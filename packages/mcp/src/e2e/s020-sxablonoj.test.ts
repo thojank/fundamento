@@ -198,16 +198,16 @@ describe("the example dialogs of Spec 020 ①", () => {
     ]);
   });
 
-  it("„Seitenleiste, die von rechts hereinfährt.“ → no Sxablono in round 1; the answer stays what it was (plan ①, Befund F-1)", async () => {
-    // The spec expects a question for a person here ("weiter Rückfrage"). It answers the navigado
-    // today and still does: seitenleiste is the navigado's goal word and the head of the request;
-    // a drawer boundary that names it would break uzo-boundary-covered. No Sxablono answers it.
-    const answer = await output<Suggested>(client, "suggest_ero", {
-      goal: "Seitenleiste, die von rechts hereinfährt.",
-      lingvo: "de",
-    });
-    expect(answer.suggestion).toEqual({ ero: "navigado", props: {} });
-    expect(answer.suggestion?.sxablono).toBeUndefined();
+  // Nachlese 8 ① F-1 (Jugxo jug_01M5EYQ8T67D7J99BBS0VJHVPR): the spec's „weiter Rückfrage“. The
+  // navigado has the boundary drawer with the words of the movement („hereinfährt“), so its own
+  // boundary and its own goal both hold, and a person decides; no Sxablono answers it.
+  it("„Seitenleiste, die von rechts hereinfährt.“ → a question for a person: the boundary drawer (Nachlese 8 F-1)", async () => {
+    const answer = await output<
+      Suggested & { action?: string; candidates?: { kind: string; case?: string }[] }
+    >(client, "suggest_ero", { goal: "Seitenleiste, die von rechts hereinfährt.", lingvo: "de" });
+    expect(answer.suggestion).toBeNull();
+    expect(answer.action).toBe("ask-human");
+    expect(answer.candidates?.some((candidate) => candidate.case === "drawer")).toBe(true);
   });
 
   it("describe_term Sxablono counts them (four since ②)", async () => {

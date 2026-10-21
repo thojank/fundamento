@@ -33,7 +33,7 @@ describe("AK-06: the S6 dialog is answered from dist/modelo.json alone", () => {
   it("AK-06: recomputes version, Dimensioj, Aspekto, tokens, types, rules and Eroj", () => {
     const description = describeModelo(modeloJson);
     expect(description).toMatchObject({
-      version: "0.1.1",
+      version: "0.2.0",
       dimensioj: ["aspekto", "viewport", "density", "color-scheme", "contrast", "motion"],
       aspektoj: ["komuna"],
       tokenCount: modeloJson.tokens.length,
@@ -86,7 +86,7 @@ describe("AK-06: the S6 dialog is answered from dist/modelo.json alone", () => {
 
   it("AK-06: states the S6 sentence", () => {
     expect(describeModelo(modeloJson).sentence).toMatch(
-      /^Fundamento v0\.1\.1: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto \(`komuna`: reference, MIT, Geist\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, thirty-four Eroj \(`alsxutilo`, `apartigilo`, `atributlisto`, `avataro`, `avizo`, `butono`, `dialogo`, `elektilo`, `elekto`, `faldilo`, `ikono`, `insigno`, `kampo`, `karto`, `kodbloko`, `kompletigilo`, `konsileto`, `langetaro`, `ligilo`, `markdovido`, `markobutono`, `menuo`, `mezurilo`, `navigado`, `pagxigilo`, `plenstato`, `saltligilo`, `spuro`, `sxaltilo`, `sxvebilo`, `tabelo`, `tekstareo`, `teksto`, `titolo`\)\. Ask explain why a value is what it is\.$/,
+      /^Fundamento v0\.2\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto \(`komuna`: reference, MIT, Geist\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, thirty-four Eroj \(`alsxutilo`, `apartigilo`, `atributlisto`, `avataro`, `avizo`, `butono`, `dialogo`, `elektilo`, `elekto`, `faldilo`, `ikono`, `insigno`, `kampo`, `karto`, `kodbloko`, `kompletigilo`, `konsileto`, `langetaro`, `ligilo`, `markdovido`, `markobutono`, `menuo`, `mezurilo`, `navigado`, `pagxigilo`, `plenstato`, `saltligilo`, `spuro`, `sxaltilo`, `sxvebilo`, `tabelo`, `tekstareo`, `teksto`, `titolo`\)\. Ask explain why a value is what it is\.$/,
     );
   });
 });

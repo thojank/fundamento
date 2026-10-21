@@ -162,8 +162,11 @@ describe("suggest_ero of the popover (Gvidanto)", () => {
     const actions = suggest("Aktionsliste im Popover");
     expect(actions.suggestion).toEqual({ ero: "menuo", props: {} });
     expect(actions.boundary).toMatchObject({ ero: "sxvebilo", case: "actions-list" });
+    // Nachlese 8 ① F-1 (Jugxo jug_01M5EYQ8T67D7J99BBS0VJHVPR): „slides in“ is the drawer of the
+    // navigado now, which comes first in Ero order; the case, the action and the kialo (O-39)
+    // are the same.
     expect(suggest("a sidepanel that slides in").boundary).toMatchObject({
-      ero: "sxvebilo",
+      ero: "navigado",
       case: "drawer",
       action: "ask-human",
     });

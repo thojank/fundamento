@@ -191,6 +191,11 @@ export function buildModeloJson(input: ModeloExportInput): ModeloJson {
   if (modelo.ikonaro.length > 0) {
     modeloJson.ikonaro = structuredClone(modelo.ikonaro);
   }
+  // Nachlese 8 ① (D-11): the words of the Gvidanto travel with the export, so a Gvidanto that
+  // reads modelo.json alone skips them too; absent while the Modelo has none.
+  if (modelo.gvidanto !== undefined) {
+    modeloJson.gvidanto = structuredClone(modelo.gvidanto);
+  }
   // Spec 007: in Ero order, like eroj. Absent while no Ero has a Uzo, so an export without Uzoj
   // keeps its bytes (AK-10).
   const uzoj = modelo.eroj.flatMap((entry) =>

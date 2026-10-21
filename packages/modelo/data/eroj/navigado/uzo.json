@@ -101,6 +101,34 @@
         },
         "kialo": "A breadcrumb shows the path to the page, not the pages beside it, because its items are the ancestors in order; that is the spuro (Spec 015 ① closes the boundary breadcrumb).",
         "ero": "spuro"
+      },
+      {
+        "case": "drawer",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "drawer",
+            "slide-in",
+            "slides-in",
+            "slide-out",
+            "off-canvas"
+          ],
+          "de": [
+            "hereinfährt",
+            "hereinfahren",
+            "hereinfahrende",
+            "einfährt",
+            "einblendet",
+            "eingeblendet",
+            "ausklappbar",
+            "ausklappbare",
+            "ausfahrbare",
+            "drawer",
+            "off-canvas",
+            "slide-in"
+          ]
+        },
+        "kialo": "A panel that slides in from the edge is neither a dialog nor a popover, because it is a region of the page with its own flow (a Sxablono), not a question and not a layer beside a trigger; a person decides until the Sxablonoj come."
       }
     ],
     "composes": {

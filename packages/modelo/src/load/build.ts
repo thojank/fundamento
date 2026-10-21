@@ -5,6 +5,7 @@ import type { ValidationIssue } from "../contracts/issues.js";
 import type {
   Dimensio,
   DimensioValoro,
+  Gvidanto,
   Ikono,
   Jugxo,
   KontrastParo,
@@ -79,6 +80,8 @@ export function buildModelo(files: ModeloFiles): BuildModeloResult {
     kontrastParoj: entriesOf<KontrastParo>(files.data["kontrastparoj.json"].value, "kontrastParoj"),
     // Spec 014 ① (G3): the Ikonaro, empty while data/ikonaro.json does not exist.
     ikonaro: entriesOf<Ikono>(files.data["ikonaro.json"]?.value, "ikonaro"),
+    // Nachlese 8 ① (D-11): the words of the Gvidanto, absent while data/gvidanto.json is.
+    ...gvidantoOf(files.data["gvidanto.json"]?.value),
     eroj: loadedEroj(files.eroj, files.uzoj),
     sxablonoj: loadedSxablonoj(files.sxablonoj ?? [], files.sxablonoUzoj ?? []),
     idsLock,
@@ -281,6 +284,17 @@ function entriesOf<T>(document: unknown, key: string): T[] {
     return [];
   }
   return list.filter((entry): entry is JsonObject => isJsonObject(entry)) as T[];
+}
+
+/**
+ * The words of the Gvidanto (Nachlese 8 ①, D-11) as the Modelo carries them: present where
+ * data/gvidanto.json holds them; validation reports the shape (`GvidantoFile`).
+ */
+function gvidantoOf(document: unknown): { gvidanto?: Gvidanto } {
+  const gvidanto = isJsonObject(document) ? document.gvidanto : undefined;
+  return isJsonObject(gvidanto) && isJsonObject(gvidanto.fillers)
+    ? { gvidanto: gvidanto as unknown as Gvidanto }
+    : {};
 }
 
 /** Stable sort by `priority` ascending; entries without a numeric priority go last. */

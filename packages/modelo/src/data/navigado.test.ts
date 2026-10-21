@@ -197,6 +197,8 @@ describe("the Uzo of the navigado (section ⑤, G5)", () => {
       ["collapsed-mobile", "not-supported"],
       // Spec 015 ①: the breadcrumb is the spuro's.
       ["breadcrumb", "use-instead"],
+      // Nachlese 8 ① F-1: a sidebar that slides in is a drawer, a person decides.
+      ["drawer", "ask-human"],
     ]);
     for (const entry of [...(uzo?.instead ?? []), ...(uzo?.boundary ?? [])]) {
       expect(entry.kialo).toMatch(/because/);

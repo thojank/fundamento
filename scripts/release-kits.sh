@@ -8,13 +8,13 @@
 #   dry-run  `pnpm publish --dry-run --tag <tag> --provenance --access public` — the preview
 #            (release.yml, mode dry-run)
 #   publish  the same without --dry-run: the real release, only from release.yml on main, mode
-#            publish, chosen by the maintainer; needs FUNDAMENTO_KIT_VERSION (0.1.1 or 0.1.1-next.1)
+#            publish, chosen by the maintainer; needs FUNDAMENTO_KIT_VERSION (0.2.0 or 0.2.0-next.1)
 #   pack     `pnpm pack --dry-run` (ci.yml, every PR)
 #   --print  builds nothing, prints the version, the tag and the command the mode would run in
 #            every kit — pnpm shows --provenance nowhere in a dry run's output, so the assembled
 #            line is what a test holds.
-# The dist-tag follows the version (Nachlese 5 ③): a pre-release (0.1.1-next.1) publishes under
-# `next`, the Modelo's version itself (0.1.1) under `latest`. Decided once, in command_for. The
+# The dist-tag follows the version (Nachlese 5 ③): a pre-release (0.2.0-next.1) publishes under
+# `next`, the Modelo's version itself (0.2.0) under `latest`. Decided once, in command_for. The
 # build refuses any number the Modelo does not have (kitVersion), before a publish is reached.
 # Exit 1 with the path names what is missing. No token anywhere: publish goes through npm Trusted
 # Publishing (OIDC) of the workflow.
@@ -29,7 +29,7 @@ print="${2:-}"
 
 # The real release names its version; the build writes it into every kit.
 if [ "$mode" = "publish" ] && [ -z "${FUNDAMENTO_KIT_VERSION:-}" ]; then
-  echo "publish braucht FUNDAMENTO_KIT_VERSION (0.1.1 oder z. B. 0.1.1-next.1): die Version des Releases." >&2
+  echo "publish braucht FUNDAMENTO_KIT_VERSION (0.2.0 oder z. B. 0.2.0-next.1): die Version des Releases." >&2
   exit 2
 fi
 version="${FUNDAMENTO_KIT_VERSION:-<modelo>-next.0}"

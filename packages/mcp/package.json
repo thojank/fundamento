@@ -1,6 +1,6 @@
 {
   "name": "@fundamento/mcp",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Fundamento MCP server: read-only tools and resources over the Modelo export.",
   "license": "MIT",
   "type": "module",

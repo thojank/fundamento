@@ -4389,6 +4389,26 @@
       "kialo": "Figma zeigt den Codeblock und die Markdown-Ansicht als Text: Beschriftung, Fokusring der Scroll-Region, Ansage nach dem Kopieren und die Linie eines Zitats zeichnet es nicht.",
       "date": "2026-10-20",
       "context": "Spec 020 ③ (G2): Figma zeichnet kodbloko und markdovido mit der Struktur statischen Textes (badge) wie titolo und teksto — der Text in der Rolle seiner Teile, die Fläche, die Abstände. Nicht gezeichnet und darum für die Parität freigegeben: die Teile legend (Beschriftung), scroll-ring (Fokusring der Scroll-Region) und announce (Ansage „Kopiert“) des kodbloko, quote (Linie und Einzug eines Zitats) und indent (Einzug einer Liste) der markdovido."
+    },
+    {
+      "id": "jug_01M5EYQ8T6MSKZR1GYNPT7HS2F",
+      "ref": {
+        "ero": "ero_01M51T74A5H5FGY35BQ90VQEGH"
+      },
+      "decision": "approved",
+      "kialo": "Ein Stichwort trifft das Ende eines Wortes nur hinter einem Vorderteil, das selbst ein Wort ist: „Anmeldung“ ist keine „Meldung“ und „Ländern“ kein „ändern“.",
+      "date": "2026-10-21",
+      "context": "Nachlese 8 ① G-1 (Abnahme Spec 020, Messung D5): Eine Antwort, die stand, ändert sich (OP-12). Die Uzo-Einträge trafen jedes Wortende ab sechs Buchstaben (Spec 007 D-06), auch hinter einer Vorsilbe; jetzt gilt das Maß von Nachlese 5 O-17 (Vorderteil ab vier Buchstaben) auch für sie. Gekippt: „Ich brauche ein Formular für die Anmeldung“ → formularo statt avizo (Grenze dialogo.inform-only über „meldung“; mit D-11, den Füllwörtern vor dem ersten Wort); „Land aus fünf Ländern wählen“ bleibt eine Rückfrage, der Kandidat der Grenze ist butono.choose-many („land“) statt atributlisto.editable („ändern“ in „Ländern“). Bekannte falsche Freunde mit echtem Vorderteil bleiben: „Landkarten“, „Eintrittskarten“, „Volltreffer“."
+    },
+    {
+      "id": "jug_01M5EYQ8T67D7J99BBS0VJHVPR",
+      "ref": {
+        "ero": "ero_01M52BH9YT0BYYTE0ZAH272Q7D"
+      },
+      "decision": "approved",
+      "kialo": "Eine Seitenleiste oder ein Panel, das hereinfährt, ist ein Drawer: eine Rückfrage, weil Runde 1 kein Sxablono dafür hat.",
+      "date": "2026-10-21",
+      "context": "Nachlese 8 ① F-1 (Abnahme Spec 020, Messung D9; Spec 020 ① F-1): Eine Antwort, die stand, ändert sich (OP-12). Der navigado hat die Grenze drawer (ask-human) mit Bewegungswörtern in Formen, die kein Ziel eines anderen Ero belegen (uzo-boundary-covered: nicht „ausklappen“ des faldilo, nicht „einblenden“ der Grenze des kampo). Gekippt: „Seitenleiste, die von rechts hereinfährt“, „Ausklappbare Seitenleiste“ und „Off-Canvas-Navigation“ → Rückfrage zwischen der Grenze drawer und dem Ziel navigate-app statt navigado; „Ein Panel, das von links hereinfährt“ → Rückfrage drawer statt goal-unknown; „a sidepanel that slides in“ bleibt eine Rückfrage an einer Grenze drawer, jetzt der des navigado statt der des sxvebilo (Ero-Reihenfolge). „Seitenleiste mit Navigation“ bleibt navigado."
     }
   ]
 }

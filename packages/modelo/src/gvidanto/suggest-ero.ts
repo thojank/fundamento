@@ -436,10 +436,33 @@ const ARTICLES: ReadonlySet<string> = new Set([
   "the",
 ]);
 
-/** The first word of a request after an article: the thing it names (Spec 020 ②). */
-function leadWordOf(text: string): string | undefined {
-  for (const match of text.normalize("NFC").matchAll(/[\p{L}\p{N}-]+/gu)) {
-    if (!ARTICLES.has(match[0].toLowerCase())) return match[0];
+/**
+ * The first word of a request after an article: the thing it names (Spec 020 ②). Before it,
+ * the words that only open a request are skipped (Nachlese 8 ①, D-11: „Ich brauche ein
+ * Formular …“, „Bitte …“, „I need …“) — the fillers of the Modelo (data/gvidanto.json) of the
+ * languages the input allows, the longest first, as often as one follows another.
+ */
+function leadWordOf(modelo: Modelo, text: string, lingvo?: string): string | undefined {
+  const words = [...text.normalize("NFC").matchAll(/[\p{L}\p{N}-]+/gu)].map((match) => match[0]);
+  const fillers = Object.entries(modelo.gvidanto?.fillers ?? {})
+    .filter(([language]) => lingvo === undefined || language === lingvo)
+    .flatMap(([, list]) =>
+      list.map((filler) => filler.normalize("NFC").toLowerCase().split(/\s+/u)),
+    )
+    .sort((a, b) => b.length - a.length);
+  let start = 0;
+  for (let skipped = true; skipped; ) {
+    skipped = false;
+    for (const filler of fillers) {
+      if (filler.every((word, index) => words[start + index]?.toLowerCase() === word)) {
+        start += filler.length;
+        skipped = true;
+        break;
+      }
+    }
+  }
+  for (const word of words.slice(start)) {
+    if (!ARTICLES.has(word.toLowerCase())) return word;
   }
   return undefined;
 }
@@ -511,7 +534,7 @@ export function suggestEro(modelo: Modelo, input: SuggestEroInput): SuggestEroRe
   const pass = { ...(input.lingvo === undefined ? {} : { lingvo: input.lingvo }), inflect: false };
   // Spec 020 ②: the first word of the request (after an article), not the whole head — „Tabs, um
   // zwischen Liste und Formular zu wechseln“ names tabs, whatever its head holds.
-  const lead = leadWordOf(input.goal);
+  const lead = leadWordOf(modelo, input.goal, input.lingvo);
   if (lead !== undefined) {
     const answer = sxablonoAnswer(modelo, lead, input.goal, pass);
     if (answer !== undefined) return { ok: true, output: answer };

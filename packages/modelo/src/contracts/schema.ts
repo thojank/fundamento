@@ -27,6 +27,8 @@ export const SCHEMA_DEFS = {
   uzoFile: "UzoFile",
   ikono: "Ikono",
   ikonaroFile: "IkonaroFile",
+  gvidanto: "Gvidanto",
+  gvidantoFile: "GvidantoFile",
   sxablono: "Sxablono",
   sxablonoFile: "SxablonoFile",
   sxablonoUzoFile: "SxablonoUzoFile",
@@ -55,6 +57,8 @@ export type DataFileName = keyof typeof DATA_FILE_SCHEMA_DEFS;
  */
 export const OPTIONAL_DATA_FILE_SCHEMA_DEFS = {
   "ikonaro.json": "IkonaroFile",
+  // Nachlese 8 ① (D-11): the words of the Gvidanto, absent while it has none.
+  "gvidanto.json": "GvidantoFile",
 } as const;
 
 export type OptionalDataFileName = keyof typeof OPTIONAL_DATA_FILE_SCHEMA_DEFS;

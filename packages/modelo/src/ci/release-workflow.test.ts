@@ -166,12 +166,12 @@ describe("release.yml publishes only when the maintainer says so (F25 release st
   });
 });
 
-// Nachlese 5 ③ (Spec 015 "Nach der Abnahme", 2026-10-19): the release 0.1.1 goes through the same
-// path. The dist-tag follows the version — a pre-release (0.1.1-next.5) publishes under `next`, the
-// Modelo's version itself (0.1.1) under `latest` —, decided in one place of the script
+// Nachlese 5 ③ (Spec 015 "Nach der Abnahme", 2026-10-19): the release 0.2.0 goes through the same
+// path. The dist-tag follows the version — a pre-release (0.2.0-next.5) publishes under `next`, the
+// Modelo's version itself (0.2.0) under `latest` —, decided in one place of the script
 // (`command_for`), shown by --print; release.yml hands only the version through. A number the Modelo
-// does not have (0.2.0, 0.1.1.1) is refused by the build before any publish.
-describe("the dist-tag follows the version: 0.1.1 → latest, 0.1.1-next.5 → next (Nachlese 5 ③)", () => {
+// does not have (0.3.0, 0.2.0.1) is refused by the build before any publish.
+describe("the dist-tag follows the version: 0.2.0 → latest, 0.2.0-next.5 → next (Nachlese 5 ③)", () => {
   const print = (version: string | undefined, mode = "publish") => {
     const env = { ...process.env };
     delete env.FUNDAMENTO_KIT_VERSION;
@@ -185,9 +185,9 @@ describe("the dist-tag follows the version: 0.1.1 → latest, 0.1.1-next.5 → n
     stdout.split("\n").filter((line) => line.includes("pnpm publish"));
 
   it.each([
-    ["0.1.1", "latest"],
-    ["0.1.1-next.5", "next"],
-    ["0.1.1-next.9", "next"],
+    ["0.2.0", "latest"],
+    ["0.2.0-next.5", "next"],
+    ["0.2.0-next.9", "next"],
   ])(
     "FUNDAMENTO_KIT_VERSION=%s publishes both kits under the dist-tag %s, and --print says so",
     (version, tag) => {
@@ -207,11 +207,11 @@ describe("the dist-tag follows the version: 0.1.1 → latest, 0.1.1-next.5 → n
     },
   );
 
-  it("the dry run of a pre-release stays under next, the dry run of 0.1.1 shows latest", () => {
-    expect(publishLines(print("0.1.1-next.5", "dry-run").stdout).join()).toContain(
+  it("the dry run of a pre-release stays under next, the dry run of 0.2.0 shows latest", () => {
+    expect(publishLines(print("0.2.0-next.5", "dry-run").stdout).join()).toContain(
       "--dry-run --tag next ",
     );
-    expect(publishLines(print("0.1.1", "dry-run").stdout).join()).toContain(
+    expect(publishLines(print("0.2.0", "dry-run").stdout).join()).toContain(
       "--dry-run --tag latest ",
     );
     // Without a version the dry run previews <modelo>-next.0: next.
@@ -237,15 +237,15 @@ describe("the dist-tag follows the version: 0.1.1 → latest, 0.1.1-next.5 → n
       workflow_dispatch?: { inputs?: Record<string, { description?: string }> };
     };
     const description = String(on.workflow_dispatch?.inputs?.version?.description ?? "");
-    expect(description).toContain("0.1.1");
-    expect(description).toMatch(/0\.1\.1-next\.\d/);
+    expect(description).toContain("0.2.0");
+    expect(description).toMatch(/0\.2\.0-next\.\d/);
     expect(description).toContain("latest");
     expect(description).toContain("next");
     const publish = steps().find((step) => (step.run ?? "").includes("release-kits.sh publish"));
     expect(String(publish?.name ?? "")).not.toMatch(/tag next/);
   });
 
-  it.each(["0.2.0", "0.1.1.1"])(
+  it.each(["0.3.0", "0.2.0.1"])(
     "FUNDAMENTO_KIT_VERSION=%s is refused by the build, before any kit is published",
     (version) => {
       // Not --print: the real path builds first, and the build refuses the number (kitVersion).
@@ -257,7 +257,7 @@ describe("the dist-tag follows the version: 0.1.1 → latest, 0.1.1-next.5 → n
       });
       expect(run.status).not.toBe(0);
       expect(run.stderr).toContain(`FUNDAMENTO_KIT_VERSION=${version}`);
-      expect(run.stderr).toContain("0.1.1-<Vorabkennung>");
+      expect(run.stderr).toContain("0.2.0-<Vorabkennung>");
       expect(run.stdout + run.stderr).not.toMatch(/== .*pnpm publish/);
     },
     60_000,

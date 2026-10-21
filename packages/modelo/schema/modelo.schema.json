@@ -81,6 +81,10 @@
         "$ref": "#/$defs/KontrastParo"
       }
     },
+    "gvidanto": {
+      "description": "The words of the Gvidanto (Nachlese 8 ①, D-11): what only opens a request, per language; absent while the Modelo has none.",
+      "$ref": "#/$defs/Gvidanto"
+    },
     "ikonaro": {
       "description": "The Ikonaro (Spec 014 ①): the icon names of the core with meaning and kialo; absent while the Modelo has none.",
       "type": "array",
@@ -4096,6 +4100,43 @@
         }
       },
       "required": ["id", "name", "meaning", "kialo"],
+      "additionalProperties": false
+    },
+    "Gvidanto": {
+      "description": "The words of the Gvidanto (Nachlese 8 ①, D-11), per language (ISO 639-1): data, not code, like the keywords of the goals.",
+      "type": "object",
+      "properties": {
+        "fillers": {
+          "description": "What only opens a request and names nothing („ich brauche“, „bitte“, „I need“): skipped, longest first and lower case, before the first word names a Sxablono.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z]{2}$"
+          },
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      },
+      "required": ["fillers"],
+      "additionalProperties": false
+    },
+    "GvidantoFile": {
+      "description": "data/gvidanto.json: the words of the Gvidanto (Nachlese 8 ①); absent while it has none.",
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "gvidanto": {
+          "$ref": "#/$defs/Gvidanto"
+        }
+      },
+      "required": ["gvidanto"],
       "additionalProperties": false
     },
     "IkonaroFile": {

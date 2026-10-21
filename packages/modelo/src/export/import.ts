@@ -53,6 +53,10 @@ export function modeloFromExport(modeloJson: ModeloJson): Modelo {
     mankoj: structuredClone(modeloJson.mankoj),
     kontrastParoj: structuredClone(modeloJson.kontrastParoj),
     ikonaro: structuredClone(modeloJson.ikonaro ?? []),
+    // Nachlese 8 ① (D-11): the words of the Gvidanto, as exported.
+    ...(modeloJson.gvidanto === undefined
+      ? {}
+      : { gvidanto: structuredClone(modeloJson.gvidanto) }),
     // eroj and skemoj are exported in the same order (Ero name); the files are not exported.
     // A Uzo finds its Ero by ID (Spec 007).
     eroj: modeloJson.eroj.flatMap((ero) => {

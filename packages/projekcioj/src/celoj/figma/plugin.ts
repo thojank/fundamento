@@ -5988,15 +5988,41 @@ if (typeof figma !== "undefined" && typeof figma.closePlugin === "function" && f
 `;
 }
 
+/** The id of the development plugin of a build with the reference brand alone. */
+const PLUGIN_ID = "fundamento-apply-plan";
+
+/** The brands of a build: the modes of the plan's collection aspekto, in their order. */
+function brandsOf(plan: FigmaPlan): string[] {
+  return plan.collections.find((collection) => collection.name === "aspekto")?.modes ?? [];
+}
+
+/** A short hash of a text (FNV-1a, 32 bits, hex): the same list gives the same id. */
+function shortHash(text: string): string {
+  let hash = 0x811c9dc5;
+  for (const char of text) {
+    hash ^= char.codePointAt(0) ?? 0;
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash.toString(16).padStart(8, "0");
+}
+
 /**
- * `manifest.json` of the development plugin. The build is in its name, so the menu shows which
- * state is imported before anything runs.
+ * `manifest.json` of the development plugin. The build and its brands are in its name, so the
+ * menu shows which state is imported before anything runs (Nachlese 8 ① F-13). A build with other
+ * brands than komuna alone has an id of its own — Figma keeps one plugin per id and ran the code
+ * imported first — from a hash of its brand list, so two builds with the same list share it; the
+ * build with komuna alone keeps the id it had, and the imports that exist go on working.
  */
 export function pluginManifest(plan: FigmaPlan, build: string = UNKNOWN_BUILD): string {
+  const brands = brandsOf(plan);
+  const reference = brands.length === 1 && brands[0] === "komuna";
   return `${JSON.stringify(
     {
-      name: `Fundamento ${plan.fundamento} (${build}): apply plan`,
-      id: "fundamento-apply-plan",
+      name: `Fundamento ${plan.fundamento} (${build}${brands.length === 0 ? "" : ` · ${brands.join(", ")}`}): apply plan`,
+      id:
+        reference || brands.length === 0
+          ? PLUGIN_ID
+          : `${PLUGIN_ID}-${shortHash(brands.join(","))}`,
       api: "1.0.0",
       main: "code.js",
       editorType: ["figma"],
