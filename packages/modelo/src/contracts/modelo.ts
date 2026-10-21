@@ -9,6 +9,7 @@ import type {
   EntityType,
   Ero,
   Fonto,
+  Gvidanto,
   IdsLock,
   Ikono,
   Jugxo,
@@ -43,6 +44,8 @@ export type {
   EroFile,
   EroInstance,
   Fonto,
+  Gvidanto,
+  GvidantoFile,
   IkonaroFile,
   Ikono,
   Jugxo,
@@ -216,6 +219,11 @@ export interface Modelo {
   kontrastParoj: KontrastParo[];
   /** The Ikonaro: the icon names of the core (Spec 014 ①, G3); empty while data/ikonaro.json is absent. */
   ikonaro: Ikono[];
+  /**
+   * The words of the Gvidanto (Nachlese 8 ①, D-11): what only opens a request, per language;
+   * absent while data/gvidanto.json is (a Modelo built by hand may leave it out).
+   */
+  gvidanto?: Gvidanto;
   /** Eroj with their Skemoj, sorted by Ero name (Spec 003). */
   eroj: LoadedEro[];
   /**

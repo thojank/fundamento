@@ -3531,6 +3531,14 @@
     "uzo_01M5D5JMAHP0J37BDYFZG8V3KZ": {
       "status": "active",
       "type": "uzo"
+    },
+    "jug_01M5EYQ8T6MSKZR1GYNPT7HS2F": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M5EYQ8T67D7J99BBS0VJHVPR": {
+      "status": "active",
+      "type": "jugxo"
     }
   }
 }

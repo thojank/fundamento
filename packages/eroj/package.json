@@ -1,6 +1,6 @@
 {
   "name": "@fundamento/eroj",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Fundamento Eroj: the generated Web Components (fm-*) and their React wrappers.",
   "license": "MIT",
   "private": true,

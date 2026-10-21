@@ -493,6 +493,7 @@ export interface ModeloJson {
    */
   uzoj?: Uzo[];
   kontrastParoj: KontrastParo[];
+  gvidanto?: Gvidanto;
   /**
    * The Ikonaro (Spec 014 ①): the icon names of the core with meaning and kialo; absent while the Modelo has none.
    */
@@ -1151,6 +1152,17 @@ export interface UzoContent {
         kind: "not-words";
         words: Keywords;
       };
+}
+/**
+ * The words of the Gvidanto (Nachlese 8 ①, D-11): what only opens a request, per language; absent while the Modelo has none.
+ */
+export interface Gvidanto {
+  /**
+   * What only opens a request and names nothing („ich brauche“, „bitte“, „I need“): skipped, longest first and lower case, before the first word names a Sxablono.
+   */
+  fillers: {
+    [k: string]: string[];
+  };
 }
 /**
  * One name of the Ikonaro (Spec 014 ①, G3, E9): an icon is vocabulary in the core — a name, its meaning in de and en and a kialo — and a picture in every Aspekto package (ikonoj/<name>.svg, checked by check:ikonaro). mirror says that the direction carries meaning and the glyph is mirrored in right-to-left writing (chevron-right; a check is not).
@@ -2016,6 +2028,30 @@ export interface Celo {
   id: CeloId;
   name: Name;
   description?: string;
+}
+/**
+ * The words of the Gvidanto (Nachlese 8 ①, D-11), per language (ISO 639-1): data, not code, like the keywords of the goals.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "Gvidanto".
+ */
+export interface Gvidanto1 {
+  /**
+   * What only opens a request and names nothing („ich brauche“, „bitte“, „I need“): skipped, longest first and lower case, before the first word names a Sxablono.
+   */
+  fillers: {
+    [k: string]: string[];
+  };
+}
+/**
+ * data/gvidanto.json: the words of the Gvidanto (Nachlese 8 ①); absent while it has none.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "GvidantoFile".
+ */
+export interface GvidantoFile {
+  $schema?: string;
+  gvidanto: Gvidanto1;
 }
 /**
  * data/ikonaro.json: the Ikonaro of the core (Spec 014 ① aims at 25 names at most); absent while no Ero draws an icon.

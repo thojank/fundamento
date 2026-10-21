@@ -2475,7 +2475,8 @@ describe("Spec 019 Nachtrag 20.10. documentation", () => {
     const n6 = read("specs/019-werkstatt-2-3/nachlese-6/plan.md");
     expect(n6).toContain("### Nachtrag 20.10.");
     const changelog = read("CHANGELOG.md");
-    expect(changelog).toContain("## 0.2.0 – geplant");
+    // Nachlese 8 ①: the planned 0.2.0 is the release now (decision a of the maintainer).
+    expect(changelog).toContain("## 0.2.0");
     expect(changelog).toContain(
       "Breaking: Das Make Kit liefert nur noch ESM. `require()` braucht Node ≥ 22.12.",
     );
@@ -2539,11 +2540,13 @@ describe("Nachlese 7 ① documentation (specs/021-nachlese-7)", () => {
     expect(own).toContain("**T2101");
     expect(own).toMatch(/rot `[0-9a-f]{7}`/);
     const changelog = read("CHANGELOG.md");
-    expect(changelog).toContain("## 0.1.1 – Fehlerbehebungen");
-    const release = changelog.slice(changelog.indexOf("## 0.1.1"));
+    // Nachlese 8 ① (decision a of the maintainer): 0.1.1 is not published; its section is the
+    // part „Fehlerbehebungen“ of 0.2.0.
+    expect(changelog).toContain("### Fehlerbehebungen (Nachlese 7 ①");
+    const release = changelog.slice(changelog.indexOf("### Fehlerbehebungen (Nachlese 7 ①"));
     for (const id of ["A-1", "A-2", "A-3", "A-4", "A-5", "A-6", "A-7"])
       expect(release, id).toContain(id);
-    expect(changelog).toContain("## 0.2.0 – geplant");
+    expect(changelog).toContain("## 0.2.0");
   });
 });
 
@@ -2577,10 +2580,8 @@ describe("Nachlese 7 ② documentation (specs/021-nachlese-7)", () => {
     expect(own).toContain("**T2111");
     expect(own).toMatch(/rot `[0-9a-f]{7}`/);
     const changelog = read("CHANGELOG.md");
-    const planned = changelog.slice(
-      changelog.indexOf("## 0.2.0 – geplant"),
-      changelog.indexOf("## 0.1.1"),
-    );
+    // Nachlese 8 ①: the planned 0.2.0 is the release; its additions stand in it.
+    const planned = changelog.slice(changelog.indexOf("## 0.2.0"));
     for (const id of ["B-1", "B-2", "B-3", "B-4", "B-5", "B-6", "B-7", "B-8", "B-9", "B-10"])
       expect(planned, id).toContain(id);
     expect(planned).toContain("Breaking: Das Make Kit liefert nur noch ESM.");

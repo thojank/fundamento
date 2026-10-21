@@ -223,13 +223,19 @@ export function keywordHitOf(
   if (needle.length < COMPOUND_SUFFIX_MIN) return undefined;
   const stemmed = german ? germanStem(needle) : undefined;
   const pool = match.suffixOf === "compounds" ? text.compounds : words;
+  // Nachlese 8 G-1: the end of a word (a Uzo entry) only behind a first part that is a word, the
+  // measure of O-17 — „Anmeldung“ is no „An“ + „Meldung“. A hyphenated compound (R-11) has its
+  // parts written apart, so every part counts there: „e-mail-adresse“ ends with „mailadresse“.
+  const ends = (word: string, end: string) =>
+    word.endsWith(end) &&
+    (match.suffixOf === "compounds" || word.length - end.length >= COMPOUND_FIRST_PART_MIN);
   for (const word of pool) {
-    if (word.endsWith(needle)) return needle;
+    if (ends(word, needle)) return needle;
     const stem = german ? germanStem(word) : undefined;
     if (
       stem !== undefined &&
-      (stem.endsWith(needle) ||
-        (stemmed !== undefined && stemmed.length >= COMPOUND_SUFFIX_MIN && stem.endsWith(stemmed)))
+      (ends(stem, needle) ||
+        (stemmed !== undefined && stemmed.length >= COMPOUND_SUFFIX_MIN && ends(stem, stemmed)))
     ) {
       return word;
     }

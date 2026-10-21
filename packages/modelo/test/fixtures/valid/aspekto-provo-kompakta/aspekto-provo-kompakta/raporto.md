@@ -1,6 +1,6 @@
 # Raporto – provo-kompakta
 
-Derived by the Agordilo 0.1.1 (Spec 016). Generated with the package; do not edit — `fm agordilo check` rebuilds it.
+Derived by the Agordilo 0.2.0 (Spec 016). Generated with the package; do not edit — `fm agordilo check` rebuilds it.
 
 ## Summary
 

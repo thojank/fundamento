@@ -77,7 +77,7 @@ function collectRefs(node: unknown, out: string[] = []): string[] {
 }
 
 describe("exportModelo: shape (§2.9)", () => {
-  it("has exactly the §2.9 top-level keys plus core (Spec 001 FR-10), skemoj (Spec 003), mankoj (F41), uzoj (Spec 007), ikonaro (Spec 014 ①) and sxablonoj (Spec 020 ①)", () => {
+  it("has exactly the §2.9 top-level keys plus core (Spec 001 FR-10), skemoj (Spec 003), mankoj (F41), uzoj (Spec 007), ikonaro (Spec 014 ①), sxablonoj (Spec 020 ①) and gvidanto (Nachlese 8 ①)", () => {
     expect(Object.keys(modeloJson).sort()).toEqual(
       [
         "$schema",
@@ -86,6 +86,7 @@ describe("exportModelo: shape (§2.9)", () => {
         "dimensioj",
         "eroj",
         "fundamento",
+        "gvidanto",
         "ikonaro",
         "jugxoj",
         "kontrastParoj",
@@ -105,7 +106,7 @@ describe("exportModelo: shape (§2.9)", () => {
   it("points $schema at the sibling schema and carries the package version", () => {
     expect(modeloJson.$schema).toBe(MODELO_JSON_SCHEMA_REF);
     expect(modeloJson.fundamento).toEqual({ version: MODELO_VERSION });
-    expect(modeloJson.fundamento.version).toBe("0.1.1");
+    expect(modeloJson.fundamento.version).toBe("0.2.0");
   });
 
   it("exports the Dimensioj in priority order with values, default, thresholds and Aspekto metadata", () => {

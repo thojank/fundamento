@@ -61,9 +61,9 @@
     }
   },
   "agordilo": {
-    "version": "0.1.1",
+    "version": "0.2.0",
     "structure": {
-      "vortaro": "0.1.1",
+      "vortaro": "0.2.0",
       "reference": "komuna",
       "sha256": "aa3ea4adb749f9e9f0fdb96072c6cdb35e9564c10b72b864f5280ba031073e9e"
     },

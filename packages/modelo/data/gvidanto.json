@@ -1,0 +1,31 @@
+{
+  "$schema": "../schema/modelo.schema.json#/$defs/GvidantoFile",
+  "gvidanto": {
+    "fillers": {
+      "de": [
+        "ich brauche",
+        "ich möchte",
+        "ich will",
+        "wir brauchen",
+        "bitte",
+        "baue",
+        "baue mir",
+        "bau mir",
+        "erstelle",
+        "erstelle mir",
+        "zeig mir",
+        "mach",
+        "mach mir",
+        "gib mir"
+      ],
+      "en": [
+        "i need",
+        "please",
+        "build",
+        "create",
+        "make",
+        "show me"
+      ]
+    }
+  }
+}
