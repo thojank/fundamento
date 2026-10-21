@@ -96,7 +96,7 @@
 
 ### C – Abschluss
 - [x] **T2249 Doku** plan (mit Stichprobe und Messanleitung), tasks.
-- [ ] **T2250 CI** grün.
+- [x] **T2250 CI** grün: Lauf 39612832635 (10:07), M5 0 ms, 0 Long Tasks.
 
 ### Messungen
 
