@@ -8,7 +8,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, describe, expect, it } from "vitest";
-import { ENV_NAMES, envExampleText, markenDirOf, parseEnv, readSettings, settingsOf } from "./env.js";
+import {
+  ENV_NAMES,
+  envExampleText,
+  markenDirOf,
+  parseEnv,
+  readSettings,
+  settingsOf,
+} from "./env.js";
 
 const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), "fm-metiejo-env-"));
@@ -85,9 +92,15 @@ describe("settingsOf (M-7)", () => {
 describe("markenDirOf (O-3: the brands live outside the repo)", () => {
   it("is ~/Fundamento/marken without FM_MARKEN_DIR, expands ~ and resolves a relative path against the checkout", () => {
     expect(markenDirOf({ present: [] }, "/Users/me", "/repo")).toBe("/Users/me/Fundamento/marken");
-    expect(markenDirOf({ markenDir: "~/Marken", present: [] }, "/Users/me", "/repo")).toBe("/Users/me/Marken");
-    expect(markenDirOf({ markenDir: "/srv/marken", present: [] }, "/Users/me", "/repo")).toBe("/srv/marken");
-    expect(markenDirOf({ markenDir: "../marken", present: [] }, "/Users/me", "/repo")).toBe("/marken");
+    expect(markenDirOf({ markenDir: "~/Marken", present: [] }, "/Users/me", "/repo")).toBe(
+      "/Users/me/Marken",
+    );
+    expect(markenDirOf({ markenDir: "/srv/marken", present: [] }, "/Users/me", "/repo")).toBe(
+      "/srv/marken",
+    );
+    expect(markenDirOf({ markenDir: "../marken", present: [] }, "/Users/me", "/repo")).toBe(
+      "/marken",
+    );
   });
 });
 

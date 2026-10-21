@@ -22,15 +22,17 @@
 
 ### C – Abschluss
 - [x] **T2311 Doku** plan ① (D-01–D-14, Abweichungen 1–11, B-1–B-7, O-1–O-7, Messanleitung), tasks ①, README (Paket, `check:tiparoj`, „Der Konfigurator (Metiejo)“), Vojmapo (8a'').
-- [ ] **T2312 Rebase** auf `main` mit Nachlese 8 ① (F-13: der Figma-Test wird grün; Paketversion folgt 0.2.0), PR, CI grün.
+- [x] **T2312 Rebase** auf `main` `3759b67` mit Nachlese 8 ①–③ (F-13: der Figma-Test ist grün; `metiejo` auf 0.2.0), ohne Konflikt.
+- [x] **T2313 Entscheidungen O-1 bis O-7** (22.10.): rote Tests für `FM_MARKEN_DIR`, den Checkout-Schutz und die Schriftdateien aus npm; dann `env.ts` (`markenDirOf`), `marko.ts` (`assertOutsideCheckout`), `tiparoj-npm.ts` (Registry, Tarball, Cache, `herkunto.json`, `@font-face`), `eksporto.ts` (`npm`, `tiparoj.css`), `start.ts`, `kontrolo-cli.ts`, `.gitignore` `marken/`, `.env.example`; plan ① (D-09 neu, D-15, Nachtrag 22.10., Messanleitung mit `FM_MARKEN_DIR`), README.
+- [ ] **T2314 PR**, CI grün, Bericht.
 
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits ① | rot `9357257`, grün (Hash des grünen Stands, CI grün); dieser Eintrag im Folgecommit |
+| Commits ① | rot `9357257` (nach dem Rebase `5837d4a`), grün `33d9b2c`/`abf4c5c`, Pin `37b2177`, Doku `8fb47e7`; Nachtrag 22.10.: rot `a121f13`, grün (Hash des grünen Stands, CI grün); dieser Eintrag im Folgecommit |
 | CI ① | (Lauf, Hash, Jobs und Zeiten) |
-| Tests lokal | Metiejo 91 in 9 Dateien (90 grün, 1 rot: Figma F-13 bis zum Rebase), Agordilo 11 Dateien, MCP 40 Dateien, CLI 7 Dateien (3 Tests neu), Modelo 161 Dateien grün (Workspace-Pin um `metiejo` ergänzt); `pnpm lint`, `pnpm check:tiparoj` (4 075 Dateien, keine Schrift bekannt) grün. Probe-Rebase auf `261021-nachlese-8-gvidanto-116ba2` (#95): ohne Konflikt, der Figma-Test (F-13) wird grün, nur die Paketversion von `metiejo` muss auf 0.2.0 |
+| Tests lokal | Metiejo 104 in 10 Dateien grün (nach dem Rebase, mit F-13 und dem Nachtrag 22.10.), Agordilo 11 Dateien, MCP 40 Dateien, CLI 7 Dateien (3 Tests neu), Modelo 161 Dateien grün (Workspace-Pin um `metiejo` ergänzt); `pnpm lint`, `pnpm check:tiparoj` (4 075 Dateien, keine Schrift bekannt) grün |
 | Zeiten | `derivationBasis` 114 ms, `deriveAspekto` mit Prüfung 1 620 ms, Vorschau-Stylesheet ≈ 200 ms, Export (Paket, CSS, Figma) ≈ 4 s |
 | Katalog | 2 100 von 2 103 Familien, 6 Lizenzen (OFL-1.1 2 059, Apache-2.0 36, UFL-1.0 5, CC0-1.0 1, MIT 1, Unlicense 1), 20 Subsets ohne Zuordnung (B-4) |
 | M-4 | `check:tiparoj`: Export mit 33 Dateien und einer bekannten Schrift PASS; ein hineinkopiertes Muster FAIL mit Datei und Schrift, Exit 1 |

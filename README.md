@@ -211,12 +211,12 @@ The Metiejo (Spec 023, working name) is the Agordilo for a person without the Vo
 pnpm fm metiejo            # http://localhost:7301
 ```
 
-1. **Start:** the name of the brand; empty, the example komuna, or an existing brand of `marken/`. The brand lives in `marken/<name>/` (agordo.json, the draft, uploads in `fontoj/`, the exports in `eksporto/`).
+1. **Start:** the name of the brand; empty, the example komuna, or an existing brand. Brands live outside the repository, in the folder `FM_MARKEN_DIR` of the `.env` names (default `~/Fundamento/marken`), one folder per brand (agordo.json, the draft, uploads in `fontoj/`, the exports in `eksporto/`); a folder inside the checkout is refused.
 2. **Farbe:** the lead colour; the contrast problems in plain words, each with one suggestion a click applies.
 3. **Schrift:** an open-source webfont with its licence from the catalogue of Fontsource (`packages/metiejo/data/tiparoj.json`, with provenance), or a licensed font of your own: its file goes into your private repository named by `FM_TIPAROJ_REPO` in the `.env` of the checkout (see `.env.example`), after a confirmation and only when the GitHub API says the repository is private; the brand names it as „lizenziert, nicht enthalten“ with a fallback.
 4. **Form, Raum, Schriftgröße, Icons:** one slider or one choice each, the preview follows at once.
 5. **Vorschau:** the five Sxablonoj in three widths, light and dark.
-6. **Fertig:** the report in plain words; *Speichern* writes `agordo.json` with its `historio` and the chosen exports: the Aspekto package, the CSS and the Figma plugin. The same values give the same bytes. `check:tiparoj` runs over every export; a byte of a licensed font removes it.
+6. **Fertig:** the report in plain words; *Speichern* writes `agordo.json` with its `historio` and the chosen exports: the Aspekto package (with the files of every webfont and their licence from the npm package `@fontsource/<id>`, cached outside the checkout, plus `tiparoj.css`), the CSS and the Figma plugin. The same values give the same bytes. `check:tiparoj` runs over every export; a byte of a licensed font removes it.
 
 The **Expertenansicht** is the Werkstatt of the Vitrino (`pnpm fm projekcioj build --out .fundamento/projekcioj` once; the server then links into it with the Agordo in the fragment). Round 2 adds the sources (screenshots, tokens) with an AI adapter and the view „Fluss“.
 

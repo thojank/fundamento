@@ -5,11 +5,12 @@
 // apart from `readSettings`, the I/O edge.
 
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 
 /** The variables of the spec, in its order (§4.3). */
 export const ENV_NAMES = [
   "FM_TIPAROJ_REPO",
+  "FM_MARKEN_DIR",
   "FM_KI_ANBIETER",
   "FM_KI_MODELL",
   "MISTRAL_API_KEY",
@@ -26,6 +27,8 @@ export const REPO_PATTERN = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 export interface Settings {
   /** The private font repository (`owner/name`), when FM_TIPAROJ_REPO names one. */
   tiparojRepo?: string;
+  /** The folder of the brands (FM_MARKEN_DIR, O-3), as written; see `markenDirOf`. */
+  markenDir?: string;
   /** The variables that are set, by name. */
   present: EnvName[];
 }
@@ -66,9 +69,22 @@ export function parseEnv(text: string): Partial<Record<EnvName, string>> {
 export function settingsOf(values: Partial<Record<EnvName, string>>): Settings {
   const present = ENV_NAMES.filter((name) => values[name] !== undefined);
   const repo = values.FM_TIPAROJ_REPO;
-  return repo !== undefined && REPO_PATTERN.test(repo)
-    ? { tiparojRepo: repo, present }
-    : { present };
+  const settings: Settings = { present };
+  if (repo !== undefined && REPO_PATTERN.test(repo)) settings.tiparojRepo = repo;
+  if (values.FM_MARKEN_DIR !== undefined) settings.markenDir = values.FM_MARKEN_DIR;
+  return settings;
+}
+
+/**
+ * Where the brands live (O-3 of plan ①): FM_MARKEN_DIR — `~` expanded, a relative path resolved
+ * against the checkout root — else `~/Fundamento/marken`. Never inside the repository: the brand
+ * module refuses that.
+ */
+export function markenDirOf(settings: Settings, home: string, root: string): string {
+  const given = settings.markenDir;
+  if (given === undefined || given === "") return join(home, "Fundamento", "marken");
+  if (given === "~" || given.startsWith("~/")) return join(home, given.slice(2));
+  return resolve(root, given);
 }
 
 /** The text of `.env.example`: the names, every value empty, no repository (§4.3). */
@@ -76,6 +92,7 @@ export function envExampleText(): string {
   return [
     "# Settings of the Metiejo (Spec 023, §4.3 and §4.5). Copy to .env in the checkout root and fill in",
     "# the values yourself; .env is ignored by git and read only by the local server, never logged.",
+    "# FM_MARKEN_DIR: where the brands live, outside the repository (default ~/Fundamento/marken).",
     ...ENV_NAMES.map((name) => `${name}=`),
     "",
   ].join("\n");

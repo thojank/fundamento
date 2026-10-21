@@ -50,7 +50,7 @@ export const SXTUPOJ: readonly Sxtupo[] = [
     spec: 1,
     title: "Start",
     question: "Wie heißt deine Marke? Womit fängst du an?",
-    hint: "Der Konfigurator legt für die Marke einen Ordner marken/<name> im Checkout an und arbeitet darin.",
+    hint: "Der Konfigurator legt für die Marke einen Ordner im Markenordner an (FM_MARKEN_DIR in der .env, sonst ~/Fundamento/marken) und arbeitet darin.",
     main: "Anlegen",
   },
   {

@@ -1,19 +1,17 @@
 // Starting the configurator from a command line: shared by `fm metiejo` (Spec 023, K-1). The
-// checkout root is this package's repository; its .env is the only source of settings (§4.3), its
-// marken/ the working directory. Logs go to stderr, never a value of the .env.
+// checkout root is this package's repository; its .env is the only source of settings (§4.3); the
+// brands live outside it (FM_MARKEN_DIR, O-3). Logs go to stderr, never a value of the .env.
 
 import { execFile } from "node:child_process";
-import { join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-import { readSettings } from "./env.js";
-import { MARKEN_DIR } from "./marko.js";
+import { homedir } from "node:os";
+import { resolve } from "node:path";
+import { markenDirOf, readSettings } from "./env.js";
 import { defaultDeps } from "./privata.js";
+import { CHECKOUT_ROOT } from "./root.js";
 import { startServilo } from "./servilo.js";
+import { defaultNpmDeps } from "./tiparoj-npm.js";
 
 export const DEFAULT_PORT = 7301;
-
-/** The root of the checkout this package lies in (valid from `src/` and `dist/`). */
-export const CHECKOUT_ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 
 /** The flags, in `node:util` parseArgs form. */
 export const METIEJO_FLAGS = {
@@ -38,7 +36,7 @@ the private repository of licensed fonts; without it their upload is locked. No 
 
 Options:
   --port <n>       The port (default: ${DEFAULT_PORT})
-  --workdir <dir>  Where the brands live (default: marken in the checkout)
+  --workdir <dir>  Where the brands live (default: FM_MARKEN_DIR, else ~/Fundamento/marken; never inside the checkout)
   --open           Open the browser (macOS)
   -h, --help       Show this help
 
@@ -101,7 +99,7 @@ export async function runMetiejo(
 ): Promise<number> {
   const root = CHECKOUT_ROOT;
   const settings = readSettings(root);
-  const workdir = options.workdir ?? join(root, MARKEN_DIR);
+  const workdir = options.workdir ?? markenDirOf(settings, homedir(), root);
   let servilo: Awaited<ReturnType<typeof startServilo>>;
   try {
     servilo = await startServilo(
@@ -110,6 +108,7 @@ export async function runMetiejo(
         workdir,
         root,
         settings,
+        npm: defaultNpmDeps(),
         ...(settings.tiparojRepo === undefined ? {} : { deps: defaultDeps(settings.tiparojRepo) }),
       },
       io,

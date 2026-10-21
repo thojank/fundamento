@@ -25,7 +25,10 @@ const LICENSE = Buffer.from("SIL Open Font License 1.1 (test)");
 const regular = Buffer.from("woff2-regular-bytes");
 const bold = Buffer.from("woff2-bold-bytes");
 const tarball = tarballOf([
-  { path: "package/package.json", bytes: Buffer.from('{"name":"@fontsource/inter","version":"5.2.1"}') },
+  {
+    path: "package/package.json",
+    bytes: Buffer.from('{"name":"@fontsource/inter","version":"5.2.1"}'),
+  },
   { path: "package/LICENSE", bytes: LICENSE },
   { path: "package/files/inter-latin-400-normal.woff2", bytes: regular },
   { path: "package/files/inter-latin-700-normal.woff2", bytes: bold },
@@ -38,7 +41,11 @@ function deps(cacheDir: string, online = true): NpmDeps {
     fetchJson: async (url) => {
       if (!online) throw new Error("offline");
       expect(url).toBe("https://registry.npmjs.org/@fontsource%2finter/latest");
-      return { version: "5.2.1", license: "OFL-1.1", dist: { tarball: "https://registry.npmjs.org/@fontsource/inter/-/inter-5.2.1.tgz" } };
+      return {
+        version: "5.2.1",
+        license: "OFL-1.1",
+        dist: { tarball: "https://registry.npmjs.org/@fontsource/inter/-/inter-5.2.1.tgz" },
+      };
     },
     fetchBytes: async (url) => {
       if (!online) throw new Error("offline");
@@ -79,12 +86,24 @@ describe("fetchFontFiles (O-4)", () => {
   it("names the package, reads the registry once and writes the files with their provenance into the cache", async () => {
     expect(npmPackageOf("inter")).toBe("@fontsource/inter");
     const files = await fetchFontFiles("inter", deps(cache));
-    expect(files).toMatchObject({ id: "inter", version: "5.2.1", license: "OFL-1.1", cached: false });
+    expect(files).toMatchObject({
+      id: "inter",
+      version: "5.2.1",
+      license: "OFL-1.1",
+      cached: false,
+    });
     expect(files.dir).toBe(join(cache, "inter@5.2.1"));
-    expect(files.files).toEqual(["LICENSE", "inter-latin-400-normal.woff2", "inter-latin-700-normal.woff2"]);
+    expect(files.files).toEqual([
+      "LICENSE",
+      "inter-latin-400-normal.woff2",
+      "inter-latin-700-normal.woff2",
+    ]);
     expect(readFileSync(join(files.dir, "LICENSE")).equals(LICENSE)).toBe(true);
     expect(readFileSync(join(files.dir, "inter-latin-700-normal.woff2")).equals(bold)).toBe(true);
-    const provenance = JSON.parse(readFileSync(join(files.dir, "herkunto.json"), "utf8")) as Record<string, unknown>;
+    const provenance = JSON.parse(readFileSync(join(files.dir, "herkunto.json"), "utf8")) as Record<
+      string,
+      unknown
+    >;
     expect(provenance).toMatchObject({
       package: "@fontsource/inter",
       version: "5.2.1",
@@ -103,14 +122,20 @@ describe("fetchFontFiles (O-4)", () => {
   });
 
   it("fails with the package named when there is no cache and no network", async () => {
-    await expect(fetchFontFiles("roboto", deps(join(scratch, "leer"), false))).rejects.toThrow(/@fontsource\/roboto/);
+    await expect(fetchFontFiles("roboto", deps(join(scratch, "leer"), false))).rejects.toThrow(
+      /@fontsource\/roboto/,
+    );
     expect(existsSync(join(scratch, "leer", "roboto@5.2.1"))).toBe(false);
   });
 });
 
 describe("fontFilesCss", () => {
   it("writes one @font-face per weight with a relative url and no network", () => {
-    const css = fontFilesCss("Inter", ["LICENSE", "inter-latin-400-normal.woff2", "inter-latin-700-normal.woff2"], "aspekto-provo/tiparoj/inter");
+    const css = fontFilesCss(
+      "Inter",
+      ["LICENSE", "inter-latin-400-normal.woff2", "inter-latin-700-normal.woff2"],
+      "aspekto-provo/tiparoj/inter",
+    );
     expect(css).toContain('font-family: "Inter"');
     expect(css).toContain("font-weight: 400");
     expect(css).toContain("font-weight: 700");

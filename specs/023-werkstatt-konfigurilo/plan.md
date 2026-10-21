@@ -6,7 +6,7 @@ Zwei Runden: ① Runde 1 (dieser Plan), ② Runde 2 (Quellen mit Token-Import, K
 
 ## ① Runde 1
 
-**Branch:** `261021-spec-023-runde-1-145b74` (von `main` `59ab620`) · **Datum:** 2026-10-21 · **Stand:** zur Abnahme; der Paketname `metiejo` ist ein Arbeitsname (O-1). Der Figma-Export bleibt rot, bis F-13 aus Nachlese 8 ① auf `main` ist (Abweichung 4).
+**Branch:** `261021-spec-023-runde-1-145b74` (von `main` `59ab620`, nach dem Rebase auf `3759b67` mit Nachlese 8 ①–③ und Release 0.2.0) · **Datum:** 2026-10-21/22 · **Stand:** zur Abnahme. Die Entscheidungen des Maintainers vom 22.10. zu O-1 bis O-7 sind eingearbeitet (Nachtrag unten): Paketname `metiejo` bestätigt, Marken außerhalb des Repos (`FM_MARKEN_DIR`), Schriftdateien aus dem npm-Paket, F-13 grün nach dem Rebase.
 
 ### Zusammenfassung
 
@@ -15,9 +15,9 @@ Zwei Runden: ① Runde 1 (dieser Plan), ② Runde 2 (Quellen mit Token-Import, K
 3. **Dieselbe Ableitung wie `fm agordilo derive` und die Werkstatt** (§4.1): `derivationBasis` (Paletten und Gestalt, 114 ms) für die Vorschau, `deriveAspekto` mit allen Prüfungen der CI (1,6 s) für den Bericht. Die Vorschau ist das Stylesheet des CSS-Celo für ein Modelo, in das der Entwurf komponiert ist (`previewCss`), in einem eigenen Dokument im Rahmen (`<iframe>`), so dass `data-fm-aspekto` und `data-fm-color-scheme` an dessen Wurzel die Marke schalten wie in einem Projekt. Gleiche Werte, gleiche Bytes (M-3, `eksporto.test.ts`).
 4. **Klartext** (`klartext.ts`): aus den strukturierten Feldern der Raporto (Paare, Prüfungen, Stufen, Verstöße mit `apply`) deutsche Sätze – was gut ist, was angepasst wurde (Sättigung gesenkt, Farbton verschoben, Hinweise), je Problem ein Satz und **ein** Vorschlag. Hat der Vorschlag einen Patch, ist er der Hauptknopf „Vorschlag übernehmen“ (Schritt Farbe); ein Klick setzt ihn.
 5. **Schriften (K-3, §4.7):** der Katalog `data/tiparoj.json` mit Herkunft (Art. VII: Quelle `https://api.fontsource.org/v1/fonts`, Tag 2026-10-21, 2100 von 2103 Familien behalten) aus dem Import `pnpm --filter @fundamento/metiejo tiparoj:import` (der einzige Netzzugriff des Pakets, vom Maintainer, nie von Build oder Test). Nur Familien mit einer SPDX-Lizenz der Liste (OFL-1.1, Apache-2.0, UFL-1.0, CC0-1.0, MIT, Unlicense) und mindestens einem Schriftsystem (ISO 15924 aus den Fontsource-Subsets). Eine gewählte Webfont wird als `Fonto` mit Lizenz, Quelle, `redistributable: true` und Schriftsystemen in die Agordo eingetragen.
-6. **Lizenzierte Schriften (§4.5):** `FM_TIPAROJ_REPO` aus der `.env` im Wurzelordner des Checkouts ist die einzige Quelle; `.env` ist ignoriert (Test), `.env.example` steht im Repo mit den sechs Namen und leeren Werten (Test: gleich `envExampleText()`). Ohne Variable ist der Upload gesperrt, mit einem Satz warum. Ein Upload liegt zuerst in `marken/<name>/fontoj/` (mit `.gitignore`), dann sagt der Bildschirm „Diese Datei geht in dein privates Repo (FM_TIPAROJ_REPO)“ und der Hauptknopf „In privates Repo hochladen“ bestätigt: zuerst die Sichtbarkeit über die GitHub-API (`gh api repos/<repo> --jq .private`), nur „privat“ erlaubt den Push; „öffentlich“ oder „nicht feststellbar“ ergeben keinen Push, mit einem Satz. Clone und Push laufen über `git` mit der vorhandenen Anmeldung des Maintainers in einen Zwischenspeicher **außerhalb des Checkouts** (`$XDG_CACHE_HOME` oder `~/Library/Caches`, `fundamento/tiparoj/<Hash des Repo-Namens>`). Die Marke nennt die Schrift mit Namen, `license: proprietary`, `redistributable: false`, Quelle „lizenziert, nicht enthalten“; der Rückfall bleibt der Stapel des `font.family`-Tokens. Kein Satz und kein Ordnername trägt den Repo-Namen (Tests).
+6. **Lizenzierte Schriften (§4.5):** `FM_TIPAROJ_REPO` aus der `.env` im Wurzelordner des Checkouts ist die einzige Quelle; `.env` ist ignoriert (Test), `.env.example` steht im Repo mit den Namen der Spec, `FM_MARKEN_DIR` (O-3) und leeren Werten (Test: gleich `envExampleText()`). Ohne Variable ist der Upload gesperrt, mit einem Satz warum. Ein Upload liegt zuerst in `marken/<name>/fontoj/` (mit `.gitignore`), dann sagt der Bildschirm „Diese Datei geht in dein privates Repo (FM_TIPAROJ_REPO)“ und der Hauptknopf „In privates Repo hochladen“ bestätigt: zuerst die Sichtbarkeit über die GitHub-API (`gh api repos/<repo> --jq .private`), nur „privat“ erlaubt den Push; „öffentlich“ oder „nicht feststellbar“ ergeben keinen Push, mit einem Satz. Clone und Push laufen über `git` mit der vorhandenen Anmeldung des Maintainers in einen Zwischenspeicher **außerhalb des Checkouts** (`$XDG_CACHE_HOME` oder `~/Library/Caches`, `fundamento/tiparoj/<Hash des Repo-Namens>`). Die Marke nennt die Schrift mit Namen, `license: proprietary`, `redistributable: false`, Quelle „lizenziert, nicht enthalten“; der Rückfall bleibt der Stapel des `font.family`-Tokens. Kein Satz und kein Ordnername trägt den Repo-Namen (Tests).
 7. **Byte-Check `pnpm check:tiparoj`** (§4.5, M-4): je bekannte Schrift (Cache des privaten Repos, `marken/*/fontoj/`) drei Fenster von 48 Bytes (Anfang, Mitte, Ende), roh und als base64 in drei Ausrichtungen; durchsucht werden `.fundamento` (alle `projekcioj*`, `release`) und `packages`. Ein Fund nennt Datei und Schrift und bricht mit Exit 1 ab. Der Export des Konfigurators läuft vor dem Ergebnis durch denselben Check und entfernt ein Ergebnis mit Fund. In der CI ist keine Schrift bekannt; der Schritt beweist den Weg und sagt das.
-8. **Export (Schritt 7):** `marken/<name>/eksporto/aspekto-<name>/` wie `fm agordilo derive`, dazu über eine `fundamento.config.json` daneben `projekcioj/css/` und `projekcioj/figma/plugin/` aus `buildProjekcioj` mit `celoj: ["css"|"figma"]` und festem `build: "metiejo"`. Speichern schreibt `agordo.json` mit einem `historio`-Eintrag je Bewegung (Regeln von `save_agordo`: nur im Arbeitsordner, nur `*.json`, nie über eine Datei, die keine Agordo ist); nichts bewegt, nichts angehängt.
+8. **Export (Schritt 7):** `<Markenordner>/<name>/eksporto/aspekto-<name>/` wie `fm agordilo derive`, dazu über eine `fundamento.config.json` daneben `projekcioj/css/` und `projekcioj/figma/plugin/` aus `buildProjekcioj` mit `celoj: ["css"|"figma"]` und festem `build: "metiejo"`. Die Dateien jeder Webfont kommen mit Lizenz aus dem npm-Paket `@fontsource/<id>` in `aspekto-<name>/tiparoj/<id>/` (LICENSE, Latin regular und bold als woff2, `herkunto.json` mit Paket, Version, Lizenz, Tarball und Tag), dazu `eksporto/tiparoj.css` mit den `@font-face`-Regeln (O-4, D-15). Speichern schreibt `agordo.json` mit einem `historio`-Eintrag je Bewegung (Regeln von `save_agordo`: nur im Arbeitsordner, nur `*.json`, nie über eine Datei, die keine Agordo ist); nichts bewegt, nichts angehängt.
 9. **Link zur Expertenansicht:** die Werkstatt der Vitrino aus `.fundamento/projekcioj/vitrino/index.html`, vom Server unter `/vitrino/` ausgeliefert, mit `#aspekto=komuna&modus=werkstatt&agordo=<deflate-raw, base64url>` wie der Link von `propose_agordo`. Ohne gebaute Vitrino steht ein Satz mit dem Build-Befehl.
 10. **M-7:** kein Wert der `.env` in einer Antwort oder einem Logeintrag (Test mit einem Fake-Schlüssel und dem Repo-Namen); der Server loggt nur „gesetzt“ oder „nicht gesetzt“.
 11. **Kleinste Änderungen daneben:** `.gitignore` `!.env.example` (Abweichung 1); `fm metiejo` in der CLI; `check:tiparoj` als Wurzelskript, in der `check`-Kette und als Schritt des Jobs `checks` (Pins in `workflow.test.ts`); README (Paket, Check, Abschnitt „Der Konfigurator (Metiejo)“); Vojmapo (Zeile 8a'').
@@ -48,8 +48,8 @@ Reihenfolge nach §4.5: Die Datei landet in `marken/<name>/fontoj/` (bleibt loka
 #### D-08 Fenster statt Hash: so findet der Check eine Schrift auch in einem Data-URL
 Ein Hash über die ganze Datei fände nur die ganze Datei. Drei Fenster von 48 Bytes (ein Vielfaches von 3, darum base64 ohne Padding) am Anfang, in der Mitte und am Ende, je roh und als base64 in drei Ausrichtungen, finden eine Kopie in einem Stylesheet, einem Bündel und einem Data-URL, gleich wo sie beginnt. `Buffer.indexOf` je Nadel; die Schriften selbst, `node_modules` und `.git` werden übersprungen. M-4 ist so getestet: sauber besteht, ein absichtlich hineinkopiertes Muster (roh, base64, verschoben) bricht ab, zehn Bytes reichen nicht.
 
-#### D-09 Das Arbeitsverzeichnis `marken/`
-`save_agordo` und die README nennen `marken/<name>.json` als Beispiel; der Konfigurator nimmt denselben Ordner, einen Unterordner je Marke: `agordo.json` (gespeichert, mit `historio`), `entwurf.json` (zwischen den Schritten), `fontoj/` (Uploads, mit `.gitignore`), `eksporto/`. Nichts davon ist im Repo-`.gitignore`; was ins Repo geht, legt der Maintainer selbst ab (§4.6). `--workdir` wählt einen anderen Ort.
+#### D-09 Der Markenordner liegt außerhalb des Repos
+Entscheidung O-3 (22.10.): Marken liegen nie im Checkout. Der Ordner kommt aus `FM_MARKEN_DIR` in der `.env` (`~` wird aufgelöst, ein relativer Pfad gegen den Wurzelordner des Checkouts), ohne Eintrag `~/Fundamento/marken`; `--workdir` wählt einen anderen. Je Marke ein Unterordner: `agordo.json` (gespeichert, mit `historio`), `entwurf.json` (zwischen den Schritten), `fontoj/` (Uploads, mit `.gitignore`), `eksporto/`. `markoDir` – der eine Weg zu jedem Ordner einer Marke – wirft, wenn der Markenordner im Checkout liegt; so schreiben Anlegen, Entwurf, Speichern und Export nie in den Checkout (Test). Zusätzlich steht `marken/` in der `.gitignore`. Die erste Fassung (21.10.) nahm `marken/` im Checkout nach dem Beispiel von `save_agordo`.
 
 #### D-10 Die Historie zählt Bewegungen
 Jedes Speichern hängt einen `historio`-Eintrag mit dem Diff der Regler seit dem letzten Speichern an (`historioEintrag`, Wunsch „Hand“); bewegt sich nichts, wird nichts angehängt. So gibt dasselbe Speichern zweimal hintereinander dieselbe `agordo.json`, und der Export daraus dieselben Bytes (M-3).
@@ -62,6 +62,9 @@ Für den Schieberegler und den Farbwähler gibt es kein Ero; die Werkstatt der V
 
 #### D-13 Eigene Problemtypen neben den ValidationIssues
 `ValidationIssue.rule` ist im Modelo eine geschlossene Vereinigung der bekannten Regeln. Der Konfigurator führt seine eigenen (`name-invalid`, `marko-exists`, `tiparo-in-result`) als `MetiejoIssue` mit derselben Form (Pfad, Regel, Meldung, Vorschlag) und rührt das Modelo nicht an.
+
+#### D-15 Die Dateien einer Webfont kommen aus dem npm-Paket
+Entscheidung O-4 (22.10.): Die Vorschau lädt eine Webfont vom Fontsource-CDN; Export und Paket nehmen die Datei mit Lizenz aus dem npm-Paket. Der Export fragt die Registry nach `@fontsource/<id>` (`/latest`: Version, Lizenz, Tarball), liest aus dem Tarball LICENSE und die Latin-Schnitte 400 und 700 (aufrecht, woff2) und legt sie mit `herkunto.json` in einen Zwischenspeicher außerhalb des Checkouts (`<Cache>/fundamento/tiparoj-npm/<id>@<version>/`, Art. VII). Von dort kopiert jeder Export nach `aspekto-<name>/tiparoj/<id>/`; ein zweiter Export braucht kein Netz und gibt dieselben Bytes (M-3). Das Entpacken ist ein kleiner ustar-Leser über `gunzipSync`, keine neue Abhängigkeit. Kann eine Schrift nicht gelesen werden (kein Netz, kein Cache), ist das ein Satz im Ergebnis, keine Ablehnung: die Marke nennt die Schrift weiter mit Lizenz. Die Tests arbeiten mit einer Fake-Registry und einem Tarball aus dem Test (`test-doubles/tar.ts`); `checkPackageDir` nimmt das Paket mit dem Ordner `tiparoj/` unverändert an.
 
 #### D-14 Nur die Variablen der Spec
 `parseEnv` liest `KEY=VALUE`, Anführungszeichen, `export`, Kommentare; es nimmt nur die sechs Namen der Spec und gibt nur `FM_TIPAROJ_REPO` als Wert weiter – die Schlüssel der Anbieter kommen in Runde 2 im Prozess zum Adapter und verlassen das Modul auch dann nur als „vorhanden“.
@@ -85,15 +88,15 @@ Aufgenommen am 2026-10-21 in Chromium (1280 × 900) am Server `pnpm fm metiejo -
 
 ### Abweichungen
 
-1. **`.gitignore` bekommt `!.env.example`.** Die Spec will `.env.example` im Repo; `.env.*` in der `.gitignore` ignorierte sie. Die Ausnahme ist die kleinste Änderung; `.env` bleibt ignoriert (Test).
+1. **`.gitignore` bekommt `!.env.example` und `marken/`.** Die Spec will `.env.example` im Repo; `.env.*` in der `.gitignore` ignorierte sie. Die Ausnahme ist die kleinste Änderung; `.env` bleibt ignoriert (Test). `marken/` ist ignoriert, obwohl der Konfigurator dort nie schreibt (O-3, D-09).
 2. **Eine Schrift für Anzeige und Fließtext** (D-06). Die Spec nennt „Welche Schrift?“ als eine Frage; je Rolle wählt die Expertenansicht.
 3. **Nur vier Regler der Gestalt** (D-05): Radius, Abstand, Schriftgröße, Icon-Gewicht. Die Spec nennt je Gruppe „ein Regler“; die übrigen Regler der Stufe 2 bleiben der Expertenansicht.
 4. **Figma-Export rot bis F-13.** Der Test erwartet eine eigene Plugin-ID (`fundamento-apply-plan-<Hash>`) und den Markennamen im Plugin-Namen, wie Nachlese 8 ① F-13 es baut (Branch `261021-nachlese-8-gvidanto-116ba2`, `pluginManifest` mit `brandsOf` und `shortHash`). Auf dieser Basis schreibt der Export noch `fundamento-apply-plan`; nach dem Rebase auf `main` mit ① wird der Test grün, ohne Änderung am Plugin (das Plugin wird hier nicht angefasst). Ein Probe-Rebase auf den Branch von #95 am 21.10. bestätigt das: kein Konflikt, `eksporto.test.ts` 4 von 4 grün.
 5. **`check:tiparoj` ist kein Check des Modelo-Läufers.** `CHECK_NAMES` im Modelo und `run.js` sind an die Checks des Modelo gebunden; der Byte-Check lebt im Paket `metiejo` (`dist/node/kontrolo-cli.js`), als Wurzelskript, in der `check`-Kette und als Schritt im Job `checks` nach „Check: Release“. Die Pins in `workflow.test.ts` sind um diesen Schritt ergänzt (`ERO_CHECK_STEPS`, `CHECKS_STEPS`), der Modelo-Läufer ist unverändert.
-6. **Die Vorschau lädt eine Webfont vom Fontsource-CDN** (`https://cdn.jsdelivr.net/fontsource/fonts/<id>@latest/latin-400|700-normal.woff2`, nur https). Das Paket trägt keine Schriftdatei (K-3: Name und Lizenz, die Dateien reisen mit dem Projekt). Ohne Netz zeigt die Vorschau den Rückfall; Tests laden nichts.
+6. **Die Vorschau lädt eine Webfont vom Fontsource-CDN** (`https://cdn.jsdelivr.net/fontsource/fonts/<id>@latest/latin-400|700-normal.woff2`, nur https); Export und Paket nehmen die Dateien mit Lizenz aus dem npm-Paket (O-4, D-15). Ohne Netz zeigt die Vorschau den Rückfall; Tests laden nichts.
 7. **Eigenes Beispiel-Markup der fünf Sxablonoj** (`vorschau-korpo.ts`). Das Markup der Vitrino ist nicht exportiert, und die Vitrino bleibt unangetastet; die Beispiele folgen den Regionen der Skemoj mit deutschem Beispielinhalt.
 8. **Vorschläge ohne Patch bleiben englisch** (D-04). Die deutschen Regeltexte kommen mit Nachlese 8 ③; dann können die Sätze der Raporto übernommen werden.
-9. **Paketversion `0.1.1`** wie alle Pakete auf dieser Basis; nach dem Rebase auf `main` mit Nachlese 8 ① (0.2.0) folgt das neue Paket der Version (keine Änderung an fremden Versionen).
+9. **Paketversion:** `0.1.1` auf der ersten Basis, `0.2.0` seit dem Rebase auf `main` mit Nachlese 8 ① (keine Änderung an fremden Versionen).
 10. **Der Hauptknopf des Starts ist „Anlegen“, der des Endes „Speichern“;** dort gibt es kein „Weiter“ (M-2 prüft: Weiter auf jedem Bildschirm dazwischen, Zurück auf jedem außer dem Start).
 11. **Keine neue CI-Umgebung:** der Test des privaten Repos erzeugt sein bare-Repo mit `git init --bare -b main` und übergibt dem Commit eine Identität per `-c`, damit der Läufer ohne `user.name` auskommt.
 
@@ -109,13 +112,15 @@ Aufgenommen am 2026-10-21 in Chromium (1280 × 900) am Server `pnpm fm metiejo -
 
 ### Offen (für den Maintainer)
 
-- **O-1 Paketname:** `metiejo` (Esperanto „Werkstatt“) als Paket, Befehl `fm metiejo`, Präfix `mt-` der Layoutklassen. Bestätigen oder umbenennen.
-- **O-2 Schrift je Rolle:** eine Frage für Anzeige und Fließtext (D-06) genügt, oder zwei Bildschirme?
-- **O-3 Ort der Marken:** `marken/<name>/` im Checkout, nicht ignoriert (D-09). Soll `marken/` in die `.gitignore`?
-- **O-4 Webfont vom CDN in der Vorschau** (Abweichung 6): in Ordnung, oder nur lokal gelieferte Dateien?
-- **O-5 Standard-Port 7301** neben dem MCP auf 7300.
-- **O-6 Hinweise im Klartext:** heute ein Satz mit der Zahl und dem Verweis auf die Expertenansicht; sollen die drei häufigsten Hinweise genannt werden?
-- **O-7 F-13:** Nach dem Rebase auf `main` mit Nachlese 8 ① muss der Figma-Test grün sein; sonst Rückfrage, was F-13 anders schreibt.
+Entschieden am 22.10. (Nachtrag unten): O-1 bis O-7. Offen bleibt nichts aus Runde 1.
+
+- **O-1 Paketname:** `metiejo` – **bestätigt.**
+- **O-2 Schrift je Rolle:** eine Frage für Anzeige und Fließtext (D-06) – **in Runde 1 so;** Runde 2 optional eine zweite Schrift für Überschriften, Standard „gleiche Schrift“.
+- **O-3 Ort der Marken:** **nicht** `marken/` im Checkout – Marken liegen außerhalb des Repos, im Ordner aus `FM_MARKEN_DIR`, ohne Eintrag `~/Fundamento/marken`; `marken/` in der `.gitignore`; ein Test prüft, dass Export und Speichern nie in den Checkout schreiben (D-09).
+- **O-4 Webfont vom CDN in der Vorschau:** **ja;** Export und Paket nehmen die Datei mit Lizenz aus dem npm-Paket (D-15).
+- **O-5 Standard-Port 7301:** **ja.**
+- **O-6 Hinweise im Klartext:** **so lassen.**
+- **O-7 F-13:** mit dem Rebase erledigt, der Figma-Test ist grün.
 
 ### Messanleitung
 
@@ -128,7 +133,9 @@ pnpm build
 pnpm fm projekcioj build --out .fundamento/projekcioj   # einmal: die Expertenansicht (Werkstatt der Vitrino)
 ```
 
-Die Einstellungen stehen in `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.env` (Vorlage: `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.env.example`). Für Runde 1 zählt nur `FM_TIPAROJ_REPO=<owner/name>` des privaten Schriften-Repos; alles andere bleibt leer. Der Server liest die Datei beim Start und zeigt keinen Wert.
+Die Einstellungen stehen in `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.env` (Vorlage: `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.env.example`). Für Runde 1 zählen `FM_TIPAROJ_REPO=<owner/name>` des privaten Schriften-Repos und `FM_MARKEN_DIR=<Ordner der Marken>`; ohne `FM_MARKEN_DIR` liegen die Marken in `/Users/thorstenjankowski/Fundamento/marken`. Ein Ordner im Checkout wird abgelehnt. Alles andere bleibt leer. Der Server liest die Datei beim Start und zeigt keinen Wert.
+
+Im Folgenden steht `<Markenordner>` für den Ordner aus `FM_MARKEN_DIR`, also ohne Eintrag `/Users/thorstenjankowski/Fundamento/marken`.
 
 **Starten:**
 
@@ -137,19 +144,18 @@ cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
 pnpm fm metiejo --open
 ```
 
-Dann **http://localhost:7301** (der Server antwortet nur auf diesem Rechner; `--port` wählt einen anderen Port, `--workdir` einen anderen Ordner als `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/marken`).
+Dann **http://localhost:7301** (der Server antwortet nur auf diesem Rechner; `--port` wählt einen anderen Port, `--workdir` einen anderen Ordner als `<Markenordner>`). Die Startzeile nennt den Markenordner.
 
-**M-1 (Stoppuhr, höchstens 10 Minuten, ohne Doku):** Von „leer“ bis zum Figma-Export: Start (Name, „Leer“ oder „Beispiel komuna“, Anlegen) → Farbe (Farbwähler; ein Problem zeigt einen Vorschlag als Hauptknopf) → Schrift (Suche, Treffer wählen, Weiter) → Form, Raum, Schriftgröße, Icons (je ein Regler oder eine Wahl, Weiter) → Vorschau (Dunkel umschalten) → Fertig (Speichern). Danach liegt `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/marken/<name>/eksporto/projekcioj/figma/plugin/manifest.json`; in Figma: Plugins → Development → Import plugin from manifest. Bitte die gemessene Zeit im Abnahme-Ergebnis notieren.
+**M-1 (Stoppuhr, höchstens 10 Minuten, ohne Doku):** Von „leer“ bis zum Figma-Export: Start (Name, „Leer“ oder „Beispiel komuna“, Anlegen) → Farbe (Farbwähler; ein Problem zeigt einen Vorschlag als Hauptknopf) → Schrift (Suche, Treffer wählen, Weiter) → Form, Raum, Schriftgröße, Icons (je ein Regler oder eine Wahl, Weiter) → Vorschau (Dunkel umschalten) → Fertig (Speichern). Danach liegt `<Markenordner>/<name>/eksporto/projekcioj/figma/plugin/manifest.json` (ohne `FM_MARKEN_DIR`: `/Users/thorstenjankowski/Fundamento/marken/<name>/eksporto/projekcioj/figma/plugin/manifest.json`); in Figma: Plugins → Development → Import plugin from manifest. Die Dateien der Webfont liegen in `<Markenordner>/<name>/eksporto/aspekto-<name>/tiparoj/<id>/` mit `LICENSE` und `herkunto.json`, die `@font-face`-Regeln in `<Markenordner>/<name>/eksporto/tiparoj.css`. Bitte die gemessene Zeit im Abnahme-Ergebnis notieren.
 
 **M-2 (ein Test zählt):** `pnpm --filter @fundamento/metiejo exec vitest run src/sxtupoj.test.ts` – je Bildschirm eine Frage, höchstens ein Hauptknopf, Zurück und Weiter.
 
 **M-3 (bytegleich):** zweimal Speichern ohne Änderung, dann:
 
 ```sh
-cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
-cp -R marken/<name>/eksporto /tmp/metiejo-eksporto-1
+cp -R "<Markenordner>/<name>/eksporto" /tmp/metiejo-eksporto-1
 # im Browser noch einmal „Speichern“, dann:
-diff -r /tmp/metiejo-eksporto-1 marken/<name>/eksporto && echo bytegleich
+diff -r /tmp/metiejo-eksporto-1 "<Markenordner>/<name>/eksporto" && echo bytegleich
 ```
 
 Ohne Browser: `pnpm --filter @fundamento/metiejo exec vitest run src/eksporto.test.ts` leitet `provo` zweimal ab und vergleicht alle Hashes.
@@ -159,7 +165,7 @@ Ohne Browser: `pnpm --filter @fundamento/metiejo exec vitest run src/eksporto.te
 ```sh
 cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
 pnpm check:tiparoj                                                    # PASS: 1 Schrift bekannt, nichts gefunden
-cat marken/<name>/fontoj/<datei> >> .fundamento/projekcioj/css/planted.css   # ein Muster absichtlich hineinkopieren
+cat "<Markenordner>/<name>/fontoj/<datei>" >> .fundamento/projekcioj/css/planted.css   # ein Muster absichtlich hineinkopieren
 pnpm check:tiparoj; echo "exit=$?"                                    # FAIL, exit 1, nennt planted.css und die Schrift
 rm .fundamento/projekcioj/css/planted.css
 pnpm check                                                            # die Kette endet mit check:tiparoj
@@ -171,11 +177,18 @@ Der Cache des privaten Repos liegt unter `/Users/thorstenjankowski/Library/Cache
 
 ```sh
 cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
-grep -r "test-123" marken .fundamento 2>/dev/null; echo "exit=$? (1 = nirgends)"
+grep -r "test-123" "<Markenordner>" .fundamento 2>/dev/null; echo "exit=$? (1 = nirgends)"
 ```
 
 Die Ausgabe des Servers nennt nur „weitere Variablen gesetzt: 1“. Der Test `src/servilo.test.ts` prüft dasselbe mit einem Fake-Schlüssel und dem Repo-Namen in jeder Antwort und jedem Logeintrag.
 
 **Expertenansicht:** Auf jedem Bildschirm steht der Link „Expertenansicht“ (bei gebauter Vitrino) – er öffnet `http://localhost:7301/vitrino/index.html#aspekto=komuna&modus=werkstatt&agordo=…` mit dem Entwurf. Dieselbe Werkstatt direkt: `open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/vitrino/index.html#modus=werkstatt"`.
 
-**Figma (F-13, Abweichung 4):** nach dem Merge trägt `marken/<name>/eksporto/projekcioj/figma/plugin/manifest.json` eine `id` `fundamento-apply-plan-<hash>` und den Markennamen im `name`; das Plugin erscheint in Figma als eigener Eintrag neben dem komuna-Build. Grüne Tests sind für Figma keine Abnahme: bitte in einer neuen leeren Datei laufen lassen.
+**Figma (F-13, Abweichung 4):** `<Markenordner>/<name>/eksporto/projekcioj/figma/plugin/manifest.json` trägt eine `id` `fundamento-apply-plan-<hash>` und den Markennamen im `name`; das Plugin erscheint in Figma als eigener Eintrag neben dem komuna-Build. Grüne Tests sind für Figma keine Abnahme: bitte in einer neuen leeren Datei laufen lassen.
+
+### Nachtrag 22.10.
+
+**Entscheidungen des Maintainers vom 2026-10-22** (O-1 bis O-7, siehe oben), umgesetzt im selben PR nach dem Rebase auf `main` `3759b67` (Nachlese 8 ①–③, Release 0.2.0 veröffentlicht):
+- **O-3:** `FM_MARKEN_DIR` als siebte Variable in `.env` und `.env.example`; `markenDirOf` (D-09); `assertOutsideCheckout` in `markoDir`; `marken/` in der `.gitignore`; Tests in `marko.test.ts` und `eksporto.test.ts` („never inside the checkout“), `env.test.ts`. `fm metiejo --help` und `check:tiparoj --help` nennen den neuen Standard. Die Bildschirmfotos vom 21.10. zeigen noch den Satz „Ordner marken/<name> im Checkout“ im Schritt Start; der Satz lautet jetzt „im Markenordner (FM_MARKEN_DIR in der .env, sonst ~/Fundamento/marken)“.
+- **O-4:** `tiparoj-npm.ts` (D-15), `exportMarko` mit `npm`, `tiparoj.css`; Tests `tiparoj-npm.test.ts` und drei in `eksporto.test.ts`.
+- **Version:** `metiejo` auf 0.2.0; der Figma-Test ist grün (F-13 auf `main`).

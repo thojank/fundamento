@@ -10,9 +10,8 @@ import { homedir } from "node:os";
 import { relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
-import { readSettings } from "../env.js";
+import { markenDirOf, readSettings } from "../env.js";
 import { knownFonts, scanDirs } from "../kontrolo.js";
-import { MARKEN_DIR } from "../marko.js";
 import { cacheDirOf, cacheRootOf } from "../privata.js";
 
 const HELP = `check:tiparoj: No byte of a licensed font in a public result (Spec 023, §4.5, M-4).
@@ -26,7 +25,7 @@ their byte patterns, raw and as base64. Default targets: .fundamento and package
 Options:
   --target <dir>   A directory to scan (repeatable; default: .fundamento and packages)
   --cache <dir>    The clone of the private repository (default: the person's cache folder)
-  --workdir <dir>  The brands (default: marken in the checkout)
+  --workdir <dir>  The brands (default: FM_MARKEN_DIR, else ~/Fundamento/marken)
   --json           Print only the result as JSON on stdout
   -h, --help       Show this help
 
@@ -80,7 +79,7 @@ function main(): number {
       : settings.tiparojRepo === undefined
         ? undefined
         : cacheDirOf(cacheRootOf(process.env, process.platform, homedir()), settings.tiparojRepo);
-  const workdir = resolve(cwd, values.workdir ?? resolve(root, MARKEN_DIR));
+  const workdir = resolve(cwd, values.workdir ?? markenDirOf(settings, homedir(), root));
   const targets = (values.target ?? [resolve(root, ".fundamento"), resolve(root, "packages")]).map(
     (target) => resolve(cwd, target),
   );

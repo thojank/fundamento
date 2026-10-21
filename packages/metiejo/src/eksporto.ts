@@ -4,13 +4,15 @@
 // lands in <brand>/eksporto/. Before the result stands, the byte check runs over it: a byte of a
 // licensed font removes the result (M-4). The same Agordo gives the same bytes (M-3).
 
-import { existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { basename, join, relative } from "node:path";
 import { type Agordo, writePackage } from "@fundamento/agordilo";
 import { projectModeloSource, type ValidationIssue } from "@fundamento/modelo";
 import { buildProjekcioj } from "@fundamento/projekcioj";
 import { type KnownFont, scanDirs } from "./kontrolo.js";
 import { clearExport, type MetiejoIssue, markoDir } from "./marko.js";
+import { readTiparoj } from "./tiparoj.js";
+import { fetchFontFiles, fontFilesCss, type NpmDeps } from "./tiparoj-npm.js";
 import { type Bases, checkDraft } from "./vorschau.js";
 
 export type EksportoCelo = "aspekto" | "css" | "figma";
@@ -23,6 +25,8 @@ export interface ExportOptions {
   fonts: readonly KnownFont[];
   /** The state the Figma plugin names; fixed, so two exports give the same bytes. */
   build?: string;
+  /** npm for the files of the webfonts (O-4); absent: the brand names them with licence only. */
+  npm?: NpmDeps;
 }
 
 export interface ExportResult {
@@ -34,6 +38,53 @@ export interface ExportResult {
   issues: (ValidationIssue | MetiejoIssue)[];
   /** What was written, one sentence per Celo (German, for the screen). */
   sentences: string[];
+}
+
+/**
+ * The files of every webfont of the brand (O-4): from npm through the cache into
+ * `<package>/tiparoj/<id>/` with LICENSE and herkunto.json, and `tiparoj.css` beside the package.
+ * A font that cannot be read is a sentence, never a refusal: the brand names it with its licence.
+ */
+async function webfontFiles(
+  dir: string,
+  packageName: string,
+  agordo: Agordo,
+  npm: NpmDeps | undefined,
+): Promise<string[]> {
+  const sentences: string[] = [];
+  const catalogue = readTiparoj();
+  const seen = new Set<string>();
+  const css: string[] = [];
+  for (const font of [agordo.schriften?.display, agordo.schriften?.body, agordo.schriften?.code]) {
+    if (font === undefined || !font.redistributable || seen.has(font.family)) continue;
+    seen.add(font.family);
+    const tiparo = catalogue.tiparoj.find((entry) => entry.family === font.family);
+    if (tiparo === undefined) continue;
+    if (npm === undefined) {
+      sentences.push(
+        `Die Webfont ${font.family} (${font.license}) ist mit Lizenz genannt, ohne Schriftdatei (kein npm-Zugang in diesem Lauf).`,
+      );
+      continue;
+    }
+    try {
+      const files = await fetchFontFiles(tiparo.id, npm);
+      const target = join(dir, packageName, "tiparoj", tiparo.id);
+      mkdirSync(target, { recursive: true });
+      for (const file of [...files.files, "herkunto.json"]) {
+        writeFileSync(join(target, file), readFileSync(join(files.dir, file)));
+      }
+      css.push(fontFilesCss(font.family, files.files, `${packageName}/tiparoj/${tiparo.id}`));
+      sentences.push(
+        `Die Webfont ${font.family} liegt mit Lizenz (${files.license || font.license}) in eksporto/${packageName}/tiparoj/${tiparo.id} (npm @fontsource/${tiparo.id} ${files.version}${files.cached ? ", aus dem Zwischenspeicher" : ""}).`,
+      );
+    } catch (error) {
+      sentences.push(
+        `Die Schriftdatei von ${font.family} wurde nicht geladen (${error instanceof Error ? error.message : String(error)}); die Marke nennt die Schrift weiter mit Lizenz.`,
+      );
+    }
+  }
+  if (css.length > 0) writeFileSync(join(dir, "tiparoj.css"), `${css.join("\n")}\n`);
+  return sentences;
 }
 
 function filesBelow(dir: string): string[] {
@@ -73,6 +124,7 @@ export async function exportMarko(
   const sentences = [
     `Das Paket ${packageName} liegt in eksporto/${packageName} (${Object.keys(derivation.files).length} Dateien).`,
   ];
+  sentences.push(...(await webfontFiles(dir, packageName, agordo, options.npm)));
   const projections = options.celoj.filter((celo): celo is "css" | "figma" => celo !== "aspekto");
   if (projections.length > 0) {
     const config = join(dir, "fundamento.config.json");

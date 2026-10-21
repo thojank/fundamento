@@ -37,6 +37,7 @@ import {
   screen,
 } from "./sxtupoj.js";
 import { fontFaceCss, fontoOf, licencedFonto, readTiparoj, searchTiparoj } from "./tiparoj.js";
+import type { NpmDeps } from "./tiparoj-npm.js";
 import { type Bases, checkDraft, komunaCss, loadBases, previewCss } from "./vorschau.js";
 import { previewBody } from "./vorschau-korpo.js";
 
@@ -45,13 +46,15 @@ export const HTTP_HOST = "127.0.0.1";
 export interface ServiloOptions {
   /** 0 picks a free port. */
   port: number;
-  /** The brands: `<root>/marken` by default. */
+  /** The brands (FM_MARKEN_DIR, never inside the checkout). */
   workdir: string;
   /** The checkout root: the .env, the Vitrino of `fm projekcioj build`. */
   root: string;
   settings: Settings;
   /** The private repository; absent without FM_TIPAROJ_REPO. */
   deps?: PrivataDeps;
+  /** npm for the files of the webfonts (O-4); absent in tests. */
+  npm?: NpmDeps;
 }
 
 export interface ServiloIo {
@@ -576,6 +579,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         const result = await exportMarko(options.workdir, name, draft.agordo, bases, {
           celoj: celoj.length === 0 ? ["aspekto"] : celoj,
           fonts,
+          ...(options.npm === undefined ? {} : { npm: options.npm }),
         });
         draft.eksporto = {
           sentences: result.ok ? result.sentences : [],

@@ -13,7 +13,7 @@ import {
   unlinkSync,
   writeFileSync,
 } from "node:fs";
-import { basename, extname, join, resolve } from "node:path";
+import { basename, extname, join, relative, resolve, sep } from "node:path";
 import {
   type Agordo,
   type GestaltBasis,
@@ -23,9 +23,10 @@ import {
 } from "@fundamento/agordilo";
 import type { ValidationIssue } from "@fundamento/modelo";
 import { isFontFile } from "./kontrolo.js";
+import { CHECKOUT_ROOT } from "./root.js";
 import { loadBases, startAgordo } from "./vorschau.js";
 
-/** The folder of the brands below the checkout (the convention of save_agordo's examples). */
+/** The name of the folder of the brands (`~/Fundamento/marken` by default, O-3), never below the checkout. */
 export const MARKEN_DIR = "marken";
 /** `$defs/Name` of the Modelo schema: the name of a brand, a package, an Aspekto. */
 export const NAME_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -73,8 +74,22 @@ function nameIssue(name: string): MetiejoIssue {
   };
 }
 
+/** Throws when a working directory lies inside the checkout (O-3): no brand is ever written there. */
+export function assertOutsideCheckout(workdir: string): void {
+  const rel = relative(resolve(CHECKOUT_ROOT), resolve(workdir));
+  if (
+    rel === "" ||
+    (!rel.startsWith(`..${sep}`) && rel !== ".." && !resolve(rel).startsWith(resolve(workdir)))
+  ) {
+    throw new Error(
+      `${workdir} lies inside the checkout ${CHECKOUT_ROOT}; brands live outside the repository (FM_MARKEN_DIR, default ~/Fundamento/marken).`,
+    );
+  }
+}
+
 /** The folder of a brand; throws for a name that is none (nothing outside the working directory). */
 export function markoDir(workdir: string, name: string): string {
+  assertOutsideCheckout(workdir);
   if (!NAME_PATTERN.test(name)) throw new Error(`${JSON.stringify(name)} is no name of a brand.`);
   const dir = resolve(workdir, name);
   if (dir !== join(resolve(workdir), name))
@@ -130,6 +145,7 @@ export function createMarko(
   input: CreateInput,
   start: (name: string, basis: CreateInput["basis"]) => Agordo = startAgordo,
 ): CreateResult {
+  assertOutsideCheckout(workdir);
   if (!NAME_PATTERN.test(input.name)) return { issues: [nameIssue(input.name)] };
   const dir = markoDir(workdir, input.name);
   if (existsSync(join(dir, "agordo.json"))) {

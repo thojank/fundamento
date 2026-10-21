@@ -6,7 +6,6 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { readAgordo } from "@fundamento/agordilo";
-import { CHECKOUT_ROOT } from "./root.js";
 import { afterAll, describe, expect, it } from "vitest";
 import {
   createMarko,
@@ -18,6 +17,7 @@ import {
   storeUpload,
   writeDraft,
 } from "./marko.js";
+import { CHECKOUT_ROOT } from "./root.js";
 
 const scratch = mkdtempSync(join(tmpdir(), "fm-metiejo-marko-"));
 const workdir = join(scratch, MARKEN_DIR);
@@ -111,7 +111,9 @@ describe("never inside the checkout (O-3)", () => {
     const inside = join(CHECKOUT_ROOT, "marken");
     expect(() => markoDir(inside, "provo")).toThrow(/checkout/i);
     expect(() => createMarko(inside, { name: "provo", basis: "leer" })).toThrow(/checkout/i);
-    expect(() => saveMarko(inside, "provo", { name: "provo", leitfarbe: "#336699" }, "2026-10-22")).toThrow(/checkout/i);
+    expect(() =>
+      saveMarko(inside, "provo", { name: "provo", leitfarbe: "#336699" }, "2026-10-22"),
+    ).toThrow(/checkout/i);
     expect(existsSync(inside)).toBe(false);
     expect(existsSync(join(CHECKOUT_ROOT, "marken", "provo"))).toBe(false);
   });

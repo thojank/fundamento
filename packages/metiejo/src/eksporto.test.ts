@@ -89,17 +89,30 @@ describe("exportMarko: the webfont files from npm (O-4)", () => {
     { path: "package/files/archivo-latin-700-normal.woff2", bytes: Buffer.from("archivo-bold") },
   ]);
   const npm: NpmDeps = {
-    fetchJson: async () => ({ version: "5.1.0", license: "OFL-1.1", dist: { tarball: "https://registry.npmjs.org/@fontsource/archivo/-/archivo-5.1.0.tgz" } }),
+    fetchJson: async () => ({
+      version: "5.1.0",
+      license: "OFL-1.1",
+      dist: { tarball: "https://registry.npmjs.org/@fontsource/archivo/-/archivo-5.1.0.tgz" },
+    }),
     fetchBytes: async () => tarball,
     cacheDir: join(scratch, "npm-cache"),
     date: "2026-10-22",
   };
 
   it("puts the files of every webfont with licence and provenance into the package, writes tiparoj.css, and the package still checks", async () => {
-    const result = await exportMarko(workdir, "provo", provo, bases, { celoj: ["aspekto"], fonts: [], npm });
+    const result = await exportMarko(workdir, "provo", provo, bases, {
+      celoj: ["aspekto"],
+      fonts: [],
+      npm,
+    });
     expect(result.ok).toBe(true);
     const fonts = join(result.dir, "aspekto-provo", "tiparoj", "archivo");
-    for (const file of ["LICENSE", "archivo-latin-400-normal.woff2", "archivo-latin-700-normal.woff2", "herkunto.json"]) {
+    for (const file of [
+      "LICENSE",
+      "archivo-latin-400-normal.woff2",
+      "archivo-latin-700-normal.woff2",
+      "herkunto.json",
+    ]) {
       expect(existsSync(join(fonts, file)), file).toBe(true);
     }
     const css = readFileSync(join(result.dir, "tiparoj.css"), "utf8");
@@ -109,27 +122,57 @@ describe("exportMarko: the webfont files from npm (O-4)", () => {
     expect(result.sentences.join(" ")).toContain("@fontsource/archivo 5.1.0");
     expect(checkPackageDir(join(result.dir, "aspekto-provo")).ok).toBe(true);
     const before = hashes(result.dir);
-    const again = await exportMarko(workdir, "provo", provo, bases, { celoj: ["aspekto"], fonts: [], npm: { ...npm, fetchJson: async () => { throw new Error("offline"); }, fetchBytes: async () => { throw new Error("offline"); } } });
+    const again = await exportMarko(workdir, "provo", provo, bases, {
+      celoj: ["aspekto"],
+      fonts: [],
+      npm: {
+        ...npm,
+        fetchJson: async () => {
+          throw new Error("offline");
+        },
+        fetchBytes: async () => {
+          throw new Error("offline");
+        },
+      },
+    });
     expect(again.ok).toBe(true);
     expect(hashes(again.dir)).toEqual(before);
   });
 
   it("without npm the brand names the font with its licence and says that no file was taken", async () => {
-    const result = await exportMarko(workdir, "provo", provo, bases, { celoj: ["aspekto"], fonts: [] });
+    const result = await exportMarko(workdir, "provo", provo, bases, {
+      celoj: ["aspekto"],
+      fonts: [],
+    });
     expect(result.ok).toBe(true);
     expect(existsSync(join(result.dir, "aspekto-provo", "tiparoj"))).toBe(false);
     expect(result.sentences.join(" ")).toMatch(/Archivo.*ohne Schriftdatei/);
   });
 
   it("a failed download is a sentence, not a refusal", async () => {
-    const failing: NpmDeps = { ...npm, cacheDir: join(scratch, "npm-leer"), fetchJson: async () => { throw new Error("offline"); } };
-    const result = await exportMarko(workdir, "provo", provo, bases, { celoj: ["aspekto"], fonts: [], npm: failing });
+    const failing: NpmDeps = {
+      ...npm,
+      cacheDir: join(scratch, "npm-leer"),
+      fetchJson: async () => {
+        throw new Error("offline");
+      },
+    };
+    const result = await exportMarko(workdir, "provo", provo, bases, {
+      celoj: ["aspekto"],
+      fonts: [],
+      npm: failing,
+    });
     expect(result.ok).toBe(true);
     expect(result.sentences.join(" ")).toMatch(/Archivo.*nicht geladen/);
   });
 
   it("never exports into the checkout (O-3)", async () => {
-    await expect(exportMarko(join(CHECKOUT_ROOT, "marken"), "provo", provo, bases, { celoj: ["aspekto"], fonts: [] })).rejects.toThrow(/checkout/i);
+    await expect(
+      exportMarko(join(CHECKOUT_ROOT, "marken"), "provo", provo, bases, {
+        celoj: ["aspekto"],
+        fonts: [],
+      }),
+    ).rejects.toThrow(/checkout/i);
     expect(existsSync(join(CHECKOUT_ROOT, "marken"))).toBe(false);
   });
 });
@@ -138,6 +181,7 @@ describe("exportMarko: the byte check (M-4)", () => {
   it("removes a result that carries a byte pattern of a licensed font and says which", async () => {
     // The "licensed font" is a slice of the stylesheet the export writes: planted by construction.
     const dir = join(markoDir(workdir, "provo"), "eksporto");
+    await exportMarko(workdir, "provo", provo, bases, { celoj: ["aspekto", "css"], fonts: [] });
     const css = readFileSync(join(dir, "projekcioj", "css", "fundamento.css"));
     const planted = {
       source: join(scratch, "cache", "Planted.woff2"),
