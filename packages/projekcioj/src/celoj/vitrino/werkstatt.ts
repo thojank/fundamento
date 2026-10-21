@@ -1371,13 +1371,17 @@ ${groupOf("ikonoj", "Icons", `<fm-elektilo id="fm-werkstatt-ikono-gewicht" value
     if (fixedRules.length > 0) {
       lock(download, true);
       lock(jugxo, true);
-      say(`Der Download ist gesperrt: feste Regel verletzt (${fixedRules.join(", ")}). Ein Jugxo öffnet keine feste Regel (G6); ändere die Agordo, bis sie hält.`);
+      say(
+        `Der Download ist gesperrt: feste Regel verletzt (${fixedRules.join(", ")}). Ein Jugxo öffnet keine feste Regel (G6); ändere die Agordo, bis sie hält.`,
+      );
       return;
     }
     if (uncovered.length > 0) {
       lock(download, true);
       lock(jugxo, false);
-      say(`Der Download ist gesperrt, bis ein Jugxo die anpassbaren Regeln deckt (${uncovered.join(", ")}): Begründung, Datum und Name. Der Jugxo steht in der Agordo.`);
+      say(
+        `Der Download ist gesperrt, bis ein Jugxo die anpassbaren Regeln deckt (${uncovered.join(", ")}): Begründung, Datum und Name. Der Jugxo steht in der Agordo.`,
+      );
       return;
     }
     lock(download, !raporto.summary.exportable);
