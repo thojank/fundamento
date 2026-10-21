@@ -14,20 +14,26 @@
     "brief": {
       "description": "Only the brief answer (Spec 007 A8): ero, purpose, axes, required, instead, boundary. The boundaries carry case, action and the Ero to use, no kialo (Nachlese 3 G4): ask without brief for the kialo. Default false.",
       "type": "boolean"
+    },
+    "lingvo": {
+      "description": "The language of the texts of the answer (Nachlese 8 ③): \"de\" gives the purpose, the kialoj and the Reguloj in German, from data/tradukoj.json; without it or with \"en\" English, the source. Names, cases and keywords stay.",
+      "enum": ["en", "de"]
     }
   },
   "oneOf": [
     {
       "properties": {
         "name": true,
-        "brief": true
+        "brief": true,
+        "lingvo": true
       },
       "required": ["name"]
     },
     {
       "properties": {
         "id": true,
-        "brief": true
+        "brief": true,
+        "lingvo": true
       },
       "required": ["id"]
     }

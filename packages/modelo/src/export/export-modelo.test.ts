@@ -77,7 +77,7 @@ function collectRefs(node: unknown, out: string[] = []): string[] {
 }
 
 describe("exportModelo: shape (§2.9)", () => {
-  it("has exactly the §2.9 top-level keys plus core (Spec 001 FR-10), skemoj (Spec 003), mankoj (F41), uzoj (Spec 007), ikonaro (Spec 014 ①), sxablonoj (Spec 020 ①) and gvidanto (Nachlese 8 ①)", () => {
+  it("has exactly the §2.9 top-level keys plus core (Spec 001 FR-10), skemoj (Spec 003), mankoj (F41), uzoj (Spec 007), ikonaro (Spec 014 ①), sxablonoj (Spec 020 ①), gvidanto (Nachlese 8 ①) and tradukoj (Nachlese 8 ③)", () => {
     expect(Object.keys(modeloJson).sort()).toEqual(
       [
         "$schema",
@@ -98,6 +98,7 @@ describe("exportModelo: shape (§2.9)", () => {
         "sxablonoj",
         "tokenTypes",
         "tokens",
+        "tradukoj",
         "uzoj",
       ].sort(),
     );

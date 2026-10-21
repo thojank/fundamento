@@ -85,6 +85,10 @@
       "description": "The words of the Gvidanto (Nachlese 8 ①, D-11): what only opens a request, per language; absent while the Modelo has none.",
       "$ref": "#/$defs/Gvidanto"
     },
+    "tradukoj": {
+      "description": "The translations of the texts of the Uzoj and the Reguloj (Nachlese 8 ③): per language, per text under its ID; English stays the source. Absent while the Modelo has none.",
+      "$ref": "#/$defs/Tradukoj"
+    },
     "ikonaro": {
       "description": "The Ikonaro (Spec 014 ①): the icon names of the core with meaning and kialo; absent while the Modelo has none.",
       "type": "array",
@@ -4122,6 +4126,38 @@
         }
       },
       "required": ["fillers"],
+      "additionalProperties": false
+    },
+    "Tradukoj": {
+      "description": "Translations of the texts of the Uzoj and the Reguloj (Nachlese 8 ③), per language (ISO 639-1): the key is the ID of the entry and the path of the text in it — <uzo id>/purpose, <uzo id>/boundary/<case>/kialo, <uzo id>/instead/<goal>/kialo, <uzo id>/composes/containers/<name>/kialo, <uzo id>/composes/with/<ero>/kialo, <uzo id>/composes/never/<ero>/kialo, <regulo id>/statement, <regulo id>/kialo. English, the text of the entry itself, stays the source.",
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z]{2}$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "propertyNames": {
+          "pattern": "^[a-z]{3}_[0-9A-HJKMNP-TV-Z]{26}/[a-z0-9/._-]+$"
+        },
+        "additionalProperties": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "TradukojFile": {
+      "description": "data/tradukoj.json: the translations of the texts of the Uzoj and the Reguloj (Nachlese 8 ③); absent while the Modelo has none.",
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tradukoj": {
+          "$ref": "#/$defs/Tradukoj"
+        }
+      },
+      "required": ["tradukoj"],
       "additionalProperties": false
     },
     "GvidantoFile": {

@@ -75,4 +75,35 @@
 
 ## ③ Regeltexte deutsch
 
-Folgt im PR ③.
+**Branch:** `261021-nachlese-8-germana-116ba2` (gestapelt auf ②) · Aufgaben ab T2241.
+
+### A – Rot zuerst
+- [x] **T2241 Tests:**
+  - Modelo (`gvidanto/nachlese-8-germana.test.ts`): jeder Text mit deutscher Fassung, Vortaro-Namen bleiben, Check, `get_ero`, `get_sxablono`, `suggest_ero`, `explain_regulo` mit `lingvo` de.
+  - Projekcioj (`celoj/nachlese-8-germana.test.ts`): Gebrauch und Kialoj deutsch, Make Kit englisch.
+  - MCP (`e2e/nachlese-8-germana.test.ts`): `lingvo` über das Protokoll.
+  - Doku.
+  - Rot in `4bb15db`.
+
+### B – Grün
+- [x] **T2242 Unterbau** (D-15): Schema `Tradukoj`, Wurzel `tradukoj.json`, Laden, Export, Import, Typen.
+- [x] **T2243 Übersetzung** (D-16, D-18): 526 Texte, Stichprobe in plan ③.
+- [x] **T2244 Check** `traduko-missing` und `traduko-orphaned`, nur Texte des Kerns (Abweichung 1).
+- [x] **T2245 Gvidanto** (D-17): `lingvo` in `get_ero`, `get_sxablono`, `explain_regulo` und `suggest_ero`, MCP-Schemas.
+- [x] **T2246 Vitrino:** Gebrauch und Kialoj der Reguloj deutsch.
+- [x] **T2247 F-17:** Output-Schema von `get_ero` (`content.of`, `when.props`), Test über alle Eroj.
+- [x] **T2248 Pins:** Anzahl der Regeln, Export-Schlüssel `tradukoj`, Vitrino gleich `get_ero` mit `lingvo` de, deutsche Kialoj in den Dialogen von Nachlese 4 und 5.
+
+### C – Abschluss
+- [x] **T2249 Doku** plan (mit Stichprobe und Messanleitung), tasks.
+- [x] **T2250 CI** grün: Lauf 39612832635 (10:07), M5 0 ms, 0 Long Tasks.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits | rot `4bb15db` |
+| Umfang | 526 Texte, 14 316 Wörter Englisch, 13 665 Wörter Deutsch |
+| Dauer | Übersetzung rund 35 Minuten (zehn Teile parallel), ③ insgesamt rund zwei Stunden |
+| Dialoge | `suggest_ero`: keiner gekippt; mit `lingvo` de deutsche Kialoj |
+

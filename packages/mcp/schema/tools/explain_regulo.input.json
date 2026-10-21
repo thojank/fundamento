@@ -10,18 +10,24 @@
     },
     "id": {
       "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/ReguloId"
+    },
+    "lingvo": {
+      "description": "The language of the texts of the answer (Nachlese 8 ③): \"de\" gives the purpose, the kialoj and the Reguloj in German, from data/tradukoj.json; without it or with \"en\" English, the source. Names, cases and keywords stay.",
+      "enum": ["en", "de"]
     }
   },
   "oneOf": [
     {
       "properties": {
-        "name": true
+        "name": true,
+        "lingvo": true
       },
       "required": ["name"]
     },
     {
       "properties": {
-        "id": true
+        "id": true,
+        "lingvo": true
       },
       "required": ["id"]
     }

@@ -29,6 +29,8 @@ export const SCHEMA_DEFS = {
   ikonaroFile: "IkonaroFile",
   gvidanto: "Gvidanto",
   gvidantoFile: "GvidantoFile",
+  tradukoj: "Tradukoj",
+  tradukojFile: "TradukojFile",
   sxablono: "Sxablono",
   sxablonoFile: "SxablonoFile",
   sxablonoUzoFile: "SxablonoUzoFile",
@@ -59,6 +61,8 @@ export const OPTIONAL_DATA_FILE_SCHEMA_DEFS = {
   "ikonaro.json": "IkonaroFile",
   // Nachlese 8 ① (D-11): the words of the Gvidanto, absent while it has none.
   "gvidanto.json": "GvidantoFile",
+  // Nachlese 8 ③: the translations of the texts of the Uzoj and the Reguloj.
+  "tradukoj.json": "TradukojFile",
 } as const;
 
 export type OptionalDataFileName = keyof typeof OPTIONAL_DATA_FILE_SCHEMA_DEFS;

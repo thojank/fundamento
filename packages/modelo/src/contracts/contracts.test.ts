@@ -101,7 +101,8 @@ describe("rule catalog (§2.6)", () => {
     // that no longer matches the checks (fm agordilo check).
     // Spec 019 ③: agordo-save-refused.
     // Spec 020 ① (G1, G3, G4): eleven rules of the Sxablonoj; ②: the one submit of a form.
-    expect(RULE_IDS).toHaveLength(175);
+    // Nachlese 8 ③: traduko-missing and traduko-orphaned.
+    expect(RULE_IDS).toHaveLength(177);
     for (const rule of [
       "agordo-jugxo-fixed",
       "raporto-out-of-sync",
