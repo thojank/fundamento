@@ -1041,7 +1041,49 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
   }) => {
     await openWerkstatt(page);
     await checkedAtLeast(page, 1);
+    // Nachlese 8 ② (D-14): where a block comes from — the Long Animation Frames of the run with
+    // their scripts and their style and layout, printed beside the line, so a CI run says it.
+    await page.evaluate(() => {
+      const frames: unknown[] = [];
+      (globalThis as unknown as { fmFrames: unknown[] }).fmFrames = frames;
+      if (!PerformanceObserver.supportedEntryTypes?.includes("long-animation-frame")) return;
+      new PerformanceObserver((list) => {
+        for (const entry of list.getEntries() as unknown as {
+          startTime: number;
+          duration: number;
+          blockingDuration: number;
+          renderStart: number;
+          styleAndLayoutStart: number;
+          scripts: {
+            invoker: string;
+            sourceFunctionName: string;
+            duration: number;
+            forcedStyleAndLayoutDuration: number;
+          }[];
+        }[]) {
+          if (entry.duration <= 50) continue;
+          const end = entry.startTime + entry.duration;
+          frames.push({
+            duration: Math.round(entry.duration),
+            blocking: Math.round(entry.blockingDuration),
+            styleAndLayout:
+              entry.styleAndLayoutStart > 0 ? Math.round(end - entry.styleAndLayoutStart) : 0,
+            scripts: entry.scripts.map((script) => ({
+              invoker: script.invoker,
+              fn: script.sourceFunctionName,
+              duration: Math.round(script.duration),
+              forced: Math.round(script.forcedStyleAndLayoutDuration),
+            })),
+          });
+        }
+      }).observe({ type: "long-animation-frame" });
+    });
     const timings = await page.evaluate(() => fmWerkstatt.measure(50));
+    const frames = await page.evaluate(
+      () => (globalThis as unknown as { fmFrames: unknown[] }).fmFrames,
+    );
+    if (frames.length > 0)
+      process.stderr.write(`M5 Long Animation Frames: ${JSON.stringify(frames)}\n`);
     expect(timings.derive).toHaveLength(50);
     expect(timings.check).toHaveLength(50);
     const stat = (values: number[]) => {
