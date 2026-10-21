@@ -25,6 +25,7 @@
   "dependencies": {
     "@fundamento/agordilo": "workspace:*",
     "@fundamento/mcp": "workspace:*",
+    "@fundamento/metiejo": "workspace:*",
     "@fundamento/modelo": "workspace:*",
     "@fundamento/projekcioj": "workspace:*"
   },

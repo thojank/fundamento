@@ -16,3 +16,5 @@ packages/eroj/src/generated/
 # Playwright run artefacts
 test-results/
 playwright-report/
+# The example of the settings stays in the repo (Spec 023, §4.3): names only, every value empty.
+!.env.example
