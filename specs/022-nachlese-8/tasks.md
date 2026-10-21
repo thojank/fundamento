@@ -56,12 +56,12 @@
 - [x] **T2224 codeblock und markdown** (D-10), Nachtrag zur Jugxo.
 - [x] **T2225 Vitrino und Web** (D-11 bis D-13): Teile von sxelo, pagxo, redaktilo; Zeilen umbrechen; Beschriftung der Vorschau; Befehl; Markdown; Dokument-Stylesheet; Caption.
 - [x] **T2226 N7-F-1** nesting 1, Jugxo.
-- [x] **T2227 M5** (D-14): Messung, keine Übergänge im Bedienbereich, nur geänderte Werte schreiben.
+- [x] **T2227 M5** (D-14): Messung, keine Übergänge im Bedienbereich, nur geänderte Werte schreiben; Long Animation Frames im Test; Bericht in Portionen.
 - [x] **T2228 Pins** (Abweichung 7).
 
 ### C – Abschluss
 - [x] **T2229 Doku** plan (mit Messanleitung), tasks.
-- [ ] **T2230 CI** grün.
+- [x] **T2230 CI** grün: Lauf 39611491094 (8:23). Vorher rot mit M5 52 ms, 1 Long Task (39597245355, 39605110053).
 
 ### Messungen
 
@@ -71,6 +71,7 @@
 | Tests lokal | Modelo 3 658, MCP 371, Projekcioj 792, Eroj 859 (drei Engines), Agordilo 94, CLI 72, `check:vitrino` 51 (M5 0 ms, 0 Long Tasks), `check:alirebleco-eroj` 561; `pnpm lint`, `pnpm perf` und alle `check:*` grün |
 | Dialoge | `suggest_ero`: 218 Sätze wie nach ①; `check_usage`: `actions` mit butono gültig (Jugxo) |
 | M5 (Drosselung ×3) | vorher 52 / 59 / 63 ms, 3 / 3 / 3 Long Tasks; nachher 50 / 0 / 0 ms, 1 / 0 / 0 |
+| M5 in der CI | rot 52 ms, 1 Long Task (zweimal) → Long Animation Frames: Skript `Worker.onmessage` 44–49 ms → mit Portionen 0 ms, 0 Long Tasks (Lauf 39611491094) |
 
 ## ③ Regeltexte deutsch
 
