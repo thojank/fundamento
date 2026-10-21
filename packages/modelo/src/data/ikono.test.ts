@@ -30,9 +30,9 @@ const suggest = (goal: string) => {
 };
 
 describe("ikono in the repo Modelo (section ②, G1, G2, G3)", () => {
-  it("lives in data/eroj/ikono/skemo.json, one of thirty-four Eroj", () => {
+  it("lives in data/eroj/ikono/skemo.json, one of thirty-five Eroj", () => {
     expect(ikono?.file).toBe("modelo/data/eroj/ikono/skemo.json");
-    expect(modelo.eroj).toHaveLength(34);
+    expect(modelo.eroj).toHaveLength(35);
     expect(modelo.eroj.map((entry) => entry.ero.name)).toContain("ikono");
   });
 
@@ -144,6 +144,8 @@ describe("the Uzo of the ikono (section ②, G6)", () => {
       "spuro",
       // Spec 015 ②: the upload and remove buttons of a file input.
       "alsxutilo",
+      // Spec 025 ①: the stepper buttons and the clear button of a kampo.
+      "kampo",
     ]);
     expect(uzo?.slots).toEqual({});
     expect(uzo?.layout).toEqual({ size: "content", wrap: "never" });

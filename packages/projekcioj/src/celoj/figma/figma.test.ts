@@ -783,6 +783,8 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
       "elektilo",
       "elekto",
       "faldilo",
+      // Spec 025 ①: the glitilo, in the Ero order like every set.
+      "glitilo",
       "ikono",
       "insigno",
       "kampo",
@@ -1017,6 +1019,8 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       elekto: "Frage",
       // Spec 014 ⑤: a disclosure's label property writes its summary (to confirm).
       faldilo: "Lieferbedingungen",
+      // Spec 025 ①: a slider's label names the value it sets, like a field's (to confirm).
+      glitilo: "Beschriftung",
       ikono: undefined,
       // Spec 011 ③: a badge (role generic) names a status (for the maintainer to confirm).
       insigno: "Status",
@@ -3528,5 +3532,93 @@ describe("Figma plan after Nachlese 7 ② (B-2, B-4)", () => {
   it("B-4: the menuo has disabled as a BOOLEAN beside its states", () => {
     expect(set("menuo")?.properties.disabled).toBe("BOOLEAN");
     expect(set("menuo")?.properties.state).toEqual(["rest", "hover", "focus", "disabled"]);
+  });
+});
+
+// Spec 025 ① (plan ① D-04): the glitilo in Figma — a slider: range × input × state (range an axis
+// of its own, as the card's orientation: it keys no part, the second thumb does), the label a
+// field's word, the limits as end labels and help (the Vitrino's words), the track with its fill
+// and thumb bound; with input a stand-in in the kampo's look (composed.input) beside the track.
+describe("the Figma plan draws the glitilo (Spec 025 ①)", () => {
+  const set = plan.components.find((component) => component.set === "glitilo");
+  const variant = (range: string, input: string, state: string) =>
+    set?.variants.find(
+      (candidate) =>
+        candidate.props.range === range &&
+        candidate.props.input === input &&
+        candidate.props.state === state,
+    );
+
+  it("a slider of range × input × state, twenty-four variants, the label a field's word, the limits and the help the Vitrino's", () => {
+    expect(structureOf("slider")).toBe("slider");
+    expect(set?.structure).toBe("slider");
+    expect(set?.extraAxes).toEqual(["range"]);
+    expect(set?.variants).toHaveLength(24);
+    expect(set?.properties.state).toEqual([
+      "rest",
+      "hover",
+      "focus",
+      "pressed",
+      "disabled",
+      "invalid",
+    ]);
+    expect(set?.properties).toMatchObject({
+      range: "BOOLEAN",
+      input: "BOOLEAN",
+      min: "NUMBER",
+      max: "NUMBER",
+      step: "NUMBER",
+    });
+    expect(set?.label).toEqual({ property: "label", defaultValue: "Beschriftung" });
+    expect(set?.texts).toEqual({
+      help: "Zwischen 0 und 100.",
+      error: "Fehler",
+      "min-label": "0",
+      "max-label": "100",
+    });
+    expect(set?.grid).toMatchObject({ rows: 4, columns: 6 });
+  });
+
+  it("binds track, fill and thumb by state, the input part only with input; the thumb size.target.min", () => {
+    expect(variant("false", "false", "rest")?.bindings).toMatchObject({
+      "track.fill": "color/background/sunken",
+      "track.height": "spacing/small",
+      "track.radius": "radius/full",
+      "fill.fill": "color/action/primary/rest",
+      "thumb.fill": "color/action/primary/rest",
+      "thumb.size": "size/target/min",
+      "thumb.radius": "radius/full",
+      "min-label.color": "color/text/muted",
+      "max-label.typography": "typography/caption",
+      "box.gap": "spacing/small",
+    });
+    expect(variant("false", "false", "rest")?.bindings["input.width"]).toBeUndefined();
+    expect(variant("false", "true", "rest")?.bindings["input.width"]).toBe("size/scale/1000");
+    expect(variant("false", "false", "hover")?.bindings["thumb.fill"]).toBe(
+      "color/action/primary/hover",
+    );
+    expect(variant("false", "false", "pressed")?.bindings["thumb.fill"]).toBe(
+      "color/action/primary/pressed",
+    );
+    expect(variant("false", "false", "invalid")?.bindings).toMatchObject({
+      "track.fill": "color/status/danger/subtle",
+      "fill.fill": "color/status/danger/basic",
+      "thumb.fill": "color/status/danger/basic",
+    });
+    expect(variant("false", "false", "disabled")?.bindings["thumb.fill"]).toBe(
+      "color/action/primary/disabled",
+    );
+    expect(variant("false", "false", "focus")?.focusVisible).toBe(true);
+  });
+
+  it("the input stands in with the kampo's look of kind number (composed.input); the slider holds the plan's share of the track", () => {
+    expect(set?.composed?.input).toMatchObject({
+      ero: "kampo",
+      props: { kind: "number", size: "medium", state: "rest" },
+    });
+    expect(Object.keys(set?.composed?.input?.bindings ?? {})).toEqual(
+      expect.arrayContaining(["surface.fill", "border.color", "box.height", "box.radius"]),
+    );
+    expect(set?.slider).toEqual({ share: 0.4, start: 0.2, end: 0.6 });
   });
 });

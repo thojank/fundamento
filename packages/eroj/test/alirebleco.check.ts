@@ -1827,3 +1827,38 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   }
 }
+
+// Spec 025 ① (G5, plan ① D-03): the rendered glitilo — a single value with its help and a range
+// with its end labels and the field beside — in every colour class: axe without a finding; the
+// focus ring of a thumb at least 3:1 against the gap colour and the ground.
+const glitiloj =
+  '<fm-glitilo id="an-g1" name="lautstaerke" value="40" required>Lautstärke<span slot="help">Zwischen 0 und 100.</span></fm-glitilo><fm-glitilo id="an-g2" name="preis" range input value-start="20" value-end="60">Preis<span slot="min-label">0</span><span slot="max-label">100</span></fm-glitilo><fm-glitilo id="an-g3" value="40" invalid>Pegel<span slot="error">Wähle einen Wert bis 100.</span></fm-glitilo><fm-glitilo id="an-g4" value="40" disabled>Aus</fm-glitilo>';
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on the glitilo single, range, invalid and disabled; the thumb's focus ring ≥ 3:1`, async ({
+        page,
+        browserName,
+      }) => {
+        await serve(page, out, glitiloj);
+        await page.evaluate(
+          ([a, s, k]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", k ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        expect(await axeViolations(page), "glitilo").toEqual([]);
+        await page.keyboard.press(TAB(browserName));
+        const thumb = page.locator("#an-g1").locator('[part="thumb"]:not([hidden])').first();
+        await expect(thumb).toBeFocused();
+        const [ring] = await focusRingContrasts(page, ["#an-g1 >>> [part=thumb]"], browserName);
+        expect(ring?.gap, "ring against gap").toBeGreaterThanOrEqual(3);
+        expect(ring?.page, "ring against page").toBeGreaterThanOrEqual(3);
+      });
+    }
+  }
+}

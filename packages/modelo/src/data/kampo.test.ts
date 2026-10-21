@@ -245,9 +245,10 @@ describe("the Uzo of the kampo (T004, A3)", () => {
     // outside is showing a password, a decimal and a range of dates.
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
       ["reveal-password", "ask-human"],
-      ["number-stepper", "not-supported"],
+      // Spec 025 ①: the stepper is the kampo's own now (kind number with stepper); a time zone stops.
       ["decimal", "not-supported"],
       ["date-range", "ask-human"],
+      ["time-zone", "ask-human"],
       // Spec 015 ②: a file is the alsxutilo's.
       ["file", "use-instead"],
       ["no-visible-label", "not-supported"],
@@ -532,10 +533,10 @@ describe("the kampo of Spec 011 ①: password, number and date", () => {
       case: "date-range",
       action: "ask-human",
     });
-    expect(suggest("Zähler mit Plus und Minus").boundary).toMatchObject({
+    // Spec 025 ①: a counter with plus and minus is the kampo with its stepper now, no boundary.
+    expect(suggest("Zähler mit Plus und Minus").suggestion).toEqual({
       ero: "kampo",
-      case: "number-stepper",
-      action: "not-supported",
+      props: { kind: "number", stepper: true },
     });
   });
 

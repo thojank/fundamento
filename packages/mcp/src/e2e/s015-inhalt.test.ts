@@ -155,9 +155,9 @@ describe("the content dialogs of the spec (Spec 015 ③)", () => {
     expect(snackbar.suggestion).toEqual({ ero: "avizo", props: {} });
   });
 
-  it("lists thirty-four Eroj; the briefs of the karto and the avataro name their axes and duties", async () => {
+  it("lists thirty-five Eroj; the briefs of the karto and the avataro name their axes and duties", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
-    expect(listed.eroj).toHaveLength(34);
+    expect(listed.eroj).toHaveLength(35);
     expect(listed.eroj.map((entry) => entry.name)).toContain("karto");
     const brief = await output<Brief>(client, "get_ero", { name: "karto", brief: true });
     expect(brief.axes.map((axis) => axis.name)).toEqual(["level", "orientation"]);

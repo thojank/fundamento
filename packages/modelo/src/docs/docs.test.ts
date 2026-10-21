@@ -1902,7 +1902,7 @@ describe("Spec 015 ③ documentation (specs/015-eroj-runde-4)", () => {
     expect(read("docs/vojmapo.md")).toContain("Spec 015 ③");
     expect(read("docs/vojmapo.md")).toContain("Runde 4 der Eroj vollständig");
     // Spec 020 ③: thirty-four with the kodbloko and the markdovido.
-    expect(read("README.md")).toContain("thirty-four `fm-*` elements");
+    expect(read("README.md")).toContain("thirty-five `fm-*` elements");
   });
 });
 
@@ -2886,5 +2886,61 @@ describe("Nachlese 8 ③ documentation (specs/022-nachlese-8)", () => {
     const own = tasks.slice(tasks.indexOf("## ③ Regeltexte deutsch"));
     expect(own).toContain("**T2241");
     expect(own).toMatch(/rot `[0-9a-f]{7}`/);
+  });
+});
+
+// Spec 025 ① (Nachtlauf 2026-10-22): specs/025-eroj-runde-5 carries the spec unchanged, the
+// benchmark file of Art. V beside it in research/, a plan and tasks with the three sections ① to
+// ③; plan ① carries the decisions, the Constitutional Compliance Review, the Arkitekturo coverage,
+// deviations, findings, open points, the benchmark figures and the measuring guide; tasks ① the
+// red hashes; the Vojmapo names ①.
+describe("Spec 025 ① documentation (specs/025-eroj-runde-5)", () => {
+  it("the spec is the one of 2026-10-22, unchanged; the benchmark file stands in research/; plan and tasks carry ① to ③", () => {
+    const spec = read("specs/025-eroj-runde-5/spec.md");
+    expect(spec).toMatch(/^# Spec 025 – Eroj-Runde 5: Eingabe und Auswahl/);
+    expect(spec).toContain(
+      "**E4 Namen:** `glitilo`, `datelektilo`, `listelektilo`, `plurelektilo`, `signeto`, `lokredaktilo`.",
+    );
+    const benchmark = read("research/benchmark-carbon-2026-10.md");
+    expect(benchmark).toMatch(/^# Benchmark Carbon, Oktober 2026: Kennzahlen, Checklisten, Lücken/);
+    expect(benchmark).toContain("<!-- spuroj-anfang -->");
+    const plan = read("specs/025-eroj-runde-5/plan.md");
+    const tasks = read("specs/025-eroj-runde-5/tasks.md");
+    for (const text of [plan, tasks]) {
+      for (const heading of ["## ① Eingabe", "## ② Datum", "## ③ Auswahl"]) {
+        expect(text).toContain(heading);
+      }
+    }
+  });
+
+  it("plan ① carries the review, the decisions, the coverage, deviations, findings, open points, the benchmark figures and the measuring guide; tasks ① the red hashes", () => {
+    const section = (text: string) =>
+      text.slice(text.indexOf("## ① Eingabe"), text.indexOf("## ② Datum"));
+    const plan = section(read("specs/025-eroj-runde-5/plan.md"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Constitutional Compliance Review",
+      "### Entwurfsentscheidungen",
+      "#### D-01",
+      "#### D-02",
+      "### Arkitekturo-Abdeckung",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### Benchmark-Kennzahlen",
+      "### Messanleitung",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const word of ["`glitilo`", "`kampo`", "`range-stated`", "`events`", "`stepper`"]) {
+      expect(plan).toContain(word);
+    }
+    expect(plan).toContain("cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds");
+    expect(plan).toContain("file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/");
+    const tasks = section(read("specs/025-eroj-runde-5/tasks.md"));
+    expect(tasks).toContain("### Messungen");
+    expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Spec 025 ①");
+    expect(read("README.md")).toContain("thirty-five `fm-*` elements");
   });
 });
