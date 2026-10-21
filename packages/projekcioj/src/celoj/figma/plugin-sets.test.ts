@@ -225,7 +225,11 @@ describe("every property the plugin owns is from the plan or neutral", () => {
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     // The frame Eroj lies in the section Fundamento (F-8), in no flow: its position among
     // siblings is not the plugin's. The sets lie in the frame's flow, and that is the plugin's.
-    const onPage = ["Document/Page 1/Fundamento/Eroj: layoutPositioning"];
+    // Spec 020 ①: the frame Sxablonoj lies beside it in the section, in no flow either.
+    const onPage = [
+      "Document/Page 1/Fundamento/Eroj: layoutPositioning",
+      "Document/Page 1/Fundamento/Sxablonoj: layoutPositioning",
+    ];
     expect(double.untouchedDefaults(OWNED).filter((entry) => !onPage.includes(entry))).toEqual([]);
     const set = pageNodes(double).find((child) => child.name === "butono");
     expect(set?.properties.strokes).toEqual([]);

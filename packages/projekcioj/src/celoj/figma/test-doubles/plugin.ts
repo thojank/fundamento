@@ -579,6 +579,32 @@ function node(
     },
   };
   Object.defineProperty(self, "leaveCell", { value: leaveCell, enumerable: false });
+  // Spec 020 ① (the example frames of the Sxablonoj): a component makes an instance of itself, as
+  // the API documents (ComponentNode.createInstance, on the current page until it is appended);
+  // the instance names its main component and takes the values of its component properties
+  // (InstanceNode.setProperties). A **belief** until the maintainer measures it in f10b-5.
+  if (type === "COMPONENT") {
+    Object.defineProperty(self, "createInstance", {
+      enumerable: false,
+      value: () => {
+        const instance = node("INSTANCE", self.name, counts, context);
+        Object.defineProperty(instance, "mainComponent", { value: recorded, enumerable: false });
+        return instance;
+      },
+    });
+  }
+  if (type === "INSTANCE") {
+    Object.defineProperty(self, "setProperties", {
+      enumerable: false,
+      value: (values: Record<string, unknown>) => {
+        counts.writes++;
+        self.properties.componentProperties = {
+          ...((self.properties.componentProperties as Record<string, unknown> | undefined) ?? {}),
+          ...values,
+        };
+      },
+    });
+  }
   // Everything the plugin assigns directly — `node.fills`, `node.minHeight`, `node.characters` —
   // lands in `properties`, so the double records it and `snapshot()` shows it. Without this the
   // double swallowed every such assignment, and a projection could lose a value unseen (F8).

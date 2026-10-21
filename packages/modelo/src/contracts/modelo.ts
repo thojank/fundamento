@@ -18,6 +18,9 @@ import type {
   Regulo,
   Rezolvo,
   Skemo,
+  Sxablono,
+  SxablonoSkemo,
+  SxablonoUzo,
   TextTransform,
   TokenRole,
   Uzo,
@@ -65,6 +68,16 @@ export type {
   SkemoPartProperty,
   SkemoPartSource,
   SkemoProp,
+  Sxablono,
+  SxablonoA11Y as SxablonoA11y,
+  SxablonoEntry,
+  SxablonoFile,
+  SxablonoGoal,
+  SxablonoInstance,
+  SxablonoRegion,
+  SxablonoSkemo,
+  SxablonoUzo,
+  SxablonoUzoFile,
   TokenSetFile,
   Uzo,
   UzoBoundary,
@@ -83,6 +96,20 @@ export interface LoadedEro {
   skemo: Skemo;
   /** The Uzo from `uzo.json` next to the Skemo, if the Ero has one (Spec 007, D-01). */
   uzo?: Uzo;
+  /** Path of that `uzo.json` relative to the Modelo root; set together with `uzo`. */
+  uzoFile?: string;
+}
+
+/**
+ * One Sxablono with its Skemo of regions, loaded from `data/sxablonoj/<name>/skemo.json`
+ * (Spec 020, G1), and its Uzo from `uzo.json` beside it.
+ */
+export interface LoadedSxablono {
+  /** Path relative to the Modelo root. */
+  file: string;
+  sxablono: Sxablono;
+  skemo: SxablonoSkemo;
+  uzo?: SxablonoUzo;
   /** Path of that `uzo.json` relative to the Modelo root; set together with `uzo`. */
   uzoFile?: string;
 }
@@ -191,6 +218,11 @@ export interface Modelo {
   ikonaro: Ikono[];
   /** Eroj with their Skemoj, sorted by Ero name (Spec 003). */
   eroj: LoadedEro[];
+  /**
+   * Sxablonoj with their Skemoj, sorted by name (Spec 020); absent or empty while the Modelo has
+   * none (a Modelo built by hand may leave it out).
+   */
+  sxablonoj?: LoadedSxablono[];
   /** Union of the core registry and every package registry. */
   idsLock: IdsLock;
   /** Composed Aspekto packages in config order (D-08). */

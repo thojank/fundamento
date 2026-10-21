@@ -15,22 +15,45 @@
     "violations": {
       "type": "array",
       "items": {
-        "type": "object",
-        "properties": {
-          "instance": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "minimum": 0
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "instance": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "minItems": 1
+              },
+              "issue": {
+                "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/Issue"
+              }
             },
-            "minItems": 1
+            "required": ["instance", "issue"],
+            "additionalProperties": false
           },
-          "issue": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/Issue"
+          {
+            "description": "A violation of a Sxablono instance (Spec 020): its index in sxablonoj.",
+            "type": "object",
+            "properties": {
+              "sxablono": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "minItems": 1
+              },
+              "issue": {
+                "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/Issue"
+              }
+            },
+            "required": ["sxablono", "issue"],
+            "additionalProperties": false
           }
-        },
-        "required": ["instance", "issue"],
-        "additionalProperties": false
+        ]
       }
     }
   },

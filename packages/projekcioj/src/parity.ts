@@ -15,8 +15,11 @@ import {
   kitAspektoj,
   kitReferenceAspekto,
   kitTypesPath,
+  patternInventory,
+  patternPath,
 } from "./celoj/make-kit/make-kit.js";
 import { reactTypesInventory } from "./celoj/react/react.js";
+import { sxablonoElementInventory } from "./celoj/web-component/sxablono-template.js";
 import { stylesheetInventory, stylesheetPath } from "./celoj/web-component/web-component.js";
 
 /** The folder of inventories inside a projections directory. */
@@ -54,6 +57,23 @@ export function parityInventories(outDir: string, input: CeloInput): GeneratedFi
         return item;
       }),
     );
+  }
+  // Spec 020 (G2): the Sxablonoj on the sides parity holds them to — Web, React, the Make Kit.
+  const sxablonoj = (input.modelo.sxablonoj ?? []).map((entry) => entry.sxablono.name);
+  if (sxablonoj.length > 0) {
+    const perSxablono = (of: (name: string) => ParityItem): Record<string, ParityItem> =>
+      Object.fromEntries(sxablonoj.map((name) => [name, of(name)]));
+    sides["sxablonoj-web-component.json"] = inventoryOf(
+      perSxablono((name) => sxablonoElementInventory(read(`eroj/src/generated/fm-${name}.ts`))),
+    );
+    sides["sxablonoj-react.json"] = inventoryOf(
+      reactTypesInventory(read(kitTypesPath(kitReferenceAspekto(input.modelo))), sxablonoj),
+    );
+    for (const aspekto of kitAspektoj(input.modelo)) {
+      sides[`sxablonoj-guidelines-${aspekto}.json`] = inventoryOf(
+        perSxablono((name) => patternInventory(read(patternPath(aspekto, name)))),
+      );
+    }
   }
   return Object.entries(sides).map(([file, inventory]) => ({
     path: `${PARITY_DIR}/${file}`,

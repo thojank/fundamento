@@ -32,6 +32,7 @@ const DESIGN =
 describe("Web Component Celo (T011)", () => {
   it("generates the descriptor, the stylesheet, the element and an index", () => {
     // Spec 008: the ligilo on the same path as the butono (Art. IX, Art. XI).
+    // Spec 020 ①: the Sxablonoj sxelo and pagxo beside the Eroj.
     expect(Object.keys(files).sort()).toEqual([
       "eroj/src/generated/alsxutilo.styles.ts",
       "eroj/src/generated/apartigilo.styles.ts",
@@ -66,10 +67,12 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/fm-mezurilo.ts",
       "eroj/src/generated/fm-navigado.ts",
       "eroj/src/generated/fm-pagxigilo.ts",
+      "eroj/src/generated/fm-pagxo.ts",
       "eroj/src/generated/fm-plenstato.ts",
       "eroj/src/generated/fm-saltligilo.ts",
       "eroj/src/generated/fm-spuro.ts",
       "eroj/src/generated/fm-sxaltilo.ts",
+      "eroj/src/generated/fm-sxelo.ts",
       "eroj/src/generated/fm-sxvebilo.ts",
       "eroj/src/generated/fm-tabelo.ts",
       "eroj/src/generated/fm-tekstareo.ts",
@@ -89,12 +92,14 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/mezurilo.styles.ts",
       "eroj/src/generated/navigado.styles.ts",
       "eroj/src/generated/pagxigilo.styles.ts",
+      "eroj/src/generated/pagxo.styles.ts",
       "eroj/src/generated/plenstato.styles.ts",
       "eroj/src/generated/react.ts",
       "eroj/src/generated/saltligilo.styles.ts",
       "eroj/src/generated/skemo.ts",
       "eroj/src/generated/spuro.styles.ts",
       "eroj/src/generated/sxaltilo.styles.ts",
+      "eroj/src/generated/sxelo.styles.ts",
       "eroj/src/generated/sxvebilo.styles.ts",
       "eroj/src/generated/tabelo.styles.ts",
       "eroj/src/generated/tekstareo.styles.ts",

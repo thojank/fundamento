@@ -12,6 +12,7 @@ import type {
   LoadedDimensio,
   LoadedEro,
   LoadedSet,
+  LoadedSxablono,
   Manko,
   Modelo,
   Regulo,
@@ -79,6 +80,7 @@ export function buildModelo(files: ModeloFiles): BuildModeloResult {
     // Spec 014 ① (G3): the Ikonaro, empty while data/ikonaro.json does not exist.
     ikonaro: entriesOf<Ikono>(files.data["ikonaro.json"]?.value, "ikonaro"),
     eroj: loadedEroj(files.eroj, files.uzoj),
+    sxablonoj: loadedSxablonoj(files.sxablonoj ?? [], files.sxablonoUzoj ?? []),
     idsLock,
     aspektoPackages,
     themesFile: files.themes.value,
@@ -122,6 +124,44 @@ function loadedEroj(
       return [entry];
     })
     .sort((a, b) => (a.ero.name < b.ero.name ? -1 : a.ero.name > b.ero.name ? 1 : 0));
+}
+
+/**
+ * Sxablonoj from `data/sxablonoj/<name>/skemo.json`, sorted by name, each with the Uzo from the
+ * `uzo.json` in the same folder (Spec 020, G1) — as the Eroj; a shapeless file is dropped here and
+ * reported by the schema step.
+ */
+function loadedSxablonoj(
+  documents: readonly ModeloDocument[],
+  uzoDocuments: readonly ModeloDocument[],
+): LoadedSxablono[] {
+  const uzoByFolder = new Map(
+    uzoDocuments.map((document) => [folderOf(document.file), document] as const),
+  );
+  return documents
+    .flatMap((document) => {
+      const value = document.value;
+      if (!isJsonObject(value) || !isJsonObject(value.sxablono) || !isJsonObject(value.skemo)) {
+        return [];
+      }
+      const entry: LoadedSxablono = {
+        file: document.file,
+        sxablono: value.sxablono as unknown as LoadedSxablono["sxablono"],
+        skemo: value.skemo as unknown as LoadedSxablono["skemo"],
+      };
+      const uzoDocument = uzoByFolder.get(folderOf(document.file));
+      if (uzoDocument !== undefined && isJsonObject(uzoDocument.value)) {
+        const uzo = uzoDocument.value.uzo;
+        if (isJsonObject(uzo)) {
+          entry.uzo = uzo as unknown as NonNullable<LoadedSxablono["uzo"]>;
+          entry.uzoFile = uzoDocument.file;
+        }
+      }
+      return [entry];
+    })
+    .sort((a, b) =>
+      a.sxablono.name < b.sxablono.name ? -1 : a.sxablono.name > b.sxablono.name ? 1 : 0,
+    );
 }
 
 /** The folder part of a Modelo-relative path (`data/eroj/butono/skemo.json` → `data/eroj/butono`). */

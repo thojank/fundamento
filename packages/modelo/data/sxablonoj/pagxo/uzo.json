@@ -1,0 +1,79 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/SxablonoUzoFile",
+  "uzo": {
+    "id": "uzo_01M5CYB7K43SNJWSQYFZ7QH2BG",
+    "sxablono": "sxa_01M5CYB6RYTJHVH5RJPJYZE8QY",
+    "skemo": "ske_01M5CYB75V2MS8V8XQG3RCYAC6",
+    "purpose": "Builds one page of an application: the title a person reads first and the focus lands on after a change of route, the badges and the line beside it, the actions on the page and its sections — in the order a screen reader lists them.",
+    "instead": [
+      {
+        "goal": "application-frame",
+        "keywords": {
+          "en": ["application-frame"],
+          "de": ["anwendungsgerüst"]
+        },
+        "ero": "sxelo",
+        "kialo": "The frame around the pages is the sxelo, because it stays while the pages change; the page is what changes."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "list-detail",
+        "action": "ask-human",
+        "keywords": {
+          "en": ["list-detail", "master-detail"],
+          "de": ["listen-detail"]
+        },
+        "kialo": "A list with its detail beside it is a page type of round 2, because the two panes share the width by a rule of their own; a person decides until it comes."
+      },
+      {
+        "case": "dashboard",
+        "action": "ask-human",
+        "keywords": {
+          "en": ["dashboard"],
+          "de": ["dashboard", "übersichtsseite"]
+        },
+        "kialo": "A dashboard of tiles is a page type of round 2, because its grid of cards follows a layout of its own; a person decides until it comes."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "shell",
+          "kialo": "A page stands in the main of the sxelo, because the shell stays while the pages change."
+        }
+      ],
+      "with": [
+        {
+          "ero": "titolo",
+          "kialo": "The title is a titolo of level 1, focusable, because it names the page and takes the focus after a change of route."
+        },
+        {
+          "ero": "insigno",
+          "kialo": "A badge beside the title says the status of what the page shows, because a status is read at a glance."
+        },
+        {
+          "ero": "teksto",
+          "kialo": "The subtitle is a teksto, because one sentence says what the page is about."
+        },
+        {
+          "ero": "butono",
+          "kialo": "An action on the page is a butono, one with emphasis high at most (one-primary-per-container)."
+        },
+        {
+          "ero": "ligilo",
+          "kialo": "A way to another page beside the title is a ligilo, because a destination is a link, not an action."
+        },
+        {
+          "ero": "menuo",
+          "kialo": "Further actions, and a destructive one, go into a menuo, because they are not the page's first action."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    }
+  }
+}

@@ -41,6 +41,7 @@ describe("Make Kit sources (T018)", () => {
       .filter((path) => path.startsWith(`make-kit/${aspekto}/`))
       .map((path) => path.slice(`make-kit/${aspekto}/`.length))
       .sort();
+    // Spec 020 ①: a guideline per Sxablono in patterns/.
     expect(paths).toEqual([
       "LICENSE",
       "README.md",
@@ -81,6 +82,8 @@ describe("Make Kit sources (T018)", () => {
       "guidelines/foundations/dimensioj.md",
       "guidelines/foundations/spacing.md",
       "guidelines/foundations/typography.md",
+      "guidelines/patterns/pagxo.md",
+      "guidelines/patterns/sxelo.md",
       "guidelines/setup.md",
       "package.json",
       "src/element.ts",

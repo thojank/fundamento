@@ -1,0 +1,66 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/SxablonoUzoFile",
+  "uzo": {
+    "id": "uzo_01M5CYB7K3EPE6NAYY3FXY444Y",
+    "sxablono": "sxa_01M5CYB6RYTJHVH5RJPJYZE8QX",
+    "skemo": "ske_01M5CYB75TAGN4FC2BK83YZAED",
+    "purpose": "Frames an application: its name and who is signed in, the main navigation, the notices of the application and the page in the main — the same on every page, so a person and a screen reader find their way the same way everywhere.",
+    "instead": [
+      {
+        "goal": "one-page",
+        "keywords": {
+          "en": ["page-content"],
+          "de": ["seiteninhalt"]
+        },
+        "ero": "pagxo",
+        "kialo": "The content of one page is a pagxo in the main of the shell, because the shell stays while the pages change."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "second-shell",
+        "action": "not-supported",
+        "keywords": {
+          "en": ["nested-shell"],
+          "de": ["zweiter-rahmen"]
+        },
+        "kialo": "A shell inside a shell is not supported, because two banners and two mains leave a screen reader with two pages in one (landmarks once per page)."
+      },
+      {
+        "case": "side-panel",
+        "action": "ask-human",
+        "keywords": {
+          "en": ["side-navigation-panel"],
+          "de": ["seitenspalte"]
+        },
+        "kialo": "A column beside the main that holds more than the navigation is a layout of round 2, because the columns share the width by a rule of their own; a person decides until it comes."
+      }
+    ],
+    "composes": {
+      "containers": [],
+      "with": [
+        {
+          "ero": "navigado",
+          "kialo": "The main navigation stands in the region nav, because the navigado is the landmark navigation and the shell sets it once."
+        },
+        {
+          "ero": "avizo",
+          "kialo": "A notice of the application stands in the region notices, because that region is a polite live region: it is heard where the focus is."
+        },
+        {
+          "ero": "saltligilo",
+          "kialo": "The skip link is the shell's own, the first focusable element of the page, because it leads past the repeated parts to the main."
+        },
+        {
+          "ero": "pagxo",
+          "kialo": "The page stands in the main, because the shell stays while the pages change."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    }
+  }
+}

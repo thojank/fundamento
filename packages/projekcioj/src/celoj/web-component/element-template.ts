@@ -3464,7 +3464,13 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
       // click stays cancelable for the page as well — the focus moves first, either way.
       if (HAS_PROP.has("focus-only") && this.propValue("focus-only") === true) event.preventDefault();
       const to = this.propValue("to");
-      const target = typeof to === "string" && to !== "" ? document.getElementById(to) : null;
+      // Spec 020 ①: the target in the link's own tree first — the main of a sxelo lies in its
+      // shadow tree — then in the document.
+      const scope = this.getRootNode();
+      const target =
+        typeof to !== "string" || to === ""
+          ? null
+          : ((scope instanceof ShadowRoot ? scope.getElementById(to) : null) ?? document.getElementById(to));
       if (target === null) return;
       if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
       // At once, not a frame later: a Tab pressed right after Enter must find the target focused

@@ -5,7 +5,12 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 import type { CheckResult } from "../../contracts/checks.js";
-import { baseResolution, skemoParityInventory } from "../../eroj/inventories.js";
+import {
+  baseResolution,
+  restrictParityInventory,
+  skemoParityInventory,
+  sxablonoParityInventory,
+} from "../../eroj/inventories.js";
 import { loadModelo } from "../../load/load-modelo.js";
 import { defaultModeloSource } from "../../load/source.js";
 import { check } from "./index.js";
@@ -52,6 +57,7 @@ const EMPTY = '{ "items": {} }';
 
 const { modelo } = loadModelo(defaultModeloSource());
 const EROJ = modelo?.eroj ?? [];
+const SXABLONOJ = modelo?.sxablonoj ?? [];
 /** The base combination, the state the sides state their resolved values in (F8). */
 const RESOLVED = modelo === undefined ? {} : baseResolution(modelo);
 
@@ -72,6 +78,10 @@ function correctSides(): Record<string, ParityInventory> {
     "guidelines-komuna.json": skemoParityInventory(EROJ, {
       aspects: ["props", "states", "values"],
     }),
+    // Spec 020 (G2): the Sxablonoj on Web (props, regions), React (props) and the Make Kit.
+    "sxablonoj-web-component.json": sxablonoParityInventory(SXABLONOJ),
+    "sxablonoj-react.json": restrictParityInventory(sxablonoParityInventory(SXABLONOJ), ["props"]),
+    "sxablonoj-guidelines-komuna.json": sxablonoParityInventory(SXABLONOJ),
   };
 }
 
@@ -92,7 +102,8 @@ describe("parity default run (T021)", () => {
   it("compares the Skemo with every side of a correct build", async () => {
     const result = await check({ json: true, repoRoot, projekcioj: writeProjections() });
     expect(result).toMatchObject({ check: "parity", ok: true, errors: [], warnings: [] });
-    expect(result.stats.sides).toBe(4);
+    // Four sides of the Eroj, three of the Sxablonoj (Spec 020).
+    expect(result.stats.sides).toBe(7);
     expect(result.stats.differences).toBe(0);
     expect(result.summary).toContain("Skemo");
   });

@@ -28,6 +28,9 @@ export const SCHEMA_DEFS = {
   ikono: "Ikono",
   ikonaroFile: "IkonaroFile",
   sxablono: "Sxablono",
+  sxablonoFile: "SxablonoFile",
+  sxablonoUzoFile: "SxablonoUzoFile",
+  sxablonoInstance: "SxablonoInstance",
   projekcio: "Projekcio",
   celo: "Celo",
 } as const;

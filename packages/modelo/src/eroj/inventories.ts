@@ -9,6 +9,7 @@ import { alphaOf, readDtcgColor } from "../checks/alirebleco/color.js";
 import type { ParityInventory, ParityItem } from "../checks/parity/inventory.js";
 import type {
   LoadedEro,
+  LoadedSxablono,
   Modelo,
   ResolvedToken,
   Skemo,
@@ -85,6 +86,30 @@ export interface SkemoInventoryOptions {
 /** A prop's values: the enum values, or the kind for a prop without a value list. */
 export function propValues(prop: SkemoProp): string[] {
   return prop.kind === "enum" ? [...(prop.values ?? [])] : [prop.kind];
+}
+
+/**
+ * The inventory of the Sxablonoj (Spec 020, G2, Art. X for Web, React and the Make Kit): one item
+ * per Sxablono — its props with their values and its regions (`regions`: the names, sorted).
+ */
+export function sxablonoParityInventory(sxablonoj: readonly LoadedSxablono[]): ParityInventory {
+  return {
+    items: Object.fromEntries(
+      sxablonoj.map((entry) => [
+        entry.sxablono.name,
+        {
+          props: Object.fromEntries(entry.skemo.props.map((prop) => [prop.name, propValues(prop)])),
+          states: [],
+          values: {
+            regions: entry.skemo.regions
+              .map((region) => region.name)
+              .sort()
+              .join(","),
+          },
+        },
+      ]),
+    ),
+  };
 }
 
 /** The keys a part property is keyed by, following `sameAs` (bounded against a cycle). */

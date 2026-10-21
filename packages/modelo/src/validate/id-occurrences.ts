@@ -125,5 +125,22 @@ export function collectIdOccurrences(files: ModeloFiles): IdOccurrence[] {
     const uzo = isJsonObject(value?.uzo) ? (value?.uzo as JsonObject) : undefined;
     add("uzo", document.file, "/uzo", uzo, "/uzo");
   }
+
+  // Spec 020 (G1): each Sxablono file holds a Sxablono and its Skemo; the Uzo beside it its own.
+  for (const document of files.sxablonoj ?? []) {
+    const value = isJsonObject(document.value) ? document.value : undefined;
+    for (const [key, entityType] of [
+      ["sxablono", "sxablono"],
+      ["skemo", "skemo"],
+    ] as const) {
+      const entity = isJsonObject(value?.[key]) ? (value?.[key] as JsonObject) : undefined;
+      add(entityType, document.file, `/${key}`, entity, `/${key}`);
+    }
+  }
+  for (const document of files.sxablonoUzoj ?? []) {
+    const value = isJsonObject(document.value) ? document.value : undefined;
+    const uzo = isJsonObject(value?.uzo) ? (value?.uzo as JsonObject) : undefined;
+    add("uzo", document.file, "/uzo", uzo, "/uzo");
+  }
   return occurrences;
 }

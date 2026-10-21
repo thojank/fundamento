@@ -27,7 +27,8 @@
     "boundary": [
       {
         "case": "heading-with-actions",
-        "action": "ask-human",
+        "action": "use-instead",
+        "ero": "pagxo",
         "keywords": {
           "en": [
             "toolbar",
@@ -40,7 +41,7 @@
             "titelzeile"
           ]
         },
-        "kialo": "A heading row with actions beside it is a pattern of the page (a Sxablono), because the heading names the section and the actions act on it; a person decides what stands in that row until the Sxablonoj come."
+        "kialo": "A heading row with actions beside it is a pattern of the page, because the heading names the page and the actions act on it: the pagxo, whose title, badges and actions stand in that row with one primary at most."
       }
     ],
     "composes": {

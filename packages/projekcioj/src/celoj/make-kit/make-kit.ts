@@ -13,11 +13,13 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import {
+  baseResolution,
   type DtcgType,
   defaultModeloSource,
   isNoTarget,
   type Jugxo,
   type LoadedEro,
+  type LoadedSxablono,
   type Modelo,
   type ModeloSource,
   nomRegulo,
@@ -27,9 +29,14 @@ import {
 } from "@fundamento/modelo";
 import { type Celo, type CeloInput, celoInputOf, type GeneratedFile } from "../../build.js";
 import { aspektoStylesheet } from "../css/css.js";
-import { componentName, reactSource } from "../react/react.js";
+import { componentName, reactEntriesOf, reactSource } from "../react/react.js";
 import { themeBlock } from "../tailwind/tailwind.js";
 import { elementSource } from "../web-component/element-template.js";
+import {
+  sxablonoElementSource,
+  sxablonoNamesOf,
+  sxablonoStylesheetOf,
+} from "../web-component/sxablono-template.js";
 import {
   elementNamesOf,
   isAvatar,
@@ -69,6 +76,23 @@ export function kitAspektoj(modelo: Modelo): string[] {
 export function kitReferenceAspekto(modelo: Modelo): string {
   const dimensio = modelo.dimensioj.find((entry) => entry.name === "aspekto");
   return dimensio?.referenceAspekto ?? dimensio?.valoroj[0]?.name ?? "";
+}
+
+/** Where a kit's guideline of one Sxablono is written inside the projections (Spec 020). */
+export const patternPath = (aspekto: string, sxablono: string): string =>
+  `${DIR}/${aspekto}/guidelines/patterns/${sxablono}.md`;
+
+/**
+ * What the guideline of a Sxablono states (Spec 020, parity of the Make Kit): the regions of its
+ * table, sorted; a pattern has no props table.
+ */
+export function patternInventory(markdown: string): ParityItem {
+  const table = markdown.slice(
+    markdown.indexOf("## Regions"),
+    markdown.indexOf("## Accessibility"),
+  );
+  const regions = [...table.matchAll(/^\| `([a-z0-9-]+)` \|/gm)].map((match) => match[1] ?? "");
+  return { props: {}, states: [], values: { regions: regions.sort().join(",") } };
 }
 
 /** Where a kit's guideline of one Ero is written inside the projections. */
@@ -799,9 +823,9 @@ ${suggestLines}
 ${uploadLines}
 ${cardLines}
 ${avatarLines}
-
+${patternSection(input)}
 Where to look: \`setup.md\` for the imports, \`foundations/\` for the tokens, \`components/\` for
-each component.
+each component${(input.modelo.sxablonoj ?? []).length === 0 ? "" : ", `patterns/` for each pattern"}.
 `,
     },
     {
@@ -873,7 +897,149 @@ A frame never mixes two values of one Dimensio: the whole document switches toge
       path: `${base}/components/${entry.ero.name}.md`,
       text: componentGuideline(input, entry, reguloj),
     })),
+    // Spec 020 (G2): a guideline per Sxablono.
+    ...(input.modelo.sxablonoj ?? []).map((entry) => ({
+      path: `${base}/patterns/${entry.sxablono.name}.md`,
+      text: patternGuideline(entry),
+    })),
   ];
+}
+
+/** The section of Guidelines.md that names the patterns (Spec 020, G2); empty without any. */
+function patternSection(input: CeloInput): string {
+  const sxablonoj = input.modelo.sxablonoj ?? [];
+  if (sxablonoj.length === 0) return "";
+  // Each line begins with what the pattern is for: two lines never begin alike (Nachlese 7 A-4).
+  const lines = sxablonoj.map(
+    (entry) =>
+      `- ${entry.uzo?.purpose ?? entry.sxablono.description} It is a \`<${sxablonoComponentName(entry)}>\` (\`patterns/${entry.sxablono.name}.md\`).`,
+  );
+  return `
+## Patterns (Sxablonoj)
+
+A pattern of components is a component of its own: build the frame of the application and each
+page from it, never by hand. Put each child into its region with the slot attribute.
+
+${lines.join("\n")}
+`;
+}
+
+/** The React name of a Sxablono, as of an Ero (\`Pagxo\`). */
+const sxablonoComponentName = (entry: LoadedSxablono) => sxablonoNamesOf(entry).className.slice(2);
+
+/** The example words of a region in a pattern's markup (the Vitrino's words). */
+const PATTERN_WORDS: Readonly<Record<string, string>> = {
+  brand: "Fundamento",
+  principal: "Erika Mustermann",
+  notices: "Gespeichert.",
+  title: "Standards",
+  badges: "Gültig",
+  subtitle: "Alle Standards des Projekts.",
+  actions: "Bearbeiten",
+};
+
+/** One child of a region in the example: the first Ero it accepts, with the props it needs. */
+function exampleChild(region: LoadedSxablono["skemo"]["regions"][number]): string {
+  const word = PATTERN_WORDS[region.name] ?? region.name;
+  const accepted = (region.accepts ?? []).find((name) => name !== "text" && name !== "icon");
+  if (region.accepts === undefined)
+    return `  <section>\n    <fm-titolo level="2">Abschnitt</fm-titolo>\n  </section>`;
+  if (accepted === undefined || region.accepts[0] === "text")
+    return `  <span slot="${region.name}">${word}</span>`;
+  if (accepted === "navigado")
+    return `  <fm-navigado slot="${region.name}" label="Hauptnavigation" page="standards"><a href="/standards" data-page="standards">Standards</a></fm-navigado>`;
+  const props = Object.entries(region.props ?? {})
+    .map(([key, value]) => (value === true ? ` ${key}` : ` ${key}="${String(value)}"`))
+    .join("");
+  const emphasis = accepted === "butono" && region.primary !== undefined ? ' emphasis="high"' : "";
+  return `  <fm-${accepted} slot="${region.name}"${props}${emphasis}>${word}</fm-${accepted}>`;
+}
+
+/** The guideline of one Sxablono (Spec 020, G2): purpose, example, regions, accessibility, use. */
+function patternGuideline(entry: LoadedSxablono): string {
+  const name = sxablonoComponentName(entry);
+  const { tag } = sxablonoNamesOf(entry);
+  const { regions, a11y } = entry.skemo;
+  const rows = regions.map((region) => {
+    const accepts = region.accepts === undefined ? "anything" : region.accepts.join(", ");
+    const needs = [
+      ...Object.entries(region.props ?? {}).map(([key, value]) =>
+        value === true ? key : `${key}=${String(value)}`,
+      ),
+      ...(region.primary === undefined ? [] : [`${region.primary} with emphasis high at most`]),
+      ...(region.live === undefined ? [] : [`a ${region.live} live region`]),
+      ...(region.default === true ? ["the default slot"] : []),
+    ].join(", ");
+    return `| \`${region.name}\` | ${accepts} | ${region.max ?? "–"} | ${region.required === true ? "yes" : "no"} | ${needs || "–"} | ${region.description} |`;
+  });
+  const access = [
+    a11y.landmarks.length === 0
+      ? "It sets no landmark of its own: it stands in the main of the shell."
+      : `It sets the landmarks ${a11y.landmarks.join(" and ")}, once per page: never two shells on a page.`,
+    ...(a11y.skip === undefined
+      ? []
+      : [
+          `Its own skip link is the first focusable element and moves the focus to the region \`${a11y.skip}\`; the fragment of the page stays (a hash router keeps its route).`,
+        ]),
+    ...(a11y.focus === undefined
+      ? []
+      : [
+          `Its one focus target is the region \`${a11y.focus}\`: after a change of route call \`focus()\` on the element, and the focus lands there.`,
+        ]),
+  ].join(" ");
+  const uzo = entry.uzo;
+  const notFor = [
+    ...(uzo?.instead ?? []).map(
+      (item) =>
+        `- ${item.goal}: ${item.ero === null ? "not covered yet" : `\`${item.ero}\``} — ${item.kialo}`,
+    ),
+    ...(uzo?.boundary ?? []).map(
+      (item) =>
+        `- ${item.case} (${item.action}${item.ero === undefined ? "" : `: \`${item.ero}\``}) — ${item.kialo}`,
+    ),
+  ].join("\n");
+  const together = (uzo?.composes.with ?? [])
+    .map((item) => `- with \`${item.ero}\` — ${item.kialo}`)
+    .join("\n");
+  return `# ${name}
+
+${entry.sxablono.description}
+
+Use \`<${name}>\` in React, or the element \`<${tag}>\` in plain HTML. Put each child into its region
+with the slot attribute${regions.some((region) => region.default === true) ? `; the region \`${regions.find((region) => region.default === true)?.name}\` is the default slot` : ""}. The pattern arranges and names; data, routing and submitting stay the application's.
+
+\`\`\`html
+<${tag}>
+${regions.map(exampleChild).join("\n")}
+</${tag}>
+\`\`\`
+
+## What it is for
+
+${uzo?.purpose ?? entry.sxablono.description}
+
+## Regions
+
+| Region | Accepts | Max | Required | Children need | What stands there |
+|---|---|---|---|---|---|
+${rows.join("\n")}
+
+## Accessibility
+
+${access}
+
+## Layout
+
+The layout follows the width of its container, not of the window: below the container width the rows stack. Every space and surface is a token.
+
+## Not for this
+
+${notFor}
+
+## Together with
+
+${together}
+`;
 }
 
 /**
@@ -897,13 +1063,26 @@ const ${constant}_CSS = ${JSON.stringify(stylesheetOf(entry.skemo, entry.uzo))};
 ${light}${elementSource(elementNamesOf(entry, true, input.modelo.ikonaro))}`;
     })
     .join("\n");
-  const defines = input.modelo.eroj
-    .map(({ ero }) => `  define${namesOf(ero).className}();`)
+  // Spec 020 (G2): the Sxablonoj in the same module, after the Eroj they hold.
+  const sxablonoj = input.modelo.sxablonoj ?? [];
+  const base = sxablonoj.length === 0 ? {} : baseResolution(input.modelo);
+  const patterns = sxablonoj
+    .map(
+      (
+        entry,
+      ) => `const ${sxablonoNamesOf(entry).constant}_CSS = ${JSON.stringify(sxablonoStylesheetOf(entry, base))};
+${sxablonoElementSource(entry, { inline: true })}`,
+    )
     .join("\n");
+  const defines = [
+    ...input.modelo.eroj.map(({ ero }) => `  define${namesOf(ero).className}();`),
+    ...sxablonoj.map((entry) => `  define${sxablonoNamesOf(entry).className}();`),
+  ].join("\n");
   return [
     {
       path: `${DIR}/${aspekto}/src/element.ts`,
       text: `${header}${elements}
+${patterns}
 /** Registers every Ero once. Importing this module already did it; this is the explicit way. */
 export function defineEroj(): void {
 ${defines}
@@ -912,7 +1091,7 @@ ${defines}
     },
     {
       path: `${DIR}/${aspekto}/src/react.ts`,
-      text: header + reactSource(input.modelo.eroj, "./element.js"),
+      text: header + reactSource(reactEntriesOf(input.modelo), "./element.js"),
     },
     {
       path: `${DIR}/${aspekto}/src/index.ts`,
@@ -1031,7 +1210,9 @@ See \`guidelines/setup.md\`.
 
 /** The type declarations of a kit (deterministic text instead of a type build). */
 function declarations(input: CeloInput, options: { elementsOnly?: boolean } = {}): string {
-  const elements = input.modelo.eroj.map(
+  // Spec 020 (G2): the Sxablonoj are elements and React components like the Eroj.
+  const entries = reactEntriesOf(input.modelo);
+  const elements = entries.map(
     (entry) => `export declare class ${namesOf(entry.ero).className} extends HTMLElement {}`,
   );
   if (options.elementsOnly === true) {
@@ -1040,7 +1221,7 @@ ${elements.join("\n")}
 export declare function defineEroj(): void;
 `;
   }
-  const components = input.modelo.eroj.flatMap((entry) => {
+  const components = entries.flatMap((entry) => {
     const name = componentName(entry.ero);
     return [
       `export declare const ${name}: import("react").ForwardRefExoticComponent<`,
@@ -1049,7 +1230,7 @@ export declare function defineEroj(): void;
     ];
   });
   return `// Generated by fm projekcioj build; do not edit (Art. I).
-${reactSource(input.modelo.eroj, "./element.js", { typesOnly: true })}
+${reactSource(entries, "./element.js", { typesOnly: true })}
 ${elements.join("\n")}
 ${components.join("\n")}
 export declare function defineEroj(): void;

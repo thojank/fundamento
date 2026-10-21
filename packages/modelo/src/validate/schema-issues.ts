@@ -160,6 +160,24 @@ export function schemaIssues(files: ModeloFiles, ajv: ModeloAjv): ValidationIssu
       );
     }
   }
+  // Spec 020 (G1): the Sxablono files, as the Ero files.
+  for (const [documents, def, semantic] of [
+    [files.sxablonoj ?? [], SCHEMA_DEFS.sxablonoFile, /^\/(sxablono|skemo)\/id(\/|$)/],
+    [files.sxablonoUzoj ?? [], SCHEMA_DEFS.sxablonoUzoFile, /^\/uzo\/id(\/|$)/],
+  ] as const) {
+    for (const document of documents) {
+      const validate = getModeloValidator(ajv, def);
+      if (!validate(document.value)) {
+        issues.push(
+          ...mapErrors(validate.errors ?? [], document, def, {
+            semantic: [semantic],
+            subtrees: [],
+            isSetFile: false,
+          }),
+        );
+      }
+    }
+  }
   for (const name of Object.keys(DATA_FILE_SCHEMA_DEFS) as DataFileName[]) {
     const document = files.data[name];
     const defName = DATA_FILE_SCHEMA_DEFS[name];

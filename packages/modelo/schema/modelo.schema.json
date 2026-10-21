@@ -94,6 +94,13 @@
         "$ref": "#/$defs/Ero"
       }
     },
+    "sxablonoj": {
+      "description": "The Sxablonoj (Spec 020): patterns of Eroj, each with its Skemo of regions and its Uzo; absent while the Modelo has none.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/SxablonoEntry"
+      }
+    },
     "skemoj": {
       "type": "array",
       "items": {
@@ -3192,7 +3199,7 @@
       "additionalProperties": false
     },
     "Sxablono": {
-      "description": "A template or pattern (layout, page type, flow). Schema only in Phase 0.",
+      "description": "A template or pattern (Spec 020, E1): a layout, page type or flow of Eroj, with a Skemo of regions and an Uzo like an Ero's. kind says which: layout (the frame of an application), page (a page), flow (a form, a filter bar, an editor).",
       "type": "object",
       "properties": {
         "id": {
@@ -3201,21 +3208,322 @@
         "name": {
           "$ref": "#/$defs/Name"
         },
+        "skemo": {
+          "$ref": "#/$defs/SkemoId"
+        },
         "kind": {
           "type": "string",
           "enum": ["layout", "page", "flow"]
         },
-        "eroj": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/EroId"
-          }
-        },
         "description": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         }
       },
-      "required": ["id", "name", "kind", "eroj"],
+      "required": ["id", "name", "skemo", "kind", "description"],
+      "additionalProperties": false
+    },
+    "SxablonoSkemo": {
+      "description": "The blueprint of a Sxablono (Spec 020, G1): its regions (each a slot in the projection), its props, what it sets for accessibility (landmarks, the skip target, the focus target), the goals suggest_ero answers with it, and the tokens of its layout (parts, as an Ero's).",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/SkemoId"
+        },
+        "sxablono": {
+          "$ref": "#/$defs/SxablonoId"
+        },
+        "props": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SkemoProp"
+          }
+        },
+        "regions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/SxablonoRegion"
+          }
+        },
+        "a11y": {
+          "$ref": "#/$defs/SxablonoA11y"
+        },
+        "goals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SxablonoGoal"
+          }
+        },
+        "parts": {
+          "description": "The tokens of the layout, by part and platform-neutral property (Art. VIII); the projection maps them. The part container takes width: the container width below which the regions stack (a size.container.* token).",
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "$ref": "#/$defs/Name"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/SkemoPart"
+          }
+        }
+      },
+      "required": ["id", "sxablono", "props", "regions", "a11y", "parts"],
+      "additionalProperties": false
+    },
+    "SxablonoRegion": {
+      "description": "A named region of a Sxablono (Spec 020): what may stand in it (Ero or Sxablono names, text or icon; any content where accepts is absent), how many, which props its children must have, how many of them may be primary actions (emphasis high), and whether it is a polite live region. One region may be the default slot.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "default": {
+          "type": "boolean"
+        },
+        "accepts": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/Name"
+          }
+        },
+        "min": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "props": {
+          "description": "Props every Ero in the region must have, with their values (the title of a page: level 1, focusable).",
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Name"
+          },
+          "additionalProperties": {
+            "oneOf": [{ "type": "string" }, { "type": "boolean" }]
+          }
+        },
+        "primary": {
+          "description": "At most this many children with emphasis high (Regulo one-primary-per-container).",
+          "type": "integer",
+          "minimum": 0
+        },
+        "live": {
+          "type": "string",
+          "enum": ["polite"]
+        }
+      },
+      "required": ["name", "description"],
+      "additionalProperties": false
+    },
+    "SxablonoA11y": {
+      "description": "What a Sxablono sets for accessibility (Spec 020, G4): the landmarks it renders (once per page), the region its own skip link jumps to, the region that holds the page's focus target.",
+      "type": "object",
+      "properties": {
+        "landmarks": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["banner", "navigation", "main", "search", "contentinfo", "complementary"]
+          }
+        },
+        "skip": {
+          "$ref": "#/$defs/Name"
+        },
+        "focus": {
+          "$ref": "#/$defs/Name"
+        }
+      },
+      "required": ["landmarks"],
+      "additionalProperties": false
+    },
+    "SxablonoGoal": {
+      "description": "A goal suggest_ero answers with the Sxablono (Spec 020, G3): its keywords, the props to set and why.",
+      "type": "object",
+      "properties": {
+        "goal": {
+          "$ref": "#/$defs/Name"
+        },
+        "keywords": {
+          "$ref": "#/$defs/Keywords"
+        },
+        "props": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Name"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "kialo": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": ["goal", "keywords", "props", "kialo"],
+      "additionalProperties": false
+    },
+    "SxablonoFile": {
+      "description": "data/sxablonoj/<name>/skemo.json (Spec 020): the Sxablono and its Skemo.",
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string"
+        },
+        "sxablono": {
+          "$ref": "#/$defs/Sxablono"
+        },
+        "skemo": {
+          "$ref": "#/$defs/SxablonoSkemo"
+        }
+      },
+      "required": ["sxablono", "skemo"],
+      "additionalProperties": false
+    },
+    "SxablonoUzo": {
+      "description": "The use of a Sxablono (Spec 020, G1): the same structure as an Ero's Uzo — purpose, alternatives, boundaries, composition — without slot rules (the regions of the Skemo say what stands where).",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UzoId"
+        },
+        "sxablono": {
+          "$ref": "#/$defs/SxablonoId"
+        },
+        "skemo": {
+          "$ref": "#/$defs/SkemoId"
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "instead": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UzoInstead"
+          }
+        },
+        "boundary": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/UzoBoundary"
+          }
+        },
+        "composes": {
+          "$ref": "#/$defs/UzoComposes"
+        }
+      },
+      "required": ["id", "sxablono", "skemo", "purpose", "instead", "boundary", "composes"],
+      "additionalProperties": false
+    },
+    "SxablonoUzoFile": {
+      "description": "data/sxablonoj/<name>/uzo.json (Spec 020).",
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string"
+        },
+        "uzo": {
+          "$ref": "#/$defs/SxablonoUzo"
+        }
+      },
+      "required": ["uzo"],
+      "additionalProperties": false
+    },
+    "SxablonoEntry": {
+      "description": "A Sxablono in modelo.json (Spec 020): the Sxablono, its Skemo and its Uzo, read back by modeloFromExport.",
+      "type": "object",
+      "properties": {
+        "sxablono": {
+          "$ref": "#/$defs/Sxablono"
+        },
+        "skemo": {
+          "$ref": "#/$defs/SxablonoSkemo"
+        },
+        "uzo": {
+          "$ref": "#/$defs/SxablonoUzo"
+        }
+      },
+      "required": ["sxablono", "skemo"],
+      "additionalProperties": false
+    },
+    "SxablonoInstance": {
+      "description": "An instance of a Sxablono for check_usage (Spec 020, G3): its props and what stands in each region — text, an icon, an Ero (with its props) or a Sxablono by name.",
+      "type": "object",
+      "properties": {
+        "sxablono": {
+          "$ref": "#/$defs/Name"
+        },
+        "props": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Name"
+          },
+          "additionalProperties": {
+            "oneOf": [{ "type": "string" }, { "type": "boolean" }, { "type": "number" }]
+          }
+        },
+        "regions": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Name"
+          },
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": ["text", "icon"]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ero": {
+                      "$ref": "#/$defs/Name"
+                    },
+                    "props": {
+                      "type": "object",
+                      "propertyNames": {
+                        "$ref": "#/$defs/Name"
+                      },
+                      "additionalProperties": {
+                        "oneOf": [{ "type": "string" }, { "type": "boolean" }, { "type": "number" }]
+                      }
+                    }
+                  },
+                  "required": ["ero"],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "sxablono": {
+                      "$ref": "#/$defs/Name"
+                    }
+                  },
+                  "required": ["sxablono"],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          }
+        }
+      },
+      "required": ["sxablono"],
       "additionalProperties": false
     },
     "Projekcio": {

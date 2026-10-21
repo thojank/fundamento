@@ -414,6 +414,36 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
     },
     badInput: { instances: [] },
   },
+  // Spec 020 ① (G3): the Sxablonoj, listed and read one by one.
+  list_sxablonoj: {
+    input: {},
+    output: {
+      sxablonoj: [
+        {
+          id: "sxa_01M5CYB6RYTJHVH5RJPJYZE8QY",
+          name: "pagxo",
+          kind: "page",
+          description: "A page.",
+          regions: ["title", "actions"],
+        },
+      ],
+    },
+    badInput: { name: "pagxo" },
+  },
+  get_sxablono: {
+    input: { name: "pagxo", brief: true },
+    output: {
+      sxablono: "pagxo",
+      kind: "page",
+      purpose: "Builds one page of an application.",
+      regions: [{ name: "title", required: true, accepts: ["titolo"] }],
+      props: [],
+      a11y: { landmarks: [], focus: "title" },
+      instead: [{ goal: "application-frame", use: "sxelo" }],
+      boundary: [{ case: "dashboard", action: "ask-human" }],
+    },
+    badInput: { name: "pagxo", id: "sxa_01M5CYB6RYTJHVH5RJPJYZE8QY" },
+  },
   // Spec 016 ③ (G9): an Agordo in, the Raporto and the palettes in short out; read-only.
   preview_agordo: {
     input: { agordo: { name: "flava", leitfarbe: "#F5C400" } },
@@ -539,6 +569,9 @@ describe("tool schemas (contracts/mcp-tools.md)", () => {
       "preview_agordo",
       "propose_agordo",
       "save_agordo",
+      // Spec 020 ① (G3): the Sxablonoj beside the Eroj.
+      "list_sxablonoj",
+      "get_sxablono",
     ]);
   });
 

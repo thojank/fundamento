@@ -1,0 +1,85 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/SxablonoFile",
+  "sxablono": {
+    "id": "sxa_01M5CYB6RYTJHVH5RJPJYZE8QY",
+    "name": "pagxo",
+    "skemo": "ske_01M5CYB75V2MS8V8XQG3RCYAC6",
+    "kind": "page",
+    "description": "A page: its title — the one heading of level 1 and the focus target after a change of route — with badges beside it, a subtitle, the actions on the page and its sections."
+  },
+  "skemo": {
+    "id": "ske_01M5CYB75V2MS8V8XQG3RCYAC6",
+    "sxablono": "sxa_01M5CYB6RYTJHVH5RJPJYZE8QY",
+    "props": [],
+    "regions": [
+      {
+        "name": "title",
+        "description": "The title of the page: a titolo of level 1, focusable — the one focus target of the page.",
+        "required": true,
+        "accepts": ["titolo"],
+        "max": 1,
+        "props": {
+          "level": "1",
+          "focusable": true
+        }
+      },
+      {
+        "name": "badges",
+        "description": "Badges beside the title: the status of what the page shows.",
+        "accepts": ["insigno"]
+      },
+      {
+        "name": "subtitle",
+        "description": "One line under the title that says what the page is about.",
+        "accepts": ["teksto"],
+        "max": 1
+      },
+      {
+        "name": "actions",
+        "description": "The actions on the page; one primary at most, a destructive one in a menuo or as a butono of low emphasis.",
+        "accepts": ["butono", "ligilo", "menuo"],
+        "primary": 1
+      },
+      {
+        "name": "sections",
+        "description": "The sections of the page, each with a titolo of level 2.",
+        "default": true
+      }
+    ],
+    "a11y": {
+      "landmarks": [],
+      "focus": "title"
+    },
+    "goals": [
+      {
+        "goal": "page-header",
+        "keywords": {
+          "en": ["page-header", "page-template", "page-layout"],
+          "de": ["seitenkopf", "seitenvorlage", "seitenaufbau"]
+        },
+        "props": {},
+        "kialo": "A page is one pattern, because its title is the one heading of level 1 and the focus target after a change of route, and its actions stand in one place with one primary at most."
+      }
+    ],
+    "parts": {
+      "frame": {
+        "gap": { "fixed": "spacing.xlarge" }
+      },
+      "head": {
+        "gap": { "fixed": "spacing.small" }
+      },
+      "badges": {
+        "gap": { "fixed": "spacing.xsmall" }
+      },
+      "actions": {
+        "gap": { "fixed": "spacing.small" }
+      },
+      "sections": {
+        "gap": { "fixed": "spacing.xlarge" }
+      },
+      "container": {
+        "width": { "fixed": "size.container.small" }
+      }
+    }
+  }
+}

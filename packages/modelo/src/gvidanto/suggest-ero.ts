@@ -8,9 +8,16 @@
 // The goal is called goal since F1-T00 (Spec 007, OP-4): `intent` is the name of a prop.
 
 import type { ValidationIssue } from "../contracts/issues.js";
-import type { Keywords, Modelo, UzoBoundary } from "../contracts/modelo.js";
+import type {
+  Keywords,
+  LoadedSxablono,
+  Modelo,
+  SxablonoGoal,
+  UzoBoundary,
+} from "../contracts/modelo.js";
 import {
   COMPOUND_SUFFIX_MIN,
+  flatKeyword,
   goalMatchOf,
   goalOf,
   keywordHitOf,
@@ -55,7 +62,16 @@ export interface SuggestEroOutput {
   goal: string;
   /** What hit: a Skemo goal, or the case of a boundary or alternative; null with candidates. */
   matched: { goal: string; keyword: string; lingvo: string } | null;
-  suggestion: { ero: string; props: GoalProps } | null;
+  /**
+   * An Ero with its props, or a Sxablono (Spec 020, G3) — a pattern of Eroj, answered with its
+   * regions beside it.
+   */
+  suggestion:
+    | { ero: string; sxablono?: never; props: GoalProps }
+    | { sxablono: string; ero?: never; props: GoalProps }
+    | null;
+  /** The regions of the suggested Sxablono (Spec 020, G3): what stands where. */
+  regions?: SuggestedRegion[];
   kialo?: string;
   regulo?: ReguloRef;
   /** The boundary or alternative that answers (Spec 007); absent when a Skemo goal answers. */
@@ -63,6 +79,13 @@ export interface SuggestEroOutput {
   /** `ask-human` when a boundary and a goal both hit: a person decides between the candidates. */
   action?: "ask-human";
   candidates?: SuggestCandidate[];
+}
+
+/** A region of a suggested Sxablono, as the answer names it (Spec 020, G3). */
+export interface SuggestedRegion {
+  name: string;
+  required?: boolean;
+  accepts?: string[];
 }
 
 export type SuggestEroResult =
@@ -361,7 +384,101 @@ function goalCandidateOf(hit: GoalHit): SuggestCandidate {
   return candidate;
 }
 
+/**
+ * The Sxablono goal a text hits, the longest keyword winning (as `goalOf` for an Ero's goals):
+ * Spec 020, G3.
+ */
+function sxablonoGoalOf(
+  entry: LoadedSxablono,
+  text: string,
+  pass: Pass,
+): { goal: SxablonoGoal; keyword: string; lingvo: string } | undefined {
+  const prepared = keywordTextOf(text);
+  const match = goalMatchOf(pass.inflect);
+  let best: { goal: SxablonoGoal; keyword: string; lingvo: string } | undefined;
+  for (const goal of entry.skemo.goals ?? []) {
+    for (const [lingvo, keywords] of Object.entries(goal.keywords)) {
+      if (pass.lingvo !== undefined && lingvo !== pass.lingvo) continue;
+      for (const keyword of keywords) {
+        if (!keywordHits(keyword, lingvo, prepared, match)) continue;
+        if (best === undefined || flatKeyword(keyword).length > flatKeyword(best.keyword).length)
+          best = { goal, keyword, lingvo };
+      }
+    }
+  }
+  return best;
+}
+
+/** The regions of a Sxablono as an answer names them (Spec 020, G3). */
+function regionsOf(entry: LoadedSxablono): SuggestedRegion[] {
+  return entry.skemo.regions.map((region) => ({
+    name: region.name,
+    ...(region.required === true ? { required: true } : {}),
+    ...(region.accepts === undefined ? {} : { accepts: [...region.accepts] }),
+  }));
+}
+
+/** The answer with a Sxablono for the text, if one of its goals hits (Spec 020, G3). */
+function sxablonoAnswer(
+  modelo: Modelo,
+  text: string,
+  goalText: string,
+  pass: Pass,
+): SuggestEroOutput | undefined {
+  for (const entry of modelo.sxablonoj ?? []) {
+    const hit = sxablonoGoalOf(entry, text, pass);
+    if (hit === undefined) continue;
+    return {
+      goal: goalText,
+      matched: { goal: hit.goal.goal, keyword: hit.keyword, lingvo: hit.lingvo },
+      suggestion: { sxablono: entry.sxablono.name, props: { ...hit.goal.props } },
+      regions: regionsOf(entry),
+      kialo: hit.goal.kialo,
+    };
+  }
+  return undefined;
+}
+
+/**
+ * The answer of suggest_ero (Spec 003, FR-14), with the Sxablonoj of Spec 020 (G3): a request
+ * whose head — the text before its first linking word — names the goal of a Sxablono is answered
+ * with the Sxablono ("Seitenkopf mit Titel, …" is the pagxo, whatever its attribute part names); a
+ * Sxablono goal anywhere else in the text answers only where no Ero and no Uzo entry does, so
+ * every answer that stood stays (OP-12). An answer that names a Sxablono (a boundary that sends
+ * to one) carries it as such, with its regions.
+ */
 export function suggestEro(modelo: Modelo, input: SuggestEroInput): SuggestEroResult {
+  const pass = { ...(input.lingvo === undefined ? {} : { lingvo: input.lingvo }), inflect: false };
+  const head = headOf(input.goal, input.lingvo);
+  if (head !== undefined) {
+    const answer = sxablonoAnswer(modelo, head, input.goal, pass);
+    if (answer !== undefined) return { ok: true, output: answer };
+  }
+  const result = suggestEroOf(modelo, input);
+  if (!result.ok) {
+    for (const inflect of [false, true]) {
+      const answer = sxablonoAnswer(modelo, input.goal, input.goal, { ...pass, inflect });
+      if (answer !== undefined) return { ok: true, output: answer };
+    }
+    return result;
+  }
+  const suggestion = result.output.suggestion;
+  const named =
+    suggestion?.ero === undefined
+      ? undefined
+      : (modelo.sxablonoj ?? []).find((entry) => entry.sxablono.name === suggestion.ero);
+  if (named === undefined || suggestion === null) return result;
+  return {
+    ok: true,
+    output: {
+      ...result.output,
+      suggestion: { sxablono: named.sxablono.name, props: suggestion.props },
+      regions: regionsOf(named),
+    },
+  };
+}
+
+function suggestEroOf(modelo: Modelo, input: SuggestEroInput): SuggestEroResult {
   // Nachlese 4 N-2 (F-3): the words as written first. Only a text that names nothing at all —
   // no goal, no Uzo entry — is read again with the German endings ("Vorschlägen" → vorschläge),
   // so every text that found something before keeps its answer.

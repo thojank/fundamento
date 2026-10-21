@@ -42,9 +42,12 @@ import {
   explain,
   explainRegulo,
   type GetEroInput,
+  type GetSxablonoInput,
   getEro,
+  getSxablono,
   isNoTarget,
   listEroj,
+  listSxablonoj,
   NOM_REGULOJ,
   oklchColor,
   resolve as resolveAssignment,
@@ -495,6 +498,14 @@ const suggestEroTool: Tool = (served, args) =>
 const checkUsageTool: Tool = (served, args) =>
   gvidanto(checkUsage(served.modelo, args as unknown as CheckUsageInput));
 
+/** list_sxablonoj (Spec 020, G3): every Sxablono with its kind and regions. */
+const listSxablonojTool: Tool = (served) =>
+  ok(JSON.parse(JSON.stringify(listSxablonoj(served.modelo))) as Record<string, unknown>);
+
+/** get_sxablono (Spec 020, G3): one Sxablono with Skemo and Uzo, or its brief. */
+const getSxablonoTool: Tool = (served, args) =>
+  gvidanto(getSxablono(served.modelo, args as unknown as GetSxablonoInput));
+
 /**
  * The structure and calibration preview_agordo derives over: the repository's core with komuna,
  * as `fm agordilo derive` reads them — read once, on the first call.
@@ -832,4 +843,6 @@ export const TOOLS: Record<ToolName, Tool> = {
   preview_agordo: previewAgordo,
   propose_agordo: proposeAgordoTool,
   save_agordo: saveAgordoTool,
+  list_sxablonoj: listSxablonojTool,
+  get_sxablono: getSxablonoTool,
 };

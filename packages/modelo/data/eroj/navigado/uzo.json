@@ -107,7 +107,7 @@
       "containers": [
         {
           "name": "shell",
-          "kialo": "A navigation stands in the shell of the application (its head or its side), because it belongs to every page and to none."
+          "kialo": "A navigation stands in the shell of the application — the region nav of the sxelo — because it belongs to every page and to none."
         }
       ],
       "with": [

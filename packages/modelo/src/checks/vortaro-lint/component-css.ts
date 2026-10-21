@@ -90,6 +90,9 @@ export const STRUCTURAL_PROPERTIES: readonly string[] = [
   // Spec 015 ③ (plan ③ D-08): that the picture of an avatar covers its circle and is cropped,
   // never stretched, is structure (cover, a keyword).
   "object-fit",
+  // Spec 020 ① (G2): a Sxablono is the container of its own layout queries (container-type:
+  // inline-size, a keyword); its breakpoints are tokens, resolved in the query's condition.
+  "container-type",
 ];
 
 /** Design properties: their value must come from a token (prefix match on the property name). */

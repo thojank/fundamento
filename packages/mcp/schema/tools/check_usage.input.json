@@ -10,9 +10,29 @@
       "items": {
         "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/EroInstance"
       },
-      "minItems": 1
+      "minItems": 0
+    },
+    "sxablonoj": {
+      "description": "Instances of Sxablonoj (Spec 020): what stands in each region. Judged for required regions, accepted children, their number and props, one primary action where the region says so, and every landmark once per page; instances may then be empty.",
+      "type": "array",
+      "items": {
+        "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SxablonoInstance"
+      }
     }
   },
   "required": ["instances"],
+  "anyOf": [
+    {
+      "properties": {
+        "instances": { "type": "array", "minItems": 1 }
+      }
+    },
+    {
+      "properties": {
+        "sxablonoj": { "type": "array", "minItems": 1 }
+      },
+      "required": ["sxablonoj"]
+    }
+  ],
   "additionalProperties": false
 }

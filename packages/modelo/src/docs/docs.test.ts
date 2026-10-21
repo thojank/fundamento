@@ -2585,3 +2585,57 @@ describe("Nachlese 7 ② documentation (specs/021-nachlese-7)", () => {
     expect(planned).toContain("Breaking: Das Make Kit liefert nur noch ESM.");
   });
 });
+
+describe("Spec 020 ① documentation (specs/020-sxablonoj-1)", () => {
+  it("the spec is copied unchanged; plan ① carries the decisions, the coverage of Arkitekturo and what the maintainer confirms (E4)", () => {
+    const spec = read("specs/020-sxablonoj-1/spec.md");
+    expect(createHash("sha256").update(spec).digest("hex")).toBe(
+      "ee2a4f8a58de176e6af9ecd41ffe556768b26104eaf5e1028ba088fb3e8ef32a",
+    );
+    const plan = read("specs/020-sxablonoj-1/plan.md");
+    const tasks = read("specs/020-sxablonoj-1/tasks.md");
+    for (const text of [plan, tasks]) {
+      expect(text).toContain("## ① Grundlage, sxelo und pagxo");
+      expect(text).toContain("## ② formularo und filtrilo");
+      expect(text).toContain("## ③ Inhalt");
+    }
+    const first = plan.slice(
+      plan.indexOf("## ① Grundlage, sxelo und pagxo"),
+      plan.indexOf("## ② formularo und filtrilo"),
+    );
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "### Arkitekturo-Abdeckung",
+      "### Gekippte Dialoge",
+      "### Abweichungen",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+    ]) {
+      expect(first, heading).toContain(heading);
+    }
+    const coverage = first.slice(first.indexOf("### Arkitekturo-Abdeckung"));
+    for (const ark of [
+      "ark-shell",
+      "ark-page",
+      "ark-form",
+      "ark-filterbar",
+      "ark-query-filters",
+      "ark-markdown",
+      "ark-markdown-editor",
+      "ark-command-hint",
+      "ark-source-excerpt",
+      "ark-diff",
+    ])
+      expect(coverage, ark).toContain(`\`${ark}\``);
+    expect(first).toContain("E4");
+    expect(first).toContain("heading-with-actions");
+    expect(first).not.toContain("ciferecigo");
+    const own = tasks.slice(
+      tasks.indexOf("## ① Grundlage, sxelo und pagxo"),
+      tasks.indexOf("## ② formularo und filtrilo"),
+    );
+    expect(own).toContain("**T2051");
+    expect(own).toMatch(/rot `[0-9a-f]{7}`/);
+  });
+});

@@ -4348,6 +4348,16 @@
       "kialo": "„Projektkarten“ sind Karten; das Grundwort steht im Deutschen am Ende.",
       "date": "2026-10-19",
       "context": "Nachlese 5 O-17 (Messung A16, Briefing 2026-10-19): eine Antwort, die stand, ändert sich (OP-12) — suggest_ero „Projektkarten“ → karto (card, karten) statt goal-unknown. Regel: Im zweiten Durchgang (wörtlich traf nichts, Nachlese 4 N-2) trifft ein deutsches Goal-Stichwort ab sechs Buchstaben auch das Ende eines zusammengeschriebenen Kompositums, mit den Endungen von N-2, wenn der Vorderteil mindestens vier Buchstaben hat (ab-, an-, be-, vor- sind keine Vorderteile: „bemerken“ ist kein „merken“). Bekannte falsche Freunde: „Landkarten“, „Eintrittskarten“ → karto, „Volltreffer“ → plenstato."
+    },
+    {
+      "id": "jug_01M5CYB7ZTCZVBJXCVDYX300V0",
+      "ref": {
+        "ero": "ero_01M5616FMN3GPB1J421PMMKBZ3"
+      },
+      "decision": "approved",
+      "kialo": "Die Titelzeile mit Aktionen ist die Seite: Es gibt jetzt ein Sxablono dafür, die Rückfrage entfällt.",
+      "date": "2026-10-20",
+      "context": "Spec 020 ① (G1): eine Antwort, die stand, ändert sich (OP-12) — die Grenze heading-with-actions des titolo war ask-human („a person decides … until the Sxablonoj come“), jetzt use-instead pagxo. suggest_ero „toolbar beside the section“, „Titelzeile“, „Kopfzeile“ → Sxablono pagxo (Grenze titolo.heading-with-actions daneben) statt Rückfrage."
     }
   ]
 }

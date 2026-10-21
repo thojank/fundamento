@@ -4,7 +4,12 @@
 // plugin-rahmen-beispiele.test.ts (Nachlese 5 ①, O-5): the frame Eroj in the section Fundamento and the examples beside the sets.
 
 import { describe, expect, it } from "vitest";
-import { BACKDROP_EXAMPLE, UNKNOWN_EXAMPLE, VERTICAL_EXAMPLE } from "./figma.js";
+import {
+  BACKDROP_EXAMPLE,
+  FIGMA_SXABLONO_FRAME,
+  UNKNOWN_EXAMPLE,
+  VERTICAL_EXAMPLE,
+} from "./figma.js";
 import {
   descendant,
   type LIFT,
@@ -113,8 +118,11 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
     if (section === undefined) throw new Error("no section");
     return section;
   };
+  // The frames of the sets; the frame of the Sxablonoj (Spec 020 ①) lies beside them.
   const framesOf = (double: ReturnType<typeof figmaDouble>) =>
-    sectionOf(double).children.filter((child) => child.type === "FRAME");
+    sectionOf(double).children.filter(
+      (child) => child.type === "FRAME" && child.name !== FIGMA_SXABLONO_FRAME,
+    );
   const frameOf = (double: ReturnType<typeof figmaDouble>) => {
     const [frame] = framesOf(double);
     if (frame === undefined) throw new Error(`no frame ${FRAME} in the section`);
@@ -218,7 +226,8 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
     const section = sectionOf(double);
     expect(section.name).toBe("Fundamento");
     expect(section.getSharedPluginData("fundamento", "section")).toBe("Fundamento");
-    expect(section.children.map((child) => child.name)).toEqual([FRAME]);
+    // Spec 020 ①: the frame of the Sxablonoj lies below the frame of the sets.
+    expect(section.children.map((child) => child.name)).toEqual([FRAME, FIGMA_SXABLONO_FRAME]);
     const frame = frameOf(double);
     expect(frame.getSharedPluginData("fundamento", "frame")).toBe(FRAME);
     expect(frame.children.map((child) => child.name)).toEqual(inFrame);
@@ -262,8 +271,15 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
     const section = box(sectionOf(double));
     const frame = box(frameOf(double));
     const padding = layout?.padding ?? NaN;
-    expect(section.width).toBe(frame.x + frame.width + padding);
-    expect(section.height).toBe(frame.y + frame.height + padding);
+    // Spec 020 ①: the frame of the Sxablonoj lies below the frame of the sets, a gap between.
+    const found = sectionOf(double).children.find((child) => child.name === FIGMA_SXABLONO_FRAME);
+    if (found === undefined) throw new Error("no frame Sxablonoj");
+    const patterns = box(found);
+    expect(patterns.y).toBe(frame.y + frame.height + (layout?.gap ?? NaN));
+    expect(section.width).toBe(
+      Math.max(frame.x + frame.width, patterns.x + patterns.width) + padding,
+    );
+    expect(section.height).toBe(patterns.y + patterns.height + padding);
   });
 
   // The finding of 2026-10-14: in the brand mode a set grows (Archivo Black) and ran into its
@@ -375,7 +391,10 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
       moved: names,
       frame: { name: FRAME, found: false, created: true, wrap: "WRAP" },
     });
-    expect(section.children.map((child) => child.name)).toEqual([FRAME]);
+    // Spec 020 ①: the frame of the Sxablonoj lies beside the new frame of the sets.
+    expect(section.children.map((child) => child.name).sort()).toEqual(
+      [FRAME, FIGMA_SXABLONO_FRAME].sort(),
+    );
     expect(frameOf(double).children.map((child) => child.name)).toEqual(inFrame);
     expect(report.components.map((component) => component.placement)).toEqual(inLayout);
     expect(overlapping(double)).toEqual([]);
