@@ -5,15 +5,25 @@ import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { createModeloAjv, getModeloValidator } from "../contracts/ajv.js";
 import { DTCG_TYPES } from "../contracts/dtcg.js";
-import type { ModeloJson, Rezolvo } from "../contracts/modelo.js";
+import type { ModeloJson } from "../contracts/modelo.js";
 import { readModeloSchema } from "../contracts/schema.js";
+import { isEroTokenName } from "../eroj/ero-tokenoj.js";
 import { buildModelo } from "../load/build.js";
 import { type ModeloFiles, readModeloFiles } from "../load/files.js";
 import { defaultModeloSource, fixtureModeloSource } from "../load/source.js";
 import { MODELO_VERSION } from "../load/version.js";
 import { allAssignments, completeAssignment, resolve } from "../resolve/index.js";
 import { fixtureRoot } from "../resolve/test-doubles/fixtures.js";
-import { exportModelo, MODELO_JSON_SCHEMA_REF, type ModeloExport } from "./export-modelo.js";
+import {
+  buildRezolvojJson,
+  expandRezolvo,
+  exportModelo,
+  isRezolvoAlias,
+  MODELO_JSON_SCHEMA_REF,
+  type ModeloExport,
+  type RezolvojJson,
+  rezolvoTokenOf,
+} from "./export-modelo.js";
 import { exportValidatedModelo } from "./prepare.js";
 
 function readFiles(source = defaultModeloSource()): ModeloFiles {
@@ -29,7 +39,7 @@ const files = readFiles();
 const { modelo } = buildModelo(files);
 const exported = exportModelo({ modelo, sets: files.sets, schema });
 const modeloJson = JSON.parse(exported.modeloJson) as ModeloJson;
-const rezolvoj = JSON.parse(exported.rezolvojJson) as { rezolvoj: Rezolvo[] };
+const rezolvoj = JSON.parse(exported.rezolvojJson) as RezolvojJson;
 const exportedSchema: unknown = JSON.parse(exported.schemaJson);
 
 const sha256 = (text: string) => createHash("sha256").update(text, "utf8").digest("hex");
@@ -279,16 +289,88 @@ describe("exportModelo: rezolvoj.json", () => {
     expect(rezolvoj.rezolvoj).toHaveLength(72);
   });
 
-  it("entry i equals resolve(allAssignments[i]) and carries provenance", () => {
+  it("entry i, its references followed, equals resolve(allAssignments[i]) and carries provenance", () => {
     assignments.forEach((assignment, index) => {
       const outcome = resolve(modelo, assignment);
       if (!outcome.ok) throw new Error(`combination ${index} did not resolve`);
       const entry = rezolvoj.rezolvoj[index];
-      expect(entry).toEqual(outcome.rezolvo);
-      for (const token of Object.values(entry?.tokens ?? {})) {
+      if (entry === undefined) throw new Error(`combination ${index} missing`);
+      expect(expandRezolvo(entry)).toEqual(outcome.rezolvo);
+      for (const token of Object.values(entry.tokens)) {
         expect(token.origin.setId).toMatch(/^set_/);
-        expect(Array.isArray(token.aliasChain)).toBe(true);
       }
+    });
+  });
+
+  // Nachlese 9 (O-8 of Spec 024): an Ero-Token is a whole-value alias on the role its Skemo binds
+  // (Constitution v2.3). rezolvoj.json writes it as that reference – ID, type, origin and the name
+  // of the aliased token – instead of a second copy of the role's value and chain: 1 232 of the
+  // 1 408 tokens of a Rezolvo, the file 72 MB → 37 MB. Nothing is lost: following the reference in
+  // the same Rezolvo gives the resolved token back.
+  it("writes every token of the third level (Ero and Sxablono) as a reference: id, type, origin and the aliased token, no value", () => {
+    let references = 0;
+    for (const entry of rezolvoj.rezolvoj) {
+      for (const [name, token] of Object.entries(entry.tokens)) {
+        if (!isEroTokenName(name)) {
+          expect(isRezolvoAlias(token), name).toBe(false);
+          continue;
+        }
+        expect(Object.keys(token).sort(), name).toEqual(["alias", "id", "origin", "type"]);
+        if (!isRezolvoAlias(token)) continue;
+        expect(entry.tokens[token.alias], `${name} → ${token.alias}`).toBeDefined();
+        references++;
+      }
+    }
+    expect(references).toBeGreaterThan(1000 * rezolvoj.rezolvoj.length);
+  });
+
+  it("rezolvoTokenOf follows a reference and returns the plain token as it stands", () => {
+    const entry = rezolvoj.rezolvoj[0];
+    if (entry === undefined) throw new Error("no Rezolvo");
+    const outcome = resolve(modelo, entry.assignment);
+    if (!outcome.ok) throw new Error("does not resolve");
+    const name = "ero.butono.surface.fill.emphasis.high.intent.neutral.rest";
+    expect(isRezolvoAlias(entry.tokens[name])).toBe(true);
+    expect(rezolvoTokenOf(entry, name)).toEqual(outcome.rezolvo.tokens[name]);
+    expect(rezolvoTokenOf(entry, "color.action.primary.rest")).toBe(
+      entry.tokens["color.action.primary.rest"],
+    );
+    expect(rezolvoTokenOf(entry, "no.such.token")).toBeUndefined();
+  });
+
+  /** The repo Modelo with one core token's `$value` replaced (in memory). */
+  function withCoreValue(name: string, value: unknown) {
+    const changed = readFiles();
+    const core = changed.sets.find((set) => set.name === "core");
+    let node = core?.value as Record<string, unknown>;
+    for (const segment of name.split(".")) node = node[segment] as Record<string, unknown>;
+    node.$value = value;
+    return buildModelo(changed).modelo;
+  }
+
+  it("keeps the whole token where an Ero-Token holds a value of its own", () => {
+    const name = "ero.butono.surface.fill.emphasis.high.intent.neutral.rest";
+    const own = { colorSpace: "srgb", components: [0.2, 0.3, 0.4], hex: "#334d66" };
+    const changed = withCoreValue(name, own);
+    const entry = buildRezolvojJson(changed).rezolvoj[0];
+    const token = entry?.tokens[name];
+    expect(isRezolvoAlias(token)).toBe(false);
+    expect(token && "value" in token ? token.value : undefined).toEqual(own);
+  });
+
+  it("writes an Ero-Token on another Ero-Token as a reference to it, and follows both", () => {
+    const name = "ero.butono.surface.fill.emphasis.high.intent.neutral.rest";
+    const other = "ero.butono.surface.fill.emphasis.high.intent.neutral.hover";
+    const changed = withCoreValue(name, `{${other}}`);
+    const built = buildRezolvojJson(changed);
+    allAssignments(changed).forEach((assignment, index) => {
+      const entry = built.rezolvoj[index];
+      if (entry === undefined) throw new Error(`combination ${index} missing`);
+      const token = entry.tokens[name];
+      expect(isRezolvoAlias(token) ? token.alias : undefined).toBe(other);
+      const outcome = resolve(changed, assignment);
+      if (!outcome.ok) throw new Error(`combination ${index} did not resolve`);
+      expect(rezolvoTokenOf(entry, name)).toEqual(outcome.rezolvo.tokens[name]);
     });
   });
 });

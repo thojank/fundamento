@@ -319,8 +319,10 @@ describe("fm modelo export (Spec 001 T019, D-09)", () => {
   // files of modelo no longer compete with each other on the runner. If the run turns red, the
   // factor stays off and the report says so.
   // Spec 024 ② (B-17): with the third level the export carries 1 408 tokens (rezolvoj.json 160 MB)
-  // and took 20 to 34 s on the runner over nine runs, 2.3 s locally; the factor stays off, the
-  // test takes the package budget of 60 s that Spec 025 ② (B-16) measured for a cold runner.
+  // and took 20 to 34 s on the runner over nine runs, 2.3 s locally; the factor stays off.
+  // Nachlese 9 (maintainer 2026-10-22): back to 30 s. The export is no slower per process (2.0 s
+  // before the third level, 2.3 s with it); the runner was full (B-1: one runner per package now),
+  // and rezolvoj.json writes the Ero-Tokens as references (O-8: 72 MB → 37 MB).
   it("writes the export and one Tokens-Studio folder per Aspekto for a project config", () => {
     const out = mkdtempSync(join(tmpdir(), "fm-export-"));
     const run = fm(["modelo", "export", "--config", ekzempla, "--out", out]);
@@ -332,7 +334,7 @@ describe("fm modelo export (Spec 001 T019, D-09)", () => {
     expect(files).toContain("vortaro/ekzemplo/$themes.json");
     expect(files).toContain("vortaro/komuna/core.json");
     rmSync(out, { recursive: true, force: true });
-  });
+  }, 30_000);
 
   // Two exports of the whole Modelo, each a spawn of the built binary: on a loaded CI runner this
   // measures the machine as much as the export, so it gets the recorded factor 3

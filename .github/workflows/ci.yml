@@ -108,10 +108,17 @@ jobs:
       - name: "Check: Tiparoj"
         run: pnpm check:tiparoj
 
+  # Nachlese 9 (B-1): one runner per package. The five suites side by side on one runner were
+  # about 20 processes on 4 vCPU, and a test spawning `fm` four times took 64 to 126 s there for
+  # 8 s of work.
   unit:
-    name: Unit tests (every package but Projekcioj and Eroj)
+    name: Unit tests (${{ matrix.package }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [agordilo, cli, mcp, metiejo, modelo]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -133,10 +140,10 @@ jobs:
       - name: Build
         run: pnpm build
 
-      # A new package joins this job by itself: the filter names what runs elsewhere, not what
-      # runs here. The Eroj have the job eroj (W1), the Projekcioj the job projekcioj.
+      # A new package with tests joins the matrix above (workflow.test.ts says so); the Eroj have
+      # the job eroj (W1), the Projekcioj the job projekcioj.
       - name: Test
-        run: pnpm turbo run test --filter=!@fundamento/eroj --filter=!@fundamento/projekcioj
+        run: pnpm turbo run test --filter=@fundamento/${{ matrix.package }}
 
   projekcioj:
     name: Unit tests (Projekcioj, shard ${{ matrix.shard }} of 2)

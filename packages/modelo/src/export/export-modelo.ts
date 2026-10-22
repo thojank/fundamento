@@ -7,13 +7,17 @@ import type { DtcgType } from "../contracts/dtcg.js";
 import { DTCG_TYPES } from "../contracts/dtcg.js";
 import { CORE_SET_NAME } from "../contracts/grammar.js";
 import type {
+  AliasLink,
   Assignment,
   LoadedSet,
   Modelo,
   ModeloJson,
+  ResolvedToken,
+  ResolvedTokenOrigin,
   Rezolvo,
   TokenSetFile,
 } from "../contracts/modelo.js";
+import { isEroTokenName } from "../eroj/ero-tokenoj.js";
 import { referenceAspektoOf } from "../load/build.js";
 import { formatCombination } from "../resolve/assignment.js";
 import { type CombinationResolution, resolveCombination } from "../resolve/resolve.js";
@@ -55,8 +59,144 @@ export interface ModeloExport {
   vortaro: Record<string, Record<string, string>>;
 }
 
+/**
+ * A token of the third level in `rezolvoj.json` (Nachlese 9, O-8 of Spec 024): an Ero- or
+ * Sxablono-Token is a whole-value alias on the role token its Skemo binds (Constitution v2.3), so
+ * the file names that token instead of carrying its value and chain a second time. Following
+ * `alias` in the same Rezolvo gives the resolved token back (`rezolvoTokenOf`); a token of the
+ * third level that holds a value of its own stays a whole `ResolvedToken`.
+ */
+export interface RezolvoAlias {
+  id: string;
+  type: ResolvedToken["type"];
+  origin: ResolvedTokenOrigin;
+  /** The token it aliases, a key of the same Rezolvo. */
+  alias: string;
+}
+
+/** One combination of `rezolvoj.json`: every token resolved, the third level as references. */
+export interface RezolvojEntry {
+  assignment: Rezolvo["assignment"];
+  tokens: Record<string, ResolvedToken | RezolvoAlias>;
+}
+
 export interface RezolvojJson {
-  rezolvoj: Rezolvo[];
+  rezolvoj: RezolvojEntry[];
+}
+
+export function isRezolvoAlias(
+  token: ResolvedToken | RezolvoAlias | undefined,
+): token is RezolvoAlias {
+  return token !== undefined && "alias" in token;
+}
+
+/** The chain of a token as an alias target: its own chain, or the token itself in its set. */
+function chainAsTarget(name: string, token: ResolvedToken): AliasLink[] {
+  return token.aliasChain.length > 0 ? token.aliasChain : [{ token: name, set: token.origin.set }];
+}
+
+/** A copy of a JSON value (a plain walk, as the resolver copies; `structuredClone` costs more). */
+function copyJson<T>(value: T): T {
+  if (Array.isArray(value)) return value.map(copyJson) as T;
+  if (value !== null && typeof value === "object") {
+    const copy: Record<string, unknown> = {};
+    for (const [key, entry] of Object.entries(value as Record<string, unknown>))
+      copy[key] = copyJson(entry);
+    return copy as T;
+  }
+  return value;
+}
+
+/** The token of a reference rebuilt from the token it aliases (`target`, already whole). */
+function fromReference(
+  name: string,
+  reference: RezolvoAlias,
+  target: ResolvedToken,
+): ResolvedToken {
+  const token: ResolvedToken = {
+    id: reference.id,
+    type: reference.type,
+    value: copyJson(target.value),
+    origin: { ...reference.origin },
+    aliasChain: [
+      { token: name, set: reference.origin.set },
+      ...chainAsTarget(reference.alias, target).map((link) => ({ ...link })),
+    ],
+  };
+  if (target.textTransform !== undefined) token.textTransform = { ...target.textTransform };
+  return token;
+}
+
+/**
+ * The resolved token `name` of one entry of `rezolvoj.json`: a whole token as it stands, a
+ * reference followed (through further references) and rebuilt; undefined for an unknown name.
+ */
+export function rezolvoTokenOf(entry: RezolvojEntry, name: string): ResolvedToken | undefined {
+  const token = entry.tokens[name];
+  if (!isRezolvoAlias(token)) return token;
+  const target = rezolvoTokenOf(entry, token.alias);
+  return target === undefined ? undefined : fromReference(name, token, target);
+}
+
+/** An entry of `rezolvoj.json` with every reference followed: the Rezolvo of `resolve`. */
+export function expandRezolvo(entry: RezolvojEntry): Rezolvo {
+  const tokens: Record<string, ResolvedToken> = {};
+  for (const name of Object.keys(entry.tokens)) {
+    const token = rezolvoTokenOf(entry, name);
+    if (token !== undefined) tokens[name] = token;
+  }
+  return { assignment: entry.assignment, tokens };
+}
+
+/** Plain JSON equality, for the check that a reference loses nothing. */
+function sameJson(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (Array.isArray(a)) {
+    return Array.isArray(b) && a.length === b.length && a.every((item, i) => sameJson(item, b[i]));
+  }
+  if (typeof a !== "object" || a === null || typeof b !== "object" || b === null) return false;
+  if (Array.isArray(b)) return false;
+  const left = Object.keys(a);
+  const right = b as Record<string, unknown>;
+  return (
+    left.length === Object.keys(right).length &&
+    left.every((key) => sameJson((a as Record<string, unknown>)[key], right[key]))
+  );
+}
+
+/**
+ * The entry of one Rezolvo: a token of the third level that is a whole-value alias becomes a
+ * reference, but only where following the reference gives exactly the resolved token back.
+ */
+function rezolvojEntryOf(rezolvo: Rezolvo): RezolvojEntry {
+  const tokens: Record<string, ResolvedToken | RezolvoAlias> = {};
+  for (const [name, token] of Object.entries(rezolvo.tokens)) {
+    const alias = token.aliasChain[1]?.token;
+    const target = alias === undefined ? undefined : rezolvo.tokens[alias];
+    if (
+      isEroTokenName(name) &&
+      alias !== undefined &&
+      target !== undefined &&
+      token.fieldAliases === undefined
+    ) {
+      // What fromReference would rebuild, compared in place: value, case and chain.
+      const chain = chainAsTarget(alias, target);
+      if (
+        token.type === target.type &&
+        token.aliasChain.length === chain.length + 1 &&
+        token.aliasChain[0]?.token === name &&
+        token.aliasChain[0]?.set === token.origin.set &&
+        chain.every((link, i) => sameJson(link, token.aliasChain[i + 1])) &&
+        sameJson(token.value, target.value) &&
+        sameJson(token.textTransform, target.textTransform)
+      ) {
+        tokens[name] = { id: token.id, type: token.type, origin: token.origin, alias };
+        continue;
+      }
+    }
+    tokens[name] = token;
+  }
+  return { assignment: rezolvo.assignment, tokens };
 }
 
 /** An input that cannot be exported (inconsistent or not validated). Callers validate first. */
@@ -226,12 +366,15 @@ export function buildModeloJson(input: ModeloExportInput): ModeloJson {
   return modeloJson;
 }
 
-/** `rezolvoj.json` as a value: one Rezolvo per combination, in `allAssignments` order. Pure. */
+/**
+ * `rezolvoj.json` as a value: one entry per combination, in `allAssignments` order, the tokens of
+ * the third level as references (O-8). Pure.
+ */
 export function buildRezolvojJson(modelo: Modelo): RezolvojJson {
   return {
     // The resolutions the validation computed already (Spec 002, D-04), in `allAssignments` order.
     rezolvoj: resolutionsOf(modelo).map(({ assignment, resolution }) =>
-      rezolvoOrThrow(modelo, assignment, resolution),
+      rezolvojEntryOf(rezolvoOrThrow(modelo, assignment, resolution)),
     ),
   };
 }

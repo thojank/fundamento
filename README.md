@@ -14,7 +14,7 @@ Terminology is Esperanto and binding (see the Constitution). Code, comments and 
 - `packages/vortaro/` (`@fundamento/vortaro`): the core tokens in W3C DTCG 2025.10 (primitives carry values, roles carry aliases), one set per file, plus `$themes.json` and `$metadata.json`. No code.
 - `packages/aspekto-komuna/` (`@fundamento/aspekto-komuna`): the reference Aspekto `komuna` as an Aspekto package (`aspekto.json`, `ids.lock.json`, its sets). Always composed.
 - `packages/cli/` (`@fundamento/cli`): the `fm` command line; `packages/mcp/` (`@fundamento/mcp`): the MCP server, bin `fundamento-mcp`.
-- `packages/modelo/dist/`: build output `modelo.json`, `modelo.schema.json`, `rezolvoj.json` and `vortaro/<aspekto>/` (byte-identical across builds).
+- `packages/modelo/dist/`: build output `modelo.json`, `modelo.schema.json`, `rezolvoj.json` and `vortaro/<aspekto>/` (byte-identical across builds). In `rezolvoj.json` a token of the third level (Ero- and Sxablono-Tokens) is a reference on the token it aliases (`alias`, `id`, `origin`, `type`); `rezolvoTokenOf` and `expandRezolvo` of `@fundamento/modelo` follow it.
 - `packages/modelo/test/fixtures/{valid,invalid}/`: fixture Modelo roots, including the external fixture Aspekto `aspekto-ekzemplo`; every check has one that makes it fail.
 
 ## Quickstart

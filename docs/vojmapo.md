@@ -46,6 +46,7 @@ Nach Roadmap vom 2026-10-19 (Maintainer-Ordner, `roadmap/roadmap-2026-10-19.md`)
 | 2+3 | Eroj Runde 3 | 014 | erledigt |
 | 4 | Eroj Runde 4; Toast als Grenze | 015 | erledigt |
 | – | Nachlesen 4 und 5 | 017, 018 | erledigt |
+| – | **Nachlese 9 „Tempo“** (Ursache der langsamen CI-Läufe: der Unit-Job mit fünf Suiten auf einem Läufer, jetzt ein Läufer je Paket; O-8 der Spec 024: die dritte Ebene in `rezolvoj.json` als Alias-Verweis, 72 → 36 MB; Export-Test wieder 30 s, kein Budget angehoben) | [026](../specs/026-nachlese-9/) | **zur Abnahme** |
 | 5 | Release 0.1.0 (Make Kits komuna und ekzemplo unter `latest`) | 018 ③ | erledigt; Arkitekturo umstellen läuft |
 | **8a** | **Werkstatt Stufe 1** (Agordilo: ① Bibliothek, ② Werkstatt, ③ `preview_agordo` und Doku) | 016 | **erledigt bis zur Abnahme von ② und ③** |
 | 8a' | **Werkstatt Stufe 2+3** (Spec 019: ① Form, Raum, Schrift, Icon-Gewicht in der Bibliothek, ② Werkstatt mit Verlauf, Vorschlags-Leiste und Prüfung im Worker, ③ `propose_agordo`, `save_agordo`, Wunsch-Vokabular, `historio`; ④ Nachlese 6) | [019](../specs/019-werkstatt-2-3/) | **zur Abnahme** (PRs #85, #87, ③; #86) |

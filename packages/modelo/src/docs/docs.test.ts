@@ -3029,3 +3029,34 @@ describe("Spec 025 ③ documentation (specs/025-eroj-runde-5)", () => {
     }
   });
 });
+
+// Nachlese 9 „Tempo“ (Briefing 2026-10-22): specs/026-nachlese-9 carries the briefing unchanged,
+// a plan with the cause of the slow runner (measurements over the CI runs, the process alone and
+// under load), O-8 (Ero-Tokens in rezolvoj.json as references) and the export budget of 30 s, and
+// tasks with the red commit.
+describe("Nachlese 9 documentation (specs/026-nachlese-9)", () => {
+  it("the briefing is copied unchanged; plan and tasks carry the cause, O-8, the budgets and the guide", () => {
+    const briefing = read("specs/026-nachlese-9/briefing.md");
+    expect(createHash("sha256").update(briefing).digest("hex")).toBe(
+      "55db051b6e5de91329b1033e53dad3d12f575623abe1602a133bc37b014de6bd",
+    );
+    const plan = read("specs/026-nachlese-9/plan.md");
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Ursache",
+      "### Entwurfsentscheidungen",
+      "### Abweichungen",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### Messanleitung",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const term of ["O-8", "rezolvoj.json", "30 s", "120 s", "ubuntu-latest", "echo FERTIG"]) {
+      expect(plan, term).toContain(term);
+    }
+    const tasks = read("specs/026-nachlese-9/tasks.md");
+    expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Nachlese 9");
+  });
+});
