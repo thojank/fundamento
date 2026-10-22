@@ -4,10 +4,10 @@
 
 ## ① Eingabe
 
-**Branch:** `261022-spec-025-eingabe-c7fa02` (von `main` `8915fa6`, nach #99).
+**Branch:** `261022-spec-025-eingabe-c7fa02` (von `main` `8915fa6`, nach #99; vor dem PR auf den Stand von Spec 024 O-1 `19303c2` (#100) rebased und neu erzeugt).
 
 ### A – Rot zuerst
-- [x] **T2501 Tests** Schema `contracts/spec025-schema.test.ts` (`SkemoEvent`, `Skemo.events`, `skemo-event-invalid`), Daten-Pins `data/glitilo.test.ts` und `data/spec025-eingabe.test.ts` (kampo: time, stepper, step, clear, Ereignisse, Goals count/time, Grenzen; range-stated mit vier Jugxoj; Ikonaro add/subtract), Eroj 34 → 35 in allen Pins (Listen, Ordnungszahlen, Zahlwort `thirty-five`, `uzoj: 35`, Kit-Dateien 55, Ikono-Set 285 Varianten, Vitrino-Ikonaro 19 × 3 + 4), `kampo.test.ts` (Grenzen, „Zähler mit Plus und Minus“), Projekcioj (`web-component.test.ts`, `figma.test.ts`, `plugin-bauformen-eingabe.test.ts`, `plugin-variablen.test.ts`, `datumoj.test.ts`, `make-kit.test.ts`, `publish.test.ts`), Browser-Specs (`glitilo.spec.ts`, `spec025-kampo.spec.ts`, Blöcke in `alirebleco.check.ts`, `vitrino.check.ts`), React-Typen `types/glitilo.tsx`, MCP-Dialoge `e2e/s025-eingabe.test.ts`, Doku-Test ①. Rot in `a1af500` (Modelo 62 Tests in 25 Dateien, Projekcioj 22 in 7 Dateien, MCP 2 in 3 Dateien – die Suite s025-eingabe lädt nicht ohne Daten).
+- [x] **T2501 Tests** Schema `contracts/spec025-schema.test.ts` (`SkemoEvent`, `Skemo.events`, `skemo-event-invalid`), Daten-Pins `data/glitilo.test.ts` und `data/spec025-eingabe.test.ts` (kampo: time, stepper, step, clear, Ereignisse, Goals count/time, Grenzen; range-stated mit vier Jugxoj; Ikonaro add/subtract), Eroj 34 → 35 in allen Pins (Listen, Ordnungszahlen, Zahlwort `thirty-five`, `uzoj: 35`, Kit-Dateien 55, Ikono-Set 285 Varianten, Vitrino-Ikonaro 19 × 3 + 4), `kampo.test.ts` (Grenzen, „Zähler mit Plus und Minus“), Projekcioj (`web-component.test.ts`, `figma.test.ts`, `plugin-bauformen-eingabe.test.ts`, `plugin-variablen.test.ts`, `datumoj.test.ts`, `make-kit.test.ts`, `publish.test.ts`), Browser-Specs (`glitilo.spec.ts`, `spec025-kampo.spec.ts`, Blöcke in `alirebleco.check.ts`, `vitrino.check.ts`), React-Typen `types/glitilo.tsx`, MCP-Dialoge `e2e/s025-eingabe.test.ts`, Doku-Test ①. Rot in `a1af500` (nach dem Rebase `8647ecc`; Modelo 62 Tests in 25 Dateien, Projekcioj 22 in 7 Dateien, MCP 2 in 3 Dateien – die Suite s025-eingabe lädt nicht ohne Daten).
 
 ### B – Grün
 - [x] **T2502 Schema und Modelo-Code** `SkemoEvent`, `Skemo.events`, Typen neu erzeugt, `RULE_IDS` + `skemo-event-invalid` (179), `eventIssues` in `skemo-rules.ts`, `rangeStated` in `USAGE_ENFORCERS`, `get_ero` mit `events` (Modelo und MCP-Ausgabeschema), Zahlwort `thirty-five` (D-01, D-02).
@@ -26,7 +26,7 @@
 
 | Was | Wert |
 |---|---|
-| Commits ① | rot `a1af500`, grün (siehe Folgecommit) |
+| Commits ① | rot `8647ecc`, grün `21efed9`, Messungen (siehe Folgecommit) – vor dem Rebase rot `a1af500`, grün `b931177` |
 | Rot gemessen | Modelo 62 Tests in 25 Dateien, Projekcioj 22 in 7 Dateien, MCP 2 in 3 Dateien (s025-eingabe lädt nicht ohne Daten) |
 | Benchmark-Kennzahlen | Eroj 34 → 35; Gattungen mit Gegenstück 27 → 28 (+ Zahl, Suche, Zeit als Ergänzung); Zustände 95 → 101; Props 146 → 161; Slots 72 → 77; Ereignisse 0 → 4; Teile 226 → 242; Bindungen 414 → 433; Ikonaro 17 → 19; Reguloj 59 → 60; Jugxoj 206 → 211 |
 
