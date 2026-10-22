@@ -325,6 +325,100 @@ test.describe("fm-datelektilo behaviour", () => {
     expect(state.message).toBe(word("value-end-invalid"));
   });
 
+  // Spec 026 ① (1): the date decides, not the row or the column — a range from the 27th to the 4th
+  // of the next month marks all nine days (the seven between in-range, the ends chosen) in the
+  // month of the start and in the month of the end, inside and outside the month alike; no other
+  // day. An end (or a start) outside the shown month keeps the look of a chosen day; a day between
+  // outside the month the ground of the range. A range of exactly one week too.
+  test("a range over a week and a month border marks every day between by its date, in both months, and its ends look chosen inside and outside the month; a range of one week (Spec 026 ①)", async ({
+    page,
+  }) => {
+    await serve(page, out, FORM('mode="range"', HELP));
+    const days = (page: Page) =>
+      page.locator("#d").evaluate((element) => {
+        const shadow = element.shadowRoot as ShadowRoot;
+        const cells = [...shadow.querySelectorAll('[part="cell"]')] as HTMLElement[];
+        const look = (date: string) => {
+          const cell = cells.find((each) => each.dataset.date === date);
+          if (cell === undefined) return undefined;
+          const style = getComputedStyle(cell);
+          return `${style.backgroundColor} ${style.color}`;
+        };
+        return {
+          month: shadow.querySelector('[part="month"]')?.textContent ?? "",
+          inRange: cells
+            .filter((cell) => cell.dataset.range === "true")
+            .map((cell) => cell.dataset.date),
+          chosen: cells
+            .filter((cell) => cell.getAttribute("aria-selected") === "true")
+            .map((cell) => cell.dataset.date),
+          looks: Object.fromEntries(
+            [
+              "2026-10-26",
+              "2026-10-27",
+              "2026-10-28",
+              "2026-10-31",
+              "2026-11-01",
+              "2026-11-03",
+              "2026-11-04",
+            ].map((date) => [date, look(date)]),
+          ),
+        };
+      });
+    const between = [
+      "2026-10-28",
+      "2026-10-29",
+      "2026-10-30",
+      "2026-10-31",
+      "2026-11-01",
+      "2026-11-02",
+      "2026-11-03",
+    ];
+    await page.getByRole("button", { name: word("trigger-name") }).click();
+    await page.locator("#d").locator('[part="cell"][data-date="2026-10-27"]').click();
+    await page.locator("#d").locator('[part="next"]').click();
+    await page.locator("#d").locator('[part="cell"][data-date="2026-11-04"]').click();
+    expect([(await stateOf(page)).start, (await stateOf(page)).end]).toEqual([
+      "2026-10-27",
+      "2026-11-04",
+    ]);
+    // Opened again: the month of the start; then the month of the end.
+    await page.getByRole("button", { name: word("trigger-name") }).click();
+    for (const turn of [0, 1]) {
+      if (turn === 1) await page.locator("#d").locator('[part="next"]').click();
+      const shown = await days(page);
+      expect(shown.inRange, shown.month).toEqual(between);
+      expect(shown.chosen, shown.month).toEqual(["2026-10-27", "2026-11-04"]);
+      // Both ends look alike, inside the month and outside it; every day between has the ground of the range.
+      expect(shown.looks["2026-10-27"], shown.month).toBe(shown.looks["2026-11-04"]);
+      const ground = (value: string | undefined) => value?.replace(/\) .*$/, ")");
+      for (const date of ["2026-10-28", "2026-10-31", "2026-11-01", "2026-11-03"]) {
+        expect(ground(shown.looks[date]), `${shown.month} ${date}`).toBe(
+          ground(shown.looks["2026-10-28"]),
+        );
+        expect(ground(shown.looks[date]), `${shown.month} ${date}`).not.toBe(
+          ground(shown.looks["2026-10-26"]),
+        );
+      }
+    }
+    // Exactly one week, Monday to Sunday.
+    await serve(
+      page,
+      out,
+      FORM('mode="range" value-start="2026-10-19" value-end="2026-10-25"', HELP),
+    );
+    await page.getByRole("button", { name: word("trigger-name") }).click();
+    const week = await days(page);
+    expect(week.inRange).toEqual([
+      "2026-10-20",
+      "2026-10-21",
+      "2026-10-22",
+      "2026-10-23",
+      "2026-10-24",
+    ]);
+    expect(week.chosen).toEqual(["2026-10-19", "2026-10-25"]);
+  });
+
   test("in right-to-left writing ArrowLeft moves to the next day (Internacia); the grid rows stay seven wide", async ({
     page,
   }) => {
