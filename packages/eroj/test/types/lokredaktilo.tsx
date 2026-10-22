@@ -15,7 +15,7 @@ export const wrongKind = (
   <Lokredaktilo label="Titel" kind="date" />
 );
 
-export const missingLabel = (
-  // @ts-expect-error label is a duty
-  <Lokredaktilo value="Barrierefreiheit" />
+export const wrongLabel = (
+  // @ts-expect-error label is a text (the duty itself is the element's warning, as for every Ero)
+  <Lokredaktilo label={3} value="Barrierefreiheit" />
 );

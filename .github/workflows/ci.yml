@@ -258,7 +258,10 @@ jobs:
   rendered-checks:
     name: Rendered checks (Make Kit, Quickstart, Vitrino)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Spec 025 ③ (B-28): the Playwright browsers took 7 min to install on a cold runner (Läufe
+    # 39754200831, 39754602800) and the Vitrino check needs 6 min with 40 Eroj; 15 min cut the
+    # check off twice. The budget follows the measured cold runner, with room.
+    timeout-minutes: 25
     env:
       PLAYWRIGHT_ENGINES: ${{ (github.ref == 'refs/heads/main' && github.event_name != 'pull_request') && 'chromium firefox webkit' || 'chromium' }}
     steps:
