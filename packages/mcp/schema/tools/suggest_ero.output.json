@@ -45,13 +45,28 @@
             "ero": {
               "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
             },
+            "label": {
+              "description": "The display name in the language asked for (Spec 026 ②), only with lingvo; the name stays the identifier.",
+              "type": "string",
+              "minLength": 1
+            },
             "props": {
               "type": "object",
               "propertyNames": {
                 "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
               },
               "additionalProperties": {
-                "anyOf": [{ "type": "string" }, { "type": "number" }, { "type": "boolean" }]
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  }
+                ]
               }
             }
           },
@@ -65,13 +80,28 @@
             "sxablono": {
               "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
             },
+            "label": {
+              "description": "The display name in the language asked for (Spec 026 ②), only with lingvo; the name stays the identifier.",
+              "type": "string",
+              "minLength": 1
+            },
             "props": {
               "type": "object",
               "propertyNames": {
                 "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
               },
               "additionalProperties": {
-                "anyOf": [{ "type": "string" }, { "type": "number" }, { "type": "boolean" }]
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  }
+                ]
               }
             }
           },
@@ -95,7 +125,14 @@
           "props": {
             "type": "object",
             "additionalProperties": {
-              "anyOf": [{ "type": "string" }, { "type": "boolean" }]
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
             }
           }
         },
@@ -172,6 +209,11 @@
               "ero": {
                 "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
               },
+              "label": {
+                "description": "The display name in the language asked for (Spec 026 ②), only with lingvo; the name stays the identifier.",
+                "type": "string",
+                "minLength": 1
+              },
               "case": {
                 "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
               },
@@ -199,6 +241,11 @@
               "ero": {
                 "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
               },
+              "label": {
+                "description": "The display name in the language asked for (Spec 026 ②), only with lingvo; the name stays the identifier.",
+                "type": "string",
+                "minLength": 1
+              },
               "goal": {
                 "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
               },
@@ -208,7 +255,17 @@
                   "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
                 },
                 "additionalProperties": {
-                  "anyOf": [{ "type": "string" }, { "type": "number" }, { "type": "boolean" }]
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "boolean"
+                    }
+                  ]
                 }
               },
               "keyword": {

@@ -460,7 +460,12 @@ describe("suggest_ero: Nachlese 4 – hyphens, endings, row actions, goal over a
   it("N-4 (F-2): the goal word überschrift outweighs the boundary word fett of the tekstareo", () => {
     const answer = suggest("Mach diesen Text fett, das ist die Überschrift des Abschnitts", "de");
     expect(answer.action).toBeUndefined();
-    expect(answer.suggestion).toEqual({ ero: "titolo", props: { level: "2" } });
+    // Spec 026 ②: with lingvo the display name stands beside the name.
+    expect(answer.suggestion).toEqual({
+      ero: "titolo",
+      label: "Überschrift",
+      props: { level: "2" },
+    });
     expect(answer.matched).toEqual({
       goal: "section-heading",
       keyword: "überschrift",
@@ -488,7 +493,11 @@ describe("suggest_ero: Nachlese 5 – the head word wins (N5-2), compounds (O-17
       const answer = suggest("Karte für ein Projekt mit Bild und Titel", lingvo);
       expect(answer.action).toBeUndefined();
       expect(answer.candidates).toBeUndefined();
-      expect(answer.suggestion).toEqual({ ero: "karto", props: {} });
+      expect(answer.suggestion).toEqual({
+        ero: "karto",
+        ...(lingvo === undefined ? {} : { label: "Karte" }),
+        props: {},
+      });
       expect(answer.matched).toEqual({ goal: "card", keyword: "karte", lingvo: "de" });
       expect(answer.regulo?.name).toBe("one-primary-per-container");
       // The boundary heading of the teksto (titel) stood in the attribute part: it is gone.
@@ -499,7 +508,7 @@ describe("suggest_ero: Nachlese 5 – the head word wins (N5-2), compounds (O-17
   it("N5-2: in English the head word before with/for/of/about wins too", () => {
     const answer = suggest("Card for a project with image and title", "en");
     expect(answer.action).toBeUndefined();
-    expect(answer.suggestion).toEqual({ ero: "karto", props: {} });
+    expect(answer.suggestion).toEqual({ ero: "karto", label: "Card", props: {} });
     expect(answer.matched).toEqual({ goal: "card", keyword: "card", lingvo: "en" });
   });
 
@@ -541,7 +550,11 @@ describe("suggest_ero: Nachlese 5 – the head word wins (N5-2), compounds (O-17
     "O-17 (A16): 'Projektkarten' is the karto – karten ends the compound (lingvo %s)",
     (lingvo) => {
       const answer = suggest("Projektkarten", lingvo);
-      expect(answer.suggestion).toEqual({ ero: "karto", props: {} });
+      expect(answer.suggestion).toEqual({
+        ero: "karto",
+        ...(lingvo === undefined ? {} : { label: "Karte" }),
+        props: {},
+      });
       expect(answer.matched).toEqual({ goal: "card", keyword: "karten", lingvo: "de" });
     },
   );

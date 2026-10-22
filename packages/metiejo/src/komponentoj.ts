@@ -25,9 +25,11 @@ import {
   type SkemoPartProperty,
   type SkemoPartSource,
   STATE_KEY,
+  skemoNomoKey,
   uzoIn,
   variantKeys,
 } from "@fundamento/modelo";
+import { nomoSpan, tekstoSpan } from "@fundamento/projekcioj";
 import { escapeHtml, jsonIsland, screenDocument } from "./html.js";
 import { markoLabel } from "./ident.js";
 import {
@@ -187,11 +189,13 @@ export function komponentoListOf(modelo: Modelo): KomponentoEntry[] {
       kind: "ero" as const,
       name: entry.ero.name,
       title: entry.ero.name,
+      key: `${entry.ero.id}/name`,
     })),
     ...(modelo.sxablonoj ?? []).map((entry) => ({
       kind: "sxablono" as const,
       name: entry.sxablono.name,
       title: entry.sxablono.name,
+      key: `${entry.sxablono.id}/name`,
     })),
   ];
 }
@@ -231,6 +235,9 @@ export interface Gebrauch {
 export interface KomponentoView {
   ref: KomponentoRef;
   title: string;
+  /** The keys of the names of the Lingvo-Schalter (Spec 026 ②): the name and the Skemo. */
+  nameKey: string;
+  skemoId: string;
   description: string;
   agordo: Agordo;
   anatomio: Anatomio[];
@@ -484,6 +491,8 @@ export function komponentoViewOf(
   return {
     ref,
     title: ref.name,
+    nameKey: `${ero?.ero.id ?? sxablono?.sxablono.id ?? ""}/name`,
+    skemoId: skemo.id,
     description: ero?.ero.description ?? sxablono?.sxablono.description ?? "",
     agordo,
     anatomio,
@@ -603,6 +612,11 @@ export interface KomponentoInput {
   betroffen?: string[];
 }
 
+/** An axis and its value in the spans of their names (Spec 026 ②): `emphasis=high`. */
+function axisValue(skemoId: string, axis: string, value: string): string {
+  return `${nomoSpan(skemoNomoKey(skemoId, "props", axis), escapeHtml(axis))}=${nomoSpan(skemoNomoKey(skemoId, "props", axis, value), escapeHtml(value))}`;
+}
+
 /** The matrix variants × states: a link per cell, the chosen one marked. */
 function matrixHtml(input: KomponentoInput): string {
   const { view, marko, kombination } = input;
@@ -611,23 +625,24 @@ function matrixHtml(input: KomponentoInput): string {
     view.ref.kind === "ero" ? { ...variant, [STATE_KEY]: state } : { ...variant };
   const isChosen = (cell: Combination): boolean =>
     Object.keys({ ...cell, ...view.zelo }).every((key) => cell[key] === view.zelo[key]);
-  const head = states
-    .map((state) => `<th scope="col">${escapeHtml(stateLabel(state))}</th>`)
-    .join("");
+  // Spec 026 ②: states, axes and values in the spans of their names.
+  const stateName = (state: string) =>
+    nomoSpan(skemoNomoKey(view.skemoId, "states", state), escapeHtml(state));
+  const head = states.map((state) => `<th scope="col">${stateName(state)}</th>`).join("");
   const rows = variants
     .map((variant) => {
       const label =
         axes.length === 0
-          ? view.title
-          : axes.map((axis) => `${axis}=${variant[axis] ?? ""}`).join(" · ");
+          ? nomoSpan(view.nameKey, escapeHtml(view.title))
+          : axes.map((axis) => axisValue(view.skemoId, axis, variant[axis] ?? "")).join(" · ");
       const cells = states
         .map((state) => {
           const cell = cellOf(variant, state);
           const chosen = isChosen(cell);
-          return `<td><a href="${komponentoUrl(marko.name, view.ref, kombination, cell)}"${chosen ? ' aria-current="true"' : ""}>${escapeHtml(stateLabel(state))}</a></td>`;
+          return `<td><a href="${komponentoUrl(marko.name, view.ref, kombination, cell)}"${chosen ? ' aria-current="true"' : ""}>${stateName(state)}</a></td>`;
         })
         .join("");
-      return `<tr><th scope="row">${escapeHtml(label)}</th>${cells}</tr>`;
+      return `<tr><th scope="row">${label}</th>${cells}</tr>`;
     })
     .join("");
   return `<table class="mt-matrico"><caption>Varianten × Zustände – ein Klick wählt die Zelle</caption><thead><tr><th scope="col">Variante</th>${head}</tr></thead><tbody>${rows}</tbody></table>`;
@@ -639,7 +654,7 @@ function gebrauchHtml(gebrauch: Gebrauch): string {
       ? ""
       : `<fm-titolo level="3">${escapeHtml(title)}</fm-titolo><ul>${items.map((item) => `<li><fm-teksto>${escapeHtml(item)}</fm-teksto></li>`).join("")}</ul>`;
   return [
-    `<fm-titolo level="2">Gebrauch</fm-titolo>`,
+    `<fm-titolo level="2">${tekstoSpan("gebrauch", "Gebrauch")}</fm-titolo>`,
     gebrauch.zweck === undefined ? "" : `<fm-teksto>${escapeHtml(gebrauch.zweck)}</fm-teksto>`,
     list(
       "Stattdessen",
@@ -669,7 +684,7 @@ export function komponentoScreen(input: KomponentoInput): string {
   const label = markoLabel(name, marko.agordo.etikedoj?.marko);
   const nav = STUDIO_PAGES.map(
     (entry) =>
-      `<a href="/studio/${encodeURIComponent(name)}/${entry.key}" data-page="${entry.key}">${escapeHtml(entry.title)}</a>`,
+      `<a href="/studio/${encodeURIComponent(name)}/${entry.key}" data-page="${entry.key}">${tekstoSpan(entry.key, escapeHtml(entry.title))}</a>`,
   ).join("");
   const toggles = (Object.keys(KOMBINATION_CHOICES) as (keyof Kombination)[])
     .map(
@@ -681,22 +696,30 @@ export function komponentoScreen(input: KomponentoInput): string {
           .join("")}</fm-elekto>`,
     )
     .join("");
-  const anatomy = `<fm-titolo level="2">Anatomie</fm-titolo><ul class="mt-anatomio">${view.anatomio
+  // Spec 026 ②: the name of a part in the span of its name, shown beside its identifier in German
+  // and English; in Esperanto the identifier alone.
+  const partName = (part: string) =>
+    `<strong class="mt-nur-traduko">${nomoSpan(skemoNomoKey(view.skemoId, "parts", part), escapeHtml(part))}</strong>`;
+  const anatomy = `<fm-titolo level="2">${tekstoSpan("anatomie", "Anatomie")}</fm-titolo><ul class="mt-anatomio">${view.anatomio
     .map(
       (part) =>
-        `<li><fm-teksto><strong>${escapeHtml(part.label)}</strong> <fm-teksto kind="code">${escapeHtml(part.part)}</fm-teksto> – ${escapeHtml(part.properties.map(propertyLabel).join(", "))}</fm-teksto></li>`,
+        `<li><fm-teksto>${partName(part.part)} <fm-teksto kind="code">${escapeHtml(part.part)}</fm-teksto> – ${escapeHtml(part.properties.map(propertyLabel).join(", "))}</fm-teksto></li>`,
     )
     .join("")}</ul>`;
   const zelo = Object.entries(view.zelo)
-    .map(([key, value]) => `${key}=${key === STATE_KEY ? stateLabel(value) : value}`)
+    .map(([key, value]) =>
+      key === STATE_KEY
+        ? `${escapeHtml(key)}=${nomoSpan(skemoNomoKey(view.skemoId, "states", value), escapeHtml(value))}`
+        : axisValue(view.skemoId, key, value),
+    )
     .join(" · ");
   const groups = view.groups
     .map(
       (group) =>
-        `<fm-faldilo open><span slot="summary">${escapeHtml(group.title)} <fm-teksto kind="code">${escapeHtml(group.key)}</fm-teksto></span><div class="mt-gruppe">${group.rows.map((row) => rowHtml(row, "semantik")).join("")}</div></fm-faldilo>`,
+        `<fm-faldilo open><span slot="summary">${partName(group.key)} <fm-teksto kind="code">${escapeHtml(group.key)}</fm-teksto></span><div class="mt-gruppe">${group.rows.map((row) => rowHtml(row, "semantik")).join("")}</div></fm-faldilo>`,
     )
     .join("");
-  const verhalten = `<fm-faldilo><span slot="summary">Verhalten</span><div class="mt-gruppe">${view.verhalten
+  const verhalten = `<fm-faldilo><span slot="summary">${tekstoSpan("verhalten", "Verhalten")}</span><div class="mt-gruppe">${view.verhalten
     .map(
       (entry) =>
         `<fm-teksto><strong>${escapeHtml(entry.name)}</strong> (${escapeHtml(entry.kind)}): ${escapeHtml(entry.values.join(" | ") || "–")}${entry.default === undefined ? "" : ` · Standard ${escapeHtml(entry.default)}`}${entry.description === undefined ? "" : `<br><fm-teksto kind="caption">${escapeHtml(entry.description)}</fm-teksto>`}</fm-teksto>`,
@@ -713,14 +736,14 @@ export function komponentoScreen(input: KomponentoInput): string {
 ${input.message === undefined ? "" : `<fm-avizo slot="notices" intent="success">${escapeHtml(input.message)}</fm-avizo>`}
 <fm-avizo slot="notices" intent="warning" id="mt-studio-meldung" hidden></fm-avizo>
 <fm-pagxo>
-<fm-titolo slot="title" level="1" focusable>${escapeHtml(view.title)}</fm-titolo>
+<fm-titolo slot="title" level="1" focusable>${nomoSpan(view.nameKey, escapeHtml(view.title))}</fm-titolo>
 <fm-teksto slot="subtitle">${escapeHtml(view.description)}</fm-teksto>
 ${expertLink}
 <section class="mt-studio">
 <div><fm-navigado label="Studio" page="${view.ref.kind}-${escapeHtml(view.ref.name)}" orientation="vertical">${nav}<a href="/marko/${encodeURIComponent(name)}/farbe" data-page="schnellstart">Schnellstart</a></fm-navigado>${komponentoNav(name, input.komponentoj, kombination, view.ref)}</div>
 <div class="mt-studio-vorschau"><div class="mt-zeile">${toggles}</div>${matrixHtml(input)}<iframe data-mt-vorschau data-mt-src="${previewSrc}" title="Vorschau der Komponente"></iframe>${anatomy}</div>
 <fm-formularo label="${escapeHtml(view.title)}" data-action="${komponentoUrl(name, view.ref, kombination, view.zelo)}">
-<fm-teksto kind="caption">Zelle: ${escapeHtml(zelo || "–")}</fm-teksto>
+<fm-teksto kind="caption">Zelle: ${zelo || "–"}</fm-teksto>
 ${groups}
 ${verhalten}
 <fm-butono slot="actions" type="submit" emphasis="medium">Übernehmen</fm-butono>

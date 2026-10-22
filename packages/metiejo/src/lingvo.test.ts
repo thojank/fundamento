@@ -38,21 +38,15 @@ const islandOf = (html: string) =>
   ) as Record<string, Record<string, string>>;
 
 describe("Studio and Schnellstart: the Lingvo switch (Spec 026 ②)", () => {
-  it("every screen has the switch Esperanto / Deutsch / English with Esperanto pressed, and the data island", () => {
+  it("every screen has the switch Esperanto / Deutsch / English with Esperanto chosen, and the data island", () => {
     for (const html of [
       studioScreen(exampleStudioInput("farbe")),
       screen(exampleScreenInput("farbe")),
       komponento,
     ]) {
-      expect(html).toContain('role="group" aria-label="lingvo"');
+      // M-2: an Ero of the screen, like the switches of the combination — no native control.
       expect(html).toContain(
-        '<button type="button" data-fm-lingvo="eo" aria-pressed="true">Esperanto</button>',
-      );
-      expect(html).toContain(
-        '<button type="button" data-fm-lingvo="de" aria-pressed="false">Deutsch</button>',
-      );
-      expect(html).toContain(
-        '<button type="button" data-fm-lingvo="en" aria-pressed="false">English</button>',
+        '<fm-elekto name="lingvo" value="eo" orientation="horizontal" size="small" data-fm-lingvo-wahl>lingvo<data slot="options" value="eo">Esperanto</data><data slot="options" value="de">Deutsch</data><data slot="options" value="en">English</data></fm-elekto>',
       );
       expect(html).toContain('<script type="application/json" id="fm-nomoj">');
       expect(html).toContain('data-fm-lingvo="eo"');
@@ -60,9 +54,7 @@ describe("Studio and Schnellstart: the Lingvo switch (Spec 026 ②)", () => {
   });
 
   it("the component page names the Ero, its parts and its states in spans with their keys; the island has their German and English names", () => {
-    expect(komponento).toContain(
-      `<span data-fm-nomo="${butono?.ero.id}/name" data-fm-nomo-kun-eo>butono</span>`,
-    );
+    expect(komponento).toContain(`<span data-fm-nomo="${butono?.ero.id}/name">butono</span>`);
     expect(komponento).toContain(
       `<span data-fm-nomo="${butono?.skemo.id}/parts/focus-ring">focus-ring</span>`,
     );

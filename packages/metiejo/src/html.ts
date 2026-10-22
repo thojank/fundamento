@@ -5,6 +5,9 @@
 // The layout below names tokens only. The client script posts the values of a formularo, sends a
 // live value to the draft and refreshes the preview; it computes nothing. Pure.
 
+import { LINGVO_BUTTONS, LINGVO_SKRIPTO } from "@fundamento/projekcioj";
+import { nomojIsland } from "./lingvo.js";
+
 export const escapeHtml = (text: string): string =>
   text.replace(
     /[&<>"']/g,
@@ -18,6 +21,8 @@ export const jsonIsland = (value: unknown): string =>
   JSON.stringify(value).replaceAll("</", "<\\/").replaceAll("<!--", "<\\!--");
 
 export const LAYOUT_CSS = `:root { color-scheme: light dark; }
+.mt-lingvo { display: flex; justify-content: flex-end; padding: 4px 8px; font: 12px/1.4 system-ui, sans-serif; }
+[data-fm-lingvo="eo"] .mt-nur-traduko { display: none; }
 body { margin: 0; font-family: var(--fm-typography-body-1-font-family); background-color: var(--fm-color-background-canvas); color: var(--fm-color-text-default); }
 .mt-sxtupo { display: grid; grid-template-columns: minmax(18rem, 28rem) minmax(0, 1fr); gap: var(--fm-spacing-xlarge); align-items: start; }
 .mt-sxtupo[data-mt-plena] { grid-template-columns: minmax(0, 1fr); }
@@ -77,7 +82,26 @@ h2 { margin: 0; font-family: var(--fm-typography-headline-3-font-family); font-s
  * draft and refreshes the preview frame, asks for the check in plain words, applies a suggestion,
  * uploads a font file. No value of a brand is computed here.
  */
-export const CLIENT_SCRIPT = `
+export const CLIENT_SCRIPT = `${LINGVO_SKRIPTO}
+// Spec 026 ②: the Lingvo-Schalter — the choice stays per browser where storage is allowed.
+const fmNomoj = JSON.parse(document.getElementById("fm-nomoj")?.textContent || "{}");
+let fmLingvoNun = "eo";
+try {
+  const stored = localStorage.getItem("fundamento-lingvo");
+  if (stored === "de" || stored === "en") fmLingvoNun = stored;
+} catch {}
+fmLingvo(fmLingvoNun, fmNomoj, fmNomoj.tekstoj);
+for (const wahl of document.querySelectorAll("[data-fm-lingvo-wahl]")) {
+  if (wahl.getAttribute("value") !== fmLingvoNun) wahl.setAttribute("value", fmLingvoNun);
+  wahl.addEventListener("change", () => {
+    fmLingvoNun = ["eo", "de", "en"].includes(wahl.value) ? wahl.value : "eo";
+    try {
+      localStorage.setItem("fundamento-lingvo", fmLingvoNun);
+    } catch {}
+    fmLingvo(fmLingvoNun, fmNomoj, fmNomoj.tekstoj);
+  });
+}
+
 const root = document.documentElement;
 const marko = root.getAttribute("data-mt-marko");
 const sxtupo = root.getAttribute("data-mt-sxtupo");
@@ -402,10 +426,21 @@ const attributes = (entries: Readonly<Record<string, string>>): string =>
     .map(([key, value]) => ` ${key}="${escapeHtml(value)}"`)
     .join("");
 
-/** A screen: komuna at the root, the stylesheet and the Eroj from the server, the client script. */
+/**
+ * The Lingvo-Schalter of a screen (Spec 026 ②): the choice of the Vitrino as an Ero of the screen —
+ * a radio group like the Studio's switches of the combination (M-2: no native controls).
+ */
+const LINGVO_WAHL = `<fm-elekto name="lingvo" value="eo" orientation="horizontal" size="small" data-fm-lingvo-wahl>lingvo${LINGVO_BUTTONS.map(
+  (button) => `<data slot="options" value="${button.lingvo}">${button.label}</data>`,
+).join("")}</fm-elekto>`;
+
+/**
+ * A screen: komuna at the root, the stylesheet and the Eroj from the server, the client script.
+ * Spec 026 ②: the Lingvo-Schalter above the body and the names the body shows in its data island.
+ */
 export function screenDocument(doc: ScreenDocument): string {
   return `<!doctype html>
-<html lang="de" data-fm-aspekto="komuna"${attributes(doc.root)}>
+<html lang="de" data-fm-lingvo="eo" data-fm-aspekto="komuna"${attributes(doc.root)}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -416,7 +451,9 @@ export function screenDocument(doc: ScreenDocument): string {
 <script type="module" src="/metiejo.js"></script>
 </head>
 <body>
+<div class="mt-lingvo">${LINGVO_WAHL}</div>
 ${doc.body}
+<script type="application/json" id="fm-nomoj">${jsonIsland(nomojIsland(doc.body))}</script>
 </body>
 </html>
 `;

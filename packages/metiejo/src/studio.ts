@@ -25,6 +25,7 @@ import {
   srgbComponentsOf,
   WCAG2_METRIC,
 } from "@fundamento/modelo";
+import { nomoSpan, tekstoSpan } from "@fundamento/projekcioj";
 import { escapeHtml, jsonIsland, screenDocument } from "./html.js";
 import { markoLabel } from "./ident.js";
 import type { MarkoView } from "./sxtupoj.js";
@@ -138,6 +139,8 @@ export interface KomponentoRef {
 export interface KomponentoEntry extends KomponentoRef {
   /** The title as the navigation shows it: the name (the identifiers stay canonical, Art. II). */
   title: string;
+  /** The key of its name for the Lingvo-Schalter (Spec 026 ②). */
+  key?: string;
 }
 
 /** One layer of a shadow as the Studio sets it (O-4): the measures and the colour. */
@@ -772,10 +775,10 @@ export function komponentoNav(
   const links = komponentoj
     .map(
       (entry) =>
-        `<a href="${komponentoUrl(marko, entry, kombination)}" data-page="${entry.kind}-${entry.name}"${current !== undefined && current.kind === entry.kind && current.name === entry.name ? ' aria-current="page"' : ""}>${escapeHtml(entry.title)}</a>`,
+        `<a href="${komponentoUrl(marko, entry, kombination)}" data-page="${entry.kind}-${entry.name}"${current !== undefined && current.kind === entry.kind && current.name === entry.name ? ' aria-current="page"' : ""}>${nomoSpan(entry.key, escapeHtml(entry.title))}</a>`,
     )
     .join("");
-  return `<fm-faldilo class="mt-komponentoj"${current === undefined ? "" : " open"}><span slot="summary">Komponenten</span><nav aria-label="Komponenten" class="mt-komponentoj-liste">${links}</nav></fm-faldilo>`;
+  return `<fm-faldilo class="mt-komponentoj"${current === undefined ? "" : " open"}><span slot="summary">${tekstoSpan("komponenten", "Komponenten")}</span><nav aria-label="Komponenten" class="mt-komponentoj-liste">${links}</nav></fm-faldilo>`;
 }
 
 const pageUrl = (name: string, page: StudioPage, kombination: Kombination): string => {
@@ -936,7 +939,7 @@ export function studioScreen(input: StudioInput): string {
   const label = markoLabel(name, input.marko.agordo.etikedoj?.marko);
   const nav = STUDIO_PAGES.map(
     (entry) =>
-      `<a href="${pageUrl(name, entry.key, input.kombination)}" data-page="${entry.key}">${escapeHtml(entry.title)}</a>`,
+      `<a href="${pageUrl(name, entry.key, input.kombination)}" data-page="${entry.key}">${tekstoSpan(entry.key, escapeHtml(entry.title))}</a>`,
   ).join("");
   const toggles = (Object.keys(KOMBINATION_CHOICES) as (keyof Kombination)[])
     .map(
@@ -968,7 +971,7 @@ export function studioScreen(input: StudioInput): string {
 ${input.message === undefined ? "" : `<fm-avizo slot="notices" intent="success">${escapeHtml(input.message)}</fm-avizo>`}
 <fm-avizo slot="notices" intent="warning" id="mt-studio-meldung" hidden></fm-avizo>
 <fm-pagxo>
-<fm-titolo slot="title" level="1" focusable>${escapeHtml(page.title)}</fm-titolo>
+<fm-titolo slot="title" level="1" focusable>${tekstoSpan(page.key, escapeHtml(page.title))}</fm-titolo>
 <fm-teksto slot="subtitle">${escapeHtml(page.hint)}</fm-teksto>
 ${expertLink}
 <section class="mt-studio">

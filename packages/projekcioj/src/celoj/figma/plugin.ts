@@ -1522,6 +1522,13 @@ async function applyCollections() {
     const found = byName.get(spec.name);
     const collection = found ?? figma.variables.createVariableCollection(spec.name);
     collections.set(spec.name, collection);
+    // Spec 026 ②: the display name of the Dimensio in the build's language. Figma's Plugin API
+    // has no description of a collection; the name stays the identifier, the display name stands
+    // as shared plugin data, written only when it does not hold yet (a second run writes nothing).
+    if (typeof spec.description === "string" && typeof collection.setSharedPluginData === "function" &&
+        collection.getSharedPluginData("fundamento", "label") !== spec.description) {
+      collection.setSharedPluginData("fundamento", "label", spec.description);
+    }
     const ids = {};
     // Die Grenze vor dem ersten Versuch, mit Zahlen (F27): Jeder Aspekto des Modelo ist ein Modus,
     // und ein Plan, der mehr mitbringt, als die Sammlung tragen kann, ist nicht der Fehler der
@@ -6626,13 +6633,18 @@ function shortHash(text: string): string {
 export function pluginManifest(plan: FigmaPlan, build: string = UNKNOWN_BUILD): string {
   const brands = brandsOf(plan);
   const reference = brands.length === 1 && brands[0] === "komuna";
+  // Spec 026 ②: a build in German or English is a plugin of its own beside the Esperanto build of
+  // the same brands (F-13: Figma runs the code imported first under one id).
+  const lingvo = plan.lingvo;
   return `${JSON.stringify(
     {
-      name: `Fundamento ${plan.fundamento} (${build}${brands.length === 0 ? "" : ` · ${brands.join(", ")}`}): apply plan`,
+      name: `Fundamento ${plan.fundamento} (${build}${brands.length === 0 ? "" : ` · ${brands.join(", ")}`}${lingvo === undefined ? "" : ` · ${lingvo}`}): apply plan`,
       id:
-        reference || brands.length === 0
-          ? PLUGIN_ID
-          : `${PLUGIN_ID}-${shortHash(brands.join(","))}`,
+        lingvo !== undefined
+          ? `${PLUGIN_ID}-${shortHash(`${brands.join(",")}|${lingvo}`)}`
+          : reference || brands.length === 0
+            ? PLUGIN_ID
+            : `${PLUGIN_ID}-${shortHash(brands.join(","))}`,
       api: "1.0.0",
       main: "code.js",
       editorType: ["figma"],

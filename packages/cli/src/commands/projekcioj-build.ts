@@ -17,7 +17,7 @@ const DEFAULT_OUT = ".fundamento/projekcioj";
 
 const HELP = `${COMMAND_LINE}: Validate a Modelo and generate every projection.
 
-Usage: ${COMMAND_LINE} [--config <file> | --fixture <dir>] [--out <dir>] [--celo <name>]
+Usage: ${COMMAND_LINE} [--config <file> | --fixture <dir>] [--out <dir>] [--celo <name>] [--lingvo <eo|de|en>]
 
 Writes one folder per Celo and projekcioj.json, the manifest with the SHA-256 of every file.
 Without --config, builds the Modelo of this repository with its reference Aspekto komuna.
@@ -33,6 +33,9 @@ Options:
   --build <id>     The state the build comes from, named by the Figma plugin in every run.
                    Default: the commit of this Fundamento checkout, "-dirty" when the working
                    tree has changes; "unbekannt" outside a checkout
+  --lingvo <name>  The language of the display names in Figma: eo (default), de or en. The
+                   component names stay Esperanto; the description of every component and the
+                   collection of every Dimensio name the display name (Spec 026)
   --bazo <file>    A measurement snapshot of another state (fm modelo mezuroj); the Vitrino
                    then shows the change against it, pair by pair
   -h, --help       Show this help
@@ -75,6 +78,7 @@ async function run(args: readonly string[], context: CliContext): Promise<number
       bazo: { type: "string", multiple: true },
       build: { type: "string" },
       celo: { type: "string", multiple: true },
+      lingvo: { type: "string" },
     },
     COMMAND_LINE,
   );
@@ -116,6 +120,12 @@ async function run(args: readonly string[], context: CliContext): Promise<number
           .map((name) => name.trim()),
       )
     : undefined;
+  const lingvo = typeof values.lingvo === "string" ? values.lingvo : "eo";
+  if (lingvo !== "eo" && lingvo !== "de" && lingvo !== "en") {
+    throw new UsageError(`--lingvo takes eo, de, en; got "${lingvo}".`, [
+      "Esperanto (eo) is the default; de and en name the display names in Figma.",
+    ]);
+  }
   const build = typeof values.build === "string" ? values.build : checkoutBuild();
   let result: Awaited<ReturnType<typeof buildProjekcioj>>;
   try {
@@ -125,6 +135,7 @@ async function run(args: readonly string[], context: CliContext): Promise<number
       ...(bazo === undefined ? {} : { bazo }),
       ...(build === undefined ? {} : { build }),
       ...(celoj === undefined ? {} : { celoj }),
+      ...(lingvo === "eo" ? {} : { lingvo }),
     });
   } catch (error) {
     context.stderr(`${error instanceof Error ? error.message : String(error)}\n`);

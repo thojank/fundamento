@@ -24,7 +24,9 @@ import {
   isPositionKeyword,
   type LoadedEro,
   type LoadedSxablono,
+  labelOf,
   type Modelo,
+  nomo,
   nomRegulo,
   PARITY_ALPHA_VARIES,
   PARITY_NOT_DRAWN,
@@ -96,6 +98,12 @@ export interface FigmaVariable {
 
 export interface FigmaCollection {
   name: string;
+  /**
+   * The display name of the Dimensio in the build's language (Spec 026 ②, `--lingvo`); absent in
+   * Esperanto. The Plugin API has no description of a collection: the plugin keeps it as shared
+   * plugin data (fundamento/label).
+   */
+  description?: string;
   /**
    * The modes, the default first: Figma's default mode of a collection is its first mode
    * (`defaultModeId` is read-only), so the order decides what "Automatisch" shows (F19).
@@ -1552,6 +1560,8 @@ export function uzoMarkdown(uzo: Uzo, reguloj: readonly Regulo[]): string {
 
 export interface FigmaPlan {
   fundamento: string;
+  /** The language of the display names (Spec 026 ②, `--lingvo`); absent in Esperanto. */
+  lingvo?: "de" | "en";
   /**
    * The one font the plugin falls back to when the model's font is not in the file — named, in
    * the same style, and reported as a warning (Maintainer, 2026-09-21).
@@ -3545,6 +3555,7 @@ export const FIGMA_CELO: Celo = {
             ),
           }),
     };
+    if (input.lingvo === "de" || input.lingvo === "en") inLingvo(plan, modelo, input.lingvo);
     return [
       { path: "figma/plan.json", text: `${JSON.stringify(plan, null, 2)}\n` },
       { path: "figma/plugin/manifest.json", text: pluginManifest(plan, input.build) },
@@ -3552,6 +3563,40 @@ export const FIGMA_CELO: Celo = {
     ];
   },
 };
+
+/**
+ * The display names of the build's language (Spec 026 ②): the component names stay Esperanto
+ * (Art. II, Code Connect); the description of every set and Sxablono names its display name first
+ * („Schieberegler (glitilo)“), the Markdown of its Uzo too, and every collection of a Dimensio
+ * carries the name of the Dimensio. Names only, no identifier changes.
+ */
+function inLingvo(plan: FigmaPlan, modelo: Modelo, lingvo: "de" | "en"): void {
+  plan.lingvo = lingvo;
+  const first = (label: string, name: string, text: string | undefined) =>
+    `${label} (${name})${text === undefined || text === "" ? "" : `\n\n${text}`}`;
+  for (const component of plan.components) {
+    const label = labelOf(modelo, "ero", component.set, lingvo);
+    component.description = first(label, component.set, component.description);
+    if (component.uzo !== undefined)
+      component.uzo = {
+        ...component.uzo,
+        markdown: first(label, component.set, component.uzo.markdown),
+      };
+  }
+  for (const sxablono of plan.sxablonoj ?? []) {
+    sxablono.description = first(
+      labelOf(modelo, "sxablono", sxablono.name, lingvo),
+      sxablono.name,
+      sxablono.description,
+    );
+  }
+  for (const collection of plan.collections) {
+    const dimensio = modelo.dimensioj.find((entry) => entry.name === collection.name);
+    if (dimensio === undefined) continue;
+    const name = nomo(modelo, lingvo, `${dimensio.id}/name`, dimensio.name);
+    if (name !== dimensio.name) collection.description = name;
+  }
+}
 
 function sortVariables(variables: readonly FigmaVariable[]): FigmaVariable[] {
   return [...variables].sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));

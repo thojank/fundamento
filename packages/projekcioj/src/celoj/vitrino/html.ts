@@ -5,7 +5,13 @@
 
 import type { Calibration, IkonoGewichte } from "@fundamento/agordilo";
 import type { ModeloFiles } from "@fundamento/modelo";
-import { VITRINO_SURFACE, type VitrinoDatumoj } from "./datumoj.js";
+import { lingvoSwitch, nomoSpan, tekstoSpan } from "../../lingvo.js";
+import {
+  VITRINO_SURFACE,
+  VITRINO_TEKSTOJ,
+  type VitrinoDatumoj,
+  type VitrinoNomoj,
+} from "./datumoj.js";
 import { vitrinoSkripto } from "./skripto.js";
 
 /**
@@ -99,13 +105,14 @@ tr[data-fm-superskribita="true"] th { text-decoration: underline; }
 function switcher(datumoj: VitrinoDatumoj, werkstatt: boolean): string {
   const dimensioj = datumoj.dimensioj
     .map((dimensio) => {
+      const keys = datumoj.nomoj.dimensioj[dimensio.name];
       const buttons = dimensio.valoroj
         .map(
           (valoro) =>
-            `<button type="button" data-fm-switch="${escapeHtml(dimensio.name)}" data-fm-valoro="${escapeHtml(valoro)}" aria-pressed="${valoro === dimensio.default}">${escapeHtml(valoro)}</button>`,
+            `<button type="button" data-fm-switch="${escapeHtml(dimensio.name)}" data-fm-valoro="${escapeHtml(valoro)}" aria-pressed="${valoro === dimensio.default}">${nomoSpan(keys?.valoroj[valoro], escapeHtml(valoro))}</button>`,
         )
         .join("");
-      return `<div class="fm-group" role="group" aria-label="${escapeHtml(dimensio.name)}"><span>${escapeHtml(dimensio.name)}</span>${buttons}</div>`;
+      return `<div class="fm-group" role="group" aria-label="${escapeHtml(dimensio.name)}"><span>${nomoSpan(keys?.key, escapeHtml(dimensio.name))}</span>${buttons}</div>`;
     })
     .join("");
   const aspektoj = datumoj.aspektoj
@@ -117,7 +124,8 @@ function switcher(datumoj: VitrinoDatumoj, werkstatt: boolean): string {
   // Spec 016 ② (G7): the mode — Ansehen, or the Werkstatt where a brand is derived live. The
   // mode stands in the fragment (modus=werkstatt), so a link leads straight into the workshop.
   const modus = `<div class="fm-group" role="group" aria-label="Modus"><span>Modus</span><button type="button" data-fm-modus="ansehen" aria-pressed="true">Ansehen</button><button type="button" data-fm-modus="werkstatt" aria-pressed="false"${werkstatt ? "" : " disabled"}>Werkstatt</button></div>`;
-  return `${modus}<div class="fm-group" role="group" aria-label="aspekto"><span>aspekto</span>${aspektoj}</div>${dimensioj}
+  // Spec 026 ②: the Lingvo-Schalter first — Esperanto, Deutsch, English.
+  return `${lingvoSwitch()}${modus}<div class="fm-group" role="group" aria-label="aspekto"><span>${nomoSpan(datumoj.nomoj.dimensioj.aspekto?.key, "aspekto")}</span>${aspektoj}</div>${dimensioj}
 <div class="fm-group"><button type="button" id="fm-vitrino-komparo-switch">Zur Gegenüberstellung</button></div>`;
 }
 
@@ -131,8 +139,45 @@ const section = (
   body: string,
   focusable = false,
   modusOnly?: "ansehen" | "werkstatt",
+  titleHtml?: string,
 ): string =>
-  `<section id="fm-vitrino-${id}"${focusable ? ' tabindex="-1"' : ""}${modusOnly === undefined ? "" : ` data-fm-modus-only="${modusOnly}"${modusOnly === "werkstatt" ? " hidden" : ""}`}><h2>${escapeHtml(title)}</h2>${body}</section>`;
+  `<section id="fm-vitrino-${id}"${focusable ? ' tabindex="-1"' : ""}${modusOnly === undefined ? "" : ` data-fm-modus-only="${modusOnly}"${modusOnly === "werkstatt" ? " hidden" : ""}`}><h2>${titleHtml ?? (id in VITRINO_TEKSTOJ ? tekstoSpan(id, escapeHtml(title)) : escapeHtml(title))}</h2>${body}</section>`;
+
+/**
+ * The heads of an Ero's tables with their names (Spec 026 ②): a column that is a state or a prop
+ * of the Skemo, a row of values (`high · neutral · small`, `kind=time`) — each in the span of its
+ * name. A head of the Vitrino's own words stays as it is.
+ */
+function withNomoj(markup: string, keys: VitrinoNomoj["eroj"][string] | undefined): string {
+  if (keys === undefined) return markup;
+  const valueKey = (value: string, prop?: string): string | undefined => {
+    if (prop !== undefined) return keys.values[prop]?.[value];
+    for (const values of Object.values(keys.values))
+      if (values[value] !== undefined) return values[value];
+    return undefined;
+  };
+  const head = (text: string) => nomoSpan(keys.states[text] ?? keys.props[text], text);
+  const row = (text: string) =>
+    text
+      .split(" · ")
+      .map((part) => {
+        const at = part.indexOf("=");
+        if (at === -1) return nomoSpan(valueKey(part) ?? keys.states[part], part);
+        const prop = part.slice(0, at);
+        const value = part.slice(at + 1);
+        return `${nomoSpan(keys.props[prop], prop)}=${nomoSpan(valueKey(value, prop), value)}`;
+      })
+      .join(" · ");
+  return markup
+    .replace(
+      /<th scope="col">([a-z0-9-]+)<\/th>/g,
+      (_, text: string) => `<th scope="col">${head(text)}</th>`,
+    )
+    .replace(
+      /<th scope="row">([a-z0-9 ·=-]+)<\/th>/g,
+      (_, text: string) => `<th scope="row">${row(text)}</th>`,
+    );
+}
 
 /** `butono` → `Butono`, for the question of a section. */
 const capitalised = (name: string): string => name.charAt(0).toUpperCase() + name.slice(1);
@@ -360,7 +405,7 @@ export function vitrinoHtml({
     )
     .join("");
   return `<!doctype html>
-<html lang="de" data-fm-aspekto="${escapeHtml(datumoj.aspektoj[0] ?? "")}"${attributes}>
+<html lang="de" data-fm-lingvo="eo" data-fm-aspekto="${escapeHtml(datumoj.aspektoj[0] ?? "")}"${attributes}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -381,7 +426,16 @@ ${section("werkstatt", "Werkstatt", werkstattShell(werkstatt), true, "werkstatt"
 ${section("paletroj", "Paletten", paletroj(datumoj), false, "ansehen")}
 ${section("roloj", "Flächen, Text, Status und Aktionen", roles, false, "ansehen")}
 ${Object.entries(datumoj.eroj)
-  .map(([ero, markup]) => section(ero, ero, markup))
+  .map(([ero, markup]) =>
+    section(
+      ero,
+      ero,
+      withNomoj(markup, datumoj.nomoj.eroj[ero]),
+      false,
+      undefined,
+      nomoSpan(datumoj.nomoj.eroj[ero]?.key, escapeHtml(ero)),
+    ),
+  )
   .join("\n")}
 ${
   Object.keys(datumoj.sxablonoj).length === 0
@@ -392,7 +446,7 @@ ${
         Object.entries(datumoj.sxablonoj)
           .map(
             ([name, markup]) =>
-              `<h3>${escapeHtml(name)}</h3><div class="fm-breiten">${markup}</div>`,
+              `<h3>${nomoSpan(datumoj.nomoj.sxablonoj[name], escapeHtml(name))}</h3><div class="fm-breiten">${markup}</div>`,
           )
           .join(""),
       )

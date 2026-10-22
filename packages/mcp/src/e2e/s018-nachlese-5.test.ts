@@ -67,7 +67,7 @@ describe("the Gvidanto dialogs of the acceptance of Nachlese 4 (Nachlese 5 ②)"
     });
     expect(answer.action).toBeUndefined();
     expect(answer.candidates).toBeUndefined();
-    expect(answer.suggestion).toEqual({ ero: "karto", props: {} });
+    expect(answer.suggestion).toEqual({ ero: "karto", label: "Karte", props: {} });
     expect(answer.matched).toEqual({ goal: "card", keyword: "karte", lingvo: "de" });
     expect(answer.kialo).toBe(kialoOf("one-primary-per-container"));
   });
@@ -77,7 +77,7 @@ describe("the Gvidanto dialogs of the acceptance of Nachlese 4 (Nachlese 5 ②)"
       goal: "Projektkarten",
       lingvo: "de",
     });
-    expect(answer.suggestion).toEqual({ ero: "karto", props: {} });
+    expect(answer.suggestion).toEqual({ ero: "karto", label: "Karte", props: {} });
     expect(answer.matched).toEqual({ goal: "card", keyword: "karten", lingvo: "de" });
   });
 

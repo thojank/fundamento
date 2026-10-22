@@ -36,7 +36,11 @@ describe("the example dialogs of Spec 020 ③", () => {
       goal: "Zeig den Befehl zum Starten der Prüfung so an, dass man ihn kopieren kann.",
       lingvo: "de",
     });
-    expect(answer.suggestion).toEqual({ ero: "kodbloko", props: { copyable: true } });
+    expect(answer.suggestion).toEqual({
+      ero: "kodbloko",
+      label: "Codeblock",
+      props: { copyable: true },
+    });
     const brief = await output<Brief>(client, "get_ero", { name: "kodbloko", brief: true });
     expect(brief.ero).toBe("kodbloko");
   });

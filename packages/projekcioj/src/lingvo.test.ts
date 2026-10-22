@@ -10,6 +10,8 @@ import { defaultModeloSource } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { CELOJ, type CeloInput, celoInputOf } from "./build.js";
 import { FIGMA_CELO, type FigmaPlan } from "./celoj/figma/figma.js";
+import { MODEL_FONTS } from "./celoj/figma/plugin-test-helpers.js";
+import { figmaDouble } from "./celoj/figma/test-doubles/plugin.js";
 import { vitrinoDatumoj } from "./celoj/vitrino/datumoj.js";
 import { vitrinoHtml } from "./celoj/vitrino/html.js";
 
@@ -59,6 +61,38 @@ describe("Figma: the display name of the build's language in the descriptions (S
   it("the Sxablonoj name their display name first too", () => {
     const sxelo = (plan: typeof eo) => plan.sxablonoj?.find((entry) => entry.name === "sxelo");
     expect(sxelo(de)?.description.startsWith("Anwendungsrahmen (sxelo)\n\n")).toBe(true);
+  });
+
+  it("the plugin keeps the name of the Dimensio with the collection (the API has no description of a collection) and writes nothing on a second run", async () => {
+    const code =
+      FIGMA_CELO.generate({ ...input, lingvo: "de" } as CeloInput).find(
+        (file) => file.path === "figma/plugin/code.js",
+      )?.text ?? "";
+    const double = figmaDouble({ fonts: MODEL_FONTS });
+    const run = () =>
+      new Function("figma", "options", `${code}\nreturn applyPlan(options);`)(
+        double.figma,
+        undefined,
+      );
+    await run();
+    const aspekto = double.collections.find((collection) => collection.name === "aspekto");
+    expect(aspekto?.getSharedPluginData("fundamento", "label")).toBe("Marke");
+    const writes = double.counts.writes;
+    await run();
+    expect(double.counts.writes).toBe(writes);
+  }, 120_000);
+
+  it("a German build is a plugin of its own: its id and name name the language beside the brands (F-13)", () => {
+    const manifest = (lingvo?: "de") =>
+      JSON.parse(
+        FIGMA_CELO.generate({
+          ...input,
+          ...(lingvo === undefined ? {} : { lingvo }),
+        } as CeloInput).find((file) => file.path === "figma/plugin/manifest.json")?.text ?? "{}",
+      ) as { id: string; name: string };
+    expect(manifest().id).toBe("fundamento-apply-plan");
+    expect(manifest("de").id).toMatch(/^fundamento-apply-plan-[0-9a-f]{8}$/);
+    expect(manifest("de").name).toContain("· komuna · de): apply plan");
   });
 
   it("Esperanto is the default: the plan without lingvo is the plan with lingvo eo", () => {

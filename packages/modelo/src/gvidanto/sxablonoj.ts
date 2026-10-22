@@ -11,18 +11,31 @@ import type {
   SxablonoSkemo,
   SxablonoUzo,
 } from "../contracts/modelo.js";
+import { labelBeside } from "../lingvo/nomoj.js";
 import { type Lingvo, uzoIn } from "../lingvo/tradukoj.js";
 import { nearestNames } from "./nearest.js";
 
 export interface ListSxablonojOutput {
-  sxablonoj: { id: string; name: string; kind: string; description: string; regions: string[] }[];
+  sxablonoj: {
+    id: string;
+    name: string;
+    /** The display name (Spec 026 ②), only with lingvo. */
+    label?: string;
+    kind: string;
+    description: string;
+    regions: string[];
+  }[];
 }
 
-export function listSxablonoj(modelo: Modelo): ListSxablonojOutput {
+export function listSxablonoj(
+  modelo: Modelo,
+  input: { lingvo?: Lingvo } = {},
+): ListSxablonojOutput {
   return {
     sxablonoj: (modelo.sxablonoj ?? []).map((entry) => ({
       id: entry.sxablono.id,
       name: entry.sxablono.name,
+      ...labelBeside(modelo, "sxablono", entry.sxablono.name, input.lingvo),
       kind: entry.sxablono.kind,
       description: entry.sxablono.description,
       regions: entry.skemo.regions.map((region) => region.name),
@@ -50,7 +63,7 @@ export interface SxablonoBrief {
 }
 
 export interface SxablonoFull {
-  sxablono: LoadedSxablono["sxablono"];
+  sxablono: LoadedSxablono["sxablono"] & { label?: string };
   skemo: SxablonoSkemo;
   uzo?: SxablonoUzo;
 }
@@ -111,7 +124,11 @@ export function getSxablono(modelo: Modelo, input: GetSxablonoInput): GetSxablon
   return {
     ok: true,
     output: {
-      sxablono: entry.sxablono,
+      sxablono: {
+        ...entry.sxablono,
+        // Spec 026 ②: the display name beside the name, with lingvo.
+        ...labelBeside(modelo, "sxablono", entry.sxablono.name, input.lingvo),
+      },
       skemo: entry.skemo,
       ...(uzo === undefined ? {} : { uzo }),
     },

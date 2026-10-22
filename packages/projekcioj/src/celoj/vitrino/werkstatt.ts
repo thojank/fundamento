@@ -1472,6 +1472,12 @@ ${groupOf("ikonoj", "Icons", `<fm-elektilo id="fm-werkstatt-ikono-gewicht" value
         h5.textContent = heading.textContent;
         heading.replaceWith(h5);
       }
+      // Spec 026 ②: the sides compare looks, not names — the names stand as plain text, as before
+      // the Lingvo-Schalter (a span in a narrow side's row head let axe read the overflowing
+      // button of the other side as its ground).
+      for (const name of template.content.querySelectorAll("[data-fm-nomo]")) {
+        name.replaceWith(document.createTextNode(name.textContent ?? ""));
+      }
       draft.append(template.content.cloneNode(true));
       reference.append(template.content.cloneNode(true));
     }
