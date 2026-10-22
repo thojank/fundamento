@@ -130,9 +130,9 @@ describe("the date dialogs of the spec (Spec 025 ②)", () => {
     expect(clean.valid).toBe(true);
   });
 
-  it("lists thirty-six Eroj; the brief of the datelektilo names mode and expanded as its axes and the label as its duty; get_ero names its events", async () => {
+  it("lists forty Eroj; the brief of the datelektilo names mode and expanded as its axes and the label as its duty; get_ero names its events", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
-    expect(listed.eroj).toHaveLength(36);
+    expect(listed.eroj).toHaveLength(40);
     expect(listed.eroj.map((ero) => ero.name)).toContain("datelektilo");
     const brief = await output<Brief>(client, "get_ero", { name: "datelektilo", brief: true });
     expect(brief.axes.map((axis) => axis.name)).toEqual(["mode", "expanded"]);

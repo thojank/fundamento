@@ -429,7 +429,7 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "glitilo", created: 24, updated: 0 },
         // Spec 014 ②: the ikono has name × size × intent = 285 variants in one state (Spec 015
         // ②: seventeen names with upload; Spec 025 ①: nineteen with add and subtract).
-        { set: "ikono", created: 300, updated: 0 },
+        { set: "ikono", created: 315, updated: 0 },
         // Spec 011 ③: the insigno has intent × size = 10 variants in one state.
         { set: "insigno", created: 10, updated: 0 },
         // Spec 009: the kampo has size × state = 18 variants.

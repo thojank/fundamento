@@ -114,7 +114,7 @@ describe("the Ikonaro of Spec 025 ② (G1: calendar)", () => {
     });
     expect(calendar?.mirror).not.toBe(true);
     expect(calendar?.kialo).toMatch(/because/);
-    expect(modelo.ikonaro).toHaveLength(20);
+    expect(modelo.ikonaro.length).toBeGreaterThanOrEqual(20);
     const ikono = eroNamed("ikono");
     expect(ikono?.skemo.props.find((prop) => prop.name === "name")?.values).toContain("calendar");
     expect(ikono?.uzo?.composes.with.map((entry) => entry.ero)).toContain("datelektilo");

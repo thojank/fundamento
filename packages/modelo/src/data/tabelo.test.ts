@@ -30,9 +30,9 @@ const suggest = (goal: string) => {
 };
 
 describe("tabelo in the repo Modelo (section ④, G1, G2, E10)", () => {
-  it("lives in data/eroj/tabelo/skemo.json, thirty-third of thirty-six Eroj", () => {
+  it("lives in data/eroj/tabelo/skemo.json, thirty-sixth of forty Eroj", () => {
     expect(tabelo?.file).toBe("modelo/data/eroj/tabelo/skemo.json");
-    expect(modelo.eroj[32]?.ero.name).toBe("tabelo");
+    expect(modelo.eroj[35]?.ero.name).toBe("tabelo");
   });
 
   it("has density, caption-hidden, sort (the column) and direction as props; the states of the sort button", () => {

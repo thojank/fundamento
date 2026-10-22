@@ -535,8 +535,8 @@ test("the Ikonaro grid, the apartigilo and the saltligilo are upgraded in their 
   await open(page);
   const icons = page.locator("#fm-vitrino-ikono fm-ikono");
   // Spec 015 ①: sixteen names (chevron-left), three sizes each, and the four status icons.
-  // Spec 015 ②: seventeen (upload); Spec 025 ①: nineteen (add, subtract); Spec 025 ②: twenty (calendar).
-  await expect(icons).toHaveCount(20 * 3 + 4);
+  // Spec 015 ②: seventeen (upload); Spec 025 ①: nineteen (add, subtract); Spec 025 ②: twenty (calendar); Spec 025 ③: twenty-one (edit).
+  await expect(icons).toHaveCount(21 * 3 + 4);
   await expect(page.locator("#fm-vitrino-ikono").getByRole("img")).toHaveCount(4);
   const maskOf = () =>
     page
@@ -1400,4 +1400,41 @@ test("fm-datelektilo is upgraded in its section, opened and moved by keyboard; a
   await page.keyboard.press("Escape");
   await expect(first.locator('[part="calendar"]')).toBeHidden();
   await expect(trigger.locator('[part="control"]')).toBeFocused();
+});
+
+// Spec 025 ③ (plan ③ D-19): the sections of the four selection Eroj — upgraded, the styled list
+// opened by keyboard and moved, the multi-select toggled, a tag pressed, the editor opened by its
+// button; axe without a finding in every section.
+test("fm-signeto, fm-listelektilo, fm-plurelektilo and fm-lokredaktilo are upgraded in their sections and operable by keyboard; axe-clean", async ({
+  page,
+}) => {
+  await open(page);
+  await expect(page.locator("#fm-vitrino-signeto fm-signeto")).toHaveCount(20);
+  const tag = page.locator("#fm-vitrino-signeto fm-signeto[mode='selectable']").first();
+  const pressed = await tag.evaluate((host) => host.hasAttribute("selected"));
+  await tag.locator('[part="body"]').click();
+  expect(await tag.evaluate((host) => host.hasAttribute("selected"))).toBe(!pressed);
+  expect(await axeViolations(page, "#fm-vitrino-signeto")).toEqual([]);
+  const list = page.locator("#fm-vitrino-listelektilo fm-listelektilo").first();
+  await list.locator('[part="control"]').focus();
+  await page.keyboard.press("ArrowDown");
+  await expect(list.locator('[part="listbox"]')).toBeVisible();
+  await page.keyboard.press("ArrowDown");
+  await expect(list.locator('[part="option"][data-active="true"]')).toHaveCount(1);
+  expect(await axeViolations(page, "#fm-vitrino-listelektilo")).toEqual([]);
+  await page.keyboard.press("Escape");
+  const multi = page.locator("#fm-vitrino-plurelektilo fm-plurelektilo").first();
+  await multi.locator('button[part="control"]').click();
+  await expect(multi.locator('[part="listbox"]')).toBeVisible();
+  const before = await multi.getAttribute("values");
+  await page.keyboard.press("Space");
+  expect(await multi.getAttribute("values")).not.toBe(before);
+  expect(await axeViolations(page, "#fm-vitrino-plurelektilo")).toEqual([]);
+  await page.keyboard.press("Escape");
+  const editor = page.locator("#fm-vitrino-lokredaktilo fm-lokredaktilo").first();
+  await editor.locator('[part="edit"]').click();
+  await expect(editor).toHaveAttribute("editing", "");
+  await page.keyboard.press("Escape");
+  await expect(editor).not.toHaveAttribute("editing", "");
+  expect(await axeViolations(page, "#fm-vitrino-lokredaktilo")).toEqual([]);
 });

@@ -1011,3 +1011,44 @@ describe("the Vitrino shows the datelektilo (Spec 025 ②)", () => {
     expect((grid.match(/<span slot="error">/g) ?? []).length).toBe(2);
   });
 });
+
+// Spec 025 ③ (plan ③ D-19): the Vitrino shows the signeto in a row per mode across the five
+// intents (and a small row), the listelektilo and the plurelektilo in the columns of a field with
+// options that carry icons and descriptions, the lokredaktilo in display, editing and error.
+describe("the Vitrino shows the selection Eroj (Spec 025 ③)", () => {
+  it("the signeto: three modes × five intents and a small row", () => {
+    const grid = datumoj.eroj.signeto ?? "";
+    expect((grid.match(/<fm-signeto /g) ?? []).length).toBe(20);
+    expect(grid).toContain('<fm-signeto mode="selectable" selected intent="success">');
+    expect(grid).toContain('<fm-signeto mode="removable" intent="neutral">');
+    expect(grid).toContain('<fm-signeto size="small" intent="neutral">');
+  });
+
+  it("the listelektilo: options with icon and description in the columns of a field", () => {
+    const grid = datumoj.eroj.listelektilo ?? "";
+    expect((grid.match(/<fm-listelektilo /g) ?? []).length).toBe(4);
+    expect(grid).toContain(
+      '<data slot="options" value="eu" icon="info" description="27 Staaten">Europa</data>',
+    );
+    expect(grid).toContain('<fm-listelektilo value="eu" invalid>');
+  });
+
+  it("the plurelektilo: a count and tags, filterable, in the columns of a field", () => {
+    const grid = datumoj.eroj.plurelektilo ?? "";
+    expect((grid.match(/<fm-plurelektilo /g) ?? []).length).toBe(8);
+    expect(grid).toContain('<fm-plurelektilo values="a11y,kontrast,fokus" filterable>');
+    expect(grid).toContain('<fm-plurelektilo values="a11y,kontrast,fokus" summary="tags">');
+  });
+
+  it("the lokredaktilo: display, editing and error", () => {
+    const grid = datumoj.eroj.lokredaktilo ?? "";
+    expect((grid.match(/<fm-lokredaktilo /g) ?? []).length).toBe(3);
+    expect(grid).toContain(
+      '<fm-lokredaktilo label="Titel" value="Barrierefreiheit"></fm-lokredaktilo>',
+    );
+    expect(grid).toContain('<fm-lokredaktilo label="Titel" value="Barrierefreiheit" editing>');
+    expect(grid).toContain(
+      '<fm-lokredaktilo label="Titel" value="" editing invalid><span slot="error">',
+    );
+  });
+});

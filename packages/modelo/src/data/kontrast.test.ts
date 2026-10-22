@@ -50,7 +50,7 @@ describe("KontrastParoj of the repo (D-12, data-model §4)", () => {
 describe("AK-02: komuna text pairs reach AAA (7:1) under contrast=high", () => {
   it("in every one of the 36 high-contrast combinations", () => {
     const high = allAssignments(modelo).filter((assignment) => assignment.contrast === "high");
-    expect(high).toHaveLength(36);
+    expect(high).toHaveLength(40);
     const textPairs = modelo.kontrastParoj.filter((pair) => pair.kategorio.startsWith("text-"));
     expect(textPairs.length).toBeGreaterThan(40);
     let minimum = Number.POSITIVE_INFINITY;

@@ -30,9 +30,9 @@ const suggest = (goal: string) => {
 };
 
 describe("ikono in the repo Modelo (section ②, G1, G2, G3)", () => {
-  it("lives in data/eroj/ikono/skemo.json, one of thirty-six Eroj", () => {
+  it("lives in data/eroj/ikono/skemo.json, one of forty Eroj", () => {
     expect(ikono?.file).toBe("modelo/data/eroj/ikono/skemo.json");
-    expect(modelo.eroj).toHaveLength(36);
+    expect(modelo.eroj).toHaveLength(40);
     expect(modelo.eroj.map((entry) => entry.ero.name)).toContain("ikono");
   });
 

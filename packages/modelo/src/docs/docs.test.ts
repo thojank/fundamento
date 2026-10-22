@@ -1870,7 +1870,7 @@ describe("Spec 015 ② documentation (specs/015-eroj-runde-4)", () => {
     expect(tasks).toMatch(/alsxutilo rot `[0-9a-f]{7}`/);
     expect(read("docs/vojmapo.md")).toContain("Spec 015 ②");
     // Spec 015 ③ counts on (thirty-one with the karto, thirty-two with the avataro).
-    expect(read("README.md")).toMatch(/thirty(-one|-two|-four|-five|-six)? `fm-\*` elements/);
+    expect(read("README.md")).toMatch(/thirty(-one|-two|-four|-five|-six)?|forty `fm-\*` elements/);
   });
 });
 
@@ -1906,7 +1906,7 @@ describe("Spec 015 ③ documentation (specs/015-eroj-runde-4)", () => {
     expect(read("docs/vojmapo.md")).toContain("Spec 015 ③");
     expect(read("docs/vojmapo.md")).toContain("Runde 4 der Eroj vollständig");
     // Spec 020 ③: thirty-four with the kodbloko and the markdovido.
-    expect(read("README.md")).toContain("thirty-six `fm-*` elements");
+    expect(read("README.md")).toContain("forty `fm-*` elements");
   });
 });
 
@@ -2945,13 +2945,13 @@ describe("Spec 025 ① documentation (specs/025-eroj-runde-5)", () => {
     expect(tasks).toContain("### Messungen");
     expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
     expect(read("docs/vojmapo.md")).toContain("Spec 025 ①");
-    expect(read("README.md")).toContain("thirty-six `fm-*` elements");
+    expect(read("README.md")).toContain("forty `fm-*` elements");
   });
 });
 
 // Spec 025 ② (Nachtlauf 2026-10-22): plan ② carries the decisions D-10 to D-13, the review, the
 // coverage, deviations, findings, open points, the benchmark figures of 36 Eroj and the measuring
-// guide; tasks ② the red hashes; the Vojmapo names ②; the README counts thirty-six elements.
+// guide; tasks ② the red hashes; the Vojmapo names ②; the README counts forty elements.
 describe("Spec 025 ② documentation (specs/025-eroj-runde-5)", () => {
   it("plan ② carries the review, the decisions, the coverage, deviations, findings, open points, the benchmark figures and the measuring guide; tasks ② the red hashes", () => {
     const section = (text: string) =>
@@ -2982,7 +2982,50 @@ describe("Spec 025 ② documentation (specs/025-eroj-runde-5)", () => {
     expect(tasks).toMatch(/T2531/);
     expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
     expect(read("docs/vojmapo.md")).toContain("Spec 025 ②");
-    expect(read("README.md")).toContain("thirty-six `fm-*` elements");
+    expect(read("README.md")).toContain("forty `fm-*` elements");
     expect(read("README.md")).toContain("`fm-datelektilo`");
+  });
+});
+
+// Spec 025 ③ (Nachtlauf 2026-10-22): plan ③ carries the decisions D-14 to D-19, the review, the
+// coverage, deviations, findings, open points, the benchmark figures of 40 Eroj (Abnahme 4 and 5)
+// and the measuring guide; tasks ③ the red hashes; the Vojmapo names ③; the README counts forty.
+describe("Spec 025 ③ documentation (specs/025-eroj-runde-5)", () => {
+  it("plan ③ carries the review, the decisions, the coverage, deviations, findings, open points, the benchmark figures and the measuring guide; tasks ③ the red hashes", () => {
+    const plan = read("specs/025-eroj-runde-5/plan.md");
+    const section = plan.slice(plan.indexOf("## ③ Auswahl"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Constitutional Compliance Review",
+      "### Entwurfsentscheidungen",
+      "#### D-14",
+      "#### D-15",
+      "#### D-16",
+      "#### D-17",
+      "### Arkitekturo-Abdeckung",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### Benchmark-Kennzahlen",
+      "### Messanleitung",
+    ]) {
+      expect(section, heading).toContain(heading);
+    }
+    for (const name of ["signeto", "listelektilo", "plurelektilo", "lokredaktilo"]) {
+      expect(section).toContain(`\`${name}\``);
+      expect(section).toContain(`#fm-vitrino-${name}`);
+    }
+    expect(section).toContain("cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds");
+    expect(section).toContain("| Eroj | 79 Komponenten | 36 | 40 (");
+    expect(section).toMatch(/Gattungen mit Gegenstück \| – \| 29 \| 33/);
+    const tasks = read("specs/025-eroj-runde-5/tasks.md");
+    const tasks3 = tasks.slice(tasks.indexOf("## ③ Auswahl"));
+    expect(tasks3).toMatch(/T2561/);
+    expect(tasks3).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Spec 025 ③");
+    expect(read("README.md")).toContain("forty `fm-*` elements");
+    for (const name of ["signeto", "listelektilo", "plurelektilo", "lokredaktilo"]) {
+      expect(read("README.md")).toContain(`\`fm-${name}\``);
+    }
   });
 });
