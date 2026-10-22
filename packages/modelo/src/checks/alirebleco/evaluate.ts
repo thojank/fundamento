@@ -10,13 +10,15 @@ import type { ColorValue, KontrastKategorio } from "../../generated/modelo-schem
 import { appendPointer } from "../../json/pointer.js";
 import { isJsonObject } from "../../load/guards.js";
 import { allAssignments, formatCombination } from "../../resolve/assignment.js";
-import { resolutionsOf } from "../../validate/resolutions.js";
+import { resolveCombination } from "../../resolve/resolve.js";
+import { cachedResolutionsOf } from "../../validate/resolutions.js";
 import {
   alphaOf,
   type BackdropSurface,
   backdropSurfaces,
   compositeOver,
   readDtcgColor,
+  SURFACE_LADDER,
 } from "./color.js";
 import {
   type BranchMeasurement,
@@ -270,8 +272,28 @@ export function evaluateAlirebleco(
   const measurements: PairMeasurement[] = [];
   const reportedSojloj = new Set<string>();
   const minima = new Map<string, number>();
-  // The resolutions every check shares (Spec 002, D-04), in `allAssignments` order.
-  for (const { assignment, resolution } of resolutionsOf(modelo)) {
+  // The resolutions a validation of the same Modelo computed already (Spec 002, D-04), in
+  // `allAssignments` order; without one, only the tokens the pairs name and their alias chains
+  // are resolved — the check reads nothing else, and a Modelo with the third level has over a
+  // thousand tokens per combination (B-15).
+  const cached = cachedResolutionsOf(modelo);
+  const wanted = new Set<string>();
+  for (const { pair } of measurable) {
+    const holders = [pair, isJsonObject(pair.aux) ? pair.aux : undefined];
+    for (const holder of holders) {
+      if (holder === undefined) continue;
+      for (const field of ["foreground", "background"] as const) {
+        const token = holder[field];
+        if (typeof token === "string") wanted.add(token);
+      }
+    }
+    for (const name of Array.isArray(pair.backdrop) ? pair.backdrop : SURFACE_LADDER)
+      wanted.add(String(name));
+  }
+  const names = [...wanted];
+  for (const [index, assignment] of assignments.entries()) {
+    const resolution =
+      cached?.[index]?.resolution ?? resolveCombination(modelo, assignment, { names });
     const combination = formatCombination(modelo, assignment);
     const complete = resolution.assignment ?? assignment;
     const sojloj = sojlojOf(sojlojDimensio, complete);

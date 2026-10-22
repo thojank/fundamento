@@ -78,7 +78,7 @@
 | Figma-Variablen | 876 → 2 439 (Repo), 2 441 (provoj); 1 563 der dritten Ebene |
 | Zeiten | `pnpm vortaro:ero-tokenoj` 1,2 s; Komponentenseite ≈ 0,3 s; Prüfung je Setzen 1,8–1,9 s warm; Ablehnung mit O-3 4,5 s (B-11) |
 | Tests lokal | Modelo 3695 in 167 Dateien, Agordilo 110, Metiejo 170, MCP 407, CLI 75, Projekcioj 805 – je grün; Eroj 859 (2 übersprungen wie zuvor); `pnpm lint` und alle `check:*` grün |
-| CI ② | Lauf 39742860574 (`df32211`): alle acht Jobs grün im zweiten Versuch (erster Versuch: drei Flakes des Runners, B-17); `checks` 1:27, `unit` 5:23, `projekcioj` 6:41 / 7:47, `eroj` 7:19 / 2:19, `alirebleco-eroj` 3:52, `rendered-checks` 8:11; `fm modelo export` 20,3 s (zuvor 34,4 s rot in 39741149168), `derives provo twice` 65,5 s; dieser Eintrag im Folgecommit |
+| CI ② | Lauf 39742860574 (`df32211`): alle acht Jobs grün im zweiten Versuch (erster Versuch: drei Flakes des Runners, B-17); `checks` 1:27, `unit` 5:23, `projekcioj` 6:41 / 7:47, `eroj` 7:19 / 2:19, `alirebleco-eroj` 3:52, `rendered-checks` 8:11; `fm modelo export` 20,3 s (zuvor 34,4 s rot in 39741149168), `derives provo twice` 65,5 s; dieser Eintrag im Folgecommit; Lauf 39745658397 (`38f444d`): Unit-Job rot an zwei Alirebleco-Timeouts (30 s), danach dritter Perf-Schritt (B-15), Lauf des Folgecommits dort |
 | Perf (B-15) | `pnpm perf` grün: Start 1 730 ms (Budget 2 000), resolve max 18,2 ms, explain max 5,7 ms, check_contrast Median 7,7 ms; Validierung 1,4 s → 0,7 s; `fm agordilo derive` 2,6 s → 1,9 s, `fm modelo export` 3,5 s → 2,4 s (Ausgaben byteidentisch) |
 
 

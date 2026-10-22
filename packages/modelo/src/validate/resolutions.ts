@@ -15,6 +15,11 @@ export interface ResolvedCombination {
 
 const cache = new WeakMap<Modelo, readonly ResolvedCombination[]>();
 
+/** The resolutions if a validation computed them already, else undefined; never computes them. */
+export function cachedResolutionsOf(modelo: Modelo): readonly ResolvedCombination[] | undefined {
+  return cache.get(modelo);
+}
+
 /** The resolution of every combination, in `allAssignments` order. */
 export function resolutionsOf(modelo: Modelo): readonly ResolvedCombination[] {
   let entries = cache.get(modelo);
