@@ -6,6 +6,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { CORE_SET_NAME } from "../contracts/grammar.js";
+import { isEroTokenName } from "../eroj/ero-tokenoj.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
 
@@ -32,8 +33,13 @@ describe("coverage of the core Vortaro (FR-01, AK-01)", () => {
     });
   }
 
-  it("stays within the planned size of 250–400 core tokens", () => {
-    expect(core.size).toBeGreaterThanOrEqual(250);
-    expect(core.size).toBeLessThanOrEqual(400);
+  // Constitution v2.3 (Spec 024 ②): the band of Spec 001 sized the first two levels of the
+  // Vortaro — foundations and roles; the third level, the Ero-Tokens, is as large as the Skemoj
+  // make it and is counted against them (ero-tokenoj.test.ts).
+  it("stays within the planned size of 250–400 core tokens of the foundations and the roles", () => {
+    const twoLevels = [...core].filter((name) => !isEroTokenName(name));
+    expect(twoLevels.length).toBeGreaterThanOrEqual(250);
+    expect(twoLevels.length).toBeLessThanOrEqual(400);
+    expect(core.size - twoLevels.length).toBeGreaterThan(800);
   });
 });
