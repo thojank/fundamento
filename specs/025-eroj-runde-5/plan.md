@@ -98,6 +98,8 @@ Ein Satz aus der Rolle `slider`: „Every value or range a person sets within kn
 
 ### Offen (für den Maintainer)
 
+**Entschieden (Maintainer, 2026-10-22): O-1 bis O-5 wie vorgeschlagen.** Kein Code ändert sich: `field` mit `range` bleibt verborgen, die Griffe heißen „Von“/„Bis“, der Zustand `pressed`, die Spur bei `invalid` bleibt `sunken`, der Name `glitilo` und `field`/`number` bleiben.
+
 - **O-1 `field` mit `range`:** verborgen (Abweichung 3). Vorschlag: so lassen; zwei Felder (von/bis) in einer späteren Runde, wenn ein Produkt sie braucht.
 - **O-2 Namen der Griffe:** „Von“/„Bis“ (de), „From“/„To“ (en) als `a11y.texts min-label-name`/`max-label-name`. Vorschlag: so.
 - **O-3 Zustandsname `pressed`** statt `active` (Abweichung 2). Vorschlag: so (E2).
@@ -229,6 +231,8 @@ Vitrino: zwei Zeilen (einzeln 24.10.2026 mit Hilfe „Ein Datum ab heute.“, Be
 
 ### Offen (für den Maintainer)
 
+**Entschieden (Maintainer, 2026-10-22): O-6 bis O-10 wie vorgeschlagen.** Kein Code ändert sich: der Name `datelektilo` mit seinen Teilnamen, der Bereich in einem Feld, `expanded` als Prop, keine Kialo des fremden `instead` in `suggest_ero` (Spec 008 D-08 bleibt), die Sprache des Figma-Kalenders bleibt.
+
 - **O-6 E4 Name** `datelektilo` (bestätigt die Spec selbst bei ①); `trigger`, `calendar`, `cell`, `day` als Teilnamen.
 - **O-7 Bereich in einem Feld** (Abweichung 5) oder zwei Felder (von/bis). Vorschlag: so lassen; zwei Felder in einer späteren Runde, wenn ein Produkt sie braucht.
 - **O-8 `expanded` als Prop** (Abweichung 3). Vorschlag: so (der Weg des `kompletigilo`).
@@ -282,7 +286,9 @@ node -e 'const fs=require("fs");let t={eroj:0,props:0,states:0,slots:0,parts:0,b
 
 ## ③ Auswahl
 
-**Branch:** `261022-spec-025-auswahl-c7fa02` (gestapelt auf ②, `261022-spec-025-datum-c7fa02`, PR #102) · **Datum:** 2026-10-22 (Nachtlauf) · **Stand:** gebaut, Abnahme offen.
+**Branch:** `261022-spec-025-auswahl-c7fa02` (gebaut gestapelt auf ②, `261022-spec-025-datum-c7fa02`, PR #102; nach dem Merge von #101–#103 auf `main` rebased) · **Datum:** 2026-10-22 (Nachtlauf) · **Stand:** gebaut, O-1 bis O-16 entschieden, Abnahme offen.
+
+**Rebase auf `main` (2026-10-22, nach #101, #102 und #103 – Spec 024 Runde 2, Constitution v2.3):** Konflikte in der Vojmapo (die Zeile des Studios von `main`, die Zeile E5 mit dem Stand von ③), in `fixtures/stufe1-provo.json` und in `aspekto.json` von `provo` und `provo-kompakta`. Die Fixtures sind nicht von Hand gemischt, sondern neu erzeugt: `pnpm vortaro:ero-tokenoj` leitet die Ero-Tokens der vier neuen Eroj aus ihren Skemoj ab (200 Tokens, 1 032 → 1 232, als Alias auf die Rolle, die das Skemo bindet) und schreibt sie in den Kern und – mit `--config` – in `ekzemplo` und `aspekto-incomplete`; `provo` und `provo-kompakta` sind mit `fm agordilo derive` neu abgeleitet (nur `aspekto.json` und das Haupt-Set ändern sich), die Stufe-1-Prüfsummen aus `deriveAspekto` neu gerechnet. Die Komponentenliste des Studios (Metiejo, M-4) zählt 40 Eroj. B-29 ist zurückgenommen, B-31 neu.
 
 ### Zusammenfassung
 
@@ -299,7 +305,7 @@ node -e 'const fs=require("fs");let t={eroj:0,props:0,states:0,slots:0,parts:0,b
 - **Art. I (Modelo-First):** konform. Skemo, Uzo, Ikonaro, Jugxoj, Ontologio, Übersetzungen zuerst; Web, React, Figma, Vitrino und Make-Kit sind erzeugt.
 - **Art. II (Unu Vortaro):** konform. Der Knopf heißt `control`, die Liste `listbox`, die Zeile `item`, das Häkchen `check`, das Schlagwort im `plurelektilo` `tag` – überall gleich; `intent` wie beim `insigno`.
 - **Art. III (Maschinenlesbarkeit):** konform. `get_ero` nennt Ereignisse (`remove` und `save` abbrechbar), Achsen und Pflichten; `suggest_ero` beantwortet die Dialoge; `check_usage` prüft `badge-text-short` am `signeto` und `error-says-what-to-do` am `lokredaktilo`.
-- **Art. IV (Multmarkeco):** konform. Keine neuen Tokens; das gewählte Schlagwort nimmt `color.action.primary.selected`/`.text`, die Liste `color.background.raised` + `elevation.shadow.overlay`, das Häkchen `color.action.primary.rest`; die Glyphe steht in jedem Aspekto-Paket.
+- **Art. IV (Multmarkeco):** konform. Keine neuen Tokens der ersten zwei Ebenen; die dritte Ebene (Constitution v2.3) trägt nach dem Rebase die 200 abgeleiteten Ero-Tokens der vier Eroj, als Alias in jeder Marke. Das gewählte Schlagwort nimmt `color.action.primary.selected`/`.text`, die Liste `color.background.raised` + `elevation.shadow.overlay`, das Häkchen `color.action.primary.rest`; die Glyphe steht in jedem Aspekto-Paket.
 - **Art. V (Clean Room):** konform. Kein fremdes System geöffnet; die Glyphe ist Phosphor Icons (MIT) mit Herkunft.
 - **Art. VI (Regularo kun Kialoj):** konform. Reguloj ausgeweitet (E5), keine neue Regulo; zwei Jugxoj (gekippte Antworten; nicht gezeichnete komponierte Teile in Figma).
 - **Art. VII (Agenta Dokumentado):** konform. Die Spec-Dialoge sind MCP-Tests (`s025-auswahl.test.ts`); die deutschen Texte stehen in `tradukoj.json`.
@@ -373,10 +379,14 @@ Vitrino: `signeto` in vier Zeilen (static, selectable gedrückt, removable, smal
 - **B-26 Manko-Kandidat:** der `plurelektilo` zeigt mit `summary=tags` die Zahl im Knopf und die Schlagwörter daneben; ein Knopf, der die Schlagwörter selbst trägt, braucht ein Muster ohne Knopf im Knopf (Candidate: Toolbar-Muster).
 - **B-27 (CI, behoben im Test; Manko-Kandidat)** React typisiert das `data`-Element der Plattform ohne `icon` und `description` einer Option: der Typtest übergibt sie als Spread (kein Excess-Property-Check). Kandidat: der React-Wrapper typisiert die Optionen eines Slots mit Eintrag. Dazu: `label` des `lokredaktilo` ist im Wrapper kein Pflichttyp – die Pflicht ist die Warnung des Elements, wie bei jedem Ero (Fixture angepasst).
 - **B-28 (CI, behoben)** Der Job „Rendered checks“ brach nach 15 min ab (Läufe 39754200831 von ② und 39754602800 von ③): die Pakete der drei Playwright-Engines (`apt`, `--with-deps`) brauchten auf einem kalten Läufer 7 min, der Vitrino-Check mit 40 Eroj 6 min. Ein Budget von 25 min hätte den Pin „jeder Job ≤ 15 min, Wanduhr unter 12“ (`workflow.test.ts`, Spec-Abnahme 4) gebrochen; stattdessen installieren die drei Browser-Jobs nur die Engines des Laufs (`$PLAYWRIGHT_ENGINES`: Chromium im PR, alle drei auf `main`). ② trägt dieselbe Änderung (`3fa8923` → `ca8d6e6`).
-- **B-29 (CI, behoben)** Zwei Tests liefen auf dem Läufer in ihr Budget: `fm agordilo derive` zweimal (8 s hier, 85 s auf dem Läufer mit 36 Eroj, über 120 s mit 40) und die Paletten-Reguloj über jede Fixture-Marke (3 s hier, 22 s bzw. 32 s auf dem Läufer, Budget 30 s). Wie B-16: Budgets nach dem gemessenen Läufer (240 s, 120 s), die geteilten Timeouts bleiben.
+- **B-29 (CI, zurückgenommen)** Zwei Tests liefen auf dem Läufer in ihr Budget: `fm agordilo derive` zweimal (8 s hier, 85 s auf dem Läufer mit 36 Eroj, über 120 s mit 40) und die Paletten-Reguloj über jede Fixture-Marke (3 s hier, 22 s bzw. 32 s auf dem Läufer, Budget 30 s). `4fd8b43` hob die Budgets auf 240 s und 120 s; der Maintainer hat das am 2026-10-22 zurückgenommen: die Budgets sind wieder 120 s und der geteilte Timeout von 30 s. Wird der Lauf rot, bleibt er rot und der Bericht sagt es; die Ursache – warum Ableitung und Prüfung mit den Ero-Tokens so wachsen und auf dem Läufer so viel langsamer sind – klärt Nachlese 9 („Tempo“), ohne ein Budget anzuheben.
 - **B-30 (CI, beobachtet)** Die Werkstatt-Zeitmessung der Spec 019 ② (G5: 50 Schieberegler-Änderungen, keine Long Task über 50 ms) maß im Lauf 39761146463 eine Long Task von 57 ms auf dem ausgelasteten Läufer; im Lauf davor (39759253087) und auf ② grün, der Rerun des Jobs grün. Kein Code von ③ beteiligt (der Test treibt den Werkstatt-Worker); Kandidat: das Budget der Messung am Läufer kalibrieren, wie die Spawn-Budgets (B-16, B-29).
+- **B-31 (Rebase, behoben im Test)** Nach dem Rebase auf #103 brach `takes --aspekto more than once` der CLI ab (Exit-Code `null`): zwei Pakete derselben Aspekto melden je überschriebenem Token eine Warnung `set-override-ambiguous` (1 605 Warnungen), die Ausgabe wuchs mit den 200 Ero-Tokens von 959 224 auf 1 097 940 Bytes – über das Standard-`maxBuffer` von `spawnSync` (1 MiB), der den Kindprozess dann beendet. Der Spawn-Helfer der CLI-Tests nimmt den Puffer des e2e-Harness des Modelo (64 MiB; Regel 0.1). Kein Budget, keine Ausgabe geändert; dass die Ausgabe mit der Zahl der Tokens wächst, gehört zu Nachlese 9.
+- **B-32 (Rebase, offen – Nachlese 9)** `pnpm perf` ist nach dem Rebase rot: der erste `check_contrast`-Aufruf ohne Zuweisung kostet 107 ms (Budget 100 ms, AK-09; die übrigen 99 Aufrufe ≈ 8 ms), der Start des MCP-Servers 1 888–2 010 ms in drei Läufen (Budget 2 000 ms, AK-07). Der erste Aufruf baut die Überlagerung jeder Kombination über alle Tokens, und die wächst mit den Ero-Tokens; auf `main` kostet er schon 101 ms (ein Lauf grün, einer rot). Kein Budget geändert; die Ursache gehört zu Nachlese 9.
 
 ### Offen (für den Maintainer)
+
+**Entschieden (Maintainer, 2026-10-22): O-11 bis O-16 wie vorgeschlagen.** Kein Code ändert sich: die vier Namen und ihre Teilnamen, `intent` statt `tone`, die drei Spec-Formen der Dialoge bleiben Rückfrage („beschreibung“ bleibt beim `tekstareo`), die Schlagwörter stehen nach dem Knopf, die Label-Wörter „Schlagwort“ und „Auswahl“, der Fokus nach dem Entfernen auf dem nächsten Schlagwort, sonst auf dem Container.
 
 - **O-11 E4 Namen** `signeto`, `listelektilo`, `plurelektilo`, `lokredaktilo` (bestätigt die Spec selbst bei ①); `item`, `check`, `tag`, `body`, `display`, `form` als Teilnamen.
 - **O-12 `intent` statt `tone`** (Abweichung 2). Vorschlag: so (eine Achse für alle).
