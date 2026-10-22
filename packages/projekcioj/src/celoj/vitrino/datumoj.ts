@@ -473,7 +473,8 @@ export const VITRINO_REGIONS: readonly {
 }[] = [
   { value: "eu", text: "Europa", icon: "info", description: "27 Staaten" },
   { value: "us", text: "USA", description: "50 Staaten" },
-  { value: "jp", text: "Japan", disabled: true },
+  // Spec 026 ① (2): disabled on purpose; the example says so in visible words.
+  { value: "jp", text: "Japan", description: "Nicht verfügbar", disabled: true },
   { value: "br", text: "Brasilien" },
 ];
 export const VITRINO_REGIONS_HELP = "Die Region des Standards.";

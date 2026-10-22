@@ -2303,7 +2303,8 @@ describe("Web Component Celo for the datelektilo (Spec 025 ②)", () => {
       '[part="field"] [part="cell"][data-today="true"] {\n  border-color: var(--fm-color-border-strong);\n  border-width: var(--fm-border-width-default);',
     );
     expect(css).toContain(
-      '[part="field"] [part="cell"][data-outside="true"] {\n  color: var(--fm-color-text-muted);',
+      // Spec 026 ① (1): a chosen day outside the month keeps the look of a chosen day.
+      '[part="field"] [part="cell"][data-outside="true"]:not([aria-selected="true"]) {\n  color: var(--fm-color-text-muted);',
     );
     expect(css).not.toContain(':where([part="field"]) [part="cell"][aria-selected="true"]');
     // The trigger takes the field's control size, prev and next the small one; the calendar its

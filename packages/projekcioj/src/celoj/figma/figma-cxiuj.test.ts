@@ -14,6 +14,8 @@ import { buildProjekcioj, celoInputOf } from "../../build.js";
 import { VITRINO_FILE } from "../vitrino/vitrino.js";
 import { FIGMA_CELO, type FigmaPlan } from "./figma.js";
 import { FIGMA_MODE_LIMIT, pluginManifest } from "./plugin.js";
+import { MODEL_FONTS } from "./plugin-test-helpers.js";
+import { figmaDouble } from "./test-doubles/plugin.js";
 
 const BRANDS = ["komuna", "ekzemplo", "provo", "provo-kompakta"];
 const config = new URL(
@@ -74,11 +76,20 @@ describe("all example brands in one build (Spec 026 ①)", () => {
     expect(built.name).toContain("komuna, ekzemplo, provo, provo-kompakta");
   });
 
+  it("the plugin of the build runs in a new empty file (the double of Figma, mode limit of Professional) and makes the collection aspekto with the four modes", async () => {
+    const code = readFileSync(join(out, "figma/plugin/code.js"), "utf8");
+    const double = figmaDouble({ fonts: MODEL_FONTS, modeLimit: FIGMA_MODE_LIMIT });
+    const module = new Function("figma", "options", `${code}\nreturn applyPlan(options);`);
+    await module(double.figma, undefined);
+    const aspekto = double.collections.find((collection) => collection.name === "aspekto");
+    expect(aspekto?.modes.map((mode) => mode.name)).toEqual(BRANDS);
+  }, 120_000);
+
   it("the Vitrino of the build switches between the four brands", () => {
     const html = readFileSync(join(out, VITRINO_FILE), "utf8");
-    const switches = [
-      ...html.matchAll(/data-fm-switch="aspekto" data-fm-valoro="([a-z-]+)"/g),
-    ].map((match) => match[1]);
+    const switches = [...html.matchAll(/data-fm-switch="aspekto" data-fm-valoro="([a-z-]+)"/g)].map(
+      (match) => match[1],
+    );
     expect(switches).toEqual(BRANDS);
   });
 });
