@@ -82,7 +82,7 @@
 
 | Was | Wert |
 |---|---|
-| Commits ③ | rot `23b3fcf`, grün `33d2bae`, Messungen im Folgecommit – nach dem Rebase auf ② (`dd76887`, B-16) und Spec 024 O-1 (`fbda604`); davor rot `2ac2243`, grün `c43b238` |
+| Commits ③ | rot `23b3fcf`, grün `33d2bae`, Messungen `0d883b9`, CI `266c4eb` (B-27, B-28) – nach dem Rebase auf ② (`dd76887`, B-16) und Spec 024 O-1 (`fbda604`); davor rot `2ac2243`, grün `c43b238` |
 | Grün gemessen | Modelo 172 Dateien / 3767 Tests, MCP 44 / 433, Projekcioj 30 / 831, Browser (Chromium) 327, `signeto`/`listelektilo`/`plurelektilo`/`lokredaktilo`.spec.ts in Chromium, Firefox und WebKit je 17, Alirebleco 24 Läufe des Blocks ③ (dazu die 585 + 24 von ① und ②), Vitrino-Check 54, Make-Kit 5, Quickstart 1, Release-Probelauf beide Kits, `check:parity` 40 Eroj / 0 Differenzen / 683 freigegeben, `check:regularo` 60 / 214, `check:ikonaro` 21 × 4, `check:clean-room` ohne Befund, Lint sauber |
 | Rot gemessen | Modelo 7 Pins nach den Daten (davor die gesamte Suite ③ rot), Projekcioj 22 Tests in 9 Dateien, MCP (s025-auswahl lädt nicht ohne Daten) |
 | Benchmark-Kennzahlen | Eroj 36 → 40; Gattungen mit Gegenstück 29 → 33 (+ Zahl, Suche, Zeit als Ergänzung); Zustände 107 → 129; Props 174 → 206; Slots 80 → 91; Ereignisse 6 → 14; Teile 265 → 315; Bindungen 454 → 542; Ikonaro 20 → 21; Reguloj 60 → 60; Jugxoj 212 → 214 |

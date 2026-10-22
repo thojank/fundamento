@@ -371,6 +371,8 @@ Vitrino: `signeto` in vier Zeilen (static, selectable gedrückt, removable, smal
 - **B-24 (behoben)** Der `brief` des `kampo` lag mit `near-date` über 750 (Abweichung 8).
 - **B-25 (behoben)** Figma zeichnete für einen Badge keinen Ring; der `signeto` hat einen Fokus-Zustand: ein Badge mit Ring-Bindung bekommt Ring und Lücke um die Kontrolle (die Sets `insigno`, `titolo`, `teksto` bleiben wie sie sind).
 - **B-26 Manko-Kandidat:** der `plurelektilo` zeigt mit `summary=tags` die Zahl im Knopf und die Schlagwörter daneben; ein Knopf, der die Schlagwörter selbst trägt, braucht ein Muster ohne Knopf im Knopf (Candidate: Toolbar-Muster).
+- **B-27 (CI, behoben im Test; Manko-Kandidat)** React typisiert das `data`-Element der Plattform ohne `icon` und `description` einer Option: der Typtest übergibt sie als Spread (kein Excess-Property-Check). Kandidat: der React-Wrapper typisiert die Optionen eines Slots mit Eintrag. Dazu: `label` des `lokredaktilo` ist im Wrapper kein Pflichttyp – die Pflicht ist die Warnung des Elements, wie bei jedem Ero (Fixture angepasst).
+- **B-28 (CI, behoben)** Der Job „Rendered checks“ brach nach 15 min ab (Läufe 39754200831 von ② und 39754602800 von ③): die Playwright-Browser brauchten auf einem kalten Läufer 7 min, der Vitrino-Check mit 40 Eroj 6 min. Budget 25 min; ② braucht dieselbe Änderung, falls sein Rerun erneut abbricht.
 
 ### Offen (für den Maintainer)
 
