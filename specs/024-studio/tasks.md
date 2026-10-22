@@ -78,7 +78,7 @@
 | Figma-Variablen | 876 → 2 439 (Repo), 2 441 (provoj); 1 563 der dritten Ebene |
 | Zeiten | `pnpm vortaro:ero-tokenoj` 1,2 s; Komponentenseite ≈ 0,3 s; Prüfung je Setzen 1,8–1,9 s warm; Ablehnung mit O-3 4,5 s (B-11) |
 | Tests lokal | Modelo 3695 in 167 Dateien, Agordilo 110, Metiejo 170, MCP 407, CLI 75, Projekcioj 805 – je grün; Eroj 859 (2 übersprungen wie zuvor); `pnpm lint` und alle `check:*` grün |
-| Perf (B-15) | `pnpm perf` grün: Start 1 861 ms (Budget 2 000), resolve max 19,6 ms, explain max 6,3 ms, check_contrast max 53,8 ms (Median 8,7); Validierung 1,4 s → 0,7 s |
+| Perf (B-15) | `pnpm perf` grün: Start 1 730 ms (Budget 2 000), resolve max 18,2 ms, explain max 5,7 ms, check_contrast Median 7,7 ms; Validierung 1,4 s → 0,7 s; `fm agordilo derive` 2,6 s → 1,9 s, `fm modelo export` 3,5 s → 2,4 s (Ausgaben byteidentisch) |
 
 
 ## ③ Runde 3

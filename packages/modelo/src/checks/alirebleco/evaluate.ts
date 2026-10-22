@@ -10,7 +10,7 @@ import type { ColorValue, KontrastKategorio } from "../../generated/modelo-schem
 import { appendPointer } from "../../json/pointer.js";
 import { isJsonObject } from "../../load/guards.js";
 import { allAssignments, formatCombination } from "../../resolve/assignment.js";
-import { resolveCombination } from "../../resolve/resolve.js";
+import { resolutionsOf } from "../../validate/resolutions.js";
 import {
   alphaOf,
   type BackdropSurface,
@@ -270,9 +270,9 @@ export function evaluateAlirebleco(
   const measurements: PairMeasurement[] = [];
   const reportedSojloj = new Set<string>();
   const minima = new Map<string, number>();
-  for (const assignment of assignments) {
+  // The resolutions every check shares (Spec 002, D-04), in `allAssignments` order.
+  for (const { assignment, resolution } of resolutionsOf(modelo)) {
     const combination = formatCombination(modelo, assignment);
-    const resolution = resolveCombination(modelo, assignment);
     const complete = resolution.assignment ?? assignment;
     const sojloj = sojlojOf(sojlojDimensio, complete);
     const activeValoro =

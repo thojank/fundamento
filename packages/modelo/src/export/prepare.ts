@@ -21,11 +21,12 @@ export function exportValidatedModelo(
   schema: Readonly<Record<string, unknown>>,
   readIssues: readonly ValidationIssue[] = [],
 ): ValidatedExportResult {
-  const report = validateModeloFiles(files, readIssues);
+  const built = buildModelo(files);
+  const report = validateModeloFiles(files, readIssues, built);
   if (!report.valid) {
     return { ok: false, errors: report.errors, warnings: report.warnings };
   }
-  const { modelo } = buildModelo(files);
+  const { modelo } = built;
   return {
     ok: true,
     files: exportModelo({ modelo, sets: files.sets, schema }),

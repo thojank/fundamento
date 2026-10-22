@@ -82,20 +82,33 @@ function coreNamesOf(modelo: Modelo): readonly string[] {
   return names;
 }
 
-const overlays = new WeakMap<Modelo, Map<string, ReturnType<typeof overlaySets>>>();
-function overlayOf(modelo: Modelo, ordered: readonly LoadedSet[]): ReturnType<typeof overlaySets> {
+interface Overlay {
+  overlaid: ReturnType<typeof overlaySets>;
+  /** The case per token: the last active set that states it wins (D-11). */
+  cases: Map<string, { value: TextTransform; set: string }>;
+}
+
+const overlays = new WeakMap<Modelo, Map<string, Overlay>>();
+function overlayOf(modelo: Modelo, ordered: readonly LoadedSet[]): Overlay {
   let own = overlays.get(modelo);
   if (own === undefined) {
     own = new Map();
     overlays.set(modelo, own);
   }
   const key = ordered.map((set) => set.name).join("\u0000");
-  let overlaid = own.get(key);
-  if (overlaid === undefined) {
-    overlaid = overlaySets(ordered);
-    own.set(key, overlaid);
+  let overlay = own.get(key);
+  if (overlay === undefined) {
+    const cases = new Map<string, { value: TextTransform; set: string }>();
+    for (const set of ordered) {
+      for (const [name, token] of Object.entries(set.tokens)) {
+        if (token.textTransform !== undefined)
+          cases.set(name, { value: token.textTransform, set: set.name });
+      }
+    }
+    overlay = { overlaid: overlaySets(ordered), cases };
+    own.set(key, overlay);
   }
-  return overlaid;
+  return overlay;
 }
 
 export function resolveCombination(
@@ -109,23 +122,12 @@ export function resolveCombination(
   }
   const complete = completed.assignment;
   const ordered = orderActiveSets(modelo, complete);
-  const overlaid = overlayOf(modelo, ordered);
+  const { overlaid, cases } = overlayOf(modelo, ordered);
   const allNames = coreNamesOf(modelo);
   const wanted = options.names === undefined ? undefined : new Set(options.names);
   const coreNames = wanted === undefined ? allNames : allNames.filter((name) => wanted.has(name));
   const { bound, issues } = bindAliases(modelo, overlaid, coreNames, complete);
   const core = modelo.setoj.find((set) => set.name === CORE_SET_NAME);
-  // The case of a token: the last active set that states it wins (D-11).
-  const caseOf = (link: string): { value: TextTransform; set: string } | undefined => {
-    for (let index = ordered.length - 1; index >= 0; index--) {
-      const set = ordered[index];
-      const textTransform = set?.tokens[link]?.textTransform;
-      if (set !== undefined && textTransform !== undefined)
-        return { value: textTransform, set: set.name };
-    }
-    return undefined;
-  };
-
   const tokens: Record<string, ResolvedToken> = {};
   for (const name of coreNames) {
     const result = bound.get(name);
@@ -153,9 +155,9 @@ export function resolveCombination(
     for (const link of result.aliasChain.length === 0
       ? [name]
       : result.aliasChain.map((entry) => entry.token)) {
-      const found = caseOf(link);
+      const found = cases.get(link);
       if (found !== undefined) {
-        resolved.textTransform = found;
+        resolved.textTransform = { value: found.value, set: found.set };
         break;
       }
     }

@@ -232,14 +232,15 @@ export function agordoJugxoIssues(
 export function checkAspekto(input: CheckInput): CheckResult {
   const { files, label, agordo } = input;
   const name = agordo.name;
-  const { modelo } = buildModelo(files);
+  const built = buildModelo(files);
+  const { modelo } = built;
   const pkg = packageOf(files, label);
   const prefix = pkg.aspekto.file.slice(0, -"aspekto.json".length);
   const ours = (issue: ValidationIssue): boolean =>
     issue.combination?.[ASPEKTO_DIMENSIO] === name ||
     (prefix !== "" && issue.path.startsWith(prefix));
 
-  const validation = validateModeloFiles(files);
+  const validation = validateModeloFiles(files, [], built);
   const evaluation = evaluateAlirebleco(modelo, {
     kontrastParojFile: files.data["kontrastparoj.json"].file,
     dimensiojFile: files.data["dimensioj.json"].file,
