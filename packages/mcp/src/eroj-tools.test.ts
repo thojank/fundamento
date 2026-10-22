@@ -87,6 +87,7 @@ describe("get_ero brief (Spec 007 A8)", () => {
     "elektilo",
     "elekto",
     "faldilo",
+    "glitilo",
     "ikono",
     "insigno",
     "kampo",
@@ -149,6 +150,9 @@ describe("suggest_ero (FR-13)", () => {
       "choose-many",
       "choose-few",
       "disclosure",
+      // Spec 025 ①: the glitilo's goals.
+      "slide",
+      "value-range",
       "show-icon",
       "status-label",
       "enter-text",
@@ -156,6 +160,9 @@ describe("suggest_ero (FR-13)", () => {
       "password",
       "number",
       "date",
+      // Spec 025 ①: a counter with its stepper and a time.
+      "count",
+      "time",
       "card",
       "command",
       "code-block",

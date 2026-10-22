@@ -1,0 +1,189 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M5GCQA5WKSWAT6046VPQB443",
+    "ero": "ero_01M5GCQ9D2C6W8R89QXM1FQYE1",
+    "skemo": "ske_01M5GCQ9SFM2M83B6VF3TJYVSP",
+    "purpose": "Sets a value, or a range between two values, within known limits by dragging or with the keys.",
+    "instead": [
+      {
+        "goal": "exact-value",
+        "keywords": {
+          "en": [
+            "exact",
+            "precise",
+            "typed"
+          ],
+          "de": [
+            "genau",
+            "genauen",
+            "genauer",
+            "exakt",
+            "präzise"
+          ]
+        },
+        "ero": "kampo",
+        "kialo": "An exact value is typed, because a thumb lands near a number and the field on it; the kampo of kind number takes it, with a stepper where plus and minus help."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "vertical-track",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "upright",
+            "standing"
+          ],
+          "de": [
+            "hochkant",
+            "stehend",
+            "aufrecht"
+          ]
+        },
+        "kialo": "A track that stands upright reads as a level and takes the keys the other way round, because up is more there; a person decides whether a product wants it."
+      },
+      {
+        "case": "ticks-with-labels",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "ticks",
+            "tick-marks",
+            "scale-marks",
+            "notches"
+          ],
+          "de": [
+            "skalenstriche",
+            "skalenstrichen",
+            "teilstriche",
+            "kerben"
+          ]
+        },
+        "kialo": "Labelled marks along the track are a scale of their own, because they name values between the ends; the slider names the ends."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "form",
+          "kialo": "A slider without a form has no sender, because the value is only sent with the form."
+        },
+        {
+          "name": "dialog",
+          "kialo": "A dialog may ask for a value before it ends, because the decision it ends in may need one."
+        }
+      ],
+      "with": [
+        {
+          "ero": "kampo",
+          "kialo": "A slider stands among the fields of a form and, with input, composes a kampo of kind number beside its track, because a value a person can read exactly is also a value a person may type."
+        },
+        {
+          "ero": "butono",
+          "kialo": "The form ends with the button that sends it, because setting a value does nothing by itself."
+        }
+      ],
+      "never": [
+        {
+          "ero": "butono",
+          "kialo": "A slider stands in no slot of a button, because a button is one target with one name and the thumb could not be reached on its own."
+        }
+      ],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "label": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "max": 1,
+        "nesting": 0
+      },
+      "help": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      },
+      "error": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      },
+      "min-label": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      },
+      "max-label": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "never"
+    },
+    "content": [
+      {
+        "regulo": "field-label-names-the-datum",
+        "fixed": false,
+        "check": {
+          "kind": "not-words",
+          "words": {
+            "de": [
+              "einstellen",
+              "ziehen",
+              "schieben"
+            ],
+            "en": [
+              "set",
+              "drag",
+              "slide"
+            ]
+          }
+        }
+      },
+      {
+        "regulo": "error-says-what-to-do",
+        "fixed": true,
+        "of": "slot:error",
+        "check": {
+          "kind": "min-words",
+          "count": 3
+        }
+      },
+      {
+        "regulo": "help-is-one-sentence",
+        "fixed": false,
+        "of": "slot:help",
+        "check": {
+          "kind": "max-sentences",
+          "count": 1
+        }
+      },
+      {
+        "regulo": "range-stated",
+        "fixed": false,
+        "of": "slot:help",
+        "check": {
+          "kind": "min-words",
+          "count": 2
+        }
+      }
+    ]
+  }
+}

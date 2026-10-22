@@ -123,6 +123,10 @@
         {
           "ero": "alsxutilo",
           "kialo": "The button of a file input shows the icon upload and its remove buttons the icon close, because the sign is read faster than the word; the word names the action."
+        },
+        {
+          "ero": "kampo",
+          "kialo": "The step buttons of a number show subtract and add, the clear button of a search close, because the sign is read faster than the word; the words of the Modelo name the buttons."
         }
       ],
       "never": [],

@@ -115,7 +115,7 @@ Everything lives in one workspace; the npm org for published packages is
 | `@fundamento/modelo` | Schema, loader, resolver, validation, checks, NomReguloj, Gvidanto |
 | `@fundamento/aspekto-komuna` | The reference Aspekto |
 | `@fundamento/projekcioj` | Every generator: CSS, Tailwind, Web Component, React, Figma, Code Connect, Make Kit |
-| `@fundamento/eroj` | The generated Eroj: thirty-four `fm-*` elements (since Spec 015 ① with `fm-pagxigilo` and `fm-spuro`, the pagination and the breadcrumb; since Spec 015 ② with `fm-alsxutilo`, the file input; since Spec 015 ③ with `fm-karto` and `fm-avataro`, the card and the avatar; since Spec 020 ③ with `fm-kodbloko` and `fm-markdovido`, the code block and the Markdown view) and their React wrappers |
+| `@fundamento/eroj` | The generated Eroj: thirty-five `fm-*` elements (since Spec 015 ① with `fm-pagxigilo` and `fm-spuro`, the pagination and the breadcrumb; since Spec 015 ② with `fm-alsxutilo`, the file input; since Spec 015 ③ with `fm-karto` and `fm-avataro`, the card and the avatar; since Spec 020 ③ with `fm-kodbloko` and `fm-markdovido`, the code block and the Markdown view; since Spec 025 ① with `fm-glitilo`, the slider) and their React wrappers |
 | `@fundamento/mcp` | The MCP server (Gvidanto) |
 | `@fundamento/cli` | `fm`: validate, export, build projections, run the server, derive and check an Aspekto from an Agordo |
 | `@fundamento/agordilo` | The Agordilo (Spec 016, Spec 019): an Agordo (lead colour, status colours, tint, three sliders, fonts; form, space, type and icon weight) becomes a complete Aspekto in OKLCH at contrast targets measured on komuna, checked by the checks of the CI, with its report |

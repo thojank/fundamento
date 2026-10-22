@@ -35,6 +35,7 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
       "elektilo",
       "elekto",
       "faldilo",
+      "glitilo",
       "ikono",
       "insigno",
       "kampo",
@@ -257,6 +258,7 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
           "kompletigilo",
           // Spec 015 ②: and to the alsxutilo.
           "alsxutilo",
+          "glitilo",
         ],
       });
       expect(modelo.reguloj.filter((regulo) => regulo.name === name)).toHaveLength(1);
@@ -299,6 +301,7 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
       "avataro",
       "kodbloko",
       "markdovido",
+      "glitilo",
     ]);
   });
 

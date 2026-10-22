@@ -13,6 +13,7 @@
         "name": "name",
         "kind": "enum",
         "values": [
+          "add",
           "check",
           "chevron-down",
           "chevron-left",
@@ -27,6 +28,7 @@
           "search",
           "sort-ascending",
           "sort-descending",
+          "subtract",
           "success",
           "upload",
           "warning"

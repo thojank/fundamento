@@ -535,8 +535,8 @@ test("the Ikonaro grid, the apartigilo and the saltligilo are upgraded in their 
   await open(page);
   const icons = page.locator("#fm-vitrino-ikono fm-ikono");
   // Spec 015 ①: sixteen names (chevron-left), three sizes each, and the four status icons.
-  // Spec 015 ②: seventeen (upload).
-  await expect(icons).toHaveCount(17 * 3 + 4);
+  // Spec 015 ②: seventeen (upload); Spec 025 ①: nineteen (add, subtract).
+  await expect(icons).toHaveCount(19 * 3 + 4);
   await expect(page.locator("#fm-vitrino-ikono").getByRole("img")).toHaveCount(4);
   const maskOf = () =>
     page
@@ -1351,4 +1351,27 @@ test.describe("the Werkstatt, stage 2 (Spec 019 ②)", () => {
     await checkedAtLeast(page, 1);
     expect(await page.evaluate(() => fmWerkstatt.state.raporto)).toEqual(kompaktaRaporto);
   });
+});
+
+// Spec 025 ① (plan ① D-07): the section of the glitilo — twelve sliders upgraded, the first moved
+// by the keyboard alone (Tab to the thumb, ArrowRight raises the value); the kampo's stepper in its
+// section steps by a click on the plus; axe without a finding in both sections.
+test("fm-glitilo is upgraded in its section, moved by keyboard; the kampo's stepper steps; axe-clean", async ({
+  page,
+}) => {
+  await open(page);
+  const section = page.locator("#fm-vitrino-glitilo");
+  await expect(section.locator("fm-glitilo")).toHaveCount(12);
+  const first = section.locator("fm-glitilo").first();
+  const thumb = first.locator('[part="thumb"]:not([hidden])').first();
+  await expect(thumb).toHaveAttribute("aria-valuenow", "40");
+  await thumb.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(thumb).toHaveAttribute("aria-valuenow", "41");
+  expect(await axeViolations(page, "#fm-vitrino-glitilo")).toEqual([]);
+  const stepper = page.locator("#fm-vitrino-kampo").locator("fm-kampo[stepper]").first();
+  await expect(stepper).toHaveAttribute("value", "3");
+  await stepper.getByRole("button", { name: "Erhöhen" }).click();
+  await expect(stepper).toHaveAttribute("value", "4");
+  expect(await axeViolations(page, "#fm-vitrino-kampo")).toEqual([]);
 });

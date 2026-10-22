@@ -86,6 +86,7 @@ describe("describe_term (FR-12)", () => {
       "elektilo",
       "elekto",
       "faldilo",
+      "glitilo",
       "ikono",
       "insigno",
       "kampo",

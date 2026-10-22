@@ -23,6 +23,7 @@
     "source": "https://github.com/phosphor-icons/core (npm @phosphor-icons/core 2.1.1, assets/fill)",
     "read": "2026-10-17",
     "names": {
+      "add": "plus",
       "check": "check",
       "chevron-down": "caret-down",
       "chevron-left": "caret-left",
@@ -37,6 +38,7 @@
       "search": "magnifying-glass",
       "sort-ascending": "sort-ascending",
       "sort-descending": "sort-descending",
+      "subtract": "minus",
       "success": "check-circle",
       "upload": "upload-simple",
       "warning": "warning"

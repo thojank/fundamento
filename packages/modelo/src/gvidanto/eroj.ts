@@ -147,6 +147,8 @@ export interface GetEroOutput {
     parts: Skemo["parts"];
     bindings: Skemo["bindings"];
     a11y: Skemo["a11y"];
+    /** The events the element says (Spec 025 ①): change, input, a cancelable remove. */
+    events?: Skemo["events"];
     goals?: Skemo["goals"];
   };
   reguloj: ReguloRef[];
@@ -517,6 +519,7 @@ export function getEro(modelo: Modelo, input: GetEroInput): GetEroResult | GetEr
         parts: skemo.parts,
         bindings: skemo.bindings,
         a11y: skemo.a11y,
+        ...(skemo.events === undefined ? {} : { events: skemo.events }),
         ...(skemo.goals === undefined ? {} : { goals: skemo.goals }),
       },
       reguloj: regulojOf(modelo, entry.ero.name).map((regulo) =>

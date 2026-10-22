@@ -77,6 +77,9 @@ function fieldPartSelector(
   // entry (aria-selected), the no-results text.
   if (part === "listbox" || part === "no-results") return `:where(${root}) [part="${part}"]`;
   if (part === "suggestion") return `:where(${root}) [part="suggestion"]${entry}`;
+  // The step buttons and the clear button of Spec 025 ① (plan ① D-05, D-06) are composed butono
+  // beside the input: their size is theirs, not the input's.
+  if (["decrement", "increment", "clear"].includes(part)) return `:where(${root}) [part="${part}"]`;
   return `:where(${root}) [part="control"]`;
 }
 
@@ -197,6 +200,68 @@ const uploadStructure = (disables: boolean): string =>
     ':where([part="file-name"]) { overflow-wrap: anywhere; }',
     ':where([part="field"]:not([data-marked="true"])) [part="required-mark"] { display: none; }',
     HIDDEN_TEXT,
+  ].join("\n");
+
+/**
+ * A slider (Spec 025 ①, plan ① D-03): the field of the kampo around a track — the track is the
+ * control, the fill and the thumbs lie in it (two thumbs with range), the limits stand at both
+ * ends, a composed kampo of kind number beside them where field says so.
+ */
+export const isSlider = (skemo: Skemo): boolean => skemo.a11y.role === "slider";
+
+/** The states of a slider stand at its thumb (E3): hover, focus, pressed while dragged, disabled and invalid as the thumb speaks them. */
+const SLIDER_STATES: Readonly<Record<string, string | undefined>> = {
+  rest: "",
+  hover: ":hover",
+  focus: ":focus-visible",
+  pressed: ":active",
+  disabled: '[aria-disabled="true"]',
+  invalid: '[aria-invalid="true"]',
+};
+
+/**
+ * The selector of a part of a slider (Spec 025 ①, D-03): the combination stands on the field, the
+ * state on a thumb inside (`:has()`, as a field reads its input); the ring stands on the thumb that
+ * has the focus; the box's gap is the field's and the row's; every other part is its own element.
+ */
+function sliderPartSelector(part: string, property: string, data: string, state: string): string {
+  const thumb = SLIDER_STATES[state] ?? "";
+  const root = `[part="field"]${data}${thumb === "" ? "" : `:has([part="thumb"]${thumb})`}`;
+  if (part === "box" && property === "gap") return `:where(${root}), :where(${root}) [part="row"]`;
+  if (part === "focus-ring") return `:where(${root}) [part="thumb"]:focus-visible`;
+  if (part === "motion") return `:where(${root}) [part="fill"], :where(${root}) [part="thumb"]`;
+  return `:where(${root}) [part="${part}"]`;
+}
+
+/**
+ * Layout of a slider (Spec 025 ①, D-03), keywords and 0 only: the host is a block that takes the
+ * width of its container (E3); the field a column of label, row, help and error; the row a line of
+ * the start label, the track and the end label with the number field, centred; the track grows
+ * along the line and holds fill and thumbs absolutely — the fill from its start over its size, the
+ * thumb at its place, both custom properties the element writes as shares of the track (no
+ * literal); the thumb is centred on its place and on the track (margin auto), mirrored in
+ * right-to-left writing; a hidden thumb or field takes no room; the label of the composed field is
+ * heard, not seen (the slider's own label names the value).
+ */
+const sliderStructure = (disables: boolean): string =>
+  [
+    ":host { display: block; }",
+    ':where([part="field"]) { display: flex; flex-direction: column; align-items: stretch; }',
+    ':where([part="label"]) { display: inline-flex; align-items: baseline; }',
+    ':where([part="row"]) { display: flex; align-items: center; }',
+    // The track is a flex row that centres its items: an absolutely placed thumb takes its static
+    // position in the block axis — the middle of the track — with no literal.
+    ':where([part="track"]) { position: relative; display: flex; align-items: center; flex: 1 1 auto; box-sizing: border-box; }',
+    ':where([part="fill"]) { position: absolute; inset: 0 auto; inset-inline-start: var(--fm-fill-start); inline-size: var(--fm-fill-size); transition-property: background-color; }',
+    ':where([part="thumb"]) { position: absolute; inset-inline-start: var(--fm-thumb-at); box-sizing: border-box; transform: translateX(-50%); cursor: pointer; transition-property: background-color; }',
+    ':host(:dir(rtl)) :where([part="thumb"]) { transform: translateX(50%); }',
+    ':where([part="thumb"]:focus:not(:focus-visible)) { outline-width: 0; }',
+    ':where([part="thumb"][hidden], [part="number"][hidden]) { display: none; }',
+    ...(disables ? [':where([part="thumb"][aria-disabled="true"]) { cursor: not-allowed; }'] : []),
+    ':where([part="min-label"], [part="max-label"]) { white-space: nowrap; }',
+    ':where([part="number"]) { flex: none; inline-size: 0; }',
+    ':where([part="number"])::part(label) { position: absolute; clip-path: inset(50%); overflow: hidden; white-space: nowrap; }',
+    ':where([part="field"]:not([data-marked="true"])) [part="required-mark"] { display: none; }',
   ].join("\n");
 
 /**
@@ -660,6 +725,14 @@ function declarations(skemo: Skemo, part: string, property: string, token: strin
   if (isMeter(skemo) && part === "fill" && property === "color") {
     return [`background-color: ${variable(token)};`];
   }
+  // A slider (Spec 025 ①, D-03): fill and thumb carry a colour, as the meter's bar does (no text
+  // lies on them); the number field beside the track is not shown where its width is none.
+  if (isSlider(skemo) && (part === "fill" || part === "thumb") && property === "color") {
+    return [`background-color: ${variable(token)};`];
+  }
+  if (isSlider(skemo) && part === "number" && property === "width") {
+    return token === "none" ? ["display: none;"] : [`min-inline-size: ${variable(token)};`];
+  }
   if (isMeter(skemo) && part === "unknown") {
     if (property === "color") return [`border-color: ${variable(token)};`];
     if (property === "width") return [`border-width: ${variable(token)};`];
@@ -821,7 +894,12 @@ const structure = (inlineHost: boolean, disables: boolean, bordered: boolean): s
  * column; the mark of a required field (an asterisk drawn as a small vector, no text) shows only
  * while the field is marked (data-marked).
  */
-const fieldStructure = (disables: boolean, select = false, textarea = false): string =>
+const fieldStructure = (
+  disables: boolean,
+  select = false,
+  textarea = false,
+  stepper = false,
+): string =>
   [
     ":host { display: block; }",
     ':where([part="field"]) { display: flex; flex-direction: column; align-items: stretch; }',
@@ -832,6 +910,18 @@ const fieldStructure = (disables: boolean, select = false, textarea = false): st
     ...(disables ? [':where([part="control"]:disabled) { cursor: not-allowed; }'] : []),
     ':where([part="field"]:not([data-marked="true"])) [part="required-mark"] { display: none; }',
     ...(select ? selectStructure : []),
+    // Spec 025 ① (plan ① D-05, D-06): the input in a row with its step buttons and its clear
+    // button (composed butono, hidden unless shown); the input fills the row.
+    ...(stepper
+      ? [
+          // The row lines up the input and its buttons; the input grows to the rest and keeps its
+          // own minimum width (no min-inline-size: 0), so a narrow filter bar still wraps its
+          // fields as before Spec 025.
+          ':where([part="row"]) { display: flex; align-items: center; }',
+          ':where([part="row"]) > [part="control"] { flex: 1 1 auto; }',
+          ':where([part="decrement"], [part="increment"], [part="clear"]) { flex: none; }',
+        ]
+      : []),
   ].join("\n");
 
 /**
@@ -1606,43 +1696,46 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
                           ? paginationStructure
                           : isUpload(skemo)
                             ? uploadStructure(disables)
-                            : isCodeblock(skemo)
-                              ? codeblockStructure()
-                              : isMarkdown(skemo)
-                                ? markdownStructure
-                                : isCard(skemo)
-                                  ? cardStructure
-                                  : isAvatar(skemo)
-                                    ? avatarStructure
-                                    : isLight(skemo)
-                                      ? lightStructure(skemo)
-                                      : isTabs(skemo)
-                                        ? tabsStructure
-                                        : isDisclosure(skemo)
-                                          ? disclosureStructure
-                                          : isField(skemo)
-                                            ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}`
-                                            : isGroup(skemo)
-                                              ? groupStructure(
-                                                  disables,
-                                                  skemo.parts["required-mark"] !== undefined,
-                                                )
-                                              : isToggle(skemo)
-                                                ? toggleStructure(
+                            : isSlider(skemo)
+                              ? sliderStructure(disables)
+                              : isCodeblock(skemo)
+                                ? codeblockStructure()
+                                : isMarkdown(skemo)
+                                  ? markdownStructure
+                                  : isCard(skemo)
+                                    ? cardStructure
+                                    : isAvatar(skemo)
+                                      ? avatarStructure
+                                      : isLight(skemo)
+                                        ? lightStructure(skemo)
+                                        : isTabs(skemo)
+                                          ? tabsStructure
+                                          : isDisclosure(skemo)
+                                            ? disclosureStructure
+                                            : isField(skemo)
+                                              ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo), skemo.parts.decrement !== undefined)}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}`
+                                              : isGroup(skemo)
+                                                ? groupStructure(
                                                     disables,
-                                                    uzo?.layout.wrap !== undefined &&
-                                                      uzo.layout.wrap !== "never",
-                                                    skemo.slots.some(
-                                                      (slot) =>
-                                                        slot.default !== true && slot.text === true,
-                                                    ),
                                                     skemo.parts["required-mark"] !== undefined,
                                                   )
-                                                : structure(
-                                                    uzo?.layout.wrap === "with-text",
-                                                    disables,
-                                                    bordered,
-                                                  );
+                                                : isToggle(skemo)
+                                                  ? toggleStructure(
+                                                      disables,
+                                                      uzo?.layout.wrap !== undefined &&
+                                                        uzo.layout.wrap !== "never",
+                                                      skemo.slots.some(
+                                                        (slot) =>
+                                                          slot.default !== true &&
+                                                          slot.text === true,
+                                                      ),
+                                                      skemo.parts["required-mark"] !== undefined,
+                                                    )
+                                                  : structure(
+                                                      uzo?.layout.wrap === "with-text",
+                                                      disables,
+                                                      bordered,
+                                                    );
   // A skip link adds its place above the page to a control's structure (Spec 014 ②, D-07).
   const floating = isSkip(skemo) ? `\n${skipStructure}` : "";
   return `${base}${floating}\n${[...tokenRules, ...undrawn].join("\n")}\n`;
@@ -1730,6 +1823,9 @@ function selectorOf(
   if (isUpload(skemo)) {
     return uploadPartSelector(part, property, data, combination[STATE_KEY] ?? "rest");
   }
+  if (isSlider(skemo)) {
+    return sliderPartSelector(part, property, data, combination[STATE_KEY] ?? "rest");
+  }
   if (isCodeblock(skemo)) return codeblockPartSelector(part, data);
   if (isMarkdown(skemo)) return markdownPartSelector(part);
   if (isCard(skemo)) return cardPartSelector(part, data);
@@ -1781,6 +1877,8 @@ export function elementNamesOf(
     role: entry.skemo.a11y.role,
     // Spec 015 ① (plan ① D-04): the breadcrumb is a light host with a list in its shadow.
     breadcrumb: isBreadcrumb(entry.skemo),
+    // Spec 025 ① (plan ① D-05): a field with step buttons (the kampo) shows them in a row.
+    stepper: entry.skemo.parts.decrement !== undefined,
     marked: entry.skemo.parts["required-mark"] !== undefined,
     // Spec 011 ③: a live region turns its indicator and shows a dismiss butono where the Skemo
     // has the parts.

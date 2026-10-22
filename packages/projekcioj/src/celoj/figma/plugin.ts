@@ -95,6 +95,17 @@ type PartNode =
   // An upload (Spec 015 ②, plan ② D-06): the dropzone with the button that chooses (`choose`,
   // its word `choose-label`) and the hint; in the example the list of the chosen files, one row
   // each (`file-row-1` …) with name, size and the remove butono.
+  // A slider (Spec 025 ①, plan ① D-04): the row of the end labels, the track with its fill and
+  // thumbs (the second of a range), the stand-in of the number field.
+  | "row"
+  | "lead"
+  | "min-label"
+  | "max-label"
+  | "track"
+  | "fill"
+  | "thumb"
+  | "thumb-end"
+  | "number"
   | "dropzone"
   | "drop-hint"
   | "choose"
@@ -415,6 +426,41 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
  */
 const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readonly Binding[]>>>> = {
   toggle: { "box.gap": [{ node: "field", fields: ["itemSpacing"] }] },
+  // A slider (Spec 025 ①, plan ① D-04): the track's fill, height (a minimum, the fill as high)
+  // and radius; the fill's colour and radius; every thumb's colour, size and radius (the second
+  // thumb of a range too); the number field's width; the end labels' colour and role; the gap of
+  // the box between the field's parts and along the row.
+  slider: {
+    "track.fill": [{ node: "track", fields: ["fills"], paint: true }],
+    "track.height": [
+      { node: "track", fields: ["minHeight"] },
+      { node: "fill", fields: ["minHeight"] },
+    ],
+    "track.radius": [{ node: "track", fields: ["cornerRadius"] }],
+    "fill.color": [{ node: "fill", fields: ["fills"], paint: true }],
+    "fill.radius": [{ node: "fill", fields: ["cornerRadius"] }],
+    "thumb.color": [
+      { node: "thumb", fields: ["fills"], paint: true },
+      { node: "thumb-end", fields: ["fills"], paint: true },
+    ],
+    "thumb.size": [
+      { node: "thumb", fields: ["width", "height"] },
+      { node: "thumb-end", fields: ["width", "height"] },
+    ],
+    "thumb.radius": [
+      { node: "thumb", fields: ["cornerRadius"] },
+      { node: "thumb-end", fields: ["cornerRadius"] },
+    ],
+    "number.width": [{ node: "number", fields: ["minWidth"] }],
+    "min-label.color": [{ node: "min-label", fields: ["fills"], paint: true }],
+    "min-label.typography": typographyOf("min-label"),
+    "max-label.color": [{ node: "max-label", fields: ["fills"], paint: true }],
+    "max-label.typography": typographyOf("max-label"),
+    "box.gap": [
+      { node: "field", fields: ["itemSpacing"] },
+      { node: "row", fields: ["itemSpacing"] },
+    ],
+  },
   // A field with suggestions (Spec 014 ⑤, plan ⑤ D-04): the listbox under the field with its
   // fill, radius and width; every suggestion a row (height, padding, radius) with its text in
   // the colour of its entry and the label role; the no-results text in its colour and role. A
@@ -1009,6 +1055,25 @@ const TRACK_LAYOUT = {
  * lifts it). Hugging, an empty auto-layout frame keeps the 100 × 100 of createFrame (③ F-4): the
  * fill stood as a circle and the track hugged it.
  */
+/**
+ * The track of a slider (Spec 025 ①, plan ① D-04): a row of fixed size (written from the measured
+ * texts and the resolved height) that centres its thumbs across and lets them overflow it.
+ */
+const SLIDER_TRACK_LAYOUT = {
+  layoutMode: "HORIZONTAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "CENTER",
+  layoutSizingHorizontal: "FIXED",
+  layoutSizingVertical: "FIXED",
+  strokesIncludedInLayout: true,
+  clipsContent: false,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
 const FILL_LAYOUT = {
   layoutMode: "HORIZONTAL",
   primaryAxisAlignItems: "MIN",
@@ -1365,6 +1430,7 @@ const PLACEHOLDER_LAYOUT = ${JSON.stringify(PLACEHOLDER_LAYOUT)};
 const METER_LAYOUT = ${JSON.stringify(METER_LAYOUT)};
 const TRACK_LAYOUT = ${JSON.stringify(TRACK_LAYOUT)};
 const FILL_LAYOUT = ${JSON.stringify(FILL_LAYOUT)};
+const SLIDER_TRACK_LAYOUT = ${JSON.stringify(SLIDER_TRACK_LAYOUT)};
 const ROW_LAYOUT = ${JSON.stringify(ROW_LAYOUT)};
 const CELL_LAYOUT = ${JSON.stringify(CELL_LAYOUT)};
 const ENTRY_ROW_LAYOUT = ${JSON.stringify(ENTRY_ROW_LAYOUT)};
@@ -4280,6 +4346,127 @@ async function applyComponents(variables, warnings) {
     bindMeasures(measures, report, component, variant);
   }
   /**
+   * A slider (Spec 025 ①, plan ① D-04): the variant is a column — the label, the row of the start
+   * label, the track and the end label with the number field, then help and error. The track is a
+   * row that fills the line and holds the fill (its share of the track, written from the plan's
+   * share; from the start thumb to the end thumb in a range) and the ring → gap → thumb of every
+   * thumb (two with range, placed on the fill's ends); the number field is a stand-in in the kampo's
+   * look (composed.number) with the value's words, shown only where the variant has a field.
+   */
+  async function drawSlider(node, component, variant, report, labels) {
+    const texts = component.texts || {};
+    const composed = component.composed || {};
+    const spec = component.slider || { share: 0.5, start: 0.25, end: 0.75 };
+    const ranged = variant.props.range === "true";
+    const field = part(node, "field", () => figma.createFrame());
+    const label = part(field, "label", () => figma.createText());
+    const row = part(field, "row", () => figma.createFrame());
+    const minLabel = part(row, "min-label", () => figma.createText());
+    const track = part(row, "track", () => figma.createFrame());
+    // The track is a row in the flow (as the meter's): a range leads with an empty frame up to the
+    // first thumb; the fill runs from the start (or the first thumb) to the thumb at its end; every
+    // thumb stands in its ring and gap right after the fill it ends — no x or y is written.
+    const lead = ranged ? part(track, "lead", () => figma.createFrame()) : undefined;
+    if (!ranged) for (const stale of track.children.slice()) if (stale.name === "lead" || stale.name === "focus-ring-end") stale.remove();
+    const fill = part(track, "fill", () => figma.createFrame());
+    const ring = part(track, "focus-ring", () => figma.createFrame());
+    const gap = part(ring, "focus-gap", () => figma.createFrame());
+    const thumb = part(gap, "thumb", () => figma.createFrame());
+    const ringEnd = ranged ? part(track, "focus-ring-end", () => figma.createFrame()) : undefined;
+    const gapEnd = ringEnd ? part(ringEnd, "focus-gap-end", () => figma.createFrame()) : undefined;
+    const thumbEnd = gapEnd ? part(gapEnd, "thumb-end", () => figma.createFrame()) : undefined;
+    const maxLabel = part(row, "max-label", () => figma.createText());
+    const number = part(row, "number", () => figma.createFrame());
+    const numberText = part(number, "number-text", () => figma.createText());
+    const help = part(field, "help", () => figma.createText());
+    const error = part(field, "error", () => figma.createText());
+    [label, row, help, error].forEach((child, index) => {
+      if (field.children.indexOf(child) !== index) field.insertChild(index, child);
+    });
+    [minLabel, track, maxLabel, number].forEach((child, index) => {
+      if (row.children.indexOf(child) !== index) row.insertChild(index, child);
+    });
+    const trackOrder = ranged && lead && ringEnd ? [lead, ring, fill, ringEnd] : [fill, ring];
+    trackOrder.forEach((child, index) => {
+      if (track.children.indexOf(child) !== index) track.insertChild(index, child);
+    });
+    const all = [label, minLabel, maxLabel, numberText, help, error];
+    for (const each of all) await loadCurrentFont(each);
+    writeCase(component, variant, label);
+    if (variant.font !== undefined) {
+      for (const each of all) write(each, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+    }
+    for (const [name, each] of [["min-label", minLabel], ["max-label", maxLabel], ["help", help], ["error", error]]) {
+      const text = texts[name];
+      if (typeof text === "string") write(each, "characters", text);
+    }
+    write(numberText, "characters", String(Math.round(spec.share * 100)));
+    labels.push(label);
+    const rings = [ring, gap].concat(ringEnd && gapEnd ? [ringEnd, gapEnd] : []);
+    const thumbs = [thumb].concat(thumbEnd ? [thumbEnd] : []);
+    const frames = [node, field, row, track, fill, number].concat(lead ? [lead] : []).concat(rings).concat(thumbs);
+    for (const frame of frames) own(frame, NEUTRAL);
+    for (const each of all) own(each, NEUTRAL_TEXT);
+    own(node, HUG_LAYOUT);
+    own(field, FIELD_LAYOUT);
+    own(row, TOGGLE_LAYOUT);
+    own(track, SLIDER_TRACK_LAYOUT);
+    own(fill, FILL_LAYOUT);
+    if (lead) own(lead, FILL_LAYOUT);
+    for (const frame of rings) own(frame, HUG_LAYOUT);
+    for (const frame of thumbs) {
+      own(frame, INDICATOR_LAYOUT);
+      own(frame, { layoutSizingHorizontal: "FIXED", layoutSizingVertical: "FIXED" });
+    }
+    own(number, CONTROL_LAYOUT);
+    own(number, { visible: variant.props.field === "true" });
+    for (const child of frames.concat(all)) own(child, IN_FLOW);
+    for (const each of all) own(each, TEXT_SIZING);
+    const nodes = {
+      field, label, row, "min-label": minLabel, track, fill, "focus-ring": ring, "focus-gap": gap,
+      thumb, "max-label": maxLabel, number, help, error,
+    };
+    if (thumbEnd) nodes["thumb-end"] = thumbEnd;
+    const measures = bind(nodes, variant, variables, component.structure);
+    // The ring of the second thumb takes the same bindings as the first (focus-ring, focus-gap).
+    if (ringEnd && gapEnd && thumbEnd) {
+      const look = { "focus-ring": ringEnd, "focus-gap": gapEnd, control: thumbEnd };
+      for (const measure of bind(look, { bindings: ringOnly(variant.bindings), paints: variant.paints, focusVisible: variant.focusVisible }, variables, "control")) measures.push(measure);
+    }
+    // The number field looks like the kampo it composes (kind number, the field's size).
+    if (composed.number !== undefined) {
+      const look = { control: number, text: numberText };
+      for (const measure of bind(look, composed.number, variables, "control")) measures.push(measure);
+    }
+    for (const each of frames.concat(all)) flush(each);
+    bindMeasures(measures, report, component, variant);
+    // Measured, then written (F14, F-3): the track as wide as the wider text of the field (as the
+    // meter's column is), as high as the plan resolves track.height; the fill the plan's share of
+    // it, less the half ring each thumb stands with on its end, so the thumb's middle marks the
+    // value; the lead of a range the room before its first thumb. The size of a ring comes from
+    // the plan's variables (the thumb plus the two bands), not from a frame the tool measures later.
+    const trackHeight = resolvedNumber(variables.get(variant.bindings["track.height"]), track);
+    const height = trackHeight === undefined ? SMALLEST_SIZE : trackHeight;
+    const width = Math.max(label.width, help.width, SMALLEST_SIZE);
+    fit(track, width, height, SLIDER_TRACK_LAYOUT);
+    const thumbSize = resolvedNumber(variables.get(variant.bindings["thumb.size"]), thumb);
+    const ringBand = resolvedNumber(variables.get(variant.bindings["focus-ring.ring"] + "/width"), ring);
+    const gapBand = resolvedNumber(variables.get(variant.bindings["focus-ring.offset"]), gap);
+    const ringSize = thumbSize === undefined ? 0 : thumbSize + 2 * ((ringBand || 0) + (gapBand || 0));
+    const from = ranged ? spec.start : 0;
+    const to = ranged ? spec.end : spec.share;
+    if (lead) fit(lead, Math.max(from * width - ringSize / 2, SMALLEST_SIZE), height, FILL_LAYOUT);
+    const span = (to - from) * width - (ranged ? ringSize : ringSize / 2);
+    fit(fill, Math.max(span, SMALLEST_SIZE), height, FILL_LAYOUT);
+  }
+
+  /** The bindings of a focus ring alone, for a second ring drawn like the first. */
+  function ringOnly(bindings) {
+    const out = {};
+    for (const [key, name] of Object.entries(bindings)) if (key.startsWith("focus-ring.")) out[key] = name;
+    return out;
+  }
+  /**
    * A card (Spec 015 ③, plan ③ D-05): the variant holds the surface — fill, radius, the border
    * in its size, the shadow as an effect, clipping its content — with the media and the body: a
    * column where the card is vertical (the media across the top, edge to edge, as high as the
@@ -4937,6 +5124,12 @@ async function applyComponents(variables, warnings) {
       // An upload (Spec 015 ②) is drawn in a function of its own.
       if (component.structure === "upload") {
         await drawUpload(node, component, variant, report, labels, undefined);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
+      // A slider (Spec 025 ①): the track with its fill and thumbs, in a function of its own.
+      if (component.structure === "slider") {
+        await drawSlider(node, component, variant, report, labels);
         if (existing === undefined) made.push(node);
         continue;
       }

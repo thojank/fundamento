@@ -32,6 +32,7 @@
     "source": "https://github.com/phosphor-icons/core (npm @phosphor-icons/core 2.1.1, assets/light)",
     "read": "2026-10-20",
     "names": {
+      "add": "plus",
       "check": "check",
       "chevron-down": "caret-down",
       "chevron-left": "caret-left",
@@ -46,6 +47,7 @@
       "search": "magnifying-glass",
       "sort-ascending": "sort-ascending",
       "sort-descending": "sort-descending",
+      "subtract": "minus",
       "success": "check-circle",
       "upload": "upload-simple",
       "warning": "warning"
@@ -56,7 +58,7 @@
     "structure": {
       "vortaro": "0.2.0",
       "reference": "komuna",
-      "sha256": "022811eab006ab390c5f9c83a11c885555e84397024991b9aee8ee51e4ff5f62"
+      "sha256": "0d9420bdb1a904314f9a2954a44a65dc327d94946603f28f70c03183d4dab11e"
     },
     "agordo": {
       "name": "provo-kompakta",
