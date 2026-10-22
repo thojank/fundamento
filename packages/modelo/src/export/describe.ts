@@ -50,6 +50,11 @@ const WORDS = [
   "thirty-five",
   // Spec 025 ②: thirty-six Eroj (the date picker).
   "thirty-six",
+  "thirty-seven",
+  "thirty-eight",
+  "thirty-nine",
+  // Spec 025 ③: forty Eroj (the tag, the styled list, the multi-select, the inline editor).
+  "forty",
 ] as const;
 
 /** A count as an English word for 0 to 35 (`no` for zero), otherwise as digits. */

@@ -53,8 +53,8 @@
             "mehrfach"
           ]
         },
-        "ero": null,
-        "kialo": "Several options at once are a group of checkboxes, because a radio group holds exactly one answer; Fundamento has no such group yet."
+        "ero": "plurelektilo",
+        "kialo": "Several options at once are the plurelektilo's, because a radio group holds exactly one answer; it shows the chosen as a count or as tags (Spec 025 ③ closes the alternative multi)."
       }
     ],
     "boundary": [

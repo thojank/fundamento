@@ -50,6 +50,8 @@ describe("the Sxablonoj of Spec 020 ②", () => {
           "alsxutilo",
           "glitilo",
           "datelektilo",
+          "listelektilo",
+          "plurelektilo",
         ],
       ],
       ["actions", true, ["butono"]],

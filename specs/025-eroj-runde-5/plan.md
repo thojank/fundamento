@@ -98,6 +98,8 @@ Ein Satz aus der Rolle `slider`: „Every value or range a person sets within kn
 
 ### Offen (für den Maintainer)
 
+**Entschieden (Maintainer, 2026-10-22): O-1 bis O-5 wie vorgeschlagen.** Kein Code ändert sich: `field` mit `range` bleibt verborgen, die Griffe heißen „Von“/„Bis“, der Zustand `pressed`, die Spur bei `invalid` bleibt `sunken`, der Name `glitilo` und `field`/`number` bleiben.
+
 - **O-1 `field` mit `range`:** verborgen (Abweichung 3). Vorschlag: so lassen; zwei Felder (von/bis) in einer späteren Runde, wenn ein Produkt sie braucht.
 - **O-2 Namen der Griffe:** „Von“/„Bis“ (de), „From“/„To“ (en) als `a11y.texts min-label-name`/`max-label-name`. Vorschlag: so.
 - **O-3 Zustandsname `pressed`** statt `active` (Abweichung 2). Vorschlag: so (E2).
@@ -229,6 +231,8 @@ Vitrino: zwei Zeilen (einzeln 24.10.2026 mit Hilfe „Ein Datum ab heute.“, Be
 
 ### Offen (für den Maintainer)
 
+**Entschieden (Maintainer, 2026-10-22): O-6 bis O-10 wie vorgeschlagen.** Kein Code ändert sich: der Name `datelektilo` mit seinen Teilnamen, der Bereich in einem Feld, `expanded` als Prop, keine Kialo des fremden `instead` in `suggest_ero` (Spec 008 D-08 bleibt), die Sprache des Figma-Kalenders bleibt.
+
 - **O-6 E4 Name** `datelektilo` (bestätigt die Spec selbst bei ①); `trigger`, `calendar`, `cell`, `day` als Teilnamen.
 - **O-7 Bereich in einem Feld** (Abweichung 5) oder zwei Felder (von/bis). Vorschlag: so lassen; zwei Felder in einer späteren Runde, wenn ein Produkt sie braucht.
 - **O-8 `expanded` als Prop** (Abweichung 3). Vorschlag: so (der Weg des `kompletigilo`).
@@ -282,4 +286,156 @@ node -e 'const fs=require("fs");let t={eroj:0,props:0,states:0,slots:0,parts:0,b
 
 ## ③ Auswahl
 
-Folgt gestapelt auf ②: `listelektilo`, `plurelektilo`, `signeto`, `lokredaktilo` (Spec ③). Aufgaben ab T2561.
+**Branch:** `261022-spec-025-auswahl-c7fa02` (gebaut gestapelt auf ②, `261022-spec-025-datum-c7fa02`, PR #102; nach dem Merge von #101–#103 auf `main` rebased) · **Datum:** 2026-10-22 (Nachtlauf) · **Stand:** gebaut, O-1 bis O-16 entschieden, Abnahme offen.
+
+**Rebase auf `main` (2026-10-22, nach #101, #102 und #103 – Spec 024 Runde 2, Constitution v2.3):** Konflikte in der Vojmapo (die Zeile des Studios von `main`, die Zeile E5 mit dem Stand von ③), in `fixtures/stufe1-provo.json` und in `aspekto.json` von `provo` und `provo-kompakta`. Die Fixtures sind nicht von Hand gemischt, sondern neu erzeugt: `pnpm vortaro:ero-tokenoj` leitet die Ero-Tokens der vier neuen Eroj aus ihren Skemoj ab (200 Tokens, 1 032 → 1 232, als Alias auf die Rolle, die das Skemo bindet) und schreibt sie in den Kern und – mit `--config` – in `ekzemplo` und `aspekto-incomplete`; `provo` und `provo-kompakta` sind mit `fm agordilo derive` neu abgeleitet (nur `aspekto.json` und das Haupt-Set ändern sich), die Stufe-1-Prüfsummen aus `deriveAspekto` neu gerechnet. Die Komponentenliste des Studios (Metiejo, M-4) zählt 40 Eroj. B-29 ist zurückgenommen, B-31 neu.
+
+### Zusammenfassung
+
+1. **`signeto` (D-14, D-18):** das Schlagwort – ein `span` ohne Rolle (wie der `insigno`), dessen Körper bei `mode=selectable` ein Knopf mit `aria-pressed` wird (Ereignis `change`) und der bei `mode=removable` einen komponierten `butono emphasis=low` mit `ikono close` trägt, benannt „‹Text› entfernen“ (Ereignis `remove`, abbrechbar; danach Fokus auf das nächste Schlagwort, am Ende auf den Container; Entf und Rücktaste entfernen auch). Props `mode`, `selected`, `size` (small/medium), `intent` (neutral und die vier Statusrollen – E2: die Achse heißt wie beim `insigno`, Abweichung 2), `disabled`; Slot `icon-start`. Constraint `selected` ⇒ `mode=selectable`.
+2. **`listelektilo` (D-15, D-18):** die gestaltete Auswahlliste – das Feld des `kampo` um einen Knopf der Rolle `combobox` (APG Select-Only Combobox), der die gewählte Option zeigt, über einer Popover-Listbox, deren Optionen (`item`) ein Symbol (`ikono`) und eine Beschreibung tragen; Tippen eines Buchstabens springt (offen zur Zeile, geschlossen zur Wahl), Pfeile, Pos1/Ende, Enter, Leertaste, Escape; Formularwert und Gültigkeit über `ElementInternals`. Props `value`, `placeholder`, `required`, `disabled`, `readonly`, `invalid`, `expanded`, `name`.
+3. **`plurelektilo` (D-16, D-18):** die Mehrfachauswahl – ein Knopf, der sagt, wie viele gewählt sind („3 gewählt“, `a11y.texts options-count`) oder die Gewählten als entfernbare `signeto` zeigt (`summary=tags`), über einer mehrfach wählbaren Listbox (Rolle `listbox`, Häkchen `check` je Option, Gewählte beim Öffnen oben), mit Filterfeld bei `filterable`, „Alle abwählen“ (`clear`) und `max` (weitere Optionen werden verweigert; mehr Werte von der Anwendung machen das Feld ungültig: „Wähle höchstens {max}.“). Jeder Wert ist ein Formularwert unter dem Namen. Ereignisse `input`, `change`.
+4. **`lokredaktilo` (D-17, D-18):** die Inline-Bearbeitung – die Anzeige des Werts mit dem Bearbeiten-Knopf („‹Label› bearbeiten“, `ikono edit`), beim Bearbeiten der komponierte `kampo` der `kind` mit Speichern und Abbrechen; Enter speichert (Ereignis `save`, abbrechbar, `detail.value`), Escape verwirft (`cancel`), danach liegt der Fokus auf dem Bearbeiten-Knopf; ein Fehler-Slot hält das Feld offen und steht im komponierten `kampo` (der Eingabe beschrieben). Props `label` (Pflicht), `value`, `kind`, `editing`, `disabled`, `readonly`, `invalid`, `name`.
+5. **G2 (Verflechtung, D-14–D-17):** `insigno.boundary removable-chip` → `use-instead signeto`; `elektilo.boundary custom-popup` → `use-instead listelektilo`, `elektilo.instead multiple` → `plurelektilo`; `kompletigilo.boundary multi-select` → `use-instead plurelektilo`; `elekto.instead multi` → `plurelektilo`; `tabelo.boundary inline-edit` → `use-instead lokredaktilo`; `kampo.instead single-value` → `lokredaktilo`. Die gekippten Antworten tragen ein Jugxo (OP-12).
+6. **Ikonaro:** `edit` (Phosphor `pencil-simple`) in komuna, ekzemplo, provo, provo-kompakta und den fünf Agordilo-Gewichten mit Herkunft; 21 Namen (G1: höchstens +6 in der Runde, vier verbraucht). Reguloj ausgeweitet (E5): `badge-text-short` auf den `signeto`, die Feld-Reguloj auf `listelektilo` und `plurelektilo`, die Fehler-Reguloj auch auf den `lokredaktilo`, `spacing-owned-by-container` um vier.
+7. **Projekcioj:** vier Web-Hosts (`chip`, `listselect`, `multiselect`, `editor`; D-18), Figma-Bauformen `badge` (signeto mit Achse `mode`, lokredaktilo) und `field` (listelektilo, plurelektilo mit der Listbox der drei Optionen), Vitrino, Make-Kit-Sätze, React-Typen (D-19). Zahlwort `forty`.
+
+### Constitutional Compliance Review
+
+- **Art. I (Modelo-First):** konform. Skemo, Uzo, Ikonaro, Jugxoj, Ontologio, Übersetzungen zuerst; Web, React, Figma, Vitrino und Make-Kit sind erzeugt.
+- **Art. II (Unu Vortaro):** konform. Der Knopf heißt `control`, die Liste `listbox`, die Zeile `item`, das Häkchen `check`, das Schlagwort im `plurelektilo` `tag` – überall gleich; `intent` wie beim `insigno`.
+- **Art. III (Maschinenlesbarkeit):** konform. `get_ero` nennt Ereignisse (`remove` und `save` abbrechbar), Achsen und Pflichten; `suggest_ero` beantwortet die Dialoge; `check_usage` prüft `badge-text-short` am `signeto` und `error-says-what-to-do` am `lokredaktilo`.
+- **Art. IV (Multmarkeco):** konform. Keine neuen Tokens der ersten zwei Ebenen; die dritte Ebene (Constitution v2.3) trägt nach dem Rebase die 200 abgeleiteten Ero-Tokens der vier Eroj, als Alias in jeder Marke. Das gewählte Schlagwort nimmt `color.action.primary.selected`/`.text`, die Liste `color.background.raised` + `elevation.shadow.overlay`, das Häkchen `color.action.primary.rest`; die Glyphe steht in jedem Aspekto-Paket.
+- **Art. V (Clean Room):** konform. Kein fremdes System geöffnet; die Glyphe ist Phosphor Icons (MIT) mit Herkunft.
+- **Art. VI (Regularo kun Kialoj):** konform. Reguloj ausgeweitet (E5), keine neue Regulo; zwei Jugxoj (gekippte Antworten; nicht gezeichnete komponierte Teile in Figma).
+- **Art. VII (Agenta Dokumentado):** konform. Die Spec-Dialoge sind MCP-Tests (`s025-auswahl.test.ts`); die deutschen Texte stehen in `tradukoj.json`.
+- **Art. VIII (Web-first, mobiles Modell):** konform. `item` statt `option`, `intent` statt „Farbe“, `tinted-categories` statt „color-coded“ (`skemo-web-term`, `uzo-web-term`); die Wörter der Knöpfe und Nachrichten kommen aus `a11y.texts` mit Platzhaltern `{label}` und `{max}`.
+- **Art. IX (Vertikaler Durchstich):** konform. Jedes der vier Eroj geht durch alle Ebenen.
+- **Art. X (Test-first):** konform. Rot in `bfac5d2` (nach den Rebases auf ②; davor `2ac2243`: Modelo, Projekcioj, MCP, Browser-Specs, Checks, Doku-Test), dann grün (`93d8dfd`).
+- **Art. XI (Einfachheit):** konform. Kein neues Paket, keine Abhängigkeit, keine neue Figma-Bauform (badge und field tragen die vier Sets).
+- **Art. XII (Interoperabilität):** konform. Kein neues Celo.
+- **Art. XIII (Einfachheit der Nutzung):** konform. `<fm-signeto mode="selectable">Kontrast</fm-signeto>`, `<fm-lokredaktilo label="Titel" value="…"></fm-lokredaktilo>` genügen.
+
+### Entwurfsentscheidungen
+
+#### D-14 `signeto`: Körper als Knopf, Entfernen als komponierter `butono`, `intent` statt `tone`
+Der `signeto` ist wie der `insigno` ein `span` ohne Rolle (Rolle `generic`), damit ein statisches Schlagwort nichts verspricht. Bei `mode=selectable` wird sein Körper (`body`) ein Knopf mit `aria-pressed` (Spec: „selectable → button mit aria-pressed“) – nicht das ganze Element, damit der Entfernen-Knopf nie in einem Knopf steht. Bei `mode=removable` steht ein komponierter `butono` im Element; bei `static` und `selectable` hält ein verborgener Platzhalter (`span part=remove hidden`) den Teil – kein Knopf, keine Glyphe (ein Schlagwort mit Symbol zählt dann genau ein `ikono`). Der Fokus nach dem Entfernen geht zum nächsten Geschwister-Element, sonst zum Container (Spec). Die Farbachse heißt `intent` wie beim `insigno` (E2), der Grenzfall „farbcodierte Kategorien“ `tinted-categories` (`uzo-web-term`). Die gekippte Antwort „Entfernbares Schlagwort“ (Grenze `removable-chip` des `insigno`, bisher not-supported) ist im Jugxo `jug_01M5H5HGB6S1HWJ2KTNP3CF48R` festgehalten.
+
+#### D-15 `listelektilo`: Select-Only Combobox über einer Popover-Listbox, Zeilen als `item`
+Der Knopf trägt `role=combobox`, `aria-haspopup=listbox`, `aria-expanded`, `aria-controls` und – offen – `aria-activedescendant` auf die aktive Zeile (APG Select-Only Combobox); die Listbox ist ein `popover=manual` der Plattform, am Feld verankert (Anchor-Positioning, wie die Liste des `kompletigilo`). Die Zeile heißt `item` (nicht `option`: `skemo-web-term`), trägt ihre Zustände als `aria-selected` (Schlüssel `selected` des Eintrags) und `data-active` (zweiter Schlüssel `active`, wie die Vorschläge des `kompletigilo`), ihr Symbol als `ikono` (`icon`) und ihre Beschreibung (`description`). Getippte Buchstaben springen zur ersten Zeile mit diesem Anfang – offen als aktive Zeile, geschlossen als Wahl (wie die native Liste). Der Knopf nimmt beim Öffnen den Fokus selbst (WebKit gibt ihn einem Knopf beim Klick nicht, B-22). Der `kompletigilo` teilt Rolle und Listbox; die Projekcioj unterscheiden ihn am Teil `suggestion` gegen `item` (B-17). Die Grenze `custom-popup` des `elektilo` (not-supported) ist durch den `listelektilo` geschlossen (Jugxo).
+
+#### D-16 `plurelektilo`: Knopf über einer mehrfach wählbaren Listbox, Schlagwörter nach dem Knopf
+Der Knopf hat keine Rolle außer `button` (`aria-haspopup=listbox`); beim Öffnen geht der Fokus in die Listbox (Rolle `listbox`, `aria-multiselectable`, `tabindex=-1`, `aria-activedescendant`) oder – bei `filterable` – ins Filterfeld (`type=search`, `aria-controls` auf die Listbox); Pfeile bewegen, Leertaste wählt an oder ab (im Filterfeld tippt sie), Enter und Escape schließen und geben den Fokus dem Knopf zurück. Das Popover ist ein **Panel** (`part=listbox`), die Listbox der Halter der Zeilen (`part=items`): eine Listbox darf nur Optionen enthalten (ARIA; axe `aria-required-children`), Filter und „Alle abwählen“ stehen darum neben ihr, nicht in ihr (Abweichung 4). `aria-required` und `aria-readonly` spricht die Listbox (ein Knopf ohne Rolle nimmt sie nicht; axe `aria-allowed-attr`). Die Gewählten stehen beim Öffnen oben (Reihenfolge festgehalten, bis die Liste schließt); ein Häkchen (`check`, `ikono check`) je Zeile ist bei nicht gewählten `color none` (unsichtbar, Platz bleibt). `summary=tags` zeigt die Gewählten als komponierte `signeto mode=removable size=small` in einer Zeile **nach** dem Knopf (`part=tags`), nicht in ihm: ein Knopf darf keinen Knopf enthalten (Abweichung 5); das Ereignis `remove` eines Schlagworts nimmt den Wert heraus. `max` verweigert weitere Zeilen (`aria-disabled`); mehr Werte von der Anwendung sind ungültig mit `values-invalid`. Die Formularwerte sind `FormData`-Einträge unter dem Namen. Die Grenze `multi-select` des `kompletigilo`, die Alternative `multiple` des `elektilo` und `multi` des `elekto` zeigen auf den `plurelektilo` (Jugxo).
+
+#### D-17 `lokredaktilo`: Anzeige mit Bearbeiten-Knopf, komponierter `kampo`, Fehler im Feld
+Das Element ist ein `generic` (wie der `insigno`) ohne eigenen Standard-Slot – sein Name ist der Prop `label` (Pflicht, Spec), der die Knöpfe („Titel bearbeiten“) und das komponierte Feld benennt. Der komponierte `kampo` bekommt das Label als Text seines Standard-Slots (gehört, nicht gesehen: `::part(label)` ist geclippt wie das Zahlenfeld des `glitilo`), die `kind`, den Wert beim Öffnen und den Fehler-Slot als eigenen `slot=error` – so beschreibt der Fehler die Eingabe (`aria-describedby` reicht nicht über die Schattengrenze) und das Feld spricht `aria-invalid`. Enter im Feld speichert (das komponierte Feld hat kein Formular, sein eigenes Enter tut nichts), Escape verwirft; `save` ist abbrechbar mit `detail.value`; danach `change` und der Fokus auf dem Bearbeiten-Knopf. Zustände am `control`: `aria-disabled`, `readonly`, `aria-invalid`; Fokus als `:has(:focus-visible)`. Die Grenze `inline-edit` des `tabelo` (ask-human) und `kampo.instead single-value` zeigen auf den `lokredaktilo` (Jugxo). Der Ring und der Fehler des Eros sind die des komponierten Feldes: Figma zeichnet sie nicht (Jugxo, D-18).
+
+#### D-18 Projekcioj: Hosts `chip`, `listselect`, `multiselect`, `editor`; Figma `badge` mit Achse `mode` und `field` mit Zeilen `item`
+Web: `hostOf` kennt die vier Hosts (generic + Teil `remove` → chip, generic + Teil `edit` → editor, combobox + Teil `item` → listselect, listbox → multiselect); `isSuggest` schließt den `listelektilo` aus (B-17). Selektoren: der Chip trägt Kombination und Zustand am `control` (Fokus `:has([part=body]:focus-visible)`, disabled als `aria-disabled` von Körper oder Entfernen-Knopf); die Listen sind Feld-Hosts (`fieldPartSelector`, Zeile `item` mit Eintrags-Attribut, `check` unter der gewählten Zeile, Platzhalter als `[part=text][data-placeholder]`); der Editor trägt sie am `control`, das Feld `inline-size` nach `editing` (`none` → `display: none`). Die Größe eines komponierten `butono` mit Wort (Speichern, Abbrechen, Alle abwählen) ist allein seine Höhe (B-20). Die Inventur liest in einem Feld nur Daten-Attribute von `field` und `control` als Props (B-18). Figma: `structureOf` legt die Rolle `listbox` auf `field`; `extraAxes` `mode` für den Badge mit Teil `remove` (160 Varianten, Abweichung 3); die Zeilen `item` binden auf die Knoten der Vorschläge (`STRUCTURE_BINDINGS.field`); ein Badge mit Fokusring (der `signeto`) bekommt Ring → Lücke → Kontrolle wie eine Kontrolle (B-25); `FIGMA_NOT_DRAWN` kennt Schlüssel `<ero>:<teil>` – die komponierten Teile (`signeto:remove`, `listelektilo:icon`/`description`, `plurelektilo:filter`/`check`/`tag`, `lokredaktilo:edit`/`field`/`save`/`cancel`/`focus-ring`/`error`) sind mit `jug_01M5H5HFYHBZB8R9TVTJE9874J` freigegeben (B-15); ein freigegebener Teil, den ein Eintrag schlüsselt (das Häkchen), steht mit seinem Jugxo im Eintrag (B-19). Der zweite Lauf schreibt nichts.
+
+#### D-19 Vitrino, Make-Kit, React
+Vitrino: `signeto` in vier Zeilen (static, selectable gedrückt, removable, small) × fünf `intent` = 20; `listelektilo` mit den Regionen (Europa mit `ikono info` und „27 Staaten“, USA, Japan deaktiviert, Brasilien) × rest/required/disabled/invalid; `plurelektilo` in zwei Zeilen (Schlagwörter, filterbar) × vier Spalten = 8; `lokredaktilo` Anzeige, Bearbeiten, Fehler. Der Vitrino-Check drückt ein Schlagwort, öffnet die Liste per Pfeil und bewegt, wählt in der Mehrfachauswahl mit Leertaste, öffnet den Editor und schließt mit Escape. Make-Kit: vier Sätze (Schlagwort neben `Insigno`; gestaltete Liste neben `Elektilo` und `Kompletigilo`; Mehrfachauswahl neben `Markobutono`; Inline-Bearbeitung neben `Formularo`) – erzeugt aus den Rollen; die Sätze des Badge und der Auswahlliste schließen die neuen Rollen aus (A-4). React-Typen aus dem Skemo (`mode`, `selected`, `values`, `filterable`, `summary`, `editing`).
+
+### Arkitekturo-Abdeckung
+
+| Artikel | Wie ③ ihn trägt |
+|---|---|
+| Art. V (Clean Room) | `edit` aus Phosphor Icons (MIT) mit Herkunft in `<metadata>`; `check:ikonaro` 21 × 4 |
+| Art. VIII (keine Web-Begriffe, keine Strings im Ero) | `item`, `intent`, `tinted-categories`; Knopfwörter und Nachrichten aus `a11y.texts` (`remove-name`, `options-count`, `clear-name`, `values-invalid`, `edit-name`, `save-name`, `cancel-name`) |
+| E1 (keine neuen Tokens) | gewähltes Schlagwort `action.primary.selected`/`.text`, Liste `background.raised` + `elevation.shadow.overlay`, Häkchen `action.primary.rest`, Zeile `size.target.min`, Feld des Editors `size.container.small` |
+| E2/E3 (Namen, Zustände am bedienten Teil) | `intent` wie `insigno`; Zustände am Körper des Schlagworts, am Knopf der Listen, an der Zeile (Eintrag), am `control` des Editors |
+| E5 (ausweiten statt vervielfachen) | sieben Reguloj ausgeweitet, keine neue |
+| E6 (native Eingabe als Kern) | der `elektilo` bleibt die Liste für schlichte Optionen (`listelektilo.instead plain-options`); das komponierte Feld des Editors ist der `kampo` |
+| G2 (Verflechtung) | sieben Grenzen und Alternativen der Nachbarn zeigen auf die neuen Eroj; die neuen zurück auf `insigno`, `elektilo`, `kompletigilo`, `markobutono`, `formularo` |
+| G3 (Stichwörter) | `goal-keyword-shared de:beschreibung` (tekstareo, listelektilo) mit Jugxo-Kontext; „anklicken“ und „mehrere“ gestrichen (hätten `insigno.clickable` und den `tekstareo` gezogen) |
+| Internacia | Wörter aus `a11y.texts` in de/en; Pfeile in der Liste sind Zeilen (keine Spiegelung nötig) |
+| Kontrast | gewähltes Schlagwort ≥ 4.5:1 gemessen (Alirebleco); `skemo-kontrastparo-missing` schweigt (`surface` des Editors entfiel, B-? der Daten) |
+
+### Abweichungen von der Spec
+
+1. **Dialoge umformuliert:** „Ich brauche eine Auswahl mit Symbolen und Beschreibung“ → „Auswahl mit Symbolen und Beschreibungen“ (die Spec-Form zieht „Beschreibung“ des `tekstareo` gleich stark; Jugxo-Kontext `goal-keyword-shared de:beschreibung`); „Kategorie-Filter zum Anklicken“ → „Kategorie als Filterchip“ („anklicken“ ist `insigno.clickable`, ein Gleichstand); „Titel direkt in der Detailansicht ändern“ → „Namen direkt an Ort und Stelle umbenennen“ („Titel“ ist der `titolo`). Die Spec-Formen bleiben als Rückfrage; der Maintainer entscheidet (O-13).
+2. **`intent` statt `tone`, `icon-start` statt `ikono`, `item` statt `option`, `control` statt `trigger`:** die Namen, die das Vokabular hat (E2, `skemo-web-term`); `radius.role.pill` statt `radius.full`.
+3. **`signeto` in Figma 160 statt 240 Varianten:** die Constraint `selected` ⇒ `mode=selectable` beschneidet das Set wie jede Constraint (`combinationsOf`).
+4. **Das Popover des `plurelektilo` ist ein Panel, die Listbox der Halter der Zeilen** (ARIA: eine Listbox enthält nur Optionen); `aria-required`/`aria-readonly` an der Listbox.
+5. **Schlagwörter nach dem Knopf, nicht im Knopf** (kein Knopf im Knopf); der Knopf zeigt auch bei `summary=tags` die Zahl.
+6. **Filter ohne Combobox-Rolle:** bei `filterable` ist das Filterfeld ein Suchfeld in der Listbox-Umgebung, der Knopf bleibt Knopf (APG Listbox); die Spec nannte „Combobox mit Listbox“.
+7. **`lokredaktilo`: Fehler und Ring im komponierten `kampo`,** das Label gehört, nicht gesehen; in Figma mit Jugxo freigegeben.
+8. **`kampo.instead near-date` (②) entfällt:** der `brief` des `kampo` lag über 750 (Abnahme 1); Kialos gekürzt (brief 734); `kampo.boundary date-range` bleibt.
+9. **Browser-Specs:** eine verweigerte Zeile wird mit `force` gedrückt (Playwright klickt `aria-disabled` nicht), wie beim `datelektilo`.
+
+### Befunde / Mankoj
+
+- **B-15 (Jugxo)** Komponierte Teile tragen in Figma keinen eigenen Knoten (`jug_01M5H5HFYHBZB8R9TVTJE9874J`); `FIGMA_NOT_DRAWN` kennt dafür `<ero>:<teil>` (ein globaler Schlüssel `icon` oder `error` hätte den `butono` und jedes Feld entzeichnet).
+- **B-16 (behoben)** `fm modelo validate --config` braucht auf dem CI-Läufer 30.0–30.6 s (drei Läufe, zwei PRs), lokal 8.9 s: `packages/cli/vitest.config.ts` `testTimeout` 60 s. Cherry-pick auf ② für dessen CI.
+- **B-17 (behoben)** `isSuggest` (combobox mit Teil `listbox`) fasste den `listelektilo`; die Hosts unterscheiden sich am Teil `suggestion`/`item`; der Make-Kit-Satz der Auswahlliste schließt den `listelektilo` aus (A-4).
+- **B-18 (behoben)** Die Inventur des Stylesheets las `data-active` der Zeile und `data-placeholder` des Textes als Props (`item` und `text` sind Kombinationsteile anderer Eroj): in einem Feld zählen nur `field` und `control`.
+- **B-19 (behoben)** Der Figma-Plan ließ die Freigabe eines Teils fallen, den ein Eintrag schlüsselt (das Häkchen): `entries` tragen `notDrawn`, die Inventur liest es.
+- **B-20 (behoben)** `size` eines komponierten `butono` mit Wort setzte Breite und Höhe: Speichern lag unter Abbrechen; nur die Höhe.
+- **B-21 (behoben)** Der Konstruktor verlangte einen Standard-Slot; der Editor hat keinen (Name ist `label`): ein losgelöster Slot steht ein.
+- **B-22 (behoben)** WebKit gibt dem Knopf der Liste beim Klick keinen Fokus; Escape erreichte nichts, die Liste deckte das nächste Element: der Knopf nimmt den Fokus beim Öffnen (wie B-10).
+- **B-23 (behoben)** Die Checks fanden `button[part=control]` mehrfach (komponierte `butono`): der Öffner ist der Knopf mit `aria-haspopup`.
+- **B-24 (behoben)** Der `brief` des `kampo` lag mit `near-date` über 750 (Abweichung 8).
+- **B-25 (behoben)** Figma zeichnete für einen Badge keinen Ring; der `signeto` hat einen Fokus-Zustand: ein Badge mit Ring-Bindung bekommt Ring und Lücke um die Kontrolle (die Sets `insigno`, `titolo`, `teksto` bleiben wie sie sind).
+- **B-26 Manko-Kandidat:** der `plurelektilo` zeigt mit `summary=tags` die Zahl im Knopf und die Schlagwörter daneben; ein Knopf, der die Schlagwörter selbst trägt, braucht ein Muster ohne Knopf im Knopf (Candidate: Toolbar-Muster).
+- **B-27 (CI, behoben im Test; Manko-Kandidat)** React typisiert das `data`-Element der Plattform ohne `icon` und `description` einer Option: der Typtest übergibt sie als Spread (kein Excess-Property-Check). Kandidat: der React-Wrapper typisiert die Optionen eines Slots mit Eintrag. Dazu: `label` des `lokredaktilo` ist im Wrapper kein Pflichttyp – die Pflicht ist die Warnung des Elements, wie bei jedem Ero (Fixture angepasst).
+- **B-28 (CI, behoben)** Der Job „Rendered checks“ brach nach 15 min ab (Läufe 39754200831 von ② und 39754602800 von ③): die Pakete der drei Playwright-Engines (`apt`, `--with-deps`) brauchten auf einem kalten Läufer 7 min, der Vitrino-Check mit 40 Eroj 6 min. Ein Budget von 25 min hätte den Pin „jeder Job ≤ 15 min, Wanduhr unter 12“ (`workflow.test.ts`, Spec-Abnahme 4) gebrochen; stattdessen installieren die drei Browser-Jobs nur die Engines des Laufs (`$PLAYWRIGHT_ENGINES`: Chromium im PR, alle drei auf `main`). ② trägt dieselbe Änderung (`3fa8923` → `ca8d6e6`).
+- **B-29 (CI, zurückgenommen)** Zwei Tests liefen auf dem Läufer in ihr Budget: `fm agordilo derive` zweimal (8 s hier, 85 s auf dem Läufer mit 36 Eroj, über 120 s mit 40) und die Paletten-Reguloj über jede Fixture-Marke (3 s hier, 22 s bzw. 32 s auf dem Läufer, Budget 30 s). `4fd8b43` hob die Budgets auf 240 s und 120 s; der Maintainer hat das am 2026-10-22 zurückgenommen: die Budgets sind wieder 120 s und der geteilte Timeout von 30 s. Wird der Lauf rot, bleibt er rot und der Bericht sagt es; die Ursache – warum Ableitung und Prüfung mit den Ero-Tokens so wachsen und auf dem Läufer so viel langsamer sind – klärt Nachlese 9 („Tempo“), ohne ein Budget anzuheben.
+- **B-30 (CI, beobachtet)** Die Werkstatt-Zeitmessung der Spec 019 ② (G5: 50 Schieberegler-Änderungen, keine Long Task über 50 ms) maß im Lauf 39761146463 eine Long Task von 57 ms auf dem ausgelasteten Läufer; im Lauf davor (39759253087) und auf ② grün, der Rerun des Jobs grün. Kein Code von ③ beteiligt (der Test treibt den Werkstatt-Worker); Kandidat: das Budget der Messung am Läufer kalibrieren, wie die Spawn-Budgets (B-16, B-29).
+- **B-31 (Rebase, behoben im Test)** Nach dem Rebase auf #103 brach `takes --aspekto more than once` der CLI ab (Exit-Code `null`): zwei Pakete derselben Aspekto melden je überschriebenem Token eine Warnung `set-override-ambiguous` (1 605 Warnungen), die Ausgabe wuchs mit den 200 Ero-Tokens von 959 224 auf 1 097 940 Bytes – über das Standard-`maxBuffer` von `spawnSync` (1 MiB), der den Kindprozess dann beendet. Der Spawn-Helfer der CLI-Tests nimmt den Puffer des e2e-Harness des Modelo (64 MiB; Regel 0.1). Kein Budget, keine Ausgabe geändert; dass die Ausgabe mit der Zahl der Tokens wächst, gehört zu Nachlese 9.
+- **B-32 (Rebase, offen – Nachlese 9)** `pnpm perf` ist nach dem Rebase rot: der erste `check_contrast`-Aufruf ohne Zuweisung kostet 107 ms (Budget 100 ms, AK-09; die übrigen 99 Aufrufe ≈ 8 ms), der Start des MCP-Servers 1 888–2 010 ms in drei Läufen (Budget 2 000 ms, AK-07). Der erste Aufruf baut die Überlagerung jeder Kombination über alle Tokens, und die wächst mit den Ero-Tokens; auf `main` kostet er schon 101 ms (ein Lauf grün, einer rot). Kein Budget geändert; die Ursache gehört zu Nachlese 9.
+
+### Offen (für den Maintainer)
+
+**Entschieden (Maintainer, 2026-10-22): O-11 bis O-16 wie vorgeschlagen.** Kein Code ändert sich: die vier Namen und ihre Teilnamen, `intent` statt `tone`, die drei Spec-Formen der Dialoge bleiben Rückfrage („beschreibung“ bleibt beim `tekstareo`), die Schlagwörter stehen nach dem Knopf, die Label-Wörter „Schlagwort“ und „Auswahl“, der Fokus nach dem Entfernen auf dem nächsten Schlagwort, sonst auf dem Container.
+
+- **O-11 E4 Namen** `signeto`, `listelektilo`, `plurelektilo`, `lokredaktilo` (bestätigt die Spec selbst bei ①); `item`, `check`, `tag`, `body`, `display`, `form` als Teilnamen.
+- **O-12 `intent` statt `tone`** (Abweichung 2). Vorschlag: so (eine Achse für alle).
+- **O-13 Dialoge** (Abweichung 1): die drei Spec-Formen bleiben Rückfrage. Vorschlag: so lassen; sonst „beschreibung“ beim `tekstareo` streichen.
+- **O-14 Schlagwörter nach dem Knopf** (Abweichung 5, B-26). Vorschlag: so.
+- **O-15 Label-Wort des `signeto` in Figma** „Schlagwort“, des `plurelektilo` „Auswahl“ (Vorschläge, kein Jugxo).
+- **O-16 Fokus des Chips** nach dem Entfernen: nächstes Geschwister-Element, sonst Container (Spec). Vorschlag: so.
+
+### Benchmark-Kennzahlen
+
+Gezählt über `packages/modelo/data/eroj/*/skemo.json` (Summen, derselbe Schnitt wie `research/benchmark-carbon-2026-10.md` § 1.1). Gattungen mit Gegenstück nach § 5 Lücke 1, 2, 6.
+
+| Größe | Benchmark | nach ② (36 Eroj) | nach ③ (40 Eroj) |
+|---|---|---|---|
+| Eroj | 79 Komponenten | 36 | 40 (`signeto`, `listelektilo`, `plurelektilo`, `lokredaktilo`) |
+| Gattungen mit Gegenstück | – | 29 | 33 (Schlagwort, gestaltete Auswahlliste, Mehrfachauswahl, Inline-Bearbeitung) + Zahleneingabe, Suche, Zeitauswahl als Ergänzungen des `kampo` (Ziel der Runde erreicht) |
+| Zustände (Summe) | 327 | 107 | 129 |
+| Props (Summe) | 923 | 174 | 206 |
+| Slots (Summe) | 222 | 80 | 91 |
+| Ereignisse im Skemo | 224 | 6 | 14 (`signeto`: `change`, `remove`; `listelektilo`: `change`; `plurelektilo`: `input`, `change`; `lokredaktilo`: `save`, `cancel`, `change`) |
+| Teile (Summe) | 434 | 265 | 315 |
+| Bindungen | – | 454 | 542 |
+| Ikonaro | 2646 | 20 | 21 |
+| Reguloj / Jugxoj | – | 60 / 212 | 60 / 214 |
+
+Messbefehl: `node -e` über die Skemoj (siehe Messanleitung).
+
+### Messanleitung
+
+Alle Befehle im Checkout des Maintainers, nach dem Merge dieses PR:
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm install && pnpm build
+pnpm fm projekcioj build --out .fundamento/projekcioj
+pnpm check:parity && pnpm check:regularo && pnpm check:ikonaro && pnpm check:clean-room --spuroj research/benchmark-carbon-2026-10.md
+```
+
+**Benchmark-Kennzahlen:**
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+node -e 'const fs=require("fs");let t={eroj:0,props:0,states:0,slots:0,parts:0,bindings:0,events:0};for(const d of fs.readdirSync("packages/modelo/data/eroj")){const s=JSON.parse(fs.readFileSync(`packages/modelo/data/eroj/${d}/skemo.json`,"utf8")).skemo;t.eroj++;t.props+=s.props.length;t.states+=s.states.length;t.slots+=s.slots.length;t.parts+=Object.keys(s.parts).length;t.bindings+=s.bindings.length;t.events+=(s.events??[]).length}console.log(t)'
+```
+
+**Vitrino (Abnahme 2):** `open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/vitrino/index.html#fm-vitrino-signeto"` – Abschnitt `signeto`: vier Zeilen × fünf `intent`; Tab auf ein wählbares Schlagwort, Leertaste drückt es an und ab; Tab auf „Namen entfernen“, Enter nimmt das Schlagwort heraus, der Fokus steht auf dem nächsten. `#fm-vitrino-listelektilo`: Tab auf den Knopf, Pfeil ab öffnet mit „Europa“ aktiv, Pfeil ab → USA, Pfeil ab überspringt Japan → Brasilien, Enter wählt und schließt (Fokus auf dem Knopf), „u“ wählt USA direkt. `#fm-vitrino-plurelektilo`: Knopf „3 gewählt“, Enter öffnet mit den Gewählten oben, Leertaste wählt ab und an (der Zähler folgt), Escape schließt; in der zweiten Zeile tippen im Filterfeld „ko“ lässt nur Kontrast; „Alle abwählen“ leert. `#fm-vitrino-lokredaktilo`: „Titel bearbeiten“ öffnet das Feld mit dem Fokus darin, Enter speichert (Fokus zurück auf dem Knopf), Escape verwirft; die dritte Spalte hält den Fehler offen. Marke und Dunkel über die Kopfzeile; `dir="rtl"` am `<html>` spiegelt Knöpfe und Zeilen.
+
+**Browser-Specs:** `PLAYWRIGHT_ENGINES="chromium firefox webkit" pnpm --filter @fundamento/eroj exec playwright test signeto.spec.ts listelektilo.spec.ts plurelektilo.spec.ts lokredaktilo.spec.ts` · **Alirebleco:** `pnpm check:alirebleco-eroj` · **Vitrino-Check:** `pnpm check:vitrino`.
+
+**Figma (Abnahme 3):** `pnpm fm projekcioj build --config fundamento.config.json --out .fundamento/projekcioj` mit den Testmarken der Spec 024 (sobald sie im Markenordner stehen), dann in einer **neuen leeren Datei** das Plugin `.fundamento/projekcioj/figma/plugin/manifest.json` laden und „Plan anwenden“: im Frame „Eroj“ die Sets `signeto` (160 Varianten, `mode` × `selected` × `size` × `intent` × Zustand, das gewählte in `action.primary.selected`), `listelektilo` und `plurelektilo` (je 12, offen mit „Eins“ gewählt und „Zwei“ aktiv), `lokredaktilo` (12, Text „Barrierefreiheit“); Moduswechsel (hell/dunkel) und Markenwechsel über die Sammlung `aspekto`.
+
+**MCP (Abnahme 1):** `pnpm --filter @fundamento/mcp exec vitest run src/e2e/s025-auswahl.test.ts` – die Dialoge der Spec (Abweichung 1); `pnpm --filter @fundamento/mcp exec vitest run src/e2e` – alle Dialoge aus 008–025 ②.

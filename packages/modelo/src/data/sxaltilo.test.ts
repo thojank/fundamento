@@ -46,6 +46,8 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
       "konsileto",
       "langetaro",
       "ligilo",
+      "listelektilo",
+      "lokredaktilo",
       "markdovido",
       "markobutono",
       "menuo",
@@ -53,7 +55,9 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
       "navigado",
       "pagxigilo",
       "plenstato",
+      "plurelektilo",
       "saltligilo",
+      "signeto",
       "spuro",
       "sxaltilo",
       "sxvebilo",
@@ -261,6 +265,8 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
           "alsxutilo",
           "glitilo",
           "datelektilo",
+          "listelektilo",
+          "plurelektilo",
         ],
       });
       expect(modelo.reguloj.filter((regulo) => regulo.name === name)).toHaveLength(1);
@@ -305,6 +311,10 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
       "markdovido",
       "glitilo",
       "datelektilo",
+      "signeto",
+      "listelektilo",
+      "plurelektilo",
+      "lokredaktilo",
     ]);
   });
 

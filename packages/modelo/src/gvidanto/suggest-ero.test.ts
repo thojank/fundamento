@@ -103,6 +103,9 @@ describe("suggest_ero", () => {
       "switch-view",
       "navigate",
       "external",
+      // Spec 025 ③: the listelektilo and the lokredaktilo.
+      "styled-choice",
+      "inline-edit",
       "markdown",
       "agree",
       "opt-in",
@@ -112,7 +115,13 @@ describe("suggest_ero", () => {
       "paginate",
       "loading",
       "empty",
+      // Spec 025 ③: the plurelektilo.
+      "choose-several",
       "skip-to-content",
+      // Spec 025 ③: the signeto.
+      "filter-chip",
+      "removable-tag",
+      "keyword-tag",
       "breadcrumb",
       "toggle",
       "popover",

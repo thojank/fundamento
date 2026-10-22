@@ -218,7 +218,8 @@ function wrapSentence(role: string | undefined, wrap: string, multiline = false)
       ? multiline
         ? "Beschriftung"
         : "Eingabezeile"
-      : role === "combobox"
+      : // Spec 025 ③: the multi-select (role listbox) is a field like the select.
+        role === "combobox" || role === "listbox"
         ? "Feld"
         : role === "dialog"
           ? "Überschrift"

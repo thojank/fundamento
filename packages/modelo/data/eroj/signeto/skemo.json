@@ -1,0 +1,656 @@
+{
+  "ero": {
+    "id": "ero_01M5H5HAQKTAM4QNSA6XRERW1D",
+    "name": "signeto",
+    "skemo": "ske_01M5H5HCBMBZGJ357PGT0CYX3J",
+    "description": "A tag: labels something with a category or a keyword; selectable it is a filter that stays pressed, removable it carries a button that takes it away."
+  },
+  "skemo": {
+    "id": "ske_01M5H5HCBMBZGJ357PGT0CYX3J",
+    "ero": "ero_01M5H5HAQKTAM4QNSA6XRERW1D",
+    "props": [
+      {
+        "name": "mode",
+        "kind": "enum",
+        "values": [
+          "static",
+          "selectable",
+          "removable"
+        ],
+        "default": "static",
+        "description": "static: a word on a thing; selectable: a filter a person presses on and off (selected); removable: the word with a button that takes the tag away (the event remove)."
+      },
+      {
+        "name": "selected",
+        "kind": "boolean",
+        "default": false,
+        "description": "The filter is pressed (mode selectable); spoken as aria-pressed."
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium"
+        ],
+        "default": "medium",
+        "description": "The height of the tag."
+      },
+      {
+        "name": "intent",
+        "kind": "enum",
+        "values": [
+          "neutral",
+          "info",
+          "success",
+          "warning",
+          "danger"
+        ],
+        "default": "neutral",
+        "description": "The role the tag takes its colours from (E1: the status roles, no free colour scale)."
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean",
+        "default": false,
+        "description": "Cannot be pressed or removed; spoken as aria-disabled."
+      }
+    ],
+    "states": [
+      "rest",
+      "hover",
+      "focus",
+      "disabled"
+    ],
+    "slots": [
+      {
+        "name": "label",
+        "default": true,
+        "text": true
+      },
+      {
+        "name": "icon-start",
+        "decorative": true
+      }
+    ],
+    "parts": {
+      "surface": {
+        "fill": {
+          "by": [
+            "selected",
+            "intent"
+          ]
+        }
+      },
+      "border": {
+        "color": {
+          "by": [
+            "intent",
+            "state"
+          ]
+        },
+        "width": {
+          "fixed": "border.width.default"
+        }
+      },
+      "text": {
+        "color": {
+          "by": [
+            "selected",
+            "intent"
+          ]
+        },
+        "typography": {
+          "fixed": "typography.label.2"
+        }
+      },
+      "remove": {
+        "size": {
+          "fixed": "size.control.small"
+        }
+      },
+      "focus-ring": {
+        "ring": {
+          "fixed": "focus.ring"
+        },
+        "offset": {
+          "fixed": "focus.offset"
+        },
+        "color": {
+          "fixed": "color.focus.inner"
+        }
+      },
+      "box": {
+        "height": {
+          "by": [
+            "size"
+          ]
+        },
+        "inline-padding": {
+          "by": [
+            "size"
+          ]
+        },
+        "gap": {
+          "fixed": "spacing.xsmall"
+        },
+        "radius": {
+          "fixed": "radius.role.pill"
+        }
+      },
+      "motion": {
+        "duration": {
+          "fixed": "motion.duration.fast"
+        },
+        "easing": {
+          "fixed": "motion.easing.standard"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "intent": "neutral",
+          "selected": "false"
+        },
+        "token": "color.background.sunken"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "intent": "neutral",
+          "selected": "true"
+        },
+        "token": "color.action.primary.selected"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "neutral",
+          "state": "rest"
+        },
+        "token": "color.border.default"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "neutral",
+          "state": "hover"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "neutral",
+          "state": "focus"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "neutral",
+          "state": "disabled"
+        },
+        "token": "color.border.disabled"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "intent": "neutral",
+          "selected": "false"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "intent": "neutral",
+          "selected": "true"
+        },
+        "token": "color.action.primary.text"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "intent": "info",
+          "selected": "false"
+        },
+        "token": "color.status.info.subtle"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "intent": "info",
+          "selected": "true"
+        },
+        "token": "color.action.primary.selected"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "info",
+          "state": "rest"
+        },
+        "token": "color.status.info.border"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "info",
+          "state": "hover"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "info",
+          "state": "focus"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "info",
+          "state": "disabled"
+        },
+        "token": "color.border.disabled"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "intent": "info",
+          "selected": "false"
+        },
+        "token": "color.status.info.text"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "intent": "info",
+          "selected": "true"
+        },
+        "token": "color.action.primary.text"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "intent": "success",
+          "selected": "false"
+        },
+        "token": "color.status.success.subtle"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "intent": "success",
+          "selected": "true"
+        },
+        "token": "color.action.primary.selected"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "success",
+          "state": "rest"
+        },
+        "token": "color.status.success.border"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "success",
+          "state": "hover"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "success",
+          "state": "focus"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "success",
+          "state": "disabled"
+        },
+        "token": "color.border.disabled"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "intent": "success",
+          "selected": "false"
+        },
+        "token": "color.status.success.text"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "intent": "success",
+          "selected": "true"
+        },
+        "token": "color.action.primary.text"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "intent": "warning",
+          "selected": "false"
+        },
+        "token": "color.status.warning.subtle"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "intent": "warning",
+          "selected": "true"
+        },
+        "token": "color.action.primary.selected"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "warning",
+          "state": "rest"
+        },
+        "token": "color.status.warning.border"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "warning",
+          "state": "hover"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "warning",
+          "state": "focus"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "warning",
+          "state": "disabled"
+        },
+        "token": "color.border.disabled"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "intent": "warning",
+          "selected": "false"
+        },
+        "token": "color.status.warning.text"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "intent": "warning",
+          "selected": "true"
+        },
+        "token": "color.action.primary.text"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "intent": "danger",
+          "selected": "false"
+        },
+        "token": "color.status.danger.subtle"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "intent": "danger",
+          "selected": "true"
+        },
+        "token": "color.action.primary.selected"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "danger",
+          "state": "rest"
+        },
+        "token": "color.status.danger.border"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "danger",
+          "state": "hover"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "danger",
+          "state": "focus"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "danger",
+          "state": "disabled"
+        },
+        "token": "color.border.disabled"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "intent": "danger",
+          "selected": "false"
+        },
+        "token": "color.status.danger.text"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "intent": "danger",
+          "selected": "true"
+        },
+        "token": "color.action.primary.text"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.control.small"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.control.medium"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "small"
+        },
+        "token": "spacing.small"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "medium"
+        },
+        "token": "spacing.medium"
+      }
+    ],
+    "a11y": {
+      "role": "generic",
+      "name": [
+        "slot:label"
+      ],
+      "states": {
+        "selected": [
+          "aria-pressed"
+        ],
+        "disabled": [
+          "aria-disabled"
+        ]
+      },
+      "keys": [
+        "Enter",
+        "Space",
+        "Delete",
+        "Backspace"
+      ],
+      "texts": {
+        "remove-name": {
+          "de": "{label} entfernen",
+          "en": "Remove {label}"
+        }
+      }
+    },
+    "events": [
+      {
+        "name": "change",
+        "description": "A selectable tag was pressed on or off."
+      },
+      {
+        "name": "remove",
+        "cancelable": true,
+        "description": "A removable tag is about to be taken away; prevented, it stays."
+      }
+    ],
+    "constraints": [
+      {
+        "when": {
+          "selected": "true"
+        },
+        "allowed": {
+          "mode": [
+            "selectable"
+          ]
+        },
+        "kialo": "Only a filter can be pressed, because a static word and a removable tag have no on and off."
+      }
+    ],
+    "goals": [
+      {
+        "goal": "filter-chip",
+        "keywords": {
+          "en": [
+            "filter-chip",
+            "selectable-tag",
+            "toggle-tag"
+          ],
+          "de": [
+            "filterchip",
+            "filterchips",
+            "kategorie-filter",
+            "wählbares-schlagwort"
+          ]
+        },
+        "props": {
+          "mode": "selectable"
+        },
+        "regulo": "badge-text-short"
+      },
+      {
+        "goal": "removable-tag",
+        "keywords": {
+          "en": [
+            "removable-tag",
+            "dismissable-tag",
+            "removable"
+          ],
+          "de": [
+            "entfernbar",
+            "entfernbares",
+            "entfernbare",
+            "abwählbar"
+          ]
+        },
+        "props": {
+          "mode": "removable"
+        },
+        "regulo": "badge-text-short"
+      },
+      {
+        "goal": "keyword-tag",
+        "keywords": {
+          "en": [
+            "keyword-tag",
+            "category-tag",
+            "label-tag",
+            "hashtag"
+          ],
+          "de": [
+            "schlagwort",
+            "stichwort",
+            "kategorie",
+            "etikettchen"
+          ]
+        },
+        "props": {},
+        "regulo": "badge-text-short"
+      }
+    ]
+  }
+}

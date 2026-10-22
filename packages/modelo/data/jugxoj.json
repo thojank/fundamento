@@ -4546,6 +4546,27 @@
       "kialo": "Zwei voneinander abhängige Daten sind die Datumsauswahl des datelektilo: Das Ende liegt nach dem Anfang, und ein Kalender zeigt beide zugleich.",
       "date": "2026-10-22",
       "context": "Spec 025 ② (plan ② D-10, G2): Eine Antwort, die stand, ändert sich (OP-12). Die Grenze date-range des kampo war ask-human („Fundamento has none yet“); mit dem datelektilo ist sie geschlossen (use-instead, wie file durch den alsxutilo in Spec 015 ②). Gekippt: „Zeitraum von bis“ (Spec 011 ①) → datelektilo mode=range mit der Grenze des kampo daneben statt Rückfrage; „Zeitraum für den Bericht“ (Dialog der Spec 025) antwortet gleich."
+    },
+    {
+      "id": "jug_01M5H5HGB6S1HWJ2KTNP3CF48R",
+      "ref": {
+        "ero": "ero_01M51ZRFPHM8B0ED97V23SDRRH"
+      },
+      "decision": "approved",
+      "kialo": "Was ein Ero der Runde abdeckt, ist keine Rückfrage und kein „nicht unterstützt“ mehr: Die Grenze wird use-instead, die Antwort nennt das neue Ero.",
+      "date": "2026-10-22",
+      "context": "Spec 025 ③ (plan ③ D-14–D-16, G2): Eine Antwort, die stand, ändert sich (OP-12). Die Grenze removable-chip des insigno (not-supported) ist durch den signeto geschlossen, die Grenze custom-popup des elektilo (not-supported) durch den listelektilo, die Grenze multi-select des kompletigilo (ask-human) und die Alternative multiple des elektilo (ohne Ero) durch den plurelektilo, ebenso die Alternative multi des elekto; die Grenze inline-edit des tabelo (ask-human) durch den lokredaktilo. Gekippt: „Entfernbares Schlagwort“ → signeto mode=removable mit der Grenze des insigno daneben; „Mehrfachauswahl“ → plurelektilo statt Rückfrage; „Popup-Liste mit Symbolen“ → listelektilo statt „nicht unterstützt“. goal-keyword-shared de:beschreibung – „Beschreibung“ steht beim tekstareo (mehrzeiliger Text) und beim listelektilo (Optionen mit Beschreibung); die Stärke der Treffer entscheidet, bei Gleichstand fragt der Gvidanto."
+    },
+    {
+      "id": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
+      "ref": {
+        "artikolo": "VIII",
+        "celo": "figma"
+      },
+      "decision": "approved",
+      "kialo": "Komponierte Knöpfe und Felder (der Löschen-Knopf des signeto, der Filter, das Häkchen, „Alle abwählen“ und die Schlagwörter des plurelektilo, Bearbeiten, Speichern, Abbrechen und das Feld des lokredaktilo, Symbol und Beschreibung einer Option des listelektilo) tragen in Figma keinen eigenen Knoten: Ihr Bild ist das des komponierten butono, kampo, signeto und ikono in deren Sets.",
+      "date": "2026-10-22",
+      "context": "Spec 025 ③ (plan ③ D-18, B-15): check:parity meldet diese Teile als freigegeben (parity-part-not-drawn), keine Differenz. Rücknahme, sobald das Plugin Instanzen anderer Sets komponiert (Kandidat B-6 der Spec 011 ⑤)."
     }
   ]
 }

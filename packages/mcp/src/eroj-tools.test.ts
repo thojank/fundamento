@@ -103,7 +103,9 @@ describe("get_ero brief (Spec 007 A8)", () => {
     "navigado",
     "pagxigilo",
     "plenstato",
+    "plurelektilo",
     "saltligilo",
+    "signeto",
     "spuro",
     "sxaltilo",
     "sxvebilo",
@@ -175,6 +177,9 @@ describe("suggest_ero (FR-13)", () => {
       "switch-view",
       "navigate",
       "external",
+      // Spec 025 ③: the listelektilo and the lokredaktilo.
+      "styled-choice",
+      "inline-edit",
       "markdown",
       "agree",
       "opt-in",
@@ -184,7 +189,13 @@ describe("suggest_ero (FR-13)", () => {
       "paginate",
       "loading",
       "empty",
+      // Spec 025 ③: the plurelektilo.
+      "choose-several",
       "skip-to-content",
+      // Spec 025 ③: the signeto.
+      "filter-chip",
+      "removable-tag",
+      "keyword-tag",
       "breadcrumb",
       "toggle",
       "popover",

@@ -67,6 +67,8 @@ describe("Make Kit sources (T018)", () => {
       "guidelines/components/konsileto.md",
       "guidelines/components/langetaro.md",
       "guidelines/components/ligilo.md",
+      "guidelines/components/listelektilo.md",
+      "guidelines/components/lokredaktilo.md",
       "guidelines/components/markdovido.md",
       "guidelines/components/markobutono.md",
       "guidelines/components/menuo.md",
@@ -74,7 +76,9 @@ describe("Make Kit sources (T018)", () => {
       "guidelines/components/navigado.md",
       "guidelines/components/pagxigilo.md",
       "guidelines/components/plenstato.md",
+      "guidelines/components/plurelektilo.md",
       "guidelines/components/saltligilo.md",
+      "guidelines/components/signeto.md",
       "guidelines/components/spuro.md",
       "guidelines/components/sxaltilo.md",
       "guidelines/components/sxvebilo.md",
@@ -1008,4 +1012,28 @@ describe("Make Kit and the Datum of Spec 025 ②", () => {
       expect(component).toContain("calendar");
     },
   );
+});
+
+// Spec 025 ③ (plan ③ D-19): Make tags with the signeto, chooses a styled option with the
+// listelektilo, several values with the plurelektilo and changes a single value on the spot with
+// the lokredaktilo — one sentence each, the neighbours named beside.
+describe("Make Kit and the Auswahl of Spec 025 ③", () => {
+  it.each(ASPEKTOJ)("%s: the guidelines name the four Eroj beside their neighbours", (aspekto) => {
+    const guidelines = kit(aspekto, "guidelines/Guidelines.md");
+    expect(guidelines).toContain(
+      "- Every category or keyword on a thing is a `<Signeto>` — static, selectable as a filter (`mode` selectable, `selected`) or removable (`mode` removable); a status stays an `<Insigno>`.",
+    );
+    expect(guidelines).toContain(
+      "- Every choice of one option whose options need an icon or a description is a `<Listelektilo>`; plain options stay an `<Elektilo>`, a search in the list a `<Kompletigilo>`.",
+    );
+    expect(guidelines).toContain(
+      "- Every choice of several values from a long list is a `<Plurelektilo>` (`filterable`, the chosen as a count or as tags); up to seven options are `<Markobutono>` boxes.",
+    );
+    expect(guidelines).toContain(
+      "- Every single value of a view changed on the spot is a `<Lokredaktilo>` with save and cancel (Enter saves, Escape cancels); a form stays a `<Formularo>`.",
+    );
+    for (const name of ["Signeto", "Listelektilo", "Plurelektilo", "Lokredaktilo"]) {
+      expect(kit(aspekto, `guidelines/components/${name.toLowerCase()}.md`)).toContain(`# ${name}`);
+    }
+  });
 });

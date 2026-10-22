@@ -40,7 +40,10 @@ import {
 import {
   elementNamesOf,
   isAvatar,
+  isChip,
+  isEditor,
   isLight,
+  isListselect,
   isMultiline,
   isPopover,
   isSkip,
@@ -527,8 +530,11 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
   // Spec 010 ③ (G7, plan ③ D-11): a choice of one among a few visible options comes from the radio
   // group; six or more go into a list — named once the Modelo has one (elektilo, Spec 010 ④, plan ④
   // D-11), until then the kit says that it has none.
+  // Spec 025 ③: the styled list shares the role combobox; the list named beside the radio group
+  // stays the elektilo, the styled list has its own sentence below.
   const listName = eroj.find(
-    (entry) => entry.skemo.a11y.role === "combobox" && !isSuggest(entry.skemo),
+    (entry) =>
+      entry.skemo.a11y.role === "combobox" && !isSuggest(entry.skemo) && !isListselect(entry.skemo),
   );
   const radioLines = eroj
     .filter((entry) => entry.skemo.a11y.role === "radiogroup" && entry.uzo !== undefined)
@@ -545,7 +551,10 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
   const selectLines = eroj
     .filter(
       (entry) =>
-        entry.skemo.a11y.role === "combobox" && !isSuggest(entry.skemo) && entry.uzo !== undefined,
+        entry.skemo.a11y.role === "combobox" &&
+        !isSuggest(entry.skemo) &&
+        !isListselect(entry.skemo) &&
+        entry.uzo !== undefined,
     )
     .map(
       (entry) =>
@@ -560,8 +569,15 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
       entry.skemo.a11y.role === "status" &&
       entry.skemo.props.some((prop) => prop.name === "intent"),
   );
+  // Spec 025 ③: the chip and the inline editor share the role generic; each has its own sentence.
   const badgeLines = eroj
-    .filter((entry) => entry.skemo.a11y.role === "generic" && entry.uzo !== undefined)
+    .filter(
+      (entry) =>
+        entry.skemo.a11y.role === "generic" &&
+        !isChip(entry.skemo) &&
+        !isEditor(entry.skemo) &&
+        entry.uzo !== undefined,
+    )
     .map(
       (entry) =>
         `- Every status in one to three words next to what it describes (draft, in review, 3 violations) is an \`<${componentName(entry.ero)}>\`${noticeName === undefined ? "" : `; a sentence is an \`<${componentName(noticeName.ero)}>\``}.`,
@@ -608,7 +624,10 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
   // in a known range the meter with its number as text; generated from the roles table, list and
   // meter, the companions named where the Modelo has them.
   const recordName = eroj.find((entry) => entry.skemo.a11y.role === "list");
-  const badgeName = eroj.find((entry) => entry.skemo.a11y.role === "generic");
+  const badgeName = eroj.find(
+    (entry) =>
+      entry.skemo.a11y.role === "generic" && !isChip(entry.skemo) && !isEditor(entry.skemo),
+  );
   const tableLines = eroj
     .filter((entry) => entry.skemo.a11y.role === "table" && entry.uzo !== undefined)
     .map(
@@ -749,7 +768,8 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
   // field with suggestions the kompletigilo; generated from the roles group with a summary slot
   // and combobox with a listbox part.
   const selectName = eroj.find(
-    (entry) => entry.skemo.a11y.role === "combobox" && !isSuggest(entry.skemo),
+    (entry) =>
+      entry.skemo.a11y.role === "combobox" && !isSuggest(entry.skemo) && !isListselect(entry.skemo),
   );
   const disclosureLines = eroj
     .filter((entry) => entry.skemo.a11y.role === "group" && entry.uzo !== undefined)
@@ -789,6 +809,44 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
       (entry) =>
         `- Every date near today a person picks, or a date range, is a \`<${componentName(entry.ero)}>\` whose field also takes the date typed${fieldName === undefined ? "" : `; a date far away, like a birthday, is a \`<${componentName(fieldName.ero)}>\` of kind date`}.`,
     )
+    .join("\n");
+  // Spec 025 ③ (G7, plan ③ D-19): every category or keyword on a thing is the signeto (a status
+  // stays the insigno); every choice of one option that needs an icon or a description is the
+  // listelektilo (plain options the elektilo, a search in the list the kompletigilo); every choice
+  // of several values from a long list is the plurelektilo (up to seven options the markobutono);
+  // every single value of a view changed on the spot is the lokredaktilo (a form the formularo).
+  // Generated from the roles generic with a remove or an edit part, combobox with an item part
+  // and listbox; the neighbours named where the Modelo has them.
+  const suggestName = eroj.find((entry) => isSuggest(entry.skemo));
+  const checkboxName = eroj.find((entry) => entry.skemo.a11y.role === "checkbox");
+  const chipLines = eroj
+    .filter((entry) => isChip(entry.skemo) && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every category or keyword on a thing is a \`<${componentName(entry.ero)}>\` — static, selectable as a filter (\`mode\` selectable, \`selected\`) or removable (\`mode\` removable)${badgeName === undefined ? "" : `; a status stays an \`<${componentName(badgeName.ero)}>\``}.`,
+    )
+    .join("\n");
+  const listselectLines = eroj
+    .filter((entry) => isListselect(entry.skemo) && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every choice of one option whose options need an icon or a description is a \`<${componentName(entry.ero)}>\`${selectName === undefined ? "" : `; plain options stay an \`<${componentName(selectName.ero)}>\``}${suggestName === undefined ? "" : `, a search in the list a \`<${componentName(suggestName.ero)}>\``}.`,
+    )
+    .join("\n");
+  const multiselectLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "listbox" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every choice of several values from a long list is a \`<${componentName(entry.ero)}>\` (\`filterable\`, the chosen as a count or as tags)${checkboxName === undefined ? "" : `; up to seven options are \`<${componentName(checkboxName.ero)}>\` boxes`}.`,
+    )
+    .join("\n");
+  const editorLines = eroj
+    .filter((entry) => isEditor(entry.skemo) && entry.uzo !== undefined)
+    .map((entry) => {
+      // The form the editor points to (its Uzo's alternative for the goal form): a Sxablono.
+      const form = entry.uzo?.instead.find((alternative) => alternative.goal === "form")?.ero;
+      return `- Every single value of a view changed on the spot is a \`<${componentName(entry.ero)}>\` with save and cancel (Enter saves, Escape cancels)${typeof form !== "string" ? "" : `; a form stays a \`<${componentName({ ...entry.ero, name: form })}>\``}.`;
+    })
     .join("\n");
   // Spec 015 ② (G7, plan ② D-08): every file a form asks for is the alsxutilo, its help naming
   // kinds and size; generated from the role button with a dropzone part, the kampo named beside.
@@ -867,6 +925,10 @@ ${suggestLines}
 ${uploadLines}
 ${sliderLines}
 ${datepickerLines}
+${chipLines}
+${listselectLines}
+${multiselectLines}
+${editorLines}
 ${cardLines}
 ${avatarLines}
 ${patternSection(input)}

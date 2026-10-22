@@ -129,9 +129,9 @@ describe("the input dialogs of the spec (Spec 025 ①)", () => {
     expect(number.violations.map((violation) => violation.issue.rule)).toEqual(["range-stated"]);
   });
 
-  it("lists thirty-six Eroj; the brief of the glitilo names field as its axis and the label as its duty; get_ero names its events", async () => {
+  it("lists forty Eroj; the brief of the glitilo names field as its axis and the label as its duty; get_ero names its events", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
-    expect(listed.eroj).toHaveLength(36);
+    expect(listed.eroj).toHaveLength(40);
     expect(listed.eroj.map((ero) => ero.name)).toContain("glitilo");
     const brief = await output<Brief>(client, "get_ero", { name: "glitilo", brief: true });
     expect(brief.axes.map((axis) => axis.name)).toEqual(["field"]);

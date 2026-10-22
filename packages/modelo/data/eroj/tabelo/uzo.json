@@ -85,7 +85,7 @@
       },
       {
         "case": "inline-edit",
-        "action": "ask-human",
+        "action": "use-instead",
         "keywords": {
           "en": [
             "inline",
@@ -96,7 +96,8 @@
             "zellenbearbeitung"
           ]
         },
-        "kialo": "Editing in a cell is a form in a table, because each cell becomes a field; a person decides whether a form fits better."
+        "kialo": "Editing a value in a cell is the lokredaktilo's, because the cell becomes a field with save and cancel on the spot (Spec 025 ③ closes the boundary inline-edit); a form for every cell stays a form.",
+        "ero": "lokredaktilo"
       },
       {
         "case": "sticky-header",

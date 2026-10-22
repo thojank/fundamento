@@ -85,6 +85,15 @@
       "kialo": "The status danger of an avizo and the invalid kampo need a sign beside the colour: colour alone is no information (WCAG 1.4.1). An octagon reads as stop and is told apart from warning (triangle) and close (cross) at small sizes."
     },
     {
+      "id": "iko_01M5H5HFGXMZ8HEZTXA55PF2RJ",
+      "name": "edit",
+      "meaning": {
+        "de": "Stift: bearbeiten",
+        "en": "Pencil: edit"
+      },
+      "kialo": "The edit button of a lokredaktilo says with the pencil that the value opens for typing, because the sign is read faster than the word; the Modelo's word names the button. The sign is the same in every writing direction, so it never mirrors."
+    },
+    {
       "id": "iko_01M55EFZMVS7WDTJ3D55SPVHQR",
       "name": "expand",
       "meaning": {

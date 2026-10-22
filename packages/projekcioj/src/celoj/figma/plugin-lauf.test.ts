@@ -247,6 +247,9 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       // Spec 011 ⑤: the langetaro and the navigado carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "langetaro"),
       ...["boundary", "slots", "content"].map(() => "ligilo"),
+      // Spec 025 ③: the listelektilo, the lokredaktilo, the plurelektilo and the signeto carry a Uzo like every set.
+      ...["boundary", "slots", "content"].map(() => "listelektilo"),
+      ...["boundary", "slots", "content"].map(() => "lokredaktilo"),
       ...["boundary", "slots", "content"].map(() => "markdovido"),
       ...["boundary", "slots", "content"].map(() => "markobutono"),
       ...["boundary", "slots", "content"].map(() => "menuo"),
@@ -255,7 +258,9 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       // Spec 015 ①: the pagxigilo and the spuro carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "pagxigilo"),
       ...["boundary", "slots", "content"].map(() => "plenstato"),
+      ...["boundary", "slots", "content"].map(() => "plurelektilo"),
       ...["boundary", "slots", "content"].map(() => "saltligilo"),
+      ...["boundary", "slots", "content"].map(() => "signeto"),
       ...["boundary", "slots", "content"].map(() => "spuro"),
       ...["boundary", "slots", "content"].map(() => "sxaltilo"),
       ...["boundary", "slots", "content"].map(() => "sxvebilo"),
@@ -320,6 +325,9 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       // Spec 011 ⑤: the langetaro and the navigado close their three parts too.
       ...["langetaro", "langetaro", "langetaro"],
       ...["ligilo", "ligilo", "ligilo"],
+      // Spec 025 ③: the four selection Eroj close their three parts too.
+      ...["listelektilo", "listelektilo", "listelektilo"],
+      ...["lokredaktilo", "lokredaktilo", "lokredaktilo"],
       ...["markdovido", "markdovido", "markdovido"],
       ...["markobutono", "markobutono", "markobutono"],
       ...["menuo", "menuo", "menuo"],
@@ -328,7 +336,9 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       // Spec 015 ①: the pagxigilo and the spuro close their three parts too.
       ...["pagxigilo", "pagxigilo", "pagxigilo"],
       ...["plenstato", "plenstato", "plenstato"],
+      ...["plurelektilo", "plurelektilo", "plurelektilo"],
       ...["saltligilo", "saltligilo", "saltligilo"],
+      ...["signeto", "signeto", "signeto"],
       ...["spuro", "spuro", "spuro"],
       ...["sxaltilo", "sxaltilo", "sxaltilo"],
       ...["sxvebilo", "sxvebilo", "sxvebilo"],
@@ -483,6 +493,11 @@ describe("the full plan against the strict double: fresh and into the file of be
     "glitilo",
     // Spec 025 ②: and the date picker.
     "datelektilo",
+    // Spec 025 ③: and the tag, the styled list, the multi-select and the inline editor.
+    "signeto",
+    "listelektilo",
+    "plurelektilo",
+    "lokredaktilo",
   ]);
   const before2 = structuredClone(repo.input);
   before2.modelo.eroj = before2.modelo.eroj.filter((entry) => !BEFORE_2.has(entry.ero.name));

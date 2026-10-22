@@ -1927,3 +1927,52 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   }
 }
+
+// Spec 025 ③ (G5, plan ③ D-18): the rendered selection Eroj — tags in every mode and intent, the
+// styled list and the multi-select closed and open, the editor in display and editing — in every
+// colour class: axe without a finding; the text of a chosen tag at least 4.5:1 on its fill.
+const auswahlEroj =
+  '<div><fm-signeto id="an-s1" intent="neutral">Kontrast</fm-signeto><fm-signeto id="an-s2" mode="selectable" selected intent="info">Fokus</fm-signeto><fm-signeto id="an-s3" mode="removable" intent="success">Namen</fm-signeto><fm-signeto id="an-s4" mode="selectable" intent="warning" disabled>Aus</fm-signeto><fm-signeto id="an-s5" intent="danger" size="small">Fehler</fm-signeto></div><fm-listelektilo id="an-l1" name="region" value="eu">Region<data slot="options" value="eu" icon="info" description="27 Staaten">Europa</data><data slot="options" value="us" description="50 Staaten">USA</data><span slot="help">Die Region des Standards.</span></fm-listelektilo><fm-plurelektilo id="an-p1" name="standards" values="a11y" filterable>Standards<data slot="options" value="a11y">Barrierefreiheit</data><data slot="options" value="kontrast">Kontrast</data><data slot="options" value="fokus">Fokus</data></fm-plurelektilo><fm-lokredaktilo id="an-e1" label="Titel" value="Barrierefreiheit"></fm-lokredaktilo><fm-lokredaktilo id="an-e2" label="Preis" value="42" kind="number" editing></fm-lokredaktilo>';
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on the signeto, listelektilo, plurelektilo and lokredaktilo, closed and open; the chosen tag's text ≥ 4.5:1`, async ({
+        page,
+      }) => {
+        await serve(page, out, auswahlEroj);
+        await page.evaluate(
+          ([a, s, k]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", k ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        expect(await axeViolations(page), "closed").toEqual([]);
+        const chosen = await page.locator("#an-s2").evaluate((host) => {
+          const control = host.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+          const style = getComputedStyle(control);
+          return [style.color, style.backgroundColor];
+        });
+        expect(contrastOf(chosen[0] ?? "", chosen[1] ?? ""), "chosen tag").toBeGreaterThanOrEqual(
+          4.5,
+        );
+        await page.locator("#an-l1").locator('[part="control"]').click();
+        await expect(page.locator("#an-l1").locator('[part="listbox"]')).toBeVisible();
+        expect(await axeViolations(page), "listelektilo open").toEqual([]);
+        await page.keyboard.press("Escape");
+        // The multi-select composes butono (clear, the tags' remove), each with a control of its
+        // own: the button that opens the list is the one with aria-haspopup.
+        await page
+          .locator("#an-p1")
+          .locator('button[part="control"][aria-haspopup="listbox"]')
+          .click();
+        await expect(page.locator("#an-p1").locator('[part="listbox"]')).toBeVisible();
+        expect(await axeViolations(page), "plurelektilo open").toEqual([]);
+        await page.keyboard.press("Escape");
+      });
+    }
+  }
+}

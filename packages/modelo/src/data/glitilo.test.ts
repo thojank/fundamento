@@ -43,9 +43,9 @@ const suggest = (goal: string) => {
 };
 
 describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
-  it("lives in data/eroj/glitilo/skemo.json, between faldilo and ikono, one of thirty-six Eroj", () => {
+  it("lives in data/eroj/glitilo/skemo.json, between faldilo and ikono, one of forty Eroj", () => {
     expect(glitilo?.file).toBe("modelo/data/eroj/glitilo/skemo.json");
-    expect(modelo.eroj).toHaveLength(36);
+    expect(modelo.eroj).toHaveLength(40);
     const names = modelo.eroj.map((entry) => entry.ero.name);
     expect(names.indexOf("glitilo")).toBe(names.indexOf("faldilo") + 1);
     expect(names.indexOf("glitilo")).toBe(names.indexOf("ikono") - 1);

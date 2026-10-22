@@ -1048,3 +1048,36 @@ describe("the plugin draws the datelektilo (Spec 025 ②)", () => {
     expect(double.snapshot()).toBe(before);
   });
 });
+
+// Spec 025 ③ (plan ③ D-18): the plugin draws the four sets of the selection round — the signeto's
+// 160 chips, the two fields with their listbox rows, the editor's twelve texts — and writes
+// nothing on a second run.
+describe("the plugin draws the selection Eroj (Spec 025 ③)", () => {
+  it("four sets with their variants; a second run writes nothing", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const sets = Object.fromEntries(
+      ["signeto", "listelektilo", "plurelektilo", "lokredaktilo"].map((name) => [
+        name,
+        pageNodes(double).find((node) => node.name === name),
+      ]),
+    );
+    // 160, not 240 (plan ③ Abweichung 3): the constraint selected ⇒ mode selectable prunes the set.
+    expect(sets.signeto?.children).toHaveLength(160);
+    expect(sets.listelektilo?.children).toHaveLength(12);
+    expect(sets.plurelektilo?.children).toHaveLength(12);
+    expect(sets.lokredaktilo?.children).toHaveLength(12);
+    const open = sets.listelektilo?.children.find(
+      (child) => child.name === "expanded=true, state=rest",
+    );
+    expect(descendant(open, "listbox")?.properties.visible).toBe(true);
+    expect(descendant(open, "suggestions-1")?.properties.characters).toBe("Eins");
+    const chip = sets.signeto?.children.find(
+      (child) => child.name === "mode=static, selected=false, size=medium, intent=info, state=rest",
+    );
+    expect(descendant(chip, "text")).toBeDefined();
+    const before = double.snapshot();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(double.snapshot()).toBe(before);
+  });
+});

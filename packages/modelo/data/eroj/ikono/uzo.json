@@ -131,6 +131,22 @@
         {
           "ero": "datelektilo",
           "kialo": "The trigger of a date picker shows calendar, its month buttons chevron-left and chevron-right, because the sign is read faster than the word; the words of the Modelo name the buttons."
+        },
+        {
+          "ero": "signeto",
+          "kialo": "A tag may carry a sign before its word and shows close on its remove button, because the sign is read faster than the word."
+        },
+        {
+          "ero": "listelektilo",
+          "kialo": "An option of a styled list carries its icon, the field its chevron, because icons tell options apart faster than words alone."
+        },
+        {
+          "ero": "plurelektilo",
+          "kialo": "A chosen option shows the check mark, the field its chevron, because the sign is read faster than the word."
+        },
+        {
+          "ero": "lokredaktilo",
+          "kialo": "The edit button shows the pencil, because the sign is read faster than the word; the word names the value."
         }
       ],
       "never": [],
