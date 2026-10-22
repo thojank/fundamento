@@ -34,8 +34,9 @@
 
 | Was | Wert |
 |---|---|
-| Commits ① | rot `5b9cdcc`, grün und Doku im Folgecommit (Hash im PR) |
-| Grün gemessen | Projekcioj 33 Dateien / 849 Tests; Browser (Chromium) 329; `datelektilo.spec.ts` und `listelektilo.spec.ts` in Chromium, Firefox und WebKit 45; Vitrino-Check, Alirebleco und Doku-Test siehe PR |
+| Commits ① | rot `5b9cdcc`, grün `54a0612` |
+| Grün gemessen | Modelo 173 Dateien / 3 792 Tests; Projekcioj 32 / 846 (dazu 4 in `figma-cxiuj.test.ts`); Browser (Chromium) 329; `datelektilo.spec.ts` und `listelektilo.spec.ts` in Chromium, Firefox und WebKit 45; Vitrino-Check 55; Alirebleco (Chromium) 211; Lint sauber |
+| CI | PR #106, Lauf 39857246437 grün nach zwei Neustarts des Jobs „Rendered checks“: zweimal brach er nach 15 min ab, weil „Playwright browsers“ 9:50 bzw. 10:41 min brauchte (apt auf kaltem Läufer, B-6/O-4 der Nachlese 9, ebenso zwei abgebrochene Läufe auf `main`); im dritten Versuch 19 s, Vitrino-Check 6:08 min. Kein Budget angehoben. |
 | Build vier Marken | 10,5 s, 413 Dateien; `aspekto` 4 Modi (Grenze 10); Plugin-ID `fundamento-apply-plan-1c9fd908`; Plugin-Lauf im Simulator 5,9 s |
 | Rot gemessen | Projekcioj 1 Test + 1 Datei, Browser 2 Tests (`datelektilo.spec.ts`, Vitrino-Check), Doku 2 Tests |
 
