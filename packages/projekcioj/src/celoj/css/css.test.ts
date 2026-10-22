@@ -12,6 +12,7 @@ import {
 } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
+import { traRolojCss } from "../../test-doubles/tra-roloj.js";
 import { WEB_COMPONENT_CELO } from "../web-component/web-component.js";
 import { CSS_CELO } from "./css.js";
 
@@ -122,9 +123,13 @@ describe("capitals and tracking reach the web projection (F31)", () => {
   });
 
   it("applies both wherever the component applies its typography", () => {
-    const component = WEB_COMPONENT_CELO.generate(prepared.input)
-      .map((file) => file.text)
-      .join("\n");
+    // Through the roles the Ero-Tokens alias (Constitution v2.3, tra-roloj.ts).
+    const component = traRolojCss(
+      WEB_COMPONENT_CELO.generate(prepared.input)
+        .map((file) => file.text)
+        .join("\n"),
+      prepared.input.modelo,
+    );
     expect(component).toContain("text-transform: var(--fm-typography-label-1-text-transform)");
     expect(component).toContain("letter-spacing: var(--fm-typography-label-1-letter-spacing)");
   });

@@ -313,6 +313,10 @@ function fields(input: ScreenInput): string {
             : `Aktuell: ${escapeHtml(current.family)} (${escapeHtml(current.license)}). Open-Source-Webfonts mit Lizenz; die Suche zeigt bis zu zwölf Treffer.`
         }</span></fm-kampo>`,
       );
+      // Spec 024 ② (two families): which role the chosen font takes.
+      parts.push(
+        `<fm-elekto name="rolle" value="beide" orientation="horizontal" size="small">Für welche Schrift?<data slot="options" value="display">Anzeige</data><data slot="options" value="body">Fließtext</data><data slot="options" value="beide">Beide</data></fm-elekto>`,
+      );
       const results = input.tiparoj?.results ?? [];
       if (results.length > 0) {
         parts.push(

@@ -751,6 +751,48 @@
       ]
     },
     {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Ero-Tokeno",
+      "term": "Ero-Tokeno",
+      "inScheme": "terminologio",
+      "prefLabel": {
+        "eo": "Ero-Tokeno",
+        "en": "component token",
+        "de": "Komponenten-Token"
+      },
+      "altLabel": {
+        "en": [
+          "ero token",
+          "component-level token"
+        ],
+        "de": [
+          "Ero-Token",
+          "Token je Komponente"
+        ]
+      },
+      "definition": {
+        "en": "A token of the Vortaro per Ero, part, axis value and state, derived mechanically from the Skemo; by default an alias on a role token, which a brand may re-point or give a value of its own. The third level of the Vortaro beside the foundations and the roles (Art. IV).",
+        "de": "Ein Token des Vortaro je Ero, Teil, Variante und Zustand, mechanisch aus dem Skemo abgeleitet; standardmäßig ein Alias auf einen Rollen-Token, den eine Marke umbelegen oder mit einem eigenen Wert belegen darf. Die dritte Ebene des Vortaro neben den Grundlagen und den Rollen (Art. IV)."
+      },
+      "broader": [
+        "#Vortaro"
+      ],
+      "related": [
+        "#Ero",
+        "#Skemo",
+        "#Aspekto"
+      ],
+      "relations": [
+        {
+          "predicate": "partOf",
+          "target": "#Vortaro"
+        },
+        {
+          "predicate": "derivedFrom",
+          "target": "#Skemo"
+        }
+      ]
+    },
+    {
       "uri": "https://fundamento.ciferecigo.com/ontologio#Token",
       "term": "Token",
       "inScheme": "modelo",

@@ -39,6 +39,18 @@ body { margin: 0; font-family: var(--fm-typography-body-1-font-family); backgrou
 .mt-reihe { display: flex; flex-direction: column; gap: var(--fm-spacing-xsmall); padding-block: var(--fm-spacing-small); border-block-end: var(--fm-border-width-default) solid var(--fm-color-border-subtle); }
 .mt-reihe input[type="color"] { inline-size: 2.75rem; block-size: 2.75rem; padding: 0; border: var(--fm-border-width-default) solid var(--fm-color-border-default); border-radius: var(--fm-radius-role-control); background: none; }
 .mt-kasxita { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.mt-komponentoj { margin-block-start: var(--fm-spacing-medium); }
+.mt-komponentoj-liste { display: flex; flex-direction: column; gap: var(--fm-spacing-xsmall); }
+.mt-komponentoj-liste a { color: var(--fm-color-link-rest); text-decoration: none; padding-block: var(--fm-spacing-xsmall); }
+.mt-komponentoj-liste a[aria-current="page"] { font-weight: var(--fm-font-weight-semibold); }
+.mt-matrico { border-collapse: collapse; inline-size: 100%; font-size: var(--fm-typography-label-2-font-size); }
+.mt-matrico th, .mt-matrico td { border: var(--fm-border-width-default) solid var(--fm-color-border-subtle); padding: var(--fm-spacing-xsmall) var(--fm-spacing-small); text-align: start; }
+.mt-matrico a { display: block; color: var(--fm-color-link-rest); text-decoration: none; }
+.mt-matrico a[aria-current="true"] { background-color: var(--fm-color-action-primary-rest); color: var(--fm-color-action-primary-text); border-radius: var(--fm-radius-role-control); padding-inline: var(--fm-spacing-xsmall); }
+.mt-anatomio { margin: 0; padding-inline-start: var(--fm-spacing-large); }
+.mt-gebrauch ul { margin: 0; padding-inline-start: var(--fm-spacing-large); }
+.mt-schatten { display: flex; flex-direction: column; gap: var(--fm-spacing-xsmall); }
+.mt-schatten input[type="color"] { inline-size: 2.75rem; block-size: 2.75rem; padding: 0; border: var(--fm-border-width-default) solid var(--fm-color-border-default); border-radius: var(--fm-radius-role-control); background: none; }
 [hidden] { display: none !important; }`;
 
 /** The layout of the preview document: the three container widths of the Vitrino, tokens only. */
@@ -53,7 +65,12 @@ body { margin: 0; padding: var(--fm-spacing-large); font-family: var(--fm-typogr
 .mt-spalte { display: flex; flex-direction: column; gap: var(--fm-spacing-medium); }
 .mt-flaeche { padding: var(--fm-spacing-large); background-color: var(--fm-color-background-default); border: var(--fm-border-width-default) solid var(--fm-color-border-subtle); border-radius: var(--fm-radius-role-surface); box-shadow: var(--fm-elevation-shadow-raised); display: flex; flex-direction: column; gap: var(--fm-spacing-medium); }
 h2 { margin: 0; font-family: var(--fm-typography-headline-3-font-family); font-size: var(--fm-typography-headline-3-font-size); }
-.mt-ikonoj { display: flex; flex-wrap: wrap; gap: var(--fm-spacing-medium); align-items: center; }`;
+.mt-ikonoj { display: flex; flex-wrap: wrap; gap: var(--fm-spacing-medium); align-items: center; }
+.mt-matrico-vorschau { border-collapse: collapse; inline-size: 100%; }
+.mt-matrico-vorschau th, .mt-matrico-vorschau td { border: var(--fm-border-width-default) solid var(--fm-color-border-subtle); padding: var(--fm-spacing-small); text-align: start; vertical-align: top; }
+.mt-beispiel { margin-block-start: var(--fm-spacing-xsmall); }
+.mt-zelle { display: flex; gap: var(--fm-spacing-xsmall); }
+.mt-farbfeld { display: inline-block; inline-size: var(--fm-size-icon-large); block-size: var(--fm-size-icon-large); border: var(--fm-border-width-default) solid var(--fm-color-border-subtle); border-radius: var(--fm-radius-role-control); }`;
 
 /**
  * The client of the screens: posts a formularo, navigates on Zurück, sends a live value to the
@@ -296,6 +313,70 @@ for (const choice of document.querySelectorAll("[data-mt-kombination]")) {
     const url = new URL(location.href);
     url.searchParams.set(choice.getAttribute("data-mt-kombination"), choice.value);
     location.href = url.toString();
+  });
+}
+// Spec 024 ② O-4: a shadow is set as fields per layer; every change sends the whole value.
+for (const box of document.querySelectorAll("[data-mt-schatten]")) {
+  const send = async () => {
+    const unit = box.getAttribute("data-mt-einheit") || "px";
+    const layers = [];
+    for (const row of box.querySelectorAll("[data-mt-ebene].mt-zeile")) {
+      const field = (name) => row.querySelector('[data-mt-feld="' + name + '"]');
+      const number = (name) => ({ value: Number(field(name).value), unit });
+      const colour = field("farbe");
+      const alpha = field("deckkraft");
+      const layer = { offsetX: number("x"), offsetY: number("y"), blur: number("unschaerfe"), spread: number("ausdehnung") };
+      if (colour.tagName.toLowerCase() === "fm-elektilo") layer.color = "{" + colour.value + "}";
+      else {
+        const hex = colour.value;
+        const channel = (i) => parseInt(hex.slice(i, i + 2), 16) / 255;
+        layer.color = { colorSpace: "srgb", components: [channel(1), channel(3), channel(5)], hex };
+        if (alpha) layer.color.alpha = Number(alpha.value);
+      }
+      layers.push(layer);
+    }
+    const body = { token: box.getAttribute("data-mt-schatten"), wert: layers.length === 1 ? layers[0] : layers };
+    const modus = box.getAttribute("data-mt-modus");
+    if (modus) body.modus = modus;
+    const result = await festlegen(body);
+    if (result) {
+      const row = box.closest("[data-mt-token]");
+      const badge = row && row.querySelector("fm-insigno");
+      if (badge) { badge.textContent = result.herkunft; badge.setAttribute("intent", result.herkunft === "gesetzt" ? "info" : "neutral"); }
+    }
+  };
+  for (const field of box.querySelectorAll("[data-mt-feld]")) field.addEventListener("change", send);
+}
+// Spec 024 ② Schreibweise: the case of a typography role.
+for (const choice of document.querySelectorAll("[data-mt-schreibweise]")) {
+  choice.addEventListener("change", async () => {
+    const result = await festlegen({ token: choice.getAttribute("data-mt-schreibweise"), schreibweise: choice.value });
+    if (result) location.reload();
+  });
+}
+// Spec 024 ② two families: a search per role; a chosen hit sets the family of that role.
+for (const search of document.querySelectorAll("[data-mt-schrift]")) {
+  let timer;
+  const rolle = search.getAttribute("data-mt-schrift");
+  search.addEventListener("input", () => {
+    clearTimeout(timer);
+    timer = setTimeout(async () => {
+      const q = search.value || "";
+      const response = await fetch("/api/marko/" + marko + "/tiparoj?q=" + encodeURIComponent(q));
+      if (!response.ok) return;
+      const body = await response.json();
+      const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+      const id = "mt-treffer-" + rolle;
+      const old = document.getElementById(id);
+      if (body.treffer.length === 0) { if (old) old.remove(); return; }
+      const html = '<fm-elekto name="tiparo-' + rolle + '" id="' + id + '" size="small">Treffer' + body.treffer.map((t) => '<data slot="options" value="' + esc(t.id) + '">' + esc(t.family) + " · " + esc(t.license) + "</data>").join("") + "</fm-elekto>";
+      if (old) old.outerHTML = html; else search.insertAdjacentHTML("afterend", html);
+      const list = document.getElementById(id);
+      list.addEventListener("change", async () => {
+        const chosen = await fetch("/api/marko/" + marko + "/schrift", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ tiparo: list.value, rolle }) });
+        if (chosen.ok) location.reload();
+      });
+    }, 200);
   });
 }
 for (const button of document.querySelectorAll("[data-mt-post]")) {

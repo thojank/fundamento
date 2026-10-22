@@ -125,3 +125,17 @@ describe("K-1 to K-5 of Spec 024 on the screens", () => {
     expect(screen(exampleScreenInput("farbe"))).toContain("/studio/provo/");
   });
 });
+
+// Spec 024 Runde 2: two font families — the step Schrift asks which role the chosen font takes.
+describe("Runde 2: the step Schrift names the role of the font", () => {
+  it("offers Anzeige, Fließtext or both beside the search, and keeps one main button", () => {
+    const html = screen(exampleScreenInput("schrift"));
+    expect(html).toContain('name="rolle"');
+    expect(html).toContain('value="display"');
+    expect(html).toContain('value="body"');
+    expect(html).toContain('value="beide"');
+    expect(html).toContain("Anzeige");
+    expect(html).toContain("Fließtext");
+    expect(screenInventory(html).mainButtons).toBeLessThanOrEqual(1);
+  });
+});

@@ -13,6 +13,9 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { planEroTokenoj } from "../../eroj/ero-tokenoj-cli.js";
+import { createIdGenerator, fixedUlidSource } from "../../ids/ulid-source.js";
+import { fixtureModeloSource } from "../../load/source.js";
 
 export const FIXTURES_DIR = fileURLToPath(new URL("../../../test/fixtures/", import.meta.url));
 
@@ -77,7 +80,30 @@ export function mutatedFixture(
     writeFileSync(path, `${JSON.stringify(result === undefined ? value : result, null, 2)}\n`);
   };
   mutate(edit, root);
+  withEroTokenoj(root);
   return root;
+}
+
+/**
+ * Regenerates the Ero-Tokens of a Modelo root after a change (Constitution v2.3): what
+ * `pnpm vortaro:ero-tokenoj` does after a Skemo changes, so a test that bends a Skemo sees its
+ * own finding and not the drift of the third level. A root whose Modelo cannot derive (a Skemo
+ * the test broke on purpose) is left as it is. IDs from a fixed source: the copy is thrown away.
+ */
+export function withEroTokenoj(root: string): void {
+  if (!existsSync(join(root, "data", "eroj")) && !existsSync(join(root, "data", "sxablonoj")))
+    return;
+  try {
+    const planned = planEroTokenoj(
+      fixtureModeloSource(root),
+      false,
+      createIdGenerator(fixedUlidSource(1_700_000_000_000, 24)),
+    );
+    if (!planned.ok) return;
+    for (const [file, text] of planned.plan.files) writeFileSync(file, text);
+  } catch {
+    // A Skemo the test broke on purpose derives nothing; the test reads its own finding.
+  }
 }
 
 /**
@@ -96,5 +122,6 @@ export function mutatedMinimal(
     writeFileSync(path, `${JSON.stringify(result === undefined ? value : result, null, 2)}\n`);
   };
   mutate(edit, root);
+  withEroTokenoj(root);
   return root;
 }

@@ -4,16 +4,22 @@
 // plugin-bauformen-eingabe.test.ts (Nachlese 5 ①, O-5): the structures of input: toggle, choice, select, text area, dialog, upload, suggest.
 
 import { describe, expect, it } from "vitest";
+import { traRolojFigmaName } from "../../test-doubles/tra-roloj.js";
 import { BACKDROP_EXAMPLE } from "./figma.js";
 import {
   descendant,
   modelDouble,
+  once,
   pageNodes,
+  prepared,
   repoFiles,
   repoPlan,
   run,
 } from "./plugin-test-helpers.js";
 import type { DoubleNode } from "./test-doubles/plugin.js";
+
+// A bound variable's name read as the role its Ero-Token aliases (Constitution v2.3).
+const role = (name: string | undefined) => traRolojFigmaName(name, prepared.input.modelo);
 
 // Spec 010 ① (plan D-10): the switch is drawn as a toggle — a field in a row: the focus ring
 // around the track (control) with the knob (indicator) in it, the label beside. The knob stands
@@ -21,14 +27,15 @@ import type { DoubleNode } from "./test-doubles/plugin.js";
 // the field's. Measured in f10b-5 (the double knows the slice of the API the plugin uses).
 describe("the sxaltilo is drawn as a toggle: track, knob, label beside (Spec 010 ①)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
-  const drawn = async () => {
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
+  const drawn = once(async () => {
     const double = modelDouble();
     await run(double, source);
     const set = pageNodes(double).find((child) => child.name === "sxaltilo");
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     return { set, variant };
-  };
+  });
 
   it("draws every variant of checked × size × state, named by the plan", async () => {
     const { set } = await drawn();
@@ -82,14 +89,15 @@ describe("the sxaltilo is drawn as a toggle: track, knob, label beside (Spec 010
 // width and height holding one VECTOR; a vector with constraints SCALE follows its frame's size.
 describe("the markobutono is drawn as a toggle: box, check mark, label and error beside (Spec 010 ②)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
-  const drawn = async () => {
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
+  const drawn = once(async () => {
     const double = modelDouble();
     await run(double, source);
     const set = pageNodes(double).find((child) => child.name === "markobutono");
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     return { double, set, variant };
-  };
+  });
   // The Aspektoj of the repository's Modelo, whose glyphs the plan carries (Nachlese 4 N-7).
   const aspektoj = Object.keys(repoPlan.ikonoj?.glyphs ?? {});
   const glyphFrames = aspektoj.map((aspekto) => `glyph-${aspekto}`);
@@ -135,7 +143,7 @@ describe("the markobutono is drawn as a toggle: box, check mark, label and error
       const fill = (
         (mark?.properties.fills ?? []) as { boundVariables?: { color?: { name: string } } }[]
       )[0];
-      expect(fill?.boundVariables?.color?.name, aspekto).toBe("color/action/primary/text");
+      expect(role(fill?.boundVariables?.color?.name), aspekto).toBe("color/action/primary/text");
     }
     expect(bound(descendant(on, "control"), "cornerRadius")).toBe("radius/role/control");
     expect(indicator?.properties.opacity).toBe(1);
@@ -198,20 +206,25 @@ describe("the markobutono is drawn as a toggle: box, check mark, label and error
 // componentPropertyReference on one text of each variant only (the label).
 describe("the elekto is drawn as a choice: question, options with circle and dot, help and error (Spec 010 ③)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
   const fillOf = (node: DoubleNode | undefined) =>
-    ((node?.properties.fills ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
-      ?.boundVariables?.color?.name;
+    role(
+      ((node?.properties.fills ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+        ?.boundVariables?.color?.name,
+    );
   const strokeOf = (node: DoubleNode | undefined) =>
-    ((node?.properties.strokes ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
-      ?.boundVariables?.color?.name;
-  const drawn = async () => {
+    role(
+      ((node?.properties.strokes ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+        ?.boundVariables?.color?.name,
+    );
+  const drawn = once(async () => {
     const double = modelDouble();
     await run(double, source);
     const set = pageNodes(double).find((child) => child.name === "elekto");
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     return { double, set, variant };
-  };
+  });
 
   it("draws every variant of size × state, named by the plan", async () => {
     const { set } = await drawn();
@@ -302,14 +315,15 @@ describe("the elekto is drawn as a choice: question, options with circle and dot
 // VECTOR per path, a SCALE constraint follows the bound frame.
 describe("the elektilo is drawn as the field of the kampo with the chevron in its control (Spec 010 ④)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
-  const drawn = async () => {
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
+  const drawn = once(async () => {
     const double = modelDouble();
     await run(double, source);
     const set = pageNodes(double).find((child) => child.name === "elektilo");
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     return { double, set, variant };
-  };
+  });
 
   it("draws every variant of size × state, named by the plan, and no list", async () => {
     const { set } = await drawn();
@@ -355,8 +369,10 @@ describe("the elektilo is drawn as the field of the kampo with the chevron in it
     expect(mark?.type).toBe("VECTOR");
     expect(mark?.properties.constraints).toEqual({ horizontal: "SCALE", vertical: "SCALE" });
     const paint = (node: DoubleNode | undefined) =>
-      ((node?.properties.fills ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
-        ?.boundVariables?.color?.name;
+      role(
+        ((node?.properties.fills ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+          ?.boundVariables?.color?.name,
+      );
     expect(paint(mark)).toBe("color/text/muted");
     expect(paint(descendant(rest, "text"))).toBe("color/text/subtle");
     expect(bound(descendant(variant("size=large, state=invalid"), "indicator"), "width")).toBe(
@@ -367,7 +383,7 @@ describe("the elektilo is drawn as the field of the kampo with the chevron in it
         boundVariables?: { color?: { name: string } };
       }[]
     )[0];
-    expect(strokes?.boundVariables?.color?.name).toBe("color/status/danger/border");
+    expect(role(strokes?.boundVariables?.color?.name)).toBe("color/status/danger/border");
   });
 
   it("keeps the text field without a chevron (Spec 009)", async () => {
@@ -392,14 +408,15 @@ describe("the elektilo is drawn as the field of the kampo with the chevron in it
 // as four lines of its typography — `rows` is a number, nothing to bind.
 describe("the tekstareo is drawn as the field of the kampo: kind × size × state, the code role bound (Spec 011 ②)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
-  const drawn = async () => {
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
+  const drawn = once(async () => {
     const double = modelDouble();
     await run(double, source);
     const set = pageNodes(double).find((child) => child.name === "tekstareo");
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     return { double, set, variant };
-  };
+  });
 
   it("draws every variant of kind × size × state, named by the plan", async () => {
     const { set } = await drawn();
@@ -450,10 +467,13 @@ describe("the tekstareo is drawn as the field of the kampo: kind × size × stat
 // FIXED frame take the variable's value (the double resolves bound numbers).
 describe("the dialogo is drawn as a dialog: surface with heading, message, reason and two actions (Spec 011 ②)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
   const paintOf = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
-    ((node?.properties[field] ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
-      ?.boundVariables?.color?.name;
+    role(
+      ((node?.properties[field] ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+        ?.boundVariables?.color?.name,
+    );
   type Report = {
     warnings: string[];
     components: {
@@ -471,7 +491,7 @@ describe("the dialogo is drawn as a dialog: surface with heading, message, reaso
       };
     }[];
   };
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
@@ -480,7 +500,7 @@ describe("the dialogo is drawn as a dialog: surface with heading, message, reaso
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     const dialogo = report.components.find((component) => component.set === "dialogo");
     return { double, set, variant, report, dialogo };
-  };
+  });
 
   it("draws the six variants of size × reason, named by the plan, in one column", async () => {
     const { set, dialogo } = await drawn();
@@ -635,7 +655,7 @@ describe("the dialogo is drawn as a dialog: surface with heading, message, reaso
     });
     expect(effects[0]?.color).toMatchObject({ r: expect.any(Number), a: expect.any(Number) });
     expect(effects[1]).toMatchObject({ type: "DROP_SHADOW", radius: 8 });
-    expect(dialogo?.shadow).toMatchObject({
+    expect({ ...dialogo?.shadow, variable: role(dialogo?.shadow?.variable) }).toMatchObject({
       part: "surface",
       variable: "elevation/shadow/modal",
       layers: 2,
@@ -716,10 +736,14 @@ describe("the dialogo is drawn as a dialog: surface with heading, message, reaso
 // each with its size and a remove of the butono's look with the glyphs of close. A second run
 // writes nothing.
 describe("the plugin draws the alsxutilo (Spec 015 ②)", () => {
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
   const paintOf = (node: DoubleNode | undefined) =>
-    (node?.properties.fills as { boundVariables?: { color?: { name: string } } }[] | undefined)?.[0]
-      ?.boundVariables?.color?.name;
+    role(
+      (
+        node?.properties.fills as { boundVariables?: { color?: { name: string } } }[] | undefined
+      )?.[0]?.boundVariables?.color?.name,
+    );
 
   it("every variant: label, dropzone, help, error; the button in the dropzone with its word and icon; the hint only with a dropzone", async () => {
     const double = modelDouble();
@@ -783,8 +807,10 @@ describe("the plugin draws the alsxutilo (Spec 015 ②)", () => {
 // keyboard, its row filled with color.background.sunken; the others with the listbox's raised fill.
 describe("the kompletigilo fills the active suggestion (N-8)", () => {
   const fillOf = (node: DoubleNode | undefined) =>
-    ((node?.properties.fills ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
-      ?.boundVariables?.color?.name;
+    role(
+      ((node?.properties.fills ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+        ?.boundVariables?.color?.name,
+    );
 
   it("the second suggestion of an open field is filled as active, the first written as chosen", async () => {
     const double = modelDouble();
@@ -858,10 +884,14 @@ describe("the kompletigilo fills the active suggestion (N-8)", () => {
 // range — the end label, the stand-in of the number field shown only with field), help and error; the
 // fill the plan's share of the track. A second run writes nothing.
 describe("the plugin draws the glitilo (Spec 025 ①)", () => {
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    role(node?.boundVariables[field]?.name);
   const paintOf = (node: DoubleNode | undefined) =>
-    (node?.properties.fills as { boundVariables?: { color?: { name: string } } }[] | undefined)?.[0]
-      ?.boundVariables?.color?.name;
+    role(
+      (
+        node?.properties.fills as { boundVariables?: { color?: { name: string } } }[] | undefined
+      )?.[0]?.boundVariables?.color?.name,
+    );
 
   it("every variant: label, row, help, error; the track with fill and thumb(s); the number field only with field; a second run writes nothing", async () => {
     const double = modelDouble();
@@ -919,11 +949,14 @@ describe("the plugin draws the glitilo (Spec 025 ①)", () => {
 // row of seven weekdays and six rows of seven cells; the chosen day, the days in between, today
 // and the days outside the month carry their own looks. A second run writes nothing.
 describe("the plugin draws the datelektilo (Spec 025 ②)", () => {
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    role(node?.boundVariables[field]?.name);
   const paintOf = (node: DoubleNode | undefined, field = "fills") =>
-    (
-      node?.properties[field] as { boundVariables?: { color?: { name: string } } }[] | undefined
-    )?.[0]?.boundVariables?.color?.name;
+    role(
+      (
+        node?.properties[field] as { boundVariables?: { color?: { name: string } } }[] | undefined
+      )?.[0]?.boundVariables?.color?.name,
+    );
 
   it("every variant: the field with its row and trigger; the calendar only where expanded, with head, weekdays and six weeks; the looks of the cells bound; a second run writes nothing", async () => {
     const double = modelDouble();

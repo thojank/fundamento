@@ -8,7 +8,10 @@
 import {
   baseResolution,
   boundToken,
+  type Combination,
   combinationsOf,
+  ERO_TOKEN_PREFIX,
+  eroTokenNameOf,
   isBindingKeyword,
   isEntryKey,
   type LoadedEro,
@@ -388,7 +391,7 @@ function markdownDocumentCss(entry: LoadedEro): string {
   const indent = fixedToken(entry.skemo.parts.indent?.["inline-padding"]);
   return indent === undefined
     ? ""
-    : `fm-${entry.ero.name} :is(ul, ol) :is(ul, ol) { margin-block: 0; padding-inline-start: ${variable(indent)}; }`;
+    : `fm-${entry.ero.name} :is(ul, ol) :is(ul, ol) { margin-block: 0; padding-inline-start: ${variable(named(entry.ero.name, entry.skemo, "indent", "inline-padding", {}, indent))}; }`;
 }
 
 /** Layout of a Markdown view (Spec 020 ③, D-24), keywords and 0 only: a column of blocks. */
@@ -695,6 +698,29 @@ const variable = (token: string, field?: string) =>
   `var(${nomRegulo("css").derive(token)}${field === undefined ? "" : `-${field}`})`;
 
 /**
+ * The token a part property of an Ero reads (Constitution v2.3): its Ero-Token — the cell of the
+ * third level a brand may set —, or the bound token itself where no Ero-Token exists (a keyword,
+ * a position) or where no owner is named (a Skemo on its own, as the tests read one).
+ */
+const named = (
+  owner: string | undefined,
+  skemo: Skemo,
+  part: string,
+  property: string,
+  combination: Combination,
+  token: string,
+): string =>
+  owner === undefined
+    ? token
+    : (eroTokenNameOf(ERO_TOKEN_PREFIX, owner, skemo, part, property, combination) ?? token);
+
+/** The offset a ring reads, as its Ero-Token where one exists. */
+const offsetOf = (owner: string | undefined, skemo: Skemo, part: string): string | undefined => {
+  const offset = fixedToken(skemo.parts[part]?.offset);
+  return offset === undefined ? undefined : named(owner, skemo, part, "offset", {}, offset);
+};
+
+/**
  * CSS declarations of a binding keyword (Spec 008, D-03, D-09). `inherit`: the typography is the
  * text's, so the control flows in the text (inline, breaking with it) and sets no font of its own.
  * `none`: the property is not set — the underline is off, a minimum is not written.
@@ -718,7 +744,13 @@ function keywordDeclarations(part: string, property: string, token: string): str
 }
 
 /** CSS declarations of one part property bound to `token` (Celo knowledge, Art. VIII). */
-function declarations(skemo: Skemo, part: string, property: string, token: string): string[] {
+function declarations(
+  skemo: Skemo,
+  part: string,
+  property: string,
+  token: string,
+  owner?: string,
+): string[] {
   // A position is a term (Spec 010 ①, D-04): the alignment of the track along the writing
   // direction, so right to left mirrors itself; structure, no design value.
   if (property === "position") {
@@ -746,7 +778,7 @@ function declarations(skemo: Skemo, part: string, property: string, token: strin
     return [`padding: ${variable(token)};`];
   }
   if (isCodeblock(skemo) && part === "scroll-ring" && property === "color") {
-    const offset = fixedToken(skemo.parts[part]?.offset);
+    const offset = offsetOf(owner, skemo, part);
     return offset === undefined
       ? []
       : [`box-shadow: 0 0 0 ${variable(offset)} ${variable(token)};`];
@@ -865,7 +897,7 @@ function declarations(skemo: Skemo, part: string, property: string, token: strin
     case "color": {
       if (part === "focus-ring") {
         // The gap between control and ring, filled in the gap colour (focus-ring-dual-contrast).
-        const offset = fixedToken(skemo.parts[part]?.offset);
+        const offset = offsetOf(owner, skemo, part);
         return offset === undefined
           ? []
           : [`box-shadow: 0 0 0 ${variable(offset)} ${variable(token)};`];
@@ -1363,7 +1395,7 @@ const skipStructure: string = [
  * every selector starts with the host's tag, the combination stands on the host (data-density,
  * data-layout). Celo knowledge: which element of the platform's table or list a part is.
  */
-export function lightStylesheetOf(skemo: Skemo, tag: string): string {
+export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): string {
   const rules: [string, string[]][] = [];
   const add = (selector: string, lines: readonly string[]) => {
     if (lines.length === 0) return;
@@ -1448,20 +1480,26 @@ export function lightStylesheetOf(skemo: Skemo, tag: string): string {
         return undefined;
     }
   };
-  const lines = (part: string, property: string, token: string): string[] => {
-    if (isBindingKeyword(token)) return keywordDeclarations(part, property, token);
+  const lines = (
+    part: string,
+    property: string,
+    bound: string,
+    combination: Combination = {},
+  ): string[] => {
+    if (isBindingKeyword(bound)) return keywordDeclarations(part, property, bound);
+    const token = named(owner, skemo, part, property, combination, bound);
     // The border of a table lies under every cell (Spec 011 ④, D-09): the block-end edge.
     if (table && part === "border") {
       if (property === "color") return [`border-block-end-color: ${variable(token)};`];
       if (property === "width") return [`border-block-end-width: ${variable(token)};`];
     }
     if (part === "focus-ring" && property === "color") {
-      const offset = fixedToken(skemo.parts["focus-ring"]?.offset);
+      const offset = offsetOf(owner, skemo, "focus-ring");
       return offset === undefined
         ? []
         : [`box-shadow: 0 0 0 ${variable(offset)} ${variable(token)};`];
     }
-    return declarations(skemo, part, property, token);
+    return declarations(skemo, part, property, token, owner);
   };
   for (const [part, properties] of Object.entries(skemo.parts)) {
     for (const [property, source] of Object.entries(properties)) {
@@ -1501,7 +1539,8 @@ export function lightStylesheetOf(skemo: Skemo, tag: string): string {
             entry,
             property,
           );
-          if (selector !== undefined) add(selector, lines(part, property, bound.token));
+          if (selector !== undefined)
+            add(selector, lines(part, property, bound.token, combination));
         }
       }
     }
@@ -1511,12 +1550,19 @@ export function lightStylesheetOf(skemo: Skemo, tag: string): string {
   // rows of their own, so the gap of the box lies between term and value and the list's gap
   // before every term but the first.
   if (!table) {
-    const listGap = fixedToken(skemo.parts.list?.gap);
-    const boxGap = fixedToken(skemo.parts.box?.gap);
+    const fixedGap = (part: string) => {
+      const gap = fixedToken(skemo.parts[part]?.gap);
+      return gap === undefined ? undefined : named(owner, skemo, part, "gap", {}, gap);
+    };
+    const listGap = fixedGap("list");
+    const boxGap = fixedGap("box");
     for (const layout of skemo.props.find((prop) => prop.name === "layout")?.values ?? []) {
       const inline = boundToken(skemo, "box", "inline-padding", { layout });
       const selector = `${tag}[data-layout="${layout}"] > dl`;
-      if (inline !== undefined) add(selector, [`column-gap: ${variable(inline.token)};`]);
+      if (inline !== undefined)
+        add(selector, [
+          `column-gap: ${variable(named(owner, skemo, "box", "inline-padding", { layout }, inline.token))};`,
+        ]);
       if (layout === "stacked") {
         if (boxGap !== undefined) add(selector, [`row-gap: ${variable(boxGap)};`]);
         if (listGap !== undefined) {
@@ -1580,7 +1626,7 @@ const selectStructure: readonly string[] = [
  * design value is still a token (Art. X gate 1). Celo knowledge (Art. VIII): the Skemo says that a
  * chevron is part of the field, the Web Celo where it stands.
  */
-function selectRules(skemo: Skemo): [string, string[]][] {
+function selectRules(skemo: Skemo, owner?: string): [string, string[]][] {
   const keys = [
     ...new Set([
       ...keysOf(skemo, skemo.parts.box?.["inline-padding"]),
@@ -1589,8 +1635,12 @@ function selectRules(skemo: Skemo): [string, string[]][] {
   ].filter((key) => key !== STATE_KEY);
   const rules: [string, string[]][] = [];
   for (const combination of combinationsOf(skemo, keys)) {
-    const token = (part: string, property: string) =>
-      boundToken(skemo, part, property, combination)?.token;
+    const token = (part: string, property: string) => {
+      const bound = boundToken(skemo, part, property, combination)?.token;
+      return bound === undefined
+        ? undefined
+        : named(owner, skemo, part, property, combination, bound);
+    };
     const padding = token("box", "inline-padding");
     const size = token("indicator", "size");
     const gap = token("box", "gap");
@@ -1690,7 +1740,7 @@ const groupStructure = (disables: boolean, marked: boolean): string =>
  * without a binding of its own repeats rest, so every state of the Skemo has a rule the parity
  * inventory reads). The Uzo decides the host (D-04).
  */
-export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
+export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
   // Fixed rules stand before the keyed ones (Spec 008): a state rule that shares a selector with
   // a fixed rule (focus-visible: the ring and the focus colour) must still come after rest.
   const fixedRules = new Map<string, string[]>();
@@ -1717,7 +1767,16 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
     for (const [property, source] of Object.entries(properties)) {
       const token = fixedToken(source);
       if (token !== undefined) {
-        add(selectorOf(skemo, part, property, {}, []), declarations(skemo, part, property, token));
+        add(
+          selectorOf(skemo, part, property, {}, []),
+          declarations(
+            skemo,
+            part,
+            property,
+            named(owner, skemo, part, property, {}, token),
+            owner,
+          ),
+        );
       }
     }
   }
@@ -1739,13 +1798,19 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
         if (bound === undefined) continue;
         add(
           selectorOf(skemo, part, property, combination, keys),
-          declarations(skemo, part, property, bound.token),
+          declarations(
+            skemo,
+            part,
+            property,
+            named(owner, skemo, part, property, combination, bound.token),
+            owner,
+          ),
         );
       }
     }
   }
   // The place of the chevron of a select comes last (D-06): it refines the inline padding.
-  const placed = isSelect(skemo) ? selectRules(skemo) : [];
+  const placed = isSelect(skemo) ? selectRules(skemo, owner) : [];
   const tokenRules = [...fixedRules.entries(), ...keyedRules.entries(), ...placed].map(
     ([selector, lines]) => `${selector} {\n${lines.map((line) => `  ${line}`).join("\n")}\n}`,
   );
@@ -2042,11 +2107,11 @@ export const WEB_COMPONENT_CELO: Celo = {
     for (const { entry, tag, constant } of eroj) {
       // A light-DOM host (Spec 011 ④, E10) exports the document's stylesheet beside the shadow's.
       const lightCss = isLight(entry.skemo)
-        ? `export const ${constant}_LIGHT_CSS = ${JSON.stringify(lightStylesheetOf(entry.skemo, tag))};\n`
+        ? `export const ${constant}_LIGHT_CSS = ${JSON.stringify(lightStylesheetOf(entry.skemo, tag, entry.ero.name))};\n`
         : "";
       files.push({
         path: `${GENERATED_DIR}/${entry.ero.name}.styles.ts`,
-        text: `${header}export const ${constant}_CSS = ${JSON.stringify(stylesheetOf(entry.skemo, entry.uzo))};\n${lightCss}`,
+        text: `${header}export const ${constant}_CSS = ${JSON.stringify(stylesheetOf(entry.skemo, entry.uzo, entry.ero.name))};\n${lightCss}`,
       });
       files.push({
         path: `${GENERATED_DIR}/${tag}.ts`,

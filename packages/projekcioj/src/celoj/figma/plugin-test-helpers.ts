@@ -60,6 +60,18 @@ export const SEPARATOR_EXAMPLE_NAMES = [
  * again measures what such a run reports — which is only there once the run goes on.
  */
 export const LIFT = { createInFoundSet: true } as const;
+/**
+ * One run per describe: the tests of a Bauform read what the run drew and never change it, so the
+ * first `drawn()` runs the plugin and every later one reads the same double (B-14: a run over a
+ * plan with the third level takes seconds; a suite ran it forty times).
+ */
+export function once<T>(draw: () => Promise<T>): () => Promise<T> {
+  let pending: Promise<T> | undefined;
+  return () => {
+    pending ??= draw();
+    return pending;
+  };
+}
 /** Runs the generated plugin source against a double. */
 export async function run(
   double: ReturnType<typeof figmaDouble>,

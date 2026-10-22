@@ -5,8 +5,7 @@
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { Modelo } from "../contracts/modelo.js";
 import { ASPEKTO_DIMENSIO } from "../load/build.js";
-import { allAssignments } from "../resolve/assignment.js";
-import { resolve } from "../resolve/resolve.js";
+import { resolutionsOf } from "./resolutions.js";
 
 /** Generic font families: they name no font file and need no license. */
 export const GENERIC_FONT_FAMILIES: ReadonlySet<string> = new Set([
@@ -37,15 +36,13 @@ export function fontIssues(modelo: Modelo): ValidationIssue[] {
       continue;
     }
     const declared = new Set((pkg.fonts ?? []).map((font) => font.family));
-    const assignments = allAssignments(modelo).filter(
-      (assignment) => assignment[ASPEKTO_DIMENSIO] === pkg.aspekto,
-    );
-    for (const assignment of assignments) {
-      const outcome = resolve(modelo, assignment);
-      if (!outcome.ok) {
+    // The resolutions every rule shares (Spec 002, D-04): no resolution pass of its own.
+    for (const { assignment, resolution } of resolutionsOf(modelo)) {
+      if (assignment[ASPEKTO_DIMENSIO] !== pkg.aspekto) continue;
+      if (resolution.assignment === undefined || resolution.errors.length > 0) {
         continue; // Alias problems are reported by the combination rules.
       }
-      for (const [name, token] of Object.entries(outcome.rezolvo.tokens)) {
+      for (const [name, token] of Object.entries(resolution.tokens)) {
         if (token.type !== "fontFamily") continue;
         const family = firstFamily(token.value);
         if (family === undefined || GENERIC_FONT_FAMILIES.has(family) || declared.has(family)) {

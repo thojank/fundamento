@@ -57,5 +57,128 @@
       "$value": { "value": 8, "unit": "px" },
       "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01K5FMAJ0H4CZYQST4Y5HHM8HV" } }
     }
+  },
+  "ero": {
+    "markobutono": {
+      "label": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}",
+          "$description": "markobutono: label.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF2CCTFB1A7KQPMVCDECEX",
+              "role": "ero"
+            }
+          }
+        }
+      },
+      "error": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}",
+          "$description": "markobutono: error.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF2CCVF8ZHHAJ52MF64XRA",
+              "role": "ero"
+            }
+          }
+        }
+      },
+      "surface": {
+        "fill": {
+          "checked": {
+            "true": {
+              "rest": {
+                "$type": "color",
+                "$value": "{color.text.default}",
+                "$description": "markobutono: surface.fill when checked=true, state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+                "$extensions": {
+                  "com.ciferecigo.fundamento": {
+                    "id": "tok_01M5GF2CCVF8ZHHAJ52MF64XRB",
+                    "role": "ero"
+                  }
+                }
+              },
+              "invalid": {
+                "$type": "color",
+                "$value": "{color.text.default}",
+                "$description": "markobutono: surface.fill when checked=true, state=invalid (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+                "$extensions": {
+                  "com.ciferecigo.fundamento": {
+                    "id": "tok_01M5GF2CCVF8ZHHAJ52MF64XRC",
+                    "role": "ero"
+                  }
+                }
+              }
+            },
+            "false": {
+              "rest": {
+                "$type": "color",
+                "$value": "{color.background.default}",
+                "$description": "markobutono: surface.fill when checked=false, state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+                "$extensions": {
+                  "com.ciferecigo.fundamento": {
+                    "id": "tok_01M5GF2CCVF8ZHHAJ52MF64XRD",
+                    "role": "ero"
+                  }
+                }
+              },
+              "invalid": {
+                "$type": "color",
+                "$value": "{color.background.default}",
+                "$description": "markobutono: surface.fill when checked=false, state=invalid (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+                "$extensions": {
+                  "com.ciferecigo.fundamento": {
+                    "id": "tok_01M5GF2CCVF8ZHHAJ52MF64XRE",
+                    "role": "ero"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "indicator": {
+        "color": {
+          "checked": {
+            "true": {
+              "$type": "color",
+              "$value": "{color.background.default}",
+              "$description": "markobutono: indicator.color when checked=true (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "com.ciferecigo.fundamento": {
+                  "id": "tok_01M5GF2CCVF8ZHHAJ52MF64XRF",
+                  "role": "ero"
+                }
+              }
+            }
+          }
+        },
+        "size": {
+          "$type": "dimension",
+          "$value": "{spacing.medium}",
+          "$description": "markobutono: indicator.size (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF2CCVF8ZHHAJ52MF64XRG"
+            }
+          }
+        }
+      },
+      "box": {
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.small}",
+          "$description": "markobutono: box.gap (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF2CCVF8ZHHAJ52MF64XRH"
+            }
+          }
+        }
+      }
+    }
   }
 }

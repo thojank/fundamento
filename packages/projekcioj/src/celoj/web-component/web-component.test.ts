@@ -10,14 +10,18 @@ import {
 } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
+import { traRolojCss } from "../../test-doubles/tra-roloj.js";
 import { REACT_CELO } from "../react/react.js";
 import { stylesheetInventory, WEB_COMPONENT_CELO } from "./web-component.js";
 
 const prepared = celoInputOf(defaultModeloSource());
 if (!prepared.ok) throw new Error("the repo Modelo must be valid");
+// Read through the roles the Ero-Tokens alias by default (Constitution v2.3, tra-roloj.ts): this
+// file is the record of what every part binds; that the stylesheets name the Ero-Tokens stands in
+// ero-tokenoj.test.ts.
 const files = Object.fromEntries(
   [...WEB_COMPONENT_CELO.generate(prepared.input), ...REACT_CELO.generate(prepared.input)].map(
-    (file) => [file.path, file.text],
+    (file) => [file.path, traRolojCss(file.text, prepared.input.modelo)],
   ),
 );
 const butono = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "butono");

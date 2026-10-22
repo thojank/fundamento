@@ -125,3 +125,55 @@ describe("Spec 024 O-1 documentation (specs/024-studio)", () => {
     expect(tasks.slice(tasks.indexOf("## O-1 Palettenraster"))).toMatch(/rot `[0-9a-f]{7}`/);
   });
 });
+
+// Runde 2 (Amendment v2.3, Ero-Tokens, Komponentenseiten): plan ② with the review, the decisions,
+// the count of the Ero-Tokens and of the Figma variables, the screenshots of the component pages,
+// the guide; tasks ② from T2431.
+describe("Spec 024 Runde 2 documentation (specs/024-studio)", () => {
+  it("plan ② carries the review, the counts, the deviations, the screenshots and the guide", () => {
+    const plan = read("plan.md");
+    const round = plan.slice(plan.indexOf("## ② Runde 2"));
+    expect(round.length).toBeGreaterThan(1000);
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Constitutional Compliance Review",
+      "### Entwurfsentscheidungen",
+      "### Bildschirmfotos",
+      "### Abweichungen",
+      "### Befunde / Mankoj",
+      "### Messanleitung",
+    ]) {
+      expect(round, heading).toContain(heading);
+    }
+    for (const term of [
+      "Amendment v2.3",
+      "Ero-Tokens",
+      "pnpm vortaro:ero-tokenoj",
+      "ero-tokeno-missing",
+      "Figma-Variablen",
+      "M-3",
+      "M-4",
+      "O-2",
+      "O-3",
+      "O-4",
+      "schreibweise",
+    ]) {
+      expect(round, term).toContain(term);
+    }
+    expect(round).toMatch(/Ero-Tokens[^\n]*\b9\d\d\b/);
+    expect(round).not.toContain("ciferecigo");
+    const shots = [...round.matchAll(/\]\((bildoj\/[a-z0-9-]+\.png)\)/g)].map(([, p = ""]) => p);
+    expect(shots.some((shot) => shot.includes("studio-komponente"))).toBe(true);
+    for (const shot of shots) expect(existsSync(join(specDir, shot)), shot).toBe(true);
+    const guide = round.slice(round.indexOf("### Messanleitung"));
+    expect(guide).toContain("cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds");
+    expect(guide).toContain("http://localhost:7301/studio/");
+  });
+
+  it("tasks ② start at T2431 and name the red commit", () => {
+    const tasks = read("tasks.md");
+    const round = tasks.slice(tasks.indexOf("## ② Runde 2"));
+    expect(round).toContain("**T2431");
+    expect(round).toMatch(/rot `[0-9a-f]{7}`/);
+  });
+});

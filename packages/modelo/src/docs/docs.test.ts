@@ -678,8 +678,12 @@ describe("Spec 004 documentation (T001, Art. V Benchmark-Aspekto)", () => {
   // einen String, der zwei Amendments unter einer Nummer nie melden würde. Seit Spec 007 (T010)
   // steht hier 2.1: Die Nummer wurde gegen main und die offenen PRs geprüft, keiner beanspruchte sie.
   // Seit F1 (Spec 007, F1-T06) 2.2: bestimmt gegen die Basis des F1-PR, main 51e9ed9 mit v2.1.
-  it("the Constitution header says version 2.2", () => {
-    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.2 · /);
+  // Seit Spec 024 Runde 2 (Amendment v2.3, freigegeben am 2026-10-21) 2.3: bestimmt gegen main
+  // 8915fa6 mit v2.2 und den offenen PR #100 (O-1), der keine Nummer beansprucht.
+  it("the Constitution header says version 2.3 and the history names v2.3 with the Ero-Tokens", () => {
+    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.3 · /);
+    expect(constitution).toContain("v2.3 (Spec 024");
+    expect(constitution).toContain("Terminologie **Ero-Tokeno**");
   });
 
   it("Art. V carries the Benchmark-Aspekto paragraph and keeps the source rule", () => {

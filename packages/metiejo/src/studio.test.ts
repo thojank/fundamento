@@ -185,3 +185,49 @@ describe("studioScreen", () => {
     expect(html).toContain("Ozean");
   });
 });
+
+// Spec 024 Runde 2: shadows as fields (O-4), the case of a typography role (Schreibweise), and
+// the two font families Anzeige and Fließtext set in the Studio.
+describe("Runde 2 in the Grundlagen of the Studio", () => {
+  it("O-4: a shadow is set as fields per layer – x, y, Unschärfe, Ausdehnung, Farbe – not as JSON", () => {
+    const html = studioScreen(exampleStudioInput("tiefe"));
+    expect(html).toContain('data-mt-schatten="elevation.shadow.raised"');
+    for (const field of ["x", "y", "unschaerfe", "ausdehnung", "farbe"])
+      expect(html, field).toContain(`data-mt-feld="${field}"`);
+    expect(html).not.toMatch(/fm-tekstareo[^>]*name="elevation\.shadow\.raised"/);
+    const rows = studioRows("tiefe", agordo, bases, DEFAULT_KOMBINATION)
+      .flatMap((group) => group.rows)
+      .filter((row) => row.token.startsWith("elevation.shadow."));
+    expect(rows.length).toBeGreaterThan(0);
+    for (const row of rows) expect(row.art).toBe("schatten");
+  });
+
+  it("Schreibweise: every typography role shows and sets its case", () => {
+    const rows = studioRows("schrift", agordo, bases, DEFAULT_KOMBINATION)
+      .flatMap((group) => group.rows)
+      .filter((row) => row.token.startsWith("typography."));
+    expect(rows.find((row) => row.token === "typography.kicker")?.schreibweise).toBe("uppercase");
+    expect(rows.find((row) => row.token === "typography.label.1")?.schreibweise).toBe("none");
+    const html = studioScreen(exampleStudioInput("schrift"));
+    expect(html).toContain('data-mt-schreibweise="typography.label.1"');
+    expect(html).toContain("Versalien");
+    const set = studioRows(
+      "schrift",
+      { ...agordo, festgelegt: { "typography.label.1": { schreibweise: "uppercase" } } },
+      bases,
+      DEFAULT_KOMBINATION,
+    )
+      .flatMap((group) => group.rows)
+      .find((row) => row.token === "typography.label.1");
+    expect(set?.schreibweise).toBe("uppercase");
+    expect(set?.herkunft).toBe("gesetzt");
+  });
+
+  it("two families: Anzeige and Fließtext are each searched and set on the page Schrift", () => {
+    const html = studioScreen(exampleStudioInput("schrift"));
+    expect(html).toContain('data-mt-schrift="display"');
+    expect(html).toContain('data-mt-schrift="body"');
+    expect(html).toContain("Anzeige");
+    expect(html).toContain("Fließtext");
+  });
+});

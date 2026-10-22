@@ -2,16 +2,20 @@
 
 import type { DerivedThemes } from "./derive.js";
 
+// A plain loop, not `Object.fromEntries` over mapped pairs: the rezolvoj of a Modelo with the
+// third level are a thousand tokens by a hundred combinations (B-16), and the copy is a third of
+// the export's time.
 function sortKeysDeep(value: unknown): unknown {
   if (Array.isArray(value)) {
-    return value.map(sortKeysDeep);
+    const copy: unknown[] = new Array(value.length);
+    for (let index = 0; index < value.length; index++) copy[index] = sortKeysDeep(value[index]);
+    return copy;
   }
   if (typeof value === "object" && value !== null) {
-    return Object.fromEntries(
-      Object.keys(value)
-        .sort()
-        .map((key) => [key, sortKeysDeep((value as Record<string, unknown>)[key])]),
-    );
+    const copy: Record<string, unknown> = {};
+    for (const key of Object.keys(value).sort())
+      copy[key] = sortKeysDeep((value as Record<string, unknown>)[key]);
+    return copy;
   }
   return value;
 }

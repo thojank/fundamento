@@ -34,9 +34,9 @@ describe("ontologio.json (FR-15, FR-16, AK-07)", () => {
     expect(checkOntologio(ontologio, constitution, eroNames)).toEqual([]);
   });
 
-  it("holds the 20 terms of the Constitution table and the entity-type concepts", () => {
+  it("holds the 21 terms of the Constitution table and the entity-type concepts", () => {
     const concepts = (ontologio as unknown as { concepts: Concept[] }).concepts;
-    expect(concepts.filter((concept) => concept.inScheme === "terminologio")).toHaveLength(20);
+    expect(concepts.filter((concept) => concept.inScheme === "terminologio")).toHaveLength(21);
     expect(
       concepts
         .filter((concept) => concept.inScheme === "modelo")
@@ -158,7 +158,7 @@ describe("ontologio: the principle Fluida Marko (Spec 004 T005)", () => {
   });
 
   it("keeps the principle out of the Constitution terminology for now", () => {
-    expect(concepts.filter((entry) => entry.inScheme === "terminologio")).toHaveLength(20);
+    expect(concepts.filter((entry) => entry.inScheme === "terminologio")).toHaveLength(21);
   });
 });
 

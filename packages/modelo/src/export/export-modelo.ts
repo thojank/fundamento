@@ -15,9 +15,10 @@ import type {
   TokenSetFile,
 } from "../contracts/modelo.js";
 import { referenceAspektoOf } from "../load/build.js";
-import { allAssignments, formatCombination } from "../resolve/assignment.js";
-import { resolve } from "../resolve/resolve.js";
+import { formatCombination } from "../resolve/assignment.js";
+import { type CombinationResolution, resolveCombination } from "../resolve/resolve.js";
 import { serializeCanonicalJson } from "../themes/serialize.js";
+import { resolutionsOf } from "../validate/resolutions.js";
 import { buildVortaroFolders } from "./per-aspekto.js";
 
 /** The value of `modelo.json#/$schema`: the schema is shipped next to it. */
@@ -63,15 +64,18 @@ export class ModeloExportError extends Error {
   override name = "ModeloExportError";
 }
 
-function resolveOrThrow(modelo: Modelo, assignment: Assignment): Rezolvo {
-  const outcome = resolve(modelo, assignment);
-  if (!outcome.ok) {
-    const rules = [...new Set(outcome.issues.map((issue) => issue.rule))].join(", ");
+function rezolvoOrThrow(
+  modelo: Modelo,
+  assignment: Assignment,
+  resolution: CombinationResolution,
+): Rezolvo {
+  if (resolution.errors.length > 0 || resolution.assignment === undefined) {
+    const rules = [...new Set(resolution.errors.map((issue) => issue.rule))].join(", ");
     throw new ModeloExportError(
       `Combination ${formatCombination(modelo, assignment) || "(default)"} does not resolve (${rules}); validate the Modelo before exporting.`,
     );
   }
-  return outcome.rezolvo;
+  return { assignment: resolution.assignment, tokens: resolution.tokens };
 }
 
 function requireId(id: string | undefined, what: string): string {
@@ -181,7 +185,7 @@ export function buildModeloJson(input: ModeloExportInput): ModeloJson {
     // Sorted by Ero name at load time; the Skemoj follow the same order (Spec 003, D-02).
     eroj: modelo.eroj.map((entry) => structuredClone(entry.ero)),
     skemoj: modelo.eroj.map((entry) => structuredClone(entry.skemo)),
-    rezolvo: resolveOrThrow(modelo, {}),
+    rezolvo: rezolvoOrThrow(modelo, {}, resolveCombination(modelo, {})),
   };
   if (reference !== undefined) {
     modeloJson.core = { referenceAspekto: reference };
@@ -225,7 +229,10 @@ export function buildModeloJson(input: ModeloExportInput): ModeloJson {
 /** `rezolvoj.json` as a value: one Rezolvo per combination, in `allAssignments` order. Pure. */
 export function buildRezolvojJson(modelo: Modelo): RezolvojJson {
   return {
-    rezolvoj: allAssignments(modelo).map((assignment) => resolveOrThrow(modelo, assignment)),
+    // The resolutions the validation computed already (Spec 002, D-04), in `allAssignments` order.
+    rezolvoj: resolutionsOf(modelo).map(({ assignment, resolution }) =>
+      rezolvoOrThrow(modelo, assignment, resolution),
+    ),
   };
 }
 

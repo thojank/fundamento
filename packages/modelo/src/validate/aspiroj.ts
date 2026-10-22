@@ -49,11 +49,24 @@ interface Measured {
   format: (value: number) => string;
 }
 
+// Whether a token is in an aspiro's scope depends on its name alone; decided once per name, not
+// once per name and combination (a Modelo with the third level has over a thousand names).
+const scopes = new WeakMap<AspektoAspiro, Map<string, boolean>>();
+
 function inScope(name: string, aspiro: AspektoAspiro): boolean {
   const tokens = aspiro.appliesTo?.tokens;
-  return (
-    tokens === undefined || tokens.some((pattern: string) => matchesTokenPattern(pattern, name))
-  );
+  if (tokens === undefined) return true;
+  let scope = scopes.get(aspiro);
+  if (scope === undefined) {
+    scope = new Map();
+    scopes.set(aspiro, scope);
+  }
+  let found = scope.get(name);
+  if (found === undefined) {
+    found = tokens.some((pattern: string) => matchesTokenPattern(pattern, name));
+    scope.set(name, found);
+  }
+  return found;
 }
 
 /** The opaque, non-anchor ramp steps of one resolution. */

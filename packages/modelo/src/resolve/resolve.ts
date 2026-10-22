@@ -4,7 +4,14 @@
 
 import { CORE_SET_NAME } from "../contracts/grammar.js";
 import type { ValidationIssue } from "../contracts/issues.js";
-import type { Assignment, Modelo, ResolvedToken, ResolveOutcome } from "../contracts/modelo.js";
+import type {
+  Assignment,
+  LoadedSet,
+  Modelo,
+  ResolvedToken,
+  ResolveOutcome,
+} from "../contracts/modelo.js";
+import type { TextTransform } from "../generated/modelo-schema.js";
 import { completeAssignment } from "./assignment.js";
 import { bindAliases } from "./bind.js";
 import { orderActiveSets } from "./order.js";
@@ -42,6 +49,68 @@ export interface ResolveCombinationOptions {
   names?: readonly string[];
 }
 
+/**
+ * A copy of a token value: a resolved token must not share its value with the set it came from.
+ * Values are JSON (DTCG), so a plain walk suffices — `structuredClone` costs ten times as much
+ * per token, and a resolution copies every core token.
+ */
+function cloneValue<T>(value: T): T {
+  if (Array.isArray(value)) return value.map(cloneValue) as T;
+  if (value !== null && typeof value === "object") {
+    const copy: Record<string, unknown> = {};
+    for (const [key, entry] of Object.entries(value as Record<string, unknown>))
+      copy[key] = cloneValue(entry);
+    return copy as T;
+  }
+  return value;
+}
+
+// A Modelo is not changed after it is built (as the resolutions cache of the validation assumes),
+// so what depends on it alone is computed once: the sorted names of the core, and the overlay of
+// each ordered run of active sets — a tool that resolves a few names over every combination
+// (check_contrast without an assignment, Spec 002 AK-09) would otherwise overlay every token of
+// every set on each call.
+const coreNames = new WeakMap<Modelo, readonly string[]>();
+function coreNamesOf(modelo: Modelo): readonly string[] {
+  let names = coreNames.get(modelo);
+  if (names === undefined) {
+    names = Object.keys(
+      modelo.setoj.find((set) => set.name === CORE_SET_NAME)?.tokens ?? {},
+    ).sort();
+    coreNames.set(modelo, names);
+  }
+  return names;
+}
+
+interface Overlay {
+  overlaid: ReturnType<typeof overlaySets>;
+  /** The case per token: the last active set that states it wins (D-11). */
+  cases: Map<string, { value: TextTransform; set: string }>;
+}
+
+const overlays = new WeakMap<Modelo, Map<string, Overlay>>();
+function overlayOf(modelo: Modelo, ordered: readonly LoadedSet[]): Overlay {
+  let own = overlays.get(modelo);
+  if (own === undefined) {
+    own = new Map();
+    overlays.set(modelo, own);
+  }
+  const key = ordered.map((set) => set.name).join("\u0000");
+  let overlay = own.get(key);
+  if (overlay === undefined) {
+    const cases = new Map<string, { value: TextTransform; set: string }>();
+    for (const set of ordered) {
+      for (const [name, token] of Object.entries(set.tokens)) {
+        if (token.textTransform !== undefined)
+          cases.set(name, { value: token.textTransform, set: set.name });
+      }
+    }
+    overlay = { overlaid: overlaySets(ordered), cases };
+    own.set(key, overlay);
+  }
+  return overlay;
+}
+
 export function resolveCombination(
   modelo: Modelo,
   assignment: Assignment,
@@ -53,15 +122,12 @@ export function resolveCombination(
   }
   const complete = completed.assignment;
   const ordered = orderActiveSets(modelo, complete);
-  const overlaid = overlaySets(ordered);
-  const allNames = Object.keys(
-    modelo.setoj.find((set) => set.name === CORE_SET_NAME)?.tokens ?? {},
-  ).sort();
+  const { overlaid, cases } = overlayOf(modelo, ordered);
+  const allNames = coreNamesOf(modelo);
   const wanted = options.names === undefined ? undefined : new Set(options.names);
   const coreNames = wanted === undefined ? allNames : allNames.filter((name) => wanted.has(name));
   const { bound, issues } = bindAliases(modelo, overlaid, coreNames, complete);
   const core = modelo.setoj.find((set) => set.name === CORE_SET_NAME);
-
   const tokens: Record<string, ResolvedToken> = {};
   for (const name of coreNames) {
     const result = bound.get(name);
@@ -73,7 +139,7 @@ export function resolveCombination(
     const resolved: ResolvedToken = {
       id: coreToken.id ?? "",
       type: coreToken.type,
-      value: structuredClone(result.value),
+      value: cloneValue(result.value),
       origin:
         winner.set.package === undefined
           ? { set: winner.set.name, setId: winner.set.id ?? "" }
@@ -81,13 +147,19 @@ export function resolveCombination(
       aliasChain: result.aliasChain.map((link) => ({ ...link })),
     };
     if (result.fieldAliases !== undefined) {
-      resolved.fieldAliases = structuredClone(result.fieldAliases);
+      resolved.fieldAliases = cloneValue(result.fieldAliases);
     }
-    // textTransform is a field of its own: the last active set that states it wins (D-11).
-    const transform = ordered.findLast((set) => set.tokens[name]?.textTransform !== undefined);
-    const textTransform = transform?.tokens[name]?.textTransform;
-    if (transform !== undefined && textTransform !== undefined) {
-      resolved.textTransform = { value: textTransform, set: transform.name };
+    // textTransform is a field of its own: the last active set that states it wins (D-11). A
+    // whole-value alias that states none follows its chain (Constitution v2.3: an Ero-Token on a
+    // typography role carries the case of the role), the first link that states one.
+    for (const link of result.aliasChain.length === 0
+      ? [name]
+      : result.aliasChain.map((entry) => entry.token)) {
+      const found = cases.get(link);
+      if (found !== undefined) {
+        resolved.textTransform = { value: found.value, set: found.set };
+        break;
+      }
     }
     tokens[name] = resolved;
   }

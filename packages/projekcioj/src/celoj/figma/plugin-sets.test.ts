@@ -4,6 +4,7 @@
 // plugin-sets.test.ts (Nachlese 5 ①, O-5): the sets: geometry, focus ring, grid, label and its font, sizes, the background of a set.
 
 import { describe, expect, it } from "vitest";
+import { traRolojFigmaName } from "../../test-doubles/tra-roloj.js";
 import type { FigmaPlan } from "./figma.js";
 import {
   butonoOf,
@@ -14,6 +15,7 @@ import {
   modelDouble,
   pageNodes,
   plan,
+  prepared,
   repo,
   repoFiles,
   repoPlan,
@@ -21,6 +23,13 @@ import {
   TITOLO_CASE_WARNING,
 } from "./plugin-test-helpers.js";
 import { type DoubleNode, figmaDouble } from "./test-doubles/plugin.js";
+
+// A bound name read through the role its Ero-Token aliases (Constitution v2.3, tra-roloj.ts): the
+// file keeps stating the roles every part binds; that the nodes bind the Ero-Tokens stands in
+// ero-tokenoj.test.ts.
+const role = (name: string | undefined) => traRolojFigmaName(name, prepared.input.modelo);
+const roleText = (text: string) =>
+  text.replaceAll(/\b(?:ero|sxablono)\/[a-z0-9]+(?:\/[a-z0-9-]+)*/g, (name) => role(name) ?? name);
 
 // F11, Geometrie (Paket „Figma zeigt das Ero", Schritt 2): Das Plugin setzte nie `layoutMode`. In
 // Figma sind Innenabstände, Abstand und Mindestmaße ohne Auto-Layout wirkungslos — die Maße des
@@ -111,10 +120,10 @@ describe("the focus ring is drawn, and never clipped (F11)", () => {
     expect(ring?.parent).toBe(variant);
     expect(gap?.parent).toBe(ring);
     expect(control?.parent).toBe(gap);
-    expect(ring?.boundVariables.paddingLeft?.name).toBe("focus/ring/width");
-    expect(ring?.boundVariables.paddingTop?.name).toBe("focus/ring/width");
-    expect(gap?.boundVariables.paddingLeft?.name).toBe("focus/offset");
-    expect(gap?.boundVariables.paddingBottom?.name).toBe("focus/offset");
+    expect(role(ring?.boundVariables.paddingLeft?.name)).toBe("focus/ring/width");
+    expect(role(ring?.boundVariables.paddingTop?.name)).toBe("focus/ring/width");
+    expect(role(gap?.boundVariables.paddingLeft?.name)).toBe("focus/offset");
+    expect(role(gap?.boundVariables.paddingBottom?.name)).toBe("focus/offset");
     // Not focused: the space is there, the ring is not.
     expect(ring?.properties.fills).toEqual([]);
     expect(gap?.properties.fills).toEqual([]);
@@ -133,16 +142,16 @@ describe("the focus ring is drawn, and never clipped (F11)", () => {
     const gap = find(focused, "focus-gap");
     const [ringStroke] = (ring?.properties.strokes ?? []) as Stroke[];
     const [gapStroke] = (gap?.properties.strokes ?? []) as Stroke[];
-    expect(ringStroke?.boundVariables?.color).toMatchObject({ name: "focus/ring/color" });
-    expect(gapStroke?.boundVariables?.color).toMatchObject({ name: "color/focus/inner" });
+    expect(role(ringStroke?.boundVariables?.color?.name)).toBe("focus/ring/color");
+    expect(role(gapStroke?.boundVariables?.color?.name)).toBe("color/focus/inner");
     // The stroke lies inside its frame and is as wide as the padding it fills: a band, no area.
     for (const [node, weight] of [
       [ring, "focus/ring/width"],
       [gap, "focus/offset"],
     ] as const) {
       expect(node?.properties.strokeAlign).toBe("INSIDE");
-      expect(node?.boundVariables.strokeWeight?.name).toBe(weight);
-      expect(node?.boundVariables.paddingLeft?.name).toBe(weight);
+      expect(role(node?.boundVariables.strokeWeight?.name)).toBe(weight);
+      expect(role(node?.boundVariables.paddingLeft?.name)).toBe(weight);
     }
     const resting = await variantOf(modelDouble(), "rest");
     expect(find(resting, "focus-ring")?.properties.strokes).toEqual([]);
@@ -810,8 +819,8 @@ describe("the label's font is bound, not written (F30)", () => {
     const label = labelOf(double);
     // The label's typography role follows the size, so which of them a given variant carries
     // depends on the variant; both fields must name the same role, and it must be a label role.
-    const family = label?.boundVariables.fontFamily?.name ?? "";
-    const style = label?.boundVariables.fontStyle?.name ?? "";
+    const family = role(label?.boundVariables.fontFamily?.name) ?? "";
+    const style = role(label?.boundVariables.fontStyle?.name) ?? "";
     expect(family).toMatch(/^typography\/label\/[12]\/font-family$/);
     expect(style).toBe(family.replace("font-family", "font-style"));
   });
@@ -841,7 +850,15 @@ describe("the label's font is bound, not written (F30)", () => {
   it("names the bound variables and the family per mode in the report", async () => {
     const double = figmaDouble({ fonts: BOTH });
     const result = await report(double);
-    expect(butonoOf(result.components)?.fonts).toEqual({
+    const fonts = butonoOf(result.components)?.fonts as { bound: Record<string, string[]> };
+    const bound = Object.fromEntries(
+      // The report names the Ero-Token variables of every size; read as roles, two sizes share one.
+      Object.entries(fonts.bound).map(([field, names]) => [
+        field,
+        [...new Set(names.map((name) => role(name)))],
+      ]),
+    );
+    expect({ ...fonts, bound }).toEqual({
       bound: {
         fontFamily: ["typography/label/2/font-family", "typography/label/1/font-family"],
         fontStyle: ["typography/label/2/font-style", "typography/label/1/font-style"],
@@ -981,7 +998,7 @@ describe("the code font is the first loadable family of its stack (W3, F-2)", ()
         (warning) =>
           warning.startsWith("tekstareo") &&
           warning.includes("abgelehnt") &&
-          warning.includes("typography/code/font-family"),
+          roleText(warning).includes("typography/code/font-family"),
       ),
     ).toBe(true);
   });
@@ -1013,7 +1030,7 @@ describe("the label carries its tracking and its case (F31)", () => {
     const double = modelDouble();
     await run(double);
     const label = labelOf(double);
-    expect(label?.boundVariables.letterSpacing?.name).toMatch(
+    expect(role(label?.boundVariables.letterSpacing?.name)).toMatch(
       /^typography\/label\/[12]\/letter-spacing$/,
     );
   });

@@ -57,5 +57,62 @@
       "$value": { "value": 8, "unit": "px" },
       "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01K5FMAJ0H4CZYQST4Y5HHM8HV" } }
     }
+  },
+  "ero": {
+    "mezurilo": {
+      "track": {
+        "fill": {
+          "$type": "color",
+          "$value": "{color.background.default}",
+          "$description": "mezurilo: track.fill (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF2DX2PF7KX0743GT3K29A",
+              "role": "ero"
+            }
+          }
+        }
+      },
+      "label": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}",
+          "$description": "mezurilo: label.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF2DX2PF7KX0743GT3K29B",
+              "role": "ero"
+            }
+          }
+        }
+      },
+      "value": {
+        "text": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "mezurilo: value-text.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5GF2DX2PF7KX0743GT3K29C",
+                "role": "ero"
+              }
+            }
+          }
+        }
+      },
+      "box": {
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.small}",
+          "$description": "mezurilo: box.gap (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF2DX2PF7KX0743GT3K29D"
+            }
+          }
+        }
+      }
+    }
   }
 }

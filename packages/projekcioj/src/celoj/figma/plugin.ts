@@ -2223,8 +2223,16 @@ function targetsOf(part, moved) {
  */
 function variableOfBinding(variables, part, name, target) {
   if (!part.endsWith(".weight")) return variables.get(name + (target.suffix || ""));
-  if (name.indexOf(WEIGHT_PREFIX) !== 0) return undefined;
-  return variables.get(STYLE_PREFIX + name.slice(WEIGHT_PREFIX.length));
+  return variables.get(styleTwinName(name));
+}
+
+/**
+ * The name of the STRING twin of a weight variable, as the Celo names it (F30): font/style/… of
+ * font/weight/…; of an Ero-Token's weight (Constitution v2.3) the name with style for weight.
+ */
+function styleTwinName(name) {
+  if (name.indexOf(WEIGHT_PREFIX) === 0) return STYLE_PREFIX + name.slice(WEIGHT_PREFIX.length);
+  return name.replace(/\\/weight(?=\\/|@|$)/, "/style");
 }
 
 function bind(nodes, variant, variables, structure) {
@@ -2861,7 +2869,13 @@ async function applyComponents(variables, warnings) {
    * refuses is no reason to stop (F30): the text keeps the written font, the run says which.
    */
   function bindMeasures(measures, report, component, variant) {
-    for (const { node: target, field, variable, font } of measures) {
+    // One binding per node and field: where a composed look rebinds a node (the choose button of
+    // the upload as a butono), the last measure holds, as the write order did. Since the third
+    // level (Constitution v2.3) the two measures name two variables that alias one role; compared
+    // and written once, a second run writes nothing (F21).
+    const last = new Map();
+    for (const measure of measures) last.set(measure.node.id + "\u0000" + measure.field, measure);
+    for (const { node: target, field, variable, font } of last.values()) {
       if (boundId(target, field) === variable.id) continue;
       if (font !== true) {
         target.setBoundVariable(field, variable);

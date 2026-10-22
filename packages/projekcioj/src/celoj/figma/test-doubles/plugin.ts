@@ -1200,6 +1200,22 @@ export function figmaDouble(
   const notifications: DoubleNotification[] = [];
   const collections: DoubleCollection[] = [];
   const variables: DoubleVariable[] = [];
+  // The index of the variables by name and id and the first mode per collection, rebuilt only
+  // when a variable, a collection or a mode is added: `resolve` runs for every bound number of
+  // every layout, and a plan with the third level holds over two thousand variables (B-14).
+  let indexed = -1;
+  let shape = 0;
+  let byName = new Map<string, DoubleVariable>();
+  let byId = new Map<string, DoubleVariable>();
+  let firstMode = new Map<string, string>();
+  const index = () => {
+    if (indexed !== shape) {
+      byName = new Map(variables.map((variable) => [variable.name, variable]));
+      byId = new Map(variables.map((variable) => [variable.id, variable]));
+      firstMode = new Map(collections.map((c) => [c.id, c.modes[0]?.modeId ?? ""]));
+      indexed = shape;
+    }
+  };
   const root = node("DOCUMENT", "Document", counts, context);
   const page = node("PAGE", "Page 1", counts, context);
   root.appendChild(page);
@@ -1229,11 +1245,13 @@ export function figmaDouble(
         }
         const modeId = id("mode");
         modes.push({ modeId, name: next });
+        shape++;
         counts.writes++;
         return modeId;
       },
     };
     collections.push(collection);
+    shape++;
     return collection;
   };
 
@@ -1279,6 +1297,7 @@ export function figmaDouble(
       },
     };
     variables.push(variable);
+    shape++;
     // Every direct assignment on a variable is a write of the document as well.
     return new Proxy(variable, {
       set(target, key, value) {
@@ -1447,9 +1466,7 @@ export function figmaDouble(
 
   // A number bound to a variable: its value in the first mode of its collection, aliases followed.
   const resolve = (name: string): unknown => {
-    const byName = new Map(variables.map((variable) => [variable.name, variable]));
-    const byId = new Map(variables.map((variable) => [variable.id, variable]));
-    const firstMode = new Map(collections.map((c) => [c.id, c.modes[0]?.modeId ?? ""]));
+    index();
     let variable = byName.get(name);
     for (let depth = 0; variable !== undefined && depth < 32; depth++) {
       const value = variable.valuesByMode[firstMode.get(variable.variableCollectionId) ?? ""];

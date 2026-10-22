@@ -4,13 +4,16 @@
 // plugin-bauformen-inhalt.test.ts (Nachlese 5 ①, O-5): the structures of content and navigation: badge, notice, state, meter, table, list, nav, tabs, icons, overlays, card, avatar.
 
 import { describe, expect, it } from "vitest";
+import { traRolojFigmaName } from "../../test-doubles/tra-roloj.js";
 import { VERTICAL_EXAMPLE } from "./figma.js";
 import {
   descendant,
   files,
   MODEL_FONTS,
   modelDouble,
+  once,
   pageNodes,
+  prepared,
   repoFiles,
   repoPlan,
   run,
@@ -18,16 +21,22 @@ import {
 } from "./plugin-test-helpers.js";
 import { type DoubleNode, figmaDouble } from "./test-doubles/plugin.js";
 
+// A bound variable's name read as the role its Ero-Token aliases (Constitution v2.3).
+const role = (name: string | undefined) => traRolojFigmaName(name, prepared.input.modelo);
+
 // Spec 011 ③ (spec „insigno", G2; plan ③ D-14): the badge is a structure of its own — variant →
 // control (the pill: a row with fill, border, radius, minimum height and inline padding bound) →
 // text (the label property, in the role of the text part). No focus ring: static text has no
 // state but rest, and no part of the hidden slot description is drawn.
 describe("the insigno is drawn as a badge: the pill with its text (Spec 011 ③)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
   const paintOf = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
-    ((node?.properties[field] ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
-      ?.boundVariables?.color?.name;
+    role(
+      ((node?.properties[field] ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+        ?.boundVariables?.color?.name,
+    );
   type Report = {
     warnings: string[];
     components: {
@@ -43,7 +52,7 @@ describe("the insigno is drawn as a badge: the pill with its text (Spec 011 ③)
       };
     }[];
   };
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
@@ -52,7 +61,7 @@ describe("the insigno is drawn as a badge: the pill with its text (Spec 011 ③)
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     const insigno = report.components.find((component) => component.set === "insigno");
     return { double, set, variant, report, insigno };
-  };
+  });
 
   it("draws ten variants of intent × size in one column, each the pill directly under the variant, the text as the label property", async () => {
     const { set, variant, insigno } = await drawn();
@@ -127,10 +136,13 @@ describe("the insigno is drawn as a badge: the pill with its text (Spec 011 ③)
 // BOOLEAN property connected to visible shows and hides the layer in an instance.
 describe("the avizo is drawn as a notice: surface with accent, heading, message, details, actions and dismiss (Spec 011 ③)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
   const paintOf = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
-    ((node?.properties[field] ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
-      ?.boundVariables?.color?.name;
+    role(
+      ((node?.properties[field] ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+        ?.boundVariables?.color?.name,
+    );
   type Definitions = Record<string, { type: string; defaultValue: string | boolean }>;
   type Report = {
     warnings: string[];
@@ -147,7 +159,7 @@ describe("the avizo is drawn as a notice: surface with accent, heading, message,
       };
     }[];
   };
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
@@ -156,7 +168,7 @@ describe("the avizo is drawn as a notice: surface with accent, heading, message,
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     const avizo = report.components.find((component) => component.set === "avizo");
     return { double, set, variant, report, avizo };
-  };
+  });
 
   it("draws four variants by intent, the control a row with the accent at its start, the texts column and the dismiss frame", async () => {
     const { set, variant, avizo } = await drawn();
@@ -334,7 +346,8 @@ describe("the avizo is drawn as a notice: surface with accent, heading, message,
 // visible false shows nothing and keeps its binding.
 describe("the plenstato is drawn as a state: the column with the arc, the text and the actions; dashed when empty (Spec 011 ③)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
   type Paint = { visible: boolean; boundVariables?: { color?: { name: string } } };
   const paints = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
     (node?.properties[field] ?? []) as Paint[];
@@ -353,7 +366,7 @@ describe("the plenstato is drawn as a state: the column with the arc, the text a
       };
     }[];
   };
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
@@ -362,7 +375,7 @@ describe("the plenstato is drawn as a state: the column with the arc, the text a
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     const plenstato = report.components.find((component) => component.set === "plenstato");
     return { double, set, variant, report, plenstato };
-  };
+  });
 
   it("draws two variants by kind: the border dashed where empty, its paint invisible where loading", async () => {
     const { set, variant, plenstato } = await drawn();
@@ -383,7 +396,7 @@ describe("the plenstato is drawn as a state: the column with the arc, the text a
       expect(control?.properties.counterAxisAlignItems, kind).toBe("CENTER");
       expect(control?.properties.strokesIncludedInLayout, kind).toBe(true);
       expect(control?.properties.fills, kind).toEqual([]);
-      expect(paints(control, "strokes")[0]?.boundVariables?.color?.name, kind).toBe(
+      expect(role(paints(control, "strokes")[0]?.boundVariables?.color?.name), kind).toBe(
         "color/border/subtle",
       );
       expect(bound(control, "strokeWeight"), kind).toBe("border/width/default");
@@ -431,7 +444,9 @@ describe("the plenstato is drawn as a state: the column with the arc, the text a
       expect(text?.properties.componentPropertyReferences, kind).toMatchObject({
         characters: expect.stringMatching(/^label/),
       });
-      expect(paints(text, "fills")[0]?.boundVariables?.color?.name, kind).toBe("color/text/muted");
+      expect(role(paints(text, "fills")[0]?.boundVariables?.color?.name), kind).toBe(
+        "color/text/muted",
+      );
       expect(bound(text, "fontSize"), kind).toBe("typography/body/1/font-size");
       const actions = descendant(node, "actions");
       expect(actions?.properties.layoutMode, kind).toBe("HORIZONTAL");
@@ -439,9 +454,9 @@ describe("the plenstato is drawn as a state: the column with the arc, the text a
       expect(actions?.children, kind).toEqual([]);
     }
     expect(descendant(loading, "indicator")?.properties.visible).toBe(true);
-    expect(paints(descendant(loading, "mark"), "strokes")[0]?.boundVariables?.color?.name).toBe(
-      "color/status/info/basic",
-    );
+    expect(
+      role(paints(descendant(loading, "mark"), "strokes")[0]?.boundVariables?.color?.name),
+    ).toBe("color/status/info/basic");
     expect(descendant(loading, "actions")?.properties.visible).toBe(false);
     expect(descendant(empty, "indicator")?.properties.visible).toBe(false);
     expect(paints(descendant(empty, "mark"), "strokes")).toEqual([]);
@@ -513,7 +528,8 @@ describe("the plenstato is drawn as a state: the column with the arc, the text a
 // models that size, FILL, and resize.
 describe("the mezurilo is drawn as a meter: label, track with the fill at 66 %, value text; the unknown example dashed (Spec 011 ④)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
   type Paint = { visible: boolean; boundVariables?: { color?: { name: string } } };
   const paints = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
     (node?.properties[field] ?? []) as Paint[];
@@ -538,7 +554,7 @@ describe("the mezurilo is drawn as a meter: label, track with the fill at 66 %, 
       };
     }[];
   };
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
@@ -547,7 +563,7 @@ describe("the mezurilo is drawn as a meter: label, track with the fill at 66 %, 
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     const mezurilo = report.components.find((component) => component.set === "mezurilo");
     return { double, set, variant, report, mezurilo };
-  };
+  });
   const planned = repoPlan.components.find((component) => component.set === "mezurilo");
 
   it("draws four variants by intent: the column with label, track and value text, the fill's colour by intent", async () => {
@@ -571,12 +587,14 @@ describe("the mezurilo is drawn as a meter: label, track with the fill at 66 %, 
     expect(label?.properties.componentPropertyReferences).toMatchObject({
       characters: expect.stringMatching(/^label/),
     });
-    expect(paints(label, "fills")[0]?.boundVariables?.color?.name).toBe("color/text/default");
+    expect(role(paints(label, "fills")[0]?.boundVariables?.color?.name)).toBe("color/text/default");
     expect(bound(label, "fontSize")).toBe("typography/label/1/font-size");
     const track = descendant(neutral, "track");
     expect(track?.properties.layoutMode).toBe("HORIZONTAL");
     expect(track?.properties.clipsContent).toBe(true);
-    expect(paints(track, "fills")[0]?.boundVariables?.color?.name).toBe("color/background/sunken");
+    expect(role(paints(track, "fills")[0]?.boundVariables?.color?.name)).toBe(
+      "color/background/sunken",
+    );
     // In the set the track has no stroke: the unknown value is the example's.
     expect(track?.properties.strokes).toEqual([]);
     expect(track?.properties.dashPattern).toEqual([]);
@@ -584,12 +602,14 @@ describe("the mezurilo is drawn as a meter: label, track with the fill at 66 %, 
     expect(bound(track, "minHeight")).toBe("spacing/medium");
     expect(track?.children.map((child) => child.name)).toEqual(["fill"]);
     const fill = descendant(neutral, "fill");
-    expect(paints(fill, "fills")[0]?.boundVariables?.color?.name).toBe("color/border/strong");
+    expect(role(paints(fill, "fills")[0]?.boundVariables?.color?.name)).toBe("color/border/strong");
     expect(bound(fill, "cornerRadius")).toBe("radius/role/pill");
     expect(bound(fill, "minHeight")).toBe("spacing/medium");
     const valueText = descendant(neutral, "value-text");
     expect(valueText?.properties.characters).toBe("66 % von 3 prüfbaren");
-    expect(paints(valueText, "fills")[0]?.boundVariables?.color?.name).toBe("color/text/subtle");
+    expect(role(paints(valueText, "fills")[0]?.boundVariables?.color?.name)).toBe(
+      "color/text/subtle",
+    );
     expect(bound(valueText, "fontSize")).toBe("typography/label/2/font-size");
     for (const [intent, token] of [
       ["success", "color/status/success/border"],
@@ -597,7 +617,7 @@ describe("the mezurilo is drawn as a meter: label, track with the fill at 66 %, 
       ["danger", "color/status/danger/border"],
     ] as const) {
       const colour = descendant(variant(`intent=${intent}, state=rest`), "fill");
-      expect(paints(colour, "fills")[0]?.boundVariables?.color?.name, intent).toBe(token);
+      expect(role(paints(colour, "fills")[0]?.boundVariables?.color?.name), intent).toBe(token);
     }
   });
 
@@ -663,16 +683,20 @@ describe("the mezurilo is drawn as a meter: label, track with the fill at 66 %, 
     expect(mezurilo).toBeDefined();
     const ground = paints(example, "fills");
     expect(ground).toHaveLength(1);
-    expect(ground[0]?.boundVariables?.color?.name).toBe("color/background/canvas");
+    expect(role(ground[0]?.boundVariables?.color?.name)).toBe("color/background/canvas");
     expect((ground[0] as { opacity?: number }).opacity).toBe(1);
     expect(ground[0]?.visible).toBe(true);
     const track = descendant(example, "track");
-    expect(paints(track, "strokes")[0]?.boundVariables?.color?.name).toBe("color/border/default");
+    expect(role(paints(track, "strokes")[0]?.boundVariables?.color?.name)).toBe(
+      "color/border/default",
+    );
     expect(paints(track, "strokes")[0]?.visible).toBe(true);
     expect(bound(track, "strokeWeight")).toBe("border/width/default");
     expect(track?.properties.dashPattern).toEqual(planned?.variants[0]?.stroke?.dashPattern);
     expect(track?.properties.dashPattern).toHaveLength(2);
-    expect(paints(track, "fills")[0]?.boundVariables?.color?.name).toBe("color/background/sunken");
+    expect(role(paints(track, "fills")[0]?.boundVariables?.color?.name)).toBe(
+      "color/background/sunken",
+    );
     expect(track?.children).toEqual([]);
     expect(descendant(example, "fill")).toBeUndefined();
     expect(descendant(example, "label")?.properties.characters).toBe("Messwert");
@@ -682,14 +706,14 @@ describe("the mezurilo is drawn as a meter: label, track with the fill at 66 %, 
     // from the Skemo's part value-text, with the paint's alpha as the token resolves (1) and no
     // opacity of its own — no disabled look, not the border colour of the unknown part.
     const setValueText = descendant(set?.children[0], "value-text");
-    const role = paints(valueText, "fills");
-    expect(role).toHaveLength(1);
-    expect(role[0]?.boundVariables?.color?.name).toBe("color/text/subtle");
-    expect(role[0]?.boundVariables?.color?.name).toBe(
-      paints(setValueText, "fills")[0]?.boundVariables?.color?.name,
+    const valuePaints = paints(valueText, "fills");
+    expect(valuePaints).toHaveLength(1);
+    expect(role(valuePaints[0]?.boundVariables?.color?.name)).toBe("color/text/subtle");
+    expect(role(valuePaints[0]?.boundVariables?.color?.name)).toBe(
+      role(paints(setValueText, "fills")[0]?.boundVariables?.color?.name),
     );
-    expect((role[0] as { opacity?: number }).opacity).toBe(1);
-    expect(role[0]?.visible).toBe(true);
+    expect((valuePaints[0] as { opacity?: number }).opacity).toBe(1);
+    expect(valuePaints[0]?.visible).toBe(true);
     expect(valueText?.properties.opacity).toBe(1);
     expect(valueText?.properties.effects).toEqual([]);
     expect(bound(valueText, "fontSize")).toBe("typography/label/2/font-size");
@@ -740,7 +764,8 @@ describe("the mezurilo is drawn as a meter: label, track with the fill at 66 %, 
 // property of a Figma text (noted, not drawn). The words are the Vitrino's table.
 describe("the tabelo is drawn as a table: caption, region with head and three rows, the sort button in the first head cell (Spec 011 ④)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
   type Paint = { visible: boolean; boundVariables?: { color?: { name: string } } };
   const paints = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
     (node?.properties[field] ?? []) as Paint[];
@@ -765,7 +790,7 @@ describe("the tabelo is drawn as a table: caption, region with head and three ro
       };
     }[];
   };
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
@@ -774,7 +799,7 @@ describe("the tabelo is drawn as a table: caption, region with head and three ro
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     const tabelo = report.components.find((component) => component.set === "tabelo");
     return { double, set, variant, report, tabelo };
-  };
+  });
   const REST = "density=comfortable, state=rest";
   const FOCUS = "density=comfortable, state=focus";
 
@@ -800,13 +825,17 @@ describe("the tabelo is drawn as a table: caption, region with head and three ro
       visible: expect.stringMatching(/^caption#/),
     });
     expect(caption?.properties.visible).toBe(true);
-    expect(paints(caption, "fills")[0]?.boundVariables?.color?.name).toBe("color/text/default");
+    expect(role(paints(caption, "fills")[0]?.boundVariables?.color?.name)).toBe(
+      "color/text/default",
+    );
     expect(bound(caption, "fontSize")).toBe("typography/label/1/font-size");
     const region = descendant(rest, "region");
     expect(region?.properties.layoutMode).toBe("VERTICAL");
     expect(region?.properties.clipsContent).toBe(true);
     expect(region?.properties.fills).toEqual([]);
-    expect(paints(region, "strokes")[0]?.boundVariables?.color?.name).toBe("color/border/subtle");
+    expect(role(paints(region, "strokes")[0]?.boundVariables?.color?.name)).toBe(
+      "color/border/subtle",
+    );
     expect(bound(region, "strokeWeight")).toBe("border/width/default");
     expect(bound(region, "cornerRadius")).toBe("radius/role/surface");
     expect(region?.children.map((child) => child.name)).toEqual([
@@ -817,8 +846,12 @@ describe("the tabelo is drawn as a table: caption, region with head and three ro
     ]);
     const head = descendant(rest, "head");
     expect(head?.properties.layoutMode).toBe("HORIZONTAL");
-    expect(paints(head, "fills")[0]?.boundVariables?.color?.name).toBe("color/background/sunken");
-    expect(paints(head, "strokes")[0]?.boundVariables?.color?.name).toBe("color/border/subtle");
+    expect(role(paints(head, "fills")[0]?.boundVariables?.color?.name)).toBe(
+      "color/background/sunken",
+    );
+    expect(role(paints(head, "strokes")[0]?.boundVariables?.color?.name)).toBe(
+      "color/border/subtle",
+    );
     expect(bound(head, "strokeBottomWeight")).toBe("border/width/default");
     expect(head?.properties.strokeTopWeight).toBe(0);
     expect(head?.children.map((child) => child.name)).toEqual(["head-1", "head-2", "head-3"]);
@@ -826,7 +859,7 @@ describe("the tabelo is drawn as a table: caption, region with head and three ro
       const node = descendant(rest, `row-${row}`);
       expect(node?.properties.layoutMode, `row-${row}`).toBe("HORIZONTAL");
       expect(node?.properties.fills, `row-${row}`).toEqual([]);
-      expect(paints(node, "strokes")[0]?.boundVariables?.color?.name, `row-${row}`).toBe(
+      expect(role(paints(node, "strokes")[0]?.boundVariables?.color?.name), `row-${row}`).toBe(
         "color/border/subtle",
       );
       expect(bound(node, "strokeBottomWeight"), `row-${row}`).toBe("border/width/default");
@@ -845,10 +878,14 @@ describe("the tabelo is drawn as a table: caption, region with head and three ro
     // Head texts in head.color and head.typography; row headers in row-header.typography; cells
     // in cell.color and cell.typography.
     const headText = descendant(rest, "head-text-2");
-    expect(paints(headText, "fills")[0]?.boundVariables?.color?.name).toBe("color/text/default");
+    expect(role(paints(headText, "fills")[0]?.boundVariables?.color?.name)).toBe(
+      "color/text/default",
+    );
     expect(bound(headText, "fontSize")).toBe("typography/label/1/font-size");
     const rowHeader = descendant(rest, "row-header-text-2");
-    expect(paints(rowHeader, "fills")[0]?.boundVariables?.color?.name).toBe("color/text/default");
+    expect(role(paints(rowHeader, "fills")[0]?.boundVariables?.color?.name)).toBe(
+      "color/text/default",
+    );
     expect(bound(rowHeader, "fontSize")).toBe("typography/label/1/font-size");
     const cellText = descendant(rest, "cell-text-2-2");
     expect(bound(cellText, "fontSize")).toBe("typography/body/2/font-size");
@@ -921,7 +958,7 @@ describe("the tabelo is drawn as a table: caption, region with head and three ro
         state,
       ).toEqual(["sort-text", "sort-indicator"]);
       const text = descendant(sort, "sort-text");
-      expect(paints(text, "fills")[0]?.boundVariables?.color?.name, state).toBe(
+      expect(role(paints(text, "fills")[0]?.boundVariables?.color?.name), state).toBe(
         "color/text/default",
       );
       expect(bound(text, "fontSize"), state).toBe("typography/label/1/font-size");
@@ -932,7 +969,7 @@ describe("the tabelo is drawn as a table: caption, region with head and three ro
       expect(indicator?.properties.fills, state).toEqual([]);
       const mark = descendant(indicator, "mark");
       expect(mark?.type, state).toBe("VECTOR");
-      expect(paints(mark, "fills")[0]?.boundVariables?.color?.name, state).toBe(
+      expect(role(paints(mark, "fills")[0]?.boundVariables?.color?.name), state).toBe(
         "color/text/subtle",
       );
       expect(mark?.properties.strokes, state).toEqual([]);
@@ -942,24 +979,24 @@ describe("the tabelo is drawn as a table: caption, region with head and three ro
       expect(bound(ring, "cornerRadius"), state).toBe("radius/focus/ring");
       expect(bound(gap, "cornerRadius"), state).toBe("radius/focus/gap");
     }
-    expect(paints(descendant(rest, "sort"), "fills")[0]?.boundVariables?.color?.name).toBe(
+    expect(role(paints(descendant(rest, "sort"), "fills")[0]?.boundVariables?.color?.name)).toBe(
       "color/action/tertiary/rest",
     );
-    expect(paints(descendant(hover, "sort"), "fills")[0]?.boundVariables?.color?.name).toBe(
+    expect(role(paints(descendant(hover, "sort"), "fills")[0]?.boundVariables?.color?.name)).toBe(
       "color/action/tertiary/hover",
     );
-    expect(paints(descendant(focus, "sort"), "fills")[0]?.boundVariables?.color?.name).toBe(
+    expect(role(paints(descendant(focus, "sort"), "fills")[0]?.boundVariables?.color?.name)).toBe(
       "color/action/tertiary/rest",
     );
     // The ring shows its colours in the focus state only.
     expect(paints(descendant(rest, "focus-ring"), "strokes")).toEqual([]);
     expect(paints(descendant(hover, "focus-ring"), "strokes")).toEqual([]);
-    expect(paints(descendant(focus, "focus-ring"), "strokes")[0]?.boundVariables?.color?.name).toBe(
-      "focus/ring/color",
-    );
-    expect(paints(descendant(focus, "focus-gap"), "strokes")[0]?.boundVariables?.color?.name).toBe(
-      "color/focus/inner",
-    );
+    expect(
+      role(paints(descendant(focus, "focus-ring"), "strokes")[0]?.boundVariables?.color?.name),
+    ).toBe("focus/ring/color");
+    expect(
+      role(paints(descendant(focus, "focus-gap"), "strokes")[0]?.boundVariables?.color?.name),
+    ).toBe("color/focus/inner");
     // The other head cells hold their text alone.
     expect(descendant(rest, "head-2")?.children.map((child) => child.name)).toEqual([
       "head-text-2",
@@ -1014,7 +1051,8 @@ describe("the tabelo is drawn as a table: caption, region with head and three ro
 // declares the label property and connects no text to it (nothing seen, nothing drawn).
 describe("the atributlisto is drawn as a list: three entries, rows in columns and columns stacked (Spec 011 ④)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
   type Paint = { visible: boolean; boundVariables?: { color?: { name: string } } };
   const paints = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
     (node?.properties[field] ?? []) as Paint[];
@@ -1034,7 +1072,7 @@ describe("the atributlisto is drawn as a list: three entries, rows in columns an
       };
     }[];
   };
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
@@ -1043,7 +1081,7 @@ describe("the atributlisto is drawn as a list: three entries, rows in columns an
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     const atributlisto = report.components.find((component) => component.set === "atributlisto");
     return { double, set, variant, report, atributlisto };
-  };
+  });
 
   it("draws three variants by layout: the list column with three entries, each term and value in their roles", async () => {
     const { set, variant, atributlisto } = await drawn();
@@ -1078,12 +1116,12 @@ describe("the atributlisto is drawn as a list: three entries, rows in columns an
           `${name} entry-${index}`,
         ).toEqual([`term-${index}`, `value-${index}`]);
         const term = descendant(entry, `term-${index}`);
-        expect(paints(term, "fills")[0]?.boundVariables?.color?.name, name).toBe(
+        expect(role(paints(term, "fills")[0]?.boundVariables?.color?.name), name).toBe(
           "color/text/muted",
         );
         expect(bound(term, "fontSize"), name).toBe("typography/label/2/font-size");
         const value = descendant(entry, `value-${index}`);
-        expect(paints(value, "fills")[0]?.boundVariables?.color?.name, name).toBe(
+        expect(role(paints(value, "fills")[0]?.boundVariables?.color?.name), name).toBe(
           "color/text/default",
         );
         expect(bound(value, "fontSize"), name).toBe("typography/body/2/font-size");
@@ -1135,7 +1173,8 @@ describe("the atributlisto is drawn as a list: three entries, rows in columns an
 // no variant axis (the Web stylesheet inventory says props {}).
 describe("the navigado is drawn as a nav: three items in a row, the first current with the underline; the example vertical (Spec 011 ⑤)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
   type Paint = { visible: boolean; boundVariables?: { color?: { name: string } } };
   const paints = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
     (node?.properties[field] ?? []) as Paint[];
@@ -1156,7 +1195,7 @@ describe("the navigado is drawn as a nav: three items in a row, the first curren
       };
     }[];
   };
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
@@ -1165,7 +1204,7 @@ describe("the navigado is drawn as a nav: three items in a row, the first curren
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     const navigado = report.components.find((component) => component.set === "navigado");
     return { double, set, variant, report, navigado };
-  };
+  });
 
   it("draws three variants by state: the nav row with three entries, each ring → gap → item with its text", async () => {
     const { set, variant, navigado } = await drawn();
@@ -1206,7 +1245,7 @@ describe("the navigado is drawn as a nav: three items in a row, the first curren
       expect(bound(item, "paddingLeft"), `item-${index}`).toBe("spacing/small");
       expect(bound(item, "paddingRight"), `item-${index}`).toBe("spacing/small");
       expect(item?.properties.strokesIncludedInLayout, `item-${index}`).toBe(true);
-      expect(paints(item, "strokes")[0]?.boundVariables?.color?.name, `item-${index}`).toBe(
+      expect(role(paints(item, "strokes")[0]?.boundVariables?.color?.name), `item-${index}`).toBe(
         "color/navigation/text/selected",
       );
       const text = descendant(item, `items-${index}`);
@@ -1231,12 +1270,12 @@ describe("the navigado is drawn as a nav: three items in a row, the first curren
     ] as const) {
       const node = variant(name);
       const current = descendant(node, "item-1");
-      expect(paints(current, "fills")[0]?.boundVariables?.color?.name, name).toBe(
+      expect(role(paints(current, "fills")[0]?.boundVariables?.color?.name), name).toBe(
         "color/navigation/selected",
       );
       expect(bound(current, "strokeBottomWeight"), name).toBe("border/width/strong");
       expect(
-        paints(descendant(node, "items-1"), "fills")[0]?.boundVariables?.color?.name,
+        role(paints(descendant(node, "items-1"), "fills")[0]?.boundVariables?.color?.name),
         name,
       ).toBe("color/navigation/text/selected");
       // Spec 014 ① (Gewicht, plan ① D-01): the current item's text in the semibold cut, its style
@@ -1255,13 +1294,14 @@ describe("the navigado is drawn as a nav: three items in a row, the first curren
       );
       for (const index of [2, 3]) {
         const other = descendant(node, `item-${index}`);
-        expect(paints(other, "fills")[0]?.boundVariables?.color?.name, `${name} ${index}`).toBe(
-          fill,
-        );
+        expect(
+          role(paints(other, "fills")[0]?.boundVariables?.color?.name),
+          `${name} ${index}`,
+        ).toBe(fill);
         expect(bound(other, "strokeBottomWeight"), `${name} ${index}`).toBeUndefined();
         expect(other?.properties.strokeBottomWeight, `${name} ${index}`).toBe(0);
         expect(
-          paints(descendant(node, `items-${index}`), "fills")[0]?.boundVariables?.color?.name,
+          role(paints(descendant(node, `items-${index}`), "fills")[0]?.boundVariables?.color?.name),
           `${name} ${index}`,
         ).toBe("color/navigation/text/rest");
       }
@@ -1274,8 +1314,8 @@ describe("the navigado is drawn as a nav: three items in a row, the first curren
     const ring = descendant(descendant(focus, "entry-1"), "focus-ring");
     const gap = descendant(ring, "focus-gap");
     expect(paints(ring, "strokes")).toHaveLength(1);
-    expect(paints(ring, "strokes")[0]?.boundVariables?.color?.name).toBe("focus/ring/color");
-    expect(paints(gap, "strokes")[0]?.boundVariables?.color?.name).toBe("color/focus/inner");
+    expect(role(paints(ring, "strokes")[0]?.boundVariables?.color?.name)).toBe("focus/ring/color");
+    expect(role(paints(gap, "strokes")[0]?.boundVariables?.color?.name)).toBe("color/focus/inner");
     expect(bound(ring, "cornerRadius")).toBe("radius/focus/ring");
     expect(bound(gap, "cornerRadius")).toBe("radius/focus/gap");
     expect(paints(descendant(descendant(focus, "entry-2"), "focus-ring"), "strokes")).toEqual([]);
@@ -1306,9 +1346,9 @@ describe("the navigado is drawn as a nav: three items in a row, the first curren
     const control = descendant(example, "control");
     expect(control?.properties.layoutMode).toBe("VERTICAL");
     expect(control?.children.map((child) => child.name)).toEqual(["entry-1", "entry-2", "entry-3"]);
-    expect(paints(descendant(example, "item-1"), "fills")[0]?.boundVariables?.color?.name).toBe(
-      "color/navigation/selected",
-    );
+    expect(
+      role(paints(descendant(example, "item-1"), "fills")[0]?.boundVariables?.color?.name),
+    ).toBe("color/navigation/selected");
     expect(bound(descendant(example, "item-1"), "strokeBottomWeight")).toBe("border/width/strong");
     expect(descendant(example, "items-3")?.properties.characters).toBe("Drei");
     expect(example?.properties.paddingLeft).toBe(repoPlan.section?.gap);
@@ -1354,7 +1394,8 @@ describe("the navigado is drawn as a nav: three items in a row, the first curren
 // connects no text to it.
 describe("the langetaro is drawn as tabs: the list with three tabs, the first active with the indicator, the line, the panel below (Spec 011 ⑤)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
   type Paint = {
     visible: boolean;
     opacity?: number;
@@ -1379,7 +1420,7 @@ describe("the langetaro is drawn as tabs: the list with three tabs, the first ac
       };
     }[];
   };
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
@@ -1388,7 +1429,7 @@ describe("the langetaro is drawn as tabs: the list with three tabs, the first ac
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     const langetaro = report.components.find((component) => component.set === "langetaro");
     return { double, set, variant, report, langetaro };
-  };
+  });
 
   it("draws four variants by state: the list row with three entries and the panel below, each tab ring → gap → tab with its text", async () => {
     const { set, variant, langetaro } = await drawn();
@@ -1407,7 +1448,9 @@ describe("the langetaro is drawn as tabs: the list with three tabs, the first ac
     expect(control?.properties.layoutMode).toBe("HORIZONTAL");
     expect(control?.properties.fills).toEqual([]);
     expect(control?.properties.strokesIncludedInLayout).toBe(true);
-    expect(paints(control, "strokes")[0]?.boundVariables?.color?.name).toBe("color/border/default");
+    expect(role(paints(control, "strokes")[0]?.boundVariables?.color?.name)).toBe(
+      "color/border/default",
+    );
     expect(bound(control, "strokeBottomWeight")).toBe("border/width/default");
     expect(control?.properties.strokeTopWeight).toBe(0);
     expect(bound(control, "itemSpacing")).toBe("spacing/xsmall");
@@ -1429,7 +1472,7 @@ describe("the langetaro is drawn as tabs: the list with three tabs, the first ac
       expect(bound(tab, "paddingLeft"), `tab-${index}`).toBe("spacing/medium");
       expect(bound(tab, "paddingRight"), `tab-${index}`).toBe("spacing/medium");
       expect(tab?.properties.strokesIncludedInLayout, `tab-${index}`).toBe(true);
-      expect(paints(tab, "strokes")[0]?.boundVariables?.color?.name, `tab-${index}`).toBe(
+      expect(role(paints(tab, "strokes")[0]?.boundVariables?.color?.name), `tab-${index}`).toBe(
         "color/navigation/text/selected",
       );
       const text = descendant(tab, `tabs-${index}`);
@@ -1445,7 +1488,9 @@ describe("the langetaro is drawn as tabs: the list with three tabs, the first ac
     expect(panel?.children.map((child) => child.name)).toEqual(["panel-text"]);
     const panelText = descendant(panel, "panel-text");
     expect(panelText?.properties.characters).toBe("Eins");
-    expect(paints(panelText, "fills")[0]?.boundVariables?.color?.name).toBe("color/text/default");
+    expect(role(paints(panelText, "fills")[0]?.boundVariables?.color?.name)).toBe(
+      "color/text/default",
+    );
     // The panel's text has no role in the Skemo: nothing of its typography is bound.
     expect(bound(panelText, "fontSize")).toBeUndefined();
     const connected = (child: DoubleNode): boolean =>
@@ -1465,14 +1510,14 @@ describe("the langetaro is drawn as tabs: the list with three tabs, the first ac
       for (const index of [1, 2, 3]) {
         const tab = descendant(node, `tab-${index}`);
         const fillPaint = paints(tab, "fills")[0];
-        expect(fillPaint?.boundVariables?.color?.name, `${name} ${index}`).toBe(fill);
+        expect(role(fillPaint?.boundVariables?.color?.name), `${name} ${index}`).toBe(fill);
         expect(fillPaint?.opacity, `${name} ${index}`).toBe(opacity);
       }
       expect(bound(descendant(node, "tab-1"), "strokeBottomWeight"), name).toBe(
         "border/width/strong",
       );
       expect(
-        paints(descendant(node, "tabs-1"), "fills")[0]?.boundVariables?.color?.name,
+        role(paints(descendant(node, "tabs-1"), "fills")[0]?.boundVariables?.color?.name),
         name,
       ).toBe("color/text/default");
       for (const index of [2, 3]) {
@@ -1482,7 +1527,7 @@ describe("the langetaro is drawn as tabs: the list with three tabs, the first ac
         ).toBeUndefined();
         expect(descendant(node, `tab-${index}`)?.properties.strokeBottomWeight).toBe(0);
         expect(
-          paints(descendant(node, `tabs-${index}`), "fills")[0]?.boundVariables?.color?.name,
+          role(paints(descendant(node, `tabs-${index}`), "fills")[0]?.boundVariables?.color?.name),
           `${name} ${index}`,
         ).toBe("color/text/subtle");
       }
@@ -1494,7 +1539,7 @@ describe("the langetaro is drawn as tabs: the list with three tabs, the first ac
     const focus = variant("state=focus");
     const ring = descendant(descendant(focus, "entry-1"), "focus-ring");
     expect(paints(ring, "strokes")).toHaveLength(1);
-    expect(paints(ring, "strokes")[0]?.boundVariables?.color?.name).toBe("focus/ring/color");
+    expect(role(paints(ring, "strokes")[0]?.boundVariables?.color?.name)).toBe("focus/ring/color");
     expect(paints(descendant(descendant(focus, "entry-2"), "focus-ring"), "strokes")).toEqual([]);
     for (const name of ["state=rest", "state=hover", "state=disabled"]) {
       const other = variant(name);
@@ -1539,20 +1584,23 @@ describe("the langetaro is drawn as tabs: the list with three tabs, the first ac
 describe("icons are drawn from the glyphs of every Aspekto and switch with the brand (Spec 014 ②)", () => {
   // The plan of core + ekzemplo: two Aspektoj, two glyph frames per icon.
   const source = files["figma/plugin/code.js"] ?? "";
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
   const paintOf = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
-    ((node?.properties[field] ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
-      ?.boundVariables?.color?.name;
+    role(
+      ((node?.properties[field] ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+        ?.boundVariables?.color?.name,
+    );
   const vectorOf = (frame: DoubleNode | undefined) =>
     frame?.children.find((child) => child.type === "VECTOR");
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
     )) as { warnings: string[]; components: { set: string; layout: { zero: string[] } }[] };
     const setOf = (name: string) => pageNodes(double).find((child) => child.name === name);
     return { double, report, setOf };
-  };
+  });
 
   it("the set ikono: 300 variants, each the control with one glyph frame per Aspekto, visible by the brand variable, filled in the bound colour, sized by the token", async () => {
     const { setOf, report } = await drawn();
@@ -1725,10 +1773,13 @@ describe("icons are drawn from the glyphs of every Aspekto and switch with the b
 // with three rows (the third in the danger colour).
 describe("the plugin draws the overlays and binds the shadows (Spec 014 ④)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
   const paintOf = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
-    ((node?.properties[field] ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
-      ?.boundVariables?.color?.name;
+    role(
+      ((node?.properties[field] ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+        ?.boundVariables?.color?.name,
+    );
   type Report = {
     warnings: string[];
     components: {
@@ -1736,14 +1787,14 @@ describe("the plugin draws the overlays and binds the shadows (Spec 014 ④)", (
       shadow?: { part: string; variable: string; layers: number; status: string; evidence: string };
     }[];
   };
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
     )) as Report;
     const setOf = (name: string) => pageNodes(double).find((child) => child.name === name);
     return { double, report, setOf };
-  };
+  });
 
   it("binds the shadow of the dialogo, the konsileto, the sxvebilo and the menuo to DROP_SHADOW effects (status bound)", async () => {
     const { report, setOf } = await drawn();
@@ -1759,7 +1810,7 @@ describe("the plugin draws the overlays and binds the shadows (Spec 014 ④)", (
       boundVariables?: Record<string, { name: string }>;
     }[];
     expect(effects[0]?.type).toBe("DROP_SHADOW");
-    expect(effects[0]?.boundVariables?.color?.name).toMatch(/^elevation\/shadow\/overlay/);
+    expect(role(effects[0]?.boundVariables?.color?.name)).toMatch(/^elevation\/shadow\/overlay/);
     expect(effects[0]?.boundVariables?.radius?.name).toMatch(/blur$/);
   });
 
@@ -1831,11 +1882,14 @@ describe("the plugin draws the overlays and binds the shadows (Spec 014 ④)", (
 // the meta row with the badge in the insigno's look and the actions row with the two actions in
 // the butono's looks; the example „ohne Bild" after the set, its media hidden.
 describe("the plugin draws the karto (Spec 015 ③)", () => {
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
   const paintOf = (node: DoubleNode | undefined, field = "fills") =>
-    (
-      node?.properties[field] as { boundVariables?: { color?: { name: string } } }[] | undefined
-    )?.[0]?.boundVariables?.color?.name;
+    role(
+      (
+        node?.properties[field] as { boundVariables?: { color?: { name: string } } }[] | undefined
+      )?.[0]?.boundVariables?.color?.name,
+    );
   const box = (node: DoubleNode | undefined) =>
     node as unknown as { x: number; y: number; width: number; height: number };
   type Definitions = Record<string, { type: string; defaultValue: string | boolean }>;
@@ -2025,10 +2079,14 @@ describe("the karto's heading fills the body in every variant (K-1)", () => {
 // glyphs external of every Aspekto (size and colour of the part icon, bound), its visibility
 // connected to the BOOLEAN property external, hidden by default (the way of dismissible).
 describe("the plugin draws the ligilo's external mark (Nachlese 5 O-41)", () => {
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
   const paintOf = (node: DoubleNode | undefined) =>
-    (node?.properties.fills as { boundVariables?: { color?: { name: string } } }[] | undefined)?.[0]
-      ?.boundVariables?.color?.name;
+    role(
+      (
+        node?.properties.fills as { boundVariables?: { color?: { name: string } } }[] | undefined
+      )?.[0]?.boundVariables?.color?.name,
+    );
   type Definitions = Record<string, { type: string; defaultValue: string | boolean }>;
 
   it("every variant: label, then icon-end with the glyphs external, hidden, shown by external; a second run writes nothing", async () => {
@@ -2066,10 +2124,14 @@ describe("the plugin draws the ligilo's external mark (Nachlese 5 O-41)", () => 
 });
 
 describe("the plugin draws the avataro (Spec 015 ③)", () => {
-  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
   const paintOf = (node: DoubleNode | undefined) =>
-    (node?.properties.fills as { boundVariables?: { color?: { name: string } } }[] | undefined)?.[0]
-      ?.boundVariables?.color?.name;
+    role(
+      (
+        node?.properties.fills as { boundVariables?: { color?: { name: string } } }[] | undefined
+      )?.[0]?.boundVariables?.color?.name,
+    );
   type Definitions = Record<string, { type: string; defaultValue: string | boolean }>;
 
   it("three sizes: the box, the initials circle with „EM“, the image circle with the silhouette; the image toggle; the example „mit Bild“ after the set", async () => {
@@ -2173,15 +2235,17 @@ describe("the plugin draws the avataro (Spec 015 ③)", () => {
 describe("the plugin draws the additions of Nachlese 7 ② (B-2, B-4)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
   const paintOf = (node: DoubleNode | undefined, field: "fills" | "strokes" = "fills") =>
-    ((node?.properties[field] ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
-      ?.boundVariables?.color?.name;
+    role(
+      ((node?.properties[field] ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+        ?.boundVariables?.color?.name,
+    );
   type Definitions = Record<string, { type: string; defaultValue: string | boolean }>;
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     await new Function("figma", `${source}\nreturn applyPlan();`)(double.figma);
     const setOf = (name: string) => pageNodes(double).find((child) => child.name === name);
     return { double, setOf };
-  };
+  });
 
   it("B-2: the mezurilo declares label-hidden as the BOOLEAN property label-visible (shown), connected to the label of every variant", async () => {
     const { double, setOf } = await drawn();

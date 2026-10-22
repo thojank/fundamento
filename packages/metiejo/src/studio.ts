@@ -123,8 +123,33 @@ export function kombinationOf(params: URLSearchParams): Kombination {
 
 export type Herkunft = "struktur" | "abgeleitet" | "gesetzt";
 
-/** What a row's control takes: a colour, a dimension, a number, an alias, or the raw value as JSON. */
-export type Art = "color" | "dimension" | "number" | "alias" | "json";
+/**
+ * What a row's control takes: a colour, a dimension, a number, an alias, a shadow as fields per
+ * layer (O-4), or the raw value as JSON.
+ */
+export type Art = "color" | "dimension" | "number" | "alias" | "schatten" | "json";
+
+/** A component the navigation lists (Spec 024 ②): an Ero or a Sxablono of the structure. */
+export interface KomponentoRef {
+  kind: "ero" | "sxablono";
+  name: string;
+}
+
+export interface KomponentoEntry extends KomponentoRef {
+  /** The title as the navigation shows it: the name (the identifiers stay canonical, Art. II). */
+  title: string;
+}
+
+/** One layer of a shadow as the Studio sets it (O-4): the measures and the colour. */
+export interface SchattenEbene {
+  x: number;
+  y: number;
+  unschaerfe: number;
+  ausdehnung: number;
+  /** The colour as an alias (a shadow colour of the brand) or as hex. */
+  farbe: { alias?: string; hex?: string; alpha?: number };
+  unit: string;
+}
 
 export interface StudioRow {
   token: string;
@@ -151,6 +176,12 @@ export interface StudioRow {
   viewports?: Record<string, { shown: string; alias?: string }>;
   /** The value with reduced motion, for a motion role. */
   reduziert?: string;
+  /** The layers of a shadow as fields (O-4), from the brand's main set. */
+  schatten?: SchattenEbene[];
+  /** The case of a typography role (Spec 024 ②): none, uppercase, lowercase or capitalize. */
+  schreibweise?: string;
+  /** The family of a font role as the brand names it, for the search per role. */
+  schrift?: { rolle: string; family?: string; license?: string };
 }
 
 export interface StudioGroup {
@@ -242,7 +273,7 @@ export function composeDraft(agordo: Agordo, bases: Bases): Composed {
   return { modelo: buildModelo(files).modelo, derived };
 }
 
-const assignmentOf = (
+export const assignmentOf = (
   name: string,
   kombination: Kombination,
   motion = "default",
@@ -255,7 +286,7 @@ const assignmentOf = (
   motion,
 });
 
-function setTokens(modelo: Modelo, setName: string): Record<string, { value: unknown }> {
+export function setTokens(modelo: Modelo, setName: string): Record<string, { value: unknown }> {
   return modelo.setoj.find((set) => set.name === setName)?.tokens ?? {};
 }
 
@@ -291,7 +322,7 @@ const kontrast = (components: readonly number[], surface: readonly number[]): nu
     ),
   );
 
-function farboOf(value: unknown): StudioRow["farbo"] | undefined {
+export function farboOf(value: unknown): StudioRow["farbo"] | undefined {
   const colour = readDtcgColor(value);
   if (colour === undefined) return undefined;
   const components = srgbComponentsOf(colour);
@@ -305,6 +336,7 @@ function farboOf(value: unknown): StudioRow["farbo"] | undefined {
 
 const artOf = (type: string, alias: string | undefined, value: unknown): Art => {
   if (alias !== undefined) return "alias";
+  if (type === "shadow") return "schatten";
   if (type === "color") return "color";
   if (type === "dimension" || type === "duration") return "dimension";
   if (type === "number" || type === "fontWeight") return "number";
@@ -321,13 +353,55 @@ interface RowContext {
   name: string;
   main: Record<string, { value: unknown }>;
   dark: Record<string, { value: unknown }>;
-  resolved: Record<string, { value: unknown; type: string }>;
+  resolved: Record<string, { value: unknown; type: string; textTransform?: { value: string } }>;
   resolvedDark: Record<string, { value: unknown; type: string }>;
 }
 
 function herkunftOf(context: RowContext, token: string): Herkunft {
   if (context.agordo.festgelegt?.[token] !== undefined) return "gesetzt";
   return context.composed.derived.has(token) ? "abgeleitet" : "struktur";
+}
+
+const FONT_ROLES = ["display", "body", "code"] as const;
+
+/** The layers of a shadow value, for the fields of O-4; undefined for an alias or no shadow. */
+function schattenOf(value: unknown): SchattenEbene[] | undefined {
+  const layers = Array.isArray(value) ? value : [value];
+  const out: SchattenEbene[] = [];
+  for (const layer of layers) {
+    if (!isRecord(layer)) return undefined;
+    const measure = (field: string): { value: number; unit: string } | undefined => {
+      const entry = layer[field];
+      return isRecord(entry) && typeof entry.value === "number" && typeof entry.unit === "string"
+        ? { value: entry.value, unit: entry.unit }
+        : undefined;
+    };
+    const x = measure("offsetX");
+    const y = measure("offsetY");
+    const blur = measure("blur");
+    const spread = measure("spread");
+    if (x === undefined || y === undefined || blur === undefined || spread === undefined)
+      return undefined;
+    const alias = aliasOf(layer.color);
+    const colour = alias === undefined ? readDtcgColor(layer.color) : undefined;
+    out.push({
+      x: x.value,
+      y: y.value,
+      unschaerfe: blur.value,
+      ausdehnung: spread.value,
+      farbe:
+        alias !== undefined
+          ? { alias }
+          : colour === undefined
+            ? {}
+            : {
+                hex: typeof colour.hex === "string" ? colour.hex : hexOf(srgbComponentsOf(colour)),
+                ...(colour.alpha === undefined ? {} : { alpha: colour.alpha }),
+              },
+      unit: x.unit,
+    });
+  }
+  return out;
 }
 
 function rowOf(context: RowContext, token: string): StudioRow | undefined {
@@ -352,6 +426,27 @@ function rowOf(context: RowContext, token: string): StudioRow | undefined {
     row.unit = resolved.value.unit;
   const farbo = farboOf(resolved.value);
   if (farbo !== undefined) row.farbo = farbo;
+  if (row.art === "schatten") {
+    // The fields of the brand's own set first (an alias stays an alias), else the resolved value;
+    // the colour of a layer is a choice among the shadow colours of the brand.
+    const layers = schattenOf(context.main[token]?.value) ?? schattenOf(resolved.value);
+    if (layers !== undefined) row.schatten = layers;
+    row.candidates = Object.keys(setTokens(context.composed.modelo, "core"))
+      .filter((name) => name.startsWith("color.shadow."))
+      .sort();
+  }
+  if (resolved.type === "typography") {
+    row.schreibweise =
+      context.agordo.festgelegt?.[token]?.schreibweise ?? resolved.textTransform?.value ?? "none";
+  }
+  const fontRole = /^font\.family\.([a-z]+)$/.exec(token)?.[1];
+  if (fontRole !== undefined && (FONT_ROLES as readonly string[]).includes(fontRole)) {
+    const font = context.agordo.schriften?.[fontRole as (typeof FONT_ROLES)[number]];
+    row.schrift = {
+      rolle: fontRole,
+      ...(font === undefined ? {} : { family: font.family, license: font.license }),
+    };
+  }
   return row;
 }
 
@@ -408,7 +503,7 @@ export function studioRows(
   const resolve = (assignment: Record<string, string>) =>
     resolveCombination(composed.modelo, assignment).tokens as Record<
       string,
-      { value: unknown; type: string }
+      { value: unknown; type: string; textTransform?: { value: string } }
     >;
   const context: RowContext = {
     agordo,
@@ -628,6 +723,8 @@ export interface StudioInput {
   expert: { href?: string; sentence?: string };
   /** What the last change touched: the rules affected. */
   betroffen?: string[];
+  /** The components the navigation lists (Spec 024 ②). */
+  komponentoj?: readonly KomponentoEntry[];
 }
 
 const HERKUNFT_LABEL: Readonly<Record<Herkunft, string>> = {
@@ -635,6 +732,51 @@ const HERKUNFT_LABEL: Readonly<Record<Herkunft, string>> = {
   abgeleitet: "abgeleitet",
   gesetzt: "gesetzt",
 };
+
+const kombinationQuery = (kombination: Kombination): URLSearchParams => {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(kombination)) {
+    if (value !== DEFAULT_KOMBINATION[key as keyof Kombination]) params.set(key, value);
+  }
+  return params;
+};
+
+/** The URL of a component page of the Studio, with the combination and the chosen cell. */
+export const komponentoUrl = (
+  marko: string,
+  ref: KomponentoRef,
+  kombination: Kombination,
+  zelo?: Readonly<Record<string, string>>,
+): string => {
+  const params = kombinationQuery(kombination);
+  if (zelo !== undefined && Object.keys(zelo).length > 0) {
+    params.set(
+      "zelo",
+      Object.entries(zelo)
+        .map(([key, value]) => `${key}=${value}`)
+        .join(","),
+    );
+  }
+  const query = params.toString();
+  return `/studio/${encodeURIComponent(marko)}/${ref.kind}/${encodeURIComponent(ref.name)}${query === "" ? "" : `?${query}`}`;
+};
+
+/** The navigation of the components under the pages of the Grundlagen (Spec 024 ②, M-4). */
+export function komponentoNav(
+  marko: string,
+  komponentoj: readonly KomponentoEntry[],
+  kombination: Kombination,
+  current?: KomponentoRef,
+): string {
+  if (komponentoj.length === 0) return "";
+  const links = komponentoj
+    .map(
+      (entry) =>
+        `<a href="${komponentoUrl(marko, entry, kombination)}" data-page="${entry.kind}-${entry.name}"${current !== undefined && current.kind === entry.kind && current.name === entry.name ? ' aria-current="page"' : ""}>${escapeHtml(entry.title)}</a>`,
+    )
+    .join("");
+  return `<fm-faldilo class="mt-komponentoj"${current === undefined ? "" : " open"}><span slot="summary">Komponenten</span><nav aria-label="Komponenten" class="mt-komponentoj-liste">${links}</nav></fm-faldilo>`;
+}
 
 const pageUrl = (name: string, page: StudioPage, kombination: Kombination): string => {
   const params = new URLSearchParams();
@@ -645,10 +787,49 @@ const pageUrl = (name: string, page: StudioPage, kombination: Kombination): stri
   return `/studio/${encodeURIComponent(name)}/${page}${query === "" ? "" : `?${query}`}`;
 };
 
+const SCHREIBWEISEN: readonly [string, string][] = [
+  ["none", "Wie geschrieben"],
+  ["uppercase", "Versalien"],
+  ["lowercase", "Kleinbuchstaben"],
+  ["capitalize", "Große Anfangsbuchstaben"],
+];
+
+/** The case of a typography role as a person reads it. */
+export const schreibweiseLabel = (value: string): string =>
+  SCHREIBWEISEN.find(([key]) => key === value)?.[1] ?? value;
+
+/** The fields of a shadow (O-4): per layer x, y, Unschärfe, Ausdehnung and the colour. */
+function schattenControl(row: StudioRow, modus?: string): string {
+  const layers = row.schatten ?? [];
+  const base = `data-mt-schatten="${escapeHtml(row.token)}"${modus === undefined ? "" : ` data-mt-modus="${escapeHtml(modus)}"`}`;
+  const colourCandidates = (row.candidates ?? []).length > 0 ? (row.candidates ?? []) : [];
+  const fields = layers
+    .map((layer, index) => {
+      const number = (feld: string, label: string, value: number) =>
+        `<fm-kampo kind="number" name="${escapeHtml(`${row.token}.${index}.${feld}`)}" value="${escapeHtml(String(value))}" size="small" data-mt-feld="${feld}" data-mt-ebene="${index}">${escapeHtml(label)} (${escapeHtml(layer.unit)})</fm-kampo>`;
+      const farbe =
+        layer.farbe.alias !== undefined
+          ? `<fm-elektilo name="${escapeHtml(`${row.token}.${index}.farbe`)}" value="${escapeHtml(layer.farbe.alias)}" size="small" data-mt-feld="farbe" data-mt-ebene="${index}">Farbe${colourCandidates
+              .map(
+                (candidate) =>
+                  `<data slot="options" value="${escapeHtml(candidate)}">${escapeHtml(candidate)}</data>`,
+              )
+              .join("")}</fm-elektilo>`
+          : `<input type="color" value="${escapeHtml(layer.farbe.hex ?? "#000000")}" aria-label="Farbe der Ebene ${index + 1}" data-mt-feld="farbe" data-mt-ebene="${index}">${layer.farbe.alpha === undefined ? "" : `<fm-kampo kind="number" name="${escapeHtml(`${row.token}.${index}.alpha`)}" value="${escapeHtml(String(layer.farbe.alpha))}" size="small" data-mt-feld="deckkraft" data-mt-ebene="${index}">Deckkraft</fm-kampo>`}`;
+      return `<div class="mt-zeile" data-mt-ebene="${index}"><fm-teksto kind="caption">Ebene ${index + 1}</fm-teksto>${number("x", "x", layer.x)}${number("y", "y", layer.y)}${number("unschaerfe", "Unschärfe", layer.unschaerfe)}${number("ausdehnung", "Ausdehnung", layer.ausdehnung)}${farbe}</div>`;
+    })
+    .join("");
+  return `<div class="mt-schatten" ${base} data-mt-einheit="${escapeHtml(layers[0]?.unit ?? "px")}">${fields}</div>`;
+}
+
 function control(row: StudioRow, modus?: string): string {
   const base = `data-mt-festlegen="${escapeHtml(row.token)}" data-mt-art="${row.art}"${modus === undefined ? "" : ` data-mt-modus="${escapeHtml(modus)}"`}`;
   const label = modus === undefined ? "Wert" : (modus.split("=")[1] ?? modus);
   switch (row.art) {
+    case "schatten":
+      return row.schatten === undefined
+        ? `<fm-tekstareo kind="code" name="${escapeHtml(row.token)}" rows="3" value="${escapeHtml(JSON.stringify(row.value))}" ${base}>${escapeHtml(label)} als JSON</fm-tekstareo>`
+        : schattenControl(row, modus);
     case "alias": {
       const current = modus?.startsWith("color-scheme=")
         ? (row.dunkel?.alias ?? row.alias)
@@ -673,7 +854,7 @@ function control(row: StudioRow, modus?: string): string {
   }
 }
 
-function rowHtml(row: StudioRow, page: StudioPage): string {
+export function rowHtml(row: StudioRow, page: StudioPage): string {
   const parts: string[] = [];
   parts.push(
     `<fm-teksto><strong>${escapeHtml(row.label)}</strong> <fm-teksto kind="code">${escapeHtml(row.token)}</fm-teksto></fm-teksto>`,
@@ -690,6 +871,8 @@ function rowHtml(row: StudioRow, page: StudioPage): string {
       `dunkel: ${row.dunkel.shown}${row.dunkel.alias === undefined ? "" : ` (${row.dunkel.alias})`}`,
     );
   if (row.reduziert !== undefined) facts.push(`reduziert: ${row.reduziert}`);
+  if (row.schreibweise !== undefined)
+    facts.push(`Schreibweise: ${schreibweiseLabel(row.schreibweise)}`);
   parts.push(
     `<fm-teksto kind="caption">${escapeHtml(facts.join(" · "))} <fm-insigno size="small" intent="${row.herkunft === "gesetzt" ? "info" : "neutral"}">${HERKUNFT_LABEL[row.herkunft]}</fm-insigno></fm-teksto>`,
   );
@@ -702,7 +885,32 @@ function rowHtml(row: StudioRow, page: StudioPage): string {
         parts.push(control({ ...row, alias: entry.alias }, `viewport=${viewport}`));
     }
   } else {
-    if (row.type !== "typography") parts.push(control(row));
+    // A family is set by its search (two families, Spec 024 ②), not as JSON.
+    if (row.type !== "typography" && row.schrift === undefined) parts.push(control(row));
+    if (
+      row.type === "typography" &&
+      row.schreibweise !== undefined &&
+      !row.token.startsWith("ero.")
+    ) {
+      // Spec 024 ② (Schreibweise): the case of the role, beside its composition.
+      parts.push(
+        `<fm-elekto name="${escapeHtml(`${row.token}.schreibweise`)}" value="${escapeHtml(row.schreibweise)}" orientation="horizontal" size="small" data-mt-schreibweise="${escapeHtml(row.token)}">Schreibweise${SCHREIBWEISEN.map(
+          ([value, text]) => `<data slot="options" value="${value}">${escapeHtml(text)}</data>`,
+        ).join("")}</fm-elekto>`,
+      );
+    }
+    if (row.schrift !== undefined) {
+      // Spec 024 ② (two families): a search per role, Anzeige and Fließtext each their own.
+      const name =
+        row.schrift.rolle === "display"
+          ? "Anzeige"
+          : row.schrift.rolle === "body"
+            ? "Fließtext"
+            : "Code";
+      parts.push(
+        `<fm-kampo kind="search" name="${escapeHtml(`schrift-${row.schrift.rolle}`)}" placeholder="Inter, Source Sans …" size="small" data-mt-schrift="${escapeHtml(row.schrift.rolle)}">${escapeHtml(name)} suchen<span slot="help">${escapeHtml(row.schrift.family === undefined ? "Die Familie der Struktur; eine Webfont mit Lizenz aus dem Katalog ersetzt sie." : `Aktuell: ${row.schrift.family} (${row.schrift.license ?? ""}).`)}</span></fm-kampo>`,
+      );
+    }
     if (row.dunkel !== undefined && (row.art === "alias" || row.art === "color")) {
       parts.push(
         control(
@@ -764,7 +972,7 @@ ${input.message === undefined ? "" : `<fm-avizo slot="notices" intent="success">
 <fm-teksto slot="subtitle">${escapeHtml(page.hint)}</fm-teksto>
 ${expertLink}
 <section class="mt-studio">
-<fm-navigado label="Studio" page="${page.key}" orientation="vertical">${nav}<a href="/marko/${encodeURIComponent(name)}/farbe" data-page="schnellstart">Schnellstart</a></fm-navigado>
+<div><fm-navigado label="Studio" page="${page.key}" orientation="vertical">${nav}<a href="/marko/${encodeURIComponent(name)}/farbe" data-page="schnellstart">Schnellstart</a></fm-navigado>${komponentoNav(name, input.komponentoj ?? [], input.kombination)}</div>
 <div class="mt-studio-vorschau"><div class="mt-zeile">${toggles}</div><iframe data-mt-vorschau data-mt-src="${previewSrc}" title="Vorschau der Marke"></iframe></div>
 <fm-formularo label="${escapeHtml(page.title)}" data-action="${pageUrl(name, page.key, input.kombination)}">
 ${groups}

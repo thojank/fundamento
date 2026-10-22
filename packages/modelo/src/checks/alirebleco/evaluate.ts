@@ -5,17 +5,20 @@
 import { CORE_SET_NAME } from "../../contracts/grammar.js";
 import type { RuleId, ValidationIssue } from "../../contracts/issues.js";
 import type { Dimensio, KontrastParo, KontrastSojloj, Modelo } from "../../contracts/modelo.js";
+import { eroKontrastParojOf } from "../../eroj/ero-tokenoj.js";
 import type { ColorValue, KontrastKategorio } from "../../generated/modelo-schema.js";
 import { appendPointer } from "../../json/pointer.js";
 import { isJsonObject } from "../../load/guards.js";
 import { allAssignments, formatCombination } from "../../resolve/assignment.js";
 import { resolveCombination } from "../../resolve/resolve.js";
+import { cachedResolutionsOf } from "../../validate/resolutions.js";
 import {
   alphaOf,
   type BackdropSurface,
   backdropSurfaces,
   compositeOver,
   readDtcgColor,
+  SURFACE_LADDER,
 } from "./color.js";
 import {
   type BranchMeasurement,
@@ -84,7 +87,7 @@ function pairEntries(modelo: Modelo): PairEntry[] {
   if (!Array.isArray(raw)) {
     return [];
   }
-  return raw.flatMap((pair: unknown, index) =>
+  const declared = raw.flatMap((pair: unknown, index) =>
     isJsonObject(pair)
       ? [
           {
@@ -95,6 +98,15 @@ function pairEntries(modelo: Modelo): PairEntry[] {
         ]
       : [],
   );
+  // The cells of the third level a brand departs from the roles in (Constitution v2.3, Spec 024
+  // Grenze 1): the fixed contrast rule holds on them as on a declared pair. Their index is the
+  // declared pairs' count onwards; they are never broken statically (their tokens are the core's).
+  const derived = eroKontrastParojOf(modelo).map((pair, offset) => ({
+    pair: { id: "", ...pair } as unknown as KontrastParo,
+    index: declared.length + offset,
+    name: pair.name,
+  }));
+  return [...declared, ...derived];
 }
 
 /** The Dimensio whose valoroj carry `kontrastSojloj` (§2.3: exactly one, `contrast`). */
@@ -260,9 +272,29 @@ export function evaluateAlirebleco(
   const measurements: PairMeasurement[] = [];
   const reportedSojloj = new Set<string>();
   const minima = new Map<string, number>();
-  for (const assignment of assignments) {
+  // The resolutions a validation of the same Modelo computed already (Spec 002, D-04), in
+  // `allAssignments` order; without one, only the tokens the pairs name and their alias chains
+  // are resolved — the check reads nothing else, and a Modelo with the third level has over a
+  // thousand tokens per combination (B-15).
+  const cached = cachedResolutionsOf(modelo);
+  const wanted = new Set<string>();
+  for (const { pair } of measurable) {
+    const holders = [pair, isJsonObject(pair.aux) ? pair.aux : undefined];
+    for (const holder of holders) {
+      if (holder === undefined) continue;
+      for (const field of ["foreground", "background"] as const) {
+        const token = holder[field];
+        if (typeof token === "string") wanted.add(token);
+      }
+    }
+    for (const name of Array.isArray(pair.backdrop) ? pair.backdrop : SURFACE_LADDER)
+      wanted.add(String(name));
+  }
+  const names = [...wanted];
+  for (const [index, assignment] of assignments.entries()) {
+    const resolution =
+      cached?.[index]?.resolution ?? resolveCombination(modelo, assignment, { names });
     const combination = formatCombination(modelo, assignment);
-    const resolution = resolveCombination(modelo, assignment);
     const complete = resolution.assignment ?? assignment;
     const sojloj = sojlojOf(sojlojDimensio, complete);
     const activeValoro =

@@ -9,7 +9,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { loadModelo } from "../load/load-modelo.js";
 import { fixtureModeloSource } from "../load/source.js";
-import { fixtureRoot } from "../validate/test-doubles/fixtures.js";
+import { fixtureRoot, withEroTokenoj } from "../validate/test-doubles/fixtures.js";
 import { validateModelo } from "../validate/validate-modelo.js";
 import { skemoPartValues, styledProps, variantKeys } from "./inventories.js";
 import {
@@ -39,6 +39,7 @@ function switchModelo(
     value.uzo.slots.label.required = true;
   });
   change(edit);
+  withEroTokenoj(root);
   return root;
 }
 
@@ -149,6 +150,7 @@ function radioModelo(
     value.uzo.slots.label.required = true;
   });
   change(edit);
+  withEroTokenoj(root);
   return root;
 }
 

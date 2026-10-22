@@ -8,6 +8,7 @@ import { join } from "node:path";
 import { baseResolution, defaultModeloSource, projectModeloSource } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
+import { traRolojFigma } from "../../test-doubles/tra-roloj.js";
 import {
   VITRINO_AVATAR,
   VITRINO_CARD,
@@ -51,8 +52,14 @@ const config = new URL(
 const prepared = celoInputOf(projectModeloSource(config));
 if (!prepared.ok) throw new Error("core + ekzemplo must be valid");
 const files = FIGMA_CELO.generate(prepared.input);
+// The plan read through the roles its Ero-Token variables alias by default (Constitution v2.3,
+// tra-roloj.ts): this file is the record of what every variant binds; that the plan names the
+// Ero-Tokens stands in ero-tokenoj.test.ts.
 const plan = JSON.parse(
-  files.find((file) => file.path === "figma/plan.json")?.text ?? "{}",
+  traRolojFigma(
+    files.find((file) => file.path === "figma/plan.json")?.text ?? "{}",
+    prepared.input.modelo,
+  ),
 ) as FigmaPlan;
 
 /**
@@ -250,8 +257,11 @@ describe("resolved paint values of the Figma side (F8)", () => {
     const opaque = celoInputOf(projectModeloSource(join(root, "fundamento.config.json")));
     if (!opaque.ok) throw new Error("the fixture must stay valid");
     const opaquePlan = JSON.parse(
-      FIGMA_CELO.generate(opaque.input).find((file) => file.path === "figma/plan.json")?.text ??
-        "{}",
+      traRolojFigma(
+        FIGMA_CELO.generate(opaque.input).find((file) => file.path === "figma/plan.json")?.text ??
+          "{}",
+        opaque.input.modelo,
+      ),
     ) as FigmaPlan;
     const variant = butonoOf(opaquePlan.components)?.variants.find(
       (entry) => entry.props.emphasis === "low" && entry.props.state === "hover",

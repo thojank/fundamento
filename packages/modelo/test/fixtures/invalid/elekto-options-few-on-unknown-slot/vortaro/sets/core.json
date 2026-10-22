@@ -57,5 +57,143 @@
       "$value": { "value": 8, "unit": "px" },
       "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01K5FMAJ0H4CZYQST4Y5HHM8HV" } }
     }
+  },
+  "ero": {
+    "elekto": {
+      "label": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}",
+          "$description": "elekto: label.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF2828TEXJHK0G00FS4QAJ",
+              "role": "ero"
+            }
+          }
+        }
+      },
+      "option": {
+        "label": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "elekto: option-label.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5GF2829XM1XXY1WG16QHTFT",
+                "role": "ero"
+              }
+            }
+          }
+        }
+      },
+      "error": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}",
+          "$description": "elekto: error.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF2829XM1XXY1WG16QHTFV",
+              "role": "ero"
+            }
+          }
+        }
+      },
+      "surface": {
+        "fill": {
+          "selected": {
+            "true": {
+              "rest": {
+                "$type": "color",
+                "$value": "{color.text.default}",
+                "$description": "elekto: surface.fill when selected=true, state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+                "$extensions": {
+                  "com.ciferecigo.fundamento": {
+                    "id": "tok_01M5GF2829XM1XXY1WG16QHTFW",
+                    "role": "ero"
+                  }
+                }
+              },
+              "invalid": {
+                "$type": "color",
+                "$value": "{color.text.default}",
+                "$description": "elekto: surface.fill when selected=true, state=invalid (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+                "$extensions": {
+                  "com.ciferecigo.fundamento": {
+                    "id": "tok_01M5GF2829XM1XXY1WG16QHTFX",
+                    "role": "ero"
+                  }
+                }
+              }
+            },
+            "false": {
+              "rest": {
+                "$type": "color",
+                "$value": "{color.background.default}",
+                "$description": "elekto: surface.fill when selected=false, state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+                "$extensions": {
+                  "com.ciferecigo.fundamento": {
+                    "id": "tok_01M5GF2829XM1XXY1WG16QHTFY",
+                    "role": "ero"
+                  }
+                }
+              },
+              "invalid": {
+                "$type": "color",
+                "$value": "{color.background.default}",
+                "$description": "elekto: surface.fill when selected=false, state=invalid (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+                "$extensions": {
+                  "com.ciferecigo.fundamento": {
+                    "id": "tok_01M5GF2829XM1XXY1WG16QHTFZ",
+                    "role": "ero"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "indicator": {
+        "color": {
+          "selected": {
+            "true": {
+              "$type": "color",
+              "$value": "{color.background.default}",
+              "$description": "elekto: indicator.color when selected=true (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "com.ciferecigo.fundamento": {
+                  "id": "tok_01M5GF2829XM1XXY1WG16QHTG0",
+                  "role": "ero"
+                }
+              }
+            }
+          }
+        },
+        "size": {
+          "$type": "dimension",
+          "$value": "{spacing.medium}",
+          "$description": "elekto: indicator.size (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF2829XM1XXY1WG16QHTG1"
+            }
+          }
+        }
+      },
+      "box": {
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.small}",
+          "$description": "elekto: box.gap (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF2829XM1XXY1WG16QHTG2"
+            }
+          }
+        }
+      }
+    }
   }
 }

@@ -20,6 +20,7 @@ import type {
 import type { ColorValue } from "../generated/modelo-schema.js";
 import { allAssignments } from "../resolve/assignment.js";
 import { resolveCombination } from "../resolve/resolve.js";
+import { ERO_TOKEN_PREFIX, eroTokenNameOf } from "./ero-tokenoj.js";
 import {
   boundToken,
   combinationsOf,
@@ -179,7 +180,7 @@ export function skemoParityInventory(
       if (prop.default !== undefined) values[`default.${prop.name}`] = String(prop.default);
     }
     if (options.resolved !== undefined) {
-      Object.assign(values, skemoPartValues(skemo, options.resolved));
+      Object.assign(values, skemoPartValues(skemo, options.resolved, entry.ero.name));
     }
     items[entry.ero.name] = { props, states: [...skemo.states], values };
   }
@@ -280,6 +281,7 @@ export function variantKeys(skemo: Skemo): string[] {
 export function skemoPartValues(
   skemo: Skemo,
   resolved: Readonly<Record<string, ResolvedToken>>,
+  owner?: string,
 ): Record<string, string> {
   const values: Record<string, string> = {};
   for (const combination of combinationsOf(skemo, variantKeys(skemo))) {
@@ -295,7 +297,13 @@ export function skemoPartValues(
           const bound = boundToken(skemo, part, property, full);
           if (bound === undefined) continue;
           const key = `${part}.${property}@${parityVariantKey(full)}`;
-          const value = resolved[bound.token]?.value;
+          // The cell reads its Ero-Token (Constitution v2.3) where the Modelo has one.
+          const name =
+            owner === undefined
+              ? bound.token
+              : (eroTokenNameOf(ERO_TOKEN_PREFIX, owner, skemo, part, property, full) ??
+                bound.token);
+          const value = resolved[name]?.value ?? resolved[bound.token]?.value;
           const text = type === "color" ? colorText(value) : parityDimensionText(value);
           if (text !== undefined) values[key] = text;
         }

@@ -456,3 +456,102 @@ describe("the Studio (Spec 024, § 4)", () => {
     expect(await (await get("/studio/testa/farbe?gespeichert=1")).text()).toContain("Gespeichert");
   });
 });
+
+// Spec 024 Runde 2: the component pages, an Ero-Token set and refused with a suggestion in German
+// (O-3: the next step of the same palette that passes), the case of a typography role, and the
+// two font families of the Schnellstart.
+describe("Runde 2: component pages and the third level over HTTP", () => {
+  const FILL = "ero.butono.surface.fill.emphasis.high.intent.neutral.rest";
+
+  it("serves a page per Ero and per Sxablono with the matrix, and a cell from the query", async () => {
+    const page = await get("/studio/testa/ero/butono");
+    expect(page.status).toBe(200);
+    const html = await page.text();
+    expect(html).toContain('class="mt-matrico"');
+    expect(html).toContain(
+      "zelo=emphasis%3Dhigh%2Cintent%3Dneutral%2Csize%3Dmedium%2Cstate%3Dhover",
+    );
+    expect(html).toContain(
+      'data-mt-festlegen="ero.butono.surface.fill.emphasis.medium.intent.neutral.rest"',
+    );
+    const cell = await get(
+      "/studio/testa/ero/butono?zelo=emphasis%3Dmedium%2Cintent%3Dneutral%2Cstate%3Dhover",
+    );
+    expect(await cell.text()).toContain(
+      'data-mt-festlegen="ero.butono.surface.fill.emphasis.medium.intent.neutral.hover"',
+    );
+    const sxablono = await get("/studio/testa/sxablono/pagxo");
+    expect(sxablono.status).toBe(200);
+    expect(await sxablono.text()).toContain('data-mt-festlegen="sxablono.pagxo.frame.gap"');
+    expect((await get("/studio/testa/ero/nenio")).status).toBe(404);
+  });
+
+  it("sets an Ero-Token to another alias, and refuses one that breaks the contrast with a German sentence and the next step that passes (O-3)", async () => {
+    const taken = await get("/api/marko/testa/festlegen", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token: FILL, alias: "color.action.primary.hover" }),
+    });
+    expect(taken.status).toBe(200);
+    expect((await taken.json()).herkunft).toBe("gesetzt");
+    const refused = await get("/api/marko/testa/festlegen", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token: FILL, alias: "color.palette.accent.100" }),
+    });
+    expect(refused.status).toBe(409);
+    const body = (await refused.json()) as { satz: string; vorschlag: string };
+    expect(body.satz).toMatch(/Kontrast/);
+    expect(body.satz).not.toMatch(/\b(the|is|rule)\b/);
+    expect(body.vorschlag).toMatch(/color\.palette\.accent\.\d+/);
+    expect(body.vorschlag).toMatch(/Stufe/);
+    expect(body.vorschlag).not.toMatch(/\b(the|is|rule|role)\b/);
+    const back = await get("/api/marko/testa/festlegen", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token: FILL, zurueck: true }),
+    });
+    expect(back.status).toBe(200);
+  });
+
+  it("sets the case of a typography role", async () => {
+    const set = await get("/api/marko/testa/festlegen", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token: "typography.label.1", schreibweise: "uppercase" }),
+    });
+    expect(set.status).toBe(200);
+    const page = await (await get("/studio/testa/schrift")).text();
+    expect(page).toContain('data-mt-schreibweise="typography.label.1"');
+    expect(page).toContain("Versalien");
+    await get("/api/marko/testa/festlegen", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token: "typography.label.1", zurueck: true }),
+    });
+  });
+
+  it("the Schnellstart takes a font per role: display, body or both", async () => {
+    const screen = await (await get("/marko/testa/schrift")).text();
+    expect(screen).toContain('name="rolle"');
+    for (const value of ["display", "body", "beide"]) expect(screen).toContain(`value="${value}"`);
+    const applied = await get("/marko/testa/schrift", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "q=inter&tiparo=inter&rolle=display",
+      redirect: "manual",
+    });
+    expect([200, 303]).toContain(applied.status);
+    const draft = (await (
+      await get("/api/marko/testa/entwurf", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "{}",
+      })
+    ).json()) as {
+      agordo: { schriften?: { display?: { family: string }; body?: { family: string } } };
+    };
+    expect(draft.agordo.schriften?.display?.family).toBe("Inter");
+    expect(draft.agordo.schriften?.body?.family).toBe("Prata");
+  });
+});
