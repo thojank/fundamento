@@ -51,7 +51,8 @@
       "success": "check-circle",
       "upload": "upload-simple",
       "warning": "warning",
-      "calendar": "calendar-blank"
+      "calendar": "calendar-blank",
+      "edit": "pencil-simple"
     }
   },
   "agordilo": {
@@ -59,7 +60,7 @@
     "structure": {
       "vortaro": "0.2.0",
       "reference": "komuna",
-      "sha256": "2359f3195feb568b3304f6544fb4fa8dcf77ce995a5a96833cb92a9fd2da548d"
+      "sha256": "554efc71d758d8147e8b63c17a9eba094fae50633007826afc0bb1cfa2ea36e7"
     },
     "agordo": {
       "name": "provo-kompakta",

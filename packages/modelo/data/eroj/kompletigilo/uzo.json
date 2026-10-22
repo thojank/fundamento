@@ -36,18 +36,18 @@
     "boundary": [
       {
         "case": "multi-select",
-        "action": "ask-human",
+        "action": "use-instead",
         "keywords": {
           "en": [
             "multiselect",
             "multiple"
           ],
           "de": [
-            "mehrfachauswahl",
-            "mehrere"
+            "mehrfachauswahl"
           ]
         },
-        "kialo": "Several values in one field need chips, a way to remove each and a way to say them all, because the field holds one text; a person decides until a multi-select Ero comes."
+        "kialo": "Several values in one field are the plurelektilo's, because it shows each chosen value, removes one and clears all (Spec 025 ③ closes the boundary multi-select).",
+        "ero": "plurelektilo"
       },
       {
         "case": "tags",

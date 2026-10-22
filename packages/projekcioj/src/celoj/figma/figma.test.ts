@@ -806,6 +806,8 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
       "konsileto",
       "langetaro",
       "ligilo",
+      "listelektilo",
+      "lokredaktilo",
       "markdovido",
       "markobutono",
       "menuo",
@@ -813,7 +815,9 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
       "navigado",
       "pagxigilo",
       "plenstato",
+      "plurelektilo",
       "saltligilo",
+      "signeto",
       "spuro",
       "sxaltilo",
       "sxvebilo",
@@ -1056,6 +1060,11 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       // Ero's (proposal for the maintainer to confirm).
       langetaro: "Reiter",
       ligilo: "Ziel",
+      // Spec 025 ③ (plan ③ D-18): the styled list shares the elektilo's role and word; the
+      // multi-select (role listbox) chooses too; the editor's text is the Vitrino's value (one
+      // source for both pictures); a tag names a category (proposal for the maintainer to confirm).
+      listelektilo: "Auswahl",
+      lokredaktilo: "Barrierefreiheit",
       markdovido: "Text",
       // Spec 010 ②: a checkbox names an option (plan ② D-11, for the maintainer to confirm, O-x).
       markobutono: "Option",
@@ -1067,11 +1076,13 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       // is the Ero's (proposal for the maintainer to confirm).
       navigado: "Navigation",
       pagxigilo: "Seitenblättern",
+      plurelektilo: "Auswahl",
       // Spec 011 ③: a loading or empty state shares the role status with the notice; its word is
       // the structure's, not the role's (for the maintainer to confirm).
       plenstato: "Zustand",
       // Spec 014 ②: a skip link is a link; its word names its destination.
       saltligilo: "Ziel",
+      signeto: "Schlagwort",
       spuro: "Pfad",
       sxaltilo: "Einstellung",
       sxvebilo: "Überschrift",
@@ -3738,5 +3749,79 @@ describe("the Figma plan draws the datelektilo (Spec 025 ②)", () => {
       prev: "chevron-left",
       next: "chevron-right",
     });
+  });
+});
+
+// Spec 025 ③ (plan ③ D-18): the four sets of the selection round in Figma — the signeto as a badge
+// of mode × selected × size × intent × state (mode an axis of its own), the listelektilo and the
+// plurelektilo as fields with the listbox of three options (the first chosen, the second active),
+// the lokredaktilo as a badge of editing × state whose text is the Vitrino's value.
+describe("the Figma plan draws the selection Eroj (Spec 025 ③)", () => {
+  const set = (name: string) => plan.components.find((component) => component.set === name);
+
+  // 160, not 240 (Abweichung 3 of plan ③): the constraint selected ⇒ mode selectable prunes the
+  // pressed static and removable tags, as every constraint prunes a set (combinationsOf).
+  it("the signeto: a badge of mode × selected × size × intent × state, 160 variants (the constraint prunes the pressed static and removable tags); the chosen tag takes the selected primary action", () => {
+    const signeto = set("signeto");
+    expect(signeto?.structure).toBe("badge");
+    expect(signeto?.extraAxes).toEqual(["mode"]);
+    expect(signeto?.variants).toHaveLength(160);
+    expect(signeto?.properties).toMatchObject({
+      mode: ["static", "selectable", "removable"],
+      selected: "BOOLEAN",
+      size: ["small", "medium"],
+      intent: ["neutral", "info", "success", "warning", "danger"],
+      state: ["rest", "hover", "focus", "disabled"],
+    });
+    const chosen = signeto?.variants.find(
+      (variant) =>
+        variant.props.mode === "selectable" &&
+        variant.props.selected === "true" &&
+        variant.props.intent === "neutral" &&
+        variant.props.size === "medium" &&
+        variant.props.state === "rest",
+    );
+    expect(chosen?.bindings).toMatchObject({
+      "surface.fill": "color/action/primary/selected",
+      "text.color": "color/action/primary/text",
+      "box.radius": "radius/role/pill",
+    });
+  });
+
+  it("the listelektilo and the plurelektilo: fields of expanded × state with the listbox of three options where expanded", () => {
+    for (const name of ["listelektilo", "plurelektilo"]) {
+      const field = set(name);
+      expect(field?.structure, name).toBe("field");
+      expect(field?.variants, name).toHaveLength(12);
+      expect(field?.entry, name).toEqual({
+        key: "selected",
+        texts: ["Eins", "Zwei", "Drei"],
+        selected: 0,
+        active: 1,
+        activeKey: "active",
+      });
+      const open = field?.variants.find(
+        (variant) => variant.props.expanded === "true" && variant.props.state === "rest",
+      );
+      expect(open?.bindings, name).toMatchObject({
+        "listbox.fill": "color/background/raised",
+        "item.typography": "typography/label/1",
+      });
+      const closed = field?.variants.find(
+        (variant) => variant.props.expanded === "false" && variant.props.state === "rest",
+      );
+      expect(closed?.hidden, name).toContain("listbox");
+    }
+  });
+
+  it("the lokredaktilo: a badge of editing × state, twelve variants, the text the Vitrino's value", () => {
+    const editor = set("lokredaktilo");
+    expect(editor?.structure).toBe("badge");
+    expect(editor?.variants).toHaveLength(12);
+    expect(editor?.label).toEqual({ property: "label", defaultValue: "Barrierefreiheit" });
+    const disabled = editor?.variants.find(
+      (variant) => variant.props.editing === "false" && variant.props.state === "disabled",
+    );
+    expect(disabled?.bindings["text.color"]).toBe("color/text/disabled");
   });
 });

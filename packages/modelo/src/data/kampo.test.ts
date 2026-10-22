@@ -53,6 +53,8 @@ describe("kampo in the repo Modelo (T004)", () => {
       "konsileto",
       "langetaro",
       "ligilo",
+      "listelektilo",
+      "lokredaktilo",
       "markdovido",
       "markobutono",
       "menuo",
@@ -60,7 +62,9 @@ describe("kampo in the repo Modelo (T004)", () => {
       "navigado",
       "pagxigilo",
       "plenstato",
+      "plurelektilo",
       "saltligilo",
+      "signeto",
       "spuro",
       "sxaltilo",
       "sxvebilo",
@@ -272,8 +276,8 @@ describe("the Uzo of the kampo (T004, A3)", () => {
       ["suggestions", "kompletigilo"],
       // Spec 025 ①: a value set by feel is the glitilo's.
       ["approximate", "glitilo"],
-      // Spec 025 ②: a date near today is the datelektilo's.
-      ["near-date", "datelektilo"],
+      // Spec 025 ③: a single value in a view is the lokredaktilo's.
+      ["single-value", "lokredaktilo"],
     ]);
     // Spec 011 ① (G5, E8): password and date are kinds now, their boundaries are gone; what stays
     // outside is showing a password, a decimal and a range of dates.
@@ -386,6 +390,13 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
           ...(name.startsWith("placeholder-") ? [] : ["alsxutilo"]),
           // Spec 025 ①: the glitilo is a field of a value in limits; the same Reguloj, no placeholder.
           ...(name.startsWith("placeholder-") ? [] : ["glitilo", "datelektilo"]),
+          // Spec 025 ③: the listelektilo and the plurelektilo are fields with a list; every field
+          // Regulo but placeholder-is-example is widened to them; the lokredaktilo takes the two
+          // of the error.
+          ...(name === "placeholder-is-example" ? [] : ["listelektilo", "plurelektilo"]),
+          ...(name === "error-says-what-to-do" || name === "error-not-color-only"
+            ? ["lokredaktilo"]
+            : []),
         ],
       });
       expect(regulo?.checkability).toBe("automatic");
@@ -441,6 +452,10 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
       "markdovido",
       "glitilo",
       "datelektilo",
+      "signeto",
+      "listelektilo",
+      "plurelektilo",
+      "lokredaktilo",
     ]);
   });
 

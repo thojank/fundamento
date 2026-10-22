@@ -184,6 +184,8 @@ describe("list_eroj and the brief (acceptance 1)", () => {
       "konsileto",
       "langetaro",
       "ligilo",
+      "listelektilo",
+      "lokredaktilo",
       "markdovido",
       "markobutono",
       "menuo",
@@ -191,7 +193,9 @@ describe("list_eroj and the brief (acceptance 1)", () => {
       "navigado",
       "pagxigilo",
       "plenstato",
+      "plurelektilo",
       "saltligilo",
+      "signeto",
       "spuro",
       "sxaltilo",
       "sxvebilo",
@@ -208,7 +212,8 @@ describe("list_eroj and the brief (acceptance 1)", () => {
     expect(brief.instead?.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["choose-many", "elektilo"],
       ["yes-no", "markobutono"],
-      ["multi", null],
+      // Spec 025 ③: covered by the plurelektilo.
+      ["multi", "plurelektilo"],
     ]);
     expect(brief.boundary?.map((entry) => entry.case)).toEqual([
       "single-option",

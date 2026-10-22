@@ -34,9 +34,9 @@ const suggest = (goal: string) => {
 };
 
 describe("kompletigilo in the repo Modelo (section ⑤, G1, G2)", () => {
-  it("lives in data/eroj/kompletigilo/skemo.json, one of thirty-six Eroj", () => {
+  it("lives in data/eroj/kompletigilo/skemo.json, one of forty Eroj", () => {
     expect(kompletigilo?.file).toBe("modelo/data/eroj/kompletigilo/skemo.json");
-    expect(modelo.eroj).toHaveLength(36);
+    expect(modelo.eroj).toHaveLength(40);
   });
 
   it("has the props of the elektilo without empty-label, plus allow-free, min-chars and expanded; the states of a field; label, options, help and error", () => {
@@ -159,7 +159,8 @@ describe("the Uzo of the kompletigilo (section ⑤, G6)", () => {
       ["many-fixed-options-no-typing", "elektilo"],
     ]);
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
-      ["multi-select", "ask-human"],
+      // Spec 025 ③: several values are the plurelektilo's.
+      ["multi-select", "use-instead"],
       ["tags", "not-supported"],
     ]);
   });
@@ -285,16 +286,12 @@ describe("suggest_ero of the combobox (Gvidanto)", () => {
     expect(answer.matched?.goal).toBe("suggest");
   });
 
-  it("'eine Handvoll fester Werte' goes to the elekto with the combobox's reason; 'Mehrfachauswahl' stops at the elektilo's boundary (first in Ero order)", () => {
+  it("'eine Handvoll fester Werte' goes to the elekto with the combobox's reason; 'Mehrfachauswahl' is the plurelektilo's (Spec 025 ③)", () => {
     const few = suggest("eine Handvoll fester Werte");
     expect(few.suggestion).toEqual({ ero: "elekto", props: {} });
     expect(few.boundary).toMatchObject({ ero: "kompletigilo", case: "few-fixed-options" });
+    // Spec 025 ③: several values are the plurelektilo's now (flipped with a Jugxo, OP-12).
     const multi = suggest("Mehrfachauswahl mit Vorschlägen");
-    expect(multi.suggestion).toBeNull();
-    expect(multi.boundary).toMatchObject({
-      ero: "elektilo",
-      case: "multiple",
-      action: "ask-human",
-    });
+    expect(multi.suggestion).toEqual({ ero: "plurelektilo", props: {} });
   });
 });

@@ -1,0 +1,108 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M5H5HDY6GDW44A6KF3KNK30P",
+    "ero": "ero_01M5H5HAQKTAM4QNSA6XRERW1D",
+    "skemo": "ske_01M5H5HCBMBZGJ357PGT0CYX3J",
+    "purpose": "Labels something with a category; can be chosen as a filter or removed.",
+    "instead": [
+      {
+        "goal": "status",
+        "keywords": {
+          "en": [
+            "status",
+            "badge"
+          ],
+          "de": [
+            "status",
+            "badge"
+          ]
+        },
+        "ero": "insigno",
+        "kialo": "A status is read, not pressed or removed, because it says what is, not what a person chooses; the insigno covers it."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "tinted-categories",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "tinted-categories",
+            "hue-per-category",
+            "colour-coded"
+          ],
+          "de": [
+            "farbcodiert",
+            "farbkodiert",
+            "farbe-je-kategorie"
+          ]
+        },
+        "kialo": "A colour per category carries no meaning on its own, because colour alone is not read by everyone (WCAG 1.4.1); the roles of the intent say what a colour means, a person decides whether a product wants more."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "filter-bar",
+          "kialo": "Filter tags stand in the bar that filters, because a pressed tag is one filter among the fields."
+        },
+        {
+          "name": "form",
+          "kialo": "Removable tags stand under the field whose values they show, because a form sends what stands in it."
+        }
+      ],
+      "with": [
+        {
+          "ero": "ikono",
+          "kialo": "A tag may carry a sign before its word, because a sign is read faster than the word; the word stays."
+        },
+        {
+          "ero": "butono",
+          "kialo": "A removable tag composes a butono of low emphasis with the ikono close, because taking away is an action with a name."
+        }
+      ],
+      "never": [
+        {
+          "ero": "butono",
+          "kialo": "A tag stands in no slot of a button, because a button is one target with one name."
+        }
+      ],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "label": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "max": 1,
+        "nesting": 0
+      },
+      "icon-start": {
+        "accepts": [
+          "ikono"
+        ],
+        "max": 1,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "content",
+      "wrap": "never"
+    },
+    "content": [
+      {
+        "regulo": "badge-text-short",
+        "fixed": false,
+        "check": {
+          "kind": "max-words",
+          "count": 3
+        }
+      }
+    ]
+  }
+}

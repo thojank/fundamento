@@ -73,6 +73,8 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/fm-konsileto.ts",
       "eroj/src/generated/fm-langetaro.ts",
       "eroj/src/generated/fm-ligilo.ts",
+      "eroj/src/generated/fm-listelektilo.ts",
+      "eroj/src/generated/fm-lokredaktilo.ts",
       "eroj/src/generated/fm-markdovido.ts",
       "eroj/src/generated/fm-markobutono.ts",
       "eroj/src/generated/fm-menuo.ts",
@@ -81,8 +83,10 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/fm-pagxigilo.ts",
       "eroj/src/generated/fm-pagxo.ts",
       "eroj/src/generated/fm-plenstato.ts",
+      "eroj/src/generated/fm-plurelektilo.ts",
       "eroj/src/generated/fm-redaktilo.ts",
       "eroj/src/generated/fm-saltligilo.ts",
+      "eroj/src/generated/fm-signeto.ts",
       "eroj/src/generated/fm-spuro.ts",
       "eroj/src/generated/fm-sxaltilo.ts",
       "eroj/src/generated/fm-sxelo.ts",
@@ -103,6 +107,8 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/konsileto.styles.ts",
       "eroj/src/generated/langetaro.styles.ts",
       "eroj/src/generated/ligilo.styles.ts",
+      "eroj/src/generated/listelektilo.styles.ts",
+      "eroj/src/generated/lokredaktilo.styles.ts",
       "eroj/src/generated/markdovido.styles.ts",
       "eroj/src/generated/markobutono.styles.ts",
       "eroj/src/generated/menuo.styles.ts",
@@ -111,9 +117,11 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/pagxigilo.styles.ts",
       "eroj/src/generated/pagxo.styles.ts",
       "eroj/src/generated/plenstato.styles.ts",
+      "eroj/src/generated/plurelektilo.styles.ts",
       "eroj/src/generated/react.ts",
       "eroj/src/generated/redaktilo.styles.ts",
       "eroj/src/generated/saltligilo.styles.ts",
+      "eroj/src/generated/signeto.styles.ts",
       "eroj/src/generated/skemo.ts",
       "eroj/src/generated/spuro.styles.ts",
       "eroj/src/generated/sxaltilo.styles.ts",
@@ -2325,5 +2333,120 @@ describe("Web Component Celo for the datelektilo (Spec 025 ②)", () => {
     expect([...inventory.states].sort()).toEqual(
       ["disabled", "focus", "hover", "invalid", "readonly", "rest"].sort(),
     );
+  });
+});
+
+// Spec 025 ③ (section ③, plan ③ D-18): the four hosts of the selection round — a chip (the signeto:
+// a span whose body becomes a pressable button with mode selectable and carries a composed remove
+// butono with mode removable), a styled select-only list (the listelektilo: a button of role
+// combobox over a popover listbox whose options carry an icon and a description), a multi-select
+// (the plurelektilo: a button over a multiselectable listbox with a filter, check marks and a
+// clear butono) and an inline editor (the lokredaktilo: the display with its edit butono, the
+// composed kampo with save and cancel). Keywords and 0 only in every structure.
+describe("Web Component Celo for the selection Eroj (Spec 025 ③)", () => {
+  const cssOf3 = (name: string) =>
+    JSON.parse(
+      new RegExp(`export const ${name.toUpperCase()}_CSS = (".*");`, "s").exec(
+        files[`eroj/src/generated/${name}.styles.ts`] ?? "",
+      )?.[1] ?? '""',
+    ) as string;
+
+  it("the signeto: a span with a body that takes role button and aria-pressed when selectable, a remove butono with the ikono close when removable; the looks by intent and selected", () => {
+    const element = files["eroj/src/generated/fm-signeto.ts"] ?? "";
+    expect(element).toContain(
+      '<span part="control"><span part="body"><slot name="icon-start"></slot><slot></slot></span><fm-butono part="remove" emphasis="low" size="small" hidden><fm-ikono slot="icon-start" name="close"></fm-ikono></fm-butono><span id="fm-texts" hidden></span></span>',
+    );
+    expect(element).toContain('"remove-name"');
+    expect(element).toContain("aria-pressed");
+    const css = cssOf3("signeto");
+    expect(css).toContain(":host { display: inline-block; }");
+    expect(css).toContain(
+      ':where([part="control"]) { display: inline-flex; align-items: center; box-sizing: border-box; border-style: solid; }',
+    );
+    expect(css).toContain(':where([part="body"]) { display: inline-flex; align-items: center; }');
+    expect(css).toContain(':where([part="body"][role="button"]) { cursor: pointer; }');
+    expect(css).toContain(
+      ':where([part="control"][data-selected="false"][data-intent="neutral"]) {\n  background-color: var(--fm-color-background-sunken);',
+    );
+    expect(css).toContain(
+      ':where([part="control"][data-selected="true"][data-intent="neutral"]) {\n  background-color: var(--fm-color-action-primary-selected);',
+    );
+    expect(css).toContain("border-radius: var(--fm-radius-role-pill);");
+    expect(componentCssIssues("signeto.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("signeto.css", css)).toEqual([]);
+    const inventory = stylesheetInventory(files["eroj/src/generated/signeto.styles.ts"] ?? "");
+    expect(inventory.props).toEqual({
+      selected: ["boolean"],
+      size: ["small", "medium"],
+      intent: ["neutral", "info", "success", "warning", "danger"],
+    });
+  });
+
+  it("the listelektilo: a button of role combobox over a popover listbox; options with icon and description; the item by active and selected", () => {
+    const element = files["eroj/src/generated/fm-listelektilo.ts"] ?? "";
+    expect(element).toContain(
+      '<button part="control" id="control" type="button" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="listbox"><span part="text" id="text"></span><span part="indicator" aria-hidden="true">',
+    );
+    expect(element).toContain(
+      '<div part="listbox" role="listbox" id="listbox" popover="manual"></div>',
+    );
+    expect(element).toContain('role="option"');
+    expect(element).toContain('part="description"');
+    const css = cssOf3("listelektilo");
+    expect(css).toContain(':where([part="listbox"]:not(:popover-open)) { display: none; }');
+    expect(css).toContain(
+      ':where([part="item"]) { display: flex; align-items: center; box-sizing: border-box; cursor: pointer; }',
+    );
+    expect(css).toContain(':where([part="field"]) [part="item"][aria-selected="true"] {');
+    expect(css).toContain(':where([part="field"]) [part="item"][data-active="true"] {');
+    expect(css).toContain(
+      ':where([part="field"]) [part="description"] {\n  color: var(--fm-color-text-muted);',
+    );
+    expect(componentCssIssues("listelektilo.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("listelektilo.css", css)).toEqual([]);
+  });
+
+  it("the plurelektilo: a button over a multiselectable listbox with a filter, check marks and a clear butono", () => {
+    const element = files["eroj/src/generated/fm-plurelektilo.ts"] ?? "";
+    expect(element).toContain(
+      '<button part="control" id="control" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="listbox"><span part="text" id="text"></span><span part="indicator" aria-hidden="true">',
+    );
+    // A listbox owns options alone (ARIA; axe aria-required-children, Abweichung 4 of plan ③): the
+    // popover is a panel, the rows' holder is the listbox.
+    expect(element).toContain(
+      '<div part="listbox" id="panel" popover="manual"><input part="filter" type="search" aria-controls="listbox" autocomplete="off" hidden><div part="items" role="listbox" id="listbox" aria-multiselectable="true"></div><fm-butono part="clear" emphasis="low" size="small"></fm-butono></div>',
+    );
+    expect(element).toContain('<fm-ikono part="check" name="check" aria-hidden="true">');
+    for (const key of ["options-count", "clear-name", "values-invalid"])
+      expect(element).toContain(`"${key}"`);
+    const css = cssOf3("plurelektilo");
+    expect(css).toContain(':where([part="listbox"]:not(:popover-open)) { display: none; }');
+    expect(css).toContain(
+      ':where([part="field"]) [part="item"][aria-selected="true"] [part="check"] {',
+    );
+    expect(componentCssIssues("plurelektilo.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("plurelektilo.css", css)).toEqual([]);
+  });
+
+  it("the lokredaktilo: the display with its text and edit butono (the ikono edit), the form with the composed kampo, save and cancel, shown by editing", () => {
+    const element = files["eroj/src/generated/fm-lokredaktilo.ts"] ?? "";
+    expect(element).toContain(
+      '<div part="control"><span part="display"><span part="text" id="text"></span><fm-butono part="edit" emphasis="low" size="small"><fm-ikono slot="icon-start" name="edit"></fm-ikono></fm-butono></span><div part="form" hidden><fm-kampo part="field"></fm-kampo><fm-butono part="save" emphasis="high" size="small"></fm-butono><fm-butono part="cancel" emphasis="low" size="small"></fm-butono></div><span part="error" id="error" hidden aria-live="polite"><slot name="error"></slot></span><span id="fm-texts" hidden></span></div>',
+    );
+    for (const key of ["edit-name", "save-name", "cancel-name"])
+      expect(element).toContain(`"${key}"`);
+    const css = cssOf3("lokredaktilo");
+    expect(css).toContain(
+      ':where([part="display"]) { display: inline-flex; align-items: center; }',
+    );
+    expect(css).toContain(':where([part="form"]) { display: flex; align-items: flex-end; }');
+    expect(css).toContain(
+      ':where([part="control"][data-editing="false"]) [part="field"] {\n  display: none;',
+    );
+    expect(css).toContain(
+      ':where([part="control"][data-editing="true"]) [part="field"] {\n  inline-size: var(--fm-size-container-small);',
+    );
+    expect(componentCssIssues("lokredaktilo.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("lokredaktilo.css", css)).toEqual([]);
   });
 });

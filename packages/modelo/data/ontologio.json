@@ -1212,6 +1212,14 @@
         {
           "predicate": "references",
           "target": "#Elekto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Listelektilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Plurelektilo"
         }
       ]
     },
@@ -1313,6 +1321,10 @@
         {
           "predicate": "references",
           "target": "#Datelektilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Lokredaktilo"
         }
       ]
     },
@@ -1597,6 +1609,10 @@
         {
           "predicate": "references",
           "target": "#Avataro"
+        },
+        {
+          "predicate": "references",
+          "target": "#Signeto"
         }
       ]
     },
@@ -1958,6 +1974,60 @@
         "#Ero"
       ],
       "relations": [
+        {
+          "predicate": "references",
+          "target": "#Ikono"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Plurelektilo",
+      "term": "Plurelektilo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Plurelektilo",
+        "en": "multi-select",
+        "de": "Mehrfachauswahl"
+      },
+      "altLabel": {
+        "en": [
+          "plurelektilo",
+          "multi-select",
+          "multiselect"
+        ],
+        "de": [
+          "Mehrfachauswahl",
+          "plurelektilo"
+        ]
+      },
+      "definition": {
+        "en": "A multi-select: chooses several values from a long list in a popover (a multiselectable listbox with a check mark per option, the chosen first), filterable, and shows the chosen ones as a count or as removable tags (composed signeto); „Alle abwählen“ clears, max refuses more. Up to seven options are markobutono boxes, one value is the elektilo's.",
+        "de": "Eine Mehrfachauswahl: wählt mehrere Werte aus einer langen Liste im Popover (eine Listbox mit Mehrfachauswahl, Häkchen je Option, die Gewählten zuerst), filterbar, und zeigt die Gewählten als Zähler oder als entfernbare Schlagwörter (komponierte signeto); „Alle abwählen“ leert, max weist weitere ab. Bis sieben Optionen sind markobutono-Kästchen, ein Wert gehört dem elektilo."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Markobutono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Elektilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Kompletigilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Signeto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        },
         {
           "predicate": "references",
           "target": "#Ikono"
@@ -2358,6 +2428,10 @@
         {
           "predicate": "references",
           "target": "#Elekto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Plurelektilo"
         }
       ]
     },
@@ -2733,6 +2807,51 @@
       ]
     },
     {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Signeto",
+      "term": "Signeto",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Signeto",
+        "en": "tag",
+        "de": "Schlagwort"
+      },
+      "altLabel": {
+        "en": [
+          "signeto",
+          "tag",
+          "chip",
+          "filter chip"
+        ],
+        "de": [
+          "Schlagwort",
+          "Chip",
+          "Filterchip",
+          "signeto"
+        ]
+      },
+      "definition": {
+        "en": "A tag: labels something with a category or a keyword in the roles of the intent (no free colour scale); selectable it is a filter a person presses on and off (aria-pressed, the event change); removable it carries a button that takes it away (the cancelable event remove; the focus moves to the next tag or the container). A status is the insigno's.",
+        "de": "Ein Schlagwort: kennzeichnet etwas mit einer Kategorie oder einem Stichwort in den Rollen des intent (keine freie Farbskala); wählbar ist es ein Filter, den eine Person an- und abdrückt (aria-pressed, das Ereignis change); entfernbar trägt es einen Knopf, der es wegnimmt (das abbrechbare Ereignis remove; der Fokus wandert zum nächsten Schlagwort oder zum Container). Ein Status gehört dem insigno."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Insigno"
+        },
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Ikono"
+        }
+      ]
+    },
+    {
       "uri": "https://fundamento.ciferecigo.com/ontologio#Spuro",
       "term": "Spuro",
       "inScheme": "eroj",
@@ -2970,6 +3089,93 @@
         {
           "predicate": "references",
           "target": "#Butono"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Listelektilo",
+      "term": "Listelektilo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Listelektilo",
+        "en": "styled select",
+        "de": "Auswahlliste"
+      },
+      "altLabel": {
+        "en": [
+          "listelektilo",
+          "styled select",
+          "select-only combobox",
+          "rich select"
+        ],
+        "de": [
+          "Auswahlliste",
+          "gestaltete Liste",
+          "listelektilo"
+        ]
+      },
+      "definition": {
+        "en": "A styled select-only list: chooses one option from a popover list whose options carry an icon and a description (the select-only combobox of APG: arrows, Home, End, Enter, Space, Escape, a typed letter jumps). Plain options stay the elektilo's, a search in the list is the kompletigilo's.",
+        "de": "Eine Auswahlliste: wählt eine Option aus einer Liste im Popover, deren Optionen ein Symbol und eine Beschreibung tragen (die Select-Only-Combobox der APG: Pfeile, Pos1, Ende, Enter, Leertaste, Escape, ein getippter Buchstabe springt). Schlichte Optionen bleiben dem elektilo, eine Suche in der Liste dem kompletigilo."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Elektilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Kompletigilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Ikono"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Lokredaktilo",
+      "term": "Lokredaktilo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Lokredaktilo",
+        "en": "inline editor",
+        "de": "Inline-Bearbeitung"
+      },
+      "altLabel": {
+        "en": [
+          "lokredaktilo",
+          "inline edit",
+          "edit in place"
+        ],
+        "de": [
+          "Inline-Bearbeitung",
+          "Direktbearbeitung",
+          "lokredaktilo"
+        ]
+      },
+      "definition": {
+        "en": "An inline editor: turns a single value in a view into a field on the spot — the display with its edit button, then a composed kampo of the kind with save and cancel; Enter saves (the cancelable event save), Escape cancels, the focus returns to the edit button; an error keeps the field open. A form is the formularo's.",
+        "de": "Eine Inline-Bearbeitung: macht aus einem einzelnen Wert einer Ansicht an Ort und Stelle ein Feld – die Anzeige mit ihrem Bearbeiten-Knopf, dann ein komponierter kampo der Art mit Speichern und Abbrechen; Enter speichert (das abbrechbare Ereignis save), Escape verwirft, der Fokus kehrt zum Bearbeiten-Knopf zurück; ein Fehler hält das Feld offen. Ein Formular gehört dem formularo."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Kampo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Ikono"
         }
       ]
     },

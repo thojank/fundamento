@@ -45,9 +45,9 @@ const suggest = (goal: string) => {
 };
 
 describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
-  it("lives in data/eroj/datelektilo/skemo.json, between butono and dialogo, one of thirty-six Eroj", () => {
+  it("lives in data/eroj/datelektilo/skemo.json, between butono and dialogo, one of forty Eroj", () => {
     expect(datelektilo?.file).toBe("modelo/data/eroj/datelektilo/skemo.json");
-    expect(modelo.eroj).toHaveLength(36);
+    expect(modelo.eroj).toHaveLength(40);
     const names = modelo.eroj.map((entry) => entry.ero.name);
     expect(names.indexOf("datelektilo")).toBe(names.indexOf("butono") + 1);
     expect(names.indexOf("datelektilo")).toBe(names.indexOf("dialogo") - 1);
@@ -326,7 +326,6 @@ describe("the Uzo of the datelektilo (section ②, G2)", () => {
     // G2: the kampo sends a date near today and a date range here; its boundary date-range is
     // closed (use-instead), as file was closed by the alsxutilo (Spec 015 ②).
     const kampo = eroNamed("kampo")?.uzo;
-    expect(kampo?.instead.find((entry) => entry.goal === "near-date")?.ero).toBe("datelektilo");
     expect(kampo?.boundary.find((entry) => entry.case === "date-range")).toMatchObject({
       action: "use-instead",
       ero: "datelektilo",

@@ -1,0 +1,121 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M5H5HF48VSG3S582RZ5V9ZR7",
+    "ero": "ero_01M5H5HBY0HCK99R9D1EQ4YMJ6",
+    "skemo": "ske_01M5H5HDHP1HX4H5VCGRG4MDXF",
+    "purpose": "Turns a single value in a view into a field on the spot, with save and cancel.",
+    "instead": [
+      {
+        "goal": "form",
+        "keywords": {
+          "en": [
+            "form",
+            "several-fields"
+          ],
+          "de": [
+            "formular",
+            "mehrere-felder"
+          ]
+        },
+        "ero": "formularo",
+        "kialo": "Several values entered together are a form, because one send covers them all; the formularo covers it."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "multi-field-edit",
+        "action": "use-instead",
+        "keywords": {
+          "en": [
+            "multi-field",
+            "several-fields-at-once"
+          ],
+          "de": [
+            "mehrfeld",
+            "mehrere-felder-zugleich"
+          ]
+        },
+        "kialo": "Several fields edited at once are a form, because save and cancel must cover them together; the formularo covers it.",
+        "ero": "formularo"
+      },
+      {
+        "case": "autosave",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "autosave",
+            "auto-save",
+            "saves-itself"
+          ],
+          "de": [
+            "autospeichern",
+            "automatisch-speichern",
+            "speichert-selbst"
+          ]
+        },
+        "kialo": "A value that saves itself while typing has no cancel, because every keystroke is already kept; a person decides whether a product wants it."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "card",
+          "kialo": "A value of a card is edited where it stands, because the card is the view of the thing."
+        },
+        {
+          "name": "page",
+          "kialo": "A value in the head of a page is edited where it stands, because the page is the view of the thing."
+        }
+      ],
+      "with": [
+        {
+          "ero": "kampo",
+          "kialo": "The open field is a composed kampo of the kind, because a value typed on the spot is typed like everywhere."
+        },
+        {
+          "ero": "butono",
+          "kialo": "Edit, save and cancel are composed butono, because each is an action with a name."
+        },
+        {
+          "ero": "ikono",
+          "kialo": "The edit button carries the pencil, because the sign is read faster than the word; the word names the value."
+        }
+      ],
+      "never": [
+        {
+          "ero": "butono",
+          "kialo": "An inline editor stands in no slot of a button, because a button is one target with one name."
+        }
+      ],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "error": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "content",
+      "wrap": "never"
+    },
+    "content": [
+      {
+        "regulo": "error-says-what-to-do",
+        "fixed": true,
+        "of": "slot:error",
+        "check": {
+          "kind": "min-words",
+          "count": 3
+        }
+      }
+    ]
+  }
+}

@@ -57,7 +57,15 @@ export type HostControl =
   | "markdown"
   | "slider"
   // Spec 025 ② (plan ② D-11): the field of a date picker — an input with a trigger and a calendar.
-  | "datepicker";
+  | "datepicker"
+  // Spec 025 ③ (plan ③ D-18): a tag whose body presses and whose remove butono takes it away (the
+  // signeto); a styled select-only list — a button of role combobox over a popover listbox (the
+  // listelektilo); a multi-select — a button over a multiselectable listbox (the plurelektilo); an
+  // inline editor — the display with its edit butono and the composed kampo (the lokredaktilo).
+  | "chip"
+  | "listselect"
+  | "multiselect"
+  | "editor";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -139,8 +147,18 @@ export function hostOf(
   upload = false,
   avatar = false,
   datepicker = false,
+  chip = false,
+  listselect = false,
+  editor = false,
 ): HostControl {
   if (role === "link") return "a";
+  // Spec 025 ③ (plan ③ D-18): a generic with a remove part is the chip, with an edit part the
+  // inline editor; a combobox with an item part is the styled select-only list; a listbox is the
+  // multi-select — a button over the platform's popover, as the list of the kompletigilo.
+  if (role === "generic" && chip) return "chip";
+  if (role === "generic" && editor) return "editor";
+  if (role === "combobox" && listselect) return "listselect";
+  if (role === "listbox") return "multiselect";
   // Spec 025 ② (plan ② D-11): a textbox with a calendar part is the date picker — the field of
   // the kampo with a trigger beside the input and the calendar as a popover.
   if (role === "textbox" && datepicker) return "datepicker";
@@ -314,6 +332,58 @@ function fieldMarkup(
     : "";
   const row = stepper || datepicker ? `<div part="row">${native}${trigger}</div>` : native;
   return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label>${row}${calendar}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+}
+
+/**
+ * The shadow markup of a chip (Spec 025 ③, plan ③ D-18): the control holds the body — the icon and
+ * the text, a button with aria-pressed while the mode is selectable — and the composed remove
+ * butono with the Ikonaro's close, shown while the mode is removable and named by the Modelo's
+ * words in the render.
+ */
+const CHIP_REMOVE_BUTTON =
+  '<fm-butono part="remove" emphasis="low" size="small" hidden><fm-ikono slot="icon-start" name="close"></fm-ikono></fm-butono>';
+function chipMarkup(): string {
+  return `<span part="control"><span part="body"><slot name="icon-start"></slot><slot></slot></span>${CHIP_REMOVE_BUTTON}<span id="fm-texts" hidden></span></span>`;
+}
+
+/**
+ * The rows of a styled list and of a multi-select (Spec 025 ③): an option with its icon, its text
+ * and its description (the icon and the description hidden while the entry has none); an option
+ * with the check mark of the Ikonaro before its text, coloured by its entry.
+ */
+const LIST_ITEM_ROW =
+  '<div part="item" role="option" aria-selected="false"><fm-ikono part="icon" aria-hidden="true" hidden></fm-ikono><span part="item-text"></span><span part="description" hidden></span></div>';
+const MULTI_ITEM_ROW =
+  '<div part="item" role="option" aria-selected="false"><fm-ikono part="check" name="check" aria-hidden="true"></fm-ikono><span part="item-text"></span></div>';
+
+/**
+ * The shadow markup of a styled select-only list and of a multi-select (Spec 025 ③, plan ③
+ * D-18): the field of the kampo — label with the mark, help and error — around a button that shows
+ * the chosen option (or how many are chosen) with the chevron, and the listbox as a popover of the
+ * platform anchored to the field. The list's button is a combobox (APG select-only combobox); the
+ * multi-select's button opens a multiselectable listbox that takes the focus, with a filter field
+ * where filterable, the clear butono at its end and the chosen values as tags after the button
+ * where the summary says so.
+ */
+function listMarkup(slots: NonNullable<ElementNames["slots"]>, multi: boolean): string {
+  const button = multi
+    ? `<button part="control" id="control" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="listbox"><span part="text" id="text"></span><span part="indicator" aria-hidden="true">${IKONO_CHEVRON}</span></button><div part="tags" hidden></div>`
+    : `<button part="control" id="control" type="button" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="listbox"><span part="text" id="text"></span><span part="indicator" aria-hidden="true">${IKONO_CHEVRON}</span></button>`;
+  // A listbox owns options alone (ARIA, axe aria-required-children): the multi-select's popover is
+  // a panel that holds the filter, the listbox of the rows (items) and the clear butono.
+  const listbox = multi
+    ? '<div part="listbox" id="panel" popover="manual"><input part="filter" type="search" aria-controls="listbox" autocomplete="off" hidden><div part="items" role="listbox" id="listbox" aria-multiselectable="true"></div><fm-butono part="clear" emphasis="low" size="small"></fm-butono></div>'
+    : '<div part="listbox" role="listbox" id="listbox" popover="manual"></div>';
+  return `<div part="field"><label part="label" id="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label>${button}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+}
+
+/**
+ * The shadow markup of an inline editor (Spec 025 ③, plan ③ D-18): the display with the value and
+ * the edit butono (the Ikonaro's edit, named "<label> bearbeiten"), the form with the composed
+ * kampo of the kind, save and cancel — shown by editing — and the error below.
+ */
+function editorMarkup(): string {
+  return '<div part="control"><span part="display"><span part="text" id="text"></span><fm-butono part="edit" emphasis="low" size="small"><fm-ikono slot="icon-start" name="edit"></fm-ikono></fm-butono></span><div part="form" hidden><fm-kampo part="field"></fm-kampo><fm-butono part="save" emphasis="high" size="small"></fm-butono><fm-butono part="cancel" emphasis="low" size="small"></fm-butono></div><span part="error" id="error" hidden aria-live="polite"><slot name="error"></slot></span><span id="fm-texts" hidden></span></div>';
 }
 
 /**
@@ -719,6 +789,10 @@ function markup(
   if (host === "tabs") return tabsMarkup();
   if (host === "input") return fieldMarkup(slots, false, false, stepper);
   if (host === "datepicker") return fieldMarkup(slots, false, false, false, true);
+  if (host === "chip") return chipMarkup();
+  if (host === "listselect") return listMarkup(slots, false);
+  if (host === "multiselect") return listMarkup(slots, true);
+  if (host === "editor") return editorMarkup();
   if (host === "textarea") return fieldMarkup(slots, true);
   if (host === "suggest") return fieldMarkup(slots, false, true);
   if (host === "disclosure") return disclosureMarkup();
@@ -768,62 +842,72 @@ export function elementSource({
       ? `const SKEMO = ${constant}_SKEMO;\nconst CSS = ${constant}_CSS;${isLight ? `\nconst LIGHT_CSS = ${constant}_LIGHT_CSS;` : ""}`
       : `import { ${constant}_SKEMO as SKEMO } from "./skemo.js";\nimport { ${constant}_CSS as CSS${isLight ? `, ${constant}_LIGHT_CSS as LIGHT_CSS` : ""} } from "./${ero}.styles.js";`;
   const control =
-    host === "a"
-      ? "a"
-      : host === "input" || host === "datepicker"
-        ? "input"
-        : host === "textarea"
-          ? "textarea"
-          : host === "dialog"
-            ? "dialog"
-            : host === "group"
-              ? "[role=radiogroup]"
-              : host === "select"
-                ? "select"
-                : host === "text"
-                  ? "span"
-                  : host === "status"
-                    ? "div"
-                    : host === "meter"
-                      ? "div"
-                      : host === "light"
-                        ? "[part='region'], [part='list']"
-                        : host === "tabs"
-                          ? "[role=tablist]"
-                          : host === "icon"
-                            ? "span"
-                            : host === "separator"
-                              ? "div"
-                              : host === "heading"
-                                ? "[part='text']"
-                                : host === "paragraph"
-                                  ? "p"
-                                  : host === "tooltip"
-                                    ? "[part='control']"
-                                    : host === "disclosure"
-                                      ? "details"
-                                      : host === "pagination"
-                                        ? "[part='list']"
-                                        : host === "suggest" || host === "upload"
-                                          ? "input"
-                                          : host === "card"
-                                            ? "article"
-                                            : host === "avatar" || host === "markdown"
-                                              ? "[part='control']"
-                                              : host === "codeblock"
-                                                ? "figure"
-                                                : host === "popover"
-                                                  ? "[role=dialog]"
-                                                  : host === "menu"
-                                                    ? "[role=menu]"
-                                                    : host === "slider"
-                                                      ? "[part='track']"
-                                                      : "button";
+    host === "chip" || host === "editor"
+      ? "[part='control']"
+      : host === "listselect" || host === "multiselect"
+        ? "button"
+        : host === "a"
+          ? "a"
+          : host === "input" || host === "datepicker"
+            ? "input"
+            : host === "textarea"
+              ? "textarea"
+              : host === "dialog"
+                ? "dialog"
+                : host === "group"
+                  ? "[role=radiogroup]"
+                  : host === "select"
+                    ? "select"
+                    : host === "text"
+                      ? "span"
+                      : host === "status"
+                        ? "div"
+                        : host === "meter"
+                          ? "div"
+                          : host === "light"
+                            ? "[part='region'], [part='list']"
+                            : host === "tabs"
+                              ? "[role=tablist]"
+                              : host === "icon"
+                                ? "span"
+                                : host === "separator"
+                                  ? "div"
+                                  : host === "heading"
+                                    ? "[part='text']"
+                                    : host === "paragraph"
+                                      ? "p"
+                                      : host === "tooltip"
+                                        ? "[part='control']"
+                                        : host === "disclosure"
+                                          ? "details"
+                                          : host === "pagination"
+                                            ? "[part='list']"
+                                            : host === "suggest" || host === "upload"
+                                              ? "input"
+                                              : host === "card"
+                                                ? "article"
+                                                : host === "avatar" || host === "markdown"
+                                                  ? "[part='control']"
+                                                  : host === "codeblock"
+                                                    ? "figure"
+                                                    : host === "popover"
+                                                      ? "[role=dialog]"
+                                                      : host === "menu"
+                                                        ? "[role=menu]"
+                                                        : host === "slider"
+                                                          ? "[part='track']"
+                                                          : "button";
   const isToggle = host === "toggle";
   const isGroup = host === "group";
   const isSelect = host === "select";
   const isSuggest = host === "suggest";
   const isDatepicker = host === "datepicker";
+  // Spec 025 ③ (plan ③ D-18): the four hosts of the selection round.
+  const isChip = host === "chip";
+  const isListselect = host === "listselect";
+  const isMultiselect = host === "multiselect";
+  const isListy = isListselect || isMultiselect;
+  const isEditor = host === "editor";
   const isUpload = host === "upload";
   const isSlider = host === "slider";
   const isDisclosure = host === "disclosure";
@@ -866,7 +950,8 @@ export function elementSource({
     isCard ||
     isAvatar ||
     isCodeblock ||
-    isMarkdown;
+    isMarkdown ||
+    isChip;
   const listSlot = slots.find((slot) => slot.list === true)?.name ?? "";
   const namedSlots = slots
     .filter((slot) => slot.default !== true && slot.decorative !== true)
@@ -3595,7 +3680,7 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
   // exposes it — the select, the checkbox and switch, the radio group judge themselves through
   // ElementInternals like the fields, and say so through the same three members.
   const choiceValidityMethods =
-    isSelect || isToggle || isGroup
+    isSelect || isToggle || isGroup || isListy || isEditor
       ? `
   /** The validity of the choice, as a native control exposes it (ElementInternals). */
   get validity(): ValidityState {
@@ -4131,6 +4216,693 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
   // Spec 025 ① (plan ① D-05, D-06): the keys and the buttons of the kampo's additions — the arrows
   // step a number (as the platform's own number input does; the shown input is a text input, E8),
   // Escape clears a search; a click on a step button steps, on the clear button clears.
+  // Spec 025 ③ (plan ③ D-18): a chip (the signeto) — static, a span named by its text; selectable,
+  // its body a button with aria-pressed that fires change on a click, Enter or Space; removable,
+  // the composed remove butono (named "<text> entfernen") fires the cancelable remove — prevented,
+  // the tag stays; else it is taken out and the focus goes to the next tag, at the end to the
+  // container. Delete and Backspace on the tag remove it too.
+  const chipInit = isChip
+    ? `    const body = root.querySelector('[part="body"]');
+    body?.addEventListener("click", () => this.#chipToggle());
+    body?.addEventListener("keydown", (event: Event) => {
+      if (!(event instanceof KeyboardEvent)) return;
+      const key = event.key === " " ? "Space" : event.key;
+      if ((key === "Enter" || key === "Space") && KEYS.includes(key) && this.propValue("mode") === "selectable") {
+        event.preventDefault();
+        this.#chipToggle();
+      }
+    });
+    this.addEventListener("keydown", (event) => {
+      if ((event.key === "Delete" || event.key === "Backspace") && KEYS.includes(event.key) && this.propValue("mode") === "removable") {
+        event.preventDefault();
+        this.#chipRemove();
+      }
+    });
+    control.addEventListener("click", (event) => {
+      const remover = event.composedPath().find((node) => node instanceof HTMLElement && node.getAttribute("part") === "remove");
+      if (!(remover instanceof HTMLElement)) return;
+      event.stopPropagation();
+      this.#chipRemove();
+    });
+    // The composed butono may upgrade after this element: its inner button takes the words then.
+    customElements.whenDefined("fm-butono").then(() => this.#render());
+`
+    : "";
+  const chipRender = isChip
+    ? `    {
+      const mode = String(this.propValue("mode"));
+      const off = this.propValue("disabled") === true;
+      // Only a filter is pressed (constraint of the Skemo): a static or removable tag shows the
+      // look of the unpressed tag whatever its attribute says.
+      const pressed = mode === "selectable" && this.propValue("selected") === true;
+      root.setAttribute("data-selected", String(pressed));
+      const body = this.shadowRoot?.querySelector('[part="body"]');
+      if (body instanceof HTMLElement) {
+        if (mode === "selectable") {
+          body.setAttribute("role", "button");
+          body.setAttribute("tabindex", "0");
+          body.setAttribute("aria-pressed", String(pressed));
+          if (off) body.setAttribute("aria-disabled", "true");
+          else body.removeAttribute("aria-disabled");
+        } else {
+          for (const name of ["role", "tabindex", "aria-pressed", "aria-disabled"]) body.removeAttribute(name);
+        }
+      }
+      // The remove butono stands in the tag only while the mode is removable (made then, as the
+      // kampo makes its step buttons); a static or selectable tag holds no button and no icon — a
+      // hidden stand-in keeps the part's place.
+      const remover = this.#chipRemover(mode === "removable");
+      if (remover instanceof HTMLElement) {
+        remover.hidden = false;
+        const text = this.#label.assignedNodes({ flatten: true }).map((node) => node.textContent ?? "").join("").trim();
+        const word = (TEXTS["remove-name"]?.[this.#lingvo()] ?? TEXTS["remove-name"]?.en ?? "{label}").replace("{label}", text);
+        if (remover.getAttribute("label") !== word) remover.setAttribute("label", word);
+        if (off) remover.setAttribute("aria-disabled", "true");
+        else remover.removeAttribute("aria-disabled");
+      }
+    }
+`
+    : "";
+  const chipMethods = isChip
+    ? `
+  /** The remove butono of the tag while wanted (made after the body); otherwise a hidden stand-in without a button; undefined when not wanted. */
+  #chipRemover(wanted: boolean): HTMLElement | undefined {
+    const present = this.#control.querySelector('[part="remove"]');
+    const isButton = present instanceof HTMLElement && present.localName === "fm-butono";
+    if (!wanted) {
+      if (!isButton && present instanceof HTMLElement) return undefined;
+      present?.remove();
+      this.#control.querySelector('[part="body"]')?.insertAdjacentHTML("afterend", '<span part="remove" hidden></span>');
+      return undefined;
+    }
+    if (isButton) return present;
+    present?.remove();
+    this.#control.querySelector('[part="body"]')?.insertAdjacentHTML("afterend", \`${CHIP_REMOVE_BUTTON}\`);
+    const made = this.#control.querySelector('[part="remove"]');
+    return made instanceof HTMLElement ? made : undefined;
+  }
+
+  /** Presses a filter on or off (mode selectable) and says change; nothing while disabled. */
+  #chipToggle(): void {
+    if (this.propValue("mode") !== "selectable" || this.propValue("disabled") === true) return;
+    this.toggleAttribute("selected");
+    this.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  /**
+   * Takes the tag away (mode removable): the event may be prevented, then the tag stays; else the
+   * focus goes to the next tag, at the end of the row to the container — never to nothing.
+   */
+  #chipRemove(): void {
+    if (this.propValue("mode") !== "removable" || this.propValue("disabled") === true) return;
+    const go = this.dispatchEvent(new CustomEvent("remove", { bubbles: true, cancelable: true }));
+    if (!go) return;
+    const next = this.nextElementSibling instanceof HTMLElement ? this.nextElementSibling : this.parentElement;
+    this.remove();
+    next?.focus();
+  }
+`
+    : "";
+  // Spec 025 ③ (plan ③ D-18): a styled select-only list (the listelektilo) and a multi-select (the
+  // plurelektilo). The button opens the listbox (a popover of the platform anchored to the field);
+  // the options are the children in the slot options, each with its value, icon, description and
+  // disabled. The list's button is the combobox and keeps the focus (aria-activedescendant); the
+  // multi-select hands the focus to the listbox (or to its filter) and puts the chosen options
+  // first when it opens. The arrows move, Home and End jump, a disabled option is skipped; Enter
+  // and Space choose (the multi-select: Space toggles, Enter closes); Escape closes; a typed letter
+  // jumps to the option that starts with it. A pointer outside and the focus leaving the element
+  // close the list. The form carries the value (the multi-select every value under its name).
+  const listInit = isListy
+    ? `    new MutationObserver(() => this.#render()).observe(this, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ["slot", "value", "icon", "description", "disabled"],
+    });
+    control.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (this.#listIsOpen()) this.#listClose(true);
+      else this.#listOpen();
+    });
+    control.addEventListener("keydown", (event) => this.#listKey(event));
+    const listbox = this.#listbox();
+    listbox.addEventListener("mousedown", (event) => {
+      // A press in the list keeps the focus where it is (a pointer on a row would move it to the body).
+      if (!(event.target instanceof HTMLInputElement)) event.preventDefault();
+    });
+    listbox.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const row = event.composedPath().find((node) => node instanceof HTMLElement && node.getAttribute("part") === "item");
+      if (row instanceof HTMLElement) this.${isMultiselect ? "#listToggleValue" : "#listChoose"}(row);
+    });
+${
+  isMultiselect
+    ? `    this.#listRole().setAttribute("tabindex", "-1");
+    listbox.addEventListener("keydown", (event) => this.#listKey(event));
+    const filter = this.#listFilter();
+    filter?.addEventListener("input", () => {
+      this.#listActive = -1;
+      this.#listBuild();
+      this.#listMove("ArrowDown");
+      this.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+    });
+    this.shadowRoot?.querySelector('[part="clear"]')?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (this.propValue("disabled") === true || this.propValue("readonly") === true) return;
+      this.setAttribute("values", "");
+      this.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    // A tag taken away (the remove of a composed signeto) takes its value out of the values.
+    this.shadowRoot?.querySelector('[part="tags"]')?.addEventListener("remove", (event) => {
+      event.preventDefault();
+      const tag = event.target;
+      if (tag instanceof HTMLElement && tag.dataset.value !== undefined) {
+        this.setAttribute("values", this.#listValues().filter((value) => value !== tag.dataset.value).join(","));
+        this.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    });
+`
+    : ""
+}    // The focus leaves the element: the list closes — judged after the move, because the platform
+    // names no relatedTarget for a button in a composed element.
+    this.addEventListener("focusout", () => {
+      setTimeout(() => {
+        if (!this.#listIsOpen()) return;
+        const active = document.activeElement;
+        if (active === this || (active instanceof Node && this.contains(active))) return;
+        this.#listClose(false);
+      }, 0);
+    });
+    customElements.whenDefined("fm-butono").then(() => this.#render());
+`
+    : "";
+  const listRender = isListy
+    ? `    {
+      const button = control as HTMLButtonElement;
+      const word = (key: string): string => TEXTS[key]?.[this.#lingvo()] ?? TEXTS[key]?.en ?? "";
+      const entries = this.#entries();
+      const chosen = this.#listValues();
+      const placeholder = String(this.propValue("placeholder") ?? "");
+      const text = this.shadowRoot?.getElementById("text");
+${
+  isMultiselect
+    ? `      const known = chosen.filter((value) => entries.some((entry) => entry.value === value));
+      const shown = known.length === 0 && placeholder !== "" ? placeholder : known.length + " " + word("options-count");
+      const tags = this.shadowRoot?.querySelector('[part="tags"]');
+      if (tags instanceof HTMLElement) {
+        const asTags = this.propValue("summary") === "tags";
+        tags.hidden = !asTags || known.length === 0;
+        const wanted = asTags ? known : [];
+        const present = [...tags.children] as HTMLElement[];
+        const same = present.length === wanted.length && present.every((tag, index) => tag.dataset.value === wanted[index]);
+        if (!same) {
+          tags.replaceChildren(
+            ...wanted.map((value) => {
+              const tag = document.createElement("fm-signeto");
+              tag.setAttribute("part", "tag");
+              tag.setAttribute("mode", "removable");
+              tag.setAttribute("size", "small");
+              tag.dataset.value = value;
+              tag.textContent = entries.find((entry) => entry.value === value)?.text ?? value;
+              return tag;
+            }),
+          );
+        }
+        for (const tag of tags.children) {
+          if (this.propValue("disabled") === true || this.propValue("readonly") === true) tag.setAttribute("disabled", "");
+          else tag.removeAttribute("disabled");
+        }
+      }
+      const valuesName = this.propValue("name");
+      const data = new FormData();
+      for (const value of known) data.append(typeof valuesName === "string" ? valuesName : "", value);
+      this.#internals.setFormValue(known.length === 0 ? null : data);
+      const clear = this.shadowRoot?.querySelector('[part="clear"]');
+      if (clear instanceof HTMLElement) {
+        clear.hidden = known.length === 0;
+        if (clear.textContent !== word("clear-name")) clear.textContent = word("clear-name");
+      }
+      const filter = this.#listFilter();
+      if (filter !== undefined) {
+        filter.hidden = this.propValue("filterable") !== true;
+        filter.setAttribute("aria-labelledby", "label");
+      }
+      this.#listRole().setAttribute("aria-labelledby", "label");
+      const maxGiven = this.propValue("max");
+      const max = typeof maxGiven === "string" && maxGiven !== "" ? Number(maxGiven) : undefined;
+      const required = this.propValue("required") === true;
+      const missing = word("required");
+      if (required && known.length === 0 && missing !== "") {
+        this.#internals.setValidity({ valueMissing: true }, missing, button);
+      } else if (max !== undefined && Number.isFinite(max) && known.length > max) {
+        this.#internals.setValidity({ rangeOverflow: true }, word("values-invalid").replace("{max}", String(max)), button);
+      } else {
+        this.#internals.setValidity({});
+      }
+`
+    : `      const value = String(this.propValue("value") ?? "");
+      const entry = entries.find((candidate) => candidate.value === value);
+      const shown = entry?.text ?? (value === "" ? placeholder : value);
+      this.#internals.setFormValue(value === "" ? null : value);
+      const required = this.propValue("required") === true;
+      const missing = word("required");
+      if (required && value === "" && missing !== "") {
+        this.#internals.setValidity({ valueMissing: true }, missing, button);
+      } else {
+        this.#internals.setValidity({});
+      }
+`
+}      if (text instanceof HTMLElement) {
+        if (text.textContent !== shown) text.textContent = shown;
+        text.setAttribute("data-placeholder", String(shown === placeholder && placeholder !== "" && chosen.length === 0));
+      }
+      const formName = this.propValue("name");
+      if (typeof formName === "string" && formName !== "") button.setAttribute("name", formName);
+      else button.removeAttribute("name");
+      // The list's button is the combobox and speaks required and read-only itself; the
+      // multi-select's button has no role that takes them — its listbox speaks them (ARIA).
+      const spoken = ${isMultiselect ? "this.#listRole()" : "button"};
+      if (required) spoken.setAttribute("aria-required", "true");
+      else spoken.removeAttribute("aria-required");
+      const disabled = this.propValue("disabled") === true;
+      const readonly = !disabled && this.propValue("readonly") === true;
+      if (readonly) {
+        button.setAttribute("readonly", "");
+        spoken.setAttribute("aria-readonly", "true");
+      } else {
+        button.removeAttribute("readonly");
+        spoken.removeAttribute("aria-readonly");
+      }
+      const invalid = this.propValue("invalid") === true || this.#filled("error");
+      if (invalid) button.setAttribute("aria-invalid", "true");
+      else button.removeAttribute("aria-invalid");
+      const off = disabled || readonly;
+      if (this.propValue("expanded") === true && !this.#listIsOpen() && !off) this.#listOpen();
+      if ((this.propValue("expanded") !== true || off) && this.#listIsOpen()) this.#listClose(false);
+      this.#listBuild();
+    }
+`
+    : "";
+  const listMethods = isListy
+    ? `
+  /** The row the keyboard stands on (an index into the rows), -1 while none. */
+  #listActive = -1;
+  /** The order of the values while the list is open (a multi-select puts the chosen first when it opens). */
+  #listOrder: string[] = [];
+  /** Closes the list on a pointer outside the element while it is open. */
+  #listOutside = (event: Event): void => {
+    if (!event.composedPath().includes(this)) this.#listClose(false);
+  };
+
+  /** The options: every child in the slot of the options with its value, text, icon, description and disabled. */
+  #entries(): { value: string; text: string; icon: string; description: string; disabled: boolean }[] {
+    return [...this.children]
+      .filter((child) => child.getAttribute("slot") === "${listSlot}")
+      .map((child) => {
+        const text = child.textContent?.trim() ?? "";
+        return {
+          value: child.getAttribute("value") ?? text,
+          text,
+          icon: child.getAttribute("icon") ?? "",
+          description: child.getAttribute("description") ?? "",
+          disabled: child.hasAttribute("disabled"),
+        };
+      });
+  }
+
+  /** The chosen values: the value, or the comma-separated values of a multi-select. */
+  #listValues(): string[] {
+    const given = String(this.propValue("${isMultiselect ? "values" : "value"}") ?? "");
+    return given.split(",").map((value) => value.trim()).filter((value) => value !== "");
+  }
+
+  /** The popover: the listbox itself, or the panel of a multi-select around filter, listbox and clear. */
+  #listbox(): HTMLElement {
+    return this.shadowRoot?.querySelector('[part="listbox"]') as HTMLElement;
+  }
+
+  /** The element of role listbox: the popover, or the holder of the rows (items) of a multi-select. */
+  #listRole(): HTMLElement {
+    return (this.shadowRoot?.querySelector('[role="listbox"]') ?? this.#listbox()) as HTMLElement;
+  }
+
+  #listFilter(): HTMLInputElement | undefined {
+    const filter = this.shadowRoot?.querySelector('[part="filter"]');
+    return filter instanceof HTMLInputElement ? filter : undefined;
+  }
+
+  #listIsOpen(): boolean {
+    return this.#listbox().matches(":popover-open");
+  }
+
+  #listRows(): HTMLElement[] {
+    return [...this.#listbox().querySelectorAll('[part="item"]')] as HTMLElement[];
+  }
+
+  /** Writes the rows of the listbox from the options: id, value, text, icon, description, selected, disabled, hidden by the filter. */
+  #listBuild(): void {
+    const listbox = this.#listbox();
+    const holder = ${isMultiselect ? "listbox.querySelector('[part=\"items\"]') ?? listbox" : "listbox"};
+    const entries = this.#entries();
+    const ordered =
+      this.#listOrder.length === 0
+        ? entries
+        : [...entries].sort((a, b) => this.#listOrder.indexOf(a.value) - this.#listOrder.indexOf(b.value));
+    const rows = [...holder.querySelectorAll('[part="item"]')] as HTMLElement[];
+    while (rows.length > ordered.length) rows.pop()?.remove();
+    while (rows.length < ordered.length) {
+      holder.insertAdjacentHTML("beforeend", '${isMultiselect ? MULTI_ITEM_ROW : LIST_ITEM_ROW}');
+      const row = holder.lastElementChild;
+      if (row instanceof HTMLElement) rows.push(row);
+    }
+    const chosen = this.#listValues();
+    const typed = (this.#listFilter()?.value ?? "").trim().toLowerCase();
+    const maxGiven = this.propValue("max");
+    const max = typeof maxGiven === "string" && maxGiven !== "" ? Number(maxGiven) : undefined;
+    const full = max !== undefined && Number.isFinite(max) && chosen.length >= max;
+    ordered.forEach((entry, index) => {
+      const row = rows[index];
+      if (row === undefined) return;
+      row.id = "item-" + (index + 1);
+      row.dataset.value = entry.value;
+      const text = row.querySelector('[part="item-text"]');
+      if (text instanceof HTMLElement && text.textContent !== entry.text) text.textContent = entry.text;
+      const selected = chosen.includes(entry.value);
+      row.setAttribute("aria-selected", String(selected));
+      if (entry.disabled || (full && !selected)) row.setAttribute("aria-disabled", "true");
+      else row.removeAttribute("aria-disabled");
+      row.hidden = typed !== "" && !entry.text.toLowerCase().includes(typed);
+      const icon = row.querySelector('[part="icon"]');
+      if (icon instanceof HTMLElement) {
+        icon.hidden = entry.icon === "";
+        if (icon.getAttribute("name") !== entry.icon) icon.setAttribute("name", entry.icon);
+      }
+      const description = row.querySelector('[part="description"]');
+      if (description instanceof HTMLElement) {
+        description.hidden = entry.description === "";
+        if (description.textContent !== entry.description) description.textContent = entry.description;
+      }
+    });
+    if (this.#listActive >= rows.length) this.#listActive = -1;
+    this.#listMark();
+  }
+
+  /** The active row says data-active; the element that has the focus names it (aria-activedescendant). */
+  #listMark(): void {
+    const rows = this.#listRows();
+    const active = rows[this.#listActive];
+    rows.forEach((row) => row.setAttribute("data-active", String(row === active)));
+    const owners: (HTMLElement | undefined)[] = ${isMultiselect ? "[this.#listRole(), this.#listFilter()]" : "[this.#control]"};
+    for (const owner of owners) {
+      if (owner === undefined) continue;
+      if (active === undefined || !this.#listIsOpen()) owner.removeAttribute("aria-activedescendant");
+      else owner.setAttribute("aria-activedescendant", active.id);
+    }
+  }
+
+  #listOpen(): void {
+    if (this.propValue("disabled") === true || this.propValue("readonly") === true) return;
+    const listbox = this.#listbox();
+${
+  isMultiselect
+    ? `    const chosen = this.#listValues();
+    const entries = this.#entries();
+    this.#listOrder = [
+      ...entries.filter((entry) => chosen.includes(entry.value)),
+      ...entries.filter((entry) => !chosen.includes(entry.value)),
+    ].map((entry) => entry.value);
+`
+    : ""
+}    this.#listBuild();
+    if (!listbox.matches(":popover-open")) listbox.showPopover();
+    this.#control.setAttribute("aria-expanded", "true");
+    if (!this.hasAttribute("expanded")) this.setAttribute("expanded", "");
+    document.addEventListener("pointerdown", this.#listOutside, true);
+    const rows = this.#listRows();
+    const usable = rows.map((row, index) => (!row.hidden && row.getAttribute("aria-disabled") !== "true" ? index : -1)).filter((index) => index !== -1);
+    const selected = rows.findIndex((row) => row.getAttribute("aria-selected") === "true");
+    this.#listActive = selected !== -1 ? selected : (usable[0] ?? -1);
+    this.#listMark();
+    rows[this.#listActive]?.scrollIntoView?.({ block: "nearest" });
+${
+  isMultiselect
+    ? `    const filter = this.#listFilter();
+    if (filter !== undefined && !filter.hidden) filter.focus();
+    else this.#listRole().focus();
+`
+    : `    // The button keeps the keyboard: a pointer on a button moves the focus to the body in some
+    // platforms (WebKit), and Escape would then reach nothing.
+    this.#control.focus();
+`
+}  }
+
+  #listClose(refocus: boolean): void {
+    const listbox = this.#listbox();
+    if (listbox.matches(":popover-open")) listbox.hidePopover();
+    this.#control.setAttribute("aria-expanded", "false");
+    if (this.hasAttribute("expanded")) this.removeAttribute("expanded");
+    document.removeEventListener("pointerdown", this.#listOutside, true);
+    this.#listActive = -1;
+    this.#listOrder = [];
+    const filter = this.#listFilter();
+    if (filter !== undefined) filter.value = "";
+    this.#listBuild();
+    if (refocus) this.#control.focus();
+  }
+
+  /** Moves the active row: the arrows by one, Home and End to the ends; hidden and disabled rows are skipped. */
+  #listMove(key: string): void {
+    const rows = this.#listRows();
+    const usable = rows.map((row, index) => (!row.hidden && row.getAttribute("aria-disabled") !== "true" ? index : -1)).filter((index) => index !== -1);
+    if (usable.length === 0) return;
+    const at = usable.indexOf(this.#listActive);
+    let next = at;
+    if (key === "Home") next = 0;
+    else if (key === "End") next = usable.length - 1;
+    else if (key === "ArrowDown") next = at === -1 ? 0 : Math.min(at + 1, usable.length - 1);
+    else if (key === "ArrowUp") next = at === -1 ? usable.length - 1 : Math.max(at - 1, 0);
+    this.#listActive = usable[next] ?? -1;
+    this.#listMark();
+    rows[this.#listActive]?.scrollIntoView?.({ block: "nearest" });
+  }
+
+  /** The row whose text starts with the typed letter, after the active one and around. */
+  #listFind(letter: string): HTMLElement | undefined {
+    const rows = this.#listRows().filter((row) => !row.hidden && row.getAttribute("aria-disabled") !== "true");
+    const active = this.#listRows()[this.#listActive];
+    const start = active === undefined ? -1 : rows.indexOf(active);
+    const around = [...rows.slice(start + 1), ...rows.slice(0, start + 1)];
+    return around.find((row) => (row.querySelector('[part="item-text"]')?.textContent ?? "").trim().toLowerCase().startsWith(letter));
+  }
+
+  /** The keys of the Skemo on the button${isMultiselect ? ", the listbox and the filter" : ""}. */
+  #listKey(event: KeyboardEvent): void {
+    const key = event.key === " " ? "Space" : event.key;
+    const open = this.#listIsOpen();
+    const inFilter = event.target instanceof HTMLInputElement;
+    if (!KEYS.includes(key)) {
+      // A typed letter jumps to the option that starts with it — open, the active row; closed, the choice.
+      if (!inFilter && event.key.length === 1 && /\\S/.test(event.key) && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        const found = this.#listFind(event.key.toLowerCase());
+        if (found === undefined) return;
+        event.preventDefault();
+        if (open) {
+          this.#listActive = this.#listRows().indexOf(found);
+          this.#listMark();
+        } else {
+          this.${isMultiselect ? "#listToggleValue" : "#listChoose"}(found);
+        }
+      }
+      return;
+    }
+    if (this.propValue("disabled") === true || this.propValue("readonly") === true) return;
+    if (key === "Escape") {
+      if (!open) return;
+      event.preventDefault();
+      this.#listClose(true);
+      return;
+    }
+    if (key === "Space" && inFilter) return;
+    event.preventDefault();
+    if (key === "Enter" || key === "Space") {
+      if (!open) {
+        this.#listOpen();
+        return;
+      }
+      const active = this.#listRows()[this.#listActive];
+${
+  isMultiselect
+    ? `      if (key === "Space" && active !== undefined) this.#listToggleValue(active);
+      else if (key === "Enter") this.#listClose(true);
+`
+    : `      if (active !== undefined) this.#listChoose(active);
+      else this.#listClose(true);
+`
+}      return;
+    }
+    if (!open) {
+      this.#listOpen();
+      if (key === "ArrowDown" || key === "ArrowUp") return;
+    }
+    this.#listMove(key);
+  }
+${
+  isMultiselect
+    ? `
+  /** Toggles the value of a row and says change; a refused row (disabled, or the limit reached) stays. */
+  #listToggleValue(row: HTMLElement): void {
+    if (row.getAttribute("aria-disabled") === "true") return;
+    const value = row.dataset.value ?? "";
+    const chosen = this.#listValues();
+    const next = chosen.includes(value) ? chosen.filter((candidate) => candidate !== value) : [...chosen, value];
+    this.setAttribute("values", next.join(","));
+    this.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+`
+    : `
+  /** Takes a row as the value, closes the list and says change where the value changed. */
+  #listChoose(row: HTMLElement): void {
+    if (row.getAttribute("aria-disabled") === "true") return;
+    const value = row.dataset.value ?? "";
+    const changed = this.getAttribute("value") !== value;
+    this.setAttribute("value", value);
+    this.#listClose(true);
+    if (changed) this.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+`
+}`
+    : "";
+  // Spec 025 ③ (plan ③ D-18): an inline editor (the lokredaktilo). The display shows the value
+  // with the edit butono named "<label> bearbeiten"; a click opens the composed kampo of the kind
+  // with the value and the focus in it, save and cancel beside. Enter and save fire the cancelable
+  // save with the typed value — prevented, the field stays open —, else the value is taken, change
+  // is said and the focus returns to the edit butono; Escape and cancel give the old value back.
+  // The error slot is handed to the kampo, which shows it under its input and says aria-invalid.
+  const editorInit = isEditor
+    ? `    root.querySelector('[part="edit"]')?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      this.#editorOpen();
+    });
+    root.querySelector('[part="save"]')?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      this.#editorSave();
+    });
+    root.querySelector('[part="cancel"]')?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      this.#editorCancel();
+    });
+    root.querySelector('[part="form"]')?.addEventListener("keydown", (event: Event) => {
+      if (!(event instanceof KeyboardEvent)) return;
+      if (event.key === "Enter" && KEYS.includes("Enter")) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.#editorSave();
+      } else if (event.key === "Escape" && KEYS.includes("Escape")) {
+        event.preventDefault();
+        this.#editorCancel();
+      }
+    });
+    // The composed Eroj may upgrade after this element: their inner controls take the words then.
+    customElements.whenDefined("fm-butono").then(() => this.#render());
+    customElements.whenDefined("fm-kampo").then(() => this.#render());
+`
+    : "";
+  const editorRender = isEditor
+    ? `    {
+      const word = (key: string): string => TEXTS[key]?.[this.#lingvo()] ?? TEXTS[key]?.en ?? "";
+      const editing = this.propValue("editing") === true;
+      const disabled = this.propValue("disabled") === true;
+      const readonly = !disabled && this.propValue("readonly") === true;
+      const off = disabled || readonly;
+      const label = String(this.propValue("label") ?? "");
+      const value = String(this.propValue("value") ?? "");
+      const invalid = this.propValue("invalid") === true || this.#filled("error");
+      const text = this.shadowRoot?.getElementById("text");
+      if (text instanceof HTMLElement && text.textContent !== value) text.textContent = value;
+      const display = this.shadowRoot?.querySelector('[part="display"]');
+      if (display instanceof HTMLElement) display.hidden = editing;
+      const form = this.shadowRoot?.querySelector('[part="form"]');
+      if (form instanceof HTMLElement) form.hidden = !editing;
+      const edit = this.shadowRoot?.querySelector('[part="edit"]');
+      if (edit instanceof HTMLElement) {
+        const name = word("edit-name").replace("{label}", label);
+        if (edit.getAttribute("label") !== name) edit.setAttribute("label", name);
+        if (off) edit.setAttribute("aria-disabled", "true");
+        else edit.removeAttribute("aria-disabled");
+      }
+      for (const [part, key] of [["save", "save-name"], ["cancel", "cancel-name"]] as const) {
+        const button = this.shadowRoot?.querySelector('[part="' + part + '"]');
+        if (button instanceof HTMLElement && button.textContent !== word(key)) button.textContent = word(key);
+      }
+      const field = this.#editorField();
+      if (field !== undefined) {
+        field.setAttribute("kind", String(this.propValue("kind") ?? "text"));
+        if (!editing && field.getAttribute("value") !== value) field.setAttribute("value", value);
+        field.toggleAttribute("invalid", invalid);
+        field.toggleAttribute("disabled", disabled);
+        // The label of the composed field is heard, not seen (the stylesheet clips it); the error
+        // slot's words stand in the field's own error slot, so the input is described by them.
+        const error = this.shadowRoot?.querySelector('slot[name="error"]');
+        const errorText = error instanceof HTMLSlotElement ? error.assignedNodes({ flatten: true }).map((node) => node.textContent ?? "").join("").trim() : "";
+        const wanted = label + (errorText === "" ? "" : "|" + errorText);
+        if (field.dataset.fmWords !== wanted) {
+          field.dataset.fmWords = wanted;
+          const children: Node[] = [document.createTextNode(label)];
+          if (errorText !== "") {
+            const span = document.createElement("span");
+            span.setAttribute("slot", "error");
+            span.textContent = errorText;
+            children.push(span);
+          }
+          field.replaceChildren(...children);
+        }
+      }
+      this.#internals.setFormValue(value === "" ? null : value);
+      if (disabled) control.setAttribute("aria-disabled", "true");
+      else control.removeAttribute("aria-disabled");
+      if (readonly) control.setAttribute("readonly", "");
+      else control.removeAttribute("readonly");
+      if (invalid) control.setAttribute("aria-invalid", "true");
+      else control.removeAttribute("aria-invalid");
+    }
+`
+    : "";
+  const editorMethods = isEditor
+    ? `
+  #editorField(): HTMLElement | undefined {
+    const field = this.shadowRoot?.querySelector('[part="field"]');
+    return field instanceof HTMLElement ? field : undefined;
+  }
+
+  /** Opens the field with the value and the focus in it; nothing while disabled or read-only. */
+  #editorOpen(): void {
+    if (this.propValue("disabled") === true || this.propValue("readonly") === true) return;
+    this.#editorField()?.setAttribute("value", String(this.propValue("value") ?? ""));
+    this.setAttribute("editing", "");
+    customElements.whenDefined("fm-kampo").then(() => this.#editorField()?.focus());
+  }
+
+  /** Saves the typed value unless the application prevents it: the value, change, the focus on the edit butono. */
+  #editorSave(): void {
+    const typed = this.#editorField()?.getAttribute("value") ?? "";
+    const go = this.dispatchEvent(new CustomEvent("save", { bubbles: true, cancelable: true, detail: { value: typed } }));
+    if (!go) return;
+    this.setAttribute("value", typed);
+    this.removeAttribute("editing");
+    this.dispatchEvent(new Event("change", { bubbles: true }));
+    (this.shadowRoot?.querySelector('[part="edit"]') as HTMLElement | null)?.focus();
+  }
+
+  /** Gives editing up: the old value stands, cancel is said, the focus returns to the edit butono. */
+  #editorCancel(): void {
+    this.removeAttribute("editing");
+    this.#editorField()?.setAttribute("value", String(this.propValue("value") ?? ""));
+    this.dispatchEvent(new Event("cancel", { bubbles: true }));
+    (this.shadowRoot?.querySelector('[part="edit"]') as HTMLElement | null)?.focus();
+  }
+`
+    : "";
   const fieldExtrasInit =
     host === "input" && stepper
       ? `    control.addEventListener("keydown", (event) => {
@@ -4597,7 +5369,13 @@ ${autoField}${isAvatar ? '  /** The picture an avatar shows and whether it has l
     root.adoptedStyleSheets = [sheet];
     root.innerHTML = \`${markup(host, slots, role, marked, indicator, dismiss, icon, breadcrumb, stepper)}\`;
     const control = root.querySelector("${control}");
-    const label = root.querySelector("slot:not([name])");
+    ${
+      // Spec 025 ③ (plan ③ D-18): an inline editor has no label slot — its name is the prop label
+      // (a11y.name prop:label); a detached slot stands in, so the element keeps one shape.
+      isEditor
+        ? 'const label = root.querySelector("slot:not([name])") ?? document.createElement("slot");'
+        : 'const label = root.querySelector("slot:not([name])");'
+    }
     const texts = root.querySelector("#fm-texts");
     if (
       !(control instanceof HTMLElement) ||
@@ -4613,7 +5391,7 @@ ${autoField}${isAvatar ? '  /** The picture an avatar shows and whether it has l
     this.#label = label;
     this.#texts = texts;
     control.addEventListener("click", (event) => this.#activate(event));
-${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${datepickerInit}${uploadInit}${sliderInit}${fieldExtrasInit}${avatarInit}${isCodeblock ? codeblockInit : ""}${skipInit}    label.addEventListener("slotchange", () => this.#render());
+${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${datepickerInit}${chipInit}${listInit}${editorInit}${uploadInit}${sliderInit}${fieldExtrasInit}${avatarInit}${isCodeblock ? codeblockInit : ""}${skipInit}    label.addEventListener("slotchange", () => this.#render());
     for (const named of root.querySelectorAll("slot[name]")) {
       named.addEventListener("slotchange", () => this.#render());
     }
@@ -4765,7 +5543,7 @@ ${isSuggest ? "" : '        control.removeAttribute("aria-disabled");\n'}      }
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
     // disabled wins over readonly; help and error show only while they have text.
     const described: string[] = [];
-${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${paginationRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${datepickerRender}${uploadRender}${sliderRender}${cardRender}${avatarRender}${isCodeblock ? codeblockRender : ""}${isMarkdown ? markdownRender : ""}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${paginationRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${datepickerRender}${chipRender}${listRender}${editorRender}${uploadRender}${sliderRender}${cardRender}${avatarRender}${isCodeblock ? codeblockRender : ""}${isMarkdown ? markdownRender : ""}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");
@@ -4827,13 +5605,16 @@ ${
   isAvatar ||
   isCodeblock ||
   isMarkdown ||
-  isSlider
+  isSlider ||
+  isEditor
     ? `    // A light-DOM host names its region by the caption (Spec 011 ④, D-09) and its list by the
     // label prop on the dl itself (D-10); an overlay (Spec 014 ④) names its layer in its own
     // render, a pagination (Spec 015 ①, B-3) its landmark — the label, else the Modelo's word; a
     // card (Spec 015 ③) is named by its heading (aria-labelledby), an avatar by its name in its
     // own render; nothing is written here. A slider (Spec 025 ①) names its thumbs by the label
-    // (aria-labelledby) and hands the description to them: the track itself is no control.
+    // (aria-labelledby) and hands the description to them: the track itself is no control. An
+    // inline editor (Spec 025 ③) names its buttons and its field by the label in its own render:
+    // the control is a generic, which takes no name.
     void text;
     void name;
 ${isSlider ? '    for (const thumb of this.#thumbs()) {\n      const description = control.getAttribute("aria-describedby");\n      if (description === null) thumb.removeAttribute("aria-describedby");\n      else thumb.setAttribute("aria-describedby", description);\n    }\n' : ""}`
@@ -4859,7 +5640,7 @@ ${
     : `    if (!(this.#control instanceof HTMLButtonElement)) return;
 ${toggleActivate}`
 }  }
-${groupMethods}${selectMethods}${inputMethods}${fieldExtrasMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${autoMethods}${tabsMethods}${overlayMethods}${tooltipMethods}${menuMethods}${suggestMethods}${datepickerMethods}${uploadMethods}${sliderMethods}${choiceValidityMethods}${isCodeblock ? codeblockMethods : ""}${isMarkdown ? markdownMethods : ""}
+${groupMethods}${selectMethods}${inputMethods}${fieldExtrasMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${autoMethods}${tabsMethods}${overlayMethods}${tooltipMethods}${menuMethods}${suggestMethods}${datepickerMethods}${chipMethods}${listMethods}${editorMethods}${uploadMethods}${sliderMethods}${choiceValidityMethods}${isCodeblock ? codeblockMethods : ""}${isMarkdown ? markdownMethods : ""}
 }
 
 /**

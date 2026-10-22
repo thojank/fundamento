@@ -76,6 +76,8 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       "konsileto",
       "langetaro",
       "ligilo",
+      "listelektilo",
+      "lokredaktilo",
       "markdovido",
       "markobutono",
       "menuo",
@@ -83,7 +85,9 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       "navigado",
       "pagxigilo",
       "plenstato",
+      "plurelektilo",
       "saltligilo",
+      "signeto",
       "spuro",
       "sxaltilo",
       "sxvebilo",
@@ -267,22 +271,22 @@ describe("the Uzo of the elektilo (section 4, G5)", () => {
       ["choose-few", "elekto"],
       // Spec 014 ⑤: covered by the kompletigilo.
       ["search-in-list", "kompletigilo"],
-      ["multiple", null],
+      // Spec 025 ③: several at once are the plurelektilo's.
+      ["multiple", "plurelektilo"],
     ]);
     expect(uzo?.instead[0]?.kialo).toMatch(/Fundamento covers it with elekto\.$/);
     expect(uzo?.instead[1]?.kialo).toMatch(/combobox with a search/);
-    expect(uzo?.instead[2]?.kialo).toMatch(/exactly one value/);
+    expect(uzo?.instead[2]?.kialo).toMatch(/plurelektilo/);
   });
 
   it("stops at a drawn popup (the list is the platform's), asks a person about grouped options, never without a visible label", () => {
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
-      ["custom-popup", "not-supported"],
+      // Spec 025 ③: a drawn list is the listelektilo's.
+      ["custom-popup", "use-instead"],
       ["grouped-options", "ask-human"],
       ["no-visible-label", "not-supported"],
     ]);
-    expect(uzo?.boundary[0]?.kialo).toBe(
-      "The list is the platform's, because a drawn list would need its own keyboard, scrolling and screen reader behaviour; that is a later round.",
-    );
+    expect(uzo?.boundary[0]?.kialo).toMatch(/listelektilo/);
     expect(uzo?.boundary[2]?.via).toEqual({ regulo: "field-label-visible" });
     for (const entry of [...(uzo?.boundary ?? []), ...(uzo?.instead ?? [])]) {
       expect(entry.kialo).toMatch(/\bbecause\b/);
@@ -433,6 +437,8 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
         "alsxutilo",
         "glitilo",
         "datelektilo",
+        "listelektilo",
+        "plurelektilo",
       ],
     ],
     [
@@ -448,6 +454,8 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
         "alsxutilo",
         "glitilo",
         "datelektilo",
+        "listelektilo",
+        "plurelektilo",
       ],
     ],
     [
@@ -463,6 +471,9 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
         "alsxutilo",
         "glitilo",
         "datelektilo",
+        "listelektilo",
+        "plurelektilo",
+        "lokredaktilo",
       ],
     ],
     [
@@ -477,6 +488,8 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
         "alsxutilo",
         "glitilo",
         "datelektilo",
+        "listelektilo",
+        "plurelektilo",
       ],
     ],
     [
@@ -491,6 +504,9 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
         "alsxutilo",
         "glitilo",
         "datelektilo",
+        "listelektilo",
+        "plurelektilo",
+        "lokredaktilo",
       ],
     ],
     // Spec 014 ①: widened once more, to the reason-help of the dialogo.
@@ -506,9 +522,15 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
         "alsxutilo",
         "glitilo",
         "datelektilo",
+        "listelektilo",
+        "plurelektilo",
       ],
     ],
-    ["placeholder-not-label", ["kampo", "elektilo", "tekstareo", "kompletigilo"]],
+    // Spec 025 ③: and to the listelektilo and the plurelektilo.
+    [
+      "placeholder-not-label",
+      ["kampo", "elektilo", "tekstareo", "kompletigilo", "listelektilo", "plurelektilo"],
+    ],
     // Spec 011 ⑤: widened once more, to the tabs of the langetaro.
     // Spec 014 ④: and to the entries of the menuo.
     ["option-labels-distinct", ["elekto", "elektilo", "langetaro", "menuo", "kompletigilo"]],
@@ -556,6 +578,10 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
       "markdovido",
       "glitilo",
       "datelektilo",
+      "signeto",
+      "listelektilo",
+      "plurelektilo",
+      "lokredaktilo",
     ]);
   });
 
@@ -724,13 +750,13 @@ describe("suggest_ero and the select (Gvidanto, section 4)", () => {
     expect(answer.boundary).toBeUndefined();
   });
 
-  it("'Dropdown mit eigenem Popup' is no Ero of Fundamento: the list is the platform's (custom-popup)", () => {
+  it("'Dropdown mit eigenem Popup' is the listelektilo since Spec 025 ③ (the boundary custom-popup is closed, use-instead)", () => {
     const answer = suggest("Dropdown mit eigenem Popup");
-    expect(answer.suggestion).toBeNull();
+    expect(answer.suggestion).toEqual({ ero: "listelektilo", props: {} });
     expect(answer.boundary).toMatchObject({
       ero: "elektilo",
       case: "custom-popup",
-      action: "not-supported",
+      action: "use-instead",
     });
   });
 

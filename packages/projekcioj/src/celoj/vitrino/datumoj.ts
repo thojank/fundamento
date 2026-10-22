@@ -451,6 +451,139 @@ export function vitrinoCalendar(): VitrinoCalendar {
     range: [day(VITRINO_DATE.start), day(VITRINO_DATE.end)],
   };
 }
+/**
+ * The selection Eroj of the Vitrino (Spec 025 ③, plan ③ D-19): the tags (one word per intent, the
+ * standards of the project), the regions of the styled list (with icon and description), the
+ * standards of the multi-select (the first three chosen), the editor's label and value. One source
+ * for the Vitrino and the Figma plan (the editor's text is the plan's label default).
+ */
+export const VITRINO_TAGS: readonly string[] = [
+  "Kontrast",
+  "Fokus",
+  "Namen",
+  "Bewegung",
+  "Sprache",
+];
+export const VITRINO_REGIONS: readonly {
+  value: string;
+  text: string;
+  icon?: string;
+  description?: string;
+  disabled?: boolean;
+}[] = [
+  { value: "eu", text: "Europa", icon: "info", description: "27 Staaten" },
+  { value: "us", text: "USA", description: "50 Staaten" },
+  { value: "jp", text: "Japan", disabled: true },
+  { value: "br", text: "Brasilien" },
+];
+export const VITRINO_REGIONS_HELP = "Die Region des Standards.";
+export const VITRINO_REGIONS_ERROR = "Wähle eine Region.";
+export const VITRINO_STANDARDS: readonly { value: string; text: string }[] = [
+  { value: "a11y", text: "Barrierefreiheit" },
+  { value: "kontrast", text: "Kontrast" },
+  { value: "fokus", text: "Fokus" },
+  { value: "namen", text: "Namen" },
+  { value: "motion", text: "Bewegung" },
+];
+export const VITRINO_STANDARDS_CHOSEN = "a11y,kontrast,fokus";
+export const VITRINO_STANDARDS_HELP = "Die Standards, die der Nachweis erfüllt.";
+export const VITRINO_STANDARDS_ERROR = "Wähle mindestens einen Standard.";
+export const VITRINO_EDITOR = {
+  label: "Titel",
+  value: "Barrierefreiheit",
+  error: "Gib einen Titel ein.",
+} as const;
+
+/**
+ * The tags of the Vitrino (Spec 025 ③, plan ③ D-19): a row per mode — static, selectable (pressed)
+ * and removable — across the five intents, and a row of small static tags; twenty in all.
+ */
+function chipMarkup(tag: string, intents: readonly string[]): string {
+  const rows: [string, string][] = [
+    ["static", ""],
+    ["selectable", ' mode="selectable" selected'],
+    ["removable", ' mode="removable"'],
+    ["small", ' size="small"'],
+  ];
+  const heads = intents.map((intent) => `<th scope="col">${intent}</th>`).join("");
+  const body = rows
+    .map(([head, attributes]) => {
+      const cells = intents
+        .map(
+          (intent, index) =>
+            `<td><${tag}${attributes} intent="${intent}">${VITRINO_TAGS[index] ?? intent}</${tag}></td>`,
+        )
+        .join("");
+      return `<tr><th scope="row">${head}</th>${cells}</tr>`;
+    })
+    .join("");
+  return `<table><caption>${tag}, jeder Modus in jeder Absicht</caption><thead><tr><th scope="col">Modus</th>${heads}</tr></thead><tbody>${body}</tbody></table>`;
+}
+
+/**
+ * The styled list of the Vitrino (Spec 025 ③, plan ③ D-19): the regions with icon and description
+ * (one disabled), the first chosen — at rest, required, disabled and invalid (the error in place
+ * of the help under invalid).
+ */
+function listselectMarkup(tag: string): string {
+  const options = VITRINO_REGIONS.map(
+    (region) =>
+      `<data slot="options" value="${region.value}"${region.icon === undefined ? "" : ` icon="${region.icon}"`}${region.description === undefined ? "" : ` description="${region.description}"`}${region.disabled === true ? " disabled" : ""}>${region.text}</data>`,
+  ).join("");
+  const columns = ["required", "disabled", "invalid"];
+  const cells = [undefined, ...columns]
+    .map(
+      (column) =>
+        `<td><${tag} value="${VITRINO_REGIONS[0]?.value ?? ""}"${column === undefined ? "" : ` ${column}`}>Region${options}${column === "invalid" ? `<span slot="error">${VITRINO_REGIONS_ERROR}</span>` : `<span slot="help">${VITRINO_REGIONS_HELP}</span>`}</${tag}></td>`,
+    )
+    .join("");
+  const heads = ["rest", ...columns].map((column) => `<th scope="col">${column}</th>`).join("");
+  return `<table><caption>${tag}, Optionen mit Symbol und Beschreibung</caption><thead><tr><th scope="col">Kombination</th>${heads}</tr></thead><tbody><tr><th scope="row">Region</th>${cells}</tr></tbody></table>`;
+}
+
+/**
+ * The multi-select of the Vitrino (Spec 025 ③, plan ③ D-19): two rows — the chosen as tags, and
+ * filterable with the count — each at rest, required, disabled and invalid.
+ */
+function multiselectMarkup(tag: string): string {
+  const options = VITRINO_STANDARDS.map(
+    (standard) => `<data slot="options" value="${standard.value}">${standard.text}</data>`,
+  ).join("");
+  const rows: [string, string][] = [
+    ["Schlagwörter", ' summary="tags"'],
+    ["filterbar", " filterable"],
+  ];
+  const columns = ["required", "disabled", "invalid"];
+  const body = rows
+    .map(([head, attributes]) => {
+      const cells = [undefined, ...columns]
+        .map(
+          (column) =>
+            `<td><${tag} values="${VITRINO_STANDARDS_CHOSEN}"${attributes}${column === undefined ? "" : ` ${column}`}>Standards${options}${column === "invalid" ? `<span slot="error">${VITRINO_STANDARDS_ERROR}</span>` : `<span slot="help">${VITRINO_STANDARDS_HELP}</span>`}</${tag}></td>`,
+        )
+        .join("");
+      return `<tr><th scope="row">${head}</th>${cells}</tr>`;
+    })
+    .join("");
+  const heads = ["rest", ...columns].map((column) => `<th scope="col">${column}</th>`).join("");
+  return `<table><caption>${tag}, Anzahl und Schlagwörter</caption><thead><tr><th scope="col">Kombination</th>${heads}</tr></thead><tbody>${body}</tbody></table>`;
+}
+
+/**
+ * The inline editor of the Vitrino (Spec 025 ③, plan ③ D-19): the display, editing, and editing
+ * with an error on an empty value.
+ */
+function editorMarkup(tag: string): string {
+  const cells = [
+    `<${tag} label="${VITRINO_EDITOR.label}" value="${VITRINO_EDITOR.value}"></${tag}>`,
+    `<${tag} label="${VITRINO_EDITOR.label}" value="${VITRINO_EDITOR.value}" editing></${tag}>`,
+    `<${tag} label="${VITRINO_EDITOR.label}" value="" editing invalid><span slot="error">${VITRINO_EDITOR.error}</span></${tag}>`,
+  ]
+    .map((cell) => `<td>${cell}</td>`)
+    .join("");
+  return `<table><caption>${tag}, Anzeige, Bearbeiten und Fehler</caption><thead><tr><th scope="col">Kombination</th><th scope="col">Anzeige</th><th scope="col">Bearbeiten</th><th scope="col">Fehler</th></tr></thead><tbody><tr><th scope="row">${VITRINO_EDITOR.label}</th>${cells}</tr></tbody></table>`;
+}
+
 export const VITRINO_UPLOAD_FILES: readonly { name: string; size: number }[] = [
   { name: "Lebenslauf.pdf", size: 1_200_000 },
   { name: "Zeugnis.png", size: 340_000 },
@@ -900,6 +1033,19 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
   if (entry.skemo.a11y.role === "textbox" && entry.skemo.parts.calendar !== undefined) {
     return datepickerMarkup(tag);
   }
+  // Spec 025 ③ (plan ③ D-19): the tags per mode and intent; the styled list and the multi-select
+  // in the states of a field; the inline editor in display, editing and error.
+  if (entry.skemo.a11y.role === "generic" && entry.skemo.parts.remove !== undefined) {
+    const intents = entry.skemo.props.find((prop) => prop.name === "intent")?.values ?? [];
+    return chipMarkup(tag, intents);
+  }
+  if (entry.skemo.a11y.role === "generic" && entry.skemo.parts.edit !== undefined) {
+    return editorMarkup(tag);
+  }
+  if (entry.skemo.a11y.role === "combobox" && entry.skemo.parts.item !== undefined) {
+    return listselectMarkup(tag);
+  }
+  if (entry.skemo.a11y.role === "listbox") return multiselectMarkup(tag);
   // An avatar (Spec 015 ③): every size with the picture, with initials and with a broken picture.
   if (entry.skemo.parts.initials !== undefined) return avatarMarkup(tag);
   // The Ikonaro grid (Spec 014 ②): the icon shows every name, not every combination.

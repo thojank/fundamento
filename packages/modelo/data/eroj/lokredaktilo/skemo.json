@@ -1,0 +1,289 @@
+{
+  "ero": {
+    "id": "ero_01M5H5HBY0HCK99R9D1EQ4YMJ6",
+    "name": "lokredaktilo",
+    "skemo": "ske_01M5H5HDHP1HX4H5VCGRG4MDXF",
+    "description": "An inline editor: turns a single value in a view into a field on the spot, with save and cancel; Enter saves, Escape cancels, the focus returns to the edit button."
+  },
+  "skemo": {
+    "id": "ske_01M5H5HDHP1HX4H5VCGRG4MDXF",
+    "ero": "ero_01M5H5HBY0HCK99R9D1EQ4YMJ6",
+    "props": [
+      {
+        "name": "label",
+        "kind": "string",
+        "required": true,
+        "description": "What the value is (Titel, Preis): the name of the edit button and of the field, heard even where the view shows it elsewhere."
+      },
+      {
+        "name": "value",
+        "kind": "string",
+        "description": "The value shown and sent; typed anew while editing."
+      },
+      {
+        "name": "kind",
+        "kind": "enum",
+        "values": [
+          "text",
+          "number",
+          "email",
+          "url"
+        ],
+        "default": "text",
+        "description": "The kind of the composed kampo: text, a whole number, an e-mail or a web address."
+      },
+      {
+        "name": "editing",
+        "kind": "boolean",
+        "default": false,
+        "description": "The field is open. The element sets it while a person edits; set by the application it opens the field."
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean",
+        "default": false,
+        "description": "Cannot be edited: the edit button is disabled."
+      },
+      {
+        "name": "readonly",
+        "kind": "boolean",
+        "default": false,
+        "description": "Can be read, not edited: the edit button does nothing."
+      },
+      {
+        "name": "invalid",
+        "kind": "boolean",
+        "default": false,
+        "description": "The typed value is wrong; the error slot says what to do and the field stays open."
+      },
+      {
+        "name": "name",
+        "kind": "string",
+        "description": "The name under which the form sends the value."
+      }
+    ],
+    "states": [
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "readonly",
+      "invalid"
+    ],
+    "slots": [
+      {
+        "name": "error",
+        "text": true
+      }
+    ],
+    "parts": {
+      "text": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "typography": {
+          "fixed": "typography.body.1"
+        }
+      },
+      "edit": {
+        "size": {
+          "fixed": "size.control.small"
+        }
+      },
+      "field": {
+        "width": {
+          "by": [
+            "editing"
+          ]
+        }
+      },
+      "save": {
+        "size": {
+          "fixed": "size.control.small"
+        }
+      },
+      "cancel": {
+        "size": {
+          "fixed": "size.control.small"
+        }
+      },
+      "error": {
+        "color": {
+          "fixed": "color.status.danger.text"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "focus-ring": {
+        "ring": {
+          "fixed": "focus.ring"
+        },
+        "offset": {
+          "fixed": "focus.offset"
+        },
+        "color": {
+          "fixed": "color.focus.inner"
+        }
+      },
+      "box": {
+        "gap": {
+          "fixed": "spacing.small"
+        },
+        "height": {
+          "fixed": "size.control.medium"
+        },
+        "inline-padding": {
+          "fixed": "spacing.small"
+        },
+        "radius": {
+          "fixed": "radius.role.control"
+        }
+      },
+      "motion": {
+        "duration": {
+          "fixed": "motion.duration.fast"
+        },
+        "easing": {
+          "fixed": "motion.easing.standard"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.text.disabled"
+      },
+      {
+        "part": "field",
+        "property": "width",
+        "when": {
+          "editing": "false"
+        },
+        "token": "none"
+      },
+      {
+        "part": "field",
+        "property": "width",
+        "when": {
+          "editing": "true"
+        },
+        "token": "size.container.small"
+      }
+    ],
+    "a11y": {
+      "role": "generic",
+      "name": [
+        "prop:label"
+      ],
+      "description": [
+        "slot:error"
+      ],
+      "states": {
+        "invalid": [
+          "aria-invalid"
+        ],
+        "disabled": [
+          "aria-disabled"
+        ],
+        "readonly": [
+          "aria-readonly"
+        ]
+      },
+      "keys": [
+        "Enter",
+        "Escape"
+      ],
+      "texts": {
+        "edit-name": {
+          "de": "{label} bearbeiten",
+          "en": "Edit {label}"
+        },
+        "save-name": {
+          "de": "Speichern",
+          "en": "Save"
+        },
+        "cancel-name": {
+          "de": "Abbrechen",
+          "en": "Cancel"
+        }
+      }
+    },
+    "events": [
+      {
+        "name": "save",
+        "cancelable": true,
+        "description": "The typed value is about to be saved (detail: value); prevented, the field stays open."
+      },
+      {
+        "name": "cancel",
+        "description": "Editing was given up; the old value stands."
+      },
+      {
+        "name": "change",
+        "description": "The value was saved."
+      }
+    ],
+    "constraints": [
+      {
+        "when": {
+          "slot:error": "filled"
+        },
+        "allowed": {
+          "invalid": [
+            "true"
+          ]
+        },
+        "kialo": "An error text without the error state is a contradiction a screen reader cannot resolve, because it reads a fault on a field that says it is fine."
+      },
+      {
+        "when": {
+          "disabled": "true"
+        },
+        "allowed": {
+          "readonly": [
+            "false"
+          ]
+        },
+        "kialo": "Two reasons why one cannot edit are one too many, because disabled wins."
+      }
+    ],
+    "goals": [
+      {
+        "goal": "inline-edit",
+        "keywords": {
+          "en": [
+            "inline-edit",
+            "in-place",
+            "click-to-edit",
+            "rename",
+            "edit-in-place"
+          ],
+          "de": [
+            "inline",
+            "direkt",
+            "umbenennen",
+            "stelle",
+            "direkt-ändern"
+          ]
+        },
+        "props": {},
+        "regulo": "error-says-what-to-do"
+      }
+    ]
+  }
+}

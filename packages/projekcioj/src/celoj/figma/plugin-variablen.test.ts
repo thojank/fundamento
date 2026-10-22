@@ -429,7 +429,7 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "glitilo", created: 24, updated: 0 },
         // Spec 014 ②: the ikono has name × size × intent = 285 variants in one state (Spec 015
         // ②: seventeen names with upload; Spec 025 ①: nineteen with add and subtract).
-        { set: "ikono", created: 300, updated: 0 },
+        { set: "ikono", created: 315, updated: 0 },
         // Spec 011 ③: the insigno has intent × size = 10 variants in one state.
         { set: "insigno", created: 10, updated: 0 },
         // Spec 009: the kampo has size × state = 18 variants.
@@ -446,6 +446,11 @@ describe("every bound paint shows the plan's colour after the first and the seco
         // label and selected are strings, no axis).
         { set: "langetaro", created: 4, updated: 0 },
         { set: "ligilo", created: 30, updated: 0 },
+        // Spec 025 ③: the listelektilo and the plurelektilo have expanded × state = 12 variants,
+        // the lokredaktilo editing × state = 12; the signeto mode × selected × size × intent ×
+        // state, 160 after the constraint selected ⇒ mode selectable.
+        { set: "listelektilo", created: 12, updated: 0 },
+        { set: "lokredaktilo", created: 12, updated: 0 },
         // Spec 020 ③: the markdovido has one variant (source and start-level are no axes).
         { set: "markdovido", created: 1, updated: 0 },
         // Spec 010 ②: the markobutono has checked × size × state = 30 variants.
@@ -462,8 +467,10 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "pagxigilo", created: 4, updated: 0 },
         // Spec 011 ③: the plenstato has kind = 2 variants in one state.
         { set: "plenstato", created: 2, updated: 0 },
+        { set: "plurelektilo", created: 12, updated: 0 },
         // Spec 014 ②: the saltligilo has state = 2 variants (rest and focus).
         { set: "saltligilo", created: 2, updated: 0 },
+        { set: "signeto", created: 160, updated: 0 },
         { set: "spuro", created: 3, updated: 0 },
         // Spec 010 ①: the sxaltilo has checked × size × state = 24 variants.
         { set: "sxaltilo", created: 24, updated: 0 },

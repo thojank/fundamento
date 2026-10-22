@@ -42,7 +42,8 @@
       "success": "check-circle",
       "upload": "upload-simple",
       "warning": "warning",
-      "calendar": "calendar-blank"
+      "calendar": "calendar-blank",
+      "edit": "pencil-simple"
     }
   },
   "tavoloj": {

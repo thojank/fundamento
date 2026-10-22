@@ -54,8 +54,8 @@ describe("what a publish would contain (T020)", () => {
       // Spec 008: one guideline per Ero, the ligilo's next to the butono's.
       // Nachlese 6 N6-3: without the second (CJS) build, 47 files; Spec 020 ①: and a guideline
       // per Sxablono in patterns/, 49; Spec 020 ②: formularo and filtrilo, 51;
-      // Spec 020 ③: kodbloko, markdovido and redaktilo, 54; Spec 025 ①: glitilo, 55; Spec 025 ②: datelektilo, 56.
-      expect(files).toHaveLength(56);
+      // Spec 020 ③: kodbloko, markdovido and redaktilo, 54; Spec 025 ①: glitilo, 55; Spec 025 ②: datelektilo, 56; Spec 025 ③: four more, 60.
+      expect(files).toHaveLength(60);
       expect(files).toEqual([
         "LICENSE",
         "README.md",
@@ -85,6 +85,8 @@ describe("what a publish would contain (T020)", () => {
         "guidelines/components/konsileto.md",
         "guidelines/components/langetaro.md",
         "guidelines/components/ligilo.md",
+        "guidelines/components/listelektilo.md",
+        "guidelines/components/lokredaktilo.md",
         "guidelines/components/markdovido.md",
         "guidelines/components/markobutono.md",
         "guidelines/components/menuo.md",
@@ -92,7 +94,9 @@ describe("what a publish would contain (T020)", () => {
         "guidelines/components/navigado.md",
         "guidelines/components/pagxigilo.md",
         "guidelines/components/plenstato.md",
+        "guidelines/components/plurelektilo.md",
         "guidelines/components/saltligilo.md",
+        "guidelines/components/signeto.md",
         "guidelines/components/spuro.md",
         "guidelines/components/sxaltilo.md",
         "guidelines/components/sxvebilo.md",

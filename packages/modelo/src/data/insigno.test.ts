@@ -31,7 +31,7 @@ const suggest = (goal: string) => {
 const INTENTS = ["neutral", "info", "success", "warning", "danger"];
 
 describe("insigno in the repo Modelo (section ③, G1, G2)", () => {
-  it("lives in data/eroj/insigno/skemo.json, among thirty-six Eroj", () => {
+  it("lives in data/eroj/insigno/skemo.json, among forty Eroj", () => {
     expect(insigno?.file).toBe("modelo/data/eroj/insigno/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
       "alsxutilo",
@@ -55,6 +55,8 @@ describe("insigno in the repo Modelo (section ③, G1, G2)", () => {
       "konsileto",
       "langetaro",
       "ligilo",
+      "listelektilo",
+      "lokredaktilo",
       "markdovido",
       "markobutono",
       "menuo",
@@ -62,7 +64,9 @@ describe("insigno in the repo Modelo (section ③, G1, G2)", () => {
       "navigado",
       "pagxigilo",
       "plenstato",
+      "plurelektilo",
       "saltligilo",
+      "signeto",
       "spuro",
       "sxaltilo",
       "sxvebilo",
@@ -204,7 +208,8 @@ describe("the Uzo of the insigno (section ③, G5)", () => {
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
       ["brand-badge", "ask-human"],
       ["dot-only", "not-supported"],
-      ["removable-chip", "not-supported"],
+      // Spec 025 ③: a removable chip is the signeto's.
+      ["removable-chip", "use-instead"],
     ]);
     for (const entry of uzo?.boundary ?? []) expect(entry.kialo).toMatch(/because/);
   });
@@ -241,7 +246,7 @@ describe("the Uzo of the insigno (section ③, G5)", () => {
 describe("the Reguloj of the insigno (G6)", () => {
   it("badge-text-short is new, automatic, the insigno's alone, with a kialo; it judges instances", () => {
     const regulo = named("badge-text-short");
-    expect(regulo?.appliesTo?.eroj).toEqual(["insigno"]);
+    expect(regulo?.appliesTo?.eroj).toEqual(["insigno", "signeto"]);
     expect(regulo?.checkability).toBe("automatic");
     expect(regulo?.kialo).toMatch(/skimmed|glance/);
     expect(regulo?.scope).toContain("max-words");

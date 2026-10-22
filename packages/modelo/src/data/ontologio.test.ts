@@ -264,6 +264,8 @@ describe("the scheme eroj (Spec 008 T009)", () => {
       "konsileto",
       "langetaro",
       "ligilo",
+      "listelektilo",
+      "lokredaktilo",
       "markdovido",
       "markobutono",
       "menuo",
@@ -271,7 +273,9 @@ describe("the scheme eroj (Spec 008 T009)", () => {
       "navigado",
       "pagxigilo",
       "plenstato",
+      "plurelektilo",
       "saltligilo",
+      "signeto",
       "spuro",
       "sxaltilo",
       "sxvebilo",
@@ -302,6 +306,8 @@ describe("the scheme eroj (Spec 008 T009)", () => {
       "Konsileto",
       "Langetaro",
       "Ligilo",
+      "Listelektilo",
+      "Lokredaktilo",
       "Markdovido",
       "Markobutono",
       "Menuo",
@@ -309,7 +315,9 @@ describe("the scheme eroj (Spec 008 T009)", () => {
       "Navigado",
       "Pagxigilo",
       "Plenstato",
+      "Plurelektilo",
       "Saltligilo",
+      "Signeto",
       "Spuro",
       "Sxaltilo",
       "Sxvebilo",
@@ -351,6 +359,8 @@ describe("the scheme eroj (Spec 008 T009)", () => {
       { predicate: "references", target: "#Glitilo" },
       // Spec 025 ②: a date near today and a date range are the datelektilo's.
       { predicate: "references", target: "#Datelektilo" },
+      // Spec 025 ③: a single value changed in a view is the lokredaktilo's.
+      { predicate: "references", target: "#Lokredaktilo" },
     ]);
     // Spec 010 ①: the switch, with its German and English names (Schalter, switch); since ② it
     // sends a setting that applies only with the form to the checkbox.
@@ -398,6 +408,9 @@ describe("the scheme eroj (Spec 008 T009)", () => {
       { predicate: "references", target: "#Butono" },
       { predicate: "references", target: "#Kampo" },
       { predicate: "references", target: "#Elekto" },
+      // Spec 025 ③: a drawn list is the listelektilo's, several values the plurelektilo's.
+      { predicate: "references", target: "#Listelektilo" },
+      { predicate: "references", target: "#Plurelektilo" },
     ]);
     const elektilo = eroj.find((concept) => concept.term === "Elektilo");
     expect(elektilo?.prefLabel).toEqual({ eo: "Elektilo", en: "select", de: "Auswahlliste" });

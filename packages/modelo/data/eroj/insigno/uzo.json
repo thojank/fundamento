@@ -113,7 +113,7 @@
       },
       {
         "case": "removable-chip",
-        "action": "not-supported",
+        "action": "use-instead",
         "keywords": {
           "en": [
             "removable",
@@ -121,10 +121,12 @@
           ],
           "de": [
             "entfernbar",
+            "entfernbares",
             "filterchip"
           ]
         },
-        "kialo": "A chip that can be removed is a filter, because removing acts; that is an Ero of its own."
+        "kialo": "A chip that can be removed is a filter, because removing acts; the signeto covers it (Spec 025 ③ closes the boundary removable-chip).",
+        "ero": "signeto"
       }
     ],
     "composes": {
