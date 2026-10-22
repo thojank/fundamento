@@ -22,9 +22,7 @@
         "license": "OFL-1.1",
         "source": "https://github.com/Omnibus-Type/Archivo",
         "redistributable": true,
-        "scripts": [
-          "Latn"
-        ]
+        "scripts": ["Latn"]
       }
     }
   },
