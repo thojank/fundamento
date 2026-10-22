@@ -19,14 +19,14 @@
 - [x] **T2508 Vitrino, Make-Kit, React** (D-07 bis D-09).
 
 ### C – Abschluss
-- [x] **T2509 Doku** plan ① (Review, D-01–D-09, Abdeckung, Abweichungen 1–8, B-1–B-7, O-1–O-5, Benchmark-Kennzahlen, Messanleitung), tasks ①, Vojmapo (Zeile E5), README.
+- [x] **T2509 Doku** plan ① (Review, D-01–D-09, Abdeckung, Abweichungen 1–8, B-1–B-8, O-1–O-5, Benchmark-Kennzahlen, Messanleitung), tasks ①, Vojmapo (Zeile E5), README.
 - [ ] **T2510 Messungen** unten; Bericht im PR mit den Benchmark-Kennzahlen.
 
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits ① | rot `8647ecc`, grün `21efed9`, Messungen (siehe Folgecommit) – vor dem Rebase rot `a1af500`, grün `b931177` |
+| Commits ① | rot `8647ecc`, grün `21efed9`, Messungen `43f0b2b`, Agordilo-Fixtures (B-8, siehe Folgecommit) – vor dem Rebase rot `a1af500`, grün `b931177` |
 | Rot gemessen | Modelo 62 Tests in 25 Dateien, Projekcioj 22 in 7 Dateien, MCP 2 in 3 Dateien (s025-eingabe lädt nicht ohne Daten) |
 | Benchmark-Kennzahlen | Eroj 34 → 35; Gattungen mit Gegenstück 27 → 28 (+ Zahl, Suche, Zeit als Ergänzung); Zustände 95 → 101; Props 146 → 161; Slots 72 → 77; Ereignisse 0 → 4; Teile 226 → 242; Bindungen 414 → 433; Ikonaro 17 → 19; Reguloj 59 → 60; Jugxoj 206 → 211 |
 
