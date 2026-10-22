@@ -5,12 +5,15 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { ModeloJson, ResolvedToken, Rezolvo } from "../contracts/modelo.js";
+import { expandRezolvo, type RezolvojJson } from "../export/export-modelo.js";
 import { MODELO_DIST } from "./test-doubles/harness.js";
 
 const modelo = JSON.parse(readFileSync(join(MODELO_DIST, "modelo.json"), "utf8")) as ModeloJson;
+// The file writes the tokens of the third level as references (Nachlese 9, O-8); followed here,
+// every check below reads whole tokens.
 const rezolvoj = (
-  JSON.parse(readFileSync(join(MODELO_DIST, "rezolvoj.json"), "utf8")) as { rezolvoj: Rezolvo[] }
-).rezolvoj;
+  JSON.parse(readFileSync(join(MODELO_DIST, "rezolvoj.json"), "utf8")) as RezolvojJson
+).rezolvoj.map(expandRezolvo);
 
 const setsByName = new Map(modelo.setoj.map((set) => [set.name, set]));
 const tokenNames = modelo.tokens.map((token) => token.name).sort();

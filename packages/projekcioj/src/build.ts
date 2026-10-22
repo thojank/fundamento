@@ -9,12 +9,14 @@ import { dirname, join } from "node:path";
 import {
   buildModelo,
   defaultModeloSource,
+  expandRezolvo,
   fixtureModeloSource,
   type Modelo,
   type ModeloFiles,
   type ModeloJson,
   type ModeloSource,
   prepareModeloExport,
+  type Rezolvo,
   type RezolvojJson,
   readModeloFiles,
   type ValidationIssue,
@@ -34,7 +36,11 @@ import { writeParityInventories } from "./parity.js";
 export interface CeloInput {
   modelo: Modelo;
   modeloJson: ModeloJson;
-  rezolvoj: RezolvojJson;
+  /**
+   * The Rezolvoj of `rezolvoj.json`, every reference of the third level followed (Nachlese 9,
+   * O-8): a Celo reads whole tokens, as it did before the file wrote them as references.
+   */
+  rezolvoj: { rezolvoj: Rezolvo[] };
   /** Environment of the build; only the optional Code Connect Celo reads it (D-13). */
   env?: Readonly<Record<string, string | undefined>>;
   /** A measurement snapshot of another state, for the Vitrino's comparison (Spec 004, `--bazo`). */
@@ -144,7 +150,11 @@ export function celoInputOf(
     input: {
       modelo: buildModelo(files).modelo,
       modeloJson: JSON.parse(prepared.files.modeloJson) as ModeloJson,
-      rezolvoj: JSON.parse(prepared.files.rezolvojJson) as RezolvojJson,
+      rezolvoj: {
+        rezolvoj: (JSON.parse(prepared.files.rezolvojJson) as RezolvojJson).rezolvoj.map(
+          expandRezolvo,
+        ),
+      },
       env: process.env,
       files,
     },
