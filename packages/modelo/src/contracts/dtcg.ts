@@ -31,6 +31,8 @@ export const TOKEN_ROLES = [
   "backdrop",
   "disabled",
   "decorative",
+  // Constitution v2.3 (Spec 024 ②): an Ero-Token of the third level.
+  "ero",
 ] as const satisfies readonly TokenRole[];
 
 /** `$extensions` key for Fundamento metadata on tokens (`id`, `role`) and sets (`id`, `kondicxoj`). */

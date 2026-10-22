@@ -141,8 +141,18 @@ export function deltaEOklab(a: ColorValue, b: ColorValue): number {
 export function oklchLightness(color: ColorValue, backdrop?: ColorValue): number {
   const seen =
     backdrop !== undefined && alphaOf(color) < 1 ? compositeOver(color, backdrop) : color;
-  return Number(toColorjs(seen).to("oklch").coords[0] ?? 0);
+  const key = `${seen.colorSpace}|${seen.components.join(",")}|${alphaOf(seen)}`;
+  const known = lightnessOf.get(key);
+  if (known !== undefined) return known;
+  const lightness = Number(toColorjs(seen).to("oklch").coords[0] ?? 0);
+  // The same few hundred colours are measured by every Regulo of every combination; the
+  // conversion is pure, so its result is kept (bounded, in case a long run sees many colours).
+  if (lightnessOf.size >= 20_000) lightnessOf.clear();
+  lightnessOf.set(key, lightness);
+  return lightness;
 }
+
+const lightnessOf = new Map<string, number>();
 
 /**
  * The surface ladder of a page, deepest first. A component without a surface of its own may sit on

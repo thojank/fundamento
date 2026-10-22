@@ -236,3 +236,143 @@ pnpm fm metiejo --open                                      # http://localhost:7
 ```
 
 Tests: `pnpm --filter @fundamento/modelo exec vitest run src/data/raster-024.test.ts`, `pnpm --filter @fundamento/agordilo exec vitest run src/raster-024.test.ts src/calibration.test.ts src/derive.test.ts`, `pnpm --filter @fundamento/metiejo exec vitest run src/studio.test.ts`.
+
+## ② Runde 2
+
+**Branch:** `261022-spec-024-runde-2-ero-tokens-f87267` (gestapelt auf O-1 `261022-spec-024-o1-raster-f87267`, #100, von `main` `8915fa6` nach #99) · **Datum:** 2026-10-22 · **Stand:** zur Abnahme. Der erste Commit ist das **Constitution Amendment v2.3** (`c6396cf`), freigegeben vom Maintainer am 21.10., 21:23. **Clean Room (§ 8, Art. V):** kein fremder Style-Guide wurde gesucht oder geöffnet; Grundlage ist allein die Spec. Entscheidungen des Maintainers (22.10.): O-2 Muster in der Studio-Vorschau ja; O-3 Vorschlag mit der nächsten Stufe der eigenen Palette ja; O-4 Schatten als Felder (x, y, Unschärfe, Ausdehnung, Farbe). Pflicht: zwei Schriftfamilien (Anzeige und Fließtext), Schreibweise setzbar, Vorschläge auf Deutsch aus den Übersetzungen.
+
+### Zusammenfassung
+
+1. **Amendment v2.3** (eigener erster Commit): Terminologie **Ero-Tokeno** („Ein Token des Vortaro je Ero, Teil, Variante und Zustand, mechanisch aus dem Skemo abgeleitet; standardmäßig ein Alias auf einen Rollen-Token; eine Marke darf ihn umbelegen“), Art. IV „Das Vortaro hat drei Ebenen: Grundlagen (Paletten, Skalen), Rollen (semantisch) und Ero-Tokens (je Komponente). Jeder Aspekto belegt alle drei; ein Alias ist eine Belegung“, Historie v2.3 mit Grund und Migration; der Begriff in der Ontologio (21 Begriffe der Tabelle; ein Begriff darf einen Bindestrich tragen: Prüfung und Schema der Ontologio).
+2. **Die Ero-Tokens** (`packages/modelo/src/eroj/ero-tokenoj.ts`, D-14): je Teil-Eigenschaft jedes Ero und jeder Sxablono ein Token je erlaubter Kombination seiner Schlüssel – `ero.butono.surface.fill.emphasis.high.intent.neutral.hover`, `ero.butono.border.width`, `ero.butono.label.typography.size.medium`, `sxablono.pagxo.frame.gap` –, mechanisch aus dem Skemo (Art. II): Art, Ero, Teil, Eigenschaft, je Achse Name und Wert, zuletzt der Zustand; ein Bindestrich des Skemo wird ein Segment der Token-Grammatik. Der Wert ist der Alias auf den Rollen-Token, den das Skemo bindet; ein Zustand ohne eigene Bindung bekommt den Token von `rest` als Alias, so hat jede Zelle der Matrix einen Token (D-17). **908 Ero-Tokens:** 874 der 34 Eroj, 34 der 5 Sxablonoj. 30 Zellen, die an ein Schlüsselwort (`inherit`, `none`) oder einen Lagebegriff gebunden sind, haben keinen Token (D-16); ein `sameAs` folgt seinem Ziel.
+3. **Der Kern trägt die dritte Ebene** (D-15): `pnpm vortaro:ero-tokenoj [--root | --config] [--check]` (`eroj/ero-tokenoj-cli.ts`) schreibt die Gruppen `ero` und `sxablono` ans Ende von `core.json` – je Token `$type`, `$value` als Alias, `$description`, ID aus dem Lock, bei Farben die Rolle `ero` –, hält vorhandene Werte und IDs, entfernt, was kein Skemo mehr ableitet (ID zurückgezogen), und mit `--config` dieselben Aliasse in den Haupt-Set jeder Aspekto eines Projekts. Zwei Regeln im Modelo (RULE_IDS 180): `ero-tokeno-missing` (ein abgeleiteter Token fehlt im Kern oder hat den falschen Typ) und `ero-tokeno-unknown` (ein Token der dritten Ebene, den kein Skemo ableitet); zwei Fixtures beweisen beide.
+4. **Migration als Alias (Art. IV, M-3):** komuna im Kern, `ekzemplo` und das Fixture `aspekto-incomplete` über `--config`, `provo` und `provo-kompakta` neu abgeleitet (die Ableitung kopiert den Kern, also auch die dritte Ebene), die 80 Fixture-Modelle mit Eroj über `--root`; eine Marke des Metiejo bekommt die Ebene beim nächsten Speichern von selbst. Der Test `ero-tokenoj.test.ts` (Modelo) prüft: jeder Ero-Token löst in komuna, provo, provo-kompakta und ekzemplo in hell und dunkel auf denselben Wert wie sein Rollen-Token, auch die Schreibweise.
+5. **Projekcioj und Eroj lesen die Ero-Tokens** (D-21): der Web-Celo bindet jeden Teil an seinen Ero-Token (`var(--fm-ero-butono-surface-fill-emphasis-high-intent-neutral-hover)`, Typografie je Feld, der Fokusring, der Chevron des Elektilo, die Listen des Light DOM, die Sxablonoj an `--fm-sxablono-…`); der CSS-Celo schreibt die dritte Ebene als Alias-`var()`, die Schreibweise eines Alias folgt seinem Ziel (D-20, auch im Resolver); der Figma-Celo macht jeden Ero-Token zur Variable der Sammlung `aspekto` (je Marke ein Modus, der Wert ein Alias auf die Rolle) und bindet die Komponenten, die Stand-ins und den Schatten an sie; ein Ero-Token eines Gewichts (`ero.navigado.items.weight.current.true`) bekommt wie `font.weight.*` seinen STRING-Zwilling für den Schnitt (F30, vier Zwillinge: `…/items/style/current/true`), den das Plugin an `fontStyle` bindet; Tailwind hat für `ero.*` kein Ziel (`--fm-*` bleibt), Penpot und Tokens Studio bekommen die Aliasse als DTCG; der Paritäts-Inventar der Skemo-Seite liest die Zelle über ihren Ero-Token. **Figma-Variablen:** 876 → 2 439 (Repo: komuna, ekzemplo über die Release-Fixture nicht mitgezählt; provoj-Plan 2 441), davon 1 563 der dritten Ebene – ein Typografie-Token zählt sechs Felder, ein Schatten fünf je Ebene, ein Ring drei (Abweichung 5).
+6. **Pixelgleich (M-3):** ohne Umbelegung ist jeder Ero-Token ein Alias auf genau den Token, den der Web-Celo vorher schrieb; `projekcioj/src/ero-tokenoj.test.ts` misst es über jede Marke × Farbschema × Kontrast (komuna, provo, provo-kompakta, ekzemplo): keine Abweichung. Die Celo-Suiten lesen die erzeugten Stylesheets und den Figma-Plan **durch die Rollen** (`test-doubles/tra-roloj.ts`, D-21): die Aufzeichnung, was jedes Ero bindet, bleibt lesbar, die Übersetzung ist die Ableitung selbst.
+7. **Feste Reguloj auf der dritten Ebene (§ 5 Grenze 1, D-19):** eine Zelle, deren Text oder Fläche eine Marke von der Rolle wegbelegt, wird als Kontrastpaar gemessen (`eroKontrastParojOf`, in `evaluateAlirebleco`), mit der Kategorie des erklärten Rollenpaars; ohne Umbelegung sind es die erklärten Paare – nichts doppelt. Ein Alias auf einen Rollen- oder Palettentoken ist erlaubt, ein Farbliteral nicht (`semantic-colors-alias-palette` ausgeweitet, D-18); die Rolle `ero` (TokenRole) hält die Paarpflicht der Rollen davon frei.
+8. **`festgelegt` auf der dritten Ebene** (Agordilo): ein Alias oder ein Wert je Ero-Token wie bei jeder Rolle, je Dimensio-Bedingung (`modoj`); dazu **`schreibweise`** (none, uppercase, lowercase, capitalize) je Schriftrolle, geschrieben als `textTransform` in die Erweiterung des Tokens im Haupt-Set – die eine Erweiterung, die ein Override tragen darf. Der Kontrast-Verstoß einer wegbelegten Zelle ist ein fester Verstoß der Raporto; das Studio lehnt ab (M-5).
+9. **Komponentenseiten (§ 4 Komponenten, M-4, D-22):** `/studio/<name>/ero/<ero>` und `/studio/<name>/sxablono/<sxablono>` aus dem Skemo (`metiejo/src/komponentoj.ts`): links unter den Grundlagen die 39 Komponenten (`fm-faldilo` „Komponenten“), die **Anatomie** (jeder Teil mit deutschem Namen und seinen Eigenschaften), die **Matrix** Varianten × Zustände (die Achsen des Skemo, die Zustände; ein Klick wählt die Zelle, sie steht in der URL `?zelo=emphasis=high,intent=neutral,size=medium,state=hover`; die erste Zelle sind die Standardwerte der Props), rechts die **Ero-Tokens der Zelle** je Teil – Alias mit Kandidaten (Farben: alle Rollen, dann die Palettenstufen; sonst die Familie der Rolle), Maße als Wert, Typografie als Wahl des Schriftstils, Herkunft, Zurücksetzen –, dazu das **Verhalten** (Achsen und Props des Skemo, Lagebegriffe) und der **Gebrauch** auf Deutsch aus den Übersetzungen (Zweck, Stattdessen, Grenzen, Do, Don't, Tastatur, Schreibregeln). Die Vorschau zeigt das Ero in jeder Variante und je Zelle die Farbfelder ihrer Ero-Tokens (D-23). M-4 ist mit dem Test-Skemo `ero-minimal` geprüft: die Seite entsteht aus einem fremden Modelo ohne Code.
+10. **O-2:** unter jeder Seite der Grundlagen stehen die fünf Sxablonoj in der mittleren Breite. **O-3:** ein abgelehnter Alias auf eine Palettenstufe bekommt als Vorschlag die nächste Stufe derselben Palette, die besteht (nach Abstand, höchstens vier Versuche, je eine Ableitung; D-24). **O-4:** Schatten sind Felder je Ebene – x, y, Unschärfe, Ausdehnung, Farbe als Alias oder Farbwähler mit Deckkraft (D-25). **Zwei Schriftfamilien:** der Schnellstart fragt „Für welche Schrift?“ (Anzeige, Fließtext, beide), das Studio sucht je Familie (Anzeige, Fließtext, Code) mit eigener Trefferliste (D-26). **Schreibweise:** je Schriftstil eine Wahl (Wie geschrieben, Versalien, Kleinbuchstaben, Große Anfangsbuchstaben), die Zeile sagt sie. **Vorschläge auf Deutsch:** Satz und Vorschlag einer Ablehnung kommen aus den deutschen Namen der Regeln, sonst aus den übersetzten Statements der Reguloj (`reguloIn(…, "de")`); kein englischer Satz des Agordilo mehr.
+11. **Kleinste Änderungen daneben:** `TokenRole` + `ero` (zehn Rollen), die Ontologie erlaubt einen Bindestrich im Begriff, das Band 250–400 misst die ersten zwei Ebenen (`coverage.test.ts`), der Penpot-Test zählt die übersprungenen Typen statt 24 zu nennen, die Test-Doubles erzeugen nach einer Skemo-Änderung die dritte Ebene neu (`withEroTokenoj`), die Motion-Regel misst nur die Rollen, die Celo-Suiten lesen durch die Rollen (`tra-roloj.ts`), README („Ero-Tokens“, `vortaro:ero-tokenoj`), Vojmapo.
+
+### Constitutional Compliance Review
+
+- **Art. I (Modelo-First):** konform. Die dritte Ebene ist eine Gruppe des Kerns, aus dem Skemo erzeugt wie `$themes.json` aus den Sets; die Projekcioj lesen sie, keine schreibt von Hand; `ero-tokeno-missing`/`-unknown` halten Skemo und Kern zusammen.
+- **Art. II (Unu Vortaro):** konform. Der Name eines Ero-Tokens folgt mechanisch aus dem Skemo (D-14); CSS, Figma, Tailwind und Penpot leiten ihre Bezeichner wie bisher ab; das Beispiel der Spec steht in der Grammatik des Vortaro (Abweichung 1).
+- **Art. III (Maschinenlesbarkeit):** konform. `resolve`, `describe`, `modelo.json` und die Penpot-Ordner tragen die Ero-Tokens; ein eigenes MCP-Werkzeug je Komponentenseite ist Runde 3 (Offen).
+- **Art. IV (Multmarkeco):** konform, nach dem Amendment: jeder Aspekto belegt die dritte Ebene, ein Alias zählt; `aspekto-incomplete` erzwingt es (Test je Fixture-Marke).
+- **Art. V (Clean Room):** konform. Kein fremder Style-Guide; keine Namen oder Werte von außen.
+- **Art. VI (Regularo kun Kialoj):** konform. Zwei Prüfregeln mit Satz und Vorschlag; `semantic-colors-alias-palette` ausgeweitet, nicht gelockert; die feste Kontrastregel gilt auf der dritten Ebene (D-19).
+- **Art. VII (Agenta Dokumentado):** konform. Jeder Ero-Token trägt seine Beschreibung (Ero, Teil, Zelle, Herkunft v2.3); die Komponentenseiten lesen Uzo und Reguloj aus dem Modelo, auf Deutsch aus `tradukoj.json`.
+- **Art. VIII (Web-first, mobiles Modell):** konform. Ero-Tokens sind DTCG-Typen (color, dimension, typography, shadow, strokeStyle, …), keine CSS-Eigenschaft; die Abbildung auf CSS und Figma bleibt Celo-Wissen.
+- **Art. IX (Vertikaler Durchstich):** konform. Die Ebene läuft vom Skemo durch Kern, Aspektoj, alle Celoj, Eroj, Studio und Prüfung – für alle 34 Eroj, weil die Ableitung mechanisch ist.
+- **Art. X (Test-first):** konform. Rot in `a8f5858`, dann grün; die vier Prüfungen laufen; M-3 als Test, M-4 mit Test-Skemo.
+- **Art. XI (Einfachheit):** konform. Kein neues Paket, keine Abhängigkeit; drei Module (`ero-tokenoj.ts`, `ero-tokenoj-cli.ts`, `komponentoj.ts`), ein Test-Helfer.
+- **Art. XII (Interoperabilität):** konform. DTCG bleibt das Speicherformat; die Ero-Tokens sind Variablen der Sammlung `aspekto`, Marken bleiben Modi (§ 3 A).
+- **Art. XIII (Einfachheit der Nutzung):** konform. Niemand tippt einen Token-Namen: die Zelle ist ein Klick, der Alias eine Wahl aus Kandidaten; der Schnellstart bleibt der Weg in 10 Minuten (M-1 unverändert).
+
+### Entwurfsentscheidungen
+
+#### D-14 Der Name eines Ero-Tokens ist das Skemo in der Grammatik des Vortaro
+`<art>.<ero>.<teil>.<eigenschaft>[.<achse>.<wert>]*[.<zustand>]`: die Spec nennt `ero.butono.emphasis-high.fill.hover`; die Grammatik des Vortaro (`[a-z0-9]+`, mit Punkt) kennt keinen Bindestrich, und `fill` ohne Teil wäre nicht eindeutig (Farbe hat Beschriftung, Rahmen und Icon). Darum tragen die Segmente Ero, Teil, Eigenschaft, je Achse Name und Wert (nur die Achsen, die die Eigenschaft schlüsseln) und den Zustand bloß; `focus-ring` wird `focus.ring`, `inline-padding` wird `inline.padding`. Das Skemo ist die einzige Quelle; die Namen über das mechanische Schema hinaus entscheidet der Maintainer (§ 8).
+
+#### D-15 Der Kern trägt die dritte Ebene als erzeugte Gruppe
+Art. I verlangt, dass alles im Modelo steht, Art. XII, dass das Vortaro DTCG ist, Art. IV, dass jede Aspekto jeden Token belegt. Darum liegen die Ero-Tokens als Gruppen `ero` und `sxablono` in `core.json` und im Haupt-Set jeder Aspekto, wie `$themes.json` aus den Sets erzeugt: `pnpm vortaro:ero-tokenoj` schreibt nur diese Gruppen (der Rest des von Hand geschriebenen Kerns bleibt Byte für Byte), hält vorhandene Werte und IDs (komuna darf umbelegen), zieht die ID eines entfernten Tokens zurück, und die beiden Regeln melden jede Drift. Ein Lader, der die Ebene nur im Speicher erzeugte, hätte sie Tokens Studio und Penpot verschwiegen.
+
+#### D-16 Ein Schlüsselwort und ein Lagebegriff haben keinen Token
+`inherit` (ein Link im Satz erbt) und `none` (kein Rahmen, kein Haken) sind Struktur, keine Werte einer Marke; `start`/`end` ist ein Begriff. Diese 30 Zellen bleiben im Skemo; ein `sameAs` folgt seinem Ziel und hat keinen eigenen Token (das Icon nimmt die Farbe der Beschriftung – ein eigener Token wäre eine neue Fähigkeit, § 5 Grenze 3).
+
+#### D-17 Jede Zelle der Matrix hat einen Token
+Ein Zustand ohne eigene Bindung fiel im Web-Celo auf `rest` zurück; die Ableitung macht daraus einen Token je Zustand mit dem Alias auf den Token von `rest`. So kann eine Marke `hover` belegen, wo das Skemo keinen eigenen Wert kennt, und die Matrix ist vollständig (§ 4: „ein Klick wählt die Zelle“).
+
+#### D-18 Ein Ero-Token aliasiert eine Rolle oder eine Palettenstufe, nie ein Farbliteral
+`semantic-colors-alias-palette` verlangt von jeder semantischen Farbe einen Alias auf die Palette, damit eine Marke eine Palettenstufe ändert und jede Verwendung folgt. Für die dritte Ebene heißt das: Alias auf eine Rolle (die zweite Ebene) oder eine Stufe (die erste), nie ein Literal und nie ein anderer Ero-Token. Maße, Schatten und Schriftstile nehmen einen eigenen Wert wie bisher. Regel 0: nicht gelockert, nur auf die neue Ebene gezogen.
+
+#### D-19 Kontrast auf der dritten Ebene: nur die Zellen, die abweichen
+Jede Zelle, deren Text oder Fläche eine Marke anders belegt als das Skemo bindet, wird als Paar gemessen (Text-Teil auf Fläche, je Kombination, ohne `disabled`), mit der Kategorie des erklärten Paars der Rollen, sonst `text-normal`. Zellen ohne Abweichung sind die erklärten Paare, die schon gemessen werden – so bleiben Raporto und Prüfzahlen der vorhandenen Marken unverändert, und die Studio-Ablehnung (M-5) greift genau dort, wo eine Umbelegung die feste Regel bricht.
+
+#### D-20 Die Schreibweise folgt dem Alias
+`textTransform` steht neben dem Wert, nicht darin; ein Alias ohne eigene Schreibweise nahm bisher keine. Ein Ero-Token auf `typography.kicker` muss die Versalien der Rolle tragen: der Resolver folgt der Alias-Kette bis zum ersten Token mit Schreibweise, der CSS-Celo schreibt für einen Alias `text-transform: var(--fm-<ziel>-text-transform)`. Ein gesetzter Wert gewinnt weiterhin (`schreibweise` in `festgelegt`).
+
+#### D-21 Die Celoj lesen die Ero-Tokens, die Suiten lesen durch die Rollen
+Web-Celo, Sxablono-Vorlage, CSS-Celo, Figma-Celo und der Paritäts-Inventar nehmen je Zelle `eroTokenOf` (sonst den gebundenen Token). Die bestehenden Suiten der Celoj sind die Aufzeichnung, was jedes Ero bindet (`var(--fm-color-action-primary-rest)`, `color/action/primary/rest`); statt 470 Erwartungen umzuschreiben, lesen sie die Ausgaben durch die Rollen, die die Ero-Tokens standardmäßig aliasieren (`tra-roloj.ts`: die Übersetzung ist `eroTokenojOfModelo`, nie eine eigene Liste; nur die Bindungen, nie die Variablen). Dass die Ausgaben die Ero-Tokens nennen, beweist `ero-tokenoj.test.ts` je Celo.
+
+#### D-22 Die Komponentenseite ist eine Funktion des Skemo
+`komponentoViewOf(kontext, ref, kombination, zelo)` nimmt irgendein Modelo mit dem Ero (M-4): Anatomie aus `parts`, Matrix aus `variantKeys` × `states` (Constraints ausgeschlossen), die Zelle aus der URL mit den Standardwerten der Props als Vorgabe, die Zeilen aus den Ero-Tokens der Zelle (eine Eigenschaft, die ein Schlüssel außerhalb der Matrix schlüsselt – der Zustand eines Eintrags –, bekommt je Wert eine Zeile), Kandidaten je Typ (Farben: Rollen, dann Stufen; sonst die Familie der Rolle), Verhalten aus `props` und Lagebegriffen, Gebrauch aus Uzo und Reguloj über `uzoIn`/`reguloIn` auf Deutsch. Eine Sxablono ist ein Skemo aus Teilen allein: eine Zelle.
+
+#### D-23 Die Vorschau zeigt das Ero je Variante und je Zelle ihre Farbfelder
+Zeigen, Drücken und Fokus sind Pseudoklassen des Browsers; eine Vorschau kann sie nicht erzwingen. Darum steht je Variante das Element (mit seinen Props und einem Wort im Standard-Slot) und je Zelle ein Farbfeld je Füllung und Farbe aus den Ero-Tokens der Zelle (`var(--fm-ero-…)`), live aus demselben Stylesheet. Eroj ohne Textslot stehen bloß (Abweichung 9).
+
+#### D-24 Der Vorschlag ist die nächste Stufe, die besteht
+Bei einem abgelehnten Alias auf `color.palette.<p>.<n>` probiert der Server die Stufen von `p` nach Abstand zu `n` (heller und dunkler im Wechsel), höchstens vier, je eine Ableitung mit allen Prüfungen (1,3 s), und nennt die erste ohne neuen festen Verstoß; besteht keine, sagt er das und rät zu einer anderen Palette. Sonst der deutsche Vorschlag des Agordilo (Patch) oder das übersetzte Statement der Regel.
+
+#### D-25 Schatten als Felder je Ebene
+Ein Schatten ist eine Liste von Ebenen (Versatz x, y, Unschärfe, Ausdehnung, Farbe); das Studio zeigt sie als `fm-kampo kind=number` je Maß in der Einheit des Werts und die Farbe als Wahl (`fm-elektilo`, wenn sie ein Alias auf `color.shadow.*` ist) oder als Farbwähler mit Deckkraft; der Client setzt aus den Feldern den DTCG-Wert zusammen und sendet ihn wie jeden Wert. Die JSON-Fläche bleibt nur für einen Schatten, der ein Alias ist.
+
+#### D-26 Zwei Schriftfamilien und die Schreibweise im selben Datenmodell
+`schriften.display` und `schriften.body` gab es (Spec 023 schrieb beide gleich); der Schnellstart fragt jetzt die Rolle (`rolle`: display, body, beide), das Studio sucht je Familie und setzt über `POST /api/marko/<name>/schrift` mit `rolle`. Die Schreibweise ist `festgelegt[token].schreibweise` – dieselbe Datei, dieselbe `historio`, bytegleich.
+
+### Bildschirmfotos
+
+Aufgenommen am 2026-10-22 in Chromium am Server `pnpm fm metiejo --port 7398` mit der Marke „Bluna“ (Start „Beispiel komuna“).
+
+- Komponentenseite des `butono`: Anatomie, Matrix Varianten × Zustände, die Zelle `emphasis=high · intent=neutral · size=medium · hover`, rechts die Ero-Tokens der Zelle, der Gebrauch: ![Studio Komponente butono](bildoj/studio-komponente-butono.png)
+- Komponentenseite der Sxablono `pagxo`: ![Studio Komponente pagxo](bildoj/studio-komponente-pagxo.png)
+- Ein umbelegter Ero-Token (gesetzt, Zurücksetzen) und die Ablehnung mit dem Vorschlag der nächsten Stufe (O-3): ![Studio Komponente abgelehnt](bildoj/studio-komponente-abgelehnt.png)
+- Tiefe mit Schatten als Feldern (O-4): ![Studio Tiefe Felder](bildoj/studio-tiefe-felder.png)
+- Schrift mit zwei Familien und der Schreibweise: ![Studio Schrift Familien](bildoj/studio-schrift-familien.png)
+- Farbe mit den Mustern in der Vorschau (O-2): ![Studio Farbe Muster](bildoj/studio-farbe-muster.png)
+
+### Abweichungen
+
+1. **Der Name des Beispiels** `ero.butono.emphasis-high.fill.hover` steht in der Grammatik als `ero.butono.surface.fill.emphasis.high.intent.neutral.hover` (D-14).
+2. **30 Zellen haben keinen Token** (Schlüsselwort, Lagebegriff, D-16); eine Marke kann dort nichts umbelegen.
+3. **Ein Farbliteral auf einem Ero-Token wird abgelehnt** (D-18): „eigener Wert“ gilt für Maße, Schatten und Schriftstile; eine Farbe ist eine Wahl aus Rollen und Stufen.
+4. **Die Vorschau erzwingt keine Zustände** (D-23): Zeigen, Drücken, Fokus sind Farbfelder, kein gehaltenes Element.
+5. **Figma-Variablen 876 → 2 439:** ein Typografie-Token sind sechs Variablen, ein Schatten fünf je Ebene, ein Ring drei; alle in der Sammlung `aspekto`, unter der Grenze von 5 000 je Sammlung. Nicht in einer echten Figma-Datei gemessen (Testing-Standard: ein grüner Lauf ist für Figma keine Abnahme); der Plan wartet mit den offenen Figma-PRs auf die Messung des Maintainers.
+6. **Das Band 250–400 misst die ersten zwei Ebenen** (376), die dritte zählt gegen die Skemoj (908).
+7. **Die Celo-Suiten lesen durch die Rollen** (D-21) statt 470 Erwartungen umzuschreiben.
+8. **Kontrastpaare nur für abweichende Zellen** (D-19); die Raporto der vorhandenen Marken bleibt gleich.
+9. **Ein Ero ohne Textslot steht in der Vorschau bloß** (Tabelle, Dialog): die Vitrino hat die Beispiele, das Studio die Matrix.
+10. **Die Werkstatt der Vitrino zeigt die dritte Ebene nicht** (kein Reiter „Komponenten“ dort); das Studio ist der Ort, die Expertenansicht bleibt bei Grundlagen und Rollen (Runde 3: Fluss mit den drei Ebenen).
+11. **`get_ero` nennt die Ero-Tokens nicht eigens**: `resolve` und `modelo.json` tragen sie; ein Werkzeug je Komponentenseite ist Runde 3 (Art. III).
+
+### Befunde / Mankoj
+
+- **B-9 Ero-Tokens:** 908 (874 Eroj, 34 Sxablonoj); Kern 376 + 908 = 1 284 Tokens; IDs im Lock 1 284 Tokens.
+- **B-10 Figma-Variablen:** 2 439 (Repo), 2 441 (Plan mit provo und provo-kompakta); 1 563 der dritten Ebene.
+- **B-11 Zeiten im Studio:** Komponentenseite ≈ 0,3 s (Ableitung 114 ms, Seite), Prüfung je Setzen 1,3 s warm, Ablehnung mit O-3 bis zu 4 × 1,3 s dazu; `pnpm vortaro:ero-tokenoj` 1,2 s.
+- **B-12 Manko-Kandidat:** eine Vorschau, die einen Zustand hält (Zeigen, Drücken, Fokus) – kein Ero kann ihn setzen, der Browser hält ihn; Schließbedingung: ein Attribut am Ero, das den Zustand erzwingt, durch eine Eroj-Runde.
+- **B-13 Manko-Kandidat Farbliteral auf der dritten Ebene** (Abweichung 3): wenn eine Marke eine Fläche braucht, die keine Stufe ist, fehlt die Stufe in der Palette – die Palette ist der Ort (§ 3 B).
+- **B-14** Die Suiten der Plugin-Läufe (`plugin-lauf`, `plugin-rahmen-beispiele`) sind mit 2 439 Variablen langsamer (je Lauf das Double mit allen Variablen); gemessen im Lauf unten.
+- **B-15 Zeiten des Modelo mit der dritten Ebene:** `validateModeloFiles` wuchs mit 1 284 Tokens von ≈ 0,4 s auf 1,4 s (der Aufwand je Auflösung ist proportional zur Zahl der Tokens), `check_contrast` ohne Zuweisung von ≈ 40 ms auf 113 ms je Aufruf, der Start des MCP-Servers auf 3,3 s (Budget 2 s, AK-07). Behoben ohne Änderung eines Ergebnisses: die Schriftregel liest die geteilten Auflösungen (`resolutionsOf`) statt eigens aufzulösen; der Resolver kopiert Werte mit einem einfachen Durchlauf statt `structuredClone`, hält die sortierten Kernnamen und die Überlagerung je Folge aktiver Sets je Modelo (ein Modelo wird nach dem Bau nicht geändert, wie der Auflösungs-Cache schon annahm); der Geltungsbereich einer Aspiro wird je Tokenname einmal entschieden; die OKLCH-Helligkeit einer Farbe wird gemerkt. Danach: Validierung 0,7 s, `check_contrast` 8 ms (Median), Start 1,9 s lokal (CI-Budget 6 s; der O-1-Lauf brauchte dort 2,5 s), `resolve` 2,4 ms je Kombination.
+
+### Offen (für den Maintainer)
+
+- **O-5 Namen der dritten Ebene** über das mechanische Schema hinaus (D-14): bleibt es bei `ero.<ero>.<teil>.<eigenschaft>.<achse>.<wert>.<zustand>`?
+- **O-6 Figma messen:** die 2 439 Variablen und die Bindungen der 39 Sets in einer echten Datei (Abweichung 5), zusammen mit den offenen Figma-PRs.
+- **O-7 Ein eigenes Werkzeug `get_ero_tokenoj`** (Art. III) für Runde 3, neben dem Fluss mit den drei Ebenen.
+
+### Messanleitung
+
+Alle Befehle im Checkout des Maintainers, nach dem Merge von #100 (O-1) und diesem PR.
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm install && pnpm build
+pnpm -s fm modelo validate                        # grün, 1 284 Tokens
+pnpm vortaro:ero-tokenoj --check                  # „Nothing would change.“ – die dritte Ebene ist aktuell
+pnpm fm projekcioj build --out .fundamento/projekcioj
+python3 -c "import json;p=json.load(open('.fundamento/projekcioj/figma/plan.json'));print(sum(len(c['variables']) for c in p['collections']))"   # 2439
+pnpm fm metiejo --open                            # http://localhost:7301
+```
+
+**M-3 (pixelgleich):** `pnpm --filter @fundamento/projekcioj exec vitest run src/ero-tokenoj.test.ts` – jede Marke × Schema × Kontrast ohne Abweichung; in der Vitrino `open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/vitrino/index.html"`: dieselben Eroj wie vor dem Merge; im Figma-Plan `.fundamento/projekcioj/figma/plan.json` die Paints je Variante wie vorher (`parity/figma.json` unverändert in den Werten).
+
+**M-4 (Komponentenseite ohne Code):** http://localhost:7301/studio/bluna/ero/butono – Anatomie, Matrix, Zelle wählen, rechts die Ero-Tokens; `pnpm --filter @fundamento/metiejo exec vitest run src/komponentoj.test.ts` („M-4“ mit dem Test-Skemo `ero-minimal`). Ein neues Ero: `data/eroj/<name>/skemo.json` anlegen, `pnpm vortaro:ero-tokenoj`, `pnpm build` – die Seite steht unter `/studio/bluna/ero/<name>`.
+
+**M-5 auf der dritten Ebene:** auf der Seite des butono die Zelle `emphasis=high · intent=neutral · size=medium · rest`, Fläche (`ero.butono.surface.fill…rest`) auf `color.palette.accent.100` setzen: abgelehnt, Satz „Zu wenig Kontrast bei …“ und Vorschlag „Die nächste Stufe der Palette accent, die besteht: color.palette.accent.<n> …“ (O-3); auf `color.action.secondary.rest` setzen: übernommen, „gesetzt“, Zurücksetzen stellt die Rolle her.
+
+**O-2:** http://localhost:7301/studio/bluna/farbe – unter Aktionen, Zuständen, Text und Feldern die fünf Muster. **O-4:** http://localhost:7301/studio/bluna/tiefe – je Schatten die Felder x, y, Unschärfe, Ausdehnung, Farbe. **Schreibweise:** http://localhost:7301/studio/bluna/schrift – bei `typography.label.1` „Versalien“ wählen; die Vorschau und `agordo.json` (`festgelegt["typography.label.1"].schreibweise`) folgen. **Zwei Familien:** dort „Anzeige suchen“ und „Fließtext suchen“ je mit eigener Trefferliste; im Schnellstart (Schritt Schrift) „Für welche Schrift?“.
+
+**Tests:** `pnpm --filter @fundamento/modelo exec vitest run src/eroj/ero-tokenoj.test.ts`, `pnpm --filter @fundamento/projekcioj exec vitest run src/ero-tokenoj.test.ts`, `pnpm --filter @fundamento/agordilo exec vitest run src/ero-tokenoj.test.ts`, `pnpm --filter @fundamento/metiejo exec vitest run src/komponentoj.test.ts src/studio.test.ts src/servilo.test.ts`.

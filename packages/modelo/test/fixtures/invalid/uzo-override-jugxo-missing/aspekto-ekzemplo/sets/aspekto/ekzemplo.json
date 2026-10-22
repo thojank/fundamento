@@ -102,5 +102,33 @@
         "unit": "px"
       }
     }
+  },
+  "ero": {
+    "butono": {
+      "surface": {
+        "fill": {
+          "emphasis": {
+            "high": {
+              "rest": {
+                "$type": "color",
+                "$value": "{color.background.default}"
+              }
+            }
+          }
+        }
+      },
+      "label": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}"
+        }
+      },
+      "box": {
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.small}"
+        }
+      }
+    }
   }
 }

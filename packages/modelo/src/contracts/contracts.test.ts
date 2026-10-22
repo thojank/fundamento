@@ -201,6 +201,7 @@ describe("shared constants", () => {
       "backdrop",
       "disabled",
       "decorative",
+      "ero",
     ]);
     expect(FUNDAMENTO_EXTENSION_KEY).toBe("com.ciferecigo.fundamento");
     expect(CHECK_NAMES).toEqual([

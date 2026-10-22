@@ -5,6 +5,7 @@
 
 import type { Agordo } from "@fundamento/agordilo";
 import { escapeHtml } from "./html.js";
+import { komponentoPreviewOf } from "./komponentoj.js";
 import type { SxtupoKey } from "./sxtupoj.js";
 
 const BREITEN = ["schmal", "mittel", "breit"] as const;
@@ -88,8 +89,22 @@ const TYPO_LEITER = `<div class="mt-spalte">${[
 
 const TIEFE = `<div class="mt-zeile">${KARTO}${KARTO}</div><div class="mt-spalte"><fm-avizo intent="info">Eine Meldung auf der Fläche.</fm-avizo><fm-sxvebilo label="Mehr" open><fm-butono slot="trigger" emphasis="medium">Schwebende Ebene</fm-butono><fm-teksto slot="content">Ein Popover mit dem Schatten der Marke.</fm-teksto></fm-sxvebilo></div>`;
 
-/** The body of the preview for a step or a page of the Studio (`studio-<seite>`) at a width. */
-export function previewBody(sxtupo: SxtupoKey | string, breite: string, agordo: Agordo): string {
+/** O-2 (Spec 024 ②): the five Sxablonoj under every page of the Grundlagen, at the middle width. */
+const MUSTER = SXABLONOJ.map((sxablono) =>
+  surface(`Muster: ${sxablono.name}`, widths(sxablono.markup, "mittel")),
+).join("");
+
+/**
+ * The body of the preview for a step, a page of the Studio (`studio-<seite>`) or a component page
+ * (`komponento-<kind>-<name>`, with the chosen cell) at a width.
+ */
+export function previewBody(
+  sxtupo: SxtupoKey | string,
+  breite: string,
+  agordo: Agordo,
+  zelo: Readonly<Record<string, string>> = {},
+): string {
+  if (sxtupo.startsWith("komponento-")) return komponentoPreviewOf(sxtupo, agordo, zelo);
   switch (sxtupo) {
     case "studio-farbe":
     case "studio-semantik":
@@ -97,23 +112,27 @@ export function previewBody(sxtupo: SxtupoKey | string, breite: string, agordo: 
         surface("Aktionen", ACTIONS) +
         surface("Zustände und Meldungen", STATUS) +
         surface("Text", TEXT) +
-        surface("Felder", FIELDS)
+        surface("Felder", FIELDS) +
+        MUSTER
       );
     case "studio-schrift":
-      return surface("Typo-Leiter", TYPO_LEITER);
+      return surface("Typo-Leiter", TYPO_LEITER) + MUSTER;
     case "studio-raum":
       return (
         surface("Raum: Abstände", widths(FORMULARO, "mittel")) +
         surface("Aktionen", ACTIONS) +
-        surface("Seite", widths(PAGXO, "mittel"))
+        surface("Seite", widths(PAGXO, "mittel")) +
+        MUSTER
       );
     case "studio-form":
-      return surface("Form: Radius", `${ACTIONS}${KARTO}`) + surface("Felder", FIELDS);
+      return surface("Form: Radius", `${ACTIONS}${KARTO}`) + surface("Felder", FIELDS) + MUSTER;
     case "studio-tiefe":
-      return surface("Tiefe: Schatten und Ebenen", TIEFE);
+      return surface("Tiefe: Schatten und Ebenen", TIEFE) + MUSTER;
     case "studio-bewegung":
       return (
-        surface("Bewegung: Zustände beim Zeigen und Drücken", ACTIONS) + surface("Felder", FIELDS)
+        surface("Bewegung: Zustände beim Zeigen und Drücken", ACTIONS) +
+        surface("Felder", FIELDS) +
+        MUSTER
       );
     case "farbe":
       return (

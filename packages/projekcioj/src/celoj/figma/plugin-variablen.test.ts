@@ -4,6 +4,7 @@
 // plugin-variablen.test.ts (Nachlese 5 ①, O-5): the variables and paints: alpha, modes, the default mode, the deckkraft, foreign collections.
 
 import { describe, expect, it } from "vitest";
+import { traRolojFigmaName } from "../../test-doubles/tra-roloj.js";
 import { type FigmaPlan, resolveFigmaPlan } from "./figma.js";
 import {
   butonoOf,
@@ -14,6 +15,7 @@ import {
   modelDouble,
   pageNodes,
   plan,
+  prepared,
   repo,
   repoFiles,
   repoPlan,
@@ -369,9 +371,13 @@ describe("every bound paint shows the plan's colour after the first and the seco
     const paints = butonoOf(report.components)?.layout.paints;
     expect(paints?.set.fills[0]).toMatchObject({ opacity: 1, variable: "color/background/canvas" });
     expect(paints?.set.fills[0]).toHaveProperty("color");
-    expect(paints?.variant.control?.fills[0]).toMatchObject({
-      variable: "color/action/primary/rest",
-    });
+    // The paint names the Ero-Token it binds (Constitution v2.3); read through its role.
+    expect(
+      traRolojFigmaName(
+        (paints?.variant.control?.fills[0] as { variable?: string } | undefined)?.variable,
+        prepared.input.modelo,
+      ),
+    ).toBe("color/action/primary/rest");
     expect(paints?.variant.control?.strokes[0]).toHaveProperty("variable");
     expect(paints?.variant.label?.fills[0]).toHaveProperty("opacity");
     expect(paints?.last.control?.fills[0]).toMatchObject({ opacity: 0 });

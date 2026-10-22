@@ -14,11 +14,13 @@ import { join } from "node:path";
 import { defaultModeloSource, projectModeloSource } from "@fundamento/modelo";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildProjekcioj, celoInputOf } from "../../build.js";
+import { traRolojFigma } from "../../test-doubles/tra-roloj.js";
 import { FIGMA_CELO, FIGMA_NOT_DRAWN, type FigmaPlan } from "./figma.js";
 import {
   descendant,
   modelDouble,
   pageNodes,
+  repo,
   repoFiles,
   repoPlan,
   run,
@@ -47,7 +49,10 @@ type Plan = Omit<FigmaPlan, "components" | "sxablonoj"> & {
     markdown?: { paragraph: string; items: string[]; quote: string };
   })[];
 };
-const plan = repoPlan as unknown as Plan;
+// The plan through the roles its Ero-Token bindings alias (Constitution v2.3, tra-roloj.ts).
+const plan = JSON.parse(
+  traRolojFigma(JSON.stringify(repoPlan), repo.input.modelo),
+) as unknown as Plan;
 
 let out = "";
 let html = "";
@@ -68,8 +73,12 @@ const provoj = celoInputOf(
   ),
 );
 if (!provoj.ok) throw new Error("core + provo + provo-kompakta must be valid");
+// The plans through the roles the Ero-Tokens alias (Constitution v2.3, tra-roloj.ts).
 const provojPlan = JSON.parse(
-  FIGMA_CELO.generate(provoj.input).find((file) => file.path === "figma/plan.json")?.text ?? "{}",
+  traRolojFigma(
+    FIGMA_CELO.generate(provoj.input).find((file) => file.path === "figma/plan.json")?.text ?? "{}",
+    provoj.input.modelo,
+  ),
 ) as FigmaPlan;
 
 const homeOf = (of: Pick<FigmaPlan, "collections">) =>

@@ -289,7 +289,8 @@
         "shadow",
         "backdrop",
         "disabled",
-        "decorative"
+        "decorative",
+        "ero"
       ]
     },
     "TextTransform": {
@@ -3768,12 +3769,15 @@
       "maxProperties": 1
     },
     "AgordoFestgelegt": {
-      "description": "A set token of the Studio (Spec 024): the value or alias for the main set of the brand (an alias wins over a value), and per Dimensio condition for the brand's conjunction set of that condition.",
+      "description": "A set token of the Studio (Spec 024): the value or alias for the main set of the brand (an alias wins over a value), per Dimensio condition for the brand's conjunction set of that condition, and for a typography role its case (`schreibweise`, Runde 2: the text transformation the role carries beside its value).",
       "type": "object",
       "properties": {
         "wert": {},
         "alias": {
           "$ref": "#/$defs/TokenName"
+        },
+        "schreibweise": {
+          "$ref": "#/$defs/TextTransform"
         },
         "modoj": {
           "type": "object",

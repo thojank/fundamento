@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { alphaOf, readDtcgColor } from "../checks/alirebleco/color.js";
 import { aliasTarget, CORE_SET_NAME } from "../contracts/grammar.js";
 import type { Modelo } from "../contracts/modelo.js";
+import { isEroTokenName } from "../eroj/ero-tokenoj.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
 import { resolutionsOf } from "../validate/resolutions.js";
@@ -25,9 +26,12 @@ describe("colour tokens of the core", () => {
     }
   });
 
-  it("aliases every semantic colour to a palette token (FR-02)", () => {
+  it("aliases every semantic colour to a palette token (FR-02), an Ero-Token to a role (v2.3)", () => {
     for (const token of colours.filter((t) => !t.name.startsWith("color.palette."))) {
-      expect(aliasTarget(token.value), token.name).toMatch(/^color\.palette\./);
+      if (isEroTokenName(token.name)) {
+        expect(aliasTarget(token.value), token.name).toMatch(/^color\./);
+        expect(isEroTokenName(aliasTarget(token.value) ?? ""), token.name).toBe(false);
+      } else expect(aliasTarget(token.value), token.name).toMatch(/^color\.palette\./);
     }
   });
 

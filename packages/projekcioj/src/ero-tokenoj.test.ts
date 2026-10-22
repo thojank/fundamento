@@ -46,7 +46,7 @@ describe("CSS Celo: the third level as custom properties", () => {
 
   it("a typography Ero-Token follows the case of its role (text-transform as var())", () => {
     expect(css).toContain(
-      "--fm-ero-teksto-text-typography-kind-kicker-text-transform: var(--fm-typography-kicker-text-transform);",
+      "--fm-ero-teksto-text-typography-kind-kicker-size-1-text-transform: var(--fm-typography-kicker-text-transform);",
     );
     expect(css).toContain(
       "--fm-ero-butono-label-typography-size-medium-font-family: var(--fm-typography-label-1-font-family);",
@@ -94,7 +94,7 @@ describe("Figma Celo: the Ero-Tokens as variables in the brand modes", () => {
       variables: { name: string; values: Record<string, unknown> }[];
     }[];
     components: {
-      ero: string;
+      set: string;
       variants: { props: Record<string, string>; bindings: Record<string, string> }[];
     }[];
   };
@@ -117,11 +117,12 @@ describe("Figma Celo: the Ero-Tokens as variables in the brand modes", () => {
   });
 
   it("the components bind their parts to the Ero-Token variables", () => {
-    const butono = plan.components.find((component) => component.ero === "butono");
+    const butono = plan.components.find((component) => component.set === "butono");
     const variant = butono?.variants.find(
       (candidate) =>
         candidate.props.emphasis === "high" &&
         candidate.props.intent === "neutral" &&
+        candidate.props.size === "medium" &&
         candidate.props.state === "hover",
     );
     expect(variant?.bindings["surface.fill"]).toBe(

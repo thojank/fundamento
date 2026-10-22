@@ -57,5 +57,47 @@
       "$value": { "value": 8, "unit": "px" },
       "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01K5FMAJ0H4CZYQST4Y5HHM8HV" } }
     }
+  },
+  "ero": {
+    "atributlisto": {
+      "surface": {
+        "fill": {
+          "$type": "color",
+          "$value": "{color.background.default}",
+          "$description": "atributlisto: surface.fill (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF235JV9RWVDH1Y3NF6HMS",
+              "role": "ero"
+            }
+          }
+        }
+      },
+      "text": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}",
+          "$description": "atributlisto: text.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF235JV9RWVDH1Y3NF6HMT",
+              "role": "ero"
+            }
+          }
+        }
+      },
+      "box": {
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.small}",
+          "$description": "atributlisto: box.gap (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF235JV9RWVDH1Y3NF6HMV"
+            }
+          }
+        }
+      }
+    }
   }
 }

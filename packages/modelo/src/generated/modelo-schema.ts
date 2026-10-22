@@ -99,7 +99,8 @@ export type TokenRole =
   | "shadow"
   | "backdrop"
   | "disabled"
-  | "decorative";
+  | "decorative"
+  | "ero";
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "TokenSetId".
@@ -1897,7 +1898,7 @@ export interface AgordoJugxo {
   name: NonEmptyText;
 }
 /**
- * A set token of the Studio (Spec 024): the value or alias for the main set of the brand (an alias wins over a value), and per Dimensio condition for the brand's conjunction set of that condition.
+ * A set token of the Studio (Spec 024): the value or alias for the main set of the brand (an alias wins over a value), per Dimensio condition for the brand's conjunction set of that condition, and for a typography role its case (`schreibweise`, Runde 2: the text transformation the role carries beside its value).
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "AgordoFestgelegt".
@@ -1905,6 +1906,7 @@ export interface AgordoJugxo {
 export interface AgordoFestgelegt {
   wert?: unknown;
   alias?: TokenName;
+  schreibweise?: TextTransform;
   modoj?: {
     [k: string]: AgordoFestgelegtWert;
   };

@@ -468,8 +468,12 @@ describe("Runde 2: component pages and the third level over HTTP", () => {
     expect(page.status).toBe(200);
     const html = await page.text();
     expect(html).toContain('class="mt-matrico"');
-    expect(html).toContain("zelo=emphasis%3Dhigh%2Cintent%3Dneutral%2Cstate%3Dhover");
-    expect(html).toContain(`data-mt-festlegen="${FILL}"`);
+    expect(html).toContain(
+      "zelo=emphasis%3Dhigh%2Cintent%3Dneutral%2Csize%3Dmedium%2Cstate%3Dhover",
+    );
+    expect(html).toContain(
+      'data-mt-festlegen="ero.butono.surface.fill.emphasis.medium.intent.neutral.rest"',
+    );
     const cell = await get(
       "/studio/testa/ero/butono?zelo=emphasis%3Dmedium%2Cintent%3Dneutral%2Cstate%3Dhover",
     );
@@ -486,7 +490,7 @@ describe("Runde 2: component pages and the third level over HTTP", () => {
     const taken = await get("/api/marko/testa/festlegen", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ token: FILL, alias: "color.palette.accent.900" }),
+      body: JSON.stringify({ token: FILL, alias: "color.action.primary.hover" }),
     });
     expect(taken.status).toBe(200);
     expect((await taken.json()).herkunft).toBe("gesetzt");

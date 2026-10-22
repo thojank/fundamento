@@ -57,5 +57,53 @@
       "$value": { "value": 8, "unit": "px" },
       "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01K5FMAJ0H4CZYQST4Y5HHM8HV" } }
     }
+  },
+  "ero": {
+    "konsileto": {
+      "surface": {
+        "fill": {
+          "emphasis": {
+            "high": {
+              "rest": {
+                "$type": "color",
+                "$value": "{color.background.default}",
+                "$description": "konsileto: surface.fill when emphasis=high, state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+                "$extensions": {
+                  "com.ciferecigo.fundamento": {
+                    "id": "tok_01M5GF2AJS6Y439S8A3R1YGSFW",
+                    "role": "ero"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "label": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}",
+          "$description": "konsileto: label.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF2AJT00VCCVTEYQ6M82JQ",
+              "role": "ero"
+            }
+          }
+        }
+      },
+      "box": {
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.small}",
+          "$description": "konsileto: box.gap (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF2AJT00VCCVTEYQ6M82JR"
+            }
+          }
+        }
+      }
+    }
   }
 }

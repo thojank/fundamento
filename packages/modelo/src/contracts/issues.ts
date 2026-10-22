@@ -152,6 +152,9 @@ export const RULE_IDS = [
   "aspiro-missed",
   // Spec 024 (§ 3 B, S-2): a brand's own rule only tightens the Regulo that measures the same.
   "aspiro-loosens-regulo",
+  // Constitution v2.3 (Spec 024 ②): the core carries every Ero-Token the Skemoj derive, no other.
+  "ero-tokeno-missing",
+  "ero-tokeno-unknown",
   "contrast-reserve",
   "surface-distinct",
   "palette-even",

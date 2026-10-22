@@ -338,6 +338,20 @@ export function packageDocuments(
       return value;
     },
   );
+  // Spec 024 ② (festgelegt.schreibweise): the case of a typography role stands beside its value,
+  // as the Vortaro carries it — the one extension an override may carry (set rules).
+  for (const [token, set] of Object.entries(agordo.festgelegt ?? {})) {
+    if (set.schreibweise === undefined) continue;
+    const node = token
+      .split(".")
+      .reduce<unknown>(
+        (current, key) => (isJsonObject(current) ? current[key] : undefined),
+        json[mainPath],
+      );
+    if (isJsonObject(node) && "$value" in node) {
+      node.$extensions = { [EXTENSION_KEY]: { textTransform: set.schreibweise } };
+    }
+  }
   sets.push({ name: mainName, path: mainPath });
 
   // Spec 024 (festgelegt.modoj): per Dimensio condition the tokens the Studio set, for the

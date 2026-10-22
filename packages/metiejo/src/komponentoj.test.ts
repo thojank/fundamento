@@ -37,7 +37,13 @@ describe("komponentoList (M-4: a page per Ero and per Sxablono, from the Skemo)"
 });
 
 describe("komponentoView of the butono", () => {
-  const view = komponentoView(BUTONO, agordo, bases, DEFAULT_KOMBINATION);
+  // The cell of the high emphasis at rest, medium size: the one the Spec names as its example.
+  const view = komponentoView(BUTONO, agordo, bases, DEFAULT_KOMBINATION, {
+    emphasis: "high",
+    intent: "neutral",
+    size: "medium",
+    state: "rest",
+  });
 
   it("names the anatomy: every part of the Skemo with a German label and its properties", () => {
     const labels = Object.fromEntries(view.anatomio.map((part) => [part.part, part.label]));
@@ -53,10 +59,16 @@ describe("komponentoView of the butono", () => {
   });
 
   it("spans the matrix variants × states from the axes of the Skemo, minus what a constraint forbids", () => {
-    expect(view.matrico.axes).toEqual(["emphasis", "intent"]);
-    expect(view.matrico.variants).toHaveLength(4);
-    expect(view.matrico.variants).toContainEqual({ emphasis: "high", intent: "danger" });
-    expect(view.matrico.variants).not.toContainEqual({ emphasis: "medium", intent: "danger" });
+    expect(view.matrico.axes).toEqual(["emphasis", "intent", "size"]);
+    expect(view.matrico.variants).toHaveLength(12);
+    expect(view.matrico.variants).toContainEqual({
+      emphasis: "high",
+      intent: "danger",
+      size: "small",
+    });
+    expect(
+      view.matrico.variants.some((v) => v.emphasis === "medium" && v.intent === "danger"),
+    ).toBe(false);
     expect(view.matrico.states).toEqual([
       "rest",
       "hover",
@@ -65,7 +77,12 @@ describe("komponentoView of the butono", () => {
       "disabled",
       "loading",
     ]);
-    expect(view.zelo).toEqual({ emphasis: "high", intent: "neutral", state: "rest" });
+    expect(view.zelo).toEqual({
+      emphasis: "high",
+      intent: "neutral",
+      size: "medium",
+      state: "rest",
+    });
   });
 
   it("lists per part the Ero-Tokens of the chosen cell: the alias, its candidates among the roles, the origin", () => {
@@ -153,6 +170,7 @@ describe("komponentoView of the butono", () => {
       { ...agordo, festgelegt: { [FILL]: { alias: "color.palette.accent.900" } } },
       bases,
       DEFAULT_KOMBINATION,
+      { emphasis: "high", intent: "neutral", size: "medium", state: "rest" },
     );
     const fill = set.groups.flatMap((group) => group.rows).find((row) => row.token === FILL);
     expect(fill?.herkunft).toBe("gesetzt");
@@ -219,7 +237,12 @@ describe("M-4: a page for a new Ero without code", () => {
 });
 
 describe("the screen and the preview of a component page", () => {
-  const view = komponentoView(BUTONO, agordo, bases, DEFAULT_KOMBINATION);
+  const view = komponentoView(BUTONO, agordo, bases, DEFAULT_KOMBINATION, {
+    emphasis: "high",
+    intent: "neutral",
+    size: "medium",
+    state: "rest",
+  });
   const html = komponentoScreen({
     view,
     marko: { name: "provo", agordo, saved: false, rev: 1 },
@@ -231,7 +254,9 @@ describe("the screen and the preview of a component page", () => {
 
   it("renders the matrix with a link per cell, the chosen cell marked, the anatomy and the controls", () => {
     expect(html).toContain('class="mt-matrico"');
-    expect(html).toContain("zelo=emphasis%3Dhigh%2Cintent%3Dneutral%2Cstate%3Dhover");
+    expect(html).toContain(
+      "zelo=emphasis%3Dhigh%2Cintent%3Dneutral%2Csize%3Dmedium%2Cstate%3Dhover",
+    );
     expect(html).toContain('aria-current="true"');
     expect(html).toContain("Fokusring");
     expect(html).toContain(`data-mt-festlegen="${FILL}"`);

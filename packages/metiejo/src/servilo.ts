@@ -17,12 +17,29 @@ import {
   readAgordo,
   reglerOf,
 } from "@fundamento/agordilo";
-import type { ValidationIssue } from "@fundamento/modelo";
+import {
+  buildModelo,
+  eroKontrastParojOf,
+  kontrastSojlojOf,
+  type Modelo,
+  readDtcgColor,
+  reguloIn,
+  resolveCombination,
+  type ValidationIssue,
+  WCAG2_METRIC,
+} from "@fundamento/modelo";
 import { EKSPORTO_CELOJ, type EksportoCelo, exportMarko } from "./eksporto.js";
 import type { Settings } from "./env.js";
 import { CLIENT_SCRIPT, escapeHtml, previewDocument } from "./html.js";
 import { identOf } from "./ident.js";
 import { type Klartext, klartextOf, satzOf, vorschlagOf } from "./klartext.js";
+import {
+  komponentoList,
+  komponentoRefOf,
+  komponentoScreen,
+  komponentoView,
+  zeloOf,
+} from "./komponentoj.js";
 import { knownFonts } from "./kontrolo.js";
 import {
   createMarko,
@@ -338,6 +355,154 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
    * condition, a display name, or takes a setting back. A value that breaks a fixed rule is not
    * taken: one sentence why, one suggestion. An adjustable rule is taken and needs a Jugxo.
    */
+  /** The structure's Modelo, for the words of the Reguloj in German (once per process). */
+  let structureModelo: Modelo | undefined;
+  const modeloOf = (): Modelo => {
+    structureModelo ??= buildModelo(bases.structure.files).modelo;
+    return structureModelo;
+  };
+
+  /** A sentence of a refusal in German: the rule by its German name, else its translated statement. */
+  const satzDe = (violation: { rule: string; subject: string; combination?: string }): string => {
+    const regulo = modeloOf().reguloj.find((entry) => entry.name === violation.rule);
+    const named = satzOf(violation as Parameters<typeof satzOf>[0]);
+    if (!named.startsWith(`${violation.rule} bei`) || regulo === undefined) return named;
+    return `${reguloIn(modeloOf(), regulo, "de").statement} – bei ${violation.subject}${named.slice(named.indexOf(" bei ") + 5 + violation.subject.length)}`;
+  };
+
+  /**
+   * The quick measure of O-3: the pairs the cell takes part in (a role: every declared pair that
+   * names it; an Ero-Token: the derived pairs of the cells that depart) against the WCAG 2.x
+   * threshold of their category in light and dark, default and high contrast.
+   */
+  const schemesThatHold = (agordo: Agordo, token: string): Set<string> => {
+    const { modelo } = composeDraft(agordo, bases);
+    const pairs = [
+      ...modelo.kontrastParoj
+        .filter((pair) => pair.foreground === token || pair.background === token)
+        .map((pair) => ({
+          foreground: pair.foreground,
+          background: pair.background,
+          kategorio: pair.kategorio,
+        })),
+      ...eroKontrastParojOf(modelo).map((pair) => ({
+        foreground: pair.foreground,
+        background: pair.background,
+        kategorio: pair.kategorio,
+      })),
+    ];
+    const holds = new Set<string>();
+    for (const scheme of ["light", "dark"]) {
+      let ok = true;
+      for (const contrast of ["default", "high"]) {
+        const assignment = { aspekto: agordo.name, "color-scheme": scheme, contrast };
+        const { tokens } = resolveCombination(modelo, assignment);
+        const sojloj = kontrastSojlojOf(modelo, assignment);
+        for (const pair of pairs) {
+          const foreground = readDtcgColor(tokens[pair.foreground]?.value);
+          const background = readDtcgColor(tokens[pair.background]?.value);
+          const threshold = sojloj?.wcag2[pair.kategorio];
+          if (foreground === undefined || background === undefined || threshold === undefined)
+            continue;
+          if (WCAG2_METRIC.compute(foreground, background) < threshold) ok = false;
+        }
+      }
+      if (ok) holds.add(scheme);
+    }
+    return holds;
+  };
+
+  /**
+   * O-3 (Spec 024 ②): the suggestion at a refused alias on a palette step is the next step of the
+   * same palette that passes, nearest first, lighter and darker alternating; at most four are
+   * tried (a derivation each). Else the suggestion of the Agordilo where it is a change of the
+   * Agordo (German), else the rule's translated statement.
+   */
+  const vorschlagDe = (
+    draft: Draft,
+    next: Agordo,
+    token: string,
+    modus: string | undefined,
+    alias: string | undefined,
+    violation: Parameters<typeof vorschlagOf>[0] | undefined,
+    knownBefore: ReadonlySet<string>,
+  ): string => {
+    const step = alias === undefined ? undefined : /^color\.palette\.([a-z]+)\.(\d+)$/.exec(alias);
+    if (step !== null && step !== undefined) {
+      const palette = step[1] ?? "";
+      const own = Number(step[2]);
+      const core = modeloOf().setoj.find((set) => set.name === "core")?.tokens ?? {};
+      const steps = Object.keys(core)
+        .filter((candidate) => candidate.startsWith(`color.palette.${palette}.`))
+        .map((candidate) => Number(candidate.split(".").at(-1)))
+        .filter((candidate) => Number.isFinite(candidate) && candidate !== own)
+        .sort((a, b) => Math.abs(a - own) - Math.abs(b - own) || a - b);
+      // Every step of the palette, nearest first: a quick measure of the cell's contrast in the
+      // four colour combinations (one composition, 0,3 s) picks the candidates, one derivation with
+      // every check (1,3 s) confirms the first that passes.
+      const withStep = (light: string, dark?: string): Agordo | undefined => {
+        const festgelegt = { ...(next.festgelegt ?? {}) };
+        const entry = { ...(festgelegt[token] ?? {}) };
+        if (modus === undefined) entry.alias = light;
+        else entry.modoj = { ...(entry.modoj ?? {}), [modus]: { alias: light } };
+        if (dark !== undefined) {
+          entry.modoj = { ...(entry.modoj ?? {}), "color-scheme=dark": { alias: dark } };
+        }
+        festgelegt[token] = entry;
+        return readAgordo({ ...next, festgelegt }).agordo;
+      };
+      const confirmed = (agordo: Agordo): boolean =>
+        !checkDraft(agordo, bases).issues.some(
+          (issue) =>
+            !knownBefore.has(`${issue.rule} ${issue.path}`) &&
+            !ADJUSTABLE_RULES.includes(issue.rule),
+        );
+      // The schemes the setting reaches: both for the main set, the one of a mode.
+      const schemes =
+        modus === undefined
+          ? ["light", "dark"]
+          : [modus === "color-scheme=dark" ? "dark" : "light"];
+      let light: string | undefined;
+      let dark: string | undefined;
+      for (const candidate of steps) {
+        if (light !== undefined && dark !== undefined) break;
+        const tried = `color.palette.${palette}.${candidate}`;
+        const agordo = withStep(tried);
+        if (agordo === undefined) continue;
+        const holds = schemesThatHold(agordo, token);
+        if (schemes.every((scheme) => holds.has(scheme))) {
+          if (confirmed(agordo)) {
+            return `Die nächste Stufe der Palette ${palette}, die besteht: ${tried} (Stufe ${candidate} statt ${own}).`;
+          }
+          continue;
+        }
+        // A cell whose text turns with the scheme (a light label on a dark fill, a dark one on a
+        // light fill) needs a step per scheme, as the role has: the nearest for light and for dark.
+        if (schemes.length === 2) {
+          if (light === undefined && holds.has("light")) light = tried;
+          if (dark === undefined && holds.has("dark")) dark = tried;
+        }
+      }
+      if (light !== undefined && dark !== undefined) {
+        const agordo = withStep(light, dark);
+        if (agordo !== undefined && confirmed(agordo)) {
+          return `Die nächsten Stufen der Palette ${palette}, die bestehen: ${light} hell und ${dark} dunkel (color-scheme=dark) – wie die Rolle je Schema eine Stufe nimmt.`;
+        }
+      }
+      return `Keine Stufe von ${palette} besteht hier an dieser Stelle; wähle eine Stufe einer anderen Palette.`;
+    }
+    void draft;
+    if (violation !== undefined && violation.apply !== undefined) return vorschlagOf(violation);
+    const regulo =
+      violation === undefined
+        ? undefined
+        : modeloOf().reguloj.find((entry) => entry.name === violation.rule);
+    if (regulo !== undefined) {
+      return `Wähle einen Wert, der die Regel erfüllt: ${reguloIn(modeloOf(), regulo, "de").statement}`;
+    }
+    return "Wähle einen anderen Wert.";
+  };
+
   function festlegen(
     name: string,
     draft: Draft,
@@ -387,6 +552,31 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         Object.keys(festgelegt).length === 0
           ? (rest as Agordo)
           : { ...(rest as Agordo), festgelegt };
+    } else if (typeof body.schreibweise === "string") {
+      // Spec 024 ② (Schreibweise): the case of a typography role, beside its value.
+      if (!["none", "uppercase", "lowercase", "capitalize"].includes(body.schreibweise)) {
+        sendJson(
+          response,
+          {
+            issues: [
+              {
+                rule: "schreibweise-invalid",
+                path: "schreibweise",
+                message: "no such case",
+                suggestion: "send none, uppercase, lowercase or capitalize",
+              },
+            ],
+          },
+          422,
+        );
+        return;
+      }
+      const festgelegt = { ...(draft.agordo.festgelegt ?? {}) };
+      festgelegt[token] = {
+        ...(festgelegt[token] ?? {}),
+        schreibweise: body.schreibweise as "none" | "uppercase" | "lowercase" | "capitalize",
+      };
+      next = { ...draft.agordo, festgelegt };
     } else {
       const alias = typeof body.alias === "string" && body.alias !== "" ? body.alias : undefined;
       const wert =
@@ -453,12 +643,15 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
             entry.rule === refused.rule &&
             (entry.path === refused.path || entry.subject === refused.path),
         );
+        const alias = typeof body.alias === "string" && body.alias !== "" ? body.alias : undefined;
         sendJson(
           response,
           {
             satz:
-              violation === undefined ? `${refused.rule}: ${refused.message}` : satzOf(violation),
-            vorschlag: violation === undefined ? refused.suggestion : vorschlagOf(violation),
+              violation === undefined
+                ? satzDe({ rule: refused.rule, subject: refused.path })
+                : satzDe(violation),
+            vorschlag: vorschlagDe(draft, agordo, token, modus, alias, violation, known),
             betroffen,
           },
           409,
@@ -519,8 +712,9 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         const id = values.get("tiparo");
         const tiparo = id === null ? undefined : tiparoj.tiparoj.find((entry) => entry.id === id);
         if (tiparo === undefined) return draft.agordo;
-        const fonto = fontoOf(tiparo);
-        return patched(draft.agordo, { schriften: { display: fonto, body: fonto } });
+        return patched(draft.agordo, {
+          schriften: schriftenOf(fontoOf(tiparo), values.get("rolle")),
+        });
       }
       case "form": {
         const wahl = values.get("form.wahl");
@@ -544,6 +738,17 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         return draft.agordo;
     }
   };
+
+  /** Spec 024 ② (two families): the roles a chosen font takes — Anzeige, Fließtext or both. */
+  const schriftenOf = (
+    fonto: ReturnType<typeof fontoOf>,
+    rolle: unknown,
+  ): Record<string, unknown> =>
+    rolle === "display"
+      ? { display: fonto }
+      : rolle === "body"
+        ? { body: fonto }
+        : { display: fonto, body: fonto };
 
   const fontFaceOf = (agordo: Agordo): string => {
     const families = new Set(
@@ -780,11 +985,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           return;
         }
         const fonto = fontoOf(tiparo);
-        setDraft(
-          name,
-          draft,
-          patched(draft.agordo, { schriften: { display: fonto, body: fonto } }),
-        );
+        setDraft(name, draft, patched(draft.agordo, { schriften: schriftenOf(fonto, body.rolle) }));
         sendJson(response, { rev: draft.rev, agordo: draft.agordo });
         return;
       }
@@ -817,6 +1018,37 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         }
         return;
       }
+    }
+
+    const komponento = /^\/studio\/([a-z0-9-]+)\/(ero|sxablono)\/([a-z0-9-]+)$/.exec(path);
+    if (komponento !== null) {
+      const [, name = "", kind = "", komponentoName = ""] = komponento;
+      const draft = draftOf(name);
+      const ref = komponentoRefOf(bases, kind, komponentoName);
+      if (draft === undefined || ref === undefined || method !== "GET") {
+        notFound(response);
+        return;
+      }
+      const kombination = kombinationOf(url.searchParams);
+      const marko = readMarko(options.workdir, name);
+      sendHtml(
+        response,
+        komponentoScreen({
+          view: komponentoView(ref, draft.agordo, bases, kombination, zeloOf(url.searchParams)),
+          marko: {
+            name,
+            agordo: draft.agordo,
+            saved:
+              marko !== undefined && JSON.stringify(marko.agordo) === JSON.stringify(draft.agordo),
+            rev: draft.rev,
+          },
+          kombination,
+          komponentoj: komponentoList(bases),
+          probleme: problemeOf(pruefungOf(draft)),
+          expert: expertOf(draft.agordo),
+        }),
+      );
+      return;
     }
 
     const studio = /^\/studio\/([a-z0-9-]+)(?:\/([a-z]+))?$/.exec(path);
@@ -867,6 +1099,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           probleme: problemeOf(derivation),
           ...(message === undefined ? {} : { message }),
           expert: expertOf(draft.agordo),
+          komponentoj: komponentoList(bases),
         }),
       );
       return;
@@ -902,9 +1135,14 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
                 .filter(([, value]) => value !== ""),
             ),
             body: previewBody(
-              isSxtupoKey(sxtupo) || sxtupo.startsWith("studio-") ? sxtupo : "vorschau",
+              isSxtupoKey(sxtupo) ||
+                sxtupo.startsWith("studio-") ||
+                sxtupo.startsWith("komponento-")
+                ? sxtupo
+                : "vorschau",
               breite,
               draft.agordo,
+              zeloOf(url.searchParams),
             ),
           }),
         );

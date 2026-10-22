@@ -18,6 +18,7 @@ import {
   boundToken,
   CORE_SET_NAME,
   combinationsOf,
+  eroTokenOf,
   isBindingKeyword,
   isEntryKey,
   isPositionKeyword,
@@ -275,7 +276,7 @@ function composedOf(
     const [part = "", property = ""] = key.split(".");
     const bound = boundToken(entry.skemo, part, property, props);
     if (bound === undefined || isBindingKeyword(bound.token)) continue;
-    bindings[key] = variableName(bound.token);
+    bindings[key] = variableName(eroTokenOf(entry, part, property, props) ?? bound.token);
     if (PART_PROPERTY_TYPES[property as keyof typeof PART_PROPERTY_TYPES] !== "color") continue;
     const paint = paintOf(bound.token, resolutions, base);
     if (paint !== undefined) paints[key] = paint;
@@ -299,7 +300,9 @@ function composedOf(
       const [part = "", property = ""] = key.split(".");
       const bound = boundToken(area.skemo, part, property, DIALOG_REASON_HELP.props);
       if (bound === undefined || isBindingKeyword(bound.token)) continue;
-      helpBindings[key] = variableName(bound.token);
+      helpBindings[key] = variableName(
+        eroTokenOf(area, part, property, DIALOG_REASON_HELP.props) ?? bound.token,
+      );
       if (PART_PROPERTY_TYPES[property as keyof typeof PART_PROPERTY_TYPES] !== "color") continue;
       const paint = paintOf(bound.token, resolutions, base);
       if (paint !== undefined) helpPaints[key] = paint;
@@ -417,7 +420,7 @@ function standInsComposedOf(
       const [part = "", property = ""] = key.split(".");
       const bound = boundToken(entry.skemo, part, property, props);
       if (bound === undefined || isBindingKeyword(bound.token)) continue;
-      bindings[key] = variableName(bound.token);
+      bindings[key] = variableName(eroTokenOf(entry, part, property, props) ?? bound.token);
       if (PART_PROPERTY_TYPES[property as keyof typeof PART_PROPERTY_TYPES] !== "color") continue;
       const paint = paintOf(bound.token, resolutions, base);
       if (paint !== undefined) paints[key] = paint;
@@ -1804,17 +1807,28 @@ function styleValue(weight: unknown): FigmaValue {
   return Number.isFinite(number) ? styleOfWeight(number) : "Regular";
 }
 
+/**
+ * The name of the STRING twin of a weight variable: `font/style/semibold` of `font/weight/semibold`;
+ * of an Ero-Token's weight (Constitution v2.3, `ero/navigado/items/weight/current/true`) the same
+ * name with `style` for `weight`, the hidden helpers of the cascade alike. The plugin names the
+ * twin by the same rule when it binds a weight (F30).
+ */
+export function styleTwinName(name: string): string {
+  if (name.startsWith(WEIGHT_PREFIX)) return `${STYLE_PREFIX}${name.slice(WEIGHT_PREFIX.length)}`;
+  return name.replace(/\/weight(?=\/|@|$)/, "/style");
+}
+
 /** The STRING twin of a weight variable: the same modes, the same cascade, cuts instead of numbers. */
 function styleTwin(variable: FigmaVariable): FigmaVariable {
   const values: Record<string, FigmaValue> = {};
   for (const [mode, value] of Object.entries(variable.values)) {
     values[mode] =
       typeof value === "object" && value !== null && "alias" in value
-        ? { alias: `${STYLE_PREFIX}${value.alias.slice(WEIGHT_PREFIX.length)}` }
+        ? { alias: styleTwinName(value.alias) }
         : styleOfWeight(Number(value));
   }
   return {
-    name: `${STYLE_PREFIX}${variable.name.slice(WEIGHT_PREFIX.length)}`,
+    name: styleTwinName(variable.name),
     type: "STRING",
     hidden: variable.hidden ?? false,
     values,
@@ -2131,9 +2145,13 @@ function variablesOf(modelo: Modelo, input: CeloInput): Map<string, FigmaVariabl
   // How many layers a shadow has may itself depend on a Dimensio, `aspekto` included, so the
   // fields of a composite are decided over every combination the Modelo has (F9).
   const resolutions = allResolutions(modelo);
+  // The weight tokens whose variables get a STRING twin (F30): font.weight.* and every Ero-Token
+  // of a weight (Constitution v2.3), with the hidden helpers of their cascade.
+  const weights = new Set<string>();
 
   for (const token of input.modeloJson.tokens) {
     const dims = dimensiojOfToken(modelo, token.name);
+    if (token.type === "fontWeight") weights.add(variableName(token.name));
     const composite = COMPOSITE_FIELDS[token.type] !== undefined;
     const names: (string | undefined)[] = composite
       ? [...compositeFields(token.type, valuesOf(resolutions, token.name))]
@@ -2181,8 +2199,9 @@ function variablesOf(modelo: Modelo, input: CeloInput): Map<string, FigmaVariabl
   }
   // Figma binds a text to a family and a cut, the Vortaro states a weight: every weight variable
   // gets a STRING twin in its own collection, with its modes and its place in the cascade (F30).
+  const isWeight = (name: string) => weights.has(name.split("@")[0] ?? name);
   for (const [collection, list] of byCollection) {
-    const twins = list.filter((variable) => variable.name.startsWith(WEIGHT_PREFIX)).map(styleTwin);
+    const twins = list.filter((variable) => isWeight(variable.name)).map(styleTwin);
     if (twins.length > 0) byCollection.set(collection, [...list, ...twins]);
   }
   return byCollection;
@@ -2394,7 +2413,8 @@ function componentSetOf(
       if (partProperties.shadow === undefined) continue;
       const bound = boundToken(skemo, part, "shadow", combination);
       if (bound === undefined || isBindingKeyword(bound.token)) continue;
-      const token = bound.token;
+      // The shadow binds its Ero-Token (Constitution v2.3); its layers are the role's.
+      const token = eroTokenOf(entry, part, "shadow", combination) ?? bound.token;
       const fields = compositeFields("shadow", valuesOf(resolutions, token));
       const prefixes = [...new Set(fields.map((field) => field.slice(0, field.indexOf("/") + 1)))];
       const layers = prefixes.map((prefix) => {
@@ -2543,7 +2563,9 @@ function componentSetOf(
           }
           continue;
         }
-        bindings[key] = variableName(bound.token);
+        // The part binds its Ero-Token (Constitution v2.3): the cell of the third level a brand
+        // sets in its mode; where none exists, the role token itself.
+        bindings[key] = variableName(eroTokenOf(entry, part, property, combination) ?? bound.token);
         const type = PART_PROPERTY_TYPES[property as keyof typeof PART_PROPERTY_TYPES];
         if (type !== "color" && type !== "dimension") continue;
         // What the plugin does not draw is named with its Jugxo, never claimed (Paket „Figma

@@ -5,6 +5,7 @@
 import { CORE_SET_NAME } from "../../contracts/grammar.js";
 import type { RuleId, ValidationIssue } from "../../contracts/issues.js";
 import type { Dimensio, KontrastParo, KontrastSojloj, Modelo } from "../../contracts/modelo.js";
+import { eroKontrastParojOf } from "../../eroj/ero-tokenoj.js";
 import type { ColorValue, KontrastKategorio } from "../../generated/modelo-schema.js";
 import { appendPointer } from "../../json/pointer.js";
 import { isJsonObject } from "../../load/guards.js";
@@ -84,7 +85,7 @@ function pairEntries(modelo: Modelo): PairEntry[] {
   if (!Array.isArray(raw)) {
     return [];
   }
-  return raw.flatMap((pair: unknown, index) =>
+  const declared = raw.flatMap((pair: unknown, index) =>
     isJsonObject(pair)
       ? [
           {
@@ -95,6 +96,15 @@ function pairEntries(modelo: Modelo): PairEntry[] {
         ]
       : [],
   );
+  // The cells of the third level a brand departs from the roles in (Constitution v2.3, Spec 024
+  // Grenze 1): the fixed contrast rule holds on them as on a declared pair. Their index is the
+  // declared pairs' count onwards; they are never broken statically (their tokens are the core's).
+  const derived = eroKontrastParojOf(modelo).map((pair, offset) => ({
+    pair: { id: "", ...pair } as unknown as KontrastParo,
+    index: declared.length + offset,
+    name: pair.name,
+  }));
+  return [...declared, ...derived];
 }
 
 /** The Dimensio whose valoroj carry `kontrastSojloj` (§2.3: exactly one, `contrast`). */

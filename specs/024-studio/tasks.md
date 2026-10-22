@@ -51,7 +51,35 @@
 
 ## ② Runde 2
 
-Nach dem Merge von ①: Constitution Amendment v2.3 als eigener erster Commit, Ero-Tokens aus den Skemoj, Migration aller Aspektoj als Alias, Projekcioj und Eroj lesen Ero-Tokens (pixelgleich, M-3), Komponentenseiten (M-4), Figma-Variablen gezählt. Aufgaben ab T2431.
+**Branch:** `261022-spec-024-runde-2-ero-tokens-f87267` (gestapelt auf O-1 `261022-spec-024-o1-raster-f87267`, #100). Entscheidungen des Maintainers (22.10.): O-2 ja, O-3 ja, O-4 Felder; Pflicht zwei Schriftfamilien, Schreibweise, Vorschläge auf Deutsch.
+
+### A – Amendment und Rot zuerst
+- [x] **T2431 Constitution Amendment v2.3** als eigener erster Commit `c6396cf`: Terminologie Ero-Tokeno, Art. IV drei Ebenen, Historie; Ontologio (Begriff mit Bindestrich in Prüfung und Schema), Doku-Test auf 2.3.
+- [x] **T2432 Tests** Modelo `eroj/ero-tokenoj.test.ts` (Ableitung, Namen, Zellen, Schlüsselwörter, Sxablonoj, Kern vollständig mit IDs, jede Fixture-Marke belegt, Auflösung gleich dem Alias in jeder Marke und jedem Schema, Schreibweise folgt, `ero-tokeno-missing`/`-unknown` mit zwei Fixtures, `pnpm vortaro:ero-tokenoj` mit `--root`, `--config`, `--check`), `coverage.test.ts` (Band der zwei Ebenen), `contracts.test.ts` (180); Projekcioj `ero-tokenoj.test.ts` (CSS, Web Component, Sxablono, Figma-Variablen und -Bindungen, M-3 über Marke × Schema × Kontrast); Agordilo `ero-tokenoj.test.ts` (festgelegt auf der dritten Ebene, Kontrast fest, schreibweise, bytegleich); Metiejo `komponentoj.test.ts` (Liste, Anatomie, Matrix, Zelle, Kandidaten, Verhalten, Gebrauch, gesetzt, Sxablono, M-4, Bildschirm, Vorschau, O-2), `studio.test.ts` (O-4, Schreibweise, zwei Familien), `sxtupoj.test.ts` (Rolle der Schrift), `servilo.test.ts` (Komponentenseiten, Ero-Token setzen, Ablehnung auf Deutsch mit O-3, Schreibweise, Rolle der Schrift), `docs-024.test.ts` (plan ②, tasks ②). Rot in `a8f5858`.
+
+### B – Grün
+- [x] **T2433 Modelo** `eroj/ero-tokenoj.ts` (`eroTokenojOf`, `eroTokenNameOf`, `eroTokenOf`, `sxablonoTokenOf`, `eroTokenojOfModelo`, `eroTokenojIssues`, `eroKontrastParojOf`), `eroj/ero-tokenoj-cli.ts` (`pnpm vortaro:ero-tokenoj`), RULE_IDS + 2, TokenRole `ero`, Resolver (Schreibweise entlang des Alias), `semantic-colors-alias-palette` auf der dritten Ebene, `evaluateAlirebleco` mit den abweichenden Zellen, Paritäts-Inventar über Ero-Tokens, Test-Doubles `withEroTokenoj`.
+- [x] **T2434 Migration** `core.json` (908 Tokens mit IDs), `ekzemplo`, `aspekto-incomplete`, `provo`, `provo-kompakta`, 80 Fixture-Modelle mit Eroj, zwei neue Fixtures `ero-tokeno-missing`, `ero-tokeno-unknown`.
+- [x] **T2435 Projekcioj** Web-Celo (`named`, Sxablono-Vorlage), CSS-Celo (Schreibweise eines Alias), Figma-Celo (Bindungen, Stand-ins, Schatten), `test-doubles/tra-roloj.ts`, Suiten durch die Rollen, Penpot-Test zählt.
+- [x] **T2436 Agordilo** `festgelegt.schreibweise` (Schema, `packageDocuments` als `textTransform`).
+- [x] **T2437 Metiejo** `komponentoj.ts` (Liste, View, Bildschirm, Vorschau, Zelle in der URL), Studio (Komponenten in der Navigation, O-4 Felder, Schreibweise, Suche je Familie), Server (Routen, `schreibweise`, O-3, Sätze und Vorschläge auf Deutsch, `rolle` der Schrift), Schnellstart (`rolle`), Vorschau (O-2, Komponente), Client-Skript.
+- [x] **T2438 Bildschirmfotos** der Komponentenseiten (butono, pagxo, Ablehnung), Tiefe mit Feldern, Schrift mit Familien und Schreibweise, Farbe mit Mustern in `bildoj/`.
+
+### C – Abschluss
+- [x] **T2439 Doku** plan ② (Review, D-14–D-26, Messungen, Abweichungen 1–11, B-9–B-14, O-5–O-7, Messanleitung), tasks ②, README, Vojmapo.
+- [ ] **T2440 PR**, CI grün, Bericht mit der Zahl der Ero-Tokens und der Figma-Variablen.
+
+### Messungen (②)
+
+| Was | Wert |
+|---|---|
+| Commits ② | Amendment `c6396cf`, rot `a8f5858`, grün (Folgecommit); dieser Eintrag im Folgecommit |
+| Ero-Tokens | 908 (874 der 34 Eroj, 34 der 5 Sxablonoj); Kern 376 + 908 = 1 284; 30 Zellen ohne Token |
+| Figma-Variablen | 876 → 2 439 (Repo), 2 441 (provoj); 1 563 der dritten Ebene |
+| Zeiten | `pnpm vortaro:ero-tokenoj` 1,2 s; Komponentenseite ≈ 0,3 s; Prüfung je Setzen 1,3 s warm; O-3 bis zu 4 Ableitungen |
+| Tests lokal | Modelo 3695 in 167 Dateien, Agordilo 110, Metiejo 170, MCP 407, CLI 75, Projekcioj 805 – je grün; Eroj (Playwright) und `pnpm lint`, alle `check:*` grün (Zahl der Eroj im Folgecommit) |
+| Perf (B-15) | `pnpm perf` grün: Start 1 861 ms (Budget 2 000), resolve max 19,6 ms, explain max 6,3 ms, check_contrast max 53,8 ms (Median 8,7); Validierung 1,4 s → 0,7 s |
+
 
 ## ③ Runde 3
 

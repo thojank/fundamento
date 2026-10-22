@@ -5,7 +5,12 @@
 // the Skemo's parts. Which element holds which region is Celo knowledge (Art. VIII): the frame of
 // an application has a banner and a main, a page a head row of title, badges and actions.
 
-import { type LoadedSxablono, nomRegulo, type ResolvedToken } from "@fundamento/modelo";
+import {
+  type LoadedSxablono,
+  nomRegulo,
+  type ResolvedToken,
+  sxablonoTokenOf,
+} from "@fundamento/modelo";
 
 export interface SxablonoNames {
   tag: string;
@@ -142,9 +147,12 @@ export function sxablonoStylesheetOf(
   base: Readonly<Record<string, ResolvedToken>>,
 ): string {
   const { parts } = entry.skemo;
+  // The token a part reads: its Ero-Token of the Sxablono (Constitution v2.3), or the fixed role
+  // token where none exists (a keyword).
   const fixed = (part: string, property: string) => {
     const source = parts[part]?.[property as keyof (typeof parts)[string]];
-    return source !== undefined && "fixed" in source ? source.fixed : undefined;
+    if (source === undefined || !("fixed" in source)) return undefined;
+    return sxablonoTokenOf(entry, part, property) ?? source.fixed;
   };
   const rules: string[] = [
     ":host { display: block; container-type: inline-size; }",

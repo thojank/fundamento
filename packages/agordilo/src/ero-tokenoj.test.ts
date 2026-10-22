@@ -48,10 +48,17 @@ describe("festgelegt on the third level (Art. IV: an alias is an assignment)", (
     expect(issues.map((issue) => issue.rule)).toContain("schema-violation");
   });
 
-  it("writes the alias into the main set; the Ero-Token resolves to the step, every other brand stays", () => {
+  it("writes the alias into the main set (and the dark one into the dark set); every other cell stays", () => {
+    // The label of a primary action is light in light mode and dark in dark mode: a fill set for
+    // both schemes names a step per scheme, as a role does.
     const agordo: Agordo = {
       ...provo,
-      festgelegt: { [FILL]: { alias: "color.palette.accent.900" } },
+      festgelegt: {
+        [FILL]: {
+          alias: "color.palette.accent.900",
+          modoj: { "color-scheme=dark": { alias: "color.palette.accent.100" } },
+        },
+      },
     };
     const derivation = deriveAspekto(agordo, structure, calibration);
     const set = JSON.parse(derivation.files["sets/aspekto/provo.json"] ?? "{}") as Json;
@@ -59,6 +66,11 @@ describe("festgelegt on the third level (Art. IV: an alias is an assignment)", (
     expect(nodeOf(set, "ero.butono.surface.fill.emphasis.high.intent.neutral.hover")?.$value).toBe(
       "{color.action.primary.hover}",
     );
+    const dark = JSON.parse(
+      derivation.files["sets/aspekto/provo+color-scheme/dark.json"] ?? "{}",
+    ) as Json;
+    expect(nodeOf(dark, FILL)?.$value).toBe("{color.palette.accent.100}");
+    expect(derivation.issues).toEqual([]);
     expect(derivation.exportable).toBe(true);
   });
 
@@ -96,7 +108,12 @@ describe("festgelegt on the third level (Art. IV: an alias is an assignment)", (
   it("the same Agordo gives the same bytes", () => {
     const agordo: Agordo = {
       ...provo,
-      festgelegt: { [FILL]: { alias: "color.palette.accent.900" } },
+      festgelegt: {
+        [FILL]: {
+          alias: "color.palette.accent.900",
+          modoj: { "color-scheme=dark": { alias: "color.palette.accent.100" } },
+        },
+      },
     };
     const first = deriveAspekto(agordo, structure, calibration).files;
     const second = deriveAspekto(agordo, structure, calibration).files;

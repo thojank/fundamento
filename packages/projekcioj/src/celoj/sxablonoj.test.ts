@@ -7,12 +7,19 @@
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { defaultModeloSource } from "@fundamento/modelo";
+import { defaultModeloSource, loadModelo } from "@fundamento/modelo";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildProjekcioj } from "../build.js";
+import { traRolojCss, traRolojFigma } from "../test-doubles/tra-roloj.js";
 
 let out = "";
-const read = (path: string) => readFileSync(join(out, path), "utf8");
+// Read through the roles the Ero-Tokens alias (Constitution v2.3, tra-roloj.ts).
+const modelo = loadModelo(defaultModeloSource()).modelo;
+const read = (path: string) => {
+  const text = readFileSync(join(out, path), "utf8");
+  if (modelo === undefined) return text;
+  return path.endsWith("plan.json") ? traRolojFigma(text, modelo) : traRolojCss(text, modelo);
+};
 
 beforeAll(async () => {
   out = mkdtempSync(join(tmpdir(), "fm-sxablonoj-"));

@@ -17,7 +17,8 @@ const TOK = "tok_01M2VEEE0QJXF3E9TY0JX4XVC6";
 const SET = "set_01M2VEEDW32MC4ZQPRN0GC9JRR";
 
 describe("Spec 001 schema extensions (T005)", () => {
-  it("has the nine token roles of D-12", () => {
+  // Constitution v2.3 (Spec 024 ②): the tenth role, ero, marks a colour of the third level.
+  it("has the nine token roles of D-12 and the role ero of v2.3", () => {
     expect([...TOKEN_ROLES]).toEqual([
       "palette",
       "foreground",
@@ -28,6 +29,7 @@ describe("Spec 001 schema extensions (T005)", () => {
       "backdrop",
       "disabled",
       "decorative",
+      "ero",
     ]);
     for (const role of TOKEN_ROLES) {
       expect(v("TokenRole")(role), role).toBe(true);

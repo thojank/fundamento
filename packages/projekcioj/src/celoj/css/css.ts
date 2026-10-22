@@ -135,6 +135,9 @@ export function tokenDeclarations(
       // löschte jeder spätere Satz die Versalien eines früheren. Nur der Grundsatz schreibt die
       // Vorgabe, damit die Eigenschaft überall einen Wert hat (F31).
       if (options.textTransform !== undefined) return [[property, options.textTransform]];
+      // Ein Alias ohne eigene Schreibweise trägt die seines Ziels (Constitution v2.3: ein
+      // Ero-Token auf einer Schriftrolle schreibt, wie die Rolle schreibt).
+      if (alias !== undefined) return [[property, `var(${cssVariable(alias)}-${suffix})`]];
       return options.base === true ? [[property, "none"]] : [];
     }
     if (alias !== undefined) return [[property, `var(${cssVariable(alias)}-${suffix})`]];

@@ -5,6 +5,7 @@
 import { aliasTarget, CORE_SET_NAME } from "../contracts/grammar.js";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { Modelo, Regulo } from "../contracts/modelo.js";
+import { isEroTokenName } from "../eroj/ero-tokenoj.js";
 import { boundToken, combinationsOf, isBindingKeyword, STATE_KEY } from "../eroj/skemo-rules.js";
 import { ASPEKTO_DIMENSIO, referenceAspektoOf } from "../load/build.js";
 import { resolve } from "../resolve/resolve.js";
@@ -298,18 +299,31 @@ const errorNotColorOnly: Enforcer = (modelo, regulo) => {
 
 /** Enforceable Reguloj by name. A Regulo declared "automatic" must have an entry here. */
 export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
-  /** FR-02: semantic colours alias palette tokens, in every set. */
+  /**
+   * FR-02: semantic colours alias palette tokens, in every set. An Ero-Token (Constitution v2.3)
+   * aliases a role or a palette step — a colour of the second or the first level — never a
+   * literal and never another Ero-Token: the late binding reaches every cell the same way.
+   */
   "semantic-colors-alias-palette": (modelo) =>
     modelo.setoj.flatMap((set) =>
       Object.values(set.tokens)
         .filter((token) => token.type === "color" && !token.name.startsWith(PALETTE_PREFIX))
-        .filter((token) => !(aliasTarget(token.value) ?? "").startsWith(PALETTE_PREFIX))
+        .filter((token) => {
+          const target = aliasTarget(token.value) ?? "";
+          return isEroTokenName(token.name)
+            ? !target.startsWith("color.") || isEroTokenName(target)
+            : !target.startsWith(PALETTE_PREFIX);
+        })
         .map((token) => ({
           rule: "color-semantic-literal" as const,
           severity: "error" as const,
           path: formatIssuePath(token.location),
-          message: `${token.name} in ${set.name} is a semantic colour but does not alias a palette token.`,
-          suggestion: `Give ${token.name} an alias like {color.palette.<name>.<step>}; literal colours belong in color.palette.* (Regulo semantic-colors-alias-palette).`,
+          message: isEroTokenName(token.name)
+            ? `${token.name} in ${set.name} is an Ero-Token but does not alias a role or a palette token.`
+            : `${token.name} in ${set.name} is a semantic colour but does not alias a palette token.`,
+          suggestion: isEroTokenName(token.name)
+            ? `Give ${token.name} an alias like {color.action.primary.rest} or {color.palette.<name>.<step>}; an Ero-Token carries no literal colour (Regulo semantic-colors-alias-palette).`
+            : `Give ${token.name} an alias like {color.palette.<name>.<step>}; literal colours belong in color.palette.* (Regulo semantic-colors-alias-palette).`,
         })),
     ),
   /**
@@ -382,9 +396,11 @@ export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
   /** FR-06: under motion=reduced every duration role is 0 ms and every easing role linear. */
   "motion-reduced-instant": (modelo) => {
     const core = modelo.setoj.find((set) => set.name === CORE_SET_NAME)?.tokens ?? {};
+    // The roles of the second level: an Ero-Token follows its role under motion=reduced.
     const roles = Object.values(core).filter(
       (token) =>
         (token.type === "duration" || token.type === "cubicBezier") &&
+        !isEroTokenName(token.name) &&
         aliasTarget(token.value) !== undefined,
     );
     const aspektoj =

@@ -310,7 +310,11 @@ describe("Penpot Celo: Abnahme against rezolvoj.json", () => {
         "duration",
         "strokeStyle",
       ]);
-      expect(file.skipped.size).toBe(24);
+      // The tokens of the four types Penpot has no field for, the third level included (v2.3).
+      const unsupported = new Set(["border", "cubicBezier", "duration", "strokeStyle"]);
+      expect(file.skipped.size).toBe(
+        input.modeloJson.tokens.filter((token) => unsupported.has(token.type)).length,
+      );
       const rezolvoj = input.rezolvoj.rezolvoj.filter((r) => r.assignment.aspekto === aspekto);
       expect(rezolvoj.length).toBe(72);
       const deviations: string[] = [];

@@ -57,5 +57,34 @@
       "$value": { "value": 8, "unit": "px" },
       "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01K5FMAJ0H4CZYQST4Y5HHM8HV" } }
     }
+  },
+  "ero": {
+    "butono": {
+      "label": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}",
+          "$description": "butono: label.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF2GZ226MQMJ7AKZGDRWP3",
+              "role": "ero"
+            }
+          }
+        }
+      },
+      "box": {
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.small}",
+          "$description": "butono: box.gap (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF2GZ35Y08KFBZ91SWE2XT"
+            }
+          }
+        }
+      }
+    }
   }
 }

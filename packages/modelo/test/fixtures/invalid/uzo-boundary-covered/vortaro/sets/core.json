@@ -57,5 +57,68 @@
       "$value": { "value": 8, "unit": "px" },
       "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01K5FMAJ0H4CZYQST4Y5HHM8HV" } }
     }
+  },
+  "ero": {
+    "butono": {
+      "surface": {
+        "fill": {
+          "emphasis": {
+            "high": {
+              "rest": {
+                "$type": "color",
+                "$value": "{color.background.default}",
+                "$description": "butono: surface.fill when emphasis=high, state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+                "$extensions": {
+                  "com.ciferecigo.fundamento": {
+                    "id": "tok_01M5GF2NMKYKHNDYWT9V4MM0EE",
+                    "role": "ero"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "label": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}",
+          "$description": "butono: label.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF2NMMA6V2A75044BYNHAN",
+              "role": "ero"
+            }
+          }
+        }
+      },
+      "box": {
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.small}",
+          "$description": "butono: box.gap (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF2NMMA6V2A75044BYNHAP"
+            }
+          }
+        }
+      }
+    },
+    "ligilo": {
+      "label": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}",
+          "$description": "ligilo: label.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF2NMMA6V2A75044BYNHAQ",
+              "role": "ero"
+            }
+          }
+        }
+      }
+    }
   }
 }

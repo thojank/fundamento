@@ -196,7 +196,9 @@ describe("the core carries the third level (migration as alias, Art. IV)", () =>
       }
     }
     expect(differences).toEqual([]);
-    const kicker = resolveCombination(modelo, {}).tokens["ero.teksto.text.typography.kind.kicker"];
+    const kicker = resolveCombination(modelo, {}).tokens[
+      "ero.teksto.text.typography.kind.kicker.size.1"
+    ];
     expect(kicker?.textTransform?.value).toBe("uppercase");
   });
 });
@@ -270,11 +272,10 @@ describe("pnpm vortaro:ero-tokenoj", () => {
     const lock = JSON.parse(readFileSync(join(dir, "data/ids.lock.json"), "utf8")) as {
       ids: Record<string, { type: string }>;
     };
-    const id = (
-      written.ero.butono.surface.fill.emphasis.high?.rest as {
-        $extensions: { "com.ciferecigo.fundamento": { id: string } };
-      }
-    ).$extensions["com.ciferecigo.fundamento"].id;
+    const rest = written.ero.butono.surface.fill.emphasis.high?.rest as
+      | { $extensions: { "com.ciferecigo.fundamento": { id: string } } }
+      | undefined;
+    const id = rest?.$extensions["com.ciferecigo.fundamento"].id ?? "";
     expect(lock.ids[id]?.type).toBe("token");
     // The hand-written part of the core is untouched: the first lines are the same bytes.
     expect(
