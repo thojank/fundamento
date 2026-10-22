@@ -67,7 +67,7 @@
 
 ### C – Abschluss
 - [x] **T2439 Doku** plan ② (Review, D-14–D-26, Messungen, Abweichungen 1–11, B-9–B-14, O-5–O-7, Messanleitung), tasks ②, README, Vojmapo.
-- [x] **T2440 PR #103** (Basis O-1 #100), CI grün (Lauf 39742860574, zweiter Versuch; B-17, O-9), Bericht mit der Zahl der Ero-Tokens und der Figma-Variablen.
+- [x] **T2440 PR #103** (Basis O-1 #100), CI grün (Lauf 39747762364 im ersten Versuch; B-17, O-9), Bericht mit der Zahl der Ero-Tokens und der Figma-Variablen.
 
 ### Messungen (②)
 
@@ -78,7 +78,7 @@
 | Figma-Variablen | 876 → 2 439 (Repo), 2 441 (provoj); 1 563 der dritten Ebene |
 | Zeiten | `pnpm vortaro:ero-tokenoj` 1,2 s; Komponentenseite ≈ 0,3 s; Prüfung je Setzen 1,8–1,9 s warm; Ablehnung mit O-3 4,5 s (B-11) |
 | Tests lokal | Modelo 3695 in 167 Dateien, Agordilo 110, Metiejo 170, MCP 407, CLI 75, Projekcioj 805 – je grün; Eroj 859 (2 übersprungen wie zuvor); `pnpm lint` und alle `check:*` grün |
-| CI ② | Lauf 39742860574 (`df32211`): alle acht Jobs grün im zweiten Versuch (erster Versuch: drei Flakes des Runners, B-17); `checks` 1:27, `unit` 5:23, `projekcioj` 6:41 / 7:47, `eroj` 7:19 / 2:19, `alirebleco-eroj` 3:52, `rendered-checks` 8:11; `fm modelo export` 20,3 s (zuvor 34,4 s rot in 39741149168), `derives provo twice` 65,5 s; dieser Eintrag im Folgecommit; Lauf 39745658397 (`38f444d`): Unit-Job rot an zwei Alirebleco-Timeouts (30 s), danach dritter Perf-Schritt (B-15), Lauf des Folgecommits dort |
+| CI ② | Lauf 39742860574 (`df32211`): alle acht Jobs grün im zweiten Versuch (erster Versuch: drei Flakes des Runners, B-17); `checks` 1:27, `unit` 5:23, `projekcioj` 6:41 / 7:47, `eroj` 7:19 / 2:19, `alirebleco-eroj` 3:52, `rendered-checks` 8:11; `fm modelo export` 20,3 s (zuvor 34,4 s rot in 39741149168), `derives provo twice` 65,5 s; dieser Eintrag im Folgecommit; Lauf 39745658397 (`38f444d`): Unit-Job rot an zwei Alirebleco-Timeouts (30 s), danach dritter Perf-Schritt (B-15): Lauf 39747762364 (`dfc9c6c`) alle acht Jobs grün im ersten Versuch, Wanduhr 11:58 – `checks` 1:46, `unit` 7:39, `projekcioj` 10:24 / 9:49, `eroj` 11:58 / 1:57, `alirebleco-eroj` 4:10, `rendered-checks` 10:46; `fm modelo export` 23,9 s, Ableitung zweimal 91,9 s, Alirebleco-Tests 17,3 s und 18,9 s |
 | Perf (B-15) | `pnpm perf` grün: Start 1 730 ms (Budget 2 000), resolve max 18,2 ms, explain max 5,7 ms, check_contrast Median 7,7 ms; Validierung 1,4 s → 0,7 s; `fm agordilo derive` 2,6 s → 1,9 s, `fm modelo export` 3,5 s → 2,4 s (Ausgaben byteidentisch) |
 
 
