@@ -24,10 +24,14 @@ function fm(args: readonly string[], initCwd: string | undefined = repoRoot): Ru
   const env: NodeJS.ProcessEnv = { ...process.env };
   delete env.INIT_CWD;
   if (initCwd !== undefined) env.INIT_CWD = initCwd;
+  // Spec 025 ③ (B-31): two packages of one Aspekto print a set-override-ambiguous warning per
+  // overridden token – 1.1 MB with 1 232 Ero-Tokens, over the 1 MiB default of spawnSync, which
+  // then kills the child. The buffer of the Modelo's e2e harness (64 MiB).
   const child = spawnSync(process.execPath, [built, ...args], {
     cwd: repoRoot,
     env,
     encoding: "utf8",
+    maxBuffer: 64 * 1024 * 1024,
   });
   return { code: child.status, stdout: child.stdout, stderr: child.stderr };
 }
