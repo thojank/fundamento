@@ -278,7 +278,7 @@ describe("the Uzo of the kampo (T004, A3)", () => {
       ["reveal-password", "ask-human"],
       // Spec 025 ①: the stepper is the kampo's own now (kind number with stepper); a time zone stops.
       ["decimal", "not-supported"],
-      ["date-range", "ask-human"],
+      ["date-range", "use-instead"],
       ["time-zone", "ask-human"],
       // Spec 015 ②: a file is the alsxutilo's.
       ["file", "use-instead"],
@@ -565,10 +565,16 @@ describe("the kampo of Spec 011 ①: password, number and date", () => {
       case: "decimal",
       action: "not-supported",
     });
+    // Spec 025 ②: the date range is the datelektilo's now; the kampo's boundary is closed
+    // (use-instead) and stands beside the answer (flipped with a Jugxo, OP-12).
+    expect(suggest("Zeitraum von bis").suggestion).toEqual({
+      ero: "datelektilo",
+      props: { mode: "range" },
+    });
     expect(suggest("Zeitraum von bis").boundary).toMatchObject({
       ero: "kampo",
       case: "date-range",
-      action: "ask-human",
+      action: "use-instead",
     });
     // Spec 025 ①: a counter with plus and minus is the kampo with its stepper now, no boundary.
     expect(suggest("Zähler mit Plus und Minus").suggestion).toEqual({

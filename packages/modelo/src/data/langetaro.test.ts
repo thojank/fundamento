@@ -29,7 +29,7 @@ const suggest = (goal: string) => {
 };
 
 describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
-  it("lives in data/eroj/langetaro/skemo.json, eighteenth of thirty-five Eroj", () => {
+  it("lives in data/eroj/langetaro/skemo.json, nineteenth of thirty-six Eroj", () => {
     expect(langetaro?.file).toBe("modelo/data/eroj/langetaro/skemo.json");
     expect(modelo.eroj[18]?.ero.name).toBe("langetaro");
   });

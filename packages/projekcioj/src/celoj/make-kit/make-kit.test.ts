@@ -52,6 +52,7 @@ describe("Make Kit sources (T018)", () => {
       "guidelines/components/avataro.md",
       "guidelines/components/avizo.md",
       "guidelines/components/butono.md",
+      "guidelines/components/datelektilo.md",
       "guidelines/components/dialogo.md",
       "guidelines/components/elektilo.md",
       "guidelines/components/elekto.md",
@@ -985,6 +986,26 @@ describe("Make Kit and the Eingabe of Spec 025 ①", () => {
       expect(component).toContain("**range-stated**");
       const kampo = kit(aspekto, "guidelines/components/kampo.md");
       expect(kampo).toContain("`stepper`");
+    },
+  );
+});
+
+// Spec 025 ② (plan ② D-13): Make picks every date near today, and every date range, with the
+// datelektilo whose field also takes the date typed — one sentence from the role textbox with a
+// calendar part; a date far away (a birthday) stays the kampo's of kind date.
+describe("Make Kit and the Datum of Spec 025 ②", () => {
+  it.each(ASPEKTOJ)(
+    "%s: the guidelines name the datelektilo beside the kampo; the component page names mode and the calendar",
+    (aspekto) => {
+      const guidelines = kit(aspekto, "guidelines/Guidelines.md");
+      expect(guidelines).toContain(
+        "- Every date near today a person picks, or a date range, is a `<Datelektilo>` whose field also takes the date typed; a date far away, like a birthday, is a `<Kampo>` of kind date.",
+      );
+      const component = kit(aspekto, "guidelines/components/datelektilo.md");
+      expect(component).toContain("# Datelektilo");
+      expect(component).toContain("`mode`");
+      expect(component).toContain("`disabled-dates`");
+      expect(component).toContain("calendar");
     },
   );
 });

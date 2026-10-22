@@ -28,6 +28,7 @@ describe("list_eroj", () => {
       "avataro",
       "avizo",
       "butono",
+      "datelektilo",
       "dialogo",
       "elektilo",
       "elekto",

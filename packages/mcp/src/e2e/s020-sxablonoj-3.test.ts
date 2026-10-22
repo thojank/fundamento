@@ -68,11 +68,11 @@ describe("the example dialogs of Spec 020 ③", () => {
     ).toEqual(["sxablono-region-props"]);
   });
 
-  it("list_eroj names thirty-five Eroj now", async () => {
+  it("list_eroj names thirty-six Eroj now", async () => {
     const listed = await output<{ eroj: { name: string }[] }>(client, "list_eroj", {});
     expect(listed.eroj.map((entry) => entry.name)).toEqual(
       expect.arrayContaining(["kodbloko", "markdovido"]),
     );
-    expect(listed.eroj).toHaveLength(35);
+    expect(listed.eroj).toHaveLength(36);
   });
 });

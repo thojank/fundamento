@@ -1870,3 +1870,51 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   }
 }
+
+// Spec 025 ② (G5, plan ② D-11): the rendered datelektilo — a single date with its help, a range,
+// an invalid and a disabled one — in every colour class: axe without a finding, closed and with
+// the calendar open; the focus ring of the chosen day at least 3:1 against the gap colour and the
+// calendar's ground; the chosen day's text at least 4.5:1 on its fill.
+const datelektiloj =
+  '<fm-datelektilo id="an-d1" name="lieferdatum" value="2026-10-24" required>Lieferdatum<span slot="help">Ein Datum ab heute.</span></fm-datelektilo><fm-datelektilo id="an-d2" name="zeitraum" mode="range" value-start="2026-10-06" value-end="2026-10-10">Zeitraum</fm-datelektilo><fm-datelektilo id="an-d3" value="2026-10-24" invalid>Frist<span slot="error">Wähle ein Datum ab heute.</span></fm-datelektilo><fm-datelektilo id="an-d4" value="2026-10-24" disabled>Aus</fm-datelektilo>';
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on the datelektilo closed and open; the chosen day's ring ≥ 3:1, its text ≥ 4.5:1`, async ({
+        page,
+        browserName,
+      }) => {
+        await page.clock.setFixedTime(new Date("2026-10-22T10:00:00"));
+        await serve(page, out, datelektiloj);
+        await page.evaluate(
+          ([a, s, k]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", k ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        expect(await axeViolations(page), "datelektilo closed").toEqual([]);
+        await page.locator("#an-d1").locator('[part="trigger"]').click();
+        const chosen = page.locator("#an-d1").locator('[part="cell"][aria-selected="true"]');
+        await expect(chosen).toBeFocused();
+        expect(await axeViolations(page), "datelektilo open").toEqual([]);
+        const [ring] = await focusRingContrasts(
+          page,
+          ['#an-d1 >>> [part=cell][aria-selected="true"]'],
+          browserName,
+        );
+        expect(ring?.gap, "ring against gap").toBeGreaterThanOrEqual(3);
+        expect(ring?.page, "ring against the calendar").toBeGreaterThanOrEqual(3);
+        const text = await chosen.evaluate((cell) => {
+          const style = getComputedStyle(cell);
+          return [style.color, style.backgroundColor];
+        });
+        expect(contrastOf(text[0] ?? "", text[1] ?? ""), "chosen day").toBeGreaterThanOrEqual(4.5);
+        await page.keyboard.press("Escape");
+      });
+    }
+  }
+}
