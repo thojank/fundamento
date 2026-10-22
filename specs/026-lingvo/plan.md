@@ -217,7 +217,7 @@ pnpm --filter @fundamento/modelo exec vitest run src/docs/docs.test.ts -t "Spec 
 - **Art. V (Clean Room):** konform. Die Namen sind eigene Übersetzungen, kein fremdes System wurde geöffnet.
 - **Art. VI (Regularo kun Kialoj):** konform. Keine Regulo geändert. `traduko-missing` ist eine Datenprüfung.
 - **Art. VII (Agenta Dokumentado):** konform. Die Dialoge der Spec sind MCP-Tests (`s026-lingvo.test.ts`).
-- **Art. X (Test-first):** konform. Rot in `a5c803c`, dann grün.
+- **Art. X (Test-first):** konform. Rot in `838d53f` (vor dem Rebase auf den Nachtrag von ① `a5c803c`), dann grün.
 - **Art. XI (Einfachheit):** konform. Kein neues Paket und keine Abhängigkeit. Ein Skript schaltet Vitrino und Studio.
 
 ### Entwurfsentscheidungen

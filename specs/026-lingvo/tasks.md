@@ -54,7 +54,7 @@
   - `vitrino.check.ts` (Schalter im Browser).
   - Doku-Test ② mit der Tabelle aus den Daten.
 
-  Rot in `a5c803c`:
+  Rot in `838d53f` (vor dem Rebase `a5c803c`):
   - Modelo: `nomoj.test.ts` lädt nicht, Doku 1 Test
   - Projekcioj: 6 von 8; grün waren „Esperanto ist Standard“ und „kein Bezeichner übersetzt“, weil `lingvo` noch nichts tat
   - Metiejo: 3
@@ -76,7 +76,7 @@
 
 | Was | Wert |
 |---|---|
-| Commits ② | rot `a5c803c`, grün und Doku im Folgecommit (Hash im PR) |
+| Commits ② | rot `838d53f`, grün `c9f5688` (vor dem Rebase auf `69720c5`: rot `a5c803c`, grün `8988254`), Hashes im Folgecommit |
 | Rot gemessen | Modelo 1 Datei + 1 Test, Projekcioj 6, Metiejo 3, MCP 3, CLI 1 |
 | Namen | 1 033 je Sprache: 40 Eroj, 5 Sxablonoj, 970 Teile/Achsen/Werte/Zustände/Slots/Regionen, 6 Dimensioj, 12 Werte |
 | Builds | Esperanto und Deutsch unterscheiden sich nur in `figma/plan.json`, `figma/plugin/code.js`, `figma/plugin/manifest.json` und `projekcioj.json` |
