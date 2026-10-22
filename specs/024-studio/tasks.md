@@ -67,7 +67,7 @@
 
 ### C – Abschluss
 - [x] **T2439 Doku** plan ② (Review, D-14–D-26, Messungen, Abweichungen 1–11, B-9–B-14, O-5–O-7, Messanleitung), tasks ②, README, Vojmapo.
-- [x] **T2440 PR #103** (Basis O-1 #100), CI grün (Lauf 39747762364 im ersten Versuch; B-17, O-9), Bericht mit der Zahl der Ero-Tokens und der Figma-Variablen.
+- [x] **T2440 PR #103** (Basis O-1 #100), CI grün im letzten Lauf mit Code (39747762364); der Lauf des Doku-Commits `e6009cb` (39749336845) ist in beiden Versuchen rot am Export-Test (30,1 s und 31,6 s; B-17, O-9), Bericht mit der Zahl der Ero-Tokens und der Figma-Variablen.
 
 ### Messungen (②)
 
