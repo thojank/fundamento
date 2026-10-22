@@ -67,10 +67,15 @@ Der Test „writes the export and one Tokens-Studio folder per Aspekto“ trägt
 - **B-4 (offen)** `fm modelo validate` mit zwei Paketen derselben Aspekto druckt je überschriebenem Token eine Warnung `set-override-ambiguous` – mit den Tokens von #104 1 605 Warnungen, 1,1 MB (Spec 025 ③ B-31). Die Ausgabe wächst mit jedem Token; eine Zusammenfassung je Set wäre lesbarer.
 - **B-5 (offen, O-2)** Der Job „Rendered accessibility“ lief auf `main` nach #103 (Lauf 39808894483, alle drei Engines) in sein Limit von 15 min und wurde abgebrochen; im PR (nur Chromium) 4 bis 6 min. Hier 411 s mit drei Engines.
 
+- **B-6 (offen, O-4)** Im Lauf dieses PR (39827200577) brauchte der Schritt „Playwright browsers“ der zwei Eroj-Shards 492 s und 736 s (`apt` mit `--with-deps` auf einem kalten Läufer; im Lauf von #104 21 s und 403 s), die Tests selbst je ≈ 70 s. Die Wanduhr des Laufs (13:59) lag damit über dem Pin „unter 12“, der Job unter seinem Limit von 15 min. Derselbe Mechanismus wie Spec 025 ③ B-28, unabhängig von dieser Änderung.
+
+**Bestätigt auf dem Läufer** (Lauf 39827200577, ein Läufer je Paket): `derives provo twice` 14,1 s statt 64 bis 126 s, der Export-Test 3,0 s statt 11 bis 36 s, die Paletten-Reguloj 7,6 s statt 14 bis 32 s – alle drei unter den alten Budgets von 120 s und 30 s, mit Abstand.
+
 ### Offen (für den Maintainer)
 
 - **O-1 Der erste `check_contrast`-Aufruf (B-3):** Vorschlag: im Modus `names` die Überlagerung nur für die genannten Tokens und ihre Alias-Ketten bilden statt für alle (Ausgaben byteidentisch) – eine eigene kleine Änderung, wenn der lokale Perf-Lauf ohne Faktor grün sein soll.
 - **O-2 Alirebleco auf `main` (B-5):** Vorschlag: den Job wie die Eroj in zwei Shards teilen (Playwright `--shard`), statt Budgets anzuheben.
+- **O-4 Browser-Pakete der Eroj-Shards (B-6):** Vorschlag: die `apt`-Pakete und Browser von Playwright cachen oder ein Container-Image mit den Engines nutzen, damit die Wanduhr nicht am Paketnetz hängt.
 - **O-3 Fünf Läufer statt einem (D-01):** je Läufer kommen Install und Build dazu (≈ 1,5 min); für ein öffentliches Repo kostenlos. Alternative mit weniger Läufern: zwei Gruppen (`modelo` | die übrigen vier) – dann teilen sich wieder vier Suiten einen Läufer, der CLI-Test eingeschlossen. Vorschlag: fünf.
 
 ### Messanleitung
