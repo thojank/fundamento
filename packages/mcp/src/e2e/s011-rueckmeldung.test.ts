@@ -176,6 +176,7 @@ describe("list_eroj and the briefs", () => {
       "elektilo",
       "elekto",
       "faldilo",
+      "glitilo",
       "ikono",
       "insigno",
       "kampo",

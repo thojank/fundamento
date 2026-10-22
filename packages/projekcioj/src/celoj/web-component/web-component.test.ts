@@ -45,7 +45,6 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/elekto.styles.ts",
       "eroj/src/generated/faldilo.styles.ts",
       "eroj/src/generated/filtrilo.styles.ts",
-      "eroj/src/generated/glitilo.styles.ts",
       "eroj/src/generated/fm-alsxutilo.ts",
       "eroj/src/generated/fm-apartigilo.ts",
       "eroj/src/generated/fm-atributlisto.ts",
@@ -87,6 +86,7 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/fm-teksto.ts",
       "eroj/src/generated/fm-titolo.ts",
       "eroj/src/generated/formularo.styles.ts",
+      "eroj/src/generated/glitilo.styles.ts",
       "eroj/src/generated/ikono.styles.ts",
       "eroj/src/generated/index.ts",
       "eroj/src/generated/insigno.styles.ts",
@@ -610,14 +610,20 @@ describe("Web Component Celo for the elektilo (Spec 010 ④)", () => {
     for (const template of templates(elektiloElement)) {
       expect(template).not.toMatch(/>[^<\s$][^<]*</);
     }
-    // The kampo is unchanged: an input, no chevron.
+    // The kampo is unchanged: an input, no chevron. Spec 025 ① (plan ① D-05): its input stands in
+    // a row, and the element holds the templates of the step buttons and the clear button it makes
+    // when kind and stepper ask for them.
     expect(parts(kampoElement)).toEqual([
       "field",
       "label",
       "required-mark",
+      "row",
       "control",
       "help",
       "error",
+      "decrement",
+      "increment",
+      "clear",
     ]);
     expect(kampoElement).not.toContain("<select");
   });
@@ -2091,11 +2097,11 @@ describe("Web Component Celo for the glitilo (Spec 025 ①)", () => {
       '<div part="thumb" id="thumb-start" role="slider" tabindex="0" aria-labelledby="label from">',
     );
     expect(element).toContain(
-      '<div part="thumb" id="thumb-end" role="slider" tabindex="0" aria-labelledby="label to" hidden>',
+      '<div part="thumb" id="thumb-end" role="slider" tabindex="0" hidden>',
     );
     expect(element).toContain('<span part="min-label" id="min-label"><slot name="min-label">');
     expect(element).toContain('<span part="max-label" id="max-label"><slot name="max-label">');
-    expect(element).toContain('<fm-kampo part="input" kind="number" hidden>');
+    expect(element).toContain('<fm-kampo part="number" kind="number" hidden>');
     for (const key of ["min-label-name", "max-label-name"]) expect(element).toContain(`"${key}"`);
     for (const key of ["aria-valuemin", "aria-valuemax", "aria-valuenow", "aria-valuetext"]) {
       expect(element).toContain(`"${key}"`);
@@ -2112,7 +2118,7 @@ describe("Web Component Celo for the glitilo (Spec 025 ①)", () => {
     expect(element).toContain("setPointerCapture");
   });
 
-  it("the stylesheet: the states stand at the thumb, the input part keyed by input (none without), the thumb size.target.min wide, the track spacing.small high", () => {
+  it("the stylesheet: the states stand at the thumb, the number part keyed by field (none without), the thumb size.target.min wide, the track spacing.small high", () => {
     const css = cssOf("glitilo");
     expect(css).toContain(':where([part="field"]:has([part="thumb"]:hover)) [part="thumb"]');
     expect(css).toContain(':where([part="field"]:has([part="thumb"]:active)) [part="thumb"]');
@@ -2120,15 +2126,15 @@ describe("Web Component Celo for the glitilo (Spec 025 ①)", () => {
       ':where([part="field"]:has([part="thumb"][aria-disabled="true"])) [part="thumb"]',
     );
     expect(css).toContain(
-      ':where([part="field"]:has([part="thumb"][aria-invalid="true"])) [part="track"]',
+      ':where([part="field"]:has([part="thumb"][aria-invalid="true"])) [part="fill"]',
     );
     expect(css).toContain(':where([part="field"]) [part="thumb"]:focus-visible');
     expect(css).toContain("inline-size: var(--fm-size-target-min);");
     expect(css).toContain("min-block-size: var(--fm-spacing-small);");
     expect(css).toContain("background-color: var(--fm-color-action-primary-rest);");
     expect(css).toContain("background-color: var(--fm-color-background-sunken);");
-    expect(css).toContain('[data-input="true"]');
-    expect(css).toContain('[data-input="false"]');
+    expect(css).toContain('[data-field="true"]');
+    expect(css).toContain('[data-field="false"]');
     expect(css).toContain("min-inline-size: var(--fm-size-scale-1000);");
     // The fill grows along the inline axis with the writing direction: a custom property the
     // element writes, no literal.
@@ -2138,9 +2144,9 @@ describe("Web Component Celo for the glitilo (Spec 025 ①)", () => {
     expect(cssPhysicalPropertyIssues("glitilo.css", css)).toEqual([]);
   });
 
-  it("the parity inventory reads input as a boolean and all six states", () => {
+  it("the parity inventory reads field as a boolean and all six states", () => {
     const inventory = stylesheetInventory(files["eroj/src/generated/glitilo.styles.ts"] ?? "");
-    expect(inventory.props).toEqual({ input: ["boolean"] });
+    expect(inventory.props).toEqual({ field: ["boolean"] });
     expect([...inventory.states].sort()).toEqual(
       ["disabled", "focus", "hover", "invalid", "pressed", "rest"].sort(),
     );
@@ -2155,6 +2161,17 @@ describe("Web Component Celo for the glitilo (Spec 025 ①)", () => {
 describe("Web Component Celo for the kampo of Spec 025 ① (time, stepper, clear)", () => {
   it("renders the stepper and the clear button as composed butono with their icons and words", () => {
     const element = files["eroj/src/generated/fm-kampo.ts"] ?? "";
+    expect(element).toContain('<div part="row"><input part="control" id="control"></div>');
+    const kampoCss = JSON.parse(
+      /export const KAMPO_CSS = (".*");/s.exec(
+        files["eroj/src/generated/kampo.styles.ts"] ?? "",
+      )?.[1] ?? '""',
+    ) as string;
+    expect(kampoCss).toContain(':where([part="row"]) { display: flex; align-items: center; }');
+    expect(kampoCss).toContain(':where([part="row"]) > [part="control"] { flex: 1 1 auto; }');
+    // The size of the step buttons is theirs, not the input's (the field's fallback selector).
+    expect(kampoCss).toContain(':where([part="field"][data-size="small"]) [part="decrement"]');
+    expect(kampoCss).not.toMatch(/\[part="control"\] \{[^}]*inline-size: var\(--fm-size-control/);
     expect(element).toContain('<fm-butono part="decrement" emphasis="low" hidden>');
     expect(element).toContain('<fm-ikono slot="icon-start" name="subtract">');
     expect(element).toContain('<fm-butono part="increment" emphasis="low" hidden>');

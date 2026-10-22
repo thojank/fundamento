@@ -922,8 +922,9 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
     expect(butonoOf(plan.components)?.structure).toBe("control");
     // Spec 011 ① (E8): the three new kinds and min, max, autocomplete are properties of the plan,
     // nothing is drawn differently (a date shows the closed field, like the elektilo; E3).
+    // Spec 025 ①: time, stepper and step are properties too; none of them keys a part.
     expect(set?.properties).toEqual({
-      kind: ["text", "email", "tel", "url", "search", "password", "number", "date"],
+      kind: ["text", "email", "tel", "url", "search", "password", "number", "date", "time"],
       value: "TEXT",
       placeholder: "TEXT",
       required: "BOOLEAN",
@@ -935,6 +936,8 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
       min: "TEXT",
       max: "TEXT",
       autocomplete: "TEXT",
+      stepper: "BOOLEAN",
+      step: "TEXT",
       state: ["rest", "hover", "focus", "disabled", "readonly", "invalid"],
     });
     expect(set?.variants).toHaveLength(3 * 6);
@@ -982,6 +985,7 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
       "password",
       "number",
       "date",
+      "time",
     ]);
     expect(items.kampo?.values["placeholder.color@size=medium,state=rest"]).toMatch(
       /^#[0-9a-f]{6}$/,
@@ -1800,7 +1804,7 @@ describe("Figma plan for the dialogo (Spec 011 ②)", () => {
       plan.components
         .filter((component) => component.composed !== undefined)
         .map((component) => component.set),
-    ).toEqual(["alsxutilo", "dialogo", "karto"]);
+    ).toEqual(["alsxutilo", "dialogo", "glitilo", "karto"]);
     const items = figmaPlanInventory(plan);
     expect(
       Object.keys(items.dialogo?.values ?? {}).filter((key) => key.startsWith("action-")),
@@ -3535,21 +3539,21 @@ describe("Figma plan after Nachlese 7 ② (B-2, B-4)", () => {
   });
 });
 
-// Spec 025 ① (plan ① D-04): the glitilo in Figma — a slider: range × input × state (range an axis
+// Spec 025 ① (plan ① D-04): the glitilo in Figma — a slider: range × field × state (range an axis
 // of its own, as the card's orientation: it keys no part, the second thumb does), the label a
 // field's word, the limits as end labels and help (the Vitrino's words), the track with its fill
-// and thumb bound; with input a stand-in in the kampo's look (composed.input) beside the track.
+// and thumb bound; with field a stand-in in the kampo's look (composed.number) beside the track.
 describe("the Figma plan draws the glitilo (Spec 025 ①)", () => {
   const set = plan.components.find((component) => component.set === "glitilo");
-  const variant = (range: string, input: string, state: string) =>
+  const variant = (range: string, field: string, state: string) =>
     set?.variants.find(
       (candidate) =>
         candidate.props.range === range &&
-        candidate.props.input === input &&
+        candidate.props.field === field &&
         candidate.props.state === state,
     );
 
-  it("a slider of range × input × state, twenty-four variants, the label a field's word, the limits and the help the Vitrino's", () => {
+  it("a slider of range × field × state, twenty-four variants, the label a field's word, the limits and the help the Vitrino's", () => {
     expect(structureOf("slider")).toBe("slider");
     expect(set?.structure).toBe("slider");
     expect(set?.extraAxes).toEqual(["range"]);
@@ -3564,7 +3568,7 @@ describe("the Figma plan draws the glitilo (Spec 025 ①)", () => {
     ]);
     expect(set?.properties).toMatchObject({
       range: "BOOLEAN",
-      input: "BOOLEAN",
+      field: "BOOLEAN",
       min: "NUMBER",
       max: "NUMBER",
       step: "NUMBER",
@@ -3579,44 +3583,44 @@ describe("the Figma plan draws the glitilo (Spec 025 ①)", () => {
     expect(set?.grid).toMatchObject({ rows: 4, columns: 6 });
   });
 
-  it("binds track, fill and thumb by state, the input part only with input; the thumb size.target.min", () => {
+  it("binds fill and thumb by state, the track once, the number part only with field; the thumb size.target.min", () => {
     expect(variant("false", "false", "rest")?.bindings).toMatchObject({
       "track.fill": "color/background/sunken",
       "track.height": "spacing/small",
       "track.radius": "radius/full",
-      "fill.fill": "color/action/primary/rest",
-      "thumb.fill": "color/action/primary/rest",
+      "fill.color": "color/action/primary/rest",
+      "thumb.color": "color/action/primary/rest",
       "thumb.size": "size/target/min",
       "thumb.radius": "radius/full",
       "min-label.color": "color/text/muted",
       "max-label.typography": "typography/caption",
       "box.gap": "spacing/small",
     });
-    expect(variant("false", "false", "rest")?.bindings["input.width"]).toBeUndefined();
-    expect(variant("false", "true", "rest")?.bindings["input.width"]).toBe("size/scale/1000");
-    expect(variant("false", "false", "hover")?.bindings["thumb.fill"]).toBe(
+    expect(variant("false", "false", "rest")?.bindings["number.width"]).toBeUndefined();
+    expect(variant("false", "true", "rest")?.bindings["number.width"]).toBe("size/scale/1000");
+    expect(variant("false", "false", "hover")?.bindings["thumb.color"]).toBe(
       "color/action/primary/hover",
     );
-    expect(variant("false", "false", "pressed")?.bindings["thumb.fill"]).toBe(
+    expect(variant("false", "false", "pressed")?.bindings["thumb.color"]).toBe(
       "color/action/primary/pressed",
     );
     expect(variant("false", "false", "invalid")?.bindings).toMatchObject({
-      "track.fill": "color/status/danger/subtle",
-      "fill.fill": "color/status/danger/basic",
-      "thumb.fill": "color/status/danger/basic",
+      "track.fill": "color/background/sunken",
+      "fill.color": "color/status/danger/basic",
+      "thumb.color": "color/status/danger/basic",
     });
-    expect(variant("false", "false", "disabled")?.bindings["thumb.fill"]).toBe(
+    expect(variant("false", "false", "disabled")?.bindings["thumb.color"]).toBe(
       "color/action/primary/disabled",
     );
     expect(variant("false", "false", "focus")?.focusVisible).toBe(true);
   });
 
-  it("the input stands in with the kampo's look of kind number (composed.input); the slider holds the plan's share of the track", () => {
-    expect(set?.composed?.input).toMatchObject({
+  it("the number field stands in with the kampo's look of kind number (composed.number); the slider holds the plan's share of the track", () => {
+    expect(set?.composed?.number).toMatchObject({
       ero: "kampo",
       props: { kind: "number", size: "medium", state: "rest" },
     });
-    expect(Object.keys(set?.composed?.input?.bindings ?? {})).toEqual(
+    expect(Object.keys(set?.composed?.number?.bindings ?? {})).toEqual(
       expect.arrayContaining(["surface.fill", "border.color", "box.height", "box.radius"]),
     );
     expect(set?.slider).toEqual({ share: 0.4, start: 0.2, end: 0.6 });

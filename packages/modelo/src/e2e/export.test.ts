@@ -57,6 +57,7 @@ describe("AK-06: the S6 dialog is answered from dist/modelo.json alone", () => {
       "elektilo",
       "elekto",
       "faldilo",
+      "glitilo",
       "ikono",
       "insigno",
       "kampo",

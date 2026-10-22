@@ -1832,7 +1832,7 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
 // with its end labels and the field beside — in every colour class: axe without a finding; the
 // focus ring of a thumb at least 3:1 against the gap colour and the ground.
 const glitiloj =
-  '<fm-glitilo id="an-g1" name="lautstaerke" value="40" required>Lautstärke<span slot="help">Zwischen 0 und 100.</span></fm-glitilo><fm-glitilo id="an-g2" name="preis" range input value-start="20" value-end="60">Preis<span slot="min-label">0</span><span slot="max-label">100</span></fm-glitilo><fm-glitilo id="an-g3" value="40" invalid>Pegel<span slot="error">Wähle einen Wert bis 100.</span></fm-glitilo><fm-glitilo id="an-g4" value="40" disabled>Aus</fm-glitilo>';
+  '<fm-glitilo id="an-g1" name="lautstaerke" value="40" required>Lautstärke<span slot="help">Zwischen 0 und 100.</span></fm-glitilo><fm-glitilo id="an-g2" name="preis" range field value-start="20" value-end="60">Preis<span slot="min-label">0</span><span slot="max-label">100</span></fm-glitilo><fm-glitilo id="an-g3" value="40" invalid>Pegel<span slot="error">Wähle einen Wert bis 100.</span></fm-glitilo><fm-glitilo id="an-g4" value="40" disabled>Aus</fm-glitilo>';
 
 for (const aspekto of ["komuna", "ekzemplo"]) {
   for (const scheme of ["light", "dark"]) {
@@ -1855,9 +1855,17 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
         await page.keyboard.press(TAB(browserName));
         const thumb = page.locator("#an-g1").locator('[part="thumb"]:not([hidden])').first();
         await expect(thumb).toBeFocused();
-        const [ring] = await focusRingContrasts(page, ["#an-g1 >>> [part=thumb]"], browserName);
-        expect(ring?.gap, "ring against gap").toBeGreaterThanOrEqual(3);
-        expect(ring?.page, "ring against page").toBeGreaterThanOrEqual(3);
+        // The ring stands on the thumb, not on the control (the track): measured there.
+        const ring = await thumb.evaluate((node) => {
+          const style = getComputedStyle(node);
+          return {
+            ring: style.outlineColor,
+            gap: /rgba?\([^)]*\)/.exec(style.boxShadow)?.[0] ?? "",
+            page: getComputedStyle(document.body).backgroundColor,
+          };
+        });
+        expect(contrastOf(ring.ring, ring.gap), "ring against gap").toBeGreaterThanOrEqual(3);
+        expect(contrastOf(ring.ring, ring.page), "ring against page").toBeGreaterThanOrEqual(3);
       });
     }
   }

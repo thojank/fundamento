@@ -1382,6 +1382,10 @@ export interface Skemo {
   };
   bindings: SkemoBinding[];
   a11y: SkemoA11Y;
+  /**
+   * The events the element says (Spec 025 ①, plan ① D-01): change, input, a cancelable remove; unique by name (skemo-event-invalid). Absent for an Ero that says none.
+   */
+  events?: SkemoEvent[];
   constraints?: SkemoConstraint[];
   /**
    * The goals a user may have with the Ero (delete, save, cancel); suggest_ero matches a word of the user against their keywords. Called goals, not intents, so that the word intent is free for a prop (Spec 007, OP-4, F1-T00).
@@ -1463,6 +1467,17 @@ export interface SkemoA11Y {
       [k: string]: NonEmptyText;
     };
   };
+}
+/**
+ * An event the element of an Ero says to the application (Spec 025 ①, plan ① D-01; benchmark gap 7): its name in the core grammar (change, input, remove), what it means, and whether the application may cancel it (a cancelable remove lets the application keep a tag). Platform-neutral (Art. VIII): a name, not a DOM event type.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SkemoEvent".
+ */
+export interface SkemoEvent {
+  name: Name;
+  cancelable?: boolean;
+  description: NonEmptyText;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema

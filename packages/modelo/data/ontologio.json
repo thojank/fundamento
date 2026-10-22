@@ -1219,7 +1219,10 @@
         "en": [
           "kampo",
           "field",
-          "input field"
+          "input field",
+          "search field",
+          "time field",
+          "stepper"
         ],
         "de": [
           "Eingabefeld",
@@ -1227,12 +1230,15 @@
           "kampo",
           "Passwortfeld",
           "Zahlenfeld",
-          "Datumsfeld"
+          "Datumsfeld",
+          "Suchfeld",
+          "Zeitfeld",
+          "Zähler"
         ]
       },
       "definition": {
-        "en": "A text field: takes one line of text from a person — text, an e-mail, a password, a whole number or a date. It always shows its label, and can show help and an error. Several lines are the tekstareo (use-instead).",
-        "de": "Ein Textfeld: nimmt eine Zeile Text von einer Person – Text, E-Mail, Passwort, ganze Zahl oder Datum. Es zeigt seine Beschriftung immer und kann Hilfe und Fehler zeigen. Mehrere Zeilen sind der tekstareo (use-instead)."
+        "en": "A text field: takes one line of text from a person — text, an e-mail, a password, a whole number (with step buttons where stepper says so), a date, a time or a search term (with a clear button). It always shows its label, and can show help and an error. Several lines are the tekstareo (use-instead), an approximate value the glitilo's.",
+        "de": "Ein Textfeld: nimmt eine Zeile Text von einer Person – Text, E-Mail, Passwort, ganze Zahl (mit Schrittknöpfen, wo stepper es sagt), Datum, Uhrzeit oder Suchbegriff (mit Löschen-Knopf). Es zeigt seine Beschriftung immer und kann Hilfe und Fehler zeigen. Mehrere Zeilen sind der tekstareo (use-instead), ein ungefährer Wert gehört dem glitilo."
       },
       "broader": [
         "#Ero"
@@ -1257,6 +1263,10 @@
         {
           "predicate": "references",
           "target": "#Tekstareo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Glitilo"
         }
       ]
     },
@@ -2167,6 +2177,47 @@
         {
           "predicate": "references",
           "target": "#Apartigilo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Glitilo",
+      "term": "Glitilo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Glitilo",
+        "en": "slider",
+        "de": "Schieberegler"
+      },
+      "altLabel": {
+        "en": [
+          "glitilo",
+          "slider",
+          "range slider",
+          "track"
+        ],
+        "de": [
+          "Schieberegler",
+          "Regler",
+          "Bereichsregler",
+          "glitilo"
+        ]
+      },
+      "definition": {
+        "en": "A slider: sets a value, or a range between two values, within known limits by dragging a thumb along a track or with the keys (arrows, Page by ten steps, Home and End). Its label always shows; the limits stand at both ends or in the help (range-stated); with input a kampo of kind number beside the track takes the value typed. The dragged thumb is pressed, the states stand at the thumb; a range sends both values. An exact value is the kampo's; a vertical track and labelled ticks stop with a person.",
+        "de": "Ein Schieberegler: setzt einen Wert oder einen Bereich zwischen zwei Werten in bekannten Grenzen, indem ein Griff auf einer Spur gezogen wird oder mit den Tasten (Pfeile, Bild um zehn Schritte, Pos1 und Ende). Die Beschriftung zeigt sich immer; die Grenzen stehen an beiden Enden oder in der Hilfe (range-stated); mit input nimmt ein kampo kind=number neben der Spur den Wert getippt an. Der gezogene Griff ist pressed, die Zustände stehen am Griff; ein Bereich sendet beide Werte. Ein genauer Wert gehört dem kampo; eine senkrechte Spur und beschriftete Skalenstriche halten bei einer Person."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Kampo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Butono"
         }
       ]
     },

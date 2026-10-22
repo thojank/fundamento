@@ -4,7 +4,8 @@
 // now and text; the keys of APG move the thumb (arrows along the writing direction, Up/Down, Page
 // by ten steps, Home/End), the pointer drags it; the value is the form value; with input a
 // composed kampo of kind number stands beside the track and both stay in step; a range keeps the
-// end at or after the start. Chromium, Firefox and WebKit.
+// end at or after the start. Chromium, Firefox and WebKit. The prop of the field beside the track is
+// `field` (the spec says input; a web word, Art. VIII).
 
 import { expect, type Page, test } from "@playwright/test";
 import { TAB } from "./alirebleco.js";
@@ -54,8 +55,8 @@ const stateOf = (page: Page) =>
       fillSize: (shadow.querySelector('[part="track"]') as HTMLElement).style.getPropertyValue(
         "--fm-fill-size",
       ),
-      inputHidden: (shadow.querySelector('[part="input"]') as HTMLElement).hidden,
-      inputValue: shadow.querySelector('[part="input"]')?.getAttribute("value"),
+      inputHidden: (shadow.querySelector('[part="number"]') as HTMLElement).hidden,
+      inputValue: shadow.querySelector('[part="number"]')?.getAttribute("value"),
     };
   });
 
@@ -104,7 +105,7 @@ test.describe("fm-glitilo behaviour", () => {
       "thumb",
       "thumb",
       "max-label",
-      "input",
+      "number",
       "help",
       "error",
     ]);
@@ -170,27 +171,38 @@ test.describe("fm-glitilo behaviour", () => {
       page.locator("#g").locator('[part="track"]').boundingBox(),
       page.locator("#g").locator('[part="fill"]').boundingBox(),
     ]);
-    expect((fill?.x ?? 0) + (fill?.width ?? 0)).toBeCloseTo((track?.x ?? 0) + (track?.width ?? 0), 0);
+    expect((fill?.x ?? 0) + (fill?.width ?? 0)).toBeCloseTo(
+      (track?.x ?? 0) + (track?.width ?? 0),
+      0,
+    );
   });
 
-  test("the pointer: a press on the track moves the nearest thumb there, a drag follows the pointer; pressed while dragged", async ({
+  test("the pointer: a press on the track moves the nearest thumb there, a press on the thumb is pressed, a drag follows the pointer", async ({
     page,
   }) => {
     await serve(page, out, FORM('value="0"', HELP));
     const track = page.locator("#g").locator('[part="track"]');
     const box = await track.boundingBox();
     if (box === null) throw new Error("no track");
-    await page.mouse.move(box.x + box.width * 0.5, box.y + box.height / 2);
+    await page.mouse.click(box.x + box.width * 0.5, box.y + box.height / 2);
+    const moved = Number((await stateOf(page)).value);
+    expect(moved).toBeGreaterThanOrEqual(45);
+    expect(moved).toBeLessThanOrEqual(55);
+    const thumb = await thumbs(page).first().boundingBox();
+    if (thumb === null) throw new Error("no thumb");
+    await page.mouse.move(thumb.x + thumb.width / 2, thumb.y + thumb.height / 2);
     await page.mouse.down();
-    const pressed = await thumbs(page)
-      .first()
-      .evaluate((thumb) => thumb.matches(":active"));
-    expect(pressed).toBe(true);
+    expect(
+      await thumbs(page)
+        .first()
+        .evaluate((node) => node.matches(":active")),
+    ).toBe(true);
     await page.mouse.move(box.x + box.width * 0.75, box.y + box.height / 2, { steps: 5 });
     await page.mouse.up();
     const value = Number((await stateOf(page)).value);
     expect(value).toBeGreaterThanOrEqual(70);
     expect(value).toBeLessThanOrEqual(80);
+    await expect(thumbs(page).first()).toBeFocused();
   });
 
   test("range: two thumbs named Von and Bis after the label, the end never before the start; both values are the form value", async ({
@@ -204,8 +216,12 @@ test.describe("fm-glitilo behaviour", () => {
         '<span slot="min-label">0</span><span slot="max-label">100</span>',
       ),
     );
-    await expect(page.getByRole("slider", { name: `Lautstärke ${word("min-label-name")}` })).toBeVisible();
-    await expect(page.getByRole("slider", { name: `Lautstärke ${word("max-label-name")}` })).toBeVisible();
+    await expect(
+      page.getByRole("slider", { name: `Lautstärke ${word("min-label-name")}` }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("slider", { name: `Lautstärke ${word("max-label-name")}` }),
+    ).toBeVisible();
     const state = await stateOf(page);
     expect(state.thumbs.map((thumb) => [thumb.now, thumb.min, thumb.max])).toEqual([
       ["20", "0", "60"],
@@ -223,11 +239,11 @@ test.describe("fm-glitilo behaviour", () => {
     expect((await stateOf(page)).end).toBe("60");
   });
 
-  test("with input a composed kampo of kind number stands beside the track; typing into it moves the thumb, the keys write into it", async ({
+  test("with field a composed kampo of kind number stands beside the track; typing into it moves the thumb, the keys write into it", async ({
     page,
   }) => {
-    await serve(page, out, FORM('input value="40"', HELP));
-    const field = page.locator("#g").locator('[part="input"]');
+    await serve(page, out, FORM('field value="40"', HELP));
+    const field = page.locator("#g").locator('[part="number"]');
     await expect(field).toBeVisible();
     await expect(field).toHaveAttribute("kind", "number");
     await expect(field).toHaveAttribute("min", "0");
@@ -291,7 +307,10 @@ test.describe("fm-glitilo behaviour", () => {
     const host = await page.locator("#g").boundingBox();
     expect(host?.width).toBeCloseTo(420, 0);
     for (const density of ["compact", "default", "comfortable"]) {
-      await page.evaluate((d) => document.documentElement.setAttribute("data-fm-density", d), density);
+      await page.evaluate(
+        (d) => document.documentElement.setAttribute("data-fm-density", d),
+        density,
+      );
       const thumb = await thumbs(page).first().boundingBox();
       expect(thumb?.width, density).toBeGreaterThanOrEqual(24);
       expect(thumb?.height, density).toBeGreaterThanOrEqual(24);

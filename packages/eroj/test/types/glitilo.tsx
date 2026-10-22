@@ -1,11 +1,11 @@
 // Type test of the React wrapper of the glitilo (Spec 025 ①, plan ① D-09): props are typed from
-// the Skemo; min, max, step, value, value-start and value-end are numbers, range and input are
+// the Skemo; min, max, step, value, value-start and value-end are numbers, range and field are
 // booleans. Each line marked as an expected error must fail to compile; every other line must
 // compile.
 import { Glitilo } from "@fundamento/eroj/react";
 
 export const valid = (
-  <Glitilo min={0} max={100} step={5} value={40} input required name="lautstaerke">
+  <Glitilo min={0} max={100} step={5} value={40} field required name="lautstaerke">
     Lautstärke
     <span slot="help">Zwischen 0 und 100.</span>
   </Glitilo>

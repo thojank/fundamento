@@ -42,6 +42,7 @@ describe("navigado in the repo Modelo (section ⑤, G1, G2, E7)", () => {
       "elektilo",
       "elekto",
       "faldilo",
+      "glitilo",
       "ikono",
       "insigno",
       "kampo",

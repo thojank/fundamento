@@ -168,6 +168,7 @@ describe("list_eroj and the briefs (acceptance 1)", () => {
       "elektilo",
       "elekto",
       "faldilo",
+      "glitilo",
       "ikono",
       "insigno",
       "kampo",

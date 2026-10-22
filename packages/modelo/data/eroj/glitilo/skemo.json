@@ -1,0 +1,488 @@
+{
+  "ero": {
+    "id": "ero_01M5GCQ9D2C6W8R89QXM1FQYE1",
+    "name": "glitilo",
+    "skemo": "ske_01M5GCQ9SFM2M83B6VF3TJYVSP",
+    "description": "A slider: sets a value, or a range between two values, within known limits by dragging or with the keys. It always shows its label and names its limits at both ends or in its help."
+  },
+  "skemo": {
+    "id": "ske_01M5GCQ9SFM2M83B6VF3TJYVSP",
+    "ero": "ero_01M5GCQ9D2C6W8R89QXM1FQYE1",
+    "props": [
+      {
+        "name": "min",
+        "kind": "number",
+        "default": 0,
+        "description": "The lowest value; the start of the track (Regulo range-stated: a bound is named at the end or in the help)."
+      },
+      {
+        "name": "max",
+        "kind": "number",
+        "default": 100,
+        "description": "The highest value; the end of the track."
+      },
+      {
+        "name": "step",
+        "kind": "number",
+        "default": 1,
+        "description": "How far one key press or one notch of the drag moves; Page keys move ten steps."
+      },
+      {
+        "name": "value",
+        "kind": "number",
+        "description": "The current value of a single slider; empty until a person sets one (a required slider holds the form then)."
+      },
+      {
+        "name": "value-start",
+        "kind": "number",
+        "description": "The lower value of a range (constraint: only with range)."
+      },
+      {
+        "name": "value-end",
+        "kind": "number",
+        "description": "The upper value of a range, never before value-start (constraint: only with range)."
+      },
+      {
+        "name": "range",
+        "kind": "boolean",
+        "default": false,
+        "description": "Two thumbs for a range between two values instead of one for a value."
+      },
+      {
+        "name": "field",
+        "kind": "boolean",
+        "default": false,
+        "description": "A number field beside the track that shows the value and takes it typed (WCAG 2.5.7: dragging has an alternative without dragging; the keys are one, the field another)."
+      },
+      {
+        "name": "required",
+        "kind": "boolean",
+        "default": false,
+        "description": "A value must be set; marked visibly and audibly (Regulo required-marked)."
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean",
+        "default": false,
+        "description": "Not available; skipped by the keyboard."
+      },
+      {
+        "name": "readonly",
+        "kind": "boolean",
+        "default": false,
+        "description": "Readable and focusable, not changeable."
+      },
+      {
+        "name": "invalid",
+        "kind": "boolean",
+        "default": false,
+        "description": "The value is wrong; true whenever the slot error is filled (constraint)."
+      },
+      {
+        "name": "name",
+        "kind": "string",
+        "description": "The name in the form; without effect in a design tool. A range sends both values under it."
+      }
+    ],
+    "states": [
+      "rest",
+      "hover",
+      "focus",
+      "pressed",
+      "disabled",
+      "invalid"
+    ],
+    "slots": [
+      {
+        "name": "label",
+        "default": true,
+        "text": true
+      },
+      {
+        "name": "help",
+        "text": true
+      },
+      {
+        "name": "error",
+        "text": true
+      },
+      {
+        "name": "min-label",
+        "text": true
+      },
+      {
+        "name": "max-label",
+        "text": true
+      }
+    ],
+    "parts": {
+      "label": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        }
+      },
+      "required-mark": {
+        "color": {
+          "fixed": "color.status.danger.text"
+        }
+      },
+      "track": {
+        "fill": {
+          "fixed": "color.background.sunken"
+        },
+        "height": {
+          "fixed": "spacing.small"
+        },
+        "radius": {
+          "fixed": "radius.full"
+        }
+      },
+      "fill": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "radius": {
+          "fixed": "radius.full"
+        }
+      },
+      "thumb": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "size": {
+          "fixed": "size.target.min"
+        },
+        "radius": {
+          "fixed": "radius.full"
+        }
+      },
+      "number": {
+        "width": {
+          "by": [
+            "field"
+          ]
+        }
+      },
+      "min-label": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "max-label": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "help": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "error": {
+        "color": {
+          "fixed": "color.status.danger.text"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "focus-ring": {
+        "ring": {
+          "fixed": "focus.ring"
+        },
+        "offset": {
+          "fixed": "focus.offset"
+        },
+        "color": {
+          "fixed": "color.focus.inner"
+        }
+      },
+      "box": {
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      },
+      "motion": {
+        "duration": {
+          "fixed": "motion.duration.fast"
+        },
+        "easing": {
+          "fixed": "motion.easing.standard"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "label",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "label",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.text.disabled"
+      },
+      {
+        "part": "fill",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.action.primary.rest"
+      },
+      {
+        "part": "fill",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.action.primary.disabled"
+      },
+      {
+        "part": "fill",
+        "property": "color",
+        "when": {
+          "state": "invalid"
+        },
+        "token": "color.status.danger.basic"
+      },
+      {
+        "part": "thumb",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.action.primary.rest"
+      },
+      {
+        "part": "thumb",
+        "property": "color",
+        "when": {
+          "state": "hover"
+        },
+        "token": "color.action.primary.hover"
+      },
+      {
+        "part": "thumb",
+        "property": "color",
+        "when": {
+          "state": "focus"
+        },
+        "token": "color.action.primary.rest"
+      },
+      {
+        "part": "thumb",
+        "property": "color",
+        "when": {
+          "state": "pressed"
+        },
+        "token": "color.action.primary.pressed"
+      },
+      {
+        "part": "thumb",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.action.primary.disabled"
+      },
+      {
+        "part": "thumb",
+        "property": "color",
+        "when": {
+          "state": "invalid"
+        },
+        "token": "color.status.danger.basic"
+      },
+      {
+        "part": "number",
+        "property": "width",
+        "when": {
+          "field": "false"
+        },
+        "token": "none"
+      },
+      {
+        "part": "number",
+        "property": "width",
+        "when": {
+          "field": "true"
+        },
+        "token": "size.scale.1000"
+      }
+    ],
+    "a11y": {
+      "role": "slider",
+      "name": [
+        "slot:label"
+      ],
+      "description": [
+        "slot:help",
+        "slot:error"
+      ],
+      "states": {
+        "required": [
+          "aria-required"
+        ],
+        "invalid": [
+          "aria-invalid"
+        ],
+        "disabled": [
+          "aria-disabled"
+        ],
+        "readonly": [
+          "aria-readonly"
+        ]
+      },
+      "keys": [
+        "ArrowLeft",
+        "ArrowRight",
+        "ArrowUp",
+        "ArrowDown",
+        "PageUp",
+        "PageDown",
+        "Home",
+        "End"
+      ],
+      "texts": {
+        "required": {
+          "de": "erforderlich",
+          "en": "required"
+        },
+        "min-label-name": {
+          "de": "Von",
+          "en": "From"
+        },
+        "max-label-name": {
+          "de": "Bis",
+          "en": "To"
+        }
+      }
+    },
+    "events": [
+      {
+        "name": "input",
+        "description": "The value changes while a thumb is dragged or a key is held."
+      },
+      {
+        "name": "change",
+        "description": "A thumb comes to rest on a new value, or the field beside it is left."
+      }
+    ],
+    "constraints": [
+      {
+        "when": {
+          "slot:error": "filled"
+        },
+        "allowed": {
+          "invalid": [
+            "true"
+          ]
+        },
+        "kialo": "An error text without the error state is a contradiction a screen reader cannot resolve: it reads a fault on a slider that says it is fine."
+      },
+      {
+        "when": {
+          "disabled": "true"
+        },
+        "allowed": {
+          "readonly": [
+            "false"
+          ]
+        },
+        "kialo": "Two reasons why one cannot move the thumb are one too many; disabled wins."
+      },
+      {
+        "when": {
+          "prop:value-start": "filled"
+        },
+        "allowed": {
+          "range": [
+            "true"
+          ]
+        },
+        "kialo": "A lower value needs a second thumb to stand against; without range the one value is value."
+      },
+      {
+        "when": {
+          "prop:value-end": "filled"
+        },
+        "allowed": {
+          "range": [
+            "true"
+          ]
+        },
+        "kialo": "An upper value needs a second thumb to stand against; without range the one value is value."
+      }
+    ],
+    "goals": [
+      {
+        "goal": "slide",
+        "keywords": {
+          "en": [
+            "slider",
+            "approximate",
+            "roughly",
+            "volume",
+            "brightness"
+          ],
+          "de": [
+            "schieberegler",
+            "regler",
+            "ungefähr",
+            "etwa",
+            "lautstärke",
+            "helligkeit",
+            "pegel"
+          ]
+        },
+        "props": {},
+        "regulo": "range-stated"
+      },
+      {
+        "goal": "value-range",
+        "keywords": {
+          "en": [
+            "range-slider",
+            "span",
+            "min-max"
+          ],
+          "de": [
+            "preisbereich",
+            "wertebereich",
+            "spanne"
+          ]
+        },
+        "props": {
+          "range": true,
+          "field": true
+        },
+        "regulo": "range-stated"
+      }
+    ]
+  }
+}

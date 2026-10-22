@@ -855,7 +855,7 @@ describe("the kompletigilo fills the active suggestion (N-8)", () => {
 
 // Spec 025 ① (plan ① D-04): the plugin draws the glitilo — every variant a column of label, the
 // row (start label, the track with its fill and the ring around the thumb — two thumbs with
-// range — the end label, the stand-in of the input shown only with input), help and error; the
+// range — the end label, the stand-in of the number field shown only with field), help and error; the
 // fill the plan's share of the track. A second run writes nothing.
 describe("the plugin draws the glitilo (Spec 025 ①)", () => {
   const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
@@ -863,7 +863,7 @@ describe("the plugin draws the glitilo (Spec 025 ①)", () => {
     (node?.properties.fills as { boundVariables?: { color?: { name: string } } }[] | undefined)?.[0]
       ?.boundVariables?.color?.name;
 
-  it("every variant: label, row, help, error; the track with fill and thumb(s); the input only with input; a second run writes nothing", async () => {
+  it("every variant: label, row, help, error; the track with fill and thumb(s); the number field only with field; a second run writes nothing", async () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     const set = pageNodes(double).find((node) => node.name === "glitilo");
@@ -878,32 +878,33 @@ describe("the plugin draws the glitilo (Spec 025 ①)", () => {
         "min-label",
         "track",
         "max-label",
-        "input",
+        "number",
       ]);
       expect(descendant(variant, "min-label")?.properties.characters).toBe("0");
       expect(descendant(variant, "max-label")?.properties.characters).toBe("100");
       expect(descendant(variant, "help")?.properties.characters).toBe("Zwischen 0 und 100.");
       const ranged = variant.name.includes("range=true");
       const track = descendant(variant, "track");
-      expect(track?.children.map((child) => child.name), variant.name).toEqual(
-        ranged ? ["fill", "focus-ring", "focus-ring-end"] : ["fill", "focus-ring"],
-      );
+      expect(
+        track?.children.map((child) => child.name),
+        variant.name,
+      ).toEqual(ranged ? ["lead", "focus-ring", "fill", "focus-ring-end"] : ["fill", "focus-ring"]);
       expect(descendant(variant, "thumb")).toBeDefined();
       expect(descendant(variant, "thumb-end") !== undefined, variant.name).toBe(ranged);
-      const withInput = variant.name.includes("input=true");
-      expect(descendant(variant, "input")?.properties.visible, variant.name).toBe(withInput);
+      const withField = variant.name.includes("field=true");
+      expect(descendant(variant, "number")?.properties.visible, variant.name).toBe(withField);
       expect(bound(descendant(variant, "thumb"), "width")).toBe("size/target/min");
       expect(bound(track, "minHeight")).toBe("spacing/small");
       expect(bound(track, "cornerRadius")).toBe("radius/full");
     }
     const rest = set?.children.find(
-      (child) => child.name === "range=false, input=false, state=rest",
+      (child) => child.name === "range=false, field=false, state=rest",
     );
     expect(paintOf(descendant(rest, "track"))).toBe("color/background/sunken");
     expect(paintOf(descendant(rest, "fill"))).toBe("color/action/primary/rest");
     expect(paintOf(descendant(rest, "thumb"))).toBe("color/action/primary/rest");
     const invalid = set?.children.find(
-      (child) => child.name === "range=false, input=false, state=invalid",
+      (child) => child.name === "range=false, field=false, state=invalid",
     );
     expect(paintOf(descendant(invalid, "thumb"))).toBe("color/status/danger/basic");
     const before = double.snapshot();

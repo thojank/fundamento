@@ -63,9 +63,9 @@ describe("the input dialogs of the spec (Spec 025 ①)", () => {
     expect(answer.kialo).toBe(kialoOf("range-stated"));
   });
 
-  it("'Preisbereich von bis' → the glitilo with range and input, citing range-stated", async () => {
+  it("'Preisbereich von bis' → the glitilo with range and field, citing range-stated", async () => {
     const answer = await output<Suggested>(client, "suggest_ero", { goal: "Preisbereich von bis" });
-    expect(answer.suggestion).toEqual({ ero: "glitilo", props: { range: true, input: true } });
+    expect(answer.suggestion).toEqual({ ero: "glitilo", props: { range: true, field: true } });
     expect(answer.kialo).toBe(kialoOf("range-stated"));
   });
 
@@ -73,15 +73,24 @@ describe("the input dialogs of the spec (Spec 025 ①)", () => {
     const answer = await output<Suggested>(client, "suggest_ero", {
       goal: "Regler für einen genauen Wert",
     });
-    expect(answer.suggestion).toEqual({ ero: "kampo", props: { kind: "number" } });
-    expect(answer.kialo).toBe(exact.kialo);
-    const time = await output<Suggested>(client, "suggest_ero", { goal: "Uhrzeit mit Zeitzone" });
-    expect(time.boundary).toEqual({
-      ero: "kampo",
-      case: "time-zone",
-      action: "ask-human",
-      kialo: zone.kialo,
+    // The instead entry names the Ero, not a kind: the kampo's own goals decide the kind.
+    expect(answer.suggestion).toEqual({ ero: "kampo", props: {} });
+    expect(answer.boundary).toEqual({
+      ero: "glitilo",
+      case: "exact-value",
+      action: "use-instead",
+      kialo: exact.kialo,
     });
+    // The goal time and the boundary tie: a person decides, both candidates named (OP-12).
+    const time = await output<
+      Suggested & { candidates?: { kind: string; case?: string; goal?: string; kialo?: string }[] }
+    >(client, "suggest_ero", { goal: "Uhrzeit mit Zeitzone" });
+    expect(time.action).toBe("ask-human");
+    expect(time.candidates?.map((candidate) => candidate.case ?? candidate.goal)).toEqual([
+      "time-zone",
+      "time",
+    ]);
+    expect(time.candidates?.[0]?.kialo).toBe(zone.kialo);
   });
 
   it("check_usage: a glitilo with a bound and no stated limit fails range-stated; with the help or both end labels it passes; the kampo of kind number alike", async () => {
@@ -108,18 +117,24 @@ describe("the input dialogs of the spec (Spec 025 ①)", () => {
     expect(labelled.valid).toBe(true);
     const number = await output<Judged>(client, "check_usage", {
       instances: [
-        { ero: "kampo", props: { kind: "number", min: "1", max: "10" }, label: "Menge", texts: {}, lingvo: "de" },
+        {
+          ero: "kampo",
+          props: { kind: "number", min: "1", max: "10" },
+          label: "Menge",
+          texts: {},
+          lingvo: "de",
+        },
       ],
     });
     expect(number.violations.map((violation) => violation.issue.rule)).toEqual(["range-stated"]);
   });
 
-  it("lists thirty-five Eroj; the brief of the glitilo names input as its axis and the label as its duty; get_ero names its events", async () => {
+  it("lists thirty-five Eroj; the brief of the glitilo names field as its axis and the label as its duty; get_ero names its events", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
     expect(listed.eroj).toHaveLength(35);
     expect(listed.eroj.map((ero) => ero.name)).toContain("glitilo");
     const brief = await output<Brief>(client, "get_ero", { name: "glitilo", brief: true });
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["input"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["field"]);
     expect(brief.props?.map((prop) => prop.name)).toContain("range");
     expect(brief.required).toEqual({ props: [], slots: ["label"] });
     const full = await output<Full>(client, "get_ero", { name: "glitilo" });

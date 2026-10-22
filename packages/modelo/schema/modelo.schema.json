@@ -2191,6 +2191,13 @@
         "a11y": {
           "$ref": "#/$defs/SkemoA11y"
         },
+        "events": {
+          "description": "The events the element says (Spec 025 ①, plan ① D-01): change, input, a cancelable remove; unique by name (skemo-event-invalid). Absent for an Ero that says none.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SkemoEvent"
+          }
+        },
         "constraints": {
           "type": "array",
           "items": {
@@ -2431,6 +2438,23 @@
         }
       },
       "required": ["role", "name", "states", "keys"],
+      "additionalProperties": false
+    },
+    "SkemoEvent": {
+      "description": "An event the element of an Ero says to the application (Spec 025 ①, plan ① D-01; benchmark gap 7): its name in the core grammar (change, input, remove), what it means, and whether the application may cancel it (a cancelable remove lets the application keep a tag). Platform-neutral (Art. VIII): a name, not a DOM event type.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "cancelable": {
+          "type": "boolean"
+        },
+        "description": {
+          "$ref": "#/$defs/NonEmptyText"
+        }
+      },
+      "required": ["name", "description"],
       "additionalProperties": false
     },
     "SkemoConstraint": {
@@ -3024,7 +3048,11 @@
             {
               "description": "Over a list of instances the prop named in of never jumps up by more than one step from the instance before (Spec 014 ③, plan ③ D-03): the levels of headings; a check over the list, no count.",
               "type": "object",
-              "properties": { "kind": { "const": "levels-in-order" } },
+              "properties": {
+                "kind": {
+                  "const": "levels-in-order"
+                }
+              },
               "required": ["kind"],
               "additionalProperties": false
             },
@@ -3328,7 +3356,14 @@
             "$ref": "#/$defs/Name"
           },
           "additionalProperties": {
-            "oneOf": [{ "type": "string" }, { "type": "boolean" }]
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
           }
         },
         "primary": {
@@ -3418,7 +3453,14 @@
                   "$ref": "#/$defs/Name"
                 },
                 "additionalProperties": {
-                  "oneOf": [{ "type": "string" }, { "type": "boolean" }]
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "boolean"
+                    }
+                  ]
                 }
               }
             },
@@ -3528,7 +3570,17 @@
             "$ref": "#/$defs/Name"
           },
           "additionalProperties": {
-            "oneOf": [{ "type": "string" }, { "type": "boolean" }, { "type": "number" }]
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "number"
+              }
+            ]
           }
         },
         "regions": {
@@ -3556,7 +3608,17 @@
                         "$ref": "#/$defs/Name"
                       },
                       "additionalProperties": {
-                        "oneOf": [{ "type": "string" }, { "type": "boolean" }, { "type": "number" }]
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
                       }
                     }
                   },
@@ -3807,10 +3869,24 @@
                 "$ref": "#/$defs/NonEmptyText"
               },
               "vorher": {
-                "oneOf": [{ "type": "number" }, { "type": "string" }]
+                "oneOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
               },
               "nachher": {
-                "oneOf": [{ "type": "number" }, { "type": "string" }]
+                "oneOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
               }
             },
             "required": ["regler", "vorher", "nachher"],

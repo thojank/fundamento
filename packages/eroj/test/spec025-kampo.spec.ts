@@ -18,20 +18,22 @@ const field = (attributes: string, slots = "") =>
   `<form id="f"><fm-kampo id="a" name="n" ${attributes}>Menge${slots}</fm-kampo></form>`;
 
 const visibleParts = (page: Page) =>
-  page.locator("#a").evaluate((element) =>
-    [...(element.shadowRoot?.querySelectorAll("[part]") ?? [])]
-      .filter((n) => !(n as HTMLElement).hidden)
-      .map((n) => n.getAttribute("part")),
-  );
+  page
+    .locator("#a")
+    .evaluate((element) =>
+      [...(element.shadowRoot?.querySelectorAll("[part]") ?? [])]
+        .filter((n) => !(n as HTMLElement).hidden)
+        .map((n) => n.getAttribute("part")),
+    );
 
 test.describe("fm-kampo of Spec 025 ①: stepper, clear, time", () => {
   test("a text field shows no stepper and no clear button: the parts of 0.2.0 (Arkitekturo contract)", async ({
     page,
   }) => {
     await serve(page, out, field('kind="text" value="abc"'));
-    expect(await visibleParts(page)).toEqual(["field", "label", "required-mark", "control"]);
+    expect(await visibleParts(page)).toEqual(["field", "label", "required-mark", "row", "control"]);
     await serve(page, out, field('kind="number" value="3"'));
-    expect(await visibleParts(page)).toEqual(["field", "label", "required-mark", "control"]);
+    expect(await visibleParts(page)).toEqual(["field", "label", "required-mark", "row", "control"]);
   });
 
   test("number with stepper: two butono named by the Modelo with the ikono subtract and add step the value by step within min and max; input and change are said", async ({
@@ -56,9 +58,13 @@ test.describe("fm-kampo of Spec 025 ①: stepper, clear, time", () => {
     const increment = page.getByRole("button", { name: word("increment-name") });
     await expect(decrement).toBeVisible();
     await expect(increment).toBeVisible();
-    await expect(decrement.locator('fm-ikono[name="subtract"]')).toHaveCount(1);
-    await expect(increment.locator('fm-ikono[name="add"]')).toHaveCount(1);
-    await expect(page.locator("#a").locator('[part="decrement"]')).toHaveAttribute("emphasis", "low");
+    const hosts = {
+      decrement: page.locator("#a").locator('[part="decrement"]'),
+      increment: page.locator("#a").locator('[part="increment"]'),
+    };
+    await expect(hosts.decrement.locator('fm-ikono[name="subtract"]')).toHaveCount(1);
+    await expect(hosts.increment.locator('fm-ikono[name="add"]')).toHaveCount(1);
+    await expect(hosts.decrement).toHaveAttribute("emphasis", "low");
     await increment.click();
     await expect(page.locator("#a")).toHaveAttribute("value", "5");
     await increment.click();
@@ -66,12 +72,16 @@ test.describe("fm-kampo of Spec 025 ①: stepper, clear, time", () => {
     await increment.click();
     // Clamped at max: 3 → 5 → 7 → 9 → 10.
     await expect(page.locator("#a")).toHaveAttribute("value", "10");
-    await expect(increment).toHaveAttribute("aria-disabled", "true");
+    await expect(hosts.increment).toHaveAttribute("aria-disabled", "true");
     await decrement.click();
     await expect(page.locator("#a")).toHaveAttribute("value", "8");
     const box = page.getByRole("textbox", { name: "Menge" });
     await expect(box).toHaveValue("8");
-    expect(await page.evaluate(() => new FormData(document.getElementById("f") as HTMLFormElement).get("n"))).toBe("8");
+    expect(
+      await page.evaluate(() =>
+        new FormData(document.getElementById("f") as HTMLFormElement).get("n"),
+      ),
+    ).toBe("8");
     const log = await page.evaluate(() => (window as unknown as { log: string[] }).log);
     expect(log).toEqual([
       "input:5",
@@ -90,7 +100,14 @@ test.describe("fm-kampo of Spec 025 ①: stepper, clear, time", () => {
   test("the arrow keys step a number like the platform's own, with and without the stepper; the field stays a text input with a numeric keyboard (E8)", async ({
     page,
   }) => {
-    await serve(page, out, field('kind="number" min="0" max="5" value="4"', '<span slot="help">Zwischen 0 und 5.</span>'));
+    await serve(
+      page,
+      out,
+      field(
+        'kind="number" min="0" max="5" value="4"',
+        '<span slot="help">Zwischen 0 und 5.</span>',
+      ),
+    );
     const box = page.getByRole("textbox", { name: "Menge" });
     await expect(box).toHaveAttribute("type", "text");
     await expect(box).toHaveAttribute("inputmode", "numeric");
@@ -117,8 +134,10 @@ test.describe("fm-kampo of Spec 025 ①: stepper, clear, time", () => {
       if (message.type() === "warning") warnings.push(message.text());
     });
     await serve(page, out, field('kind="text" stepper value="abc"'));
-    await expect.poll(() => warnings.filter((text) => text.includes('stepper="true"')).length).toBeGreaterThan(0);
-    expect(await visibleParts(page)).toEqual(["field", "label", "required-mark", "control"]);
+    await expect
+      .poll(() => warnings.filter((text) => text.includes('stepper="true"')).length)
+      .toBeGreaterThan(0);
+    expect(await visibleParts(page)).toEqual(["field", "label", "required-mark", "row", "control"]);
   });
 
   test("search: a clear butono named 'Suche leeren' shows while there is a value, clears it and returns the focus; Escape clears too; the role is searchbox", async ({
@@ -129,7 +148,9 @@ test.describe("fm-kampo of Spec 025 ①: stepper, clear, time", () => {
     await expect(box).toHaveValue("Standard");
     const clear = page.getByRole("button", { name: word("clear-name") });
     await expect(clear).toBeVisible();
-    await expect(clear.locator('fm-ikono[name="close"]')).toHaveCount(1);
+    await expect(page.locator("#a").locator('[part="clear"] fm-ikono[name="close"]')).toHaveCount(
+      1,
+    );
     await clear.click();
     await expect(box).toHaveValue("");
     await expect(page.locator("#a")).toHaveAttribute("value", "");
@@ -146,15 +167,23 @@ test.describe("fm-kampo of Spec 025 ①: stepper, clear, time", () => {
     page,
   }) => {
     await serve(page, out, field('kind="time" min="08:00" max="18:00" value="09:30" required'));
-    const box = page.locator("#a").locator('[part="control"]');
+    const box = page.locator("#a").locator("input");
     await expect(box).toHaveAttribute("type", "time");
     await expect(box).toHaveAttribute("min", "08:00");
     await expect(box).toHaveAttribute("max", "18:00");
     await expect(box).toHaveValue("09:30");
-    expect(await page.evaluate(() => new FormData(document.getElementById("f") as HTMLFormElement).get("n"))).toBe("09:30");
+    expect(
+      await page.evaluate(() =>
+        new FormData(document.getElementById("f") as HTMLFormElement).get("n"),
+      ),
+    ).toBe("09:30");
     await serve(page, out, field('kind="time" required'));
     expect(
-      await page.locator("#a").evaluate((element) => (element as unknown as { checkValidity(): boolean }).checkValidity()),
+      await page
+        .locator("#a")
+        .evaluate((element) =>
+          (element as unknown as { checkValidity(): boolean }).checkValidity(),
+        ),
     ).toBe(false);
   });
 });

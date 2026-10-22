@@ -62,7 +62,7 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       ["value-start", "number", false, undefined],
       ["value-end", "number", false, undefined],
       ["range", "boolean", false, false],
-      ["input", "boolean", false, false],
+      ["field", "boolean", false, false],
       ["required", "boolean", false, false],
       ["disabled", "boolean", false, false],
       ["readonly", "boolean", false, false],
@@ -71,8 +71,8 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
     ]);
     // E2: the dragged thumb is pressed, the name the butono has for it — no new state name.
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "pressed", "disabled", "invalid"]);
-    // input keys the part input (none without); range keys no part: it is an axis of the set alone.
-    expect(variantKeys(skemoOrThrow())).toEqual(["input", "state"]);
+    // field keys the part number (none without); range keys no part: it is an axis of the set alone.
+    expect(variantKeys(skemoOrThrow())).toEqual(["field", "state"]);
   });
 
   it("has the slots label (default), help, error, min-label and max-label, every one a text", () => {
@@ -92,7 +92,7 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       "track",
       "fill",
       "thumb",
-      "input",
+      "number",
       "min-label",
       "max-label",
       "help",
@@ -102,17 +102,20 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       "motion",
     ]);
     expect(skemo?.parts.track).toEqual({
-      fill: { by: ["state"] },
+      fill: { fixed: "color.background.sunken" },
       height: { fixed: "spacing.small" },
       radius: { fixed: "radius.full" },
     });
-    expect(skemo?.parts.fill).toEqual({ fill: { by: ["state"] }, radius: { fixed: "radius.full" } });
+    expect(skemo?.parts.fill).toEqual({
+      color: { by: ["state"] },
+      radius: { fixed: "radius.full" },
+    });
     expect(skemo?.parts.thumb).toEqual({
-      fill: { by: ["state"] },
+      color: { by: ["state"] },
       size: { fixed: "size.target.min" },
       radius: { fixed: "radius.full" },
     });
-    expect(skemo?.parts.input).toEqual({ width: { by: ["input"] } });
+    expect(skemo?.parts.number).toEqual({ width: { by: ["field"] } });
     expect(skemo?.parts["min-label"]).toEqual({
       color: { fixed: "color.text.muted" },
       typography: { fixed: "typography.caption" },
@@ -123,26 +126,26 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
     }
   });
 
-  it("colours track, fill and thumb by state: the sunken ground under the primary action, danger when invalid, disabled roles when disabled; the input is none without input", () => {
-    const token = (part: string, property: string, state: string, input = "false") =>
-      boundToken(skemoOrThrow(), part, property, { state, input })?.token;
+  it("colours fill and thumb by state (their colour, as the meter's bar: no text lies on them), the track the sunken ground; danger when invalid, disabled roles when disabled; the number field is none without field", () => {
+    const token = (part: string, property: string, state: string, field = "false") =>
+      boundToken(skemoOrThrow(), part, property, { state, field })?.token;
     expect(token("track", "fill", "rest")).toBe("color.background.sunken");
-    expect(token("track", "fill", "invalid")).toBe("color.status.danger.subtle");
-    expect(token("fill", "fill", "rest")).toBe("color.action.primary.rest");
-    expect(token("fill", "fill", "disabled")).toBe("color.action.primary.disabled");
-    expect(token("fill", "fill", "invalid")).toBe("color.status.danger.basic");
-    expect(token("thumb", "fill", "rest")).toBe("color.action.primary.rest");
-    expect(token("thumb", "fill", "hover")).toBe("color.action.primary.hover");
-    expect(token("thumb", "fill", "pressed")).toBe("color.action.primary.pressed");
-    expect(token("thumb", "fill", "disabled")).toBe("color.action.primary.disabled");
-    expect(token("thumb", "fill", "invalid")).toBe("color.status.danger.basic");
-    expect(token("input", "width", "rest", "false")).toBe("none");
-    expect(token("input", "width", "rest", "true")).toBe("size.scale.1000");
+    expect(token("track", "fill", "invalid")).toBe("color.background.sunken");
+    expect(token("fill", "color", "rest")).toBe("color.action.primary.rest");
+    expect(token("fill", "color", "disabled")).toBe("color.action.primary.disabled");
+    expect(token("fill", "color", "invalid")).toBe("color.status.danger.basic");
+    expect(token("thumb", "color", "rest")).toBe("color.action.primary.rest");
+    expect(token("thumb", "color", "hover")).toBe("color.action.primary.hover");
+    expect(token("thumb", "color", "pressed")).toBe("color.action.primary.pressed");
+    expect(token("thumb", "color", "disabled")).toBe("color.action.primary.disabled");
+    expect(token("thumb", "color", "invalid")).toBe("color.status.danger.basic");
+    expect(token("number", "width", "rest", "false")).toBe("none");
+    expect(token("number", "width", "rest", "true")).toBe("size.scale.1000");
     expect(token("label", "color", "disabled")).toBe("color.text.disabled");
     // Every combination of the keys has a token (a state without its own repeats rest).
-    for (const combination of combinationsOf(skemoOrThrow(), ["state", "input"])) {
+    for (const combination of combinationsOf(skemoOrThrow(), ["state", "field"])) {
       for (const part of ["track", "fill", "thumb", "label"]) {
-        const property = part === "label" ? "color" : "fill";
+        const property = part === "track" ? "fill" : "color";
         expect(boundToken(skemoOrThrow(), part, property, combination), part).toBeDefined();
       }
     }
@@ -159,7 +162,16 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
         disabled: ["aria-disabled"],
         readonly: ["aria-readonly"],
       },
-      keys: ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End"],
+      keys: [
+        "ArrowLeft",
+        "ArrowRight",
+        "ArrowUp",
+        "ArrowDown",
+        "PageUp",
+        "PageDown",
+        "Home",
+        "End",
+      ],
       texts: {
         required: { de: "erforderlich", en: "required" },
         "min-label-name": { de: "Von", en: "From" },
@@ -196,7 +208,7 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       {
         goal: "slide",
         keywords: {
-          en: ["slider", "approximate", "roughly", "level", "volume", "brightness"],
+          en: ["slider", "approximate", "roughly", "volume", "brightness"],
           de: ["schieberegler", "regler", "ungefähr", "etwa", "lautstärke", "helligkeit", "pegel"],
         },
         props: {},
@@ -205,10 +217,10 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       {
         goal: "value-range",
         keywords: {
-          en: ["range-slider", "span", "between", "min-max"],
-          de: ["bereich", "preisbereich", "spanne", "von-bis", "mindestens-höchstens"],
+          en: ["range-slider", "span", "min-max"],
+          de: ["preisbereich", "wertebereich", "spanne"],
         },
-        props: { range: true, input: true },
+        props: { range: true, field: true },
         regulo: "range-stated",
       },
     ]);
@@ -220,9 +232,11 @@ describe("the Uzo of the glitilo (section ①, G2)", () => {
     expect(uzo?.purpose).toBe(
       "Sets a value, or a range between two values, within known limits by dragging or with the keys.",
     );
-    expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([["exact-value", "kampo"]]);
+    expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
+      ["exact-value", "kampo"],
+    ]);
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
-      ["vertical", "ask-human"],
+      ["vertical-track", "ask-human"],
       ["ticks-with-labels", "ask-human"],
     ]);
     for (const entry of [...(uzo?.instead ?? []), ...(uzo?.boundary ?? [])]) {
@@ -282,10 +296,10 @@ describe("the Uzo of the glitilo (section ①, G2)", () => {
     expect(modelo.reguloj.filter((entry) => entry.name === "range-stated")).toHaveLength(1);
   });
 
-  it("the brief names input as the axis and the label as the duty, lists range among the props, and stays under 750", () => {
+  it("the brief names field as the axis and the label as the duty, lists range among the props, and stays under 750", () => {
     if (glitilo === undefined) throw new Error("missing");
     const brief = briefOf(glitilo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["input"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["field"]);
     expect(brief.props?.map((prop) => prop.name)).toContain("range");
     expect(brief.required).toEqual({ props: [], slots: ["label"] });
     const bytes = Buffer.byteLength(JSON.stringify(brief), "utf8");
@@ -336,7 +350,7 @@ describe("the Reguloj of the glitilo (G4, E5)", () => {
 describe("suggest_ero of the slider (Gvidanto)", () => {
   it("'Preisbereich von bis' is the glitilo with range and input, citing range-stated (the spec's dialog)", () => {
     const answer = suggest("Preisbereich von bis");
-    expect(answer.suggestion).toEqual({ ero: "glitilo", props: { range: true, input: true } });
+    expect(answer.suggestion).toEqual({ ero: "glitilo", props: { range: true, field: true } });
     expect(answer.regulo).toMatchObject({ name: "range-stated" });
     expect(answer.kialo).toBe(named("range-stated")?.kialo);
   });
@@ -346,20 +360,20 @@ describe("suggest_ero of the slider (Gvidanto)", () => {
       ero: "glitilo",
       props: {},
     });
+    // The instead entry names the Ero, not a kind: the kampo's own goals decide the kind.
     const exact = suggest("Regler für einen genauen Wert");
-    expect(exact.suggestion).toEqual({ ero: "kampo", props: { kind: "number" } });
+    expect(exact.suggestion).toEqual({ ero: "kampo", props: {} });
   });
 
-  it("a vertical slider and labelled ticks stop at the boundaries", () => {
-    expect(suggest("Senkrechter Regler für die Lautstärke").boundary).toMatchObject({
-      ero: "glitilo",
-      case: "vertical",
-      action: "ask-human",
-    });
-    expect(suggest("Regler mit Skalenstrichen").boundary).toMatchObject({
-      ero: "glitilo",
-      case: "ticks-with-labels",
-      action: "ask-human",
-    });
+  it("a vertical slider and labelled ticks stop at the boundaries: the goal and the boundary tie, a person decides (OP-12)", () => {
+    const cases = (goal: string) => {
+      const answer = suggest(goal);
+      expect(answer.action, goal).toBe("ask-human");
+      return answer.candidates?.map((candidate) =>
+        candidate.kind === "boundary" ? candidate.case : candidate.goal,
+      );
+    };
+    expect(cases("Regler hochkant für die Lautstärke")).toEqual(["vertical-track", "slide"]);
+    expect(cases("Regler mit Skalenstrichen")).toEqual(["ticks-with-labels", "slide"]);
   });
 });

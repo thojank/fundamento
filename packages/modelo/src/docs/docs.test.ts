@@ -1866,7 +1866,7 @@ describe("Spec 015 ② documentation (specs/015-eroj-runde-4)", () => {
     expect(tasks).toMatch(/alsxutilo rot `[0-9a-f]{7}`/);
     expect(read("docs/vojmapo.md")).toContain("Spec 015 ②");
     // Spec 015 ③ counts on (thirty-one with the karto, thirty-two with the avataro).
-    expect(read("README.md")).toMatch(/thirty(-one|-two|-four)? `fm-\*` elements/);
+    expect(read("README.md")).toMatch(/thirty(-one|-two|-four|-five)? `fm-\*` elements/);
   });
 });
 

@@ -4,8 +4,8 @@
 // benchmark (0 events in the Skemo against 224). Additive; every Skemo before stays valid.
 
 import { describe, expect, it } from "vitest";
-import { RULE_IDS } from "./issues.js";
 import { createModeloAjv, getModeloValidator } from "./ajv.js";
+import { RULE_IDS } from "./issues.js";
 
 const ajv = createModeloAjv();
 const v = (def: string) => getModeloValidator(ajv, def);

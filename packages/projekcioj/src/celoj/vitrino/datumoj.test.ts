@@ -257,7 +257,11 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
       html.indexOf('id="fm-vitrino-kampo"'),
       html.indexOf("</section>", html.indexOf('id="fm-vitrino-kampo"')),
     );
-    const cells = own.match(/<fm-kampo[^>]*>.*?<\/fm-kampo>/g) ?? [];
+    // Spec 025 ① (plan ① D-07): the rows of the stepper and the search state their own help
+    // (range-stated) or none; the grid's cells keep the word.
+    const cells = (own.match(/<fm-kampo[^>]*>.*?<\/fm-kampo>/g) ?? []).filter(
+      (cell) => !cell.includes(" stepper") && !cell.includes('kind="search" value='),
+    );
     expect(cells.length).toBeGreaterThan(10);
     const withHelp = cells.filter((cell) => cell.includes('<span slot="help">Hinweis</span>'));
     expect(withHelp.length).toBe(cells.length);
@@ -968,7 +972,7 @@ describe("the Vitrino shows the glitilo and the kampo additions (Spec 025 ①)",
     expect(grid).toContain(
       '<fm-glitilo range value-start="20" value-end="60">Bereich<span slot="min-label">0</span><span slot="max-label">100</span></fm-glitilo>',
     );
-    expect(grid).toContain('<fm-glitilo input value="40">mit Eingabefeld<span slot="help">');
+    expect(grid).toContain('<fm-glitilo field value="40">mit Eingabefeld<span slot="help">');
     expect((grid.match(/<span slot="error">/g) ?? []).length).toBe(3);
     expect(html).toContain("Größe aus dem Container");
   });

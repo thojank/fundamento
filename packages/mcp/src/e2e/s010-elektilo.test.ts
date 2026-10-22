@@ -222,6 +222,7 @@ describe("list_eroj and the brief (acceptance 1, 7)", () => {
       "elektilo",
       "elekto",
       "faldilo",
+      "glitilo",
       "ikono",
       "insigno",
       "kampo",

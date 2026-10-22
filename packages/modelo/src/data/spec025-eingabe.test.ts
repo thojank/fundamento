@@ -144,7 +144,7 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
     expect(skemo.goals?.find((goal) => goal.goal === "count")).toEqual({
       goal: "count",
       keywords: {
-        en: ["stepper", "counter", "plus", "minus", "quantity"],
+        en: ["counter", "plus", "minus", "quantity"],
         de: ["zähler", "menge", "plus", "minus", "schrittknöpfe", "stückzahl"],
       },
       props: { kind: "number", stepper: true },
@@ -205,9 +205,7 @@ describe("range-stated at the kampo (G4, E5)", () => {
       rulesOf(judge({ kind: "number", min: "1", max: "10" }, { help: "Zwischen 1 und 10." })),
     ).toEqual([]);
     expect(rulesOf(judge({ kind: "number", stepper: true }, {}))).toEqual([]);
-    expect(
-      rulesOf(judge({ kind: "date", min: "2026-10-01", max: "2026-12-31" }, {})),
-    ).toEqual([]);
+    expect(rulesOf(judge({ kind: "date", min: "2026-10-01", max: "2026-12-31" }, {}))).toEqual([]);
     const finding = judge({ kind: "number", max: "10" }, {}).violations[0];
     expect(finding?.issue.regulo?.name).toBe("range-stated");
     expect(finding?.issue.message).toContain("max");
@@ -242,11 +240,14 @@ describe("suggest_ero of the kampo additions (Gvidanto)", () => {
       ero: "kampo",
       props: { kind: "time" },
     });
-    expect(suggest("Uhrzeit mit Zeitzone").boundary).toMatchObject({
-      ero: "kampo",
-      case: "time-zone",
-      action: "ask-human",
-    });
+    // The goal time and the boundary tie: a person decides, with both candidates (OP-12).
+    const zone = suggest("Uhrzeit mit Zeitzone");
+    expect(zone.action).toBe("ask-human");
+    expect(
+      zone.candidates?.map((candidate) =>
+        candidate.kind === "boundary" ? candidate.case : candidate.goal,
+      ),
+    ).toEqual(["time-zone", "time"]);
   });
 });
 

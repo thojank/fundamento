@@ -64,6 +64,13 @@
             "a11y": {
               "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SkemoA11y"
             },
+            "events": {
+              "description": "The events the element says (Spec 025 ①): change, input, a cancelable remove.",
+              "type": "array",
+              "items": {
+                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SkemoEvent"
+              }
+            },
             "goals": {
               "type": "array",
               "items": {
@@ -521,7 +528,9 @@
               "name": {
                 "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
               },
-              "type": { "enum": ["string", "boolean", "number", "enum"] }
+              "type": {
+                "enum": ["string", "boolean", "number", "enum"]
+              }
             },
             "required": ["name", "type"],
             "additionalProperties": false
