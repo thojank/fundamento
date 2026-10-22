@@ -172,7 +172,7 @@ node -e 'const fs=require("fs");let t={eroj:0,props:0,states:0,slots:0,parts:0,b
 - **Art. VII (Agenta Dokumentado):** konform. Die Spec-Dialoge sind MCP-Tests (`s025-datum.test.ts`); die deutschen Texte stehen in `tradukoj.json`.
 - **Art. VIII (Web-first, mobiles Modell):** konform. `expanded` statt „offen“, `trigger` statt „button“; die Nachrichten sind Wörter des Modelo mit einem Platzhalter `{example}`, den das Element füllt; kein DOM-Begriff im Skemo.
 - **Art. IX (Vertikaler Durchstich):** konform. Der `datelektilo` geht durch alle Ebenen, bevor ③ in die Breite geht.
-- **Art. X (Test-first):** konform. Rot in `7ae1180` (Modelo 49 Tests in 26 Dateien, Projekcioj 19 in 8, MCP 20 in 21 – die Suite s025-datum lädt nicht ohne Daten), dann grün.
+- **Art. X (Test-first):** konform. Rot in `7ae1180` (nach dem Rebase auf ① `0c62812`; Modelo 49 Tests in 26 Dateien, Projekcioj 19 in 8, MCP 20 in 21 – die Suite s025-datum lädt nicht ohne Daten), dann grün (`5c3a36a`).
 - **Art. XI (Einfachheit):** konform. Kein neues Paket, keine Abhängigkeit; ein Host, keine neue Bauform (der Kalender hängt an der Bauform `field`).
 - **Art. XII (Interoperabilität):** konform. Kein neues Celo.
 - **Art. XIII (Einfachheit der Nutzung):** konform. `<fm-datelektilo value="2026-10-24">Lieferdatum</fm-datelektilo>` genügt.

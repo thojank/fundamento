@@ -37,7 +37,7 @@
 **Branch:** `261022-spec-025-datum-c7fa02` (gestapelt auf ①, PR #101).
 
 ### A – Rot zuerst
-- [x] **T2531 Tests** Daten-Pins `data/datelektilo.test.ts` und `data/spec025-datum.test.ts` (kampo: Grenze `date-range` geschlossen, `near-date`, Jugxo der gekippten Antwort; Ikonaro `calendar`; Ontologio, Übersetzungen), Eroj 35 → 36 in allen Pins (Listen, Ordnungszahlen, Zahlwort `thirty-six`, `uzoj: 36`, Kit-Dateien 56, Ikono-Set 300 Varianten, Vitrino-Ikonaro 20 × 3 + 4), `kampo.test.ts` („Zeitraum von bis“ kippt), Projekcioj (`web-component.test.ts`, `figma.test.ts`, `plugin-bauformen-eingabe.test.ts`, `plugin-variablen.test.ts`, `datumoj.test.ts`, `make-kit.test.ts`, `publish.test.ts`), Browser-Spec `datelektilo.spec.ts`, Blöcke in `alirebleco.check.ts` und `vitrino.check.ts`, React-Typen `types/datelektilo.tsx`, MCP-Dialoge `e2e/s025-datum.test.ts`, Doku-Test ②. Rot in `7ae1180` (Modelo 49 Tests in 26 Dateien, Projekcioj 19 in 8 Dateien, MCP 20 in 21 Dateien – die Suite s025-datum lädt nicht ohne Daten).
+- [x] **T2531 Tests** Daten-Pins `data/datelektilo.test.ts` und `data/spec025-datum.test.ts` (kampo: Grenze `date-range` geschlossen, `near-date`, Jugxo der gekippten Antwort; Ikonaro `calendar`; Ontologio, Übersetzungen), Eroj 35 → 36 in allen Pins (Listen, Ordnungszahlen, Zahlwort `thirty-six`, `uzoj: 36`, Kit-Dateien 56, Ikono-Set 300 Varianten, Vitrino-Ikonaro 20 × 3 + 4), `kampo.test.ts` („Zeitraum von bis“ kippt), Projekcioj (`web-component.test.ts`, `figma.test.ts`, `plugin-bauformen-eingabe.test.ts`, `plugin-variablen.test.ts`, `datumoj.test.ts`, `make-kit.test.ts`, `publish.test.ts`), Browser-Spec `datelektilo.spec.ts`, Blöcke in `alirebleco.check.ts` und `vitrino.check.ts`, React-Typen `types/datelektilo.tsx`, MCP-Dialoge `e2e/s025-datum.test.ts`, Doku-Test ②. Rot in `7ae1180` (nach dem Rebase `0c62812`; Modelo 49 Tests in 26 Dateien, Projekcioj 19 in 8 Dateien, MCP 20 in 21 Dateien – die Suite s025-datum lädt nicht ohne Daten).
 
 ### B – Grün
 - [x] **T2532 Modelo** `datelektilo` Skemo, Uzo, Ontologio, Übersetzungen; `kampo` (Grenze `date-range` → use-instead, `near-date`, Goal `date` + geburtsdatum, komponiert mit `datelektilo`); sieben Feld-Reguloj ausgeweitet; Jugxo der gekippten Antwort; Formularo nimmt `datelektilo` (D-10).
@@ -54,7 +54,7 @@
 
 | Was | Wert |
 |---|---|
-| Commits ② | rot `7ae1180`, grün `e43e40d`, Messungen (siehe Folgecommit) |
+| Commits ② | rot `0c62812`, grün `5c3a36a`, Messungen `7458c46` + Folgecommit – nach dem Rebase auf ① (`bd9dedd`) und Spec 024 O-1 (`fbda604`); davor rot `7ae1180`, grün `e43e40d` |
 | Grün gemessen | Modelo 171 Dateien / 3741 Tests, MCP 43 / 421, Projekcioj 30 / 817, Agordilo 104, CLI 75, Metiejo 147, Browser (Chromium) 310, `datelektilo.spec.ts` in Chromium, Firefox und WebKit je 9, Alirebleco 24 Datelektilo-Läufe + 585 zuvor, Vitrino-Check 53, Make-Kit 5, Quickstart 1, Release-Probelauf beide Kits, `check:parity` 36 Eroj / 0 Differenzen / 393 freigegeben, Lint sauber |
 | Rot gemessen | Modelo 49 Tests in 26 Dateien, Projekcioj 19 in 8 Dateien, MCP 20 in 21 Dateien (s025-datum lädt nicht ohne Daten) |
 | Benchmark-Kennzahlen | Eroj 35 → 36; Gattungen mit Gegenstück 28 → 29 (+ Zahl, Suche, Zeit als Ergänzung); Zustände 101 → 107; Props 161 → 174; Slots 77 → 80; Ereignisse 4 → 6; Teile 242 → 265; Bindungen 433 → 454; Ikonaro 19 → 20; Reguloj 60 → 60; Jugxoj 211 → 212 |
