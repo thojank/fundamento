@@ -15,6 +15,9 @@ import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
 import { validateModelo } from "../validate/validate-modelo.js";
 
+// Spec 025 ①: the step buttons and the clear button are the kampo's own (kind number, search).
+const KAMPO_OWN = ["decrement", "increment", "clear"];
+
 const { modelo } = loadModelo(defaultModeloSource());
 if (modelo === undefined) throw new Error("the repo Modelo must load");
 const eroNamed = (name: string) => modelo.eroj.find((entry) => entry.ero.name === name);
@@ -51,10 +54,12 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
       "avataro",
       "avizo",
       "butono",
+      "datelektilo",
       "dialogo",
       "elektilo",
       "elekto",
       "faldilo",
+      "glitilo",
       "ikono",
       "insigno",
       "kampo",
@@ -112,19 +117,25 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
 
   it("names the parts of the kampo without a height of its own, and copies the kampo's bindings (Regel 0.1)", () => {
     if (skemo === undefined || kampo === undefined) throw new Error("missing");
-    expect(Object.keys(skemo.parts).sort()).toEqual(Object.keys(kampo.skemo.parts).sort());
+    expect(Object.keys(skemo.parts).sort()).toEqual(
+      Object.keys(kampo.skemo.parts)
+        .filter((part) => !KAMPO_OWN.includes(part))
+        .sort(),
+    );
     expect(skemo.parts.box?.height).toBeUndefined();
     expect(kampo.skemo.parts.box?.height).toBeDefined();
     // Every binding of the kampo that is not the readonly state's, not the height and not the
     // typography of the text stands in the tekstareo word for word.
     const copied = kampo.skemo.bindings.filter(
       (binding) =>
+        !KAMPO_OWN.includes(binding.part) &&
         binding.when?.state !== "readonly" &&
         !(binding.part === "box" && binding.property === "height") &&
         !(binding.part === "text" && binding.property === "typography"),
     );
     for (const binding of copied) expect(skemo.bindings).toContainEqual(binding);
     for (const [part, properties] of Object.entries(kampo.skemo.parts)) {
+      if (KAMPO_OWN.includes(part)) continue;
       for (const [property, source] of Object.entries(properties)) {
         if (part === "box" && property === "height") continue;
         if (part === "text" && property === "typography") continue;
@@ -289,6 +300,8 @@ describe("the Reguloj of the tekstareo (G6, E5)", () => {
       "avataro",
       "kodbloko",
       "markdovido",
+      "glitilo",
+      "datelektilo",
     ]);
   });
 

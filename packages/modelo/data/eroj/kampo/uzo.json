@@ -4,7 +4,7 @@
     "id": "uzo_01M4S1ZQVJ03HSQDA2SFEKA3DC",
     "ero": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF",
     "skemo": "ske_01M4S1ZQFKVZX7X0A8W94SRGCE",
-    "purpose": "Takes one line of text from a person: a name, an address, an e-mail, a search term.",
+    "purpose": "Takes one line of text from a person: a name, an address, an e-mail, a number, a time, a search term.",
     "instead": [
       {
         "goal": "multi-line",
@@ -23,7 +23,7 @@
           ]
         },
         "ero": "tekstareo",
-        "kialo": "Several lines need a field that grows with them, because one line hides what was written; tekstareo covers it."
+        "kialo": "Several lines need a field that grows, because one line hides what was written."
       },
       {
         "goal": "choose-many",
@@ -100,7 +100,41 @@
           ]
         },
         "ero": "kompletigilo",
-        "kialo": "A field whose values a person types and picks from suggestions is the kompletigilo, because the list shortens while typing; a plain field knows no suggestions."
+        "kialo": "Values typed and picked from suggestions are the kompletigilo's, because the list shortens while typing."
+      },
+      {
+        "goal": "approximate",
+        "keywords": {
+          "en": [
+            "approximate",
+            "roughly",
+            "slider"
+          ],
+          "de": [
+            "ungefähr",
+            "etwa",
+            "regler"
+          ]
+        },
+        "ero": "glitilo",
+        "kialo": "A value set by feel is dragged, because the hand finds a position faster than a number."
+      },
+      {
+        "goal": "near-date",
+        "keywords": {
+          "en": [
+            "calendar",
+            "delivery-date",
+            "booking-date"
+          ],
+          "de": [
+            "kalender",
+            "lieferdatum",
+            "buchungsdatum"
+          ]
+        },
+        "ero": "datelektilo",
+        "kialo": "A date near today is picked in a calendar, because the eye finds a weekday faster than the hand."
       }
     ],
     "boundary": [
@@ -122,20 +156,6 @@
         "kialo": "A switch that shows the password is a control of its own, because the field only hides; a person decides whether a product wants it."
       },
       {
-        "case": "number-stepper",
-        "action": "not-supported",
-        "keywords": {
-          "en": [
-            "stepper",
-            "counter"
-          ],
-          "de": [
-            "zähler"
-          ]
-        },
-        "kialo": "Step buttons are a control of their own, because they change the value and the field only shows it."
-      },
-      {
         "case": "decimal",
         "action": "not-supported",
         "keywords": {
@@ -155,7 +175,7 @@
       },
       {
         "case": "date-range",
-        "action": "ask-human",
+        "action": "use-instead",
         "keywords": {
           "en": [
             "period",
@@ -166,7 +186,26 @@
             "datumsbereich"
           ]
         },
-        "kialo": "Two dates that depend on each other are an Ero of their own, because the end lies after the start; Fundamento has none yet."
+        "kialo": "Two dates that depend on each other are the datelektilo's, because the end lies after the start and a calendar shows both at once (Spec 025 ② closes the boundary date-range).",
+        "ero": "datelektilo"
+      },
+      {
+        "case": "time-zone",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "timezone",
+            "time-zone",
+            "utc",
+            "am-pm"
+          ],
+          "de": [
+            "zeitzone",
+            "utc",
+            "am-pm"
+          ]
+        },
+        "kialo": "A time zone or a period (am, pm) beside the time is a choice of its own, because the platform's time input takes the time in the person's own clock; a person decides whether a product wants it."
       },
       {
         "case": "file",
@@ -221,6 +260,14 @@
         {
           "ero": "butono",
           "kialo": "The form ends with the button that sends it, because filling it in does nothing by itself; the button stands after the last field, not beside it (a search excepted)."
+        },
+        {
+          "ero": "glitilo",
+          "kialo": "A kampo of kind number stands beside the track of a glitilo with input, because a value one drags is also a value one may type and read exactly."
+        },
+        {
+          "ero": "datelektilo",
+          "kialo": "A kampo of kind date stands beside a datelektilo only for a date far away, because a birthday is typed faster than scrolled; a date near today and a date range are the datelektilo's."
         }
       ],
       "never": [
@@ -316,6 +363,22 @@
               "here",
               "enter",
               "please"
+            ]
+          }
+        }
+      },
+      {
+        "regulo": "range-stated",
+        "fixed": false,
+        "of": "slot:help",
+        "check": {
+          "kind": "min-words",
+          "count": 2
+        },
+        "when": {
+          "props": {
+            "kind": [
+              "number"
             ]
           }
         }

@@ -31,9 +31,9 @@ const suggest = (goal: string) => {
 };
 
 describe("pagxigilo in the repo Modelo (section ①, G1, G2)", () => {
-  it("lives in data/eroj/pagxigilo/skemo.json, one of thirty-four Eroj", () => {
+  it("lives in data/eroj/pagxigilo/skemo.json, one of thirty-six Eroj", () => {
     expect(pagxigilo?.file).toBe("modelo/data/eroj/pagxigilo/skemo.json");
-    expect(modelo.eroj).toHaveLength(34);
+    expect(modelo.eroj).toHaveLength(36);
   });
 
   it("has page and total-pages as duties, label, mode (button or link), href-template and siblings; the states of an item; the pages as entries", () => {

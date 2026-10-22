@@ -48,6 +48,7 @@
 | Tokens | Kern 356 → 376; Figma-Variablen 856 → 876 |
 | Tests lokal | Modelo 3678 in 166 Dateien, Agordilo 104, Metiejo 147, MCP 407, CLI 75, Projekcioj 795, Eroj 859 (2 übersprungen wie zuvor) – je grün; `pnpm lint` und alle `check:*` grün |
 | Schritte | 950 → 975: 0,16 OKLCH-L je 100 Einheiten (Aspiro 0,04–0,2 hält); `palette-aligned` Spreizung 0 an 25/150/850/975 |
+| CI O-1 | Lauf 39696649758 (`19303c2`, PR #100, alle acht Jobs grün im ersten Lauf, Wanduhr 10:46): `checks` 1:03, `unit` 6:32, `projekcioj` 4:11 / 4:15, `eroj` 1:51 / 2:08, `alirebleco-eroj` 4:00, `rendered-checks` 10:46 |
 
 ## ② Runde 2
 
@@ -59,7 +60,7 @@
 
 ### B – Grün
 - [x] **T2433 Modelo** `eroj/ero-tokenoj.ts` (`eroTokenojOf`, `eroTokenNameOf`, `eroTokenOf`, `sxablonoTokenOf`, `eroTokenojOfModelo`, `eroTokenojIssues`, `eroKontrastParojOf`), `eroj/ero-tokenoj-cli.ts` (`pnpm vortaro:ero-tokenoj`), RULE_IDS + 2, TokenRole `ero`, Resolver (Schreibweise entlang des Alias), `semantic-colors-alias-palette` auf der dritten Ebene, `evaluateAlirebleco` mit den abweichenden Zellen, Paritäts-Inventar über Ero-Tokens, Test-Doubles `withEroTokenoj`.
-- [x] **T2434 Migration** `core.json` (908 Tokens mit IDs), `ekzemplo`, `aspekto-incomplete`, `provo`, `provo-kompakta`, 80 Fixture-Modelle mit Eroj, zwei neue Fixtures `ero-tokeno-missing`, `ero-tokeno-unknown`.
+- [x] **T2434 Migration** `core.json` (908 Tokens mit IDs, nach dem Merge von Spec 025 1 032), `ekzemplo`, `aspekto-incomplete`, `provo`, `provo-kompakta`, 80 Fixture-Modelle mit Eroj, zwei neue Fixtures `ero-tokeno-missing`, `ero-tokeno-unknown`.
 - [x] **T2435 Projekcioj** Web-Celo (`named`, Sxablono-Vorlage), CSS-Celo (Schreibweise eines Alias), Figma-Celo (Bindungen, Stand-ins, Schatten), `test-doubles/tra-roloj.ts`, Suiten durch die Rollen, Penpot-Test zählt.
 - [x] **T2436 Agordilo** `festgelegt.schreibweise` (Schema, `packageDocuments` als `textTransform`).
 - [x] **T2437 Metiejo** `komponentoj.ts` (Liste, View, Bildschirm, Vorschau, Zelle in der URL), Studio (Komponenten in der Navigation, O-4 Felder, Schreibweise, Suche je Familie), Server (Routen, `schreibweise`, O-3, Sätze und Vorschläge auf Deutsch, `rolle` der Schrift), Schnellstart (`rolle`), Vorschau (O-2, Komponente), Client-Skript.
@@ -74,11 +75,12 @@
 | Was | Wert |
 |---|---|
 | Commits ② | Amendment `c6396cf`, rot `a8f5858`, grün `1d3518e`; dieser Eintrag im Folgecommit |
-| Ero-Tokens | 908 (874 der 34 Eroj, 34 der 5 Sxablonoj); Kern 376 + 908 = 1 284; 30 Zellen ohne Token |
-| Figma-Variablen | 876 → 2 439 (Repo), 2 441 (provoj); 1 563 der dritten Ebene |
+| Ero-Tokens | 1 032 (998 der 36 Eroj, 34 der 5 Sxablonoj); Kern 376 + 1 032 = 1 408; 32 Zellen ohne Token (vor dem Merge von Spec 025: 908, 1 284, 30) |
+| Figma-Variablen | 876 → 2 636 (Repo, 36 Sets), 2 638 (provoj); 1 760 der dritten Ebene (vor dem Merge von Spec 025: 2 439 / 2 441, 1 563) |
 | Zeiten | `pnpm vortaro:ero-tokenoj` 1,2 s; Komponentenseite ≈ 0,3 s; Prüfung je Setzen 1,8–1,9 s warm; Ablehnung mit O-3 4,5 s (B-11) |
 | Tests lokal | Modelo 3695 in 167 Dateien, Agordilo 110, Metiejo 170, MCP 407, CLI 75, Projekcioj 805 – je grün; Eroj 859 (2 übersprungen wie zuvor); `pnpm lint` und alle `check:*` grün |
 | CI ② | Lauf 39742860574 (`df32211`): alle acht Jobs grün im zweiten Versuch (erster Versuch: drei Flakes des Runners, B-17); `checks` 1:27, `unit` 5:23, `projekcioj` 6:41 / 7:47, `eroj` 7:19 / 2:19, `alirebleco-eroj` 3:52, `rendered-checks` 8:11; `fm modelo export` 20,3 s (zuvor 34,4 s rot in 39741149168), `derives provo twice` 65,5 s; dieser Eintrag im Folgecommit; Lauf 39745658397 (`38f444d`): Unit-Job rot an zwei Alirebleco-Timeouts (30 s), danach dritter Perf-Schritt (B-15): Lauf 39747762364 (`dfc9c6c`) alle acht Jobs grün im ersten Versuch, Wanduhr 11:58 – `checks` 1:46, `unit` 7:39, `projekcioj` 10:24 / 9:49, `eroj` 11:58 / 1:57, `alirebleco-eroj` 4:10, `rendered-checks` 10:46; `fm modelo export` 23,9 s, Ableitung zweimal 91,9 s, Alirebleco-Tests 17,3 s und 18,9 s |
+| Merge `main` (22.10., nach #100, #101, #102) | Spec 025 brachte `datelektilo`, `glitilo` und den `kampo` mit `kind=time`: fünf Textkonflikte (Vojmapo, RULE_IDS 179 + 2 = 181, Stufe-1-Prüfsummen, Struktur-Hash von provo und provo-kompakta), dann `pnpm vortaro:ero-tokenoj` (124 neue Tokens), provo und provo-kompakta neu abgeleitet, die zwei 025-Plugin-Tests lesen durch die Rollen; Modelo 3758, Agordilo 110, MCP 421, CLI 75, Metiejo 170, Projekcioj 827, Eroj 928 grün; `pnpm lint`, alle `check:*` und `pnpm perf` grün |
 | Perf (B-15) | `pnpm perf` grün: Start 1 730 ms (Budget 2 000), resolve max 18,2 ms, explain max 5,7 ms, check_contrast Median 7,7 ms; Validierung 1,4 s → 0,7 s; `fm agordilo derive` 2,6 s → 1,9 s, `fm modelo export` 3,5 s → 2,4 s (Ausgaben byteidentisch) |
 
 

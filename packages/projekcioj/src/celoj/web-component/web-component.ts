@@ -60,9 +60,39 @@ function fieldPartSelector(
   state: string,
   select = false,
   entry = "",
+  datepicker = false,
+  stateName = "rest",
 ): string {
   const root = `[part="field"]${data}${state === "" ? "" : `:has([part="control"]${state})`}`;
   if (part === "box" && property === "gap") return `:where(${root})`;
+  // A date picker (Spec 025 ②, plan ② D-11): the trigger, the calendar and its head, month, prev,
+  // next and weekday are elements of their own in the field; the day cell carries its own states
+  // (CELL_STATES), the field's readonly and invalid reach it; its four looks are the cell by its
+  // attributes — chosen (aria-selected), between the ends of a range (data-range), today
+  // (data-today) and outside the month (data-outside); the ring stands on the input and on the
+  // focused cell alike.
+  if (datepicker) {
+    const field = `[part="field"]${data}`;
+    const cellRoot =
+      CELL_STATES[stateName] === undefined
+        ? `:where(${root}) [part="cell"]`
+        : `:where(${field}) [part="cell"]${CELL_STATES[stateName]}`;
+    if (["trigger", "calendar", "head", "month", "prev", "next", "weekday"].includes(part)) {
+      return `:where(${root}) [part="${part}"]`;
+    }
+    if (part === "cell" || part === "day") return cellRoot;
+    // The four looks stand outside :where(), so that they outrank the cell's hover and focus
+    // (specificity): a chosen day keeps its fill under the pointer.
+    if (part === "selected-cell" || part === "selected-day") {
+      return `${field} [part="cell"][aria-selected="true"]`;
+    }
+    if (part === "in-range-cell") return `${field} [part="cell"][data-range="true"]`;
+    if (part === "today-cell") return `${field} [part="cell"][data-today="true"]`;
+    if (part === "outside-day") return `${field} [part="cell"][data-outside="true"]`;
+    if (part === "focus-ring") {
+      return `:where(${root}) [part="control"]:focus-visible, :where(${root}) [part="cell"]:focus-visible`;
+    }
+  }
   // A select (Spec 010 ④, D-06) shows its placeholder as the first option, chosen while nothing
   // else is: the colour of the placeholder is the select's while that option is the chosen one.
   // Outside :where(), so that it wins over the colour of the text in every state (specificity).
@@ -80,6 +110,9 @@ function fieldPartSelector(
   // entry (aria-selected), the no-results text.
   if (part === "listbox" || part === "no-results") return `:where(${root}) [part="${part}"]`;
   if (part === "suggestion") return `:where(${root}) [part="suggestion"]${entry}`;
+  // The step buttons and the clear button of Spec 025 ① (plan ① D-05, D-06) are composed butono
+  // beside the input: their size is theirs, not the input's.
+  if (["decrement", "increment", "clear"].includes(part)) return `:where(${root}) [part="${part}"]`;
   return `:where(${root}) [part="control"]`;
 }
 
@@ -200,6 +233,68 @@ const uploadStructure = (disables: boolean): string =>
     ':where([part="file-name"]) { overflow-wrap: anywhere; }',
     ':where([part="field"]:not([data-marked="true"])) [part="required-mark"] { display: none; }',
     HIDDEN_TEXT,
+  ].join("\n");
+
+/**
+ * A slider (Spec 025 ①, plan ① D-03): the field of the kampo around a track — the track is the
+ * control, the fill and the thumbs lie in it (two thumbs with range), the limits stand at both
+ * ends, a composed kampo of kind number beside them where field says so.
+ */
+export const isSlider = (skemo: Skemo): boolean => skemo.a11y.role === "slider";
+
+/** The states of a slider stand at its thumb (E3): hover, focus, pressed while dragged, disabled and invalid as the thumb speaks them. */
+const SLIDER_STATES: Readonly<Record<string, string | undefined>> = {
+  rest: "",
+  hover: ":hover",
+  focus: ":focus-visible",
+  pressed: ":active",
+  disabled: '[aria-disabled="true"]',
+  invalid: '[aria-invalid="true"]',
+};
+
+/**
+ * The selector of a part of a slider (Spec 025 ①, D-03): the combination stands on the field, the
+ * state on a thumb inside (`:has()`, as a field reads its input); the ring stands on the thumb that
+ * has the focus; the box's gap is the field's and the row's; every other part is its own element.
+ */
+function sliderPartSelector(part: string, property: string, data: string, state: string): string {
+  const thumb = SLIDER_STATES[state] ?? "";
+  const root = `[part="field"]${data}${thumb === "" ? "" : `:has([part="thumb"]${thumb})`}`;
+  if (part === "box" && property === "gap") return `:where(${root}), :where(${root}) [part="row"]`;
+  if (part === "focus-ring") return `:where(${root}) [part="thumb"]:focus-visible`;
+  if (part === "motion") return `:where(${root}) [part="fill"], :where(${root}) [part="thumb"]`;
+  return `:where(${root}) [part="${part}"]`;
+}
+
+/**
+ * Layout of a slider (Spec 025 ①, D-03), keywords and 0 only: the host is a block that takes the
+ * width of its container (E3); the field a column of label, row, help and error; the row a line of
+ * the start label, the track and the end label with the number field, centred; the track grows
+ * along the line and holds fill and thumbs absolutely — the fill from its start over its size, the
+ * thumb at its place, both custom properties the element writes as shares of the track (no
+ * literal); the thumb is centred on its place and on the track (margin auto), mirrored in
+ * right-to-left writing; a hidden thumb or field takes no room; the label of the composed field is
+ * heard, not seen (the slider's own label names the value).
+ */
+const sliderStructure = (disables: boolean): string =>
+  [
+    ":host { display: block; }",
+    ':where([part="field"]) { display: flex; flex-direction: column; align-items: stretch; }',
+    ':where([part="label"]) { display: inline-flex; align-items: baseline; }',
+    ':where([part="row"]) { display: flex; align-items: center; }',
+    // The track is a flex row that centres its items: an absolutely placed thumb takes its static
+    // position in the block axis — the middle of the track — with no literal.
+    ':where([part="track"]) { position: relative; display: flex; align-items: center; flex: 1 1 auto; box-sizing: border-box; }',
+    ':where([part="fill"]) { position: absolute; inset: 0 auto; inset-inline-start: var(--fm-fill-start); inline-size: var(--fm-fill-size); transition-property: background-color; }',
+    ':where([part="thumb"]) { position: absolute; inset-inline-start: var(--fm-thumb-at); box-sizing: border-box; transform: translateX(-50%); cursor: pointer; transition-property: background-color; }',
+    ':host(:dir(rtl)) :where([part="thumb"]) { transform: translateX(50%); }',
+    ':where([part="thumb"]:focus:not(:focus-visible)) { outline-width: 0; }',
+    ':where([part="thumb"][hidden], [part="number"][hidden]) { display: none; }',
+    ...(disables ? [':where([part="thumb"][aria-disabled="true"]) { cursor: not-allowed; }'] : []),
+    ':where([part="min-label"], [part="max-label"]) { white-space: nowrap; }',
+    ':where([part="number"]) { flex: none; inline-size: 0; }',
+    ':where([part="number"])::part(label) { position: absolute; clip-path: inset(50%); overflow: hidden; white-space: nowrap; }',
+    ':where([part="field"]:not([data-marked="true"])) [part="required-mark"] { display: none; }',
   ].join("\n");
 
 /**
@@ -470,6 +565,25 @@ function dialogPartSelector(part: string, data: string): string {
 export const isSuggest = (skemo: Skemo): boolean =>
   skemo.a11y.role === "combobox" && skemo.parts.listbox !== undefined;
 
+/**
+ * A date picker (Spec 025 ②, plan ② D-11): the field of the kampo (role textbox) with a calendar
+ * part — a popover of the platform beside the field, as the listbox of the kompletigilo.
+ */
+export const isDatepicker = (skemo: Skemo): boolean =>
+  skemo.a11y.role === "textbox" && skemo.parts.calendar !== undefined;
+
+/**
+ * The states of a day cell of a date picker (E3: the states stand at the operated part): its own
+ * hover and focus, disabled as aria-disabled (a cell is no control of the platform); readonly and
+ * invalid are the field's and reach the cell through the field.
+ */
+const CELL_STATES: Readonly<Record<string, string | undefined>> = {
+  rest: "",
+  hover: ":hover",
+  focus: ":focus-visible",
+  disabled: '[aria-disabled="true"]',
+};
+
 /** A disclosure (Spec 014 ⑤, D-03): the platform's details and summary. */
 const isDisclosure = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "disclosure";
 
@@ -692,6 +806,14 @@ function declarations(
   if (isMeter(skemo) && part === "fill" && property === "color") {
     return [`background-color: ${variable(token)};`];
   }
+  // A slider (Spec 025 ①, D-03): fill and thumb carry a colour, as the meter's bar does (no text
+  // lies on them); the number field beside the track is not shown where its width is none.
+  if (isSlider(skemo) && (part === "fill" || part === "thumb") && property === "color") {
+    return [`background-color: ${variable(token)};`];
+  }
+  if (isSlider(skemo) && part === "number" && property === "width") {
+    return token === "none" ? ["display: none;"] : [`min-inline-size: ${variable(token)};`];
+  }
   if (isMeter(skemo) && part === "unknown") {
     if (property === "color") return [`border-color: ${variable(token)};`];
     if (property === "width") return [`border-width: ${variable(token)};`];
@@ -753,6 +875,21 @@ function declarations(
   }
   if (isSuggest(skemo) && part === "listbox" && property === "height") {
     return token === "none" ? ["display: none;"] : [`max-block-size: ${variable(token)};`];
+  }
+  // A date picker (Spec 025 ②, plan ② D-11): the cell and its looks carry their ground as a colour
+  // (as the glitilo's fill does: no text part of the Ero lies on it, the day is the text in it);
+  // today's look is the cell's border; the calendar is as wide as its token, as high at most as
+  // its height while expanded, and not shown while that height is none.
+  if (isDatepicker(skemo)) {
+    if (["cell", "selected-cell", "in-range-cell"].includes(part) && property === "color") {
+      return [`background-color: ${variable(token)};`];
+    }
+    if (part === "today-cell" && property === "color") return [`border-color: ${variable(token)};`];
+    if (part === "today-cell" && property === "width") return [`border-width: ${variable(token)};`];
+    if (part === "calendar" && property === "width") return [`inline-size: ${variable(token)};`];
+    if (part === "calendar" && property === "height") {
+      return token === "none" ? ["display: none;"] : [`max-block-size: ${variable(token)};`];
+    }
   }
   switch (property as SkemoPartProperty) {
     case "fill":
@@ -853,7 +990,12 @@ const structure = (inlineHost: boolean, disables: boolean, bordered: boolean): s
  * column; the mark of a required field (an asterisk drawn as a small vector, no text) shows only
  * while the field is marked (data-marked).
  */
-const fieldStructure = (disables: boolean, select = false, textarea = false): string =>
+const fieldStructure = (
+  disables: boolean,
+  select = false,
+  textarea = false,
+  stepper = false,
+): string =>
   [
     ":host { display: block; }",
     ':where([part="field"]) { display: flex; flex-direction: column; align-items: stretch; }',
@@ -864,6 +1006,18 @@ const fieldStructure = (disables: boolean, select = false, textarea = false): st
     ...(disables ? [':where([part="control"]:disabled) { cursor: not-allowed; }'] : []),
     ':where([part="field"]:not([data-marked="true"])) [part="required-mark"] { display: none; }',
     ...(select ? selectStructure : []),
+    // Spec 025 ① (plan ① D-05, D-06): the input in a row with its step buttons and its clear
+    // button (composed butono, hidden unless shown); the input fills the row.
+    ...(stepper
+      ? [
+          // The row lines up the input and its buttons; the input grows to the rest and keeps its
+          // own minimum width (no min-inline-size: 0), so a narrow filter bar still wraps its
+          // fields as before Spec 025.
+          ':where([part="row"]) { display: flex; align-items: center; }',
+          ':where([part="row"]) > [part="control"] { flex: 1 1 auto; }',
+          ':where([part="decrement"], [part="increment"], [part="clear"]) { flex: none; }',
+        ]
+      : []),
   ].join("\n");
 
 /**
@@ -1201,6 +1355,28 @@ const suggestStructure: string = [
   ':where([part="suggestion"]) { display: flex; align-items: center; box-sizing: border-box; cursor: pointer; white-space: nowrap; }',
   ':where([part="no-results"]) { display: block; }',
   HIDDEN_TEXT,
+].join("\n");
+
+/**
+ * Layout of the calendar of a date picker (Spec 025 ②, plan ② D-11), keywords and 0 only: the
+ * trigger and the month buttons keep their size in the row; the field is the anchor, the calendar
+ * a popover of the platform under it (the writing direction mirrors it), a column of the head (a
+ * row with the month between prev and next) and the grid — a column of rows of seven, every
+ * weekday and every cell a seventh of the row, centred; a cell has a border for today's look (0
+ * otherwise) and is a pointer target, not allowed where it is refused.
+ */
+const datepickerStructure: string = [
+  ':where([part="trigger"], [part="prev"], [part="next"]) { flex: none; }',
+  ':where([part="field"]) { anchor-name: --fm-field; }',
+  ':where([part="calendar"]) { position: fixed; inset: auto; margin: 0; box-sizing: border-box; position-anchor: --fm-field; position-area: block-end; position-try-fallbacks: flip-block; display: flex; flex-direction: column; border-style: none; }',
+  ':where([part="calendar"]:not(:popover-open)) { display: none; }',
+  ':where([part="head"]) { display: flex; align-items: center; justify-content: space-between; }',
+  ':where([part="grid"]) { display: flex; flex-direction: column; }',
+  ':where([part="weekdays"]) { display: flex; }',
+  ':where([part="week"]) { display: flex; }',
+  ':where([part="weekday"], [part="cell"]) { flex: 1 1 0; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }',
+  ':where([part="cell"]) { border-style: solid; border-width: 0; cursor: pointer; }',
+  ':where([part="cell"][aria-disabled="true"]) { cursor: not-allowed; }',
 ].join("\n");
 
 /**
@@ -1671,43 +1847,46 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
                           ? paginationStructure
                           : isUpload(skemo)
                             ? uploadStructure(disables)
-                            : isCodeblock(skemo)
-                              ? codeblockStructure()
-                              : isMarkdown(skemo)
-                                ? markdownStructure
-                                : isCard(skemo)
-                                  ? cardStructure
-                                  : isAvatar(skemo)
-                                    ? avatarStructure
-                                    : isLight(skemo)
-                                      ? lightStructure(skemo)
-                                      : isTabs(skemo)
-                                        ? tabsStructure
-                                        : isDisclosure(skemo)
-                                          ? disclosureStructure
-                                          : isField(skemo)
-                                            ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}`
-                                            : isGroup(skemo)
-                                              ? groupStructure(
-                                                  disables,
-                                                  skemo.parts["required-mark"] !== undefined,
-                                                )
-                                              : isToggle(skemo)
-                                                ? toggleStructure(
+                            : isSlider(skemo)
+                              ? sliderStructure(disables)
+                              : isCodeblock(skemo)
+                                ? codeblockStructure()
+                                : isMarkdown(skemo)
+                                  ? markdownStructure
+                                  : isCard(skemo)
+                                    ? cardStructure
+                                    : isAvatar(skemo)
+                                      ? avatarStructure
+                                      : isLight(skemo)
+                                        ? lightStructure(skemo)
+                                        : isTabs(skemo)
+                                          ? tabsStructure
+                                          : isDisclosure(skemo)
+                                            ? disclosureStructure
+                                            : isField(skemo)
+                                              ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo), skemo.parts.decrement !== undefined || isDatepicker(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}${isDatepicker(skemo) ? `\n${datepickerStructure}` : ""}`
+                                              : isGroup(skemo)
+                                                ? groupStructure(
                                                     disables,
-                                                    uzo?.layout.wrap !== undefined &&
-                                                      uzo.layout.wrap !== "never",
-                                                    skemo.slots.some(
-                                                      (slot) =>
-                                                        slot.default !== true && slot.text === true,
-                                                    ),
                                                     skemo.parts["required-mark"] !== undefined,
                                                   )
-                                                : structure(
-                                                    uzo?.layout.wrap === "with-text",
-                                                    disables,
-                                                    bordered,
-                                                  );
+                                                : isToggle(skemo)
+                                                  ? toggleStructure(
+                                                      disables,
+                                                      uzo?.layout.wrap !== undefined &&
+                                                        uzo.layout.wrap !== "never",
+                                                      skemo.slots.some(
+                                                        (slot) =>
+                                                          slot.default !== true &&
+                                                          slot.text === true,
+                                                      ),
+                                                      skemo.parts["required-mark"] !== undefined,
+                                                    )
+                                                  : structure(
+                                                      uzo?.layout.wrap === "with-text",
+                                                      disables,
+                                                      bordered,
+                                                    );
   // A skip link adds its place above the page to a control's structure (Spec 014 ②, D-07).
   const floating = isSkip(skemo) ? `\n${skipStructure}` : "";
   return `${base}${floating}\n${[...tokenRules, ...undrawn].join("\n")}\n`;
@@ -1795,12 +1974,26 @@ function selectorOf(
   if (isUpload(skemo)) {
     return uploadPartSelector(part, property, data, combination[STATE_KEY] ?? "rest");
   }
+  if (isSlider(skemo)) {
+    return sliderPartSelector(part, property, data, combination[STATE_KEY] ?? "rest");
+  }
   if (isCodeblock(skemo)) return codeblockPartSelector(part, data);
   if (isMarkdown(skemo)) return markdownPartSelector(part);
   if (isCard(skemo)) return cardPartSelector(part, data);
   if (isAvatar(skemo)) return avatarPartSelector(part, data);
   const state = STATE_SELECTORS[combination[STATE_KEY] ?? "rest"] ?? "";
-  if (isField(skemo)) return fieldPartSelector(part, property, data, state, isSelect(skemo), entry);
+  if (isField(skemo)) {
+    return fieldPartSelector(
+      part,
+      property,
+      data,
+      state,
+      isSelect(skemo),
+      entry,
+      isDatepicker(skemo),
+      combination[STATE_KEY] ?? "rest",
+    );
+  }
   if (isToggle(skemo)) return togglePartSelector(part, property, data, state);
   return partSelector(part, `[part="control"]${data}${state}`);
 }
@@ -1842,10 +2035,15 @@ export function elementNamesOf(
       isPagination(entry.skemo),
       isUpload(entry.skemo),
       isAvatar(entry.skemo),
+      isDatepicker(entry.skemo),
     ),
     role: entry.skemo.a11y.role,
     // Spec 015 ① (plan ① D-04): the breadcrumb is a light host with a list in its shadow.
     breadcrumb: isBreadcrumb(entry.skemo),
+    // Spec 025 ① (plan ① D-05): a field with step buttons (the kampo) shows them in a row.
+    stepper: entry.skemo.parts.decrement !== undefined,
+    // Spec 025 ② (plan ② D-11): a field with a calendar part is the date picker.
+    datepicker: isDatepicker(entry.skemo),
     marked: entry.skemo.parts["required-mark"] !== undefined,
     // Spec 011 ③: a live region turns its indicator and shows a dismiss butono where the Skemo
     // has the parts.

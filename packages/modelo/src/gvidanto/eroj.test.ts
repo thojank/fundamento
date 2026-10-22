@@ -28,10 +28,12 @@ describe("list_eroj", () => {
       "avataro",
       "avizo",
       "butono",
+      "datelektilo",
       "dialogo",
       "elektilo",
       "elekto",
       "faldilo",
+      "glitilo",
       "ikono",
       "insigno",
       "kampo",
@@ -64,8 +66,8 @@ describe("list_eroj", () => {
       variants: ["high", "medium", "low"],
       props: ["emphasis", "intent", "size", "type", "disabled", "loading", "full-width", "label"],
     });
-    // Spec 020 ③: the kodbloko stands before the ligilo.
-    expect(listEroj(modelo).eroj[18]).toMatchObject({
+    // Spec 020 ③: the kodbloko stands before the ligilo; Spec 025 ①: the glitilo too.
+    expect(listEroj(modelo).eroj[20]).toMatchObject({
       name: "ligilo",
       variants: ["inline", "standalone"],
       props: ["to", "placement", "external", "size", "label"],

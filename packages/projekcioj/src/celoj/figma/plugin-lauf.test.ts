@@ -224,12 +224,16 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       // Spec 011 ③: the avizo, the insigno and the plenstato carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "avizo"),
       ...["boundary", "slots", "content"].map(() => "butono"),
+      // Spec 025 ②: the datelektilo carries a Uzo like every set.
+      ...["boundary", "slots", "content"].map(() => "datelektilo"),
       // Spec 011 ②: the dialogo and the tekstareo carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "dialogo"),
       ...["boundary", "slots", "content"].map(() => "elektilo"),
       ...["boundary", "slots", "content"].map(() => "elekto"),
       // Spec 014 ⑤: the faldilo and the kompletigilo carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "faldilo"),
+      // Spec 025 ①: the glitilo carries a Uzo like every set.
+      ...["boundary", "slots", "content"].map(() => "glitilo"),
       ...["boundary", "slots", "content"].map(() => "ikono"),
       ...["boundary", "slots", "content"].map(() => "insigno"),
       ...["boundary", "slots", "content"].map(() => "kampo"),
@@ -293,12 +297,16 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       // Spec 011 ③: the avizo, the insigno and the plenstato close their three parts too.
       ...["avizo", "avizo", "avizo"],
       ...["butono", "butono", "butono"],
+      // Spec 025 ②: the datelektilo closes its three parts too.
+      ...["datelektilo", "datelektilo", "datelektilo"],
       // Spec 011 ②: the dialogo and the tekstareo close their three parts too.
       ...["dialogo", "dialogo", "dialogo"],
       ...["elektilo", "elektilo", "elektilo"],
       ...["elekto", "elekto", "elekto"],
       // Spec 014 ⑤: the faldilo and the kompletigilo close their three parts too.
       ...["faldilo", "faldilo", "faldilo"],
+      // Spec 025 ①: the glitilo closes its three parts too.
+      ...["glitilo", "glitilo", "glitilo"],
       ...["ikono", "ikono", "ikono"],
       ...["insigno", "insigno", "insigno"],
       ...["kampo", "kampo", "kampo"],
@@ -471,6 +479,10 @@ describe("the full plan against the strict double: fresh and into the file of be
     // Spec 020 ③: and the code block and the Markdown view.
     "kodbloko",
     "markdovido",
+    // Spec 025 ①: and the slider.
+    "glitilo",
+    // Spec 025 ②: and the date picker.
+    "datelektilo",
   ]);
   const before2 = structuredClone(repo.input);
   before2.modelo.eroj = before2.modelo.eroj.filter((entry) => !BEFORE_2.has(entry.ero.name));

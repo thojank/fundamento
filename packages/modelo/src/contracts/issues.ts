@@ -190,6 +190,8 @@ export const RULE_IDS = [
   // Reguloj of the ligilo (their rule IDs are the Regulo names).
   "skemo-web-term",
   "skemo-a11y-invalid",
+  // Spec 025 ① (plan ① D-01): the events of a Skemo, unique by name and no name of a prop.
+  "skemo-event-invalid",
   "uzo-boundary-covered",
   // Nachlese 8 ③: a text without its translation, a translation without its text.
   "traduko-missing",

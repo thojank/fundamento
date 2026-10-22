@@ -3,7 +3,7 @@
     "id": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF",
     "name": "kampo",
     "skemo": "ske_01M4S1ZQFKVZX7X0A8W94SRGCE",
-    "description": "A text field: takes one line of text from a person. It always shows its label, and can show help and an error."
+    "description": "A text field: takes one line of text from a person. It always shows its label, and can show help and an error. A number may show step buttons, a search a clear button, a time is the platform's own."
   },
   "skemo": {
     "id": "ske_01M4S1ZQFKVZX7X0A8W94SRGCE",
@@ -20,10 +20,11 @@
           "search",
           "password",
           "number",
-          "date"
+          "date",
+          "time"
         ],
         "default": "text",
-        "description": "What kind of text is expected; changes the keyboard on touch and the input aids, never the look. password hides what is typed; number takes a whole number (a text input with a numeric keyboard, no wheel or arrows); date opens the platform's own date dialog."
+        "description": "What kind of text is expected; changes the keyboard on touch and the input aids, never the look. password hides what is typed; number takes a whole number (a text input with a numeric keyboard, no wheel or arrows unless stepper says so); date and time open the platform's own dialogs; search clears with a button and Escape."
       },
       {
         "name": "value",
@@ -89,6 +90,17 @@
         "name": "autocomplete",
         "kind": "string",
         "description": "What the platform may fill in, in the platform's words: current-password or new-password for a password, email for an e-mail."
+      },
+      {
+        "name": "stepper",
+        "kind": "boolean",
+        "default": false,
+        "description": "Step buttons beside a number (constraint: only with kind number): Verringern and Erhöhen as composed butono with the ikono subtract and add, stepping by step within min and max, as the arrow keys do."
+      },
+      {
+        "name": "step",
+        "kind": "string",
+        "description": "How far one step button or one arrow key moves a number (constraint: only with kind number); 1 without it."
       }
     ],
     "states": [
@@ -217,6 +229,25 @@
         },
         "easing": {
           "fixed": "motion.easing.standard"
+        }
+      },
+      "decrement": {
+        "size": {
+          "by": [
+            "size"
+          ]
+        }
+      },
+      "increment": {
+        "size": {
+          "by": [
+            "size"
+          ]
+        }
+      },
+      "clear": {
+        "size": {
+          "fixed": "size.control.small"
         }
       }
     },
@@ -420,6 +451,54 @@
           "size": "large"
         },
         "token": "spacing.medium"
+      },
+      {
+        "part": "decrement",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.control.small"
+      },
+      {
+        "part": "decrement",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.control.medium"
+      },
+      {
+        "part": "decrement",
+        "property": "size",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.control.large"
+      },
+      {
+        "part": "increment",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.control.small"
+      },
+      {
+        "part": "increment",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.control.medium"
+      },
+      {
+        "part": "increment",
+        "property": "size",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.control.large"
       }
     ],
     "a11y": {
@@ -446,15 +525,40 @@
         ]
       },
       "keys": [
-        "Enter"
+        "Enter",
+        "ArrowUp",
+        "ArrowDown",
+        "Escape"
       ],
       "texts": {
         "required": {
           "de": "erforderlich",
           "en": "required"
+        },
+        "decrement-name": {
+          "de": "Verringern",
+          "en": "Decrease"
+        },
+        "increment-name": {
+          "de": "Erhöhen",
+          "en": "Increase"
+        },
+        "clear-name": {
+          "de": "Suche leeren",
+          "en": "Clear search"
         }
       }
     },
+    "events": [
+      {
+        "name": "input",
+        "description": "The text changes while a person types, steps or clears."
+      },
+      {
+        "name": "change",
+        "description": "The field is left with a text other than the one it was entered with, or a step button was pressed."
+      }
+    ],
     "constraints": [
       {
         "when": {
@@ -485,10 +589,11 @@
         "allowed": {
           "kind": [
             "number",
-            "date"
+            "date",
+            "time"
           ]
         },
-        "kialo": "A bound needs a scale; text, an address or a password has none, so min says nothing there."
+        "kialo": "A bound needs a scale; text, an address or a password has none; a time has one, so min says nothing there."
       },
       {
         "when": {
@@ -497,10 +602,33 @@
         "allowed": {
           "kind": [
             "number",
-            "date"
+            "date",
+            "time"
           ]
         },
-        "kialo": "A bound needs a scale; text, an address or a password has none, so max says nothing there."
+        "kialo": "A bound needs a scale; text, an address or a password has none; a time has one, so max says nothing there."
+      },
+      {
+        "when": {
+          "stepper": "true"
+        },
+        "allowed": {
+          "kind": [
+            "number"
+          ]
+        },
+        "kialo": "Step buttons step a number, because only a number has a next and a previous value; on a text they would have nothing to step."
+      },
+      {
+        "when": {
+          "prop:step": "filled"
+        },
+        "allowed": {
+          "kind": [
+            "number"
+          ]
+        },
+        "kialo": "A step needs a scale, because only a number moves by a step; a text has none."
       }
     ],
     "goals": [
@@ -584,16 +712,64 @@
           "en": [
             "date",
             "expiry",
-            "deadline"
+            "deadline",
+            "birthday"
           ],
           "de": [
             "datum",
             "ablaufdatum",
-            "frist"
+            "frist",
+            "geburtsdatum"
           ]
         },
         "props": {
           "kind": "date"
+        },
+        "regulo": "field-label-visible"
+      },
+      {
+        "goal": "count",
+        "keywords": {
+          "en": [
+            "counter",
+            "plus",
+            "minus",
+            "quantity"
+          ],
+          "de": [
+            "zähler",
+            "menge",
+            "plus",
+            "minus",
+            "schrittknöpfe",
+            "stückzahl"
+          ]
+        },
+        "props": {
+          "kind": "number",
+          "stepper": true
+        },
+        "regulo": "range-stated"
+      },
+      {
+        "goal": "time",
+        "keywords": {
+          "en": [
+            "time",
+            "clock",
+            "hour",
+            "o-clock"
+          ],
+          "de": [
+            "uhrzeit",
+            "uhr",
+            "stunde",
+            "beginn",
+            "startzeit"
+          ]
+        },
+        "props": {
+          "kind": "time"
         },
         "regulo": "field-label-visible"
       }

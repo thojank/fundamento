@@ -937,6 +937,67 @@ const layoutAllowance: UsageEnforcer = ({ regulo, instances, eroOf }) =>
     });
   });
 
+/**
+ * range-stated (Spec 025 ①, plan ① D-02, G4): an instance with a bound of its own — min or max
+ * given — states its limits visibly: a help of at least the words the Uzo rule asks for, or (where
+ * the Skemo has the slots) both end labels with text. The Uzo entry says which prop values the
+ * rule judges (the kampo of kind number, not a date) and whether an Aspekto may override it.
+ */
+const rangeStated: UsageEnforcer = ({ modelo, regulo, instances, eroOf }) =>
+  instances.flatMap((instance, index): UsageFinding[] => {
+    const ero = eroOf(instance);
+    if (ero === undefined || !applies(regulo, ero)) return [];
+    const rule = ero.uzo?.content.find((entry) => entry.regulo === regulo.name);
+    if (rule === undefined) return [];
+    if (rule.when?.props !== undefined) {
+      const judged = Object.entries(rule.when.props).every(([prop, values]) => {
+        const given =
+          instance.props[prop] ??
+          ero.skemo.props.find((candidate) => candidate.name === prop)?.default;
+        return typeof given === "string" && values.includes(given);
+      });
+      if (!judged) return [];
+    }
+    const bounds = ["min", "max"].filter((prop) => {
+      const given = instance.props[prop];
+      return given !== undefined && given !== "";
+    });
+    if (bounds.length === 0) return [];
+    const help = textOfSource(instance, rule.of ?? "slot:help", ero.skemo);
+    const helped =
+      help !== undefined && textCheckFailure(ero.skemo, rule.check, help, ero.uzo) === undefined;
+    const ends = ["min-label", "max-label"].filter((slot) =>
+      ero.skemo.slots.some((candidate) => candidate.name === slot),
+    );
+    const labelled =
+      ends.length === 2 &&
+      ends.every((slot) => textOfSource(instance, `slot:${slot}`, ero.skemo) !== undefined);
+    if (helped || labelled) return [];
+    const where =
+      ends.length === 2
+        ? "a help that names them, or a text in both min-label and max-label"
+        : "a help that names them";
+    const jugxo = overrideOf(modelo, instance, rule);
+    const message = `Instance ${index} of ${ero.ero.name} has a bound (${bounds.join(", ")}) and states no limit: ${where} is missing.`;
+    if (jugxo !== undefined) {
+      return [
+        {
+          instance: [index],
+          severity: "info",
+          message: `${message} The Aspekto ${instance.aspekto} overrides ${regulo.name} with the Jugxo ${jugxo}.`,
+          suggestion: `Keep it if the Jugxo ${jugxo} covers it; otherwise name the limits.`,
+        },
+      ];
+    }
+    return [
+      {
+        instance: [index],
+        message,
+        suggestion: `Name the limits where the person sees them before the error: ${where} ("Zwischen 1 und 10.").`,
+      },
+    ];
+  });
+
 /** Enforcers of the Ero Reguloj by name (the repo test accepts this table next to the Modelo's). */
 export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
   "one-primary-per-container": ({ instances, eroOf, regulo }) => {
@@ -998,6 +1059,8 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
   // Spec 007 T019 (A6, A7, data-model §4): the layout rule and the text rules of the Uzo. Each
   // reads the Uzo of the Ero; until an Ero has one, none of them finds anything.
   "full-width-in-action-bar-or-compact": layoutAllowance,
+  // Spec 025 ① (plan ① D-02): the limits of a slider or a number with bounds are stated.
+  "range-stated": rangeStated,
   "label-names-action": textRule,
   "destructive-label-names-object": textRule,
   "destructive-label-not-generic": textRule,

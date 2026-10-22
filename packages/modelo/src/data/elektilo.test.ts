@@ -19,6 +19,9 @@ import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
 import { validateModelo } from "../validate/validate-modelo.js";
 
+// Spec 025 ①: the step buttons and the clear button are the kampo's own (kind number, search).
+const KAMPO_OWN = ["decrement", "increment", "clear"];
+
 const { modelo } = loadModelo(defaultModeloSource());
 if (modelo === undefined) throw new Error("the repo Modelo must load");
 const eroNamed = (name: string) => modelo.eroj.find((entry) => entry.ero.name === name);
@@ -58,10 +61,12 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       "avataro",
       "avizo",
       "butono",
+      "datelektilo",
       "dialogo",
       "elektilo",
       "elekto",
       "faldilo",
+      "glitilo",
       "ikono",
       "insigno",
       "kampo",
@@ -137,9 +142,13 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
   it("names the parts of the kampo plus the chevron indicator, and copies the kampo's bindings (Regel 0.1)", () => {
     if (skemo === undefined || kampo === undefined) throw new Error("elektilo or kampo missing");
     expect(Object.keys(skemo.parts).sort()).toEqual(
-      [...Object.keys(kampo.skemo.parts), "indicator"].sort(),
+      [
+        ...Object.keys(kampo.skemo.parts).filter((part) => !KAMPO_OWN.includes(part)),
+        "indicator",
+      ].sort(),
     );
     for (const [part, properties] of Object.entries(kampo.skemo.parts)) {
+      if (KAMPO_OWN.includes(part)) continue;
       for (const [property, source] of Object.entries(properties)) {
         expect(skemo.parts[part]?.[property as never], `${part}.${property}`).toEqual(source);
       }
@@ -147,7 +156,9 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
     // Every binding of the kampo in a state the elektilo has is the elektilo's too; readonly is
     // the kampo's alone (a select has no read-only state).
     const shared = kampo.skemo.bindings.filter(
-      (binding) => binding.when?.state === undefined || skemo.states.includes(binding.when.state),
+      (binding) =>
+        !KAMPO_OWN.includes(binding.part) &&
+        (binding.when?.state === undefined || skemo.states.includes(binding.when.state)),
     );
     expect(skemo.bindings.filter((binding) => binding.part !== "indicator")).toEqual(shared);
     const tokens = skemo.bindings.map((binding) => binding.token);
@@ -193,7 +204,8 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       keys: ["ArrowUp", "ArrowDown", "Enter", "Escape"],
       texts: { required: { de: "erforderlich", en: "required" } },
     });
-    expect(skemo?.a11y.texts).toEqual(kampo?.skemo.a11y.texts);
+    // Spec 025 ①: the kampo speaks its buttons too; required is the shared word.
+    expect(skemo?.a11y.texts).toEqual({ required: kampo?.skemo.a11y.texts?.required });
   });
 
   it("forbids an error text without invalid, like the kampo (constraint, Spec 009 D-04)", () => {
@@ -419,6 +431,8 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
         "tekstareo",
         "kompletigilo",
         "alsxutilo",
+        "glitilo",
+        "datelektilo",
       ],
     ],
     [
@@ -432,6 +446,8 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
         "tekstareo",
         "kompletigilo",
         "alsxutilo",
+        "glitilo",
+        "datelektilo",
       ],
     ],
     [
@@ -445,20 +461,52 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
         "avizo",
         "kompletigilo",
         "alsxutilo",
+        "glitilo",
+        "datelektilo",
       ],
     ],
     [
       "required-marked",
-      ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo", "alsxutilo"],
+      [
+        "kampo",
+        "markobutono",
+        "elekto",
+        "elektilo",
+        "tekstareo",
+        "kompletigilo",
+        "alsxutilo",
+        "glitilo",
+        "datelektilo",
+      ],
     ],
     [
       "error-not-color-only",
-      ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo", "alsxutilo"],
+      [
+        "kampo",
+        "markobutono",
+        "elekto",
+        "elektilo",
+        "tekstareo",
+        "kompletigilo",
+        "alsxutilo",
+        "glitilo",
+        "datelektilo",
+      ],
     ],
     // Spec 014 ①: widened once more, to the reason-help of the dialogo.
     [
       "help-is-one-sentence",
-      ["kampo", "elekto", "elektilo", "tekstareo", "dialogo", "kompletigilo", "alsxutilo"],
+      [
+        "kampo",
+        "elekto",
+        "elektilo",
+        "tekstareo",
+        "dialogo",
+        "kompletigilo",
+        "alsxutilo",
+        "glitilo",
+        "datelektilo",
+      ],
     ],
     ["placeholder-not-label", ["kampo", "elektilo", "tekstareo", "kompletigilo"]],
     // Spec 011 ⑤: widened once more, to the tabs of the langetaro.
@@ -506,6 +554,8 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
       "avataro",
       "kodbloko",
       "markdovido",
+      "glitilo",
+      "datelektilo",
     ]);
   });
 

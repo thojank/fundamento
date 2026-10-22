@@ -269,6 +269,7 @@ export function skemoIssues(modelo: Modelo, files: ModeloFiles): ValidationIssue
     goalIssues(entry, reguloNames, at);
     nameIssues(entry, at);
     a11yIssues(entry, at);
+    eventIssues(entry, at);
   }
   issues.push(...ekzemploIssues(modelo, files));
   issues.push(...uzoIssues(modelo, files));
@@ -736,6 +737,36 @@ function a11yIssues(entry: LoadedEro, at: At): void {
       `Key a11y.texts by a boolean prop (${booleans.join(", ") || "none"}) or by <prop>-<value> of an enum prop, or add the prop first.`,
     );
   }
+}
+
+/**
+ * `skemo-event-invalid` (Spec 025 ①, plan ① D-01): every event of a Skemo has a name of its own —
+ * two events of one name would be one event with two meanings — and no name of a prop: a prop is
+ * set, an event is said (change says that value changed; a prop named change would say nothing).
+ */
+function eventIssues(entry: LoadedEro, at: At): void {
+  const { ero, skemo } = entry;
+  const props = new Set(skemo.props.map((prop) => prop.name));
+  const seen = new Set<string>();
+  (skemo.events ?? []).forEach((event, index) => {
+    if (seen.has(event.name)) {
+      at(
+        appendPointer("/skemo/events", String(index)),
+        "skemo-event-invalid",
+        `Skemo of ${ero.name} names the event ${event.name} twice; one event has one meaning.`,
+        `Keep one entry for ${event.name} and give the other event a name of its own.`,
+      );
+    }
+    seen.add(event.name);
+    if (props.has(event.name)) {
+      at(
+        appendPointer("/skemo/events", String(index)),
+        "skemo-event-invalid",
+        `Skemo of ${ero.name} names the event ${event.name} like one of its props; a prop is set, an event is said.`,
+        `Name the event after what happened (change, input, remove), not after the prop it concerns.`,
+      );
+    }
+  });
 }
 
 /**

@@ -45,8 +45,11 @@ const ERO_CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = 
 // suite 622 s of it beside three other packages). The checks are a job of their own now, the
 // unit tests of every package but Projekcioj and Eroj another, and the Projekcioj suite runs in
 // two Vitest shards — the same cut the Eroj got with W1.
+// Spec 025 ③ (B-28): only the engines of the run (PLAYWRIGHT_ENGINES: Chromium on a pull request,
+// all three on main) — the apt packages of three engines took 7 min on a cold runner and, with the
+// Vitrino check of 40 Eroj, cut the rendered checks off at the 15-minute budget twice.
 const PLAYWRIGHT_BROWSERS =
-  "pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium firefox webkit";
+  "pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES";
 
 /** The job of the checks: build, perf, lint, the Modelo checks, release. */
 const CHECKS_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [

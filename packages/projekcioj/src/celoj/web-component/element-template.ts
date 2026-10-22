@@ -54,7 +54,10 @@ export type HostControl =
   | "card"
   | "avatar"
   | "codeblock"
-  | "markdown";
+  | "markdown"
+  | "slider"
+  // Spec 025 ② (plan ② D-11): the field of a date picker — an input with a trigger and a calendar.
+  | "datepicker";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -111,6 +114,10 @@ export interface ElementNames {
   icon?: boolean;
   /** Spec 015 ① (plan ① D-04): a navigation whose items are a path — the breadcrumb, a light host with a list in its shadow. */
   breadcrumb?: boolean;
+  /** Spec 025 ① (plan ① D-05): a field with the parts decrement and increment — the kampo shows its step buttons and its clear button. */
+  stepper?: boolean;
+  /** Spec 025 ② (plan ② D-11): a textbox with a calendar part — the datelektilo, a field with a trigger and a popover calendar. */
+  datepicker?: boolean;
   /**
    * The Make Kit builds one file per Aspekto: the descriptor and the stylesheet are then constants
    * above the element instead of imports (D-14).
@@ -131,8 +138,12 @@ export function hostOf(
   pagination = false,
   upload = false,
   avatar = false,
+  datepicker = false,
 ): HostControl {
   if (role === "link") return "a";
+  // Spec 025 ② (plan ② D-11): a textbox with a calendar part is the date picker — the field of
+  // the kampo with a trigger beside the input and the calendar as a popover.
+  if (role === "textbox" && datepicker) return "datepicker";
   // Spec 015 ② (plan ② D-05): the platform's file input is heard as a button; with a dropzone
   // part it is the file input of an alsxutilo, not a button of its own.
   if (role === "button" && upload) return "upload";
@@ -185,6 +196,9 @@ export function hostOf(
   // a Markdown view a column of Eroj it builds from its source (role document).
   if (role === "figure") return "codeblock";
   if (role === "document") return "markdown";
+  // Spec 025 ① (plan ① D-03): a slider is a track with thumbs of role slider, the field of the
+  // kampo around it.
+  if (role === "slider") return "slider";
   return "button";
 }
 
@@ -268,6 +282,8 @@ function fieldMarkup(
   slots: NonNullable<ElementNames["slots"]>,
   textarea = false,
   suggest = false,
+  stepper = false,
+  datepicker = false,
 ): string {
   // A text area (Spec 011 ②, D-11): the platform's textarea in place of the input. A field with
   // suggestions (Spec 014 ⑤, D-03): the input as a combobox over a listbox — a popover of the
@@ -276,11 +292,55 @@ function fieldMarkup(
     ? '<textarea part="control" id="control"></textarea>'
     : suggest
       ? '<input part="control" id="control" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="listbox" autocomplete="off">'
-      : '<input part="control" id="control">';
+      : datepicker
+        ? '<input part="control" id="control" autocomplete="off">'
+        : '<input part="control" id="control">';
   const listbox = suggest
     ? '<div part="listbox" role="listbox" id="listbox" popover="manual"></div><span part="count" role="status" aria-live="polite" class="fm-hidden"></span>'
     : "";
-  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label>${native}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+  // Spec 025 ① (plan ① D-05, D-06): the step buttons of a number and the clear button of a search
+  // — composed butono of emphasis low with the Ikonaro's subtract, add and close, named by the
+  // Modelo's words in the render, hidden unless the kind and the stepper ask for them — in a row
+  // with the input.
+  // Spec 025 ② (plan ② D-11): the trigger of a date picker beside the input — a composed butono
+  // with the ikono calendar, named by the Modelo's word in the render — and the calendar after the
+  // row: a non-modal dialog of the platform's popover with the head (prev, month, next) and the
+  // grid; the weeks and their cells are made in the render for the shown month.
+  const trigger = datepicker
+    ? '<fm-butono part="trigger" emphasis="low" aria-haspopup="dialog" aria-expanded="false" aria-controls="calendar"><fm-ikono slot="icon-start" name="calendar"></fm-ikono></fm-butono>'
+    : "";
+  const calendar = datepicker
+    ? '<div part="calendar" id="calendar" role="dialog" popover="manual" aria-modal="false" aria-labelledby="month"><div part="head"><fm-butono part="prev" emphasis="low" size="small"><fm-ikono slot="icon-start" name="chevron-left"></fm-ikono></fm-butono><span part="month" id="month" aria-live="polite"></span><fm-butono part="next" emphasis="low" size="small"><fm-ikono slot="icon-start" name="chevron-right"></fm-ikono></fm-butono></div><div part="grid" role="grid" aria-labelledby="month"><div part="weekdays" role="row"></div></div></div>'
+    : "";
+  const row = stepper || datepicker ? `<div part="row">${native}${trigger}</div>` : native;
+  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label>${row}${calendar}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+}
+
+/**
+ * The step buttons and the clear button of a kampo (Spec 025 ①, plan ① D-05, D-06): composed
+ * butono of emphasis low with the Ikonaro's subtract, add and close, made by the element when the
+ * kind and the stepper ask for them and taken away otherwise — a text field keeps the parts of
+ * 0.2.0 (Arkitekturo contract; a composed butono carries a control of its own).
+ */
+const DECREMENT_BUTTON =
+  '<fm-butono part="decrement" emphasis="low" hidden><fm-ikono slot="icon-start" name="subtract"></fm-ikono></fm-butono>';
+const INCREMENT_BUTTON =
+  '<fm-butono part="increment" emphasis="low" hidden><fm-ikono slot="icon-start" name="add"></fm-ikono></fm-butono>';
+const CLEAR_BUTTON =
+  '<fm-butono part="clear" emphasis="low" size="small" hidden><fm-ikono slot="icon-start" name="close"></fm-ikono></fm-butono>';
+
+/**
+ * The shadow markup of a slider (Spec 025 ①, plan ① D-03): the field of the kampo — the label with
+ * the mark of a required field, help and error below — around a row: the start label, the track
+ * (the control) with its fill and two thumbs of role slider (the second shown with range), each
+ * named by the label and, in a range, the Modelo's word for its end (from, to), the end label and
+ * a composed kampo of kind number (shown with field) whose label is the slider's, heard not seen.
+ */
+function sliderMarkup(slots: NonNullable<ElementNames["slots"]>): string {
+  const texts = textsMarkup(
+    slots.filter((slot) => slot.name !== "min-label" && slot.name !== "max-label"),
+  );
+  return `<div part="field"><span part="label" id="label"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></span><div part="row"><span part="min-label" id="min-label"><slot name="min-label"></slot></span><div part="track" id="control"><div part="fill"></div><div part="thumb" id="thumb-start" role="slider" tabindex="0" aria-labelledby="label from"></div><div part="thumb" id="thumb-end" role="slider" tabindex="0" hidden></div></div><span part="max-label" id="max-label"><slot name="max-label"></slot></span><fm-kampo part="number" kind="number" hidden><span id="number-label"></span></fm-kampo></div>${texts}<span id="from" hidden></span><span id="to" hidden></span><span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -636,8 +696,10 @@ function markup(
   dismiss = false,
   icon = false,
   breadcrumb = false,
+  stepper = false,
 ): string {
   if (host === "text") return textMarkup(slots);
+  if (host === "slider") return sliderMarkup(slots);
   if (host === "status") return statusMarkup(slots, indicator, dismiss, icon);
   if (host === "icon") return iconMarkup();
   if (host === "separator") return separatorMarkup();
@@ -655,7 +717,8 @@ function markup(
   if (host === "codeblock") return codeblockMarkup();
   if (host === "markdown") return markdownMarkup();
   if (host === "tabs") return tabsMarkup();
-  if (host === "input") return fieldMarkup(slots);
+  if (host === "input") return fieldMarkup(slots, false, false, stepper);
+  if (host === "datepicker") return fieldMarkup(slots, false, false, false, true);
   if (host === "textarea") return fieldMarkup(slots, true);
   if (host === "suggest") return fieldMarkup(slots, false, true);
   if (host === "disclosure") return disclosureMarkup();
@@ -692,6 +755,7 @@ export function elementSource({
   skip = false,
   icon = false,
   breadcrumb = false,
+  stepper = false,
   slots = [
     { name: "label", default: true },
     { name: "icon-start", decorative: true },
@@ -706,7 +770,7 @@ export function elementSource({
   const control =
     host === "a"
       ? "a"
-      : host === "input"
+      : host === "input" || host === "datepicker"
         ? "input"
         : host === "textarea"
           ? "textarea"
@@ -752,14 +816,18 @@ export function elementSource({
                                                   ? "[role=dialog]"
                                                   : host === "menu"
                                                     ? "[role=menu]"
-                                                    : "button";
+                                                    : host === "slider"
+                                                      ? "[part='track']"
+                                                      : "button";
   const isToggle = host === "toggle";
   const isGroup = host === "group";
   const isSelect = host === "select";
   const isSuggest = host === "suggest";
+  const isDatepicker = host === "datepicker";
   const isUpload = host === "upload";
+  const isSlider = host === "slider";
   const isDisclosure = host === "disclosure";
-  const isFieldHost = host === "input" || host === "textarea" || isSuggest;
+  const isFieldHost = host === "input" || host === "textarea" || isSuggest || isDatepicker;
   // The platform element of a field: the generated code names it, so the types narrow (TS).
   const nativeField = host === "textarea" ? "HTMLTextAreaElement" : "HTMLInputElement";
   const isDialog = host === "dialog";
@@ -1107,7 +1175,7 @@ export function elementSource({
   // sent and the platform said invalid on the host (Spec 011 ② F-8); an empty, untouched required
   // field shows none, as the other fields of a form.
   const invalidReport =
-    isFieldHost || isUpload
+    isFieldHost || isUpload || isSlider
       ? `    this.addEventListener("invalid", () => {
       this.#reported = true;
       this.#render();
@@ -1120,7 +1188,7 @@ export function elementSource({
 `
       : "";
   const inputEnter =
-    host === "input"
+    host === "input" || isDatepicker
       ? `    control.addEventListener("keydown", (event) => {
       if (event.key !== "Enter" || !KEYS.includes("Enter")) return;
       const form = this.#internals.form;
@@ -1136,7 +1204,7 @@ export function elementSource({
     ? `    if (control instanceof ${nativeField}) {
       const kind = String(this.propValue("kind") ?? "text");
 ${
-  host === "input" || isSuggest
+  host === "input" || isSuggest || isDatepicker
     ? `      // A number is a text input with a numeric keyboard and a whole-number pattern (Spec 011 ①,
       // E8; GOV.UK: type=number changes its value with the wheel and the arrows); a date is the
       // platform's own dialog; a password hides what is typed. Nachlese 5 O-14: an address and a
@@ -1160,7 +1228,45 @@ ${
         if (typeof given === "string" && given !== "" && !(bound && dateOutside)) control.setAttribute(attribute, given);
         else control.removeAttribute(attribute);
       }
+${
+  host === "input" && stepper
+    ? `      // Spec 025 ① (plan ① D-05, D-06): a number with stepper shows its two step buttons (the
+      // constraint refuses a stepper on another kind), named by the Modelo's words, in the size of
+      // the field, each refusing at its bound; a search shows its clear button while it has a value.
+      // A time (E6) is the platform's own input like a date: kind is its type, min and max its bounds.
+      {
+        const stepperOn = kind === "number" && this.propValue("stepper") === true;
+        const searching = kind === "search";
+        if (kind === "time") control.removeAttribute("inputmode");
+        const buttonWord = (key: string): string => TEXTS[key]?.[this.#lingvo()] ?? TEXTS[key]?.en ?? "";
+        const given = String(this.propValue("value") ?? "");
+        const current = given === "" ? undefined : Number(given);
+        const off = this.propValue("disabled") === true || this.propValue("readonly") === true;
+        for (const [part, key, bound, direction] of [
+          ["decrement", "decrement-name", this.propValue("min"), -1],
+          ["increment", "increment-name", this.propValue("max"), 1],
+        ] as const) {
+          const button = this.#fieldButton(part, stepperOn);
+          if (button === undefined) continue;
+          button.hidden = false;
+          button.setAttribute("label", buttonWord(key));
+          button.setAttribute("size", String(this.propValue("size") ?? "medium"));
+          const limit = typeof bound === "string" && bound !== "" ? Number(bound) : undefined;
+          const atBound =
+            limit !== undefined && current !== undefined && Number.isFinite(limit) && Number.isFinite(current) &&
+            (direction < 0 ? current <= limit : current >= limit);
+          if (off || atBound) button.setAttribute("aria-disabled", "true");
+          else button.removeAttribute("aria-disabled");
+        }
+        const clear = this.#fieldButton("clear", searching && given !== "" && !off);
+        if (clear !== undefined) {
+          clear.hidden = false;
+          clear.setAttribute("label", buttonWord("clear-name"));
+        }
+      }
 `
+    : ""
+}`
     : `      // A text area (Spec 011 ②, D-11): rows is its height; code is written without the
       // platform's spelling check, in the code typography the stylesheet binds.
       const rows = this.propValue("rows");
@@ -1168,7 +1274,16 @@ ${
       if (kind === "code") control.setAttribute("spellcheck", "false");
       else control.removeAttribute("spellcheck");
 `
-}      const value = this.propValue("value");
+}${
+  isDatepicker
+    ? `      // Spec 025 ② (plan ② D-11): the form carries the ISO day (a range as one ISO interval), the
+      // field shows it in the document's format — or what a person typed while it is no date; a
+      // field under the keyboard is not overwritten.
+      const text = this.#dateFormValue();
+      const shown = this.#dateShown();
+      if (control.value !== shown && this.shadowRoot?.activeElement !== control) control.value = shown;
+      control.setAttribute("autocomplete", "off");`
+    : `      const value = this.propValue("value");
       const text = typeof value === "string" ? value : "";
 ${
   isSuggest
@@ -1176,6 +1291,7 @@ ${
       const shown = this.#entries().find((entry) => entry.value === text)?.text ?? text;
       if (control.value !== shown) control.value = shown;`
     : `      if (control.value !== text) control.value = text;`
+}`
 }
       this.#internals.setFormValue(text);
       const placeholder = this.propValue("placeholder");
@@ -1192,7 +1308,7 @@ ${
       const disabled = this.propValue("disabled") === true;
       control.readOnly = !disabled && this.propValue("readonly") === true;
       const invalid = this.propValue("invalid") === true || this.#filled("error");
-      this.#validate(control, kind, text, required, invalid);
+      this.#validate(control, ${isDatepicker ? '"datepicker"' : "kind"}, text, required, invalid);
     }
 `
     : "";
@@ -1222,7 +1338,17 @@ ${
     const own = this.#errorText();
     let flags: ValidityStateFlags = {};
     let message = own;
-    if (required && text === "") {
+    ${
+      isDatepicker
+        ? `if (kind === "datepicker" && this.#dateTyped !== undefined) {
+      // Spec 025 ② (plan ② D-11): what was typed is no date, or the end lies before the start —
+      // the Modelo's message, with today in the document's format as the example.
+      flags = { badInput: true };
+      const reason = this.#dateTyped.reason;
+      if (own === "") message = (TEXTS[reason]?.[this.#lingvo()] ?? TEXTS[reason]?.en ?? "").replace("{example}", this.#dateFormat(this.#dateToday()));
+    } else `
+        : ""
+    }if (required && text === "") {
       flags = { valueMissing: true };
       if (own === "") message = TEXTS.required?.[this.#lingvo()] ?? TEXTS.required?.en ?? "";
     }${
@@ -2042,7 +2168,7 @@ ${
   // The text of a slot of the light DOM, read for a meter's value text and a table's caption or
   // empty state (the default slot is named "").
   const slotTextMethod =
-    isMeter || isLight || isUpload
+    isMeter || isLight || isUpload || isSlider
       ? `
   /** The text a slot holds (the default slot as ""), trimmed; empty without content. */
   #slotText(name: string): string {
@@ -3543,6 +3669,828 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
 `
       : "",
   ].join("");
+
+  // Spec 025 ② (plan ② D-11, G5): the date picker — the typed date is read on change and Enter,
+  // ArrowDown opens the calendar; the trigger opens and closes it; prev and next turn the month; a
+  // cell is picked by click, the grid takes the keys of the APG date picker dialog; a pointer or
+  // the focus outside closes the calendar.
+  const datepickerInit = isDatepicker
+    ? `    const input = control as HTMLInputElement;
+    input.addEventListener("change", () => this.#dateCommit());
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowDown" && KEYS.includes("ArrowDown")) {
+        event.preventDefault();
+        this.#calendarOpen();
+      } else if (event.key === "Enter" && KEYS.includes("Enter")) {
+        this.#dateCommit();
+      } else if (event.key === "Escape" && KEYS.includes("Escape") && this.#calendarIsOpen()) {
+        event.preventDefault();
+        this.#calendarClose("control");
+      }
+    });
+    // The trigger and the month buttons keep the focus where it is (a pointer on a button moves it
+    // to the body in some platforms, which would close the calendar before the click).
+    for (const button of root.querySelectorAll('[part="trigger"], [part="head"]')) {
+      button.addEventListener("mousedown", (event) => event.preventDefault());
+    }
+    root.querySelector('[part="trigger"]')?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (this.#calendarIsOpen()) this.#calendarClose("trigger");
+      else this.#calendarOpen();
+    });
+    root.querySelector('[part="prev"]')?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      this.#calendarTurn(-1);
+    });
+    root.querySelector('[part="next"]')?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      this.#calendarTurn(1);
+    });
+    const grid = root.querySelector('[part="grid"]');
+    grid?.addEventListener("click", (event) => {
+      const cell = event.composedPath().find((node) => node instanceof HTMLElement && node.getAttribute("part") === "cell");
+      if (cell instanceof HTMLElement && cell.dataset.date !== undefined) this.#calendarPick(cell.dataset.date);
+    });
+    grid?.addEventListener("keydown", (event) => this.#calendarKey(event as KeyboardEvent));
+    // The focus leaves the element (Tab out of the grid): the calendar closes — judged after the
+    // move, because the platform names no relatedTarget for a button in a composed element.
+    this.addEventListener("focusout", () => {
+      setTimeout(() => {
+        if (!this.#calendarIsOpen()) return;
+        const active = document.activeElement;
+        if (active === this || (active instanceof Node && this.contains(active))) return;
+        this.#calendarClose(undefined);
+      }, 0);
+    });
+    // The composed butono may upgrade after this element: its inner button takes the words then.
+    customElements.whenDefined("fm-butono").then(() => this.#render());
+`
+    : "";
+  const datepickerRender = isDatepicker
+    ? `    {
+      const word = (key: string): string => TEXTS[key]?.[this.#lingvo()] ?? TEXTS[key]?.en ?? "";
+      const off = this.propValue("disabled") === true || this.propValue("readonly") === true;
+      const trigger = this.shadowRoot?.querySelector('[part="trigger"]');
+      if (trigger instanceof HTMLElement) {
+        if (trigger.getAttribute("label") !== word("trigger-name")) trigger.setAttribute("label", word("trigger-name"));
+        if (off) trigger.setAttribute("aria-disabled", "true");
+        else trigger.removeAttribute("aria-disabled");
+        const expanded = String(this.#calendarIsOpen());
+        for (const target of [trigger, trigger.shadowRoot?.querySelector('[part="control"]')]) {
+          if (!(target instanceof HTMLElement)) continue;
+          if (target.getAttribute("aria-haspopup") !== "dialog") target.setAttribute("aria-haspopup", "dialog");
+          if (target.getAttribute("aria-expanded") !== expanded) target.setAttribute("aria-expanded", expanded);
+          if (target.getAttribute("aria-controls") !== "calendar") target.setAttribute("aria-controls", "calendar");
+        }
+      }
+      for (const [part, key] of [["prev", "prev-name"], ["next", "next-name"]] as const) {
+        const button = this.shadowRoot?.querySelector('[part="' + part + '"]');
+        if (button instanceof HTMLElement && button.getAttribute("label") !== word(key)) button.setAttribute("label", word(key));
+      }
+      if (this.propValue("expanded") === true && !this.#calendarIsOpen() && !off) this.#calendarOpen(false);
+      if (this.propValue("expanded") !== true && this.#calendarIsOpen()) this.#calendarClose(undefined);
+      // The grid stands from the first render on (closed, it is not shown): the month of the
+      // chosen day, else of today.
+      if (this.#dateView === "") this.#dateView = (this.#dateValues().start ?? this.#dateToday()).slice(0, 8) + "01";
+      this.#calendarBuild();
+    }
+`
+    : "";
+  const datepickerMethods = isDatepicker
+    ? `
+  /** What a person typed that is no date, and which message says so (value-invalid, value-end-invalid). */
+  #dateTyped: { text: string; reason: string } | undefined = undefined;
+  /** The day the keyboard stands on in the calendar (ISO) and the first day of the shown month. */
+  #dateFocus = "";
+  #dateView = "";
+  /** Closes the calendar on a pointer outside the element while it is open. */
+  #calendarOutside = (event: Event): void => {
+    if (!event.composedPath().includes(this)) this.#calendarClose(undefined);
+  };
+
+  #dateIso(date: Date): string {
+    const pad = (n: number): string => String(n).padStart(2, "0");
+    return String(date.getFullYear()).padStart(4, "0") + "-" + pad(date.getMonth() + 1) + "-" + pad(date.getDate());
+  }
+
+  /** The Date of an ISO day, or undefined where the text is no day that exists. */
+  #dateOf(iso: string): Date | undefined {
+    const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(iso);
+    if (match === null) return undefined;
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    const date = new Date(year, month - 1, day);
+    return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? date : undefined;
+  }
+
+  #dateToday(): string {
+    return this.#dateIso(new Date());
+  }
+
+  #dateShift(iso: string, days: number): string {
+    const date = this.#dateOf(iso) ?? new Date();
+    date.setDate(date.getDate() + days);
+    return this.#dateIso(date);
+  }
+
+  /** The same day months later (or earlier), clamped to the length of the month it lands in. */
+  #dateShiftMonths(iso: string, months: number): string {
+    const date = this.#dateOf(iso) ?? new Date();
+    const day = date.getDate();
+    const first = new Date(date.getFullYear(), date.getMonth() + months, 1);
+    const last = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+    first.setDate(Math.min(day, last));
+    return this.#dateIso(first);
+  }
+
+  #dateLocale(): string | undefined {
+    const lang = this.closest("[lang]")?.getAttribute("lang") ?? document.documentElement.lang;
+    return lang === "" ? undefined : lang;
+  }
+
+  /** The day in the format of the document's language (Intl): 24.10.2026 in German. */
+  #dateFormat(iso: string): string {
+    const date = this.#dateOf(iso);
+    if (date === undefined) return iso;
+    return new Intl.DateTimeFormat(this.#dateLocale(), { year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
+  }
+
+  /** The ISO day of a typed text: ISO itself, or day, month and year in the order of the document's language. */
+  #dateParse(text: string): string | undefined {
+    const trimmed = text.trim();
+    if (/^\\d{4}-\\d{2}-\\d{2}$/.test(trimmed)) return this.#dateOf(trimmed) === undefined ? undefined : trimmed;
+    const numbers = trimmed.split(/\\D+/).filter((piece) => piece !== "");
+    if (numbers.length !== 3) return undefined;
+    const order = new Intl.DateTimeFormat(this.#dateLocale(), { year: "numeric", month: "2-digit", day: "2-digit" })
+      .formatToParts(new Date(2026, 9, 24))
+      .filter((piece) => piece.type === "day" || piece.type === "month" || piece.type === "year")
+      .map((piece) => piece.type);
+    const at = (type: Intl.DateTimeFormatPartTypes): number => Number(numbers[order.indexOf(type)] ?? "");
+    let year = at("year");
+    if (year < 100) year += 2000;
+    const iso = String(year).padStart(4, "0") + "-" + String(at("month")).padStart(2, "0") + "-" + String(at("day")).padStart(2, "0");
+    return this.#dateOf(iso) === undefined ? undefined : iso;
+  }
+
+  #dateRanged(): boolean {
+    return this.propValue("mode") === "range";
+  }
+
+  /** The chosen days: value, or value-start and value-end with mode range (only days that exist). */
+  #dateValues(): { start: string | undefined; end: string | undefined } {
+    const clean = (name: string): string | undefined => {
+      const given = this.getAttribute(name) ?? "";
+      return this.#dateOf(given) === undefined ? undefined : given;
+    };
+    if (!this.#dateRanged()) return { start: clean("value"), end: undefined };
+    return { start: clean("value-start"), end: clean("value-end") };
+  }
+
+  /** What the field shows: the typed text while it is no date, else the day (or both days) formatted. */
+  #dateShown(): string {
+    if (this.#dateTyped !== undefined) return this.#dateTyped.text;
+    const { start, end } = this.#dateValues();
+    if (!this.#dateRanged()) return start === undefined ? "" : this.#dateFormat(start);
+    if (start === undefined) return "";
+    return end === undefined ? this.#dateFormat(start) : this.#dateFormat(start) + " – " + this.#dateFormat(end);
+  }
+
+  /** The form value: the ISO day; a range as one ISO interval (start/end), nothing until both stand. */
+  #dateFormValue(): string {
+    const { start, end } = this.#dateValues();
+    if (!this.#dateRanged()) return start ?? "";
+    return start !== undefined && end !== undefined ? start + "/" + end : "";
+  }
+
+  /** Whether a day is refused: before min, after max, or among disabled-dates (a list, or weekends). */
+  #dateDisabled(iso: string): boolean {
+    const min = this.getAttribute("min") ?? "";
+    const max = this.getAttribute("max") ?? "";
+    if (this.#dateOf(min) !== undefined && iso < min) return true;
+    if (this.#dateOf(max) !== undefined && iso > max) return true;
+    const rule = (this.getAttribute("disabled-dates") ?? "").trim();
+    if (rule === "") return false;
+    if (rule === "weekends") {
+      const day = this.#dateOf(iso)?.getDay();
+      return day === 0 || day === 6;
+    }
+    return rule.split(",").map((piece) => piece.trim()).includes(iso);
+  }
+
+  /** The first day of the week in the document's language (1 Monday to 7 Sunday); Monday where the platform does not say. */
+  #dateWeekStart(): number {
+    try {
+      const locale = new Intl.Locale(this.#dateLocale() ?? "de") as unknown as {
+        getWeekInfo?: () => { firstDay: number };
+        weekInfo?: { firstDay: number };
+      };
+      const info = typeof locale.getWeekInfo === "function" ? locale.getWeekInfo() : locale.weekInfo;
+      return info?.firstDay ?? 1;
+    } catch {
+      return 1;
+    }
+  }
+
+  /** The short weekday names from the first day of the week, without the period some languages write after them. */
+  #dateWeekdays(): string[] {
+    const format = new Intl.DateTimeFormat(this.#dateLocale(), { weekday: "short" });
+    const start = this.#dateWeekStart();
+    const names: string[] = [];
+    for (let index = 0; index < 7; index += 1) {
+      // The 19th of October 2026 is a Monday.
+      names.push(format.format(new Date(2026, 9, 19 + ((start - 1 + index) % 7))).replace(/\\.$/, ""));
+    }
+    return names;
+  }
+
+  #calendar(): HTMLElement {
+    return this.shadowRoot?.querySelector('[part="calendar"]') as HTMLElement;
+  }
+
+  #calendarIsOpen(): boolean {
+    const calendar = this.shadowRoot?.querySelector('[part="calendar"]');
+    return calendar instanceof HTMLElement && calendar.matches(":popover-open");
+  }
+
+  /** Writes month, weekdays and the six weeks of the shown month; marks the chosen days, the range, today, outside and refused days. */
+  #calendarBuild(): void {
+    const root = this.shadowRoot;
+    if (root === null) return;
+    const view = this.#dateOf(this.#dateView) ?? new Date();
+    const month = root.querySelector('[part="month"]');
+    const heading = new Intl.DateTimeFormat(this.#dateLocale(), { month: "long", year: "numeric" }).format(view);
+    if (month !== null && month.textContent !== heading) month.textContent = heading;
+    const weekdays = root.querySelector('[part="weekdays"]');
+    const names = this.#dateWeekdays();
+    if (weekdays !== null && weekdays.children.length !== 7) {
+      weekdays.innerHTML = names.map(() => '<span part="weekday" role="columnheader"></span>').join("");
+    }
+    weekdays?.querySelectorAll('[part="weekday"]').forEach((cell, index) => {
+      if (cell.textContent !== names[index]) cell.textContent = names[index] ?? "";
+    });
+    const grid = root.querySelector('[part="grid"]');
+    if (grid === null) return;
+    let weeks = [...grid.querySelectorAll('[part="week"]')];
+    if (weeks.length !== 6) {
+      for (const stale of weeks) stale.remove();
+      for (let index = 0; index < 6; index += 1) {
+        grid.insertAdjacentHTML("beforeend", '<div part="week" role="row">' + '<div part="cell" role="gridcell" tabindex="-1"></div>'.repeat(7) + "</div>");
+      }
+      weeks = [...grid.querySelectorAll('[part="week"]')];
+    }
+    const start = this.#dateWeekStart();
+    const first = new Date(view.getFullYear(), view.getMonth(), 1);
+    const offset = (first.getDay() - start + 7) % 7;
+    const { start: chosenStart, end: chosenEnd } = this.#dateValues();
+    const today = this.#dateToday();
+    const off = this.propValue("disabled") === true || this.propValue("readonly") === true;
+    const longFormat = new Intl.DateTimeFormat(this.#dateLocale(), { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+    let dayIndex = 0;
+    for (const week of weeks) {
+      for (const cell of week.querySelectorAll('[part="cell"]')) {
+        const date = new Date(first.getFullYear(), first.getMonth(), 1 - offset + dayIndex);
+        dayIndex += 1;
+        const iso = this.#dateIso(date);
+        const write = (name: string, value: string | undefined): void => {
+          if (value === undefined) cell.removeAttribute(name);
+          else if (cell.getAttribute(name) !== value) cell.setAttribute(name, value);
+        };
+        write("data-date", iso);
+        const text = String(date.getDate());
+        if (cell.textContent !== text) cell.textContent = text;
+        write("aria-label", longFormat.format(date));
+        const selected = iso === chosenStart || iso === chosenEnd;
+        write("aria-selected", selected ? "true" : "false");
+        const between = chosenStart !== undefined && chosenEnd !== undefined && iso > chosenStart && iso < chosenEnd;
+        write("data-range", between ? "true" : undefined);
+        write("data-today", iso === today ? "true" : undefined);
+        write("data-outside", date.getMonth() === view.getMonth() ? undefined : "true");
+        write("aria-disabled", off || this.#dateDisabled(iso) ? "true" : undefined);
+        write("tabindex", iso === this.#dateFocus ? "0" : "-1");
+      }
+    }
+  }
+
+  /** The cell of the day the keyboard stands on. */
+  #calendarCell(): HTMLElement | undefined {
+    const cell = this.shadowRoot?.querySelector('[part="cell"][data-date="' + this.#dateFocus + '"]');
+    return cell instanceof HTMLElement ? cell : undefined;
+  }
+
+  /** Opens the calendar on the month of the chosen day (else today) and puts the keyboard on that day. */
+  #calendarOpen(focus = true): void {
+    if (this.propValue("disabled") === true || this.propValue("readonly") === true) return;
+    const { start } = this.#dateValues();
+    this.#dateFocus = start ?? this.#dateToday();
+    this.#dateView = this.#dateFocus.slice(0, 8) + "01";
+    this.#calendarBuild();
+    const calendar = this.#calendar();
+    if (!calendar.matches(":popover-open")) calendar.showPopover();
+    // Where the platform has no anchor positioning, the calendar stands under the field.
+    const platform = (globalThis as { CSS?: { supports(query: string): boolean } }).CSS;
+    if (platform === undefined || !platform.supports("anchor-name: --a")) {
+      const field = this.shadowRoot?.querySelector('[part="field"]');
+      const box = field instanceof HTMLElement ? field.getBoundingClientRect() : this.getBoundingClientRect();
+      calendar.style.insetBlockStart = box.bottom + "px";
+      calendar.style.insetInlineStart = (this.matches(":dir(rtl)") ? window.innerWidth - box.right : box.left) + "px";
+    }
+    if (!this.hasAttribute("expanded")) this.setAttribute("expanded", "");
+    document.addEventListener("pointerdown", this.#calendarOutside);
+    if (focus) this.#calendarCell()?.focus();
+    this.#render();
+  }
+
+  /** Closes the calendar; the focus goes where the way out says (Escape: the trigger; a choice: the field). */
+  #calendarClose(to: "trigger" | "control" | undefined): void {
+    const calendar = this.#calendar();
+    if (calendar.matches(":popover-open")) calendar.hidePopover();
+    document.removeEventListener("pointerdown", this.#calendarOutside);
+    if (this.hasAttribute("expanded")) this.removeAttribute("expanded");
+    if (to === "control") this.#control.focus();
+    if (to === "trigger") {
+      const trigger = this.shadowRoot?.querySelector('[part="trigger"]');
+      if (trigger instanceof HTMLElement) trigger.focus();
+    }
+    this.#render();
+  }
+
+  /** Puts the keyboard on another day; a day in another month turns the page. */
+  #calendarMove(iso: string): void {
+    this.#dateFocus = iso;
+    if (iso.slice(0, 7) !== this.#dateView.slice(0, 7)) this.#dateView = iso.slice(0, 8) + "01";
+    this.#calendarBuild();
+    this.#calendarCell()?.focus();
+  }
+
+  /** Turns the month by prev or next; the keyboard's day moves with it, the focus stays on the button. */
+  #calendarTurn(months: number): void {
+    const next = this.#dateShiftMonths(this.#dateView, months);
+    this.#dateView = next;
+    this.#dateFocus = this.#dateShiftMonths(this.#dateFocus, months);
+    if (this.#dateFocus.slice(0, 7) !== next.slice(0, 7)) this.#dateFocus = next;
+    this.#calendarBuild();
+  }
+
+  /** The keys of the APG date picker dialog on the grid: the arrows follow the writing direction. */
+  #calendarKey(event: KeyboardEvent): void {
+    const rtl = this.matches(":dir(rtl)");
+    const focus = this.#dateFocus;
+    const start = this.#dateWeekStart();
+    const weekday = ((this.#dateOf(focus)?.getDay() ?? 1) - start + 7) % 7;
+    const moves: Record<string, () => string> = {
+      ArrowRight: () => this.#dateShift(focus, rtl ? -1 : 1),
+      ArrowLeft: () => this.#dateShift(focus, rtl ? 1 : -1),
+      ArrowDown: () => this.#dateShift(focus, 7),
+      ArrowUp: () => this.#dateShift(focus, -7),
+      PageDown: () => this.#dateShiftMonths(focus, event.shiftKey ? 12 : 1),
+      PageUp: () => this.#dateShiftMonths(focus, event.shiftKey ? -12 : -1),
+      Home: () => this.#dateShift(focus, -weekday),
+      End: () => this.#dateShift(focus, 6 - weekday),
+    };
+    const move = moves[event.key];
+    if (move !== undefined && KEYS.includes(event.key)) {
+      event.preventDefault();
+      this.#calendarMove(move());
+      return;
+    }
+    if ((event.key === "Enter" || event.key === " ") && KEYS.includes("Enter")) {
+      event.preventDefault();
+      this.#calendarPick(focus);
+      return;
+    }
+    if (event.key === "Escape" && KEYS.includes("Escape")) {
+      event.preventDefault();
+      this.#calendarClose("trigger");
+    }
+  }
+
+  /** Takes a day: the value (single), or the start and then the end of a range — an end before the start starts anew. */
+  #calendarPick(iso: string): void {
+    if (this.#dateDisabled(iso) || this.propValue("disabled") === true || this.propValue("readonly") === true) return;
+    this.#dateTyped = undefined;
+    this.#reported = true;
+    if (!this.#dateRanged()) {
+      const changed = this.getAttribute("value") !== iso;
+      this.setAttribute("value", iso);
+      this.#calendarClose("control");
+      if (changed) this.dispatchEvent(new Event("change", { bubbles: true }));
+      return;
+    }
+    const { start, end } = this.#dateValues();
+    if (start === undefined || end !== undefined || iso < start) {
+      this.setAttribute("value-start", iso);
+      this.removeAttribute("value-end");
+      this.#dateFocus = iso;
+      this.#calendarBuild();
+      return;
+    }
+    const changed = this.getAttribute("value-end") !== iso;
+    this.setAttribute("value-end", iso);
+    this.#calendarClose("control");
+    if (changed) this.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  /** Reads what a person typed: a day, or the two days of a range; else the field is invalid with the Modelo's message. */
+  #dateCommit(): void {
+    const typed = (this.#control as HTMLInputElement).value;
+    const before = this.#dateFormValue();
+    if (typed.trim() === "") {
+      this.#dateTyped = undefined;
+      for (const name of ["value", "value-start", "value-end"]) this.removeAttribute(name);
+    } else if (!this.#dateRanged()) {
+      const iso = this.#dateParse(typed);
+      if (iso === undefined) {
+        this.#dateTyped = { text: typed, reason: "value-invalid" };
+      } else {
+        this.#dateTyped = undefined;
+        this.setAttribute("value", iso);
+      }
+    } else {
+      const pieces = typed.split(/\\s*[–—]\\s*|\\s+-\\s+|\\//).filter((piece) => piece.trim() !== "");
+      const start = pieces[0] === undefined ? undefined : this.#dateParse(pieces[0]);
+      const end = pieces[1] === undefined ? undefined : this.#dateParse(pieces[1]);
+      if (pieces.length !== 2 || start === undefined || end === undefined) {
+        this.#dateTyped = { text: typed, reason: "value-invalid" };
+      } else if (end < start) {
+        this.#dateTyped = { text: typed, reason: "value-end-invalid" };
+      } else {
+        this.#dateTyped = undefined;
+        this.setAttribute("value-start", start);
+        this.setAttribute("value-end", end);
+      }
+    }
+    this.#reported = true;
+    this.#render();
+    if (this.#dateTyped === undefined && this.#dateFormValue() !== before) {
+      this.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  }
+`
+    : "";
+  // Spec 025 ① (plan ① D-05, D-06): the keys and the buttons of the kampo's additions — the arrows
+  // step a number (as the platform's own number input does; the shown input is a text input, E8),
+  // Escape clears a search; a click on a step button steps, on the clear button clears.
+  const fieldExtrasInit =
+    host === "input" && stepper
+      ? `    control.addEventListener("keydown", (event) => {
+      const kind = String(this.propValue("kind") ?? "text");
+      if (kind === "number" && (event.key === "ArrowUp" || event.key === "ArrowDown") && KEYS.includes(event.key)) {
+        event.preventDefault();
+        this.#step(event.key === "ArrowUp" ? 1 : -1);
+      }
+      if (kind === "search" && event.key === "Escape" && KEYS.includes("Escape") && control.value !== "") {
+        event.preventDefault();
+        this.#clearSearch();
+      }
+    });
+    root.querySelector('[part="row"]')?.addEventListener("click", (event) => {
+      const button = event
+        .composedPath()
+        .find((node) => node instanceof HTMLElement && ["decrement", "increment", "clear"].includes(node.getAttribute("part") ?? ""));
+      if (!(button instanceof HTMLElement)) return;
+      event.stopPropagation();
+      if (button.getAttribute("aria-disabled") === "true") return;
+      const part = button.getAttribute("part");
+      if (part === "clear") this.#clearSearch();
+      else this.#step(part === "increment" ? 1 : -1);
+    });
+`
+      : "";
+  const fieldExtrasMethods =
+    host === "input" && stepper
+      ? `
+  /**
+   * Steps a number by step within min and max (Spec 025 ①): from the value, else from min, else
+   * from 0; nothing while disabled or read-only; input and change as a native number input says them.
+   */
+  #step(direction: number): void {
+    if (this.propValue("disabled") === true || this.propValue("readonly") === true) return;
+    const stepGiven = this.propValue("step");
+    const step = typeof stepGiven === "string" && Number(stepGiven) > 0 ? Number(stepGiven) : 1;
+    const min = this.propValue("min");
+    const max = this.propValue("max");
+    const low = typeof min === "string" && min !== "" && Number.isFinite(Number(min)) ? Number(min) : undefined;
+    const high = typeof max === "string" && max !== "" && Number.isFinite(Number(max)) ? Number(max) : undefined;
+    const given = String(this.propValue("value") ?? "");
+    const base = given !== "" && Number.isFinite(Number(given)) ? Number(given) : (low ?? 0);
+    let next = base + direction * step;
+    if (low !== undefined && next < low) next = low;
+    if (high !== undefined && next > high) next = high;
+    if (next === base && given !== "") return;
+    this.#reported = true;
+    this.setAttribute("value", String(next));
+    this.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+    this.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  /**
+   * A step or clear button of the field (Spec 025 ①): made beside the input while it is wanted
+   * (before it the decrement, after it the others), taken away otherwise; undefined when not wanted.
+   */
+  #fieldButton(part: "decrement" | "increment" | "clear", wanted: boolean): HTMLElement | undefined {
+    const row = this.shadowRoot?.querySelector('[part="row"]');
+    const present = row?.querySelector('[part="' + part + '"]');
+    if (!wanted) {
+      present?.remove();
+      return undefined;
+    }
+    if (present instanceof HTMLElement) return present;
+    if (!(row instanceof HTMLElement)) return undefined;
+    const markup = part === "decrement" ? \`${DECREMENT_BUTTON}\` : part === "increment" ? \`${INCREMENT_BUTTON}\` : \`${CLEAR_BUTTON}\`;
+    if (part === "decrement") this.#control.insertAdjacentHTML("beforebegin", markup);
+    else if (part === "increment") this.#control.insertAdjacentHTML("afterend", markup);
+    else row.insertAdjacentHTML("beforeend", markup);
+    const made = row.querySelector('[part="' + part + '"]');
+    return made instanceof HTMLElement ? made : undefined;
+  }
+
+  /** Clears a search (Spec 025 ①): the value is empty, the focus returns to the field; input and change. */
+  #clearSearch(): void {
+    if (this.propValue("disabled") === true || this.propValue("readonly") === true) return;
+    this.setAttribute("value", "");
+    this.#control.focus();
+    this.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+    this.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+`
+      : "";
+  // A slider (Spec 025 ①, plan ① D-03, G5): the thumbs take the keys of APG and the pointer; a
+  // press on the track takes the nearest thumb there; the composed number field writes the value
+  // back; change is said once a thumb rests (key up, pointer up, the field left).
+  const sliderInit = isSlider
+    ? `    for (const thumb of this.#thumbs()) {
+      thumb.addEventListener("keydown", (event) => this.#sliderKey(event, thumb));
+      thumb.addEventListener("keyup", () => this.#sliderSettle());
+      thumb.addEventListener("blur", () => this.#sliderSettle());
+      thumb.addEventListener("pointerdown", (event) => this.#sliderGrab(event, thumb));
+    }
+    control.addEventListener("pointerdown", (event) => {
+      const origin = event.composedPath()[0];
+      if (origin instanceof HTMLElement && origin.getAttribute("part") === "thumb") return;
+      const nearest = this.#sliderNearest(event.clientX);
+      if (nearest !== undefined) this.#sliderGrab(event, nearest);
+    });
+    const number = root.querySelector('[part="number"]');
+    if (number !== null) {
+      number.addEventListener("input", (event) => {
+        event.stopPropagation();
+        this.#sliderTyped(false);
+      });
+      number.addEventListener("change", (event) => {
+        event.stopPropagation();
+        this.#sliderTyped(true);
+      });
+    }
+`
+    : "";
+  const sliderRender = isSlider
+    ? `    {
+      const lingvo = this.#lingvo();
+      const word = (key: string): string => TEXTS[key]?.[lingvo] ?? TEXTS[key]?.en ?? "";
+      const shadow = this.shadowRoot;
+      const from = shadow?.getElementById("from");
+      if (from instanceof HTMLElement) from.textContent = word("min-label-name");
+      const to = shadow?.getElementById("to");
+      if (to instanceof HTMLElement) to.textContent = word("max-label-name");
+      const ranged = this.propValue("range") === true;
+      const [min, max] = this.#sliderBounds();
+      const values = this.#sliderValues();
+      const disabled = this.propValue("disabled") === true;
+      const readonly = !disabled && this.propValue("readonly") === true;
+      const required = this.propValue("required") === true;
+      const missing = ranged ? values[0] === undefined || values[1] === undefined : values[0] === undefined;
+      const invalid = this.propValue("invalid") === true || this.#filled("error") || (required && missing && this.#reported);
+      const format = new Intl.NumberFormat(lingvo === "" ? undefined : lingvo);
+      const share = (value: number): number => ((value - min) / (max - min || 1)) * 100;
+      this.#thumbs().forEach((thumb, index) => {
+        const shown = ranged || index === 0;
+        thumb.hidden = !shown;
+        // A hidden thumb names nothing: it must not count as a control of the label (axe exempts
+        // the label of disabled controls only while every control that it names is disabled).
+        if (!shown) {
+          thumb.removeAttribute("aria-labelledby");
+          return;
+        }
+        const now = values[index] ?? (index === 1 ? max : min);
+        const low = ranged && index === 1 ? (values[0] ?? min) : min;
+        const high = ranged && index === 0 ? (values[1] ?? max) : max;
+        thumb.setAttribute("aria-valuemin", String(low));
+        thumb.setAttribute("aria-valuemax", String(high));
+        thumb.setAttribute("aria-valuenow", String(now));
+        thumb.setAttribute("aria-valuetext", format.format(now));
+        thumb.setAttribute("aria-labelledby", ranged ? (index === 0 ? "label from" : "label to") : "label");
+        thumb.tabIndex = disabled ? -1 : 0;
+        for (const [attribute, on] of [
+          ["aria-disabled", disabled],
+          ["aria-readonly", readonly],
+          ["aria-required", required],
+          ["aria-invalid", invalid],
+        ] as const) {
+          if (on) thumb.setAttribute(attribute, "true");
+          else thumb.removeAttribute(attribute);
+        }
+        thumb.style.setProperty("--fm-thumb-at", String(share(now)) + "%");
+      });
+      const start = ranged ? share(values[0] ?? min) : 0;
+      const end = share(ranged ? (values[1] ?? max) : (values[0] ?? min));
+      control.style.setProperty("--fm-fill-start", String(start) + "%");
+      control.style.setProperty("--fm-fill-size", String(Math.max(0, end - start)) + "%");
+      const number = shadow?.querySelector('[part="number"]');
+      if (number instanceof HTMLElement) {
+        // The field beside the track shows one value (Spec 025 ①, plan ① Abweichung): hidden with range.
+        number.hidden = this.propValue("field") !== true || ranged;
+        number.setAttribute("min", String(min));
+        number.setAttribute("max", String(max));
+        number.setAttribute("step", String(this.#sliderBounds()[2]));
+        number.toggleAttribute("disabled", disabled);
+        number.toggleAttribute("readonly", readonly);
+        number.toggleAttribute("required", required);
+        const shown = values[0] === undefined ? "" : String(values[0]);
+        if (number.getAttribute("value") !== shown) number.setAttribute("value", shown);
+        const numberLabel = shadow?.getElementById("number-label");
+        if (numberLabel instanceof HTMLElement) numberLabel.textContent = this.#slotText("");
+      }
+      const formName = this.propValue("name");
+      if (typeof formName === "string" && formName !== "" && ranged && !missing) {
+        const data = new FormData();
+        data.append(formName, String(values[0]));
+        data.append(formName, String(values[1]));
+        this.#internals.setFormValue(data);
+      } else {
+        this.#internals.setFormValue(missing ? "" : String(values[0]));
+      }
+      const own = this.#slotText("error");
+      if (required && missing) {
+        this.#internals.setValidity({ valueMissing: true }, own === "" ? word("required") : own, this.#thumbs()[0]);
+      } else {
+        this.#internals.setValidity({});
+      }
+    }
+`
+    : "";
+  const sliderMethods = isSlider
+    ? `
+  /** The two thumbs of the track; the second is hidden without range. */
+  #thumbs(): HTMLElement[] {
+    return [...(this.shadowRoot?.querySelectorAll('[part="thumb"]') ?? [])] as HTMLElement[];
+  }
+
+  /** min, max and step as numbers: the Skemo's defaults where the props are missing or no number; max above min. */
+  #sliderBounds(): [number, number, number] {
+    const read = (name: string, fallback: number): number => {
+      const given = Number(this.propValue(name));
+      return Number.isFinite(given) ? given : fallback;
+    };
+    const min = read("min", 0);
+    const max = Math.max(min + 1, read("max", 100));
+    const step = Math.max(Number.EPSILON, read("step", 1));
+    return [min, max, step];
+  }
+
+  /** A raw value clamped into the bounds and onto the grid of step. */
+  #sliderClamp(raw: number): number {
+    const [min, max, step] = this.#sliderBounds();
+    const stepped = min + Math.round((raw - min) / step) * step;
+    const digits = Math.min(10, (String(step).split(".")[1] ?? "").length);
+    return Math.min(max, Math.max(min, Number(stepped.toFixed(digits))));
+  }
+
+  /** The values of the thumbs: value, or value-start and value-end with range; undefined while empty. */
+  #sliderValues(): (number | undefined)[] {
+    const ranged = this.propValue("range") === true;
+    const parse = (name: string): number | undefined => {
+      const raw = this.getAttribute(name);
+      if (raw === null || raw.trim() === "") return undefined;
+      const number = Number(raw);
+      return Number.isFinite(number) ? this.#sliderClamp(number) : undefined;
+    };
+    if (!ranged) return [parse("value")];
+    const start = parse("value-start");
+    const end = parse("value-end");
+    return [
+      start === undefined ? undefined : end === undefined ? start : Math.min(start, end),
+      end === undefined ? undefined : start === undefined ? end : Math.max(start, end),
+    ];
+  }
+
+  /** Sets the value of one thumb (clamped, never past the other thumb); input at once, change once it settles. */
+  #sliderSet(index: number, raw: number, settle: boolean): void {
+    if (this.propValue("disabled") === true || this.propValue("readonly") === true) return;
+    const ranged = this.propValue("range") === true;
+    const values = this.#sliderValues();
+    let next = this.#sliderClamp(raw);
+    if (ranged && index === 0 && values[1] !== undefined) next = Math.min(next, values[1]);
+    if (ranged && index === 1 && values[0] !== undefined) next = Math.max(next, values[0]);
+    const name = ranged ? (index === 0 ? "value-start" : "value-end") : "value";
+    this.#reported = true;
+    if (values[index] !== next) {
+      this.setAttribute(name, String(next));
+      this.#sliderPending = true;
+      this.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+    } else if (!this.hasAttribute(name)) {
+      this.setAttribute(name, String(next));
+    }
+    if (settle) this.#sliderSettle();
+  }
+
+  /** Says change once, after a thumb moved and came to rest. */
+  #sliderSettle(): void {
+    if (!this.#sliderPending) return;
+    this.#sliderPending = false;
+    this.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  /** The keys of APG: arrows by step along the writing direction, Page by ten steps, Home and End to the limits. */
+  #sliderKey(event: KeyboardEvent, thumb: HTMLElement): void {
+    if (!KEYS.includes(event.key)) return;
+    const index = this.#thumbs().indexOf(thumb);
+    const [min, max, step] = this.#sliderBounds();
+    const values = this.#sliderValues();
+    const current = values[index] ?? (index === 1 ? max : min);
+    const rtl = getComputedStyle(this).direction === "rtl";
+    const forward = event.key === "ArrowRight" ? !rtl : event.key === "ArrowLeft" ? rtl : event.key === "ArrowUp";
+    let next = current;
+    if (event.key === "Home") next = min;
+    else if (event.key === "End") next = max;
+    else if (event.key === "PageUp") next = current + step * 10;
+    else if (event.key === "PageDown") next = current - step * 10;
+    else next = forward ? current + step : current - step;
+    event.preventDefault();
+    this.#sliderSet(index, next, false);
+  }
+
+  /** The thumb nearest to a point along the track. */
+  #sliderNearest(clientX: number): HTMLElement | undefined {
+    const shown = this.#thumbs().filter((thumb) => !thumb.hidden);
+    const wanted = this.#sliderValueAt(clientX);
+    const values = this.#sliderValues();
+    return shown
+      .map((thumb, index) => ({ thumb, distance: Math.abs((values[index] ?? 0) - wanted) }))
+      .sort((a, b) => a.distance - b.distance)[0]?.thumb;
+  }
+
+  /** The value under a point of the track, in the writing direction, on the grid of step. */
+  #sliderValueAt(clientX: number): number {
+    const box = this.#control.getBoundingClientRect();
+    const [min, max] = this.#sliderBounds();
+    const ratio = box.width > 0 ? Math.min(1, Math.max(0, (clientX - box.left) / box.width)) : 0;
+    const share = getComputedStyle(this).direction === "rtl" ? 1 - ratio : ratio;
+    return this.#sliderClamp(min + share * (max - min));
+  }
+
+  /** A press takes the thumb; the pointer drags it until it is released (pointer capture). */
+  #sliderGrab(event: PointerEvent, thumb: HTMLElement): void {
+    if (thumb.hidden || this.propValue("disabled") === true || this.propValue("readonly") === true) return;
+    event.preventDefault();
+    const index = this.#thumbs().indexOf(thumb);
+    thumb.focus();
+    this.#sliderSet(index, this.#sliderValueAt(event.clientX), false);
+    thumb.setPointerCapture(event.pointerId);
+    const move = (moving: PointerEvent) => this.#sliderSet(index, this.#sliderValueAt(moving.clientX), false);
+    const release = () => {
+      thumb.removeEventListener("pointermove", move);
+      thumb.removeEventListener("pointerup", release);
+      thumb.removeEventListener("pointercancel", release);
+      this.#sliderSettle();
+    };
+    thumb.addEventListener("pointermove", move);
+    thumb.addEventListener("pointerup", release);
+    thumb.addEventListener("pointercancel", release);
+  }
+
+  /** The number typed into the field beside the track becomes the value of the first thumb. */
+  #sliderTyped(settle: boolean): void {
+    const number = this.shadowRoot?.querySelector('[part="number"]');
+    const raw = number?.getAttribute("value") ?? "";
+    if (raw.trim() === "" || !Number.isFinite(Number(raw))) return;
+    this.#sliderSet(0, Number(raw), settle);
+  }
+
+  /** A reset of the form takes the values away, as it empties a native input. */
+  formResetCallback(): void {
+    this.#reported = false;
+    this.removeAttribute("value");
+    this.removeAttribute("value-start");
+    this.removeAttribute("value-end");
+  }
+
+  /** The validity of the slider, as a native input exposes it (ElementInternals). */
+  get validity(): ValidityState {
+    return this.#internals.validity;
+  }
+
+  /** The message of the validity, as a native input exposes it. */
+  get validationMessage(): string {
+    return this.#internals.validationMessage;
+  }
+
+  /** Whether the slider is valid; fires invalid when it is not, as a native input does. */
+  checkValidity(): boolean {
+    return this.#internals.checkValidity();
+  }
+`
+    : "";
   const body = `
 type Value = string | boolean;
 
@@ -3637,7 +4585,7 @@ export class ${className} extends Base {
   readonly #root: HTMLElement;
   readonly #label: HTMLSlotElement;
   readonly #texts: HTMLElement;
-${autoField}${isAvatar ? '  /** The picture an avatar shows and whether it has loaded (Spec 015 ③): until then the initials stand. */\n  #picture = "";\n  #loaded = false;\n' : ""}${isUpload ? '  /** The chosen files (Spec 015 ②): the value of the field, in the order they were chosen. */\n  #files: File[] = [];\n  /** The element\'s own error: a chosen file breaks accept or max-size (empty while none does). */\n  #fileError = "";\n' : ""}${isFieldHost || isUpload ? "  /** Whether a person touched the field or the form reported it invalid (Spec 011 ② F-8): the error shows from then on. */\n  #reported = false;\n" : ""}
+${autoField}${isAvatar ? '  /** The picture an avatar shows and whether it has loaded (Spec 015 ③): until then the initials stand. */\n  #picture = "";\n  #loaded = false;\n' : ""}${isUpload ? '  /** The chosen files (Spec 015 ②): the value of the field, in the order they were chosen. */\n  #files: File[] = [];\n  /** The element\'s own error: a chosen file breaks accept or max-size (empty while none does). */\n  #fileError = "";\n' : ""}${isFieldHost || isUpload || isSlider ? "  /** Whether a person touched the field or the form reported it invalid (Spec 011 ② F-8): the error shows from then on. */\n  #reported = false;\n" : ""}${isSlider ? "  /** Whether a thumb moved since the last change (Spec 025 ①): change is said once it rests. */\n  #sliderPending = false;\n" : ""}
   constructor() {
     super();
     this.#internals = this.attachInternals();
@@ -3647,7 +4595,7 @@ ${autoField}${isAvatar ? '  /** The picture an avatar shows and whether it has l
       sheet.replaceSync(CSS);
     }
     root.adoptedStyleSheets = [sheet];
-    root.innerHTML = \`${markup(host, slots, role, marked, indicator, dismiss, icon, breadcrumb)}\`;
+    root.innerHTML = \`${markup(host, slots, role, marked, indicator, dismiss, icon, breadcrumb, stepper)}\`;
     const control = root.querySelector("${control}");
     const label = root.querySelector("slot:not([name])");
     const texts = root.querySelector("#fm-texts");
@@ -3665,12 +4613,14 @@ ${autoField}${isAvatar ? '  /** The picture an avatar shows and whether it has l
     this.#label = label;
     this.#texts = texts;
     control.addEventListener("click", (event) => this.#activate(event));
-${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${uploadInit}${avatarInit}${isCodeblock ? codeblockInit : ""}${skipInit}    label.addEventListener("slotchange", () => this.#render());
+${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${datepickerInit}${uploadInit}${sliderInit}${fieldExtrasInit}${avatarInit}${isCodeblock ? codeblockInit : ""}${skipInit}    label.addEventListener("slotchange", () => this.#render());
     for (const named of root.querySelectorAll("slot[name]")) {
       named.addEventListener("slotchange", () => this.#render());
     }
 ${
-  isUpload
+  // Spec 025 ② (plan ② D-11): a date picker reads what is typed on change, not on every key —
+  // half a date is no value.
+  isUpload || isDatepicker
     ? ""
     : `    if (control instanceof ${nativeField}) {
       // The value a person types is the form value (ElementInternals, as fm-butono submits), and
@@ -3743,6 +4693,11 @@ ${autoDisconnect}
     // A named slot reads as filled or empty (Spec 009 D-04; Spec 011 ③: actions of a state only
     // when empty), read here like a string prop.
     for (const name of NAMED_SLOTS) read[\`slot:\${name}\`] = this.#filled(name) ? "filled" : "empty";
+    // A boolean prop reads as true or false (Spec 025 ①: the stepper of a kampo on a kind that is
+    // no number), as check_usage reads it; the render leaves it out where the kind forbids it.
+    for (const prop of PROPS) {
+      if (prop.kind === "boolean") read[prop.name] = String(this.propValue(prop.name) === true);
+    }
     for (const constraint of CONSTRAINTS) {
       const applies = Object.entries(constraint.when).every(([key, value]) => read[key] === value);
       const violated = Object.entries(constraint.allowed).some(
@@ -3753,7 +4708,7 @@ ${autoDisconnect}
       warn(\`${tag}: \${given} is not allowed here; using the default. \${constraint.kialo}\`);
       for (const key of Object.keys(constraint.when)) {
         const prop = PROPS.find((candidate) => candidate.name === key);
-        if (prop !== undefined) values[key] = String(prop.default ?? prop.values?.[0] ?? "");
+        if (prop !== undefined && prop.kind === "enum") values[key] = String(prop.default ?? prop.values?.[0] ?? "");
       }
     }
     return values;
@@ -3810,7 +4765,7 @@ ${isSuggest ? "" : '        control.removeAttribute("aria-disabled");\n'}      }
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
     // disabled wins over readonly; help and error show only while they have text.
     const described: string[] = [];
-${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${paginationRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${uploadRender}${cardRender}${avatarRender}${isCodeblock ? codeblockRender : ""}${isMarkdown ? markdownRender : ""}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${paginationRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${datepickerRender}${uploadRender}${sliderRender}${cardRender}${avatarRender}${isCodeblock ? codeblockRender : ""}${isMarkdown ? markdownRender : ""}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");
@@ -3865,15 +4820,23 @@ ${
       .trim();
     const name = this.propValue("label");
 ${
-  isLight || isOverlay || isPagination || isCard || isAvatar || isCodeblock || isMarkdown
+  isLight ||
+  isOverlay ||
+  isPagination ||
+  isCard ||
+  isAvatar ||
+  isCodeblock ||
+  isMarkdown ||
+  isSlider
     ? `    // A light-DOM host names its region by the caption (Spec 011 ④, D-09) and its list by the
     // label prop on the dl itself (D-10); an overlay (Spec 014 ④) names its layer in its own
     // render, a pagination (Spec 015 ①, B-3) its landmark — the label, else the Modelo's word; a
     // card (Spec 015 ③) is named by its heading (aria-labelledby), an avatar by its name in its
-    // own render; nothing is written here.
+    // own render; nothing is written here. A slider (Spec 025 ①) names its thumbs by the label
+    // (aria-labelledby) and hands the description to them: the track itself is no control.
     void text;
     void name;
-`
+${isSlider ? '    for (const thumb of this.#thumbs()) {\n      const description = control.getAttribute("aria-describedby");\n      if (description === null) thumb.removeAttribute("aria-describedby");\n      else thumb.setAttribute("aria-describedby", description);\n    }\n' : ""}`
     : `    if (text === "" && typeof name === "string" && name !== "") control.setAttribute("aria-label", name);
     else control.removeAttribute("aria-label");
 `
@@ -3896,7 +4859,7 @@ ${
     : `    if (!(this.#control instanceof HTMLButtonElement)) return;
 ${toggleActivate}`
 }  }
-${groupMethods}${selectMethods}${inputMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${autoMethods}${tabsMethods}${overlayMethods}${tooltipMethods}${menuMethods}${suggestMethods}${uploadMethods}${choiceValidityMethods}${isCodeblock ? codeblockMethods : ""}${isMarkdown ? markdownMethods : ""}
+${groupMethods}${selectMethods}${inputMethods}${fieldExtrasMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${autoMethods}${tabsMethods}${overlayMethods}${tooltipMethods}${menuMethods}${suggestMethods}${datepickerMethods}${uploadMethods}${sliderMethods}${choiceValidityMethods}${isCodeblock ? codeblockMethods : ""}${isMarkdown ? markdownMethods : ""}
 }
 
 /**

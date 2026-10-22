@@ -37,10 +37,13 @@ describe("kampo in the repo Modelo (T004)", () => {
       "avataro",
       "avizo",
       "butono",
+      "datelektilo",
       "dialogo",
       "elektilo",
       "elekto",
       "faldilo",
+      // Spec 025 ①: the glitilo.
+      "glitilo",
       "ikono",
       "insigno",
       "kampo",
@@ -73,7 +76,12 @@ describe("kampo in the repo Modelo (T004)", () => {
     // Spec 011 ① (E8): kind takes password, number (whole numbers) and date (the platform's
     // dialog); min and max bound a number or a date; autocomplete names what the platform fills in.
     expect(skemo.props.map((prop) => [prop.name, prop.values ?? prop.kind, prop.default])).toEqual([
-      ["kind", ["text", "email", "tel", "url", "search", "password", "number", "date"], "text"],
+      // Spec 025 ①: time is the platform's own time input; stepper and step belong to a number.
+      [
+        "kind",
+        ["text", "email", "tel", "url", "search", "password", "number", "date", "time"],
+        "text",
+      ],
       ["value", "string", undefined],
       ["placeholder", "string", undefined],
       ["required", "boolean", false],
@@ -85,6 +93,8 @@ describe("kampo in the repo Modelo (T004)", () => {
       ["min", "string", undefined],
       ["max", "string", undefined],
       ["autocomplete", "string", undefined],
+      ["stepper", "boolean", false],
+      ["step", "string", undefined],
     ]);
     expect(skemo.props.map((prop) => prop.name)).not.toContain("label");
     expect(skemo.props.map((prop) => prop.name)).not.toContain("type");
@@ -112,9 +122,13 @@ describe("kampo in the repo Modelo (T004)", () => {
     expect(Object.keys(skemo.parts).sort()).toEqual([
       "border",
       "box",
+      // Spec 025 ①: the clear button of a search, the step buttons of a number (composed butono).
+      "clear",
+      "decrement",
       "error",
       "focus-ring",
       "help",
+      "increment",
       "label",
       "motion",
       "placeholder",
@@ -154,9 +168,16 @@ describe("kampo in the repo Modelo (T004)", () => {
       disabled: ["aria-disabled"],
       readonly: ["aria-readonly"],
     });
-    expect(skemo.a11y.texts).toEqual({ required: { de: "erforderlich", en: "required" } });
+    // Spec 025 ①: the words of the step buttons and the clear button (<part>-name).
+    expect(skemo.a11y.texts).toEqual({
+      required: { de: "erforderlich", en: "required" },
+      "decrement-name": { de: "Verringern", en: "Decrease" },
+      "increment-name": { de: "Erhöhen", en: "Increase" },
+      "clear-name": { de: "Suche leeren", en: "Clear search" },
+    });
     // Spec 011 ① (O-7): Enter in the one-line field sends the form, so the Skemo names the key.
-    expect(skemo.a11y.keys).toEqual(["Enter"]);
+    // Spec 025 ①: the arrows step a number, Escape clears a search.
+    expect(skemo.a11y.keys).toEqual(["Enter", "ArrowUp", "ArrowDown", "Escape"]);
   });
 
   // Spec 011 ① (E8): a bound needs a scale — min and max belong to a number or a date; the
@@ -178,7 +199,13 @@ describe("kampo in the repo Modelo (T004)", () => {
     expect(result.violations[0]?.issue.message).toContain("prop:min=filled");
     expect(
       evaluateUsage(modelo, [
-        { ero: "kampo", props: { kind: "number", min: "1", max: "99" }, label: "Vorrang" },
+        // Spec 025 ①: a bound is stated in the help (range-stated).
+        {
+          ero: "kampo",
+          props: { kind: "number", min: "1", max: "99" },
+          label: "Vorrang",
+          texts: { help: "Zwischen 1 und 99." },
+        },
       ]).violations,
     ).toEqual([]);
   });
@@ -208,6 +235,9 @@ describe("kampo in the repo Modelo (T004)", () => {
       ["password", { kind: "password" }],
       ["number", { kind: "number" }],
       ["date", { kind: "date" }],
+      // Spec 025 ①: a counter is a number with its stepper; a time is the platform's own.
+      ["count", { kind: "number", stepper: true }],
+      ["time", { kind: "time" }],
     ]);
     const words = (skemo.goals ?? []).flatMap((goal) => Object.values(goal.keywords).flat());
     for (const word of ["eingeben", "enter", "type", "zur", "to"])
@@ -224,7 +254,7 @@ describe("the Uzo of the kampo (T004, A3)", () => {
     });
     expect(uzo?.layout).toEqual({ size: "container", wrap: "never" });
     expect(uzo?.purpose).toBe(
-      "Takes one line of text from a person: a name, an address, an e-mail, a search term.",
+      "Takes one line of text from a person: a name, an address, an e-mail, a number, a time, a search term.",
     );
   });
 
@@ -240,14 +270,19 @@ describe("the Uzo of the kampo (T004, A3)", () => {
       ["toggle", "sxaltilo"],
       // Spec 014 ⑤: suggestions while typing are the kompletigilo's.
       ["suggestions", "kompletigilo"],
+      // Spec 025 ①: a value set by feel is the glitilo's.
+      ["approximate", "glitilo"],
+      // Spec 025 ②: a date near today is the datelektilo's.
+      ["near-date", "datelektilo"],
     ]);
     // Spec 011 ① (G5, E8): password and date are kinds now, their boundaries are gone; what stays
     // outside is showing a password, a decimal and a range of dates.
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
       ["reveal-password", "ask-human"],
-      ["number-stepper", "not-supported"],
+      // Spec 025 ①: the stepper is the kampo's own now (kind number with stepper); a time zone stops.
       ["decimal", "not-supported"],
-      ["date-range", "ask-human"],
+      ["date-range", "use-instead"],
+      ["time-zone", "ask-human"],
       // Spec 015 ②: a file is the alsxutilo's.
       ["file", "use-instead"],
       ["no-visible-label", "not-supported"],
@@ -267,7 +302,13 @@ describe("the Uzo of the kampo (T004, A3)", () => {
       "dialog",
       "search-bar",
     ]);
-    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["kampo", "butono"]);
+    // Spec 025 ①: the field beside the track of a glitilo.
+    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual([
+      "kampo",
+      "butono",
+      "glitilo",
+      "datelektilo",
+    ]);
     expect(uzo?.composes.never.map((entry) => entry.ero)).toEqual(["butono"]);
     const butono = modelo.eroj.find((entry) => entry.ero.name === "butono");
     expect(butono?.uzo?.composes.with.map((entry) => entry.ero)).toEqual([
@@ -291,6 +332,8 @@ describe("the Uzo of the kampo (T004, A3)", () => {
       ["error-says-what-to-do", true, "slot:error", "min-words"],
       ["help-is-one-sentence", false, "slot:help", "max-sentences"],
       ["placeholder-is-example", false, "prop:placeholder", "not-words"],
+      // Spec 025 ①: the limits of a number are stated in its help.
+      ["range-stated", false, "slot:help", "min-words"],
     ]);
   });
 });
@@ -341,6 +384,8 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
           // Spec 015 ②: the alsxutilo is a field of files; every field Regulo but the two of the
           // placeholder is widened to it (it has none).
           ...(name.startsWith("placeholder-") ? [] : ["alsxutilo"]),
+          // Spec 025 ①: the glitilo is a field of a value in limits; the same Reguloj, no placeholder.
+          ...(name.startsWith("placeholder-") ? [] : ["glitilo", "datelektilo"]),
         ],
       });
       expect(regulo?.checkability).toBe("automatic");
@@ -394,6 +439,8 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
       "avataro",
       "kodbloko",
       "markdovido",
+      "glitilo",
+      "datelektilo",
     ]);
   });
 
@@ -527,15 +574,21 @@ describe("the kampo of Spec 011 ①: password, number and date", () => {
       case: "decimal",
       action: "not-supported",
     });
+    // Spec 025 ②: the date range is the datelektilo's now; the kampo's boundary is closed
+    // (use-instead) and stands beside the answer (flipped with a Jugxo, OP-12).
+    expect(suggest("Zeitraum von bis").suggestion).toEqual({
+      ero: "datelektilo",
+      props: { mode: "range" },
+    });
     expect(suggest("Zeitraum von bis").boundary).toMatchObject({
       ero: "kampo",
       case: "date-range",
-      action: "ask-human",
+      action: "use-instead",
     });
-    expect(suggest("Zähler mit Plus und Minus").boundary).toMatchObject({
+    // Spec 025 ①: a counter with plus and minus is the kampo with its stepper now, no boundary.
+    expect(suggest("Zähler mit Plus und Minus").suggestion).toEqual({
       ero: "kampo",
-      case: "number-stepper",
-      action: "not-supported",
+      props: { kind: "number", stepper: true },
     });
   });
 

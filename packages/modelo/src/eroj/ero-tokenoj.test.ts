@@ -119,7 +119,7 @@ describe("the derivation of the Ero-Tokens from a Skemo (Art. II: mechanical)", 
     expect(isEroTokenName("color.action.primary.rest")).toBe(false);
   });
 
-  it("counts the tokens of the repository: every Ero and every Sxablono, 30 cells bound to a keyword stay out", () => {
+  it("counts the tokens of the repository: every Ero and every Sxablono, the cells bound to a keyword stay out (32 after Spec 025)", () => {
     const all = eroTokenojOfModelo(modelo);
     expect(all.filter((token) => token.kind === ERO_TOKEN_PREFIX).length).toBeGreaterThan(800);
     expect(all.filter((token) => token.kind === SXABLONO_TOKEN_PREFIX).length).toBe(34);

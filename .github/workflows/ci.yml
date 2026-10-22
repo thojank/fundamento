@@ -203,11 +203,13 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      # All three engines are installed in every run, also where PLAYWRIGHT_ENGINES runs only one:
-      # workflow.test.ts pins this line. The time of this step is apt (`--with-deps`), not the
-      # browser download (Vojmapo); a cache of ~/.cache/ms-playwright was measured and taken back.
+      # Spec 025 ③ (B-28): only the engines a run uses are installed — Chromium on a pull request,
+      # all three on main. The time of this step is apt (`--with-deps`), not the browser download
+      # (Vojmapo); on a cold runner the packages of three engines took 7 min (Läufe 39754200831,
+      # 39754602800) and, with the Vitrino check of 40 Eroj, cut the rendered checks off at 15 min.
+      # A cache of ~/.cache/ms-playwright was measured and taken back. workflow.test.ts pins this line.
       - name: Playwright browsers
-        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium firefox webkit
+        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
 
       - name: Build
         run: pnpm build
@@ -244,7 +246,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Playwright browsers
-        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium firefox webkit
+        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
 
       - name: Build
         run: pnpm build
@@ -278,7 +280,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Playwright browsers
-        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium firefox webkit
+        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
 
       - name: Build
         run: pnpm build

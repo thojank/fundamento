@@ -52,10 +52,12 @@ describe("Make Kit sources (T018)", () => {
       "guidelines/components/avataro.md",
       "guidelines/components/avizo.md",
       "guidelines/components/butono.md",
+      "guidelines/components/datelektilo.md",
       "guidelines/components/dialogo.md",
       "guidelines/components/elektilo.md",
       "guidelines/components/elekto.md",
       "guidelines/components/faldilo.md",
+      "guidelines/components/glitilo.md",
       "guidelines/components/ikono.md",
       "guidelines/components/insigno.md",
       "guidelines/components/kampo.md",
@@ -963,6 +965,47 @@ describe("Make Kit guidelines after Nachlese 7 ②", () => {
       const together = text.slice(text.indexOf("## Together with"), text.indexOf("## Slots"));
       for (const name of ["ligilo", "insigno", "teksto"])
         expect(together, name).toContain(`- with \`${name}\``);
+    },
+  );
+});
+
+// Spec 025 ① (plan ① D-08): Make sets every approximate value within known limits with the
+// glitilo, its ends or help naming the limits — one sentence from the role slider; an exact number
+// stays the kampo's, with its stepper where plus and minus help.
+describe("Make Kit and the Eingabe of Spec 025 ①", () => {
+  it.each(ASPEKTOJ)(
+    "%s: the guidelines name the glitilo beside the kampo; the component page names range-stated",
+    (aspekto) => {
+      const guidelines = kit(aspekto, "guidelines/Guidelines.md");
+      expect(guidelines).toContain(
+        "- Every value or range a person sets within known limits by feel is a `<Glitilo>` whose ends or help name the limits (`min`, `max`); an exact number is a `<Kampo>` of kind number, with `stepper` where plus and minus help.",
+      );
+      const component = kit(aspekto, "guidelines/components/glitilo.md");
+      expect(component).toContain("# Glitilo");
+      expect(component).toContain("`range`");
+      expect(component).toContain("**range-stated**");
+      const kampo = kit(aspekto, "guidelines/components/kampo.md");
+      expect(kampo).toContain("`stepper`");
+    },
+  );
+});
+
+// Spec 025 ② (plan ② D-13): Make picks every date near today, and every date range, with the
+// datelektilo whose field also takes the date typed — one sentence from the role textbox with a
+// calendar part; a date far away (a birthday) stays the kampo's of kind date.
+describe("Make Kit and the Datum of Spec 025 ②", () => {
+  it.each(ASPEKTOJ)(
+    "%s: the guidelines name the datelektilo beside the kampo; the component page names mode and the calendar",
+    (aspekto) => {
+      const guidelines = kit(aspekto, "guidelines/Guidelines.md");
+      expect(guidelines).toContain(
+        "- Every date near today a person picks, or a date range, is a `<Datelektilo>` whose field also takes the date typed; a date far away, like a birthday, is a `<Kampo>` of kind date.",
+      );
+      const component = kit(aspekto, "guidelines/components/datelektilo.md");
+      expect(component).toContain("# Datelektilo");
+      expect(component).toContain("`mode`");
+      expect(component).toContain("`disabled-dates`");
+      expect(component).toContain("calendar");
     },
   );
 });

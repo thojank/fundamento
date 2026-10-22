@@ -44,6 +44,7 @@ import {
   VITRINO_AVATAR,
   VITRINO_CARD,
   VITRINO_CONTENT_TEXT,
+  VITRINO_DATE,
   VITRINO_DIALOG_ACTIONS,
   VITRINO_ICON_EXAMPLE,
   VITRINO_LIST_ENTRIES,
@@ -53,6 +54,7 @@ import {
   VITRINO_OPTIONS,
   VITRINO_PROMPT,
   VITRINO_SHORT_COMMAND,
+  VITRINO_SLIDER,
   VITRINO_SLOT_TEXTS,
   VITRINO_SUMMARY_TEXT,
   VITRINO_SURFACE,
@@ -60,6 +62,8 @@ import {
   VITRINO_TRIGGER_TEXT,
   VITRINO_UPLOAD_FILES,
   VITRINO_UPLOAD_HELP,
+  type VitrinoCalendar,
+  vitrinoCalendar,
 } from "../vitrino/datumoj.js";
 import { signOf } from "../web-component/element-template.js";
 import {
@@ -164,6 +168,12 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   // (F-12) the caption of the kodbloko and the quote and indent of the markdovido are drawn.
   "scroll-ring": "jug_01M5D5JN34KAD7N6A822HW524H",
   announce: "jug_01M5D5JN34KAD7N6A822HW524H",
+  // Spec 025 ① (plan ① D-05, B-1): the step buttons and the clear button of the kampo hang on kind
+  // and stepper, which key no variant; the set shows the field alone, their picture is the
+  // butono's with the glyphs subtract, add and close.
+  decrement: "jug_01M5GCQAYC3R7C7DPHQGYDPYKM",
+  increment: "jug_01M5GCQAYC3R7C7DPHQGYDPYKM",
+  clear: "jug_01M5GCQAYC3R7C7DPHQGYDPYKM",
 };
 
 /**
@@ -435,6 +445,34 @@ function standInsComposedOf(
   }
   return Object.keys(composed).length === 0 ? undefined : composed;
 }
+
+/**
+ * The composed kampo of a slider (Spec 025 ①, plan ① D-04): the number field beside the track is a
+ * kampo of kind number in the field's size at rest; the stand-in takes the kampo's roles read from
+ * its Skemo — the surface, the border, the height and radius of the box, the typed text's role.
+ */
+export const SLIDER_COMPOSED: readonly {
+  node: string;
+  ero: string;
+  props: Record<string, string>;
+  parts: readonly string[];
+}[] = [
+  {
+    node: "number",
+    ero: "kampo",
+    props: { kind: "number", size: "medium", [STATE_KEY]: "rest" },
+    parts: [
+      "surface.fill",
+      "border.color",
+      "border.width",
+      "box.height",
+      "box.radius",
+      "box.inline-padding",
+      "text.color",
+      "text.typography",
+    ],
+  },
+];
 
 /**
  * The size of a file as the person reads it (Spec 015 ②): decimal units in German, as the web's
@@ -785,7 +823,8 @@ export type FigmaStructure =
   | "card"
   | "avatar"
   | "codeblock"
-  | "markdown";
+  | "markdown"
+  | "slider";
 
 /**
  * A radio group (Spec 010 ③, D-07) is a choice: the label (the question) above a column of
@@ -811,78 +850,82 @@ export type FigmaStructure =
  * active one, and the panel with its word below.
  */
 export const structureOf = (role: string, parts: readonly string[] = []): FigmaStructure =>
-  // Spec 015 ② (plan ② D-06): the platform's file input is heard as a button; with a dropzone
-  // part it is an upload — label, the dropzone with the button and its hint, help, error.
-  role === "button" && parts.includes("dropzone")
-    ? "upload"
-    : role === "textbox" || role === "combobox"
-      ? "field"
-      : role === "switch" || role === "checkbox"
-        ? "toggle"
-        : role === "radiogroup"
-          ? "choice"
-          : role === "dialog"
-            ? parts.length > 0 && !parts.includes("backdrop")
-              ? "popover"
-              : "dialog"
-            : role === "generic"
-              ? "badge"
-              : role === "status"
-                ? parts.includes("indicator")
-                  ? "state"
-                  : "notice"
-                : role === "meter"
-                  ? "meter"
-                  : role === "table"
-                    ? "table"
-                    : role === "list"
-                      ? "list"
-                      : role === "navigation"
-                        ? // Spec 015 ① (plan ① D-05): a navigation with an ellipsis part is a
-                          // pagination, with a separator part a breadcrumb.
-                          parts.includes("ellipsis")
-                          ? "pagination"
-                          : parts.includes("separator")
-                            ? "breadcrumb"
-                            : "nav"
-                        : role === "tablist"
-                          ? "tabs"
-                          : // Spec 014 ② (plan ② D-08): an icon (role img) is the glyph of every
-                            // Aspekto in a box; a separator (role separator) a line.
-                            // Spec 015 ③ (plan ③ D-11): an avatar shares the role img; its
-                            // initials tell it apart — the box with the initials and the image.
-                            role === "img"
-                            ? parts.includes("initials")
-                              ? "avatar"
-                              : "icon"
-                            : role === "separator"
-                              ? "separator"
-                              : // Spec 014 ③ (plan ③ D-05): a heading and a paragraph are static
-                                // text, drawn as a badge is — the text in the role of the variant.
-                                role === "heading" || role === "paragraph"
-                                ? "badge"
-                                : // Nachlese 8 ② (F-12): a code block (role figure) is its caption,
-                                  // the code in the code role and the copy button; a Markdown view
-                                  // (role document) a paragraph, a list and a quote.
-                                  role === "figure"
-                                  ? "codeblock"
-                                  : role === "document"
-                                    ? "markdown"
-                                    : // Spec 014 ④ (plan ④ D-06): the overlays — a tooltip, a menu, and
-                                      // a popover (a dialog without a backdrop: non-modal, with a trigger).
-                                      role === "tooltip"
-                                      ? "tooltip"
-                                      : role === "menu"
-                                        ? "menu"
-                                        : // Spec 014 ⑤ (plan ⑤ D-04): a disclosure (role group).
-                                          role === "group"
-                                          ? "disclosure"
-                                          : // Spec 015 ③ (plan ③ D-05): a card (role article) — the
-                                            // surface with the media and the body: heading,
-                                            // content, the meta row and the actions.
-                                            role === "article"
-                                            ? "card"
-                                            : "control";
+  // Spec 025 ① (plan ① D-04): a slider — label, the row of the end labels, the track with its fill
+  // and thumbs and the number field, help, error.
+  role === "slider"
+    ? "slider"
+    : // Spec 015 ② (plan ② D-06): the platform's file input is heard as a button; with a dropzone
+      // part it is an upload — label, the dropzone with the button and its hint, help, error.
+      role === "button" && parts.includes("dropzone")
+      ? "upload"
+      : role === "textbox" || role === "combobox"
+        ? "field"
+        : role === "switch" || role === "checkbox"
+          ? "toggle"
+          : role === "radiogroup"
+            ? "choice"
+            : role === "dialog"
+              ? parts.length > 0 && !parts.includes("backdrop")
+                ? "popover"
+                : "dialog"
+              : role === "generic"
+                ? "badge"
+                : role === "status"
+                  ? parts.includes("indicator")
+                    ? "state"
+                    : "notice"
+                  : role === "meter"
+                    ? "meter"
+                    : role === "table"
+                      ? "table"
+                      : role === "list"
+                        ? "list"
+                        : role === "navigation"
+                          ? // Spec 015 ① (plan ① D-05): a navigation with an ellipsis part is a
+                            // pagination, with a separator part a breadcrumb.
+                            parts.includes("ellipsis")
+                            ? "pagination"
+                            : parts.includes("separator")
+                              ? "breadcrumb"
+                              : "nav"
+                          : role === "tablist"
+                            ? "tabs"
+                            : // Spec 014 ② (plan ② D-08): an icon (role img) is the glyph of every
+                              // Aspekto in a box; a separator (role separator) a line.
+                              // Spec 015 ③ (plan ③ D-11): an avatar shares the role img; its
+                              // initials tell it apart — the box with the initials and the image.
+                              role === "img"
+                              ? parts.includes("initials")
+                                ? "avatar"
+                                : "icon"
+                              : role === "separator"
+                                ? "separator"
+                                : // Spec 014 ③ (plan ③ D-05): a heading and a paragraph are static
+                                  // text, drawn as a badge is — the text in the role of the variant.
+                                  role === "heading" || role === "paragraph"
+                                  ? "badge"
+                                  : // Nachlese 8 ② (F-12): a code block (role figure) is its caption,
+                                    // the code in the code role and the copy button; a Markdown view
+                                    // (role document) a paragraph, a list and a quote.
+                                    role === "figure"
+                                    ? "codeblock"
+                                    : role === "document"
+                                      ? "markdown"
+                                      : // Spec 014 ④ (plan ④ D-06): the overlays — a tooltip, a menu, and
+                                        // a popover (a dialog without a backdrop: non-modal, with a trigger).
+                                        role === "tooltip"
+                                        ? "tooltip"
+                                        : role === "menu"
+                                          ? "menu"
+                                          : // Spec 014 ⑤ (plan ⑤ D-04): a disclosure (role group).
+                                            role === "group"
+                                            ? "disclosure"
+                                            : // Spec 015 ③ (plan ③ D-05): a card (role article) — the
+                                              // surface with the media and the body: heading,
+                                              // content, the meta row and the actions.
+                                              role === "article"
+                                              ? "card"
+                                              : "control";
 
 /**
  * The neutral word every label template shows, per a11y role (M-3; Maintainer, F14, 2026-10-13,
@@ -963,6 +1006,8 @@ const STRUCTURE_LABEL_DEFAULTS: Readonly<Partial<Record<FigmaStructure, string>>
   popover: "Überschrift",
   // Spec 015 ② (plan ② D-06): an upload's label names what is asked for, like a field's.
   upload: "Beschriftung",
+  // Spec 025 ① (plan ① D-04): a slider's label names the value it sets, like a field's.
+  slider: "Beschriftung",
   // Spec 015 ③ (plan ③ D-11): an avatar's label property writes its initials, the Vitrino's
   // (the icon shares the role img and carries no label). Proposal for the maintainer to confirm;
   // no Jugxo created here.
@@ -1205,6 +1250,17 @@ export interface FigmaComponentSet {
    * value example in the Skemo's range, written as the fill's width from the measured track.
    */
   meter?: { share: number };
+  /**
+   * A slider (Spec 025 ①, plan ① D-04): the fill's share of the track for one thumb, and the
+   * shares the two thumbs of a range stand at — the Vitrino's values over the Skemo's limits.
+   */
+  slider?: { share: number; start: number; end: number };
+  /**
+   * A date picker (Spec 025 ②, plan ② D-12): the Vitrino's month as the calendar shows it — the
+   * weekday names, six weeks of days (outside the month marked), today, the chosen day and the
+   * ends of the range; the plugin draws every cell from it.
+   */
+  calendar?: VitrinoCalendar;
   /**
    * The table of the set (Spec 011 ④, plan ④ D-14): the head words, the rows (row header first),
    * the numeric columns, the sorted column and the direction of its sort button — the Vitrino's
@@ -2310,6 +2366,10 @@ function iconsOf(
   if (structure === "upload") return { "icon-start": "upload", remove: "close" };
   // A pagination (Spec 015 ①): the arrows back and forth; a breadcrumb: the chevron between two.
   if (structure === "pagination") return { prev: "chevron-left", next: "chevron-right" };
+  // A date picker (Spec 025 ②): the calendar on the trigger, the chevrons on prev and next.
+  if (structure === "field" && skemo.parts.calendar !== undefined) {
+    return { trigger: "calendar", prev: "chevron-left", next: "chevron-right" };
+  }
   if (structure === "breadcrumb") return { separator: "chevron-right" };
   // A disclosure (Spec 014 ⑤): the chevron points down where open, right where closed.
   if (structure === "disclosure" && skemo.parts.indicator !== undefined) {
@@ -2355,6 +2415,8 @@ function componentSetOf(
   // it on the page; the set shows each side beside a stand-in of the trigger.
   // A card (Spec 015 ③, plan ③ D-05): one variant per orientation — it keys no part, the layout
   // of surface and media does; the set shows the media above and beside the body.
+  // A slider (Spec 025 ①, plan ① D-04): one variant per range — it keys no part, the second thumb
+  // does; the set shows one thumb and two.
   const extraAxes =
     structure === "icon"
       ? ["name"]
@@ -2362,7 +2424,13 @@ function componentSetOf(
         ? ["placement"]
         : structure === "card"
           ? ["orientation"]
-          : [];
+          : structure === "slider"
+            ? ["range"]
+            : // A date picker (Spec 025 ②, plan ② D-12): one variant per mode — it keys no part,
+              // the chosen days do; the set shows one day and a range.
+              structure === "field" && skemo.parts.calendar !== undefined
+              ? ["mode"]
+              : [];
   const keys = [...extraAxes, ...variantKeys(skemo)];
   // What the plugin draws for this structure (Spec 011 ③): the bindings every structure shares and
   // the ones this structure binds elsewhere — the text's colour on the label of a badge. What the
@@ -3028,7 +3096,10 @@ function componentSetOf(
         : // Spec 015 ③ (plan ③ D-05): a card's actions and badge look like a butono and an insigno.
           structure === "card"
           ? standInsComposedOf(CARD_COMPOSED, eroj, resolutions, base)
-          : undefined;
+          : // Spec 025 ① (plan ① D-04): the number field beside a slider's track looks like a kampo.
+            structure === "slider"
+            ? standInsComposedOf(SLIDER_COMPOSED, eroj, resolutions, base)
+            : undefined;
   // The overlays (Spec 014 ④, plan ④ D-06): a popover shows the words of its trigger stand-in and
   // its content beside the heading (the label property); a menu its three entries (the
   // Vitrino's: edit, duplicate disabled, delete danger) and the word of its trigger, the Modelo's
@@ -3106,6 +3177,37 @@ function componentSetOf(
         }
       : {}),
     ...(structure === "tabs" ? { texts: { ...TABS_TEXTS } } : {}),
+    // Spec 025 ① (plan ① D-04): the Vitrino's help and end labels, the error the Vitrino's word;
+    // the fill from the Vitrino's values as shares of the track.
+    ...(structure === "slider"
+      ? {
+          texts: {
+            help: VITRINO_SLIDER.help,
+            error: VITRINO_SLOT_TEXTS.error ?? "",
+            "min-label": VITRINO_SLIDER.minLabel,
+            "max-label": VITRINO_SLIDER.maxLabel,
+          },
+          slider: {
+            share: Number(VITRINO_SLIDER.value) / 100,
+            start: Number(VITRINO_SLIDER.start) / 100,
+            end: Number(VITRINO_SLIDER.end) / 100,
+          },
+        }
+      : {}),
+    // Spec 025 ② (plan ② D-12): the Vitrino's help, month and dates (the error the Vitrino's
+    // word); the calendar of the Vitrino's month.
+    ...(structure === "field" && skemo.parts.calendar !== undefined
+      ? {
+          texts: {
+            help: VITRINO_DATE.help,
+            error: VITRINO_SLOT_TEXTS.error ?? "",
+            month: VITRINO_DATE.month,
+            value: VITRINO_DATE.shownValue,
+            range: VITRINO_DATE.shownRange,
+          },
+          calendar: vitrinoCalendar(),
+        }
+      : {}),
     ...(structure === "popover"
       ? { texts: { trigger: VITRINO_TRIGGER_TEXT, content: VITRINO_CONTENT_TEXT } }
       : {}),

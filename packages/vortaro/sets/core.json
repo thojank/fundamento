@@ -7294,6 +7294,896 @@
         }
       }
     },
+    "datelektilo": {
+      "label": {
+        "color": {
+          "rest": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "datelektilo: label.color when state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5P2KHJHY0KHXN3V96A",
+                "role": "ero"
+              }
+            }
+          },
+          "hover": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "datelektilo: label.color when state=hover (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK4H",
+                "role": "ero"
+              }
+            }
+          },
+          "focus": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "datelektilo: label.color when state=focus (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK4J",
+                "role": "ero"
+              }
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{color.text.disabled}",
+            "$description": "datelektilo: label.color when state=disabled (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK4K",
+                "role": "ero"
+              }
+            }
+          },
+          "readonly": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "datelektilo: label.color when state=readonly (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK4M",
+                "role": "ero"
+              }
+            }
+          },
+          "invalid": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "datelektilo: label.color when state=invalid (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK4N",
+                "role": "ero"
+              }
+            }
+          }
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.label.1}",
+          "$description": "datelektilo: label.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK4P"
+            }
+          }
+        }
+      },
+      "required": {
+        "mark": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.status.danger.text}",
+            "$description": "datelektilo: required-mark.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK4Q",
+                "role": "ero"
+              }
+            }
+          }
+        }
+      },
+      "surface": {
+        "fill": {
+          "rest": {
+            "$type": "color",
+            "$value": "{color.background.default}",
+            "$description": "datelektilo: surface.fill when state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK4R",
+                "role": "ero"
+              }
+            }
+          },
+          "hover": {
+            "$type": "color",
+            "$value": "{color.background.default}",
+            "$description": "datelektilo: surface.fill when state=hover (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK4S",
+                "role": "ero"
+              }
+            }
+          },
+          "focus": {
+            "$type": "color",
+            "$value": "{color.background.default}",
+            "$description": "datelektilo: surface.fill when state=focus (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK4T",
+                "role": "ero"
+              }
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{color.background.sunken}",
+            "$description": "datelektilo: surface.fill when state=disabled (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK4V",
+                "role": "ero"
+              }
+            }
+          },
+          "readonly": {
+            "$type": "color",
+            "$value": "{color.background.sunken}",
+            "$description": "datelektilo: surface.fill when state=readonly (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK4W",
+                "role": "ero"
+              }
+            }
+          },
+          "invalid": {
+            "$type": "color",
+            "$value": "{color.background.default}",
+            "$description": "datelektilo: surface.fill when state=invalid (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK4X",
+                "role": "ero"
+              }
+            }
+          }
+        }
+      },
+      "border": {
+        "color": {
+          "rest": {
+            "$type": "color",
+            "$value": "{color.border.default}",
+            "$description": "datelektilo: border.color when state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK4Y",
+                "role": "ero"
+              }
+            }
+          },
+          "hover": {
+            "$type": "color",
+            "$value": "{color.border.strong}",
+            "$description": "datelektilo: border.color when state=hover (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK4Z",
+                "role": "ero"
+              }
+            }
+          },
+          "focus": {
+            "$type": "color",
+            "$value": "{color.border.strong}",
+            "$description": "datelektilo: border.color when state=focus (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK50",
+                "role": "ero"
+              }
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{color.border.disabled}",
+            "$description": "datelektilo: border.color when state=disabled (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK51",
+                "role": "ero"
+              }
+            }
+          },
+          "readonly": {
+            "$type": "color",
+            "$value": "{color.border.default}",
+            "$description": "datelektilo: border.color when state=readonly (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK52",
+                "role": "ero"
+              }
+            }
+          },
+          "invalid": {
+            "$type": "color",
+            "$value": "{color.status.danger.border}",
+            "$description": "datelektilo: border.color when state=invalid (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK53",
+                "role": "ero"
+              }
+            }
+          }
+        },
+        "width": {
+          "$type": "dimension",
+          "$value": "{border.width.default}",
+          "$description": "datelektilo: border.width (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK54"
+            }
+          }
+        }
+      },
+      "text": {
+        "color": {
+          "rest": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "datelektilo: text.color when state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK55",
+                "role": "ero"
+              }
+            }
+          },
+          "hover": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "datelektilo: text.color when state=hover (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK56",
+                "role": "ero"
+              }
+            }
+          },
+          "focus": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "datelektilo: text.color when state=focus (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK57",
+                "role": "ero"
+              }
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{color.text.disabled}",
+            "$description": "datelektilo: text.color when state=disabled (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK58",
+                "role": "ero"
+              }
+            }
+          },
+          "readonly": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "datelektilo: text.color when state=readonly (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK59",
+                "role": "ero"
+              }
+            }
+          },
+          "invalid": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "datelektilo: text.color when state=invalid (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5A",
+                "role": "ero"
+              }
+            }
+          }
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.body.1}",
+          "$description": "datelektilo: text.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5B"
+            }
+          }
+        }
+      },
+      "trigger": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.control.medium}",
+          "$description": "datelektilo: trigger.size (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5C"
+            }
+          }
+        }
+      },
+      "calendar": {
+        "fill": {
+          "$type": "color",
+          "$value": "{color.background.raised}",
+          "$description": "datelektilo: calendar.fill (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5D",
+              "role": "ero"
+            }
+          }
+        },
+        "radius": {
+          "$type": "dimension",
+          "$value": "{radius.role.surface}",
+          "$description": "datelektilo: calendar.radius (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5E"
+            }
+          }
+        },
+        "shadow": {
+          "$type": "shadow",
+          "$value": "{elevation.shadow.overlay}",
+          "$description": "datelektilo: calendar.shadow (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5F"
+            }
+          }
+        },
+        "layer": {
+          "$type": "number",
+          "$value": "{elevation.layer.overlay}",
+          "$description": "datelektilo: calendar.layer (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5G"
+            }
+          }
+        },
+        "width": {
+          "$type": "dimension",
+          "$value": "{size.container.small}",
+          "$description": "datelektilo: calendar.width (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5H"
+            }
+          }
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.medium}",
+            "$description": "datelektilo: calendar.inline-padding (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5J"
+              }
+            }
+          }
+        },
+        "height": {
+          "expanded": {
+            "true": {
+              "$type": "dimension",
+              "$value": "{size.container.medium}",
+              "$description": "datelektilo: calendar.height when expanded=true (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "com.ciferecigo.fundamento": {
+                  "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5K"
+                }
+              }
+            }
+          }
+        }
+      },
+      "month": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}",
+          "$description": "datelektilo: month.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5M",
+              "role": "ero"
+            }
+          }
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.label.1}",
+          "$description": "datelektilo: month.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5N"
+            }
+          }
+        }
+      },
+      "prev": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.control.small}",
+          "$description": "datelektilo: prev.size (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5P"
+            }
+          }
+        }
+      },
+      "next": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.control.small}",
+          "$description": "datelektilo: next.size (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5Q"
+            }
+          }
+        }
+      },
+      "weekday": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}",
+          "$description": "datelektilo: weekday.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5R",
+              "role": "ero"
+            }
+          }
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.caption}",
+          "$description": "datelektilo: weekday.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5S"
+            }
+          }
+        }
+      },
+      "cell": {
+        "color": {
+          "rest": {
+            "$type": "color",
+            "$value": "{color.action.tertiary.rest}",
+            "$description": "datelektilo: cell.color when state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5T",
+                "role": "ero"
+              }
+            }
+          },
+          "hover": {
+            "$type": "color",
+            "$value": "{color.action.tertiary.hover}",
+            "$description": "datelektilo: cell.color when state=hover (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5V",
+                "role": "ero"
+              }
+            }
+          },
+          "focus": {
+            "$type": "color",
+            "$value": "{color.action.tertiary.rest}",
+            "$description": "datelektilo: cell.color when state=focus (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5W",
+                "role": "ero"
+              }
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{color.action.tertiary.disabled}",
+            "$description": "datelektilo: cell.color when state=disabled (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5X",
+                "role": "ero"
+              }
+            }
+          },
+          "readonly": {
+            "$type": "color",
+            "$value": "{color.action.tertiary.rest}",
+            "$description": "datelektilo: cell.color when state=readonly (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5Y",
+                "role": "ero"
+              }
+            }
+          },
+          "invalid": {
+            "$type": "color",
+            "$value": "{color.action.tertiary.rest}",
+            "$description": "datelektilo: cell.color when state=invalid (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5Z",
+                "role": "ero"
+              }
+            }
+          }
+        },
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.target.min}",
+          "$description": "datelektilo: cell.size (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK60"
+            }
+          }
+        },
+        "radius": {
+          "$type": "dimension",
+          "$value": "{radius.role.control}",
+          "$description": "datelektilo: cell.radius (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK61"
+            }
+          }
+        }
+      },
+      "day": {
+        "color": {
+          "rest": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "datelektilo: day.color when state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK62",
+                "role": "ero"
+              }
+            }
+          },
+          "hover": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "datelektilo: day.color when state=hover (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK63",
+                "role": "ero"
+              }
+            }
+          },
+          "focus": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "datelektilo: day.color when state=focus (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK64",
+                "role": "ero"
+              }
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{color.text.disabled}",
+            "$description": "datelektilo: day.color when state=disabled (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK65",
+                "role": "ero"
+              }
+            }
+          },
+          "readonly": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "datelektilo: day.color when state=readonly (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK66",
+                "role": "ero"
+              }
+            }
+          },
+          "invalid": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "datelektilo: day.color when state=invalid (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK67",
+                "role": "ero"
+              }
+            }
+          }
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.label.1}",
+          "$description": "datelektilo: day.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK68"
+            }
+          }
+        }
+      },
+      "selected": {
+        "cell": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.action.primary.selected}",
+            "$description": "datelektilo: selected-cell.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK69",
+                "role": "ero"
+              }
+            }
+          }
+        },
+        "day": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.action.primary.text}",
+            "$description": "datelektilo: selected-day.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6A",
+                "role": "ero"
+              }
+            }
+          }
+        }
+      },
+      "in": {
+        "range": {
+          "cell": {
+            "color": {
+              "$type": "color",
+              "$value": "{color.action.secondary.selected}",
+              "$description": "datelektilo: in-range-cell.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "com.ciferecigo.fundamento": {
+                  "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6B",
+                  "role": "ero"
+                }
+              }
+            }
+          }
+        }
+      },
+      "today": {
+        "cell": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.border.strong}",
+            "$description": "datelektilo: today-cell.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6C",
+                "role": "ero"
+              }
+            }
+          },
+          "width": {
+            "$type": "dimension",
+            "$value": "{border.width.default}",
+            "$description": "datelektilo: today-cell.width (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6D"
+              }
+            }
+          }
+        }
+      },
+      "outside": {
+        "day": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.text.muted}",
+            "$description": "datelektilo: outside-day.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6E",
+                "role": "ero"
+              }
+            }
+          }
+        }
+      },
+      "help": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}",
+          "$description": "datelektilo: help.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6F",
+              "role": "ero"
+            }
+          }
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.caption}",
+          "$description": "datelektilo: help.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6G"
+            }
+          }
+        }
+      },
+      "error": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.status.danger.text}",
+          "$description": "datelektilo: error.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6H",
+              "role": "ero"
+            }
+          }
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.caption}",
+          "$description": "datelektilo: error.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6J"
+            }
+          }
+        }
+      },
+      "focus": {
+        "ring": {
+          "ring": {
+            "$type": "border",
+            "$value": "{focus.ring}",
+            "$description": "datelektilo: focus-ring.ring (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6K"
+              }
+            }
+          },
+          "offset": {
+            "$type": "dimension",
+            "$value": "{focus.offset}",
+            "$description": "datelektilo: focus-ring.offset (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6M"
+              }
+            }
+          },
+          "color": {
+            "$type": "color",
+            "$value": "{color.focus.inner}",
+            "$description": "datelektilo: focus-ring.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6N",
+                "role": "ero"
+              }
+            }
+          }
+        }
+      },
+      "box": {
+        "height": {
+          "$type": "dimension",
+          "$value": "{size.control.medium}",
+          "$description": "datelektilo: box.height (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6P"
+            }
+          }
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.medium}",
+            "$description": "datelektilo: box.inline-padding (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6Q"
+              }
+            }
+          }
+        },
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.small}",
+          "$description": "datelektilo: box.gap (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6R"
+            }
+          }
+        },
+        "radius": {
+          "$type": "dimension",
+          "$value": "{radius.role.control}",
+          "$description": "datelektilo: box.radius (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6S"
+            }
+          }
+        }
+      },
+      "motion": {
+        "duration": {
+          "$type": "duration",
+          "$value": "{motion.duration.fast}",
+          "$description": "datelektilo: motion.duration (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6T"
+            }
+          }
+        },
+        "easing": {
+          "$type": "cubicBezier",
+          "$value": "{motion.easing.standard}",
+          "$description": "datelektilo: motion.easing (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6V"
+            }
+          }
+        }
+      }
+    },
     "dialogo": {
       "backdrop": {
         "color": {
@@ -8911,6 +9801,487 @@
         }
       }
     },
+    "glitilo": {
+      "label": {
+        "color": {
+          "rest": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "glitilo: label.color when state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6W",
+                "role": "ero"
+              }
+            }
+          },
+          "hover": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "glitilo: label.color when state=hover (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6X",
+                "role": "ero"
+              }
+            }
+          },
+          "focus": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "glitilo: label.color when state=focus (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6Y",
+                "role": "ero"
+              }
+            }
+          },
+          "pressed": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "glitilo: label.color when state=pressed (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK6Z",
+                "role": "ero"
+              }
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{color.text.disabled}",
+            "$description": "glitilo: label.color when state=disabled (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK70",
+                "role": "ero"
+              }
+            }
+          },
+          "invalid": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "glitilo: label.color when state=invalid (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK71",
+                "role": "ero"
+              }
+            }
+          }
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.label.1}",
+          "$description": "glitilo: label.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK72"
+            }
+          }
+        }
+      },
+      "required": {
+        "mark": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.status.danger.text}",
+            "$description": "glitilo: required-mark.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK73",
+                "role": "ero"
+              }
+            }
+          }
+        }
+      },
+      "track": {
+        "fill": {
+          "$type": "color",
+          "$value": "{color.background.sunken}",
+          "$description": "glitilo: track.fill (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK74",
+              "role": "ero"
+            }
+          }
+        },
+        "height": {
+          "$type": "dimension",
+          "$value": "{spacing.small}",
+          "$description": "glitilo: track.height (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK75"
+            }
+          }
+        },
+        "radius": {
+          "$type": "dimension",
+          "$value": "{radius.full}",
+          "$description": "glitilo: track.radius (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK76"
+            }
+          }
+        }
+      },
+      "fill": {
+        "color": {
+          "rest": {
+            "$type": "color",
+            "$value": "{color.action.primary.rest}",
+            "$description": "glitilo: fill.color when state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK77",
+                "role": "ero"
+              }
+            }
+          },
+          "hover": {
+            "$type": "color",
+            "$value": "{color.action.primary.rest}",
+            "$description": "glitilo: fill.color when state=hover (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK78",
+                "role": "ero"
+              }
+            }
+          },
+          "focus": {
+            "$type": "color",
+            "$value": "{color.action.primary.rest}",
+            "$description": "glitilo: fill.color when state=focus (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK79",
+                "role": "ero"
+              }
+            }
+          },
+          "pressed": {
+            "$type": "color",
+            "$value": "{color.action.primary.rest}",
+            "$description": "glitilo: fill.color when state=pressed (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7A",
+                "role": "ero"
+              }
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{color.action.primary.disabled}",
+            "$description": "glitilo: fill.color when state=disabled (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7B",
+                "role": "ero"
+              }
+            }
+          },
+          "invalid": {
+            "$type": "color",
+            "$value": "{color.status.danger.basic}",
+            "$description": "glitilo: fill.color when state=invalid (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7C",
+                "role": "ero"
+              }
+            }
+          }
+        },
+        "radius": {
+          "$type": "dimension",
+          "$value": "{radius.full}",
+          "$description": "glitilo: fill.radius (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7D"
+            }
+          }
+        }
+      },
+      "thumb": {
+        "color": {
+          "rest": {
+            "$type": "color",
+            "$value": "{color.action.primary.rest}",
+            "$description": "glitilo: thumb.color when state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7E",
+                "role": "ero"
+              }
+            }
+          },
+          "hover": {
+            "$type": "color",
+            "$value": "{color.action.primary.hover}",
+            "$description": "glitilo: thumb.color when state=hover (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7F",
+                "role": "ero"
+              }
+            }
+          },
+          "focus": {
+            "$type": "color",
+            "$value": "{color.action.primary.rest}",
+            "$description": "glitilo: thumb.color when state=focus (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7G",
+                "role": "ero"
+              }
+            }
+          },
+          "pressed": {
+            "$type": "color",
+            "$value": "{color.action.primary.pressed}",
+            "$description": "glitilo: thumb.color when state=pressed (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7H",
+                "role": "ero"
+              }
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{color.action.primary.disabled}",
+            "$description": "glitilo: thumb.color when state=disabled (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7J",
+                "role": "ero"
+              }
+            }
+          },
+          "invalid": {
+            "$type": "color",
+            "$value": "{color.status.danger.basic}",
+            "$description": "glitilo: thumb.color when state=invalid (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7K",
+                "role": "ero"
+              }
+            }
+          }
+        },
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.target.min}",
+          "$description": "glitilo: thumb.size (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7M"
+            }
+          }
+        },
+        "radius": {
+          "$type": "dimension",
+          "$value": "{radius.full}",
+          "$description": "glitilo: thumb.radius (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7N"
+            }
+          }
+        }
+      },
+      "number": {
+        "width": {
+          "field": {
+            "true": {
+              "$type": "dimension",
+              "$value": "{size.scale.1000}",
+              "$description": "glitilo: number.width when field=true (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "com.ciferecigo.fundamento": {
+                  "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7P"
+                }
+              }
+            }
+          }
+        }
+      },
+      "min": {
+        "label": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.text.muted}",
+            "$description": "glitilo: min-label.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7Q",
+                "role": "ero"
+              }
+            }
+          },
+          "typography": {
+            "$type": "typography",
+            "$value": "{typography.caption}",
+            "$description": "glitilo: min-label.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7R"
+              }
+            }
+          }
+        }
+      },
+      "max": {
+        "label": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.text.muted}",
+            "$description": "glitilo: max-label.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7S",
+                "role": "ero"
+              }
+            }
+          },
+          "typography": {
+            "$type": "typography",
+            "$value": "{typography.caption}",
+            "$description": "glitilo: max-label.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7T"
+              }
+            }
+          }
+        }
+      },
+      "help": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}",
+          "$description": "glitilo: help.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7V",
+              "role": "ero"
+            }
+          }
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.caption}",
+          "$description": "glitilo: help.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7W"
+            }
+          }
+        }
+      },
+      "error": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.status.danger.text}",
+          "$description": "glitilo: error.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7X",
+              "role": "ero"
+            }
+          }
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.caption}",
+          "$description": "glitilo: error.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7Y"
+            }
+          }
+        }
+      },
+      "focus": {
+        "ring": {
+          "ring": {
+            "$type": "border",
+            "$value": "{focus.ring}",
+            "$description": "glitilo: focus-ring.ring (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK7Z"
+              }
+            }
+          },
+          "offset": {
+            "$type": "dimension",
+            "$value": "{focus.offset}",
+            "$description": "glitilo: focus-ring.offset (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK80"
+              }
+            }
+          },
+          "color": {
+            "$type": "color",
+            "$value": "{color.focus.inner}",
+            "$description": "glitilo: focus-ring.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK81",
+                "role": "ero"
+              }
+            }
+          }
+        }
+      },
+      "box": {
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.small}",
+          "$description": "glitilo: box.gap (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK82"
+            }
+          }
+        }
+      },
+      "motion": {
+        "duration": {
+          "$type": "duration",
+          "$value": "{motion.duration.fast}",
+          "$description": "glitilo: motion.duration (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK83"
+            }
+          }
+        },
+        "easing": {
+          "$type": "cubicBezier",
+          "$value": "{motion.easing.standard}",
+          "$description": "glitilo: motion.easing (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK84"
+            }
+          }
+        }
+      }
+    },
     "ikono": {
       "glyph": {
         "color": {
@@ -9844,6 +11215,90 @@
           "$extensions": {
             "com.ciferecigo.fundamento": {
               "id": "tok_01M5GF0TQY40AAXJHBF90R5XEV"
+            }
+          }
+        }
+      },
+      "decrement": {
+        "size": {
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.control.small}",
+              "$description": "kampo: decrement.size when size=small (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "com.ciferecigo.fundamento": {
+                  "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK85"
+                }
+              }
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.control.medium}",
+              "$description": "kampo: decrement.size when size=medium (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "com.ciferecigo.fundamento": {
+                  "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK86"
+                }
+              }
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{size.control.large}",
+              "$description": "kampo: decrement.size when size=large (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "com.ciferecigo.fundamento": {
+                  "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK87"
+                }
+              }
+            }
+          }
+        }
+      },
+      "increment": {
+        "size": {
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.control.small}",
+              "$description": "kampo: increment.size when size=small (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "com.ciferecigo.fundamento": {
+                  "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK88"
+                }
+              }
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.control.medium}",
+              "$description": "kampo: increment.size when size=medium (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "com.ciferecigo.fundamento": {
+                  "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK89"
+                }
+              }
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{size.control.large}",
+              "$description": "kampo: increment.size when size=large (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "com.ciferecigo.fundamento": {
+                  "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK8A"
+                }
+              }
+            }
+          }
+        }
+      },
+      "clear": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.control.small}",
+          "$description": "kampo: clear.size (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK8B"
             }
           }
         }

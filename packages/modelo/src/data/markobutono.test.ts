@@ -32,10 +32,12 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
       "avataro",
       "avizo",
       "butono",
+      "datelektilo",
       "dialogo",
       "elektilo",
       "elekto",
       "faldilo",
+      "glitilo",
       "ikono",
       "insigno",
       "kampo",
@@ -169,7 +171,8 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
       keys: ["Space"],
       texts: { required: { de: "erforderlich", en: "required" } },
     });
-    expect(skemo?.a11y.texts).toEqual(kampo?.skemo.a11y.texts);
+    // Spec 025 ①: the kampo speaks its buttons too; required is the shared word.
+    expect(skemo?.a11y.texts).toEqual({ required: kampo?.skemo.a11y.texts?.required });
   });
 
   it("forbids an error text without invalid, like the kampo (constraint, Spec 009 D-04)", () => {
@@ -305,6 +308,8 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
         "tekstareo",
         "kompletigilo",
         "alsxutilo",
+        "glitilo",
+        "datelektilo",
       ],
     ],
     [
@@ -318,6 +323,8 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
         "tekstareo",
         "kompletigilo",
         "alsxutilo",
+        "glitilo",
+        "datelektilo",
       ],
     ],
     [
@@ -331,15 +338,37 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
         "avizo",
         "kompletigilo",
         "alsxutilo",
+        "glitilo",
+        "datelektilo",
       ],
     ],
     [
       "required-marked",
-      ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo", "alsxutilo"],
+      [
+        "kampo",
+        "markobutono",
+        "elekto",
+        "elektilo",
+        "tekstareo",
+        "kompletigilo",
+        "alsxutilo",
+        "glitilo",
+        "datelektilo",
+      ],
     ],
     [
       "error-not-color-only",
-      ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo", "alsxutilo"],
+      [
+        "kampo",
+        "markobutono",
+        "elekto",
+        "elektilo",
+        "tekstareo",
+        "kompletigilo",
+        "alsxutilo",
+        "glitilo",
+        "datelektilo",
+      ],
     ],
   ])("%s is widened to the markobutono, not duplicated (E5)", (name, eroj) => {
     expect(named(name)?.appliesTo).toEqual({ eroj });
@@ -383,6 +412,8 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
       "avataro",
       "kodbloko",
       "markdovido",
+      "glitilo",
+      "datelektilo",
     ]);
   });
 

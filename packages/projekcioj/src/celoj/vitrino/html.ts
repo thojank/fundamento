@@ -268,7 +268,10 @@ function wrapSentence(role: string | undefined, wrap: string, multiline = false)
                                           ? "Codezeile"
                                           : role === "document"
                                             ? "Text"
-                                            : "Label";
+                                            : // Spec 025 ①: a slider's track stays one line.
+                                              role === "slider"
+                                              ? "Spur"
+                                              : "Label";
   if (wrap === "never") return `${subject} bricht nie um`;
   if (wrap === "with-text") return `${subject} darf umbrechen (inline), standalone nie`;
   return `${subject} darf umbrechen`;

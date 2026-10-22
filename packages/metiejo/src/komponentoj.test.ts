@@ -28,7 +28,7 @@ const FILL = "ero.butono.surface.fill.emphasis.high.intent.neutral.rest";
 describe("komponentoList (M-4: a page per Ero and per Sxablono, from the Skemo)", () => {
   it("lists every Ero of the structure, then every Sxablono, each with a title", () => {
     const list = komponentoList(bases);
-    expect(list.filter((entry) => entry.kind === "ero")).toHaveLength(34);
+    expect(list.filter((entry) => entry.kind === "ero")).toHaveLength(36);
     expect(list.filter((entry) => entry.kind === "sxablono")).toHaveLength(5);
     expect(list[0]).toMatchObject({ kind: "ero", name: "alsxutilo" });
     expect(list.at(-1)).toMatchObject({ kind: "sxablono", name: "sxelo" });

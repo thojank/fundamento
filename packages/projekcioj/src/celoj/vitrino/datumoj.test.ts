@@ -257,7 +257,11 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
       html.indexOf('id="fm-vitrino-kampo"'),
       html.indexOf("</section>", html.indexOf('id="fm-vitrino-kampo"')),
     );
-    const cells = own.match(/<fm-kampo[^>]*>.*?<\/fm-kampo>/g) ?? [];
+    // Spec 025 ① (plan ① D-07): the rows of the stepper and the search state their own help
+    // (range-stated) or none; the grid's cells keep the word.
+    const cells = (own.match(/<fm-kampo[^>]*>.*?<\/fm-kampo>/g) ?? []).filter(
+      (cell) => !cell.includes(" stepper") && !cell.includes('kind="search" value='),
+    );
     expect(cells.length).toBeGreaterThan(10);
     const withHelp = cells.filter((cell) => cell.includes('<span slot="help">Hinweis</span>'));
     expect(withHelp.length).toBe(cells.length);
@@ -292,10 +296,14 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
       avataro: "img",
       avizo: "status",
       butono: "button",
+      // Spec 025 ②: the date picker is a textbox with a calendar.
+      datelektilo: "textbox",
       dialogo: "dialog",
       elektilo: "combobox",
       elekto: "radiogroup",
       faldilo: "group",
+      // Spec 025 ①: the slider.
+      glitilo: "slider",
       ikono: "img",
       insigno: "generic",
       kampo: "textbox",
@@ -945,5 +953,61 @@ describe("the Vitrino rows of Nachlese 7 ②", () => {
     expect(row).toMatch(/<fm-teksto>[^<]+<fm-ligilo[^>]*>[^<]+<\/fm-ligilo>/);
     expect(row).toContain("<fm-insigno");
     expect(row).toContain('<fm-teksto kind="code">');
+  });
+});
+
+// Spec 025 ① (plan ① D-07): the Vitrino shows the glitilo in three rows — a single value with the
+// help that names the limits, a range with its end labels, a value with the field beside — each
+// at rest, required, disabled and invalid; the kampo in two more rows: a number with its stepper
+// and its bounds in the help, a search with a value (the clear button); kind time in the row of
+// the kinds.
+describe("the Vitrino shows the glitilo and the kampo additions (Spec 025 ①)", () => {
+  it("three rows, four columns; the limits stated by help or by both end labels; the error only under invalid", () => {
+    const grid = datumoj.eroj.glitilo ?? "";
+    expect((grid.match(/<fm-glitilo /g) ?? []).length).toBe(12);
+    expect(grid).toContain(
+      '<th scope="col">rest</th><th scope="col">required</th><th scope="col">disabled</th><th scope="col">invalid</th>',
+    );
+    expect(grid).toContain(
+      '<fm-glitilo value="40">einzeln<span slot="help">Zwischen 0 und 100.</span></fm-glitilo>',
+    );
+    expect(grid).toContain(
+      '<fm-glitilo range value-start="20" value-end="60">Bereich<span slot="min-label">0</span><span slot="max-label">100</span></fm-glitilo>',
+    );
+    expect(grid).toContain('<fm-glitilo field value="40">mit Eingabefeld<span slot="help">');
+    expect((grid.match(/<span slot="error">/g) ?? []).length).toBe(3);
+    expect(html).toContain("Größe aus dem Container");
+  });
+
+  it("the kampo shows kind time among its kinds, a number with stepper and bounds, a search with a value", () => {
+    const grid = datumoj.eroj.kampo ?? "";
+    expect(grid).toContain('<fm-kampo kind="time" value="09:30"');
+    expect(grid).toContain(
+      '<fm-kampo kind="number" stepper min="1" max="10" value="3">Menge<span slot="help">Zwischen 1 und 10.</span></fm-kampo>',
+    );
+    expect(grid).toContain('<fm-kampo kind="search" value="Standard">Suche</fm-kampo>');
+  });
+});
+
+// Spec 025 ② (plan ② D-13): the Vitrino shows the datelektilo in two rows — a single date with
+// the help, a date range — each at rest, required, disabled and invalid; the dates are the
+// Vitrino's (October 2026), the same the Figma set shows.
+describe("the Vitrino shows the datelektilo (Spec 025 ②)", () => {
+  it("two rows, four columns; the dates of the Vitrino; the error only under invalid", () => {
+    const grid = datumoj.eroj.datelektilo ?? "";
+    expect((grid.match(/<fm-datelektilo /g) ?? []).length).toBe(8);
+    expect(grid).toContain(
+      '<th scope="col">rest</th><th scope="col">required</th><th scope="col">disabled</th><th scope="col">invalid</th>',
+    );
+    expect(grid).toContain(
+      '<fm-datelektilo value="2026-10-24">einzeln<span slot="help">Ein Datum ab heute.</span></fm-datelektilo>',
+    );
+    expect(grid).toContain(
+      '<fm-datelektilo mode="range" value-start="2026-10-06" value-end="2026-10-10">Bereich<span slot="help">Ein Datum ab heute.</span></fm-datelektilo>',
+    );
+    expect(grid).toContain(
+      '<fm-datelektilo value="2026-10-24" invalid>einzeln<span slot="error">Wähle ein Datum ab heute.</span>',
+    );
+    expect((grid.match(/<span slot="error">/g) ?? []).length).toBe(2);
   });
 });

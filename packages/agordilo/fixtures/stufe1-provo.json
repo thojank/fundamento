@@ -1,5 +1,5 @@
 {
-  "source": "packages/modelo/test/fixtures/valid/aspekto-provo/aspekto-provo auf main ac5deb3 (Spec 016, Agordilo Stufe 1); Prüfsummen nach O-1 (Spec 024, die Stufen 25, 150, 850, 975 der farbigen Paletten) neu gerechnet",
+  "source": "packages/modelo/test/fixtures/valid/aspekto-provo/aspekto-provo auf main ac5deb3 (Spec 016, Agordilo Stufe 1); Prüfsummen nach O-1 (Spec 024, die Stufen 25, 150, 850, 975 der farbigen Paletten) neu gerechnet; nach Spec 025 ① (Glyphen add und subtract der Ikonaro) neu gerechnet",
   "agordo": {
     "name": "provo",
     "owner": "Provo (fictitious, test only)",
@@ -28,9 +28,11 @@
   },
   "sha256": {
     "$themes.json": "32d20d206abf9b832c41c26c654fb33aef9694a5661ff89655091a4aae9931d3",
-    "aspekto.json": "2340cdc394db064eb6526bf3692f4dff8a7269a58f4a81f12fe7f67e6e3b3b1e",
+    "aspekto.json": "d35bdfbe480576f696af6ecf8a046abf75526b7ea93de3ae3485c8aeef8e0591",
     "ids.lock.json": "19279ae73d078332a67f90d7e401fa8878e9fc7794e8496809c133730e1e564e",
     "ikonoj/LICENSE": "ddbe6082ec3cf979db47e5af549d2849c5d6182b3e005ef91ce1dbb9eb122f11",
+    "ikonoj/add.svg": "4baa2c668c8800442d47ab39d716e35142c125a9146efefa50f701e9622f2000",
+    "ikonoj/calendar.svg": "933da659d9665391e2868ce1f17644e7d672b7369a329aec197ed2c7f61bc5fa",
     "ikonoj/check.svg": "37080105de6ae35b2bfda063742a7cfe4b088de778edc72a8be69fc537548639",
     "ikonoj/chevron-down.svg": "5283306e5f6fde1abee28343c16d2a1d13a3c9d42a6690bbba155502a22ebe3d",
     "ikonoj/chevron-left.svg": "512b7d134bdc27d7f9c0fe71b2c8e4db32d6ffeeb7d846c51dbded5910703bde",
@@ -45,12 +47,13 @@
     "ikonoj/search.svg": "a199d68a44476ba7e148d8711bb24649e4e713099a99ff50c924f771a6b3aed3",
     "ikonoj/sort-ascending.svg": "5d987a85af68fc08fc9d9bbedfd42eb18840d5c91dbff9db9b36d072b95860b9",
     "ikonoj/sort-descending.svg": "a2fc9fcacc8629c34c41696b4bfbc7ba153fed9c4baf2e1fade248c2640e1731",
+    "ikonoj/subtract.svg": "b1b5ecc39733eaaf3164e2819d9227dad52b97030cac6e4e367feb9d347ff481",
     "ikonoj/success.svg": "9dad12b9422fa0917c97a728e2864deebf92a31eaf8787f6610b50f50031fdd6",
     "ikonoj/upload.svg": "58a3e265785ce61dd953378ceaef7740a7aa30d8a228e14ec17084895b01ec7c",
     "ikonoj/warning.svg": "a259c73cc10ebf602d378b0cbb84233867bfea183a7354e609ea4b274c5b869a",
     "raporto.json": "59bac84d809ae97da61d96535f236d7bd279fc023aa632c27c2e0a17c11c8965",
     "raporto.md": "38edbdc57660e2f107cb190a8f04d82f6fdc997d96ec6cebf0eeb88202fcdda8",
     "sets/aspekto/provo+color-scheme/dark.json": "4e9efc4e7d34a6eaad46b1c022e18344e118f17b12935e0b93cd4497d8aa30ad",
-    "sets/aspekto/provo.json": "4e3bcb2c5e0eab3fa5d28d229a8e97c1e907585064f3bfffeaa884d9b47d5c82"
+    "sets/aspekto/provo.json": "c1cd7d7d22479063b7a0f2e14cfc779f4dc684ea15ff2d4a697c5254f62fe6f6"
   }
 }

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor">
+  <metadata>fundamento-ikonaro: subtract
+source: Phosphor Icons, icon "minus" (bold), https://phosphoricons.com
+version: @phosphor-icons/core 2.1.1
+license: MIT, https://github.com/phosphor-icons/core/blob/main/LICENSE</metadata>
+  <path d="M228,128a12,12,0,0,1-12,12H40a12,12,0,0,1,0-24H216A12,12,0,0,1,228,128Z"/>
+</svg>

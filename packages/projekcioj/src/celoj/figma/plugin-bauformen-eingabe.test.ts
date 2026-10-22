@@ -877,3 +877,173 @@ describe("the kompletigilo fills the active suggestion (N-8)", () => {
     expect(double.snapshot()).toBe(before);
   });
 });
+
+// Spec 025 ① (plan ① D-04): the plugin draws the glitilo — every variant a column of label, the
+// row (start label, the track with its fill and the ring around the thumb — two thumbs with
+// range — the end label, the stand-in of the number field shown only with field), help and error; the
+// fill the plan's share of the track. A second run writes nothing.
+describe("the plugin draws the glitilo (Spec 025 ①)", () => {
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    role(node?.boundVariables[field]?.name);
+  const paintOf = (node: DoubleNode | undefined) =>
+    role(
+      (
+        node?.properties.fills as { boundVariables?: { color?: { name: string } } }[] | undefined
+      )?.[0]?.boundVariables?.color?.name,
+    );
+
+  it("every variant: label, row, help, error; the track with fill and thumb(s); the number field only with field; a second run writes nothing", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = pageNodes(double).find((node) => node.name === "glitilo");
+    expect(set?.children).toHaveLength(24);
+    for (const variant of set?.children ?? []) {
+      const field = descendant(variant, "field");
+      expect(field?.properties.layoutMode, variant.name).toBe("VERTICAL");
+      expect(field?.children.map((child) => child.name)).toEqual(["label", "row", "help", "error"]);
+      const row = descendant(variant, "row");
+      expect(row?.properties.layoutMode, variant.name).toBe("HORIZONTAL");
+      expect(row?.children.map((child) => child.name)).toEqual([
+        "min-label",
+        "track",
+        "max-label",
+        "number",
+      ]);
+      expect(descendant(variant, "min-label")?.properties.characters).toBe("0");
+      expect(descendant(variant, "max-label")?.properties.characters).toBe("100");
+      expect(descendant(variant, "help")?.properties.characters).toBe("Zwischen 0 und 100.");
+      const ranged = variant.name.includes("range=true");
+      const track = descendant(variant, "track");
+      expect(
+        track?.children.map((child) => child.name),
+        variant.name,
+      ).toEqual(ranged ? ["lead", "focus-ring", "fill", "focus-ring-end"] : ["fill", "focus-ring"]);
+      expect(descendant(variant, "thumb")).toBeDefined();
+      expect(descendant(variant, "thumb-end") !== undefined, variant.name).toBe(ranged);
+      const withField = variant.name.includes("field=true");
+      expect(descendant(variant, "number")?.properties.visible, variant.name).toBe(withField);
+      expect(bound(descendant(variant, "thumb"), "width")).toBe("size/target/min");
+      expect(bound(track, "minHeight")).toBe("spacing/small");
+      expect(bound(track, "cornerRadius")).toBe("radius/full");
+    }
+    const rest = set?.children.find(
+      (child) => child.name === "range=false, field=false, state=rest",
+    );
+    expect(paintOf(descendant(rest, "track"))).toBe("color/background/sunken");
+    expect(paintOf(descendant(rest, "fill"))).toBe("color/action/primary/rest");
+    expect(paintOf(descendant(rest, "thumb"))).toBe("color/action/primary/rest");
+    const invalid = set?.children.find(
+      (child) => child.name === "range=false, field=false, state=invalid",
+    );
+    expect(paintOf(descendant(invalid, "thumb"))).toBe("color/status/danger/basic");
+    const before = double.snapshot();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(double.snapshot()).toBe(before);
+  });
+});
+
+// Spec 025 ② (plan ② D-12): the plugin draws the datelektilo — every variant the field's column
+// (label, the row of the ring around the control with its text and the trigger with the calendar
+// glyph, help, error) and, where expanded, the calendar below: the head (prev, month, next), the
+// row of seven weekdays and six rows of seven cells; the chosen day, the days in between, today
+// and the days outside the month carry their own looks. A second run writes nothing.
+describe("the plugin draws the datelektilo (Spec 025 ②)", () => {
+  const bound = (node: DoubleNode | undefined, field: string) =>
+    role(node?.boundVariables[field]?.name);
+  const paintOf = (node: DoubleNode | undefined, field = "fills") =>
+    role(
+      (
+        node?.properties[field] as { boundVariables?: { color?: { name: string } } }[] | undefined
+      )?.[0]?.boundVariables?.color?.name,
+    );
+
+  it("every variant: the field with its row and trigger; the calendar only where expanded, with head, weekdays and six weeks; the looks of the cells bound; a second run writes nothing", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = pageNodes(double).find((node) => node.name === "datelektilo");
+    expect(set?.children).toHaveLength(24);
+    for (const variant of set?.children ?? []) {
+      const field = descendant(variant, "field");
+      expect(field?.properties.layoutMode, variant.name).toBe("VERTICAL");
+      expect(field?.children.map((child) => child.name)).toEqual([
+        "label",
+        "row",
+        "calendar",
+        "help",
+        "error",
+      ]);
+      const row = descendant(variant, "row");
+      expect(row?.properties.layoutMode, variant.name).toBe("HORIZONTAL");
+      expect(row?.children.map((child) => child.name)).toEqual(["focus-ring", "trigger"]);
+      expect(descendant(variant, "control")).toBeDefined();
+      const ranged = variant.name.includes("mode=range");
+      expect(descendant(variant, "text")?.properties.characters).toBe(
+        ranged ? "06.10.2026 – 10.10.2026" : "24.10.2026",
+      );
+      expect(descendant(variant, "help")?.properties.characters).toBe("Ein Datum ab heute.");
+      const expanded = variant.name.includes("expanded=true");
+      const calendar = descendant(variant, "calendar");
+      expect(calendar?.properties.visible, variant.name).toBe(expanded);
+      expect(calendar?.children.map((child) => child.name)).toEqual([
+        "head",
+        "weekdays",
+        "week-1",
+        "week-2",
+        "week-3",
+        "week-4",
+        "week-5",
+        "week-6",
+      ]);
+      expect(descendant(variant, "head")?.children.map((child) => child.name)).toEqual([
+        "prev",
+        "month",
+        "next",
+      ]);
+      expect(descendant(variant, "month")?.properties.characters).toBe("Oktober 2026");
+      expect(descendant(variant, "weekdays")?.children).toHaveLength(7);
+      expect(descendant(variant, "weekday-1")?.properties.characters).toBe("Mo");
+      for (const week of ["week-1", "week-6"]) {
+        expect(descendant(variant, week)?.children, variant.name).toHaveLength(7);
+      }
+      expect(bound(descendant(variant, "trigger"), "width")).toBe("size/control/medium");
+      expect(bound(descendant(variant, "cell-4"), "width")).toBe("size/target/min");
+      expect(bound(descendant(variant, "cell-4"), "cornerRadius")).toBe("radius/role/control");
+      // The 28th of September stands first, outside the month; the 1st is the fourth cell.
+      expect(descendant(variant, "cell-text-1")?.properties.characters).toBe("28");
+      expect(descendant(variant, "cell-text-4")?.properties.characters).toBe("1");
+      expect(paintOf(descendant(variant, "cell-text-1"))).toBe("color/text/muted");
+      // Today, the 22nd (cell 25), carries the strong border; the chosen day the primary fill
+      // (the 24th, cell 27) or the range (the 6th to the 10th, cells 9 to 13).
+      expect(paintOf(descendant(variant, "cell-25"), "strokes")).toBe("color/border/strong");
+      expect(bound(descendant(variant, "cell-25"), "strokeWeight")).toBe("border/width/default");
+      if (ranged) {
+        expect(paintOf(descendant(variant, "cell-9"))).toBe("color/action/primary/selected");
+        expect(paintOf(descendant(variant, "cell-13"))).toBe("color/action/primary/selected");
+        expect(paintOf(descendant(variant, "cell-11"))).toBe("color/action/secondary/selected");
+        expect(paintOf(descendant(variant, "cell-text-9"))).toBe("color/action/primary/text");
+      } else {
+        expect(paintOf(descendant(variant, "cell-27"))).toBe("color/action/primary/selected");
+        expect(paintOf(descendant(variant, "cell-text-27"))).toBe("color/action/primary/text");
+        // A plain day takes the cell's ground of the variant's state.
+        const ground = variant.name.includes("state=hover")
+          ? "color/action/tertiary/hover"
+          : variant.name.includes("state=disabled")
+            ? "color/action/tertiary/disabled"
+            : "color/action/tertiary/rest";
+        expect(paintOf(descendant(variant, "cell-11")), variant.name).toBe(ground);
+      }
+    }
+    const rest = set?.children.find(
+      (child) => child.name === "mode=single, expanded=true, state=rest",
+    );
+    expect(paintOf(descendant(rest, "calendar"))).toBe("color/background/raised");
+    expect(paintOf(descendant(rest, "control"))).toBe("color/background/default");
+    const hover = set?.children.find(
+      (child) => child.name === "mode=single, expanded=true, state=hover",
+    );
+    expect(paintOf(descendant(hover, "cell-11"))).toBe("color/action/tertiary/hover");
+    const before = double.snapshot();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(double.snapshot()).toBe(before);
+  });
+});

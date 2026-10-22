@@ -1827,3 +1827,103 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   }
 }
+
+// Spec 025 ① (G5, plan ① D-03): the rendered glitilo — a single value with its help and a range
+// with its end labels and the field beside — in every colour class: axe without a finding; the
+// focus ring of a thumb at least 3:1 against the gap colour and the ground.
+const glitiloj =
+  '<fm-glitilo id="an-g1" name="lautstaerke" value="40" required>Lautstärke<span slot="help">Zwischen 0 und 100.</span></fm-glitilo><fm-glitilo id="an-g2" name="preis" range field value-start="20" value-end="60">Preis<span slot="min-label">0</span><span slot="max-label">100</span></fm-glitilo><fm-glitilo id="an-g3" value="40" invalid>Pegel<span slot="error">Wähle einen Wert bis 100.</span></fm-glitilo><fm-glitilo id="an-g4" value="40" disabled>Aus</fm-glitilo>';
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on the glitilo single, range, invalid and disabled; the thumb's focus ring ≥ 3:1`, async ({
+        page,
+        browserName,
+      }) => {
+        await serve(page, out, glitiloj);
+        await page.evaluate(
+          ([a, s, k]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", k ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        expect(await axeViolations(page), "glitilo").toEqual([]);
+        await page.keyboard.press(TAB(browserName));
+        const thumb = page.locator("#an-g1").locator('[part="thumb"]:not([hidden])').first();
+        await expect(thumb).toBeFocused();
+        // The ring stands on the thumb, not on the control (the track): measured there.
+        const ring = await thumb.evaluate((node) => {
+          const style = getComputedStyle(node);
+          return {
+            ring: style.outlineColor,
+            gap: /rgba?\([^)]*\)/.exec(style.boxShadow)?.[0] ?? "",
+            page: getComputedStyle(document.body).backgroundColor,
+          };
+        });
+        expect(contrastOf(ring.ring, ring.gap), "ring against gap").toBeGreaterThanOrEqual(3);
+        expect(contrastOf(ring.ring, ring.page), "ring against page").toBeGreaterThanOrEqual(3);
+      });
+    }
+  }
+}
+
+// Spec 025 ② (G5, plan ② D-11): the rendered datelektilo — a single date with its help, a range,
+// an invalid and a disabled one — in every colour class: axe without a finding, closed and with
+// the calendar open; the focus ring of the chosen day at least 3:1 against the gap colour and the
+// calendar's ground; the chosen day's text at least 4.5:1 on its fill.
+const datelektiloj =
+  '<fm-datelektilo id="an-d1" name="lieferdatum" value="2026-10-24" required>Lieferdatum<span slot="help">Ein Datum ab heute.</span></fm-datelektilo><fm-datelektilo id="an-d2" name="zeitraum" mode="range" value-start="2026-10-06" value-end="2026-10-10">Zeitraum</fm-datelektilo><fm-datelektilo id="an-d3" value="2026-10-24" invalid>Frist<span slot="error">Wähle ein Datum ab heute.</span></fm-datelektilo><fm-datelektilo id="an-d4" value="2026-10-24" disabled>Aus</fm-datelektilo>';
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on the datelektilo closed and open; the chosen day's ring ≥ 3:1, its text ≥ 4.5:1`, async ({
+        page,
+        browserName,
+      }) => {
+        await page.clock.setFixedTime(new Date("2026-10-22T10:00:00"));
+        await serve(page, out, datelektiloj);
+        await page.evaluate(
+          ([a, s, k]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", k ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        expect(await axeViolations(page), "datelektilo closed").toEqual([]);
+        await page.locator("#an-d1").locator('[part="trigger"]').click();
+        const chosen = page.locator("#an-d1").locator('[part="cell"][aria-selected="true"]');
+        await expect(chosen).toBeFocused();
+        expect(await axeViolations(page), "datelektilo open").toEqual([]);
+        // The ring of the focused cell, measured at the cell (the helper measures a host's control):
+        // its outline against the gap colour of its shadow and against the calendar's ground.
+        const ring = await chosen.evaluate((cell) => {
+          const style = getComputedStyle(cell);
+          const calendar = cell.closest('[part="calendar"]') as HTMLElement;
+          return {
+            ring: style.outlineColor,
+            gap: /rgba?\([^)]*\)/.exec(style.boxShadow)?.[0] ?? "",
+            ground: getComputedStyle(calendar).backgroundColor,
+          };
+        });
+        expect(contrastOf(ring.ring, ring.gap), "ring against gap").toBeGreaterThanOrEqual(3);
+        expect(
+          contrastOf(ring.ring, ring.ground),
+          "ring against the calendar",
+        ).toBeGreaterThanOrEqual(3);
+        const text = await chosen.evaluate((cell) => {
+          const style = getComputedStyle(cell);
+          return [style.color, style.backgroundColor];
+        });
+        expect(contrastOf(text[0] ?? "", text[1] ?? ""), "chosen day").toBeGreaterThanOrEqual(4.5);
+        await page.keyboard.press("Escape");
+      });
+    }
+  }
+}

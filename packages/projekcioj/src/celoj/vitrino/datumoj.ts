@@ -369,10 +369,88 @@ export const VITRINO_KAMPO_KINDS: Readonly<Record<string, Readonly<Record<string
   email: { value: "name@example.org" },
   url: { value: "https://example.org" },
   date: { value: "2026-10-20", min: "2026-10-01", max: "2026-12-31" },
+  // Spec 025 ①: a time with its bounds, the platform's own input.
+  time: { value: "09:30", min: "08:00", max: "18:00" },
   number: { value: "42" },
   password: { value: "beispiel1234" },
 };
 export const VITRINO_UPLOAD_HELP = "PDF oder PNG, höchstens 5 MB";
+
+/**
+ * The slider of the Vitrino (Spec 025 ①, plan ① D-07): a single value with the help that names
+ * the limits (range-stated), a range with its end labels, a value with the field beside the track;
+ * the Figma set shows the same words and the same shares of the track (one source for both
+ * pictures). The limits are the Skemo's defaults, 0 and 100.
+ */
+export const VITRINO_SLIDER = {
+  value: "40",
+  start: "20",
+  end: "60",
+  minLabel: "0",
+  maxLabel: "100",
+  help: "Zwischen 0 und 100.",
+} as const;
+
+/**
+ * The kampo with its stepper in the Vitrino (Spec 025 ①, plan ① D-07): a quantity between 1 and
+ * 10, the limits in the help (range-stated); and a search with a value, so the clear button shows.
+ */
+export const VITRINO_STEPPER = {
+  min: "1",
+  max: "10",
+  value: "3",
+  help: "Zwischen 1 und 10.",
+} as const;
+export const VITRINO_SEARCH_VALUE = "Standard";
+
+/**
+ * The date picker of the Vitrino (Spec 025 ②, plan ② D-13): a single date and a range in October
+ * 2026, today the 22nd; the Figma set shows the same month, the same days and the same words (one
+ * source for both pictures). The shown texts are the German format the element writes from lang.
+ */
+export const VITRINO_DATE = {
+  value: "2026-10-24",
+  start: "2026-10-06",
+  end: "2026-10-10",
+  today: "2026-10-22",
+  help: "Ein Datum ab heute.",
+  error: "Wähle ein Datum ab heute.",
+  month: "Oktober 2026",
+  shownValue: "24.10.2026",
+  shownRange: "06.10.2026 – 10.10.2026",
+} as const;
+
+/** The calendar of the Vitrino's month as the Figma plan draws it (Spec 025 ②, plan ② D-12). */
+export interface VitrinoCalendar {
+  /** The short weekday names from Monday, as the German document writes them. */
+  weekdays: string[];
+  /** Six weeks of seven days: the number of the day and whether it lies outside the month. */
+  days: { text: string; outside: boolean }[];
+  /** The day of the month that is today, chosen (single), and the two ends of the range. */
+  today: number;
+  selected: number;
+  range: [number, number];
+}
+
+/** The six weeks around the Vitrino's month, Monday first (the German week), from VITRINO_DATE. */
+export function vitrinoCalendar(): VitrinoCalendar {
+  const day = (iso: string) => Number(iso.slice(8, 10));
+  const [year, month] = VITRINO_DATE.value.split("-").map(Number) as [number, number, number];
+  const first = new Date(year, month - 1, 1);
+  // Monday first: the offset of the first day from Monday (Sunday is 0 in the platform's week).
+  const offset = (first.getDay() + 6) % 7;
+  const days = Array.from({ length: 42 }, (_, index) => {
+    const date = new Date(year, month - 1, 1 - offset + index);
+    return { text: String(date.getDate()), outside: date.getMonth() !== month - 1 };
+  });
+  return {
+    weekdays: ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
+    days,
+    today: day(VITRINO_DATE.today),
+    selected: day(VITRINO_DATE.value),
+    range: [day(VITRINO_DATE.start), day(VITRINO_DATE.end)],
+  };
+}
 export const VITRINO_UPLOAD_FILES: readonly { name: string; size: number }[] = [
   { name: "Lebenslauf.pdf", size: 1_200_000 },
   { name: "Zeugnis.png", size: 340_000 },
@@ -433,6 +511,69 @@ function cardMarkup(tag: string): string {
   const one = (attributes: string, picture: boolean) =>
     `<${tag} level="3"${attributes}>${picture ? VITRINO_CARD_PICTURE : ""}<span slot="heading">${VITRINO_CARD.heading}</span>${VITRINO_CARD.text}<fm-insigno slot="meta">${VITRINO_CARD.badge}</fm-insigno>${actions}</${tag}>`;
   return `<table><caption>${tag}, beide Ausrichtungen, mit und ohne Bild</caption><thead><tr><th scope="col">orientation</th><th scope="col">mit Bild</th><th scope="col">ohne Bild</th></tr></thead><tbody><tr><th scope="row">vertical</th><td>${one("", true)}</td><td>${one("", false)}</td></tr><tr><th scope="row">horizontal</th><td colspan="2">${one(' orientation="horizontal"', true)}</td></tr></tbody></table>`;
+}
+
+/**
+ * The date pickers of the Vitrino (Spec 025 ②, plan ② D-13): two rows — a single date with the help,
+ * a range — each at rest, required, disabled and invalid (the error in place of the help under
+ * invalid).
+ */
+function datepickerMarkup(tag: string): string {
+  const help = `<span slot="help">${VITRINO_DATE.help}</span>`;
+  const rows: [string, string][] = [
+    ["einzeln", ` value="${VITRINO_DATE.value}"`],
+    [
+      "Bereich",
+      ` mode="range" value-start="${VITRINO_DATE.start}" value-end="${VITRINO_DATE.end}"`,
+    ],
+  ];
+  const columns = ["required", "disabled", "invalid"];
+  const body = rows
+    .map(([head, attributes]) => {
+      const cells = [undefined, ...columns]
+        .map(
+          (column) =>
+            `<td><${tag}${attributes}${column === undefined ? "" : ` ${column}`}>${head}${column === "invalid" ? `<span slot="error">${VITRINO_DATE.error}</span>` : help}</${tag}></td>`,
+        )
+        .join("");
+      return `<tr><th scope="row">${head}</th>${cells}</tr>`;
+    })
+    .join("");
+  const heads = ["rest", ...columns].map((column) => `<th scope="col">${column}</th>`).join("");
+  return `<table><caption>${tag}, einzeln und Bereich</caption><thead><tr><th scope="col">Kombination</th>${heads}</tr></thead><tbody>${body}</tbody></table>`;
+}
+
+/**
+ * The sliders of the Vitrino (Spec 025 ①, plan ① D-07): three rows — a single value with the help
+ * that names the limits, a range with its end labels, a value with the field beside the track —
+ * each at rest, required, disabled and invalid (the error only under invalid).
+ */
+function sliderMarkup(tag: string): string {
+  const help = `<span slot="help">${VITRINO_SLIDER.help}</span>`;
+  const ends = `<span slot="min-label">${VITRINO_SLIDER.minLabel}</span><span slot="max-label">${VITRINO_SLIDER.maxLabel}</span>`;
+  const rows: [string, string, string][] = [
+    ["einzeln", ` value="${VITRINO_SLIDER.value}"`, help],
+    [
+      "Bereich",
+      ` range value-start="${VITRINO_SLIDER.start}" value-end="${VITRINO_SLIDER.end}"`,
+      ends,
+    ],
+    ["mit Eingabefeld", ` field value="${VITRINO_SLIDER.value}"`, help],
+  ];
+  const columns = ["required", "disabled", "invalid"];
+  const body = rows
+    .map(([head, attributes, slots]) => {
+      const cells = [undefined, ...columns]
+        .map(
+          (column) =>
+            `<td><${tag}${attributes}${column === undefined ? "" : ` ${column}`}>${head}${slots}${column === "invalid" ? `<span slot="error">${VITRINO_SLOT_TEXTS.error ?? ""}</span>` : ""}</${tag}></td>`,
+        )
+        .join("");
+      return `<tr><th scope="row">${head}</th>${cells}</tr>`;
+    })
+    .join("");
+  const heads = ["rest", ...columns].map((column) => `<th scope="col">${column}</th>`).join("");
+  return `<table><caption>${tag}, einzeln, Bereich und mit Eingabefeld</caption><thead><tr><th scope="col">Kombination</th>${heads}</tr></thead><tbody>${body}</tbody></table>`;
 }
 
 /**
@@ -677,6 +818,19 @@ function additionRows(entry: LoadedEro, tag: string, menuItems = ""): string {
         `<fm-butono emphasis="medium" data-fm-opens="${id}">${VITRINO_OPEN}</fm-butono><${tag} id="${id}">Befund verwerfen?<fm-teksto slot="message">Fundstelle: STD-4, Absatz 2.</fm-teksto><fm-teksto slot="message">Der Befund gilt danach als verworfen.</fm-teksto>${VITRINO_DIALOG_ACTIONS}</${tag}>`,
       );
     }
+    // Spec 025 ① (plan ① D-07): a number with its stepper and its limits in the help; a search
+    // with a value, so the clear button shows.
+    case "kampo":
+      return (
+        row(
+          "number stepper",
+          `<${tag} kind="number" stepper min="${VITRINO_STEPPER.min}" max="${VITRINO_STEPPER.max}" value="${VITRINO_STEPPER.value}">Menge<span slot="help">${VITRINO_STEPPER.help}</span></${tag}>`,
+        ) +
+        row(
+          "search mit Wert",
+          `<${tag} kind="search" value="${VITRINO_SEARCH_VALUE}">Suche</${tag}>`,
+        )
+      );
     // Spec 020 ③: a command longer than the cell, so the region scrolls; with copyable.
     case "kodbloko":
       return row(
@@ -740,6 +894,12 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
   const tag = `fm-${entry.ero.name}`;
   // A card (Spec 015 ③): both orientations, with and without its picture.
   if (entry.skemo.a11y.role === "article") return cardMarkup(tag);
+  // A slider (Spec 025 ①): single, range and with the field beside, in the states of a field.
+  if (entry.skemo.a11y.role === "slider") return sliderMarkup(tag);
+  // A date picker (Spec 025 ②): a single date and a range, in the states of a field.
+  if (entry.skemo.a11y.role === "textbox" && entry.skemo.parts.calendar !== undefined) {
+    return datepickerMarkup(tag);
+  }
   // An avatar (Spec 015 ③): every size with the picture, with initials and with a broken picture.
   if (entry.skemo.parts.initials !== undefined) return avatarMarkup(tag);
   // The Ikonaro grid (Spec 014 ②): the icon shows every name, not every combination.

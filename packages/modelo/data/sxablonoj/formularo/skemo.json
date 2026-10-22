@@ -21,7 +21,9 @@
       {
         "name": "problems",
         "description": "What went wrong with the form as a whole — an avizo at its top; the error of one field stands at the field.",
-        "accepts": ["avizo"]
+        "accepts": [
+          "avizo"
+        ]
       },
       {
         "name": "fields",
@@ -36,14 +38,18 @@
           "sxaltilo",
           "tekstareo",
           "kompletigilo",
-          "alsxutilo"
+          "alsxutilo",
+          "glitilo",
+          "datelektilo"
         ]
       },
       {
         "name": "actions",
         "description": "The actions of the form: exactly one submit button, one primary at most.",
         "required": true,
-        "accepts": ["butono"],
+        "accepts": [
+          "butono"
+        ],
         "primary": 1,
         "one": {
           "type": "submit"
@@ -57,8 +63,14 @@
       {
         "goal": "form",
         "keywords": {
-          "en": ["form", "input-form"],
-          "de": ["formular", "eingabemaske"]
+          "en": [
+            "form",
+            "input-form"
+          ],
+          "de": [
+            "formular",
+            "eingabemaske"
+          ]
         },
         "props": {},
         "kialo": "A form is one pattern, because its fields, its problems and its one submit button belong together and are sent once; the fields carry their own errors."
@@ -66,30 +78,62 @@
       {
         "goal": "sign-in",
         "keywords": {
-          "en": ["sign-in", "login", "token"],
-          "de": ["anmeldung", "login", "token", "anmeldeformular"]
+          "en": [
+            "sign-in",
+            "login",
+            "token"
+          ],
+          "de": [
+            "anmeldung",
+            "login",
+            "token",
+            "anmeldeformular"
+          ]
         },
         "props": {},
         "kialo": "A sign-in is a form, because a secret is entered in a field that hides it and sent with one submit button; Enter in the field sends it too.",
         "children": [
-          { "region": "fields", "ero": "kampo", "props": { "kind": "password" } },
-          { "region": "actions", "ero": "butono", "props": { "type": "submit", "emphasis": "high" } }
+          {
+            "region": "fields",
+            "ero": "kampo",
+            "props": {
+              "kind": "password"
+            }
+          },
+          {
+            "region": "actions",
+            "ero": "butono",
+            "props": {
+              "type": "submit",
+              "emphasis": "high"
+            }
+          }
         ]
       }
     ],
     "parts": {
       "frame": {
-        "gap": { "fixed": "spacing.large" }
+        "gap": {
+          "fixed": "spacing.large"
+        }
       },
       "problems": {
-        "gap": { "fixed": "spacing.small" }
+        "gap": {
+          "fixed": "spacing.small"
+        }
       },
       "fields": {
-        "gap": { "fixed": "spacing.medium" },
-        "width": { "fixed": "size.container.medium" }
+        "gap": {
+          "fixed": "spacing.medium"
+        },
+        "width": {
+          "fixed": "size.container.medium"
+        }
       },
       "actions": {
-        "gap": { "fixed": "spacing.small" }
+        "gap": {
+          "fixed": "spacing.small"
+        }
       }
     }
   }

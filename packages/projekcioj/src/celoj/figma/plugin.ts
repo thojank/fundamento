@@ -95,6 +95,17 @@ type PartNode =
   // An upload (Spec 015 ②, plan ② D-06): the dropzone with the button that chooses (`choose`,
   // its word `choose-label`) and the hint; in the example the list of the chosen files, one row
   // each (`file-row-1` …) with name, size and the remove butono.
+  // A slider (Spec 025 ①, plan ① D-04): the row of the end labels, the track with its fill and
+  // thumbs (the second of a range), the stand-in of the number field.
+  | "row"
+  | "lead"
+  | "min-label"
+  | "max-label"
+  | "track"
+  | "fill"
+  | "thumb"
+  | "thumb-end"
+  | "number"
   | "dropzone"
   | "drop-hint"
   | "choose"
@@ -120,6 +131,22 @@ type PartNode =
   | "listbox"
   | "suggestion-*"
   | "suggestions-*"
+  // A date picker (Spec 025 ②): the trigger beside the control, the calendar with its head (prev,
+  // month, next), the weekdays and the cells with their texts; the looks of a cell are logical
+  // names of the same frame and text (selected, in range, today, outside).
+  | "trigger"
+  | "calendar"
+  | "month"
+  | "prev"
+  | "next"
+  | "weekday-*"
+  | "cell-*"
+  | "cell-text-*"
+  | "selected-cell-*"
+  | "selected-day-*"
+  | "in-range-cell-*"
+  | "today-cell-*"
+  | "outside-day-*"
   | "no-results"
   // A notice (Spec 011 ③): the details text and the dismiss frame; a badge and a state (Spec 011
   // ③) reuse control, text, indicator, mark, texts and actions.
@@ -415,6 +442,41 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
  */
 const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readonly Binding[]>>>> = {
   toggle: { "box.gap": [{ node: "field", fields: ["itemSpacing"] }] },
+  // A slider (Spec 025 ①, plan ① D-04): the track's fill, height (a minimum, the fill as high)
+  // and radius; the fill's colour and radius; every thumb's colour, size and radius (the second
+  // thumb of a range too); the number field's width; the end labels' colour and role; the gap of
+  // the box between the field's parts and along the row.
+  slider: {
+    "track.fill": [{ node: "track", fields: ["fills"], paint: true }],
+    "track.height": [
+      { node: "track", fields: ["minHeight"] },
+      { node: "fill", fields: ["minHeight"] },
+    ],
+    "track.radius": [{ node: "track", fields: ["cornerRadius"] }],
+    "fill.color": [{ node: "fill", fields: ["fills"], paint: true }],
+    "fill.radius": [{ node: "fill", fields: ["cornerRadius"] }],
+    "thumb.color": [
+      { node: "thumb", fields: ["fills"], paint: true },
+      { node: "thumb-end", fields: ["fills"], paint: true },
+    ],
+    "thumb.size": [
+      { node: "thumb", fields: ["width", "height"] },
+      { node: "thumb-end", fields: ["width", "height"] },
+    ],
+    "thumb.radius": [
+      { node: "thumb", fields: ["cornerRadius"] },
+      { node: "thumb-end", fields: ["cornerRadius"] },
+    ],
+    "number.width": [{ node: "number", fields: ["minWidth"] }],
+    "min-label.color": [{ node: "min-label", fields: ["fills"], paint: true }],
+    "min-label.typography": typographyOf("min-label"),
+    "max-label.color": [{ node: "max-label", fields: ["fills"], paint: true }],
+    "max-label.typography": typographyOf("max-label"),
+    "box.gap": [
+      { node: "field", fields: ["itemSpacing"] },
+      { node: "row", fields: ["itemSpacing"] },
+    ],
+  },
   // A field with suggestions (Spec 014 ⑤, plan ⑤ D-04): the listbox under the field with its
   // fill, radius and width; every suggestion a row (height, padding, radius) with its text in
   // the colour of its entry and the label role; the no-results text in its colour and role. A
@@ -433,6 +495,34 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
     // Nachlese 4 N-8: the active suggestion's row is filled by active (the frame of the row).
     "suggestion.fill": [{ node: "suggestion-*", fields: ["fills"], paint: true }],
     "suggestion.typography": typographyOf("suggestions-*"),
+    // A date picker (Spec 025 ②, plan ② D-12): the trigger's size; the calendar's fill, radius,
+    // width, height and padding; the month and the weekdays in their colour and role; prev and
+    // next in their size; every cell its colour (the ground), size and radius, its day text in
+    // its colour and role; the four looks on the cells they apply to (logical names of the same
+    // nodes): the chosen day, the days between the ends, today's border, the days outside.
+    "trigger.size": [{ node: "trigger", fields: ["width", "height"] }],
+    "calendar.fill": [{ node: "calendar", fields: ["fills"], paint: true }],
+    "calendar.radius": [{ node: "calendar", fields: ["cornerRadius"] }],
+    "calendar.width": [{ node: "calendar", fields: ["width"] }],
+    "calendar.height": [{ node: "calendar", fields: ["maxHeight"] }],
+    "calendar.inline-padding": [{ node: "calendar", fields: ["paddingLeft", "paddingRight"] }],
+    "month.color": [{ node: "month", fields: ["fills"], paint: true }],
+    "month.typography": typographyOf("month"),
+    "prev.size": [{ node: "prev", fields: ["width", "height"] }],
+    "next.size": [{ node: "next", fields: ["width", "height"] }],
+    "weekday.color": [{ node: "weekday-*", fields: ["fills"], paint: true }],
+    "weekday.typography": typographyOf("weekday-*"),
+    "cell.color": [{ node: "cell-*", fields: ["fills"], paint: true }],
+    "cell.size": [{ node: "cell-*", fields: ["width", "height"] }],
+    "cell.radius": [{ node: "cell-*", fields: ["cornerRadius"] }],
+    "day.color": [{ node: "cell-text-*", fields: ["fills"], paint: true }],
+    "day.typography": typographyOf("cell-text-*"),
+    "selected-cell.color": [{ node: "selected-cell-*", fields: ["fills"], paint: true }],
+    "selected-day.color": [{ node: "selected-day-*", fields: ["fills"], paint: true }],
+    "in-range-cell.color": [{ node: "in-range-cell-*", fields: ["fills"], paint: true }],
+    "today-cell.color": [{ node: "today-cell-*", fields: ["strokes"], paint: true }],
+    "today-cell.width": [{ node: "today-cell-*", fields: ["strokeWeight"] }],
+    "outside-day.color": [{ node: "outside-day-*", fields: ["fills"], paint: true }],
     "no-results.color": [{ node: "no-results", fields: ["fills"], paint: true }],
     "no-results.typography": typographyOf("no-results"),
   },
@@ -1009,6 +1099,25 @@ const TRACK_LAYOUT = {
  * lifts it). Hugging, an empty auto-layout frame keeps the 100 × 100 of createFrame (③ F-4): the
  * fill stood as a circle and the track hugged it.
  */
+/**
+ * The track of a slider (Spec 025 ①, plan ① D-04): a row of fixed size (written from the measured
+ * texts and the resolved height) that centres its thumbs across and lets them overflow it.
+ */
+const SLIDER_TRACK_LAYOUT = {
+  layoutMode: "HORIZONTAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "CENTER",
+  layoutSizingHorizontal: "FIXED",
+  layoutSizingVertical: "FIXED",
+  strokesIncludedInLayout: true,
+  clipsContent: false,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
 const FILL_LAYOUT = {
   layoutMode: "HORIZONTAL",
   primaryAxisAlignItems: "MIN",
@@ -1365,6 +1474,7 @@ const PLACEHOLDER_LAYOUT = ${JSON.stringify(PLACEHOLDER_LAYOUT)};
 const METER_LAYOUT = ${JSON.stringify(METER_LAYOUT)};
 const TRACK_LAYOUT = ${JSON.stringify(TRACK_LAYOUT)};
 const FILL_LAYOUT = ${JSON.stringify(FILL_LAYOUT)};
+const SLIDER_TRACK_LAYOUT = ${JSON.stringify(SLIDER_TRACK_LAYOUT)};
 const ROW_LAYOUT = ${JSON.stringify(ROW_LAYOUT)};
 const CELL_LAYOUT = ${JSON.stringify(CELL_LAYOUT)};
 const ENTRY_ROW_LAYOUT = ${JSON.stringify(ENTRY_ROW_LAYOUT)};
@@ -4294,6 +4404,127 @@ async function applyComponents(variables, warnings) {
     bindMeasures(measures, report, component, variant);
   }
   /**
+   * A slider (Spec 025 ①, plan ① D-04): the variant is a column — the label, the row of the start
+   * label, the track and the end label with the number field, then help and error. The track is a
+   * row that fills the line and holds the fill (its share of the track, written from the plan's
+   * share; from the start thumb to the end thumb in a range) and the ring → gap → thumb of every
+   * thumb (two with range, placed on the fill's ends); the number field is a stand-in in the kampo's
+   * look (composed.number) with the value's words, shown only where the variant has a field.
+   */
+  async function drawSlider(node, component, variant, report, labels) {
+    const texts = component.texts || {};
+    const composed = component.composed || {};
+    const spec = component.slider || { share: 0.5, start: 0.25, end: 0.75 };
+    const ranged = variant.props.range === "true";
+    const field = part(node, "field", () => figma.createFrame());
+    const label = part(field, "label", () => figma.createText());
+    const row = part(field, "row", () => figma.createFrame());
+    const minLabel = part(row, "min-label", () => figma.createText());
+    const track = part(row, "track", () => figma.createFrame());
+    // The track is a row in the flow (as the meter's): a range leads with an empty frame up to the
+    // first thumb; the fill runs from the start (or the first thumb) to the thumb at its end; every
+    // thumb stands in its ring and gap right after the fill it ends — no x or y is written.
+    const lead = ranged ? part(track, "lead", () => figma.createFrame()) : undefined;
+    if (!ranged) for (const stale of track.children.slice()) if (stale.name === "lead" || stale.name === "focus-ring-end") stale.remove();
+    const fill = part(track, "fill", () => figma.createFrame());
+    const ring = part(track, "focus-ring", () => figma.createFrame());
+    const gap = part(ring, "focus-gap", () => figma.createFrame());
+    const thumb = part(gap, "thumb", () => figma.createFrame());
+    const ringEnd = ranged ? part(track, "focus-ring-end", () => figma.createFrame()) : undefined;
+    const gapEnd = ringEnd ? part(ringEnd, "focus-gap-end", () => figma.createFrame()) : undefined;
+    const thumbEnd = gapEnd ? part(gapEnd, "thumb-end", () => figma.createFrame()) : undefined;
+    const maxLabel = part(row, "max-label", () => figma.createText());
+    const number = part(row, "number", () => figma.createFrame());
+    const numberText = part(number, "number-text", () => figma.createText());
+    const help = part(field, "help", () => figma.createText());
+    const error = part(field, "error", () => figma.createText());
+    [label, row, help, error].forEach((child, index) => {
+      if (field.children.indexOf(child) !== index) field.insertChild(index, child);
+    });
+    [minLabel, track, maxLabel, number].forEach((child, index) => {
+      if (row.children.indexOf(child) !== index) row.insertChild(index, child);
+    });
+    const trackOrder = ranged && lead && ringEnd ? [lead, ring, fill, ringEnd] : [fill, ring];
+    trackOrder.forEach((child, index) => {
+      if (track.children.indexOf(child) !== index) track.insertChild(index, child);
+    });
+    const all = [label, minLabel, maxLabel, numberText, help, error];
+    for (const each of all) await loadCurrentFont(each);
+    writeCase(component, variant, label);
+    if (variant.font !== undefined) {
+      for (const each of all) write(each, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+    }
+    for (const [name, each] of [["min-label", minLabel], ["max-label", maxLabel], ["help", help], ["error", error]]) {
+      const text = texts[name];
+      if (typeof text === "string") write(each, "characters", text);
+    }
+    write(numberText, "characters", String(Math.round(spec.share * 100)));
+    labels.push(label);
+    const rings = [ring, gap].concat(ringEnd && gapEnd ? [ringEnd, gapEnd] : []);
+    const thumbs = [thumb].concat(thumbEnd ? [thumbEnd] : []);
+    const frames = [node, field, row, track, fill, number].concat(lead ? [lead] : []).concat(rings).concat(thumbs);
+    for (const frame of frames) own(frame, NEUTRAL);
+    for (const each of all) own(each, NEUTRAL_TEXT);
+    own(node, HUG_LAYOUT);
+    own(field, FIELD_LAYOUT);
+    own(row, TOGGLE_LAYOUT);
+    own(track, SLIDER_TRACK_LAYOUT);
+    own(fill, FILL_LAYOUT);
+    if (lead) own(lead, FILL_LAYOUT);
+    for (const frame of rings) own(frame, HUG_LAYOUT);
+    for (const frame of thumbs) {
+      own(frame, INDICATOR_LAYOUT);
+      own(frame, { layoutSizingHorizontal: "FIXED", layoutSizingVertical: "FIXED" });
+    }
+    own(number, CONTROL_LAYOUT);
+    own(number, { visible: variant.props.field === "true" });
+    for (const child of frames.concat(all)) own(child, IN_FLOW);
+    for (const each of all) own(each, TEXT_SIZING);
+    const nodes = {
+      field, label, row, "min-label": minLabel, track, fill, "focus-ring": ring, "focus-gap": gap,
+      thumb, "max-label": maxLabel, number, help, error,
+    };
+    if (thumbEnd) nodes["thumb-end"] = thumbEnd;
+    const measures = bind(nodes, variant, variables, component.structure);
+    // The ring of the second thumb takes the same bindings as the first (focus-ring, focus-gap).
+    if (ringEnd && gapEnd && thumbEnd) {
+      const look = { "focus-ring": ringEnd, "focus-gap": gapEnd, control: thumbEnd };
+      for (const measure of bind(look, { bindings: ringOnly(variant.bindings), paints: variant.paints, focusVisible: variant.focusVisible }, variables, "control")) measures.push(measure);
+    }
+    // The number field looks like the kampo it composes (kind number, the field's size).
+    if (composed.number !== undefined) {
+      const look = { control: number, text: numberText };
+      for (const measure of bind(look, composed.number, variables, "control")) measures.push(measure);
+    }
+    for (const each of frames.concat(all)) flush(each);
+    bindMeasures(measures, report, component, variant);
+    // Measured, then written (F14, F-3): the track as wide as the wider text of the field (as the
+    // meter's column is), as high as the plan resolves track.height; the fill the plan's share of
+    // it, less the half ring each thumb stands with on its end, so the thumb's middle marks the
+    // value; the lead of a range the room before its first thumb. The size of a ring comes from
+    // the plan's variables (the thumb plus the two bands), not from a frame the tool measures later.
+    const trackHeight = resolvedNumber(variables.get(variant.bindings["track.height"]), track);
+    const height = trackHeight === undefined ? SMALLEST_SIZE : trackHeight;
+    const width = Math.max(label.width, help.width, SMALLEST_SIZE);
+    fit(track, width, height, SLIDER_TRACK_LAYOUT);
+    const thumbSize = resolvedNumber(variables.get(variant.bindings["thumb.size"]), thumb);
+    const ringBand = resolvedNumber(variables.get(variant.bindings["focus-ring.ring"] + "/width"), ring);
+    const gapBand = resolvedNumber(variables.get(variant.bindings["focus-ring.offset"]), gap);
+    const ringSize = thumbSize === undefined ? 0 : thumbSize + 2 * ((ringBand || 0) + (gapBand || 0));
+    const from = ranged ? spec.start : 0;
+    const to = ranged ? spec.end : spec.share;
+    if (lead) fit(lead, Math.max(from * width - ringSize / 2, SMALLEST_SIZE), height, FILL_LAYOUT);
+    const span = (to - from) * width - (ranged ? ringSize : ringSize / 2);
+    fit(fill, Math.max(span, SMALLEST_SIZE), height, FILL_LAYOUT);
+  }
+
+  /** The bindings of a focus ring alone, for a second ring drawn like the first. */
+  function ringOnly(bindings) {
+    const out = {};
+    for (const [key, name] of Object.entries(bindings)) if (key.startsWith("focus-ring.")) out[key] = name;
+    return out;
+  }
+  /**
    * A card (Spec 015 ③, plan ③ D-05): the variant holds the surface — fill, radius, the border
    * in its size, the shadow as an effect, clipping its content — with the media and the body: a
    * column where the card is vertical (the media across the top, edge to edge, as high as the
@@ -4954,6 +5185,12 @@ async function applyComponents(variables, warnings) {
         if (existing === undefined) made.push(node);
         continue;
       }
+      // A slider (Spec 025 ①): the track with its fill and thumbs, in a function of its own.
+      if (component.structure === "slider") {
+        await drawSlider(node, component, variant, report, labels);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
       // A card (Spec 015 ③): the surface with the media and the body, in a function of its own.
       if (component.structure === "card") {
         await drawCard(node, component, variant, report, labels, toggled, undefined);
@@ -4980,7 +5217,11 @@ async function applyComponents(variables, warnings) {
       const toggleTexts = isToggle && Object.keys(component.texts || {}).length > 0;
       const column = toggleTexts ? part(field, "texts", () => figma.createFrame()) : undefined;
       const labelParent = column || field;
-      const ring = part(field || node, "focus-ring", () => figma.createFrame());
+      // A date picker (Spec 025 ②, plan ② D-12): the field holds a row of the ring around the
+      // control and the trigger, then the calendar — the plan's month — before help and error.
+      const dated = isField && component.calendar !== undefined;
+      const row = dated ? part(field, "row", () => figma.createFrame()) : undefined;
+      const ring = part(row || field || node, "focus-ring", () => figma.createFrame());
       const gap = part(ring, "focus-gap", () => figma.createFrame());
       const control =
         ours(gap, "part", "control") ??
@@ -5004,6 +5245,51 @@ async function applyComponents(variables, warnings) {
         toggled.push({ part: "icon-end", node: iconEnd });
       }
       if (isField && field.children.indexOf(label) !== 0) field.insertChild(0, label);
+      if (row !== undefined && field.children.indexOf(row) !== 1) field.insertChild(1, row);
+      const trigger = row !== undefined ? part(row, "trigger", () => figma.createFrame()) : undefined;
+      if (row !== undefined && trigger !== undefined) {
+        if (row.children.indexOf(ring) !== 0) row.insertChild(0, ring);
+        if (row.children.indexOf(trigger) !== 1) row.insertChild(1, trigger);
+      }
+      const calendar = dated ? part(field, "calendar", () => figma.createFrame()) : undefined;
+      if (calendar !== undefined && field.children.indexOf(calendar) !== 2) field.insertChild(2, calendar);
+      const head = calendar !== undefined ? part(calendar, "head", () => figma.createFrame()) : undefined;
+      const prev = head !== undefined ? part(head, "prev", () => figma.createFrame()) : undefined;
+      const monthText = head !== undefined ? part(head, "month", () => figma.createText()) : undefined;
+      const next = head !== undefined ? part(head, "next", () => figma.createFrame()) : undefined;
+      if (head !== undefined) {
+        [prev, monthText, next].forEach((child, index) => {
+          if (head.children.indexOf(child) !== index) head.insertChild(index, child);
+        });
+      }
+      const weekdays = calendar !== undefined ? part(calendar, "weekdays", () => figma.createFrame()) : undefined;
+      const weekdayTexts = weekdays !== undefined
+        ? Array.from({ length: 7 }, (_, index) => part(weekdays, "weekday-" + (index + 1), () => figma.createText()))
+        : [];
+      const weeks = calendar !== undefined
+        ? Array.from({ length: 6 }, (_, index) => part(calendar, "week-" + (index + 1), () => figma.createFrame()))
+        : [];
+      const cells = weeks.flatMap((week, weekIndex) =>
+        Array.from({ length: 7 }, (_, dayIndex) => {
+          const n = weekIndex * 7 + dayIndex + 1;
+          const frame = part(week, "cell-" + n, () => figma.createFrame());
+          const text = part(frame, "cell-text-" + n, () => figma.createText());
+          return { n, frame, text, week };
+        }),
+      );
+      if (calendar !== undefined && weekdays !== undefined) {
+        [head, weekdays].concat(weeks).forEach((child, index) => {
+          if (calendar.children.indexOf(child) !== index) calendar.insertChild(index, child);
+        });
+        weekdayTexts.forEach((child, index) => {
+          if (weekdays.children.indexOf(child) !== index) weekdays.insertChild(index, child);
+        });
+        for (const cell of cells) {
+          const index = (cell.n - 1) % 7;
+          if (cell.week.children.indexOf(cell.frame) !== index) cell.week.insertChild(index, cell.frame);
+        }
+      }
+      const dateTexts = (monthText !== undefined ? [monthText] : []).concat(weekdayTexts).concat(cells.map((cell) => cell.text));
       if (isToggle && column === undefined && field.children.indexOf(label) !== 1) field.insertChild(1, label);
       if (column !== undefined && field.children.indexOf(column) !== 1) field.insertChild(1, column);
       if (column !== undefined && column.children.indexOf(label) !== 0) column.insertChild(0, label);
@@ -5041,7 +5327,7 @@ async function applyComponents(variables, warnings) {
       if (listbox !== undefined && help !== undefined && field.children.indexOf(listbox) !== field.children.indexOf(help) - 1) {
         field.insertChild(field.children.indexOf(help), listbox);
       }
-      const texts = [label, textNode, help, error].concat(noResults !== undefined ? [noResults] : []).filter((each) => each !== undefined);
+      const texts = [label, textNode, help, error].concat(noResults !== undefined ? [noResults] : []).concat(dateTexts).filter((each) => each !== undefined);
       // Erst die Schrift, die der Text jetzt trägt, dann jedes Schreiben (F-A): Figma lehnt
       // textCase auf einem Text ab, dessen aktuelle Schrift nicht geladen ist — ein neuer Text trägt
       // Inter Regular, nicht die Schrift des Plans.
@@ -5073,6 +5359,15 @@ async function applyComponents(variables, warnings) {
         const text = (component.texts || {})[name];
         if (typeof text === "string") write(each, "characters", text);
       }
+      // A date picker (Spec 025 ②): the chosen day (or the range) in the field, the month, the
+      // weekdays and the days of the plan's calendar.
+      if (dated && textNode !== undefined && calendar !== undefined) {
+        const words = component.texts || {};
+        write(textNode, "characters", variant.props.mode === "range" ? String(words.range || "") : String(words.value || ""));
+        if (monthText !== undefined) write(monthText, "characters", String(words.month || ""));
+        weekdayTexts.forEach((each, index) => write(each, "characters", component.calendar.weekdays[index] || ""));
+        for (const cell of cells) write(cell.text, "characters", (component.calendar.days[cell.n - 1] || { text: "" }).text);
+      }
       // Die Unterstreichung eines Links (Spec 008, D-11): je Variante an oder aus, geschrieben wie
       // textCase – Figma bindet Dicke und Farbe der Linie an keine Variable (Jugxo B-1).
       if (typeof variant.underline === "boolean") {
@@ -5087,6 +5382,15 @@ async function applyComponents(variables, warnings) {
       // its clipping and its line would otherwise cover what the plan draws.
       const frames = [node, ring, gap, control]
         .concat(field ? [field] : [])
+        .concat(row ? [row] : [])
+        .concat(trigger ? [trigger] : [])
+        .concat(calendar ? [calendar] : [])
+        .concat(head ? [head] : [])
+        .concat(prev ? [prev] : [])
+        .concat(next ? [next] : [])
+        .concat(weekdays ? [weekdays] : [])
+        .concat(weeks)
+        .concat(cells.map((cell) => cell.frame))
         .concat(column ? [column] : [])
         .concat(indicator ? [indicator] : [])
         .concat(listbox ? [listbox] : [])
@@ -5097,6 +5401,34 @@ async function applyComponents(variables, warnings) {
       // an auto-layout frame (F11). The variant, ring and gap wrap their content.
       for (const frame of [node, ring, gap]) own(frame, HUG_LAYOUT);
       if (field) own(field, isToggle ? TOGGLE_LAYOUT : FIELD_LAYOUT);
+      if (dated && row !== undefined && trigger !== undefined && calendar !== undefined && head !== undefined && weekdays !== undefined) {
+        // The row lines up the ring and the trigger; the trigger and the month buttons hold their
+        // glyphs in a fixed box the plan sizes; the calendar is a column as wide as its token,
+        // shown where the variant is expanded; head, weekdays and weeks are rows, every cell a
+        // fixed box with its day centred.
+        own(row, TOGGLE_LAYOUT);
+        for (const holder of [trigger, prev, next]) {
+          own(holder, CONTROL_LAYOUT);
+          own(holder, { layoutSizingHorizontal: "FIXED", layoutSizingVertical: "FIXED" });
+        }
+        Object.assign(glyphNodes, drawGlyphs(trigger, icons.trigger || "calendar", "trigger-", glyphMeasures));
+        Object.assign(glyphNodes, drawGlyphs(prev, icons.prev || "chevron-left", "prev-", glyphMeasures));
+        Object.assign(glyphNodes, drawGlyphs(next, icons.next || "chevron-right", "next-", glyphMeasures));
+        own(calendar, SURFACE_LAYOUT);
+        own(calendar, { visible: (variant.hidden || []).indexOf("calendar") === -1 });
+        own(head, TOGGLE_LAYOUT);
+        own(head, { primaryAxisAlignItems: "SPACE_BETWEEN", layoutSizingHorizontal: "FILL" });
+        own(weekdays, TOGGLE_LAYOUT);
+        own(weekdays, { primaryAxisAlignItems: "SPACE_BETWEEN", layoutSizingHorizontal: "FILL" });
+        for (const week of weeks) {
+          own(week, TOGGLE_LAYOUT);
+          own(week, { primaryAxisAlignItems: "SPACE_BETWEEN", layoutSizingHorizontal: "FILL" });
+        }
+        for (const cell of cells) {
+          own(cell.frame, CONTROL_LAYOUT);
+          own(cell.frame, { layoutSizingHorizontal: "FIXED", layoutSizingVertical: "FIXED", strokesIncludedInLayout: true });
+        }
+      }
       own(control, CONTROL_LAYOUT);
       if (isToggle) {
         // The knob stands where the variant says (D-04), along the writing direction; the border
@@ -5170,8 +5502,53 @@ async function applyComponents(variables, warnings) {
       if (error) nodes.error = error;
       if (listbox) nodes.listbox = listbox;
       if (noResults) nodes["no-results"] = noResults;
+      if (trigger) nodes.trigger = trigger;
+      if (calendar) nodes.calendar = calendar;
+      if (monthText) nodes.month = monthText;
+      if (prev) nodes.prev = prev;
+      if (next) nodes.next = next;
+      weekdayTexts.forEach((each, index) => {
+        nodes["weekday-" + (index + 1)] = each;
+      });
       Object.assign(nodes, glyphNodes);
       const measures = bind(nodes, variant, variables, component.structure);
+      // The cells of a date picker (Spec 025 ②) are bound one by one: every cell its ground, size,
+      // radius and the role of its day; the chosen day, the days between the ends, today and the
+      // days outside the month take their own looks (logical names of the same nodes).
+      if (dated && calendar !== undefined) {
+        const plan = component.calendar;
+        const ranged = variant.props.mode === "range";
+        for (const cell of cells) {
+          const day = plan.days[cell.n - 1] || { text: "", outside: true };
+          const number = Number(day.text);
+          const inside = !day.outside;
+          const selected = inside && (ranged ? number === plan.range[0] || number === plan.range[1] : number === plan.selected);
+          const between = inside && ranged && number > plan.range[0] && number < plan.range[1];
+          const today = inside && number === plan.today;
+          const keys = ["cell.size", "cell.radius", "day.typography"];
+          const cellNodes = {};
+          cellNodes["cell-" + cell.n] = cell.frame;
+          cellNodes["cell-text-" + cell.n] = cell.text;
+          if (selected) {
+            keys.push("selected-cell.color", "selected-day.color");
+            cellNodes["selected-cell-" + cell.n] = cell.frame;
+            cellNodes["selected-day-" + cell.n] = cell.text;
+          } else {
+            keys.push(between ? "in-range-cell.color" : "cell.color");
+            if (between) cellNodes["in-range-cell-" + cell.n] = cell.frame;
+            keys.push(day.outside ? "outside-day.color" : "day.color");
+            if (day.outside) cellNodes["outside-day-" + cell.n] = cell.text;
+          }
+          if (today) {
+            keys.push("today-cell.color", "today-cell.width");
+            cellNodes["today-cell-" + cell.n] = cell.frame;
+          }
+          const look = {};
+          for (const key of keys) if (variant.bindings[key] !== undefined) look[key] = variant.bindings[key];
+          for (const measure of bind(cellNodes, { bindings: look, paints: variant.paints, focusVisible: false }, variables, component.structure)) measures.push(measure);
+        }
+        bindShadow(nodes, variant, report);
+      }
       for (const measure of glyphMeasures) measures.push(measure);
       // The rows of the suggestions (Spec 014 ⑤) are bound like a tab list's entries; the
       // listbox's shadow as an overlay's.

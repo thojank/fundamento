@@ -2,6 +2,24 @@
   "$schema": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/IkonaroFile",
   "ikonaro": [
     {
+      "id": "iko_01M5GCQBAPAJAWMNPC5DR8VMEE",
+      "name": "add",
+      "meaning": {
+        "de": "Plus: erhöhen, hinzufügen",
+        "en": "Plus: increase, add"
+      },
+      "kialo": "The increase button of a kampo of kind number with stepper says with the plus what it does beside its word; the sign is the same in every writing direction, so it never mirrors."
+    },
+    {
+      "id": "iko_01M5GYYDXE2TQP5KAEP2S1EGWP",
+      "name": "calendar",
+      "meaning": {
+        "de": "Kalender: ein Datum wählen",
+        "en": "Calendar: pick a date"
+      },
+      "kialo": "The trigger of a datelektilo says with the calendar that a month opens beside the field, because the sign is read faster than the word; the Modelo's word names the button. The sign is the same in every writing direction, so it never mirrors."
+    },
+    {
       "id": "iko_01M55EFZMTVJR4FGV32KYEG54W",
       "name": "check",
       "meaning": {
@@ -128,6 +146,15 @@
         "en": "Sorted descending"
       },
       "kialo": "The counterpart of sort-ascending on the sort part of a tabelo column."
+    },
+    {
+      "id": "iko_01M5GCQBAPAJAWMNPC5DR8VMEF",
+      "name": "subtract",
+      "meaning": {
+        "de": "Minus: verringern, wegnehmen",
+        "en": "Minus: decrease, take away"
+      },
+      "kialo": "The decrease button of a kampo of kind number with stepper says with the minus what it does beside its word; the sign is the same in every writing direction, so it never mirrors."
     },
     {
       "id": "iko_01M55EFZMVS7WDTJ3D55SPVHR0",

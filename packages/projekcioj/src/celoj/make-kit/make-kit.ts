@@ -459,7 +459,11 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
   const fieldLines = eroj
     .filter(
       (entry) =>
-        entry.skemo.a11y.role === "textbox" && !isMultiline(entry.skemo) && entry.uzo !== undefined,
+        entry.skemo.a11y.role === "textbox" &&
+        !isMultiline(entry.skemo) &&
+        // Spec 025 ②: the date picker shares the role; its own sentence stands below.
+        entry.skemo.parts.calendar === undefined &&
+        entry.uzo !== undefined,
     )
     .map(
       (entry) =>
@@ -469,7 +473,12 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
   // Spec 011 ② (G7, plan ② D-14): every text of several lines comes from the text area (a textbox
   // with rows), one line from the field; generated from both where the Modelo has them.
   const fieldName = eroj.find(
-    (entry) => entry.skemo.a11y.role === "textbox" && !isMultiline(entry.skemo),
+    (entry) =>
+      entry.skemo.a11y.role === "textbox" &&
+      !isMultiline(entry.skemo) &&
+      // Spec 025 ②: the date picker shares the role textbox; the field named beside the others
+      // stays the kampo.
+      entry.skemo.parts.calendar === undefined,
   );
   const areaLines = eroj
     .filter(
@@ -756,6 +765,31 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
         `- Every field whose values a person types and picks from suggestions is a \`<${componentName(entry.ero)}>\`${selectName === undefined ? "" : `; a fixed short list is an \`<${componentName(selectName.ero)}>\``}.`,
     )
     .join("\n");
+  // Spec 025 ① (G7, plan ① D-08): every value set by feel within known limits is the glitilo, its
+  // ends or help naming the limits; an exact number stays the kampo's, with its stepper. Generated
+  // from the role slider, the kampo named beside.
+  const sliderLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "slider" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every value or range a person sets within known limits by feel is a \`<${componentName(entry.ero)}>\` whose ends or help name the limits (\`min\`, \`max\`)${fieldName === undefined ? "" : `; an exact number is a \`<${componentName(fieldName.ero)}>\` of kind number, with \`stepper\` where plus and minus help`}.`,
+    )
+    .join("\n");
+  // Spec 025 ② (G7, plan ② D-13): every date near today, and every date range, is the datelektilo
+  // whose field also takes the date typed; a date far away stays the kampo's of kind date.
+  // Generated from the role textbox with a calendar part, the kampo named beside.
+  const datepickerLines = eroj
+    .filter(
+      (entry) =>
+        entry.skemo.a11y.role === "textbox" &&
+        entry.skemo.parts.calendar !== undefined &&
+        entry.uzo !== undefined,
+    )
+    .map(
+      (entry) =>
+        `- Every date near today a person picks, or a date range, is a \`<${componentName(entry.ero)}>\` whose field also takes the date typed${fieldName === undefined ? "" : `; a date far away, like a birthday, is a \`<${componentName(fieldName.ero)}>\` of kind date`}.`,
+    )
+    .join("\n");
   // Spec 015 ② (G7, plan ② D-08): every file a form asks for is the alsxutilo, its help naming
   // kinds and size; generated from the role button with a dropzone part, the kampo named beside.
   const uploadLines = eroj
@@ -831,6 +865,8 @@ ${menuLines}
 ${disclosureLines}
 ${suggestLines}
 ${uploadLines}
+${sliderLines}
+${datepickerLines}
 ${cardLines}
 ${avatarLines}
 ${patternSection(input)}

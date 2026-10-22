@@ -108,9 +108,9 @@ describe("the input dialogs of the spec (Spec 015 ②)", () => {
     });
   });
 
-  it("lists thirty-four Eroj; the brief of the alsxutilo names its axis and duty", async () => {
+  it("lists thirty-six Eroj; the brief of the alsxutilo names its axis and duty", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
-    expect(listed.eroj).toHaveLength(34);
+    expect(listed.eroj).toHaveLength(36);
     expect(listed.eroj[0]?.name).toBe("alsxutilo");
     const brief = await output<Brief>(client, "get_ero", { name: "alsxutilo", brief: true });
     expect(brief.axes.map((axis) => axis.name)).toEqual(["dropzone"]);

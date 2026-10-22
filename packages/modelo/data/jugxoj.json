@@ -4419,6 +4419,133 @@
       "kialo": "Die Knöpfe eines Dialogs und einer Meldung stehen in actions: Dort ist ein butono eine Verschachtelung der Tiefe 1, keine Verletzung.",
       "date": "2026-10-21",
       "context": "Nachlese 8 ② (N7-F-1, Befund F-1 von Nachlese 7 ②): Eine Antwort, die stand, ändert sich (OP-12). Die Uzo von dialogo und avizo erlaubten in actions den butono (und bei der avizo den ligilo) mit nesting 0; check_usage meldete darum jeden Knopf dort als uzo-slot-nesting. Jetzt nesting 1. Gekippt: check_usage einer avizo oder eines dialogo mit butono in actions ist ohne uzo-slot-nesting; jede andere Prüfung der Slots (accepts, max, min, required) bleibt."
+    },
+    {
+      "id": "jug_01M5GCQAYBSF9EMFW6SP32Y7HF",
+      "ref": {
+        "ero": "ero_01M5GCQ9D2C6W8R89QXM1FQYE1"
+      },
+      "decision": "approved",
+      "kialo": "„Zwischen 0 und 100.“ nennt beide Grenzen, bevor jemand zieht: Wer sie kennt, trifft den Wert beim ersten Mal.",
+      "date": "2026-10-22",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 025 ①, range-stated, G4); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M5GCQAJ4VEMP50AE0YEFBXWW",
+        "instances": [
+          {
+            "ero": "glitilo",
+            "props": {
+              "min": 0,
+              "max": 100,
+              "value": 40
+            },
+            "label": "Lautstärke",
+            "texts": {
+              "help": "Zwischen 0 und 100."
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M5GCQAYC3R7C7DPHQGYDPYKH",
+      "ref": {
+        "ero": "ero_01M5GCQ9D2C6W8R89QXM1FQYE1"
+      },
+      "decision": "approved",
+      "kialo": "'From 1 to 10.' names both limits before anyone drags: whoever knows them hits the value the first time.",
+      "date": "2026-10-22",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 025 ①, range-stated, G4); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M5GCQAJ4VEMP50AE0YEFBXWW",
+        "instances": [
+          {
+            "ero": "glitilo",
+            "props": {
+              "min": 1,
+              "max": 10,
+              "value": 3
+            },
+            "label": "Quantity",
+            "texts": {
+              "help": "From 1 to 10."
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M5GCQAYC3R7C7DPHQGYDPYKJ",
+      "ref": {
+        "ero": "ero_01M5GCQ9D2C6W8R89QXM1FQYE1"
+      },
+      "decision": "rejected",
+      "kialo": "Ein Regler mit Grenzen, der sie nicht nennt, lässt raten: Die Person erfährt die Grenze erst, wenn der Wert abgelehnt wird.",
+      "date": "2026-10-22",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 025 ①, range-stated, G4); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M5GCQAJ4VEMP50AE0YEFBXWW",
+        "instances": [
+          {
+            "ero": "glitilo",
+            "props": {
+              "min": 1,
+              "max": 10
+            },
+            "label": "Menge",
+            "texts": {},
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M5GCQAYC3R7C7DPHQGYDPYKK",
+      "ref": {
+        "ero": "ero_01M5GCQ9D2C6W8R89QXM1FQYE1"
+      },
+      "decision": "rejected",
+      "kialo": "A slider with limits that does not name them leaves the person guessing: the limit shows only when the value is refused.",
+      "date": "2026-10-22",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 025 ①, range-stated, G4); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M5GCQAJ4VEMP50AE0YEFBXWW",
+        "instances": [
+          {
+            "ero": "glitilo",
+            "props": {
+              "min": 1,
+              "max": 10
+            },
+            "label": "Quantity",
+            "texts": {},
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M5GCQAYC3R7C7DPHQGYDPYKM",
+      "ref": {
+        "artikolo": "VIII",
+        "celo": "figma"
+      },
+      "decision": "approved",
+      "kialo": "Die Schrittknöpfe und der Löschen-Knopf des kampo hängen an kind und stepper, die keinen Teil schlüsseln: Das Set zeigt das Feld allein, ihr Bild ist das des komponierten butono (emphasis low) mit den Glyphen subtract, add und close – gezeichnet im Set des butono und des ikono. Die Teile decrement, increment und clear tragen darum in Figma keinen Knoten (FIGMA_NOT_DRAWN).",
+      "date": "2026-10-22",
+      "context": "Spec 025 ① (plan ① D-05, B-1): Figma zeichnet die Schrittknöpfe und den Löschen-Knopf des kampo nicht; check:parity meldet die drei Teile als freigegeben (parity-part-not-drawn), keine Differenz. Rücknahme, sobald der Vitrino-Vergleich eine Variante mit stepper zeigt."
+    },
+    {
+      "id": "jug_01M5GYYE9X3KKQ8K6NXTDPM25K",
+      "ref": {
+        "ero": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF"
+      },
+      "decision": "approved",
+      "kialo": "Zwei voneinander abhängige Daten sind die Datumsauswahl des datelektilo: Das Ende liegt nach dem Anfang, und ein Kalender zeigt beide zugleich.",
+      "date": "2026-10-22",
+      "context": "Spec 025 ② (plan ② D-10, G2): Eine Antwort, die stand, ändert sich (OP-12). Die Grenze date-range des kampo war ask-human („Fundamento has none yet“); mit dem datelektilo ist sie geschlossen (use-instead, wie file durch den alsxutilo in Spec 015 ②). Gekippt: „Zeitraum von bis“ (Spec 011 ①) → datelektilo mode=range mit der Grenze des kampo daneben statt Rückfrage; „Zeitraum für den Bericht“ (Dialog der Spec 025) antwortet gleich."
     }
   ]
 }

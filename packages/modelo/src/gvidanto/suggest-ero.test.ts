@@ -75,10 +75,16 @@ describe("suggest_ero", () => {
       "destructive",
       "confirm",
       "dismiss",
+      // Spec 025 ②: the datelektilo.
+      "pick-date",
+      "date-range",
       "ask-reason",
       "choose-many",
       "choose-few",
       "disclosure",
+      // Spec 025 ①: the glitilo.
+      "slide",
+      "value-range",
       "show-icon",
       "status-label",
       "enter-text",
@@ -86,6 +92,9 @@ describe("suggest_ero", () => {
       "password",
       "number",
       "date",
+      // Spec 025 ①: the kampo's counter and time.
+      "count",
+      "time",
       "card",
       "command",
       "code-block",

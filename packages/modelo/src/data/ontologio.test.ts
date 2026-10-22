@@ -249,10 +249,12 @@ describe("the scheme eroj (Spec 008 T009)", () => {
       "avataro",
       "avizo",
       "butono",
+      "datelektilo",
       "dialogo",
       "elektilo",
       "elekto",
       "faldilo",
+      "glitilo",
       "ikono",
       "insigno",
       "kampo",
@@ -285,10 +287,12 @@ describe("the scheme eroj (Spec 008 T009)", () => {
       "Avataro",
       "Avizo",
       "Butono",
+      "Datelektilo",
       "Dialogo",
       "Elektilo",
       "Elekto",
       "Faldilo",
+      "Glitilo",
       "Ikono",
       "Insigno",
       "Kampo",
@@ -343,6 +347,10 @@ describe("the scheme eroj (Spec 008 T009)", () => {
       { predicate: "references", target: "#Elekto" },
       { predicate: "references", target: "#Elektilo" },
       { predicate: "references", target: "#Tekstareo" },
+      // Spec 025 ①: an approximate value is the glitilo's.
+      { predicate: "references", target: "#Glitilo" },
+      // Spec 025 ②: a date near today and a date range are the datelektilo's.
+      { predicate: "references", target: "#Datelektilo" },
     ]);
     // Spec 010 ①: the switch, with its German and English names (Schalter, switch); since ② it
     // sends a setting that applies only with the form to the checkbox.
