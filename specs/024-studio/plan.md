@@ -352,7 +352,7 @@ Aufgenommen am 2026-10-22 in Chromium am Server `pnpm fm metiejo --port 7398` mi
 ### Offen (für den Maintainer)
 
 - **O-5 Namen der dritten Ebene** über das mechanische Schema hinaus (D-14): bleibt es bei `ero.<ero>.<teil>.<eigenschaft>.<achse>.<wert>.<zustand>`?
-- **O-9 Budget des Export-Tests** (B-17): 30 → 45 s wegen der dritten Ebene, oder O-8. Der Test lag in sieben Läufen zwischen 20,3 und 34,4 s, dreimal über 30 s; der letzte Lauf des PR (Doku-Commit `e6009cb`) ist an ihm rot, der letzte Lauf mit Code (`dfc9c6c`, 39747762364) war grün.
+- **O-9 Budget des Export-Tests** (B-17): nach dem Merge von `main` folgt der Test dem Paketbudget der CLI von 60 s, das Spec 025 ② (B-16, `dd76887`, 22.10.) am kalten Runner gemessen hat – ein eigener Faktor bleibt aus, wie am 16.10. bestimmt; der Lauf des Merge-Commits (39793065942) war mit 33,6 s und 1 408 Tokens erneut rot, und die Reihe lag in neun Läufen zwischen 20 und 34 s. Veto des Maintainers möglich; dann bleibt O-8 der Weg. Der Test lag in sieben Läufen zwischen 20,3 und 34,4 s, dreimal über 30 s; der letzte Lauf des PR (Doku-Commit `e6009cb`) ist an ihm rot, der letzte Lauf mit Code (`dfc9c6c`, 39747762364) war grün.
 - **O-8 Rezolvoj der dritten Ebene:** `rezolvoj.json` trägt alle 1 284 Tokens je Kombination (144 MB, B-16). Vorschlag: die Ero-Tokens als Alias-Verweis statt als aufgelöster Wert, oder nur die ersten zwei Ebenen – eine Frage der Projekcioj, die die Rezolvoj lesen (Tokens Studio, MCP `resolve`).
 - **O-6 Figma messen:** die 2 636 Variablen und die Bindungen der 36 Sets in einer echten Datei (Abweichung 5), zusammen mit den offenen Figma-PRs.
 - **O-7 Ein eigenes Werkzeug `get_ero_tokenoj`** (Art. III) für Runde 3, neben dem Fluss mit den drei Ebenen.
