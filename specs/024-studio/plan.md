@@ -341,7 +341,7 @@ Aufgenommen am 2026-10-22 in Chromium am Server `pnpm fm metiejo --port 7398` mi
 
 - **B-9 Ero-Tokens:** 908 (874 Eroj, 34 Sxablonoj); Kern 376 + 908 = 1 284 Tokens; IDs im Lock 1 284 Tokens.
 - **B-10 Figma-Variablen:** 2 439 (Repo), 2 441 (Plan mit provo und provo-kompakta); 1 563 der dritten Ebene.
-- **B-11 Zeiten im Studio:** Komponentenseite ≈ 0,3 s (Ableitung 114 ms, Seite), Prüfung je Setzen 1,3 s warm, Ablehnung mit O-3 bis zu 4 × 1,3 s dazu; `pnpm vortaro:ero-tokenoj` 1,2 s.
+- **B-11 Zeiten im Studio:** Komponentenseite ≈ 0,3 s (Ableitung 114 ms, Seite), Prüfung je Setzen 1,8–1,9 s warm (`POST /api/marko/bluna/festlegen`, ein Alias, der besteht), Ablehnung mit O-3 4,5 s (Alias `color.palette.accent.100` auf der Fläche des Butono: Satz, Vorschlag 700 hell / 50 dunkel – zwei Ableitungen mehr als die Prüfung selbst); gemessen am 22.10. mit `curl` am Server `pnpm fm metiejo --port 7398 --workdir <Marken>` nach dem Lauf der Suiten; `pnpm vortaro:ero-tokenoj` 1,2 s.
 - **B-12 Manko-Kandidat:** eine Vorschau, die einen Zustand hält (Zeigen, Drücken, Fokus) – kein Ero kann ihn setzen, der Browser hält ihn; Schließbedingung: ein Attribut am Ero, das den Zustand erzwingt, durch eine Eroj-Runde.
 - **B-13 Manko-Kandidat Farbliteral auf der dritten Ebene** (Abweichung 3): wenn eine Marke eine Fläche braucht, die keine Stufe ist, fehlt die Stufe in der Palette – die Palette ist der Ort (§ 3 B).
 - **B-14** Die Suiten der Plugin-Läufe (`plugin-lauf`, `plugin-rahmen-beispiele`) sind mit 2 439 Variablen langsamer (je Lauf das Double mit allen Variablen); gemessen im Lauf unten.
