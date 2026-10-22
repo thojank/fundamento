@@ -52,8 +52,9 @@ const scratch = mkdtempSync(join(tmpdir(), "fm-agordilo-"));
 
 // One derivation composes and checks the whole Modelo with the derived Aspekto (2–4 s on a quiet
 // machine, measured 45 s for four spawns inside the parallel run): the tests that derive carry a
-// budget sized for that work, not the 30 s of a single spawn.
-const DERIVE_BUDGET = 120_000;
+// budget sized for that work, not the 30 s of a single spawn. Spec 025 ③ (B-29): 8 s here, 85 s
+// on the CI runner with 36 Eroj (run 39759176989) and over 120 s with 40 (run 39759253087).
+const DERIVE_BUDGET = 240_000;
 afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 
 function filesOf(dir: string): Record<string, string> {

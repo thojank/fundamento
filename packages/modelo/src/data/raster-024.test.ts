@@ -105,7 +105,11 @@ describe("O-1: the coloured palettes carry the steps 25, 150, 850 and 975 (Spec 
     },
   );
 
-  it("the palette Reguloj hold with the new steps in the repository and in every fixture brand", () => {
+  // Spec 025 ③ (B-29): the check over every fixture brand takes 3 s here, 22 s on the CI runner
+  // with 36 Eroj and 32 s with 40 (run 39759253087, over the shared 30 s): its own budget.
+  it("the palette Reguloj hold with the new steps in the repository and in every fixture brand", {
+    timeout: 120_000,
+  }, () => {
     const rules = new Set(["palette-even", "palette-aligned", "srgb-gamut"]);
     for (const source of [
       defaultModeloSource(),
