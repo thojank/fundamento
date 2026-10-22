@@ -44,8 +44,10 @@ None.
 | color.palette.neutral.950 | light | #1e1d22 | 16.71:1 | 16.71:1 | yes | yes | 0.0098 → 0.0098 |
 | color.palette.neutral.975 | light | #15141a | 18.34:1 | 18.35:1 | yes | yes | 0.0138 → 0.0138 |
 | color.palette.neutral.1000 | light | #000000 | 21.00:1 | 21.00:1 | yes | yes | 0.0000 → 0.0000 |
+| color.palette.accent.25 | light | #faf9fe | 1.05:1 | 1.05:1 | yes | yes | 0.0075 → 0.0075 |
 | color.palette.accent.50 | light | #f4f1fc | 1.11:1 | 1.11:1 | yes | yes | 0.0150 → 0.0150 |
 | color.palette.accent.100 | light | #ede7fe | 1.20:1 | 1.20:1 | yes | yes | 0.0320 → 0.0320 |
+| color.palette.accent.150 | light | #e5ddfd | 1.30:1 | 1.30:1 | yes | yes | 0.0438 → 0.0438 |
 | color.palette.accent.200 | light | #ded2fd | 1.42:1 | 1.42:1 | yes | yes | 0.0602 → 0.0602 |
 | color.palette.accent.300 | light | #cebbfe | 1.72:1 | 1.72:1 | yes | yes | 0.0946 → 0.0946 |
 | color.palette.accent.400 | light | #b59af2 | 2.37:1 | 2.37:1 | yes | yes | 0.1265 → 0.1265 |
@@ -53,10 +55,14 @@ None.
 | color.palette.accent.600 | light | #7a5ab6 | 5.29:1 | 5.29:1 | yes | yes | 0.1397 → 0.1397 |
 | color.palette.accent.700 | light | #62419a | 7.64:1 | 7.64:1 | yes | yes | 0.1397 → 0.1397 |
 | color.palette.accent.800 | light | #4b2980 | 10.93:1 | 10.92:1 | yes | yes | 0.1397 → 0.1397 |
+| color.palette.accent.850 | light | #401e6f | 12.85:1 | 12.85:1 | yes | yes | 0.1316 → 0.1316 |
 | color.palette.accent.900 | light | #34145f | 14.84:1 | 14.84:1 | yes | yes | 0.1239 → 0.1239 |
 | color.palette.accent.950 | light | #271048 | 16.72:1 | 16.72:1 | yes | yes | 0.0985 → 0.0985 |
+| color.palette.accent.975 | light | #181029 | 18.34:1 | 18.34:1 | yes | yes | 0.0493 → 0.0493 |
+| color.palette.success.25 | light | #f5fbf7 | 1.05:1 | 1.05:1 | yes | yes | 0.0077 → 0.0077 |
 | color.palette.success.50 | light | #eaf6ef | 1.11:1 | 1.11:1 | yes | yes | 0.0153 → 0.0153 |
 | color.palette.success.100 | light | #d9f1e2 | 1.19:1 | 1.19:1 | yes | yes | 0.0327 → 0.0327 |
+| color.palette.success.150 | light | #c9ebd6 | 1.29:1 | 1.29:1 | yes | yes | 0.0449 → 0.0449 |
 | color.palette.success.200 | light | #b6e5c9 | 1.40:1 | 1.40:1 | yes | yes | 0.0616 → 0.0616 |
 | color.palette.success.300 | light | #8dd8ad | 1.67:1 | 1.67:1 | yes | yes | 0.0968 → 0.0968 |
 | color.palette.success.400 | light | #53c089 | 2.26:1 | 2.26:1 | yes | yes | 0.1295 → 0.1295 |
@@ -64,10 +70,14 @@ None.
 | color.palette.success.600 | light | #008050 | 4.97:1 | 4.97:1 | yes | yes | 0.1430 → 0.1229 |
 | color.palette.success.700 | light | #00633d | 7.34:1 | 7.34:1 | yes | yes | 0.1384 → 0.1023 |
 | color.palette.success.800 | light | #004a2c | 10.40:1 | 10.40:1 | yes | yes | 0.1268 → 0.0837 |
+| color.palette.success.850 | light | #003d24 | 12.34:1 | 12.34:1 | yes | yes | 0.1143 → 0.0739 |
 | color.palette.success.900 | light | #00311c | 14.38:1 | 14.38:1 | yes | yes | 0.1029 → 0.0642 |
 | color.palette.success.950 | light | #002514 | 16.40:1 | 16.40:1 | yes | yes | 0.0781 → 0.0544 |
+| color.palette.success.975 | light | #03190e | 18.22:1 | 18.22:1 | yes | yes | 0.0390 → 0.0390 |
+| color.palette.warning.25 | light | #fdf9f3 | 1.05:1 | 1.05:1 | yes | yes | 0.0083 → 0.0083 |
 | color.palette.warning.50 | light | #f9f2e7 | 1.11:1 | 1.11:1 | yes | yes | 0.0165 → 0.0165 |
 | color.palette.warning.100 | light | #f8e8d1 | 1.21:1 | 1.21:1 | yes | yes | 0.0352 → 0.0352 |
+| color.palette.warning.150 | light | #f4debe | 1.31:1 | 1.31:1 | yes | yes | 0.0483 → 0.0483 |
 | color.palette.warning.200 | light | #f1d3a7 | 1.43:1 | 1.43:1 | yes | yes | 0.0663 → 0.0663 |
 | color.palette.warning.300 | light | #ebbd75 | 1.74:1 | 1.74:1 | yes | yes | 0.1043 → 0.1043 |
 | color.palette.warning.400 | light | #d89b2c | 2.42:1 | 2.42:1 | yes | yes | 0.1395 → 0.1395 |
@@ -75,10 +85,14 @@ None.
 | color.palette.warning.600 | light | #8e6100 | 5.45:1 | 5.45:1 | yes | yes | 0.1249 → 0.1101 |
 | color.palette.warning.700 | light | #6f4b00 | 7.85:1 | 7.84:1 | yes | yes | 0.1064 → 0.0922 |
 | color.palette.warning.800 | light | #523600 | 11.14:1 | 11.14:1 | yes | yes | 0.0881 → 0.0745 |
+| color.palette.warning.850 | light | #442c00 | 13.06:1 | 13.06:1 | yes | yes | 0.0784 → 0.0658 |
 | color.palette.warning.900 | light | #372300 | 15.02:1 | 15.02:1 | yes | yes | 0.0698 → 0.0571 |
 | color.palette.warning.950 | light | #2a1a00 | 16.85:1 | 16.85:1 | yes | yes | 0.0520 → 0.0486 |
+| color.palette.warning.975 | light | #1b1307 | 18.40:1 | 18.40:1 | yes | yes | 0.0260 → 0.0260 |
+| color.palette.danger.25 | light | #fef8f6 | 1.05:1 | 1.05:1 | yes | yes | 0.0076 → 0.0076 |
 | color.palette.danger.50 | light | #fdefec | 1.12:1 | 1.12:1 | yes | yes | 0.0153 → 0.0153 |
 | color.palette.danger.100 | light | #ffe3dc | 1.21:1 | 1.21:1 | yes | yes | 0.0340 → 0.0323 |
+| color.palette.danger.150 | light | #ffd7cc | 1.32:1 | 1.32:1 | yes | yes | 0.0485 → 0.0472 |
 | color.palette.danger.200 | light | #ffcabc | 1.46:1 | 1.46:1 | yes | yes | 0.0693 → 0.0638 |
 | color.palette.danger.300 | light | #ffad97 | 1.80:1 | 1.80:1 | yes | yes | 0.1190 → 0.1018 |
 | color.palette.danger.400 | light | #ff7b5a | 2.55:1 | 2.55:1 | yes | yes | 0.1694 → 0.1681 |
@@ -86,10 +100,14 @@ None.
 | color.palette.danger.600 | light | #bd3100 | 5.81:1 | 5.81:1 | yes | yes | 0.1870 → 0.1831 |
 | color.palette.danger.700 | light | #932400 | 8.40:1 | 8.40:1 | yes | yes | 0.1870 → 0.1521 |
 | color.palette.danger.800 | light | #6d1800 | 11.74:1 | 11.74:1 | yes | yes | 0.1627 → 0.1228 |
+| color.palette.danger.850 | light | #5c1300 | 13.61:1 | 13.61:1 | yes | yes | 0.1435 → 0.1084 |
 | color.palette.danger.900 | light | #4b0e00 | 15.47:1 | 15.47:1 | yes | yes | 0.1266 → 0.0943 |
 | color.palette.danger.950 | light | #3b0900 | 17.17:1 | 17.17:1 | yes | yes | 0.0964 → 0.0806 |
+| color.palette.danger.975 | light | #260b05 | 18.52:1 | 18.52:1 | yes | yes | 0.0482 → 0.0482 |
+| color.palette.info.25 | light | #f4fafd | 1.05:1 | 1.05:1 | yes | yes | 0.0071 → 0.0071 |
 | color.palette.info.50 | light | #e9f5fa | 1.11:1 | 1.11:1 | yes | yes | 0.0142 → 0.0142 |
 | color.palette.info.100 | light | #d5eff9 | 1.20:1 | 1.20:1 | yes | yes | 0.0302 → 0.0302 |
+| color.palette.info.150 | light | #c5e7f6 | 1.30:1 | 1.30:1 | yes | yes | 0.0414 → 0.0414 |
 | color.palette.info.200 | light | #b0e0f4 | 1.42:1 | 1.42:1 | yes | yes | 0.0568 → 0.0568 |
 | color.palette.info.300 | light | #81d1f0 | 1.71:1 | 1.71:1 | yes | yes | 0.0894 → 0.0894 |
 | color.palette.info.400 | light | #3db6df | 2.34:1 | 2.34:1 | yes | yes | 0.1196 → 0.1196 |
@@ -97,8 +115,10 @@ None.
 | color.palette.info.600 | light | #007696 | 5.21:1 | 5.21:1 | yes | yes | 0.1315 → 0.0997 |
 | color.palette.info.700 | light | #005b75 | 7.59:1 | 7.59:1 | yes | yes | 0.1221 → 0.0833 |
 | color.palette.info.800 | light | #004356 | 10.90:1 | 10.90:1 | yes | yes | 0.1074 → 0.0672 |
+| color.palette.info.850 | light | #003748 | 12.83:1 | 12.83:1 | yes | yes | 0.0970 → 0.0593 |
 | color.palette.info.900 | light | #002c3a | 14.82:1 | 14.82:1 | yes | yes | 0.0876 → 0.0515 |
 | color.palette.info.950 | light | #00212c | 16.72:1 | 16.72:1 | yes | yes | 0.0691 → 0.0437 |
+| color.palette.info.975 | light | #011720 | 18.34:1 | 18.34:1 | yes | yes | 0.0346 → 0.0346 |
 | color.palette.neutral.950 | dark | #1e1d22 | 1.26:1 | 1.26:1 | yes | yes | 0.0098 → 0.0098 |
 
 ## KontrastParoj (lowest value per pair)

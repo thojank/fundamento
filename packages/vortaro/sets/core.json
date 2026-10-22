@@ -317,6 +317,24 @@
         }
       },
       "accent": {
+        "25": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9609,
+              0.9681,
+              0.9775
+            ],
+            "hex": "#f5f7f9"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 25: the very light tint between white and 50 (Spec 024, O-1).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GDCME33SKWMP56CQMKR03X",
+              "role": "palette"
+            }
+          }
+        },
         "50": {
           "$value": {
             "colorSpace": "srgb",
@@ -349,6 +367,24 @@
           "$extensions": {
             "com.ciferecigo.fundamento": {
               "id": "tok_01M2W9400ZA1K81R0W23SG0XSS",
+              "role": "palette"
+            }
+          }
+        },
+        "150": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.8208,
+              0.862,
+              0.9156
+            ],
+            "hex": "#d1dce9"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 150: the light border step between 100 and 200 (Spec 024, O-1).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GDCME33SKWMP56CQMKR03Y",
               "role": "palette"
             }
           }
@@ -479,6 +515,24 @@
             }
           }
         },
+        "850": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.1015,
+              0.2021,
+              0.3281
+            ],
+            "hex": "#1a3454"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 850: text on very dark surfaces, between 800 and 900 (Spec 024, O-1).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GDCME33SKWMP56CQMKR03Z",
+              "role": "palette"
+            }
+          }
+        },
         "900": {
           "$value": {
             "colorSpace": "srgb",
@@ -514,9 +568,45 @@
               "role": "palette"
             }
           }
+        },
+        "975": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.0563,
+              0.0884,
+              0.1299
+            ],
+            "hex": "#0e1721"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 975: the deepest ground of the dark mode, between 950 and black (Spec 024, O-1).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GDCME33SKWMP56CQMKR040",
+              "role": "palette"
+            }
+          }
         }
       },
       "success": {
+        "25": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9553,
+              0.973,
+              0.9579
+            ],
+            "hex": "#f4f8f4"
+          },
+          "$description": "Success green, step 25: the very light tint between white and 50 (Spec 024, O-1).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GDCME33SKWMP56CQMKR041",
+              "role": "palette"
+            }
+          }
+        },
         "50": {
           "$value": {
             "colorSpace": "srgb",
@@ -549,6 +639,24 @@
           "$extensions": {
             "com.ciferecigo.fundamento": {
               "id": "tok_01M2W9400ZA1K81R0W23SG0XT3",
+              "role": "palette"
+            }
+          }
+        },
+        "150": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.7866,
+              0.8897,
+              0.8033
+            ],
+            "hex": "#c9e3cd"
+          },
+          "$description": "Success green, step 150: the light border step between 100 and 200 (Spec 024, O-1).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GDCME33SKWMP56CQMKR042",
               "role": "palette"
             }
           }
@@ -679,6 +787,24 @@
             }
           }
         },
+        "850": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.0029,
+              0.2479,
+              0.0239
+            ],
+            "hex": "#013f06"
+          },
+          "$description": "Success green, step 850: text on very dark surfaces, between 800 and 900 (Spec 024, O-1).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GDCME33SKWMP56CQMKR043",
+              "role": "palette"
+            }
+          }
+        },
         "900": {
           "$value": {
             "colorSpace": "srgb",
@@ -714,9 +840,45 @@
               "role": "palette"
             }
           }
+        },
+        "975": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.047,
+              0.1022,
+              0.0425
+            ],
+            "hex": "#0c1a0b"
+          },
+          "$description": "Success green, step 975: the deepest ground of the dark mode, between 950 and black (Spec 024, O-1).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GDCME33SKWMP56CQMKR044",
+              "role": "palette"
+            }
+          }
         }
       },
       "warning": {
+        "25": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9796,
+              0.9652,
+              0.9463
+            ],
+            "hex": "#faf6f1"
+          },
+          "$description": "Warning amber, step 25: the very light tint between white and 50 (Spec 024, O-1).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GDCME33SKWMP56CQMKR045",
+              "role": "palette"
+            }
+          }
+        },
         "50": {
           "$value": {
             "colorSpace": "srgb",
@@ -749,6 +911,24 @@
           "$extensions": {
             "com.ciferecigo.fundamento": {
               "id": "tok_01M2W9400ZA1K81R0W23SG0XTE",
+              "role": "palette"
+            }
+          }
+        },
+        "150": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9267,
+              0.8442,
+              0.7345
+            ],
+            "hex": "#ecd7bb"
+          },
+          "$description": "Warning amber, step 150: the light border step between 100 and 200 (Spec 024, O-1).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GDCME33SKWMP56CQMKR046",
               "role": "palette"
             }
           }
@@ -879,6 +1059,24 @@
             }
           }
         },
+        "850": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.2945,
+              0.1638,
+              0.0022
+            ],
+            "hex": "#4b2a01"
+          },
+          "$description": "Warning amber, step 850: text on very dark surfaces, between 800 and 900 (Spec 024, O-1).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GDCME33SKWMP56CQMKR047",
+              "role": "palette"
+            }
+          }
+        },
         "900": {
           "$value": {
             "colorSpace": "srgb",
@@ -914,9 +1112,45 @@
               "role": "palette"
             }
           }
+        },
+        "975": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.1177,
+              0.0764,
+              0.0427
+            ],
+            "hex": "#1e130b"
+          },
+          "$description": "Warning amber, step 975: the deepest ground of the dark mode, between 950 and black (Spec 024, O-1).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GDCME33SKWMP56CQMKR048",
+              "role": "palette"
+            }
+          }
         }
       },
       "danger": {
+        "25": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9859,
+              0.9612,
+              0.9566
+            ],
+            "hex": "#fbf5f4"
+          },
+          "$description": "Danger red, step 25: the very light tint between white and 50 (Spec 024, O-1).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GDCME33SKWMP56CQMKR049",
+              "role": "palette"
+            }
+          }
+        },
         "50": {
           "$value": {
             "colorSpace": "srgb",
@@ -949,6 +1183,24 @@
           "$extensions": {
             "com.ciferecigo.fundamento": {
               "id": "tok_01M2W9400ZA1K81R0W23SG0XTS",
+              "role": "palette"
+            }
+          }
+        },
+        "150": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9678,
+              0.8178,
+              0.7935
+            ],
+            "hex": "#f7d1ca"
+          },
+          "$description": "Danger red, step 150: the light border step between 100 and 200 (Spec 024, O-1).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GDCME33SKWMP56CQMKR04A",
               "role": "palette"
             }
           }
@@ -1079,6 +1331,24 @@
             }
           }
         },
+        "850": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.3981,
+              0.0034,
+              0.0019
+            ],
+            "hex": "#660100"
+          },
+          "$description": "Danger red, step 850: text on very dark surfaces, between 800 and 900 (Spec 024, O-1).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GDCME33SKWMP56CQMKR04B",
+              "role": "palette"
+            }
+          }
+        },
         "900": {
           "$value": {
             "colorSpace": "srgb",
@@ -1114,9 +1384,45 @@
               "role": "palette"
             }
           }
+        },
+        "975": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.1518,
+              0.052,
+              0.0388
+            ],
+            "hex": "#270d0a"
+          },
+          "$description": "Danger red, step 975: the deepest ground of the dark mode, between 950 and black (Spec 024, O-1).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GDCME33SKWMP56CQMKR04C",
+              "role": "palette"
+            }
+          }
         }
       },
       "info": {
+        "25": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.953,
+              0.9702,
+              0.9832
+            ],
+            "hex": "#f3f7fb"
+          },
+          "$description": "Information blue, step 25: the very light tint between white and 50 (Spec 024, O-1).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GDCME33SKWMP56CQMKR04D",
+              "role": "palette"
+            }
+          }
+        },
         "50": {
           "$value": {
             "colorSpace": "srgb",
@@ -1149,6 +1455,24 @@
           "$extensions": {
             "com.ciferecigo.fundamento": {
               "id": "tok_01M2W9400ZA1K81R0W23SG0XV4",
+              "role": "palette"
+            }
+          }
+        },
+        "150": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.7736,
+              0.8735,
+              0.9476
+            ],
+            "hex": "#c5dff2"
+          },
+          "$description": "Information blue, step 150: the light border step between 100 and 200 (Spec 024, O-1).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GDCME33SKWMP56CQMKR04E",
               "role": "palette"
             }
           }
@@ -1279,6 +1603,24 @@
             }
           }
         },
+        "850": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.0025,
+              0.205,
+              0.3657
+            ],
+            "hex": "#01345d"
+          },
+          "$description": "Information blue, step 850: text on very dark surfaces, between 800 and 900 (Spec 024, O-1).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GDCME33SKWMP56CQMKR04F",
+              "role": "palette"
+            }
+          }
+        },
         "900": {
           "$value": {
             "colorSpace": "srgb",
@@ -1311,6 +1653,24 @@
           "$extensions": {
             "com.ciferecigo.fundamento": {
               "id": "tok_01M2W9400ZA1K81R0W23SG0XVD",
+              "role": "palette"
+            }
+          }
+        },
+        "975": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.0437,
+              0.0893,
+              0.1408
+            ],
+            "hex": "#0b1724"
+          },
+          "$description": "Information blue, step 975: the deepest ground of the dark mode, between 950 and black (Spec 024, O-1).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GDCME33SKWMP56CQMKR04G",
               "role": "palette"
             }
           }
