@@ -296,6 +296,8 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
       avataro: "img",
       avizo: "status",
       butono: "button",
+      // Spec 025 ②: the date picker is a textbox with a calendar.
+      datelektilo: "textbox",
       dialogo: "dialog",
       elektilo: "combobox",
       elekto: "radiogroup",
@@ -984,5 +986,28 @@ describe("the Vitrino shows the glitilo and the kampo additions (Spec 025 ①)",
       '<fm-kampo kind="number" stepper min="1" max="10" value="3">Menge<span slot="help">Zwischen 1 und 10.</span></fm-kampo>',
     );
     expect(grid).toContain('<fm-kampo kind="search" value="Standard">Suche</fm-kampo>');
+  });
+});
+
+// Spec 025 ② (plan ② D-13): the Vitrino shows the datelektilo in two rows — a single date with
+// the help, a date range — each at rest, required, disabled and invalid; the dates are the
+// Vitrino's (October 2026), the same the Figma set shows.
+describe("the Vitrino shows the datelektilo (Spec 025 ②)", () => {
+  it("two rows, four columns; the dates of the Vitrino; the error only under invalid", () => {
+    const grid = datumoj.eroj.datelektilo ?? "";
+    expect((grid.match(/<fm-datelektilo /g) ?? []).length).toBe(8);
+    expect(grid).toContain(
+      '<th scope="col">rest</th><th scope="col">required</th><th scope="col">disabled</th><th scope="col">invalid</th>',
+    );
+    expect(grid).toContain(
+      '<fm-datelektilo value="2026-10-24">einzeln<span slot="help">Ein Datum ab heute.</span></fm-datelektilo>',
+    );
+    expect(grid).toContain(
+      '<fm-datelektilo mode="range" value-start="2026-10-06" value-end="2026-10-10">Bereich<span slot="help">Ein Datum ab heute.</span></fm-datelektilo>',
+    );
+    expect(grid).toContain(
+      '<fm-datelektilo value="2026-10-24" invalid>einzeln<span slot="error">Wähle ein Datum ab heute.</span>',
+    );
+    expect((grid.match(/<span slot="error">/g) ?? []).length).toBe(2);
   });
 });

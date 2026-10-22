@@ -112,6 +112,7 @@ describe("list_eroj and the brief (acceptance 1)", () => {
       "avataro",
       "avizo",
       "butono",
+      "datelektilo",
       "dialogo",
       "elektilo",
       "elekto",

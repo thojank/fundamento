@@ -57,9 +57,39 @@ function fieldPartSelector(
   state: string,
   select = false,
   entry = "",
+  datepicker = false,
+  stateName = "rest",
 ): string {
   const root = `[part="field"]${data}${state === "" ? "" : `:has([part="control"]${state})`}`;
   if (part === "box" && property === "gap") return `:where(${root})`;
+  // A date picker (Spec 025 ②, plan ② D-11): the trigger, the calendar and its head, month, prev,
+  // next and weekday are elements of their own in the field; the day cell carries its own states
+  // (CELL_STATES), the field's readonly and invalid reach it; its four looks are the cell by its
+  // attributes — chosen (aria-selected), between the ends of a range (data-range), today
+  // (data-today) and outside the month (data-outside); the ring stands on the input and on the
+  // focused cell alike.
+  if (datepicker) {
+    const field = `[part="field"]${data}`;
+    const cellRoot =
+      CELL_STATES[stateName] === undefined
+        ? `:where(${root}) [part="cell"]`
+        : `:where(${field}) [part="cell"]${CELL_STATES[stateName]}`;
+    if (["trigger", "calendar", "head", "month", "prev", "next", "weekday"].includes(part)) {
+      return `:where(${root}) [part="${part}"]`;
+    }
+    if (part === "cell" || part === "day") return cellRoot;
+    // The four looks stand outside :where(), so that they outrank the cell's hover and focus
+    // (specificity): a chosen day keeps its fill under the pointer.
+    if (part === "selected-cell" || part === "selected-day") {
+      return `${field} [part="cell"][aria-selected="true"]`;
+    }
+    if (part === "in-range-cell") return `${field} [part="cell"][data-range="true"]`;
+    if (part === "today-cell") return `${field} [part="cell"][data-today="true"]`;
+    if (part === "outside-day") return `${field} [part="cell"][data-outside="true"]`;
+    if (part === "focus-ring") {
+      return `:where(${root}) [part="control"]:focus-visible, :where(${root}) [part="cell"]:focus-visible`;
+    }
+  }
   // A select (Spec 010 ④, D-06) shows its placeholder as the first option, chosen while nothing
   // else is: the colour of the placeholder is the select's while that option is the chosen one.
   // Outside :where(), so that it wins over the colour of the text in every state (specificity).
@@ -532,6 +562,25 @@ function dialogPartSelector(part: string, data: string): string {
 export const isSuggest = (skemo: Skemo): boolean =>
   skemo.a11y.role === "combobox" && skemo.parts.listbox !== undefined;
 
+/**
+ * A date picker (Spec 025 ②, plan ② D-11): the field of the kampo (role textbox) with a calendar
+ * part — a popover of the platform beside the field, as the listbox of the kompletigilo.
+ */
+export const isDatepicker = (skemo: Skemo): boolean =>
+  skemo.a11y.role === "textbox" && skemo.parts.calendar !== undefined;
+
+/**
+ * The states of a day cell of a date picker (E3: the states stand at the operated part): its own
+ * hover and focus, disabled as aria-disabled (a cell is no control of the platform); readonly and
+ * invalid are the field's and reach the cell through the field.
+ */
+const CELL_STATES: Readonly<Record<string, string | undefined>> = {
+  rest: "",
+  hover: ":hover",
+  focus: ":focus-visible",
+  disabled: '[aria-disabled="true"]',
+};
+
 /** A disclosure (Spec 014 ⑤, D-03): the platform's details and summary. */
 const isDisclosure = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "disclosure";
 
@@ -794,6 +843,21 @@ function declarations(skemo: Skemo, part: string, property: string, token: strin
   }
   if (isSuggest(skemo) && part === "listbox" && property === "height") {
     return token === "none" ? ["display: none;"] : [`max-block-size: ${variable(token)};`];
+  }
+  // A date picker (Spec 025 ②, plan ② D-11): the cell and its looks carry their ground as a colour
+  // (as the glitilo's fill does: no text part of the Ero lies on it, the day is the text in it);
+  // today's look is the cell's border; the calendar is as wide as its token, as high at most as
+  // its height while expanded, and not shown while that height is none.
+  if (isDatepicker(skemo)) {
+    if (["cell", "selected-cell", "in-range-cell"].includes(part) && property === "color") {
+      return [`background-color: ${variable(token)};`];
+    }
+    if (part === "today-cell" && property === "color") return [`border-color: ${variable(token)};`];
+    if (part === "today-cell" && property === "width") return [`border-width: ${variable(token)};`];
+    if (part === "calendar" && property === "width") return [`inline-size: ${variable(token)};`];
+    if (part === "calendar" && property === "height") {
+      return token === "none" ? ["display: none;"] : [`max-block-size: ${variable(token)};`];
+    }
   }
   switch (property as SkemoPartProperty) {
     case "fill":
@@ -1262,6 +1326,28 @@ const suggestStructure: string = [
 ].join("\n");
 
 /**
+ * Layout of the calendar of a date picker (Spec 025 ②, plan ② D-11), keywords and 0 only: the
+ * trigger and the month buttons keep their size in the row; the field is the anchor, the calendar
+ * a popover of the platform under it (the writing direction mirrors it), a column of the head (a
+ * row with the month between prev and next) and the grid — a column of rows of seven, every
+ * weekday and every cell a seventh of the row, centred; a cell has a border for today's look (0
+ * otherwise) and is a pointer target, not allowed where it is refused.
+ */
+const datepickerStructure: string = [
+  ':where([part="trigger"], [part="prev"], [part="next"]) { flex: none; }',
+  ':where([part="field"]) { anchor-name: --fm-field; }',
+  ':where([part="calendar"]) { position: fixed; inset: auto; margin: 0; box-sizing: border-box; position-anchor: --fm-field; position-area: block-end; position-try-fallbacks: flip-block; display: flex; flex-direction: column; border-style: none; }',
+  ':where([part="calendar"]:not(:popover-open)) { display: none; }',
+  ':where([part="head"]) { display: flex; align-items: center; justify-content: space-between; }',
+  ':where([part="grid"]) { display: flex; flex-direction: column; }',
+  ':where([part="weekdays"]) { display: flex; }',
+  ':where([part="week"]) { display: flex; }',
+  ':where([part="weekday"], [part="cell"]) { flex: 1 1 0; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }',
+  ':where([part="cell"]) { border-style: solid; border-width: 0; cursor: pointer; }',
+  ':where([part="cell"][aria-disabled="true"]) { cursor: not-allowed; }',
+].join("\n");
+
+/**
  * Layout of a skip link (Spec 014 ②, D-07), keywords and 0 only, on top of a control's: the link
  * is fixed at the start of the viewport (the writing direction mirrors it) on its layer, and
  * clipped from sight until it has the focus — a keyboard user finds it first, nobody else sees
@@ -1713,7 +1799,7 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
                                           : isDisclosure(skemo)
                                             ? disclosureStructure
                                             : isField(skemo)
-                                              ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo), skemo.parts.decrement !== undefined)}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}`
+                                              ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo), skemo.parts.decrement !== undefined || isDatepicker(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}${isDatepicker(skemo) ? `\n${datepickerStructure}` : ""}`
                                               : isGroup(skemo)
                                                 ? groupStructure(
                                                     disables,
@@ -1831,7 +1917,18 @@ function selectorOf(
   if (isCard(skemo)) return cardPartSelector(part, data);
   if (isAvatar(skemo)) return avatarPartSelector(part, data);
   const state = STATE_SELECTORS[combination[STATE_KEY] ?? "rest"] ?? "";
-  if (isField(skemo)) return fieldPartSelector(part, property, data, state, isSelect(skemo), entry);
+  if (isField(skemo)) {
+    return fieldPartSelector(
+      part,
+      property,
+      data,
+      state,
+      isSelect(skemo),
+      entry,
+      isDatepicker(skemo),
+      combination[STATE_KEY] ?? "rest",
+    );
+  }
   if (isToggle(skemo)) return togglePartSelector(part, property, data, state);
   return partSelector(part, `[part="control"]${data}${state}`);
 }
@@ -1873,12 +1970,15 @@ export function elementNamesOf(
       isPagination(entry.skemo),
       isUpload(entry.skemo),
       isAvatar(entry.skemo),
+      isDatepicker(entry.skemo),
     ),
     role: entry.skemo.a11y.role,
     // Spec 015 ① (plan ① D-04): the breadcrumb is a light host with a list in its shadow.
     breadcrumb: isBreadcrumb(entry.skemo),
     // Spec 025 ① (plan ① D-05): a field with step buttons (the kampo) shows them in a row.
     stepper: entry.skemo.parts.decrement !== undefined,
+    // Spec 025 ② (plan ② D-11): a field with a calendar part is the date picker.
+    datepicker: isDatepicker(entry.skemo),
     marked: entry.skemo.parts["required-mark"] !== undefined,
     // Spec 011 ③: a live region turns its indicator and shows a dismiss butono where the Skemo
     // has the parts.

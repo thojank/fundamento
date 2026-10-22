@@ -75,6 +75,9 @@ describe("suggest_ero", () => {
       "destructive",
       "confirm",
       "dismiss",
+      // Spec 025 ②: the datelektilo.
+      "pick-date",
+      "date-range",
       "ask-reason",
       "choose-many",
       "choose-few",

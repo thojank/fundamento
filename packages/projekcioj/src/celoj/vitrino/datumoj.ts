@@ -402,6 +402,55 @@ export const VITRINO_STEPPER = {
   help: "Zwischen 1 und 10.",
 } as const;
 export const VITRINO_SEARCH_VALUE = "Standard";
+
+/**
+ * The date picker of the Vitrino (Spec 025 ②, plan ② D-13): a single date and a range in October
+ * 2026, today the 22nd; the Figma set shows the same month, the same days and the same words (one
+ * source for both pictures). The shown texts are the German format the element writes from lang.
+ */
+export const VITRINO_DATE = {
+  value: "2026-10-24",
+  start: "2026-10-06",
+  end: "2026-10-10",
+  today: "2026-10-22",
+  help: "Ein Datum ab heute.",
+  error: "Wähle ein Datum ab heute.",
+  month: "Oktober 2026",
+  shownValue: "24.10.2026",
+  shownRange: "06.10.2026 – 10.10.2026",
+} as const;
+
+/** The calendar of the Vitrino's month as the Figma plan draws it (Spec 025 ②, plan ② D-12). */
+export interface VitrinoCalendar {
+  /** The short weekday names from Monday, as the German document writes them. */
+  weekdays: string[];
+  /** Six weeks of seven days: the number of the day and whether it lies outside the month. */
+  days: { text: string; outside: boolean }[];
+  /** The day of the month that is today, chosen (single), and the two ends of the range. */
+  today: number;
+  selected: number;
+  range: [number, number];
+}
+
+/** The six weeks around the Vitrino's month, Monday first (the German week), from VITRINO_DATE. */
+export function vitrinoCalendar(): VitrinoCalendar {
+  const day = (iso: string) => Number(iso.slice(8, 10));
+  const [year, month] = VITRINO_DATE.value.split("-").map(Number) as [number, number, number];
+  const first = new Date(year, month - 1, 1);
+  // Monday first: the offset of the first day from Monday (Sunday is 0 in the platform's week).
+  const offset = (first.getDay() + 6) % 7;
+  const days = Array.from({ length: 42 }, (_, index) => {
+    const date = new Date(year, month - 1, 1 - offset + index);
+    return { text: String(date.getDate()), outside: date.getMonth() !== month - 1 };
+  });
+  return {
+    weekdays: ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
+    days,
+    today: day(VITRINO_DATE.today),
+    selected: day(VITRINO_DATE.value),
+    range: [day(VITRINO_DATE.start), day(VITRINO_DATE.end)],
+  };
+}
 export const VITRINO_UPLOAD_FILES: readonly { name: string; size: number }[] = [
   { name: "Lebenslauf.pdf", size: 1_200_000 },
   { name: "Zeugnis.png", size: 340_000 },
@@ -462,6 +511,36 @@ function cardMarkup(tag: string): string {
   const one = (attributes: string, picture: boolean) =>
     `<${tag} level="3"${attributes}>${picture ? VITRINO_CARD_PICTURE : ""}<span slot="heading">${VITRINO_CARD.heading}</span>${VITRINO_CARD.text}<fm-insigno slot="meta">${VITRINO_CARD.badge}</fm-insigno>${actions}</${tag}>`;
   return `<table><caption>${tag}, beide Ausrichtungen, mit und ohne Bild</caption><thead><tr><th scope="col">orientation</th><th scope="col">mit Bild</th><th scope="col">ohne Bild</th></tr></thead><tbody><tr><th scope="row">vertical</th><td>${one("", true)}</td><td>${one("", false)}</td></tr><tr><th scope="row">horizontal</th><td colspan="2">${one(' orientation="horizontal"', true)}</td></tr></tbody></table>`;
+}
+
+/**
+ * The date pickers of the Vitrino (Spec 025 ②, plan ② D-13): two rows — a single date with the help,
+ * a range — each at rest, required, disabled and invalid (the error in place of the help under
+ * invalid).
+ */
+function datepickerMarkup(tag: string): string {
+  const help = `<span slot="help">${VITRINO_DATE.help}</span>`;
+  const rows: [string, string][] = [
+    ["einzeln", ` value="${VITRINO_DATE.value}"`],
+    [
+      "Bereich",
+      ` mode="range" value-start="${VITRINO_DATE.start}" value-end="${VITRINO_DATE.end}"`,
+    ],
+  ];
+  const columns = ["required", "disabled", "invalid"];
+  const body = rows
+    .map(([head, attributes]) => {
+      const cells = [undefined, ...columns]
+        .map(
+          (column) =>
+            `<td><${tag}${attributes}${column === undefined ? "" : ` ${column}`}>${head}${column === "invalid" ? `<span slot="error">${VITRINO_DATE.error}</span>` : help}</${tag}></td>`,
+        )
+        .join("");
+      return `<tr><th scope="row">${head}</th>${cells}</tr>`;
+    })
+    .join("");
+  const heads = ["rest", ...columns].map((column) => `<th scope="col">${column}</th>`).join("");
+  return `<table><caption>${tag}, einzeln und Bereich</caption><thead><tr><th scope="col">Kombination</th>${heads}</tr></thead><tbody>${body}</tbody></table>`;
 }
 
 /**
@@ -817,6 +896,10 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
   if (entry.skemo.a11y.role === "article") return cardMarkup(tag);
   // A slider (Spec 025 ①): single, range and with the field beside, in the states of a field.
   if (entry.skemo.a11y.role === "slider") return sliderMarkup(tag);
+  // A date picker (Spec 025 ②): a single date and a range, in the states of a field.
+  if (entry.skemo.a11y.role === "textbox" && entry.skemo.parts.calendar !== undefined) {
+    return datepickerMarkup(tag);
+  }
   // An avatar (Spec 015 ③): every size with the picture, with initials and with a broken picture.
   if (entry.skemo.parts.initials !== undefined) return avatarMarkup(tag);
   // The Ikonaro grid (Spec 014 ②): the icon shows every name, not every combination.

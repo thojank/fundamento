@@ -778,6 +778,7 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
       // Spec 011 ③: the avizo, the insigno and the plenstato, in the Ero order like every set.
       "avizo",
       "butono",
+      "datelektilo",
       // Spec 011 ②: the dialogo and the tekstareo, in the Ero order like every set.
       "dialogo",
       "elektilo",
@@ -1015,6 +1016,8 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       // to confirm).
       avizo: "Meldung",
       butono: "Aktion",
+      // Spec 025 ②: a date picker is a field; its label names the date it asks for.
+      datelektilo: "Beschriftung",
       // Spec 011 ②: a dialog's heading names the decision (for the maintainer to confirm).
       dialogo: "Entscheidung",
       // Spec 010 ④: a select names what is chosen (plan ④ D-07, for the maintainer to confirm).
@@ -3624,5 +3627,106 @@ describe("the Figma plan draws the glitilo (Spec 025 ①)", () => {
       expect.arrayContaining(["surface.fill", "border.color", "box.height", "box.radius"]),
     );
     expect(set?.slider).toEqual({ share: 0.4, start: 0.2, end: 0.6 });
+  });
+});
+
+// Spec 025 ② (plan ② D-12): the datelektilo in Figma — a field: mode × expanded × state (mode an
+// axis of its own, as the slider's range: it keys no part; expanded keys the calendar, hidden
+// while closed as the kompletigilo's listbox). The calendar of the plan is the Vitrino's month:
+// October 2026 from Monday, the 24th chosen (single) or the 6th to the 10th (range), today the
+// 22nd — one source for both pictures.
+describe("the Figma plan draws the datelektilo (Spec 025 ②)", () => {
+  const set = plan.components.find((component) => component.set === "datelektilo");
+  const variant = (mode: string, expanded: string, state: string) =>
+    set?.variants.find(
+      (candidate) =>
+        candidate.props.mode === mode &&
+        candidate.props.expanded === expanded &&
+        candidate.props.state === state,
+    );
+
+  it("a field of mode × expanded × state, twenty-four variants; the label a field's word; the texts the Vitrino's; the calendar of the plan", () => {
+    expect(set?.structure).toBe("field");
+    expect(set?.extraAxes).toEqual(["mode"]);
+    expect(set?.variants).toHaveLength(24);
+    expect(set?.properties.state).toEqual([
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "readonly",
+      "invalid",
+    ]);
+    expect(set?.properties).toMatchObject({ mode: ["single", "range"], expanded: "BOOLEAN" });
+    expect(set?.label).toEqual({ property: "label", defaultValue: "Beschriftung" });
+    expect(set?.texts).toEqual({
+      help: "Ein Datum ab heute.",
+      error: "Fehler",
+      month: "Oktober 2026",
+      value: "24.10.2026",
+      range: "06.10.2026 – 10.10.2026",
+    });
+    expect(set?.calendar).toMatchObject({
+      weekdays: ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
+      today: 22,
+      selected: 24,
+      range: [6, 10],
+    });
+    expect(set?.calendar?.days).toHaveLength(42);
+    expect(set?.calendar?.days[0]).toEqual({ text: "28", outside: true });
+    expect(set?.calendar?.days[3]).toEqual({ text: "1", outside: false });
+    expect(set?.calendar?.days[41]).toEqual({ text: "8", outside: true });
+    expect(set?.grid).toMatchObject({ rows: 4, columns: 6 });
+  });
+
+  it("binds the field as the kampo, the trigger, the calendar and the cell's looks; the calendar only where expanded; the icons of trigger, prev and next", () => {
+    const closed = variant("single", "false", "rest");
+    expect(closed?.bindings).toMatchObject({
+      "surface.fill": "color/background/default",
+      "border.color": "color/border/default",
+      "trigger.size": "size/control/medium",
+      "calendar.fill": "color/background/raised",
+      "calendar.radius": "radius/role/surface",
+      "calendar.width": "size/container/small",
+      "calendar.inline-padding": "spacing/medium",
+      "month.typography": "typography/label/1",
+      "prev.size": "size/control/small",
+      "weekday.color": "color/text/muted",
+      "cell.color": "color/action/tertiary/rest",
+      "cell.size": "size/target/min",
+      "cell.radius": "radius/role/control",
+      "day.color": "color/text/default",
+      "day.typography": "typography/label/1",
+      "selected-cell.color": "color/action/primary/selected",
+      "selected-day.color": "color/action/primary/text",
+      "in-range-cell.color": "color/action/secondary/selected",
+      "today-cell.color": "color/border/strong",
+      "today-cell.width": "border/width/default",
+      "outside-day.color": "color/text/muted",
+      "box.gap": "spacing/small",
+    });
+    expect(closed?.bindings["calendar.height"]).toBeUndefined();
+    expect(closed?.hidden).toContain("calendar");
+    const open = variant("range", "true", "rest");
+    expect(open?.bindings["calendar.height"]).toBe("size/container/medium");
+    expect(open?.hidden ?? []).not.toContain("calendar");
+    expect(open?.shadow?.variable).toBe("elevation/shadow/overlay");
+    expect(variant("single", "false", "hover")?.bindings["cell.color"]).toBe(
+      "color/action/tertiary/hover",
+    );
+    expect(variant("single", "false", "disabled")?.bindings).toMatchObject({
+      "cell.color": "color/action/tertiary/disabled",
+      "day.color": "color/text/disabled",
+      "surface.fill": "color/background/sunken",
+    });
+    expect(variant("single", "false", "invalid")?.bindings["border.color"]).toBe(
+      "color/status/danger/border",
+    );
+    expect(variant("single", "false", "focus")?.focusVisible).toBe(true);
+    expect(closed?.icons).toEqual({
+      trigger: "calendar",
+      prev: "chevron-left",
+      next: "chevron-right",
+    });
   });
 });

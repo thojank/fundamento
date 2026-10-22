@@ -212,6 +212,10 @@
       "status": "active",
       "type": "ero"
     },
+    "ero_01M5GYYCPEQ6SKJGPDKMFVZCAQ": {
+      "status": "active",
+      "type": "ero"
+    },
     "iko_01M55EFZMTVJR4FGV32KYEG54W": {
       "status": "active",
       "type": "ikono"
@@ -289,6 +293,10 @@
       "type": "ikono"
     },
     "iko_01M5GCQBAPAJAWMNPC5DR8VMEF": {
+      "status": "active",
+      "type": "ikono"
+    },
+    "iko_01M5GYYDXE2TQP5KAEP2S1EGWP": {
       "status": "active",
       "type": "ikono"
     },
@@ -1144,6 +1152,10 @@
       "status": "retired",
       "type": "jugxo"
     },
+    "jug_01M5GYYE9X3KKQ8K6NXTDPM25K": {
+      "status": "active",
+      "type": "jugxo"
+    },
     "kpa_01M2VEEE9HREQTY2499C9JS05Q": {
       "status": "active",
       "type": "kontrastParo"
@@ -1977,6 +1989,10 @@
       "type": "skemo"
     },
     "ske_01M5GCQ9SFM2M83B6VF3TJYVSP": {
+      "status": "active",
+      "type": "skemo"
+    },
+    "ske_01M5GYYD31C6C7EN316YWX0FYY": {
       "status": "active",
       "type": "skemo"
     },
@@ -3669,6 +3685,10 @@
       "type": "uzo"
     },
     "uzo_01M5GCQA5WKSWAT6046VPQB443": {
+      "status": "active",
+      "type": "uzo"
+    },
+    "uzo_01M5GYYDGXAZSS03E95136YPGK": {
       "status": "active",
       "type": "uzo"
     }

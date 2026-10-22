@@ -82,6 +82,7 @@ describe("describe_term (FR-12)", () => {
       "avataro",
       "avizo",
       "butono",
+      "datelektilo",
       "dialogo",
       "elektilo",
       "elekto",

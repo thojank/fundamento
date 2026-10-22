@@ -535,8 +535,8 @@ test("the Ikonaro grid, the apartigilo and the saltligilo are upgraded in their 
   await open(page);
   const icons = page.locator("#fm-vitrino-ikono fm-ikono");
   // Spec 015 ①: sixteen names (chevron-left), three sizes each, and the four status icons.
-  // Spec 015 ②: seventeen (upload); Spec 025 ①: nineteen (add, subtract).
-  await expect(icons).toHaveCount(19 * 3 + 4);
+  // Spec 015 ②: seventeen (upload); Spec 025 ①: nineteen (add, subtract); Spec 025 ②: twenty (calendar).
+  await expect(icons).toHaveCount(20 * 3 + 4);
   await expect(page.locator("#fm-vitrino-ikono").getByRole("img")).toHaveCount(4);
   const maskOf = () =>
     page
@@ -1374,4 +1374,30 @@ test("fm-glitilo is upgraded in its section, moved by keyboard; the kampo's step
   await stepper.getByRole("button", { name: "Erhöhen" }).click();
   await expect(stepper).toHaveAttribute("value", "4");
   expect(await axeViolations(page, "#fm-vitrino-kampo")).toEqual([]);
+});
+
+// Spec 025 ② (plan ② D-13): the section of the datelektilo — eight date pickers upgraded, the
+// first opened by its trigger, the day moved by the keyboard alone (ArrowRight), Escape closes and
+// gives the focus back to the trigger; axe without a finding closed and open.
+test("fm-datelektilo is upgraded in its section, opened and moved by keyboard; axe-clean", async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(new Date("2026-10-22T10:00:00"));
+  await open(page);
+  const section = page.locator("#fm-vitrino-datelektilo");
+  await expect(section.locator("fm-datelektilo")).toHaveCount(8);
+  const first = section.locator("fm-datelektilo").first();
+  await expect(first.locator('input[part="control"]')).toHaveValue("24.10.2026");
+  expect(await axeViolations(page, "#fm-vitrino-datelektilo")).toEqual([]);
+  const trigger = first.locator('[part="trigger"]');
+  await trigger.click();
+  const chosen = first.locator('[part="cell"][aria-selected="true"]');
+  await expect(chosen).toBeFocused();
+  await expect(first.locator('[part="month"]')).toHaveText("Oktober 2026");
+  await page.keyboard.press("ArrowRight");
+  await expect(first.locator('[part="cell"][data-date="2026-10-25"]')).toBeFocused();
+  expect(await axeViolations(page, "#fm-vitrino-datelektilo")).toEqual([]);
+  await page.keyboard.press("Escape");
+  await expect(first.locator('[part="calendar"]')).toBeHidden();
+  await expect(trigger.locator('[part="control"]')).toBeFocused();
 });

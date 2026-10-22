@@ -40,6 +40,7 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/avataro.styles.ts",
       "eroj/src/generated/avizo.styles.ts",
       "eroj/src/generated/butono.styles.ts",
+      "eroj/src/generated/datelektilo.styles.ts",
       "eroj/src/generated/dialogo.styles.ts",
       "eroj/src/generated/elektilo.styles.ts",
       "eroj/src/generated/elekto.styles.ts",
@@ -51,6 +52,7 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/fm-avataro.ts",
       "eroj/src/generated/fm-avizo.ts",
       "eroj/src/generated/fm-butono.ts",
+      "eroj/src/generated/fm-datelektilo.ts",
       "eroj/src/generated/fm-dialogo.ts",
       "eroj/src/generated/fm-elektilo.ts",
       "eroj/src/generated/fm-elekto.ts",
@@ -2198,5 +2200,126 @@ describe("Web Component Celo for the kampo of Spec 025 ① (time, stepper, clear
     expect(componentCssIssues("kampo.css", css)).toEqual([]);
     const inventory = stylesheetInventory(styles);
     expect(inventory.props).toEqual({ size: ["small", "medium", "large"] });
+  });
+});
+
+// Spec 025 ② (section ②, plan ② D-11): the datelektilo is the field of the kampo with a trigger
+// beside the input (a composed butono with the ikono calendar, named by the Modelo) and the
+// calendar as a popover of the platform anchored to the field (as the kompletigilo's listbox): the
+// head with month and year between prev and next, the grid of role grid with its weekday headers
+// and the day cells (role gridcell, a roving tabindex). The cell's own looks are parts keyed by
+// the cell's attributes: aria-selected, data-range, data-today, data-outside.
+describe("Web Component Celo for the datelektilo (Spec 025 ②)", () => {
+  const element = files["eroj/src/generated/fm-datelektilo.ts"] ?? "";
+  const css = JSON.parse(
+    /export const DATELEKTILO_CSS = (".*");/s.exec(
+      files["eroj/src/generated/datelektilo.styles.ts"] ?? "",
+    )?.[1] ?? '""',
+  ) as string;
+
+  it("renders the field with the trigger in a row and the calendar as a popover dialog with head and grid", () => {
+    expect(element).toContain(
+      '<div part="row"><input part="control" id="control" autocomplete="off">',
+    );
+    expect(element).toContain(
+      '<fm-butono part="trigger" emphasis="low" aria-haspopup="dialog" aria-expanded="false" aria-controls="calendar">',
+    );
+    expect(element).toContain('<fm-ikono slot="icon-start" name="calendar">');
+    expect(element).toContain(
+      '<div part="calendar" id="calendar" role="dialog" popover="manual" aria-modal="false" aria-labelledby="month">',
+    );
+    expect(element).toContain('<div part="head">');
+    expect(element).toContain('<fm-butono part="prev" emphasis="low" size="small">');
+    expect(element).toContain('<fm-ikono slot="icon-start" name="chevron-left">');
+    expect(element).toContain('<span part="month" id="month" aria-live="polite">');
+    expect(element).toContain('<fm-butono part="next" emphasis="low" size="small">');
+    expect(element).toContain('<div part="grid" role="grid" aria-labelledby="month">');
+    for (const key of [
+      "trigger-name",
+      "prev-name",
+      "next-name",
+      "value-invalid",
+      "value-end-invalid",
+    ]) {
+      expect(element).toContain(`"${key}"`);
+    }
+    // The weekday names and the month come from the document's language, never from a string.
+    expect(element).toContain("Intl.DateTimeFormat");
+    expect(element).not.toContain('"Montag"');
+    expect(element).not.toContain('"Oktober"');
+  });
+
+  it("the stylesheet lays out the row, the calendar popover, the grid of rows of seven cells; the cell's looks by attribute; keywords and 0 only in the structure", () => {
+    expect(css).toContain(':where([part="row"]) { display: flex; align-items: center; }');
+    expect(css).toContain(':where([part="row"]) > [part="control"] { flex: 1 1 auto; }');
+    expect(css).toContain(':where([part="trigger"], [part="prev"], [part="next"]) { flex: none; }');
+    expect(css).toContain(':where([part="field"]) { anchor-name: --fm-field; }');
+    expect(css).toContain(
+      ':where([part="calendar"]) { position: fixed; inset: auto; margin: 0; box-sizing: border-box; position-anchor: --fm-field; position-area: block-end; position-try-fallbacks: flip-block; display: flex; flex-direction: column; border-style: none; }',
+    );
+    expect(css).toContain(':where([part="calendar"]:not(:popover-open)) { display: none; }');
+    expect(css).toContain(
+      ':where([part="head"]) { display: flex; align-items: center; justify-content: space-between; }',
+    );
+    expect(css).toContain(':where([part="grid"]) { display: flex; flex-direction: column; }');
+    expect(css).toContain(':where([part="week"]) { display: flex; }');
+    expect(css).toContain(
+      ':where([part="weekday"], [part="cell"]) { flex: 1 1 0; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }',
+    );
+    expect(css).toContain(
+      ':where([part="cell"]) { border-style: solid; border-width: 0; cursor: pointer; }',
+    );
+    expect(css).toContain(':where([part="cell"][aria-disabled="true"]) { cursor: not-allowed; }');
+    // The looks of a cell: by state on the cell itself; its four looks by attribute outside
+    // :where(), so that they outrank hover and focus (a chosen day keeps its fill under the pointer).
+    expect(css).toContain(
+      ':where([part="field"]) [part="cell"] {\n  background-color: var(--fm-color-action-tertiary-rest);',
+    );
+    expect(css).toContain(
+      ':where([part="field"]) [part="cell"]:hover {\n  background-color: var(--fm-color-action-tertiary-hover);',
+    );
+    expect(css).toContain(
+      ':where([part="field"]) [part="cell"][aria-disabled="true"] {\n  background-color: var(--fm-color-action-tertiary-disabled);',
+    );
+    expect(css).toContain(
+      '[part="field"] [part="cell"][aria-selected="true"] {\n  background-color: var(--fm-color-action-primary-selected);\n  color: var(--fm-color-action-primary-text);',
+    );
+    expect(css).toContain(
+      '[part="field"] [part="cell"][data-range="true"] {\n  background-color: var(--fm-color-action-secondary-selected);',
+    );
+    expect(css).toContain(
+      '[part="field"] [part="cell"][data-today="true"] {\n  border-color: var(--fm-color-border-strong);\n  border-width: var(--fm-border-width-default);',
+    );
+    expect(css).toContain(
+      '[part="field"] [part="cell"][data-outside="true"] {\n  color: var(--fm-color-text-muted);',
+    );
+    expect(css).not.toContain(':where([part="field"]) [part="cell"][aria-selected="true"]');
+    // The trigger takes the field's control size, prev and next the small one; the calendar its
+    // surface, shadow, layer, width and padding; its height none while closed.
+    expect(css).toContain(
+      ':where([part="field"]) [part="trigger"] {\n  inline-size: var(--fm-size-control-medium);\n  block-size: var(--fm-size-control-medium);',
+    );
+    expect(css).toContain(
+      ':where([part="field"]) [part="prev"] {\n  inline-size: var(--fm-size-control-small);',
+    );
+    expect(css).toContain(
+      ':where([part="field"]) [part="calendar"] {\n  background-color: var(--fm-color-background-raised);\n  border-radius: var(--fm-radius-role-surface);\n  box-shadow: var(--fm-elevation-shadow-overlay);\n  z-index: var(--fm-elevation-layer-overlay);\n  inline-size: var(--fm-size-container-small);\n  padding-inline: var(--fm-spacing-medium);',
+    );
+    expect(css).toContain(
+      ':where([part="field"][data-expanded="true"]) [part="calendar"] {\n  max-block-size: var(--fm-size-container-medium);',
+    );
+    expect(css).toContain(
+      ':where([part="field"]) [part="cell"] {\n  inline-size: var(--fm-size-target-min);\n  block-size: var(--fm-size-target-min);',
+    );
+    expect(componentCssIssues("datelektilo.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("datelektilo.css", css)).toEqual([]);
+  });
+
+  it("the parity inventory reads expanded as a boolean and the six states of a field", () => {
+    const inventory = stylesheetInventory(files["eroj/src/generated/datelektilo.styles.ts"] ?? "");
+    expect(inventory.props).toEqual({ expanded: ["boolean"] });
+    expect([...inventory.states].sort()).toEqual(
+      ["disabled", "focus", "hover", "invalid", "readonly", "rest"].sort(),
+    );
   });
 });

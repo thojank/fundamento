@@ -32,6 +32,7 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
       "avataro",
       "avizo",
       "butono",
+      "datelektilo",
       "dialogo",
       "elektilo",
       "elekto",
@@ -308,6 +309,7 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
         "kompletigilo",
         "alsxutilo",
         "glitilo",
+        "datelektilo",
       ],
     ],
     [
@@ -322,6 +324,7 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
         "kompletigilo",
         "alsxutilo",
         "glitilo",
+        "datelektilo",
       ],
     ],
     [
@@ -336,6 +339,7 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
         "kompletigilo",
         "alsxutilo",
         "glitilo",
+        "datelektilo",
       ],
     ],
     [
@@ -349,6 +353,7 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
         "kompletigilo",
         "alsxutilo",
         "glitilo",
+        "datelektilo",
       ],
     ],
     [
@@ -362,6 +367,7 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
         "kompletigilo",
         "alsxutilo",
         "glitilo",
+        "datelektilo",
       ],
     ],
   ])("%s is widened to the markobutono, not duplicated (E5)", (name, eroj) => {
@@ -407,6 +413,7 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
       "kodbloko",
       "markdovido",
       "glitilo",
+      "datelektilo",
     ]);
   });
 

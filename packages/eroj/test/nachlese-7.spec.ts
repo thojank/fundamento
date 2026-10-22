@@ -81,7 +81,7 @@ test.describe("Nachlese 7 ① (0.1.1)", () => {
   }) => {
     await serve(page, out, '<main id="host"></main>');
     // Spec 020 ③: 34 with the kodbloko and the markdovido; Spec 025 ①: 35 with the glitilo and the markdovido.
-    expect(TAGS).toHaveLength(35);
+    expect(TAGS).toHaveLength(36);
     const results = await page.evaluate((tags) => {
       // A constructor that writes an attribute on its host breaks createElement: the platform
       // reports the error and hands back an HTMLUnknownElement instead of the Ero.
@@ -111,7 +111,7 @@ test.describe("Nachlese 7 ① (0.1.1)", () => {
   }) => {
     await serve(page, out, '<main id="host"></main>');
     const files = readdirSync(GUIDELINES).filter((file) => file.endsWith(".md"));
-    expect(files).toHaveLength(35);
+    expect(files).toHaveLength(36);
     const failures: string[] = [];
     for (const file of files) {
       for (const example of examplesOf(file)) {

@@ -48,6 +48,8 @@ const WORDS = [
   "thirty-four",
   // Spec 025 ①: thirty-five Eroj (the slider).
   "thirty-five",
+  // Spec 025 ②: thirty-six Eroj (the date picker).
+  "thirty-six",
 ] as const;
 
 /** A count as an English word for 0 to 35 (`no` for zero), otherwise as digits. */

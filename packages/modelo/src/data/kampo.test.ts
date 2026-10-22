@@ -37,6 +37,7 @@ describe("kampo in the repo Modelo (T004)", () => {
       "avataro",
       "avizo",
       "butono",
+      "datelektilo",
       "dialogo",
       "elektilo",
       "elekto",
@@ -271,6 +272,8 @@ describe("the Uzo of the kampo (T004, A3)", () => {
       ["suggestions", "kompletigilo"],
       // Spec 025 ①: a value set by feel is the glitilo's.
       ["approximate", "glitilo"],
+      // Spec 025 ②: a date near today is the datelektilo's.
+      ["near-date", "datelektilo"],
     ]);
     // Spec 011 ① (G5, E8): password and date are kinds now, their boundaries are gone; what stays
     // outside is showing a password, a decimal and a range of dates.
@@ -278,7 +281,7 @@ describe("the Uzo of the kampo (T004, A3)", () => {
       ["reveal-password", "ask-human"],
       // Spec 025 ①: the stepper is the kampo's own now (kind number with stepper); a time zone stops.
       ["decimal", "not-supported"],
-      ["date-range", "ask-human"],
+      ["date-range", "use-instead"],
       ["time-zone", "ask-human"],
       // Spec 015 ②: a file is the alsxutilo's.
       ["file", "use-instead"],
@@ -300,7 +303,12 @@ describe("the Uzo of the kampo (T004, A3)", () => {
       "search-bar",
     ]);
     // Spec 025 ①: the field beside the track of a glitilo.
-    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["kampo", "butono", "glitilo"]);
+    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual([
+      "kampo",
+      "butono",
+      "glitilo",
+      "datelektilo",
+    ]);
     expect(uzo?.composes.never.map((entry) => entry.ero)).toEqual(["butono"]);
     const butono = modelo.eroj.find((entry) => entry.ero.name === "butono");
     expect(butono?.uzo?.composes.with.map((entry) => entry.ero)).toEqual([
@@ -377,7 +385,7 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
           // placeholder is widened to it (it has none).
           ...(name.startsWith("placeholder-") ? [] : ["alsxutilo"]),
           // Spec 025 ①: the glitilo is a field of a value in limits; the same Reguloj, no placeholder.
-          ...(name.startsWith("placeholder-") ? [] : ["glitilo"]),
+          ...(name.startsWith("placeholder-") ? [] : ["glitilo", "datelektilo"]),
         ],
       });
       expect(regulo?.checkability).toBe("automatic");
@@ -432,6 +440,7 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
       "kodbloko",
       "markdovido",
       "glitilo",
+      "datelektilo",
     ]);
   });
 
@@ -565,10 +574,16 @@ describe("the kampo of Spec 011 ①: password, number and date", () => {
       case: "decimal",
       action: "not-supported",
     });
+    // Spec 025 ②: the date range is the datelektilo's now; the kampo's boundary is closed
+    // (use-instead) and stands beside the answer (flipped with a Jugxo, OP-12).
+    expect(suggest("Zeitraum von bis").suggestion).toEqual({
+      ero: "datelektilo",
+      props: { mode: "range" },
+    });
     expect(suggest("Zeitraum von bis").boundary).toMatchObject({
       ero: "kampo",
       case: "date-range",
-      action: "ask-human",
+      action: "use-instead",
     });
     // Spec 025 ①: a counter with plus and minus is the kampo with its stepper now, no boundary.
     expect(suggest("Zähler mit Plus und Minus").suggestion).toEqual({

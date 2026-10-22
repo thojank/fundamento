@@ -1267,6 +1267,10 @@
         {
           "predicate": "references",
           "target": "#Glitilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Datelektilo"
         }
       ]
     },
@@ -1401,6 +1405,52 @@
         {
           "predicate": "references",
           "target": "#Dialogo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Datelektilo",
+      "term": "Datelektilo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Datelektilo",
+        "en": "date picker",
+        "de": "Datumsauswahl"
+      },
+      "altLabel": {
+        "en": [
+          "datelektilo",
+          "date picker",
+          "calendar field",
+          "date range picker"
+        ],
+        "de": [
+          "Datumsauswahl",
+          "Kalenderfeld",
+          "Datumswähler",
+          "Zeitraumauswahl",
+          "datelektilo"
+        ]
+      },
+      "definition": {
+        "en": "A date picker: lets a person choose a date or a date range near today, typed into the field in the document's format or picked from a calendar that opens beside the field (a popover): the head with month and year between prev and next, the grid of the days with the keys of the APG date picker dialog. The chosen day, the days in between, today and the days outside the month have their own looks; min, max and disabled-dates refuse days. A birthday is typed into the kampo of kind date; a time of day is the kampo's of kind time; several months and presets stop with a person.",
+        "de": "Eine Datumsauswahl: lässt eine Person ein Datum oder einen Zeitraum in der Nähe von heute wählen, getippt ins Feld im Format der Dokumentsprache oder gewählt in einem Kalender, der sich neben dem Feld öffnet (ein Popover): der Kopf mit Monat und Jahr zwischen Zurück und Weiter, das Raster der Tage mit den Tasten des APG-Datumsdialogs. Der gewählte Tag, die Tage dazwischen, heute und die Tage außerhalb des Monats haben ihr eigenes Bild; min, max und disabled-dates sperren Tage. Ein Geburtsdatum tippt man in den kampo kind=date; eine Uhrzeit gehört dem kampo kind=time; mehrere Monate und Vorgaben halten bei einer Person."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Kampo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Ikono"
         }
       ]
     },

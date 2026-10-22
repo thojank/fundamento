@@ -43,6 +43,7 @@ import {
   VITRINO_AVATAR,
   VITRINO_CARD,
   VITRINO_CONTENT_TEXT,
+  VITRINO_DATE,
   VITRINO_DIALOG_ACTIONS,
   VITRINO_ICON_EXAMPLE,
   VITRINO_LIST_ENTRIES,
@@ -60,6 +61,8 @@ import {
   VITRINO_TRIGGER_TEXT,
   VITRINO_UPLOAD_FILES,
   VITRINO_UPLOAD_HELP,
+  type VitrinoCalendar,
+  vitrinoCalendar,
 } from "../vitrino/datumoj.js";
 import { signOf } from "../web-component/element-template.js";
 import {
@@ -1250,6 +1253,12 @@ export interface FigmaComponentSet {
    */
   slider?: { share: number; start: number; end: number };
   /**
+   * A date picker (Spec 025 ②, plan ② D-12): the Vitrino's month as the calendar shows it — the
+   * weekday names, six weeks of days (outside the month marked), today, the chosen day and the
+   * ends of the range; the plugin draws every cell from it.
+   */
+  calendar?: VitrinoCalendar;
+  /**
    * The table of the set (Spec 011 ④, plan ④ D-14): the head words, the rows (row header first),
    * the numeric columns, the sorted column and the direction of its sort button — the Vitrino's
    * table, one source for both pictures.
@@ -2338,6 +2347,10 @@ function iconsOf(
   if (structure === "upload") return { "icon-start": "upload", remove: "close" };
   // A pagination (Spec 015 ①): the arrows back and forth; a breadcrumb: the chevron between two.
   if (structure === "pagination") return { prev: "chevron-left", next: "chevron-right" };
+  // A date picker (Spec 025 ②): the calendar on the trigger, the chevrons on prev and next.
+  if (structure === "field" && skemo.parts.calendar !== undefined) {
+    return { trigger: "calendar", prev: "chevron-left", next: "chevron-right" };
+  }
   if (structure === "breadcrumb") return { separator: "chevron-right" };
   // A disclosure (Spec 014 ⑤): the chevron points down where open, right where closed.
   if (structure === "disclosure" && skemo.parts.indicator !== undefined) {
@@ -2394,7 +2407,11 @@ function componentSetOf(
           ? ["orientation"]
           : structure === "slider"
             ? ["range"]
-            : [];
+            : // A date picker (Spec 025 ②, plan ② D-12): one variant per mode — it keys no part,
+              // the chosen days do; the set shows one day and a range.
+              structure === "field" && skemo.parts.calendar !== undefined
+              ? ["mode"]
+              : [];
   const keys = [...extraAxes, ...variantKeys(skemo)];
   // What the plugin draws for this structure (Spec 011 ③): the bindings every structure shares and
   // the ones this structure binds elsewhere — the text's colour on the label of a badge. What the
@@ -3153,6 +3170,20 @@ function componentSetOf(
             start: Number(VITRINO_SLIDER.start) / 100,
             end: Number(VITRINO_SLIDER.end) / 100,
           },
+        }
+      : {}),
+    // Spec 025 ② (plan ② D-12): the Vitrino's help, month and dates (the error the Vitrino's
+    // word); the calendar of the Vitrino's month.
+    ...(structure === "field" && skemo.parts.calendar !== undefined
+      ? {
+          texts: {
+            help: VITRINO_DATE.help,
+            error: VITRINO_SLOT_TEXTS.error ?? "",
+            month: VITRINO_DATE.month,
+            value: VITRINO_DATE.shownValue,
+            range: VITRINO_DATE.shownRange,
+          },
+          calendar: vitrinoCalendar(),
         }
       : {}),
     ...(structure === "popover"
