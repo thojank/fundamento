@@ -26,7 +26,7 @@
 
 | Was | Wert |
 |---|---|
-| Commits ① | rot `8647ecc`, grün `21efed9`, Messungen `43f0b2b`, Agordilo-Fixtures `e124d20` + `8770f9d` (B-8) – vor dem Rebase rot `a1af500`, grün `b931177` |
+| Commits ① | rot `55d2cdb`, grün `52e833e`, Hashes `3052fc8`, Agordilo-Fixtures `55877fe` + `17bb3ae` (B-8), CI `76f3fbf` – nach dem zweiten Rebase auf Spec 024 O-1 (`fbda604`); davor rot `8647ecc`/`a1af500`, grün `21efed9`/`b931177` |
 | Grün gemessen | Modelo 169 Dateien / 3716 Tests, MCP 42 / 414, Projekcioj 30 / 808, Browser (Chromium) 301, Alirebleco 585, Vitrino-Check 52, Make-Kit 5, Quickstart 1, `check:parity` 35 Eroj / 0 Differenzen / 369 freigegeben |
 | CI | PR #101, Lauf 39722615015 grün (alle acht Jobs) |
 | Rot gemessen | Modelo 62 Tests in 25 Dateien, Projekcioj 22 in 7 Dateien, MCP 2 in 3 Dateien (s025-eingabe lädt nicht ohne Daten) |
