@@ -11,6 +11,7 @@ import {
   files,
   MODEL_FONTS,
   modelDouble,
+  once,
   pageNodes,
   prepared,
   repoFiles,
@@ -51,7 +52,7 @@ describe("the insigno is drawn as a badge: the pill with its text (Spec 011 ③)
       };
     }[];
   };
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
@@ -60,7 +61,7 @@ describe("the insigno is drawn as a badge: the pill with its text (Spec 011 ③)
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     const insigno = report.components.find((component) => component.set === "insigno");
     return { double, set, variant, report, insigno };
-  };
+  });
 
   it("draws ten variants of intent × size in one column, each the pill directly under the variant, the text as the label property", async () => {
     const { set, variant, insigno } = await drawn();
@@ -158,7 +159,7 @@ describe("the avizo is drawn as a notice: surface with accent, heading, message,
       };
     }[];
   };
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
@@ -167,7 +168,7 @@ describe("the avizo is drawn as a notice: surface with accent, heading, message,
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     const avizo = report.components.find((component) => component.set === "avizo");
     return { double, set, variant, report, avizo };
-  };
+  });
 
   it("draws four variants by intent, the control a row with the accent at its start, the texts column and the dismiss frame", async () => {
     const { set, variant, avizo } = await drawn();
@@ -365,7 +366,7 @@ describe("the plenstato is drawn as a state: the column with the arc, the text a
       };
     }[];
   };
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
@@ -374,7 +375,7 @@ describe("the plenstato is drawn as a state: the column with the arc, the text a
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     const plenstato = report.components.find((component) => component.set === "plenstato");
     return { double, set, variant, report, plenstato };
-  };
+  });
 
   it("draws two variants by kind: the border dashed where empty, its paint invisible where loading", async () => {
     const { set, variant, plenstato } = await drawn();
@@ -553,7 +554,7 @@ describe("the mezurilo is drawn as a meter: label, track with the fill at 66 %, 
       };
     }[];
   };
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
@@ -562,7 +563,7 @@ describe("the mezurilo is drawn as a meter: label, track with the fill at 66 %, 
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     const mezurilo = report.components.find((component) => component.set === "mezurilo");
     return { double, set, variant, report, mezurilo };
-  };
+  });
   const planned = repoPlan.components.find((component) => component.set === "mezurilo");
 
   it("draws four variants by intent: the column with label, track and value text, the fill's colour by intent", async () => {
@@ -789,7 +790,7 @@ describe("the tabelo is drawn as a table: caption, region with head and three ro
       };
     }[];
   };
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
@@ -798,7 +799,7 @@ describe("the tabelo is drawn as a table: caption, region with head and three ro
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     const tabelo = report.components.find((component) => component.set === "tabelo");
     return { double, set, variant, report, tabelo };
-  };
+  });
   const REST = "density=comfortable, state=rest";
   const FOCUS = "density=comfortable, state=focus";
 
@@ -1071,7 +1072,7 @@ describe("the atributlisto is drawn as a list: three entries, rows in columns an
       };
     }[];
   };
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
@@ -1080,7 +1081,7 @@ describe("the atributlisto is drawn as a list: three entries, rows in columns an
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     const atributlisto = report.components.find((component) => component.set === "atributlisto");
     return { double, set, variant, report, atributlisto };
-  };
+  });
 
   it("draws three variants by layout: the list column with three entries, each term and value in their roles", async () => {
     const { set, variant, atributlisto } = await drawn();
@@ -1194,7 +1195,7 @@ describe("the navigado is drawn as a nav: three items in a row, the first curren
       };
     }[];
   };
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
@@ -1203,7 +1204,7 @@ describe("the navigado is drawn as a nav: three items in a row, the first curren
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     const navigado = report.components.find((component) => component.set === "navigado");
     return { double, set, variant, report, navigado };
-  };
+  });
 
   it("draws three variants by state: the nav row with three entries, each ring → gap → item with its text", async () => {
     const { set, variant, navigado } = await drawn();
@@ -1419,7 +1420,7 @@ describe("the langetaro is drawn as tabs: the list with three tabs, the first ac
       };
     }[];
   };
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
@@ -1428,7 +1429,7 @@ describe("the langetaro is drawn as tabs: the list with three tabs, the first ac
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     const langetaro = report.components.find((component) => component.set === "langetaro");
     return { double, set, variant, report, langetaro };
-  };
+  });
 
   it("draws four variants by state: the list row with three entries and the panel below, each tab ring → gap → tab with its text", async () => {
     const { set, variant, langetaro } = await drawn();
@@ -1592,14 +1593,14 @@ describe("icons are drawn from the glyphs of every Aspekto and switch with the b
     );
   const vectorOf = (frame: DoubleNode | undefined) =>
     frame?.children.find((child) => child.type === "VECTOR");
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
     )) as { warnings: string[]; components: { set: string; layout: { zero: string[] } }[] };
     const setOf = (name: string) => pageNodes(double).find((child) => child.name === name);
     return { double, report, setOf };
-  };
+  });
 
   it("the set ikono: 300 variants, each the control with one glyph frame per Aspekto, visible by the brand variable, filled in the bound colour, sized by the token", async () => {
     const { setOf, report } = await drawn();
@@ -1786,14 +1787,14 @@ describe("the plugin draws the overlays and binds the shadows (Spec 014 ④)", (
       shadow?: { part: string; variable: string; layers: number; status: string; evidence: string };
     }[];
   };
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
     )) as Report;
     const setOf = (name: string) => pageNodes(double).find((child) => child.name === name);
     return { double, report, setOf };
-  };
+  });
 
   it("binds the shadow of the dialogo, the konsileto, the sxvebilo and the menuo to DROP_SHADOW effects (status bound)", async () => {
     const { report, setOf } = await drawn();
@@ -2239,12 +2240,12 @@ describe("the plugin draws the additions of Nachlese 7 ② (B-2, B-4)", () => {
         ?.boundVariables?.color?.name,
     );
   type Definitions = Record<string, { type: string; defaultValue: string | boolean }>;
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     await new Function("figma", `${source}\nreturn applyPlan();`)(double.figma);
     const setOf = (name: string) => pageNodes(double).find((child) => child.name === name);
     return { double, setOf };
-  };
+  });
 
   it("B-2: the mezurilo declares label-hidden as the BOOLEAN property label-visible (shown), connected to the label of every variant", async () => {
     const { double, setOf } = await drawn();

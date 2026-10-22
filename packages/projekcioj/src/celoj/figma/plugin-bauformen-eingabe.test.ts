@@ -9,6 +9,7 @@ import { BACKDROP_EXAMPLE } from "./figma.js";
 import {
   descendant,
   modelDouble,
+  once,
   pageNodes,
   prepared,
   repoFiles,
@@ -28,13 +29,13 @@ describe("the sxaltilo is drawn as a toggle: track, knob, label beside (Spec 010
   const source = repoFiles["figma/plugin/code.js"] ?? "";
   const bound = (node: DoubleNode | undefined, field: string) =>
     traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     await run(double, source);
     const set = pageNodes(double).find((child) => child.name === "sxaltilo");
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     return { set, variant };
-  };
+  });
 
   it("draws every variant of checked × size × state, named by the plan", async () => {
     const { set } = await drawn();
@@ -90,13 +91,13 @@ describe("the markobutono is drawn as a toggle: box, check mark, label and error
   const source = repoFiles["figma/plugin/code.js"] ?? "";
   const bound = (node: DoubleNode | undefined, field: string) =>
     traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     await run(double, source);
     const set = pageNodes(double).find((child) => child.name === "markobutono");
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     return { double, set, variant };
-  };
+  });
   // The Aspektoj of the repository's Modelo, whose glyphs the plan carries (Nachlese 4 N-7).
   const aspektoj = Object.keys(repoPlan.ikonoj?.glyphs ?? {});
   const glyphFrames = aspektoj.map((aspekto) => `glyph-${aspekto}`);
@@ -217,13 +218,13 @@ describe("the elekto is drawn as a choice: question, options with circle and dot
       ((node?.properties.strokes ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
         ?.boundVariables?.color?.name,
     );
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     await run(double, source);
     const set = pageNodes(double).find((child) => child.name === "elekto");
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     return { double, set, variant };
-  };
+  });
 
   it("draws every variant of size × state, named by the plan", async () => {
     const { set } = await drawn();
@@ -316,13 +317,13 @@ describe("the elektilo is drawn as the field of the kampo with the chevron in it
   const source = repoFiles["figma/plugin/code.js"] ?? "";
   const bound = (node: DoubleNode | undefined, field: string) =>
     traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     await run(double, source);
     const set = pageNodes(double).find((child) => child.name === "elektilo");
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     return { double, set, variant };
-  };
+  });
 
   it("draws every variant of size × state, named by the plan, and no list", async () => {
     const { set } = await drawn();
@@ -409,13 +410,13 @@ describe("the tekstareo is drawn as the field of the kampo: kind × size × stat
   const source = repoFiles["figma/plugin/code.js"] ?? "";
   const bound = (node: DoubleNode | undefined, field: string) =>
     traRolojFigmaName(node?.boundVariables[field]?.name, prepared.input.modelo);
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     await run(double, source);
     const set = pageNodes(double).find((child) => child.name === "tekstareo");
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     return { double, set, variant };
-  };
+  });
 
   it("draws every variant of kind × size × state, named by the plan", async () => {
     const { set } = await drawn();
@@ -490,7 +491,7 @@ describe("the dialogo is drawn as a dialog: surface with heading, message, reaso
       };
     }[];
   };
-  const drawn = async () => {
+  const drawn = once(async () => {
     const double = modelDouble();
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
@@ -499,7 +500,7 @@ describe("the dialogo is drawn as a dialog: surface with heading, message, reaso
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     const dialogo = report.components.find((component) => component.set === "dialogo");
     return { double, set, variant, report, dialogo };
-  };
+  });
 
   it("draws the six variants of size × reason, named by the plan, in one column", async () => {
     const { set, dialogo } = await drawn();
