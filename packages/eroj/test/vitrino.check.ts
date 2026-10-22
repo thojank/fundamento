@@ -1500,3 +1500,35 @@ test("the datelektilo marks a range over a month border by date; the listelektil
   await expect(japan.locator('[part="description"]')).toBeVisible();
   await page.keyboard.press("Escape");
 });
+
+// Spec 026 ② (Lingvo-Schalter): Esperanto is the default; Deutsch and English name every Ero with
+// its Esperanto name small beside it, the states and values of the matrices and the Dimensioj of
+// the header, and the headings of the sections; the fragment keeps the choice (lingvo=de) and a
+// link opens in it. The elements stay what they are.
+test("the Lingvo switch names the Eroj, states, values and Dimensioj in German and English with the Esperanto name beside them; the fragment keeps it (Spec 026 ②)", async ({
+  page,
+}) => {
+  expect(await open(page)).toEqual([]);
+  const heading = page.locator("#fm-vitrino-glitilo h2");
+  await expect(heading).toHaveText("glitilo");
+  const sliders = await page.locator("fm-glitilo").count();
+  await page.locator('button[data-fm-lingvo="de"]').click();
+  await expect(heading).toHaveText("Schieberegler glitilo");
+  await expect(heading.locator('small[lang="eo"]')).toHaveText("glitilo");
+  expect(new URL(page.url()).hash).toContain("lingvo=de");
+  await expect(page.locator('button[data-fm-lingvo="de"]')).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("#fm-vitrino-butono thead th").nth(1)).toHaveText("Ruhe");
+  await expect(page.locator('[data-fm-switch="color-scheme"][data-fm-valoro="dark"]')).toHaveText(
+    "Dunkel",
+  );
+  await expect(page.locator("#fm-vitrino-paletroj h2")).toHaveText("Paletten");
+  expect(await page.locator("fm-glitilo").count()).toBe(sliders);
+  await open(page, "#lingvo=en");
+  await expect(heading).toHaveText("Slider glitilo");
+  await expect(page.locator("#fm-vitrino-paletroj h2")).toHaveText("Palettes");
+  await expect(page.locator("#fm-vitrino-butono thead th").nth(1)).toHaveText("Rest");
+  await page.locator('button[data-fm-lingvo="eo"]').click();
+  await expect(heading).toHaveText("glitilo");
+  expect(new URL(page.url()).hash).not.toContain("lingvo=");
+  await expect(page.locator("#fm-vitrino-butono thead th").nth(1)).toHaveText("rest");
+});
