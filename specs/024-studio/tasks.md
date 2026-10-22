@@ -67,17 +67,17 @@
 
 ### C – Abschluss
 - [x] **T2439 Doku** plan ② (Review, D-14–D-26, Messungen, Abweichungen 1–11, B-9–B-14, O-5–O-7, Messanleitung), tasks ②, README, Vojmapo.
-- [ ] **T2440 PR**, CI grün, Bericht mit der Zahl der Ero-Tokens und der Figma-Variablen.
+- [x] **T2440 PR #103** (Basis O-1 #100), CI im Folgecommit, Bericht mit der Zahl der Ero-Tokens und der Figma-Variablen.
 
 ### Messungen (②)
 
 | Was | Wert |
 |---|---|
-| Commits ② | Amendment `c6396cf`, rot `a8f5858`, grün (Folgecommit); dieser Eintrag im Folgecommit |
+| Commits ② | Amendment `c6396cf`, rot `a8f5858`, grün `1d3518e`; dieser Eintrag im Folgecommit |
 | Ero-Tokens | 908 (874 der 34 Eroj, 34 der 5 Sxablonoj); Kern 376 + 908 = 1 284; 30 Zellen ohne Token |
 | Figma-Variablen | 876 → 2 439 (Repo), 2 441 (provoj); 1 563 der dritten Ebene |
 | Zeiten | `pnpm vortaro:ero-tokenoj` 1,2 s; Komponentenseite ≈ 0,3 s; Prüfung je Setzen 1,3 s warm; O-3 bis zu 4 Ableitungen |
-| Tests lokal | Modelo 3695 in 167 Dateien, Agordilo 110, Metiejo 170, MCP 407, CLI 75, Projekcioj 805 – je grün; Eroj (Playwright) und `pnpm lint`, alle `check:*` grün (Zahl der Eroj im Folgecommit) |
+| Tests lokal | Modelo 3695 in 167 Dateien, Agordilo 110, Metiejo 170, MCP 407, CLI 75, Projekcioj 805 – je grün; Eroj 859 (2 übersprungen wie zuvor); `pnpm lint` und alle `check:*` grün |
 | Perf (B-15) | `pnpm perf` grün: Start 1 861 ms (Budget 2 000), resolve max 19,6 ms, explain max 6,3 ms, check_contrast max 53,8 ms (Median 8,7); Validierung 1,4 s → 0,7 s |
 
 
