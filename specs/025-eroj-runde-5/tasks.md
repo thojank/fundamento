@@ -48,13 +48,14 @@
 
 ### C – Abschluss
 - [x] **T2537 Doku** plan ② (Review, D-10–D-13, Abdeckung, Abweichungen 1–9, B-9–B-14, O-6–O-10, Benchmark-Kennzahlen, Messanleitung), tasks ②, Vojmapo (Zeile E5), README.
-- [ ] **T2538 Messungen** unten; Bericht im PR mit den Benchmark-Kennzahlen.
+- [x] **T2538 Messungen** unten; Bericht im PR mit den Benchmark-Kennzahlen (CI-Lauf folgt).
 
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits ② | rot `7ae1180`, grün (siehe Folgecommit) |
+| Commits ② | rot `7ae1180`, grün `e43e40d`, Messungen (siehe Folgecommit) |
+| Grün gemessen | Modelo 171 Dateien / 3741 Tests, MCP 43 / 421, Projekcioj 30 / 817, Agordilo 104, CLI 75, Metiejo 147, Browser (Chromium) 310, `datelektilo.spec.ts` in Chromium, Firefox und WebKit je 9, Alirebleco 24 Datelektilo-Läufe + 585 zuvor, Vitrino-Check 53, Make-Kit 5, Quickstart 1, Release-Probelauf beide Kits, `check:parity` 36 Eroj / 0 Differenzen / 393 freigegeben, Lint sauber |
 | Rot gemessen | Modelo 49 Tests in 26 Dateien, Projekcioj 19 in 8 Dateien, MCP 20 in 21 Dateien (s025-datum lädt nicht ohne Daten) |
 | Benchmark-Kennzahlen | Eroj 35 → 36; Gattungen mit Gegenstück 28 → 29 (+ Zahl, Suche, Zeit als Ergänzung); Zustände 101 → 107; Props 161 → 174; Slots 77 → 80; Ereignisse 4 → 6; Teile 242 → 265; Bindungen 433 → 454; Ikonaro 19 → 20; Reguloj 60 → 60; Jugxoj 211 → 212 |
 
