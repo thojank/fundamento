@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
@@ -62,10 +62,19 @@ const CHECKS_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
   ["Check: Tiparoj", "pnpm check:tiparoj"],
 ];
 
-/** The job of the unit tests: every package but the Projekcioj (their own shards) and the Eroj. */
+// Nachlese 9 (B-1): the five suites of this job ran side by side on the four vCPU of one runner,
+// each with three Vitest workers, and the spawned `fm` of the CLI tests beside them – about 20
+// processes on 4 cores. A test that spawns `fm agordilo derive` four times took 8 s on a quiet
+// machine and 64 to 126 s on the runner (45 runs since 2026-10-20, without a trend: the same
+// commit 65 and 123 s), the export 3 s and 11 to 35 s; the Ero-Tokens did not make a process
+// slower. The cut of W1 and B-12 once more: one runner per package.
+/** The packages of the unit job, a runner each: every package with tests but Projekcioj and Eroj. */
+const UNIT_PACKAGES = ["agordilo", "cli", "mcp", "metiejo", "modelo"];
+
+/** The job of the unit tests: one package per runner (matrix), the Projekcioj and Eroj elsewhere. */
 const UNIT_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
   ["Build", "pnpm build"],
-  ["Test", "pnpm turbo run test --filter=!@fundamento/eroj --filter=!@fundamento/projekcioj"],
+  ["Test", "pnpm turbo run test --filter=@fundamento/${{ matrix.package }}"],
 ];
 
 /** The job of the Projekcioj suite: two Vitest shards (every Celo builds the whole Modelo). */
@@ -268,6 +277,26 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     for (const name of ["checks", "unit", "projekcioj"]) {
       expect(loadJob(name).env, name).toBeUndefined();
     }
+  });
+
+  it("runs the unit tests on one runner per package, and every package with tests has one (Nachlese 9)", () => {
+    expect(loadJob("unit").strategy).toEqual({
+      "fail-fast": false,
+      matrix: { package: UNIT_PACKAGES },
+    });
+    // A new package with tests needs a place: here, or a job of its own like Projekcioj and Eroj.
+    const tested = readdirSync(`${repoRoot}packages`, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .filter((name) => {
+        const path = `${repoRoot}packages/${name}/package.json`;
+        if (!existsSync(path)) return false;
+        const pkg: unknown = JSON.parse(readFileSync(path, "utf8"));
+        return isRecord(pkg) && isRecord(pkg.scripts) && typeof pkg.scripts.test === "string";
+      })
+      .filter((name) => name !== "eroj" && name !== "projekcioj")
+      .sort();
+    expect(tested).toEqual(UNIT_PACKAGES);
   });
 
   it("keeps every job under a 15-minute budget (the wall clock stays under 12)", () => {
