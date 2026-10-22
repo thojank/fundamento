@@ -38,6 +38,7 @@ describe("ligilo in the repo Modelo (T006)", () => {
       "avataro",
       "avizo",
       "butono",
+      "datelektilo",
       "dialogo",
       "elektilo",
       "elekto",
@@ -327,6 +328,7 @@ describe("the Reguloj of the ligilo (T005, A2, D-13)", () => {
       "kodbloko",
       "markdovido",
       "glitilo",
+      "datelektilo",
     ]);
   });
 

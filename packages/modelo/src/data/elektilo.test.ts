@@ -61,6 +61,7 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       "avataro",
       "avizo",
       "butono",
+      "datelektilo",
       "dialogo",
       "elektilo",
       "elekto",
@@ -431,6 +432,7 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
         "kompletigilo",
         "alsxutilo",
         "glitilo",
+        "datelektilo",
       ],
     ],
     [
@@ -445,6 +447,7 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
         "kompletigilo",
         "alsxutilo",
         "glitilo",
+        "datelektilo",
       ],
     ],
     [
@@ -459,6 +462,7 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
         "kompletigilo",
         "alsxutilo",
         "glitilo",
+        "datelektilo",
       ],
     ],
     [
@@ -472,6 +476,7 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
         "kompletigilo",
         "alsxutilo",
         "glitilo",
+        "datelektilo",
       ],
     ],
     [
@@ -485,6 +490,7 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
         "kompletigilo",
         "alsxutilo",
         "glitilo",
+        "datelektilo",
       ],
     ],
     // Spec 014 ①: widened once more, to the reason-help of the dialogo.
@@ -499,6 +505,7 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
         "kompletigilo",
         "alsxutilo",
         "glitilo",
+        "datelektilo",
       ],
     ],
     ["placeholder-not-label", ["kampo", "elektilo", "tekstareo", "kompletigilo"]],
@@ -548,6 +555,7 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
       "kodbloko",
       "markdovido",
       "glitilo",
+      "datelektilo",
     ]);
   });
 

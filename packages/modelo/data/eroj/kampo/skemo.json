@@ -712,12 +712,14 @@
           "en": [
             "date",
             "expiry",
-            "deadline"
+            "deadline",
+            "birthday"
           ],
           "de": [
             "datum",
             "ablaufdatum",
-            "frist"
+            "frist",
+            "geburtsdatum"
           ]
         },
         "props": {

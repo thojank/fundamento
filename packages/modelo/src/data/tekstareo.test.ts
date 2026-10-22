@@ -54,6 +54,7 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
       "avataro",
       "avizo",
       "butono",
+      "datelektilo",
       "dialogo",
       "elektilo",
       "elekto",
@@ -300,6 +301,7 @@ describe("the Reguloj of the tekstareo (G6, E5)", () => {
       "kodbloko",
       "markdovido",
       "glitilo",
+      "datelektilo",
     ]);
   });
 

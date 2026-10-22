@@ -1,0 +1,657 @@
+{
+  "ero": {
+    "id": "ero_01M5GYYCPEQ6SKJGPDKMFVZCAQ",
+    "name": "datelektilo",
+    "skemo": "ske_01M5GYYD31C6C7EN316YWX0FYY",
+    "description": "A date picker: lets a person choose a date or a date range near today, typed into the field or picked from a calendar. It always shows its label; the calendar opens beside the field and closes with the choice."
+  },
+  "skemo": {
+    "id": "ske_01M5GYYD31C6C7EN316YWX0FYY",
+    "ero": "ero_01M5GYYCPEQ6SKJGPDKMFVZCAQ",
+    "props": [
+      {
+        "name": "mode",
+        "kind": "enum",
+        "values": [
+          "single",
+          "range"
+        ],
+        "default": "single",
+        "description": "single: one date (value); range: a start and an end (value-start, value-end), the end never before the start."
+      },
+      {
+        "name": "value",
+        "kind": "string",
+        "description": "The chosen date as an ISO date (YYYY-MM-DD), with mode single; shown and typed in the format of the document's language (lang)."
+      },
+      {
+        "name": "value-start",
+        "kind": "string",
+        "description": "The first date of a range as an ISO date, with mode range."
+      },
+      {
+        "name": "value-end",
+        "kind": "string",
+        "description": "The last date of a range as an ISO date, with mode range; at or after value-start."
+      },
+      {
+        "name": "min",
+        "kind": "string",
+        "description": "The earliest date a person may choose, an ISO date; earlier days are refused in the calendar and when typed."
+      },
+      {
+        "name": "max",
+        "kind": "string",
+        "description": "The latest date a person may choose, an ISO date."
+      },
+      {
+        "name": "disabled-dates",
+        "kind": "string",
+        "description": "Days that cannot be chosen: a list of ISO dates separated by commas, or the rule weekends (Saturday and Sunday)."
+      },
+      {
+        "name": "required",
+        "kind": "boolean",
+        "default": false,
+        "description": "A date must be chosen; marked visibly and audibly (Regulo required-marked)."
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean",
+        "default": false,
+        "description": "Cannot be used: the field takes no text, the calendar does not open; skipped by the keyboard."
+      },
+      {
+        "name": "readonly",
+        "kind": "boolean",
+        "default": false,
+        "description": "Can be read and focused, not changed: the field keeps its date, the calendar does not open."
+      },
+      {
+        "name": "invalid",
+        "kind": "boolean",
+        "default": false,
+        "description": "The chosen date is wrong; the error slot says what to do."
+      },
+      {
+        "name": "expanded",
+        "kind": "boolean",
+        "default": false,
+        "description": "The calendar is open. The element sets it while the calendar shows; set by the application it opens the calendar."
+      },
+      {
+        "name": "name",
+        "kind": "string",
+        "description": "The name under which the form sends the date (ISO), a range as one ISO interval (start/end)."
+      }
+    ],
+    "states": [
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "readonly",
+      "invalid"
+    ],
+    "slots": [
+      {
+        "name": "label",
+        "default": true,
+        "text": true
+      },
+      {
+        "name": "help",
+        "text": true
+      },
+      {
+        "name": "error",
+        "text": true
+      }
+    ],
+    "parts": {
+      "label": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        }
+      },
+      "required-mark": {
+        "color": {
+          "fixed": "color.status.danger.text"
+        }
+      },
+      "surface": {
+        "fill": {
+          "by": [
+            "state"
+          ]
+        }
+      },
+      "border": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "width": {
+          "fixed": "border.width.default"
+        }
+      },
+      "text": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "typography": {
+          "fixed": "typography.body.1"
+        }
+      },
+      "trigger": {
+        "size": {
+          "fixed": "size.control.medium"
+        }
+      },
+      "calendar": {
+        "fill": {
+          "fixed": "color.background.raised"
+        },
+        "radius": {
+          "fixed": "radius.role.surface"
+        },
+        "shadow": {
+          "fixed": "elevation.shadow.overlay"
+        },
+        "layer": {
+          "fixed": "elevation.layer.overlay"
+        },
+        "width": {
+          "fixed": "size.container.small"
+        },
+        "inline-padding": {
+          "fixed": "spacing.medium"
+        },
+        "height": {
+          "by": [
+            "expanded"
+          ]
+        }
+      },
+      "month": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        }
+      },
+      "prev": {
+        "size": {
+          "fixed": "size.control.small"
+        }
+      },
+      "next": {
+        "size": {
+          "fixed": "size.control.small"
+        }
+      },
+      "weekday": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "cell": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "size": {
+          "fixed": "size.target.min"
+        },
+        "radius": {
+          "fixed": "radius.role.control"
+        }
+      },
+      "day": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        }
+      },
+      "selected-cell": {
+        "color": {
+          "fixed": "color.action.primary.selected"
+        }
+      },
+      "selected-day": {
+        "color": {
+          "fixed": "color.action.primary.text"
+        }
+      },
+      "in-range-cell": {
+        "color": {
+          "fixed": "color.action.secondary.selected"
+        }
+      },
+      "today-cell": {
+        "color": {
+          "fixed": "color.border.strong"
+        },
+        "width": {
+          "fixed": "border.width.default"
+        }
+      },
+      "outside-day": {
+        "color": {
+          "fixed": "color.text.muted"
+        }
+      },
+      "help": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "error": {
+        "color": {
+          "fixed": "color.status.danger.text"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "focus-ring": {
+        "ring": {
+          "fixed": "focus.ring"
+        },
+        "offset": {
+          "fixed": "focus.offset"
+        },
+        "color": {
+          "fixed": "color.focus.inner"
+        }
+      },
+      "box": {
+        "height": {
+          "fixed": "size.control.medium"
+        },
+        "inline-padding": {
+          "fixed": "spacing.medium"
+        },
+        "gap": {
+          "fixed": "spacing.small"
+        },
+        "radius": {
+          "fixed": "radius.role.control"
+        }
+      },
+      "motion": {
+        "duration": {
+          "fixed": "motion.duration.fast"
+        },
+        "easing": {
+          "fixed": "motion.easing.standard"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "label",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "label",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.text.disabled"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.background.default"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.background.sunken"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "state": "readonly"
+        },
+        "token": "color.background.sunken"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.border.default"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "hover"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "focus"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.border.disabled"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "readonly"
+        },
+        "token": "color.border.default"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "invalid"
+        },
+        "token": "color.status.danger.border"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.text.disabled"
+      },
+      {
+        "part": "cell",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.action.tertiary.rest"
+      },
+      {
+        "part": "cell",
+        "property": "color",
+        "when": {
+          "state": "hover"
+        },
+        "token": "color.action.tertiary.hover"
+      },
+      {
+        "part": "cell",
+        "property": "color",
+        "when": {
+          "state": "focus"
+        },
+        "token": "color.action.tertiary.rest"
+      },
+      {
+        "part": "cell",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.action.tertiary.disabled"
+      },
+      {
+        "part": "day",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "day",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.text.disabled"
+      },
+      {
+        "part": "calendar",
+        "property": "height",
+        "when": {
+          "expanded": "false"
+        },
+        "token": "none"
+      },
+      {
+        "part": "calendar",
+        "property": "height",
+        "when": {
+          "expanded": "true"
+        },
+        "token": "size.container.medium"
+      }
+    ],
+    "a11y": {
+      "role": "textbox",
+      "name": [
+        "slot:label"
+      ],
+      "description": [
+        "slot:help",
+        "slot:error"
+      ],
+      "states": {
+        "required": [
+          "aria-required"
+        ],
+        "invalid": [
+          "aria-invalid"
+        ],
+        "disabled": [
+          "aria-disabled"
+        ],
+        "readonly": [
+          "aria-readonly"
+        ],
+        "expanded": [
+          "aria-expanded"
+        ]
+      },
+      "keys": [
+        "ArrowDown",
+        "ArrowUp",
+        "ArrowLeft",
+        "ArrowRight",
+        "PageUp",
+        "PageDown",
+        "Home",
+        "End",
+        "Enter",
+        "Escape"
+      ],
+      "texts": {
+        "required": {
+          "de": "erforderlich",
+          "en": "required"
+        },
+        "trigger-name": {
+          "de": "Kalender öffnen",
+          "en": "Open calendar"
+        },
+        "prev-name": {
+          "de": "Voriger Monat",
+          "en": "Previous month"
+        },
+        "next-name": {
+          "de": "Nächster Monat",
+          "en": "Next month"
+        },
+        "value-invalid": {
+          "de": "Gib ein Datum wie {example} ein.",
+          "en": "Enter a date like {example}."
+        },
+        "value-end-invalid": {
+          "de": "Wähle ein Ende nach dem Anfang.",
+          "en": "Choose an end after the start."
+        }
+      }
+    },
+    "events": [
+      {
+        "name": "input",
+        "description": "The text in the field changes while a person types a date."
+      },
+      {
+        "name": "change",
+        "description": "A date is picked in the calendar, or a typed date is valid and the field is left or Enter is pressed."
+      }
+    ],
+    "constraints": [
+      {
+        "when": {
+          "slot:error": "filled"
+        },
+        "allowed": {
+          "invalid": [
+            "true"
+          ]
+        },
+        "kialo": "An error text without the error state is a contradiction a screen reader cannot resolve, because it reads a fault on a field that says it is fine."
+      },
+      {
+        "when": {
+          "disabled": "true"
+        },
+        "allowed": {
+          "readonly": [
+            "false"
+          ]
+        },
+        "kialo": "Two reasons why one cannot choose are one too many, because disabled wins."
+      },
+      {
+        "when": {
+          "prop:value": "filled"
+        },
+        "allowed": {
+          "mode": [
+            "single"
+          ]
+        },
+        "kialo": "One date is a single choice, because a range has a start and an end of its own (value-start, value-end)."
+      },
+      {
+        "when": {
+          "prop:value-start": "filled"
+        },
+        "allowed": {
+          "mode": [
+            "range"
+          ]
+        },
+        "kialo": "A start needs an end to stand against, because without mode range the one date is value."
+      },
+      {
+        "when": {
+          "prop:value-end": "filled"
+        },
+        "allowed": {
+          "mode": [
+            "range"
+          ]
+        },
+        "kialo": "An end needs a start to stand against, because without mode range the one date is value."
+      }
+    ],
+    "goals": [
+      {
+        "goal": "pick-date",
+        "keywords": {
+          "en": [
+            "date-picker",
+            "calendar",
+            "delivery-date",
+            "booking-date",
+            "due-date"
+          ],
+          "de": [
+            "kalender",
+            "datumsauswahl",
+            "lieferdatum",
+            "buchungsdatum",
+            "fälligkeit"
+          ]
+        },
+        "props": {},
+        "regulo": "field-label-visible"
+      },
+      {
+        "goal": "date-range",
+        "keywords": {
+          "en": [
+            "date-range",
+            "period",
+            "timeframe"
+          ],
+          "de": [
+            "zeitraum",
+            "berichtszeitraum",
+            "datumsbereich",
+            "zeitspanne"
+          ]
+        },
+        "props": {
+          "mode": "range"
+        },
+        "regulo": "field-label-visible"
+      }
+    ]
+  }
+}

@@ -992,7 +992,13 @@ describe("the plugin draws the datelektilo (Spec 025 ②)", () => {
       } else {
         expect(paintOf(descendant(variant, "cell-27"))).toBe("color/action/primary/selected");
         expect(paintOf(descendant(variant, "cell-text-27"))).toBe("color/action/primary/text");
-        expect(paintOf(descendant(variant, "cell-11"))).toBe("color/action/tertiary/rest");
+        // A plain day takes the cell's ground of the variant's state.
+        const ground = variant.name.includes("state=hover")
+          ? "color/action/tertiary/hover"
+          : variant.name.includes("state=disabled")
+            ? "color/action/tertiary/disabled"
+            : "color/action/tertiary/rest";
+        expect(paintOf(descendant(variant, "cell-11")), variant.name).toBe(ground);
       }
     }
     const rest = set?.children.find(

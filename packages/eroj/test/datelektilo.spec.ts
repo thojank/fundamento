@@ -126,6 +126,8 @@ test.describe("fm-datelektilo behaviour", () => {
       const host = document.getElementById("d") as HTMLElement;
       host.addEventListener("input", () => log.push("input"));
       host.addEventListener("change", () => log.push(`change:${host.getAttribute("value")}`));
+      // Enter sends the form as in a native field (Spec 011 ①): the page keeps it here.
+      document.getElementById("f")?.addEventListener("submit", (event) => event.preventDefault());
     });
     const box = page.getByRole("textbox", { name: "Lieferdatum" });
     await box.fill("25.10.2026");
@@ -145,7 +147,7 @@ test.describe("fm-datelektilo behaviour", () => {
     await box.press("Tab");
     const wrong = await stateOf(page);
     expect(wrong.valid).toBe(false);
-    expect(wrong.message).toBe(word("invalid-date").replace("{example}", "22.10.2026"));
+    expect(wrong.message).toBe(word("value-invalid").replace("{example}", "22.10.2026"));
     await expect(box).toHaveAttribute("aria-invalid", "true");
     expect(wrong.value).toBe("2026-10-26");
   });
@@ -252,7 +254,10 @@ test.describe("fm-datelektilo behaviour", () => {
     expect(state.disabledDays).not.toContain("2026-10-28");
     expect(state.disabledDays).not.toContain("2026-10-20");
     // A refused day does not take the value.
-    await page.locator("#d").locator('[part="cell"][data-date="2026-10-10"]').click();
+    await page
+      .locator("#d")
+      .locator('[part="cell"][data-date="2026-10-10"]')
+      .click({ force: true });
     expect((await stateOf(page)).value).toBe("2026-10-24");
     expect((await stateOf(page)).open).toBe(true);
     await page.locator("#d").locator('[part="cell"][data-date="2026-10-20"]').click();
@@ -317,7 +322,7 @@ test.describe("fm-datelektilo behaviour", () => {
     await box.press("Tab");
     state = await stateOf(page);
     expect(state.valid).toBe(false);
-    expect(state.message).toBe(word("range-order"));
+    expect(state.message).toBe(word("value-end-invalid"));
   });
 
   test("in right-to-left writing ArrowLeft moves to the next day (Internacia); the grid rows stay seven wide", async ({

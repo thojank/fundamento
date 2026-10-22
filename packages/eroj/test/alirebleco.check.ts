@@ -1901,13 +1901,22 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
         const chosen = page.locator("#an-d1").locator('[part="cell"][aria-selected="true"]');
         await expect(chosen).toBeFocused();
         expect(await axeViolations(page), "datelektilo open").toEqual([]);
-        const [ring] = await focusRingContrasts(
-          page,
-          ['#an-d1 >>> [part=cell][aria-selected="true"]'],
-          browserName,
-        );
-        expect(ring?.gap, "ring against gap").toBeGreaterThanOrEqual(3);
-        expect(ring?.page, "ring against the calendar").toBeGreaterThanOrEqual(3);
+        // The ring of the focused cell, measured at the cell (the helper measures a host's control):
+        // its outline against the gap colour of its shadow and against the calendar's ground.
+        const ring = await chosen.evaluate((cell) => {
+          const style = getComputedStyle(cell);
+          const calendar = cell.closest('[part="calendar"]') as HTMLElement;
+          return {
+            ring: style.outlineColor,
+            gap: /rgba?\([^)]*\)/.exec(style.boxShadow)?.[0] ?? "",
+            ground: getComputedStyle(calendar).backgroundColor,
+          };
+        });
+        expect(contrastOf(ring.ring, ring.gap), "ring against gap").toBeGreaterThanOrEqual(3);
+        expect(
+          contrastOf(ring.ring, ring.ground),
+          "ring against the calendar",
+        ).toBeGreaterThanOrEqual(3);
         const text = await chosen.evaluate((cell) => {
           const style = getComputedStyle(cell);
           return [style.color, style.backgroundColor];

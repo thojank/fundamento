@@ -40,6 +40,7 @@ describe("insigno in the repo Modelo (section ③, G1, G2)", () => {
       "avataro",
       "avizo",
       "butono",
+      "datelektilo",
       "dialogo",
       "elektilo",
       "elekto",

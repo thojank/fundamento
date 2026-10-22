@@ -49,6 +49,7 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
       "avataro",
       "avizo",
       "butono",
+      "datelektilo",
       "dialogo",
       "elektilo",
       "elekto",
@@ -442,6 +443,7 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
         "kompletigilo",
         "alsxutilo",
         "glitilo",
+        "datelektilo",
       ],
     ],
     [
@@ -456,6 +458,7 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
         "kompletigilo",
         "alsxutilo",
         "glitilo",
+        "datelektilo",
       ],
     ],
     [
@@ -470,6 +473,7 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
         "kompletigilo",
         "alsxutilo",
         "glitilo",
+        "datelektilo",
       ],
     ],
     [
@@ -483,6 +487,7 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
         "kompletigilo",
         "alsxutilo",
         "glitilo",
+        "datelektilo",
       ],
     ],
     [
@@ -496,6 +501,7 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
         "kompletigilo",
         "alsxutilo",
         "glitilo",
+        "datelektilo",
       ],
     ],
     // Spec 014 ①: widened once more, to the reason-help of the dialogo.
@@ -510,6 +516,7 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
         "kompletigilo",
         "alsxutilo",
         "glitilo",
+        "datelektilo",
       ],
     ],
   ])("%s is widened to the elekto, not duplicated (E5)", (name, eroj) => {
@@ -555,6 +562,7 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
       "kodbloko",
       "markdovido",
       "glitilo",
+      "datelektilo",
     ]);
   });
 

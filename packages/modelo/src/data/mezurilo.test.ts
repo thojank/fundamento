@@ -39,6 +39,7 @@ describe("mezurilo in the repo Modelo (section ④, G1, G2)", () => {
       "avataro",
       "avizo",
       "butono",
+      "datelektilo",
       "dialogo",
       "elektilo",
       "elekto",

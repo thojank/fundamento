@@ -59,7 +59,8 @@
       "subtract": "minus",
       "success": "check-circle",
       "upload": "upload-simple",
-      "warning": "warning"
+      "warning": "warning",
+      "calendar": "calendar-blank"
     }
   },
   "agordilo": {
@@ -67,7 +68,7 @@
     "structure": {
       "vortaro": "0.2.0",
       "reference": "komuna",
-      "sha256": "0d9420bdb1a904314f9a2954a44a65dc327d94946603f28f70c03183d4dab11e"
+      "sha256": "f7013caf6c29aa624433cd605ff0fe3b5ef81e1ea6e160835b06a9ca4e85fc0f"
     },
     "agordo": {
       "name": "provo",

@@ -131,6 +131,22 @@ type PartNode =
   | "listbox"
   | "suggestion-*"
   | "suggestions-*"
+  // A date picker (Spec 025 ②): the trigger beside the control, the calendar with its head (prev,
+  // month, next), the weekdays and the cells with their texts; the looks of a cell are logical
+  // names of the same frame and text (selected, in range, today, outside).
+  | "trigger"
+  | "calendar"
+  | "month"
+  | "prev"
+  | "next"
+  | "weekday-*"
+  | "cell-*"
+  | "cell-text-*"
+  | "selected-cell-*"
+  | "selected-day-*"
+  | "in-range-cell-*"
+  | "today-cell-*"
+  | "outside-day-*"
   | "no-results"
   // A notice (Spec 011 ③): the details text and the dismiss frame; a badge and a state (Spec 011
   // ③) reuse control, text, indicator, mark, texts and actions.
@@ -479,6 +495,34 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
     // Nachlese 4 N-8: the active suggestion's row is filled by active (the frame of the row).
     "suggestion.fill": [{ node: "suggestion-*", fields: ["fills"], paint: true }],
     "suggestion.typography": typographyOf("suggestions-*"),
+    // A date picker (Spec 025 ②, plan ② D-12): the trigger's size; the calendar's fill, radius,
+    // width, height and padding; the month and the weekdays in their colour and role; prev and
+    // next in their size; every cell its colour (the ground), size and radius, its day text in
+    // its colour and role; the four looks on the cells they apply to (logical names of the same
+    // nodes): the chosen day, the days between the ends, today's border, the days outside.
+    "trigger.size": [{ node: "trigger", fields: ["width", "height"] }],
+    "calendar.fill": [{ node: "calendar", fields: ["fills"], paint: true }],
+    "calendar.radius": [{ node: "calendar", fields: ["cornerRadius"] }],
+    "calendar.width": [{ node: "calendar", fields: ["width"] }],
+    "calendar.height": [{ node: "calendar", fields: ["maxHeight"] }],
+    "calendar.inline-padding": [{ node: "calendar", fields: ["paddingLeft", "paddingRight"] }],
+    "month.color": [{ node: "month", fields: ["fills"], paint: true }],
+    "month.typography": typographyOf("month"),
+    "prev.size": [{ node: "prev", fields: ["width", "height"] }],
+    "next.size": [{ node: "next", fields: ["width", "height"] }],
+    "weekday.color": [{ node: "weekday-*", fields: ["fills"], paint: true }],
+    "weekday.typography": typographyOf("weekday-*"),
+    "cell.color": [{ node: "cell-*", fields: ["fills"], paint: true }],
+    "cell.size": [{ node: "cell-*", fields: ["width", "height"] }],
+    "cell.radius": [{ node: "cell-*", fields: ["cornerRadius"] }],
+    "day.color": [{ node: "cell-text-*", fields: ["fills"], paint: true }],
+    "day.typography": typographyOf("cell-text-*"),
+    "selected-cell.color": [{ node: "selected-cell-*", fields: ["fills"], paint: true }],
+    "selected-day.color": [{ node: "selected-day-*", fields: ["fills"], paint: true }],
+    "in-range-cell.color": [{ node: "in-range-cell-*", fields: ["fills"], paint: true }],
+    "today-cell.color": [{ node: "today-cell-*", fields: ["strokes"], paint: true }],
+    "today-cell.width": [{ node: "today-cell-*", fields: ["strokeWeight"] }],
+    "outside-day.color": [{ node: "outside-day-*", fields: ["fills"], paint: true }],
     "no-results.color": [{ node: "no-results", fields: ["fills"], paint: true }],
     "no-results.typography": typographyOf("no-results"),
   },
@@ -5159,7 +5203,11 @@ async function applyComponents(variables, warnings) {
       const toggleTexts = isToggle && Object.keys(component.texts || {}).length > 0;
       const column = toggleTexts ? part(field, "texts", () => figma.createFrame()) : undefined;
       const labelParent = column || field;
-      const ring = part(field || node, "focus-ring", () => figma.createFrame());
+      // A date picker (Spec 025 ②, plan ② D-12): the field holds a row of the ring around the
+      // control and the trigger, then the calendar — the plan's month — before help and error.
+      const dated = isField && component.calendar !== undefined;
+      const row = dated ? part(field, "row", () => figma.createFrame()) : undefined;
+      const ring = part(row || field || node, "focus-ring", () => figma.createFrame());
       const gap = part(ring, "focus-gap", () => figma.createFrame());
       const control =
         ours(gap, "part", "control") ??
@@ -5183,6 +5231,51 @@ async function applyComponents(variables, warnings) {
         toggled.push({ part: "icon-end", node: iconEnd });
       }
       if (isField && field.children.indexOf(label) !== 0) field.insertChild(0, label);
+      if (row !== undefined && field.children.indexOf(row) !== 1) field.insertChild(1, row);
+      const trigger = row !== undefined ? part(row, "trigger", () => figma.createFrame()) : undefined;
+      if (row !== undefined && trigger !== undefined) {
+        if (row.children.indexOf(ring) !== 0) row.insertChild(0, ring);
+        if (row.children.indexOf(trigger) !== 1) row.insertChild(1, trigger);
+      }
+      const calendar = dated ? part(field, "calendar", () => figma.createFrame()) : undefined;
+      if (calendar !== undefined && field.children.indexOf(calendar) !== 2) field.insertChild(2, calendar);
+      const head = calendar !== undefined ? part(calendar, "head", () => figma.createFrame()) : undefined;
+      const prev = head !== undefined ? part(head, "prev", () => figma.createFrame()) : undefined;
+      const monthText = head !== undefined ? part(head, "month", () => figma.createText()) : undefined;
+      const next = head !== undefined ? part(head, "next", () => figma.createFrame()) : undefined;
+      if (head !== undefined) {
+        [prev, monthText, next].forEach((child, index) => {
+          if (head.children.indexOf(child) !== index) head.insertChild(index, child);
+        });
+      }
+      const weekdays = calendar !== undefined ? part(calendar, "weekdays", () => figma.createFrame()) : undefined;
+      const weekdayTexts = weekdays !== undefined
+        ? Array.from({ length: 7 }, (_, index) => part(weekdays, "weekday-" + (index + 1), () => figma.createText()))
+        : [];
+      const weeks = calendar !== undefined
+        ? Array.from({ length: 6 }, (_, index) => part(calendar, "week-" + (index + 1), () => figma.createFrame()))
+        : [];
+      const cells = weeks.flatMap((week, weekIndex) =>
+        Array.from({ length: 7 }, (_, dayIndex) => {
+          const n = weekIndex * 7 + dayIndex + 1;
+          const frame = part(week, "cell-" + n, () => figma.createFrame());
+          const text = part(frame, "cell-text-" + n, () => figma.createText());
+          return { n, frame, text, week };
+        }),
+      );
+      if (calendar !== undefined && weekdays !== undefined) {
+        [head, weekdays].concat(weeks).forEach((child, index) => {
+          if (calendar.children.indexOf(child) !== index) calendar.insertChild(index, child);
+        });
+        weekdayTexts.forEach((child, index) => {
+          if (weekdays.children.indexOf(child) !== index) weekdays.insertChild(index, child);
+        });
+        for (const cell of cells) {
+          const index = (cell.n - 1) % 7;
+          if (cell.week.children.indexOf(cell.frame) !== index) cell.week.insertChild(index, cell.frame);
+        }
+      }
+      const dateTexts = (monthText !== undefined ? [monthText] : []).concat(weekdayTexts).concat(cells.map((cell) => cell.text));
       if (isToggle && column === undefined && field.children.indexOf(label) !== 1) field.insertChild(1, label);
       if (column !== undefined && field.children.indexOf(column) !== 1) field.insertChild(1, column);
       if (column !== undefined && column.children.indexOf(label) !== 0) column.insertChild(0, label);
@@ -5220,7 +5313,7 @@ async function applyComponents(variables, warnings) {
       if (listbox !== undefined && help !== undefined && field.children.indexOf(listbox) !== field.children.indexOf(help) - 1) {
         field.insertChild(field.children.indexOf(help), listbox);
       }
-      const texts = [label, textNode, help, error].concat(noResults !== undefined ? [noResults] : []).filter((each) => each !== undefined);
+      const texts = [label, textNode, help, error].concat(noResults !== undefined ? [noResults] : []).concat(dateTexts).filter((each) => each !== undefined);
       // Erst die Schrift, die der Text jetzt trägt, dann jedes Schreiben (F-A): Figma lehnt
       // textCase auf einem Text ab, dessen aktuelle Schrift nicht geladen ist — ein neuer Text trägt
       // Inter Regular, nicht die Schrift des Plans.
@@ -5252,6 +5345,15 @@ async function applyComponents(variables, warnings) {
         const text = (component.texts || {})[name];
         if (typeof text === "string") write(each, "characters", text);
       }
+      // A date picker (Spec 025 ②): the chosen day (or the range) in the field, the month, the
+      // weekdays and the days of the plan's calendar.
+      if (dated && textNode !== undefined && calendar !== undefined) {
+        const words = component.texts || {};
+        write(textNode, "characters", variant.props.mode === "range" ? String(words.range || "") : String(words.value || ""));
+        if (monthText !== undefined) write(monthText, "characters", String(words.month || ""));
+        weekdayTexts.forEach((each, index) => write(each, "characters", component.calendar.weekdays[index] || ""));
+        for (const cell of cells) write(cell.text, "characters", (component.calendar.days[cell.n - 1] || { text: "" }).text);
+      }
       // Die Unterstreichung eines Links (Spec 008, D-11): je Variante an oder aus, geschrieben wie
       // textCase – Figma bindet Dicke und Farbe der Linie an keine Variable (Jugxo B-1).
       if (typeof variant.underline === "boolean") {
@@ -5266,6 +5368,15 @@ async function applyComponents(variables, warnings) {
       // its clipping and its line would otherwise cover what the plan draws.
       const frames = [node, ring, gap, control]
         .concat(field ? [field] : [])
+        .concat(row ? [row] : [])
+        .concat(trigger ? [trigger] : [])
+        .concat(calendar ? [calendar] : [])
+        .concat(head ? [head] : [])
+        .concat(prev ? [prev] : [])
+        .concat(next ? [next] : [])
+        .concat(weekdays ? [weekdays] : [])
+        .concat(weeks)
+        .concat(cells.map((cell) => cell.frame))
         .concat(column ? [column] : [])
         .concat(indicator ? [indicator] : [])
         .concat(listbox ? [listbox] : [])
@@ -5276,6 +5387,34 @@ async function applyComponents(variables, warnings) {
       // an auto-layout frame (F11). The variant, ring and gap wrap their content.
       for (const frame of [node, ring, gap]) own(frame, HUG_LAYOUT);
       if (field) own(field, isToggle ? TOGGLE_LAYOUT : FIELD_LAYOUT);
+      if (dated && row !== undefined && trigger !== undefined && calendar !== undefined && head !== undefined && weekdays !== undefined) {
+        // The row lines up the ring and the trigger; the trigger and the month buttons hold their
+        // glyphs in a fixed box the plan sizes; the calendar is a column as wide as its token,
+        // shown where the variant is expanded; head, weekdays and weeks are rows, every cell a
+        // fixed box with its day centred.
+        own(row, TOGGLE_LAYOUT);
+        for (const holder of [trigger, prev, next]) {
+          own(holder, CONTROL_LAYOUT);
+          own(holder, { layoutSizingHorizontal: "FIXED", layoutSizingVertical: "FIXED" });
+        }
+        Object.assign(glyphNodes, drawGlyphs(trigger, icons.trigger || "calendar", "trigger-", glyphMeasures));
+        Object.assign(glyphNodes, drawGlyphs(prev, icons.prev || "chevron-left", "prev-", glyphMeasures));
+        Object.assign(glyphNodes, drawGlyphs(next, icons.next || "chevron-right", "next-", glyphMeasures));
+        own(calendar, SURFACE_LAYOUT);
+        own(calendar, { visible: (variant.hidden || []).indexOf("calendar") === -1 });
+        own(head, TOGGLE_LAYOUT);
+        own(head, { primaryAxisAlignItems: "SPACE_BETWEEN", layoutSizingHorizontal: "FILL" });
+        own(weekdays, TOGGLE_LAYOUT);
+        own(weekdays, { primaryAxisAlignItems: "SPACE_BETWEEN", layoutSizingHorizontal: "FILL" });
+        for (const week of weeks) {
+          own(week, TOGGLE_LAYOUT);
+          own(week, { primaryAxisAlignItems: "SPACE_BETWEEN", layoutSizingHorizontal: "FILL" });
+        }
+        for (const cell of cells) {
+          own(cell.frame, CONTROL_LAYOUT);
+          own(cell.frame, { layoutSizingHorizontal: "FIXED", layoutSizingVertical: "FIXED", strokesIncludedInLayout: true });
+        }
+      }
       own(control, CONTROL_LAYOUT);
       if (isToggle) {
         // The knob stands where the variant says (D-04), along the writing direction; the border
@@ -5349,8 +5488,53 @@ async function applyComponents(variables, warnings) {
       if (error) nodes.error = error;
       if (listbox) nodes.listbox = listbox;
       if (noResults) nodes["no-results"] = noResults;
+      if (trigger) nodes.trigger = trigger;
+      if (calendar) nodes.calendar = calendar;
+      if (monthText) nodes.month = monthText;
+      if (prev) nodes.prev = prev;
+      if (next) nodes.next = next;
+      weekdayTexts.forEach((each, index) => {
+        nodes["weekday-" + (index + 1)] = each;
+      });
       Object.assign(nodes, glyphNodes);
       const measures = bind(nodes, variant, variables, component.structure);
+      // The cells of a date picker (Spec 025 ②) are bound one by one: every cell its ground, size,
+      // radius and the role of its day; the chosen day, the days between the ends, today and the
+      // days outside the month take their own looks (logical names of the same nodes).
+      if (dated && calendar !== undefined) {
+        const plan = component.calendar;
+        const ranged = variant.props.mode === "range";
+        for (const cell of cells) {
+          const day = plan.days[cell.n - 1] || { text: "", outside: true };
+          const number = Number(day.text);
+          const inside = !day.outside;
+          const selected = inside && (ranged ? number === plan.range[0] || number === plan.range[1] : number === plan.selected);
+          const between = inside && ranged && number > plan.range[0] && number < plan.range[1];
+          const today = inside && number === plan.today;
+          const keys = ["cell.size", "cell.radius", "day.typography"];
+          const cellNodes = {};
+          cellNodes["cell-" + cell.n] = cell.frame;
+          cellNodes["cell-text-" + cell.n] = cell.text;
+          if (selected) {
+            keys.push("selected-cell.color", "selected-day.color");
+            cellNodes["selected-cell-" + cell.n] = cell.frame;
+            cellNodes["selected-day-" + cell.n] = cell.text;
+          } else {
+            keys.push(between ? "in-range-cell.color" : "cell.color");
+            if (between) cellNodes["in-range-cell-" + cell.n] = cell.frame;
+            keys.push(day.outside ? "outside-day.color" : "day.color");
+            if (day.outside) cellNodes["outside-day-" + cell.n] = cell.text;
+          }
+          if (today) {
+            keys.push("today-cell.color", "today-cell.width");
+            cellNodes["today-cell-" + cell.n] = cell.frame;
+          }
+          const look = {};
+          for (const key of keys) if (variant.bindings[key] !== undefined) look[key] = variant.bindings[key];
+          for (const measure of bind(cellNodes, { bindings: look, paints: variant.paints, focusVisible: false }, variables, component.structure)) measures.push(measure);
+        }
+        bindShadow(nodes, variant, report);
+      }
       for (const measure of glyphMeasures) measures.push(measure);
       // The rows of the suggestions (Spec 014 ⑤) are bound like a tab list's entries; the
       // listbox's shadow as an overlay's.

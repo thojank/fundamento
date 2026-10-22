@@ -127,6 +127,10 @@
         {
           "ero": "kampo",
           "kialo": "The step buttons of a number show subtract and add, the clear button of a search close, because the sign is read faster than the word; the words of the Modelo name the buttons."
+        },
+        {
+          "ero": "datelektilo",
+          "kialo": "The trigger of a date picker shows calendar, its month buttons chevron-left and chevron-right, because the sign is read faster than the word; the words of the Modelo name the buttons."
         }
       ],
       "never": [],

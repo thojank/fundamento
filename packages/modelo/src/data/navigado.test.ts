@@ -38,6 +38,7 @@ describe("navigado in the repo Modelo (section ⑤, G1, G2, E7)", () => {
       "avataro",
       "avizo",
       "butono",
+      "datelektilo",
       "dialogo",
       "elektilo",
       "elekto",

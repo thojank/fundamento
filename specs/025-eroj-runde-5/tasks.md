@@ -34,7 +34,29 @@
 
 ## ② Datum
 
-Aufgaben ab T2531 (gestapelt auf ①).
+**Branch:** `261022-spec-025-datum-c7fa02` (gestapelt auf ①, PR #101).
+
+### A – Rot zuerst
+- [x] **T2531 Tests** Daten-Pins `data/datelektilo.test.ts` und `data/spec025-datum.test.ts` (kampo: Grenze `date-range` geschlossen, `near-date`, Jugxo der gekippten Antwort; Ikonaro `calendar`; Ontologio, Übersetzungen), Eroj 35 → 36 in allen Pins (Listen, Ordnungszahlen, Zahlwort `thirty-six`, `uzoj: 36`, Kit-Dateien 56, Ikono-Set 300 Varianten, Vitrino-Ikonaro 20 × 3 + 4), `kampo.test.ts` („Zeitraum von bis“ kippt), Projekcioj (`web-component.test.ts`, `figma.test.ts`, `plugin-bauformen-eingabe.test.ts`, `plugin-variablen.test.ts`, `datumoj.test.ts`, `make-kit.test.ts`, `publish.test.ts`), Browser-Spec `datelektilo.spec.ts`, Blöcke in `alirebleco.check.ts` und `vitrino.check.ts`, React-Typen `types/datelektilo.tsx`, MCP-Dialoge `e2e/s025-datum.test.ts`, Doku-Test ②. Rot in `7ae1180` (Modelo 49 Tests in 26 Dateien, Projekcioj 19 in 8 Dateien, MCP 20 in 21 Dateien – die Suite s025-datum lädt nicht ohne Daten).
+
+### B – Grün
+- [x] **T2532 Modelo** `datelektilo` Skemo, Uzo, Ontologio, Übersetzungen; `kampo` (Grenze `date-range` → use-instead, `near-date`, Goal `date` + geburtsdatum, komponiert mit `datelektilo`); sieben Feld-Reguloj ausgeweitet; Jugxo der gekippten Antwort; Formularo nimmt `datelektilo` (D-10).
+- [x] **T2533 Ikonaro** `calendar` in vier Aspekto-Paketen und fünf Agordilo-Gewichten, Name im `ikono`, abgeleitete Fixtures und Stufe-1-Prüfsummen neu (B-13).
+- [x] **T2534 Web** Host `datepicker` (Markup, Stylesheet, Verhalten: Tippen, Kalender, Tasten, Bereich, Grenzen, RTL), B-10, B-11 (D-11).
+- [x] **T2535 Figma** Achse `mode`, Kalender des Vitrino-Monats im Plan, Zeichnung im Plugin mit Zellen einzeln gebunden (D-12).
+- [x] **T2536 Vitrino, Make-Kit, React** (D-13, B-9).
+
+### C – Abschluss
+- [x] **T2537 Doku** plan ② (Review, D-10–D-13, Abdeckung, Abweichungen 1–9, B-9–B-14, O-6–O-10, Benchmark-Kennzahlen, Messanleitung), tasks ②, Vojmapo (Zeile E5), README.
+- [ ] **T2538 Messungen** unten; Bericht im PR mit den Benchmark-Kennzahlen.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits ② | rot `7ae1180`, grün (siehe Folgecommit) |
+| Rot gemessen | Modelo 49 Tests in 26 Dateien, Projekcioj 19 in 8 Dateien, MCP 20 in 21 Dateien (s025-datum lädt nicht ohne Daten) |
+| Benchmark-Kennzahlen | Eroj 35 → 36; Gattungen mit Gegenstück 28 → 29 (+ Zahl, Suche, Zeit als Ergänzung); Zustände 101 → 107; Props 161 → 174; Slots 77 → 80; Ereignisse 4 → 6; Teile 242 → 265; Bindungen 433 → 454; Ikonaro 19 → 20; Reguloj 60 → 60; Jugxoj 211 → 212 |
 
 ## ③ Auswahl
 

@@ -76,7 +76,9 @@ describe("the date dialogs of the spec (Spec 025 ②)", () => {
     const answer = await output<Suggested>(client, "suggest_ero", { goal: "Geburtsdatum" });
     expect(answer.suggestion).toEqual({ ero: "kampo", props: { kind: "date" } });
     const full = await output<Full>(client, "get_ero", { name: "datelektilo" });
-    expect(full.uzo?.instead).toEqual([{ goal: "birthday", ero: "kampo", kialo: birthday.kialo }]);
+    expect(
+      full.uzo?.instead.map((entry) => ({ goal: entry.goal, ero: entry.ero, kialo: entry.kialo })),
+    ).toEqual([{ goal: "birthday", ero: "kampo", kialo: birthday.kialo }]);
   });
 
   it("'Lieferdatum im Kalender' → the datelektilo alone; 'Kalender über mehrere Monate' stops with a person", async () => {
@@ -128,13 +130,13 @@ describe("the date dialogs of the spec (Spec 025 ②)", () => {
     expect(clean.valid).toBe(true);
   });
 
-  it("lists thirty-six Eroj; the brief of the datelektilo names expanded as its axis and the label as its duty; get_ero names its events", async () => {
+  it("lists thirty-six Eroj; the brief of the datelektilo names mode and expanded as its axes and the label as its duty; get_ero names its events", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
     expect(listed.eroj).toHaveLength(36);
     expect(listed.eroj.map((ero) => ero.name)).toContain("datelektilo");
     const brief = await output<Brief>(client, "get_ero", { name: "datelektilo", brief: true });
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["expanded"]);
-    expect(brief.props?.map((prop) => prop.name)).toContain("mode");
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["mode", "expanded"]);
+    expect(brief.props?.map((prop) => prop.name)).toContain("disabled-dates");
     expect(brief.required).toEqual({ props: [], slots: ["label"] });
     const full = await output<Full>(client, "get_ero", { name: "datelektilo" });
     expect(full.skemo.events?.map((event) => event.name)).toEqual(["input", "change"]);

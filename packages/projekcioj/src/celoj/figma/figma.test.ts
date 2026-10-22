@@ -3692,16 +3692,17 @@ describe("the Figma plan draws the datelektilo (Spec 025 ②)", () => {
       "month.typography": "typography/label/1",
       "prev.size": "size/control/small",
       "weekday.color": "color/text/muted",
-      "cell.fill": "color/action/tertiary/rest",
-      "cell.color": "color/text/default",
+      "cell.color": "color/action/tertiary/rest",
       "cell.size": "size/target/min",
       "cell.radius": "radius/role/control",
-      "selected-cell.fill": "color/action/primary/selected",
-      "selected-cell.color": "color/action/primary/text",
-      "in-range-cell.fill": "color/action/secondary/selected",
+      "day.color": "color/text/default",
+      "day.typography": "typography/label/1",
+      "selected-cell.color": "color/action/primary/selected",
+      "selected-day.color": "color/action/primary/text",
+      "in-range-cell.color": "color/action/secondary/selected",
       "today-cell.color": "color/border/strong",
       "today-cell.width": "border/width/default",
-      "outside-cell.color": "color/text/muted",
+      "outside-day.color": "color/text/muted",
       "box.gap": "spacing/small",
     });
     expect(closed?.bindings["calendar.height"]).toBeUndefined();
@@ -3710,12 +3711,12 @@ describe("the Figma plan draws the datelektilo (Spec 025 ②)", () => {
     expect(open?.bindings["calendar.height"]).toBe("size/container/medium");
     expect(open?.hidden ?? []).not.toContain("calendar");
     expect(open?.shadow?.variable).toBe("elevation/shadow/overlay");
-    expect(variant("single", "false", "hover")?.bindings["cell.fill"]).toBe(
+    expect(variant("single", "false", "hover")?.bindings["cell.color"]).toBe(
       "color/action/tertiary/hover",
     );
     expect(variant("single", "false", "disabled")?.bindings).toMatchObject({
-      "cell.fill": "color/action/tertiary/disabled",
-      "cell.color": "color/text/disabled",
+      "cell.color": "color/action/tertiary/disabled",
+      "day.color": "color/text/disabled",
       "surface.fill": "color/background/sunken",
     });
     expect(variant("single", "false", "invalid")?.bindings["border.color"]).toBe(

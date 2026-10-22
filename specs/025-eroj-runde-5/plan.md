@@ -151,7 +151,134 @@ node -e 'const fs=require("fs");let t={eroj:0,props:0,states:0,slots:0,parts:0,b
 
 ## ② Datum
 
-Folgt gestapelt auf ①: `datelektilo` (Spec ②). Aufgaben ab T2531.
+**Branch:** `261022-spec-025-datum-c7fa02` (gestapelt auf ①, `261022-spec-025-eingabe-c7fa02`, PR #101) · **Datum:** 2026-10-22 (Nachtlauf) · **Stand:** gebaut, Abnahme offen.
+
+### Zusammenfassung
+
+1. **`datelektilo` (D-10, D-11):** die Datumsauswahl – das Feld des `kampo` (Rolle `textbox`) mit einem Auslöser daneben (komponierter `butono emphasis=low` mit `ikono calendar`, „Kalender öffnen“) und dem Kalender als Overlay der Plattform (Popover, wie die Liste des `kompletigilo`): Kopf mit Monat und Jahr zwischen „Voriger Monat“ und „Nächster Monat“, Raster der Tage (`role=grid`, Wochentage als Spaltenköpfe, Zellen `gridcell` mit wanderndem `tabindex`). Props `mode` (`single`/`range`), `value` bzw. `value-start`/`value-end` (ISO), `min`, `max`, `disabled-dates` (Liste oder `weekends`), `required`, `disabled`, `readonly`, `invalid`, `expanded`, `name`. Erster Wochentag, Monatsnamen und Datumsformat kommen aus `lang` (`Intl`), keine eigenen Props. Ereignisse `input` und `change` im Skemo.
+2. **Eingabe und Kalender synchron (D-11):** Getipptes wird bei `change` und Enter gelesen (Format der Dokumentsprache oder ISO); ein Datum, das es nicht gibt, macht das Feld ungültig mit „Gib ein Datum wie 22.10.2026 ein.“ (`a11y.texts value-invalid`, das Beispiel ist heute im Format der Sprache); ein Ende vor dem Anfang mit „Wähle ein Ende nach dem Anfang.“ (`value-end-invalid`). Im Kalender: Pfeile um Tag und Woche, Bild um einen Monat, Umschalt+Bild um ein Jahr, Pos1/Ende in der Woche, Enter wählt (Fokus zurück ins Feld), Escape schließt (Fokus auf den Auslöser); Pfeile folgen der Schreibrichtung. Bei `range` ist der erste Klick der Anfang, der zweite das Ende; ein früherer zweiter Klick beginnt neu; der Formularwert ist ein ISO-Intervall `start/end`.
+3. **G2 (Verflechtung):** `kampo.boundary date-range` ist geschlossen (`use-instead datelektilo`, wie `file` durch den `alsxutilo`), `kampo.instead near-date` → `datelektilo`; `datelektilo.instead birthday` → `kampo` (kind date), Grenze `time-of-day` → `kampo` (kind time), `multiple-months` und `presets` ask-human. Der Dialog „Zeitraum von bis“ aus Spec 011 ① kippt zum `datelektilo mode=range` mit Jugxo (OP-12).
+4. **Ikonaro:** `calendar` (Phosphor `calendar-blank`) in komuna (regular), ekzemplo (fill), provo (bold), provo-kompakta (light) und den fünf Gewichten des Agordilo mit Herkunft; 20 Namen (G1: höchstens +6 in der Runde, drei verbraucht).
+5. **Projekcioj:** Web-Host `datepicker` (D-11), Figma-Bauform `field` mit der Achse `mode` und dem Kalender des Vitrino-Monats (D-12), Vitrino in zwei Zeilen, Make-Kit-Satz, React-Typen (D-13). Zahlwort `thirty-six`.
+
+### Constitutional Compliance Review
+
+- **Art. I (Modelo-First):** konform. Skemo, Uzo, Ikonaro, Jugxo, Ontologio, Übersetzungen zuerst; Web, React, Figma, Vitrino und Make-Kit sind erzeugt.
+- **Art. II (Unu Vortaro):** konform. Keine Umbenennung; der Auslöser heißt `trigger`, der Kalender `calendar`, die Zelle `cell`, der Tag `day` – überall gleich.
+- **Art. III (Maschinenlesbarkeit):** konform. `get_ero` nennt Ereignisse, Props und die Uzo; `suggest_ero` beantwortet die Dialoge der Spec; `check_usage` prüft die Feld-Reguloj am `datelektilo`.
+- **Art. IV (Multmarkeco):** konform. Keine neuen Tokens; der gewählte Tag nimmt `color.action.primary.selected`/`.text`, die Tage dazwischen `color.action.secondary.selected`, heute `color.border.strong`; die Glyphe steht in jedem Aspekto-Paket.
+- **Art. V (Clean Room):** konform. Kein fremdes System geöffnet; die Glyphe ist Phosphor Icons (MIT) mit Herkunft; `check:clean-room` ohne Befund.
+- **Art. VI (Regularo kun Kialoj):** konform. Sieben Feld-Reguloj ausgeweitet (E5), keine neue Regulo; die gekippte Antwort trägt ein Jugxo.
+- **Art. VII (Agenta Dokumentado):** konform. Die Spec-Dialoge sind MCP-Tests (`s025-datum.test.ts`); die deutschen Texte stehen in `tradukoj.json`.
+- **Art. VIII (Web-first, mobiles Modell):** konform. `expanded` statt „offen“, `trigger` statt „button“; die Nachrichten sind Wörter des Modelo mit einem Platzhalter `{example}`, den das Element füllt; kein DOM-Begriff im Skemo.
+- **Art. IX (Vertikaler Durchstich):** konform. Der `datelektilo` geht durch alle Ebenen, bevor ③ in die Breite geht.
+- **Art. X (Test-first):** konform. Rot in `7ae1180` (Modelo 49 Tests in 26 Dateien, Projekcioj 19 in 8, MCP 20 in 21 – die Suite s025-datum lädt nicht ohne Daten), dann grün.
+- **Art. XI (Einfachheit):** konform. Kein neues Paket, keine Abhängigkeit; ein Host, keine neue Bauform (der Kalender hängt an der Bauform `field`).
+- **Art. XII (Interoperabilität):** konform. Kein neues Celo.
+- **Art. XIII (Einfachheit der Nutzung):** konform. `<fm-datelektilo value="2026-10-24">Lieferdatum</fm-datelektilo>` genügt.
+
+### Entwurfsentscheidungen
+
+#### D-10 Uzo-Verflechtung: die Grenze `date-range` des `kampo` schließt
+Die Spec (G2) legt den Zeitraum zum `datelektilo`. Die Grenze `date-range` des `kampo` war `ask-human` („Fundamento has none yet“); jetzt `use-instead datelektilo` – derselbe Weg wie `file` → `alsxutilo` (Spec 015 ②) und `navigation` → `ligilo` (Spec 008). Der Gvidanto sagt dann „dasselbe“ (Spec 008 D-08): das Ziel `date-range` des `datelektilo` antwortet, die Grenze des `kampo` steht mit ihrer Kialo daneben. „Zeitraum von bis“ (Spec 011 ①) kippt darum von der Rückfrage zur Antwort – festgehalten als Jugxo `jug_01M5GYYE9X3KKQ8K6NXTDPM25K` (OP-12). Umgekehrt sendet `datelektilo.instead birthday` ein Geburtsdatum zum `kampo`; das Ziel `date` des `kampo` nimmt „geburtsdatum“ als Stichwort, damit die Antwort `kind=date` trägt (ein fünfbuchstabiges Stichwort trifft kein Kompositum, Nachlese 5 O-17). Die Kialo des `instead` erscheint nicht in der Antwort: Ein `instead` eines anderen Ero bestätigt nur die Wahl und bleibt draußen (Spec 008 D-08, OP-12); sie steht in `get_ero datelektilo` (Abweichung 7).
+
+#### D-11 Web-Host `datepicker`: das Feld des `kampo` mit Auslöser und Popover-Kalender
+Der Host ist ein Feld-Host (`isFieldHost`): Beschriftung, Hilfe, Fehler, Pflichtmarke, Formularwert, Gültigkeit und `formResetCallback` kommen vom Feld. Dazu: die Zeile aus Eingabe und Auslöser (`row`, wie die Schrittknöpfe des `kampo`), der Kalender als `popover="manual"` mit `role=dialog`, `aria-modal=false`, benannt durch den Monat (`aria-labelledby=month`, der Monat ist `aria-live=polite`); Verankerung über CSS-Anchor-Positioning am Feld (`anchor-name: --fm-field`, wie die Liste des `kompletigilo`), ohne Anchor-Positioning ein gemessener Platz unter dem Feld. Die Zustände des Feldes stehen am Eingabefeld; die Zelle trägt ihre eigenen (`:hover`, `:focus-visible`, `aria-disabled`), `readonly` und `invalid` erreichen sie über das Feld. Die vier Bilder der Zelle sind Teile (`selected-cell`/`selected-day`, `in-range-cell`, `today-cell`, `outside-day`), geschlüsselt an den Attributen `aria-selected`, `data-range`, `data-today`, `data-outside`, außerhalb von `:where()`, damit sie Hover und Fokus überstimmen (ein gewählter Tag behält sein Bild unter dem Zeiger). Die Zelle trägt ihren Grund als `color` (der Weg der Füllung des `glitilo` und des Balkens des `mezurilo`), der Tag (`day`) seine Textfarbe: so legt `skemo-kontrastparo-missing` die Beschriftung nicht auf den gewählten Tag (B-12). Wochentage und Monat kommen aus `Intl.DateTimeFormat` (kurze Wochentage ohne den Punkt, den das Deutsche schreibt), der erste Wochentag aus `Intl.Locale.getWeekInfo` (Montag, wo die Plattform nichts sagt), das Format aus `formatToParts` einer Probe. Der Fokus bleibt bei einem Zeiger auf Auslöser und Monatsknöpfen, wo er ist (`mousedown` ohne Default): WebKit gibt einem Knopf beim Klick keinen Fokus und hätte den Kalender vor dem Klick geschlossen (B-10).
+
+#### D-12 Figma: Bauform `field` mit der Achse `mode` und dem Kalender des Vitrino-Monats
+`mode` ist eine Achse des Sets, die keinen Teil schlüsselt (wie `range` des `glitilo`); `expanded` schlüsselt die Höhe des Kalenders (`none` geschlossen) und blendet ihn aus (wie die Liste des `kompletigilo`). Varianten `mode` × `expanded` × Zustand = 24. Der Plan trägt den Kalender des Vitrino-Monats (`VITRINO_DATE`, Oktober 2026 ab Montag, heute der 22., gewählt der 24., Bereich 6.–10.) – eine Quelle für beide Bilder. Das Plugin zeichnet die Spalte Beschriftung, Zeile (Ring → Lücke → Kontrolle mit dem Datum als Text, Auslöser mit der Glyphe `calendar`), Kalender (Kopf mit `prev`, Monat, `next`; Wochentage; sechs Wochen à sieben Zellen mit ihrem Tag), Hilfe, Fehler; jede Zelle wird einzeln gebunden – Grund, Größe, Radius und Schriftrolle, der gewählte Tag, die Tage dazwischen, heute (Strich) und die Tage außerhalb unter ihren eigenen Teilen (logische Namen derselben Knoten). Der zweite Lauf schreibt nichts (F21/F22).
+
+#### D-13 Vitrino, Make-Kit, React
+Vitrino: zwei Zeilen (einzeln 24.10.2026 mit Hilfe „Ein Datum ab heute.“, Bereich 6.–10.10.2026) × rest/required/disabled/invalid; der Vitrino-Check öffnet den ersten per Auslöser, bewegt den Tag mit Pfeil rechts und schließt mit Escape. Make-Kit: „Every date near today a person picks, or a date range, is a `<Datelektilo>` whose field also takes the date typed; a date far away, like a birthday, is a `<Kampo>` of kind date.“ – erzeugt aus der Rolle `textbox` mit Teil `calendar`; der generische Feld-Satz und das daneben genannte Feld bleiben der `kampo` (B-9). React-Typen aus dem Skemo (`mode`, `valueStart`, `valueEnd`, `disabledDates`, `expanded`); der Typtest prüft zwei echte Typfehler.
+
+### Arkitekturo-Abdeckung
+
+| Artikel | Wie ② ihn trägt |
+|---|---|
+| Art. V (Clean Room) | `calendar` aus Phosphor Icons (MIT) mit Herkunft in `<metadata>`; `check:ikonaro` 20 × 4, `check:clean-room` ohne Befund |
+| Art. VIII (keine Web-Begriffe, keine Strings im Ero) | `trigger`, `calendar`, `expanded`; Monat, Wochentage und Format aus `Intl` in der Sprache des Dokuments; die Nachrichten aus `a11y.texts` |
+| E1 (keine neuen Tokens) | gewählter Tag `action.primary.selected`/`.text`, Bereich `action.secondary.selected`, heute `border.strong`, Zelle `size.target.min` (2.5.8), Kalender `background.raised` + `elevation.shadow.overlay` |
+| E2/E3 (Namen, Zustände am bedienten Teil) | Zustände am Eingabefeld und an der Zelle; die vier Bilder der Zelle als Teile (Abweichung 2) |
+| E5 (ausweiten statt vervielfachen) | sieben Feld-Reguloj ausgeweitet, keine neue Regulo |
+| E6 (native Eingabe als Kern) | das Feld ist die native Eingabe (getippt ist immer möglich); der Kalender ist Zusatz |
+| G2 (Verflechtung) | `kampo.date-range` → `datelektilo` (geschlossen), `kampo.near-date` → `datelektilo`; `datelektilo.birthday` → `kampo`, `time-of-day` → `kampo` |
+| G3 (Stichwörter) | `goal-keyword-shared` ohne Warnung; „termin“ gestrichen (hätte „Uhrzeit des Termins“ aus ① gekippt), „von-bis“ gestrichen (hätte „Preisbereich von bis“ des `glitilo` gezogen) |
+| Internacia | Pfeile folgen der Schreibrichtung, das Raster spiegelt (Browser-Spec in RTL); Wochentage und Format aus `lang` |
+| Kontrast | Zelle und Tag getrennt (`color` als Grund, `day.color` als Text): kein `fill`, `skemo-kontrastparo-missing` schweigt; der gewählte Tag ≥ 4.5:1 gemessen (Alirebleco) |
+
+### Abweichungen von der Spec
+
+1. **`label` ist der Standard-Slot, kein Prop** (wie bei jedem Feld, G1); die Uzo macht ihn zur Pflicht.
+2. **Die Bilder der Tageszelle sind Teile, keine Zustände:** `selected`, `in-range`, `today`, `outside-month` kennt das Vokabular nicht als Zustände (nur `selected`/`current`/`active` als Schlüssel eines Eintrags eines Slots, E7). Neue Zustände hätten `STATE_ORDER`, die Figma-Achsen und die Ero-Tokens jedes Sets verbreitert; Teile (`selected-cell`/`selected-day`, `in-range-cell`, `today-cell`, `outside-day`) sind der Weg des `danger-item` (`menuo`) und des `selected-indicator` (`langetaro`) – die kleinste Ergänzung (E2).
+3. **`expanded` als Prop** (nicht in der Spec): der Kalender ist offen – wie `expanded` des `kompletigilo`; die Achse des Figma-Sets („geschlossen, offen“) und der Weg, über den eine Anwendung den Kalender öffnet.
+4. **`disabled-dates` als Text:** eine Liste von ISO-Daten mit Komma oder die Regel `weekends`.
+5. **Bereich in einem Feld:** „06.10.2026 – 10.10.2026“ (Gedankenstrich); getippt werden zwei Daten, getrennt durch Gedankenstrich, „ - “ oder „/“; der Formularwert ist das ISO-Intervall `2026-10-06/2026-10-10`.
+6. **Nachrichten nach Prop geschlüsselt:** `value-invalid` und `value-end-invalid` statt „Fehlertext nach `error-says-what-to-do` und Beispielformat“ als freie Namen – `skemo-a11y-invalid` lässt nur `<prop>-invalid` zu; der Fehler-Slot der Anwendung geht vor.
+7. **„Geburtsdatum“** antwortet `kampo kind=date` ohne die Kialo des `datelektilo.instead birthday` in der Antwort (D-10); die Kialo steht in `get_ero datelektilo`.
+8. **Figma zeigt den Kalender in jedem Zustand des Feldes** (24 Varianten statt vier Bilder): die Spec nennt „geschlossen, offen einzeln, offen Bereich, Fehler“; das Set hat sie alle, dazu hover, focus, disabled, readonly.
+9. **Der Auslöser hat keine `size`-Achse:** der `datelektilo` hat keinen Prop `size` (nicht in der Spec); Feld und Auslöser sind `size.control.medium`, die Monatsknöpfe `size.control.small`.
+
+### Befunde / Mankoj
+
+- **B-9 (behoben)** Der Make-Kit nannte neben `tekstareo`, `alsxutilo` und `glitilo` plötzlich den `datelektilo` statt des `kampo`: `fieldName` war das erste Ero der Rolle `textbox` – alphabetisch jetzt der `datelektilo`; der generische Feld-Satz entstand zweimal (A-4). Beide schließen Eroj mit Teil `calendar` aus.
+- **B-10 (behoben)** WebKit gibt einem Knopf beim Klick keinen Fokus: `focusout` des Rasters ging an `body`, der Kalender schloss, bevor der Klick auf „Nächster Monat“ ankam. Auslöser und Kopf nehmen `mousedown` ohne Default; `focusout` prüft nach dem Wechsel (`setTimeout 0`) über `document.activeElement`.
+- **B-11 (behoben)** Ein zweites Ero der Rolle `textbox` ohne Schrittknöpfe ließ den Eroj-Build fallen: der Render des Hosts `input` rief `#fieldButton`, das nur mit Teil `decrement` entsteht (latent seit ①). Der Block hängt jetzt an `stepper`.
+- **B-12 (behoben)** `skemo-kontrastparo-missing` legt die Farbe jedes Text-Teils (Beschriftung, Hilfe) auf jede `fill` des Skemo: `label.color` auf `selected-cell.fill` wäre ein Paar, das nie vorkommt und keinen Kontrast hätte. Die Zelle trägt darum `color` als Grund (D-11), der Tag ist ein eigener Teil.
+- **B-13 (behoben)** Die abgeleiteten Fixtures `aspekto-provo`/`aspekto-provo-kompakta` und `fixtures/stufe1-provo.json` neu erzeugt (28 Dateien mit `calendar`), wie B-8.
+- **B-14 Manko-Kandidat:** Figma zeichnet die Wochentage und den Kalender mit den deutschen Kurznamen ab Montag (die Quelle der Vitrino); eine Marke mit anderer Sprache sähe denselben Kalender – der Plan hat keine Sprache.
+
+### Offen (für den Maintainer)
+
+- **O-6 E4 Name** `datelektilo` (bestätigt die Spec selbst bei ①); `trigger`, `calendar`, `cell`, `day` als Teilnamen.
+- **O-7 Bereich in einem Feld** (Abweichung 5) oder zwei Felder (von/bis). Vorschlag: so lassen; zwei Felder in einer späteren Runde, wenn ein Produkt sie braucht.
+- **O-8 `expanded` als Prop** (Abweichung 3). Vorschlag: so (der Weg des `kompletigilo`).
+- **O-9 Kialo des fremden `instead` in `suggest_ero`** (Abweichung 7): soll die Antwort „Geburtsdatum“ die Kialo des `datelektilo` nennen? Dann ändert sich Spec 008 D-08 für alle Eroj (OP-12). Vorschlag: so lassen.
+- **O-10 Sprache des Figma-Kalenders** (B-14). Vorschlag: so lassen, bis eine Marke eine andere Sprache braucht.
+
+### Benchmark-Kennzahlen
+
+Gezählt über `packages/modelo/data/eroj/*/skemo.json` (Summen, derselbe Schnitt wie `research/benchmark-carbon-2026-10.md` § 1.1). Gattungen mit Gegenstück nach § 5 Lücke 1.
+
+| Größe | Benchmark | nach ① (35 Eroj) | nach ② (36 Eroj) |
+|---|---|---|---|
+| Eroj | 79 Komponenten | 35 | 36 (`datelektilo`) |
+| Gattungen mit Gegenstück | – | 28 | 29 (Datumsauswahl, Zeitraum) + Zahleneingabe, Suche, Zeitauswahl als Ergänzungen des `kampo` (Ziel der Runde: 33) |
+| Zustände (Summe) | 327 | 101 | 107 |
+| Props (Summe) | 923 | 161 | 174 |
+| Slots (Summe) | 222 | 77 | 80 |
+| Ereignisse im Skemo | 224 | 4 | 6 (`datelektilo`: `input`, `change`) |
+| Teile (Summe) | 434 | 242 | 265 |
+| Bindungen | – | 433 | 454 |
+| Ikonaro | 2646 | 19 | 20 |
+| Reguloj / Jugxoj | – | 60 / 211 | 60 / 212 |
+
+Messbefehl: `node -e` über die Skemoj (siehe Messanleitung).
+
+### Messanleitung
+
+Alle Befehle im Checkout des Maintainers, nach dem Merge dieses PR:
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm install && pnpm build
+pnpm fm projekcioj build --out .fundamento/projekcioj
+pnpm check:parity && pnpm check:regularo && pnpm check:ikonaro && pnpm check:clean-room --spuroj research/benchmark-carbon-2026-10.md
+```
+
+**Benchmark-Kennzahlen:**
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+node -e 'const fs=require("fs");let t={eroj:0,props:0,states:0,slots:0,parts:0,bindings:0,events:0};for(const d of fs.readdirSync("packages/modelo/data/eroj")){const s=JSON.parse(fs.readFileSync(`packages/modelo/data/eroj/${d}/skemo.json`,"utf8")).skemo;t.eroj++;t.props+=s.props.length;t.states+=s.states.length;t.slots+=s.slots.length;t.parts+=Object.keys(s.parts).length;t.bindings+=s.bindings.length;t.events+=(s.events??[]).length}console.log(t)'
+```
+
+**Vitrino (Abnahme 2):** `open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/vitrino/index.html#fm-vitrino-datelektilo"` – Abschnitt `datelektilo`: zwei Zeilen (einzeln, Bereich) × rest/required/disabled/invalid. Tab auf den Auslöser, Enter öffnet den Kalender auf Oktober 2026 mit dem 24. unter dem Fokus; Pfeil rechts → 25., Bild ab → November, Umschalt+Bild ab → 2027, Pos1 → Montag der Woche; Enter wählt und schließt (Fokus im Feld), Escape schließt (Fokus auf dem Auslöser). Ins Feld „25.10.2026“ tippen und Tab: der Wert ist 2026-10-25; „31.02.2026“ macht das Feld ungültig („Gib ein Datum wie … ein.“). `dir="rtl"` am `<html>` spiegelt das Raster (Pfeil links = nächster Tag). Marke und Dunkel über die Kopfzeile.
+
+**Browser-Specs:** `PLAYWRIGHT_ENGINES="chromium firefox webkit" pnpm --filter @fundamento/eroj exec playwright test datelektilo.spec.ts kampo.spec.ts` · **Alirebleco:** `pnpm check:alirebleco-eroj` · **Vitrino-Check:** `pnpm check:vitrino`.
+
+**Figma (Abnahme 3):** `pnpm fm projekcioj build --config fundamento.config.json --out .fundamento/projekcioj` mit den Testmarken der Spec 024 (sobald sie im Markenordner stehen), dann in einer **neuen leeren Datei** das Plugin `.fundamento/projekcioj/figma/plugin/manifest.json` laden und „Plan anwenden“: im Frame „Eroj“ das Set `datelektilo` mit 24 Varianten (`mode` × `expanded` × Zustand); offen zeigt es Oktober 2026 ab Montag mit dem 24. (einzeln) bzw. 6.–10. (Bereich) und dem 22. als heute; Moduswechsel (hell/dunkel) und Markenwechsel über die Sammlung `aspekto`.
+
+**MCP (Abnahme 1):** `pnpm --filter @fundamento/mcp exec vitest run src/e2e/s025-datum.test.ts` – die Dialoge der Spec („Zeitraum für den Bericht“, „Geburtsdatum“); `pnpm --filter @fundamento/mcp exec vitest run src/e2e` – alle Dialoge aus 008–025 ①.
 
 ## ③ Auswahl
 

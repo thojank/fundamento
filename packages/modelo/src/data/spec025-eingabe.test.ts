@@ -174,7 +174,12 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
       ero: "glitilo",
       keywords: { en: ["approximate", "roughly", "slider"], de: ["ungefähr", "etwa", "regler"] },
     });
-    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["kampo", "butono", "glitilo"]);
+    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual([
+      "kampo",
+      "butono",
+      "glitilo",
+      "datelektilo",
+    ]);
     // range-stated judges the kampo too, on its help.
     expect(uzo?.content.find((entry) => entry.regulo === "range-stated")).toEqual({
       regulo: "range-stated",
@@ -254,7 +259,7 @@ describe("suggest_ero of the kampo additions (Gvidanto)", () => {
 describe("the Ikonaro of Spec 025 ① (G1: add and subtract)", () => {
   it("names add and subtract, neither mirrored; the ikono knows both names; the kampo composes the ikono", () => {
     const names = modelo.ikonaro?.map((ikono) => ikono.name) ?? [];
-    expect(names).toHaveLength(19);
+    expect(names).toHaveLength(20);
     expect(names).toContain("add");
     expect(names).toContain("subtract");
     expect([...names].sort()).toEqual(names);

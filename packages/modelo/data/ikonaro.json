@@ -11,6 +11,15 @@
       "kialo": "The increase button of a kampo of kind number with stepper says with the plus what it does beside its word; the sign is the same in every writing direction, so it never mirrors."
     },
     {
+      "id": "iko_01M5GYYDXE2TQP5KAEP2S1EGWP",
+      "name": "calendar",
+      "meaning": {
+        "de": "Kalender: ein Datum wählen",
+        "en": "Calendar: pick a date"
+      },
+      "kialo": "The trigger of a datelektilo says with the calendar that a month opens beside the field, because the sign is read faster than the word; the Modelo's word names the button. The sign is the same in every writing direction, so it never mirrors."
+    },
+    {
       "id": "iko_01M55EFZMTVJR4FGV32KYEG54W",
       "name": "check",
       "meaning": {

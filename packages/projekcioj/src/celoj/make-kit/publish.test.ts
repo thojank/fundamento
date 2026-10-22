@@ -70,6 +70,7 @@ describe("what a publish would contain (T020)", () => {
         "guidelines/components/avataro.md",
         "guidelines/components/avizo.md",
         "guidelines/components/butono.md",
+        "guidelines/components/datelektilo.md",
         "guidelines/components/dialogo.md",
         "guidelines/components/elektilo.md",
         "guidelines/components/elekto.md",

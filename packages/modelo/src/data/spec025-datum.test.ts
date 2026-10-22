@@ -79,7 +79,7 @@ describe("the kampo of Spec 025 ②: the date range goes to the datelektilo (Ark
       "datelektilo",
     ]);
     // The goal date keeps its words and takes the birthday, so „Geburtsdatum“ answers kind date.
-    expect(kampo.skemo.goals.find((goal) => goal.goal === "date")?.keywords).toEqual({
+    expect(kampo.skemo.goals?.find((goal) => goal.goal === "date")?.keywords).toEqual({
       en: ["date", "expiry", "deadline", "birthday"],
       de: ["datum", "ablaufdatum", "frist", "geburtsdatum"],
     });
@@ -94,7 +94,10 @@ describe("the kampo of Spec 025 ②: the date range goes to the datelektilo (Ark
       action: "use-instead",
     });
     const jugxo = modelo.jugxoj.find(
-      (entry) => entry.ref.ero === kampo.ero.id && entry.context?.includes("Zeitraum von bis"),
+      (entry) =>
+        "ero" in entry.ref &&
+        entry.ref.ero === kampo.ero.id &&
+        entry.context?.includes("Zeitraum von bis"),
     );
     expect(jugxo?.decision).toBe("approved");
     expect(jugxo?.context).toContain("Spec 025 ②");
@@ -152,7 +155,8 @@ describe("the Ontologio and the translations of Spec 025 ②", () => {
       `${kampo.uzo?.id}/instead/near-date/kialo`,
       `${kampo.uzo?.id}/composes/with/datelektilo/kialo`,
     ]) {
-      expect(de[key], key).toMatch(/\bweil\b/);
+      expect(de[key], key).toBeDefined();
+      if (!key.endsWith("/purpose")) expect(de[key], key).toMatch(/\bweil\b/);
     }
   });
 });

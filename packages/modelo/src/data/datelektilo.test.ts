@@ -105,10 +105,12 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       "next",
       "weekday",
       "cell",
+      "day",
       "selected-cell",
+      "selected-day",
       "in-range-cell",
       "today-cell",
-      "outside-cell",
+      "outside-day",
       "help",
       "error",
       "focus-ring",
@@ -135,26 +137,29 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       color: { fixed: "color.text.muted" },
       typography: { fixed: "typography.caption" },
     });
+    // The cell carries its ground as a colour (the way of the glitilo's fill and the meter's bar:
+    // no fill, so the pair rule does not lay the label on it); the day is the text in the cell.
     expect(skemo?.parts.cell).toEqual({
-      fill: { by: ["state"] },
       color: { by: ["state"] },
       size: { fixed: "size.target.min" },
       radius: { fixed: "radius.role.control" },
+    });
+    expect(skemo?.parts.day).toEqual({
+      color: { by: ["state"] },
       typography: { fixed: "typography.label.1" },
     });
     expect(skemo?.parts["selected-cell"]).toEqual({
-      fill: { fixed: "color.action.primary.selected" },
-      color: { fixed: "color.action.primary.text" },
+      color: { fixed: "color.action.primary.selected" },
     });
+    expect(skemo?.parts["selected-day"]).toEqual({ color: { fixed: "color.action.primary.text" } });
     expect(skemo?.parts["in-range-cell"]).toEqual({
-      fill: { fixed: "color.action.secondary.selected" },
-      color: { fixed: "color.text.default" },
+      color: { fixed: "color.action.secondary.selected" },
     });
     expect(skemo?.parts["today-cell"]).toEqual({
       color: { fixed: "color.border.strong" },
       width: { fixed: "border.width.default" },
     });
-    expect(skemo?.parts["outside-cell"]).toEqual({ color: { fixed: "color.text.muted" } });
+    expect(skemo?.parts["outside-day"]).toEqual({ color: { fixed: "color.text.muted" } });
     expect(skemo?.parts.box).toEqual({
       height: { fixed: "size.control.medium" },
       "inline-padding": { fixed: "spacing.medium" },
@@ -180,12 +185,12 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
     expect(token("text", "color", "rest")).toBe("color.text.default");
     expect(token("text", "color", "disabled")).toBe("color.text.disabled");
     expect(token("label", "color", "disabled")).toBe("color.text.disabled");
-    expect(token("cell", "fill", "rest")).toBe("color.action.tertiary.rest");
-    expect(token("cell", "fill", "hover")).toBe("color.action.tertiary.hover");
-    expect(token("cell", "fill", "focus")).toBe("color.action.tertiary.rest");
-    expect(token("cell", "fill", "disabled")).toBe("color.action.tertiary.disabled");
-    expect(token("cell", "color", "rest")).toBe("color.text.default");
-    expect(token("cell", "color", "disabled")).toBe("color.text.disabled");
+    expect(token("cell", "color", "rest")).toBe("color.action.tertiary.rest");
+    expect(token("cell", "color", "hover")).toBe("color.action.tertiary.hover");
+    expect(token("cell", "color", "focus")).toBe("color.action.tertiary.rest");
+    expect(token("cell", "color", "disabled")).toBe("color.action.tertiary.disabled");
+    expect(token("day", "color", "rest")).toBe("color.text.default");
+    expect(token("day", "color", "disabled")).toBe("color.text.disabled");
     expect(token("calendar", "height", "rest", "false")).toBe("none");
     expect(token("calendar", "height", "rest", "true")).toBe("size.container.medium");
     for (const combination of combinationsOf(skemoOrThrow(), ["state", "expanded"])) {
@@ -194,8 +199,8 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
         ["border", "color"],
         ["text", "color"],
         ["label", "color"],
-        ["cell", "fill"],
         ["cell", "color"],
+        ["day", "color"],
         ["calendar", "height"],
       ]) {
         expect(
@@ -206,7 +211,7 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
     }
   });
 
-  it("speaks role textbox: name from the label, description from help then error, the states with expanded, the keys of the APG date picker dialog, the words of trigger, prev, next and the two messages in de and en", () => {
+  it("speaks role textbox: name from the label, description from help then error, the states with expanded, the keys of the APG date picker dialog, the words of trigger, prev, next and the two messages (value-invalid, value-end-invalid) in de and en", () => {
     expect(skemo?.a11y).toEqual({
       role: "textbox",
       name: ["slot:label"],
@@ -235,11 +240,12 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
         "trigger-name": { de: "Kalender öffnen", en: "Open calendar" },
         "prev-name": { de: "Voriger Monat", en: "Previous month" },
         "next-name": { de: "Nächster Monat", en: "Next month" },
-        "invalid-date": {
+        // The two messages are keyed by the prop they judge (<prop>-invalid, skemo-a11y-invalid).
+        "value-invalid": {
           de: "Gib ein Datum wie {example} ein.",
           en: "Enter a date like {example}.",
         },
-        "range-order": {
+        "value-end-invalid": {
           de: "Wähle ein Ende nach dem Anfang.",
           en: "Choose an end after the start.",
         },
@@ -360,11 +366,11 @@ describe("the Uzo of the datelektilo (section ②, G2)", () => {
     }
   });
 
-  it("the brief names expanded as the axis and the label as the duty, lists mode among the props, and stays under 750", () => {
+  it("the brief names mode and expanded as the axes and the label as the duty, lists disabled-dates among the props, and stays under 750", () => {
     if (datelektilo === undefined) throw new Error("missing");
     const brief = briefOf(datelektilo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["expanded"]);
-    expect(brief.props?.map((prop) => prop.name)).toContain("mode");
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["mode", "expanded"]);
+    expect(brief.props?.map((prop) => prop.name)).toContain("disabled-dates");
     expect(brief.required).toEqual({ props: [], slots: ["label"] });
     const bytes = Buffer.byteLength(JSON.stringify(brief), "utf8");
     expect(Math.ceil(bytes / 3), `${bytes} bytes`).toBeLessThanOrEqual(750);
@@ -416,8 +422,8 @@ describe("suggest_ero of the date picker (Gvidanto)", () => {
     expect(birthday?.kialo).toMatch(/typed|type/);
   });
 
-  it("'Lieferdatum im Kalender wählen' is the datelektilo alone; 'Uhrzeit des Termins' stays the kampo of kind time (Spec 025 ①)", () => {
-    expect(suggest("Lieferdatum im Kalender wählen").suggestion).toEqual({
+  it("'Lieferdatum im Kalender' is the datelektilo alone; 'Uhrzeit des Termins' stays the kampo of kind time (Spec 025 ①)", () => {
+    expect(suggest("Lieferdatum im Kalender").suggestion).toEqual({
       ero: "datelektilo",
       props: {},
     });

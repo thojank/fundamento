@@ -4536,6 +4536,16 @@
       "kialo": "Die Schrittknöpfe und der Löschen-Knopf des kampo hängen an kind und stepper, die keinen Teil schlüsseln: Das Set zeigt das Feld allein, ihr Bild ist das des komponierten butono (emphasis low) mit den Glyphen subtract, add und close – gezeichnet im Set des butono und des ikono. Die Teile decrement, increment und clear tragen darum in Figma keinen Knoten (FIGMA_NOT_DRAWN).",
       "date": "2026-10-22",
       "context": "Spec 025 ① (plan ① D-05, B-1): Figma zeichnet die Schrittknöpfe und den Löschen-Knopf des kampo nicht; check:parity meldet die drei Teile als freigegeben (parity-part-not-drawn), keine Differenz. Rücknahme, sobald der Vitrino-Vergleich eine Variante mit stepper zeigt."
+    },
+    {
+      "id": "jug_01M5GYYE9X3KKQ8K6NXTDPM25K",
+      "ref": {
+        "ero": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF"
+      },
+      "decision": "approved",
+      "kialo": "Zwei voneinander abhängige Daten sind die Datumsauswahl des datelektilo: Das Ende liegt nach dem Anfang, und ein Kalender zeigt beide zugleich.",
+      "date": "2026-10-22",
+      "context": "Spec 025 ② (plan ② D-10, G2): Eine Antwort, die stand, ändert sich (OP-12). Die Grenze date-range des kampo war ask-human („Fundamento has none yet“); mit dem datelektilo ist sie geschlossen (use-instead, wie file durch den alsxutilo in Spec 015 ②). Gekippt: „Zeitraum von bis“ (Spec 011 ①) → datelektilo mode=range mit der Grenze des kampo daneben statt Rückfrage; „Zeitraum für den Bericht“ (Dialog der Spec 025) antwortet gleich."
     }
   ]
 }

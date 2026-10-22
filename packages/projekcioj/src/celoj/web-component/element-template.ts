@@ -55,7 +55,9 @@ export type HostControl =
   | "avatar"
   | "codeblock"
   | "markdown"
-  | "slider";
+  | "slider"
+  // Spec 025 ② (plan ② D-11): the field of a date picker — an input with a trigger and a calendar.
+  | "datepicker";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -114,6 +116,8 @@ export interface ElementNames {
   breadcrumb?: boolean;
   /** Spec 025 ① (plan ① D-05): a field with the parts decrement and increment — the kampo shows its step buttons and its clear button. */
   stepper?: boolean;
+  /** Spec 025 ② (plan ② D-11): a textbox with a calendar part — the datelektilo, a field with a trigger and a popover calendar. */
+  datepicker?: boolean;
   /**
    * The Make Kit builds one file per Aspekto: the descriptor and the stylesheet are then constants
    * above the element instead of imports (D-14).
@@ -134,8 +138,12 @@ export function hostOf(
   pagination = false,
   upload = false,
   avatar = false,
+  datepicker = false,
 ): HostControl {
   if (role === "link") return "a";
+  // Spec 025 ② (plan ② D-11): a textbox with a calendar part is the date picker — the field of
+  // the kampo with a trigger beside the input and the calendar as a popover.
+  if (role === "textbox" && datepicker) return "datepicker";
   // Spec 015 ② (plan ② D-05): the platform's file input is heard as a button; with a dropzone
   // part it is the file input of an alsxutilo, not a button of its own.
   if (role === "button" && upload) return "upload";
@@ -275,6 +283,7 @@ function fieldMarkup(
   textarea = false,
   suggest = false,
   stepper = false,
+  datepicker = false,
 ): string {
   // A text area (Spec 011 ②, D-11): the platform's textarea in place of the input. A field with
   // suggestions (Spec 014 ⑤, D-03): the input as a combobox over a listbox — a popover of the
@@ -283,7 +292,9 @@ function fieldMarkup(
     ? '<textarea part="control" id="control"></textarea>'
     : suggest
       ? '<input part="control" id="control" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="listbox" autocomplete="off">'
-      : '<input part="control" id="control">';
+      : datepicker
+        ? '<input part="control" id="control" autocomplete="off">'
+        : '<input part="control" id="control">';
   const listbox = suggest
     ? '<div part="listbox" role="listbox" id="listbox" popover="manual"></div><span part="count" role="status" aria-live="polite" class="fm-hidden"></span>'
     : "";
@@ -291,8 +302,18 @@ function fieldMarkup(
   // — composed butono of emphasis low with the Ikonaro's subtract, add and close, named by the
   // Modelo's words in the render, hidden unless the kind and the stepper ask for them — in a row
   // with the input.
-  const row = stepper ? `<div part="row">${native}</div>` : native;
-  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label>${row}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+  // Spec 025 ② (plan ② D-11): the trigger of a date picker beside the input — a composed butono
+  // with the ikono calendar, named by the Modelo's word in the render — and the calendar after the
+  // row: a non-modal dialog of the platform's popover with the head (prev, month, next) and the
+  // grid; the weeks and their cells are made in the render for the shown month.
+  const trigger = datepicker
+    ? '<fm-butono part="trigger" emphasis="low" aria-haspopup="dialog" aria-expanded="false" aria-controls="calendar"><fm-ikono slot="icon-start" name="calendar"></fm-ikono></fm-butono>'
+    : "";
+  const calendar = datepicker
+    ? '<div part="calendar" id="calendar" role="dialog" popover="manual" aria-modal="false" aria-labelledby="month"><div part="head"><fm-butono part="prev" emphasis="low" size="small"><fm-ikono slot="icon-start" name="chevron-left"></fm-ikono></fm-butono><span part="month" id="month" aria-live="polite"></span><fm-butono part="next" emphasis="low" size="small"><fm-ikono slot="icon-start" name="chevron-right"></fm-ikono></fm-butono></div><div part="grid" role="grid" aria-labelledby="month"><div part="weekdays" role="row"></div></div></div>'
+    : "";
+  const row = stepper || datepicker ? `<div part="row">${native}${trigger}</div>` : native;
+  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label>${row}${calendar}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -697,6 +718,7 @@ function markup(
   if (host === "markdown") return markdownMarkup();
   if (host === "tabs") return tabsMarkup();
   if (host === "input") return fieldMarkup(slots, false, false, stepper);
+  if (host === "datepicker") return fieldMarkup(slots, false, false, false, true);
   if (host === "textarea") return fieldMarkup(slots, true);
   if (host === "suggest") return fieldMarkup(slots, false, true);
   if (host === "disclosure") return disclosureMarkup();
@@ -748,7 +770,7 @@ export function elementSource({
   const control =
     host === "a"
       ? "a"
-      : host === "input"
+      : host === "input" || host === "datepicker"
         ? "input"
         : host === "textarea"
           ? "textarea"
@@ -801,10 +823,11 @@ export function elementSource({
   const isGroup = host === "group";
   const isSelect = host === "select";
   const isSuggest = host === "suggest";
+  const isDatepicker = host === "datepicker";
   const isUpload = host === "upload";
   const isSlider = host === "slider";
   const isDisclosure = host === "disclosure";
-  const isFieldHost = host === "input" || host === "textarea" || isSuggest;
+  const isFieldHost = host === "input" || host === "textarea" || isSuggest || isDatepicker;
   // The platform element of a field: the generated code names it, so the types narrow (TS).
   const nativeField = host === "textarea" ? "HTMLTextAreaElement" : "HTMLInputElement";
   const isDialog = host === "dialog";
@@ -1165,7 +1188,7 @@ export function elementSource({
 `
       : "";
   const inputEnter =
-    host === "input"
+    host === "input" || isDatepicker
       ? `    control.addEventListener("keydown", (event) => {
       if (event.key !== "Enter" || !KEYS.includes("Enter")) return;
       const form = this.#internals.form;
@@ -1181,7 +1204,7 @@ export function elementSource({
     ? `    if (control instanceof ${nativeField}) {
       const kind = String(this.propValue("kind") ?? "text");
 ${
-  host === "input" || isSuggest
+  host === "input" || isSuggest || isDatepicker
     ? `      // A number is a text input with a numeric keyboard and a whole-number pattern (Spec 011 ①,
       // E8; GOV.UK: type=number changes its value with the wheel and the arrows); a date is the
       // platform's own dialog; a password hides what is typed. Nachlese 5 O-14: an address and a
@@ -1206,7 +1229,7 @@ ${
         else control.removeAttribute(attribute);
       }
 ${
-  host === "input"
+  host === "input" && stepper
     ? `      // Spec 025 ① (plan ① D-05, D-06): a number with stepper shows its two step buttons (the
       // constraint refuses a stepper on another kind), named by the Modelo's words, in the size of
       // the field, each refusing at its bound; a search shows its clear button while it has a value.
@@ -1251,7 +1274,16 @@ ${
       if (kind === "code") control.setAttribute("spellcheck", "false");
       else control.removeAttribute("spellcheck");
 `
-}      const value = this.propValue("value");
+}${
+  isDatepicker
+    ? `      // Spec 025 ② (plan ② D-11): the form carries the ISO day (a range as one ISO interval), the
+      // field shows it in the document's format — or what a person typed while it is no date; a
+      // field under the keyboard is not overwritten.
+      const text = this.#dateFormValue();
+      const shown = this.#dateShown();
+      if (control.value !== shown && this.shadowRoot?.activeElement !== control) control.value = shown;
+      control.setAttribute("autocomplete", "off");`
+    : `      const value = this.propValue("value");
       const text = typeof value === "string" ? value : "";
 ${
   isSuggest
@@ -1259,6 +1291,7 @@ ${
       const shown = this.#entries().find((entry) => entry.value === text)?.text ?? text;
       if (control.value !== shown) control.value = shown;`
     : `      if (control.value !== text) control.value = text;`
+}`
 }
       this.#internals.setFormValue(text);
       const placeholder = this.propValue("placeholder");
@@ -1275,7 +1308,7 @@ ${
       const disabled = this.propValue("disabled") === true;
       control.readOnly = !disabled && this.propValue("readonly") === true;
       const invalid = this.propValue("invalid") === true || this.#filled("error");
-      this.#validate(control, kind, text, required, invalid);
+      this.#validate(control, ${isDatepicker ? '"datepicker"' : "kind"}, text, required, invalid);
     }
 `
     : "";
@@ -1305,7 +1338,17 @@ ${
     const own = this.#errorText();
     let flags: ValidityStateFlags = {};
     let message = own;
-    if (required && text === "") {
+    ${
+      isDatepicker
+        ? `if (kind === "datepicker" && this.#dateTyped !== undefined) {
+      // Spec 025 ② (plan ② D-11): what was typed is no date, or the end lies before the start —
+      // the Modelo's message, with today in the document's format as the example.
+      flags = { badInput: true };
+      const reason = this.#dateTyped.reason;
+      if (own === "") message = (TEXTS[reason]?.[this.#lingvo()] ?? TEXTS[reason]?.en ?? "").replace("{example}", this.#dateFormat(this.#dateToday()));
+    } else `
+        : ""
+    }if (required && text === "") {
       flags = { valueMissing: true };
       if (own === "") message = TEXTS.required?.[this.#lingvo()] ?? TEXTS.required?.en ?? "";
     }${
@@ -3626,6 +3669,465 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
 `
       : "",
   ].join("");
+
+  // Spec 025 ② (plan ② D-11, G5): the date picker — the typed date is read on change and Enter,
+  // ArrowDown opens the calendar; the trigger opens and closes it; prev and next turn the month; a
+  // cell is picked by click, the grid takes the keys of the APG date picker dialog; a pointer or
+  // the focus outside closes the calendar.
+  const datepickerInit = isDatepicker
+    ? `    const input = control as HTMLInputElement;
+    input.addEventListener("change", () => this.#dateCommit());
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowDown" && KEYS.includes("ArrowDown")) {
+        event.preventDefault();
+        this.#calendarOpen();
+      } else if (event.key === "Enter" && KEYS.includes("Enter")) {
+        this.#dateCommit();
+      } else if (event.key === "Escape" && KEYS.includes("Escape") && this.#calendarIsOpen()) {
+        event.preventDefault();
+        this.#calendarClose("control");
+      }
+    });
+    // The trigger and the month buttons keep the focus where it is (a pointer on a button moves it
+    // to the body in some platforms, which would close the calendar before the click).
+    for (const button of root.querySelectorAll('[part="trigger"], [part="head"]')) {
+      button.addEventListener("mousedown", (event) => event.preventDefault());
+    }
+    root.querySelector('[part="trigger"]')?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (this.#calendarIsOpen()) this.#calendarClose("trigger");
+      else this.#calendarOpen();
+    });
+    root.querySelector('[part="prev"]')?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      this.#calendarTurn(-1);
+    });
+    root.querySelector('[part="next"]')?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      this.#calendarTurn(1);
+    });
+    const grid = root.querySelector('[part="grid"]');
+    grid?.addEventListener("click", (event) => {
+      const cell = event.composedPath().find((node) => node instanceof HTMLElement && node.getAttribute("part") === "cell");
+      if (cell instanceof HTMLElement && cell.dataset.date !== undefined) this.#calendarPick(cell.dataset.date);
+    });
+    grid?.addEventListener("keydown", (event) => this.#calendarKey(event as KeyboardEvent));
+    // The focus leaves the element (Tab out of the grid): the calendar closes — judged after the
+    // move, because the platform names no relatedTarget for a button in a composed element.
+    this.addEventListener("focusout", () => {
+      setTimeout(() => {
+        if (!this.#calendarIsOpen()) return;
+        const active = document.activeElement;
+        if (active === this || (active instanceof Node && this.contains(active))) return;
+        this.#calendarClose(undefined);
+      }, 0);
+    });
+    // The composed butono may upgrade after this element: its inner button takes the words then.
+    customElements.whenDefined("fm-butono").then(() => this.#render());
+`
+    : "";
+  const datepickerRender = isDatepicker
+    ? `    {
+      const word = (key: string): string => TEXTS[key]?.[this.#lingvo()] ?? TEXTS[key]?.en ?? "";
+      const off = this.propValue("disabled") === true || this.propValue("readonly") === true;
+      const trigger = this.shadowRoot?.querySelector('[part="trigger"]');
+      if (trigger instanceof HTMLElement) {
+        if (trigger.getAttribute("label") !== word("trigger-name")) trigger.setAttribute("label", word("trigger-name"));
+        if (off) trigger.setAttribute("aria-disabled", "true");
+        else trigger.removeAttribute("aria-disabled");
+        const expanded = String(this.#calendarIsOpen());
+        for (const target of [trigger, trigger.shadowRoot?.querySelector('[part="control"]')]) {
+          if (!(target instanceof HTMLElement)) continue;
+          if (target.getAttribute("aria-haspopup") !== "dialog") target.setAttribute("aria-haspopup", "dialog");
+          if (target.getAttribute("aria-expanded") !== expanded) target.setAttribute("aria-expanded", expanded);
+          if (target.getAttribute("aria-controls") !== "calendar") target.setAttribute("aria-controls", "calendar");
+        }
+      }
+      for (const [part, key] of [["prev", "prev-name"], ["next", "next-name"]] as const) {
+        const button = this.shadowRoot?.querySelector('[part="' + part + '"]');
+        if (button instanceof HTMLElement && button.getAttribute("label") !== word(key)) button.setAttribute("label", word(key));
+      }
+      if (this.propValue("expanded") === true && !this.#calendarIsOpen() && !off) this.#calendarOpen(false);
+      if (this.propValue("expanded") !== true && this.#calendarIsOpen()) this.#calendarClose(undefined);
+      // The grid stands from the first render on (closed, it is not shown): the month of the
+      // chosen day, else of today.
+      if (this.#dateView === "") this.#dateView = (this.#dateValues().start ?? this.#dateToday()).slice(0, 8) + "01";
+      this.#calendarBuild();
+    }
+`
+    : "";
+  const datepickerMethods = isDatepicker
+    ? `
+  /** What a person typed that is no date, and which message says so (value-invalid, value-end-invalid). */
+  #dateTyped: { text: string; reason: string } | undefined = undefined;
+  /** The day the keyboard stands on in the calendar (ISO) and the first day of the shown month. */
+  #dateFocus = "";
+  #dateView = "";
+  /** Closes the calendar on a pointer outside the element while it is open. */
+  #calendarOutside = (event: Event): void => {
+    if (!event.composedPath().includes(this)) this.#calendarClose(undefined);
+  };
+
+  #dateIso(date: Date): string {
+    const pad = (n: number): string => String(n).padStart(2, "0");
+    return String(date.getFullYear()).padStart(4, "0") + "-" + pad(date.getMonth() + 1) + "-" + pad(date.getDate());
+  }
+
+  /** The Date of an ISO day, or undefined where the text is no day that exists. */
+  #dateOf(iso: string): Date | undefined {
+    const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(iso);
+    if (match === null) return undefined;
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    const date = new Date(year, month - 1, day);
+    return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? date : undefined;
+  }
+
+  #dateToday(): string {
+    return this.#dateIso(new Date());
+  }
+
+  #dateShift(iso: string, days: number): string {
+    const date = this.#dateOf(iso) ?? new Date();
+    date.setDate(date.getDate() + days);
+    return this.#dateIso(date);
+  }
+
+  /** The same day months later (or earlier), clamped to the length of the month it lands in. */
+  #dateShiftMonths(iso: string, months: number): string {
+    const date = this.#dateOf(iso) ?? new Date();
+    const day = date.getDate();
+    const first = new Date(date.getFullYear(), date.getMonth() + months, 1);
+    const last = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+    first.setDate(Math.min(day, last));
+    return this.#dateIso(first);
+  }
+
+  #dateLocale(): string | undefined {
+    const lang = this.closest("[lang]")?.getAttribute("lang") ?? document.documentElement.lang;
+    return lang === "" ? undefined : lang;
+  }
+
+  /** The day in the format of the document's language (Intl): 24.10.2026 in German. */
+  #dateFormat(iso: string): string {
+    const date = this.#dateOf(iso);
+    if (date === undefined) return iso;
+    return new Intl.DateTimeFormat(this.#dateLocale(), { year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
+  }
+
+  /** The ISO day of a typed text: ISO itself, or day, month and year in the order of the document's language. */
+  #dateParse(text: string): string | undefined {
+    const trimmed = text.trim();
+    if (/^\\d{4}-\\d{2}-\\d{2}$/.test(trimmed)) return this.#dateOf(trimmed) === undefined ? undefined : trimmed;
+    const numbers = trimmed.split(/\\D+/).filter((piece) => piece !== "");
+    if (numbers.length !== 3) return undefined;
+    const order = new Intl.DateTimeFormat(this.#dateLocale(), { year: "numeric", month: "2-digit", day: "2-digit" })
+      .formatToParts(new Date(2026, 9, 24))
+      .filter((piece) => piece.type === "day" || piece.type === "month" || piece.type === "year")
+      .map((piece) => piece.type);
+    const at = (type: Intl.DateTimeFormatPartTypes): number => Number(numbers[order.indexOf(type)] ?? "");
+    let year = at("year");
+    if (year < 100) year += 2000;
+    const iso = String(year).padStart(4, "0") + "-" + String(at("month")).padStart(2, "0") + "-" + String(at("day")).padStart(2, "0");
+    return this.#dateOf(iso) === undefined ? undefined : iso;
+  }
+
+  #dateRanged(): boolean {
+    return this.propValue("mode") === "range";
+  }
+
+  /** The chosen days: value, or value-start and value-end with mode range (only days that exist). */
+  #dateValues(): { start: string | undefined; end: string | undefined } {
+    const clean = (name: string): string | undefined => {
+      const given = this.getAttribute(name) ?? "";
+      return this.#dateOf(given) === undefined ? undefined : given;
+    };
+    if (!this.#dateRanged()) return { start: clean("value"), end: undefined };
+    return { start: clean("value-start"), end: clean("value-end") };
+  }
+
+  /** What the field shows: the typed text while it is no date, else the day (or both days) formatted. */
+  #dateShown(): string {
+    if (this.#dateTyped !== undefined) return this.#dateTyped.text;
+    const { start, end } = this.#dateValues();
+    if (!this.#dateRanged()) return start === undefined ? "" : this.#dateFormat(start);
+    if (start === undefined) return "";
+    return end === undefined ? this.#dateFormat(start) : this.#dateFormat(start) + " – " + this.#dateFormat(end);
+  }
+
+  /** The form value: the ISO day; a range as one ISO interval (start/end), nothing until both stand. */
+  #dateFormValue(): string {
+    const { start, end } = this.#dateValues();
+    if (!this.#dateRanged()) return start ?? "";
+    return start !== undefined && end !== undefined ? start + "/" + end : "";
+  }
+
+  /** Whether a day is refused: before min, after max, or among disabled-dates (a list, or weekends). */
+  #dateDisabled(iso: string): boolean {
+    const min = this.getAttribute("min") ?? "";
+    const max = this.getAttribute("max") ?? "";
+    if (this.#dateOf(min) !== undefined && iso < min) return true;
+    if (this.#dateOf(max) !== undefined && iso > max) return true;
+    const rule = (this.getAttribute("disabled-dates") ?? "").trim();
+    if (rule === "") return false;
+    if (rule === "weekends") {
+      const day = this.#dateOf(iso)?.getDay();
+      return day === 0 || day === 6;
+    }
+    return rule.split(",").map((piece) => piece.trim()).includes(iso);
+  }
+
+  /** The first day of the week in the document's language (1 Monday to 7 Sunday); Monday where the platform does not say. */
+  #dateWeekStart(): number {
+    try {
+      const locale = new Intl.Locale(this.#dateLocale() ?? "de") as unknown as {
+        getWeekInfo?: () => { firstDay: number };
+        weekInfo?: { firstDay: number };
+      };
+      const info = typeof locale.getWeekInfo === "function" ? locale.getWeekInfo() : locale.weekInfo;
+      return info?.firstDay ?? 1;
+    } catch {
+      return 1;
+    }
+  }
+
+  /** The short weekday names from the first day of the week, without the period some languages write after them. */
+  #dateWeekdays(): string[] {
+    const format = new Intl.DateTimeFormat(this.#dateLocale(), { weekday: "short" });
+    const start = this.#dateWeekStart();
+    const names: string[] = [];
+    for (let index = 0; index < 7; index += 1) {
+      // The 19th of October 2026 is a Monday.
+      names.push(format.format(new Date(2026, 9, 19 + ((start - 1 + index) % 7))).replace(/\\.$/, ""));
+    }
+    return names;
+  }
+
+  #calendar(): HTMLElement {
+    return this.shadowRoot?.querySelector('[part="calendar"]') as HTMLElement;
+  }
+
+  #calendarIsOpen(): boolean {
+    const calendar = this.shadowRoot?.querySelector('[part="calendar"]');
+    return calendar instanceof HTMLElement && calendar.matches(":popover-open");
+  }
+
+  /** Writes month, weekdays and the six weeks of the shown month; marks the chosen days, the range, today, outside and refused days. */
+  #calendarBuild(): void {
+    const root = this.shadowRoot;
+    if (root === null) return;
+    const view = this.#dateOf(this.#dateView) ?? new Date();
+    const month = root.querySelector('[part="month"]');
+    const heading = new Intl.DateTimeFormat(this.#dateLocale(), { month: "long", year: "numeric" }).format(view);
+    if (month !== null && month.textContent !== heading) month.textContent = heading;
+    const weekdays = root.querySelector('[part="weekdays"]');
+    const names = this.#dateWeekdays();
+    if (weekdays !== null && weekdays.children.length !== 7) {
+      weekdays.innerHTML = names.map(() => '<span part="weekday" role="columnheader"></span>').join("");
+    }
+    weekdays?.querySelectorAll('[part="weekday"]').forEach((cell, index) => {
+      if (cell.textContent !== names[index]) cell.textContent = names[index] ?? "";
+    });
+    const grid = root.querySelector('[part="grid"]');
+    if (grid === null) return;
+    let weeks = [...grid.querySelectorAll('[part="week"]')];
+    if (weeks.length !== 6) {
+      for (const stale of weeks) stale.remove();
+      for (let index = 0; index < 6; index += 1) {
+        grid.insertAdjacentHTML("beforeend", '<div part="week" role="row">' + '<div part="cell" role="gridcell" tabindex="-1"></div>'.repeat(7) + "</div>");
+      }
+      weeks = [...grid.querySelectorAll('[part="week"]')];
+    }
+    const start = this.#dateWeekStart();
+    const first = new Date(view.getFullYear(), view.getMonth(), 1);
+    const offset = (first.getDay() - start + 7) % 7;
+    const { start: chosenStart, end: chosenEnd } = this.#dateValues();
+    const today = this.#dateToday();
+    const off = this.propValue("disabled") === true || this.propValue("readonly") === true;
+    const longFormat = new Intl.DateTimeFormat(this.#dateLocale(), { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+    let dayIndex = 0;
+    for (const week of weeks) {
+      for (const cell of week.querySelectorAll('[part="cell"]')) {
+        const date = new Date(first.getFullYear(), first.getMonth(), 1 - offset + dayIndex);
+        dayIndex += 1;
+        const iso = this.#dateIso(date);
+        const write = (name: string, value: string | undefined): void => {
+          if (value === undefined) cell.removeAttribute(name);
+          else if (cell.getAttribute(name) !== value) cell.setAttribute(name, value);
+        };
+        write("data-date", iso);
+        const text = String(date.getDate());
+        if (cell.textContent !== text) cell.textContent = text;
+        write("aria-label", longFormat.format(date));
+        const selected = iso === chosenStart || iso === chosenEnd;
+        write("aria-selected", selected ? "true" : "false");
+        const between = chosenStart !== undefined && chosenEnd !== undefined && iso > chosenStart && iso < chosenEnd;
+        write("data-range", between ? "true" : undefined);
+        write("data-today", iso === today ? "true" : undefined);
+        write("data-outside", date.getMonth() === view.getMonth() ? undefined : "true");
+        write("aria-disabled", off || this.#dateDisabled(iso) ? "true" : undefined);
+        write("tabindex", iso === this.#dateFocus ? "0" : "-1");
+      }
+    }
+  }
+
+  /** The cell of the day the keyboard stands on. */
+  #calendarCell(): HTMLElement | undefined {
+    const cell = this.shadowRoot?.querySelector('[part="cell"][data-date="' + this.#dateFocus + '"]');
+    return cell instanceof HTMLElement ? cell : undefined;
+  }
+
+  /** Opens the calendar on the month of the chosen day (else today) and puts the keyboard on that day. */
+  #calendarOpen(focus = true): void {
+    if (this.propValue("disabled") === true || this.propValue("readonly") === true) return;
+    const { start } = this.#dateValues();
+    this.#dateFocus = start ?? this.#dateToday();
+    this.#dateView = this.#dateFocus.slice(0, 8) + "01";
+    this.#calendarBuild();
+    const calendar = this.#calendar();
+    if (!calendar.matches(":popover-open")) calendar.showPopover();
+    // Where the platform has no anchor positioning, the calendar stands under the field.
+    const platform = (globalThis as { CSS?: { supports(query: string): boolean } }).CSS;
+    if (platform === undefined || !platform.supports("anchor-name: --a")) {
+      const field = this.shadowRoot?.querySelector('[part="field"]');
+      const box = field instanceof HTMLElement ? field.getBoundingClientRect() : this.getBoundingClientRect();
+      calendar.style.insetBlockStart = box.bottom + "px";
+      calendar.style.insetInlineStart = (this.matches(":dir(rtl)") ? window.innerWidth - box.right : box.left) + "px";
+    }
+    if (!this.hasAttribute("expanded")) this.setAttribute("expanded", "");
+    document.addEventListener("pointerdown", this.#calendarOutside);
+    if (focus) this.#calendarCell()?.focus();
+    this.#render();
+  }
+
+  /** Closes the calendar; the focus goes where the way out says (Escape: the trigger; a choice: the field). */
+  #calendarClose(to: "trigger" | "control" | undefined): void {
+    const calendar = this.#calendar();
+    if (calendar.matches(":popover-open")) calendar.hidePopover();
+    document.removeEventListener("pointerdown", this.#calendarOutside);
+    if (this.hasAttribute("expanded")) this.removeAttribute("expanded");
+    if (to === "control") this.#control.focus();
+    if (to === "trigger") {
+      const trigger = this.shadowRoot?.querySelector('[part="trigger"]');
+      if (trigger instanceof HTMLElement) trigger.focus();
+    }
+    this.#render();
+  }
+
+  /** Puts the keyboard on another day; a day in another month turns the page. */
+  #calendarMove(iso: string): void {
+    this.#dateFocus = iso;
+    if (iso.slice(0, 7) !== this.#dateView.slice(0, 7)) this.#dateView = iso.slice(0, 8) + "01";
+    this.#calendarBuild();
+    this.#calendarCell()?.focus();
+  }
+
+  /** Turns the month by prev or next; the keyboard's day moves with it, the focus stays on the button. */
+  #calendarTurn(months: number): void {
+    const next = this.#dateShiftMonths(this.#dateView, months);
+    this.#dateView = next;
+    this.#dateFocus = this.#dateShiftMonths(this.#dateFocus, months);
+    if (this.#dateFocus.slice(0, 7) !== next.slice(0, 7)) this.#dateFocus = next;
+    this.#calendarBuild();
+  }
+
+  /** The keys of the APG date picker dialog on the grid: the arrows follow the writing direction. */
+  #calendarKey(event: KeyboardEvent): void {
+    const rtl = this.matches(":dir(rtl)");
+    const focus = this.#dateFocus;
+    const start = this.#dateWeekStart();
+    const weekday = ((this.#dateOf(focus)?.getDay() ?? 1) - start + 7) % 7;
+    const moves: Record<string, () => string> = {
+      ArrowRight: () => this.#dateShift(focus, rtl ? -1 : 1),
+      ArrowLeft: () => this.#dateShift(focus, rtl ? 1 : -1),
+      ArrowDown: () => this.#dateShift(focus, 7),
+      ArrowUp: () => this.#dateShift(focus, -7),
+      PageDown: () => this.#dateShiftMonths(focus, event.shiftKey ? 12 : 1),
+      PageUp: () => this.#dateShiftMonths(focus, event.shiftKey ? -12 : -1),
+      Home: () => this.#dateShift(focus, -weekday),
+      End: () => this.#dateShift(focus, 6 - weekday),
+    };
+    const move = moves[event.key];
+    if (move !== undefined && KEYS.includes(event.key)) {
+      event.preventDefault();
+      this.#calendarMove(move());
+      return;
+    }
+    if ((event.key === "Enter" || event.key === " ") && KEYS.includes("Enter")) {
+      event.preventDefault();
+      this.#calendarPick(focus);
+      return;
+    }
+    if (event.key === "Escape" && KEYS.includes("Escape")) {
+      event.preventDefault();
+      this.#calendarClose("trigger");
+    }
+  }
+
+  /** Takes a day: the value (single), or the start and then the end of a range — an end before the start starts anew. */
+  #calendarPick(iso: string): void {
+    if (this.#dateDisabled(iso) || this.propValue("disabled") === true || this.propValue("readonly") === true) return;
+    this.#dateTyped = undefined;
+    this.#reported = true;
+    if (!this.#dateRanged()) {
+      const changed = this.getAttribute("value") !== iso;
+      this.setAttribute("value", iso);
+      this.#calendarClose("control");
+      if (changed) this.dispatchEvent(new Event("change", { bubbles: true }));
+      return;
+    }
+    const { start, end } = this.#dateValues();
+    if (start === undefined || end !== undefined || iso < start) {
+      this.setAttribute("value-start", iso);
+      this.removeAttribute("value-end");
+      this.#dateFocus = iso;
+      this.#calendarBuild();
+      return;
+    }
+    const changed = this.getAttribute("value-end") !== iso;
+    this.setAttribute("value-end", iso);
+    this.#calendarClose("control");
+    if (changed) this.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  /** Reads what a person typed: a day, or the two days of a range; else the field is invalid with the Modelo's message. */
+  #dateCommit(): void {
+    const typed = (this.#control as HTMLInputElement).value;
+    const before = this.#dateFormValue();
+    if (typed.trim() === "") {
+      this.#dateTyped = undefined;
+      for (const name of ["value", "value-start", "value-end"]) this.removeAttribute(name);
+    } else if (!this.#dateRanged()) {
+      const iso = this.#dateParse(typed);
+      if (iso === undefined) {
+        this.#dateTyped = { text: typed, reason: "value-invalid" };
+      } else {
+        this.#dateTyped = undefined;
+        this.setAttribute("value", iso);
+      }
+    } else {
+      const pieces = typed.split(/\\s*[–—]\\s*|\\s+-\\s+|\\//).filter((piece) => piece.trim() !== "");
+      const start = pieces[0] === undefined ? undefined : this.#dateParse(pieces[0]);
+      const end = pieces[1] === undefined ? undefined : this.#dateParse(pieces[1]);
+      if (pieces.length !== 2 || start === undefined || end === undefined) {
+        this.#dateTyped = { text: typed, reason: "value-invalid" };
+      } else if (end < start) {
+        this.#dateTyped = { text: typed, reason: "value-end-invalid" };
+      } else {
+        this.#dateTyped = undefined;
+        this.setAttribute("value-start", start);
+        this.setAttribute("value-end", end);
+      }
+    }
+    this.#reported = true;
+    this.#render();
+    if (this.#dateTyped === undefined && this.#dateFormValue() !== before) {
+      this.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  }
+`
+    : "";
   // Spec 025 ① (plan ① D-05, D-06): the keys and the buttons of the kampo's additions — the arrows
   // step a number (as the platform's own number input does; the shown input is a text input, E8),
   // Escape clears a search; a click on a step button steps, on the clear button clears.
@@ -4111,12 +4613,14 @@ ${autoField}${isAvatar ? '  /** The picture an avatar shows and whether it has l
     this.#label = label;
     this.#texts = texts;
     control.addEventListener("click", (event) => this.#activate(event));
-${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${uploadInit}${sliderInit}${fieldExtrasInit}${avatarInit}${isCodeblock ? codeblockInit : ""}${skipInit}    label.addEventListener("slotchange", () => this.#render());
+${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${datepickerInit}${uploadInit}${sliderInit}${fieldExtrasInit}${avatarInit}${isCodeblock ? codeblockInit : ""}${skipInit}    label.addEventListener("slotchange", () => this.#render());
     for (const named of root.querySelectorAll("slot[name]")) {
       named.addEventListener("slotchange", () => this.#render());
     }
 ${
-  isUpload
+  // Spec 025 ② (plan ② D-11): a date picker reads what is typed on change, not on every key —
+  // half a date is no value.
+  isUpload || isDatepicker
     ? ""
     : `    if (control instanceof ${nativeField}) {
       // The value a person types is the form value (ElementInternals, as fm-butono submits), and
@@ -4261,7 +4765,7 @@ ${isSuggest ? "" : '        control.removeAttribute("aria-disabled");\n'}      }
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
     // disabled wins over readonly; help and error show only while they have text.
     const described: string[] = [];
-${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${paginationRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${uploadRender}${sliderRender}${cardRender}${avatarRender}${isCodeblock ? codeblockRender : ""}${isMarkdown ? markdownRender : ""}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${paginationRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${datepickerRender}${uploadRender}${sliderRender}${cardRender}${avatarRender}${isCodeblock ? codeblockRender : ""}${isMarkdown ? markdownRender : ""}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");
@@ -4355,7 +4859,7 @@ ${
     : `    if (!(this.#control instanceof HTMLButtonElement)) return;
 ${toggleActivate}`
 }  }
-${groupMethods}${selectMethods}${inputMethods}${fieldExtrasMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${autoMethods}${tabsMethods}${overlayMethods}${tooltipMethods}${menuMethods}${suggestMethods}${uploadMethods}${sliderMethods}${choiceValidityMethods}${isCodeblock ? codeblockMethods : ""}${isMarkdown ? markdownMethods : ""}
+${groupMethods}${selectMethods}${inputMethods}${fieldExtrasMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${autoMethods}${tabsMethods}${overlayMethods}${tooltipMethods}${menuMethods}${suggestMethods}${datepickerMethods}${uploadMethods}${sliderMethods}${choiceValidityMethods}${isCodeblock ? codeblockMethods : ""}${isMarkdown ? markdownMethods : ""}
 }
 
 /**

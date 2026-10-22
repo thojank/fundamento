@@ -75,6 +75,9 @@ describe("suggest_ero", () => {
       "destructive",
       "confirm",
       "dismiss",
+      // Spec 025 ②: the datelektilo.
+      "pick-date",
+      "date-range",
       "ask-reason",
       "choose-many",
       "choose-few",
@@ -82,9 +85,6 @@ describe("suggest_ero", () => {
       // Spec 025 ①: the glitilo.
       "slide",
       "value-range",
-      // Spec 025 ②: the datelektilo.
-      "pick-date",
-      "date-range",
       "show-icon",
       "status-label",
       "enter-text",

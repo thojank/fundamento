@@ -146,6 +146,8 @@ describe("the Uzo of the ikono (section ②, G6)", () => {
       "alsxutilo",
       // Spec 025 ①: the stepper buttons and the clear button of a kampo.
       "kampo",
+      // Spec 025 ②: the trigger and the month buttons of a datelektilo.
+      "datelektilo",
     ]);
     expect(uzo?.slots).toEqual({});
     expect(uzo?.layout).toEqual({ size: "content", wrap: "never" });

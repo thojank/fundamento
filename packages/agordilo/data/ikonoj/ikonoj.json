@@ -32,6 +32,7 @@
     "subtract": "minus",
     "success": "check-circle",
     "upload": "upload-simple",
-    "warning": "warning"
+    "warning": "warning",
+    "calendar": "calendar-blank"
   }
 }

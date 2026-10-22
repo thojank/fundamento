@@ -2234,7 +2234,13 @@ describe("Web Component Celo for the datelektilo (Spec 025 ②)", () => {
     expect(element).toContain('<span part="month" id="month" aria-live="polite">');
     expect(element).toContain('<fm-butono part="next" emphasis="low" size="small">');
     expect(element).toContain('<div part="grid" role="grid" aria-labelledby="month">');
-    for (const key of ["trigger-name", "prev-name", "next-name", "invalid-date", "range-order"]) {
+    for (const key of [
+      "trigger-name",
+      "prev-name",
+      "next-name",
+      "value-invalid",
+      "value-end-invalid",
+    ]) {
       expect(element).toContain(`"${key}"`);
     }
     // The weekday names and the month come from the document's language, never from a string.
@@ -2264,8 +2270,8 @@ describe("Web Component Celo for the datelektilo (Spec 025 ②)", () => {
       ':where([part="cell"]) { border-style: solid; border-width: 0; cursor: pointer; }',
     );
     expect(css).toContain(':where([part="cell"][aria-disabled="true"]) { cursor: not-allowed; }');
-    // The looks of a cell: by state on the cell itself, then its four looks by attribute, later
-    // in the source so that they win over hover at the same specificity.
+    // The looks of a cell: by state on the cell itself; its four looks by attribute outside
+    // :where(), so that they outrank hover and focus (a chosen day keeps its fill under the pointer).
     expect(css).toContain(
       ':where([part="field"]) [part="cell"] {\n  background-color: var(--fm-color-action-tertiary-rest);',
     );
@@ -2276,20 +2282,18 @@ describe("Web Component Celo for the datelektilo (Spec 025 ②)", () => {
       ':where([part="field"]) [part="cell"][aria-disabled="true"] {\n  background-color: var(--fm-color-action-tertiary-disabled);',
     );
     expect(css).toContain(
-      ':where([part="field"]) [part="cell"][aria-selected="true"] {\n  background-color: var(--fm-color-action-primary-selected);\n  color: var(--fm-color-action-primary-text);',
+      '[part="field"] [part="cell"][aria-selected="true"] {\n  background-color: var(--fm-color-action-primary-selected);\n  color: var(--fm-color-action-primary-text);',
     );
     expect(css).toContain(
-      ':where([part="field"]) [part="cell"][data-range="true"] {\n  background-color: var(--fm-color-action-secondary-selected);',
+      '[part="field"] [part="cell"][data-range="true"] {\n  background-color: var(--fm-color-action-secondary-selected);',
     );
     expect(css).toContain(
-      ':where([part="field"]) [part="cell"][data-today="true"] {\n  border-color: var(--fm-color-border-strong);\n  border-width: var(--fm-border-width-default);',
+      '[part="field"] [part="cell"][data-today="true"] {\n  border-color: var(--fm-color-border-strong);\n  border-width: var(--fm-border-width-default);',
     );
     expect(css).toContain(
-      ':where([part="field"]) [part="cell"][data-outside="true"] {\n  color: var(--fm-color-text-muted);',
+      '[part="field"] [part="cell"][data-outside="true"] {\n  color: var(--fm-color-text-muted);',
     );
-    expect(css.indexOf('[part="cell"][aria-selected="true"]')).toBeGreaterThan(
-      css.indexOf('[part="cell"]:hover'),
-    );
+    expect(css).not.toContain(':where([part="field"]) [part="cell"][aria-selected="true"]');
     // The trigger takes the field's control size, prev and next the small one; the calendar its
     // surface, shadow, layer, width and padding; its height none while closed.
     expect(css).toContain(
@@ -2300,9 +2304,6 @@ describe("Web Component Celo for the datelektilo (Spec 025 ②)", () => {
     );
     expect(css).toContain(
       ':where([part="field"]) [part="calendar"] {\n  background-color: var(--fm-color-background-raised);\n  border-radius: var(--fm-radius-role-surface);\n  box-shadow: var(--fm-elevation-shadow-overlay);\n  z-index: var(--fm-elevation-layer-overlay);\n  inline-size: var(--fm-size-container-small);\n  padding-inline: var(--fm-spacing-medium);',
-    );
-    expect(css).toContain(
-      ':where([part="field"][data-expanded="false"]) [part="calendar"] {\n  display: none;',
     );
     expect(css).toContain(
       ':where([part="field"][data-expanded="true"]) [part="calendar"] {\n  max-block-size: var(--fm-size-container-medium);',

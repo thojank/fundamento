@@ -28,10 +28,11 @@
   },
   "sha256": {
     "$themes.json": "32d20d206abf9b832c41c26c654fb33aef9694a5661ff89655091a4aae9931d3",
-    "aspekto.json": "9e9d869f9c41f05fd3f3c91294a0c5279d1671f301e6faff0dab394eb99c31df",
+    "aspekto.json": "0f8e986e0d9c58db6e9a910759a56c0784529a88a16171fd6ea707579c64b3b5",
     "ids.lock.json": "19279ae73d078332a67f90d7e401fa8878e9fc7794e8496809c133730e1e564e",
     "ikonoj/LICENSE": "ddbe6082ec3cf979db47e5af549d2849c5d6182b3e005ef91ce1dbb9eb122f11",
     "ikonoj/add.svg": "4baa2c668c8800442d47ab39d716e35142c125a9146efefa50f701e9622f2000",
+    "ikonoj/calendar.svg": "933da659d9665391e2868ce1f17644e7d672b7369a329aec197ed2c7f61bc5fa",
     "ikonoj/check.svg": "37080105de6ae35b2bfda063742a7cfe4b088de778edc72a8be69fc537548639",
     "ikonoj/chevron-down.svg": "5283306e5f6fde1abee28343c16d2a1d13a3c9d42a6690bbba155502a22ebe3d",
     "ikonoj/chevron-left.svg": "512b7d134bdc27d7f9c0fe71b2c8e4db32d6ffeeb7d846c51dbded5910703bde",

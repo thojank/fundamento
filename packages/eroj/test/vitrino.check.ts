@@ -1387,7 +1387,7 @@ test("fm-datelektilo is upgraded in its section, opened and moved by keyboard; a
   const section = page.locator("#fm-vitrino-datelektilo");
   await expect(section.locator("fm-datelektilo")).toHaveCount(8);
   const first = section.locator("fm-datelektilo").first();
-  await expect(first.locator('[part="control"]')).toHaveValue("24.10.2026");
+  await expect(first.locator('input[part="control"]')).toHaveValue("24.10.2026");
   expect(await axeViolations(page, "#fm-vitrino-datelektilo")).toEqual([]);
   const trigger = first.locator('[part="trigger"]');
   await trigger.click();
