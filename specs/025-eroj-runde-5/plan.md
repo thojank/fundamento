@@ -305,7 +305,7 @@ node -e 'const fs=require("fs");let t={eroj:0,props:0,states:0,slots:0,parts:0,b
 - **Art. VII (Agenta Dokumentado):** konform. Die Spec-Dialoge sind MCP-Tests (`s025-auswahl.test.ts`); die deutschen Texte stehen in `tradukoj.json`.
 - **Art. VIII (Web-first, mobiles Modell):** konform. `item` statt `option`, `intent` statt „Farbe“, `tinted-categories` statt „color-coded“ (`skemo-web-term`, `uzo-web-term`); die Wörter der Knöpfe und Nachrichten kommen aus `a11y.texts` mit Platzhaltern `{label}` und `{max}`.
 - **Art. IX (Vertikaler Durchstich):** konform. Jedes der vier Eroj geht durch alle Ebenen.
-- **Art. X (Test-first):** konform. Rot in `2ac2243` (Modelo, Projekcioj, MCP, Browser-Specs, Checks, Doku-Test), dann grün.
+- **Art. X (Test-first):** konform. Rot in `23b3fcf` (nach dem Rebase auf ② `dd76887`; davor `2ac2243`: Modelo, Projekcioj, MCP, Browser-Specs, Checks, Doku-Test), dann grün (`33d2bae`).
 - **Art. XI (Einfachheit):** konform. Kein neues Paket, keine Abhängigkeit, keine neue Figma-Bauform (badge und field tragen die vier Sets).
 - **Art. XII (Interoperabilität):** konform. Kein neues Celo.
 - **Art. XIII (Einfachheit der Nutzung):** konform. `<fm-signeto mode="selectable">Kontrast</fm-signeto>`, `<fm-lokredaktilo label="Titel" value="…"></fm-lokredaktilo>` genügen.
