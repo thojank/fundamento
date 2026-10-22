@@ -1050,7 +1050,7 @@ describe("the plugin draws the datelektilo (Spec 025 ②)", () => {
 });
 
 // Spec 025 ③ (plan ③ D-18): the plugin draws the four sets of the selection round — the signeto's
-// 240 chips, the two fields with their listbox rows, the editor's twelve texts — and writes
+// 160 chips, the two fields with their listbox rows, the editor's twelve texts — and writes
 // nothing on a second run.
 describe("the plugin draws the selection Eroj (Spec 025 ③)", () => {
   it("four sets with their variants; a second run writes nothing", async () => {
@@ -1062,7 +1062,8 @@ describe("the plugin draws the selection Eroj (Spec 025 ③)", () => {
         pageNodes(double).find((node) => node.name === name),
       ]),
     );
-    expect(sets.signeto?.children).toHaveLength(240);
+    // 160, not 240 (plan ③ Abweichung 3): the constraint selected ⇒ mode selectable prunes the set.
+    expect(sets.signeto?.children).toHaveLength(160);
     expect(sets.listelektilo?.children).toHaveLength(12);
     expect(sets.plurelektilo?.children).toHaveLength(12);
     expect(sets.lokredaktilo?.children).toHaveLength(12);

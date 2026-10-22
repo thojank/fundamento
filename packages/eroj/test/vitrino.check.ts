@@ -1420,11 +1420,12 @@ test("fm-signeto, fm-listelektilo, fm-plurelektilo and fm-lokredaktilo are upgra
   await page.keyboard.press("ArrowDown");
   await expect(list.locator('[part="listbox"]')).toBeVisible();
   await page.keyboard.press("ArrowDown");
-  await expect(list.locator('[part="option"][data-active="true"]')).toHaveCount(1);
+  await expect(list.locator('[part="item"][data-active="true"]')).toHaveCount(1);
   expect(await axeViolations(page, "#fm-vitrino-listelektilo")).toEqual([]);
   await page.keyboard.press("Escape");
   const multi = page.locator("#fm-vitrino-plurelektilo fm-plurelektilo").first();
-  await multi.locator('button[part="control"]').click();
+  // The multi-select composes butono (clear, the tags' remove): the opener is the one with aria-haspopup.
+  await multi.locator('button[part="control"][aria-haspopup="listbox"]').click();
   await expect(multi.locator('[part="listbox"]')).toBeVisible();
   const before = await multi.getAttribute("values");
   await page.keyboard.press("Space");

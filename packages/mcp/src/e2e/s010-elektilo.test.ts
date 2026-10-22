@@ -262,10 +262,11 @@ describe("list_eroj and the brief (acceptance 1, 7)", () => {
       ["choose-few", "elekto"],
       // Spec 014 ⑤: covered by the kompletigilo.
       ["search-in-list", "kompletigilo"],
-      ["multiple", null],
+      // Spec 025 ③: covered by the plurelektilo; the custom popup is the listelektilo's.
+      ["multiple", "plurelektilo"],
     ]);
     expect(brief.boundary?.map((entry) => [entry.case, entry.action])).toEqual([
-      ["custom-popup", "not-supported"],
+      ["custom-popup", "use-instead"],
       ["grouped-options", "ask-human"],
       ["no-visible-label", "not-supported"],
     ]);

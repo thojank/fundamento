@@ -45,7 +45,7 @@ describe("the kampo of Spec 025 ②: the date range goes to the datelektilo (Ark
     expect(kampo.skemo.props.find((prop) => prop.name === "kind")?.values).toContain("date");
   });
 
-  it("the boundary date-range is closed: use-instead datelektilo with a kialo that names the calendar; the instead entry near-date sends a date near today there (G2)", () => {
+  it("the boundary date-range is closed: use-instead datelektilo with a kialo that names the calendar (G2; a near date is the datelektilo's by its goal, the kampo's brief has no room for another alternative)", () => {
     const range = kampo.uzo?.boundary.find((entry) => entry.case === "date-range");
     expect(range).toMatchObject({
       action: "use-instead",
@@ -54,15 +54,6 @@ describe("the kampo of Spec 025 ②: the date range goes to the datelektilo (Ark
     });
     expect(range?.kialo).toMatch(/because/);
     expect(range?.kialo).toMatch(/datelektilo/);
-    const near = kampo.uzo?.instead.find((entry) => entry.goal === "near-date");
-    expect(near).toMatchObject({
-      ero: "datelektilo",
-      keywords: {
-        en: ["calendar", "delivery-date", "booking-date"],
-        de: ["kalender", "lieferdatum", "buchungsdatum"],
-      },
-    });
-    expect(near?.kialo).toMatch(/because/);
     expect(kampo.uzo?.instead.map((entry) => entry.goal)).toEqual([
       "multi-line",
       "choose-many",
@@ -70,7 +61,7 @@ describe("the kampo of Spec 025 ②: the date range goes to the datelektilo (Ark
       "toggle",
       "suggestions",
       "approximate",
-      "near-date",
+      "single-value",
     ]);
     expect(kampo.uzo?.composes.with.map((entry) => entry.ero)).toEqual([
       "kampo",
@@ -152,7 +143,6 @@ describe("the Ontologio and the translations of Spec 025 ②", () => {
       `${uzoId}/boundary/presets/kialo`,
       `${uzoId}/composes/with/kampo/kialo`,
       `${kampo.uzo?.id}/boundary/date-range/kialo`,
-      `${kampo.uzo?.id}/instead/near-date/kialo`,
       `${kampo.uzo?.id}/composes/with/datelektilo/kialo`,
     ]) {
       expect(de[key], key).toBeDefined();

@@ -314,6 +314,8 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
         "alsxutilo",
         "glitilo",
         "datelektilo",
+        "listelektilo",
+        "plurelektilo",
       ],
     ],
     [
@@ -329,6 +331,8 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
         "alsxutilo",
         "glitilo",
         "datelektilo",
+        "listelektilo",
+        "plurelektilo",
       ],
     ],
     [
@@ -344,6 +348,9 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
         "alsxutilo",
         "glitilo",
         "datelektilo",
+        "listelektilo",
+        "plurelektilo",
+        "lokredaktilo",
       ],
     ],
     [
@@ -358,6 +365,8 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
         "alsxutilo",
         "glitilo",
         "datelektilo",
+        "listelektilo",
+        "plurelektilo",
       ],
     ],
     [
@@ -372,6 +381,9 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
         "alsxutilo",
         "glitilo",
         "datelektilo",
+        "listelektilo",
+        "plurelektilo",
+        "lokredaktilo",
       ],
     ],
   ])("%s is widened to the markobutono, not duplicated (E5)", (name, eroj) => {
@@ -418,6 +430,10 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
       "markdovido",
       "glitilo",
       "datelektilo",
+      "signeto",
+      "listelektilo",
+      "plurelektilo",
+      "lokredaktilo",
     ]);
   });
 

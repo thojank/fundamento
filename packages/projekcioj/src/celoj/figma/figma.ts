@@ -46,6 +46,7 @@ import {
   VITRINO_CONTENT_TEXT,
   VITRINO_DATE,
   VITRINO_DIALOG_ACTIONS,
+  VITRINO_EDITOR,
   VITRINO_ICON_EXAMPLE,
   VITRINO_LIST_ENTRIES,
   VITRINO_MEDIA_TEXT,
@@ -174,6 +175,23 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   decrement: "jug_01M5GCQAYC3R7C7DPHQGYDPYKM",
   increment: "jug_01M5GCQAYC3R7C7DPHQGYDPYKM",
   clear: "jug_01M5GCQAYC3R7C7DPHQGYDPYKM",
+  // Spec 025 ③ (plan ③ D-18, B-15): the composed parts of the selection round carry no node of
+  // their own — their picture is the composed butono's, kampo's, signeto's and ikono's in their
+  // sets. Keyed by Ero, because the same part name is drawn elsewhere (the icon of a butono, the
+  // error and the ring of a field): `<ero>:<part>` wins over the bare part name.
+  "signeto:remove": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
+  "listelektilo:icon": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
+  "listelektilo:description": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
+  "plurelektilo:filter": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
+  "plurelektilo:check": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
+  "plurelektilo:tag": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
+  "lokredaktilo:edit": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
+  "lokredaktilo:field": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
+  "lokredaktilo:save": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
+  "lokredaktilo:cancel": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
+  // The ring and the error of the inline editor are the composed field's: the kampo draws them.
+  "lokredaktilo:focus-ring": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
+  "lokredaktilo:error": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
 };
 
 /**
@@ -234,7 +252,11 @@ function slotWordsOf(skemo: LoadedEro["skemo"]): Record<string, string> {
 function fieldTextsOf(skemo: LoadedEro["skemo"]): Record<string, string> {
   const rows = skemo.props.find((prop) => prop.name === "rows" && prop.kind === "number")?.default;
   const lines = typeof rows === "number" && rows > 1 ? rows : 1;
-  const example = skemo.a11y.role === "combobox" ? VITRINO_PROMPT : FIELD_EXAMPLE;
+  // Spec 025 ③: the multi-select (role listbox) shows its prompt like the select.
+  const example =
+    skemo.a11y.role === "combobox" || skemo.a11y.role === "listbox"
+      ? VITRINO_PROMPT
+      : FIELD_EXAMPLE;
   return { text: example + "\n".repeat(lines - 1), ...slotWordsOf(skemo) };
 }
 
@@ -858,7 +880,8 @@ export const structureOf = (role: string, parts: readonly string[] = []): FigmaS
       // part it is an upload — label, the dropzone with the button and its hint, help, error.
       role === "button" && parts.includes("dropzone")
       ? "upload"
-      : role === "textbox" || role === "combobox"
+      : // Spec 025 ③ (plan ③ D-18): a multi-select (role listbox) is a field like the styled list.
+        role === "textbox" || role === "combobox" || role === "listbox"
         ? "field"
         : role === "switch" || role === "checkbox"
           ? "toggle"
@@ -958,6 +981,8 @@ const LABEL_DEFAULTS: Readonly<Record<string, string>> = {
   // meter-text-states-value gives the number to the value text). For the maintainer to confirm;
   // no Jugxo created here.
   meter: "Messwert",
+  // Spec 025 ③ (plan ③ D-18): a multi-select (role listbox) chooses, as the select does (O-21).
+  listbox: "Auswahl",
   // Spec 011 ④ (plan ④ D-14): a table's caption names what stands in the rows (Regulo
   // table-caption-names-the-content); the set's word is a caption's, like a field's label. For
   // the maintainer to confirm; no Jugxo created here.
@@ -1420,6 +1445,8 @@ export interface FigmaComponentSet {
         paints?: Record<string, FigmaPaint>;
         geometry?: Record<string, string>;
         hidden?: string[];
+        /** What the plugin does not draw of this entry, named with its Jugxo (Spec 025 ③: the check mark). */
+        notDrawn?: Record<string, string>;
         /**
          * The font of the entry's text where a weight keyed by the entry departs from its role
          * (Spec 014 ①, plan ① D-01: the current item of a navigation in the semibold cut): the
@@ -1439,6 +1466,7 @@ export interface FigmaComponentSet {
         paints?: Record<string, FigmaPaint>;
         geometry?: Record<string, string>;
         hidden?: string[];
+        notDrawn?: Record<string, string>;
         font?: { family: string; style: string; families: string[] };
       }
     >;
@@ -2344,7 +2372,10 @@ function iconsOf(
   ) {
     return { "icon-end": "external" };
   }
-  if (skemo.a11y.role === "combobox" && skemo.parts.indicator !== undefined) {
+  if (
+    (skemo.a11y.role === "combobox" || skemo.a11y.role === "listbox") &&
+    skemo.parts.indicator !== undefined
+  ) {
     return { indicator: "chevron-down" };
   }
   // Nachlese 4 N-7 (Spec 014 ② O-7): the check mark of a checkbox is the Ikonaro's check.
@@ -2430,7 +2461,11 @@ function componentSetOf(
               // the chosen days do; the set shows one day and a range.
               structure === "field" && skemo.parts.calendar !== undefined
               ? ["mode"]
-              : [];
+              : // A chip (Spec 025 ③, plan ③ D-18): one variant per mode — it keys no part, the
+                // pressable body and the remove butono do; the set shows all three.
+                structure === "badge" && skemo.parts.remove !== undefined
+                ? ["mode"]
+                : [];
   const keys = [...extraAxes, ...variantKeys(skemo)];
   // What the plugin draws for this structure (Spec 011 ③): the bindings every structure shares and
   // the ones this structure binds elsewhere — the text's colour on the label of a badge. What the
@@ -2642,7 +2677,9 @@ function componentSetOf(
         // (Spec 011 ③: the text of a badge or a state is its label, not the typed text B-2
         // releases).
         const release =
-          part === labelPart || ownBindings.has(key) ? undefined : FIGMA_NOT_DRAWN[part];
+          part === labelPart || ownBindings.has(key)
+            ? undefined
+            : (FIGMA_NOT_DRAWN[`${entry.ero.name}:${part}`] ?? FIGMA_NOT_DRAWN[part]);
         if (release !== undefined) {
           notDrawn[key] = release;
           continue;
@@ -2699,6 +2736,9 @@ function componentSetOf(
           ...(Object.keys(sink.paints).length === 0 ? {} : { paints: sink.paints }),
           ...(Object.keys(sink.geometry).length === 0 ? {} : { geometry: sink.geometry }),
           ...(sink.hidden.length === 0 ? {} : { hidden: sink.hidden }),
+          // Spec 025 ③ (plan ③ D-18): a released part keyed by the entry (the check mark of a
+          // multi-select) is named with its Jugxo here, as the variant names its own.
+          ...(Object.keys(sink.notDrawn).length === 0 ? {} : { notDrawn: sink.notDrawn }),
           ...(entryFont === undefined ? {} : { font: entryFont }),
         };
       }
@@ -2995,7 +3035,7 @@ function componentSetOf(
   const sign =
     structure === "state"
       ? STATE_SIGN
-      : skemo.a11y.role === "combobox" || structure === "table"
+      : skemo.a11y.role === "combobox" || skemo.a11y.role === "listbox" || structure === "table"
         ? undefined
         : signOf(skemo.a11y.role, "16");
   // The boolean props that show a part (Spec 011 ③): BOOLEAN properties of the set, no axis. The
@@ -3295,7 +3335,14 @@ function componentSetOf(
             defaultValue:
               (structure === "pagination" || structure === "breadcrumb"
                 ? skemo.a11y.texts?.["label-empty"]?.de
-                : undefined) ?? labelDefaultOf(skemo.a11y.role, structure),
+                : // Spec 025 ③ (plan ③ D-18): an inline editor's label property writes its text,
+                  // the value of the Vitrino's editor — one source for both pictures; a tag names
+                  // a category (proposal for the maintainer to confirm; no Jugxo created here).
+                  structure === "badge" && skemo.parts.edit !== undefined
+                  ? VITRINO_EDITOR.value
+                  : structure === "badge" && skemo.parts.remove !== undefined
+                    ? "Schlagwort"
+                    : undefined) ?? labelDefaultOf(skemo.a11y.role, structure),
           },
         }),
     fonts,
@@ -3569,6 +3616,12 @@ export function figmaPlanInventory(plan: unknown): Record<string, ParityItem> {
       ];
       for (const { props, part } of sides) {
         const where = `@${parityVariantKey(keyed(props))}`;
+        // An entry's released part (Spec 025 ③) is named with its Jugxo like the variant's.
+        if ("notDrawn" in part && part !== variant) {
+          for (const [key, jugxo] of Object.entries(part.notDrawn ?? {})) {
+            values[`${key}${where}`] = `${PARITY_NOT_DRAWN} (${jugxo})`;
+          }
+        }
         for (const [key, text] of Object.entries(part.geometry ?? {}))
           values[`${key}${where}`] = text;
         for (const [binding, paint] of Object.entries(part.paints ?? {})) {

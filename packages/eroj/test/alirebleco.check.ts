@@ -1963,7 +1963,12 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
         await expect(page.locator("#an-l1").locator('[part="listbox"]')).toBeVisible();
         expect(await axeViolations(page), "listelektilo open").toEqual([]);
         await page.keyboard.press("Escape");
-        await page.locator("#an-p1").locator('button[part="control"]').click();
+        // The multi-select composes butono (clear, the tags' remove), each with a control of its
+        // own: the button that opens the list is the one with aria-haspopup.
+        await page
+          .locator("#an-p1")
+          .locator('button[part="control"][aria-haspopup="listbox"]')
+          .click();
         await expect(page.locator("#an-p1").locator('[part="listbox"]')).toBeVisible();
         expect(await axeViolations(page), "plurelektilo open").toEqual([]);
         await page.keyboard.press("Escape");

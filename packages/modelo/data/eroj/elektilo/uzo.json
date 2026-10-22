@@ -57,14 +57,14 @@
             "mehrfach"
           ]
         },
-        "ero": null,
-        "kialo": "Several options at once from one list need a list with checks, because a select holds exactly one value; Fundamento has no such Ero yet."
+        "ero": "plurelektilo",
+        "kialo": "Several values from one list are the plurelektilo's, because a select takes one; it shows the chosen as a count or as tags (Spec 025 ③ closes the alternative multiple)."
       }
     ],
     "boundary": [
       {
         "case": "custom-popup",
-        "action": "not-supported",
+        "action": "use-instead",
         "keywords": {
           "en": [
             "popup",
@@ -75,7 +75,8 @@
             "overlay"
           ]
         },
-        "kialo": "The list is the platform's, because a drawn list would need its own keyboard, scrolling and screen reader behaviour; that is a later round."
+        "kialo": "A drawn list with icons and descriptions is the listelektilo, because it brings its own keyboard and screen reader behaviour (Spec 025 ③ closes the boundary custom-popup); a list of words stays the platform's.",
+        "ero": "listelektilo"
       },
       {
         "case": "grouped-options",

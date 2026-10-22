@@ -62,8 +62,34 @@ function fieldPartSelector(
   entry = "",
   datepicker = false,
   stateName = "rest",
+  listy = false,
 ): string {
   const root = `[part="field"]${data}${state === "" ? "" : `:has([part="control"]${state})`}`;
+  // A styled list and a multi-select (Spec 025 ③, plan ③ D-18): the box's gap is the field's, the
+  // row's and the tags'; the rows (item) carry the state of their entry (aria-selected, data-active)
+  // and hold the icon, the description and the check mark; the placeholder is the text while
+  // nothing is chosen; the filter, the clear butono and the tags are their own elements; the ring
+  // stands on the button and on the filter alike.
+  if (listy) {
+    if (part === "box" && property === "gap") {
+      return `:where(${root}), :where(${root}) [part="item"], :where(${root}) [part="tags"]`;
+    }
+    if (part === "item") return `:where(${root}) [part="item"]${entry}`;
+    if (part === "check") {
+      return entry === ""
+        ? `:where(${root}) [part="check"]`
+        : `:where(${root}) [part="item"]${entry} [part="check"]`;
+    }
+    if (["icon", "description", "filter", "clear", "tag", "listbox"].includes(part)) {
+      return `:where(${root}) [part="${part}"]`;
+    }
+    if (part === "placeholder") {
+      return `:where(${root}) [part="control"] [part="text"][data-placeholder="true"]`;
+    }
+    if (part === "focus-ring") {
+      return `:where(${root}) [part="control"]:focus-visible, :where(${root}) [part="filter"]:focus-visible, :where(${root}) [part="items"]:focus-visible`;
+    }
+  }
   if (part === "box" && property === "gap") return `:where(${root})`;
   // A date picker (Spec 025 ②, plan ② D-11): the trigger, the calendar and its head, month, prev,
   // next and weekday are elements of their own in the field; the day cell carries its own states
@@ -133,7 +159,11 @@ function disclosurePartSelector(part: string, data: string, state: string): stri
  * select (Spec 010 ④, D-06) — the same field around the platform's select.
  */
 const isField = (skemo: Skemo): boolean =>
-  hostOf(skemo.a11y.role) === "input" || isSelect(skemo) || isTextarea(skemo) || isSuggest(skemo);
+  hostOf(skemo.a11y.role) === "input" ||
+  isSelect(skemo) ||
+  isTextarea(skemo) ||
+  isSuggest(skemo) ||
+  isListy(skemo);
 
 /** Whether the Ero is a text area (Spec 011 ②, D-11): a textbox over several lines, with rows. */
 export const isMultiline = (skemo: Skemo): boolean =>
@@ -157,8 +187,9 @@ const isTooltip = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "toolti
 /** A menu (Spec 014 ④, D-05): a layer of the platform with the role menu and rows of entries. */
 const isMenu = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "menu";
 
-/** Static text (Spec 011 ③, D-08): the badge, a span without a role. */
-const isText = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "text";
+/** Static text (Spec 011 ③, D-08): the badge, a span without a role (Spec 025 ③: not the chip, not the editor). */
+const isText = (skemo: Skemo): boolean =>
+  hostOf(skemo.a11y.role) === "text" && !isChip(skemo) && !isEditor(skemo);
 
 /** A live region (Spec 011 ③, D-09, D-10): the notice, the loading and empty state. */
 const isStatus = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "status";
@@ -561,9 +592,81 @@ function dialogPartSelector(part: string, data: string): string {
   return `:where(${root})`;
 }
 
-/** A field with suggestions (Spec 014 ⑤, D-03): a combobox with a listbox part of its own. */
+/**
+ * A field with suggestions (Spec 014 ⑤, D-03): a combobox with a listbox part of its own. Spec 025
+ * ③: the styled select-only list shares the role and the listbox; its rows are the part item, the
+ * suggestions' the part suggestion.
+ */
 export const isSuggest = (skemo: Skemo): boolean =>
-  skemo.a11y.role === "combobox" && skemo.parts.listbox !== undefined;
+  skemo.a11y.role === "combobox" &&
+  skemo.parts.listbox !== undefined &&
+  skemo.parts.item === undefined;
+
+/**
+ * Spec 025 ③ (plan ③ D-18): a styled select-only list (the listelektilo) is a combobox whose rows
+ * are the part item; a multi-select (the plurelektilo) a listbox; a chip (the signeto) a generic
+ * with a remove part; an inline editor (the lokredaktilo) a generic with an edit part.
+ */
+export const isListselect = (skemo: Skemo): boolean =>
+  skemo.a11y.role === "combobox" && skemo.parts.item !== undefined;
+export const isMultiselect = (skemo: Skemo): boolean => skemo.a11y.role === "listbox";
+const isListy = (skemo: Skemo): boolean => isListselect(skemo) || isMultiselect(skemo);
+export const isChip = (skemo: Skemo): boolean =>
+  skemo.a11y.role === "generic" && skemo.parts.remove !== undefined;
+export const isEditor = (skemo: Skemo): boolean =>
+  skemo.a11y.role === "generic" && skemo.parts.edit !== undefined;
+
+/**
+ * The states of a chip (E3): hover on the tag, focus on its pressable body, disabled as the body's
+ * or the remove butono's aria-disabled (a span is no control of the platform).
+ */
+const CHIP_STATES: Readonly<Record<string, string | undefined>> = {
+  rest: "",
+  hover: ":hover",
+  focus: ':has([part="body"]:focus-visible)',
+  disabled: ':has([part="body"][aria-disabled="true"], [part="remove"][aria-disabled="true"])',
+};
+
+/**
+ * The states of an inline editor (E3): hover on the control, focus while a composed part has it,
+ * disabled, read-only and invalid as the control speaks them (aria-disabled, readonly, aria-invalid
+ * — the composed kampo carries its own).
+ */
+const EDITOR_STATES: Readonly<Record<string, string | undefined>> = {
+  rest: "",
+  hover: ":hover",
+  focus: ":has(:focus-visible)",
+  disabled: '[aria-disabled="true"]',
+  readonly: "[readonly]",
+  invalid: '[aria-invalid="true"]',
+};
+
+/**
+ * The selector of a part of a chip (Spec 025 ③, D-18): the combination (selected, intent, size)
+ * and the state stand on the control; surface, border, text, box and motion are the control; the
+ * remove butono is its own element; the ring stands on the body, which takes the focus.
+ */
+function chipPartSelector(part: string, data: string, state: string): string {
+  const root = `[part="control"]${data}${CHIP_STATES[state] ?? ""}`;
+  if (part === "remove") return `:where(${root}) [part="remove"]`;
+  if (part === "focus-ring") return `:where([part="control"]${data}) [part="body"]:focus-visible`;
+  return `:where(${root})`;
+}
+
+/**
+ * The selector of a part of an inline editor (Spec 025 ③, D-18): the combination (editing) and the
+ * state stand on the control; the text, the composed butono (edit, save, cancel), the composed
+ * kampo (field) and the error are their own elements; the ring is the composed field's, drawn on
+ * its input (the editor itself has no control of its own); box and motion are the control.
+ */
+function editorPartSelector(part: string, data: string, state: string): string {
+  const root = `[part="control"]${data}${EDITOR_STATES[state] ?? ""}`;
+  if (part === "focus-ring") return `:where(${root}) [part="field"]::part(control):focus-visible`;
+  if (["text", "edit", "field", "save", "cancel", "error"].includes(part)) {
+    return `:where(${root}) [part="${part}"]`;
+  }
+  return `:where(${root})`;
+}
 
 /**
  * A date picker (Spec 025 ②, plan ② D-11): the field of the kampo (role textbox) with a calendar
@@ -589,7 +692,7 @@ const isDisclosure = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "dis
 
 /** Whether the Ero is a select (Spec 010 ④, D-06): the field of the kampo around a select. */
 const isSelect = (skemo: Skemo): boolean =>
-  hostOf(skemo.a11y.role) === "select" && !isSuggest(skemo);
+  hostOf(skemo.a11y.role) === "select" && !isSuggest(skemo) && !isListselect(skemo);
 
 /**
  * Whether the Ero is a toggle: a control with its label beside it — the track of a switch with
@@ -828,6 +931,20 @@ function declarations(
         : ["border-block-end-style: solid;", `border-block-end-width: ${variable(token)};`];
     }
   }
+  // Spec 025 ③ (plan ③ D-18): the composed field of an inline editor is as wide as its token while
+  // editing and not shown while its width is none. The size of a composed butono that carries a
+  // word (save and cancel of the editor, the clear of a multi-select) is its height alone: the word
+  // takes its width (an icon-only butono — remove, edit — is as wide as it is high).
+  if (isEditor(skemo) && part === "field" && property === "width") {
+    return token === "none" ? ["display: none;"] : [`inline-size: ${variable(token)};`];
+  }
+  if (
+    ((isEditor(skemo) && (part === "save" || part === "cancel")) ||
+      (isMultiselect(skemo) && part === "clear")) &&
+    property === "size"
+  ) {
+    return [`block-size: ${variable(token)};`];
+  }
   if (isBindingKeyword(token)) return keywordDeclarations(part, property, token);
   // The line of a separator (Spec 014 ②, D-06): the border of one edge of the control; which edge
   // is structure (the orientation), its colour and width are the line's.
@@ -870,10 +987,10 @@ function declarations(
   }
   // The listbox of a field with suggestions (Spec 014 ⑤): its width is the most it takes, its
   // height the most it takes before it scrolls; a height of none is a listbox that is not shown.
-  if (isSuggest(skemo) && part === "listbox" && property === "width") {
+  if ((isSuggest(skemo) || isListy(skemo)) && part === "listbox" && property === "width") {
     return [`max-inline-size: ${variable(token)};`];
   }
-  if (isSuggest(skemo) && part === "listbox" && property === "height") {
+  if ((isSuggest(skemo) || isListy(skemo)) && part === "listbox" && property === "height") {
     return token === "none" ? ["display: none;"] : [`max-block-size: ${variable(token)};`];
   }
   // A date picker (Spec 025 ②, plan ② D-11): the cell and its looks carry their ground as a colour
@@ -1380,6 +1497,90 @@ const datepickerStructure: string = [
 ].join("\n");
 
 /**
+ * Layout of a chip (Spec 025 ③, plan ③ D-18), keywords only: the host is an inline block; the
+ * control a row that hugs its body and the remove butono, with the border of the tag; the body a
+ * row of the icon and the text, a pointer while it is a button; the remove butono shows only in
+ * mode removable.
+ */
+const chipStructure: string = [
+  ":host { display: inline-block; }",
+  ":host([hidden]) { display: none; }",
+  ':where([part="control"]) { display: inline-flex; align-items: center; box-sizing: border-box; border-style: solid; }',
+  ':where([part="control"]) { white-space: nowrap; transition-property: background-color, color, border-color; }',
+  ':where([part="body"]) { display: inline-flex; align-items: center; }',
+  ':where([part="body"][role="button"]) { cursor: pointer; }',
+  ':where([part="body"][aria-disabled="true"]) { cursor: not-allowed; }',
+  ':where([part="body"]:focus:not(:focus-visible)) { outline-width: 0; }',
+  ':where([part="remove"][hidden]) { display: none; }',
+  `:where([part="body"]) ${ICONS}, :where([part="body"]) ${MARK} { flex: none; }`,
+].join("\n");
+
+/**
+ * Layout of a styled list and a multi-select (Spec 025 ③, plan ③ D-18), keywords and 0 only: the
+ * host is a block that takes the width of its container (E3), the field a column of label, button,
+ * tags, help and error; the button a row of the text (which never wraps and clips) and the chevron,
+ * with the border of a field; the field is the anchor, the listbox a popover of the platform under
+ * it (the writing direction mirrors it), a column of rows that scrolls when the options are more
+ * than its height holds; every row a line of icon, text and description (the check mark of a
+ * multi-select before the text), a pointer, not allowed where refused; the filter and the tags
+ * stand only where they are wanted; the mark of a required field shows only while marked.
+ */
+const listStructure = (disables: boolean, multi: boolean): string =>
+  [
+    ":host { display: block; }",
+    ':where([part="field"]) { display: flex; flex-direction: column; align-items: stretch; }',
+    ':where([part="label"]) { display: inline-flex; align-items: baseline; }',
+    ':where([part="control"]) { display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; margin: 0; border-style: solid; appearance: none; cursor: pointer; text-align: start; transition-property: background-color, color, border-color; }',
+    ':where([part="control"]:focus:not(:focus-visible)) { outline-width: 0; }',
+    ...(disables ? [':where([part="control"]:disabled) { cursor: not-allowed; }'] : []),
+    ':where([part="control"][readonly]) { cursor: default; }',
+    ':where([part="text"]) { flex: 1 1 auto; min-inline-size: 0; overflow: hidden; white-space: nowrap; }',
+    ':where([part="indicator"]) { flex: none; display: inline-flex; }',
+    ':where([part="field"]) { anchor-name: --fm-field; }',
+    ':where([part="listbox"]) { position: fixed; inset: auto; margin: 0; box-sizing: border-box; position-anchor: --fm-field; position-area: block-end; position-try-fallbacks: flip-block; display: flex; flex-direction: column; align-items: stretch; overflow: auto; border-style: none; }',
+    ':where([part="listbox"]:not(:popover-open)) { display: none; }',
+    ':where([part="listbox"]:focus:not(:focus-visible)) { outline-width: 0; }',
+    ':where([part="items"]) { display: flex; flex-direction: column; }',
+    ':where([part="items"]:focus:not(:focus-visible)) { outline-width: 0; }',
+    ':where([part="item"]) { display: flex; align-items: center; box-sizing: border-box; cursor: pointer; }',
+    ':where([part="item"][hidden]) { display: none; }',
+    ':where([part="item"][aria-disabled="true"]) { cursor: not-allowed; }',
+    ':where([part="item-text"]) { flex: 1 1 auto; white-space: nowrap; }',
+    ...(multi
+      ? [
+          ':where([part="filter"]) { box-sizing: border-box; margin: 0; }',
+          ':where([part="filter"][hidden], [part="clear"][hidden]) { display: none; }',
+          ':where([part="tags"]) { display: flex; flex-wrap: wrap; }',
+          ':where([part="tags"][hidden]) { display: none; }',
+        ]
+      : [
+          ':where([part="description"]) { white-space: nowrap; }',
+          ':where([part="icon"][hidden], [part="description"][hidden]) { display: none; }',
+        ]),
+    ':where([part="field"]:not([data-marked="true"])) [part="required-mark"] { display: none; }',
+    HIDDEN_TEXT,
+  ].join("\n");
+
+/**
+ * Layout of an inline editor (Spec 025 ③, plan ③ D-18), keywords only: the host is inline; the
+ * control a column of the display (or the form) and the error; the display a row of the text and
+ * the edit butono; the form a row of the composed field, save and cancel, aligned at their base;
+ * the label of the composed field is heard, not seen (the value stands in its view); while editing
+ * the field shows the error itself, so the editor's own error holder hides.
+ */
+const editorStructure: string = [
+  ":host { display: inline-flex; vertical-align: middle; }",
+  ":host([hidden]) { display: none; }",
+  ':where([part="control"]) { display: flex; flex-direction: column; align-items: flex-start; box-sizing: border-box; }',
+  ':where([part="display"]) { display: inline-flex; align-items: center; }',
+  ':where([part="form"]) { display: flex; align-items: flex-end; }',
+  ':where([part="display"][hidden], [part="form"][hidden], [part="error"][hidden]) { display: none; }',
+  ':where([part="control"][data-editing="true"]) [part="error"] { display: none; }',
+  ':where([part="field"])::part(label) { position: absolute; clip-path: inset(50%); overflow: hidden; white-space: nowrap; }',
+  ':where([part="text"]) { overflow-wrap: anywhere; }',
+].join("\n");
+
+/**
  * Layout of a skip link (Spec 014 ②, D-07), keywords and 0 only, on top of a control's: the link
  * is fixed at the start of the viewport (the writing direction mirrors it) on its layer, and
  * clipped from sight until it has the focus — a keyboard user finds it first, nobody else sees
@@ -1821,72 +2022,80 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
       : [];
   const disables = skemo.states.includes("disabled") || skemo.states.includes("loading");
   const bordered = skemo.parts.border !== undefined;
-  const base = isDialog(skemo)
-    ? dialogStructure
-    : isTooltip(skemo)
-      ? tooltipStructure(placementOf(skemo))
-      : isPopover(skemo)
-        ? popoverStructure(placementOf(skemo))
-        : isMenu(skemo)
-          ? menuStructure(placementOf(skemo))
-          : isIcon(skemo)
-            ? iconStructure
-            : isSeparator(skemo)
-              ? separatorStructure
-              : isHeading(skemo)
-                ? headingStructure
-                : isParagraph(skemo)
-                  ? paragraphStructure
-                  : isText(skemo)
-                    ? textStructure(bordered)
-                    : isStatus(skemo)
-                      ? statusStructure(skemo)
-                      : isMeter(skemo)
-                        ? meterStructure
-                        : isPagination(skemo)
-                          ? paginationStructure
-                          : isUpload(skemo)
-                            ? uploadStructure(disables)
-                            : isSlider(skemo)
-                              ? sliderStructure(disables)
-                              : isCodeblock(skemo)
-                                ? codeblockStructure()
-                                : isMarkdown(skemo)
-                                  ? markdownStructure
-                                  : isCard(skemo)
-                                    ? cardStructure
-                                    : isAvatar(skemo)
-                                      ? avatarStructure
-                                      : isLight(skemo)
-                                        ? lightStructure(skemo)
-                                        : isTabs(skemo)
-                                          ? tabsStructure
-                                          : isDisclosure(skemo)
-                                            ? disclosureStructure
-                                            : isField(skemo)
-                                              ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo), skemo.parts.decrement !== undefined || isDatepicker(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}${isDatepicker(skemo) ? `\n${datepickerStructure}` : ""}`
-                                              : isGroup(skemo)
-                                                ? groupStructure(
-                                                    disables,
-                                                    skemo.parts["required-mark"] !== undefined,
-                                                  )
-                                                : isToggle(skemo)
-                                                  ? toggleStructure(
-                                                      disables,
-                                                      uzo?.layout.wrap !== undefined &&
-                                                        uzo.layout.wrap !== "never",
-                                                      skemo.slots.some(
-                                                        (slot) =>
-                                                          slot.default !== true &&
-                                                          slot.text === true,
-                                                      ),
-                                                      skemo.parts["required-mark"] !== undefined,
-                                                    )
-                                                  : structure(
-                                                      uzo?.layout.wrap === "with-text",
-                                                      disables,
-                                                      bordered,
-                                                    );
+  const base = isChip(skemo)
+    ? chipStructure
+    : isEditor(skemo)
+      ? editorStructure
+      : isListy(skemo)
+        ? listStructure(disables, isMultiselect(skemo))
+        : isDialog(skemo)
+          ? dialogStructure
+          : isTooltip(skemo)
+            ? tooltipStructure(placementOf(skemo))
+            : isPopover(skemo)
+              ? popoverStructure(placementOf(skemo))
+              : isMenu(skemo)
+                ? menuStructure(placementOf(skemo))
+                : isIcon(skemo)
+                  ? iconStructure
+                  : isSeparator(skemo)
+                    ? separatorStructure
+                    : isHeading(skemo)
+                      ? headingStructure
+                      : isParagraph(skemo)
+                        ? paragraphStructure
+                        : isText(skemo)
+                          ? textStructure(bordered)
+                          : isStatus(skemo)
+                            ? statusStructure(skemo)
+                            : isMeter(skemo)
+                              ? meterStructure
+                              : isPagination(skemo)
+                                ? paginationStructure
+                                : isUpload(skemo)
+                                  ? uploadStructure(disables)
+                                  : isSlider(skemo)
+                                    ? sliderStructure(disables)
+                                    : isCodeblock(skemo)
+                                      ? codeblockStructure()
+                                      : isMarkdown(skemo)
+                                        ? markdownStructure
+                                        : isCard(skemo)
+                                          ? cardStructure
+                                          : isAvatar(skemo)
+                                            ? avatarStructure
+                                            : isLight(skemo)
+                                              ? lightStructure(skemo)
+                                              : isTabs(skemo)
+                                                ? tabsStructure
+                                                : isDisclosure(skemo)
+                                                  ? disclosureStructure
+                                                  : isField(skemo)
+                                                    ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo), skemo.parts.decrement !== undefined || isDatepicker(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}${isDatepicker(skemo) ? `\n${datepickerStructure}` : ""}`
+                                                    : isGroup(skemo)
+                                                      ? groupStructure(
+                                                          disables,
+                                                          skemo.parts["required-mark"] !==
+                                                            undefined,
+                                                        )
+                                                      : isToggle(skemo)
+                                                        ? toggleStructure(
+                                                            disables,
+                                                            uzo?.layout.wrap !== undefined &&
+                                                              uzo.layout.wrap !== "never",
+                                                            skemo.slots.some(
+                                                              (slot) =>
+                                                                slot.default !== true &&
+                                                                slot.text === true,
+                                                            ),
+                                                            skemo.parts["required-mark"] !==
+                                                              undefined,
+                                                          )
+                                                        : structure(
+                                                            uzo?.layout.wrap === "with-text",
+                                                            disables,
+                                                            bordered,
+                                                          );
   // A skip link adds its place above the page to a control's structure (Spec 014 ②, D-07).
   const floating = isSkip(skemo) ? `\n${skipStructure}` : "";
   return `${base}${floating}\n${[...tokenRules, ...undrawn].join("\n")}\n`;
@@ -1981,6 +2190,9 @@ function selectorOf(
   if (isMarkdown(skemo)) return markdownPartSelector(part);
   if (isCard(skemo)) return cardPartSelector(part, data);
   if (isAvatar(skemo)) return avatarPartSelector(part, data);
+  // Spec 025 ③: the chip and the inline editor carry their states as the control speaks them.
+  if (isChip(skemo)) return chipPartSelector(part, data, combination[STATE_KEY] ?? "rest");
+  if (isEditor(skemo)) return editorPartSelector(part, data, combination[STATE_KEY] ?? "rest");
   const state = STATE_SELECTORS[combination[STATE_KEY] ?? "rest"] ?? "";
   if (isField(skemo)) {
     return fieldPartSelector(
@@ -1992,6 +2204,7 @@ function selectorOf(
       entry,
       isDatepicker(skemo),
       combination[STATE_KEY] ?? "rest",
+      isListy(skemo),
     );
   }
   if (isToggle(skemo)) return togglePartSelector(part, property, data, state);
@@ -2036,6 +2249,9 @@ export function elementNamesOf(
       isUpload(entry.skemo),
       isAvatar(entry.skemo),
       isDatepicker(entry.skemo),
+      isChip(entry.skemo),
+      isListselect(entry.skemo),
+      isEditor(entry.skemo),
     ),
     role: entry.skemo.a11y.role,
     // Spec 015 ① (plan ① D-04): the breadcrumb is a light host with a list in its shadow.
@@ -2219,6 +2435,16 @@ export function stylesheetInventory(moduleText: string): ParityItem {
     for (const compound of compounds) {
       const part = /\[part="([a-z0-9-]+)"\]/.exec(compound)?.[1];
       if (part !== undefined && !COMBINATION_PARTS.has(part)) continue;
+      // In a composite (Spec 009; Spec 025 ③: the styled list and the multi-select) the field and
+      // its control carry the combination; a data attribute on any other part inside it — the
+      // active row (data-active), the text while it shows the placeholder — is that part's own.
+      if (
+        selector.includes('[part="field"]') &&
+        part !== undefined &&
+        part !== "field" &&
+        part !== "control"
+      )
+        continue;
       for (const [, name = "", value = ""] of compound.matchAll(
         /\[data-([a-z0-9-]+)="([^"]*)"\]/g,
       )) {

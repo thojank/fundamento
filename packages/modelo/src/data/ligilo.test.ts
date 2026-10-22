@@ -270,7 +270,7 @@ describe("the Reguloj of the ligilo (T005, A2, D-13)", () => {
     // saltligilo too (E5).
     const widened =
       name === "link-label-names-destination"
-        ? ["ligilo", "navigado", "saltligilo", "signeto", "spuro"]
+        ? ["ligilo", "navigado", "saltligilo", "spuro"]
         : name === "link-not-color-only"
           ? ["ligilo", "navigado"]
           : ["ligilo"];
@@ -333,6 +333,10 @@ describe("the Reguloj of the ligilo (T005, A2, D-13)", () => {
       "markdovido",
       "glitilo",
       "datelektilo",
+      "signeto",
+      "listelektilo",
+      "plurelektilo",
+      "lokredaktilo",
     ]);
   });
 

@@ -307,12 +307,13 @@ describe("the Uzo of the elekto (section 3, G5)", () => {
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["choose-many", "elektilo"],
       ["yes-no", "markobutono"],
-      ["multi", null],
+      // Spec 025 ③: several at once are the plurelektilo's.
+      ["multi", "plurelektilo"],
     ]);
     expect(uzo?.instead[0]?.kialo).toMatch(/Fundamento covers it with elektilo\.$/);
     expect(uzo?.instead[0]?.kialo).not.toMatch(/PR ④/);
     expect(uzo?.instead[1]?.kialo).toMatch(/A yes or no is a check mark/);
-    expect(uzo?.instead[2]?.kialo).toMatch(/group of checkboxes/);
+    expect(uzo?.instead[2]?.kialo).toMatch(/plurelektilo/);
   });
 
   it("stops at a single option and never without a visible label", () => {
@@ -448,6 +449,8 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
         "alsxutilo",
         "glitilo",
         "datelektilo",
+        "listelektilo",
+        "plurelektilo",
       ],
     ],
     [
@@ -463,6 +466,8 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
         "alsxutilo",
         "glitilo",
         "datelektilo",
+        "listelektilo",
+        "plurelektilo",
       ],
     ],
     [
@@ -478,6 +483,9 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
         "alsxutilo",
         "glitilo",
         "datelektilo",
+        "listelektilo",
+        "plurelektilo",
+        "lokredaktilo",
       ],
     ],
     [
@@ -492,6 +500,8 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
         "alsxutilo",
         "glitilo",
         "datelektilo",
+        "listelektilo",
+        "plurelektilo",
       ],
     ],
     [
@@ -506,6 +516,9 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
         "alsxutilo",
         "glitilo",
         "datelektilo",
+        "listelektilo",
+        "plurelektilo",
+        "lokredaktilo",
       ],
     ],
     // Spec 014 ①: widened once more, to the reason-help of the dialogo.
@@ -521,6 +534,8 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
         "alsxutilo",
         "glitilo",
         "datelektilo",
+        "listelektilo",
+        "plurelektilo",
       ],
     ],
   ])("%s is widened to the elekto, not duplicated (E5)", (name, eroj) => {
@@ -567,6 +582,10 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
       "markdovido",
       "glitilo",
       "datelektilo",
+      "signeto",
+      "listelektilo",
+      "plurelektilo",
+      "lokredaktilo",
     ]);
   });
 

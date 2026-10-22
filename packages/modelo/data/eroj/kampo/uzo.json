@@ -23,7 +23,7 @@
           ]
         },
         "ero": "tekstareo",
-        "kialo": "Several lines need a field that grows, because one line hides what was written."
+        "kialo": "Several lines need a field that grows, because one line hides them."
       },
       {
         "goal": "choose-many",
@@ -82,7 +82,7 @@
           ]
         },
         "ero": "sxaltilo",
-        "kialo": "A setting on or off needs a control that shows its state, because a text would have to be read to know it; sxaltilo when it applies at once (in a form, applied with it: markobutono)."
+        "kialo": "A setting on or off shows its state, because a text would have to be read to know it; sxaltilo when it applies at once (in a form, applied with it: markobutono)."
       },
       {
         "goal": "suggestions",
@@ -100,7 +100,7 @@
           ]
         },
         "ero": "kompletigilo",
-        "kialo": "Values typed and picked from suggestions are the kompletigilo's, because the list shortens while typing."
+        "kialo": "Typed and picked from suggestions is the kompletigilo's, because the list shortens while typing."
       },
       {
         "goal": "approximate",
@@ -120,21 +120,21 @@
         "kialo": "A value set by feel is dragged, because the hand finds a position faster than a number."
       },
       {
-        "goal": "near-date",
+        "goal": "single-value",
         "keywords": {
           "en": [
-            "calendar",
-            "delivery-date",
-            "booking-date"
+            "single-value",
+            "in-view",
+            "edit-in-view"
           ],
           "de": [
-            "kalender",
-            "lieferdatum",
-            "buchungsdatum"
+            "einzelwert",
+            "inline-bearbeiten",
+            "an-ort-und-stelle"
           ]
         },
-        "ero": "datelektilo",
-        "kialo": "A date near today is picked in a calendar, because the eye finds a weekday faster than the hand."
+        "ero": "lokredaktilo",
+        "kialo": "A value changed in a view is the lokredaktilo's, because a form for one value is a detour."
       }
     ],
     "boundary": [

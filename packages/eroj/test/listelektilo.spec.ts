@@ -22,10 +22,10 @@ const stateOf = (page: Page) =>
       shown: shadow.querySelector('[part="text"]')?.textContent ?? "",
       open: listbox.matches(":popover-open"),
       expanded: shadow.querySelector('[part="control"]')?.getAttribute("aria-expanded"),
-      active: [...shadow.querySelectorAll('[part="option"][data-active="true"]')].map(
+      active: [...shadow.querySelectorAll('[part="item"][data-active="true"]')].map(
         (row) => (row as HTMLElement).dataset.value,
       ),
-      selected: [...shadow.querySelectorAll('[part="option"][aria-selected="true"]')].map(
+      selected: [...shadow.querySelectorAll('[part="item"][aria-selected="true"]')].map(
         (row) => (row as HTMLElement).dataset.value,
       ),
       sent: new FormData(form).getAll("region").map(String),
@@ -47,7 +47,7 @@ test.describe("fm-listelektilo behaviour", () => {
     expect(state.sent).toEqual(["eu"]);
     expect(state.open).toBe(false);
     await box.click();
-    const options = page.locator("#l").locator('[part="option"]');
+    const options = page.locator("#l").locator('[part="item"]');
     await expect(options).toHaveCount(4);
     await expect(options.nth(0)).toHaveAttribute("aria-selected", "true");
     await expect(options.nth(0).locator('fm-ikono[name="info"]')).toHaveCount(1);
@@ -108,7 +108,7 @@ test.describe("fm-listelektilo behaviour", () => {
     await expect(box).toHaveText(/Region wählen/);
     expect((await stateOf(page)).valid).toBe(false);
     await box.click();
-    await page.locator("#l").locator('[part="option"][data-value="us"]').click();
+    await page.locator("#l").locator('[part="item"][data-value="us"]').click();
     const state = await stateOf(page);
     expect(state.value).toBe("us");
     expect(state.open).toBe(false);

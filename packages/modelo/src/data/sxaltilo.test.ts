@@ -265,6 +265,8 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
           "alsxutilo",
           "glitilo",
           "datelektilo",
+          "listelektilo",
+          "plurelektilo",
         ],
       });
       expect(modelo.reguloj.filter((regulo) => regulo.name === name)).toHaveLength(1);
@@ -309,6 +311,10 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
       "markdovido",
       "glitilo",
       "datelektilo",
+      "signeto",
+      "listelektilo",
+      "plurelektilo",
+      "lokredaktilo",
     ]);
   });
 

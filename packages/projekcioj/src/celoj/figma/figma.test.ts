@@ -1060,6 +1060,11 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       // Ero's (proposal for the maintainer to confirm).
       langetaro: "Reiter",
       ligilo: "Ziel",
+      // Spec 025 ③ (plan ③ D-18): the styled list shares the elektilo's role and word; the
+      // multi-select (role listbox) chooses too; the editor's text is the Vitrino's value (one
+      // source for both pictures); a tag names a category (proposal for the maintainer to confirm).
+      listelektilo: "Auswahl",
+      lokredaktilo: "Barrierefreiheit",
       markdovido: "Text",
       // Spec 010 ②: a checkbox names an option (plan ② D-11, for the maintainer to confirm, O-x).
       markobutono: "Option",
@@ -1071,11 +1076,13 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       // is the Ero's (proposal for the maintainer to confirm).
       navigado: "Navigation",
       pagxigilo: "Seitenblättern",
+      plurelektilo: "Auswahl",
       // Spec 011 ③: a loading or empty state shares the role status with the notice; its word is
       // the structure's, not the role's (for the maintainer to confirm).
       plenstato: "Zustand",
       // Spec 014 ②: a skip link is a link; its word names its destination.
       saltligilo: "Ziel",
+      signeto: "Schlagwort",
       spuro: "Pfad",
       sxaltilo: "Einstellung",
       sxvebilo: "Überschrift",
@@ -3752,11 +3759,13 @@ describe("the Figma plan draws the datelektilo (Spec 025 ②)", () => {
 describe("the Figma plan draws the selection Eroj (Spec 025 ③)", () => {
   const set = (name: string) => plan.components.find((component) => component.set === name);
 
-  it("the signeto: a badge of mode × selected × size × intent × state, 240 variants; the chosen tag takes the selected primary action", () => {
+  // 160, not 240 (Abweichung 3 of plan ③): the constraint selected ⇒ mode selectable prunes the
+  // pressed static and removable tags, as every constraint prunes a set (combinationsOf).
+  it("the signeto: a badge of mode × selected × size × intent × state, 160 variants (the constraint prunes the pressed static and removable tags); the chosen tag takes the selected primary action", () => {
     const signeto = set("signeto");
     expect(signeto?.structure).toBe("badge");
     expect(signeto?.extraAxes).toEqual(["mode"]);
-    expect(signeto?.variants).toHaveLength(240);
+    expect(signeto?.variants).toHaveLength(160);
     expect(signeto?.properties).toMatchObject({
       mode: ["static", "selectable", "removable"],
       selected: "BOOLEAN",
@@ -3796,7 +3805,7 @@ describe("the Figma plan draws the selection Eroj (Spec 025 ③)", () => {
       );
       expect(open?.bindings, name).toMatchObject({
         "listbox.fill": "color/background/raised",
-        "option.typography": "typography/label/1",
+        "item.typography": "typography/label/1",
       });
       const closed = field?.variants.find(
         (variant) => variant.props.expanded === "false" && variant.props.state === "rest",
@@ -3810,9 +3819,9 @@ describe("the Figma plan draws the selection Eroj (Spec 025 ③)", () => {
     expect(editor?.structure).toBe("badge");
     expect(editor?.variants).toHaveLength(12);
     expect(editor?.label).toEqual({ property: "label", defaultValue: "Barrierefreiheit" });
-    const hover = editor?.variants.find(
-      (variant) => variant.props.editing === "false" && variant.props.state === "hover",
+    const disabled = editor?.variants.find(
+      (variant) => variant.props.editing === "false" && variant.props.state === "disabled",
     );
-    expect(hover?.bindings["surface.fill"]).toBe("color/action/tertiary/hover");
+    expect(disabled?.bindings["text.color"]).toBe("color/text/disabled");
   });
 });

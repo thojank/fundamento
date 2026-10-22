@@ -2382,7 +2382,7 @@ describe("Web Component Celo for the selection Eroj (Spec 025 ③)", () => {
     });
   });
 
-  it("the listelektilo: a button of role combobox over a popover listbox; options with icon and description; the option by active and selected", () => {
+  it("the listelektilo: a button of role combobox over a popover listbox; options with icon and description; the item by active and selected", () => {
     const element = files["eroj/src/generated/fm-listelektilo.ts"] ?? "";
     expect(element).toContain(
       '<button part="control" id="control" type="button" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="listbox"><span part="text" id="text"></span><span part="indicator" aria-hidden="true">',
@@ -2395,10 +2395,10 @@ describe("Web Component Celo for the selection Eroj (Spec 025 ③)", () => {
     const css = cssOf3("listelektilo");
     expect(css).toContain(':where([part="listbox"]:not(:popover-open)) { display: none; }');
     expect(css).toContain(
-      ':where([part="option"]) { display: flex; align-items: center; box-sizing: border-box; cursor: pointer; }',
+      ':where([part="item"]) { display: flex; align-items: center; box-sizing: border-box; cursor: pointer; }',
     );
-    expect(css).toContain(':where([part="field"]) [part="option"][aria-selected="true"] {');
-    expect(css).toContain(':where([part="field"]) [part="option"][data-active="true"] {');
+    expect(css).toContain(':where([part="field"]) [part="item"][aria-selected="true"] {');
+    expect(css).toContain(':where([part="field"]) [part="item"][data-active="true"] {');
     expect(css).toContain(
       ':where([part="field"]) [part="description"] {\n  color: var(--fm-color-text-muted);',
     );
@@ -2411,16 +2411,18 @@ describe("Web Component Celo for the selection Eroj (Spec 025 ③)", () => {
     expect(element).toContain(
       '<button part="control" id="control" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="listbox"><span part="text" id="text"></span><span part="indicator" aria-hidden="true">',
     );
+    // A listbox owns options alone (ARIA; axe aria-required-children, Abweichung 4 of plan ③): the
+    // popover is a panel, the rows' holder is the listbox.
     expect(element).toContain(
-      '<div part="listbox" role="listbox" id="listbox" aria-multiselectable="true" popover="manual"><input part="filter" type="search" aria-controls="listbox" autocomplete="off" hidden><div part="options"></div><fm-butono part="clear" emphasis="low" size="small"></fm-butono></div>',
+      '<div part="listbox" id="panel" popover="manual"><input part="filter" type="search" aria-controls="listbox" autocomplete="off" hidden><div part="items" role="listbox" id="listbox" aria-multiselectable="true"></div><fm-butono part="clear" emphasis="low" size="small"></fm-butono></div>',
     );
     expect(element).toContain('<fm-ikono part="check" name="check" aria-hidden="true">');
-    for (const key of ["count-word", "clear-name", "values-invalid"])
+    for (const key of ["options-count", "clear-name", "values-invalid"])
       expect(element).toContain(`"${key}"`);
     const css = cssOf3("plurelektilo");
     expect(css).toContain(':where([part="listbox"]:not(:popover-open)) { display: none; }');
     expect(css).toContain(
-      ':where([part="field"]) [part="option"][aria-selected="true"] [part="check"] {',
+      ':where([part="field"]) [part="item"][aria-selected="true"] [part="check"] {',
     );
     expect(componentCssIssues("plurelektilo.css", css)).toEqual([]);
     expect(cssPhysicalPropertyIssues("plurelektilo.css", css)).toEqual([]);

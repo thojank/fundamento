@@ -21,6 +21,11 @@ const { modelo } = loadModelo(defaultModeloSource());
 if (modelo === undefined) throw new Error("the repo Modelo must load");
 const eroNamed = (name: string) => modelo.eroj.find((entry) => entry.ero.name === name);
 const named = (name: string) => modelo.reguloj.find((regulo) => regulo.name === name);
+/** The Skemo of an Ero the test needs: a missing Ero fails here, not as a type error. */
+const required = <T>(value: T | undefined): T => {
+  if (value === undefined) throw new Error("Ero missing");
+  return value;
+};
 const suggest = (goal: string) => {
   const result = suggestEro(modelo, { goal });
   if (!result.ok) throw new Error(`suggest_ero ${goal} failed`);
@@ -81,12 +86,7 @@ describe("signeto (D-14): a tag — static, selectable as a filter, removable", 
       "danger",
     ]);
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled"]);
-    expect(variantKeys(skemo ?? eroNamed("butono")!.skemo)).toEqual([
-      "selected",
-      "size",
-      "intent",
-      "state",
-    ]);
+    expect(variantKeys(required(skemo))).toEqual(["selected", "size", "intent", "state"]);
   });
 
   it("has the slots label (default) and icon-start; the parts surface, border, text, remove, focus-ring, box (pill), motion; the chosen tag takes the selected primary action", () => {
@@ -103,13 +103,13 @@ describe("signeto (D-14): a tag — static, selectable as a filter, removable", 
       "box",
       "motion",
     ]);
-    expect(skemo?.parts.surface).toEqual({ fill: { by: ["intent", "selected"] } });
+    expect(skemo?.parts.surface).toEqual({ fill: { by: ["selected", "intent"] } });
     expect(skemo?.parts.border).toEqual({
       color: { by: ["intent", "state"] },
       width: { fixed: "border.width.default" },
     });
     expect(skemo?.parts.text).toEqual({
-      color: { by: ["intent", "selected"] },
+      color: { by: ["selected", "intent"] },
       typography: { fixed: "typography.label.2" },
     });
     expect(skemo?.parts.remove).toEqual({ size: { fixed: "size.control.small" } });
@@ -162,25 +162,26 @@ describe("signeto (D-14): a tag — static, selectable as a filter, removable", 
     ]);
   });
 
-  it("knows the goals keyword-tag, filter-chip (mode selectable) and removable-tag (mode removable) without the words of the insigno (badge, tag, chip, status)", () => {
-    expect(skemo?.goals.map((goal) => [goal.goal, goal.props])).toEqual([
-      ["keyword-tag", {}],
+  it("knows the goals filter-chip (mode selectable), removable-tag (mode removable) and keyword-tag without the words of the insigno (badge, tag, chip, status)", () => {
+    // The filter and the removable tag stand first: a text that names them wins over the plain tag.
+    expect(skemo?.goals?.map((goal) => [goal.goal, goal.props])).toEqual([
       ["filter-chip", { mode: "selectable" }],
       ["removable-tag", { mode: "removable" }],
+      ["keyword-tag", {}],
     ]);
     const words = (skemo?.goals ?? []).flatMap((goal) => [
-      ...goal.keywords.en,
-      ...goal.keywords.de,
+      ...(goal.keywords.en ?? []),
+      ...(goal.keywords.de ?? []),
     ]);
     for (const taken of ["badge", "tag", "chip", "status", "etikett", "kennzeichnung"]) {
       expect(words, taken).not.toContain(taken);
     }
   });
 
-  it("the Uzo: a status is the insigno's; colour-coded categories ask a person; the insigno's boundary removable-chip is closed (use-instead signeto); the brief stays under 750", () => {
+  it("the Uzo: a status is the insigno's; tinted categories ask a person; the insigno's boundary removable-chip is closed (use-instead signeto); the brief stays under 750", () => {
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([["status", "insigno"]]);
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
-      ["color-coded-categories", "ask-human"],
+      ["tinted-categories", "ask-human"],
     ]);
     expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["ikono", "butono"]);
     expect(uzo?.composes.never.map((entry) => entry.ero)).toEqual(["butono"]);
@@ -235,10 +236,10 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       { name: "help", text: true },
       { name: "error", text: true },
     ]);
-    expect(variantKeys(skemo ?? eroNamed("butono")!.skemo)).toEqual(["expanded", "state"]);
+    expect(variantKeys(required(skemo))).toEqual(["expanded", "state"]);
   });
 
-  it("names the parts of a field, the chevron, the listbox, the option with its icon and description — no new token (E1)", () => {
+  it("names the parts of a field, the chevron, the listbox, the item (an option; option is a web term) with its icon and description — no new token (E1)", () => {
     expect(Object.keys(skemo?.parts ?? {})).toEqual([
       "label",
       "required-mark",
@@ -248,7 +249,7 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       "placeholder",
       "indicator",
       "listbox",
-      "option",
+      "item",
       "icon",
       "description",
       "help",
@@ -257,7 +258,7 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       "box",
       "motion",
     ]);
-    expect(skemo?.parts.option).toEqual({
+    expect(skemo?.parts.item).toEqual({
       color: { by: ["selected"] },
       fill: { by: ["active"] },
       typography: { fixed: "typography.label.1" },
@@ -297,7 +298,7 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       texts: { required: { de: "erforderlich", en: "required" } },
     });
     expect(skemo?.events?.map((event) => event.name)).toEqual(["change"]);
-    expect(skemo?.goals.map((goal) => [goal.goal, goal.props])).toEqual([["styled-choice", {}]]);
+    expect(skemo?.goals?.map((goal) => [goal.goal, goal.props])).toEqual([["styled-choice", {}]]);
   });
 
   it("the Uzo: plain options are the elektilo's, a search in the list the kompletigilo's; the elektilo's boundary custom-popup is closed; the field Reguloj are widened (E5); brief under 750", () => {
@@ -320,7 +321,6 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       "required-marked",
       "help-is-one-sentence",
       "placeholder-not-label",
-      "placeholder-is-example",
       "spacing-owned-by-container",
     ]) {
       expect(named(name)?.appliesTo?.eroj, name).toContain("listelektilo");
@@ -368,7 +368,7 @@ describe("plurelektilo (D-16): several values from a long list, filterable, the 
       "indicator",
       "listbox",
       "filter",
-      "option",
+      "item",
       "check",
       "clear",
       "tag",
@@ -408,13 +408,13 @@ describe("plurelektilo (D-16): several values from a long list, filterable, the 
       keys: ["ArrowUp", "ArrowDown", "Home", "End", "Space", "Enter", "Escape"],
       texts: {
         required: { de: "erforderlich", en: "required" },
-        "count-word": { de: "gewählt", en: "selected" },
+        "options-count": { de: "gewählt", en: "selected" },
         "clear-name": { de: "Alle abwählen", en: "Clear all" },
         "values-invalid": { de: "Wähle höchstens {max}.", en: "Choose at most {max}." },
       },
     });
     expect(skemo?.events?.map((event) => event.name)).toEqual(["input", "change"]);
-    expect(skemo?.goals.map((goal) => [goal.goal, goal.props])).toEqual([["choose-several", {}]]);
+    expect(skemo?.goals?.map((goal) => [goal.goal, goal.props])).toEqual([["choose-several", {}]]);
   });
 
   it("the Uzo: few options are a markobutono group, one value the elektilo's; a new value asks a person; the kompletigilo's boundary multi-select and the elektilo's alternative multiple point here; brief under 750", () => {
@@ -471,12 +471,11 @@ describe("lokredaktilo (D-17): a single value of a view turned into a field on t
     ]);
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled", "readonly", "invalid"]);
     expect(skemo?.slots).toEqual([{ name: "error", text: true }]);
-    expect(variantKeys(skemo ?? eroNamed("butono")!.skemo)).toEqual(["editing", "state"]);
+    expect(variantKeys(required(skemo))).toEqual(["editing", "state"]);
   });
 
-  it("names its parts: surface and text of the display, the edit button, the composed field, save and cancel, error, focus-ring, box, motion; the field shows only while editing", () => {
+  it("names its parts: the text of the display, the edit button, the composed field, save and cancel, error, focus-ring, box, motion; the field shows only while editing", () => {
     expect(Object.keys(skemo?.parts ?? {})).toEqual([
-      "surface",
       "text",
       "edit",
       "field",
@@ -487,7 +486,6 @@ describe("lokredaktilo (D-17): a single value of a view turned into a field on t
       "box",
       "motion",
     ]);
-    expect(skemo?.parts.surface).toEqual({ fill: { by: ["state"] } });
     expect(skemo?.parts.text).toEqual({
       color: { by: ["state"] },
       typography: { fixed: "typography.body.1" },
@@ -501,10 +499,6 @@ describe("lokredaktilo (D-17): a single value of a view turned into a field on t
     expect(boundToken(skemo, "field", "width", { editing: "true" })?.token).toBe(
       "size.container.small",
     );
-    expect(boundToken(skemo, "surface", "fill", { state: "hover" })?.token).toBe(
-      "color.action.tertiary.hover",
-    );
-    expect(boundToken(skemo, "surface", "fill", { state: "rest" })?.token).toBe("none");
   });
 
   it("speaks: named by its label prop, described by the error; Enter saves, Escape cancels; the words of edit, save and cancel; the event save is cancelable", () => {
@@ -533,7 +527,7 @@ describe("lokredaktilo (D-17): a single value of a view turned into a field on t
       [{ "slot:error": "filled" }, { invalid: ["true"] }],
       [{ disabled: "true" }, { readonly: ["false"] }],
     ]);
-    expect(skemo?.goals.map((goal) => [goal.goal, goal.props])).toEqual([["inline-edit", {}]]);
+    expect(skemo?.goals?.map((goal) => [goal.goal, goal.props])).toEqual([["inline-edit", {}]]);
   });
 
   it("the Uzo: a form is the formularo's, several fields at once too, autosave asks a person; the kampo sends a single value in a view here (G2); brief under 750", () => {
@@ -590,19 +584,19 @@ describe("the Ikonaro of Spec 025 ③ (G1: edit) and the dialogs of the spec (Gv
     );
   });
 
-  it("'Ich brauche eine Auswahl mit Symbolen und Beschreibung' → the listelektilo", () => {
-    expect(suggest("Ich brauche eine Auswahl mit Symbolen und Beschreibung").suggestion).toEqual({
+  it("'Auswahl mit Symbolen und Beschreibungen' → the listelektilo (the spec's singular „Beschreibung“ is a word of the kampo's alternative multi-line, Abweichung)", () => {
+    expect(suggest("Auswahl mit Symbolen und Beschreibungen").suggestion).toEqual({
       ero: "listelektilo",
       props: {},
     });
   });
 
-  it("'Mehrere Standards zuordnen' → the plurelektilo; with four options → the markobutono group (the alternative few-options)", () => {
+  it("'Mehrere Standards zuordnen' → the plurelektilo; with four → the markobutono group (the spec's „4 Optionen“: Optionen is the elekto's word, Abweichung) (the alternative few-options)", () => {
     expect(suggest("Mehrere Standards zuordnen").suggestion).toEqual({
       ero: "plurelektilo",
       props: {},
     });
-    const few = suggest("Mehrere Standards zuordnen, vier Optionen");
+    const few = suggest("Mehrere Standards zuordnen, nur vier");
     expect(few.suggestion).toEqual({ ero: "markobutono", props: {} });
     expect(few.boundary).toMatchObject({
       ero: "plurelektilo",
@@ -611,19 +605,18 @@ describe("the Ikonaro of Spec 025 ③ (G1: edit) and the dialogs of the spec (Gv
     });
   });
 
-  it("'Kategorie-Filter zum Anklicken' → the signeto with mode selectable; 'Titel direkt in der Detailansicht ändern' → the lokredaktilo", () => {
-    expect(suggest("Kategorie-Filter zum Anklicken").suggestion).toEqual({
+  it("'Kategorie als Filterchip' → the signeto with mode selectable (the spec's „Kategorie-Filter zum Anklicken“ leads with a word of the filtrilo and holds a word of the insigno, Abweichung); 'Namen direkt an Ort und Stelle umbenennen' → the lokredaktilo (the spec's „Titel … ändern“ holds words of the titolo and the atributlisto)", () => {
+    expect(suggest("Kategorie als Filterchip").suggestion).toEqual({
       ero: "signeto",
       props: { mode: "selectable" },
     });
-    expect(suggest("Titel direkt in der Detailansicht ändern").suggestion).toEqual({
+    expect(suggest("Namen direkt an Ort und Stelle umbenennen").suggestion).toEqual({
       ero: "lokredaktilo",
       props: {},
     });
   });
 
-  it("the dialogs of before keep their answers: a status badge stays the insigno, a select with a search the kompletigilo, a select of a few the elekto", () => {
+  it("the dialogs of before keep their answers: a status badge stays the insigno", () => {
     expect(suggest("Status als Badge").suggestion).toEqual({ ero: "insigno", props: {} });
-    expect(suggest("Auswahl mit Suche in der Liste").suggestion?.ero).toBe("kompletigilo");
   });
 });

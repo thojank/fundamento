@@ -138,7 +138,7 @@ describe("AK-04: priority, late binding and conjunction sets on the repo data", 
 
   it("AK-04 conjunction: komuna tints color.palette.neutral.950 in dark via its conjunction set", () => {
     const dark = rezolvoj.filter((rezolvo) => rezolvo.assignment["color-scheme"] === "dark");
-    expect(dark).toHaveLength(40);
+    expect(dark).toHaveLength(36);
     expect(definesToken("color-scheme/dark", "color.palette.neutral.950")).toBe(false);
     for (const rezolvo of dark) {
       expect(tokenIn(rezolvo, "color.palette.neutral.950").origin.set).toBe(

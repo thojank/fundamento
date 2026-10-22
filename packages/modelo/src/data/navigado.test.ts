@@ -245,7 +245,6 @@ describe("the Reguloj of the navigado (G6, E5)", () => {
       "ligilo",
       "navigado",
       "saltligilo",
-      "signeto",
       "spuro",
     ]);
     expect(named("link-not-color-only")?.appliesTo?.eroj).toEqual(["ligilo", "navigado"]);

@@ -28,7 +28,7 @@
   },
   "sha256": {
     "$themes.json": "32d20d206abf9b832c41c26c654fb33aef9694a5661ff89655091a4aae9931d3",
-    "aspekto.json": "d35bdfbe480576f696af6ecf8a046abf75526b7ea93de3ae3485c8aeef8e0591",
+    "aspekto.json": "64b4d0f0b632ead549fee4df827d4af65ce1da37fee3fe880a399d9c21f1aa6f",
     "ids.lock.json": "19279ae73d078332a67f90d7e401fa8878e9fc7794e8496809c133730e1e564e",
     "ikonoj/LICENSE": "ddbe6082ec3cf979db47e5af549d2849c5d6182b3e005ef91ce1dbb9eb122f11",
     "ikonoj/add.svg": "4baa2c668c8800442d47ab39d716e35142c125a9146efefa50f701e9622f2000",
@@ -40,6 +40,7 @@
     "ikonoj/close.svg": "9bb4679a52d3dee72b089839cb2cc8e0475be4d9ca1c522d5c3c39d05b6e394a",
     "ikonoj/collapse.svg": "c5373aea766baa7578ed292adaefc3457646cebe103da68116a6949d859f8e03",
     "ikonoj/danger.svg": "191d6bf1b82bc9914f8c10323839df826e665281ff96bd92834289ab5b4c9478",
+    "ikonoj/edit.svg": "68ed57acfc2c68b1d526d48a45eccb96929205e3798679243005a3df014ee1fd",
     "ikonoj/expand.svg": "5cf8f13effa4a620f3cc17e86f6199a04035431d0a5c47d1d6b12451d4a74b14",
     "ikonoj/external.svg": "11966b513a1e2af09645cf7a5867a2664bbd190658bd4281f8cb1f76cce39267",
     "ikonoj/info.svg": "b8b6494b1a755bdcb1ba75b20fe731a9741f60d5da6aa5dd493118d4196226f2",
@@ -54,6 +55,6 @@
     "raporto.json": "59bac84d809ae97da61d96535f236d7bd279fc023aa632c27c2e0a17c11c8965",
     "raporto.md": "38edbdc57660e2f107cb190a8f04d82f6fdc997d96ec6cebf0eeb88202fcdda8",
     "sets/aspekto/provo+color-scheme/dark.json": "4e9efc4e7d34a6eaad46b1c022e18344e118f17b12935e0b93cd4497d8aa30ad",
-    "sets/aspekto/provo.json": "c1cd7d7d22479063b7a0f2e14cfc779f4dc684ea15ff2d4a697c5254f62fe6f6"
+    "sets/aspekto/provo.json": "ddfea0aaa40dc044e07fdcdf7330dfd6c438e3d018f42d4544dfef5d711f28f7"
   }
 }

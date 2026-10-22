@@ -26,13 +26,13 @@ const stateOf = (page: Page) =>
       values: element.getAttribute("values"),
       shown: shadow.querySelector('[part="text"]')?.textContent?.trim() ?? "",
       open: listbox.matches(":popover-open"),
-      order: [...shadow.querySelectorAll('[part="option"]:not([hidden])')].map(
+      order: [...shadow.querySelectorAll('[part="item"]:not([hidden])')].map(
         (row) => (row as HTMLElement).dataset.value,
       ),
-      selected: [...shadow.querySelectorAll('[part="option"][aria-selected="true"]')].map(
+      selected: [...shadow.querySelectorAll('[part="item"][aria-selected="true"]')].map(
         (row) => (row as HTMLElement).dataset.value,
       ),
-      active: [...shadow.querySelectorAll('[part="option"][data-active="true"]')].map(
+      active: [...shadow.querySelectorAll('[part="item"][data-active="true"]')].map(
         (row) => (row as HTMLElement).dataset.value,
       ),
       tags: [...shadow.querySelectorAll("fm-signeto")].map((tag) => tag.textContent?.trim()),
@@ -48,7 +48,7 @@ test.describe("fm-plurelektilo behaviour", () => {
   }) => {
     await serve(page, out, FORM('values="kontrast,motion"'));
     const button = page.getByRole("button", { name: "Standards" });
-    await expect(button).toHaveText(`2 ${word("count-word")}`);
+    await expect(button).toHaveText(`2 ${word("options-count")}`);
     await expect(button).toHaveAttribute("aria-haspopup", "listbox");
     let state = await stateOf(page);
     expect(state.sent).toEqual(["kontrast", "motion"]);
@@ -57,9 +57,10 @@ test.describe("fm-plurelektilo behaviour", () => {
     expect(state.open).toBe(true);
     expect(state.order).toEqual(["kontrast", "motion", "a11y", "fokus", "namen"]);
     expect(state.selected).toEqual(["kontrast", "motion"]);
-    const listbox = page.locator("#p").locator('[part="listbox"]');
+    // The popover is a panel; the rows' holder is the listbox (ARIA: a listbox owns options alone).
+    const listbox = page.locator("#p").locator('[part="items"]');
     await expect(listbox).toHaveAttribute("aria-multiselectable", "true");
-    await expect(page.locator("#p").locator('[part="option"] [part="check"]')).toHaveCount(5);
+    await expect(page.locator("#p").locator('[part="item"] [part="check"]')).toHaveCount(5);
     await expect(page.getByRole("button", { name: word("clear-name") })).toBeVisible();
   });
 
@@ -82,7 +83,7 @@ test.describe("fm-plurelektilo behaviour", () => {
     await page.keyboard.press("Space");
     expect((await stateOf(page)).values).toBe("kontrast,a11y");
     expect((await stateOf(page)).open).toBe(true);
-    await expect(button).toHaveText(`2 ${word("count-word")}`);
+    await expect(button).toHaveText(`2 ${word("options-count")}`);
     await page.keyboard.press("Enter");
     expect((await stateOf(page)).open).toBe(false);
     await expect(button).toBeFocused();
@@ -129,13 +130,15 @@ test.describe("fm-plurelektilo behaviour", () => {
     await filter.fill("ko");
     expect((await stateOf(page)).order).toEqual(["kontrast"]);
     await filter.fill("");
-    await page.locator("#p").locator('[part="option"][data-value="a11y"]').click();
-    await page.locator("#p").locator('[part="option"][data-value="fokus"]').click();
-    await page.locator("#p").locator('[part="option"][data-value="namen"]').click();
+    await page.locator("#p").locator('[part="item"][data-value="a11y"]').click();
+    await page.locator("#p").locator('[part="item"][data-value="fokus"]').click();
+    // The third option is refused (aria-disabled, the limit reached): Playwright refuses to click
+    // a disabled option itself, so the press is forced, as the datelektilo's tests press a refused day.
+    await page.locator("#p").locator('[part="item"][data-value="namen"]').click({ force: true });
     const state = await stateOf(page);
     expect(state.values).toBe("a11y,fokus");
     expect(state.valid).toBe(true);
-    await expect(page.locator("#p").locator('[part="option"][data-value="namen"]')).toHaveAttribute(
+    await expect(page.locator("#p").locator('[part="item"][data-value="namen"]')).toHaveAttribute(
       "aria-disabled",
       "true",
     );

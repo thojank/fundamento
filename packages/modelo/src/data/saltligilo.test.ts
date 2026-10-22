@@ -138,7 +138,6 @@ describe("the Uzo of the saltligilo (section ②, G6)", () => {
       "ligilo",
       "navigado",
       "saltligilo",
-      "signeto",
       "spuro",
     ]);
     expect(named("spacing-owned-by-container")?.appliesTo?.eroj).toContain("saltligilo");

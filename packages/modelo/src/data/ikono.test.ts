@@ -148,6 +148,11 @@ describe("the Uzo of the ikono (section ②, G6)", () => {
       "kampo",
       // Spec 025 ②: the trigger and the month buttons of a datelektilo.
       "datelektilo",
+      // Spec 025 ③: the tag, the styled list, the multi-select and the editor.
+      "signeto",
+      "listelektilo",
+      "plurelektilo",
+      "lokredaktilo",
     ]);
     expect(uzo?.slots).toEqual({});
     expect(uzo?.layout).toEqual({ size: "content", wrap: "never" });

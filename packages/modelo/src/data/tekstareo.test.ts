@@ -306,6 +306,10 @@ describe("the Reguloj of the tekstareo (G6, E5)", () => {
       "markdovido",
       "glitilo",
       "datelektilo",
+      "signeto",
+      "listelektilo",
+      "plurelektilo",
+      "lokredaktilo",
     ]);
   });
 

@@ -48,9 +48,9 @@ beforeAll(async () => {
 });
 
 describe("the selection dialogs of the spec (Spec 025 ③)", () => {
-  it("'Ich brauche eine Auswahl mit Symbolen und Beschreibung' → the listelektilo", async () => {
+  it("'Auswahl mit Symbolen und Beschreibungen' → the listelektilo", async () => {
     const answer = await output<Suggested>(client, "suggest_ero", {
-      goal: "Ich brauche eine Auswahl mit Symbolen und Beschreibung",
+      goal: "Auswahl mit Symbolen und Beschreibungen",
     });
     expect(answer.suggestion).toEqual({ ero: "listelektilo", props: {} });
   });
@@ -61,7 +61,7 @@ describe("the selection dialogs of the spec (Spec 025 ③)", () => {
     });
     expect(many.suggestion).toEqual({ ero: "plurelektilo", props: {} });
     const fewer = await output<Suggested>(client, "suggest_ero", {
-      goal: "Mehrere Standards zuordnen, vier Optionen",
+      goal: "Mehrere Standards zuordnen, nur vier",
     });
     expect(fewer.suggestion).toEqual({ ero: "markobutono", props: {} });
     expect(fewer.boundary).toEqual({
@@ -72,9 +72,9 @@ describe("the selection dialogs of the spec (Spec 025 ③)", () => {
     });
   });
 
-  it("'Kategorie-Filter zum Anklicken' → the signeto with mode selectable; a removable chip leaves the insigno for the signeto", async () => {
+  it("'Kategorie als Filterchip' → the signeto with mode selectable; a removable chip leaves the insigno for the signeto", async () => {
     const filter = await output<Suggested>(client, "suggest_ero", {
-      goal: "Kategorie-Filter zum Anklicken",
+      goal: "Kategorie als Filterchip",
     });
     expect(filter.suggestion).toEqual({ ero: "signeto", props: { mode: "selectable" } });
     const removable = await output<Suggested>(client, "suggest_ero", {
@@ -89,9 +89,9 @@ describe("the selection dialogs of the spec (Spec 025 ③)", () => {
     });
   });
 
-  it("'Titel direkt in der Detailansicht ändern' → the lokredaktilo", async () => {
+  it("'Namen direkt an Ort und Stelle umbenennen' → the lokredaktilo", async () => {
     const answer = await output<Suggested>(client, "suggest_ero", {
-      goal: "Titel direkt in der Detailansicht ändern",
+      goal: "Namen direkt an Ort und Stelle umbenennen",
     });
     expect(answer.suggestion).toEqual({ ero: "lokredaktilo", props: {} });
   });

@@ -495,6 +495,14 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
     // Nachlese 4 N-8: the active suggestion's row is filled by active (the frame of the row).
     "suggestion.fill": [{ node: "suggestion-*", fields: ["fills"], paint: true }],
     "suggestion.typography": typographyOf("suggestions-*"),
+    // Spec 025 ③ (plan ③ D-18): the rows of a styled list and a multi-select (the part item) are
+    // drawn as the suggestions are — the same nodes, keyed by the entry (selected) and active.
+    "item.height": [{ node: "suggestion-*", fields: ["minHeight"] }],
+    "item.inline-padding": [{ node: "suggestion-*", fields: ["paddingLeft", "paddingRight"] }],
+    "item.radius": [{ node: "suggestion-*", fields: ["cornerRadius"] }],
+    "item.color": [{ node: "suggestions-*", fields: ["fills"], paint: true }],
+    "item.fill": [{ node: "suggestion-*", fields: ["fills"], paint: true }],
+    "item.typography": typographyOf("suggestions-*"),
     // A date picker (Spec 025 ②, plan ② D-12): the trigger's size; the calendar's fill, radius,
     // width, height and padding; the month and the weekdays in their colour and role; prev and
     // next in their size; every cell its colour (the ground), size and radius, its day text in
@@ -3297,7 +3305,13 @@ async function applyComponents(variables, warnings) {
    * (G2); nothing of the hidden slot description is drawn.
    */
   async function drawBadge(node, component, variant, report, labels) {
-    const control = part(node, "control", () => figma.createFrame());
+    // Spec 025 ③ (plan ③ D-18): a badge whose Skemo binds a focus ring (the signeto: its body is
+    // pressed) holds the ring and its gap around the control, as a control does; a badge without
+    // one keeps the control directly under the variant, as before.
+    const ringed = Object.keys(variant.bindings).some((key) => key.indexOf("focus-ring.") === 0);
+    const ring = ringed ? part(node, "focus-ring", () => figma.createFrame()) : undefined;
+    const gap = ring !== undefined ? part(ring, "focus-gap", () => figma.createFrame()) : undefined;
+    const control = part(gap || node, "control", () => figma.createFrame());
     const text = part(control, "text", () => figma.createText());
     await loadCurrentFont(text);
     writeCase(component, variant, text);
@@ -3305,16 +3319,23 @@ async function applyComponents(variables, warnings) {
       write(text, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
     }
     labels.push(text);
-    for (const frame of [node, control]) own(frame, NEUTRAL);
+    const wrappers = ring !== undefined && gap !== undefined ? [ring, gap] : [];
+    for (const frame of [node, control].concat(wrappers)) own(frame, NEUTRAL);
     own(text, NEUTRAL_TEXT);
     own(node, HUG_LAYOUT);
+    for (const frame of wrappers) own(frame, HUG_LAYOUT);
     own(control, CONTROL_LAYOUT);
     // The border lies in the size, as on the web (box-sizing border-box).
     own(control, { strokesIncludedInLayout: true });
-    for (const child of [node, control, text]) own(child, IN_FLOW);
+    for (const child of [node, control, text].concat(wrappers)) own(child, IN_FLOW);
     own(text, TEXT_SIZING);
-    const measures = bind({ control, text }, variant, variables, component.structure);
-    for (const each of [node, control, text]) flush(each);
+    const nodes = { control, text };
+    if (ring !== undefined && gap !== undefined) {
+      nodes["focus-ring"] = ring;
+      nodes["focus-gap"] = gap;
+    }
+    const measures = bind(nodes, variant, variables, component.structure);
+    for (const each of [node, control, text].concat(wrappers)) flush(each);
     bindMeasures(measures, report, component, variant);
   }
   /**

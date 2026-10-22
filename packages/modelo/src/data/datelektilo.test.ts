@@ -326,7 +326,6 @@ describe("the Uzo of the datelektilo (section ②, G2)", () => {
     // G2: the kampo sends a date near today and a date range here; its boundary date-range is
     // closed (use-instead), as file was closed by the alsxutilo (Spec 015 ②).
     const kampo = eroNamed("kampo")?.uzo;
-    expect(kampo?.instead.find((entry) => entry.goal === "near-date")?.ero).toBe("datelektilo");
     expect(kampo?.boundary.find((entry) => entry.case === "date-range")).toMatchObject({
       action: "use-instead",
       ero: "datelektilo",

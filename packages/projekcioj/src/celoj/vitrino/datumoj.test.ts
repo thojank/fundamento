@@ -315,6 +315,10 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
       konsileto: "tooltip",
       langetaro: "tablist",
       ligilo: "link",
+      // Spec 025 ③: the styled list shares the role combobox, the multi-select is a listbox, the
+      // tag and the inline editor are generic like the badge.
+      listelektilo: "combobox",
+      lokredaktilo: "generic",
       markdovido: "document",
       markobutono: "checkbox",
       menuo: "menu",
@@ -322,7 +326,9 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
       navigado: "navigation",
       pagxigilo: "navigation",
       plenstato: "status",
+      plurelektilo: "listbox",
       saltligilo: "link",
+      signeto: "generic",
       spuro: "navigation",
       sxaltilo: "switch",
       sxvebilo: "dialog",
