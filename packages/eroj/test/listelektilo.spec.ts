@@ -2,7 +2,9 @@
 // button of role combobox named by the label that shows the chosen option, over a popover listbox
 // whose options carry an icon and a description; the keys of APG (arrows, Home, End, Enter, Space,
 // Escape, a typed letter jumps to the option that starts with it — closed too); the value is the
-// form value. Chromium, Firefox and WebKit.
+// form value. Chromium, Firefox and WebKit. Spec 026 ① (2): the example is the Vitrino's — every
+// option not disabled is chosen by a click and by the keyboard; Japan is disabled on purpose and
+// says so in its description (the example only, the look of the Ero is unchanged).
 
 import { expect, type Page, test } from "@playwright/test";
 import { buildProjections, serve } from "./serve.js";
@@ -10,7 +12,7 @@ import { buildProjections, serve } from "./serve.js";
 const { out } = await buildProjections();
 
 const FORM = (attributes = "") =>
-  `<form id="f"><fm-listelektilo id="l" name="region" ${attributes}>Region<data slot="options" value="eu" icon="info" description="27 Staaten">Europa</data><data slot="options" value="us" description="50 Staaten">USA</data><data slot="options" value="jp" disabled>Japan</data><data slot="options" value="br">Brasilien</data><span slot="help">Die Region des Standards.</span></fm-listelektilo></form>`;
+  `<form id="f"><fm-listelektilo id="l" name="region" ${attributes}>Region<data slot="options" value="eu" icon="info" description="27 Staaten">Europa</data><data slot="options" value="us" description="50 Staaten">USA</data><data slot="options" value="jp" description="Nicht verfügbar" disabled>Japan</data><data slot="options" value="br">Brasilien</data><span slot="help">Die Region des Standards.</span></fm-listelektilo></form>`;
 
 const stateOf = (page: Page) =>
   page.locator("#l").evaluate((element) => {
@@ -117,6 +119,40 @@ test.describe("fm-listelektilo behaviour", () => {
     expect((await stateOf(page)).open).toBe(true);
     await page.mouse.click(5, 5);
     expect((await stateOf(page)).open).toBe(false);
+  });
+
+  test("every option not disabled is chosen by a click and by the keyboard; the disabled one is refused and says so in visible words (Spec 026 ①)", async ({
+    page,
+  }) => {
+    for (const [from, to, letter] of [
+      ["us", "eu", "e"],
+      ["eu", "us", "u"],
+      ["eu", "br", "b"],
+    ] as const) {
+      await serve(page, out, FORM(`value="${from}"`));
+      const box = page.getByRole("combobox", { name: "Region" });
+      await box.click();
+      await page.locator("#l").locator(`[part="item"][data-value="${to}"]`).click();
+      expect((await stateOf(page)).value, `click ${to}`).toBe(to);
+      await serve(page, out, FORM(`value="${from}"`));
+      await page.getByRole("combobox", { name: "Region" }).focus();
+      await page.keyboard.press("ArrowDown");
+      await page.keyboard.press(letter);
+      await page.keyboard.press("Enter");
+      expect((await stateOf(page)).value, `keys ${to}`).toBe(to);
+    }
+    await serve(page, out, FORM('value="eu"'));
+    const box = page.getByRole("combobox", { name: "Region" });
+    await box.click();
+    const japan = page.locator("#l").locator('[part="item"][data-value="jp"]');
+    await expect(japan).toHaveAttribute("aria-disabled", "true");
+    await expect(japan.locator('[part="description"]')).toBeVisible();
+    await expect(japan.locator('[part="description"]')).toHaveText("Nicht verfügbar");
+    await japan.click({ force: true });
+    expect((await stateOf(page)).value).toBe("eu");
+    await page.keyboard.press("j");
+    await page.keyboard.press("Enter");
+    expect((await stateOf(page)).value).toBe("eu");
   });
 
   test("disabled is skipped and never opens; readonly shows the value and never opens; the host takes the width of its container (E3)", async ({

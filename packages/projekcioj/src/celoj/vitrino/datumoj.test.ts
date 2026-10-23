@@ -1039,6 +1039,20 @@ describe("the Vitrino shows the selection Eroj (Spec 025 ③)", () => {
     expect(grid).toContain('<fm-listelektilo value="eu" invalid>');
   });
 
+  // Spec 026 ① (2): Japan is disabled on purpose; the example says so in visible words (its
+  // description), the look of the Ero is unchanged.
+  it("a disabled option of the listelektilo's example says so in its description (Spec 026 ①)", () => {
+    const grid = datumoj.eroj.listelektilo ?? "";
+    expect(grid).toContain(
+      '<data slot="options" value="jp" description="Nicht verfügbar" disabled>Japan</data>',
+    );
+    const disabled = [...grid.matchAll(/<data slot="options"[^>]*>/g)]
+      .map((match) => match[0])
+      .filter((tag) => / disabled[ >]/.test(tag));
+    expect(disabled.length).toBeGreaterThan(0);
+    for (const tag of disabled) expect(tag).toContain('description="Nicht verfügbar"');
+  });
+
   it("the plurelektilo: a count and tags, filterable, in the columns of a field", () => {
     const grid = datumoj.eroj.plurelektilo ?? "";
     expect((grid.match(/<fm-plurelektilo /g) ?? []).length).toBe(8);

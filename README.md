@@ -191,6 +191,14 @@ From a lead colour to a brand that every projection carries, in the order a pers
 
    The CSS switches to it with `data-fm-aspekto="<name>"`, the Figma plan has it as a mode of the collection `aspekto`, and the Vitrino of that build shows it beside komuna. A worked example is the test brand `provo`: `packages/modelo/test/fixtures/valid/aspekto-provo/` (Agordo, package and a config with ekzemplo and provo, `fundamento.tri.config.json`).
 
+   **All example brands in one build** (Spec 026 ①): komuna, ekzemplo (yellow, square), provo and provo-kompakta are test brands under `packages/modelo/test/fixtures/valid/`; one config beside them names all four, and one command builds the Vitrino and the Figma plugin with them (four modes of the collection `aspekto`, within the ten of Figma Professional; the plugin has an id and a name of its own, F-13):
+
+   ```sh
+   pnpm fm projekcioj build --config packages/modelo/test/fixtures/valid/aspekto-provo-kompakta/fundamento.cxiuj.config.json --out .fundamento/projekcioj-cxiuj
+   ```
+
+   The Vitrino is `.fundamento/projekcioj-cxiuj/vitrino/index.html`, the plugin `.fundamento/projekcioj-cxiuj/figma/plugin/manifest.json`.
+
 An agent takes the same way without the browser: `preview_agordo` over the MCP server answers with the same report before anything is written.
 
 ## Die Marke per Prompt formen

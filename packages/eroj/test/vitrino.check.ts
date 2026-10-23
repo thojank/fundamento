@@ -1439,3 +1439,64 @@ test("fm-signeto, fm-listelektilo, fm-plurelektilo and fm-lokredaktilo are upgra
   await expect(editor).not.toHaveAttribute("editing", "");
   expect(await axeViolations(page, "#fm-vitrino-lokredaktilo")).toEqual([]);
 });
+
+// Spec 026 ① (1, 2): in the Vitrino itself — the range of the datelektilo over a week and a month
+// border marks all nine days by their date; every option of the listelektilo that is not disabled
+// is chosen by a click and by the keyboard, Japan is disabled on purpose and says so visibly.
+test("the datelektilo marks a range over a month border by date; the listelektilo chooses every option not disabled, Japan says it is not available (Spec 026 ①)", async ({
+  page,
+}) => {
+  await open(page);
+  const date = page.locator("#fm-vitrino-datelektilo fm-datelektilo[mode='range']").first();
+  await date.locator('[part="trigger"]').click();
+  await date.locator('[part="cell"][data-date="2026-10-27"]').click();
+  await date.locator('[part="next"]').click();
+  await date.locator('[part="cell"][data-date="2026-11-04"]').click();
+  await date.locator('[part="trigger"]').click();
+  const marked = await date.evaluate((host) => {
+    const cells = [...(host.shadowRoot?.querySelectorAll('[part="cell"]') ?? [])] as HTMLElement[];
+    return {
+      between: cells
+        .filter((cell) => cell.dataset.range === "true")
+        .map((cell) => cell.dataset.date),
+      chosen: cells
+        .filter((cell) => cell.getAttribute("aria-selected") === "true")
+        .map((cell) => cell.dataset.date),
+    };
+  });
+  expect(marked.between).toEqual([
+    "2026-10-28",
+    "2026-10-29",
+    "2026-10-30",
+    "2026-10-31",
+    "2026-11-01",
+    "2026-11-02",
+    "2026-11-03",
+  ]);
+  expect(marked.chosen).toEqual(["2026-10-27", "2026-11-04"]);
+  await page.keyboard.press("Escape");
+  const list = page.locator("#fm-vitrino-listelektilo fm-listelektilo").first();
+  for (const [value, letter, other] of [
+    ["us", "u", "eu"],
+    ["br", "b", "eu"],
+    ["eu", "e", "us"],
+  ] as const) {
+    await list.locator('[part="control"]').click();
+    await list.locator(`[part="item"][data-value="${value}"]`).click();
+    await expect(list).toHaveAttribute("value", value);
+    await list.locator('[part="control"]').click();
+    await list.locator(`[part="item"][data-value="${other}"]`).click();
+    await expect(list).toHaveAttribute("value", other);
+    await list.locator('[part="control"]').focus();
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press(letter);
+    await page.keyboard.press("Enter");
+    await expect(list).toHaveAttribute("value", value);
+  }
+  await list.locator('[part="control"]').click();
+  const japan = list.locator('[part="item"][data-value="jp"]');
+  await expect(japan).toHaveAttribute("aria-disabled", "true");
+  await expect(japan.locator('[part="description"]')).toHaveText("Nicht verfügbar");
+  await expect(japan.locator('[part="description"]')).toBeVisible();
+  await page.keyboard.press("Escape");
+});

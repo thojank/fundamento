@@ -1,0 +1,4 @@
+{
+  "$schema": "../../../../schema/config.schema.json",
+  "aspektoj": ["../aspekto-ekzemplo/aspekto-ekzemplo", "../aspekto-provo/aspekto-provo", "./aspekto-provo-kompakta"]
+}

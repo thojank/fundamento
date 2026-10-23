@@ -114,7 +114,12 @@ function fieldPartSelector(
     }
     if (part === "in-range-cell") return `${field} [part="cell"][data-range="true"]`;
     if (part === "today-cell") return `${field} [part="cell"][data-today="true"]`;
-    if (part === "outside-day") return `${field} [part="cell"][data-outside="true"]`;
+    // Spec 026 ① (1): a chosen day outside the shown month (the end of a range in the month of
+    // its start, the start in the month of its end) keeps the look of a chosen day; the look of a
+    // day outside the month stood later with the same specificity and took its colour.
+    if (part === "outside-day") {
+      return `${field} [part="cell"][data-outside="true"]:not([aria-selected="true"])`;
+    }
     if (part === "focus-ring") {
       return `:where(${root}) [part="control"]:focus-visible, :where(${root}) [part="cell"]:focus-visible`;
     }

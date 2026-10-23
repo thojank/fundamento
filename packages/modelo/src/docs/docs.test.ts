@@ -3060,3 +3060,70 @@ describe("Nachlese 9 documentation (specs/026-nachlese-9)", () => {
     expect(read("docs/vojmapo.md")).toContain("Nachlese 9");
   });
 });
+
+// Spec 026 ① (2026-10-22): specs/026-lingvo carries the spec unchanged, a plan and tasks with the
+// sections ① and ②; plan ① carries the causes of the two defects of Spec 025, the build with all
+// four example brands (one command, also in the README) and the measuring guide with full paths,
+// cd and file:// links; tasks ① the red commit.
+const CXIUJ_BUILD =
+  "pnpm fm projekcioj build --config packages/modelo/test/fixtures/valid/aspekto-provo-kompakta/fundamento.cxiuj.config.json --out .fundamento/projekcioj-cxiuj";
+
+describe("Spec 026 ① documentation (specs/026-lingvo)", () => {
+  it("the spec is the one of 2026-10-22, unchanged; plan and tasks carry ① and ②", () => {
+    const spec = read("specs/026-lingvo/spec.md");
+    expect(createHash("sha256").update(spec).digest("hex")).toBe(
+      "e4c2d20ee3f2564efa59544f12245da11b30e1f9ccdc4d244d2db1325e823841",
+    );
+    for (const file of ["plan.md", "tasks.md"]) {
+      const text = read(`specs/026-lingvo/${file}`);
+      expect(text, file).toContain("## ① Fehler und Build");
+      expect(text, file).toContain("## ② Lingvo-Schalter");
+    }
+  });
+
+  it("plan ① carries the causes, the decisions, deviations, findings, open points and the measuring guide; the README the one command; tasks ① the red commit", () => {
+    const whole = read("specs/026-lingvo/plan.md");
+    const plan = whole.slice(
+      whole.indexOf("## ① Fehler und Build"),
+      whole.indexOf("## ② Lingvo-Schalter"),
+    );
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Ursachen",
+      "### Entwurfsentscheidungen",
+      "#### D-01",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### Messanleitung",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const term of [
+      "`datelektilo`",
+      "`listelektilo`",
+      "Japan",
+      "ekzemplo",
+      "MODE_LIMIT",
+      "F-13",
+      "cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds",
+      CXIUJ_BUILD,
+      'open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj-cxiuj/vitrino/index.html#',
+      "/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj-cxiuj/figma/plugin/manifest.json",
+    ]) {
+      expect(plan, term).toContain(term);
+    }
+    for (const line of plan.split("\n").filter((entry) => entry.includes("index.html#"))) {
+      expect(line, line).toMatch(/file:\/\/\/Users\//);
+    }
+    expect(whole).not.toContain("ciferecigo");
+    expect(read("README.md")).toContain(CXIUJ_BUILD);
+    const tasks = read("specs/026-lingvo/tasks.md");
+    const own = tasks.slice(
+      tasks.indexOf("## ① Fehler und Build"),
+      tasks.indexOf("## ② Lingvo-Schalter"),
+    );
+    expect(own).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Spec 026 ①");
+  });
+});
