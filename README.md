@@ -104,6 +104,8 @@ document.documentElement.setAttribute("data-fm-color-scheme", "dark");
 
 The other Dimensioj work the same way: `data-fm-contrast`, `data-fm-density`, `data-fm-viewport`, `data-fm-motion`. For Tailwind v4, import `tailwind/fundamento.tailwind.css` as well and use `bg-fm-action-primary-rest` and friends. A designer gets the same Ero through the Figma plan (`figma/plan.json` with its plugin) and through the Make Kit of an Aspekto.
 
+**Building screens in Figma** (Spec 027): the plugin („Fundamento Bauformen …“) draws components to build with. An Ero that takes the width of its container in code fills the width of its instance; every text is a text property; help, error and the icon slots are switches, and an icon slot takes any `ikono` by instance swap; texts that wrap in code wrap in Figma. The five Sxablonoj are components whose regions are Figma slots — the `sxelo` in three widths with or without a sidebar — so a screen is put together from instances, their properties, their words and their width. The toast names the duration of the run.
+
 ## Packages
 
 Everything lives in one workspace; the npm org for published packages is

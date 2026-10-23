@@ -31,10 +31,22 @@
 // a text that carries two property references (characters and visible: the caption) — beliefs
 // alike until measured. Spec 011 ⑤ adds nothing new to the slice: the underline of a navigation's
 // item, the line of a tab list and the indicator of a tab are bottom weights (strokeBottomWeight)
-// on a frame with the three other sides at 0, as the rows of a table are.
+// on a frame with the three other sides at 0, as the rows of a table are. Spec 027 adds, each
+// measured in the empty file „Fundamento Spec 027 Messung" (plan 027, M1–M9): ComponentNode
+// createInstance and createSlot, InstanceNode swapComponent and its layers (bound and filled as
+// overrides), the property types INSTANCE_SWAP and SLOT with componentPropertyReferences
+// mainComponent and slotContentId, editComponentProperty with a name, deleteComponentProperty,
+// layoutSizingHorizontal FILL on the parts of a fixed variant, textAutoResize HEIGHT, and Date.now
+// for the duration of the run.
 
 import { VITRINO_TRIGGER_TEXT } from "../vitrino/datumoj.js";
-import { FIGMA_SXABLONO_FRAME, type FigmaPlan, PAGINATION_GAP, TEXT_CASE_VARIES } from "./figma.js";
+import {
+  FIGMA_SXABLONO_FRAME,
+  type FigmaPlan,
+  INHERIT_COLOR,
+  PAGINATION_GAP,
+  TEXT_CASE_VARIES,
+} from "./figma.js";
 
 /** The nodes of one variant the plugin draws, outside in (F11). */
 type PartNode =
@@ -198,6 +210,10 @@ type PartNode =
   | "mark-*"
   | "icon"
   | "icon-glyph-*"
+  // Spec 027 B-9: the edit icon of an inline editor's display state, its glyphs and vectors.
+  | "edit"
+  | "edit-glyph-*"
+  | "edit-mark-*"
   | "icon-mark-*"
   | "indicator-glyph-*"
   | "indicator-mark-*"
@@ -224,6 +240,8 @@ interface Binding {
   focusOnly?: boolean;
   /** A font field: bound only after every font of every mode is loaded, and never fatal (F30). */
   font?: boolean;
+  /** Not bound where the variant binds this part property instead (Spec 027 B-2). */
+  unless?: string;
 }
 
 const PADDINGS = ["paddingLeft", "paddingRight", "paddingTop", "paddingBottom"] as const;
@@ -482,6 +500,10 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
   // the colour of its entry and the label role; the no-results text in its colour and role. A
   // plain field has none of these parts: the keys bind nothing there.
   field: {
+    // Spec 027 B-2: the text of a field shows its value where it shows no placeholder — the chosen
+    // day of a date picker — in the colour of the typed text; where the variant binds the
+    // placeholder's colour (the empty kampo, the prompt of a select), that one holds (F-4).
+    "text.color": [{ node: "text", fields: ["fills"], paint: true, unless: "placeholder.color" }],
     "listbox.fill": [{ node: "listbox", fields: ["fills"], paint: true }],
     "listbox.radius": [{ node: "listbox", fields: ["cornerRadius"] }],
     "listbox.width": [{ node: "listbox", fields: ["width"] }],
@@ -650,7 +672,19 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
   },
   // A badge (Spec 011 ③, plan ③ D-14): its text is the label — the colour of the text part goes
   // on the text node (in a field the text node shows the placeholder, B-2).
-  badge: { "text.color": [{ node: "text", fields: ["fills"], paint: true }] },
+  // Spec 027: the icon of a chip and the edit icon of an inline editor take the colour of the text
+  // (the web's currentColor); the edit icon its size (edit.size, B-9).
+  badge: {
+    "text.color": [
+      { node: "text", fields: ["fills"], paint: true },
+      { node: "icon-mark-*", fields: ["fills"], paint: true },
+      { node: "edit-mark-*", fields: ["fills"], paint: true },
+    ],
+    "edit.size": [
+      { node: "edit", fields: ["width", "height"] },
+      { node: "edit-glyph-*", fields: ["width", "height"] },
+    ],
+  },
   // Nachlese 8 ② (F-12): a code block — the padding of the box on every side of the surface, as on
   // the web; the code in the code role and its colour; the caption in its own role and colour.
   codeblock: {
@@ -1399,6 +1433,52 @@ const CONTROL_LAYOUT: Readonly<Record<string, string>> = {
   layoutSizingVertical: "HUG",
 };
 
+/**
+ * Spec 027 B-1/B-5: per structure, the parts of a stretching Ero (Uzo layout size container) that
+ * fill the width of the variant — where the code lets them fill: the field around its control,
+ * the ring and gap, the row of a date picker or slider (the ring, the track grow in it), the rows
+ * and first column of a table —, and the texts that wrap in code (`*` stands for a number).
+ * Icons, indicators, thumbs, stand-ins and the list or calendar of a field (size.container.small,
+ * bound) stay as they are. `wrapAlways` wraps in a set that does not stretch, where the parent has
+ * a fixed width of its own (the surface of a popover); `center` centres a wrapped text in a
+ * centred column (a state). A vertical separator stands in a row: its length is its height.
+ */
+const STRETCH: Readonly<
+  Record<
+    string,
+    {
+      fill?: readonly string[];
+      wrap?: readonly string[];
+      wrapAlways?: readonly string[];
+      center?: boolean;
+    }
+  >
+> = {
+  field: { fill: ["field", "row", "focus-ring", "focus-gap", "control"], wrap: ["help", "error"] },
+  upload: { fill: ["field", "dropzone"], wrap: ["help", "error"] },
+  slider: { fill: ["field", "row", "track"], wrap: ["help", "error"] },
+  separator: { fill: ["control"] },
+  list: { fill: ["list", "entry-*"] },
+  notice: { fill: ["control", "texts"], wrap: ["heading", "message", "details"] },
+  dialog: { fill: ["surface"], wrap: ["heading", "message", "reason-help"] },
+  disclosure: { fill: ["control", "focus-ring", "focus-gap", "summary"], wrap: ["content-text"] },
+  card: { fill: ["surface"], wrap: ["heading", "content"] },
+  codeblock: { fill: ["control"] },
+  tabs: { fill: ["control", "panel"], wrap: ["panel-text"] },
+  markdown: {
+    fill: ["control", "items-list", "quote"],
+    wrap: ["paragraph", "item-text-*", "quote-text"],
+  },
+  meter: { fill: ["control"] },
+  nav: { fill: ["control"] },
+  pagination: { fill: ["control"] },
+  state: { fill: ["control"], wrap: ["text"], center: true },
+  breadcrumb: { fill: ["control"] },
+  table: { fill: ["region", "head", "row-*", "head-1", "cell-*-1"] },
+  badge: { fill: ["control"], wrap: ["text"] },
+  popover: { wrapAlways: ["content-text"] },
+};
+
 /** Every child of a variant lies in the flow of its parent, never freely placed (F14). */
 const IN_FLOW: Readonly<Record<string, string>> = { layoutPositioning: "AUTO" };
 
@@ -1442,6 +1522,13 @@ export const drawnPartPropertiesOf = (structure: string): readonly string[] => [
  */
 export const structureBoundPartPropertiesOf = (structure: string): readonly string[] =>
   Object.keys(STRUCTURE_BINDINGS[structure] ?? {});
+
+/**
+ * The part property that, bound in a variant, keeps a structure from binding this one (Spec 027
+ * B-2: the text of a field takes the typed text's colour only where no placeholder is shown).
+ */
+export const unlessOf = (structure: string, key: string): string | undefined =>
+  STRUCTURE_BINDINGS[structure]?.[key]?.find((binding) => binding.unless !== undefined)?.unless;
 
 /**
  * The menu command that lifts the abort of F10c: a run that would create a variant in a set it
@@ -1497,6 +1584,7 @@ const WRAP_SIZING = ${JSON.stringify(WRAP_SIZING)};
 const MARK_NEUTRAL = ${JSON.stringify(MARK_NEUTRAL)};
 const INDICATOR_LAYOUT = ${JSON.stringify(INDICATOR_LAYOUT)};
 const STRUCTURE_BINDINGS = ${JSON.stringify(STRUCTURE_BINDINGS)};
+const STRETCH = ${JSON.stringify(STRETCH)};
 const IKONOJ = ${JSON.stringify(plan.ikonoj ?? { names: [], mirror: [], glyphs: {} })};
 const IN_FLOW = ${JSON.stringify(IN_FLOW)};
 const TEXT_SIZING = ${JSON.stringify(TEXT_SIZING)};
@@ -1664,32 +1752,24 @@ function findSection() {
 }
 
 /**
- * The example frames of the Sxablonoj (Spec 020, G2, E3): the frame „Sxablonoj" in the section,
- * below the frame „Eroj"; in it a frame per Sxablono (a column), in that a frame per region (its
- * direction) holding instances of the Ero sets — the variant whose props match, its label the
- * region's word — or a text. No set, no variants: an example of how the Eroj compose, which follows
- * the modes as the instances do. Found again by its marks on every run: an instance that already
- * shows the wanted variant stays, a text that already says the word stays (a second run writes
- * nothing).
+ * The Sxablonoj (Spec 020, G2, E3; Spec 027 B-8): the frame „Sxablonoj" in the section, below the
+ * frame „Eroj"; in it a component per Sxablono — the sxelo a set of its widths and sidebar — whose
+ * rows and columns are frames, as on the web, and whose regions are Figma slots (measured M4c–M7,
+ * 2026-10-23: a slot takes its default content in the component and a designer's in an instance;
+ * it lies in a row and fills it). What stands in a region by default is the Vitrino's example: an
+ * instance of an Ero set — the variant whose props match, its label the region's word — or a
+ * text. The parts take the Sxablono's tokens (gap, inline padding, fill, the divider under the
+ * header, a maximum width); the component takes the container's width where the Skemo has one.
+ * Found again by their marks on every run: a second run writes nothing. Where the tool has no
+ * slots (createSlot missing or refused), a region is a frame, and the run says so.
  */
 async function placeSxablonoj(section, eroj, warnings, variables) {
   if (section === undefined || PLAN.sxablonoj === undefined || PLAN.sxablonoj.length === 0) return;
-  // A frame of the example: neutral like every node the plugin draws (F13), its layout the plan's.
-  const layOut = (node, direction, spacing, hugWidth, inFlow = true) => {
-    own(node, NEUTRAL);
-    if (inFlow) own(node, IN_FLOW);
-    Object.assign(gather(node), {
-      layoutMode: direction,
-      itemSpacing: spacing,
-      ...(hugWidth ? { layoutSizingHorizontal: "HUG" } : {}),
-      layoutSizingVertical: "HUG",
-    });
-    flush(node);
-  };
-  // A frame the plugin made below \`root\`, at any depth: a second run finds the frames of the
-  // first, also where an older run left them flat (Nachlese 8 ②: regions moved into rows).
+  // A frame the plugin made below \`root\`, at any depth, outside the instances it holds: a second
+  // run finds the frames of the first.
   const below = (root, key, value) => {
     for (const child of root.children || []) {
+      if (child.type === "INSTANCE") continue;
       if (child.getSharedPluginData(NAMESPACE, key) === value) return child;
       const found = below(child, key, value);
       if (found !== undefined) return found;
@@ -1711,8 +1791,7 @@ async function placeSxablonoj(section, eroj, warnings, variables) {
   write(frame, "x", PLAN.section.padding);
   write(frame, "y", eroj === undefined ? PLAN.section.padding : eroj.y + eroj.height + PLAN.section.gap);
   // Nachlese 8 ② (F-8): the frame is a surface bound to the background role, with the section's
-  // padding, so the examples read in light and in dark like the Vitrino's page — written with its
-  // layout in one go, so a second run finds nothing to write.
+  // padding, so the Sxablonoj read in light and in dark like the Vitrino's page.
   const ground = variables === undefined ? undefined : variables.get("color/background/default");
   own(frame, NEUTRAL);
   Object.assign(gather(frame), {
@@ -1732,137 +1811,272 @@ async function placeSxablonoj(section, eroj, warnings, variables) {
   });
   flush(frame);
   const textColour = variables === undefined ? undefined : variables.get("color/text/default");
+  const paintOf = (variable) =>
+    figma.variables.setBoundVariableForPaint({ type: "SOLID", color: { r: 0, g: 0, b: 0 } }, "color", variable);
+  let slotless = false;
   for (const [index, sxablono] of PLAN.sxablonoj.entries()) {
-    let example = ours(frame, "sxablono", sxablono.name);
-    if (example === undefined) {
-      example = create(() => figma.createFrame());
-      frame.appendChild(example);
-      stamp(example, "sxablono", sxablono.name);
+    const kinds = sxablono.variants === undefined ? "COMPONENT" : "COMPONENT_SET";
+    let owner = ours(frame, "sxablono", sxablono.name);
+    // The example frame of an earlier run (Spec 020 to Nachlese 10) gives way to the component.
+    if (owner !== undefined && owner.type !== kinds) {
+      owner.remove();
+      owner = undefined;
     }
-    if (frame.children.indexOf(example) !== index) frame.insertChild(index, example);
-    write(example, "name", sxablono.name);
-    const layout = sxablono.layout || { name: "frame", direction: "VERTICAL", children: sxablono.regions.map((region) => region.name) };
-    layOut(example, layout.direction, PLAN.section.gap / 2, true);
-    const used = new Set();
-    // Nachlese 8 ② (F-9): the rows and columns of the web, each a named frame; the regions in them.
-    const build = async (parent, children) => {
-      for (const [position, child] of children.entries()) {
-        if (typeof child !== "string") {
-          let box = below(example, "box", child.name);
-          if (box === undefined) {
-            box = create(() => figma.createFrame());
-            stamp(box, "box", child.name);
-          }
-          place(parent, box, position);
-          write(box, "name", child.name);
-          layOut(box, child.direction, PLAN.section.gap / 4, true);
-          used.add(box);
-          await build(box, child.children);
-          continue;
-        }
-        const region = sxablono.regions.find((candidate) => candidate.name === child);
-        if (region === undefined) continue;
-        let holder = below(example, "region", region.name);
-        if (holder === undefined) {
-          holder = create(() => figma.createFrame());
-          stamp(holder, "region", region.name);
-        }
-        place(parent, holder, position);
-        used.add(holder);
-        write(holder, "name", region.name);
-        layOut(holder, region.direction, PLAN.section.gap / 4, true);
-        await fill(holder, region);
+    const forms = sxablono.variants === undefined
+      ? [{ props: undefined, width: sxablono.width, layout: sxablono.layout }]
+      : sxablono.variants;
+    const components = [];
+    for (const form of forms) {
+      const name = form.props === undefined ? sxablono.name : variantName(form.props);
+      let component = owner === undefined
+        ? undefined
+        : owner.type === "COMPONENT" ? owner : ours(owner, "variant", name);
+      if (component === undefined) {
+        component = create(() => figma.createComponent());
+        if (owner !== undefined && owner.type === "COMPONENT_SET") owner.appendChild(component);
+        else frame.appendChild(component);
+        if (form.props === undefined) stamp(component, "sxablono", sxablono.name);
+        else stamp(component, "variant", name);
       }
-    };
-    // F-10: what stands in a region is the Vitrino's example — an instance or a word, never the
-    // region's name; the name is the layer's.
-    const fill = async (holder, region) => {
-      for (const [slot, item] of region.items.entries()) {
-        const current = holder.children[slot];
-        if (item.set === undefined) {
-          let text = current !== undefined && current.type === "TEXT" ? current : undefined;
-          if (text === undefined) {
-            text = create(() => figma.createText());
-            holder.insertChild(slot, text);
+      write(component, "name", name);
+      // In the flow of the frame or the set, as every node the plugin draws (F14).
+      own(component, IN_FLOW);
+      components.push({ component, form });
+    }
+    if (owner === undefined) {
+      owner = sxablono.variants === undefined
+        ? components[0].component
+        : create(() => figma.combineAsVariants(components.map((entry) => entry.component), frame));
+      if (owner.type === "COMPONENT_SET") stamp(owner, "sxablono", sxablono.name);
+    }
+    if (owner.parent !== frame) frame.appendChild(owner);
+    if (frame.children.indexOf(owner) !== index) frame.insertChild(index, owner);
+    write(owner, "name", sxablono.name);
+    if (owner.type === "COMPONENT_SET") {
+      // The variants of the sxelo in a column, at the section's gap, as the Eroj sets stand.
+      own(owner, NEUTRAL);
+      own(owner, IN_FLOW);
+      Object.assign(gather(owner), {
+        layoutMode: "VERTICAL",
+        itemSpacing: PLAN.section.gap,
+        paddingLeft: PLAN.section.gap,
+        paddingRight: PLAN.section.gap,
+        paddingTop: PLAN.section.gap,
+        paddingBottom: PLAN.section.gap,
+        layoutSizingHorizontal: "HUG",
+        layoutSizingVertical: "HUG",
+      });
+      flush(owner);
+      components.forEach((entry, position) => {
+        if (owner.children.indexOf(entry.component) !== position) owner.insertChild(position, entry.component);
+      });
+    }
+    // The purpose of the Sxablono, as an Ero set carries its Uzo's (Spec 007 T028).
+    write(owner, "description", sxablono.description);
+    const regionSlots = {};
+    for (const { component, form } of components) {
+      const used = new Set();
+      const parts = sxablono.parts || {};
+      const fixed = form.width !== undefined && variables !== undefined && variables.get(form.width) !== undefined;
+      // A frame or region of the Sxablono: neutral, its direction, hugging its height; across a
+      // column whose width is fixed or filled it fills, in a row it hugs (F-9: the row's regions).
+      const layOut = (node, direction, across) => {
+        own(node, NEUTRAL);
+        own(node, IN_FLOW);
+        const row = direction === "HORIZONTAL";
+        const spread = ["header", "head", "footer"].indexOf(node.name) !== -1;
+        Object.assign(gather(node), {
+          layoutMode: direction,
+          itemSpacing: 0,
+          primaryAxisAlignItems: spread ? "SPACE_BETWEEN" : "MIN",
+          counterAxisAlignItems: row ? "CENTER" : "MIN",
+          layoutSizingHorizontal: across ? "FILL" : "HUG",
+          layoutSizingVertical: "HUG",
+        });
+        if (node.name === "header" && parts.header !== undefined && parts.header.strokeBottomWeight !== undefined) {
+          Object.assign(gather(node), { strokeTopWeight: 0, strokeRightWeight: 0, strokeLeftWeight: 0, strokesIncludedInLayout: true });
+        }
+        // The paints of the part with its neutral values, written once (F21).
+        for (const field of ["fills", "strokes"]) {
+          const variableName = (parts[node.name] || {})[field];
+          const variable = variableName === undefined || variables === undefined ? undefined : variables.get(variableName);
+          if (variable !== undefined) gather(node)[field] = [paintOf(variable)];
+        }
+        flush(node);
+      };
+      own(component, NEUTRAL);
+      Object.assign(gather(component), {
+        layoutMode: form.layout.direction,
+        itemSpacing: 0,
+        primaryAxisAlignItems: "MIN",
+        counterAxisAlignItems: "MIN",
+        layoutSizingHorizontal: fixed ? "FIXED" : "HUG",
+        layoutSizingVertical: "HUG",
+      });
+      flush(component);
+      const build = async (parent, children, stretch) => {
+        const row = parent.layoutMode === "HORIZONTAL";
+        for (const [position, child] of children.entries()) {
+          if (typeof child !== "string") {
+            let box = below(component, "box", child.name);
+            if (box === undefined) {
+              box = create(() => figma.createFrame());
+              stamp(box, "box", child.name);
+            }
+            place(parent, box, position);
+            write(box, "name", child.name);
+            // A column beside a sidebar takes the rest of its row (the content of the sxelo).
+            const across = row ? child.name === "content" : stretch;
+            layOut(box, child.direction, across);
+            used.add(box);
+            await build(box, child.children, across);
+            continue;
           }
-          await loadCurrentFont(text);
-          write(text, "name", region.name + "-text");
-          write(text, "characters", item.text || "");
-          own(text, NEUTRAL_TEXT);
-          own(text, IN_FLOW);
-          own(text, TEXT_SIZING);
-          if (textColour !== undefined) {
-            gather(text).fills = [
-              figma.variables.setBoundVariableForPaint(
-                { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
-                "color",
-                textColour,
-              ),
-            ];
+          const region = sxablono.regions.find((candidate) => candidate.name === child);
+          if (region === undefined) continue;
+          let holder = below(component, "region", region.name);
+          if (holder === undefined) {
+            holder = createRegion(component);
+            stamp(holder, "region", region.name);
           }
-          flush(text);
-          continue;
+          place(parent, holder, position);
+          used.add(holder);
+          write(holder, "name", region.name);
+          layOut(holder, region.direction, row ? false : stretch);
+          await fill(holder, region);
+          if (holder.type === "SLOT") (regionSlots[region.name] = regionSlots[region.name] || []).push(holder);
         }
-        const set = findSet(item.set);
-        if (set === undefined) {
-          warnings.push("Sxablonoj/" + sxablono.name + "/" + region.name + ": Das Set " + item.set + " fehlt; das Beispiel zeigt es nicht.");
-          continue;
-        }
-        const wanted = Object.entries(Object.assign({ state: "rest" }, item.props || {}));
-        const variant =
-          set.children.find((child) => {
-            const name = child.name.split(", ");
-            return wanted.every(([key, value]) =>
-              name.indexOf(key + "=" + value) !== -1 ||
-              !name.some((pair) => pair.indexOf(key + "=") === 0),
-            );
-          }) || set.children[0];
-        if (variant === undefined) continue;
-        let instance =
-          current !== undefined && current.type === "INSTANCE" && current.mainComponent === variant
-            ? current
-            : undefined;
-        if (instance === undefined) {
-          instance = create(() => variant.createInstance());
-          holder.insertChild(slot, instance);
-        }
-        write(instance, "name", item.set);
-        own(instance, IN_FLOW);
-        flush(instance);
-        const definitions = set.componentPropertyDefinitions || {};
-        const shown = instance.componentProperties || {};
-        const valueOf = (key) => {
-          const entry = shown[key];
-          return entry !== undefined && typeof entry === "object" ? entry.value : entry;
-        };
-        const wantedProperties = {};
-        const label = Object.keys(definitions).find(
-          (key) => key.split("#")[0] === "label" && definitions[key].type === "TEXT",
-        );
-        if (label !== undefined && item.text !== undefined && valueOf(label) !== item.text) wantedProperties[label] = item.text;
-        // F-9: an example sets the BOOLEAN properties it names — the menu closed.
-        for (const [name, value] of Object.entries(item.toggles || {})) {
-          const key = Object.keys(definitions).find(
-            (candidate) => candidate.split("#")[0] === name && definitions[candidate].type === "BOOLEAN",
+      };
+      // F-10: what stands in a region is the Vitrino's example — an instance or a word, never the
+      // region's name; the name is the layer's.
+      const fill = async (holder, region) => {
+        for (const [slot, item] of region.items.entries()) {
+          const current = holder.children[slot];
+          if (item.set === undefined) {
+            let text = current !== undefined && current.type === "TEXT" ? current : undefined;
+            if (text === undefined) {
+              text = create(() => figma.createText());
+              holder.insertChild(slot, text);
+            }
+            await loadCurrentFont(text);
+            write(text, "name", region.name + "-text");
+            write(text, "characters", item.text || "");
+            own(text, NEUTRAL_TEXT);
+            own(text, IN_FLOW);
+            own(text, TEXT_SIZING);
+            if (textColour !== undefined) gather(text).fills = [paintOf(textColour)];
+            flush(text);
+            continue;
+          }
+          const set = findSet(item.set);
+          if (set === undefined) {
+            warnings.push("Sxablonoj/" + sxablono.name + "/" + region.name + ": Das Set " + item.set + " fehlt; die Vorlage zeigt es nicht.");
+            continue;
+          }
+          const wanted = Object.entries(Object.assign({ state: "rest" }, item.props || {}));
+          const variant =
+            set.children.find((child) => {
+              const name = child.name.split(", ");
+              return wanted.every(([key, value]) =>
+                name.indexOf(key + "=" + value) !== -1 ||
+                !name.some((pair) => pair.indexOf(key + "=") === 0),
+              );
+            }) || set.children[0];
+          if (variant === undefined) continue;
+          let instance =
+            current !== undefined && current.type === "INSTANCE" && current.mainComponent === variant
+              ? current
+              : undefined;
+          if (instance === undefined) {
+            instance = create(() => variant.createInstance());
+            holder.insertChild(slot, instance);
+          }
+          write(instance, "name", item.set);
+          own(instance, IN_FLOW);
+          flush(instance);
+          const definitions = set.componentPropertyDefinitions || {};
+          const shown = instance.componentProperties || {};
+          const valueOf = (key) => {
+            const entry = shown[key];
+            return entry !== undefined && typeof entry === "object" ? entry.value : entry;
+          };
+          const wantedProperties = {};
+          const label = Object.keys(definitions).find(
+            (key) => key.split("#")[0] === "label" && definitions[key].type === "TEXT",
           );
-          if (key !== undefined && valueOf(key) !== value) wantedProperties[key] = value;
+          if (label !== undefined && item.text !== undefined && valueOf(label) !== item.text) wantedProperties[label] = item.text;
+          // F-9: an example sets the BOOLEAN properties it names — the menu closed.
+          for (const [name, value] of Object.entries(item.toggles || {})) {
+            const key = Object.keys(definitions).find(
+              (candidate) => candidate.split("#")[0] === name && definitions[candidate].type === "BOOLEAN",
+            );
+            if (key !== undefined && valueOf(key) !== value) wantedProperties[key] = value;
+          }
+          if (Object.keys(wantedProperties).length > 0) instance.setProperties(wantedProperties);
         }
-        if (Object.keys(wantedProperties).length > 0) instance.setProperties(wantedProperties);
+      };
+      await build(component, form.layout.children, fixed);
+      // A frame or region of an earlier run that the layout no longer has: the plugin's own, taken
+      // away.
+      const stale = [];
+      const collect = (node) => {
+        for (const child of node.children || []) {
+          if (child.type === "INSTANCE") continue;
+          const kind = child.getSharedPluginData(NAMESPACE, "region") !== "" || child.getSharedPluginData(NAMESPACE, "box") !== "";
+          if (kind && !used.has(child)) stale.push(child);
+          else if (child.type === "FRAME" || child.type === "SLOT") collect(child);
+        }
+      };
+      collect(component);
+      for (const node of stale) node.remove();
+      // The tokens of the parts, after every frame has its layout (F11), and the width.
+      const nodeOf = (name) => (name === "frame" ? component : below(component, "box", name) || below(component, "region", name));
+      for (const [name, fields] of Object.entries(parts)) {
+        const node = nodeOf(name);
+        if (node === undefined) continue;
+        for (const [field, variableName] of Object.entries(fields)) {
+          const variable = variables === undefined ? undefined : variables.get(variableName);
+          if (variable === undefined) continue;
+          if (field === "fills" || field === "strokes") continue;
+          if (boundId(node, field) !== variable.id) node.setBoundVariable(field, variable);
+        }
       }
-    };
-    await build(example, layout.children);
-    // A frame of an earlier run that the layout no longer has (a region left empty, the flat
-    // regions before Nachlese 8): the plugin's own example, taken away.
-    const stale = [];
-    const collect = (node) => {
-      for (const child of node.children || []) {
-        const kind = child.getSharedPluginData(NAMESPACE, "region") !== "" || child.getSharedPluginData(NAMESPACE, "box") !== "";
-        if (kind && !used.has(child)) stale.push(child);
-        else if (child.type === "FRAME") collect(child);
+      if (fixed) {
+        const width = variables.get(form.width);
+        if (boundId(component, "width") !== width.id) component.setBoundVariable("width", width);
       }
-    };
-    collect(example);
-    for (const node of stale) node.remove();
+    }
+    // One SLOT property per region, shared by every variant (measured M5/M6: each variant's slot
+    // brings a property of its own; the later ones are pointed at the first and theirs removed).
+    for (const [region, slots] of Object.entries(regionSlots)) {
+      const references = (slot) => (slot.componentPropertyReferences || {}).slotContentId;
+      let key = references(slots[0]);
+      if (key === undefined) continue;
+      if (key.split("#")[0] !== region) key = owner.editComponentProperty(key, { name: region });
+      for (const slot of slots.slice(1)) {
+        const held = references(slot);
+        if (held === key) continue;
+        write(slot, "componentPropertyReferences", Object.assign({}, slot.componentPropertyReferences || {}, { slotContentId: key }));
+        const definitions = owner.componentPropertyDefinitions || {};
+        if (held !== undefined && definitions[held] !== undefined) owner.deleteComponentProperty(held);
+      }
+    }
+  }
+  if (slotless) {
+    warnings.push("Sxablonoj: Das Werkzeug hat keine Slots (createSlot); die Regionen sind Rahmen, in die eine Instanz nichts aufnimmt.");
+  }
+  /** A slot in the component, or a frame where the tool has none (the run says so). */
+  function createRegion(component) {
+    if (typeof component.createSlot === "function") {
+      try {
+        return create(() => component.createSlot());
+      } catch (error) {
+        slotless = true;
+      }
+    } else slotless = true;
+    const region = create(() => figma.createFrame());
+    component.appendChild(region);
+    return region;
   }
 }
 
@@ -2176,6 +2390,7 @@ function flush(node) {
     }
   }
   pending.delete(node.id);
+  shape(node, values);
   const fields = Object.keys(values).sort((a, b) => layoutRank(a) - layoutRank(b));
   for (const field of fields) {
     // What a node is as a child of a layout applies only inside one (F-5): the glyph frames in
@@ -2260,6 +2475,7 @@ function bind(nodes, variant, variables, structure) {
       !part.endsWith(".weight") && variant.bindings[partOfKey(part) + ".weight"] !== undefined;
     for (const target of targetsOf(part, moved)) {
       if (weighted && target.fields.indexOf("fontStyle") !== -1) continue;
+      if (target.unless !== undefined && variant.bindings[target.unless] !== undefined) continue;
       const variable = variableOfBinding(variables, part, name, target);
       if (variable === undefined) continue;
       for (const key of namedBy(nodes, target.node)) {
@@ -2424,6 +2640,330 @@ function shrinkEmpty(frame) {
 }
 
 /**
+ * Spec 027 B-1 and B-5 (Dehnung, Umbruch): a variant of an Ero that takes the width of its
+ * container in code (Uzo layout size container, the plan's \`stretch\`) has a fixed width, and its
+ * parts fill it where the code lets them fill (STRETCH of its structure); a text that wraps in
+ * code fills its column and grows in height. Measured in Figma (plan 027, M2/M3): a hugging root
+ * shrinks to the parts that do not fill once its whole chain fills — so the root is fixed, at the
+ * width it hugged before (Abnahme 3: the sets look as before), and an instance resized fills.
+ * The drawings own the layout of their nodes as before; \`shape\` turns what they gather into the
+ * stretched form while one variant is drawn, so a second run finds every value in place and
+ * writes nothing (F21). The width is measured in \`settle\` once the set exists — with the
+ * drawing's own layout put back for a moment — and stamped (\`breite\`): only a changed plan or
+ * build measures again.
+ */
+let shaping = undefined;
+/** Per variant id, what \`shape\` turned: the nodes, their drawn sizing and the drawing's widths. */
+const shapedVariants = new Map();
+
+/** Whether a name is one of the patterns (\`entry-*\` stands for a number). */
+function namedIn(patterns, name) {
+  return (patterns || []).some((pattern) =>
+    pattern.indexOf("*") === -1
+      ? pattern === name
+      : new RegExp("^" + pattern.split("*").join("[0-9]+") + "$").test(name),
+  );
+}
+
+/** Whether the variant being drawn lets this node fill its width (never a layer of an instance). */
+function fills(node) {
+  return shaping !== undefined && node.id !== shaping.root.id && node.type !== "TEXT" &&
+    namedIn(shaping.fill, node.name) && !inInstance(node);
+}
+
+/** Whether a node is a layer of an instance (the icon of a slot): its layout is its main's. */
+function inInstance(node) {
+  for (let current = node.parent; current !== undefined && current !== null; current = current.parent) {
+    if (current.type === "INSTANCE") return true;
+    if (current.type === "COMPONENT" || current.type === "PAGE") return false;
+  }
+  return false;
+}
+
+/** Turns the values gathered for a node into the stretched form (B-1, B-5); see \`shaping\`. */
+function shape(node, values) {
+  if (shaping === undefined) return;
+  const record = (sizing) => {
+    shaping.nodes.set(node.id, node);
+    if (!shaping.drawn.has(node.id)) shaping.drawn.set(node.id, sizing);
+  };
+  if (node.id === shaping.root.id) {
+    if (values.layoutSizingHorizontal === undefined) return;
+    record(values.layoutSizingHorizontal);
+    values.layoutSizingHorizontal = "FIXED";
+    return;
+  }
+  if (node.type === "TEXT") {
+    if (!namedIn(shaping.wrap, node.name) || inInstance(node)) return;
+    record("HUG");
+    values.layoutSizingHorizontal = "FILL";
+    values.textAutoResize = "HEIGHT";
+    if (shaping.center === true) values.textAlignHorizontal = "CENTER";
+    return;
+  }
+  if (!fills(node)) return;
+  record(values.layoutSizingHorizontal || node.layoutSizingHorizontal);
+  values.layoutSizingHorizontal = "FILL";
+  // A row that grows keeps its content at the start, its indicator at the end, as on the web; at
+  // the width it hugs the alignment shows nothing (Abnahme 3).
+  if (values.layoutMode === "HORIZONTAL" && values.primaryAxisAlignItems === "CENTER") {
+    const last = node.children[node.children.length - 1];
+    const marked = last !== undefined && (last.name === "indicator" || last.name === "icon-end");
+    values.primaryAxisAlignItems = marked ? "SPACE_BETWEEN" : "MIN";
+  }
+}
+
+/**
+ * The width of a stretching variant (B-1), once its set exists and every text holds its words:
+ * the drawing's own layout put back — the parts hugging or at the width the drawing fitted, the
+ * wrapping texts on one line —, the width read, and the stretched form written again with the
+ * variant fixed at that width. A width bound to a variable (the dialog's container) stays bound.
+ * Skipped where the stamp says this plan and build measured it (F21).
+ */
+function settle(node, stampValue) {
+  const shaped = shapedVariants.get(node.id);
+  if (shaped === undefined) return;
+  if (node.getSharedPluginData(NAMESPACE, "breite") === stampValue) return;
+  const parts = [...shaped.drawn.entries()].filter(([id]) => id !== node.id);
+  // The texts first: a width the drawing fits may be read from them (the track of a slider).
+  for (const [id] of parts) {
+    const part = shaped.nodes.get(id);
+    if (part.type !== "TEXT") continue;
+    write(part, "layoutSizingHorizontal", "HUG");
+    write(part, "textAutoResize", "WIDTH_AND_HEIGHT");
+  }
+  for (const [id, sizing] of parts) {
+    const part = shaped.nodes.get(id);
+    if (part.type === "TEXT") continue;
+    if (sizing === "FIXED") {
+      const drawn = shaped.widths.get(id);
+      const width = typeof drawn === "function" ? drawn() : drawn === undefined ? part.width : drawn;
+      // resize fixes an axis that hugged (③ F-4): the height keeps the sizing it had.
+      const vertical = part.layoutSizingVertical;
+      part.resize(Math.max(width, SMALLEST_SIZE), Math.max(part.height, SMALLEST_SIZE));
+      write(part, "layoutSizingHorizontal", "FIXED");
+      write(part, "layoutSizingVertical", vertical);
+    } else {
+      write(part, "layoutSizingHorizontal", sizing || "HUG");
+    }
+  }
+  // What the drawing measures from parts at their own width (the columns of a table).
+  for (const before of shaped.before) before();
+  const bound = boundId(node, "width") !== undefined;
+  if (!bound) write(node, "layoutSizingHorizontal", "HUG");
+  const width = node.width;
+  const height = node.height;
+  for (const [id] of parts) {
+    const part = shaped.nodes.get(id);
+    write(part, "layoutSizingHorizontal", "FILL");
+    if (part.type === "TEXT") write(part, "textAutoResize", "HEIGHT");
+  }
+  if (!bound) node.resize(Math.max(width, SMALLEST_SIZE), Math.max(height, SMALLEST_SIZE));
+  write(node, "layoutSizingHorizontal", "FIXED");
+  write(node, "layoutSizingVertical", "HUG");
+  // What the drawing fits from a part's final width (the fill of a slider's track).
+  for (const after of shaped.after) after();
+  stamp(node, "breite", stampValue);
+}
+
+/** The stretched form of one variant, or undefined where its set does not stretch (B-1, B-5). */
+function shapingOf(component, variant, node) {
+  const form = STRETCH[component.structure || "control"];
+  if (form === undefined) return undefined;
+  const vertical = variant.props.orientation === "vertical" && component.structure === "separator";
+  const stretch = component.stretch === true && !vertical;
+  if (!stretch && (form.wrapAlways || []).length === 0) return undefined;
+  return {
+    root: stretch ? node : { id: "" },
+    fill: stretch ? form.fill || [] : [],
+    wrap: stretch ? (form.wrap || []).concat(form.wrapAlways || []) : form.wrapAlways,
+    center: form.center === true,
+    nodes: new Map(),
+    drawn: new Map(),
+    widths: new Map(),
+    before: [],
+    after: [],
+    stretch: stretch,
+  };
+}
+
+/** Keeps what the variant just drawn turned, for \`settle\`; no variant is shaped after it. */
+function endShaping() {
+  if (shaping !== undefined && shaping.stretch) shapedVariants.set(shaping.root.id, shaping);
+  shaping = undefined;
+}
+
+/** A short hash of a text (FNV-1a, 32 bits): the stamp of what a measured width depends on. */
+function hashOf(text) {
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < text.length; index++) {
+    hash ^= text.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash.toString(16);
+}
+
+/** The stamp of every variable value of the plan, computed once a run (a width depends on it). */
+let collectionsHash = undefined;
+function collectionsStamp() {
+  if (collectionsHash === undefined) collectionsHash = hashOf(JSON.stringify(PLAN.collections));
+  return collectionsHash;
+}
+
+/** The text layers of a node, at any depth, outside the instances it holds (their words are theirs). */
+function textsOf(node) {
+  const found = [];
+  for (const child of node.children || []) {
+    if (child.type === "TEXT") found.push(child);
+    else if (child.type !== "INSTANCE") found.push(...textsOf(child));
+  }
+  return found;
+}
+
+/**
+ * A component property of the set by name and type: found, or declared with its default (F11);
+ * a default the plan changed is edited. Figma numbers a name the set already has (measured M8,
+ * \`help\` → \`help2\`), so the names the plugin declares are distinct by themselves.
+ */
+function propertyKey(set, name, type, defaultValue) {
+  const definitions = set.componentPropertyDefinitions || {};
+  let key = Object.keys(definitions).find(
+    (candidate) => candidate.split("#")[0] === name && definitions[candidate].type === type,
+  );
+  if (key === undefined) key = set.addComponentProperty(name, type, defaultValue);
+  else if (definitions[key].defaultValue !== defaultValue) {
+    set.editComponentProperty(key, { defaultValue: defaultValue });
+  }
+  return key;
+}
+
+/** A node's references with one field set to a key, or taken off where the key is undefined. */
+function refer(node, field, key) {
+  const references = Object.assign({}, node.componentPropertyReferences || {});
+  if (key === undefined) delete references[field];
+  else references[field] = key;
+  write(node, "componentPropertyReferences", references);
+}
+
+/**
+ * Spec 027 B-3: help and error of a field are BOOLEAN properties of the set — help on, error
+ * off. Figma ties a layer's visibility to its property alike in every variant (measured M4a): the
+ * error of the invalid state stays shown and is not connected, so the invalid variant shows it
+ * whatever an instance switches.
+ */
+function switchHelpAndError(set, planned) {
+  for (const part of ["help", "error"]) {
+    const layers = planned.map((entry) => ({
+      entry,
+      texts: textsOf(entry.node).filter((text) => text.name === part),
+    }));
+    if (!layers.some((each) => each.texts.length > 0)) continue;
+    const shown = part === "help";
+    const key = propertyKey(set, part, "BOOLEAN", shown);
+    for (const { entry, texts } of layers) {
+      const always = part === "error" && entry.variant.props.state === "invalid";
+      for (const text of texts) {
+        // A layer's visibility written while it is connected sets its property for every variant
+        // (M4a): the invalid error is taken off first, the others are connected after.
+        if (always) {
+          refer(text, "visible", undefined);
+          write(text, "visible", true);
+        } else {
+          write(text, "visible", shown);
+          refer(text, "visible", key);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Spec 027 B-6: an icon slot holds an instance of a variant of the set ikono; an INSTANCE_SWAP
+ * property \`<slot>-ikono\` sets it, its default the plan's icon (measured M4b: a swap keeps the
+ * colour and size bound on the instance's layers). Whether the slot shows is the BOOLEAN of the
+ * plan's toggles (icon-start, icon-end, the external of a link).
+ */
+function connectIconSlots(set, slots) {
+  const keys = {};
+  for (const slot of slots) {
+    if (slot.instance === undefined || slot.main === undefined) continue;
+    if (keys[slot.name] === undefined) {
+      keys[slot.name] = propertyKey(set, slot.name + "-ikono", "INSTANCE_SWAP", slot.main.id);
+    }
+    refer(slot.instance, "mainComponent", keys[slot.name]);
+  }
+}
+
+/**
+ * Spec 027 B-4: every text of a set is a TEXT property, named after its layer — the Skemo's slot
+ * and part names the drawings give (heading, message, items-1 …). A name a variant holds twice is
+ * the name of the layer around it (action-1, option-1); a name whose words differ between the
+ * variants is one property per value of the axis that decides them (text-single, text-range), so
+ * every variant keeps its words (Abnahme 3). A name another property of the set has (the BOOLEAN
+ * help, the label) takes \`-text\` (help-text). The label stays the label property.
+ */
+function connectTexts(set, component, planned) {
+  const definitions = set.componentPropertyDefinitions || {};
+  const reserved = new Set(
+    Object.keys(definitions)
+      .filter((key) => definitions[key].type !== "TEXT")
+      .map((key) => key.split("#")[0]),
+  );
+  if (component.label !== undefined) reserved.add(component.label.property);
+  const labelKey = Object.keys(definitions).find(
+    (key) => component.label !== undefined && key.split("#")[0] === component.label.property && definitions[key].type === "TEXT",
+  );
+  const slots = new Map();
+  for (const { variant, node } of planned) {
+    const texts = textsOf(node);
+    const counted = {};
+    for (const text of texts) counted[text.name] = (counted[text.name] || 0) + 1;
+    for (const text of texts) {
+      const references = text.componentPropertyReferences || {};
+      if (labelKey !== undefined && references.characters === labelKey) continue;
+      const slot = counted[text.name] > 1 && text.parent !== undefined && text.parent !== null ? text.parent.name : text.name;
+      if (!slots.has(slot)) slots.set(slot, []);
+      slots.get(slot).push({ text, props: variant.props, words: text.characters });
+    }
+  }
+  for (const [slot, entries] of slots) {
+    const words = [...new Set(entries.map((entry) => entry.words))];
+    let nameOf = () => slot;
+    if (words.length > 1) {
+      const axis = Object.keys(entries[0].props).find((prop) => {
+        const seen = {};
+        return entries.every((entry) => {
+          const value = entry.props[prop];
+          if (seen[value] === undefined) seen[value] = entry.words;
+          return seen[value] === entry.words;
+        });
+      });
+      nameOf = (entry) =>
+        axis !== undefined ? slot + "-" + entry.props[axis] : slot + "-" + (words.indexOf(entry.words) + 1);
+    }
+    const keys = {};
+    for (const entry of entries) {
+      let name = nameOf(entry);
+      if (reserved.has(name)) name = name + "-text";
+      if (keys[name] === undefined) keys[name] = propertyKey(set, name, "TEXT", entry.words);
+      refer(entry.text, "characters", keys[name]);
+    }
+  }
+}
+
+/** How many properties of each type the set offers (Spec 027: the Figma limit, M1). */
+function propertiesCount(set) {
+  const counted = {};
+  const definitions = set.componentPropertyDefinitions || {};
+  for (const key of Object.keys(definitions)) {
+    const type = definitions[key].type;
+    if (type === "VARIANT") continue;
+    counted[type] = (counted[type] || 0) + 1;
+  }
+  return counted;
+}
+
+/**
  * A frame brought to a measured size (Spec 011 ④ acceptance, F-3): resized only where it does
  * not hold the size yet (F21: a second run writes nothing), never below the tool's smallest.
  * resize fixes an axis that hugged (③ F-4), so the sizing the frame owns is written again after
@@ -2432,6 +2972,16 @@ function shrinkEmpty(frame) {
 function fit(frame, width, height, layout) {
   const w = Math.max(width, SMALLEST_SIZE);
   const h = Math.max(height, SMALLEST_SIZE);
+  // Spec 027 B-1: a part that fills the width of a stretching Ero keeps the drawing's width only
+  // for the measure (settle); its height is fitted as before.
+  if (shaping !== undefined && fills(frame)) {
+    shaping.widths.set(frame.id, w);
+    if (frame.height === h) return false;
+    frame.resize(Math.max(frame.width, SMALLEST_SIZE), h);
+    write(frame, "layoutSizingHorizontal", "FILL");
+    write(frame, "layoutSizingVertical", layout.layoutSizingVertical);
+    return true;
+  }
   if (frame.width === w && frame.height === h) return false;
   frame.resize(w, h);
   write(frame, "layoutSizingHorizontal", layout.layoutSizingHorizontal);
@@ -2890,7 +3440,11 @@ async function applyComponents(variables, warnings) {
     // and written once, a second run writes nothing (F21).
     const last = new Map();
     for (const measure of measures) last.set(measure.node.id + "\u0000" + measure.field, measure);
-    for (const { node: target, field, variable, font } of last.values()) {
+    for (const measure of last.values()) {
+      const { field, variable, font } = measure;
+      // Spec 027 B-1: a width bound on a part that now fills (the dialog's surface) binds the
+      // variant, which holds the width; the part fills it.
+      const target = field === "width" && fills(measure.node) ? shaping.root : measure.node;
       if (boundId(target, field) === variable.id) continue;
       if (font !== true) {
         target.setBoundVariable(field, variable);
@@ -2964,6 +3518,38 @@ async function applyComponents(variables, warnings) {
     return nodes;
   }
   /**
+   * Spec 027 B-6: the icon of a slot as an instance of the ikono of that name, in the size of the
+   * Ero where the ikono has it (its own size token: Figma takes no size bound on a layer of an
+   * instance, measured M11), neutral, in \`holder\`, so INSTANCE_SWAP sets another. The vectors of
+   * the instance are the nodes the caller binds the colour to (<prefix>mark-n from \`offset\` + 1;
+   * a fill overridden on them stays when the icon is swapped, M10). Frames an older run drew
+   * directly give way. Without the set ikono (a plan without it) the glyph frames are drawn as
+   * before.
+   */
+  function drawIconInstance(holder, name, prefix, measures, size, offset) {
+    const ikono = findSet("ikono");
+    const named = ikono === undefined
+      ? []
+      : ikono.children.filter((variant) => variant.name.split(", ").indexOf("name=" + name) !== -1);
+    const main = named.find((variant) => variant.name.split(", ").indexOf("size=" + size) !== -1) || named[0];
+    if (main === undefined) return { nodes: drawGlyphs(holder, name, prefix, measures), instance: undefined, main: undefined };
+    for (const child of holder.children.slice()) if (child.type !== "INSTANCE") child.remove();
+    let instance = holder.children.find((child) => child.type === "INSTANCE");
+    if (instance === undefined) {
+      instance = create(() => main.createInstance());
+      holder.appendChild(instance);
+    } else if (instance.mainComponent !== main) instance.swapComponent(main);
+    write(instance, "name", "ikono");
+    const nodes = {};
+    const control = instance.children.find((child) => child.name === "control");
+    Object.keys(IKONOJ.glyphs).forEach((aspekto, index) => {
+      const glyph = control === undefined ? undefined : control.children.find((child) => child.name === "glyph-" + aspekto);
+      const mark = glyph === undefined ? undefined : glyph.children[0];
+      if (mark !== undefined) nodes[prefix + "mark-" + (offset + index + 1)] = mark;
+    });
+    return { nodes, instance, main };
+  }
+  /**
    * The set ikono (Spec 014 ②, plan ② D-08): the variant holds the control — the box, its size
    * bound — with the glyph frames of every Aspekto in it; no label, no focus ring.
    */
@@ -3003,11 +3589,7 @@ async function applyComponents(variables, warnings) {
     // it does not hold the length yet (F21), the sizing it owns written again after it (③ F-4).
     if (!vertical) {
       const length = Math.max((component.separator || {}).length || 0, SMALLEST_SIZE);
-      if (control.width !== length) {
-        control.resize(length, Math.max(control.height, SMALLEST_SIZE));
-        write(control, "layoutSizingHorizontal", INDICATOR_LAYOUT.layoutSizingHorizontal);
-        write(control, "layoutSizingVertical", INDICATOR_LAYOUT.layoutSizingVertical);
-      }
+      fit(control, length, Math.max(control.height, SMALLEST_SIZE), INDICATOR_LAYOUT);
     }
     bindMeasures(measures, report, component, variant);
   }
@@ -3311,7 +3893,7 @@ async function applyComponents(variables, warnings) {
    * property, in the role of the text part. No focus ring: static text has no state but rest
    * (G2); nothing of the hidden slot description is drawn.
    */
-  async function drawBadge(node, component, variant, report, labels) {
+  async function drawBadge(node, component, variant, report, labels, toggled, iconSlots) {
     // Spec 025 ③ (plan ③ D-18): a badge whose Skemo binds a focus ring (the signeto: its body is
     // pressed) holds the ring and its gap around the control, as a control does; a badge without
     // one keeps the control directly under the variant, as before.
@@ -3320,6 +3902,19 @@ async function applyComponents(variables, warnings) {
     const gap = ring !== undefined ? part(ring, "focus-gap", () => figma.createFrame()) : undefined;
     const control = part(gap || node, "control", () => figma.createFrame());
     const text = part(control, "text", () => figma.createText());
+    // Spec 027 B-6: the icon-start slot of a chip, before its text, off by default (the plan's
+    // toggle) and an instance of the ikono. B-9: the edit icon of an inline editor after its text
+    // in the display state, as the web shows its edit button there.
+    const icons = variant.icons || {};
+    const iconStart = typeof icons["icon-start"] === "string" ? part(control, "icon-start", () => figma.createFrame()) : undefined;
+    const edit = typeof icons.edit === "string" ? part(control, "edit", () => figma.createFrame()) : undefined;
+    if (edit === undefined) {
+      const stale = ours(control, "part", "edit");
+      if (stale !== undefined) stale.remove();
+    }
+    [iconStart, text, edit].filter((child) => child !== undefined).forEach((child, index) => {
+      if (control.children.indexOf(child) !== index) control.insertChild(index, child);
+    });
     await loadCurrentFont(text);
     writeCase(component, variant, text);
     if (variant.font !== undefined) {
@@ -3341,7 +3936,27 @@ async function applyComponents(variables, warnings) {
       nodes["focus-ring"] = ring;
       nodes["focus-gap"] = gap;
     }
+    const glyphMeasures = [];
+    if (iconStart !== undefined) {
+      own(iconStart, NEUTRAL);
+      own(iconStart, INDICATOR_LAYOUT);
+      own(iconStart, IN_FLOW);
+      const drawn = drawIconInstance(iconStart, icons["icon-start"], "icon-", glyphMeasures, variant.props.size, 0);
+      nodes["icon-start"] = iconStart;
+      Object.assign(nodes, drawn.nodes);
+      iconSlots.push({ name: "icon-start", instance: drawn.instance, main: drawn.main });
+      toggled.push({ part: "icon-start", node: iconStart });
+    }
+    if (edit !== undefined) {
+      own(edit, NEUTRAL);
+      own(edit, INDICATOR_LAYOUT);
+      own(edit, IN_FLOW);
+      nodes.edit = edit;
+      Object.assign(nodes, drawGlyphs(edit, icons.edit, "edit-", glyphMeasures));
+    }
     const measures = bind(nodes, variant, variables, component.structure);
+    for (const measure of glyphMeasures) measures.push(measure);
+    for (const each of Object.keys(nodes)) if (each.indexOf("icon-") === 0 || each.indexOf("edit") === 0) flush(nodes[each]);
     for (const each of [node, control, text].concat(wrappers)) flush(each);
     bindMeasures(measures, report, component, variant);
   }
@@ -3452,6 +4067,15 @@ async function applyComponents(variables, warnings) {
     write(text, "characters", word);
     own(frame, NEUTRAL);
     own(text, NEUTRAL_TEXT);
+    // Spec 027 B-2: the word of a stand-in paints in the colour a text inherits on its page
+    // (INHERIT_COLOR, color.text.default) — before, it had no fill and was not seen. A stand-in
+    // that looks like the butono it composes binds the butono's colour over it (the dialog's).
+    const inherited = variables.get("${INHERIT_COLOR.replaceAll(".", "/")}");
+    if (inherited !== undefined) {
+      gather(text).fills = [
+        figma.variables.setBoundVariableForPaint({ type: "SOLID", color: { r: 0, g: 0, b: 0 } }, "color", inherited),
+      ];
+    }
     own(frame, CONTROL_LAYOUT);
     for (const child of [frame, text]) own(child, IN_FLOW);
     own(text, TEXT_SIZING);
@@ -3580,6 +4204,13 @@ async function applyComponents(variables, warnings) {
       for (const measure of bind({ "danger-item": rows[danger].text }, variant, variables, component.structure)) measures.push(measure);
     }
     bindShadow(nodes, variant, report);
+    // Spec 027 B-7: the trigger stands in its target size — at least size.target.min high and
+    // wide, its word centred —, so a closed menu (open off) is as large as the butono low it
+    // stands in for, not as high as its word.
+    const target = variables.get("size/target/min");
+    if (target !== undefined) {
+      for (const field of ["minWidth", "minHeight"]) measures.push({ node: trigger.frame, field, variable: target });
+    }
     for (const each of frames.concat(all).concat([trigger.frame, trigger.text])) flush(each);
     bindMeasures(measures, report, component, variant);
   }
@@ -3859,7 +4490,10 @@ async function applyComponents(variables, warnings) {
     }
     if (fill && component.meter !== undefined) {
       const height = trackHeight === undefined ? SMALLEST_SIZE : trackHeight;
-      fit(fill, component.meter.share * track.width, height, FILL_LAYOUT);
+      const share = () => fit(fill, component.meter.share * track.width, height, FILL_LAYOUT);
+      // Spec 027 B-1: in a stretching meter the share is taken of the track once it is measured.
+      if (shaping !== undefined && fills(control)) shaping.after.push(share);
+      else share();
     }
   }
   /**
@@ -4009,11 +4643,15 @@ async function applyComponents(variables, warnings) {
     bindMeasures(measures, report, component, variant);
     // Measured, then written (F14): every cell of a column at least as wide as its widest, so
     // the columns align; the same on every run, so nothing is rewritten.
-    columns.forEach((column) => {
+    const align = () => columns.forEach((column) => {
       const stack = [headCells[column]].concat(cells.map((row) => row[column]));
       const widest = Math.max.apply(null, stack.map((cell) => cell.width));
       for (const cell of stack) write(cell, "minWidth", widest);
     });
+    // Spec 027 B-1: in a stretching table the first column fills its row; the columns are lined
+    // up while the variant is measured (settle), every cell hugging its word.
+    if (shaping !== undefined && fills(headCells[0])) shaping.before.push(align);
+    else align();
   }
   /**
    * A key-value list (Spec 011 ④, plan ④ D-14): the variant holds the list — a column, the gap
@@ -4519,10 +5157,11 @@ async function applyComponents(variables, warnings) {
       const look = { "focus-ring": ringEnd, "focus-gap": gapEnd, control: thumbEnd };
       for (const measure of bind(look, { bindings: ringOnly(variant.bindings), paints: variant.paints, focusVisible: variant.focusVisible }, variables, "control")) measures.push(measure);
     }
-    // The number field looks like the kampo it composes (kind number, the field's size).
+    // The number field looks like the kampo it composes (kind number, the field's size); its value
+    // takes the kampo's colour of the typed text (Spec 027 B-2), bound as a field's.
     if (composed.number !== undefined) {
       const look = { control: number, text: numberText };
-      for (const measure of bind(look, composed.number, variables, "control")) measures.push(measure);
+      for (const measure of bind(look, composed.number, variables, "field")) measures.push(measure);
     }
     for (const each of frames.concat(all)) flush(each);
     bindMeasures(measures, report, component, variant);
@@ -4534,16 +5173,25 @@ async function applyComponents(variables, warnings) {
     const trackHeight = resolvedNumber(variables.get(variant.bindings["track.height"]), track);
     const height = trackHeight === undefined ? SMALLEST_SIZE : trackHeight;
     const width = Math.max(label.width, help.width, SMALLEST_SIZE);
+    // Spec 027 B-1: a stretching slider's track fills its row; the width the track had is read
+    // from the texts on one line when the variant is measured (settle), and the fill and the lead
+    // are the plan's shares of the track's width after it.
+    const stretched = shaping !== undefined && fills(track);
     fit(track, width, height, SLIDER_TRACK_LAYOUT);
+    if (stretched) shaping.widths.set(track.id, () => Math.max(label.width, help.width, SMALLEST_SIZE));
     const thumbSize = resolvedNumber(variables.get(variant.bindings["thumb.size"]), thumb);
     const ringBand = resolvedNumber(variables.get(variant.bindings["focus-ring.ring"] + "/width"), ring);
     const gapBand = resolvedNumber(variables.get(variant.bindings["focus-ring.offset"]), gap);
     const ringSize = thumbSize === undefined ? 0 : thumbSize + 2 * ((ringBand || 0) + (gapBand || 0));
     const from = ranged ? spec.start : 0;
     const to = ranged ? spec.end : spec.share;
-    if (lead) fit(lead, Math.max(from * width - ringSize / 2, SMALLEST_SIZE), height, FILL_LAYOUT);
-    const span = (to - from) * width - (ranged ? ringSize : ringSize / 2);
-    fit(fill, Math.max(span, SMALLEST_SIZE), height, FILL_LAYOUT);
+    const shares = (along) => {
+      if (lead) fit(lead, Math.max(from * along - ringSize / 2, SMALLEST_SIZE), height, FILL_LAYOUT);
+      const span = (to - from) * along - (ranged ? ringSize : ringSize / 2);
+      fit(fill, Math.max(span, SMALLEST_SIZE), height, FILL_LAYOUT);
+    };
+    if (stretched) shaping.after.push(() => shares(track.width));
+    else shares(width);
   }
 
   /** The bindings of a focus ring alone, for a second ring drawn like the first. */
@@ -4726,8 +5374,10 @@ async function applyComponents(variables, warnings) {
       : undefined;
     if (one !== undefined) {
       write(text, "characters", one);
+      // Spec 027 B-4: the one initial is a TEXT property of its own (initials-text); only a
+      // connection to the label comes off.
       const references = text.componentPropertyReferences || {};
-      if (references.characters !== undefined) {
+      if (references.characters !== undefined && references.characters.split("#")[0] === "label") {
         const rest = Object.assign({}, references);
         delete rest.characters;
         write(text, "componentPropertyReferences", rest);
@@ -5037,7 +5687,11 @@ async function applyComponents(variables, warnings) {
   const section = openSection();
   const frame = openFrame(section, warnings);
   progress.section = sectionReport;
-  for (const component of PLAN.components) {
+  // Spec 027 B-6: the set ikono first, so an icon slot of another set holds an instance of it.
+  const ordered = PLAN.components
+    .filter((component) => component.structure === "icon")
+    .concat(PLAN.components.filter((component) => component.structure !== "icon"));
+  for (const component of ordered) {
     let set = findSet(component.set);
     // How the run found the set, before it changed anything (F10b). Ohne diesen Blick lässt sich
     // hinterher nicht mehr unterscheiden, ob ein Knoten fehlte oder ob er nur seine Markierung
@@ -5084,6 +5738,8 @@ async function applyComponents(variables, warnings) {
     const labels = [];
     // The nodes a BOOLEAN property shows or hides (Spec 011 ③), connected once the set exists.
     const toggled = [];
+    // The icon slots that hold an ikono (Spec 027 B-6), connected to INSTANCE_SWAP once it exists.
+    const iconSlots = [];
     for (const variant of component.variants) {
       const name = variantName(variant.props);
       const existing = set === undefined ? undefined : ours(set, "variant", name);
@@ -5093,6 +5749,9 @@ async function applyComponents(variables, warnings) {
       write(node, "name", name);
       stamp(node, "variant", name);
       stamp(node, "ero", component.set);
+      // Spec 027 B-1/B-5: the stretched form of the variant while it is drawn (see shaping).
+      endShaping();
+      shaping = shapingOf(component, variant, node);
       // An icon and a separator (Spec 014 ②) are drawn in functions of their own.
       if (component.structure === "icon") {
         await drawIcon(node, component, variant, report);
@@ -5119,7 +5778,7 @@ async function applyComponents(variables, warnings) {
       // A badge, a notice and a state (Spec 011 ③) are drawn in functions of their own: no focus
       // ring, the control directly under the variant.
       if (component.structure === "badge") {
-        await drawBadge(node, component, variant, report, labels);
+        await drawBadge(node, component, variant, report, labels, toggled, iconSlots);
         if (existing === undefined) made.push(node);
         continue;
       }
@@ -5406,6 +6065,12 @@ async function applyComponents(variables, warnings) {
         const none = (component.texts || {})["options-empty"];
         write(noResults, "characters", typeof none === "string" ? none : "");
       }
+      // Spec 027 B-2: a list without a text of no hits in its Skemo (listelektilo, plurelektilo)
+      // keeps the empty text it always drew — it holds the room at the end of the list, and taking
+      // it away would change the picture (Abnahme 3, Befund B-11) — in the colour a text inherits.
+      const inheritedNone = noResults !== undefined && variant.bindings["no-results.color"] === undefined
+        ? variables.get("${INHERIT_COLOR.replaceAll(".", "/")}")
+        : undefined;
       // Only values from the plan (F13): every owned property neutral first — Figma's white fill,
       // its clipping and its line would otherwise cover what the plan draws.
       const frames = [node, ring, gap, control]
@@ -5425,6 +6090,11 @@ async function applyComponents(variables, warnings) {
         .concat(...suggestionRows.map((row) => [row.entry, row.ring, row.gap, row.frame]));
       for (const frame of frames) own(frame, NEUTRAL);
       for (const each of texts) own(each, NEUTRAL_TEXT);
+      if (inheritedNone !== undefined) {
+        gather(noResults).fills = [
+          figma.variables.setBoundVariableForPaint({ type: "SOLID", color: { r: 0, g: 0, b: 0 } }, "color", inheritedNone),
+        ];
+      }
       // Layout before any measure is bound: padding, gap and minimum sizes only take effect on
       // an auto-layout frame (F11). The variant, ring and gap wrap their content.
       for (const frame of [node, ring, gap]) own(frame, HUG_LAYOUT);
@@ -5498,19 +6168,31 @@ async function applyComponents(variables, warnings) {
         }
         Object.assign(glyphNodes, drawGlyphs(indicator, icons.indicator, "indicator-", glyphMeasures));
       }
+      // Spec 027 B-6: an icon slot holds an instance of the ikono, its size and colour bound on
+      // the instance's layers; the BOOLEAN of the plan shows it (icon-start, icon-end, external).
+      const iconSize = variables.get(variant.bindings["icon.size"]);
+      const glyphCount = Object.keys(IKONOJ.glyphs).length;
       if (iconFrame !== undefined) {
         own(iconFrame, NEUTRAL);
         own(iconFrame, INDICATOR_LAYOUT);
         own(iconFrame, IN_FLOW);
         glyphNodes.icon = iconFrame;
-        Object.assign(glyphNodes, drawGlyphs(iconFrame, icons["icon-start"], "icon-", glyphMeasures));
+        const drawn = drawIconInstance(iconFrame, icons["icon-start"], "icon-", glyphMeasures, variant.props.size, 0);
+        Object.assign(glyphNodes, drawn.nodes);
+        iconSlots.push({ name: "icon-start", instance: drawn.instance, main: drawn.main });
+        toggled.push({ part: "icon-start", node: iconFrame });
       }
       if (iconEnd !== undefined) {
         own(iconEnd, NEUTRAL);
         own(iconEnd, INDICATOR_LAYOUT);
         own(iconEnd, IN_FLOW);
-        glyphNodes.icon = iconEnd;
-        Object.assign(glyphNodes, drawGlyphs(iconEnd, icons["icon-end"], "icon-", glyphMeasures));
+        if (glyphNodes.icon === undefined) glyphNodes.icon = iconEnd;
+        else if (iconSize !== undefined) {
+          for (const field of ["width", "height"]) glyphMeasures.push({ node: iconEnd, field, variable: iconSize });
+        }
+        const drawn = drawIconInstance(iconEnd, icons["icon-end"], "icon-", glyphMeasures, variant.props.size, iconFrame === undefined ? 0 : glyphCount);
+        Object.assign(glyphNodes, drawn.nodes);
+        iconSlots.push({ name: "icon-end", instance: drawn.instance, main: drawn.main });
       }
       if (column) {
         own(column, TEXTS_LAYOUT);
@@ -5589,6 +6271,9 @@ async function applyComponents(variables, warnings) {
         }
       }
       for (const each of Object.values(glyphNodes)) flush(each);
+      // Spec 027 B-6: the end slot beside a start slot is no node of the bindings (\`icon\` is the
+      // start's); its own values are written here.
+      if (iconEnd !== undefined) flush(iconEnd);
       // Der Radius des Rings und seines Abstands wird gebunden, nicht eingetragen (F32): als Zahl
       // stand er in jedem Modus gleich und umschloss in einer Marke mit Radius 0 einen eckigen
       // Knopf rund. Er geht denselben Weg wie die übrigen Maße, also nach dem Layout.
@@ -5608,6 +6293,7 @@ async function applyComponents(variables, warnings) {
       bindMeasures(measures, report, component, variant);
       if (existing === undefined) made.push(node);
     }
+    endShaping();
     if (set === undefined) {
       set = create(() => figma.combineAsVariants(made, figma.currentPage));
       madeThisRun.set(component.set, set);
@@ -5743,6 +6429,17 @@ async function applyComponents(variables, warnings) {
         write(each.node, "componentPropertyReferences", Object.assign({}, each.node.componentPropertyReferences || {}, { visible: key }));
       }
     }
+    // Spec 027: the switches and words of the set (B-3, B-6, B-4), then the width of every
+    // stretching variant (B-1), and what the set now offers in the report.
+    const drawnVariants = component.variants
+      .map((variant) => ({ variant, node: ours(set, "variant", variantName(variant.props)) }))
+      .filter((entry) => entry.node !== undefined);
+    switchHelpAndError(set, drawnVariants);
+    connectIconSlots(set, iconSlots);
+    connectTexts(set, component, drawnVariants);
+    const stampValue = hashOf(BUILD + "|" + collectionsStamp() + "|" + JSON.stringify(component));
+    for (const entry of drawnVariants) settle(entry.node, stampValue);
+    report.properties = propertiesCount(set);
     component.variants.forEach((variant, index) => {
       const node = ours(set, "variant", variantName(variant.props));
       if (node !== undefined && set.children.indexOf(node) !== index) set.insertChild(index, node);
@@ -5799,7 +6496,25 @@ async function applyComponents(variables, warnings) {
     stamp(set, "after", JSON.stringify(report.after));
     reports.push(report);
   }
-  // Spec 020 (G2, E3): the example frames of the Sxablonoj, after every set exists.
+  // Spec 027 B-6: the ikono is drawn first; a set this run created stands in the frame where the
+  // plan's order puts it (before the next set of the plan), and the report keeps that order.
+  for (const component of ordered) {
+    if (component.structure !== "icon" || frame === undefined) continue;
+    const placed = findSet(component.set);
+    const moved = madeThisRun.get(component.set) === placed || sectionReport.moved.indexOf(component.set) !== -1;
+    if (placed === undefined || placed.parent !== frame || !moved) continue;
+    const after = PLAN.components.slice(PLAN.components.indexOf(component) + 1)
+      .map((next) => findSet(next.set))
+      .find((next) => next !== undefined && next.parent === frame);
+    if (after === undefined || frame.children.indexOf(placed) === frame.children.indexOf(after) - 1) continue;
+    // Out of the frame first, so the place of the next set is counted without it.
+    section.appendChild(placed);
+    frame.insertChild(frame.children.indexOf(after), placed);
+  }
+  const rank = (name) => PLAN.components.findIndex((component) => component.set === name);
+  reports.sort((a, b) => rank(a.set) - rank(b.set));
+  if (sectionReport !== undefined) sectionReport.moved.sort((a, b) => rank(a) - rank(b));
+  // Spec 020 (G2, E3): the Sxablonoj, after every set exists.
   await placeSxablonoj(section, frame, warnings, variables);
   fitSection(section);
   return reports;
@@ -5949,10 +6664,19 @@ function measureLayout(set, component) {
     rows.get(row).push(box);
   }
   const uneven = [];
+  // Spec 027 B-3: the invalid state shows the error the others hide (the BOOLEAN error is off),
+  // so its variant is higher by the error; its width is still the row's.
+  const definitions = set.componentPropertyDefinitions || {};
+  const errorSwitch = Object.keys(definitions).some(
+    (key) => key.split("#")[0] === "error" && definitions[key].type === "BOOLEAN",
+  );
+  const shows = (box) => errorSwitch && box.name.split(", ").indexOf("state=invalid") !== -1;
   for (const [row, members] of rows) {
     const sizes = new Map();
+    const widths = new Set(members.filter((box) => !shows(box)).map((box) => px(box.width)));
     for (const box of members) {
-      const key = dims(box);
+      const key = shows(box) && widths.has(px(box.width)) && widths.size === 1 ? undefined : dims(box);
+      if (key === undefined) continue;
       if (!sizes.has(key)) sizes.set(key, []);
       sizes.get(key).push(box.name);
     }
@@ -6265,6 +6989,8 @@ const progress = { build: BUILD, phase: "start", collections: 0, variables: 0, c
  * \`options.createInFoundSet\` is true — the maintainer's deliberate choice, off by default.
  */
 async function applyPlan(options) {
+  // Spec 027: the duration of the run, in the report and its toast (Nachlese 9 measured runs).
+  const started = Date.now();
   const createInFoundSet = options != null && options.createInFoundSet === true;
   progress.phase = "check";
   // Zuerst die Waisen (F-B): Eine lose Variante trägt \`ero\` wie das Set und würde sonst unten für
@@ -6354,6 +7080,7 @@ async function applyPlan(options) {
   return {
     fundamento: PLAN.fundamento,
     build: BUILD,
+    ms: Date.now() - started,
     collections: PLAN.collections.length,
     modes: modes,
     // Collections of the plan that stand empty in the file: reported, never removed.
@@ -6423,6 +7150,7 @@ function reportParts(result) {
     JSON.stringify({
       fundamento: result.fundamento,
       build: result.build,
+      ms: result.ms,
       collections: result.collections,
       modes: result.modes,
       empty: result.empty,
@@ -6537,11 +7265,12 @@ function announce(result) {
       report.set + " " + report.created.length + " neu, " + report.updated.length + " aktualisiert",
     )
     .join("; ");
+  const seconds = (Math.round(result.ms / 100) / 10).toFixed(1).replace(".", ",");
   const headline =
-    result.warnings.length === 0
+    (result.warnings.length === 0
       ? WHO + ": " + result.variables + " Variablen, " + counted + "."
       : WHO + ": " + result.warnings.length +
-        " Warnung(en) — " + result.warnings.join(" | ");
+        " Warnung(en) — " + result.warnings.join(" | ")) + " Lauf in " + seconds + " s.";
   figma.notify(
     headline + " Der ganze Bericht steht in der Konsole.",
     result.warnings.length === 0 ? undefined : { error: true, timeout: 10000 },
@@ -6605,8 +7334,13 @@ if (typeof figma !== "undefined" && typeof figma.closePlugin === "function" && f
 `;
 }
 
-/** The id of the development plugin of a build with the reference brand alone. */
-const PLUGIN_ID = "fundamento-apply-plan";
+/**
+ * The id of the development plugin (Spec 027): its own beside the plugins before — Figma keeps one
+ * plugin per id and runs the code imported first (F-13) —, and per brand list and language, as
+ * before. The menu shows „Fundamento Bauformen" in front, so it stands apart from „Fundamento
+ * 0.2.0 (…)" of the earlier builds.
+ */
+const PLUGIN_ID = "fundamento-bauformen";
 
 /** The brands of a build: the modes of the plan's collection aspekto, in their order. */
 function brandsOf(plan: FigmaPlan): string[] {
@@ -6632,19 +7366,13 @@ function shortHash(text: string): string {
  */
 export function pluginManifest(plan: FigmaPlan, build: string = UNKNOWN_BUILD): string {
   const brands = brandsOf(plan);
-  const reference = brands.length === 1 && brands[0] === "komuna";
   // Spec 026 ②: a build in German or English is a plugin of its own beside the Esperanto build of
   // the same brands (F-13: Figma runs the code imported first under one id).
   const lingvo = plan.lingvo;
   return `${JSON.stringify(
     {
-      name: `Fundamento ${plan.fundamento} (${build}${brands.length === 0 ? "" : ` · ${brands.join(", ")}`}${lingvo === undefined ? "" : ` · ${lingvo}`}): apply plan`,
-      id:
-        lingvo !== undefined
-          ? `${PLUGIN_ID}-${shortHash(`${brands.join(",")}|${lingvo}`)}`
-          : reference || brands.length === 0
-            ? PLUGIN_ID
-            : `${PLUGIN_ID}-${shortHash(brands.join(","))}`,
+      name: `Fundamento Bauformen ${plan.fundamento} (${build}${brands.length === 0 ? "" : ` · ${brands.join(", ")}`}${lingvo === undefined ? "" : ` · ${lingvo}`}): apply plan`,
+      id: `${PLUGIN_ID}-${shortHash(`${brands.join(",")}${lingvo === undefined ? "" : `|${lingvo}`}`)}`,
       api: "1.0.0",
       main: "code.js",
       editorType: ["figma"],

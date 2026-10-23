@@ -258,7 +258,10 @@ describe("the plugin draws the Sxablonoj and the two content sets (F-8 to F-12)"
       boundVariables?: { color?: { name: string } };
     }[];
     expect(fill?.boundVariables?.color?.name).toBe("color/background/default");
-    const sxelo = frame?.children.find((child) => child.name === "sxelo");
+    // Spec 027 B-8: the sxelo is a set; without a sidebar a variant stands as the web's frame.
+    const sxelo = frame?.children
+      .find((child) => child.name === "sxelo")
+      ?.children.find((child) => child.name === "width=medium, sidebar=false");
     expect(sxelo?.children.map((child) => child.name)).toEqual([
       "header",
       "nav",

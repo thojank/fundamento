@@ -319,7 +319,7 @@ interface NodeContext {
   variableById?: (id: string) => DoubleVariable | undefined;
   /** The collection a variable belongs to, with its mode ids in order (F30). */
   collectionOf?: (variable: DoubleVariable) => DoubleCollection | undefined;
-  box?: (node: DoubleNode) => DoubleBox;
+  box?: (node: DoubleNode, key?: string) => DoubleBox;
   resolveColor?: (name: string) => { r: number; g: number; b: number } | undefined;
   /**
    * Counts every change to the document. The layout is computed once per state of the document,
@@ -327,6 +327,10 @@ interface NodeContext {
    * hundreds of times and took the plugin tests from 10 s to 117 s (and past 60 s on the CI).
    */
   version: number;
+  /** Every node by id, for an INSTANCE_SWAP value (a component id; Spec 027). */
+  nodes?: Map<string, DoubleNode>;
+  /** The counts of the double, for the layers of an instance (Spec 027). */
+  counts?: DoubleCounts;
 }
 
 const GEOMETRY_KEYS: ReadonlySet<string> = new Set(["x", "y", "width", "height"]);
@@ -474,6 +478,7 @@ function node(
     },
     pluginData: {},
     appendChild(child) {
+      refuseInInstance(self);
       child.parent?.children.splice(child.parent.children.indexOf(child), 1);
       // A node that comes from elsewhere has no cell here; appending does not give it one (F14).
       if (child.parent !== recorded) (child as unknown as { leaveCell?: () => void }).leaveCell?.();
@@ -482,6 +487,7 @@ function node(
       context.version++;
     },
     insertChild(index, child) {
+      refuseInInstance(self);
       child.parent?.children.splice(child.parent.children.indexOf(child), 1);
       if (child.parent !== recorded) (child as unknown as { leaveCell?: () => void }).leaveCell?.();
       child.parent = recorded;
@@ -522,6 +528,13 @@ function node(
       self.properties.height = height;
       self.defaults.delete("width");
       self.defaults.delete("height");
+      // Measured M9 (2026-10-23): an instance whose width was bound to a variable took 800 and
+      // lost the binding when resized; its filling surface followed. For a node that is no
+      // instance the double keeps a binding, as before (not measured).
+      if (type === "INSTANCE") {
+        delete self.boundVariables.width;
+        delete self.boundVariables.height;
+      }
       counts.writes++;
       context.version++;
     },
@@ -543,6 +556,9 @@ function node(
       return self.pluginData[`${namespace}/${key}`] ?? "";
     },
     setBoundVariable(field, variable) {
+      // Measured M11 (2026-10-23): a width or height bound on a layer of an instance is not taken
+      // — no error, no binding, the size stays the main's. The instance itself takes it (M10).
+      if (LAYERS.has(self) && (field === "width" || field === "height")) return;
       // Figma refuses a font binding whose variable can show a font the file has not loaded: the
       // value of every mode must be loaded first, not only the one the node shows today (F30).
       if (FONT_FIELDS.has(field) && variable !== null) {
@@ -586,15 +602,43 @@ function node(
   // the API documents (ComponentNode.createInstance, on the current page until it is appended);
   // the instance names its main component and takes the values of its component properties
   // (InstanceNode.setProperties). A **belief** until the maintainer measures it in f10b-5.
+  // Spec 027 (measured 2026-10-23 in file ErG5PAaxWHdoBYEm4HMPzD, M4b, M4c): an instance holds
+  // the layers of its main component — the same names, values and bindings — and the plugin can
+  // bind and fill those layers (an override); a BOOLEAN, TEXT or INSTANCE_SWAP property set on the
+  // instance reaches the layers connected to it, and a swap keeps the fill written on a layer of
+  // the same name. Before Spec 027 the double's instance was empty.
   if (type === "COMPONENT") {
     Object.defineProperty(self, "createInstance", {
       enumerable: false,
       value: () => {
         const instance = node("INSTANCE", self.name, counts, context);
-        Object.defineProperty(instance, "mainComponent", { value: recorded, enumerable: false });
+        adopt(instance, recorded, context);
         return instance;
       },
     });
+    // M4c/M5: a slot in a component — a frame-like layer of type SLOT, its own SLOT property on
+    // the component (or on its set); the property is named after the slot and follows a rename.
+    Object.defineProperty(self, "createSlot", {
+      enumerable: false,
+      value: () => {
+        const slot = node("SLOT", "Slot", counts, context);
+        recorded.appendChild(slot);
+        const owner = (self.parent?.type === "COMPONENT_SET"
+          ? self.parent
+          : recorded) as unknown as {
+          addComponentProperty(name: string, type: string, value: unknown): string;
+        };
+        const key = owner.addComponentProperty("Slot", "SLOT", undefined);
+        slot.properties.componentPropertyReferences = { slotContentId: key };
+        return slot;
+      },
+    });
+    defineProperties(
+      self,
+      () => recorded,
+      () => self.parent?.type === "COMPONENT_SET",
+      false,
+    );
   }
   if (type === "INSTANCE") {
     Object.defineProperty(self, "setProperties", {
@@ -605,6 +649,33 @@ function node(
           ...((self.properties.componentProperties as Record<string, unknown> | undefined) ?? {}),
           ...values,
         };
+        // The layers connected to a property take its value (M4b: the swap of icon-start).
+        const walk = (layer: DoubleNode) => {
+          for (const child of layer.children) {
+            const references = (child.properties.componentPropertyReferences ?? {}) as Record<
+              string,
+              string
+            >;
+            for (const [field, key] of Object.entries(references)) {
+              if (!Object.hasOwn(values, key)) continue;
+              const value = values[key];
+              if (field === "mainComponent") {
+                const next = context.nodes?.get(String(value));
+                if (next !== undefined) swapLayers(child, next, context);
+              } else child.properties[field] = value;
+            }
+            walk(child);
+          }
+        };
+        walk(recorded);
+        context.version++;
+      },
+    });
+    Object.defineProperty(self, "swapComponent", {
+      enumerable: false,
+      value: (next: DoubleNode) => {
+        counts.writes++;
+        swapLayers(recorded, next, context);
       },
     });
   }
@@ -716,6 +787,8 @@ function node(
           }
         }
       }
+      // M4c/M5: a slot's SLOT property carries the slot's name, and follows when it is renamed.
+      if (target.type === "SLOT" && key === "name") renameSlot(target, String(value));
       if (typeof key === "string" && !(key in target)) {
         target.properties[key] =
           (key === "fills" || key === "strokes") && Array.isArray(value)
@@ -745,7 +818,7 @@ function node(
       // Size and place are computed by the layout of the file, never read from what was last
       // written: the double does not assume a size the tool would compute differently (F14).
       if (typeof key === "string" && GEOMETRY_KEYS.has(key) && context.box !== undefined) {
-        const value = context.box(recorded)[key as keyof DoubleBox];
+        const value = context.box(recorded, key)[key as keyof DoubleBox];
         // Figma keeps geometry as 32-bit floats (Nachlese 4 N-5, F-6): 0.01 reads 0.0099999998.
         return context.float32 === true ? Math.fround(value) : value;
       }
@@ -755,6 +828,8 @@ function node(
       return Reflect.get(target, key);
     },
   });
+  RAW.set(recorded, self);
+  context.nodes?.set(self.id, recorded);
   return recorded;
 }
 
@@ -763,6 +838,223 @@ const STUCK_AT_ZERO = new WeakSet<object>();
 
 /** The nodes that were removed (N5-1): they answer `removed` and `id`, nothing else. */
 const REMOVED = new WeakSet<object>();
+
+/** The node behind its recording proxy: the double's own bookkeeping writes nothing (Spec 027). */
+const RAW = new WeakMap<object, DoubleNode>();
+/** The layers of an instance (Spec 027): they take no child, a slot excepted. */
+const LAYERS = new WeakSet<object>();
+/** The main component of an instance or of a layer that is an instance itself. */
+const MAIN = new WeakMap<object, DoubleNode>();
+
+/**
+ * Figma refuses a child in an instance and in a layer of one, a slot excepted (measured M4c,
+ * 2026-10-23: a text appended to the slot of an instance stood in it; the message is Figma's for a
+ * layer of an instance, a belief).
+ */
+function refuseInInstance(parent: DoubleNode): void {
+  if (parent.type === "SLOT") return;
+  if (parent.type === "INSTANCE" || LAYERS.has(parent)) {
+    throw new Error(
+      `Cannot move node. New parent is an instance or is inside of an instance (Double: ${parent.type} "${parent.name}")`,
+    );
+  }
+}
+
+/** The counts for the layers Figma makes in an instance: no node the plugin created. */
+function layerCounts(counts: DoubleCounts | undefined): DoubleCounts {
+  const own = counts ?? { collections: 0, variables: 0, nodes: 0, valueWrites: 0, writes: 0 };
+  return new Proxy(own, {
+    set(target, key, value) {
+      if (key !== "nodes") Reflect.set(target, key, value);
+      return true;
+    },
+  });
+}
+
+/** A copy of `source` as a layer of an instance below `parent` (Spec 027, M4b). */
+function layerOf(source: DoubleNode, parent: DoubleNode, context: NodeContext): DoubleNode {
+  const layer = node(source.type, source.name, layerCounts(context.counts), context);
+  const raw = RAW.get(layer) ?? layer;
+  raw.properties = structuredClone({ ...source.properties });
+  raw.defaults = new Set(source.defaults);
+  raw.boundVariables = { ...source.boundVariables };
+  raw.pluginData = { ...source.pluginData };
+  raw.explicitVariableModes = { ...source.explicitVariableModes };
+  raw.parent = parent;
+  LAYERS.add(raw);
+  const main = MAIN.get(RAW.get(source) ?? source);
+  if (source.type === "INSTANCE" && main !== undefined) {
+    MAIN.set(raw, main);
+    Object.defineProperty(raw, "mainComponent", { get: () => MAIN.get(raw), enumerable: false });
+  }
+  for (const child of source.children) raw.children.push(layerOf(child, layer, context));
+  return layer;
+}
+
+/**
+ * An instance takes the layers and the values of its main component (ComponentNode.createInstance;
+ * Spec 027: with its layers, measured M4b). Its own values follow the main's; the properties of a
+ * set stay on the set.
+ */
+function adopt(instance: DoubleNode, main: DoubleNode, context: NodeContext): void {
+  const raw = RAW.get(instance) ?? instance;
+  const { componentPropertyDefinitions: _definitions, ...values } = main.properties;
+  raw.properties = { ...structuredClone(values), ...raw.properties };
+  raw.boundVariables = { ...main.boundVariables };
+  MAIN.set(raw, main);
+  Object.defineProperty(raw, "mainComponent", {
+    get: () => MAIN.get(raw),
+    set: (next: DoubleNode) => swapLayers(instance, next, context, false),
+    enumerable: false,
+    configurable: true,
+  });
+  raw.children = main.children.map((child) => layerOf(child, instance, context));
+  context.version++;
+}
+
+/**
+ * An instance (or a layer that is one) swapped to another component: its layers are the new
+ * main's; a layer of the same path keeps every value in which the old layer differed from the old
+ * main's layer — an override, written on this instance or on the instance in a main above it (M4b:
+ * the fill of `mark`, written on the icon in the butono, survived the swap from check to close in
+ * an instance of the butono). Assigning `mainComponent` clears the overrides.
+ */
+function swapLayers(target: DoubleNode, next: DoubleNode, context: NodeContext, keep = true): void {
+  const raw = RAW.get(target) ?? target;
+  const pathsOf = (root: DoubleNode | undefined) => {
+    const paths = new Map<string, DoubleNode>();
+    const walk = (layer: DoubleNode, path: string) => {
+      for (const child of layer.children) {
+        const at = `${path}/${child.name}`;
+        paths.set(at, RAW.get(child) ?? child);
+        walk(child, at);
+      }
+    };
+    if (root !== undefined) walk(root, "");
+    return paths;
+  };
+  const kept = keep ? pathsOf(raw) : new Map<string, DoubleNode>();
+  const before = keep ? pathsOf(MAIN.get(raw)) : new Map<string, DoubleNode>();
+  MAIN.set(raw, next);
+  if (raw.type === "INSTANCE" && !Object.getOwnPropertyDescriptor(raw, "mainComponent")) {
+    Object.defineProperty(raw, "mainComponent", { get: () => MAIN.get(raw), enumerable: false });
+  }
+  raw.children = next.children.map((child) => layerOf(child, target, context));
+  const same = (a: unknown, b: unknown) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+  for (const [at, layer] of pathsOf(raw)) {
+    const old = kept.get(at);
+    if (old === undefined) continue;
+    const main = before.get(at);
+    for (const [field, value] of Object.entries(old.properties)) {
+      if (!same(value, main?.properties[field])) layer.properties[field] = structuredClone(value);
+    }
+    for (const [field, binding] of Object.entries(old.boundVariables)) {
+      if (!same(binding, main?.boundVariables[field])) layer.boundVariables[field] = binding;
+    }
+  }
+  context.version++;
+}
+
+/** The node that holds the properties of a component: its set, or the component alone. */
+function ownerOf(component: DoubleNode | undefined): DoubleNode | undefined {
+  if (component === undefined) return undefined;
+  return component.parent?.type === "COMPONENT_SET" ? component.parent : component;
+}
+
+/** Renames the SLOT property of a slot with the slot (M4c, M5). */
+function renameSlot(slot: DoubleNode, name: string): void {
+  const references = slot.properties.componentPropertyReferences as
+    | { slotContentId?: string }
+    | undefined;
+  const key = references?.slotContentId;
+  const owner = ownerOf(slot.parent) as unknown as
+    | { editComponentProperty?: (key: string, change: { name: string }) => string }
+    | undefined;
+  if (key === undefined || owner?.editComponentProperty === undefined) return;
+  if (key.split("#")[0] === name) return;
+  owner.editComponentProperty(key, { name });
+}
+
+/**
+ * The component properties of a set or of a component that stands alone (Spec 027: a Sxablono
+ * without variants holds its SLOT properties itself). A variant refuses them — they belong to its
+ * set (a belief; the API documents the set as their place). A rename keeps the id and moves every
+ * reference along (M5: the slot of the first variant followed `nav` → `nav-region`).
+ */
+function defineProperties(
+  self: DoubleNode,
+  root: () => DoubleNode,
+  isVariant: () => boolean,
+  eager: boolean,
+): void {
+  const definitions: Record<string, { type: string; defaultValue: unknown }> = {};
+  if (eager) self.properties.componentPropertyDefinitions = definitions;
+  const own = () => {
+    if (isVariant()) {
+      throw new Error(
+        `${self.type} "${self.name}": component properties belong to the component set, not to a variant.`,
+      );
+    }
+    self.properties.componentPropertyDefinitions = definitions;
+  };
+  const rewrite = (from: string, to: string) => {
+    const walk = (layer: DoubleNode) => {
+      for (const child of layer.children) {
+        const raw = RAW.get(child) ?? child;
+        const references = raw.properties.componentPropertyReferences as
+          | Record<string, string>
+          | undefined;
+        if (references !== undefined) {
+          for (const [field, key] of Object.entries(references)) {
+            if (key !== from) continue;
+            raw.properties.componentPropertyReferences = { ...references, [field]: to };
+            if (raw.type === "SLOT" && field === "slotContentId") raw.name = to.split("#")[0] ?? to;
+          }
+        }
+        walk(child);
+      }
+    };
+    walk(root());
+  };
+  Object.defineProperty(self, "addComponentProperty", {
+    enumerable: false,
+    value: (name: string, type: string, defaultValue: unknown) => {
+      own();
+      // Measured M8 (2026-10-23): a name the component already has, of any type, is numbered —
+      // a second `help` became `help2`, a third `help3`, an INSTANCE_SWAP beside the BOOLEAN
+      // `icon-start` became `icon-start2`. The key returned names the property as it stands.
+      const taken = new Set(Object.keys(definitions).map((key) => key.split("#")[0]));
+      let free = name;
+      for (let n = 2; taken.has(free); n++) free = `${name}${n}`;
+      const key = `${free}#${id("property")}`;
+      definitions[key] = { type, defaultValue };
+      return key;
+    },
+  });
+  Object.defineProperty(self, "editComponentProperty", {
+    enumerable: false,
+    value: (key: string, change: { defaultValue?: unknown; name?: string }) => {
+      own();
+      const definition = definitions[key];
+      if (definition === undefined) throw new Error(`No component property ${key}.`);
+      if (change.defaultValue !== undefined) definition.defaultValue = change.defaultValue;
+      if (change.name === undefined) return key;
+      const next = `${change.name}${key.slice(key.indexOf("#"))}`;
+      delete definitions[key];
+      definitions[next] = definition;
+      rewrite(key, next);
+      return next;
+    },
+  });
+  Object.defineProperty(self, "deleteComponentProperty", {
+    enumerable: false,
+    value: (key: string) => {
+      own();
+      if (definitions[key] === undefined) throw new Error(`No component property ${key}.`);
+      delete definitions[key];
+    },
+  });
+}
 
 /**
  * The layout of a file, as far as the plugin relies on it (F14). It follows what Figma was
@@ -857,12 +1149,67 @@ function layoutOf(
     prop(current, "layoutPositioning") !== "ABSOLUTE" &&
     prop(current, "visible") !== false &&
     !STUCK_AT_ZERO.has(current);
-  /** What a child adds to the size of a parent that hugs: nothing along an axis it fills. */
+  /**
+   * What a child adds to the size of its parent. Along an axis it fills, a frame adds what it
+   * would hug — its children that do not fill that axis, paddings and gaps — where the parent hugs
+   * that axis, and a text adds nothing (measured 2026-10-23, file ErG5PAaxWHdoBYEm4HMPzD, M2/M3):
+   * a hugging column kept 191 for its filling ring around a control of 183; a hugging row kept 93
+   * for a filling ring beside a trigger; a hugging component whose ring, gap and control all
+   * filled shrank to its label (85 instead of 152); a hugging column ignored a filling text of 279
+   * and wrapped it at 30. Before Spec 027 the double counted every filling child as nothing.
+   */
   const contribution = (child: DoubleNode): { width: number; height: number } => {
     const own = intrinsic(child);
+    const along = (axis: "H" | "V"): number => {
+      const size = axis === "H" ? own.width : own.height;
+      if (!fills(child, axis)) return size;
+      const parent = child.parent;
+      if (parent === undefined || !hugs(parent, axis) || child.type === "TEXT") return 0;
+      const natural = naturalOf(child);
+      return axis === "H" ? natural.width : natural.height;
+    };
+    return { width: along("H"), height: along("V") };
+  };
+  /** The size a frame would hug, whatever its own sizing says (M2/M3, see contribution). */
+  const naturals = new Map<DoubleNode, { width: number; height: number }>();
+  const naturalOf = (current: DoubleNode): { width: number; height: number } => {
+    const known = naturals.get(current);
+    if (known !== undefined) return known;
+    const size = naturalUncached(current);
+    naturals.set(current, size);
+    return size;
+  };
+  const naturalUncached = (current: DoubleNode): { width: number; height: number } => {
+    const mode = prop(current, "layoutMode");
+    if (
+      (mode !== "HORIZONTAL" && mode !== "VERTICAL") ||
+      wraps(current) ||
+      inFlow(current).length === 0
+    ) {
+      return intrinsic(current);
+    }
+    const children = inFlow(current).map(contribution);
+    const along = (child: { width: number; height: number }) =>
+      mode === "HORIZONTAL" ? child.width : child.height;
+    const across = (child: { width: number; height: number }) =>
+      mode === "HORIZONTAL" ? child.height : child.width;
+    const spacing = num(current, "itemSpacing") * Math.max(0, children.length - 1);
+    const main = children.reduce((sum, child) => sum + along(child), 0) + spacing;
+    const cross = Math.max(0, ...children.map(across));
+    const stroke = strokeOf(current);
+    const width =
+      (mode === "HORIZONTAL" ? main : cross) +
+      num(current, "paddingLeft") +
+      num(current, "paddingRight") +
+      stroke;
+    const height =
+      (mode === "HORIZONTAL" ? cross : main) +
+      num(current, "paddingTop") +
+      num(current, "paddingBottom") +
+      stroke;
     return {
-      width: fills(child, "H") ? 0 : own.width,
-      height: fills(child, "V") ? 0 : own.height,
+      width: Math.max(width, num(current, "minWidth")),
+      height: Math.max(height, num(current, "minHeight")),
     };
   };
   /** A visible stroke takes space, unless strokesIncludedInLayout says no (run #21). */
@@ -1193,10 +1540,17 @@ export function figmaDouble(
   // Filled below, once the document and the variables exist.
   const context: NodeContext = {
     loaded,
+    nodes: new Map(),
+    counts,
     ...(options.refuse === undefined ? {} : { refuses: new Set(options.refuse) }),
     ...(options.float32 === true ? { float32: true } : {}),
     version: 0,
-    variableById: (id) => variables.find((variable) => variable.id === id),
+    // By the index below (Spec 027: the font check of every binding searched all variables of
+    // every mode one by one, the largest share of a run).
+    variableById: (id) => {
+      index();
+      return byId.get(id);
+    },
     collectionOf: (variable) =>
       collections.find((collection) => collection.id === variable.variableCollectionId),
   };
@@ -1419,22 +1773,14 @@ export function figmaDouble(
     combineAsVariants: (components: DoubleNode[], parent: DoubleNode) => {
       const set = node("COMPONENT_SET", "Component Set", counts, context);
       // Component properties live on the set (F11): a TEXT property the labels are connected to;
-      // a BOOLEAN property a layer's visibility is connected to (Spec 011 ③, dismissible).
-      const definitions: Record<string, { type: string; defaultValue: string | boolean }> = {};
-      set.properties.componentPropertyDefinitions = definitions;
-      Object.assign(set, {
-        addComponentProperty(name: string, type: string, defaultValue: string | boolean) {
-          const key = `${name}#${id("property")}`;
-          definitions[key] = { type, defaultValue };
-          return key;
-        },
-        editComponentProperty(key: string, change: { defaultValue?: string | boolean }) {
-          const definition = definitions[key];
-          if (definition === undefined) throw new Error(`No component property ${key}.`);
-          if (change.defaultValue !== undefined) definition.defaultValue = change.defaultValue;
-          return key;
-        },
-      });
+      // a BOOLEAN property a layer's visibility is connected to (Spec 011 ③, dismissible); since
+      // Spec 027 also INSTANCE_SWAP and SLOT.
+      defineProperties(
+        RAW.get(set) ?? set,
+        () => set,
+        () => false,
+        true,
+      );
       parent.appendChild(set);
       for (const component of components) set.appendChild(component);
       return set;
@@ -1500,9 +1846,36 @@ export function figmaDouble(
   context.collections = () => collections;
   // One layout per state of the document (see NodeContext.version), with its resolved numbers.
   let computed: { version: number; top: DoubleNode; boxes: Map<DoubleNode, DoubleBox> } | undefined;
-  context.box = (current: DoubleNode) => {
-    let top = current;
-    while (top.parent !== undefined) top = top.parent;
+  // A size depends on the layers above a node only as far as it fills them: width and height are
+  // computed from the first layer up that does not fill its parent (Spec 027: the plugin measures
+  // every stretching variant after writing it, and a layout of the whole file per read took a run
+  // from 4 s to minutes). A place (x, y) is relative to the parent: it is computed from the parent
+  // up the same way.
+  const fillsParent = (node: DoubleNode): boolean => {
+    const parent = node.parent;
+    const mode = parent?.properties.layoutMode;
+    if (parent === undefined || (mode !== "HORIZONTAL" && mode !== "VERTICAL")) return false;
+    if (node.properties.layoutPositioning === "ABSOLUTE" || node.properties.visible === false) {
+      return false;
+    }
+    return (
+      node.properties.layoutSizingHorizontal === "FILL" ||
+      node.properties.layoutSizingVertical === "FILL"
+    );
+  };
+  context.box = (current: DoubleNode, key?: string) => {
+    if (computed !== undefined && computed.version === context.version) {
+      const known = computed.boxes.get(current);
+      // The layout of a part of the file places its top at 0/0: the top's own place is not in it.
+      const placed = current !== computed.top || computed.top.parent === undefined;
+      if (known !== undefined && (placed || key === "width" || key === "height")) return known;
+    }
+    let top = key === "x" || key === "y" ? (current.parent ?? current) : current;
+    if (GEOMETRY_KEYS.has(key ?? "")) {
+      while (top.parent !== undefined && fillsParent(top)) top = top.parent;
+    } else {
+      while (top.parent !== undefined) top = top.parent;
+    }
     if (computed === undefined || computed.version !== context.version || computed.top !== top) {
       const resolved = new Map<string, unknown>();
       const once = (name: string) => {

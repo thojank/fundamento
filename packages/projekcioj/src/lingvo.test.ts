@@ -92,8 +92,10 @@ describe("Figma: the display name of the build's language in the descriptions (S
           ...(lingvo === undefined ? {} : { lingvo }),
         } as CeloInput).find((file) => file.path === "figma/plugin/manifest.json")?.text ?? "{}",
       ) as { id: string; name: string };
-    expect(manifest().id).toBe("fundamento-apply-plan");
-    expect(manifest("de").id).toMatch(/^fundamento-apply-plan-[0-9a-f]{8}$/);
+    // Spec 027: the ids of the Bauformen, the German build still one of its own.
+    expect(manifest().id).toMatch(/^fundamento-bauformen-[0-9a-f]{8}$/);
+    expect(manifest("de").id).toMatch(/^fundamento-bauformen-[0-9a-f]{8}$/);
+    expect(manifest("de").id).not.toBe(manifest().id);
     expect(manifest("de").name).toContain("· komuna · de): apply plan");
   });
 

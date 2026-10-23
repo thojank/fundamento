@@ -76,6 +76,7 @@ import {
   pluginManifest,
   pluginSource,
   structureBoundPartPropertiesOf,
+  unlessOf,
 } from "./plugin.js";
 
 /** A variable value: a literal, or an alias to another variable of the plan. */
@@ -195,7 +196,7 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   "plurelektilo:filter": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
   "plurelektilo:check": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
   "plurelektilo:tag": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
-  "lokredaktilo:edit": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
+  // Spec 027 B-9: the edit icon of the display state is drawn (the glyph edit at edit.size).
   "lokredaktilo:field": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
   "lokredaktilo:save": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
   "lokredaktilo:cancel": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
@@ -1130,6 +1131,11 @@ export const ICON_EXAMPLE = VITRINO_ICON_EXAMPLE;
 
 export interface FigmaComponentSet {
   set: string;
+  /**
+   * Spec 027 B-1: the Ero takes the width of its container (Uzo layout size container): its
+   * variants are fixed at the width they hug, their parts fill it, an instance resized fills.
+   */
+  stretch?: boolean;
   /** How the plugin draws the variants (Spec 009, D-09); a plan without it is a control. */
   structure?: FigmaStructure;
   /** A code block's words (Nachlese 8 ② F-12): its caption, its code, the copy button. */
@@ -1620,12 +1626,31 @@ export interface FigmaPlan {
   sxablonoj?: FigmaSxablono[];
 }
 
-/** An example frame of a Sxablono in the plan (Spec 020, G2; Nachlese 8 ② F-9 to F-11). */
+/**
+ * A Sxablono in the plan (Spec 020, G2; Nachlese 8 ② F-9 to F-11; Spec 027 B-8): a component in
+ * the frame `FIGMA_SXABLONO_FRAME`, its regions Figma slots holding the Vitrino's example.
+ */
 export interface FigmaSxablono {
   name: string;
   description: string;
   /** How the regions stand, as on the web: rows and columns of named frames, regions as leaves. */
   layout: FigmaSxablonoBox;
+  /**
+   * Spec 027 B-8: the parts of the Skemo bound to the Sxablono's tokens, by the name of the frame
+   * or region that draws them (`frame` is the component): field → variable — the gap
+   * (itemSpacing), the inline padding (paddingLeft, paddingRight), the fill (fills), a width
+   * (maxWidth; the container's is the component's width), the divider (the header's bottom edge).
+   */
+  parts?: Record<string, Record<string, string>>;
+  /** Spec 027 B-8: the variable of the component's width (the Skemo's container), if it has one. */
+  width?: string;
+  /**
+   * Spec 027 B-8: the variants of the sxelo — width compact, medium, expanded (the container
+   * tokens small, medium, large) × sidebar true, false — each with its width and its layout: the
+   * header in a column where the web's container query stacks it, the navigation beside the
+   * content with a sidebar.
+   */
+  variants?: { props: Record<string, string>; width: string; layout: FigmaSxablonoBox }[];
   regions: {
     name: string;
     direction: "HORIZONTAL" | "VERTICAL";
@@ -1769,16 +1794,119 @@ function sxablonoLayoutOf(
  * the web, the regions as named frames with the Vitrino's example in them — instances of the Ero
  * sets with their words, or a word — and never the name of a region as a visible word.
  */
-function sxablonoFrameOf(entry: LoadedSxablono, sets: ReadonlySet<string>): FigmaSxablono {
+/** The field of a Sxablono's part property in Figma (Spec 027 B-8); the width is the part's. */
+const SXABLONO_FIELDS: Readonly<Record<string, readonly string[]>> = {
+  gap: ["itemSpacing"],
+  "inline-padding": ["paddingLeft", "paddingRight"],
+  fill: ["fills"],
+  width: ["maxWidth"],
+};
+
+/**
+ * The parts of a Sxablono bound to its tokens (Spec 027 B-8): the variable of every part property
+ * the plan holds (sxablono/<name>/<part>/<property>), on the frame or region of the part's name;
+ * the divider of the sxelo is the bottom edge of its header, as on the web; the container's width
+ * is the component's. A property without a node (the preview label's role) is not drawn.
+ */
+function sxablonoPartsOf(
+  entry: LoadedSxablono,
+  known: (name: string) => boolean,
+): { parts: Record<string, Record<string, string>>; width?: string } {
+  const parts: Record<string, Record<string, string>> = {};
+  let width: string | undefined;
+  for (const [part, properties] of Object.entries(entry.skemo.parts ?? {})) {
+    for (const property of Object.keys(properties)) {
+      const name = `sxablono/${entry.sxablono.name}/${part}/${property.replace(/-/g, "/")}`;
+      if (!known(name)) continue;
+      if (part === "container" && property === "width") {
+        width = name;
+        continue;
+      }
+      if (part === "divider") {
+        const fields =
+          property === "color" ? ["strokes"] : property === "width" ? ["strokeBottomWeight"] : [];
+        const header = parts.header ?? {};
+        for (const field of fields) header[field] = name;
+        parts.header = header;
+        continue;
+      }
+      const fields = parts[part] ?? {};
+      for (const field of SXABLONO_FIELDS[property] ?? []) fields[field] = name;
+      if (Object.keys(fields).length > 0) parts[part] = fields;
+    }
+  }
+  return { parts, ...(width === undefined ? {} : { width }) };
+}
+
+/** The widths of the sxelo's variants (Spec 027 B-8): the container tokens, one per viewport. */
+const SXELO_WIDTHS: Readonly<Record<string, string>> = {
+  compact: "size.container.small",
+  medium: "size.container.medium",
+  expanded: "size.container.large",
+};
+
+function sxablonoFrameOf(
+  entry: LoadedSxablono,
+  sets: ReadonlySet<string>,
+  known: (name: string) => boolean = () => false,
+  base: Readonly<Record<string, { value: unknown }>> = {},
+): FigmaSxablono {
   const itemsOf = (region: string): FigmaSxablonoItem[] =>
     (SXABLONO_EXAMPLES[`${entry.sxablono.name}/${region}`] ?? [])
       .filter((item) => item.set === undefined || sets.has(item.set))
       .map((item) => structuredClone(item) as FigmaSxablonoItem);
   const rows = rowRegionsOf(entry);
+  const layout = sxablonoLayoutOf(entry, (name) => itemsOf(name).length > 0);
+  const { parts, width } = sxablonoPartsOf(entry, known);
+  // Spec 027 B-8: the frame of an application (banner and main) is a set of its widths and of
+  // its navigation as a sidebar or as a row; the web stacks its header below the medium container
+  // (its container query), so compact has the header in a column.
+  const shell =
+    entry.skemo.a11y.landmarks.includes("banner") && entry.skemo.a11y.landmarks.includes("main");
+  const stackBelow = parityPx(base["size.container.medium"]?.value);
+  const variants = shell
+    ? Object.entries(SXELO_WIDTHS).flatMap(([viewport, token]) =>
+        ["true", "false"].map((sidebar) => {
+          const stacked = parityPx(base[token]?.value) < stackBelow;
+          const children = layout.children.map((child) =>
+            typeof child !== "string" && child.name === "header"
+              ? { ...child, direction: stacked ? ("VERTICAL" as const) : ("HORIZONTAL" as const) }
+              : child,
+          );
+          const head = children.filter((child) => typeof child !== "string");
+          const regions = children.filter((child): child is string => typeof child === "string");
+          const body: FigmaSxablonoBox["children"] =
+            sidebar === "true" && regions.includes("nav")
+              ? [
+                  {
+                    name: "body",
+                    direction: "HORIZONTAL",
+                    children: [
+                      "nav",
+                      {
+                        name: "content",
+                        direction: "VERTICAL",
+                        children: regions.filter((name) => name !== "nav"),
+                      },
+                    ],
+                  },
+                ]
+              : regions;
+          return {
+            props: { width: viewport, sidebar },
+            width: token.replace(/\./g, "/"),
+            layout: { ...layout, children: [...head, ...body] },
+          };
+        }),
+      )
+    : undefined;
   return {
     name: entry.sxablono.name,
     description: entry.uzo?.purpose ?? entry.sxablono.description,
-    layout: sxablonoLayoutOf(entry, (name) => itemsOf(name).length > 0),
+    layout,
+    ...(Object.keys(parts).length === 0 ? {} : { parts }),
+    ...(width === undefined ? {} : { width }),
+    ...(variants === undefined ? {} : { variants }),
     regions: entry.skemo.regions.map((region) => ({
       name: region.name,
       direction: rows.includes(region.name) ? "HORIZONTAL" : "VERTICAL",
@@ -2395,7 +2523,25 @@ function iconsOf(
     skemo.parts.icon !== undefined &&
     skemo.slots.some((slot) => slot.name === "icon-start" && slot.decorative === true)
   ) {
-    return { "icon-start": ICON_EXAMPLE };
+    // Spec 027 B-6: both icon slots of a button, each the Vitrino's example, off by default.
+    return {
+      "icon-start": ICON_EXAMPLE,
+      ...(skemo.slots.some((slot) => slot.name === "icon-end" && slot.decorative === true)
+        ? { "icon-end": ICON_EXAMPLE }
+        : {}),
+    };
+  }
+  // Spec 027 B-6: the icon-start slot of a chip, off by default; B-9: the edit icon of an inline
+  // editor in its display state (the web's edit button there).
+  if (structure === "badge") {
+    const start = skemo.slots.some((slot) => slot.name === "icon-start" && slot.decorative === true)
+      ? { "icon-start": ICON_EXAMPLE }
+      : {};
+    const edit =
+      skemo.parts.edit !== undefined && combination.editing === "false" ? { edit: "edit" } : {};
+    return Object.keys(start).length + Object.keys(edit).length === 0
+      ? undefined
+      : { ...start, ...edit };
   }
   // Nachlese 5 O-41 (Nachlese 4 N-7, B-8): a link with a decorative icon-end slot and the prop
   // external marks an external target with the Ikonaro's external there, as the web's fallback
@@ -2713,8 +2859,19 @@ function componentSetOf(
         // check:parity says so. The part the label property writes is drawn whatever its name
         // (Spec 011 ③: the text of a badge or a state is its label, not the typed text B-2
         // releases).
+        // Spec 027 B-2: a structure's binding that gives way to another part property where the
+        // variant binds that one (the placeholder's colour) draws nothing there: its release holds.
+        const unless = unlessOf(structure, key);
+        const yields =
+          unless !== undefined &&
+          boundToken(
+            skemo,
+            unless.slice(0, unless.indexOf(".")),
+            unless.slice(unless.indexOf(".") + 1),
+            combination,
+          ) !== undefined;
         const release =
-          part === labelPart || ownBindings.has(key)
+          part === labelPart || (ownBindings.has(key) && !yields)
             ? undefined
             : (FIGMA_NOT_DRAWN[`${entry.ero.name}:${part}`] ?? FIGMA_NOT_DRAWN[part]);
         if (release !== undefined) {
@@ -3116,14 +3273,27 @@ function componentSetOf(
       : structure === "menu" && skemo.props.some((prop) => prop.name === "open")
         ? [{ property: "open", part: "surface", defaultValue: true }]
         : [];
-  const toggles =
-    ownToggles.length > 0
+  // Spec 027 B-6: an icon slot the plugin draws shows by a BOOLEAN of its name, off by default —
+  // where no prop of the Skemo shows it already (the ligilo's external shows its icon-end).
+  const drawnSlots = new Set(
+    variants
+      .flatMap((variant) => Object.keys(variant.icons ?? {}))
+      .filter((name) => name.startsWith("icon-")),
+  );
+  const slotToggles = [...drawnSlots]
+    .filter((slot) => !propToggles.some((toggle) => toggle.part === slot))
+    .sort()
+    .map((slot) => ({ property: slot, part: slot, defaultValue: false }));
+  const toggles = [
+    ...(ownToggles.length > 0
       ? [...propToggles, ...ownToggles]
       : structure === "card" && skemo.slots.some((slot) => slot.name === "media")
         ? [...propToggles, { property: "media", part: "media", defaultValue: true }]
         : structure === "avatar" && skemo.parts.image !== undefined
           ? [...propToggles, { property: "image", part: "image", defaultValue: false }]
-          : propToggles;
+          : propToggles),
+    ...slotToggles,
+  ];
   // The table of a table's set and the entries of a list's (Spec 011 ④): the Vitrino's words.
   const table =
     structure === "table"
@@ -3352,6 +3522,8 @@ function componentSetOf(
     ...(avatar === undefined ? {} : { avatar }),
     ...(description === undefined ? {} : { description }),
     ...(uzo === undefined ? {} : { uzo }),
+    // Spec 027 B-1: an Ero that takes the width of its container (Uzo layout size container).
+    ...(entry.uzo?.layout?.size === "container" ? { stretch: true } : {}),
     properties,
     variants,
     pluginData: { fundamento: { ero: entry.ero.name, skemo: skemo.id, version } },
@@ -3558,6 +3730,9 @@ export const FIGMA_CELO: Celo = {
     }
     const base = baseResolution(modelo);
     const gap = parityPx(base[SET_GAP]?.value);
+    const knownVariables = new Set(
+      collections.flatMap((collection) => collection.variables.map((variable) => variable.name)),
+    );
     const plan: FigmaPlan = {
       fundamento: modeloJson.fundamento.version,
       fontFallback: FIGMA_FONT_FALLBACK,
@@ -3578,7 +3753,12 @@ export const FIGMA_CELO: Celo = {
         ? {}
         : {
             sxablonoj: (modelo.sxablonoj ?? []).map((entry) =>
-              sxablonoFrameOf(entry, new Set(modelo.eroj.map((ero) => ero.ero.name))),
+              sxablonoFrameOf(
+                entry,
+                new Set(modelo.eroj.map((ero) => ero.ero.name)),
+                (name) => knownVariables.has(name),
+                base,
+              ),
             ),
           }),
     };

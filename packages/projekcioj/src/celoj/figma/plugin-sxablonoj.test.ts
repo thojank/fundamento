@@ -1,5 +1,8 @@
 // Spec 020 ① (G2, E3, Abnahme 5): the plugin draws an example frame per Sxablono — no component
 // set, no variants — in a frame „Sxablonoj" of the section „Fundamento" next to the frame „Eroj".
+// Spec 027 B-8: since then a component per Sxablono (the sxelo a set of widths and sidebar), its
+// regions slots; this file keeps the cases of Spec 020 on that form, plugin-bauformen-sxablonoj
+// the new ones.
 // Each region is an auto-layout frame of its name; what stands in it are instances of the Ero
 // sets (not detached copies), so the example follows a change of mode as the sets do. A second
 // run finds the frames again and makes no second one.
@@ -14,9 +17,10 @@ const source = repoFiles["figma/plugin/code.js"] ?? "";
 const mainOf = (node: DoubleNode | undefined) =>
   (node as unknown as { mainComponent?: DoubleNode } | undefined)?.mainComponent;
 
+// The instances a region holds, not the ones inside them (Spec 027 B-6: the icon of a butono).
 const instancesIn = (node: DoubleNode | undefined): DoubleNode[] =>
   (node?.children ?? []).flatMap((child) =>
-    child.type === "INSTANCE" ? [child, ...instancesIn(child)] : instancesIn(child),
+    child.type === "INSTANCE" ? [child] : instancesIn(child),
   );
 
 describe("the plugin draws the Sxablonoj as example frames (Spec 020 ①)", () => {
@@ -35,7 +39,9 @@ describe("the plugin draws the Sxablonoj as example frames (Spec 020 ①)", () =
       "redaktilo",
       "sxelo",
     ]);
-    const sxelo = frame?.children.find((child) => child.name === "sxelo");
+    const sxelo = frame?.children
+      .find((child) => child.name === "sxelo")
+      ?.children.find((child) => child.name === "width=medium, sidebar=false");
     // Nachlese 8 ② (F-9): brand and principal stand in the head row, as on the web.
     expect(sxelo?.children.map((child) => child.name)).toEqual([
       "header",

@@ -248,7 +248,12 @@ describe("the avizo is drawn as a notice: surface with accent, heading, message,
     const keys = Object.keys(definitions()).filter((key) => key.startsWith("dismissible#"));
     expect(keys).toHaveLength(1);
     expect(definitions()[keys[0] ?? ""]).toEqual({ type: "BOOLEAN", defaultValue: false });
-    expect(Object.keys(definitions())).toHaveLength(2);
+    // Spec 027 B-4: beside label and dismissible the words of heading and details.
+    expect(
+      Object.keys(definitions())
+        .map((key) => key.split("#")[0])
+        .sort(),
+    ).toEqual(["details", "dismissible", "heading", "label"]);
     for (const variant of set?.children ?? []) {
       expect(
         descendant(variant, "dismiss")?.properties.componentPropertyReferences,
@@ -256,12 +261,14 @@ describe("the avizo is drawn as a notice: surface with accent, heading, message,
       ).toEqual({ visible: keys[0] });
     }
     await run(double, source);
-    expect(Object.keys(definitions())).toHaveLength(2);
+    expect(Object.keys(definitions())).toHaveLength(4);
     // No other set declares it.
     const butono = pageNodes(double).find((child) => child.name === "butono");
     expect(
-      Object.keys((butono?.properties.componentPropertyDefinitions ?? {}) as Definitions),
-    ).toHaveLength(1);
+      Object.keys((butono?.properties.componentPropertyDefinitions ?? {}) as Definitions).filter(
+        (key) => key.startsWith("dismissible#"),
+      ),
+    ).toHaveLength(0);
   });
 
   it("measures every variant with a size and a cell, warns of nothing, and writes nothing new on a second run", async () => {
@@ -634,11 +641,12 @@ describe("the mezurilo is drawn as a meter: label, track with the fill at 66 %, 
       const fill = descendant(node, "fill");
       const widest = Math.max(box(label).width, box(valueText).width);
       expect(widest, intent).toBeGreaterThan(0);
-      // The column carries the written width (a set has no container to fill); the variant hugs.
-      expect(control?.properties.layoutSizingHorizontal, intent).toBe("FIXED");
+      // Spec 027 B-1: the meter takes the width of its container; the variant is fixed at the
+      // width of the wider text, the column fills it.
+      expect(control?.properties.layoutSizingHorizontal, intent).toBe("FILL");
       expect(control?.properties.layoutSizingVertical, intent).toBe("HUG");
       expect(box(control).width, intent).toBe(widest);
-      expect(node?.properties.layoutSizingHorizontal, intent).toBe("HUG");
+      expect(node?.properties.layoutSizingHorizontal, intent).toBe("FIXED");
       expect(box(node).width, intent).toBe(widest);
       // The track fills the column's inline axis and is as high as track.height, no 100 × 100.
       expect(track?.properties.layoutSizingHorizontal, intent).toBe("FILL");
@@ -1010,7 +1018,10 @@ describe("the tabelo is drawn as a table: caption, region with head and three ro
       Object.keys(definitions()).find((candidate) => candidate.startsWith("caption#"));
     expect(key()).toBeDefined();
     expect(definitions()[key() ?? ""]).toEqual({ type: "BOOLEAN", defaultValue: true });
-    expect(Object.keys(definitions())).toHaveLength(2);
+    // Spec 027 B-4: beside label and caption the words of the head and the cells, a TEXT each.
+    const types = Object.values(definitions()).map((definition) => definition.type);
+    expect(types.filter((type) => type === "BOOLEAN")).toHaveLength(1);
+    expect(types.filter((type) => type === "TEXT").length).toBeGreaterThan(1);
     for (const node of set?.children ?? []) {
       const caption = descendant(node, "caption");
       expect(caption?.properties.visible, node.name).toBe(true);
@@ -1019,8 +1030,10 @@ describe("the tabelo is drawn as a table: caption, region with head and three ro
       });
     }
     expect(variant(REST)).toBeDefined();
+    const count = Object.keys(definitions()).length;
     await run(double, source);
-    expect(Object.keys(definitions())).toHaveLength(2);
+    // Once over two runs (Spec 027 B-4: the words of the cells beside it).
+    expect(Object.keys(definitions())).toHaveLength(count);
     expect(definitions()[key() ?? ""]).toEqual({ type: "BOOLEAN", defaultValue: true });
   });
 
@@ -1132,10 +1145,13 @@ describe("the atributlisto is drawn as a list: three entries, rows in columns an
       expect(descendant(node, "value-2")?.properties.characters, name).toBe("Team Fundamento");
       expect(descendant(node, "term-3")?.properties.characters, name).toBe("Gültig seit");
       expect(descendant(node, "value-3")?.properties.characters, name).toBe("–");
-      // No text carries the label property: the label is the accessible name, never seen.
+      // No text carries the label property: the label is the accessible name, never seen
+      // (Spec 027 B-4: every text carries a TEXT property of its own).
       const connected = (child: DoubleNode): boolean =>
-        child.properties.componentPropertyReferences !== undefined ||
-        child.children.some(connected);
+        String(
+          (child.properties.componentPropertyReferences as { characters?: string } | undefined)
+            ?.characters ?? "",
+        ).startsWith("label#") || child.children.some(connected);
       expect(connected(node as DoubleNode), name).toBe(false);
     }
   });
@@ -1143,7 +1159,12 @@ describe("the atributlisto is drawn as a list: three entries, rows in columns an
   it("declares the label property with the word Angaben and nothing else", async () => {
     const { set } = await drawn();
     const definitions = (set?.properties.componentPropertyDefinitions ?? {}) as Definitions;
-    expect(Object.values(definitions)).toEqual([{ type: "TEXT", defaultValue: "Angaben" }]);
+    // Spec 027 B-4: beside it a TEXT property for the words of every entry.
+    const label = Object.entries(definitions).filter(([key]) => key.startsWith("label#"));
+    expect(label.map(([, definition]) => definition)).toEqual([
+      { type: "TEXT", defaultValue: "Angaben" },
+    ]);
+    expect(Object.values(definitions).every((definition) => definition.type === "TEXT")).toBe(true);
   });
 
   it("measures every variant with a size and a cell, warns of nothing, and writes nothing new on a second run", async () => {
@@ -1255,9 +1276,13 @@ describe("the navigado is drawn as a nav: three items in a row, the first curren
     expect(descendant(rest, "items-1")?.properties.characters).toBe("Eins");
     expect(descendant(rest, "items-2")?.properties.characters).toBe("Zwei");
     expect(descendant(rest, "items-3")?.properties.characters).toBe("Drei");
-    // No text carries the label property: the label is the name of the landmark, never seen.
+    // No text carries the label property: the label is the name of the landmark, never seen
+    // (Spec 027 B-4: every text carries a TEXT property of its own).
     const connected = (child: DoubleNode): boolean =>
-      child.properties.componentPropertyReferences !== undefined || child.children.some(connected);
+      String(
+        (child.properties.componentPropertyReferences as { characters?: string } | undefined)
+          ?.characters ?? "",
+      ).startsWith("label#") || child.children.some(connected);
     expect(connected(rest as DoubleNode)).toBe(false);
   });
 
@@ -1326,7 +1351,12 @@ describe("the navigado is drawn as a nav: three items in a row, the first curren
   it("declares the label property with the word Navigation and nothing else", async () => {
     const { set } = await drawn();
     const definitions = (set?.properties.componentPropertyDefinitions ?? {}) as Definitions;
-    expect(Object.values(definitions)).toEqual([{ type: "TEXT", defaultValue: "Navigation" }]);
+    // Spec 027 B-4: beside it a TEXT property for the words of every entry.
+    const label = Object.entries(definitions).filter(([key]) => key.startsWith("label#"));
+    expect(label.map(([, definition]) => definition)).toEqual([
+      { type: "TEXT", defaultValue: "Navigation" },
+    ]);
+    expect(Object.values(definitions).every((definition) => definition.type === "TEXT")).toBe(true);
   });
 
   it('places the example „vertikal" right after the set: the same three items in a column, the first current', async () => {
@@ -1493,8 +1523,12 @@ describe("the langetaro is drawn as tabs: the list with three tabs, the first ac
     );
     // The panel's text has no role in the Skemo: nothing of its typography is bound.
     expect(bound(panelText, "fontSize")).toBeUndefined();
+    // No text carries the label property (Spec 027 B-4: every text a TEXT property of its own).
     const connected = (child: DoubleNode): boolean =>
-      child.properties.componentPropertyReferences !== undefined || child.children.some(connected);
+      String(
+        (child.properties.componentPropertyReferences as { characters?: string } | undefined)
+          ?.characters ?? "",
+      ).startsWith("label#") || child.children.some(connected);
     expect(connected(rest as DoubleNode)).toBe(false);
   });
 
@@ -1553,7 +1587,12 @@ describe("the langetaro is drawn as tabs: the list with three tabs, the first ac
   it("declares the label property with the word Reiter and nothing else; no example frame", async () => {
     const { set, langetaro } = await drawn();
     const definitions = (set?.properties.componentPropertyDefinitions ?? {}) as Definitions;
-    expect(Object.values(definitions)).toEqual([{ type: "TEXT", defaultValue: "Reiter" }]);
+    // Spec 027 B-4: beside it a TEXT property for the words of every entry.
+    const label = Object.entries(definitions).filter(([key]) => key.startsWith("label#"));
+    expect(label.map(([, definition]) => definition)).toEqual([
+      { type: "TEXT", defaultValue: "Reiter" },
+    ]);
+    expect(Object.values(definitions).every((definition) => definition.type === "TEXT")).toBe(true);
     expect(langetaro?.example).toBeUndefined();
   });
 
@@ -1646,10 +1685,21 @@ describe("icons are drawn from the glyphs of every Aspekto and switch with the b
       (child) => child.name === "emphasis=high, intent=neutral, size=medium, state=rest",
     );
     const control = descendant(rest, "control");
-    expect(control?.children.map((child) => child.name)).toEqual(["icon-start", "label"]);
+    // Spec 027 B-6: both icon slots, off by default; each holds an instance of the ikono whose
+    // glyphs take the size and colour of the butono's icon.
+    expect(control?.children.map((child) => child.name)).toEqual([
+      "icon-start",
+      "label",
+      "icon-end",
+    ]);
     const icon = descendant(rest, "icon-start");
-    expect(icon?.children.map((child) => child.name)).toEqual(["glyph-komuna", "glyph-ekzemplo"]);
+    expect(icon?.children.map((child) => child.type)).toEqual(["INSTANCE"]);
+    expect(descendant(icon, "control")?.children.map((child) => child.name)).toEqual([
+      "glyph-komuna",
+      "glyph-ekzemplo",
+    ]);
     expect(bound(icon, "width")).toBe("size/icon/medium");
+    expect(bound(descendant(rest, "icon-end"), "width")).toBe("size/icon/medium");
     expect(paintOf(vectorOf(descendant(icon, "glyph-komuna")), "fills")).toBe(
       "color/action/primary/text",
     );
@@ -2108,7 +2158,10 @@ describe("the plugin draws the ligilo's external mark (Nachlese 5 O-41)", () => 
       expect(icon?.properties.componentPropertyReferences).toEqual({ visible: external });
       const size = variant.name.match(/size=(\w+)/)?.[1];
       expect(bound(icon, "width"), variant.name).toBe(`size/icon/${size}`);
-      const glyphs = icon?.children ?? [];
+      // Spec 027 B-6: the slot holds an instance of the ikono external; its glyphs take the
+      // size and the colour of the link's icon (INSTANCE_SWAP sets another ikono).
+      expect(icon?.children.map((child) => child.type)).toEqual(["INSTANCE"]);
+      const glyphs = descendant(icon?.children[0], "control")?.children ?? [];
       expect(glyphs.map((glyph) => glyph.name)).toEqual(["glyph-komuna"]);
       for (const glyph of glyphs) {
         expect(bound(glyph, "width"), variant.name).toBe(`size/icon/${size}`);
@@ -2167,7 +2220,10 @@ describe("the plugin draws the avataro (Spec 015 ③)", () => {
       // of 20 px; the label property holds both, so the smallest size's text is not connected.
       if (variant.name.startsWith("size=small")) {
         expect(text?.properties.characters, variant.name).toBe("E");
-        expect(text?.properties.componentPropertyReferences ?? {}, variant.name).toEqual({});
+        // Spec 027 B-4: its one initial is a TEXT property of its own, not the label.
+        expect(text?.properties.componentPropertyReferences, variant.name).toEqual({
+          characters: expect.stringMatching(/^initials-text#/),
+        });
       } else {
         expect(text?.properties.characters, variant.name).toBe("EM");
         expect(text?.properties.componentPropertyReferences).toEqual({
@@ -2220,7 +2276,10 @@ describe("the plugin draws the avataro (Spec 015 ③)", () => {
     small.properties.characters = "EM";
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     expect(small.properties.characters).toBe("E");
-    expect(small.properties.componentPropertyReferences ?? {}).toEqual({});
+    // Spec 027 B-4: off the label, onto the TEXT property of the one initial.
+    expect(small.properties.componentPropertyReferences).toEqual({
+      characters: expect.stringMatching(/^initials-text#/),
+    });
     const before = double.snapshot();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     expect(double.snapshot()).toBe(before);

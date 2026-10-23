@@ -966,9 +966,10 @@ describe("a run reports every node of the set that was there at its start and is
   /**
    * Variant, focus ring, focus gap, control, label: five nodes per variant, plus the set; since
    * Spec 014 ② the icon-start of every variant with its glyph frame and vector (the repo plan:
-   * komuna alone): eight nodes per variant.
+   * komuna alone): eight nodes per variant. Spec 027 B-6: both icon slots, each its frame and an
+   * instance of the ikono with the instance's control, glyph frame and vector: fifteen.
    */
-  const NODES = 72 * 8 + 1;
+  const NODES = 72 * 15 + 1;
 
   it("counts the same nodes at start and end of a clean run, and loses none", async () => {
     const double = modelDouble();
@@ -1289,7 +1290,8 @@ describe("a failed run leaves everything readable in the console (F21)", () => {
           // Spec 011 ④: the atributlisto's three (layout auto since Spec 014 ①) and the avizo's
           // four variants are made first; the run fails in the butono. Spec 015 ②: the
           // alsxutilo's twelve before them; Spec 015 ③: and the avataro's three.
-          if (++made === 12 + 3 + 3 + 4 + 40)
+          // Spec 027 B-6: the ikono's 315 variants are made first, so its icon slots hold them.
+          if (++made === 315 + 12 + 3 + 3 + 4 + 40)
             throw new Error("in set_layoutMode: Cannot delete occupied row/column.");
           return create();
         },

@@ -36,6 +36,9 @@ const roleText = (text: string) =>
 // Ero kamen nicht an, und die Abnahme sah Figmas 100 × 100. Das Double hat diese Bindungen
 // stillschweigend angenommen; ab jetzt kennt es die Vorbedingung und scheitert laut
 // (jug_01M3094ZC6F3XZ1H0MWQZ62MYV, erste Anwendung auf eine Vorbedingung des Werkzeugs).
+/** The BOOLEAN properties Spec 027 adds (B-3 help and error, B-6 the icon slots). */
+const SPEC_027_SWITCHES = new Set(["help", "error", "icon-start", "icon-end"]);
+
 describe("the geometry of the Ero reaches Figma (F11)", () => {
   const AUTO_LAYOUT_FIELDS = [
     "paddingLeft",
@@ -388,7 +391,13 @@ describe("the label is a text property of the component (F11)", () => {
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     const definitions = (setOf(double)?.properties.componentPropertyDefinitions ??
       {}) as Definitions;
-    expect(Object.keys(definitions)).toHaveLength(1);
+    // Spec 027 B-6: beside the label the icon slots, a BOOLEAN and an INSTANCE_SWAP each.
+    expect(Object.keys(definitions).filter((key) => key.startsWith("label#"))).toHaveLength(1);
+    expect(
+      Object.keys(definitions)
+        .map((key) => key.split("#")[0])
+        .sort(),
+    ).toEqual(["icon-end", "icon-end-ikono", "icon-start", "icon-start-ikono", "label"]);
   });
 });
 
@@ -592,9 +601,12 @@ describe("every variant has its size and its own place in the grid (F14)", () =>
       string,
       { defaultValue: string }
     >;
-    expect(Object.values(definitions).map((definition) => definition.defaultValue)).toEqual([
-      "Aktion",
-    ]);
+    // Spec 027 B-6: the icon slots of the butono beside the label, off.
+    expect(
+      Object.entries(definitions)
+        .filter(([key]) => !key.includes("-ikono#"))
+        .map(([, definition]) => definition.defaultValue),
+    ).toEqual(["Aktion", false, false]);
   });
 });
 
@@ -1070,15 +1082,22 @@ describe("the label carries its tracking and its case (F31)", () => {
 describe("the label default follows the role of the Ero (M-3)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
   type Definitions = Record<string, { type: string; defaultValue: string }>;
+  // Spec 027 adds the words of the other texts (B-4), help and error (B-3) and the icon slots
+  // with their INSTANCE_SWAP (B-6); these cases are about the label and the switches before it.
   const defaultsOf = (set: DoubleNode | undefined) =>
-    Object.values((set?.properties.componentPropertyDefinitions ?? {}) as Definitions).map(
-      (definition) => definition.defaultValue,
-    );
+    Object.entries((set?.properties.componentPropertyDefinitions ?? {}) as Definitions)
+      .filter(([key, definition]) => {
+        const name = key.split("#")[0] ?? "";
+        if (definition.type === "BOOLEAN") return !SPEC_027_SWITCHES.has(name);
+        return definition.type === "TEXT" && name === "label";
+      })
+      .map(([, definition]) => definition.defaultValue);
 
   it("writes Aktion, Beschriftung and Ziel as the defaults of the three sets", async () => {
     const double = modelDouble();
     await run(double, source);
     const of = (name: string) => defaultsOf(pageNodes(double).find((child) => child.name === name));
+    // Spec 027 B-6: the icon slots of the butono are switches of their own (icon-start, icon-end).
     expect(of("butono")).toEqual(["Aktion"]);
     expect(of("elekto")).toEqual(["Frage"]);
     expect(of("kampo")).toEqual(["Beschriftung"]);
