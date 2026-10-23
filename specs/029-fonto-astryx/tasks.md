@@ -32,7 +32,7 @@
   - Regularo zählt die Jugxoj der Pakete, der Regelkatalog die sechs Regeln von `check:fontoj`, der Workspace das neue Paket.
   - `check:vitrino`: die beratenden APCA-Hinweise der 72 Kombinationen von komuna (2394 → 2646, B-5), der Zeuge für die breite Viewport-Stufe (`--fm-layout-grid-columns`);
   - `internacia.spec.ts`: headline.4 ist in komuna 14 px; die vierfache Überschrift passt in eine Zeile des Dialogs, das Umbrechen belegt die achtfache.
-- [x] **T2918 Befunde aus den Prüfungen, behoben:** Info-Rand hell auf Stufe 40 (`wcag2-reserve`, J6); die Werkstatt bringt das Stylesheet ihrer Struktur mit (B-6, Unit-Test in `vitrino.test.ts`); der Rollbereich der Token-Tabelle ist mit der Tastatur erreichbar (B-7, axe).
+- [x] **T2918 Befunde aus den Prüfungen, behoben:** Info-Rand hell auf Stufe 40 (`wcag2-reserve`, J6); die Werkstatt bringt das Stylesheet ihrer Struktur mit (B-6, Unit-Test in `vitrino.test.ts`; der Rundweg in `vitrino.check.ts` misst die Farbe von „Ansehen“ in „Ansehen“, nach dem Übergang, weil die Werkstatt jetzt komuna 0.2 zeigt); der Rollbereich der Token-Tabelle ist mit der Tastatur erreichbar (B-7, axe).
 - [x] **T2915 Befunde als Regeln:** zwei frühere Befunde, die nur als Test bestanden, gewinnen gegen die Fonto (die gewählte dritte Aktion bleibt deckend; kein reines Weiß als Text im Dunkeln, R4), ebenso die Parität (eine Deckkraft je Paint) und Nachlese 8 ② 1 (`neutral.950` bleibt im Dunkel-Set von komuna).
 
 ### C – Abschluss
