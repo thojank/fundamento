@@ -27,6 +27,7 @@
     "mezuroj": "node dist/node/mezuroj-cli.js"
   },
   "dependencies": {
+    "@fundamento/aspekto-komuna-0-2": "workspace:*",
     "@fundamento/modelo": "workspace:*"
   },
   "devDependencies": {

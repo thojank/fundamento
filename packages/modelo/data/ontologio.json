@@ -505,6 +505,42 @@
       ]
     },
     {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Fonto",
+      "term": "Fonto",
+      "inScheme": "terminologio",
+      "prefLabel": {
+        "eo": "Fonto",
+        "en": "source system",
+        "de": "Quelle"
+      },
+      "altLabel": {
+        "en": [
+          "open source design system"
+        ],
+        "de": [
+          "offene Quelle",
+          "Quellsystem"
+        ]
+      },
+      "definition": {
+        "en": "A design system with an open, permissive licence that Fundamento takes values, scales, properties and the structure of its documentation from, pinned to one version and commit, with the provenance of every value taken; identifiers and texts are never taken (Constitution v2.4, Art. V).",
+        "de": "Ein Design System mit offener, permissiver Lizenz, aus dem Fundamento Werte, Skalen, Eigenschaften und den Aufbau der Doku übernimmt, gepinnt auf eine Version und einen Commit, mit der Herkunft jedes übernommenen Werts; Bezeichner und Texte werden nie übernommen (Constitution v2.4, Art. V)."
+      },
+      "broader": [
+        "#Modelo"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Aspekto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Jugxo"
+        }
+      ]
+    },
+    {
       "uri": "https://fundamento.ciferecigo.com/ontologio#Sxablono",
       "term": "Sxablono",
       "inScheme": "terminologio",

@@ -1598,9 +1598,9 @@
       "$type": "fontFamily",
       "display": {
         "$value": [
-          "Archivo",
-          "system-ui",
-          "sans-serif"
+          "Prata",
+          "ui-serif",
+          "serif"
         ]
       },
       "body": {

@@ -1,0 +1,311 @@
+{
+ "color.background.raised": {
+  "light": {
+   "step": "neutral.25",
+   "aspiro": "oklch-l-extreme",
+   "regulo": "surface-distinct",
+   "kialo": "Die Karte der Fonto ist reines Weiß wie die Fläche. Das Aspiro oklch-l-extreme von komuna hält jede Fläche mindestens 0,02 von Weiß entfernt, und surface-distinct verlangt 0,02 zwischen Fläche und Karte: die Karte ist die hellste erlaubte Stufe (97,5)."
+  },
+  "dark": {
+   "step": "neutral.800",
+   "regulo": "surface-order",
+   "kialo": "Die Karte der Fonto liegt im Dunkeln eine Stufe unter der Fläche (10 unter 15). surface-order verlangt sunken ≤ canvas ≤ default ≤ raised: die Karte ist eine Stufe heller als die Fläche (20)."
+  }
+ },
+ "color.background.default": {
+  "light": {
+   "step": "neutral.50",
+   "aspiro": "oklch-l-extreme",
+   "regulo": "surface-distinct",
+   "kialo": "Die Fläche der Fonto ist reines Weiß. Das Aspiro oklch-l-extreme von komuna lässt höchstens 0,98 zu, und die Karte braucht 0,02 Abstand darüber: die Fläche ist Stufe 95 der Fonto."
+  }
+ },
+ "color.background.canvas": {
+  "light": {
+   "step": "neutral.100",
+   "regulo": "surface-distinct",
+   "kialo": "Die Seite der Fonto (95) gleicht der vertieften Fläche und, nach der Anpassung, der Fläche. surface-distinct verlangt 0,02 zwischen benachbarten Flächen: die Seite ist eine Stufe dunkler (90)."
+  }
+ },
+ "color.background.sunken": {
+  "light": {
+   "step": "neutral.150",
+   "regulo": "surface-distinct",
+   "kialo": "Die vertiefte Fläche der Fonto (muted, 95) gleicht der Seite. surface-distinct verlangt 0,02 Abstand: sie ist eine Stufe unter der Seite (85)."
+  },
+  "dark": {
+   "step": "neutral.950",
+   "regulo": "surface-distinct",
+   "kialo": "Die vertiefte Fläche der Fonto (muted, 10) gleicht im Dunkeln der Seite. surface-distinct verlangt 0,02 Abstand: sie ist eine Stufe dunkler (5)."
+  }
+ },
+ "color.action.primary.hover": {
+  "light": {
+   "step": "neutral.975",
+   "regulo": "state-distinct",
+   "kialo": "Die Fonto legt 5 % Schwarz über die Aktion (#1b1b1b → #1a1a1a); state-distinct verlangt 0,05 Abstand in der Helligkeit zur Ruhe. Hover geht in derselben Richtung bis zur ersten Stufe mit 0,05 Abstand (2,5)."
+  },
+  "dark": {
+   "step": "neutral.150",
+   "regulo": "state-distinct",
+   "kialo": "Die Fonto legt 5 % Weiß über die helle Aktion (95); heller als 95 bleibt kein Abstand von 0,05. Hover geht eine Stufe dunkler als nötig in die andere Richtung (85)."
+  }
+ },
+ "color.action.primary.pressed": {
+  "light": {
+   "step": "neutral.975",
+   "regulo": "state-distinct",
+   "aspiro": "oklch-l-extreme",
+   "kialo": "Die Fonto legt 10 % Schwarz über die Aktion; das bleibt unter 0,05 Abstand. Reines Schwarz verbietet das Aspiro oklch-l-extreme: gedrückt nimmt wie hover die Stufe 2,5."
+  },
+  "dark": {
+   "step": "neutral.200",
+   "regulo": "state-distinct",
+   "kialo": "Die Fonto legt 10 % Weiß über die helle Aktion; heller bleibt kein Abstand von 0,05. Gedrückt ist eine Stufe unter hover (80)."
+  }
+ },
+ "color.action.primary.selected": {
+  "light": {
+   "step": "neutral.975",
+   "regulo": "state-distinct",
+   "aspiro": "oklch-l-extreme",
+   "kialo": "Wie gedrückt."
+  },
+  "dark": {
+   "step": "neutral.200",
+   "regulo": "state-distinct",
+   "kialo": "Wie gedrückt."
+  }
+ },
+ "color.action.secondary.hover": {
+  "light": {
+   "step": "neutral.150",
+   "regulo": "state-distinct",
+   "kialo": "Die Fonto legt 5 % Schwarz über die zweite Aktion; state-distinct verlangt 0,05 Abstand: zwei Stufen dunkler als Ruhe (85)."
+  },
+  "dark": {
+   "step": "neutral.600",
+   "regulo": "state-distinct",
+   "kialo": "Die Fonto legt 5 % Weiß über die zweite Aktion; state-distinct verlangt 0,05 Abstand: eine Stufe heller als Ruhe (40)."
+  }
+ },
+ "color.action.secondary.pressed": {
+  "light": {
+   "step": "neutral.200",
+   "regulo": "state-distinct",
+   "kialo": "Die Fonto legt 10 % Schwarz über die zweite Aktion: eine Stufe unter hover (80)."
+  },
+  "dark": {
+   "step": "neutral.600",
+   "regulo": "contrast (KontrastParo action-secondary-text-on-action-secondary-pressed)",
+   "kialo": "Gedrückt eine Stufe weiter (50) hätte mit weißer Schrift 4,47:1, unter 4,5:1. Gedrückt bleibt auf der Stufe von hover (40), 0,08 von Ruhe entfernt (state-distinct).",
+   "aspiro": "wcag2-reserve"
+  }
+ },
+ "color.action.secondary.selected": {
+  "light": {
+   "step": "neutral.200",
+   "regulo": "state-distinct",
+   "kialo": "Wie gedrückt."
+  },
+  "dark": {
+   "step": "neutral.600",
+   "regulo": "contrast (KontrastParo action-secondary-text-on-action-secondary-selected)",
+   "kialo": "Wie gedrückt.",
+   "aspiro": "wcag2-reserve"
+  }
+ },
+ "color.action.danger.hover": {
+  "light": {
+   "step": "danger.50",
+   "regulo": "state-distinct",
+   "aspiro": "wcag2-reserve",
+   "kialo": "Die Fonto legt 5 % Rot über die destruktive Aktion (85). state-distinct verlangt 0,05 Abstand, eine Stufe der Fonto hat 0,043; zwei Stufen dunkler nähmen der roten Schrift den Kontrast (Aspiro wcag2-reserve). hover ist zwei Stufen heller (95)."
+  },
+  "dark": {
+   "step": "danger.900",
+   "regulo": "state-distinct",
+   "aspiro": "wcag2-reserve",
+   "kialo": "Wie hell, in die Richtung, in der der Kontrast zur hellen roten Schrift wächst: zwei Stufen dunkler (10)."
+  }
+ },
+ "color.action.danger.pressed": {
+  "light": {
+   "step": "danger.25",
+   "regulo": "state-distinct",
+   "aspiro": "wcag2-reserve",
+   "kialo": "Gedrückt eine Stufe weiter als hover in dieselbe Richtung (97,5)."
+  },
+  "dark": {
+   "step": "danger.950",
+   "regulo": "state-distinct",
+   "aspiro": "wcag2-reserve",
+   "kialo": "Gedrückt eine Stufe weiter als hover (5)."
+  }
+ },
+ "color.text.subtle": {
+  "dark": {
+   "step": "neutral.200",
+   "regulo": "text-hierarchy",
+   "kialo": "Zweites und drittes Textgewicht der Fonto sind im Dunkeln gleich (65). text-hierarchy verlangt drei unterscheidbare Rollen mit 0,05 Abstand: das zweite Gewicht ist eine Stufe heller (80)."
+  },
+  "light": {
+   "step": "neutral.800",
+   "regulo": "text-hierarchy",
+   "kialo": "Das dritte Textgewicht muss auf der vertieften Fläche 4,5:1 mit Reserve halten und rückt deshalb auf Stufe 30 (das zweite Gewicht der Fonto). Damit die drei Gewichte unterscheidbar bleiben (text-hierarchy, 0,05), ist das zweite eine Stufe dunkler (20)."
+  }
+ },
+ "color.status.info.basic": {
+  "light": {
+   "step": "info.600",
+   "regulo": "contrast-reserve",
+   "kialo": "Weiß auf der Info-Füllung der Fonto (#0074e2, gerundet auf Stufe 50) erreicht 4,56:1, unter der Reserve von 5 % über 4,5:1. Die Füllung ist eine Stufe dunkler (40)."
+  }
+ },
+ "font.lineheight.display.1": {
+  "compact": {
+   "valoro": 1.2222,
+   "regulo": "type-rhythm",
+   "kialo": "Bei Touch und schmaler Breite hat display-2 der Fonto 1,2222 und das größere display-1 1,2381. type-rhythm verlangt, dass die Zeilenhöhe mit der Größe fällt: display-1 nimmt 1,2222."
+  }
+ },
+ "font.lineheight.body.2": {
+  "compact": {
+   "valoro": 1.5,
+   "regulo": "type-rhythm",
+   "kialo": "Bei Touch und schmaler Breite hat supporting (14 px) der Fonto 1,4286 und body (16 px) 1,5. type-rhythm verlangt in der Familie body eine mit der Größe fallende Zeilenhöhe: body.2 nimmt 1,5."
+  }
+ },
+ "font.lineheight.label.2": {
+  "compact": {
+   "valoro": 1.5,
+   "regulo": "type-rhythm",
+   "kialo": "Wie body.2: label.2 (14 px) nimmt die Zeilenhöhe 1,5 von label.1 (16 px)."
+  }
+ },
+ "color.background.inverse": {
+  "dark": {
+   "step": "neutral.25",
+   "aspiro": "oklch-l-extreme",
+   "kialo": "Die inverse Fläche der Fonto ist im Dunkeln reines Weiß. Das Aspiro oklch-l-extreme von komuna hält jede Fläche 0,02 von Weiß entfernt: Stufe 97,5."
+  }
+ },
+ "color.border.default": {
+  "light": {
+   "step": "neutral.600",
+   "regulo": "contrast (WCAG 1.4.11, KontrastParo border-on-background)",
+   "kialo": "Der Feldrahmen der Fonto (border-emphasized, 85) hat auf der Fläche 1,3:1. Ein Rahmen, der ein Feld erkennbar macht, braucht 3:1 und die Reserve von komuna (10 %) – auch auf der vertieften Fläche (85): Stufe 40.",
+   "aspiro": "wcag2-reserve"
+  },
+  "dark": {
+   "step": "neutral.400",
+   "regulo": "contrast (WCAG 1.4.11, KontrastParo border-on-background)",
+   "kialo": "Der Feldrahmen der Fonto (35) hat auf der Karte 1,4:1. 3:1 mit Reserve auch auf der hellsten dunklen Fläche (20): Stufe 60.",
+   "aspiro": "wcag2-reserve"
+  }
+ },
+ "color.border.inverse": {
+  "light": {
+   "step": "neutral.500",
+   "regulo": "contrast (KontrastParo border-inverse-on-background-inverse)",
+   "kialo": "Rahmen auf der inversen Fläche (5): 3:1 mit Reserve verlangt Stufe 50.",
+   "aspiro": "wcag2-reserve"
+  },
+  "dark": {
+   "step": "neutral.500",
+   "regulo": "contrast (KontrastParo border-inverse-on-background-inverse)",
+   "kialo": "Rahmen auf der inversen Fläche (97,5): 3:1 mit Reserve verlangt Stufe 50.",
+   "aspiro": "wcag2-reserve"
+  }
+ },
+ "color.status.danger.border": {
+  "light": {
+   "step": "danger.600",
+   "regulo": "contrast (WCAG 1.4.11, KontrastParo status-danger-border-on-background-sunken)",
+   "kialo": "Der Status-Rand der Fonto (80/85) hat auf den Flächen 1,1–1,6:1. Ein Rand, der den Status erkennbar macht, braucht 3:1 mit Reserve auch auf der vertieften Fläche: Stufe 40 der Rampe.",
+   "aspiro": "wcag2-reserve"
+  }
+ },
+ "color.status.success.border": {
+  "light": {
+   "step": "success.600",
+   "regulo": "contrast (WCAG 1.4.11, KontrastParo status-success-border-on-background-sunken)",
+   "kialo": "Der Status-Rand der Fonto (80/85) hat auf den Flächen 1,1–1,6:1. Ein Rand, der den Status erkennbar macht, braucht 3:1 mit Reserve auch auf der vertieften Fläche: Stufe 40 der Rampe.",
+   "aspiro": "wcag2-reserve"
+  }
+ },
+ "color.status.warning.border": {
+  "light": {
+   "step": "warning.600",
+   "regulo": "contrast (WCAG 1.4.11, KontrastParo status-warning-border-on-background-sunken)",
+   "kialo": "Der Status-Rand der Fonto (80/85) hat auf den Flächen 1,1–1,6:1. Ein Rand, der den Status erkennbar macht, braucht 3:1 mit Reserve auch auf der vertieften Fläche: Stufe 40 der Rampe.",
+   "aspiro": "wcag2-reserve"
+  }
+ },
+ "color.status.success.basic": {
+  "light": {
+   "step": "success.600",
+   "regulo": "contrast (KontrastParo status-success-on-basic)",
+   "kialo": "Weiß auf der Erfolgs-Füllung der Fonto (#198100, gerundet auf Stufe 50) hat 4,28:1, unter 4,5:1: eine Stufe dunkler (40).",
+   "aspiro": "wcag2-reserve"
+  }
+ },
+ "color.status.danger.basic": {
+  "light": {
+   "step": "danger.600",
+   "regulo": "contrast-reserve",
+   "kialo": "Weiß auf der Fehler-Füllung der Fonto (#c9303a, gerundet auf Stufe 50) hat 4,93:1, unter der Reserve von komuna (10 %): eine Stufe dunkler (40).",
+   "aspiro": "wcag2-reserve"
+  }
+ },
+ "color.text.muted": {
+  "light": {
+   "step": "neutral.700",
+   "regulo": "contrast (KontrastParo text-muted-on-background-sunken)",
+   "kialo": "Das dritte Textgewicht der Fonto (icon-secondary, 45, gerundet auf 40) hat auf der vertieften Fläche 4,37:1, unter 4,5:1: Stufe 30.",
+   "aspiro": "wcag2-reserve"
+  }
+ },
+ "color.status.danger.text": {
+  "dark": {
+   "step": "danger.150",
+   "regulo": "contrast-reserve",
+   "aspiro": "wcag2-reserve",
+   "kialo": "Rote Schrift der Fonto (text-red, 80) auf der roten Fläche im Dunkeln (25, gerundet auf 20) hat 4,9:1, unter der Reserve von komuna (10 % über 4,5:1): eine Stufe heller (85)."
+  }
+ },
+ "color.action.tertiary.selected": {
+  "light": {
+   "step": "neutral.150",
+   "regulo": "Befund Spec 004 (colour.test: eine dauerhafte Wahl ist eine Fläche)",
+   "kialo": "Die Fonto zeigt die gewählte dritte Aktion mit 10 % Überlagerung (durchsichtig). Eine dauerhafte Wahl ist bei Fundamento eine Fläche, deckend: die Überlagerung der Fonto auf der Fläche (95), gerundet auf Stufe 85."
+  },
+  "dark": {
+   "step": "neutral.700",
+   "regulo": "Befund Spec 004 (colour.test: eine dauerhafte Wahl ist eine Fläche)",
+   "kialo": "Wie hell: 10 % Weiß der Fonto auf der Fläche (15), gerundet auf Stufe 30."
+  }
+ },
+ "color.text.default": {
+  "dark": {
+   "step": "neutral.25",
+   "regulo": "Befund R4 (text-hierarchy.test: kein reines Weiß als Text im Dunkeln, Halation)",
+   "kialo": "Die Fonto setzt Text im Dunkeln reinweiß. Reines Weiß auf dunkler Fläche überstrahlt (Halation, Befund R4 von komuna): Stufe 97,5."
+  }
+ },
+ "color.border.subtle": {
+  "dark": {
+   "step": "tint.8",
+   "regulo": "Art. X Parität (check:parity, parity-alpha-varies-by-mode)",
+   "kialo": "Der feine Rahmen der Fonto ist hell 8 % Schwarz und dunkel 10 % Weiß. Eine Farbe mit wechselnder Deckkraft hat in einer Projektion mit einer Deckkraft je Farbe keine treue Abbildung (Parität, parity-alpha-varies-by-mode). Dunkel nimmt deshalb 8 % Weiß."
+  }
+ },
+ "color.status.info.border": {
+  "light": {
+   "step": "info.600",
+   "regulo": "contrast (WCAG 1.4.11, gerenderte Prüfung des insigno und der avizo)",
+   "kialo": "Der Info-Rand der Fonto (blau 80) hat auf der Seite unter 3:1. Ein Rand, der den Status erkennbar macht, braucht 3:1 mit Reserve: Stufe 40 der Rampe, wie die übrigen Status-Ränder.",
+   "aspiro": "wcag2-reserve"
+  }
+ }
+}

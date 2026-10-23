@@ -100,15 +100,28 @@ export function referenceFonts(bases: Bases): Partial<Record<(typeof FONT_ROLES)
   return out;
 }
 
-/** The Agordo a brand starts with (step 1): empty — a name and the reference's lead colour — or komuna's colour and fonts. */
+let todayBases: Bases | undefined;
+
+/** Today's komuna (Spec 029 ①: the values of the Fonto) as a structure, read once per process. */
+function komunaBases(bases: Bases): Bases {
+  todayBases ??= { ...bases, structure: readStructure("komuna") };
+  return todayBases;
+}
+
+/**
+ * The Agordo a brand starts with (step 1): empty — a name and the reference's lead colour — or
+ * the colour and fonts of komuna: today's komuna (Spec 029 ①, its accent is neutral like the
+ * Fonto's) or komuna-0-2, komuna as it was before, the structure the Agordilo derives over.
+ */
 export function startAgordo(
   name: string,
-  basis: "leer" | "komuna",
+  basis: "leer" | "komuna" | "komuna-0-2",
   bases: Bases = loadBases(),
 ): Agordo {
-  const leitfarbe = referenceLeadColour(bases);
+  const start = basis === "komuna" ? komunaBases(bases) : bases;
+  const leitfarbe = referenceLeadColour(start);
   if (basis === "leer") return { name, leitfarbe };
-  const fonts = referenceFonts(bases);
+  const fonts = referenceFonts(start);
   const schriften: NonNullable<Agordo["schriften"]> = {};
   if (fonts.display !== undefined) schriften.display = fonts.display;
   if (fonts.body !== undefined) schriften.body = fonts.body;

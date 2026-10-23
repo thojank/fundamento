@@ -89,6 +89,27 @@
       "description": "The translations of the texts of the Uzoj and the Reguloj (Nachlese 8 ③): per language, per text under its ID; English stays the source. Absent while the Modelo has none.",
       "$ref": "#/$defs/Tradukoj"
     },
+    "fontoj": {
+      "description": "The Fontoj (Spec 029 ①, Constitution v2.4): open design systems the Modelo takes values from, pinned; absent while it takes from none.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/FontoSistemo"
+      }
+    },
+    "deveno": {
+      "description": "The provenance of every value an Aspekto took from a Fonto (Spec 029 ①, Art. VII), each with its Aspekto; absent while there is none.",
+      "type": "array",
+      "items": {
+        "allOf": [
+          { "$ref": "#/$defs/DevenoValoro" },
+          {
+            "type": "object",
+            "properties": { "aspekto": { "$ref": "#/$defs/Name" } },
+            "required": ["aspekto"]
+          }
+        ]
+      }
+    },
     "ikonaro": {
       "description": "The Ikonaro (Spec 014 ①): the icon names of the core with meaning and kialo; absent while the Modelo has none.",
       "type": "array",
@@ -1822,6 +1843,120 @@
         "external",
         "closing"
       ],
+      "additionalProperties": false
+    },
+    "FontoSistemo": {
+      "description": "A Fonto (Constitution v2.4, Art. V): a design system with an open, permissive licence that Fundamento takes values from, pinned to one version and commit (data/fontoj.json). Not to be confused with $defs/Fonto, a font family of an Aspekto.",
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "#/$defs/Name" },
+        "name": { "$ref": "#/$defs/NonEmptyText" },
+        "license": { "$ref": "#/$defs/License" },
+        "copyright": { "$ref": "#/$defs/NonEmptyText" },
+        "source": { "$ref": "#/$defs/NonEmptyText" },
+        "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+        "tag": { "$ref": "#/$defs/NonEmptyText" },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "packages": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "$ref": "#/$defs/NonEmptyText" },
+              "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+              "integrity": { "type": "string", "pattern": "^sha512-" }
+            },
+            "required": ["name", "version", "integrity"],
+            "additionalProperties": false
+          }
+        },
+        "read": { "type": "string", "format": "date" },
+        "scope": { "$ref": "#/$defs/NonEmptyText" },
+        "notices": { "$ref": "#/$defs/NonEmptyText" }
+      },
+      "required": [
+        "id",
+        "name",
+        "license",
+        "copyright",
+        "source",
+        "version",
+        "commit",
+        "packages",
+        "read",
+        "scope",
+        "notices"
+      ],
+      "additionalProperties": false
+    },
+    "FontojFile": {
+      "type": "object",
+      "properties": {
+        "$schema": { "type": "string" },
+        "fontoj": { "type": "array", "items": { "$ref": "#/$defs/FontoSistemo" } }
+      },
+      "required": ["fontoj"],
+      "additionalProperties": false
+    },
+    "DevenoValoro": {
+      "description": "The provenance of one value an Aspekto took from a Fonto (Constitution v2.4, Art. VII): the token and the set it is written in, the Fonto, the source file and key, the Fonto's value, the value written and how it was taken. A value a Regulo changed names its Jugxo.",
+      "type": "object",
+      "properties": {
+        "token": { "$ref": "#/$defs/TokenName" },
+        "aspekto": {
+          "description": "The Aspekto the value belongs to; in deveno.json the file names it once, in modelo.json every entry.",
+          "$ref": "#/$defs/Name"
+        },
+        "aro": { "$ref": "#/$defs/NonEmptyText" },
+        "fonto": { "$ref": "#/$defs/Name" },
+        "dosiero": { "$ref": "#/$defs/NonEmptyText" },
+        "sxlosilo": { "$ref": "#/$defs/NonEmptyText" },
+        "fontoValoro": { "$ref": "#/$defs/NonEmptyText" },
+        "valoro": { "$ref": "#/$defs/NonEmptyText" },
+        "maniero": {
+          "description": "prenita: taken as it is; konvertita: converted into Fundamento's units; kunmetita: composed from Fonto values as the Fonto composes them; rundita / kunmetita-rundita: the nearest step of Fundamento; interpolita: between two steps of the Fonto; derivita: derived where the Fonto has no value; adaptita: changed because a Regulo or an Aspiro wins (names its Jugxo).",
+          "type": "string",
+          "enum": [
+            "prenita",
+            "konvertita",
+            "kunmetita",
+            "rundita",
+            "kunmetita-rundita",
+            "interpolita",
+            "derivita",
+            "adaptita"
+          ]
+        },
+        "kampo": {
+          "description": "A field of a composite value (fontWeight of a typography token) when only that field is taken.",
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "jugxo": { "$ref": "#/$defs/JugxoId" },
+        "kialo": { "$ref": "#/$defs/NonEmptyText" },
+        "noto": { "$ref": "#/$defs/NonEmptyText" }
+      },
+      "required": [
+        "token",
+        "aro",
+        "fonto",
+        "dosiero",
+        "sxlosilo",
+        "fontoValoro",
+        "valoro",
+        "maniero"
+      ],
+      "additionalProperties": false
+    },
+    "DevenoFile": {
+      "description": "deveno.json of an Aspekto package: the provenance of every value it took from a Fonto.",
+      "type": "object",
+      "properties": {
+        "$schema": { "type": "string" },
+        "aspekto": { "$ref": "#/$defs/Name" },
+        "valoroj": { "type": "array", "items": { "$ref": "#/$defs/DevenoValoro" } }
+      },
+      "required": ["aspekto", "valoroj"],
       "additionalProperties": false
     },
     "MankojFile": {

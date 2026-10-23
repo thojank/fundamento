@@ -1,0 +1,57 @@
+{
+  "$extensions": {
+    "com.ciferecigo.fundamento": {
+      "id": "set_01M5N81WFGG7QN7NJV4E8H014M",
+      "kondicxoj": [
+        "aspekto=komuna",
+        "color-scheme=dark",
+        "contrast=high"
+      ]
+    }
+  },
+  "color": {
+    "background": {
+      "raised": {
+        "$value": "{color.palette.neutral.800}"
+      }
+    },
+    "action": {
+      "secondary": {
+        "hover": {
+          "$value": "{color.palette.neutral.800}"
+        },
+        "pressed": {
+          "$value": "{color.palette.neutral.800}"
+        },
+        "selected": {
+          "$value": "{color.palette.neutral.800}"
+        }
+      },
+      "danger": {
+        "rest": {
+          "$value": "{color.palette.danger.800}"
+        },
+        "hover": {
+          "$value": "{color.palette.danger.900}"
+        },
+        "pressed": {
+          "$value": "{color.palette.danger.950}"
+        },
+        "text": {
+          "$value": "{color.palette.danger.50}"
+        }
+      }
+    },
+    "status": {
+      "danger": {
+        "text": {
+          "$value": "{color.palette.danger.50}"
+        },
+        "basic": {
+          "$value": "{color.palette.danger.200}"
+        }
+      }
+    },
+    "$type": "color"
+  }
+}

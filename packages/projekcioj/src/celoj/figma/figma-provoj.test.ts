@@ -31,14 +31,17 @@ describe("provo and provo-kompakta in Figma (Spec 019 ③, G8)", () => {
   });
 
   it("radius, spacing, type size and control height are variables with a value per brand", () => {
-    expect(valuesOf("radius/medium")).toEqual({ komuna: 4, provo: 6, "provo-kompakta": 1 });
+    // Spec 029 ①: komuna's radius and type are the Fonto's (element 10, base 14).
+    expect(valuesOf("radius/medium")).toEqual({ komuna: 10, provo: 6, "provo-kompakta": 1 });
     expect(valuesOf("spacing/scale/400")).toEqual({ komuna: 16, provo: 20, "provo-kompakta": 12 });
-    expect(valuesOf("font/size/scale/300")).toEqual({
-      komuna: 16,
+    // Spec 029 ①: komuna's type scale changes at a narrow width (touch and narrow of the Fonto), so
+    // its steps cascade over viewport; the medium width holds the base.
+    expect(valuesOf("font/size/scale/300@viewport=medium")).toEqual({
+      komuna: 14,
       provo: 16,
       "provo-kompakta": 14,
     });
-    expect(valuesOf("size/scale/700")).toEqual({ komuna: 40, provo: 40, "provo-kompakta": 36 });
+    expect(valuesOf("size/scale/700")).toEqual({ komuna: 36, provo: 40, "provo-kompakta": 36 });
   });
 
   it("draws the Ikonaro of each brand in its own Phosphor weight", () => {

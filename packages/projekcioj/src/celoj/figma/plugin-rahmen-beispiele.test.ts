@@ -45,7 +45,8 @@ describe("the field of the kampo has room and shows its texts (F-4)", () => {
     expect(rest.control).toBeDefined();
     const width = Number(rest.control?.width);
     const height = Number(rest.control?.height);
-    expect(height, "size.control.medium of the first variant (size=small: 32)").toBe(32);
+    // Spec 029 ①: the element size sm of the Fonto (28) for the first variant, size=small.
+    expect(height, "size.control.small of the first variant (size=small: 28)").toBe(28);
     expect(width, `${width} × ${height}`).toBeGreaterThan(height);
   });
 

@@ -98,6 +98,11 @@ jobs:
       - name: "Check: Ikonaro"
         run: pnpm check:ikonaro
 
+      # Spec 029 ① (Constitution v2.4): every value taken from a Fonto points at a pinned Fonto
+      # with its licence text, its provenance matches the Aspekto, an adaptation names its Jugxo.
+      - name: "Check: Fontoj"
+        run: pnpm check:fontoj
+
       # F23: the release path itself, on every PR — both kits built as release.yml builds them,
       # packed as a dry run. A broken release path turns red here, not in the maintainer's run.
       - name: "Check: Release"

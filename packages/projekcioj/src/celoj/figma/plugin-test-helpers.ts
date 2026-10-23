@@ -2,8 +2,14 @@
 // a prepared file, the runner and the walkers over the double. No tests here; the tests stand in
 // plugin-<topic>.test.ts, split from plugin.test.ts by topic so Vitest runs them side by side.
 
-import { defaultModeloSource, projectModeloSource } from "@fundamento/modelo";
-import { celoInputOf } from "../../build.js";
+import { komuna02PackageDir, struktur02Files } from "@fundamento/agordilo";
+import {
+  defaultModeloSource,
+  projectModeloSource,
+  readModeloFiles,
+  withAspektoPackages,
+} from "@fundamento/modelo";
+import { celoInputOf, celoInputOfFiles } from "../../build.js";
 import { FIGMA_CELO, type FigmaPlan } from "./figma.js";
 import { type DoubleNode, figmaDouble } from "./test-doubles/plugin.js";
 
@@ -44,6 +50,10 @@ export const MODEL_FONTS = [
   // tests measure the binding, not the fixture's stack (Befund for the fixture, Spec 011 ②).
   { family: "Geist", style: "SemiBold" },
   { family: "Archivo", style: "SemiBold" },
+  // Spec 029 ①: komuna's headlines 3 and 4 are bold, as in the Fonto (a real Geist ships it), with
+  // the crossing Archivo Bold the field-by-field binding passes through.
+  { family: "Geist", style: "Bold" },
+  { family: "Archivo", style: "Bold" },
   { family: "Geist Mono", style: "Regular" },
   { family: "Geist Mono", style: "Medium" },
   { family: "ui-monospace", style: "Regular" },
@@ -133,4 +143,29 @@ export function descendant(node: DoubleNode | undefined, name: string): DoubleNo
 export function double_shown(node: DoubleNode, field: "fills" | "strokes") {
   const [paint] = (node.properties[field] ?? []) as { color?: unknown; visible?: boolean }[];
   return paint === undefined || paint.visible === false ? undefined : paint.color;
+}
+
+let komuna02Code: string | undefined;
+/**
+ * The plugin of the repository built with the values of komuna 0.2 (Spec 029 ①): the structure the
+ * Agordilo derives over, rebuilt from komuna-0-2. What a test of the Bauformen compares with
+ * `main` is the drawing, not the values komuna took from the Fonto.
+ */
+export function komuna02PluginCode(): string {
+  if (komuna02Code === undefined) {
+    const read = readModeloFiles(
+      withAspektoPackages(defaultModeloSource(), [komuna02PackageDir()]),
+    );
+    const files = read.files === undefined ? undefined : struktur02Files(read.files);
+    const prepared = files === undefined ? undefined : celoInputOfFiles(files);
+    if (prepared === undefined || !prepared.ok) {
+      throw new Error(
+        `komuna 0.2 does not build: ${JSON.stringify(prepared && !prepared.ok ? prepared.errors.slice(0, 2) : "no files")}`,
+      );
+    }
+    komuna02Code =
+      FIGMA_CELO.generate(prepared.input).find((file) => file.path === "figma/plugin/code.js")
+        ?.text ?? "";
+  }
+  return komuna02Code;
 }

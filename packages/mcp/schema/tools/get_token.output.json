@@ -57,6 +57,35 @@
         "additionalProperties": false,
         "required": ["set", "kondicxoj", "value"]
       }
+    },
+    "deveno": {
+      "description": "Spec 029 ① (Constitution v2.4, Art. VII): where the values of this token come from when an Aspekto took them from a Fonto – per Aspekto and set, the Fonto, its file and key, its value, how it was taken and, for an adapted value, the Jugxo.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "aspekto": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+          },
+          "aro": { "type": "string", "minLength": 1 },
+          "fonto": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+          },
+          "dosiero": { "type": "string", "minLength": 1 },
+          "sxlosilo": { "type": "string", "minLength": 1 },
+          "fontoValoro": { "type": "string", "minLength": 1 },
+          "valoro": { "type": "string", "minLength": 1 },
+          "maniero": { "type": "string", "minLength": 1 },
+          "kampo": { "type": "string", "minLength": 1 },
+          "jugxo": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/JugxoId"
+          },
+          "kialo": { "type": "string", "minLength": 1 },
+          "noto": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false,
+        "required": ["aspekto", "aro", "fonto", "dosiero", "sxlosilo", "fontoValoro", "maniero"]
+      }
     }
   },
   "additionalProperties": false,

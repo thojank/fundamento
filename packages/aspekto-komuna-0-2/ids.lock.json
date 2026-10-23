@@ -1,0 +1,16 @@
+{
+  "ids": {
+    "dva_malnova_01M5N7CK0H95VDDY1XE3KHBSH6": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "set_malnova_01M5N7CKCZR2X2FQ93PWV05F64": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "set_malnova_01M5N7CKCZR2X2FQ93PWV05F65": {
+      "status": "active",
+      "type": "tokenSet"
+    }
+  }
+}

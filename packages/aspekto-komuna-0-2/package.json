@@ -1,0 +1,27 @@
+{
+  "name": "@fundamento/aspekto-komuna-0-2",
+  "version": "0.2.0",
+  "description": "Fundamento Aspekto komuna-0-2: the reference brand komuna as it was in Fundamento 0.2.0 before Spec 029 (calm, neutral, no signature colour; Geist), kept unchanged and selectable beside today's komuna. A complete set of its own, its dark conjunction set and the Ikonaro from Phosphor Icons (regular, MIT). Contains no code.",
+  "license": "MIT",
+  "type": "module",
+  "fundamento": {
+    "aspekto": "./aspekto.json"
+  },
+  "files": [
+    "aspekto.json",
+    "ids.lock.json",
+    "$themes.json",
+    "sets",
+    "ikonoj"
+  ],
+  "exports": {
+    "./package.json": "./package.json",
+    "./aspekto.json": "./aspekto.json",
+    "./ids.lock.json": "./ids.lock.json",
+    "./sets/*": "./sets/*",
+    "./ikonoj/*": "./ikonoj/*"
+  },
+  "scripts": {
+    "lint": "biome check ."
+  }
+}

@@ -118,9 +118,12 @@ describe("AK-04: priority, late binding and conjunction sets on the repo data", 
     for (const set of ["color-scheme/dark", "contrast/high", "color-scheme/dark+contrast/high"]) {
       expect(definesToken(set, "color.border.strong"), set).toBe(true);
     }
-    // contrast (priority 5) beats color-scheme (4); their conjunction beats both.
+    // contrast (priority 5) beats color-scheme (4); their conjunction beats both. Spec 029 ①: komuna
+    // states every colour role of its dark mode in its conjunction set, borders included.
     expect(origin({ "color-scheme": "light", contrast: "high" })).toBe("contrast/high");
-    expect(origin({ "color-scheme": "dark", contrast: "default" })).toBe("color-scheme/dark");
+    expect(origin({ "color-scheme": "dark", contrast: "default" })).toBe(
+      "aspekto/komuna+color-scheme/dark",
+    );
     expect(origin({ "color-scheme": "dark", contrast: "high" })).toBe(
       "color-scheme/dark+contrast/high",
     );
@@ -130,27 +133,37 @@ describe("AK-04: priority, late binding and conjunction sets on the repo data", 
   it("AK-04 late binding: color.link.rest in dark is re-pointed by color-scheme/dark", () => {
     const dark = rezolvoWhere({ "color-scheme": "dark" });
     const light = rezolvoWhere({ "color-scheme": "light" });
-    // komuna states its own actions in dark (Spec 004, G9); the links stay with the generic set.
+    // Spec 029 ①: komuna states every colour role of its dark mode, links included; the set only
+    // re-points the alias (D-03), the value comes from the core palette.
     const token = tokenIn(dark, "color.link.rest");
-    // The generic set only re-points the alias (D-03); the value comes from the core palette.
-    expect(token.origin.set).toBe("color-scheme/dark");
-    expect(token.aliasChain[0]).toEqual({ set: "color-scheme/dark", token: "color.link.rest" });
+    expect(definesToken("color-scheme/dark", "color.link.rest")).toBe(true);
+    expect(token.origin.set).toBe("aspekto/komuna+color-scheme/dark");
+    expect(token.aliasChain[0]).toEqual({
+      set: "aspekto/komuna+color-scheme/dark",
+      token: "color.link.rest",
+    });
     expect(token.aliasChain.at(-1)?.set).toBe("core");
     expect(token.value).not.toEqual(tokenIn(light, "color.link.rest").value);
   });
 
-  it("AK-04 conjunction: komuna tints color.palette.neutral.950 in dark via its conjunction set", () => {
+  it("AK-04 conjunction: komuna tints palette steps in dark via its conjunction set", () => {
+    // Spec 029 ①: the steps of the dark ramps of the Fonto, which komuna's dark roles use.
     const dark = rezolvoj.filter((rezolvo) => rezolvo.assignment["color-scheme"] === "dark");
     expect(dark).toHaveLength(36);
-    expect(definesToken("color-scheme/dark", "color.palette.neutral.950")).toBe(false);
     for (const rezolvo of dark) {
-      expect(tokenIn(rezolvo, "color.palette.neutral.950").origin.set).toBe(
-        "aspekto/komuna+color-scheme/dark",
+      const tinted = Object.entries(rezolvo.tokens).filter(
+        ([name, token]) =>
+          name.startsWith("color.palette.") &&
+          token.origin.set === "aspekto/komuna+color-scheme/dark",
       );
-      expect(tokenIn(rezolvo, "color.background.canvas").aliasChain.at(-1)).toEqual({
-        set: "aspekto/komuna+color-scheme/dark",
-        token: "color.palette.neutral.950",
-      });
+      expect(tinted.length).toBeGreaterThan(0);
+      for (const [name] of tinted) {
+        expect(definesToken("color-scheme/dark", name)).toBe(false);
+      }
+      const users = Object.values(rezolvo.tokens).filter(
+        (token) => token.aliasChain.at(-1)?.set === "aspekto/komuna+color-scheme/dark",
+      );
+      expect(users.length).toBeGreaterThan(0);
     }
   });
 });

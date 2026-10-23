@@ -76,7 +76,7 @@ describe("Spec 029 ① 5: the foundation pages", () => {
     const text = tokenoj.find((token) => token.name === "color.text.default");
     expect(text?.ebeno).toBe("rolle");
     expect(text?.valoroj.komuna?.light).toBe("#000000");
-    expect(text?.valoroj.komuna?.dark).toBe("#ffffff");
+    expect(text?.valoroj.komuna?.dark).toBe("#f8f8f8");
     // Die Herkunft: komuna aus der Fonto (Datei und Schlüssel), die anderen aus ihrem Set.
     expect(text?.deveno?.komuna).toMatchObject({ fonto: "astryx", maniero: "prenita" });
     expect(text?.valoroj["komuna-0-2"]?.light).not.toBe(text?.valoroj.komuna?.light);
@@ -94,7 +94,7 @@ describe("Spec 029 ① 5: the foundation pages", () => {
     const koloro = datumoj.bazoj?.koloro?.komuna ?? [];
     const text = koloro.find((row) => row.token === "color.text.default");
     expect(text?.light).toBe("#000000");
-    expect(text?.dark).toBe("#ffffff");
+    expect(text?.dark).toBe("#f8f8f8");
     expect(text?.kontrasto?.light).toBeGreaterThan(15);
     expect(koloro.some((row) => row.token.startsWith("color.status."))).toBe(true);
   });

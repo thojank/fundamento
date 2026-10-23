@@ -35,7 +35,13 @@ export * from "./metrics.js";
  * listed here when the system composes it. Valid from `src/checks/alirebleco` and from
  * `dist/checks/alirebleco`.
  */
-export const KNOWN_ASPEKTO_FIXTURES: readonly string[] = ["ekzemplo", "provo", "provo-kompakta"];
+// Spec 029 ①: and komuna-0-2, komuna as it was before the Fonto — every check runs for every brand.
+export const KNOWN_ASPEKTO_FIXTURES: readonly string[] = [
+  "ekzemplo",
+  "provo",
+  "provo-kompakta",
+  "komuna-0-2",
+];
 
 export function knownAspektoConfigs(): { name: string; configFile: string }[] {
   const dir = fileURLToPath(new URL("../../../test/fixtures/valid/", import.meta.url));

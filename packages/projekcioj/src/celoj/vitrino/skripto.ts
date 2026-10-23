@@ -8,11 +8,12 @@
 // Werkstatt computes lives in its own bundled module (werkstatt.ts), never here.
 
 import { LINGVO_SKRIPTO } from "../../lingvo.js";
+import { BAZOJ_SKRIPTO } from "./bazoj.js";
 import { VITRINO_TEKSTOJ } from "./datumoj.js";
 
 export function vitrinoSkripto(): string {
   // Spec 026 ②: the Lingvo-Schalter's script and the English headings of the sections first.
-  return `${LINGVO_SKRIPTO}\nconst VITRINO_TEKSTOJ = ${JSON.stringify(VITRINO_TEKSTOJ)};\n${vitrinoKerno()}`;
+  return `${LINGVO_SKRIPTO}\nconst VITRINO_TEKSTOJ = ${JSON.stringify(VITRINO_TEKSTOJ)};\n${vitrinoKerno()}\n${BAZOJ_SKRIPTO}`;
 }
 
 function vitrinoKerno(): string {
@@ -242,6 +243,7 @@ function apcaSatz() {
 function render() {
   document.body.setAttribute("data-fm-kombino", kombino());
   renderRoloj();
+  renderBazoj();
   renderKontrasto();
   renderRegularo();
   renderKovrado();

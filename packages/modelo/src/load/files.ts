@@ -42,6 +42,8 @@ export interface AspektoPackageFiles {
   /** Optional Aspekto-scoped Reguloj and Jugxoj (D-10). */
   reguloj?: ModeloDocument;
   jugxoj?: ModeloDocument;
+  /** Spec 029 ①: deveno.json, the provenance of the values taken from a Fonto. */
+  deveno?: ModeloDocument;
   /**
    * The glyphs of the package (Spec 014 ②, G3): `ikonoj/<name>.svg`, the SVG text by name. Read
    * here, the loader's I/O edge, so every Celo draws the Aspekto's picture from the Modelo alone.
@@ -157,7 +159,8 @@ export function readModeloFiles(source: ModeloSource): ReadModeloFilesResult {
     const entry: AspektoPackageFiles = { name, dir, aspekto, idsLock, themes: packageThemes };
     const ikonoj = readGlyphs(join(dir, GLYPH_DIR_NAME));
     if (ikonoj !== undefined) entry.ikonoj = ikonoj;
-    for (const key of ["reguloj", "jugxoj"] as const) {
+    // Spec 029 ①: deveno.json, the provenance of the values taken from a Fonto (optional).
+    for (const key of ["reguloj", "jugxoj", "deveno"] as const) {
       const path = join(dir, `${key}.json`);
       if (existsSync(path)) {
         const document = read(path);

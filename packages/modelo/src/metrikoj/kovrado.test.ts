@@ -95,8 +95,10 @@ describe("dimensio-kovrado", () => {
       dimensio: "color-scheme",
       valoro: "dark",
     });
-    expect(dark.total).toBe(76);
-    expect(dark.own).toBe(57);
+    // Spec 029 ①: komuna states every colour role of its dark mode, the steps of the dark ramps of
+    // the Fonto and the shadows with their rim of light.
+    expect(dark.total).toBe(94);
+    expect(dark.own).toBe(94);
     const roles = dimensioKovrado(modelo, {
       aspekto: "komuna",
       dimensio: "color-scheme",
