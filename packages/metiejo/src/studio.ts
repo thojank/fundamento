@@ -28,6 +28,7 @@ import {
 import { nomoSpan, tekstoSpan } from "@fundamento/projekcioj";
 import { escapeHtml, jsonIsland, screenDocument } from "./html.js";
 import { markoLabel } from "./ident.js";
+import { dimensioNomoj } from "./lingvo.js";
 import type { MarkoView } from "./sxtupoj.js";
 import { type Bases, loadBases } from "./vorschau.js";
 
@@ -723,7 +724,7 @@ export interface StudioInput {
   /** The number of uncovered violations of the draft. */
   probleme: number;
   message?: string;
-  expert: { href?: string; sentence?: string };
+  expert: { href?: string; sentence?: string; hinweis?: string };
   /** What the last change touched: the rules affected. */
   betroffen?: string[];
   /** The components the navigation lists (Spec 024 ②). */
@@ -763,6 +764,42 @@ export const komponentoUrl = (
   const query = params.toString();
   return `/studio/${encodeURIComponent(marko)}/${ref.kind}/${encodeURIComponent(ref.name)}${query === "" ? "" : `?${query}`}`;
 };
+
+/** The Dimensio of each switch of the combination (Nachlese 10 N-7). */
+const KOMBINATION_DIMENSIOJ: Readonly<Record<keyof Kombination, string>> = {
+  scheme: "color-scheme",
+  density: "density",
+  contrast: "contrast",
+  viewport: "viewport",
+};
+
+/**
+ * The switches of the combination (Spec 024 ②): one radio group per Dimensio, named — like its
+ * values — in the span of its name (Nachlese 10 N-7: the names of the Dimensioj and Valoroj).
+ */
+export function kombinationToggles(kombination: Kombination): string {
+  const names = dimensioNomoj();
+  return (Object.keys(KOMBINATION_CHOICES) as (keyof Kombination)[])
+    .map((key) => {
+      const dimensio = KOMBINATION_DIMENSIOJ[key];
+      const keys = names[dimensio];
+      return `<fm-elekto name="${key}" value="${kombination[key]}" orientation="horizontal" size="small" data-mt-kombination="${key}">${nomoSpan(keys?.key, escapeHtml(dimensio))}${KOMBINATION_CHOICES[
+        key
+      ].values
+        .map(
+          (value) =>
+            `<data slot="options" value="${value}">${nomoSpan(keys?.valoroj[value], escapeHtml(value))}</data>`,
+        )
+        .join("")}</fm-elekto>`;
+    })
+    .join("");
+}
+
+/** The sentence of the Expertenansicht about its build (Nachlese 10 N-5), as a notice. */
+export const expertHinweisHtml = (expert: { hinweis?: string }): string =>
+  expert.hinweis === undefined
+    ? ""
+    : `<fm-avizo slot="notices" intent="warning" data-mt-expert-hinweis>${escapeHtml(expert.hinweis)}</fm-avizo>`;
 
 /** The navigation of the components under the pages of the Grundlagen (Spec 024 ②, M-4). */
 export function komponentoNav(
@@ -941,16 +978,7 @@ export function studioScreen(input: StudioInput): string {
     (entry) =>
       `<a href="${pageUrl(name, entry.key, input.kombination)}" data-page="${entry.key}">${tekstoSpan(entry.key, escapeHtml(entry.title))}</a>`,
   ).join("");
-  const toggles = (Object.keys(KOMBINATION_CHOICES) as (keyof Kombination)[])
-    .map(
-      (key) =>
-        `<fm-elekto name="${key}" value="${input.kombination[key]}" orientation="horizontal" size="small" data-mt-kombination="${key}">${escapeHtml(KOMBINATION_CHOICES[key].label)}${KOMBINATION_CHOICES[
-          key
-        ].values
-          .map((value) => `<data slot="options" value="${value}">${value}</data>`)
-          .join("")}</fm-elekto>`,
-    )
-    .join("");
+  const toggles = kombinationToggles(input.kombination);
   const groups = input.groups
     .map((groupEntry) => {
       const etikedo =
@@ -970,6 +998,7 @@ export function studioScreen(input: StudioInput): string {
 <span slot="principal">Marke ${escapeHtml(label)} · Prüfung: <fm-insigno intent="${input.probleme === 0 ? "success" : "warning"}" id="mt-probleme">${input.probleme} ${input.probleme === 1 ? "Problem" : "Probleme"}</fm-insigno> <fm-butono emphasis="high" size="small" data-mt-post="/studio/${encodeURIComponent(name)}/speichern">Speichern</fm-butono></span>
 ${input.message === undefined ? "" : `<fm-avizo slot="notices" intent="success">${escapeHtml(input.message)}</fm-avizo>`}
 <fm-avizo slot="notices" intent="warning" id="mt-studio-meldung" hidden></fm-avizo>
+${expertHinweisHtml(input.expert)}
 <fm-pagxo>
 <fm-titolo slot="title" level="1" focusable>${tekstoSpan(page.key, escapeHtml(page.title))}</fm-titolo>
 <fm-teksto slot="subtitle">${escapeHtml(page.hint)}</fm-teksto>

@@ -42,7 +42,9 @@ describe("Figma: the display name of the build's language in the descriptions (S
   it("with lingvo de the set glitilo names „Schieberegler (glitilo)“ first in its description and in its Uzo; en „Slider (glitilo)“", () => {
     const purpose = set(eo, "glitilo")?.description ?? "";
     expect(purpose).not.toContain("Schieberegler");
-    expect(set(de, "glitilo")?.description).toBe(`Schieberegler (glitilo)\n\n${purpose}`);
+    // Nachlese 10 N-6: in German the purpose is German too (the English one stays in English).
+    expect(set(de, "glitilo")?.description?.startsWith("Schieberegler (glitilo)\n\n")).toBe(true);
+    expect(set(de, "glitilo")?.description).not.toContain(purpose);
     expect(set(de, "glitilo")?.uzo?.markdown.startsWith("Schieberegler (glitilo)\n\n")).toBe(true);
     expect(set(en, "glitilo")?.description).toBe(`Slider (glitilo)\n\n${purpose}`);
     expect(set(de, "butono")?.description?.startsWith("Schaltfläche (butono)\n\n")).toBe(true);

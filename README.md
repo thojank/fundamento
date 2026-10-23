@@ -159,9 +159,9 @@ The Vitrino has a second mode beside *Ansehen*: the **Werkstatt** (Spec 016 ②)
 Esperanto is the default display; the identifiers are Esperanto and stay so (Constitution Art. II). The display switches to German or English (Spec 026 ②), the names of the components too:
 
 - **Vitrino:** the switch *Esperanto / Deutsch / English* in the header, or `#lingvo=de` / `#lingvo=en` in the fragment. An Ero is named „Schieberegler“ with `glitilo` small beside it; states, values, Dimensioj and the headings follow.
-- **Studio and Schnellstart** (`pnpm fm metiejo`): the same switch on every screen; the choice stays per browser.
+- **Studio and Schnellstart** (`pnpm fm metiejo`): the same switch in the header of every screen („Sprache“ / „Language“); names, the purpose of a component, the switches of the combination and the preview follow; the choice stays per browser. When the build of the Expertenansicht (`.fundamento/projekcioj`) is not the Metiejo's commit, the screens say so with the command that builds it anew.
 - **Gvidanto:** with `lingvo` (`de`, `en`) every answer of `suggest_ero`, `get_ero`, `get_sxablono`, `list_eroj` and `list_sxablonoj` names the display name as `label` beside `name`.
-- **Figma:** `pnpm fm projekcioj build --lingvo de` writes the display name first into the description of every component („Schieberegler (glitilo)“) and to every collection of a Dimensio; component names, variables and modes stay Esperanto, and the plugin is one of its own beside the Esperanto build.
+- **Figma:** `pnpm fm projekcioj build --lingvo de` writes the description of every component in German throughout — the display name („Schieberegler (glitilo)“), the purpose, the rules of its Uzo and their reasons (Nachlese 10) — and the name of every Dimensio to its collection; component names, variables and modes stay Esperanto, and the plugin is one of its own beside the Esperanto build.
 
 The names stand in `packages/modelo/data/tradukoj.json` under the ID of their entry — an Ero or a Sxablono under `<id>/name`, its parts, axes, values, states, slots and regions under the ID of its Skemo (`<ske>/parts/<part>`, `<ske>/props/<prop>/values/<value>`, …), a Dimensio and its values under theirs. Validation reports every missing name (`traduko-missing`). Tags, props, CSS variables, tokens and file names never change; the Make Kit guidelines stay English.
 

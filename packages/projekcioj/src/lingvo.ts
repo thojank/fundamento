@@ -37,7 +37,7 @@ export const tekstoSpan = (key: string, de: string): string =>
  * The script that switches a page (plain JavaScript, no module of its own): `fmLingvo(lingvo,
  * nomoj, tekstoj)` writes every name and heading in the language, marks the pressed button and
  * the root (`data-fm-lingvo`). `nomoj` is { de: { key: name }, en: { key: name } }, `tekstoj`
- * { key: { en: text } } — German is the text the page was written with.
+ * { key: { de?, en?, eo? } } — a language without a text shows the text the page was written with.
  */
 export const LINGVO_SKRIPTO = String.raw`
 function fmLingvo(lingvo, nomoj, tekstoj) {
@@ -48,8 +48,10 @@ function fmLingvo(lingvo, nomoj, tekstoj) {
     const eo = node.getAttribute("data-fm-eo");
     const key = node.getAttribute("data-fm-nomo");
     const name = lingvo === "eo" ? eo : (((nomoj || {})[lingvo] || {})[key] || eo);
-    // The name of an Ero or a Sxablono keeps its Esperanto name small beside it.
-    const beside = lingvo !== "eo" && name !== eo && /^(ero|sxa)_[^/]+\/name$/.test(key);
+    // The name of an Ero or a Sxablono keeps its Esperanto name small beside it — but where the
+    // page says the name alone (data-fm-nomo-sole, Nachlese 10 N-8: „Schieberegler: Varianten …“).
+    const beside =
+      lingvo !== "eo" && name !== eo && /^(ero|sxa)_[^/]+\/name$/.test(key) && !node.hasAttribute("data-fm-nomo-sole");
     const html = beside ? escape(name) + ' <small lang="eo">' + escape(eo) + "</small>" : escape(name);
     if (node.innerHTML !== html) node.innerHTML = html;
     if (lingvo === "en") node.setAttribute("lang", "en");
@@ -58,8 +60,10 @@ function fmLingvo(lingvo, nomoj, tekstoj) {
   for (const node of document.querySelectorAll("[data-fm-teksto]")) {
     if (!node.hasAttribute("data-fm-de")) node.setAttribute("data-fm-de", node.textContent);
     const de = node.getAttribute("data-fm-de");
-    const own = ((tekstoj || {})[node.getAttribute("data-fm-teksto")] || {}).en;
-    const text = lingvo === "en" && own ? own : de;
+    // The words of a heading in the language chosen where the page has them (Nachlese 10 N-1: the
+    // switch says „Sprache“, „Language“, „lingvo“), else the text it was written with.
+    const own = ((tekstoj || {})[node.getAttribute("data-fm-teksto")] || {})[lingvo];
+    const text = own || de;
     if (node.textContent !== text) node.textContent = text;
     if (lingvo === "en" && own) node.setAttribute("lang", "en");
     else node.removeAttribute("lang");
