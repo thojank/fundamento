@@ -803,12 +803,27 @@ const primaryFill = (page: Page) =>
     .locator("button")
     .evaluate((element) => getComputedStyle(element).backgroundColor);
 
+/** The fill once a transition has ended: two reads in a row agree. */
+async function settledFill(page: Page): Promise<string> {
+  let last = "";
+  await expect
+    .poll(async () => {
+      const fill = await primaryFill(page);
+      const same = fill === last;
+      last = fill;
+      return same;
+    })
+    .toBe(true);
+  return last;
+}
+
 test.describe("the Werkstatt (Spec 016 ②)", () => {
   test("opens from the mode switch and from the fragment; the panel is made of Eroj; the lead colour changes every Ero live", async ({
     page,
   }) => {
     const problems = await open(page);
     await expect(page.locator("#fm-vitrino-werkstatt")).toBeHidden();
+    const ansehen = await settledFill(page);
     await page.locator('button[data-fm-modus="werkstatt"]').click();
     await expect(page.locator("#fm-vitrino-werkstatt")).toBeVisible();
     expect(await page.evaluate(() => location.hash)).toContain("modus=werkstatt");
@@ -832,7 +847,8 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
       await expect(page.locator(`label[for='fm-werkstatt-${slider}']`)).toHaveCount(1);
       await expect(page.locator(`output[for='fm-werkstatt-${slider}']`)).toHaveCount(1);
     }
-    const before = await primaryFill(page);
+    // Spec 029 ①: the Werkstatt shows its structure, komuna 0.2, not today's komuna of Ansehen.
+    const before = await settledFill(page);
     await panel.locator("#fm-werkstatt-leitfarbe").locator("input").fill("#2e8b57");
     await expect.poll(() => primaryFill(page)).not.toBe(before);
     // The Dimensioj stay switchable: dark changes the surface, the draft stays.
@@ -842,7 +858,7 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     await page.locator('button[data-fm-modus="ansehen"]').click();
     await page.locator('[data-fm-switch="color-scheme"][data-fm-valoro="light"]').click();
     await expect(page.locator("#fm-vitrino-werkstatt")).toBeHidden();
-    await expect.poll(() => primaryFill(page)).toBe(before);
+    await expect.poll(() => primaryFill(page)).toBe(ansehen);
     expect(problems).toEqual([]);
   });
 
