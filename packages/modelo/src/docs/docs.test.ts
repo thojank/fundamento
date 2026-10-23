@@ -3239,3 +3239,49 @@ describe("Nachlese 10 documentation (specs/028-nachlese-10)", () => {
     expect(read("docs/vojmapo.md")).toContain("Nachlese 10");
   });
 });
+
+// Spec 027 „Figma-Bauformen" (2026-10-23): specs/027-figma-bauformen carries the spec unchanged, a
+// plan with the findings B-1 to B-9, the measurements in Figma, the duration of the plugin run and
+// the measuring guide with full paths, cd and file:// links (acceptance in a new empty file), and
+// tasks with the red commit.
+describe("Spec 027 documentation (specs/027-figma-bauformen)", () => {
+  it("the spec is copied unchanged; plan and tasks carry the findings, the run and the guide", () => {
+    const spec = read("specs/027-figma-bauformen/spec.md");
+    expect(createHash("sha256").update(spec).digest("hex")).toBe(
+      "dd52d5f96901abe13077f260f69431ea9a7b1e605b2ed339de92b795700d3b41",
+    );
+    const plan = read("specs/027-figma-bauformen/plan.md");
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Messungen in Figma",
+      "### Entwurfsentscheidungen",
+      "### Abweichungen",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### Messanleitung",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const term of [
+      "B-1",
+      "B-2",
+      "B-3",
+      "B-4",
+      "B-5",
+      "B-6",
+      "B-7",
+      "B-8",
+      "B-9",
+      "Dauer des Plugin-Laufs",
+      "Fundamento Bauformen",
+      "neue leere Datei",
+      "cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds",
+      "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/",
+    ]) {
+      expect(plan, term).toContain(term);
+    }
+    expect(plan).not.toContain("ciferecigo");
+    expect(read("specs/027-figma-bauformen/tasks.md")).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Spec 027");
+  });
+});
