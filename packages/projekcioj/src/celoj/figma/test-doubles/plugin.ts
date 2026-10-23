@@ -34,6 +34,9 @@ export interface DoubleCollection {
   defaultModeId: string;
   renameMode(modeId: string, name: string): void;
   addMode(name: string): string;
+  /** Shared plugin data, as every collection of the Plugin API has (PluginDataMixin). */
+  getSharedPluginData(namespace: string, key: string): string;
+  setSharedPluginData(namespace: string, key: string, value: string): void;
 }
 
 export interface DoubleNode {
@@ -1227,7 +1230,15 @@ export function figmaDouble(
   const createCollection = (name: string): DoubleCollection => {
     counts.collections++;
     const modes: DoubleMode[] = [{ modeId: id("mode"), name: "Mode 1" }];
+    const shared = new Map<string, string>();
     const collection: DoubleCollection = {
+      getSharedPluginData(namespace, key) {
+        return shared.get(`${namespace}/${key}`) ?? "";
+      },
+      setSharedPluginData(namespace, key, value) {
+        shared.set(`${namespace}/${key}`, value);
+        counts.writes++;
+      },
       id: id("collection"),
       name,
       modes,

@@ -24,6 +24,7 @@ import {
   keywordHits,
   keywordTextOf,
 } from "../eroj/usage.js";
+import { labelOf } from "../lingvo/nomoj.js";
 import { type Lingvo, reguloIn, traduko } from "../lingvo/tradukoj.js";
 import { type ReguloRef, reguloRef } from "./eroj.js";
 
@@ -50,10 +51,12 @@ export interface SuggestedBoundary {
 }
 
 export type SuggestCandidate =
-  | (SuggestedBoundary & { kind: "boundary"; keyword: string })
+  | (SuggestedBoundary & { kind: "boundary"; keyword: string; label?: string })
   | {
       kind: "goal";
       ero: string;
+      /** The display name (Spec 026 ②), only with lingvo. */
+      label?: string;
       goal: string;
       props: GoalProps;
       keyword: string;
@@ -71,8 +74,8 @@ export interface SuggestEroOutput {
    * regions beside it.
    */
   suggestion:
-    | { ero: string; sxablono?: never; props: GoalProps }
-    | { sxablono: string; ero?: never; props: GoalProps }
+    | { ero: string; sxablono?: never; label?: string; props: GoalProps }
+    | { sxablono: string; ero?: never; label?: string; props: GoalProps }
     | null;
   /** The regions of the suggested Sxablono (Spec 020, G3): what stands where. */
   regions?: SuggestedRegion[];
@@ -536,8 +539,51 @@ function sxablonoOutput(
  */
 export function suggestEro(modelo: Modelo, input: SuggestEroInput): SuggestEroResult {
   const result = suggestEroIn(modelo, input);
-  if (!result.ok || input.lingvo !== "de") return result;
-  return { ok: true, output: answerIn(modelo, result.output, input.lingvo) };
+  if (!result.ok) return result;
+  const lingvo = input.lingvo === "de" || input.lingvo === "en" ? input.lingvo : undefined;
+  if (lingvo === undefined) return result;
+  const translated = lingvo === "de" ? answerIn(modelo, result.output, lingvo) : result.output;
+  return { ok: true, output: labelled(modelo, translated, lingvo) };
+}
+
+/** The display name of an Ero, else of a Sxablono of that name (Spec 026 ②). */
+function labelOfName(modelo: Modelo, name: string, lingvo: Lingvo): string {
+  return modelo.eroj.some((entry) => entry.ero.name === name)
+    ? labelOf(modelo, "ero", name, lingvo)
+    : labelOf(modelo, "sxablono", name, lingvo);
+}
+
+/**
+ * The answer with the display name beside every name it suggests (Spec 026 ②): the suggestion
+ * and every candidate carry `label`; names stay the identifiers.
+ */
+function labelled(modelo: Modelo, output: SuggestEroOutput, lingvo: Lingvo): SuggestEroOutput {
+  const suggestion = output.suggestion;
+  return {
+    ...output,
+    suggestion:
+      suggestion === null
+        ? null
+        : suggestion.ero !== undefined
+          ? {
+              ero: suggestion.ero,
+              label: labelOf(modelo, "ero", suggestion.ero, lingvo),
+              props: suggestion.props,
+            }
+          : {
+              sxablono: suggestion.sxablono,
+              label: labelOf(modelo, "sxablono", suggestion.sxablono, lingvo),
+              props: suggestion.props,
+            },
+    ...(output.candidates === undefined
+      ? {}
+      : {
+          candidates: output.candidates.map((candidate) => ({
+            ...candidate,
+            label: labelOfName(modelo, candidate.ero, lingvo),
+          })),
+        }),
+  };
 }
 
 /**

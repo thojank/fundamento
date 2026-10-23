@@ -2,7 +2,7 @@
 // AK-09, AK-11). Read-only: nothing here writes into the repo.
 
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -3125,5 +3125,68 @@ describe("Spec 026 ① documentation (specs/026-lingvo)", () => {
     );
     expect(own).toMatch(/rot `[0-9a-f]{7}`/);
     expect(read("docs/vojmapo.md")).toContain("Spec 026 ①");
+  });
+});
+
+// Spec 026 ② (Lingvo-Schalter): plan ② carries the table of every name of the 40 Eroj and the 5
+// Sxablonoj in Esperanto, German and English for the maintainer's review — the names of
+// data/tradukoj.json, row for row —, the decisions and the measuring guide with the switch in the
+// Vitrino (#lingvo=de), the Studio, the Gvidanto and the Figma build with --lingvo de.
+describe("Spec 026 ② documentation (specs/026-lingvo)", () => {
+  it("plan ② carries the table of all names, the decisions and the measuring guide; tasks ② the red commit", () => {
+    const whole = read("specs/026-lingvo/plan.md");
+    const plan = whole.slice(whole.indexOf("## ② Lingvo-Schalter"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Constitutional Compliance Review",
+      "### Entwurfsentscheidungen",
+      "#### D-05",
+      "### Die Namen zur Prüfung",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### Messanleitung",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    const tradukoj = JSON.parse(read("packages/modelo/data/tradukoj.json")).tradukoj as Record<
+      string,
+      Record<string, string>
+    >;
+    let rows = 0;
+    for (const [kind, key] of [
+      ["eroj", "ero"],
+      ["sxablonoj", "sxablono"],
+    ] as const) {
+      const dir = join(repoRoot, "packages/modelo/data", kind);
+      for (const name of readdirSync(dir)) {
+        if (!existsSync(join(dir, name, "skemo.json"))) continue;
+        const entry = JSON.parse(read(`packages/modelo/data/${kind}/${name}/skemo.json`))[key] as {
+          id: string;
+        };
+        const row = `| \`${name}\` | ${tradukoj.de?.[`${entry.id}/name`]} | ${tradukoj.en?.[`${entry.id}/name`]} |`;
+        expect(plan, row).toContain(row);
+        rows += 1;
+      }
+    }
+    expect(rows).toBe(45);
+    for (const term of [
+      "cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds",
+      'open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj-cxiuj/vitrino/index.html#lingvo=de',
+      "--lingvo de",
+      "Schieberegler",
+      "label",
+      "localStorage",
+      "packages/modelo/data/tradukoj.json",
+    ]) {
+      expect(plan, term).toContain(term);
+    }
+    for (const line of plan.split("\n").filter((entry) => entry.includes("index.html#"))) {
+      expect(line, line).toMatch(/file:\/\/\/Users\//);
+    }
+    expect(whole).not.toContain("ciferecigo");
+    const tasks = read("specs/026-lingvo/tasks.md");
+    expect(tasks.slice(tasks.indexOf("## ② Lingvo-Schalter"))).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Spec 026 ②");
   });
 });

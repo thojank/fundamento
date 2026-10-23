@@ -13,6 +13,7 @@ import {
   type LoadedEro,
   type LoadedSxablono,
   type Modelo,
+  nomoTabelo,
   oklchLExtreme,
   oklchLightness,
   oklchLStepConsistency,
@@ -20,6 +21,7 @@ import {
   readDtcgColor,
   regularoEnforcementIssues,
   STATE_KEY,
+  skemoNomoKey,
   styledProps,
   traduko,
   typeScaleConsistency,
@@ -72,8 +74,99 @@ export interface VitrinoMezuro {
   bazo?: { wcag2: number; apca: number };
 }
 
+/**
+ * The headings of the Vitrino's own sections in English (Spec 026 ②); German is the text they are
+ * written with, and Esperanto shows them as before.
+ */
+export const VITRINO_TEKSTOJ: Readonly<Record<string, { en: string }>> = {
+  werkstatt: { en: "Workshop" },
+  paletroj: { en: "Palettes" },
+  roloj: { en: "Surfaces, text, status and actions" },
+  sxablonoj: { en: "Templates (Sxablonoj)" },
+  uzo: { en: "Usage" },
+  kontrasto: { en: "Contrast matrix" },
+  regularo: { en: "Regularo and goals" },
+  kovrado: { en: "Own values per Dimensio" },
+  komparo: { en: "Comparison" },
+};
+
+/**
+ * The names of the Lingvo-Schalter (Spec 026 ②): German and English by key, and the keys of the
+ * names the page shows — per Ero its name, states, props and values, per Sxablono and Dimensio
+ * their names.
+ */
+export interface VitrinoNomoj {
+  de: Record<string, string>;
+  en: Record<string, string>;
+  eroj: Record<
+    string,
+    {
+      key: string;
+      states: Record<string, string>;
+      props: Record<string, string>;
+      values: Record<string, Record<string, string>>;
+    }
+  >;
+  sxablonoj: Record<string, string>;
+  dimensioj: Record<string, { key: string; valoroj: Record<string, string> }>;
+}
+
+/** The keys of the names of a Modelo the Vitrino shows, with their German and English names. */
+export function vitrinoNomoj(modelo: Modelo): VitrinoNomoj {
+  const eroj: VitrinoNomoj["eroj"] = {};
+  for (const entry of modelo.eroj) {
+    const { skemo } = entry;
+    eroj[entry.ero.name] = {
+      key: `${entry.ero.id}/name`,
+      states: Object.fromEntries(
+        skemo.states.map((state) => [state, skemoNomoKey(skemo.id, "states", state)]),
+      ),
+      props: Object.fromEntries(
+        skemo.props.map((prop) => [prop.name, skemoNomoKey(skemo.id, "props", prop.name)]),
+      ),
+      values: Object.fromEntries(
+        skemo.props
+          .filter((prop) => (prop.values ?? []).length > 0)
+          .map((prop) => [
+            prop.name,
+            Object.fromEntries(
+              (prop.values ?? []).map((value) => [
+                String(value),
+                skemoNomoKey(skemo.id, "props", prop.name, value),
+              ]),
+            ),
+          ]),
+      ),
+    };
+  }
+  return {
+    ...nomoTabelo(modelo),
+    eroj,
+    sxablonoj: Object.fromEntries(
+      (modelo.sxablonoj ?? []).map((entry) => [entry.sxablono.name, `${entry.sxablono.id}/name`]),
+    ),
+    dimensioj: Object.fromEntries(
+      modelo.dimensioj.map((dimensio) => [
+        dimensio.name,
+        {
+          key: `${dimensio.id}/name`,
+          // The brands are names of their own (Spec 026 ②): no key for the values of aspekto.
+          valoroj:
+            dimensio.name === "aspekto"
+              ? {}
+              : Object.fromEntries(
+                  (dimensio.valoroj ?? []).map((valoro) => [valoro.name, `${valoro.id}/name`]),
+                ),
+        },
+      ]),
+    ),
+  };
+}
+
 export interface VitrinoDatumoj {
   fundamento: string;
+  /** The names of the Lingvo-Schalter (Spec 026 ②). */
+  nomoj: VitrinoNomoj;
   aspektoj: string[];
   dimensioj: { name: string; valoroj: string[]; default: string }[];
   kombinoj: string[];
@@ -1552,6 +1645,7 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
 
   return {
     fundamento: input.modeloJson.fundamento.version,
+    nomoj: vitrinoNomoj(modelo),
     aspektoj,
     dimensioj: modelo.dimensioj
       .filter((dimensio) => dimensio.name !== "aspekto")

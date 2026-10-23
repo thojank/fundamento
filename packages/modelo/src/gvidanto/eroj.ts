@@ -26,6 +26,7 @@ import type {
   UzoSlot,
 } from "../contracts/modelo.js";
 import { variantKeys } from "../eroj/inventories.js";
+import { labelBeside } from "../lingvo/nomoj.js";
 import { type Lingvo, reguloIn, uzoIn } from "../lingvo/tradukoj.js";
 import { ASPEKTO_DIMENSIO } from "../load/build.js";
 import { nomRegulo } from "../nomreguloj/index.js";
@@ -45,6 +46,8 @@ export interface ReguloRef {
 export interface EroSummary {
   id: string;
   name: string;
+  /** The display name (Spec 026 ②), only with lingvo. */
+  label?: string;
   description: string;
   /**
    * The values of the prop that names an Ero's variants: its first enum prop (plan D-13), for the
@@ -138,7 +141,7 @@ export interface GetEroBrief {
 }
 
 export interface GetEroOutput {
-  ero: { id: string; name: string; description: string };
+  ero: { id: string; name: string; label?: string; description: string };
   skemo: {
     id: string;
     props: Skemo["props"];
@@ -312,11 +315,13 @@ export function projekciojOf(modelo: Modelo, entry: LoadedEro): EroProjekcioj {
 }
 
 /** Every Ero of the Modelo with its variants and props (contracts/mcp-tools). */
-export function listEroj(modelo: Modelo): { eroj: EroSummary[] } {
+export function listEroj(modelo: Modelo, input: { lingvo?: Lingvo } = {}): { eroj: EroSummary[] } {
   return {
     eroj: modelo.eroj.map((entry) => ({
       id: entry.ero.id,
       name: entry.ero.name,
+      // Spec 026 ②: the display name beside the name, with lingvo.
+      ...labelBeside(modelo, "ero", entry.ero.name, input.lingvo),
       description: entry.ero.description,
       variants: [...(entry.skemo.props.find((prop) => prop.kind === "enum")?.values ?? [])],
       props: entry.skemo.props.map((prop) => prop.name),
@@ -510,7 +515,13 @@ export function getEro(modelo: Modelo, input: GetEroInput): GetEroResult | GetEr
   return {
     ok: true,
     output: {
-      ero: { id: entry.ero.id, name: entry.ero.name, description: entry.ero.description },
+      ero: {
+        id: entry.ero.id,
+        name: entry.ero.name,
+        // Spec 026 ②: the display name beside the name, with lingvo.
+        ...labelBeside(modelo, "ero", entry.ero.name, lingvo),
+        description: entry.ero.description,
+      },
       skemo: {
         id: skemo.id,
         props: skemo.props,

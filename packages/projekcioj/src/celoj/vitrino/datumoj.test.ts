@@ -236,7 +236,8 @@ describe("the Vitrino carries the Uzo of every Ero (T027, S5)", () => {
 
   it("renders the section Gebrauch with the boundaries and their kialo", () => {
     expect(html).toContain('id="fm-vitrino-uzo"');
-    expect(html).toContain("<h2>Gebrauch</h2>");
+    // Spec 026 ②: the heading in the span of its text, so the Lingvo-Schalter can switch it.
+    expect(html).toContain('<h2><span data-fm-teksto="uzo">Gebrauch</span></h2>');
     for (const boundary of datumoj.uzo?.butono?.boundary ?? []) {
       expect(html).toContain(boundary.case);
       expect(html).toContain(boundary.kialo);

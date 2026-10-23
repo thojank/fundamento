@@ -42,4 +42,41 @@
 
 ## ② Lingvo-Schalter
 
-Folgt im gestapelten PR auf ①.
+**Branch:** `261022-spec-026-lingvo-und-marken-bui-172dff` (gestapelt auf ①, PR #106).
+
+### A – Rot zuerst
+- [x] **T2631 Tests** in acht Dateien:
+  - Modelo `src/lingvo/nomoj.test.ts`: alle Namen deutsch und englisch, Check, Beispiele, eindeutig je Sprache, kurz, Gvidanto mit `label`, „Schieberegler“ über Stichwörter.
+  - MCP `e2e/s026-lingvo.test.ts`.
+  - Projekcioj `src/lingvo.test.ts`: Figma-Beschreibung, Sammlung, Esperanto als Standard, kein Bezeichner übersetzt, Vitrino mit Schalter, Spans und Island.
+  - CLI `projekcioj.test.ts` (`--lingvo`).
+  - Metiejo `src/lingvo.test.ts`.
+  - `vitrino.check.ts` (Schalter im Browser).
+  - Doku-Test ② mit der Tabelle aus den Daten.
+
+  Rot in `838d53f` (vor dem Rebase `a5c803c`):
+  - Modelo: `nomoj.test.ts` lädt nicht, Doku 1 Test
+  - Projekcioj: 6 von 8; grün waren „Esperanto ist Standard“ und „kein Bezeichner übersetzt“, weil `lingvo` noch nichts tat
+  - Metiejo: 3
+  - MCP: 3
+  - CLI: 1
+
+### B – Grün
+- [x] **T2632 Daten:** 1 033 Namen in `tradukoj.json` je `de` und `en` (D-05–D-07), `nomoj.ts`, Check in `tradukoIssues`.
+- [x] **T2633 Gvidanto:** `label` in `suggest_ero`, `get_ero`, `get_sxablono`, `list_eroj`, `list_sxablonoj`; Ein- und Ausgabeschemas; elf exakte Pins um `label` ergänzt (B-5).
+- [x] **T2634 Figma und CLI:** `--lingvo`, Beschreibungen, Sammlung als Plugin-Daten (Simulator um Shared Plugin Data der Sammlung ergänzt), Plugin-ID mit Sprache (Abweichung 4, Test grün nachgereicht) (D-11).
+- [x] **T2635 Vitrino:** Schalter, Spans, Island, Fragment, Überschriften (D-08, D-09); Pin `<h2>Gebrauch</h2>` nachgezogen; Namen in den Spalten der Werkstatt als Text (B-11).
+- [x] **T2636 Studio und Schnellstart:** `fm-elekto`, Spans, Island, `localStorage` (D-10, B-6).
+
+### C – Abschluss
+- [x] **T2637 Doku:** plan ② (Review, D-05–D-11, Tabelle der Namen, Abweichungen 1–5, B-4–B-11, O-4–O-7, Messanleitung), tasks ②, README, Vojmapo.
+- [x] **T2638 Messungen:** unten; Bericht im PR.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits ② | rot `838d53f`, grün `c9f5688` (vor dem Rebase auf `69720c5`: rot `a5c803c`, grün `8988254`), Hashes im Folgecommit |
+| Rot gemessen | Modelo 1 Datei + 1 Test, Projekcioj 6, Metiejo 3, MCP 3, CLI 1 |
+| Namen | 1 033 je Sprache: 40 Eroj, 5 Sxablonoj, 970 Teile/Achsen/Werte/Zustände/Slots/Regionen, 6 Dimensioj, 12 Werte |
+| Builds | Esperanto und Deutsch unterscheiden sich nur in `figma/plan.json`, `figma/plugin/code.js`, `figma/plugin/manifest.json` und `projekcioj.json` |

@@ -6,6 +6,7 @@
 
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { Modelo } from "../contracts/modelo.js";
+import { nomojOf } from "./nomoj.js";
 
 /** A language a text can be asked in; English is the source. */
 export type Lingvo = "de" | "en";
@@ -92,24 +93,49 @@ const pointerOf = (lingvo: string, key: string) =>
   `/tradukoj/${lingvo}/${key.replaceAll("~", "~0").replaceAll("/", "~1")}`;
 
 /**
- * The check of the translations (Nachlese 8 ③): for every language the Modelo translates into,
- * a text without its translation is an error (traduko-missing) — the Vitrino would show it in
- * English —, a translation whose text does not exist (any more) a warning (traduko-orphaned).
+ * The check of the translations (Nachlese 8 ③, Spec 026 ②): for every language the Modelo
+ * translates into, a text without its translation is an error (traduko-missing) — the Vitrino
+ * would show it in English —, and so is a name without its name in that language (Spec 026 ②:
+ * the Vitrino would show the Esperanto name); English is the source of the texts and needs no
+ * entry for them, only for the names. A translation that names neither a text nor a name (any
+ * more) is a warning (traduko-orphaned).
  */
 export function tradukoIssues(modelo: Modelo): ValidationIssue[] {
   const tekstoj = tekstojOf(modelo);
-  const keys = new Set(tekstoj.map((teksto) => teksto.key));
+  const nomoj = nomojOf(modelo);
+  const keys = new Set([
+    ...tekstoj.map((teksto) => teksto.key),
+    ...nomoj.map((entry) => entry.key),
+  ]);
   const issues: ValidationIssue[] = [];
+  const missing = (lingvo: string, key: string, message: string, suggestion: string) =>
+    issues.push({
+      rule: "traduko-missing",
+      severity: "error",
+      path: formatIssuePath({ file: FILE, pointer: pointerOf(lingvo, key) }),
+      message,
+      suggestion,
+    });
   for (const [lingvo, texts] of Object.entries(modelo.tradukoj ?? {})) {
-    for (const teksto of tekstoj) {
-      if ((texts[teksto.key] ?? "").trim() !== "") continue;
-      issues.push({
-        rule: "traduko-missing",
-        severity: "error",
-        path: formatIssuePath({ file: FILE, pointer: pointerOf(lingvo, teksto.key) }),
-        message: `The text ${teksto.key} has no translation into ${lingvo}; the Vitrino would show it in English: "${teksto.en}"`,
-        suggestion: `Add "${teksto.key}" to tradukoj.${lingvo} in ${FILE}, translated from the English text.`,
-      });
+    if (lingvo !== "en") {
+      for (const teksto of tekstoj) {
+        if ((texts[teksto.key] ?? "").trim() !== "") continue;
+        missing(
+          lingvo,
+          teksto.key,
+          `The text ${teksto.key} has no translation into ${lingvo}; the Vitrino would show it in English: "${teksto.en}"`,
+          `Add "${teksto.key}" to tradukoj.${lingvo} in ${FILE}, translated from the English text.`,
+        );
+      }
+    }
+    for (const entry of nomoj) {
+      if ((texts[entry.key] ?? "").trim() !== "") continue;
+      missing(
+        lingvo,
+        entry.key,
+        `The name ${entry.key} (${entry.kind} ${entry.eo} of ${entry.of}) has no name in ${lingvo}; the Vitrino would show the Esperanto name "${entry.eo}".`,
+        `Add "${entry.key}" to tradukoj.${lingvo} in ${FILE}: the display name, short and usual; the identifier stays.`,
+      );
     }
     for (const key of Object.keys(texts)) {
       if (keys.has(key)) continue;
@@ -117,7 +143,7 @@ export function tradukoIssues(modelo: Modelo): ValidationIssue[] {
         rule: "traduko-orphaned",
         severity: "warning",
         path: formatIssuePath({ file: FILE, pointer: pointerOf(lingvo, key) }),
-        message: `The translation ${key} into ${lingvo} names no text of the Modelo.`,
+        message: `The translation ${key} into ${lingvo} names no text and no name of the Modelo.`,
         suggestion: `Remove "${key}" from tradukoj.${lingvo}, or name the text by the ID of its entry and its path.`,
       });
     }

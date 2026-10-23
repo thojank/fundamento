@@ -7,7 +7,15 @@
 // the fragment, where the Werkstatt adds its own part (`agordo=…`) through `fmVitrino`. What the
 // Werkstatt computes lives in its own bundled module (werkstatt.ts), never here.
 
+import { LINGVO_SKRIPTO } from "../../lingvo.js";
+import { VITRINO_TEKSTOJ } from "./datumoj.js";
+
 export function vitrinoSkripto(): string {
+  // Spec 026 ②: the Lingvo-Schalter's script and the English headings of the sections first.
+  return `${LINGVO_SKRIPTO}\nconst VITRINO_TEKSTOJ = ${JSON.stringify(VITRINO_TEKSTOJ)};\n${vitrinoKerno()}`;
+}
+
+function vitrinoKerno(): string {
   return String.raw`
 const datumoj = JSON.parse(document.getElementById("fm-vitrino").textContent);
 const root = document.documentElement;
@@ -105,8 +113,25 @@ function fragment() {
   if (root.getAttribute("data-fm-modus") === "werkstatt") parts.push("modus=werkstatt");
   parts.push("aspekto=" + root.getAttribute("data-fm-aspekto"));
   for (const dimensio of datumoj.dimensioj) parts.push(dimensio.name + "=" + root.getAttribute("data-fm-" + dimensio.name));
+  // Spec 026 ②: the language only when it is not Esperanto, so every link of before stays.
+  if (lingvo !== "eo") parts.push("lingvo=" + lingvo);
   for (const [name, value] of extraParts) parts.push(name + "=" + value);
   location.replace("#" + parts.join("&"));
+}
+
+// The Lingvo-Schalter (Spec 026 ②): Esperanto by default; a button or the fragment (lingvo=de)
+// switches the names and headings, the elements stay.
+const LINGVOJ = ["eo", "de", "en"];
+let lingvo = "eo";
+
+function setLingvo(value, write) {
+  lingvo = LINGVOJ.includes(value) ? value : "eo";
+  fmLingvo(lingvo, datumoj.nomoj, VITRINO_TEKSTOJ);
+  if (write) fragment();
+}
+
+for (const button of document.querySelectorAll("button[data-fm-lingvo]")) {
+  button.addEventListener("click", () => setLingvo(button.getAttribute("data-fm-lingvo"), true));
 }
 
 // The mode (Spec 016 ②): the Werkstatt derives over the reference Aspekto, so the root shows it
@@ -297,6 +322,7 @@ komparoSwitch.addEventListener("click", () => {
 function applyFragment() {
   if (location.hash.length < 2) return;
   let modus = "ansehen";
+  let asked = "eo";
   const seen = new Set();
   for (const part of location.hash.slice(1).split("&")) {
     const at = part.indexOf("=");
@@ -305,6 +331,8 @@ function applyFragment() {
     if (!name || !value) continue;
     if (name === "modus") {
       modus = value;
+    } else if (name === "lingvo") {
+      asked = value;
     } else if (KNOWN_NAMES.has(name)) {
       root.setAttribute("data-fm-" + name, value);
       for (const other of document.querySelectorAll('[data-fm-switch="' + name + '"]')) {
@@ -316,6 +344,7 @@ function applyFragment() {
     }
   }
   for (const name of [...extraParts.keys()]) if (!seen.has(name)) extraParts.delete(name);
+  if (asked !== lingvo) setLingvo(asked, false);
   setModus(modus, false);
   for (const handler of fragmentHandlers) handler(new Map(extraParts));
 }

@@ -9,4 +9,5 @@ export * from "./celoj/tailwind/tailwind.js";
 export * from "./celoj/vitrino/vitrino.js";
 export * from "./celoj/web-component/web-component.js";
 export * from "./eroj-sources.js";
+export * from "./lingvo.js";
 export * from "./parity.js";

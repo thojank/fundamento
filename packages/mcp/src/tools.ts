@@ -483,8 +483,9 @@ function gvidanto(
   return ok(JSON.parse(JSON.stringify(result.output)) as Record<string, unknown>);
 }
 
-/** list_eroj (Spec 003 FR-13): every Ero with its variants and props. */
-const listErojTool: Tool = (served) => ok(listEroj(served.modelo));
+/** list_eroj (Spec 003 FR-13): every Ero with its variants and props; with lingvo its label (Spec 026 ②). */
+const listErojTool: Tool = (served, args) =>
+  ok(listEroj(served.modelo, args as { lingvo?: "de" | "en" }));
 
 /** get_ero (Spec 003 FR-13): one Ero with Skemo, Reguloj, examples and projections. */
 const getEroTool: Tool = (served, args) =>
@@ -499,8 +500,12 @@ const checkUsageTool: Tool = (served, args) =>
   gvidanto(checkUsage(served.modelo, args as unknown as CheckUsageInput));
 
 /** list_sxablonoj (Spec 020, G3): every Sxablono with its kind and regions. */
-const listSxablonojTool: Tool = (served) =>
-  ok(JSON.parse(JSON.stringify(listSxablonoj(served.modelo))) as Record<string, unknown>);
+const listSxablonojTool: Tool = (served, args) =>
+  ok(
+    JSON.parse(
+      JSON.stringify(listSxablonoj(served.modelo, args as { lingvo?: "de" | "en" })),
+    ) as Record<string, unknown>,
+  );
 
 /** get_sxablono (Spec 020, G3): one Sxablono with Skemo and Uzo, or its brief. */
 const getSxablonoTool: Tool = (served, args) =>

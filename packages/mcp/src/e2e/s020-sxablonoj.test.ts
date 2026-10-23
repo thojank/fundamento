@@ -95,7 +95,7 @@ describe("the example dialogs of Spec 020 ①", () => {
       goal: "Rahmen für meine Verwaltungsanwendung mit Navigation und angemeldetem Nutzer.",
       lingvo: "de",
     });
-    expect(answer.suggestion).toEqual({ sxablono: "sxelo", props: {} });
+    expect(answer.suggestion).toEqual({ sxablono: "sxelo", label: "Anwendungsrahmen", props: {} });
     expect(answer.matched).toMatchObject({ keyword: "rahmen", lingvo: "de" });
     expect(answer.regions?.map((region) => region.name)).toEqual([
       "brand",
@@ -112,7 +112,7 @@ describe("the example dialogs of Spec 020 ①", () => {
       goal: "Seitenkopf mit Titel, zwei Badges und den Aktionen Bearbeiten und Löschen.",
       lingvo: "de",
     });
-    expect(answer.suggestion).toEqual({ sxablono: "pagxo", props: {} });
+    expect(answer.suggestion).toEqual({ sxablono: "pagxo", label: "Seite", props: {} });
     const regions = answer.regions?.map((region) => region.name) ?? [];
     for (const name of ["title", "badges", "actions"]) expect(regions).toContain(name);
   });

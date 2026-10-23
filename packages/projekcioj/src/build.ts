@@ -48,6 +48,11 @@ export interface CeloInput {
   /** The state the build comes from (a commit); the Figma plugin names it in every run. */
   build?: string;
   /**
+   * The language of the display names in Figma (Spec 026 ②, `--lingvo`): the description of every
+   * component and collection names them; absent is Esperanto, where the name is the identifier.
+   */
+  lingvo?: "de" | "en";
+  /**
    * The files the Modelo was built from (Spec 016 ②, plan ② D-02): the Werkstatt of the Vitrino
    * embeds the structure — core and the reference Aspekto — the Agordilo derives over, so the
    * browser derives over the same documents as `fm agordilo derive`.
@@ -118,6 +123,8 @@ export interface BuildOptions {
   bazo?: VitrinoBazo;
   /** The state the build comes from, e.g. the commit; see `CeloInput.build`. */
   build?: string;
+  /** The language of the display names in Figma; see `CeloInput.lingvo`. Default Esperanto. */
+  lingvo?: "eo" | "de" | "en";
   /** A Modelo source; defaults to the repository's Modelo. */
   source?: ModeloSource;
   /** Shortcut for a fixture Modelo root (`<root>/vortaro`, `<root>/data`). */
@@ -174,6 +181,7 @@ export async function buildProjekcioj(options: BuildOptions): Promise<BuildResul
   if (!prepared.ok) return prepared;
   if (options.bazo !== undefined) prepared.input.bazo = options.bazo;
   if (options.build !== undefined) prepared.input.build = options.build;
+  if (options.lingvo === "de" || options.lingvo === "en") prepared.input.lingvo = options.lingvo;
 
   const generated = celoj.flatMap((celo) => celo.generate(prepared.input));
   const paths = generated.map((file) => file.path);

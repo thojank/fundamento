@@ -2,8 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ciferecigo.com/fundamento/schema/mcp/list_eroj.input.json",
   "title": "list_eroj input",
-  "description": "Every Ero of the served Modelo with its variants and its props. Takes no input.",
+  "description": "Every Ero of the served Modelo with its variants and its props. With lingvo, every Ero names its display name as label beside its name (Spec 026 ②).",
   "type": "object",
-  "properties": {},
+  "properties": {
+    "lingvo": {
+      "description": "The language of the display names (Spec 026 ②): every entry names its label beside its name.",
+      "enum": ["en", "de"]
+    }
+  },
   "additionalProperties": false
 }

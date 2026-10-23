@@ -81,6 +81,24 @@ describe("fm projekcioj build (T008)", () => {
     expect(code).toMatch(/^const BUILD = "release-1";$/m);
   });
 
+  // Spec 026 ② (Lingvo-Schalter): the build takes the language of the display names in Figma;
+  // Esperanto is the default and writes no language into the plan.
+  it("takes --lingvo de or en for the display names in Figma; Esperanto is the default; another language is a usage error", {
+    timeout: 10_000,
+  }, () => {
+    const german = build([...FIXTURE, "--celo", "figma", "--lingvo", "de"]);
+    expect(german.run.status).toBe(0);
+    const plan = JSON.parse(readFileSync(join(german.out, "figma/plan.json"), "utf8"));
+    expect(plan.lingvo).toBe("de");
+    const plain = build([...FIXTURE, "--celo", "figma"]);
+    expect(
+      JSON.parse(readFileSync(join(plain.out, "figma/plan.json"), "utf8")).lingvo,
+    ).toBeUndefined();
+    const wrong = build([...FIXTURE, "--celo", "figma", "--lingvo", "fr"]);
+    expect(wrong.run.status).toBe(2);
+    expect(wrong.run.stderr).toContain("eo, de, en");
+  });
+
   it("takes either --config or --fixture, not both", { timeout: 10_000 }, () => {
     const { run } = build([...FIXTURE, "--config", "fundamento.config.json"]);
     expect(run.status).toBe(2);

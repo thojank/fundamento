@@ -16,6 +16,11 @@
           "name": {
             "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
           },
+          "label": {
+            "description": "The display name in the language asked for (Spec 026 ②), only with lingvo; the name stays the identifier.",
+            "type": "string",
+            "minLength": 1
+          },
           "description": {
             "type": "string",
             "minLength": 1

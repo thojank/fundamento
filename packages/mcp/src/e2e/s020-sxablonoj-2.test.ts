@@ -41,7 +41,7 @@ describe("the example dialogs of Spec 020 ②", () => {
       goal: "Formular für die Anmeldung mit Token.",
       lingvo: "de",
     });
-    expect(answer.suggestion).toEqual({ sxablono: "formularo", props: {} });
+    expect(answer.suggestion).toEqual({ sxablono: "formularo", label: "Formular", props: {} });
     expect(answer.children).toEqual([
       { region: "fields", ero: "kampo", props: { kind: "password" } },
       { region: "actions", ero: "butono", props: { type: "submit", emphasis: "high" } },
@@ -54,7 +54,7 @@ describe("the example dialogs of Spec 020 ②", () => {
       goal: "Filter über der Liste mit Trefferzahl.",
       lingvo: "de",
     });
-    expect(answer.suggestion).toEqual({ sxablono: "filtrilo", props: {} });
+    expect(answer.suggestion).toEqual({ sxablono: "filtrilo", label: "Filterleiste", props: {} });
     expect(answer.regions?.map((region) => region.name)).toContain("status");
   });
 });
