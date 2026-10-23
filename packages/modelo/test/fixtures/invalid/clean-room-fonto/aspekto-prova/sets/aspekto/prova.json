@@ -1,0 +1,12 @@
+{
+  "$extensions": { "com.ciferecigo.fundamento": { "kondicxoj": ["aspekto=prova"] } },
+  "color": {
+    "$type": "color",
+    "palette": {
+      "accent": {
+        "500": { "$value": { "colorSpace": "srgb", "components": [0.4784, 0.2431, 0.6157], "hex": "#7a3e9d" } },
+        "600": { "$value": { "colorSpace": "srgb", "components": [0.1765, 0.4157, 0.3098], "hex": "#2d6a4f" } }
+      }
+    }
+  }
+}

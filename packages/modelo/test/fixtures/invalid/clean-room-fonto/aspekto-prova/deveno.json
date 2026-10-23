@@ -1,0 +1,6 @@
+{
+  "aspekto": "prova",
+  "valoroj": [
+    { "token": "color.palette.accent.500", "aro": "aspekto/prova", "fonto": "alfa", "dosiero": "src/palette.ts", "sxlosilo": "violet.50", "fontoValoro": "#7a3e9d", "valoro": "#7a3e9d", "maniero": "prenita" }
+  ]
+}

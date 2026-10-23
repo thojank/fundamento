@@ -1,0 +1,8 @@
+{
+  "description": "Spec 029 ① (Constitution v2.4, Art. V): the fingerprint check leaves out values with a valid Fonto provenance and stays as it was for every other value. Both values of the set are fingerprints of an invented benchmark Aspekto; accent.500 names the Fonto alfa (listed, pinned, with its notice) in deveno.json and passes, accent.600 has no provenance and is reported. deveno.json itself records Fonto values and is not searched.",
+  "check": "clean-room",
+  "args": ["--spuroj", "spuroj/testmarko.json"],
+  "issues": [
+    { "rule": "clean-room-marko-spuro", "path": "aspekto-prova/sets/aspekto/prova.json:8:100" }
+  ]
+}

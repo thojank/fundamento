@@ -1,0 +1,10 @@
+{
+  "aspekto": "prova",
+  "valoroj": [
+    { "token": "color.background.inverse", "aro": "aspekto/prova", "fonto": "alfa", "dosiero": "src/theme.ts", "sxlosilo": "--color-background-inverted", "fontoValoro": "#0a1317", "valoro": "{color.palette.neutral.50}", "maniero": "rundita" },
+    { "token": "radius.medium", "aro": "aspekto/prova", "fonto": "alfa", "dosiero": "src/radius.ts", "sxlosilo": "--radius-element", "fontoValoro": "0.75rem", "valoro": "{\"value\":12,\"unit\":\"px\"}", "maniero": "konvertita" },
+    { "token": "color.background.default", "aro": "aspekto/prova", "fonto": "alfa", "dosiero": "src/theme.ts", "sxlosilo": "--color-background-surface", "fontoValoro": "#ffffff", "valoro": "{color.palette.neutral.50}", "maniero": "adaptita" },
+    { "token": "color.background.raised", "aro": "aspekto/prova", "fonto": "alfa", "dosiero": "src/theme.ts", "sxlosilo": "--color-background-card", "fontoValoro": "#ffffff", "valoro": "{color.palette.neutral.50}", "maniero": "adaptita", "jugxo": "jug_01M5N89C1WQ308F9302JTZRVZ9" },
+    { "token": "color.palette.neutral.50", "aro": "aspekto/prova", "fonto": "alfa", "dosiero": "src/palette.ts", "sxlosilo": "neutral.95", "fontoValoro": "#f1f1f1", "valoro": "#f1f1f1", "maniero": "prenita" }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "$comment": "Synthetic fingerprints of an invented benchmark Aspekto for the clean-room test of Spec 029 ①: both values appear in the set of the Aspekto prova, one of them with a valid Fonto provenance.",
+  "source": "testmarko",
+  "fingerprints": [
+    "e88e3cf4f610ee5c0d8cf7d0a52113788dc7c89f0ba9c476e6ba043ecceb6d4d",
+    "fc4beb17a0d958d421520761b20fee2838fa3089d53164c0dd5cd04826a1559d"
+  ]
+}
