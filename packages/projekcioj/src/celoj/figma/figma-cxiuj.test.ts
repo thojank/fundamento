@@ -65,9 +65,10 @@ describe("all example brands in one build (Spec 026 ①)", () => {
 
   it("the plugin has an id and a name of its own that name the four brands (F-13)", () => {
     const manifest = JSON.parse(pluginManifest(plan, "abc1234")) as { id: string; name: string };
-    expect(manifest.id).toMatch(/^fundamento-apply-plan-[0-9a-f]{8}$/);
+    // Spec 027: the plugin of the Bauformen, apart from the builds before it.
+    expect(manifest.id).toMatch(/^fundamento-bauformen-[0-9a-f]{8}$/);
     expect(manifest.name).toContain(
-      "Fundamento 0.2.0 (abc1234 · komuna, ekzemplo, provo, provo-kompakta)",
+      "Fundamento Bauformen 0.2.0 (abc1234 · komuna, ekzemplo, provo, provo-kompakta)",
     );
     const built = JSON.parse(
       readFileSync(join(out, "figma/plugin/manifest.json"), "utf8"),

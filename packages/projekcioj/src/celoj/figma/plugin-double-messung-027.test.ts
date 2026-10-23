@@ -236,4 +236,34 @@ describe("instances, properties and slots (M4, M5, M6)", () => {
       "icon-start2",
     ]);
   });
+
+  it("M11: a size bound on a layer of an instance is not taken; on the instance it is", async () => {
+    const { double, figma } = await setup();
+    const component = figma.createComponent();
+    const layer = figma.createFrame();
+    set(layer, { name: "control" });
+    component.appendChild(layer);
+    const instance = (component as unknown as { createInstance(): DoubleNode }).createInstance();
+    const collection = (
+      double.figma as unknown as {
+        variables: { createVariableCollection(name: string): { modes: { modeId: string }[] } };
+      }
+    ).variables.createVariableCollection("M11");
+    const variable = (
+      double.figma as unknown as {
+        variables: {
+          createVariable(
+            name: string,
+            collection: unknown,
+            type: string,
+          ): DoubleNode & { setValueForMode(mode: string, value: number): void };
+        };
+      }
+    ).variables.createVariable("size/icon/medium", collection, "FLOAT");
+    variable.setValueForMode(collection.modes[0]?.modeId ?? "", 20);
+    instance.children[0]?.setBoundVariable("width", variable as never);
+    expect(instance.children[0]?.boundVariables.width).toBeUndefined();
+    instance.setBoundVariable("width", variable as never);
+    expect(instance.boundVariables.width).toBeDefined();
+  });
 });

@@ -8,11 +8,13 @@ import { pluginManifest } from "./plugin.js";
 import { modelDouble, once, pageNodes, repoFiles, repoPlan, run } from "./plugin-test-helpers.js";
 import type { DoubleNode } from "./test-doubles/plugin.js";
 
-const drawn = once(async () => {
+/** One run of the plan in the double, read by every case (Vitest collects nothing here). */
+async function draw() {
   const double = modelDouble();
   await run(double, repoFiles["figma/plugin/code.js"] ?? "");
   return double;
-});
+}
+const drawn = once(draw);
 
 type Definitions = Record<string, { type: string; defaultValue: unknown }>;
 const setOf = (double: Awaited<ReturnType<typeof drawn>>, name: string) =>
@@ -112,7 +114,7 @@ describe("B-6: an icon slot is off by default and holds an ikono that INSTANCE_S
     }
   });
 
-  it("a swapped icon keeps the colour and size of the butono's label", async () => {
+  it("the icon is the ikono of the butono's size; a swapped one keeps the colour of the label", async () => {
     const double = await drawn();
     const set = setOf(double, "butono");
     const ikono = setOf(double, "ikono");
@@ -124,6 +126,12 @@ describe("B-6: an icon slot is off by default and holds an ikono that INSTANCE_S
     const before = markOf(named(variant, "icon-start")[0] as DoubleNode)?.[0]?.boundVariables?.color
       ?.name;
     expect(before).toBeDefined();
+    // Figma takes no size bound on a layer of an instance (M11): the ikono of the same size.
+    const size = /size=(\w+)/.exec(variant.name)?.[1];
+    const held = (named(variant, "icon-start")[0]?.children ?? []).find(
+      (child) => child.type === "INSTANCE",
+    );
+    expect(mainOf(held)?.name.split(", ")).toContain(`size=${size}`);
     const close = ikono.children.find((child) => child.name.split(", ").includes("name=close"));
     const instance = (variant as unknown as { createInstance(): DoubleNode }).createInstance();
     (instance as unknown as { setProperties(values: Record<string, unknown>): void }).setProperties(

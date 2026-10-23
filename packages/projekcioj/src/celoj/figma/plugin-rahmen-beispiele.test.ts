@@ -292,7 +292,11 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
     expect(overlapping(double)).toEqual([]);
     // The first two sets with a label to lengthen: since Spec 011 ④ the atributlisto sorts first
     // and connects no text to its label (its label is the accessible name, never seen).
-    const [left, right] = names.filter((name) => labelsOf(setNamed(double, name)).length > 0);
+    // Spec 027 B-1: a set whose Ero takes the width of its container is fixed at the width it
+    // hugged in the base mode, and keeps it in a wider brand (plan 027, B-10); the case takes the
+    // butono, whose label grows the set, and the set after it.
+    const left = "butono";
+    const right = names[names.indexOf(left) + 1];
     if (left === undefined || right === undefined) throw new Error("2");
     const labels = labelsOf(setNamed(double, left));
     expect(labels.length).toBeGreaterThan(0);

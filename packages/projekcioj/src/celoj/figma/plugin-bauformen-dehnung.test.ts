@@ -10,11 +10,13 @@ import { describe, expect, it } from "vitest";
 import { modelDouble, once, pageNodes, repoFiles, run } from "./plugin-test-helpers.js";
 import type { DoubleNode } from "./test-doubles/plugin.js";
 
-const drawn = once(async () => {
+/** One run of the plan in the double, read by every case (Vitest collects nothing here). */
+async function draw() {
   const double = modelDouble();
   await run(double, repoFiles["figma/plugin/code.js"] ?? "");
   return double;
-});
+}
+const drawn = once(draw);
 
 type Sized = DoubleNode & { width: number; height: number; resize(w: number, h: number): void };
 const sized = (node: DoubleNode | undefined) => node as Sized;
@@ -146,7 +148,8 @@ describe("B-1: a container Ero fills the width of its instance", () => {
           400 - reserve,
           3,
         );
-        expect(400 - reserve, variant.name).toBeGreaterThan(360);
+        // The control grew with the instance (a date picker keeps its trigger beside it).
+        expect(400 - reserve, variant.name).toBeGreaterThan(sized(variant).width - reserve);
         measured++;
         instance.remove();
       }

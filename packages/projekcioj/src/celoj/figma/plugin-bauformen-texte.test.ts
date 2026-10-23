@@ -6,17 +6,22 @@ import { describe, expect, it } from "vitest";
 import { modelDouble, once, pageNodes, repoFiles } from "./plugin-test-helpers.js";
 import type { DoubleNode } from "./test-doubles/plugin.js";
 
-const drawn = once(async () => {
+/** One run of the plan in the double, read by every case (Vitest collects nothing here). */
+async function draw() {
   const double = modelDouble();
   const report = (await new Function(
     "figma",
     `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
   )(double.figma)) as { components: { set: string; properties?: Record<string, number> }[] };
   return { double, report };
-});
+}
+const drawn = once(draw);
 
+/** The sets of the Eroj (the Sxablono sxelo is a set too: its texts are slot content, B-8). */
 const setsOf = (double: Parameters<typeof pageNodes>[0]) =>
-  pageNodes(double).filter((node) => node.type === "COMPONENT_SET");
+  pageNodes(double).filter(
+    (node) => node.type === "COMPONENT_SET" && node.getSharedPluginData("fundamento", "ero") !== "",
+  );
 
 const textsIn = (node: DoubleNode): DoubleNode[] =>
   node.children.flatMap((child) => (child.type === "TEXT" ? [child] : textsIn(child)));
@@ -85,7 +90,11 @@ describe("B-4: every text of a set is a TEXT property, named after its slot", ()
           used.get(key)?.add(String(text.properties.characters));
         }
       }
-      expect(texts.length, set.name).toBe(used.size);
+      // The label of a navigation, a tab list or a list is its accessible name, never seen: a
+      // property without a layer, the maintainer's proposal since Spec 011 ⑤.
+      const unseen = texts.filter(([key]) => !used.has(key)).map(([key]) => key.split("#")[0]);
+      expect(unseen, set.name).toEqual(unseen.length === 0 ? [] : ["label"]);
+      expect(texts.length - unseen.length, set.name).toBe(used.size);
       for (const [key, words] of used) {
         expect([...words], `${set.name}: ${key}`).toEqual([String(definitions[key]?.defaultValue)]);
       }
@@ -109,7 +118,7 @@ describe("B-4: every text of a set is a TEXT property, named after its slot", ()
     expect(namesOf("kampo")).toEqual(["error-text", "help-text", "label", "text"]);
     expect(namesOf("avizo")).toEqual(["details", "heading", "label"]);
     expect(namesOf("menuo")).toEqual(["items-1", "items-2", "items-3", "label"]);
-    expect(namesOf("navigado")).toEqual(["items-1", "items-2", "items-3"]);
+    expect(namesOf("navigado")).toEqual(["items-1", "items-2", "items-3", "label"]);
     expect(namesOf("dialogo")).toEqual(
       expect.arrayContaining(["action-1", "action-2", "label", "message", "reason-label"]),
     );

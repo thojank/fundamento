@@ -92,7 +92,23 @@ export function bildOf(variant: DoubleNode): string[] {
         const fill = paints(child.properties.fills);
         const stroke = paints(child.properties.strokes);
         const effects = JSON.stringify(child.properties.effects ?? []);
-        if (fill.length > 0 || stroke.length > 0 || effects !== "[]") {
+        // A frame that paints one edge alone (the line of a quote, of a row) is that line: where
+        // the rest of the frame reaches paints nothing.
+        const sides = ["Top", "Right", "Bottom", "Left"].filter(
+          (side) =>
+            child.boundVariables[`stroke${side}Weight`] !== undefined ||
+            child.properties[`stroke${side}Weight`] !== 0,
+        );
+        if (fill.length === 0 && effects === "[]" && stroke.length > 0 && sides.length === 1) {
+          const side = sides[0] ?? "";
+          const along =
+            side === "Top" || side === "Bottom" ? `w${round(width)}` : `h${round(height)}`;
+          const x = side === "Right" ? at.x + width : at.x;
+          const y = side === "Bottom" ? at.y + height : at.y;
+          lines.push(
+            `L ${side} ${round(x)},${round(y)} ${along} ${stroke.join("+")} ${field(child, `stroke${side}Weight`)} o${opacity} v${shown}`,
+          );
+        } else if (fill.length > 0 || stroke.length > 0 || effects !== "[]") {
           lines.push(
             `${child.type === "VECTOR" ? "V" : "F"} ${round(at.x)},${round(at.y)} ${round(width)}x${round(height)} ` +
               `${fill.join("+")} | ${stroke.join("+")} ${stroke.length > 0 ? STROKE_FIELDS.map((name) => field(child, name)).join(" ") : ""} ` +

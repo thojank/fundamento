@@ -212,7 +212,8 @@ describe("exportMarko: Figma (F-13)", () => {
     const manifestPath = join(result.dir, "projekcioj", "figma", "plugin", "manifest.json");
     expect(existsSync(manifestPath)).toBe(true);
     const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as { id: string; name: string };
-    expect(manifest.id).toMatch(/^fundamento-apply-plan-[0-9a-f]+$/);
+    // Spec 027: the plugin of the Bauformen.
+    expect(manifest.id).toMatch(/^fundamento-bauformen-[0-9a-f]+$/);
     expect(manifest.name).toContain("provo");
     expect(existsSync(join(result.dir, "projekcioj", "figma", "plugin", "code.js"))).toBe(true);
   });

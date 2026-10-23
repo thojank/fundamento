@@ -319,7 +319,7 @@ interface NodeContext {
   variableById?: (id: string) => DoubleVariable | undefined;
   /** The collection a variable belongs to, with its mode ids in order (F30). */
   collectionOf?: (variable: DoubleVariable) => DoubleCollection | undefined;
-  box?: (node: DoubleNode) => DoubleBox;
+  box?: (node: DoubleNode, key?: string) => DoubleBox;
   resolveColor?: (name: string) => { r: number; g: number; b: number } | undefined;
   /**
    * Counts every change to the document. The layout is computed once per state of the document,
@@ -528,6 +528,13 @@ function node(
       self.properties.height = height;
       self.defaults.delete("width");
       self.defaults.delete("height");
+      // Measured M9 (2026-10-23): an instance whose width was bound to a variable took 800 and
+      // lost the binding when resized; its filling surface followed. For a node that is no
+      // instance the double keeps a binding, as before (not measured).
+      if (type === "INSTANCE") {
+        delete self.boundVariables.width;
+        delete self.boundVariables.height;
+      }
       counts.writes++;
       context.version++;
     },
@@ -549,6 +556,9 @@ function node(
       return self.pluginData[`${namespace}/${key}`] ?? "";
     },
     setBoundVariable(field, variable) {
+      // Measured M11 (2026-10-23): a width or height bound on a layer of an instance is not taken
+      // — no error, no binding, the size stays the main's. The instance itself takes it (M10).
+      if (LAYERS.has(self) && (field === "width" || field === "height")) return;
       // Figma refuses a font binding whose variable can show a font the file has not loaded: the
       // value of every mode must be loaded first, not only the one the node shows today (F30).
       if (FONT_FIELDS.has(field) && variable !== null) {
@@ -808,7 +818,7 @@ function node(
       // Size and place are computed by the layout of the file, never read from what was last
       // written: the double does not assume a size the tool would compute differently (F14).
       if (typeof key === "string" && GEOMETRY_KEYS.has(key) && context.box !== undefined) {
-        const value = context.box(recorded)[key as keyof DoubleBox];
+        const value = context.box(recorded, key)[key as keyof DoubleBox];
         // Figma keeps geometry as 32-bit floats (Nachlese 4 N-5, F-6): 0.01 reads 0.0099999998.
         return context.float32 === true ? Math.fround(value) : value;
       }
@@ -1161,7 +1171,15 @@ function layoutOf(
     return { width: along("H"), height: along("V") };
   };
   /** The size a frame would hug, whatever its own sizing says (M2/M3, see contribution). */
+  const naturals = new Map<DoubleNode, { width: number; height: number }>();
   const naturalOf = (current: DoubleNode): { width: number; height: number } => {
+    const known = naturals.get(current);
+    if (known !== undefined) return known;
+    const size = naturalUncached(current);
+    naturals.set(current, size);
+    return size;
+  };
+  const naturalUncached = (current: DoubleNode): { width: number; height: number } => {
     const mode = prop(current, "layoutMode");
     if (
       (mode !== "HORIZONTAL" && mode !== "VERTICAL") ||
@@ -1527,7 +1545,12 @@ export function figmaDouble(
     ...(options.refuse === undefined ? {} : { refuses: new Set(options.refuse) }),
     ...(options.float32 === true ? { float32: true } : {}),
     version: 0,
-    variableById: (id) => variables.find((variable) => variable.id === id),
+    // By the index below (Spec 027: the font check of every binding searched all variables of
+    // every mode one by one, the largest share of a run).
+    variableById: (id) => {
+      index();
+      return byId.get(id);
+    },
     collectionOf: (variable) =>
       collections.find((collection) => collection.id === variable.variableCollectionId),
   };
@@ -1823,9 +1846,36 @@ export function figmaDouble(
   context.collections = () => collections;
   // One layout per state of the document (see NodeContext.version), with its resolved numbers.
   let computed: { version: number; top: DoubleNode; boxes: Map<DoubleNode, DoubleBox> } | undefined;
-  context.box = (current: DoubleNode) => {
-    let top = current;
-    while (top.parent !== undefined) top = top.parent;
+  // A size depends on the layers above a node only as far as it fills them: width and height are
+  // computed from the first layer up that does not fill its parent (Spec 027: the plugin measures
+  // every stretching variant after writing it, and a layout of the whole file per read took a run
+  // from 4 s to minutes). A place (x, y) is relative to the parent: it is computed from the parent
+  // up the same way.
+  const fillsParent = (node: DoubleNode): boolean => {
+    const parent = node.parent;
+    const mode = parent?.properties.layoutMode;
+    if (parent === undefined || (mode !== "HORIZONTAL" && mode !== "VERTICAL")) return false;
+    if (node.properties.layoutPositioning === "ABSOLUTE" || node.properties.visible === false) {
+      return false;
+    }
+    return (
+      node.properties.layoutSizingHorizontal === "FILL" ||
+      node.properties.layoutSizingVertical === "FILL"
+    );
+  };
+  context.box = (current: DoubleNode, key?: string) => {
+    if (computed !== undefined && computed.version === context.version) {
+      const known = computed.boxes.get(current);
+      // The layout of a part of the file places its top at 0/0: the top's own place is not in it.
+      const placed = current !== computed.top || computed.top.parent === undefined;
+      if (known !== undefined && (placed || key === "width" || key === "height")) return known;
+    }
+    let top = key === "x" || key === "y" ? (current.parent ?? current) : current;
+    if (GEOMETRY_KEYS.has(key ?? "")) {
+      while (top.parent !== undefined && fillsParent(top)) top = top.parent;
+    } else {
+      while (top.parent !== undefined) top = top.parent;
+    }
     if (computed === undefined || computed.version !== context.version || computed.top !== top) {
       const resolved = new Map<string, unknown>();
       const once = (name: string) => {

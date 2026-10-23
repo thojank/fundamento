@@ -11,11 +11,13 @@ import type { DoubleNode } from "./test-doubles/plugin.js";
 
 const source = repoFiles["figma/plugin/code.js"] ?? "";
 
-const drawn = once(async () => {
+/** One run of the plan in the double, read by every case (Vitest collects nothing here). */
+async function draw() {
   const double = modelDouble();
   await run(double, source);
   return double;
-});
+}
+const drawn = once(draw);
 
 const frameOf = (double: Awaited<ReturnType<typeof drawn>>) =>
   pageNodes(double).find((node) => node.name === "Sxablonoj") as DoubleNode;

@@ -19,8 +19,8 @@
   "apartigilo": {
     "set": "648x57\norientation=horizontal, state=rest@4,4\norientation=vertical, state=rest@4,13",
     "variants": {
-      "orientation=horizontal, state=rest": "8f170bb25eaa8f01",
-      "orientation=vertical, state=rest": "9ebd940c6fbd7a7c"
+      "orientation=horizontal, state=rest": "1fea48003deb6a72",
+      "orientation=vertical, state=rest": "8082bc14d71d5372"
     }
   },
   "atributlisto": {
@@ -664,10 +664,10 @@
   "langetaro": {
     "set": "739.2x55\nstate=rest@4,4\nstate=hover@188.8,4\nstate=focus@373.6,4\nstate=disabled@558.4,4",
     "variants": {
-      "state=rest": "23ac0f903f4b9637",
-      "state=hover": "31d628621881bebe",
-      "state=focus": "1cd2330f8c388771",
-      "state=disabled": "edff8183cb081579"
+      "state=rest": "faf4d4d138d2bccb",
+      "state=hover": "2953af9f5862505c",
+      "state=focus": "d3af4e93e60cb184",
+      "state=disabled": "d5025f231ef30a6e"
     }
   },
   "ligilo": {
@@ -742,7 +742,7 @@
   "markdovido": {
     "set": "459.2x104\nstate=rest@4,4",
     "variants": {
-      "state=rest": "501a9f49d3b76318"
+      "state=rest": "1a130815244a7b27"
     }
   },
   "markobutono": {
@@ -1014,9 +1014,9 @@
   "spuro": {
     "set": "506.4x33.5\nstate=rest@4,4\nstate=hover@172.8,4\nstate=focus@341.6,4",
     "variants": {
-      "state=rest": "4a78b3c6f116dc14",
-      "state=hover": "89859b64d46afac1",
-      "state=focus": "39be90ba10357f8d"
+      "state=rest": "71da72a398de11c4",
+      "state=hover": "5c84f76276ea119c",
+      "state=focus": "b6df3163c7299252"
     }
   },
   "sxaltilo": {
@@ -1057,12 +1057,12 @@
   "tabelo": {
     "set": "980.4x375\ndensity=comfortable, state=rest@4,4\ndensity=comfortable, state=hover@330.8,4\ndensity=comfortable, state=focus@657.6,4\ndensity=compact, state=rest@4,223.5\ndensity=compact, state=hover@330.8,223.5\ndensity=compact, state=focus@657.6,223.5",
     "variants": {
-      "density=comfortable, state=rest": "bdd6f70d0c4a5f02",
-      "density=comfortable, state=hover": "494173776bf230f5",
-      "density=comfortable, state=focus": "ff9f4f2e21ed9c63",
-      "density=compact, state=rest": "c2cc039199a0cd07",
-      "density=compact, state=hover": "c8db5ecbaab2d0b7",
-      "density=compact, state=focus": "d8e7558f828b9972"
+      "density=comfortable, state=rest": "b3e4cede0d7b9b0a",
+      "density=comfortable, state=hover": "c3d95be4e77f6376",
+      "density=comfortable, state=focus": "7b917406af7e24e6",
+      "density=compact, state=rest": "19ca182b303a7b28",
+      "density=compact, state=hover": "0b73531ca3f257af",
+      "density=compact, state=focus": "319dc8eb738412cb"
     }
   },
   "tekstareo": {

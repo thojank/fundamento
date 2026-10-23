@@ -522,7 +522,10 @@ describe("the dialogo is drawn as a dialog: surface with heading, message, reaso
     expect(small?.children.map((child) => child.name)).toEqual(["surface"]);
     const surface = descendant(small, "surface");
     expect(surface?.properties.layoutMode).toBe("VERTICAL");
-    expect(surface?.properties.layoutSizingHorizontal).toBe("FIXED");
+    // Spec 027 B-1: the dialog takes the width of its container: the variant holds the width
+    // bound by size, the surface fills it.
+    expect(surface?.properties.layoutSizingHorizontal).toBe("FILL");
+    expect(small?.properties.layoutSizingHorizontal).toBe("FIXED");
     expect(surface?.properties.layoutSizingVertical).toBe("HUG");
     expect(surface?.children.map((child) => child.name)).toEqual([
       "heading",
@@ -530,10 +533,10 @@ describe("the dialogo is drawn as a dialog: surface with heading, message, reaso
       "content",
       "actions",
     ]);
-    expect(bound(surface, "width")).toBe("size/container/small");
-    expect(
-      bound(descendant(variant("size=medium, reason=none, state=rest"), "surface"), "width"),
-    ).toBe("size/container/medium");
+    expect(bound(small, "width")).toBe("size/container/small");
+    expect(bound(variant("size=medium, reason=none, state=rest"), "width")).toBe(
+      "size/container/medium",
+    );
     expect(paintOf(surface, "fills")).toBe("color/background/raised");
     expect(paintOf(surface, "strokes")).toBe("color/border/default");
     expect(bound(surface, "strokeWeight")).toBe("border/width/default");

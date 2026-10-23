@@ -851,8 +851,11 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
       expect(each.bindings["icon.color"]).toBe(each.bindings["label.color"]);
     }
     expect(set?.toggles).toEqual([{ property: "external", part: "icon-end", defaultValue: false }]);
-    // The button keeps its icon-start and no toggle of its own.
-    expect(butonoOf(plan.components)?.toggles).toBeUndefined();
+    // Spec 027 B-6: the button's icon slots are switches of their own, off by default.
+    expect(butonoOf(plan.components)?.toggles).toEqual([
+      { property: "icon-end", part: "icon-end", defaultValue: false },
+      { property: "icon-start", part: "icon-start", defaultValue: false },
+    ]);
   });
 
   it("underlines inline in every state and standalone from hover and focus on (D-11, B-1)", () => {
@@ -2833,7 +2836,8 @@ describe("the Figma plan draws icons (Spec 014 ②)", () => {
     expect(rest?.bindings["icon.color"]).toBe("color/action/primary/text");
     expect(rest?.bindings["icon.size"]).toBe("size/icon/medium");
     expect(rest?.paints?.["icon.color"]).toBeDefined();
-    expect(rest?.icons).toEqual({ "icon-start": "check" });
+    // Spec 027 B-6: both icon slots, each the Vitrino's example; the set shows them off.
+    expect(rest?.icons).toEqual({ "icon-start": "check", "icon-end": "check" });
   });
 
   it("draws the set ikono as an icon: name × size × intent, the colour of a neutral icon bound to the text's, a status icon to its status text", () => {
