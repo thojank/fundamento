@@ -19,6 +19,9 @@ const CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = [
   ["Check: Clean-Room", "check:clean-room"],
   // Spec 014 ① (G3): every installed Aspekto draws every name of the Ikonaro.
   ["Check: Ikonaro", "check:ikonaro"],
+  // Spec 029 ① (Constitution v2.4): every value taken from a Fonto points at a pinned Fonto with
+  // its licence text, and its provenance matches the Aspekto.
+  ["Check: Fontoj", "check:fontoj"],
 ];
 
 /** Rendered checks of the Eroj (Spec 003 T013, plan D-09): axe-core, keyboard, focus, ARIA. */

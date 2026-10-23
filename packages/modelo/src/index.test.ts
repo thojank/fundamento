@@ -14,6 +14,7 @@ describe("@fundamento/modelo public entry", () => {
       "alirebleco",
       "clean-room",
       "ikonaro",
+      "fontoj",
     ]);
   });
 

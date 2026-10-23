@@ -1,0 +1,19 @@
+{
+  "$extensions": { "com.ciferecigo.fundamento": { "kondicxoj": ["aspekto=prova"] } },
+  "color": {
+    "$type": "color",
+    "palette": {
+      "neutral": {
+        "50": { "$value": { "colorSpace": "srgb", "components": [0.9451, 0.9451, 0.9451], "hex": "#f1f1f1" } }
+      }
+    },
+    "background": {
+      "default": { "$value": "{color.palette.neutral.50}" },
+      "raised": { "$value": "{color.palette.neutral.50}" }
+    }
+  },
+  "radius": {
+    "$type": "dimension",
+    "medium": { "$value": { "value": 10, "unit": "px" } }
+  }
+}

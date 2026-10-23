@@ -1,0 +1,4 @@
+{
+  "$schema": "https://ciferecigo.com/fundamento/schema/config.schema.json",
+  "aspektoj": ["./aspekto-prova"]
+}
