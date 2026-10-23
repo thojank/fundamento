@@ -21,7 +21,7 @@ export const jsonIsland = (value: unknown): string =>
   JSON.stringify(value).replaceAll("</", "<\\/").replaceAll("<!--", "<\\!--");
 
 export const LAYOUT_CSS = `:root { color-scheme: light dark; }
-.mt-lingvo { display: flex; justify-content: flex-end; padding: 4px 8px; font: 12px/1.4 system-ui, sans-serif; }
+.mt-lingvo { display: inline-flex; align-items: center; }
 [data-fm-lingvo="eo"] .mt-nur-traduko { display: none; }
 body { margin: 0; font-family: var(--fm-typography-body-1-font-family); background-color: var(--fm-color-background-canvas); color: var(--fm-color-text-default); }
 .mt-sxtupo { display: grid; grid-template-columns: minmax(18rem, 28rem) minmax(0, 1fr); gap: var(--fm-spacing-xlarge); align-items: start; }
@@ -99,6 +99,8 @@ for (const wahl of document.querySelectorAll("[data-fm-lingvo-wahl]")) {
       localStorage.setItem("fundamento-lingvo", fmLingvoNun);
     } catch {}
     fmLingvo(fmLingvoNun, fmNomoj, fmNomoj.tekstoj);
+    // Nachlese 10 N-8: the preview in the frame reads the choice when it loads.
+    if (typeof refreshFrame === "function") refreshFrame();
   });
 }
 
@@ -240,6 +242,31 @@ if (nameField && kennung) {
   };
   nameField.addEventListener("input", show);
   show();
+}
+
+// Nachlese 10 N-2/N-3: opening an existing brand needs no name — the field is no duty then and
+// shows no error, the brand list is — and the main button says what happens.
+const basis = document.querySelector('fm-elekto[name="basis"]');
+if (basis && nameField) {
+  const main = document.querySelector('fm-butono[type="submit"][emphasis="high"]');
+  const brands = document.querySelector('fm-elektilo[name="oeffnen"]');
+  const apply = () => {
+    const open = basis.value === "oeffnen";
+    nameField.hidden = open;
+    if (open) {
+      nameField.removeAttribute("required");
+      nameField.removeAttribute("invalid");
+    } else if (!nameField.hasAttribute("required")) {
+      nameField.setAttribute("required", "");
+    }
+    if (brands) {
+      if (open) brands.setAttribute("required", "");
+      else brands.removeAttribute("required");
+    }
+    if (main) main.textContent = open ? "Öffnen" : "Anlegen";
+  };
+  basis.addEventListener("change", apply);
+  apply();
 }
 
 // K-3/K-4 (Spec 024): the search answers while typing, without Enter; without a hit a sentence.
@@ -430,9 +457,20 @@ const attributes = (entries: Readonly<Record<string, string>>): string =>
  * The Lingvo-Schalter of a screen (Spec 026 ②): the choice of the Vitrino as an Ero of the screen —
  * a radio group like the Studio's switches of the combination (M-2: no native controls).
  */
-const LINGVO_WAHL = `<fm-elekto name="lingvo" value="eo" orientation="horizontal" size="small" data-fm-lingvo-wahl>lingvo${LINGVO_BUTTONS.map(
+const LINGVO_WAHL = `<fm-elekto name="lingvo" value="eo" orientation="horizontal" size="small" data-fm-lingvo-wahl><span data-fm-teksto="lingvo">lingvo</span>${LINGVO_BUTTONS.map(
   (button) => `<data slot="options" value="${button.lingvo}">${button.label}</data>`,
 ).join("")}</fm-elekto>`;
+
+/**
+ * The switch in the header (Nachlese 10 N-1): in the frame's principal region beside the brand and
+ * the step; a screen without the frame has it above its body.
+ */
+function withLingvoWahl(body: string): string {
+  const wahl = `<div slot="principal" class="mt-lingvo">${LINGVO_WAHL}</div>`;
+  return body.includes("<fm-sxelo>")
+    ? body.replace("<fm-sxelo>", `<fm-sxelo>\n${wahl}`)
+    : `<div class="mt-lingvo">${LINGVO_WAHL}</div>\n${body}`;
+}
 
 /**
  * A screen: komuna at the root, the stylesheet and the Eroj from the server, the client script.
@@ -451,8 +489,7 @@ export function screenDocument(doc: ScreenDocument): string {
 <script type="module" src="/metiejo.js"></script>
 </head>
 <body>
-<div class="mt-lingvo">${LINGVO_WAHL}</div>
-${doc.body}
+${withLingvoWahl(doc.body)}
 <script type="application/json" id="fm-nomoj">${jsonIsland(nomojIsland(doc.body))}</script>
 </body>
 </html>
@@ -485,6 +522,19 @@ ${PREVIEW_CSS}</style>
 </head>
 <body>
 ${doc.body}
+<script type="application/json" id="fm-nomoj">${jsonIsland(nomojIsland(doc.body))}</script>
+<script>${LINGVO_SKRIPTO}
+// Nachlese 10 N-8: the preview follows the choice of the browser, as the screen around it does.
+{
+  let lingvo = "eo";
+  try {
+    const stored = localStorage.getItem("fundamento-lingvo");
+    if (stored === "de" || stored === "en") lingvo = stored;
+  } catch {}
+  const nomoj = JSON.parse(document.getElementById("fm-nomoj")?.textContent || "{}");
+  fmLingvo(lingvo, nomoj, nomoj.tekstoj);
+}
+</script>
 </body>
 </html>
 `;

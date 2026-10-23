@@ -44,9 +44,10 @@ describe("Studio and Schnellstart: the Lingvo switch (Spec 026 ②)", () => {
       screen(exampleScreenInput("farbe")),
       komponento,
     ]) {
-      // M-2: an Ero of the screen, like the switches of the combination — no native control.
+      // M-2: an Ero of the screen, like the switches of the combination — no native control;
+      // Nachlese 10 N-1: its name in the span of its words (Sprache, Language, lingvo).
       expect(html).toContain(
-        '<fm-elekto name="lingvo" value="eo" orientation="horizontal" size="small" data-fm-lingvo-wahl>lingvo<data slot="options" value="eo">Esperanto</data><data slot="options" value="de">Deutsch</data><data slot="options" value="en">English</data></fm-elekto>',
+        '<fm-elekto name="lingvo" value="eo" orientation="horizontal" size="small" data-fm-lingvo-wahl><span data-fm-teksto="lingvo">lingvo</span><data slot="options" value="eo">Esperanto</data><data slot="options" value="de">Deutsch</data><data slot="options" value="en">English</data></fm-elekto>',
       );
       expect(html).toContain('<script type="application/json" id="fm-nomoj">');
       expect(html).toContain('data-fm-lingvo="eo"');

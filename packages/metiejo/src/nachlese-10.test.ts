@@ -49,7 +49,7 @@ const islandOf = (html: string) =>
     en?: Record<string, string>;
     tekstoj?: Record<string, Record<string, string>>;
   };
-const escape = (text: string) =>
+const escaped = (text: string) =>
   text
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -62,7 +62,7 @@ describe("N-6: the purpose of the component in the language chosen", () => {
     const uzo = glitilo?.uzo;
     const purpose = uzo?.purpose.replace(/\s*\n\s*/g, " ").trim() ?? "";
     expect(komponento).toContain(
-      `<span data-fm-nomo="${uzo?.id}/purpose">${escape(purpose)}</span>`,
+      `<span data-fm-nomo="${uzo?.id}/purpose">${escaped(purpose)}</span>`,
     );
     expect(islandOf(komponento).de?.[`${uzo?.id}/purpose`]).toBe(
       modelo.tradukoj?.de?.[`${uzo?.id}/purpose`],
@@ -171,7 +171,7 @@ describe("N-5: the Expertenansicht says when its build is not the Metiejo's", ()
     });
     for (const html of [studio, schritt]) {
       expect(html).toContain(
-        `<fm-avizo slot="notices" intent="warning" data-mt-expert-hinweis>${escape(hinweis)}</fm-avizo>`,
+        `<fm-avizo slot="notices" intent="warning" data-mt-expert-hinweis>${escaped(hinweis)}</fm-avizo>`,
       );
     }
   });

@@ -60,12 +60,13 @@ describe("Figma with --lingvo de: the description of a set in German throughout 
 });
 
 describe("the radio group draws one focus ring (N-4)", () => {
-  it("the option suppresses the platform's outline by its style, not its width", () => {
+  it("the option suppresses the platform's outline with the shorthand, not by its width alone", () => {
     const css = WEB_COMPONENT_CELO.generate(input)
       .filter((file) => file.path.includes("elekto"))
-      .map((file) => file.text)
+      .map((file) => file.text.replaceAll('\\"', '"'))
       .join("\n");
-    expect(css).toContain(':where([part="option"]:focus) { outline-style: none; }');
+    // The shorthand resets the style to none; the browser test measures it (metiejo.spec.ts).
+    expect(css).toContain(':where([part="option"]:focus) { outline: 0; }');
     expect(css).not.toContain(':where([part="option"]:focus) { outline-width: 0; }');
   });
 });

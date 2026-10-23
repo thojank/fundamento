@@ -28,6 +28,7 @@ import {
   type ValidationIssue,
   WCAG2_METRIC,
 } from "@fundamento/modelo";
+import { buildOf, expertHinweis, standOf } from "./eksperto.js";
 import { EKSPORTO_CELOJ, type EksportoCelo, exportMarko } from "./eksporto.js";
 import type { Settings } from "./env.js";
 import { CLIENT_SCRIPT, escapeHtml, previewDocument } from "./html.js";
@@ -88,6 +89,8 @@ export interface ServiloOptions {
   deps?: PrivataDeps;
   /** npm for the files of the webfonts (O-4); absent in tests. */
   npm?: NpmDeps;
+  /** The commit the Metiejo runs on (Nachlese 10 N-5); default: the checkout's, unknown outside one. */
+  stand?: string;
 }
 
 export interface ServiloIo {
@@ -242,6 +245,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     "dist",
   );
   const vitrinoDir = join(options.root, ".fundamento", "projekcioj", "vitrino");
+  const stand = options.stand ?? standOf(options.root);
   const privata = privataState(options.settings);
   const ikonoGewichte = ["regular", ...Object.keys(bases.structure.ikonoGewichte?.glyphs ?? {})];
   const regler = reglerOf(bases.gestalt);
@@ -272,7 +276,11 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     const fragment = deflateRawSync(Buffer.from(JSON.stringify(agordo), "utf8")).toString(
       "base64url",
     );
-    return { href: `/vitrino/index.html#aspekto=komuna&modus=werkstatt&agordo=${fragment}` };
+    const hinweis = expertHinweis(buildOf(join(vitrinoDir, "..")), stand);
+    return {
+      href: `/vitrino/index.html#aspekto=komuna&modus=werkstatt&agordo=${fragment}`,
+      ...(hinweis === undefined ? {} : { hinweis }),
+    };
   };
 
   const inputOf = (

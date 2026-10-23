@@ -20,7 +20,8 @@ let server: ChildProcess | undefined;
 let base = "";
 let workdir = "";
 
-test.beforeAll(async ({}, info) => {
+test.beforeAll(async () => {
+  const info = test.info();
   workdir = mkdtempSync(join(tmpdir(), "fm-metiejo-spec-"));
   const port = 7500 + (info.workerIndex % 50) * 7 + Math.floor(Math.random() * 7);
   base = `http://localhost:${port}`;

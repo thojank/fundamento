@@ -37,11 +37,13 @@ import {
   candidatesOf,
   composeDraft,
   DEFAULT_KOMBINATION,
+  expertHinweisHtml,
   farboOf,
   KOMBINATION_CHOICES,
   type Kombination,
   type KomponentoEntry,
   type KomponentoRef,
+  kombinationToggles,
   komponentoNav,
   komponentoUrl,
   rowHtml,
@@ -235,6 +237,8 @@ export interface Gebrauch {
 export interface KomponentoView {
   ref: KomponentoRef;
   title: string;
+  /** The purpose of its Uzo with the key of its text (Nachlese 10 N-6); absent without a Uzo. */
+  zweck?: { key: string; text: string };
   /** The keys of the names of the Lingvo-Schalter (Spec 026 ②): the name and the Skemo. */
   nameKey: string;
   skemoId: string;
@@ -492,6 +496,14 @@ export function komponentoViewOf(
     ref,
     title: ref.name,
     nameKey: `${ero?.ero.id ?? sxablono?.sxablono.id ?? ""}/name`,
+    ...(() => {
+      const uzo = ero?.uzo ?? sxablono?.uzo;
+      return uzo === undefined
+        ? {}
+        : {
+            zweck: { key: `${uzo.id}/purpose`, text: uzo.purpose.replace(/\s*\n\s*/g, " ").trim() },
+          };
+    })(),
     skemoId: skemo.id,
     description: ero?.ero.description ?? sxablono?.sxablono.description ?? "",
     agordo,
@@ -608,13 +620,22 @@ export interface KomponentoInput {
   komponentoj: readonly KomponentoEntry[];
   probleme: number;
   message?: string;
-  expert: { href?: string; sentence?: string };
+  expert: { href?: string; sentence?: string; hinweis?: string };
   betroffen?: string[];
 }
 
 /** An axis and its value in the spans of their names (Spec 026 ②): `emphasis=high`. */
-function axisValue(skemoId: string, axis: string, value: string): string {
-  return `${nomoSpan(skemoNomoKey(skemoId, "props", axis), escapeHtml(axis))}=${nomoSpan(skemoNomoKey(skemoId, "props", axis, value), escapeHtml(value))}`;
+function axisValue(
+  skemo: { id: string; props: readonly { name: string; values?: readonly (string | number)[] }[] },
+  axis: string,
+  value: string,
+): string {
+  // A value of an enum has a name; true and false of a boolean stay as they are.
+  const named = skemo.props
+    .find((prop) => prop.name === axis)
+    ?.values?.map(String)
+    .includes(value);
+  return `${nomoSpan(skemoNomoKey(skemo.id, "props", axis), escapeHtml(axis))}=${named === true ? nomoSpan(skemoNomoKey(skemo.id, "props", axis, value), escapeHtml(value)) : escapeHtml(value)}`;
 }
 
 /** The matrix variants × states: a link per cell, the chosen one marked. */
@@ -634,7 +655,7 @@ function matrixHtml(input: KomponentoInput): string {
       const label =
         axes.length === 0
           ? nomoSpan(view.nameKey, escapeHtml(view.title))
-          : axes.map((axis) => axisValue(view.skemoId, axis, variant[axis] ?? "")).join(" · ");
+          : axes.map((axis) => axisValue(view.skemo, axis, variant[axis] ?? "")).join(" · ");
       const cells = states
         .map((state) => {
           const cell = cellOf(variant, state);
@@ -686,16 +707,7 @@ export function komponentoScreen(input: KomponentoInput): string {
     (entry) =>
       `<a href="/studio/${encodeURIComponent(name)}/${entry.key}" data-page="${entry.key}">${tekstoSpan(entry.key, escapeHtml(entry.title))}</a>`,
   ).join("");
-  const toggles = (Object.keys(KOMBINATION_CHOICES) as (keyof Kombination)[])
-    .map(
-      (key) =>
-        `<fm-elekto name="${key}" value="${kombination[key]}" orientation="horizontal" size="small" data-mt-kombination="${key}">${escapeHtml(KOMBINATION_CHOICES[key].label)}${KOMBINATION_CHOICES[
-          key
-        ].values
-          .map((value) => `<data slot="options" value="${value}">${value}</data>`)
-          .join("")}</fm-elekto>`,
-    )
-    .join("");
+  const toggles = kombinationToggles(kombination);
   // Spec 026 ②: the name of a part in the span of its name, shown beside its identifier in German
   // and English; in Esperanto the identifier alone.
   const partName = (part: string) =>
@@ -710,7 +722,7 @@ export function komponentoScreen(input: KomponentoInput): string {
     .map(([key, value]) =>
       key === STATE_KEY
         ? `${escapeHtml(key)}=${nomoSpan(skemoNomoKey(view.skemoId, "states", value), escapeHtml(value))}`
-        : axisValue(view.skemoId, key, value),
+        : axisValue(view.skemo, key, value),
     )
     .join(" · ");
   const groups = view.groups
@@ -735,9 +747,10 @@ export function komponentoScreen(input: KomponentoInput): string {
 <span slot="principal">Marke ${escapeHtml(label)} · Prüfung: <fm-insigno intent="${input.probleme === 0 ? "success" : "warning"}" id="mt-probleme">${input.probleme} ${input.probleme === 1 ? "Problem" : "Probleme"}</fm-insigno> <fm-butono emphasis="high" size="small" data-mt-post="/studio/${encodeURIComponent(name)}/speichern">Speichern</fm-butono></span>
 ${input.message === undefined ? "" : `<fm-avizo slot="notices" intent="success">${escapeHtml(input.message)}</fm-avizo>`}
 <fm-avizo slot="notices" intent="warning" id="mt-studio-meldung" hidden></fm-avizo>
+${expertHinweisHtml(input.expert)}
 <fm-pagxo>
 <fm-titolo slot="title" level="1" focusable>${nomoSpan(view.nameKey, escapeHtml(view.title))}</fm-titolo>
-<fm-teksto slot="subtitle">${escapeHtml(view.description)}</fm-teksto>
+<fm-teksto slot="subtitle">${view.zweck === undefined ? escapeHtml(view.description) : nomoSpan(view.zweck.key, escapeHtml(view.zweck.text))}</fm-teksto>
 ${expertLink}
 <section class="mt-studio">
 <div><fm-navigado label="Studio" page="${view.ref.kind}-${escapeHtml(view.ref.name)}" orientation="vertical">${nav}<a href="/marko/${encodeURIComponent(name)}/farbe" data-page="schnellstart">Schnellstart</a></fm-navigado>${komponentoNav(name, input.komponentoj, kombination, view.ref)}</div>
@@ -800,11 +813,12 @@ export function komponentoPreview(view: KomponentoView): string {
     }
     return swatches.join("");
   };
+  // Nachlese 10 N-8: the names of the preview in the spans of their names, as on the page.
   const rows = variants.map((variant) => {
     const label =
       axes.length === 0
-        ? view.title
-        : axes.map((axis) => `${axis}=${variant[axis] ?? ""}`).join(" · ");
+        ? nomoSpan(view.nameKey, escapeHtml(view.title))
+        : axes.map((axis) => axisValue(skemo, axis, variant[axis] ?? "")).join(" · ");
     const element =
       view.ref.kind === "ero"
         ? `<${view.tag}${attributesOf(variant)}>${escapeHtml(view.title)}</${view.tag}>`
@@ -815,12 +829,15 @@ export function komponentoPreview(view: KomponentoView): string {
         return `<td><span class="mt-zelle">${swatchOf(cell)}</span></td>`;
       })
       .join("");
-    return `<tr><th scope="row"><fm-teksto kind="caption">${escapeHtml(label)}</fm-teksto><div class="mt-beispiel">${element}</div></th>${cells}</tr>`;
+    return `<tr><th scope="row"><fm-teksto kind="caption">${label}</fm-teksto><div class="mt-beispiel">${element}</div></th>${cells}</tr>`;
   });
   const head = states
-    .map((state) => `<th scope="col">${escapeHtml(stateLabel(state))}</th>`)
+    .map(
+      (state) =>
+        `<th scope="col">${nomoSpan(skemoNomoKey(skemo.id, "states", state), escapeHtml(state))}</th>`,
+    )
     .join("");
-  return `<section class="mt-flaeche"><h2>${escapeHtml(view.title)}: Varianten × Zustände</h2><table class="mt-matrico-vorschau"><thead><tr><th scope="col">Variante</th>${head}</tr></thead><tbody>${rows.join("")}</tbody></table></section>`;
+  return `<section class="mt-flaeche"><h2><span data-fm-nomo="${view.nameKey}" data-fm-nomo-sole>${escapeHtml(view.title)}</span>: ${tekstoSpan("varianten-zustaende", "Varianten × Zustände")}</h2><table class="mt-matrico-vorschau"><thead><tr><th scope="col">Variante</th>${head}</tr></thead><tbody>${rows.join("")}</tbody></table></section>`;
 }
 
 /** The preview of a component page from its name (`komponento-<kind>-<name>`), for the frame. */

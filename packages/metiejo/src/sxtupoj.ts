@@ -156,7 +156,7 @@ export interface ScreenInput {
   /** Steps 3 and 7: the report in plain words. */
   klartext?: Klartext;
   /** The Expertenansicht: a link into the Werkstatt of the Vitrino, or the sentence how to build it. */
-  expert: { href?: string; sentence?: string };
+  expert: { href?: string; sentence?: string; hinweis?: string };
   /** The sliders of the Agordo, from the structure. */
   regler: readonly Regler[];
   /** The icon weights the structure draws. */
@@ -232,6 +232,12 @@ function notices(input: ScreenInput): string {
   }
   if (input.message !== undefined) {
     parts.push(`<fm-avizo slot="notices" intent="success">${escapeHtml(input.message)}</fm-avizo>`);
+  }
+  // Nachlese 10 N-5: the Expertenansicht says when its build is not the Metiejo's.
+  if (input.expert.hinweis !== undefined) {
+    parts.push(
+      `<fm-avizo slot="notices" intent="warning" data-mt-expert-hinweis>${escapeHtml(input.expert.hinweis)}</fm-avizo>`,
+    );
   }
   return parts.join("");
 }

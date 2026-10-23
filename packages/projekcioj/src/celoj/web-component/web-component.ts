@@ -1927,7 +1927,10 @@ const groupStructure = (disables: boolean, marked: boolean): string =>
     ':where([part="options"]) { display: flex; flex-direction: column; align-items: flex-start; }',
     ':where([part="field"][aria-orientation="horizontal"]) [part="options"] { flex-direction: row; flex-wrap: nowrap; }',
     ':where([part="option"]) { display: inline-flex; align-items: center; cursor: pointer; white-space: nowrap; }',
-    ':where([part="option"]:focus) { outline-width: 0; }',
+    // Nachlese 10 N-4: the ring is the control's; the option hides the platform's outline. An
+    // outline of style auto ignores its width, so outline-width 0 left it beside the ring; the
+    // shorthand resets the style to none as well (0 is the one literal the token gate allows).
+    ':where([part="option"]:focus) { outline: 0; }',
     ':where([part="control"]) { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; margin: 0; padding: 0; border-style: solid; flex: none; transition-property: background-color, border-color; }',
     ':where([part="indicator"]) { display: block; flex: none; transition-property: opacity; }',
     ':where([part="indicator"]) > svg { display: block; }',

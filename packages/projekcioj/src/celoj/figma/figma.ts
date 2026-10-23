@@ -37,8 +37,10 @@ import {
   parityVariantKey,
   type Regulo,
   readDtcgColor,
+  reguloIn,
   STATE_KEY,
   type Uzo,
+  uzoIn,
   variantKeys,
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
@@ -1524,7 +1526,32 @@ export const UZO_FIELD = "descriptionMarkdown" as const;
  * `descriptionMarkdown` and `description` are one field in Figma, so what T029 writes is what
  * the set shows, and the purpose of T028 would otherwise be gone.
  */
-export function uzoMarkdown(uzo: Uzo, reguloj: readonly Regulo[]): string {
+/** The words of the Uzo Markdown in its two languages (Nachlese 10 N-6); identifiers stay. */
+const UZO_VORTOJ = {
+  en: {
+    notFor: "## Not for this",
+    anything: "anything",
+    atMost: "at most",
+    nesting: "nesting",
+    fixed: "fixed",
+    adjustable: "adjustable",
+  },
+  de: {
+    notFor: "## Nicht hierfür",
+    anything: "alles",
+    atMost: "höchstens",
+    nesting: "Verschachtelung",
+    fixed: "fest",
+    adjustable: "anpassbar",
+  },
+} as const;
+
+export function uzoMarkdown(
+  uzo: Uzo,
+  reguloj: readonly Regulo[],
+  lingvo: "en" | "de" = "en",
+): string {
+  const words = UZO_VORTOJ[lingvo];
   const statement = (name: string) => reguloj.find((regulo) => regulo.name === name)?.statement;
   const notFor = [
     ...uzo.boundary.map(
@@ -1537,16 +1564,16 @@ export function uzoMarkdown(uzo: Uzo, reguloj: readonly Regulo[]): string {
   ];
   const slots = Object.entries(uzo.slots).map(
     ([slot, rule]) =>
-      `- **${slot}**: ${(rule.accepts ?? []).join(", ") || "anything"}${rule.max === undefined ? "" : `, at most ${rule.max}`}${rule.nesting === undefined ? "" : `, nesting ${rule.nesting}`}`,
+      `- **${slot}**: ${(rule.accepts ?? []).join(", ") || words.anything}${rule.max === undefined ? "" : `, ${words.atMost} ${rule.max}`}${rule.nesting === undefined ? "" : `, ${words.nesting} ${rule.nesting}`}`,
   );
   const content = uzo.content.map(
     (rule) =>
-      `- **${rule.regulo}** (${rule.fixed ? "fixed" : "adjustable"}): ${statement(rule.regulo) ?? ""}`,
+      `- **${rule.regulo}** (${rule.fixed ? words.fixed : words.adjustable}): ${statement(rule.regulo) ?? ""}`,
   );
   return [
     uzo.purpose.replace(/\s*\n\s*/g, " ").trim(),
     "",
-    "## Not for this",
+    words.notFor,
     ...notFor,
     "",
     "## Slots",
@@ -3574,20 +3601,39 @@ function inLingvo(plan: FigmaPlan, modelo: Modelo, lingvo: "de" | "en"): void {
   plan.lingvo = lingvo;
   const first = (label: string, name: string, text: string | undefined) =>
     `${label} (${name})${text === undefined || text === "" ? "" : `\n\n${text}`}`;
+  // Nachlese 10 N-6: in German the texts are German too — the purpose of Nachlese 8 ③, the words
+  // of the Markdown, the kialoj and the statements of the Reguloj; English keeps its own.
+  const reguloj = modelo.reguloj.map((regulo) => reguloIn(modelo, regulo, lingvo));
+  const line = (text: string) => text.replace(/\s*\n\s*/g, " ").trim();
   for (const component of plan.components) {
     const label = labelOf(modelo, "ero", component.set, lingvo);
-    component.description = first(label, component.set, component.description);
+    const source = modelo.eroj.find((entry) => entry.ero.name === component.set)?.uzo;
+    const uzo = source === undefined || lingvo === "en" ? undefined : uzoIn(modelo, source, lingvo);
+    component.description = first(
+      label,
+      component.set,
+      uzo === undefined ? component.description : line(uzo.purpose),
+    );
     if (component.uzo !== undefined)
       component.uzo = {
         ...component.uzo,
-        markdown: first(label, component.set, component.uzo.markdown),
+        markdown: first(
+          label,
+          component.set,
+          uzo === undefined ? component.uzo.markdown : uzoMarkdown(uzo, reguloj, "de"),
+        ),
       };
   }
   for (const sxablono of plan.sxablonoj ?? []) {
+    const source = (modelo.sxablonoj ?? []).find(
+      (entry) => entry.sxablono.name === sxablono.name,
+    )?.uzo;
     sxablono.description = first(
       labelOf(modelo, "sxablono", sxablono.name, lingvo),
       sxablono.name,
-      sxablono.description,
+      source === undefined || lingvo === "en"
+        ? sxablono.description
+        : uzoIn(modelo, source, lingvo).purpose,
     );
   }
   for (const collection of plan.collections) {

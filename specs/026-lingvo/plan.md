@@ -262,6 +262,8 @@ Die Wahl bleibt pro Browser (`localStorage`), Deutsch ist also nach einem Klick 
 
 ### Die Namen zur Prüfung
 
+*Nachlese 10 ① (Maintainer, 2026-10-23): `avizo` „Meldung“, `listelektilo` „Listenauswahl“ / „Listbox“, `spuro` „Pfadnavigation“ – die Tabelle zeigt den Stand danach.*
+
 Alle 40 Eroj und 5 Sxablonoj, dazu die Dimensioj. Die Namen der Teile, Achsen, Werte, Zustände, Slots und Regionen stehen in `packages/modelo/data/tradukoj.json`. Die Messanleitung (Schritt 6) gibt sie alle als Tabelle aus.
 
 **Eroj (40)**
@@ -272,7 +274,7 @@ Alle 40 Eroj und 5 Sxablonoj, dazu die Dimensioj. Die Namen der Teile, Achsen, W
 | `apartigilo` | Trennlinie | Divider |
 | `atributlisto` | Schlüssel-Wert-Liste | Key-value list |
 | `avataro` | Avatar | Avatar |
-| `avizo` | Hinweis | Notice |
+| `avizo` | Meldung | Notice |
 | `butono` | Schaltfläche | Button |
 | `datelektilo` | Datumsauswahl | Date picker |
 | `dialogo` | Dialog | Dialog |
@@ -289,7 +291,7 @@ Alle 40 Eroj und 5 Sxablonoj, dazu die Dimensioj. Die Namen der Teile, Achsen, W
 | `konsileto` | Tooltip | Tooltip |
 | `langetaro` | Registerkarten | Tabs |
 | `ligilo` | Link | Link |
-| `listelektilo` | Auswahlliste | Styled select |
+| `listelektilo` | Listenauswahl | Listbox |
 | `lokredaktilo` | Inline-Bearbeitung | Inline editor |
 | `markdovido` | Markdown-Ansicht | Markdown view |
 | `markobutono` | Kontrollkästchen | Checkbox |
@@ -301,7 +303,7 @@ Alle 40 Eroj und 5 Sxablonoj, dazu die Dimensioj. Die Namen der Teile, Achsen, W
 | `plurelektilo` | Mehrfachauswahl | Multi-select |
 | `saltligilo` | Sprunglink | Skip link |
 | `signeto` | Schlagwort | Tag |
-| `spuro` | Brotkrumen | Breadcrumb |
+| `spuro` | Pfadnavigation | Breadcrumb |
 | `sxaltilo` | Schalter | Switch |
 | `sxvebilo` | Popover | Popover |
 | `tabelo` | Datentabelle | Data table |
