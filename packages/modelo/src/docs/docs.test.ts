@@ -3190,3 +3190,52 @@ describe("Spec 026 ② documentation (specs/026-lingvo)", () => {
     expect(read("docs/vojmapo.md")).toContain("Spec 026 ②");
   });
 });
+
+// Nachlese 10 (Abnahme Spec 026, 2026-10-23): specs/028-nachlese-10 carries the briefing
+// unchanged, a plan with the causes (N-1 to N-8), the decisions, findings, open points and the
+// measuring guide with full paths, cd and file:// links, and tasks with the red commit.
+describe("Nachlese 10 documentation (specs/028-nachlese-10)", () => {
+  it("the briefing is copied unchanged; plan and tasks carry the causes and the guide", () => {
+    const briefing = read("specs/028-nachlese-10/briefing.md");
+    expect(createHash("sha256").update(briefing).digest("hex")).toBe(
+      "85d3d11d9db05af82df9f79366bbf0b6b52357c0436fc6e9fa306f9dc28cb5f5",
+    );
+    const plan = read("specs/028-nachlese-10/plan.md");
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Ursachen",
+      "### Entwurfsentscheidungen",
+      "### Abweichungen",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### Messanleitung",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const term of [
+      "Meldung",
+      "Listenauswahl",
+      "Listbox",
+      "Pfadnavigation",
+      "N-1",
+      "N-2",
+      "N-3",
+      "N-4",
+      "N-5",
+      "N-6",
+      "N-7",
+      "N-8",
+      "cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds",
+      'open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/',
+      "--lingvo de",
+    ]) {
+      expect(plan, term).toContain(term);
+    }
+    for (const line of plan.split("\n").filter((entry) => entry.includes("index.html#"))) {
+      expect(line, line).toMatch(/file:\/\/\/Users\//);
+    }
+    expect(plan).not.toContain("ciferecigo");
+    expect(read("specs/028-nachlese-10/tasks.md")).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Nachlese 10");
+  });
+});
