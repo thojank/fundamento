@@ -217,6 +217,43 @@ importers:
         specifier: ^2.9.1
         version: 2.9.1
 
+  packages/nordstelo:
+    dependencies:
+      '@axe-core/playwright':
+        specifier: 4.13.0
+        version: 4.13.0(playwright-core@1.63.0)
+      '@fundamento/eroj':
+        specifier: workspace:*
+        version: link:../eroj
+      '@fundamento/mcp':
+        specifier: workspace:*
+        version: link:../mcp
+      '@fundamento/metiejo':
+        specifier: workspace:*
+        version: link:../metiejo
+      '@fundamento/modelo':
+        specifier: workspace:*
+        version: link:../modelo
+      '@fundamento/projekcioj':
+        specifier: workspace:*
+        version: link:../projekcioj
+      '@modelcontextprotocol/client':
+        specifier: 2.0.0
+        version: 2.0.0
+      playwright:
+        specifier: 1.63.0
+        version: 1.63.0
+    devDependencies:
+      '@types/node':
+        specifier: ^24.13.5
+        version: 24.13.5
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.0.1
+        version: 5.0.1(@types/node@24.13.5)(jsdom@24.1.3)(vite@8.3.0(@types/node@24.13.5)(jiti@2.7.0)(yaml@2.9.1))
+
   packages/projekcioj:
     dependencies:
       '@fundamento/agordilo':

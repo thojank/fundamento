@@ -3285,3 +3285,65 @@ describe("Spec 027 documentation (specs/027-figma-bauformen)", () => {
     expect(read("docs/vojmapo.md")).toContain("Spec 027");
   });
 });
+
+// Spec 030 „Nordstern-Kennzahl" (2026-10-23): specs/030-nordstern-kennzahl carries the spec
+// unchanged, a plan with the decisions, the proposed terms for the Vortaro, the report of the
+// first run as the baseline before Spec 029 ① (figure F against 0, value per task, spread, top 10
+// of the gaps, tokens) and the measuring guide with full paths, cd and file:// links; tasks with
+// the red commit. The run is a command of its own (Art. II), never a step of the CI.
+describe("Spec 030 documentation (specs/030-nordstern-kennzahl)", () => {
+  it("the spec is copied unchanged; plan and tasks carry the decisions, the first run and the guide", () => {
+    const spec = read("specs/030-nordstern-kennzahl/spec.md");
+    expect(createHash("sha256").update(spec).digest("hex")).toBe(
+      "e17387d04c8fdd1ec8267dc46e14305f2dd84e03aac2b040ff10a893218b769d",
+    );
+    const plan = read("specs/030-nordstern-kennzahl/plan.md");
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "### Neue Begriffe (Vorschlag)",
+      "### Erster Lauf: Ausgangslinie vor Spec 029 ①",
+      "### Abweichungen",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### Messanleitung",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const term of [
+      "K1",
+      "K2",
+      "K3",
+      "K4",
+      "K5",
+      "K6",
+      "K7",
+      "Kennzahl F",
+      "Kennzahl 0",
+      "Streuung",
+      "Top-10",
+      "Tokens",
+      "pnpm nordstelo",
+      "--max-tokens",
+      "nicht in der CI",
+      "cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds",
+      "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/",
+    ]) {
+      expect(plan, term).toContain(term);
+    }
+    expect(plan).not.toMatch(/sk-[A-Za-z0-9]{8,}|Bearer [A-Za-z0-9]/);
+    expect(plan).not.toContain("ciferecigo");
+    expect(read("specs/030-nordstern-kennzahl/tasks.md")).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Spec 030");
+    expect(read("README.md")).toContain("pnpm nordstelo");
+  });
+
+  it("the run is not a step of the CI; its unit tests are", () => {
+    const ci = read(".github/workflows/ci.yml");
+    expect(ci).not.toMatch(/pnpm nordstelo(?! )|nordstelo\/dist\/cli/);
+    expect(ci).toMatch(/package: \[[^\]]*nordstelo/);
+    expect(JSON.parse(read("package.json")).scripts.nordstelo).toBe(
+      "node packages/nordstelo/dist/cli.js",
+    );
+  });
+});
