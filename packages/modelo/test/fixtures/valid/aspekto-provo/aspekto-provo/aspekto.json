@@ -6,11 +6,12 @@
   "idNamespace": "provo",
   "fonts": [
     {
-      "family": "Archivo",
+      "family": "Prata",
       "license": "OFL-1.1",
-      "source": "https://github.com/Omnibus-Type/Archivo",
+      "source": "https://github.com/cyrealtype/Prata",
       "redistributable": true,
       "scripts": [
+        "Cyrl",
         "Latn"
       ]
     },
@@ -89,11 +90,12 @@
       },
       "schriften": {
         "display": {
-          "family": "Archivo",
+          "family": "Prata",
           "license": "OFL-1.1",
-          "source": "https://github.com/Omnibus-Type/Archivo",
+          "source": "https://github.com/cyrealtype/Prata",
           "redistributable": true,
           "scripts": [
+            "Cyrl",
             "Latn"
           ]
         }
@@ -106,6 +108,15 @@
       },
       "ikono": {
         "gewicht": "bold"
+      },
+      "festgelegt": {
+        "font.family.display": {
+          "wert": [
+            "Prata",
+            "ui-serif",
+            "serif"
+          ]
+        }
       }
     }
   }

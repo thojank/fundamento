@@ -166,7 +166,8 @@ describe("validate", () => {
     });
     const report = await output<{ valid: boolean; errors: Issue[] }>(incomplete.client, "validate");
     expect(report.valid).toBe(false);
-    expect(report.errors).toHaveLength(4);
+    // Spec 029 ①: four missing tokens and state-distinct of the fallback to the new komuna (B-4).
+    expect(report.errors).toHaveLength(5);
   });
 
   it("validates a local package against the served core", async () => {

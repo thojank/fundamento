@@ -38,7 +38,8 @@ describe("Spec 029 ① 2: komuna after theme-neutral", () => {
     expect(hex(light, "color.palette.neutral.50")).toBe("#f1f1f1");
     expect(hex(light, "color.palette.neutral.900")).toBe("#1b1b1b");
     expect(hex(light, "color.text.default")).toBe("#000000");
-    expect(hex(dark, "color.text.default")).toBe("#ffffff");
+    // Im Dunkeln kein reines Weiß (Befund R4, Halation; Jugxo): Stufe 97,5.
+    expect(hex(dark, "color.text.default")).toBe("#f8f8f8");
     expect(hex(light, "color.action.primary.rest")).toBe("#1b1b1b");
     expect(hex(dark, "color.action.primary.rest")).toBe("#f1f1f1");
     expect(hex(light, "color.action.primary.text")).toBe("#ffffff");
@@ -163,7 +164,12 @@ describe("Spec 029 ①: the other brands keep their values", () => {
         const { tokens } = resolveCombination(prepared.input.modelo, { ...assignment, aspekto });
         const rows = Object.keys(tokens)
           .sort()
-          .filter((name) => aspekto !== "provo" || !/^(font\.family\.|typography\.)/.test(name))
+          // provo: Prata reaches every token of type typography and fontFamily, Ero-Tokens included.
+          .filter(
+            (name) =>
+              aspekto !== "provo" ||
+              !["typography", "fontFamily"].includes(String(tokens[name]?.type)),
+          )
           .map((name) => [name, tokens[name]?.type, canonical(tokens[name]?.value)]);
         if (createHash("sha256").update(JSON.stringify(rows)).digest("hex") !== expected)
           differences.push(`${aspekto} ${key}`);

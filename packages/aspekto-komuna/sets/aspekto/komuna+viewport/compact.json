@@ -1,0 +1,246 @@
+{
+  "$extensions": {
+    "com.ciferecigo.fundamento": {
+      "id": "set_01M5N7VJ4JQ9SVVN86F25NFCWV",
+      "kondicxoj": [
+        "aspekto=komuna",
+        "viewport=compact"
+      ]
+    }
+  },
+  "font": {
+    "size": {
+      "scale": {
+        "100": {
+          "$value": {
+            "value": 12,
+            "unit": "px"
+          }
+        },
+        "200": {
+          "$value": {
+            "value": 14,
+            "unit": "px"
+          }
+        },
+        "300": {
+          "$value": {
+            "value": 16,
+            "unit": "px"
+          }
+        },
+        "400": {
+          "$value": {
+            "value": 19,
+            "unit": "px"
+          }
+        },
+        "500": {
+          "$value": {
+            "value": 22,
+            "unit": "px"
+          }
+        },
+        "600": {
+          "$value": {
+            "value": 26,
+            "unit": "px"
+          }
+        },
+        "700": {
+          "$value": {
+            "value": 30,
+            "unit": "px"
+          }
+        },
+        "800": {
+          "$value": {
+            "value": 36,
+            "unit": "px"
+          }
+        },
+        "900": {
+          "$value": {
+            "value": 42,
+            "unit": "px"
+          }
+        },
+        "1000": {
+          "$value": {
+            "value": 49,
+            "unit": "px"
+          }
+        },
+        "1100": {
+          "$value": {
+            "value": 58,
+            "unit": "px"
+          }
+        },
+        "1200": {
+          "$value": {
+            "value": 68,
+            "unit": "px"
+          }
+        }
+      },
+      "display": {
+        "1": {
+          "$value": "{font.size.scale.900}"
+        },
+        "2": {
+          "$value": "{font.size.scale.800}"
+        },
+        "3": {
+          "$value": "{font.size.scale.700}"
+        }
+      },
+      "headline": {
+        "1": {
+          "$value": "{font.size.scale.600}"
+        },
+        "2": {
+          "$value": "{font.size.scale.500}"
+        },
+        "3": {
+          "$value": "{font.size.scale.400}"
+        },
+        "4": {
+          "$value": "{font.size.scale.300}"
+        }
+      },
+      "body": {
+        "1": {
+          "$value": "{font.size.scale.300}"
+        },
+        "2": {
+          "$value": "{font.size.scale.200}"
+        }
+      },
+      "label": {
+        "1": {
+          "$value": "{font.size.scale.300}"
+        },
+        "2": {
+          "$value": "{font.size.scale.200}"
+        }
+      },
+      "caption": {
+        "$value": "{font.size.scale.200}"
+      },
+      "code": {
+        "$value": "{font.size.scale.300}"
+      },
+      "kicker": {
+        "$value": "{font.size.scale.200}"
+      },
+      "$type": "dimension"
+    },
+    "tracking": {
+      "display": {
+        "1": {
+          "$value": "{font.tracking.scale.900}"
+        },
+        "2": {
+          "$value": "{font.tracking.scale.800}"
+        },
+        "3": {
+          "$value": "{font.tracking.scale.700}"
+        }
+      },
+      "headline": {
+        "1": {
+          "$value": "{font.tracking.scale.600}"
+        },
+        "2": {
+          "$value": "{font.tracking.scale.500}"
+        },
+        "3": {
+          "$value": "{font.tracking.scale.400}"
+        },
+        "4": {
+          "$value": "{font.tracking.scale.300}"
+        }
+      },
+      "body": {
+        "1": {
+          "$value": "{font.tracking.scale.300}"
+        },
+        "2": {
+          "$value": "{font.tracking.scale.200}"
+        }
+      },
+      "label": {
+        "1": {
+          "$value": "{font.tracking.scale.300}"
+        },
+        "2": {
+          "$value": "{font.tracking.scale.200}"
+        }
+      },
+      "caption": {
+        "$value": "{font.tracking.scale.200}"
+      },
+      "code": {
+        "$value": "{font.tracking.scale.300}"
+      },
+      "kicker": {
+        "$value": "{font.tracking.scale.caps}"
+      },
+      "$type": "dimension"
+    },
+    "lineheight": {
+      "display": {
+        "1": {
+          "$value": 1.2222
+        },
+        "2": {
+          "$value": 1.2222
+        },
+        "3": {
+          "$value": 1.4667
+        }
+      },
+      "headline": {
+        "1": {
+          "$value": 1.3846
+        },
+        "2": {
+          "$value": 1.4545
+        },
+        "3": {
+          "$value": 1.4737
+        },
+        "4": {
+          "$value": 1.5
+        }
+      },
+      "body": {
+        "1": {
+          "$value": 1.5
+        },
+        "2": {
+          "$value": 1.5
+        }
+      },
+      "label": {
+        "1": {
+          "$value": 1.5
+        },
+        "2": {
+          "$value": 1.5
+        }
+      },
+      "caption": {
+        "$value": 1.4286
+      },
+      "code": {
+        "$value": 1.5
+      },
+      "kicker": {
+        "$value": 1.4286
+      },
+      "$type": "number"
+    }
+  }
+}

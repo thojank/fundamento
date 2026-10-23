@@ -1443,6 +1443,8 @@ export interface FigmaComponentSet {
         color: FigmaPaint;
         /** The alpha of the base combination: what a written, unbound layer shows. */
         alpha: number;
+        /** Spec 029 ①: the layer lies inside the surface (DTCG `inset`): an INNER_SHADOW. */
+        inset?: boolean;
         offsetX: number;
         offsetY: number;
         blur: number;
@@ -2719,7 +2721,13 @@ function componentSetOf(
             ? { hex, opacity: only }
             : { hex, alphaVariesByMode: true };
         const px = (kind: string) => measureOf(fieldValue(base[token]?.value, field(kind)));
+        // Spec 029 ①: a layer that lies inside the surface in any combination (the rim of light of
+        // komuna's dark shadows) is an inner shadow; Figma holds one effect type for every mode.
+        const inset = resolutions.some(
+          ({ tokens }) => fieldValue(tokens[token]?.value, field("inset")) === true,
+        );
         return {
+          ...(inset ? { inset: true } : {}),
           fields: {
             color: variableName(token, field("color")),
             offsetX: variableName(token, field("offsetX")),

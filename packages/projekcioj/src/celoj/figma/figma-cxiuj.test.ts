@@ -89,9 +89,9 @@ describe("all example brands in one build (Spec 026 ①)", () => {
 
   it("the Vitrino of the build switches between the five brands", () => {
     const html = readFileSync(join(out, VITRINO_FILE), "utf8");
-    const switches = [...html.matchAll(/data-fm-switch="aspekto" data-fm-valoro="([a-z-]+)"/g)].map(
-      (match) => match[1],
-    );
+    const switches = [
+      ...html.matchAll(/data-fm-switch="aspekto" data-fm-valoro="([a-z0-9-]+)"/g),
+    ].map((match) => match[1]);
     expect(switches).toEqual(BRANDS);
   });
 });

@@ -14,6 +14,8 @@ export const SCHEMA_DEFS = {
   dimensiojFile: "DimensiojFile",
   regulojFile: "RegulojFile",
   jugxojFile: "JugxojFile",
+  fontojFile: "FontojFile",
+  devenoFile: "DevenoFile",
   mankojFile: "MankojFile",
   kontrastParojFile: "KontrastParojFile",
   idsLock: "IdsLock",
@@ -63,6 +65,9 @@ export const OPTIONAL_DATA_FILE_SCHEMA_DEFS = {
   "gvidanto.json": "GvidantoFile",
   // Nachlese 8 ③: the translations of the texts of the Uzoj and the Reguloj.
   "tradukoj.json": "TradukojFile",
+  // Spec 029 ① (Constitution v2.4): the Fontoj, design systems with an open licence that values
+  // are taken from, pinned; absent in a Modelo that takes from none.
+  "fontoj.json": "FontojFile",
 } as const;
 
 export type OptionalDataFileName = keyof typeof OPTIONAL_DATA_FILE_SCHEMA_DEFS;

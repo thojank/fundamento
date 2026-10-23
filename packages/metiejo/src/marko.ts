@@ -43,7 +43,7 @@ export interface Marko {
 
 export interface CreateInput {
   name: string;
-  basis: "leer" | "komuna";
+  basis: "leer" | "komuna" | "komuna-0-2";
 }
 
 /**

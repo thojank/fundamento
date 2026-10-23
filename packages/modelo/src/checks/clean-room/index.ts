@@ -9,6 +9,7 @@ import type { ValidationIssue } from "../../contracts/issues.js";
 import { loadScanTree, scanScopeOf } from "../namespace/files.js";
 import { extensionOf, REFERENCE_EXTENSIONS } from "../namespace/paths.js";
 import { compareIssues, scanNamespace } from "../namespace/scan.js";
+import { fontoExemptions } from "./fonto.js";
 import {
   type FingerprintIndex,
   findBrandValues,
@@ -69,15 +70,21 @@ export async function check(options: CheckOptions): Promise<CheckResult> {
   const { fingerprints, sources, missing } = fingerprintsFor(scope.root, scope.repoRun, named);
   const brandIssues: ValidationIssue[] = [];
   let fingerprintFiles = 0;
+  // Spec 029 ① (Constitution v2.4): values with a valid Fonto provenance are left out.
+  const fonto = fontoExemptions(
+    tree.paths,
+    (path) => tree.texts.get(path) ?? readText(join(scope.root, path)),
+  );
   for (const path of tree.paths) {
     if (!FINGERPRINT_EXTENSIONS.has(extensionOf(path))) continue;
     // A fingerprint list holds hashes, never values; scanning one would only find its own name.
     if (scope.repoRun ? MARKO_SPURO_ALLOWLIST.has(path) : path === MARKO_SPUROJ_FILE_NAME) continue;
     if (namedLists.has(join(scope.root, path))) continue;
+    if (fonto.files.has(path)) continue;
     const text = tree.texts.get(path) ?? readText(join(scope.root, path));
     if (text === undefined) continue;
     fingerprintFiles++;
-    brandIssues.push(...findBrandValues(path, text, fingerprints));
+    brandIssues.push(...findBrandValues(path, text, fingerprints, fonto.ranges.get(path)));
   }
 
   const namespace = scanNamespace(tree);

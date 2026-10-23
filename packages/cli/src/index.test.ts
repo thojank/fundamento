@@ -407,7 +407,8 @@ describe("fm modelo validate --aspekto / --config (Spec 001 T027, D-07)", () => 
     expect(fm(["modelo", "validate", "--config", ekzemploConfig]).code).toBe(0);
     const run = fm(["modelo", "validate", "--config", incompleteConfig, "--json"]);
     expect(run.code).toBe(1);
-    expect((JSON.parse(run.stdout) as { errors: unknown[] }).errors).toHaveLength(4);
+    // Spec 029 ①: four missing tokens and state-distinct of the fallback to the new komuna (B-4).
+    expect((JSON.parse(run.stdout) as { errors: unknown[] }).errors).toHaveLength(5);
   });
 
   it("rejects a path together with --config, and suggests --aspekto for a typo", () => {

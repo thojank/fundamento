@@ -5,12 +5,15 @@
 // the butono shown (B-6). The changes B-7 (menuo) and B-9 (lokredaktilo, display) are wanted and
 // stand in WANTED; what B-1 changes as a consequence stands in STRETCHED, with the reason.
 // `FM_BILD_BASIS=1` writes the file from the current plugin — only ever on `main`'s plugin.
+// Spec 029 ①: komuna took the values of the Fonto, so every picture of komuna changed on purpose;
+// the comparison draws with the values of komuna 0.2 (the structure rebuilt from komuna-0-2) and
+// keeps measuring what it measured: the Bauformen, not the values.
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { modelDouble, once, pageNodes, repoFiles, run } from "./plugin-test-helpers.js";
+import { komuna02PluginCode, modelDouble, once, pageNodes, run } from "./plugin-test-helpers.js";
 import { bildHash, bildOf } from "./test-doubles/bild.js";
 import type { DoubleNode } from "./test-doubles/plugin.js";
 
@@ -78,7 +81,7 @@ const STRETCHED: Readonly<Record<string, { reason: string; match: string; count:
 /** One run of the plan in the double, read by every case (Vitest collects nothing here). */
 async function draw() {
   const double = modelDouble();
-  await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+  await run(double, komuna02PluginCode());
   const show = (set: string, node: DoubleNode) => {
     for (const child of node.children) {
       // Through the node, so the double lays the file out again.

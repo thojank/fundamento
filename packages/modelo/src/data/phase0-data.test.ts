@@ -186,10 +186,11 @@ describe("Phase 0 repo Modelo: core tokens (FR-09, FR-12, FR-18, S2, S4)", () =>
 
   it("contains the S2 and S4 example aliases", () => {
     const core = setNamed(repoModelo(), CORE).tokens;
-    expect(core["color.action.primary.rest"]?.value).toBe("{color.palette.accent.700}");
-    expect(core["color.palette.accent.700"]?.type).toBe("color");
-    expect(core["color.text.default"]?.value).toBe("{color.palette.neutral.900}");
+    // Spec 029 ①: komuna takes the action and the text of the Fonto (neutral 10, black).
+    expect(core["color.action.primary.rest"]?.value).toBe("{color.palette.neutral.900}");
     expect(core["color.palette.neutral.900"]?.type).toBe("color");
+    expect(core["color.text.default"]?.value).toBe("{color.palette.neutral.1000}");
+    expect(core["color.palette.neutral.1000"]?.type).toBe("color");
   });
 
   it("has at least one composite with a sub-field alias", () => {
@@ -198,7 +199,15 @@ describe("Phase 0 repo Modelo: core tokens (FR-09, FR-12, FR-18, S2, S4)", () =>
         ["border", "shadow", "typography"].includes(t.type) &&
         typeof t.value === "object" &&
         t.value !== null &&
-        Object.values(t.value).some((field) => typeof field === "string" && field.startsWith("{")),
+        // A shadow may be a list of layers (Spec 029 ①: the shadows of the Fonto have two or three).
+        (Array.isArray(t.value) ? t.value : [t.value]).some(
+          (layer) =>
+            typeof layer === "object" &&
+            layer !== null &&
+            Object.values(layer).some(
+              (field) => typeof field === "string" && field.startsWith("{"),
+            ),
+        ),
     );
     expect([...new Set(composites.map((t) => t.type))].sort()).toEqual([
       "border",
@@ -226,9 +235,16 @@ describe("Phase 0 repo Modelo: core tokens (FR-09, FR-12, FR-18, S2, S4)", () =>
 
 describe("Phase 0 repo Modelo: sets (FR-10, FR-12)", () => {
   it("has the expected sets", () => {
+    // Spec 029 ①: komuna states its own dimensions in conjunction sets (plan D-02).
     expect(repoModelo().setoj.map((s) => s.name)).toEqual([
       "aspekto/komuna",
       KOMUNA_DARK,
+      "aspekto/komuna+color-scheme/dark+contrast/high",
+      "aspekto/komuna+color-scheme/light+contrast/high",
+      "aspekto/komuna+density/comfortable",
+      "aspekto/komuna+density/compact",
+      "aspekto/komuna+viewport/compact",
+      "aspekto/komuna+viewport/expanded",
       DARK,
       DARK_HIGH,
       HIGH,
@@ -272,21 +288,31 @@ describe("Phase 0 repo Modelo: sets (FR-10, FR-12)", () => {
     const dark = setNamed(modelo, DARK).tokens;
     const high = setNamed(modelo, HIGH).tokens;
     const both = setNamed(modelo, DARK_HIGH).tokens;
-    // komuna states the surfaces, text, actions and status of its own dark mode (Spec 004, G9),
-    // so the generic set carries the rest; those are the tokens this rule is about.
+    // komuna states every colour role of its own dark mode (Spec 004, G9; Spec 029 ①), and in
+    // dark and high contrast a few in a set of three conditions (plan D-04): the generic sets
+    // still win over komuna's dark set, and the most specific set over all.
     const komunaDark = setNamed(modelo, KOMUNA_DARK).tokens;
-    const shared = Object.keys(dark).filter(
-      (name) => high[name]?.type === "color" && komunaDark[name] === undefined,
-    );
+    const komunaDarkHigh = setNamed(
+      modelo,
+      "aspekto/komuna+color-scheme/dark+contrast/high",
+    ).tokens;
+    const shared = Object.keys(dark).filter((name) => high[name]?.type === "color");
     expect(shared.length).toBeGreaterThan(0);
     const rezolvo = resolveOk(modelo, { "color-scheme": "dark", contrast: "high" });
     for (const name of shared) {
-      const expected = both[name] === undefined ? HIGH : DARK_HIGH;
+      const expected =
+        komunaDarkHigh[name] !== undefined
+          ? "aspekto/komuna+color-scheme/dark+contrast/high"
+          : both[name] === undefined
+            ? HIGH
+            : DARK_HIGH;
       expect(resolvedToken(rezolvo, name).origin.set, name).toBe(expected);
     }
     const darkOnly = resolveOk(modelo, { "color-scheme": "dark" });
     for (const name of shared) {
-      expect(resolvedToken(darkOnly, name).origin.set, name).toBe(DARK);
+      expect(resolvedToken(darkOnly, name).origin.set, name).toBe(
+        komunaDark[name] === undefined ? DARK : KOMUNA_DARK,
+      );
     }
   });
 
@@ -297,25 +323,32 @@ describe("Phase 0 repo Modelo: sets (FR-10, FR-12)", () => {
       { dimensio: "aspekto", valoro: "komuna" },
       { dimensio: "color-scheme", valoro: "dark" },
     ]);
-    // Since Spec 004 komuna states its whole dark mode here; the tinted step is one of them.
-    expect(Object.keys(conjunction.tokens)).toContain("color.palette.neutral.950");
+    // Since Spec 004 komuna states its whole dark mode here; Spec 029 ①: the steps it tints are
+    // those of the dark ramps of the Fonto, which its dark roles use.
+    const tinted = Object.keys(conjunction.tokens).filter((name) =>
+      name.startsWith("color.palette."),
+    );
+    expect(tinted.length).toBeGreaterThan(0);
     expect(Object.keys(conjunction.tokens).length).toBeGreaterThan(50);
-    const canvas = resolveOk(modelo, { "color-scheme": "dark" }).tokens["color.background.canvas"];
-    expect(canvas?.aliasChain.at(-1)).toEqual({
-      token: "color.palette.neutral.950",
-      set: KOMUNA_DARK,
-    });
+    const rezolvo = resolveOk(modelo, { "color-scheme": "dark" });
+    const users = Object.values(rezolvo.tokens).filter(
+      (token) => token.aliasChain.at(-1)?.set === KOMUNA_DARK,
+    );
+    expect(users.length).toBeGreaterThan(0);
+    expect(tinted).toContain(users[0]?.aliasChain.at(-1)?.token);
   });
 
   it("late binding: color-scheme/dark re-points semantics to other palette steps (D-03)", () => {
     const modelo = repoModelo();
     const dark = setNamed(modelo, DARK).tokens;
     expect(Object.keys(dark).some((name) => name.startsWith("color.palette."))).toBe(false);
-    // komuna states actions and text of its own dark mode (Spec 004, G9); links stay generic.
+    // Spec 029 ①: komuna states every colour role of its dark mode, links included; the alias is
+    // still bound late, against the palette of the core.
     const link = resolveOk(modelo, { "color-scheme": "dark" }).tokens["color.link.rest"];
-    expect(link?.origin.set).toBe(DARK);
-    expect(link?.aliasChain[0]).toEqual({ token: "color.link.rest", set: DARK });
+    expect(link?.origin.set).toBe(KOMUNA_DARK);
+    expect(link?.aliasChain[0]).toEqual({ token: "color.link.rest", set: KOMUNA_DARK });
     expect(link?.aliasChain.at(-1)?.set).toBe(CORE);
+    expect(Object.keys(dark)).toContain("color.link.rest");
     const text = resolveOk(modelo, { "color-scheme": "dark" }).tokens["color.text.default"];
     expect(text?.origin.set).toBe(KOMUNA_DARK);
   });
@@ -435,7 +468,18 @@ describe("Phase 0 repo Modelo: KontrastParoj (FR-16)", () => {
               )
             : toColor(raw).contrast(fg, "WCAG21");
         const where = `${pair.name} @ ${formatCombination(modelo, assignment)}`;
-        expect(ratio, where).toBeGreaterThanOrEqual(thresholds[pair.kategorio]);
+        // Spec 002 (D-10) and Spec 029 ①: a pair with an alternative (aux) holds through it, as
+        // check:alirebleco measures — komuna's warning fill is the yellow of the Fonto, its
+        // border reaches 3:1.
+        const aux = pair.aux;
+        const auxRatio =
+          aux === undefined
+            ? 0
+            : toColor(resolvedToken(rezolvo, aux.background).value).contrast(
+                toColor(resolvedToken(rezolvo, aux.foreground).value),
+                "WCAG21",
+              );
+        expect(Math.max(ratio, auxRatio), where).toBeGreaterThanOrEqual(thresholds[pair.kategorio]);
         const key = `${pair.name}/contrast=${rezolvo.assignment.contrast}`;
         minima[key] = Math.min(minima[key] ?? Number.POSITIVE_INFINITY, ratio);
       }

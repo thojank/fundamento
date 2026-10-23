@@ -106,17 +106,17 @@ describe("exportMarko: the byte check (M-4)", () => {
   });
 });
 
+// Spec 029 ①: provo shows Prata (OFL), which has the weight 400 only.
 describe("exportMarko: the webfont files from npm (O-4)", () => {
   const tarball = tarballOf([
     { path: "package/LICENSE", bytes: Buffer.from("OFL (test)") },
-    { path: "package/files/archivo-latin-400-normal.woff2", bytes: Buffer.from("archivo-regular") },
-    { path: "package/files/archivo-latin-700-normal.woff2", bytes: Buffer.from("archivo-bold") },
+    { path: "package/files/prata-latin-400-normal.woff2", bytes: Buffer.from("prata-regular") },
   ]);
   const npm: NpmDeps = {
     fetchJson: async () => ({
       version: "5.1.0",
       license: "OFL-1.1",
-      dist: { tarball: "https://registry.npmjs.org/@fontsource/archivo/-/archivo-5.1.0.tgz" },
+      dist: { tarball: "https://registry.npmjs.org/@fontsource/prata/-/prata-5.1.0.tgz" },
     }),
     fetchBytes: async () => tarball,
     cacheDir: join(scratch, "npm-cache"),
@@ -130,20 +130,15 @@ describe("exportMarko: the webfont files from npm (O-4)", () => {
       npm,
     });
     expect(result.ok).toBe(true);
-    const fonts = join(result.dir, "aspekto-provo", "tiparoj", "archivo");
-    for (const file of [
-      "LICENSE",
-      "archivo-latin-400-normal.woff2",
-      "archivo-latin-700-normal.woff2",
-      "herkunto.json",
-    ]) {
+    const fonts = join(result.dir, "aspekto-provo", "tiparoj", "prata");
+    for (const file of ["LICENSE", "prata-latin-400-normal.woff2", "herkunto.json"]) {
       expect(existsSync(join(fonts, file)), file).toBe(true);
     }
     const css = readFileSync(join(result.dir, "tiparoj.css"), "utf8");
-    expect(css).toContain('font-family: "Archivo"');
-    expect(css).toContain("url(aspekto-provo/tiparoj/archivo/archivo-latin-700-normal.woff2)");
-    expect(result.sentences.join(" ")).toContain("Archivo");
-    expect(result.sentences.join(" ")).toContain("@fontsource/archivo 5.1.0");
+    expect(css).toContain('font-family: "Prata"');
+    expect(css).toContain("url(aspekto-provo/tiparoj/prata/prata-latin-400-normal.woff2)");
+    expect(result.sentences.join(" ")).toContain("Prata");
+    expect(result.sentences.join(" ")).toContain("@fontsource/prata 5.1.0");
     expect(checkPackageDir(join(result.dir, "aspekto-provo")).ok).toBe(true);
     const before = hashes(result.dir);
     const again = await exportMarko(workdir, "provo", provo, bases, {
@@ -170,7 +165,7 @@ describe("exportMarko: the webfont files from npm (O-4)", () => {
     });
     expect(result.ok).toBe(true);
     expect(existsSync(join(result.dir, "aspekto-provo", "tiparoj"))).toBe(false);
-    expect(result.sentences.join(" ")).toMatch(/Archivo.*ohne Schriftdatei/);
+    expect(result.sentences.join(" ")).toMatch(/Prata.*ohne Schriftdatei/);
   });
 
   it("a failed download is a sentence, not a refusal", async () => {
@@ -187,7 +182,7 @@ describe("exportMarko: the webfont files from npm (O-4)", () => {
       npm: failing,
     });
     expect(result.ok).toBe(true);
-    expect(result.sentences.join(" ")).toMatch(/Archivo.*nicht geladen/);
+    expect(result.sentences.join(" ")).toMatch(/Prata.*nicht geladen/);
   });
 
   it("never exports into the checkout (O-3)", async () => {
@@ -213,7 +208,7 @@ describe("exportMarko: Figma (F-13)", () => {
     expect(existsSync(manifestPath)).toBe(true);
     const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as { id: string; name: string };
     // Spec 027: the plugin of the Bauformen.
-    expect(manifest.id).toMatch(/^fundamento-bauformen-[0-9a-f]+$/);
+    expect(manifest.id).toMatch(/^fundamento-grundlagen-[0-9a-f]+$/);
     expect(manifest.name).toContain("provo");
     expect(existsSync(join(result.dir, "projekcioj", "figma", "plugin", "code.js"))).toBe(true);
   });

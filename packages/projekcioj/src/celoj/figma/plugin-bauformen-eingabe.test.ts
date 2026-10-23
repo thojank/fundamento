@@ -648,20 +648,23 @@ describe("the dialogo is drawn as a dialog: surface with heading, message, reaso
     const { variant, dialogo } = await drawn();
     const surface = descendant(variant("size=small, reason=none, state=rest"), "surface");
     const effects = surface?.properties.effects as Record<string, unknown>[];
-    expect(effects).toHaveLength(2);
+    // Spec 029 ①: shadow-high of the Fonto (0 4 6, 0 12 24) and the rim of light of the dark mode,
+    // an inner shadow that is transparent in light.
+    expect(effects).toHaveLength(3);
     expect(effects[0]).toMatchObject({
       type: "DROP_SHADOW",
-      offset: { x: 0, y: 12 },
-      radius: 32,
+      offset: { x: 0, y: 4 },
+      radius: 6,
       spread: 0,
       visible: true,
     });
     expect(effects[0]?.color).toMatchObject({ r: expect.any(Number), a: expect.any(Number) });
-    expect(effects[1]).toMatchObject({ type: "DROP_SHADOW", radius: 8 });
+    expect(effects[1]).toMatchObject({ type: "DROP_SHADOW", radius: 24 });
+    expect(effects[2]).toMatchObject({ type: "INNER_SHADOW" });
     expect({ ...dialogo?.shadow, variable: role(dialogo?.shadow?.variable) }).toMatchObject({
       part: "surface",
       variable: "elevation/shadow/modal",
-      layers: 2,
+      layers: 3,
       status: "bound",
     });
     expect(dialogo?.shadow?.evidence).toContain("setBoundVariableForEffect");

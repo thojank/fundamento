@@ -329,6 +329,8 @@ describe("the label is set in the model's font (F11)", () => {
         // Spec 011 ②: the heading of the dialogo (SemiBold) and the code text of the tekstareo
         // (Geist Mono Regular, and the Medium crossing the field-by-field binding passes through).
         { family: "Geist", style: "SemiBold" },
+        // Spec 029 ①: the headlines 3 and 4 of komuna are bold, as in the Fonto.
+        { family: "Geist", style: "Bold" },
         { family: "Geist Mono", style: "Regular" },
         { family: "Geist Mono", style: "Medium" },
       ],

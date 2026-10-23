@@ -97,6 +97,12 @@ describe("invalid/aspekto-incomplete (AK-03)", () => {
       ["aspekto-incomplete", `${set}#/color/text/default`],
       ["aspekto-incomplete", `${set}#/motion/duration/fast`],
       ["aspekto-incomplete", `${set}#/typography/kicker`],
+      // Spec 029 ①: the missing primary action falls back to the core, now komuna after the
+      // Fonto (neutral.900); in ekzemplo's palette rest and pressed meet (plan, B-4).
+      [
+        "state-distinct",
+        "rezolvo(aspekto=ekzemplo,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default)/color.action.primary.pressed",
+      ],
     ]);
   });
 });
@@ -117,8 +123,14 @@ describe("the warning surface of ekzemplo holds through its border (Spec 002 S3,
     const warning = (evaluation.measurements ?? []).filter(
       (entry) => entry.pair.name === PAIR && entry.branch === "aux",
     );
-    expect(warning.length).toBe(18);
-    for (const entry of warning) {
+    // Spec 029 ①: komuna's warning fill is the yellow of the Fonto, carried by its border in light.
+    for (const entry of warning.filter((item) => item.combination.aspekto === "komuna")) {
+      expect(entry.combination["color-scheme"]).toBe("light");
+      expect(entry.aux?.ratio).toBeGreaterThanOrEqual(3);
+    }
+    const ekzemplo = warning.filter((entry) => entry.combination.aspekto === "ekzemplo");
+    expect(ekzemplo.length).toBe(18);
+    for (const entry of ekzemplo) {
       expect(entry.combination).toMatchObject({
         aspekto: "ekzemplo",
         "color-scheme": "light",
@@ -254,9 +266,12 @@ describe("ekzemplo is a brand of its own, in every category (F29)", () => {
       expect(px(token), token).toBeLessThan(reference(token) ?? 0);
     }
     const floor = px("size.target.min");
-    for (const size of ["small", "medium", "large"]) {
+    // Spec 029 ①: komuna's controls are the element sizes of the Fonto (28/32/36); ekzemplo stays
+    // tighter than komuna 0.2 (32/40/48), the reference it was drawn against.
+    const komuna02 = { small: 32, medium: 40, large: 48 } as const;
+    for (const size of ["small", "medium", "large"] as const) {
       const token = `size.control.${size}`;
-      expect(px(token), token).toBeLessThan(reference(token) ?? 0);
+      expect(px(token), token).toBeLessThan(komuna02[size]);
       expect(px(token), token).toBeGreaterThanOrEqual(floor ?? 0);
     }
     expect(floor).toBe(24);

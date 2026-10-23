@@ -681,8 +681,10 @@ describe("Spec 004 documentation (T001, Art. V Benchmark-Aspekto)", () => {
   // Seit F1 (Spec 007, F1-T06) 2.2: bestimmt gegen die Basis des F1-PR, main 51e9ed9 mit v2.1.
   // Seit Spec 024 Runde 2 (Amendment v2.3, freigegeben am 2026-10-21) 2.3: bestimmt gegen main
   // 8915fa6 mit v2.2 und den offenen PR #100 (O-1), der keine Nummer beansprucht.
-  it("the Constitution header says version 2.3 and the history names v2.3 with the Ero-Tokens", () => {
-    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.3 · /);
+  // Seit Spec 029 ① (Amendment v2.4, freigegeben am 2026-10-23, 21:56) 2.4: bestimmt gegen main
+  // d29a5206 mit v2.3; die Spec nennt die Nummer.
+  it("the Constitution header says version 2.4 and the history names v2.3 with the Ero-Tokens", () => {
+    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.4 · /);
     expect(constitution).toContain("v2.3 (Spec 024");
     expect(constitution).toContain("Terminologie **Ero-Tokeno**");
   });

@@ -3,8 +3,10 @@
 import type { IdsLock } from "../contracts/entity-ids.js";
 import type { ValidationIssue } from "../contracts/issues.js";
 import type {
+  DevenoValoro,
   Dimensio,
   DimensioValoro,
+  FontoSistemo,
   Gvidanto,
   Ikono,
   Jugxo,
@@ -85,6 +87,8 @@ export function buildModelo(files: ModeloFiles): BuildModeloResult {
     ...gvidantoOf(files.data["gvidanto.json"]?.value),
     // Nachlese 8 ③: the translations, absent while data/tradukoj.json is.
     ...tradukojOf(files.data["tradukoj.json"]?.value),
+    // Spec 029 ①: the Fontoj and the provenance of the values taken from them.
+    ...fontojOf(files),
     eroj: loadedEroj(files.eroj, files.uzoj),
     sxablonoj: loadedSxablonoj(files.sxablonoj ?? [], files.sxablonoUzoj ?? []),
     idsLock,
@@ -321,4 +325,22 @@ function idsLockOf(document: unknown): IdsLock {
     return { ids: document.ids as IdsLock["ids"] };
   }
   return { ids: {} };
+}
+
+/**
+ * The Fontoj of data/fontoj.json and the deveno.json of every package (Spec 029 ①), each value with
+ * its Aspekto; both absent while there is none, so a Modelo without a Fonto looks as before.
+ */
+function fontojOf(files: ModeloFiles): Pick<Modelo, "fontoj" | "deveno"> {
+  const fontoj = entriesOf<FontoSistemo>(files.data["fontoj.json"]?.value, "fontoj");
+  const deveno = files.packages.flatMap((pkg) => {
+    const value = pkg.deveno?.value;
+    if (!isJsonObject(value) || !Array.isArray(value.valoroj)) return [];
+    const aspekto = typeof value.aspekto === "string" ? value.aspekto : pkg.name;
+    return (value.valoroj as DevenoValoro[]).map((entry) => ({ ...entry, aspekto }));
+  });
+  return {
+    ...(files.data["fontoj.json"] === undefined ? {} : { fontoj }),
+    ...(deveno.length === 0 ? {} : { deveno }),
+  };
 }

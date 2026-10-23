@@ -63,7 +63,8 @@ describe("an Aspekto may override every category (F28)", () => {
   const source = brand((set) => {
     put(set, "spacing.scale.400", px(14));
     put(set, "size.scale.700", px(44));
-    put(set, "radius.xlarge", px(28));
+    // Spec 029 ①: komuna's xlarge is 28 now (the page radius of the Fonto); the brand takes 30.
+    put(set, "radius.xlarge", px(30));
     put(set, "motion.duration.scale.2", { value: 120, unit: "ms" });
     put(set, "layout.grid.columns", "{layout.columns.12}");
     put(set, "opacity.hover", 0.14);
@@ -78,7 +79,7 @@ describe("an Aspekto may override every category (F28)", () => {
     const cases: [string, unknown][] = [
       ["spacing.large", px(14)],
       ["size.control.medium", px(44)],
-      ["radius.xlarge", px(28)],
+      ["radius.xlarge", px(30)],
       ["motion.duration.medium", { value: 120, unit: "ms" }],
       ["layout.grid.columns", 12],
       ["opacity.hover", 0.14],

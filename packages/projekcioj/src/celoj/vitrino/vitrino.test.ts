@@ -97,6 +97,17 @@ describe("the Werkstatt in the Vitrino (Spec 016 ②)", () => {
     expect(html).toContain("modus=");
   });
 
+  // Spec 029 ①: the Agordilo derives over komuna 0.2, today's komuna has the values of the Fonto.
+  // The Werkstatt brings the stylesheet of its structure along, only for its mode, so a draft at
+  // the standard looks like the structure and not like a mix with today's values.
+  it("brings the stylesheet of komuna 0.2 along, for the Werkstatt mode only (Spec 029 ①)", () => {
+    const bazo = /<style id="fm-werkstatt-bazo-css">([\s\S]*?)<\/style>/.exec(html)?.[1] ?? "";
+    expect(bazo).toContain(':where(:root[data-fm-modus="werkstatt"]) {');
+    expect(bazo).not.toMatch(/:where\(:root(?!\[data-fm-modus="werkstatt"\])/);
+    expect(bazo).toContain("--fm-radius-medium: 4px;");
+    expect(island()).not.toHaveProperty("bazoCss");
+  });
+
   it("embeds the structure with its fingerprint, the calibration and the schemas, with no path of this machine", () => {
     const data = island();
     const structure = data.structure as {

@@ -497,6 +497,16 @@ export interface ModeloJson {
   gvidanto?: Gvidanto;
   tradukoj?: Tradukoj;
   /**
+   * The Fontoj (Spec 029 ①, Constitution v2.4): open design systems the Modelo takes values from, pinned; absent while it takes from none.
+   */
+  fontoj?: FontoSistemo[];
+  /**
+   * The provenance of every value an Aspekto took from a Fonto (Spec 029 ①, Art. VII), each with its Aspekto; absent while there is none.
+   */
+  deveno?: (DevenoValoro & {
+    aspekto: Name;
+  })[];
+  /**
    * The Ikonaro (Spec 014 ①): the icon names of the core with meaning and kialo; absent while the Modelo has none.
    */
   ikonaro?: Ikono[];
@@ -1173,6 +1183,71 @@ export interface Tradukoj {
   [k: string]: {
     [k: string]: string;
   };
+}
+/**
+ * A Fonto (Constitution v2.4, Art. V): a design system with an open, permissive licence that Fundamento takes values from, pinned to one version and commit (data/fontoj.json). Not to be confused with $defs/Fonto, a font family of an Aspekto.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "FontoSistemo".
+ */
+export interface FontoSistemo {
+  id: Name;
+  name: NonEmptyText;
+  license: License;
+  copyright: NonEmptyText;
+  source: NonEmptyText;
+  version: string;
+  tag?: NonEmptyText;
+  commit: string;
+  /**
+   * @minItems 1
+   */
+  packages: {
+    name: NonEmptyText;
+    version: string;
+    integrity: string;
+  }[];
+  read: string;
+  scope: NonEmptyText;
+  notices: NonEmptyText;
+}
+/**
+ * The provenance of one value an Aspekto took from a Fonto (Constitution v2.4, Art. VII): the token and the set it is written in, the Fonto, the source file and key, the Fonto's value, the value written and how it was taken. A value a Regulo changed names its Jugxo.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "DevenoValoro".
+ */
+export interface DevenoValoro {
+  token: TokenName;
+  /**
+   * The Aspekto the value belongs to; in deveno.json the file names it once, in modelo.json every entry.
+   */
+  aspekto?: string;
+  aro: NonEmptyText;
+  fonto: Name;
+  dosiero: NonEmptyText;
+  sxlosilo: NonEmptyText;
+  fontoValoro: NonEmptyText;
+  valoro: NonEmptyText;
+  /**
+   * prenita: taken as it is; konvertita: converted into Fundamento's units; kunmetita: composed from Fonto values as the Fonto composes them; rundita / kunmetita-rundita: the nearest step of Fundamento; interpolita: between two steps of the Fonto; derivita: derived where the Fonto has no value; adaptita: changed because a Regulo or an Aspiro wins (names its Jugxo).
+   */
+  maniero:
+    | "prenita"
+    | "konvertita"
+    | "kunmetita"
+    | "rundita"
+    | "kunmetita-rundita"
+    | "interpolita"
+    | "derivita"
+    | "adaptita";
+  /**
+   * A field of a composite value (fontWeight of a typography token) when only that field is taken.
+   */
+  kampo?: string;
+  jugxo?: JugxoId;
+  kialo?: NonEmptyText;
+  noto?: NonEmptyText;
 }
 /**
  * One name of the Ikonaro (Spec 014 ①, G3, E9): an icon is vocabulary in the core — a name, its meaning in de and en and a kialo — and a picture in every Aspekto package (ikonoj/<name>.svg, checked by check:ikonaro). mirror says that the direction carries meaning and the glyph is mirrored in right-to-left writing (chevron-right; a check is not).
@@ -1971,6 +2046,25 @@ export interface RegulojFile {
  */
 export interface JugxojFile {
   jugxoj: Jugxo[];
+}
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "FontojFile".
+ */
+export interface FontojFile {
+  $schema?: string;
+  fontoj: FontoSistemo[];
+}
+/**
+ * deveno.json of an Aspekto package: the provenance of every value it took from a Fonto.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "DevenoFile".
+ */
+export interface DevenoFile {
+  $schema?: string;
+  aspekto: Name;
+  valoroj: DevenoValoro[];
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema

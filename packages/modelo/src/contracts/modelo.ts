@@ -3,12 +3,14 @@
 
 import type {
   AspektoAspiro,
+  DevenoValoro,
   Dimensio,
   DimensioValoro,
   DtcgType,
   EntityType,
   Ero,
   Fonto,
+  FontoSistemo,
   Gvidanto,
   IdsLock,
   Ikono,
@@ -38,6 +40,7 @@ export type {
   AspektoFile,
   AspektoMetadata,
   ColorValue,
+  DevenoValoro,
   Dimensio,
   DimensiojFile,
   DimensioValoro,
@@ -45,6 +48,7 @@ export type {
   EroFile,
   EroInstance,
   Fonto,
+  FontoSistemo,
   Gvidanto,
   GvidantoFile,
   IkonaroFile,
@@ -232,6 +236,16 @@ export interface Modelo {
    * text ID; absent while data/tradukoj.json is. English, the text of the entry, is the source.
    */
   tradukoj?: Tradukoj;
+  /**
+   * The Fontoj (Spec 029 ①, Constitution v2.4): open design systems values are taken from, pinned
+   * to a version and a commit; absent while data/fontoj.json is.
+   */
+  fontoj?: FontoSistemo[];
+  /**
+   * The provenance of every value an Aspekto took from a Fonto (Spec 029 ①, Art. VII), from the
+   * deveno.json of the packages, each with the Aspekto it belongs to; absent while none has one.
+   */
+  deveno?: (DevenoValoro & { aspekto: string })[];
   /** Eroj with their Skemoj, sorted by Ero name (Spec 003). */
   eroj: LoadedEro[];
   /**

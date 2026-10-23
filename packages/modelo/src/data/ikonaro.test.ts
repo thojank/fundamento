@@ -161,11 +161,12 @@ describe("data/ikonaro.json (Spec 014 ①, G3)", () => {
     const result = await check({ json: true, repoRoot });
     expect(result.errors).toEqual([]);
     expect(result.ok).toBe(true);
-    // Spec 019 ①: provo-kompakta is the fourth known Aspekto (Phosphor light).
+    // Spec 019 ①: provo-kompakta is the fourth known Aspekto (Phosphor light); Spec 029 ①:
+    // komuna-0-2 the fifth.
     expect(result.stats).toMatchObject({
       names: names.length,
-      aspektoj: 4,
-      glyphs: names.length * 4,
+      aspektoj: 5,
+      glyphs: names.length * 5,
     });
   });
 

@@ -217,8 +217,9 @@ describe("the sections of FR-06", () => {
     const dark = coverage.find(
       (entry) => entry.dimensio === "color-scheme" && entry.valoro === "dark",
     );
-    expect(dark?.propraj).toBe(57);
-    expect(dark?.entute).toBe(76);
+    // Spec 029 ①: komuna states every colour role, the steps of the dark ramps and the shadows.
+    expect(dark?.propraj).toBe(94);
+    expect(dark?.entute).toBe(94);
     expect(coverage.some((entry) => entry.dimensio === "motion")).toBe(true);
   });
 });

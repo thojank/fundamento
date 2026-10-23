@@ -138,21 +138,33 @@ describe("Figma plan (T015)", () => {
   });
 
   it("fails when one alias is swapped", () => {
-    const broken = JSON.parse(JSON.stringify(plan)) as FigmaPlan;
-    const collection = broken.collections.find((candidate) => candidate.name === "color-scheme");
-    const variable = collection?.variables.find(
-      (candidate) => candidate.name.startsWith("color/") && candidate.hidden !== true,
-    );
-    if (variable === undefined || collection === undefined) throw new Error("no cascaded variable");
-    const [first, second] = collection.modes;
-    const swapped = variable.values[first ?? ""];
-    variable.values[first ?? ""] = variable.values[second ?? ""] as never;
-    variable.values[second ?? ""] = swapped as never;
     const rezolvo = prepared.input.rezolvoj.rezolvoj[0];
     if (rezolvo === undefined) throw new Error("no rezolvo");
-    const resolved = resolveFigmaPlan(broken, rezolvo.assignment);
     const before = resolveFigmaPlan(plan, rezolvo.assignment);
-    expect(resolved[variable.name]).not.toEqual(before[variable.name]);
+    const colors = plan.collections
+      .find((candidate) => candidate.name === "color-scheme")
+      ?.variables.filter(
+        (candidate) => candidate.name.startsWith("color/") && candidate.hidden !== true,
+      );
+    // Spec 029 ①: some roles of komuna resolve alike in light and dark, as in the Fonto; a swap of
+    // those changes nothing. The first whose swap changes the resolved value must be caught.
+    let caught = false;
+    for (const candidate of colors ?? []) {
+      const broken = JSON.parse(JSON.stringify(plan)) as FigmaPlan;
+      const collection = broken.collections.find((entry) => entry.name === "color-scheme");
+      const variable = collection?.variables.find((entry) => entry.name === candidate.name);
+      if (variable === undefined || collection === undefined) continue;
+      const [first, second] = collection.modes;
+      const swapped = variable.values[first ?? ""];
+      variable.values[first ?? ""] = variable.values[second ?? ""] as never;
+      variable.values[second ?? ""] = swapped as never;
+      const resolved = resolveFigmaPlan(broken, rezolvo.assignment);
+      if (JSON.stringify(resolved[variable.name]) !== JSON.stringify(before[variable.name])) {
+        caught = true;
+        break;
+      }
+    }
+    expect(caught).toBe(true);
   });
 
   it("describes the component set from the Skemo and marks every node as Fundamento", () => {
@@ -283,35 +295,44 @@ describe("composite tokens reach Figma field by field (F9)", () => {
   const variables = plan.collections.flatMap((collection) => collection.variables);
   const named = (name: string) => variables.find((variable) => variable.name === name);
 
-  it("gives a shadow of one layer its five fields, with the colour as an alias", () => {
+  // Spec 029 ①: komuna's shadows are the Fonto's, two layers in light and three in dark (a rim of
+  // light): every layer has its five fields, cascaded by color-scheme, and a colour a step of the
+  // palette has stays an alias.
+  it("gives every layer of a shadow its five fields, with the colour as an alias where it can", () => {
     expect(named("elevation/shadow/raised")).toBeUndefined();
-    expect(named("elevation/shadow/raised/color")).toMatchObject({
+    expect(named("elevation/shadow/floating/1/color@color-scheme=light")).toMatchObject({
       type: "COLOR",
-      values: { komuna: { alias: "color/shadow/key" } },
+      values: { komuna: { alias: "color/palette/shade/10" } },
     });
-    expect(named("elevation/shadow/raised/offset-y")).toMatchObject({
-      type: "FLOAT",
-      values: { komuna: 2 },
+    expect(named("elevation/shadow/raised/1/blur@color-scheme=light")).toMatchObject({
+      values: { komuna: 4 },
     });
-    expect(named("elevation/shadow/raised/blur")).toMatchObject({ values: { komuna: 6 } });
-    expect(named("elevation/shadow/raised/spread")).toMatchObject({ values: { komuna: 0 } });
-    expect(named("elevation/shadow/raised/offset-x")).toMatchObject({ values: { komuna: 0 } });
+    expect(named("elevation/shadow/floating/2/blur@color-scheme=light")).toMatchObject({
+      values: { komuna: 24 },
+    });
   });
 
   // A layer an Aspekto does not have renders nothing: transparent colour, zero measures. That is
   // the honest translation in a file whose variables are the same in every mode (F9).
   it("says with a transparent layer that an Aspekto has fewer layers", () => {
-    expect(named("elevation/shadow/floating/2/color")?.values.ekzemplo).toEqual({
+    // Spec 029 ①: komuna's third layer is the rim of light of its dark mode; in light it is not there.
+    expect(named("elevation/shadow/floating/3/color@color-scheme=light")?.values.komuna).toEqual({
       r: 0,
       g: 0,
       b: 0,
       a: 0,
     });
-    expect(named("elevation/shadow/floating/2/blur")?.values.ekzemplo).toBe(0);
-    // komuna has both layers for real; ekzemplo's brand casts no shadow at all, so its first layer
-    // is a transparent zero of its own making — the second is the filler.
-    expect(named("elevation/shadow/floating/1/blur")?.values.komuna).toBe(24);
-    expect(named("elevation/shadow/floating/2/blur")?.values.komuna).toBe(4);
+    expect(named("elevation/shadow/floating/2/color@color-scheme=light")?.values.ekzemplo).toEqual({
+      r: 0,
+      g: 0,
+      b: 0,
+      a: 0,
+    });
+    expect(named("elevation/shadow/floating/2/blur@color-scheme=light")?.values.ekzemplo).toBe(0);
+    // komuna has both layers for real (shadow-high of the Fonto); ekzemplo's brand casts no shadow
+    // at all, so its first layer is a transparent zero of its own making — the second is the filler.
+    expect(named("elevation/shadow/floating/1/blur@color-scheme=light")?.values.komuna).toBe(6);
+    expect(named("elevation/shadow/floating/2/blur@color-scheme=light")?.values.komuna).toBe(24);
   });
 
   it("fills a layer the value does not have with nothing at all", () => {
@@ -696,8 +717,9 @@ describe("a brand that draws pills (F32)", () => {
 
   it("leaves the reference brand round in the ordinary way", () => {
     const komuna = resolveFigmaPlan(pillPlan, { aspekto: "komuna" });
-    expect(Number(komuna["radius/role/control"])).toBe(4);
-    expect(Number(komuna["radius/focus/gap"])).toBe(6);
+    // Spec 029 ①: the element radius of the Fonto (10), the ring 3 px away (13).
+    expect(Number(komuna["radius/role/control"])).toBe(10);
+    expect(Number(komuna["radius/focus/gap"])).toBe(13);
   });
 });
 
@@ -979,7 +1001,8 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
     expect(rest?.paints?.["placeholder.color"]).toMatchObject({ hex: expect.stringMatching(/^#/) });
     expect(set?.texts).toEqual({ text: "Beispiel", help: "Hinweis", error: "Fehler" });
     expect(butonoOf(plan.components)?.texts).toBeUndefined();
-    expect(rest?.geometry?.["box.height"]).toBe("40px");
+    // Spec 029 ①: size.control.medium is the element size md of the Fonto (32).
+    expect(rest?.geometry?.["box.height"]).toBe("32px");
     // Fonts of every text part, over every mode: the caption and the body roles too.
     expect((set?.fonts?.length ?? 0) >= (butonoOf(plan.components)?.fonts?.length ?? 0)).toBe(true);
   });
@@ -1223,7 +1246,7 @@ describe("Figma plan for the sxaltilo (Spec 010 ①)", () => {
     expect(on?.bindings["box.width"]).toBe("size/control/medium");
     expect(on?.paints?.["indicator.fill"]).toMatchObject({ hex: expect.stringMatching(/^#/) });
     expect(on?.geometry?.["indicator.size"]).toBe("20px");
-    expect(on?.geometry?.["box.width"]).toBe("40px");
+    expect(on?.geometry?.["box.width"]).toBe("32px");
     expect(on?.notDrawn).toEqual({});
   });
 
@@ -1470,7 +1493,7 @@ describe("Figma plan for the elektilo (Spec 010 ④)", () => {
     expect(variant("large", "rest")?.bindings["indicator.size"]).toBe("size/icon/large");
     expect(rest?.bindings["box.gap"]).toBe("spacing/small");
     expect(rest?.bindings["placeholder.color"]).toBe("color/text/subtle");
-    expect(rest?.geometry?.["box.height"]).toBe("40px");
+    expect(rest?.geometry?.["box.height"]).toBe("32px");
     // The closed field shows the prompt (placeholder), so the colour of a chosen option's text has
     // no node; the mark of a required select is the projection's — the kampo's Jugxo.
     expect(rest?.notDrawn).toEqual({
@@ -1703,8 +1726,10 @@ describe("Figma plan for the dialogo (Spec 011 ②)", () => {
     const rest = variant("small", "none");
     expect(rest?.shadow?.part).toBe("surface");
     expect(rest?.shadow?.variable).toBe("elevation/shadow/modal");
-    // komuna has two layers, ekzemplo one: the fields are numbered (F9).
-    expect(rest?.shadow?.layers).toHaveLength(2);
+    // komuna has two layers in light and three in dark (Spec 029 ①), ekzemplo one: the fields are
+    // numbered (F9), the third an inner shadow.
+    expect(rest?.shadow?.layers).toHaveLength(3);
+    expect(rest?.shadow?.layers?.[2]?.inset).toBe(true);
     const [key, ambient] = rest?.shadow?.layers ?? [];
     expect(key?.fields).toEqual({
       color: "elevation/shadow/modal/1/color",
@@ -1713,9 +1738,10 @@ describe("Figma plan for the dialogo (Spec 011 ②)", () => {
       blur: "elevation/shadow/modal/1/blur",
       spread: "elevation/shadow/modal/1/spread",
     });
-    expect(key).toMatchObject({ offsetX: 0, offsetY: 12, blur: 32, spread: 0 });
+    // Spec 029 ①: shadow-high of the Fonto, 0 4 6 and 0 12 24.
+    expect(key).toMatchObject({ offsetX: 0, offsetY: 4, blur: 6, spread: 0 });
     expect(key?.color).toMatchObject({ hex: expect.stringMatching(/^#[0-9a-f]{6}$/) });
-    expect(ambient).toMatchObject({ offsetX: 0, offsetY: 0, blur: 8, spread: 0 });
+    expect(ambient).toMatchObject({ offsetX: 0, offsetY: 12, blur: 24, spread: 0 });
     expect(ambient?.fields.color).toBe("elevation/shadow/modal/2/color");
     // Every field names a variable of the plan.
     const names = new Set(
@@ -1733,9 +1759,10 @@ describe("Figma plan for the dialogo (Spec 011 ②)", () => {
 
   it("takes the heading's role for the font and the text case of a set without a label part", () => {
     const rest = variant("small", "none");
-    expect(rest?.font).toEqual({ family: "Geist", style: "SemiBold", families: ["Geist"] });
+    // Spec 029 ①: the heading (headline.4) is bold, as heading-4 of the Fonto.
+    expect(rest?.font).toEqual({ family: "Geist", style: "Bold", families: ["Geist"] });
     expect(typeof rest?.textCase).toBe("string");
-    expect(set?.fonts?.some((font) => font.style === "SemiBold")).toBe(true);
+    expect(set?.fonts?.some((font) => font.style === "Bold")).toBe(true);
     expect(set?.fonts?.some((font) => font.style === "Regular")).toBe(true);
   });
 
@@ -2136,7 +2163,10 @@ describe("Figma plan for the plenstato (Spec 011 ③)", () => {
       /^#[0-9a-f]{6}/,
     );
     expect(items.plenstato?.values["indicator.color@kind=empty,state=rest"]).toBeUndefined();
-    expect(items.plenstato?.values["border.color@kind=empty,state=rest"]).toMatch(/^#[0-9a-f]{6}/);
+    // Spec 029 ①: the border of the Fonto is a translucent overlay (8 % black, 10 % white).
+    expect(items.plenstato?.values["border.color@kind=empty,state=rest"]).toMatch(
+      /^(#[0-9a-f]{6}|alpha varies by mode)/,
+    );
     expect(items.plenstato?.values["text.color@kind=loading,state=rest"]).toMatch(/^#[0-9a-f]{6}/);
     expect(items.plenstato?.values["indicator.size@kind=loading,state=rest"]).toMatch(/px$/);
     expect(items.plenstato?.values["border.width@kind=empty,state=rest"]).toBe("1px");
@@ -3427,8 +3457,9 @@ describe("the Figma plan draws the karto (Spec 015 ③)", () => {
     // The orientation is no key (extraAxes); the composed looks and the media are no part.
     expect(items.karto?.values).toEqual({
       "surface.fill@state=rest": expect.stringMatching(/^#[0-9a-f]{6}$/),
-      "surface.radius@state=rest": "8px",
-      "border.color@state=rest": expect.stringMatching(/^#[0-9a-f]{6}$/),
+      // Spec 029 ①: the container radius of the Fonto; its border a translucent overlay.
+      "surface.radius@state=rest": "12px",
+      "border.color@state=rest": expect.stringMatching(/^(#[0-9a-f]{6}$|alpha varies by mode)/),
       "border.width@state=rest": "1px",
       "heading.color@state=rest": expect.stringMatching(/^#[0-9a-f]{6}$/),
       "content.color@state=rest": expect.stringMatching(/^#[0-9a-f]{6}$/),
@@ -3528,7 +3559,8 @@ describe("the Figma plan draws the avataro (Spec 015 ③)", () => {
         [
           ["small", "20px"],
           ["medium", "24px"],
-          ["large", "48px"],
+          // Spec 029 ①: size.control.large is the element size lg of the Fonto (36).
+          ["large", "36px"],
         ].flatMap(([size, box]) => [
           [`box.size@size=${size},state=rest`, box],
           [`image.radius@size=${size},state=rest`, "9999px"],

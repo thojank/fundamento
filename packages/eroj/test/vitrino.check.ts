@@ -84,7 +84,8 @@ const WITNESSES = [
   ["color-scheme", "dark", firstContrastRow],
   ["contrast", "high", firstContrastRow],
   ["density", "compact", (page: Page) => cssValue(page, "--fm-spacing-medium")],
-  ["viewport", "expanded", (page: Page) => cssValue(page, "--fm-font-size-display-1")],
+  // Spec 029 ①: komuna keeps its type on wide screens, as the Fonto does; the grid widens.
+  ["viewport", "expanded", (page: Page) => cssValue(page, "--fm-layout-grid-columns")],
   ["motion", "reduced", (page: Page) => cssValue(page, "--fm-motion-duration-medium")],
   ["aspekto", "ekzemplo", firstContrastRow],
 ] as const;
@@ -199,8 +200,10 @@ test("the contrast table shows WCAG, APCA and the change against the comparison 
     // 1890 → 1962); Spec 011 ① six more for the link colours on raised and sunken (1962 → 2178);
     // Spec 011 ③ four more for the default text on the weak status surfaces (2178 → 2196);
     // Spec 011 ⑤ four more for the tab text on the tertiary action surfaces (2196 → 2394);
-    // the snapshot of the comparison state stays at 1296.
-    "In den 72 Kombinationen des Vergleichsstands: 2394 gegen 1296 (Veränderung +1098)",
+    // Spec 029 ① gives komuna the values of the Fonto (2394 → 2646): text-normal falls from 2358 to
+    // 2286, ui rises from 36 to 360 (the field and inverse borders the rules moved to 3:1 WCAG stay
+    // below the advisory APCA band; plan, B-5). The snapshot of the comparison state stays at 1296.
+    "In den 72 Kombinationen des Vergleichsstands: 2646 gegen 1296 (Veränderung +1350)",
   );
 });
 

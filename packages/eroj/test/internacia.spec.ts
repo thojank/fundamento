@@ -615,8 +615,9 @@ test("dialogo right to left: the actions mirror to the left, the heading aligns 
   expect(rtl.okFromLeft).toBeLessThan(rtl.okFromRight);
 });
 
-// Four times the heading: the small surface is size.container.small wide (640 px in komuna), and a
-// doubled heading still fits one line of headline.4 there.
+// Four times the heading: the small surface is size.container.small wide (640 px in komuna). Since
+// Spec 029 ① headline.4 is 14 px in komuna (the Fonto), and four times the heading still fits one
+// line there; eight times does not, and the heading wraps.
 test("dialogo heading expansion to 400 %: the surface keeps its width, the heading wraps, nothing is clipped", async ({
   page,
 }) => {
@@ -633,20 +634,28 @@ test("dialogo heading expansion to 400 %: the surface keeps its width, the headi
       return {
         width: control.getBoundingClientRect().width,
         headingHeight: head.getBoundingClientRect().height,
-        clipped: control.scrollWidth > control.clientWidth + 1,
+        clipped:
+          control.scrollWidth > control.clientWidth + 1 || head.scrollWidth > head.clientWidth + 1,
       };
     });
+  const expand = (factor: number) =>
+    page.locator("#d").evaluate(
+      (element, text) => {
+        element.childNodes[0].textContent = text;
+      },
+      pseudo(heading, factor),
+    );
   const before = await measure();
-  await page.locator("#d").evaluate(
-    (element, text) => {
-      element.childNodes[0].textContent = text;
-    },
-    pseudo(heading, 4),
-  );
+  await expand(4);
   const after = await measure();
   expect(Math.round(after.width)).toBe(Math.round(before.width));
-  expect(after.headingHeight).toBeGreaterThan(before.headingHeight);
+  expect(after.headingHeight).toBeGreaterThanOrEqual(before.headingHeight);
   expect(after.clipped).toBe(false);
+  await expand(8);
+  const wrapped = await measure();
+  expect(Math.round(wrapped.width)).toBe(Math.round(before.width));
+  expect(wrapped.headingHeight).toBeGreaterThan(before.headingHeight);
+  expect(wrapped.clipped).toBe(false);
 });
 
 // Spec 011 ③ (G7): the avizo right to left — the accent stands at the start, which is the right;

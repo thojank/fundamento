@@ -345,6 +345,14 @@ export function buildModeloJson(input: ModeloExportInput): ModeloJson {
   if (modelo.tradukoj !== undefined) {
     modeloJson.tradukoj = structuredClone(modelo.tradukoj);
   }
+  // Spec 029 ① (Art. VII): the Fontoj and the provenance of the values taken from them travel with
+  // the export; absent while there is none, so an export without them keeps its bytes.
+  if (modelo.fontoj !== undefined) {
+    modeloJson.fontoj = structuredClone(modelo.fontoj);
+  }
+  if (modelo.deveno !== undefined) {
+    modeloJson.deveno = structuredClone(modelo.deveno);
+  }
   // Spec 007: in Ero order, like eroj. Absent while no Ero has a Uzo, so an export without Uzoj
   // keeps its bytes (AK-10).
   const uzoj = modelo.eroj.flatMap((entry) =>

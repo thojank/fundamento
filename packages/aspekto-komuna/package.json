@@ -12,14 +12,18 @@
     "ids.lock.json",
     "$themes.json",
     "sets",
-    "ikonoj"
+    "ikonoj",
+    "jugxoj.json",
+    "deveno.json"
   ],
   "exports": {
     "./package.json": "./package.json",
     "./aspekto.json": "./aspekto.json",
     "./ids.lock.json": "./ids.lock.json",
     "./sets/*": "./sets/*",
-    "./ikonoj/*": "./ikonoj/*"
+    "./ikonoj/*": "./ikonoj/*",
+    "./jugxoj.json": "./jugxoj.json",
+    "./deveno.json": "./deveno.json"
   },
   "scripts": {
     "lint": "biome check ."

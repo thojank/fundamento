@@ -87,14 +87,16 @@ function collectRefs(node: unknown, out: string[] = []): string[] {
 }
 
 describe("exportModelo: shape (§2.9)", () => {
-  it("has exactly the §2.9 top-level keys plus core (Spec 001 FR-10), skemoj (Spec 003), mankoj (F41), uzoj (Spec 007), ikonaro (Spec 014 ①), sxablonoj (Spec 020 ①), gvidanto (Nachlese 8 ①) and tradukoj (Nachlese 8 ③)", () => {
+  it("has exactly the §2.9 top-level keys plus core (Spec 001 FR-10), skemoj (Spec 003), mankoj (F41), uzoj (Spec 007), ikonaro (Spec 014 ①), sxablonoj (Spec 020 ①), gvidanto (Nachlese 8 ①), tradukoj (Nachlese 8 ③), fontoj and deveno (Spec 029 ①)", () => {
     expect(Object.keys(modeloJson).sort()).toEqual(
       [
         "$schema",
         "aspektoj",
         "core",
+        "deveno",
         "dimensioj",
         "eroj",
+        "fontoj",
         "fundamento",
         "gvidanto",
         "ikonaro",

@@ -6,6 +6,7 @@
 import type { Calibration, IkonoGewichte } from "@fundamento/agordilo";
 import type { ModeloFiles } from "@fundamento/modelo";
 import { lingvoSwitch, nomoSpan, tekstoSpan } from "../../lingvo.js";
+import { BAZOJ_CSS, bazojSections } from "./bazoj.js";
 import {
   VITRINO_SURFACE,
   VITRINO_TEKSTOJ,
@@ -26,6 +27,11 @@ export interface WerkstattDatumoj {
   reference: string;
   /** Every Aspekto of the build, for the comparison. */
   aspektoj: string[];
+  /**
+   * Spec 029 ①: the stylesheet of the structure's reference Aspekto at `:root[data-fm-modus=
+   * "werkstatt"]`, when its values are not those of the build's reference Aspekto (komuna 0.2).
+   */
+  bazoCss?: string;
 }
 
 export interface VitrinoInput {
@@ -412,9 +418,11 @@ export function vitrinoHtml({
 <title>Fundamento Vitrino</title>
 <style id="fm-vitrino-css">${css}</style>
 <style id="fm-vitrino-layout">${LAYOUT}
+${BAZOJ_CSS}
 ${stillControls(css)}</style>
 <script type="application/json" id="fm-vitrino">${jsonIsland({ ...datumoj, werkstatt: werkstatt !== undefined })}</script>
-${werkstatt === undefined ? "" : `<script type="application/json" id="fm-werkstatt">${jsonIsland(werkstatt)}</script>`}
+${werkstatt?.bazoCss === undefined ? "" : `<style id="fm-werkstatt-bazo-css">${werkstatt.bazoCss}</style>`}
+${werkstatt === undefined ? "" : `<script type="application/json" id="fm-werkstatt">${jsonIsland({ ...werkstatt, bazoCss: undefined })}</script>`}
 </head>
 <body data-fm-kombino="${escapeHtml(first)}">
 <header id="fm-vitrino-kapo">
@@ -425,6 +433,13 @@ ${werkstatt === undefined ? "" : `<script type="application/json" id="fm-werksta
 ${section("werkstatt", "Werkstatt", werkstattShell(werkstatt), true, "werkstatt")}
 ${section("paletroj", "Paletten", paletroj(datumoj), false, "ansehen")}
 ${section("roloj", "Flächen, Text, Status und Aktionen", roles, false, "ansehen")}
+${
+  datumoj.bazoj === undefined
+    ? ""
+    : bazojSections(datumoj.bazoj, datumoj.aspektoj[0] ?? "", (id, title, body) =>
+        section(id, title, body, false, "ansehen"),
+      )
+}
 ${Object.entries(datumoj.eroj)
   .map(([ero, markup]) =>
     section(
