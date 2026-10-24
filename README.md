@@ -209,7 +209,7 @@ From a lead colour to a brand that every projection carries, in the order a pers
 
    The CSS switches to it with `data-fm-aspekto="<name>"`, the Figma plan has it as a mode of the collection `aspekto`, and the Vitrino of that build shows it beside komuna. A worked example is the test brand `provo`: `packages/modelo/test/fixtures/valid/aspekto-provo/` (Agordo, package and a config with ekzemplo and provo, `fundamento.tri.config.json`).
 
-   **All example brands in one build** (Spec 026 ①, Spec 029 ①): ekzemplo (yellow, square), provo (with Prata) and provo-kompakta are test brands under `packages/modelo/test/fixtures/valid/`, `komuna-0-2` (`packages/aspekto-komuna-0-2`) is komuna as it was before the Fonto; one config beside them names all four, and one command builds the Vitrino and the Figma plugin with komuna and them (five modes of the collection `aspekto`, within the ten of Figma Professional; the plugin has an id and a name of its own, F-13):
+   **All example brands in one build** (Spec 026 ①, Spec 029 ①): ekzemplo (yellow, square), provo (with Prata, its headings in 400, the one weight Prata has) and provo-kompakta are test brands under `packages/modelo/test/fixtures/valid/`, `komuna-0-2` (`packages/aspekto-komuna-0-2`) is komuna as it was before the Fonto; one config beside them names all four, and one command builds the Vitrino and the Figma plugin with komuna and them (five modes of the collection `aspekto`, within the ten of Figma Professional; the plugin has an id and a name of its own, F-13):
 
    ```sh
    pnpm fm projekcioj build --config packages/modelo/test/fixtures/valid/aspekto-provo-kompakta/fundamento.cxiuj.config.json --out .fundamento/projekcioj-cxiuj
