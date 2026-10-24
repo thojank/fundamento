@@ -63,6 +63,13 @@
   - Spec 030: F 75,6 gegen 0 71,4
   - 1 902 461 Tokens; `restaro` 0 abweichend
   - kein Schlüssel in einer Datei des Laufs oder im Log
+- [x] **T3112 Reihen O und K** (Nachtrag des Maintainers vom 24.10.):
+  - Stand von #112 (`721743f`) in einem eigenen Worktree gebaut; Proben mit einer Aufgabe nach `/tmp`
+  - Ausgangslinie K `20261024-1233`, K nach den Korrekturen `20261024-1248`
+  - Ausgangslinie O `20261024-1422` mit 1 Wiederholung (Entscheidung des Maintainers, der erste Versuch mit 3 Wiederholungen angehalten und aus dem Verlauf genommen)
+  - alle mit `restaro --skribi` in beiden Gewichtungen, je 0 abweichend; kein Schlüssel in Dateien oder Logs
+- [ ] **T3113 O nach den Korrekturen:** nach dem Tageswechsel des freien Kontingents.
+- [ ] **T3114 Abschnitt ④ des Briefings** unverändert übernehmen, sobald er in der Datei steht.
 - [ ] **T3109 Messpunkt nach der Fonto:** nach dem Merge von Spec 029 ① (Sitzung A oder Maintainer), Messanleitung Schritt 4.
 - [x] **T3110 Doku:**
   - plan: Zusammenfassung, Ursachen, D-01–D-09, Messpunkte, Abweichungen 1–5, B-1–B-7, O-1–O-5, Messanleitung

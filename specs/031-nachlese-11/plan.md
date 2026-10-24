@@ -192,6 +192,41 @@ Gemessen ist damit:
 
 Die Berichte: `.fundamento/nordstelo/20261024-0825/restaro.md` (Ausgangslinie in beiden Gewichtungen) und `.fundamento/nordstelo/20261024-1201/raporto.md` (Messanleitung).
 
+### Messreihen H, O und K
+
+Nachtrag des Maintainers vom 24.10. (Nachricht und Roadmap vom 24.10.): drei Reihen mit je eigenem Modell. Der Abschnitt ④ des Briefings lag bei der Bearbeitung noch nicht vor; die Datei ist unverändert (SHA-256 wie oben). Er wird unverändert übernommen, sobald er im Briefing steht.
+
+| Reihe | Modell | Wiederholungen |
+|---|---|---|
+| H | OpenAI `gpt-4.1-mini` | 3 |
+| O | OpenRouter `nvidia/nemotron-3-ultra-550b-a55b:free` | 1 (Entscheidung des Maintainers am 24.10.: Ein Lauf mit 3 Wiederholungen bräuchte etwa 40 Mio. Tokens und 1 250 Anfragen, mehr als Kostengrenze und freies Tageskontingent) |
+| K | Mistral `ministral-14b-2512` | 3 |
+
+- **Ausgangslinie** = Stand von #112 (`721743f`): vor Nachlese 11, ohne Spec 029 ① (#111 nicht gemergt), in einem eigenen Worktree gebaut.
+- **Nach den Korrekturen** = `498001e` dieses Branches.
+- Kostengrenze 15 Mio. Tokens, Temperatur 0,2, Deutsch.
+- Alle Läufe sind mit `restaro --skribi` in beiden Gewichtungen bewertet, je 0 abweichend.
+
+| Reihe | Messpunkt | Lauf | F gegen 0, Nachlese 11 | F gegen 0, Spec 030 | Streuung F / 0 (N11) | Tokens ein / aus | ohne Seite |
+|---|---|---|---|---|---|---|---|
+| H | Ausgangslinie | `20261024-0825` | 74,8 gegen 38 | 71 gegen 74,3 | 11 / 0 | 1 543 556 / 62 783 | 2 |
+| H | nach den Korrekturen | `20261024-1201` | 79,6 gegen 35,2 | 75,6 gegen 71,4 | 8,6 / 0 | 1 838 103 / 64 358 | 0 |
+| K | Ausgangslinie | `20261024-1233` | 65,2 gegen 33,3 | 62,9 gegen 47,6 | 13,5 / 2,7 | 2 933 354 / 158 769 | 2 |
+| K | nach den Korrekturen | `20261024-1248` | 74,4 gegen 33,3 | 70,7 gegen 47,6 | 16,5 / 0 | 3 261 566 / 148 810 | 1 |
+| O | Ausgangslinie | `20261024-1422` | 63,2 gegen 33,3 | 57,5 gegen 46,5 | – (1 Wiederholung) | 15 059 836 / 135 529 | **13 von 40** |
+| O | nach den Korrekturen | folgt (freies Tageskontingent) | – | – | – | – | – |
+| H, O, K | nach der Fonto | folgt nach Spec 029 ① | – | – | – | – | – |
+
+- **K:**
+  - `color-contrast` fällt von 29 Seiten der Variante F auf 0 (B-6).
+  - Die Seite, die am `tabelo` hängen blieb (`werkzeugliste` F-2), ist weg (B-7).
+  - Ein Ausfall danach ist eine Zeitüberschreitung des Anbieters.
+- **O, Ausgangslinie:**
+  - 13 von 40 Ergebnissen sind am Anbieter gescheitert und zählen 0 (D-12): sieben Mal Zeitüberschreitung nach 3 Minuten bei Variante 0, sechs Mal „Antwort ohne Nachricht“.
+  - Ohne diese Ausfälle (nur zur Einordnung, nicht die Methode): Nachlese 11 F 65,8 (n 15) gegen 0 38,9 (n 12); Spec 030 F 59,4 gegen 0 57,1.
+  - Die Ausgangslinie O ist damit schwach belegt.
+- **O, Messpunkt nach den Korrekturen:** Er folgt nach dem Tageswechsel des Kontingents. Heute sind etwa 600 der 1 000 freien Anfragen verbraucht (Probe, angehaltener erster Versuch, Ausgangslinie). Der angehaltene erste Versuch mit 3 Wiederholungen liegt außerhalb des Verlaufs unter `/tmp/n11-abgebrochen/`.
+
 ### Abweichungen
 
 1. **Konformitätstest geteilt** (D-03): Slots und Props misst der Browser, Ereignisse, React, Guidelines und Gvidanto der Unit-Test. Der rote Test las die Slots noch aus dem Quelltext. Das trägt nicht: Die Auswahlfelder lesen ihre Optionen aus dem Light DOM, Leiste und Menü weisen manuell zu. Nachgezogen in T3105.
@@ -212,14 +247,30 @@ Die Berichte: `.fundamento/nordstelo/20261024-0825/restaro.md` (Ausgangslinie in
 - **B-5, `fm-konsileto`:** Der Quelltext liest `[slot="trigger"]`, das Skemo kennt keinen solchen Slot. Es ist der gemeinsame Code der Overlays und wird nie erreicht; der Konformitätstest misst am Element und sieht das zu Recht nicht.
 - **B-6, Fehlermeldungen im Bericht:** „Ohne Seite“ trägt Steuerzeichen und Zeilen aus dem Fehler von Playwright. Das ist in Spec 030 so und nur kosmetisch.
 - **B-7, nur 3 von 60 Seiten der Variante F nutzen `fm-sxelo`**, wie im ersten Lauf (B-8 der Spec 030).
+- **B-8, Fehler in der Messung seit Spec 030: K2 liest die Bereiche einer Sxablono falsch.**
+  - `score.ts` nimmt `Object.keys(regions)`, `regions` ist aber eine Liste. Damit gilt jeder `slot=` an einem Kind von `pagxo`, `formularo`, `sxelo`, `filtrilo` oder `redaktilo` als erfunden, auch ein richtiger.
+  - Das bestraft Variante F gerade dann, wenn sie Sxablonoj nutzt.
+  - Gemessen mit den Bereichen richtig gelesen (Skript außerhalb des Repos):
+
+    | Lauf | betroffene Ergebnisse | F Nachlese 11 | F Spec 030 | K2 von F |
+    |---|---|---|---|---|
+    | H Ausgangslinie | 7 | 74,8 → 74,8 | 71 → 71,5 | 0,68 → 0,71 |
+    | H nach den Korrekturen | 8 | 79,6 → 79,6 | 75,6 → 75,6 | 0,74 → 0,78 |
+    | K Ausgangslinie | 27 | 65,2 → 66,7 | 62,9 → 64,4 | 0,61 → 0,69 |
+    | K nach den Korrekturen | 32 | 74,4 → 75,1 | 70,7 → 72,9 | 0,66 → 0,75 |
+    | O Ausgangslinie | 5 | 63,2 → 64,8 | 57,5 → 59 | 0,57 → 0,6 |
+
+  - Bei K sind 4 der Top-10-Lücken solche falschen Funde. Nicht behoben, weil die Korrektur die gespeicherten Zahlen der Spec 030 ändert (O-6).
 
 ### Offen (für den Maintainer)
 
-- **O-1, Zustimmung zu O-1 der Spec 030:** Das Tor und K5 = 25 sind gebaut, wie das Briefing sie vorschlägt („gilt, wenn der Maintainer zustimmt“). Ohne Zustimmung gilt weiter die Zeile „Gewichtung Spec 030“; sie steht in jedem Bericht.
+- **O-1, entschieden vom Maintainer am 24.10., 16:24:** Markenfähigkeit als Tor, K5 = 25, beide Gewichtungen berichten. Gebaut wie oben; die Zeile „Gewichtung Spec 030“ bleibt in jedem Bericht.
 - **O-2, gemessene Markenfähigkeit:** Das Tor liest aus dem Befund, welchen Schaltern eine Seite folgen kann (D-06). Ein Fingerabdruck der gezeichneten Farben je Rendering würde messen, ob sie es tut. Ein neues Feld im Befund trennt aber alte und neue Läufe; Vorschlag erst mit dem nächsten Katalog.
 - **O-3, `fm-tekstareo` `change`** (B-3): Soll das Element `change` auslösen wie der `kampo`? Das wäre Verhalten des Ero, eigener PR.
 - **O-4, Fund „Standard-Slot“ in K2** (D-09): Ab dem nächsten Katalog entfernen? Bis dahin trifft er nur gespeicherte Befunde.
 - **O-5, Messpunkt 3:** nach dem Merge von Spec 029 ① derselbe Befehl wie unten (Schritt 4); auslösen kann Sitzung A oder der Maintainer.
+- **O-6, B-8 beheben?** Die Bereiche richtig lesen und alle gespeicherten Läufe mit `restaro --skribi` neu bewerten. Das geht deterministisch, ohne neue Läufe, für alle Reihen gleich; danach gibt die alte Gewichtung die Zahlen der Spec 030 nicht mehr byte-gleich wieder.
+- **O-7, Ausgangslinie O:** 13 von 40 Ausfällen am freien Anbieter. Vor dem Merge von #111 wiederholen? Das passt erst nach dem Tageswechsel ins Kontingent, und dann fehlt der Platz für den Messpunkt O nach den Korrekturen am selben Tag.
 
 ### Messanleitung
 
