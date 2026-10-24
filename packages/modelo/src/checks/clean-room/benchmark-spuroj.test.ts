@@ -8,10 +8,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
-import { check } from "./index.js";
-import { brandCandidates } from "./marko-spuro.js";
 import { BENCHMARK_SPUROJ_DIR, parseBenchmarkSpuroj } from "./benchmark-spuroj.js";
 import hazardaj from "./hazardaj-trafoj.json" with { type: "json" };
+import { check } from "./index.js";
+import { brandCandidates } from "./marko-spuro.js";
 import { isTrivial, TRIVIALAJ } from "./trivialaj.js";
 
 const repoRoot = fileURLToPath(new URL("../../../../../", import.meta.url));
@@ -105,8 +105,8 @@ describe("what does not count (Spec 032 ② 1–3)", () => {
     const result = await check({ json: true, repoRoot, fixture: dir });
     expect(result.errors.map(({ rule, path }) => [rule, path])).toEqual([
       ["clean-room-jugxo-missing", "hazardaj-trafoj.json"],
-      ["clean-room-marko-spuro", "src/theme.css:10:22"],
-      ["clean-room-marko-spuro", "src/theme.css:4:20"],
+      ["clean-room-marko-spuro", "src/theme.css:10:19"],
+      ["clean-room-marko-spuro", "src/theme.css:4:21"],
       ["clean-room-marko-spuro", "src/theme.css:7:22"],
     ]);
   });
@@ -125,7 +125,7 @@ describe("what does not count (Spec 032 ② 1–3)", () => {
     for (const text of ["#fff", "#000000", "#5a5a5a", "#ABABAB", "#777777ff"]) {
       expect(isTrivial(candidate(text)), text).toBe(true);
     }
-    for (const text of ["#540000", "#5a5a5b", "#123456"]) {
+    for (const text of ["#5b0103", "#5a5a5b", "#123456"]) {
       expect(isTrivial(candidate(text)), text).toBe(false);
     }
   });

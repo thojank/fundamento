@@ -13,7 +13,7 @@ import type {
 } from "../contracts/modelo.js";
 import type { TextTransform } from "../generated/modelo-schema.js";
 import { completeAssignment } from "./assignment.js";
-import { bindAliases } from "./bind.js";
+import { bindAliases, type OverlayLookup } from "./bind.js";
 import { orderActiveSets } from "./order.js";
 import { findAmbiguousOverrides, overlaySets } from "./overlay.js";
 
@@ -67,9 +67,8 @@ function cloneValue<T>(value: T): T {
 
 // A Modelo is not changed after it is built (as the resolutions cache of the validation assumes),
 // so what depends on it alone is computed once: the sorted names of the core, and the overlay of
-// each ordered run of active sets — a tool that resolves a few names over every combination
-// (check_contrast without an assignment, Spec 002 AK-09) would otherwise overlay every token of
-// every set on each call.
+// each ordered run of active sets for a full resolution. A resolution of a few names (check_contrast
+// without an assignment, Spec 002 AK-09) needs neither: it looks its names up (Spec 032 ③).
 const coreNames = new WeakMap<Modelo, readonly string[]>();
 function coreNamesOf(modelo: Modelo): readonly string[] {
   let names = coreNames.get(modelo);
@@ -83,9 +82,9 @@ function coreNamesOf(modelo: Modelo): readonly string[] {
 }
 
 interface Overlay {
-  overlaid: ReturnType<typeof overlaySets>;
-  /** The case per token: the last active set that states it wins (D-11). */
-  cases: Map<string, { value: TextTransform; set: string }>;
+  overlaid: OverlayLookup;
+  /** The case of a token: the last active set that states one wins (D-11). */
+  caseOf: (name: string) => { value: TextTransform; set: string } | undefined;
 }
 
 const overlays = new WeakMap<Modelo, Map<string, Overlay>>();
@@ -105,10 +104,44 @@ function overlayOf(modelo: Modelo, ordered: readonly LoadedSet[]): Overlay {
           cases.set(name, { value: token.textTransform, set: set.name });
       }
     }
-    overlay = { overlaid: overlaySets(ordered), cases };
+    overlay = { overlaid: overlaySets(ordered), caseOf: (name) => cases.get(name) };
     own.set(key, overlay);
   }
   return overlay;
+}
+
+/**
+ * The overlay for a few names (Spec 032 ③): each name, and each link of its alias chain, is looked
+ * up in the active sets from the last to the first, so the answer is the one of the whole overlay.
+ * Building the whole overlay walks every token of every active set; for check_contrast without an
+ * assignment that was 144 overlays of all tokens on the first call (119 of 139 ms measured), for
+ * three names and their chains.
+ */
+function namedOverlayOf(ordered: readonly LoadedSet[]): Overlay {
+  const last = <T>(pick: (set: LoadedSet) => T | undefined): T | undefined => {
+    for (let index = ordered.length - 1; index >= 0; index--) {
+      const set = ordered[index];
+      const found = set === undefined ? undefined : pick(set);
+      if (found !== undefined) return found;
+    }
+    return undefined;
+  };
+  const tokenIn = (set: LoadedSet, name: string) =>
+    Object.hasOwn(set.tokens, name) ? set.tokens[name] : undefined;
+  return {
+    overlaid: {
+      get: (name) =>
+        last((set) => {
+          const token = tokenIn(set, name);
+          return token === undefined ? undefined : { token, set };
+        }),
+    },
+    caseOf: (name) =>
+      last((set) => {
+        const value = tokenIn(set, name)?.textTransform;
+        return value === undefined ? undefined : { value, set: set.name };
+      }),
+  };
 }
 
 export function resolveCombination(
@@ -122,9 +155,10 @@ export function resolveCombination(
   }
   const complete = completed.assignment;
   const ordered = orderActiveSets(modelo, complete);
-  const { overlaid, cases } = overlayOf(modelo, ordered);
-  const allNames = coreNamesOf(modelo);
   const wanted = options.names === undefined ? undefined : new Set(options.names);
+  const { overlaid, caseOf } =
+    wanted === undefined ? overlayOf(modelo, ordered) : namedOverlayOf(ordered);
+  const allNames = coreNamesOf(modelo);
   const coreNames = wanted === undefined ? allNames : allNames.filter((name) => wanted.has(name));
   const { bound, issues } = bindAliases(modelo, overlaid, coreNames, complete);
   const core = modelo.setoj.find((set) => set.name === CORE_SET_NAME);
@@ -155,7 +189,7 @@ export function resolveCombination(
     for (const link of result.aliasChain.length === 0
       ? [name]
       : result.aliasChain.map((entry) => entry.token)) {
-      const found = cases.get(link);
+      const found = caseOf(link);
       if (found !== undefined) {
         resolved.textTransform = { value: found.value, set: found.set };
         break;

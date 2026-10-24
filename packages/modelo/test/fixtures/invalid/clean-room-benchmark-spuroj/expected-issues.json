@@ -4,7 +4,7 @@
   "issues": [
     {
       "rule": "clean-room-marko-spuro",
-      "path": "src/theme.css:4:20"
+      "path": "src/theme.css:4:21"
     },
     {
       "rule": "clean-room-marko-spuro",

@@ -91,6 +91,8 @@ jobs:
       - name: "Check: Alirebleco"
         run: pnpm check:alirebleco
 
+      # Spec 032 ②: with the fingerprints of every benchmark file in research/ (Carbon, Astryx),
+      # read from the files themselves; no --spuroj needed.
       - name: "Check: Clean-Room"
         run: pnpm check:clean-room
 

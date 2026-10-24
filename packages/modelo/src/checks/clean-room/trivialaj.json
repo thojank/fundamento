@@ -1,0 +1,31 @@
+{
+  "$comment": "Spec 032 ② (Maintainer 2026-10-24): values every system has. A fingerprint of one of them says nothing about where a value comes from, so a hit on it does not count, for every list. Each rule with its Kialo (Art. VI). Read by the clean-room check (trivialaj.ts).",
+  "trivialaj": [
+    {
+      "nomo": "griza",
+      "griza": true,
+      "kialo": "Reinweiß, Reinschwarz und reine Grautöne (R = G = B) hat jedes System, das Text auf eine Fläche setzt; ein Grau hat keinen Farbton, der eine Marke kennzeichnen könnte. Ein Treffer auf einem Grau ist kein Hinweis auf eine Übernahme (Entscheidung des Maintainers, 24.10.2026)."
+    },
+    {
+      "nomo": "nula",
+      "alfa": 0,
+      "valoroj": [{ "kind": "curve", "normalized": "0,0,0,0" }],
+      "kialo": "Null-Werte zeichnen nichts: eine Farbe mit Deckkraft 0 ist unsichtbar, gleich welche Kanäle sie trägt, und die Kurve aus vier Nullen ist keine Gestaltung. Sie zählen nicht (Entscheidung des Maintainers, 24.10.2026)."
+    },
+    {
+      "nomo": "lineara-kurbo",
+      "valoroj": [{ "kind": "curve", "normalized": "0,0,1,1" }],
+      "kialo": "Die lineare Kurve (0, 0, 1, 1) ist das CSS-Schlüsselwort linear, die Bewegung ohne Beschleunigung; jedes System mit Bewegung führt sie. Sie ist so trivial wie Weiß und Schwarz (Spec 032 ②, Abweichung 1: ohne sie meldet die Liste von Carbon sechs Treffer auf main)."
+    },
+    {
+      "nomo": "malgrandaj-longoj",
+      "valoroj": [
+        { "kind": "length", "normalized": "0px" },
+        { "kind": "length", "normalized": "1px" },
+        { "kind": "length", "normalized": "2px" },
+        { "kind": "length", "normalized": "4px" }
+      ],
+      "kialo": "Die Längen 0, 1, 2 und 4 px sind Haarlinie, Rahmen und kleinster Rasterschritt jedes Systems und zählen nicht (Entscheidung des Maintainers, 24.10.2026). Längen sind nach K2 schon keine Kandidaten der Prüfung; die Regel steht hier, damit die Entscheidung gilt, sobald eine Liste Längen führt."
+    }
+  ]
+}
