@@ -1,0 +1,30 @@
+{
+  "task": "anmeldung",
+  "variant": "0",
+  "repeat": 1,
+  "score": {
+    "k": {
+      "K1": 1,
+      "K2": null,
+      "K3": null,
+      "K4": 1,
+      "K5": 0.2,
+      "K6": 1
+    },
+    "total": 88.6,
+    "gaps": [
+      {
+        "kind": "rebuilt-ero",
+        "key": "button"
+      },
+      {
+        "kind": "rebuilt-ero",
+        "key": "h1"
+      },
+      {
+        "kind": "rebuilt-ero",
+        "key": "input"
+      }
+    ]
+  }
+}

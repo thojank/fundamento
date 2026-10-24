@@ -122,6 +122,7 @@ Everything lives in one workspace; the npm org for published packages is
 | `@fundamento/cli` | `fm`: validate, export, build projections, run the server, derive and check an Aspekto from an Agordo |
 | `@fundamento/agordilo` | The Agordilo (Spec 016, Spec 019): an Agordo (lead colour, status colours, tint, three sliders, fonts; form, space, type and icon weight) becomes a complete Aspekto in OKLCH at contrast targets measured on komuna, checked by the checks of the CI, with its report |
 | `@fundamento/metiejo` | The Metiejo (Spec 023, working name): the brand configurator as a local server (`pnpm fm metiejo`) — step by step from a name and a lead colour to a checked Aspekto package, with webfonts under licence, licensed fonts in a private repository, exports (package, CSS, Figma plugin) and the byte check `check:tiparoj` |
+| `@fundamento/nordstelo` | The north-star measure (Spec 030, private): context-free agents build the 20 tasks of `packages/modelo/data/nordstelo.json` – Variante F with the Gvidanto, Variante 0 with nothing but “build it as HTML” – and Fundamento scores every page deterministically (K1–K7, no model as judge). Run on demand with `pnpm nordstelo`, never in CI |
 | `@fundamento/make-kit-<aspekto>` | Build output of `projekcioj`: one Figma Make kit per Aspekto (pre-releases published under the dist-tag `next`, the release 0.1.0 under `latest`) |
 
 ## MCP server
@@ -283,6 +284,8 @@ pnpm prints a `> package@version script` header on stdout. When piping JSON, use
 | `pnpm id:retire <id>` | Marks an ID `retired`. A retired ID can never be used again. |
 | `pnpm vortaro:themes [--root <path>]` | Regenerates `$themes.json` and `$metadata.json` from `data/dimensioj.json` and the set `kondicxoj`. Run it after changing Dimensioj or sets; validation fails when the files drift. |
 | `pnpm vortaro:ero-tokenoj [--root <path> \| --config <file>] [--check]` | Derives the Ero-Tokens of the third level from the Skemoj (Constitution v2.3): into the core as an alias on the role each Skemo binds, with IDs from the lock, and with `--config` into the main set of every Aspekto package of a project. A token the core has keeps its value and ID; one no Skemo derives any more is removed and its ID retired. Run it after changing a Skemo; validation reports the drift (`ero-tokeno-missing`, `ero-tokeno-unknown`). `--check` writes nothing and exits 1 on drift. |
+
+| `pnpm nordstelo [--anbieter <name>] [--modell <name>] [--max-tokens <n>]` | One run of the north-star measure (Spec 030): every task × Variante F and 0 × 3 repeats with the provider, model and key of the `.env` (`FM_KI_ANBIETER`, `FM_KI_MODELL`; the key is never printed). Renders each page in every brand and mode, scores it (K1–K7) and writes the pages, screenshots, a report and the history to `.fundamento/nordstelo/`; the Metiejo shows the history at `/nordstelo`. `--max-tokens` is the cost limit of the run (default 15 000 000): the run stops before it and still reports. `pnpm nordstelo restaro <run>` scores a stored run again. Never part of the CI. |
 
 Every maintainer command explains itself with `--help`.
 

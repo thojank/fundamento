@@ -26,6 +26,7 @@ export * from "./lingvo/tradukoj.js";
 export * from "./load/index.js";
 export * from "./metrikoj/index.js";
 export * from "./nomreguloj/index.js";
+export * from "./nordstelo/katalogo.js";
 export * from "./ontologio/check.js";
 export * from "./resolve/index.js";
 export * from "./themes/index.js";

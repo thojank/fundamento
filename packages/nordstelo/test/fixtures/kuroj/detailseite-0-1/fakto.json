@@ -1,0 +1,476 @@
+{
+  "lingvo": "de",
+  "bytes": 3948,
+  "elements": [
+    {
+      "tag": "div",
+      "attrs": {
+        "class": "container"
+      },
+      "parent": -1,
+      "text": ""
+    },
+    {
+      "tag": "h1",
+      "attrs": {},
+      "parent": 0,
+      "text": "Produktname XYZ"
+    },
+    {
+      "tag": "section",
+      "attrs": {
+        "aria-labelledby": "properties-heading"
+      },
+      "parent": 0,
+      "text": ""
+    },
+    {
+      "tag": "h2",
+      "attrs": {
+        "id": "properties-heading"
+      },
+      "parent": 2,
+      "text": "Eigenschaften"
+    },
+    {
+      "tag": "dl",
+      "attrs": {
+        "class": "properties"
+      },
+      "parent": 2,
+      "text": ""
+    },
+    {
+      "tag": "dt",
+      "attrs": {},
+      "parent": 4,
+      "text": "Hersteller"
+    },
+    {
+      "tag": "dd",
+      "attrs": {},
+      "parent": 4,
+      "text": "Beispiel GmbH"
+    },
+    {
+      "tag": "dt",
+      "attrs": {},
+      "parent": 4,
+      "text": "Modell"
+    },
+    {
+      "tag": "dd",
+      "attrs": {},
+      "parent": 4,
+      "text": "XYZ-2024"
+    },
+    {
+      "tag": "dt",
+      "attrs": {},
+      "parent": 4,
+      "text": "Farbe"
+    },
+    {
+      "tag": "dd",
+      "attrs": {},
+      "parent": 4,
+      "text": "Schwarz"
+    },
+    {
+      "tag": "dt",
+      "attrs": {},
+      "parent": 4,
+      "text": "Gewicht"
+    },
+    {
+      "tag": "dd",
+      "attrs": {},
+      "parent": 4,
+      "text": "1,2 kg"
+    },
+    {
+      "tag": "dt",
+      "attrs": {},
+      "parent": 4,
+      "text": "Abmessungen"
+    },
+    {
+      "tag": "dd",
+      "attrs": {},
+      "parent": 4,
+      "text": "25 x 15 x 5 cm"
+    },
+    {
+      "tag": "dt",
+      "attrs": {},
+      "parent": 4,
+      "text": "Material"
+    },
+    {
+      "tag": "dd",
+      "attrs": {},
+      "parent": 4,
+      "text": "Aluminium"
+    },
+    {
+      "tag": "dt",
+      "attrs": {},
+      "parent": 4,
+      "text": "Garantie"
+    },
+    {
+      "tag": "dd",
+      "attrs": {},
+      "parent": 4,
+      "text": "2 Jahre"
+    },
+    {
+      "tag": "section",
+      "attrs": {
+        "aria-labelledby": "history-heading"
+      },
+      "parent": 0,
+      "text": ""
+    },
+    {
+      "tag": "h2",
+      "attrs": {
+        "id": "history-heading"
+      },
+      "parent": 19,
+      "text": "Verlauf"
+    },
+    {
+      "tag": "ul",
+      "attrs": {
+        "class": "history-list"
+      },
+      "parent": 19,
+      "text": ""
+    },
+    {
+      "tag": "li",
+      "attrs": {},
+      "parent": 21,
+      "text": ""
+    },
+    {
+      "tag": "time",
+      "attrs": {
+        "class": "history-date",
+        "datetime": "2024-05-15"
+      },
+      "parent": 22,
+      "text": "15. Mai 2024"
+    },
+    {
+      "tag": "p",
+      "attrs": {
+        "class": "history-description"
+      },
+      "parent": 22,
+      "text": "Produkt wurde offiziell vorgestellt."
+    },
+    {
+      "tag": "li",
+      "attrs": {},
+      "parent": 21,
+      "text": ""
+    },
+    {
+      "tag": "time",
+      "attrs": {
+        "class": "history-date",
+        "datetime": "2024-06-01"
+      },
+      "parent": 25,
+      "text": "1. Juni 2024"
+    },
+    {
+      "tag": "p",
+      "attrs": {
+        "class": "history-description"
+      },
+      "parent": 25,
+      "text": "Erste Kundenlieferungen erfolgten."
+    },
+    {
+      "tag": "li",
+      "attrs": {},
+      "parent": 21,
+      "text": ""
+    },
+    {
+      "tag": "time",
+      "attrs": {
+        "class": "history-date",
+        "datetime": "2024-07-10"
+      },
+      "parent": 28,
+      "text": "10. Juli 2024"
+    },
+    {
+      "tag": "p",
+      "attrs": {
+        "class": "history-description"
+      },
+      "parent": 28,
+      "text": "Software-Update Version 1.1 veröffentlicht."
+    },
+    {
+      "tag": "li",
+      "attrs": {},
+      "parent": 21,
+      "text": ""
+    },
+    {
+      "tag": "time",
+      "attrs": {
+        "class": "history-date",
+        "datetime": "2024-08-20"
+      },
+      "parent": 31,
+      "text": "20. August 2024"
+    },
+    {
+      "tag": "p",
+      "attrs": {
+        "class": "history-description"
+      },
+      "parent": 31,
+      "text": "Erweiterte Garantieoptionen eingeführt."
+    }
+  ],
+  "aria": [
+    {
+      "role": "heading",
+      "name": "Produktname XYZ",
+      "level": 1
+    },
+    {
+      "role": "region",
+      "name": "Eigenschaften"
+    },
+    {
+      "role": "heading",
+      "name": "Eigenschaften",
+      "level": 2
+    },
+    {
+      "role": "term",
+      "name": ""
+    },
+    {
+      "role": "definition",
+      "name": ""
+    },
+    {
+      "role": "term",
+      "name": ""
+    },
+    {
+      "role": "definition",
+      "name": ""
+    },
+    {
+      "role": "term",
+      "name": ""
+    },
+    {
+      "role": "definition",
+      "name": ""
+    },
+    {
+      "role": "term",
+      "name": ""
+    },
+    {
+      "role": "definition",
+      "name": ""
+    },
+    {
+      "role": "term",
+      "name": ""
+    },
+    {
+      "role": "definition",
+      "name": ""
+    },
+    {
+      "role": "term",
+      "name": ""
+    },
+    {
+      "role": "definition",
+      "name": ""
+    },
+    {
+      "role": "term",
+      "name": ""
+    },
+    {
+      "role": "definition",
+      "name": ""
+    },
+    {
+      "role": "region",
+      "name": "Verlauf"
+    },
+    {
+      "role": "heading",
+      "name": "Verlauf",
+      "level": 2
+    },
+    {
+      "role": "list",
+      "name": ""
+    },
+    {
+      "role": "listitem",
+      "name": ""
+    },
+    {
+      "role": "time",
+      "name": ""
+    },
+    {
+      "role": "paragraph",
+      "name": ""
+    },
+    {
+      "role": "listitem",
+      "name": ""
+    },
+    {
+      "role": "time",
+      "name": ""
+    },
+    {
+      "role": "paragraph",
+      "name": ""
+    },
+    {
+      "role": "listitem",
+      "name": ""
+    },
+    {
+      "role": "time",
+      "name": ""
+    },
+    {
+      "role": "paragraph",
+      "name": ""
+    },
+    {
+      "role": "listitem",
+      "name": ""
+    },
+    {
+      "role": "time",
+      "name": ""
+    },
+    {
+      "role": "paragraph",
+      "name": ""
+    }
+  ],
+  "console": [],
+  "renders": [
+    {
+      "aspekto": "komuna",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "komuna",
+      "scheme": "light",
+      "contrast": "high",
+      "axe": []
+    },
+    {
+      "aspekto": "komuna",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "komuna",
+      "scheme": "dark",
+      "contrast": "high",
+      "axe": []
+    },
+    {
+      "aspekto": "ekzemplo",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "ekzemplo",
+      "scheme": "light",
+      "contrast": "high",
+      "axe": []
+    },
+    {
+      "aspekto": "ekzemplo",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "ekzemplo",
+      "scheme": "dark",
+      "contrast": "high",
+      "axe": []
+    },
+    {
+      "aspekto": "provo",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "provo",
+      "scheme": "light",
+      "contrast": "high",
+      "axe": []
+    },
+    {
+      "aspekto": "provo",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "provo",
+      "scheme": "dark",
+      "contrast": "high",
+      "axe": []
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "scheme": "light",
+      "contrast": "high",
+      "axe": []
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "scheme": "dark",
+      "contrast": "high",
+      "axe": []
+    }
+  ]
+}

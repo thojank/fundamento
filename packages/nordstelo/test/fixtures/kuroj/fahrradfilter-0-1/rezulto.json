@@ -1,0 +1,42 @@
+{
+  "task": "fahrradfilter",
+  "variant": "0",
+  "repeat": 1,
+  "score": {
+    "k": {
+      "K1": 1,
+      "K2": null,
+      "K3": null,
+      "K4": 0,
+      "K5": 0.2,
+      "K6": 0.3333
+    },
+    "total": 41,
+    "gaps": [
+      {
+        "kind": "a11y",
+        "key": "color-contrast"
+      },
+      {
+        "kind": "rebuilt-ero",
+        "key": "button"
+      },
+      {
+        "kind": "rebuilt-ero",
+        "key": "input"
+      },
+      {
+        "kind": "rebuilt-ero",
+        "key": "select"
+      },
+      {
+        "kind": "criterion",
+        "key": "fahrradfilter: Der Preis wird mit einem Schieberegler gewählt."
+      },
+      {
+        "kind": "criterion",
+        "key": "fahrradfilter: Die Grenzen des Preises stehen sichtbar da."
+      }
+    ]
+  }
+}

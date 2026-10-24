@@ -1,0 +1,62 @@
+{
+  "task": "werkzeugliste",
+  "variant": "F",
+  "repeat": 1,
+  "score": {
+    "k": {
+      "K1": 1,
+      "K2": 0.5,
+      "K3": 0,
+      "K4": 0,
+      "K5": 1,
+      "K6": 0.2
+    },
+    "total": 41.5,
+    "gaps": [
+      {
+        "kind": "invented-tag",
+        "key": "fm-listitem"
+      },
+      {
+        "kind": "invented-slot",
+        "key": "kompletigilo.slot=label (Standard-Slot)"
+      },
+      {
+        "kind": "invented-slot",
+        "key": "listelektilo.slot=label (Standard-Slot)"
+      },
+      {
+        "kind": "regulo",
+        "key": "field-label-visible"
+      },
+      {
+        "kind": "regulo",
+        "key": "placeholder-not-label"
+      },
+      {
+        "kind": "regulo",
+        "key": "select-placeholder-is-prompt"
+      },
+      {
+        "kind": "a11y",
+        "key": "button-name"
+      },
+      {
+        "kind": "criterion",
+        "key": "werkzeugliste: Der Status steht als Etikett in der Zeile."
+      },
+      {
+        "kind": "criterion",
+        "key": "werkzeugliste: Die Tabelle hat eine Beschriftung."
+      },
+      {
+        "kind": "criterion",
+        "key": "werkzeugliste: Ein Suchfeld mit Namen."
+      },
+      {
+        "kind": "criterion",
+        "key": "werkzeugliste: Jedes Feld hat eine sichtbare Beschriftung."
+      }
+    ]
+  }
+}

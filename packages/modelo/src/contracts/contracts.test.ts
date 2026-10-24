@@ -69,6 +69,8 @@ describe("entity ID prefixes (§2.3)", () => {
       projekcio: "prj",
       celo: "cel",
       ikono: "iko",
+      tasko: "tsk",
+      kriterio: "kri",
     });
     expect(Object.keys(ENTITY_ID_PREFIXES)).toEqual([...ENTITY_TYPES]);
   });
@@ -102,7 +104,8 @@ describe("rule catalog (§2.6)", () => {
     // Spec 019 ③: agordo-save-refused.
     // Spec 020 ① (G1, G3, G4): eleven rules of the Sxablonoj; ②: the one submit of a form.
     // Nachlese 8 ③: traduko-missing and traduko-orphaned.
-    expect(RULE_IDS).toHaveLength(181);
+    // Spec 030: the three references of the north-star catalogue (Sxablono, Ero, Regulo).
+    expect(RULE_IDS).toHaveLength(184);
     for (const rule of [
       "agordo-jugxo-fixed",
       "raporto-out-of-sync",

@@ -306,7 +306,9 @@ export type EntityType =
   | "sxablono"
   | "projekcio"
   | "celo"
-  | "ikono";
+  | "ikono"
+  | "tasko"
+  | "kriterio";
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "AnyId".
@@ -472,6 +474,16 @@ export type AgordoColor = string;
  * via the `definition` "IdStatus".
  */
 export type IdStatus = "active" | "retired";
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "TaskoId".
+ */
+export type TaskoId = string;
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "KriterioId".
+ */
+export type KriterioId = string;
 
 /**
  * Canonical schema of the Fundamento Modelo. The root validates the exported modelo.json; $defs describe every Key Entity and every source-file format (set files and the data files).
@@ -2150,4 +2162,85 @@ export interface GvidantoFile {
 export interface IkonaroFile {
   $schema?: string;
   ikonaro: Ikono[];
+}
+/**
+ * A text in German and English (Spec 030): the task as a person would say it, or the criterion as the maintainer reads it.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "NordsteloTeksto".
+ */
+export interface NordsteloTeksto {
+  de: NonEmptyText;
+  en: NonEmptyText;
+}
+/**
+ * How a criterion is decided on the facts of a rendered page (Spec 030, K6), deterministically. aria counts nodes of the accessibility tree by role, name (a case-insensitive regular expression) and level; named-fields asks that every field has a name; elemento counts elements of the page by a simple selector per variant (tag, [attr], [attr=value], comma for or) – a variant without a selector does not count; teksto looks for a regular expression in the text of the page.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "NordsteloKontrolo".
+ */
+export interface NordsteloKontrolo {
+  "0"?: NonEmptyText;
+  kind: "aria" | "named-fields" | "elemento" | "teksto";
+  role?: string;
+  name?: NonEmptyText;
+  level?: number;
+  F?: NonEmptyText;
+  pattern?: NonEmptyText;
+  min?: number;
+  max?: number;
+}
+/**
+ * One acceptance criterion of a Tasko (Spec 030): checkable, and tied to the Regulo it stands for, whose kialo is the reason.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "Kriterio".
+ */
+export interface Kriterio {
+  id: KriterioId;
+  regulo: Name;
+  teksto: NordsteloTeksto;
+  kontrolo: NordsteloKontrolo;
+}
+/**
+ * One task of the north-star catalogue (Spec 030): what a context-free agent is asked to build, in everyday words, the Sxablono and the Eroj a good answer uses, and the criteria of acceptance.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "Tasko".
+ */
+export interface Tasko {
+  id: TaskoId;
+  name: Name;
+  teksto: NordsteloTeksto;
+  sxablono: Name;
+  /**
+   * @minItems 1
+   */
+  eroj: Name[];
+  /**
+   * @minItems 1
+   */
+  kriterioj: Kriterio[];
+}
+/**
+ * The weight of one criterion of the score (K1–K6, Spec 030) with its reason; K7, the effort, is reported and never weighted.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "Pezo".
+ */
+export interface Pezo {
+  kriterio: "K1" | "K2" | "K3" | "K4" | "K5" | "K6";
+  pezo: number;
+  kialo: NordsteloTeksto;
+}
+/**
+ * data/nordstelo.json: the catalogue of tasks of the north-star measure and the weights of the score (Spec 030); absent while there is none.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "NordsteloFile".
+ */
+export interface NordsteloFile {
+  $schema?: string;
+  taskoj: Tasko[];
+  pezoj: Pezo[];
 }
