@@ -119,6 +119,14 @@ describe("what does not count (Spec 032 ② 1–3)", () => {
       "malgrandaj-longoj",
     ]);
     for (const rule of TRIVIALAJ) expect(rule.kialo.length, rule.nomo).toBeGreaterThan(40);
+    // Maintainer 2026-10-24 (O-4): Null-Werte are opacity 0, the curve of four zeros and a length
+    // of 0 in any unit.
+    const nula = TRIVIALAJ.find((rule) => rule.nomo === "nula");
+    expect(nula?.alfa).toBe(0);
+    expect(nula?.valoroj).toEqual([
+      { kind: "curve", normalized: "0,0,0,0" },
+      { kind: "length", normalized: "0" },
+    ]);
   });
 
   it("pure white, pure black and every grey are trivial; a colour with a hue is not", () => {

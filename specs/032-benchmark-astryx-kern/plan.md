@@ -2,7 +2,7 @@
 
 **Briefing:** [`briefing.md`](briefing.md) (Auftrag Sitzung C vom 2026-10-24, unverändert kopiert; SHA-256 `8ef01979…57d628`) · **Benchmark:** [`research/benchmark-astryx-2026-10.md`](../../research/benchmark-astryx-2026-10.md) (aus `thojank/fundamento-benchmark-astryx`, PR #1, HEAD `a745aea`, Pfad `ergebnis/research/benchmark-astryx-2026-10.md`; unverändert, SHA-256 `ac9c6344…78f064c5`) · **Basis:** `main` `d29a5206` (nach #109) · **Regel 0** gilt: der Weg, den das Repo schon geht, sonst die kleinste Änderung mit Eintrag hier. **Kein Budget angehoben**, keine Tokens, keine Optik geändert, keine Constitution.
 
-**Branch:** `261024-astryx-benchmark-clean-room-pe-7d4571` (von `main` `d29a5206`) · **Datum:** 2026-10-24 · **Stand:** gebaut, Abnahme offen. ② 4 (Fonto-Ausnahme) wartet auf den Merge von #111 (Befund B-1).
+**Branch:** `261024-astryx-benchmark-clean-room-pe-7d4571` (von `main` `d29a5206`) · **Datum:** 2026-10-24 · **Stand:** gebaut; O-1 bis O-5 am 2026-10-24 entschieden (unten). ② 4 (Fonto-Ausnahme) wird nach dem Merge von #111 gebaut; bis dahin wartet dieser PR und setzt danach auf `main` neu auf.
 
 **Clean Room (Art. V):** Aus dem Benchmark-Repo wurde nur diese eine Datei gelesen (`gh api …/contents/ergebnis/research/benchmark-astryx-2026-10.md?ref=a745aea`), sonst nichts. Kein fremdes System geöffnet.
 
@@ -14,8 +14,8 @@
    - triviale Werte, als Daten mit Kialo in `packages/modelo/src/checks/clean-room/trivialaj.json`;
    - der Zufallstreffer `color.palette.danger.900`, als Jugxo `jug_01M5PTA0PQY9P362JAVW9VP96G` zu Art. V mit Begründung, verknüpft über `hazardaj-trafoj.json`.
 
-   **Ergebnis auf `main`: 0 Treffer**, 2278 Fingerprints aus 4 Listen; nicht gezählt: 54 Schriftfamilien eines Benchmarks, 199 triviale Werte (184 ohne die Tests, die Fixture und diesen Plan), 2 Stellen des Zufallstreffers.
-3. **② 4 Fonto:** wartet auf #111. Ein Probe-Merge zeigt, dass #111 so, wie es steht, mit diesem PR **139 Treffer** ergibt; zwei Gründe und ein Vorschlag in B-1 und O-2.
+   **Ergebnis auf `main`: 0 Treffer**, 2278 Fingerprints aus 4 Listen; nicht gezählt: 54 Schriftfamilien eines Benchmarks, 200 triviale Werte (184 ohne die Tests, die Fixture und diesen Plan), 2 Stellen des Zufallstreffers.
+3. **② 4 Fonto:** wartet auf #111. Ein Probe-Merge ergab mit diesem PR **139 Treffer** (B-1). Entschieden am 24.10. (E-1): Die Liste theme-neutral zählt nicht, solange die Fonto Astryx in `fontoj.json` mit Lizenz steht; gebaut nach dem Merge von #111. Offen bleibt ein Wert der Fonto in der Liste „weitere“ (O-6).
 4. **③ `perf`:** Ursache des kalten ersten `check_contrast` gefunden und behoben. Der Aufruf ohne Zuweisung baute für jede der 144 Kombinationen die volle Überlagerung aller Tokens aller aktiven Sets (`overlayOf`), obwohl er drei Namen und ihre Alias-Ketten braucht. Im Modus `names` schlägt die Auflösung jetzt nur diese Namen nach. Kalter Aufruf im Prozess: 216 → 17 ms; `pnpm perf` fünf Läufe nacheinander grün (Messungen unten). Budget bleibt 100 ms.
 
 ### Ursachen
@@ -60,7 +60,7 @@ Ein Treffer, der nicht zählt, gibt seine Stelle frei: Kennt ein Benchmark „X�
 | Regel | Was | Kialo (kurz) |
 |---|---|---|
 | `griza` | Hex mit R = G = B: Reinweiß, Reinschwarz, jeder Grauton | kein Farbton, der eine Marke kennzeichnet |
-| `nula` | Farbe mit Deckkraft 0 (achtstelliges Hex, `…00`), Kurve `0, 0, 0, 0` | Null-Werte zeichnen nichts |
+| `nula` | Farbe mit Deckkraft 0 (achtstelliges Hex, `…00`), Kurve `0, 0, 0, 0`, Länge 0 in jeder Einheit | Null-Werte zeichnen nichts (E-3) |
 | `lineara-kurbo` | Kurve `0, 0, 1, 1` | CSS `linear`; Abweichung 1 |
 | `malgrandaj-longoj` | 0, 1, 2 und 4 px | Längen sind nach K2 keine Kandidaten; die Regel gilt, sobald eine Liste Längen führt |
 
@@ -87,8 +87,8 @@ Verworfen: Überlagerungen beim Start bauen (der Start liegt am Budget, B-3) und
 
 ### Abweichungen
 
-1. **Lineare Kurve als trivialer Wert** (`lineara-kurbo`): Die Entscheidung des Maintainers nennt Weiß, Schwarz, Grau, Null-Werte und 0/1/2/4 px. Mit Carbon in der CI meldet die Prüfung auf `main` außerdem 6 Stellen der linearen Kurve `0, 0, 1, 1`, darunter `easing.curve.linear` im Kern („Linear: no easing“). Sie ist so trivial wie Weiß und Schwarz und steht als eigene Regel mit eigener Kialo in den Daten. Die Alternative steht in O-1.
-2. **„Null-Werte“ ausgelegt** als Farbe mit Deckkraft 0 und Kurve aus vier Nullen. Eine Null als Länge deckt `malgrandaj-longoj` ab. Siehe O-4.
+1. **Lineare Kurve als trivialer Wert** (`lineara-kurbo`): Die Entscheidung des Maintainers nennt Weiß, Schwarz, Grau, Null-Werte und 0/1/2/4 px. Mit Carbon in der CI meldet die Prüfung auf `main` außerdem 6 Stellen der linearen Kurve `0, 0, 1, 1`, darunter `easing.curve.linear` im Kern („Linear: no easing“). Sie ist so trivial wie Weiß und Schwarz und steht als eigene Regel mit eigener Kialo in den Daten. Vom Maintainer bestätigt (E-2).
+2. **„Null-Werte“ ausgelegt** als Farbe mit Deckkraft 0 und Kurve aus vier Nullen; vom Maintainer bestätigt und um Längen von 0 in jeder Einheit ergänzt (E-3).
 3. **Fixture der Spec 004:** `clean-room-fremda-spuro` meldet einen Treffer statt zwei (D-02); das ist die Entscheidung 1, keine aufgeweichte Grenze.
 
 ### Befunde / Mankoj
@@ -103,21 +103,26 @@ Verworfen: Überlagerungen beim Start bauen (der Start liegt am Budget, B-3) und
 
      Die Ausnahme von #111 deckt nur den `$value` eines Tokens in einem Set, nicht diese Stellen. 81 der 86 sind Werte, die `deveno.json` als `fontoValoro` einer gültigen Fonto nennt; die übrigen 5 sind die Kurve der Fonto.
 
-  Vorschlag in O-2. Wer zuerst gemergt wird, ist egal: Der zweite PR ist in `check:clean-room` rot, bis ② 4 gebaut ist (O-3).
+  Entschieden in E-1 (die Liste theme-neutral zählt nicht, solange die Fonto eingetragen ist); unter E-1 blieben von den 139 noch die 3 Treffer aus `benchmark-astryx-weitere` (O-6). Dieser PR wartet auf #111 und setzt danach neu auf.
 - **B-2 Last auf der Messmaschine:** Andere Sitzungen ließen während der Arbeit Playwright und Vitest laufen (Load bis 140 auf 10 Kernen); einzelne Perf-Läufe zeigten dann einen Start von 15 s. Gemessen ist unten nur bei ruhiger Maschine, mit Load-Angabe.
 - **B-3 Start am Budget:** Auf `main` lag „start to first describe“ in drei Läufen bei 1905, 1926 und 2056 ms (Budget 2000 ms, Load ≈ 7). Der Start ist nicht Teil dieses Auftrags und unverändert; er ist der nächste Kandidat für dieselbe Art Ursachensuche (O-5).
 
+### Entscheidungen des Maintainers (2026-10-24)
+
+- **E-1 Fonto-Ausnahme je Wert (zu O-2, O-3):** Fingerprints, die der Benchmark als „aus theme-neutral“ kennzeichnet (Liste `benchmark-astryx-theme-neutral`, § 7.1 der Datei von Astryx), sind erlaubt, solange die Fonto Astryx in `packages/modelo/data/fontoj.json` mit Lizenz eingetragen ist, unabhängig vom Ort im Repo. Werte der übrigen sechs Themes von Astryx (`benchmark-astryx-weitere`) und von Carbon bleiben verboten. Gebaut wird nach dem Merge von #111; dieser PR setzt dann auf `main` neu auf. Ziel: 0 Treffer. Damit entfällt der Teil 2 von O-2 (Ausnahme über `deveno.json`); der Fehler beim Kern-Pfad in `fonto.ts` (B-1, Teil 1) ist für diese Ausnahme ohne Belang, bleibt aber ein Fehler von #111.
+- **E-2 Lineare Kurve (zu O-1):** als triviale Regel, so lassen.
+- **E-3 Null-Werte (zu O-4):** wie ausgelegt, Deckkraft 0 und Kurve aus vier Nullen, dazu Längen von 0 (in `trivialaj.json` nachgetragen, `nula`).
+- **E-4 Start-Budget (zu O-5):** vorgemerkt, jetzt nichts tun.
+- **Reihenfolge:** Bis zum Merge von #111 wartet dieser PR.
+
 ### Offen (für den Maintainer)
 
-- **O-1 Lineare Kurve** (Abweichung 1): als triviale Regel in den Daten (gebaut) oder als Jugxo nur für Carbon? Vorschlag: so lassen. Die Kurve hat jedes System, wie Weiß.
-- **O-2 Fonto-Ausnahme nach #111** (B-1), Vorschlag in zwei Teilen:
-  1. In `fonto.ts` den Kern des Repos nehmen: `packages/vortaro/sets/core.json` vor jedem anderen `core.json`. Das ist ein Fehler in #111 und sollte dort behoben werden.
-  2. Die Ausnahme je Wert statt je Stelle: Ein Fingerprint, dessen Wert `deveno.json` mit einer gültigen Fonto nennt (als übernommenen Wert oder als `fontoValoro`), zählt für die Listen von Astryx nirgends.
+- **O-6 Ein Wert der Fonto in der Liste „weitere“** (zu E-1): Im Probe-Merge kommen 3 der 139 Treffer aus `benchmark-astryx-weitere`, alle derselbe Wert: der helle Wert von `color.background.inverse` der Fonto, wie #111 ihn liest. Er steht in `scripts/fonto-astryx/werte.mjs` (Zeile 104), in einer Jugxo von `packages/aspekto-komuna/jugxoj.json` und in `specs/029-fonto-astryx/plan.md` (Tabelle J-Liste). komuna nutzt ihn nicht (angepasst auf `neutral.950`). Die Datei von Astryx führt ihn nicht unter theme-neutral, sondern unter den übrigen Themes und dem Basis-Satz; vermutlich stammt er aus dem Basis-Satz von `@astryxdesign/core`, der zur Fonto gehört. Nach E-1 bliebe er verboten, und das Ziel 0 Treffer wäre nicht erreicht. Möglichkeiten:
+  1. Die drei Stellen in #111 nennen den Wert nicht mehr (nur Token und Stufe).
+  2. Eine Jugxo zu Art. V für diesen einen Fingerprint über `hazardaj-trafoj.json`, wie beim Zufallstreffer.
+  3. E-1 auf den Basis-Satz der Fonto erweitern; die Datei von Astryx trennt ihn aber nicht von den sechs Themes.
 
-  Die Alternative wäre eine Liste erlaubter Dateien wie für die eigene Marke (Spec 001). Sie müsste mit jeder neuen Stelle wachsen. Gebaut wird erst nach dem Merge von #111, als kleiner Folge-PR oder als Nachtrag hier.
-- **O-3 Reihenfolge der Merges:** #111 zuerst, mit O-2.1 im selben PR; danach dieser PR mit O-2.2, auf `main` neu aufgesetzt. Umgekehrt geht es auch, dann trägt #111 beide Teile.
-- **O-4 „Null-Werte“** (Abweichung 2): gemeint wie ausgelegt (Deckkraft 0, Kurve aus Nullen)?
-- **O-5 Start-Budget** (B-3): Ursache des Starts nahe 2 s suchen, mit derselben Regel: messen, nicht anheben.
+  Vorschlag: 1, weil der Wert in komuna nicht vorkommt und die Stellen ihn nur zitieren.
 
 ### Messungen
 
@@ -168,7 +173,7 @@ cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
 pnpm check:clean-room
 ```
 
-Erwartet: `PASS clean-room: …; 2278 fingerprints from 4 list(s), not counted: 54 benchmark font families, 199 trivial value(s), 2 random hit(s) with Jugxo.`, `0 error(s)`. Die Zahl der Dateien hängt vom Checkout ab.
+Erwartet: `PASS clean-room: …; 2278 fingerprints from 4 list(s), not counted: 54 benchmark font families, 200 trivial value(s), 2 random hit(s) with Jugxo.`, `0 error(s)`. Die Zahl der Dateien hängt vom Checkout ab.
 
 Gegenprobe mit der synthetischen Fixture (ein erfundener Benchmark in ihrem `research/`, keine echten Werte):
 
