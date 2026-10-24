@@ -22,7 +22,7 @@ import { providerOf, runAgent } from "./agent.js";
 import type { Facts, Variant } from "./facts.js";
 import { connectGvidanto } from "./gvidanto.js";
 import { createRenderer } from "./render.js";
-import { runNordstelo } from "./run.js";
+import { failedScore, runNordstelo } from "./run.js";
 import { type Score, score } from "./score.js";
 
 const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
@@ -82,11 +82,16 @@ function restaro(runDir: string): number {
         task: string;
         variant: Variant;
         score: Score;
+        error?: string;
       };
       const facts = JSON.parse(readFileSync(join(dir, "fakto.json"), "utf8")) as Facts;
       const tasko = katalogo.taskoj.find((entry) => entry.name === stored.task);
       if (tasko === undefined) continue;
-      const again = score({ facts, tasko, variant: stored.variant, modelo, pezoj: katalogo.pezoj });
+      // A result without a page counts 0, as in the run (D-12).
+      const again =
+        stored.error === undefined
+          ? score({ facts, tasko, variant: stored.variant, modelo, pezoj: katalogo.pezoj })
+          : failedScore(stored.variant, stored.error);
       checked += 1;
       if (JSON.stringify(again) !== JSON.stringify(stored.score)) {
         differing += 1;

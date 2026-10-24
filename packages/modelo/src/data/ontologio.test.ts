@@ -42,7 +42,17 @@ describe("ontologio.json (FR-15, FR-16, AK-07)", () => {
         .filter((concept) => concept.inScheme === "modelo")
         .map((concept) => concept.term)
         .sort(),
-    ).toEqual(["DimensioValoro", "Ikonaro", "KontrastParo", "Regulo", "Token", "TokenSet"]);
+    ).toEqual([
+      "DimensioValoro",
+      "Ikonaro",
+      "KontrastParo",
+      // Spec 030: the task of the north-star catalogue and its acceptance criterion.
+      "Kriterio",
+      "Regulo",
+      "Tasko",
+      "Token",
+      "TokenSet",
+    ]);
   });
 
   // Spec 014 ① (G3, plan ① D-04): the Ikonaro — icons as vocabulary of the core — and its entries.

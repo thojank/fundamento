@@ -1,0 +1,34 @@
+{
+  "task": "kontakt-fehler",
+  "variant": "F",
+  "repeat": 2,
+  "score": {
+    "k": {
+      "K1": 1,
+      "K2": 1,
+      "K3": 0,
+      "K4": 0.75,
+      "K5": 1,
+      "K6": 0.8
+    },
+    "total": 76,
+    "gaps": [
+      {
+        "kind": "regulo",
+        "key": "uzo-slot-accepts"
+      },
+      {
+        "kind": "regulo",
+        "key": "uzo-slot-nesting"
+      },
+      {
+        "kind": "a11y",
+        "key": "color-contrast"
+      },
+      {
+        "kind": "criterion",
+        "key": "kontakt-fehler: Genau eine primäre Aktion."
+      }
+    ]
+  }
+}

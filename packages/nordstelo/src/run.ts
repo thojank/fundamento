@@ -54,7 +54,7 @@ function runId(date: Date, out: string): string {
   return id;
 }
 
-function failedScore(variant: Variant, error: string): Score {
+export function failedScore(variant: Variant, error: string): Score {
   const zero = variant === "F" ? 0 : null;
   return {
     k: { K1: 0, K2: zero, K3: zero, K4: 0, K5: 0, K6: 0 },

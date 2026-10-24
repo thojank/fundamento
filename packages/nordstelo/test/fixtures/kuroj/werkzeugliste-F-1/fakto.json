@@ -1,0 +1,273 @@
+{
+  "lingvo": "de",
+  "bytes": 859,
+  "elements": [
+    {
+      "tag": "fm-listelektilo",
+      "attrs": {
+        "name": "status-filter",
+        "placeholder": "Status filtern"
+      },
+      "parent": -1,
+      "text": ""
+    },
+    {
+      "tag": "span",
+      "attrs": {
+        "slot": "label"
+      },
+      "parent": 0,
+      "text": "Status"
+    },
+    {
+      "tag": "fm-listitem",
+      "attrs": {
+        "slot": "options",
+        "value": "danger",
+        "style": "background: var(--color-status-danger-basic); color: var(--color-status-danger-on);"
+      },
+      "parent": 0,
+      "text": "Gefahr"
+    },
+    {
+      "tag": "fm-listitem",
+      "attrs": {
+        "slot": "options",
+        "value": "info",
+        "style": "background: var(--color-status-info-basic); color: var(--color-status-info-on);"
+      },
+      "parent": 0,
+      "text": "Info"
+    },
+    {
+      "tag": "fm-listitem",
+      "attrs": {
+        "slot": "options",
+        "value": "success",
+        "style": "background: var(--color-status-success-basic); color: var(--color-status-success-on);"
+      },
+      "parent": 0,
+      "text": "Erfolg"
+    },
+    {
+      "tag": "fm-listitem",
+      "attrs": {
+        "slot": "options",
+        "value": "warning",
+        "style": "background: var(--color-status-warning-basic); color: var(--color-status-warning-on);"
+      },
+      "parent": 0,
+      "text": "Warnung"
+    },
+    {
+      "tag": "fm-kompletigilo",
+      "attrs": {
+        "name": "search",
+        "placeholder": "Suchen"
+      },
+      "parent": -1,
+      "text": ""
+    },
+    {
+      "tag": "span",
+      "attrs": {
+        "slot": "label"
+      },
+      "parent": 6,
+      "text": "Suche"
+    }
+  ],
+  "aria": [
+    {
+      "role": "combobox",
+      "name": ""
+    },
+    {
+      "role": "combobox",
+      "name": ""
+    },
+    {
+      "role": "status",
+      "name": ""
+    }
+  ],
+  "console": [],
+  "renders": [
+    {
+      "aspekto": "komuna",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": [
+        {
+          "id": "button-name",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "komuna",
+      "scheme": "light",
+      "contrast": "high",
+      "axe": [
+        {
+          "id": "button-name",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "komuna",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": [
+        {
+          "id": "button-name",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "komuna",
+      "scheme": "dark",
+      "contrast": "high",
+      "axe": [
+        {
+          "id": "button-name",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "ekzemplo",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": [
+        {
+          "id": "button-name",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "ekzemplo",
+      "scheme": "light",
+      "contrast": "high",
+      "axe": [
+        {
+          "id": "button-name",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "ekzemplo",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": [
+        {
+          "id": "button-name",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "ekzemplo",
+      "scheme": "dark",
+      "contrast": "high",
+      "axe": [
+        {
+          "id": "button-name",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "provo",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": [
+        {
+          "id": "button-name",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "provo",
+      "scheme": "light",
+      "contrast": "high",
+      "axe": [
+        {
+          "id": "button-name",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "provo",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": [
+        {
+          "id": "button-name",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "provo",
+      "scheme": "dark",
+      "contrast": "high",
+      "axe": [
+        {
+          "id": "button-name",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": [
+        {
+          "id": "button-name",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "scheme": "light",
+      "contrast": "high",
+      "axe": [
+        {
+          "id": "button-name",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": [
+        {
+          "id": "button-name",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "scheme": "dark",
+      "contrast": "high",
+      "axe": [
+        {
+          "id": "button-name",
+          "nodes": 1
+        }
+      ]
+    }
+  ]
+}

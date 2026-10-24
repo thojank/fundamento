@@ -1,0 +1,406 @@
+{
+  "lingvo": "de",
+  "bytes": 2737,
+  "elements": [
+    {
+      "tag": "form",
+      "attrs": {
+        "id": "bike-filter",
+        "aria-label": "Filter für Fahrräder"
+      },
+      "parent": -1,
+      "text": ""
+    },
+    {
+      "tag": "fieldset",
+      "attrs": {},
+      "parent": 0,
+      "text": ""
+    },
+    {
+      "tag": "legend",
+      "attrs": {},
+      "parent": 1,
+      "text": "Preisbereich"
+    },
+    {
+      "tag": "label",
+      "attrs": {
+        "for": "price-min"
+      },
+      "parent": 1,
+      "text": "Min. Preis (€):"
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "number",
+        "id": "price-min",
+        "name": "price-min",
+        "min": "0",
+        "step": "1",
+        "placeholder": "0",
+        "style": ""
+      },
+      "parent": 1,
+      "text": ""
+    },
+    {
+      "tag": "label",
+      "attrs": {
+        "for": "price-max"
+      },
+      "parent": 1,
+      "text": "Max. Preis (€):"
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "number",
+        "id": "price-max",
+        "name": "price-max",
+        "min": "0",
+        "step": "1",
+        "placeholder": "9999",
+        "style": ""
+      },
+      "parent": 1,
+      "text": ""
+    },
+    {
+      "tag": "fieldset",
+      "attrs": {},
+      "parent": 0,
+      "text": ""
+    },
+    {
+      "tag": "legend",
+      "attrs": {},
+      "parent": 7,
+      "text": "Kategorie"
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "id": "category",
+        "name": "category",
+        "aria-label": "Kategorie auswählen"
+      },
+      "parent": 7,
+      "text": ""
+    },
+    {
+      "tag": "option",
+      "attrs": {
+        "value": ""
+      },
+      "parent": 9,
+      "text": "Alle Kategorien"
+    },
+    {
+      "tag": "option",
+      "attrs": {
+        "value": "mountainbike"
+      },
+      "parent": 9,
+      "text": "Mountainbike"
+    },
+    {
+      "tag": "option",
+      "attrs": {
+        "value": "rennrad"
+      },
+      "parent": 9,
+      "text": "Rennrad"
+    },
+    {
+      "tag": "option",
+      "attrs": {
+        "value": "citybike"
+      },
+      "parent": 9,
+      "text": "Citybike"
+    },
+    {
+      "tag": "option",
+      "attrs": {
+        "value": "elektrofahrrad"
+      },
+      "parent": 9,
+      "text": "Elektrofahrrad"
+    },
+    {
+      "tag": "option",
+      "attrs": {
+        "value": "faltrad"
+      },
+      "parent": 9,
+      "text": "Faltrad"
+    },
+    {
+      "tag": "option",
+      "attrs": {
+        "value": "tourenrad"
+      },
+      "parent": 9,
+      "text": "Tourenrad"
+    },
+    {
+      "tag": "option",
+      "attrs": {
+        "value": "kinderfahrrad"
+      },
+      "parent": 9,
+      "text": "Kinderfahrrad"
+    },
+    {
+      "tag": "button",
+      "attrs": {
+        "type": "submit"
+      },
+      "parent": 0,
+      "text": "Filtern"
+    }
+  ],
+  "aria": [
+    {
+      "role": "form",
+      "name": "Filter für Fahrräder"
+    },
+    {
+      "role": "group",
+      "name": "Preisbereich"
+    },
+    {
+      "role": "spinbutton",
+      "name": "Min. Preis (€):"
+    },
+    {
+      "role": "spinbutton",
+      "name": "Max. Preis (€):"
+    },
+    {
+      "role": "group",
+      "name": "Kategorie"
+    },
+    {
+      "role": "combobox",
+      "name": "Kategorie auswählen"
+    },
+    {
+      "role": "option",
+      "name": "Alle Kategorien"
+    },
+    {
+      "role": "option",
+      "name": "Mountainbike"
+    },
+    {
+      "role": "option",
+      "name": "Rennrad"
+    },
+    {
+      "role": "option",
+      "name": "Citybike"
+    },
+    {
+      "role": "option",
+      "name": "Elektrofahrrad"
+    },
+    {
+      "role": "option",
+      "name": "Faltrad"
+    },
+    {
+      "role": "option",
+      "name": "Tourenrad"
+    },
+    {
+      "role": "option",
+      "name": "Kinderfahrrad"
+    },
+    {
+      "role": "button",
+      "name": "Filtern"
+    }
+  ],
+  "console": [],
+  "renders": [
+    {
+      "aspekto": "komuna",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": [
+        {
+          "id": "color-contrast",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "komuna",
+      "scheme": "light",
+      "contrast": "high",
+      "axe": [
+        {
+          "id": "color-contrast",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "komuna",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": [
+        {
+          "id": "color-contrast",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "komuna",
+      "scheme": "dark",
+      "contrast": "high",
+      "axe": [
+        {
+          "id": "color-contrast",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "ekzemplo",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": [
+        {
+          "id": "color-contrast",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "ekzemplo",
+      "scheme": "light",
+      "contrast": "high",
+      "axe": [
+        {
+          "id": "color-contrast",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "ekzemplo",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": [
+        {
+          "id": "color-contrast",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "ekzemplo",
+      "scheme": "dark",
+      "contrast": "high",
+      "axe": [
+        {
+          "id": "color-contrast",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "provo",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": [
+        {
+          "id": "color-contrast",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "provo",
+      "scheme": "light",
+      "contrast": "high",
+      "axe": [
+        {
+          "id": "color-contrast",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "provo",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": [
+        {
+          "id": "color-contrast",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "provo",
+      "scheme": "dark",
+      "contrast": "high",
+      "axe": [
+        {
+          "id": "color-contrast",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": [
+        {
+          "id": "color-contrast",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "scheme": "light",
+      "contrast": "high",
+      "axe": [
+        {
+          "id": "color-contrast",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": [
+        {
+          "id": "color-contrast",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "scheme": "dark",
+      "contrast": "high",
+      "axe": [
+        {
+          "id": "color-contrast",
+          "nodes": 1
+        }
+      ]
+    }
+  ]
+}

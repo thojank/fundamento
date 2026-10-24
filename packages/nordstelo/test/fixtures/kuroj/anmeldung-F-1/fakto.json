@@ -1,0 +1,189 @@
+{
+  "lingvo": "de",
+  "bytes": 315,
+  "elements": [
+    {
+      "tag": "form",
+      "attrs": {},
+      "parent": -1,
+      "text": ""
+    },
+    {
+      "tag": "fm-kampo",
+      "attrs": {
+        "kind": "email",
+        "name": "email",
+        "placeholder": "E-Mail",
+        "required": ""
+      },
+      "parent": 0,
+      "text": ""
+    },
+    {
+      "tag": "label",
+      "attrs": {},
+      "parent": 1,
+      "text": "E-Mail"
+    },
+    {
+      "tag": "fm-kampo",
+      "attrs": {
+        "kind": "password",
+        "name": "password",
+        "placeholder": "Passwort",
+        "required": ""
+      },
+      "parent": 0,
+      "text": ""
+    },
+    {
+      "tag": "label",
+      "attrs": {},
+      "parent": 3,
+      "text": "Passwort"
+    },
+    {
+      "tag": "fm-butono",
+      "attrs": {
+        "type": "submit",
+        "emphasis": "high",
+        "label": "Anmelden"
+      },
+      "parent": 0,
+      "text": ""
+    }
+  ],
+  "aria": [
+    {
+      "role": "textbox",
+      "name": "E-Mail"
+    },
+    {
+      "role": "textbox",
+      "name": "Passwort"
+    },
+    {
+      "role": "button",
+      "name": "Anmelden"
+    }
+  ],
+  "console": [],
+  "renders": [
+    {
+      "aspekto": "komuna",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "komuna",
+      "scheme": "light",
+      "contrast": "high",
+      "axe": []
+    },
+    {
+      "aspekto": "komuna",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": [
+        {
+          "id": "color-contrast",
+          "nodes": 2
+        }
+      ]
+    },
+    {
+      "aspekto": "komuna",
+      "scheme": "dark",
+      "contrast": "high",
+      "axe": []
+    },
+    {
+      "aspekto": "ekzemplo",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "ekzemplo",
+      "scheme": "light",
+      "contrast": "high",
+      "axe": []
+    },
+    {
+      "aspekto": "ekzemplo",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": [
+        {
+          "id": "color-contrast",
+          "nodes": 2
+        }
+      ]
+    },
+    {
+      "aspekto": "ekzemplo",
+      "scheme": "dark",
+      "contrast": "high",
+      "axe": []
+    },
+    {
+      "aspekto": "provo",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "provo",
+      "scheme": "light",
+      "contrast": "high",
+      "axe": []
+    },
+    {
+      "aspekto": "provo",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": [
+        {
+          "id": "color-contrast",
+          "nodes": 2
+        }
+      ]
+    },
+    {
+      "aspekto": "provo",
+      "scheme": "dark",
+      "contrast": "high",
+      "axe": []
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "scheme": "light",
+      "contrast": "high",
+      "axe": []
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": [
+        {
+          "id": "color-contrast",
+          "nodes": 2
+        }
+      ]
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "scheme": "dark",
+      "contrast": "high",
+      "axe": []
+    }
+  ]
+}

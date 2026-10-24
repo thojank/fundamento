@@ -1,0 +1,22 @@
+{
+  "task": "anmeldung",
+  "variant": "F",
+  "repeat": 1,
+  "score": {
+    "k": {
+      "K1": 1,
+      "K2": 1,
+      "K3": 1,
+      "K4": 0.75,
+      "K5": 1,
+      "K6": 1
+    },
+    "total": 95,
+    "gaps": [
+      {
+        "kind": "a11y",
+        "key": "color-contrast"
+      }
+    ]
+  }
+}
