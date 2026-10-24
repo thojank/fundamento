@@ -18,6 +18,16 @@ const F_CORE = "packages/core/src/theme/tokens.stylex.ts";
 const palTs = readFileSync(`${fontoDir}/neutral/package/src/neutralPalettes.generated.ts`, "utf8");
 const palJson = palTs.slice(palTs.indexOf("export const palette = ") + 23);
 const PAL = JSON.parse(palJson.slice(0, palJson.indexOf("\n} as const") + 2));
+// Die inverse Fläche steht nicht in theme-neutral, sondern im Kern der Fonto (light-dark(hell,
+// dunkel)); der Wert wird dort gelesen, nicht hier zitiert (#113 O-6).
+const coreTs = readFileSync(`${fontoDir}/core/package/src/theme/tokens.stylex.ts`, "utf8");
+const lightDark = (key) => {
+  const found = new RegExp(`'${key}': 'light-dark\\((#[0-9A-Fa-f]{6}), (#[0-9A-Fa-f]{6})\\)'`).exec(
+    coreTs,
+  );
+  if (found === null) throw new Error(`${key} fehlt in ${F_CORE}`);
+  return [found[1], found[2]];
+};
 
 // ---------- Farbmathematik ----------
 const hex2 = (n) =>
@@ -101,7 +111,7 @@ const T = {
   "--color-background-body": [ref("N", "light", 95), ref("N", "dark", 10)],
   "--color-background-card": [ref("N", "light", 100), ref("N", "dark", 10)],
   "--color-background-muted": [ref("N", "light", 95), ref("N", "dark", 10)],
-  "--color-background-inverted": [lit("#0A1317"), lit("#FFFFFF")],
+  "--color-background-inverted": lightDark("--color-background-inverted").map(lit),
   "--color-accent": [ref("N", "light", 10), ref("N", "dark", 95)],
   "--color-accent-muted": [ref("N", "light", 95), ref("N", "dark", 15)],
   "--color-neutral": [ref("N", "light", 0, 0x0f), ref("N", "dark", 100, 0x1a)],

@@ -182,7 +182,7 @@ Die Fonto hat 21 Stufen je Rampe in Schritten von 5, Fundamento 17 (neutral) und
 
 | Token | Modus | Fonto | komuna |
 |---|---|---|---|
-| `color.background.inverse` | hell | #0a1317 | neutral.950 |
+| `color.background.inverse` | hell | aus dem Kern der Fonto (nicht theme-neutral) | neutral.950 |
 | `color.text.muted` | dunkel | #9e9e9e | neutral.300 |
 | `color.text.disabled` | dunkel | #525252 | neutral.700 |
 | `color.link.hover` | hell | #171717 | neutral.900 |

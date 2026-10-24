@@ -708,12 +708,19 @@ const REG = {
   contrastReserve: "reg_01M2ZHPC0G6PFCX6YH5YVPPG70",
   typeRhythm: "reg_01M2ZJ0YJ3CWC217Q7VC1RS6VS",
 };
+// Die helle inverse Fläche des Kerns der Fonto ist kein Wert von theme-neutral und keiner von
+// komuna (gerundet): die Jugxo nennt Token und Stufe, nicht den Wert (#113 O-6); den Schlüssel
+// der Fonto nennt deveno.json.
+const quelle = (d) =>
+  d.dosiero.startsWith("packages/core/") && d.aro === "core" && d.fontoValoro.startsWith("#")
+    ? "hell aus dem Kern der Fonto"
+    : d.fontoValoro;
 const liste = (id) =>
   deveno
     .filter((d) => d.jugxo === id)
     .map(
       (d) =>
-        `${d.token}${d.aro === "core" ? "" : ` (${d.aro.replace("aspekto/komuna+", "")})`}: ${d.fontoValoro} → ${d.valoro}`,
+        `${d.token}${d.aro === "core" ? "" : ` (${d.aro.replace("aspekto/komuna+", "")})`}: ${quelle(d)} → ${d.valoro}`,
     )
     .join("; ");
 const DATUM = "2026-10-23";
