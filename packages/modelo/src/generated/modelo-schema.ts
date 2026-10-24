@@ -1256,6 +1256,10 @@ export interface SxablonoSkemo {
   a11y: SxablonoA11Y;
   goals?: SxablonoGoal[];
   /**
+   * The events the element of the Sxablono says to the application (Nachlese 11 B-2: submit of the formularo), as an Ero's; absent where it says none.
+   */
+  events?: SkemoEvent[];
+  /**
    * The tokens of the layout, by part and platform-neutral property (Art. VIII); the projection maps them. The part container takes width: the container width below which the regions stack (a size.container.* token).
    */
   parts: {
@@ -1349,6 +1353,17 @@ export interface SxablonoGoal {
       [k: string]: string | boolean;
     };
   }[];
+}
+/**
+ * An event the element of an Ero says to the application (Spec 025 ①, plan ① D-01; benchmark gap 7): its name in the core grammar (change, input, remove), what it means, and whether the application may cancel it (a cancelable remove lets the application keep a tag). Platform-neutral (Art. VIII): a name, not a DOM event type.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SkemoEvent".
+ */
+export interface SkemoEvent {
+  name: Name;
+  cancelable?: boolean;
+  description: NonEmptyText;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -1480,17 +1495,6 @@ export interface SkemoA11Y {
       [k: string]: NonEmptyText;
     };
   };
-}
-/**
- * An event the element of an Ero says to the application (Spec 025 ①, plan ① D-01; benchmark gap 7): its name in the core grammar (change, input, remove), what it means, and whether the application may cancel it (a cancelable remove lets the application keep a tag). Platform-neutral (Art. VIII): a name, not a DOM event type.
- *
- * This interface was referenced by `ModeloJson`'s JSON-Schema
- * via the `definition` "SkemoEvent".
- */
-export interface SkemoEvent {
-  name: Name;
-  cancelable?: boolean;
-  description: NonEmptyText;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -2242,5 +2246,26 @@ export interface Pezo {
 export interface NordsteloFile {
   $schema?: string;
   taskoj: Tasko[];
+  /**
+   * The weights the score counts with (since Nachlese 11: K5 25, the gate multmarkeco).
+   */
   pezoj: Pezo[];
+  /**
+   * The weights before (Nachlese 11 ②): reported beside the score, without the gate, so that a change of the rule is seen to come from the north star and not from the result.
+   */
+  pezojAntauxaj?: {
+    nomo: string;
+    kialo: NordsteloTeksto;
+    pezoj: Pezo[];
+  };
+  /**
+   * The gate of Markenfähigkeit (Nachlese 11 ②, Art. IV): the criteria a result scores only for the combinations of Aspekto, colour scheme and contrast its page follows.
+   */
+  multmarkeco?: {
+    /**
+     * @minItems 1
+     */
+    kriterioj: ("K1" | "K2" | "K3" | "K4" | "K5" | "K6")[];
+    kialo: NordsteloTeksto;
+  };
 }

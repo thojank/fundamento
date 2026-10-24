@@ -1,7 +1,9 @@
 // Nachlese 11 ① (what the north-star measure found, Spec 030): the projections.
-// B-2: the conformance of every Ero and every Sxablono — every slot, prop and event of the Skemo
-//   exists in the Web Component and in React, and the other way round; the Make Kit guideline and
-//   the Gvidanto name the default slot as the Skemo does.
+// B-2: the conformance of every Ero and every Sxablono — every event of the Skemo is one the Web
+//   Component says, every prop and icon slot one React takes, and the other way round; the Make
+//   Kit guideline and the Gvidanto name the slots and the default slot as the Skemo does. The
+//   slots and props of the Web Component are measured on the living element, in the browser
+//   (packages/eroj/test/nachlese-11-konformeco.spec.ts).
 // B-6: fundamento.css sets the surface and the text colour of the page from the roles; the
 //   quickstart of the kit (setup.md) says so.
 // B-7 stands in the browser (packages/eroj/test/nachlese-11.spec.ts).
@@ -17,7 +19,7 @@ import {
   patternPath,
 } from "./celoj/make-kit/make-kit.js";
 import { REACT_CELO, reactInventory } from "./celoj/react/react.js";
-import { elementInventory, WEB_COMPONENT_CELO } from "./celoj/web-component/web-component.js";
+import { elementEvents, WEB_COMPONENT_CELO } from "./celoj/web-component/web-component.js";
 
 const prepared = celoInputOf(defaultModeloSource());
 if (!prepared.ok) throw new Error("the repo Modelo must be valid");
@@ -77,26 +79,9 @@ describe("Nachlese 11 B-2: Skemo, Web Component and React say the same (conforma
   });
 
   it.each(names)(
-    "%s: every slot of the Skemo is a slot of the element, and the other way round",
-    (name) => {
-      const element = elementInventory(files, name);
-      expect(sorted(element.slots)).toEqual(sorted(skemoSides[name]?.slots ?? []));
-    },
-  );
-
-  it.each(names)(
-    "%s: every prop of the Skemo is an attribute of the element, and the other way round",
-    (name) => {
-      expect(elementInventory(files, name).props.sort()).toEqual(
-        [...(skemoSides[name]?.props ?? [])].sort(),
-      );
-    },
-  );
-
-  it.each(names)(
     "%s: every event of the Skemo is one the element says, and the other way round",
     (name) => {
-      expect(elementInventory(files, name).events.sort()).toEqual(
+      expect(elementEvents(files[`eroj/src/generated/fm-${name}.ts`] ?? "")).toEqual(
         [...(skemoSides[name]?.events ?? [])].sort(),
       );
     },

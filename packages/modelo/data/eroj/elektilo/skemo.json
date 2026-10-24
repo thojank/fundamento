@@ -452,6 +452,12 @@
         }
       }
     },
+    "events": [
+      {
+        "name": "change",
+        "description": "Another option was chosen; value is its value."
+      }
+    ],
     "constraints": [
       {
         "when": {

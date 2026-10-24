@@ -113,6 +113,13 @@
         ]
       }
     ],
+    "events": [
+      {
+        "name": "submit",
+        "cancelable": true,
+        "description": "The form is sent with valid fields (detail: values, by name); prevented, nothing else happens; sending is the application's."
+      }
+    ],
     "parts": {
       "frame": {
         "gap": {

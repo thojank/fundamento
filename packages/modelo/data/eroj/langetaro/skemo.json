@@ -213,6 +213,13 @@
         "End"
       ]
     },
+    "events": [
+      {
+        "name": "select",
+        "cancelable": true,
+        "description": "A tab is about to be chosen (detail: value); prevented, the selected tab stays."
+      }
+    ],
     "goals": [
       {
         "goal": "switch-view",

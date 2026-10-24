@@ -32,11 +32,13 @@ const FIELDS = [
     "fm-formularo",
     {},
     h("fm-kampo", { kind: "email", required: "" }, "E-Mail"),
+    h("fm-kampo", { kind: "password", required: "" }, "Passwort"),
     h("fm-butono", { emphasis: "high", type: "submit" }, "Anmelden"),
   ),
 ];
 const ARIA = [
   { role: "textbox", name: "E-Mail erforderlich" },
+  { role: "textbox", name: "Passwort erforderlich" },
   { role: "button", name: "Anmelden" },
 ];
 const PLAIN = [

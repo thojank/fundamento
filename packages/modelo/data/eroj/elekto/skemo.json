@@ -424,6 +424,16 @@
         }
       }
     },
+    "events": [
+      {
+        "name": "input",
+        "description": "Another option is chosen; value is its value."
+      },
+      {
+        "name": "change",
+        "description": "Another option was chosen, as a radio group says it."
+      }
+    ],
     "constraints": [
       {
         "when": {
