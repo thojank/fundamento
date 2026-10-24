@@ -86,12 +86,13 @@ describe("typography across Dimensioj (AK-05 as amended, K3)", () => {
     const medium = resolved({})["typography.display.1"];
     const compact = resolved({ viewport: "compact" })["typography.display.1"];
     expect(compact?.value).not.toEqual(medium?.value);
+    // Spec 029 ①: komuna states its type for touch and narrow screens in its own conjunction set.
     expect(compact?.fieldAliases?.["/fontSize"]?.[0]).toEqual({
-      set: "viewport/compact",
+      set: "aspekto/komuna+viewport/compact",
       token: "font.size.display.1",
     });
     expect(compact?.fieldAliases?.["/letterSpacing"]?.[0]).toEqual({
-      set: "viewport/compact",
+      set: "aspekto/komuna+viewport/compact",
       token: "font.tracking.display.1",
     });
   });

@@ -83,11 +83,15 @@ describe("check_contrast", () => {
       foreground: "color.status.warning.basic",
       background: "color.background.default",
     });
+    // Spec 029 ①: komuna's warning fill is the yellow of the Fonto in light, default and high
+    // contrast alike; its border carries the pair in all 36 light combinations.
     const aux = out.results.filter((group) => group.branch === "aux");
-    expect(aux).toHaveLength(1);
-    expect(aux[0]?.combinations).toHaveLength(18);
-    expect(aux[0]?.auxRatio).toBeGreaterThanOrEqual(3);
-    expect(aux[0]?.ratio).toBeLessThan(3);
+    expect(aux.length).toBeGreaterThan(0);
+    expect(aux.flatMap((group) => group.combinations).length).toBeGreaterThanOrEqual(18);
+    for (const group of aux) {
+      expect(group.auxRatio).toBeGreaterThanOrEqual(3);
+      expect(group.ratio).toBeLessThan(3);
+    }
     const viaBorder = success({
       foreground: "color.status.warning.border",
       background: "color.background.default",

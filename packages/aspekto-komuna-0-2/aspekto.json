@@ -1,0 +1,107 @@
+{
+  "id": "dva_malnova_01M5N7CK0H95VDDY1XE3KHBSH6",
+  "name": "komuna-0-2",
+  "owner": "Fundamento",
+  "license": "MIT",
+  "idNamespace": "malnova",
+  "fonts": [
+    {
+      "family": "Geist",
+      "license": "OFL-1.1",
+      "source": "https://github.com/vercel/geist-font",
+      "redistributable": true,
+      "scripts": ["Latn"]
+    },
+    {
+      "family": "Geist Mono",
+      "license": "OFL-1.1",
+      "source": "https://github.com/vercel/geist-font",
+      "redistributable": true,
+      "scripts": ["Latn"]
+    }
+  ],
+  "ikonoj": {
+    "set": "Phosphor Icons",
+    "style": "regular",
+    "version": "2.1.1",
+    "license": "MIT",
+    "source": "https://github.com/phosphor-icons/core (npm @phosphor-icons/core 2.1.1, assets/regular)",
+    "read": "2026-10-17",
+    "names": {
+      "add": "plus",
+      "check": "check",
+      "chevron-down": "caret-down",
+      "chevron-left": "caret-left",
+      "chevron-right": "caret-right",
+      "close": "x",
+      "collapse": "arrows-in-simple",
+      "danger": "warning-octagon",
+      "expand": "arrows-out-simple",
+      "external": "arrow-square-out",
+      "info": "info",
+      "more": "dots-three",
+      "search": "magnifying-glass",
+      "sort-ascending": "sort-ascending",
+      "sort-descending": "sort-descending",
+      "subtract": "minus",
+      "success": "check-circle",
+      "upload": "upload-simple",
+      "warning": "warning",
+      "calendar": "calendar-blank",
+      "edit": "pencil-simple"
+    }
+  },
+  "aspiroj": [
+    {
+      "metriko": "wcag2-reserve",
+      "min": 0.1,
+      "kialo": "Die Referenzmarke soll vormachen, was erreichbar ist: zehn Prozent Reserve über der Schwelle halten auch auf schlechten Bildschirmen und bei weicher Schriftglättung. Für andere Marken bleibt die Regulo bei fünf Prozent."
+    },
+    {
+      "metriko": "oklch-l-extreme",
+      "min": 0.02,
+      "appliesTo": {
+        "tokens": [
+          "color.background.**",
+          "color.action.*.rest",
+          "color.action.*.hover",
+          "color.action.*.pressed",
+          "color.action.*.selected",
+          "color.action.*.disabled",
+          "color.status.*.basic",
+          "color.status.*.weak",
+          "color.status.*.subtle"
+        ]
+      },
+      "kialo": "Reines Weiß und reines Schwarz lassen keinen Platz mehr nach oben oder unten; komuna hält jede Fläche einen Schritt von den Ankern entfernt — die Seitenflächen ebenso wie die Flächen von Aktionen und Status, damit der Dunkelmodus ein Entwurf bleibt und kein Spiegelbild. Durchsichtige Werte bleiben außen vor: eine Auflage hat keine eigene Fläche."
+    },
+    {
+      "metriko": "type-scale-ratio",
+      "min": 1.1,
+      "max": 1.3,
+      "appliesTo": {
+        "tokens": ["font.size.scale.*"]
+      },
+      "kialo": "Ein ruhiges Band zwischen 1,10 und 1,30 macht die Skala berechenbar und lässt eine abgeleitete Marke sie nachrechnen."
+    },
+    {
+      "metriko": "oklch-l-step",
+      "min": 0.04,
+      "max": 0.2,
+      "appliesTo": {
+        "tokens": ["color.palette.**"]
+      },
+      "kialo": "Eine feste Schrittweite lässt alle Rampen gleich schnell laufen; wer eine Stufe wechselt, bekommt überall dieselbe Wirkung."
+    },
+    {
+      "metriko": "dimensio-kovrado",
+      "dimensio": "color-scheme",
+      "valoro": "dark",
+      "min": 1,
+      "appliesTo": {
+        "tokens": ["color.background.**", "color.text.**", "color.action.**", "color.status.**"]
+      },
+      "kialo": "Ein Dunkelmodus, den alle Marken teilen, ist eine Umsetzung, kein Entwurf. komuna bestimmt Flächen, Text, Aktionen und Status im Dunkeln selbst."
+    }
+  ]
+}

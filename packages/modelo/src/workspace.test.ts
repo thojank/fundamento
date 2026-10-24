@@ -21,6 +21,8 @@ function manifest(dir: string): Manifest {
 const PACKAGES = {
   agordilo: "@fundamento/agordilo",
   "aspekto-komuna": "@fundamento/aspekto-komuna",
+  // Spec 029 ①: komuna as it was before the Fonto, an Aspekto package of its own.
+  "aspekto-komuna-0-2": "@fundamento/aspekto-komuna-0-2",
   cli: "@fundamento/cli",
   eroj: "@fundamento/eroj",
   mcp: "@fundamento/mcp",
@@ -32,7 +34,7 @@ const PACKAGES = {
 } as const;
 
 describe("workspace packages (plan D-01)", () => {
-  it("has exactly the five Phase-1 packages, the two of Phase 3, the Agordilo (Spec 016) and the Metiejo (Spec 023)", () => {
+  it("has exactly the five Phase-1 packages, the two of Phase 3, the Agordilo (Spec 016), the Metiejo (Spec 023) and komuna-0-2 (Spec 029)", () => {
     const dirs = readdirSync(packagesDir, { withFileTypes: true })
       .filter((entry) => entry.isDirectory())
       .map((entry) => entry.name)

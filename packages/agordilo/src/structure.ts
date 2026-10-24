@@ -5,6 +5,7 @@
 
 import {
   type AspektoPackageFiles,
+  CORE_SET_NAME,
   type ModeloFiles,
   serializeCanonicalJson,
 } from "@fundamento/modelo";
@@ -72,5 +73,147 @@ export function referenceStructureFiles(files: ModeloFiles): ModeloFiles | undef
     ...files,
     sets: files.sets.filter((set) => set.package === undefined || set.package === reference.name),
     packages: [{ ...reference, dir }],
+  };
+}
+
+/** The Aspekto that keeps komuna as it was before the Fonto (Spec 029 ①). */
+export const KOMUNA_0_2 = "komuna-0-2";
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const nameOf = (value: unknown): string | undefined =>
+  isRecord(value) && typeof value.name === "string" ? value.name : undefined;
+
+/** Every `$value` of `core` taken from the token of the same name in `frozen` (and its textTransform). */
+function withValuesOf(core: unknown, frozen: unknown): unknown {
+  if (!isRecord(core)) return core;
+  if ("$value" in core) {
+    if (!isRecord(frozen) || !("$value" in frozen)) return core;
+    const out: Record<string, unknown> = { ...core, $value: structuredClone(frozen.$value) };
+    const ext = isRecord(frozen.$extensions) ? frozen.$extensions[EXTENSION] : undefined;
+    const own = isRecord(core.$extensions) ? core.$extensions[EXTENSION] : undefined;
+    if (isRecord(ext) && "textTransform" in ext && isRecord(own)) {
+      out.$extensions = {
+        ...(isRecord(core.$extensions) ? core.$extensions : {}),
+        [EXTENSION]: { ...own, textTransform: ext.textTransform },
+      };
+    }
+    return out;
+  }
+  return Object.fromEntries(
+    Object.entries(core).map(([key, child]) => [
+      key,
+      key.startsWith("$") ? child : withValuesOf(child, isRecord(frozen) ? frozen[key] : undefined),
+    ]),
+  );
+}
+
+const EXTENSION = "com.ciferecigo.fundamento";
+
+/**
+ * The structure of komuna 0.2 (Spec 029 ①): komuna took the values of a Fonto, but every derived
+ * brand was written from komuna as it was, and the calibration of the Agordilo was measured on it.
+ * The package komuna-0-2 keeps those values; this rebuilds the structure from it — the core with
+ * the values of komuna-0-2, the reference package with komuna-0-2's conjunction sets under the
+ * reference's name and set IDs — so the documents are the same as before, and so is the
+ * fingerprint. Pure; `undefined` when the files hold no komuna-0-2. The other packages, the
+ * reference's own new conjunction sets and its Jugxoj and provenance are not part of it.
+ */
+export function struktur02Files(files: ModeloFiles): ModeloFiles | undefined {
+  const reference = files.packages[0];
+  const frozen = files.packages.find((pkg) => nameOf(pkg.aspekto.value) === KOMUNA_0_2);
+  const referenceName = nameOf(reference?.aspekto.value);
+  if (reference === undefined || frozen === undefined || referenceName === undefined)
+    return undefined;
+  const frozenMain = files.sets.find(
+    (set) => set.package === frozen.name && set.name === `aspekto/${KOMUNA_0_2}`,
+  );
+  if (frozenMain === undefined) return undefined;
+  const ownId = (name: string): unknown => {
+    const set = files.sets.find((entry) => entry.package === reference.name && entry.name === name);
+    const ext =
+      isRecord(set?.value) && isRecord(set.value.$extensions) ? set.value.$extensions : {};
+    return isRecord(ext[EXTENSION]) ? ext[EXTENSION].id : undefined;
+  };
+  const renamed = (name: string): string =>
+    name.replace(`aspekto/${KOMUNA_0_2}`, `aspekto/${referenceName}`);
+  const referenceSets = files.sets
+    .filter((set) => set.package === frozen.name)
+    .map((set) => {
+      const name = renamed(set.name);
+      const value = isRecord(set.value) ? set.value : {};
+      const ext = isRecord(value.$extensions) ? value.$extensions : {};
+      const own = isRecord(ext[EXTENSION]) ? ext[EXTENSION] : {};
+      const kondicxoj = (Array.isArray(own.kondicxoj) ? own.kondicxoj : []).map((entry) =>
+        entry === `aspekto=${KOMUNA_0_2}` ? `aspekto=${referenceName}` : entry,
+      );
+      // The reference's own set holds nothing (its values are the core's).
+      const body =
+        name === `aspekto/${referenceName}`
+          ? {}
+          : Object.fromEntries(Object.entries(value).filter(([key]) => key !== "$extensions"));
+      return {
+        ...set,
+        name,
+        package: reference.name,
+        file: set.file.replace(KOMUNA_0_2, referenceName),
+        value: { $extensions: { [EXTENSION]: { id: ownId(name), kondicxoj } }, ...body },
+      };
+    });
+  const sets = files.sets
+    .filter((set) => set.package === undefined)
+    .map((set) =>
+      set.name === CORE_SET_NAME
+        ? { ...set, value: withValuesOf(set.value, frozenMain.value) }
+        : set,
+    );
+  const frozenAspekto = isRecord(frozen.aspekto.value) ? frozen.aspekto.value : {};
+  const referenceAspekto = isRecord(reference.aspekto.value) ? reference.aspekto.value : {};
+  const aspekto: Record<string, unknown> = {
+    ...frozenAspekto,
+    id: referenceAspekto.id,
+    name: referenceName,
+  };
+  delete aspekto.idNamespace;
+  const { reguloj: _reguloj, jugxoj: _jugxoj, deveno: _deveno, ...base } = reference;
+  // The IDs komuna 0.2 used: the Aspekto's and its two sets'; the later ones stay with today's komuna.
+  const used = new Set([
+    String(referenceAspekto.id),
+    ...referenceSets.map((set) => {
+      const ext = (set.value as Record<string, unknown>).$extensions as Record<string, unknown>;
+      return String((ext[EXTENSION] as Record<string, unknown>).id);
+    }),
+  ]);
+  const lock =
+    isRecord(reference.idsLock.value) && isRecord(reference.idsLock.value.ids)
+      ? reference.idsLock.value.ids
+      : {};
+  const ownIds = Object.fromEntries(Object.entries(lock).filter(([id]) => used.has(id)));
+  // The theme fragment of komuna 0.2: komuna-0-2's, under the reference's name and ID.
+  const themes = JSON.parse(
+    JSON.stringify(frozen.themes.value)
+      .replaceAll(`aspekto/${KOMUNA_0_2}`, `aspekto/${referenceName}`)
+      .replaceAll(JSON.stringify(frozenAspekto.id), JSON.stringify(referenceAspekto.id))
+      .replaceAll(`"name":"${KOMUNA_0_2}"`, `"name":"${referenceName}"`),
+  ) as unknown;
+  // Other packages (a derived brand under check) stay as they are, after the reference.
+  const others = files.packages.filter((pkg) => pkg !== reference && pkg !== frozen);
+  const otherSets = files.sets.filter((set) => others.some((pkg) => pkg.name === set.package));
+  return {
+    ...files,
+    sets: [...sets, ...referenceSets, ...otherSets].sort((a, b) =>
+      a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
+    ),
+    packages: [
+      {
+        ...base,
+        dir: frozen.dir,
+        aspekto: { ...reference.aspekto, value: aspekto },
+        themes: { ...reference.themes, value: themes },
+        idsLock: { ...reference.idsLock, value: { ids: ownIds } },
+      },
+      ...others,
+    ],
   };
 }

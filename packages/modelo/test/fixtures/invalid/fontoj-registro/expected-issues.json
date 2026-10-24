@@ -1,0 +1,10 @@
+{
+  "description": "Spec 029 ① (Constitution v2.4, Art. V Fonto): a value names a Fonto that data/fontoj.json does not list (beta); a listed Fonto is not pinned (a version range and a branch instead of a version and a commit) and its copyright is not in THIRD_PARTY_NOTICES.md. The value from alfa is in order.",
+  "check": "fontoj",
+  "issues": [
+    { "rule": "fonto-unknown", "path": "aspekto-prova/deveno.json#/valoroj/1/fonto" },
+    { "rule": "fonto-unpinned", "path": "data/fontoj.json#/fontoj/1/version" },
+    { "rule": "fonto-unpinned", "path": "data/fontoj.json#/fontoj/1/commit" },
+    { "rule": "fonto-notice-missing", "path": "data/fontoj.json#/fontoj/1/notices" }
+  ]
+}

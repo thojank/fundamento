@@ -109,6 +109,19 @@ export function schemaIssues(files: ModeloFiles, ajv: ModeloAjv): ValidationIssu
         );
       }
     }
+    // Spec 029 ①: the provenance of the values taken from a Fonto.
+    if (pkg.deveno !== undefined) {
+      const validate = getModeloValidator(ajv, SCHEMA_DEFS.devenoFile);
+      if (!validate(pkg.deveno.value)) {
+        issues.push(
+          ...mapErrors(validate.errors ?? [], pkg.deveno, SCHEMA_DEFS.devenoFile, {
+            semantic: [],
+            subtrees: [],
+            isSetFile: false,
+          }),
+        );
+      }
+    }
     for (const [document, defName] of [
       [pkg.aspekto, SCHEMA_DEFS.aspektoFile],
       [pkg.idsLock, SCHEMA_DEFS.idsLock],

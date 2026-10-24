@@ -215,6 +215,14 @@ export const RULE_IDS = [
   "ikonaro-glyph-provenance-missing",
   "ikonaro-glyph-viewbox",
   "ikonaro-glyph-unknown",
+  // Spec 029 ① (Constitution v2.4): the Fontoj and the provenance of the values taken from them
+  // (check:fontoj).
+  "fonto-unknown",
+  "fonto-unpinned",
+  "fonto-notice-missing",
+  "deveno-token-unknown",
+  "deveno-stale",
+  "deveno-jugxo-missing",
   // Spec 016 ① (G6, G8): an Agordo that records a Jugxo for a fixed rule, and a package whose
   // shipped report no longer matches the checks (fm agordilo check).
   "agordo-jugxo-fixed",

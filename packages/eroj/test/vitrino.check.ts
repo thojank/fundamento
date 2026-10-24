@@ -84,7 +84,8 @@ const WITNESSES = [
   ["color-scheme", "dark", firstContrastRow],
   ["contrast", "high", firstContrastRow],
   ["density", "compact", (page: Page) => cssValue(page, "--fm-spacing-medium")],
-  ["viewport", "expanded", (page: Page) => cssValue(page, "--fm-font-size-display-1")],
+  // Spec 029 ①: komuna keeps its type on wide screens, as the Fonto does; the grid widens.
+  ["viewport", "expanded", (page: Page) => cssValue(page, "--fm-layout-grid-columns")],
   ["motion", "reduced", (page: Page) => cssValue(page, "--fm-motion-duration-medium")],
   ["aspekto", "ekzemplo", firstContrastRow],
 ] as const;
@@ -199,8 +200,10 @@ test("the contrast table shows WCAG, APCA and the change against the comparison 
     // 1890 → 1962); Spec 011 ① six more for the link colours on raised and sunken (1962 → 2178);
     // Spec 011 ③ four more for the default text on the weak status surfaces (2178 → 2196);
     // Spec 011 ⑤ four more for the tab text on the tertiary action surfaces (2196 → 2394);
-    // the snapshot of the comparison state stays at 1296.
-    "In den 72 Kombinationen des Vergleichsstands: 2394 gegen 1296 (Veränderung +1098)",
+    // Spec 029 ① gives komuna the values of the Fonto (2394 → 2646): text-normal falls from 2358 to
+    // 2286, ui rises from 36 to 360 (the field and inverse borders the rules moved to 3:1 WCAG stay
+    // below the advisory APCA band; plan, B-5). The snapshot of the comparison state stays at 1296.
+    "In den 72 Kombinationen des Vergleichsstands: 2646 gegen 1296 (Veränderung +1350)",
   );
 });
 
@@ -800,12 +803,27 @@ const primaryFill = (page: Page) =>
     .locator("button")
     .evaluate((element) => getComputedStyle(element).backgroundColor);
 
+/** The fill once a transition has ended: two reads in a row agree. */
+async function settledFill(page: Page): Promise<string> {
+  let last = "";
+  await expect
+    .poll(async () => {
+      const fill = await primaryFill(page);
+      const same = fill === last;
+      last = fill;
+      return same;
+    })
+    .toBe(true);
+  return last;
+}
+
 test.describe("the Werkstatt (Spec 016 ②)", () => {
   test("opens from the mode switch and from the fragment; the panel is made of Eroj; the lead colour changes every Ero live", async ({
     page,
   }) => {
     const problems = await open(page);
     await expect(page.locator("#fm-vitrino-werkstatt")).toBeHidden();
+    const ansehen = await settledFill(page);
     await page.locator('button[data-fm-modus="werkstatt"]').click();
     await expect(page.locator("#fm-vitrino-werkstatt")).toBeVisible();
     expect(await page.evaluate(() => location.hash)).toContain("modus=werkstatt");
@@ -829,7 +847,8 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
       await expect(page.locator(`label[for='fm-werkstatt-${slider}']`)).toHaveCount(1);
       await expect(page.locator(`output[for='fm-werkstatt-${slider}']`)).toHaveCount(1);
     }
-    const before = await primaryFill(page);
+    // Spec 029 ①: the Werkstatt shows its structure, komuna 0.2, not today's komuna of Ansehen.
+    const before = await settledFill(page);
     await panel.locator("#fm-werkstatt-leitfarbe").locator("input").fill("#2e8b57");
     await expect.poll(() => primaryFill(page)).not.toBe(before);
     // The Dimensioj stay switchable: dark changes the surface, the draft stays.
@@ -839,7 +858,7 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     await page.locator('button[data-fm-modus="ansehen"]').click();
     await page.locator('[data-fm-switch="color-scheme"][data-fm-valoro="light"]').click();
     await expect(page.locator("#fm-vitrino-werkstatt")).toBeHidden();
-    await expect.poll(() => primaryFill(page)).toBe(before);
+    await expect.poll(() => primaryFill(page)).toBe(ansehen);
     expect(problems).toEqual([]);
   });
 

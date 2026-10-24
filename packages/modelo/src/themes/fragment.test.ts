@@ -29,6 +29,7 @@ function loaded(source = defaultModeloSource()) {
 
 describe("deriveThemeFragment (D-05)", () => {
   it("is the package's contribution: its sets in every theme that enables them", () => {
+    // Spec 029 ①: komuna states its own dimensions in conjunction sets (plan D-02).
     expect(deriveThemeFragment(loaded(), "@fundamento/aspekto-komuna")).toEqual([
       {
         group: "aspekto",
@@ -37,14 +38,72 @@ describe("deriveThemeFragment (D-05)", () => {
         selectedTokenSets: {
           core: "source",
           "aspekto/komuna": "enabled",
+          "aspekto/komuna+viewport/compact": "enabled",
+          "aspekto/komuna+viewport/expanded": "enabled",
+          "aspekto/komuna+density/comfortable": "enabled",
+          "aspekto/komuna+density/compact": "enabled",
           "aspekto/komuna+color-scheme/dark": "enabled",
+          "aspekto/komuna+color-scheme/dark+contrast/high": "enabled",
+          "aspekto/komuna+color-scheme/light+contrast/high": "enabled",
+        },
+      },
+      {
+        group: "viewport",
+        id: "dva_01M2VEEDQFS0RGTE2M27JARKH3",
+        name: "compact",
+        selectedTokenSets: {
+          "aspekto/komuna+viewport/compact": "enabled",
+        },
+      },
+      {
+        group: "viewport",
+        id: "dva_01M2VEEDQFS0RGTE2M27JARKH5",
+        name: "expanded",
+        selectedTokenSets: {
+          "aspekto/komuna+viewport/expanded": "enabled",
+        },
+      },
+      {
+        group: "density",
+        id: "dva_01M2VEEDQFS0RGTE2M27JARKH6",
+        name: "compact",
+        selectedTokenSets: {
+          "aspekto/komuna+density/compact": "enabled",
+        },
+      },
+      {
+        group: "density",
+        id: "dva_01M2VEEDQFS0RGTE2M27JARKH8",
+        name: "comfortable",
+        selectedTokenSets: {
+          "aspekto/komuna+density/comfortable": "enabled",
+        },
+      },
+      {
+        group: "color-scheme",
+        id: "dva_01M2VEEDQFS0RGTE2M27JARKH9",
+        name: "light",
+        selectedTokenSets: {
+          "aspekto/komuna+color-scheme/light+contrast/high": "enabled",
         },
       },
       {
         group: "color-scheme",
         id: "dva_01M2VEEDQFS0RGTE2M27JARKHA",
         name: "dark",
-        selectedTokenSets: { "aspekto/komuna+color-scheme/dark": "enabled" },
+        selectedTokenSets: {
+          "aspekto/komuna+color-scheme/dark": "enabled",
+          "aspekto/komuna+color-scheme/dark+contrast/high": "enabled",
+        },
+      },
+      {
+        group: "contrast",
+        id: "dva_01M2VEEDQFS0RGTE2M27JARKHC",
+        name: "high",
+        selectedTokenSets: {
+          "aspekto/komuna+color-scheme/dark+contrast/high": "enabled",
+          "aspekto/komuna+color-scheme/light+contrast/high": "enabled",
+        },
       },
     ]);
   });

@@ -66,7 +66,8 @@ describe("CSS Celo files (T009)", () => {
   });
 
   it("writes aliases as var() references", () => {
-    expect(combined).toContain("  --fm-color-text-default: var(--fm-color-palette-neutral-900);");
+    // Spec 029 ①: komuna's text is the primary text of the Fonto, black (neutral.1000).
+    expect(combined).toContain("  --fm-color-text-default: var(--fm-color-palette-neutral-1000);");
   });
 
   it("splits composite tokens into one property per field", () => {

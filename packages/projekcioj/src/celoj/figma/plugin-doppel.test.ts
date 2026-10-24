@@ -311,9 +311,12 @@ describe("the double lays out no invisible child (N-5)", () => {
     expect(descendant(loading, "actions")?.properties.visible).toBe(false);
     // Arc, gap, text and paddings are whole numbers; only the hidden 0.01 placeholder (and the
     // spacing before it) made the column 78.01 high in the double — 74 in the file's terms.
-    expect(Number.isInteger(size(loading).height)).toBe(true);
+    // Spec 029 ①: the sizes of the Fonto bring halves (and thousandths from the line heights), so
+    // the hundredth of the placeholder is told apart in hundredths modulo a half.
+    const hundredths = (height: number) => Math.round(height * 100) % 50;
+    expect(hundredths(size(loading).height)).toBe(0);
     // The empty variant shows its placeholder: there the 0.01 belongs to the column.
     const empty = descendant(variant("kind=empty, state=rest"), "control") as DoubleNode;
-    expect(Number.isInteger(size(empty).height)).toBe(false);
+    expect(hundredths(size(empty).height)).toBe(1);
   });
 });

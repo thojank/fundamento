@@ -1,0 +1,69 @@
+{
+  "$extensions": {
+    "com.ciferecigo.fundamento": {
+      "id": "set_01M5N7VJ4JQ9SVVN86F25NFCWW",
+      "kondicxoj": [
+        "aspekto=komuna",
+        "viewport=expanded"
+      ]
+    }
+  },
+  "font": {
+    "size": {
+      "display": {
+        "1": {
+          "$value": "{font.size.scale.900}"
+        },
+        "2": {
+          "$value": "{font.size.scale.800}"
+        },
+        "3": {
+          "$value": "{font.size.scale.700}"
+        }
+      },
+      "headline": {
+        "1": {
+          "$value": "{font.size.scale.600}"
+        },
+        "2": {
+          "$value": "{font.size.scale.500}"
+        },
+        "3": {
+          "$value": "{font.size.scale.400}"
+        },
+        "4": {
+          "$value": "{font.size.scale.300}"
+        }
+      },
+      "$type": "dimension"
+    },
+    "tracking": {
+      "display": {
+        "1": {
+          "$value": "{font.tracking.scale.900}"
+        },
+        "2": {
+          "$value": "{font.tracking.scale.800}"
+        },
+        "3": {
+          "$value": "{font.tracking.scale.700}"
+        }
+      },
+      "headline": {
+        "1": {
+          "$value": "{font.tracking.scale.600}"
+        },
+        "2": {
+          "$value": "{font.tracking.scale.500}"
+        },
+        "3": {
+          "$value": "{font.tracking.scale.400}"
+        },
+        "4": {
+          "$value": "{font.tracking.scale.300}"
+        }
+      },
+      "$type": "dimension"
+    }
+  }
+}

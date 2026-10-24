@@ -29,6 +29,7 @@ import {
   type ValidationIssue,
 } from "@fundamento/modelo";
 import type { CeloInput } from "../../build.js";
+import { BAZOJ_TEKSTOJ, bazojDatumoj, type VitrinoBazoj } from "./bazoj.js";
 
 const PALETTE = /^color\.palette\.([a-z0-9-]+)\.(\d+)$/;
 const SURFACES = [
@@ -78,7 +79,9 @@ export interface VitrinoMezuro {
  * The headings of the Vitrino's own sections in English (Spec 026 ②); German is the text they are
  * written with, and Esperanto shows them as before.
  */
-export const VITRINO_TEKSTOJ: Readonly<Record<string, { en: string }>> = {
+export const VITRINO_TEKSTOJ: Readonly<Record<string, { de?: string; en: string }>> = {
+  // Spec 029 ① 5: the headings, texts and column heads of the foundation pages, German and English.
+  ...BAZOJ_TEKSTOJ,
   werkstatt: { en: "Workshop" },
   paletroj: { en: "Palettes" },
   roloj: { en: "Surfaces, text, status and actions" },
@@ -234,6 +237,8 @@ export interface VitrinoDatumoj {
    * `komunaj` counts this build only where the snapshot has data, and `mankantaj` says how many
    * combinations of the snapshot are missing here — only then is `bazo` more than the comparison.
    */
+  /** Spec 029 ① 5: the values of the foundation pages per brand (bazoj.ts). */
+  bazoj?: VitrinoBazoj;
   apcaHintoj: {
     nun: number;
     kombinoj: number;
@@ -1689,6 +1694,11 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
       .filter((entry) => entry.skemo.parts.initials !== undefined)
       .map((entry) => entry.ero.name),
     uzo: uzojOf(modelo),
+    bazoj: bazojDatumoj(
+      modelo,
+      input.rezolvoj.rezolvoj as unknown as Parameters<typeof bazojDatumoj>[1],
+      aspektoj,
+    ),
     apcaHintoj: {
       nun: apcaNun,
       kombinoj: Object.keys(mezuroj).length,

@@ -149,6 +149,7 @@ export function findBrandValues(
   file: string,
   text: string,
   fingerprints: FingerprintIndex,
+  exempt: readonly (readonly [number, number])[] = [],
 ): ValidationIssue[] {
   if (fingerprints.size === 0) return [];
   const seen = new Set<number>();
@@ -156,6 +157,8 @@ export function findBrandValues(
   for (const candidate of brandCandidates(text)) {
     const source = fingerprints.get(fingerprintOf(candidate));
     if (seen.has(candidate.index) || source === undefined) continue;
+    // Spec 029 ①: a value with a valid Fonto provenance is not a brand value.
+    if (exempt.some(([start, end]) => candidate.index >= start && candidate.index < end)) continue;
     seen.add(candidate.index);
     const { line, column } = lineColumn(text, candidate.index);
     const whose = source === REPO_SOURCE ? "A brand value" : `A value of the Aspekto '${source}'`;

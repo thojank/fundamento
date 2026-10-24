@@ -1,0 +1,10 @@
+{
+  "description": "Spec 029 ① (Art. VII): provenance that no longer matches the Aspekto. A value names a token its set does not define; the value written in the set is no longer the one the provenance records (radius.medium is 10 px, the record says 12 px); an adapted value names no Jugxo, another one a Jugxo that does not exist. The last value is in order.",
+  "check": "fontoj",
+  "issues": [
+    { "rule": "deveno-token-unknown", "path": "aspekto-prova/deveno.json#/valoroj/0/token" },
+    { "rule": "deveno-stale", "path": "aspekto-prova/deveno.json#/valoroj/1/valoro" },
+    { "rule": "deveno-jugxo-missing", "path": "aspekto-prova/deveno.json#/valoroj/2/jugxo" },
+    { "rule": "deveno-jugxo-missing", "path": "aspekto-prova/deveno.json#/valoroj/3/jugxo" }
+  ]
+}

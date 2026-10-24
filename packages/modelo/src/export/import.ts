@@ -61,6 +61,13 @@ export function modeloFromExport(modeloJson: ModeloJson): Modelo {
     ...(modeloJson.tradukoj === undefined
       ? {}
       : { tradukoj: structuredClone(modeloJson.tradukoj) }),
+    // Spec 029 ①: the Fontoj and the provenance, as exported.
+    ...(modeloJson.fontoj === undefined ? {} : { fontoj: structuredClone(modeloJson.fontoj) }),
+    ...(modeloJson.deveno === undefined
+      ? {}
+      : {
+          deveno: structuredClone(modeloJson.deveno) as NonNullable<Modelo["deveno"]>,
+        }),
     // eroj and skemoj are exported in the same order (Ero name); the files are not exported.
     // A Uzo finds its Ero by ID (Spec 007).
     eroj: modeloJson.eroj.flatMap((ero) => {

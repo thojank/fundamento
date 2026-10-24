@@ -2526,16 +2526,28 @@ function shadowEffects(shadow, variables) {
   const bindable = "setBoundVariableForEffect" in figma.variables;
   const effects = shadow.layers.map((layer) => {
     const rgb = rgbOf(layer.color.hex);
-    let effect = {
-      type: "DROP_SHADOW",
-      color: { r: rgb.r, g: rgb.g, b: rgb.b, a: layer.alpha },
-      offset: { x: layer.offsetX, y: layer.offsetY },
-      radius: layer.blur,
-      spread: layer.spread,
-      visible: true,
-      blendMode: "NORMAL",
-      showShadowBehindNode: false,
-    };
+    // Spec 029 ①: a layer inside the surface (inset) is an INNER_SHADOW, which has no
+    // showShadowBehindNode.
+    let effect = layer.inset === true
+      ? {
+          type: "INNER_SHADOW",
+          color: { r: rgb.r, g: rgb.g, b: rgb.b, a: layer.alpha },
+          offset: { x: layer.offsetX, y: layer.offsetY },
+          radius: layer.blur,
+          spread: layer.spread,
+          visible: true,
+          blendMode: "NORMAL",
+        }
+      : {
+          type: "DROP_SHADOW",
+          color: { r: rgb.r, g: rgb.g, b: rgb.b, a: layer.alpha },
+          offset: { x: layer.offsetX, y: layer.offsetY },
+          radius: layer.blur,
+          spread: layer.spread,
+          visible: true,
+          blendMode: "NORMAL",
+          showShadowBehindNode: false,
+        };
     if (!bindable) return effect;
     const fields = [
       ["color", layer.fields.color],
@@ -7335,12 +7347,14 @@ if (typeof figma !== "undefined" && typeof figma.closePlugin === "function" && f
 }
 
 /**
- * The id of the development plugin (Spec 027): its own beside the plugins before — Figma keeps one
- * plugin per id and runs the code imported first (F-13) —, and per brand list and language, as
- * before. The menu shows „Fundamento Bauformen" in front, so it stands apart from „Fundamento
- * 0.2.0 (…)" of the earlier builds.
+ * The id of the development plugin: its own beside the plugins before — Figma keeps one plugin per
+ * id and runs the code imported first (F-13) —, and per brand list and language, as before. Spec
+ * 029 ①: komuna has the values of the Fonto, so the plugin is „Fundamento Grundlagen" with ids
+ * `fundamento-grundlagen-…`, apart from „Fundamento Bauformen" of Spec 027 and „Fundamento 0.2.0
+ * (…)" of the earlier builds.
  */
-const PLUGIN_ID = "fundamento-bauformen";
+const PLUGIN_ID = "fundamento-grundlagen";
+const PLUGIN_NAME = "Fundamento Grundlagen";
 
 /** The brands of a build: the modes of the plan's collection aspekto, in their order. */
 function brandsOf(plan: FigmaPlan): string[] {
@@ -7371,7 +7385,7 @@ export function pluginManifest(plan: FigmaPlan, build: string = UNKNOWN_BUILD): 
   const lingvo = plan.lingvo;
   return `${JSON.stringify(
     {
-      name: `Fundamento Bauformen ${plan.fundamento} (${build}${brands.length === 0 ? "" : ` · ${brands.join(", ")}`}${lingvo === undefined ? "" : ` · ${lingvo}`}): apply plan`,
+      name: `${PLUGIN_NAME} ${plan.fundamento} (${build}${brands.length === 0 ? "" : ` · ${brands.join(", ")}`}${lingvo === undefined ? "" : ` · ${lingvo}`}): apply plan`,
       id: `${PLUGIN_ID}-${shortHash(`${brands.join(",")}${lingvo === undefined ? "" : `|${lingvo}`}`)}`,
       api: "1.0.0",
       main: "code.js",

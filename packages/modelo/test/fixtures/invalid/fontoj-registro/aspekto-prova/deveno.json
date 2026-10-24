@@ -1,0 +1,7 @@
+{
+  "aspekto": "prova",
+  "valoroj": [
+    { "token": "color.palette.neutral.50", "aro": "aspekto/prova", "fonto": "alfa", "dosiero": "src/palette.ts", "sxlosilo": "neutral.95", "fontoValoro": "#f1f1f1", "valoro": "#f1f1f1", "maniero": "prenita" },
+    { "token": "radius.medium", "aro": "aspekto/prova", "fonto": "beta", "dosiero": "src/radius.ts", "sxlosilo": "--radius-element", "fontoValoro": "0.625rem", "valoro": "{\"value\":10,\"unit\":\"px\"}", "maniero": "konvertita" }
+  ]
+}

@@ -3,7 +3,8 @@
 
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   defaultModeloSource,
   type ModeloFiles,
@@ -13,7 +14,13 @@ import {
   withAspektoPackages,
 } from "@fundamento/modelo";
 import type { Calibration } from "../calibration.js";
-import { fingerprintDocuments, type IkonoGewichte, type Structure } from "../structure.js";
+import {
+  fingerprintDocuments,
+  type IkonoGewichte,
+  KOMUNA_0_2,
+  type Structure,
+  struktur02Files,
+} from "../structure.js";
 import type { Wuensche } from "../wunsch.js";
 
 /** data/calibration.json of this package; valid from both `src/node/` and `dist/node/`. */
@@ -74,9 +81,27 @@ function structureOf(files: ModeloFiles): Structure {
   };
 }
 
-/** The structure of the repository: the core Vortaro and data with the reference Aspekto. */
-export function readStructure(): Structure {
-  return structureOf(filesOrThrow(readModeloFiles(defaultModeloSource())));
+/** The directory of the package komuna-0-2 (Spec 029 ①). */
+export function komuna02PackageDir(): string {
+  return dirname(fileURLToPath(import.meta.resolve("@fundamento/aspekto-komuna-0-2/package.json")));
+}
+
+/**
+ * The structure the Agordilo derives over (Spec 029 ①): by default komuna as it was before the
+ * Fonto, rebuilt from the package komuna-0-2 — the structure every derived brand names as its
+ * origin and the calibration was measured on. `"komuna"` reads today's komuna, the reference with
+ * the values of the Fonto; deriving from it waits for a calibration of its own (plan, O-3).
+ */
+export function readStructure(reference: "komuna-0-2" | "komuna" = KOMUNA_0_2): Structure {
+  if (reference === "komuna") {
+    return structureOf(filesOrThrow(readModeloFiles(defaultModeloSource())));
+  }
+  const files = filesOrThrow(
+    readModeloFiles(withAspektoPackages(defaultModeloSource(), [komuna02PackageDir()])),
+  );
+  const rebuilt = struktur02Files(files);
+  if (rebuilt === undefined) throw new Error("The package komuna-0-2 does not hold komuna 0.2.");
+  return structureOf(rebuilt);
 }
 
 /**
@@ -87,9 +112,14 @@ export function readStructureWith(packageDir: string): {
   structure?: Structure;
   issues: ValidationIssue[];
 } {
-  const result = readModeloFiles(withAspektoPackages(defaultModeloSource(), [packageDir]));
+  // Spec 029 ①: checked over the structure it was derived from, komuna 0.2 (readStructure).
+  const result = readModeloFiles(
+    withAspektoPackages(defaultModeloSource(), [komuna02PackageDir(), packageDir]),
+  );
   if (result.files === undefined) return { issues: result.issues };
-  return { structure: structureOf(result.files), issues: result.issues };
+  const rebuilt = struktur02Files(result.files);
+  if (rebuilt === undefined) return { issues: result.issues };
+  return { structure: structureOf(rebuilt), issues: result.issues };
 }
 
 /** data/wuensche.json: the wish vocabulary of propose_agordo (Spec 019 ③, G6). */

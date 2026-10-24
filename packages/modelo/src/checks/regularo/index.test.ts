@@ -85,7 +85,17 @@ describe("regularo on the repo", () => {
       )[key]?.length;
     expect(result.stats).toEqual({
       reguloj: count("reguloj.json", "reguloj"),
-      jugxoj: count("jugxoj.json", "jugxoj"),
+      // Spec 029 ①: and the eight Jugxoj of komuna's package (the Fonto's values a rule changed).
+      jugxoj:
+        (count("jugxoj.json", "jugxoj") ?? 0) +
+        (
+          JSON.parse(
+            readFileSync(
+              new URL("../../../../aspekto-komuna/jugxoj.json", import.meta.url),
+              "utf8",
+            ),
+          ) as { jugxoj: unknown[] }
+        ).jugxoj.length,
       uzoj: 40,
     });
   });
