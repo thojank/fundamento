@@ -28,6 +28,11 @@
 - [x] **T2905 Doku:** tasks, Vojmapo.
 - [x] **T2906 Messungen:** unten; Bericht im PR.
 
+### D – Entscheidungen vom 24.10. (Briefing A)
+- [x] **T2907 Rote Tests** im Doku-Test „Spec 029 ②a“, 4 neue: Briefing unverändert (SHA-256); jede der 254 Zeilen entschieden wie vorgeschlagen, Stand 2026-10-24; Auflagen ②a-2 bis ②a-6 an genau ihren 14 Zeilen; Achse `lines` statt `rules`. Rot in `a2008a8`: 4 von 12.
+- [x] **T2908 Eintragen:** `entscheidung` = Vorschlag (②a-1), `auflage` an A-elekto-2, A-markobutono-2, A-sxaltilo-2 (②a-2), den acht Grenzen-Zeilen (②a-3), A-mezurilo-5 (②a-4), A-plenstato-6 (②a-5), A-tabelo-1 (②a-6, `achsen` mit `lines`); plan mit „Entscheidungen vom 24.10.“ und O-1 bis O-6 entschieden.
+- [ ] **T2909 Neu aufsetzen** auf `main` nach dem Merge von ① (#111).
+
 ### Messungen
 
 | Was | Wert |
