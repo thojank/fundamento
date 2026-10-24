@@ -3332,6 +3332,20 @@ describe("Spec 029 ① documentation (specs/029-fonto-astryx)", () => {
     expect(read("docs/vojmapo.md")).toContain("Spec 029");
   });
 
+  // #113 O-6 (Maintainer 24.10.): the light value of color.background.inverse of the Fonto is not a
+  // value of komuna (rounded to neutral.950) and no theme-neutral value of the benchmark list; the
+  // plan, the Jugxo of komuna and the generator name token and step, not the value. The generator
+  // reads it from the pinned package. deveno.json records it as provenance (not searched).
+  it("plan, Jugxo and generator name color.background.inverse (light) by token and step, not by value", () => {
+    for (const file of [
+      "specs/029-fonto-astryx/plan.md",
+      "packages/aspekto-komuna/jugxoj.json",
+      "scripts/fonto-astryx/werte.mjs",
+    ]) {
+      expect(read(file).toLowerCase(), file).not.toContain("0a1317");
+    }
+  });
+
   // Briefing A (Maintainer 24.10., „alles wie empfohlen"): copied unchanged beside the spec; plan
   // and tasks carry ①-6, the headings of provo in 400.
   it("the briefing of 24.10. is copied unchanged; plan and tasks carry ①-6", () => {
