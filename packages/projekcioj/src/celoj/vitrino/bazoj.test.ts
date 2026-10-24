@@ -127,6 +127,14 @@ describe("Spec 029 ① 5: the foundation pages", () => {
     });
     const provo = datumoj.bazoj?.tipografio?.provo ?? [];
     expect(provo.find((row) => row.token === "typography.display.1")?.familio).toBe("Prata");
+    // Spec 029 ①-6: Prata has the weight 400 only; provo's headings show it, not a faked cut.
+    for (const token of [
+      "typography.display.1",
+      "typography.headline.1",
+      "typography.headline.4",
+    ]) {
+      expect(provo.find((row) => row.token === token)?.pezo, token).toBe("400");
+    }
   });
 
   it("Icons: every name of the Ikonaro, drawn by the chosen brand", () => {
