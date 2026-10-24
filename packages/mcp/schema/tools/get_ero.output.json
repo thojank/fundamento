@@ -157,6 +157,11 @@
                   "items": {
                     "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
                   }
+                },
+                "defaultSlot": {
+                  "description": "The slot that takes the content without a slot attribute (Nachlese 11 B-2); slot=\"<it>\" names the same slot.",
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9-]*$"
                 }
               },
               "required": ["tag", "attributes", "slots"],

@@ -222,6 +222,12 @@
         }
       }
     },
+    "events": [
+      {
+        "name": "select",
+        "description": "An entry was chosen (detail: value, its value else its text); the menu closes."
+      }
+    ],
     "goals": [
       {
         "goal": "action-menu",

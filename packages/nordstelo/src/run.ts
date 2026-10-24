@@ -4,6 +4,8 @@
 // Markdown) with date, commit, model, the figure F against 0, the value per task, the spread, the
 // top 10 of the gaps and the tokens; and it appends to the history the Metiejo shows. One budget of
 // tokens covers the whole run: before a result that would pass it the run stops and still reports.
+// Nachlese 11 ②: every result is scored in both weightings of the catalogue; the report and the
+// history carry both.
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -11,8 +13,8 @@ import type { NordsteloHistorio, NordsteloKuro } from "@fundamento/metiejo";
 import type { Modelo, NordsteloFile } from "@fundamento/modelo";
 import { type AgentResult, Budget, CostLimitReached } from "./agent.js";
 import type { Facts, Variant } from "./facts.js";
-import { type RunRecord, type Summary, summarize } from "./report.js";
-import { type Score, score } from "./score.js";
+import { type RunRecord, type Summary, summarize, type VariantSummary } from "./report.js";
+import { KRITERIOJ, type Score, scoreBoth } from "./score.js";
 
 export interface RunDeps {
   out: string;
@@ -83,36 +85,70 @@ export function markdownReport(
     maxTokens: number;
   },
   summary: Summary,
+  /** A heading of its own, e.g. for a rescoring of a stored run. */
+  title = `Nordstern-Kennzahl – Lauf ${meta.id}`,
 ): string {
-  const n = (value: number) =>
-    Number.isNaN(value) ? "–" : value.toLocaleString("de-DE", { maximumFractionDigits: 1 });
+  const n = (value: number | null | undefined) =>
+    value === null || value === undefined || Number.isNaN(value)
+      ? "–"
+      : value.toLocaleString("de-DE", { maximumFractionDigits: 2 });
+  const old = summary.antauxa;
+  const figure = (variants: Record<Variant, VariantSummary>) =>
+    `${n(variants.F.median)} | ${n(variants["0"].median)}`;
   const lines = [
-    `# Nordstern-Kennzahl – Lauf ${meta.id}`,
+    `# ${title}`,
     "",
     `Datum ${meta.dato} · Commit \`${meta.commit}\` · Modell ${meta.anbieter}/${meta.modell} · Kostengrenze ${n(meta.maxTokens)} Tokens`,
     ...(meta.aborted === undefined ? [] : ["", `**Abgebrochen:** ${meta.aborted}`]),
     "",
     "| | Kennzahl F | Kennzahl 0 |",
     "|---|---|---|",
-    `| Median über die Aufgaben | ${n(summary.variants.F.median)} | ${n(summary.variants["0"].median)} |`,
-    `| Streuung (Median von max − min) | ${n(summary.variants.F.spread)} | ${n(summary.variants["0"].spread)} |`,
+    ...(old === undefined
+      ? [`| Median über die Aufgaben | ${figure(summary.variants)} |`]
+      : [
+          `| Median über die Aufgaben, Gewichtung Nachlese 11 (Markenfähigkeit als Tor, K5 = 25) | ${figure(summary.variants)} |`,
+          `| Median über die Aufgaben, Gewichtung Spec 030 (ohne Tor, K5 = 10) | ${figure(old)} |`,
+        ]),
+    `| Streuung (Median von max − min)${old === undefined ? "" : ", Nachlese 11 / Spec 030"} | ${n(summary.variants.F.spread)}${old === undefined ? "" : ` / ${n(old.F.spread)}`} | ${n(summary.variants["0"].spread)}${old === undefined ? "" : ` / ${n(old["0"].spread)}`} |`,
     `| K7 Tokens ein / aus (Median je Lauf) | ${n(summary.variants.F.effort.inputTokens)} / ${n(summary.variants.F.effort.outputTokens)} | ${n(summary.variants["0"].effort.inputTokens)} / ${n(summary.variants["0"].effort.outputTokens)} |`,
     `| K7 Werkzeugaufrufe, Zeit, Markup (Median) | ${n(summary.variants.F.effort.toolCalls)}, ${n(summary.variants.F.effort.ms / 1000)} s, ${n(summary.variants.F.effort.bytes)} B | ${n(summary.variants["0"].effort.toolCalls)}, ${n(summary.variants["0"].effort.ms / 1000)} s, ${n(summary.variants["0"].effort.bytes)} B |`,
-    "",
-    "## Wert je Aufgabe (Median, min–max)",
-    "",
-    "| Aufgabe | F | 0 |",
-    "|---|---|---|",
   ];
+  if (summary.kriterioj !== undefined) {
+    lines.push(
+      "",
+      "## Mittel je Kriterium (0–1; in Variante 0 gelten K2 und K3 nicht)",
+      "",
+      `| | ${KRITERIOJ.join(" | ")} | Markenfähigkeit |`,
+      `|---|${KRITERIOJ.map(() => "---|").join("")}---|`,
+    );
+    for (const variant of ["F", "0"] as const) {
+      const row = (values: Record<string, number | null>) =>
+        KRITERIOJ.map((kriterio) => n(values[kriterio])).join(" | ");
+      lines.push(
+        `| ${variant}${old === undefined ? "" : ", Nachlese 11"} | ${row(summary.kriterioj[variant])} | ${n(summary.multmarkeco?.[variant])} |`,
+      );
+      if (summary.kriteriojAntauxaj !== undefined)
+        lines.push(`| ${variant}, Spec 030 | ${row(summary.kriteriojAntauxaj[variant])} | – |`);
+    }
+  }
+  lines.push(
+    "",
+    `## Wert je Aufgabe (Median, min–max${old === undefined ? "" : "; Gewichtung Nachlese 11, dahinter Spec 030"})`,
+    "",
+    old === undefined ? "| Aufgabe | F | 0 |" : "| Aufgabe | F | 0 | F (Spec 030) | 0 (Spec 030) |",
+    old === undefined ? "|---|---|---|" : "|---|---|---|---|---|",
+  );
   const tasks = new Set(
     [...summary.variants.F.tasks, ...summary.variants["0"].tasks].map((task) => task.task),
   );
   for (const task of tasks) {
-    const cell = (variant: Variant) => {
-      const entry = summary.variants[variant].tasks.find((item) => item.task === task);
+    const cell = (variants: Record<Variant, VariantSummary>, variant: Variant) => {
+      const entry = variants[variant].tasks.find((item) => item.task === task);
       return entry === undefined ? "–" : `${n(entry.median)} (${n(entry.min)}–${n(entry.max)})`;
     };
-    lines.push(`| ${task} | ${cell("F")} | ${cell("0")} |`);
+    lines.push(
+      `| ${task} | ${cell(summary.variants, "F")} | ${cell(summary.variants, "0")} |${old === undefined ? "" : ` ${cell(old, "F")} | ${cell(old, "0")} |`}`,
+    );
   }
   lines.push(
     "",
@@ -198,10 +234,11 @@ export async function runNordstelo(options: RunOptions, deps: RunDeps): Promise<
       }
       writeFileSync(join(target, "fakto.json"), `${JSON.stringify(facts, null, 2)}\n`);
       // A run without a page (the provider failed, the render failed) counts 0 in every criterion.
-      const result =
+      const scored =
         error === undefined
-          ? score({ facts, tasko, variant, modelo: deps.modelo, pezoj: deps.katalogo.pezoj })
-          : failedScore(variant, error);
+          ? scoreBoth({ facts, tasko, variant, modelo: deps.modelo }, deps.katalogo)
+          : { nova: failedScore(variant, error), antauxa: failedScore(variant, error) };
+      const result = scored.nova;
       const effort = agentResult?.effort ?? {
         inputTokens: budget.spent - before,
         outputTokens: 0,
@@ -214,6 +251,7 @@ export async function runNordstelo(options: RunOptions, deps: RunDeps): Promise<
         variant,
         repeat,
         score: result,
+        antauxa: scored.antauxa,
         effort,
         ...(error === undefined ? {} : { error }),
       };
@@ -251,7 +289,7 @@ export async function runNordstelo(options: RunOptions, deps: RunDeps): Promise<
   };
   writeFileSync(
     join(dir, "raporto.json"),
-    `${JSON.stringify({ ...meta, taskoj: taskoj.map((tasko) => tasko.name), variants: options.variants, repeats: options.repeats, summary, records: records.map(({ task, variant, repeat, score: s, effort, error }) => ({ task, variant, repeat, total: s.total, k: s.k, effort, ...(error === undefined ? {} : { error }) })) }, null, 2)}\n`,
+    `${JSON.stringify({ ...meta, taskoj: taskoj.map((tasko) => tasko.name), variants: options.variants, repeats: options.repeats, summary, records: records.map(({ task, variant, repeat, score: s, antauxa, effort, error }) => ({ task, variant, repeat, total: s.total, k: s.k, ...(s.multmarkeco === undefined ? {} : { multmarkeco: s.multmarkeco }), ...(antauxa === undefined ? {} : { antauxa: { total: antauxa.total, k: antauxa.k } }), effort, ...(error === undefined ? {} : { error }) })) }, null, 2)}\n`,
   );
   writeFileSync(join(dir, "raporto.md"), markdownReport(meta, summary));
 
@@ -265,6 +303,14 @@ export async function runNordstelo(options: RunOptions, deps: RunDeps): Promise<
       ...(records.some((r) => r.variant === "F") ? { F: summary.variants.F.median } : {}),
       ...(records.some((r) => r.variant === "0") ? { "0": summary.variants["0"].median } : {}),
     },
+    ...(summary.antauxa === undefined
+      ? {}
+      : {
+          kennzahlAntauxa: {
+            ...(records.some((r) => r.variant === "F") ? { F: summary.antauxa.F.median } : {}),
+            ...(records.some((r) => r.variant === "0") ? { "0": summary.antauxa["0"].median } : {}),
+          },
+        }),
     streuung: {
       ...(records.some((r) => r.variant === "F") ? { F: summary.variants.F.spread } : {}),
       ...(records.some((r) => r.variant === "0") ? { "0": summary.variants["0"].spread } : {}),

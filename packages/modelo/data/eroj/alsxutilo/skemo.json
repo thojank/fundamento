@@ -390,6 +390,16 @@
         }
       }
     },
+    "events": [
+      {
+        "name": "input",
+        "description": "The chosen files change: a file is chosen, dropped or removed."
+      },
+      {
+        "name": "change",
+        "description": "The chosen files changed; the element's files are the new list."
+      }
+    ],
     "constraints": [
       {
         "when": {

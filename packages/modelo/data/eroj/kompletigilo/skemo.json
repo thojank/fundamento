@@ -557,6 +557,20 @@
         }
       }
     },
+    "events": [
+      {
+        "name": "input",
+        "description": "The text in the field changes while a person types (the platform's input)."
+      },
+      {
+        "name": "query",
+        "description": "The typed text changed (detail: query): the application may load suggestions for it."
+      },
+      {
+        "name": "change",
+        "description": "A suggestion was taken; value is its value."
+      }
+    ],
     "constraints": [
       {
         "when": {

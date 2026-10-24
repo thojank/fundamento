@@ -2470,3 +2470,25 @@ export function stylesheetInventory(moduleText: string): ParityItem {
   }
   return { props: Object.fromEntries(props), states: [...states], values: {} };
 }
+
+/**
+ * The events a generated element says (Nachlese 11 B-2, conformance): every event it dispatches
+ * itself, and `input` where its shadow holds the platform's text field or file input — the
+ * platform's input is composed and reaches the application through the shadow boundary (change is
+ * not, so an element says change only where it dispatches it). Read from the element's source, so
+ * an event the template adds or drops is found; the conformance test compares it with the Skemo.
+ */
+export function elementEvents(source: string): string[] {
+  const events = new Set(
+    [...source.matchAll(/this\.dispatchEvent\(\s*new (?:Custom)?Event\("([a-z-]+)"/g)].map(
+      ([, name = ""]) => name,
+    ),
+  );
+  for (const [, name = ""] of source.matchAll(
+    /(?:const|let) (?:event|accepted) = new (?:Custom)?Event\("([a-z-]+)"/g,
+  ))
+    events.add(name);
+  if (/<(?:textarea|input)(?![^>]*type=\\?"(?:hidden|checkbox|radio|range)\\?")[ >]/.test(source))
+    events.add("input");
+  return [...events].sort();
+}

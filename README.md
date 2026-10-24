@@ -95,6 +95,8 @@ import { Butono } from "@fundamento/eroj/react";
   <Butono emphasis="high" type="submit">Weiter</Butono>  {/* React 18 and 19 */}
 ```
 
+`fundamento.css` also sets the page (Nachlese 11 B-6): the root takes `color.background.canvas` as its surface and `color.text.default` as its text, in every Aspekto and mode, so a page that loads nothing else stays readable in the dark scheme. A surface of the page's own still wins (the rule has no specificity).
+
 Both projections are the same element with the same tokens. Switching brand or colour scheme is one attribute on `<html>`, without a reload and without a rebuild:
 
 ```js
@@ -285,7 +287,7 @@ pnpm prints a `> package@version script` header on stdout. When piping JSON, use
 | `pnpm vortaro:themes [--root <path>]` | Regenerates `$themes.json` and `$metadata.json` from `data/dimensioj.json` and the set `kondicxoj`. Run it after changing Dimensioj or sets; validation fails when the files drift. |
 | `pnpm vortaro:ero-tokenoj [--root <path> \| --config <file>] [--check]` | Derives the Ero-Tokens of the third level from the Skemoj (Constitution v2.3): into the core as an alias on the role each Skemo binds, with IDs from the lock, and with `--config` into the main set of every Aspekto package of a project. A token the core has keeps its value and ID; one no Skemo derives any more is removed and its ID retired. Run it after changing a Skemo; validation reports the drift (`ero-tokeno-missing`, `ero-tokeno-unknown`). `--check` writes nothing and exits 1 on drift. |
 
-| `pnpm nordstelo [--anbieter <name>] [--modell <name>] [--max-tokens <n>]` | One run of the north-star measure (Spec 030): every task × Variante F and 0 × 3 repeats with the provider, model and key of the `.env` (`FM_KI_ANBIETER`, `FM_KI_MODELL`; the key is never printed). Renders each page in every brand and mode, scores it (K1–K7) and writes the pages, screenshots, a report and the history to `.fundamento/nordstelo/`; the Metiejo shows the history at `/nordstelo`. `--max-tokens` is the cost limit of the run (default 15 000 000): the run stops before it and still reports. `pnpm nordstelo restaro <run>` scores a stored run again. Never part of the CI. |
+| `pnpm nordstelo [--anbieter <name>] [--modell <name>] [--max-tokens <n>]` | One run of the north-star measure (Spec 030): every task × Variante F and 0 × 3 repeats with the provider, model and key of the `.env` (`FM_KI_ANBIETER`, `FM_KI_MODELL`; the key is never printed). Renders each page in every brand and mode, scores it (K1–K7) and writes the pages, screenshots, a report and the history to `.fundamento/nordstelo/`; the Metiejo shows the history at `/nordstelo`. `--max-tokens` is the cost limit of the run (default 15 000 000): the run stops before it and still reports. `pnpm nordstelo restaro <run> [--skribi]` scores a stored run again: a run stored before Nachlese 11 must give its numbers again in the weighting of Spec 030; `--skribi` writes the rescoring in both weightings next to the run (`restaro.md`) and carries both figures into the history. Since Nachlese 11 every run is reported in both weightings: Markenfähigkeit as a gate with K5 = 25, and Spec 030 without the gate. Never part of the CI. |
 
 Every maintainer command explains itself with `--help`.
 

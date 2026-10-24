@@ -23,6 +23,11 @@ export interface NordsteloKuro {
   modell: string;
   /** Median over the tasks of the medians of the repeats, per variant. */
   kennzahl: { F?: number; "0"?: number };
+  /**
+   * The same in the weighting before (Nachlese 11 ②: Spec 030, without the gate of
+   * Markenfähigkeit); absent for a run scored only one way.
+   */
+  kennzahlAntauxa?: { F?: number; "0"?: number };
   /** Median of the spread (max − min) of the repeats, per variant. */
   streuung: { F?: number; "0"?: number };
   tokens: { input: number; output: number };
@@ -75,10 +80,10 @@ export function nordsteloScreen(historio: NordsteloHistorio): string {
   const rows = newest
     .map(
       (kuro) =>
-        `<tr><th scope="row">${escapeHtml(new Date(kuro.dato).toLocaleString("de-DE", { timeZone: "UTC" }))} UTC</th><td>${escapeHtml(kuro.commit)}</td><td>${escapeHtml(`${kuro.anbieter} · ${kuro.modell}`)}</td><td>${number(kuro.kennzahl.F)}</td><td>${number(kuro.kennzahl["0"])}</td><td>${number(kuro.streuung.F)} / ${number(kuro.streuung["0"])}</td><td>${number(kuro.tokens.input)} / ${number(kuro.tokens.output)}</td><td>${escapeHtml(kuro.abgebrochen ?? "")}</td></tr>`,
+        `<tr><th scope="row">${escapeHtml(new Date(kuro.dato).toLocaleString("de-DE", { timeZone: "UTC" }))} UTC</th><td>${escapeHtml(kuro.commit)}</td><td>${escapeHtml(`${kuro.anbieter} · ${kuro.modell}`)}</td><td>${number(kuro.kennzahl.F)}</td><td>${number(kuro.kennzahl["0"])}</td><td>${kuro.kennzahlAntauxa === undefined ? "–" : `${number(kuro.kennzahlAntauxa.F)} / ${number(kuro.kennzahlAntauxa["0"])}`}</td><td>${number(kuro.streuung.F)} / ${number(kuro.streuung["0"])}</td><td>${number(kuro.tokens.input)} / ${number(kuro.tokens.output)}</td><td>${escapeHtml(kuro.abgebrochen ?? "")}</td></tr>`,
     )
     .join("");
-  const runs = `<fm-tabelo>Läufe<table slot="content"><thead><tr><th scope="col">Datum</th><th scope="col">Commit</th><th scope="col">Modell</th><th scope="col">Kennzahl F</th><th scope="col">Kennzahl 0</th><th scope="col">Streuung F / 0</th><th scope="col">Tokens ein / aus</th><th scope="col">Abgebrochen</th></tr></thead><tbody>${rows}</tbody></table></fm-tabelo>`;
+  const runs = `<fm-tabelo>Läufe<table slot="content"><thead><tr><th scope="col">Datum</th><th scope="col">Commit</th><th scope="col">Modell</th><th scope="col">Kennzahl F</th><th scope="col">Kennzahl 0</th><th scope="col">Spec 030 F / 0</th><th scope="col">Streuung F / 0</th><th scope="col">Tokens ein / aus</th><th scope="col">Abgebrochen</th></tr></thead><tbody>${rows}</tbody></table></fm-tabelo>`;
   const latest = newest[0] as NordsteloKuro;
   const tasks = latest.taskoj
     .map(
@@ -87,5 +92,5 @@ export function nordsteloScreen(historio: NordsteloHistorio): string {
     )
     .join("");
   const perTask = `<fm-tabelo>Aufgaben des Laufs vom ${escapeHtml(new Date(latest.dato).toLocaleString("de-DE", { timeZone: "UTC" }))} UTC<table slot="content"><thead><tr><th scope="col">Aufgabe</th><th scope="col">F</th><th scope="col">0</th><th scope="col">Seite</th><th scope="col">Bildschirmfoto</th></tr></thead><tbody>${tasks}</tbody></table></fm-tabelo>`;
-  return `${head}${title}<fm-teksto>Median über die Aufgaben, je Aufgabe der Median aus den Läufen; F mit Gvidanto, 0 ohne. Durchgezogen F, gestrichelt 0.</fm-teksto>${course(kuroj)}${runs}${perTask}</main></body></html>`;
+  return `${head}${title}<fm-teksto>Median über die Aufgaben, je Aufgabe der Median aus den Läufen; F mit Gvidanto, 0 ohne. Durchgezogen F, gestrichelt 0. Seit Nachlese 11 mit Markenfähigkeit als Tor und K5 = 25; daneben die Kennzahl in der Gewichtung der Spec 030.</fm-teksto>${course(kuroj)}${runs}${perTask}</main></body></html>`;
 }

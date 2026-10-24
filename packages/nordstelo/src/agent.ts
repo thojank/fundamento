@@ -177,47 +177,14 @@ interface ChatReply {
 
 const sleep = (ms: number) => new Promise((done) => setTimeout(done, ms));
 
-type Schema = Record<string, unknown>;
-
-/**
- * The input schema as a function of the provider. OpenAI takes no oneOf/anyOf/allOf at the top
- * of the parameters; the branches are merged into one object (their properties together, required
- * what every branch requires). The Gvidanto still checks the input against its own schema.
- */
-export function flattenSchema(schema: Schema): Schema {
-  const { $schema: _schema, oneOf, anyOf, allOf, ...rest } = schema;
-  const branches = [oneOf, anyOf, allOf].find(Array.isArray) as Schema[] | undefined;
-  if (branches === undefined) return rest;
-  const properties: Record<string, unknown> = {
-    ...((rest.properties as Record<string, unknown>) ?? {}),
-  };
-  const requiredOf = (branch: Schema) => new Set((branch.required as string[] | undefined) ?? []);
-  for (const branch of branches)
-    Object.assign(properties, (branch.properties as Record<string, unknown>) ?? {});
-  let required = [...requiredOf(rest)];
-  if (allOf !== undefined) {
-    for (const branch of branches) required.push(...requiredOf(branch));
-  } else {
-    const sets = branches.map(requiredOf);
-    const first = sets[0] ?? new Set<string>();
-    required.push(...[...first].filter((name) => sets.every((set) => set.has(name))));
-  }
-  required = [...new Set(required)];
-  return {
-    ...rest,
-    type: "object",
-    properties,
-    ...(required.length === 0 ? {} : { required }),
-  };
-}
-
 function functionOf(tool: ToolInfo) {
   return {
     type: "function" as const,
     function: {
       name: tool.name,
       description: (tool.description ?? "").slice(0, 1000),
-      parameters: flattenSchema(tool.inputSchema),
+      // Nachlese 11 B-3: the Gvidanto lists one object at the root, valid for every provider.
+      parameters: tool.inputSchema,
     },
   };
 }

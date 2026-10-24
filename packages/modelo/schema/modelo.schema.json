@@ -3304,6 +3304,13 @@
             "$ref": "#/$defs/SxablonoGoal"
           }
         },
+        "events": {
+          "description": "The events the element of the Sxablono says to the application (Nachlese 11 B-2: submit of the formularo), as an Ero's; absent where it says none.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SkemoEvent"
+          }
+        },
         "parts": {
           "description": "The tokens of the layout, by part and platform-neutral property (Art. VIII); the projection maps them. The part container takes width: the container width below which the regions stack (a size.container.* token).",
           "type": "object",
@@ -4490,10 +4497,52 @@
           }
         },
         "pezoj": {
+          "description": "The weights the score counts with (since Nachlese 11: K5 25, the gate multmarkeco).",
           "type": "array",
           "items": {
             "$ref": "#/$defs/Pezo"
           }
+        },
+        "pezojAntauxaj": {
+          "description": "The weights before (Nachlese 11 ②): reported beside the score, without the gate, so that a change of the rule is seen to come from the north star and not from the result.",
+          "type": "object",
+          "properties": {
+            "nomo": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kialo": {
+              "$ref": "#/$defs/NordsteloTeksto"
+            },
+            "pezoj": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Pezo"
+              }
+            }
+          },
+          "required": ["nomo", "kialo", "pezoj"],
+          "additionalProperties": false
+        },
+        "multmarkeco": {
+          "description": "The gate of Markenfähigkeit (Nachlese 11 ②, Art. IV): the criteria a result scores only for the combinations of Aspekto, colour scheme and contrast its page follows.",
+          "type": "object",
+          "properties": {
+            "kriterioj": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["K1", "K2", "K3", "K4", "K5", "K6"]
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "kialo": {
+              "$ref": "#/$defs/NordsteloTeksto"
+            }
+          },
+          "required": ["kriterioj", "kialo"],
+          "additionalProperties": false
         }
       },
       "required": ["taskoj", "pezoj"],

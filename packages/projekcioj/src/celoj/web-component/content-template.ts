@@ -16,10 +16,11 @@ export function codeblockMarkup(): string {
 /**
  * The shadow markup of a Markdown view: a column around the default slot. The content is built
  * into the light DOM (the Eroj it uses — a tabelo above all — are styled by the document); the
- * shadow holds the gap between the blocks.
+ * shadow holds the gap between the blocks. The slot shows what the element builds from its
+ * source and takes no content of its own (data-fm-own, Nachlese 11 B-2: the Skemo has no slot).
  */
 export function markdownMarkup(): string {
-  return '<div part="control"><slot></slot></div><span id="fm-texts" hidden></span>';
+  return '<div part="control"><slot data-fm-own></slot></div><span id="fm-texts" hidden></span>';
 }
 
 /** The copy of a code block: on a click of its button. */
