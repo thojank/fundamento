@@ -1,0 +1,14 @@
+{
+  "description": "Spec 032 ②: a benchmark file in research/ brings its fingerprint list (no --spuroj). Font families of a benchmark are no fingerprints, the family of the fixture's own brand is; grey, pure white, a fully transparent colour and the linear curve are trivial; the random hit is exempt through its Jugxo. What is left: the brand family and the colour only the benchmark has.",
+  "check": "clean-room",
+  "issues": [
+    {
+      "rule": "clean-room-marko-spuro",
+      "path": "src/theme.css:4:20"
+    },
+    {
+      "rule": "clean-room-marko-spuro",
+      "path": "src/theme.css:7:22"
+    }
+  ]
+}

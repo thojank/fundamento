@@ -448,4 +448,28 @@ describe("resolveCombination with a token subset (Spec 002, D-18)", () => {
   it("ignores names that are not core tokens", () => {
     expect(resolveCombination(repo, {}, { names: ["color.missing"] }).tokens).toEqual({});
   });
+
+  // Spec 032 ③: the cold first check_contrast (every combination, a handful of names) spent
+  // 119 of 139 ms overlaying every token of every active set, once per combination. With names,
+  // only those names and their alias chains are looked up; no set is walked token by token.
+  it("walks no set token by token when names are given, in any combination", () => {
+    const { modelo: fresh } = loadModelo(defaultModeloSource());
+    if (fresh === undefined) throw new Error("repo did not load");
+    const walked = new Map<string, number>();
+    for (const set of fresh.setoj) {
+      set.tokens = new Proxy(set.tokens, {
+        ownKeys(target) {
+          walked.set(set.name, (walked.get(set.name) ?? 0) + 1);
+          return Reflect.ownKeys(target);
+        },
+      });
+    }
+    const wanted = ["color.text.muted", "color.background.sunken", "color.background.default"];
+    for (const assignment of allAssignments(fresh)) {
+      const part = resolveCombination(fresh, assignment, { names: wanted });
+      expect(Object.keys(part.tokens)).toEqual(wanted.slice().sort());
+    }
+    // The sorted names of the core are taken once per Modelo; nothing else is enumerated.
+    expect(Object.fromEntries(walked)).toEqual({ core: 1 });
+  });
 });

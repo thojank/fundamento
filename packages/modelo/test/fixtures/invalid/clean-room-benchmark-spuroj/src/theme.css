@@ -1,0 +1,11 @@
+/* Synthetic values against the benchmark list of research/benchmark-testo-2026-10.md. */
+:root {
+  --fm-font-body: "Testa Sans", sans-serif;
+  --fm-font-brand: "Marka Sans", sans-serif;
+  --fm-color-line: #5a5a5a;
+  --fm-color-paper: #fff;
+  --fm-color-accent: #123456;
+  --fm-color-veil: #12345600;
+  --fm-easing-linear: cubic-bezier(0, 0, 1, 1);
+  --fm-color-own: #a1b2c3;
+}
