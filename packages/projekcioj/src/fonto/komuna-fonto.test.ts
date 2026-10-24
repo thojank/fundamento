@@ -196,4 +196,53 @@ describe("Spec 029 ①: the other brands keep their values", () => {
       expect.objectContaining({ family: "Prata", license: "OFL-1.1", redistributable: true }),
     );
   });
+
+  // Spec 029 ①-6 (Maintainer 24.10., B-2): Prata has the weight 400 only (tiparoj.json). provo's
+  // headings stand in 400 instead of a cut the browser fakes; every other role keeps its weight.
+  it("provo sets its headings in 400, the only weight of Prata, in all combinations (①-6)", () => {
+    const tiparoj = JSON.parse(
+      readFileSync(new URL("../../../metiejo/data/tiparoj.json", import.meta.url), "utf8"),
+    ) as { tiparoj: { family: string; weights: number[] }[] };
+    const prata = tiparoj.tiparoj.find((tiparo) => tiparo.family === "Prata")?.weights;
+    expect(prata).toEqual([400]);
+    const prepared = celoInputOf(projectModeloSource(CXIUJ));
+    if (!prepared.ok) throw new Error("cxiuj");
+    const headings = [
+      "typography.display.1",
+      "typography.display.2",
+      "typography.display.3",
+      "typography.headline.1",
+      "typography.headline.2",
+      "typography.headline.3",
+      "typography.headline.4",
+    ];
+    type Role = { fontFamily?: unknown; fontWeight?: unknown };
+    const faked: string[] = [];
+    const moved: string[] = [];
+    for (const key of Object.keys(BAZO.marken.provo ?? {})) {
+      const assignment = Object.fromEntries(key.split("&").map((pair) => pair.split("=")));
+      const provo = resolveCombination(prepared.input.modelo, { ...assignment, aspekto: "provo" });
+      const before = resolveCombination(prepared.input.modelo, {
+        ...assignment,
+        aspekto: "komuna-0-2",
+      });
+      for (const [name, token] of Object.entries(provo.tokens)) {
+        if (token?.type !== "typography") continue;
+        const role = token.value as Role;
+        const family = Array.isArray(role.fontFamily) ? role.fontFamily[0] : role.fontFamily;
+        if (family === "Prata" && !prata?.includes(Number(role.fontWeight)))
+          faked.push(`${key} ${name} ${String(role.fontWeight)}`);
+        if (name.startsWith("typography.") && !headings.includes(name)) {
+          const weight = (before.tokens[name]?.value as Role | undefined)?.fontWeight;
+          if (role.fontWeight !== weight) moved.push(`${key} ${name}`);
+        }
+      }
+      for (const name of headings) {
+        const role = provo.tokens[name]?.value as Role | undefined;
+        expect((role?.fontFamily as string[] | undefined)?.[0], `${key} ${name}`).toBe("Prata");
+      }
+    }
+    expect(faked).toEqual([]);
+    expect(moved).toEqual([]);
+  });
 });

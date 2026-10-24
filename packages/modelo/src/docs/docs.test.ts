@@ -3332,6 +3332,17 @@ describe("Spec 029 ① documentation (specs/029-fonto-astryx)", () => {
     expect(read("docs/vojmapo.md")).toContain("Spec 029");
   });
 
+  // Briefing A (Maintainer 24.10., „alles wie empfohlen"): copied unchanged beside the spec; plan
+  // and tasks carry ①-6, the headings of provo in 400.
+  it("the briefing of 24.10. is copied unchanged; plan and tasks carry ①-6", () => {
+    const briefing = read("specs/029-fonto-astryx/briefing-a-2026-10-24.md");
+    expect(createHash("sha256").update(briefing).digest("hex")).toBe(
+      "b1095dedf2e8caec9dc03268edf3aa339f7e88dc7896de23798df28d286c8626",
+    );
+    expect(read("specs/029-fonto-astryx/plan.md")).toContain("①-6");
+    expect(read("specs/029-fonto-astryx/tasks.md")).toContain("①-6");
+  });
+
   it("the Constitution is v2.4 with the Fonto in Art. V, VII, the terminology and the history", () => {
     const constitution = read(".specify/memory/constitution.md");
     expect(constitution).toContain("Version 2.4 · 2026-10-23");

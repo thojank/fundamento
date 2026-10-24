@@ -87,6 +87,18 @@ describe("all example brands in one build (Spec 026 ①)", () => {
     expect(aspekto?.modes.map((mode) => mode.name)).toEqual(BRANDS);
   }, 120_000);
 
+  // Spec 029 ①-6 (Maintainer 24.10., B-2): Prata has the weight 400 only. provo's headings ask
+  // Figma for Prata Regular, so no run falls back to Inter for a cut Prata lacks.
+  it("asks for Prata in Regular only, the one cut of Prata (①-6)", () => {
+    const prata = plan.components.flatMap((component) =>
+      (component.fonts ?? [])
+        .filter((font) => font.family === "Prata")
+        .map((font) => `${component.set} ${font.style}`),
+    );
+    expect(prata.length).toBeGreaterThan(0);
+    expect(prata.filter((entry) => !entry.endsWith(" Regular"))).toEqual([]);
+  });
+
   it("the Vitrino of the build switches between the five brands", () => {
     const html = readFileSync(join(out, VITRINO_FILE), "utf8");
     const switches = [
