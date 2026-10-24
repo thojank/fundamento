@@ -124,6 +124,8 @@ Verworfen: Überlagerungen beim Start bauen (der Start liegt am Budget, B-3) und
 
   Vorschlag: 1, weil der Wert in komuna nicht vorkommt und die Stellen ihn nur zitieren.
 
+  **Entschieden (Maintainer, 24.10.):** Möglichkeit 1. Die drei Stellen in #111 nennen nur Token und Stufe, nicht den Wert; das übernimmt Sitzung A in #111. Danach baut dieser PR die Fonto-Ausnahme nach E-1.
+
 ### Messungen
 
 Alle auf dieser Maschine (Mac des Maintainers, Apple M1 Max, 10 Kerne), Node 24.21, gemessen bei Load 5 bis 8 (B-2). **`pnpm perf` fünf Läufe nacheinander, alle grün** (mcp 8 von 8, projekcioj 1 von 1):
