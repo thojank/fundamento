@@ -1,6 +1,6 @@
 {
-  "$comment": "Spec 029 ②a: Abgleich der 40 Eroj mit der Fonto Astryx. Nur Vorschläge; der Maintainer entscheidet Zeile für Zeile (entscheidung). Es stehen keine Werte der Fonto hier, nur Namen von Komponenten und Props als Herkunft (Amendment v2.4, Art. VII).",
-  "stand": "2026-10-23",
+  "$comment": "Spec 029 ②a: Abgleich der 40 Eroj mit der Fonto Astryx. Entschieden vom Maintainer am 24.10. (briefing-a-2026-10-24.md, „alles wie empfohlen“): entscheidung ist der Vorschlag jeder Zeile (②a-1); auflage hält die Ausnahmen ②a-2 bis ②a-6 fest. Es stehen keine Werte der Fonto hier, nur Namen von Komponenten und Props als Herkunft (Amendment v2.4, Art. VII).",
+  "stand": "2026-10-24",
   "fonto": {
     "id": "astryx",
     "name": "Astryx",
@@ -59,7 +59,8 @@
       "vorschlag": "anpassen",
       "begruendung": "Wer nicht weiß, warum etwas gesperrt ist, bleibt stecken. Übernehmen als Text-Slot `disabled-reason` an jedem Ero mit `disabled`: Das Element bleibt fokussierbar (aria-disabled, aria-describedby), der Grund erscheint im konsileto. Ohne Grund bleibt es wie heute. Entscheidet die Grenze tooltip-on-disabled.",
       "titel": "Grund für deaktivierte Elemente",
-      "entscheidung": null,
+      "entscheidung": "anpassen",
+      "auflage": "Die Grenze tooltip-on-disabled ist damit entschieden, wie in dieser Zeile vorgeschlagen (②a-3).",
       "aspekt": "muster"
     },
     {
@@ -98,7 +99,7 @@
         }
       ],
       "titel": "Gemeinsames Status-Modell der Felder",
-      "entscheidung": null,
+      "entscheidung": "anpassen",
       "aspekt": "muster"
     },
     {
@@ -118,7 +119,7 @@
         }
       ],
       "titel": "Zweck-Achse des dialogo",
-      "entscheidung": null,
+      "entscheidung": "übernehmen",
       "aspekt": "muster"
     },
     {
@@ -130,7 +131,7 @@
       "vorschlag": "behalten",
       "begruendung": "Das Blatt von unten (BottomSheet) ist eine eigene Gattung und kommt erst mit Eroj-Runde 6. Ohne sie gibt es nichts, wohin die Darstellung wechseln könnte. Vorschlag: in ②b nichts bauen und die Achse mit der Gattung einführen.",
       "titel": "Adaptive Darstellung",
-      "entscheidung": null,
+      "entscheidung": "behalten",
       "aspekt": "muster"
     },
     {
@@ -155,7 +156,7 @@
       "vorschlag": "übernehmen",
       "begruendung": "Ein Schalter, der speichert, oder ein Feld, das prüft, braucht einen sichtbaren Zustand. Boolean `loading` an allen Feldern, wie am butono.",
       "titel": "Laden in Feldern",
-      "entscheidung": null,
+      "entscheidung": "übernehmen",
       "aspekt": "muster"
     },
     {
@@ -167,7 +168,7 @@
       "vorschlag": "übernehmen",
       "begruendung": "Einen Wert zu leeren, ist bei Auswahl und Datum sonst umständlich. Boolean `clearable`, mit dem Namen „{label} leeren“ für Hilfsmittel.",
       "titel": "Löschen-Knopf im Feld",
-      "entscheidung": null,
+      "entscheidung": "übernehmen",
       "aspekt": "muster"
     },
     {
@@ -192,7 +193,7 @@
       "vorschlag": "behalten",
       "begruendung": "Zwei Markierungen wären zwei Wege. Die Vorgabe je Formular gehört zur Sxablono formularo, also zu den Templates.",
       "titel": "Optional statt Pflicht markieren",
-      "entscheidung": null,
+      "entscheidung": "behalten",
       "aspekt": "muster"
     },
     {
@@ -217,7 +218,7 @@
       "vorschlag": "behalten",
       "begruendung": "Die Regulo gewinnt (Amendment v2.4, Bedingung 5): Ein Feld ohne sichtbare Beschriftung verliert, wer den Platzhalter überschreibt.",
       "titel": "Verborgene Beschriftung",
-      "entscheidung": null,
+      "entscheidung": "behalten",
       "aspekt": "muster"
     },
     {
@@ -242,7 +243,7 @@
       "vorschlag": "behalten",
       "begruendung": "Was man zum Ausfüllen braucht, steht sichtbar da; ein Tooltip ist auf Touch schwer zu erreichen.",
       "titel": "Hilfe hinter einem Icon an der Beschriftung",
-      "entscheidung": null,
+      "entscheidung": "behalten",
       "aspekt": "muster"
     },
     {
@@ -254,7 +255,7 @@
       "vorschlag": "behalten",
       "begruendung": "Wir haben dasselbe Ergebnis über die Bindung im Skemo; sie ist maschinenlesbar und gilt in Figma ebenso.",
       "titel": "Icon-Größe aus dem Zusammenhang",
-      "entscheidung": null,
+      "entscheidung": "behalten",
       "aspekt": "muster"
     },
     {
@@ -266,7 +267,7 @@
       "vorschlag": "behalten",
       "begruendung": "Ein Weg je Aufgabe (Art. XIII). Der konsileto trägt seine Regulo tooltip-text-short; ein Prop am Knopf wäre ein zweiter Ort.",
       "titel": "Tooltip als Prop an Steuerelementen",
-      "entscheidung": null,
+      "entscheidung": "behalten",
       "aspekt": "muster"
     },
     {
@@ -278,7 +279,7 @@
       "vorschlag": "behalten",
       "begruendung": "Die Stufen der Erhebung kommen mit ① in die Grundlagen. Ein Ero trägt sie über seine Fläche, nicht als Prop.",
       "titel": "Erhebung als Prop",
-      "entscheidung": null,
+      "entscheidung": "behalten",
       "aspekt": "muster"
     },
     {
@@ -304,7 +305,7 @@
       "vorschlag": "behalten",
       "begruendung": "Die Regulo gewinnt. Breiten setzt der Container, in Figma die Instanz (Spec 027).",
       "titel": "Breite je Ero",
-      "entscheidung": null,
+      "entscheidung": "behalten",
       "aspekt": "muster"
     },
     {
@@ -316,7 +317,7 @@
       "vorschlag": "behalten",
       "begruendung": "Das ist eine Frage der React-Projektion, nicht des Skemo. Die Web Components bleiben bei Ereignissen.",
       "titel": "Aktion, die selbst lädt",
-      "entscheidung": null,
+      "entscheidung": "behalten",
       "aspekt": "muster"
     }
   ],
@@ -334,7 +335,7 @@
           "fonto": "`accept`, `maxSize`, `maxFiles`, `isMultiple`, `mode` (2 Werte: Feld oder Ablagefläche), `isLoading`, `status`, `disabledMessage`",
           "vorschlag": "anpassen",
           "begruendung": "Die Höchstzahl der Dateien fehlt uns und wird als Zahl `max-files` übernommen. `dropzone` deckt die zwei Darstellungen der Fonto schon ab und bleibt Boolean. Status und Grund für „deaktiviert“ kommen aus den Mustern M-1 und M-2.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-alsxutilo-2",
@@ -343,7 +344,7 @@
           "fonto": "keine Größenachse, nur eine Breite",
           "vorschlag": "behalten",
           "begruendung": "Beide Systeme kennen keine Größenstufen. Die Breite gehört dem Container (Regulo spacing-owned-by-container).",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-alsxutilo-3",
@@ -352,7 +353,7 @@
           "fonto": "dazu Laden, Warnung und Erfolg",
           "vorschlag": "anpassen",
           "begruendung": "Status nach M-2 (Warnung, Erfolg) und Laden nach M-5. Beim Prüfen großer Dateien ist „lädt“ ein echter Zustand.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-alsxutilo-4",
@@ -361,7 +362,7 @@
           "fonto": "Beschriftung, Beschreibung, Ablagefläche, Upload-Icon, Platzhalter, Dateiname, Löschen, Spinner, Statusmeldung",
           "vorschlag": "anpassen",
           "begruendung": "Das Upload-Icon in der Ablagefläche übernehmen; `upload` steht schon im Ikonaro. Die übrigen Teile decken sich, unsere Liste ist feiner.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-alsxutilo-5",
@@ -370,7 +371,7 @@
           "fonto": "natives Dateifeld mit Beschriftung, Ablagefläche per Tastatur bedienbar; deaktiviert mit Grund bleibt fokussierbar",
           "vorschlag": "behalten",
           "begruendung": "Tastatur und Rollen sind gleichwertig. Nur der Grund für „deaktiviert“ ändert das Verhalten, und der steht als M-1 für alle Eroj.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-alsxutilo-6",
@@ -379,7 +380,7 @@
           "fonto": "Prüfung von Typ, Größe und Anzahl mit Statusmeldung; kein Fortschritt, keine Bildvorschau",
           "vorschlag": "behalten",
           "begruendung": "Die Fonto deckt Fortschritt und Vorschau auch nicht ab. Unsere Grenzen bleiben, bis der Maintainer sie entscheidet. Die Vorschau gehört zur fehlenden Gattung Thumbnail.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -396,7 +397,7 @@
           "fonto": "`orientation`, `variant` mit 2 Stärken, `label`, `isFullBleed`",
           "vorschlag": "anpassen",
           "begruendung": "Zwei Stärken der Linie sind sinnvoll, etwa zwischen Abschnitten und innerhalb einer Karte. Wir nennen die Achse nach unserem Vortaro `emphasis` mit `low` und `high`; die Werte richten sich nach der Anzahl der Fonto.",
-          "entscheidung": null,
+          "entscheidung": "anpassen",
           "achsen": [
             {
               "name": "emphasis",
@@ -413,7 +414,7 @@
           "fonto": "keine Größe; `isFullBleed` hebt den Innenabstand des Containers auf",
           "vorschlag": "behalten",
           "begruendung": "Ob eine Linie bis an den Rand geht, bestimmt der Container (Regulo spacing-owned-by-container), nicht das Ero.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-apartigilo-3",
@@ -422,7 +423,7 @@
           "fonto": "rest",
           "vorschlag": "behalten",
           "begruendung": "Eine Linie hat keine Zustände, in beiden Systemen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-apartigilo-4",
@@ -431,7 +432,7 @@
           "fonto": "Linie und optionale Beschriftung in der Mitte",
           "vorschlag": "behalten",
           "begruendung": "Unsere Grenze labelled-line (ask-human) begründet: Eine Linie mit Wort ist eine Überschrift. Die Beschriftung bleibt offen, bis der Maintainer die Grenze entscheidet (O-3).",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-apartigilo-5",
@@ -440,7 +441,7 @@
           "fonto": "separator mit aria-orientation, beschriftet über aria-labelledby",
           "vorschlag": "behalten",
           "begruendung": "Die Semantik ist gleich. Eine Beschriftung käme nur mit der Grenze aus der Zeile davor.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-apartigilo-6",
@@ -449,7 +450,7 @@
           "fonto": "Linie trennt auch interaktive Bereiche in einem Layout",
           "vorschlag": "behalten",
           "begruendung": "Die Fonto ergänzt kein Muster, das uns fehlt. Unsere Regel für Abstände bleibt.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -466,7 +467,7 @@
           "fonto": "`columns` (eine, mehrere oder Zahl), Beschriftung vorn oder oben, `orientation`, `maxNumOfItems`, `title`",
           "vorschlag": "anpassen",
           "begruendung": "Unsere drei Werte von `layout` decken Beschriftung vorn, oben und automatisch ab. Neu übernehmen: die Höchstzahl sichtbarer Einträge als Zahl `max-entries` mit „mehr anzeigen“. Mehrspaltigkeit ist Sache des Containers.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-atributlisto-2",
@@ -475,7 +476,7 @@
           "fonto": "keine Größe; Breite der Beschriftung einstellbar",
           "vorschlag": "behalten",
           "begruendung": "Die Breite der Beschriftung folgt dem Raster der Sxablonoj, nicht einem Prop des Ero.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-atributlisto-3",
@@ -484,7 +485,7 @@
           "fonto": "rest; aufgeklappt, wenn Einträge verborgen sind",
           "vorschlag": "anpassen",
           "begruendung": "Mit `max-entries` kommt der Zustand „aufgeklappt“ hinzu, mit aria-expanded am Knopf.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-atributlisto-4",
@@ -493,7 +494,7 @@
           "fonto": "Titel, Beschriftung, Wert, Aufklapp-Knopf",
           "vorschlag": "anpassen",
           "begruendung": "Den Titel als Slot `heading` und den Teil `more` übernehmen. Begriff und Wert decken sich.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-atributlisto-5",
@@ -502,7 +503,7 @@
           "fonto": "Beschreibungsliste ohne eigene Tastatur",
           "vorschlag": "behalten",
           "begruendung": "Gleichwertig. Unser Leertext bleibt.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-atributlisto-6",
@@ -511,7 +512,7 @@
           "fonto": "flache Liste",
           "vorschlag": "behalten",
           "begruendung": "Die Fonto verschachtelt auch nicht; unsere Grenze bleibt mit ihrer Kialo.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -528,7 +529,7 @@
           "fonto": "Bild, Ersatzbild, Name, Alt-Text, 5 benannte Größen, Form mit 3 Werten (rund, abgerundet, eckig), Status, Tooltip, Link",
           "vorschlag": "anpassen",
           "begruendung": "Die Form übernehmen, um Personen (rund) von Teams oder Dingen (eckig) zu unterscheiden. Name nach unserem Vortaro: Achse `corner` mit `round`, `soft`, `square`. Status, Tooltip und Link nicht (siehe Zeilen 4 und 6).",
-          "entscheidung": null,
+          "entscheidung": "anpassen",
           "achsen": [
             {
               "name": "corner",
@@ -545,7 +546,7 @@
           "fonto": "5 Stufen",
           "vorschlag": "übernehmen",
           "begruendung": "Anzahl der Fonto: zwei Stufen mehr, für dichte Listen und Profilköpfe. Werte `x-small` bis `x-large`; jede Stufe bekommt Ero-Tokens für alle Marken.",
-          "entscheidung": null,
+          "entscheidung": "übernehmen",
           "achsen": [
             {
               "name": "size",
@@ -562,7 +563,7 @@
           "fonto": "rest; als Link oder Knopf auch hover und focus",
           "vorschlag": "behalten",
           "begruendung": "Ein Avatar, der etwas tut, ist bei uns ein ligilo oder butono mit Avatar darin. So bleibt eine Bedeutung je Ero.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-avataro-4",
@@ -571,7 +572,7 @@
           "fonto": "Foto, Initialen, Standard-Icon, Statuspunkt",
           "vorschlag": "anpassen",
           "begruendung": "Das Standard-Icon ohne Namen übernehmen; der Name des Icons kommt aus Phosphor (Spec: Ikonaro bleibt Phosphor). Der Statuspunkt bleibt unsere Grenze presence-dot (ask-human).",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-avataro-5",
@@ -580,7 +581,7 @@
           "fonto": "img mit Namen, ohne Namen dekorativ (presentation, aria-hidden)",
           "vorschlag": "behalten",
           "begruendung": "Rolle und Name decken sich; ohne Namen ist das Bild in beiden Systemen Schmuck.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-avataro-6",
@@ -589,7 +590,7 @@
           "fonto": "Tooltip mit dem Namen standardmäßig an",
           "vorschlag": "behalten",
           "begruendung": "Ein Weg für Tooltips: der konsileto mit `for` (Art. XIII). Die Gruppe steht als fehlende Gattung AvatarGroup in der Liste.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -606,7 +607,7 @@
           "fonto": "`status` mit denselben 4 Bedeutungen, `isDismissable`, `container` (Karte oder Band), `elevation`, `collapsible`, `icon`",
           "vorschlag": "anpassen",
           "begruendung": "Werte und Anzahl stimmen schon. Neu übernehmen: die Wahl zwischen Karte im Inhalt und Band über die ganze Breite oben auf der Seite, als Achse `frame` mit `card` und `band`. Elevation nicht (M-12).",
-          "entscheidung": null,
+          "entscheidung": "anpassen",
           "achsen": [
             {
               "name": "frame",
@@ -623,7 +624,7 @@
           "fonto": "keine Größe",
           "vorschlag": "behalten",
           "begruendung": "Eine Meldung nimmt die Breite ihres Ortes; Stufen bringen ihr nichts.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-avizo-3",
@@ -632,7 +633,7 @@
           "fonto": "rest; aufgeklappt oder zugeklappt bei langer Beschreibung",
           "vorschlag": "behalten",
           "begruendung": "Lange Details stehen bei uns im Slot `details`, aufklappbar mit einem faldilo darin. Ein eigener Zustand wäre ein zweiter Weg.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-avizo-4",
@@ -641,7 +642,7 @@
           "fonto": "Rahmen, Statusfläche, Icon, Titel, Beschreibung, Aktion, Schließen, Inhaltsfläche",
           "vorschlag": "behalten",
           "begruendung": "Die Teile decken sich; `accent` ist unsere farbige Kante.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-avizo-5",
@@ -650,7 +651,7 @@
           "fonto": "alert für Warnung und Fehler, status für Info und Erfolg",
           "vorschlag": "übernehmen",
           "begruendung": "Warnungen und Fehler sollen sofort angesagt werden. Die Rolle folgt dem `intent`: warning und danger → alert.",
-          "entscheidung": null
+          "entscheidung": "übernehmen"
         },
         {
           "id": "A-avizo-6",
@@ -659,7 +660,7 @@
           "fonto": "Banner bleibt stehen; Toast ist ein eigenes Ero der Fonto",
           "vorschlag": "behalten",
           "begruendung": "Die Fonto bestätigt unsere Trennung: Was stehen bleibt, ist ein avizo. Der Toast bleibt nach E6 außen vor (siehe Liste der fehlenden Gattungen).",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -676,7 +677,7 @@
           "fonto": "`variant` mit 4 Werten (primär, sekundär, ghost, destruktiv), `elevation`, `isLoading`, `isIconOnly`, `width`, `tooltip`, `href`",
           "vorschlag": "behalten",
           "begruendung": "Dieselben vier Erscheinungen haben wir auf zwei Achsen: high, medium, low und high mit danger (Art. II, v2.2, Jugxo zur Umbenennung). Elevation, Tooltip, Breite und Link nicht: M-11, M-12, M-13 und die Grenze navigation.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-butono-2",
@@ -685,7 +686,7 @@
           "fonto": "3 Stufen",
           "vorschlag": "behalten",
           "begruendung": "Gleiche Anzahl; die Werte heißen wie bei uns.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-butono-3",
@@ -694,7 +695,7 @@
           "fonto": "dieselben; Laden auf Wunsch unterbrechbar",
           "vorschlag": "behalten",
           "begruendung": "Gleich. Ein unterbrechbares Laden ist Sache der Anwendung.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-butono-4",
@@ -703,7 +704,7 @@
           "fonto": "Icon, Beschriftung, Endinhalt (Icon oder Badge), Spinner; eigener IconButton",
           "vorschlag": "anpassen",
           "begruendung": "Den Endinhalt erweitern: `icon-end` nimmt auch ein insigno auf, etwa einen Zähler. Der Icon-Knopf bleibt ein butono mit `label` (Regulo label-required), kein eigenes Ero.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-butono-5",
@@ -712,7 +713,7 @@
           "fonto": "Laden behält den Fokus; deaktiviert mit Tooltip bleibt fokussierbar (aria-disabled)",
           "vorschlag": "anpassen",
           "begruendung": "Mit Grund für „deaktiviert“ bleibt der Knopf fokussierbar und sagt den Grund an (M-1). Ohne Grund bleibt es wie heute.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-butono-6",
@@ -721,7 +722,7 @@
           "fonto": "Knopf mit `href`; höchstens eine primäre Aktion je Ansicht",
           "vorschlag": "behalten",
           "begruendung": "Unsere Regulo link-navigates-button-acts trennt Ziel und Aktion; die Fonto rät dasselbe. Die Regel zur primären Aktion deckt sich.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -742,7 +743,8 @@
           "fonto": "zwei Komponenten; Zahl der Monate (1 oder 2), Wochenbeginn, Format, Vorauswahlen, Löschen, kürzeste und längste Spanne, Darstellung",
           "vorschlag": "anpassen",
           "begruendung": "Übernehmen: die Zahl der sichtbaren Monate als Achse `months` mit `1` und `2` (entscheidet die Grenze multiple-months), die Spannen `min-span` und `max-span` für den Zeitraum und Löschen nach M-6. Wochenbeginn und Format kommen bei uns aus der Sprache.",
-          "entscheidung": null,
+          "entscheidung": "anpassen",
+          "auflage": "Die Grenze multiple-months ist damit entschieden, wie in dieser Zeile vorgeschlagen (②a-3).",
           "achsen": [
             {
               "name": "months",
@@ -759,7 +761,7 @@
           "fonto": "3 Stufen",
           "vorschlag": "übernehmen",
           "begruendung": "Ein Datumsfeld steht oft in einer Zeile mit kampo und elektilo und braucht deren Höhe. Achse `size` wie beim kampo.",
-          "entscheidung": null,
+          "entscheidung": "übernehmen",
           "achsen": [
             {
               "name": "size",
@@ -776,7 +778,7 @@
           "fonto": "dazu Laden, Warnung, Erfolg",
           "vorschlag": "anpassen",
           "begruendung": "Status nach M-2 (Warnung, Erfolg) und Laden nach M-5.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-datelektilo-4",
@@ -785,7 +787,7 @@
           "fonto": "dazu Löschen-Knopf, Leiste mit Vorauswahlen, Wochennummern auf Wunsch",
           "vorschlag": "anpassen",
           "begruendung": "Den Löschen-Knopf übernehmen (M-6). Vorauswahlen bleiben die Grenze presets (ask-human), Wochennummern nicht.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-datelektilo-5",
@@ -794,7 +796,7 @@
           "fonto": "dieselbe Tastatur; auf Touch der native Picker",
           "vorschlag": "behalten",
           "begruendung": "Die Tastatur ist gleich. Der native Picker auf Touch ist adaptive Darstellung und steht unter M-4.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-datelektilo-6",
@@ -803,7 +805,7 @@
           "fonto": "eigene Komponenten für Uhrzeit und für Datum mit Uhrzeit",
           "vorschlag": "behalten",
           "begruendung": "Die Uhrzeit hat der kampo seit Spec 025. Datum mit Uhrzeit steht als DateTimeInput in der Liste der fehlenden Gattungen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -820,7 +822,7 @@
           "fonto": "`variant` (normal, Vollbild), `purpose` mit 3 Werten, Breite, Höhe; eigener AlertDialog",
           "vorschlag": "anpassen",
           "begruendung": "Die Zweck-Achse übernehmen wir nach M-3. `reason` (Begründungsfeld) bleibt unser eigenes Muster. Das Vollbild wird ein Wert von `size` (nächste Zeile).",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-dialogo-2",
@@ -829,7 +831,7 @@
           "fonto": "freie Breite und Vollbild",
           "vorschlag": "anpassen",
           "begruendung": "Einen dritten Wert `full` für lange Formulare und für die schmale Bildschirmbreite übernehmen. Freie Breiten nicht: Die Stufen kommen aus den Container-Tokens.",
-          "entscheidung": null,
+          "entscheidung": "anpassen",
           "achsen": [
             {
               "name": "size",
@@ -846,7 +848,7 @@
           "fonto": "rest",
           "vorschlag": "behalten",
           "begruendung": "Ein Dialog hat keine eigenen Zustände; Laden zeigt sein Inhalt.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-dialogo-4",
@@ -855,7 +857,7 @@
           "fonto": "Kopf, Inhalt, Fuß, Hintergrund",
           "vorschlag": "behalten",
           "begruendung": "Die Teile decken sich; unsere sind feiner und tragen das Begründungsfeld.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-dialogo-5",
@@ -864,7 +866,7 @@
           "fonto": "dialog, bei Pflicht alertdialog; Fokus bleibt im Dialog; Escape nach Zweck",
           "vorschlag": "anpassen",
           "begruendung": "Die Rolle alertdialog und das Verhalten von Escape folgen der Zweck-Achse aus M-3.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-dialogo-6",
@@ -873,7 +875,7 @@
           "fonto": "Seitenpanel und Blatt von unten als eigene Komponenten",
           "vorschlag": "behalten",
           "begruendung": "Unsere Grenzen bleiben. Drawer und BottomSheet stehen in der Liste der fehlenden Gattungen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -890,7 +892,7 @@
           "fonto": "dazu Nur-Lesen, Suche, Löschen, `variant` (Feld, sekundär, ghost), Darstellung, Start-Icon, Laden",
           "vorschlag": "anpassen",
           "begruendung": "`readonly` übernehmen; es fehlt nur hier unter den Feldern. Suche bleibt beim listelektilo und kompletigilo, Löschen nach M-6. Den Knopf-Look nicht: Ein Auswahlfeld, das wie ein Knopf aussieht, ist ein menuo.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-elektilo-2",
@@ -899,7 +901,7 @@
           "fonto": "3 Stufen",
           "vorschlag": "behalten",
           "begruendung": "Drei Stufen in beiden Systemen; die Werte heißen wie bei uns.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-elektilo-3",
@@ -908,7 +910,7 @@
           "fonto": "dazu Nur-Lesen, Laden, Warnung, Erfolg",
           "vorschlag": "anpassen",
           "begruendung": "Nur-Lesen (Zeile 1). Status nach M-2 (Warnung, Erfolg) und Laden nach M-5.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-elektilo-4",
@@ -917,7 +919,8 @@
           "fonto": "dazu Start-Icon, Löschen, Status-Icon, Suchzeile, Abschnittsüberschrift, Leerzustand",
           "vorschlag": "anpassen",
           "begruendung": "Abschnittsüberschriften für Optionsgruppen übernehmen; das entscheidet die Grenze grouped-options (ask-human). Das Start-Icon nicht, wie beim kampo (icon-in-field).",
-          "entscheidung": null
+          "entscheidung": "anpassen",
+          "auflage": "Die Grenze grouped-options ist damit entschieden, wie in dieser Zeile vorgeschlagen (②a-3)."
         },
         {
           "id": "A-elektilo-5",
@@ -926,7 +929,7 @@
           "fonto": "dazu Home/End und Tippen springt zur passenden Option, wie beim nativen Auswahlfeld; nur lesbar bleibt fokussierbar",
           "vorschlag": "übernehmen",
           "begruendung": "Home/End und Springen per Tippen erwartet jeder vom nativen Auswahlfeld. Kein Widerspruch zu einer Regulo.",
-          "entscheidung": null
+          "entscheidung": "übernehmen"
         },
         {
           "id": "A-elektilo-6",
@@ -935,7 +938,7 @@
           "fonto": "eine Komponente für beides",
           "vorschlag": "behalten",
           "begruendung": "Wir trennen das native Auswahlfeld (elektilo) vom gestalteten (listelektilo). Die Trennung hält die Uzo eindeutig.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -952,7 +955,7 @@
           "fonto": "dieselben, dazu `disabledMessage`, `status`, `isOptional`",
           "vorschlag": "behalten",
           "begruendung": "Die Achsen decken sich; Grund und Status kommen aus M-1 und M-2.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-elekto-2",
@@ -961,7 +964,8 @@
           "fonto": "2 Stufen",
           "vorschlag": "übernehmen",
           "begruendung": "Anzahl der Fonto: zwei Stufen. `large` entfällt; für Bestehendes gilt ein Übergang (O-2).",
-          "entscheidung": null,
+          "entscheidung": "übernehmen",
+          "auflage": "`large` bleibt ein Release lang als Alias auf `medium`, als veraltet markiert (Warnung im Gvidanto und in der Konsole), danach entfällt es (②a-2).",
           "achsen": [
             {
               "name": "size",
@@ -978,7 +982,7 @@
           "fonto": "dazu Warnung und Erfolg",
           "vorschlag": "anpassen",
           "begruendung": "Warnung und Erfolg kommen aus dem Status-Modell M-2.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-elekto-4",
@@ -987,7 +991,7 @@
           "fonto": "Kopf, Optionen, je Option Beschriftung und Beschreibung",
           "vorschlag": "übernehmen",
           "begruendung": "Eine Beschreibung je Option übernehmen (Teil `option-description`), etwa für Tarife oder Lieferarten.",
-          "entscheidung": null
+          "entscheidung": "übernehmen"
         },
         {
           "id": "A-elekto-5",
@@ -996,7 +1000,7 @@
           "fonto": "dasselbe Muster (APG)",
           "vorschlag": "behalten",
           "begruendung": "Beide folgen dem Muster radiogroup nach APG: Pfeile wählen, Space bestätigt.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-elekto-6",
@@ -1005,7 +1009,7 @@
           "fonto": "für kleine Mengen, alle Optionen sichtbar",
           "vorschlag": "behalten",
           "begruendung": "Die Fonto rät dasselbe. Unsere Regulo bleibt.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -1022,7 +1026,7 @@
           "fonto": "offen, deaktiviert, Seite des Pfeils (Anfang oder Ende), Gruppe",
           "vorschlag": "anpassen",
           "begruendung": "Die Seite des Pfeils übernehmen, unter eigenem Namen: Achse `indicator-side` mit `start` und `end`. Deaktiviert ebenfalls übernehmen (nächste Zeilen).",
-          "entscheidung": null,
+          "entscheidung": "anpassen",
           "achsen": [
             {
               "name": "indicator-side",
@@ -1039,7 +1043,7 @@
           "fonto": "keine Größe",
           "vorschlag": "behalten",
           "begruendung": "Ein Aufklappbereich nimmt die Breite seines Ortes; Stufen bringen ihm nichts.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-faldilo-3",
@@ -1048,7 +1052,7 @@
           "fonto": "dazu deaktiviert",
           "vorschlag": "übernehmen",
           "begruendung": "Ein Abschnitt, der gerade nicht aufgehen darf, braucht „deaktiviert“ mit Grund (M-1).",
-          "entscheidung": null
+          "entscheidung": "übernehmen"
         },
         {
           "id": "A-faldilo-4",
@@ -1057,7 +1061,7 @@
           "fonto": "Container, Auslöser, Pfeil, Inhalt, Gruppen-Container",
           "vorschlag": "behalten",
           "begruendung": "Gleich; die Gruppe ist bei uns das Prop `group`.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-faldilo-5",
@@ -1066,7 +1070,7 @@
           "fonto": "Knopf mit aria-expanded und aria-controls",
           "vorschlag": "behalten",
           "begruendung": "Beide zeigen den Zustand mit aria-expanded am Auslöser; Enter und Space schalten.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-faldilo-6",
@@ -1075,7 +1079,7 @@
           "fonto": "Gruppe, in der immer nur einer offen ist",
           "vorschlag": "behalten",
           "begruendung": "`group` deckt das schon. Die Grenze bleibt.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -1092,7 +1096,7 @@
           "fonto": "dazu Ausrichtung, Wertanzeige mit 3 Werten (Tooltip, Text, keine), Markierungen, Mindestabstand der Griffe, Format",
           "vorschlag": "anpassen",
           "begruendung": "Die Wertanzeige mit drei Werten übernehmen und `field` darin aufgehen lassen, unter eigenem Namen: `readout` mit `none`, `text`, `field`. Den Tooltip nicht: Er verdeckt den Wert beim Ziehen auf Touch, das Eingabefeld leistet mehr. Mindestabstand im Bereich übernehmen.",
-          "entscheidung": null,
+          "entscheidung": "anpassen",
           "achsen": [
             {
               "name": "readout",
@@ -1109,7 +1113,7 @@
           "fonto": "keine Größe",
           "vorschlag": "behalten",
           "begruendung": "Spur und Griff haben feste Maße aus den Tokens; eine Größenachse fehlt in beiden.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-glitilo-3",
@@ -1118,7 +1122,7 @@
           "fonto": "dazu Warnung und Erfolg",
           "vorschlag": "anpassen",
           "begruendung": "Warnung und Erfolg kommen aus dem Status-Modell M-2.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-glitilo-4",
@@ -1127,7 +1131,7 @@
           "fonto": "dazu Markierungen, Beschriftung der Markierungen, Tooltip des Werts",
           "vorschlag": "anpassen",
           "begruendung": "Markierungen ohne Beschriftung übernehmen (Teil `tick`). Beschriftete Markierungen bleiben die Grenze ticks-with-labels (ask-human).",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-glitilo-5",
@@ -1136,7 +1140,7 @@
           "fonto": "dasselbe Muster (APG), Wert als Text über das Format",
           "vorschlag": "behalten",
           "begruendung": "Beide folgen dem Muster slider nach APG, mit dem Wert als Text für Hilfsmittel.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-glitilo-6",
@@ -1145,7 +1149,7 @@
           "fonto": "senkrechte Ausrichtung",
           "vorschlag": "behalten",
           "begruendung": "Die Grenze bleibt, bis der Maintainer sie entscheidet; die Regulo range-stated gilt weiter.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -1162,7 +1166,7 @@
           "fonto": "Icon, Farbe mit 9 Werten (Texthierarchie, Akzent, Status, erben), Größe, Beschriftung",
           "vorschlag": "behalten",
           "begruendung": "Die Statusfarben haben wir als `intent`. Die Farben der Texthierarchie bekommt ein Icon, indem es die Farbe seines Textes erbt, wie im butono. Ein zweiter Weg wäre doppelt.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-ikono-2",
@@ -1171,7 +1175,7 @@
           "fonto": "4 Stufen",
           "vorschlag": "übernehmen",
           "begruendung": "Anzahl der Fonto: die kleine Stufe `x-small` für Status-Icons im Feld (M-2) und dichte Tabellen.",
-          "entscheidung": null,
+          "entscheidung": "übernehmen",
           "achsen": [
             {
               "name": "size",
@@ -1188,7 +1192,7 @@
           "fonto": "rest",
           "vorschlag": "behalten",
           "begruendung": "Ein Icon hat keine Zustände; die Farbe kommt aus dem Ero, das es trägt.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-ikono-4",
@@ -1197,7 +1201,7 @@
           "fonto": "Glyphe",
           "vorschlag": "behalten",
           "begruendung": "Ein Icon ist in beiden Systemen nur seine Glyphe.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-ikono-5",
@@ -1206,7 +1210,7 @@
           "fonto": "dasselbe",
           "vorschlag": "behalten",
           "begruendung": "Mit Namen ein Bild, ohne Namen Schmuck: in beiden Systemen dieselbe Regel.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-ikono-6",
@@ -1215,7 +1219,7 @@
           "fonto": "eigene Icons je Theme",
           "vorschlag": "behalten",
           "begruendung": "Die Spec schließt das Icon-Set der Fonto aus; das Ikonaro bleibt Phosphor.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -1232,7 +1236,7 @@
           "fonto": "5 Statuswerte und 9 Farbtöne für Kategorien, Icon",
           "vorschlag": "behalten",
           "begruendung": "Die 5 Statuswerte decken sich. Die Farbtöne für Kategorien gehören zum signeto (Grenze tinted-categories), sonst verwischt der Unterschied, den die Spec in ②b verlangt.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-insigno-2",
@@ -1241,7 +1245,7 @@
           "fonto": "keine Größe",
           "vorschlag": "behalten",
           "begruendung": "Zwei Stufen braucht die dichte Tabelle; eine Stufe zu streichen, bringt keinen Gewinn.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-insigno-3",
@@ -1250,7 +1254,7 @@
           "fonto": "rest",
           "vorschlag": "behalten",
           "begruendung": "Ein Statusetikett ist nicht interaktiv und hat keine Zustände.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-insigno-4",
@@ -1259,7 +1263,7 @@
           "fonto": "Icon und Beschriftung",
           "vorschlag": "übernehmen",
           "begruendung": "Einen Slot `icon-start` übernehmen: Status mit Icon und Text ist nicht nur Farbe.",
-          "entscheidung": null
+          "entscheidung": "übernehmen"
         },
         {
           "id": "A-insigno-5",
@@ -1268,7 +1272,7 @@
           "fonto": "ohne Rolle",
           "vorschlag": "behalten",
           "begruendung": "Das Etikett ist Text in seinem Zusammenhang; eine eigene Rolle braucht es nicht.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-insigno-6",
@@ -1277,7 +1281,7 @@
           "fonto": "Statuspunkt mit Text als eigene Komponente",
           "vorschlag": "behalten",
           "begruendung": "Ein Punkt ohne Text verletzt unsere Grenze dot-only. Mit Text ist er ein insigno; der Punkt wäre ein Wert der Form, kein neues Ero.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -1300,7 +1304,7 @@
           "fonto": "eigene Komponenten für Text, Zahl, Uhrzeit; Löschen, Start-Icon, Laden, Einheit, nur ganze Zahlen, Format",
           "vorschlag": "anpassen",
           "begruendung": "Übernehmen: Löschen für alle Arten außer password (M-6) und die Einheit als Text `unit` für Zahlen. Eine Komponente mit `kind` bleibt.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-kampo-2",
@@ -1309,7 +1313,7 @@
           "fonto": "3 Stufen",
           "vorschlag": "behalten",
           "begruendung": "Drei Stufen in beiden Systemen; die Werte heißen wie bei uns.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-kampo-3",
@@ -1318,7 +1322,7 @@
           "fonto": "dazu Laden, Warnung, Erfolg",
           "vorschlag": "anpassen",
           "begruendung": "Status nach M-2 (Warnung, Erfolg) und Laden nach M-5.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-kampo-4",
@@ -1327,7 +1331,7 @@
           "fonto": "dazu Start-Icon, Spinner, Status-Icon, Einheit",
           "vorschlag": "anpassen",
           "begruendung": "Das Status-Icon im Feld übernehmen: Ein Fehler ist dann nicht nur Farbe (Regulo error-not-color-only). Teil `unit` für die Einheit. Das Start-Icon bleibt die Grenze icon-in-field.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-kampo-5",
@@ -1336,7 +1340,7 @@
           "fonto": "dasselbe; das Mausrad ändert Zahlen",
           "vorschlag": "behalten",
           "begruendung": "Das Mausrad ändert keinen Wert: Beim Scrollen der Seite ändert sich sonst unbemerkt eine Zahl.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-kampo-6",
@@ -1345,7 +1349,7 @@
           "fonto": "Info-Icon an der Beschriftung, verborgene Beschriftung",
           "vorschlag": "behalten",
           "begruendung": "Hilfe steht als Satz im Slot `help` (Regulo help-is-one-sentence), nicht hinter einem Icon (M-9). Die verborgene Beschriftung verbietet field-label-visible (M-8).",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -1362,7 +1366,7 @@
           "fonto": "`variant` mit 3 Flächen und 10 Farbtönen, `elevation`, Innenabstand, Breite und Höhe",
           "vorschlag": "anpassen",
           "begruendung": "Die drei Flächen übernehmen (normal, gedämpft, ohne Fläche), unter eigenem Namen: Achse `tone` mit `default`, `muted`, `none`. Farbtöne, Elevation und Innenabstand nicht (M-12, Dichte-Dimensio).",
-          "entscheidung": null,
+          "entscheidung": "anpassen",
           "achsen": [
             {
               "name": "tone",
@@ -1379,7 +1383,7 @@
           "fonto": "Innenabstand in Stufen",
           "vorschlag": "behalten",
           "begruendung": "Den Innenabstand regelt die Dimensio density für alle Marken; ein Prop je Karte wäre ein zweiter Weg.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-karto-3",
@@ -1388,7 +1392,7 @@
           "fonto": "rest",
           "vorschlag": "behalten",
           "begruendung": "Gleich; die anklickbare Karte ist eine eigene Gattung.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-karto-4",
@@ -1397,7 +1401,7 @@
           "fonto": "Container und Inhalt",
           "vorschlag": "behalten",
           "begruendung": "Unsere Slots sind feiner und tragen die Uzo.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-karto-5",
@@ -1406,7 +1410,7 @@
           "fonto": "Container ohne Rolle",
           "vorschlag": "behalten",
           "begruendung": "Unsere Semantik ist genauer.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-karto-6",
@@ -1415,7 +1419,7 @@
           "fonto": "anklickbare und wählbare Karte als eigene Komponenten",
           "vorschlag": "behalten",
           "begruendung": "Unsere Grenzen bleiben. ClickableCard und SelectableCard stehen in der Liste der fehlenden Gattungen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -1432,7 +1436,7 @@
           "fonto": "Sprache, Titel, Sprachbeschriftung, Zeilennummern, hervorgehobene Zeilen, Diff, Umbruch, Höhe, Größe, Rahmen, Einklappen",
           "vorschlag": "anpassen",
           "begruendung": "Übernehmen: Zeilennummern (`line-numbers`), Umbruch (`wrap`) und die Sprache als Text für die Beschriftung. Diff bleibt die Grenze diff (ask-human). Syntaxfarben kommen mit ① (Spec ①, Punkt 2).",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-kodbloko-2",
@@ -1441,7 +1445,7 @@
           "fonto": "2 Stufen",
           "vorschlag": "behalten",
           "begruendung": "Die Größe folgt der Schriftrolle für Code; die Dichte-Dimensio passt sie an.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-kodbloko-3",
@@ -1450,7 +1454,7 @@
           "fonto": "dazu eingeklappt ab einer Zeilenzahl",
           "vorschlag": "behalten",
           "begruendung": "Lange Blöcke lassen sich mit einem faldilo einklappen; ein eigener Zustand wäre ein zweiter Weg.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-kodbloko-4",
@@ -1459,7 +1463,7 @@
           "fonto": "Kopfleiste, Titel, Zeilennummern, Code, hervorgehobene Zeilen, Kopieren",
           "vorschlag": "anpassen",
           "begruendung": "Die Teile `line-number` und `highlight` übernehmen.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-kodbloko-5",
@@ -1468,7 +1472,7 @@
           "fonto": "Kopieren wird angesagt",
           "vorschlag": "behalten",
           "begruendung": "Beide sagen das Kopieren an; die Rolle figure mit Legende ist bei uns genauer.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-kodbloko-6",
@@ -1477,7 +1481,8 @@
           "fonto": "Diff und Syntaxfarben",
           "vorschlag": "anpassen",
           "begruendung": "Die Grenze syntax-highlighting entfällt mit den Syntaxfarben aus ①. Diff bleibt offen für den Maintainer.",
-          "entscheidung": null
+          "entscheidung": "anpassen",
+          "auflage": "Die Grenze syntax-highlighting ist damit entschieden, wie vorgeschlagen; die Hervorhebung kommt mit den Syntaxfarben in ②b, mit dem kodbloko (①-2), nicht schon in ① (②a-3)."
         }
       ]
     },
@@ -1494,7 +1499,7 @@
           "fonto": "dazu höchste Zahl der Vorschläge, Einträge beim Fokus, Löschen (an), Verzögerung, Start-Icon",
           "vorschlag": "anpassen",
           "begruendung": "Übernehmen: `max-suggestions` als Zahl und Löschen nach M-6. Die Verzögerung ist Sache der Anwendung.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-kompletigilo-2",
@@ -1503,7 +1508,7 @@
           "fonto": "3 Stufen",
           "vorschlag": "behalten",
           "begruendung": "Drei Stufen in beiden Systemen; die Werte heißen wie bei uns.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-kompletigilo-3",
@@ -1512,7 +1517,7 @@
           "fonto": "dazu Warnung und Erfolg",
           "vorschlag": "anpassen",
           "begruendung": "Warnung und Erfolg kommen aus dem Status-Modell M-2; Laden haben wir schon.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-kompletigilo-4",
@@ -1521,7 +1526,7 @@
           "fonto": "dazu Gruppenüberschrift, Spinner, Löschen, gewählter Eintrag",
           "vorschlag": "anpassen",
           "begruendung": "Gruppenüberschriften und einen Spinner im Feld übernehmen.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-kompletigilo-5",
@@ -1530,7 +1535,7 @@
           "fonto": "dasselbe Muster (APG)",
           "vorschlag": "behalten",
           "begruendung": "Beide folgen dem Muster combobox nach APG mit Pfeilen, Enter und Escape.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-kompletigilo-6",
@@ -1539,7 +1544,7 @@
           "fonto": "Mehrfachwahl als eigene Komponente",
           "vorschlag": "behalten",
           "begruendung": "Gleich getrennt; Tokenizer steht in der Liste der fehlenden Gattungen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -1556,7 +1561,7 @@
           "fonto": "Seite (4), Ausrichtung mit 3 Werten, Verzögerung, Auslöser bei Fokus und Touch",
           "vorschlag": "anpassen",
           "begruendung": "Die Ausrichtung übernehmen, unter eigenem Namen: `justify` mit `start`, `center`, `end`. Verzögerungen bleiben Motion-Tokens.",
-          "entscheidung": null,
+          "entscheidung": "anpassen",
           "achsen": [
             {
               "name": "justify",
@@ -1573,7 +1578,7 @@
           "fonto": "keine Größe",
           "vorschlag": "behalten",
           "begruendung": "Ein Tooltip nimmt die Breite seines kurzen Texts (Regulo tooltip-text-short).",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-konsileto-3",
@@ -1582,7 +1587,7 @@
           "fonto": "rest",
           "vorschlag": "behalten",
           "begruendung": "Ein Tooltip ist sichtbar oder nicht; weitere Zustände hat er in beiden Systemen nicht.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-konsileto-4",
@@ -1591,7 +1596,7 @@
           "fonto": "Fläche und Text",
           "vorschlag": "behalten",
           "begruendung": "Fläche und Text decken sich; mehr Teile hat ein Tooltip in beiden Systemen nicht.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-konsileto-5",
@@ -1600,7 +1605,7 @@
           "fonto": "Hover und Fokus, Escape schließt, Touch tippt",
           "vorschlag": "behalten",
           "begruendung": "Gleich (WCAG 1.4.13).",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-konsileto-6",
@@ -1609,7 +1614,7 @@
           "fonto": "Grund für „deaktiviert“ als Tooltip",
           "vorschlag": "anpassen",
           "begruendung": "Die Grenze tooltip-on-disabled wird mit M-1 entschieden.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         }
       ]
     },
@@ -1626,7 +1631,7 @@
           "fonto": "Wert, Größe, Breite mit 2 Werten (Inhalt oder füllen), Trennlinie, Überlauf, Rolle",
           "vorschlag": "anpassen",
           "begruendung": "Die Breite übernehmen, unter eigenem Namen: `spread` mit `content` und `fill`. Navigation zwischen Seiten bleibt der navigado.",
-          "entscheidung": null,
+          "entscheidung": "anpassen",
           "achsen": [
             {
               "name": "spread",
@@ -1643,7 +1648,7 @@
           "fonto": "3 Stufen",
           "vorschlag": "übernehmen",
           "begruendung": "Registerkarten stehen oft neben Feldern und Knöpfen; drei Stufen wie dort.",
-          "entscheidung": null,
+          "entscheidung": "übernehmen",
           "achsen": [
             {
               "name": "size",
@@ -1660,7 +1665,7 @@
           "fonto": "dieselben",
           "vorschlag": "behalten",
           "begruendung": "Dieselben vier Zustände in beiden Systemen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-langetaro-4",
@@ -1669,7 +1674,8 @@
           "fonto": "dazu Überlauf mit Pfeilen, Inhalt am Anfang und Ende",
           "vorschlag": "anpassen",
           "begruendung": "Den Überlauf übernehmen: Die Leiste scrollt, die gewählte Karte bleibt sichtbar. Das entscheidet die Grenze many-tabs.",
-          "entscheidung": null
+          "entscheidung": "anpassen",
+          "auflage": "Die Grenze many-tabs ist damit entschieden, wie in dieser Zeile vorgeschlagen (②a-3)."
         },
         {
           "id": "A-langetaro-5",
@@ -1678,7 +1684,7 @@
           "fonto": "Landmarke nav oder tablist",
           "vorschlag": "behalten",
           "begruendung": "Wir trennen Registerkarten (langetaro) und Navigation (navigado). Das hält die Rollen eindeutig.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-langetaro-6",
@@ -1687,7 +1693,7 @@
           "fonto": "Menü für weitere Karten",
           "vorschlag": "behalten",
           "begruendung": "Die übrigen Grenzen bleiben.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -1704,7 +1710,7 @@
           "fonto": "dazu Unterstreichung, 11 Textgrößen, Gewicht, Farbe, deaktiviert, Download",
           "vorschlag": "behalten",
           "begruendung": "Inline und eigenständig sowie extern decken sich. Die Unterstreichung regelt bei uns link-not-color-only; Gewicht und Farbe kommen aus der Rolle.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-ligilo-2",
@@ -1713,7 +1719,7 @@
           "fonto": "11 Textgrößen",
           "vorschlag": "behalten",
           "begruendung": "Die Größe folgt den Typo-Rollen aus ①; drei Stufen reichen für den Link selbst.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-ligilo-3",
@@ -1722,7 +1728,7 @@
           "fonto": "dazu deaktiviert",
           "vorschlag": "behalten",
           "begruendung": "Unsere Grenze disabled-link (not-supported): Ein Ziel, das nicht erreichbar ist, ist kein Link.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-ligilo-4",
@@ -1731,7 +1737,7 @@
           "fonto": "Beschriftung, Icon vorn und hinten",
           "vorschlag": "übernehmen",
           "begruendung": "Einen Slot `icon-start` übernehmen, wie beim butono.",
-          "entscheidung": null
+          "entscheidung": "übernehmen"
         },
         {
           "id": "A-ligilo-5",
@@ -1740,7 +1746,7 @@
           "fonto": "dasselbe, Hinweis auf neuen Tab",
           "vorschlag": "behalten",
           "begruendung": "Beide sagen das Verlassen an; unser Text „öffnet extern“ deckt auch den neuen Tab.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-ligilo-6",
@@ -1749,7 +1755,8 @@
           "fonto": "Download als Prop",
           "vorschlag": "anpassen",
           "begruendung": "Download übernehmen und die Grenze download damit entscheiden; das Icon kommt aus Phosphor.",
-          "entscheidung": null
+          "entscheidung": "anpassen",
+          "auflage": "Die Grenze download ist damit entschieden, wie in dieser Zeile vorgeschlagen (②a-3)."
         }
       ]
     },
@@ -1766,7 +1773,7 @@
           "fonto": "dazu Suche, Löschen, eigene Darstellung der Option, Größe, Darstellung, Laden",
           "vorschlag": "anpassen",
           "begruendung": "Löschen nach M-6. Suche bleibt beim kompletigilo (Grenze search-in-list). Größe in der nächsten Zeile.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-listelektilo-2",
@@ -1775,7 +1782,7 @@
           "fonto": "3 Stufen",
           "vorschlag": "übernehmen",
           "begruendung": "Wie beim elektilo: drei Stufen, damit beide in einer Zeile gleich hoch sind.",
-          "entscheidung": null,
+          "entscheidung": "übernehmen",
           "achsen": [
             {
               "name": "size",
@@ -1792,7 +1799,7 @@
           "fonto": "dazu Laden, Warnung, Erfolg",
           "vorschlag": "anpassen",
           "begruendung": "Status nach M-2 (Warnung, Erfolg) und Laden nach M-5.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-listelektilo-4",
@@ -1801,7 +1808,7 @@
           "fonto": "dazu Abschnittsüberschrift, Trenner, Leerzustand, Status-Icon",
           "vorschlag": "anpassen",
           "begruendung": "Abschnittsüberschrift und Trenner übernehmen.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-listelektilo-5",
@@ -1810,7 +1817,7 @@
           "fonto": "dazu Springen per Tippen",
           "vorschlag": "übernehmen",
           "begruendung": "Springen per Tippen übernehmen, wie beim elektilo.",
-          "entscheidung": null
+          "entscheidung": "übernehmen"
         },
         {
           "id": "A-listelektilo-6",
@@ -1819,7 +1826,7 @@
           "fonto": "auf Touch ein Blatt von unten",
           "vorschlag": "behalten",
           "begruendung": "Die Grenze bleibt; die adaptive Darstellung steht unter M-4.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -1836,7 +1843,7 @@
           "fonto": "kein eigenes Gegenstück; im Bearbeiten-Modus ein Textfeld",
           "vorschlag": "behalten",
           "begruendung": "Die Fonto hat keinen Inline-Editor; es gibt nichts zu übernehmen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-lokredaktilo-2",
@@ -1845,7 +1852,7 @@
           "fonto": "Textfeld mit 3 Stufen",
           "vorschlag": "behalten",
           "begruendung": "Die Größe folgt dem umgebenden Text, nicht einer Stufe.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-lokredaktilo-3",
@@ -1854,7 +1861,7 @@
           "fonto": "Status des Textfelds",
           "vorschlag": "anpassen",
           "begruendung": "Im Bearbeiten-Modus gilt der Feldstatus aus M-2.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-lokredaktilo-4",
@@ -1863,7 +1870,7 @@
           "fonto": "–",
           "vorschlag": "behalten",
           "begruendung": "Die Fonto hat keinen Inline-Editor; unsere Teile bleiben, wie Spec 025 sie gebaut hat.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-lokredaktilo-5",
@@ -1872,7 +1879,7 @@
           "fonto": "–",
           "vorschlag": "behalten",
           "begruendung": "Kein Gegenstück; unser Verhalten bleibt.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-lokredaktilo-6",
@@ -1881,7 +1888,7 @@
           "fonto": "–",
           "vorschlag": "behalten",
           "begruendung": "Kein Gegenstück; die Grenzen bleiben.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -1898,7 +1905,7 @@
           "fonto": "Startebene 1–6, Dichte mit 2 Werten, Breite, Ausrichtung, Streaming, Quellen",
           "vorschlag": "anpassen",
           "begruendung": "Übernehmen: die Dichte als Achse `density` mit `default` und `compact` (Namen der Dimensio density) und `streaming` für Antworten von Agenten, die nach und nach kommen. Startebene 1 nicht: Die Seite hat ihre eine Überschrift erster Ebene.",
-          "entscheidung": null,
+          "entscheidung": "anpassen",
           "achsen": [
             {
               "name": "density",
@@ -1915,7 +1922,7 @@
           "fonto": "Breite des Inhalts",
           "vorschlag": "behalten",
           "begruendung": "Die Lesebreite kommt aus der Sxablono, nicht aus dem Ero.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-markdovido-3",
@@ -1924,7 +1931,7 @@
           "fonto": "dazu Streaming",
           "vorschlag": "übernehmen",
           "begruendung": "Den Zustand „streamt“ mit aria-busy übernehmen.",
-          "entscheidung": null
+          "entscheidung": "übernehmen"
         },
         {
           "id": "A-markdovido-4",
@@ -1933,7 +1940,7 @@
           "fonto": "Dokument, Überschrift, Absatz, Liste, Codeblock, Zitat, Tabelle, Trenner, Bild",
           "vorschlag": "anpassen",
           "begruendung": "Codeblöcke als kodbloko und Tabellen als tabelo zeichnen; die Eroj setzen sich zusammen. Bilder bleiben die Grenze images (ask-human).",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-markdovido-5",
@@ -1942,7 +1949,7 @@
           "fonto": "dasselbe, mit Ankern an Überschriften",
           "vorschlag": "behalten",
           "begruendung": "Beide geben ein Dokument aus; Anker an Überschriften setzt bei uns die Vitrino.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-markdovido-6",
@@ -1951,7 +1958,7 @@
           "fonto": "Zitate mit Quellen",
           "vorschlag": "behalten",
           "begruendung": "Die Grenzen bleiben. Quellenangaben stehen als Citation in der Liste der fehlenden Gattungen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -1968,7 +1975,7 @@
           "fonto": "Wert mit drei Werten (an, aus, gemischt), nur lesen, Größe, Icon an der Beschriftung, Beschreibung",
           "vorschlag": "anpassen",
           "begruendung": "`readonly` übernehmen. Den gemischten Wert nicht: Er ist unsere Grenze indeterminate (not-supported), weil ein Kästchen allein nichts mischt; er gehört zur Gruppe (CheckboxList in der Liste der fehlenden Gattungen).",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-markobutono-2",
@@ -1977,7 +1984,8 @@
           "fonto": "2 Stufen",
           "vorschlag": "übernehmen",
           "begruendung": "Anzahl der Fonto, wie beim elekto (O-2).",
-          "entscheidung": null,
+          "entscheidung": "übernehmen",
+          "auflage": "`large` bleibt ein Release lang als Alias auf `medium`, als veraltet markiert (Warnung im Gvidanto und in der Konsole), danach entfällt es (②a-2).",
           "achsen": [
             {
               "name": "size",
@@ -1994,7 +2002,7 @@
           "fonto": "dazu Nur-Lesen, Laden, Warnung, Erfolg",
           "vorschlag": "anpassen",
           "begruendung": "Nur-Lesen (Zeile 1). Status nach M-2 (Warnung, Erfolg) und Laden nach M-5.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-markobutono-4",
@@ -2003,7 +2011,7 @@
           "fonto": "Kästchen, Beschriftung, Beschreibung, Statusmeldung",
           "vorschlag": "übernehmen",
           "begruendung": "Einen Slot `help` für die Beschreibung übernehmen, wie bei den übrigen Feldern.",
-          "entscheidung": null
+          "entscheidung": "übernehmen"
         },
         {
           "id": "A-markobutono-5",
@@ -2012,7 +2020,7 @@
           "fonto": "dasselbe",
           "vorschlag": "behalten",
           "begruendung": "Rolle checkbox mit Space in beiden Systemen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-markobutono-6",
@@ -2021,7 +2029,7 @@
           "fonto": "Gruppe als eigene Komponente",
           "vorschlag": "behalten",
           "begruendung": "Die Grenzen bleiben bis zur Entscheidung über CheckboxList.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -2038,7 +2046,7 @@
           "fonto": "Einträge (mit Haken, Optionen, Untermenüs, Zielen), Darstellung, Ausrichtung, Pfeil am Auslöser, Kopf und Fuß, Breite",
           "vorschlag": "anpassen",
           "begruendung": "Die Ausrichtung übernehmen wie beim konsileto (`justify`).",
-          "entscheidung": null,
+          "entscheidung": "anpassen",
           "achsen": [
             {
               "name": "justify",
@@ -2055,7 +2063,7 @@
           "fonto": "Größe über den Knopf",
           "vorschlag": "behalten",
           "begruendung": "Der Auslöser ist ein Knopf und trägt dessen Größe, in beiden Systemen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-menuo-3",
@@ -2064,7 +2072,7 @@
           "fonto": "dieselben",
           "vorschlag": "behalten",
           "begruendung": "Dieselben vier Zustände in beiden Systemen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-menuo-4",
@@ -2073,7 +2081,7 @@
           "fonto": "dazu Icon je Eintrag, Abschnittsüberschrift, Trenner, Haken, Untermenü-Pfeil",
           "vorschlag": "anpassen",
           "begruendung": "Icon je Eintrag, Abschnittsüberschrift und Trenner übernehmen.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-menuo-5",
@@ -2082,7 +2090,7 @@
           "fonto": "Menü-Knopf nach APG, Springen per Tippen; Einträge mit Ziel sind Links",
           "vorschlag": "übernehmen",
           "begruendung": "Springen per Tippen übernehmen. Ein Eintrag mit Ziel wird ein Link (Regulo link-navigates-button-acts).",
-          "entscheidung": null
+          "entscheidung": "übernehmen"
         },
         {
           "id": "A-menuo-6",
@@ -2091,7 +2099,7 @@
           "fonto": "Untermenüs, Einträge mit Haken, Blatt auf Touch",
           "vorschlag": "behalten",
           "begruendung": "Die Grenzen bleiben; das Blatt steht unter M-4.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -2108,7 +2116,7 @@
           "fonto": "Wert, Maximum, 5 Farben (mit Akzent), unbestimmt, Wertbeschriftung, Markierungen",
           "vorschlag": "behalten",
           "begruendung": "Unsere 4 Werte decken die Bedeutungen ab; der Akzent der Fonto ist bei uns `neutral`. Unbestimmter Fortschritt ist ein Ladezustand (plenstato).",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-mezurilo-2",
@@ -2117,7 +2125,7 @@
           "fonto": "keine Größe",
           "vorschlag": "behalten",
           "begruendung": "Der Balken nimmt die Breite seines Ortes; Stufen fehlen in beiden.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-mezurilo-3",
@@ -2126,7 +2134,7 @@
           "fonto": "dazu unbestimmt und deaktiviert",
           "vorschlag": "behalten",
           "begruendung": "Ein Messbalken zeigt einen Stand, keinen Vorgang (siehe Zeile 5).",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-mezurilo-4",
@@ -2135,7 +2143,7 @@
           "fonto": "dazu Markierungen",
           "vorschlag": "behalten",
           "begruendung": "Die Grenze multi-segment bleibt; Markierungen wären Teilstände.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-mezurilo-5",
@@ -2144,7 +2152,8 @@
           "fonto": "Rolle progressbar",
           "vorschlag": "behalten",
           "begruendung": "Die Fonto misst Fortschritt, wir einen Stand. Fortschritt ist eine eigene Bedeutung; bei Bedarf ein eigenes Ero (O-4).",
-          "entscheidung": null
+          "entscheidung": "behalten",
+          "auflage": "Fortschritt wird ein eigenes Ero, in Eroj-Runde 6; der mezurilo bleibt der Stand (②a-4)."
         },
         {
           "id": "A-mezurilo-6",
@@ -2153,7 +2162,7 @@
           "fonto": "Wertbeschriftung mit Format",
           "vorschlag": "behalten",
           "begruendung": "Unsere Regulo verlangt den Wert als Text schon.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -2170,7 +2179,7 @@
           "fonto": "zwei Komponenten: oben mit Produktname und Bereichen, seitlich mit Abschnitten, Verschachtelung, Einklappen und Ziehen",
           "vorschlag": "anpassen",
           "begruendung": "Abschnitte mit Überschrift in der senkrechten Navigation übernehmen. Verschachtelung bleibt die Grenze submenu.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-navigado-2",
@@ -2179,7 +2188,7 @@
           "fonto": "Breite der Seitenleiste ziehbar",
           "vorschlag": "behalten",
           "begruendung": "Die Breite gehört dem sxelo.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-navigado-3",
@@ -2188,7 +2197,7 @@
           "fonto": "dazu eingeklappt",
           "vorschlag": "behalten",
           "begruendung": "Die Grenze collapsed-mobile (not-supported) bleibt; die mobile Navigation ist eine fehlende Gattung (MobileNav).",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-navigado-4",
@@ -2197,7 +2206,7 @@
           "fonto": "Produkt-Icon und -Name, Einträge, Menü für weitere, Einklappen, Abschnittsüberschrift, Icons",
           "vorschlag": "anpassen",
           "begruendung": "Teil `section-heading` und einen Slot `icon-start` je Eintrag übernehmen. Produktname und Kopf gehören dem sxelo.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-navigado-5",
@@ -2206,7 +2215,7 @@
           "fonto": "dasselbe",
           "vorschlag": "behalten",
           "begruendung": "Landmarke navigation und aria-current an der aktuellen Seite, in beiden Systemen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-navigado-6",
@@ -2215,7 +2224,7 @@
           "fonto": "Hauptnavigation ab 5 Zielen seitlich",
           "vorschlag": "behalten",
           "begruendung": "Die Fonto rät dasselbe wie unsere Uzo; die Grenzen bleiben.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -2232,7 +2241,7 @@
           "fonto": "6 Darstellungen (Seiten, Anzahl, kompakt, Punkte, Eingabe, keine), Seitengröße, erste und letzte Seite, unbekannte Gesamtzahl",
           "vorschlag": "anpassen",
           "begruendung": "Drei Darstellungen übernehmen, unter eigenem Namen: `summary` mit `pages`, `count`, `compact`. Punkte gehören zum Karussell, die Eingabe ist selten.",
-          "entscheidung": null,
+          "entscheidung": "anpassen",
           "achsen": [
             {
               "name": "summary",
@@ -2249,7 +2258,7 @@
           "fonto": "2 Stufen",
           "vorschlag": "übernehmen",
           "begruendung": "Unter dichten Tabellen braucht es eine kleine Stufe.",
-          "entscheidung": null,
+          "entscheidung": "übernehmen",
           "achsen": [
             {
               "name": "size",
@@ -2266,7 +2275,7 @@
           "fonto": "dieselben",
           "vorschlag": "behalten",
           "begruendung": "Dieselben vier Zustände in beiden Systemen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-pagxigilo-4",
@@ -2275,7 +2284,7 @@
           "fonto": "dazu erste und letzte Seite, Auswahl der Seitengröße, Anzeige der Anzahl",
           "vorschlag": "anpassen",
           "begruendung": "Erste und letzte Seite übernehmen. Die Seitengröße bleibt die Grenze page-size-select (ask-human).",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-pagxigilo-5",
@@ -2284,7 +2293,7 @@
           "fonto": "dasselbe",
           "vorschlag": "behalten",
           "begruendung": "Landmarke navigation und aria-current an der aktuellen Seite, in beiden Systemen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-pagxigilo-6",
@@ -2293,7 +2302,7 @@
           "fonto": "„mehr“ bei unbekannter Gesamtzahl",
           "vorschlag": "übernehmen",
           "begruendung": "Eine unbekannte Gesamtzahl kommt bei Suchen und Protokollen vor; nur „weiter“ ohne letzte Seite.",
-          "entscheidung": null
+          "entscheidung": "übernehmen"
         }
       ]
     },
@@ -2314,7 +2323,7 @@
           "fonto": "Leerzustand mit Titel, Beschreibung, Icon, Aktionen, Ebene der Überschrift, kompakt; Spinner mit 4 Größen; Platzhalter",
           "vorschlag": "anpassen",
           "begruendung": "Kompakt als Boolean `compact` übernehmen, für Tabellen und Seitenleisten. Die Ebene der Überschrift folgt der Seite (heading-levels-in-order).",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-plenstato-2",
@@ -2323,7 +2332,7 @@
           "fonto": "Spinner in 4 Stufen, Leerzustand kompakt",
           "vorschlag": "anpassen",
           "begruendung": "Mit `compact` hat der Ladezustand zwei Stufen; mehr braucht ein Zustand für einen Bereich nicht.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-plenstato-3",
@@ -2332,7 +2341,7 @@
           "fonto": "rest",
           "vorschlag": "behalten",
           "begruendung": "Lade- und Leerzustand sind selbst Zustände eines Bereichs; mehr gibt es nicht.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-plenstato-4",
@@ -2341,7 +2350,7 @@
           "fonto": "Icon, Titel, Beschreibung, Aktionen",
           "vorschlag": "übernehmen",
           "begruendung": "Einen Slot `heading` und einen Slot `icon` übernehmen; der Leertext sagt dann, was fehlt, und der Titel, wo man ist.",
-          "entscheidung": null
+          "entscheidung": "übernehmen"
         },
         {
           "id": "A-plenstato-5",
@@ -2350,7 +2359,7 @@
           "fonto": "dasselbe",
           "vorschlag": "behalten",
           "begruendung": "Beide sagen den Zustand höflich mit der Rolle status an.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-plenstato-6",
@@ -2359,7 +2368,8 @@
           "fonto": "Platzhalter in Form des Inhalts",
           "vorschlag": "behalten",
           "begruendung": "Die Grenze bleibt, bis der Maintainer sie entscheidet (O-5).",
-          "entscheidung": null
+          "entscheidung": "behalten",
+          "auflage": "Die Grenze skeleton bleibt; neu entschieden wird sie in Eroj-Runde 6 (②a-5)."
         }
       ]
     },
@@ -2376,7 +2386,7 @@
           "fonto": "Anzeige im Auslöser mit 3 Werten (Anzahl, Beschriftungen, Badges), höchste Zahl der Badges, alle wählen, Suche, Neu anlegen, Größe",
           "vorschlag": "anpassen",
           "begruendung": "`summary` bekommt den dritten Wert `labels` (Anzahl der Fonto). Übernehmen: `select-all` als Boolean.",
-          "entscheidung": null,
+          "entscheidung": "anpassen",
           "achsen": [
             {
               "name": "summary",
@@ -2393,7 +2403,7 @@
           "fonto": "3 Stufen",
           "vorschlag": "übernehmen",
           "begruendung": "Wie listelektilo und elektilo.",
-          "entscheidung": null,
+          "entscheidung": "übernehmen",
           "achsen": [
             {
               "name": "size",
@@ -2410,7 +2420,7 @@
           "fonto": "dazu Laden, Warnung, Erfolg",
           "vorschlag": "anpassen",
           "begruendung": "Status nach M-2 (Warnung, Erfolg) und Laden nach M-5.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-plurelektilo-4",
@@ -2419,7 +2429,7 @@
           "fonto": "dazu Zeile „alle wählen“, Abschnittsüberschrift, Trenner, Leerzustand",
           "vorschlag": "anpassen",
           "begruendung": "Zeile „alle wählen“ und Abschnittsüberschrift übernehmen.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-plurelektilo-5",
@@ -2428,7 +2438,7 @@
           "fonto": "combobox mit Mehrfachauswahl",
           "vorschlag": "behalten",
           "begruendung": "Beide nutzen eine Liste mit Mehrfachauswahl und dieselben Tasten; die Rolle am Auslöser unterscheidet sich, das Ergebnis für Hilfsmittel nicht.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-plurelektilo-6",
@@ -2437,7 +2447,7 @@
           "fonto": "Neu anlegen",
           "vorschlag": "behalten",
           "begruendung": "Die Grenze bleibt, bis der Maintainer sie entscheidet.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -2454,7 +2464,7 @@
           "fonto": "Teil der Seitenhülle, ohne eigene Props",
           "vorschlag": "behalten",
           "begruendung": "Kein eigenes Gegenstück; unsere Props bleiben.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-saltligilo-2",
@@ -2463,7 +2473,7 @@
           "fonto": "–",
           "vorschlag": "behalten",
           "begruendung": "Die Fonto hat keinen eigenen Sprunglink; seine Größe folgt der Schrift.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-saltligilo-3",
@@ -2472,7 +2482,7 @@
           "fonto": "sichtbar beim Fokus",
           "vorschlag": "behalten",
           "begruendung": "Unsichtbar bis zum Fokus, in beiden Systemen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-saltligilo-4",
@@ -2481,7 +2491,7 @@
           "fonto": "Sprunglink der Hülle",
           "vorschlag": "behalten",
           "begruendung": "Beschriftung und Fläche decken sich mit dem Sprunglink der Hülle.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-saltligilo-5",
@@ -2490,7 +2500,7 @@
           "fonto": "dasselbe",
           "vorschlag": "behalten",
           "begruendung": "Ein Link, der mit Enter zum Inhalt springt, in beiden Systemen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-saltligilo-6",
@@ -2499,7 +2509,7 @@
           "fonto": "Die Hülle setzt den Sprunglink selbst",
           "vorschlag": "behalten",
           "begruendung": "Dass der sxelo den saltligilo selbst setzt, gehört zu den Templates; die sind nicht Teil dieser Spec.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -2516,7 +2526,7 @@
           "fonto": "Größe (3), Farbe mit Standard und 10 Farbtönen, Icon, Link, Beschreibung, Endinhalt, Entfernen",
           "vorschlag": "behalten",
           "begruendung": "Unsere Modi decken die Fonto ab. Die Farbtöne bleiben die Grenze tinted-categories (ask-human).",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-signeto-2",
@@ -2525,7 +2535,7 @@
           "fonto": "3 Stufen",
           "vorschlag": "übernehmen",
           "begruendung": "Anzahl der Fonto: `large` dazu, für Filterleisten auf Touch.",
-          "entscheidung": null,
+          "entscheidung": "übernehmen",
           "achsen": [
             {
               "name": "size",
@@ -2542,7 +2552,7 @@
           "fonto": "dieselben",
           "vorschlag": "behalten",
           "begruendung": "Dieselben vier Zustände in beiden Systemen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-signeto-4",
@@ -2551,7 +2561,7 @@
           "fonto": "dazu Endinhalt und Beschreibung",
           "vorschlag": "behalten",
           "begruendung": "Beschreibung und Endinhalt decken unser Slot `label` und der Entfernen-Knopf.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-signeto-5",
@@ -2560,7 +2570,7 @@
           "fonto": "Entfernen-Knopf mit Namen",
           "vorschlag": "behalten",
           "begruendung": "Entfernen hat in beiden einen Namen mit der Beschriftung; Delete und Backspace kommen bei uns dazu.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-signeto-6",
@@ -2569,7 +2579,7 @@
           "fonto": "Token und Badge unterscheiden sich in der Form",
           "vorschlag": "anpassen",
           "begruendung": "Die Spec verlangt in ②b eine unterscheidbare Form; Vorschlag: die Form über die Radius-Rolle, Werte aus ①.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         }
       ]
     },
@@ -2586,7 +2596,7 @@
           "fonto": "Trenner, 2 Darstellungen (normal, unterstützend), Menü im Eintrag, Icon",
           "vorschlag": "anpassen",
           "begruendung": "Die zwei Darstellungen übernehmen, als `emphasis` mit `medium` und `low`.",
-          "entscheidung": null,
+          "entscheidung": "anpassen",
           "achsen": [
             {
               "name": "emphasis",
@@ -2603,7 +2613,7 @@
           "fonto": "keine Größe",
           "vorschlag": "behalten",
           "begruendung": "Ein Pfad nimmt die Schrift seines Ortes; Stufen fehlen in beiden.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-spuro-3",
@@ -2612,7 +2622,7 @@
           "fonto": "dieselben",
           "vorschlag": "behalten",
           "begruendung": "Dieselben drei Zustände in beiden Systemen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-spuro-4",
@@ -2621,7 +2631,7 @@
           "fonto": "Pfad, Eintrag, Trenner, Icon",
           "vorschlag": "übernehmen",
           "begruendung": "Einen Slot `icon-start` am ersten Eintrag übernehmen.",
-          "entscheidung": null
+          "entscheidung": "übernehmen"
         },
         {
           "id": "A-spuro-5",
@@ -2630,7 +2640,7 @@
           "fonto": "dasselbe; Menü im Eintrag nach APG",
           "vorschlag": "behalten",
           "begruendung": "Landmarke navigation und aria-current am letzten Eintrag, in beiden Systemen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-spuro-6",
@@ -2639,7 +2649,8 @@
           "fonto": "Menü für ausgelassene Einträge in der Mitte",
           "vorschlag": "anpassen",
           "begruendung": "Die Mitte mit einem menuo auslassen und die Grenze damit entscheiden.",
-          "entscheidung": null
+          "entscheidung": "anpassen",
+          "auflage": "Die Grenze collapsed-middle ist damit entschieden, wie in dieser Zeile vorgeschlagen (②a-3)."
         }
       ]
     },
@@ -2656,7 +2667,7 @@
           "fonto": "dazu Laden, Beschreibung, Status, Seite der Beschriftung (2), Abstand der Beschriftung",
           "vorschlag": "anpassen",
           "begruendung": "Die Seite der Beschriftung übernehmen, unter eigenem Namen: `label-side` mit `start` und `end`.",
-          "entscheidung": null,
+          "entscheidung": "anpassen",
           "achsen": [
             {
               "name": "label-side",
@@ -2673,7 +2684,8 @@
           "fonto": "2 Stufen",
           "vorschlag": "übernehmen",
           "begruendung": "Anzahl der Fonto, wie elekto und markobutono (O-2).",
-          "entscheidung": null,
+          "entscheidung": "übernehmen",
+          "auflage": "`large` bleibt ein Release lang als Alias auf `medium`, als veraltet markiert (Warnung im Gvidanto und in der Konsole), danach entfällt es (②a-2).",
           "achsen": [
             {
               "name": "size",
@@ -2690,7 +2702,7 @@
           "fonto": "dazu Laden und Status",
           "vorschlag": "anpassen",
           "begruendung": "Ein Schalter wirkt sofort; dauert das, zeigt er „lädt“ (M-5). Status nach M-2.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-sxaltilo-4",
@@ -2699,7 +2711,7 @@
           "fonto": "Spur, Griff, Beschriftung, Beschreibung, Spinner, Statusmeldung",
           "vorschlag": "übernehmen",
           "begruendung": "Slot `help` und den Spinner übernehmen.",
-          "entscheidung": null
+          "entscheidung": "übernehmen"
         },
         {
           "id": "A-sxaltilo-5",
@@ -2708,7 +2720,7 @@
           "fonto": "dasselbe",
           "vorschlag": "behalten",
           "begruendung": "Rolle switch mit Space in beiden; Enter erlauben wir zusätzlich.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-sxaltilo-6",
@@ -2717,7 +2729,7 @@
           "fonto": "wirkt sofort, sonst Kontrollkästchen",
           "vorschlag": "behalten",
           "begruendung": "Die Fonto begründet wie unsere Uzo.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -2734,7 +2746,7 @@
           "fonto": "Seite, Ausrichtung, Breite, Innenabstand, Rolle, modal, Schließen-Knopf, Schließen bei Klick daneben und Escape",
           "vorschlag": "anpassen",
           "begruendung": "Die Ausrichtung übernehmen wie beim konsileto (`justify`).",
-          "entscheidung": null,
+          "entscheidung": "anpassen",
           "achsen": [
             {
               "name": "justify",
@@ -2751,7 +2763,7 @@
           "fonto": "Breite",
           "vorschlag": "behalten",
           "begruendung": "Die Breite folgt dem Inhalt und den Container-Tokens.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-sxvebilo-3",
@@ -2760,7 +2772,7 @@
           "fonto": "rest",
           "vorschlag": "behalten",
           "begruendung": "Offen oder zu ist das Prop `open`; weitere Zustände hat das Overlay nicht.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-sxvebilo-4",
@@ -2769,7 +2781,7 @@
           "fonto": "Auslöser, Fläche, Inhalt, Schließen",
           "vorschlag": "übernehmen",
           "begruendung": "Einen Teil `close` übernehmen: Auf Touch gibt es kein Escape.",
-          "entscheidung": null
+          "entscheidung": "übernehmen"
         },
         {
           "id": "A-sxvebilo-5",
@@ -2778,7 +2790,7 @@
           "fonto": "dialog, Fokus bleibt drin und kehrt zurück, Klick daneben schließt",
           "vorschlag": "behalten",
           "begruendung": "Beide halten den Fokus im Overlay, schließen mit Escape und geben den Fokus zurück.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-sxvebilo-6",
@@ -2787,7 +2799,7 @@
           "fonto": "Hover-Karte als eigene Komponente",
           "vorschlag": "behalten",
           "begruendung": "Die Grenzen bleiben; HoverCard steht in der Liste der fehlenden Gattungen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -2804,7 +2816,8 @@
           "fonto": "Dichte mit 3 Werten, Linien mit 4 Werten (Zeilen, Spalten, Gitter, keine), Streifen, Hover, Ausrichtung, Umbruch",
           "vorschlag": "anpassen",
           "begruendung": "Die Dichte bekommt drei Werte; Namen wie die Dimensio density: `compact`, `default`, `comfortable`. Linien übernehmen, unter eigenem Namen: `rules` mit `rows`, `columns`, `grid`, `none`.",
-          "entscheidung": null,
+          "entscheidung": "anpassen",
+          "auflage": "Die Achse der Linien heißt `lines`, nicht `rules`: `rules` verwechselt man mit den Reguloj (②a-6). Werte wie vorgeschlagen.",
           "achsen": [
             {
               "name": "density",
@@ -2813,7 +2826,7 @@
               "neu": false
             },
             {
-              "name": "rules",
+              "name": "lines",
               "werte": ["rows", "columns", "grid", "none"],
               "fonto": "dividers",
               "neu": true
@@ -2827,7 +2840,7 @@
           "fonto": "Dichte statt Größe",
           "vorschlag": "behalten",
           "begruendung": "Die Tabelle hat statt einer Größe die Dichte, in beiden Systemen (Zeile 1).",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-tabelo-3",
@@ -2836,7 +2849,7 @@
           "fonto": "dazu gewählte und aufgeklappte Zeilen",
           "vorschlag": "behalten",
           "begruendung": "Die Grenze row-selection (ask-human) bleibt.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-tabelo-4",
@@ -2845,7 +2858,7 @@
           "fonto": "dazu Auswahl, Aufklappen, Detailbereich, Fuß, Leerzustand",
           "vorschlag": "anpassen",
           "begruendung": "Den Fuß übernehmen (Teil `foot`), etwa für Summen.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-tabelo-5",
@@ -2854,7 +2867,7 @@
           "fonto": "aria-sort, aria-selected, aria-expanded",
           "vorschlag": "behalten",
           "begruendung": "Gleich für Sortieren.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-tabelo-6",
@@ -2863,7 +2876,7 @@
           "fonto": "Streifen, feste Spalten, Erweiterungen",
           "vorschlag": "behalten",
           "begruendung": "Unsere Grenzen bleiben.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -2880,7 +2893,8 @@
           "fonto": "dazu höchste Länge mit Zähler, Rechtschreibprüfung, Start-Icon, Laden",
           "vorschlag": "anpassen",
           "begruendung": "Die höchste Länge mit Zähler übernehmen (`max-length`) und die Grenze character-count damit entscheiden.",
-          "entscheidung": null
+          "entscheidung": "anpassen",
+          "auflage": "Die Grenze character-count ist damit entschieden, wie in dieser Zeile vorgeschlagen (②a-3)."
         },
         {
           "id": "A-tekstareo-2",
@@ -2889,7 +2903,7 @@
           "fonto": "3 Stufen",
           "vorschlag": "behalten",
           "begruendung": "Drei Stufen in beiden Systemen; die Werte heißen wie bei uns.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-tekstareo-3",
@@ -2898,7 +2912,7 @@
           "fonto": "dazu Nur-Lesen, Laden, Warnung, Erfolg",
           "vorschlag": "anpassen",
           "begruendung": "Status nach M-2 (Warnung, Erfolg) und Laden nach M-5.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-tekstareo-4",
@@ -2907,7 +2921,7 @@
           "fonto": "dazu Zähler, Status-Icon",
           "vorschlag": "übernehmen",
           "begruendung": "Teil `counter` übernehmen.",
-          "entscheidung": null
+          "entscheidung": "übernehmen"
         },
         {
           "id": "A-tekstareo-5",
@@ -2916,7 +2930,7 @@
           "fonto": "dasselbe; der Zähler wird angesagt",
           "vorschlag": "behalten",
           "begruendung": "Rolle textbox in beiden; den Zähler sagen wir mit der Zeile 4 ebenfalls an.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-tekstareo-6",
@@ -2925,7 +2939,7 @@
           "fonto": "–",
           "vorschlag": "behalten",
           "begruendung": "Die Fonto wächst nicht mit und kennt keinen formatierten Text; unsere Grenzen bleiben.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -2942,7 +2956,7 @@
           "fonto": "9 Typen, 11 Größen, 6 Farben, 4 Gewichte, Zeilen, Tooltip beim Abschneiden, Zahlen gleicher Breite",
           "vorschlag": "anpassen",
           "begruendung": "`kind` bekommt `label` für Beschriftungen. Übernehmen: `max-lines` mit Tooltip beim Abschneiden und `tabular` für Zahlen in Tabellen.",
-          "entscheidung": null,
+          "entscheidung": "anpassen",
           "achsen": [
             {
               "name": "kind",
@@ -2959,7 +2973,7 @@
           "fonto": "11 Größen",
           "vorschlag": "behalten",
           "begruendung": "Die Stufen kommen aus den Typo-Rollen (①); das Ero wählt die Rolle, nicht die Stufe.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-teksto-3",
@@ -2968,7 +2982,7 @@
           "fonto": "rest",
           "vorschlag": "behalten",
           "begruendung": "Text ist nicht interaktiv und hat keine Zustände.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-teksto-4",
@@ -2977,7 +2991,7 @@
           "fonto": "Text, Überschrift, Tooltip beim Abschneiden",
           "vorschlag": "anpassen",
           "begruendung": "Mit `max-lines` kommt der Tooltip dazu.",
-          "entscheidung": null
+          "entscheidung": "anpassen"
         },
         {
           "id": "A-teksto-5",
@@ -2986,7 +3000,7 @@
           "fonto": "span, p, div oder label",
           "vorschlag": "behalten",
           "begruendung": "Das Element folgt dem Zweck; bei uns ein Absatz, die Fonto lässt es wählen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-teksto-6",
@@ -2995,7 +3009,7 @@
           "fonto": "–",
           "vorschlag": "behalten",
           "begruendung": "Formatierter Text gehört dem markdovido; die Fonto trennt Text und Markdown ebenso.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     },
@@ -3012,7 +3026,7 @@
           "fonto": "Ebene, Typ (3 Display-Stufen), Gewicht, Ebene für Hilfsmittel, Farbe, Zeilen",
           "vorschlag": "behalten",
           "begruendung": "Wir trennen Semantik (`level`) und Optik (`size`) schon; die Fonto braucht dafür eine zweite Ebene.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-titolo-2",
@@ -3021,7 +3035,7 @@
           "fonto": "3 Display-Stufen und Größe aus der Ebene",
           "vorschlag": "behalten",
           "begruendung": "Die Stufen kommen aus den Typo-Rollen (①).",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-titolo-3",
@@ -3030,7 +3044,7 @@
           "fonto": "rest",
           "vorschlag": "behalten",
           "begruendung": "Eine Überschrift ist nicht interaktiv und hat keine Zustände.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-titolo-4",
@@ -3039,7 +3053,7 @@
           "fonto": "Text",
           "vorschlag": "behalten",
           "begruendung": "Eine Überschrift ist in beiden Systemen nur ihr Text.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-titolo-5",
@@ -3048,7 +3062,7 @@
           "fonto": "dasselbe",
           "vorschlag": "behalten",
           "begruendung": "Rolle heading mit aria-level, in beiden Systemen.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         },
         {
           "id": "A-titolo-6",
@@ -3057,7 +3071,7 @@
           "fonto": "–",
           "vorschlag": "behalten",
           "begruendung": "Kopf mit Aktionen gehört der Sxablono pagxo.",
-          "entscheidung": null
+          "entscheidung": "behalten"
         }
       ]
     }

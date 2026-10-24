@@ -641,7 +641,7 @@ Messanleitung wie „①b – Abnahme 28.10.“ (Vitrino und Vergleichsseite neu
 
 ## ②a Abgleichstabelle
 
-**Basis:** `main` nach #109 (`d29a520`) · **Branch:** `261023-spec-029-2a-abgleich-826849` · **Datum:** 2026-10-23 · **Stand:** Vorschlag vollständig, Entscheidung beim Maintainer. **Nur plan und Daten, kein Umbau:** Kein Skemo, kein Token, keine Projekcio ist geändert.
+**Basis:** `main` nach #109 (`d29a520`) · **Branch:** `261023-spec-029-2a-abgleich-826849` · **Datum:** 2026-10-23 · **Stand:** entschieden am 24.10. ([Entscheidungen vom 24.10.](#entscheidungen-vom-2410)). **Nur plan und Daten, kein Umbau:** Kein Skemo, kein Token, keine Projekcio ist geändert.
 
 ### Zusammenfassung
 
@@ -653,7 +653,7 @@ Messanleitung wie „①b – Abnahme 28.10.“ (Vitrino und Vergleichsseite neu
    - Verhalten (Tastatur, ARIA)
    - Muster und Grenzen
 
-   Jede Zeile hat einen Vorschlag – **übernehmen**, **anpassen** oder **behalten** – mit Begründung und ein leeres Feld `entscheidung` für den Maintainer. Die Tabellen unten zeigen dieselben Zeilen.
+   Jede Zeile hat einen Vorschlag – **übernehmen**, **anpassen** oder **behalten** – mit Begründung und das Feld `entscheidung` des Maintainers (seit 24.10. gefüllt, Ausnahmen als `auflage`). Die Tabellen unten zeigen dieselben Zeilen mit ihrem Vorschlag.
 2. **Zahlen:** 240 Zeilen: 27 übernehmen, 72 anpassen, 141 behalten.
 
    | Aspekt | übernehmen | anpassen | behalten |
@@ -676,7 +676,21 @@ Messanleitung wie „①b – Abnahme 28.10.“ (Vitrino und Vergleichsseite neu
    - 5 für die Sxablonoj (Templates, später)
    - 6 sind kein Ero (Anordnung, Verhalten)
    - der Toast bleibt nach E6 eine Grenze
-5. **Achsen:** Neue Achsen tragen Namen von Fundamento, nie den Bezeichner der Fonto: `corner`, `frame`, `months`, `readout`, `indicator-side`, `justify`, `spread`, `tone`, `rules`, `label-side`, `dismiss`, `message-position`. Wo Fundamento den Namen schon führt (`size`, `emphasis`, `intent`, `density`, `kind`, `summary`), bleibt er, auch an einem Ero, das die Achse neu bekommt; nur Werte und Anzahl richten sich nach der Fonto. Ein Test prüft beides.
+5. **Achsen:** Neue Achsen tragen Namen von Fundamento, nie den Bezeichner der Fonto: `corner`, `frame`, `months`, `readout`, `indicator-side`, `justify`, `spread`, `tone`, `lines`, `label-side`, `dismiss`, `message-position` (`lines` statt des Vorschlags `rules`, ②a-6). Wo Fundamento den Namen schon führt (`size`, `emphasis`, `intent`, `density`, `kind`, `summary`), bleibt er, auch an einem Ero, das die Achse neu bekommt; nur Werte und Anzahl richten sich nach der Fonto. Ein Test prüft beides.
+
+### Entscheidungen vom 24.10.
+
+Der Maintainer hat am 24.10. (10:37) entschieden: „alles wie empfohlen“ ([`briefing-a-2026-10-24.md`](briefing-a-2026-10-24.md), unverändert kopiert). In [`abgleich.json`](abgleich.json) ist deshalb bei allen 254 Zeilen (240 der Eroj, 14 Muster) `entscheidung` gleich dem Vorschlag (②a-1): 30 übernehmen, 74 anpassen, 150 behalten (die Eroj 27/72/141, die Muster 3/2/9). Wo der Maintainer etwas dazu sagt, steht es als `auflage` an der Zeile, an 14 Zeilen:
+
+| Punkt | Entscheidung | Zeilen (`auflage`) |
+|---|---|---|
+| ②a-2 | `large` bei elekto, markobutono, sxaltilo bleibt **ein Release lang als Alias auf `medium`**, als veraltet markiert (Warnung im Gvidanto und in der Konsole), danach entfällt es | A-elekto-2, A-markobutono-2, A-sxaltilo-2 |
+| ②a-3 | die acht Grenzen **wie in den Zeilen vorgeschlagen**; die Syntax-Hervorhebung kommt mit den Syntaxfarben in ②b (①-2), nicht schon mit ① | M-1 (tooltip-on-disabled), A-datelektilo-1 (multiple-months), A-elektilo-4 (grouped-options), A-langetaro-4 (many-tabs), A-ligilo-6 (download), A-spuro-6 (collapsed-middle), A-tekstareo-1 (character-count), A-kodbloko-6 (syntax-highlighting) |
+| ②a-4 | **Fortschritt wird ein eigenes Ero, in Eroj-Runde 6**; der mezurilo bleibt der Stand | A-mezurilo-5 |
+| ②a-5 | die Grenze **skeleton bleibt**, neu entschieden in Eroj-Runde 6 | A-plenstato-6 |
+| ②a-6 | die Namen der neuen Achsen **angenommen, außer `rules` → `lines`** (Verwechslung mit den Reguloj); in `achsen` von A-tabelo-1 steht `lines` | A-tabelo-1 |
+
+Vorschlag und Begründung jeder Zeile bleiben, wie sie am 23.10. standen; die Tabellen unten zeigen sie. Wo eine Begründung durch eine Auflage überholt ist (A-tabelo-1 nennt noch `rules`, A-kodbloko-6 die Syntaxfarben „aus ①“), gilt die Auflage. ②b setzt die Zeilen um.
 
 ### Fonto (gepinnt)
 
@@ -1327,8 +1341,8 @@ Gattungen der Fonto ohne Gegenstück in Fundamento. Stoff für Eroj-Runde 6, hie
 
 ### Offen (für den Maintainer)
 
-- **O-1, wie entscheiden:** Vorschlag: eine Liste der IDs je Entscheidung im Briefing für ②b, etwa „übernehmen: A-avizo-5, M-3 …; anders als vorgeschlagen: A-elekto-2 behalten“. P0 trägt sie in `entscheidung` ein; der Test lässt dort `null` oder einen der drei Werte zu.
-- **O-2, gestrichene Werte:** Soll `large` bei elekto, markobutono und sxaltilo sofort entfallen? Oder ein Release lang als Alias auf `medium` bleiben, mit Jugxo und Hinweis im Gvidanto? Vorschlag: Alias für ein Release.
+- **O-1, wie entscheiden:** Vorschlag: eine Liste der IDs je Entscheidung im Briefing für ②b, etwa „übernehmen: A-avizo-5, M-3 …; anders als vorgeschlagen: A-elekto-2 behalten“. P0 trägt sie in `entscheidung` ein; der Test lässt dort `null` oder einen der drei Werte zu. **Entschieden 24.10. (②a-1): der Vorschlag jeder Zeile gilt, Ausnahmen ②a-2 bis ②a-6 (oben).**
+- **O-2, gestrichene Werte:** Soll `large` bei elekto, markobutono und sxaltilo sofort entfallen? Oder ein Release lang als Alias auf `medium` bleiben, mit Jugxo und Hinweis im Gvidanto? Vorschlag: Alias für ein Release. **Entschieden 24.10. (②a-2): Alias für ein Release, als veraltet markiert (Warnung im Gvidanto und in der Konsole), danach entfernen.**
 - **O-3, Grenzen, die Zeilen entscheiden würden:**
   - tooltip-on-disabled (M-1)
   - multiple-months (A-datelektilo-1)
@@ -1340,9 +1354,11 @@ Gattungen der Fonto ohne Gegenstück in Fundamento. Stoff für Eroj-Runde 6, hie
   - syntax-highlighting (A-kodbloko-6, mit ①)
 
   Weitere Grenzen bleiben laut Vorschlag, die Fonto hat dort etwas: labelled-line, indeterminate, skeleton, diff, presets, ticks-with-labels, vertical-track, create-new-value, row-selection.
-- **O-4, Fortschritt:** Ein eigenes Ero für Fortschritt mit bekannter Dauer (Rolle progressbar), neben dem mezurilo? Vorschlag: Kandidat für Eroj-Runde 6.
-- **O-5, Platzhalter in Form des Inhalts:** Die Grenze skeleton des plenstato bleibt nach Vorschlag. Die Fonto hat den Platzhalter.
-- **O-6, Namen:** die 12 neuen Achsennamen der Zusammenfassung, Punkt 5.
+
+  **Entschieden 24.10. (②a-3): wie in den Zeilen vorgeschlagen; die Syntax-Hervorhebung kommt mit den Syntaxfarben in ②b.**
+- **O-4, Fortschritt:** Ein eigenes Ero für Fortschritt mit bekannter Dauer (Rolle progressbar), neben dem mezurilo? Vorschlag: Kandidat für Eroj-Runde 6. **Entschieden 24.10. (②a-4): ja, in Eroj-Runde 6.**
+- **O-5, Platzhalter in Form des Inhalts:** Die Grenze skeleton des plenstato bleibt nach Vorschlag. Die Fonto hat den Platzhalter. **Entschieden 24.10. (②a-5): bleibt, neu entschieden in Eroj-Runde 6.**
+- **O-6, Namen:** die 12 neuen Achsennamen der Zusammenfassung, Punkt 5. **Entschieden 24.10. (②a-6): angenommen, außer `rules` → `lines`.**
 
 ### Messanleitung
 
@@ -1369,6 +1385,7 @@ Die Daten: `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/s
 cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
 node -e 'const d=require("./specs/029-fonto-astryx/abgleich.json");for(const e of d.eroj)for(const z of e.zeilen)if(z.vorschlag==="übernehmen")console.log(z.id, "–", z.begruendung)'
 node -e 'const d=require("./specs/029-fonto-astryx/abgleich.json");for(const z of d.eroj.find(e=>e.ero==="dialogo").zeilen)console.log(z.id, z.vorschlag, "–", z.begruendung)'
+node -e 'const d=require("./specs/029-fonto-astryx/abgleich.json");for(const z of [...d.muster,...d.eroj.flatMap(e=>e.zeilen)])if(z.auflage)console.log(z.id, z.entscheidung, "–", z.auflage)'
 ```
 
 **3. Den Pin prüfen.** Integrity und Commit stimmen mit der Tabelle oben überein:
