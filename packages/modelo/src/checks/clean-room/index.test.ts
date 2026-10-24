@@ -178,7 +178,10 @@ describe("fingerprint sources with provenance (T013)", () => {
   it("finds the values of a named list and says where they come from", async () => {
     const result = await check({ json: true, repoRoot, fixture: root, spuroj: [spuroj] });
     const found = result.errors.filter((issue) => issue.rule === "clean-room-marko-spuro");
-    expect(found.map((issue) => issue.path)).toEqual(["src/theme.css:3:22", "src/theme.css:4:20"]);
+    // Spec 032 ② (Maintainer 2026-10-24): the family name of a benchmark is observation, no
+    // fingerprint (Art. V); of the two values only the colour counts.
+    expect(found.map((issue) => issue.path)).toEqual(["src/theme.css:3:22"]);
+    expect(result.stats.benchmarkFamilies).toBe(1);
     for (const issue of found) {
       expect(issue.message).toContain("testmarko");
     }
@@ -204,7 +207,8 @@ describe("fingerprint sources with provenance (T013)", () => {
 
   it("keeps the built-in list of the repository working", async () => {
     const result = await check({ json: true, repoRoot });
-    expect(result.stats.fingerprintSources).toBe(1);
+    // The repo's own list, then the lists of the benchmark files in research/ (Spec 032 ②).
+    expect(result.stats.fingerprintSources).toBe(4);
     expect(result.stats.fingerprints).toBeGreaterThan(3);
     expect(result.ok).toBe(true);
   });

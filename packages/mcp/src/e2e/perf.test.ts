@@ -15,7 +15,11 @@ const START_BUDGET_MS = 2_000 * FACTOR;
 const RESOLVE_BUDGET_MS = 100 * FACTOR;
 
 const client = new Client({ name: "perf", version: "0" });
-afterAll(() => client.close());
+const cold = new Client({ name: "perf-cold", version: "0" });
+afterAll(async () => {
+  await client.close();
+  await cold.close();
+});
 
 describe("performance (AK-07)", { timeout: 60_000 }, () => {
   it(`starts and answers describe within ${START_BUDGET_MS} ms`, async () => {
@@ -149,4 +153,30 @@ describe("performance (AK-07)", { timeout: 60_000 }, () => {
       expect(Math.max(...timings)).toBeLessThan(RESOLVE_BUDGET_MS);
     },
   );
+});
+
+// Spec 032 ③ (O-1 of Nachlese 9): the first, cold call. A fresh server whose first tool call is
+// check_contrast without an assignment (every combination of both Aspektoj): nothing warmed by
+// resolve or explain before it. The budget stays 100 ms (Maintainer 2026-10-16: find the cause,
+// never raise the budget).
+describe("performance of the first call (Spec 032 ③)", { timeout: 60_000 }, () => {
+  it(`answers a cold first check_contrast within ${RESOLVE_BUDGET_MS} ms`, async () => {
+    const transport = new StdioClientTransport({
+      command: process.execPath,
+      args: [BIN, "--config", EKZEMPLO_CONFIG],
+      stderr: "ignore",
+    });
+    await cold.connect(transport as Transport);
+    const started = performance.now();
+    const result = await cold.callTool({
+      name: "check_contrast",
+      arguments: { foreground: "color.text.muted", background: "color.background.sunken" },
+    });
+    const elapsed = performance.now() - started;
+    process.stderr.write(
+      `Spec 032 cold first check_contrast: ${elapsed.toFixed(1)} ms (budget ${RESOLVE_BUDGET_MS} ms)\n`,
+    );
+    expect(result.isError).toBeFalsy();
+    expect(elapsed).toBeLessThan(RESOLVE_BUDGET_MS);
+  });
 });
