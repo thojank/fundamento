@@ -35,6 +35,10 @@
 - [x] **T2918 Befunde aus den Prüfungen, behoben:** Info-Rand hell auf Stufe 40 (`wcag2-reserve`, J6); die Werkstatt bringt das Stylesheet ihrer Struktur mit (B-6, Unit-Test in `vitrino.test.ts`; der Rundweg in `vitrino.check.ts` misst die Farbe von „Ansehen“ in „Ansehen“, nach dem Übergang, weil die Werkstatt jetzt komuna 0.2 zeigt); der Rollbereich der Token-Tabelle ist mit der Tastatur erreichbar (B-7, axe).
 - [x] **T2915 Befunde als Regeln:** zwei frühere Befunde, die nur als Test bestanden, gewinnen gegen die Fonto (die gewählte dritte Aktion bleibt deckend; kein reines Weiß als Text im Dunkeln, R4), ebenso die Parität (eine Deckkraft je Paint) und Nachlese 8 ② 1 (`neutral.950` bleibt im Dunkel-Set von komuna).
 
+### D – Entscheidungen vom 24.10. (Briefing A)
+- [x] **T2919 Briefing** [`briefing-a-2026-10-24.md`](briefing-a-2026-10-24.md) unverändert kopiert (Doku-Test mit SHA-256); O-1 bis O-5 im plan mit den Entscheidungen ①-1 bis ①-5, B-3 mit ①-7 (②b).
+- [x] **T2920 ①-6 Überschriften von provo auf 400:** Prata hat nur 400 (`tiparoj.json`). Das Agordo von provo legt `typography.display.1–3` und `typography.headline.1–4` fest (`festgelegt`, Aliase wie die Struktur, `fontWeight` `{font.weight.regular}`), neu abgeleitet: in `sets/aspekto/provo.json` ändern sich genau die sieben Gewichte. Rot in `99989cc`: 4 Tests in 4 Dateien (`fonto/komuna-fonto`, `celoj/vitrino/bazoj`, `celoj/figma/figma-cxiuj`, modelo `docs`).
+
 ### C – Abschluss
 - [x] **T2916 Doku:** plan (Amendment, Fonto, komuna-0-2, Zuordnung, Jugxo-Liste, D-01–D-08, Abweichungen, Befunde, Offen, Compliance, Messungen, Messanleitung), tasks, Vojmapo, README.
 - [x] **T2917 Messungen:** im plan; Bericht im PR.

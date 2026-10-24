@@ -42,6 +42,69 @@
         "ui-serif",
         "serif"
       ]
+    },
+    "typography.display.1": {
+      "wert": {
+        "fontFamily": "{font.family.display}",
+        "fontSize": "{font.size.display.1}",
+        "fontWeight": "{font.weight.regular}",
+        "letterSpacing": "{font.tracking.display.1}",
+        "lineHeight": "{font.lineheight.display.1}"
+      }
+    },
+    "typography.display.2": {
+      "wert": {
+        "fontFamily": "{font.family.display}",
+        "fontSize": "{font.size.display.2}",
+        "fontWeight": "{font.weight.regular}",
+        "letterSpacing": "{font.tracking.display.2}",
+        "lineHeight": "{font.lineheight.display.2}"
+      }
+    },
+    "typography.display.3": {
+      "wert": {
+        "fontFamily": "{font.family.display}",
+        "fontSize": "{font.size.display.3}",
+        "fontWeight": "{font.weight.regular}",
+        "letterSpacing": "{font.tracking.display.3}",
+        "lineHeight": "{font.lineheight.display.3}"
+      }
+    },
+    "typography.headline.1": {
+      "wert": {
+        "fontFamily": "{font.family.display}",
+        "fontSize": "{font.size.headline.1}",
+        "fontWeight": "{font.weight.regular}",
+        "letterSpacing": "{font.tracking.headline.1}",
+        "lineHeight": "{font.lineheight.headline.1}"
+      }
+    },
+    "typography.headline.2": {
+      "wert": {
+        "fontFamily": "{font.family.display}",
+        "fontSize": "{font.size.headline.2}",
+        "fontWeight": "{font.weight.regular}",
+        "letterSpacing": "{font.tracking.headline.2}",
+        "lineHeight": "{font.lineheight.headline.2}"
+      }
+    },
+    "typography.headline.3": {
+      "wert": {
+        "fontFamily": "{font.family.display}",
+        "fontSize": "{font.size.headline.3}",
+        "fontWeight": "{font.weight.regular}",
+        "letterSpacing": "{font.tracking.headline.3}",
+        "lineHeight": "{font.lineheight.headline.3}"
+      }
+    },
+    "typography.headline.4": {
+      "wert": {
+        "fontFamily": "{font.family.display}",
+        "fontSize": "{font.size.headline.4}",
+        "fontWeight": "{font.weight.regular}",
+        "letterSpacing": "{font.tracking.headline.4}",
+        "lineHeight": "{font.lineheight.headline.4}"
+      }
     }
   }
 }

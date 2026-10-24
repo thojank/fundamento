@@ -4,6 +4,8 @@
 
 **Branch:** `261023-spec-029-fonto-astryx-grundlagen` (von `main` `d29a5206`) · **Datum:** 2026-10-23 · **Stand:** ① gebaut, Abnahme offen. ②a startet in Sitzung B; ②b und ③ stapeln nach der Entscheidung zu ②a auf diesen Branch.
 
+**Entscheidungen vom 24.10.** ([`briefing-a-2026-10-24.md`](briefing-a-2026-10-24.md), unverändert kopiert; Maintainer, 10:37: „alles wie empfohlen“): ①-1 bis ①-5 beantworten O-1 bis O-5 (unten), **①-6 ist in diesem PR nachgezogen:** die Überschriften von provo stehen in 400, dem einzigen Gewicht von Prata (B-2). ①-2 und ①-7 kommen in ②b, ①-3 nach ②b, ①-4 im Querschnitt Q. Danach wartet ① auf die Abnahme durch den Maintainer (Vitrino, Figma); gemergt wird erst danach.
+
 ### Zusammenfassung
 
 | # | Punkt der Spec | Was jetzt gilt |
@@ -12,7 +14,7 @@
 | B | Fonto gepinnt | `packages/modelo/data/fontoj.json`: astryx, `@astryxdesign/core` und `@astryxdesign/theme-neutral` **0.7.4** mit Integrität, Tag `v0.7.4`, Commit `704757fd827c6fa00a71af80b06d5da99d155e45`. `THIRD_PARTY_NOTICES.md` mit Copyright und MIT-Text. Prüfung **`check:fontoj`** in `pnpm check` und CI. |
 | ①1 | komuna-0-2 | Neues Paket `packages/aspekto-komuna-0-2` (Namespace `malnova`): die heutige komuna als vollständiges eigenes Set mit Dunkel-Set, Schriften, Ikonaro und Aspiroj. Im Build mit allen Marken, umschaltbar in Vitrino, Studio (Basis „komuna-0-2“) und Figma (fünfter Modus). **pixelgleich:** in allen 72 Kombinationen jeder der 1 608 Werte wie komuna auf `main` (Test), Bildvergleich der Vitrino unten. |
 | ①2 | komuna nach theme-neutral | Farbe, Typografie-Skala (Basis 14, Verhältnis 1,2; Touch und schmal: Basis 16, 1,1736), Abstände, Elementgrößen 28/32/36, Radien 6/10/12/28, Elevation mit dunkler Lichtkante, Fokus 2 px mit 3 px Abstand, Bewegung 125/300/700 ms und die Kurve der Fonto. **Familien bleiben Geist und Geist Mono.** 405 Werte mit Herkunft in `packages/aspekto-komuna/deveno.json`. |
-| ①3 | provo mit Prata | `font.family.display` von provo ist `Prata, ui-serif, serif` (OFL-1.1), neu abgeleitet; jeder andere Wert von provo gleich (Test). |
+| ①3 | provo mit Prata | `font.family.display` von provo ist `Prata, ui-serif, serif` (OFL-1.1), neu abgeleitet. **①-6:** die sieben Überschriften-Rollen (`typography.display.1–3`, `typography.headline.1–4`) stehen in 400, dem einzigen Gewicht von Prata (`tiparoj.json`), festgelegt im Agordo von provo; jeder andere Wert von provo gleich (Test). |
 | ①4 | Regeln gewinnen | Alle Prüfungen grün für komuna, komuna-0-2, ekzemplo, provo, provo-kompakta. 45 Werte der Fonto angepasst, festgehalten in 7 Jugxoj von komuna (`packages/aspekto-komuna/jugxoj.json`), dazu eine achte für die Rundung auf die Stufen von Fundamento. **Jugxo-Liste unten.** |
 | ①5 | Foundation-Seiten | Acht Abschnitte der Vitrino: Tokens (alle 1 608, Suche, Ebene, Wert je Marke hell/dunkel, Herkunft), Farbe, Elevation, Form, Abstände, Typografie, Bewegung, Icons – eigene Texte deutsch und englisch, Lingvo-Schalter, gewählte Marke. |
 | F | Figma | Das Plugin heißt **„Fundamento Grundlagen 0.2.0 (‹Build› · ‹Marken›): apply plan“**, ID `fundamento-grundlagen-‹Hash›`, getrennt von „Fundamento Bauformen …“ (027) und „Fundamento 0.2.0 (…)“. Der Build mit allen Marken hat fünf Modi. Eine Schattenschicht, die in einem Modus innen liegt, ist ein INNER_SHADOW. |
@@ -260,8 +262,8 @@ Der Startschirm bietet neben „Leer“ und „Beispiel komuna“ jetzt „Beisp
 ### Befunde / Mankoj
 
 - **B-1 „Fonto“ ist im Schema doppelt belegt:** `$defs/Fonto` ist seit Spec 001 die Schriftangabe einer Aspekto, `fontoj/` der Ordner hochgeladener Schriften im Studio. Das Fonto-Register heißt im Schema deshalb `FontoSistemo`/`FontojFile`. Vorschlag: die Schriftangabe in einer eigenen Spec in `Tiparo` umbenennen (der Katalog heißt schon `tiparoj.json`).
-- **B-2 Prata hat nur das Gewicht 400.** Überschriften von provo stehen in 600 bzw. 700; der Browser fettet Prata künstlich. Figma fällt für fehlende Schnitte auf Inter zurück und sagt es.
-- **B-3 Generischer Fallback des Agordilo:** Ohne `festgelegt` schreibt die Ableitung `[Prata, system-ui, sans-serif]` – eine Serifenschrift mit serifenlosem Ersatz. provo legt `ui-serif, serif` fest; der Agordilo könnte den Ersatz aus der Kategorie der Schrift nehmen (`tiparoj.json` kennt sie).
+- **B-2 Prata hat nur das Gewicht 400** (behoben, ①-6). Die Überschriften von provo standen in 500 (display) bzw. 600 (headline); der Browser fettete Prata künstlich, Figma fiel für die fehlenden Schnitte auf Inter zurück. Jetzt legt das Agordo von provo die sieben Überschriften-Rollen fest (`festgelegt`, der Weg des Studio, Spec 024): dieselben Aliase wie die Struktur, nur `fontWeight` auf `{font.weight.regular}`. Neu abgeleitet ändern sich in `sets/aspekto/provo.json` genau diese sieben Gewichte; Ero-Tokens zeigen auf die Rollen und folgen. Tests: jede Rolle in Prata hat in allen 72 Kombinationen ein Gewicht, das Prata hat, die übrigen Rollen behalten ihres (`fonto/komuna-fonto.test.ts`); die Foundation-Seite Typografie zeigt 400 (`celoj/vitrino/bazoj.test.ts`); der Figma-Plan fragt Prata nur als Regular an (`celoj/figma/figma-cxiuj.test.ts`). Die allgemeine Regel – die Ableitung nimmt das nächste Gewicht, das die Schrift hat – gehört zu ①-7 in ②b, wenn der Agordilo `tiparoj.json` liest.
+- **B-3 Generischer Fallback des Agordilo:** Ohne `festgelegt` schreibt die Ableitung `[Prata, system-ui, sans-serif]` – eine Serifenschrift mit serifenlosem Ersatz. provo legt `ui-serif, serif` fest; der Agordilo könnte den Ersatz aus der Kategorie der Schrift nehmen (`tiparoj.json` kennt sie). **Entschieden 24.10. (①-7): ja, in ②b.**
 - **B-4 Die unvollständige Fixture `aspekto-incomplete`** fällt bei fehlenden Tokens auf die Werte des Kerns zurück, also auf die neue komuna; dort fallen in ekzemplos Palette Ruhe und gedrückt zusammen (`state-distinct`). Die erwarteten Fehler nennen das jetzt mit.
 - **B-5 Beratende APCA-Hinweise verschieben sich** (Vitrino, Kontrast, 72 Kombinationen von komuna, beratend, kein Budget): Text (`text-normal`) sinkt von 2358 auf 2286, Ränder (`ui`, Band Lc 45–60) steigen von 36 auf 360, zusammen 2394 → 2646. Die Ränder der Fonto sind heller als die von komuna 0.2; die Regeln heben sie auf 3:1 nach WCAG mit Reserve (J4, J6), das APCA-Band erreichen sie damit nicht überall. Das schlechteste Paar ist `border-inverse-on-background-inverse` mit Lc 30,1. Der Zeuge in `vitrino.check.ts` nennt die neue Zahl. Ob Ränder auch das APCA-Band halten sollen, wäre eine eigene Regel (O-5).
 - **B-6 Werkstatt-Ansicht über der neuen komuna** (gefunden von `check:vitrino`, behoben, D-05): Der Entwurf im Standard zeigte die Werte der neuen komuna, ein Regler die von komuna 0.2. Die Werkstatt bringt jetzt das Stylesheet ihrer Struktur mit; Unit-Test in `celoj/vitrino/vitrino.test.ts`.
@@ -269,11 +271,11 @@ Der Startschirm bietet neben „Leer“ und „Beispiel komuna“ jetzt „Beisp
 
 ### Offen (für den Maintainer)
 
-- **O-1 Weiße Flächen:** Soll das Aspiro `oklch-l-extreme` von komuna für Flächen fallen oder auf 0 gehen? Dann wären Fläche und Karte weiß wie in der Fonto (Seite 95, Fläche 97,5, Karte 100). Das Aspiro bleibt hier, weil keine Budgets angehoben und keine Ziele gesenkt werden sollen.
-- **O-2 Syntax-Farben** (Abweichung 4): mit dem `kodbloko` in ②b, oder eigener Schritt?
-- **O-3 Agordilo auf die neue komuna** (D-05): Kalibrierung neu messen, und wohin geht die Leitfarbe einer Marke, wenn der Akzent der Referenz neutral ist – in die Aktionen (wie bisher) oder nur in Akzente und Fokus (wie die Fonto)?
-- **O-4 Die Dunkel-Rampen der Fonto** sind an den Enden weniger bunt als die hellen. Fundamento hat eine Rampe je Familie und Modus; komuna nimmt je Stufe die Rampe, die ihre Rollen im Modus brauchen. Soll das Modelo zwei Rampen je Familie kennen?
-- **O-5 Ränder und APCA** (B-5): Reicht für Ränder 3:1 nach WCAG mit Reserve (heute die Regel), oder sollen sie auch das beratende APCA-Band Lc 45 halten? Das würde die Ränder von komuna dunkler machen als die der Fonto.
+- **O-1 Weiße Flächen:** Soll das Aspiro `oklch-l-extreme` von komuna für Flächen fallen oder auf 0 gehen? Dann wären Fläche und Karte weiß wie in der Fonto (Seite 95, Fläche 97,5, Karte 100). Das Aspiro bleibt hier, weil keine Budgets angehoben und keine Ziele gesenkt werden sollen. **Entschieden 24.10. (①-1): nein, das Aspiro `oklch-l-extreme` bleibt.**
+- **O-2 Syntax-Farben** (Abweichung 4): mit dem `kodbloko` in ②b, oder eigener Schritt? **Entschieden 24.10. (①-2): in ②b, mit dem kodbloko.**
+- **O-3 Agordilo auf die neue komuna** (D-05): Kalibrierung neu messen, und wohin geht die Leitfarbe einer Marke, wenn der Akzent der Referenz neutral ist – in die Aktionen (wie bisher) oder nur in Akzente und Fokus (wie die Fonto)? **Entschieden 24.10. (①-3): nach ②b, als eigener Schritt; die Leitfarbe einer Marke geht in die Aktionen, wie bisher.**
+- **O-4 Die Dunkel-Rampen der Fonto** sind an den Enden weniger bunt als die hellen. Fundamento hat eine Rampe je Familie und Modus; komuna nimmt je Stufe die Rampe, die ihre Rollen im Modus brauchen. Soll das Modelo zwei Rampen je Familie kennen? **Entschieden 24.10. (①-4): ja, später, im Querschnitt Q.**
+- **O-5 Ränder und APCA** (B-5): Reicht für Ränder 3:1 nach WCAG mit Reserve (heute die Regel), oder sollen sie auch das beratende APCA-Band Lc 45 halten? Das würde die Ränder von komuna dunkler machen als die der Fonto. **Entschieden 24.10. (①-5): nein, es bleibt bei WCAG 3:1 mit Reserve.**
 
 ### Constitutional Compliance Review
 
@@ -328,6 +330,21 @@ Gemessen am 24.10. auf dem Mac des Maintainers, in einem Worktree, Branch `26102
 
 **Größen:** `code.js` des Plugins komuna 2 253 660 → 2 352 356 Byte (+4,4 %, dritte Schattenschicht, INNER_SHADOW), alle Marken 2 728 163 → 3 021 981 (+10,8 %, fünfte Marke). Vitrino komuna 6,24 → 7,45 MB (+19 %: Foundation-Seiten, Stylesheet der Werkstatt-Basis 229 kB), alle Marken 11,3 → 14,9 MB (+32 %). Für beide gibt es kein Budget.
 
+**Nachtrag ①-6 (24.10., Briefing A):** im selben Worktree auf dem Branch dieses PR.
+- **Rot** `99989cc`: 4 Tests in 4 Dateien.
+- **Tests** (`turbo run test --concurrency=2 --continue --force`, 641 s), alle grün:
+  - modelo 176 Dateien, 3818 Tests (+1, Briefing)
+  - projekcioj 43 Dateien, 985 Tests, 1 übersprungen (+2)
+  - mcp 436, metiejo 187, agordilo 113, cli 76
+  - eroj 991, 2 übersprungen
+- **Prüfungen** einzeln, grün:
+  - `lint`, `check:vortaro-lint`, `check:regularo` (60 Reguloj, 222 Jugxoj), `check:mankoj`, `check:clean-room`, `check:ikonaro`
+  - `check:fontoj` (1 Fonto, 405 Werte, 45 angepasst), `check:tiparoj`, `check:make-kit`, `check:quickstart`, `check:release`
+  - `check:parity`: 0 Unterschiede, 659 freigegebene
+  - `check:alirebleco`: 0 Fehler, 2646 beratende APCA-Hinweise wie vorher; die Gewichte von provo ändern keinen Kontrast
+  - `check:alirebleco-eroj` 633/633, `check:vitrino` 56/56
+- **`perf` rot, wie auf `main`:** Der erste Aufruf von `check_contrast` braucht 118,1 ms, alle weiteren 6,3–13,4 ms (Median 8,7). Das Budget ist nicht angehoben.
+
 ### Messanleitung
 
 Alle Befehle im Checkout des Maintainers, auf dem Branch dieses PR:
@@ -359,7 +376,15 @@ pnpm fm projekcioj build --config packages/modelo/test/fixtures/valid/aspekto-pr
 
   Erwartet: 164 von 172 Bildern gleich. Anders sind nur die Paletten (je 4336 Pixel: die Beschriftung nennt die Marke, „komuna“ gegen „komuna-0-2“) und `plenstato` (die Animation des Ladezustands; sie ist auch zwischen zwei Läufen von `main` anders: 168 von 172 gleich).
 
-**3. provo zeigt Prata.** [file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj-cxiuj/vitrino/index.html#aspekto=provo](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj-cxiuj/vitrino/index.html#aspekto=provo) – Überschriften in Prata (der Browser lädt die Schrift nicht; ohne installiertes Prata steht ui-serif). Prata: https://github.com/cyrealtype/Prata.
+**3. provo zeigt Prata.** [file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj-cxiuj/vitrino/index.html#aspekto=provo](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj-cxiuj/vitrino/index.html#aspekto=provo) – Überschriften in Prata, **im Gewicht 400, nicht künstlich fett (①-6)**; im Abschnitt Typografie steht bei `typography.display.1` bis `typography.headline.4` das Gewicht 400 (der Browser lädt die Schrift nicht; ohne installiertes Prata steht ui-serif). In Figma, Modus `provo`: die Überschrift des `dialogo` in Prata Regular, ohne Hinweis auf einen fehlenden Schnitt. Prata: https://github.com/cyrealtype/Prata.
+
+provo neu ableiten (Nachvollzug ①-6), erwartet: keine Änderung gegenüber dem Branch:
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm fm agordilo derive packages/modelo/test/fixtures/valid/aspekto-provo/agordo.json --out packages/modelo/test/fixtures/valid/aspekto-provo/aspekto-provo
+git status --short
+```
 
 **4. Foundation-Seiten (Abnahme ①).** In derselben Vitrino die Abschnitte Tokens, Farbe, Elevation, Form, Abstände, Typografie, Bewegung, Icons; Marke und Modus oben wechseln, Sprache auf Deutsch/English stellen, in „Token suchen“ z. B. `color.text` tippen.
 
