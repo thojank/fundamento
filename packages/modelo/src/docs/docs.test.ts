@@ -3357,7 +3357,7 @@ describe("Nachlese 11 documentation (specs/031-nachlese-11)", () => {
   it("the briefing is copied unchanged; plan and tasks carry the causes, the measuring points and the guide", () => {
     const briefing = read("specs/031-nachlese-11/briefing.md");
     expect(createHash("sha256").update(briefing).digest("hex")).toBe(
-      "d6b62bb8fc6cb2cdc0c00979a8b38d1b2e275429d10a6bc73bdb15fc0b6ff28f",
+      "16bb1cf349057b96e16280ef075ffdfb01cf5c16ad74ef8efd75f5b21514fa17",
     );
     const plan = read("specs/031-nachlese-11/plan.md");
     for (const heading of [
@@ -3384,6 +3384,13 @@ describe("Nachlese 11 documentation (specs/031-nachlese-11)", () => {
       "nach den Korrekturen",
       "nach der Fonto",
       "gpt-4.1-mini",
+      // ④: three series, each with its own model.
+      "Reihe H",
+      "Reihe O",
+      "Reihe K",
+      "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "ministral-14b-2512",
+      "Anfragen",
       "Streuung",
       "Top-10",
       "Tokens",

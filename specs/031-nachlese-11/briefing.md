@@ -26,9 +26,27 @@ Der erste Lauf der Nordstern-Kennzahl (Spec 030, `.fundamento/nordstelo/20261024
 2. Nach dem Merge von Spec 029 ①: derselbe Lauf noch einmal. Das löst Sitzung A aus oder der Maintainer.
 - Der Bericht zeigt die drei Messpunkte nebeneinander: Ausgangslinie, nach den Korrekturen, nach der Fonto. Jeweils F gegen 0, mit alter und neuer Gewichtung, Streuung, Tokens und den Top-10 der Lücken.
 
+## ④ Drei Messreihen (Maintainer 24.10., 13:11)
+Jeder Messpunkt aus ③ läuft in drei Reihen. Es gelten immer **genaue Modellnamen**, nie `-latest`.
+
+| Reihe | Anbieter | Modell | Zweck | Grenzen |
+|---|---|---|---|---|
+| H (Hauptreihe) | OpenAI | `gpt-4.1-mini` | Vergleich mit der Ausgangslinie | Kostengrenze `--max-tokens` |
+| O (offen, stark) | OpenRouter | `nvidia/nemotron-3-ultra-550b-a55b:free` | starkes offenes Modell | **1 000 kostenlose Anfragen pro Tag** auf dem Konto des Maintainers |
+| K (klein) | Mistral | `ministral-14b-2512` | Hilft Fundamento kleinen Modellen mehr? | **0,5 Anfragen pro Sekunde**; andere Mistral-Modelle sind im Tarif des Maintainers gesperrt (403) oder ohne Kontingent (429) |
+
+- **Ersatz für O:** `thinkingmachines/inkling:free`, falls Nemotron nicht verfügbar ist. Der Wechsel steht im Bericht.
+- **Grenzen je Anbieter** sind Einstellungen des Laufs: Anfragen pro Sekunde und pro Tag.
+- **Bei 429 wartet der Lauf** und versucht es erneut, mit wachsendem Abstand. Er bricht nicht ab.
+- **Ist das Tageslimit erreicht** (Reihe O), speichert der Lauf seinen Stand und setzt am nächsten Tag mit demselben Befehl fort. Die bereits fertigen Ergebnisse bleiben gültig.
+- **Vor dem Start schätzt der Lauf die Zahl der Anfragen** je Reihe und meldet, wenn das Tageslimit nicht reicht.
+- Der Bericht zeigt für jeden Messpunkt **drei Reihen nebeneinander**, mit F gegen 0, alter und neuer Gewichtung, Streuung, Anfragen und Tokens.
+- Die Ausgangslinie gibt es bisher nur für Reihe H. Für die Reihen O und K wird sie auf demselben Stand nachgeholt (Commit der Ausgangslinie, eigener Worktree), bevor ① gemergt wird. Geht das nicht mehr, beginnen O und K mit dem Messpunkt nach ①, und der Bericht vermerkt das.
+- Keine Schlüssel in Logs, Dateien oder Commits. Die Anbieter-IDs und Modellnamen stehen in den Ergebnissen, die Schlüssel nie.
+
 ## Entscheidungen des Maintainers (24.10.)
 - O-1 (Spec 030): Markenfähigkeit wird ein Tor, K5 bekommt 25 Punkte, beide Gewichtungen werden berichtet. *(Vorschlag; gilt, wenn der Maintainer zustimmt.)*
-- Modell: gpt-4.1-mini, bis das Mistral-Konto Anfragen zulässt. Alle Messpunkte laufen mit demselben Modell.
+- Modelle: drei Reihen H, O, K wie in ④. Mistral Large ist im Tarif des Maintainers nicht verfügbar; es wird nicht genutzt.
 
 ## Auftrag P0
 - Ein PR von `main` (nach #112), oder gestapelt auf #112, falls der noch offen ist.
