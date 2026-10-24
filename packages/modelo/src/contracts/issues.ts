@@ -109,6 +109,9 @@ export const RULE_IDS = [
   "clean-room-benchmark-reference",
   "clean-room-foreign-prefix",
   "clean-room-marko-spuro",
+  // Spec 032 ②: the lists of the benchmark files, random hits only with their Jugxo
+  "clean-room-spuroj-invalid",
+  "clean-room-jugxo-missing",
   // MCP tools (Spec 001 T023, FR-18)
   "mcp-input-invalid",
   "token-unknown",

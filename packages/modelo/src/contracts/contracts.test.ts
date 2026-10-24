@@ -106,7 +106,8 @@ describe("rule catalog (§2.6)", () => {
     // Nachlese 8 ③: traduko-missing and traduko-orphaned.
     // Spec 030: the three references of the north-star catalogue (Sxablono, Ero, Regulo).
     // Spec 029 ①: the six rules of check:fontoj.
-    expect(RULE_IDS).toHaveLength(190);
+    // Spec 032 ②: clean-room-spuroj-invalid and clean-room-jugxo-missing.
+    expect(RULE_IDS).toHaveLength(192);
     for (const rule of [
       "agordo-jugxo-fixed",
       "raporto-out-of-sync",

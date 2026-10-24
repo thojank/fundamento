@@ -16,6 +16,8 @@ export interface BrandCandidate {
   normalized: string;
   /** Character offset in the text. */
   index: number;
+  /** A hex colour of eight digits: its alpha byte (0–255), which the fingerprint leaves out. */
+  alpha?: number;
 }
 
 /** The only files that may contain brand values (repo-relative). */
@@ -50,7 +52,13 @@ function normalizeNumbers(parts: readonly string[]): string | undefined {
 export function brandCandidates(text: string): BrandCandidate[] {
   const candidates: BrandCandidate[] = [];
   for (const match of text.matchAll(HEX)) {
-    candidates.push({ kind: "hex", normalized: normalizeHex(match[1] ?? ""), index: match.index });
+    const digits = match[1] ?? "";
+    candidates.push({
+      kind: "hex",
+      normalized: normalizeHex(digits),
+      index: match.index,
+      ...(digits.length === 8 ? { alpha: Number.parseInt(digits.slice(6), 16) } : {}),
+    });
   }
   for (const match of text.matchAll(CUBIC_BEZIER)) {
     const normalized = normalizeNumbers((match[1] ?? "").split(","));
@@ -144,21 +152,28 @@ export function fingerprintIndex(
   return index;
 }
 
+/**
+ * Whether a hit counts (Spec 032 ②): a benchmark's font family, a trivial value or a random hit
+ * with its Jugxo does not. Without a filter every hit counts.
+ */
+export type HitCounts = (candidate: BrandCandidate, fingerprint: string, source: string) => boolean;
+
 /** One issue per brand value found in `text`; `file` is the scan-relative path. */
 export function findBrandValues(
   file: string,
   text: string,
   fingerprints: FingerprintIndex,
-  exempt: readonly (readonly [number, number])[] = [],
+  counts: HitCounts = () => true,
 ): ValidationIssue[] {
   if (fingerprints.size === 0) return [];
   const seen = new Set<number>();
   const issues: ValidationIssue[] = [];
   for (const candidate of brandCandidates(text)) {
-    const source = fingerprints.get(fingerprintOf(candidate));
+    const fingerprint = fingerprintOf(candidate);
+    const source = fingerprints.get(fingerprint);
     if (seen.has(candidate.index) || source === undefined) continue;
-    // Spec 029 ①: a value with a valid Fonto provenance is not a brand value.
-    if (exempt.some(([start, end]) => candidate.index >= start && candidate.index < end)) continue;
+    // A hit that does not count leaves its place open: a longer family at the same offset may.
+    if (!counts(candidate, fingerprint, source)) continue;
     seen.add(candidate.index);
     const { line, column } = lineColumn(text, candidate.index);
     const whose = source === REPO_SOURCE ? "A brand value" : `A value of the Aspekto '${source}'`;
