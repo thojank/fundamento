@@ -23,6 +23,7 @@ import { buildProjekcioj } from "@fundamento/projekcioj";
 import { providerOf, runAgent } from "./agent.js";
 import type { Facts, Variant } from "./facts.js";
 import { connectGvidanto } from "./gvidanto.js";
+import { AnfragoLedger, dayOf, LIMOJ, type Limoj, Pordisto } from "./limoj.js";
 import { createRenderer } from "./render.js";
 import { type RunRecord, summarize } from "./report.js";
 import { failedScore, markdownReport, runNordstelo } from "./run.js";
@@ -48,6 +49,9 @@ pnpm nordstelo restaro <Laufordner> [--skribi]
   --lingvo <de|en>     Sprache der Aufgaben, Standard: de
   --anbieter <Name>    mistral, openai oder openrouter statt FM_KI_ANBIETER (Schlüssel aus der .env)
   --modell <Name>      ein anderes Modell als FM_KI_MODELL (Schlüssel aus der .env)
+  --anfragen-sekunde <n>  Anfragen je Sekunde höchstens (Standard: mistral 0,5, sonst frei)
+  --anfragen-tag <n>   Anfragen je UTC-Tag höchstens (Standard: openrouter 1000, sonst frei);
+                       am Limit hält der Lauf an, derselbe Befehl setzt ihn am nächsten Tag fort
   --out <Ordner>       Standard: .fundamento/nordstelo im Checkout`;
 
 function commitOf(): string {
@@ -210,6 +214,29 @@ async function kuri(values: Record<string, string | boolean | undefined>): Promi
     dirname(fileURLToPath(import.meta.resolve("@fundamento/eroj/package.json"))),
     "dist",
   );
+  // Nachlese 11 ④: the limits of the provider are settings of the run; the requests of each UTC
+  // day are counted beside the runs, so the next run of the day knows them.
+  const limoj: Limoj = {
+    ...LIMOJ[provider.name],
+    ...(typeof values["anfragen-sekunde"] === "string"
+      ? { perSekundo: Number(values["anfragen-sekunde"]) }
+      : {}),
+    ...(typeof values["anfragen-tag"] === "string"
+      ? { perTago: Number(values["anfragen-tag"]) }
+      : {}),
+  };
+  const ledgerFile = join(out, "anfragoj.json");
+  const ledger = new AnfragoLedger(
+    existsSync(ledgerFile)
+      ? (JSON.parse(readFileSync(ledgerFile, "utf8")) as Record<string, number>)
+      : {},
+  );
+  const gate = new Pordisto(limoj, ledger, {
+    now: () => Date.now(),
+    sleep: (ms) => new Promise((done) => setTimeout(done, ms)),
+    provider: provider.name,
+    counted: () => writeFileSync(ledgerFile, `${JSON.stringify(ledger.entries, null, 2)}\n`),
+  });
   const gvidanto = await connectGvidanto();
   const renderer = await createRenderer({
     projekcioj,
@@ -248,13 +275,16 @@ async function kuri(values: Record<string, string | boolean | undefined>): Promi
             variant,
             budget,
             ...(variant === "F" ? { tools: gvidanto.bridge } : {}),
+            gate,
             log,
           }),
         render: (html, variant) => renderer.render(html, variant),
+        limoj,
+        todayUsed: () => ledger.count(provider.name, dayOf(Date.now())),
       },
     );
     process.stdout.write(
-      `Kennzahl F ${shown(result.summary.variants.F.median)} · Kennzahl 0 ${shown(result.summary.variants["0"].median)} · Tokens ${result.summary.tokens.input + result.summary.tokens.output}${result.aborted === undefined ? "" : ` · ${result.aborted}`}\nBericht: ${join(result.dir, "raporto.md")}\n`,
+      `Kennzahl F ${shown(result.summary.variants.F.median)} · Kennzahl 0 ${shown(result.summary.variants["0"].median)} · Tokens ${result.summary.tokens.input + result.summary.tokens.output}${result.summary.requests === undefined ? "" : ` · Anfragen ${result.summary.requests}`}${result.aborted === undefined ? "" : ` · ${result.aborted}`}${result.paused === undefined ? "" : ` · Pausiert: ${result.paused}`}\nBericht: ${join(result.dir, "raporto.md")}\n`,
     );
     return 0;
   } finally {
@@ -278,6 +308,8 @@ async function main(argv: readonly string[]): Promise<number> {
       anbieter: { type: "string" },
       modell: { type: "string" },
       out: { type: "string" },
+      "anfragen-sekunde": { type: "string" },
+      "anfragen-tag": { type: "string" },
       skribi: { type: "boolean" },
       help: { type: "boolean", short: "h" },
     },

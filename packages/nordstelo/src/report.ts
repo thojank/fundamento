@@ -15,6 +15,8 @@ export interface Effort {
   ms: number;
   /** Size of the markup the agent wrote. */
   bytes: number;
+  /** Requests to the provider (Nachlese 11 ④); absent in runs before. */
+  requests?: number;
 }
 
 export interface RunRecord {
@@ -56,6 +58,8 @@ export interface Summary {
   multmarkeco?: Record<Variant, number | null>;
   gaps: (Gap & { count: number })[];
   tokens: { input: number; output: number };
+  /** Requests to the provider over the run (Nachlese 11 ④); absent where no result counts them. */
+  requests?: number;
   failed: { task: string; variant: Variant; repeat: number; error: string }[];
 }
 
@@ -120,6 +124,9 @@ function variantSummary(
       toolCalls: effort((entry) => entry.toolCalls),
       ms: effort((entry) => entry.ms),
       bytes: effort((entry) => entry.bytes),
+      ...(records.some((record) => record.effort.requests !== undefined)
+        ? { requests: effort((entry) => entry.requests ?? 0) }
+        : {}),
     },
   };
 }
@@ -167,6 +174,9 @@ export function summarize(records: readonly RunRecord[]): Summary {
       input: records.reduce((sum, record) => sum + record.effort.inputTokens, 0),
       output: records.reduce((sum, record) => sum + record.effort.outputTokens, 0),
     },
+    ...(records.some((record) => record.effort.requests !== undefined)
+      ? { requests: records.reduce((sum, record) => sum + (record.effort.requests ?? 0), 0) }
+      : {}),
     failed: records.flatMap((record) =>
       record.error === undefined
         ? []

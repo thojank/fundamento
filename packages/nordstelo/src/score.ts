@@ -215,9 +215,9 @@ function inventedGaps(facts: Facts, known: Known): { gaps: Gap[]; used: number }
       const sxablono = known.sxablonoj.get(parentName);
       const slots = ero
         ? (ero.skemo.slots ?? []).map((entry) => entry.name)
-        : Object.keys(
-            (sxablono?.skemo as { regions?: Record<string, unknown> } | undefined)?.regions ?? {},
-          );
+        : // Nachlese 11 O-6: the regions are a list; their names are the slots (Spec 030 read the
+          // indices of the list, and every region looked invented).
+          (sxablono?.skemo.regions ?? []).map((region) => region.name);
       if ((ero !== undefined || sxablono !== undefined) && !slots.includes(slot)) {
         gaps.push({ kind: "invented-slot", key: `${parentName}.slot=${slot}` });
       } else if (ero?.skemo.slots?.some((entry) => entry.name === slot && entry.default === true)) {

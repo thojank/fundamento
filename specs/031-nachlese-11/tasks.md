@@ -68,8 +68,23 @@
   - Ausgangslinie K `20261024-1233`, K nach den Korrekturen `20261024-1248`
   - Ausgangslinie O `20261024-1422` mit 1 Wiederholung (Entscheidung des Maintainers, der erste Versuch mit 3 Wiederholungen angehalten und aus dem Verlauf genommen)
   - alle mit `restaro --skribi` in beiden Gewichtungen, je 0 abweichend; kein Schlüssel in Dateien oder Logs
-- [ ] **T3113 O nach den Korrekturen:** nach dem Tageswechsel des freien Kontingents.
-- [ ] **T3114 Abschnitt ④ des Briefings** unverändert übernehmen, sobald er in der Datei steht.
+- [x] **T3114 Abschnitt ④ des Briefings** unverändert übernommen (Datei vom 24.10., 18:40; die Übertragung um 13:11 war fehlgeschlagen). Doku-Test mit neuem SHA und den drei Reihen.
+- [x] **T3115 Rot für ④ und O-6** in `df6d911`, `nordstelo/src/nachlese-11-reihen.test.ts` (Datei lädt nicht, `limoj.js` fehlt) und Doku 1:
+  - Bereiche einer Sxablono
+  - Grenzen je Anbieter, Pforte je Sekunde und Tag
+  - 429 ohne Abbruch
+  - Schätzung
+  - Pause und Fortsetzen
+- [x] **T3116 Grün:**
+  - O-6 in `score.ts` (D-14)
+  - `limoj.ts` (D-10, D-13)
+  - Agent mit Pforte, `requests` und wachsendem Abstand (D-11)
+  - `run.ts` mit `stato.json`, Pause und Fortsetzen (D-12)
+  - Bericht mit Anfragen
+  - CLI mit `--anfragen-sekunde`, `--anfragen-tag` und `anfragoj.json`
+- [x] **T3117 Neu bewertet nach O-6:** `restaro --skribi` für `20261024-0825`, `-1201`, `-1233`, `-1248`, `-1422`. Abweichend 7, 8, 27, 32, 5, genau die von B-8 betroffenen Ergebnisse.
+- [ ] **T3118 Ausgangslinie O wiederholen** am 25.10. nach dem Tageswechsel, Worktree auf `721743f` (O-7).
+- [ ] **T3113 O nach den Korrekturen:** nach T3118, auf diesem Branch.
 - [ ] **T3109 Messpunkt nach der Fonto:** nach dem Merge von Spec 029 ① (Sitzung A oder Maintainer), Messanleitung Schritt 4.
 - [x] **T3110 Doku:**
   - plan: Zusammenfassung, Ursachen, D-01–D-09, Messpunkte, Abweichungen 1–5, B-1–B-7, O-1–O-5, Messanleitung

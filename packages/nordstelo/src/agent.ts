@@ -129,6 +129,10 @@ export interface AgentOptions {
   /** Milliseconds one request may take. */
   timeout?: number;
   log?: (line: string) => void;
+  /** The gate of the provider's limits (Nachlese 11 ④); every request passes it. */
+  gate?: { pass(): Promise<void> };
+  /** Waiting between attempts; a test passes its own. */
+  sleep?: (ms: number) => Promise<void>;
 }
 
 export interface AgentEffort {
@@ -137,6 +141,8 @@ export interface AgentEffort {
   toolCalls: number;
   ms: number;
   bytes: number;
+  /** Requests to the provider, retries included (Nachlese 11 ④). */
+  requests?: number;
 }
 
 export interface AgentResult {
@@ -175,7 +181,13 @@ interface ChatReply {
   usage?: { prompt_tokens?: number; completion_tokens?: number };
 }
 
-const sleep = (ms: number) => new Promise((done) => setTimeout(done, ms));
+const sleep = (ms: number) => new Promise<void>((done) => setTimeout(done, ms));
+
+/** The first wait after a refused request, doubled after every further one up to the last. */
+const FIRST_WAIT = 2_000;
+const LAST_WAIT = 300_000;
+/** Attempts after a server error, a timeout or an answer without a message (429 has no end). */
+const TRANSIENT_ATTEMPTS = 3;
 
 function functionOf(tool: ToolInfo) {
   return {
@@ -214,6 +226,8 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
   let inputTokens = 0;
   let outputTokens = 0;
   let toolCalls = 0;
+  let requests = 0;
+  const wait = options.sleep ?? sleep;
 
   const call = async (offerTools: boolean): Promise<ChatMessage> => {
     budget.ensure();
@@ -225,20 +239,44 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
         : {}),
       temperature: 0.2,
     };
-    for (let attempt = 0; ; attempt++) {
-      const response = await request(`${provider.baseUrl}/chat/completions`, {
-        method: "POST",
-        headers: { "content-type": "application/json", authorization: provider.authorization() },
-        body: JSON.stringify(body),
-        signal: AbortSignal.timeout(options.timeout ?? 180_000),
-      });
+    // Nachlese 11 ④: on 429 the run waits with a growing interval and tries again, without end;
+    // a server error, a timeout or an answer without a message a few times.
+    let delay = FIRST_WAIT;
+    let transient = 0;
+    const again = async (why: string): Promise<void> => {
+      log(`Anbieter ${provider.name}: ${why}, neuer Versuch in ${Math.round(delay / 1000)} s`);
+      await wait(delay);
+      delay = Math.min(delay * 2, LAST_WAIT);
+    };
+    for (;;) {
+      await options.gate?.pass();
+      requests += 1;
+      let response: Response;
+      try {
+        response = await request(`${provider.baseUrl}/chat/completions`, {
+          method: "POST",
+          headers: { "content-type": "application/json", authorization: provider.authorization() },
+          body: JSON.stringify(body),
+          signal: AbortSignal.timeout(options.timeout ?? 180_000),
+        });
+      } catch (error) {
+        const timedOut = error instanceof Error && error.name === "TimeoutError";
+        if (timedOut && transient < TRANSIENT_ATTEMPTS) {
+          transient += 1;
+          await again("keine Antwort in der Zeit");
+          continue;
+        }
+        throw error;
+      }
       const text = await response.text();
       if (!response.ok) {
-        if ((response.status === 429 || response.status >= 500) && attempt < 3) {
-          log(
-            `Anbieter ${provider.name} antwortet ${response.status}, neuer Versuch ${attempt + 1}`,
-          );
-          await sleep([2_000, 8_000, 20_000][attempt] ?? 20_000);
+        if (response.status === 429) {
+          await again("antwortet 429");
+          continue;
+        }
+        if (response.status >= 500 && transient < TRANSIENT_ATTEMPTS) {
+          transient += 1;
+          await again(`antwortet ${response.status}`);
           continue;
         }
         throw new Error(
@@ -252,8 +290,14 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
       outputTokens += output;
       budget.charge(input, output);
       const message = reply.choices?.[0]?.message;
-      if (message === undefined)
+      if (message === undefined) {
+        if (transient < TRANSIENT_ATTEMPTS) {
+          transient += 1;
+          await again("Antwort ohne Nachricht");
+          continue;
+        }
         throw new Error(`Anbieter ${provider.name}: Antwort ohne Nachricht.`);
+      }
       return message;
     }
   };
@@ -315,6 +359,7 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
       toolCalls,
       ms: Date.now() - started,
       bytes: Buffer.byteLength(html),
+      requests,
     },
     transcript,
   };

@@ -1,6 +1,6 @@
 # Nachlese 11 – Was die Nordstern-Kennzahl gefunden hat – Plan
 
-**Briefing:** [`briefing.md`](briefing.md) (Fassung vom 2026-10-24, unverändert kopiert; SHA-256 `d6b62bb8…c0b6ff28f`) · **Basis:** gestapelt auf #112 (Spec 030, `721743f`), weil #112 noch offen ist · **Regel 0** gilt: der Weg, den das Repo schon geht, sonst die kleinste Änderung mit Eintrag hier. **Keine Budgets angehoben. Keine Änderung an der Optik der Eroj.** Getrennt von Spec 029 (Sitzung A).
+**Briefing:** [`briefing.md`](briefing.md) (Fassung vom 2026-10-24 mit Abschnitt ④, unverändert kopiert; SHA-256 `16bb1cf3…21514fa17`) · **Basis:** gestapelt auf #112 (Spec 030, `721743f`), weil #112 noch offen ist · **Regel 0** gilt: der Weg, den das Repo schon geht, sonst die kleinste Änderung mit Eintrag hier. **Keine Budgets angehoben. Keine Änderung an der Optik der Eroj.** Getrennt von Spec 029 (Sitzung A).
 
 **Branch:** `261024-nachlese-11-fehler-und-gewicht-d66050` (von `261023-spec-030-nordstern-826849`) · **Datum:** 2026-10-24 · **Stand:** gebaut, Messpunkt nach den Korrekturen vorhanden, Abnahme offen.
 
@@ -35,6 +35,13 @@
    - K5 zählt 25; K1, K4 und K6 je 16,67, K2 und K3 je 12,5.
    - Die Gewichte der Spec 030 stehen als `pezojAntauxaj` daneben. Jede Bewertung, jeder Bericht und der Verlauf der Metiejo zeigen beide.
    - Die 120 gespeicherten Ergebnisse des ersten Laufs sind neu bewertet. Die alte Gewichtung gibt jede gespeicherte Zahl wieder (0 abweichend).
+7. **④ Drei Messreihen** H, O und K:
+   - Grenzen je Anbieter als Einstellungen
+   - bei 429 warten statt abbrechen
+   - am Tageslimit pausieren und mit demselben Befehl fortsetzen
+   - Schätzung der Anfragen vor dem Start, Anfragen im Bericht
+   - Ausgangslinie O und K auf dem Stand von #112
+   - O-6: K2 liest die Bereiche einer Sxablono richtig, alle gespeicherten Läufe neu bewertet
 6. **③ Messpunkt nach ①:** Lauf `20261024-1201` mit `gpt-4.1-mini`, sonst wie der erste Lauf. Ergebnisse unter „Messpunkte“.
 
 ### Ursachen
@@ -142,29 +149,61 @@ Die 120 Ergebnisse sollen ohne neuen Lauf neu bewertet werden. Der Befund (`fakt
 - Ein gespeicherter Befund mit `slot="label"` ist so gerendert worden, wie es damals war: Das Feld hatte keinen Namen. Die Regel bleibt, damit die alte Gewichtung die gespeicherten Zahlen wiedergibt.
 - Neue Seiten tragen das Attribut nach dem Rendern nicht mehr, weil das Element es entfernt (D-02). Der Fund kommt dort nicht mehr vor.
 
+#### D-10 ④ Grenzen je Anbieter als Einstellungen des Laufs
+- `limoj.ts` führt die Grenzen der Reihen: Mistral 0,5 Anfragen je Sekunde, OpenRouter 1 000 je UTC-Tag, OpenAI keine. `--anfragen-sekunde` und `--anfragen-tag` ändern sie.
+- Jede Anfrage des Agenten geht durch eine Pforte (`Pordisto`): Sie hält den Abstand und zählt den Tag.
+- Gezählt wird in `.fundamento/nordstelo/anfragoj.json` (Anbieter und UTC-Tag; OpenRouter zählt nach UTC). So kennt der zweite Lauf eines Tages den ersten.
+- Anfragen außerhalb von `pnpm nordstelo` sieht das Buch nicht.
+
+#### D-11 ④ 429 ohne Abbruch
+- Bei 429 wartet der Agent 2 s, dann doppelt so lang bis höchstens 5 Minuten, und versucht es ohne Ende.
+- Ein Serverfehler, eine Zeitüberschreitung oder eine Antwort ohne Nachricht bekommt dieselben Abstände, aber höchstens 3 Versuche; danach zählt das Ergebnis 0 wie bisher (D-12 der Spec 030).
+- Das sind genau die Ausfälle der Ausgangslinie O.
+- Jede Wiederholung ist eine Anfrage und zählt gegen das Tageslimit.
+
+#### D-12 ④ Fortsetzen am nächsten Tag mit demselben Befehl
+- Ein Lauf schreibt `stato.json` (Commit, Anbieter, Modell, Aufgaben, Varianten, Wiederholungen, Sprache, `finita`).
+- Am Tageslimit hält er vor dem nächsten Ergebnis an. Er schreibt seinen Bericht mit „Pausiert“, aber noch keinen Eintrag im Verlauf.
+- Derselbe Befehl findet den offenen Lauf mit gleichem Commit, Modell und Plan und setzt im selben Ordner fort:
+  - Die fertigen Ergebnisse bleiben, ihre Tokens zählen gegen die Kostengrenze.
+  - Nur die offenen laufen.
+- Ein anderer Commit oder ein anderes Modell beginnt einen eigenen Ordner, damit kein Lauf zwei Stände mischt.
+
+#### D-13 ④ Schätzung vor dem Start, Anfragen im Bericht
+- Vor dem Start schätzt der Lauf:
+  - F-Ergebnis: Anfragen je F-Ergebnis aus früheren Läufen desselben Modells, sonst 25 (24 Werkzeugrunden und die Antwort)
+  - 0-Ergebnis: 1 Anfrage
+- Mit dem heutigen Stand des Buchs meldet er, ob das Tageslimit reicht, und wie viele Tage es sonst braucht.
+- `effort.requests` je Ergebnis; der Bericht nennt „Anfragen gesamt“ und den Median je Lauf.
+
+#### D-14 O-6: die Bereiche einer Sxablono nach Namen
+- K2 nimmt die Namen der Bereiche (`regions[].name`).
+- `restaro --skribi` hat alle fünf gespeicherten Läufe neu bewertet. Die gespeicherten `rezulto.json` bleiben, wie sie gemessen wurden (D-08); `restaro` meldet die betroffenen als abweichend.
+- Die Fixtures im Paket treffen keine Sxablono; ihr Test bleibt unverändert grün.
+
 ### Messpunkte
 
-Alle drei mit OpenAI `gpt-4.1-mini`, Temperatur 0,2, 20 Aufgaben × F und 0 × 3, Deutsch, Kostengrenze 15 000 000 Tokens. Gewichtung Spec 030 = ohne Tor, K5 10; Gewichtung Nachlese 11 = Markenfähigkeit als Tor, K5 25.
+Reihe H: OpenAI `gpt-4.1-mini`, Temperatur 0,2, 20 Aufgaben × F und 0 × 3, Deutsch, Kostengrenze 15 000 000 Tokens. Gewichtung Spec 030 = ohne Tor, K5 10; Gewichtung Nachlese 11 = Markenfähigkeit als Tor, K5 25. Alle Zahlen sind nach O-6 (B-8 behoben) neu bewertet; die Reihen O und K stehen unter „Messreihen H, O und K“.
 
 | | Ausgangslinie | nach den Korrekturen | nach der Fonto |
 |---|---|---|---|
 | Lauf | `20261024-0825` (neu bewertet) | `20261024-1201` | folgt nach dem Merge von Spec 029 ① |
 | Commit | `7e4ebe7` (Spec 030), Katalog `39a0391` | `39a0391` | – |
 | **F gegen 0, Gewichtung Nachlese 11** | **74,8 gegen 38** | **79,6 gegen 35,2** | – |
-| F gegen 0, Gewichtung Spec 030 | 71 gegen 74,3 | 75,6 gegen 71,4 | – |
-| Streuung F / 0, Nachlese 11 | 11 / 0 | 8,6 / 0 | – |
+| F gegen 0, Gewichtung Spec 030 | 71,5 gegen 74,3 (gemessen vor O-6: 71) | 75,6 gegen 71,4 | – |
+| Streuung F / 0, Nachlese 11 | 11 / 0 | 8,2 / 0 | – |
 | Streuung F / 0, Spec 030 | 13,2 / 19,3 | 9,5 / 9,6 | – |
 | Tokens ein / aus | 1 543 556 / 62 783 | 1 838 103 / 64 358 | – |
 | Tokens je Lauf F, Median (ein / aus) | 24 004 / 210,5 | 27 456 / 233,5 | – |
 | Ohne Seite | 2 (`benutzerverwaltung` F-1, F-2) | 0 | – |
-| Determinismus (`restaro`) | 120, 0 abweichend | 120, 0 abweichend | – |
+| `restaro` nach O-6 | 120, 7 abweichend (die von B-8 betroffenen) | 120, 8 abweichend (ebenso) | – |
 
 **Mittel je Kriterium, Variante F** (0–1; Nachlese 11, in Klammern Spec 030):
 
 | | K1 | K2 | K3 | K4 | K5 | K6 | Markenfähigkeit |
 |---|---|---|---|---|---|---|---|
-| Ausgangslinie | 0,93 | 0,68 | 0,52 | 0,45 (0,5) | 0,89 (0,94) | 0,48 | 0,95 |
-| nach den Korrekturen | 0,98 | 0,74 | 0,58 | 0,7 (0,73) | 0,95 (0,98) | 0,46 | 0,97 |
+| Ausgangslinie | 0,93 | 0,71 | 0,52 | 0,45 (0,5) | 0,89 (0,94) | 0,48 | 0,95 |
+| nach den Korrekturen | 0,98 | 0,78 | 0,58 | 0,7 (0,73) | 0,95 (0,98) | 0,46 | 0,97 |
 
 In Variante 0 sind K4 und K5 mit Tor bei beiden Messpunkten 0: Keine der je 60 Seiten folgt einer Marke oder setzt eine eigene Media-Query (`prefers-color-scheme`, `prefers-contrast`).
 
@@ -186,7 +225,7 @@ In Variante 0 sind K4 und K5 mit Tor bei beiden Messpunkten 0: Keine der je 60 S
 Gemessen ist damit:
 - **B-6 wirkt:** `color-contrast` fällt von 33 Seiten der Variante F auf 0.
 - **B-7 wirkt:** `benutzerverwaltung` F von 0 (0–77,1) auf 90,4 (85,9–95,8), kein Ergebnis ohne Seite. Alle drei Seiten schreiben wieder `<fm-tabelo>` mit einer `<table>` ohne Slot; das Element nimmt sie jetzt als Inhalt.
-- **Die neue Gewichtung trennt F und 0:** Mit dem Tor liegt F 44,4 Punkte vor 0, ohne Tor 4,2.
+- **Die neue Gewichtung trennt F und 0:** Mit dem Tor liegt F 44,4 Punkte vor 0, ohne Tor 4,2. In der Ausgangslinie H liegt F mit dem Tor 36,8 Punkte vor 0 (74,8 gegen 38), ohne Tor 2,8 dahinter (71,5 gegen 74,3).
 - **Die größte Lücke ist weiter die Beschriftung der Felder**, jetzt als `label`-Attribut am `kampo` (Plätze 1–4 und 7). B-2 hat den Slot geschlossen, nicht das Attribut (B-3 unten).
 - **Streuung:** Ein Lauf mit 3 Wiederholungen. Ein Teil der Bewegung je Aufgabe ist Streuung des Modells (`anmeldung` F 95,8 → 75, `ausleihe-assistent` mit einem Ergebnis 0). Der Vergleich gilt über den Median der Aufgaben, nicht je Aufgabe.
 
@@ -194,38 +233,42 @@ Die Berichte: `.fundamento/nordstelo/20261024-0825/restaro.md` (Ausgangslinie in
 
 ### Messreihen H, O und K
 
-Nachtrag des Maintainers vom 24.10. (Nachricht und Roadmap vom 24.10.): drei Reihen mit je eigenem Modell. Der Abschnitt ④ des Briefings lag bei der Bearbeitung noch nicht vor; die Datei ist unverändert (SHA-256 wie oben). Er wird unverändert übernommen, sobald er im Briefing steht.
+Abschnitt ④ des Briefings (Maintainer, 24.10.; in der Datei seit 18:40, unverändert übernommen): Jeder Messpunkt läuft in drei Reihen mit genauen Modellnamen.
 
-| Reihe | Modell | Wiederholungen |
-|---|---|---|
-| H | OpenAI `gpt-4.1-mini` | 3 |
-| O | OpenRouter `nvidia/nemotron-3-ultra-550b-a55b:free` | 1 (Entscheidung des Maintainers am 24.10.: Ein Lauf mit 3 Wiederholungen bräuchte etwa 40 Mio. Tokens und 1 250 Anfragen, mehr als Kostengrenze und freies Tageskontingent) |
-| K | Mistral `ministral-14b-2512` | 3 |
+| Reihe | Anbieter | Modell | Wiederholungen | Grenzen |
+|---|---|---|---|---|
+| Reihe H | OpenAI | `gpt-4.1-mini` | 3 | Kostengrenze |
+| Reihe O | OpenRouter | `nvidia/nemotron-3-ultra-550b-a55b:free` | 1 (Entscheidung des Maintainers am 24.10.: Mit 3 Wiederholungen wären es etwa 40 Mio. Tokens und 1 250 Anfragen je Lauf) | 1 000 Anfragen je UTC-Tag |
+| Reihe K | Mistral | `ministral-14b-2512` | 3 | 0,5 Anfragen je Sekunde |
 
-- **Ausgangslinie** = Stand von #112 (`721743f`): vor Nachlese 11, ohne Spec 029 ① (#111 nicht gemergt), in einem eigenen Worktree gebaut.
-- **Nach den Korrekturen** = `498001e` dieses Branches.
+- **Ausgangslinie** = Stand von #112 (`721743f`): vor Nachlese 11, ohne Spec 029 ①, in einem eigenen Worktree gebaut.
+- **Nach den Korrekturen** = `498001e` (H: `39a0391`, dieselben Korrekturen).
 - Kostengrenze 15 Mio. Tokens, Temperatur 0,2, Deutsch.
-- Alle Läufe sind mit `restaro --skribi` in beiden Gewichtungen bewertet, je 0 abweichend.
+- Alle Läufe sind nach O-6 mit `restaro --skribi` in beiden Gewichtungen neu bewertet. Abweichend sind genau die Ergebnisse, die B-8 betraf.
+- Anfragen zählen die Läufe erst seit ④ (`effort.requests`); die Läufe dieser Tabelle liefen vorher.
 
 | Reihe | Messpunkt | Lauf | F gegen 0, Nachlese 11 | F gegen 0, Spec 030 | Streuung F / 0 (N11) | Tokens ein / aus | ohne Seite |
 |---|---|---|---|---|---|---|---|
-| H | Ausgangslinie | `20261024-0825` | 74,8 gegen 38 | 71 gegen 74,3 | 11 / 0 | 1 543 556 / 62 783 | 2 |
-| H | nach den Korrekturen | `20261024-1201` | 79,6 gegen 35,2 | 75,6 gegen 71,4 | 8,6 / 0 | 1 838 103 / 64 358 | 0 |
-| K | Ausgangslinie | `20261024-1233` | 65,2 gegen 33,3 | 62,9 gegen 47,6 | 13,5 / 2,7 | 2 933 354 / 158 769 | 2 |
-| K | nach den Korrekturen | `20261024-1248` | 74,4 gegen 33,3 | 70,7 gegen 47,6 | 16,5 / 0 | 3 261 566 / 148 810 | 1 |
-| O | Ausgangslinie | `20261024-1422` | 63,2 gegen 33,3 | 57,5 gegen 46,5 | – (1 Wiederholung) | 15 059 836 / 135 529 | **13 von 40** |
-| O | nach den Korrekturen | folgt (freies Tageskontingent) | – | – | – | – | – |
+| Reihe H | Ausgangslinie | `20261024-0825` | **74,8 gegen 38** | 71,5 gegen 74,3 | 11 / 0 | 1 543 556 / 62 783 | 2 |
+| Reihe H | nach den Korrekturen | `20261024-1201` | 79,6 gegen 35,2 | 75,6 gegen 71,4 | 8,2 / 0 | 1 838 103 / 64 358 | 0 |
+| Reihe K | Ausgangslinie | `20261024-1233` | 66,7 gegen 33,3 | 64,4 gegen 47,6 | 12,9 / 2,7 | 2 933 354 / 158 769 | 2 |
+| Reihe K | nach den Korrekturen | `20261024-1248` | 75,1 gegen 33,3 | 72,9 gegen 47,6 | 18,5 / 0 | 3 261 566 / 148 810 | 1 |
+| Reihe O | Ausgangslinie, **schwach belegt** | `20261024-1422` | 64,8 gegen 33,3 | 59 gegen 46,5 | – (1 Wiederholung) | 15 059 836 / 135 529 | **13 von 40** |
+| Reihe O | Ausgangslinie, Wiederholung | folgt am 25.10. nach dem Tageswechsel, Worktree auf `721743f` | – | – | – | – | – |
+| Reihe O | nach den Korrekturen | folgt nach der Wiederholung | – | – | – | – | – |
 | H, O, K | nach der Fonto | folgt nach Spec 029 ① | – | – | – | – | – |
 
 - **K:**
   - `color-contrast` fällt von 29 Seiten der Variante F auf 0 (B-6).
   - Die Seite, die am `tabelo` hängen blieb (`werkzeugliste` F-2), ist weg (B-7).
   - Ein Ausfall danach ist eine Zeitüberschreitung des Anbieters.
-- **O, Ausgangslinie:**
+  - F steigt um 8,4 Punkte (Nachlese 11), 0 bleibt.
+- **O, Ausgangslinie schwach belegt** (O-7):
   - 13 von 40 Ergebnissen sind am Anbieter gescheitert und zählen 0 (D-12): sieben Mal Zeitüberschreitung nach 3 Minuten bei Variante 0, sechs Mal „Antwort ohne Nachricht“.
-  - Ohne diese Ausfälle (nur zur Einordnung, nicht die Methode): Nachlese 11 F 65,8 (n 15) gegen 0 38,9 (n 12); Spec 030 F 59,4 gegen 0 57,1.
-  - Die Ausgangslinie O ist damit schwach belegt.
-- **O, Messpunkt nach den Korrekturen:** Er folgt nach dem Tageswechsel des Kontingents. Heute sind etwa 600 der 1 000 freien Anfragen verbraucht (Probe, angehaltener erster Versuch, Ausgangslinie). Der angehaltene erste Versuch mit 3 Wiederholungen liegt außerhalb des Verlaufs unter `/tmp/n11-abgebrochen/`.
+  - Ohne diese Ausfälle (nur zur Einordnung): Nachlese 11 F 65,8 gegen 0 38,9.
+  - Die Wiederholung läuft am 25.10. auf `721743f`, also mit dem Werkzeug von damals (Abweichung 6).
+  - #111 wartet nicht darauf.
+- **Ersatz für O:** `thinkingmachines/inkling:free`, falls Nemotron nicht verfügbar ist. Bisher war Nemotron verfügbar; ein Wechsel stünde hier.
 
 ### Abweichungen
 
@@ -237,6 +280,10 @@ Nachtrag des Maintainers vom 24.10. (Nachricht und Roadmap vom 24.10.): drei Rei
 3. **Ereignisse nachgetragen, Verhalten unverändert:** Die 15 Skemoj und die `formularo` beschreiben jetzt, was ihr Element schon tut. Dafür hat das Schema `SxablonoSkemo` ein optionales `events`.
 4. **B-6 im Browser-Test in zwei Marken** (komuna, ekzemplo: der Build der Browser-Tests), im Lauf in allen vier. Der Wert ist eine Rolle, für jede Marke dieselbe Regel.
 5. **Messpunkt in den Checkout des Maintainers geschrieben** (`.fundamento/nordstelo/`, neben die Ausgangslinie), aus diesem Worktree auf dem Commit `39a0391`. Die `.env` habe ich nur gelesen.
+6. **Wiederholung der Ausgangslinie O mit dem Werkzeug von `721743f`** (Entscheidung des Maintainers, eigener Worktree):
+   - ohne Pforte, Fortsetzen und die längeren Wiederholungen aus ④
+   - mit `--ripetoj 1` etwa 430 Anfragen, das passt in einen Tag
+   - bewertet wird mit `restaro` dieses Branches
 
 ### Befunde / Mankoj
 
@@ -247,7 +294,7 @@ Nachtrag des Maintainers vom 24.10. (Nachricht und Roadmap vom 24.10.): drei Rei
 - **B-5, `fm-konsileto`:** Der Quelltext liest `[slot="trigger"]`, das Skemo kennt keinen solchen Slot. Es ist der gemeinsame Code der Overlays und wird nie erreicht; der Konformitätstest misst am Element und sieht das zu Recht nicht.
 - **B-6, Fehlermeldungen im Bericht:** „Ohne Seite“ trägt Steuerzeichen und Zeilen aus dem Fehler von Playwright. Das ist in Spec 030 so und nur kosmetisch.
 - **B-7, nur 3 von 60 Seiten der Variante F nutzen `fm-sxelo`**, wie im ersten Lauf (B-8 der Spec 030).
-- **B-8, Fehler in der Messung seit Spec 030: K2 liest die Bereiche einer Sxablono falsch.**
+- **B-8, Fehler in der Messung seit Spec 030: K2 las die Bereiche einer Sxablono falsch. Behoben (O-6).**
   - `score.ts` nimmt `Object.keys(regions)`, `regions` ist aber eine Liste. Damit gilt jeder `slot=` an einem Kind von `pagxo`, `formularo`, `sxelo`, `filtrilo` oder `redaktilo` als erfunden, auch ein richtiger.
   - Das bestraft Variante F gerade dann, wenn sie Sxablonoj nutzt.
   - Gemessen mit den Bereichen richtig gelesen (Skript außerhalb des Repos):
@@ -260,7 +307,9 @@ Nachtrag des Maintainers vom 24.10. (Nachricht und Roadmap vom 24.10.): drei Rei
     | K nach den Korrekturen | 32 | 74,4 → 75,1 | 70,7 → 72,9 | 0,66 → 0,75 |
     | O Ausgangslinie | 5 | 63,2 → 64,8 | 57,5 → 59 | 0,57 → 0,6 |
 
-  - Bei K sind 4 der Top-10-Lücken solche falschen Funde. Nicht behoben, weil die Korrektur die gespeicherten Zahlen der Spec 030 ändert (O-6).
+  - Bei K waren 4 der Top-10-Lücken solche falschen Funde.
+  - Seit O-6 liest K2 die Namen der Bereiche, und alle gespeicherten Läufe sind neu bewertet. Die Zahlen oben sind die korrigierten.
+  - Die Gewichtung Spec 030 gibt die Zahl der Spec 030 nur noch dort wieder, wo B-8 nicht traf (H Ausgangslinie F 71 → 71,5).
 
 ### Offen (für den Maintainer)
 
@@ -269,8 +318,8 @@ Nachtrag des Maintainers vom 24.10. (Nachricht und Roadmap vom 24.10.): drei Rei
 - **O-3, `fm-tekstareo` `change`** (B-3): Soll das Element `change` auslösen wie der `kampo`? Das wäre Verhalten des Ero, eigener PR.
 - **O-4, Fund „Standard-Slot“ in K2** (D-09): Ab dem nächsten Katalog entfernen? Bis dahin trifft er nur gespeicherte Befunde.
 - **O-5, Messpunkt 3:** nach dem Merge von Spec 029 ① derselbe Befehl wie unten (Schritt 4); auslösen kann Sitzung A oder der Maintainer.
-- **O-6, B-8 beheben?** Die Bereiche richtig lesen und alle gespeicherten Läufe mit `restaro --skribi` neu bewerten. Das geht deterministisch, ohne neue Läufe, für alle Reihen gleich; danach gibt die alte Gewichtung die Zahlen der Spec 030 nicht mehr byte-gleich wieder.
-- **O-7, Ausgangslinie O:** 13 von 40 Ausfällen am freien Anbieter. Vor dem Merge von #111 wiederholen? Das passt erst nach dem Tageswechsel ins Kontingent, und dann fehlt der Platz für den Messpunkt O nach den Korrekturen am selben Tag.
+- **O-6, entschieden (Maintainer, 24.10.):** B-8 behoben, alle gespeicherten Ergebnisse (H, O, K) neu bewertet (D-14).
+- **O-7, entschieden (Maintainer, 24.10.):** #111 wartet nicht. Die Ausgangslinie O wird am 25.10. nach dem Tageswechsel wiederholt, in einem Worktree auf `721743f`; bis dahin „schwach belegt“.
 
 ### Messanleitung
 
@@ -322,6 +371,27 @@ pnpm nordstelo --anbieter openai --modell gpt-4.1-mini --max-tokens 15000000
 ```
 
 Der Schlüssel kommt aus der `.env` des Checkouts und erscheint in keiner Zeile.
+
+**4a. Reihe O und K** (④). Ausgangslinie O wiederholen, am 25.10. nach dem Tageswechsel (O-7), auf dem Stand von #112:
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+git worktree add --detach /tmp/fundamento-721743f 721743fb
+cd /tmp/fundamento-721743f && pnpm install && pnpm build
+pnpm nordstelo --env /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.env --anbieter openrouter --modell nvidia/nemotron-3-ultra-550b-a55b:free --ripetoj 1 --max-tokens 15000000 --out /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/nordstelo
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm nordstelo restaro .fundamento/nordstelo/<Lauf> --skribi
+```
+
+Danach Reihe O nach den Korrekturen, auf diesem Branch. Am Tageslimit hält der Lauf an; derselbe Befehl setzt ihn am nächsten Tag fort:
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm nordstelo --anbieter openrouter --modell nvidia/nemotron-3-ultra-550b-a55b:free --ripetoj 1
+pnpm nordstelo --anbieter mistral --modell ministral-14b-2512
+```
+
+Vor dem Start nennt der Lauf seine Schätzung, etwa „Geschätzt 520 Anfragen; Tageslimit 1000, heute schon 600 verbraucht: reicht nicht …“. Die Berichte: `open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/nordstelo/20261024-1233/restaro.md"` (K) und `open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/nordstelo/20261024-1422/restaro.md"` (O).
 
 **5. B-3, B-2 und die Gewichtung als Tests.**
 
