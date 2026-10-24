@@ -7,14 +7,20 @@ import { mkdtempSync, readdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { NordsteloHistorio } from "@fundamento/metiejo";
-import { defaultModeloSource, loadModelo, type NordsteloFile } from "@fundamento/modelo";
+import {
+  defaultModeloSource,
+  loadModelo,
+  type Modelo,
+  type NordsteloFile,
+} from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import type { Budget } from "./agent.js";
 import { type RunDeps, runNordstelo } from "./run.js";
 import { facts, h } from "./test-doubles/facts.js";
 
-const { modelo } = loadModelo(defaultModeloSource());
-if (modelo === undefined) throw new Error("the repository Modelo must load");
+const loaded = loadModelo(defaultModeloSource()).modelo;
+if (loaded === undefined) throw new Error("the repository Modelo must load");
+const modelo: Modelo = loaded;
 const katalogo = JSON.parse(
   readFileSync(new URL("../../modelo/data/nordstelo.json", import.meta.url), "utf8"),
 ) as NordsteloFile;

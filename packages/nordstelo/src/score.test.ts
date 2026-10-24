@@ -76,6 +76,23 @@ describe("score (K1–K6)", () => {
     ).toEqual(["fm-knopf", "butono.variant", "butono.emphasis=huge", "kampo.slot=icon"]);
   });
 
+  it("K2: content in a slot named like the default slot is never shown and is a gap", () => {
+    const page = [
+      h(
+        "fm-formularo",
+        {},
+        h("fm-kampo", { kind: "email" }, h("span", { slot: "label" }, "E-Mail")),
+        h("fm-butono", { emphasis: "high", type: "submit" }, "Anmelden"),
+      ),
+    ];
+    const result = score(input({ facts: facts(page, GOOD_ARIA) }));
+    expect(result.gaps).toContainEqual({
+      kind: "invented-slot",
+      key: "kampo.slot=label (Standard-Slot)",
+    });
+    expect(result.k.K2).toBeLessThan(1);
+  });
+
   it("K3: a Regulo check_usage reports is a gap; two primary actions in one form", () => {
     const page = [
       h(

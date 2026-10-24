@@ -31,7 +31,8 @@
     "id:retire": "node packages/modelo/dist/ids/cli.js retire",
     "vortaro:themes": "node packages/modelo/dist/themes/cli.js",
     "vortaro:ero-tokenoj": "node packages/modelo/dist/eroj/ero-tokenoj-cli.js",
-    "fm": "node packages/cli/dist/index.js"
+    "fm": "node packages/cli/dist/index.js",
+    "nordstelo": "node packages/nordstelo/dist/cli.js"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",

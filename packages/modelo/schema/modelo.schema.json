@@ -197,12 +197,14 @@
         "sxablono",
         "projekcio",
         "celo",
-        "ikono"
+        "ikono",
+        "tasko",
+        "kriterio"
       ]
     },
     "AnyId": {
       "type": "string",
-      "pattern": "^(tok|set|dim|dva|reg|jug|man|kpa|ero|ske|uzo|sxa|prj|cel|iko)_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^(tok|set|dim|dva|reg|jug|man|kpa|ero|ske|uzo|sxa|prj|cel|iko|tsk|kri)_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "TokenId": {
       "type": "string",
@@ -4334,6 +4336,167 @@
         }
       },
       "required": ["ikonaro"],
+      "additionalProperties": false
+    },
+    "TaskoId": {
+      "type": "string",
+      "pattern": "^tsk_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "KriterioId": {
+      "type": "string",
+      "pattern": "^kri_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "NordsteloTeksto": {
+      "description": "A text in German and English (Spec 030): the task as a person would say it, or the criterion as the maintainer reads it.",
+      "type": "object",
+      "properties": {
+        "de": {
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "en": {
+          "$ref": "#/$defs/NonEmptyText"
+        }
+      },
+      "required": ["de", "en"],
+      "additionalProperties": false
+    },
+    "NordsteloKontrolo": {
+      "description": "How a criterion is decided on the facts of a rendered page (Spec 030, K6), deterministically. aria counts nodes of the accessibility tree by role, name (a case-insensitive regular expression) and level; named-fields asks that every field has a name; elemento counts elements of the page by a simple selector per variant (tag, [attr], [attr=value], comma for or) – a variant without a selector does not count; teksto looks for a regular expression in the text of the page.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["aria", "named-fields", "elemento", "teksto"]
+        },
+        "role": {
+          "type": "string",
+          "pattern": "^[a-z]+(\\|[a-z]+)*$"
+        },
+        "name": {
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6
+        },
+        "F": {
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "0": {
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "pattern": {
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "min": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": ["kind"],
+      "additionalProperties": false
+    },
+    "Kriterio": {
+      "description": "One acceptance criterion of a Tasko (Spec 030): checkable, and tied to the Regulo it stands for, whose kialo is the reason.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/KriterioId"
+        },
+        "regulo": {
+          "$ref": "#/$defs/Name"
+        },
+        "teksto": {
+          "$ref": "#/$defs/NordsteloTeksto"
+        },
+        "kontrolo": {
+          "$ref": "#/$defs/NordsteloKontrolo"
+        }
+      },
+      "required": ["id", "regulo", "teksto", "kontrolo"],
+      "additionalProperties": false
+    },
+    "Tasko": {
+      "description": "One task of the north-star catalogue (Spec 030): what a context-free agent is asked to build, in everyday words, the Sxablono and the Eroj a good answer uses, and the criteria of acceptance.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/TaskoId"
+        },
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "teksto": {
+          "$ref": "#/$defs/NordsteloTeksto"
+        },
+        "sxablono": {
+          "$ref": "#/$defs/Name"
+        },
+        "eroj": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "kriterioj": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Kriterio"
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["id", "name", "teksto", "sxablono", "eroj", "kriterioj"],
+      "additionalProperties": false
+    },
+    "Pezo": {
+      "description": "The weight of one criterion of the score (K1–K6, Spec 030) with its reason; K7, the effort, is reported and never weighted.",
+      "type": "object",
+      "properties": {
+        "kriterio": {
+          "type": "string",
+          "enum": ["K1", "K2", "K3", "K4", "K5", "K6"]
+        },
+        "pezo": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "kialo": {
+          "$ref": "#/$defs/NordsteloTeksto"
+        }
+      },
+      "required": ["kriterio", "pezo", "kialo"],
+      "additionalProperties": false
+    },
+    "NordsteloFile": {
+      "description": "data/nordstelo.json: the catalogue of tasks of the north-star measure and the weights of the score (Spec 030); absent while there is none.",
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "taskoj": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Tasko"
+          }
+        },
+        "pezoj": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Pezo"
+          }
+        }
+      },
+      "required": ["taskoj", "pezoj"],
       "additionalProperties": false
     }
   }

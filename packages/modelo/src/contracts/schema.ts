@@ -31,6 +31,7 @@ export const SCHEMA_DEFS = {
   gvidantoFile: "GvidantoFile",
   tradukoj: "Tradukoj",
   tradukojFile: "TradukojFile",
+  nordsteloFile: "NordsteloFile",
   sxablono: "Sxablono",
   sxablonoFile: "SxablonoFile",
   sxablonoUzoFile: "SxablonoUzoFile",
@@ -63,6 +64,8 @@ export const OPTIONAL_DATA_FILE_SCHEMA_DEFS = {
   "gvidanto.json": "GvidantoFile",
   // Nachlese 8 ③: the translations of the texts of the Uzoj and the Reguloj.
   "tradukoj.json": "TradukojFile",
+  // Spec 030: the catalogue of tasks of the north-star measure and the weights of its score.
+  "nordstelo.json": "NordsteloFile",
 } as const;
 
 export type OptionalDataFileName = keyof typeof OPTIONAL_DATA_FILE_SCHEMA_DEFS;

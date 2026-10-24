@@ -7,6 +7,7 @@ import {
   Budget,
   CostLimitReached,
   extractHtml,
+  flattenSchema,
   providerOf,
   runAgent,
   type ToolBridge,
@@ -189,5 +190,28 @@ describe("runAgent", () => {
     });
     await expect(run).rejects.toBeInstanceOf(CostLimitReached);
     expect(budget.spent).toBe(1200);
+  });
+});
+
+describe("flattenSchema", () => {
+  it("merges top-level branches into one object for providers that take no oneOf", () => {
+    expect(
+      flattenSchema({
+        $schema: "x",
+        type: "object",
+        properties: { lingvo: { type: "string" } },
+        oneOf: [
+          { properties: { name: { type: "string" } }, required: ["name"] },
+          { properties: { id: { type: "string" } }, required: ["id"] },
+        ],
+      }),
+    ).toEqual({
+      type: "object",
+      properties: { lingvo: { type: "string" }, name: { type: "string" }, id: { type: "string" } },
+    });
+    expect(flattenSchema({ type: "object", properties: {} })).toEqual({
+      type: "object",
+      properties: {},
+    });
   });
 });

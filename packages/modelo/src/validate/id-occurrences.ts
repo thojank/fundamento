@@ -107,6 +107,19 @@ export function collectIdOccurrences(files: ModeloFiles): IdOccurrence[] {
     }
   }
 
+  // Spec 030: every Tasko of the catalogue carries a tsk_ ID, each of its criteria a kri_ ID.
+  const nordstelo = files.data["nordstelo.json"];
+  if (nordstelo !== undefined) {
+    for (const { entry, index } of rawEntries(nordstelo.value, "taskoj")) {
+      const pointer = `/taskoj/${index}`;
+      add("tasko", nordstelo.file, pointer, entry, pointer);
+      for (const { entry: kriterio, index: k } of rawEntries(entry, "kriterioj")) {
+        const inner = `${pointer}/kriterioj/${k}`;
+        add("kriterio", nordstelo.file, inner, kriterio, inner);
+      }
+    }
+  }
+
   // Spec 003: each Ero file holds an Ero and its Skemo, two entities with their own IDs.
   for (const document of files.eroj) {
     const value = isJsonObject(document.value) ? document.value : undefined;

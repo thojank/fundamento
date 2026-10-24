@@ -52,6 +52,7 @@ import {
   storeUpload,
   writeDraft,
 } from "./marko.js";
+import { NORDSTELO_DIR, type NordsteloHistorio, nordsteloScreen } from "./nordstelo.js";
 import { type PrivataDeps, privataState, uploadFont } from "./privata.js";
 import { composeDraft, isStudioPage, kombinationOf, studioRows, studioScreen } from "./studio.js";
 import {
@@ -245,6 +246,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     "dist",
   );
   const vitrinoDir = join(options.root, ".fundamento", "projekcioj", "vitrino");
+  const nordsteloDir = join(options.root, ...NORDSTELO_DIR);
   const stand = options.stand ?? standOf(options.root);
   const privata = privataState(options.settings);
   const ikonoGewichte = ["regular", ...Object.keys(bases.structure.ikonoGewichte?.glyphs ?? {})];
@@ -810,6 +812,23 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     }
     if (method === "GET" && path.startsWith("/vitrino/")) {
       sendStatic(response, vitrinoDir, path.slice("/vitrino/".length));
+      return;
+    }
+    // Spec 030: the north-star measure over time, and the pages and screenshots of its runs.
+    if (method === "GET" && path === "/nordstelo") {
+      const file = join(nordsteloDir, "historio.json");
+      const historio: NordsteloHistorio = existsSync(file)
+        ? (JSON.parse(readFileSync(file, "utf8")) as NordsteloHistorio)
+        : { kuroj: [] };
+      sendHtml(response, nordsteloScreen(historio));
+      return;
+    }
+    if (method === "GET" && path.startsWith("/nordstelo/dosiero/")) {
+      sendStatic(
+        response,
+        nordsteloDir,
+        decodeURIComponent(path.slice("/nordstelo/dosiero/".length)),
+      );
       return;
     }
 
