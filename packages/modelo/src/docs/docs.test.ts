@@ -3545,9 +3545,11 @@ describe("Spec 029 ②a documentation (specs/029-fonto-astryx)", () => {
     vorschlag: string;
     begruendung: string;
     entscheidung: string | null;
+    auflage?: string;
     achsen?: { name: string; werte: string[]; fonto?: string; neu: boolean }[];
   };
   type Abgleich = {
+    stand: string;
     fonto: {
       id: string;
       lizenz: string;
@@ -3688,6 +3690,83 @@ describe("Spec 029 ②a documentation (specs/029-fonto-astryx)", () => {
     const text = read("specs/029-fonto-astryx/abgleich.json");
     expect(text).not.toMatch(/#[0-9a-fA-F]{6}\b/);
     expect(text).not.toMatch(/\b\d+(\.\d+)?(px|rem)\b/);
+  });
+
+  // Briefing A (Maintainer 24.10., „alles wie empfohlen"): the proposal of every row is its decision
+  // (②a-1); the exceptions ②a-2 to ②a-6 stand beside the decision as an auflage of their rows.
+  const AUFLAGEN: Record<string, string> = {
+    "A-elekto-2": "②a-2",
+    "A-markobutono-2": "②a-2",
+    "A-sxaltilo-2": "②a-2",
+    "M-1": "②a-3",
+    "A-datelektilo-1": "②a-3",
+    "A-elektilo-4": "②a-3",
+    "A-langetaro-4": "②a-3",
+    "A-ligilo-6": "②a-3",
+    "A-spuro-6": "②a-3",
+    "A-tekstareo-1": "②a-3",
+    "A-kodbloko-6": "②a-3",
+    "A-mezurilo-5": "②a-4",
+    "A-plenstato-6": "②a-5",
+    "A-tabelo-1": "②a-6",
+  };
+  const zeilen = (data: Abgleich): Zeile[] => [
+    ...data.muster,
+    ...data.eroj.flatMap((entry) => entry.zeilen),
+  ];
+
+  it("the briefing of 24.10. is copied unchanged", () => {
+    const briefing = read("specs/029-fonto-astryx/briefing-a-2026-10-24.md");
+    expect(createHash("sha256").update(briefing).digest("hex")).toBe(
+      "b1095dedf2e8caec9dc03268edf3aa339f7e88dc7896de23798df28d286c8626",
+    );
+  });
+
+  it("every row is decided as proposed (②a-1), as of 24.10.", () => {
+    const data = abgleich();
+    expect(data.stand).toBe("2026-10-24");
+    const open = zeilen(data).filter((zeile) => zeile.entscheidung !== zeile.vorschlag);
+    expect(open.map((zeile) => zeile.id)).toEqual([]);
+    expect(zeilen(data)).toHaveLength(254);
+  });
+
+  it("the exceptions ②a-2 to ②a-6 stand as an auflage on their rows, and on no other", () => {
+    const data = abgleich();
+    const found = Object.fromEntries(
+      zeilen(data)
+        .filter((zeile) => zeile.auflage !== undefined)
+        .map((zeile) => [zeile.id, zeile.auflage ?? ""]),
+    );
+    expect(Object.keys(found).sort()).toEqual(Object.keys(AUFLAGEN).sort());
+    for (const [id, punkt] of Object.entries(AUFLAGEN)) {
+      expect(found[id], id).toContain(`(${punkt})`);
+      expect(found[id]?.length ?? 0, id).toBeGreaterThan(30);
+    }
+    for (const id of ["A-elekto-2", "A-markobutono-2", "A-sxaltilo-2"]) {
+      expect(found[id], id).toMatch(/`large`.*Alias.*`medium`.*veraltet/);
+    }
+    expect(found["A-kodbloko-6"]).toContain("②b");
+    expect(found["A-mezurilo-5"]).toContain("Eroj-Runde 6");
+    expect(found["A-plenstato-6"]).toContain("Eroj-Runde 6");
+  });
+
+  it("the axis of the table lines is `lines`, not `rules` (②a-6: Reguloj)", () => {
+    const data = abgleich();
+    const achsen = [...data.muster, ...data.eroj.flatMap((entry) => entry.zeilen)].flatMap(
+      (zeile) => zeile.achsen ?? [],
+    );
+    expect(achsen.map((achse) => achse.name)).not.toContain("rules");
+    const tabelo = data.eroj.find((entry) => entry.ero === "tabelo")?.zeilen[0];
+    expect(tabelo?.achsen?.find((achse) => achse.name === "lines")).toEqual({
+      name: "lines",
+      werte: ["rows", "columns", "grid", "none"],
+      fonto: "dividers",
+      neu: true,
+    });
+    const plan = read("specs/029-fonto-astryx/plan.md");
+    expect(plan).toContain("### Entscheidungen vom 24.10.");
+    expect(plan).toContain("`lines`");
+    expect(plan).not.toMatch(/`tone`, `rules`/);
   });
 
   it("the plan shows every row with its proposal, the patterns, the missing genera and the guide; tasks the red commit", () => {
