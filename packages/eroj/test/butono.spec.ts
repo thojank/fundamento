@@ -261,3 +261,63 @@ test("every size is at least size.target.min wide and high in every density and 
     }
   }
 });
+
+// Spec 029 ①b c) (Abnahme ① des Maintainers, 27.10.): a disabled butono with emphasis=high showed
+// no text — label and fill resolved to the same grey in komuna. The text of a disabled element
+// stays visible: pale, but readable. The Fonto draws „disabled“ as its own variant at half the
+// opacity (measured 3,3–4:1 between text and fill); komuna keeps at least 3:1, in both schemes.
+test("komuna: a disabled butono shows its label in every emphasis × intent × size, at least 3:1 against its fill, light and dark", async ({
+  page,
+}) => {
+  const combos = combinationsOf(skemo, ["emphasis", "intent", "size"]);
+  await serve(
+    page,
+    out,
+    combos
+      .map(
+        (c, i) =>
+          `<fm-butono id="d${i}" emphasis="${c.emphasis}" intent="${c.intent}" size="${c.size}" disabled>Aktion</fm-butono>`,
+      )
+      .join(" "),
+  );
+  const parse = (value: string): number[] => {
+    const parts = value.match(/[\d.]+/g)?.map(Number) ?? [];
+    return [parts[0] ?? 0, parts[1] ?? 0, parts[2] ?? 0, parts[3] ?? 1];
+  };
+  const over = (top: number[], bottom: number[]): number[] =>
+    [0, 1, 2].map((i) => (top[i] ?? 0) * (top[3] ?? 1) + (bottom[i] ?? 0) * (1 - (top[3] ?? 1)));
+  const luminance = (rgb: number[]): number =>
+    rgb
+      .map((c) => c / 255)
+      .map((c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
+      .reduce((sum, c, i) => sum + c * ([0.2126, 0.7152, 0.0722][i] ?? 0), 0);
+  const ratio = (a: number[], b: number[]): number => {
+    const [high, low] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+    return ((high ?? 0) + 0.05) / ((low ?? 0) + 0.05);
+  };
+  const faint: string[] = [];
+  for (const scheme of ["light", "dark"]) {
+    await page.evaluate((value) => {
+      document.documentElement.setAttribute("data-fm-aspekto", "komuna");
+      document.documentElement.setAttribute("data-fm-color-scheme", value);
+    }, scheme);
+    for (const [i, c] of combos.entries()) {
+      const seen = await page.locator(`#d${i}`).evaluate((element) => {
+        const control = element.shadowRoot?.querySelector('[part="control"]');
+        const style = control === null || control === undefined ? null : getComputedStyle(control);
+        return {
+          page: getComputedStyle(document.body).backgroundColor,
+          fill: style?.backgroundColor ?? "",
+          color: style?.color ?? "",
+          opacity: style?.opacity ?? "1",
+        };
+      });
+      const ground = parse(seen.page);
+      const fill = over(parse(seen.fill), ground);
+      const text = over(parse(seen.color), fill);
+      const contrast = ratio(text, fill);
+      if (contrast < 3) faint.push(`${scheme} ${JSON.stringify(c)} ${contrast.toFixed(2)}:1`);
+    }
+  }
+  expect(faint).toEqual([]);
+});

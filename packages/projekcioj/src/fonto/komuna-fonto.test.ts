@@ -50,15 +50,41 @@ describe("Spec 029 ① 2: komuna after theme-neutral", () => {
     expect(hex(light, "color.palette.danger.150")).toBe("#ffc4be");
   });
 
-  it("the hierarchy of the surfaces, adapted where a Regulo or an Aspiro wins (Jugxo)", () => {
-    // Hell: Seite 90 < Fläche 95 < Karte 97,5 (die Fonto: Weiß, Aspiro oklch-l-extreme).
-    expect(hex(light, "color.background.canvas")).toBe("#e2e2e2");
-    expect(hex(light, "color.background.default")).toBe("#f1f1f1");
-    expect(hex(light, "color.background.sunken")).toBe("#d4d4d4");
-    // Dunkel: Fläche 15 wie die Fonto, Karte eine Stufe heller (surface-order), Seite 10.
+  // Spec 029 ①b a) (Maintainer 27.10., ①-1 neu): white is allowed. The Aspiro oklch-l-extreme no
+  // longer binds komuna (komuna-0-2 keeps it); surface-distinct and surface-order still do.
+  it("the hierarchy of the surfaces: the card white, the page as the Fonto, adapted where a Regulo wins (Jugxo)", () => {
+    // Hell: Karte Weiß (Fonto), Fläche 97,5 (surface-distinct: 0,02 unter der Karte), Seite 95
+    // (Fonto, Körper), vertiefte Fläche 90 (surface-distinct unter der Seite).
+    expect(hex(light, "color.background.raised")).toBe("#ffffff");
+    expect(hex(light, "color.background.canvas")).toBe("#f1f1f1");
+    expect(hex(light, "color.background.default")).toBe(hex(light, "color.palette.neutral.25"));
+    expect(hex(light, "color.background.sunken")).toBe(hex(light, "color.palette.neutral.100"));
+    // Dunkel: Fläche 15 wie die Fonto, Karte eine Stufe heller (surface-order), Seite 10; die
+    // inverse Fläche ist Weiß wie bei der Fonto.
     expect(hex(dark, "color.background.default")).toBe("#262626");
     expect(hex(dark, "color.background.canvas")).toBe("#1b1b1b");
     expect(hex(dark, "color.background.raised")).toBe("#303030");
+    expect(hex(dark, "color.background.inverse")).toBe("#ffffff");
+    // Gedrückt geht bei der ersten Aktion hell bis Schwarz, eine Stufe weiter als hover.
+    expect(hex(light, "color.action.primary.pressed")).toBe("#000000");
+    expect(hex(light, "color.action.primary.hover")).not.toBe(
+      hex(light, "color.action.primary.pressed"),
+    );
+  });
+
+  it("the Aspiro oklch-l-extreme binds komuna-0-2, no longer komuna; J1 names the decision of 27.10.", () => {
+    const aspiroj = (name: string) =>
+      (modelo.aspektoj.find((aspekto) => aspekto.name === name)?.aspiroj ?? []).map(
+        (aspiro) => aspiro.metriko,
+      );
+    expect(aspiroj("komuna")).not.toContain("oklch-l-extreme");
+    const malnova = JSON.parse(
+      readFileSync(new URL("../../../aspekto-komuna-0-2/aspekto.json", import.meta.url), "utf8"),
+    ) as { aspiroj?: { metriko: string }[] };
+    expect((malnova.aspiroj ?? []).map((aspiro) => aspiro.metriko)).toContain("oklch-l-extreme");
+    const j1 = modelo.jugxoj.find((jugxo) => jugxo.id === "jug_01M5N89C1TWQ57VAQD0V6V4KR7");
+    expect(j1?.kialo).toContain("27.10.");
+    expect(j1?.kialo).not.toContain("Aspiro oklch-l-extreme von komuna hält");
   });
 
   it("typography: base 14 and ratio 1.2 of the Fonto, families of komuna", () => {

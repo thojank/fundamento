@@ -679,13 +679,32 @@ describe("the Vitrino shows the Ikonaro and the Grundbausteine (Spec 014 ②)", 
     expect(html).toContain('id="fm-vitrino-ikono"');
   });
 
-  it("the butono carries the example icon in its icon-start slot in every cell; the ligilo none", () => {
+  // Spec 029 ①b d) (Maintainer 27.10.): like the Fonto and like Figma (Spec 027 B-6), the examples
+  // carry no icon by default; one row of its own shows the variants with an icon.
+  it("butono, ligilo and signeto show no icon in their rows; one row „mit Icon“ shows the variants with one", () => {
+    const rowOf = (section: string, head: string) =>
+      section.split("<tr>").find((row) => row.startsWith(`<th scope="row">${head}</th>`)) ?? "";
     const butono = datumoj.eroj.butono ?? "";
-    expect(butono).toContain('<fm-ikono slot="icon-start" name="check"></fm-ikono>');
-    expect((butono.match(/<fm-butono /g) ?? []).length).toBe(
-      (butono.match(/<fm-ikono slot="icon-start"/g) ?? []).length,
+    const withIcon = rowOf(butono, "mit Icon");
+    expect(withIcon).not.toBe("");
+    expect(butono.replace(withIcon, "")).not.toContain("<fm-ikono");
+    for (const variant of [
+      'emphasis="high" intent="neutral"',
+      'emphasis="high" intent="danger"',
+      'emphasis="medium" intent="neutral"',
+      'emphasis="low" intent="neutral"',
+    ]) {
+      expect(withIcon, variant).toContain(variant);
+    }
+    expect((withIcon.match(/<fm-butono /g) ?? []).length).toBe(
+      (withIcon.match(/<fm-ikono slot="icon-start" name="check"><\/fm-ikono>/g) ?? []).length,
     );
-    expect(datumoj.eroj.ligilo ?? "").not.toContain("<fm-ikono");
+    const ligilo = datumoj.eroj.ligilo ?? "";
+    expect(ligilo.replace(rowOf(ligilo, "mit Icon"), "")).not.toContain("<fm-ikono");
+    expect(rowOf(ligilo, "mit Icon")).toContain('<fm-ikono slot="icon-end"');
+    const signeto = datumoj.eroj.signeto ?? "";
+    expect(signeto.replace(rowOf(signeto, "mit Icon"), "")).not.toContain("<fm-ikono");
+    expect(rowOf(signeto, "mit Icon")).toContain('<fm-ikono slot="icon-start"');
   });
 
   it("the apartigilo stands in both orientations, the saltligilo in one row pointing at its section", () => {
