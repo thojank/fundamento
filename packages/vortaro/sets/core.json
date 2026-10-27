@@ -1817,7 +1817,7 @@
     },
     "background": {
       "default": {
-        "$value": "{color.palette.neutral.50}",
+        "$value": "{color.palette.neutral.25}",
         "$description": "Default surface background.",
         "$extensions": {
           "com.ciferecigo.fundamento": {
@@ -1827,7 +1827,7 @@
         }
       },
       "canvas": {
-        "$value": "{color.palette.neutral.100}",
+        "$value": "{color.palette.neutral.50}",
         "$description": "Page canvas behind surfaces.",
         "$extensions": {
           "com.ciferecigo.fundamento": {
@@ -1837,7 +1837,7 @@
         }
       },
       "raised": {
-        "$value": "{color.palette.neutral.25}",
+        "$value": "{color.palette.neutral.0}",
         "$description": "Raised surface such as a card or menu.",
         "$extensions": {
           "com.ciferecigo.fundamento": {
@@ -1847,7 +1847,7 @@
         }
       },
       "sunken": {
-        "$value": "{color.palette.neutral.150}",
+        "$value": "{color.palette.neutral.100}",
         "$description": "Sunken area such as a well or input track.",
         "$extensions": {
           "com.ciferecigo.fundamento": {
@@ -2026,7 +2026,7 @@
           }
         },
         "pressed": {
-          "$value": "{color.palette.neutral.975}",
+          "$value": "{color.palette.neutral.1000}",
           "$description": "Primary action: fill while pressed.",
           "$extensions": {
             "com.ciferecigo.fundamento": {
@@ -2036,7 +2036,7 @@
           }
         },
         "selected": {
-          "$value": "{color.palette.neutral.975}",
+          "$value": "{color.palette.neutral.1000}",
           "$description": "Primary action: fill when selected.",
           "$extensions": {
             "com.ciferecigo.fundamento": {

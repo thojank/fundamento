@@ -8,11 +8,8 @@
       "dosiero": "packages/themes/neutral/src/neutralTheme.ts",
       "sxlosilo": "--color-background-body (light: neutral.light[95]) – Seite (body)",
       "fontoValoro": "#f1f1f1",
-      "valoro": "{color.palette.neutral.100}",
-      "maniero": "adaptita",
-      "jugxo": "jug_01M5N89C1TWQ57VAQD0V6V4KR7",
-      "kialo": "Die Seite der Fonto (95) gleicht der vertieften Fläche und, nach der Anpassung, der Fläche. surface-distinct verlangt 0,02 zwischen benachbarten Flächen: die Seite ist eine Stufe dunkler (90).",
-      "noto": "Fonto-Stufe wäre neutral.50"
+      "valoro": "{color.palette.neutral.50}",
+      "maniero": "prenita"
     },
     {
       "token": "color.background.canvas",
@@ -31,10 +28,10 @@
       "dosiero": "packages/themes/neutral/src/neutralTheme.ts",
       "sxlosilo": "--color-background-surface (light: neutral.light[100]) – Fläche (surface)",
       "fontoValoro": "#ffffff",
-      "valoro": "{color.palette.neutral.50}",
+      "valoro": "{color.palette.neutral.25}",
       "maniero": "adaptita",
       "jugxo": "jug_01M5N89C1TWQ57VAQD0V6V4KR7",
-      "kialo": "Die Fläche der Fonto ist reines Weiß. Das Aspiro oklch-l-extreme von komuna lässt höchstens 0,98 zu, und die Karte braucht 0,02 Abstand darüber: die Fläche ist Stufe 95 der Fonto.",
+      "kialo": "Die Fläche der Fonto ist reines Weiß wie die Karte. surface-distinct verlangt 0,02 zwischen Fläche und Karte: die Karte bleibt Weiß wie bei der Fonto, die Fläche nimmt die nächste Stufe darunter (97,5). Entscheidung des Maintainers vom 27.10. (①-1 neu): Weiß ist erlaubt, das Aspiro oklch-l-extreme gilt für komuna nicht mehr.",
       "noto": "Fonto-Stufe wäre neutral.0"
     },
     {
@@ -54,11 +51,8 @@
       "dosiero": "packages/themes/neutral/src/neutralTheme.ts",
       "sxlosilo": "--color-background-card (light: neutral.light[100]) – Karte (card)",
       "fontoValoro": "#ffffff",
-      "valoro": "{color.palette.neutral.25}",
-      "maniero": "adaptita",
-      "jugxo": "jug_01M5N89C1TWQ57VAQD0V6V4KR7",
-      "kialo": "Die Karte der Fonto ist reines Weiß wie die Fläche. Das Aspiro oklch-l-extreme von komuna hält jede Fläche mindestens 0,02 von Weiß entfernt, und surface-distinct verlangt 0,02 zwischen Fläche und Karte: die Karte ist die hellste erlaubte Stufe (97,5).",
-      "noto": "Fonto-Stufe wäre neutral.0"
+      "valoro": "{color.palette.neutral.0}",
+      "maniero": "prenita"
     },
     {
       "token": "color.background.raised",
@@ -80,10 +74,10 @@
       "dosiero": "packages/themes/neutral/src/neutralTheme.ts",
       "sxlosilo": "--color-background-muted (light: neutral.light[95]) – vertiefte Fläche (muted)",
       "fontoValoro": "#f1f1f1",
-      "valoro": "{color.palette.neutral.150}",
+      "valoro": "{color.palette.neutral.100}",
       "maniero": "adaptita",
       "jugxo": "jug_01M5N89C1TWQ57VAQD0V6V4KR7",
-      "kialo": "Die vertiefte Fläche der Fonto (muted, 95) gleicht der Seite. surface-distinct verlangt 0,02 Abstand: sie ist eine Stufe unter der Seite (85).",
+      "kialo": "Die vertiefte Fläche der Fonto (muted, 95) gleicht der Seite. surface-distinct verlangt 0,02 Abstand: sie ist eine Stufe unter der Seite (90).",
       "noto": "Fonto-Stufe wäre neutral.50"
     },
     {
@@ -118,11 +112,8 @@
       "dosiero": "packages/core/src/theme/tokens.stylex.ts",
       "sxlosilo": "--color-background-inverted (dark: #FFFFFF) – inverse Fläche (core)",
       "fontoValoro": "#ffffff",
-      "valoro": "{color.palette.neutral.25}",
-      "maniero": "adaptita",
-      "jugxo": "jug_01M5N89C1TWQ57VAQD0V6V4KR7",
-      "kialo": "Die inverse Fläche der Fonto ist im Dunkeln reines Weiß. Das Aspiro oklch-l-extreme von komuna hält jede Fläche 0,02 von Weiß entfernt: Stufe 97,5.",
-      "noto": "Fonto-Stufe wäre neutral.0"
+      "valoro": "{color.palette.neutral.0}",
+      "maniero": "prenita"
     },
     {
       "token": "color.text.default",
@@ -472,10 +463,10 @@
       "dosiero": "packages/themes/neutral/src/neutralTheme.ts",
       "sxlosilo": "--color-overlay-pressed (light: neutral.light[0] + 1A) über --color-accent (light: neutral.light[10]) – Button primary + overlay-pressed",
       "fontoValoro": "#181818",
-      "valoro": "{color.palette.neutral.975}",
+      "valoro": "{color.palette.neutral.1000}",
       "maniero": "adaptita",
       "jugxo": "jug_01M5N89C1WQ308F9302JTZRVZH",
-      "kialo": "Die Fonto legt 10 % Schwarz über die Aktion; das bleibt unter 0,05 Abstand. Reines Schwarz verbietet das Aspiro oklch-l-extreme: gedrückt nimmt wie hover die Stufe 2,5.",
+      "kialo": "Die Fonto legt 10 % Schwarz über die Aktion; das bleibt unter 0,05 Abstand. Gedrückt geht eine Stufe weiter als hover in dieselbe Richtung, bis Schwarz. Entscheidung des Maintainers vom 27.10. (①-1 neu): Weiß ist erlaubt, das Aspiro oklch-l-extreme gilt für komuna nicht mehr.",
       "noto": "Fonto-Stufe wäre neutral.900"
     },
     {
@@ -498,7 +489,7 @@
       "dosiero": "packages/themes/neutral/src/neutralTheme.ts",
       "sxlosilo": "--color-overlay-pressed (light: neutral.light[0] + 1A) über --color-accent (light: neutral.light[10]) – wie pressed",
       "fontoValoro": "#181818",
-      "valoro": "{color.palette.neutral.975}",
+      "valoro": "{color.palette.neutral.1000}",
       "maniero": "adaptita",
       "jugxo": "jug_01M5N89C1WQ308F9302JTZRVZH",
       "kialo": "Wie gedrückt.",

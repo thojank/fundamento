@@ -73,15 +73,14 @@ describe("Spec 029 ① 2: komuna after theme-neutral", () => {
   });
 
   it("the Aspiro oklch-l-extreme binds komuna-0-2, no longer komuna; J1 names the decision of 27.10.", () => {
-    const aspiroj = (name: string) =>
-      (modelo.aspektoj.find((aspekto) => aspekto.name === name)?.aspiroj ?? []).map(
-        (aspiro) => aspiro.metriko,
-      );
-    expect(aspiroj("komuna")).not.toContain("oklch-l-extreme");
-    const malnova = JSON.parse(
-      readFileSync(new URL("../../../aspekto-komuna-0-2/aspekto.json", import.meta.url), "utf8"),
-    ) as { aspiroj?: { metriko: string }[] };
-    expect((malnova.aspiroj ?? []).map((aspiro) => aspiro.metriko)).toContain("oklch-l-extreme");
+    const aspiroj = (dir: string) =>
+      (
+        JSON.parse(
+          readFileSync(new URL(`../../../${dir}/aspekto.json`, import.meta.url), "utf8"),
+        ) as { aspiroj?: { metriko: string }[] }
+      ).aspiroj?.map((aspiro) => aspiro.metriko) ?? [];
+    expect(aspiroj("aspekto-komuna")).not.toContain("oklch-l-extreme");
+    expect(aspiroj("aspekto-komuna-0-2")).toContain("oklch-l-extreme");
     const j1 = modelo.jugxoj.find((jugxo) => jugxo.id === "jug_01M5N89C1TWQ57VAQD0V6V4KR7");
     expect(j1?.kialo).toContain("27.10.");
     expect(j1?.kialo).not.toContain("Aspiro oklch-l-extreme von komuna hält");

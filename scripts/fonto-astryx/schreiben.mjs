@@ -731,7 +731,7 @@ const jugxoj = [
     id: J.flaechenHell,
     ref: { regulo: REG.surfaceDistinct },
     kialo:
-      "Die Fonto legt Fläche und Karte als reines Weiß auf eine Seite in Stufe 95. Das Aspiro oklch-l-extreme von komuna hält jede Fläche 0,02 von Weiß und Schwarz entfernt, und surface-distinct verlangt 0,02 zwischen benachbarten Flächen. Die Regel gewinnt (Art. V, Fonto 5): die Karte ist die hellste erlaubte Stufe (97,5), die Fläche Stufe 95, die Seite 90, die vertiefte Fläche 85; die inverse Fläche im Dunkeln 97,5 statt Weiß.",
+      "Die Fonto legt Fläche und Karte als reines Weiß auf eine Seite in Stufe 95, die vertiefte Fläche gleicht der Seite. Seit der Entscheidung des Maintainers vom 27.10. (①-1 neu) ist Weiß für komuna erlaubt; das Aspiro oklch-l-extreme gilt für komuna nicht mehr (komuna-0-2 behält es). surface-distinct verlangt weiter 0,02 zwischen benachbarten Flächen. Die Regel gewinnt (Art. V, Fonto 5): die Karte ist Weiß wie bei der Fonto, die Fläche die Stufe darunter (97,5), die Seite 95 wie bei der Fonto, die vertiefte Fläche 90. (Vom 23. bis 27.10. galt: Karte 97,5, Fläche 95, Seite 90, vertiefte Fläche 85, inverse Fläche im Dunkeln 97,5 – wegen des Aspiro.)",
   },
   {
     id: J.flaechenDunkel,
@@ -755,7 +755,7 @@ const jugxoj = [
     id: J.zustaende,
     ref: { regulo: REG.stateDistinct },
     kialo:
-      "Die Fonto zeigt hover und gedrückt mit 5 % und 10 % Überlagerung. Das ändert die Helligkeit um weniger als 0,02; state-distinct verlangt 0,05, und eine Stufe der Fonto hat 0,043. Die Zustände gehen deshalb eine oder zwei Stufen weiter, in der Richtung der Fonto, wo der Kontrast der Schrift es erlaubt, sonst in der anderen; reines Schwarz verbietet das Aspiro oklch-l-extreme, und die zweite Aktion bleibt im Dunkeln gedrückt auf der Stufe von hover, damit weiße Schrift 4,5:1 hält. Die gewählte dritte Aktion ist bei der Fonto eine Überlagerung; eine dauerhafte Wahl ist bei Fundamento eine Fläche (Befund Spec 004): deckend, die Überlagerung der Fonto auf der Fläche.",
+      "Die Fonto zeigt hover und gedrückt mit 5 % und 10 % Überlagerung. Das ändert die Helligkeit um weniger als 0,02; state-distinct verlangt 0,05, und eine Stufe der Fonto hat 0,043. Die Zustände gehen deshalb eine oder zwei Stufen weiter, in der Richtung der Fonto, wo der Kontrast der Schrift es erlaubt, sonst in der anderen; gedrückt geht bei der ersten Aktion hell bis Schwarz (seit 27.10. erlaubt, ①-1 neu), und die zweite Aktion bleibt im Dunkeln gedrückt auf der Stufe von hover, damit weiße Schrift 4,5:1 hält. Die gewählte dritte Aktion ist bei der Fonto eine Überlagerung; eine dauerhafte Wahl ist bei Fundamento eine Fläche (Befund Spec 004): deckend, die Überlagerung der Fonto auf der Fläche.",
   },
   {
     id: J.status,

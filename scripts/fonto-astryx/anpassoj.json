@@ -1,11 +1,5 @@
 {
  "color.background.raised": {
-  "light": {
-   "step": "neutral.25",
-   "aspiro": "oklch-l-extreme",
-   "regulo": "surface-distinct",
-   "kialo": "Die Karte der Fonto ist reines Weiß wie die Fläche. Das Aspiro oklch-l-extreme von komuna hält jede Fläche mindestens 0,02 von Weiß entfernt, und surface-distinct verlangt 0,02 zwischen Fläche und Karte: die Karte ist die hellste erlaubte Stufe (97,5)."
-  },
   "dark": {
    "step": "neutral.800",
    "regulo": "surface-order",
@@ -14,24 +8,16 @@
  },
  "color.background.default": {
   "light": {
-   "step": "neutral.50",
-   "aspiro": "oklch-l-extreme",
+   "step": "neutral.25",
    "regulo": "surface-distinct",
-   "kialo": "Die Fläche der Fonto ist reines Weiß. Das Aspiro oklch-l-extreme von komuna lässt höchstens 0,98 zu, und die Karte braucht 0,02 Abstand darüber: die Fläche ist Stufe 95 der Fonto."
-  }
- },
- "color.background.canvas": {
-  "light": {
-   "step": "neutral.100",
-   "regulo": "surface-distinct",
-   "kialo": "Die Seite der Fonto (95) gleicht der vertieften Fläche und, nach der Anpassung, der Fläche. surface-distinct verlangt 0,02 zwischen benachbarten Flächen: die Seite ist eine Stufe dunkler (90)."
+   "kialo": "Die Fläche der Fonto ist reines Weiß wie die Karte. surface-distinct verlangt 0,02 zwischen Fläche und Karte: die Karte bleibt Weiß wie bei der Fonto, die Fläche nimmt die nächste Stufe darunter (97,5). Entscheidung des Maintainers vom 27.10. (①-1 neu): Weiß ist erlaubt, das Aspiro oklch-l-extreme gilt für komuna nicht mehr."
   }
  },
  "color.background.sunken": {
   "light": {
-   "step": "neutral.150",
+   "step": "neutral.100",
    "regulo": "surface-distinct",
-   "kialo": "Die vertiefte Fläche der Fonto (muted, 95) gleicht der Seite. surface-distinct verlangt 0,02 Abstand: sie ist eine Stufe unter der Seite (85)."
+   "kialo": "Die vertiefte Fläche der Fonto (muted, 95) gleicht der Seite. surface-distinct verlangt 0,02 Abstand: sie ist eine Stufe unter der Seite (90)."
   },
   "dark": {
    "step": "neutral.950",
@@ -53,10 +39,9 @@
  },
  "color.action.primary.pressed": {
   "light": {
-   "step": "neutral.975",
+   "step": "neutral.1000",
    "regulo": "state-distinct",
-   "aspiro": "oklch-l-extreme",
-   "kialo": "Die Fonto legt 10 % Schwarz über die Aktion; das bleibt unter 0,05 Abstand. Reines Schwarz verbietet das Aspiro oklch-l-extreme: gedrückt nimmt wie hover die Stufe 2,5."
+   "kialo": "Die Fonto legt 10 % Schwarz über die Aktion; das bleibt unter 0,05 Abstand. Gedrückt geht eine Stufe weiter als hover in dieselbe Richtung, bis Schwarz. Entscheidung des Maintainers vom 27.10. (①-1 neu): Weiß ist erlaubt, das Aspiro oklch-l-extreme gilt für komuna nicht mehr."
   },
   "dark": {
    "step": "neutral.200",
@@ -66,9 +51,8 @@
  },
  "color.action.primary.selected": {
   "light": {
-   "step": "neutral.975",
+   "step": "neutral.1000",
    "regulo": "state-distinct",
-   "aspiro": "oklch-l-extreme",
    "kialo": "Wie gedrückt."
   },
   "dark": {
@@ -181,13 +165,6 @@
    "valoro": 1.5,
    "regulo": "type-rhythm",
    "kialo": "Wie body.2: label.2 (14 px) nimmt die Zeilenhöhe 1,5 von label.1 (16 px)."
-  }
- },
- "color.background.inverse": {
-  "dark": {
-   "step": "neutral.25",
-   "aspiro": "oklch-l-extreme",
-   "kialo": "Die inverse Fläche der Fonto ist im Dunkeln reines Weiß. Das Aspiro oklch-l-extreme von komuna hält jede Fläche 0,02 von Weiß entfernt: Stufe 97,5."
   }
  },
  "color.border.default": {

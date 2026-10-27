@@ -189,7 +189,7 @@
         "$value": "{color.palette.neutral.950}"
       },
       "inverse": {
-        "$value": "{color.palette.neutral.25}"
+        "$value": "{color.palette.neutral.0}"
       }
     },
     "text": {
