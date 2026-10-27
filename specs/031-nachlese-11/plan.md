@@ -254,8 +254,8 @@ Abschnitt ④ des Briefings (Maintainer, 24.10.; in der Datei seit 18:40, unver�
 | Reihe K | Ausgangslinie | `20261024-1233` | 66,7 gegen 33,3 | 64,4 gegen 47,6 | 12,9 / 2,7 | 2 933 354 / 158 769 | 2 |
 | Reihe K | nach den Korrekturen | `20261024-1248` | 75,1 gegen 33,3 | 72,9 gegen 47,6 | 18,5 / 0 | 3 261 566 / 148 810 | 1 |
 | Reihe O | Ausgangslinie, **schwach belegt** | `20261024-1422` | 64,8 gegen 33,3 | 59 gegen 46,5 | – (1 Wiederholung) | 15 059 836 / 135 529 | **13 von 40** |
-| Reihe O | Ausgangslinie, Wiederholung | folgt am 25.10. nach dem Tageswechsel, Worktree auf `721743f` | – | – | – | – | – |
-| Reihe O | nach den Korrekturen | folgt nach der Wiederholung | – | – | – | – | – |
+| Reihe O | Ausgangslinie, Wiederholung (T3118, 27.10.) | `20261027-1500` | 0 gegen 33,3 | 0 gegen 50 | – | 10 223 950 / 95 433 | **19 von 40** (13 von 20 F) |
+| Reihe O | nach den Korrekturen (T3113, 27.10.) | `20261027-1535` | **89 gegen 16,7** | 86,8 gegen 21,5 | – | 13 872 095 / 182 553, 459 Anfragen | **10 von 40** (alle in 0) |
 | H, O, K | nach der Fonto | folgt nach Spec 029 ① | – | – | – | – | – |
 
 - **K:**
@@ -268,6 +268,19 @@ Abschnitt ④ des Briefings (Maintainer, 24.10.; in der Datei seit 18:40, unver�
   - Ohne diese Ausfälle (nur zur Einordnung): Nachlese 11 F 65,8 gegen 0 38,9.
   - Die Wiederholung läuft am 25.10. auf `721743f`, also mit dem Werkzeug von damals (Abweichung 6).
   - #111 wartet nicht darauf.
+- **O, beide Ausgangslinien und der Messpunkt sind von Ausfällen am freien Anbieter bestimmt**, nicht von Fundamento:
+  - `20261024-1422`: 13 von 40 ohne Seite
+  - `20261027-1500`: 19 von 40, davon 13 von 20 in F, alle „Antwort ohne Nachricht“; das Werkzeug von `721743f` versucht leere Antworten nicht erneut, der Median von F ist deshalb 0
+  - `20261027-1535`: F vollständig, weil die leeren Antworten (8 Mal) mit D-11 erneut versucht wurden; 10 von 20 Ergebnissen in 0 mit Zeitüberschreitung (B-9)
+  - Zur Einordnung, nur die Ergebnisse mit Seite, Nachlese 11 (Spec 030):
+
+    | Lauf | F | 0 |
+    |---|---|---|
+    | `1422` | 66,4 (59,7), n 15 | 38,9 (57,1), n 12 |
+    | `1500` | 69,9 (63,9), n 7 | 38,9 (57,1), n 14 |
+    | `1535` | 89 (86,8), n 20 | 41,6 (68,8), n 10 |
+  - Ein Vergleich der Reihe O über die Messpunkte ist so nicht belastbar (O-8).
+- **Kontingent am 27.10.:** T3118 lief mit dem alten Werkzeug, das keine Anfragen zählt. Aus seinen Ergebnissen sind 520 Anfragen geschätzt und in `anfragoj.json` eingetragen, eher zu hoch. T3113 hat 459 gezählt (Stand 990 von 1 000) und brauchte keine Pause; die Schätzung vor dem Start sagte richtig „reicht nicht“ und rechnete mit dem ungünstigsten Fall von 25 Anfragen je F.
 - **Ersatz für O:** `thinkingmachines/inkling:free`, falls Nemotron nicht verfügbar ist. Bisher war Nemotron verfügbar; ein Wechsel stünde hier.
 
 ### Abweichungen
@@ -294,6 +307,10 @@ Abschnitt ④ des Briefings (Maintainer, 24.10.; in der Datei seit 18:40, unver�
 - **B-5, `fm-konsileto`:** Der Quelltext liest `[slot="trigger"]`, das Skemo kennt keinen solchen Slot. Es ist der gemeinsame Code der Overlays und wird nie erreicht; der Konformitätstest misst am Element und sieht das zu Recht nicht.
 - **B-6, Fehlermeldungen im Bericht:** „Ohne Seite“ trägt Steuerzeichen und Zeilen aus dem Fehler von Playwright. Das ist in Spec 030 so und nur kosmetisch.
 - **B-7, nur 3 von 60 Seiten der Variante F nutzen `fm-sxelo`**, wie im ersten Lauf (B-8 der Spec 030).
+- **B-9, Zeitüberschreitung beim Lesen der Antwort ohne erneuten Versuch** (gemessen am 27.10. in `20261027-1535`, behoben in diesem Branch):
+  - OpenRouter schickt die Kopfzeilen sofort und die Antwort später; die Zeitgrenze von 3 Minuten fällt deshalb beim Lesen des Inhalts.
+  - Das lag außerhalb des Versuchs von D-11, und 10 Ergebnisse der Variante 0 zählten 0.
+  - Jetzt gehört das Lesen zum Versuch (Test mit einem Inhalt, der mit `TimeoutError` endet).
 - **B-8, Fehler in der Messung seit Spec 030: K2 las die Bereiche einer Sxablono falsch. Behoben (O-6).**
   - `score.ts` nimmt `Object.keys(regions)`, `regions` ist aber eine Liste. Damit gilt jeder `slot=` an einem Kind von `pagxo`, `formularo`, `sxelo`, `filtrilo` oder `redaktilo` als erfunden, auch ein richtiger.
   - Das bestraft Variante F gerade dann, wenn sie Sxablonoj nutzt.
@@ -319,6 +336,9 @@ Abschnitt ④ des Briefings (Maintainer, 24.10.; in der Datei seit 18:40, unver�
 - **O-4, Fund „Standard-Slot“ in K2** (D-09): Ab dem nächsten Katalog entfernen? Bis dahin trifft er nur gespeicherte Befunde.
 - **O-5, Messpunkt 3:** nach dem Merge von Spec 029 ① derselbe Befehl wie unten (Schritt 4); auslösen kann Sitzung A oder der Maintainer.
 - **O-6, entschieden (Maintainer, 24.10.):** B-8 behoben, alle gespeicherten Ergebnisse (H, O, K) neu bewertet (D-14).
+- **O-8, Reihe O neu messen?** Mit B-9 behoben fallen die Zeitüberschreitungen nicht mehr ins Ergebnis. Je Messpunkt sind es etwa 460 Anfragen, also ein Lauf je Tag. Vorschlag:
+  - Messpunkt nach den Korrekturen am nächsten Tag neu (überschreibt nichts, eigener Ordner)
+  - die Ausgangslinie mit dem Werkzeug dieses Branches gegen den Stand von #112 (Eroj, CSS, Gvidanto von `721743f`). Das wäre eine Änderung am Werkzeug, die der Auftrag nicht vorsieht (Abweichung 6).
 - **O-7, entschieden (Maintainer, 24.10.):** #111 wartet nicht. Die Ausgangslinie O wird am 25.10. nach dem Tageswechsel wiederholt, in einem Worktree auf `721743f`; bis dahin „schwach belegt“.
 
 ### Messanleitung

@@ -83,8 +83,14 @@
   - Bericht mit Anfragen
   - CLI mit `--anfragen-sekunde`, `--anfragen-tag` und `anfragoj.json`
 - [x] **T3117 Neu bewertet nach O-6:** `restaro --skribi` für `20261024-0825`, `-1201`, `-1233`, `-1248`, `-1422`. Abweichend 7, 8, 27, 32, 5, genau die von B-8 betroffenen Ergebnisse.
-- [ ] **T3118 Ausgangslinie O wiederholen** am 25.10. nach dem Tageswechsel, Worktree auf `721743f` (O-7).
-- [ ] **T3113 O nach den Korrekturen:** nach T3118, auf diesem Branch.
+- [x] **T3118 Ausgangslinie O wiederholt** am 27.10., Worktree auf `721743f`: `20261027-1500`.
+  - 19 von 40 ohne Seite, Nachlese 11 F 0 gegen 0 33,3, Spec 030 F 0 gegen 0 50
+  - 520 Anfragen geschätzt und ins Tagesbuch eingetragen
+- [x] **T3113 O nach den Korrekturen** am 27.10. auf `56c7266`: `20261027-1535`.
+  - Nachlese 11 F 89 gegen 0 16,7, Spec 030 F 86,8 gegen 0 21,5
+  - 459 Anfragen, keine Pause
+  - 10 von 40 ohne Seite (Zeitüberschreitung in 0); `restaro` 0 abweichend; kein Schlüssel in Dateien oder Logs
+- [x] **T3119 B-9:** Zeitüberschreitung beim Lesen der Antwort gehört zum Versuch. Rot in einem eigenen Commit, grün im Folgecommit.
 - [ ] **T3109 Messpunkt nach der Fonto:** nach dem Merge von Spec 029 ① (Sitzung A oder Maintainer), Messanleitung Schritt 4.
 - [x] **T3110 Doku:**
   - plan: Zusammenfassung, Ursachen, D-01–D-09, Messpunkte, Abweichungen 1–5, B-1–B-7, O-1–O-5, Messanleitung

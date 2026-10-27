@@ -258,7 +258,9 @@ describe("④ a timeout while the answer is read is tried again (measured at Ope
         if (calls === 1) {
           const body = new ReadableStream({
             start(controller) {
-              controller.error(new DOMException("The operation was aborted due to timeout", "TimeoutError"));
+              controller.error(
+                new DOMException("The operation was aborted due to timeout", "TimeoutError"),
+              );
             },
           });
           return new Response(body, { status: 200 });

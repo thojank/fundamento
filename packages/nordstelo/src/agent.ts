@@ -252,6 +252,7 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
       await options.gate?.pass();
       requests += 1;
       let response: Response;
+      let text: string;
       try {
         response = await request(`${provider.baseUrl}/chat/completions`, {
           method: "POST",
@@ -259,6 +260,9 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
           body: JSON.stringify(body),
           signal: AbortSignal.timeout(options.timeout ?? 180_000),
         });
+        // OpenRouter sends its headers at once and the answer later: the timeout falls on the body
+        // (measured on 27.10.), so reading it belongs to the attempt.
+        text = await response.text();
       } catch (error) {
         const timedOut = error instanceof Error && error.name === "TimeoutError";
         if (timedOut && transient < TRANSIENT_ATTEMPTS) {
@@ -268,7 +272,6 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
         }
         throw error;
       }
-      const text = await response.text();
       if (!response.ok) {
         if (response.status === 429) {
           await again("antwortet 429");
