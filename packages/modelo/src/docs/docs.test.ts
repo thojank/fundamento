@@ -3357,6 +3357,26 @@ describe("Spec 029 ① documentation (specs/029-fonto-astryx)", () => {
     expect(read("specs/029-fonto-astryx/tasks.md")).toContain("①-6");
   });
 
+  // Briefing A ①b (Maintainer 27.10., Abnahme ① nicht bestanden): copied unchanged; plan and tasks
+  // carry ①b with its Jugxoj and the path of the local comparison page.
+  it("the briefing ①b of 27.10. is copied unchanged; plan and tasks carry ①b, its Jugxoj and the comparison page", () => {
+    const briefing = read("specs/029-fonto-astryx/briefing-a-1b-2026-10-27.md");
+    expect(createHash("sha256").update(briefing).digest("hex")).toBe(
+      "b4a83e80e05c24addee348bcd8e043191c743ff55d7c77249942ca10c53aa994",
+    );
+    const plan = read("specs/029-fonto-astryx/plan.md");
+    for (const term of [
+      "## ①b",
+      "### Jugxo-Liste ①b",
+      "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/vergleich/index.html",
+      "node scripts/fonto-astryx/vergleich/vergleich.mjs",
+      "node scripts/fonto-astryx/eroj.mjs",
+    ]) {
+      expect(plan, term).toContain(term);
+    }
+    expect(read("specs/029-fonto-astryx/tasks.md")).toContain("①b");
+  });
+
   it("the Constitution is v2.4 with the Fonto in Art. V, VII, the terminology and the history", () => {
     const constitution = read(".specify/memory/constitution.md");
     expect(constitution).toContain("Version 2.4 · 2026-10-23");
