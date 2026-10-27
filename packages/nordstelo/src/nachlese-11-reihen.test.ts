@@ -238,3 +238,41 @@ describe("④ at the daily limit the run keeps its state and continues with the 
     expect(fresh.id).not.toBe(paused.id);
   });
 });
+
+describe("④ a timeout while the answer is read is tried again (measured at OpenRouter, 27.10.)", () => {
+  it("OpenRouter sends its headers at once and the answer later: the timeout falls on the body", async () => {
+    const provider = providerOf({
+      FM_KI_ANBIETER: "openrouter",
+      FM_KI_MODELL: "nvidia/nemotron-3-ultra-550b-a55b:free",
+      OPENROUTER_API_KEY: "sk-test-0123456789",
+    });
+    let calls = 0;
+    const result = await runAgent({
+      provider,
+      task: "Baue",
+      variant: "0",
+      budget: { ensure() {}, charge() {} } as unknown as Budget,
+      sleep: async () => {},
+      fetch: async () => {
+        calls += 1;
+        if (calls === 1) {
+          const body = new ReadableStream({
+            start(controller) {
+              controller.error(new DOMException("The operation was aborted due to timeout", "TimeoutError"));
+            },
+          });
+          return new Response(body, { status: 200 });
+        }
+        return new Response(
+          JSON.stringify({
+            choices: [{ message: { role: "assistant", content: "<main>x</main>" } }],
+            usage: { prompt_tokens: 10, completion_tokens: 5 },
+          }),
+          { status: 200 },
+        );
+      },
+    });
+    expect(result.html).toBe("<main>x</main>");
+    expect(result.effort.requests).toBe(2);
+  });
+});
