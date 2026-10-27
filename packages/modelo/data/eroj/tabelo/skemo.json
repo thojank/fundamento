@@ -219,6 +219,12 @@
         "Space"
       ]
     },
+    "events": [
+      {
+        "name": "sort-change",
+        "description": "A sortable header was pressed (detail: column, direction); sorting itself is the application's, the table shows sort and direction."
+      }
+    ],
     "goals": [
       {
         "goal": "table",

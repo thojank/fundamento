@@ -608,7 +608,8 @@ const SORT_SIGN = '<fm-ikono name="sort-ascending" size="small"></fm-ikono>';
  * pierces shadow roots finds the composing Ero's control alone).
  */
 function iconMarkup(): string {
-  return '<span part="glyph"></span><slot hidden></slot><span id="fm-texts" hidden></span>';
+  // Nachlese 11 B-2: no default slot — the Skemo of an icon has none; a detached slot stands in.
+  return '<span part="glyph"></span><span id="fm-texts" hidden></span>';
 }
 
 /**
@@ -681,7 +682,7 @@ const SUGGESTION_ROW = '<div part="suggestion" role="option" aria-selected="fals
 
 /** The shadow markup of a separator (Spec 014 ②, plan ② D-06): the line, nothing else. */
 function separatorMarkup(): string {
-  return '<div part="control"></div><slot hidden></slot><span id="fm-texts" hidden></span>';
+  return '<div part="control"></div><span id="fm-texts" hidden></span>';
 }
 
 /**
@@ -743,7 +744,7 @@ const TAB_ROW = '<button part="tab" role="tab" type="button"><slot></slot></butt
  * picture once it has loaded, else the initials.
  */
 function avatarMarkup(): string {
-  return '<span part="control"><img part="image" alt="" hidden><span part="initials" aria-hidden="true"></span></span><slot hidden></slot><span id="fm-texts" hidden></span>';
+  return '<span part="control"><img part="image" alt="" hidden><span part="initials" aria-hidden="true"></span></span><span id="fm-texts" hidden></span>';
 }
 
 /**
@@ -956,6 +957,14 @@ export function elementSource({
   const namedSlots = slots
     .filter((slot) => slot.default !== true && slot.decorative !== true)
     .map((slot) => slot.name);
+  // Nachlese 11 B-2: the name the Skemo gives the default slot. Content with slot="<that name>"
+  // is the default slot's, as the default region of a Sxablono takes both forms.
+  const defaultSlot = slots.find((slot) => slot.default === true)?.name;
+  // Nachlese 11 B-7: the region slot of a light host (the content of the tabelo), the slot the
+  // platform's table belongs in (lightMarkup reads it the same way).
+  const contentSlot = isLight
+    ? slots.find((slot) => slot.default !== true && slot.text !== true)?.name
+    : undefined;
   // Only the element of a toggle carries these lines (Spec 010 ①, D-09; ②, D-08).
   const toggleRender = isToggle
     ? `    // A toggle (Spec 010 ①, D-09): checked is spoken as aria-checked; in a form it sends "on"
@@ -1404,9 +1413,12 @@ ${
   /** The text of the error slot: the message of the form while the field is invalid. */
   #errorText(): string {
     const slot = this.shadowRoot?.querySelector('slot[name="error"]');
+    // Nachlese 11 B-7: a table or a list in the default slot is never part of a caption: its text
+    // written into the caption would change the slot it is read from, without end.
     return slot instanceof HTMLSlotElement
       ? slot
           .assignedNodes({ flatten: true })
+          .filter((node) => !(node instanceof HTMLTableElement || node instanceof HTMLDListElement))
           .map((node) => node.textContent ?? "")
           .join("")
           .trim()
@@ -2107,8 +2119,33 @@ ${
     return node instanceof HTMLElement ? node : undefined;
   }
 
-  /** Writes what the Ero adds to the native element; every write first compares. */
-  #decorate(): void {
+${
+  contentSlot === undefined
+    ? ""
+    : `  /**
+   * Nachlese 11 B-7: the platform's table belongs in the slot ${contentSlot}. One table without a slot,
+   * and none in the slot, is the content all the same — unambiguous, so it moves there. Two, or one
+   * beside a slotted one, stay out of sight, and the console says the markup; never a loop.
+   */
+  #adoptContent(): void {
+    const loose = [...this.children].filter(
+      (child) => child.tagName.toLowerCase() === "table" && !child.hasAttribute("slot"),
+    );
+    if (loose.length === 0) return;
+    const slotted = [...this.children].some((child) => child.getAttribute("slot") === "${contentSlot}");
+    const [only] = loose;
+    if (loose.length === 1 && !slotted && only !== undefined) {
+      only.setAttribute("slot", "${contentSlot}");
+      return;
+    }
+    warn(
+      \`${tag}: \${loose.length} table element(s) without slot="${contentSlot}" are not shown; one table per element, the caption as text without a slot, the table written <table slot="${contentSlot}">\`,
+    );
+  }
+
+`
+}  /** Writes what the Ero adds to the native element; every write first compares. */
+  #decorate(): void {${contentSlot === undefined ? "" : "\n    this.#adoptContent();"}
     const table = this.#native("table");
     if (table !== undefined) this.#decorateTable(table);
     const list = this.#native("dl");
@@ -2258,9 +2295,12 @@ ${
   /** The text a slot holds (the default slot as ""), trimmed; empty without content. */
   #slotText(name: string): string {
     const slot = this.shadowRoot?.querySelector(name === "" ? "slot:not([name])" : \`slot[name="\${name}"]\`);
+    // Nachlese 11 B-7: a table or a list in the default slot is never part of a caption: its text
+    // written into the caption would change the slot it is read from, without end.
     return slot instanceof HTMLSlotElement
       ? slot
           .assignedNodes({ flatten: true })
+          .filter((node) => !(node instanceof HTMLTableElement || node instanceof HTMLDListElement))
           .map((node) => node.textContent ?? "")
           .join("")
           .trim()
@@ -5287,6 +5327,8 @@ const DESCRIPTION = (("description" in SKEMO.a11y ? SKEMO.a11y.description : [])
 const HAS_PROP = new Set(PROPS.map((prop) => prop.name));
 /** The named slots of the Skemo, decorative ones aside: a live region shows each while it has content. */
 const NAMED_SLOTS: readonly string[] = ${JSON.stringify(namedSlots)};
+/** The name the Skemo gives the default slot (Nachlese 11 B-2); slot="<it>" means the default slot. */
+const DEFAULT_SLOT: string | undefined = ${defaultSlot === undefined ? "undefined" : JSON.stringify(defaultSlot)};
 /**
  * What assistive technology hears while an enum prop has a value (Spec 011 ③, D-07): the texts
  * keyed <prop>-<value> — the kind of a notice ("Fehler:"), "lädt" while loading.
@@ -5372,7 +5414,9 @@ ${autoField}${isAvatar ? '  /** The picture an avatar shows and whether it has l
     ${
       // Spec 025 ③ (plan ③ D-18): an inline editor has no label slot — its name is the prop label
       // (a11y.name prop:label); a detached slot stands in, so the element keeps one shape.
-      isEditor
+      // Nachlese 11 B-2: so does every Ero whose Skemo has no default slot (ikono, avataro,
+      // apartigilo, lokredaktilo): the element offers no slot the Skemo does not name.
+      isEditor || defaultSlot === undefined
         ? 'const label = root.querySelector("slot:not([name])") ?? document.createElement("slot");'
         : 'const label = root.querySelector("slot:not([name])");'
     }
@@ -5391,7 +5435,19 @@ ${autoField}${isAvatar ? '  /** The picture an avatar shows and whether it has l
     this.#label = label;
     this.#texts = texts;
     control.addEventListener("click", (event) => this.#activate(event));
-${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${datepickerInit}${chipInit}${listInit}${editorInit}${uploadInit}${sliderInit}${fieldExtrasInit}${avatarInit}${isCodeblock ? codeblockInit : ""}${skipInit}    label.addEventListener("slotchange", () => this.#render());
+${
+  defaultSlot === undefined
+    ? ""
+    : `    // Nachlese 11 B-2: a child in the slot the Skemo names default (slot="label") is content of the
+    // default slot, as the Skemo, the Gvidanto and the Make Kit name it; the attribute goes.
+    new MutationObserver(() => this.#adoptDefault()).observe(this, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["slot"],
+    });
+`
+}${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${datepickerInit}${chipInit}${listInit}${editorInit}${uploadInit}${sliderInit}${fieldExtrasInit}${avatarInit}${isCodeblock ? codeblockInit : ""}${skipInit}    label.addEventListener("slotchange", () => this.#render());
     for (const named of root.querySelectorAll("slot[name]")) {
       named.addEventListener("slotchange", () => this.#render());
     }
@@ -5412,11 +5468,22 @@ ${
 }${invalidReport}${inputEnter}  }
 
   connectedCallback(): void {
-${connectHost}${isGroup || isTabs || isMenu ? "    this.#assign();\n" : ""}    this.#render();
+${defaultSlot === undefined ? "" : "    this.#adoptDefault();\n"}${connectHost}${isGroup || isTabs || isMenu ? "    this.#assign();\n" : ""}    this.#render();
   }
 
   attributeChangedCallback(): void {
     this.#render();
+  }${
+    defaultSlot === undefined
+      ? ""
+      : `
+
+  /** Children in slot="\${DEFAULT_SLOT}" belong to the default slot (Nachlese 11 B-2). */
+  #adoptDefault(): void {
+    for (const child of this.children) {
+      if (child.getAttribute("slot") === DEFAULT_SLOT) child.removeAttribute("slot");
+    }
+  }`
   }
 ${autoDisconnect}
   /**

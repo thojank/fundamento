@@ -991,6 +991,78 @@
       ]
     },
     {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Tasko",
+      "term": "Tasko",
+      "inScheme": "modelo",
+      "notation": "tasko",
+      "prefLabel": {
+        "eo": "Tasko",
+        "en": "task",
+        "de": "Aufgabe"
+      },
+      "altLabel": {
+        "en": [
+          "task",
+          "north-star task",
+          "agent task"
+        ],
+        "de": [
+          "Aufgabe",
+          "Nordstern-Aufgabe",
+          "Aufgabe für Agenten"
+        ]
+      },
+      "definition": {
+        "en": "One task of the north-star catalogue (data/nordstelo.json, Spec 030): what a context-free agent is asked to build, in everyday words in German and English, with the Sxablono and the Eroj a good answer uses and its acceptance criteria. Each task has a tsk_ ID.",
+        "de": "Eine Aufgabe des Nordstern-Katalogs (data/nordstelo.json, Spec 030): was ein kontextfreier Agent bauen soll, in Alltagssprache auf Deutsch und Englisch, mit der Sxablono und den Eroj einer guten Lösung und ihren Abnahmekriterien. Jede Aufgabe hat eine tsk_-ID."
+      },
+      "broader": [
+        "#Modelo"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Regulo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Kriterio",
+      "term": "Kriterio",
+      "inScheme": "modelo",
+      "notation": "kriterio",
+      "prefLabel": {
+        "eo": "Kriterio",
+        "en": "acceptance criterion",
+        "de": "Abnahmekriterium"
+      },
+      "altLabel": {
+        "en": [
+          "criterion",
+          "acceptance criterion",
+          "check of a task"
+        ],
+        "de": [
+          "Kriterium",
+          "Abnahmekriterium",
+          "Prüfung einer Aufgabe"
+        ]
+      },
+      "definition": {
+        "en": "One acceptance criterion of a Tasko (Spec 030): decided deterministically on the facts of the rendered page and tied to the Regulo whose kialo is its reason. Each criterion has a kri_ ID.",
+        "de": "Ein Abnahmekriterium einer Aufgabe (Spec 030): deterministisch entschieden auf den Befunden der gerenderten Seite und an die Regulo gebunden, deren Kialo sein Grund ist. Jedes Kriterium hat eine kri_-ID."
+      },
+      "broader": [
+        "#Modelo"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Regulo"
+        }
+      ]
+    },
+    {
       "uri": "https://fundamento.ciferecigo.com/ontologio#Ikono",
       "term": "Ikono",
       "inScheme": "eroj",

@@ -95,6 +95,8 @@ import { Butono } from "@fundamento/eroj/react";
   <Butono emphasis="high" type="submit">Weiter</Butono>  {/* React 18 and 19 */}
 ```
 
+`fundamento.css` also sets the page (Nachlese 11 B-6): the root takes `color.background.canvas` as its surface and `color.text.default` as its text, in every Aspekto and mode, so a page that loads nothing else stays readable in the dark scheme. A surface of the page's own still wins (the rule has no specificity).
+
 Both projections are the same element with the same tokens. Switching brand or colour scheme is one attribute on `<html>`, without a reload and without a rebuild:
 
 ```js
@@ -122,6 +124,7 @@ Everything lives in one workspace; the npm org for published packages is
 | `@fundamento/cli` | `fm`: validate, export, build projections, run the server, derive and check an Aspekto from an Agordo |
 | `@fundamento/agordilo` | The Agordilo (Spec 016, Spec 019): an Agordo (lead colour, status colours, tint, three sliders, fonts; form, space, type and icon weight) becomes a complete Aspekto in OKLCH at contrast targets measured on komuna, checked by the checks of the CI, with its report |
 | `@fundamento/metiejo` | The Metiejo (Spec 023, working name): the brand configurator as a local server (`pnpm fm metiejo`) — step by step from a name and a lead colour to a checked Aspekto package, with webfonts under licence, licensed fonts in a private repository, exports (package, CSS, Figma plugin) and the byte check `check:tiparoj` |
+| `@fundamento/nordstelo` | The north-star measure (Spec 030, private): context-free agents build the 20 tasks of `packages/modelo/data/nordstelo.json` – Variante F with the Gvidanto, Variante 0 with nothing but “build it as HTML” – and Fundamento scores every page deterministically (K1–K7, no model as judge). Run on demand with `pnpm nordstelo`, never in CI |
 | `@fundamento/make-kit-<aspekto>` | Build output of `projekcioj`: one Figma Make kit per Aspekto (pre-releases published under the dist-tag `next`, the release 0.1.0 under `latest`) |
 
 ## MCP server
@@ -283,6 +286,8 @@ pnpm prints a `> package@version script` header on stdout. When piping JSON, use
 | `pnpm id:retire <id>` | Marks an ID `retired`. A retired ID can never be used again. |
 | `pnpm vortaro:themes [--root <path>]` | Regenerates `$themes.json` and `$metadata.json` from `data/dimensioj.json` and the set `kondicxoj`. Run it after changing Dimensioj or sets; validation fails when the files drift. |
 | `pnpm vortaro:ero-tokenoj [--root <path> \| --config <file>] [--check]` | Derives the Ero-Tokens of the third level from the Skemoj (Constitution v2.3): into the core as an alias on the role each Skemo binds, with IDs from the lock, and with `--config` into the main set of every Aspekto package of a project. A token the core has keeps its value and ID; one no Skemo derives any more is removed and its ID retired. Run it after changing a Skemo; validation reports the drift (`ero-tokeno-missing`, `ero-tokeno-unknown`). `--check` writes nothing and exits 1 on drift. |
+
+| `pnpm nordstelo [--anbieter <name>] [--modell <name>] [--max-tokens <n>]` | One run of the north-star measure (Spec 030): every task × Variante F and 0 × 3 repeats with the provider, model and key of the `.env` (`FM_KI_ANBIETER`, `FM_KI_MODELL`; the key is never printed). Renders each page in every brand and mode, scores it (K1–K7) and writes the pages, screenshots, a report and the history to `.fundamento/nordstelo/`; the Metiejo shows the history at `/nordstelo`. `--max-tokens` is the cost limit of the run (default 15 000 000): the run stops before it and still reports. `pnpm nordstelo restaro <run> [--skribi]` scores a stored run again: a run stored before Nachlese 11 must give its numbers again in the weighting of Spec 030; `--skribi` writes the rescoring in both weightings next to the run (`restaro.md`) and carries both figures into the history. Since Nachlese 11 every run is reported in both weightings: Markenfähigkeit as a gate with K5 = 25, and Spec 030 without the gate. Three series with exact model names (Nachlese 11 ④): H `--anbieter openai --modell gpt-4.1-mini`, O `--anbieter openrouter --modell nvidia/nemotron-3-ultra-550b-a55b:free`, K `--anbieter mistral --modell ministral-14b-2512`. The limits of a provider are settings (`--anfragen-sekunde`, `--anfragen-tag`; Mistral 0.5 per second, OpenRouter 1 000 per UTC day, counted in `.fundamento/nordstelo/anfragoj.json`): on 429 the run waits with a growing interval, at the daily limit it pauses and the same command continues it the next day; before the start it estimates its requests, and the report counts them. Never part of the CI. |
 
 Every maintainer command explains itself with `--help`.
 

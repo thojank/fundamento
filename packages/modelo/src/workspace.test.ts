@@ -27,12 +27,14 @@ const PACKAGES = {
   // Spec 023: the Metiejo, the brand configurator (working name).
   metiejo: "@fundamento/metiejo",
   modelo: "@fundamento/modelo",
+  // Spec 030: the north-star measure, run on demand, never in CI (private).
+  nordstelo: "@fundamento/nordstelo",
   projekcioj: "@fundamento/projekcioj",
   vortaro: "@fundamento/vortaro",
 } as const;
 
 describe("workspace packages (plan D-01)", () => {
-  it("has exactly the five Phase-1 packages, the two of Phase 3, the Agordilo (Spec 016) and the Metiejo (Spec 023)", () => {
+  it("has exactly the five Phase-1 packages, the two of Phase 3, the Agordilo (Spec 016), the Metiejo (Spec 023) and the Nordstelo (Spec 030)", () => {
     const dirs = readdirSync(packagesDir, { withFileTypes: true })
       .filter((entry) => entry.isDirectory())
       .map((entry) => entry.name)

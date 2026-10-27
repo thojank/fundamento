@@ -195,3 +195,30 @@ export function reactTypesInventory(
   }
   return items;
 }
+
+/**
+ * What the wrapper of one entry takes (Nachlese 11 B-2, conformance): its props in the Skemo's
+ * spelling, the icon slots it takes as React nodes, whether it passes children (the default slot,
+ * and every named slot as a child with its slot attribute), and whether it renders the element with
+ * the ref and every other prop — so the element's events reach React as they reach HTML.
+ */
+export function reactInventory(
+  source: string,
+  name: string,
+): { props: string[]; slots: string[]; children: boolean; forwardsElement: boolean } {
+  const block = propsBlock(source, name) ?? "";
+  const props: string[] = [];
+  const slots: string[] = [];
+  let children = false;
+  for (const [, field = "", type = ""] of block.matchAll(/^\s*([A-Za-z0-9]+)\??:\s*([^;]+);/gm)) {
+    if (field === "children") children = type.trim() === "ReactNode";
+    else if (type.trim() === "ReactNode") slots.push(kebab(field));
+    else props.push(kebab(field));
+  }
+  const start = source.indexOf(`export const ${name} = forwardRef`);
+  const end = source.indexOf("\n});", start);
+  const wrapper = start === -1 ? "" : source.slice(start, end);
+  const forwardsElement =
+    /\{ \.\.\.rest, \.\.\.attributes, ref \}/.test(wrapper) && /\n {4}children,\n/.test(wrapper);
+  return { props, slots, children, forwardsElement };
+}

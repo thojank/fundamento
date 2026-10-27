@@ -69,7 +69,17 @@ export interface EroExample {
 export type PropSurface = string[] | "boolean" | "string" | "number";
 
 export interface EroProjekcioj {
-  webComponent: { tag: string; attributes: Record<string, PropSurface>; slots: string[] };
+  webComponent: {
+    tag: string;
+    attributes: Record<string, PropSurface>;
+    slots: string[];
+    /**
+     * The slot that takes the content without a slot attribute (Nachlese 11 B-2), e.g. label:
+     * `<fm-kampo>E-Mail</fm-kampo>`; `slot="label"` names the same slot. Absent where the Ero has
+     * none.
+     */
+    defaultSlot?: string;
+  };
   react: { package: string; component: string; props: Record<string, PropSurface> };
   figma: {
     componentSet: string;
@@ -186,6 +196,12 @@ function camel(name: string): string {
   return name.replace(/-([a-z0-9])/g, (_match, letter: string) => letter.toUpperCase());
 }
 
+/** The default slot of a Skemo, as the projections name it (Nachlese 11 B-2). */
+function defaultSlotOf(skemo: Skemo): { defaultSlot?: string } {
+  const slot = skemo.slots.find((entry) => entry.default === true);
+  return slot === undefined ? {} : { defaultSlot: slot.name };
+}
+
 function propSurface(prop: SkemoProp): PropSurface {
   return prop.kind === "enum" ? [...(prop.values ?? [])] : prop.kind;
 }
@@ -294,6 +310,7 @@ export function projekciojOf(modelo: Modelo, entry: LoadedEro): EroProjekcioj {
       tag: `fm-${ero.name}`,
       attributes,
       slots: skemo.slots.map((slot) => slot.name),
+      ...defaultSlotOf(skemo),
     },
     react: {
       package: "@fundamento/eroj/react",

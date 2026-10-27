@@ -239,6 +239,11 @@ export const RULE_IDS = [
   // Spec 020 ②: exactly one child of a region with the props it names (the submit button).
   "sxablono-region-one",
   "sxablono-landmark-twice",
+  // Spec 030: the catalogue of the north-star measure names a Sxablono, an Ero or a Regulo the
+  // Modelo does not have.
+  "nordstelo-sxablono-unknown",
+  "nordstelo-ero-unknown",
+  "nordstelo-regulo-unknown",
   // Projekcio lints (Spec 003, D-17)
   "css-physical-property",
   "ero-hardcoded-string",

@@ -1,0 +1,223 @@
+{
+  "lingvo": "de",
+  "bytes": 610,
+  "elements": [
+    {
+      "tag": "h1",
+      "attrs": {},
+      "parent": -1,
+      "text": "Anmeldung"
+    },
+    {
+      "tag": "form",
+      "attrs": {
+        "action": "#",
+        "method": "post"
+      },
+      "parent": -1,
+      "text": ""
+    },
+    {
+      "tag": "label",
+      "attrs": {
+        "for": "email"
+      },
+      "parent": 1,
+      "text": "E-Mail:"
+    },
+    {
+      "tag": "br",
+      "attrs": {},
+      "parent": 1,
+      "text": ""
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "email",
+        "id": "email",
+        "name": "email",
+        "required": "",
+        "style": ""
+      },
+      "parent": 1,
+      "text": ""
+    },
+    {
+      "tag": "br",
+      "attrs": {},
+      "parent": 1,
+      "text": ""
+    },
+    {
+      "tag": "br",
+      "attrs": {},
+      "parent": 1,
+      "text": ""
+    },
+    {
+      "tag": "label",
+      "attrs": {
+        "for": "password"
+      },
+      "parent": 1,
+      "text": "Passwort:"
+    },
+    {
+      "tag": "br",
+      "attrs": {},
+      "parent": 1,
+      "text": ""
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "password",
+        "id": "password",
+        "name": "password",
+        "required": "",
+        "style": ""
+      },
+      "parent": 1,
+      "text": ""
+    },
+    {
+      "tag": "br",
+      "attrs": {},
+      "parent": 1,
+      "text": ""
+    },
+    {
+      "tag": "br",
+      "attrs": {},
+      "parent": 1,
+      "text": ""
+    },
+    {
+      "tag": "button",
+      "attrs": {
+        "type": "submit"
+      },
+      "parent": 1,
+      "text": "Anmelden"
+    }
+  ],
+  "aria": [
+    {
+      "role": "heading",
+      "name": "Anmeldung",
+      "level": 1
+    },
+    {
+      "role": "textbox",
+      "name": "E-Mail:"
+    },
+    {
+      "role": "textbox",
+      "name": "Passwort:"
+    },
+    {
+      "role": "button",
+      "name": "Anmelden"
+    }
+  ],
+  "console": [],
+  "renders": [
+    {
+      "aspekto": "komuna",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "komuna",
+      "scheme": "light",
+      "contrast": "high",
+      "axe": []
+    },
+    {
+      "aspekto": "komuna",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "komuna",
+      "scheme": "dark",
+      "contrast": "high",
+      "axe": []
+    },
+    {
+      "aspekto": "ekzemplo",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "ekzemplo",
+      "scheme": "light",
+      "contrast": "high",
+      "axe": []
+    },
+    {
+      "aspekto": "ekzemplo",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "ekzemplo",
+      "scheme": "dark",
+      "contrast": "high",
+      "axe": []
+    },
+    {
+      "aspekto": "provo",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "provo",
+      "scheme": "light",
+      "contrast": "high",
+      "axe": []
+    },
+    {
+      "aspekto": "provo",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "provo",
+      "scheme": "dark",
+      "contrast": "high",
+      "axe": []
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "scheme": "light",
+      "contrast": "high",
+      "axe": []
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "scheme": "dark",
+      "contrast": "high",
+      "axe": []
+    }
+  ]
+}

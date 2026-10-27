@@ -1,0 +1,38 @@
+{
+  "name": "@fundamento/nordstelo",
+  "version": "0.2.0",
+  "description": "Fundamento Nordstelo: the north-star measure (Spec 030) – context-free agents build screens from a catalogue of tasks, Fundamento scores them deterministically (K1–K7). Runs on demand on the maintainer's machine, never in CI.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "lint": "tsc -p tsconfig.json --noEmit && biome check ."
+  },
+  "dependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@fundamento/eroj": "workspace:*",
+    "@fundamento/mcp": "workspace:*",
+    "@fundamento/metiejo": "workspace:*",
+    "@fundamento/modelo": "workspace:*",
+    "@fundamento/projekcioj": "workspace:*",
+    "@modelcontextprotocol/client": "2.0.0",
+    "playwright": "1.63.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.5",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.1"
+  }
+}

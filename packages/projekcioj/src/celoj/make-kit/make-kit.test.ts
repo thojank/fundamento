@@ -900,11 +900,13 @@ describe("Make Kit guidelines after Nachlese 7 ①", () => {
     (aspekto) => {
       const tabs = kit(aspekto, "guidelines/components/langetaro.md");
       const nav = kit(aspekto, "guidelines/components/navigado.md");
-      expect(tabs).not.toContain('slot="tabs"');
+      // Nachlese 11 B-2: the guideline names slot="tabs" as the same slot as no attribute (the
+      // default slot takes both); the entries stay children without a slot.
+      expect(tabs).toContain('`slot="tabs"` names the same slot');
       expect(tabs).toContain(
         'Each tab is a child without a slot: `<data value="express">Express</data>`',
       );
-      expect(nav).not.toContain('slot="items"');
+      expect(nav).toContain('`slot="items"` names the same slot');
       expect(nav).toContain(
         'Each entry is a link child: `<a href="/express" data-page="express">Express</a>`',
       );
@@ -963,8 +965,9 @@ describe("Make Kit guidelines after Nachlese 7 ②", () => {
       expect(row(dialog, "| `open` |")).toContain("first focusable child");
       expect(row(dialog, "| `open` |")).toContain("Enter");
       const text = kit(aspekto, "guidelines/components/teksto.md");
-      expect(row(text, "| `label` |")).toMatch(
-        /^\| `label` \| text, ligilo, insigno, teksto \| – \|/,
+      // Nachlese 11 B-2: the default slot is marked as the Skemo marks it.
+      expect(row(text, "| `label` (default slot) |")).toMatch(
+        /^\| `label` \(default slot\) \| text, ligilo, insigno, teksto \| – \|/,
       );
       const together = text.slice(text.indexOf("## Together with"), text.indexOf("## Slots"));
       for (const name of ["ligilo", "insigno", "teksto"])

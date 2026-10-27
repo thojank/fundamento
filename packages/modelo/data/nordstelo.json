@@ -1,0 +1,1558 @@
+{
+  "$schema": "../schema/modelo.schema.json#/$defs/NordsteloFile",
+  "taskoj": [
+    {
+      "id": "tsk_01M5N8ADAPXX3XB0P58ZWN53Z7",
+      "name": "anmeldung",
+      "teksto": {
+        "de": "Ein Anmeldeformular mit E-Mail und Passwort.",
+        "en": "A sign-in form with email and password."
+      },
+      "sxablono": "formularo",
+      "eroj": [
+        "kampo",
+        "butono",
+        "ligilo",
+        "markobutono"
+      ],
+      "kriterioj": [
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7CA",
+          "regulo": "field-label-visible",
+          "teksto": {
+            "de": "Jedes Feld hat eine sichtbare Beschriftung.",
+            "en": "Every field has a visible label."
+          },
+          "kontrolo": {
+            "kind": "named-fields"
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7CB",
+          "regulo": "field-label-names-the-datum",
+          "teksto": {
+            "de": "Ein Feld für die E-Mail-Adresse.",
+            "en": "A field for the email address."
+          },
+          "kontrolo": {
+            "0": "input[type=email]",
+            "kind": "elemento",
+            "F": "fm-kampo[kind=email]",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7CC",
+          "regulo": "field-label-names-the-datum",
+          "teksto": {
+            "de": "Ein Feld für das Passwort.",
+            "en": "A field for the password."
+          },
+          "kontrolo": {
+            "0": "input[type=password]",
+            "kind": "elemento",
+            "F": "fm-kampo[kind=password]",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7CD",
+          "regulo": "one-primary-per-container",
+          "teksto": {
+            "de": "Genau eine primäre Aktion.",
+            "en": "Exactly one primary action."
+          },
+          "kontrolo": {
+            "kind": "elemento",
+            "F": "fm-butono[emphasis=high]",
+            "min": 1,
+            "max": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7CE",
+          "regulo": "label-names-action",
+          "teksto": {
+            "de": "Der Knopf nennt die Aktion, etwa „Anmelden“.",
+            "en": "The button names the action, such as “Sign in”."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "button",
+            "name": "anmeld|einlogg|sign ?in|log ?in",
+            "min": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "tsk_01M5N8ADAQMSCPB4WEG7KMF7CF",
+      "name": "werkzeugliste",
+      "teksto": {
+        "de": "Eine Liste von Werkzeugen mit Suche und Filter nach Status.",
+        "en": "A list of tools with search and a filter by status."
+      },
+      "sxablono": "filtrilo",
+      "eroj": [
+        "kampo",
+        "elektilo",
+        "tabelo",
+        "insigno",
+        "butono"
+      ],
+      "kriterioj": [
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7CG",
+          "regulo": "field-label-visible",
+          "teksto": {
+            "de": "Ein Suchfeld mit Namen.",
+            "en": "A search field with a name."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "searchbox",
+            "name": ".",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7CH",
+          "regulo": "field-label-visible",
+          "teksto": {
+            "de": "Ein Auswahlfeld für den Status.",
+            "en": "A select for the status."
+          },
+          "kontrolo": {
+            "0": "select,input[type=radio]",
+            "kind": "elemento",
+            "F": "fm-elektilo,fm-listelektilo,fm-plurelektilo,fm-elekto",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7CJ",
+          "regulo": "table-caption-names-the-content",
+          "teksto": {
+            "de": "Die Tabelle hat eine Beschriftung.",
+            "en": "The table has a caption."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "table",
+            "name": ".",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7CK",
+          "regulo": "badge-text-short",
+          "teksto": {
+            "de": "Der Status steht als Etikett in der Zeile.",
+            "en": "The status stands as a badge in the row."
+          },
+          "kontrolo": {
+            "kind": "elemento",
+            "F": "fm-insigno",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7CM",
+          "regulo": "field-label-visible",
+          "teksto": {
+            "de": "Jedes Feld hat eine sichtbare Beschriftung.",
+            "en": "Every field has a visible label."
+          },
+          "kontrolo": {
+            "kind": "named-fields"
+          }
+        }
+      ]
+    },
+    {
+      "id": "tsk_01M5N8ADAQMSCPB4WEG7KMF7CN",
+      "name": "einstellungen",
+      "teksto": {
+        "de": "Einstellungen mit Benachrichtigungen und Sprache.",
+        "en": "Settings with notifications and language."
+      },
+      "sxablono": "pagxo",
+      "eroj": [
+        "sxaltilo",
+        "elekto",
+        "titolo",
+        "butono",
+        "apartigilo"
+      ],
+      "kriterioj": [
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7CP",
+          "regulo": "heading-levels-in-order",
+          "teksto": {
+            "de": "Genau eine Überschrift der ersten Ebene.",
+            "en": "Exactly one heading of level one."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "heading",
+            "level": 1,
+            "min": 1,
+            "max": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7CQ",
+          "regulo": "switch-label-names-the-setting",
+          "teksto": {
+            "de": "Ein Schalter für die Benachrichtigungen.",
+            "en": "A switch for the notifications."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "switch|checkbox",
+            "name": "benachrichtig|mitteilung|notification",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7CR",
+          "regulo": "field-label-visible",
+          "teksto": {
+            "de": "Eine Auswahl der Sprache.",
+            "en": "A choice of language."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "combobox|listbox|radiogroup",
+            "name": "sprache|language",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7CS",
+          "regulo": "field-label-visible",
+          "teksto": {
+            "de": "Jedes Feld hat eine sichtbare Beschriftung.",
+            "en": "Every field has a visible label."
+          },
+          "kontrolo": {
+            "kind": "named-fields"
+          }
+        }
+      ]
+    },
+    {
+      "id": "tsk_01M5N8ADAQMSCPB4WEG7KMF7CT",
+      "name": "ausleihe-assistent",
+      "teksto": {
+        "de": "Ein Assistent in drei Schritten für eine Ausleihe.",
+        "en": "A three-step wizard for borrowing an item."
+      },
+      "sxablono": "formularo",
+      "eroj": [
+        "kampo",
+        "datelektilo",
+        "butono",
+        "spuro",
+        "teksto"
+      ],
+      "kriterioj": [
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7CV",
+          "regulo": "heading-levels-in-order",
+          "teksto": {
+            "de": "Die Seite sagt, in welchem der drei Schritte man ist.",
+            "en": "The page says which of the three steps one is in."
+          },
+          "kontrolo": {
+            "kind": "teksto",
+            "pattern": "(schritt|step)\\s*\\d\\s*(von|of|/)\\s*3"
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7CW",
+          "regulo": "label-names-action",
+          "teksto": {
+            "de": "Ein Knopf führt zum nächsten Schritt.",
+            "en": "A button leads to the next step."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "button",
+            "name": "weiter|nächst|next|continue",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7CX",
+          "regulo": "field-label-visible",
+          "teksto": {
+            "de": "Ein Feld für das Datum der Ausleihe.",
+            "en": "A field for the date of the loan."
+          },
+          "kontrolo": {
+            "0": "input[type=date]",
+            "kind": "elemento",
+            "F": "fm-datelektilo",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7CY",
+          "regulo": "one-primary-per-container",
+          "teksto": {
+            "de": "Genau eine primäre Aktion.",
+            "en": "Exactly one primary action."
+          },
+          "kontrolo": {
+            "kind": "elemento",
+            "F": "fm-butono[emphasis=high]",
+            "min": 1,
+            "max": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7CZ",
+          "regulo": "field-label-visible",
+          "teksto": {
+            "de": "Jedes Feld hat eine sichtbare Beschriftung.",
+            "en": "Every field has a visible label."
+          },
+          "kontrolo": {
+            "kind": "named-fields"
+          }
+        }
+      ]
+    },
+    {
+      "id": "tsk_01M5N8ADAQMSCPB4WEG7KMF7D0",
+      "name": "detailseite",
+      "teksto": {
+        "de": "Eine Detailseite mit Eigenschaften und Verlauf.",
+        "en": "A detail page with properties and history."
+      },
+      "sxablono": "pagxo",
+      "eroj": [
+        "titolo",
+        "atributlisto",
+        "tabelo",
+        "insigno",
+        "spuro",
+        "lokredaktilo"
+      ],
+      "kriterioj": [
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7D1",
+          "regulo": "heading-levels-in-order",
+          "teksto": {
+            "de": "Genau eine Überschrift der ersten Ebene.",
+            "en": "Exactly one heading of level one."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "heading",
+            "level": 1,
+            "min": 1,
+            "max": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7D2",
+          "regulo": "heading-levels-in-order",
+          "teksto": {
+            "de": "Die Eigenschaften stehen als Liste von Begriff und Wert.",
+            "en": "The properties stand as a list of term and value."
+          },
+          "kontrolo": {
+            "0": "dl",
+            "kind": "elemento",
+            "F": "fm-atributlisto",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7D3",
+          "regulo": "table-caption-names-the-content",
+          "teksto": {
+            "de": "Der Verlauf hat eine Beschriftung, die sagt, was er zeigt.",
+            "en": "The history has a caption that says what it shows."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "table|list",
+            "name": ".",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7D4",
+          "regulo": "link-label-names-destination",
+          "teksto": {
+            "de": "Ein Pfad zurück zur Übersicht.",
+            "en": "A path back to the overview."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "navigation",
+            "min": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "tsk_01M5N8ADAQMSCPB4WEG7KMF7D5",
+      "name": "app-rahmen",
+      "teksto": {
+        "de": "Ein App-Rahmen mit Hauptnavigation, dem Namen der angemeldeten Person oben und einem Inhaltsbereich.",
+        "en": "An app frame with main navigation, the signed-in person's name at the top and a content area."
+      },
+      "sxablono": "sxelo",
+      "eroj": [
+        "navigado",
+        "saltligilo",
+        "avataro",
+        "ligilo",
+        "titolo"
+      ],
+      "kriterioj": [
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7D6",
+          "regulo": "link-label-names-destination",
+          "teksto": {
+            "de": "Eine Hauptnavigation.",
+            "en": "A main navigation."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "navigation",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7D7",
+          "regulo": "heading-levels-in-order",
+          "teksto": {
+            "de": "Ein Inhaltsbereich als Hauptbereich der Seite.",
+            "en": "A content area as the main region of the page."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "main",
+            "min": 1,
+            "max": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7D8",
+          "regulo": "link-label-names-destination",
+          "teksto": {
+            "de": "Kein Link heißt nur „hier“ oder „mehr“.",
+            "en": "No link is called only “here” or “more”."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "link",
+            "name": "^(hier|here|mehr|more|link|klicken|click)$",
+            "max": 0
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7D9",
+          "regulo": "link-label-names-destination",
+          "teksto": {
+            "de": "Ein Sprunglink zum Inhalt.",
+            "en": "A skip link to the content."
+          },
+          "kontrolo": {
+            "0": "a[href^=#]",
+            "kind": "elemento",
+            "F": "fm-saltligilo",
+            "min": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "tsk_01M5N8ADAQMSCPB4WEG7KMF7DA",
+      "name": "loeschen-bestaetigen",
+      "teksto": {
+        "de": "Ein geöffneter Dialog, in dem man das Löschen eines Projekts bestätigt.",
+        "en": "An open dialog in which one confirms deleting a project."
+      },
+      "sxablono": "pagxo",
+      "eroj": [
+        "dialogo",
+        "butono",
+        "titolo"
+      ],
+      "kriterioj": [
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7DB",
+          "regulo": "dialog-title-names-the-decision",
+          "teksto": {
+            "de": "Der Dialog nennt die Entscheidung.",
+            "en": "The dialog names the decision."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "dialog|alertdialog",
+            "name": "lösch|loesch|entfern|delete|remove",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7DC",
+          "regulo": "destructive-label-names-object",
+          "teksto": {
+            "de": "Der Knopf nennt, was gelöscht wird.",
+            "en": "The button names what is deleted."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "button",
+            "name": "(lösch|loesch|delete).*(projekt|project)|(projekt|project).*(lösch|loesch|delete)",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7DD",
+          "regulo": "destructive-label-not-generic",
+          "teksto": {
+            "de": "Kein Knopf heißt nur „OK“ oder „Ja“.",
+            "en": "No button is called only “OK” or “Yes”."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "button",
+            "name": "^(ok|ja|yes)$",
+            "max": 0
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7DE",
+          "regulo": "label-names-action",
+          "teksto": {
+            "de": "Man kann abbrechen.",
+            "en": "One can cancel."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "button",
+            "name": "abbrech|cancel|behalten|keep",
+            "min": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "tsk_01M5N8ADAQMSCPB4WEG7KMF7DF",
+      "name": "profil-bearbeiten",
+      "teksto": {
+        "de": "Ein Formular, um das eigene Profil zu bearbeiten: Name, Bild und Kurzbeschreibung.",
+        "en": "A form to edit one's own profile: name, picture and a short description."
+      },
+      "sxablono": "formularo",
+      "eroj": [
+        "kampo",
+        "alsxutilo",
+        "tekstareo",
+        "avataro",
+        "butono"
+      ],
+      "kriterioj": [
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7DG",
+          "regulo": "field-label-visible",
+          "teksto": {
+            "de": "Jedes Feld hat eine sichtbare Beschriftung.",
+            "en": "Every field has a visible label."
+          },
+          "kontrolo": {
+            "kind": "named-fields"
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7DH",
+          "regulo": "file-constraints-stated",
+          "teksto": {
+            "de": "Ein Feld zum Hochladen des Bildes.",
+            "en": "A field to upload the picture."
+          },
+          "kontrolo": {
+            "0": "input[type=file]",
+            "kind": "elemento",
+            "F": "fm-alsxutilo",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7DJ",
+          "regulo": "help-is-one-sentence",
+          "teksto": {
+            "de": "Ein mehrzeiliges Feld für die Beschreibung.",
+            "en": "A multi-line field for the description."
+          },
+          "kontrolo": {
+            "0": "textarea",
+            "kind": "elemento",
+            "F": "fm-tekstareo",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7DK",
+          "regulo": "one-primary-per-container",
+          "teksto": {
+            "de": "Genau eine primäre Aktion.",
+            "en": "Exactly one primary action."
+          },
+          "kontrolo": {
+            "kind": "elemento",
+            "F": "fm-butono[emphasis=high]",
+            "min": 1,
+            "max": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "tsk_01M5N8ADAQMSCPB4WEG7KMF7DM",
+      "name": "bestellstatus",
+      "teksto": {
+        "de": "Eine Übersicht über eine Bestellung mit Status, Fortschritt der Lieferung und dem Hinweis, dass sich die Lieferung verzögert.",
+        "en": "An overview of an order with its status, the progress of the delivery and a notice that the delivery is delayed."
+      },
+      "sxablono": "pagxo",
+      "eroj": [
+        "insigno",
+        "mezurilo",
+        "avizo",
+        "atributlisto",
+        "titolo"
+      ],
+      "kriterioj": [
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7DN",
+          "regulo": "meter-text-states-value",
+          "teksto": {
+            "de": "Der Fortschritt ist ein Balken mit Wert.",
+            "en": "The progress is a bar with a value."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "meter|progressbar",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7DP",
+          "regulo": "error-says-what-to-do",
+          "teksto": {
+            "de": "Die Verzögerung wird genannt.",
+            "en": "The delay is stated."
+          },
+          "kontrolo": {
+            "kind": "teksto",
+            "pattern": "verzög|verzoeg|später|delay|late"
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7DQ",
+          "regulo": "badge-text-short",
+          "teksto": {
+            "de": "Der Status steht als Etikett.",
+            "en": "The status stands as a badge."
+          },
+          "kontrolo": {
+            "kind": "elemento",
+            "F": "fm-insigno",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7DR",
+          "regulo": "heading-levels-in-order",
+          "teksto": {
+            "de": "Genau eine Überschrift der ersten Ebene.",
+            "en": "Exactly one heading of level one."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "heading",
+            "level": 1,
+            "min": 1,
+            "max": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "tsk_01M5N8ADAQMSCPB4WEG7KMF7DS",
+      "name": "rechnung-hochladen",
+      "teksto": {
+        "de": "Ein Formular, um eine Rechnung als PDF hochzuladen, höchstens 10 MB.",
+        "en": "A form to upload an invoice as a PDF, 10 MB at most."
+      },
+      "sxablono": "formularo",
+      "eroj": [
+        "alsxutilo",
+        "butono",
+        "kampo",
+        "avizo"
+      ],
+      "kriterioj": [
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7DT",
+          "regulo": "file-constraints-stated",
+          "teksto": {
+            "de": "Ein Feld zum Hochladen.",
+            "en": "A field to upload."
+          },
+          "kontrolo": {
+            "0": "input[type=file]",
+            "kind": "elemento",
+            "F": "fm-alsxutilo",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7DV",
+          "regulo": "file-constraints-stated",
+          "teksto": {
+            "de": "Die Seite nennt die Dateiart PDF.",
+            "en": "The page names the file type PDF."
+          },
+          "kontrolo": {
+            "kind": "teksto",
+            "pattern": "pdf"
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7DW",
+          "regulo": "file-constraints-stated",
+          "teksto": {
+            "de": "Die Seite nennt die Größe 10 MB.",
+            "en": "The page names the size of 10 MB."
+          },
+          "kontrolo": {
+            "kind": "teksto",
+            "pattern": "10\\s*mb"
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7DX",
+          "regulo": "one-primary-per-container",
+          "teksto": {
+            "de": "Genau eine primäre Aktion.",
+            "en": "Exactly one primary action."
+          },
+          "kontrolo": {
+            "kind": "elemento",
+            "F": "fm-butono[emphasis=high]",
+            "min": 1,
+            "max": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7DY",
+          "regulo": "field-label-visible",
+          "teksto": {
+            "de": "Jedes Feld hat eine sichtbare Beschriftung.",
+            "en": "Every field has a visible label."
+          },
+          "kontrolo": {
+            "kind": "named-fields"
+          }
+        }
+      ]
+    },
+    {
+      "id": "tsk_01M5N8ADAQMSCPB4WEG7KMF7DZ",
+      "name": "personensuche",
+      "teksto": {
+        "de": "Eine Suche nach Personen mit Ergebnissen und Blättern durch die Seiten.",
+        "en": "A search for people with results and paging through the pages."
+      },
+      "sxablono": "filtrilo",
+      "eroj": [
+        "kampo",
+        "karto",
+        "pagxigilo",
+        "avataro",
+        "plenstato"
+      ],
+      "kriterioj": [
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7E0",
+          "regulo": "field-label-visible",
+          "teksto": {
+            "de": "Ein Suchfeld mit Namen.",
+            "en": "A search field with a name."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "searchbox",
+            "name": ".",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7E1",
+          "regulo": "link-label-names-destination",
+          "teksto": {
+            "de": "Eine Navigation durch die Seiten.",
+            "en": "A navigation through the pages."
+          },
+          "kontrolo": {
+            "0": "nav",
+            "kind": "elemento",
+            "F": "fm-pagxigilo",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7E2",
+          "regulo": "link-label-names-destination",
+          "teksto": {
+            "de": "Kein Link heißt nur „hier“ oder „mehr“.",
+            "en": "No link is called only “here” or “more”."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "link",
+            "name": "^(hier|here|mehr|more|link|klicken|click)$",
+            "max": 0
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7E3",
+          "regulo": "field-label-visible",
+          "teksto": {
+            "de": "Jedes Feld hat eine sichtbare Beschriftung.",
+            "en": "Every field has a visible label."
+          },
+          "kontrolo": {
+            "kind": "named-fields"
+          }
+        }
+      ]
+    },
+    {
+      "id": "tsk_01M5N8ADAQMSCPB4WEG7KMF7E4",
+      "name": "leere-projektliste",
+      "teksto": {
+        "de": "Eine Projektliste, die noch leer ist, mit dem Hinweis, wie man das erste Projekt anlegt.",
+        "en": "A list of projects that is still empty, with a hint how to create the first project."
+      },
+      "sxablono": "pagxo",
+      "eroj": [
+        "plenstato",
+        "butono",
+        "titolo",
+        "ikono"
+      ],
+      "kriterioj": [
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7E5",
+          "regulo": "empty-state-says-what-next",
+          "teksto": {
+            "de": "Der Leerzustand sagt, was fehlt.",
+            "en": "The empty state says what is missing."
+          },
+          "kontrolo": {
+            "kind": "teksto",
+            "pattern": "noch kein|keine projekte|no projects|not .* yet|no .* yet"
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7E6",
+          "regulo": "label-names-action",
+          "teksto": {
+            "de": "Ein Knopf legt ein Projekt an.",
+            "en": "A button creates a project."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "button|link",
+            "name": "anlegen|erstell|neu|create|new|add",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7E7",
+          "regulo": "heading-levels-in-order",
+          "teksto": {
+            "de": "Genau eine Überschrift der ersten Ebene.",
+            "en": "Exactly one heading of level one."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "heading",
+            "level": 1,
+            "min": 1,
+            "max": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "tsk_01M5N8ADAQMSCPB4WEG7KMF7E8",
+      "name": "kontakt-fehler",
+      "teksto": {
+        "de": "Ein Kontaktformular, in dem die E-Mail-Adresse ungültig eingegeben wurde und der Fehler zu sehen ist.",
+        "en": "A contact form in which the email address was entered wrongly and the error is shown."
+      },
+      "sxablono": "formularo",
+      "eroj": [
+        "kampo",
+        "tekstareo",
+        "butono",
+        "avizo"
+      ],
+      "kriterioj": [
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7E9",
+          "regulo": "field-label-visible",
+          "teksto": {
+            "de": "Jedes Feld hat eine sichtbare Beschriftung.",
+            "en": "Every field has a visible label."
+          },
+          "kontrolo": {
+            "kind": "named-fields"
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7EA",
+          "regulo": "error-not-color-only",
+          "teksto": {
+            "de": "Das Feld ist als ungültig markiert.",
+            "en": "The field is marked as invalid."
+          },
+          "kontrolo": {
+            "0": "[aria-invalid=true]",
+            "kind": "elemento",
+            "F": "fm-kampo[invalid]",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7EB",
+          "regulo": "error-says-what-to-do",
+          "teksto": {
+            "de": "Der Fehler sagt, was zu tun ist.",
+            "en": "The error says what to do."
+          },
+          "kontrolo": {
+            "kind": "teksto",
+            "pattern": "(gib|bitte|trage|enter|please|use).{0,60}(e-?mail|adresse|address)|(e-?mail|adresse|address).{0,60}(eingeben|angeben|enter)"
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7EC",
+          "regulo": "required-marked",
+          "teksto": {
+            "de": "Pflichtfelder sind markiert.",
+            "en": "Required fields are marked."
+          },
+          "kontrolo": {
+            "0": "[required],[aria-required=true]",
+            "kind": "elemento",
+            "F": "fm-kampo[required],fm-tekstareo[required]",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7ED",
+          "regulo": "one-primary-per-container",
+          "teksto": {
+            "de": "Genau eine primäre Aktion.",
+            "en": "Exactly one primary action."
+          },
+          "kontrolo": {
+            "kind": "elemento",
+            "F": "fm-butono[emphasis=high]",
+            "min": 1,
+            "max": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "tsk_01M5N8ADAQMSCPB4WEG7KMF7EE",
+      "name": "markdown-notiz",
+      "teksto": {
+        "de": "Ein Editor für eine Notiz in Markdown mit einer Vorschau daneben.",
+        "en": "An editor for a note in Markdown with a preview beside it."
+      },
+      "sxablono": "redaktilo",
+      "eroj": [
+        "tekstareo",
+        "markdovido",
+        "butono",
+        "titolo"
+      ],
+      "kriterioj": [
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7EF",
+          "regulo": "field-label-visible",
+          "teksto": {
+            "de": "Ein mehrzeiliges Feld für den Text.",
+            "en": "A multi-line field for the text."
+          },
+          "kontrolo": {
+            "0": "textarea",
+            "kind": "elemento",
+            "F": "fm-tekstareo,fm-redaktilo",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7EG",
+          "regulo": "heading-levels-in-order",
+          "teksto": {
+            "de": "Eine Vorschau des Markdowns.",
+            "en": "A preview of the Markdown."
+          },
+          "kontrolo": {
+            "kind": "elemento",
+            "F": "fm-markdovido,fm-redaktilo",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7EH",
+          "regulo": "field-label-visible",
+          "teksto": {
+            "de": "Jedes Feld hat eine sichtbare Beschriftung.",
+            "en": "Every field has a visible label."
+          },
+          "kontrolo": {
+            "kind": "named-fields"
+          }
+        }
+      ]
+    },
+    {
+      "id": "tsk_01M5N8ADAQMSCPB4WEG7KMF7EJ",
+      "name": "faq",
+      "teksto": {
+        "de": "Eine Seite mit häufigen Fragen, deren Antworten man aufklappen kann.",
+        "en": "A page of frequently asked questions whose answers one can expand."
+      },
+      "sxablono": "pagxo",
+      "eroj": [
+        "faldilo",
+        "titolo",
+        "ligilo",
+        "teksto"
+      ],
+      "kriterioj": [
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7EK",
+          "regulo": "disclosure-label-names-content",
+          "teksto": {
+            "de": "Mindestens drei aufklappbare Fragen.",
+            "en": "At least three questions that expand."
+          },
+          "kontrolo": {
+            "0": "details",
+            "kind": "elemento",
+            "F": "fm-faldilo",
+            "min": 3
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7EM",
+          "regulo": "disclosure-label-names-content",
+          "teksto": {
+            "de": "Jede Frage ist ein Bedienelement mit Namen.",
+            "en": "Every question is a control with a name."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "button|group",
+            "name": "\\?",
+            "min": 3
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7EN",
+          "regulo": "heading-levels-in-order",
+          "teksto": {
+            "de": "Genau eine Überschrift der ersten Ebene.",
+            "en": "Exactly one heading of level one."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "heading",
+            "level": 1,
+            "min": 1,
+            "max": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7EP",
+          "regulo": "link-label-names-destination",
+          "teksto": {
+            "de": "Kein Link heißt nur „hier“ oder „mehr“.",
+            "en": "No link is called only “here” or “more”."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "link",
+            "name": "^(hier|here|mehr|more|link|klicken|click)$",
+            "max": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "tsk_01M5N8ADAQMSCPB4WEG7KMF7EQ",
+      "name": "projekt-registerkarten",
+      "teksto": {
+        "de": "Eine Projektseite mit Registerkarten für Übersicht, Aufgaben und Dateien.",
+        "en": "A project page with tabs for overview, tasks and files."
+      },
+      "sxablono": "pagxo",
+      "eroj": [
+        "langetaro",
+        "titolo",
+        "tabelo",
+        "insigno"
+      ],
+      "kriterioj": [
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7ER",
+          "regulo": "option-labels-distinct",
+          "teksto": {
+            "de": "Drei Registerkarten.",
+            "en": "Three tabs."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "tab",
+            "min": 3
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7ES",
+          "regulo": "option-labels-distinct",
+          "teksto": {
+            "de": "Die Karten stehen in einer Leiste.",
+            "en": "The tabs stand in a tab list."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "tablist",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7ET",
+          "regulo": "heading-levels-in-order",
+          "teksto": {
+            "de": "Genau eine Überschrift der ersten Ebene.",
+            "en": "Exactly one heading of level one."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "heading",
+            "level": 1,
+            "min": 1,
+            "max": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "tsk_01M5N8ADAQMSCPB4WEG7KMF7EV",
+      "name": "fahrradfilter",
+      "teksto": {
+        "de": "Ein Filter für Fahrräder nach Preisbereich und Kategorie.",
+        "en": "A filter for bicycles by price range and category."
+      },
+      "sxablono": "filtrilo",
+      "eroj": [
+        "glitilo",
+        "plurelektilo",
+        "signeto",
+        "butono"
+      ],
+      "kriterioj": [
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7EW",
+          "regulo": "range-stated",
+          "teksto": {
+            "de": "Der Preis wird mit einem Schieberegler gewählt.",
+            "en": "The price is chosen with a slider."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "slider",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7EX",
+          "regulo": "range-stated",
+          "teksto": {
+            "de": "Die Grenzen des Preises stehen sichtbar da.",
+            "en": "The limits of the price are shown."
+          },
+          "kontrolo": {
+            "kind": "teksto",
+            "pattern": "\\d+\\s*(€|eur)|(€|eur)\\s*\\d+"
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7EY",
+          "regulo": "field-label-visible",
+          "teksto": {
+            "de": "Jedes Feld hat eine sichtbare Beschriftung.",
+            "en": "Every field has a visible label."
+          },
+          "kontrolo": {
+            "kind": "named-fields"
+          }
+        }
+      ]
+    },
+    {
+      "id": "tsk_01M5N8ADAQMSCPB4WEG7KMF7EZ",
+      "name": "termin-buchen",
+      "teksto": {
+        "de": "Ein Formular, um einen Termin mit Datum, Uhrzeit und Ort zu buchen.",
+        "en": "A form to book an appointment with date, time and place."
+      },
+      "sxablono": "formularo",
+      "eroj": [
+        "datelektilo",
+        "kampo",
+        "kompletigilo",
+        "butono",
+        "listelektilo"
+      ],
+      "kriterioj": [
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7F0",
+          "regulo": "field-label-visible",
+          "teksto": {
+            "de": "Ein Feld für das Datum.",
+            "en": "A field for the date."
+          },
+          "kontrolo": {
+            "0": "input[type=date]",
+            "kind": "elemento",
+            "F": "fm-datelektilo",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7F1",
+          "regulo": "field-label-visible",
+          "teksto": {
+            "de": "Ein Feld für die Uhrzeit.",
+            "en": "A field for the time."
+          },
+          "kontrolo": {
+            "0": "input[type=time]",
+            "kind": "elemento",
+            "F": "fm-kampo[kind=time]",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7F2",
+          "regulo": "field-label-visible",
+          "teksto": {
+            "de": "Jedes Feld hat eine sichtbare Beschriftung.",
+            "en": "Every field has a visible label."
+          },
+          "kontrolo": {
+            "kind": "named-fields"
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7F3",
+          "regulo": "one-primary-per-container",
+          "teksto": {
+            "de": "Genau eine primäre Aktion.",
+            "en": "Exactly one primary action."
+          },
+          "kontrolo": {
+            "kind": "elemento",
+            "F": "fm-butono[emphasis=high]",
+            "min": 1,
+            "max": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "tsk_01M5N8ADAQMSCPB4WEG7KMF7F4",
+      "name": "installationshilfe",
+      "teksto": {
+        "de": "Eine Hilfeseite, die zeigt, wie man ein Paket installiert, mit einem Befehl zum Kopieren.",
+        "en": "A help page that shows how to install a package, with a command to copy."
+      },
+      "sxablono": "pagxo",
+      "eroj": [
+        "kodbloko",
+        "teksto",
+        "titolo",
+        "ligilo",
+        "konsileto"
+      ],
+      "kriterioj": [
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7F5",
+          "regulo": "icon-meaning-named",
+          "teksto": {
+            "de": "Der Befehl steht in einem Codeblock.",
+            "en": "The command stands in a code block."
+          },
+          "kontrolo": {
+            "0": "pre",
+            "kind": "elemento",
+            "F": "fm-kodbloko",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7F6",
+          "regulo": "label-names-action",
+          "teksto": {
+            "de": "Ein Knopf kopiert den Befehl.",
+            "en": "A button copies the command."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "button",
+            "name": "kopier|copy",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7F7",
+          "regulo": "heading-levels-in-order",
+          "teksto": {
+            "de": "Genau eine Überschrift der ersten Ebene.",
+            "en": "Exactly one heading of level one."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "heading",
+            "level": 1,
+            "min": 1,
+            "max": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7F8",
+          "regulo": "link-label-names-destination",
+          "teksto": {
+            "de": "Kein Link heißt nur „hier“ oder „mehr“.",
+            "en": "No link is called only “here” or “more”."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "link",
+            "name": "^(hier|here|mehr|more|link|klicken|click)$",
+            "max": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "tsk_01M5N8ADAQMSCPB4WEG7KMF7F9",
+      "name": "benutzerverwaltung",
+      "teksto": {
+        "de": "Eine Benutzerverwaltung als Tabelle, in der jede Zeile ein Menü mit Aktionen hat und die Rollen als Schlagworte zu sehen sind.",
+        "en": "A user administration as a table in which every row has a menu of actions and the roles are shown as tags."
+      },
+      "sxablono": "pagxo",
+      "eroj": [
+        "tabelo",
+        "menuo",
+        "signeto",
+        "avataro",
+        "sxvebilo",
+        "titolo"
+      ],
+      "kriterioj": [
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7FA",
+          "regulo": "table-caption-names-the-content",
+          "teksto": {
+            "de": "Die Tabelle hat eine Beschriftung.",
+            "en": "The table has a caption."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "table",
+            "name": ".",
+            "min": 1
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7FB",
+          "regulo": "label-names-action",
+          "teksto": {
+            "de": "Jede Zeile hat ein Menü mit Aktionen.",
+            "en": "Every row has a menu of actions."
+          },
+          "kontrolo": {
+            "kind": "elemento",
+            "F": "fm-menuo",
+            "min": 2
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7FC",
+          "regulo": "badge-text-short",
+          "teksto": {
+            "de": "Die Rollen stehen als Schlagworte.",
+            "en": "The roles stand as tags."
+          },
+          "kontrolo": {
+            "kind": "elemento",
+            "F": "fm-signeto,fm-insigno",
+            "min": 2
+          }
+        },
+        {
+          "id": "kri_01M5N8ADAQMSCPB4WEG7KMF7FD",
+          "regulo": "heading-levels-in-order",
+          "teksto": {
+            "de": "Genau eine Überschrift der ersten Ebene.",
+            "en": "Exactly one heading of level one."
+          },
+          "kontrolo": {
+            "kind": "aria",
+            "role": "heading",
+            "level": 1,
+            "min": 1,
+            "max": 1
+          }
+        }
+      ]
+    }
+  ],
+  "pezoj": [
+    {
+      "kriterio": "K1",
+      "pezo": 16.67,
+      "kialo": {
+        "de": "Eine Seite, die nicht fehlerfrei rendert, nützt niemandem; alles Weitere setzt das voraus.",
+        "en": "A page that does not render without errors helps nobody; everything else depends on it."
+      }
+    },
+    {
+      "kriterio": "K2",
+      "pezo": 12.5,
+      "kialo": {
+        "de": "Erfundene Bezeichner zeigen, wo der Gvidanto einem Agenten nicht gesagt hat, was es gibt; sie brechen still im Browser.",
+        "en": "Invented identifiers show where the Gvidanto did not tell an agent what exists; they break silently in the browser."
+      }
+    },
+    {
+      "kriterio": "K3",
+      "pezo": 12.5,
+      "kialo": {
+        "de": "Die Reguloj sind das Wissen des Systems; check_usage misst, ob ein Agent es anwendet.",
+        "en": "The Reguloj are the knowledge of the system; check_usage measures whether an agent applies it."
+      }
+    },
+    {
+      "kriterio": "K4",
+      "pezo": 16.67,
+      "kialo": {
+        "de": "Barrierefreiheit in jeder Marke und jedem Modus ist das Versprechen von Fundamento; ein Fehler trifft Menschen direkt.",
+        "en": "Accessibility in every brand and mode is Fundamento's promise; a failure hits people directly."
+      }
+    },
+    {
+      "kriterio": "K5",
+      "pezo": 25,
+      "kialo": {
+        "de": "Rohwerte und nachgebaute Eroj folgen keiner Marke und keinem Modus; der Markenwechsel bricht dort. Der Nordstern verlangt Screens, die jede Marke tragen: deshalb zählt K5 ein Viertel der Kennzahl (Nachlese 11, O-1 der Spec 030).",
+        "en": "Raw values and rebuilt Eroj follow no brand and no mode; switching the brand breaks there. The north star asks for screens that carry every brand: so K5 counts a quarter of the score (Nachlese 11, O-1 of Spec 030)."
+      }
+    },
+    {
+      "kriterio": "K6",
+      "pezo": 16.67,
+      "kialo": {
+        "de": "Die Aufgabe ist erst gelöst, wenn ihre Abnahmekriterien gelten; sonst ist die Seite schön, aber falsch.",
+        "en": "The task is solved only when its acceptance criteria hold; otherwise the page may look fine but is wrong."
+      }
+    }
+  ],
+  "pezojAntauxaj": {
+    "nomo": "Spec 030",
+    "kialo": {
+      "de": "Die Gewichte des ersten Laufs, ohne das Tor der Markenfähigkeit: berichtet neben den neuen, damit die Ausgangslinie vergleichbar bleibt und sichtbar ist, dass die Regel aus dem Nordstern kommt und nicht aus dem Ergebnis.",
+      "en": "The weights of the first run, without the gate of Markenfähigkeit: reported beside the new ones, so the baseline stays comparable and it is seen that the rule comes from the north star, not from the result."
+    },
+    "pezoj": [
+      {
+        "kriterio": "K1",
+        "pezo": 20,
+        "kialo": {
+          "de": "Eine Seite, die nicht fehlerfrei rendert, nützt niemandem; alles Weitere setzt das voraus.",
+          "en": "A page that does not render without errors helps nobody; everything else depends on it."
+        }
+      },
+      {
+        "kriterio": "K2",
+        "pezo": 15,
+        "kialo": {
+          "de": "Erfundene Bezeichner zeigen, wo der Gvidanto einem Agenten nicht gesagt hat, was es gibt; sie brechen still im Browser.",
+          "en": "Invented identifiers show where the Gvidanto did not tell an agent what exists; they break silently in the browser."
+        }
+      },
+      {
+        "kriterio": "K3",
+        "pezo": 15,
+        "kialo": {
+          "de": "Die Reguloj sind das Wissen des Systems; check_usage misst, ob ein Agent es anwendet.",
+          "en": "The Reguloj are the knowledge of the system; check_usage measures whether an agent applies it."
+        }
+      },
+      {
+        "kriterio": "K4",
+        "pezo": 20,
+        "kialo": {
+          "de": "Barrierefreiheit in jeder Marke und jedem Modus ist das Versprechen von Fundamento; ein Fehler trifft Menschen direkt.",
+          "en": "Accessibility in every brand and mode is Fundamento's promise; a failure hits people directly."
+        }
+      },
+      {
+        "kriterio": "K5",
+        "pezo": 10,
+        "kialo": {
+          "de": "Rohwerte und nachgebaute Eroj folgen keiner Marke und keinem Modus; der Markenwechsel bricht dort.",
+          "en": "Raw values and rebuilt Eroj follow no brand and no mode; switching the brand breaks there."
+        }
+      },
+      {
+        "kriterio": "K6",
+        "pezo": 20,
+        "kialo": {
+          "de": "Die Aufgabe ist erst gelöst, wenn ihre Abnahmekriterien gelten; sonst ist die Seite schön, aber falsch.",
+          "en": "The task is solved only when its acceptance criteria hold; otherwise the page may look fine but is wrong."
+        }
+      }
+    ]
+  },
+  "multmarkeco": {
+    "kriterioj": [
+      "K4",
+      "K5"
+    ],
+    "kialo": {
+      "de": "Der Nordstern verlangt Screens, die jede Marke tragen (Art. IV). Eine Seite, die Marke oder Modus nicht wechseln kann, ist nur in einer Kombination barrierefrei und frei von Rohwerten, nicht in jeder Marke und jedem Modus; K4 und K5 zählen deshalb nur für die Kombinationen, denen die Seite folgt.",
+      "en": "The north star asks for screens that carry every brand (Art. IV). A page that cannot switch brand or mode is accessible and free of raw values in one combination only, not in every brand and mode; so K4 and K5 count only for the combinations the page follows."
+    }
+  }
+}

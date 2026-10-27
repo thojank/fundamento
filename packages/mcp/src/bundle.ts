@@ -57,9 +57,67 @@ function strip(schema: Json): Json {
   return body;
 }
 
-/** A self-contained copy of a tool schema. */
+/** A self-contained copy of a tool schema, its root one object (Nachlese 11 B-3). */
 export function bundleSchema(schema: Json): Json {
-  return withDefinitions(strip(schema));
+  return withDefinitions(oneObject(strip(schema)));
+}
+
+const COMBINATORS = ["oneOf", "anyOf", "allOf"] as const;
+
+/** How one alternative of the root is named in the sentence: what it requires or constrains. */
+function alternativeText(branch: Json): string {
+  const required = (branch.required as string[] | undefined) ?? [];
+  const properties = Object.entries((branch.properties as Json | undefined) ?? {});
+  const named = properties.flatMap(([name, property]) => {
+    const items = (property as Json | undefined)?.minItems;
+    if (typeof items === "number" && items > 0)
+      return [`\`${name}\` with at least ${items} ${items === 1 ? "entry" : "entries"}`];
+    return required.includes(name) ? [`\`${name}\``] : [];
+  });
+  const rest = required.filter((name) => !properties.some(([key]) => key === name));
+  return [...named, ...rest.map((name) => `\`${name}\``)].join(" and ");
+}
+
+/**
+ * The root of a tool's input as one object (Nachlese 11 B-3). Anthropic refuses oneOf, anyOf and
+ * allOf at the top of input_schema, OpenAI and Mistral also enum and not; the file keeps them, and
+ * the server checks every call against the file (server.ts). What the client receives: the
+ * properties of every alternative together, required what every alternative requires, and the
+ * alternatives said in the description, so an agent reads what the schema no longer enforces.
+ */
+function oneObject(schema: Json): Json {
+  const combinator = COMBINATORS.find((keyword) => Array.isArray(schema[keyword]));
+  if (combinator === undefined) return schema;
+  const { [combinator]: rawBranches, ...rest } = schema;
+  const branches = rawBranches as Json[];
+  const properties: Json = { ...((rest.properties as Json | undefined) ?? {}) };
+  for (const branch of branches) {
+    for (const [name, property] of Object.entries((branch.properties as Json | undefined) ?? {})) {
+      // A branch that only lists a property (`name: true`) keeps the root's definition.
+      if (!(name in properties) && property !== true) properties[name] = property;
+    }
+  }
+  const requiredOf = (entry: Json) => new Set((entry.required as string[] | undefined) ?? []);
+  const sets = branches.map(requiredOf);
+  const fromBranches =
+    combinator === "allOf"
+      ? sets.flatMap((set) => [...set])
+      : [...(sets[0] ?? [])].filter((name) => sets.every((set) => set.has(name)));
+  const required = [...new Set([...requiredOf(rest), ...fromBranches])];
+  const alternatives = branches.map(alternativeText).filter((text) => text !== "");
+  const sentence =
+    combinator === "allOf" || alternatives.length === 0
+      ? ""
+      : ` Give ${combinator === "oneOf" ? "exactly one" : "at least one"} of: ${alternatives.join(" or ")}.`;
+  return {
+    ...rest,
+    type: "object",
+    properties,
+    ...(required.length === 0 ? {} : { required }),
+    ...(typeof rest.description === "string"
+      ? { description: `${rest.description}${sentence}` }
+      : {}),
+  };
 }
 
 /**
