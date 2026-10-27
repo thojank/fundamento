@@ -73,7 +73,9 @@ describe("the sections of FR-06", () => {
       "color.background.raised",
     ]);
     expect(roles?.surfaces[1]?.alNaskbo).toBeGreaterThan(0.02);
-    expect(roles?.surfaces[3]?.alEkstremo).toBeGreaterThan(0.02);
+    // Spec 029 ①b a): the card of komuna is white (①-1 neu, 27.10.) — no distance to the anchor.
+    expect(roles?.surfaces[3]?.alEkstremo).toBe(0);
+    expect(roles?.surfaces[2]?.alEkstremo).toBeGreaterThan(0.02);
     expect(roles?.text).toHaveLength(3);
     expect(roles?.status.length).toBeGreaterThan(10);
     expect(roles?.agoj.length).toBeGreaterThan(10);
@@ -147,7 +149,9 @@ describe("the sections of FR-06", () => {
 
   it("carries the design goals of the brand with target, measurement and result", () => {
     const goals = datumoj.aspiroj.komuna ?? [];
-    expect(goals.length).toBe(5);
+    // Spec 029 ①b a): oklch-l-extreme no longer binds komuna (①-1 neu, 27.10.).
+    expect(goals.length).toBe(4);
+    expect(goals.map((goal) => goal.metriko)).not.toContain("oklch-l-extreme");
     expect(goals.map((goal) => goal.metriko)).toContain("dimensio-kovrado");
     for (const goal of goals) {
       expect(goal.atingita).toBe(true);
@@ -1043,9 +1047,9 @@ describe("the Vitrino shows the datelektilo (Spec 025 ②)", () => {
 // intents (and a small row), the listelektilo and the plurelektilo in the columns of a field with
 // options that carry icons and descriptions, the lokredaktilo in display, editing and error.
 describe("the Vitrino shows the selection Eroj (Spec 025 ③)", () => {
-  it("the signeto: three modes × five intents and a small row", () => {
+  it("the signeto: three modes × five intents, a small row and a row with icon (Spec 029 ①b d))", () => {
     const grid = datumoj.eroj.signeto ?? "";
-    expect((grid.match(/<fm-signeto /g) ?? []).length).toBe(20);
+    expect((grid.match(/<fm-signeto /g) ?? []).length).toBe(25);
     expect(grid).toContain('<fm-signeto mode="selectable" selected intent="success">');
     expect(grid).toContain('<fm-signeto mode="removable" intent="neutral">');
     expect(grid).toContain('<fm-signeto size="small" intent="neutral">');
