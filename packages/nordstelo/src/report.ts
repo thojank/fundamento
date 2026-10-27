@@ -2,9 +2,11 @@
 // median over the tasks, Variante F and 0 apart; the spread of the repeats (max − min per task,
 // its median); the top 10 of the gaps of Variante F – what agents invent, which Reguloj they break,
 // which Eroj they rebuild; the tokens. K7, the effort, as medians beside the score.
+// Nachlese 11 ②: both weightings — the new one with the gate of Markenfähigkeit and the one of
+// Spec 030 without it — and the mean of every criterion, per variant.
 
 import type { Variant } from "./facts.js";
-import type { Gap, Score } from "./score.js";
+import { type Gap, KRITERIOJ, type Kriterio, type Score } from "./score.js";
 
 export interface Effort {
   inputTokens: number;
@@ -13,6 +15,8 @@ export interface Effort {
   ms: number;
   /** Size of the markup the agent wrote. */
   bytes: number;
+  /** Requests to the provider (Nachlese 11 ④); absent in runs before. */
+  requests?: number;
 }
 
 export interface RunRecord {
@@ -20,6 +24,8 @@ export interface RunRecord {
   variant: Variant;
   repeat: number;
   score: Score;
+  /** The same result in the weighting before (Spec 030), without the gate (Nachlese 11 ②). */
+  antauxa?: Score;
   effort: Effort;
   /** Why the run gave no page (an error of the provider, a timeout); it counts as 0. */
   error?: string;
@@ -42,8 +48,18 @@ export interface VariantSummary {
 
 export interface Summary {
   variants: Record<Variant, VariantSummary>;
+  /** The same in the weighting before (Spec 030), where the records carry it (Nachlese 11 ②). */
+  antauxa?: Record<Variant, VariantSummary>;
+  /** Mean of every criterion over the results, 0–1; null where it does not apply. */
+  kriterioj?: Record<Variant, Record<Kriterio, number | null>>;
+  /** The same without the gate (Spec 030). */
+  kriteriojAntauxaj?: Record<Variant, Record<Kriterio, number | null>>;
+  /** Mean share of the combinations the pages follow (Markenfähigkeit), per variant. */
+  multmarkeco?: Record<Variant, number | null>;
   gaps: (Gap & { count: number })[];
   tokens: { input: number; output: number };
+  /** Requests to the provider over the run (Nachlese 11 ④); absent where no result counts them. */
+  requests?: number;
   failed: { task: string; variant: Variant; repeat: number; error: string }[];
 }
 
@@ -58,7 +74,26 @@ export function median(values: readonly number[]): number {
 
 const round1 = (value: number): number => Math.round(value * 10) / 10;
 
-function variantSummary(records: readonly RunRecord[]): VariantSummary {
+const round2 = (value: number): number => Math.round(value * 100) / 100;
+
+const mean = (values: readonly number[]): number | null =>
+  values.length === 0
+    ? null
+    : round2(values.reduce((sum, value) => sum + value, 0) / values.length);
+
+function kriterioMeans(scores: readonly Score[]): Record<Kriterio, number | null> {
+  return Object.fromEntries(
+    KRITERIOJ.map((kriterio) => [
+      kriterio,
+      mean(scores.flatMap((entry) => (entry.k[kriterio] === null ? [] : [entry.k[kriterio]]))),
+    ]),
+  ) as Record<Kriterio, number | null>;
+}
+
+function variantSummary(
+  records: readonly RunRecord[],
+  pick: (record: RunRecord) => Score = (record) => record.score,
+): VariantSummary {
   const byTask = new Map<string, RunRecord[]>();
   for (const record of records) {
     const list = byTask.get(record.task) ?? [];
@@ -68,7 +103,7 @@ function variantSummary(records: readonly RunRecord[]): VariantSummary {
   const tasks: TaskSummary[] = [...byTask.entries()].map(([task, list]) => {
     const scores = [...list]
       .sort((a, b) => a.repeat - b.repeat)
-      .map((record) => (record.error === undefined ? record.score.total : 0));
+      .map((record) => (record.error === undefined ? pick(record).total : 0));
     return {
       task,
       median: round1(median(scores)),
@@ -89,6 +124,9 @@ function variantSummary(records: readonly RunRecord[]): VariantSummary {
       toolCalls: effort((entry) => entry.toolCalls),
       ms: effort((entry) => entry.ms),
       bytes: effort((entry) => entry.bytes),
+      ...(records.some((record) => record.effort.requests !== undefined)
+        ? { requests: effort((entry) => entry.requests ?? 0) }
+        : {}),
     },
   };
 }
@@ -106,16 +144,39 @@ export function summarize(records: readonly RunRecord[]): Summary {
   const gaps = [...counts.values()]
     .sort((a, b) => b.count - a.count || (a.key < b.key ? -1 : a.key > b.key ? 1 : 0))
     .slice(0, 10);
+  const of = (variant: Variant) => records.filter((record) => record.variant === variant);
+  const old = (record: RunRecord) => record.antauxa ?? record.score;
+  const both = records.some((record) => record.antauxa !== undefined);
+  const per = <T>(make: (variant: Variant) => T): Record<Variant, T> => ({
+    F: make("F"),
+    "0": make("0"),
+  });
   return {
-    variants: {
-      F: variantSummary(records.filter((record) => record.variant === "F")),
-      "0": variantSummary(records.filter((record) => record.variant === "0")),
-    },
+    variants: per((variant) => variantSummary(of(variant))),
+    ...(both
+      ? {
+          antauxa: per((variant) => variantSummary(of(variant), old)),
+          kriteriojAntauxaj: per((variant) => kriterioMeans(of(variant).map(old))),
+        }
+      : {}),
+    kriterioj: per((variant) => kriterioMeans(of(variant).map((record) => record.score))),
+    multmarkeco: per((variant) =>
+      mean(
+        of(variant).flatMap((record) =>
+          record.score.multmarkeco === undefined
+            ? []
+            : [record.error === undefined ? record.score.multmarkeco : 0],
+        ),
+      ),
+    ),
     gaps,
     tokens: {
       input: records.reduce((sum, record) => sum + record.effort.inputTokens, 0),
       output: records.reduce((sum, record) => sum + record.effort.outputTokens, 0),
     },
+    ...(records.some((record) => record.effort.requests !== undefined)
+      ? { requests: records.reduce((sum, record) => sum + (record.effort.requests ?? 0), 0) }
+      : {}),
     failed: records.flatMap((record) =>
       record.error === undefined
         ? []

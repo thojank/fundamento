@@ -7,7 +7,6 @@ import {
   Budget,
   CostLimitReached,
   extractHtml,
-  flattenSchema,
   providerOf,
   runAgent,
   type ToolBridge,
@@ -193,25 +192,26 @@ describe("runAgent", () => {
   });
 });
 
-describe("flattenSchema", () => {
-  it("merges top-level branches into one object for providers that take no oneOf", () => {
-    expect(
-      flattenSchema({
-        $schema: "x",
-        type: "object",
-        properties: { lingvo: { type: "string" } },
-        oneOf: [
-          { properties: { name: { type: "string" } }, required: ["name"] },
-          { properties: { id: { type: "string" } }, required: ["id"] },
-        ],
-      }),
-    ).toEqual({
+describe("the functions of Variante F (Nachlese 11 B-3)", () => {
+  it("offers the Gvidanto's input schema as it is: the Gvidanto lists one object at the root", async () => {
+    const seen: { url: string; body: unknown; headers: Record<string, string> }[] = [];
+    const inputSchema = {
       type: "object",
-      properties: { lingvo: { type: "string" }, name: { type: "string" }, id: { type: "string" } },
+      description: "One Ero. Give exactly one of: `name` or `id`.",
+      properties: { name: { type: "string" }, id: { type: "string" } },
+    };
+    await runAgent({
+      provider: providerOf({ FM_KI_ANBIETER: "openai", FM_KI_MODELL: "m", OPENAI_API_KEY: KEY }),
+      fetch: fakeFetch([message("<main>x</main>")], seen),
+      task: "Baue",
+      variant: "F",
+      budget: new Budget(1_000_000),
+      tools: {
+        list: async () => [{ name: "get_ero", description: "One Ero", inputSchema }],
+        call: async () => "{}",
+      },
     });
-    expect(flattenSchema({ type: "object", properties: {} })).toEqual({
-      type: "object",
-      properties: {},
-    });
+    const body = seen[0]?.body as { tools: { function: { parameters: unknown } }[] };
+    expect(body.tools[0]?.function.parameters).toEqual(inputSchema);
   });
 });

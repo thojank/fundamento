@@ -121,3 +121,25 @@ describe("the route /nordstelo", () => {
     expect(outside.status).toBe(404);
   });
 });
+
+// Nachlese 11 ② (O-1 der Spec 030): the figure in the weighting of Nachlese 11 with the gate of
+// Markenfähigkeit, and beside it the one of Spec 030, so the rule is seen to come from the north
+// star and not from the result.
+describe("nordsteloScreen with both weightings (Nachlese 11)", () => {
+  const both: NordsteloHistorio = {
+    kuroj: [
+      {
+        ...(historio.kuroj[0] as NordsteloHistorio["kuroj"][number]),
+        kennzahl: { F: 70.4, "0": 31.2 },
+        kennzahlAntauxa: { F: 71, "0": 74.3 },
+      },
+    ],
+  };
+  const html = nordsteloScreen(both);
+
+  it("shows the figure of Spec 030 beside the new one", () => {
+    expect(html).toContain("Spec 030");
+    expect(html).toContain("74,3");
+    expect(html).toContain("31,2");
+  });
+});

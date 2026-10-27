@@ -1441,7 +1441,7 @@
   "pezoj": [
     {
       "kriterio": "K1",
-      "pezo": 20,
+      "pezo": 16.67,
       "kialo": {
         "de": "Eine Seite, die nicht fehlerfrei rendert, nützt niemandem; alles Weitere setzt das voraus.",
         "en": "A page that does not render without errors helps nobody; everything else depends on it."
@@ -1449,7 +1449,7 @@
     },
     {
       "kriterio": "K2",
-      "pezo": 15,
+      "pezo": 12.5,
       "kialo": {
         "de": "Erfundene Bezeichner zeigen, wo der Gvidanto einem Agenten nicht gesagt hat, was es gibt; sie brechen still im Browser.",
         "en": "Invented identifiers show where the Gvidanto did not tell an agent what exists; they break silently in the browser."
@@ -1457,7 +1457,7 @@
     },
     {
       "kriterio": "K3",
-      "pezo": 15,
+      "pezo": 12.5,
       "kialo": {
         "de": "Die Reguloj sind das Wissen des Systems; check_usage misst, ob ein Agent es anwendet.",
         "en": "The Reguloj are the knowledge of the system; check_usage measures whether an agent applies it."
@@ -1465,7 +1465,7 @@
     },
     {
       "kriterio": "K4",
-      "pezo": 20,
+      "pezo": 16.67,
       "kialo": {
         "de": "Barrierefreiheit in jeder Marke und jedem Modus ist das Versprechen von Fundamento; ein Fehler trifft Menschen direkt.",
         "en": "Accessibility in every brand and mode is Fundamento's promise; a failure hits people directly."
@@ -1473,19 +1473,86 @@
     },
     {
       "kriterio": "K5",
-      "pezo": 10,
+      "pezo": 25,
       "kialo": {
-        "de": "Rohwerte und nachgebaute Eroj folgen keiner Marke und keinem Modus; der Markenwechsel bricht dort.",
-        "en": "Raw values and rebuilt Eroj follow no brand and no mode; switching the brand breaks there."
+        "de": "Rohwerte und nachgebaute Eroj folgen keiner Marke und keinem Modus; der Markenwechsel bricht dort. Der Nordstern verlangt Screens, die jede Marke tragen: deshalb zählt K5 ein Viertel der Kennzahl (Nachlese 11, O-1 der Spec 030).",
+        "en": "Raw values and rebuilt Eroj follow no brand and no mode; switching the brand breaks there. The north star asks for screens that carry every brand: so K5 counts a quarter of the score (Nachlese 11, O-1 of Spec 030)."
       }
     },
     {
       "kriterio": "K6",
-      "pezo": 20,
+      "pezo": 16.67,
       "kialo": {
         "de": "Die Aufgabe ist erst gelöst, wenn ihre Abnahmekriterien gelten; sonst ist die Seite schön, aber falsch.",
         "en": "The task is solved only when its acceptance criteria hold; otherwise the page may look fine but is wrong."
       }
     }
-  ]
+  ],
+  "pezojAntauxaj": {
+    "nomo": "Spec 030",
+    "kialo": {
+      "de": "Die Gewichte des ersten Laufs, ohne das Tor der Markenfähigkeit: berichtet neben den neuen, damit die Ausgangslinie vergleichbar bleibt und sichtbar ist, dass die Regel aus dem Nordstern kommt und nicht aus dem Ergebnis.",
+      "en": "The weights of the first run, without the gate of Markenfähigkeit: reported beside the new ones, so the baseline stays comparable and it is seen that the rule comes from the north star, not from the result."
+    },
+    "pezoj": [
+      {
+        "kriterio": "K1",
+        "pezo": 20,
+        "kialo": {
+          "de": "Eine Seite, die nicht fehlerfrei rendert, nützt niemandem; alles Weitere setzt das voraus.",
+          "en": "A page that does not render without errors helps nobody; everything else depends on it."
+        }
+      },
+      {
+        "kriterio": "K2",
+        "pezo": 15,
+        "kialo": {
+          "de": "Erfundene Bezeichner zeigen, wo der Gvidanto einem Agenten nicht gesagt hat, was es gibt; sie brechen still im Browser.",
+          "en": "Invented identifiers show where the Gvidanto did not tell an agent what exists; they break silently in the browser."
+        }
+      },
+      {
+        "kriterio": "K3",
+        "pezo": 15,
+        "kialo": {
+          "de": "Die Reguloj sind das Wissen des Systems; check_usage misst, ob ein Agent es anwendet.",
+          "en": "The Reguloj are the knowledge of the system; check_usage measures whether an agent applies it."
+        }
+      },
+      {
+        "kriterio": "K4",
+        "pezo": 20,
+        "kialo": {
+          "de": "Barrierefreiheit in jeder Marke und jedem Modus ist das Versprechen von Fundamento; ein Fehler trifft Menschen direkt.",
+          "en": "Accessibility in every brand and mode is Fundamento's promise; a failure hits people directly."
+        }
+      },
+      {
+        "kriterio": "K5",
+        "pezo": 10,
+        "kialo": {
+          "de": "Rohwerte und nachgebaute Eroj folgen keiner Marke und keinem Modus; der Markenwechsel bricht dort.",
+          "en": "Raw values and rebuilt Eroj follow no brand and no mode; switching the brand breaks there."
+        }
+      },
+      {
+        "kriterio": "K6",
+        "pezo": 20,
+        "kialo": {
+          "de": "Die Aufgabe ist erst gelöst, wenn ihre Abnahmekriterien gelten; sonst ist die Seite schön, aber falsch.",
+          "en": "The task is solved only when its acceptance criteria hold; otherwise the page may look fine but is wrong."
+        }
+      }
+    ]
+  },
+  "multmarkeco": {
+    "kriterioj": [
+      "K4",
+      "K5"
+    ],
+    "kialo": {
+      "de": "Der Nordstern verlangt Screens, die jede Marke tragen (Art. IV). Eine Seite, die Marke oder Modus nicht wechseln kann, ist nur in einer Kombination barrierefrei und frei von Rohwerten, nicht in jeder Marke und jedem Modus; K4 und K5 zählen deshalb nur für die Kombinationen, denen die Seite folgt.",
+      "en": "The north star asks for screens that carry every brand (Art. IV). A page that cannot switch brand or mode is accessible and free of raw values in one combination only, not in every brand and mode; so K4 and K5 count only for the combinations the page follows."
+    }
+  }
 }

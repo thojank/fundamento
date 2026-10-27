@@ -141,22 +141,27 @@ export function createFundamentoServer(served: Served, options: ServerOptions = 
     }
     return { contents: [contents] };
   });
-  const listed = tools.map((tool) => ({
-    name: tool.name,
-    description: String(tool.input.schema.description ?? tool.name),
-    inputSchema: bundleSchema(tool.input.schema) as { type: "object" },
-    outputSchema: bundleResultSchema(tool.output.schema, tool.error.schema) as { type: "object" },
-    // Spec 019 ③: save_agordo writes (with confirm, in the working directory, over an Agordo).
-    annotations:
-      tool.name === "save_agordo"
-        ? {
-            readOnlyHint: false,
-            destructiveHint: true,
-            idempotentHint: false,
-            openWorldHint: false,
-          }
-        : { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  }));
+  const listed = tools.map((tool) => {
+    // Nachlese 11 B-3: one object at the root; the description says the alternatives the file
+    // keeps, and the tool says the same words.
+    const inputSchema = bundleSchema(tool.input.schema) as { type: "object"; description?: string };
+    return {
+      name: tool.name,
+      description: String(inputSchema.description ?? tool.name),
+      inputSchema,
+      outputSchema: bundleResultSchema(tool.output.schema, tool.error.schema) as { type: "object" },
+      // Spec 019 ③: save_agordo writes (with confirm, in the working directory, over an Agordo).
+      annotations:
+        tool.name === "save_agordo"
+          ? {
+              readOnlyHint: false,
+              destructiveHint: true,
+              idempotentHint: false,
+              openWorldHint: false,
+            }
+          : { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+    };
+  });
   server.setRequestHandler("tools/list", () => ({ tools: listed }));
   server.setRequestHandler("tools/call", (request) => {
     const name = request.params.name as ToolName;

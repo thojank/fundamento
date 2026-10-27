@@ -28,7 +28,7 @@ import {
   type Uzo,
 } from "@fundamento/modelo";
 import { type Celo, type CeloInput, celoInputOf, type GeneratedFile } from "../../build.js";
-import { aspektoStylesheet } from "../css/css.js";
+import { aspektoStylesheet, PAGE_SURFACE } from "../css/css.js";
 import { componentName, reactEntriesOf, reactSource } from "../react/react.js";
 import { themeBlock } from "../tailwind/tailwind.js";
 import { elementSource } from "../web-component/element-template.js";
@@ -244,7 +244,13 @@ function exampleLabel(
  * how it behaves in the layout, and what its label may say (fixed or adjustable, with an example
  * each way). Generated from the Uzo, the Reguloj and the Jugxoj; no hand-written line (Art. VII).
  */
-function uzoSections(input: CeloInput, uzo: Uzo, reguloj: readonly Regulo[]): string {
+function uzoSections(
+  input: CeloInput,
+  uzo: Uzo,
+  reguloj: readonly Regulo[],
+  skemo: LoadedEro["skemo"],
+  tag: string,
+): string {
   const reguloNamed = (name: string) => reguloj.find((regulo) => regulo.name === name);
   const notFor = [
     ...uzo.boundary.map(
@@ -273,12 +279,19 @@ function uzoSections(input: CeloInput, uzo: Uzo, reguloj: readonly Regulo[]): st
     ...uzo.composes.never.map((entry) => `- never with \`${entry.ero}\` — ${entry.kialo}`),
     `- spacing: the space between siblings belongs to the ${uzo.composes.spacing.owner} (${uzo.composes.spacing.regulo})${spacing === undefined ? "" : ` — ${spacing.statement}`}`,
   ].join("\n");
-  const slots = Object.entries(uzo.slots)
-    .map(
-      ([slot, rule]) =>
-        `| \`${slot}\` | ${(rule.accepts ?? []).join(", ") || "–"} | ${rule.max ?? "–"} | ${rule.required === true ? "yes" : "no"} | ${rule.nesting ?? "–"} |`,
-    )
+  // Nachlese 11 B-2: every slot of the Skemo, the default one marked as the Skemo marks it, with
+  // the rules the Uzo gives it ("–" where it gives none).
+  const slots = skemo.slots
+    .map((slot) => {
+      const rule = uzo.slots[slot.name];
+      return `| \`${slot.name}\`${slot.default === true ? " (default slot)" : ""} | ${(rule?.accepts ?? []).join(", ") || "–"} | ${rule?.max ?? "–"} | ${rule?.required === true ? "yes" : "no"} | ${rule?.nesting ?? "–"} |`;
+    })
     .join("\n");
+  const defaultSlot = skemo.slots.find((slot) => slot.default === true)?.name;
+  const slotSentence =
+    defaultSlot === undefined
+      ? "Every slot takes a child with its slot attribute."
+      : `The default slot \`${defaultSlot}\` takes the content without a slot attribute — \`<${tag}>…</${tag}>\`; \`slot="${defaultSlot}"\` names the same slot. Every other slot takes a child with its slot attribute.`;
   const allowances = Object.entries(uzo.layout)
     .flatMap(([prop, allowance]) => {
       if (typeof allowance !== "object") return [];
@@ -319,6 +332,8 @@ ${notFor}
 ${together}
 
 ## Slots
+
+${slotSentence}
 
 | Slot | Accepts | Max | Required | Nesting |
 |---|---|---|---|---|
@@ -443,7 +458,7 @@ ${rules}
 ## Examples
 
 ${examples}
-${entry.uzo === undefined ? "" : uzoSections(input, entry.uzo, reguloj)}`;
+${entry.uzo === undefined ? "" : uzoSections(input, entry.uzo, reguloj, skemo, tag)}`;
 }
 
 function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
@@ -894,6 +909,8 @@ components and its tokens; never write a colour, a size or a font value yourself
 - Take every value from a token: Tailwind classes \`*-fm-*\` or the CSS variables \`--fm-*\`.
 - Switch brand, colour scheme, contrast, density, viewport and motion with the \`data-fm-*\`
   attributes on \`<html>\`; never with a second stylesheet.
+- The page takes its surface and its text colour from the styles (\`${PAGE_SURFACE.fill}\`,
+  \`${PAGE_SURFACE.color}\`); never set a background of the page yourself.
 ${ruleLines}
 ${fieldLines}
 ${areaLines}
@@ -947,6 +964,10 @@ import "${makeKitName(aspekto)}/styles.css";
 import "${makeKitName(aspekto)}/tailwind.css"; // only with Tailwind v4
 import { ${eroj.map((entry) => componentName(entry.ero)).join(", ")} } from "${makeKitName(aspekto)}";
 \`\`\`
+
+The styles set the page: its root takes \`${PAGE_SURFACE.fill}\` as its surface and
+\`${PAGE_SURFACE.color}\` as its text, in every Aspekto and mode — a page with nothing else keeps
+its contrast in the dark scheme too. Do not paint a background of your own behind the page.
 
 Set the Dimensioj on \`<html>\`; every value follows without a reload.
 
@@ -1495,4 +1516,15 @@ export function guidelinesInventory(markdown: string): ParityItem & { sections: 
     values,
     sections: guidelineSections(markdown),
   };
+}
+
+/**
+ * The slots a component guideline lists (Nachlese 11 B-2, conformance): every row of its Slots
+ * table, the default slot as the table marks it.
+ */
+export function guidelineSlots(markdown: string): { name: string; default: boolean }[] {
+  const table = sectionBody(markdown, "Slots") ?? "";
+  return [...table.matchAll(/^\| `([a-z0-9-]+)`( \(default slot\))? \|/gm)].map(
+    ([, name = "", marked]) => ({ name, default: marked !== undefined }),
+  );
 }

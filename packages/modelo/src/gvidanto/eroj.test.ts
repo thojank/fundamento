@@ -183,6 +183,8 @@ describe("get_ero", () => {
         label: "string",
       },
       slots: ["label", "icon-start", "icon-end"],
+      // Nachlese 11 B-2: the slot that takes the content without a slot attribute.
+      defaultSlot: "label",
     });
     expect(output.projekcioj.react).toEqual({
       package: "@fundamento/eroj/react",

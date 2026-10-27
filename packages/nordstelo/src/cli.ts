@@ -3,14 +3,16 @@
 // maintainer's machine with the keys of their .env – never in CI. Provider, model and key come from
 // the .env (FM_KI_ANBIETER, FM_KI_MODELL, the key of the provider); the key is never printed.
 // `pnpm nordstelo restaro <run>` scores the stored results of a run again and says whether every
-// number is the same (Determinismus).
+// number is the same (Determinismus). Nachlese 11 ②: a result stored by the rules of Spec 030 is
+// checked against the old weighting; `--skribi` writes the rescoring in both weightings next to the
+// run (restaro.md, restaro.json) and carries both figures into the history.
 
 import { execFileSync } from "node:child_process";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
-import { parseEnv } from "@fundamento/metiejo";
+import { type NordsteloHistorio, parseEnv } from "@fundamento/metiejo";
 import {
   defaultModeloSource,
   loadModelo,
@@ -21,9 +23,11 @@ import { buildProjekcioj } from "@fundamento/projekcioj";
 import { providerOf, runAgent } from "./agent.js";
 import type { Facts, Variant } from "./facts.js";
 import { connectGvidanto } from "./gvidanto.js";
+import { AnfragoLedger, dayOf, LIMOJ, type Limoj, Pordisto } from "./limoj.js";
 import { createRenderer } from "./render.js";
-import { failedScore, runNordstelo } from "./run.js";
-import { type Score, score } from "./score.js";
+import { type RunRecord, summarize } from "./report.js";
+import { failedScore, markdownReport, runNordstelo } from "./run.js";
+import { scoreBoth } from "./score.js";
 
 const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 const CXIUJ_CONFIG = join(
@@ -32,7 +36,9 @@ const CXIUJ_CONFIG = join(
 );
 
 const HELP = `pnpm nordstelo [Optionen]           ein Lauf: Aufgaben × Varianten × Wiederholungen
-pnpm nordstelo restaro <Laufordner>  die gespeicherten Ergebnisse eines Laufs erneut bewerten
+pnpm nordstelo restaro <Laufordner> [--skribi]
+                                     die gespeicherten Ergebnisse eines Laufs erneut bewerten; mit
+                                     --skribi beide Gewichtungen nach restaro.md und in den Verlauf
 
   --env <Datei>        die .env mit FM_KI_ANBIETER, FM_KI_MODELL und dem Schlüssel (Standard: .env im Checkout)
   --taskoj <a,b>       nur diese Aufgaben (Namen aus packages/modelo/data/nordstelo.json)
@@ -43,6 +49,9 @@ pnpm nordstelo restaro <Laufordner>  die gespeicherten Ergebnisse eines Laufs er
   --lingvo <de|en>     Sprache der Aufgaben, Standard: de
   --anbieter <Name>    mistral, openai oder openrouter statt FM_KI_ANBIETER (Schlüssel aus der .env)
   --modell <Name>      ein anderes Modell als FM_KI_MODELL (Schlüssel aus der .env)
+  --anfragen-sekunde <n>  Anfragen je Sekunde höchstens (Standard: mistral 0,5, sonst frei)
+  --anfragen-tag <n>   Anfragen je UTC-Tag höchstens (Standard: openrouter 1000, sonst frei);
+                       am Limit hält der Lauf an, derselbe Befehl setzt ihn am nächsten Tag fort
   --out <Ordner>       Standard: .fundamento/nordstelo im Checkout`;
 
 function commitOf(): string {
@@ -68,40 +77,110 @@ function modeloAndKatalogo() {
   return { modelo, katalogo };
 }
 
-function restaro(runDir: string): number {
+function restaro(runDir: string, skribi: boolean): number {
   const { modelo, katalogo } = modeloAndKatalogo();
   let checked = 0;
   let differing = 0;
+  const records: RunRecord[] = [];
   for (const task of readdirSync(runDir, { withFileTypes: true }).filter((entry) =>
     entry.isDirectory(),
   )) {
     for (const result of readdirSync(join(runDir, task.name))) {
       const dir = join(runDir, task.name, result);
       if (!existsSync(join(dir, "rezulto.json"))) continue;
-      const stored = JSON.parse(readFileSync(join(dir, "rezulto.json"), "utf8")) as {
-        task: string;
-        variant: Variant;
-        score: Score;
-        error?: string;
-      };
+      const stored = JSON.parse(readFileSync(join(dir, "rezulto.json"), "utf8")) as RunRecord;
       const facts = JSON.parse(readFileSync(join(dir, "fakto.json"), "utf8")) as Facts;
       const tasko = katalogo.taskoj.find((entry) => entry.name === stored.task);
       if (tasko === undefined) continue;
       // A result without a page counts 0, as in the run (D-12).
       const again =
         stored.error === undefined
-          ? score({ facts, tasko, variant: stored.variant, modelo, pezoj: katalogo.pezoj })
-          : failedScore(stored.variant, stored.error);
+          ? scoreBoth({ facts, tasko, variant: stored.variant, modelo }, katalogo)
+          : {
+              nova: failedScore(stored.variant, stored.error),
+              antauxa: failedScore(stored.variant, stored.error),
+            };
+      // Stored before Nachlese 11, a result carries the score of Spec 030 alone: the old weighting
+      // must give it again. Stored since, it carries both, and both must come again.
+      const same =
+        stored.antauxa === undefined
+          ? JSON.stringify(again.antauxa) === JSON.stringify(stored.score)
+          : JSON.stringify(again.nova) === JSON.stringify(stored.score) &&
+            JSON.stringify(again.antauxa) === JSON.stringify(stored.antauxa);
       checked += 1;
-      if (JSON.stringify(again) !== JSON.stringify(stored.score)) {
+      if (!same) {
         differing += 1;
         process.stdout.write(
-          `${task.name}/${result}: gespeichert ${stored.score.total}, jetzt ${again.total}\n`,
+          `${task.name}/${result}: gespeichert ${stored.score.total}, jetzt ${stored.antauxa === undefined ? again.antauxa.total : again.nova.total}\n`,
         );
       }
+      records.push({ ...stored, score: again.nova, antauxa: again.antauxa });
     }
   }
   process.stdout.write(`${checked} Ergebnisse erneut bewertet, ${differing} abweichend.\n`);
+  const summary = summarize(records);
+  const shownOf = (value: number | undefined) => (value === undefined ? "–" : shown(value));
+  process.stdout.write(
+    `Gewichtung Nachlese 11: Kennzahl F ${shownOf(summary.variants.F.median)} · Kennzahl 0 ${shownOf(summary.variants["0"].median)}\nGewichtung Spec 030: Kennzahl F ${shownOf(summary.antauxa?.F.median)} · Kennzahl 0 ${shownOf(summary.antauxa?.["0"].median)}\n`,
+  );
+  if (skribi) {
+    const id =
+      runDir
+        .split("/")
+        .filter((part) => part !== "")
+        .at(-1) ?? "";
+    const stored = existsSync(join(runDir, "raporto.json"))
+      ? (JSON.parse(readFileSync(join(runDir, "raporto.json"), "utf8")) as {
+          dato: string;
+          commit: string;
+          anbieter: string;
+          modell: string;
+          maxTokens: number;
+        })
+      : { dato: "", commit: "", anbieter: "", modell: "", maxTokens: 0 };
+    const meta = {
+      id,
+      dato: stored.dato,
+      commit: stored.commit,
+      anbieter: stored.anbieter,
+      modell: stored.modell,
+      maxTokens: stored.maxTokens,
+    };
+    writeFileSync(
+      join(runDir, "restaro.md"),
+      markdownReport(
+        meta,
+        summary,
+        `Nordstern-Kennzahl – Lauf ${id}, erneut bewertet (Nachlese 11, Katalog von ${commitOf()})`,
+      ),
+    );
+    writeFileSync(
+      join(runDir, "restaro.json"),
+      `${JSON.stringify({ ...meta, katalogo: commitOf(), summary, records: records.map(({ task, variant, repeat, score: s, antauxa, error }) => ({ task, variant, repeat, total: s.total, k: s.k, ...(s.multmarkeco === undefined ? {} : { multmarkeco: s.multmarkeco }), ...(antauxa === undefined ? {} : { antauxa: { total: antauxa.total, k: antauxa.k } }), ...(error === undefined ? {} : { error }) })) }, null, 2)}\n`,
+    );
+    // The history shows the figure in the new weighting, the one of Spec 030 beside it.
+    const historyFile = join(runDir, "..", "historio.json");
+    if (existsSync(historyFile)) {
+      const historio = JSON.parse(readFileSync(historyFile, "utf8")) as NordsteloHistorio;
+      const kuro = historio.kuroj.find((entry) => entry.id === id);
+      if (kuro !== undefined) {
+        kuro.kennzahl = { F: summary.variants.F.median, "0": summary.variants["0"].median };
+        if (summary.antauxa !== undefined)
+          kuro.kennzahlAntauxa = { F: summary.antauxa.F.median, "0": summary.antauxa["0"].median };
+        kuro.streuung = { F: summary.variants.F.spread, "0": summary.variants["0"].spread };
+        for (const tasko of kuro.taskoj) {
+          const of = (variant: Variant) =>
+            summary.variants[variant].tasks.find((entry) => entry.task === tasko.tasko)?.median;
+          const f = of("F");
+          const nul = of("0");
+          if (f !== undefined) tasko.F = f;
+          if (nul !== undefined) tasko["0"] = nul;
+        }
+        writeFileSync(historyFile, `${JSON.stringify(historio, null, 2)}\n`);
+      }
+    }
+    process.stdout.write(`Bericht: ${join(runDir, "restaro.md")}\n`);
+  }
   return differing === 0 ? 0 : 1;
 }
 
@@ -135,6 +214,29 @@ async function kuri(values: Record<string, string | boolean | undefined>): Promi
     dirname(fileURLToPath(import.meta.resolve("@fundamento/eroj/package.json"))),
     "dist",
   );
+  // Nachlese 11 ④: the limits of the provider are settings of the run; the requests of each UTC
+  // day are counted beside the runs, so the next run of the day knows them.
+  const limoj: Limoj = {
+    ...LIMOJ[provider.name],
+    ...(typeof values["anfragen-sekunde"] === "string"
+      ? { perSekundo: Number(values["anfragen-sekunde"]) }
+      : {}),
+    ...(typeof values["anfragen-tag"] === "string"
+      ? { perTago: Number(values["anfragen-tag"]) }
+      : {}),
+  };
+  const ledgerFile = join(out, "anfragoj.json");
+  const ledger = new AnfragoLedger(
+    existsSync(ledgerFile)
+      ? (JSON.parse(readFileSync(ledgerFile, "utf8")) as Record<string, number>)
+      : {},
+  );
+  const gate = new Pordisto(limoj, ledger, {
+    now: () => Date.now(),
+    sleep: (ms) => new Promise((done) => setTimeout(done, ms)),
+    provider: provider.name,
+    counted: () => writeFileSync(ledgerFile, `${JSON.stringify(ledger.entries, null, 2)}\n`),
+  });
   const gvidanto = await connectGvidanto();
   const renderer = await createRenderer({
     projekcioj,
@@ -173,13 +275,16 @@ async function kuri(values: Record<string, string | boolean | undefined>): Promi
             variant,
             budget,
             ...(variant === "F" ? { tools: gvidanto.bridge } : {}),
+            gate,
             log,
           }),
         render: (html, variant) => renderer.render(html, variant),
+        limoj,
+        todayUsed: () => ledger.count(provider.name, dayOf(Date.now())),
       },
     );
     process.stdout.write(
-      `Kennzahl F ${shown(result.summary.variants.F.median)} · Kennzahl 0 ${shown(result.summary.variants["0"].median)} · Tokens ${result.summary.tokens.input + result.summary.tokens.output}${result.aborted === undefined ? "" : ` · ${result.aborted}`}\nBericht: ${join(result.dir, "raporto.md")}\n`,
+      `Kennzahl F ${shown(result.summary.variants.F.median)} · Kennzahl 0 ${shown(result.summary.variants["0"].median)} · Tokens ${result.summary.tokens.input + result.summary.tokens.output}${result.summary.requests === undefined ? "" : ` · Anfragen ${result.summary.requests}`}${result.aborted === undefined ? "" : ` · ${result.aborted}`}${result.paused === undefined ? "" : ` · Pausiert: ${result.paused}`}\nBericht: ${join(result.dir, "raporto.md")}\n`,
     );
     return 0;
   } finally {
@@ -203,6 +308,9 @@ async function main(argv: readonly string[]): Promise<number> {
       anbieter: { type: "string" },
       modell: { type: "string" },
       out: { type: "string" },
+      "anfragen-sekunde": { type: "string" },
+      "anfragen-tag": { type: "string" },
+      skribi: { type: "boolean" },
       help: { type: "boolean", short: "h" },
     },
   });
@@ -213,10 +321,10 @@ async function main(argv: readonly string[]): Promise<number> {
   if (positionals[0] === "restaro") {
     const dir = positionals[1];
     if (dir === undefined) {
-      process.stderr.write("pnpm nordstelo restaro <Laufordner>\n");
+      process.stderr.write("pnpm nordstelo restaro <Laufordner> [--skribi]\n");
       return 2;
     }
-    return restaro(resolve(dir));
+    return restaro(resolve(dir), values.skribi === true);
   }
   return kuri(values);
 }

@@ -62,13 +62,19 @@ export async function serve(
   projections: string,
   body: string,
   head = "",
+  // Nachlese 11 B-6: a page as the quickstart writes it — fundamento.css and the Eroj, no surface
+  // of its own.
+  { bare = false }: { bare?: boolean } = {},
 ): Promise<void> {
+  const surface = bare
+    ? ""
+    : "<style>body { background-color: var(--fm-color-background-default); }</style>";
   await page.route(`${ORIGIN}/**`, async (route) => {
     const path = new URL(route.request().url()).pathname;
     if (path === "/") {
       await route.fulfill({
         contentType: "text/html; charset=utf-8",
-        body: `<!doctype html><html lang="de" data-fm-motion="reduced"><head><meta charset="utf-8"><title>Fundamento Eroj</title><link rel="stylesheet" href="/css/fundamento.css"><style>body { background-color: var(--fm-color-background-default); }</style>${head}<script type="module">import "/eroj/define.js";</script></head><body>${body}</body></html>`,
+        body: `<!doctype html><html lang="de" data-fm-motion="reduced"><head><meta charset="utf-8"><title>Fundamento Eroj</title><link rel="stylesheet" href="/css/fundamento.css">${surface}${head}<script type="module">import "/eroj/define.js";</script></head><body>${body}</body></html>`,
       });
       return;
     }

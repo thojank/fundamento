@@ -5,16 +5,20 @@
 // acceptance criteria of the task. Each is a share between 0 and 1, the total 0–100 weighted by
 // the weights of the catalogue. In Variante 0 K2 and K3 do not apply (no Ero to check); K7, the
 // effort, is reported beside the score and never weighted.
+// Nachlese 11 ②: Markenfähigkeit is a gate. The criteria of the gate (K4, K5) count only for the
+// renders whose combination the page follows; a page that follows no brand and no mode gets
+// nothing for them. `scoreBoth` gives the new weighting with the gate and the old one without.
 
 import {
   checkUsage,
   type EroInstance,
   type Modelo,
+  type NordsteloFile,
   type NordsteloKontrolo,
   type Pezo,
   type Tasko,
 } from "@fundamento/modelo";
-import type { Element, Facts, Variant } from "./facts.js";
+import type { Element, Facts, Render, Variant } from "./facts.js";
 
 export type Kriterio = "K1" | "K2" | "K3" | "K4" | "K5" | "K6";
 export const KRITERIOJ: readonly Kriterio[] = ["K1", "K2", "K3", "K4", "K5", "K6"];
@@ -56,6 +60,8 @@ export interface Score {
   /** 0–100, weighted over the criteria that apply, rounded to one decimal. */
   total: number;
   gaps: Gap[];
+  /** With the gate (Nachlese 11): the share of the renders whose combination the page follows. */
+  multmarkeco?: number;
 }
 
 export interface ScoreInput {
@@ -64,6 +70,8 @@ export interface ScoreInput {
   variant: Variant;
   modelo: Modelo;
   pezoj: Pezo[];
+  /** The criteria of the gate of Markenfähigkeit (Nachlese 11); without it no gate. */
+  pordego?: readonly Kriterio[];
 }
 
 /** What one raw value or rebuilt Ero takes off K5 (five findings make it 0). */
@@ -207,9 +215,9 @@ function inventedGaps(facts: Facts, known: Known): { gaps: Gap[]; used: number }
       const sxablono = known.sxablonoj.get(parentName);
       const slots = ero
         ? (ero.skemo.slots ?? []).map((entry) => entry.name)
-        : Object.keys(
-            (sxablono?.skemo as { regions?: Record<string, unknown> } | undefined)?.regions ?? {},
-          );
+        : // Nachlese 11 O-6: the regions are a list; their names are the slots (Spec 030 read the
+          // indices of the list, and every region looked invented).
+          (sxablono?.skemo.regions ?? []).map((region) => region.name);
       if ((ero !== undefined || sxablono !== undefined) && !slots.includes(slot)) {
         gaps.push({ kind: "invented-slot", key: `${parentName}.slot=${slot}` });
       } else if (ero?.skemo.slots?.some((entry) => entry.name === slot && entry.default === true)) {
@@ -442,10 +450,87 @@ export function holds(kontrolo: NordsteloKontrolo, facts: Facts, variant: Varian
   }
 }
 
+// --- the gate: Markenfähigkeit (Nachlese 11 ②) -------------------------------------------------
+
+/** The Dimensioj a render switches; the first render (komuna, light, default) is the base. */
+export type Sxaltilo = "aspekto" | "color-scheme" | "contrast";
+
+export interface Multmarkeco {
+  /** Which switch the page follows. */
+  follows: Record<Sxaltilo, boolean>;
+  /** Per render of the facts: whether the page follows its combination. */
+  renders: boolean[];
+  /** Share of the renders whose combination the page follows, 0–1. */
+  share: number;
+}
+
+const BASE: Readonly<Record<Sxaltilo, string>> = {
+  aspekto: "komuna",
+  "color-scheme": "light",
+  contrast: "default",
+};
+
+const switched = (render: Render, sxaltilo: Sxaltilo): string =>
+  sxaltilo === "aspekto"
+    ? render.aspekto
+    : sxaltilo === "color-scheme"
+      ? render.scheme
+      : render.contrast;
+
+/**
+ * Which combinations a page follows, read from its stored facts (deterministic, no new render).
+ * A page that uses Fundamento — an Ero, a Sxablono or a variable --fm-* — follows the data-fm-*
+ * of the root in every switch, unless it pins one on an element of its own (data-fm-aspekto,
+ * data-fm-color-scheme, data-fm-contrast). Without Fundamento a page follows no brand; it follows
+ * the colour scheme with a media query prefers-color-scheme or color-scheme: … dark of its own,
+ * the contrast with prefers-contrast. A render counts where the page follows every switch in which
+ * it differs from the base; the base counts where at least one other render does.
+ */
+export function multmarkeco(facts: Facts, modelo: Modelo): Multmarkeco {
+  const known = knownOf(modelo);
+  const css = facts.elements
+    .flatMap((element) => [element.attrs.style ?? "", element.tag === "style" ? element.text : ""])
+    .join("\n");
+  const fundamento =
+    /var\(--fm-/.test(css) ||
+    facts.elements.some((element) => {
+      const name = fmName(element.tag);
+      return name !== undefined && (known.eroj.has(name) || known.sxablonoj.has(name));
+    });
+  const pinned = (sxaltilo: Sxaltilo) =>
+    facts.elements.some((element) => element.attrs[`data-fm-${sxaltilo}`] !== undefined);
+  const follows: Record<Sxaltilo, boolean> = {
+    aspekto: fundamento && !pinned("aspekto"),
+    "color-scheme":
+      (fundamento && !pinned("color-scheme")) ||
+      /prefers-color-scheme\s*:\s*dark|color-scheme\s*:[^;}]*\bdark\b/i.test(css),
+    contrast: (fundamento && !pinned("contrast")) || /prefers-contrast\s*:/i.test(css),
+  };
+  const switches = Object.keys(BASE) as Sxaltilo[];
+  const differing = (render: Render) =>
+    switches.filter((sxaltilo) => switched(render, sxaltilo) !== BASE[sxaltilo]);
+  const others = facts.renders.map(
+    (render) =>
+      differing(render).length > 0 && differing(render).every((sxaltilo) => follows[sxaltilo]),
+  );
+  const any = others.some(Boolean);
+  const renders = facts.renders.map((render, index) =>
+    differing(render).length === 0 ? any : (others[index] ?? false),
+  );
+  const counted = renders.filter(Boolean).length;
+  return {
+    follows,
+    renders,
+    share: facts.renders.length === 0 ? 0 : counted / facts.renders.length,
+  };
+}
+
 // --- the score ---------------------------------------------------------------------------------
 
 export function score(input: ScoreInput): Score {
   const { facts, tasko, variant, modelo, pezoj } = input;
+  const gated = new Set(input.pordego ?? []);
+  const gate = gated.size === 0 ? undefined : multmarkeco(facts, modelo);
   const known = knownOf(modelo);
   const gaps: Gap[] = [];
 
@@ -468,14 +553,18 @@ export function score(input: ScoreInput): Score {
     k3 = invented.used === 0 ? 0 : reguloj.share;
   }
 
-  const clean = facts.renders.filter((render) => render.axe.length === 0).length;
+  // With the gate K4 counts only the renders the page follows (Nachlese 11 ②).
+  const counts = (index: number) => !gated.has("K4") || gate?.renders[index] === true;
+  const clean = facts.renders.filter(
+    (render, index) => render.axe.length === 0 && counts(index),
+  ).length;
   for (const render of facts.renders)
     for (const finding of render.axe) gaps.push({ kind: "a11y", key: finding.id });
   const k4 = facts.renders.length === 0 ? 0 : clean / facts.renders.length;
 
   const lint = lintGaps(facts, known);
   gaps.push(...lint);
-  const k5 = Math.max(0, 1 - K5_STEP * lint.length);
+  const k5 = Math.max(0, 1 - K5_STEP * lint.length) * (gated.has("K5") ? (gate?.share ?? 0) : 1);
 
   let decided = 0;
   let held = 0;
@@ -504,5 +593,32 @@ export function score(input: ScoreInput): Score {
     weighted += pezo.pezo * value;
     weights += pezo.pezo;
   }
-  return { k, total: weights === 0 ? 0 : round1((100 * weighted) / weights), gaps: sortGaps(gaps) };
+  return {
+    k,
+    total: weights === 0 ? 0 : round1((100 * weighted) / weights),
+    gaps: sortGaps(gaps),
+    ...(gate === undefined ? {} : { multmarkeco: round4(gate.share) }),
+  };
+}
+
+/** One result in both weightings of the catalogue (Nachlese 11 ②). */
+export interface Scores {
+  /** The weights of the catalogue with the gate of Markenfähigkeit. */
+  nova: Score;
+  /** The weights before (Spec 030), without the gate; the catalogue's own where it has none. */
+  antauxa: Score;
+}
+
+export function scoreBoth(
+  input: Omit<ScoreInput, "pezoj" | "pordego">,
+  katalogo: Pick<NordsteloFile, "pezoj" | "pezojAntauxaj" | "multmarkeco">,
+): Scores {
+  return {
+    nova: score({
+      ...input,
+      pezoj: katalogo.pezoj,
+      ...(katalogo.multmarkeco === undefined ? {} : { pordego: katalogo.multmarkeco.kriterioj }),
+    }),
+    antauxa: score({ ...input, pezoj: katalogo.pezojAntauxaj?.pezoj ?? katalogo.pezoj }),
+  };
 }

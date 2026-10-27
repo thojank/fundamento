@@ -423,6 +423,12 @@
         }
       }
     },
+    "events": [
+      {
+        "name": "input",
+        "description": "The text changes while a person types (the platform's input)."
+      }
+    ],
     "constraints": [
       {
         "when": {

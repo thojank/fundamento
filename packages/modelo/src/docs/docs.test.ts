@@ -3347,3 +3347,75 @@ describe("Spec 030 documentation (specs/030-nordstern-kennzahl)", () => {
     );
   });
 });
+
+// Nachlese 11 (what the north-star measure found, 2026-10-24): specs/031-nachlese-11 carries the
+// briefing unchanged, a plan with the causes of B-2, B-3, B-6 and B-7, the decisions, the gate of
+// Markenfähigkeit with both weightings, the measuring points side by side (Ausgangslinie, nach den
+// Korrekturen, nach der Fonto) and the measuring guide with full paths, cd and file:// links; tasks
+// with the red commit. No key in any of them.
+describe("Nachlese 11 documentation (specs/031-nachlese-11)", () => {
+  it("the briefing is copied unchanged; plan and tasks carry the causes, the measuring points and the guide", () => {
+    const briefing = read("specs/031-nachlese-11/briefing.md");
+    expect(createHash("sha256").update(briefing).digest("hex")).toBe(
+      "16bb1cf349057b96e16280ef075ffdfb01cf5c16ad74ef8efd75f5b21514fa17",
+    );
+    const plan = read("specs/031-nachlese-11/plan.md");
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Ursachen",
+      "### Entwurfsentscheidungen",
+      "### Messpunkte",
+      "### Abweichungen",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### Messanleitung",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const term of [
+      "B-2",
+      "B-3",
+      "B-6",
+      "B-7",
+      "Markenfähigkeit",
+      "Gewichtung Spec 030",
+      "Gewichtung Nachlese 11",
+      "Ausgangslinie",
+      "nach den Korrekturen",
+      "nach der Fonto",
+      "gpt-4.1-mini",
+      // ④: three series, each with its own model.
+      "Reihe H",
+      "Reihe O",
+      "Reihe K",
+      "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "ministral-14b-2512",
+      "Anfragen",
+      "Streuung",
+      "Top-10",
+      "Tokens",
+      "pnpm nordstelo restaro",
+      "cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds",
+      "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/",
+    ]) {
+      expect(plan, term).toContain(term);
+    }
+    const tasks = read("specs/031-nachlese-11/tasks.md");
+    for (const text of [plan, tasks]) {
+      expect(text).not.toMatch(/sk-[A-Za-z0-9_-]{8,}|Bearer [A-Za-z0-9]/);
+      expect(text).not.toContain("ciferecigo");
+    }
+    expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Nachlese 11");
+  });
+
+  it("the Eroj quickstart of the README says that fundamento.css sets the surface of the page (B-6)", () => {
+    const readme = read("README.md");
+    const quickstart = readme.slice(
+      readme.indexOf("## Eroj quickstart"),
+      readme.indexOf("## Packages"),
+    );
+    expect(quickstart).toContain("color.background.canvas");
+    expect(quickstart).toContain("color.text.default");
+  });
+});

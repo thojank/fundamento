@@ -251,6 +251,13 @@
         }
       }
     },
+    "events": [
+      {
+        "name": "dismiss",
+        "cancelable": true,
+        "description": "The close button was pressed; prevented, the notice stays, else it hides and the focus moves on."
+      }
+    ],
     "goals": [
       {
         "goal": "notify",

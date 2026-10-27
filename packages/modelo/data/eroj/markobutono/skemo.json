@@ -328,6 +328,16 @@
         }
       }
     },
+    "events": [
+      {
+        "name": "input",
+        "description": "The box is turned on or off, by pointer, Space or a click on the label."
+      },
+      {
+        "name": "change",
+        "description": "The box was turned, as a native checkbox says it."
+      }
+    ],
     "constraints": [
       {
         "when": {

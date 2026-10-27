@@ -370,6 +370,16 @@
         "Enter"
       ]
     },
+    "events": [
+      {
+        "name": "input",
+        "description": "The switch is turned on or off, by pointer, Space or a click on the label."
+      },
+      {
+        "name": "change",
+        "description": "The switch was turned, as a native checkbox says it."
+      }
+    ],
     "goals": [
       {
         "goal": "toggle",

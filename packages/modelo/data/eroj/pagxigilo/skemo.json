@@ -360,6 +360,13 @@
         }
       }
     },
+    "events": [
+      {
+        "name": "page-change",
+        "cancelable": true,
+        "description": "A page is about to be chosen in mode button (detail: page); prevented, the page stays."
+      }
+    ],
     "goals": [
       {
         "goal": "paginate",

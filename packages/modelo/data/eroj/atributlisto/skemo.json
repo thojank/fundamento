@@ -108,6 +108,12 @@
         }
       }
     },
+    "events": [
+      {
+        "name": "sort-change",
+        "description": "A sortable column was pressed (detail: column, direction); sorting itself is the application's."
+      }
+    ],
     "goals": [
       {
         "goal": "details",

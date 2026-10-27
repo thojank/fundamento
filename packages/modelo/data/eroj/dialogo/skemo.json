@@ -193,6 +193,17 @@
         "Enter"
       ]
     },
+    "events": [
+      {
+        "name": "confirm",
+        "cancelable": true,
+        "description": "The primary action was chosen (detail: reason); prevented, the dialog stays open, else it closes."
+      },
+      {
+        "name": "cancel",
+        "description": "The dialog was cancelled (Escape or the cancel action); it closes."
+      }
+    ],
     "constraints": [
       {
         "when": {
