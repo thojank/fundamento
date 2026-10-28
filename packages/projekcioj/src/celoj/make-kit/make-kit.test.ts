@@ -446,6 +446,33 @@ describe("the kit version comes from FUNDAMENTO_KIT_VERSION (release step, Nachl
 // Spec 010 ① (G7, plan D-12): Make builds every on/off setting from the switch, never from a
 // button that pretends — one sentence in the guidelines, generated from every Ero with role switch;
 // the switch's own page names no label prop it does not have.
+// Spec 029 ①b (Abnahme 28.10., 13:03): the kit's elements – and the Vitrino, which runs the
+// reference kit's element.js – styled every Ero from the roles its Skemo binds, never from its
+// Ero-Tokens; komuna's own values (the disabled high button with white text, the medium button
+// whose edge is its surface) reached packages/eroj but not the kit. The stylesheets name the
+// Ero-Tokens, as the web-component Celo writes them.
+describe("Make Kit elements style every Ero from its Ero-Tokens (Spec 029 ①b)", () => {
+  it.each(ASPEKTOJ)(
+    "%s: the butono's states and the alsxutilo's edge read --fm-ero-*",
+    (aspekto) => {
+      const element = kit(aspekto, "src/element.ts");
+      for (const name of [
+        "--fm-ero-butono-label-color-emphasis-high-intent-neutral-disabled",
+        "--fm-ero-butono-label-color-emphasis-high-intent-danger-disabled",
+        "--fm-ero-butono-border-color-emphasis-medium-intent-neutral-rest",
+        "--fm-ero-butono-surface-fill-emphasis-medium-intent-neutral-rest",
+        "--fm-ero-alsxutilo-dropzone-fill-rest",
+      ]) {
+        expect(element, name).toContain(`var(${name})`);
+      }
+      // No state of the butono reads a role past its Ero-Token.
+      expect(element).not.toMatch(
+        /data-emphasis=\\"high\\"\]\[data-intent=\\"neutral\\"\]:disabled\) \{[^}]*var\(--fm-color-text-disabled\)/,
+      );
+    },
+  );
+});
+
 describe("Make Kit and the sxaltilo (Spec 010 ①)", () => {
   it.each(ASPEKTOJ)(
     "%s: the guidelines say that every on/off setting is a <Sxaltilo>",

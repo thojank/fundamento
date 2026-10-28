@@ -145,6 +145,27 @@ describe("Spec 029 ①b b): the Ero-Tokens of komuna after the Fonto", () => {
     for (const entry of deveno) expect(names.has(entry.token), entry.token).toBe(true);
   });
 
+  // Abnahme 28.10., 13:03: the comparison drew Fundamento with packages/eroj and the standard
+  // configuration, the maintainer accepts the Vitrino of fundamento.cxiuj.config.json – the new
+  // values showed on the one and not on the other. And the modal dialogo stood open over the
+  // whole page while every other case was measured: its backdrop greyed every picture.
+  it("the comparison draws Fundamento from the accepted build – fundamento.cxiuj.config.json, the element of its Vitrino – and opens a modal Ero only for its own case", async () => {
+    const vergleich = readFileSync(
+      new URL("../../../../scripts/fonto-astryx/vergleich/vergleich.mjs", import.meta.url),
+      "utf8",
+    );
+    expect(vergleich).toContain("aspekto-provo-kompakta/fundamento.cxiuj.config.json");
+    expect(vergleich).toContain('"--config"');
+    expect(vergleich).not.toContain("/eroj/define.js");
+    const dialogo = (
+      (await import(`${faelle}dialogo.mjs`)) as {
+        default: { fm: { attrs?: Record<string, string>; modal?: boolean } };
+      }
+    ).default;
+    expect(dialogo.fm.attrs?.open).toBeUndefined();
+    expect(dialogo.fm.modal).toBe(true);
+  });
+
   it("the code of the Fonto runs only in the local comparison: no package of Fundamento depends on it", () => {
     const packages = fileURLToPath(new URL("../../../", import.meta.url));
     for (const dir of readdirSync(packages)) {

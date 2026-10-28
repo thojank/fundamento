@@ -5,10 +5,11 @@
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { extname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { projectModeloSource } from "@fundamento/modelo";
 import { buildProjekcioj, VITRINO_FILE } from "@fundamento/projekcioj";
-import { expect, type Page, test } from "@playwright/test";
-import { axeViolations } from "./alirebleco.js";
+import { expect, type Locator, type Page, test } from "@playwright/test";
+import { axeViolations, contrast } from "./alirebleco.js";
 import { EKZEMPLO_CONFIG, ORIGIN } from "./serve.js";
 
 test.describe.configure({ mode: "serial" });
@@ -36,7 +37,7 @@ test.beforeAll(async () => {
   expect(built.ok).toBe(true);
 });
 
-async function open(page: Page, hash = ""): Promise<string[]> {
+async function open(page: Page, hash = "", dir = out): Promise<string[]> {
   const problems: string[] = [];
   page.on("pageerror", (error) => problems.push(`pageerror: ${String(error)}`));
   page.on("console", (message) => {
@@ -44,7 +45,7 @@ async function open(page: Page, hash = ""): Promise<string[]> {
   });
   await page.route(`${ORIGIN}/**`, async (route) => {
     const path = new URL(route.request().url()).pathname;
-    const file = join(out, path === "/" ? VITRINO_FILE : path.slice(1));
+    const file = join(dir, path === "/" ? VITRINO_FILE : path.slice(1));
     try {
       await route.fulfill({
         contentType: TYPES[extname(file)] ?? "application/octet-stream",
@@ -1558,4 +1559,79 @@ test("the Lingvo switch names the Eroj, states, values and Dimensioj in German a
   await expect(heading).toHaveText("glitilo");
   expect(new URL(page.url()).hash).not.toContain("lingvo=");
   await expect(page.locator("#fm-vitrino-butono thead th").nth(1)).toHaveText("rest");
+});
+
+// Spec 029 ①b (Abnahme 28.10., 13:03): the maintainer accepts the Vitrino of every brand
+// (fundamento.cxiuj.config.json). The Ero-Tokens of komuna must reach its Eroj there as they reach
+// packages/eroj: the disabled high button readable, the medium button a surface without a visible
+// edge (the Fonto's secondary), the button of the alsxutilo the same.
+const CXIUJ_CONFIG = fileURLToPath(
+  new URL(
+    "../../modelo/test/fixtures/valid/aspekto-provo-kompakta/fundamento.cxiuj.config.json",
+    import.meta.url,
+  ),
+);
+
+test.describe("the Vitrino of every brand shows the Ero-Tokens of komuna (Spec 029 ①b)", () => {
+  let cxiuj = "";
+
+  test.beforeAll(async () => {
+    cxiuj = mkdtempSync(join(tmpdir(), "fm-vitrino-cxiuj-"));
+    const built = await buildProjekcioj({
+      outDir: cxiuj,
+      source: projectModeloSource(CXIUJ_CONFIG),
+    });
+    expect(built.ok).toBe(true);
+  });
+
+  /** Fill, edge and text of a butono's control, as computed. */
+  const lookOf = (host: Locator) =>
+    host.evaluate((element) => {
+      const control = element.shadowRoot?.querySelector('[part="control"]');
+      const style = control === null || control === undefined ? null : getComputedStyle(control);
+      return {
+        fill: style?.backgroundColor ?? "",
+        edge: style?.borderTopColor ?? "",
+        edgeWidth: style?.borderTopWidth ?? "",
+        text: style?.color ?? "",
+      };
+    });
+
+  for (const scheme of ["light", "dark"] as const) {
+    test(`komuna ${scheme}: the disabled high button reads at 3:1 at least, neutral and danger`, async ({
+      page,
+    }) => {
+      await open(page, `#aspekto=komuna&color-scheme=${scheme}`, cxiuj);
+      const buttons = page.locator("#fm-vitrino-butono fm-butono[emphasis='high'][disabled]");
+      expect(await buttons.count()).toBeGreaterThan(0);
+      for (const button of await buttons.all()) {
+        const look = await lookOf(button);
+        const label = await button.getAttribute("intent");
+        expect(
+          contrast(look.text, look.fill),
+          `${label}: ${look.text} on ${look.fill}`,
+        ).toBeGreaterThanOrEqual(3);
+      }
+    });
+
+    test(`komuna ${scheme}: the medium button and the button of the alsxutilo are a surface without a visible edge`, async ({
+      page,
+    }) => {
+      await open(page, `#aspekto=komuna&color-scheme=${scheme}`, cxiuj);
+      const page_ = await surfaceColour(page);
+      const medium = page.locator(
+        "#fm-vitrino-butono fm-butono[emphasis='medium']:not([disabled])",
+      );
+      expect(await medium.count()).toBeGreaterThan(0);
+      const choose = page
+        .locator("#fm-vitrino-alsxutilo fm-alsxutilo")
+        .first()
+        .locator('[part="choose"]');
+      for (const button of [...(await medium.all()), choose]) {
+        const look = await lookOf(button);
+        expect(look.edge, `edge = fill (${look.edgeWidth})`).toBe(look.fill);
+        expect(look.fill, "a surface of its own, not the page").not.toBe(page_);
+      }
+    });
+  }
 });
