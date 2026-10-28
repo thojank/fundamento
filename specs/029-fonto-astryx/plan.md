@@ -549,3 +549,81 @@ cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
 pnpm --filter @fundamento/projekcioj exec vitest run src/fonto src/celoj/vitrino/datumoj.test.ts
 cd packages/eroj && npx playwright test test/butono.spec.ts --project=chromium
 ```
+
+## ①b – Abnahme 28.10. (13:03): Befund und Behebung
+
+Befund des Maintainers am Stand `28447a9`, Build mit allen Marken (`fundamento.cxiuj.config.json`), Vitrino `#aspekto=komuna`: 1) butono high deaktiviert (neutral und danger) ohne Text, 2) butono medium weiß mit dunklem Rand, 3) der Knopf des alsxutilo im alten Stil – auf der Vergleichsseite alles im neuen Stil; Radius, Seitengrund, Beispiele ohne Icon und die Zeile „mit Icon“ angekommen; 4) die Spalte „Fundamento hell“ der Vergleichsseite mittelgrau.
+
+### Ursache
+
+- **1–3: Die Vitrino bettet das Element des Make Kits ein, und das Make Kit schrieb die Stile ohne Ero-Tokens.** `make-kit.ts` rief `stylesheetOf(skemo, uzo)` und `lightStylesheetOf(skemo, tag)` ohne den Besitzer auf; ohne ihn liest jede Regel die Rolle des Skemo (`var(--fm-color-text-disabled)`), mit ihm das Ero-Token (`var(--fm-ero-butono-label-color-…)`), wie die Web-Component-Celo und damit `packages/eroj` sie schreiben. Das CSS beider Builds war richtig (`:root` von komuna: `--fm-ero-butono-label-color-emphasis-high-intent-neutral-disabled: var(--fm-color-text-inverse)`; jede andere Marke unter ihrem `data-fm-aspekto`), nur las das Element es nicht. Gemessen in der Vitrino: die Variable löst am Element zu `#ffffff` auf, die Schrift ist `rgb(145,145,145)` auf `rgb(145,145,145)`. Solange jedes Ero-Token auf seine Rolle zeigte, war das gleich; seit ①b nicht mehr. Dasselbe galt für das ausgelieferte Make Kit jeder Marke.
+- **4: Das dialogo stand während der ganzen Messung modal offen.** `fm-dialogo` öffnet mit `open` immer über `showModal()`; seine Abdeckung (50 % Schwarz) lag über der Fundamento-Seite, jedes Bild halb so hell (248 → 124, dunkel 38 → 19). Die Fonto misst ihr Dialog inline.
+- **Dazu, beim Prüfen gefunden: secondary der Fonto ist durchsichtig, Fundamento nahm eine deckende Fläche.** Die Fonto legt Schwarz 6 % (hell) bzw. Weiß 10 % (dunkel) über das, worauf der Knopf steht. Der Generator verrechnete das mit dem Weiß der Vergleichsseite zu `#f0f0f0` und nahm die Rolle `action.secondary.rest` (`#f1f1f1`) – genau der Seitengrund der Vitrino (`background.canvas`, Stufe 95). Mit Behebung 1 allein wäre der Knopf in der Vitrino nur noch Text gewesen.
+
+### Behebung
+
+- **Make Kit:** Besitzer an beide Aufrufe; die Elemente aller Kits und die Vitrino lesen die Ero-Tokens.
+- **Generator (`eroj.mjs`):** Eine durchsichtige Farbe der Fonto, die keine Rolle mit dieser Deckkraft trägt, bleibt durchsichtig – die nächste Stufe der Palette (`shade`, `tint`) derselben Farbe, nicht der mit der Vergleichsseite verrechnete Wert. Sind beide Modi durchsichtig, aber verschieden deckend, gilt eine gemeinsame Deckkraft, die beiden Werten der Fonto am nächsten liegt (Figma: eine Deckkraft je Paint, `parity-alpha-varies-by-mode`). Ergebnis: butono medium (rest, focus, loading; Fläche und Rand), die Initialen des avataro und das nicht gewählte signeto nehmen `color.action.tertiary.hover` – hell Schwarz 8 % (Fonto 6 %), dunkel Weiß 8 % (Fonto 10 %), in beiden Modi dieselbe Rolle; die zwei Sonderwerte im Dunkel-Set entfallen. Hover und gedrückt von medium bleiben auf ihren Rollen (`action.secondary.hover`/`pressed`, J9: die Fonto misst dort denselben Grundwert); sie liegen auf jeder Seite dunkler als die Ruhe (hell auf der Vitrino 222 → 212 → 198).
+- **Vergleichsseite:** baut genau den Build der Abnahme (`--config …/fundamento.cxiuj.config.json`) und lädt das Element, das dessen Vitrino einbettet, statt `packages/eroj`; ein modales Ero (`modal: true`, dialogo) öffnet nur für seinen eigenen Fall, ohne den Fokus des Öffnens, sein Bild ist sein Rahmen.
+- **Jugxoj:** J9 (Zustände) 21 → 25 (hover und gedrückt von medium, vorher J13); J13 (Rollen) 8 → 4; J14 (Kontrast) 8 → 7 (avataro dunkel entfällt). Herkunft 1353 → 1351 Angaben.
+- **Prüfung der Initialen des avataro** (`alirebleco.check.ts`): las die durchsichtige Fläche als deckendes Schwarz (2,26:1); verrechnet jetzt die Fläche mit dem Grund unter dem avataro. Die Schwelle 4,5:1 bleibt.
+- **Zeuge der APCA-Hinweise** (`vitrino.check.ts`, beratend): 8496 → 8550; alle WCAG-Schwellen halten.
+
+### Tests ①b-Abnahme
+
+- **Rot** in `c978c7c`: die Vitrino aus `fundamento.cxiuj.config.json` im Browser, komuna hell und dunkel – butono high deaktiviert mit Text ≥ 3:1 (neutral und danger; vorher 1,00:1 hell, 2,95:1 dunkel), butono medium und der Knopf des alsxutilo mit Rand = Fläche und einer eigenen Fläche (vorher Rand `rgb(94,94,94)` auf `rgb(241,241,241)`); die Elemente des Make Kits lesen `--fm-ero-*` (komuna, ekzemplo); die Vergleichsseite baut diesen Build und öffnet das dialogo nur für seinen Fall.
+- **Grün:** alle sieben; `check:vitrino` 60/60, `check:alirebleco-eroj` 633/633, Playwright der Eroj 1021/1021, `check:make-kit` 5/5, `check:quickstart` 1/1; Vitest modelo 3838, projekcioj 1161 (+1 übersprungen), mcp 442, metiejo 193, agordilo 113, cli 76, nordstelo 58; `check:parity` 0 Fehler, `check:alirebleco` 0 Fehler (8550 beratend), die übrigen Prüfungen 0 Fehler.
+
+### Messungen ①b-Abnahme
+
+- **komuna-0-2 pixelgleich** (`pixelvergleich.mjs`): gegen den Stand vor der Behebung (`28447a9`, derselbe Inhalt) 196 von 200 Bildern gleich, anders nur `plenstato` (Animation). Ebenso ekzemplo, provo und provo-kompakta je 196 von 200. Gegen `main`: 152 von 172 gleich – anders die Paletten und `plenstato` wie in ①, dazu butono, ligilo und signeto in der Größe, weil ihre Abschnitte seit ①b d) die Zeile „mit Icon“ haben.
+- **Vergleichsseite:** Grund der Bilder hell 248 (vorher 124), dunkel 38 (vorher 19), wie die Fonto (255 bzw. 38; die Fonto-Seite ist weiß, Fundamento zeigt `background.default`); 331 Fälle, 40 Eroj.
+
+### Messanleitung ①b-Abnahme
+
+Im Checkout des Maintainers, auf dem Branch dieses PR:
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+git fetch && git switch 261023-spec-029-fonto-astryx-grundlagen && git pull
+pnpm install && pnpm build
+rm -rf .fundamento/projekcioj-cxiuj
+pnpm fm projekcioj build --config packages/modelo/test/fixtures/valid/aspekto-provo-kompakta/fundamento.cxiuj.config.json --out .fundamento/projekcioj-cxiuj
+open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj-cxiuj/vitrino/index.html#aspekto=komuna"
+```
+
+**1. Vitrino:** [file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj-cxiuj/vitrino/index.html#aspekto=komuna](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj-cxiuj/vitrino/index.html#aspekto=komuna) – butono: high deaktiviert (neutral, danger) mit weißer Schrift auf Grau; medium eine graue Fläche ohne sichtbaren Rand, etwas dunkler als die Seite; alsxutilo: der Knopf „Datei auswählen“ ebenso. Dunkel: `#aspekto=komuna&color-scheme=dark`.
+
+**2. Vergleichsseite:** baut denselben Build selbst (in `.fundamento/vergleich/fm`) und lädt das Element seiner Vitrino.
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+npm ci --prefix scripts/fonto-astryx/vergleich
+node scripts/fonto-astryx/vergleich/vergleich.mjs
+node scripts/fonto-astryx/eroj.mjs > /tmp/eroj.json && node scripts/fonto-astryx/vergleich/gruende.mjs /tmp/eroj.json
+open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/vergleich/index.html"
+```
+
+[file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/vergleich/index.html](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/vergleich/index.html) – die Spalte „Fundamento hell“ auf hellem Grund; dialogo als sein Rahmen.
+
+**3. Werte neu erzeugen (Nachvollzug):** wie Punkt 2 der Messanleitung ①b; erwartet: keine Änderung gegenüber dem Branch.
+
+**4. komuna-0-2 pixelgleich:** gegen den Stand vor der Behebung, gleicher Inhalt:
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+git worktree add /tmp/fundamento-vor 28447a9c && cd /tmp/fundamento-vor && pnpm install && pnpm build && pnpm fm projekcioj build --config packages/modelo/test/fixtures/valid/aspekto-provo-kompakta/fundamento.cxiuj.config.json --out /tmp/fundamento-vor/.fundamento/projekcioj-cxiuj
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+node scripts/fonto-astryx/pixelvergleich.mjs /tmp/fundamento-vor/.fundamento/projekcioj-cxiuj/vitrino/index.html .fundamento/projekcioj-cxiuj/vitrino/index.html komuna-0-2 komuna-0-2
+```
+
+Erwartet: 196 von 200 Bildern gleich, anders nur `plenstato`.
+
+**Tests:**
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/packages/eroj
+npx playwright test --config playwright.vitrino.config.ts -g "every brand shows"
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm --filter @fundamento/projekcioj exec vitest run src/celoj/make-kit/make-kit.test.ts src/fonto
+```

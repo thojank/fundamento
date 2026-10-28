@@ -5842,7 +5842,7 @@
       "initials": {
         "fill": {
           "$type": "color",
-          "$value": "{color.palette.neutral.50}",
+          "$value": "{color.action.tertiary.hover}",
           "$description": "avataro: initials.fill (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
           "$extensions": {
             "com.ciferecigo.fundamento": {
@@ -6392,7 +6392,7 @@
                 "neutral": {
                   "rest": {
                     "$type": "color",
-                    "$value": "{color.action.secondary.rest}",
+                    "$value": "{color.action.tertiary.hover}",
                     "$description": "butono: surface.fill when emphasis=medium, intent=neutral, state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                     "$extensions": {
                       "com.ciferecigo.fundamento": {
@@ -6425,7 +6425,7 @@
                   },
                   "focus": {
                     "$type": "color",
-                    "$value": "{color.action.secondary.rest}",
+                    "$value": "{color.action.tertiary.hover}",
                     "$description": "butono: surface.fill when emphasis=medium, intent=neutral, state=focus (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                     "$extensions": {
                       "com.ciferecigo.fundamento": {
@@ -6447,7 +6447,7 @@
                   },
                   "loading": {
                     "$type": "color",
-                    "$value": "{color.action.secondary.rest}",
+                    "$value": "{color.action.tertiary.hover}",
                     "$description": "butono: surface.fill when emphasis=medium, intent=neutral, state=loading (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                     "$extensions": {
                       "com.ciferecigo.fundamento": {
@@ -7006,7 +7006,7 @@
                 "neutral": {
                   "rest": {
                     "$type": "color",
-                    "$value": "{color.action.secondary.rest}",
+                    "$value": "{color.action.tertiary.hover}",
                     "$description": "butono: border.color when emphasis=medium, intent=neutral, state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                     "$extensions": {
                       "com.ciferecigo.fundamento": {
@@ -7039,7 +7039,7 @@
                   },
                   "focus": {
                     "$type": "color",
-                    "$value": "{color.action.secondary.rest}",
+                    "$value": "{color.action.tertiary.hover}",
                     "$description": "butono: border.color when emphasis=medium, intent=neutral, state=focus (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                     "$extensions": {
                       "com.ciferecigo.fundamento": {
@@ -7061,7 +7061,7 @@
                   },
                   "loading": {
                     "$type": "color",
-                    "$value": "{color.action.secondary.rest}",
+                    "$value": "{color.action.tertiary.hover}",
                     "$description": "butono: border.color when emphasis=medium, intent=neutral, state=loading (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                     "$extensions": {
                       "com.ciferecigo.fundamento": {
@@ -16780,7 +16780,7 @@
               "intent": {
                 "neutral": {
                   "$type": "color",
-                  "$value": "{color.palette.neutral.50}",
+                  "$value": "{color.action.tertiary.hover}",
                   "$description": "signeto: surface.fill when selected=false, intent=neutral (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                   "$extensions": {
                     "com.ciferecigo.fundamento": {

@@ -3575,7 +3575,13 @@ describe("the Figma plan draws the avataro (Spec 015 ③)", () => {
         ].flatMap(([size, box]) => [
           [`box.size@size=${size},state=rest`, box],
           [`image.radius@size=${size},state=rest`, "9999px"],
-          [`initials.fill@size=${size},state=rest`, hex],
+          // Spec 029 ①b (Abnahme 28.10.): the Fonto fills the initials translucent (black 6 %, white
+          // 10 %); komuna takes 8 % in both modes, the other brands stay opaque – one paint, its
+          // opacity per mode in the inventory, as the fine edges (B-1b-4).
+          [
+            `initials.fill@size=${size},state=rest`,
+            "alpha varies by mode (color/background/sunken)",
+          ],
           [`initials.color@size=${size},state=rest`, hex],
           [`initials.radius@size=${size},state=rest`, "9999px"],
         ]),

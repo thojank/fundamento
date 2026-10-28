@@ -206,8 +206,10 @@ test("the contrast table shows WCAG, APCA and the change against the comparison 
     // below the advisory APCA band; plan, B-5). The snapshot of the comparison state stays at 1296.
     // Spec 029 ①b gives the Ero-Tokens of komuna the values of the Fonto: their pairs are evaluated
     // beside the declared ones (eroKontrastParojOf, 89 → 280 pairs), every one advisory where it
-    // misses the APCA band (2646 → 8496; plan ①b, B-1b-1).
-    "In den 72 Kombinationen des Vergleichsstands: 8496 gegen 1296 (Veränderung +7200)",
+    // misses the APCA band (2646 → 8496; plan ①b, B-1b-1). Abnahme 28.10.: the medium button,
+    // the avataro's initials and the unselected signeto take the Fonto's translucent fill (8 %),
+    // advisory beside text on it (8496 → 8550; every WCAG threshold holds).
+    "In den 72 Kombinationen des Vergleichsstands: 8550 gegen 1296 (Veränderung +7254)",
   );
 });
 

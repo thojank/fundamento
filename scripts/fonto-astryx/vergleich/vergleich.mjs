@@ -27,6 +27,11 @@ const here = fileURLToPath(new URL(".", import.meta.url));
 const repo = join(here, "../../..");
 // VERGLEICH_OUT: ein eigenes Ausgabeverzeichnis (mehrere Läufe nebeneinander).
 const out = process.env.VERGLEICH_OUT ?? join(repo, ".fundamento/vergleich");
+/** Die Konfiguration des Builds, den der Maintainer abnimmt: alle Marken. */
+const CXIUJ_CONFIG = join(
+  repo,
+  "packages/modelo/test/fixtures/valid/aspekto-provo-kompakta/fundamento.cxiuj.config.json",
+);
 const args = process.argv.slice(2);
 const only = args.includes("--ero") ? args[args.indexOf("--ero") + 1].split(",") : undefined;
 const bilder = !args.includes("--ohne-bilder");
@@ -238,17 +243,33 @@ async function main() {
   const props = {};
   for (const def of definitions) props[def.ero] = await teileVon(def.ero);
 
-  // Fundamento: Projekcioj von komuna (Standard-Konfiguration) und die gebauten Eroj.
+  // Fundamento: genau der Build, den der Maintainer abnimmt (Abnahme 28.10.) – alle Marken aus
+  // fundamento.cxiuj.config.json, ihr CSS und das Element, das ihre Vitrino einbettet (das
+  // Element des Make Kits der Referenz-Marke), nicht packages/eroj.
   const fm = join(out, "fm");
   rmSync(fm, { recursive: true, force: true });
   execFileSync(
     process.execPath,
-    [join(repo, "packages/cli/dist/index.js"), "projekcioj", "build", "--out", fm],
+    [
+      join(repo, "packages/cli/dist/index.js"),
+      "projekcioj",
+      "build",
+      "--config",
+      CXIUJ_CONFIG,
+      "--out",
+      fm,
+    ],
     { cwd: repo, stdio: "ignore" },
   );
+  const vitrino = readFileSync(join(fm, "vitrino/index.html"), "utf8");
+  const element = /<script type="module" id="fm-vitrino-elemento">([\s\S]*?)<\/script>/.exec(
+    vitrino,
+  );
+  if (element === null) throw new Error("Die Vitrino des Builds hat kein Element.");
+  writeFileSync(join(fm, "element.js"), element[1]);
   writeFileSync(
     join(fm, "index.html"),
-    `<!doctype html><html lang="de" data-fm-aspekto="komuna" data-fm-motion="reduced"><head><meta charset="utf-8"><link rel="stylesheet" href="/fm/css/fundamento.css"><style>body{margin:0;background:var(--fm-color-background-default)} [data-fall]{display:inline-block;padding:12px;vertical-align:top;position:relative}</style><script type="module">import "/eroj/define.js"; const m=new URLSearchParams(location.search).get("mode"); if(m) document.documentElement.setAttribute("data-fm-color-scheme", m);</script></head><body><div style="padding:16px">${cases
+    `<!doctype html><html lang="de" data-fm-aspekto="komuna" data-fm-motion="reduced"><head><meta charset="utf-8"><link rel="stylesheet" href="/fm/css/fundamento.css"><style>body{margin:0;background:var(--fm-color-background-default)} [data-fall]{display:inline-block;padding:12px;vertical-align:top;position:relative}</style><script type="module">import "/fm/element.js"; const m=new URLSearchParams(location.search).get("mode"); if(m) document.documentElement.setAttribute("data-fm-color-scheme", m);</script></head><body><div style="padding:16px">${cases
       .map(
         (c) =>
           `<div data-fall="${c.id}"${c.breite ? ` style="min-width:${c.breite}px;min-height:${c.hoehe ?? 0}px"` : ""}>${c.html}</div>`,
@@ -290,7 +311,6 @@ async function main() {
 
   const server = await serve([
     ["/fm/", fm],
-    ["/eroj/", join(repo, "packages/eroj/dist")],
     ["/fonto/", fonto],
   ]);
   const origin = `http://localhost:${server.address().port}`;
@@ -365,6 +385,22 @@ async function main() {
               : holder.locator(":scope > *").first();
         await page.mouse.move(0, 0);
         await page.mouse.up();
+        // Ein modales Ero (dialogo) öffnet nur für seinen eigenen Fall: offen läge seine Abdeckung
+        // über der ganzen Seite und machte jedes andere Bild grau (Abnahme 28.10.). Gemessen in
+        // Ruhe, ohne den Fokus, den das Öffnen setzt.
+        const modal = side === "fm" && c.modal;
+        if (modal) {
+          await holder
+            .locator(":scope > *")
+            .first()
+            .evaluate((host) => host.setAttribute("open", ""));
+          await page.waitForTimeout(100);
+          await page.evaluate(() => {
+            let active = document.activeElement;
+            while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
+            active?.blur?.();
+          });
+        }
         if (c.interago === "hover" || c.interago === "press")
           await target.hover({ force: true }).catch(() => {});
         if (c.interago === "press") await page.mouse.down();
@@ -416,9 +452,33 @@ async function main() {
         let bild;
         if (bilder) {
           bild = `${side}-${mode}-${c.id.replaceAll("|", "_")}.png`;
+          // Das modale Ero liegt in der obersten Ebene, nicht in seinem Fall: sein Rahmen ist das Bild.
+          const clip = modal
+            ? await holder.evaluate((el) => {
+                const box = el.firstElementChild?.shadowRoot
+                  ?.querySelector('[part~="control"]')
+                  ?.getBoundingClientRect();
+                return box === undefined
+                  ? undefined
+                  : {
+                      x: box.x - 12,
+                      y: box.y - 12,
+                      width: box.width + 24,
+                      height: box.height + 24,
+                    };
+              })
+            : undefined;
+          await (clip === undefined
+            ? holder.screenshot({ path: join(images, bild), animations: "disabled" })
+            : page.screenshot({ path: join(images, bild), animations: "disabled", clip })
+          ).catch(() => (bild = undefined));
+        }
+        if (modal) {
           await holder
-            .screenshot({ path: join(images, bild), animations: "disabled" })
-            .catch(() => (bild = undefined));
+            .locator(":scope > *")
+            .first()
+            .evaluate((host) => host.removeAttribute("open"));
+          await page.waitForTimeout(100);
         }
         if (c.interago === "press") await page.mouse.up();
         if (c.interago === "focus") await target.evaluate((el) => el.blur()).catch(() => {});

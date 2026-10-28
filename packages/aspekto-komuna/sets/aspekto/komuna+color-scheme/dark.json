@@ -806,14 +806,6 @@
         }
       }
     },
-    "avataro": {
-      "initials": {
-        "fill": {
-          "$type": "color",
-          "$value": "{color.palette.neutral.800}"
-        }
-      }
-    },
     "avizo": {
       "surface": {
         "fill": {
@@ -1719,20 +1711,6 @@
       }
     },
     "signeto": {
-      "surface": {
-        "fill": {
-          "selected": {
-            "false": {
-              "intent": {
-                "neutral": {
-                  "$type": "color",
-                  "$value": "{color.palette.neutral.700}"
-                }
-              }
-            }
-          }
-        }
-      },
       "border": {
         "color": {
           "intent": {

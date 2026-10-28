@@ -67,6 +67,11 @@
 - [x] **T2937 c) Fehler** über b): deaktivierter butono high mit weißer Schrift auf grauer Fläche (3,15:1).
 - [x] **T2938 Projekcioj:** Figma liest Farbe und Maß aus dem Ero-Token (vorher aus der Rolle; bindend war schon der Ero-Token); die Fonto-Ausnahme von `check:clean-room` parst jedes Set einmal (10,7 s → 2 s).
 - [x] **T2939 Bestehende Tests nachgezogen**, wo sie Werte der Rollen statt der Ero-Tokens von komuna festhielten (AK-03 je Ero, Figma-Plan, Vitrino-Zählungen, Spec 024 M-3, Export).
+- [x] **T2940 Abnahme 28.10. (13:03), rote Tests** in `c978c7c`: die Vitrino aus `fundamento.cxiuj.config.json` im Browser (butono high deaktiviert ≥ 3:1, medium und der Knopf des alsxutilo mit Rand = Fläche, hell und dunkel), die Elemente des Make Kits lesen `--fm-ero-*`, die Vergleichsseite baut diesen Build und öffnet das dialogo nur für seinen Fall.
+- [x] **T2941 Make Kit:** die Stile mit Besitzer (`stylesheetOf`, `lightStylesheetOf`); Vitrino und Kits lesen die Ero-Tokens.
+- [x] **T2942 Generator:** durchsichtige Farben der Fonto bleiben durchsichtig (nächste Stufe `shade`/`tint`), eine gemeinsame Deckkraft beider Modi; butono medium, avataro, signeto auf `action.tertiary.hover` (8 %).
+- [x] **T2943 Vergleichsseite:** derselbe Build und das Element seiner Vitrino; das modale dialogo nur in seinem Fall (der graue Grund).
+- [x] **T2944 Prüfungen nachgezogen:** Kontrast der Initialen des avataro über durchsichtiger Fläche verrechnet; Zeuge der APCA-Hinweise 8550; Figma-Inventar des avataro „alpha varies by mode“.
 
 ### Messungen ①b
 

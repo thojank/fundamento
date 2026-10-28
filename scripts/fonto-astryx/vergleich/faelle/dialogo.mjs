@@ -10,7 +10,8 @@ export default {
   zustaende: { rest: {} },
   fm: {
     tag: "fm-dialogo",
-    attrs: { open: "" },
+    // Modal: die Vergleichsseite öffnet es nur für seinen eigenen Fall (Abnahme 28.10.).
+    modal: true,
     inner: 'Titel<span slot="message">Nachricht des Dialogs.</span>',
   },
   fonto: {

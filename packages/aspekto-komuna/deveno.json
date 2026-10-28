@@ -4713,21 +4713,9 @@
       "dosiero": "packages/core/src/Avatar/Avatar.tsx",
       "sxlosilo": "Avatar {\"size\":\"sm\"} rest, hell: [object Object] background-color (gemessen)",
       "fontoValoro": "#f0f0f0",
-      "valoro": "{color.palette.neutral.50}",
-      "maniero": "kunmetita-rundita",
-      "noto": "sichtbarer Wert: Überlagerung, Deckkraft und Untergrund verrechnet; nächste Stufe neutral.50, ΔE2000 0.2"
-    },
-    {
-      "token": "ero.avataro.initials.fill",
-      "aro": "aspekto/komuna+color-scheme/dark",
-      "fonto": "astryx",
-      "dosiero": "packages/core/src/Avatar/Avatar.tsx",
-      "sxlosilo": "Avatar {\"size\":\"sm\"} rest, dunkel: [object Object] background-color (gemessen)",
-      "fontoValoro": "#3c3c3c",
-      "valoro": "{color.palette.neutral.800}",
-      "maniero": "adaptita",
-      "jugxo": "jug_01M5ZS3RD8HWV0EWSCGZAHA30K",
-      "kialo": "Schrift auf der Fläche der Fonto hätte 4.05:1; komuna verlangt 4,5:1 mit Reserve (4,95:1): die Fläche nimmt Stufe neutral.800 (5.75:1)."
+      "valoro": "{color.action.tertiary.hover}",
+      "maniero": "rundita",
+      "noto": "durchsichtig wie die Fonto (6 %); eine Deckkraft je Paint (Parität): 8 % in beiden Modi"
     },
     {
       "token": "ero.avataro.initials.color",
@@ -5158,9 +5146,9 @@
       "dosiero": "packages/core/src/Button/Button.tsx",
       "sxlosilo": "Button {\"variant\":\"secondary\",\"size\":\"sm\"} rest, hell: button background-color (gemessen)",
       "fontoValoro": "#f0f0f0",
-      "valoro": "{color.action.secondary.rest}",
-      "maniero": "kunmetita-rundita",
-      "noto": "sichtbarer Wert: Überlagerung, Deckkraft und Untergrund verrechnet; Rolle des Skemo, ΔE2000 0.2"
+      "valoro": "{color.action.tertiary.hover}",
+      "maniero": "rundita",
+      "noto": "durchsichtig wie die Fonto (6 %); eine Deckkraft je Paint (Parität): 8 % in beiden Modi"
     },
     {
       "token": "ero.butono.surface.fill.emphasis.medium.intent.neutral.hover",
@@ -5171,8 +5159,8 @@
       "fontoValoro": "#e4e4e4",
       "valoro": "{color.action.secondary.hover}",
       "maniero": "adaptita",
-      "jugxo": "jug_01M5ZNMRXQEZY8N0FJ7FVQNG7C",
-      "kialo": "Die Rolle color.action.secondary.hover ist nach einer Regulo angepasst (Jugxo jug_01M5N89C1WQ308F9302JTZRVZH); das Ero-Token folgt ihr."
+      "jugxo": "jug_01M5ZMZSNG2G533GB0RY9HVNSG",
+      "kialo": "Gerundet fiele der Zustand auf die Ruhe; die Rolle des Zustands bleibt (state-distinct)."
     },
     {
       "token": "ero.butono.surface.fill.emphasis.medium.intent.neutral.pressed",
@@ -5183,8 +5171,8 @@
       "fontoValoro": "#d8d8d8",
       "valoro": "{color.action.secondary.pressed}",
       "maniero": "adaptita",
-      "jugxo": "jug_01M5ZNMRXQEZY8N0FJ7FVQNG7C",
-      "kialo": "Die Rolle color.action.secondary.pressed ist nach einer Regulo angepasst (Jugxo jug_01M5N89C1WQ308F9302JTZRVZH); das Ero-Token folgt ihr."
+      "jugxo": "jug_01M5ZMZSNG2G533GB0RY9HVNSG",
+      "kialo": "Gerundet fiele der Zustand auf die Ruhe; die Rolle des Zustands bleibt (state-distinct)."
     },
     {
       "token": "ero.butono.surface.fill.emphasis.medium.intent.neutral.focus",
@@ -5193,9 +5181,9 @@
       "dosiero": "packages/core/src/Button/Button.tsx",
       "sxlosilo": "Button {\"variant\":\"secondary\",\"size\":\"sm\"} focus, hell: button background-color (gemessen)",
       "fontoValoro": "#f0f0f0",
-      "valoro": "{color.action.secondary.rest}",
-      "maniero": "kunmetita-rundita",
-      "noto": "sichtbarer Wert: Überlagerung, Deckkraft und Untergrund verrechnet; Rolle des Skemo, ΔE2000 0.2"
+      "valoro": "{color.action.tertiary.hover}",
+      "maniero": "rundita",
+      "noto": "durchsichtig wie die Fonto (6 %); eine Deckkraft je Paint (Parität): 8 % in beiden Modi"
     },
     {
       "token": "ero.butono.surface.fill.emphasis.medium.intent.neutral.disabled",
@@ -5215,9 +5203,9 @@
       "dosiero": "packages/core/src/Button/Button.tsx",
       "sxlosilo": "Button {\"variant\":\"secondary\",\"size\":\"sm\"} loading, hell: button background-color (gemessen)",
       "fontoValoro": "#f0f0f0",
-      "valoro": "{color.action.secondary.rest}",
-      "maniero": "kunmetita-rundita",
-      "noto": "sichtbarer Wert: Überlagerung, Deckkraft und Untergrund verrechnet; Rolle des Skemo, ΔE2000 0.2"
+      "valoro": "{color.action.tertiary.hover}",
+      "maniero": "rundita",
+      "noto": "durchsichtig wie die Fonto (6 %); eine Deckkraft je Paint (Parität): 8 % in beiden Modi"
     },
     {
       "token": "ero.butono.surface.fill.emphasis.low.intent.neutral.rest",
@@ -5798,9 +5786,9 @@
       "dosiero": "packages/core/src/Button/Button.tsx",
       "sxlosilo": "Button {\"variant\":\"secondary\",\"size\":\"sm\"} rest, hell: button border-width 0 → background-color (gemessen)",
       "fontoValoro": "#f0f0f0",
-      "valoro": "{color.action.secondary.rest}",
-      "maniero": "kunmetita-rundita",
-      "noto": "kein Rand bei der Fonto: Randfarbe = Fläche des Elements; Rolle des Skemo, ΔE2000 0.2"
+      "valoro": "{color.action.tertiary.hover}",
+      "maniero": "rundita",
+      "noto": "kein Rand bei der Fonto: Randfarbe = Fläche des Elements; durchsichtig wie die Fonto (6 %); eine Deckkraft je Paint (Parität): 8 % in beiden Modi"
     },
     {
       "token": "ero.butono.border.color.emphasis.medium.intent.neutral.hover",
@@ -5811,8 +5799,8 @@
       "fontoValoro": "#e4e4e4",
       "valoro": "{color.action.secondary.hover}",
       "maniero": "adaptita",
-      "jugxo": "jug_01M5ZNMRXQEZY8N0FJ7FVQNG7C",
-      "kialo": "Die Rolle color.action.secondary.hover ist nach einer Regulo angepasst (Jugxo jug_01M5N89C1WQ308F9302JTZRVZH); das Ero-Token folgt ihr."
+      "jugxo": "jug_01M5ZMZSNG2G533GB0RY9HVNSG",
+      "kialo": "Gerundet fiele der Zustand auf die Ruhe; die Rolle des Zustands bleibt (state-distinct)."
     },
     {
       "token": "ero.butono.border.color.emphasis.medium.intent.neutral.pressed",
@@ -5823,8 +5811,8 @@
       "fontoValoro": "#d8d8d8",
       "valoro": "{color.action.secondary.pressed}",
       "maniero": "adaptita",
-      "jugxo": "jug_01M5ZNMRXQEZY8N0FJ7FVQNG7C",
-      "kialo": "Die Rolle color.action.secondary.pressed ist nach einer Regulo angepasst (Jugxo jug_01M5N89C1WQ308F9302JTZRVZH); das Ero-Token folgt ihr."
+      "jugxo": "jug_01M5ZMZSNG2G533GB0RY9HVNSG",
+      "kialo": "Gerundet fiele der Zustand auf die Ruhe; die Rolle des Zustands bleibt (state-distinct)."
     },
     {
       "token": "ero.butono.border.color.emphasis.medium.intent.neutral.focus",
@@ -5833,9 +5821,9 @@
       "dosiero": "packages/core/src/Button/Button.tsx",
       "sxlosilo": "Button {\"variant\":\"secondary\",\"size\":\"sm\"} focus, hell: button border-width 0 → background-color (gemessen)",
       "fontoValoro": "#f0f0f0",
-      "valoro": "{color.action.secondary.rest}",
-      "maniero": "kunmetita-rundita",
-      "noto": "kein Rand bei der Fonto: Randfarbe = Fläche des Elements; Rolle des Skemo, ΔE2000 0.2"
+      "valoro": "{color.action.tertiary.hover}",
+      "maniero": "rundita",
+      "noto": "kein Rand bei der Fonto: Randfarbe = Fläche des Elements; durchsichtig wie die Fonto (6 %); eine Deckkraft je Paint (Parität): 8 % in beiden Modi"
     },
     {
       "token": "ero.butono.border.color.emphasis.medium.intent.neutral.disabled",
@@ -5855,9 +5843,9 @@
       "dosiero": "packages/core/src/Button/Button.tsx",
       "sxlosilo": "Button {\"variant\":\"secondary\",\"size\":\"sm\"} loading, hell: button border-width 0 → background-color (gemessen)",
       "fontoValoro": "#f0f0f0",
-      "valoro": "{color.action.secondary.rest}",
-      "maniero": "kunmetita-rundita",
-      "noto": "kein Rand bei der Fonto: Randfarbe = Fläche des Elements; Rolle des Skemo, ΔE2000 0.2"
+      "valoro": "{color.action.tertiary.hover}",
+      "maniero": "rundita",
+      "noto": "kein Rand bei der Fonto: Randfarbe = Fläche des Elements; durchsichtig wie die Fonto (6 %); eine Deckkraft je Paint (Parität): 8 % in beiden Modi"
     },
     {
       "token": "ero.butono.border.color.emphasis.low.intent.neutral.rest",
@@ -9398,7 +9386,7 @@
       "fontoValoro": "#ebebeb",
       "valoro": "{color.border.subtle}",
       "maniero": "prenita",
-      "noto": "durchsichtig wie die Fonto (8 %)"
+      "noto": "durchsichtig wie die Fonto (8 %); eine Deckkraft je Paint (Parität): 8 % in beiden Modi"
     },
     {
       "token": "ero.karto.border.width",
@@ -10281,7 +10269,7 @@
       "fontoValoro": "#ebebeb",
       "valoro": "{color.border.subtle}",
       "maniero": "prenita",
-      "noto": "durchsichtig wie die Fonto (8 %)"
+      "noto": "durchsichtig wie die Fonto (8 %); eine Deckkraft je Paint (Parität): 8 % in beiden Modi"
     },
     {
       "token": "ero.langetaro.list.width",
@@ -12809,20 +12797,9 @@
       "dosiero": "packages/core/src/Token/Token.tsx",
       "sxlosilo": "Token {\"size\":\"sm\"} rest, hell: & background-color (gemessen)",
       "fontoValoro": "#f0f0f0",
-      "valoro": "{color.palette.neutral.50}",
-      "maniero": "kunmetita-rundita",
-      "noto": "sichtbarer Wert: Überlagerung, Deckkraft und Untergrund verrechnet; nächste Stufe neutral.50, ΔE2000 0.2"
-    },
-    {
-      "token": "ero.signeto.surface.fill.selected.false.intent.neutral",
-      "aro": "aspekto/komuna+color-scheme/dark",
-      "fonto": "astryx",
-      "dosiero": "packages/core/src/Token/Token.tsx",
-      "sxlosilo": "Token {\"size\":\"sm\"} rest, dunkel: & background-color (gemessen)",
-      "fontoValoro": "#3c3c3c",
-      "valoro": "{color.palette.neutral.700}",
-      "maniero": "kunmetita-rundita",
-      "noto": "eine Deckkraft je Paint (Parität): verrechnet wie der andere Modus; nächste Stufe neutral.700, ΔE2000 3.6"
+      "valoro": "{color.action.tertiary.hover}",
+      "maniero": "rundita",
+      "noto": "durchsichtig wie die Fonto (6 %); eine Deckkraft je Paint (Parität): 8 % in beiden Modi"
     },
     {
       "token": "ero.signeto.border.color.intent.neutral.rest",

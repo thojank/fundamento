@@ -52,6 +52,7 @@ export function rollout(definitions) {
                 : merge(def.fonto, fontoProps),
             teile: def.teile,
             ziel: def.ziel ?? {},
+            modal: def.fm.modal === true,
             breite: def.breite,
             hoehe: def.hoehe,
           });

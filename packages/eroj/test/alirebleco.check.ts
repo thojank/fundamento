@@ -1811,12 +1811,29 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
             };
             return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
           };
+          // Spec 029 ①b (Abnahme 28.10.): komuna fills the initials translucent, as the Fonto
+          // (black or white 8 %); the ground is that fill over what lies beneath the avataro.
+          const channels = (colour: string) => {
+            const [r = 0, g = 0, b = 0, alpha = 1] = colour.match(/[\d.]+/g)?.map(Number) ?? [];
+            return { rgb: [r, g, b], alpha };
+          };
+          const beneath = (element: Element): number[] => {
+            for (let node: Element | null = element; node !== null; node = node.parentElement) {
+              const { rgb, alpha } = channels(getComputedStyle(node).backgroundColor);
+              if (alpha === 1) return rgb;
+            }
+            return [255, 255, 255];
+          };
           return ["an-a1", "an-a2", "an-a3"].map((id) => {
-            const initials = document
-              .getElementById(id)
-              ?.shadowRoot?.querySelector('[part="initials"]') as HTMLElement;
+            const host = document.getElementById(id) as HTMLElement;
+            const initials = host.shadowRoot?.querySelector('[part="initials"]') as HTMLElement;
             const style = getComputedStyle(initials);
-            const [a, b] = [luminance(style.color), luminance(style.backgroundColor)].sort(
+            const fill = channels(style.backgroundColor);
+            const under = beneath(host);
+            const ground = fill.rgb.map(
+              (value, i) => value * fill.alpha + (under[i] ?? 255) * (1 - fill.alpha),
+            );
+            const [a, b] = [luminance(style.color), luminance(`rgb(${ground.join(", ")})`)].sort(
               (x, y) => y - x,
             );
             return ((a ?? 0) + 0.05) / ((b ?? 0) + 0.05);

@@ -696,6 +696,7 @@ for (const [ero, def] of definitions) {
               hex,
               composed: false,
               prop: property,
+              want: Number(rgba[4]),
               fixed: {
                 alias: role,
                 maniero: "prenita",
@@ -715,10 +716,43 @@ for (const [ero, def] of definitions) {
               hex,
               composed: false,
               prop: property,
+              want: Number(rgba[4]),
               fixed: {
                 alias: current,
                 maniero: "rundita",
                 noto: `durchsichtig wie die Fonto (${Math.round(Number(rgba[4]) * 100)} %), Deckkraft der Rolle ${Math.round(alphaOf(resolved[mode][current]?.value) * 100)} % (J8)`,
+              },
+            };
+            continue;
+          }
+          // Abnahme 28.10.: keine Rolle trägt die Farbe durchsichtig – die nächste durchsichtige Stufe
+          // der Palette (shade, tint) derselben Farbe. Verrechnet mit dem Weiß der Vergleichsseite
+          // wäre die Fläche deckend und gliche auf einer grauen Seite der Seite (secondary der
+          // Fonto: Schwarz 6 % über dem, worauf der Knopf steht).
+          const step = colorTokens
+            .filter(
+              (name) =>
+                name.startsWith("color.palette.") &&
+                hexOf(resolved[mode][name]?.value) === target &&
+                alphaOf(resolved[mode][name]?.value) > 0 &&
+                alphaOf(resolved[mode][name]?.value) < 1,
+            )
+            .sort(
+              (a, b) =>
+                Math.abs(alphaOf(resolved[mode][a]?.value) - Number(rgba[4])) -
+                Math.abs(alphaOf(resolved[mode][b]?.value) - Number(rgba[4])),
+            )[0];
+          if (step !== undefined) {
+            const exact = Math.abs(alphaOf(resolved[mode][step]?.value) - Number(rgba[4])) < 0.006;
+            entry.modes[mode] = {
+              hex,
+              composed: false,
+              prop: property,
+              want: Number(rgba[4]),
+              fixed: {
+                alias: step,
+                maniero: exact ? "prenita" : "rundita",
+                noto: `durchsichtig wie die Fonto (${Math.round(Number(rgba[4]) * 100)} %)${exact ? "" : `, nächste Stufe der Palette ${Math.round(alphaOf(resolved[mode][step]?.value) * 100)} %`}`,
               },
             };
             continue;
@@ -826,6 +860,58 @@ for (const entry of derived) {
     noto: `eine Deckkraft je Paint (Parität): verrechnet wie der andere Modus${how.noto ? `; ${how.noto}` : ""}`,
   };
   delete m.fixed;
+}
+// Beide Modi durchsichtig, aber verschieden deckend (secondary der Fonto: hell Schwarz 6 %, dunkel
+// Weiß 10 %): Figma kennt eine Deckkraft je Paint (parity-alpha-varies-by-mode). Die gemeinsame
+// Deckkraft, die beiden Werten der Fonto am nächsten liegt (die größere Abweichung zählt); je Modus
+// eine Rolle mit genau dieser Deckkraft und Farbe, sonst die Stufe der Palette (Abnahme 28.10.).
+const translucentWith = (mode, hex, alpha) =>
+  colorTokens.filter(
+    (name) =>
+      hexOf(resolved[mode][name]?.value) === hex &&
+      alphaOf(resolved[mode][name]?.value) > 0 &&
+      alphaOf(resolved[mode][name]?.value) < 1 &&
+      (alpha === undefined || Math.abs(alphaOf(resolved[mode][name]?.value) - alpha) < 0.006),
+  );
+for (const entry of derived) {
+  if (entry.type !== "color") continue;
+  const [light, dark] = [entry.modes.light, entry.modes.dark];
+  if (light?.want === undefined || dark?.want === undefined) continue;
+  if (light.how?.jugxo !== undefined || dark.how?.jugxo !== undefined) continue;
+  const alphaNow = (m, mode) => alphaOf(resolved[mode][m.how.alias]?.value);
+  if (Math.abs(alphaNow(light, "light") - alphaNow(dark, "dark")) < 0.006) continue;
+  const hexes = {
+    light: hexOf(resolved.light[light.how.alias]?.value),
+    dark: hexOf(resolved.dark[dark.how.alias]?.value),
+  };
+  const alphas = (mode) =>
+    translucentWith(mode, hexes[mode]).map((name) => alphaOf(resolved[mode][name]?.value));
+  const common = alphas("light").filter((a) => alphas("dark").some((b) => Math.abs(a - b) < 0.006));
+  const best = common.sort(
+    (a, b) =>
+      Math.max(Math.abs(a - light.want), Math.abs(a - dark.want)) -
+        Math.max(Math.abs(b - light.want), Math.abs(b - dark.want)) || a - b,
+  )[0];
+  if (best === undefined) continue;
+  for (const [mode, m] of [
+    ["light", light],
+    ["dark", dark],
+  ]) {
+    const prefer = preferOf(entry.property);
+    const rank = (name) => {
+      if (name.startsWith("color.palette.")) return 100;
+      const i = prefer.findIndex((prefix) => name.startsWith(prefix));
+      return i === -1 ? 50 : i;
+    };
+    const alias = translucentWith(mode, hexes[mode], best).sort((a, b) => rank(a) - rank(b))[0];
+    if (alias === undefined) continue;
+    const exact = Math.abs(best - m.want) < 0.006;
+    m.how = {
+      alias,
+      maniero: exact ? "prenita" : "rundita",
+      noto: `durchsichtig wie die Fonto (${Math.round(m.want * 100)} %); eine Deckkraft je Paint (Parität): ${Math.round(best * 100)} % in beiden Modi`,
+    };
+  }
 }
 const restOf = (entry) => {
   if (entry.when.state === undefined || entry.when.state === "rest") return undefined;
