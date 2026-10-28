@@ -72,8 +72,6 @@ for (const def of definitions) {
           )
         )
           grund = "②b: die Fonto unterscheidet, was das Token nicht trennt";
-        else if (entries.length === 0 && /butono-box-inline-padding/.test(name))
-          grund = "②b: Form „nur Icon“ (O-1b-4)";
         else if (entries.length === 0 && /avizo-accent/.test(name))
           grund = "behalten nach Abgleichstabelle (A-avizo-4)";
         else if (entries.length === 0) grund = "kein gemessenes Gegenstück";

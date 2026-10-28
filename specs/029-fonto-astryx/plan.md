@@ -488,9 +488,9 @@ Alle Jugxoj gehören zu komuna (`packages/aspekto-komuna/jugxoj.json`, `decision
 
 ### Offen (für den Maintainer) ①b
 
-- **O-1b-1 Form des butono:** 10 px wie theme-neutral (jetzt) oder Pille wie im Storybook? Eine Pille für alle Knöpfe ginge über `radius.role.control`; eine Form-Achse (`corner`) wäre ②b.
-- **O-1b-2 Schatten der Karte:** leicht wie gesehen (jetzt, `elevation low`) oder flach wie der Standard der Fonto?
-- **O-1b-4 Knopf nur mit Icon:** quadratisch ohne Innenabstand wie die Fonto – eine Form des butono (②b). Bis dahin der Innenabstand der Rolle (4/8/16 px) für Knöpfe mit und ohne Text.
+- **O-1b-1 Form des butono:** ~~10 px wie theme-neutral (jetzt) oder Pille wie im Storybook?~~ **Entschieden 28.10., 17:22:** Der Radius bleibt 10 px (Standard von theme-neutral); die Pille ist keine Aufgabe von ①.
+- **O-1b-2 Schatten der Karte:** ~~leicht wie gesehen oder flach?~~ **Entschieden 28.10., 17:22:** leichter Schatten, wie gemessen (`elevation low`).
+- **O-1b-4 Knopf nur mit Icon:** ~~eine Form des butono (②b)~~ **Entschieden 28.10., 17:22:** in #111 – Innenabstand wie die Fonto (12 px in jeder Größe), ein Knopf nur mit Icon quadratisch ohne Innenabstand (Abschnitt „①b – Abnahme 28.10., 17:19“).
 - **O-1b-3 Status-Farben der Meldung:** Die Fonto färbt Titel und Text einer Meldung je Status; Fundamento hat ein Token für alle Status. Die Achse kommt mit ②b (12 Tokens „uneinheitlich“, im Bericht).
 
 ### Messungen ①b
@@ -627,3 +627,14 @@ npx playwright test --config playwright.vitrino.config.ts -g "every brand shows"
 cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
 pnpm --filter @fundamento/projekcioj exec vitest run src/celoj/make-kit/make-kit.test.ts src/fonto
 ```
+
+## ①b – Abnahme 28.10. (17:19): Innenabstand des butono
+
+Befund: Werte und Varianten des butono passen bis auf den Innenabstand. Entscheidung des Maintainers (17:22): „gut genug“ – kein Pixel- oder Story-Abgleich mit dem Storybook der Fonto, kein Vollinventar; ②b setzt nach dem Merge von #111 genau die Entscheidungen aus ②a (#110) um. O-1b-1 (Radius 10 px), O-1b-2 (leichter Schatten) und O-1b-4 (nur Icon) entschieden.
+
+- **Innenabstand:** `ero.butono.box.inline.padding.size.{small,medium,large}` → `spacing.scale.300` (12 px), gemessen an der Fonto (sm, md und lg je 12 px); der Generator hält den Innenabstand des butono nicht mehr fest (`BEHALTEN` nur noch die Kante der avizo). Herkunft: drei Angaben mehr.
+- **Nur Icon** (Element, kein Token): fm-butono markiert seinen Knopf mit `data-icon-only`, solange sein Wort leer ist (auch ein später geschriebenes Wort, wie das des alsxutilo); dann ist er quadratisch – die Höhe seiner Größe auf beiden Seiten, aus demselben Ero-Token – ohne Innenabstand.
+- **Eroj mit Knöpfen:** Bemaßt ein Ero einen Knopf-Teil, den es aus einem butono zusammensetzt (`size`: remove, edit, trigger, prev, next, increment, decrement, dismiss, clear), nimmt `::part(control)` die Maße des Teils (`inherit`) ohne Innenabstand – alsxutilo, avizo, datelektilo, kampo, lokredaktilo, signeto. Ein Knopf mit Wort, dem das Ero nur die Höhe gibt (clear des plurelektilo, save/cancel des lokredaktilo), behält seinen Innenabstand. Vorher liefen der Auslöser des datelektilo (32 px in 24 px) und die Stepper des kampo über.
+- **Tests:** rot in `2257cdc` (Token 12 px; im Browser in drei Engines: 12 px mit Wort in jeder Größe, nur Icon quadratisch ohne Innenabstand mit dem Icon im Knopf; jeder Knopf nur mit Icon in datelektilo, kampo, lokredaktilo, avizo, signeto in seinem Teil, quadratisch, ohne Innenabstand), grün im Folgecommit. Keine Grenze angehoben.
+
+Messanleitung wie „①b – Abnahme 28.10.“ (Vitrino und Vergleichsseite neu bauen); in der Vitrino zeigt der Abschnitt butono die Zeile „mit Icon“, die Abschnitte datelektilo und kampo ihre Knöpfe im Feld.

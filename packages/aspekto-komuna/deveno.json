@@ -5980,6 +5980,36 @@
       "maniero": "prenita"
     },
     {
+      "token": "ero.butono.box.inline.padding.size.small",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Button/Button.tsx",
+      "sxlosilo": "Button {\"variant\":\"primary\",\"size\":\"sm\"} rest, hell: button padding-inline (gemessen)",
+      "fontoValoro": "12px",
+      "valoro": "{spacing.scale.300}",
+      "maniero": "prenita"
+    },
+    {
+      "token": "ero.butono.box.inline.padding.size.medium",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Button/Button.tsx",
+      "sxlosilo": "Button {\"variant\":\"primary\",\"size\":\"md\"} rest, hell: button padding-inline (gemessen)",
+      "fontoValoro": "12px",
+      "valoro": "{spacing.scale.300}",
+      "maniero": "prenita"
+    },
+    {
+      "token": "ero.butono.box.inline.padding.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Button/Button.tsx",
+      "sxlosilo": "Button {\"variant\":\"primary\",\"size\":\"lg\"} rest, hell: button padding-inline (gemessen)",
+      "fontoValoro": "12px",
+      "valoro": "{spacing.scale.300}",
+      "maniero": "prenita"
+    },
+    {
       "token": "ero.butono.box.gap",
       "aro": "core",
       "fonto": "astryx",

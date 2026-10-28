@@ -5447,7 +5447,18 @@ ${
       attributeFilter: ["slot"],
     });
 `
-}${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${datepickerInit}${chipInit}${listInit}${editorInit}${uploadInit}${sliderInit}${fieldExtrasInit}${avatarInit}${isCodeblock ? codeblockInit : ""}${skipInit}    label.addEventListener("slotchange", () => this.#render());
+}${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${datepickerInit}${chipInit}${listInit}${editorInit}${uploadInit}${sliderInit}${fieldExtrasInit}${avatarInit}${isCodeblock ? codeblockInit : ""}${skipInit}${
+  host === "button"
+    ? `    // A word written into the default slot later (the alsxutilo writes its own) changes the
+    // form: the render looks again (Spec 029 ①b, Abnahme 28.10.).
+    new MutationObserver(() => this.#render()).observe(this, {
+      characterData: true,
+      childList: true,
+      subtree: true,
+    });
+`
+    : ""
+}    label.addEventListener("slotchange", () => this.#render());
     for (const named of root.querySelectorAll("slot[name]")) {
       named.addEventListener("slotchange", () => this.#render());
     }
@@ -5687,7 +5698,14 @@ ${
 ${isSlider ? '    for (const thumb of this.#thumbs()) {\n      const description = control.getAttribute("aria-describedby");\n      if (description === null) thumb.removeAttribute("aria-describedby");\n      else thumb.setAttribute("aria-describedby", description);\n    }\n' : ""}`
     : `    if (text === "" && typeof name === "string" && name !== "") control.setAttribute("aria-label", name);
     else control.removeAttribute("aria-label");
+${
+  host === "button"
+    ? `    // Spec 029 ①b (Abnahme 28.10., O-1b-4): without a word the button is its icon – square,
+    // without inline padding, wherever it stands (an Ero's remove, trigger, stepper).
+    control.toggleAttribute("data-icon-only", text === "");
 `
+    : ""
+}`
 }  }
 
   #activate(event: Event): void {

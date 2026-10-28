@@ -72,6 +72,7 @@
 - [x] **T2942 Generator:** durchsichtige Farben der Fonto bleiben durchsichtig (nächste Stufe `shade`/`tint`), eine gemeinsame Deckkraft beider Modi; butono medium, avataro, signeto auf `action.tertiary.hover` (8 %).
 - [x] **T2943 Vergleichsseite:** derselbe Build und das Element seiner Vitrino; das modale dialogo nur in seinem Fall (der graue Grund).
 - [x] **T2944 Prüfungen nachgezogen:** Kontrast der Initialen des avataro über durchsichtiger Fläche verrechnet; Zeuge der APCA-Hinweise 8550; Figma-Inventar des avataro „alpha varies by mode“.
+- [x] **T2945 Abnahme 28.10. (17:19), Innenabstand:** rot in `2257cdc`; butono 12 px in jeder Größe wie die Fonto; nur Icon quadratisch ohne Innenabstand (Element `data-icon-only`); Eroj mit bemaßten Knopf-Teilen geben dem Knopf ihre Maße (`::part(control)`); O-1b-1, O-1b-2, O-1b-4 entschieden.
 
 ### Messungen ①b
 

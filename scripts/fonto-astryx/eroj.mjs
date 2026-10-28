@@ -416,12 +416,9 @@ const derived = [];
 const skemoAliasOf = new Map(
   modelo.eroj.flatMap((entry) => eroTokenojOf(entry).map((tokeno) => [tokeno.name, tokeno.alias])),
 );
-const BEHALTEN = [
-  "ero.avizo.accent.",
-  // Die Fonto zeichnet einen Knopf nur mit Icon quadratisch ohne Innenabstand, mit Text 12 px; das
-  // Token des butono trennt die beiden Formen nicht (die Form „nur Icon“ ist ②b): kein Wert.
-  "ero.butono.box.inline.padding.",
-];
+const BEHALTEN = ["ero.avizo.accent."];
+// Abnahme 28.10. (O-1b-4 entschieden): der Innenabstand des butono wie die Fonto (12 px); ein Knopf
+// nur mit Icon ist quadratisch ohne Innenabstand – das zeichnet das Element, nicht das Token.
 const uneinheitlich = [];
 for (const [ero, def] of definitions) {
   const loaded = modelo.eroj.find((entry) => entry.ero.name === ero);

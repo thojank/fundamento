@@ -220,6 +220,9 @@ export const isPagination = (skemo: Skemo): boolean =>
  * A file input (Spec 015 ②, plan ② D-05): the platform's file input, heard as a button, with a
  * dropzone part — the field of the kampo around it, the chosen files listed below.
  */
+/** The button (butono): role button, not the file input that is named a button too. */
+export const isButton = (skemo: Skemo): boolean => skemo.a11y.role === "button" && !isUpload(skemo);
+
 export const isUpload = (skemo: Skemo): boolean =>
   skemo.a11y.role === "button" && skemo.parts.dropzone !== undefined;
 
@@ -1945,6 +1948,40 @@ const groupStructure = (disables: boolean, marked: boolean): string =>
   ].join("\n");
 
 /**
+ * The parts an Ero composes from a butono (Spec 029 ①b, Abnahme 28.10.): where the Ero sizes one,
+ * the butono's control takes the part's box (stylesheetOf, sized).
+ */
+const COMPOSED_BUTONO_PARTS: readonly string[] = [
+  "remove",
+  "edit",
+  "trigger",
+  "prev",
+  "next",
+  "increment",
+  "decrement",
+  "dismiss",
+  "clear",
+];
+
+/** A pseudo-element after every selector of a list (commas inside :where(…) stay). */
+function onEach(selector: string, pseudo: string): string {
+  const parts: string[] = [];
+  let depth = 0;
+  let start = 0;
+  for (let index = 0; index < selector.length; index++) {
+    const char = selector.charAt(index);
+    if (char === "(") depth++;
+    else if (char === ")") depth--;
+    else if (char === "," && depth === 0) {
+      parts.push(selector.slice(start, index).trim());
+      start = index + 1;
+    }
+  }
+  parts.push(selector.slice(start).trim());
+  return parts.map((part) => `${part}${pseudo}`).join(", ");
+}
+
+/**
  * The stylesheet of one Ero: structure, then one rule per part property and combination (a state
  * without a binding of its own repeats rest, so every state of the Skemo has a rule the parity
  * inventory reads). The Uzo decides the host (D-04).
@@ -1958,6 +1995,21 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
   const add = (selector: string, lines: readonly string[]) => {
     if (lines.length === 0) return;
     rules.set(selector, [...(rules.get(selector) ?? []), ...lines]);
+  };
+  // Spec 029 ①b (Abnahme 28.10., O-1b-4): a composed butono whose part the Ero sizes (a remove, a
+  // trigger, a stepper) takes that box as its control – the same width and height, without inline
+  // padding – so its square never runs over the part. ::part(control) is what fm-butono exposes;
+  // inherit takes the size the part was given.
+  const sized = (part: string, property: string, selector: string, lines: readonly string[]) => {
+    if (property !== "size" || !COMPOSED_BUTONO_PARTS.includes(part)) return;
+    // A butono with a word (the clear of a multi-select) gets its height alone: it keeps its padding.
+    if (!lines.some((line) => line.startsWith("inline-size:"))) return;
+    add(onEach(selector, "::part(control)"), [
+      "inline-size: inherit;",
+      "block-size: inherit;",
+      "min-block-size: 0;",
+      "padding-inline: 0;",
+    ]);
   };
   // A light-DOM host (Spec 011 ④, E10) keeps only the region and its edge in the shadow sheet;
   // every other part stands in the document's stylesheet (lightStylesheetOf).
@@ -1976,16 +2028,16 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
     for (const [property, source] of Object.entries(properties)) {
       const token = fixedToken(source);
       if (token !== undefined) {
-        add(
-          selectorOf(skemo, part, property, {}, []),
-          declarations(
-            skemo,
-            part,
-            property,
-            named(owner, skemo, part, property, {}, token),
-            owner,
-          ),
+        const selector = selectorOf(skemo, part, property, {}, []);
+        const lines = declarations(
+          skemo,
+          part,
+          property,
+          named(owner, skemo, part, property, {}, token),
+          owner,
         );
+        add(selector, lines);
+        sized(part, property, selector, lines);
       }
     }
   }
@@ -2005,18 +2057,39 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
         if (keys.includes(STATE_KEY) && combination[STATE_KEY] !== state) continue;
         const bound = boundToken(skemo, part, property, combination);
         if (bound === undefined) continue;
-        add(
-          selectorOf(skemo, part, property, combination, keys),
-          declarations(
-            skemo,
-            part,
-            property,
-            named(owner, skemo, part, property, combination, bound.token),
-            owner,
-          ),
+        const selector = selectorOf(skemo, part, property, combination, keys);
+        const lines = declarations(
+          skemo,
+          part,
+          property,
+          named(owner, skemo, part, property, combination, bound.token),
+          owner,
         );
+        add(selector, lines);
+        sized(part, property, selector, lines);
       }
     }
+  }
+  // Spec 029 ①b (Abnahme 28.10., O-1b-4): a button without a word is its icon – square, the
+  // height of its size on both sides (the same Ero-Token), without inline padding; last, so it
+  // refines the padding of the size. Where an Ero sizes the part it composes (the trigger of the
+  // datelektilo, 24 px), that Ero's sheet gives the control the part's box (sized, above). The
+  // element marks the form (data-icon-only).
+  if (isButton(skemo)) {
+    const iconOnly = (selector: string) =>
+      selector.replace('[part="control"]', '[part="control"][data-icon-only]');
+    const height = skemo.parts.box?.height;
+    const keys = height === undefined ? [] : keysOf(skemo, height);
+    for (const combination of combinationsOf(skemo, keys)) {
+      const bound = boundToken(skemo, "box", "height", combination);
+      if (bound === undefined) continue;
+      const side = variable(named(owner, skemo, "box", "height", combination, bound.token));
+      add(iconOnly(selectorOf(skemo, "box", "height", combination, keys)), [
+        `inline-size: ${side};`,
+        `block-size: ${side};`,
+      ]);
+    }
+    add(':where([part="control"][data-icon-only])', ["padding-inline: 0;", "min-block-size: 0;"]);
   }
   // The place of the chevron of a select comes last (D-06): it refines the inline padding.
   const placed = isSelect(skemo) ? selectRules(skemo, owner) : [];

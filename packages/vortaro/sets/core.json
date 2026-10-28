@@ -7279,7 +7279,7 @@
             "size": {
               "small": {
                 "$type": "dimension",
-                "$value": "{spacing.small}",
+                "$value": "{spacing.scale.300}",
                 "$description": "butono: box.inline-padding when size=small (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                 "$extensions": {
                   "com.ciferecigo.fundamento": {
@@ -7289,7 +7289,7 @@
               },
               "medium": {
                 "$type": "dimension",
-                "$value": "{spacing.medium}",
+                "$value": "{spacing.scale.300}",
                 "$description": "butono: box.inline-padding when size=medium (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                 "$extensions": {
                   "com.ciferecigo.fundamento": {
@@ -7299,7 +7299,7 @@
               },
               "large": {
                 "$type": "dimension",
-                "$value": "{spacing.large}",
+                "$value": "{spacing.scale.300}",
                 "$description": "butono: box.inline-padding when size=large (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                 "$extensions": {
                   "com.ciferecigo.fundamento": {
