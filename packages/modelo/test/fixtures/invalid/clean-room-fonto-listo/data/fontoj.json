@@ -1,0 +1,14 @@
+{
+  "fontoj": [
+    {
+      "id": "testo",
+      "name": "Testo",
+      "license": "MIT",
+      "copyright": "Copyright (c) 2026 Testo Example",
+      "source": "https://example.invalid/testo",
+      "version": "1.0.0",
+      "commit": "0123456789abcdef0123456789abcdef01234567",
+      "notices": "NOTICES.md"
+    }
+  ]
+}

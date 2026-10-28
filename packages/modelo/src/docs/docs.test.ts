@@ -3838,6 +3838,7 @@ describe("Spec 032 documentation (specs/032-benchmark-astryx-kern)", () => {
     }
     for (const term of [
       "overlayOf",
+      "fonto-listoj.json",
       "Median",
       "Maximum",
       "fünf Läufe",

@@ -12,6 +12,7 @@ import { loadScanTree, scanScopeOf } from "../namespace/files.js";
 import { extensionOf, REFERENCE_EXTENSIONS } from "../namespace/paths.js";
 import { compareIssues, scanNamespace } from "../namespace/scan.js";
 import { isBenchmarkSpurojPath, parseBenchmarkSpuroj, SPUROJ_START } from "./benchmark-spuroj.js";
+import { fontoExemptions } from "./fonto.js";
 import {
   FIXTURE_JUGXOJ_PATH,
   HAZARDAJ_FILE_NAME,
@@ -20,7 +21,6 @@ import {
   randomHitKey,
   randomHits,
 } from "./hazardaj.js";
-import { fontoExemptions } from "./fonto.js";
 import {
   type FingerprintIndex,
   findBrandValues,
