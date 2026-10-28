@@ -266,6 +266,111 @@ test("every size is at least size.target.min wide and high in every density and 
   }
 });
 
+// Spec 029 ①b (Abnahme 28.10., 17:19; O-1b-4 decided 17:22): the inline padding of the Fonto
+// (12 px in every size) for a butono with a word; a butono with only an icon is square without
+// padding, so nothing runs over – alone and wherever an Ero carries one.
+test("komuna: a butono with a word has 12 px inline padding in every size; one with only an icon is square without padding, its icon inside", async ({
+  page,
+}) => {
+  const sizes = ["small", "medium", "large"];
+  await serve(
+    page,
+    out,
+    sizes
+      .map(
+        (size) =>
+          `<fm-butono data-wort size="${size}">Aktion</fm-butono><fm-butono data-icon size="${size}" label="Schließen"><fm-ikono slot="icon-start" name="close"></fm-ikono></fm-butono>`,
+      )
+      .join(""),
+  );
+  const look = (selector: string) =>
+    page.locator(selector).evaluateAll((elements) =>
+      elements.map((element) => {
+        const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+        const icon = element.querySelector("fm-ikono")?.getBoundingClientRect();
+        const box = control.getBoundingClientRect();
+        const style = getComputedStyle(control);
+        return {
+          size: element.getAttribute("size"),
+          padding: [style.paddingInlineStart, style.paddingInlineEnd],
+          width: box.width,
+          height: box.height,
+          inside:
+            icon === undefined ||
+            (icon.left >= box.left - 0.5 &&
+              icon.right <= box.right + 0.5 &&
+              icon.top >= box.top - 0.5 &&
+              icon.bottom <= box.bottom + 0.5),
+        };
+      }),
+    );
+  for (const word of await look("fm-butono[data-wort]")) {
+    expect(word.padding, `${word.size}`).toEqual(["12px", "12px"]);
+  }
+  for (const icon of await look("fm-butono[data-icon]")) {
+    expect(icon.padding, `${icon.size}`).toEqual(["0px", "0px"]);
+    expect(
+      Math.abs(icon.width - icon.height),
+      `${icon.size}: ${icon.width}×${icon.height}`,
+    ).toBeLessThan(0.5);
+    expect(icon.inside, `${icon.size}`).toBe(true);
+  }
+});
+
+test("komuna: every butono with only an icon inside an Ero stays inside its part, square, without padding", async ({
+  page,
+}) => {
+  await serve(
+    page,
+    out,
+    [
+      '<fm-datelektilo value="2026-10-24">Lieferdatum</fm-datelektilo>',
+      '<fm-kampo kind="number" stepper value="3">Anzahl</fm-kampo>',
+      '<fm-lokredaktilo label="Titel" value="Bericht"></fm-lokredaktilo>',
+      '<fm-pagxigilo page="2" total-pages="5"></fm-pagxigilo>',
+      "<fm-avizo dismissible>Gespeichert.</fm-avizo>",
+      '<fm-signeto mode="removable">Entwurf</fm-signeto>',
+    ].join(""),
+  );
+  const found = await page.evaluate(() => {
+    const results: {
+      host: string;
+      part: string;
+      overflow: boolean;
+      square: boolean;
+      padding: string;
+    }[] = [];
+    for (const host of document.querySelectorAll("body > *")) {
+      for (const button of host.shadowRoot?.querySelectorAll("fm-butono") ?? []) {
+        const outer = button.getBoundingClientRect();
+        if (outer.width === 0 || (button as HTMLElement).hidden) continue;
+        const text = [...button.childNodes]
+          .map((node) => node.textContent ?? "")
+          .join("")
+          .trim();
+        if (text !== "") continue;
+        const control = button.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+        const inner = control.getBoundingClientRect();
+        results.push({
+          host: host.localName,
+          part: button.getAttribute("part") ?? "",
+          overflow: inner.width > outer.width + 0.5 || inner.height > outer.height + 0.5,
+          square: Math.abs(inner.width - inner.height) < 0.5,
+          padding: getComputedStyle(control).paddingInlineStart,
+        });
+      }
+    }
+    return results;
+  });
+  expect(found.length).toBeGreaterThanOrEqual(6);
+  for (const button of found) {
+    const name = `${button.host} ${button.part}`;
+    expect(button.overflow, name).toBe(false);
+    expect(button.square, name).toBe(true);
+    expect(button.padding, name).toBe("0px");
+  }
+});
+
 // Spec 029 ①b c) (Abnahme ① des Maintainers, 27.10.): a disabled butono with emphasis=high showed
 // no text — label and fill resolved to the same grey in komuna. The text of a disabled element
 // stays visible: pale, but readable. The Fonto draws „disabled“ as its own variant at half the

@@ -50,10 +50,14 @@ describe("Spec 029 ①b b): the Ero-Tokens of komuna after the Fonto", () => {
     expect([28, 32, 36]).toEqual(
       ["small", "medium", "large"].map((size) => px(light, `ero.butono.box.height.size.${size}`)),
     );
-    // The inline padding stays on its role: the Fonto draws an icon-only button square without
-    // padding and one with a label with 12 px; the Ero-Token does not tell the two forms apart
-    // (the form icon-only is ②b, O-1b-4).
-    expect(px(light, "ero.butono.box.inline.padding.size.small")).toBe(px(light, "spacing.small"));
+    // Abnahme 28.10. (O-1b-4 decided): the inline padding of the Fonto, 12 px in every size; a
+    // butono with only an icon is square without padding (the element, not the token). The radius
+    // stays 10 px, the standard of theme-neutral (O-1b-1: the pill is no task of ①).
+    expect([12, 12, 12]).toEqual(
+      ["small", "medium", "large"].map((size) =>
+        px(light, `ero.butono.box.inline.padding.size.${size}`),
+      ),
+    );
     expect(px(light, "ero.butono.box.radius")).toBe(10);
   });
 
