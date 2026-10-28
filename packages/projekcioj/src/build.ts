@@ -10,6 +10,7 @@ import {
   buildModelo,
   defaultModeloSource,
   expandRezolvo,
+  exportValidatedModelo,
   fixtureModeloSource,
   type Modelo,
   type ModeloFiles,
@@ -19,6 +20,7 @@ import {
   type Rezolvo,
   type RezolvojJson,
   readModeloFiles,
+  readModeloSchema,
   type ValidationIssue,
 } from "@fundamento/modelo";
 import { CODE_CONNECT_CELO } from "./celoj/code-connect/code-connect.js";
@@ -152,6 +154,34 @@ export function celoInputOf(
   if (!prepared.ok) return prepared;
   const { files } = readModeloFiles(source);
   if (files === undefined) return { ok: false, errors: [], warnings: prepared.warnings };
+  return {
+    ok: true,
+    input: {
+      modelo: buildModelo(files).modelo,
+      modeloJson: JSON.parse(prepared.files.modeloJson) as ModeloJson,
+      rezolvoj: {
+        rezolvoj: (JSON.parse(prepared.files.rezolvojJson) as RezolvojJson).rezolvoj.map(
+          expandRezolvo,
+        ),
+      },
+      env: process.env,
+      files,
+    },
+    warnings: prepared.warnings,
+  };
+}
+
+/**
+ * The input of the Celoj from Modelo files already read (Spec 029 ①: the structure of komuna 0.2,
+ * rebuilt from komuna-0-2), validated and exported like `celoInputOf`.
+ */
+export function celoInputOfFiles(
+  files: ModeloFiles,
+):
+  | { ok: true; input: CeloInput; warnings: ValidationIssue[] }
+  | { ok: false; errors: ValidationIssue[]; warnings: ValidationIssue[] } {
+  const prepared = exportValidatedModelo(files, readModeloSchema());
+  if (!prepared.ok) return prepared;
   return {
     ok: true,
     input: {

@@ -105,7 +105,8 @@ describe("rule catalog (§2.6)", () => {
     // Spec 020 ① (G1, G3, G4): eleven rules of the Sxablonoj; ②: the one submit of a form.
     // Nachlese 8 ③: traduko-missing and traduko-orphaned.
     // Spec 030: the three references of the north-star catalogue (Sxablono, Ero, Regulo).
-    expect(RULE_IDS).toHaveLength(184);
+    // Spec 029 ①: the six rules of check:fontoj.
+    expect(RULE_IDS).toHaveLength(190);
     for (const rule of [
       "agordo-jugxo-fixed",
       "raporto-out-of-sync",
@@ -215,6 +216,7 @@ describe("shared constants", () => {
       "alirebleco",
       "clean-room",
       "ikonaro",
+      "fontoj",
     ]);
   });
 

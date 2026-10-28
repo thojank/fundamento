@@ -96,8 +96,17 @@ function walk(node: unknown, pointer: string, celo: string | undefined, out: Cel
     }
   }
   const declaringKey = declared?.pointer.split("/")[1];
+  // Spec 029 ① (Constitution v2.4, Art. VII): a value taken from a Fonto names in `dosiero` and
+  // `sxlosilo` where it stands in the Fonto — the Fonto's own file and key, its provenance — and in
+  // `fontoValoro` the value as the Fonto writes it. That is
+  // no name a Celo of Fundamento gives; the sentence declares its Fonto in the typed field `fonto`.
+  const provenance =
+    typeof node.fonto === "string" && typeof node.sxlosilo === "string"
+      ? new Set(["dosiero", "sxlosilo", "fontoValoro"])
+      : new Set<string>();
   for (const [key, value] of Object.entries(node)) {
     const here = `${pointer}/${key}`;
+    if (provenance.has(key)) continue;
     const found = KEY_NAMES.find((name) => key.toLowerCase().includes(name));
     if (found !== undefined) {
       out.push({ pointer: here, needle: found });

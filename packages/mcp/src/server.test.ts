@@ -99,12 +99,24 @@ describe("the repo server", () => {
 
   it("get_token returns the core definition and every override", async () => {
     const { structuredContent } = await call(client, "get_token", { name: "color.text.default" });
+    // Spec 029 ①: komuna's text is the primary text of the Fonto, pure black (neutral.1000).
     expect(structuredContent?.definition).toEqual({
       set: "core",
-      value: "{color.palette.neutral.900}",
+      value: "{color.palette.neutral.1000}",
     });
     const overrides = structuredContent?.overrides as { set: string }[];
     expect(overrides.map((override) => override.set)).toContain("color-scheme/dark");
+    // Art. VII (v2.4): where the value comes from – the Fonto, its file and key, how it was taken.
+    const deveno = structuredContent?.deveno as {
+      aspekto: string;
+      fonto: string;
+      maniero: string;
+      sxlosilo: string;
+    }[];
+    expect(deveno).toContainEqual(
+      expect.objectContaining({ aspekto: "komuna", fonto: "astryx", maniero: "prenita" }),
+    );
+    expect(deveno[0]?.sxlosilo).toContain("--color-text-primary");
     const byId = await call(client, "get_token", { id: structuredContent?.id as string });
     expect(byId.structuredContent?.name).toBe("color.text.default");
     const kicker = await call(client, "get_token", { name: "typography.kicker" });
@@ -164,6 +176,8 @@ describe("a server over an invalid Modelo", () => {
 
   it("starts and reports the errors in describe", async () => {
     const { structuredContent } = await call(client, "describe");
-    expect(structuredContent?.validation).toEqual({ errors: 4, warnings: 0 });
+    // Spec 029 ①: the four missing tokens, and state-distinct where the missing action falls back to
+    // the new komuna in ekzemplo's palette (plan, B-4).
+    expect(structuredContent?.validation).toEqual({ errors: 5, warnings: 0 });
   });
 });

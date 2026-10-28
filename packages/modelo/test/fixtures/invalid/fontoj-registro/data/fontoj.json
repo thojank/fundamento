@@ -1,0 +1,32 @@
+{
+  "fontoj": [
+    {
+      "id": "alfa",
+      "name": "Alfa",
+      "license": "MIT",
+      "copyright": "Copyright (c) 2026 Alfa Example",
+      "source": "https://example.org/alfa",
+      "version": "1.2.3",
+      "tag": "v1.2.3",
+      "commit": "0123456789abcdef0123456789abcdef01234567",
+      "packages": [{ "name": "@alfa/core", "version": "1.2.3", "integrity": "sha512-AAAA" }],
+      "read": "2026-10-23",
+      "scope": "Werte der Farbe.",
+      "notices": "THIRD_PARTY_NOTICES.md"
+    },
+    {
+      "id": "gamma",
+      "name": "Gamma",
+      "license": "Apache-2.0",
+      "copyright": "Copyright 2026 Gamma Example",
+      "source": "https://example.org/gamma",
+      "version": "^1.2.0",
+      "tag": "v1",
+      "commit": "main",
+      "packages": [{ "name": "@gamma/core", "version": "1.2.0", "integrity": "sha512-BBBB" }],
+      "read": "2026-10-23",
+      "scope": "Werte der Abstände.",
+      "notices": "THIRD_PARTY_NOTICES.md"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 // fm-butono in the browser (Spec 003 T011; FR-07, plan D-07, AK-03 for the component, WCAG 2.5.8).
 // Chromium, Firefox and WebKit (playwright.config.ts).
 
-import { boundToken, combinationsOf } from "@fundamento/modelo";
+import { boundToken, combinationsOf, eroTokenOf } from "@fundamento/modelo";
 import { expect, test } from "@playwright/test";
 
 /** WebKit on macOS moves Tab focus to buttons only with Alt+Tab (system default). */
@@ -207,9 +207,13 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
         });
         if (state === "pressed") await page.mouse.up();
         const combination = { ...c, state };
+        // Spec 029 ①b: a part reads its Ero-Token (Art. IV, v2.3); komuna sets its own values
+        // there, every other brand keeps the alias of the binding.
         const token = (part: string, property: string) => {
-          const bound = boundToken(skemo, part, property, combination);
-          const value = bound === undefined ? undefined : rezolvo.tokens[bound.token]?.value;
+          const bound =
+            eroTokenOf(butono, part, property, combination) ??
+            boundToken(skemo, part, property, combination)?.token;
+          const value = bound === undefined ? undefined : rezolvo.tokens[bound]?.value;
           if (value === undefined)
             throw new Error(`${part}.${property} unbound in ${JSON.stringify(combination)}`);
           return value;
@@ -260,4 +264,169 @@ test("every size is at least size.target.min wide and high in every density and 
       }
     }
   }
+});
+
+// Spec 029 ①b (Abnahme 28.10., 17:19; O-1b-4 decided 17:22): the inline padding of the Fonto
+// (12 px in every size) for a butono with a word; a butono with only an icon is square without
+// padding, so nothing runs over – alone and wherever an Ero carries one.
+test("komuna: a butono with a word has 12 px inline padding in every size; one with only an icon is square without padding, its icon inside", async ({
+  page,
+}) => {
+  const sizes = ["small", "medium", "large"];
+  await serve(
+    page,
+    out,
+    sizes
+      .map(
+        (size) =>
+          `<fm-butono data-wort size="${size}">Aktion</fm-butono><fm-butono data-icon size="${size}" label="Schließen"><fm-ikono slot="icon-start" name="close"></fm-ikono></fm-butono>`,
+      )
+      .join(""),
+  );
+  const look = (selector: string) =>
+    page.locator(selector).evaluateAll((elements) =>
+      elements.map((element) => {
+        const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+        const icon = element.querySelector("fm-ikono")?.getBoundingClientRect();
+        const box = control.getBoundingClientRect();
+        const style = getComputedStyle(control);
+        return {
+          size: element.getAttribute("size"),
+          padding: [style.paddingInlineStart, style.paddingInlineEnd],
+          width: box.width,
+          height: box.height,
+          inside:
+            icon === undefined ||
+            (icon.left >= box.left - 0.5 &&
+              icon.right <= box.right + 0.5 &&
+              icon.top >= box.top - 0.5 &&
+              icon.bottom <= box.bottom + 0.5),
+        };
+      }),
+    );
+  for (const word of await look("fm-butono[data-wort]")) {
+    expect(word.padding, `${word.size}`).toEqual(["12px", "12px"]);
+  }
+  for (const icon of await look("fm-butono[data-icon]")) {
+    expect(icon.padding, `${icon.size}`).toEqual(["0px", "0px"]);
+    expect(
+      Math.abs(icon.width - icon.height),
+      `${icon.size}: ${icon.width}×${icon.height}`,
+    ).toBeLessThan(0.5);
+    expect(icon.inside, `${icon.size}`).toBe(true);
+  }
+});
+
+test("komuna: every butono with only an icon inside an Ero stays inside its part, square, without padding", async ({
+  page,
+}) => {
+  await serve(
+    page,
+    out,
+    [
+      '<fm-datelektilo value="2026-10-24">Lieferdatum</fm-datelektilo>',
+      '<fm-kampo kind="number" stepper value="3">Anzahl</fm-kampo>',
+      '<fm-lokredaktilo label="Titel" value="Bericht"></fm-lokredaktilo>',
+      '<fm-pagxigilo page="2" total-pages="5"></fm-pagxigilo>',
+      "<fm-avizo dismissible>Gespeichert.</fm-avizo>",
+      '<fm-signeto mode="removable">Entwurf</fm-signeto>',
+    ].join(""),
+  );
+  const found = await page.evaluate(() => {
+    const results: {
+      host: string;
+      part: string;
+      overflow: boolean;
+      square: boolean;
+      padding: string;
+    }[] = [];
+    for (const host of document.querySelectorAll("body > *")) {
+      for (const button of host.shadowRoot?.querySelectorAll("fm-butono") ?? []) {
+        const outer = button.getBoundingClientRect();
+        if (outer.width === 0 || (button as HTMLElement).hidden) continue;
+        const text = [...button.childNodes]
+          .map((node) => node.textContent ?? "")
+          .join("")
+          .trim();
+        if (text !== "") continue;
+        const control = button.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+        const inner = control.getBoundingClientRect();
+        results.push({
+          host: host.localName,
+          part: button.getAttribute("part") ?? "",
+          overflow: inner.width > outer.width + 0.5 || inner.height > outer.height + 0.5,
+          square: Math.abs(inner.width - inner.height) < 0.5,
+          padding: getComputedStyle(control).paddingInlineStart,
+        });
+      }
+    }
+    return results;
+  });
+  expect(found.length).toBeGreaterThanOrEqual(6);
+  for (const button of found) {
+    const name = `${button.host} ${button.part}`;
+    expect(button.overflow, name).toBe(false);
+    expect(button.square, name).toBe(true);
+    expect(button.padding, name).toBe("0px");
+  }
+});
+
+// Spec 029 ①b c) (Abnahme ① des Maintainers, 27.10.): a disabled butono with emphasis=high showed
+// no text — label and fill resolved to the same grey in komuna. The text of a disabled element
+// stays visible: pale, but readable. The Fonto draws „disabled“ as its own variant at half the
+// opacity (measured 3,3–4:1 between text and fill); komuna keeps at least 3:1, in both schemes.
+test("komuna: a disabled butono shows its label in every emphasis × intent × size, at least 3:1 against its fill, light and dark", async ({
+  page,
+}) => {
+  const combos = combinationsOf(skemo, ["emphasis", "intent", "size"]);
+  await serve(
+    page,
+    out,
+    combos
+      .map(
+        (c, i) =>
+          `<fm-butono id="d${i}" emphasis="${c.emphasis}" intent="${c.intent}" size="${c.size}" disabled>Aktion</fm-butono>`,
+      )
+      .join(" "),
+  );
+  const parse = (value: string): number[] => {
+    const parts = value.match(/[\d.]+/g)?.map(Number) ?? [];
+    return [parts[0] ?? 0, parts[1] ?? 0, parts[2] ?? 0, parts[3] ?? 1];
+  };
+  const over = (top: number[], bottom: number[]): number[] =>
+    [0, 1, 2].map((i) => (top[i] ?? 0) * (top[3] ?? 1) + (bottom[i] ?? 0) * (1 - (top[3] ?? 1)));
+  const luminance = (rgb: number[]): number =>
+    rgb
+      .map((c) => c / 255)
+      .map((c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
+      .reduce((sum, c, i) => sum + c * ([0.2126, 0.7152, 0.0722][i] ?? 0), 0);
+  const ratio = (a: number[], b: number[]): number => {
+    const [high, low] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+    return ((high ?? 0) + 0.05) / ((low ?? 0) + 0.05);
+  };
+  const faint: string[] = [];
+  for (const scheme of ["light", "dark"]) {
+    await page.evaluate((value) => {
+      document.documentElement.setAttribute("data-fm-aspekto", "komuna");
+      document.documentElement.setAttribute("data-fm-color-scheme", value);
+    }, scheme);
+    for (const [i, c] of combos.entries()) {
+      const seen = await page.locator(`#d${i}`).evaluate((element) => {
+        const control = element.shadowRoot?.querySelector('[part="control"]');
+        const style = control === null || control === undefined ? null : getComputedStyle(control);
+        return {
+          page: getComputedStyle(document.body).backgroundColor,
+          fill: style?.backgroundColor ?? "",
+          color: style?.color ?? "",
+          opacity: style?.opacity ?? "1",
+        };
+      });
+      const ground = parse(seen.page);
+      const fill = over(parse(seen.fill), ground);
+      const text = over(parse(seen.color), fill);
+      const contrast = ratio(text, fill);
+      if (contrast < 3) faint.push(`${scheme} ${JSON.stringify(c)} ${contrast.toFixed(2)}:1`);
+    }
+  }
+  expect(faint).toEqual([]);
 });

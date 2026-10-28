@@ -4,11 +4,95 @@
       "status": "active",
       "type": "dimensioValoro"
     },
+    "jug_01M5N89C1TWQ57VAQD0V6V4KR7": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M5N89C1WQ308F9302JTZRVZE": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M5N89C1WQ308F9302JTZRVZF": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M5N89C1WQ308F9302JTZRVZG": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M5N89C1WQ308F9302JTZRVZH": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M5N89C1WQ308F9302JTZRVZJ": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M5N89C1WQ308F9302JTZRVZK": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M5N89C1WQ308F9302JTZRVZM": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M5ZMZSNG2G533GB0RY9HVNSG": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M5ZN30KJ3DFY1FXD8K3HHEJ6": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M5ZN8QFKFKBR76C7B320RGJ9": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M5ZNJ4SM3XWE76KJ431Y7B3G": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M5ZNMRXQEZY8N0FJ7FVQNG7C": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M5ZS3RD8HWV0EWSCGZAHA30K": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M5ZT2Z2V5GMPZXTDV3BK8PRE": {
+      "status": "active",
+      "type": "jugxo"
+    },
     "set_01M2VEEDW32MC4ZQPRN0GC9JRS": {
       "status": "active",
       "type": "tokenSet"
     },
     "set_01M2VEEDW45A0B9Q4GQ465NCHN": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "set_01M5N7VJ4JQ9SVVN86F25NFCWV": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "set_01M5N7VJ4JQ9SVVN86F25NFCWW": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "set_01M5N7VJ4JQ9SVVN86F25NFCWX": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "set_01M5N7VJ4JQ9SVVN86F25NFCWY": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "set_01M5N81WFGG7QN7NJV4E8H014M": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "set_01M5N82WZEQ9DM65MW9Q8SWH32": {
       "status": "active",
       "type": "tokenSet"
     }

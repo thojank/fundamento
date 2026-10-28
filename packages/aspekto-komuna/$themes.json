@@ -6,7 +6,53 @@
     "selectedTokenSets": {
       "aspekto/komuna": "enabled",
       "aspekto/komuna+color-scheme/dark": "enabled",
+      "aspekto/komuna+color-scheme/dark+contrast/high": "enabled",
+      "aspekto/komuna+color-scheme/light+contrast/high": "enabled",
+      "aspekto/komuna+density/comfortable": "enabled",
+      "aspekto/komuna+density/compact": "enabled",
+      "aspekto/komuna+viewport/compact": "enabled",
+      "aspekto/komuna+viewport/expanded": "enabled",
       "core": "source"
+    }
+  },
+  {
+    "group": "viewport",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKH3",
+    "name": "compact",
+    "selectedTokenSets": {
+      "aspekto/komuna+viewport/compact": "enabled"
+    }
+  },
+  {
+    "group": "viewport",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKH5",
+    "name": "expanded",
+    "selectedTokenSets": {
+      "aspekto/komuna+viewport/expanded": "enabled"
+    }
+  },
+  {
+    "group": "density",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKH6",
+    "name": "compact",
+    "selectedTokenSets": {
+      "aspekto/komuna+density/compact": "enabled"
+    }
+  },
+  {
+    "group": "density",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKH8",
+    "name": "comfortable",
+    "selectedTokenSets": {
+      "aspekto/komuna+density/comfortable": "enabled"
+    }
+  },
+  {
+    "group": "color-scheme",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKH9",
+    "name": "light",
+    "selectedTokenSets": {
+      "aspekto/komuna+color-scheme/light+contrast/high": "enabled"
     }
   },
   {
@@ -14,7 +60,17 @@
     "id": "dva_01M2VEEDQFS0RGTE2M27JARKHA",
     "name": "dark",
     "selectedTokenSets": {
-      "aspekto/komuna+color-scheme/dark": "enabled"
+      "aspekto/komuna+color-scheme/dark": "enabled",
+      "aspekto/komuna+color-scheme/dark+contrast/high": "enabled"
+    }
+  },
+  {
+    "group": "contrast",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKHC",
+    "name": "high",
+    "selectedTokenSets": {
+      "aspekto/komuna+color-scheme/dark+contrast/high": "enabled",
+      "aspekto/komuna+color-scheme/light+contrast/high": "enabled"
     }
   }
 ]

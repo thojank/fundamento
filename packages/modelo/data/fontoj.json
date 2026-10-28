@@ -1,0 +1,29 @@
+{
+  "fontoj": [
+    {
+      "id": "astryx",
+      "name": "Astryx",
+      "license": "MIT",
+      "copyright": "Copyright (c) 2026 Meta Platforms, Inc.",
+      "source": "https://github.com/facebook/astryx",
+      "version": "0.7.4",
+      "tag": "v0.7.4",
+      "commit": "704757fd827c6fa00a71af80b06d5da99d155e45",
+      "packages": [
+        {
+          "name": "@astryxdesign/core",
+          "version": "0.7.4",
+          "integrity": "sha512-zd/XfUw8OH8Dj65w6cPYamMXgb11P7oIgrlXgyBGaHXKJi3aedkU17Q+lERgv7YL3Bv4/UKPMqKL/QZkvoay1w=="
+        },
+        {
+          "name": "@astryxdesign/theme-neutral",
+          "version": "0.7.4",
+          "integrity": "sha512-IoGRxRpcAWao4jNL+HsV0t3rlCWeV4EYrzP54iRRRXEzU21XxMdBt+B63y+n/84mBkzyB38vGK/BuYkRbVDBtw=="
+        }
+      ],
+      "read": "2026-10-23",
+      "scope": "Werte des Themes theme-neutral (Farbe hell und dunkel, Typografie-Skala mit der Anpassung bei Touch und schmaler Breite, Abstände, Elementgrößen, Radien, Elevation, Fokus, Bewegung, Deckkraft), verteilt auf die Grundlagen und Rollen der Aspekto komuna (Spec 029 ①). Keine Bezeichner, keine Texte, keine Schriften, keine Icons.",
+      "notices": "THIRD_PARTY_NOTICES.md"
+    }
+  ]
+}

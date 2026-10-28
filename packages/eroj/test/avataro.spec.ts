@@ -127,20 +127,27 @@ test.describe("fm-avataro behaviour", () => {
     const small = await look("#s");
     const medium = await look("#m");
     const large = await look("#l");
+    // Spec 029 ①b: the Ero-Tokens of the avataro (komuna takes them from the Fonto).
     expect(small.width).toBe(
-      Number.parseFloat(await resolved(page, "inline-size", "--fm-size-icon-medium")),
+      Number.parseFloat(
+        await resolved(page, "inline-size", "--fm-ero-avataro-box-size-size-small"),
+      ),
     );
     expect(medium.width).toBe(
-      Number.parseFloat(await resolved(page, "inline-size", "--fm-size-icon-large")),
+      Number.parseFloat(
+        await resolved(page, "inline-size", "--fm-ero-avataro-box-size-size-medium"),
+      ),
     );
     expect(large.width).toBe(
-      Number.parseFloat(await resolved(page, "inline-size", "--fm-size-control-large")),
+      Number.parseFloat(
+        await resolved(page, "inline-size", "--fm-ero-avataro-box-size-size-large"),
+      ),
     );
     for (const one of [small, medium, large]) expect(one.height).toBe(one.width);
     expect(small.background).toBe(
-      await resolved(page, "background-color", "--fm-color-background-sunken"),
+      await resolved(page, "background-color", "--fm-ero-avataro-initials-fill"),
     );
-    expect(small.color).toBe(await resolved(page, "color", "--fm-color-text-subtle"));
+    expect(small.color).toBe(await resolved(page, "color", "--fm-ero-avataro-initials-color"));
     // E8: every name, the same colours.
     expect([medium.background, large.background]).toEqual([small.background, small.background]);
     expect([medium.color, large.color]).toEqual([small.color, small.color]);

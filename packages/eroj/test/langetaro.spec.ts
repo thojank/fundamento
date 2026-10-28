@@ -193,7 +193,8 @@ test.describe("fm-langetaro behaviour", () => {
       const root = getComputedStyle(document.documentElement);
       return {
         semibold: root.getPropertyValue("--fm-font-weight-semibold").trim(),
-        role: root.getPropertyValue("--fm-typography-label-1-font-weight").trim(),
+        // Spec 029 ①b: the weight of a tab is its Ero-Token (komuna: the tab of the Fonto).
+        role: root.getPropertyValue("--fm-ero-langetaro-tabs-typography-font-weight").trim(),
       };
     });
     expect(tokens.semibold).toBe("600");

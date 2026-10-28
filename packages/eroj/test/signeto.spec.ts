@@ -136,7 +136,9 @@ test.describe("fm-signeto behaviour", () => {
       };
       return { small: box("s"), medium: box("m") };
     });
-    expect(sizes.small.height).toBeLessThan(sizes.medium.height);
+    // Spec 029 ①b: the Token of the Fonto is 20 px small and 24 px medium; small keeps the target
+    // size of 24 px (touch-target-min, J15): small is no taller than medium.
+    expect(sizes.small.height).toBeLessThanOrEqual(sizes.medium.height);
     expect(sizes.small.radius).not.toBe("0px");
     await expect(page.locator("#s").locator("fm-ikono")).toHaveCount(1);
   });

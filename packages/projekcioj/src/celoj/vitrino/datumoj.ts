@@ -29,6 +29,7 @@ import {
   type ValidationIssue,
 } from "@fundamento/modelo";
 import type { CeloInput } from "../../build.js";
+import { BAZOJ_TEKSTOJ, bazojDatumoj, type VitrinoBazoj } from "./bazoj.js";
 
 const PALETTE = /^color\.palette\.([a-z0-9-]+)\.(\d+)$/;
 const SURFACES = [
@@ -78,7 +79,9 @@ export interface VitrinoMezuro {
  * The headings of the Vitrino's own sections in English (Spec 026 ②); German is the text they are
  * written with, and Esperanto shows them as before.
  */
-export const VITRINO_TEKSTOJ: Readonly<Record<string, { en: string }>> = {
+export const VITRINO_TEKSTOJ: Readonly<Record<string, { de?: string; en: string }>> = {
+  // Spec 029 ① 5: the headings, texts and column heads of the foundation pages, German and English.
+  ...BAZOJ_TEKSTOJ,
   werkstatt: { en: "Workshop" },
   paletroj: { en: "Palettes" },
   roloj: { en: "Surfaces, text, status and actions" },
@@ -234,6 +237,8 @@ export interface VitrinoDatumoj {
    * `komunaj` counts this build only where the snapshot has data, and `mankantaj` says how many
    * combinations of the snapshot are missing here — only then is `bazo` more than the comparison.
    */
+  /** Spec 029 ① 5: the values of the foundation pages per brand (bazoj.ts). */
+  bazoj?: VitrinoBazoj;
   apcaHintoj: {
     nun: number;
     kombinoj: number;
@@ -611,7 +616,14 @@ function chipMarkup(tag: string, intents: readonly string[]): string {
       return `<tr><th scope="row">${head}</th>${cells}</tr>`;
     })
     .join("");
-  return `<table><caption>${tag}, jeder Modus in jeder Absicht</caption><thead><tr><th scope="col">Modus</th>${heads}</tr></thead><tbody>${body}</tbody></table>`;
+  // Spec 029 ①b d): the tags with the example icon in a row of their own.
+  const withIcon = `<tr><th scope="row">${VITRINO_WITH_ICON}</th>${intents
+    .map(
+      (intent, index) =>
+        `<td><${tag} intent="${intent}"><fm-ikono slot="icon-start" name="${VITRINO_ICON_EXAMPLE}"></fm-ikono>${VITRINO_TAGS[index] ?? intent}</${tag}></td>`,
+    )
+    .join("")}</tr>`;
+  return `<table><caption>${tag}, jeder Modus in jeder Absicht</caption><thead><tr><th scope="col">Modus</th>${heads}</tr></thead><tbody>${body}${withIcon}</tbody></table>`;
 }
 
 /**
@@ -858,6 +870,9 @@ export const VITRINO_LABELS: Readonly<Record<string, string>> = {
  * Vitrino shows icons, so Figma draws them (the Jugxo of the undrawn icon is lifted).
  */
 export const VITRINO_ICON_EXAMPLE = "check";
+
+/** The head of the row that shows the variants with an icon (Spec 029 ①b d)). */
+export const VITRINO_WITH_ICON = "mit Icon";
 
 /** The sizes the Ikonaro grid of the Vitrino shows, one row each (Spec 014 ②). */
 const ICON_SIZES = ["small", "medium", "large"] as const;
@@ -1201,13 +1216,16 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
         ` ${prop.name}="${prop.name === "label" ? (VITRINO_LABELS[entry.skemo.a11y.role] ?? `#fm-vitrino-${entry.ero.name}`) : floats ? `fm-vitrino-${entry.ero.name}` : `#fm-vitrino-${entry.ero.name}`}"`,
     )
     .join("");
-  // A button shows the example icon in its icon-start slot (Spec 014 ②): the same name Figma draws.
-  const icons =
-    entry.skemo.a11y.role === "button" &&
-    entry.skemo.parts.icon !== undefined &&
-    entry.skemo.slots.some((slot) => slot.name === "icon-start" && slot.decorative === true)
-      ? `<fm-ikono slot="icon-start" name="${VITRINO_ICON_EXAMPLE}"></fm-ikono>`
-      : "";
+  // Spec 029 ①b d) (Maintainer 27.10.): the rows show no icon, like the Fonto and like Figma (Spec
+  // 027 B-6); one row of its own shows the variants with the example icon in the first decorative
+  // icon slot (Spec 014 ②: the same name Figma draws).
+  const iconSlot = entry.skemo.slots.find(
+    (slot) => slot.decorative === true && slot.name.startsWith("icon-"),
+  );
+  const icon =
+    iconSlot === undefined
+      ? ""
+      : `<fm-ikono slot="${iconSlot.name}" name="${VITRINO_ICON_EXAMPLE}"></fm-ikono>`;
   // The prop an option's value is compared with (Spec 010 ③, E7) holds the first option: one chosen.
   // An Ero with a placeholder besides (the select, Spec 010 ④, D-13) shows the closed field with
   // its prompt instead: its options are in the list that opens, the field says that none is chosen.
@@ -1297,7 +1315,7 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
       const cells = [undefined, ...columns]
         .map(
           (column) =>
-            `<td>${opener}<${tag}${identity}${attributes}${duties}${examples}${required}${chosen}${source}${column === undefined ? "" : ` ${column}`}>${icons}${named ? content : ""}${optionTexts(entry)}${slotTexts(entry, column, combination)}${actions}${light}</${tag}></td>`,
+            `<td>${opener}<${tag}${identity}${attributes}${duties}${examples}${required}${chosen}${source}${column === undefined ? "" : ` ${column}`}>${named ? content : ""}${optionTexts(entry)}${slotTexts(entry, column, combination)}${actions}${light}</${tag}></td>`,
         )
         .join("");
       return `<tr><th scope="row">${label}</th>${cells}</tr>`;
@@ -1333,8 +1351,26 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
     examples === "" || !entry.skemo.slots.some((slot) => slot.name === "value-text")
       ? ""
       : `<tr><th scope="row">${VITRINO_UNKNOWN_LABEL}</th><td><${tag}>${VITRINO_UNKNOWN_LABEL}<span slot="value-text">${VITRINO_UNKNOWN_TEXT}</span></${tag}></td></tr>`;
+  // The variants with an icon: every combination of the axes that key a colour (emphasis, intent),
+  // at the default of the others.
+  const variantKeys = keys.filter((key) => key === "emphasis" || key === "intent");
+  const withIcon =
+    icon === ""
+      ? ""
+      : `<tr><th scope="row">${VITRINO_WITH_ICON}</th><td>${(variantKeys.length === 0
+          ? [{}]
+          : combinationsOf(entry.skemo, variantKeys)
+        )
+          .map((combination) => {
+            const attributes = Object.entries(combination)
+              .map(([key, value]) => ` ${key}="${value}"`)
+              .join("");
+            const label = vitrinoLabelOf(combination) || VITRINO_WITH_ICON;
+            return `<${tag}${attributes}${required}>${icon}${label}</${tag}>`;
+          })
+          .join(" ")}</td></tr>`;
   const heads = ["rest", ...columns].map((column) => `<th scope="col">${column}</th>`).join("");
-  return `<table><caption>${tag}, jede Kombination der Skemo</caption><thead><tr><th scope="col">Kombination</th>${heads}</tr></thead><tbody>${rows}${kinds}${unknown}${additionRows(entry, tag)}</tbody></table>`;
+  return `<table><caption>${tag}, jede Kombination der Skemo</caption><thead><tr><th scope="col">Kombination</th>${heads}</tr></thead><tbody>${rows}${kinds}${unknown}${additionRows(entry, tag)}${withIcon}</tbody></table>`;
 }
 
 /**
@@ -1689,6 +1725,11 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
       .filter((entry) => entry.skemo.parts.initials !== undefined)
       .map((entry) => entry.ero.name),
     uzo: uzojOf(modelo),
+    bazoj: bazojDatumoj(
+      modelo,
+      input.rezolvoj.rezolvoj as unknown as Parameters<typeof bazojDatumoj>[1],
+      aspektoj,
+    ),
     apcaHintoj: {
       nun: apcaNun,
       kombinoj: Object.keys(mezuroj).length,

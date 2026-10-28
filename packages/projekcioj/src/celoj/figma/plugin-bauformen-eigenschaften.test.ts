@@ -194,13 +194,14 @@ describe("B-9: the lokredaktilo shows its edit icon in the display state", () =>
 });
 
 describe("the plugin of Spec 027 stands apart in the menu", () => {
-  it("its name begins with „Fundamento Bauformen“ and its id is its own", () => {
+  // Spec 029 ①: the plugin of the Grundlagen follows the Bauformen under a name and ids of its own.
+  it("its name begins with „Fundamento Grundlagen“ and its id is its own", () => {
     const manifest = JSON.parse(pluginManifest(repoPlan, "abc1234")) as {
       name: string;
       id: string;
     };
-    expect(manifest.name.startsWith("Fundamento Bauformen 0.2.0")).toBe(true);
-    expect(manifest.id.startsWith("fundamento-bauformen")).toBe(true);
+    expect(manifest.name.startsWith("Fundamento Grundlagen 0.2.0")).toBe(true);
+    expect(manifest.id.startsWith("fundamento-grundlagen")).toBe(true);
     expect(manifest.id).not.toBe("fundamento-apply-plan");
   });
 

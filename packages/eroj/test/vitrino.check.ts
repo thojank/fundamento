@@ -5,10 +5,11 @@
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { extname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { projectModeloSource } from "@fundamento/modelo";
 import { buildProjekcioj, VITRINO_FILE } from "@fundamento/projekcioj";
-import { expect, type Page, test } from "@playwright/test";
-import { axeViolations } from "./alirebleco.js";
+import { expect, type Locator, type Page, test } from "@playwright/test";
+import { axeViolations, contrast } from "./alirebleco.js";
 import { EKZEMPLO_CONFIG, ORIGIN } from "./serve.js";
 
 test.describe.configure({ mode: "serial" });
@@ -36,7 +37,7 @@ test.beforeAll(async () => {
   expect(built.ok).toBe(true);
 });
 
-async function open(page: Page, hash = ""): Promise<string[]> {
+async function open(page: Page, hash = "", dir = out): Promise<string[]> {
   const problems: string[] = [];
   page.on("pageerror", (error) => problems.push(`pageerror: ${String(error)}`));
   page.on("console", (message) => {
@@ -44,7 +45,7 @@ async function open(page: Page, hash = ""): Promise<string[]> {
   });
   await page.route(`${ORIGIN}/**`, async (route) => {
     const path = new URL(route.request().url()).pathname;
-    const file = join(out, path === "/" ? VITRINO_FILE : path.slice(1));
+    const file = join(dir, path === "/" ? VITRINO_FILE : path.slice(1));
     try {
       await route.fulfill({
         contentType: TYPES[extname(file)] ?? "application/octet-stream",
@@ -84,7 +85,8 @@ const WITNESSES = [
   ["color-scheme", "dark", firstContrastRow],
   ["contrast", "high", firstContrastRow],
   ["density", "compact", (page: Page) => cssValue(page, "--fm-spacing-medium")],
-  ["viewport", "expanded", (page: Page) => cssValue(page, "--fm-font-size-display-1")],
+  // Spec 029 ①: komuna keeps its type on wide screens, as the Fonto does; the grid widens.
+  ["viewport", "expanded", (page: Page) => cssValue(page, "--fm-layout-grid-columns")],
   ["motion", "reduced", (page: Page) => cssValue(page, "--fm-motion-duration-medium")],
   ["aspekto", "ekzemplo", firstContrastRow],
 ] as const;
@@ -199,8 +201,15 @@ test("the contrast table shows WCAG, APCA and the change against the comparison 
     // 1890 → 1962); Spec 011 ① six more for the link colours on raised and sunken (1962 → 2178);
     // Spec 011 ③ four more for the default text on the weak status surfaces (2178 → 2196);
     // Spec 011 ⑤ four more for the tab text on the tertiary action surfaces (2196 → 2394);
-    // the snapshot of the comparison state stays at 1296.
-    "In den 72 Kombinationen des Vergleichsstands: 2394 gegen 1296 (Veränderung +1098)",
+    // Spec 029 ① gives komuna the values of the Fonto (2394 → 2646): text-normal falls from 2358 to
+    // 2286, ui rises from 36 to 360 (the field and inverse borders the rules moved to 3:1 WCAG stay
+    // below the advisory APCA band; plan, B-5). The snapshot of the comparison state stays at 1296.
+    // Spec 029 ①b gives the Ero-Tokens of komuna the values of the Fonto: their pairs are evaluated
+    // beside the declared ones (eroKontrastParojOf, 89 → 280 pairs), every one advisory where it
+    // misses the APCA band (2646 → 8496; plan ①b, B-1b-1). Abnahme 28.10.: the medium button,
+    // the avataro's initials and the unselected signeto take the Fonto's translucent fill (8 %),
+    // advisory beside text on it (8496 → 8550; every WCAG threshold holds).
+    "In den 72 Kombinationen des Vergleichsstands: 8550 gegen 1296 (Veränderung +7254)",
   );
 });
 
@@ -661,13 +670,17 @@ test("fm-alsxutilo is upgraded in its section, a file chosen and removed by keyb
   page,
   browserName,
 }) => {
+  // The listener before the page: Playwright turns the interception of the dialog on when the
+  // first listener comes, beside the key press; on a slow renderer the press won and the dialog
+  // went unseen until the test's timeout (Spec 029 ①b, run 40615856463 attempts 1 and 4; with
+  // the CPU slowed fourfold 2 of 4 late listeners saw it, 6 of 6 early ones).
+  const chooser = page.waitForEvent("filechooser");
   await open(page);
   const section = page.locator("#fm-vitrino-alsxutilo");
   const first = section.locator("fm-alsxutilo").first();
   const input = first.locator('input[type="file"]');
   await expect(input).toHaveAccessibleDescription("PDF oder PNG, höchstens 5 MB");
   await input.focus();
-  const chooser = page.waitForEvent("filechooser");
   await page.keyboard.press("Space");
   await (await chooser).setFiles([
     { name: "Lebenslauf.pdf", mimeType: "application/pdf", buffer: Buffer.alloc(1200, 1) },
@@ -800,12 +813,27 @@ const primaryFill = (page: Page) =>
     .locator("button")
     .evaluate((element) => getComputedStyle(element).backgroundColor);
 
+/** The fill once a transition has ended: two reads in a row agree. */
+async function settledFill(page: Page): Promise<string> {
+  let last = "";
+  await expect
+    .poll(async () => {
+      const fill = await primaryFill(page);
+      const same = fill === last;
+      last = fill;
+      return same;
+    })
+    .toBe(true);
+  return last;
+}
+
 test.describe("the Werkstatt (Spec 016 ②)", () => {
   test("opens from the mode switch and from the fragment; the panel is made of Eroj; the lead colour changes every Ero live", async ({
     page,
   }) => {
     const problems = await open(page);
     await expect(page.locator("#fm-vitrino-werkstatt")).toBeHidden();
+    const ansehen = await settledFill(page);
     await page.locator('button[data-fm-modus="werkstatt"]').click();
     await expect(page.locator("#fm-vitrino-werkstatt")).toBeVisible();
     expect(await page.evaluate(() => location.hash)).toContain("modus=werkstatt");
@@ -829,7 +857,8 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
       await expect(page.locator(`label[for='fm-werkstatt-${slider}']`)).toHaveCount(1);
       await expect(page.locator(`output[for='fm-werkstatt-${slider}']`)).toHaveCount(1);
     }
-    const before = await primaryFill(page);
+    // Spec 029 ①: the Werkstatt shows its structure, komuna 0.2, not today's komuna of Ansehen.
+    const before = await settledFill(page);
     await panel.locator("#fm-werkstatt-leitfarbe").locator("input").fill("#2e8b57");
     await expect.poll(() => primaryFill(page)).not.toBe(before);
     // The Dimensioj stay switchable: dark changes the surface, the draft stays.
@@ -839,7 +868,7 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     await page.locator('button[data-fm-modus="ansehen"]').click();
     await page.locator('[data-fm-switch="color-scheme"][data-fm-valoro="light"]').click();
     await expect(page.locator("#fm-vitrino-werkstatt")).toBeHidden();
-    await expect.poll(() => primaryFill(page)).toBe(before);
+    await expect.poll(() => primaryFill(page)).toBe(ansehen);
     expect(problems).toEqual([]);
   });
 
@@ -1409,7 +1438,8 @@ test("fm-signeto, fm-listelektilo, fm-plurelektilo and fm-lokredaktilo are upgra
   page,
 }) => {
   await open(page);
-  await expect(page.locator("#fm-vitrino-signeto fm-signeto")).toHaveCount(20);
+  // Spec 029 ①b d): five more in the row „mit Icon“.
+  await expect(page.locator("#fm-vitrino-signeto fm-signeto")).toHaveCount(25);
   const tag = page.locator("#fm-vitrino-signeto fm-signeto[mode='selectable']").first();
   const pressed = await tag.evaluate((host) => host.hasAttribute("selected"));
   await tag.locator('[part="body"]').click();
@@ -1531,4 +1561,79 @@ test("the Lingvo switch names the Eroj, states, values and Dimensioj in German a
   await expect(heading).toHaveText("glitilo");
   expect(new URL(page.url()).hash).not.toContain("lingvo=");
   await expect(page.locator("#fm-vitrino-butono thead th").nth(1)).toHaveText("rest");
+});
+
+// Spec 029 ①b (Abnahme 28.10., 13:03): the maintainer accepts the Vitrino of every brand
+// (fundamento.cxiuj.config.json). The Ero-Tokens of komuna must reach its Eroj there as they reach
+// packages/eroj: the disabled high button readable, the medium button a surface without a visible
+// edge (the Fonto's secondary), the button of the alsxutilo the same.
+const CXIUJ_CONFIG = fileURLToPath(
+  new URL(
+    "../../modelo/test/fixtures/valid/aspekto-provo-kompakta/fundamento.cxiuj.config.json",
+    import.meta.url,
+  ),
+);
+
+test.describe("the Vitrino of every brand shows the Ero-Tokens of komuna (Spec 029 ①b)", () => {
+  let cxiuj = "";
+
+  test.beforeAll(async () => {
+    cxiuj = mkdtempSync(join(tmpdir(), "fm-vitrino-cxiuj-"));
+    const built = await buildProjekcioj({
+      outDir: cxiuj,
+      source: projectModeloSource(CXIUJ_CONFIG),
+    });
+    expect(built.ok).toBe(true);
+  });
+
+  /** Fill, edge and text of a butono's control, as computed. */
+  const lookOf = (host: Locator) =>
+    host.evaluate((element) => {
+      const control = element.shadowRoot?.querySelector('[part="control"]');
+      const style = control === null || control === undefined ? null : getComputedStyle(control);
+      return {
+        fill: style?.backgroundColor ?? "",
+        edge: style?.borderTopColor ?? "",
+        edgeWidth: style?.borderTopWidth ?? "",
+        text: style?.color ?? "",
+      };
+    });
+
+  for (const scheme of ["light", "dark"] as const) {
+    test(`komuna ${scheme}: the disabled high button reads at 3:1 at least, neutral and danger`, async ({
+      page,
+    }) => {
+      await open(page, `#aspekto=komuna&color-scheme=${scheme}`, cxiuj);
+      const buttons = page.locator("#fm-vitrino-butono fm-butono[emphasis='high'][disabled]");
+      expect(await buttons.count()).toBeGreaterThan(0);
+      for (const button of await buttons.all()) {
+        const look = await lookOf(button);
+        const label = await button.getAttribute("intent");
+        expect(
+          contrast(look.text, look.fill),
+          `${label}: ${look.text} on ${look.fill}`,
+        ).toBeGreaterThanOrEqual(3);
+      }
+    });
+
+    test(`komuna ${scheme}: the medium button and the button of the alsxutilo are a surface without a visible edge`, async ({
+      page,
+    }) => {
+      await open(page, `#aspekto=komuna&color-scheme=${scheme}`, cxiuj);
+      const page_ = await surfaceColour(page);
+      const medium = page.locator(
+        "#fm-vitrino-butono fm-butono[emphasis='medium']:not([disabled])",
+      );
+      expect(await medium.count()).toBeGreaterThan(0);
+      const choose = page
+        .locator("#fm-vitrino-alsxutilo fm-alsxutilo")
+        .first()
+        .locator('[part="choose"]');
+      for (const button of [...(await medium.all()), choose]) {
+        const look = await lookOf(button);
+        expect(look.edge, `edge = fill (${look.edgeWidth})`).toBe(look.fill);
+        expect(look.fill, "a surface of its own, not the page").not.toBe(page_);
+      }
+    });
+  }
 });

@@ -17,7 +17,8 @@ import { FIGMA_MODE_LIMIT, pluginManifest } from "./plugin.js";
 import { MODEL_FONTS } from "./plugin-test-helpers.js";
 import { figmaDouble } from "./test-doubles/plugin.js";
 
-const BRANDS = ["komuna", "ekzemplo", "provo", "provo-kompakta"];
+// Spec 029 ①: komuna-0-2, today's komuna before the Fonto, is the fifth brand of the build.
+const BRANDS = ["komuna", "ekzemplo", "provo", "provo-kompakta", "komuna-0-2"];
 const config = new URL(
   "../../../../modelo/test/fixtures/valid/aspekto-provo-kompakta/fundamento.cxiuj.config.json",
   import.meta.url,
@@ -47,7 +48,7 @@ describe("all example brands in one build (Spec 026 ①)", () => {
     if (out !== "") rmSync(out, { recursive: true, force: true });
   });
 
-  it("the collection aspekto has the four brands as modes, within the mode limit of Figma Professional, and every variable a value in each", () => {
+  it("the collection aspekto has the five brands as modes, within the mode limit of Figma Professional, and every variable a value in each", () => {
     const collection = plan.collections.find((candidate) => candidate.name === "aspekto");
     expect(collection?.modes).toEqual(BRANDS);
     expect(collection?.modes.length).toBeLessThanOrEqual(FIGMA_MODE_LIMIT);
@@ -63,21 +64,21 @@ describe("all example brands in one build (Spec 026 ①)", () => {
     expect(Object.keys(plan.ikonoj.glyphs)).toEqual(BRANDS);
   });
 
-  it("the plugin has an id and a name of its own that name the four brands (F-13)", () => {
+  it("the plugin has an id and a name of its own that name the five brands (F-13)", () => {
     const manifest = JSON.parse(pluginManifest(plan, "abc1234")) as { id: string; name: string };
     // Spec 027: the plugin of the Bauformen, apart from the builds before it.
-    expect(manifest.id).toMatch(/^fundamento-bauformen-[0-9a-f]{8}$/);
+    expect(manifest.id).toMatch(/^fundamento-grundlagen-[0-9a-f]{8}$/);
     expect(manifest.name).toContain(
-      "Fundamento Bauformen 0.2.0 (abc1234 · komuna, ekzemplo, provo, provo-kompakta)",
+      "Fundamento Grundlagen 0.2.0 (abc1234 · komuna, ekzemplo, provo, provo-kompakta, komuna-0-2)",
     );
     const built = JSON.parse(
       readFileSync(join(out, "figma/plugin/manifest.json"), "utf8"),
     ) as typeof manifest;
     expect(built.id).toBe(manifest.id);
-    expect(built.name).toContain("komuna, ekzemplo, provo, provo-kompakta");
+    expect(built.name).toContain("komuna, ekzemplo, provo, provo-kompakta, komuna-0-2");
   });
 
-  it("the plugin of the build runs in a new empty file (the double of Figma, mode limit of Professional) and makes the collection aspekto with the four modes", async () => {
+  it("the plugin of the build runs in a new empty file (the double of Figma, mode limit of Professional) and makes the collection aspekto with the five modes", async () => {
     const code = readFileSync(join(out, "figma/plugin/code.js"), "utf8");
     const double = figmaDouble({ fonts: MODEL_FONTS, modeLimit: FIGMA_MODE_LIMIT });
     const module = new Function("figma", "options", `${code}\nreturn applyPlan(options);`);
@@ -86,11 +87,23 @@ describe("all example brands in one build (Spec 026 ①)", () => {
     expect(aspekto?.modes.map((mode) => mode.name)).toEqual(BRANDS);
   }, 120_000);
 
-  it("the Vitrino of the build switches between the four brands", () => {
-    const html = readFileSync(join(out, VITRINO_FILE), "utf8");
-    const switches = [...html.matchAll(/data-fm-switch="aspekto" data-fm-valoro="([a-z-]+)"/g)].map(
-      (match) => match[1],
+  // Spec 029 ①-6 (Maintainer 24.10., B-2): Prata has the weight 400 only. provo's headings ask
+  // Figma for Prata Regular, so no run falls back to Inter for a cut Prata lacks.
+  it("asks for Prata in Regular only, the one cut of Prata (①-6)", () => {
+    const prata = plan.components.flatMap((component) =>
+      (component.fonts ?? [])
+        .filter((font) => font.family === "Prata")
+        .map((font) => `${component.set} ${font.style}`),
     );
+    expect(prata.length).toBeGreaterThan(0);
+    expect(prata.filter((entry) => !entry.endsWith(" Regular"))).toEqual([]);
+  });
+
+  it("the Vitrino of the build switches between the five brands", () => {
+    const html = readFileSync(join(out, VITRINO_FILE), "utf8");
+    const switches = [
+      ...html.matchAll(/data-fm-switch="aspekto" data-fm-valoro="([a-z0-9-]+)"/g),
+    ].map((match) => match[1]);
     expect(switches).toEqual(BRANDS);
   });
 });

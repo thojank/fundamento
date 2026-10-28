@@ -73,7 +73,9 @@ describe("the sections of FR-06", () => {
       "color.background.raised",
     ]);
     expect(roles?.surfaces[1]?.alNaskbo).toBeGreaterThan(0.02);
-    expect(roles?.surfaces[3]?.alEkstremo).toBeGreaterThan(0.02);
+    // Spec 029 ①b a): the card of komuna is white (①-1 neu, 27.10.) — no distance to the anchor.
+    expect(roles?.surfaces[3]?.alEkstremo).toBe(0);
+    expect(roles?.surfaces[2]?.alEkstremo).toBeGreaterThan(0.02);
     expect(roles?.text).toHaveLength(3);
     expect(roles?.status.length).toBeGreaterThan(10);
     expect(roles?.agoj.length).toBeGreaterThan(10);
@@ -100,7 +102,15 @@ describe("the sections of FR-06", () => {
       .map((dimensio) => first?.combination[dimensio.name] ?? "")
       .join("|");
     const rows = datumoj.mezuroj[key] ?? [];
-    expect(rows.length).toBe(modelo.kontrastParoj.length);
+    // Spec 029 ①b: the declared pairs and the pairs of the Ero-Tokens komuna sets to its own values.
+    const sameCombination = (evaluation.measurements ?? []).filter(
+      (measurement) =>
+        modelo.dimensioj
+          .map((dimensio) => measurement.combination[dimensio.name] ?? "")
+          .join("|") === key,
+    );
+    expect(rows.length).toBeGreaterThanOrEqual(modelo.kontrastParoj.length);
+    expect(rows.length).toBe(sameCombination.length);
     const row = rows.find((entry) => entry.paro === first?.pair.name);
     expect(row?.wcag2).toBeCloseTo(first?.main.ratio ?? 0, 1);
     expect(row?.apca).not.toBe(0);
@@ -147,7 +157,9 @@ describe("the sections of FR-06", () => {
 
   it("carries the design goals of the brand with target, measurement and result", () => {
     const goals = datumoj.aspiroj.komuna ?? [];
-    expect(goals.length).toBe(5);
+    // Spec 029 ①b a): oklch-l-extreme no longer binds komuna (①-1 neu, 27.10.).
+    expect(goals.length).toBe(4);
+    expect(goals.map((goal) => goal.metriko)).not.toContain("oklch-l-extreme");
     expect(goals.map((goal) => goal.metriko)).toContain("dimensio-kovrado");
     for (const goal of goals) {
       expect(goal.atingita).toBe(true);
@@ -217,8 +229,10 @@ describe("the sections of FR-06", () => {
     const dark = coverage.find(
       (entry) => entry.dimensio === "color-scheme" && entry.valoro === "dark",
     );
-    expect(dark?.propraj).toBe(57);
-    expect(dark?.entute).toBe(76);
+    // Spec 029 ①: komuna states every colour role, the steps of the dark ramps and the shadows.
+    // Spec 029 ①b: and the Ero-Tokens whose dark value komuna takes from the Fonto.
+    expect(dark?.propraj).toBeGreaterThanOrEqual(94);
+    expect(dark?.entute).toBe(dark?.propraj);
     expect(coverage.some((entry) => entry.dimensio === "motion")).toBe(true);
   });
 });
@@ -678,13 +692,32 @@ describe("the Vitrino shows the Ikonaro and the Grundbausteine (Spec 014 ②)", 
     expect(html).toContain('id="fm-vitrino-ikono"');
   });
 
-  it("the butono carries the example icon in its icon-start slot in every cell; the ligilo none", () => {
+  // Spec 029 ①b d) (Maintainer 27.10.): like the Fonto and like Figma (Spec 027 B-6), the examples
+  // carry no icon by default; one row of its own shows the variants with an icon.
+  it("butono, ligilo and signeto show no icon in their rows; one row „mit Icon“ shows the variants with one", () => {
+    const rowOf = (section: string, head: string) =>
+      section.split("<tr>").find((row) => row.startsWith(`<th scope="row">${head}</th>`)) ?? "";
     const butono = datumoj.eroj.butono ?? "";
-    expect(butono).toContain('<fm-ikono slot="icon-start" name="check"></fm-ikono>');
-    expect((butono.match(/<fm-butono /g) ?? []).length).toBe(
-      (butono.match(/<fm-ikono slot="icon-start"/g) ?? []).length,
+    const withIcon = rowOf(butono, "mit Icon");
+    expect(withIcon).not.toBe("");
+    expect(butono.replace(withIcon, "")).not.toContain("<fm-ikono");
+    for (const variant of [
+      'emphasis="high" intent="neutral"',
+      'emphasis="high" intent="danger"',
+      'emphasis="medium" intent="neutral"',
+      'emphasis="low" intent="neutral"',
+    ]) {
+      expect(withIcon, variant).toContain(variant);
+    }
+    expect((withIcon.match(/<fm-butono /g) ?? []).length).toBe(
+      (withIcon.match(/<fm-ikono slot="icon-start" name="check"><\/fm-ikono>/g) ?? []).length,
     );
-    expect(datumoj.eroj.ligilo ?? "").not.toContain("<fm-ikono");
+    const ligilo = datumoj.eroj.ligilo ?? "";
+    expect(ligilo.replace(rowOf(ligilo, "mit Icon"), "")).not.toContain("<fm-ikono");
+    expect(rowOf(ligilo, "mit Icon")).toContain('<fm-ikono slot="icon-end"');
+    const signeto = datumoj.eroj.signeto ?? "";
+    expect(signeto.replace(rowOf(signeto, "mit Icon"), "")).not.toContain("<fm-ikono");
+    expect(rowOf(signeto, "mit Icon")).toContain('<fm-ikono slot="icon-start"');
   });
 
   it("the apartigilo stands in both orientations, the saltligilo in one row pointing at its section", () => {
@@ -1023,9 +1056,9 @@ describe("the Vitrino shows the datelektilo (Spec 025 ②)", () => {
 // intents (and a small row), the listelektilo and the plurelektilo in the columns of a field with
 // options that carry icons and descriptions, the lokredaktilo in display, editing and error.
 describe("the Vitrino shows the selection Eroj (Spec 025 ③)", () => {
-  it("the signeto: three modes × five intents and a small row", () => {
+  it("the signeto: three modes × five intents, a small row and a row with icon (Spec 029 ①b d))", () => {
     const grid = datumoj.eroj.signeto ?? "";
-    expect((grid.match(/<fm-signeto /g) ?? []).length).toBe(20);
+    expect((grid.match(/<fm-signeto /g) ?? []).length).toBe(25);
     expect(grid).toContain('<fm-signeto mode="selectable" selected intent="success">');
     expect(grid).toContain('<fm-signeto mode="removable" intent="neutral">');
     expect(grid).toContain('<fm-signeto size="small" intent="neutral">');

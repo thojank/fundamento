@@ -25,6 +25,9 @@ describe("@fundamento/aspekto-komuna (D-05)", () => {
       "$themes.json",
       "sets",
       "ikonoj",
+      // Spec 029 ①: the Jugxoj of the values a rule changed, and the provenance of every value.
+      "jugxoj.json",
+      "deveno.json",
     ]);
     expect((manifest.exports as Record<string, string>)["./ikonoj/*"]).toBe("./ikonoj/*");
   });

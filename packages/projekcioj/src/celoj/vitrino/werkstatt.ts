@@ -1454,7 +1454,12 @@ ${groupOf("ikonoj", "Icons", `<fm-elektilo id="fm-werkstatt-ikono-gewicht" value
     const css = document.getElementById("fm-vitrino-css")?.textContent ?? "";
     const style = document.createElement("style");
     style.id = "fm-werkstatt-flanko-css";
-    style.textContent = css.replaceAll(":where(:root", ":where([data-fm-side]");
+    // Spec 029 ①: the draft side also takes the stylesheet of the structure (komuna 0.2), as the root.
+    const bazo = document.getElementById("fm-werkstatt-bazo-css")?.textContent ?? "";
+    style.textContent = `${css.replaceAll(":where(:root", ":where([data-fm-side]")}\n${bazo.replaceAll(
+      `:where(:root[data-fm-modus="werkstatt"]`,
+      `:where([data-fm-side="draft"]`,
+    )}`;
     document.head.append(style);
     const island = document.getElementById("fm-vitrino")?.textContent ?? "{}";
     const eroj = Object.keys((JSON.parse(island) as { eroj?: Record<string, string> }).eroj ?? {});

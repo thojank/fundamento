@@ -19,6 +19,9 @@ const CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = [
   ["Check: Clean-Room", "check:clean-room"],
   // Spec 014 ① (G3): every installed Aspekto draws every name of the Ikonaro.
   ["Check: Ikonaro", "check:ikonaro"],
+  // Spec 029 ① (Constitution v2.4): every value taken from a Fonto points at a pinned Fonto with
+  // its licence text, and its provenance matches the Aspekto.
+  ["Check: Fontoj", "check:fontoj"],
 ];
 
 /** Rendered checks of the Eroj (Spec 003 T013, plan D-09): axe-core, keyboard, focus, ARIA. */
@@ -104,15 +107,33 @@ const ALIREBLECO_EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string]>
   ["Check: Alirebleco (Eroj)", "pnpm check:alirebleco-eroj"],
 ];
 
-/** The job of the other rendered checks: the Make Kit, the quickstart, the Vitrino. */
+// Spec 029 ①b (B-1b-6): the job of the Make Kit, the quickstart and the Vitrino ran 14:34 on a
+// slow runner already on 2026-10-24 (run 40091280058) and four times past its 15 minutes after
+// the rebase onto #112 and ①b (runs 40615856463, 40623800273; the Vitrino alone 12:47). Runners
+// come in two speeds (Build 7–9 s or 11–12 s), about half of each. The Vitrino is cut in two by
+// VITRINO_PARTO (playwright.vitrino.config.ts): the Werkstatt beside the Make Kit and the
+// quickstart, the rest in a job of its own – about 9 minutes each on a slow runner.
+/** The job of the Make Kit, the quickstart and the Werkstatt of the Vitrino. */
 const RENDERED_CHECK_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
   ["Playwright browsers", PLAYWRIGHT_BROWSERS],
   ["Build", "pnpm build"],
-  ...ERO_CHECK_STEPS.filter(
-    ([name]) =>
-      name !== "Check: Release" && name !== "Check: Alirebleco (Eroj)" && name !== "Check: Tiparoj",
-  ).map(([name, script]) => [name, `pnpm ${script}`] as const),
+  ["Check: Make Kit", "pnpm check:make-kit"],
+  ["Check: Quickstart", "pnpm check:quickstart"],
+  ["Check: Vitrino (Werkstatt)", "pnpm check:vitrino"],
 ];
+
+/** The job of the Vitrino without its Werkstatt. */
+const VITRINO_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
+  ["Playwright browsers", PLAYWRIGHT_BROWSERS],
+  ["Build", "pnpm build"],
+  ["Check: Vitrino", "pnpm check:vitrino"],
+];
+
+/** The part of the Vitrino each job runs (VITRINO_PARTO); together they are the whole check. */
+const VITRINO_PARTOJ: Readonly<Record<string, readonly [step: string, parto: string]>> = {
+  "rendered-checks": ["Check: Vitrino (Werkstatt)", "werkstatt"],
+  vitrino: ["Check: Vitrino", "cetero"],
+};
 
 const JOBS: Readonly<Record<string, ReadonlyArray<readonly [name: string, run: string]>>> = {
   checks: CHECKS_STEPS,
@@ -121,6 +142,7 @@ const JOBS: Readonly<Record<string, ReadonlyArray<readonly [name: string, run: s
   eroj: EROJ_STEPS,
   "alirebleco-eroj": ALIREBLECO_EROJ_STEPS,
   "rendered-checks": RENDERED_CHECK_STEPS,
+  vitrino: VITRINO_STEPS,
 };
 
 interface Step {
@@ -238,7 +260,7 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     expect(installIndex).toBeGreaterThan(indexOfAction(steps, "actions/setup-node"));
   });
 
-  it("has the six jobs checks, unit, projekcioj, eroj, alirebleco-eroj and rendered-checks, each with its named steps in order after the install", () => {
+  it("has the seven jobs checks, unit, projekcioj, eroj, alirebleco-eroj, rendered-checks and vitrino, each with its named steps in order after the install", () => {
     expect(Object.keys(loadJobs())).toEqual(Object.keys(JOBS));
     for (const [job, expected] of Object.entries(JOBS)) {
       const steps = loadSteps(job);
@@ -264,14 +286,14 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     }
   });
 
-  it("shards the Playwright suite of the Eroj and the Vitest suite of the Projekcioj in two, without fail-fast, and gives only the three rendered jobs the engines", () => {
+  it("shards the Playwright suite of the Eroj and the Vitest suite of the Projekcioj in two, without fail-fast, and gives only the four rendered jobs the engines", () => {
     for (const name of ["eroj", "projekcioj"]) {
       expect(loadJob(name).strategy, name).toEqual({
         "fail-fast": false,
         matrix: { shard: [1, 2] },
       });
     }
-    for (const name of ["eroj", "alirebleco-eroj", "rendered-checks"]) {
+    for (const name of ["eroj", "alirebleco-eroj", "rendered-checks", "vitrino"]) {
       const env = loadJob(name).env;
       expect(isRecord(env) && typeof env.PLAYWRIGHT_ENGINES === "string", name).toBe(true);
     }
@@ -298,6 +320,22 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
       .filter((name) => name !== "eroj" && name !== "projekcioj")
       .sort();
     expect(tested).toEqual(UNIT_PACKAGES);
+  });
+
+  it("runs the Vitrino in two parts, the Werkstatt beside the Make Kit and the rest alone (Spec 029 ①b)", () => {
+    for (const [job, [name, parto]] of Object.entries(VITRINO_PARTOJ)) {
+      const step = loadSteps(job).find((candidate) => candidate.name === name) as
+        | (Step & { env?: unknown })
+        | undefined;
+      expect(step?.env, job).toEqual({ VITRINO_PARTO: parto });
+    }
+    // No other step chooses a part: locally and anywhere else the Vitrino runs whole.
+    const chosen = Object.keys(loadJobs()).flatMap((job) =>
+      loadSteps(job).filter((step) => isRecord((step as { env?: unknown }).env)),
+    );
+    expect(chosen).toHaveLength(2);
+    const config = readFileSync(`${repoRoot}packages/eroj/playwright.vitrino.config.ts`, "utf8");
+    expect(config).toContain("VITRINO_PARTO");
   });
 
   it("keeps every job under a 15-minute budget (the wall clock stays under 12)", () => {

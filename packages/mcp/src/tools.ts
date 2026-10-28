@@ -241,6 +241,11 @@ const getToken: Tool = (served, args) => {
     overrides,
   };
   if (core?.textTransform !== undefined) output.textTransform = core.textTransform;
+  // Spec 029 ① (Art. VII): the provenance of the values an Aspekto took from a Fonto.
+  const deveno = (served.modelo.deveno ?? []).filter((value) => value.token === entry.name);
+  if (deveno.length > 0) {
+    output.deveno = deveno.map(({ token: _token, ...value }) => value);
+  }
   return ok(output);
 };
 

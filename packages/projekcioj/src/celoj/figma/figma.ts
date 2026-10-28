@@ -319,9 +319,10 @@ function composedOf(
     const [part = "", property = ""] = key.split(".");
     const bound = boundToken(entry.skemo, part, property, props);
     if (bound === undefined || isBindingKeyword(bound.token)) continue;
-    bindings[key] = variableName(eroTokenOf(entry, part, property, props) ?? bound.token);
+    const valueToken = eroTokenOf(entry, part, property, props) ?? bound.token;
+    bindings[key] = variableName(valueToken);
     if (PART_PROPERTY_TYPES[property as keyof typeof PART_PROPERTY_TYPES] !== "color") continue;
-    const paint = paintOf(bound.token, resolutions, base);
+    const paint = paintOf(valueToken, resolutions, base);
     if (paint !== undefined) paints[key] = paint;
   }
   const composed: NonNullable<FigmaComponentSet["composed"]> = {};
@@ -343,11 +344,10 @@ function composedOf(
       const [part = "", property = ""] = key.split(".");
       const bound = boundToken(area.skemo, part, property, DIALOG_REASON_HELP.props);
       if (bound === undefined || isBindingKeyword(bound.token)) continue;
-      helpBindings[key] = variableName(
-        eroTokenOf(area, part, property, DIALOG_REASON_HELP.props) ?? bound.token,
-      );
+      const valueToken = eroTokenOf(area, part, property, DIALOG_REASON_HELP.props) ?? bound.token;
+      helpBindings[key] = variableName(valueToken);
       if (PART_PROPERTY_TYPES[property as keyof typeof PART_PROPERTY_TYPES] !== "color") continue;
-      const paint = paintOf(bound.token, resolutions, base);
+      const paint = paintOf(valueToken, resolutions, base);
       if (paint !== undefined) helpPaints[key] = paint;
     }
     if (Object.keys(helpBindings).length > 0) {
@@ -463,9 +463,10 @@ function standInsComposedOf(
       const [part = "", property = ""] = key.split(".");
       const bound = boundToken(entry.skemo, part, property, props);
       if (bound === undefined || isBindingKeyword(bound.token)) continue;
-      bindings[key] = variableName(eroTokenOf(entry, part, property, props) ?? bound.token);
+      const valueToken = eroTokenOf(entry, part, property, props) ?? bound.token;
+      bindings[key] = variableName(valueToken);
       if (PART_PROPERTY_TYPES[property as keyof typeof PART_PROPERTY_TYPES] !== "color") continue;
-      const paint = paintOf(bound.token, resolutions, base);
+      const paint = paintOf(valueToken, resolutions, base);
       if (paint !== undefined) paints[key] = paint;
     }
     if (Object.keys(bindings).length === 0) continue;
@@ -1443,6 +1444,8 @@ export interface FigmaComponentSet {
         color: FigmaPaint;
         /** The alpha of the base combination: what a written, unbound layer shows. */
         alpha: number;
+        /** Spec 029 ①: the layer lies inside the surface (DTCG `inset`): an INNER_SHADOW. */
+        inset?: boolean;
         offsetX: number;
         offsetY: number;
         blur: number;
@@ -2719,7 +2722,13 @@ function componentSetOf(
             ? { hex, opacity: only }
             : { hex, alphaVariesByMode: true };
         const px = (kind: string) => measureOf(fieldValue(base[token]?.value, field(kind)));
+        // Spec 029 ①: a layer that lies inside the surface in any combination (the rim of light of
+        // komuna's dark shadows) is an inner shadow; Figma holds one effect type for every mode.
+        const inset = resolutions.some(
+          ({ tokens }) => fieldValue(tokens[token]?.value, field("inset")) === true,
+        );
         return {
+          ...(inset ? { inset: true } : {}),
           fields: {
             color: variableName(token, field("color")),
             offsetX: variableName(token, field("offsetX")),
@@ -2850,8 +2859,10 @@ function componentSetOf(
           continue;
         }
         // The part binds its Ero-Token (Constitution v2.3): the cell of the third level a brand
-        // sets in its mode; where none exists, the role token itself.
-        bindings[key] = variableName(eroTokenOf(entry, part, property, combination) ?? bound.token);
+        // sets in its mode; where none exists, the role token itself. Its paint and geometry are the
+        // Ero-Token's value too (Spec 029 ①b: komuna sets its own values on the third level).
+        const valueToken = eroTokenOf(entry, part, property, combination) ?? bound.token;
+        bindings[key] = variableName(valueToken);
         const type = PART_PROPERTY_TYPES[property as keyof typeof PART_PROPERTY_TYPES];
         if (type !== "color" && type !== "dimension") continue;
         // What the plugin does not draw is named with its Jugxo, never claimed (Paket „Figma
@@ -2880,10 +2891,10 @@ function componentSetOf(
         }
         if (!drawn.has(key)) continue;
         if (type === "color") {
-          const paint = paintOf(bound.token, resolutions, base);
+          const paint = paintOf(valueToken, resolutions, base);
           if (paint !== undefined) paints[key] = paint;
         } else {
-          const text = parityDimensionText(base[bound.token]?.value);
+          const text = parityDimensionText(base[valueToken]?.value);
           if (text !== undefined) geometry[key] = text;
         }
       }

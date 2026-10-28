@@ -854,7 +854,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       const name = identOf(written);
       const created = createMarko(
         options.workdir,
-        { name, basis: basis === "komuna" ? "komuna" : "leer" },
+        { name, basis: basis === "komuna" || basis === "komuna-0-2" ? basis : "leer" },
         (ident, start) => {
           const agordo = startAgordo(ident, start);
           return written === ident ? agordo : { ...agordo, etikedoj: { marko: written } };

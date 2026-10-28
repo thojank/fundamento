@@ -49,13 +49,15 @@ describe("check:ikonaro on the repo (Spec 014 ①)", () => {
     expect(result.ok).toBe(true);
     // Spec 016 ①: the derived Aspekto provo draws the Ikonaro of komuna, copied with the structure.
     // Spec 019 ①: provo draws it in Phosphor bold, provo-kompakta in light (ikono.gewicht).
-    expect(result.stats.aspektoj).toBe(4);
+    // Spec 029 ①: and komuna-0-2, with the glyphs of komuna as they were.
+    expect(result.stats.aspektoj).toBe(5);
     expect(result.stats.names).toBeGreaterThan(0);
-    expect(result.stats.glyphs).toBe((result.stats.names ?? 0) * 4);
+    expect(result.stats.glyphs).toBe((result.stats.names ?? 0) * 5);
     expect(result.summary).toMatch(/komuna/);
     expect(result.summary).toMatch(/ekzemplo/);
     expect(result.summary).toMatch(/provo/);
     expect(result.summary).toMatch(/provo-kompakta/);
+    expect(result.summary).toMatch(/komuna-0-2/);
   });
 });
 

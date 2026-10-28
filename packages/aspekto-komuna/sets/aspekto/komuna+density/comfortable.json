@@ -1,0 +1,25 @@
+{
+  "$extensions": {
+    "com.ciferecigo.fundamento": {
+      "id": "set_01M5N7VJ4JQ9SVVN86F25NFCWY",
+      "kondicxoj": [
+        "aspekto=komuna",
+        "density=comfortable"
+      ]
+    }
+  },
+  "size": {
+    "control": {
+      "small": {
+        "$value": "{size.scale.600}"
+      },
+      "medium": {
+        "$value": "{size.scale.700}"
+      },
+      "large": {
+        "$value": "{size.scale.800}"
+      },
+      "$type": "dimension"
+    }
+  }
+}

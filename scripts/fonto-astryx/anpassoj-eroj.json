@@ -1,0 +1,34 @@
+{
+ "ero.glitilo.track.fill": {
+  "dark": {
+   "alias": "color.background.sunken",
+   "maniero": "adaptita",
+   "jugxo": "jug_01M5ZS3RD8HWV0EWSCGZAHA30K",
+   "kialo": "KontrastParo ero.glitilo.label.color.rest+ero.glitilo.track.fill hatte mit dem Wert der Fonto 2.82:1 (dunkel, Schwelle 4.5:1): ero.glitilo.track.fill bleibt auf der Rolle des Skemo."
+  }
+ },
+ "ero.langetaro.tab.fill.hover": {
+  "dark": {
+   "alias": "color.action.tertiary.hover",
+   "maniero": "adaptita",
+   "jugxo": "jug_01M5ZS3RD8HWV0EWSCGZAHA30K",
+   "kialo": "KontrastParo ero.langetaro.tabs.color.active.false+ero.langetaro.tab.fill.hover hatte mit dem Wert der Fonto 4.47:1 (dunkel, Schwelle 4.5:1): ero.langetaro.tab.fill.hover bleibt auf der Rolle des Skemo."
+  }
+ },
+ "ero.langetaro.tabs.color.active.false": {
+  "dark": {
+   "alias": "color.text.subtle",
+   "maniero": "adaptita",
+   "jugxo": "jug_01M5ZS3RD8HWV0EWSCGZAHA30K",
+   "kialo": "KontrastParo ero.langetaro.tabs.color.active.false+ero.langetaro.tab.fill.hover hatte mit dem Wert der Fonto 4.47:1 (dunkel, Schwelle 4.5:1): ero.langetaro.tabs.color.active.false bleibt auf der Rolle des Skemo."
+  }
+ },
+ "ero.mezurilo.track.fill": {
+  "dark": {
+   "alias": "color.background.sunken",
+   "maniero": "adaptita",
+   "jugxo": "jug_01M5ZS3RD8HWV0EWSCGZAHA30K",
+   "kialo": "KontrastParo ero.mezurilo.value.text.color+ero.mezurilo.track.fill hatte mit dem Wert der Fonto 4.04:1 (dunkel, Schwelle 4.5:1): ero.mezurilo.track.fill bleibt auf der Rolle des Skemo."
+  }
+ }
+}

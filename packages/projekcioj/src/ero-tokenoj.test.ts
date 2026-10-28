@@ -150,6 +150,14 @@ describe("M-3: every existing brand is pixel-equal after the migration", () => {
   it("an Ero-Token resolves to the value of its role token in every brand, scheme and contrast", () => {
     const differences: string[] = [];
     const tokens = eroTokenojOfModelo(input.modelo);
+    // Spec 029 ①b b): komuna sets the Ero-Tokens with a counterpart in the Fonto to the values of the
+    // Fonto (each with its origin in deveno.json); every other Ero-Token of komuna, and every token
+    // of every other brand, still resolves to its role.
+    const fromFonto = new Set(
+      (input.modelo.deveno ?? [])
+        .filter((entry) => entry.token.startsWith("ero."))
+        .map((entry) => entry.token),
+    );
     for (const aspekto of ["komuna", "provo", "provo-kompakta"]) {
       for (const scheme of ["light", "dark"]) {
         for (const contrast of ["default", "high"]) {
@@ -159,6 +167,7 @@ describe("M-3: every existing brand is pixel-equal after the migration", () => {
             contrast,
           });
           for (const token of tokens) {
+            if (aspekto === "komuna" && fromFonto.has(token.name)) continue;
             if (
               JSON.stringify(resolved[token.name]?.value) !==
               JSON.stringify(resolved[token.alias]?.value)

@@ -205,6 +205,7 @@ describe("README.md (S1, FR-02, AK-11)", () => {
     "pnpm check:alirebleco",
     "pnpm check:clean-room",
     "pnpm check:ikonaro",
+    "pnpm check:fontoj",
     "pnpm -s",
     "--fixture",
     "--json",
@@ -680,8 +681,10 @@ describe("Spec 004 documentation (T001, Art. V Benchmark-Aspekto)", () => {
   // Seit F1 (Spec 007, F1-T06) 2.2: bestimmt gegen die Basis des F1-PR, main 51e9ed9 mit v2.1.
   // Seit Spec 024 Runde 2 (Amendment v2.3, freigegeben am 2026-10-21) 2.3: bestimmt gegen main
   // 8915fa6 mit v2.2 und den offenen PR #100 (O-1), der keine Nummer beansprucht.
-  it("the Constitution header says version 2.3 and the history names v2.3 with the Ero-Tokens", () => {
-    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.3 · /);
+  // Seit Spec 029 ① (Amendment v2.4, freigegeben am 2026-10-23, 21:56) 2.4: bestimmt gegen main
+  // d29a5206 mit v2.3; die Spec nennt die Nummer.
+  it("the Constitution header says version 2.4 and the history names v2.3 with the Ero-Tokens", () => {
+    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.4 · /);
     expect(constitution).toContain("v2.3 (Spec 024");
     expect(constitution).toContain("Terminologie **Ero-Tokeno**");
   });
@@ -3283,6 +3286,112 @@ describe("Spec 027 documentation (specs/027-figma-bauformen)", () => {
     expect(plan).not.toContain("ciferecigo");
     expect(read("specs/027-figma-bauformen/tasks.md")).toMatch(/rot `[0-9a-f]{7}`/);
     expect(read("docs/vojmapo.md")).toContain("Spec 027");
+  });
+});
+
+// Spec 029 ① „Fonto Astryx – Grundlagen" (2026-10-23): specs/029-fonto-astryx carries the spec
+// unchanged, a plan with the Constitution Amendment v2.4, the pinned Fonto, komuna-0-2, the list
+// of the Jugxoj, the deviations and the measuring guide with full paths, cd and file:// links, and
+// tasks with the red commit. The Constitution, its Ontologio and the notices follow the amendment.
+describe("Spec 029 ① documentation (specs/029-fonto-astryx)", () => {
+  it("the spec is copied unchanged; plan and tasks carry the amendment, the Jugxoj and the guide", () => {
+    const spec = read("specs/029-fonto-astryx/spec.md");
+    expect(createHash("sha256").update(spec).digest("hex")).toBe(
+      "36ac8edfd68a57affcce8c309be2c07c51c6c3aacfb5b9c7b33761bfd30a710a",
+    );
+    const plan = read("specs/029-fonto-astryx/plan.md");
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Constitution Amendment v2.4",
+      "### Die Fonto, gepinnt",
+      "### Jugxo-Liste",
+      "### Entwurfsentscheidungen",
+      "### Abweichungen",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### Constitutional Compliance Review",
+      "### Messanleitung",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const term of [
+      "704757fd827c6fa00a71af80b06d5da99d155e45",
+      "komuna-0-2",
+      "pixelgleich",
+      "Prata",
+      "Fundamento Grundlagen",
+      "Dauer des Plugin-Laufs",
+      "neue leere Datei",
+      "cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds",
+      "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/",
+    ]) {
+      expect(plan, term).toContain(term);
+    }
+    expect(plan).not.toContain("ciferecigo");
+    expect(read("specs/029-fonto-astryx/tasks.md")).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Spec 029");
+  });
+
+  // #113 O-6 (Maintainer 24.10.): the light value of color.background.inverse of the Fonto is not a
+  // value of komuna (rounded to neutral.950) and no theme-neutral value of the benchmark list; the
+  // plan, the Jugxo of komuna and the generator name token and step, not the value. The generator
+  // reads it from the pinned package. deveno.json records it as provenance (not searched).
+  it("plan, Jugxo and generator name color.background.inverse (light) by token and step, not by value", () => {
+    for (const file of [
+      "specs/029-fonto-astryx/plan.md",
+      "packages/aspekto-komuna/jugxoj.json",
+      "scripts/fonto-astryx/werte.mjs",
+    ]) {
+      expect(read(file).toLowerCase(), file).not.toContain("0a1317");
+    }
+  });
+
+  // Briefing A (Maintainer 24.10., „alles wie empfohlen"): copied unchanged beside the spec; plan
+  // and tasks carry ①-6, the headings of provo in 400.
+  it("the briefing of 24.10. is copied unchanged; plan and tasks carry ①-6", () => {
+    const briefing = read("specs/029-fonto-astryx/briefing-a-2026-10-24.md");
+    expect(createHash("sha256").update(briefing).digest("hex")).toBe(
+      "b1095dedf2e8caec9dc03268edf3aa339f7e88dc7896de23798df28d286c8626",
+    );
+    expect(read("specs/029-fonto-astryx/plan.md")).toContain("①-6");
+    expect(read("specs/029-fonto-astryx/tasks.md")).toContain("①-6");
+  });
+
+  // Briefing A ①b (Maintainer 27.10., Abnahme ① nicht bestanden): copied unchanged; plan and tasks
+  // carry ①b with its Jugxoj and the path of the local comparison page.
+  it("the briefing ①b of 27.10. is copied unchanged; plan and tasks carry ①b, its Jugxoj and the comparison page", () => {
+    const briefing = read("specs/029-fonto-astryx/briefing-a-1b-2026-10-27.md");
+    expect(createHash("sha256").update(briefing).digest("hex")).toBe(
+      "b4a83e80e05c24addee348bcd8e043191c743ff55d7c77249942ca10c53aa994",
+    );
+    const plan = read("specs/029-fonto-astryx/plan.md");
+    for (const term of [
+      "## ①b",
+      "### Jugxo-Liste ①b",
+      "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/vergleich/index.html",
+      "node scripts/fonto-astryx/vergleich/vergleich.mjs",
+      "node scripts/fonto-astryx/eroj.mjs",
+    ]) {
+      expect(plan, term).toContain(term);
+    }
+    expect(read("specs/029-fonto-astryx/tasks.md")).toContain("①b");
+  });
+
+  it("the Constitution is v2.4 with the Fonto in Art. V, VII, the terminology and the history", () => {
+    const constitution = read(".specify/memory/constitution.md");
+    expect(constitution).toContain("Version 2.4 · 2026-10-23");
+    expect(constitution).toContain("**Fonto (offene Quelle).**");
+    expect(constitution).toContain("| **Fonto** |");
+    expect(constitution).toContain("die Fonto-ID und den Quellpfad (Datei, Schlüssel)");
+    expect(constitution).toContain("v2.4 (Spec 029");
+    const ontologio = JSON.parse(read("packages/modelo/data/ontologio.json")) as {
+      concepts: { term: string }[];
+    };
+    expect(ontologio.concepts.map((concept) => concept.term)).toContain("Fonto");
+    const notices = read("THIRD_PARTY_NOTICES.md");
+    expect(notices).toContain("704757fd827c6fa00a71af80b06d5da99d155e45");
+    expect(notices).toContain("Copyright (c) 2026 Meta Platforms, Inc.");
+    expect(notices).toContain("MIT License");
   });
 });
 

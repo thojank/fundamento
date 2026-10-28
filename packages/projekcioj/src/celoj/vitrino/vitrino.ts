@@ -14,10 +14,17 @@ import {
   fingerprintOf,
   loadCalibration,
   loadIkonoGewichte,
+  readStructure,
   referenceStructureFiles,
 } from "@fundamento/agordilo";
-import { readConfigSchema, readModeloSchema, referenceAspektoOf } from "@fundamento/modelo";
+import {
+  buildModelo,
+  readConfigSchema,
+  readModeloSchema,
+  referenceAspektoOf,
+} from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
+import { aspektoStylesheet } from "../css/css.js";
 import { kitReferenceAspekto, kitTypesPath } from "../make-kit/make-kit.js";
 import { type VitrinoBazo, vitrinoDatumoj } from "./datumoj.js";
 import { vitrinoHtml, type WerkstattDatumoj } from "./html.js";
@@ -40,7 +47,12 @@ const elementPath = (aspekto: string): string =>
  * Werkstatt.
  */
 export function werkstattDatumoj(input: CeloInput): WerkstattDatumoj | undefined {
-  const files = input.files === undefined ? undefined : referenceStructureFiles(input.files);
+  // Spec 029 ①: the Werkstatt derives over komuna 0.2, as the CLI does (readStructure), whatever
+  // values today's komuna has; a Modelo without a reference package has no Werkstatt.
+  const files =
+    input.files === undefined || input.files.packages[0] === undefined
+      ? undefined
+      : referenceStructureFiles(readStructure().files);
   const reference = referenceAspektoOf(input.modelo);
   if (files === undefined || reference === undefined) return undefined;
   const aspektoj = (
@@ -49,7 +61,19 @@ export function werkstattDatumoj(input: CeloInput): WerkstattDatumoj | undefined
   // Spec 019 ①: the Ikonaro in the further Phosphor weights travels with the structure, so the
   // Werkstatt derives an Agordo with ikono.gewicht as the CLI does.
   const ikonoGewichte = loadIkonoGewichte();
+  // Spec 029 ①: where the structure's values are not the reference Aspekto's of the build (komuna
+  // 0.2 under today's komuna), the Werkstatt brings their stylesheet along — the page under a
+  // draft shows what the Agordilo derives over, not a mix with today's values.
+  const own = input.files === undefined ? undefined : referenceStructureFiles(input.files);
+  const bazoCss =
+    own !== undefined && fingerprintOf(own) === fingerprintOf(files)
+      ? undefined
+      : aspektoStylesheet(buildModelo(files).modelo, reference).replaceAll(
+          ":where(:root",
+          `:where(:root[data-fm-modus="werkstatt"]`,
+        );
   return {
+    ...(bazoCss === undefined ? {} : { bazoCss }),
     structure: {
       files,
       fingerprint: fingerprintOf(files),

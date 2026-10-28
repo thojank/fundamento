@@ -3,7 +3,7 @@
 // clipped from sight; every colour from the bound tokens per intent, the size a minimum the text
 // may grow. Chromium, Firefox and WebKit.
 
-import { boundToken, combinationsOf } from "@fundamento/modelo";
+import { boundToken, combinationsOf, eroTokenOf } from "@fundamento/modelo";
 import { expect, test } from "@playwright/test";
 import { buildProjections, serve } from "./serve.js";
 
@@ -160,8 +160,11 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
       });
       const combination = { ...c, state: "rest" };
       const token = (part: string, property: string) => {
-        const bound = boundToken(skemo, part, property, combination);
-        const value = bound === undefined ? undefined : rezolvo.tokens[bound.token]?.value;
+        // Spec 029 ①b: the part reads its Ero-Token; komuna sets its own values there.
+        const bound =
+          eroTokenOf(insigno, part, property, combination) ??
+          boundToken(skemo, part, property, combination)?.token;
+        const value = bound === undefined ? undefined : rezolvo.tokens[bound]?.value;
         if (value === undefined)
           throw new Error(`${part}.${property} unbound in ${JSON.stringify(combination)}`);
         return value;

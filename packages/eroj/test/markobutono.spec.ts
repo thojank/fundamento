@@ -3,7 +3,7 @@
 // the error under the label — rendered from the same template as the switch. Chromium, Firefox and
 // WebKit (playwright.config.ts).
 
-import { boundToken, combinationsOf } from "@fundamento/modelo";
+import { boundToken, combinationsOf, eroTokenOf } from "@fundamento/modelo";
 import { expect, test } from "@playwright/test";
 import { buildProjections, serve } from "./serve.js";
 
@@ -206,8 +206,11 @@ test.describe("fm-markobutono behaviour", () => {
           height: control.getBoundingClientRect().height,
         };
       });
+      // Spec 029 ①b: a part reads its Ero-Token (komuna takes the check mark of the Fonto).
       const token = (part: string, property: string) =>
-        boundToken(skemo, part, property, { ...combination, state: "rest" })?.token ?? "";
+        eroTokenOf(markobutono, part, property, { ...combination, state: "rest" }) ??
+        boundToken(skemo, part, property, { ...combination, state: "rest" })?.token ??
+        "";
       const px = async (name: string) => Number.parseFloat(await value(name));
       expect(measured.markSize, `#s${i} mark`).toBe(await px(token("indicator", "size")));
       // The box is the mark plus its border (as the track of the switch, ① D-05): a square.

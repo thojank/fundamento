@@ -66,7 +66,9 @@ describe("alirebleco over every known Aspekto (Nachlese 3 W2)", () => {
   // Aspekto beside ekzemplo; it is measured the same way, its failures are warnings.
   it("measures the derived Aspekto provo as an external Aspekto (Spec 016 ①)", async () => {
     const result = await check({ json: true, repoRoot });
-    expect(result.stats.aspektoj).toBe(4);
+    // Spec 029 ①: and komuna-0-2, komuna as it was, measured beside them without a failing pair.
+    expect(result.stats.aspektoj).toBe(5);
+    expect(result.stats["komuna-0-2:errors"]).toBe(0);
     expect(result.stats["provo:combinations"]).toBe(144);
     expect(result.stats["provo:evaluations"]).toBeGreaterThan(0);
     expect(result.stats["provo:errors"]).toBe(0);
@@ -95,12 +97,14 @@ describe("alirebleco on the repo", () => {
         readFileSync(new URL("../../../data/kontrastparoj.json", import.meta.url), "utf8"),
       ) as { kontrastParoj: unknown[] }
     ).kontrastParoj.length;
-    expect(result.stats.pairs).toBe(pairs);
+    // Spec 029 ①b: the declared pairs and, beside them, the pairs of the Ero-Tokens komuna sets to
+    // its own values (eroKontrastParojOf, only where a token departs from its role).
+    expect(result.stats.pairs).toBeGreaterThanOrEqual(pairs);
     expect(result.stats.combinations).toBe(72);
-    expect(result.stats.evaluations).toBe(pairs * 72);
+    expect(result.stats.evaluations).toBe((result.stats.pairs ?? 0) * 72);
     // The lowest ratio belongs to a ui pair (threshold 3:1); text pairs need 4.5:1 or 7:1.
     expect(result.stats.minRatio).toBeGreaterThanOrEqual(3);
-    expect(result.summary).toMatch(new RegExp(String(pairs * 72)));
+    expect(result.summary).toMatch(new RegExp(String((result.stats.pairs ?? 0) * 72)));
     for (const warning of result.warnings) {
       expect(warning.rule).toBe("contrast-advisory");
       expect(warning.severity).toBe("warning");
