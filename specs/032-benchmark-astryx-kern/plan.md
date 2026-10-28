@@ -2,7 +2,7 @@
 
 **Briefing:** [`briefing.md`](briefing.md) (Auftrag Sitzung C vom 2026-10-24, unverändert kopiert; SHA-256 `8ef01979…57d628`) · **Benchmark:** [`research/benchmark-astryx-2026-10.md`](../../research/benchmark-astryx-2026-10.md) (aus `thojank/fundamento-benchmark-astryx`, PR #1, HEAD `a745aea`, Pfad `ergebnis/research/benchmark-astryx-2026-10.md`; unverändert, SHA-256 `ac9c6344…78f064c5`) · **Basis:** `main` `d29a5206` (nach #109) · **Regel 0** gilt: der Weg, den das Repo schon geht, sonst die kleinste Änderung mit Eintrag hier. **Kein Budget angehoben**, keine Tokens, keine Optik geändert, keine Constitution.
 
-**Branch:** `261024-astryx-benchmark-clean-room-pe-7d4571` (von `main` `d29a5206`) · **Datum:** 2026-10-24 · **Stand:** gebaut; O-1 bis O-5 am 2026-10-24 entschieden (unten). ② 4 (Fonto-Ausnahme) wird nach dem Merge von #111 gebaut; bis dahin wartet dieser PR und setzt danach auf `main` neu auf.
+**Branch:** `261024-astryx-benchmark-clean-room-pe-7d4571` (von `main` `d29a5206`, nach dem Merge von #111 am 2026-10-28 auf `main` `7d049b5` neu aufgesetzt) · **Datum:** 2026-10-24, Nachtrag 2026-10-28 · **Stand:** gebaut, ② 4 nach E-1 gebaut, Abnahme offen.
 
 **Clean Room (Art. V):** Aus dem Benchmark-Repo wurde nur diese eine Datei gelesen (`gh api …/contents/ergebnis/research/benchmark-astryx-2026-10.md?ref=a745aea`), sonst nichts. Kein fremdes System geöffnet.
 
@@ -14,8 +14,8 @@
    - triviale Werte, als Daten mit Kialo in `packages/modelo/src/checks/clean-room/trivialaj.json`;
    - der Zufallstreffer `color.palette.danger.900`, als Jugxo `jug_01M5PTA0PQY9P362JAVW9VP96G` zu Art. V mit Begründung, verknüpft über `hazardaj-trafoj.json`.
 
-   **Ergebnis auf `main`: 0 Treffer**, 2278 Fingerprints aus 4 Listen; nicht gezählt: 54 Schriftfamilien eines Benchmarks, 200 triviale Werte (184 ohne die Tests, die Fixture und diesen Plan), 2 Stellen des Zufallstreffers.
-3. **② 4 Fonto:** wartet auf #111. Ein Probe-Merge ergab mit diesem PR **139 Treffer** (B-1). Entschieden am 24.10. (E-1): Die Liste theme-neutral zählt nicht, solange die Fonto Astryx in `fontoj.json` mit Lizenz steht; gebaut nach dem Merge von #111. Offen bleibt ein Wert der Fonto in der Liste „weitere“ (O-6).
+   **Ergebnis auf `main` vor #111: 0 Treffer**, 2278 Fingerprints aus 4 Listen; nicht gezählt: 54 Schriftfamilien eines Benchmarks, 200 triviale Werte (184 ohne die Tests, die Fixture und diesen Plan), 2 Stellen des Zufallstreffers.
+3. **② 4 Fonto (E-1, Nachtrag 2026-10-28):** Die Liste `benchmark-astryx-theme-neutral` zählt nicht, solange `packages/modelo/data/fontoj.json` die Fonto Astryx mit Lizenz führt, gleich wo im Repo der Wert steht; die übrigen Themes von Astryx und Carbon zählen weiter (D-07, `fonto-listoj.json`). Nach dem Merge von #111 meldete die Prüfung 83 Treffer, alle aus theme-neutral; jetzt **0 Treffer** auf dem neu aufgesetzten Branch. Der Probe-Merge vom 24.10. (B-1) ist damit erledigt.
 4. **③ `perf`:** Ursache des kalten ersten `check_contrast` gefunden und behoben. Der Aufruf ohne Zuweisung baute für jede der 144 Kombinationen die volle Überlagerung aller Tokens aller aktiven Sets (`overlayOf`), obwohl er drei Namen und ihre Alias-Ketten braucht. Im Modus `names` schlägt die Auflösung jetzt nur diese Namen nach. Kalter Aufruf im Prozess: 216 → 17 ms; `pnpm perf` fünf Läufe nacheinander grün (Messungen unten). Budget bleibt 100 ms.
 
 ### Ursachen
@@ -85,6 +85,14 @@ Auch `check:alirebleco` nutzt den Modus `names` (89 Paare); er wird dadurch nich
 
 Verworfen: Überlagerungen beim Start bauen (der Start liegt am Budget, B-3) und das Budget anheben (Regel des Maintainers vom 16.10.).
 
+#### D-07 Fonto-Liste: eine Benchmark-Liste, die eine Fonto ist (E-1)
+`fonto-listoj.json` ordnet einer Liste ihre Fonto zu, mit Kialo: `benchmark-astryx-theme-neutral` gehört zu `astryx`. `fonto-listoj.ts` liest die Registry (`packages/modelo/data/fontoj.json`, in einer Fixture `data/fontoj.json`). Die Liste zählt nicht, solange ihre Fonto dort mit Lizenz steht: `license` gesetzt, gepinnt (Version und Commit) und das Copyright in den Notices, die sie nennt. Das ist derselbe Nachweis, den Spec 029 ① von einer Fonto verlangt.
+
+- **Unabhängig vom Ort:** Ein Wert der Liste zählt im Plan der Spec 029, in einer Jugxo, im Importskript und in einem Test so wenig wie im Set.
+- **Andere Listen zählen weiter:** Kennt eine zweite Liste denselben Fingerprint (die übrigen Themes, Carbon, eine Liste über `--spuroj`), zählt der Treffer. Sonst hinge das Urteil an der Reihenfolge der Listen, denn die Herkunft eines Fingerprints ist die erste Liste, die ihn kennt.
+- **Fällt der Eintrag weg** (ohne Lizenz, ungepinnt, andere ID), zählt die Liste wieder; ein Test belegt jeden der drei Fälle.
+- **Neben der Ausnahme von #111:** Die Ausnahme über `deveno.json` (Spec 029 ①, je `$value` im Set) bleibt und kommt zuerst. Die Ausgabe nennt beide getrennt: „value(s) with Fonto provenance“ und „value(s) of a Fonto list“ (Stats `fontoValues`, `fontoListValues`).
+
 ### Abweichungen
 
 1. **Lineare Kurve als trivialer Wert** (`lineara-kurbo`): Die Entscheidung des Maintainers nennt Weiß, Schwarz, Grau, Null-Werte und 0/1/2/4 px. Mit Carbon in der CI meldet die Prüfung auf `main` außerdem 6 Stellen der linearen Kurve `0, 0, 1, 1`, darunter `easing.curve.linear` im Kern („Linear: no easing“). Sie ist so trivial wie Weiß und Schwarz und steht als eigene Regel mit eigener Kialo in den Daten. Vom Maintainer bestätigt (E-2).
@@ -109,7 +117,7 @@ Verworfen: Überlagerungen beim Start bauen (der Start liegt am Budget, B-3) und
 
 ### Entscheidungen des Maintainers (2026-10-24)
 
-- **E-1 Fonto-Ausnahme je Wert (zu O-2, O-3):** Fingerprints, die der Benchmark als „aus theme-neutral“ kennzeichnet (Liste `benchmark-astryx-theme-neutral`, § 7.1 der Datei von Astryx), sind erlaubt, solange die Fonto Astryx in `packages/modelo/data/fontoj.json` mit Lizenz eingetragen ist, unabhängig vom Ort im Repo. Werte der übrigen sechs Themes von Astryx (`benchmark-astryx-weitere`) und von Carbon bleiben verboten. Gebaut wird nach dem Merge von #111; dieser PR setzt dann auf `main` neu auf. Ziel: 0 Treffer. Damit entfällt der Teil 2 von O-2 (Ausnahme über `deveno.json`); der Fehler beim Kern-Pfad in `fonto.ts` (B-1, Teil 1) ist für diese Ausnahme ohne Belang, bleibt aber ein Fehler von #111.
+- **E-1 Fonto-Ausnahme je Wert (zu O-2, O-3; gebaut am 2026-10-28, D-07):** Fingerprints, die der Benchmark als „aus theme-neutral“ kennzeichnet (Liste `benchmark-astryx-theme-neutral`, § 7.1 der Datei von Astryx), sind erlaubt, solange die Fonto Astryx in `packages/modelo/data/fontoj.json` mit Lizenz eingetragen ist, unabhängig vom Ort im Repo. Werte der übrigen sechs Themes von Astryx (`benchmark-astryx-weitere`) und von Carbon bleiben verboten. Gebaut wird nach dem Merge von #111; dieser PR setzt dann auf `main` neu auf. Ziel: 0 Treffer. Damit entfällt der Teil 2 von O-2 (Ausnahme über `deveno.json`); der Fehler beim Kern-Pfad in `fonto.ts` (B-1, Teil 1) ist für diese Ausnahme ohne Belang, bleibt aber ein Fehler von #111.
 - **E-2 Lineare Kurve (zu O-1):** als triviale Regel, so lassen.
 - **E-3 Null-Werte (zu O-4):** wie ausgelegt, Deckkraft 0 und Kurve aus vier Nullen, dazu Längen von 0 (in `trivialaj.json` nachgetragen, `nula`).
 - **E-4 Start-Budget (zu O-5):** vorgemerkt, jetzt nichts tun.
@@ -175,7 +183,7 @@ cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
 pnpm check:clean-room
 ```
 
-Erwartet: `PASS clean-room: …; 2278 fingerprints from 4 list(s), not counted: 54 benchmark font families, 200 trivial value(s), 2 random hit(s) with Jugxo.`, `0 error(s)`. Die Zahl der Dateien hängt vom Checkout ab.
+Erwartet: `PASS clean-room: …; 2278 fingerprints from 4 list(s), not counted: 106 value(s) with Fonto provenance, 166 value(s) of a Fonto list, 52 benchmark font families, 251 trivial value(s), 2 random hit(s) with Jugxo.`, `0 error(s)`. Die Zahl der Dateien und der nicht gezählten Stellen hängt vom Checkout ab; entscheidend ist `0 error(s)`.
 
 Gegenprobe mit der synthetischen Fixture (ein erfundener Benchmark in ihrem `research/`, keine echten Werte):
 

@@ -14,6 +14,13 @@ import { compareIssues, scanNamespace } from "../namespace/scan.js";
 import { isBenchmarkSpurojPath, parseBenchmarkSpuroj, SPUROJ_START } from "./benchmark-spuroj.js";
 import { fontoExemptions } from "./fonto.js";
 import {
+  FIXTURE_FONTOJ_PATH,
+  FONTO_LISTOJ_FILE_NAME,
+  fontoListSources,
+  REPO_FONTO_LISTOJ_PATH,
+  REPO_FONTOJ_PATH,
+} from "./fonto-listoj.js";
+import {
   FIXTURE_JUGXOJ_PATH,
   HAZARDAJ_FILE_NAME,
   REPO_HAZARDAJ_PATH,
@@ -37,6 +44,7 @@ import { findBenchmarkPaths, findBenchmarkReferences } from "./rules.js";
 import { isTrivial } from "./trivialaj.js";
 
 export * from "./benchmark-spuroj.js";
+export * from "./fonto-listoj.js";
 export * from "./hazardaj.js";
 export * from "./marko-spuro.js";
 export * from "./patterns.js";
@@ -89,7 +97,7 @@ export async function check(options: CheckOptions): Promise<CheckResult> {
   const benchmark = benchmarkFiles.map((path) => parseBenchmarkSpuroj(read(path) ?? "", path));
   const named = [...configSpuroj(options.config), ...(options.spuroj ?? [])];
   const namedLists = new Set(named.map((file) => resolve(file)));
-  const { fingerprints, sources, missing } = fingerprintsFor(
+  const { fingerprints, lists, sources, missing } = fingerprintsFor(
     scope.root,
     scope.repoRun,
     benchmark.flatMap((file) => file.lists),
@@ -114,8 +122,21 @@ export async function check(options: CheckOptions): Promise<CheckResult> {
     tree.paths,
     (path) => tree.texts.get(path) ?? readText(join(scope.root, path)),
   );
+  // Spec 032 ② 4, E-1: a list that is the theme of a Fonto standing with its licence does not
+  // count, wherever its values stand; a fingerprint another list knows too still does.
+  const fontoListojPath = scope.repoRun ? REPO_FONTO_LISTOJ_PATH : FONTO_LISTOJ_FILE_NAME;
+  const fontoListojText = read(fontoListojPath);
+  const fontojText = read(scope.repoRun ? REPO_FONTOJ_PATH : FIXTURE_FONTOJ_PATH);
+  const fontoLists =
+    fontoListojText === undefined || fontojText === undefined
+      ? new Set<string>()
+      : fontoListSources(JSON.parse(fontoListojText), JSON.parse(fontojText), read);
+  const knownElsewhere = new Set(
+    lists.filter((list) => !fontoLists.has(list.source)).flatMap((list) => list.fingerprints),
+  );
   const notCounted = {
     fontoValues: new Set<string>(),
+    fontoListValues: new Set<string>(),
     benchmarkFamilies: new Set<string>(),
     trivialValues: new Set<string>(),
     randomHits: new Set<string>(),
@@ -127,6 +148,10 @@ export async function check(options: CheckOptions): Promise<CheckResult> {
       const exempt = fonto.ranges.get(path) ?? [];
       if (exempt.some(([start, end]) => candidate.index >= start && candidate.index < end)) {
         notCounted.fontoValues.add(at);
+        return false;
+      }
+      if (fontoLists.has(source) && !knownElsewhere.has(fingerprint)) {
+        notCounted.fontoListValues.add(at);
         return false;
       }
       if (source !== REPO_SOURCE && candidate.kind === "family") {
@@ -177,7 +202,7 @@ export async function check(options: CheckOptions): Promise<CheckResult> {
       ok
         ? "no benchmark files or references, all identifiers in the Fundamento namespace"
         : `${pathIssues.length} benchmark path(s), ${referenceIssues.length} benchmark reference(s), ${foreignIssues.length} foreign identifier(s), ${brandIssues.length} brand value(s)`
-    }; ${fingerprints.size} fingerprints from ${sources} list(s), not counted: ${notCounted.fontoValues.size} value(s) with Fonto provenance, ${notCounted.benchmarkFamilies.size} benchmark font famil${notCounted.benchmarkFamilies.size === 1 ? "y" : "ies"}, ${notCounted.trivialValues.size} trivial value(s), ${notCounted.randomHits.size} random hit(s) with Jugxo.`,
+    }; ${fingerprints.size} fingerprints from ${sources} list(s), not counted: ${notCounted.fontoValues.size} value(s) with Fonto provenance, ${notCounted.fontoListValues.size} value(s) of a Fonto list, ${notCounted.benchmarkFamilies.size} benchmark font famil${notCounted.benchmarkFamilies.size === 1 ? "y" : "ies"}, ${notCounted.trivialValues.size} trivial value(s), ${notCounted.randomHits.size} random hit(s) with Jugxo.`,
     errors,
     warnings: [],
     stats: {
@@ -191,6 +216,7 @@ export async function check(options: CheckOptions): Promise<CheckResult> {
       benchmarkFiles: benchmarkFiles.length,
       brandValues: brandIssues.length,
       fontoValues: notCounted.fontoValues.size,
+      fontoListValues: notCounted.fontoListValues.size,
       benchmarkFamilies: notCounted.benchmarkFamilies.size,
       trivialValues: notCounted.trivialValues.size,
       randomHits: notCounted.randomHits.size,
@@ -243,7 +269,12 @@ function fingerprintsFor(
   repoRun: boolean,
   benchmark: readonly { source: string; fingerprints: readonly string[] }[],
   named: readonly string[],
-): { fingerprints: FingerprintIndex; sources: number; missing: ValidationIssue[] } {
+): {
+  fingerprints: FingerprintIndex;
+  lists: readonly { source: string; fingerprints: readonly string[] }[];
+  sources: number;
+  missing: ValidationIssue[];
+} {
   const lists: { source: string; fingerprints: readonly string[] }[] = [];
   const missing: ValidationIssue[] = [];
   if (repoRun) {
@@ -270,5 +301,5 @@ function fingerprintsFor(
     }
     lists.push(parseFingerprintSource(JSON.parse(text), file));
   }
-  return { fingerprints: fingerprintIndex(lists), sources: lists.length, missing };
+  return { fingerprints: fingerprintIndex(lists), lists, sources: lists.length, missing };
 }

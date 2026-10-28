@@ -62,7 +62,7 @@ describe("a benchmark list that is a Fonto (Spec 032 ② 4, E-1)", () => {
     expect(rulesAndPaths(result.errors)).toEqual([
       { rule: "clean-room-marko-spuro", path: "src/theme.css:3:21" },
       { rule: "clean-room-marko-spuro", path: "src/theme.css:4:27" },
-      { rule: "clean-room-marko-spuro", path: "src/theme.css:5:21" },
+      { rule: "clean-room-marko-spuro", path: "src/theme.css:5:22" },
     ]);
     expect(result.stats.fontoListValues).toBe(0);
   });

@@ -8,7 +8,7 @@
     },
     {
       "rule": "clean-room-marko-spuro",
-      "path": "src/theme.css:5:21"
+      "path": "src/theme.css:5:22"
     }
   ]
 }

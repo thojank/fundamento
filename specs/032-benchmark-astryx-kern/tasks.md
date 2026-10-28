@@ -22,7 +22,7 @@
 - [x] **T3205 CI** (② 5): Kommentar am Schritt „Check: Clean-Room“; der Schritt bleibt `pnpm check:clean-room` und liest die Listen selbst.
 - [x] **T3206 `perf`** (D-06): `namedOverlayOf` in `resolve.ts`, `OverlayLookup` in `bind.ts`.
 - [x] **T3207a Entscheidungen** (2026-10-24): E-1 bis E-4 in plan; `nula` um Längen von 0 ergänzt (Test zuerst rot, dann `trivialaj.json`); Kialo von `lineara-kurbo` mit der Bestätigung.
-- [ ] **T3207 Fonto-Ausnahme** (② 4, E-1): nach dem Merge von #111, auf `main` neu aufsetzen. Die Liste `benchmark-astryx-theme-neutral` zählt nicht, solange `fontoj.json` die Fonto Astryx mit Lizenz führt; `benchmark-astryx-weitere` und Carbon zählen weiter. Rot zuerst, Ziel 0 Treffer. O-6 entschieden: Sitzung A entfernt den Wert an den drei Stellen in #111.
+- [x] **T3207 Fonto-Ausnahme** (② 4, E-1, 2026-10-28): auf `main` `7d049b5` (nach #111) neu aufgesetzt. Rot `d827de4`: der Repo-Lauf mit 83 Treffern (4 Tests), die neue Testdatei lädt nicht (`fonto-listoj.json` fehlt), Doku 1. Grün: `fonto-listoj.json` mit Kialo, `fonto-listoj.ts`, Filter in `index.ts` (andere Listen zählen weiter), Fixture `invalid/clean-room-fonto-listo`; 0 Treffer. Beim Rebase den Block „Nachlese 11“ im Doku-Test wiederhergestellt (die automatische Auflösung hatte ihn mit dem von Spec 032 verschränkt). Regelkatalog 190 → 192.
 
 ### C – Abschluss
 - [x] **T3208 Doku:** plan (Ursachen, D-01–D-06, Abweichungen 1–3, B-1–B-3, O-1–O-5, Messungen, Messanleitung), tasks, Vojmapo, README.
@@ -35,3 +35,4 @@
 | Commits | rot `c7c575a`, grün im Folgecommit (Hash im PR) |
 | Rot gemessen | Clean-Room 1 Datei (lädt nicht), Auflösung 1, Doku 2, Perf 1 |
 | Grün gemessen | Modelo 176 Dateien / 3822 Tests; MCP 45 / 436; `pnpm perf` fünfmal nacheinander grün (kalter erster `check_contrast` Median 16,1 ms, Maximum 35,0 ms); `check:clean-room` 0 Fehler mit 4 Listen; Lint sauber |
+| Nachtrag 2026-10-28 (E-1, nach #111) | rot `d827de4` (Repo-Lauf 83 Treffer, 4 Tests; neue Testdatei lädt nicht; Doku 1); grün: Modelo 180 Dateien / 3858 Tests, MCP 46 / 442, `pnpm perf` grün (kalter erster `check_contrast` 15,5 ms, Start 1932 ms), `check:clean-room` 0 Fehler, Lint sauber |
