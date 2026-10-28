@@ -667,13 +667,17 @@ test("fm-alsxutilo is upgraded in its section, a file chosen and removed by keyb
   page,
   browserName,
 }) => {
+  // The listener before the page: Playwright turns the interception of the dialog on when the
+  // first listener comes, beside the key press; on a slow renderer the press won and the dialog
+  // went unseen until the test's timeout (Spec 029 ①b, run 40615856463 attempts 1 and 4; with
+  // the CPU slowed fourfold 2 of 4 late listeners saw it, 6 of 6 early ones).
+  const chooser = page.waitForEvent("filechooser");
   await open(page);
   const section = page.locator("#fm-vitrino-alsxutilo");
   const first = section.locator("fm-alsxutilo").first();
   const input = first.locator('input[type="file"]');
   await expect(input).toHaveAccessibleDescription("PDF oder PNG, höchstens 5 MB");
   await input.focus();
-  const chooser = page.waitForEvent("filechooser");
   await page.keyboard.press("Space");
   await (await chooser).setFiles([
     { name: "Lebenslauf.pdf", mimeType: "application/pdf", buffer: Buffer.alloc(1200, 1) },

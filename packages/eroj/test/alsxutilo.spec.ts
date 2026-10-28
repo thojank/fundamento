@@ -252,6 +252,9 @@ test.describe("fm-alsxutilo behaviour", () => {
     page,
     browserName,
   }) => {
+    // The listener before the page, so the interception of the dialog is on before the key press
+    // (Spec 029 ①b: a late listener raced the press on a slow renderer, see vitrino.check.ts).
+    const chooser = page.waitForEvent("filechooser");
     await serve(page, out, `<fm-butono id="before">Vorher</fm-butono>${FORM("", HELP)}`);
     await page.locator("#before").focus();
     await page.keyboard.press(TAB(browserName));
@@ -261,7 +264,6 @@ test.describe("fm-alsxutilo behaviour", () => {
       .locator('[part="picker"]')
       .evaluate((element) => getComputedStyle(element).outlineStyle);
     expect(ring).not.toBe("none");
-    const chooser = page.waitForEvent("filechooser");
     await page.keyboard.press("Space");
     await (await chooser).setFiles([pdf("Lebenslauf.pdf")]);
     expect((await stateOf(page)).rows.map((row) => row.name)).toEqual(["Lebenslauf.pdf"]);
