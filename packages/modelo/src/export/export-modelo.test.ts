@@ -317,8 +317,13 @@ describe("exportModelo: rezolvoj.json", () => {
           expect(isRezolvoAlias(token), name).toBe(false);
           continue;
         }
+        // Spec 029 ①b: komuna sets a few Ero-Tokens to a value of its own (Art. IV: an alias or an
+        // own value) – written as the token itself, as any token that is no whole-value alias.
+        if (!isRezolvoAlias(token)) {
+          expect("value" in token, name).toBe(true);
+          continue;
+        }
         expect(Object.keys(token).sort(), name).toEqual(["alias", "id", "origin", "type"]);
-        if (!isRezolvoAlias(token)) continue;
         expect(entry.tokens[token.alias], `${name} → ${token.alias}`).toBeDefined();
         references++;
       }

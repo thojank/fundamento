@@ -1,0 +1,14 @@
+{
+  "name": "@fundamento/fonto-vergleich",
+  "private": true,
+  "description": "Spec 029 ①b: lokaler Vergleich Fundamento (komuna) gegen die gepinnte Fonto Astryx 0.7.4 (theme-neutral), je Ero. Nie veröffentlicht, kein Paket von Fundamento hängt davon ab.",
+  "type": "module",
+  "devDependencies": {
+    "@astryxdesign/core": "0.7.4",
+    "@astryxdesign/theme-neutral": "0.7.4",
+    "@stylexjs/stylex": "0.19.1",
+    "esbuild": "0.28.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  }
+}

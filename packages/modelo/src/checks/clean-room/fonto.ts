@@ -86,6 +86,7 @@ export function fontoExemptions(
   const files = new Set(paths.filter((path) => DEVENO.test(path)));
   const ranges = new Map<string, [number, number][]>();
   const known = new Set(paths);
+  const trees = new Map<string, ReturnType<typeof parseTree> | undefined>();
   for (const deveno of files) {
     const root = modeloRoot(deveno, known);
     if (root === undefined) continue;
@@ -104,9 +105,14 @@ export function fontoExemptions(
       if (typeof entry.token !== "string" || typeof entry.aro !== "string") continue;
       const file =
         entry.aro === "core" ? core : `${dir === "." ? "" : `${dir}/`}sets/${entry.aro}.json`;
-      const source = file === undefined ? undefined : text(file);
-      if (file === undefined || source === undefined) continue;
-      const tree = parseTree(source);
+      if (file === undefined) continue;
+      // One parse per set: a deveno.json names hundreds of tokens of the same set.
+      if (!trees.has(file)) {
+        const source = text(file);
+        trees.set(file, source === undefined ? undefined : parseTree(source));
+      }
+      const tree = trees.get(file);
+      if (tree === undefined) continue;
       const node = tree && findNodeAtLocation(tree, [...entry.token.split("."), "$value"]);
       if (node === undefined) continue;
       ranges.set(file, [...(ranges.get(file) ?? []), [node.offset, node.offset + node.length]]);

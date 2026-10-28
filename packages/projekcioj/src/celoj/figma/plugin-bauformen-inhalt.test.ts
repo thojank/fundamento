@@ -325,14 +325,16 @@ describe("the avizo is drawn as a notice: surface with accent, heading, message,
         const words = ["heading", "message", "details"].map(
           (name) => box(descendant(variant, name)).height,
         );
-        const gap = value(texts, "spacing/small");
+        // Spec 029 ①b: the gap and padding are the Ero-Tokens of the avizo (komuna takes them from
+        // the Fonto), the variables the plan binds.
+        const gap = value(texts, "ero/avizo/box/gap");
         expect(gap).toBeGreaterThan(0);
         expect(box(texts).height, where).toBeCloseTo(
           words.reduce((sum, each) => sum + each, 0) + 3 * gap + box(actions).height,
           5,
         );
         // The control is the column and its padding; the variant is the control.
-        const padding = value(control, "spacing/medium");
+        const padding = value(control, "ero/avizo/box/inline/padding");
         expect(padding).toBeGreaterThan(0);
         expect(box(control).height, where).toBeCloseTo(box(texts).height + 2 * padding, 5);
         expect(box(variant).height, where).toBe(box(control).height);

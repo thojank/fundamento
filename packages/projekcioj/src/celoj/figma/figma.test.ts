@@ -1312,7 +1312,8 @@ describe("Figma plan for the markobutono (Spec 010 ②)", () => {
     expect(on?.bindings["indicator.color"]).toBe("color/action/primary/text");
     expect(on?.paints?.["indicator.color"]).toMatchObject({ hex: expect.stringMatching(/^#/) });
     expect(on?.bindings["indicator.size"]).toBe("size/icon/medium");
-    expect(on?.geometry?.["indicator.size"]).toBe("20px");
+    // Spec 029 ①b: the check mark of the Fonto (14 px) on komuna's Ero-Token.
+    expect(on?.geometry?.["indicator.size"]).toBe("14px");
     expect(on?.bindings["box.radius"]).toBe("radius/role/control");
     expect(on?.bindings["error.color"]).toBe("color/status/danger/text");
     expect(on?.hidden).toBeUndefined();
@@ -1489,7 +1490,8 @@ describe("Figma plan for the elektilo (Spec 010 ④)", () => {
     expect(rest?.bindings["indicator.color"]).toBe("color/text/muted");
     expect(rest?.paints?.["indicator.color"]).toMatchObject({ hex: expect.stringMatching(/^#/) });
     expect(rest?.bindings["indicator.size"]).toBe("size/icon/medium");
-    expect(rest?.geometry?.["indicator.size"]).toBe("20px");
+    // Spec 029 ①b: the chevron of the Fonto (16 px) on komuna's Ero-Token.
+    expect(rest?.geometry?.["indicator.size"]).toBe("16px");
     expect(variant("large", "rest")?.bindings["indicator.size"]).toBe("size/icon/large");
     expect(rest?.bindings["box.gap"]).toBe("spacing/small");
     expect(rest?.bindings["placeholder.color"]).toBe("color/text/subtle");
@@ -1701,7 +1703,8 @@ describe("Figma plan for the dialogo (Spec 011 ②)", () => {
       "box.gap": "spacing/medium",
     });
     expect(variant("medium", "none")?.bindings["surface.width"]).toBe("size/container/medium");
-    expect(rest?.geometry?.["surface.width"]).toBe("640px");
+    // Spec 029 ①b: the width of the Fonto's dialog (400 px) for small; medium has no counterpart.
+    expect(rest?.geometry?.["surface.width"]).toBe("400px");
     expect(variant("medium", "none")?.geometry?.["surface.width"]).toBe("960px");
     expect(rest?.geometry?.["content.gap"]).toMatch(/px$/);
     expect(rest?.geometry?.["actions.gap"]).toMatch(/px$/);
@@ -1787,7 +1790,7 @@ describe("Figma plan for the dialogo (Spec 011 ②)", () => {
       reason: ["none", "optional", "required"],
     });
     expect(items.dialogo?.states).toEqual(["rest"]);
-    expect(items.dialogo?.values["surface.width@reason=none,size=small,state=rest"]).toBe("640px");
+    expect(items.dialogo?.values["surface.width@reason=none,size=small,state=rest"]).toBe("400px");
     expect(items.dialogo?.values["surface.width@reason=required,size=medium,state=rest"]).toBe(
       "960px",
     );
@@ -2819,7 +2822,11 @@ describe("Figma plan for the langetaro (Spec 011 ⑤)", () => {
     expect(values["selected-indicator.width@active=true,state=rest"]).toMatch(/px$/);
     expect(values["selected-indicator.width@active=false,state=rest"]).toBeUndefined();
     expect(values["selected-indicator.color@state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
-    expect(values["list.color@state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
+    // Spec 029 ①b: the line under the tabs of the Fonto is the fine border, 8 % black in komuna
+    // and opaque in ekzemplo – one paint carries one opacity, as with the karto's border (①).
+    expect(values["list.color@state=rest"]).toMatch(
+      /^(#[0-9a-f]{6}(\/0\.\d+)?$|alpha varies by mode)/,
+    );
     expect(values["list.width@state=rest"]).toMatch(/px$/);
     expect(values["panel.color@state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
     expect(values["panel.inline-padding@state=focus"]).toMatch(/px$/);
@@ -3459,13 +3466,16 @@ describe("the Figma plan draws the karto (Spec 015 ③)", () => {
       "surface.fill@state=rest": expect.stringMatching(/^#[0-9a-f]{6}$/),
       // Spec 029 ①: the container radius of the Fonto; its border a translucent overlay.
       "surface.radius@state=rest": "12px",
-      "border.color@state=rest": expect.stringMatching(/^(#[0-9a-f]{6}$|alpha varies by mode)/),
+      "border.color@state=rest": expect.stringMatching(
+        /^(#[0-9a-f]{6}(\/0\.\d+)?$|alpha varies by mode)/,
+      ),
       "border.width@state=rest": "1px",
       "heading.color@state=rest": expect.stringMatching(/^#[0-9a-f]{6}$/),
       "content.color@state=rest": expect.stringMatching(/^#[0-9a-f]{6}$/),
       "meta.gap@state=rest": "4px",
       "actions.gap@state=rest": "4px",
-      "box.inline-padding@state=rest": "8px",
+      // Spec 029 ①b: the padding of the Fonto's card (12 px within its 1 px border).
+      "box.inline-padding@state=rest": "11px",
       "box.gap@state=rest": "4px",
     });
   });
@@ -3557,10 +3567,11 @@ describe("the Figma plan draws the avataro (Spec 015 ③)", () => {
     expect(items.avataro?.values).toEqual(
       Object.fromEntries(
         [
-          ["small", "20px"],
-          ["medium", "24px"],
-          // Spec 029 ①: size.control.large is the element size lg of the Fonto (36).
-          ["large", "36px"],
+          // Spec 029 ①b: the sizes sm/md/lg of the Fonto's avatar.
+          ["small", "24px"],
+          ["medium", "36px"],
+
+          ["large", "48px"],
         ].flatMap(([size, box]) => [
           [`box.size@size=${size},state=rest`, box],
           [`image.radius@size=${size},state=rest`, "9999px"],

@@ -2,7 +2,7 @@
 // native input, help and error — rendered from the same template as the butono and the ligilo.
 // Chromium, Firefox and WebKit (playwright.config.ts).
 
-import { boundToken, combinationsOf } from "@fundamento/modelo";
+import { boundToken, combinationsOf, eroTokenOf } from "@fundamento/modelo";
 import { expect, test } from "@playwright/test";
 import { TAB } from "./alirebleco.js";
 import { buildProjections, serve } from "./serve.js";
@@ -226,8 +226,11 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
         });
         const combination = { ...c, state };
         const token = (part: string, property: string) => {
-          const bound = boundToken(skemo, part, property, combination);
-          const value = bound === undefined ? undefined : rezolvo.tokens[bound.token]?.value;
+          // Spec 029 ①b: the part reads its Ero-Token; komuna sets its own values there.
+          const bound =
+            eroTokenOf(kampo, part, property, combination) ??
+            boundToken(skemo, part, property, combination)?.token;
+          const value = bound === undefined ? undefined : rezolvo.tokens[bound]?.value;
           if (value === undefined)
             throw new Error(`${part}.${property} unbound in ${JSON.stringify(combination)}`);
           return value;

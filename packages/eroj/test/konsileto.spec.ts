@@ -97,8 +97,9 @@ test.describe("fm-konsileto behaviour", () => {
         return colour;
       };
       return {
-        text: probe("--fm-color-text-inverse"),
-        fill: probe("--fm-color-background-inverse"),
+        // Spec 029 ①b: the Ero-Tokens of the konsileto (komuna: the tooltip of the Fonto).
+        text: probe("--fm-ero-konsileto-text-color"),
+        fill: probe("--fm-ero-konsileto-surface-fill"),
       };
     });
     const shown = await tooltipOf(page, "t");

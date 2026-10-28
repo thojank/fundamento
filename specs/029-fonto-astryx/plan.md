@@ -427,3 +427,123 @@ pnpm fm modelo validate && pnpm check:fontoj && pnpm check:alirebleco && pnpm ch
 ```
 
 Die Spec: `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/specs/029-fonto-astryx/spec.md`; dieser Plan: `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/specs/029-fonto-astryx/plan.md`.
+
+## ①b – Werte je Komponente aus der Fonto, weiße Flächen (27.10.)
+
+**Anlass:** Abnahme ① des Maintainers am 27.10., 22:07: „passt noch nicht“, vor allem die Varianten (`butono`, `kampo`, `karto`, `dialogo` neben dem Storybook der Fonto). Briefing: [`briefing-a-1b-2026-10-27.md`](briefing-a-1b-2026-10-27.md), unverändert kopiert. #111 steht auf `main` nach #112 (`3dbb482`), neu aufgesetzt; Konflikte nur in Tests, Zählungen und Listen (Spec 030 und Spec 029 nebeneinander).
+
+### Zusammenfassung ①b
+
+| # | Punkt des Briefings | Was jetzt gilt |
+|---|---|---|
+| a | Weiß erlaubt (①-1 neu) | Das Aspiro `oklch-l-extreme` gilt für komuna nicht mehr (komuna-0-2 behält es). Karte weiß wie die Fonto, Seite 95 wie die Fonto, Fläche 97,5 und vertiefte Fläche 90 (surface-distinct gilt weiter, J1 angepasst, die alte Lage steht in J1); inverse Fläche dunkel weiß; gedrückt und gewählt der ersten Aktion hell Schwarz (J5). Felder und Karten sind über ihre Ero-Tokens reinweiß. |
+| b | Ero-Tokens aller 40 Eroj aus der Fonto | 781 Ero-Tokens von komuna haben einen Wert der Fonto, mit 948 Herkunftsangaben in `deveno.json` (680 übernommen, 168 auf eine Stufe gerundet bzw. verrechnet, 93 angepasst) (Datei der Komponente in `packages/core/src`, Element, Eigenschaft, Kombination, Modus). Quelle sind die gemessenen Stile der gepinnten Komponenten mit den Overrides von theme-neutral. Varianten des butono: high/medium/low = primary/secondary/ghost, intent=danger = destructive. 37 Eroj haben Werte; apartigilo, atributlisto und navigado keine (siehe Abweichungen). Nachvollzug: ein zweiter Lauf von Vergleich und Generator schreibt Kern und Herkunft byte-gleich. |
+| c | deaktivierter butono high ohne Text | Ursache: J8 rundete `color.action.primary.disabled` auf `neutral.400`, die Stufe von `color.text.disabled` – Fläche und Schrift gleich (1,00:1). Jetzt die eigene Variante blass wie die Fonto: Fläche grau, Schrift weiß (3,15:1, Fonto 3,32:1). Browser-Test: jeder deaktivierte butono mindestens 3:1, hell und dunkel, drei Engines. |
+| d | Vitrino ohne Icon | Die Kombinationszeilen zeigen kein Icon; eine Zeile „mit Icon“ zeigt die Varianten (butono high/medium/low/danger, ligilo, signeto je Absicht). |
+| e | Vergleichsseite | Lokal, nicht veröffentlicht: `scripts/fonto-astryx/vergleich/` baut beide Seiten (Fundamento komuna aus dem Projekcioj-Build, die Fonto aus den gepinnten Paketen mit React als devDependency nur dort), misst je Ero, Kombination, Zustand (Ruhe, Hover, gedrückt, Fokus, deaktiviert, lädt, ungültig …) und Modus die Eigenschaften, die die Ero-Tokens treiben, und schreibt Bilder, `messungen.json` und die Seite nach `.fundamento/vergleich/`. 331 Fälle, 40 Eroj, 1324 Bilder; die Tabelle nennt bei jeder Abweichung den Grund (`gruende.mjs`, 201 Gründe). |
+
+### Wie die Werte entstehen
+
+1. **Messen** (`vergleich.mjs`): Jede Fall-Datei in `vergleich/faelle/` ordnet einem Teil von Fundamento das Element der Fonto zu (je Eigenschaft, wo Kasten und Text auf verschiedenen Elementen liegen). Gemessen wird auf beiden Seiten dieselbe CSS-Eigenschaft, die das Ero-Token im erzeugten Stylesheet treibt. Farben auch sichtbar: Überlagerung (hover der Fonto als Verlauf), Deckkraft (deaktiviert 50 %) und Untergrund verrechnet. Übergänge der Fonto sind ausgeschaltet, das Reset der Fonto ist geladen.
+2. **Ableiten** (`eroj.mjs`): Ein Wert wird, wo es geht, ein Alias – die Rolle, auf die das Ero-Token im Skemo zeigt, dann eine Rolle der passenden Gruppe (Fläche → `color.background.*`, Schrift → `color.text.*`, Rand → `color.border.*`), dann eine Stufe (ΔE2000, „rundita“); Maße auf Tokens von komuna mit genau diesem Wert, sonst ein eigener Wert in px; Schrift auf die Rolle mit Größe und Gewicht der Fonto; Schatten auf die Elevation mit denselben Schichten. komuna ist die Referenzmarke: die hellen Werte stehen im Kern (`packages/vortaro/sets/core.json`), die dunklen im Dunkel-Set von komuna; jede andere Marke belegt jedes Token selbst und bleibt gleich (Tests).
+3. **Regeln gewinnen** (`eroj-regeln.mjs`): schreibt, prüft `check:alirebleco` und hält jedes Paar unter der Schwelle in `anpassoj-eroj.json` fest, bis die Prüfung hält.
+
+Nicht übernommen wird: ein Pseudo-Element (`::backdrop`, `::placeholder`), ein Selektor in einen Nachfahren (`::slotted`) oder auf ein anderes Element derselben Art (`[aria-selected]`, die gewählte Kalenderzelle) – außer die Fall-Datei ordnet ihn ausdrücklich zu; ein Teil, der nicht gezeichnet ist (geschlossenes Popover, 0×0, verborgen 1×1); ein Token, das eine Achse nicht trennt, über die die Fonto verschiedene Werte zeigt (die Farbe der Meldung je Status: 12 Tokens, das ist ②b); ein Wert für eine Achse, die die Fonto nicht hat, außer für ihren Standardwert (insigno ohne Größen); Teile, die Fundamento nach der Abgleichstabelle behält (die farbige Kante der avizo).
+
+### Jugxo-Liste ①b
+
+Alle Jugxoj gehören zu komuna (`packages/aspekto-komuna/jugxoj.json`, `decision: deviation-recorded`); jede nennt im Kontext genau ihre Tokens, `deveno.json` je Wert die Jugxo.
+
+| Jugxo | Bezug | Tokens | Inhalt |
+|---|---|---|---|
+| J1 `jug_01M5N89C1TWQ57VAQD0V6V4KR7` (angepasst) | Regulo `surface-distinct` | 2 | Weiß erlaubt (27.10.): Karte weiß, Fläche 97,5, vertiefte Fläche 90; die alte Lage (wegen des Aspiro) steht in der Begründung. |
+| J5 `jug_01M5N89C1WQ308F9302JTZRVZH` (angepasst) | Regulo `state-distinct` | 18 | gedrückt und gewählt der ersten Aktion hell bis Schwarz (seit 27.10. erlaubt). |
+| J9 `jug_01M5ZMZSNG2G533GB0RY9HVNSG` | Regulo `state-distinct` | 21 | Hover und gedrückt der Eroj (5 %/10 % Überlagerung der Fonto) fielen gerundet auf die Ruhe: die Rolle des Zustands bleibt. |
+| J10 `jug_01M5ZN30KJ3DFY1FXD8K3HHEJ6` | Art. X | 11 | Die Fonto zeichnet keinen Rand: die Breite bleibt, die Farbe ist die Fläche – unsichtbar, in erzwungenen Farben eine Kontur. |
+| J11 `jug_01M5ZN8QFKFKBR76C7B320RGJ9` | Art. X | 2 | Deaktiviert lesbar (c): destructive deaktiviert hat bei der Fonto 2,63:1; mindestens 3:1. |
+| J12 `jug_01M5ZNJ4SM3XWE76KJ431Y7B3G` | Art. X (WCAG 1.4.11) | 33 | Feld- und Status-Ränder der Fonto unter 3:1: die Rolle mit der KontrastParo bleibt (Briefing: Feldränder mindestens 3:1); ebenso die Kontraste ohne Text der gerenderten Prüfung (Griff und Kontur des sxaltilo, Kontur des insigno, Kante der avizo, Füllung des mezurilo). |
+| J13 `jug_01M5ZNMRXQEZY8N0FJ7FVQNG7C` | Art. V | 8 | Das Ero-Token folgt einer nach einer Regulo angepassten Rolle (J3–J7), statt einer anderen Rolle mit dem Wert der Fonto. |
+| J14 `jug_01M5ZS3RD8HWV0EWSCGZAHA30K` | Art. X | 8 | KontrastParoj der Eroj unter der Schwelle (glitilo, mezurilo, langetaro im Dunkeln) und Schrift auf der Fläche desselben Teils unter 4,95:1 (Füllungen des insigno): die Fläche rückt auf die nächste Stufe, die hält, oder bleibt auf der Rolle. |
+| J15 `jug_01M5ZT2Z2V5GMPZXTDV3BK8PRE` | Regulo `touch-target-min` | 10 | Die Fonto lässt Knöpfe und Griffe unter 24 px (min-width 0): die Rolle mit der Mindest-Zielgröße bleibt (WCAG 2.5.8). |
+
+### Abweichungen ①b
+
+1. **Rundung auf die Stufen von Fundamento:** Farben der Fonto zwischen zwei Stufen (verrechnete Überlagerungen, deaktiviert mit halber Deckkraft, die Status-Flächen im Dunkeln) nehmen die nächste Stufe (195 Werte „rundita“/„kunmetita-rundita“, ΔE2000 in `deveno.json`). Eigene Farbwerte verbietet `color-semantic-literal` (Art. IV).
+2. **Kein Rand, aber Kontur:** Wo die Fonto keinen Rand zeichnet (butono, dialogo, insigno …), ist die Randfarbe die Fläche und die Breite bleibt (J10).
+3. **Pille im Storybook:** Der Button der Fonto misst in theme-neutral 10 px Radius (`--radius-element`), keine Pille; die Pille ist eine eigene Form-Option der Fonto (`--_button-radius: var(--radius-full)`). komuna nimmt die 10 px. Eine Form-Achse wäre ②b (O-1b-1).
+4. **Karte mit Schatten:** Die Card der Fonto ist im Standard flach; der Maintainer sah einen leichten Schatten. Gemessen ist `elevation="low"` – der Schatten `raised` von komuna (O-1b-2).
+5. **Felder zeigen Fokus anders:** Die Fonto zeigt den Fokus eines Feldes als dunklen Rand mit innerem Schatten, ohne Ring. komuna behält ihren Fokusring an Feldern (focus-ring-dual-contrast); die Randfarbe im Fokus kommt aus der Fonto.
+6. **Knopf nur mit Icon:** Die Fonto zeichnet ihn quadratisch ohne Innenabstand, mit Text 12 px. Das Innenabstands-Token des butono trennt die beiden Formen nicht; mit 12 px liefen die Schließen-Knöpfe über (avizo, Kalender). Der Innenabstand bleibt deshalb auf seiner Rolle; die Form „nur Icon“ ist ②b (O-1b-4).
+7. **Zwei Stufen der Schrift:** Die Fonto hat primary und secondary, Fundamento drei Stufen; secondary hat den Wert von muted. Auf medium abgebildet fiele medium auf low (text-hierarchy verlangt drei unterscheidbare Stufen): medium bleibt auf seiner Rolle.
+8. **Kein Gegenstück:** apartigilo (die Fonto malt die Linie als Fläche), atributlisto (alles Light-DOM), navigado (Abstand unterscheidet waagerecht und senkrecht, das Token nicht); Teile in Popovern (Vorschläge, Kalenderzellen gewählt, Menüeinträge im Hover) und Dateilisten lassen sich nicht messbar öffnen. Sie stehen in der Tabelle der Vergleichsseite als nicht gemessen.
+
+### Befunde ①b
+
+- **B-1b-1 Beratende APCA-Hinweise steigen** (kein Budget, beratend): Seit komuna Ero-Tokens mit eigenen Werten belegt, prüft `check:alirebleco` neben den 89 deklarierten auch ihre Paare (`eroKontrastParojOf`, 280 Paare). Alle WCAG-Schwellen halten; die beratenden APCA-Hinweise in den 72 Kombinationen von komuna steigen von 2646 auf 8496 (Zeuge in `vitrino.check.ts`).
+- **B-1b-2 Figma las Farbe und Maß aus der Rolle:** Die Projektion band den Ero-Token, schrieb Paint und Geometrie aber aus der Rolle – solange jede Marke Aliase führte, war das gleich. Jetzt aus dem Ero-Token (`figma.ts`, vier Stellen); `check:parity` 0 Fehler.
+- **B-1b-3 Fonto-Ausnahme des Clean Room parste je Eintrag:** 948 neue Herkunftsangaben hätten den Kern 948-mal geparst (10,7 s, in der vollen Suite über 30 s). Jetzt ein Parse je Set: 2 s.
+- **B-1b-4 Eine Deckkraft je Paint auch über Marken:** Im Build mit allen Marken sind die feinen Ränder von komuna (8 % Schwarz) durchsichtig, die der anderen Marken deckend – wie die Karte schon in ① („alpha varies by mode“ im Inventar der Figma-Parität; die Prüfung läuft über das Repo und ist grün).
+
+### Offen (für den Maintainer) ①b
+
+- **O-1b-1 Form des butono:** 10 px wie theme-neutral (jetzt) oder Pille wie im Storybook? Eine Pille für alle Knöpfe ginge über `radius.role.control`; eine Form-Achse (`corner`) wäre ②b.
+- **O-1b-2 Schatten der Karte:** leicht wie gesehen (jetzt, `elevation low`) oder flach wie der Standard der Fonto?
+- **O-1b-4 Knopf nur mit Icon:** quadratisch ohne Innenabstand wie die Fonto – eine Form des butono (②b). Bis dahin der Innenabstand der Rolle (4/8/16 px) für Knöpfe mit und ohne Text.
+- **O-1b-3 Status-Farben der Meldung:** Die Fonto färbt Titel und Text einer Meldung je Status; Fundamento hat ein Token für alle Status. Die Achse kommt mit ②b (12 Tokens „uneinheitlich“, im Bericht).
+
+### Messungen ①b
+
+Gemessen am 28.10. in einem Worktree, Branch `261023-spec-029-fonto-astryx-grundlagen` nach dem Neuaufsetzen auf `main` `3dbb482`.
+
+- **Rot:** a), c), d) in `92e9e98`; b) in `8f645c8` (8 von 8); Doku in `ebecd32`.
+- **Tests** (`turbo run test --concurrency=2 --continue --force`, 456 s), alle grün: modelo 3837, projekcioj 1158 (1 übersprungen), mcp 442, metiejo 193, agordilo 113, nordstelo 58, cli 76, eroj 1021.
+- **Prüfungen** einzeln, grün: `lint`, `check:vortaro-lint`, `check:regularo`, `check:mankoj`, `check:clean-room`, `check:ikonaro`, `check:fontoj`, `check:tiparoj`, `check:make-kit`, `check:quickstart`, `check:release`; `check:parity` 0 Fehler (659 freigegebene wie vorher); `check:alirebleco` 280 Paare × 72, alle WCAG-Schwellen, 8496 beratende APCA-Hinweise (B-1b-1); `check:alirebleco-eroj` 633/633; `check:vitrino` 56/56.
+- **`perf` rot wie auf `main`:** der erste Aufruf von `check_contrast` 109,7 ms, alle weiteren 6,8–21,9 ms. Kein Budget angehoben.
+- **komuna-0-2** unverändert: die 72 Hashes über alle aufgelösten Werte gleich mit komuna von `main` (`fonto/komuna-0-2.test.ts`); ekzemplo, provo, provo-kompakta je Kombination gleich (`fonto/komuna-fonto.test.ts`).
+- **Nachvollzug:** ein zweiter Lauf von Vergleich, Regeln und Generator schreibt Kern und Herkunft byte-gleich.
+
+### Messanleitung ①b
+
+Im Checkout des Maintainers, auf dem Branch dieses PR:
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+git fetch && git switch 261023-spec-029-fonto-astryx-grundlagen && git pull
+pnpm install && pnpm build
+pnpm fm projekcioj build --config packages/modelo/test/fixtures/valid/aspekto-provo-kompakta/fundamento.cxiuj.config.json --out .fundamento/projekcioj-cxiuj
+```
+
+**1. Vergleichsseite (Abnahme ①b).** Lokal, nicht veröffentlicht. Einmal die Fonto als devDependency des Vergleichs installieren, dann Vergleich und Gründe:
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+npm ci --prefix scripts/fonto-astryx/vergleich
+node scripts/fonto-astryx/vergleich/vergleich.mjs
+node scripts/fonto-astryx/eroj.mjs > /tmp/eroj.json && node scripts/fonto-astryx/vergleich/gruende.mjs /tmp/eroj.json
+open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/vergleich/index.html"
+```
+
+Die Seite: [file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/vergleich/index.html](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/vergleich/index.html). Je Ero (Sprungmarken oben) links Fundamento, rechts die Fonto, hell und dunkel, in jedem Zustand mit Gegenstück; darunter (aufklappen) die gemessenen Stile – Höhe, Innenabstand, Radius, Rand, Randfarbe, Fläche, Schriftfarbe, Schriftgröße –, oben Fundamento, unten die Fonto, gelb wo sie abweichen, mit Grund. Zuerst `butono`, `kampo`, `karto`, `dialogo`. Die Schrift ist absichtlich verschieden (Geist bei komuna, Figtree bei der Fonto).
+
+**2. Werte neu erzeugen (Nachvollzug).** Nach der Messung, in dieser Reihenfolge; erwartet: keine Änderung gegenüber dem Branch.
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+echo '{}' > scripts/fonto-astryx/anpassoj-eroj.json
+node scripts/fonto-astryx/eroj-regeln.mjs
+node scripts/fonto-astryx/eroj.mjs > /tmp/eroj.json
+npx biome format --write packages/vortaro/sets/core.json packages/aspekto-komuna
+git status --short
+```
+
+**3. Vitrino und Figma (Abnahme ①b).** [file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj-cxiuj/vitrino/index.html#aspekto=komuna](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj-cxiuj/vitrino/index.html#aspekto=komuna) – butono ohne Icon, darunter die Zeile „mit Icon“; deaktiviert blass mit lesbarem Text. Figma: wie Punkt 5 der Messanleitung ① in einer **neuen leeren Datei**, Plugin „Fundamento Grundlagen 0.2.0 (… · komuna, ekzemplo, provo, provo-kompakta, komuna-0-2)“; die Varianten des butono, kampo, karto und dialogo zeigen die neuen Werte.
+
+**4. komuna-0-2 pixelgleich:** wie Punkt 2 der Messanleitung ① (`pixelvergleich.mjs`).
+
+**Tests:**
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm --filter @fundamento/projekcioj exec vitest run src/fonto src/celoj/vitrino/datumoj.test.ts
+cd packages/eroj && npx playwright test test/butono.spec.ts --project=chromium
+```

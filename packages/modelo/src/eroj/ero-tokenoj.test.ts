@@ -135,6 +135,11 @@ describe("the derivation of the Ero-Tokens from a Skemo (Art. II: mechanical)", 
 describe("the core carries the third level (migration as alias, Art. IV)", () => {
   it("defines every derived Ero-Token with its type, an ID in the lock and the alias the Skemo binds", () => {
     const missing: string[] = [];
+    // Spec 029 ①b: komuna, the reference whose values live in the core, sets the Ero-Tokens with a
+    // counterpart in the Fonto (each with its origin in deveno.json); every other one is the alias.
+    const fromFonto = new Set(
+      (modelo.deveno ?? []).filter((entry) => entry.aro === "core").map((entry) => entry.token),
+    );
     for (const token of eroTokenojOfModelo(modelo)) {
       const defined = core.tokens[token.name];
       if (defined === undefined) {
@@ -142,7 +147,7 @@ describe("the core carries the third level (migration as alias, Art. IV)", () =>
         continue;
       }
       if (defined.type !== token.type) missing.push(`${token.name} type ${defined.type}`);
-      if (defined.value !== `{${token.alias}}`)
+      if (defined.value !== `{${token.alias}}` && !fromFonto.has(token.name))
         missing.push(`${token.name} value ${JSON.stringify(defined.value)}`);
       if (!/^tok_[0-9A-Z]{26}$/.test(defined.id ?? "")) missing.push(`${token.name} id`);
       else if (modelo.idsLock.ids[defined.id ?? ""]?.status !== "active")
@@ -182,10 +187,15 @@ describe("the core carries the third level (migration as alias, Art. IV)", () =>
     ).modelo;
     if (provoj === undefined) throw new Error("provoj");
     const differences: string[] = [];
+    // Spec 029 ①b: the Ero-Tokens komuna takes from the Fonto (deveno.json) depart from their role.
+    const fromFonto = new Set(
+      (provoj.deveno ?? []).map((entry) => entry.token).filter((name) => name.startsWith("ero.")),
+    );
     for (const aspekto of ["komuna", "provo", "provo-kompakta"]) {
       for (const scheme of ["light", "dark"]) {
         const { tokens } = resolveCombination(provoj, { aspekto, "color-scheme": scheme });
         for (const token of eroTokenojOfModelo(provoj)) {
+          if (aspekto === "komuna" && fromFonto.has(token.name)) continue;
           const own = tokens[token.name];
           const target = tokens[token.alias];
           if (JSON.stringify(own?.value) !== JSON.stringify(target?.value))

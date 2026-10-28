@@ -52,3 +52,25 @@
 | Commits | rot `2b44898`, grün im Folgecommit (Hash im PR) |
 | Rot gemessen | 44 Tests in 13 Dateien |
 | Grün gemessen | siehe plan, Messungen |
+
+## ①b Werte je Komponente aus der Fonto, weiße Flächen (Briefing A ①b, 27.10.)
+
+**Branch:** `261023-spec-029-fonto-astryx-grundlagen`, neu aufgesetzt auf `main` nach #112 (`3dbb482`). Briefing [`briefing-a-1b-2026-10-27.md`](briefing-a-1b-2026-10-27.md) unverändert kopiert.
+
+- [x] **T2930 Neu aufsetzen** auf `main` nach #112: Konflikte nur in Tests, Zählungen und Listen (Doku-Test Spec 029/030 nebeneinander, Regelkatalog 190, Schema mit `nordstelo.json` und `fontoj.json`, Workspace mit nordstelo und komuna-0-2); volle Suite grün.
+- [x] **T2931 Rote Tests a), c), d)** in `92e9e98`: Weiß erlaubt (Flächen, Aspiro bei komuna-0-2, J1), deaktivierter butono lesbar im Browser (1,00:1 bei high), Vitrino ohne Icon mit Zeile „mit Icon“.
+- [x] **T2932 a) Weiß erlaubt:** Aspiro `oklch-l-extreme` nur noch bei komuna-0-2; `anpassoj.json` (Karte weiß, Fläche 97,5, vertiefte Fläche 90, inverse Fläche dunkel weiß, gedrückt hell Schwarz), J1 und J5 neu begründet; neu erzeugt.
+- [x] **T2933 d) Vitrino:** Kombinationszeilen ohne Icon, Zeile „mit Icon“ (butono, ligilo, signeto).
+- [x] **T2934 Rote Tests b)** in `8f645c8` (8 von 8) und Doku-Test in `ebecd32`.
+- [x] **T2935 e) Vergleich** `scripts/fonto-astryx/vergleich/`: eigenes Paket `@fundamento/fonto-vergleich` (privat, die Fonto 0.7.4 und React nur dort, Integrität wie im Register), 40 Fall-Dateien, Messung beider Seiten je Kombination, Zustand und Modus, Bilder, Seite mit Tabelle und Gründen (`gruende.mjs`).
+- [x] **T2936 b) Ero-Tokens:** `eroj.mjs` (Ableitung als Alias, Herkunft je Wert, Regeln) und `eroj-regeln.mjs` (Prüfschleife mit `check:alirebleco`); hell im Kern, dunkel im Dunkel-Set von komuna; Jugxoj J9–J15.
+- [x] **T2937 c) Fehler** über b): deaktivierter butono high mit weißer Schrift auf grauer Fläche (3,15:1).
+- [x] **T2938 Projekcioj:** Figma liest Farbe und Maß aus dem Ero-Token (vorher aus der Rolle; bindend war schon der Ero-Token); die Fonto-Ausnahme von `check:clean-room` parst jedes Set einmal (10,7 s → 2 s).
+- [x] **T2939 Bestehende Tests nachgezogen**, wo sie Werte der Rollen statt der Ero-Tokens von komuna festhielten (AK-03 je Ero, Figma-Plan, Vitrino-Zählungen, Spec 024 M-3, Export).
+
+### Messungen ①b
+
+| Was | Wert |
+|---|---|
+| Commits | rot `92e9e98` (a, c, d), `8f645c8` (b), `ebecd32` (Doku); grün im Folgecommit (Hash im PR) |
+| Ero-Tokens mit Wert der Fonto | siehe plan ①b |

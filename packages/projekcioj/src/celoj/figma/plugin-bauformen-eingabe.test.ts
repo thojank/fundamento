@@ -721,8 +721,9 @@ describe("the dialogo is drawn as a dialog: surface with heading, message, reaso
     expect(dialogo?.layout.uneven).toEqual([]);
     expect(report.warnings.filter((warning) => warning.startsWith("dialogo"))).toEqual([]);
     expect(report.warnings.filter((warning) => warning.startsWith("tekstareo"))).toEqual([]);
-    // The parts of the first variant in the report: the surface at size.container.small.
-    expect(dialogo?.layout.held.rest.surface).toMatchObject({ width: 640 });
+    // The parts of the first variant in the report: the surface at the width of the Fonto's dialog
+    // (Spec 029 ①b: komuna's Ero-Token, 400 px; size.container.small before).
+    expect(dialogo?.layout.held.rest.surface).toMatchObject({ width: 400 });
     expect(dialogo?.layout.held.rest.heading).toBeDefined();
     expect(dialogo?.layout.held.rest.actions).toBeDefined();
   });

@@ -1,7 +1,7 @@
 // fm-butono in the browser (Spec 003 T011; FR-07, plan D-07, AK-03 for the component, WCAG 2.5.8).
 // Chromium, Firefox and WebKit (playwright.config.ts).
 
-import { boundToken, combinationsOf } from "@fundamento/modelo";
+import { boundToken, combinationsOf, eroTokenOf } from "@fundamento/modelo";
 import { expect, test } from "@playwright/test";
 
 /** WebKit on macOS moves Tab focus to buttons only with Alt+Tab (system default). */
@@ -207,9 +207,13 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
         });
         if (state === "pressed") await page.mouse.up();
         const combination = { ...c, state };
+        // Spec 029 ①b: a part reads its Ero-Token (Art. IV, v2.3); komuna sets its own values
+        // there, every other brand keeps the alias of the binding.
         const token = (part: string, property: string) => {
-          const bound = boundToken(skemo, part, property, combination);
-          const value = bound === undefined ? undefined : rezolvo.tokens[bound.token]?.value;
+          const bound =
+            eroTokenOf(butono, part, property, combination) ??
+            boundToken(skemo, part, property, combination)?.token;
+          const value = bound === undefined ? undefined : rezolvo.tokens[bound]?.value;
           if (value === undefined)
             throw new Error(`${part}.${property} unbound in ${JSON.stringify(combination)}`);
           return value;

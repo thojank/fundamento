@@ -203,7 +203,10 @@ test("the contrast table shows WCAG, APCA and the change against the comparison 
     // Spec 029 ① gives komuna the values of the Fonto (2394 → 2646): text-normal falls from 2358 to
     // 2286, ui rises from 36 to 360 (the field and inverse borders the rules moved to 3:1 WCAG stay
     // below the advisory APCA band; plan, B-5). The snapshot of the comparison state stays at 1296.
-    "In den 72 Kombinationen des Vergleichsstands: 2646 gegen 1296 (Veränderung +1350)",
+    // Spec 029 ①b gives the Ero-Tokens of komuna the values of the Fonto: their pairs are evaluated
+    // beside the declared ones (eroKontrastParojOf, 89 → 280 pairs), every one advisory where it
+    // misses the APCA band (2646 → 8496; plan ①b, B-1b-1).
+    "In den 72 Kombinationen des Vergleichsstands: 8496 gegen 1296 (Veränderung +7200)",
   );
 });
 
@@ -1428,7 +1431,8 @@ test("fm-signeto, fm-listelektilo, fm-plurelektilo and fm-lokredaktilo are upgra
   page,
 }) => {
   await open(page);
-  await expect(page.locator("#fm-vitrino-signeto fm-signeto")).toHaveCount(20);
+  // Spec 029 ①b d): five more in the row „mit Icon“.
+  await expect(page.locator("#fm-vitrino-signeto fm-signeto")).toHaveCount(25);
   const tag = page.locator("#fm-vitrino-signeto fm-signeto[mode='selectable']").first();
   const pressed = await tag.evaluate((host) => host.hasAttribute("selected"));
   await tag.locator('[part="body"]').click();

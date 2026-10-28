@@ -186,8 +186,13 @@ test.describe("fm-dialogo behaviour", () => {
         const root = getComputedStyle(document.documentElement);
         return {
           width: control.getBoundingClientRect().width,
-          small: Number.parseFloat(root.getPropertyValue("--fm-size-container-small")),
-          medium: Number.parseFloat(root.getPropertyValue("--fm-size-container-medium")),
+          // Spec 029 ①b: the width is the Ero-Token of the dialogo (komuna: 400 px of the Fonto).
+          small: Number.parseFloat(
+            root.getPropertyValue("--fm-ero-dialogo-surface-width-size-small"),
+          ),
+          medium: Number.parseFloat(
+            root.getPropertyValue("--fm-ero-dialogo-surface-width-size-medium"),
+          ),
           shadow: style.boxShadow,
           backdrop: getComputedStyle(control, "::backdrop").backgroundColor,
           fill: style.backgroundColor,

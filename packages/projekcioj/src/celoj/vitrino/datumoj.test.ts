@@ -102,7 +102,15 @@ describe("the sections of FR-06", () => {
       .map((dimensio) => first?.combination[dimensio.name] ?? "")
       .join("|");
     const rows = datumoj.mezuroj[key] ?? [];
-    expect(rows.length).toBe(modelo.kontrastParoj.length);
+    // Spec 029 ①b: the declared pairs and the pairs of the Ero-Tokens komuna sets to its own values.
+    const sameCombination = (evaluation.measurements ?? []).filter(
+      (measurement) =>
+        modelo.dimensioj
+          .map((dimensio) => measurement.combination[dimensio.name] ?? "")
+          .join("|") === key,
+    );
+    expect(rows.length).toBeGreaterThanOrEqual(modelo.kontrastParoj.length);
+    expect(rows.length).toBe(sameCombination.length);
     const row = rows.find((entry) => entry.paro === first?.pair.name);
     expect(row?.wcag2).toBeCloseTo(first?.main.ratio ?? 0, 1);
     expect(row?.apca).not.toBe(0);
@@ -222,8 +230,9 @@ describe("the sections of FR-06", () => {
       (entry) => entry.dimensio === "color-scheme" && entry.valoro === "dark",
     );
     // Spec 029 ①: komuna states every colour role, the steps of the dark ramps and the shadows.
-    expect(dark?.propraj).toBe(94);
-    expect(dark?.entute).toBe(94);
+    // Spec 029 ①b: and the Ero-Tokens whose dark value komuna takes from the Fonto.
+    expect(dark?.propraj).toBeGreaterThanOrEqual(94);
+    expect(dark?.entute).toBe(dark?.propraj);
     expect(coverage.some((entry) => entry.dimensio === "motion")).toBe(true);
   });
 });

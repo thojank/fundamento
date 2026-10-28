@@ -4,7 +4,7 @@
 // placeholder as a disabled first option while nothing is chosen. The list that opens is the
 // platform's: no popup of the Ero's own, no state open (E3). Chromium, Firefox and WebKit.
 
-import { boundToken, combinationsOf } from "@fundamento/modelo";
+import { boundToken, combinationsOf, eroTokenOf } from "@fundamento/modelo";
 import { expect, test } from "@playwright/test";
 import { TAB } from "./alirebleco.js";
 import { buildProjections, serve } from "./serve.js";
@@ -277,8 +277,11 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
       aspekto,
     );
     const token = (part: string, property: string, combination: Record<string, string>) => {
-      const bound = boundToken(skemo, part, property, combination);
-      const value = bound === undefined ? undefined : rezolvo.tokens[bound.token]?.value;
+      // Spec 029 ①b: the part reads its Ero-Token; komuna sets its own values there.
+      const bound =
+        eroTokenOf(elektilo, part, property, combination) ??
+        boundToken(skemo, part, property, combination)?.token;
+      const value = bound === undefined ? undefined : rezolvo.tokens[bound]?.value;
       if (value === undefined)
         throw new Error(`${part}.${property} unbound in ${JSON.stringify(combination)}`);
       return value;
