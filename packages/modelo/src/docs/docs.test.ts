@@ -4066,4 +4066,23 @@ describe("Spec 033 documentation (specs/033-markenassistent)", () => {
     }
     expect(read("specs/033-markenassistent/tasks.md")).toContain("## S5");
   });
+
+  it("S6 (Schätzung und Zähler): the plan names the price data, the bases and Abnahme 5 with its measurement", () => {
+    const plan = read("specs/033-markenassistent/plan.md");
+    const s6 = plan.slice(plan.indexOf("## S6"));
+    for (const term of [
+      "prezoj.json",
+      "takso.json",
+      "Nordstern",
+      "Abnahme 5",
+      "±50 %",
+      "Tokens",
+      "Kosten",
+      "Dauer",
+      "### Messanleitung",
+    ]) {
+      expect(s6, term).toContain(term);
+    }
+    expect(read("specs/033-markenassistent/tasks.md")).toContain("## S6");
+  });
 });
