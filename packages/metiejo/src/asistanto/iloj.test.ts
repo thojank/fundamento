@@ -57,14 +57,18 @@ describe("the tools of the assistant (Spec 033 S1)", () => {
   it("regler lists the sliders of a Faceto with range, standard and value", async () => {
     const { work } = laborejo();
     const result = await call(work, "regler", { faceto: "formo" });
-    const paths = (result.regler as { path: string; min: number; max: number }[]).map((r) => r.path);
+    const paths = (result.regler as { path: string; min: number; max: number }[]).map(
+      (r) => r.path,
+    );
     expect(paths).toEqual(["form.radius", "form.rahmen"]);
   });
 
   it("bewege moves sliders by a wish of the vocabulary; a word it does not know moves nothing", async () => {
     const { work, applied } = laborejo();
     const result = await call(work, "bewege", { wunsch: "runder" });
-    expect(result.bewegt).toEqual(expect.arrayContaining([expect.objectContaining({ regler: "form.radius" })]));
+    expect(result.bewegt).toEqual(
+      expect.arrayContaining([expect.objectContaining({ regler: "form.radius" })]),
+    );
     expect(applied.at(-1)).toContain("formo");
     const unknown = await call(work, "bewege", { wunsch: "glitzernder" });
     expect(unknown.bewegt).toEqual([]);
@@ -85,11 +89,17 @@ describe("the tools of the assistant (Spec 033 S1)", () => {
 
   it("setze_farbe sets the lead or a status colour and refuses what is no colour", async () => {
     const { work, agordo } = laborejo();
-    expect((await call(work, "setze_farbe", { rolle: "leitfarbe", farbe: "#d0602f" })).ok).toBe(true);
+    expect((await call(work, "setze_farbe", { rolle: "leitfarbe", farbe: "#d0602f" })).ok).toBe(
+      true,
+    );
     expect(agordo().leitfarbe).toBe("#d0602f");
-    expect((await call(work, "setze_farbe", { rolle: "danger", farbe: "oklch(0.55 0.2 25)" })).ok).toBe(true);
+    expect(
+      (await call(work, "setze_farbe", { rolle: "danger", farbe: "oklch(0.55 0.2 25)" })).ok,
+    ).toBe(true);
     expect(agordo().zusatzfarben?.danger).toBe("oklch(0.55 0.2 25)");
-    expect((await call(work, "setze_farbe", { rolle: "leitfarbe", farbe: "warmes Rot" })).ok).toBe(false);
+    expect((await call(work, "setze_farbe", { rolle: "leitfarbe", farbe: "warmes Rot" })).ok).toBe(
+      false,
+    );
     expect((await call(work, "setze_farbe", { rolle: "text", farbe: "#000000" })).ok).toBe(false);
   });
 

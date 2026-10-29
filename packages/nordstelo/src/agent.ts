@@ -5,105 +5,24 @@
 // field and never written: not in a log line, not in an error, not in a result. A budget of tokens
 // stops a run before a call that would pass it (Kostengrenze).
 
-export type ProviderName = "mistral" | "openai" | "openrouter";
+import {
+  Budget,
+  type ChatMessage,
+  CostLimitReached,
+  chatCompletion,
+  type Fetch,
+  functionOf,
+  KEY_NAMES,
+  Provider,
+  type ProviderName,
+  providerOf,
+  type ToolInfo,
+} from "@fundamento/metiejo";
 
-const BASE_URLS: Record<ProviderName, string> = {
-  mistral: "https://api.mistral.ai/v1",
-  openai: "https://api.openai.com/v1",
-  openrouter: "https://openrouter.ai/api/v1",
-};
-
-const KEY_NAMES: Record<ProviderName, string> = {
-  mistral: "MISTRAL_API_KEY",
-  openai: "OPENAI_API_KEY",
-  openrouter: "OPENROUTER_API_KEY",
-};
-
-export class Provider {
-  readonly #key: string;
-  readonly name: ProviderName;
-  readonly model: string;
-  readonly baseUrl: string;
-
-  constructor(name: ProviderName, model: string, key: string) {
-    this.name = name;
-    this.model = model;
-    this.baseUrl = BASE_URLS[name];
-    this.#key = key;
-  }
-
-  authorization(): string {
-    return `Bearer ${this.#key}`;
-  }
-
-  /** Replaces the key wherever a text of the provider repeats it. */
-  redact(text: string): string {
-    return this.#key === "" ? text : text.split(this.#key).join("‹Schlüssel›");
-  }
-
-  toString(): string {
-    return `${this.name}/${this.model}`;
-  }
-
-  toJSON(): { name: ProviderName; model: string; baseUrl: string } {
-    return { name: this.name, model: this.model, baseUrl: this.baseUrl };
-  }
-}
-
-/** The provider of the settings; an error names the variable that is missing, never a value. */
-export function providerOf(values: Readonly<Record<string, string | undefined>>): Provider {
-  const name = (values.FM_KI_ANBIETER ?? "").trim().toLowerCase();
-  if (!(name in BASE_URLS)) {
-    throw new Error(`FM_KI_ANBIETER muss mistral, openai oder openrouter sein (in der .env).`);
-  }
-  const provider = name as ProviderName;
-  const model = (values.FM_KI_MODELL ?? "").trim();
-  if (model === "") throw new Error("FM_KI_MODELL fehlt in der .env.");
-  const key = values[KEY_NAMES[provider]] ?? "";
-  if (key === "") throw new Error(`${KEY_NAMES[provider]} fehlt in der .env.`);
-  return new Provider(provider, model, key);
-}
-
-export class CostLimitReached extends Error {
-  constructor(
-    readonly limit: number,
-    readonly spent: number,
-  ) {
-    super(`Kostengrenze ${limit} Tokens erreicht (verbraucht: ${spent}).`);
-    this.name = "CostLimitReached";
-  }
-}
-
-/** Tokens of a run or of a whole Lauf; one Budget can be shared by every call. */
-export class Budget {
-  spent = 0;
-  input = 0;
-  output = 0;
-  /** The most one call has cost so far: the estimate of the next. */
-  largestCall = 0;
-
-  constructor(readonly limit: number) {}
-
-  charge(input: number, output: number): void {
-    this.input += input;
-    this.output += output;
-    this.spent += input + output;
-    this.largestCall = Math.max(this.largestCall, input + output);
-  }
-
-  /** Throws before a call whose estimated cost would pass the limit. */
-  ensure(estimate = this.largestCall): void {
-    if (this.spent + estimate > this.limit || this.spent >= this.limit) {
-      throw new CostLimitReached(this.limit, this.spent);
-    }
-  }
-}
-
-export interface ToolInfo {
-  name: string;
-  description?: string;
-  inputSchema: Record<string, unknown>;
-}
+export type { Fetch, ProviderName, ToolInfo };
+// Spec 033 S1: provider, key, budget and the request with its waits live in @fundamento/metiejo,
+// shared with the Asistanto; this module keeps its names for the run and the tests.
+export { Budget, CostLimitReached, KEY_NAMES, Provider, providerOf };
 
 /** The Gvidanto as the agent sees it: the list of tools and a call that returns text. */
 export interface ToolBridge {
@@ -112,8 +31,6 @@ export interface ToolBridge {
   /** The prompt of the server that says how to use the tools (MCP prompt gvidanto). */
   prompt?(): Promise<string>;
 }
-
-export type Fetch = (url: string, init: RequestInit) => Promise<Response>;
 
 export interface AgentOptions {
   provider: Provider;
@@ -168,27 +85,6 @@ export const SYSTEM_F = [
 export const PROMPT_0 =
   "Baue es als HTML. Antworte nur mit dem HTML-Dokument in einem ```html-Block.";
 
-interface ChatMessage {
-  role: "system" | "user" | "assistant" | "tool";
-  content: string;
-  tool_calls?: { id: string; type: "function"; function: { name: string; arguments: string } }[];
-  tool_call_id?: string;
-  name?: string;
-}
-
-interface ChatReply {
-  choices?: { message?: ChatMessage }[];
-  usage?: { prompt_tokens?: number; completion_tokens?: number };
-}
-
-const sleep = (ms: number) => new Promise<void>((done) => setTimeout(done, ms));
-
-/** The first wait after a refused request, doubled after every further one up to the last. */
-const FIRST_WAIT = 2_000;
-const LAST_WAIT = 300_000;
-/** Attempts after a server error, a timeout or an answer without a message (429 has no end). */
-const TRANSIENT_ATTEMPTS = 3;
-
 type Schema = Record<string, unknown>;
 
 /**
@@ -212,19 +108,6 @@ export function providerSchema(schema: Schema): Schema {
       : [...(sets[0] ?? [])].filter((name) => sets.every((set) => set.has(name)));
   const required = [...new Set([...requiredOf(rest), ...fromBranches])];
   return { ...rest, type: "object", properties, ...(required.length === 0 ? {} : { required }) };
-}
-
-function functionOf(tool: ToolInfo) {
-  return {
-    type: "function" as const,
-    function: {
-      name: tool.name,
-      description: (tool.description ?? "").slice(0, 1000),
-      // Nachlese 11 B-3: the Gvidanto lists one object at the root; an older system (Nachlese 12 ②)
-      // is merged into one.
-      parameters: providerSchema(tool.inputSchema),
-    },
-  };
 }
 
 /**
@@ -266,7 +149,11 @@ async function runAgentInner(options: AgentOptions, spent: AgentEffort): Promise
     const guide = (await options.tools.prompt?.()) ?? "";
     messages.push({ role: "system", content: guide === "" ? SYSTEM_F : `${SYSTEM_F}\n\n${guide}` });
     messages.push({ role: "user", content: task });
-    tools = (await options.tools.list()).map(functionOf);
+    // Nachlese 11 B-3: the Gvidanto lists one object at the root; an older system (Nachlese 12 ②)
+    // is merged into one.
+    tools = (await options.tools.list()).map((tool) =>
+      functionOf({ ...tool, inputSchema: providerSchema(tool.inputSchema) }),
+    );
   } else {
     messages.push({ role: "user", content: `${task}\n\n${PROMPT_0}` });
   }
@@ -276,85 +163,32 @@ async function runAgentInner(options: AgentOptions, spent: AgentEffort): Promise
   let outputTokens = 0;
   let toolCalls = 0;
   let requests = 0;
-  const wait = options.sleep ?? sleep;
-
   const call = async (offerTools: boolean): Promise<ChatMessage> => {
-    budget.ensure();
-    const body = {
-      model: provider.model,
-      messages,
-      ...(offerTools && tools !== undefined && tools.length > 0
-        ? { tools, tool_choice: "auto" }
-        : {}),
-      temperature: 0.2,
-    };
-    // Nachlese 11 ④: on 429 the run waits with a growing interval and tries again, without end;
-    // a server error, a timeout or an answer without a message a few times.
-    let delay = FIRST_WAIT;
-    let transient = 0;
-    const again = async (why: string): Promise<void> => {
-      log(`Anbieter ${provider.name}: ${why}, neuer Versuch in ${Math.round(delay / 1000)} s`);
-      await wait(delay);
-      delay = Math.min(delay * 2, LAST_WAIT);
-    };
-    for (;;) {
-      await options.gate?.pass();
-      requests += 1;
-      spent.requests = requests;
-      let response: Response;
-      let text: string;
-      try {
-        response = await request(`${provider.baseUrl}/chat/completions`, {
-          method: "POST",
-          headers: { "content-type": "application/json", authorization: provider.authorization() },
-          body: JSON.stringify(body),
-          signal: AbortSignal.timeout(options.timeout ?? 180_000),
-        });
-        // OpenRouter sends its headers at once and the answer later: the timeout falls on the body
-        // (measured on 27.10.), so reading it belongs to the attempt.
-        text = await response.text();
-      } catch (error) {
-        const timedOut = error instanceof Error && error.name === "TimeoutError";
-        if (timedOut && transient < TRANSIENT_ATTEMPTS) {
-          transient += 1;
-          await again("keine Antwort in der Zeit");
-          continue;
-        }
-        throw error;
-      }
-      if (!response.ok) {
-        if (response.status === 429) {
-          await again("antwortet 429");
-          continue;
-        }
-        if (response.status >= 500 && transient < TRANSIENT_ATTEMPTS) {
-          transient += 1;
-          await again(`antwortet ${response.status}`);
-          continue;
-        }
-        throw new Error(
-          `Anbieter ${provider.name} antwortet ${response.status}: ${provider.redact(text).slice(0, 300)}`,
-        );
-      }
-      const reply = JSON.parse(text) as ChatReply;
-      const input = reply.usage?.prompt_tokens ?? 0;
-      const output = reply.usage?.completion_tokens ?? 0;
-      inputTokens += input;
-      outputTokens += output;
-      spent.inputTokens = inputTokens;
-      spent.outputTokens = outputTokens;
-      budget.charge(input, output);
-      const message = reply.choices?.[0]?.message;
-      if (message === undefined) {
-        if (transient < TRANSIENT_ATTEMPTS) {
-          transient += 1;
-          await again("Antwort ohne Nachricht");
-          continue;
-        }
-        throw new Error(`Anbieter ${provider.name}: Antwort ohne Nachricht.`);
-      }
-      return message;
-    }
+    const result = await chatCompletion(
+      provider,
+      {
+        messages,
+        ...(offerTools && tools !== undefined && tools.length > 0
+          ? { tools, tool_choice: "auto" }
+          : {}),
+        temperature: 0.2,
+      },
+      budget,
+      {
+        fetch: request,
+        timeout: options.timeout ?? 180_000,
+        ...(options.gate === undefined ? {} : { gate: options.gate }),
+        ...(options.sleep === undefined ? {} : { sleep: options.sleep }),
+        log,
+      },
+    );
+    requests += result.requests;
+    inputTokens += result.input;
+    outputTokens += result.output;
+    spent.requests = requests;
+    spent.inputTokens = inputTokens;
+    spent.outputTokens = outputTokens;
+    return result.message;
   };
 
   let answer = "";

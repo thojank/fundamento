@@ -39,7 +39,9 @@ function scripted(replies: Reply[]) {
       body: JSON.parse(String(init.body)) as Record<string, unknown>,
       authorization: headers.authorization ?? "",
     });
-    const reply = replies.shift() ?? { body: { choices: [{ message: { role: "assistant", content: "…" } }] } };
+    const reply = replies.shift() ?? {
+      body: { choices: [{ message: { role: "assistant", content: "…" } }] },
+    };
     return new Response(typeof reply.body === "string" ? reply.body : JSON.stringify(reply.body), {
       status: reply.status ?? 200,
     });
@@ -53,7 +55,9 @@ const toolCall = (name: string, args: Record<string, unknown>) => ({
       message: {
         role: "assistant",
         content: "",
-        tool_calls: [{ id: "c1", type: "function", function: { name, arguments: JSON.stringify(args) } }],
+        tool_calls: [
+          { id: "c1", type: "function", function: { name, arguments: JSON.stringify(args) } },
+        ],
       },
     },
   ],
@@ -85,14 +89,46 @@ describe("one turn of the chat (Spec 033 S1)", () => {
     expect(agordo().form?.radius ?? 1).toBeGreaterThan(1);
     expect(result.kosto).toMatchObject({ enigo: 1900, eligo: 70, requests: 2 });
     expect(result.iloj.map((entry) => entry.name)).toEqual(["bewege"]);
-    const offered = (requests[0]?.body.tools as { function: { name: string } }[]).map((t) => t.function.name);
+    const first = requests[0];
+    if (first === undefined) throw new Error("no request");
+    const offered = (first.body.tools as { function: { name: string } }[]).map(
+      (t) => t.function.name,
+    );
     expect(offered).toContain("setze_regler");
     expect(offered).not.toContain("setze_token");
     expect(requests[0]?.body.model).toBe("ministral-14b-2512");
-    const system = (requests[0]?.body.messages as { role: string; content: string }[])[0];
+    const system = (first.body.messages as { role: string; content: string }[])[0];
     expect(system?.role).toBe("system");
     expect(system?.content).toContain("Werkzeuge");
     expect(system?.content).toContain("Freigabe");
+  });
+
+  // Probe run 29.10. (nemotron :free): after a tool the model answered with nothing.
+  it("an empty answer becomes a sentence: what changed, or that nothing did and how to say it", async () => {
+    const { work } = laborejo();
+    const { fetch } = scripted([
+      { body: toolCall("bewege", { wunsch: "runder" }) },
+      { body: answer("") },
+      { body: answer("   ") },
+    ]);
+    const changed = await babili({
+      provider,
+      fetch,
+      laborejo: work,
+      historio: [],
+      teksto: "runder",
+      budget: new Budget(20_000),
+    });
+    expect(changed.antwort).toContain("Form (Radien)");
+    const nothing = await babili({
+      provider,
+      fetch,
+      laborejo: work,
+      historio: [],
+      teksto: "hm",
+      budget: new Budget(20_000),
+    });
+    expect(nothing.antwort).toMatch(/nichts geändert/);
   });
 
   it("on 429 the turn waits, says so, and goes on", async () => {

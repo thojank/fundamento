@@ -683,8 +683,10 @@ describe("Spec 004 documentation (T001, Art. V Benchmark-Aspekto)", () => {
   // 8915fa6 mit v2.2 und den offenen PR #100 (O-1), der keine Nummer beansprucht.
   // Seit Spec 029 ① (Amendment v2.4, freigegeben am 2026-10-23, 21:56) 2.4: bestimmt gegen main
   // d29a5206 mit v2.3; die Spec nennt die Nummer.
-  it("the Constitution header says version 2.4 and the history names v2.3 with the Ero-Tokens", () => {
-    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.4 · /);
+  // Seit Spec 033 S1 (Amendment v2.5, freigegeben am 2026-10-24, 13:41) 2.5: bestimmt gegen main
+  // 05f122dc mit v2.4 und ohne offenen PR; die Spec nennt die Nummer.
+  it("the Constitution header says version 2.5 and the history names v2.3 with the Ero-Tokens", () => {
+    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.5 · /);
     expect(constitution).toContain("v2.3 (Spec 024");
     expect(constitution).toContain("Terminologie **Ero-Tokeno**");
   });
@@ -3379,7 +3381,10 @@ describe("Spec 029 ① documentation (specs/029-fonto-astryx)", () => {
 
   it("the Constitution is v2.4 with the Fonto in Art. V, VII, the terminology and the history", () => {
     const constitution = read(".specify/memory/constitution.md");
-    expect(constitution).toContain("Version 2.4 · 2026-10-23");
+    // Since Spec 033 S1 the header says 2.5; v2.4 stands in the history.
+    expect(constitution).toContain(
+      "v2.4 (Spec 029, freigegeben vom Maintainer am 2026-10-23, 21:56)",
+    );
     expect(constitution).toContain("**Fonto (offene Quelle).**");
     expect(constitution).toContain("| **Fonto** |");
     expect(constitution).toContain("die Fonto-ID und den Quellpfad (Datei, Schlüssel)");

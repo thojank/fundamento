@@ -220,12 +220,13 @@
         "celo",
         "ikono",
         "tasko",
-        "kriterio"
+        "kriterio",
+        "faceto"
       ]
     },
     "AnyId": {
       "type": "string",
-      "pattern": "^(tok|set|dim|dva|reg|jug|man|kpa|ero|ske|uzo|sxa|prj|cel|iko|tsk|kri)_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^(tok|set|dim|dva|reg|jug|man|kpa|ero|ske|uzo|sxa|prj|cel|iko|tsk|kri|fac)_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "TokenId": {
       "type": "string",
@@ -4488,6 +4489,10 @@
       "type": "string",
       "pattern": "^kri_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
+    "FacetoId": {
+      "type": "string",
+      "pattern": "^fac_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
     "NordsteloTeksto": {
       "description": "A text in German and English (Spec 030): the task as a person would say it, or the criterion as the maintainer reads it.",
       "type": "object",
@@ -4681,6 +4686,161 @@
         }
       },
       "required": ["taskoj", "pezoj"],
+      "additionalProperties": false
+    },
+    "FacetojFile": {
+      "description": "data/facetoj.json: the brand model, scope 1 (Spec 033 S1) – every visual aspect of a brand as a Faceto of the layer vida, with its weight and Kialo, the tokens it owns and the fields of the Agordo that define it; absent while there is none.",
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tavolo": {
+          "description": "The layer of the Aspekto this list covers (Tavolo); scope 1 is vida, the visual layer.",
+          "type": "string",
+          "enum": ["vida"]
+        },
+        "facetoj": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Faceto"
+          }
+        }
+      },
+      "required": ["tavolo", "facetoj"],
+      "additionalProperties": false
+    },
+    "Faceto": {
+      "description": "One visual aspect of a brand (Spec 033 S1): open (the value of the base), defined or released in the assistant. Owns the core tokens whose name starts with one of `tokenoj` (whole segments); an Ero-Tokeno belongs to the Faceto its alias chain leads to. A Faceto without tokens is a choice of Dimensioj (`dimensioj`).",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/FacetoId"
+        },
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "nomo": {
+          "$ref": "#/$defs/NordsteloTeksto"
+        },
+        "pezo": {
+          "description": "The weight of the Faceto in the completeness.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "kialo": {
+          "description": "Why the Faceto weighs what it weighs (Art. VI).",
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "tokenoj": {
+          "description": "Token-name prefixes, whole segments (`color.status` covers color.status.*).",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TokenName"
+          },
+          "uniqueItems": true
+        },
+        "agordo": {
+          "description": "Dotted paths of the Agordo whose value defines the Faceto (`form.radius`, `zusatzfarben`).",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z]+(\\.[a-z]+)*$"
+          },
+          "uniqueItems": true
+        },
+        "dimensioj": {
+          "description": "The Dimensioj the Faceto is about, for one without tokens of its own.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": ["id", "name", "nomo", "pezo", "kialo", "tokenoj", "agordo"],
+      "additionalProperties": false
+    },
+    "KronikoEro": {
+      "description": "One entry of the Kroniko of a brand (Spec 033 S1, Amendment v2.5): marken/<name>/kroniko.jsonl, one per line – every proposal, change, take-over, release, reopening, declaration of a foreign basis, confirmation, notice and chat turn, with time, source, model and cost. `persono` and `rolo` stay empty while the Metiejo runs for one person; they keep the place for a database with person and role.",
+      "type": "object",
+      "properties": {
+        "tempo": {
+          "description": "UTC, ISO 8601 with Z.",
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+        },
+        "ago": {
+          "type": "string",
+          "enum": [
+            "kreo",
+            "propono",
+            "sxangxo",
+            "akcepto",
+            "liberigo",
+            "remalfermo",
+            "fremda",
+            "konfirmo",
+            "averto",
+            "babilo"
+          ]
+        },
+        "fonto": {
+          "description": "Where it came from: the chat, speech, the sliders of the Studio or Schnellstart, an agent, the system.",
+          "type": "string",
+          "enum": ["babilo", "parolo", "regilo", "agento", "sistemo"]
+        },
+        "faceto": {
+          "$ref": "#/$defs/Name"
+        },
+        "teksto": {
+          "type": "string"
+        },
+        "modelo": {
+          "description": "provider/model, e.g. mistral/ministral-14b-2512.",
+          "type": "string",
+          "minLength": 1
+        },
+        "kosto": {
+          "type": "object",
+          "properties": {
+            "enigo": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "eligo": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "ms": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "usd": {
+              "type": "number",
+              "minimum": 0
+            },
+            "requests": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": ["enigo", "eligo", "ms"],
+          "additionalProperties": false
+        },
+        "detaloj": {
+          "type": "object"
+        },
+        "persono": {
+          "type": ["string", "null"]
+        },
+        "rolo": {
+          "type": ["string", "null"]
+        }
+      },
+      "required": ["tempo", "ago", "fonto"],
       "additionalProperties": false
     }
   }

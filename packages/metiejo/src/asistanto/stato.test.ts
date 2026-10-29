@@ -25,7 +25,13 @@ describe("the states of the Facetoj (Spec 033 S1)", () => {
   const agordo = { name: "lumo", leitfarbe: "#2f6fdb" };
 
   it("a new brand: every Faceto open; 0 % released, 0 % defined", () => {
-    const result = vollstaendigkeitOf({ facetoj, modelo, agordo, kroniko: [at("kreo")], probleme: [] });
+    const result = vollstaendigkeitOf({
+      facetoj,
+      modelo,
+      agordo,
+      kroniko: [at("kreo")],
+      probleme: [],
+    });
     expect(result.facetoj.map((faceto) => faceto.stato)).toEqual(Array(12).fill("offen"));
     expect(result.prozent).toBe(0);
     expect(result.definiert).toBe(0);
@@ -37,14 +43,21 @@ describe("the states of the Facetoj (Spec 033 S1)", () => {
       "definiert",
     );
     expect(
-      stand({ ...base, kroniko: [at("kreo"), at("sxangxo", "formo"), at("liberigo", "formo")] }, "formo")
-        ?.stato,
+      stand(
+        { ...base, kroniko: [at("kreo"), at("sxangxo", "formo"), at("liberigo", "formo")] },
+        "formo",
+      )?.stato,
     ).toBe("freigegeben");
     expect(
       stand(
         {
           ...base,
-          kroniko: [at("kreo"), at("sxangxo", "formo"), at("liberigo", "formo"), at("sxangxo", "formo")],
+          kroniko: [
+            at("kreo"),
+            at("sxangxo", "formo"),
+            at("liberigo", "formo"),
+            at("sxangxo", "formo"),
+          ],
         },
         "formo",
       )?.stato,
@@ -53,7 +66,12 @@ describe("the states of the Facetoj (Spec 033 S1)", () => {
       stand(
         {
           ...base,
-          kroniko: [at("kreo"), at("akcepto", "formo"), at("liberigo", "formo"), at("remalfermo", "formo")],
+          kroniko: [
+            at("kreo"),
+            at("akcepto", "formo"),
+            at("liberigo", "formo"),
+            at("remalfermo", "formo"),
+          ],
         },
         "formo",
       )?.stato,
@@ -68,16 +86,23 @@ describe("the states of the Facetoj (Spec 033 S1)", () => {
       kroniko: [],
       probleme: [],
     });
-    const defined = result.facetoj.filter((faceto) => faceto.stato === "definiert").map((f) => f.name);
+    const defined = result.facetoj
+      .filter((faceto) => faceto.stato === "definiert")
+      .map((f) => f.name);
     expect(defined).toEqual(["gvidkoloro", "formo"]);
   });
 
   it("the completeness is weighted by facetoj.json; the defined share stands beside it", () => {
     const released = ["gvidkoloro", "tiparo"];
-    const kroniko = [at("kreo"), ...released.flatMap((name) => [at("akcepto", name), at("liberigo", name)])];
+    const kroniko = [
+      at("kreo"),
+      ...released.flatMap((name) => [at("akcepto", name), at("liberigo", name)]),
+    ];
     const result = vollstaendigkeitOf({ facetoj, modelo, agordo, kroniko, probleme: [] });
     const weight = (names: string[]) =>
-      facetoj.facetoj.filter((faceto) => names.includes(faceto.name)).reduce((sum, f) => sum + f.pezo, 0);
+      facetoj.facetoj
+        .filter((faceto) => names.includes(faceto.name))
+        .reduce((sum, f) => sum + f.pezo, 0);
     const total = weight(facetoj.facetoj.map((faceto) => faceto.name));
     expect(result.prozent).toBe(Math.round((100 * weight(released)) / total));
     expect(result.definiert).toBe(result.prozent);
@@ -88,7 +113,10 @@ describe("the states of the Facetoj (Spec 033 S1)", () => {
   it("an open problem of a token of a released Faceto: not green, not counted – 100 % is always green", () => {
     const kroniko = [
       at("kreo"),
-      ...facetoj.facetoj.flatMap((faceto) => [at("akcepto", faceto.name), at("liberigo", faceto.name)]),
+      ...facetoj.facetoj.flatMap((faceto) => [
+        at("akcepto", faceto.name),
+        at("liberigo", faceto.name),
+      ]),
     ];
     const green = vollstaendigkeitOf({ facetoj, modelo, agordo, kroniko, probleme: [] });
     expect(green.prozent).toBe(100);
@@ -107,19 +135,27 @@ describe("the states of the Facetoj (Spec 033 S1)", () => {
 
   it("a problem of a KontrastParo counts for the Facetoj of both its tokens", () => {
     const pair = modelo.kontrastParoj.find(
-      (entry) => entry.foreground.startsWith("color.status") && entry.background.startsWith("color.background"),
+      (entry) =>
+        entry.foreground.startsWith("color.status") &&
+        entry.background.startsWith("color.background"),
     );
     if (pair === undefined) throw new Error("no status pair");
-    const result = vollstaendigkeitOf({ facetoj, modelo, agordo, kroniko: [], probleme: [{ subject: pair.name }] });
+    const result = vollstaendigkeitOf({
+      facetoj,
+      modelo,
+      agordo,
+      kroniko: [],
+      probleme: [{ subject: pair.name }],
+    });
     const red = result.facetoj.filter((faceto) => !faceto.gruen).map((faceto) => faceto.name);
     expect(red).toEqual(["neutralaj", "statoj"]);
   });
 
   it("a change of the Agordo names the Facetoj whose fields it touched", () => {
     const before = { name: "lumo", leitfarbe: "#2f6fdb" };
-    expect(facetojOfAgordoDiff(facetoj, modelo, before, { ...before, leitfarbe: "#d0602f" })).toEqual([
-      "gvidkoloro",
-    ]);
+    expect(
+      facetojOfAgordoDiff(facetoj, modelo, before, { ...before, leitfarbe: "#d0602f" }),
+    ).toEqual(["gvidkoloro"]);
     expect(
       facetojOfAgordoDiff(facetoj, modelo, before, {
         ...before,

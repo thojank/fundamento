@@ -6,6 +6,7 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { type Provider, providerOf } from "./asistanto/ki.js";
 
 /** The variables of the spec, in its order (§4.3). */
 export const ENV_NAMES = [
@@ -96,6 +97,30 @@ export function envExampleText(): string {
     ...ENV_NAMES.map((name) => `${name}=`),
     "",
   ].join("\n");
+}
+
+/**
+ * The language model of the Asistanto (Spec 033 S1), for the local server only: the provider of
+ * FM_KI_ANBIETER and FM_KI_MODELL with the key of that provider, held in its private field; or the
+ * sentence that says what is missing. The key never leaves the server.
+ */
+export function kiOf(values: Partial<Record<EnvName, string>>): {
+  provider?: Provider;
+  satz?: string;
+} {
+  try {
+    return { provider: providerOf(values) };
+  } catch (error) {
+    return {
+      satz: `Kein Sprachmodell eingerichtet: ${error instanceof Error ? error.message : String(error)}`,
+    };
+  }
+}
+
+/** The language model of `<root>/.env`; see kiOf. */
+export function readKi(root: string): { provider?: Provider; satz?: string } {
+  const file = join(root, ".env");
+  return kiOf(existsSync(file) ? parseEnv(readFileSync(file, "utf8")) : {});
 }
 
 /** Reads `<root>/.env` when it exists; nothing else is ever read (§4.3). */

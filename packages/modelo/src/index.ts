@@ -19,6 +19,7 @@ export * from "./eroj/inventories.js";
 export * from "./eroj/skemo-rules.js";
 export * from "./eroj/usage.js";
 export * from "./export/index.js";
+export * from "./facetoj/facetoj.js";
 export * from "./gvidanto/index.js";
 export * from "./ids/index.js";
 export * from "./lingvo/nomoj.js";

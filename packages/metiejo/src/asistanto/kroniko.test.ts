@@ -26,7 +26,9 @@ describe("the Kroniko of a brand (Spec 033 S1)", () => {
       kosto: { enigo: 1200, eligo: 80, ms: 2100 },
       detaloj: { regler: "leitfarbe.ton", vorher: 250, nachher: 238 },
     });
-    const lines = readFileSync(join(workdir, "lumo", KRONIKO_FILE), "utf8").trim().split("\n");
+    const lines = readFileSync(join(workdir, "lumo", KRONIKO_FILE), "utf8")
+      .trim()
+      .split("\n");
     expect(lines).toHaveLength(2);
     const entries = readKroniko(workdir, "lumo");
     expect(entries.map((entry) => entry.ago)).toEqual(["kreo", "sxangxo"]);

@@ -437,6 +437,102 @@ for (const button of document.querySelectorAll("[data-mt-post]")) {
   });
 }
 
+// Spec 033 S1: the Asistanto – the chat over tools, the actions of a step, the confirmation – and the
+// one draft of assistant and Studio: a change elsewhere (a new rev) reloads the preview here.
+const asistanto = document.getElementById("mt-asistanto");
+const asistantoData = asistanto ? JSON.parse(asistanto.textContent || "{}") : undefined;
+let sending = false;
+function meldung(text) {
+  const box = document.getElementById("mt-asistanto-meldung") || document.getElementById("mt-studio-meldung");
+  if (!box) return;
+  box.textContent = text;
+  box.hidden = text === "";
+}
+function karto(rolle, text) {
+  const list = document.querySelector("[data-mt-babilo-listo]");
+  if (!list) return;
+  const card = document.createElement("fm-karto");
+  card.setAttribute("data-mt-rolle", rolle);
+  const who = document.createElement("fm-teksto");
+  who.setAttribute("kind", "caption");
+  who.textContent = rolle === "user" ? "Du" : "Assistent";
+  const body = document.createElement("fm-teksto");
+  body.textContent = text;
+  card.append(who, body);
+  list.append(card);
+}
+async function post(path, value) {
+  const response = await fetch("/api/marko/" + marko + "/" + path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(value) });
+  const body = await response.json().catch(() => ({}));
+  return { ok: response.ok, body };
+}
+if (asistantoData && marko) {
+  const input = document.querySelector("[data-mt-babilo-teksto]");
+  const send = document.querySelector("[data-mt-babilo-sendi]");
+  const submit = async () => {
+    const teksto = (input && input.getAttribute("value")) || "";
+    if (teksto.trim() === "" || sending) return;
+    sending = true;
+    karto("user", teksto);
+    if (input) input.removeAttribute("value");
+    meldung("");
+    const result = await post("asistanto", { teksto, faceto: asistantoData.faceto });
+    sending = false;
+    if (!result.ok) { meldung(result.body.satz || "Der Assistent hat nicht geantwortet."); return; }
+    karto("assistant", result.body.antwort || "");
+    rev = result.body.rev;
+    refreshFrame();
+    zeigeStato(result.body.stato);
+  };
+  if (send) send.addEventListener("click", submit);
+  for (const button of document.querySelectorAll("[data-mt-faceto-ago]")) {
+    button.addEventListener("click", async () => {
+      const result = await post("faceto", { faceto: asistantoData.faceto, ago: button.getAttribute("data-mt-faceto-ago") });
+      if (!result.ok) { meldung(result.body.satz || ""); return; }
+      location.reload();
+    });
+  }
+  const fremda = document.querySelector("[data-mt-fremda]");
+  if (fremda) fremda.addEventListener("click", async () => {
+    const nomo = (input && input.getAttribute("value")) || "";
+    const result = await post("fremda", { kiel: "nennung", nomo });
+    if (result.ok) location.reload();
+  });
+  const konfirmi = document.querySelector("[data-mt-konfirmi]");
+  if (konfirmi) konfirmi.addEventListener("click", async () => {
+    const rajtoj = document.querySelector("[data-mt-rajtoj]");
+    if (!rajtoj || !rajtoj.hasAttribute("checked")) { meldung("Bitte bestätige zuerst das Kästchen."); return; }
+    const result = await post("konfirmo", { rajtoj: true });
+    if (result.ok) location.reload(); else meldung(result.body.satz || "");
+  });
+}
+function zeigeStato(stato) {
+  if (!stato) return;
+  const meter = document.querySelector("[data-mt-prozent]");
+  if (meter) meter.setAttribute("value", String(stato.prozent));
+  const caption = document.querySelector("[data-mt-definiert]");
+  if (caption) caption.textContent = "freigegeben " + stato.prozent + " % · definiert " + stato.definiert + " %";
+  for (const faceto of stato.facetoj || []) {
+    const badge = document.querySelector('[data-mt-faceto-stato="' + faceto.name + '"]');
+    if (badge) badge.textContent = faceto.stato + (faceto.gruen ? "" : " · Prüfung offen");
+  }
+}
+// The one draft: when the assistant or the Studio changed it elsewhere, follow.
+if (marko && (asistantoData || (sxtupo && sxtupo.startsWith("studio-")))) {
+  setInterval(async () => {
+    if (sending || document.hidden) return;
+    const response = await fetch("/api/marko/" + marko + "/stato").catch(() => undefined);
+    if (!response || !response.ok) return;
+    const stato = await response.json();
+    if (stato.rev === rev) return;
+    rev = stato.rev;
+    if (asistantoData) { refreshFrame(); zeigeStato(stato); return; }
+    const editing = document.activeElement && document.activeElement.closest && document.activeElement.closest("fm-formularo");
+    if (editing) meldung("Die Marke wurde im Assistenten geändert. Lade die Seite neu, um es zu sehen.");
+    else location.reload();
+  }, 3000);
+}
+
 if (frame) refreshFrame();
 if (sxtupo === "farbe") check();
 `;

@@ -70,7 +70,11 @@ afterAll(async () => {
 
 const get = (path: string, init: RequestInit = {}) => fetch(`${servilo.url}${path}`, init);
 const post = (path: string, body: unknown) =>
-  get(path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+  get(path, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
 const stato = async () =>
   (await (await get("/api/marko/lumo/stato")).json()) as {
     rev: number;
@@ -92,7 +96,8 @@ describe("the assistant beside the Studio (Spec 033 S1)", () => {
     for (const ero of ["fm-sxelo", "fm-mezurilo", "fm-tekstareo", "fm-butono", "fm-karto"]) {
       expect(html, ero).toContain(`<${ero}`);
     }
-    for (const native of ["<input", "<button", "<textarea", "<select"]) expect(html).not.toContain(native);
+    for (const native of ["<input", "<button", "<textarea", "<select"])
+      expect(html).not.toContain(native);
     expect(html).toContain("iframe data-mt-vorschau");
     expect(html).toContain("Leitfarbe und Akzente");
     expect(html).toContain("Elementgrößen");
@@ -109,7 +114,14 @@ describe("the assistant beside the Studio (Spec 033 S1)", () => {
               role: "assistant",
               content: "",
               tool_calls: [
-                { id: "t1", type: "function", function: { name: "setze_regler", arguments: '{"regler":"form.radius","wert":1.6}' } },
+                {
+                  id: "t1",
+                  type: "function",
+                  function: {
+                    name: "setze_regler",
+                    arguments: '{"regler":"form.radius","wert":1.6}',
+                  },
+                },
               ],
             },
           },
@@ -122,9 +134,16 @@ describe("the assistant beside the Studio (Spec 033 S1)", () => {
       },
     );
     const before = (await stato()).rev;
-    const response = await post("/api/marko/lumo/asistanto", { teksto: "runder bitte", faceto: "formo" });
+    const response = await post("/api/marko/lumo/asistanto", {
+      teksto: "runder bitte",
+      faceto: "formo",
+    });
     expect(response.status).toBe(200);
-    const body = (await response.json()) as { antwort: string; rev: number; kosto: { enigo: number } };
+    const body = (await response.json()) as {
+      antwort: string;
+      rev: number;
+      kosto: { enigo: number };
+    };
     expect(body.antwort).toBe("Die Ecken sind jetzt runder.");
     expect(body.rev).toBeGreaterThan(before);
     expect(body.kosto.enigo).toBe(1700);
@@ -134,7 +153,9 @@ describe("the assistant beside the Studio (Spec 033 S1)", () => {
     expect(change?.modelo).toBe("mistral/ministral-14b-2512");
     const turn = entries.findLast((entry) => entry.ago === "babilo");
     expect(turn?.kosto?.enigo).toBe(1700);
-    expect((await stato()).facetoj.find((faceto) => faceto.name === "formo")?.stato).toBe("definiert");
+    expect((await stato()).facetoj.find((faceto) => faceto.name === "formo")?.stato).toBe(
+      "definiert",
+    );
   });
 
   it("a change at the Studio's sliders is the same draft: a new rev and a Kroniko entry from the slider", async () => {
@@ -150,19 +171,30 @@ describe("the assistant beside the Studio (Spec 033 S1)", () => {
     const open = await post("/api/marko/lumo/faceto", { faceto: "movo", ago: "liberigo" });
     expect(open.status).toBe(422);
     expect(((await open.json()) as { satz: string }).satz).toMatch(/Übernimm|anpass/);
-    expect((await post("/api/marko/lumo/faceto", { faceto: "movo", ago: "akcepto" })).status).toBe(200);
-    expect((await post("/api/marko/lumo/faceto", { faceto: "movo", ago: "liberigo" })).status).toBe(200);
+    expect((await post("/api/marko/lumo/faceto", { faceto: "movo", ago: "akcepto" })).status).toBe(
+      200,
+    );
+    expect((await post("/api/marko/lumo/faceto", { faceto: "movo", ago: "liberigo" })).status).toBe(
+      200,
+    );
     const released = await stato();
     expect(released.facetoj.find((faceto) => faceto.name === "movo")?.stato).toBe("freigegeben");
     expect(released.prozent).toBeGreaterThan(0);
-    expect((await post("/api/marko/lumo/faceto", { faceto: "movo", ago: "remalfermo" })).status).toBe(200);
-    expect((await stato()).facetoj.find((faceto) => faceto.name === "movo")?.stato).toBe("definiert");
+    expect(
+      (await post("/api/marko/lumo/faceto", { faceto: "movo", ago: "remalfermo" })).status,
+    ).toBe(200);
+    expect((await stato()).facetoj.find((faceto) => faceto.name === "movo")?.stato).toBe(
+      "definiert",
+    );
     const agoj = readKroniko(workdir, "lumo").map((entry) => entry.ago);
     expect(agoj).toEqual(expect.arrayContaining(["akcepto", "liberigo", "remalfermo"]));
   });
 
   it("a brand that builds on a foreign one asks for the confirmation first and records it (Amendment v2.5)", async () => {
-    expect((await post("/api/marko/lumo/fremda", { kiel: "nennung", nomo: "Eine bekannte Marke" })).status).toBe(200);
+    expect(
+      (await post("/api/marko/lumo/fremda", { kiel: "nennung", nomo: "Eine bekannte Marke" }))
+        .status,
+    ).toBe(200);
     const blocked = await post("/api/marko/lumo/asistanto", { teksto: "weiter" });
     expect(blocked.status).toBe(409);
     expect(((await blocked.json()) as { satz: string }).satz).toContain("Bestätigung");

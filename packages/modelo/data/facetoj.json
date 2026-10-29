@@ -1,0 +1,236 @@
+{
+  "$schema": "../schema/modelo.schema.json#/$defs/FacetojFile",
+  "tavolo": "vida",
+  "facetoj": [
+    {
+      "id": "fac_01M63Q0YM7J6J7HY2KXFWBA2QX",
+      "name": "gvidkoloro",
+      "nomo": {
+        "de": "Leitfarbe und Akzente",
+        "en": "Lead colour and accents"
+      },
+      "pezo": 3,
+      "kialo": "Die Leitfarbe trägt die Wiedererkennung der Marke und färbt Aktionen, Verweise und die Akzentpalette; ein Fehlgriff hier fällt auf jedem Bildschirm auf, deshalb das höchste Gewicht neben der Schrift.",
+      "tokenoj": [
+        "color.palette.accent",
+        "color.brand",
+        "color.action",
+        "color.link"
+      ],
+      "agordo": [
+        "leitfarbe",
+        "regler.saettigung"
+      ]
+    },
+    {
+      "id": "fac_01M63Q0YM8G72J6NPZRG8VST03",
+      "name": "neutralaj",
+      "nomo": {
+        "de": "Neutraltöne",
+        "en": "Neutrals"
+      },
+      "pezo": 2,
+      "kialo": "Flächen, Text und Ränder sind der größte Teil jeder Oberfläche; ihre Tönung und Helligkeit bestimmen Ruhe und Lesbarkeit, auch wenn sie seltener bewusst gewählt werden als die Leitfarbe.",
+      "tokenoj": [
+        "color.palette.neutral",
+        "color.palette.shade",
+        "color.palette.tint",
+        "color.background",
+        "color.text",
+        "color.border",
+        "color.navigation",
+        "color.backdrop",
+        "opacity"
+      ],
+      "agordo": [
+        "neutral.toenung",
+        "regler.helligkeit",
+        "regler.kontrast"
+      ]
+    },
+    {
+      "id": "fac_01M63Q0YM8G72J6NPZRG8VST04",
+      "name": "statoj",
+      "nomo": {
+        "de": "Statusfarben",
+        "en": "Status colours"
+      },
+      "pezo": 2,
+      "kialo": "Erfolg, Warnung, Fehler und Hinweis müssen in jeder Marke sofort unterscheidbar und kontrastsicher sein; sie tragen Bedeutung, nicht nur Stimmung.",
+      "tokenoj": [
+        "color.status",
+        "color.palette.success",
+        "color.palette.warning",
+        "color.palette.danger",
+        "color.palette.info"
+      ],
+      "agordo": [
+        "zusatzfarben"
+      ]
+    },
+    {
+      "id": "fac_01M63Q0YM8G72J6NPZRG8VST05",
+      "name": "modoj",
+      "nomo": {
+        "de": "Dunkelmodus und hoher Kontrast",
+        "en": "Dark mode and high contrast"
+      },
+      "pezo": 2,
+      "kialo": "Die Marke muss in jedem Farbschema und Kontrastmodus bestehen (Art. IV); die Ableitung schlägt beides vor, freigegeben ist es erst, wenn jemand es angesehen hat.",
+      "tokenoj": [],
+      "agordo": [
+        "ziele"
+      ],
+      "dimensioj": [
+        "color-scheme",
+        "contrast"
+      ]
+    },
+    {
+      "id": "fac_01M63Q0YM8G72J6NPZRG8VST06",
+      "name": "tiparo",
+      "nomo": {
+        "de": "Schriftfamilien, Schriftskala und Gewichte",
+        "en": "Type families, scale and weights"
+      },
+      "pezo": 3,
+      "kialo": "Schrift ist neben der Farbe das stärkste Merkmal einer Marke und trägt den Inhalt; Familie, Skala und Gewichte prägen jeden Text, deshalb das höchste Gewicht.",
+      "tokenoj": [
+        "font",
+        "typography"
+      ],
+      "agordo": [
+        "schriften",
+        "schrift.groesse",
+        "schrift.skala",
+        "schrift.gewicht"
+      ]
+    },
+    {
+      "id": "fac_01M63Q0YM8G72J6NPZRG8VST07",
+      "name": "formo",
+      "nomo": {
+        "de": "Form (Radien)",
+        "en": "Shape (radii)"
+      },
+      "pezo": 1,
+      "kialo": "Radien und Rahmen geben der Marke ihren Umriss; sie sind sichtbar, aber mit einem Regler schnell entschieden.",
+      "tokenoj": [
+        "radius",
+        "border",
+        "stroke",
+        "ero.menuo.item.radius",
+        "ero.markdovido.quote.width"
+      ],
+      "agordo": [
+        "form.radius",
+        "form.rahmen"
+      ]
+    },
+    {
+      "id": "fac_01M63Q0YM8G72J6NPZRG8VST08",
+      "name": "spaco",
+      "nomo": {
+        "de": "Raum und Dichte",
+        "en": "Space and density"
+      },
+      "pezo": 2,
+      "kialo": "Abstände und Raster bestimmen, wie luftig oder dicht jede Seite wirkt, und wirken über alle Komponenten zugleich.",
+      "tokenoj": [
+        "spacing",
+        "layout",
+        "size.scale",
+        "size.container",
+        "size.breakpoint",
+        "ero.karto.box.inline.padding",
+        "ero.markdovido.quote.inline.padding"
+      ],
+      "agordo": [
+        "raum.abstand"
+      ]
+    },
+    {
+      "id": "fac_01M63Q0YM8G72J6NPZRG8VST09",
+      "name": "elevacio",
+      "nomo": {
+        "de": "Elevation",
+        "en": "Elevation"
+      },
+      "pezo": 1,
+      "kialo": "Schatten und Ebenen ordnen, was über was liegt; sie sind ein Detail der Tiefe, das die Ableitung meist richtig vorschlägt.",
+      "tokenoj": [
+        "elevation",
+        "color.shadow"
+      ],
+      "agordo": [
+        "form.schatten"
+      ]
+    },
+    {
+      "id": "fac_01M63Q0YM8G72J6NPZRG8VST0A",
+      "name": "movo",
+      "nomo": {
+        "de": "Bewegung",
+        "en": "Motion"
+      },
+      "pezo": 1,
+      "kialo": "Dauern und Kurven geben der Marke ihr Tempo; sie fallen nur in der Bewegung auf und haben keinen eigenen Regler.",
+      "tokenoj": [
+        "motion"
+      ],
+      "agordo": []
+    },
+    {
+      "id": "fac_01M63Q0YM8G72J6NPZRG8VST0B",
+      "name": "fokuso",
+      "nomo": {
+        "de": "Fokus",
+        "en": "Focus"
+      },
+      "pezo": 1,
+      "kialo": "Der Fokusring muss überall sichtbar sein (WCAG 2.4.7); seine Gestalt ist eine kleine, aber verpflichtende Entscheidung.",
+      "tokenoj": [
+        "focus",
+        "color.focus"
+      ],
+      "agordo": []
+    },
+    {
+      "id": "fac_01M63Q0YM8G72J6NPZRG8VST0C",
+      "name": "grandoj",
+      "nomo": {
+        "de": "Elementgrößen",
+        "en": "Element sizes"
+      },
+      "pezo": 1,
+      "kialo": "Die Höhe der Bedienelemente und die Mindestgröße der Ziele bestimmen Dichte und Bedienbarkeit; ein Regler entscheidet sie.",
+      "tokenoj": [
+        "size.control",
+        "size.target",
+        "ero.dialogo.surface.width.size.small",
+        "ero.faldilo.indicator.size",
+        "ero.markobutono.indicator.size.size.medium",
+        "ero.saltligilo.box.height"
+      ],
+      "agordo": [
+        "raum.hoehe"
+      ]
+    },
+    {
+      "id": "fac_01M63Q0YM8G72J6NPZRG8VST0D",
+      "name": "ikonoj",
+      "nomo": {
+        "de": "Icons (Set und Stil)",
+        "en": "Icons (set and style)"
+      },
+      "pezo": 1,
+      "kialo": "Das Gewicht der Icons passt sie an Schrift und Form an; das Set ist gesetzt (Phosphor), der Stil eine Wahl unter wenigen.",
+      "tokenoj": [
+        "size.icon"
+      ],
+      "agordo": [
+        "ikono"
+      ]
+    }
+  ]
+}

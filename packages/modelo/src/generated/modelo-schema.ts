@@ -308,7 +308,8 @@ export type EntityType =
   | "celo"
   | "ikono"
   | "tasko"
-  | "kriterio";
+  | "kriterio"
+  | "faceto";
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "AnyId".
@@ -484,6 +485,11 @@ export type TaskoId = string;
  * via the `definition` "KriterioId".
  */
 export type KriterioId = string;
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "FacetoId".
+ */
+export type FacetoId = string;
 
 /**
  * Canonical schema of the Fundamento Modelo. The root validates the exported modelo.json; $defs describe every Key Entity and every source-file format (set files and the data files).
@@ -2362,4 +2368,95 @@ export interface NordsteloFile {
     kriterioj: ("K1" | "K2" | "K3" | "K4" | "K5" | "K6")[];
     kialo: NordsteloTeksto;
   };
+}
+/**
+ * data/facetoj.json: the brand model, scope 1 (Spec 033 S1) – every visual aspect of a brand as a Faceto of the layer vida, with its weight and Kialo, the tokens it owns and the fields of the Agordo that define it; absent while there is none.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "FacetojFile".
+ */
+export interface FacetojFile {
+  $schema?: string;
+  /**
+   * The layer of the Aspekto this list covers (Tavolo); scope 1 is vida, the visual layer.
+   */
+  tavolo: "vida";
+  /**
+   * @minItems 1
+   */
+  facetoj: Faceto[];
+}
+/**
+ * One visual aspect of a brand (Spec 033 S1): open (the value of the base), defined or released in the assistant. Owns the core tokens whose name starts with one of `tokenoj` (whole segments); an Ero-Tokeno belongs to the Faceto its alias chain leads to. A Faceto without tokens is a choice of Dimensioj (`dimensioj`).
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "Faceto".
+ */
+export interface Faceto {
+  id: FacetoId;
+  name: Name;
+  nomo: NordsteloTeksto;
+  /**
+   * The weight of the Faceto in the completeness.
+   */
+  pezo: number;
+  /**
+   * Why the Faceto weighs what it weighs (Art. VI).
+   */
+  kialo: string;
+  /**
+   * Token-name prefixes, whole segments (`color.status` covers color.status.*).
+   */
+  tokenoj: TokenName[];
+  /**
+   * Dotted paths of the Agordo whose value defines the Faceto (`form.radius`, `zusatzfarben`).
+   */
+  agordo: string[];
+  /**
+   * The Dimensioj the Faceto is about, for one without tokens of its own.
+   */
+  dimensioj?: Name[];
+}
+/**
+ * One entry of the Kroniko of a brand (Spec 033 S1, Amendment v2.5): marken/<name>/kroniko.jsonl, one per line – every proposal, change, take-over, release, reopening, declaration of a foreign basis, confirmation, notice and chat turn, with time, source, model and cost. `persono` and `rolo` stay empty while the Metiejo runs for one person; they keep the place for a database with person and role.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "KronikoEro".
+ */
+export interface KronikoEro {
+  /**
+   * UTC, ISO 8601 with Z.
+   */
+  tempo: string;
+  ago:
+    | "kreo"
+    | "propono"
+    | "sxangxo"
+    | "akcepto"
+    | "liberigo"
+    | "remalfermo"
+    | "fremda"
+    | "konfirmo"
+    | "averto"
+    | "babilo";
+  /**
+   * Where it came from: the chat, speech, the sliders of the Studio or Schnellstart, an agent, the system.
+   */
+  fonto: "babilo" | "parolo" | "regilo" | "agento" | "sistemo";
+  faceto?: Name;
+  teksto?: string;
+  /**
+   * provider/model, e.g. mistral/ministral-14b-2512.
+   */
+  modelo?: string;
+  kosto?: {
+    enigo: number;
+    eligo: number;
+    ms: number;
+    usd?: number;
+    requests?: number;
+  };
+  detaloj?: {};
+  persono?: string | null;
+  rolo?: string | null;
 }

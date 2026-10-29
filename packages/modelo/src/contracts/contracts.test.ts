@@ -71,6 +71,7 @@ describe("entity ID prefixes (§2.3)", () => {
       ikono: "iko",
       tasko: "tsk",
       kriterio: "kri",
+      faceto: "fac",
     });
     expect(Object.keys(ENTITY_ID_PREFIXES)).toEqual([...ENTITY_TYPES]);
   });
@@ -107,7 +108,8 @@ describe("rule catalog (§2.6)", () => {
     // Spec 030: the three references of the north-star catalogue (Sxablono, Ero, Regulo).
     // Spec 029 ①: the six rules of check:fontoj.
     // Spec 032 ②: clean-room-spuroj-invalid and clean-room-jugxo-missing.
-    expect(RULE_IDS).toHaveLength(192);
+    // Spec 033 S1: faceto-token-unassigned and faceto-token-twice.
+    expect(RULE_IDS).toHaveLength(194);
     for (const rule of [
       "agordo-jugxo-fixed",
       "raporto-out-of-sync",
