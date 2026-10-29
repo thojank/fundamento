@@ -113,6 +113,7 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
         ["name", "string", undefined],
         // Spec 011 ① (plan ① D-09): a chosen empty option, 'Alle', 'keine Auswahl', value "".
         ["empty-label", "string", undefined],
+        ["clearable", "boolean", false],
       ],
     );
     expect(skemo?.props.find((prop) => prop.name === "placeholder")?.description).toMatch(
@@ -149,6 +150,7 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
     expect(Object.keys(skemo.parts).sort()).toEqual(
       [
         ...Object.keys(kampo.skemo.parts).filter((part) => !KAMPO_OWN.includes(part)),
+        "clear",
         "indicator",
       ].sort(),
     );
@@ -209,6 +211,7 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       },
       keys: ["ArrowUp", "ArrowDown", "Enter", "Escape"],
       texts: {
+        "clear-name": { de: "{label} leeren", en: "Clear {label}" },
         required: { de: "erforderlich", en: "required" },
         loading: { de: "lädt", en: "loading" },
       },
@@ -217,6 +220,7 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
     expect(skemo?.a11y.texts).toEqual({
       required: kampo?.skemo.a11y.texts?.required,
       loading: kampo?.skemo.a11y.texts?.loading,
+      "clear-name": kampo?.skemo.a11y.texts?.["clear-name"],
     });
   });
 

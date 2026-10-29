@@ -225,6 +225,7 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       "invalid",
       "expanded",
       "name",
+      "clearable",
     ]);
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled", "readonly", "invalid"]);
     expect(skemo?.slots).toEqual([
@@ -259,6 +260,7 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       "box",
       "motion",
       "spinner",
+      "clear",
     ]);
     expect(skemo?.parts.item).toEqual({
       color: { by: ["selected"] },
@@ -299,6 +301,7 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       },
       keys: ["ArrowUp", "ArrowDown", "Home", "End", "Enter", "Space", "Escape"],
       texts: {
+        "clear-name": { de: "{label} leeren", en: "Clear {label}" },
         required: { de: "erforderlich", en: "required" },
         loading: { de: "lädt", en: "loading" },
       },
@@ -354,6 +357,7 @@ describe("plurelektilo (D-16): several values from a long list, filterable, the 
       ["invalid", "boolean", false],
       ["expanded", "boolean", false],
       ["name", "string", undefined],
+      ["clearable", "boolean", true],
     ]);
     expect(skemo?.props.find((prop) => prop.name === "summary")?.values).toEqual(["count", "tags"]);
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled", "readonly", "invalid"]);

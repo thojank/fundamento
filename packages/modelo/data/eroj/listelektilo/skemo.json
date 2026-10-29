@@ -59,6 +59,12 @@
         "name": "name",
         "kind": "string",
         "description": "The name under which the form sends the choice."
+      },
+      {
+        "name": "clearable",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-6: a clear button in the field, shown while it has a value and is neither disabled nor read-only, named „{label} leeren“; a press empties the value and returns the focus to the field."
       }
     ],
     "states": [
@@ -267,6 +273,11 @@
         "inline-padding": {
           "fixed": "spacing.small"
         }
+      },
+      "clear": {
+        "size": {
+          "fixed": "size.control.small"
+        }
       }
     },
     "bindings": [
@@ -472,6 +483,10 @@
         "loading": {
           "de": "lädt",
           "en": "loading"
+        },
+        "clear-name": {
+          "de": "{label} leeren",
+          "en": "Clear {label}"
         }
       }
     },

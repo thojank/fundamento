@@ -70,8 +70,8 @@ describe("Spec 029 ① 5: the foundation pages", () => {
 
   it("Tokens: every token with its level, its value per brand and mode and its origin, searchable", () => {
     const tokenoj = datumoj.bazoj?.tokenoj ?? [];
-    // Spec 029 ②b-1 M-5: the spinner of the twelve fields, 36 Ero-Tokens.
-    expect(tokenoj.length).toBe(1644);
+    // Spec 029 ②b-1: the spinner of the twelve fields (M-5, 36) and the clear button of four (M-6, 4).
+    expect(tokenoj.length).toBe(1648);
     const levels = new Set(tokenoj.map((token) => token.ebeno));
     expect(levels).toEqual(new Set(["grundlage", "rolle", "ero"]));
     const text = tokenoj.find((token) => token.name === "color.text.default");

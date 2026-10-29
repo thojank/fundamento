@@ -964,6 +964,7 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
     // nothing is drawn differently (a date shows the closed field, like the elektilo; E3).
     // Spec 025 ①: time, stepper and step are properties too; none of them keys a part.
     expect(set?.properties).toEqual({
+      clearable: "BOOLEAN",
       // Spec 029 ②b-1 M-5: loading shows the spinner (a BOOLEAN of the set).
       loading: "BOOLEAN",
       kind: ["text", "email", "tel", "url", "search", "password", "number", "date", "time"],
@@ -1460,6 +1461,7 @@ describe("Figma plan for the elektilo (Spec 010 ④)", () => {
   it("plans a closed field of size × state with the purpose, the word Auswahl, the prompt, help and error", () => {
     expect(set?.structure).toBe("field");
     expect(set?.properties).toEqual({
+      clearable: "BOOLEAN",
       // Spec 029 ②b-1 M-5: loading shows the spinner (a BOOLEAN of the set).
       loading: "BOOLEAN",
       value: "TEXT",
@@ -1485,7 +1487,7 @@ describe("Figma plan for the elektilo (Spec 010 ④)", () => {
     expect(set?.entry).toBeUndefined();
     // Spec 014 ②: the chevron is an ikono of the plan (chevron-down per variant), no sign.
     expect(set?.sign).toBeUndefined();
-    expect(set?.variants[0]?.icons).toEqual({ indicator: "chevron-down" });
+    expect(set?.variants[0]?.icons).toEqual({ indicator: "chevron-down", clear: "close" });
     expect(kampoSet?.sign).toBeUndefined();
   });
 
@@ -2935,7 +2937,8 @@ describe("the Figma plan draws icons (Spec 014 ②)", () => {
 
   it("the elektilo, the tabelo and the avizo name the icons they compose", () => {
     const elektilo = plan.components.find((component) => component.set === "elektilo");
-    expect(elektilo?.variants[0]?.icons).toEqual({ indicator: "chevron-down" });
+    // Spec 029 ②b-1 M-6: the clear button's close beside the chevron.
+    expect(elektilo?.variants[0]?.icons).toEqual({ indicator: "chevron-down", clear: "close" });
     expect(elektilo?.sign).toBeUndefined();
     const tabelo = plan.components.find((component) => component.set === "tabelo");
     expect(tabelo?.variants[0]?.icons).toEqual({ "sort-indicator": "sort-ascending" });
@@ -3813,6 +3816,7 @@ describe("the Figma plan draws the datelektilo (Spec 025 ②)", () => {
       trigger: "calendar",
       prev: "chevron-left",
       next: "chevron-right",
+      clear: "close",
     });
   });
 });

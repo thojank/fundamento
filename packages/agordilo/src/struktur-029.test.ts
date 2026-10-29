@@ -28,9 +28,10 @@ describe("Spec 029 ①: the structure of komuna 0.2 for the Agordilo", () => {
     const structure = readStructure();
     expect(structure.fingerprint).toBe(storedSha("aspekto-provo/aspekto-provo"));
     expect(structure.fingerprint).toBe(storedSha("aspekto-provo-kompakta/aspekto-provo-kompakta"));
-    // Spec 029 ②b-1 M-5: the spinner of the fields (36 Ero-Tokens) is part of the structure.
+    // Spec 029 ②b-1: the spinner of the fields (M-5, 36 Ero-Tokens) and the clear button of four
+    // more fields (M-6, 4) are part of the structure.
     expect(structure.fingerprint).toBe(
-      "c5c79836514babe1f6f95cdc8ba7adb6bb3102bc084ec839be3ea126bf8a85aa",
+      "f221a24eac12a06830e7832a72ffa03496d9b293360192a7058e21b9c347c9b2",
     );
   });
 

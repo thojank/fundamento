@@ -3943,6 +3943,12 @@
             "$value": "{spacing.small}"
           }
         }
+      },
+      "clear": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.control.small}"
+        }
       }
     },
     "dialogo": {
@@ -4320,6 +4326,12 @@
             "$type": "dimension",
             "$value": "{spacing.small}"
           }
+        }
+      },
+      "clear": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.control.small}"
         }
       }
     },
@@ -5877,6 +5889,12 @@
             "$value": "{spacing.small}"
           }
         }
+      },
+      "clear": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.control.small}"
+        }
       }
     },
     "konsileto": {
@@ -6516,6 +6534,12 @@
             "$type": "dimension",
             "$value": "{spacing.small}"
           }
+        }
+      },
+      "clear": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.control.small}"
         }
       }
     },

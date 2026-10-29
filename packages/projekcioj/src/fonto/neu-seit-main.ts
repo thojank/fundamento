@@ -5,8 +5,11 @@
 /** ②b-1 M-5: the spinner of the twelve fields (size, colour, room beside the label). */
 const SPINNER = /^ero\.[a-z]+\.spinner\.(size|color|inline\.padding)$/;
 
-/** Whether a token was added after main's record. */
-export const addedSinceMain = (name: string): boolean => SPINNER.test(name);
+/** ②b-1 M-6: the clear button of the four fields that had none (kampo and plurelektilo had one). */
+const CLEAR = /^ero\.(elektilo|listelektilo|datelektilo|kompletigilo)\.clear\.size$/;
 
-/** How many tokens ②b added so far (12 fields × 3). */
-export const ADDED_SINCE_MAIN = 36;
+/** Whether a token was added after main's record. */
+export const addedSinceMain = (name: string): boolean => SPINNER.test(name) || CLEAR.test(name);
+
+/** How many tokens ②b added so far (M-5: 12 fields × 3; M-6: 4). */
+export const ADDED_SINCE_MAIN = 40;

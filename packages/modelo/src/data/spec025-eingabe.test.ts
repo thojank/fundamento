@@ -49,7 +49,7 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
       "autocomplete",
     ]);
     // Spec 029 ②b-1 M-5: loading after them, as every new prop.
-    expect(names.slice(12)).toEqual(["stepper", "step", "loading"]);
+    expect(names.slice(12)).toEqual(["stepper", "step", "loading", "clearable"]);
     expect(skemo.props.find((prop) => prop.name === "kind")?.values).toEqual([
       "text",
       "email",
@@ -99,13 +99,14 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
     ]);
   });
 
-  it("names the buttons in de and en (a11y.texts <part>-name): Verringern, Erhöhen, Suche leeren", () => {
+  it("names the buttons in de and en (a11y.texts <part>-name): Verringern, Erhöhen, {label} leeren", () => {
     expect(skemo.a11y.texts).toEqual({
       loading: { de: "lädt", en: "loading" },
       required: { de: "erforderlich", en: "required" },
       "decrement-name": { de: "Verringern", en: "Decrease" },
       "increment-name": { de: "Erhöhen", en: "Increase" },
-      "clear-name": { de: "Suche leeren", en: "Clear search" },
+      // Spec 029 ②b-1 M-6: named after the field's label, as every clear button.
+      "clear-name": { de: "{label} leeren", en: "Clear {label}" },
     });
     // Arrow keys step a number as the platform's own number input does; Escape clears a search.
     expect(skemo.a11y.keys).toEqual(["Enter", "ArrowUp", "ArrowDown", "Escape"]);

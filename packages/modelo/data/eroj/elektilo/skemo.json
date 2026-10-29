@@ -63,6 +63,12 @@
         "name": "empty-label",
         "kind": "string",
         "description": "The text of a chosen empty option, 'Alle', 'keine Auswahl': the first option, with the value \"\", selectable; it replaces the placeholder (constraint) and counts as an option (Regulo option-labels-distinct)."
+      },
+      {
+        "name": "clearable",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-6: a clear button in the field, shown while it has a value and is neither disabled nor read-only, named „{label} leeren“; a press empties the value and returns the focus to the field."
       }
     ],
     "states": [
@@ -220,6 +226,11 @@
         },
         "inline-padding": {
           "fixed": "spacing.small"
+        }
+      },
+      "clear": {
+        "size": {
+          "fixed": "size.control.small"
         }
       }
     },
@@ -473,6 +484,10 @@
         "loading": {
           "de": "lädt",
           "en": "loading"
+        },
+        "clear-name": {
+          "de": "{label} leeren",
+          "en": "Clear {label}"
         }
       }
     },

@@ -349,7 +349,7 @@ describe("the elektilo is drawn as the field of the kampo with the chevron in it
       "error",
     ]);
     const control = descendant(rest, "control");
-    expect(control?.children.map((child) => child.name)).toEqual(["text", "indicator"]);
+    expect(control?.children.map((child) => child.name)).toEqual(["text", "clear", "indicator"]);
     expect(control?.properties.layoutMode).toBe("HORIZONTAL");
     expect(descendant(rest, "label")?.properties.characters).toBe("Auswahl");
     expect(descendant(rest, "text")?.properties.characters).toBe("Bitte wählen");
@@ -395,7 +395,7 @@ describe("the elektilo is drawn as the field of the kampo with the chevron in it
     const { double } = await drawn();
     const kampo = pageNodes(double).find((child) => child.name === "kampo");
     const control = descendant(kampo?.children[0], "control");
-    expect(control?.children.map((child) => child.name)).toEqual(["text"]);
+    expect(control?.children.map((child) => child.name)).toEqual(["text", "clear"]);
   });
 
   it("a second run writes nothing new", async () => {

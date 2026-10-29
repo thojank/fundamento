@@ -53,6 +53,7 @@ describe("kompletigilo in the repo Modelo (section ⑤, G1, G2)", () => {
       ["expanded", "boolean", false],
       // Nachlese 4 N-9 (O-24): the application loads new suggestions.
       ["loading", "boolean", false],
+      ["clearable", "boolean", false],
     ]);
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled", "invalid"]);
     expect(skemo?.slots).toEqual([
@@ -132,6 +133,7 @@ describe("kompletigilo in the repo Modelo (section ⑤, G1, G2)", () => {
     });
     expect(skemo?.a11y.keys).toEqual(["ArrowUp", "ArrowDown", "Enter", "Escape"]);
     expect(skemo?.a11y.texts).toEqual({
+      "clear-name": { de: "{label} leeren", en: "Clear {label}" },
       required: { de: "erforderlich", en: "required" },
       "options-empty": { de: "Keine Vorschläge", en: "No suggestions" },
       "options-count": { de: "Vorschläge", en: "suggestions" },

@@ -72,6 +72,7 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       ["invalid", "boolean", false, false],
       ["expanded", "boolean", false, false],
       ["name", "string", false, undefined],
+      ["clearable", "boolean", false, false],
     ]);
     expect(skemo?.props.find((prop) => prop.name === "mode")?.values).toEqual(["single", "range"]);
     for (const prop of skemo?.props ?? []) {
@@ -118,6 +119,7 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       "box",
       "motion",
       "spinner",
+      "clear",
     ]);
     expect(skemo?.parts.trigger).toEqual({ size: { fixed: "size.control.medium" } });
     expect(skemo?.parts.calendar).toEqual({
@@ -239,6 +241,7 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
         "Escape",
       ],
       texts: {
+        "clear-name": { de: "{label} leeren", en: "Clear {label}" },
         loading: { de: "lädt", en: "loading" },
         required: { de: "erforderlich", en: "required" },
         "trigger-name": { de: "Kalender öffnen", en: "Open calendar" },

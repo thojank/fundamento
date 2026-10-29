@@ -330,7 +330,9 @@ function fieldMarkup(
   const calendar = datepicker
     ? '<div part="calendar" id="calendar" role="dialog" popover="manual" aria-modal="false" aria-labelledby="month"><div part="head"><fm-butono part="prev" emphasis="low" size="small"><fm-ikono slot="icon-start" name="chevron-left"></fm-ikono></fm-butono><span part="month" id="month" aria-live="polite"></span><fm-butono part="next" emphasis="low" size="small"><fm-ikono slot="icon-start" name="chevron-right"></fm-ikono></fm-butono></div><div part="grid" role="grid" aria-labelledby="month"><div part="weekdays" role="row"></div></div></div>'
     : "";
-  const row = stepper || datepicker ? `<div part="row">${native}${trigger}</div>` : native;
+  // Spec 029 ②b-1 M-6: a field with suggestions has a row too, for its clear button.
+  const row =
+    stepper || datepicker || suggest ? `<div part="row">${native}${trigger}</div>` : native;
   return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span>${SPINNER}</label>${row}${calendar}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
 }
 
@@ -368,7 +370,7 @@ const MULTI_ITEM_ROW =
 function listMarkup(slots: NonNullable<ElementNames["slots"]>, multi: boolean): string {
   const button = multi
     ? `<button part="control" id="control" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="listbox"><span part="text" id="text"></span><span part="indicator" aria-hidden="true">${IKONO_CHEVRON}</span></button><div part="tags" hidden></div>`
-    : `<button part="control" id="control" type="button" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="listbox"><span part="text" id="text"></span><span part="indicator" aria-hidden="true">${IKONO_CHEVRON}</span></button>`;
+    : `<div part="row"><button part="control" id="control" type="button" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="listbox"><span part="text" id="text"></span><span part="indicator" aria-hidden="true">${IKONO_CHEVRON}</span></button></div>`;
   // A listbox owns options alone (ARIA, axe aria-required-children): the multi-select's popover is
   // a panel that holds the filter, the listbox of the rows (items) and the clear butono.
   const listbox = multi
@@ -1359,10 +1361,12 @@ ${
           if (off || atBound) button.setAttribute("aria-disabled", "true");
           else button.removeAttribute("aria-disabled");
         }
-        const clear = this.#fieldButton("clear", searching && given !== "" && !off);
+        // Spec 029 ②b-1 M-6: clearable shows it for every kind but password, as a search does.
+        const clearing = searching || (this.propValue("clearable") === true && kind !== "password");
+        const clear = this.#fieldButton("clear", clearing && given !== "" && !off);
         if (clear !== undefined) {
           clear.hidden = false;
-          clear.setAttribute("label", buttonWord("clear-name"));
+          clear.setAttribute("label", this.#clearName());
         }
       }
 `
@@ -4487,7 +4491,8 @@ ${
       this.#internals.setFormValue(known.length === 0 ? null : data);
       const clear = this.shadowRoot?.querySelector('[part="clear"]');
       if (clear instanceof HTMLElement) {
-        clear.hidden = known.length === 0;
+        // Spec 029 ②b-1 M-6: clearable (true by default) keeps the button; clearable="false" takes it.
+        clear.hidden = known.length === 0 || this.propValue("clearable") === false;
         if (clear.textContent !== word("clear-name")) clear.textContent = word("clear-name");
       }
       const filter = this.#listFilter();
@@ -5618,6 +5623,44 @@ ${host === "button" ? '        control.removeAttribute("aria-disabled");\n' : ""
         this.#turnSpinner(spinner, busy);
       }
     }
+${
+  isSelect || isListselect || isDatepicker || isSuggest
+    ? `    // Spec 029 ②b-1 M-6: the clear button of the field, while it has a value and is neither
+    // disabled nor read-only; a select keeps it beside its chevron, a date picker before its
+    // trigger, a list and a field with suggestions at the end of their row.
+    {
+      const filled = ${
+        isDatepicker
+          ? '["value", "value-start", "value-end"].some((name) => String(this.propValue(name) ?? "") !== "")'
+          : 'String(this.propValue("value") ?? "") !== ""'
+      };
+      const off = this.propValue("disabled") === true || this.propValue("readonly") === true;
+      const wanted = this.propValue("clearable") === true && filled && !off;
+      const holder = ${isSelect ? "control.parentElement" : "root.querySelector('[part=\"row\"]')"};
+      let clear = holder?.querySelector(':scope > [part="clear"]');
+      if (!wanted) clear?.remove();
+      else if (holder instanceof HTMLElement) {
+        if (!(clear instanceof HTMLElement)) {
+          ${
+            isDatepicker
+              ? `holder.querySelector('[part="trigger"]')?.insertAdjacentHTML("beforebegin", ${JSON.stringify(CLEAR_BUTTON)});`
+              : `holder.insertAdjacentHTML("beforeend", ${JSON.stringify(CLEAR_BUTTON)});`
+          }
+          clear = holder.querySelector(':scope > [part="clear"]');
+          clear?.addEventListener("click", (event) => {
+            event.stopPropagation();
+            this.#clearValue();
+          });
+        }
+        if (clear instanceof HTMLElement) {
+          clear.hidden = false;
+          clear.setAttribute("label", this.#clearName());
+        }
+      }
+    }
+`
+    : ""
+}
     // A link: \`to\` is its target (Art. VIII, the Web Celo spells it href); \`external\` marks
     // that the target lies outside the application (Spec 008, D-09).
     if (control instanceof HTMLAnchorElement) {
@@ -5721,7 +5764,41 @@ ${
 }`
 }  }
 
-  /**
+${
+  isSelect || isListselect || isDatepicker || isSuggest || (host === "input" && stepper)
+    ? `  /** The name of a field's clear button (Spec 029 ②b-1 M-6): the Modelo's words with the label. */
+  #clearName(): string {
+    const label = this.#label
+      .assignedNodes({ flatten: true })
+      .map((node) => node.textContent ?? "")
+      .join("")
+      .trim();
+    const lingvo = this.#lingvo();
+    return (TEXTS["clear-name"]?.[lingvo] ?? TEXTS["clear-name"]?.en ?? "").replace("{label}", label);
+  }
+
+`
+    : ""
+}${
+  isSelect || isListselect || isDatepicker || isSuggest
+    ? `  /**
+   * Clears the field (Spec 029 ②b-1 M-6): every value empty, the focus back in the field; the events
+   * the Skemo names (a select and a list say change alone). Nothing while disabled or read-only.
+   */
+  #clearValue(): void {
+    if (this.propValue("disabled") === true || this.propValue("readonly") === true) return;
+    for (const name of ["value-start", "value-end"]) if (HAS_PROP.has(name)) this.setAttribute(name, "");
+    this.setAttribute("value", "");
+    if (this.#control instanceof HTMLInputElement || this.#control instanceof HTMLSelectElement) {
+      this.#control.value = "";
+    }
+    this.#control.focus();
+${isSelect || isListselect ? "" : '    this.dispatchEvent(new Event("input", { bubbles: true, composed: true }));\n'}    this.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+`
+    : ""
+}  /**
    * Turns the spinner of a field while it loads (Spec 029 ②b-1 M-5): one turn per slow duration
    * of the motion roles, for ever; under reduced motion the role is instant and the arc stands.
    */

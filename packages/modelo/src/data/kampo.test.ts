@@ -100,6 +100,7 @@ describe("kampo in the repo Modelo (T004)", () => {
       ["stepper", "boolean", false],
       ["step", "string", undefined],
       ["loading", "boolean", false],
+      ["clearable", "boolean", false],
     ]);
     expect(skemo.props.map((prop) => prop.name)).not.toContain("label");
     expect(skemo.props.map((prop) => prop.name)).not.toContain("type");
@@ -181,7 +182,8 @@ describe("kampo in the repo Modelo (T004)", () => {
       loading: { de: "lädt", en: "loading" },
       "decrement-name": { de: "Verringern", en: "Decrease" },
       "increment-name": { de: "Erhöhen", en: "Increase" },
-      "clear-name": { de: "Suche leeren", en: "Clear search" },
+      // Spec 029 ②b-1 M-6: named after the field's label, as every clear button.
+      "clear-name": { de: "{label} leeren", en: "Clear {label}" },
     });
     // Spec 011 ① (O-7): Enter in the one-line field sends the form, so the Skemo names the key.
     // Spec 025 ①: the arrows step a number, Escape clears a search.

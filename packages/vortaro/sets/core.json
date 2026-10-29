@@ -8312,6 +8312,18 @@
             }
           }
         }
+      },
+      "clear": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.control.small}",
+          "$description": "datelektilo: clear.size (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M63SXQ7CFDDVGS0FBNK1BZHZ"
+            }
+          }
+        }
       }
     },
     "dialogo": {
@@ -9148,6 +9160,18 @@
               "com.ciferecigo.fundamento": {
                 "id": "tok_01M639HHHAKMBJHPBF88JXRC5A"
               }
+            }
+          }
+        }
+      },
+      "clear": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.control.small}",
+          "$description": "elektilo: clear.size (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M63SXQ7CFDDVGS0FBNK1BZJ0"
             }
           }
         }
@@ -12638,6 +12662,18 @@
             }
           }
         }
+      },
+      "clear": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.control.small}",
+          "$description": "kompletigilo: clear.size (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M63SXQ7CFDDVGS0FBNK1BZJ1"
+            }
+          }
+        }
       }
     },
     "konsileto": {
@@ -14050,6 +14086,18 @@
               "com.ciferecigo.fundamento": {
                 "id": "tok_01M639HHHAKMBJHPBF88JXRC5F"
               }
+            }
+          }
+        }
+      },
+      "clear": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.control.small}",
+          "$description": "listelektilo: clear.size (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M63SXQ7DT7MKBHBJ3CTYK304"
             }
           }
         }

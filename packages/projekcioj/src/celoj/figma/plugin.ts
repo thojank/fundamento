@@ -54,6 +54,8 @@ type PartNode =
   | "label-row"
   | "spinner"
   | "spinner-mark"
+  | "clear"
+  | "clear-glyph-*"
   | "focus-ring"
   | "focus-gap"
   | "control"
@@ -276,6 +278,11 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
   "spinner.size": [{ node: "spinner", fields: ["width", "height"] }],
   "spinner.color": [{ node: "spinner-mark", fields: ["strokes"], paint: true }],
   "spinner.inline-padding": [{ node: "label-row", fields: ["itemSpacing"] }],
+  // Spec 029 ②b-1 M-6: the clear button at the end of a field's control and its glyphs.
+  "clear.size": [
+    { node: "clear", fields: ["width", "height"] },
+    { node: "clear-glyph-*", fields: ["width", "height"] },
+  ],
   // A typography token is a composite; Figma holds its fields as separate variables (F9). Bound
   // to the bare name, the size never arrived — there is no variable of that name. Family and cut
   // are bound too (F30), so the label follows the brand when the mode changes instead of keeping
@@ -2622,16 +2629,7 @@ function labelOf(holder, component, toggled) {
   [label, spinner].forEach((child, index) => {
     if (row.children.indexOf(child) !== index) row.insertChild(index, child);
   });
-  // The arc's vector has a name of its own, so that no lookup takes it for the mark of a sign.
-  let mark = ours(spinner, "part", "spinner-mark");
-  if (mark === undefined) {
-    mark = spinner.children.filter((child) => child.type === "VECTOR")[0];
-    if (mark !== undefined) {
-      fresh.add(mark.id);
-      mark.setSharedPluginData(NAMESPACE, "part", "spinner-mark");
-    }
-  }
-  if (mark !== undefined) write(mark, "name", "spinner-mark");
+  const mark = vectorPartOf(spinner, "spinner-mark");
   own(row, NEUTRAL);
   own(row, LABEL_ROW_LAYOUT);
   own(row, IN_FLOW);
@@ -2645,6 +2643,22 @@ function labelOf(holder, component, toggled) {
   const nodes = { "label-row": row, spinner };
   if (mark) nodes["spinner-mark"] = mark;
   return { label, placed: row, nodes };
+}
+
+/**
+ * The vector of a sign or glyph as its own part (Spec 029 ②b-1): named apart from the mark of a
+ * sign, so that no lookup takes a field's spinner or clear glyph for the mark of its chevron.
+ */
+function vectorPartOf(holder, name) {
+  let found = ours(holder, "part", name);
+  if (found === undefined) {
+    found = holder.children.filter((child) => child.type === "VECTOR")[0];
+    if (found === undefined) return undefined;
+    fresh.add(found.id);
+    found.setSharedPluginData(NAMESPACE, "part", name);
+  }
+  write(found, "name", name);
+  return found;
 }
 
 function markOf(indicator) {
@@ -3569,7 +3583,7 @@ async function applyComponents(variables, warnings) {
     bound.opacity = component.surface.opacity;
     gather(node).fills = [bound];
   }
-  function drawGlyphs(holder, name, prefix, measures) {
+  function drawGlyphs(holder, name, prefix, measures, markPart) {
     const nodes = {};
     Object.keys(IKONOJ.glyphs).forEach((aspekto, index) => {
       const svg = (IKONOJ.glyphs[aspekto] || {})[name];
@@ -3577,7 +3591,7 @@ async function applyComponents(variables, warnings) {
         typeof svg === "string" ? figma.createNodeFromSvg(svg) : figma.createFrame(),
       );
       if (holder.children.indexOf(frame) !== index) holder.insertChild(index, frame);
-      const vector = markOf(frame);
+      const vector = markPart === undefined ? markOf(frame) : vectorPartOf(frame, markPart);
       own(frame, NEUTRAL);
       own(frame, INDICATOR_LAYOUT);
       own(frame, IN_FLOW);
@@ -6016,6 +6030,9 @@ async function applyComponents(variables, warnings) {
         if (control.children.indexOf(iconEnd) !== control.children.length - 1) control.appendChild(iconEnd);
         toggled.push({ part: "icon-end", node: iconEnd });
       }
+      // Spec 029 ②b-1 M-6: the clear button of a field at the end of its control, shown by the
+      // BOOLEAN clearable (toggled, connected below).
+      const clearFrame = typeof icons.clear === "string" ? part(control, "clear", () => figma.createFrame()) : undefined;
       if (isField && field.children.indexOf(labelPlaced) !== 0) field.insertChild(0, labelPlaced);
       if (row !== undefined && field.children.indexOf(row) !== 1) field.insertChild(1, row);
       const trigger = row !== undefined ? part(row, "trigger", () => figma.createFrame()) : undefined;
@@ -6079,6 +6096,17 @@ async function applyComponents(variables, warnings) {
         : undefined;
       if (fieldSign && control.children.indexOf(indicator) !== control.children.length - 1) {
         control.appendChild(indicator);
+      }
+      // Spec 029 ②b-1 M-6: the clear button right before the chevron of a select, which closes the
+      // control; at the end of any other (insertChild takes the child out first, then places it).
+      if (clearFrame !== undefined) {
+        const end = fieldSign ? indicator : undefined;
+        const want = end === undefined ? control.children.length - 1 : control.children.indexOf(end) - 1;
+        const now = control.children.indexOf(clearFrame);
+        if (now !== want) {
+          if (end === undefined) control.appendChild(clearFrame);
+          else control.insertChild(control.children.indexOf(end) - (now < control.children.indexOf(end) ? 1 : 0), clearFrame);
+        }
       }
       const mark = indicator !== undefined && typeof component.sign === "string" ? markOf(indicator) : undefined;
       // A field with suggestions (Spec 014 ⑤): the listbox under the field, its rows the entries
@@ -6279,6 +6307,21 @@ async function applyComponents(variables, warnings) {
         Object.assign(glyphNodes, drawn.nodes);
         iconSlots.push({ name: "icon-end", instance: drawn.instance, main: drawn.main });
       }
+      if (clearFrame !== undefined) {
+        own(clearFrame, NEUTRAL);
+        own(clearFrame, INDICATOR_LAYOUT);
+        own(clearFrame, IN_FLOW);
+        toggled.push({ part: "clear", node: clearFrame });
+        const drawn = drawGlyphs(clearFrame, icons.clear, "clear-", glyphMeasures, "clear-mark");
+        Object.assign(glyphNodes, drawn);
+        const colour = typeof component.clearColor === "string" ? variables.get(component.clearColor) : undefined;
+        if (colour !== undefined) {
+          for (const [key, node] of Object.entries(drawn)) {
+            if (key.indexOf("clear-mark-") !== 0) continue;
+            gather(node).fills = [figma.variables.setBoundVariableForPaint({ type: "SOLID", color: { r: 0, g: 0, b: 0 } }, "color", colour)];
+          }
+        }
+      }
       if (column) {
         own(column, TEXTS_LAYOUT);
         // The box stands at the first line of its label (D-09), as on the web.
@@ -6307,6 +6350,7 @@ async function applyComponents(variables, warnings) {
       });
       Object.assign(nodes, glyphNodes);
       Object.assign(nodes, labelled.nodes);
+      if (clearFrame !== undefined) nodes.clear = clearFrame;
       const measures = bind(nodes, variant, variables, component.structure);
       for (const each of [labelled.nodes["label-row"], labelled.nodes.spinner, labelled.nodes["spinner-mark"]]) if (each !== undefined) flush(each);
       // The cells of a date picker (Spec 025 ②) are bound one by one: every cell its ground, size,
@@ -6374,6 +6418,8 @@ async function applyComponents(variables, warnings) {
       // Everything gathered is written once, layout before the parts inside it; the measures
       // are bound after that, when every frame has its layout.
       for (const each of frames.concat(texts).concat(mark ? [mark] : [])) flush(each);
+      // Spec 029 ②b-1 M-6: the clear button after its control, so the control's layout is its own.
+      if (clearFrame !== undefined) flush(clearFrame);
       // A font binding is the one Figma may refuse — when a font of some mode is missing, the
       // file cannot show it (F30). Refused is no reason to stop: the label keeps the written font
       // of the base combination, and the run says which binding did not take.

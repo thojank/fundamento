@@ -107,6 +107,12 @@
         "kind": "boolean",
         "default": false,
         "description": "Spec 029 ②b-1 M-5: the application loads or checks (a value saved, a list fetched, a file examined): the field says so (aria-busy, described by a11y.texts loading) and shows the turning spinner; it stays operable."
+      },
+      {
+        "name": "clearable",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-6: a clear button in the field, shown while it has a value and is neither disabled nor read-only, named „{label} leeren“; a press empties the value and returns the focus to the field."
       }
     ],
     "states": [
@@ -564,8 +570,8 @@
           "en": "Increase"
         },
         "clear-name": {
-          "de": "Suche leeren",
-          "en": "Clear search"
+          "de": "{label} leeren",
+          "en": "Clear {label}"
         },
         "loading": {
           "de": "lädt",

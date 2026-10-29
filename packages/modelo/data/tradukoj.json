@@ -168,12 +168,12 @@
       "uzo_01M4S1ZQVJ03HSQDA2SFEKA3DC/composes/with/datelektilo/kialo": "Ein kampo kind=date steht neben einem datelektilo nur für ein weit entferntes Datum, weil ein Geburtsdatum schneller getippt als geblättert ist; ein Datum in der Nähe und ein Zeitraum gehören dem datelektilo.",
       "uzo_01M4S1ZQVJ03HSQDA2SFEKA3DC/composes/with/glitilo/kialo": "Ein kampo kind=number steht neben der Spur eines glitilo mit input, weil ein Wert, den man zieht, auch ein Wert ist, den man tippen und genau lesen darf.",
       "uzo_01M4S1ZQVJ03HSQDA2SFEKA3DC/composes/with/kampo/kialo": "Felder eines Formulars stehen untereinander, weil eine Person ein Formular von oben nach unten liest und in dieser Reihenfolge ausfüllt.",
-      "uzo_01M4S1ZQVJ03HSQDA2SFEKA3DC/instead/approximate/kialo": "Ein nach Gefühl gesetzter Wert wird gezogen, weil die Hand eine Position schneller findet als eine Zahl.",
+      "uzo_01M4S1ZQVJ03HSQDA2SFEKA3DC/instead/approximate/kialo": "Ein nach Gefühl gesetzter Wert wird gezogen, weil die Hand eine Position schneller findet.",
       "uzo_01M4S1ZQVJ03HSQDA2SFEKA3DC/instead/choose-few/kialo": "Wenige Optionen werden gewählt, nicht getippt, weil ein Feld jeden Text nimmt; der elekto deckt das ab.",
       "uzo_01M4S1ZQVJ03HSQDA2SFEKA3DC/instead/choose-many/kialo": "Viele Optionen sind eine Liste, weil ein Feld jeden Text nimmt; der elektilo deckt das ab.",
       "uzo_01M4S1ZQVJ03HSQDA2SFEKA3DC/instead/multi-line/kialo": "Mehrere Zeilen brauchen ein Feld, das wächst, weil eine Zeile sie verbirgt.",
-      "uzo_01M4S1ZQVJ03HSQDA2SFEKA3DC/instead/single-value/kialo": "Ein in einer Ansicht geänderter Wert gehört dem lokredaktilo, weil ein Formular für einen Wert ein Umweg ist.",
-      "uzo_01M4S1ZQVJ03HSQDA2SFEKA3DC/instead/suggestions/kialo": "Getippt und aus Vorschlägen gewählt gehört dem kompletigilo, weil die Liste beim Tippen kürzer wird.",
+      "uzo_01M4S1ZQVJ03HSQDA2SFEKA3DC/instead/single-value/kialo": "Ein Wert wird an Ort und Stelle geändert, weil ein Formular für einen Wert ein Umweg ist.",
+      "uzo_01M4S1ZQVJ03HSQDA2SFEKA3DC/instead/suggestions/kialo": "Vorschläge werden beim Tippen gewählt, weil die Liste beim Tippen kürzer wird.",
       "uzo_01M4S1ZQVJ03HSQDA2SFEKA3DC/instead/toggle/kialo": "Eine Einstellung an oder aus zeigt ihren Zustand, weil ein Text gelesen werden müsste, um ihn zu kennen; sxaltilo, wenn sie sofort gilt (im Formular, mit ihm angewandt: markobutono).",
       "uzo_01M4S1ZQVJ03HSQDA2SFEKA3DC/purpose": "Nimmt eine Zeile Text von einer Person: einen Namen, eine Adresse, eine E-Mail, eine Zahl, eine Uhrzeit, einen Suchbegriff.",
       "uzo_01M4WMD1GEGR6YWD8Q1WW9D0T3/boundary/no-visible-label/kialo": "Ein Schalter ohne sichtbare Beschriftung sagt, dass etwas an ist, nicht was, weil die Schiene den Zustand zeigt und nur die Beschriftung die Einstellung nennt.",
@@ -1650,7 +1650,17 @@
       "ske_01M4WMD145A64P8KV15HEH3TQ9/props/loading": "Lädt",
       "ske_01M4WMD145A64P8KV15HEH3TQ9/parts/spinner": "Ladeanzeige",
       "ske_01M584YDGN2F49VDAMJY14PDWK/props/loading": "Lädt",
-      "ske_01M584YDGN2F49VDAMJY14PDWK/parts/spinner": "Ladeanzeige"
+      "ske_01M584YDGN2F49VDAMJY14PDWK/parts/spinner": "Ladeanzeige",
+      "ske_01M4S1ZQFKVZX7X0A8W94SRGCE/props/clearable": "Löschbar",
+      "ske_01M4WYFKQC9XZQ48YDQN9VBD12/props/clearable": "Löschbar",
+      "ske_01M4WYFKQC9XZQ48YDQN9VBD12/parts/clear": "Leeren",
+      "ske_01M5H5HCR9NKF99T4FP6VKWNH4/props/clearable": "Löschbar",
+      "ske_01M5H5HCR9NKF99T4FP6VKWNH4/parts/clear": "Leeren",
+      "ske_01M5H5HD4N9SNX1YS9MG9SSQ55/props/clearable": "Löschbar",
+      "ske_01M5GYYD31C6C7EN316YWX0FYY/props/clearable": "Löschbar",
+      "ske_01M5GYYD31C6C7EN316YWX0FYY/parts/clear": "Leeren",
+      "ske_01M56AF004GZ2N13Y6C2K29HDY/props/clearable": "Löschbar",
+      "ske_01M56AF004GZ2N13Y6C2K29HDY/parts/clear": "Leeren"
     },
     "en": {
       "ero_01M584YD41VQDMJ4QZJEEC7DA4/name": "File upload",
@@ -2708,7 +2718,17 @@
       "ske_01M4WMD145A64P8KV15HEH3TQ9/props/loading": "Loading",
       "ske_01M4WMD145A64P8KV15HEH3TQ9/parts/spinner": "Spinner",
       "ske_01M584YDGN2F49VDAMJY14PDWK/props/loading": "Loading",
-      "ske_01M584YDGN2F49VDAMJY14PDWK/parts/spinner": "Spinner"
+      "ske_01M584YDGN2F49VDAMJY14PDWK/parts/spinner": "Spinner",
+      "ske_01M4S1ZQFKVZX7X0A8W94SRGCE/props/clearable": "Clearable",
+      "ske_01M4WYFKQC9XZQ48YDQN9VBD12/props/clearable": "Clearable",
+      "ske_01M4WYFKQC9XZQ48YDQN9VBD12/parts/clear": "Clear",
+      "ske_01M5H5HCR9NKF99T4FP6VKWNH4/props/clearable": "Clearable",
+      "ske_01M5H5HCR9NKF99T4FP6VKWNH4/parts/clear": "Clear",
+      "ske_01M5H5HD4N9SNX1YS9MG9SSQ55/props/clearable": "Clearable",
+      "ske_01M5GYYD31C6C7EN316YWX0FYY/props/clearable": "Clearable",
+      "ske_01M5GYYD31C6C7EN316YWX0FYY/parts/clear": "Clear",
+      "ske_01M56AF004GZ2N13Y6C2K29HDY/props/clearable": "Clearable",
+      "ske_01M56AF004GZ2N13Y6C2K29HDY/parts/clear": "Clear"
     }
   }
 }

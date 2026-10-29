@@ -97,7 +97,7 @@ test.describe("Spec 029 ②b-1 M-5: loading in every field", () => {
 });
 
 // M-6 – a clear button in the field: shown while the field has a value and is neither disabled nor
-// read-only, named „{label} leeren“; a press empties the value, says input and change, and the
+// read-only, named „{label} leeren“; a press empties the value, says the events of its Skemo, and the
 // focus returns to the field. Without clearable no button (the plurelektilo shows its own by
 // default, the kampo of kind search as before).
 const CLEARABLE: Readonly<Record<string, { markup: string; label: string; value: string }>> = {
@@ -150,7 +150,7 @@ test.describe("Spec 029 ②b-1 M-6: a clear button in the field", () => {
           (name) => (document.querySelector(name) as { said?: string[] }).said,
           `fm-${ero}`,
         ),
-      ).toEqual(["input", "change"]);
+      ).toEqual(ero === "elektilo" || ero === "listelektilo" ? ["change"] : ["input", "change"]);
       await expect(clear).toBeHidden();
       const focused = await page.evaluate(() => document.activeElement?.localName);
       expect(focused).toBe(`fm-${ero}`);

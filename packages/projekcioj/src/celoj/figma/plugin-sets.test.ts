@@ -1103,7 +1103,7 @@ describe("the label default follows the role of the Ero (M-3)", () => {
     expect(of("butono")).toEqual(["Aktion"]);
     // Spec 029 ②b-1 M-5: every field has the BOOLEAN loading, off by default.
     expect(of("elekto")).toEqual(["Frage", false]);
-    expect(of("kampo")).toEqual(["Beschriftung", false]);
+    expect(of("kampo")).toEqual(["Beschriftung", false, false]);
     // Nachlese 5 O-41: the BOOLEAN external beside the label, hidden by default.
     expect(of("ligilo")).toEqual(["Ziel", false]);
     expect(of("markobutono")).toEqual(["Option", false]);

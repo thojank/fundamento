@@ -2091,6 +2091,15 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
     }
     add(':where([part="control"][data-icon-only])', ["padding-inline: 0;", "min-block-size: 0;"]);
   }
+  // Spec 029 ②b-1 M-6: a list and a field with suggestions hold their control and the clear button
+  // in a row (a select keeps its own, a date picker and a kampo theirs).
+  if (
+    skemo.props.some((prop) => prop.name === "clearable") &&
+    (isListselect(skemo) || isSuggest(skemo))
+  ) {
+    add(':where([part="row"])', ["display: flex;", "align-items: center;"]);
+    add(':where([part="row"]) > [part="control"]', ["flex: 1 1 auto;", "min-inline-size: 0;"]);
+  }
   // Spec 029 ②b-1 M-5: the spinner of a field stands beside the label while the field loads (the
   // element takes its hidden away); its arc fills its box.
   if (skemo.parts.spinner !== undefined) {

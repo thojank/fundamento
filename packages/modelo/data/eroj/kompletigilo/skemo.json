@@ -76,6 +76,12 @@
         "kind": "boolean",
         "default": false,
         "description": "The application loads new suggestions for the typed text (a search on a server): the field says so (aria-busy and a live region with the text of a11y.texts loading) and stays operable; the list keeps what it has until the application sets the new options."
+      },
+      {
+        "name": "clearable",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-6: a clear button in the field, shown while it has a value and is neither disabled nor read-only, named „{label} leeren“; a press empties the value and returns the focus to the field."
       }
     ],
     "states": [
@@ -277,6 +283,11 @@
         },
         "inline-padding": {
           "fixed": "spacing.small"
+        }
+      },
+      "clear": {
+        "size": {
+          "fixed": "size.control.small"
         }
       }
     },
@@ -565,6 +576,10 @@
         "loading": {
           "de": "lädt",
           "en": "loading"
+        },
+        "clear-name": {
+          "de": "{label} leeren",
+          "en": "Clear {label}"
         }
       }
     },

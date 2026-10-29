@@ -1441,3 +1441,11 @@ Auftrag des Maintainers vom 28.10. (21:56): ②b setzt genau die Entscheidungen 
 - **Web:** der Bogen hinter Beschriftung und Pflichtmarke in allen sieben Feld-Templates, verborgen bis zum Laden, dreht einmal je `motion.duration.slow`; das Feld bleibt bedienbar (nur der butono sperrt beim Laden). Die Vitrino zeigt jedes Feld in einer Spalte `loading`.
 - **Figma:** die Beschriftung jedes Feldes in einer Zeile mit dem Spinner (`label-row`), BOOLEAN `loading`; der Bildvergleich gegen main nennt die Variablen ohne ihre IDs (vom Maintainer am 29.10. bestätigt), Basis vom unveränderten Plugin neu geschrieben, kein Bild geändert.
 - **Vergleiche mit main:** komuna-0-2, ekzemplo, provo, provo-kompakta lösen jedes Token von main zum Wert von main auf; nur die neuen (`neu-seit-main.ts`) zählen getrennt.
+
+### M-6 umgesetzt
+
+- **Modelo:** `clearable` bei kampo, elektilo, listelektilo, datelektilo, kompletigilo (am Ende der Props), beim plurelektilo standardmäßig wahr (`clearable="false"` nimmt sein „Alle abwählen“); Teil `clear` bei vier Feldern neu (4 Ero-Tokens); Wort „{label} leeren“/„Clear {label}“. **Verhaltensänderung:** der Löschen-Knopf eines Suchfelds (Spec 025 ①) heißt jetzt nach seiner Beschriftung („Suche“ ergibt weiter „Suche leeren“).
+- **Web:** der Knopf erscheint, solange ein Wert da ist und das Feld weder deaktiviert noch schreibgeschützt ist; elektilo neben dem Chevron, datelektilo vor dem Auslöser, listelektilo und kompletigilo am Ende einer neuen Zeile; ein Druck leert, sagt die Ereignisse des Skemo (elektilo, listelektilo nur change) und gibt den Fokus ans Feld.
+- **Figma:** `close` am Ende des Controls (vor dem Chevron), Farbe die Beschriftung des butono low, Größe `clear.size`; die Freigabe aus Spec 025 ① gilt nur noch für den plurelektilo (`check:parity` 641 statt 659 freigegebene).
+- **Budget Brief 750:** der kampo stand mit M-5 und M-6 bei 758; drei Begründungen im Uzo des kampo (Vorschläge, Wert in der Ansicht, nach Gefühl) gestrafft, englisch und deutsch – jetzt 740. Für M-2 (zwei Achsen, etwa +52) entschied der Maintainer am 29.10.: Boolean-Props stehen im Brief kompakt als Liste von Namen.
+

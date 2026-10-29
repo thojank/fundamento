@@ -808,6 +808,8 @@ const BOOLEAN_TOGGLES: Readonly<
   external: { part: "icon-end" },
   // Spec 029 ②b-1 M-5: a field that loads shows its spinner beside the label.
   loading: { part: "spinner" },
+  // Spec 029 ②b-1 M-6: a field that can be cleared shows its clear button.
+  clearable: { part: "clear" },
 };
 
 /**
@@ -1167,6 +1169,11 @@ export interface FigmaComponentSet {
    * beside the label and shown by the BOOLEAN property loading; where the Skemo has the part.
    */
   spinner?: string;
+  /**
+   * The variable the glyph of a field's clear button is filled with (Spec 029 ②b-1 M-6): the label
+   * colour of the butono of emphasis low the web composes.
+   */
+  clearColor?: string;
   /**
    * The axes of the variants that are no axes of the Skemo's parts (Spec 014 ②, plan ② D-08): the
    * name of an icon — one variant per name of the Ikonaro, drawn in its own column, while the
@@ -2602,6 +2609,28 @@ function iconsOf(
   return undefined;
 }
 
+/**
+ * Spec 029 ②b-1 M-6: a field that can be cleared shows the Ikonaro's close at the end of its
+ * control, shown by the BOOLEAN clearable — where the clear button is an icon in the field (the
+ * plurelektilo's clears in its panel, with a word).
+ */
+const clearsInField = (skemo: LoadedEro["skemo"]): boolean =>
+  skemo.parts.clear !== undefined &&
+  skemo.props.some((prop) => prop.name === "clearable" && prop.default !== true);
+
+function withClear(
+  skemo: LoadedEro["skemo"],
+  icons: Record<string, string> | undefined,
+): Record<string, string> | undefined {
+  return clearsInField(skemo) ? { ...(icons ?? {}), clear: "close" } : icons;
+}
+
+/**
+ * The colour of the clear button's icon (Spec 029 ②b-1 M-6): the web composes a butono of
+ * emphasis low, so its glyph takes that butono's label colour at rest.
+ */
+const CLEAR_ICON_COLOR = "ero.butono.label.color.emphasis.low.intent.neutral.rest";
+
 /** The component set of one Ero: every variant with its variable bindings (D-12). */
 function componentSetOf(
   entry: LoadedEro,
@@ -2888,8 +2917,11 @@ function componentSetOf(
             unless.slice(unless.indexOf(".") + 1),
             combination,
           ) !== undefined;
+        // Spec 029 ②b-1 M-6: a field that can be cleared draws its clear button; the release of
+        // Spec 025 ① holds for the plurelektilo's (a word in its panel) alone.
+        const drawnClear = part === "clear" && clearsInField(skemo);
         const release =
-          part === labelPart || (ownBindings.has(key) && !yields)
+          part === labelPart || (ownBindings.has(key) && !yields) || drawnClear
             ? undefined
             : (FIGMA_NOT_DRAWN[`${entry.ero.name}:${part}`] ?? FIGMA_NOT_DRAWN[part]);
         if (release !== undefined) {
@@ -3001,7 +3033,7 @@ function componentSetOf(
     const [onlyCase] = [...cases];
     const textCase = cases.size <= 1 ? (onlyCase ?? "ORIGINAL") : TEXT_CASE_VARIES;
     const shadow = shadowOf(combination);
-    const icons = iconsOf(skemo, structure, combination);
+    const icons = withClear(skemo, iconsOf(skemo, structure, combination));
     return {
       props: { ...combination },
       ...(icons === undefined ? {} : { icons }),
@@ -3529,6 +3561,7 @@ function componentSetOf(
       : {}),
     ...(sign === undefined ? {} : { sign }),
     ...(skemo.parts.spinner === undefined ? {} : { spinner: STATE_SIGN }),
+    ...(clearsInField(skemo) ? { clearColor: variableName(CLEAR_ICON_COLOR) } : {}),
     ...(options === undefined ? {} : { entry: options }),
     ...(example === undefined ? {} : { example }),
     ...(examples === undefined ? {} : { examples }),

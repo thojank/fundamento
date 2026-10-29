@@ -80,6 +80,12 @@
         "name": "name",
         "kind": "string",
         "description": "The name under which the form sends the choice."
+      },
+      {
+        "name": "clearable",
+        "kind": "boolean",
+        "default": true,
+        "description": "Spec 029 ②b-1 M-6: the button that clears every chosen value (Alle abwählen) is shown; true by default, as before."
       }
     ],
     "states": [
