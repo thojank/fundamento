@@ -197,6 +197,42 @@ export async function legiRetejon(
   url: string,
   request: RetejoFetch = globalThis.fetch,
 ): Promise<Trovo[]> {
+  return (await legiPagxon(url, request)).trovoj;
+}
+
+/** The links of a page that point to press, brand or media pages of the same host (Spec 033 S4). */
+export function markoLigiloj(page: string, url: string, limit = 5): string[] {
+  const host = new URL(url).host;
+  const found: string[] = [];
+  for (const match of page.matchAll(
+    /<a\b[^>]*href\s*=\s*["']([^"'#]+)["'][^>]*>([\s\S]*?)<\/a>/gi,
+  )) {
+    let target: URL;
+    try {
+      target = new URL(match[1] ?? "", url);
+    } catch {
+      continue;
+    }
+    const words = `${target.pathname} ${(match[2] ?? "").replace(/<[^>]+>/g, " ")}`;
+    if (
+      target.host !== host ||
+      !/press|presse|brand|marke|media|medien|newsroom|logo|styleguide|corporate|design/i.test(
+        words,
+      )
+    )
+      continue;
+    const clean = `${target.origin}${target.pathname}${target.search}`;
+    if (clean !== url && !found.includes(clean)) found.push(clean);
+    if (found.length >= limit) break;
+  }
+  return found;
+}
+
+/** A page with its findings and the press and brand pages it links to. */
+export async function legiPagxon(
+  url: string,
+  request: RetejoFetch = globalThis.fetch,
+): Promise<{ trovoj: Trovo[]; ligiloj: string[] }> {
   const page = await text(url, request);
   const sheets: Sheet[] = [];
   const order: { index: number; load: () => Promise<Sheet | undefined> }[] = [];
@@ -243,5 +279,5 @@ export async function legiRetejon(
     const known = colours.get(colour);
     if (known !== undefined) known.pezo += weight;
   }
-  return [...colours.values(), ...rest];
+  return { trovoj: [...colours.values(), ...rest], ligiloj: markoLigiloj(page, url) };
 }

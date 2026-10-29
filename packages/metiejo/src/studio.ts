@@ -719,6 +719,8 @@ export function studioRows(
 
 export interface StudioInput {
   page: StudioPage;
+  /** Spec 033: the notice before the export, with the foreign brand where there is one. */
+  averto?: string;
   marko: MarkoView;
   kombination: Kombination;
   groups: StudioGroup[];
@@ -999,7 +1001,7 @@ export function studioScreen(input: StudioInput): string {
 <span slot="principal">Marke ${escapeHtml(label)} · Prüfung: <fm-insigno intent="${input.probleme === 0 ? "success" : "warning"}" id="mt-probleme">${input.probleme} ${input.probleme === 1 ? "Problem" : "Probleme"}</fm-insigno> <fm-butono emphasis="high" size="small" data-mt-post="/studio/${encodeURIComponent(name)}/speichern">Speichern</fm-butono></span>
 ${input.message === undefined ? "" : `<fm-avizo slot="notices" intent="success">${escapeHtml(input.message)}</fm-avizo>`}
 <fm-avizo slot="notices" intent="warning" id="mt-studio-meldung" hidden></fm-avizo>
-<fm-avizo slot="notices" intent="info" data-mt-averto>${escapeHtml(AVERTO_EKSPORTO)}</fm-avizo>
+<fm-avizo slot="notices" intent="info" data-mt-averto>${escapeHtml(input.averto ?? AVERTO_EKSPORTO)}</fm-avizo>
 ${expertHinweisHtml(input.expert)}
 <fm-pagxo>
 <fm-titolo slot="title" level="1" focusable>${tekstoSpan(page.key, escapeHtml(page.title))}</fm-titolo>

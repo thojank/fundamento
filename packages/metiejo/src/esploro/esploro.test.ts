@@ -21,7 +21,14 @@ const pages: Record<string, { type: string; body: string }> = {
     type: "text/css",
     body: ":root{--brand-primary:#9c5a2b}body{font-family:Lora,serif}.btn{border-radius:6px;padding:12px}",
   },
-  "https://pano.example/presse": { type: "text/html", body: "<style>.logo{fill:#9c5a2b;color:#f3e6cf}</style>" },
+  "https://pano.example/presse": {
+    type: "text/html",
+    body: "<style>.logo{fill:#9c5a2b;color:#f3e6cf}</style>",
+  },
+  "https://pano.example/marke": {
+    type: "text/html",
+    body: "<style>h1{font-family:Fraunces,serif}</style>",
+  },
 };
 const pageFetch = async (url: string) => {
   const page = pages[url];
@@ -34,13 +41,24 @@ function scripted(replies: unknown[]) {
   const requests: Record<string, unknown>[] = [];
   const fetch = async (_url: string, init: RequestInit) => {
     requests.push(JSON.parse(String(init.body)) as Record<string, unknown>);
-    const reply = replies.shift() ?? { choices: [{ message: { role: "assistant", content: "Fertig." } }], usage: { prompt_tokens: 10, completion_tokens: 2 } };
+    const reply = replies.shift() ?? {
+      choices: [{ message: { role: "assistant", content: "Fertig." } }],
+      usage: { prompt_tokens: 10, completion_tokens: 2 },
+    };
     return new Response(JSON.stringify(reply), { status: 200 });
   };
   return { fetch, requests };
 }
 const call = (name: string, args: Record<string, unknown>, id = "c") => ({
-  choices: [{ message: { role: "assistant", content: "", tool_calls: [{ id, type: "function", function: { name, arguments: JSON.stringify(args) } }] } }],
+  choices: [
+    {
+      message: {
+        role: "assistant",
+        content: "",
+        tool_calls: [{ id, type: "function", function: { name, arguments: JSON.stringify(args) } }],
+      },
+    },
+  ],
   usage: { prompt_tokens: 500, completion_tokens: 20 },
 });
 
@@ -48,7 +66,17 @@ describe("which addresses the agent may read (Spec 033 S4)", () => {
   it("public http and https only: no file, no localhost, no private network", () => {
     expect(permesataAdreso("https://pano.example/")).toBe(true);
     expect(permesataAdreso("http://pano.example/presse")).toBe(true);
-    for (const url of ["file:///etc/passwd", "http://localhost:7301/", "http://127.0.0.1/", "http://10.0.0.5/", "http://192.168.1.2/", "http://172.16.0.1/", "http://[::1]/", "http://metadata.google.internal/", "ftp://pano.example/"]) {
+    for (const url of [
+      "file:///etc/passwd",
+      "http://localhost:7301/",
+      "http://127.0.0.1/",
+      "http://10.0.0.5/",
+      "http://192.168.1.2/",
+      "http://172.16.0.1/",
+      "http://[::1]/",
+      "http://metadata.google.internal/",
+      "ftp://pano.example/",
+    ]) {
       expect(permesataAdreso(url), url).toBe(false);
     }
   });
@@ -63,20 +91,36 @@ describe("the research agent (Spec 033 S4)", () => {
     const { fetch, requests } = scripted([
       call("lies_seite", { url: "https://pano.example/" }, "a"),
       call("lies_seite", { url: "https://pano.example/presse" }, "b"),
-      { choices: [{ message: { role: "assistant", content: "Gelesen: Startseite und Presse." } }], usage: { prompt_tokens: 900, completion_tokens: 30 } },
+      {
+        choices: [{ message: { role: "assistant", content: "Gelesen: Startseite und Presse." } }],
+        usage: { prompt_tokens: 900, completion_tokens: 30 },
+      },
     ]);
-    const result = await esplori({ nomo: "Bäckerei Pano", provider, fetch, pageFetch, budget: new Budget(30_000), bases });
+    const result = await esplori({
+      nomo: "Bäckerei Pano",
+      provider,
+      fetch,
+      pageFetch,
+      budget: new Budget(30_000),
+      bases,
+    });
     expect(result.seitoj).toEqual(["https://pano.example/", "https://pano.example/presse"]);
     const lead = result.proponoj.find((propono) => propono.faceto === "gvidkoloro");
     expect(lead?.agordo).toEqual({ leitfarbe: "#9c5a2b" });
     expect(lead?.herkunft[0]?.dosiero).toMatch(/^https:\/\/pano\.example\//);
-    expect(result.proponoj.find((propono) => propono.faceto === "tiparo")?.agordo.schriften?.body?.family).toBe("Lora");
+    expect(
+      result.proponoj.find((propono) => propono.faceto === "tiparo")?.agordo.schriften?.body
+        ?.family,
+    ).toBe("Lora");
     expect(result.kosto).toMatchObject({ enigo: 1900, eligo: 70 });
-    const firstAnswer = (requests[1]?.messages as { role: string; content: string }[]).find((message) => message.role === "tool");
+    const firstAnswer = ((requests[1]?.messages ?? []) as { role: string; content: string }[]).find(
+      (message) => message.role === "tool",
+    );
     expect(firstAnswer?.content).toContain("https://pano.example/presse");
     expect(firstAnswer?.content).toContain("https://pano.example/marke");
     expect(firstAnswer?.content).not.toContain("karriere");
-    const system = (requests[0]?.messages as { role: string; content: string }[])[0]?.content ?? "";
+    const system =
+      ((requests[0]?.messages ?? []) as { role: string; content: string }[])[0]?.content ?? "";
     expect(system).toContain("Bäckerei Pano");
     expect(system).toContain("Beobachtung");
   });
@@ -84,17 +128,39 @@ describe("the research agent (Spec 033 S4)", () => {
   it("refuses an address that is not public, and stops after six pages", async () => {
     const { fetch } = scripted([
       call("lies_seite", { url: "http://127.0.0.1:7301/" }, "x"),
-      ...Array.from({ length: 7 }, (_, index) => call("lies_seite", { url: `https://pano.example/?p=${index}` }, `p${index}`)),
-      { choices: [{ message: { role: "assistant", content: "Ende." } }], usage: { prompt_tokens: 10, completion_tokens: 2 } },
+      ...Array.from({ length: 7 }, (_, index) =>
+        call("lies_seite", { url: `https://pano.example/?p=${index}` }, `p${index}`),
+      ),
+      {
+        choices: [{ message: { role: "assistant", content: "Ende." } }],
+        usage: { prompt_tokens: 10, completion_tokens: 2 },
+      },
     ]);
-    const result = await esplori({ nomo: "Pano", provider, fetch, pageFetch, budget: new Budget(60_000), bases });
+    const result = await esplori({
+      nomo: "Pano",
+      provider,
+      fetch,
+      pageFetch,
+      budget: new Budget(60_000),
+      bases,
+    });
     expect(result.abgelehnt).toContain("http://127.0.0.1:7301/");
     expect(result.seitoj.length).toBeLessThanOrEqual(6);
   });
 
   it("without a model, a given address is read with the press and brand pages it links to", async () => {
-    const result = await esplori({ nomo: "Pano", url: "https://pano.example/", pageFetch, budget: new Budget(1), bases });
-    expect(result.seitoj).toEqual(["https://pano.example/", "https://pano.example/presse", "https://pano.example/marke"]);
+    const result = await esplori({
+      nomo: "Pano",
+      url: "https://pano.example/",
+      pageFetch,
+      budget: new Budget(1),
+      bases,
+    });
+    expect(result.seitoj).toEqual([
+      "https://pano.example/",
+      "https://pano.example/presse",
+      "https://pano.example/marke",
+    ]);
     expect(result.proponoj.some((propono) => propono.faceto === "gvidkoloro")).toBe(true);
     expect(result.kosto.enigo).toBe(0);
   });

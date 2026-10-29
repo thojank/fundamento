@@ -141,6 +141,8 @@ export interface MarkoView {
 
 export interface ScreenInput {
   sxtupo: SxtupoKey;
+  /** Spec 033: the notice before the export, with the foreign brand where there is one. */
+  averto?: string;
   marko?: MarkoView;
   /** The brands of the working directory (step 1: open one). */
   markoj: string[];
@@ -399,7 +401,7 @@ function problems(input: ScreenInput): string {
   if (input.sxtupo === "fertig") {
     // Constitution v2.5, Art. VI, 2: before every export a visible notice of possible confusability.
     parts.push(
-      `<fm-avizo slot="problems" intent="info" data-mt-averto>${escapeHtml(AVERTO_EKSPORTO)}</fm-avizo>`,
+      `<fm-avizo slot="problems" intent="info" data-mt-averto>${escapeHtml(input.averto ?? AVERTO_EKSPORTO)}</fm-avizo>`,
     );
   }
   if (input.sxtupo === "fertig" && input.eksporto !== undefined) {

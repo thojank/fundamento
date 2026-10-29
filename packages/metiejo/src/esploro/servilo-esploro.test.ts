@@ -30,12 +30,18 @@ const deps: PrivataDeps = {
 };
 const pageFetch = async (url: string) =>
   url === "https://pano.example/"
-    ? new Response('<style>:root{--brand-primary:#9c5a2b}.btn{border-radius:6px}</style><a href="/presse">Presse</a>', { status: 200, headers: { "content-type": "text/html" } })
+    ? new Response(
+        '<style>:root{--brand-primary:#9c5a2b}.btn{border-radius:6px}</style><a href="/presse">Presse</a>',
+        { status: 200, headers: { "content-type": "text/html" } },
+      )
     : new Response("", { status: 404 });
 const llmFetch = async () =>
   new Response(
     JSON.stringify(
-      replies.shift() ?? { choices: [{ message: { role: "assistant", content: "Gelesen." } }], usage: { prompt_tokens: 40, completion_tokens: 4 } },
+      replies.shift() ?? {
+        choices: [{ message: { role: "assistant", content: "Gelesen." } }],
+        usage: { prompt_tokens: 40, completion_tokens: 4 },
+      },
     ),
     { status: 200 },
   );
@@ -43,15 +49,37 @@ const llmFetch = async () =>
 beforeAll(async () => {
   servilo = await startServilo(
     {
-      port: 0, workdir, root, settings: settingsOf(parseEnv("")), deps,
-      ki: { provider: new Provider("mistral", "ministral-14b-2512", "sk-esploro-servilo"), fetch: llmFetch },
+      port: 0,
+      workdir,
+      root,
+      settings: settingsOf(parseEnv("")),
+      deps,
+      ki: {
+        provider: new Provider("mistral", "ministral-14b-2512", "sk-esploro-servilo"),
+        fetch: llmFetch,
+      },
       esploro: { fetch: pageFetch },
     },
     { stderr: () => {} },
   );
-  plain = await startServilo({ port: 0, workdir, root, settings: settingsOf(parseEnv("")), deps, esploro: { fetch: pageFetch } }, { stderr: () => {} });
+  plain = await startServilo(
+    {
+      port: 0,
+      workdir,
+      root,
+      settings: settingsOf(parseEnv("")),
+      deps,
+      esploro: { fetch: pageFetch },
+    },
+    { stderr: () => {} },
+  );
   for (const name of ["pano", "simila"]) {
-    await fetch(`${servilo.url}/marko`, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: `name=${name}&basis=komuna`, redirect: "manual" });
+    await fetch(`${servilo.url}/marko`, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: `name=${name}&basis=komuna`,
+      redirect: "manual",
+    });
   }
 });
 afterAll(async () => {
@@ -61,7 +89,11 @@ afterAll(async () => {
 });
 
 const post = (base: string, path: string, body: unknown) =>
-  fetch(`${base}${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+  fetch(`${base}${path}`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
 
 describe("Weg C: a brand only named (Spec 033 S4)", () => {
   it("without the confirmation the agent does not start", async () => {
@@ -72,16 +104,41 @@ describe("Weg C: a brand only named (Spec 033 S4)", () => {
 
   it("with it: the naming, the confirmation, the proposals with URLs and the agent's tokens in the Kroniko", async () => {
     replies.push({
-      choices: [{ message: { role: "assistant", content: "", tool_calls: [{ id: "a", type: "function", function: { name: "lies_seite", arguments: '{"url":"https://pano.example/"}' } }] } }],
+      choices: [
+        {
+          message: {
+            role: "assistant",
+            content: "",
+            tool_calls: [
+              {
+                id: "a",
+                type: "function",
+                function: { name: "lies_seite", arguments: '{"url":"https://pano.example/"}' },
+              },
+            ],
+          },
+        },
+      ],
       usage: { prompt_tokens: 400, completion_tokens: 10 },
     });
-    const response = await post(servilo.url, "/api/marko/pano/esplori", { nomo: "Bäckerei Pano", rajtoj: true });
+    const response = await post(servilo.url, "/api/marko/pano/esplori", {
+      nomo: "Bäckerei Pano",
+      rajtoj: true,
+    });
     expect(response.status).toBe(200);
-    const body = (await response.json()) as { proponoj: { faceto: string; herkunft: { dosiero: string }[] }[]; seitoj: string[] };
+    const body = (await response.json()) as {
+      proponoj: { faceto: string; herkunft: { dosiero: string }[] }[];
+      seitoj: string[];
+    };
     expect(body.seitoj).toEqual(["https://pano.example/"]);
-    expect(body.proponoj.find((propono) => propono.faceto === "gvidkoloro")?.herkunft[0]?.dosiero).toBe("https://pano.example/");
+    expect(
+      body.proponoj.find((propono) => propono.faceto === "gvidkoloro")?.herkunft[0]?.dosiero,
+    ).toBe("https://pano.example/");
     const entries = readKroniko(workdir, "pano");
-    expect(entries.find((entry) => entry.ago === "fremda")?.detaloj).toMatchObject({ kiel: "nennung", nomo: "Bäckerei Pano" });
+    expect(entries.find((entry) => entry.ago === "fremda")?.detaloj).toMatchObject({
+      kiel: "nennung",
+      nomo: "Bäckerei Pano",
+    });
     expect(entries.some((entry) => entry.ago === "konfirmo")).toBe(true);
     expect(entries.some((entry) => entry.ago === "propono" && entry.fonto === "agento")).toBe(true);
     expect(entries.findLast((entry) => entry.ago === "babilo")?.kosto?.enigo).toBeGreaterThan(0);
@@ -91,15 +148,27 @@ describe("Weg C: a brand only named (Spec 033 S4)", () => {
     const fertig = await (await fetch(`${servilo.url}/marko/pano/fertig`)).text();
     expect(fertig).toContain("Bäckerei Pano");
     expect(fertig).toContain("lokal");
-    await fetch(`${servilo.url}/studio/pano/speichern`, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: "eksporto-css=ja", redirect: "manual" });
+    await fetch(`${servilo.url}/studio/pano/speichern`, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "eksporto-css=ja",
+      redirect: "manual",
+    });
     const notice = readKroniko(workdir, "pano").findLast((entry) => entry.ago === "averto");
     expect(notice?.teksto).toContain("Bäckerei Pano");
   });
 
   it("without a model: with an address it reads that address; without one it says what is missing", async () => {
-    const withUrl = await post(plain.url, "/api/marko/simila/esplori", { nomo: "Pano", url: "https://pano.example/", rajtoj: true });
+    const withUrl = await post(plain.url, "/api/marko/simila/esplori", {
+      nomo: "Pano",
+      url: "https://pano.example/",
+      rajtoj: true,
+    });
     expect(withUrl.status).toBe(200);
-    const without = await post(plain.url, "/api/marko/simila/esplori", { nomo: "Pano", rajtoj: true });
+    const without = await post(plain.url, "/api/marko/simila/esplori", {
+      nomo: "Pano",
+      rajtoj: true,
+    });
     expect(without.status).toBe(503);
     expect(((await without.json()) as { satz: string }).satz).toMatch(/Adresse|FM_KI_ANBIETER/);
   });
