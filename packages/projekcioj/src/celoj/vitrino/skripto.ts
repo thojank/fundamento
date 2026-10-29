@@ -19,6 +19,11 @@ export function vitrinoSkripto(): string {
 function vitrinoKerno(): string {
   return String.raw`
 const datumoj = JSON.parse(document.getElementById("fm-vitrino").textContent);
+// Nachlese 12 ④: the KontrastParoj stand once per table; every combination gets its table back.
+if (datumoj.mezuroj && Array.isArray(datumoj.mezuroj.unikaj)) {
+  const packed = datumoj.mezuroj;
+  datumoj.mezuroj = Object.fromEntries(Object.entries(packed.al).map(([key, index]) => [key, packed.unikaj[index] || []]));
+}
 const root = document.documentElement;
 const esc = (value) => String(value).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const percent = (value) => (value * 100).toFixed(1) + " %";

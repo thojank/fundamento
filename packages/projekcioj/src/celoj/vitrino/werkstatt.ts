@@ -789,20 +789,43 @@ class Werkstatt {
    * M5 (Spec 019 ②): `count` slider changes, each derived (the palettes, with the values of stage
    * 2) and checked, the times in milliseconds, and the longest block of the main thread meanwhile
    * (Long Tasks, where the browser reports them). The Agordo is restored afterwards.
+   * Nachlese 12 ③: per change the longest block that began while it was derived and checked, and
+   * the longest work of scripts in one frame (Long Animation Frames, forced style and layout inside
+   * a script included) – so a slow runner's style and layout is told apart from the Werkstatt's
+   * own work.
    */
-  async measure(
-    count: number,
-  ): Promise<{ derive: number[]; check: number[]; longest: number; longTasks: number }> {
+  async measure(count: number): Promise<{
+    derive: number[];
+    check: number[];
+    longest: number;
+    longTasks: number;
+    perChange: number[];
+    scriptLongest: number;
+  }> {
     const original = this.state.agordo;
     const derive: number[] = [];
     const check: number[] = [];
-    const long: number[] = [];
-    let observer: PerformanceObserver | undefined;
+    const long: { start: number; duration: number }[] = [];
+    const scripts: number[] = [];
+    const changes: { start: number; end: number }[] = [];
+    const observers: PerformanceObserver[] = [];
     if (PerformanceObserver.supportedEntryTypes?.includes("longtask") === true) {
-      observer = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) long.push(entry.duration);
+      const observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries())
+          long.push({ start: entry.startTime, duration: entry.duration });
       });
       observer.observe({ type: "longtask" });
+      observers.push(observer);
+    }
+    if (PerformanceObserver.supportedEntryTypes?.includes("long-animation-frame") === true) {
+      const observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries() as unknown as {
+          scripts: { duration: number }[];
+        }[])
+          scripts.push(entry.scripts.reduce((sum, script) => sum + script.duration, 0));
+      });
+      observer.observe({ type: "long-animation-frame" });
+      observers.push(observer);
     }
     for (let index = 0; index < count; index++) {
       const helligkeit = Math.round((-1 + (2 * (index + 1)) / (count + 1)) * 100) / 100;
@@ -814,12 +837,27 @@ class Werkstatt {
       const checking = performance.now();
       await this.runCheck();
       check.push(performance.now() - checking);
+      changes.push({ start: started, end: performance.now() });
     }
     await new Promise((resolve) => setTimeout(resolve, 100));
-    observer?.disconnect();
+    for (const observer of observers) observer.disconnect();
     this.setAgordo(original, { write: false });
     await this.runCheck();
-    return { derive, check, longest: Math.max(0, ...long), longTasks: long.length };
+    // A Long Task belongs to the change during which it began; one after the last, to the last.
+    const perChange = changes.map(() => 0);
+    for (const task of long) {
+      let index = changes.findIndex((change) => task.start < change.end);
+      if (index === -1) index = changes.length - 1;
+      if (index >= 0) perChange[index] = Math.max(perChange[index] ?? 0, task.duration);
+    }
+    return {
+      derive,
+      check,
+      longest: Math.max(0, ...long.map((task) => task.duration)),
+      longTasks: long.length,
+      perChange,
+      scriptLongest: Math.max(0, ...scripts),
+    };
   }
 
   // --- the panel --------------------------------------------------------------------------------
