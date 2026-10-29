@@ -58,3 +58,15 @@ describe("Spec 029 ②b-1 M-6: clearable in the Figma plan", () => {
     },
   );
 });
+
+// M-1 – the reason for disabled is a konsileto of the running page: no layer of the set, no TEXT
+// property in Figma.
+describe("Spec 029 ②b-1 M-1: the reason for disabled in the Figma plan", () => {
+  it.each(["kampo", "elektilo", "butono", "sxaltilo", "faldilo"])(
+    "%s: no property disabled-reason",
+    (ero) => {
+      const set = plan.components.find((component) => component.set === ero);
+      expect(Object.keys(set?.properties ?? {})).not.toContain("disabled-reason");
+    },
+  );
+});

@@ -141,3 +141,56 @@ describe("Spec 029 ②b-1: the brief lists boolean props as flags", () => {
     expect(Math.ceil(Buffer.byteLength(JSON.stringify(brief)) / 3)).toBeLessThanOrEqual(700);
   });
 });
+
+// M-1 – the reason for disabled (abgleich.json, Muster M-1; Maintainer 29.10.: in a konsileto): a
+// text slot disabled-reason at every Ero with disabled; it describes the element, and a reason
+// without disabled is a contradiction (constraint). The faldilo gets disabled with it (A-faldilo-3);
+// the boundary tooltip-on-disabled of the konsileto is decided and goes.
+const REASONED = [
+  "kampo",
+  "tekstareo",
+  "elektilo",
+  "listelektilo",
+  "plurelektilo",
+  "kompletigilo",
+  "datelektilo",
+  "glitilo",
+  "elekto",
+  "markobutono",
+  "sxaltilo",
+  "alsxutilo",
+  "butono",
+  "menuo",
+  "faldilo",
+];
+
+describe("Spec 029 ②b-1 M-1: the reason for disabled", () => {
+  it.each(REASONED)(
+    "%s: a text slot disabled-reason that describes it, only with disabled",
+    (ero) => {
+      const skemo = skemoOf(ero);
+      expect(skemo.props.find((prop) => prop.name === "disabled")).toMatchObject({
+        kind: "boolean",
+      });
+      expect(skemo.slots).toContainEqual({ name: "disabled-reason", text: true });
+      expect(skemo.a11y.description ?? []).toContain("slot:disabled-reason");
+      expect(skemo.constraints ?? []).toContainEqual(
+        expect.objectContaining({
+          when: { "slot:disabled-reason": "filled" },
+          allowed: { disabled: ["true"] },
+        }),
+      );
+    },
+  );
+
+  it("the faldilo can be disabled, a state of its own", () => {
+    expect(skemoOf("faldilo").states).toContain("disabled");
+  });
+
+  it("the konsileto's boundary tooltip-on-disabled is decided", () => {
+    const uzo = modelo.eroj.find((entry) => entry.ero.name === "konsileto")?.uzo;
+    expect((uzo?.boundary ?? []).map((boundary) => boundary.case)).not.toContain(
+      "tooltip-on-disabled",
+    );
+  });
+});
