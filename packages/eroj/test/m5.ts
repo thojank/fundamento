@@ -46,3 +46,68 @@ export function m5Urteil(messung: M5Messung): M5Urteil {
     );
   return { rot: gruende.length > 0, perzentil: p, gruende };
 }
+
+/**
+ * The second Gegenprobe (Nachlese 12 ③, maintainer 29.10.): a block of `ziel` ms of style and
+ * layout, no long script. Runs in the page (page.evaluate; no closure over this module): a block of
+ * elements laid out off screen is doubled until one recalculation of its style and layout, forced
+ * once here to measure it, costs at least `ziel` ms on this runner. Then every hand-over of the
+ * Werkstatt to its worker switches a class on the block and reads nothing, so the cost falls in the
+ * rendering of the next frame – the block a slow Werkstatt would cause, not a script of its own.
+ */
+export function stilBlockadeEinbauen(ziel: number): { elemente: number; kosten: number } {
+  const host = document.createElement("div");
+  host.id = "fm-m5-stilblockade";
+  host.setAttribute("aria-hidden", "true");
+  host.style.cssText = "position:absolute;inset-inline-start:-100000px;inset-block-start:0;";
+  const style = document.createElement("style");
+  style.textContent =
+    "#fm-m5-stilblockade > span { display: inline-block; inline-size: 7px; padding: 1px; }" +
+    "#fm-m5-stilblockade.an > span { inline-size: 8px; padding: 2px; }";
+  document.head.append(style);
+  document.body.append(host);
+  let elemente = 0;
+  const grow = (count: number) => {
+    const fragment = document.createDocumentFragment();
+    for (let index = 0; index < count; index++) {
+      const span = document.createElement("span");
+      span.textContent = "m";
+      fragment.append(span);
+    }
+    host.append(fragment);
+    elemente += count;
+  };
+  const kosten = () => {
+    host.classList.toggle("an");
+    const started = performance.now();
+    void host.offsetHeight;
+    return performance.now() - started;
+  };
+  grow(2000);
+  let last = kosten();
+  while (last < ziel && elemente < 2_000_000) {
+    grow(elemente);
+    last = Math.min(kosten(), kosten());
+  }
+  // Doubling overshoots: take off an eighth at a time while the block still costs `ziel`, so the
+  // Gegenprobe stays near the limit (80 ms, not 160).
+  while (last > ziel * 1.25) {
+    const step = Math.floor(elemente / 8);
+    for (let index = 0; index < step; index++) host.lastElementChild?.remove();
+    const smaller = Math.min(kosten(), kosten());
+    if (smaller < ziel) {
+      grow(step);
+      elemente -= step;
+      last = Math.min(kosten(), kosten());
+      break;
+    }
+    elemente -= step;
+    last = smaller;
+  }
+  const post = Worker.prototype.postMessage;
+  Worker.prototype.postMessage = function (this: Worker, ...args: unknown[]) {
+    host.classList.toggle("an");
+    return (post as (...rest: unknown[]) => void).apply(this, args);
+  } as typeof Worker.prototype.postMessage;
+  return { elemente, kosten: last };
+}

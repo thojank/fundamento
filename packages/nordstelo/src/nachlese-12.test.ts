@@ -166,3 +166,23 @@ describe("② two runs at the same time keep each other's count of requests", ()
     ).toEqual({ "openrouter 2026-10-29": 300, "mistral 2026-10-29": 40 });
   });
 });
+
+describe("B-4: a result without a page counts its own tokens, not those of the runs beside it", () => {
+  it("the effort the agent attaches to its error is the effort of the result", async () => {
+    const out = mkdtempSync(join(tmpdir(), "nordstelo-n12-"));
+    const d = deps(out, new Set());
+    d.agent = async ({ budget }) => {
+      // Meanwhile the other runs of the Lauf spend 500 tokens of the shared budget.
+      budget.charge(500, 0);
+      throw Object.assign(new Error("Anbieter openrouter: Antwort ohne Nachricht."), {
+        effort: { inputTokens: 7, outputTokens: 0, toolCalls: 2, ms: 10, bytes: 0, requests: 4 },
+      });
+    };
+    const result = await runNordstelo(
+      { taskoj: ["anmeldung"], variants: ["F"], repeats: 1, maxTokens: 1_000_000, concurrency: 1 },
+      d,
+    );
+    expect(result.summary.tokens.input).toBe(7);
+    expect(result.summary.requests).toBe(4);
+  });
+});
