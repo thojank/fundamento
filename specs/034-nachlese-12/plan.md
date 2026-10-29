@@ -84,12 +84,12 @@ Kosten in $:
 | Reihe H | Ausgangslinie | `20261024-0825` | 74,8 gegen 38 | 71,5 gegen 74,3 | 11 / 0 · 13,2 / 19,3 | – (vor ④) | 1 543 556 / 62 783 | ≤ 0,72 $ | 2 |
 | Reihe H | nach den Korrekturen | `20261024-1201` | 79,6 gegen 35,2 | 75,6 gegen 71,4 | 8,2 / 0 · 9,5 / 9,6 | – (vor ④) | 1 838 103 / 64 358 | ≤ 0,84 $ | 0 |
 | Reihe H | **nach der Fonto** | `20261029-1126` | **74,2 gegen 35,2** | 69 gegen 72,9 | 9,8 / 0 · 11,6 / 2,9 | 314 | 1 768 320 / 63 532 | ≤ 0,81 $ | 0 |
-| Reihe K | Ausgangslinie | `20261024-1233` | 66,7 gegen 33,3 | 64,4 gegen 47,6 | 12,9 / 2,7 · 14,7 / 7,2 | – (vor ④) | 2 933 354 / 158 769 | 0 $ | 2 |
-| Reihe K | nach den Korrekturen | `20261024-1248` | 75,1 gegen 33,3 | 72,9 gegen 47,6 | 18,5 / 0 · 15,1 / 4,3 | – (vor ④) | 3 261 566 / 148 810 | 0 $ | 1 |
+| Reihe K | Ausgangslinie | `20261024-1233` | 66,7 gegen 33,3 | 64,4 gegen 47,6 | 12,9 / 2,7 · 14,7 / 7,2 | – (vor ④) | 2 260 904 / 158 769 (B-4; vorher 2 933 354) | 0 $ | 2 |
+| Reihe K | nach den Korrekturen | `20261024-1248` | 75,1 gegen 33,3 | 72,9 gegen 47,6 | 18,5 / 0 · 15,1 / 4,3 | – (vor ④) | 2 749 789 / 148 810 (B-4; vorher 3 261 566) | 0 $ | 1 |
 | Reihe K | **nach der Fonto** | `20261029-1127` | **76 gegen 33,3** | 74,9 gegen 47,6 | 16,7 / 0 · 14,8 / 7,8 | 333 | 2 828 072 / 153 502 | 0 $ | 0 |
 | Reihe O | Ausgangslinie (System `721743f`) | `20261029-1143` | 68,2 gegen 36,1 | 65,6 gegen 53,6 | – (1 Wiederholung) | 483 (ohne die gescheiterten) | 11 500 479 / 185 886 (B-4: ohne Ersatzzählung) | 0 $ | 5 von 40 (12,5 %) |
-| Reihe O | nach den Korrekturen (System `af6695a`) | folgt | – | – | – | – | – | 0 $ | – |
-| Reihe O | nach der Fonto (System `05f122d`) | folgt | – | – | – | – | – | 0 $ | – |
+| Reihe O | nach den Korrekturen (System `af6695a`) | `20261029-1306` | 85,2 gegen 36,1 | 82,2 gegen 50 | – (1 Wiederholung) | 464 (ohne die gescheiterten) | 8 003 555 / 163 127 (B-4: ohne Ersatzzählung) | 0 $ | 6 von 40 (15 %) |
+| Reihe O | nach der Fonto (System `05f122d`) | `20261029-1437`, pausiert am Tageslimit (1 von 40), setzt nach 00:00 UTC fort | – | – | – | – | – | 0 $ | – |
 
 Die alten Läufe der Reihe O (`20261024-1422`, `20261027-1500`, `20261027-1535`) mit verschiedenen Werkzeugen ersetzt die neue Reihe (O-8); sie bleiben im Verlauf.
 
@@ -159,7 +159,16 @@ Zusammengefasst nach Runner:
 
 - Auf langsamen Runnern wäre M5 mit dem alten Urteil in 5 von 7 Versuchen rot gewesen (52–74 ms). Mit dem neuen ist es grün, weil die Skripte 0 ms und das 90. Perzentil 0 ms sind: Die Blockaden betreffen 1–3 von 50 Änderungen.
 - Die Gegenprobe 1 war in allen 11 Versuchen rot: Skripte 82–96 ms, Perzentil 112–126 ms.
-- Die Gegenprobe 2 (Stil und Layout) kam erst mit `2050f62` dazu; lokal rot (Skripte 5–9 ms, Perzentil 196–207 ms). Ihre CI-Werte folgen aus dem Lauf von `2050f62` (B-5).
+- Die Gegenprobe 2 (Stil und Layout) kam mit `2050f62` dazu; lokal rot (Skripte 5–9 ms, Perzentil 196–207 ms). In der CI:
+
+  | Lauf | Runner (Ableitung) | Block | Stil und Layout je Umschalten | Skripte | p90 je Änderung | Urteil |
+  |---|---|---|---|---|---|---|
+  | `c89f5e6` (#116) | langsam (139,9 ms) | 16 000 Elemente | 93 ms | 15 ms | 242 ms | rot |
+  | `04b68b7` (Merge von #116 auf `main`) | schnell (102,0 ms) | 28 000 Elemente | 96 ms | 0 ms | 308 ms | rot |
+
+  - Auf schnellen wie langsamen Runnern rot über das 90. Perzentil, die Skripte unter der Grenze.
+  - Ein mittlerer Runner fehlt noch; vier Wiederholungen des Werkstatt-Jobs auf `04b68b7` laufen im Hintergrund (B-5).
+  - Die Kalibrierung braucht je Runner verschieden viele Elemente für dieselben ~95 ms: Sie misst auf dem Runner selbst, deshalb gilt die Gegenprobe unabhängig von seiner Geschwindigkeit.
 
 ### Größe der Vitrino
 
@@ -174,7 +183,7 @@ Zusammengefasst nach Runner:
 
   | Job | vorher | nachher |
   |---|---|---|
-  | Rendered checks (Vitrino), axe und Abschnitte ohne Werkstatt | 9,6 min (10 Läufe) | 9,1 min (1 Lauf; weitere folgen, B-5) |
+  | Rendered checks (Vitrino), axe und Abschnitte ohne Werkstatt | 9,6 min (10 Läufe, 5,6–10,1) | 9,1 min (8 Läufe, 5,8–10,5) |
   | Rendered checks (Make Kit, Quickstart, Vitrino-Werkstatt) | 7,4 min (9 Läufe) | 9,1 min (11 Versuche, davon 7 auf langsamen Runnern) |
   | vor der Teilung (Spec 029 ①b), ein Job | 10,6 min (67 Läufe) | – |
 
@@ -203,14 +212,35 @@ Zusammengefasst nach Runner:
   - Jetzt hängt der Agent seinen Aufwand an den Fehler (`effort`), und der Lauf nimmt diesen.
   - Die Kennzahl ist nicht berührt, nur Tokens und Anfragen.
   - Die Läufe der Reihe O mit dem Werkzeug `269b4ff` haben den Fehler noch. Ihre Tokens stehen im Bericht ohne die gescheiterten Ergebnisse, ihre Anfragen ebenso.
-- **B-5, Messungen der CI noch offen:**
-  - die Dauer des Jobs „Rendered checks (Vitrino)“ nachher: ein Lauf; fünf Wiederholungen laufen im Hintergrund auf `2050f62`
-  - die Gegenprobe 2 in der CI
+  - **H und K neu gerechnet** (Nachtrag des Maintainers vom 29.10.). Die Kennzahl bleibt; nur Ergebnisse, an denen der Agent scheiterte, hatten die Ersatzzählung. Ergebnisse, die erst beim Rendern scheiterten, zählen die Tokens des Agenten richtig.
+
+    | Messpunkt | ohne Seite | davon Agent gescheitert (Ersatzzählung) | Tokens ein / aus vorher | Tokens ein / aus neu | Kosten vorher | Kosten neu |
+    |---|---|---|---|---|---|---|
+    | H Ausgangslinie `20261024-0825` | 2 | 0 (beide beim Rendern, `tabelo` B-7) | 1 543 556 / 62 783 | 1 543 556 / 62 783 | ≤ 0,72 $ | ≤ 0,72 $ |
+    | H nach den Korrekturen `20261024-1201` | 0 | 0 | 1 838 103 / 64 358 | 1 838 103 / 64 358 | ≤ 0,84 $ | ≤ 0,84 $ |
+    | H nach der Fonto `20261029-1126` | 0 | 0 | 1 768 320 / 63 532 | 1 768 320 / 63 532 | ≤ 0,81 $ | ≤ 0,81 $ |
+    | K Ausgangslinie `20261024-1233` | 2 | 1 (`app-rahmen` F-1, 672 450 Ersatz); 1 beim Rendern | 2 933 354 / 158 769 | 2 260 904 / 158 769 | 0 $ | 0 $ |
+    | K nach den Korrekturen `20261024-1248` | 1 | 1 (`detailseite` F-1, 511 777 Ersatz) | 3 261 566 / 148 810 | 2 749 789 / 148 810 | 0 $ | 0 $ |
+    | K nach der Fonto `20261029-1127` | 0 | 0 | 2 828 072 / 153 502 | 2 828 072 / 153 502 | 0 $ | 0 $ |
+
+  - „Neu“ ist eine untere Grenze. Was ein gescheitertes Ergebnis bis zu seiner Zeitüberschreitung selbst verbraucht hat, haben die alten Läufe nicht festgehalten. Ein F-Ergebnis von K braucht im Median 33 000 Tokens, der Fehler der unteren Grenze liegt also in dieser Größe.
+  - Für H ändern sich weder Tokens noch Kosten.
+- **B-5, Messungen der CI:**
+  - **Vitrino-Job nachher:** 8 Läufe.
+    - `87fc1c6`: 9,1 min
+    - `c89f5e6`: 6,1 min, dann fünf Wiederholungen mit 5,8 / 9,0 / 9,4 / 7,2 / 9,7 min
+    - Merge `04b68b7`: 10,5 min
+    - Median 9,1 gegen vorher 9,6 min.
+    - Die Spanne (5,8–10,5) kommt aus den Runnern. Die kleinere Vitrino (15,1 → 7,7 MB) verkürzt den Job höchstens um eine halbe Minute; mehr ist mit diesen Läufen nicht zu belegen.
+  - **Gegenprobe 2 in der CI:** schnell und langsam rot (oben); der mittlere Runner folgt.
 - **B-3, `regularo` steht wie die Kontrastpaare 18-fach in der Vitrino** (komuna 0,28 MB). Gleicher Weg möglich; nicht Teil dieses Auftrags (Aufgabe von 8b).
 
 ### Offen (für den Maintainer)
 
-- **O-1, Reihe O:** Ergebnis folgt (Messanleitung, Schritt 2); bei mehr als 20 % ohne Seite endet sie als nicht messbar.
+- **O-1, Reihe O:**
+  - Ausgangslinie 12,5 % und nach den Korrekturen 15 % ohne Seite, beide messbar.
+  - Nach der Fonto am 29.10. am Tageslimit pausiert. `/tmp/n12-o-weiter.sh` startet dieselbe Kette nach 00:00 UTC.
+  - Bei mehr als 20 % ohne Seite endet die Reihe als nicht messbar.
 - **O-2, Kosten mit Cache:** Soll das Werkzeug `cached_tokens` zählen, damit die Kosten genau sind?
 
 ### Messanleitung
