@@ -8,6 +8,7 @@ import type { ModeloFiles } from "@fundamento/modelo";
 import { lingvoSwitch, nomoSpan, tekstoSpan } from "../../lingvo.js";
 import { BAZOJ_CSS, bazojSections } from "./bazoj.js";
 import {
+  kunpremiMezurojn,
   VITRINO_SURFACE,
   VITRINO_TEKSTOJ,
   type VitrinoDatumoj,
@@ -420,7 +421,7 @@ export function vitrinoHtml({
 <style id="fm-vitrino-layout">${LAYOUT}
 ${BAZOJ_CSS}
 ${stillControls(css)}</style>
-<script type="application/json" id="fm-vitrino">${jsonIsland({ ...datumoj, werkstatt: werkstatt !== undefined })}</script>
+<script type="application/json" id="fm-vitrino">${jsonIsland({ ...datumoj, mezuroj: kunpremiMezurojn(datumoj.mezuroj), werkstatt: werkstatt !== undefined })}</script>
 ${werkstatt?.bazoCss === undefined ? "" : `<style id="fm-werkstatt-bazo-css">${werkstatt.bazoCss}</style>`}
 ${werkstatt === undefined ? "" : `<script type="application/json" id="fm-werkstatt">${jsonIsland({ ...werkstatt, bazoCss: undefined })}</script>`}
 </head>

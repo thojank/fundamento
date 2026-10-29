@@ -22,12 +22,13 @@ import {
 import { buildProjekcioj } from "@fundamento/projekcioj";
 import { providerOf, runAgent } from "./agent.js";
 import type { Facts, Variant } from "./facts.js";
-import { connectGvidanto } from "./gvidanto.js";
-import { AnfragoLedger, dayOf, LIMOJ, type Limoj, Pordisto } from "./limoj.js";
+import { connectGvidanto, type GvidantoModule } from "./gvidanto.js";
+import { AnfragoLedger, dayOf, LIMOJ, type Limoj, mergeLedger, Pordisto } from "./limoj.js";
 import { createRenderer } from "./render.js";
 import { type RunRecord, summarize } from "./report.js";
 import { failedScore, markdownReport, runNordstelo } from "./run.js";
 import { scoreBoth } from "./score.js";
+import { sistemoLabel, sistemoOf } from "./sistemo.js";
 
 const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 const CXIUJ_CONFIG = join(
@@ -52,16 +53,20 @@ pnpm nordstelo restaro <Laufordner> [--skribi]
   --anfragen-sekunde <n>  Anfragen je Sekunde höchstens (Standard: mistral 0,5, sonst frei)
   --anfragen-tag <n>   Anfragen je UTC-Tag höchstens (Standard: openrouter 1000, sonst frei);
                        am Limit hält der Lauf an, derselbe Befehl setzt ihn am nächsten Tag fort
-  --out <Ordner>       Standard: .fundamento/nordstelo im Checkout`;
+  --out <Ordner>       Standard: .fundamento/nordstelo im Checkout
+  --sistemo <Checkout> das System (Eroj, Gvidanto, CSS) aus einem anderen, gebauten Checkout messen;
+                       das Werkzeug bleibt dieses (Nachlese 12 ②)
+  --hoechstens-ohne-seite <Prozent>
+                       mehr Ergebnisse ohne Seite beenden den Lauf: nicht messbar mit diesem Anbieter`;
 
-function commitOf(): string {
+function commitOf(root = ROOT): string {
   try {
     const commit = execFileSync("git", ["rev-parse", "--short", "HEAD"], {
-      cwd: ROOT,
+      cwd: root,
       encoding: "utf8",
     }).trim();
     const dirty =
-      execFileSync("git", ["status", "--porcelain"], { cwd: ROOT, encoding: "utf8" }).trim() !== "";
+      execFileSync("git", ["status", "--porcelain"], { cwd: root, encoding: "utf8" }).trim() !== "";
     return dirty ? `${commit}-dirty` : commit;
   } catch {
     return "unbekannt";
@@ -203,17 +208,35 @@ async function kuri(values: Record<string, string | boolean | undefined>): Promi
   });
   const out = resolve(String(values.out ?? join(ROOT, ".fundamento", "nordstelo")));
   const { modelo, katalogo } = modeloAndKatalogo();
-  const projekcioj = join(out, "projekcioj");
-  const built = await buildProjekcioj({
+  // Nachlese 12 ②: the system of another checkout – its Eroj, its CSS, its Gvidanto; the tool,
+  // the catalogue and the scoring stay this checkout's. Its CSS goes to a folder of its own, so a
+  // run of this checkout at the same time keeps its own.
+  const sistemo =
+    typeof values.sistemo === "string" ? sistemoOf(resolve(values.sistemo)) : undefined;
+  const sistemoCommit = sistemo === undefined ? undefined : commitOf(sistemo.root);
+  const projekcioj = join(
+    out,
+    sistemo === undefined ? "projekcioj" : `projekcioj-${sistemoCommit ?? "sistemo"}`,
+  );
+  const cssOf =
+    sistemo === undefined
+      ? { buildProjekcioj, projectModeloSource, config: CXIUJ_CONFIG }
+      : {
+          ...((await import(sistemo.projekcioj)) as { buildProjekcioj: typeof buildProjekcioj }),
+          ...((await import(sistemo.modelo)) as {
+            projectModeloSource: typeof projectModeloSource;
+          }),
+          config: sistemo.cxiujConfig,
+        };
+  const built = await cssOf.buildProjekcioj({
     outDir: projekcioj,
-    source: projectModeloSource(CXIUJ_CONFIG),
+    source: cssOf.projectModeloSource(cssOf.config),
     celoj: ["css"],
   });
   if (!built.ok) throw new Error("Die Projektion css mit allen Marken ließ sich nicht bauen.");
-  const erojDist = join(
-    dirname(fileURLToPath(import.meta.resolve("@fundamento/eroj/package.json"))),
-    "dist",
-  );
+  const erojDist =
+    sistemo?.erojDist ??
+    join(dirname(fileURLToPath(import.meta.resolve("@fundamento/eroj/package.json"))), "dist");
   // Nachlese 11 ④: the limits of the provider are settings of the run; the requests of each UTC
   // day are counted beside the runs, so the next run of the day knows them.
   const limoj: Limoj = {
@@ -235,9 +258,18 @@ async function kuri(values: Record<string, string | boolean | undefined>): Promi
     now: () => Date.now(),
     sleep: (ms) => new Promise((done) => setTimeout(done, ms)),
     provider: provider.name,
-    counted: () => writeFileSync(ledgerFile, `${JSON.stringify(ledger.entries, null, 2)}\n`),
+    // Nachlese 12 ②: another run may write the file meanwhile; both counts stay.
+    counted: () => {
+      const file = existsSync(ledgerFile)
+        ? (JSON.parse(readFileSync(ledgerFile, "utf8")) as Record<string, number>)
+        : {};
+      writeFileSync(ledgerFile, `${JSON.stringify(mergeLedger(file, ledger.entries), null, 2)}\n`);
+    },
   });
-  const gvidanto = await connectGvidanto();
+  const gvidanto =
+    sistemo === undefined
+      ? await connectGvidanto()
+      : await connectGvidanto(undefined, (await import(sistemo.mcp)) as GvidantoModule);
   const renderer = await createRenderer({
     projekcioj,
     erojDist,
@@ -245,7 +277,8 @@ async function kuri(values: Record<string, string | boolean | undefined>): Promi
   });
   const log = (line: string) => process.stderr.write(`${provider.redact(line)}\n`);
   try {
-    log(`Lauf mit ${provider.toString()} auf ${commitOf()}`);
+    const commit = sistemoLabel(commitOf(), sistemoCommit);
+    log(`Lauf mit ${provider.toString()} auf ${commit}`);
     const result = await runNordstelo(
       {
         ...(typeof values.taskoj === "string"
@@ -258,12 +291,15 @@ async function kuri(values: Record<string, string | boolean | undefined>): Promi
         maxTokens: Number(values["max-tokens"] ?? 15_000_000),
         concurrency: Number(values.samtempe ?? 3),
         lingvo: values.lingvo === "en" ? "en" : "de",
+        ...(typeof values["hoechstens-ohne-seite"] === "string"
+          ? { maxOhneSeite: Number(values["hoechstens-ohne-seite"]) / 100 }
+          : {}),
       },
       {
         out,
         modelo,
         katalogo,
-        commit: commitOf(),
+        commit,
         anbieter: provider.name,
         modell: provider.model,
         now: () => new Date(),
@@ -310,6 +346,8 @@ async function main(argv: readonly string[]): Promise<number> {
       out: { type: "string" },
       "anfragen-sekunde": { type: "string" },
       "anfragen-tag": { type: "string" },
+      sistemo: { type: "string" },
+      "hoechstens-ohne-seite": { type: "string" },
       skribi: { type: "boolean" },
       help: { type: "boolean", short: "h" },
     },

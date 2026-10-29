@@ -189,19 +189,68 @@ const LAST_WAIT = 300_000;
 /** Attempts after a server error, a timeout or an answer without a message (429 has no end). */
 const TRANSIENT_ATTEMPTS = 3;
 
+type Schema = Record<string, unknown>;
+
+/**
+ * The input schema as a provider takes it (Nachlese 12 ②): today's Gvidanto lists one object at
+ * the root (Nachlese 11 B-3); an older system measured with today's tool still has oneOf, anyOf or
+ * allOf there, and they are merged into one object as the tool of Spec 030 did – properties
+ * together, required what every branch requires. The Gvidanto checks the input against its own
+ * schema all the same.
+ */
+export function providerSchema(schema: Schema): Schema {
+  const { $schema: _schema, oneOf, anyOf, allOf, ...rest } = schema;
+  const branches = [oneOf, anyOf, allOf].find(Array.isArray) as Schema[] | undefined;
+  if (branches === undefined) return rest;
+  const properties: Schema = { ...((rest.properties as Schema | undefined) ?? {}) };
+  for (const branch of branches) Object.assign(properties, (branch.properties as Schema) ?? {});
+  const requiredOf = (branch: Schema) => new Set((branch.required as string[] | undefined) ?? []);
+  const sets = branches.map(requiredOf);
+  const fromBranches =
+    allOf !== undefined
+      ? sets.flatMap((set) => [...set])
+      : [...(sets[0] ?? [])].filter((name) => sets.every((set) => set.has(name)));
+  const required = [...new Set([...requiredOf(rest), ...fromBranches])];
+  return { ...rest, type: "object", properties, ...(required.length === 0 ? {} : { required }) };
+}
+
 function functionOf(tool: ToolInfo) {
   return {
     type: "function" as const,
     function: {
       name: tool.name,
       description: (tool.description ?? "").slice(0, 1000),
-      // Nachlese 11 B-3: the Gvidanto lists one object at the root, valid for every provider.
-      parameters: tool.inputSchema,
+      // Nachlese 11 B-3: the Gvidanto lists one object at the root; an older system (Nachlese 12 ②)
+      // is merged into one.
+      parameters: providerSchema(tool.inputSchema),
     },
   };
 }
 
+/**
+ * One run of the agent. A failure carries what the run spent until then (`effort` on the error,
+ * Nachlese 12 B-4), so the Lauf counts a result without a page by its own tokens.
+ */
 export async function runAgent(options: AgentOptions): Promise<AgentResult> {
+  const spent: AgentEffort = {
+    inputTokens: 0,
+    outputTokens: 0,
+    toolCalls: 0,
+    ms: 0,
+    bytes: 0,
+    requests: 0,
+  };
+  const started = Date.now();
+  try {
+    return await runAgentInner(options, spent);
+  } catch (error) {
+    if (error instanceof Error && !(error instanceof CostLimitReached))
+      Object.assign(error, { effort: { ...spent, ms: Date.now() - started } });
+    throw error;
+  }
+}
+
+async function runAgentInner(options: AgentOptions, spent: AgentEffort): Promise<AgentResult> {
   const { provider, task, variant, budget } = options;
   const request = options.fetch ?? (globalThis.fetch as Fetch);
   const log = (line: string) => options.log?.(provider.redact(line));
@@ -251,6 +300,7 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
     for (;;) {
       await options.gate?.pass();
       requests += 1;
+      spent.requests = requests;
       let response: Response;
       let text: string;
       try {
@@ -291,6 +341,8 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
       const output = reply.usage?.completion_tokens ?? 0;
       inputTokens += input;
       outputTokens += output;
+      spent.inputTokens = inputTokens;
+      spent.outputTokens = outputTokens;
       budget.charge(input, output);
       const message = reply.choices?.[0]?.message;
       if (message === undefined) {
@@ -317,6 +369,7 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
     messages.push({ role: "assistant", content: message.content ?? "", tool_calls: requested });
     for (const entry of requested) {
       toolCalls += 1;
+      spent.toolCalls = toolCalls;
       let args: Record<string, unknown> = {};
       try {
         args = JSON.parse(entry.function.arguments || "{}") as Record<string, unknown>;

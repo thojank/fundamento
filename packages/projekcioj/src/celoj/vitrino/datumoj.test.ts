@@ -7,7 +7,14 @@ import { join } from "node:path";
 import { defaultModeloSource, evaluateAlirebleco, getEro, loadModelo } from "@fundamento/modelo";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildProjekcioj } from "../../build.js";
-import { roundTo, VITRINO_OPTIONS, VITRINO_PROMPT, type VitrinoDatumoj } from "./datumoj.js";
+import {
+  type MezurojKunpremitaj,
+  malkunpremiMezurojn,
+  roundTo,
+  VITRINO_OPTIONS,
+  VITRINO_PROMPT,
+  type VitrinoDatumoj,
+} from "./datumoj.js";
 import { VITRINO_FILE } from "./vitrino.js";
 
 const dirs: string[] = [];
@@ -29,6 +36,8 @@ beforeAll(async () => {
     .replace(/<script type="application\/json" id="fm-werkstatt">[\s\S]*?<\/script>/, "");
   const island = /<script type="application\/json" id="fm-vitrino">(.*?)<\/script>/s.exec(html);
   datumoj = JSON.parse((island?.[1] ?? "{}").replaceAll("<\\/", "</")) as VitrinoDatumoj;
+  // Nachlese 12 ④: the KontrastParoj stand once per table in the island.
+  datumoj.mezuroj = malkunpremiMezurojn(datumoj.mezuroj as unknown as MezurojKunpremitaj);
 }, 120_000);
 
 afterAll(() => {

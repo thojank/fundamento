@@ -276,6 +276,41 @@ export interface VitrinoBazo {
  * text, and a number in exponent notation (1 − L of a pure white, "2e-16") became NaN — seen in
  * the Vitrino as the anchor distance of color.text.default in dark (Spec 004 M1, Befund 5).
  */
+/**
+ * The KontrastParoj as the data island holds them (Nachlese 12 ④): each distinct table once, and
+ * per combination the index of its table. Density, viewport and motion change no colour, so the
+ * 18 combinations of one Aspekto, colour scheme and contrast share one table – the way the kialoj
+ * of the Reguloj stand once since Nachlese 6 N6-3.
+ */
+export interface MezurojKunpremitaj {
+  unikaj: VitrinoMezuro[][];
+  al: Record<string, number>;
+}
+
+export function kunpremiMezurojn(mezuroj: VitrinoDatumoj["mezuroj"]): MezurojKunpremitaj {
+  const unikaj: VitrinoMezuro[][] = [];
+  const seen = new Map<string, number>();
+  const al: Record<string, number> = {};
+  for (const [key, rows] of Object.entries(mezuroj)) {
+    const text = JSON.stringify(rows);
+    let index = seen.get(text);
+    if (index === undefined) {
+      index = unikaj.length;
+      unikaj.push(rows);
+      seen.set(text, index);
+    }
+    al[key] = index;
+  }
+  return { unikaj, al };
+}
+
+/** Every combination with its table again; combinations of one table share the same array. */
+export function malkunpremiMezurojn(packed: MezurojKunpremitaj): VitrinoDatumoj["mezuroj"] {
+  return Object.fromEntries(
+    Object.entries(packed.al).map(([key, index]) => [key, packed.unikaj[index] ?? []]),
+  );
+}
+
 export const roundTo = (value: number, digits = 3): number => {
   const rounded = Number(value.toFixed(digits));
   return rounded === 0 ? 0 : rounded;

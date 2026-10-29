@@ -10,7 +10,12 @@ import { fileURLToPath } from "node:url";
 import { defaultModeloSource, projectModeloSource } from "@fundamento/modelo";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildProjekcioj } from "../../build.js";
-import type { VitrinoBazo, VitrinoDatumoj } from "./datumoj.js";
+import {
+  type MezurojKunpremitaj,
+  malkunpremiMezurojn,
+  type VitrinoBazo,
+  type VitrinoDatumoj,
+} from "./datumoj.js";
 import { VITRINO_FILE } from "./vitrino.js";
 
 const repoRoot = fileURLToPath(new URL("../../../../../", import.meta.url));
@@ -21,12 +26,18 @@ afterAll(() => {
   for (const dir of dirs.splice(0)) rmSync(dir, { recursive: true, force: true });
 });
 
-const islandOf = (html: string): VitrinoDatumoj =>
-  JSON.parse(
+// Nachlese 12 ④: the KontrastParoj stand once per table in the island; read back per combination.
+const islandOf = (html: string): VitrinoDatumoj => {
+  const island = JSON.parse(
     (
       /<script type="application\/json" id="fm-vitrino">(.*?)<\/script>/s.exec(html)?.[1] ?? "{}"
     ).replaceAll("<\\/", "</"),
-  ) as VitrinoDatumoj;
+  ) as VitrinoDatumoj & { mezuroj: unknown };
+  return {
+    ...island,
+    mezuroj: malkunpremiMezurojn(island.mezuroj as unknown as MezurojKunpremitaj),
+  } as VitrinoDatumoj;
+};
 
 describe("fm modelo mezuroj writes a snapshot the Vitrino can compare with", () => {
   // One snapshot for the whole file: taking it costs a full evaluation of 72 combinations, and

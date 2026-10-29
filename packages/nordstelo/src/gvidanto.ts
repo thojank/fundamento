@@ -22,8 +22,18 @@ const textOf = (result: { content?: unknown }): string =>
     .map((entry) => entry.text ?? "")
     .join("\n");
 
-export async function connectGvidanto(served: Served = loadServed()): Promise<Gvidanto> {
-  const server = createFundamentoServer(served);
+/** The MCP server of a system (Nachlese 12 ②): this checkout's, or another checkout's module. */
+export interface GvidantoModule {
+  createFundamentoServer: typeof createFundamentoServer;
+  loadServed: typeof loadServed;
+}
+
+export async function connectGvidanto(
+  served?: Served,
+  module: GvidantoModule = { createFundamentoServer, loadServed },
+): Promise<Gvidanto> {
+  const servedNow = served ?? module.loadServed();
+  const server = module.createFundamentoServer(servedNow);
   const [clientSide, serverSide] = InMemoryTransport.createLinkedPair();
   const client = new Client({ name: "nordstelo", version: "0.2.0" });
   await Promise.all([server.connect(serverSide), client.connect(clientSide)]);
@@ -55,5 +65,5 @@ export async function connectGvidanto(served: Served = loadServed()): Promise<Gv
       return guide;
     },
   };
-  return { bridge, served, close: () => client.close() };
+  return { bridge, served: servedNow, close: () => client.close() };
 }
