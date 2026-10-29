@@ -1,0 +1,12 @@
+{
+  "jugxoj": [
+    {
+      "id": "jug_01M5PZ0000TESTXHAZARDAJ001",
+      "ref": { "artikolo": "V" },
+      "decision": "approved",
+      "kialo": "Synthetic: the value was the fixture's own before the benchmark list was measured.",
+      "date": "2026-10-24",
+      "context": "Fixture invalid/clean-room-benchmark-spuroj (Spec 032 ②)."
+    }
+  ]
+}

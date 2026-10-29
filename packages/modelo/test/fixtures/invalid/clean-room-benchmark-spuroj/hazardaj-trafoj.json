@@ -1,0 +1,11 @@
+{
+  "$comment": "The fixture's own value that a benchmark list happens to know; the Jugxo says why it is not taken from there.",
+  "hazardaj": [
+    {
+      "fingerprint": "7662742ac0ff8b0ffdf73b0d314a3b69b0217125bdfbe397ba6a3a0836b044a8",
+      "source": "benchmark-testo",
+      "token": "color.own",
+      "jugxo": "jug_01M5PZ0000TESTXHAZARDAJ001"
+    }
+  ]
+}

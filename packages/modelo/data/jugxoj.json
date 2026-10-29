@@ -4567,6 +4567,16 @@
       "kialo": "Komponierte Knöpfe und Felder (der Löschen-Knopf des signeto, der Filter, das Häkchen, „Alle abwählen“ und die Schlagwörter des plurelektilo, Bearbeiten, Speichern, Abbrechen und das Feld des lokredaktilo, Symbol und Beschreibung einer Option des listelektilo) tragen in Figma keinen eigenen Knoten: Ihr Bild ist das des komponierten butono, kampo, signeto und ikono in deren Sets.",
       "date": "2026-10-22",
       "context": "Spec 025 ③ (plan ③ D-18, B-15): check:parity meldet diese Teile als freigegeben (parity-part-not-drawn), keine Differenz. Rücknahme, sobald das Plugin Instanzen anderer Sets komponiert (Kandidat B-6 der Spec 011 ⑤)."
+    },
+    {
+      "id": "jug_01M5PTA0PQY9P362JAVW9VP96G",
+      "ref": {
+        "artikolo": "V"
+      },
+      "decision": "approved",
+      "kialo": "Zufallstreffer, keine Übernahme: color.palette.danger.900 steht seit Spec 004 T006 (2026-09-20) im Vortaro-Kern, einen Monat bevor der Benchmark Astryx gemessen wurde (2026-10-23). Der Wert folgt aus Fundamentos eigener Palette: Die dunklen Stufen der Gefahrenfarbe liegen außerhalb von sRGB, Grün und Blau fallen auf 0, Rot steht auf zwei Stellen gerundet. Ein solcher reiner Rotton hat nur einen freien Kanal mit rund hundert möglichen Werten; dass eine Liste mit 1647 Farben einen davon kennt, ist Zufall.",
+      "date": "2026-10-24",
+      "context": "Spec 032 ② (Entscheidung des Maintainers vom 24.10.2026): Probelauf der Clean-Room-Prüfung gegen research/benchmark-astryx-2026-10.md auf main d29a5206, Liste benchmark-astryx-weitere (die übrigen Themes und der Basis-Satz, nicht theme-neutral). Treffer in packages/vortaro/sets/core.json (color.palette.danger.900) und in specs/004-komparo/plan.md (V2, Beobachtung zu danger 800–950). Ausgenommen über packages/modelo/src/checks/clean-room/hazardaj-trafoj.json mit Fingerprint und Quelle, nur als Hash; jeder andere Treffer dieser Liste bleibt ein Befund."
     }
   ]
 }

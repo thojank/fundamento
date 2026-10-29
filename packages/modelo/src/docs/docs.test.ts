@@ -3803,3 +3803,56 @@ describe("Spec 029 ②a documentation (specs/029-fonto-astryx)", () => {
     expect(read("docs/vojmapo.md")).toContain("Spec 029 ②a");
   });
 });
+
+// Spec 032 (Sitzung C, 2026-10-24): specs/032-benchmark-astryx-kern carries the briefing unchanged;
+// the benchmark file of Astryx stands unchanged in research/ beside the one of Carbon (PR #1 of the
+// benchmark repo, a745aea); the plan carries the cause of the cold check_contrast, the decisions on
+// the fingerprints, deviations, findings, open points and the measuring guide with full paths, cd
+// and file:// links, five perf runs with median and maximum; tasks the red commit.
+describe("Spec 032 documentation (specs/032-benchmark-astryx-kern)", () => {
+  it("the briefing and the benchmark file of Astryx are copied unchanged", () => {
+    const briefing = read("specs/032-benchmark-astryx-kern/briefing.md");
+    expect(createHash("sha256").update(briefing).digest("hex")).toBe(
+      "8ef0197993e4c8763a9ec5031eb0e73ee37316e866ddfd754e3bc0901457d628",
+    );
+    const benchmark = read("research/benchmark-astryx-2026-10.md");
+    expect(createHash("sha256").update(benchmark).digest("hex")).toBe(
+      "ac9c6344aceffd84d01fcd1de271e9e2c33f9dd62ab71264b0d3291e78f064c5",
+    );
+    expect(benchmark).toMatch(/^# Benchmark Astryx, Oktober 2026: Kennzahlen, Checklisten, Lücken/);
+    expect(benchmark).toContain("<!-- spuroj-anfang -->");
+  });
+
+  it("plan and tasks carry the cause, the decisions, five perf runs and the guide", () => {
+    const plan = read("specs/032-benchmark-astryx-kern/plan.md");
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Ursachen",
+      "### Entwurfsentscheidungen",
+      "### Abweichungen",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### Messanleitung",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const term of [
+      "overlayOf",
+      "fonto-listoj.json",
+      "Median",
+      "Maximum",
+      "fünf Läufe",
+      "Jugxo",
+      "Kialo",
+      "#111",
+      "cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds",
+      "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/",
+    ]) {
+      expect(plan, term).toContain(term);
+    }
+    const tasks = read("specs/032-benchmark-astryx-kern/tasks.md");
+    for (const text of [plan, tasks]) expect(text).not.toContain("ciferecigo");
+    expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Spec 032");
+  });
+});

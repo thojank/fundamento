@@ -1,5 +1,5 @@
 {
-  "description": "The fixture itself brings no fingerprints; a second list passed with --spuroj knows two synthetic values of an invented benchmark Aspekto 'testmarko'. Both occurrences in src/theme.css are reported, and the message names the source. Without the list the fixture is clean.",
+  "description": "The fixture itself brings no fingerprints; a second list passed with --spuroj knows two synthetic values of an invented benchmark Aspekto 'testmarko'. The colour in src/theme.css is reported, and the message names the source; the font family is not, because the family name of a benchmark is observation, no fingerprint (Spec 032 ②, Art. V). Without the list the fixture is clean.",
   "check": "clean-room",
   "args": [
     "--spuroj",
@@ -9,10 +9,6 @@
     {
       "rule": "clean-room-marko-spuro",
       "path": "src/theme.css:3:22"
-    },
-    {
-      "rule": "clean-room-marko-spuro",
-      "path": "src/theme.css:4:20"
     }
   ]
 }

@@ -1,0 +1,14 @@
+{
+  "description": "Spec 032 ② 4, E-1 (Maintainer 2026-10-24): the list benchmark-testo-fonto is the theme of the Fonto 'testo', registered in data/fontoj.json with its licence; its values do not count, wherever they stand. A value of the other themes counts, and so does a value of the Fonto that a second benchmark also knows.",
+  "check": "clean-room",
+  "issues": [
+    {
+      "rule": "clean-room-marko-spuro",
+      "path": "src/theme.css:4:27"
+    },
+    {
+      "rule": "clean-room-marko-spuro",
+      "path": "src/theme.css:5:22"
+    }
+  ]
+}

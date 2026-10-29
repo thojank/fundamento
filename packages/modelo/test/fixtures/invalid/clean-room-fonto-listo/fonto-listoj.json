@@ -1,0 +1,10 @@
+{
+  "$comment": "The list of the fixture's benchmark that is the theme of its Fonto 'testo'.",
+  "listoj": [
+    {
+      "source": "benchmark-testo-fonto",
+      "fonto": "testo",
+      "kialo": "Synthetic: the theme of the Fonto testo, taken with its licence."
+    }
+  ]
+}

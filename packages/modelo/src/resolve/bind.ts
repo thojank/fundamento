@@ -38,12 +38,18 @@ export interface BindResult {
 }
 
 /**
+ * The winning definition of a token in one combination. A Map of the whole overlay, or a lookup
+ * that searches only the names asked for (Spec 032 ③); binding only ever asks by name.
+ */
+export type OverlayLookup = Pick<ReadonlyMap<string, OverlaidToken>, "get">;
+
+/**
  * Resolves `names` (and everything they reference) against `overlaid`. `assignment` must be
  * complete; it becomes the `combination` of each issue.
  */
 export function bindAliases(
   modelo: Modelo,
-  overlaid: ReadonlyMap<string, OverlaidToken>,
+  overlaid: OverlayLookup,
   names: readonly string[],
   assignment: Assignment,
 ): BindResult {

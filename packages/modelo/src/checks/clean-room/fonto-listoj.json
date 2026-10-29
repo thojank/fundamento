@@ -1,0 +1,10 @@
+{
+  "$comment": "Spec 032 ② 4, E-1 (Maintainer 2026-10-24): benchmark lists that are the theme of a Fonto. While data/fontoj.json lists that Fonto with its licence (pinned, its copyright in the notices it names), a fingerprint of such a list does not count, wherever it stands in the repository. A fingerprint that another list also knows still counts. Read by the clean-room check (fonto-listoj.ts).",
+  "listoj": [
+    {
+      "source": "benchmark-astryx-theme-neutral",
+      "fonto": "astryx",
+      "kialo": "Die Liste aus § 7.1 der Datei von Astryx kennzeichnet die Werte aus theme-neutral; genau dieses Theme ist nach Amendment v2.4 die Fonto Astryx (MIT, 0.7.4, gepinnt in fontoj.json). Ein solcher Wert ist übernommen mit Nachweis, nicht abgeschrieben, auch dort, wo ein Plan, eine Jugxo, ein Skript oder ein Test ihn nennt. Die übrigen sechs Themes von Astryx und Carbon sind keine Fonto und bleiben verboten (Entscheidung des Maintainers, 24.10.2026)."
+    }
+  ]
+}

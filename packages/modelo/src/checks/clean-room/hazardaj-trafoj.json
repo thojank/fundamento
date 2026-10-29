@@ -1,0 +1,11 @@
+{
+  "$comment": "Spec 032 ② (Maintainer 2026-10-24): values of the repository that a benchmark list happens to know. Each entry names the fingerprint, the list that knows it, the token it belongs to and the Jugxo (Art. V) that says why it is not taken from there; without its Jugxo an entry exempts nothing. Hashes only: the value itself stays out of this file.",
+  "hazardaj": [
+    {
+      "fingerprint": "191dd8e83082ccdbdfb935f6656a17ed6d4bd60957e5d37211861b6d6b25eeab",
+      "source": "benchmark-astryx-weitere",
+      "token": "color.palette.danger.900",
+      "jugxo": "jug_01M5PTA0PQY9P362JAVW9VP96G"
+    }
+  ]
+}
