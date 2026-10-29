@@ -14,6 +14,8 @@ import {
   type NordsteloFile,
 } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
+import { providerSchema } from "./agent.js";
+import { mergeLedger } from "./limoj.js";
 import { type RunDeps, runNordstelo } from "./run.js";
 import { sistemoLabel, sistemoOf } from "./sistemo.js";
 import { facts, h } from "./test-doubles/facts.js";
@@ -127,5 +129,40 @@ describe("② more than 20 % without a page end the series", () => {
     expect(result.aborted).toMatch(/Mehr als 20 % .*ohne Seite.*nicht messbar mit diesem Anbieter/);
     expect(d.calls.length).toBeLessThan(10);
     expect(readFileSync(join(out, result.id, "raporto.md"), "utf8")).toMatch(/nicht messbar/);
+  });
+});
+
+describe("② the tool offers an older system's tools in a form every provider takes", () => {
+  it("a root with oneOf (the Gvidanto before Nachlese 11 B-3) is merged into one object, as the tool of Spec 030 did", () => {
+    expect(
+      providerSchema({
+        $schema: "x",
+        type: "object",
+        properties: { lingvo: { type: "string" } },
+        oneOf: [
+          { properties: { name: { type: "string" } }, required: ["name"] },
+          { properties: { id: { type: "string" } }, required: ["id"] },
+        ],
+      }),
+    ).toEqual({
+      type: "object",
+      properties: { lingvo: { type: "string" }, name: { type: "string" }, id: { type: "string" } },
+    });
+  });
+
+  it("a schema of today's Gvidanto is offered as it is", () => {
+    const today = { type: "object", properties: { name: { type: "string" } } };
+    expect(providerSchema(today)).toEqual(today);
+  });
+});
+
+describe("② two runs at the same time keep each other's count of requests", () => {
+  it("the ledger merges with what another run wrote, the higher count per provider and day", () => {
+    expect(
+      mergeLedger(
+        { "openrouter 2026-10-29": 300, "mistral 2026-10-29": 10 },
+        { "mistral 2026-10-29": 40 },
+      ),
+    ).toEqual({ "openrouter 2026-10-29": 300, "mistral 2026-10-29": 40 });
   });
 });

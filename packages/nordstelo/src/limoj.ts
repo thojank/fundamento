@@ -139,3 +139,16 @@ export function schaetzung(input: {
     }`,
   };
 }
+
+/**
+ * The ledger as a file holds it after a write (Nachlese 12 ②): two runs at the same time each keep
+ * their own counts, and each count only grows; the file keeps the higher one per provider and day.
+ */
+export function mergeLedger(
+  file: Readonly<Record<string, number>>,
+  own: Readonly<Record<string, number>>,
+): Record<string, number> {
+  const merged: Record<string, number> = { ...file };
+  for (const [key, count] of Object.entries(own)) merged[key] = Math.max(merged[key] ?? 0, count);
+  return merged;
+}
