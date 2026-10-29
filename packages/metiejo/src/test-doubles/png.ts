@@ -20,7 +20,11 @@ function chunk(type: string, data: Uint8Array): Buffer {
   crc.writeUInt32BE(crc32(Buffer.concat([Buffer.from(type, "ascii"), data])), 0);
   return Buffer.concat([head, data, crc]);
 }
-export function encodePng(width: number, height: number, pixel: (x: number, y: number) => number[]): Buffer {
+export function encodePng(
+  width: number,
+  height: number,
+  pixel: (x: number, y: number) => number[],
+): Buffer {
   const ihdr = Buffer.alloc(13);
   ihdr.writeUInt32BE(width, 0);
   ihdr.writeUInt32BE(height, 4);
@@ -38,4 +42,3 @@ export function encodePng(width: number, height: number, pixel: (x: number, y: n
     chunk("IEND", new Uint8Array()),
   ]);
 }
-

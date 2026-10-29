@@ -41,10 +41,14 @@ beforeAll(async () => {
     if (request.url === "/s.css") {
       response
         .writeHead(200, { "content-type": "text/css" })
-        .end("body{font-family:Inter,sans-serif}.btn{border-radius:6px;padding:10px 12px;background:#0f766e}");
+        .end(
+          "body{font-family:Inter,sans-serif}.btn{border-radius:6px;padding:10px 12px;background:#0f766e}",
+        );
       return;
     }
-    response.writeHead(200, { "content-type": "text/html" }).end('<link rel="stylesheet" href="/s.css">');
+    response
+      .writeHead(200, { "content-type": "text/html" })
+      .end('<link rel="stylesheet" href="/s.css">');
   });
   await new Promise<void>((done) => site.listen(0, "127.0.0.1", done));
   siteUrl = `http://127.0.0.1:${(site.address() as AddressInfo).port}/`;
@@ -76,7 +80,10 @@ type Proponoj = { proponoj: { faceto: string; satz: string; herkunft: { dosiero:
 
 describe("Weg B: material of an existing brand (Spec 033 S2)", () => {
   it("material without the confirmation is not read: the confirmation comes first", async () => {
-    const response = await post("/api/marko/lumo/materialo", { filename: "bildschirm.png", base64: screenshot });
+    const response = await post("/api/marko/lumo/materialo", {
+      filename: "bildschirm.png",
+      base64: screenshot,
+    });
     expect(response.status).toBe(409);
     expect(((await response.json()) as { satz: string }).satz).toContain("Bestätigung");
     expect(readKroniko(workdir, "lumo").some((entry) => entry.ago === "fremda")).toBe(false);
@@ -94,9 +101,13 @@ describe("Weg B: material of an existing brand (Spec 033 S2)", () => {
     expect(lead?.herkunft[0]?.dosiero).toBe("bildschirm.png");
     expect(existsSync(join(workdir, "lumo", "materialo", "bildschirm.png"))).toBe(true);
     const entries = readKroniko(workdir, "lumo");
-    expect(entries.find((entry) => entry.ago === "fremda")?.detaloj).toMatchObject({ kiel: "upload" });
+    expect(entries.find((entry) => entry.ago === "fremda")?.detaloj).toMatchObject({
+      kiel: "upload",
+    });
     expect(entries.some((entry) => entry.ago === "konfirmo")).toBe(true);
-    const proposal = entries.find((entry) => entry.ago === "propono" && entry.faceto === "gvidkoloro");
+    const proposal = entries.find(
+      (entry) => entry.ago === "propono" && entry.faceto === "gvidkoloro",
+    );
     expect(proposal?.fonto).toBe("agento");
     expect(JSON.stringify(proposal?.detaloj)).toContain("bildschirm.png");
   });
@@ -109,7 +120,11 @@ describe("Weg B: material of an existing brand (Spec 033 S2)", () => {
     expect(faceted).toEqual(expect.arrayContaining(["tiparo", "formo", "spaco"]));
     const formo = body.proponoj.find((propono) => propono.faceto === "formo");
     expect(formo?.herkunft[0]?.dosiero).toBe(`${siteUrl}s.css`);
-    expect(readKroniko(workdir, "lumo").filter((entry) => entry.ago === "fremda").at(-1)?.detaloj).toMatchObject({
+    expect(
+      readKroniko(workdir, "lumo")
+        .filter((entry) => entry.ago === "fremda")
+        .at(-1)?.detaloj,
+    ).toMatchObject({
       kiel: "link",
     });
   });
@@ -137,13 +152,19 @@ describe("Weg B: material of an existing brand (Spec 033 S2)", () => {
     });
     expect(response.status).toBe(200);
     const body = (await response.json()) as Proponoj & { satzoj: string[] };
-    expect(body.proponoj.find((propono) => propono.faceto === "tiparo")?.satz).toContain("Hausschrift");
+    expect(body.proponoj.find((propono) => propono.faceto === "tiparo")?.satz).toContain(
+      "Hausschrift",
+    );
     expect(body.satzoj.join(" ")).toContain("FM_TIPAROJ_REPO");
     expect(existsSync(join(workdir, "lumo", "fontoj", "Hausschrift-Regular.woff2"))).toBe(true);
   });
 
   it("a file the Enportilo cannot read is named, nothing else changes", async () => {
-    const response = await post("/api/marko/lumo/materialo", { filename: "notizen.docx", base64: "AAAA", rajtoj: true });
+    const response = await post("/api/marko/lumo/materialo", {
+      filename: "notizen.docx",
+      base64: "AAAA",
+      rajtoj: true,
+    });
     expect(response.status).toBe(422);
     expect(((await response.json()) as { satz: string }).satz).toMatch(/PNG|SVG|PDF/);
   });

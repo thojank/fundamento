@@ -48,6 +48,14 @@ import {
 } from "./asistanto/stato.js";
 import { buildOf, expertHinweis, standOf } from "./eksperto.js";
 import { EKSPORTO_CELOJ, type EksportoCelo, exportMarko } from "./eksporto.js";
+import {
+  legiMaterialon,
+  NeLegebla,
+  readProponoj,
+  takeProponon,
+  writeProponoj,
+} from "./enportilo/materialo.js";
+import { proponojOf } from "./enportilo/rekono.js";
 import type { Settings } from "./env.js";
 import { CLIENT_SCRIPT, escapeHtml, previewDocument } from "./html.js";
 import { identOf } from "./ident.js";
@@ -175,6 +183,23 @@ const PATCHABLE = new Set([
   "festgelegt",
   "etikedoj",
 ]);
+
+/** An Agordo with a proposal laid over it: objects merged one level deep, values replaced. */
+export function mergedAgordo(agordo: Agordo, patch: Partial<Agordo>): Agordo {
+  const next: Record<string, unknown> = { ...agordo };
+  for (const [key, value] of Object.entries(patch)) {
+    const before = next[key];
+    next[key] =
+      typeof value === "object" &&
+      value !== null &&
+      !Array.isArray(value) &&
+      typeof before === "object" &&
+      before !== null
+        ? { ...(before as Record<string, unknown>), ...(value as Record<string, unknown>) }
+        : value;
+  }
+  return next as unknown as Agordo;
+}
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -1026,12 +1051,18 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
               : { pret: true, modelo: provider.toString() },
           ...(fremda === undefined ? {} : { fremda }),
           sumo: sumoj.get(name) ?? { enigo: 0, eligo: 0, ms: 0 },
+          ...(() => {
+            const propono = readProponoj(options.workdir, name).find(
+              (entry) => entry.faceto === current.name,
+            );
+            return propono === undefined ? {} : { propono };
+          })(),
         }),
       );
       return;
     }
     const asistantoApi =
-      /^\/api\/marko\/([a-z0-9-]+)\/(stato|asistanto|faceto|fremda|konfirmo)$/.exec(path);
+      /^\/api\/marko\/([a-z0-9-]+)\/(stato|asistanto|faceto|fremda|konfirmo|materialo)$/.exec(path);
     if (asistantoApi !== null) {
       const [, name = "", action = ""] = asistantoApi;
       const draft = draftOf(name);
@@ -1170,8 +1201,87 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           sendJson(response, { satz: "Der Schritt ist nicht freigegeben." }, 422);
           return;
         }
+        // Spec 033 S2: "Vorschlag übernehmen" applies an open proposal of the Enportilo first.
+        if (ago === "akcepto") {
+          const propono = takeProponon(options.workdir, name, faceto);
+          if (propono !== undefined) {
+            const { agordo } = readAgordo(mergedAgordo(draft.agordo, propono.agordo));
+            if (agordo !== undefined) setDraft(name, draft, agordo, "agento");
+          }
+        }
         kroniko(name, { ago, fonto: "regilo", faceto });
         sendJson(response, { rev: draft.rev, stato: statoOf(name, draft) });
+        return;
+      }
+      if (action === "materialo") {
+        // Spec 033 S2 (Weg B), Constitution v2.5: material of an existing brand needs the
+        // confirmation at the start; the reading, the foreign basis and the proposals go into the Kroniko.
+        if (body.rajtoj !== true) {
+          sendJson(
+            response,
+            {
+              satz: `Bestätigung zuerst: Material einer bestehenden Marke liest der Enportilo erst, wenn du bestätigst: ${KONFIRMO_TEKSTO}`,
+            },
+            409,
+          );
+          return;
+        }
+        let read: Awaited<ReturnType<typeof legiMaterialon>>;
+        try {
+          read = await legiMaterialon(
+            {
+              ...(typeof body.url === "string" ? { url: body.url } : {}),
+              ...(typeof body.filename === "string" ? { filename: body.filename } : {}),
+              ...(typeof body.base64 === "string"
+                ? { bytes: Buffer.from(body.base64, "base64") }
+                : {}),
+            },
+            {
+              workdir: options.workdir,
+              name,
+              ...(options.settings.tiparojRepo === undefined
+                ? {}
+                : { tiparojRepo: options.settings.tiparojRepo }),
+              ...(options.deps === undefined ? {} : { deps: options.deps }),
+              familyOf: familyOfFilename,
+            },
+          );
+        } catch (error) {
+          sendJson(
+            response,
+            {
+              satz:
+                error instanceof NeLegebla
+                  ? error.message
+                  : `Das Material ließ sich nicht lesen: ${error instanceof Error ? error.message : String(error)}`,
+            },
+            422,
+          );
+          return;
+        }
+        kroniko(name, {
+          ago: "fremda",
+          fonto: "regilo",
+          detaloj: { kiel: read.kiel, nomo: read.nomo },
+        });
+        kroniko(name, {
+          ago: "konfirmo",
+          fonto: "regilo",
+          teksto: KONFIRMO_TEKSTO,
+          detaloj: { materialo: read.nomo },
+        });
+        const proponoj = proponojOf(read.trovoj, bases);
+        writeProponoj(options.workdir, name, proponoj);
+        for (const propono of proponoj) {
+          kroniko(name, {
+            ago: "propono",
+            fonto: "agento",
+            faceto: propono.faceto,
+            teksto: propono.satz,
+            detaloj: { agordo: propono.agordo, herkunft: propono.herkunft },
+          });
+        }
+        sendJson(response, { proponoj, satzoj: read.satzoj, trovoj: read.trovoj.length });
         return;
       }
       if (action === "fremda") {

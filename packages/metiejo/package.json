@@ -27,7 +27,8 @@
     "@fundamento/agordilo": "workspace:*",
     "@fundamento/eroj": "workspace:*",
     "@fundamento/modelo": "workspace:*",
-    "@fundamento/projekcioj": "workspace:*"
+    "@fundamento/projekcioj": "workspace:*",
+    "postcss": "^8.5.28"
   },
   "devDependencies": {
     "@types/node": "^24.13.5",

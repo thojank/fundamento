@@ -135,3 +135,91 @@ pnpm --filter @fundamento/nordstelo exec vitest run
 ```
 
 Die Spec: `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/specs/033-markenassistent/spec.md`.
+
+## S2 – Weg B: Uploads, Links, Erkennung, private Schriften
+
+**Branch:** `261029-spec-033-s2-weg-b` (auf S1) · **Datum:** 2026-10-29 · **Stand:** gebaut, Abnahme offen.
+
+### Zusammenfassung
+
+1. **Enportilo, deterministisch, ohne Browser und ohne Sprachmodell** (`packages/metiejo/src/enportilo/`):
+   - **PNG** (Screenshots, Logos): eigener Decoder auf `node:zlib` (8 Bit, Grau, RGB, RGBA, Palette; alle fünf Filter), dann die dominanten Farben mit ihrem Anteil an der Fläche.
+   - **SVG:** Farben aus `fill`, `stroke`, `stop-color` und `style`, mit Zeile.
+   - **PDF** (Styleguides): die Farben, mit denen die Seiten gemalt sind (`rg`/`RG`, `k`/`K` in den entpackten Inhalts-Streams), und die eingebetteten Schriften (`/BaseFont`, ohne Subset-Präfix und Schnitt).
+   - **Links:** die Seite und ihre Stylesheets, verlinkt und eingebettet, höchstens zehn, je höchstens 2 MB, gelesen mit `postcss`. Ergebnis: Farben (eine Variable zählt für jede Verwendung, auch über `var()`-Ketten und vor ihrer Definition), Familien nach Rolle (Überschriften, Code, Fließtext), Radien und Innenabstände in px; dazu Custom Properties nach ihrem Namen (`radius`, `family`, `spacing`). Jeder Fund mit Datei und Zeile.
+   - **Schriften** (woff2, woff, ttf, otf): in `marken/<name>/fontoj/` und, wie bisher, ins private Repo (`FM_TIPAROJ_REPO`), erst nach der Prüfung, dass es privat ist (`uploadFont`). Ohne Repo sagt ein Satz, dass die Schrift wartet.
+2. **Vorschlag je Faceto mit Herkunft** (`rekono.ts`), über die Felder des Agordo im Bereich der Regler:
+   - **Leitfarbe:** die kräftigste Farbe mittlerer Helligkeit (Gewicht × Chroma).
+   - **Neutraltöne:** die Tönung der hellen Flächen.
+   - **Statusfarben:** nach Farbton-Bändern, kräftige Stufen vor blassen.
+   - **Schriften:** je Rolle die häufigste Familie, aus dem Katalog als Webschrift, sonst als lizenziert und nicht enthalten.
+   - **Radius und Abstand:** der Median gegen `radius.medium` (4 px) und `spacing.medium` (8 px) der Struktur. Ein Wert jenseits des Reglers steht am Ende, und der Satz sagt das.
+3. **Ablauf:** Im Assistenten unter „Material deiner Marke“ eine Datei (`fm-alsxutilo`) oder ein Link (`fm-kampo`), dazu die Bestätigung (`fm-markobutono`).
+   - **Ohne Bestätigung liest der Enportilo nichts** (409): Die Bestätigung kommt zu Beginn (Amendment v2.5).
+   - Nach dem Lesen stehen fremde Basis (`upload` oder `link`, mit Name), Bestätigung und jeder Vorschlag (Quelle `agento`, mit Herkunft) in der Kroniko.
+   - Der Schritt zeigt seinen offenen Vorschlag mit Herkunft; „Vorschlag übernehmen“ legt ihn über den Entwurf (Quelle `agento`) und definiert den Schritt.
+   - Der Hinweis vor dem Export bleibt wie in S1.
+4. **Ablage:** Uploads in `marken/<name>/materialo/` (mit `.gitignore`), offene Vorschläge in `marken/<name>/enportilo.json`, einer je Faceto, bis zur Übernahme.
+
+### Entwurfsentscheidungen
+
+#### D-08 Ohne Browser und ohne neue Bild-Bibliothek
+Ein PNG-Decoder auf `node:zlib` und ein Leser für Farb-Operatoren in PDF genügen für Farben und Schriften. Playwright fehlt in der Metiejo und im CI-Job ihrer Unit-Tests; eine Bild- oder PDF-Bibliothek wäre eine neue Abhängigkeit für wenig Gewinn. Neu ist nur `postcss` in der Metiejo, das das Modelo schon nutzt. JPEG, interlaced PNG und 16-Bit-PNG nennt die Fehlermeldung; der Screenshot eines Browsers ist 8-Bit-PNG.
+
+#### D-09 Beobachtung, nicht Übernahme (Art. V)
+Der Enportilo misst Werte (eine Farbe, ein Radius, ein Abstand, der Name einer Familie) und schreibt sie in die Felder des Agordo; er übernimmt keine Bezeichner, keine Token-Namen und keine Dateien einer fremden Marke. Die Herkunft je Wert steht in Vorschlag und Kroniko.
+
+#### D-10 Vorschläge als Datei bis zur Übernahme
+Ein Vorschlag bleibt offen, bis die Person ihn übernimmt; ein neues Lesen ersetzt den offenen Vorschlag seiner Faceto. Die Kroniko hält jeden Vorschlag fest, auch die ersetzten.
+
+### Probeläufe
+
+Eigene Testmarke `provo` (Beispielmarke von Fundamento), Projektionen lokal gebaut; Gegenstand ist eine Wegwerf-Marke `proba` (Basis komuna) in einem temporären Ordner. Kein Sprachmodell: **0 Tokens, 0 $**.
+
+| Material | Funde | Vorschläge | Dauer | Leitfarbe | Weitere Vorschläge mit Herkunft |
+|---|---|---|---|---|---|
+| Screenshot der Vitrino von `provo` (1200 × 900, Playwright, Chromium) | 4 | 2 | 85 ms | `#62419a` (1,0 % der Fläche) | Neutraltöne (Tönung 0,14, 93,7 % der Fläche) |
+| URL einer Seite mit den Stylesheets von `provo` (`css/fundamento.css`, `css/fundamento-provo.css`, lokal ausgeliefert) | 258 | 6 | 57 ms | `#4b2980` (`fundamento.css`, Zeile 2500) | Neutraltöne, Statusfarben (danger `#932400`, success `#53c089`, info `#007696`, warning `#d89b2c`), Schriften (Geist, Geist Mono, OFL-1.1), Radius 2 (Median 10 px, Ende des Reglers), Abstand 1,5 (Median 16 px, Ende des Reglers) |
+
+Die Kroniko danach: `kreo fremda konfirmo propono:gvidkoloro propono:neutralaj fremda konfirmo propono:gvidkoloro propono:neutralaj propono:statoj propono:tiparo propono:formo propono:spaco`.
+
+### Abweichungen
+
+1. **Kein Erkennen von Radien und Abständen aus Bildern:** Aus Screenshots und PDF kommen Farben und Schriften; Radien und Abstände aus dem CSS einer Seite. Für Bilder bräuchte es eine Kantenerkennung, die Spec nennt kein Verfahren (O-6).
+2. **Bestätigung je Material:** Jedes Lesen verlangt die Bestätigung und hält sie fest, nicht nur das erste.
+
+### Befunde / Mankoj
+
+- **B-5 Leitfarbe aus einem Stylesheet mit allen Paletten:** Im ersten Probelauf war die häufigste kräftige Farbe der URL ein heller Palettenton. Behoben, je Schritt mit einem Test zuerst rot: Die Leitfarbe hat jetzt mittlere Helligkeit; Farben, deren Variable `primary`, `brand`, `accent` oder `action` heißt, zählen mehr; Verweise über `var()` zählen auch vor der Definition und durch Ketten; Statusfarben folgen derselben Regel.
+- **B-6 Custom Properties:** Das CSS einer Marke legt Radius, Familien und Abstände in Variablen ab; im ersten Lauf fand der Enportilo keine. Behoben (Test zuerst rot).
+- **B-7 Lokaler Lint:** `pnpm lint` scheiterte zweimal am Wettlauf von `build` und `lint` der Eroj um `src/generated/` (ENOTEMPTY); der zweite Lauf war grün. Das gab es schon vor dieser Spec; die CI ist nicht betroffen.
+- **B-8 M5 in der CI:** Der Zeittest der Werkstatt (höchstens 50 ms Blockade) war auf langsamen Läufern rot (51, 65, 53 ms) und bei Wiederholung grün, auf #113 und auf S1. Die langen Frames sind reines Style und Layout ohne Skript; Kandidat für eine eigene Ursachensuche.
+
+### Offen (für den Maintainer)
+
+- **O-5 URL einer eigenen Testmarke:** Der Probelauf nutzt die lokal gebaute `provo`. Für die Abnahme 2 die URL einer eigenen, öffentlich erreichbaren Testmarke nennen, falls es eine gibt.
+- **O-6 Radien und Abstände aus Bildern** (Abweichung 1): wichtig genug für eine eigene Runde?
+
+### Messanleitung
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm install && pnpm build
+pnpm fm projekcioj build --config packages/modelo/test/fixtures/valid/aspekto-provo/fundamento.config.json --out .fundamento/projekcioj-provo
+pnpm fm metiejo --open
+```
+
+1. Eine Marke anlegen, `http://localhost:7301/asistanto/<marke>/gvidkoloro` öffnen, „Material deiner Marke“ aufklappen.
+2. Einen Screenshot einer eigenen Testmarke (PNG) wählen, ohne das Kästchen „Ich habe die Rechte …“: „Material lesen“ antwortet mit der Bitte um Bestätigung. Mit Kästchen: Die Seite lädt neu; der Schritt zeigt „Vorschlag aus deinem Material“ mit Herkunft (Datei, Anteil der Fläche).
+3. Einen Link eingeben (zum Beispiel eine lokal ausgelieferte Seite mit `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj-provo/css/fundamento-provo.css`) und lesen: Schritte „Schrift“, „Form (Radien)“ und „Raum und Dichte“ zeigen Vorschläge mit Datei und Zeile.
+4. „Vorschlag übernehmen“: Vorschau und Zustand folgen; die Kroniko nennt `propono` und `sxangxo` mit Quelle `agento`.
+5. Eine Schriftdatei (woff2) lesen: Mit `FM_TIPAROJ_REPO` geht sie nach der Prüfung ins private Repo, ohne bleibt sie in `marken/<marke>/fontoj/`.
+
+Die Kroniko: `file:///Users/thorstenjankowski/Fundamento/marken/<marke>/kroniko.jsonl`; die offenen Vorschläge: `file:///Users/thorstenjankowski/Fundamento/marken/<marke>/enportilo.json`.
+
+**Tests:**
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm --filter @fundamento/metiejo exec vitest run src/enportilo src/asistanto
+```
