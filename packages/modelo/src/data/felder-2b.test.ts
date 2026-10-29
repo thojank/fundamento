@@ -4,6 +4,7 @@
 // operable (as the kompletigilo since Nachlese 4 N-9).
 
 import { describe, expect, it } from "vitest";
+import { briefOf } from "../gvidanto/eroj.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
 import { validateModelo } from "../validate/validate-modelo.js";
@@ -103,5 +104,40 @@ describe("Spec 029 ②b-1 M-6: a clear button in the field", () => {
       de: "Alle abwählen",
       en: "Clear all",
     });
+  });
+});
+
+// The brief of get_ero (Maintainer 29.10., before M-2): a boolean prop that is no axis stands as
+// its name in flags, in Skemo order, not as {name, type} in props; the ceiling 750 stays.
+describe("Spec 029 ②b-1: the brief lists boolean props as flags", () => {
+  it.each(modelo.eroj.map((entry) => entry.ero.name))(
+    "%s: no boolean in props, every one in flags",
+    (ero) => {
+      const entry = modelo.eroj.find((candidate) => candidate.ero.name === ero);
+      if (entry === undefined) throw new Error(ero);
+      const brief = briefOf(entry);
+      const axes = new Set(brief.axes.map((axis) => axis.name));
+      const booleans = entry.skemo.props
+        .filter((prop) => prop.kind === "boolean" && !axes.has(prop.name))
+        .map((prop) => prop.name);
+      expect((brief.props ?? []).filter((prop) => prop.type === "boolean")).toEqual([]);
+      expect(brief.flags ?? []).toEqual(booleans);
+    },
+  );
+
+  it("the kampo: its flags, and its brief well under 750", () => {
+    const entry = modelo.eroj.find((candidate) => candidate.ero.name === "kampo");
+    if (entry === undefined) throw new Error("kampo");
+    const brief = briefOf(entry);
+    expect(brief.flags).toEqual([
+      "required",
+      "disabled",
+      "readonly",
+      "invalid",
+      "stepper",
+      "loading",
+      "clearable",
+    ]);
+    expect(Math.ceil(Buffer.byteLength(JSON.stringify(brief)) / 3)).toBeLessThanOrEqual(700);
   });
 });
