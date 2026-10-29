@@ -4017,7 +4017,16 @@ describe("Spec 033 documentation (specs/033-markenassistent)", () => {
   it("S3 (Weg A): the plan names the Kreilo, the pairs of opposites, the 15 minutes and the trial run", () => {
     const plan = read("specs/033-markenassistent/plan.md");
     const s3 = plan.slice(plan.indexOf("## S3"));
-    for (const term of ["Kreilo", "Gegensatzpaare", "15 Minuten", "100 %", "Tokens", "Kosten", "Dauer", "### Messanleitung"]) {
+    for (const term of [
+      "Kreilo",
+      "Gegensatzpaare",
+      "15 Minuten",
+      "100 %",
+      "Tokens",
+      "Kosten",
+      "Dauer",
+      "### Messanleitung",
+    ]) {
       expect(s3, term).toContain(term);
     }
     expect(read("specs/033-markenassistent/tasks.md")).toContain("## S3");

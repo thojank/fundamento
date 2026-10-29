@@ -114,7 +114,7 @@ ${dialog}
 <fm-teksto slot="subtitle">${escapeHtml(faceto.kialo)}</fm-teksto>
 <fm-ligilo slot="actions" to="/studio/${encodeURIComponent(name)}/${studio}" placement="standalone">Im Studio bearbeiten</fm-ligilo>
 <section class="mt-studio">
-<div><fm-navigado label="Schritte" page="${escapeHtml(faceto.name)}" orientation="vertical">${nav}<a href="/studio/${encodeURIComponent(name)}/${studio}" data-page="studio">Studio</a></fm-navigado><fm-teksto kind="caption">${nochNicht}</fm-teksto></div>
+<div><fm-navigado label="Schritte" page="${escapeHtml(faceto.name)}" orientation="vertical">${nav}<a href="/studio/${encodeURIComponent(name)}/${studio}" data-page="studio">Studio</a><a href="/asistanto/${encodeURIComponent(name)}/komenco" data-page="komenco">Einstiegsfragen</a></fm-navigado><fm-teksto kind="caption">${nochNicht}</fm-teksto></div>
 <div class="mt-studio-vorschau"><iframe data-mt-vorschau data-mt-src="${previewSrc}" title="Vorschau der Marke"></iframe></div>
 <div class="mt-babilo">
 <fm-teksto kind="caption" data-mt-ki>${kiSatz}</fm-teksto>

@@ -80,7 +80,13 @@ const stato = async (name: string) =>
 
 const answers = {
   celo: "Eine Bäckerei für die Nachbarschaft. Ehrliches Brot, früh am Morgen. Für Familien und Leute auf dem Weg zur Arbeit. Warm und freundlich, nicht schick. Man soll sich willkommen fühlen.",
-  karaktero: { "ruhig-lebhaft": -1, "klassisch-modern": -1, "warm-kuehl": -2, "sachlich-verspielt": 1, "leicht-kraeftig": 0 },
+  karaktero: {
+    "ruhig-lebhaft": -1,
+    "klassisch-modern": -1,
+    "warm-kuehl": -2,
+    "sachlich-verspielt": 1,
+    "leicht-kraeftig": 0,
+  },
   festgelegt: { farbe: "#a0522d" },
 };
 
@@ -88,11 +94,24 @@ describe("Weg A: a new brand from the entry questions (Spec 033 S3)", () => {
   it("the entry questions are a screen of Eroj: the text, five sliders of opposites, what is fixed, inspiration", async () => {
     const html = await (await fetch(`${servilo.url}/asistanto/pano/komenco`)).text();
     expect((html.match(/<fm-glitilo/g) ?? []).length).toBe(5);
-    for (const pole of ["ruhig", "lebhaft", "klassisch", "modern", "warm", "kühl", "sachlich", "verspielt", "leicht", "kräftig"]) {
+    for (const pole of [
+      "ruhig",
+      "lebhaft",
+      "klassisch",
+      "modern",
+      "warm",
+      "kühl",
+      "sachlich",
+      "verspielt",
+      "leicht",
+      "kräftig",
+    ]) {
       expect(html, pole).toContain(pole);
     }
-    for (const ero of ["fm-tekstareo", "fm-kampo", "fm-alsxutilo", "fm-butono"]) expect(html, ero).toContain(`<${ero}`);
-    for (const native of ["<input", "<button", "<textarea", "<select"]) expect(html).not.toContain(native);
+    for (const ero of ["fm-tekstareo", "fm-kampo", "fm-alsxutilo", "fm-butono"])
+      expect(html, ero).toContain(`<${ero}`);
+    for (const native of ["<input", "<button", "<textarea", "<select"])
+      expect(html).not.toContain(native);
   });
 
   it("the answers become a proposal per Faceto on the draft: visible at once, defined, with provenance in the Kroniko", async () => {
@@ -101,9 +120,12 @@ describe("Weg A: a new brand from the entry questions (Spec 033 S3)", () => {
     const body = (await response.json()) as { facetoj: string[]; satz: string };
     expect(body.facetoj).toEqual(expect.arrayContaining(["gvidkoloro", "tiparo", "formo"]));
     const states = (await stato("pano")).facetoj;
-    for (const name of body.facetoj) expect(states.find((faceto) => faceto.name === name)?.stato, name).toBe("definiert");
+    for (const name of body.facetoj)
+      expect(states.find((faceto) => faceto.name === name)?.stato, name).toBe("definiert");
     const entries = readKroniko(workdir, "pano");
-    const proposal = entries.find((entry) => entry.ago === "propono" && entry.faceto === "gvidkoloro");
+    const proposal = entries.find(
+      (entry) => entry.ago === "propono" && entry.faceto === "gvidkoloro",
+    );
     expect(proposal?.fonto).toBe("agento");
     expect(JSON.stringify(proposal?.detaloj)).toContain("Einstiegsfragen");
     expect(entries.some((entry) => entry.ago === "sxangxo" && entry.fonto === "agento")).toBe(true);
@@ -128,7 +150,14 @@ describe("Weg A: a new brand from the entry questions (Spec 033 S3)", () => {
               role: "assistant",
               content: "",
               tool_calls: [
-                { id: "f1", type: "function", function: { name: "setze_farbe", arguments: '{"rolle":"leitfarbe","farbe":"#2f6b3a"}' } },
+                {
+                  id: "f1",
+                  type: "function",
+                  function: {
+                    name: "setze_farbe",
+                    arguments: '{"rolle":"leitfarbe","farbe":"#2f6b3a"}',
+                  },
+                },
               ],
             },
           },
@@ -136,7 +165,9 @@ describe("Weg A: a new brand from the entry questions (Spec 033 S3)", () => {
         usage: { prompt_tokens: 600, completion_tokens: 20 },
       },
       {
-        choices: [{ message: { role: "assistant", content: "Ein ruhiges Waldgrün passt zur Gärtnerei." } }],
+        choices: [
+          { message: { role: "assistant", content: "Ein ruhiges Waldgrün passt zur Gärtnerei." } },
+        ],
         usage: { prompt_tokens: 700, completion_tokens: 15 },
       },
     );
@@ -149,7 +180,9 @@ describe("Weg A: a new brand from the entry questions (Spec 033 S3)", () => {
     const body = (await response.json()) as { antwort?: string; kosto?: { enigo: number } };
     expect(body.antwort).toContain("Waldgrün");
     expect(body.kosto?.enigo).toBe(1300);
-    const change = readKroniko(workdir, "arbo").findLast((entry) => entry.ago === "sxangxo" && entry.faceto === "gvidkoloro");
+    const change = readKroniko(workdir, "arbo").findLast(
+      (entry) => entry.ago === "sxangxo" && entry.faceto === "gvidkoloro",
+    );
     expect(change?.fonto).toBe("babilo");
   });
 });
