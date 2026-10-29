@@ -10,6 +10,7 @@ import { projectModeloSource } from "@fundamento/modelo";
 import { buildProjekcioj, VITRINO_FILE } from "@fundamento/projekcioj";
 import { expect, type Locator, type Page, test } from "@playwright/test";
 import { axeViolations, contrast } from "./alirebleco.js";
+import { M5_GRENZE_MS, m5Urteil } from "./m5.js";
 import { EKZEMPLO_CONFIG, ORIGIN } from "./serve.js";
 
 test.describe.configure({ mode: "serial" });
@@ -784,9 +785,16 @@ type WerkstattState = {
 
 declare const fmWerkstatt: {
   state: WerkstattState & { worker?: boolean };
-  measure(
-    count: number,
-  ): Promise<{ derive: number[]; check: number[]; longest: number; longTasks: number }>;
+  measure(count: number): Promise<{
+    derive: number[];
+    check: number[];
+    longest: number;
+    longTasks: number;
+    /** Nachlese 12 ③: per change the longest block of the main thread (ms). */
+    perChange: number[];
+    /** Nachlese 12 ③: the longest work of scripts in one frame (Long Animation Frames, ms). */
+    scriptLongest: number;
+  }>;
 };
 
 /** Opens the Vitrino in the Werkstatt, optionally with an Agordo in the fragment. */
@@ -1126,9 +1134,39 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     const line = `M5 (${test.info().project.name}): Ableitung median ${derive.median.toFixed(1)} ms, p95 ${derive.p95.toFixed(1)} ms; Prüfung median ${check.median.toFixed(1)} ms, p95 ${check.p95.toFixed(1)} ms; längste Blockade des Hauptfadens ${timings.longest.toFixed(0)} ms (${timings.longTasks} Long Tasks)`;
     process.stderr.write(`${line}\n`);
     test.info().annotations.push({ type: "M5", description: line });
-    // G5: no block of the main thread above 50 ms; the derivation under 150 ms (M5).
-    expect(timings.longest).toBeLessThanOrEqual(50);
+    // G5: no block of the main thread above 50 ms; the derivation under 150 ms (M5). Nachlese 12 ③:
+    // the scripts in every change, the rendering over the changes (m5.ts).
+    expect(timings.perChange).toHaveLength(50);
+    const urteil = m5Urteil(timings);
+    process.stderr.write(
+      `M5 Urteil (${test.info().project.name}): Skripte längstens ${timings.scriptLongest.toFixed(0)} ms; Blockade je Änderung p90 ${urteil.perzentil.toFixed(0)} ms, längste ${timings.longest.toFixed(0)} ms\n`,
+    );
+    expect(urteil.gruende).toEqual([]);
     expect(derive.median).toBeLessThan(150);
+  });
+
+  // Nachlese 12 ③ (Gegenprobe): a block of 80 ms the Werkstatt makes itself – a busy loop each time
+  // it hands a check to its worker – is red, on fast and on slow runners alike.
+  test("M5 Gegenprobe: an artificial block of 80 ms in the Werkstatt makes M5 red", async ({
+    page,
+  }) => {
+    await openWerkstatt(page);
+    await checkedAtLeast(page, 1);
+    await page.evaluate(() => {
+      const post = Worker.prototype.postMessage;
+      Worker.prototype.postMessage = function (this: Worker, ...args: unknown[]) {
+        const until = performance.now() + 80;
+        while (performance.now() < until) {
+          // the artificial block
+        }
+        return (post as (...rest: unknown[]) => void).apply(this, args);
+      } as typeof Worker.prototype.postMessage;
+    });
+    const timings = await page.evaluate(() => fmWerkstatt.measure(10));
+    const urteil = m5Urteil(timings);
+    process.stderr.write(`M5 Gegenprobe: ${urteil.gruende.join("; ")}\n`);
+    expect(urteil.rot).toBe(true);
+    expect(timings.scriptLongest).toBeGreaterThan(M5_GRENZE_MS);
   });
 
   test("the Werkstatt is keyboard-operable and announces the report politely", async ({ page }) => {
@@ -1352,11 +1390,18 @@ test.describe("the Werkstatt, stage 2 (Spec 019 ②)", () => {
     await checkedAtLeast(page, 1);
     expect((await state(page)).worker).toBe(true);
     await page.evaluate(() => {
-      (globalThis as unknown as { fmLong: number[] }).fmLong = [];
+      const box = globalThis as unknown as { fmLong: number[]; fmScripts: number[] };
+      box.fmLong = [];
+      box.fmScripts = [];
       new PerformanceObserver((list) => {
-        for (const entry of list.getEntries())
-          (globalThis as unknown as { fmLong: number[] }).fmLong.push(entry.duration);
+        for (const entry of list.getEntries()) box.fmLong.push(entry.duration);
       }).observe({ type: "longtask" });
+      // Nachlese 12 ③: the work of scripts per frame, apart from style and layout.
+      if (PerformanceObserver.supportedEntryTypes?.includes("long-animation-frame"))
+        new PerformanceObserver((list) => {
+          for (const entry of list.getEntries() as unknown as { scripts: { duration: number }[] }[])
+            box.fmScripts.push(entry.scripts.reduce((sum, script) => sum + script.duration, 0));
+        }).observe({ type: "long-animation-frame" });
     });
     const checked = (await state(page)).checked;
     const slider = page.locator("#fm-werkstatt-helligkeit");
@@ -1367,10 +1412,16 @@ test.describe("the Werkstatt, stage 2 (Spec 019 ②)", () => {
     }
     await checkedAtLeast(page, checked + 1);
     await page.waitForTimeout(500);
-    const longTasks = await page.evaluate(
-      () => (globalThis as unknown as { fmLong: number[] }).fmLong,
-    );
-    expect(longTasks.filter((duration) => duration > 50)).toEqual([]);
+    const { longTasks, scripts } = await page.evaluate(() => {
+      const box = globalThis as unknown as { fmLong: number[]; fmScripts: number[] };
+      return { longTasks: box.fmLong, scripts: box.fmScripts };
+    });
+    // Nachlese 12 ③: each Long Task belongs to one of the 50 changes; the others blocked less.
+    const perChange = [
+      ...longTasks,
+      ...Array.from({ length: Math.max(0, 50 - longTasks.length) }, () => 0),
+    ];
+    expect(m5Urteil({ perChange, scriptLongest: Math.max(0, ...scripts) }).gruende).toEqual([]);
   });
 
   test("browser and CLI agree on provo-kompakta: the report, value for value (G5)", async ({
@@ -1636,4 +1687,72 @@ test.describe("the Vitrino of every brand shows the Ero-Tokens of komuna (Spec 0
       }
     });
   }
+});
+
+// Nachlese 12 ③: the verdict of M5 and G5 itself, with the values measured in CI.
+test.describe("the verdict of M5 (Nachlese 12 ③)", () => {
+  const zeros = (count: number) => Array.from({ length: count }, () => 0);
+
+  test("a slow runner: one or two frames of style and layout of 51 to 65 ms in 50 changes stay green", () => {
+    expect(m5Urteil({ perChange: [...zeros(48), 55, 54], scriptLongest: 0 }).rot).toBe(false);
+    expect(m5Urteil({ perChange: [...zeros(49), 65], scriptLongest: 0 }).rot).toBe(false);
+  });
+
+  test("a Werkstatt that blocks in most changes is red, whatever the scripts say", () => {
+    expect(
+      m5Urteil({ perChange: Array.from({ length: 50 }, () => 56), scriptLongest: 0 }).rot,
+    ).toBe(true);
+    expect(
+      m5Urteil({
+        perChange: [...zeros(40), ...Array.from({ length: 10 }, () => 60)],
+        scriptLongest: 0,
+      }).rot,
+    ).toBe(true);
+  });
+
+  test("a script of 80 ms is red even once in 50 changes", () => {
+    const urteil = m5Urteil({ perChange: [...zeros(49), 80], scriptLongest: 80 });
+    expect(urteil.rot).toBe(true);
+    expect(urteil.gruende[0]).toMatch(/Skripte blockieren 80 ms/);
+  });
+});
+
+// Nachlese 12 ④: the KontrastParoj of a combination are stored once and referred to from every
+// density, viewport and motion; the table of the section is the same in each of them.
+test("the KontrastParoj of one combination are the same table in every density and motion (Nachlese 12 ④)", async ({
+  page,
+}) => {
+  await open(page, "#aspekto=komuna&color-scheme=dark&contrast=high");
+  const table = () => page.locator("#fm-vitrino-kontrasto-paroj").innerHTML();
+  const first = await table();
+  expect(first).toContain("text-on-background");
+  for (const [dimensio, valoro] of [
+    ["density", "compact"],
+    ["density", "comfortable"],
+    ["motion", "reduced"],
+    ["viewport", "compact"],
+  ] as const) {
+    await page.evaluate(
+      ([name, value]) => {
+        location.hash = `#aspekto=komuna&color-scheme=dark&contrast=high&${name}=${value}`;
+      },
+      [dimensio, valoro],
+    );
+    await expect
+      .poll(() =>
+        page.evaluate((name) => document.documentElement.getAttribute(`data-fm-${name}`), dimensio),
+      )
+      .toBe(valoro);
+    await expect.poll(table, { message: `${dimensio}=${valoro}` }).toBe(first);
+  }
+  // The data island holds each distinct table once.
+  const island = await page.evaluate(() => {
+    const data = JSON.parse(document.getElementById("fm-vitrino")?.textContent ?? "{}");
+    return {
+      unikaj: data.mezuroj?.unikaj?.length ?? -1,
+      al: Object.keys(data.mezuroj?.al ?? {}).length,
+    };
+  });
+  expect(island.unikaj).toBeGreaterThan(0);
+  expect(island.al).toBeGreaterThan(island.unikaj);
 });

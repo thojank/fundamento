@@ -3856,3 +3856,56 @@ describe("Spec 032 documentation (specs/032-benchmark-astryx-kern)", () => {
     expect(read("docs/vojmapo.md")).toContain("Spec 032");
   });
 });
+
+// Nachlese 12 (2026-10-29): specs/034-nachlese-12 carries the briefing unchanged, a plan with the
+// measuring point "nach der Fonto" in the series H, K and O, Reihe O with one tool over all three
+// points, M5 robust without raising the limit (with the Gegenprobe of 80 ms) and the Vitrino with
+// its KontrastParoj once; the measuring guide with full paths, cd and file:// links; tasks with the
+// red commit. No key in any of them.
+describe("Nachlese 12 documentation (specs/034-nachlese-12)", () => {
+  it("the briefing is copied unchanged; plan and tasks carry the series, M5, the Vitrino and the guide", () => {
+    const briefing = read("specs/034-nachlese-12/briefing.md");
+    expect(createHash("sha256").update(briefing).digest("hex")).toBe(
+      "d9b851b665200c2e3460132a845c3274741188a4288ff8173cdd815f1e7cdb60",
+    );
+    const plan = read("specs/034-nachlese-12/plan.md");
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "### Messpunkte",
+      "### Abweichungen",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### Messanleitung",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const term of [
+      "Reihe H",
+      "Reihe K",
+      "Reihe O",
+      "Ausgangslinie",
+      "nach den Korrekturen",
+      "nach der Fonto",
+      "Kosten",
+      "Anfragen",
+      "Top-10",
+      "M5",
+      "Gegenprobe",
+      "80 ms",
+      "Vitrino",
+      "MB",
+      "cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds",
+      "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/",
+    ]) {
+      expect(plan, term).toContain(term);
+    }
+    const tasks = read("specs/034-nachlese-12/tasks.md");
+    for (const text of [plan, tasks]) {
+      expect(text).not.toMatch(/sk-[A-Za-z0-9_-]{8,}|Bearer [A-Za-z0-9]/);
+      expect(text).not.toContain("ciferecigo");
+    }
+    expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Nachlese 12");
+  });
+});
