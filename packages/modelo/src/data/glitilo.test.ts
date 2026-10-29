@@ -304,7 +304,8 @@ describe("the Uzo of the glitilo (section ①, G2)", () => {
     if (glitilo === undefined) throw new Error("missing");
     const brief = briefOf(glitilo);
     expect(brief.axes.map((axis) => axis.name)).toEqual(["field"]);
-    expect(brief.props?.map((prop) => prop.name)).toContain("range");
+    // Spec 029 ②b-1: a boolean stands in flags.
+    expect(brief.flags).toContain("range");
     expect(brief.required).toEqual({ props: [], slots: ["label"] });
     const bytes = Buffer.byteLength(JSON.stringify(brief), "utf8");
     expect(Math.ceil(bytes / 3), `${bytes} bytes`).toBeLessThanOrEqual(750);

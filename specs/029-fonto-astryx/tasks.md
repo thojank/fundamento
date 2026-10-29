@@ -126,7 +126,7 @@
 - [x] **T2950 M-5 rot** in `ac0fe9b` (Skemo 23, Browser 12, Figma 12).
 - [x] **T2951 M-5 grün:** Modelo, Web, Figma, Vitrino; Erwartungen der bestehenden Tests nachgezogen (Teile, Props, Zählungen, Prüfsummen).
 - [x] **T2952 M-6 Löschen-Knopf:** rot in `9b81ad3`, grün im Folgecommit (Modelo, Web, Figma; Brief des kampo 740).
-- [ ] T2955 Brief: Boolean-Props kompakt (Entscheidung 29.10.)
+- [x] **T2955 Brief: Boolean-Props kompakt** (Entscheidung 29.10.): rot in `0d464a0`; `flags` im Brief und im Ausgabeschema von get_ero, `props` ohne Booleans; kampo 740 → 682 von 750.
 - [ ] T2953 M-1 Grund für „deaktiviert“
 - [ ] T2954 M-2 Status warning/success
 

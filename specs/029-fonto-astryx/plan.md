@@ -1449,3 +1449,7 @@ Auftrag des Maintainers vom 28.10. (21:56): ②b setzt genau die Entscheidungen 
 - **Figma:** `close` am Ende des Controls (vor dem Chevron), Farbe die Beschriftung des butono low, Größe `clear.size`; die Freigabe aus Spec 025 ① gilt nur noch für den plurelektilo (`check:parity` 641 statt 659 freigegebene).
 - **Budget Brief 750:** der kampo stand mit M-5 und M-6 bei 758; drei Begründungen im Uzo des kampo (Vorschläge, Wert in der Ansicht, nach Gefühl) gestrafft, englisch und deutsch – jetzt 740. Für M-2 (zwei Achsen, etwa +52) entschied der Maintainer am 29.10.: Boolean-Props stehen im Brief kompakt als Liste von Namen.
 
+### Brief: Boolean-Props kompakt
+
+Entscheidung des Maintainers (29.10.): Im Brief von `get_ero` stehen Boolean-Props, die keine Achse sind, als Namen in `flags` (Skemo-Reihenfolge); `props` nennt die übrigen mit Typ. Das Ausgabeschema von `get_ero` kennt `flags`. Der kampo sinkt von 740 auf 682 (Grenze 750 unverändert) – Platz für die Achsen von M-2. Für MCP-Clients ändert sich die Form des Briefs: wer `props` nach Booleans durchsuchte, liest jetzt `flags`.
+

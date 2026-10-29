@@ -301,11 +301,13 @@ describe("get_ero with the Uzo and brief (T022)", () => {
     const brief = getEro(modelo, { name: "butono", brief: true });
     expect(brief.ok).toBe(true);
     if (!brief.ok) return;
-    // Nachlese 5 N5-3: props names the props without an axis (disabled, loading, …).
+    // Nachlese 5 N5-3: props names the props without an axis; Spec 029 ②b-1: the booleans among
+    // them (disabled, loading, …) stand in flags.
     expect(Object.keys(brief.output).sort()).toEqual([
       "axes",
       "boundary",
       "ero",
+      "flags",
       "instead",
       "props",
       "purpose",
@@ -400,24 +402,30 @@ describe("brief: the props without an axis (Nachlese 5 N5-3)", () => {
   it("the kompletigilo's brief names loading as a boolean, the axes stay axes", () => {
     const brief = getEro(modelo, { name: "kompletigilo", brief: true });
     if (!brief.ok) throw new Error("get_ero kompletigilo failed");
-    expect(brief.output.props).toContainEqual({ name: "loading", type: "boolean" });
+    // Spec 029 ②b-1: a boolean stands in flags.
+    expect(brief.output.flags).toContain("loading");
     expect(brief.output.props).toContainEqual({ name: "min-chars", type: "number" });
     expect(brief.output.props).toContainEqual({ name: "value", type: "string" });
     const axes = new Set(brief.output.axes.map((axis) => axis.name));
     expect(brief.output.props?.filter((prop) => axes.has(prop.name))).toEqual([]);
   });
 
-  it("every prop of every Skemo is an axis or a prop of the brief, in Skemo order", () => {
+  it("every prop of every Skemo is an axis, a prop or a flag of the brief, in Skemo order", () => {
     const offending: string[] = [];
     for (const entry of modelo.eroj) {
       const brief = getEro(modelo, { name: entry.ero.name, brief: true });
       if (!brief.ok) throw new Error(`get_ero ${entry.ero.name} failed`);
       const axes = new Set(brief.output.axes.map((axis) => axis.name));
       const expected = entry.skemo.props
-        .filter((prop) => !axes.has(prop.name))
+        .filter((prop) => !axes.has(prop.name) && prop.kind !== "boolean")
         .map((prop) => ({ name: prop.name, type: prop.kind }));
+      const flags = entry.skemo.props
+        .filter((prop) => !axes.has(prop.name) && prop.kind === "boolean")
+        .map((prop) => prop.name);
       const props = brief.output.props ?? [];
       if (JSON.stringify(props) !== JSON.stringify(expected)) offending.push(entry.ero.name);
+      if (JSON.stringify(brief.output.flags ?? []) !== JSON.stringify(flags))
+        offending.push(`${entry.ero.name} (flags)`);
     }
     expect(offending).toEqual([]);
   });

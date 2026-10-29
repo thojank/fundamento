@@ -197,9 +197,9 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
   it("the brief of the kampo stays under 750 with time, the stepper and the step", () => {
     const brief = briefOf(kampo);
     expect(brief.axes.map((axis) => axis.name)).toEqual(["kind", "size"]);
-    expect(brief.props?.map((prop) => prop.name)).toEqual(
-      expect.arrayContaining(["stepper", "step"]),
-    );
+    // Spec 029 ②b-1: stepper is a boolean, it stands in flags.
+    expect(brief.flags).toContain("stepper");
+    expect(brief.props?.map((prop) => prop.name)).toEqual(expect.arrayContaining(["step"]));
     const bytes = Buffer.byteLength(JSON.stringify(brief), "utf8");
     expect(Math.ceil(bytes / 3), `${bytes} bytes`).toBeLessThanOrEqual(750);
   });
