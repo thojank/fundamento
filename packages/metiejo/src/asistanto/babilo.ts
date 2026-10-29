@@ -7,9 +7,11 @@ import { ILOJ, type Laborejo, vokiIlon } from "./iloj.js";
 import {
   type Budget,
   type ChatMessage,
+  type ChatResult,
   chatCompletion,
   type Fetch,
   functionOf,
+  kostoOnError,
   type Provider,
 } from "./ki.js";
 
@@ -96,12 +98,18 @@ export async function babili(options: BabiloOptions): Promise<BabiloRezulto> {
   };
   for (;;) {
     const offer = toolCalls < maxToolCalls;
-    const result = await chatCompletion(
-      provider,
-      { messages, ...(offer ? { tools, tool_choice: "auto" } : {}), temperature: 0.2 },
-      budget,
-      chat,
-    );
+    let result: ChatResult;
+    try {
+      result = await chatCompletion(
+        provider,
+        { messages, ...(offer ? { tools, tool_choice: "auto" } : {}), temperature: 0.2 },
+        budget,
+        chat,
+      );
+    } catch (error) {
+      // Nachlese 12 B-4: the turn says what it spent itself, the failed call included.
+      throw kostoOnError(error, { enigo, eligo, requests }, started);
+    }
     enigo += result.input;
     eligo += result.output;
     requests += result.requests;

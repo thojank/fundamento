@@ -11,6 +11,7 @@ import {
   chatCompletion,
   type Fetch,
   functionOf,
+  kostoOnError,
   type Provider,
   type ToolInfo,
 } from "../asistanto/ki.js";
@@ -185,7 +186,10 @@ export async function esplori(options: EsploroOptions): Promise<EsploroRezulto> 
           ...(options.gate === undefined ? {} : { gate: options.gate }),
           ...(options.log === undefined ? {} : { log: options.log }),
         },
-      );
+      ).catch((error: unknown) => {
+        // Nachlese 12 B-4: the research says what it spent itself, the failed call included.
+        throw kostoOnError(error, { enigo, eligo, requests }, started);
+      });
       enigo += result.input;
       eligo += result.output;
       requests += result.requests;

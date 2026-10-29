@@ -41,7 +41,13 @@ import {
   type KronikoInput,
   readKroniko,
 } from "./asistanto/kroniko.js";
-import { AnfragoLedger, DayLimitReached, type Limoj, Pordisto } from "./asistanto/limoj.js";
+import {
+  AnfragoLedger,
+  DayLimitReached,
+  type Limoj,
+  mergeLedger,
+  Pordisto,
+} from "./asistanto/limoj.js";
 import {
   facetojOfAgordoDiff,
   type Vollstaendigkeit,
@@ -348,6 +354,16 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
   const redact = (text: string): string => options.ki?.provider?.redact(text) ?? text;
   const kroniko = (name: string, entry: KronikoInput): KronikoEro =>
     appendKroniko(options.workdir, name, entry, redact);
+  /**
+   * A turn of the model that ended in an error (Nachlese 12 B-4): it goes into the Kroniko with what
+   * it spent itself – the `kosto` the turn put on its error – so the counter counts it, and nothing
+   * of the turns beside it. Without a cost on the error nothing was asked of the provider.
+   */
+  const failedTurn = (name: string, entry: KronikoInput, error: unknown, satz: string): void => {
+    const kosto = (error as { kosto?: KronikoInput["kosto"] }).kosto;
+    if (kosto === undefined) return;
+    kroniko(name, { ...entry, kosto, detaloj: { ...(entry.detaloj ?? {}), eraro: satz } });
+  };
   // Spec 033 S6: the gate of the provider's limits, the requests of the UTC day beside the brands.
   const gate = (() => {
     const limoj = options.ki?.limoj;
@@ -361,8 +377,14 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       now: () => Date.now(),
       sleep: options.ki?.sleep ?? ((ms) => new Promise((done) => setTimeout(done, ms))),
       provider: provider.name,
+      // Nachlese 12 ②: another server or run may have counted meanwhile; the file is merged, not
+      // overwritten, and the gate counts on with what the file says.
       counted: () => {
         mkdirSync(options.workdir, { recursive: true });
+        const onDisk = existsSync(file)
+          ? (JSON.parse(readFileSync(file, "utf8")) as Record<string, number>)
+          : {};
+        Object.assign(ledger.entries, mergeLedger(onDisk, ledger.entries));
         writeFileSync(file, `${JSON.stringify(ledger.entries, null, 2)}\n`);
       },
     });
@@ -659,12 +681,24 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         },
       };
     } catch (error) {
-      if (error instanceof DayLimitReached)
-        return { status: 429, body: { satz: dayLimitSatz(error) } };
+      const failed: KronikoInput = {
+        ago: "babilo",
+        fonto,
+        ...(faceto === undefined ? {} : { faceto }),
+        teksto,
+        modelo: provider.toString(),
+        ...(Object.keys(detaloj).length === 0 ? {} : { detaloj }),
+      };
+      if (error instanceof DayLimitReached) {
+        const satz = dayLimitSatz(error);
+        failedTurn(name, failed, error, satz);
+        return { status: 429, body: { satz } };
+      }
       const satz =
         error instanceof CostLimitReached
           ? `Die Kostengrenze dieser Runde ist erreicht (${error.limit} Tokens). Formuliere den Wunsch kürzer oder in mehreren Schritten.`
           : redact(error instanceof Error ? error.message : String(error));
+      failedTurn(name, failed, error, satz);
       return { status: 502, body: { satz } };
     }
   };
@@ -1498,15 +1532,23 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
             zaehlilo: zaehliloOf(name),
           });
         } catch (error) {
-          if (error instanceof DayLimitReached) {
-            sendJson(response, { satz: dayLimitSatz(error) }, 429);
-            return;
-          }
-          sendJson(
-            response,
-            { satz: redact(error instanceof Error ? error.message : String(error)) },
-            502,
+          const satz =
+            error instanceof DayLimitReached
+              ? dayLimitSatz(error)
+              : redact(error instanceof Error ? error.message : String(error));
+          failedTurn(
+            name,
+            {
+              ago: "babilo",
+              fonto: "agento",
+              teksto: `Recherche zu „${nomo}“`,
+              ...(provider === undefined ? {} : { modelo: provider.toString() }),
+              detaloj: { vojo: "C" },
+            },
+            error,
+            satz,
           );
+          sendJson(response, { satz }, error instanceof DayLimitReached ? 429 : 502);
         }
         return;
       }
@@ -1624,9 +1666,21 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
               { role: "assistant", content: turn.antwort },
             ]);
           } catch (error) {
-            io.stderr(
-              `Kreilo: ${redact(error instanceof Error ? error.message : String(error))}\n`,
+            const satz = redact(error instanceof Error ? error.message : String(error));
+            failedTurn(
+              name,
+              {
+                ago: "babilo",
+                fonto: "babilo",
+                faceto: "gvidkoloro",
+                teksto: "Leitfarbe zur Beschreibung (Einstiegsfragen)",
+                modelo: provider.toString(),
+                detaloj: { vojo: "A" },
+              },
+              error,
+              satz,
             );
+            io.stderr(`Kreilo: ${satz}\n`);
           }
         }
         mkdirSync(join(options.workdir, name), { recursive: true });
