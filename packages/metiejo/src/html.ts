@@ -483,6 +483,7 @@ if (asistantoData && marko) {
     rev = result.body.rev;
     refreshFrame();
     zeigeStato(result.body.stato);
+    zeigeKosto(result.body);
   };
   if (send) send.addEventListener("click", submit);
   for (const button of document.querySelectorAll("[data-mt-faceto-ago]")) {
@@ -550,6 +551,7 @@ if (asistantoData && marko) {
     rev = result.body.rev;
     refreshFrame();
     zeigeStato(result.body.stato);
+    zeigeKosto(result.body);
   };
   let recorder;
   if (speak) speak.addEventListener("click", async () => {
@@ -597,6 +599,12 @@ if (asistantoData && marko) {
     const result = await post("konfirmo", { rajtoj: true });
     if (result.ok) location.reload(); else meldung(result.body.satz || "");
   });
+}
+// Spec 033 S6: the counter of the brand after every turn; after a 429 the provider made it wait.
+function zeigeKosto(body) {
+  const counter = document.querySelector("[data-mt-zaehlilo]");
+  if (counter && body.zaehlilo) counter.textContent = body.zaehlilo.satz;
+  if (body.atendoj > 0) meldung("Der Anbieter hat gebremst (429): " + body.atendoj + "× gewartet, dann ging es weiter.");
 }
 function zeigeStato(stato) {
   if (!stato) return;

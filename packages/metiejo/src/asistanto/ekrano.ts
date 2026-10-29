@@ -45,8 +45,10 @@ export interface AsistantoInput {
   historio: readonly { role: "user" | "assistant"; content: string }[];
   ki: { pret: boolean; modelo?: string; satz?: string };
   fremda?: { kiel: string; nomo?: string; konfirmita: boolean };
-  /** Tokens and time of the chat of this brand since the server started. */
-  sumo: { enigo: number; eligo: number; ms: number };
+  /** Spec 033 S6: the counter of this brand from its Kroniko – tokens, dollars, time, requests. */
+  zaehlilo: string;
+  /** Spec 033 S6: the estimates before the start, one line each. */
+  takso?: { babilo: string; parolo: string; esploro: string; materialo: string };
   /** Spec 033 S5: the Voxtral model when the server transcribes; absent: the browser's recognition. */
   parolo?: string | undefined;
   /** Spec 033 S2: the open proposal of the Enportilo for this step, with its provenance. */
@@ -93,7 +95,7 @@ export function asistantoScreen(input: AsistantoInput): string {
       ? `<fm-dialogo open label="Bestätigung" data-mt-konfirmo><fm-titolo slot="title" level="2">Deine Marke baut auf einer bestehenden Marke auf</fm-titolo><fm-teksto>${escapeHtml(fremda.nomo === undefined ? "Du hast eine bestehende Marke genannt." : `Du hast „${fremda.nomo}“ genannt.`)} Fundamento ist hier Plattform: Die Verantwortung für Marken- und Urheberrechte trägst du. Die Bestätigung steht mit Zeitpunkt im Protokoll der Marke.</fm-teksto><fm-markobutono name="rajtoj" value="ja" data-mt-rajtoj>${escapeHtml(KONFIRMO_TEKSTO)}</fm-markobutono><fm-butono slot="actions" emphasis="high" data-mt-konfirmi>Bestätigen</fm-butono></fm-dialogo>`
       : "";
   const kiSatz = input.ki.pret
-    ? `Modell ${escapeHtml(input.ki.modelo ?? "")} · bisher ${input.sumo.enigo + input.sumo.eligo} Tokens, ${Math.round(input.sumo.ms / 1000)} s`
+    ? `Modell ${escapeHtml(input.ki.modelo ?? "")} · <span data-mt-zaehlilo>${escapeHtml(input.zaehlilo)}</span>`
     : escapeHtml(input.ki.satz ?? "Kein Sprachmodell eingerichtet.");
   const nochNicht = vollstaendigkeit.nochNicht
     .map(
@@ -104,8 +106,13 @@ export function asistantoScreen(input: AsistantoInput): string {
     input.propono === undefined
       ? ""
       : `<fm-avizo intent="info" data-mt-propono><span slot="heading">Vorschlag aus deinem Material</span><fm-teksto>${escapeHtml(input.propono.satz)}</fm-teksto><fm-teksto kind="caption">Herkunft: ${input.propono.herkunft.map((entry) => escapeHtml(entry.loko === undefined ? entry.dosiero : `${entry.dosiero}, ${entry.loko}`)).join(" · ")}</fm-teksto></fm-avizo>`;
-  const material = `<fm-faldilo data-mt-materialo><span slot="summary">Material deiner Marke (Screenshot, Logo, PDF, Schrift oder Link)</span><fm-alsxutilo name="materialo" accept=".png,.svg,.pdf,.woff2,.woff,.ttf,.otf" data-mt-materialo-dosiero>Datei</fm-alsxutilo><fm-kampo name="url" type="url" data-mt-materialo-url>Link auf eine Webseite</fm-kampo><fm-markobutono name="rajtoj-materialo" value="ja" data-mt-materialo-rajtoj>${escapeHtml(KONFIRMO_TEKSTO)}</fm-markobutono><fm-butono emphasis="medium" data-mt-materialo-legi>Material lesen</fm-butono></fm-faldilo>`;
-  const esploro = `<fm-faldilo data-mt-esploro><span slot="summary">Bestehende Marke nur genannt (Recherche)</span><fm-kampo name="nomo" data-mt-esploro-nomo>Name der Marke</fm-kampo><fm-kampo name="url" type="url" data-mt-esploro-url>Adresse der Website (optional)</fm-kampo><fm-markobutono name="rajtoj-esploro" value="ja" data-mt-esploro-rajtoj>${escapeHtml(KONFIRMO_TEKSTO)}</fm-markobutono><fm-teksto kind="caption">Der Assistent liest öffentliche Seiten und misst Farben, Schriften, Radien und Abstände; er übernimmt keine Texte, Bilder oder Dateien. Das Ergebnis bleibt lokal.</fm-teksto><fm-butono emphasis="medium" data-mt-esploro-sendi>Recherchieren</fm-butono></fm-faldilo>`;
+  // Spec 033 S6: the estimate before the start, beside the action it is for.
+  const takso = (zugo: keyof NonNullable<AsistantoInput["takso"]>, label: string) =>
+    input.takso === undefined
+      ? ""
+      : `<fm-teksto kind="caption" data-mt-takso-${zugo}>${escapeHtml(label)} ${escapeHtml(input.takso[zugo])}</fm-teksto>`;
+  const material = `<fm-faldilo data-mt-materialo><span slot="summary">Material deiner Marke (Screenshot, Logo, PDF, Schrift oder Link)</span><fm-alsxutilo name="materialo" accept=".png,.svg,.pdf,.woff2,.woff,.ttf,.otf" data-mt-materialo-dosiero>Datei</fm-alsxutilo><fm-kampo name="url" type="url" data-mt-materialo-url>Link auf eine Webseite</fm-kampo><fm-markobutono name="rajtoj-materialo" value="ja" data-mt-materialo-rajtoj>${escapeHtml(KONFIRMO_TEKSTO)}</fm-markobutono>${takso("materialo", "je Datei")}<fm-butono emphasis="medium" data-mt-materialo-legi>Material lesen</fm-butono></fm-faldilo>`;
+  const esploro = `<fm-faldilo data-mt-esploro><span slot="summary">Bestehende Marke nur genannt (Recherche)</span><fm-kampo name="nomo" data-mt-esploro-nomo>Name der Marke</fm-kampo><fm-kampo name="url" type="url" data-mt-esploro-url>Adresse der Website (optional)</fm-kampo><fm-markobutono name="rajtoj-esploro" value="ja" data-mt-esploro-rajtoj>${escapeHtml(KONFIRMO_TEKSTO)}</fm-markobutono><fm-teksto kind="caption">Der Assistent liest öffentliche Seiten und misst Farben, Schriften, Radien und Abstände; er übernimmt keine Texte, Bilder oder Dateien. Das Ergebnis bleibt lokal.</fm-teksto>${takso("esploro", "Recherche")}<fm-butono emphasis="medium" data-mt-esploro-sendi>Recherchieren</fm-butono></fm-faldilo>`;
   const previewSrc = `/marko/${encodeURIComponent(name)}/vorschau?sxtupo=studio-${studio}&breite=mittel`;
   const body = `<fm-sxelo>
 <span slot="brand">Markenassistent</span>
@@ -127,6 +134,7 @@ ${dialog}
 <fm-butono emphasis="medium" data-mt-parolo data-mt-parolo-voxtral="${input.parolo === undefined ? "ne" : "ja"}"${input.ki.pret ? "" : " disabled"}>Sprechen</fm-butono>
 <fm-sxaltilo name="vorlesen" data-mt-vorlesen>Antworten vorlesen</fm-sxaltilo>
 <fm-teksto kind="caption" data-mt-parolo-satz>${escapeHtml(input.parolo === undefined ? "Sprache: Der Browser erkennt sie selbst (Web Speech API), wo er das kann." : `Sprache: Voxtral (${input.parolo}) auf dem lokalen Server.`)}</fm-teksto>
+${takso("babilo", "Schätzung je Wunsch")}${input.parolo === undefined ? "" : takso("parolo", "gesprochen")}
 ${propono}
 ${material}
 ${esploro}

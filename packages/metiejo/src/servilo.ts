@@ -41,6 +41,7 @@ import {
   type KronikoInput,
   readKroniko,
 } from "./asistanto/kroniko.js";
+import { AnfragoLedger, DayLimitReached, type Limoj, Pordisto } from "./asistanto/limoj.js";
 import {
   facetojOfAgordoDiff,
   type Vollstaendigkeit,
@@ -95,6 +96,19 @@ import {
   type SxtupoKey,
   screen,
 } from "./sxtupoj.js";
+import {
+  mezurojOf,
+  nordsteloRapidoj,
+  readKronikoj,
+  STARTO,
+  type Takso,
+  taksi,
+  taksoSatz,
+  type Vojo,
+  type Zugo,
+  zaehlilo,
+  zaehliloSatz,
+} from "./takso/takso.js";
 import { fontFaceCss, fontoOf, licencedFonto, readTiparoj, searchTiparoj } from "./tiparoj.js";
 import type { NpmDeps } from "./tiparoj-npm.js";
 import {
@@ -107,6 +121,8 @@ import {
 } from "./vorschau.js";
 import { previewBody } from "./vorschau-korpo.js";
 
+/** Spec 033 S6: the requests of the UTC day per provider, beside the brands. */
+export const ANFRAGOJ_FILE = ".anfragoj.json";
 export const HTTP_HOST = "127.0.0.1";
 
 export interface ServiloOptions {
@@ -135,6 +151,11 @@ export interface ServiloOptions {
     sleep?: (ms: number) => Promise<void>;
     /** Tokens one chat turn may use at most (Kostengrenze); default 60 000. */
     limo?: number;
+    /**
+     * Spec 033 S6: the limits of the provider (requests per second and per UTC day); start.ts passes
+     * LIMOJ of the provider. The requests of the day are counted in marken/.anfragoj.json.
+     */
+    limoj?: Limoj;
   };
   /**
    * Spec 033 S5: speech in over Voxtral – the Mistral provider with the transcription model, from
@@ -319,15 +340,60 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
   const privata = privataState(options.settings);
   const ikonoGewichte = ["regular", ...Object.keys(bases.structure.ikonoGewichte?.glyphs ?? {})];
   const regler = reglerOf(bases.gestalt);
-  // Spec 033 S1: the brand model, the chat of each brand and its tokens since the start.
+  // Spec 033 S1: the brand model and the chat of each brand; S6: its counter is read from the Kroniko.
   const facetojFile = readFacetoj(defaultModeloSource().dataDir);
   if (facetojFile === undefined) throw new Error("data/facetoj.json fehlt im Modelo.");
   const facetoj = facetojFile;
   const babiloj = new Map<string, { role: "user" | "assistant"; content: string }[]>();
-  const sumoj = new Map<string, { enigo: number; eligo: number; ms: number }>();
   const redact = (text: string): string => options.ki?.provider?.redact(text) ?? text;
   const kroniko = (name: string, entry: KronikoInput): KronikoEro =>
     appendKroniko(options.workdir, name, entry, redact);
+  // Spec 033 S6: the gate of the provider's limits, the requests of the UTC day beside the brands.
+  const gate = (() => {
+    const limoj = options.ki?.limoj;
+    const provider = options.ki?.provider;
+    if (limoj === undefined || provider === undefined) return undefined;
+    const file = join(options.workdir, ANFRAGOJ_FILE);
+    const ledger = new AnfragoLedger(
+      existsSync(file) ? (JSON.parse(readFileSync(file, "utf8")) as Record<string, number>) : {},
+    );
+    return new Pordisto(limoj, ledger, {
+      now: () => Date.now(),
+      sleep: options.ki?.sleep ?? ((ms) => new Promise((done) => setTimeout(done, ms))),
+      provider: provider.name,
+      counted: () => {
+        mkdirSync(options.workdir, { recursive: true });
+        writeFileSync(file, `${JSON.stringify(ledger.entries, null, 2)}\n`);
+      },
+    });
+  })();
+  const gated = gate === undefined ? {} : { gate };
+  const zaehliloOf = (name: string) => {
+    const sum = zaehlilo(readKroniko(options.workdir, name));
+    return { ...sum, satz: zaehliloSatz(sum) };
+  };
+  let rapidoj: Map<string, number> | undefined;
+  /** The estimates for the model of the .env: per path and per turn, each with its line. */
+  const taksojOf = () => {
+    const modelo = options.ki?.provider?.toString() ?? STARTO.modelo;
+    rapidoj ??= nordsteloRapidoj(join(options.root, ".fundamento", "nordstelo"));
+    const speeds = rapidoj;
+    const mezuroj = mezurojOf(readKronikoj(options.workdir));
+    const withSatz = (takso: Takso) => ({ ...takso, satz: taksoSatz(takso) });
+    const of = (input: { vojo: Vojo } | { zugo: Zugo }) =>
+      withSatz(taksi({ ...input, modelo, mezuroj, rapidoj: speeds }));
+    return {
+      modelo,
+      vojoj: { A: of({ vojo: "A" }), B: of({ vojo: "B" }), C: of({ vojo: "C" }) },
+      zugoj: {
+        kreilo: of({ zugo: "kreilo" }),
+        babilo: of({ zugo: "babilo" }),
+        parolo: of({ zugo: "parolo" }),
+        esploro: of({ zugo: "esploro" }),
+        materialo: of({ zugo: "materialo" }),
+      },
+    };
+  };
 
   const draftOf = (name: string): Draft | undefined => {
     const held = drafts.get(name);
@@ -558,6 +624,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         budget: new Budget(options.ki?.limo ?? 60_000),
         ...(options.ki?.fetch === undefined ? {} : { fetch: options.ki.fetch }),
         ...(options.ki?.sleep === undefined ? {} : { sleep: options.ki.sleep }),
+        ...gated,
         log: (line) => io.stderr(`${redact(line)}\n`),
       });
       babiloj.set(name, [
@@ -565,12 +632,6 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         { role: "user", content: teksto },
         { role: "assistant", content: result.antwort },
       ]);
-      const sumo = sumoj.get(name) ?? { enigo: 0, eligo: 0, ms: 0 };
-      sumoj.set(name, {
-        enigo: sumo.enigo + result.kosto.enigo,
-        eligo: sumo.eligo + result.kosto.eligo,
-        ms: sumo.ms + result.kosto.ms,
-      });
       kroniko(name, {
         ago: "babilo",
         fonto,
@@ -594,9 +655,12 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           atendoj: result.atendoj,
           sxangxoj: result.sxangxoj,
           stato: statoOf(name, draft),
+          zaehlilo: zaehliloOf(name),
         },
       };
     } catch (error) {
+      if (error instanceof DayLimitReached)
+        return { status: 429, body: { satz: dayLimitSatz(error) } };
       const satz =
         error instanceof CostLimitReached
           ? `Die Kostengrenze dieser Runde ist erreicht (${error.limit} Tokens). Formuliere den Wunsch kürzer oder in mehreren Schritten.`
@@ -604,6 +668,9 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       return { status: 502, body: { satz } };
     }
   };
+
+  const dayLimitSatz = (error: DayLimitReached): string =>
+    `Tageslimit von ${error.provider} erreicht (${error.limit} Anfragen am UTC-Tag). Morgen geht es weiter; bis dahin wirken Studio und Regler ohne Sprachmodell.`;
 
   const kiSatz = (): string =>
     options.ki?.satz ??
@@ -1129,7 +1196,15 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       }
       sendHtml(
         response,
-        kreiloScreen({ name, label: draft.agordo.etikedoj?.marko ?? name, rev: draft.rev }),
+        kreiloScreen({
+          name,
+          label: draft.agordo.etikedoj?.marko ?? name,
+          rev: draft.rev,
+          takso: (() => {
+            const taksoj = taksojOf();
+            return { vojo: taksoj.vojoj.A.satz, kreilo: taksoj.zugoj.kreilo.satz };
+          })(),
+        }),
       );
       return;
     }
@@ -1171,7 +1246,16 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
               ? { pret: false, satz: kiSatz() }
               : { pret: true, modelo: provider.toString() },
           ...(fremda === undefined ? {} : { fremda }),
-          sumo: sumoj.get(name) ?? { enigo: 0, eligo: 0, ms: 0 },
+          zaehlilo: zaehliloOf(name).satz,
+          takso: (() => {
+            const taksoj = taksojOf();
+            return {
+              babilo: taksoj.zugoj.babilo.satz,
+              parolo: taksoj.zugoj.parolo.satz,
+              esploro: taksoj.zugoj.esploro.satz,
+              materialo: taksoj.zugoj.materialo.satz,
+            };
+          })(),
           parolo: options.parolo?.provider?.toString(),
           ...(() => {
             const propono = readProponoj(options.workdir, name).find(
@@ -1184,7 +1268,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       return;
     }
     const asistantoApi =
-      /^\/api\/marko\/([a-z0-9-]+)\/(stato|asistanto|faceto|fremda|konfirmo|materialo|kreilo|esplori|parolo)$/.exec(
+      /^\/api\/marko\/([a-z0-9-]+)\/(stato|takso|asistanto|faceto|fremda|konfirmo|materialo|kreilo|esplori|parolo)$/.exec(
         path,
       );
     if (asistantoApi !== null) {
@@ -1204,7 +1288,13 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           facetoj: stato.facetoj,
           nochNicht: stato.nochNicht,
           ...(fremda === undefined ? {} : { fremda }),
+          zaehlilo: zaehliloOf(name),
         });
+        return;
+      }
+      if (action === "takso" && method === "GET") {
+        // Spec 033 S6: the estimate before the start, per path and turn, and the counter so far.
+        sendJson(response, { ...taksojOf(), zaehlilo: zaehliloOf(name) });
         return;
       }
       if (method !== "POST") {
@@ -1371,6 +1461,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
             ...(options.ki?.fetch === undefined ? {} : { fetch: options.ki.fetch }),
             ...(options.esploro?.fetch === undefined ? {} : { pageFetch: options.esploro.fetch }),
             ...(options.ki?.sleep === undefined ? {} : { sleep: options.ki.sleep }),
+            ...gated,
             budget: new Budget(options.ki?.limo ?? 60_000),
             bases,
             log: (line) => io.stderr(`${redact(line)}\n`),
@@ -1392,6 +1483,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
             ...(provider === undefined ? {} : { modelo: provider.toString() }),
             kosto: result.kosto,
             detaloj: {
+              vojo: "C",
               antwort: result.antwort,
               seitoj: result.seitoj,
               abgelehnt: result.abgelehnt,
@@ -1403,8 +1495,13 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
             abgelehnt: result.abgelehnt,
             antwort: result.antwort,
             kosto: result.kosto,
+            zaehlilo: zaehliloOf(name),
           });
         } catch (error) {
+          if (error instanceof DayLimitReached) {
+            sendJson(response, { satz: dayLimitSatz(error) }, 429);
+            return;
+          }
           sendJson(
             response,
             { satz: redact(error instanceof Error ? error.message : String(error)) },
@@ -1510,6 +1607,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
               budget: new Budget(options.ki?.limo ?? 60_000),
               ...(options.ki?.fetch === undefined ? {} : { fetch: options.ki.fetch }),
               ...(options.ki?.sleep === undefined ? {} : { sleep: options.ki.sleep }),
+              ...gated,
               log: (line) => io.stderr(`${redact(line)}\n`),
             });
             kroniko(name, {
@@ -1519,7 +1617,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
               teksto: "Leitfarbe zur Beschreibung (Einstiegsfragen)",
               modelo: provider.toString(),
               kosto: turn.kosto,
-              detaloj: { antwort: turn.antwort, iloj: turn.iloj },
+              detaloj: { vojo: "A", antwort: turn.antwort, iloj: turn.iloj, atendoj: turn.atendoj },
             });
             babiloj.set(name, [
               ...(babiloj.get(name) ?? []),

@@ -1,0 +1,60 @@
+{
+  "kialo": "Startwerte der Schätzung von Zeit und Kosten (Spec 033 S6): gemessene Züge der Probeläufe von S1 bis S5, je Zug der Median von Anfragen, Tokens (ein, aus) und Dauer in ms. Sie gelten, bis die Kroniko der Marken eigene Züge des Modells hat; für ein anderes Modell skaliert das Tempo aus den Läufen der Nordstern-Kennzahl die Dauer. Ein Weg ist die Summe seiner Züge und der lokalen Zeit (Kreilo, Freigaben, Export, Projektionen).",
+  "modelo": "mistral/ministral-14b-2512",
+  "dato": "2026-10-29",
+  "zugoj": {
+    "babilo": {
+      "requests": 3,
+      "enigo": 3879,
+      "eligo": 75,
+      "ms": 5848,
+      "fonto": "Median von 5 Chat-Zügen: Probelauf S1 (3 Wünsche) und Abnahme 1 in S3 (2 Wünsche), 29.10.2026"
+    },
+    "kreilo": {
+      "requests": 2,
+      "enigo": 2698,
+      "eligo": 90,
+      "ms": 5414,
+      "fonto": "Der Zug „Leitfarbe wärmer“ aus dem Probelauf S1 (dasselbe Werkzeug setze_farbe); der Kreilo ruft das Modell nur ohne festgelegte Farbe und ohne Inspiration"
+    },
+    "parolo": {
+      "requests": 3,
+      "enigo": 3216,
+      "eligo": 70,
+      "ms": 4700,
+      "sekundoj": 3,
+      "fonto": "Mittel der 2 gesprochenen Züge aus Abnahme 4 in S5 (Chat und Voxtral, 449 ms für 1 s Audio); ein Wunsch mit 3 s Audio angenommen"
+    },
+    "esploro": {
+      "requests": 3,
+      "enigo": 1397,
+      "eligo": 124,
+      "ms": 5564,
+      "fonto": "Abnahme 3 in S4: Recherche zu einer genannten Marke, 2 Seiten gelesen"
+    },
+    "materialo": {
+      "requests": 0,
+      "enigo": 0,
+      "eligo": 0,
+      "ms": 71,
+      "fonto": "Probelauf S2: ein Screenshot (85 ms) und eine URL (57 ms), gelesen ohne Sprachmodell"
+    }
+  },
+  "vojoj": {
+    "A": {
+      "zugoj": { "babilo": 2 },
+      "lokaMs": 28000,
+      "fonto": "Abnahme 1 in S3 und Abnahme 5 in S6: je zwei Wünsche im Chat; lokal (Kreilo, zwölf Freigaben, Export, Projektionen) 16,0 s und 40,2 s, Mittel 28 s"
+    },
+    "B": {
+      "zugoj": { "materialo": 2 },
+      "lokaMs": 0,
+      "fonto": "Abnahme 2 in S2: ein Screenshot und eine URL"
+    },
+    "C": {
+      "zugoj": { "esploro": 1 },
+      "lokaMs": 0,
+      "fonto": "Abnahme 3 in S4: eine genannte Marke"
+    }
+  }
+}

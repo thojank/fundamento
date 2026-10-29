@@ -1,0 +1,25 @@
+{
+  "kialo": "Preise der Sprachmodelle, die der Markenassistent nutzen darf, in US-Dollar: Tokens je Million (Eingabe, Ausgabe), Sprache je Minute. Jeder Preis hat das Datum, an dem er auf der Seite des Anbieters gelesen wurde, und diese Seite. Ein Modell ohne Eintrag hat keinen Preis: Zähler und Schätzung sagen dann „Kosten unbekannt“, statt es als kostenlos zu zählen.",
+  "modeloj": [
+    {
+      "modelo": "mistral/ministral-14b-2512",
+      "enigo": 0.2,
+      "eligo": 0.2,
+      "dato": "2026-10-29",
+      "fonto": "https://docs.mistral.ai/inference/pricing"
+    },
+    {
+      "modelo": "mistral/voxtral-mini-transcribe-3-0",
+      "minuto": 0.0035,
+      "dato": "2026-10-29",
+      "fonto": "https://docs.mistral.ai/inference/pricing"
+    },
+    {
+      "modelo": "openrouter/*:free",
+      "enigo": 0,
+      "eligo": 0,
+      "dato": "2026-10-29",
+      "fonto": "https://openrouter.ai/docs/api-reference/limits"
+    }
+  ]
+}

@@ -7,7 +7,13 @@ import { KONFIRMO_TEKSTO } from "../asistanto/averto.js";
 import { escapeHtml, jsonIsland, screenDocument } from "../html.js";
 import { KREILO } from "./kreilo.js";
 
-export function kreiloScreen(input: { name: string; label: string; rev: number }): string {
+export function kreiloScreen(input: {
+  name: string;
+  label: string;
+  rev: number;
+  /** Spec 033 S6: the estimate of Weg A and of the turn that chooses the lead colour. */
+  takso?: { vojo: string; kreilo: string };
+}): string {
   const name = input.name;
   const sliders = KREILO.paroj
     .map(
@@ -33,6 +39,11 @@ ${sliders}
 <fm-titolo level="2">Inspiration</fm-titolo>
 <fm-alsxutilo name="inspiro" accept=".png,.svg,.pdf" multiple data-mt-kreilo-inspiro>Bilder, die die Stimmung zeigen</fm-alsxutilo>
 <fm-markobutono name="rajtoj-inspiro" value="ja" data-mt-kreilo-rajtoj>${escapeHtml(KONFIRMO_TEKSTO)}</fm-markobutono>
+${
+  input.takso === undefined
+    ? ""
+    : `<fm-teksto kind="caption" data-mt-takso-vojo>Schätzung für den Weg bis 100 % (mit zwei Wünschen im Chat) ${escapeHtml(input.takso.vojo)}</fm-teksto><fm-teksto kind="caption" data-mt-takso-kreilo>Ohne festgelegte Farbe und ohne Inspiration wählt das Modell die Leitfarbe, dazu ${escapeHtml(input.takso.kreilo)}</fm-teksto>`
+}
 <fm-butono emphasis="high" data-mt-kreilo-sendi>Vorschlag machen</fm-butono>
 </section>
 </fm-pagxo>

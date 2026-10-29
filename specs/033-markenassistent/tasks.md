@@ -128,3 +128,28 @@
 | Commits | rot `122e50e`, grün im Folgecommit (Hash im PR) |
 | Grün gemessen | Metiejo 31 Dateien / 276 Tests; Lint sauber |
 | Probelauf | Transkript richtig, Voxtral 436–462 ms für 1 s Audio; Chat 2 558 und 4 013 Tokens, 4,7 s und 10,6 s, zusammen ≈ 0,0013 $ |
+
+## S6 – Schätzung und Zähler
+
+**Branch:** `261029-spec-033-s6-schaetzung` (auf S5).
+
+### A – Rot zuerst
+- [x] **T3351 Tests:** Metiejo `src/takso/takso.test.ts` (Preise mit Datum und Quelle, `:free`, ohne Preis; Zähler aus der Kroniko mit Transkription; Züge unterscheiden; Nordstern-Tempo; Startwerte, Weg A innerhalb ±50 % von Abnahme 1, Skalierung, Protokoll-Median, Satz) und `servilo-takso.test.ts` (Route `takso`, Anzeige vor dem Start, Zähler über Neustart, Kreilo als Weg A, Hinweis nach 429, `LIMOJ`/`Pordisto` in der Metiejo, Tageslimit über Neustart); Doku-Test S6. Rot in `d4b5464`.
+
+### B – Grün
+- [x] **T3352 Daten:** `data/prezoj.json` (Preise von Mistral, geprüft am 29.10.), `data/takso.json` (Startwerte je Zug und Weg mit Quelle).
+- [x] **T3353 Schätzung und Zähler:** `src/takso/prezoj.ts`, `src/takso/takso.ts` (D-19, D-20).
+- [x] **T3354 Grenzen:** `limoj.ts` in die Metiejo, Re-Export in der Nordstelo; Torwächter im Server mit `marken/.anfragoj.json`, Tageslimit → 429 mit Satz; `start.ts` gibt `LIMOJ` des Anbieters mit (D-21).
+- [x] **T3355 Server und Bildschirm:** Route `takso`, `zaehlilo` in Status und Antworten, Schätzungen auf Einstiegsfragen, Material, Recherche und Chat; `vojo` A/C in der Kroniko; Client: Zähler und Meldung nach 429.
+- [x] **T3356 Abnahme 5** (plan): Schätzung vor dem Start gegen den gemessenen Weg A; danach lokale Zeit der Startwerte als Mittel beider Läufe.
+
+### C – Abschluss
+- [x] **T3357 Doku:** plan S6, tasks, Vojmapo.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits | rot `d4b5464`, grün im Folgecommit (Hash im PR) |
+| Grün gemessen | Metiejo 33 Dateien / 295 Tests; Nordstelo 7 / 58; Lint sauber |
+| Abnahme 5 | Schätzung / gemessen: Dauer 0,54, Tokens 1,11, Kosten 1,11 (alle im Bereich ±50 %); 7 098 Tokens, 5 Anfragen, 51,2 s, ≈ 0,0014 $ |

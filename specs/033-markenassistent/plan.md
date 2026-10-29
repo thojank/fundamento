@@ -481,3 +481,104 @@ pnpm fm metiejo --open
 cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
 pnpm --filter @fundamento/metiejo exec vitest run src/parolo src/asistanto
 ```
+
+## S6 – Schätzung und Zähler für Zeit und Kosten
+
+**Branch:** `261029-spec-033-s6-schaetzung` (auf S5) · **Datum:** 2026-10-29 · **Stand:** gebaut, Abnahme 5 gemessen.
+
+### Zusammenfassung
+
+1. **Preise als Daten** (`packages/metiejo/data/prezoj.json`). Jeder Preis hat das Datum, an dem er gelesen wurde, und die Seite. Gelesen am 2026-10-29 auf [docs.mistral.ai/inference/pricing](https://docs.mistral.ai/inference/pricing):
+   - `mistral/ministral-14b-2512`: 0,20 $ je Mio. Tokens Ein- und Ausgabe. Damit ist B-3 geprüft.
+   - `mistral/voxtral-mini-transcribe-3-0`: 0,0035 $ je Minute. Damit ist B-12 geprüft.
+   - `openrouter/*:free`: 0 $.
+
+   Ein Modell ohne Eintrag hat keinen Preis. Zähler und Schätzung sagen dann „Kosten unbekannt (kein Preis für …)“ und zählen es nicht als kostenlos.
+2. **Schätzung vor dem Start, je Weg und Modell** (`packages/metiejo/src/takso/takso.ts`). Sie nennt Dauer, Tokens und Kosten in $ und stützt sich auf gemessene Durchschnitte, in dieser Reihenfolge:
+   1. **Protokoll:** der Median der Züge dieser Art mit diesem Modell aus der Kroniko aller Marken, sobald es welche gibt;
+   2. **Nordstern:** Für ein anderes Modell skaliert das Tempo aus den Läufen der Nordstern-Kennzahl (`.fundamento/nordstelo/<lauf>/`, ms je Anfrage) die Dauer der Startwerte. Die Tokens folgen den Prompts des Assistenten, nicht dem Modell;
+   3. **Startwerte** aus den Probeläufen S1 bis S5 (`packages/metiejo/data/takso.json`), je Zug mit Quelle.
+
+   Ein Weg ist die Summe seiner Züge und der lokalen Zeit: Weg A sind zwei Chat-Züge plus Kreilo, Freigaben, Export und Projektionen; Weg B sind zwei Materialien ohne Modell; Weg C ist eine Recherche. Den Zug, in dem das Modell die Leitfarbe wählt (nur ohne festgelegte Farbe und ohne Inspiration), nennt die Schätzung getrennt.
+3. **Wo die Schätzung steht:** `GET /api/marko/<marke>/takso`.
+   - Auf den Einstiegsfragen (Weg A und der Zug, in dem das Modell die Leitfarbe wählt).
+   - Beim Material (je Datei).
+   - Bei der Recherche.
+   - Im Chat („Schätzung je Wunsch“ und, mit Voxtral, gesprochen).
+4. **Zähler während der Arbeit:** Der Zähler summiert die Kroniko der Marke: Tokens, Kosten in $, die Zeit des Sprachmodells (mit Transkription), Anfragen und Wartezeiten nach 429.
+   - Er steht im Assistenten neben dem Modell und kommt mit jeder Antwort neu.
+   - Er bleibt über einen Neustart des Servers erhalten; S1 hatte nur eine Summe im Speicher.
+5. **Grenzen der Anbieter:** Der Torwächter der Nordstelo (`Pordisto`, `LIMOJ`) liegt jetzt in der Metiejo (`src/asistanto/limoj.ts`); die Nordstelo exportiert ihn weiter, wie `ki.ts` seit S1.
+   - `pnpm fm metiejo` gibt die Grenzen des Anbieters aus der `.env` mit: Mistral 0,5 Anfragen je Sekunde, OpenRouter 1 000 je UTC-Tag.
+   - Die Anfragen des Tages stehen in `marken/.anfragoj.json`.
+   - Am Tageslimit hält der Zug mit einem Satz an (429).
+   - Nach einer 429-Antwort wartet der Assistent wie bisher; neu ist die Meldung „Der Anbieter hat gebremst (429): N× gewartet“.
+   - Kreilo- und Recherche-Zug tragen in der Kroniko `vojo` A bzw. C.
+
+### Entwurfsentscheidungen
+
+#### D-19 Tokens aus unseren Prompts, Zeit aus dem Modell
+Wie viele Tokens ein Zug braucht, hängt vor allem an Systemtext, Werkzeugen und Verlauf des Assistenten; das messen die Probeläufe und später die Kroniko. Die Nordstern-Läufe haben ganz andere Prompts (Gvidanto, Seiten bauen), taugen also nicht für Tokens, wohl aber für das Verhältnis der Geschwindigkeit zweier Modelle (ministral 8,3 s, gpt-4.1-mini 2,1 s, nemotron `:free` 19,1 s je Anfrage).
+
+#### D-20 Der Zähler liest die Kroniko
+Die Kroniko hält jeden Zug mit Modell und Kosten fest. Liest der Zähler sie, stimmen Zähler und Protokoll immer überein, auch nach einem Neustart und für Züge aus Kreilo, Recherche und Sprache.
+
+#### D-21 Grenzen nur, wenn sie gesetzt sind
+Der Server bekommt `ki.limoj` von `start.ts`. Tests ohne Grenzen laufen ohne Wartezeit; der Probelauf und `pnpm fm metiejo` laufen mit den Grenzen des Anbieters.
+
+### Probeläufe
+
+**Abnahme 5** am 2026-10-29 mit `mistral/ministral-14b-2512`, Kostengrenze 30 000 Tokens je Zug, Grenze 0,5 Anfragen je Sekunde, Wegwerf-Marke in einem temporären Ordner. Der Ablauf ist derselbe wie in Abnahme 1: fünf Sätze, zwei synthetische Inspirationsbilder, zwei Wünsche, zwölf Freigaben, Export und Projektionen. Die Schätzung wurde vor dem Start vom Server geholt.
+
+| | Schätzung vor dem Start | gemessen | Verhältnis |
+|---|---|---|---|
+| **Dauer** | 27,7 s | 51,2 s (Modell 11 s, lokal 40,2 s) | **0,54** |
+| **Tokens** | 7 908 (7 758 + 150) | 7 098 (6 936 + 162) | **1,11** |
+| Anfragen | 6 | 5 | 1,2 |
+| **Kosten** | 0,0016 $ | 0,0014 $ | **1,11** |
+| Grundlage | Probeläufe vom 29.10.2026 | Zähler: „bisher 7 098 Tokens · 0,0014 $ · 11 s · 5 Anfragen“ | |
+
+**Alle drei liegen im Bereich ±50 %.** Die Dauer liegt knapp darin. Die Modellzeit traf gut (11,7 s geschätzt, 11 s gemessen). Daneben lag die lokale Zeit: 40,2 s statt 16,0 s in Abnahme 1, vor allem Export und `fm projekcioj build` auf einem ausgelasteten Rechner (B-13).
+
+Nach der Messung nehmen die Startwerte für die lokale Zeit das Mittel beider Läufe, 28 s. Weg A wird damit auf 39,7 s geschätzt, das liegt bei 1,10 von Abnahme 1 und 0,78 von Abnahme 5. Mit der Grenze von 0,5 Anfragen je Sekunde gab es keine 429; in Abnahme 1 waren es ohne die Grenze 2.
+
+Zum Vergleich hat der Server, ohne Lauf, Weg A für `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` geschätzt: ≈ 43 s, ≈ 7 900 Tokens, 0 $, Tempo aus den Nordstern-Läufen. Gemessen ist das nicht.
+
+Kein Schlüssel stand in Kroniko oder Log. Kosten der Probeläufe dieser Stufe: 7 098 Tokens ≈ 0,0014 $.
+
+### Abweichungen
+
+1. **Lokale Zeit nur aus Probeläufen:** Die Spec nennt als spätere Grundlage das Protokoll. Für die Züge des Modells gilt das, die lokale Zeit eines Wegs (Freigaben, Export, Projektionen) steht aber nicht in der Kroniko und bleibt ein Startwert (B-13).
+2. **Zeit im Zähler ist die des Sprachmodells** mit Transkription, nicht die Zeit, die die Person im Assistenten verbringt.
+
+### Befunde / Mankoj
+
+- **B-3 und B-12 geprüft:** Beide Preise stehen auf der Preisseite von Mistral (siehe oben).
+- **B-13 Lokale Zeit streut:** 16,0 s und 40,2 s für denselben Ablauf. Die Schätzung der Dauer von Weg A hängt deshalb mehr am Rechner als am Modell. Vorschlag: Der Export hält seine Dauer in der Kroniko fest, dann kann auch die lokale Zeit aus dem Protokoll kommen.
+
+### Offen (für den Maintainer)
+
+- **O-9 Weitere Preise:** `prezoj.json` kennt nur die Modelle, die die Probeläufe nutzen. Für `openai/gpt-4.1-mini` oder `mistral/mistral-large-latest` (in der `.env`) nennt der Zähler „Kosten unbekannt“, bis ein Preis mit Datum und Seite eingetragen ist.
+
+### Messanleitung
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm install && pnpm build
+pnpm fm metiejo --open
+```
+
+1. Eine Marke anlegen und `http://localhost:7301/asistanto/<marke>/komenco` öffnen. Über „Vorschlag machen“ stehen die Schätzung für Weg A und für den Zug, in dem das Modell die Leitfarbe wählt, jeweils mit Dauer, Tokens, $ und Grundlage.
+2. `http://localhost:7301/asistanto/<marke>/gvidkoloro`: Neben dem Modell steht der Zähler („bisher … Tokens · … $ · … s · … Anfragen“). Unter dem Chat steht „Schätzung je Wunsch ≈ …“, bei Material und Recherche die eigene Schätzung.
+3. Einen Wunsch schreiben. Der Zähler wächst mit der Antwort. Nach einem Neustart von `pnpm fm metiejo` steht derselbe Stand da.
+4. Die Schätzung als Daten: `http://localhost:7301/api/marko/<marke>/takso`.
+5. Preise und Startwerte: `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/packages/metiejo/data/prezoj.json` und `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/packages/metiejo/data/takso.json`.
+6. Die Anfragen des Tages: `file:///Users/thorstenjankowski/Fundamento/marken/.anfragoj.json`.
+
+**Tests:**
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm --filter @fundamento/metiejo exec vitest run src/takso
+pnpm --filter @fundamento/nordstelo exec vitest run
+```

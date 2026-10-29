@@ -97,6 +97,8 @@ export interface EsploroOptions {
   bases: Bases;
   maxSeitoj?: number;
   sleep?: (ms: number) => Promise<void>;
+  /** The gate of the provider's limits (Spec 033 S6). */
+  gate?: { pass(): Promise<void> };
   log?: (line: string) => void;
 }
 
@@ -180,6 +182,7 @@ export async function esplori(options: EsploroOptions): Promise<EsploroRezulto> 
         {
           ...(options.fetch === undefined ? {} : { fetch: options.fetch }),
           ...(options.sleep === undefined ? {} : { sleep: options.sleep }),
+          ...(options.gate === undefined ? {} : { gate: options.gate }),
           ...(options.log === undefined ? {} : { log: options.log }),
         },
       );
