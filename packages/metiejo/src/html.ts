@@ -532,6 +532,64 @@ if (asistantoData && marko) {
     meldung(result.body.antwort || "");
     location.reload();
   });
+  // Spec 033 S5: speech – recorded and transcribed by Voxtral on the server, else the browser's own
+  // recognition; answers read aloud when the switch is on.
+  const speak = document.querySelector("[data-mt-parolo]");
+  const vorlesen = document.querySelector("[data-mt-vorlesen]");
+  const readAloud = (text) => {
+    if (!vorlesen || !vorlesen.hasAttribute("checked") || !("speechSynthesis" in window)) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "de-DE";
+    speechSynthesis.speak(utterance);
+  };
+  const shown = async (result, said) => {
+    if (!result.ok) { meldung(result.body.satz || "Der Assistent hat nicht geantwortet."); return; }
+    karto("user", said || result.body.teksto || "");
+    karto("assistant", result.body.antwort || "");
+    readAloud(result.body.antwort || "");
+    rev = result.body.rev;
+    refreshFrame();
+    zeigeStato(result.body.stato);
+  };
+  let recorder;
+  if (speak) speak.addEventListener("click", async () => {
+    if (speak.getAttribute("data-mt-parolo-voxtral") === "ja" && navigator.mediaDevices && window.MediaRecorder) {
+      if (recorder && recorder.state === "recording") { recorder.stop(); return; }
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const chunks = [];
+      recorder = new MediaRecorder(stream);
+      recorder.addEventListener("dataavailable", (event) => chunks.push(event.data));
+      recorder.addEventListener("stop", async () => {
+        stream.getTracks().forEach((track) => track.stop());
+        speak.textContent = "Sprechen";
+        const blob = new Blob(chunks, { type: recorder.mimeType || "audio/webm" });
+        const bytes = new Uint8Array(await blob.arrayBuffer());
+        let binary = "";
+        for (let index = 0; index < bytes.length; index += 0x8000) binary += String.fromCharCode(...bytes.subarray(index, index + 0x8000));
+        meldung("Ich höre zu …");
+        sending = true;
+        const result = await post("parolo", { audio: btoa(binary), mime: blob.type, faceto: asistantoData.faceto });
+        sending = false;
+        meldung("");
+        await shown(result);
+      });
+      recorder.start();
+      speak.textContent = "Aufnahme beenden";
+      return;
+    }
+    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Recognition) { meldung("Dieser Browser erkennt keine Sprache. Schreib deinen Wunsch oder setze MISTRAL_API_KEY für Voxtral."); return; }
+    const recognition = new Recognition();
+    recognition.lang = "de-DE";
+    recognition.addEventListener("result", async (event) => {
+      const said = event.results[0][0].transcript;
+      sending = true;
+      const result = await post("asistanto", { teksto: said, faceto: asistantoData.faceto, fonto: "parolo" });
+      sending = false;
+      await shown(result, said);
+    });
+    recognition.start();
+  });
   const konfirmi = document.querySelector("[data-mt-konfirmi]");
   if (konfirmi) konfirmi.addEventListener("click", async () => {
     const rajtoj = document.querySelector("[data-mt-rajtoj]");

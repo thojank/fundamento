@@ -16,10 +16,22 @@ describe("transcription over Voxtral (Spec 033 S5)", () => {
   it("sends the audio as multipart with the model to /audio/transcriptions and returns the text", async () => {
     const seen: { url: string; authorization: string; form: FormData }[] = [];
     const fetch = async (url: string, init: RequestInit) => {
-      seen.push({ url, authorization: (init.headers as Record<string, string>).authorization ?? "", form: init.body as FormData });
-      return new Response(JSON.stringify({ text: " runder bitte ", usage: { prompt_audio_seconds: 2 } }), { status: 200 });
+      seen.push({
+        url,
+        authorization: (init.headers as Record<string, string>).authorization ?? "",
+        form: init.body as FormData,
+      });
+      return new Response(
+        JSON.stringify({ text: " runder bitte ", usage: { prompt_audio_seconds: 2 } }),
+        { status: 200 },
+      );
     };
-    const result = await transkribi(new Provider("mistral", PAROLO_MODELO, KEY), Buffer.from("RIFFfake"), "audio/wav", { fetch });
+    const result = await transkribi(
+      new Provider("mistral", PAROLO_MODELO, KEY),
+      Buffer.from("RIFFfake"),
+      "audio/wav",
+      { fetch },
+    );
     expect(result.teksto).toBe("runder bitte");
     expect(result.sekundoj).toBe(2);
     expect(seen[0]?.url).toBe("https://api.mistral.ai/v1/audio/transcriptions");
@@ -30,9 +42,12 @@ describe("transcription over Voxtral (Spec 033 S5)", () => {
 
   it("an error of the provider never carries the key", async () => {
     const fetch = async () => new Response(`bad key ${KEY}`, { status: 401 });
-    const error = await transkribi(new Provider("mistral", PAROLO_MODELO, KEY), Buffer.from("x"), "audio/wav", { fetch }).catch(
-      (caught: unknown) => caught,
-    );
+    const error = await transkribi(
+      new Provider("mistral", PAROLO_MODELO, KEY),
+      Buffer.from("x"),
+      "audio/wav",
+      { fetch },
+    ).catch((caught: unknown) => caught);
     expect(String(error)).toContain("401");
     expect(String(error)).not.toContain(KEY);
   });

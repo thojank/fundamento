@@ -4053,7 +4053,15 @@ describe("Spec 033 documentation (specs/033-markenassistent)", () => {
   it("S5 (Sprache): the plan names Voxtral with its exact model, the browser fallback and the trial run", () => {
     const plan = read("specs/033-markenassistent/plan.md");
     const s5 = plan.slice(plan.indexOf("## S5"));
-    for (const term of ["voxtral-mini-transcribe-3-0", "Web Speech API", "parolo", "Tokens", "Kosten", "Dauer", "### Messanleitung"]) {
+    for (const term of [
+      "voxtral-mini-transcribe-3-0",
+      "Web Speech API",
+      "parolo",
+      "Tokens",
+      "Kosten",
+      "Dauer",
+      "### Messanleitung",
+    ]) {
       expect(s5, term).toContain(term);
     }
     expect(read("specs/033-markenassistent/tasks.md")).toContain("## S5");

@@ -103,3 +103,28 @@
 | Commits | rot `680a46a`, grün im Folgecommit (Hash im PR) |
 | Grün gemessen | Metiejo 29 Dateien / 267 Tests; Lint sauber |
 | Probelauf | 2 Seiten, 6 Vorschläge, 1 521 Tokens, 3 Anfragen, 5,6 s, ≈ 0,0003 $ |
+
+## S5 – Sprache
+
+**Branch:** `261029-spec-033-s5-sprache` (auf S4).
+
+### A – Rot zuerst
+- [x] **T3341 Tests:** Metiejo `src/parolo/parolo.test.ts` (multipart an `/audio/transcriptions`, genauer Modellname, Schlüssel nur im Header, Fehler geschwärzt) und `servilo-parolo.test.ts` (Aufnahme → Chat-Zug mit Quelle `parolo`, Transkription in der Kroniko, ohne Voxtral Satz mit Browser, Knöpfe im Assistenten); Doku-Test S5. Rot in `122e50e`. Danach hat biome die Tests nur umformatiert.
+- [x] **T3342 Tests B-11:** `babilo.test.ts`: Eine behauptete Änderung ohne Werkzeug bekommt eine Erinnerung; bleibt sie, beginnt die Antwort mit „Es wurde nichts geändert.“ (auch im Passiv und mit Dezimalpunkt). Rot vor dem Fix.
+
+### B – Grün
+- [x] **T3343 Transkription:** `parolo.ts` (D-17), `paroloOf`/`readParolo` in `env.ts`, `start.ts`.
+- [x] **T3344 Server und Bildschirm:** `chatTurn` herausgezogen (D-16), Route `parolo`, „Sprechen“, „Antworten vorlesen“, Client-Skript mit MediaRecorder, Web Speech API und speechSynthesis.
+- [x] **T3345 Ehrliche Antwort:** Regel 6 und Erinnerung in `babilo.ts` (D-18).
+- [x] **T3346 Probelauf Abnahme 4** (plan): zwei Läufe, vor und nach B-11.
+
+### C – Abschluss
+- [x] **T3347 Doku:** plan S5, tasks, Vojmapo.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits | rot `122e50e`, grün im Folgecommit (Hash im PR) |
+| Grün gemessen | Metiejo 31 Dateien / 276 Tests; Lint sauber |
+| Probelauf | Transkript richtig, Voxtral 436–462 ms für 1 s Audio; Chat 2 558 und 4 013 Tokens, 4,7 s und 10,6 s, zusammen ≈ 0,0013 $ |
