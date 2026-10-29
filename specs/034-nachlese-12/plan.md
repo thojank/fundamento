@@ -133,9 +133,33 @@ Gemessen ist damit:
 
 Die beiden roten (55 und 54 ms) hatten eine Ableitung von 138,9 und 136,5 ms; der rote Versuch aus #114 (56 ms, später neu gestartet) 143,5 ms. Die übrigen Werte des Briefings (51, 65 ms) stammen aus überschriebenen Versuchen, deren Logs GitHub nicht mehr liefert.
 
-**Nachher:**
-- Lokal: Skripte 0 ms, Perzentil 0 ms; Gegenprobe Skripte 81 ms, Perzentil 100 ms.
-- CI: siehe PR (mindestens zehn Läufe, nach Runner-Klasse).
+**Nachher** (11 CI-Versuche des Werkstatt-Jobs auf `87fc1c6`: der erste Lauf von #116 und zehn Wiederholungen dieses Jobs):
+
+| Versuch | Runner (Ableitung) | längste Blockade wie bisher gemessen | Long Tasks | neues Urteil: Skripte | neues Urteil: p90 je Änderung | Urteil alt / neu |
+|---|---|---|---|---|---|---|
+| 0 | langsam (149,2 ms) | 0 ms | 0 | 0 ms | 0 ms | grün / grün |
+| 1 | mittel (113,2 ms) | 0 ms | 0 | 0 ms | 0 ms | grün / grün |
+| 2 | langsam (143,1 ms) | **74 ms** | 3 | 0 ms | 0 ms | **rot** / grün |
+| 3 | schnell (99,7 ms) | 0 ms | 0 | 0 ms | 0 ms | grün / grün |
+| 4 | langsam (139,8 ms) | **52 ms** | 3 | 0 ms | 0 ms | **rot** / grün |
+| 5 | langsam (137,2 ms) | **52 ms** | 1 | 0 ms | 0 ms | **rot** / grün |
+| 6 | schnell (101,3 ms) | 0 ms | 0 | 0 ms | 0 ms | grün / grün |
+| 7 | langsam (139,9 ms) | **53 ms** | 1 | 0 ms | 0 ms | **rot** / grün |
+| 8 | langsam (140,0 ms) | **56 ms** | 2 | 0 ms | 0 ms | **rot** / grün |
+| 9 | langsam (141,1 ms) | 0 ms | 0 | 0 ms | 0 ms | grün / grün |
+| 10 | schnell (100,8 ms) | 0 ms | 0 | 0 ms | 0 ms | grün / grün |
+
+Zusammengefasst nach Runner:
+
+| Runner | vorher: Läufe | vorher: rot | nachher: Versuche | nachher mit dem alten Urteil rot | nachher: rot | Gegenprobe 1 (Skript 80 ms) |
+|---|---|---|---|---|---|---|
+| schnell | 23 | 0 | 3 | 0 | 0 | rot in 3 von 3 |
+| mittel | 20 | 0 | 1 | 0 | 0 | rot in 1 von 1 |
+| langsam | 38 | 2 | 7 | 5 | 0 | rot in 7 von 7 |
+
+- Auf langsamen Runnern wäre M5 mit dem alten Urteil in 5 von 7 Versuchen rot gewesen (52–74 ms). Mit dem neuen ist es grün, weil die Skripte 0 ms und das 90. Perzentil 0 ms sind: Die Blockaden betreffen 1–3 von 50 Änderungen.
+- Die Gegenprobe 1 war in allen 11 Versuchen rot: Skripte 82–96 ms, Perzentil 112–126 ms.
+- Die Gegenprobe 2 (Stil und Layout) kam erst mit `2050f62` dazu; lokal rot (Skripte 5–9 ms, Perzentil 196–207 ms). Ihre CI-Werte folgen aus dem Lauf von `2050f62` (B-5).
 
 ### Größe der Vitrino
 
@@ -146,7 +170,16 @@ Die beiden roten (55 und 54 ms) hatten eine Ableitung von 138,9 und 136,5 ms; de
 | alle vier Marken | 29,15 MB | 10,64 MB | 2,18 → 1,16 MB |
 
 - **Pixelvergleich** des Abschnitts Kontrast, `main` gegen Branch: komuna und ekzemplo × hell/dunkel × Kontrast normal/hoch × Dichte normal/kompakt, 16 von 16 Abschnitten byte-gleich (PNG).
-- **Dauer der Vitrino-Jobs in der CI:** siehe PR.
+- **Dauer der Vitrino-Jobs in der CI** (erfolgreiche Jobs, Median):
+
+  | Job | vorher | nachher |
+  |---|---|---|
+  | Rendered checks (Vitrino), axe und Abschnitte ohne Werkstatt | 9,6 min (10 Läufe) | 9,1 min (1 Lauf; weitere folgen, B-5) |
+  | Rendered checks (Make Kit, Quickstart, Vitrino-Werkstatt) | 7,4 min (9 Läufe) | 9,1 min (11 Versuche, davon 7 auf langsamen Runnern) |
+  | vor der Teilung (Spec 029 ①b), ein Job | 10,6 min (67 Läufe) | – |
+
+  - Der Werkstatt-Job ist nachher länger. Die erste Gegenprobe kostet 17–27 s, und 7 der 11 Versuche liefen auf langsamen Runnern.
+  - Vorher sind es Läufe mit gemischten Runnern. Eine Aussage über die Wirkung der kleineren Vitrino auf den axe-Job braucht mehr Läufe (B-5).
 
 ### Abweichungen
 
@@ -170,6 +203,9 @@ Die beiden roten (55 und 54 ms) hatten eine Ableitung von 138,9 und 136,5 ms; de
   - Jetzt hängt der Agent seinen Aufwand an den Fehler (`effort`), und der Lauf nimmt diesen.
   - Die Kennzahl ist nicht berührt, nur Tokens und Anfragen.
   - Die Läufe der Reihe O mit dem Werkzeug `269b4ff` haben den Fehler noch. Ihre Tokens stehen im Bericht ohne die gescheiterten Ergebnisse, ihre Anfragen ebenso.
+- **B-5, Messungen der CI noch offen:**
+  - die Dauer des Jobs „Rendered checks (Vitrino)“ nachher: ein Lauf; fünf Wiederholungen laufen im Hintergrund auf `2050f62`
+  - die Gegenprobe 2 in der CI
 - **B-3, `regularo` steht wie die Kontrastpaare 18-fach in der Vitrino** (komuna 0,28 MB). Gleicher Weg möglich; nicht Teil dieses Auftrags (Aufgabe von 8b).
 
 ### Offen (für den Maintainer)
