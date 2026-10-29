@@ -4085,4 +4085,43 @@ describe("Spec 033 documentation (specs/033-markenassistent)", () => {
     }
     expect(read("specs/033-markenassistent/tasks.md")).toContain("## S6");
   });
+
+  it("the acceptance list stands at the top of the plan: S1 to S6 in order, each with cd, a full path and what to see", () => {
+    const plan = read("specs/033-markenassistent/plan.md");
+    const start = plan.indexOf("## Abnahmeliste");
+    expect(start).toBeGreaterThan(-1);
+    expect(start).toBeLessThan(plan.indexOf("## S1"));
+    const liste = plan.slice(start, plan.indexOf("\n## ", start + 1));
+    let last = -1;
+    for (const stufe of ["S1", "S2", "S3", "S4", "S5", "S6"]) {
+      const at = liste.indexOf(`### ${stufe}`);
+      expect(at, stufe).toBeGreaterThan(last);
+      last = at;
+    }
+    expect(
+      liste.match(/cd \/Users\/thorstenjankowski\/n8n-compose\/20260918_fundamento-ds/g)?.length ??
+        0,
+    ).toBeGreaterThanOrEqual(6);
+    expect(liste).toContain("file:///Users/thorstenjankowski/");
+    expect(liste.match(/\*\*Sehen:\*\*/g)?.length ?? 0).toBeGreaterThanOrEqual(6);
+  });
+
+  it("trial runs go through tsx as a devDependency of the Metiejo, not through npx", () => {
+    const pkg = JSON.parse(read("packages/metiejo/package.json")) as {
+      devDependencies?: Record<string, string>;
+    };
+    expect(pkg.devDependencies?.tsx).toBeDefined();
+    expect(existsSync(join(repoRoot, "packages/metiejo/scripts/abnahme-weg-a.ts"))).toBe(true);
+    const plan = read("specs/033-markenassistent/plan.md");
+    expect(plan).toContain("pnpm --filter @fundamento/metiejo exec tsx scripts/abnahme-weg-a.ts");
+    expect(plan).not.toMatch(/npx tsx/);
+  });
+
+  it("S6 names the cause of B-13 measured per step and the decision on O-9", () => {
+    const plan = read("specs/033-markenassistent/plan.md");
+    const s6 = plan.slice(plan.indexOf("## S6"));
+    expect(s6).toContain("Messung je Schritt");
+    expect(s6).toMatch(/B-13[^\n]*Ursache/);
+    expect(s6).toMatch(/O-9[^\n]*entschieden/);
+  });
 });
