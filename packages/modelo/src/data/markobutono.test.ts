@@ -87,6 +87,8 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
     expect(skemo?.slots).toEqual([
       { name: "label", default: true, text: true, beside: true },
       { name: "error", text: true, beside: true },
+      // Spec 029 ②b-1 M-1: the reason for disabled.
+      { name: "disabled-reason", text: true },
     ]);
   });
 
@@ -167,7 +169,7 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
     expect(skemo?.a11y).toEqual({
       role: "checkbox",
       name: ["slot:label"],
-      description: ["slot:error"],
+      description: ["slot:error", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],
         checked: ["aria-checked"],
@@ -201,7 +203,11 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
         label: "Ich akzeptiere die AGB",
         texts: { error: "x" },
       }),
-    ).toEqual({ "slot:label": "filled", "slot:error": "filled" });
+    ).toEqual({
+      "slot:label": "filled",
+      "slot:error": "filled",
+      "slot:disabled-reason": "empty",
+    });
   });
 
   it("knows the goals agree (required) and opt-in with whole words, no preposition", () => {

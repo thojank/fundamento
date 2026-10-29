@@ -136,6 +136,10 @@
       {
         "name": "error",
         "text": true
+      },
+      {
+        "name": "disabled-reason",
+        "text": true
       }
     ],
     "parts": {
@@ -531,7 +535,8 @@
       ],
       "description": [
         "slot:help",
-        "slot:error"
+        "slot:error",
+        "slot:disabled-reason"
       ],
       "states": {
         "required": [
@@ -659,6 +664,17 @@
           ]
         },
         "kialo": "A step needs a scale, because only a number moves by a step; a text has none."
+      },
+      {
+        "when": {
+          "slot:disabled-reason": "filled"
+        },
+        "allowed": {
+          "disabled": [
+            "true"
+          ]
+        },
+        "kialo": "A reason without disabled is a contradiction, because it says why something is blocked that is not."
       }
     ],
     "goals": [

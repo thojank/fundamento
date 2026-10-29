@@ -100,6 +100,10 @@
       {
         "name": "error",
         "text": true
+      },
+      {
+        "name": "disabled-reason",
+        "text": true
       }
     ],
     "parts": {
@@ -451,7 +455,8 @@
       ],
       "description": [
         "slot:help",
-        "slot:error"
+        "slot:error",
+        "slot:disabled-reason"
       ],
       "states": {
         "selected": [
@@ -519,6 +524,17 @@
           ]
         },
         "kialo": "An empty option beside a prompt is the same first line twice, because both stand in the closed field for 'nothing chosen'; the empty option replaces the prompt."
+      },
+      {
+        "when": {
+          "slot:disabled-reason": "filled"
+        },
+        "allowed": {
+          "disabled": [
+            "true"
+          ]
+        },
+        "kialo": "A reason without disabled is a contradiction, because it says why something is blocked that is not."
       }
     ],
     "goals": [

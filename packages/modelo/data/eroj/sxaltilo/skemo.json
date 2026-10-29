@@ -56,6 +56,10 @@
         "default": true,
         "text": true,
         "beside": true
+      },
+      {
+        "name": "disabled-reason",
+        "text": true
       }
     ],
     "parts": {
@@ -374,6 +378,9 @@
       "name": [
         "slot:label"
       ],
+      "description": [
+        "slot:disabled-reason"
+      ],
       "states": {
         "checked": [
           "aria-checked"
@@ -428,6 +435,19 @@
         },
         "props": {},
         "regulo": "switch-label-names-the-setting"
+      }
+    ],
+    "constraints": [
+      {
+        "when": {
+          "slot:disabled-reason": "filled"
+        },
+        "allowed": {
+          "disabled": [
+            "true"
+          ]
+        },
+        "kialo": "A reason without disabled is a contradiction, because it says why something is blocked that is not."
       }
     ]
   }

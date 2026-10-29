@@ -82,6 +82,10 @@
       {
         "name": "error",
         "text": true
+      },
+      {
+        "name": "disabled-reason",
+        "text": true
       }
     ],
     "parts": {
@@ -359,7 +363,8 @@
       ],
       "description": [
         "slot:help",
-        "slot:error"
+        "slot:error",
+        "slot:disabled-reason"
       ],
       "states": {
         "required": [
@@ -457,6 +462,17 @@
           ]
         },
         "kialo": "Who learns the allowed files only from the error makes the mistake twice: a field with accept or max-size states the kinds and the size in its help, 'PDF, höchstens 5 MB' (file-constraints-stated)."
+      },
+      {
+        "when": {
+          "slot:disabled-reason": "filled"
+        },
+        "allowed": {
+          "disabled": [
+            "true"
+          ]
+        },
+        "kialo": "A reason without disabled is a contradiction, because it says why something is blocked that is not."
       }
     ],
     "goals": [

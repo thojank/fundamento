@@ -83,6 +83,8 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       { name: "error", text: true },
       { name: "min-label", text: true },
       { name: "max-label", text: true },
+      // Spec 029 ②b-1 M-1: the reason for disabled.
+      { name: "disabled-reason", text: true },
     ]);
   });
 
@@ -157,7 +159,7 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
     expect(skemo?.a11y).toEqual({
       role: "slider",
       name: ["slot:label"],
-      description: ["slot:help", "slot:error"],
+      description: ["slot:help", "slot:error", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],
         required: ["aria-required"],
@@ -203,6 +205,7 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       [{ disabled: "true" }, { readonly: ["false"] }],
       [{ "prop:value-start": "filled" }, { range: ["true"] }],
       [{ "prop:value-end": "filled" }, { range: ["true"] }],
+      [{ "slot:disabled-reason": "filled" }, { disabled: ["true"] }],
     ]);
     for (const constraint of skemo?.constraints ?? []) expect(constraint.kialo).not.toBe("");
   });

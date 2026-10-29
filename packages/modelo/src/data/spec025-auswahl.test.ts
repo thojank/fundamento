@@ -237,6 +237,8 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       },
       { name: "help", text: true },
       { name: "error", text: true },
+      // Spec 029 ②b-1 M-1: the reason for disabled.
+      { name: "disabled-reason", text: true },
     ]);
     expect(variantKeys(required(skemo))).toEqual(["expanded", "state"]);
   });
@@ -289,7 +291,7 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
     expect(skemo?.a11y).toEqual({
       role: "combobox",
       name: ["slot:label"],
-      description: ["slot:help", "slot:error"],
+      description: ["slot:help", "slot:error", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],
         selected: ["aria-selected"],
@@ -408,7 +410,7 @@ describe("plurelektilo (D-16): several values from a long list, filterable, the 
     expect(skemo?.a11y).toEqual({
       role: "listbox",
       name: ["slot:label"],
-      description: ["slot:help", "slot:error"],
+      description: ["slot:help", "slot:error", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],
         selected: ["aria-selected"],

@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 import { projectModeloSource, resolveCombination } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../build.js";
-import { ADDED_SINCE_MAIN, addedSinceMain } from "./neu-seit-main.js";
+import { ADDED_SINCE_MAIN, mainRows } from "./neu-seit-main.js";
 
 const CXIUJ = fileURLToPath(
   new URL(
@@ -37,10 +37,7 @@ const canonical = (value: unknown): unknown =>
       : value;
 
 function hashOf(tokens: Record<string, { type?: unknown; value?: unknown }>): string {
-  const rows = Object.keys(tokens)
-    .filter((name) => !addedSinceMain(name))
-    .sort()
-    .map((name) => [name, tokens[name]?.type, canonical(tokens[name]?.value)]);
+  const rows = mainRows(tokens, () => true, canonical);
   return createHash("sha256").update(JSON.stringify(rows)).digest("hex");
 }
 

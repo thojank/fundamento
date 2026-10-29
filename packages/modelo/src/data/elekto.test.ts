@@ -114,6 +114,8 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
       },
       { name: "help", text: true, beside: true },
       { name: "error", text: true, beside: true },
+      // Spec 029 ②b-1 M-1: the reason for disabled.
+      { name: "disabled-reason", text: true },
     ]);
   });
 
@@ -230,7 +232,7 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
     expect(skemo?.a11y).toEqual({
       role: "radiogroup",
       name: ["slot:label"],
-      description: ["slot:help", "slot:error"],
+      description: ["slot:help", "slot:error", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],
         selected: ["aria-checked"],
@@ -269,6 +271,7 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
       "slot:options": "filled",
       "slot:help": "empty",
       "slot:error": "empty",
+      "slot:disabled-reason": "empty",
     });
   });
 
@@ -423,7 +426,11 @@ describe("the cross-links of G5 (one Ero per entry)", () => {
   });
 
   it("the markobutono's Skemo is unchanged by the radio group", () => {
-    expect(markobutono?.skemo.slots.map((slot) => slot.name)).toEqual(["label", "error"]);
+    expect(markobutono?.skemo.slots.map((slot) => slot.name)).toEqual([
+      "label",
+      "error",
+      "disabled-reason",
+    ]);
   });
 });
 

@@ -109,6 +109,8 @@ describe("kampo in the repo Modelo (T004)", () => {
       ["label", true],
       ["help", true],
       ["error", true],
+      // Spec 029 ②b-1 M-1: the reason for disabled.
+      ["disabled-reason", true],
     ]);
   });
 
@@ -168,7 +170,7 @@ describe("kampo in the repo Modelo (T004)", () => {
   it("speaks role textbox: name from the label, description from help then error, the states, required in de and en (D-02)", () => {
     expect(skemo.a11y.role).toBe("textbox");
     expect(skemo.a11y.name).toEqual(["slot:label"]);
-    expect(skemo.a11y.description).toEqual(["slot:help", "slot:error"]);
+    expect(skemo.a11y.description).toEqual(["slot:help", "slot:error", "slot:disabled-reason"]);
     expect(skemo.a11y.states).toEqual({
       loading: ["aria-busy"],
       required: ["aria-required"],
@@ -228,7 +230,12 @@ describe("kampo in the repo Modelo (T004)", () => {
     expect(forbiddenBy(skemo, { disabled: "true", readonly: "false" })).toBeUndefined();
     expect(
       slotStates(skemo, { ero: "kampo", props: {}, label: "E-Mail", texts: { error: "x" } }),
-    ).toEqual({ "slot:label": "filled", "slot:help": "empty", "slot:error": "filled" });
+    ).toEqual({
+      "slot:label": "filled",
+      "slot:help": "empty",
+      "slot:error": "filled",
+      "slot:disabled-reason": "empty",
+    });
     const result = evaluateUsage(modelo, [
       { ero: "kampo", props: {}, label: "E-Mail", texts: { error: "Gib eine Adresse mit @ ein" } },
     ]);

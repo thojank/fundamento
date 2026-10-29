@@ -293,8 +293,10 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
     expect(invalid.length).toBeGreaterThan(0);
     const withError = cells.filter((cell) => cell.includes('<span slot="error">Fehler</span>'));
     expect(withError).toEqual(invalid);
-    // The butono and the ligilo have no help or error slot: their cells stay as they were.
-    expect(html.match(/<fm-butono[^>]*>[^<]*<span/g)).toBeNull();
+    // The butono and the ligilo have no help or error slot: their cells stay as they were (the
+    // section grundo of Spec 029 ②b-1 M-1 gives the butono its reason).
+    const spans = html.match(/<fm-butono[^>]*>[^<]*<span/g) ?? [];
+    expect(spans.filter((cell) => cell !== "<fm-butono disabled>Beispiel<span")).toEqual([]);
   });
 
   // F-6 (Spec 009 C8): the slot table did not say that the label of the kampo is a duty.
@@ -1115,6 +1117,37 @@ describe("the Vitrino shows the selection Eroj (Spec 025 ③)", () => {
     expect(grid).toContain('<fm-lokredaktilo label="Titel" value="Barrierefreiheit" editing>');
     expect(grid).toContain(
       '<fm-lokredaktilo label="Titel" value="" editing invalid><span slot="error">',
+    );
+  });
+});
+
+// Spec 029 ②b-1 M-1: the reason for disabled, to be seen – every Ero with the slot, disabled with
+// the example reason, in a section of its own (the grids of the Eroj keep their counts).
+describe("the Vitrino shows every Ero disabled with a reason (Spec 029 ②b-1 M-1)", () => {
+  it("one row per Ero with the slot disabled-reason, in the section grundo", () => {
+    expect(html).toContain('id="fm-vitrino-grundo"');
+    const rows = [...(datumoj.grundo ?? "").matchAll(/<th scope="row">fm-([a-z]+)<\/th>/g)].map(
+      (match) => match[1],
+    );
+    expect(rows).toEqual([
+      "alsxutilo",
+      "butono",
+      "datelektilo",
+      "elektilo",
+      "elekto",
+      "faldilo",
+      "glitilo",
+      "kampo",
+      "kompletigilo",
+      "listelektilo",
+      "markobutono",
+      "menuo",
+      "plurelektilo",
+      "sxaltilo",
+      "tekstareo",
+    ]);
+    expect(datumoj.grundo).toContain(
+      '<fm-kampo disabled>Beispiel<span slot="disabled-reason">Erst nach der Freigabe</span></fm-kampo>',
     );
   });
 });

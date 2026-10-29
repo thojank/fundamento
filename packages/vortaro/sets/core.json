@@ -9829,16 +9829,62 @@
                 "role": "ero"
               }
             }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{color.action.tertiary.disabled}",
+            "$description": "faldilo: summary.fill when state=disabled (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M643W59J4D173M6MAZW8HMZK",
+                "role": "ero"
+              }
+            }
           }
         },
         "color": {
-          "$type": "color",
-          "$value": "{color.text.default}",
-          "$description": "faldilo: summary.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
-          "$extensions": {
-            "com.ciferecigo.fundamento": {
-              "id": "tok_01M5GF0TQY40AAXJHBF90R5XBW",
-              "role": "ero"
+          "rest": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "faldilo: summary.color when state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M643W59J4D173M6MAZW8HMZM",
+                "role": "ero"
+              }
+            }
+          },
+          "hover": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "faldilo: summary.color when state=hover (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M643W59KE23BY36G4Y3RKGNY",
+                "role": "ero"
+              }
+            }
+          },
+          "focus": {
+            "$type": "color",
+            "$value": "{color.text.default}",
+            "$description": "faldilo: summary.color when state=focus (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M643W59KE23BY36G4Y3RKGNZ",
+                "role": "ero"
+              }
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{color.text.disabled}",
+            "$description": "faldilo: summary.color when state=disabled (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M643W59KE23BY36G4Y3RKGP0",
+                "role": "ero"
+              }
             }
           }
         },

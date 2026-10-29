@@ -767,7 +767,44 @@ function cardMarkup(): string {
 }
 
 /** The shadow markup of the control: slots before the label (icon-start), the label, the rest. */
+/**
+ * The reason for disabled (Spec 029 ②b-1 M-1, Maintainer 29.10.): its slot waits unseen; while
+ * the element is disabled with a reason, the element puts it into a konsileto it composes then —
+ * silent (the Ero names it among its own description), shown while the disabled element it belongs
+ * to has the focus or the pointer — and takes it back when the reason no longer holds.
+ */
+const REASON = '<span data-fm-reason hidden><slot name="disabled-reason"></slot></span>';
+
+/**
+ * The shadow markup of the host, with the reason for disabled where the Skemo has its slot: in a
+ * konsileto of its own, never among the texts under a field or in a button; a menu hands it on to
+ * its own trigger, a butono that shows it.
+ */
 function markup(
+  host: HostControl,
+  slots: NonNullable<ElementNames["slots"]>,
+  role: string,
+  marked: boolean,
+  indicator = false,
+  dismiss = false,
+  icon = false,
+  breadcrumb = false,
+  stepper = false,
+): string {
+  const reasoned = slots.some((slot) => slot.name === "disabled-reason");
+  const own = slots.filter((slot) => slot.name !== "disabled-reason");
+  const body = hostMarkup(host, own, role, marked, indicator, dismiss, icon, breadcrumb, stepper);
+  if (!reasoned) return body;
+  if (host === "menu") {
+    return body.replace(
+      '<fm-ikono name="more"></fm-ikono></fm-butono>',
+      '<fm-ikono name="more"></fm-ikono><slot name="disabled-reason" slot="disabled-reason"></slot></fm-butono>',
+    );
+  }
+  return body + REASON;
+}
+
+function hostMarkup(
   host: HostControl,
   slots: NonNullable<ElementNames["slots"]>,
   role: string,
@@ -966,6 +1003,101 @@ export function elementSource({
   const namedSlots = slots
     .filter((slot) => slot.default !== true && slot.decorative !== true)
     .map((slot) => slot.name);
+  // Spec 029 ②b-1 M-1: an Ero with a reason for disabled; a disclosure, disabled since then, keeps
+  // its summary from toggling even without one.
+  const hasReason = namedSlots.includes("disabled-reason");
+  const blocks = hasReason || isDisclosure;
+  const reasonInit = blocks
+    ? `    // Spec 029 ②b-1 M-1: while the element is inert nothing it does happens — the host stops the
+    // pointer, the keys (but Tab and Escape) and the input before anything inside hears them.
+    for (const type of ["click", "pointerdown", "mousedown", "keydown", "keyup", "keypress", "beforeinput", "paste", "cut", "drop", "dragstart"]) {
+      this.addEventListener(
+        type,
+        (event) => {
+          if (!this.#inert) return;
+          if (event instanceof KeyboardEvent && ["Tab", "Escape", "Shift"].includes(event.key)) return;
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        },
+        { capture: true },
+      );
+    }
+`
+    : "";
+  const reasonMethods = blocks
+    ? `
+  /** Whether nothing the element does happens (Spec 029 ②b-1 M-1): disabled with a reason${isDisclosure ? ", or a disabled disclosure" : ""}. */
+  #inert = false;
+
+  /** Takes back what the reason wrote: the render disables the element as it always does. */
+  #unreason(): void {
+    for (const target of this.shadowRoot?.querySelectorAll("[data-fm-reasoned]") ?? []) {
+      if (!(target instanceof HTMLElement)) continue;
+      if (target.getAttribute("data-fm-reasoned") === "native") {
+        (target as HTMLButtonElement).disabled = true;
+        target.removeAttribute("aria-disabled");
+      } else target.tabIndex = -1;
+      const rest = (target.getAttribute("aria-describedby") ?? "").split(" ").filter((id) => id !== "" && id !== "disabled-reason");
+      if (rest.length > 0) target.setAttribute("aria-describedby", rest.join(" "));
+      else target.removeAttribute("aria-describedby");
+      target.removeAttribute("data-fm-reasoned");
+    }
+  }
+
+  /**
+   * Disabled with a reason (Spec 029 ②b-1 M-1): the first control the render disabled stays
+   * reachable — aria-disabled instead of disabled, a tab stop — and is described by the reason,
+   * which the konsileto shows while it has the focus or the pointer; nothing it does happens.
+   * Whether the reason holds; without one the element is disabled as before (skipped).
+   */
+  #reason(): boolean {
+    const disabled = this.propValue("disabled") === true;
+    const reasoned = disabled && this.#filled("disabled-reason");
+    this.#inert = reasoned${isDisclosure ? " || disabled" : ""};
+    const shadow = this.shadowRoot;
+    let tip = shadow?.getElementById("disabled-reason");
+    // A menu hands its reason to its own trigger, a butono that shows it (none of its rows).
+    const target = !reasoned${isMenu ? ' || HAS_PROP.has("disabled")' : ""}
+      ? undefined
+      : [...(shadow?.querySelectorAll('input, select, textarea, button, [aria-disabled="true"][tabindex="-1"]') ?? [])].find(
+          (node): node is HTMLElement =>
+            node instanceof HTMLElement &&
+            !node.hidden &&
+            node.getAttribute("type") !== "hidden" &&
+            (("disabled" in node && (node as HTMLButtonElement).disabled) ||
+              (node.getAttribute("tabindex") === "-1" && node.getAttribute("aria-disabled") === "true")),
+        );
+    const slot = shadow?.querySelector('slot[name="disabled-reason"]');
+    if (target === undefined) {
+      // The slot waits unseen again; the konsileto goes.
+      if (tip instanceof HTMLElement && slot instanceof HTMLSlotElement) {
+        shadow?.querySelector("[data-fm-reason]")?.append(slot);
+        tip.remove();
+      }
+      return false;
+    }
+    if ("disabled" in target && (target as HTMLButtonElement).disabled) {
+      (target as HTMLButtonElement).disabled = false;
+      target.setAttribute("aria-disabled", "true");
+      target.setAttribute("data-fm-reasoned", "native");
+    } else {
+      target.tabIndex = 0;
+      target.setAttribute("data-fm-reasoned", "focus");
+    }
+    if (target.id === "") target.id = "fm-reason-target";
+    if (!(tip instanceof HTMLElement) && slot instanceof HTMLSlotElement) {
+      tip = document.createElement("fm-konsileto");
+      tip.id = "disabled-reason";
+      tip.setAttribute("data-fm-silent", "");
+      tip.setAttribute("for", target.id);
+      tip.append(slot);
+      shadow?.append(tip);
+    }
+    if (tip instanceof HTMLElement && tip.getAttribute("for") !== target.id) tip.setAttribute("for", target.id);
+    return true;
+  }
+`
+    : "";
   // Nachlese 11 B-2: the name the Skemo gives the default slot. Content with slot="<that name>"
   // is the default slot's, as the default region of a Sxablono takes both forms.
   const defaultSlot = slots.find((slot) => slot.default === true)?.name;
@@ -2632,11 +2764,19 @@ ${
   /** Finds the trigger by id and wires it once; the description follows the words. */
   #tooltipBind(): void {
     const id = String(this.propValue("for") ?? "");
-    const trigger = id === "" ? null : document.getElementById(id);
+    // Spec 029 ②b-1 M-1: the trigger in the konsileto's own tree first (a konsileto an Ero composes
+    // for its reason), then in the document.
+    const tree = this.getRootNode();
+    const local = id === "" || !(tree instanceof ShadowRoot) ? null : tree.getElementById(id);
+    const trigger = id === "" ? null : (local ?? document.getElementById(id));
     if (!(trigger instanceof HTMLElement)) return;
     const words = (this.textContent ?? "").trim();
     const name = (trigger.getAttribute("label") ?? trigger.getAttribute("aria-label") ?? trigger.textContent ?? "").trim();
-    if (words !== "" && words !== name) {
+    // A silent konsileto (data-fm-silent: the reason an Ero composes) leaves the description to
+    // the Ero, which names its reason among its own.
+    if (this.hasAttribute("data-fm-silent")) {
+      // nothing to describe here
+    } else if (words !== "" && words !== name) {
       trigger.setAttribute("aria-describedby", this.#overlayId());
       // The same words as a plain description too (ARIA 1.3): a tool that does not read a
       // reference into a host with a shadow tree still hears them.
@@ -3361,6 +3501,8 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
     // Nachlese 7 ② B-4: disabled locks the trigger (aria-disabled, it stays focusable and says
     // why nothing opens) and closes an open menu.
     const locked = this.propValue("disabled") === true;
+    // Spec 029 ②b-1 M-1: with a reason the own trigger is a disabled butono that shows it.
+    if (own instanceof HTMLElement) own.toggleAttribute("disabled", locked && this.#filled("disabled-reason"));
     if (locked) {
       this.#overlayTriggerAria("aria-disabled", "true");
       if (control.matches(":popover-open")) this.#overlayClose();
@@ -3407,6 +3549,18 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
     const group = this.propValue("group");
     if (typeof group === "string" && group !== "") details.setAttribute("name", group);
     else details.removeAttribute("name");
+    // Spec 029 ②b-1 M-1: disabled, the summary says so and is no tab stop (a reason makes it one).
+    const summary = this.shadowRoot?.querySelector('[part="summary"]');
+    if (summary instanceof HTMLElement) {
+      const off = this.propValue("disabled") === true;
+      if (off) {
+        summary.setAttribute("aria-disabled", "true");
+        summary.tabIndex = -1;
+      } else {
+        summary.removeAttribute("aria-disabled");
+        summary.removeAttribute("tabindex");
+      }
+    }
     const chevron = this.shadowRoot?.querySelector('[part="indicator"]');
     const sign = open ? "chevron-down" : "chevron-right";
     if (chevron instanceof HTMLElement && chevron.getAttribute("name") !== sign) chevron.setAttribute("name", sign);
@@ -5459,7 +5613,7 @@ ${
       attributeFilter: ["slot"],
     });
 `
-}${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${datepickerInit}${chipInit}${listInit}${editorInit}${uploadInit}${sliderInit}${fieldExtrasInit}${avatarInit}${isCodeblock ? codeblockInit : ""}${skipInit}${
+}${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${datepickerInit}${chipInit}${listInit}${editorInit}${uploadInit}${sliderInit}${fieldExtrasInit}${reasonInit}${avatarInit}${isCodeblock ? codeblockInit : ""}${skipInit}${
   host === "button"
     ? `    // A word written into the default slot later (the alsxutilo writes its own) changes the
     // form: the render looks again (Spec 029 ①b, Abnahme 28.10.).
@@ -5597,7 +5751,7 @@ ${autoDisconnect}
   #render(): void {
     const control = this.#control;
     const root = this.#root;
-    for (const [name, value] of Object.entries(this.#enums())) {
+${blocks ? "    this.#unreason();\n" : ""}    for (const [name, value] of Object.entries(this.#enums())) {
       root.setAttribute(\`data-\${name}\`, value);
       if (root !== control) control.setAttribute(\`data-\${name}\`, value);
     }
@@ -5689,7 +5843,14 @@ ${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statu
       if (holder instanceof HTMLElement) holder.hidden = !has;
       if (has) described.push(name);
     }
-    // What is heard in addition (Spec 008, D-02): the texts of every true boolean prop, in the
+${
+  blocks
+    ? `    // Spec 029 ②b-1 M-1: the reason describes only while the element is disabled with it.
+    const reasoned = this.#reason();
+    if (!reasoned && described.includes("disabled-reason")) described.splice(described.indexOf("disabled-reason"), 1);
+`
+    : ""
+}    // What is heard in addition (Spec 008, D-02): the texts of every true boolean prop, in the
     // language of the document, as the description of the control; the mark shows with them.
     const lingvo = this.#lingvo();
 ${
@@ -5718,7 +5879,18 @@ ${
     // the accessibility tree of every engine; the attribute change does.
     control.removeAttribute("aria-describedby");
     if (described.length > 0) control.setAttribute("aria-describedby", described.join(" "));
-    if (heard.length > 0) {
+${
+  blocks
+    ? `    // The reason describes the control that keeps the focus, where that is not the control itself
+    // (a row of a radio group, the thumb of a slider, the summary of a disclosure).
+    const reasonTarget = this.shadowRoot?.querySelector("[data-fm-reasoned]");
+    if (reasoned && reasonTarget instanceof HTMLElement && reasonTarget !== control) {
+      const ids = (reasonTarget.getAttribute("aria-describedby") ?? "").split(" ").filter((id) => id !== "");
+      if (!ids.includes("disabled-reason")) reasonTarget.setAttribute("aria-describedby", [...ids, "disabled-reason"].join(" "));
+    }
+`
+    : ""
+}    if (heard.length > 0) {
       root.setAttribute("data-marked", "true");
       if (root !== control) control.setAttribute("data-marked", "true");
     } else {
@@ -5834,7 +6006,7 @@ ${
     : `    if (!(this.#control instanceof HTMLButtonElement)) return;
 ${toggleActivate}`
 }  }
-${groupMethods}${selectMethods}${inputMethods}${fieldExtrasMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${autoMethods}${tabsMethods}${overlayMethods}${tooltipMethods}${menuMethods}${suggestMethods}${datepickerMethods}${chipMethods}${listMethods}${editorMethods}${uploadMethods}${sliderMethods}${choiceValidityMethods}${isCodeblock ? codeblockMethods : ""}${isMarkdown ? markdownMethods : ""}
+${groupMethods}${selectMethods}${inputMethods}${fieldExtrasMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${autoMethods}${tabsMethods}${overlayMethods}${tooltipMethods}${reasonMethods}${menuMethods}${suggestMethods}${datepickerMethods}${chipMethods}${listMethods}${editorMethods}${uploadMethods}${sliderMethods}${choiceValidityMethods}${isCodeblock ? codeblockMethods : ""}${isMarkdown ? markdownMethods : ""}
 }
 
 /**

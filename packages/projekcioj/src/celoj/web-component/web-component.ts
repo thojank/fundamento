@@ -153,7 +153,11 @@ function fieldPartSelector(
  */
 function disclosurePartSelector(part: string, data: string, state: string): string {
   const root = `[part="control"]${data}`;
-  if (part === "summary") return `:where(${root}) [part="summary"]${STATE_SELECTORS[state] ?? ""}`;
+  // Spec 029 ②b-1 M-1: a summary is never :disabled; disabled, it says so.
+  if (part === "summary") {
+    const sign = state === "disabled" ? '[aria-disabled="true"]' : (STATE_SELECTORS[state] ?? "");
+    return `:where(${root}) [part="summary"]${sign}`;
+  }
   if (part === "focus-ring") return `:where(${root}) [part="summary"]:focus-visible`;
   if (part === "indicator" || part === "content") return `:where(${root}) [part="${part}"]`;
   return `:where(${root})`;
@@ -784,7 +788,9 @@ const STATE_SELECTORS: Readonly<Record<string, string | undefined>> = {
   invalid: '[aria-invalid="true"]',
   readonly: "[readonly]",
   loading: '[aria-busy="true"]',
-  disabled: ":disabled",
+  // Spec 029 ②b-1 M-1: disabled with a reason, the control stays reachable (aria-disabled, marked
+  // by the element) and looks as disabled as without one.
+  disabled: ":is(:disabled, [data-fm-reasoned])",
 };
 
 /**

@@ -90,6 +90,8 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       { name: "label", default: true, text: true },
       { name: "help", text: true },
       { name: "error", text: true },
+      // Spec 029 ②b-1 M-1: the reason for disabled.
+      { name: "disabled-reason", text: true },
     ]);
   });
 
@@ -219,7 +221,7 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
     expect(skemo?.a11y).toEqual({
       role: "textbox",
       name: ["slot:label"],
-      description: ["slot:help", "slot:error"],
+      description: ["slot:help", "slot:error", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],
         required: ["aria-required"],
@@ -275,6 +277,7 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       [{ "prop:value": "filled" }, { mode: ["single"] }],
       [{ "prop:value-start": "filled" }, { mode: ["range"] }],
       [{ "prop:value-end": "filled" }, { mode: ["range"] }],
+      [{ "slot:disabled-reason": "filled" }, { disabled: ["true"] }],
     ]);
     for (const constraint of skemo?.constraints ?? []) expect(constraint.kialo).toMatch(/because/);
   });

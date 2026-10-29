@@ -182,7 +182,7 @@ describe("get_ero", () => {
         "full-width": "boolean",
         label: "string",
       },
-      slots: ["label", "icon-start", "icon-end"],
+      slots: ["label", "icon-start", "icon-end", "disabled-reason"],
       // Nachlese 11 B-2: the slot that takes the content without a slot attribute.
       defaultSlot: "label",
     });

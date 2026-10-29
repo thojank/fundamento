@@ -142,6 +142,8 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       },
       { name: "help", text: true },
       { name: "error", text: true },
+      // Spec 029 ②b-1 M-1: the reason for disabled.
+      { name: "disabled-reason", text: true },
     ]);
   });
 
@@ -201,7 +203,7 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
     expect(skemo?.a11y).toEqual({
       role: "combobox",
       name: ["slot:label"],
-      description: ["slot:help", "slot:error"],
+      description: ["slot:help", "slot:error", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],
         selected: ["aria-selected"],
@@ -231,7 +233,8 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
     // The first constraint is the kampo's; the second is the elektilo's own (Spec 011 ①: no
     // empty-label beside a placeholder).
     expect(skemo.constraints?.[0]).toEqual(kampo?.skemo.constraints?.[0]);
-    expect(skemo.constraints).toHaveLength(2);
+    // Spec 029 ②b-1 M-1: and a reason only with disabled.
+    expect(skemo.constraints).toHaveLength(3);
     expect(
       slotStates(skemo, {
         ero: "elektilo",
@@ -244,6 +247,7 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       "slot:options": "filled",
       "slot:help": "empty",
       "slot:error": "empty",
+      "slot:disabled-reason": "empty",
     });
   });
 

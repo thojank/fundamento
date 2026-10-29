@@ -128,6 +128,7 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
       [{ "prop:max": "filled" }, { kind: ["number", "date", "time"] }],
       [{ stepper: "true" }, { kind: ["number"] }],
       [{ "prop:step": "filled" }, { kind: ["number"] }],
+      [{ "slot:disabled-reason": "filled" }, { disabled: ["true"] }],
     ]);
     expect(rulesOf(judge({ kind: "text", stepper: true }, {}))).toEqual([
       ["ero-prop-constraint", "error"],

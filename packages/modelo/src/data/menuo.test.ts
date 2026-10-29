@@ -53,6 +53,8 @@ describe("menuo in the repo Modelo (section ④, G1, G2, G4)", () => {
     expect(skemo?.slots).toEqual([
       { name: "items", default: true, text: true },
       { name: "trigger" },
+      // Spec 029 ②b-1 M-1: the reason for disabled, shown by the own trigger.
+      { name: "disabled-reason", text: true },
     ]);
     // Only the state is an axis: placement keys no part, label and open are no axes (E7).
     expect(variantKeys(skemoOrThrow())).toEqual(["state"]);

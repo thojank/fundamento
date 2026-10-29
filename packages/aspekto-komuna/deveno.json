@@ -7873,7 +7873,7 @@
       "noto": "durchsichtig wie die Fonto"
     },
     {
-      "token": "ero.faldilo.summary.color",
+      "token": "ero.faldilo.summary.color.rest",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/Collapsible/Collapsible.tsx",

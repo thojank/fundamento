@@ -1702,7 +1702,8 @@ describe("Web Component Celo for the overlays (Spec 014 ④)", () => {
     expect(element).toContain('<div part="control" role="menu" popover="auto"></div>');
     expect(element).toContain('role="menuitem"');
     expect(element).toContain(
-      '<fm-butono part="trigger" emphasis="low"><fm-ikono name="more"></fm-ikono></fm-butono>',
+      // Spec 029 ②b-1 M-1: the reason for disabled handed on to the own trigger, which shows it.
+      '<fm-butono part="trigger" emphasis="low"><fm-ikono name="more"></fm-ikono><slot name="disabled-reason" slot="disabled-reason"></slot></fm-butono>',
     );
     expect(element).toContain('"aria-haspopup"');
     expect(element).toContain('new CustomEvent("select"');

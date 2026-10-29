@@ -629,7 +629,9 @@ test("fm-faldilo and fm-kompletigilo are upgraded in their sections, axe-clean",
   page,
 }) => {
   await open(page);
-  await expect(page.locator("#fm-vitrino-faldilo").getByRole("group")).toHaveCount(2);
+  // Spec 029 ②b-1 M-1: a column disabled beside rest and open.
+  await expect(page.locator("#fm-vitrino-faldilo").getByRole("group")).toHaveCount(3);
+  await expect(page.locator("#fm-vitrino-faldilo fm-faldilo[disabled]")).toHaveCount(1);
   await expect(page.locator("#fm-vitrino-faldilo fm-faldilo[open]")).toHaveCount(1);
   // Nachlese 4 N-9: a column loading besides required, disabled, invalid and expanded (3 × 6).
   await expect(page.locator("#fm-vitrino-kompletigilo fm-kompletigilo")).toHaveCount(18);
@@ -1785,4 +1787,16 @@ test("the KontrastParoj of one combination are the same table in every density a
   });
   expect(island.unikaj).toBeGreaterThan(0);
   expect(island.al).toBeGreaterThan(island.unikaj);
+});
+
+// Spec 029 ②b-1 M-1: the section grundo – every Ero disabled with a reason; the kampo is reached
+// by Tab and shows its reason; axe without a finding.
+test("the reasons for disabled: reachable, shown on focus, axe-clean", async ({ page }) => {
+  await open(page);
+  const section = page.locator("#fm-vitrino-grundo");
+  await expect(section.locator("tbody tr")).toHaveCount(15);
+  const kampo = section.locator("fm-kampo");
+  await kampo.getByRole("textbox").focus();
+  await expect(kampo.getByText("Erst nach der Freigabe")).toBeVisible();
+  expect(await axeViolations(page, "#fm-vitrino-grundo")).toEqual([]);
 });

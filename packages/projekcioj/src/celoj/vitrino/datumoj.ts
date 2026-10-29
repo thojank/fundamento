@@ -211,6 +211,11 @@ export interface VitrinoDatumoj {
   /** Per Ero its grid as markup (`fm-<ero>`); the element upgrades it in the browser (Spec 008). */
   eroj: Record<string, string>;
   /**
+   * Spec 029 ②b-1 M-1: every Ero with the slot disabled-reason, disabled with a reason – reachable
+   * by Tab, the reason in a konsileto on focus and pointer; absent where no Ero has the slot.
+   */
+  grundo?: string;
+  /**
    * Per Sxablono its example at the three container widths schmal, mittel, breit (Spec 020, G2):
    * the layout follows the container, so the same element shows each of its layouts.
    */
@@ -1425,6 +1430,46 @@ function vitrinoDutyValue(
   return prop.values?.[0] ?? "";
 }
 
+/** The example reason of the Vitrino (Spec 029 ②b-1 M-1). */
+export const VITRINO_REASON = "Erst nach der Freigabe";
+
+/**
+ * Every Ero with the slot disabled-reason, disabled with the example reason (Spec 029 ②b-1 M-1):
+ * one row each, with the content its Skemo asks for (a summary, entries, options or a label).
+ */
+export function grundoMarkup(eroj: readonly LoadedEro[]): string | undefined {
+  const reasoned = eroj.filter((entry) =>
+    entry.skemo.slots.some((slot) => slot.name === "disabled-reason"),
+  );
+  if (reasoned.length === 0) return undefined;
+  const reason = `<span slot="disabled-reason">${VITRINO_REASON}</span>`;
+  const rows = reasoned.map((entry) => {
+    const tag = `fm-${entry.ero.name}`;
+    const slots = entry.skemo.slots.map((slot) => slot.name);
+    const content = slots.includes("summary")
+      ? '<span slot="summary">Lieferbedingungen</span>Inhalt'
+      : slots[0] === "items"
+        ? `${VITRINO_OPTIONS.slice(0, 2)
+            .map((word, index) => `<data value="${index + 1}">${word}</data>`)
+            .join("")}`
+        : `Beispiel${
+            slots.includes("options")
+              ? VITRINO_OPTIONS.slice(0, 2)
+                  .map((word, index) => `<data slot="options" value="${index + 1}">${word}</data>`)
+                  .join("")
+              : ""
+          }`;
+    return `<tr><th scope="row">${tag}</th><td><${tag} disabled>${content}${reason}</${tag}></td></tr>`;
+  });
+  return `<table><caption>Deaktiviert mit Grund: mit Tab erreichbar, der Grund erscheint bei Fokus und Zeiger</caption><thead><tr><th scope="col">Ero</th><th scope="col">disabled</th></tr></thead><tbody>${rows.join("")}</tbody></table>`;
+}
+
+/** The section grundo where an Ero has the slot disabled-reason (exact optional properties). */
+function grundoOf(eroj: readonly LoadedEro[]): { grundo?: string } {
+  const grundo = grundoMarkup(eroj);
+  return grundo === undefined ? {} : { grundo };
+}
+
 /** The grid of every Ero of the Modelo, by name (Spec 008, D-12); the icon shows the Ikonaro. */
 export function erojMarkup(
   eroj: readonly LoadedEro[],
@@ -1749,6 +1794,7 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
       ankroj,
     }),
     eroj: erojMarkup(modelo.eroj, modelo.ikonaro),
+    ...grundoOf(modelo.eroj),
     sxablonoj: sxablonojMarkup(modelo.sxablonoj ?? []),
     a11yRoloj: Object.fromEntries(
       modelo.eroj.map((entry) => [entry.ero.name, entry.skemo.a11y.role]),

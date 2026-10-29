@@ -206,8 +206,7 @@ async function focusedOf(page: Page) {
   return page.evaluate(() => {
     let active: Element | null = document.activeElement;
     while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
-    if (active === null || active === document.body || active.localName === "button")
-      return undefined;
+    if (active === null || active === document.body || active.id === "before") return undefined;
     const root = active.getRootNode() as ShadowRoot;
     const disabled = active.closest('[aria-disabled="true"]') !== null;
     const ids = (active.getAttribute("aria-describedby") ?? "").split(/\s+/).filter(Boolean);

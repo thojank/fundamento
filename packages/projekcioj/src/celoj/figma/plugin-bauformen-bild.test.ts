@@ -12,7 +12,7 @@
 // order the file was filled in; every new variable shifted them). The basis was written again from
 // the plugin of 943d965 (main after #111 and #110, the plugin unchanged since): the changes of Spec
 // 027 that WANTED and STRETCHED named are part of it, so both lists are empty until a spec changes
-// a picture on purpose again.
+// a picture on purpose again – as ②b-1 M-1 does for the faldilo.
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -34,7 +34,14 @@ const SHOWN_IN_MAIN = (set: string, layer: string) =>
  * Wanted changes of the spec: set → the variants whose name holds `match` (all without), with the
  * Befund. B-2: a text that had no fill painted nothing in Figma; with its fill it is seen.
  */
-const WANTED: Readonly<Record<string, { befund: string; match?: string }>> = {};
+const WANTED: Readonly<Record<string, { befund: string; match?: string }>> = {
+  // Spec 029 ②b-1 M-1 (A-faldilo-3): the faldilo can be disabled – its summary's colour goes by
+  // state (the variable ero/faldilo/summary/color/rest where main bound …/summary/color, the same
+  // value), and the state disabled adds a variant per open.
+  faldilo: {
+    befund: "M-1: the summary's colour by state, the state disabled added (open × state = 8).",
+  },
+};
 
 /**
  * What B-1 and B-5 change as a consequence: set → the variants whose name holds `match`, with

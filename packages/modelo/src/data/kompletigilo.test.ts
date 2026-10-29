@@ -66,6 +66,8 @@ describe("kompletigilo in the repo Modelo (section ⑤, G1, G2)", () => {
       },
       { name: "help", text: true },
       { name: "error", text: true },
+      // Spec 029 ②b-1 M-1: the reason for disabled.
+      { name: "disabled-reason", text: true },
     ]);
     // expanded keys the listbox: an axis beside size and state (E7: selected is the state of an entry).
     expect(variantKeys(skemoOrThrow())).toEqual(["size", "expanded", "state"]);
@@ -121,7 +123,7 @@ describe("kompletigilo in the repo Modelo (section ⑤, G1, G2)", () => {
   it("speaks role combobox like the elektilo, expanded as aria-expanded; announces the suggestions (texts) (G5)", () => {
     expect(skemo?.a11y.role).toBe("combobox");
     expect(skemo?.a11y.name).toEqual(["slot:label"]);
-    expect(skemo?.a11y.description).toEqual(["slot:help", "slot:error"]);
+    expect(skemo?.a11y.description).toEqual(["slot:help", "slot:error", "slot:disabled-reason"]);
     expect(skemo?.a11y.states).toEqual({
       selected: ["aria-selected"],
       required: ["aria-required"],

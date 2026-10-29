@@ -113,6 +113,10 @@
       {
         "name": "error",
         "text": true
+      },
+      {
+        "name": "disabled-reason",
+        "text": true
       }
     ],
     "parts": {
@@ -532,7 +536,8 @@
       ],
       "description": [
         "slot:help",
-        "slot:error"
+        "slot:error",
+        "slot:disabled-reason"
       ],
       "states": {
         "selected": [
@@ -608,6 +613,17 @@
           ]
         },
         "kialo": "An error text without the error state is a contradiction a screen reader cannot resolve: it reads a fault on a field that says it is fine."
+      },
+      {
+        "when": {
+          "slot:disabled-reason": "filled"
+        },
+        "allowed": {
+          "disabled": [
+            "true"
+          ]
+        },
+        "kialo": "A reason without disabled is a contradiction, because it says why something is blocked that is not."
       }
     ],
     "goals": [

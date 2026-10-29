@@ -145,7 +145,7 @@ describe("Spec 029 ②b-1: the brief lists boolean props as flags", () => {
 // M-1 – the reason for disabled (abgleich.json, Muster M-1; Maintainer 29.10.: in a konsileto): a
 // text slot disabled-reason at every Ero with disabled; it describes the element, and a reason
 // without disabled is a contradiction (constraint). The faldilo gets disabled with it (A-faldilo-3);
-// the boundary tooltip-on-disabled of the konsileto is decided and goes.
+// the boundary tooltip-on-disabled of the konsileto is decided: the slot says it, not a konsileto.
 const REASONED = [
   "kampo",
   "tekstareo",
@@ -187,10 +187,10 @@ describe("Spec 029 ②b-1 M-1: the reason for disabled", () => {
     expect(skemoOf("faldilo").states).toContain("disabled");
   });
 
-  it("the konsileto's boundary tooltip-on-disabled is decided", () => {
+  it("the konsileto's boundary tooltip-on-disabled is decided: not the konsileto's, the slot's", () => {
     const uzo = modelo.eroj.find((entry) => entry.ero.name === "konsileto")?.uzo;
-    expect((uzo?.boundary ?? []).map((boundary) => boundary.case)).not.toContain(
-      "tooltip-on-disabled",
-    );
+    const boundary = uzo?.boundary.find((entry) => entry.case === "tooltip-on-disabled");
+    expect(boundary?.action).toBe("not-supported");
+    expect(boundary?.kialo).toContain("disabled-reason");
   });
 });

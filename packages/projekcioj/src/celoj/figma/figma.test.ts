@@ -3151,7 +3151,8 @@ describe("the Figma plan draws the faldilo and the kompletigilo (Spec 014 ⑤)",
   it("the faldilo: open × state as a disclosure, the chevron per open, the word of the summary", () => {
     const faldilo = set("faldilo");
     expect(faldilo?.structure).toBe("disclosure");
-    expect(faldilo?.variants).toHaveLength(6);
+    // Spec 029 ②b-1 M-1: open × the four states, disabled among them.
+    expect(faldilo?.variants).toHaveLength(8);
     const open = faldilo?.variants.find(
       (variant) => variant.props.open === "true" && variant.props.state === "rest",
     );

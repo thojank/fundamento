@@ -96,7 +96,7 @@ describe("konsileto in the repo Modelo (section ④, G1, G2, G4)", () => {
 });
 
 describe("the Uzo of the konsileto (section ④, G6)", () => {
-  it("states the purpose; essential info is visible text, operable content a popover; a tooltip on a disabled control asks a person", () => {
+  it("states the purpose; essential info is visible text, operable content a popover; a tooltip on a disabled control is the reason's (M-1)", () => {
     expect(uzo?.purpose).toBe(
       "Shows the name or a short hint of a control while it is hovered or focused.",
     );
@@ -106,7 +106,8 @@ describe("the Uzo of the konsileto (section ④, G6)", () => {
     ]);
     expect(uzo?.instead[0]?.kialo).toMatch(/touch|hover/i);
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
-      ["tooltip-on-disabled", "ask-human"],
+      // Spec 029 ②b-1 M-1: decided – the slot disabled-reason of the disabled Ero says why.
+      ["tooltip-on-disabled", "not-supported"],
     ]);
     for (const entry of [...(uzo?.instead ?? []), ...(uzo?.boundary ?? [])]) {
       expect(entry.kialo).toMatch(/because/);
