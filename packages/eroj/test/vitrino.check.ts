@@ -10,7 +10,7 @@ import { projectModeloSource } from "@fundamento/modelo";
 import { buildProjekcioj, VITRINO_FILE } from "@fundamento/projekcioj";
 import { expect, type Locator, type Page, test } from "@playwright/test";
 import { axeViolations, contrast } from "./alirebleco.js";
-import { M5_GRENZE_MS, m5Urteil } from "./m5.js";
+import { M5_GRENZE_MS, m5Urteil, stilBlockadeEinbauen } from "./m5.js";
 import { EKZEMPLO_CONFIG, ORIGIN } from "./serve.js";
 
 test.describe.configure({ mode: "serial" });
@@ -1143,6 +1143,31 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     );
     expect(urteil.gruende).toEqual([]);
     expect(derive.median).toBeLessThan(150);
+  });
+
+  // Nachlese 12 ③ (zweite Gegenprobe, Maintainer 29.10.): a block of 80 ms of style and layout,
+  // no long script – each hand-over of the Werkstatt to its worker switches a class on a large
+  // block laid out off screen, nothing is read, so the cost falls in the rendering of the next
+  // frame. The block is sized on the runner until one recalculation costs at least 80 ms. Red over
+  // the 90th percentile, on fast and on slow runners alike; the scripts stay under the limit.
+  test("M5 Gegenprobe 2: an artificial block of 80 ms of style and layout makes M5 red over the 90th percentile", async ({
+    page,
+  }) => {
+    await openWerkstatt(page);
+    await checkedAtLeast(page, 1);
+    const last = await page.evaluate(stilBlockadeEinbauen, 80);
+    process.stderr.write(
+      `M5 Gegenprobe 2: ${last.elemente} Elemente, Stil und Layout ${last.kosten.toFixed(0)} ms je Umschalten\n`,
+    );
+    expect(last.kosten).toBeGreaterThanOrEqual(80);
+    const timings = await page.evaluate(() => fmWerkstatt.measure(10));
+    const urteil = m5Urteil(timings);
+    process.stderr.write(
+      `M5 Gegenprobe 2: Skripte längstens ${timings.scriptLongest.toFixed(0)} ms; ${urteil.gruende.join("; ")}\n`,
+    );
+    expect(urteil.rot).toBe(true);
+    expect(urteil.perzentil).toBeGreaterThan(M5_GRENZE_MS);
+    expect(timings.scriptLongest).toBeLessThanOrEqual(M5_GRENZE_MS);
   });
 
   // Nachlese 12 ③ (Gegenprobe): a block of 80 ms the Werkstatt makes itself – a busy loop each time
