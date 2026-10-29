@@ -62,3 +62,46 @@ describe("Spec 029 ②b-1 M-5: loading in every field", () => {
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
   });
 });
+
+// M-6 – a clear button in the field (abgleich.json, Muster M-6): a boolean `clearable`, the button
+// named „{label} leeren“ for assistive technology. The plurelektilo had its own (Alle abwählen):
+// clearable is true there by default and keeps its words, so nothing it did changes.
+const CLEARABLE = [
+  "kampo",
+  "elektilo",
+  "listelektilo",
+  "plurelektilo",
+  "datelektilo",
+  "kompletigilo",
+];
+
+describe("Spec 029 ②b-1 M-6: a clear button in the field", () => {
+  it.each(CLEARABLE)(
+    "%s: a boolean clearable and the part clear in a small control's size",
+    (ero) => {
+      const skemo = skemoOf(ero);
+      expect(skemo.props.find((prop) => prop.name === "clearable")).toMatchObject({
+        kind: "boolean",
+        default: ero === "plurelektilo",
+      });
+      expect(skemo.parts.clear).toEqual({ size: { fixed: "size.control.small" } });
+    },
+  );
+
+  it.each(CLEARABLE.filter((ero) => ero !== "plurelektilo"))(
+    "%s: the button is named after the field: „{label} leeren“",
+    (ero) => {
+      expect(skemoOf(ero).a11y.texts?.["clear-name"]).toEqual({
+        de: "{label} leeren",
+        en: "Clear {label}",
+      });
+    },
+  );
+
+  it("the plurelektilo keeps „Alle abwählen“", () => {
+    expect(skemoOf("plurelektilo").a11y.texts?.["clear-name"]).toEqual({
+      de: "Alle abwählen",
+      en: "Clear all",
+    });
+  });
+});

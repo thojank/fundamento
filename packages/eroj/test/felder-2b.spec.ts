@@ -95,3 +95,86 @@ test.describe("Spec 029 ②b-1 M-5: loading in every field", () => {
     });
   }
 });
+
+// M-6 – a clear button in the field: shown while the field has a value and is neither disabled nor
+// read-only, named „{label} leeren“; a press empties the value, says input and change, and the
+// focus returns to the field. Without clearable no button (the plurelektilo shows its own by
+// default, the kampo of kind search as before).
+const CLEARABLE: Readonly<Record<string, { markup: string; label: string; value: string }>> = {
+  kampo: {
+    markup: '<fm-kampo clearable value="Anna">Name</fm-kampo>',
+    label: "Name",
+    value: "value",
+  },
+  elektilo: {
+    markup: `<fm-elektilo clearable value="deutschland">Land${options("Deutschland", "Österreich")}</fm-elektilo>`,
+    label: "Land",
+    value: "value",
+  },
+  listelektilo: {
+    markup: `<fm-listelektilo clearable value="europa">Region${options("Europa", "Asien")}</fm-listelektilo>`,
+    label: "Region",
+    value: "value",
+  },
+  datelektilo: {
+    markup: '<fm-datelektilo clearable value="2026-10-24">Lieferdatum</fm-datelektilo>',
+    label: "Lieferdatum",
+    value: "value",
+  },
+  kompletigilo: {
+    markup: `<fm-kompletigilo clearable value="deutschland">Land${options("Deutschland", "Dänemark")}</fm-kompletigilo>`,
+    label: "Land",
+    value: "value",
+  },
+};
+
+test.describe("Spec 029 ②b-1 M-6: a clear button in the field", () => {
+  for (const [ero, { markup, label, value }] of Object.entries(CLEARABLE)) {
+    test(`${ero}: „${label} leeren“ empties the value, says input and change, the focus returns`, async ({
+      page,
+    }) => {
+      await serve(page, out, markup);
+      const host = page.locator(`fm-${ero}`);
+      await page.evaluate((name) => {
+        const element = document.querySelector(name) as HTMLElement & { said?: string[] };
+        element.said = [];
+        element.addEventListener("input", () => element.said?.push("input"));
+        element.addEventListener("change", () => element.said?.push("change"));
+      }, `fm-${ero}`);
+      const clear = page.getByRole("button", { name: `${label} leeren` });
+      await expect(clear).toBeVisible();
+      await clear.click();
+      await expect(host).toHaveAttribute(value, "");
+      expect(
+        await page.evaluate(
+          (name) => (document.querySelector(name) as { said?: string[] }).said,
+          `fm-${ero}`,
+        ),
+      ).toEqual(["input", "change"]);
+      await expect(clear).toBeHidden();
+      const focused = await page.evaluate(() => document.activeElement?.localName);
+      expect(focused).toBe(`fm-${ero}`);
+      await page.evaluate(
+        (name) => document.querySelector(name)?.removeAttribute("clearable"),
+        `fm-${ero}`,
+      );
+      await page.evaluate(
+        (name) => document.querySelector(name)?.setAttribute("value", "x"),
+        `fm-${ero}`,
+      );
+      await expect(page.getByRole("button", { name: `${label} leeren` })).toHaveCount(0);
+    });
+  }
+
+  test("plurelektilo: Alle abwählen as before, clearable by default", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      `<fm-plurelektilo values="kontrast">Standards${options("Kontrast", "Fokus")}</fm-plurelektilo>`,
+    );
+    await page
+      .locator("fm-plurelektilo")
+      .evaluate((element) => element.setAttribute("expanded", ""));
+    await expect(page.getByRole("button", { name: "Alle abwählen" })).toHaveCount(1);
+  });
+});

@@ -42,3 +42,19 @@ describe("Spec 029 ②b-1 M-5: loading in the Figma plan", () => {
     });
   });
 });
+
+// M-6 – the BOOLEAN clearable shows the clear button of a field (the close icon at the end of the
+// control); off by default, on for the plurelektilo (its own button, as before).
+describe("Spec 029 ②b-1 M-6: clearable in the Figma plan", () => {
+  it.each(["kampo", "elektilo", "listelektilo", "plurelektilo", "datelektilo", "kompletigilo"])(
+    "%s: a BOOLEAN clearable shows the clear button",
+    (ero) => {
+      const set = plan.components.find((component) => component.set === ero);
+      expect(set?.toggles ?? []).toContainEqual({
+        property: "clearable",
+        part: "clear",
+        defaultValue: ero === "plurelektilo",
+      });
+    },
+  );
+});
