@@ -44,6 +44,12 @@
         "description": "Not available; skipped by the keyboard, nothing can be chosen or dropped."
       },
       {
+        "name": "loading",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-5: the application loads or checks (a value saved, a list fetched, a file examined): the field says so (aria-busy, described by a11y.texts loading) and shows the turning spinner; it stays operable."
+      },
+      {
         "name": "invalid",
         "kind": "boolean",
         "default": false,
@@ -209,6 +215,17 @@
         "easing": {
           "fixed": "motion.easing.standard"
         }
+      },
+      "spinner": {
+        "size": {
+          "fixed": "size.icon.small"
+        },
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "inline-padding": {
+          "fixed": "spacing.small"
+        }
       }
     },
     "bindings": [
@@ -353,6 +370,9 @@
         ],
         "disabled": [
           "aria-disabled"
+        ],
+        "loading": [
+          "aria-busy"
         ]
       },
       "keys": [
@@ -387,6 +407,10 @@
         "max-size-invalid": {
           "de": "{file} ist zu groß: Wähle eine Datei bis {max-size}.",
           "en": "{file} is too large: choose a file up to {max-size}."
+        },
+        "loading": {
+          "de": "lädt",
+          "en": "loading"
         }
       }
     },

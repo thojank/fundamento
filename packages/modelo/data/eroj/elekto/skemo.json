@@ -44,6 +44,12 @@
         "description": "Not available; skipped by the keyboard, no option can be chosen."
       },
       {
+        "name": "loading",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-5: the application loads or checks (a value saved, a list fetched, a file examined): the field says so (aria-busy, described by a11y.texts loading) and shows the turning spinner; it stays operable."
+      },
+      {
         "name": "name",
         "kind": "string",
         "description": "The name in the form; without effect in a design tool, like type on the butono."
@@ -199,6 +205,17 @@
         },
         "easing": {
           "fixed": "motion.easing.standard"
+        }
+      },
+      "spinner": {
+        "size": {
+          "fixed": "size.icon.small"
+        },
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "inline-padding": {
+          "fixed": "spacing.small"
         }
       }
     },
@@ -408,6 +425,9 @@
         ],
         "orientation": [
           "aria-orientation"
+        ],
+        "loading": [
+          "aria-busy"
         ]
       },
       "keys": [
@@ -421,6 +441,10 @@
         "required": {
           "de": "erforderlich",
           "en": "required"
+        },
+        "loading": {
+          "de": "lädt",
+          "en": "loading"
         }
       }
     },

@@ -8,6 +8,11 @@
 // Spec 029 ①: komuna took the values of the Fonto, so every picture of komuna changed on purpose;
 // the comparison draws with the values of komuna 0.2 (the structure rebuilt from komuna-0-2) and
 // keeps measuring what it measured: the Bauformen, not the values.
+// Spec 029 ②b-1: the picture names the variables a shadow binds without their ids (they follow the
+// order the file was filled in; every new variable shifted them). The basis was written again from
+// the plugin of 943d965 (main after #111 and #110, the plugin unchanged since): the changes of Spec
+// 027 that WANTED and STRETCHED named are part of it, so both lists are empty until a spec changes
+// a picture on purpose again.
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -29,54 +34,14 @@ const SHOWN_IN_MAIN = (set: string, layer: string) =>
  * Wanted changes of the spec: set → the variants whose name holds `match` (all without), with the
  * Befund. B-2: a text that had no fill painted nothing in Figma; with its fill it is seen.
  */
-const WANTED: Readonly<Record<string, { befund: string; match?: string }>> = {
-  datelektilo: { befund: "B-2: der Wert im Feld (vorher ohne Füllung); aufgeklappt auch B-1" },
-  glitilo: { befund: "B-2: die Zahl im Zahlenfeld (vorher ohne Füllung)", match: "field=true" },
-  konsileto: { befund: "B-2: das Wort des Auslösers (vorher ohne Füllung)" },
-  sxvebilo: { befund: "B-2: das Wort des Auslösers (vorher ohne Füllung)" },
-  menuo: { befund: "B-7: der Auslöser in Zielgröße; B-2: sein Wort (vorher ohne Füllung)" },
-  lokredaktilo: { befund: "B-9: das Bearbeiten-Icon im Anzeigezustand", match: "editing=false" },
-};
+const WANTED: Readonly<Record<string, { befund: string; match?: string }>> = {};
 
 /**
  * What B-1 and B-5 change as a consequence: set → the variants whose name holds `match`, with
  * the reason. The variant keeps the width it hugged; a part that fills now spans it where a
  * sibling was wider than the part.
  */
-const STRETCHED: Readonly<Record<string, { reason: string; match: string; count: number }>> = {
-  kampo: {
-    reason:
-      "B-1: die Beschriftung ist breiter als die Eingabe; die Eingabe füllt das Feld (+1,2 px)",
-    match: "size=small",
-    count: 6,
-  },
-  alsxutilo: {
-    reason: "B-1: der Hinweis ist breiter als die Ablagefläche; sie füllt das Feld",
-    match: "dropzone=false",
-    count: 6,
-  },
-  kompletigilo: {
-    reason: "B-1: die Liste ist 640 breit (size.container.small); die Eingabe füllt das Feld",
-    match: "expanded=true",
-    count: 15,
-  },
-  listelektilo: {
-    reason: "B-1: die Liste ist 640 breit (size.container.small); die Eingabe füllt das Feld",
-    match: "expanded=true",
-    count: 6,
-  },
-  plurelektilo: {
-    reason: "B-1: die Liste ist 640 breit (size.container.small); die Eingabe füllt das Feld",
-    match: "expanded=true",
-    count: 6,
-  },
-  plenstato: {
-    reason:
-      "B-5: der Text füllt die zentrierte Spalte und ist zentriert gesetzt — dieselben Glyphen an derselben Stelle; das Bild des Doubles notiert die Breite des zentrierten Textes",
-    match: "state=rest",
-    count: 2,
-  },
-};
+const STRETCHED: Readonly<Record<string, { reason: string; match: string; count: number }>> = {};
 
 /** One run of the plan in the double, read by every case (Vitest collects nothing here). */
 async function draw() {

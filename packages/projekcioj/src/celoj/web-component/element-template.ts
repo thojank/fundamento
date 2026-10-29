@@ -331,7 +331,7 @@ function fieldMarkup(
     ? '<div part="calendar" id="calendar" role="dialog" popover="manual" aria-modal="false" aria-labelledby="month"><div part="head"><fm-butono part="prev" emphasis="low" size="small"><fm-ikono slot="icon-start" name="chevron-left"></fm-ikono></fm-butono><span part="month" id="month" aria-live="polite"></span><fm-butono part="next" emphasis="low" size="small"><fm-ikono slot="icon-start" name="chevron-right"></fm-ikono></fm-butono></div><div part="grid" role="grid" aria-labelledby="month"><div part="weekdays" role="row"></div></div></div>'
     : "";
   const row = stepper || datepicker ? `<div part="row">${native}${trigger}</div>` : native;
-  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label>${row}${calendar}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span>${SPINNER}</label>${row}${calendar}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -374,7 +374,7 @@ function listMarkup(slots: NonNullable<ElementNames["slots"]>, multi: boolean): 
   const listbox = multi
     ? '<div part="listbox" id="panel" popover="manual"><input part="filter" type="search" aria-controls="listbox" autocomplete="off" hidden><div part="items" role="listbox" id="listbox" aria-multiselectable="true"></div><fm-butono part="clear" emphasis="low" size="small"></fm-butono></div>'
     : '<div part="listbox" role="listbox" id="listbox" popover="manual"></div>';
-  return `<div part="field"><label part="label" id="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label>${button}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+  return `<div part="field"><label part="label" id="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span>${SPINNER}</label>${button}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -410,7 +410,7 @@ function sliderMarkup(slots: NonNullable<ElementNames["slots"]>): string {
   const texts = textsMarkup(
     slots.filter((slot) => slot.name !== "min-label" && slot.name !== "max-label"),
   );
-  return `<div part="field"><span part="label" id="label"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></span><div part="row"><span part="min-label" id="min-label"><slot name="min-label"></slot></span><div part="track" id="control"><div part="fill"></div><div part="thumb" id="thumb-start" role="slider" tabindex="0" aria-labelledby="label from"></div><div part="thumb" id="thumb-end" role="slider" tabindex="0" hidden></div></div><span part="max-label" id="max-label"><slot name="max-label"></slot></span><fm-kampo part="number" kind="number" hidden><span id="number-label"></span></fm-kampo></div>${texts}<span id="from" hidden></span><span id="to" hidden></span><span id="fm-texts" hidden></span></div>`;
+  return `<div part="field"><span part="label" id="label"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span>${SPINNER}</span><div part="row"><span part="min-label" id="min-label"><slot name="min-label"></slot></span><div part="track" id="control"><div part="fill"></div><div part="thumb" id="thumb-start" role="slider" tabindex="0" aria-labelledby="label from"></div><div part="thumb" id="thumb-end" role="slider" tabindex="0" hidden></div></div><span part="max-label" id="max-label"><slot name="max-label"></slot></span><fm-kampo part="number" kind="number" hidden><span id="number-label"></span></fm-kampo></div>${texts}<span id="from" hidden></span><span id="to" hidden></span><span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -433,7 +433,7 @@ function dialogMarkup(): string {
  */
 function selectMarkup(slots: NonNullable<ElementNames["slots"]>, role: string): string {
   void role;
-  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><div><select part="control" id="control"></select><span part="indicator" aria-hidden="true">${IKONO_CHEVRON}</span></div>${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span>${SPINNER}</label><div><select part="control" id="control"></select><span part="indicator" aria-hidden="true">${IKONO_CHEVRON}</span></div>${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -452,7 +452,7 @@ function toggleMarkup(
   const mark = marked
     ? `<span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span>`
     : "";
-  const label = `<label part="label" id="label" for="control"><slot></slot>${mark}</label>`;
+  const label = `<label part="label" id="label" for="control"><slot></slot>${mark}${SPINNER}</label>`;
   const texts = textsMarkup(slots);
   const beside = texts === "" ? label : `<div>${label}${texts}</div>`;
   const sign = role === "checkbox" ? IKONO_CHECK : (signOf(role) ?? "");
@@ -469,7 +469,7 @@ function groupMarkup(slots: NonNullable<ElementNames["slots"]>, marked: boolean)
   const mark = marked
     ? `<span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span>`
     : "";
-  return `<div part="field" id="control" role="radiogroup" aria-labelledby="label"><span part="label" id="label"><slot></slot>${mark}</span><div part="options"></div>${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+  return `<div part="field" id="control" role="radiogroup" aria-labelledby="label"><span part="label" id="label"><slot></slot>${mark}${SPINNER}</span><div part="options"></div>${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -487,6 +487,13 @@ function rowMarkup(role: string): string {
  * it with the motion roles of the Skemo.
  */
 const ARC_PATH = "M8 2a6 6 0 1 1-6 6";
+
+/**
+ * The spinner of a field (Spec 029 ②b-1 M-5): the arc of the loading indicator at the end of the
+ * label, after the mark of a required field; hidden until the field loads, heard not seen (the
+ * field is busy and described by the Modelo's word).
+ */
+const SPINNER = `<span part="spinner" aria-hidden="true" hidden><svg aria-hidden="true" viewBox="0 0 16 16" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="${ARC_PATH}"/></svg></span>`;
 
 /**
  * The sign of a dismiss butono (Spec 011 ③, D-09; Spec 014 ②, G3): the ikono close in its
@@ -700,7 +707,7 @@ function separatorMarkup(): string {
  * the list of the chosen files follows, and a live region says how many there are.
  */
 function uploadMarkup(): string {
-  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><div part="dropzone"><span part="picker"><fm-butono part="choose" emphasis="medium" inert><fm-ikono slot="icon-start" name="upload"></fm-ikono><span id="choose-text"></span></fm-butono><input part="control" id="control" type="file"></span><span part="drop-hint" id="drop-hint" hidden></span></div><span part="help" id="help" hidden><slot name="help"></slot></span><span part="error" id="error" hidden aria-live="polite"><slot name="error"></slot><span id="file-error"></span></span><ul part="file-list" hidden></ul><span part="count" role="status" aria-live="polite" class="fm-hidden"></span><span id="fm-texts" hidden></span></div>`;
+  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span>${SPINNER}</label><div part="dropzone"><span part="picker"><fm-butono part="choose" emphasis="medium" inert><fm-ikono slot="icon-start" name="upload"></fm-ikono><span id="choose-text"></span></fm-butono><input part="control" id="control" type="file"></span><span part="drop-hint" id="drop-hint" hidden></span></div><span part="help" id="help" hidden><slot name="help"></slot></span><span part="error" id="error" hidden aria-live="polite"><slot name="error"></slot><span id="file-error"></span></span><ul part="file-list" hidden></ul><span part="count" role="status" aria-live="polite" class="fm-hidden"></span><span id="fm-texts" hidden></span></div>`;
 }
 
 /** One chosen file (Spec 015 ②): its name, its size and the butono that removes it. */
@@ -5597,13 +5604,19 @@ ${autoDisconnect}
     }
     if (HAS_PROP.has("loading")) {
       const busy = this.propValue("loading") === true;
-      // A button that works ignores activation; a field that loads suggestions (Nachlese 4 N-9)
-      // stays operable — the person keeps typing — and is only busy.
+      // A button that works ignores activation; a field that loads (Nachlese 4 N-9, Spec 029 ②b-1
+      // M-5) stays operable — the person keeps typing or choosing — and is only busy, with the
+      // spinner at the end of its label turning.
       if (busy) {
         control.setAttribute("aria-busy", "true");
-${isSuggest ? "" : '        control.setAttribute("aria-disabled", "true");\n'}      } else {
+${host === "button" ? '        control.setAttribute("aria-disabled", "true");\n' : ""}      } else {
         control.removeAttribute("aria-busy");
-${isSuggest ? "" : '        control.removeAttribute("aria-disabled");\n'}      }
+${host === "button" ? '        control.removeAttribute("aria-disabled");\n' : ""}      }
+      const spinner = this.shadowRoot?.querySelector('[part="spinner"]');
+      if (spinner instanceof HTMLElement) {
+        spinner.hidden = !busy;
+        this.#turnSpinner(spinner, busy);
+      }
     }
     // A link: \`to\` is its target (Art. VIII, the Web Celo spells it href); \`external\` marks
     // that the target lies outside the application (Spec 008, D-09).
@@ -5707,6 +5720,25 @@ ${
     : ""
 }`
 }  }
+
+  /**
+   * Turns the spinner of a field while it loads (Spec 029 ②b-1 M-5): one turn per slow duration
+   * of the motion roles, for ever; under reduced motion the role is instant and the arc stands.
+   */
+  #turnSpinner(spinner: HTMLElement, turning: boolean): void {
+    const running = spinner.getAnimations();
+    const raw = getComputedStyle(this).getPropertyValue("--fm-motion-duration-slow").trim();
+    const duration = Number.parseFloat(raw) * (raw.endsWith("ms") ? 1 : 1000);
+    if (!turning || !this.isConnected || !(duration > 0)) {
+      for (const animation of running) animation.cancel();
+      return;
+    }
+    if (running.length > 0) return;
+    spinner.animate([{ transform: "rotate(0turn)" }, { transform: "rotate(1turn)" }], {
+      duration,
+      iterations: Number.POSITIVE_INFINITY,
+    });
+  }
 
   #activate(event: Event): void {
     if (this.propValue("loading") === true || this.propValue("disabled") === true) {

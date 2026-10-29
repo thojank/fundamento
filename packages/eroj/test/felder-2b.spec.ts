@@ -12,7 +12,7 @@ const options = (...words: string[]) =>
   words.map((word) => `<data slot="options" value="${word.toLowerCase()}">${word}</data>`).join("");
 
 /** Every field of M-5 with a label, as the Vitrino writes it. */
-export const FIELD_MARKUP: Readonly<Record<string, (attributes: string) => string>> = {
+const FIELD_MARKUP: Readonly<Record<string, (attributes: string) => string>> = {
   kampo: (a) => `<fm-kampo ${a}>Name</fm-kampo>`,
   tekstareo: (a) => `<fm-tekstareo ${a}>Begründung</fm-tekstareo>`,
   elektilo: (a) => `<fm-elektilo ${a}>Land${options("Deutschland", "Österreich")}</fm-elektilo>`,

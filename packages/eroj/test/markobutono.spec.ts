@@ -37,7 +37,7 @@ test.describe("fm-markobutono behaviour", () => {
             n.getAttribute("part"),
           ),
         ),
-    ).toEqual(["field", "control", "indicator", "label", "required-mark", "error"]);
+    ).toEqual(["field", "control", "indicator", "label", "required-mark", "spinner", "error"]);
   });
 
   // Nachlese 4 N-7 (Spec 014 ② O-7): the check mark is the Ikonaro's check in the size of the

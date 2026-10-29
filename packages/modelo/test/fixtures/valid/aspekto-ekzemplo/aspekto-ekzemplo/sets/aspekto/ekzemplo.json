@@ -2814,6 +2814,22 @@
           "$type": "cubicBezier",
           "$value": "{motion.easing.standard}"
         }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
+        }
       }
     },
     "apartigilo": {
@@ -3944,6 +3960,22 @@
           "$type": "cubicBezier",
           "$value": "{motion.easing.standard}"
         }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
+        }
       }
     },
     "dialogo": {
@@ -4306,6 +4338,22 @@
           "$type": "cubicBezier",
           "$value": "{motion.easing.standard}"
         }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
+        }
       }
     },
     "elekto": {
@@ -4563,6 +4611,22 @@
         "easing": {
           "$type": "cubicBezier",
           "$value": "{motion.easing.standard}"
+        }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
         }
       }
     },
@@ -4879,6 +4943,22 @@
         "easing": {
           "$type": "cubicBezier",
           "$value": "{motion.easing.standard}"
+        }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
         }
       }
     },
@@ -5337,6 +5417,22 @@
         "size": {
           "$type": "dimension",
           "$value": "{size.control.small}"
+        }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
         }
       }
     },
@@ -5797,6 +5893,22 @@
         "radius": {
           "$type": "dimension",
           "$value": "{radius.role.control}"
+        }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
         }
       }
     },
@@ -6422,6 +6534,22 @@
           "$type": "cubicBezier",
           "$value": "{motion.easing.standard}"
         }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
+        }
       }
     },
     "lokredaktilo": {
@@ -6771,6 +6899,22 @@
         "easing": {
           "$type": "cubicBezier",
           "$value": "{motion.easing.standard}"
+        }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
         }
       }
     },
@@ -7670,6 +7814,22 @@
           "$type": "cubicBezier",
           "$value": "{motion.easing.standard}"
         }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
+        }
       }
     },
     "saltligilo": {
@@ -8354,6 +8514,22 @@
           "$type": "cubicBezier",
           "$value": "{motion.easing.standard}"
         }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
+        }
       }
     },
     "sxvebilo": {
@@ -8801,6 +8977,22 @@
         "easing": {
           "$type": "cubicBezier",
           "$value": "{motion.easing.standard}"
+        }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
         }
       }
     },

@@ -109,6 +109,7 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
         ["invalid", "boolean", false],
         ["size", ["small", "medium", "large"], "medium"],
         ["disabled", "boolean", false],
+        ["loading", "boolean", false],
         ["name", "string", undefined],
         // Spec 011 ① (plan ① D-09): a chosen empty option, 'Alle', 'keine Auswahl', value "".
         ["empty-label", "string", undefined],
@@ -200,16 +201,23 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       name: ["slot:label"],
       description: ["slot:help", "slot:error"],
       states: {
+        loading: ["aria-busy"],
         selected: ["aria-selected"],
         required: ["aria-required"],
         invalid: ["aria-invalid"],
         disabled: ["aria-disabled"],
       },
       keys: ["ArrowUp", "ArrowDown", "Enter", "Escape"],
-      texts: { required: { de: "erforderlich", en: "required" } },
+      texts: {
+        required: { de: "erforderlich", en: "required" },
+        loading: { de: "lädt", en: "loading" },
+      },
     });
     // Spec 025 ①: the kampo speaks its buttons too; required is the shared word.
-    expect(skemo?.a11y.texts).toEqual({ required: kampo?.skemo.a11y.texts?.required });
+    expect(skemo?.a11y.texts).toEqual({
+      required: kampo?.skemo.a11y.texts?.required,
+      loading: kampo?.skemo.a11y.texts?.loading,
+    });
   });
 
   it("forbids an error text without invalid, like the kampo (constraint, Spec 009 D-04)", () => {

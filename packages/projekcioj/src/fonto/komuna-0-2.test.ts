@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 import { projectModeloSource, resolveCombination } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../build.js";
+import { ADDED_SINCE_MAIN, addedSinceMain } from "./neu-seit-main.js";
 
 const CXIUJ = fileURLToPath(
   new URL(
@@ -37,6 +38,7 @@ const canonical = (value: unknown): unknown =>
 
 function hashOf(tokens: Record<string, { type?: unknown; value?: unknown }>): string {
   const rows = Object.keys(tokens)
+    .filter((name) => !addedSinceMain(name))
     .sort()
     .map((name) => [name, tokens[name]?.type, canonical(tokens[name]?.value)]);
   return createHash("sha256").update(JSON.stringify(rows)).digest("hex");
@@ -61,7 +63,7 @@ describe("Spec 029 ① 1: komuna-0-2 keeps today's komuna", () => {
         key.split("&").map((pair) => pair.split("=") as [string, string]),
       );
       const { tokens } = resolveCombination(modelo, { aspekto: "komuna-0-2", ...assignment });
-      expect(Object.keys(tokens)).toHaveLength(BAZO.tokens);
+      expect(Object.keys(tokens)).toHaveLength(BAZO.tokens + ADDED_SINCE_MAIN);
       if (hashOf(tokens) !== expected) differences.push(key);
     }
     expect(Object.keys(BAZO.kombinoj)).toHaveLength(72);

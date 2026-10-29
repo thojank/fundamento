@@ -49,7 +49,16 @@ test.describe("fm-elektilo behaviour", () => {
             n.getAttribute("part"),
           ),
         ),
-    ).toEqual(["field", "label", "required-mark", "control", "indicator", "help", "error"]);
+    ).toEqual([
+      "field",
+      "label",
+      "required-mark",
+      "spinner",
+      "control",
+      "indicator",
+      "help",
+      "error",
+    ]);
     // The chevron is a sign of the projection: hidden from assistive technology, no text.
     await expect(page.locator("#a").locator('[part="indicator"]')).toHaveAttribute(
       "aria-hidden",

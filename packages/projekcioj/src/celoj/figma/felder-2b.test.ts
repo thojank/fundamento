@@ -14,8 +14,7 @@ const config = new URL(
 const prepared = celoInputOf(projectModeloSource(config));
 if (!prepared.ok) throw new Error("core + ekzemplo must be valid");
 const plan = JSON.parse(
-  FIGMA_CELO.generate(prepared.input).find((file) => file.path === "figma/plan.json")?.text ??
-    "{}",
+  FIGMA_CELO.generate(prepared.input).find((file) => file.path === "figma/plan.json")?.text ?? "{}",
 ) as FigmaPlan;
 
 const FIELDS = [

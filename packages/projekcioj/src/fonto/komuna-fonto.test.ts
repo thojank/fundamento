@@ -14,6 +14,7 @@ import {
 } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../build.js";
+import { addedSinceMain } from "./neu-seit-main.js";
 
 const repo = loadModelo(defaultModeloSource());
 if (repo.modelo === undefined) throw new Error("The repository Modelo does not load.");
@@ -188,6 +189,7 @@ describe("Spec 029 ①: the other brands keep their values", () => {
         const assignment = Object.fromEntries(key.split("&").map((pair) => pair.split("=")));
         const { tokens } = resolveCombination(prepared.input.modelo, { ...assignment, aspekto });
         const rows = Object.keys(tokens)
+          .filter((name) => !addedSinceMain(name))
           .sort()
           // provo: Prata reaches every token of type typography and fontFamily, Ero-Tokens included.
           .filter(

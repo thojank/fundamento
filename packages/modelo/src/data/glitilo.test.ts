@@ -65,6 +65,7 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       ["field", "boolean", false, false],
       ["required", "boolean", false, false],
       ["disabled", "boolean", false, false],
+      ["loading", "boolean", false, false],
       ["readonly", "boolean", false, false],
       ["invalid", "boolean", false, false],
       ["name", "string", false, undefined],
@@ -100,6 +101,7 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       "focus-ring",
       "box",
       "motion",
+      "spinner",
     ]);
     expect(skemo?.parts.track).toEqual({
       fill: { fixed: "color.background.sunken" },
@@ -157,6 +159,7 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       name: ["slot:label"],
       description: ["slot:help", "slot:error"],
       states: {
+        loading: ["aria-busy"],
         required: ["aria-required"],
         invalid: ["aria-invalid"],
         disabled: ["aria-disabled"],
@@ -173,6 +176,7 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
         "End",
       ],
       texts: {
+        loading: { de: "lädt", en: "loading" },
         required: { de: "erforderlich", en: "required" },
         "min-label-name": { de: "Von", en: "From" },
         "max-label-name": { de: "Bis", en: "To" },

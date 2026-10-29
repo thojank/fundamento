@@ -56,6 +56,7 @@ describe("alsxutilo in the repo Modelo (section ②, G1, G2)", () => {
       ["dropzone", "boolean", false, false],
       ["required", "boolean", false, false],
       ["disabled", "boolean", false, false],
+      ["loading", "boolean", false, false],
       ["invalid", "boolean", false, false],
       ["name", "string", false, undefined],
     ]);
@@ -87,6 +88,7 @@ describe("alsxutilo in the repo Modelo (section ②, G1, G2)", () => {
       "focus-ring",
       "box",
       "motion",
+      "spinner",
     ]);
     const kampo = eroNamed("kampo")?.skemo;
     for (const part of ["required-mark", "help", "error", "focus-ring", "motion"]) {
@@ -128,12 +130,14 @@ describe("alsxutilo in the repo Modelo (section ②, G1, G2)", () => {
       name: ["slot:label"],
       description: ["slot:help", "slot:error"],
       states: {
+        loading: ["aria-busy"],
         required: ["aria-required"],
         invalid: ["aria-invalid"],
         disabled: ["aria-disabled"],
       },
       keys: ["Space", "Enter"],
       texts: {
+        loading: { de: "lädt", en: "loading" },
         required: { de: "erforderlich", en: "required" },
         "choose-name": { de: "Datei auswählen", en: "Choose file" },
         "drop-hint-name": { de: "oder hierher ziehen", en: "or drop it here" },

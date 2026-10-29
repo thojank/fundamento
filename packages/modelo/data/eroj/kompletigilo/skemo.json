@@ -267,6 +267,17 @@
         "radius": {
           "fixed": "radius.role.control"
         }
+      },
+      "spinner": {
+        "size": {
+          "fixed": "size.icon.small"
+        },
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "inline-padding": {
+          "fixed": "spacing.small"
+        }
       }
     },
     "bindings": [

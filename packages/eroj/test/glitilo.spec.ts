@@ -98,6 +98,7 @@ test.describe("fm-glitilo behaviour", () => {
       "field",
       "label",
       "required-mark",
+      "spinner",
       "row",
       "min-label",
       "track",

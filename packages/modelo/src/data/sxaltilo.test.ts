@@ -74,6 +74,7 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
       ["checked", "boolean", false],
       ["size", ["small", "medium", "large"], "medium"],
       ["disabled", "boolean", false],
+      ["loading", "boolean", false],
       ["name", "string", undefined],
     ]);
     expect(skemo.states).toEqual(["rest", "hover", "focus", "disabled"]);
@@ -88,6 +89,7 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
       "indicator",
       "label",
       "motion",
+      "spinner",
       "surface",
     ]);
     const tokens = [
@@ -140,8 +142,9 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
     expect(skemo.a11y).toEqual({
       role: "switch",
       name: ["slot:label"],
-      states: { checked: ["aria-checked"], disabled: ["aria-disabled"] },
+      states: { checked: ["aria-checked"], disabled: ["aria-disabled"], loading: ["aria-busy"] },
       keys: ["Space", "Enter"],
+      texts: { loading: { de: "lädt", en: "loading" } },
     });
   });
 

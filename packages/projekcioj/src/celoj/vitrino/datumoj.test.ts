@@ -485,7 +485,8 @@ describe("the Vitrino shows the elekto with three options, required, invalid and
         `<fm-elekto size="${size}" value="1" invalid>${size}${OPTIONS}<span slot="help">Hinweis</span><span slot="error">Fehler</span></fm-elekto>`,
       );
     }
-    expect(grid.match(/<data slot="options"/g)).toHaveLength(3 * 4 * 3);
+    // Spec 029 ②b-1 M-5: a fifth column, loading.
+    expect(grid.match(/<data slot="options"/g)).toHaveLength(3 * 5 * 3);
     expect(grid.match(/slot="error"/g)).toHaveLength(3);
     expect(VITRINO_OPTIONS).toEqual(["Eins", "Zwei", "Drei"]);
   });
@@ -517,7 +518,8 @@ describe("the Vitrino shows the elektilo closed with the prompt, required, inval
       );
     }
     expect(grid).not.toMatch(/<fm-elektilo[^>]* value=/);
-    expect(grid.match(/<data slot="options"/g)).toHaveLength(3 * 4 * 3);
+    // Spec 029 ②b-1 M-5: a fifth column, loading.
+    expect(grid.match(/<data slot="options"/g)).toHaveLength(3 * 5 * 3);
     expect(grid.match(/slot="error"/g)).toHaveLength(3);
     expect(VITRINO_PROMPT).toBe("Bitte wählen");
     // The radio group keeps its first option chosen.
@@ -840,11 +842,12 @@ describe("the Vitrino shows the pagxigilo and the spuro (Spec 015 ①)", () => {
 // dropzone, required, disabled and invalid — each with accept and max-size and a help that names
 // kinds and size (file-constraints-stated); the error only under invalid.
 describe("the Vitrino shows the alsxutilo (Spec 015 ②)", () => {
-  it("one row, five columns, accept and max-size, the help names kinds and size", () => {
+  it("one row, six columns, accept and max-size, the help names kinds and size", () => {
     const grid = datumoj.eroj.alsxutilo ?? "";
-    expect((grid.match(/<fm-alsxutilo /g) ?? []).length).toBe(5);
+    // Spec 029 ②b-1 M-5: loading as a column of its own.
+    expect((grid.match(/<fm-alsxutilo /g) ?? []).length).toBe(6);
     expect(grid).toContain(
-      '<th scope="col">rest</th><th scope="col">dropzone</th><th scope="col">required</th><th scope="col">disabled</th><th scope="col">invalid</th>',
+      '<th scope="col">rest</th><th scope="col">dropzone</th><th scope="col">required</th><th scope="col">disabled</th><th scope="col">loading</th><th scope="col">invalid</th>',
     );
     expect(grid).toContain(
       '<fm-alsxutilo max-size="5000000" accept=".pdf,.png" dropzone>rest<span slot="help">PDF oder PNG, höchstens 5 MB</span></fm-alsxutilo>',

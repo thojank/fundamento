@@ -67,6 +67,12 @@
         "description": "Not available; skipped by the keyboard."
       },
       {
+        "name": "loading",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-5: the application loads or checks (a value saved, a list fetched, a file examined): the field says so (aria-busy, described by a11y.texts loading) and shows the turning spinner; it stays operable."
+      },
+      {
         "name": "readonly",
         "kind": "boolean",
         "default": false,
@@ -227,6 +233,17 @@
         "easing": {
           "fixed": "motion.easing.standard"
         }
+      },
+      "spinner": {
+        "size": {
+          "fixed": "size.icon.small"
+        },
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "inline-padding": {
+          "fixed": "spacing.small"
+        }
       }
     },
     "bindings": [
@@ -356,6 +373,9 @@
         ],
         "readonly": [
           "aria-readonly"
+        ],
+        "loading": [
+          "aria-busy"
         ]
       },
       "keys": [
@@ -380,6 +400,10 @@
         "max-label-name": {
           "de": "Bis",
           "en": "To"
+        },
+        "loading": {
+          "de": "lädt",
+          "en": "loading"
         }
       }
     },

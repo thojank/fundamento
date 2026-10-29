@@ -101,6 +101,12 @@
         "name": "step",
         "kind": "string",
         "description": "How far one step button or one arrow key moves a number (constraint: only with kind number); 1 without it."
+      },
+      {
+        "name": "loading",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-5: the application loads or checks (a value saved, a list fetched, a file examined): the field says so (aria-busy, described by a11y.texts loading) and shows the turning spinner; it stays operable."
       }
     ],
     "states": [
@@ -248,6 +254,17 @@
       "clear": {
         "size": {
           "fixed": "size.control.small"
+        }
+      },
+      "spinner": {
+        "size": {
+          "fixed": "size.icon.small"
+        },
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "inline-padding": {
+          "fixed": "spacing.small"
         }
       }
     },
@@ -522,6 +539,9 @@
         ],
         "readonly": [
           "aria-readonly"
+        ],
+        "loading": [
+          "aria-busy"
         ]
       },
       "keys": [
@@ -546,6 +566,10 @@
         "clear-name": {
           "de": "Suche leeren",
           "en": "Clear search"
+        },
+        "loading": {
+          "de": "lädt",
+          "en": "loading"
         }
       }
     },

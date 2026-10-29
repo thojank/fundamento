@@ -120,3 +120,12 @@
 | Rot gemessen | Doku-Test 7 von 8 rot |
 | Grün gemessen | Doku-Test 8 von 8; Modelo gesamt und Lint im PR |
 | Abgleich | 40 Eroj, 240 Zeilen: 27 übernehmen, 72 anpassen, 141 behalten; 14 Muster; 45 fehlende Gattungen (33 Eroj-Runde 6) |
+
+## ②b-1 Felder (M-5, M-6, M-1, M-2)
+
+- [x] **T2950 M-5 rot** in `ac0fe9b` (Skemo 23, Browser 12, Figma 12).
+- [x] **T2951 M-5 grün:** Modelo, Web, Figma, Vitrino; Erwartungen der bestehenden Tests nachgezogen (Teile, Props, Zählungen, Prüfsummen).
+- [ ] T2952 M-6 Löschen-Knopf
+- [ ] T2953 M-1 Grund für „deaktiviert“
+- [ ] T2954 M-2 Status warning/success
+

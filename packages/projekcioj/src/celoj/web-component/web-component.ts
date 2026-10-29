@@ -2091,6 +2091,16 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
     }
     add(':where([part="control"][data-icon-only])', ["padding-inline: 0;", "min-block-size: 0;"]);
   }
+  // Spec 029 ②b-1 M-5: the spinner of a field stands beside the label while the field loads (the
+  // element takes its hidden away); its arc fills its box.
+  if (skemo.parts.spinner !== undefined) {
+    add(':where([part="field"]) [part="spinner"]:not([hidden])', [
+      "display: inline-block;",
+      "flex: none;",
+      "vertical-align: middle;",
+    ]);
+    add(':where([part="field"]) [part="spinner"] > svg', ["display: block;"]);
+  }
   // The place of the chevron of a select comes last (D-06): it refines the inline padding.
   const placed = isSelect(skemo) ? selectRules(skemo, owner) : [];
   const tokenRules = [...fixedRules.entries(), ...keyedRules.entries(), ...placed].map(
@@ -2200,6 +2210,9 @@ function selectorOf(
   combination: Readonly<Record<string, string>>,
   keys: readonly string[],
 ): string {
+  // Spec 029 ②b-1 M-5: the spinner of a field is its own element at the end of the label; every
+  // field host has the root [part="field"].
+  if (part === "spinner") return ':where([part="field"]) [part="spinner"]';
   // The state of one entry (Spec 010 ③, E7: selected) is no data attribute of the Ero: the row of
   // the option speaks it, as the Skemo names it in a11y.states (aria-checked).
   const data = keys

@@ -99,6 +99,7 @@ describe("kampo in the repo Modelo (T004)", () => {
       ["autocomplete", "string", undefined],
       ["stepper", "boolean", false],
       ["step", "string", undefined],
+      ["loading", "boolean", false],
     ]);
     expect(skemo.props.map((prop) => prop.name)).not.toContain("label");
     expect(skemo.props.map((prop) => prop.name)).not.toContain("type");
@@ -137,6 +138,7 @@ describe("kampo in the repo Modelo (T004)", () => {
       "motion",
       "placeholder",
       "required-mark",
+      "spinner",
       "surface",
       "text",
     ]);
@@ -167,6 +169,7 @@ describe("kampo in the repo Modelo (T004)", () => {
     expect(skemo.a11y.name).toEqual(["slot:label"]);
     expect(skemo.a11y.description).toEqual(["slot:help", "slot:error"]);
     expect(skemo.a11y.states).toEqual({
+      loading: ["aria-busy"],
       required: ["aria-required"],
       invalid: ["aria-invalid"],
       disabled: ["aria-disabled"],
@@ -175,6 +178,7 @@ describe("kampo in the repo Modelo (T004)", () => {
     // Spec 025 ①: the words of the step buttons and the clear button (<part>-name).
     expect(skemo.a11y.texts).toEqual({
       required: { de: "erforderlich", en: "required" },
+      loading: { de: "lädt", en: "loading" },
       "decrement-name": { de: "Verringern", en: "Decrease" },
       "increment-name": { de: "Erhöhen", en: "Increase" },
       "clear-name": { de: "Suche leeren", en: "Clear search" },

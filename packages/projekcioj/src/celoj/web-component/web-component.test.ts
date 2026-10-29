@@ -310,7 +310,7 @@ describe("Web Component Celo for the sxaltilo (Spec 010 ①)", () => {
   it("renders a button with role switch as the track, the knob in it and the label beside it", () => {
     const templates = [...sxaltiloElement.matchAll(/`(<[^`]*)`/g)].map((m) => m[1] ?? "");
     expect(templates.flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]))).toEqual(
-      ["field", "control", "indicator", "label"],
+      ["field", "control", "indicator", "label", "spinner"],
     );
     expect(sxaltiloElement).toContain('role="switch"');
     expect(sxaltiloElement).toContain('aria-labelledby="label"');
@@ -379,6 +379,7 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
       "indicator",
       "label",
       "required-mark",
+      "spinner",
       "error",
     ]);
     expect(markobutonoElement).toContain('role="checkbox"');
@@ -394,7 +395,7 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
       expect(template).not.toMatch(/>[^<\s$][^<]*</);
     }
     // The switch is unchanged: no mark, no error, no sign in its knob (① D-09).
-    expect(parts(sxaltiloElement)).toEqual(["field", "control", "indicator", "label"]);
+    expect(parts(sxaltiloElement)).toEqual(["field", "control", "indicator", "label", "spinner"]);
     expect(sxaltiloElement).toContain('role="switch"');
   });
 
@@ -484,6 +485,7 @@ describe("Web Component Celo for the elekto (Spec 010 ③)", () => {
       "field",
       "label",
       "required-mark",
+      "spinner",
       "options",
       "help",
       "error",
@@ -510,6 +512,7 @@ describe("Web Component Celo for the elekto (Spec 010 ③)", () => {
       "indicator",
       "label",
       "required-mark",
+      "spinner",
       "error",
     ]);
     expect(markobutonoElement).not.toContain("slotAssignment");
@@ -602,6 +605,7 @@ describe("Web Component Celo for the elektilo (Spec 010 ④)", () => {
       "field",
       "label",
       "required-mark",
+      "spinner",
       "control",
       "indicator",
       "help",
@@ -631,6 +635,7 @@ describe("Web Component Celo for the elektilo (Spec 010 ④)", () => {
       "field",
       "label",
       "required-mark",
+      "spinner",
       "row",
       "control",
       "help",
@@ -800,7 +805,15 @@ describe("Web Component Celo for the tekstareo (Spec 011 ②)", () => {
     templates(source).flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]));
 
   it("renders the field of the kampo around a native textarea", () => {
-    expect(parts(element)).toEqual(["field", "label", "required-mark", "control", "help", "error"]);
+    expect(parts(element)).toEqual([
+      "field",
+      "label",
+      "required-mark",
+      "spinner",
+      "control",
+      "help",
+      "error",
+    ]);
     expect(element).toContain('<textarea part="control" id="control"></textarea>');
     expect(element).toContain('<label part="label" for="control">');
     expect(element).toContain("static formAssociated = true;");

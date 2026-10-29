@@ -1419,8 +1419,23 @@ Die Spec: `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/sp
 
 ## ②b-1 – Feld-Muster (M-1, M-2, M-5, M-6)
 
-Auftrag des Maintainers vom 28.10. (21:56): ②b setzt genau die Entscheidungen aus ②a um (`abgleich.json` mit Auflagen), Maßstab „gut genug“, kein Story- oder Pixelabgleich mit dem Storybook der Fonto; Figma prüft der Maintainer bei der Abnahme. Schnitt (Entscheidung 29.10.): gestapelte PRs – ②b-1 Feld-Muster, ②b-2 Größen und Achsen, ②b-3 Anatomie und Verhalten, ②b-4 kodbloko mit Syntaxfarben (①-2), Ersatzschrift (①-7), signeto/insigno und die Vitrino-Befunde aus Spec 025.
+Auftrag des Maintainers vom 28.10. (21:56): ②b setzt genau die Entscheidungen aus ②a um (`abgleich.json` mit Auflagen), Maßstab „gut genug“, kein Story- oder Pixelabgleich mit dem Storybook der Fonto; Figma prüft der Maintainer bei der Abnahme. Schnitt (Auftrag 29.10.: kleinere PRs nach Themen, den genauen Schnitt legt P0 fest), gestapelt, jeder einzeln abgenommen:
+
+| PR | Inhalt | Zeilen aus `abgleich.json` |
+|---|---|---|
+| ②b-1 Felder | M-5 Laden, M-6 Löschen, M-1 Grund für „deaktiviert“, M-2 Status warning/success mit `message-position` | M-1, M-2, M-5, M-6 und die Zeilen, die nur darauf verweisen (Zustände der Felder A-*-3, Löschen bei datelektilo/kompletigilo/listelektilo, A-kampo-4, A-butono-5, A-faldilo-3, A-konsileto-6) |
+| ②b-2 Achsen und Werte | neue Achsen und Größen, `large` als veralteter Alias (elekto, markobutono, sxaltilo), `lines`, Zweck-Achse des dialogo (M-3) | Aspekte „achsen“ und „groessen“ |
+| ②b-3 Anatomie und Slots | neue Teile und Slots | Aspekt „anatomie“ |
+| ②b-4 Verhalten | Tippen-Springen, Rollen nach Status und Zweck, Überlauf, Download, unbekannte Gesamtzahl, ausgelassene Mitte, Streamen | Aspekt „verhalten“, übrige Musterzeilen |
+| ②b-5 kodbloko, Schrift, Form | Syntaxfarben mit dem kodbloko (①-2), Ersatzschrift nach Kategorie (①-7), signeto/insigno unterscheidbar, Vitrino-Befunde aus Spec 025 | A-kodbloko-1/4/6, A-signeto-6 |
 
 ### Entwurf
 
 - **M-5 Laden in Feldern** (kampo, tekstareo, elektilo, listelektilo, plurelektilo, kompletigilo, datelektilo, glitilo, elekto, markobutono, sxaltilo, alsxutilo): Boolean `loading` wie am butono. Das Feld bleibt bedienbar (wie der kompletigilo seit Nachlese 4 N-9) und ist beschäftigt (`aria-busy`); beschrieben mit dem Wort des Modelo („lädt“), der kompletigilo weiter in seiner Live-Region. Sichtbar als Teil `spinner`: der Bogen des plenstato in Icongröße (`size.icon.small`) und gedämpfter Schrift (`color.text.muted`), der sich mit den Bewegungsrollen dreht und unter reduzierter Bewegung steht. Figma: BOOLEAN `loading` zeigt den Spinner.
+
+### M-5 umgesetzt
+
+- **Modelo:** zwölf Felder mit `loading` (beim kampo nach den Props von 0.2.0, Arkitekturo-Vertrag), `aria-busy`, Wort „lädt“, Teil `spinner` (`size.icon.small`, `color.text.muted`, `spacing.small` als Abstand zur Beschriftung); 36 Ero-Tokens in allen Marken (`pnpm vortaro:ero-tokenoj`), provo und provo-kompakta neu abgeleitet, Stufe-1-Prüfsummen und Fingerabdruck der Struktur neu (wie bei Spec 024/025).
+- **Web:** der Bogen hinter Beschriftung und Pflichtmarke in allen sieben Feld-Templates, verborgen bis zum Laden, dreht einmal je `motion.duration.slow`; das Feld bleibt bedienbar (nur der butono sperrt beim Laden). Die Vitrino zeigt jedes Feld in einer Spalte `loading`.
+- **Figma:** die Beschriftung jedes Feldes in einer Zeile mit dem Spinner (`label-row`), BOOLEAN `loading`; der Bildvergleich gegen main nennt die Variablen ohne ihre IDs (vom Maintainer am 29.10. bestätigt), Basis vom unveränderten Plugin neu geschrieben, kein Bild geändert.
+- **Vergleiche mit main:** komuna-0-2, ekzemplo, provo, provo-kompakta lösen jedes Token von main zum Wert von main auf; nur die neuen (`neu-seit-main.ts`) zählen getrennt.

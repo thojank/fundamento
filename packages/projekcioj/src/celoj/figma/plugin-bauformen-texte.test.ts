@@ -139,7 +139,8 @@ describe("B-4: every text of a set is a TEXT property, named after its slot", ()
     const datelektilo = report.components.find((component) => component.set === "datelektilo");
     expect(datelektilo?.properties?.TEXT).toBeGreaterThan(50);
     const kampo = report.components.find((component) => component.set === "kampo");
-    expect(kampo?.properties).toEqual({ BOOLEAN: 2, TEXT: 4 });
+    // Spec 029 ②b-1 M-5: loading beside the switches of help and error.
+    expect(kampo?.properties).toEqual({ BOOLEAN: 3, TEXT: 4 });
   });
 });
 

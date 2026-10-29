@@ -806,6 +806,8 @@ const BOOLEAN_TOGGLES: Readonly<
   "label-hidden": { part: "label", hides: true, shownAs: "label-visible" },
   // Nachlese 5 O-41 (Nachlese 4 B-8): the ligilo's external shows the mark in its slot icon-end.
   external: { part: "icon-end" },
+  // Spec 029 ②b-1 M-5: a field that loads shows its spinner beside the label.
+  loading: { part: "spinner" },
 };
 
 /**
@@ -1160,6 +1162,11 @@ export interface FigmaComponentSet {
    * the size of its frame and the colour of its vector; a knob has no sign.
    */
   sign?: string;
+  /**
+   * The spinner of a field (Spec 029 ②b-1 M-5): the arc of a loading state (STATE_SIGN), drawn
+   * beside the label and shown by the BOOLEAN property loading; where the Skemo has the part.
+   */
+  spinner?: string;
   /**
    * The axes of the variants that are no axes of the Skemo's parts (Spec 014 ②, plan ② D-08): the
    * name of an icon — one variant per name of the Ikonaro, drawn in its own column, while the
@@ -3521,6 +3528,7 @@ function componentSetOf(
         }
       : {}),
     ...(sign === undefined ? {} : { sign }),
+    ...(skemo.parts.spinner === undefined ? {} : { spinner: STATE_SIGN }),
     ...(options === undefined ? {} : { entry: options }),
     ...(example === undefined ? {} : { example }),
     ...(examples === undefined ? {} : { examples }),

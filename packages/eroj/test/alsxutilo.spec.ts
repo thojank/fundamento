@@ -89,6 +89,7 @@ test.describe("fm-alsxutilo behaviour", () => {
       "field",
       "label",
       "required-mark",
+      "spinner",
       "dropzone",
       "picker",
       "choose",

@@ -220,6 +220,7 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       "placeholder",
       "required",
       "disabled",
+      "loading",
       "readonly",
       "invalid",
       "expanded",
@@ -257,6 +258,7 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       "focus-ring",
       "box",
       "motion",
+      "spinner",
     ]);
     expect(skemo?.parts.item).toEqual({
       color: { by: ["selected"] },
@@ -287,6 +289,7 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       name: ["slot:label"],
       description: ["slot:help", "slot:error"],
       states: {
+        loading: ["aria-busy"],
         selected: ["aria-selected"],
         required: ["aria-required"],
         invalid: ["aria-invalid"],
@@ -295,7 +298,10 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
         expanded: ["aria-expanded"],
       },
       keys: ["ArrowUp", "ArrowDown", "Home", "End", "Enter", "Space", "Escape"],
-      texts: { required: { de: "erforderlich", en: "required" } },
+      texts: {
+        required: { de: "erforderlich", en: "required" },
+        loading: { de: "lädt", en: "loading" },
+      },
     });
     expect(skemo?.events?.map((event) => event.name)).toEqual(["change"]);
     expect(skemo?.goals?.map((goal) => [goal.goal, goal.props])).toEqual([["styled-choice", {}]]);
@@ -343,6 +349,7 @@ describe("plurelektilo (D-16): several values from a long list, filterable, the 
       ["placeholder", "string", undefined],
       ["required", "boolean", false],
       ["disabled", "boolean", false],
+      ["loading", "boolean", false],
       ["readonly", "boolean", false],
       ["invalid", "boolean", false],
       ["expanded", "boolean", false],
@@ -377,6 +384,7 @@ describe("plurelektilo (D-16): several values from a long list, filterable, the 
       "focus-ring",
       "box",
       "motion",
+      "spinner",
     ]);
     expect(skemo?.parts.check).toEqual({
       color: { by: ["selected"] },
@@ -398,6 +406,7 @@ describe("plurelektilo (D-16): several values from a long list, filterable, the 
       name: ["slot:label"],
       description: ["slot:help", "slot:error"],
       states: {
+        loading: ["aria-busy"],
         selected: ["aria-selected"],
         required: ["aria-required"],
         invalid: ["aria-invalid"],
@@ -407,6 +416,7 @@ describe("plurelektilo (D-16): several values from a long list, filterable, the 
       },
       keys: ["ArrowUp", "ArrowDown", "Home", "End", "Space", "Enter", "Escape"],
       texts: {
+        loading: { de: "lädt", en: "loading" },
         required: { de: "erforderlich", en: "required" },
         "options-count": { de: "gewählt", en: "selected" },
         "clear-name": { de: "Alle abwählen", en: "Clear all" },

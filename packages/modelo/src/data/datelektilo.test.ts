@@ -67,6 +67,7 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       ["disabled-dates", "string", false, undefined],
       ["required", "boolean", false, false],
       ["disabled", "boolean", false, false],
+      ["loading", "boolean", false, false],
       ["readonly", "boolean", false, false],
       ["invalid", "boolean", false, false],
       ["expanded", "boolean", false, false],
@@ -116,6 +117,7 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       "focus-ring",
       "box",
       "motion",
+      "spinner",
     ]);
     expect(skemo?.parts.trigger).toEqual({ size: { fixed: "size.control.medium" } });
     expect(skemo?.parts.calendar).toEqual({
@@ -217,6 +219,7 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       name: ["slot:label"],
       description: ["slot:help", "slot:error"],
       states: {
+        loading: ["aria-busy"],
         required: ["aria-required"],
         invalid: ["aria-invalid"],
         disabled: ["aria-disabled"],
@@ -236,6 +239,7 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
         "Escape",
       ],
       texts: {
+        loading: { de: "lädt", en: "loading" },
         required: { de: "erforderlich", en: "required" },
         "trigger-name": { de: "Kalender öffnen", en: "Open calendar" },
         "prev-name": { de: "Voriger Monat", en: "Previous month" },

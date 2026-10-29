@@ -62,6 +62,12 @@
         "description": "Cannot be used: the field takes no text, the calendar does not open; skipped by the keyboard."
       },
       {
+        "name": "loading",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-5: the application loads or checks (a value saved, a list fetched, a file examined): the field says so (aria-busy, described by a11y.texts loading) and shows the turning spinner; it stays operable."
+      },
+      {
         "name": "readonly",
         "kind": "boolean",
         "default": false,
@@ -306,6 +312,17 @@
         "easing": {
           "fixed": "motion.easing.standard"
         }
+      },
+      "spinner": {
+        "size": {
+          "fixed": "size.icon.small"
+        },
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "inline-padding": {
+          "fixed": "spacing.small"
+        }
       }
     },
     "bindings": [
@@ -502,6 +519,9 @@
         ],
         "expanded": [
           "aria-expanded"
+        ],
+        "loading": [
+          "aria-busy"
         ]
       },
       "keys": [
@@ -540,6 +560,10 @@
         "value-end-invalid": {
           "de": "Wähle ein Ende nach dem Anfang.",
           "en": "Choose an end after the start."
+        },
+        "loading": {
+          "de": "lädt",
+          "en": "loading"
         }
       }
     },

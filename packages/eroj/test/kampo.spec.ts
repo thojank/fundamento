@@ -56,7 +56,7 @@ test.describe("fm-kampo behaviour", () => {
         ),
       // Spec 025 ① (plan ① D-05): the input stands in a row that takes the step buttons and the
       // clear button when the kind asks for them; a text field has none.
-    ).toEqual(["field", "label", "required-mark", "row", "control", "help", "error"]);
+    ).toEqual(["field", "label", "required-mark", "spinner", "row", "control", "help", "error"]);
   });
 
   test("required: aria-required, the mark shows, and 'erforderlich' is heard in the document's language", async ({

@@ -964,6 +964,8 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
     // nothing is drawn differently (a date shows the closed field, like the elektilo; E3).
     // Spec 025 ①: time, stepper and step are properties too; none of them keys a part.
     expect(set?.properties).toEqual({
+      // Spec 029 ②b-1 M-5: loading shows the spinner (a BOOLEAN of the set).
+      loading: "BOOLEAN",
       kind: ["text", "email", "tel", "url", "search", "password", "number", "date", "time"],
       value: "TEXT",
       placeholder: "TEXT",
@@ -1212,6 +1214,8 @@ describe("Figma plan for the sxaltilo (Spec 010 ①)", () => {
   it("plans a toggle of checked × size × state with the purpose as description", () => {
     expect(set?.structure).toBe("toggle");
     expect(set?.properties).toEqual({
+      // Spec 029 ②b-1 M-5: loading shows the spinner (a BOOLEAN of the set).
+      loading: "BOOLEAN",
       checked: "BOOLEAN",
       size: ["small", "medium", "large"],
       disabled: "BOOLEAN",
@@ -1277,6 +1281,8 @@ describe("Figma plan for the markobutono (Spec 010 ②)", () => {
   it("plans a toggle of checked × size × state with the purpose, the word Option and the error text", () => {
     expect(set?.structure).toBe("toggle");
     expect(set?.properties).toEqual({
+      // Spec 029 ②b-1 M-5: loading shows the spinner (a BOOLEAN of the set).
+      loading: "BOOLEAN",
       checked: "BOOLEAN",
       required: "BOOLEAN",
       invalid: "BOOLEAN",
@@ -1360,6 +1366,8 @@ describe("Figma plan for the elekto (Spec 010 ③)", () => {
   it("plans a choice of size × state with the purpose, the word Frage, three options, help and error", () => {
     expect(set?.structure).toBe("choice");
     expect(set?.properties).toEqual({
+      // Spec 029 ②b-1 M-5: loading shows the spinner (a BOOLEAN of the set).
+      loading: "BOOLEAN",
       value: "TEXT",
       required: "BOOLEAN",
       invalid: "BOOLEAN",
@@ -1452,6 +1460,8 @@ describe("Figma plan for the elektilo (Spec 010 ④)", () => {
   it("plans a closed field of size × state with the purpose, the word Auswahl, the prompt, help and error", () => {
     expect(set?.structure).toBe("field");
     expect(set?.properties).toEqual({
+      // Spec 029 ②b-1 M-5: loading shows the spinner (a BOOLEAN of the set).
+      loading: "BOOLEAN",
       value: "TEXT",
       placeholder: "TEXT",
       required: "BOOLEAN",
@@ -1539,6 +1549,8 @@ describe("Figma plan for the tekstareo (Spec 011 ②)", () => {
   it("plans a field of kind × size × state with the purpose, the word Beschriftung and the field's texts", () => {
     expect(set?.structure).toBe("field");
     expect(set?.properties).toEqual({
+      // Spec 029 ②b-1 M-5: loading shows the spinner (a BOOLEAN of the set).
+      loading: "BOOLEAN",
       kind: ["text", "code"],
       value: "TEXT",
       // A number prop: Figma has no number property; the plan states the Skemo's kind.

@@ -101,6 +101,7 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
         ["placeholder", "string", undefined],
         ["required", "boolean", false],
         ["disabled", "boolean", false],
+        ["loading", "boolean", false],
         ["readonly", "boolean", false],
         ["invalid", "boolean", false],
         ["size", ["small", "medium", "large"], "medium"],
@@ -171,13 +172,17 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
       name: ["slot:label"],
       description: ["slot:help", "slot:error"],
       states: {
+        loading: ["aria-busy"],
         required: ["aria-required"],
         invalid: ["aria-invalid"],
         disabled: ["aria-disabled"],
         readonly: ["aria-readonly"],
       },
       keys: [],
-      texts: { required: { de: "erforderlich", en: "required" } },
+      texts: {
+        required: { de: "erforderlich", en: "required" },
+        loading: { de: "lädt", en: "loading" },
+      },
     });
   });
 

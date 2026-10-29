@@ -78,6 +78,7 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
         ["invalid", "boolean", false],
         ["size", ["small", "medium", "large"], "medium"],
         ["disabled", "boolean", false],
+        ["loading", "boolean", false],
         ["name", "string", undefined],
       ],
     );
@@ -99,6 +100,7 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
       "label",
       "motion",
       "required-mark",
+      "spinner",
       "surface",
     ]);
     const tokens = [
@@ -167,16 +169,23 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
       name: ["slot:label"],
       description: ["slot:error"],
       states: {
+        loading: ["aria-busy"],
         checked: ["aria-checked"],
         required: ["aria-required"],
         invalid: ["aria-invalid"],
         disabled: ["aria-disabled"],
       },
       keys: ["Space"],
-      texts: { required: { de: "erforderlich", en: "required" } },
+      texts: {
+        required: { de: "erforderlich", en: "required" },
+        loading: { de: "lädt", en: "loading" },
+      },
     });
     // Spec 025 ①: the kampo speaks its buttons too; required is the shared word.
-    expect(skemo?.a11y.texts).toEqual({ required: kampo?.skemo.a11y.texts?.required });
+    expect(skemo?.a11y.texts).toEqual({
+      required: kampo?.skemo.a11y.texts?.required,
+      loading: kampo?.skemo.a11y.texts?.loading,
+    });
   });
 
   it("forbids an error text without invalid, like the kampo (constraint, Spec 009 D-04)", () => {

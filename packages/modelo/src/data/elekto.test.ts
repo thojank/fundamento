@@ -95,6 +95,7 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
         ["invalid", "boolean", false],
         ["size", ["small", "medium", "large"], "medium"],
         ["disabled", "boolean", false],
+        ["loading", "boolean", false],
         ["name", "string", undefined],
         ["orientation", ["vertical", "horizontal"], "vertical"],
       ],
@@ -129,6 +130,7 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
       "option-label",
       "options",
       "required-mark",
+      "spinner",
       "surface",
     ]);
     const tokens = [
@@ -230,6 +232,7 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
       name: ["slot:label"],
       description: ["slot:help", "slot:error"],
       states: {
+        loading: ["aria-busy"],
         selected: ["aria-checked"],
         required: ["aria-required"],
         invalid: ["aria-invalid"],
@@ -237,10 +240,16 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
         orientation: ["aria-orientation"],
       },
       keys: ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"],
-      texts: { required: { de: "erforderlich", en: "required" } },
+      texts: {
+        required: { de: "erforderlich", en: "required" },
+        loading: { de: "lädt", en: "loading" },
+      },
     });
     // Spec 025 ①: the kampo speaks its buttons too; required is the shared word.
-    expect(skemo?.a11y.texts).toEqual({ required: kampo?.skemo.a11y.texts?.required });
+    expect(skemo?.a11y.texts).toEqual({
+      required: kampo?.skemo.a11y.texts?.required,
+      loading: kampo?.skemo.a11y.texts?.loading,
+    });
   });
 
   it("forbids an error text without invalid, like the kampo (constraint, Spec 009 D-04)", () => {

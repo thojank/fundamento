@@ -278,7 +278,8 @@ test("fm-sxaltilo is upgraded in its section, unchecked, checked and disabled", 
   const section = page.locator("#fm-vitrino-sxaltilo");
   await expect(section.locator("thead")).toContainText("checked");
   await expect(section.getByRole("switch", { checked: true })).toHaveCount(3);
-  await expect(section.getByRole("switch", { checked: false })).toHaveCount(6);
+  // Spec 029 ②b-1 M-5: rest, disabled and loading unchecked in every size.
+  await expect(section.getByRole("switch", { checked: false })).toHaveCount(9);
   const disabled = section.locator("fm-sxaltilo[disabled]").first().locator("button");
   await expect(disabled).toBeDisabled();
 });
@@ -293,7 +294,8 @@ test("fm-markobutono is upgraded in its section, ticked, required, invalid and d
   await expect(section.locator("thead")).toContainText("checked");
   await expect(section.locator("thead")).toContainText("invalid");
   await expect(section.getByRole("checkbox", { checked: true })).toHaveCount(3);
-  await expect(section.getByRole("checkbox", { checked: false })).toHaveCount(12);
+  // Spec 029 ②b-1 M-5: a column loading beside required, invalid and disabled.
+  await expect(section.getByRole("checkbox", { checked: false })).toHaveCount(15);
   await expect(section.locator('fm-markobutono[invalid] [slot="error"]')).toHaveCount(3);
   const invalid = section.locator("fm-markobutono[invalid]").first().locator("button");
   await expect(invalid).toHaveAttribute("aria-invalid", "true");
@@ -310,9 +312,10 @@ test("fm-elekto is upgraded in its section with three options, required, invalid
   const section = page.locator("#fm-vitrino-elekto");
   await expect(section.locator("thead")).toContainText("required");
   await expect(section.locator("thead")).toContainText("invalid");
-  await expect(section.getByRole("radiogroup")).toHaveCount(12);
-  await expect(section.getByRole("radio", { checked: true })).toHaveCount(12);
-  await expect(section.getByRole("radio", { checked: false })).toHaveCount(24);
+  // Spec 029 ②b-1 M-5: five columns with loading, in three sizes.
+  await expect(section.getByRole("radiogroup")).toHaveCount(15);
+  await expect(section.getByRole("radio", { checked: true })).toHaveCount(15);
+  await expect(section.getByRole("radio", { checked: false })).toHaveCount(30);
   await expect(section.locator('fm-elekto[invalid] [slot="error"]')).toHaveCount(3);
   const invalid = section.locator("fm-elekto[invalid]").first().getByRole("radiogroup");
   await expect(invalid).toHaveAttribute("aria-invalid", "true");
@@ -330,7 +333,8 @@ test("fm-elektilo is upgraded in its section with the prompt and three options, 
   const section = page.locator("#fm-vitrino-elektilo");
   await expect(section.locator("thead")).toContainText("required");
   await expect(section.locator("thead")).toContainText("invalid");
-  await expect(section.getByRole("combobox")).toHaveCount(12);
+  // Spec 029 ②b-1 M-5: a column loading, in three sizes.
+  await expect(section.getByRole("combobox")).toHaveCount(15);
   const first = section.getByRole("combobox").first();
   await expect(first).toHaveValue("");
   await expect(first.locator("option")).toHaveText(["Bitte wählen", "Eins", "Zwei", "Drei"]);
@@ -351,7 +355,8 @@ test("fm-tekstareo is upgraded in its section in every kind × size, required, i
   const section = page.locator("#fm-vitrino-tekstareo");
   await expect(section.locator("thead")).toContainText("required");
   await expect(section.locator("thead")).toContainText("invalid");
-  await expect(section.getByRole("textbox")).toHaveCount(24);
+  // Spec 029 ②b-1 M-5: a column loading, two kinds in three sizes.
+  await expect(section.getByRole("textbox")).toHaveCount(30);
   expect(
     await section
       .getByRole("textbox")

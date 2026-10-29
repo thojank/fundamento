@@ -48,7 +48,8 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
       "max",
       "autocomplete",
     ]);
-    expect(names.slice(12)).toEqual(["stepper", "step"]);
+    // Spec 029 ②b-1 M-5: loading after them, as every new prop.
+    expect(names.slice(12)).toEqual(["stepper", "step", "loading"]);
     expect(skemo.props.find((prop) => prop.name === "kind")?.values).toEqual([
       "text",
       "email",
@@ -83,12 +84,13 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
       "box",
       "motion",
     ]);
-    expect(parts.slice(11)).toEqual(["decrement", "increment", "clear"]);
+    expect(parts.slice(11)).toEqual(["decrement", "increment", "clear", "spinner"]);
     expect(skemo.parts.decrement).toEqual({ size: { by: ["size"] } });
     expect(skemo.parts.increment).toEqual({ size: { by: ["size"] } });
     expect(skemo.parts.clear).toEqual({ size: { fixed: "size.control.small" } });
     const sizes = skemo.bindings.filter(
       (binding) => binding.part === "decrement" && binding.property === "size",
+      "spinner",
     );
     expect(sizes.map((binding) => [binding.when?.size, binding.token])).toEqual([
       ["small", "size.control.small"],
@@ -99,6 +101,7 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
 
   it("names the buttons in de and en (a11y.texts <part>-name): Verringern, Erhöhen, Suche leeren", () => {
     expect(skemo.a11y.texts).toEqual({
+      loading: { de: "lädt", en: "loading" },
       required: { de: "erforderlich", en: "required" },
       "decrement-name": { de: "Verringern", en: "Decrease" },
       "increment-name": { de: "Erhöhen", en: "Increase" },

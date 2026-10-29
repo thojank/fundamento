@@ -25,6 +25,8 @@ const role = (name: string | undefined) => traRolojFigmaName(name, prepared.inpu
 // around the track (control) with the knob (indicator) in it, the label beside. The knob stands
 // at the start or the end of the track as the variant says; the gap between track and label is
 // the field's. Measured in f10b-5 (the double knows the slice of the API the plugin uses).
+// Spec 029 ②b-1 M-5: the label of every field stands in a row with its spinner (label-row), shown by
+// the BOOLEAN property loading; the label itself is the row's first child.
 describe("the sxaltilo is drawn as a toggle: track, knob, label beside (Spec 010 ①)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
   const bound = (node: DoubleNode | undefined, field: string) =>
@@ -47,7 +49,7 @@ describe("the sxaltilo is drawn as a toggle: track, knob, label beside (Spec 010
     const { variant } = await drawn();
     const on = variant("checked=true, size=medium, state=rest");
     const field = on?.children.find((child) => child.name === "field");
-    expect(field?.children.map((child) => child.name)).toEqual(["focus-ring", "label"]);
+    expect(field?.children.map((child) => child.name)).toEqual(["focus-ring", "label-row"]);
     expect(field?.properties.layoutMode).toBe("HORIZONTAL");
     const control = descendant(on, "control");
     expect(control?.children.map((child) => child.name)).toEqual(["indicator"]);
@@ -117,7 +119,7 @@ describe("the markobutono is drawn as a toggle: box, check mark, label and error
     expect(field?.properties.counterAxisAlignItems).toBe("MIN");
     const texts = field?.children.find((child) => child.name === "texts");
     expect(texts?.properties.layoutMode).toBe("VERTICAL");
-    expect(texts?.children.map((child) => child.name)).toEqual(["label", "error"]);
+    expect(texts?.children.map((child) => child.name)).toEqual(["label-row", "error"]);
     expect(descendant(on, "label")?.properties.characters).toBe("Option");
     expect(descendant(on, "error")?.properties.characters).toBe("Fehler");
     const control = descendant(on, "control");
@@ -184,7 +186,10 @@ describe("the markobutono is drawn as a toggle: box, check mark, label and error
     const on = set?.children.find(
       (child) => child.name === "checked=true, size=medium, state=rest",
     );
-    expect(on?.children[0]?.children.map((child) => child.name)).toEqual(["focus-ring", "label"]);
+    expect(on?.children[0]?.children.map((child) => child.name)).toEqual([
+      "focus-ring",
+      "label-row",
+    ]);
     expect(descendant(on, "indicator")?.children).toEqual([]);
   });
 
@@ -238,7 +243,7 @@ describe("the elekto is drawn as a choice: question, options with circle and dot
     const field = rest?.children.find((child) => child.name === "field");
     expect(field?.properties.layoutMode).toBe("VERTICAL");
     expect(field?.children.map((child) => child.name)).toEqual([
-      "label",
+      "label-row",
       "options",
       "help",
       "error",
@@ -338,7 +343,7 @@ describe("the elektilo is drawn as the field of the kampo with the chevron in it
     const field = rest?.children.find((child) => child.name === "field");
     expect(field?.properties.layoutMode).toBe("VERTICAL");
     expect(field?.children.map((child) => child.name)).toEqual([
-      "label",
+      "label-row",
       "focus-ring",
       "help",
       "error",
@@ -761,7 +766,7 @@ describe("the plugin draws the alsxutilo (Spec 015 ②)", () => {
       const field = descendant(variant, "field");
       expect(field?.properties.layoutMode, variant.name).toBe("VERTICAL");
       expect(field?.children.map((child) => child.name)).toEqual([
-        "label",
+        "label-row",
         "dropzone",
         "help",
         "error",
@@ -908,7 +913,12 @@ describe("the plugin draws the glitilo (Spec 025 ①)", () => {
     for (const variant of set?.children ?? []) {
       const field = descendant(variant, "field");
       expect(field?.properties.layoutMode, variant.name).toBe("VERTICAL");
-      expect(field?.children.map((child) => child.name)).toEqual(["label", "row", "help", "error"]);
+      expect(field?.children.map((child) => child.name)).toEqual([
+        "label-row",
+        "row",
+        "help",
+        "error",
+      ]);
       const row = descendant(variant, "row");
       expect(row?.properties.layoutMode, variant.name).toBe("HORIZONTAL");
       expect(row?.children.map((child) => child.name)).toEqual([
@@ -974,7 +984,7 @@ describe("the plugin draws the datelektilo (Spec 025 ②)", () => {
       const field = descendant(variant, "field");
       expect(field?.properties.layoutMode, variant.name).toBe("VERTICAL");
       expect(field?.children.map((child) => child.name)).toEqual([
-        "label",
+        "label-row",
         "row",
         "calendar",
         "help",

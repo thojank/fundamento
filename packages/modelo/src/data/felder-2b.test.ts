@@ -17,7 +17,7 @@ const skemoOf = (ero: string) => {
 };
 
 /** The fields of M-2 and M-5 (abgleich.json, Muster M-5). */
-export const FIELDS = [
+const FIELDS = [
   "kampo",
   "tekstareo",
   "elektilo",
@@ -33,23 +33,30 @@ export const FIELDS = [
 ] as const;
 
 describe("Spec 029 ②b-1 M-5: loading in every field", () => {
-  it.each(FIELDS)("%s: a boolean loading, false by default, busy, described by the Modelo's word", (ero) => {
-    const skemo = skemoOf(ero);
-    expect(skemo.props.find((prop) => prop.name === "loading")).toMatchObject({
-      kind: "boolean",
-      default: false,
-    });
-    expect(skemo.a11y.states?.loading).toEqual(["aria-busy"]);
-    expect(skemo.a11y.texts?.loading).toEqual({ de: "lädt", en: "loading" });
-  });
+  it.each(FIELDS)(
+    "%s: a boolean loading, false by default, busy, described by the Modelo's word",
+    (ero) => {
+      const skemo = skemoOf(ero);
+      expect(skemo.props.find((prop) => prop.name === "loading")).toMatchObject({
+        kind: "boolean",
+        default: false,
+      });
+      expect(skemo.a11y.states?.loading).toEqual(["aria-busy"]);
+      expect(skemo.a11y.texts?.loading).toEqual({ de: "lädt", en: "loading" });
+    },
+  );
 
-  it.each(FIELDS)("%s: the part spinner, an icon's size and the muted text's colour", (ero) => {
-    const skemo = skemoOf(ero);
-    expect(skemo.parts.spinner).toEqual({
-      size: { fixed: "size.icon.small" },
-      color: { fixed: "color.text.muted" },
-    });
-  });
+  it.each(FIELDS)(
+    "%s: the part spinner, an icon's size, the muted text's colour, room beside the label",
+    (ero) => {
+      const skemo = skemoOf(ero);
+      expect(skemo.parts.spinner).toEqual({
+        size: { fixed: "size.icon.small" },
+        color: { fixed: "color.text.muted" },
+        "inline-padding": { fixed: "spacing.small" },
+      });
+    },
+  );
 
   it("the repo Modelo stays valid", () => {
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
