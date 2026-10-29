@@ -59,6 +59,8 @@ describe("alsxutilo in the repo Modelo (section ②, G1, G2)", () => {
       ["loading", "boolean", false, false],
       ["invalid", "boolean", false, false],
       ["name", "string", false, undefined],
+      // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
+      ["label", "string", false, undefined],
     ]);
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled", "invalid", "dragover"]);
     expect(skemo?.slots).toEqual([
@@ -129,7 +131,7 @@ describe("alsxutilo in the repo Modelo (section ②, G1, G2)", () => {
   it("is heard as the platform's file input (role button) named by its label, described by help and error; the words of the Modelo with placeholders (G5)", () => {
     expect(skemo?.a11y).toEqual({
       role: "button",
-      name: ["slot:label"],
+      name: ["slot:label", "prop:label"],
       description: ["slot:help", "slot:error", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],

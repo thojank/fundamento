@@ -86,6 +86,12 @@
         "kind": "boolean",
         "default": true,
         "description": "Spec 029 ②b-1 M-6: the button that clears every chosen value (Alle abwählen) is shown; true by default, as before."
+      },
+      {
+        "name": "label",
+        "kind": "string",
+        "shown": true,
+        "description": "The visible label written as an attribute (Spec 029 ②b-1b, Nachlese 12): <fm-plurelektilo label=\"E-Mail\"> shows it where the label slot's text would stand and names the control by it, so the simplest way to write the field is labelled; the slot's text wins where both are given."
       }
     ],
     "states": [
@@ -489,7 +495,8 @@
     "a11y": {
       "role": "listbox",
       "name": [
-        "slot:label"
+        "slot:label",
+        "prop:label"
       ],
       "description": [
         "slot:help",

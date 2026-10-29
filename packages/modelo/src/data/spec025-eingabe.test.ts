@@ -49,7 +49,7 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
       "autocomplete",
     ]);
     // Spec 029 ②b-1 M-5: loading after them, as every new prop.
-    expect(names.slice(12)).toEqual(["stepper", "step", "loading", "clearable"]);
+    expect(names.slice(12)).toEqual(["stepper", "step", "loading", "clearable", "label"]);
     expect(skemo.props.find((prop) => prop.name === "kind")?.values).toEqual([
       "text",
       "email",

@@ -54,6 +54,8 @@ describe("kompletigilo in the repo Modelo (section ⑤, G1, G2)", () => {
       // Nachlese 4 N-9 (O-24): the application loads new suggestions.
       ["loading", "boolean", false],
       ["clearable", "boolean", false],
+      // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
+      ["label", "string", undefined],
     ]);
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled", "invalid"]);
     expect(skemo?.slots).toEqual([
@@ -122,7 +124,7 @@ describe("kompletigilo in the repo Modelo (section ⑤, G1, G2)", () => {
 
   it("speaks role combobox like the elektilo, expanded as aria-expanded; announces the suggestions (texts) (G5)", () => {
     expect(skemo?.a11y.role).toBe("combobox");
-    expect(skemo?.a11y.name).toEqual(["slot:label"]);
+    expect(skemo?.a11y.name).toEqual(["slot:label", "prop:label"]);
     expect(skemo?.a11y.description).toEqual(["slot:help", "slot:error", "slot:disabled-reason"]);
     expect(skemo?.a11y.states).toEqual({
       selected: ["aria-selected"],

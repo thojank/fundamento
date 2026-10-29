@@ -54,6 +54,12 @@
         "name": "name",
         "kind": "string",
         "description": "The name in the form; without effect in a design tool, like type on the butono."
+      },
+      {
+        "name": "label",
+        "kind": "string",
+        "shown": true,
+        "description": "The visible label written as an attribute (Spec 029 ②b-1b, Nachlese 12): <fm-markobutono label=\"E-Mail\"> shows it where the label slot's text would stand and names the control by it, so the simplest way to write the field is labelled; the slot's text wins where both are given."
       }
     ],
     "states": [
@@ -324,7 +330,8 @@
     "a11y": {
       "role": "checkbox",
       "name": [
-        "slot:label"
+        "slot:label",
+        "prop:label"
       ],
       "description": [
         "slot:error",

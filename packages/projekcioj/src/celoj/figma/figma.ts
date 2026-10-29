@@ -1529,6 +1529,11 @@ export interface FigmaComponentSet {
    */
   label?: { property: string; defaultValue: string };
   /**
+   * Spec 029 ②b-1b (Nachlese 12): the string props the Ero shows in the slot of the same name
+   * (`shown`, the label of a field); in Figma that slot's TEXT property is the prop, no second one.
+   */
+  shown?: string[];
+  /**
    * Every font the set can need, over **all** combinations, with the Aspektoj that ask for it
    * (F30). A binding to a font variable only holds once every value the variable takes is loaded,
    * so the run loads this list before it binds — the base combination's font alone is not enough.
@@ -2657,6 +2662,9 @@ function componentSetOf(
         };
   const properties: FigmaComponentSet["properties"] = {};
   for (const prop of skemo.props) {
+    // Spec 029 ②b-1b (Nachlese 12): a shown prop is the slot's text in Figma (the TEXT property
+    // label the set already has), no second property.
+    if (prop.shown === true) continue;
     if (prop.kind === "enum") properties[prop.name] = [...(prop.values ?? [])];
     else if (prop.kind === "boolean") properties[prop.name] = "BOOLEAN";
     else if (prop.kind === "number") properties[prop.name] = "NUMBER";
@@ -3582,6 +3590,9 @@ function componentSetOf(
     ...(uzo === undefined ? {} : { uzo }),
     // Spec 027 B-1: an Ero that takes the width of its container (Uzo layout size container).
     ...(entry.uzo?.layout?.size === "container" ? { stretch: true } : {}),
+    ...(skemo.props.some((prop) => prop.shown === true)
+      ? { shown: skemo.props.filter((prop) => prop.shown === true).map((prop) => prop.name) }
+      : {}),
     properties,
     variants,
     pluginData: { fundamento: { ero: entry.ero.name, skemo: skemo.id, version } },
@@ -3915,6 +3926,9 @@ export function figmaPlanInventory(plan: unknown): Record<string, ParityItem> {
           values === "BOOLEAN" ? "boolean" : values === "NUMBER" ? "number" : "string",
         ];
     }
+    // Spec 029 ②b-1b (Nachlese 12): the TEXT property of the label slot declares the shown prop
+    // label too – one text in Figma, as the attribute and the slot are one label on the page.
+    for (const name of component.shown ?? []) props[name] ??= ["string"];
     const states = component.properties[STATE_KEY];
     // F8: the side states what the plugin applies — the paint with its deckkraft, or the marker
     // for a binding whose alpha is not the same in every mode.

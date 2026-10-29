@@ -73,6 +73,8 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       ["expanded", "boolean", false, false],
       ["name", "string", false, undefined],
       ["clearable", "boolean", false, false],
+      // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
+      ["label", "string", false, undefined],
     ]);
     expect(skemo?.props.find((prop) => prop.name === "mode")?.values).toEqual(["single", "range"]);
     for (const prop of skemo?.props ?? []) {
@@ -221,7 +223,7 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
   it("speaks role textbox: name from the label, description from help then error, the states with expanded, the keys of the APG date picker dialog, the words of trigger, prev, next and the two messages (value-invalid, value-end-invalid) in de and en", () => {
     expect(skemo?.a11y).toEqual({
       role: "textbox",
-      name: ["slot:label"],
+      name: ["slot:label", "prop:label"],
       description: ["slot:help", "slot:error", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],

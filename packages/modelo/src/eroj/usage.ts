@@ -1080,7 +1080,7 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
           instance: [index],
           message: `Instance ${index} of ${ero.ero.name} has no visible label${typeof instance.props.placeholder === "string" ? ` (only the placeholder "${instance.props.placeholder}")` : ""}.`,
           suggestion:
-            "Give the label as slot text; a placeholder disappears while typing and names nothing afterwards.",
+            'Give the label as the text of the element or as label="…" (both are shown, Nachlese 12); a placeholder disappears while typing and names nothing afterwards.',
         },
       ];
     }),
@@ -1097,7 +1097,7 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
             instance: [index],
             message: `Instance ${index} of ${ero.ero.name} has the placeholder "${placeholder}" and no label: the placeholder stands in for the label.`,
             suggestion:
-              "Give the label as slot text and keep the placeholder as an example of a value.",
+              'Give the label as the text of the element or as label="…" and keep the placeholder as an example of a value.',
           },
         ];
       }

@@ -106,9 +106,12 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
         ["invalid", "boolean", false],
         ["size", ["small", "medium", "large"], "medium"],
         ["name", "string", undefined],
+        // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
+        ["label", "string", undefined],
       ],
     );
-    expect(skemo?.props.map((prop) => prop.name)).not.toContain("label");
+    // Spec 029 ②b-1b (Nachlese 12): label is a prop now, shown as the visible label.
+    expect(skemo?.props.find((prop) => prop.name === "label")?.shown).toBe(true);
   });
 
   it("knows the states rest, hover, focus, disabled and invalid (G2); readonly is a prop the platform speaks, no state of its own", () => {
@@ -171,7 +174,7 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
   it("speaks role textbox like the kampo: name, description, states, required in de and en; no key of its own", () => {
     expect(skemo?.a11y).toEqual({
       role: "textbox",
-      name: ["slot:label"],
+      name: ["slot:label", "prop:label"],
       description: ["slot:help", "slot:error", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],

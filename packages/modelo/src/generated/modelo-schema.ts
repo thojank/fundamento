@@ -1364,6 +1364,10 @@ export interface SkemoProp {
    * The prop must be given (get_ero brief lists it under required.props). A prop without a default is not a duty by that alone: label is the fallback name of an empty slot, value the text of an empty field (Abnahme Spec 008/009 R-10, 2026-10-13).
    */
   required?: boolean;
+  /**
+   * The text of the prop is shown where the default slot of the same name would stand, while that slot is empty; the slot wins where both are given (Spec 029 ②b-1b, Befund der Nachlese 12): the label of a field written as an attribute is its visible label, never only a hidden name.
+   */
+  shown?: boolean;
 }
 /**
  * A named region of a Sxablono (Spec 020): what may stand in it (Ero or Sxablono names, text or icon; any content where accepts is absent), how many, which props its children must have, how many of them may be primary actions (emphasis high), and whether it is a polite live region. One region may be the default slot.

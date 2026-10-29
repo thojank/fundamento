@@ -226,6 +226,8 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       "expanded",
       "name",
       "clearable",
+      // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
+      "label",
     ]);
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled", "readonly", "invalid"]);
     expect(skemo?.slots).toEqual([
@@ -290,7 +292,7 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
   it("speaks role combobox (select-only): the keys of APG with Home, End and Space; the chosen option is aria-selected; events change", () => {
     expect(skemo?.a11y).toEqual({
       role: "combobox",
-      name: ["slot:label"],
+      name: ["slot:label", "prop:label"],
       description: ["slot:help", "slot:error", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],
@@ -360,6 +362,8 @@ describe("plurelektilo (D-16): several values from a long list, filterable, the 
       ["expanded", "boolean", false],
       ["name", "string", undefined],
       ["clearable", "boolean", true],
+      // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
+      ["label", "string", undefined],
     ]);
     expect(skemo?.props.find((prop) => prop.name === "summary")?.values).toEqual(["count", "tags"]);
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled", "readonly", "invalid"]);
@@ -409,7 +413,7 @@ describe("plurelektilo (D-16): several values from a long list, filterable, the 
   it("speaks role listbox (multiselectable): Space toggles, Enter and Escape close; the count of the chosen is said; the words of count, clear and the limit", () => {
     expect(skemo?.a11y).toEqual({
       role: "listbox",
-      name: ["slot:label"],
+      name: ["slot:label", "prop:label"],
       description: ["slot:help", "slot:error", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],

@@ -80,6 +80,8 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
         ["disabled", "boolean", false],
         ["loading", "boolean", false],
         ["name", "string", undefined],
+        // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
+        ["label", "string", undefined],
       ],
     );
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled", "invalid"]);
@@ -168,7 +170,7 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
   it("speaks role checkbox: name from the label, description from the error, Space, required in de and en like the kampo", () => {
     expect(skemo?.a11y).toEqual({
       role: "checkbox",
-      name: ["slot:label"],
+      name: ["slot:label", "prop:label"],
       description: ["slot:error", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],

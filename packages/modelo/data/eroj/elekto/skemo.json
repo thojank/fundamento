@@ -63,6 +63,12 @@
         ],
         "default": "vertical",
         "description": "The options one below the other, or side by side on one line that never breaks; side by side only for up to three short options (Uzo). Layout, no token: it keys no part."
+      },
+      {
+        "name": "label",
+        "kind": "string",
+        "shown": true,
+        "description": "The visible label written as an attribute (Spec 029 ②b-1b, Nachlese 12): <fm-elekto label=\"E-Mail\"> shows it where the label slot's text would stand and names the control by it, so the simplest way to write the field is labelled; the slot's text wins where both are given."
       }
     ],
     "states": [
@@ -411,7 +417,8 @@
     "a11y": {
       "role": "radiogroup",
       "name": [
-        "slot:label"
+        "slot:label",
+        "prop:label"
       ],
       "description": [
         "slot:help",

@@ -76,6 +76,8 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
       ["disabled", "boolean", false],
       ["loading", "boolean", false],
       ["name", "string", undefined],
+      // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
+      ["label", "string", undefined],
     ]);
     expect(skemo.states).toEqual(["rest", "hover", "focus", "disabled"]);
     expect(skemo.slots).toEqual([
@@ -145,7 +147,7 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
   it("speaks role switch: name from the label, checked as aria-checked, Space and Enter, no required (D-08)", () => {
     expect(skemo.a11y).toEqual({
       role: "switch",
-      name: ["slot:label"],
+      name: ["slot:label", "prop:label"],
       description: ["slot:disabled-reason"],
       states: { checked: ["aria-checked"], disabled: ["aria-disabled"], loading: ["aria-busy"] },
       keys: ["Space", "Enter"],

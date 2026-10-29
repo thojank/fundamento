@@ -404,11 +404,15 @@ function componentGuideline(
     skemo.a11y.role === "link"
       ? " The prop `to` is the destination; the element renders it as the link's target."
       : "";
-  // Only an Ero with a label prop has an icon-only form (Spec 010 ①: the switch, like the field,
-  // always shows its label and has no such prop).
-  const iconOnly = skemo.props.some((prop) => prop.name === "label")
-    ? ` for an icon-only ${entry.ero.name} set \`label\` as its accessible name.`
-    : "";
+  // Only an Ero with a hidden label prop has an icon-only form (Spec 010 ①: the switch, like the
+  // field, always shows its label). Spec 029 ②b-1b (Nachlese 12): a field's label prop is shown.
+  const labelProp = skemo.props.find((prop) => prop.name === "label");
+  const iconOnly =
+    labelProp === undefined
+      ? ""
+      : labelProp.shown === true
+        ? ` the prop \`label\` is shown the same way (\`<${name} label="…" />\`); the children win where both are given.`
+        : ` for an icon-only ${entry.ero.name} set \`label\` as its accessible name.`;
   // A slot whose entries are options (Spec 010 ③, E7): how an option is written, and which is
   // chosen — the one whose value is the prop the Skemo names.
   const options = skemo.slots

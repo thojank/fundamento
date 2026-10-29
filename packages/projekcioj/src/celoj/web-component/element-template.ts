@@ -126,6 +126,8 @@ export interface ElementNames {
   stepper?: boolean;
   /** Abnahme #122 (Skemo trailingAfter): the spinner of a toggle directly after the text of its label. */
   afterLabel?: boolean;
+  /** Spec 029 ②b-1b (Nachlese 12): the prop label is shown (`shown`) – label="…" is the visible label of a field. */
+  shownLabel?: boolean;
   /** Spec 025 ② (plan ② D-11): a textbox with a calendar part — the datelektilo, a field with a trigger and a popover calendar. */
   datepicker?: boolean;
   /**
@@ -905,6 +907,7 @@ export function elementSource({
   breadcrumb = false,
   stepper = false,
   afterLabel = false,
+  shownLabel = false,
   slots = [
     { name: "label", default: true },
     { name: "icon-start", decorative: true },
@@ -5992,12 +5995,40 @@ ${hasEnd ? "    this.#orderEnd();\n    this.#endRoom();\n" : ""}    if (marking)
       root.removeAttribute("data-marked");
       control.removeAttribute("data-marked");
     }
-    const text = this.#label
+${
+  shownLabel
+    ? `    // Spec 029 ②b-1b (Nachlese 12): label="…" is the visible label of the field – it stands where
+    // the slot's text would, while the slot holds none (the slot wins), and names the control as
+    // the slot's text does.
+    const given = this.#label
+      .assignedNodes({ flatten: true })
+      .map((node) => node.textContent ?? "")
+      .join("")
+      .trim();
+    const present = this.#label.nextElementSibling;
+    const shown =
+      present instanceof HTMLElement && present.hasAttribute("data-fm-label")
+        ? present
+        : document.createElement("span");
+    if (shown !== present) {
+      shown.setAttribute("data-fm-label", "");
+      this.#label.after(shown);
+    }
+    const attribute = this.propValue("label");
+    const word = given === "" && typeof attribute === "string" ? attribute.trim() : "";
+    if (shown.textContent !== word) shown.textContent = word;
+    shown.hidden = word === "";
+    const text = given === "" ? word : given;
+    const name = "";
+`
+    : `    const text = this.#label
       .assignedNodes({ flatten: true })
       .map((node) => node.textContent ?? "")
       .join("")
       .trim();
     const name = this.propValue("label");
+`
+}
 ${
   isLight ||
   isOverlay ||
@@ -6035,11 +6066,12 @@ ${
   isSelect || isListselect || isDatepicker || isSuggest || (host === "input" && stepper)
     ? `  /** The name of a field's clear button (Spec 029 ②b-1 M-6): the Modelo's words with the label. */
   #clearName(): string {
-    const label = this.#label
-      .assignedNodes({ flatten: true })
-      .map((node) => node.textContent ?? "")
-      .join("")
-      .trim();
+    const label =
+      this.#label
+        .assignedNodes({ flatten: true })
+        .map((node) => node.textContent ?? "")
+        .join("")
+        .trim() || (this.shadowRoot?.querySelector("[data-fm-label]")?.textContent ?? "");
     const lingvo = this.#lingvo();
     return (TEXTS["clear-name"]?.[lingvo] ?? TEXTS["clear-name"]?.en ?? "").replace("{label}", label);
   }

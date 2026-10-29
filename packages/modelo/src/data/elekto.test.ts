@@ -98,6 +98,8 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
         ["loading", "boolean", false],
         ["name", "string", undefined],
         ["orientation", ["vertical", "horizontal"], "vertical"],
+        // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
+        ["label", "string", undefined],
       ],
     );
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled", "invalid"]);
@@ -231,7 +233,7 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
   it("speaks role radiogroup: name from the label, description from help and error, arrows and Space, required in de and en like the kampo", () => {
     expect(skemo?.a11y).toEqual({
       role: "radiogroup",
-      name: ["slot:label"],
+      name: ["slot:label", "prop:label"],
       description: ["slot:help", "slot:error", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],

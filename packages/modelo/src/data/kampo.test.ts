@@ -101,8 +101,11 @@ describe("kampo in the repo Modelo (T004)", () => {
       ["step", "string", undefined],
       ["loading", "boolean", false],
       ["clearable", "boolean", false],
+      // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
+      ["label", "string", undefined],
     ]);
-    expect(skemo.props.map((prop) => prop.name)).not.toContain("label");
+    // Spec 029 ②b-1b (Nachlese 12): label is a prop now, shown as the visible label.
+    expect(skemo.props.find((prop) => prop.name === "label")?.shown).toBe(true);
     expect(skemo.props.map((prop) => prop.name)).not.toContain("type");
     expect(skemo.states).toEqual(["rest", "hover", "focus", "disabled", "readonly", "invalid"]);
     expect(skemo.slots.map((slot) => [slot.name, slot.text])).toEqual([
@@ -169,7 +172,7 @@ describe("kampo in the repo Modelo (T004)", () => {
 
   it("speaks role textbox: name from the label, description from help then error, the states, required in de and en (D-02)", () => {
     expect(skemo.a11y.role).toBe("textbox");
-    expect(skemo.a11y.name).toEqual(["slot:label"]);
+    expect(skemo.a11y.name).toEqual(["slot:label", "prop:label"]);
     expect(skemo.a11y.description).toEqual(["slot:help", "slot:error", "slot:disabled-reason"]);
     expect(skemo.a11y.states).toEqual({
       loading: ["aria-busy"],

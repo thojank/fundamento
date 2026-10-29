@@ -114,6 +114,8 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
         // Spec 011 ① (plan ① D-09): a chosen empty option, 'Alle', 'keine Auswahl', value "".
         ["empty-label", "string", undefined],
         ["clearable", "boolean", false],
+        // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
+        ["label", "string", undefined],
       ],
     );
     expect(skemo?.props.find((prop) => prop.name === "placeholder")?.description).toMatch(
@@ -205,7 +207,7 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
   it("speaks role combobox: name from the label, description from help and error, ArrowUp/Down, Enter, Escape, required like the kampo (G4)", () => {
     expect(skemo?.a11y).toEqual({
       role: "combobox",
-      name: ["slot:label"],
+      name: ["slot:label", "prop:label"],
       description: ["slot:help", "slot:error", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],

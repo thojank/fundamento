@@ -418,7 +418,12 @@ describe("brief: the props without an axis (Nachlese 5 N5-3)", () => {
       const axes = new Set(brief.output.axes.map((axis) => axis.name));
       const expected = entry.skemo.props
         .filter((prop) => !axes.has(prop.name) && prop.kind !== "boolean")
-        .map((prop) => ({ name: prop.name, type: prop.kind }));
+        .map((prop) => ({
+          name: prop.name,
+          type: prop.kind,
+          // Spec 029 ②b-1b (Nachlese 12): a shown prop says so.
+          ...(prop.shown === true ? { shown: true } : {}),
+        }));
       const flags = entry.skemo.props
         .filter((prop) => !axes.has(prop.name) && prop.kind === "boolean")
         .map((prop) => prop.name);

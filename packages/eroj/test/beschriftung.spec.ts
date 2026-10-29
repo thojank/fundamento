@@ -55,13 +55,16 @@ test.describe("Spec 029 ②b-1b (Nachlese 12): the label as an attribute is show
     );
     await expect(page.getByText("Aus dem Slot", { exact: true })).toBeVisible();
     await expect(page.getByText("Aus dem Attribut", { exact: true })).toBeHidden();
-    await expect(page.getByLabel("Aus dem Slot", { exact: true })).toHaveCount(1);
+    // The accessible name of the platform (a <label> holding a slot): its text is the slotted one.
+    await expect(page.getByRole("textbox", { name: "Aus dem Slot", exact: true })).toHaveCount(1);
     await page.evaluate(() => {
       const kampo = document.querySelector("fm-kampo");
       if (kampo !== null) kampo.textContent = "";
     });
     await expect(page.getByText("Aus dem Attribut", { exact: true })).toBeVisible();
-    await expect(page.getByLabel("Aus dem Attribut", { exact: true })).toHaveCount(1);
+    await expect(page.getByRole("textbox", { name: "Aus dem Attribut", exact: true })).toHaveCount(
+      1,
+    );
   });
 
   test("whitespace around the attribute's field counts as empty: the attribute is shown", async ({

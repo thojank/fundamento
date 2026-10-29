@@ -2455,6 +2455,7 @@ export function elementNamesOf(
     // Spec 025 ① (plan ① D-05): a field with step buttons (the kampo) shows them in a row.
     stepper: entry.skemo.parts.decrement !== undefined,
     afterLabel: entry.skemo.trailingAfter === "label",
+    shownLabel: entry.skemo.props.some((prop) => prop.name === "label" && prop.shown === true),
     // Spec 025 ② (plan ② D-11): a field with a calendar part is the date picker.
     datepicker: isDatepicker(entry.skemo),
     marked: entry.skemo.parts["required-mark"] !== undefined,

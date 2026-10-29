@@ -69,6 +69,8 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       ["readonly", "boolean", false, false],
       ["invalid", "boolean", false, false],
       ["name", "string", false, undefined],
+      // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
+      ["label", "string", false, undefined],
     ]);
     // E2: the dragged thumb is pressed, the name the butono has for it — no new state name.
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "pressed", "disabled", "invalid"]);
@@ -158,7 +160,7 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
   it("speaks role slider: name from the label, description from help then error, the states, required and the words of the two thumbs in de and en; the keys of APG", () => {
     expect(skemo?.a11y).toEqual({
       role: "slider",
-      name: ["slot:label"],
+      name: ["slot:label", "prop:label"],
       description: ["slot:help", "slot:error", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],
