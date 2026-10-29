@@ -3528,3 +3528,278 @@ describe("Nachlese 11 documentation (specs/031-nachlese-11)", () => {
     expect(quickstart).toContain("color.text.default");
   });
 });
+
+// Spec 029 ②a „Fonto Astryx – Abgleichstabelle" (2026-10-23): specs/029-fonto-astryx carries the
+// spec unchanged and, as data, the comparison of every one of the 40 Eroj with its counterpart in
+// the pinned Fonto (abgleich.json): one row per aspect (axes and values, sizes, states, anatomy and
+// slots, behaviour, patterns), each with a proposal – übernehmen, anpassen or behalten – and its
+// reason, plus the list of Fonto genera Fundamento lacks. Nothing is built; the maintainer decides
+// row by row in the field entscheidung (null until then). The plan shows the same rows; new axes
+// keep Fundamento's own names (Art. II, v2.2).
+describe("Spec 029 ②a documentation (specs/029-fonto-astryx)", () => {
+  type Zeile = {
+    id: string;
+    aspekt: string;
+    fundamento: string;
+    fonto: string;
+    vorschlag: string;
+    begruendung: string;
+    entscheidung: string | null;
+    auflage?: string;
+    achsen?: { name: string; werte: string[]; fonto?: string; neu: boolean }[];
+  };
+  type Abgleich = {
+    stand: string;
+    fonto: {
+      id: string;
+      lizenz: string;
+      copyright: string;
+      pakoj: { name: string; version: string; integrity: string }[];
+      repo: string;
+      tag: string;
+      commit: string;
+    };
+    muster: (Zeile & { eroj: string[]; quelle: string[] })[];
+    eroj: { ero: string; id: string; fonto: string[]; quelle: string[]; zeilen: Zeile[] }[];
+    fehlend: {
+      gattung: string;
+      fonto: string;
+      quelle: string;
+      vorschlag: string;
+      begruendung: string;
+    }[];
+  };
+  const ASPEKTE = ["achsen", "groessen", "zustaende", "anatomie", "verhalten", "muster"];
+  const VORSCHLAEGE = ["übernehmen", "anpassen", "behalten"];
+  const abgleich = (): Abgleich =>
+    JSON.parse(read("specs/029-fonto-astryx/abgleich.json")) as Abgleich;
+
+  it("the spec is copied unchanged", () => {
+    const spec = read("specs/029-fonto-astryx/spec.md");
+    expect(createHash("sha256").update(spec).digest("hex")).toBe(
+      "36ac8edfd68a57affcce8c309be2c07c51c6c3aacfb5b9c7b33761bfd30a710a",
+    );
+  });
+
+  it("the Fonto is pinned: core and theme-neutral 0.7.4 with integrity, tag and commit, MIT", () => {
+    const { fonto } = abgleich();
+    expect(fonto.id).toBe("astryx");
+    expect(fonto.lizenz).toBe("MIT");
+    expect(fonto.copyright).toContain("Meta Platforms");
+    expect(fonto.pakoj.map((pako) => `${pako.name}@${pako.version}`)).toEqual([
+      "@astryxdesign/core@0.7.4",
+      "@astryxdesign/theme-neutral@0.7.4",
+    ]);
+    for (const pako of fonto.pakoj) expect(pako.integrity).toMatch(/^sha512-[A-Za-z0-9+/=]{80,}$/);
+    expect(fonto.tag).toBe("v0.7.4");
+    expect(fonto.commit).toMatch(/^[0-9a-f]{40}$/);
+  });
+
+  it("every one of the 40 Eroj has its counterpart and one row per aspect with proposal and reason", () => {
+    const data = abgleich();
+    const dir = join(repoRoot, "packages/modelo/data/eroj");
+    const eroj = readdirSync(dir).filter((name) => existsSync(join(dir, name, "skemo.json")));
+    expect(eroj).toHaveLength(40);
+    expect(data.eroj.map((entry) => entry.ero).sort()).toEqual([...eroj].sort());
+    const ids = new Set<string>();
+    for (const entry of data.eroj) {
+      const skemo = JSON.parse(read(`packages/modelo/data/eroj/${entry.ero}/skemo.json`)) as {
+        ero: { id: string };
+      };
+      expect(entry.id, entry.ero).toBe(skemo.ero.id);
+      expect(entry.fonto.length, entry.ero).toBeGreaterThan(0);
+      for (const path of entry.quelle)
+        expect(path, entry.ero).toMatch(/^src\/[A-Za-z]+\/[A-Za-z]+\.(doc\.mjs|spec\.md)$/);
+      expect(
+        entry.zeilen.map((zeile) => zeile.aspekt),
+        entry.ero,
+      ).toEqual(ASPEKTE);
+      for (const zeile of entry.zeilen) {
+        expect(VORSCHLAEGE, zeile.id).toContain(zeile.vorschlag);
+        expect(zeile.begruendung.length, zeile.id).toBeGreaterThan(20);
+        expect(zeile.fundamento.length, zeile.id).toBeGreaterThan(0);
+        expect(zeile.fonto.length, zeile.id).toBeGreaterThan(0);
+        expect([null, ...VORSCHLAEGE], zeile.id).toContain(zeile.entscheidung);
+        expect(ids.has(zeile.id), zeile.id).toBe(false);
+        ids.add(zeile.id);
+      }
+    }
+    expect(ids.size).toBe(240);
+  });
+
+  it("the patterns of the spec are rows of their own: disabled reason, field status, dialog purpose, adaptive", () => {
+    const { muster } = abgleich();
+    const themen = muster.map((zeile) => zeile.id);
+    for (const id of ["M-1", "M-2", "M-3", "M-4"]) expect(themen).toContain(id);
+    for (const zeile of muster) {
+      expect(VORSCHLAEGE, zeile.id).toContain(zeile.vorschlag);
+      expect(zeile.begruendung.length, zeile.id).toBeGreaterThan(20);
+      expect(zeile.eroj.length, zeile.id).toBeGreaterThan(0);
+      expect([null, ...VORSCHLAEGE], zeile.id).toContain(zeile.entscheidung);
+    }
+  });
+
+  it("axes keep Fundamento's names: an existing axis of the Ero, or a new name that is not the Fonto's", () => {
+    const data = abgleich();
+    const props = (ero: string): string[] =>
+      (
+        JSON.parse(read(`packages/modelo/data/eroj/${ero}/skemo.json`)) as {
+          skemo: { props: { name: string }[] };
+        }
+      ).skemo.props.map((prop) => prop.name);
+    const known = new Set(data.eroj.flatMap((entry) => props(entry.ero)));
+    const kebab = (name: string): string => name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+    const check = (achse: NonNullable<Zeile["achsen"]>[number], own: Set<string>): void => {
+      expect(achse.name).toMatch(/^[a-z]+(-[a-z]+)*$/);
+      expect(achse.name).not.toBe("variant");
+      for (const wert of achse.werte) expect(wert, achse.name).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+      if (!achse.neu) expect(own.has(achse.name), achse.name).toBe(true);
+      if (!known.has(achse.name) && achse.fonto) {
+        expect(achse.name, achse.fonto).not.toBe(kebab(achse.fonto));
+      }
+    };
+    let count = 0;
+    for (const entry of data.eroj) {
+      const own = new Set(props(entry.ero));
+      for (const achse of entry.zeilen.flatMap((zeile) => zeile.achsen ?? [])) {
+        check(achse, own);
+        count += 1;
+      }
+    }
+    for (const achse of data.muster.flatMap((zeile) => zeile.achsen ?? [])) {
+      check(achse, known);
+      count += 1;
+    }
+    expect(count).toBeGreaterThan(10);
+  });
+
+  it("the list of missing genera names the Fonto source and is not built here", () => {
+    const data = abgleich();
+    const mapped = new Set(data.eroj.flatMap((entry) => entry.fonto));
+    expect(data.fehlend.length).toBeGreaterThanOrEqual(20);
+    for (const gattung of data.fehlend) {
+      expect(mapped.has(gattung.fonto), gattung.fonto).toBe(false);
+      expect(gattung.quelle).toMatch(/^src\/[A-Za-z]+\/[A-Za-z]+\.doc\.mjs$/);
+      expect(gattung.begruendung.length, gattung.fonto).toBeGreaterThan(10);
+    }
+    const toast = data.fehlend.find((gattung) => gattung.fonto === "Toast");
+    expect(toast?.begruendung).toContain("E6");
+  });
+
+  it("the data carry no values of the Fonto: no colours, no lengths", () => {
+    const text = read("specs/029-fonto-astryx/abgleich.json");
+    expect(text).not.toMatch(/#[0-9a-fA-F]{6}\b/);
+    expect(text).not.toMatch(/\b\d+(\.\d+)?(px|rem)\b/);
+  });
+
+  // Briefing A (Maintainer 24.10., „alles wie empfohlen"): the proposal of every row is its decision
+  // (②a-1); the exceptions ②a-2 to ②a-6 stand beside the decision as an auflage of their rows.
+  const AUFLAGEN: Record<string, string> = {
+    "A-elekto-2": "②a-2",
+    "A-markobutono-2": "②a-2",
+    "A-sxaltilo-2": "②a-2",
+    "M-1": "②a-3",
+    "A-datelektilo-1": "②a-3",
+    "A-elektilo-4": "②a-3",
+    "A-langetaro-4": "②a-3",
+    "A-ligilo-6": "②a-3",
+    "A-spuro-6": "②a-3",
+    "A-tekstareo-1": "②a-3",
+    "A-kodbloko-6": "②a-3",
+    "A-mezurilo-5": "②a-4",
+    "A-plenstato-6": "②a-5",
+    "A-tabelo-1": "②a-6",
+  };
+  const zeilen = (data: Abgleich): Zeile[] => [
+    ...data.muster,
+    ...data.eroj.flatMap((entry) => entry.zeilen),
+  ];
+
+  it("the briefing of 24.10. is copied unchanged", () => {
+    const briefing = read("specs/029-fonto-astryx/briefing-a-2026-10-24.md");
+    expect(createHash("sha256").update(briefing).digest("hex")).toBe(
+      "b1095dedf2e8caec9dc03268edf3aa339f7e88dc7896de23798df28d286c8626",
+    );
+  });
+
+  it("every row is decided as proposed (②a-1), as of 24.10.", () => {
+    const data = abgleich();
+    expect(data.stand).toBe("2026-10-24");
+    const open = zeilen(data).filter((zeile) => zeile.entscheidung !== zeile.vorschlag);
+    expect(open.map((zeile) => zeile.id)).toEqual([]);
+    expect(zeilen(data)).toHaveLength(254);
+  });
+
+  it("the exceptions ②a-2 to ②a-6 stand as an auflage on their rows, and on no other", () => {
+    const data = abgleich();
+    const found = Object.fromEntries(
+      zeilen(data)
+        .filter((zeile) => zeile.auflage !== undefined)
+        .map((zeile) => [zeile.id, zeile.auflage ?? ""]),
+    );
+    expect(Object.keys(found).sort()).toEqual(Object.keys(AUFLAGEN).sort());
+    for (const [id, punkt] of Object.entries(AUFLAGEN)) {
+      expect(found[id], id).toContain(`(${punkt})`);
+      expect(found[id]?.length ?? 0, id).toBeGreaterThan(30);
+    }
+    for (const id of ["A-elekto-2", "A-markobutono-2", "A-sxaltilo-2"]) {
+      expect(found[id], id).toMatch(/`large`.*Alias.*`medium`.*veraltet/);
+    }
+    expect(found["A-kodbloko-6"]).toContain("②b");
+    expect(found["A-mezurilo-5"]).toContain("Eroj-Runde 6");
+    expect(found["A-plenstato-6"]).toContain("Eroj-Runde 6");
+  });
+
+  it("the axis of the table lines is `lines`, not `rules` (②a-6: Reguloj)", () => {
+    const data = abgleich();
+    const achsen = [...data.muster, ...data.eroj.flatMap((entry) => entry.zeilen)].flatMap(
+      (zeile) => zeile.achsen ?? [],
+    );
+    expect(achsen.map((achse) => achse.name)).not.toContain("rules");
+    const tabelo = data.eroj.find((entry) => entry.ero === "tabelo")?.zeilen[0];
+    expect(tabelo?.achsen?.find((achse) => achse.name === "lines")).toEqual({
+      name: "lines",
+      werte: ["rows", "columns", "grid", "none"],
+      fonto: "dividers",
+      neu: true,
+    });
+    const plan = read("specs/029-fonto-astryx/plan.md");
+    expect(plan).toContain("### Entscheidungen vom 24.10.");
+    expect(plan).toContain("`lines`");
+    expect(plan).not.toMatch(/`tone`, `rules`/);
+  });
+
+  it("the plan shows every row with its proposal, the patterns, the missing genera and the guide; tasks the red commit", () => {
+    const data = abgleich();
+    const plan = read("specs/029-fonto-astryx/plan.md");
+    for (const heading of [
+      "## ②a Abgleichstabelle",
+      "### Zusammenfassung",
+      "### Fonto (gepinnt)",
+      "### Muster",
+      "### Abgleich je Ero",
+      "### Fehlende Gattungen",
+      "### Abweichungen",
+      "### Offen (für den Maintainer)",
+      "### Messanleitung",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const zeile of [...data.muster, ...data.eroj.flatMap((entry) => entry.zeilen)]) {
+      expect(plan, zeile.id).toContain(`| ${zeile.id} |`);
+      const line = plan.split("\n").find((entry) => entry.startsWith(`| ${zeile.id} |`));
+      expect(line, zeile.id).toContain(`**${zeile.vorschlag}**`);
+    }
+    for (const gattung of data.fehlend) expect(plan, gattung.fonto).toContain(gattung.fonto);
+    for (const term of [
+      data.fonto.commit,
+      "cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds",
+      "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/specs/029-fonto-astryx/",
+    ]) {
+      expect(plan, term).toContain(term);
+    }
+    expect(plan).not.toContain("ciferecigo");
+    expect(read("specs/029-fonto-astryx/tasks.md")).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Spec 029 ②a");
+  });
+});
