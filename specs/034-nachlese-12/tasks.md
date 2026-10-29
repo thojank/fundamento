@@ -34,6 +34,8 @@
 - [x] **T3407 Größe und Pixelvergleich der Vitrino:** komuna und ekzemplo 15,1 → 7,7 MB, 16 von 16 Abschnitten pixelgleich.
 - [ ] **T3408 M5 in der CI:** mindestens zehn Läufe nach der Änderung, nach Runner-Klasse; Dauer der Vitrino-Jobs vorher und nachher.
 - [x] **T3409 Doku:** plan, tasks, Vojmapo.
+- [x] **T3410 Zweite Gegenprobe von M5** (Nachtrag des Maintainers vom 29.10.): Stil und Layout von 80 ms ohne langes Skript. Rot in `7d53853`, die Hilfe `stilBlockadeEinbauen` grün. Gemessen: 97 ms je Umschalten, Skripte 9 ms, Perzentil 207 ms.
+- [x] **T3411 B-4:** Ein Ergebnis ohne Seite zählt seinen eigenen Aufwand. Rot in `c136046`, grün im Folgecommit.
 
 ### Messungen
 

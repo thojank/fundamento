@@ -15,7 +15,9 @@
    - Mehr als 20 % ohne Seite beenden die Reihe als „nicht messbar mit diesem Anbieter“ (`--hoechstens-ohne-seite 20`).
 3. **③ M5 robust, Grenze 50 ms unverändert:**
    - Das Urteil trennt die Arbeit der Skripte (je Frame, höchstens 50 ms, in jeder Änderung) von der Blockade je Änderung (90. Perzentil über 50 Änderungen, höchstens 50 ms).
-   - Die Gegenprobe mit künstlichen 80 ms in der Werkstatt ist rot: Skripte 81 ms, Perzentil 100 ms.
+   - Zwei Gegenproben, beide rot:
+     - künstliche 80 ms Skript in der Werkstatt: Skripte 81 ms, Perzentil 100 ms
+     - künstliche 80 ms Stil und Layout ohne langes Skript (Nachtrag des Maintainers): Skripte 9 ms, Perzentil 207 ms
 4. **④ Kontrastpaare einmal:**
    - Die Vitrino legt jede Tabelle einmal ab, und jede Kombination verweist darauf.
    - Größe: komuna 10,5 → 6,8 MB, komuna mit ekzemplo (Build der CI) 15,1 → 7,7 MB, alle vier Marken 29,2 → 10,6 MB.
@@ -55,7 +57,13 @@ Das Urteil (`packages/eroj/test/m5.ts`) für M5 und G5:
 
 - Die Grenze bleibt 50 ms.
 - Rot wird es, wenn ein Skript der Werkstatt einmal 50 ms überschreitet oder wenn mehr als jede zehnte Änderung länger blockiert.
-- Die Gegenprobe baut 80 ms in jeden Auftrag der Werkstatt an ihren Worker ein (`Worker.prototype.postMessage` im Test umhüllt, kein Haken im Produktionscode) und erwartet Rot.
+- **Gegenprobe 1 (Skript):** Sie baut 80 ms in jeden Auftrag der Werkstatt an ihren Worker ein (`Worker.prototype.postMessage` im Test umhüllt, kein Haken im Produktionscode) und erwartet Rot.
+- **Gegenprobe 2 (Stil und Layout, Nachtrag vom 29.10.):** `stilBlockadeEinbauen` in `m5.ts`:
+  - Ein Block von `span`-Elementen liegt außerhalb des Bildes und wird verdoppelt, bis eine erzwungene Neuberechnung von Stil und Layout auf diesem Runner mindestens 80 ms kostet.
+  - Danach wird er in Achtelschritten verkleinert, solange er 80 ms hält; gemessen 97 ms.
+  - Dann schaltet jeder Auftrag an den Worker nur eine Klasse am Block, ohne zu lesen. Die Kosten fallen in die Darstellung des nächsten Frames.
+  - Erwartet: rot über das 90. Perzentil, Skripte unter 50 ms. Gemessen: Skripte 9 ms, Perzentil 207 ms.
+  - Weil der Block auf dem Runner selbst kalibriert wird, gilt das auf schnellen wie langsamen Runnern.
 - `measure()` der Werkstatt liefert dafür `perChange` und `scriptLongest`; die alte Zeile mit „längste Blockade“ bleibt im Log.
 
 #### D-04 ④ Eine Tabelle je Marke, Farbschema und Kontrast
@@ -79,7 +87,7 @@ Kosten in $:
 | Reihe K | Ausgangslinie | `20261024-1233` | 66,7 gegen 33,3 | 64,4 gegen 47,6 | 12,9 / 2,7 · 14,7 / 7,2 | – (vor ④) | 2 933 354 / 158 769 | 0 $ | 2 |
 | Reihe K | nach den Korrekturen | `20261024-1248` | 75,1 gegen 33,3 | 72,9 gegen 47,6 | 18,5 / 0 · 15,1 / 4,3 | – (vor ④) | 3 261 566 / 148 810 | 0 $ | 1 |
 | Reihe K | **nach der Fonto** | `20261029-1127` | **76 gegen 33,3** | 74,9 gegen 47,6 | 16,7 / 0 · 14,8 / 7,8 | 333 | 2 828 072 / 153 502 | 0 $ | 0 |
-| Reihe O | Ausgangslinie (System `721743f`) | läuft | – | – | – | – | – | 0 $ | – |
+| Reihe O | Ausgangslinie (System `721743f`) | `20261029-1143` | 68,2 gegen 36,1 | 65,6 gegen 53,6 | – (1 Wiederholung) | 483 (ohne die gescheiterten) | 11 500 479 / 185 886 (B-4: ohne Ersatzzählung) | 0 $ | 5 von 40 (12,5 %) |
 | Reihe O | nach den Korrekturen (System `af6695a`) | folgt | – | – | – | – | – | 0 $ | – |
 | Reihe O | nach der Fonto (System `05f122d`) | folgt | – | – | – | – | – | 0 $ | – |
 
@@ -156,6 +164,12 @@ Die beiden roten (55 und 54 ms) hatten eine Ableitung von 138,9 und 136,5 ms; de
   - H und K liefen zugleich mit dem Werkzeug von `main`; jeder schrieb das Tagesbuch mit seinem Stand.
   - H stellte 314 Anfragen, eingetragen sind 64.
   - Behoben in diesem Branch (`mergeLedger`); für OpenAI und Mistral ohne Folgen, weil sie kein Tageslimit haben.
+- **B-4, Tokens gescheiterter Ergebnisse doppelt gezählt** (seit Spec 030, behoben in diesem Branch):
+  - Für ein Ergebnis ohne Seite nahm der Lauf die Änderung des gemeinsamen Budgets während dieses Ergebnisses. Bei drei gleichzeitigen Ergebnissen enthielt sie die Tokens der beiden anderen.
+  - Bei der Ausgangslinie O kamen so 7,17 Mio. Tokens auf 5 Zeitüberschreitungen; die Summe von 18,67 Mio. lag über der Kostengrenze, die tatsächlich nicht überschritten war.
+  - Jetzt hängt der Agent seinen Aufwand an den Fehler (`effort`), und der Lauf nimmt diesen.
+  - Die Kennzahl ist nicht berührt, nur Tokens und Anfragen.
+  - Die Läufe der Reihe O mit dem Werkzeug `269b4ff` haben den Fehler noch. Ihre Tokens stehen im Bericht ohne die gescheiterten Ergebnisse, ihre Anfragen ebenso.
 - **B-3, `regularo` steht wie die Kontrastpaare 18-fach in der Vitrino** (komuna 0,28 MB). Gleicher Weg möglich; nicht Teil dieses Auftrags (Aufgabe von 8b).
 
 ### Offen (für den Maintainer)

@@ -227,7 +227,30 @@ function functionOf(tool: ToolInfo) {
   };
 }
 
+/**
+ * One run of the agent. A failure carries what the run spent until then (`effort` on the error,
+ * Nachlese 12 B-4), so the Lauf counts a result without a page by its own tokens.
+ */
 export async function runAgent(options: AgentOptions): Promise<AgentResult> {
+  const spent: AgentEffort = {
+    inputTokens: 0,
+    outputTokens: 0,
+    toolCalls: 0,
+    ms: 0,
+    bytes: 0,
+    requests: 0,
+  };
+  const started = Date.now();
+  try {
+    return await runAgentInner(options, spent);
+  } catch (error) {
+    if (error instanceof Error && !(error instanceof CostLimitReached))
+      Object.assign(error, { effort: { ...spent, ms: Date.now() - started } });
+    throw error;
+  }
+}
+
+async function runAgentInner(options: AgentOptions, spent: AgentEffort): Promise<AgentResult> {
   const { provider, task, variant, budget } = options;
   const request = options.fetch ?? (globalThis.fetch as Fetch);
   const log = (line: string) => options.log?.(provider.redact(line));
@@ -277,6 +300,7 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
     for (;;) {
       await options.gate?.pass();
       requests += 1;
+      spent.requests = requests;
       let response: Response;
       let text: string;
       try {
@@ -317,6 +341,8 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
       const output = reply.usage?.completion_tokens ?? 0;
       inputTokens += input;
       outputTokens += output;
+      spent.inputTokens = inputTokens;
+      spent.outputTokens = outputTokens;
       budget.charge(input, output);
       const message = reply.choices?.[0]?.message;
       if (message === undefined) {
@@ -343,6 +369,7 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
     messages.push({ role: "assistant", content: message.content ?? "", tool_calls: requested });
     for (const entry of requested) {
       toolCalls += 1;
+      spent.toolCalls = toolCalls;
       let args: Record<string, unknown> = {};
       try {
         args = JSON.parse(entry.function.arguments || "{}") as Record<string, unknown>;

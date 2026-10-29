@@ -330,6 +330,7 @@ export async function runNordstelo(options: RunOptions, deps: RunDeps): Promise<
       const before = budget.spent;
       let agentResult: AgentResult | undefined;
       let error: string | undefined;
+      let failedEffort: AgentResult["effort"] | undefined;
       try {
         agentResult = await deps.agent({ task: tasko.teksto[lingvo], variant, budget });
       } catch (caught) {
@@ -343,6 +344,9 @@ export async function runNordstelo(options: RunOptions, deps: RunDeps): Promise<
           return;
         }
         error = String(caught instanceof Error ? caught.message : caught);
+        // Nachlese 12 B-4: the agent says what the failed result spent; the change of the shared
+        // budget meanwhile holds the tokens of the results beside it as well.
+        failedEffort = (caught as { effort?: AgentResult["effort"] }).effort;
       }
       largestRun = Math.max(largestRun, budget.spent - before);
       let facts = EMPTY_FACTS;
@@ -364,13 +368,14 @@ export async function runNordstelo(options: RunOptions, deps: RunDeps): Promise<
           ? scoreBoth({ facts, tasko, variant, modelo: deps.modelo }, deps.katalogo)
           : { nova: failedScore(variant, error), antauxa: failedScore(variant, error) };
       const result = scored.nova;
-      const effort = agentResult?.effort ?? {
-        inputTokens: budget.spent - before,
-        outputTokens: 0,
-        toolCalls: 0,
-        ms: 0,
-        bytes: 0,
-      };
+      const effort = agentResult?.effort ??
+        failedEffort ?? {
+          inputTokens: options.concurrency > 1 ? 0 : budget.spent - before,
+          outputTokens: 0,
+          toolCalls: 0,
+          ms: 0,
+          bytes: 0,
+        };
       const record: RunRecord = {
         task: tasko.name,
         variant,
