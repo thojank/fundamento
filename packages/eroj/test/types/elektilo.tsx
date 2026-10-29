@@ -47,10 +47,8 @@ export const wrongSize = (
   <Elektilo size="huge">Land</Elektilo>
 );
 
-export const noLabelProp = (
-  // @ts-expect-error the label is the children, never a prop (G1)
-  <Elektilo label="Land">Land</Elektilo>
-);
+// Spec 029 ②b-1b (Nachlese 12): the label is the children or the prop label – both are shown.
+export const labelProp = <Elektilo label="Land" />;
 
 export const noOptionsProp = (
   // @ts-expect-error the options are children in the slot options, not a prop (E7)

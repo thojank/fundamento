@@ -16,10 +16,8 @@ export const wrongSize = (
   <Sxaltilo size="huge">Dark Mode</Sxaltilo>
 );
 
-export const noLabelProp = (
-  // @ts-expect-error the label is the children, never a prop (G1)
-  <Sxaltilo label="Dark Mode">Dark Mode</Sxaltilo>
-);
+// Spec 029 ②b-1b (Nachlese 12): the label is the children or the prop label – both are shown.
+export const labelProp = <Sxaltilo label="Dark Mode" />;
 
 export const noRequired = (
   // @ts-expect-error a switch is never empty: no required (section 1)
