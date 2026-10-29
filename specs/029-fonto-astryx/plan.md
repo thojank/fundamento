@@ -1416,3 +1416,11 @@ pnpm --filter @fundamento/modelo exec vitest run src/docs/docs.test.ts -t "Spec 
 Erwartet: 8 Tests grün.
 
 Die Spec: `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/specs/029-fonto-astryx/spec.md`.
+
+## ②b-1 – Feld-Muster (M-1, M-2, M-5, M-6)
+
+Auftrag des Maintainers vom 28.10. (21:56): ②b setzt genau die Entscheidungen aus ②a um (`abgleich.json` mit Auflagen), Maßstab „gut genug“, kein Story- oder Pixelabgleich mit dem Storybook der Fonto; Figma prüft der Maintainer bei der Abnahme. Schnitt (Entscheidung 29.10.): gestapelte PRs – ②b-1 Feld-Muster, ②b-2 Größen und Achsen, ②b-3 Anatomie und Verhalten, ②b-4 kodbloko mit Syntaxfarben (①-2), Ersatzschrift (①-7), signeto/insigno und die Vitrino-Befunde aus Spec 025.
+
+### Entwurf
+
+- **M-5 Laden in Feldern** (kampo, tekstareo, elektilo, listelektilo, plurelektilo, kompletigilo, datelektilo, glitilo, elekto, markobutono, sxaltilo, alsxutilo): Boolean `loading` wie am butono. Das Feld bleibt bedienbar (wie der kompletigilo seit Nachlese 4 N-9) und ist beschäftigt (`aria-busy`); beschrieben mit dem Wort des Modelo („lädt“), der kompletigilo weiter in seiner Live-Region. Sichtbar als Teil `spinner`: der Bogen des plenstato in Icongröße (`size.icon.small`) und gedämpfter Schrift (`color.text.muted`), der sich mit den Bewegungsrollen dreht und unter reduzierter Bewegung steht. Figma: BOOLEAN `loading` zeigt den Spinner.
