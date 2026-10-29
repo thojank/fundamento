@@ -4,7 +4,7 @@
 // – and the limits of the provider: requests per day through the gate of the Nordstelo, now in the
 // Metiejo; at the limit the turn stops with a sentence. After a 429 the screen says it waited.
 
-import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -12,7 +12,7 @@ import { Provider } from "../asistanto/ki.js";
 import { readKroniko } from "../asistanto/kroniko.js";
 import { parseEnv, settingsOf } from "../env.js";
 import { CLIENT_SCRIPT } from "../html.js";
-import { LIMOJ, Pordisto } from "../index.js";
+import { dayOf, LIMOJ, Pordisto } from "../index.js";
 import { MARKEN_DIR } from "../marko.js";
 import type { PrivataDeps } from "../privata.js";
 import { type Servilo, startServilo } from "../servilo.js";
@@ -172,5 +172,84 @@ describe("the limits of the provider (Spec 033 S6)", () => {
     expect(
       (await post(restarted.url, "/api/marko/limo/asistanto", { teksto: "runder" })).status,
     ).toBe(429);
+  });
+});
+
+// Nachlese 12 (#116), taken into the Metiejo: B-4 and the ledger of parallel runs.
+describe("the corrections of Nachlese 12 in the Metiejo (Spec 033 S6)", () => {
+  const own = join(scratch, "nachlese-12");
+  const ownWorkdir = join(own, MARKEN_DIR);
+  mkdirSync(ownWorkdir, { recursive: true });
+  // The turn of „fehler“ gets answers without a message only; the one of „bone“ answers at once.
+  const parallelFetch = async (_url: string, init: RequestInit) => {
+    const messages = (JSON.parse(String(init.body)) as { messages: { content: string }[] })
+      .messages;
+    const failing = messages.some((message) => message.content === "geht schief");
+    await new Promise((done) => setTimeout(done, 5));
+    return new Response(
+      JSON.stringify(
+        failing
+          ? { usage: { prompt_tokens: 70, completion_tokens: 0 } }
+          : {
+              choices: [{ message: { role: "assistant", content: "Gern." } }],
+              usage: { prompt_tokens: 600, completion_tokens: 40 },
+            },
+      ),
+      { status: 200 },
+    );
+  };
+  const startOwn = async (extra: Record<string, unknown> = {}) => {
+    const server = await startServilo(
+      {
+        port: 0,
+        workdir: ownWorkdir,
+        root: own,
+        settings: settingsOf(parseEnv("")),
+        deps,
+        ki: { provider, fetch: parallelFetch, sleep: async () => {}, ...extra },
+      },
+      { stderr: () => {} },
+    );
+    servers.push(server);
+    for (const name of ["fehler", "bone"]) {
+      await fetch(`${server.url}/marko`, {
+        method: "POST",
+        headers: { "content-type": "application/x-www-form-urlencoded" },
+        body: `name=${name}&basis=komuna`,
+        redirect: "manual",
+      });
+    }
+    return server;
+  };
+
+  it("B-4: a turn that ends in an error counts its own tokens in the Kroniko, none of the turn beside it", async () => {
+    const server = await startOwn();
+    const [failed, done] = await Promise.all([
+      post(server.url, "/api/marko/fehler/asistanto", { teksto: "geht schief" }),
+      post(server.url, "/api/marko/bone/asistanto", { teksto: "runder" }),
+    ]);
+    expect(failed.status).toBe(502);
+    expect(done.status).toBe(200);
+    const turn = readKroniko(ownWorkdir, "fehler").findLast((entry) => entry.ago === "babilo");
+    expect(turn?.kosto).toMatchObject({ enigo: 280, eligo: 0, requests: 4 });
+    expect(JSON.stringify(turn?.detaloj)).toContain("Antwort ohne Nachricht");
+    const stato = (await (await fetch(`${server.url}/api/marko/fehler/stato`)).json()) as {
+      zaehlilo: { enigo: number; requests: number };
+    };
+    expect(stato.zaehlilo).toMatchObject({ enigo: 280, requests: 4 });
+  });
+
+  it("the ledger of the day is merged with what another run wrote meanwhile, not overwritten", async () => {
+    const server = await startOwn({ limoj: { perTago: 100 } });
+    const key = `mistral ${dayOf(Date.now())}`;
+    const file = join(ownWorkdir, ".anfragoj.json");
+    // Another run of the same day has counted 50 requests since this server started.
+    writeFileSync(file, `${JSON.stringify({ [key]: 50, "openrouter 2026-10-28": 7 })}\n`);
+    expect((await post(server.url, "/api/marko/bone/asistanto", { teksto: "runder" })).status).toBe(
+      200,
+    );
+    const ledger = JSON.parse(readFileSync(file, "utf8")) as Record<string, number>;
+    expect(ledger[key]).toBeGreaterThanOrEqual(50);
+    expect(ledger["openrouter 2026-10-28"]).toBe(7);
   });
 });
