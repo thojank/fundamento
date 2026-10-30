@@ -2180,6 +2180,27 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
         `padding-inline-end: calc(${variable(named(owner, skemo, "spinner", "size", {}, spinnerSize.fixed))} + ${variable(named(owner, skemo, "spinner", "inline-padding", {}, spinnerRoom.fixed))});`,
       ]);
     }
+    // Abnahme #122 (decision 30.10., Skemo trailingAfter): the spinner directly after the text of
+    // the label. While it shows, the label keeps its room at the end of every line, and the
+    // spinner takes none in the line: it stands after the last word and never wraps alone.
+    if (
+      skemo.trailingAfter === "label" &&
+      spinnerSize !== undefined &&
+      "fixed" in spinnerSize &&
+      spinnerRoom !== undefined &&
+      "fixed" in spinnerRoom
+    ) {
+      const size = variable(named(owner, skemo, "spinner", "size", {}, spinnerSize.fixed));
+      const room = variable(
+        named(owner, skemo, "spinner", "inline-padding", {}, spinnerRoom.fixed),
+      );
+      add(':where([part="label"]:has(> [part="spinner"]:not([hidden])))', [
+        `padding-inline-end: calc(${size} + ${room} + ${room});`,
+      ]);
+      add(':where([part="label"]) > [part="spinner"]', [
+        `margin-inline-end: calc(-1 * (${size} + ${room} + ${room}));`,
+      ]);
+    }
   }
   // The end of a field comes last (Abnahme #122): it refines the inline padding of the control.
   const placed = isBoxedField(skemo) ? endRules(skemo, owner) : [];

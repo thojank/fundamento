@@ -465,7 +465,8 @@ function toggleMarkup(
     : "";
   // Abnahme #122 (decision of the maintainer, 30.10.; Skemo trailingAfter): the spinner directly
   // after the text of the label – after its last line, before an error under it; hidden from the
-  // name (aria-hidden). Without trailingAfter at the end of the field.
+  // name (aria-hidden); the stylesheet keeps its room at the end of every line, so it never wraps
+  // to a line of its own. Without trailingAfter at the end of the field.
   const inLabel = afterLabel ? SPINNER : "";
   const label = `<label part="label" id="label" for="control"><slot></slot>${mark}${inLabel}</label>`;
   const texts = textsMarkup(slots);
