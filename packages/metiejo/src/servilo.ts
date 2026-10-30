@@ -55,6 +55,7 @@ import {
 } from "./asistanto/stato.js";
 import { buildOf, expertHinweis, standOf } from "./eksperto.js";
 import { EKSPORTO_CELOJ, type EksportoCelo, exportMarko } from "./eksporto.js";
+import { type Bildilo, playwrightBildilo } from "./enportilo/bildilo.js";
 import {
   legiMaterialon,
   NeLegebla,
@@ -170,8 +171,12 @@ export interface ServiloOptions {
    * MISTRAL_API_KEY; absent without it (the browser's Web Speech API takes over). `fetch` for tests.
    */
   parolo?: { provider?: Provider; satz?: string; fetch?: Fetch };
-  /** Spec 033 S4: how the research agent reaches public pages; a test passes its own. */
-  esploro?: { fetch?: (url: string, init?: RequestInit) => Promise<Response> };
+  /**
+   * Spec 033 S4: how the research agent reaches public pages; a test passes its own. Spec 035 4.1:
+   * the browser that renders them – default Playwright, imported on the first page; a test passes a
+   * double.
+   */
+  esploro?: { fetch?: (url: string, init?: RequestInit) => Promise<Response>; bildilo?: Bildilo };
 }
 
 export interface ServiloIo {
@@ -392,6 +397,8 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     });
   })();
   const gated = gate === undefined ? {} : { gate };
+  // Spec 035 4.1 (AC-11): creating the renderer loads nothing; Playwright comes with the first page.
+  const bildilo = options.esploro?.bildilo ?? playwrightBildilo();
   const zaehliloOf = (name: string) => {
     const sum = zaehlilo(readKroniko(options.workdir, name));
     return { ...sum, satz: zaehliloSatz(sum) };
@@ -1508,6 +1515,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
             ...(provider === undefined ? {} : { provider }),
             ...(options.ki?.fetch === undefined ? {} : { fetch: options.ki.fetch }),
             ...(options.esploro?.fetch === undefined ? {} : { pageFetch: options.esploro.fetch }),
+            bildilo,
             ...(options.ki?.sleep === undefined ? {} : { sleep: options.ki.sleep }),
             ...gated,
             budget: new Budget(options.ki?.limo ?? 60_000),
@@ -1535,6 +1543,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
               antwort: result.antwort,
               seitoj: result.seitoj,
               abgelehnt: result.abgelehnt,
+              notoj: result.notoj,
             },
           });
           sendJson(response, {
@@ -1542,6 +1551,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
             seitoj: result.seitoj,
             abgelehnt: result.abgelehnt,
             antwort: result.antwort,
+            notoj: result.notoj,
             kosto: result.kosto,
             zaehlilo: zaehliloOf(name),
           });

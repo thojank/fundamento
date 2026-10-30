@@ -3,7 +3,8 @@
 // the declarations come the colours (literal, and a custom property once more for every var() that
 // uses it), the font families by role (headings: display, code: code, else body), the radii and the
 // spacing (padding and gap) in px, each with the file and the line. Generic families, 0, pills and
-// percentages do not count.
+// percentages do not count. A bot challenge instead of the page (a status that refuses automatic
+// readers, the markers of a challenge) is Blokita: nothing of it is read (Spec 035, Befund 4.1).
 
 import postcss from "postcss";
 import { coloursIn, type Herkunft, lineOf, type Trovo } from "./trovo.js";
@@ -36,10 +37,35 @@ const BRAND_BONUS = 4;
 const COLOUR_PROPS =
   /^(color|background|background-color|border(-[a-z]+)?-color|border|fill|stroke|outline-color|--.+)$/;
 
+/** A page that blocks automatic reading: a bot challenge instead of the page (Spec 035, Befund 4.1). */
+export class Blokita extends Error {
+  constructor(
+    readonly url: string,
+    readonly status: number,
+  ) {
+    super(`${url} blockiert das automatische Lesen (Status ${status}).`);
+  }
+}
+
+/** Statuses that refuse an automatic reader whatever the body says. */
+const BLOCK_STATUS = new Set([403, 429]);
+/** The markers of the common bot challenges, in the headers or the body of the answer. */
+const CHALLENGE =
+  /cf-chl|_cf_chl_opt|challenge-platform|<title>\s*(just a moment|attention required|access denied)|_incapsula_resource|captcha-delivery\.com|px-captcha|ddos-guard|verify you are (a )?human/i;
+
+function blocked(response: Response, body: string): boolean {
+  return (
+    BLOCK_STATUS.has(response.status) ||
+    response.headers.get("cf-mitigated") === "challenge" ||
+    CHALLENGE.test(body.slice(0, 64 * 1024))
+  );
+}
+
 async function text(url: string, request: RetejoFetch): Promise<string> {
   const response = await request(url, { signal: AbortSignal.timeout(15_000), redirect: "follow" });
-  if (!response.ok) throw new Error(`${url} antwortet ${response.status}.`);
   const body = await response.text();
+  if (blocked(response, body)) throw new Blokita(url, response.status);
+  if (!response.ok) throw new Error(`${url} antwortet ${response.status}.`);
   return body.length > LIMIT ? body.slice(0, LIMIT) : body;
 }
 
@@ -228,11 +254,11 @@ export function markoLigiloj(page: string, url: string, limit = 5): string[] {
   return found;
 }
 
-/** A page with its findings and the press and brand pages it links to. */
+/** A page with its findings, the press and brand pages it links to, and its HTML as read. */
 export async function legiPagxon(
   url: string,
   request: RetejoFetch = globalThis.fetch,
-): Promise<{ trovoj: Trovo[]; ligiloj: string[] }> {
+): Promise<{ trovoj: Trovo[]; ligiloj: string[]; html: string }> {
   const page = await text(url, request);
   const sheets: Sheet[] = [];
   const order: { index: number; load: () => Promise<Sheet | undefined> }[] = [];
@@ -279,5 +305,5 @@ export async function legiPagxon(
     const known = colours.get(colour);
     if (known !== undefined) known.pezo += weight;
   }
-  return { trovoj: [...colours.values(), ...rest], ligiloj: markoLigiloj(page, url) };
+  return { trovoj: [...colours.values(), ...rest], ligiloj: markoLigiloj(page, url), html: page };
 }

@@ -12,6 +12,7 @@ import { parseEnv, settingsOf } from "../env.js";
 import { MARKEN_DIR } from "../marko.js";
 import type { PrivataDeps } from "../privata.js";
 import { type Servilo, startServilo } from "../servilo.js";
+import { blanka } from "../test-doubles/weg-c.js";
 
 const scratch = mkdtempSync(join(tmpdir(), "fm-metiejo-esploro-"));
 const root = join(scratch, "checkout");
@@ -35,6 +36,8 @@ const pageFetch = async (url: string) =>
         { status: 200, headers: { "content-type": "text/html" } },
       )
     : new Response("", { status: 404 });
+/** Spec 035 4.1: every page renders as an empty white screen; its colours come from the CSS. */
+const bildilo = { bildigi: async () => ({ bildo: blanka(), logoj: [] }) };
 const llmFetch = async () =>
   new Response(
     JSON.stringify(
@@ -58,7 +61,7 @@ beforeAll(async () => {
         provider: new Provider("mistral", "ministral-14b-2512", "sk-esploro-servilo"),
         fetch: llmFetch,
       },
-      esploro: { fetch: pageFetch },
+      esploro: { fetch: pageFetch, bildilo },
     },
     { stderr: () => {} },
   );
@@ -69,7 +72,7 @@ beforeAll(async () => {
       root,
       settings: settingsOf(parseEnv("")),
       deps,
-      esploro: { fetch: pageFetch },
+      esploro: { fetch: pageFetch, bildilo },
     },
     { stderr: () => {} },
   );
