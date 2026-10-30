@@ -38,6 +38,9 @@ body { margin: 0; font-family: var(--fm-typography-body-1-font-family); backgrou
 .mt-zeile { display: flex; flex-wrap: wrap; gap: var(--fm-spacing-small); align-items: center; }
 .mt-pruefung { display: flex; flex-direction: column; gap: var(--fm-spacing-medium); }
 .mt-studio { display: grid; grid-template-columns: minmax(10rem, 12rem) minmax(0, 1fr) minmax(20rem, 30rem); gap: var(--fm-spacing-large); align-items: start; }
+.mt-schritte { min-inline-size: 0; }
+.mt-schritte fm-navigado { display: flex; flex-direction: column; max-inline-size: 100%; }
+.mt-schritte fm-navigado > a { flex-wrap: wrap; white-space: normal; overflow-wrap: anywhere; max-inline-size: 100%; gap: var(--fm-spacing-xsmall); padding-block: var(--fm-spacing-xsmall); }
 .mt-studio-vorschau { display: flex; flex-direction: column; gap: var(--fm-spacing-small); }
 .mt-studio-vorschau iframe { inline-size: 100%; block-size: 48rem; border: var(--fm-border-width-default) dashed var(--fm-color-border-default); border-radius: var(--fm-radius-role-surface); background-color: var(--fm-color-background-canvas); }
 .mt-gruppe { display: flex; flex-direction: column; gap: var(--fm-spacing-medium); }

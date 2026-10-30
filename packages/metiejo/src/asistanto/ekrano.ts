@@ -58,9 +58,14 @@ export interface AsistantoInput {
 const facetoUrl = (name: string, faceto: string) =>
   `/asistanto/${encodeURIComponent(name)}/${encodeURIComponent(faceto)}`;
 
+/**
+ * A step in the left bar: its name and its state (Spec 035, Befund 4.5.2). The badge stands in a
+ * span of its own: fm-navigado keeps a direct fm-insigno of a link only as the count of data-count
+ * and removed the state badge otherwise.
+ */
 function facetoLink(name: string, faceto: FacetoStand, current: string): string {
   const mark = faceto.gruen ? "" : " · Prüfung offen";
-  return `<a href="${facetoUrl(name, faceto.name)}" data-page="${escapeHtml(faceto.name)}"${faceto.name === current ? ' aria-current="page"' : ""}>${escapeHtml(faceto.nomo)} <fm-insigno intent="${STATO_INTENT[faceto.stato]}" data-mt-faceto-stato="${escapeHtml(faceto.name)}">${STATO_NOMOJ[faceto.stato]}${mark}</fm-insigno></a>`;
+  return `<a href="${facetoUrl(name, faceto.name)}" data-page="${escapeHtml(faceto.name)}"${faceto.name === current ? ' aria-current="page"' : ""}><span>${escapeHtml(faceto.nomo)}</span> <span class="mt-schritt-stato"><fm-insigno intent="${STATO_INTENT[faceto.stato]}" data-mt-faceto-stato="${escapeHtml(faceto.name)}">${STATO_NOMOJ[faceto.stato]}${mark}</fm-insigno></span></a>`;
 }
 
 function chatHtml(historio: AsistantoInput["historio"]): string {
@@ -124,7 +129,7 @@ ${dialog}
 <fm-teksto slot="subtitle">${escapeHtml(faceto.kialo)}</fm-teksto>
 <fm-ligilo slot="actions" to="/studio/${encodeURIComponent(name)}/${studio}" placement="standalone">Im Studio bearbeiten</fm-ligilo>
 <section class="mt-studio">
-<div><fm-navigado label="Schritte" page="${escapeHtml(faceto.name)}" orientation="vertical">${nav}<a href="/studio/${encodeURIComponent(name)}/${studio}" data-page="studio">Studio</a><a href="/asistanto/${encodeURIComponent(name)}/komenco" data-page="komenco">Einstiegsfragen</a></fm-navigado><fm-teksto kind="caption">${nochNicht}</fm-teksto></div>
+<div class="mt-schritte"><fm-navigado label="Schritte" page="${escapeHtml(faceto.name)}" orientation="vertical">${nav}<a href="/studio/${encodeURIComponent(name)}/${studio}" data-page="studio">Studio</a><a href="/asistanto/${encodeURIComponent(name)}/komenco" data-page="komenco">Einstiegsfragen</a></fm-navigado><fm-teksto kind="caption">${nochNicht}</fm-teksto></div>
 <div class="mt-studio-vorschau"><iframe data-mt-vorschau data-mt-src="${previewSrc}" title="Vorschau der Marke"></iframe></div>
 <div class="mt-babilo">
 <fm-teksto kind="caption" data-mt-ki>${kiSatz}</fm-teksto>
