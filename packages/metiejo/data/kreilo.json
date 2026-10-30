@@ -1,0 +1,86 @@
+{
+  "$comment": "Spec 033 S3 (Weg A, Kreilo): the character of a new brand as pairs of opposites, each with the movements of the sliders per step towards its right pole (−2 … +2; the left pole moves the other way) and its Kialo; the font rules by character; the anchors of the lead colour. Data, like the wish vocabulary of the Agordilo: the language model never sets these values, the Kreilo computes them and the Agordilo derives.",
+  "paroj": [
+    {
+      "nomo": "ruhig-lebhaft",
+      "maldekstre": "ruhig",
+      "dekstre": "lebhaft",
+      "bewegungen": [
+        { "regler": "regler.saettigung", "schritt": 0.15 },
+        { "regler": "regler.kontrast", "schritt": 0.05 },
+        { "regler": "form.schatten", "schritt": 0.15 }
+      ],
+      "kialo": "Lebhafte Marken tragen kräftigere Farben, mehr Kontrast und mehr Tiefe; ruhige nehmen Sättigung und Schatten zurück, damit nichts drängt."
+    },
+    {
+      "nomo": "klassisch-modern",
+      "maldekstre": "klassisch",
+      "dekstre": "modern",
+      "bewegungen": [
+        { "regler": "form.schatten", "schritt": -0.1 },
+        { "regler": "schrift.skala", "schritt": 0.015 }
+      ],
+      "kialo": "Moderne Marken wirken flacher und setzen größere Sprünge zwischen den Schriftstufen; klassische tragen mehr Tiefe und eine ruhigere Skala. Die Schrift folgt den Schriftregeln."
+    },
+    {
+      "nomo": "warm-kuehl",
+      "maldekstre": "warm",
+      "dekstre": "kühl",
+      "bewegungen": [{ "regler": "neutral.toenung", "schritt": -0.1 }],
+      "kialo": "Warm und kühl entscheidet zuerst der Farbton der Leitfarbe (Anker unten); warme Marken tönen auch ihre Neutraltöne, kühle lassen sie neutraler."
+    },
+    {
+      "nomo": "sachlich-verspielt",
+      "maldekstre": "sachlich",
+      "dekstre": "verspielt",
+      "bewegungen": [
+        { "regler": "form.radius", "schritt": 0.35 },
+        { "regler": "regler.saettigung", "schritt": 0.1 }
+      ],
+      "kialo": "Verspielte Marken sind runder und bunter; sachliche werden eckiger und zurückhaltender in der Farbe."
+    },
+    {
+      "nomo": "leicht-kraeftig",
+      "maldekstre": "leicht",
+      "dekstre": "kräftig",
+      "bewegungen": [
+        { "regler": "schrift.gewicht", "schritt": 0.35 },
+        { "regler": "regler.kontrast", "schritt": 0.1 },
+        { "regler": "raum.abstand", "schritt": -0.05 }
+      ],
+      "kialo": "Kräftige Marken setzen schwerere Schrift und mehr Kontrast auf etwas dichteren Raum; leichte tragen dünnere Schrift mit mehr Luft."
+    }
+  ],
+  "leitfarbe": {
+    "helligkeit": 0.55,
+    "chroma": { "basis": 0.11, "je_lebhaft": 0.025, "min": 0.04, "max": 0.18 },
+    "farbton": { "-2": 45, "-1": 70, "0": 175, "1": 225, "2": 260 },
+    "kialo": "Ohne festgelegte Farbe und ohne Inspiration gibt der Charakter die Leitfarbe: warm–kühl den Farbton (warme Orange- und Goldtöne bis kühle Blautöne, die Mitte ein Petrol), ruhig–lebhaft die Sättigung, die Helligkeit eine Stufe, auf der die Ableitung beide Modi bedienen kann."
+  },
+  "tiparoj": [
+    {
+      "kiam": { "sachlich-verspielt": ">0" },
+      "display": "Nunito",
+      "body": "Nunito",
+      "kialo": "Verspielte Marken: eine runde Grotesk mit offenen Formen für Überschriften und Text."
+    },
+    {
+      "kiam": { "klassisch-modern": "<0" },
+      "display": "Fraunces",
+      "body": "Source Serif 4",
+      "kialo": "Klassische Marken: Serifen tragen Tradition; Fraunces für Überschriften, Source Serif 4 gut lesbar im Text."
+    },
+    {
+      "kiam": { "klassisch-modern": ">0" },
+      "display": "Inter",
+      "body": "Inter",
+      "kialo": "Moderne Marken: eine sachliche Grotesk mit großer Spanne an Gewichten."
+    },
+    {
+      "kiam": {},
+      "display": "Manrope",
+      "body": "Manrope",
+      "kialo": "In der Mitte: eine freundliche, neutrale Grotesk, die weder klassisch noch technisch wirkt."
+    }
+  ]
+}

@@ -223,3 +223,96 @@ Die Kroniko: `file:///Users/thorstenjankowski/Fundamento/marken/<marke>/kroniko.
 cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
 pnpm --filter @fundamento/metiejo exec vitest run src/enportilo src/asistanto
 ```
+
+## S3 – Weg A (Kreilo): Einstiegsfragen, Charakter als Gegensatzpaare, Inspiration, Vorschlag je Aspekt
+
+**Branch:** `261029-spec-033-s3-weg-a` (auf S2) · **Datum:** 2026-10-29 · **Stand:** gebaut, Abnahme offen.
+
+### Zusammenfassung
+
+1. **Einstiegsfragen** unter `/asistanto/<marke>/komenco`, gebaut aus Eroj:
+   - „Was soll die Marke repräsentieren, und für wen?“ (`fm-tekstareo`)
+   - der Charakter als **fünf Gegensatzpaare** (`fm-glitilo` von −2 bis +2, die Pole als Beschriftung an den Enden): ruhig–lebhaft, klassisch–modern, warm–kühl, sachlich–verspielt, leicht–kräftig
+   - was schon festgelegt ist: Farbe und Schrift (`fm-kampo`)
+   - Inspirationsbilder (`fm-alsxutilo`, mehrere) mit der Bestätigung nach Amendment v2.5
+
+   Der Assistent verlinkt „Einstiegsfragen“ in seiner Schritt-Navigation.
+2. **Kreilo als Daten:** `packages/metiejo/data/kreilo.json`.
+   - Je Paar die Bewegungen der Regler pro Stufe zum rechten Pol, mit Kialo; der linke Pol bewegt in die Gegenrichtung.
+   - Die Schriftregeln nach Charakter, mit Kialo: verspielt → Nunito; klassisch → Fraunces und Source Serif 4; modern → Inter; ausgewogen → Manrope.
+   - Die Anker der Leitfarbe: warm–kühl gibt den Farbton von 45° bis 260°, ruhig–lebhaft die Sättigung.
+   - Jeder Wert bleibt im Bereich seines Reglers.
+3. **Vorrang der Leitfarbe:** festgelegt, dann die kräftigste Farbe der Inspirationsbilder (Enportilo aus S2), dann mit Sprachmodell ein Zug über `setze_farbe` passend zur Beschreibung, sonst die Anker des Charakters. Bei der Schrift: festgelegt, sonst die erste Regel, die zum Charakter passt.
+4. **Sofort sichtbar:** Der Vorschlag liegt direkt auf dem Entwurf (Quelle `agento`); die berührten Schritte sind „definiert“. Die Person sieht jeden in der Vorschau, passt ihn im Chat oder im Studio an und gibt frei. Jeder Schritt hat in der Kroniko einen Eintrag `propono` mit seiner Herkunft, etwa „Einstiegsfragen, ruhig–lebhaft −1 (ruhig)“ oder die Datei eines Inspirationsbilds; die Antworten stehen in `marken/<name>/kreilo.json`.
+
+### Entwurfsentscheidungen
+
+#### D-11 Charakter als Daten, nicht als Prompt
+Wie das Wunsch-Vokabular der Agordilo: Die Wirkung eines Paars steht mit Kialo in den Daten, und der Kreilo rechnet sie. Das Sprachmodell setzt keine dieser Werte. Es kommt nur dort ins Spiel, wo Worte gebraucht werden: die Leitfarbe passend zur Beschreibung, über das Werkzeug `setze_farbe`, und danach jede Anpassung im Chat.
+
+#### D-12 Weg A legt den Vorschlag direkt auf den Entwurf
+Bei einer neuen Marke gibt es kein fremdes Material, das erst übernommen werden müsste (anders als Weg B). Der Vorschlag ist sofort in der Vorschau sichtbar („Jedes Ergebnis ist sofort sichtbar“); die Freigabe bleibt bei der Person.
+
+### Probeläufe
+
+**Abnahme 1, automatisch durchgespielt** am 2026-10-29 mit `mistral/ministral-14b-2512` und einer Kostengrenze von 30 000 Tokens je Zug, Wegwerf-Marke `pano` in einem temporären Ordner.
+
+- **Fünf Sätze:** „Eine Bäckerei für die Nachbarschaft. Ehrliches Brot, früh am Morgen gebacken. Für Familien und Leute auf dem Weg zur Arbeit. Warm und freundlich, nicht schick. Man soll sich willkommen fühlen.“
+- **Charakter:** ruhig −1, klassisch −1, warm −2, verspielt +1, Mitte bei leicht–kräftig.
+- **Zwei Inspirationsbilder:** synthetisch erzeugt (Krustenbraun und Creme, Weizengold und Hell), keine Fotos Dritter.
+- **Ablauf:** zwei Wünsche im Chat („Die Leitfarbe etwas wärmer, bitte.“, „Etwas runder.“). Danach jeden offenen Schritt übernommen und alle zwölf freigegeben, ohne menschliche Prüfung. Am Ende Speichern mit Export (Paket, CSS, Figma) und `fm projekcioj build` über die exportierte Konfiguration.
+
+| Schritt | Ergebnis | Zeit seit Start |
+|---|---|---|
+| Kreilo | 5 Schritte gesetzt (Leitfarbe aus den Inspirationsbildern, Neutraltöne, Schrift, Form, Elevation) | 2,2 s |
+| zwei Chat-Züge | beide über Werkzeuge geändert (wärmer, Radius 1,35 → 1,75) | – |
+| 12 Freigaben | **100 % freigegeben**, 100 % definiert | 25,2 s |
+| Prüfung | exportierbar, 0 Probleme | – |
+| Export und Projektionen | Paket, CSS, Figma-Plugin; Vitrino mit der Marke | 29,5 s / 36,2 s |
+
+**Gesamt: Dauer 36,2 s, 6 847 Tokens (6 696 ein, 151 aus), 7 Anfragen, Kosten ≈ 0,0014 $** (0,20 $ je Mio. Tokens, B-3). Kroniko: 40 Einträge, kein Schlüssel in Kroniko oder Log.
+
+Gemessen ist damit, dass der Ablauf technisch weit unter **15 Minuten** bleibt. Die Zeit einer Person, die jeden Schritt ansieht und anpasst, ist nicht gemessen; das ist die Abnahme des Maintainers (Messanleitung).
+
+### Abweichungen
+
+1. **Statusfarben, Modi, Bewegung, Fokus, Elementgrößen, Icons setzt der Kreilo nicht:** Kein Paar sagt etwas über sie. Sie stehen auf dem Wert der Basis (offen), bis die Person „Vorschlag übernehmen“ wählt oder sie im Chat anpasst.
+2. **Logo:** „Was ist schon festgelegt (Farbe, Schrift, Logo)?“ Ein Logo geht als Inspirationsbild (PNG, SVG) in die Leitfarbe ein; ein Logo-Feld der Marke gehört zu Umfang 3.
+
+### Befunde / Mankoj
+
+- **B-9 Inspiration als fremdes Material:** Inspirationsbilder sind Uploads; der Kreilo verlangt die Bestätigung, bevor er sie liest, und hält fremde Basis und Bestätigung je Bild fest (Art. VI, 1).
+
+### Offen (für den Maintainer)
+
+- **O-7 Schriftregeln und Farbanker** in `kreilo.json`: Familien (Nunito, Fraunces mit Source Serif 4, Inter, Manrope) und Farbtöne (45°/70°/175°/225°/260°) bitte bestätigen oder ersetzen; jede Regel trägt ihre Kialo.
+
+### Messanleitung
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm install && pnpm build
+pnpm fm metiejo --open
+```
+
+1. Eine neue Marke anlegen, dann `http://localhost:7301/asistanto/<marke>/komenco` öffnen. Erwartet: das Textfeld, fünf Regler mit den Polen an beiden Enden, Farbe, Schrift, Inspiration und Bestätigung. Die Stoppuhr beginnt.
+2. Fünf Sätze schreiben, den Charakter einstellen, zwei Bilder wählen, das Kästchen bestätigen, „Vorschlag machen“. Erwartet: Weiterleitung auf „Leitfarbe und Akzente“; die gesetzten Schritte sind „definiert“, die Vorschau zeigt die Marke.
+3. Jeden Schritt ansehen, im Chat anpassen, „Vorschlag übernehmen“ und „Freigeben“, bis der Balken 100 % zeigt. Stoppuhr ablesen (Ziel: höchstens 15 Minuten).
+4. Im Studio „Speichern“: Der Export liegt in `file:///Users/thorstenjankowski/Fundamento/marken/<marke>/eksporto/`; die Vitrino mit der Marke:
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm fm projekcioj build --config /Users/thorstenjankowski/Fundamento/marken/<marke>/eksporto/fundamento.config.json --out /Users/thorstenjankowski/Fundamento/marken/<marke>/eksporto/projekcioj
+open "file:///Users/thorstenjankowski/Fundamento/marken/<marke>/eksporto/projekcioj/vitrino/index.html"
+```
+
+Das Figma-Plugin: `/Users/thorstenjankowski/Fundamento/marken/<marke>/eksporto/projekcioj/figma/plugin/manifest.json` in Figma über Plugins → Development → Import plugin from manifest.
+
+Die Daten des Kreilo: `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/packages/metiejo/data/kreilo.json`.
+
+**Tests:**
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm --filter @fundamento/metiejo exec vitest run src/kreilo src/asistanto src/enportilo
+```

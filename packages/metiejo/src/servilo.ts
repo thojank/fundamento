@@ -4,7 +4,7 @@
 // talks to the private font repository — the browser talks to nothing but this server. It logs
 // and answers no value of the .env; the settings reach the screens as "set" or "not set".
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import { dirname, extname, join, resolve, sep } from "node:path";
@@ -56,6 +56,7 @@ import {
   writeProponoj,
 } from "./enportilo/materialo.js";
 import { proponojOf } from "./enportilo/rekono.js";
+import type { Trovo } from "./enportilo/trovo.js";
 import type { Settings } from "./env.js";
 import { CLIENT_SCRIPT, escapeHtml, previewDocument } from "./html.js";
 import { identOf } from "./ident.js";
@@ -68,6 +69,8 @@ import {
   zeloOf,
 } from "./komponentoj.js";
 import { knownFonts } from "./kontrolo.js";
+import { kreiloScreen } from "./kreilo/ekrano.js";
+import { describeKaraktero, kreiloProponoj } from "./kreilo/kreilo.js";
 import {
   createMarko,
   listMarkoj,
@@ -1012,6 +1015,21 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       return;
     }
 
+    // Spec 033 S3 (Weg A): the entry questions of the Kreilo.
+    const komenco = /^\/asistanto\/([a-z0-9-]+)\/komenco$/.exec(path);
+    if (komenco !== null && method === "GET") {
+      const [, name = ""] = komenco;
+      const draft = draftOf(name);
+      if (draft === undefined) {
+        notFound(response);
+        return;
+      }
+      sendHtml(
+        response,
+        kreiloScreen({ name, label: draft.agordo.etikedoj?.marko ?? name, rev: draft.rev }),
+      );
+      return;
+    }
     // Spec 033 S1: the Asistanto – its screen, the state, the chat, the steps, the confirmation.
     const asistanto = /^\/asistanto\/([a-z0-9-]+)(?:\/([a-z]+))?$/.exec(path);
     if (asistanto !== null && method === "GET") {
@@ -1062,7 +1080,9 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       return;
     }
     const asistantoApi =
-      /^\/api\/marko\/([a-z0-9-]+)\/(stato|asistanto|faceto|fremda|konfirmo|materialo)$/.exec(path);
+      /^\/api\/marko\/([a-z0-9-]+)\/(stato|asistanto|faceto|fremda|konfirmo|materialo|kreilo)$/.exec(
+        path,
+      );
     if (asistantoApi !== null) {
       const [, name = "", action = ""] = asistantoApi;
       const draft = draftOf(name);
@@ -1211,6 +1231,138 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         }
         kroniko(name, { ago, fonto: "regilo", faceto });
         sendJson(response, { rev: draft.rev, stato: statoOf(name, draft) });
+        return;
+      }
+      if (action === "kreilo") {
+        // Spec 033 S3 (Weg A): the entry questions become a proposal per Faceto, laid on the draft at
+        // once; inspiration images are uploads and ask for the confirmation first (Amendment v2.5).
+        const inspiro = Array.isArray(body.inspiro) ? body.inspiro.filter(isRecord) : [];
+        if (inspiro.length > 0 && body.rajtoj !== true) {
+          sendJson(
+            response,
+            {
+              satz: `Bestätigung zuerst: Inspirationsbilder liest der Enportilo erst, wenn du bestätigst: ${KONFIRMO_TEKSTO}`,
+            },
+            409,
+          );
+          return;
+        }
+        const trovoj: Trovo[] = [];
+        for (const image of inspiro) {
+          try {
+            const read = await legiMaterialon(
+              {
+                filename: typeof image.filename === "string" ? image.filename : "",
+                bytes: Buffer.from(typeof image.base64 === "string" ? image.base64 : "", "base64"),
+              },
+              { workdir: options.workdir, name, familyOf: familyOfFilename },
+            );
+            trovoj.push(...read.trovoj);
+            kroniko(name, {
+              ago: "fremda",
+              fonto: "regilo",
+              detaloj: { kiel: "upload", nomo: read.nomo, inspiro: true },
+            });
+            kroniko(name, {
+              ago: "konfirmo",
+              fonto: "regilo",
+              teksto: KONFIRMO_TEKSTO,
+              detaloj: { materialo: read.nomo },
+            });
+          } catch (error) {
+            sendJson(
+              response,
+              { satz: error instanceof Error ? error.message : String(error) },
+              422,
+            );
+            return;
+          }
+        }
+        const karaktero = isRecord(body.karaktero)
+          ? Object.fromEntries(
+              Object.entries(body.karaktero).map(([key, value]) => [key, Number(value) || 0]),
+            )
+          : {};
+        const festgelegt = isRecord(body.festgelegt) ? body.festgelegt : {};
+        const celo = typeof body.celo === "string" ? body.celo : "";
+        const result = kreiloProponoj(
+          {
+            celo,
+            karaktero,
+            festgelegt: {
+              ...(typeof festgelegt.farbe === "string" ? { farbe: festgelegt.farbe } : {}),
+              ...(typeof festgelegt.schrift === "string" ? { schrift: festgelegt.schrift } : {}),
+            },
+            inspiro: trovoj,
+          },
+          draft.agordo,
+          bases,
+        );
+        const { agordo, issues } = readAgordo(result.agordo);
+        if (agordo === undefined) {
+          sendJson(response, { satz: issues.map((issue) => issue.message).join(" ") }, 422);
+          return;
+        }
+        setDraft(name, draft, agordo, "agento");
+        for (const faceto of result.facetoj) {
+          kroniko(name, {
+            ago: "propono",
+            fonto: "agento",
+            faceto,
+            teksto: result.satz,
+            detaloj: { herkunft: result.herkunft[faceto] ?? [], kreilo: { celo, karaktero } },
+          });
+        }
+        // With a model, no fixed colour and no inspiration, the model chooses the lead colour.
+        const provider = options.ki?.provider;
+        const colourFixed =
+          (typeof festgelegt.farbe === "string" && festgelegt.farbe.trim() !== "") ||
+          trovoj.some((trovo) => trovo.kind === "farbo");
+        let turn: Awaited<ReturnType<typeof babili>> | undefined;
+        if (provider !== undefined && !colourFixed) {
+          try {
+            turn = await babili({
+              provider,
+              laborejo: laborejoOf(name, draft, provider.toString()),
+              historio: [],
+              teksto: `Neue Marke. Beschreibung: ${celo || "(keine)"}. Charakter: ${describeKaraktero(karaktero) || "ausgewogen"}. Wähle mit dem Werkzeug setze_farbe eine Leitfarbe, die zur Beschreibung passt, und sag in zwei Sätzen, warum.`,
+              faceto: "gvidkoloro",
+              budget: new Budget(options.ki?.limo ?? 60_000),
+              ...(options.ki?.fetch === undefined ? {} : { fetch: options.ki.fetch }),
+              ...(options.ki?.sleep === undefined ? {} : { sleep: options.ki.sleep }),
+              log: (line) => io.stderr(`${redact(line)}\n`),
+            });
+            kroniko(name, {
+              ago: "babilo",
+              fonto: "babilo",
+              faceto: "gvidkoloro",
+              teksto: "Leitfarbe zur Beschreibung (Einstiegsfragen)",
+              modelo: provider.toString(),
+              kosto: turn.kosto,
+              detaloj: { antwort: turn.antwort, iloj: turn.iloj },
+            });
+            babiloj.set(name, [
+              ...(babiloj.get(name) ?? []),
+              { role: "assistant", content: turn.antwort },
+            ]);
+          } catch (error) {
+            io.stderr(
+              `Kreilo: ${redact(error instanceof Error ? error.message : String(error))}\n`,
+            );
+          }
+        }
+        mkdirSync(join(options.workdir, name), { recursive: true });
+        writeFileSync(
+          join(options.workdir, name, "kreilo.json"),
+          `${JSON.stringify({ celo, karaktero, festgelegt }, null, 2)}\n`,
+        );
+        sendJson(response, {
+          facetoj: result.facetoj,
+          satz: result.satz,
+          rev: draft.rev,
+          stato: statoOf(name, draft),
+          ...(turn === undefined ? {} : { antwort: turn.antwort, kosto: turn.kosto }),
+        });
         return;
       }
       if (action === "materialo") {

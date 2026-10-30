@@ -540,6 +540,29 @@ function zeigeStato(stato) {
     if (badge) badge.textContent = faceto.stato + (faceto.gruen ? "" : " · Prüfung offen");
   }
 }
+// Spec 033 S3: the entry questions of the Kreilo.
+const kreilo = document.getElementById("mt-kreilo");
+if (kreilo && marko) {
+  const send = document.querySelector("[data-mt-kreilo-sendi]");
+  if (send) send.addEventListener("click", async () => {
+    const attr = (selector) => { const el = document.querySelector(selector); return (el && el.getAttribute("value")) || ""; };
+    const karaktero = {};
+    for (const slider of document.querySelectorAll("[data-mt-paro]")) karaktero[slider.getAttribute("data-mt-paro")] = Number(slider.getAttribute("value") || "0");
+    const inspiro = [];
+    const picker = document.querySelector("[data-mt-kreilo-inspiro]");
+    for (const file of (picker && picker.files) || []) {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      let binary = "";
+      for (let index = 0; index < bytes.length; index += 0x8000) binary += String.fromCharCode(...bytes.subarray(index, index + 0x8000));
+      inspiro.push({ filename: file.name, base64: btoa(binary) });
+    }
+    const rajtoj = document.querySelector("[data-mt-kreilo-rajtoj]");
+    meldung("Ich mache den Vorschlag …");
+    const result = await post("kreilo", { celo: attr("[data-mt-kreilo-celo]"), karaktero, festgelegt: { farbe: attr("[data-mt-kreilo-farbe]"), schrift: attr("[data-mt-kreilo-schrift]") }, inspiro, rajtoj: !!rajtoj && rajtoj.hasAttribute("checked") });
+    if (!result.ok) { meldung(result.body.satz || "Der Vorschlag ging nicht."); return; }
+    location.href = "/asistanto/" + marko + "/gvidkoloro";
+  });
+}
 // The one draft: when the assistant or the Studio changed it elsewhere, follow.
 if (marko && (asistantoData || (sxtupo && sxtupo.startsWith("studio-")))) {
   setInterval(async () => {

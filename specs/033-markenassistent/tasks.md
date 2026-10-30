@@ -57,3 +57,26 @@
 | Commits | rot `0cee3f1`, grün im Folgecommit (Hash im PR) |
 | Grün gemessen | Metiejo 25 Dateien / 245 Tests (Enportilo und Assistent 52); Lint sauber |
 | Probelauf | Screenshot 4 Funde, 2 Vorschläge, 85 ms; URL 258 Funde, 6 Vorschläge, 57 ms; 0 Tokens, 0 $ |
+
+## S3 – Weg A (Kreilo)
+
+**Branch:** `261029-spec-033-s3-weg-a` (auf S2).
+
+### A – Rot zuerst
+- [x] **T3321 Tests:** Metiejo `src/kreilo/kreilo.test.ts` (fünf Paare mit Kialo, Bewegungen, Reglerbereich, Leitfarbe nach warm–kühl und ruhig–lebhaft, Schrift nach klassisch–modern und verspielt, Festgelegtes und Inspiration zuerst, Herkunft) und `servilo-kreilo.test.ts` (Einstiegsfragen aus Eroj, Vorschlag sofort auf dem Entwurf, Kroniko, Bestätigung für Inspiration, Leitfarbe über `setze_farbe`); Doku-Test S3. Rot in `590bef2`: Kreilo-Modul fehlt, Server 4 rot, Doku 1.
+
+### B – Grün
+- [x] **T3322 Daten und Kreilo:** `data/kreilo.json`, `kreilo.ts` (D-11).
+- [x] **T3323 Server und Bildschirm:** `/asistanto/<marke>/komenco`, Route `kreilo` (D-12), Link im Assistenten, Client-Skript.
+- [x] **T3324 Probelauf Abnahme 1** (automatisch, plan).
+
+### C – Abschluss
+- [x] **T3325 Doku:** plan S3, tasks, Vojmapo.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits | rot `590bef2`, grün im Folgecommit (Hash im PR) |
+| Grün gemessen | Metiejo 27 Dateien / 257 Tests; Lint sauber |
+| Probelauf | 100 % in 36,2 s, 6 847 Tokens, 7 Anfragen, ≈ 0,0014 $; Vitrino und Figma mit der Marke |
