@@ -616,6 +616,15 @@ function zeigeStato(stato) {
     const badge = document.querySelector('[data-mt-faceto-stato="' + faceto.name + '"]');
     if (badge) badge.textContent = faceto.stato + (faceto.gruen ? "" : " · Prüfung offen");
   }
+  // Spec 035, Befund 4.4: after a change in the chat or elsewhere the step can be released at once.
+  const current = asistantoData && (stato.facetoj || []).find((faceto) => faceto.name === asistantoData.faceto);
+  if (!current) return;
+  const release = document.querySelector('[data-mt-faceto-ago="liberigo"]');
+  if (release) release.toggleAttribute("disabled", !current.freigebbar);
+  const reopen = document.querySelector('[data-mt-faceto-ago="remalfermo"]');
+  if (reopen) reopen.toggleAttribute("disabled", current.stato !== "freigegeben");
+  const satz = document.querySelector("[data-mt-freigabe-satz]");
+  if (satz && current.freigabeSatz) satz.textContent = current.freigabeSatz;
 }
 // Spec 033 S3: the entry questions of the Kreilo.
 const kreilo = document.getElementById("mt-kreilo");

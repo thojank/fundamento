@@ -3,7 +3,9 @@
 // released Facetoj against all, weighted by facetoj.json – and beside it the share of defined ones.
 // A Faceto counts as released only while the check has no open problem of its tokens, so a brand at
 // 100 % is always checked green. Scopes 2 and 3 are named as not yet part of the model, not as 0 %.
-// Pure.
+// Whether a step can be released, and the sentence beside the button, are part of the state (Spec
+// 035, Befund 4.4): a change in the chat or at the sliders defines a step and makes it releasable
+// (plan Spec 033, Abweichung 1), and the screen follows a chat turn without a reload. Pure.
 
 import type { Agordo } from "@fundamento/agordilo";
 import { type FacetojFile, facetojOfToken, type Modelo, underPrefix } from "@fundamento/modelo";
@@ -19,6 +21,10 @@ export interface FacetoStand {
   gruen: boolean;
   probleme: number;
   pezo: number;
+  /** Defined and green: „Freigeben“ is on (Spec 035, Befund 4.4). */
+  freigebbar: boolean;
+  /** The sentence beside the buttons of the step. */
+  freigabeSatz: string;
 }
 
 export interface Vollstaendigkeit {
@@ -131,6 +137,22 @@ export interface StatoEingabe {
   probleme: readonly OffenesProblem[];
 }
 
+/** Whether a step can be released, and what to do otherwise (Spec 035, Befund 4.4). */
+export function freigabeOf(
+  stand: Pick<FacetoStand, "stato" | "gruen" | "probleme">,
+): Pick<FacetoStand, "freigebbar" | "freigabeSatz"> {
+  const freigebbar = stand.stato === "definiert" && stand.gruen;
+  const freigabeSatz =
+    stand.stato === "offen"
+      ? "Übernimm den Vorschlag oder passe den Schritt im Chat oder an den Reglern an, dann kannst du freigeben."
+      : !stand.gruen
+        ? `Die Prüfung meldet ${stand.probleme} offene${stand.probleme === 1 ? "s Problem" : " Probleme"} in diesem Schritt.`
+        : stand.stato === "freigegeben"
+          ? "Freigegeben. Du kannst den Schritt wieder öffnen."
+          : "Bereit zur Freigabe.";
+  return { freigebbar, freigabeSatz };
+}
+
 const percent = (part: number, whole: number): number =>
   whole === 0 ? 0 : Math.round((100 * part) / whole);
 
@@ -173,13 +195,15 @@ export function vollstaendigkeitOf(input: StatoEingabe): Vollstaendigkeit {
       : defined.has(faceto.name) || released.has(faceto.name)
         ? "definiert"
         : "offen";
+    const gruen = count === 0;
     return {
       name: faceto.name,
       nomo: faceto.nomo.de,
       stato,
-      gruen: count === 0,
+      gruen,
       probleme: count,
       pezo: faceto.pezo,
+      ...freigabeOf({ stato, gruen, probleme: count }),
     };
   });
   const total = staende.reduce((sum, faceto) => sum + faceto.pezo, 0);

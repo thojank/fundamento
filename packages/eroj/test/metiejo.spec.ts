@@ -122,12 +122,19 @@ test.describe("Markenassistent (Spec 035, Befund 4.4)", () => {
     await page.goto(`${base}/asistanto/freigabe/formo`);
     const release = page.locator('fm-butono[data-mt-faceto-ago="liberigo"]');
     await expect(release).toHaveAttribute("disabled", "");
+    // The screen asks for the state every few seconds; the answer after the change is the one.
+    const followed = page.waitForResponse(
+      async (response) =>
+        response.url().endsWith("/api/marko/freigabe/stato") &&
+        ((await response.json()) as { rev: number }).rev > 1,
+    );
     const changed = await fetch(`${base}/api/marko/freigabe/entwurf`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ form: { radius: 1.6 } }),
     });
     expect(changed.ok).toBe(true);
+    await followed;
     await expect(release).not.toHaveAttribute("disabled");
     await expect(page.locator("[data-mt-freigabe-satz]")).toHaveText("Bereit zur Freigabe.");
     await release.click();
