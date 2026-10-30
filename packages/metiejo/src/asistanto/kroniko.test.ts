@@ -65,6 +65,22 @@ describe("the Kroniko of a brand (Spec 033 S1)", () => {
     expect(file).toContain("‹Schlüssel›");
   });
 
+  it("an export with its duration is an entry of the Kroniko (Spec 033 S6, O-10)", () => {
+    const ajv = createModeloAjv();
+    const entry = appendKroniko(workdir, "lumo", {
+      ago: "eksporto",
+      fonto: "sistemo",
+      detaloj: {
+        pasxo: "eksporto",
+        ms: 5200,
+        partoj: { paket: 900, projekcioj: 4100, pruefung: 200 },
+      },
+    });
+    expect(
+      documentSchemaIssues({ file: KRONIKO_FILE, value: entry }, SCHEMA_DEFS.kronikoEro, ajv),
+    ).toEqual([]);
+  });
+
   it("a brand without a record has an empty Kroniko", () => {
     expect(readKroniko(workdir, "nenie")).toEqual([]);
   });

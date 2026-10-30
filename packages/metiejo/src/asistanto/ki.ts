@@ -163,10 +163,14 @@ export interface ChatResult {
   waits: number;
 }
 
+/** What a call spent until it ended, on its error too (Nachlese 12 B-4). */
+export type ChatSpent = Omit<ChatResult, "message">;
+
 /**
  * One call of chat/completions: charged to the budget, checked against it before. On 429 the call
  * waits with a growing interval and tries again without end, after a server error, a timeout or an
- * answer without a message a few times. An error never carries the key.
+ * answer without a message a few times. The tokens are those of every attempt. An error never
+ * carries the key; it carries what the call spent (`spent`, Nachlese 12 B-4).
  */
 export async function chatCompletion(
   provider: Provider,
@@ -174,14 +178,50 @@ export async function chatCompletion(
   budget: Budget,
   options: ChatOptions = {},
 ): Promise<ChatResult> {
+  const spent: ChatSpent = { input: 0, output: 0, requests: 0, waits: 0 };
+  try {
+    return await attempts(provider, body, budget, options, spent);
+  } catch (error) {
+    if (error instanceof Error) Object.assign(error, { spent: { ...spent } });
+    throw error;
+  }
+}
+
+/**
+ * Puts on an error of a turn what the turn spent itself (Nachlese 12 B-4): the calls before and the
+ * failed one, as `kosto` for the Kroniko.
+ */
+export function kostoOnError(
+  error: unknown,
+  before: { enigo: number; eligo: number; requests: number },
+  started: number,
+): unknown {
+  const failed = (error as { spent?: Partial<ChatSpent> }).spent ?? {};
+  if (error instanceof Error)
+    Object.assign(error, {
+      kosto: {
+        enigo: before.enigo + (failed.input ?? 0),
+        eligo: before.eligo + (failed.output ?? 0),
+        ms: Date.now() - started,
+        requests: before.requests + (failed.requests ?? 0),
+      },
+    });
+  return error;
+}
+
+async function attempts(
+  provider: Provider,
+  body: Record<string, unknown>,
+  budget: Budget,
+  options: ChatOptions,
+  spent: ChatSpent,
+): Promise<ChatResult> {
   budget.ensure();
   const request = options.fetch ?? (globalThis.fetch as Fetch);
   const wait = options.sleep ?? defaultSleep;
   const log = (line: string) => options.log?.(provider.redact(line));
   let delay = FIRST_WAIT;
   let transient = 0;
-  let requests = 0;
-  let waits = 0;
   const again = async (why: string): Promise<void> => {
     log(`Anbieter ${provider.name}: ${why}, neuer Versuch in ${Math.round(delay / 1000)} s`);
     await wait(delay);
@@ -189,7 +229,7 @@ export async function chatCompletion(
   };
   for (;;) {
     await options.gate?.pass();
-    requests += 1;
+    spent.requests += 1;
     let response: Response;
     let text: string;
     try {
@@ -213,7 +253,7 @@ export async function chatCompletion(
     }
     if (!response.ok) {
       if (response.status === 429) {
-        waits += 1;
+        spent.waits += 1;
         await again("antwortet 429");
         continue;
       }
@@ -230,6 +270,8 @@ export async function chatCompletion(
     const input = reply.usage?.prompt_tokens ?? 0;
     const output = reply.usage?.completion_tokens ?? 0;
     budget.charge(input, output);
+    spent.input += input;
+    spent.output += output;
     const message = reply.choices?.[0]?.message;
     if (message === undefined) {
       if (transient < TRANSIENT_ATTEMPTS) {
@@ -239,6 +281,6 @@ export async function chatCompletion(
       }
       throw new Error(`Anbieter ${provider.name}: Antwort ohne Nachricht.`);
     }
-    return { message, input, output, requests, waits };
+    return { message, ...spent };
   }
 }

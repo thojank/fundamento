@@ -164,24 +164,37 @@ async function runAgentInner(options: AgentOptions, spent: AgentEffort): Promise
   let toolCalls = 0;
   let requests = 0;
   const call = async (offerTools: boolean): Promise<ChatMessage> => {
-    const result = await chatCompletion(
-      provider,
-      {
-        messages,
-        ...(offerTools && tools !== undefined && tools.length > 0
-          ? { tools, tool_choice: "auto" }
-          : {}),
-        temperature: 0.2,
-      },
-      budget,
-      {
-        fetch: request,
-        timeout: options.timeout ?? 180_000,
-        ...(options.gate === undefined ? {} : { gate: options.gate }),
-        ...(options.sleep === undefined ? {} : { sleep: options.sleep }),
-        log,
-      },
-    );
+    let result: Awaited<ReturnType<typeof chatCompletion>>;
+    try {
+      result = await chatCompletion(
+        provider,
+        {
+          messages,
+          ...(offerTools && tools !== undefined && tools.length > 0
+            ? { tools, tool_choice: "auto" }
+            : {}),
+          temperature: 0.2,
+        },
+        budget,
+        {
+          fetch: request,
+          timeout: options.timeout ?? 180_000,
+          ...(options.gate === undefined ? {} : { gate: options.gate }),
+          ...(options.sleep === undefined ? {} : { sleep: options.sleep }),
+          log,
+        },
+      );
+    } catch (error) {
+      // Nachlese 12 B-4: the failed request counts too, answers without a message included.
+      const failed = (error as { spent?: { input: number; output: number; requests: number } })
+        .spent;
+      if (failed !== undefined) {
+        spent.requests = requests + failed.requests;
+        spent.inputTokens = inputTokens + failed.input;
+        spent.outputTokens = outputTokens + failed.output;
+      }
+      throw error;
+    }
     requests += result.requests;
     inputTokens += result.input;
     outputTokens += result.output;

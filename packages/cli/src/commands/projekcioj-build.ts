@@ -1,11 +1,13 @@
 // `fm projekcioj build [--config <file>] [--out <dir>]`: validates the Modelo and generates every
 // projection (Spec 003, plan D-01): CSS, Tailwind, Web Component, React, Figma plan, Code Connect
 // and Make Kits, plus `projekcioj.json` with the SHA-256 of every file. Nothing is written for an
-// invalid Modelo.
+// invalid Modelo. A config in the export folder of a brand (Spec 033 S6, O-10) writes the duration
+// of the build into the brand's Kroniko, for the estimate of the Markenassistent.
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { markoOfEksporto, notiLokan } from "@fundamento/metiejo";
 import { defaultModeloSource, fixtureModeloSource, projectModeloSource } from "@fundamento/modelo";
 import { buildProjekcioj } from "@fundamento/projekcioj";
 import { parseFlags, UsageError } from "../args.js";
@@ -128,6 +130,7 @@ async function run(args: readonly string[], context: CliContext): Promise<number
   }
   const build = typeof values.build === "string" ? values.build : checkoutBuild();
   let result: Awaited<ReturnType<typeof buildProjekcioj>>;
+  const started = Date.now();
   try {
     result = await buildProjekcioj({
       outDir,
@@ -153,6 +156,15 @@ async function run(args: readonly string[], context: CliContext): Promise<number
   context.stdout(
     `${COMMAND_LINE}: wrote ${result.files.length} files for the Celoj ${written} to ${outDir}.\n`,
   );
+  const marko =
+    config === undefined ? undefined : markoOfEksporto(resolve(context.baseDir, config));
+  if (marko !== undefined) {
+    const ms = Date.now() - started;
+    notiLokan(marko.workdir, marko.name, { pasxo: "projekcioj", ms, celoj: result.celoj });
+    context.stdout(
+      `${COMMAND_LINE}: ${(ms / 1000).toFixed(1)} s in der Kroniko der Marke ${marko.name} festgehalten.\n`,
+    );
+  }
   return EXIT_OK;
 }
 

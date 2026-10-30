@@ -2428,7 +2428,7 @@ export interface Faceto {
   dimensioj?: Name[];
 }
 /**
- * One entry of the Kroniko of a brand (Spec 033 S1, Amendment v2.5): marken/<name>/kroniko.jsonl, one per line – every proposal, change, take-over, release, reopening, declaration of a foreign basis, confirmation, notice and chat turn, with time, source, model and cost. `persono` and `rolo` stay empty while the Metiejo runs for one person; they keep the place for a database with person and role.
+ * One entry of the Kroniko of a brand (Spec 033 S1, Amendment v2.5): marken/<name>/kroniko.jsonl, one per line – every proposal, change, take-over, release, reopening, declaration of a foreign basis, confirmation, notice, chat turn and export (with its duration, Spec 033 S6), with time, source, model and cost. `persono` and `rolo` stay empty while the Metiejo runs for one person; they keep the place for a database with person and role.
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "KronikoEro".
@@ -2448,7 +2448,8 @@ export interface KronikoEro {
     | "fremda"
     | "konfirmo"
     | "averto"
-    | "babilo";
+    | "babilo"
+    | "eksporto";
   /**
    * Where it came from: the chat, speech, the sliders of the Studio or Schnellstart, an agent, the system.
    */

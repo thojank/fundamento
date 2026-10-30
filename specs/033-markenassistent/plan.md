@@ -1,12 +1,102 @@
 # Spec 033 – Markenassistent – Plan
 
-**Spec:** [`spec.md`](spec.md) (Fassung vom 2026-10-24, unverändert kopiert; SHA-256 `b940b1fa…1379f644`) · **Basis:** `main` `05f122dc` (nach #110, #111, #113) · **Regel 0** gilt: der Weg, den das Repo schon geht, sonst die kleinste Änderung mit Eintrag hier. **Keine Grenze angehoben**, nichts weggeworfen: Schnellstart und Studio bleiben und werden Teil des Assistenten. Ersetzt Studio Runde 3.
+**Spec:** [`spec.md`](spec.md) (Fassung vom 2026-10-24, unverändert kopiert; SHA-256 `b940b1fa…1379f644`) · **Basis:** `main` `04b68b79` (nach #116; zuerst `05f122dc` nach #110, #111, #113) · **Regel 0** gilt: der Weg, den das Repo schon geht, sonst die kleinste Änderung mit Eintrag hier. **Keine Grenze angehoben**, nichts weggeworfen: Schnellstart und Studio bleiben und werden Teil des Assistenten. Ersetzt Studio Runde 3.
 
-**Stufen, gestapelt:** S1 von `main` (dieser Abschnitt), S2 bis S6 jeweils auf der vorigen. Spec 029 ②b läuft parallel; bei Konflikten setzt der spätere PR neu auf.
+**Stufen, gestapelt:** S1 von `main` (dieser Abschnitt), S2 bis S6 jeweils auf der vorigen. Spec 029 ②b läuft parallel; bei Konflikten setzt der spätere PR neu auf. Am 2026-10-29 nach #116 (Nachlese 12) von unten nach oben neu auf `main` gesetzt.
+
+## Abnahmeliste
+
+Für die Abnahme durch den Maintainer, in dieser Reihenfolge. Alles im Checkout `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds`, auf dem Branch von S6 (er enthält S1 bis S5). In der `.env`: `FM_KI_ANBIETER=mistral`, `FM_KI_MODELL=ministral-14b-2512`, `MISTRAL_API_KEY` gesetzt. Die Marken liegen in `/Users/thorstenjankowski/Fundamento/marken/` (oder unter `FM_MARKEN_DIR`).
+
+### S0 Vorbereitung
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds && git fetch && git switch 261029-spec-033-s6-schaetzung && pnpm install && pnpm build
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds && pnpm fm metiejo --open
+```
+
+**Sehen:** Der Browser öffnet `http://localhost:7301`. Dort eine Marke „abnahme“ mit Basis komuna anlegen.
+
+### S1 Markenmodell, Ablauf, Chat, Freigabe, Kroniko
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds && open http://localhost:7301/asistanto/abnahme
+```
+
+**Sehen:**
+- Links zwölf Schritte, oben der Balken „Vollständig (Umfang 1, visuell)“ bei 0 %.
+- Im Schritt „Form (Radien)“ „Mach die Ecken etwas runder“ senden: Die Antwort kommt in ein bis zwei Sätzen, die Vorschau wird runder, der Schritt steht auf „definiert“.
+- „Freigeben“ hebt den Balken, „Wieder öffnen“ setzt ihn zurück.
+- Eine Änderung im Studio (`http://localhost:7301/studio/abnahme/raum`) erscheint nach wenigen Sekunden im Assistenten.
+- Die Kroniko `file:///Users/thorstenjankowski/Fundamento/marken/abnahme/kroniko.jsonl` hat je Zug `fonto`, `modelo` und `kosto` und keinen Schlüssel.
+
+### S2 Weg B: Material
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds && open http://localhost:7301/asistanto/abnahme/gvidkoloro
+```
+
+**Sehen:**
+- „Material deiner Marke“ aufklappen, einen Screenshot einer eigenen Testmarke (PNG) wählen.
+- Ohne das Kästchen bittet „Material lesen“ um die Bestätigung.
+- Mit Kästchen zeigt der Schritt „Vorschlag aus deinem Material“ mit Herkunft (Datei, Anteil der Fläche).
+- „Vorschlag übernehmen“: Vorschau und Zustand folgen.
+- Die offenen Vorschläge: `file:///Users/thorstenjankowski/Fundamento/marken/abnahme/enportilo.json`.
+
+### S3 Weg A: Einstiegsfragen
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds && open http://localhost:7301/asistanto/abnahme/komenco
+```
+
+**Sehen:**
+- „Erzähl mir von deiner Marke“ mit dem Textfeld, fünf Reglern für die Gegensatzpaare, „Was ist schon festgelegt?“ und „Inspiration“, alles aus Eroj.
+- Über „Vorschlag machen“ steht die Schätzung für Weg A (S6).
+- Fünf Sätze schreiben und „Vorschlag machen“ drücken: Mehrere Schritte stehen auf „definiert“, die Vorschau zeigt die neue Marke.
+- Die Kroniko nennt `propono` mit Quelle `agento` und „Einstiegsfragen“.
+
+### S4 Weg C: Recherche
+
+Vorher in `http://localhost:7301` eine zweite Marke „nennung“ (Basis komuna) anlegen.
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds && open http://localhost:7301/asistanto/nennung/gvidkoloro
+```
+
+**Sehen:**
+- „Bestehende Marke nur genannt (Recherche)“ aufklappen, „Wikipedia“ eingeben, das Kästchen setzen, „Recherchieren“ drücken.
+- Nach einigen Sekunden nennt die Meldung die gelesenen Seiten, die Schritte zeigen Vorschläge mit URL und Zeile.
+- `http://localhost:7301/marko/nennung/fertig` zeigt den Hinweis mit „Wikipedia“ und „Das Ergebnis bleibt lokal und wird nicht veröffentlicht.“
+
+### S5 Sprache
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds && open http://localhost:7301/asistanto/abnahme/formo
+```
+
+**Sehen:**
+- Unter dem Chat stehen „Sprechen“, „Antworten vorlesen“ und die Zeile „Sprache: Voxtral (mistral/voxtral-mini-transcribe-3-0) auf dem lokalen Server.“
+- „Sprechen“ drücken, „Mach die Ecken etwas runder“ sagen, noch einmal drücken: Der Text steht im Chat, die Antwort darunter, die Vorschau wird runder.
+- Mit „Antworten vorlesen“ liest der Browser die Antwort vor.
+- Der Zug steht in der Kroniko mit `"fonto":"parolo"` und `transkribo`.
+
+### S6 Schätzung und Zähler
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds && open http://localhost:7301/api/marko/abnahme/takso
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds && pnpm --filter @fundamento/metiejo exec tsx scripts/abnahme-weg-a.ts --mit-modell
+```
+
+**Sehen:**
+- `takso` zeigt Weg A, B und C und die Züge, je mit Anfragen, Tokens, Dauer, $ und Grundlage.
+- Im Assistenten steht neben dem Modell „bisher … Tokens · … $ · … s · … Anfragen“. Der Zähler wächst mit jeder Antwort und steht nach einem Neustart von `pnpm fm metiejo` wieder da.
+- Das Skript spielt Weg A durch (Abnahme 5, etwa 0,0015 $). Es druckt die Schätzung vor dem Start, je Schritt Uhr und CPU, die Last des Rechners, das Verhältnis Schätzung/gemessen und „Schlüssel in Kroniko oder Log: nein“.
+- Die Preise: `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/packages/metiejo/data/prezoj.json`.
+- Nach dem Lauf des Skripts oder nach „Speichern“ im Studio und `fm projekcioj build` im Exportordner endet die Zeile von Weg A in `takso` mit „lokal aus dem Protokoll: Export (…), Projektionen (…)“ (O-10).
 
 ## S1 – Amendment v2.5, Markenmodell, Ablauf neben dem Studio, Chat über Werkzeuge, Freigabe, Kroniko, Bestätigung und Hinweis
 
-**Branch:** `261029-spec-033-s1-markenassistent` (von `main` `05f122dc`) · **Datum:** 2026-10-29 · **Stand:** gebaut, Abnahme offen.
+**Branch:** `261029-spec-033-s1-markenassistent` (von `main` `05f122dc`, nach #116 neu auf `04b68b79`) · **Datum:** 2026-10-29 · **Stand:** gebaut, Abnahme offen.
 
 ### Zusammenfassung
 
@@ -76,6 +166,28 @@ Drei Runden je Modell an einer Wegwerf-Marke `proba` (Basis komuna) in einem tem
 | `openrouter/openai/gpt-oss-20b:free` (Modell der `.env`) | 0 | 3 | – | 0 $ | 404: „unavailable for free“; nicht weiter genutzt (B-2) |
 
 Kein Schlüssel stand in Kroniko oder Log (im Probelauf geprüft). Die Kroniko hatte nach dem Mistral-Lauf 8 Einträge (`kreo`, `sxangxo`, `babilo`).
+
+#### B-13: Messung je Schritt
+
+Gemessen am 2026-10-29 ohne Sprachmodell (die Züge des Modells trafen die Schätzung, siehe oben), mit `packages/metiejo/scripts/abnahme-weg-a.ts` und einem Vergleichsskript. Je Schritt die Wanduhr und die CPU-Zeit: des Prozesses, in dem der Server läuft, und für `fm projekcioj build` des Kindprozesses über `/usr/bin/time`. Rechner: Apple M1 Max, 8 Leistungs- und 2 Effizienzkerne.
+
+| Lauf | Last (1 min) | Kreilo | Export Uhr / CPU | Projektionen Uhr / CPU | lokal gesamt |
+|---|---|---|---|---|---|
+| Abnahme 1 (S3, 29.10.) | – | ≈ 2 s | 4,3 s / – | 6,7 s / – | 16,0 s |
+| Abnahme 5 (S6, 29.10.) | – | ≈ 2 s | 12,7 s / – | ≈ 21 s / – | 40,2 s |
+| Skript, 3 Läufe | 31–45 | 2,6–4,5 s | 9,8–12,8 s / 7,9–8,3 s | 12,9–14,8 s / 11,7–11,9 s | 26–32 s |
+| Skript, 2 Läufe | 8–11 | 1,8–1,9 s | 5,3–5,4 s / 7,3–7,6 s | 7,3 s / 10,4 s | 15,0 s |
+| Vergleich: S3 alt, S6 alt, S6 neu im Wechsel, je 3 Läufe | 13–35 | 1,6–1,7 s | 4,6–5,1 s / 6,4–7,2 s | 6,8–8,3 s / 9,9–10,4 s | 13,1–14,9 s |
+| Vergleich: `node` gegen `tsx`; Farbe, „verspielt“, Bilder | 7–11 | 1,6–1,9 s | 4,5–5,4 s / 6,2–7,5 s | 6,8–7,8 s / 10,2–11,0 s | 13,2–14,9 s |
+
+**Ursache:** Die Schritte haben auf den Prozessor gewartet, den andere Prozesse des Rechners belegten. Nach dem Code richtet sich die Zeit nicht.
+- **Die Arbeit ist dieselbe:** Die CPU-Zeit eines Schritts ist in langsamen und schnellen Läufen fast gleich (Export 7,3–8,3 s, Projektionen 10,4–11,9 s).
+- **Nur die Wanduhr wächst:** Bei Last 31–45 ist sie etwa doppelt so hoch (Export 12,8 statt 5,4 s), bei Last unter 11 liegt sie unter der CPU-Zeit, weil Export und Projektionen mehrere Threads nutzen.
+- **Code und Eingaben spielen keine Rolle:** S3 vor dem Neuaufsetzen, S6 vor dem Neuaufsetzen und S6 auf `main` mit #116 brauchen im Wechsel gemessen gleich lang. Ebenso `node` gegen `tsx` und Farbe, „verspielt“ oder zwei Inspirationsbilder.
+- **Was die Zeit kostet:** Ein CPU-Profil des Exports zeigt breite Arbeit ohne einzelnen Ausreißer. Es werden alle Kombinationen aufgelöst (`resolve`, `overlay`), Kontraste geprüft (`alirebleco/color`), kanonisch serialisiert und das Figma-Plugin gebaut; etwa 10 % entfallen auf die Speicherbereinigung.
+- **Abnahme 5:** Für ihren Lauf ist die Last nicht festgehalten. Ihr Muster (Export 12,7 s, Projektionen ≈ 21 s) gleicht den Läufen unter Last. Das Skript schreibt die Last deshalb jetzt in jeden Lauf.
+
+Die Startwerte bleiben in der Summe wie gesetzt (lokal 28 s, Mittel aus 16,0 und 40,2 s). Auf einem freien Rechner braucht Weg A lokal etwa 15 s. Seit O-10 kommen Export und Projektionen deshalb aus der Kroniko, sobald sie dort stehen; der Startwert ist nur noch der Rückfall.
 
 ### Abweichungen
 
@@ -480,4 +592,141 @@ pnpm fm metiejo --open
 ```sh
 cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
 pnpm --filter @fundamento/metiejo exec vitest run src/parolo src/asistanto
+```
+
+## S6 – Schätzung und Zähler für Zeit und Kosten
+
+**Branch:** `261029-spec-033-s6-schaetzung` (auf S5) · **Datum:** 2026-10-29 · **Stand:** gebaut, Abnahme 5 gemessen.
+
+### Zusammenfassung
+
+1. **Preise als Daten** (`packages/metiejo/data/prezoj.json`). Jeder Preis hat das Datum, an dem er gelesen wurde, und die Seite. Gelesen am 2026-10-29 auf [docs.mistral.ai/inference/pricing](https://docs.mistral.ai/inference/pricing):
+   - `mistral/ministral-14b-2512`: 0,20 $ je Mio. Tokens Ein- und Ausgabe. Damit ist B-3 geprüft.
+   - `mistral/voxtral-mini-transcribe-3-0`: 0,0035 $ je Minute. Damit ist B-12 geprüft.
+   - `openrouter/*:free`: 0 $.
+
+   Ein Modell ohne Eintrag hat keinen Preis. Zähler und Schätzung sagen dann „Kosten unbekannt (kein Preis für …)“ und zählen es nicht als kostenlos.
+2. **Schätzung vor dem Start, je Weg und Modell** (`packages/metiejo/src/takso/takso.ts`). Sie nennt Dauer, Tokens und Kosten in $ und stützt sich auf gemessene Durchschnitte, in dieser Reihenfolge:
+   1. **Protokoll:** der Median der Züge dieser Art mit diesem Modell aus der Kroniko aller Marken, sobald es welche gibt;
+   2. **Nordstern:** Für ein anderes Modell skaliert das Tempo aus den Läufen der Nordstern-Kennzahl (`.fundamento/nordstelo/<lauf>/`, ms je Anfrage) die Dauer der Startwerte. Die Tokens folgen den Prompts des Assistenten, nicht dem Modell;
+   3. **Startwerte** aus den Probeläufen S1 bis S5 (`packages/metiejo/data/takso.json`), je Zug mit Quelle.
+
+   Ein Weg ist die Summe seiner Züge und der lokalen Zeit: Weg A sind zwei Chat-Züge plus Kreilo, Freigaben, Export und Projektionen; Weg B sind zwei Materialien ohne Modell; Weg C ist eine Recherche. Den Zug, in dem das Modell die Leitfarbe wählt (nur ohne festgelegte Farbe und ohne Inspiration), nennt die Schätzung getrennt.
+3. **Wo die Schätzung steht:** `GET /api/marko/<marke>/takso`.
+   - Auf den Einstiegsfragen (Weg A und der Zug, in dem das Modell die Leitfarbe wählt).
+   - Beim Material (je Datei).
+   - Bei der Recherche.
+   - Im Chat („Schätzung je Wunsch“ und, mit Voxtral, gesprochen).
+4. **Zähler während der Arbeit:** Der Zähler summiert die Kroniko der Marke: Tokens, Kosten in $, die Zeit des Sprachmodells (mit Transkription), Anfragen und Wartezeiten nach 429.
+   - Er steht im Assistenten neben dem Modell und kommt mit jeder Antwort neu.
+   - Er bleibt über einen Neustart des Servers erhalten; S1 hatte nur eine Summe im Speicher.
+5. **Grenzen der Anbieter:** Der Torwächter der Nordstelo (`Pordisto`, `LIMOJ`) liegt jetzt in der Metiejo (`src/asistanto/limoj.ts`); die Nordstelo exportiert ihn weiter, wie `ki.ts` seit S1.
+   - `pnpm fm metiejo` gibt die Grenzen des Anbieters aus der `.env` mit: Mistral 0,5 Anfragen je Sekunde, OpenRouter 1 000 je UTC-Tag.
+   - Die Anfragen des Tages stehen in `marken/.anfragoj.json`.
+   - Am Tageslimit hält der Zug mit einem Satz an (429).
+   - Nach einer 429-Antwort wartet der Assistent wie bisher; neu ist die Meldung „Der Anbieter hat gebremst (429): N× gewartet“.
+   - Kreilo- und Recherche-Zug tragen in der Kroniko `vojo` A bzw. C.
+6. **Zwei Korrekturen aus Nachlese 12 (#116) in der Metiejo**, je mit Test:
+   - **Tagesbuch der Anfragen (②):** `mergeLedger` zieht mit `limoj.ts` in die Metiejo. Der Server führt `marken/.anfragoj.json` mit der Datei zusammen, statt sie zu überschreiben. Laufen zwei Server oder ein Server und ein Nordstern-Lauf gleichzeitig, bleibt der höhere Stand je Anbieter und Tag; der Torwächter zählt mit diesem Stand weiter.
+   - **B-4:** `chatCompletion` zählt die Tokens jedes Versuchs, auch die von Antworten ohne Nachricht, die vorher dem Budget belastet, aber nicht gemeldet wurden. Bei einem Fehler hängt die Anfrage ihren eigenen Aufwand an (`spent`), ein Zug die Kosten des ganzen Zugs (`kosto`).
+   - Der Server hält einen Zug, der mit Fehler endet, mit diesem eigenen Aufwand und dem Grund in der Kroniko fest (Chat, Kreilo, Recherche). Der Zähler zählt ihn damit, und nichts von einem Zug, der gleichzeitig lief. `runAgent` der Nordstelo zählt die fehlgeschlagene Anfrage ebenso mit.
+7. **`tsx` als devDependency der Metiejo:** Die Probeläufe liegen als `packages/metiejo/scripts/abnahme-weg-a.ts` im Repo und laufen mit `pnpm --filter @fundamento/metiejo exec tsx …` statt über einen Download aus npm.
+8. **Lokale Zeit aus der Kroniko (O-10, Variante b):** Export und Projektionen schreiben ihre Dauer in die Kroniko, als neue Art `ago` `eksporto` mit Quelle `sistemo`.
+   - **Export:** Jeder geschriebene Export („Speichern“ in Schnellstart und Studio) hält fest: `pasxo` `eksporto`, `ms`, die Teile (`paket`, `projekcioj` für CSS und Figma, `pruefung` für die Byteprüfung) und die Ziele.
+   - **Projektionen:** `fm projekcioj build` mit einer Konfiguration im Exportordner einer Marke (`marken/<marke>/eksporto/fundamento.config.json`) hält `pasxo` `projekcioj` mit `ms` und den gebauten Celoj fest und sagt das in einer Zeile. Eine Konfiguration anderswo schreibt nichts.
+   - **Schätzung:** Die lokale Zeit von Weg A besteht aus drei Schritten: Kreilo mit den Freigaben, Export, Projektionen. Je Schritt nimmt sie den Median aus der Kroniko aller Marken, wie die Zeit des Modells. Der Startwert gilt nur als Rückfall für einen Schritt ohne Messung.
+   - **Startwert:** Die bisherigen 28 s sind nach den Anteilen der Messung je Schritt aus B-13 aufgeteilt (3,5 / 10,2 / 14,3 s); die Summe bleibt 28 s.
+   - **Anzeige:** Die Zeile der Schätzung nennt die gemessenen Schritte, zum Beispiel „lokal aus dem Protokoll: Export (3), Projektionen (1)“.
+
+### Entwurfsentscheidungen
+
+#### D-19 Tokens aus unseren Prompts, Zeit aus dem Modell
+Wie viele Tokens ein Zug braucht, hängt vor allem an Systemtext, Werkzeugen und Verlauf des Assistenten; das messen die Probeläufe und später die Kroniko. Die Nordstern-Läufe haben ganz andere Prompts (Gvidanto, Seiten bauen), taugen also nicht für Tokens, wohl aber für das Verhältnis der Geschwindigkeit zweier Modelle (ministral 8,3 s, gpt-4.1-mini 2,1 s, nemotron `:free` 19,1 s je Anfrage).
+
+#### D-20 Der Zähler liest die Kroniko
+Die Kroniko hält jeden Zug mit Modell und Kosten fest. Liest der Zähler sie, stimmen Zähler und Protokoll immer überein, auch nach einem Neustart und für Züge aus Kreilo, Recherche und Sprache.
+
+#### D-21 Grenzen nur, wenn sie gesetzt sind
+Der Server bekommt `ki.limoj` von `start.ts`. Tests ohne Grenzen laufen ohne Wartezeit; der Probelauf und `pnpm fm metiejo` laufen mit den Grenzen des Anbieters.
+
+#### D-22 Lokale Schritte wie Züge des Modells (O-10)
+Die Dauer eines Schritts misst, wer ihn ausführt: der Server den Export, der CLI-Befehl die Projektionen. Beide schreiben in die Kroniko der Marke, denn dort liest die Schätzung schon die Züge des Modells. Anders als Tokens hängt die lokale Zeit nicht am Modell, deshalb zählen die Messungen aller Marken für jedes Modell. Den Kreilo misst noch niemand; er bleibt beim Startwert (3,5 s von 28 s).
+
+Die Projektionen finden ihre Marke über den Ort der Konfiguration. Das ist der Ort, den der Export selbst schreibt, und eine zusätzliche Option für den Befehl braucht es dafür nicht.
+
+### Probeläufe
+
+**Abnahme 5** am 2026-10-29 mit `mistral/ministral-14b-2512`, Kostengrenze 30 000 Tokens je Zug, Grenze 0,5 Anfragen je Sekunde, Wegwerf-Marke in einem temporären Ordner. Der Ablauf ist derselbe wie in Abnahme 1: fünf Sätze, zwei synthetische Inspirationsbilder, zwei Wünsche, zwölf Freigaben, Export und Projektionen. Die Schätzung wurde vor dem Start vom Server geholt.
+
+| | Schätzung vor dem Start | gemessen | Verhältnis |
+|---|---|---|---|
+| **Dauer** | 27,7 s | 51,2 s (Modell 11 s, lokal 40,2 s) | **0,54** |
+| **Tokens** | 7 908 (7 758 + 150) | 7 098 (6 936 + 162) | **1,11** |
+| Anfragen | 6 | 5 | 1,2 |
+| **Kosten** | 0,0016 $ | 0,0014 $ | **1,11** |
+| Grundlage | Probeläufe vom 29.10.2026 | Zähler: „bisher 7 098 Tokens · 0,0014 $ · 11 s · 5 Anfragen“ | |
+
+**Alle drei liegen im Bereich ±50 %.** Die Dauer liegt knapp darin. Die Modellzeit traf gut (11,7 s geschätzt, 11 s gemessen). Daneben lag die lokale Zeit: 40,2 s statt 16,0 s in Abnahme 1, vor allem Export und `fm projekcioj build` auf einem ausgelasteten Rechner (B-13).
+
+Nach der Messung nehmen die Startwerte für die lokale Zeit das Mittel beider Läufe, 28 s. Weg A wird damit auf 39,7 s geschätzt, das liegt bei 1,10 von Abnahme 1 und 0,78 von Abnahme 5. Mit der Grenze von 0,5 Anfragen je Sekunde gab es keine 429; in Abnahme 1 waren es ohne die Grenze 2.
+
+Zum Vergleich hat der Server, ohne Lauf, Weg A für `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` geschätzt: ≈ 43 s, ≈ 7 900 Tokens, 0 $, Tempo aus den Nordstern-Läufen. Gemessen ist das nicht.
+
+Kein Schlüssel stand in Kroniko oder Log. Kosten der Probeläufe dieser Stufe: 7 098 Tokens ≈ 0,0014 $.
+
+### Abweichungen
+
+1. **Kreilo noch aus dem Startwert:** Die Spec nennt als spätere Grundlage das Protokoll. Für die Züge des Modells und seit O-10 für Export und Projektionen gilt das; den lokalen Teil des Kreilo (mit den Freigaben, etwa 1,7 s) misst noch niemand.
+2. **Zeit im Zähler ist die des Sprachmodells** mit Transkription, nicht die Zeit, die die Person im Assistenten verbringt.
+3. **B-4 zwischen S1 und S5:** Seit S1 geht die Anfrage der Nordstelo über `chatCompletion` der Metiejo. Beim Neuaufsetzen auf #116 bleibt in S1 bis S5 der Aufwand am Fehler erhalten, aber nur bis zur letzten erfolgreichen Anfrage. Die Tokens einer fehlgeschlagenen Anfrage (Antworten ohne Nachricht) zählt erst S6 wieder mit, wie #116 es tat.
+
+### Befunde / Mankoj
+
+- **B-3 und B-12 geprüft:** Beide Preise stehen auf der Preisseite von Mistral (siehe oben).
+- **B-13 Lokale Zeit streut – Ursache gefunden:** 16,0 s und 40,2 s für denselben Ablauf; die Messung je Schritt zeigt Warten auf den Prozessor unter fremder Last, nicht mehr Arbeit (siehe „B-13: Messung je Schritt“). Vorschlag: Der Export hält seine Dauer in der Kroniko fest, dann kann auch die lokale Zeit aus dem Protokoll kommen.
+
+### Offen (für den Maintainer)
+
+- **O-9 entschieden (Maintainer, 2026-10-29):** kein Preis für `mistral-large-latest`, das Modell ist im Tarif nicht verfügbar. Der Maintainer stellt die `.env` selbst um; „Kosten unbekannt“ bleibt das richtige Verhalten für ein Modell ohne Preis.
+- **O-10 entschieden (Maintainer, 2026-10-30): Variante b.** Die Dauer von Export und Projektionen steht in der Kroniko, die Schätzung nutzt sie wie die Zeit des Modells, der Startwert bleibt nur als Rückfall. Umgesetzt in S6 (Zusammenfassung Punkt 8, D-22).
+
+### Messanleitung
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm install && pnpm build
+pnpm fm metiejo --open
+```
+
+1. Eine Marke anlegen und `http://localhost:7301/asistanto/<marke>/komenco` öffnen. Über „Vorschlag machen“ stehen die Schätzung für Weg A und für den Zug, in dem das Modell die Leitfarbe wählt, jeweils mit Dauer, Tokens, $ und Grundlage.
+2. `http://localhost:7301/asistanto/<marke>/gvidkoloro`: Neben dem Modell steht der Zähler („bisher … Tokens · … $ · … s · … Anfragen“). Unter dem Chat steht „Schätzung je Wunsch ≈ …“, bei Material und Recherche die eigene Schätzung.
+3. Einen Wunsch schreiben. Der Zähler wächst mit der Antwort. Nach einem Neustart von `pnpm fm metiejo` steht derselbe Stand da.
+4. Die Schätzung als Daten: `http://localhost:7301/api/marko/<marke>/takso`.
+5. Preise und Startwerte: `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/packages/metiejo/data/prezoj.json` und `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/packages/metiejo/data/takso.json`.
+6. Die Anfragen des Tages: `file:///Users/thorstenjankowski/Fundamento/marken/.anfragoj.json`.
+7. Weg A mit Messung je Schritt (Abnahme 5 und B-13). Ohne `--mit-modell` läuft das Skript ohne Sprachmodell und kostet nichts; `--laeufe 3` wiederholt den Lauf.
+
+   ```sh
+   cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+   pnpm --filter @fundamento/metiejo exec tsx scripts/abnahme-weg-a.ts --laeufe 3
+   pnpm --filter @fundamento/metiejo exec tsx scripts/abnahme-weg-a.ts --mit-modell
+   ```
+8. Lokale Zeit aus der Kroniko (O-10).
+   - Im Studio „Speichern“ drücken. Danach steht in `file:///Users/thorstenjankowski/Fundamento/marken/<marke>/kroniko.jsonl` ein Eintrag `"ago":"eksporto"` mit `pasxo`, `ms` und `partoj`.
+   - Die Projektionen der Marke bauen:
+
+     ```sh
+     cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+     pnpm fm projekcioj build --config /Users/thorstenjankowski/Fundamento/marken/<marke>/eksporto/fundamento.config.json --out /Users/thorstenjankowski/Fundamento/marken/<marke>/eksporto/projekcioj
+     ```
+
+     Die letzte Zeile lautet „… s in der Kroniko der Marke <marke> festgehalten.“
+   - `http://localhost:7301/api/marko/<marke>/takso`: Die Zeile von Weg A endet mit „lokal aus dem Protokoll: Export (1), Projektionen (1)“.
+
+**Tests:**
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm --filter @fundamento/metiejo exec vitest run src/takso src/asistanto
+pnpm --filter @fundamento/nordstelo exec vitest run
 ```

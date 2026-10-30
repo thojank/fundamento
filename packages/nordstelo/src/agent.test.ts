@@ -215,3 +215,24 @@ describe("the functions of Variante F (Nachlese 11 B-3)", () => {
     expect(body.tools[0]?.function.parameters).toEqual(inputSchema);
   });
 });
+
+// Nachlese 12 B-4 with the request of the Metiejo (Spec 033 S6): the effort on the error of a run
+// holds the tokens and requests of the request that failed, answers without a message included.
+describe("the effort on the error of a run", () => {
+  it("counts the tokens and requests of the failed request", async () => {
+    const seen: { url: string; body: unknown; headers: Record<string, string> }[] = [];
+    const empty = { usage: { prompt_tokens: 70, completion_tokens: 0 } };
+    const error = (await runAgent({
+      provider: providerOf({ FM_KI_ANBIETER: "mistral", FM_KI_MODELL: "m", MISTRAL_API_KEY: KEY }),
+      fetch: fakeFetch([empty, empty, empty, empty], seen),
+      task: "Ein Formular",
+      variant: "0",
+      budget: new Budget(100_000),
+      sleep: async () => {},
+    }).catch((caught: unknown) => caught)) as Error & {
+      effort?: { inputTokens: number; requests?: number };
+    };
+    expect(error.message).toContain("Antwort ohne Nachricht");
+    expect(error.effort).toMatchObject({ inputTokens: 280, requests: 4 });
+  });
+});

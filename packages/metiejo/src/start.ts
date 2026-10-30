@@ -5,6 +5,7 @@
 import { execFile } from "node:child_process";
 import { homedir } from "node:os";
 import { resolve } from "node:path";
+import { LIMOJ } from "./asistanto/limoj.js";
 import { markenDirOf, readKi, readParolo, readSettings } from "./env.js";
 import { defaultDeps } from "./privata.js";
 import { CHECKOUT_ROOT } from "./root.js";
@@ -109,7 +110,11 @@ export async function runMetiejo(
         root,
         settings,
         npm: defaultNpmDeps(),
-        ki: readKi(root),
+        // Spec 033 S6: the limits of the provider of the .env (requests per second and per day).
+        ki: (() => {
+          const ki = readKi(root);
+          return ki.provider === undefined ? ki : { ...ki, limoj: LIMOJ[ki.provider.name] };
+        })(),
         parolo: readParolo(root),
         ...(settings.tiparojRepo === undefined ? {} : { deps: defaultDeps(settings.tiparojRepo) }),
       },

@@ -38,6 +38,11 @@ export interface ExportResult {
   issues: (ValidationIssue | MetiejoIssue)[];
   /** What was written, one sentence per Celo (German, for the screen). */
   sentences: string[];
+  /**
+   * Spec 033 S6 (O-10): milliseconds per part of an export that was written – the package with its
+   * webfonts, the projections (CSS, Figma), the byte check.
+   */
+  partoj?: { paket: number; projekcioj: number; pruefung: number };
 }
 
 /**
@@ -112,6 +117,13 @@ export async function exportMarko(
   bases: Bases,
   options: ExportOptions,
 ): Promise<ExportResult> {
+  let mark = Date.now();
+  const lap = () => {
+    const now = Date.now();
+    const ms = now - mark;
+    mark = now;
+    return ms;
+  };
   const derivation = checkDraft(agordo, bases);
   const dir = join(markoDir(workdir, name), "eksporto");
   if (!derivation.exportable) {
@@ -125,6 +137,7 @@ export async function exportMarko(
     `Das Paket ${packageName} liegt in eksporto/${packageName} (${Object.keys(derivation.files).length} Dateien).`,
   ];
   sentences.push(...(await webfontFiles(dir, packageName, agordo, options.npm)));
+  const paket = lap();
   const projections = options.celoj.filter((celo): celo is "css" | "figma" => celo !== "aspekto");
   if (projections.length > 0) {
     const config = join(dir, "fundamento.config.json");
@@ -148,6 +161,7 @@ export async function exportMarko(
         "Das Figma-Plugin liegt in eksporto/projekcioj/figma/plugin (Plugins → Development → Import plugin from manifest).",
       );
   }
+  const projekcioj = lap();
   const scan = scanDirs([dir], options.fonts);
   if (!scan.ok) {
     rmSync(dir, { recursive: true, force: true });
@@ -168,5 +182,13 @@ export async function exportMarko(
       sentences: [],
     };
   }
-  return { ok: true, dir, files: filesBelow(dir), issues: [], sentences };
+  const files = filesBelow(dir);
+  return {
+    ok: true,
+    dir,
+    files,
+    issues: [],
+    sentences,
+    partoj: { paket, projekcioj, pruefung: lap() },
+  };
 }
