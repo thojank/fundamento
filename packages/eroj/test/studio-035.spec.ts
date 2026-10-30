@@ -230,4 +230,49 @@ test.describe("Studio (Spec 035 Teil 3)", () => {
     await expect(fehler).toContainText("Vorschlag:");
     await expect(wahl.locator("select")).toHaveValue(vorher);
   });
+
+  test("3.4: a change in the Studio appears in the assistant through rev, within its poll interval (two pages)", async ({
+    browser,
+    request,
+  }) => {
+    const id = await marke(request, "Quarzwelle Abgleich");
+    // Two windows, as a person has them side by side: the assistant and the Studio.
+    const asistanto = await browser.newContext();
+    const studio = await browser.newContext();
+    try {
+      const a = await asistanto.newPage();
+      const s = await studio.newPage();
+      await a.goto(`${base}/asistanto/${id}/spaco`);
+      const rahmen = a.locator("iframe[data-mt-vorschau]");
+      const vorher = (await stand(request, id)).rev;
+      await expect(rahmen).toHaveAttribute("src", new RegExp(`[?&]rev=${vorher}(&|$)`));
+      await s.goto(`${base}/studio/${id}/raum`);
+      const feld = s.locator('fm-kampo[name="spacing.scale.400"] input');
+      await feld.fill("18");
+      const gesendet = sendung(s, `/studio/${id}/raum`);
+      await feld.press("Enter");
+      expect((await gesendet).status()).toBe(303);
+      const nachher = (await stand(request, id)).rev;
+      expect(nachher).toBeGreaterThan(vorher);
+      // The assistant polls /api/marko/<marke>/stato every 3 s (Spec 033 D-05); a new rev reloads
+      // its preview – within one interval and the default wait of an expectation (5 s).
+      await expect(rahmen).toHaveAttribute("src", new RegExp(`[?&]rev=${nachher}(&|$)`));
+      const vorschau = a.frameLocator("iframe[data-mt-vorschau]");
+      await expect(
+        vorschau.locator('link[rel="stylesheet"][href*="vorschau.css"]'),
+      ).toHaveAttribute("href", new RegExp(`rev=${nachher}$`));
+      await expect
+        .poll(() =>
+          vorschau
+            .locator("body")
+            .evaluate((body) =>
+              getComputedStyle(body).getPropertyValue("--fm-spacing-scale-400").trim(),
+            ),
+        )
+        .toBe("18px");
+    } finally {
+      await asistanto.close();
+      await studio.close();
+    }
+  });
 });
