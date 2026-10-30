@@ -89,7 +89,7 @@ Kosten in $:
 | Reihe K | **nach der Fonto** | `20261029-1127` | **76 gegen 33,3** | 74,9 gegen 47,6 | 16,7 / 0 · 14,8 / 7,8 | 333 | 2 828 072 / 153 502 | 0 $ | 0 |
 | Reihe O | Ausgangslinie (System `721743f`) | `20261029-1143` | 68,2 gegen 36,1 | 65,6 gegen 53,6 | – (1 Wiederholung) | 483 (ohne die gescheiterten) | 11 500 479 / 185 886 (B-4: ohne Ersatzzählung) | 0 $ | 5 von 40 (12,5 %) |
 | Reihe O | nach den Korrekturen (System `af6695a`) | `20261029-1306` | 85,2 gegen 36,1 | 82,2 gegen 50 | – (1 Wiederholung) | 464 (ohne die gescheiterten) | 8 003 555 / 163 127 (B-4: ohne Ersatzzählung) | 0 $ | 6 von 40 (15 %) |
-| Reihe O | nach der Fonto (System `05f122d`) | `20261029-1437`, pausiert am Tageslimit (1 von 40), setzt nach 00:00 UTC fort | – | – | – | – | – | 0 $ | – |
+| Reihe O | nach der Fonto (System `05f122d`) | `20261029-1437`, **beendet: nicht messbar mit diesem Anbieter** | – | – | – | 44 am 30.10. | – | 0 $ | 11 von 12 begonnenen (Abbruch bei 9 von 40) |
 
 Die alten Läufe der Reihe O (`20261024-1422`, `20261027-1500`, `20261027-1535`) mit verschiedenen Werkzeugen ersetzt die neue Reihe (O-8); sie bleiben im Verlauf.
 
@@ -165,9 +165,13 @@ Zusammengefasst nach Runner:
   |---|---|---|---|---|---|---|
   | `c89f5e6` (#116) | langsam (139,9 ms) | 16 000 Elemente | 93 ms | 15 ms | 242 ms | rot |
   | `04b68b7` (Merge von #116 auf `main`) | schnell (102,0 ms) | 28 000 Elemente | 96 ms | 0 ms | 308 ms | rot |
+  | `04b68b7`, Wiederholung 1 | mittel (118,2 ms) | – | – | 0 ms | 213 ms | rot |
+  | `04b68b7`, Wiederholung 2 | schnell (100,7 ms) | – | – | 5 ms | 284 ms | rot |
+  | `04b68b7`, Wiederholung 3 | langsam (138,4 ms) | – | – | 0 ms | 249 ms | rot |
+  | `04b68b7`, Wiederholung 4 | langsam (140,2 ms) | – | – | 14 ms | 218 ms | rot |
 
   - Auf schnellen wie langsamen Runnern rot über das 90. Perzentil, die Skripte unter der Grenze.
-  - Ein mittlerer Runner fehlt noch; vier Wiederholungen des Werkstatt-Jobs auf `04b68b7` laufen im Hintergrund (B-5).
+  - In 6 von 6 CI-Läufen rot (2 schnell, 1 mittel, 3 langsam). Die Skripte blieben bei 0–15 ms, das Perzentil lag bei 213–308 ms. Bei den Wiederholungen stehen Block und Kosten nicht im Log, weil die Logzeile dafür nur im ersten Versuch gelesen wurde.
   - Die Kalibrierung braucht je Runner verschieden viele Elemente für dieselben ~95 ms: Sie misst auf dem Runner selbst, deshalb gilt die Gegenprobe unabhängig von seiner Geschwindigkeit.
 
 ### Größe der Vitrino
@@ -232,15 +236,16 @@ Zusammengefasst nach Runner:
     - Merge `04b68b7`: 10,5 min
     - Median 9,1 gegen vorher 9,6 min.
     - Die Spanne (5,8–10,5) kommt aus den Runnern. Die kleinere Vitrino (15,1 → 7,7 MB) verkürzt den Job höchstens um eine halbe Minute; mehr ist mit diesen Läufen nicht zu belegen.
-  - **Gegenprobe 2 in der CI:** schnell und langsam rot (oben); der mittlere Runner folgt.
+  - **Gegenprobe 2 in der CI:** in 6 von 6 Läufen rot, auf schnellen, mittleren und langsamen Runnern (oben).
 - **B-3, `regularo` steht wie die Kontrastpaare 18-fach in der Vitrino** (komuna 0,28 MB). Gleicher Weg möglich; nicht Teil dieses Auftrags (Aufgabe von 8b).
 
 ### Offen (für den Maintainer)
 
-- **O-1, Reihe O:**
-  - Ausgangslinie 12,5 % und nach den Korrekturen 15 % ohne Seite, beide messbar.
-  - Nach der Fonto am 29.10. am Tageslimit pausiert. `/tmp/n12-o-weiter.sh` startet dieselbe Kette nach 00:00 UTC.
-  - Bei mehr als 20 % ohne Seite endet die Reihe als nicht messbar.
+- **O-1, Reihe O endet: nicht messbar mit diesem Anbieter** (Abbruchregel aus ②):
+  - Ausgangslinie und nach den Korrekturen waren messbar (12,5 % und 15 % ohne Seite).
+  - „Nach der Fonto“ lief am 30.10. ab 00:05 UTC weiter und endete nach 12 begonnenen Ergebnissen: 11 ohne Seite, 9 davon zählten bis zum Abbruch. Es waren 8 leere Antworten und 3 Zeitüberschreitungen, jeweils nach drei erneuten Versuchen; 44 Anfragen am 30.10.
+  - Ursache ist der freie Anbieter, nicht das System: Dieselben Eroj und derselbe Gvidanto (`05f122d`) liefen am 29.10. in H und K ohne ein einziges Ergebnis ohne Seite.
+  - H und K tragen die Aussage. Die beiden fertigen Messpunkte von O bleiben als Messung im Verlauf, ohne den dritten nicht vergleichbar über alle drei Punkte.
 - **O-2, Kosten mit Cache:** Soll das Werkzeug `cached_tokens` zählen, damit die Kosten genau sind?
 
 ### Messanleitung
