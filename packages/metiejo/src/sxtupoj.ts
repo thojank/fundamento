@@ -14,7 +14,7 @@ import {
   reglerValue,
 } from "@fundamento/agordilo";
 import { oklchColor, srgbComponentsOf } from "@fundamento/modelo";
-import { AVERTO_EKSPORTO } from "./asistanto/averto.js";
+import { AVERTO_EKSPORTO, meldungenOf } from "./asistanto/averto.js";
 import { escapeHtml, jsonIsland, screenDocument } from "./html.js";
 import { markoLabel } from "./ident.js";
 import type { Klartext } from "./klartext.js";
@@ -262,13 +262,18 @@ export function klartextHtml(klartext: Klartext, options: { firstAsMain: boolean
       `<fm-teksto kind="caption">Angepasst: ${klartext.angepasst.map(escapeHtml).join(" ")}</fm-teksto>`,
     );
   }
-  klartext.probleme.forEach((problem, index) => {
+  // Spec 035, Befund 4.5.4: equal warnings with an equal suggestion are one message.
+  meldungenOf(klartext.probleme).forEach((problem, index) => {
     const apply =
       problem.apply === undefined
         ? ""
         : `<fm-butono slot="actions" emphasis="${index === 0 && options.firstAsMain ? "high" : "medium"}" data-apply="${escapeHtml(JSON.stringify(problem.apply))}">Vorschlag übernehmen</fm-butono>`;
+    const betroffen =
+      problem.anzahl === 1
+        ? ""
+        : `<fm-teksto kind="caption" data-mt-betroffen="${problem.anzahl}">Betroffen: ${problem.betroffen.map(escapeHtml).join(" · ")}</fm-teksto>`;
     parts.push(
-      `<fm-avizo intent="${problem.fest ? "danger" : "warning"}"><span slot="heading">${escapeHtml(problem.satz)}</span><fm-teksto>Vorschlag: ${escapeHtml(problem.vorschlag)}</fm-teksto>${apply}</fm-avizo>`,
+      `<fm-avizo intent="${problem.fest ? "danger" : "warning"}"><span slot="heading">${escapeHtml(problem.satz)}</span><fm-teksto>Vorschlag: ${escapeHtml(problem.vorschlag)}</fm-teksto>${betroffen}${apply}</fm-avizo>`,
     );
   });
   return parts.join("");
