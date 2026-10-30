@@ -2,6 +2,13 @@
 
 Changes of the published packages (the Make Kits `@fundamento/make-kit-<aspekto>`). The release path is `release.yml` (README, `pnpm check:release`).
 
+## Unveröffentlicht
+
+### Hinweis für MCP-Clients
+
+- Breaking für Clients, die das Kurzprofil lesen: `get_ero` mit `brief` nennt Boolean-Props, die keine Achse sind, jetzt nur mit ihrem Namen in `flags`; `props` enthält nur noch die übrigen Props mit Typ. Wer Boolean-Props bisher in `props` suchte (etwa `disabled` oder `loading`), liest sie jetzt aus `flags`.
+  (Spec 029 ②b-1, Entscheidung des Maintainers vom 2026-10-29; das Ausgabeschema von `get_ero` kennt `flags`.)
+
 ## 0.2.0
 
 Das erste Release nach 0.1.0. 0.1.1 ist nicht erschienen (Entscheidung des Maintainers vom 2026-10-21); ihr Inhalt steht hier. Keine Prop, kein Slot, keine Achse, kein Ereignis und kein Tag aus 0.1.0 ist umbenannt (Arkitekturo-Vertrag); kein Token geändert.

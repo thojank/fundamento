@@ -48,7 +48,8 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
       "max",
       "autocomplete",
     ]);
-    expect(names.slice(12)).toEqual(["stepper", "step"]);
+    // Spec 029 ②b-1 M-5: loading after them, as every new prop.
+    expect(names.slice(12)).toEqual(["stepper", "step", "loading", "clearable"]);
     expect(skemo.props.find((prop) => prop.name === "kind")?.values).toEqual([
       "text",
       "email",
@@ -83,26 +84,32 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
       "box",
       "motion",
     ]);
-    expect(parts.slice(11)).toEqual(["decrement", "increment", "clear"]);
-    expect(skemo.parts.decrement).toEqual({ size: { by: ["size"] } });
-    expect(skemo.parts.increment).toEqual({ size: { by: ["size"] } });
-    expect(skemo.parts.clear).toEqual({ size: { fixed: "size.control.small" } });
+    expect(parts.slice(11)).toEqual(["decrement", "increment", "clear", "spinner"]);
+    // Abnahme #122: inside the field's border, as large as an icon of the field's size, each a
+    // target of at least size.target.min.
+    const button = { size: { by: ["size"] }, width: { fixed: "size.target.min" } };
+    expect(skemo.parts.decrement).toEqual(button);
+    expect(skemo.parts.increment).toEqual(button);
+    expect(skemo.parts.clear).toEqual(button);
     const sizes = skemo.bindings.filter(
       (binding) => binding.part === "decrement" && binding.property === "size",
+      "spinner",
     );
     expect(sizes.map((binding) => [binding.when?.size, binding.token])).toEqual([
-      ["small", "size.control.small"],
-      ["medium", "size.control.medium"],
-      ["large", "size.control.large"],
+      ["small", "size.icon.small"],
+      ["medium", "size.icon.medium"],
+      ["large", "size.icon.large"],
     ]);
   });
 
-  it("names the buttons in de and en (a11y.texts <part>-name): Verringern, Erhöhen, Suche leeren", () => {
+  it("names the buttons in de and en (a11y.texts <part>-name): Verringern, Erhöhen, {label} leeren", () => {
     expect(skemo.a11y.texts).toEqual({
+      loading: { de: "lädt", en: "loading" },
       required: { de: "erforderlich", en: "required" },
       "decrement-name": { de: "Verringern", en: "Decrease" },
       "increment-name": { de: "Erhöhen", en: "Increase" },
-      "clear-name": { de: "Suche leeren", en: "Clear search" },
+      // Spec 029 ②b-1 M-6: named after the field's label, as every clear button.
+      "clear-name": { de: "{label} leeren", en: "Clear {label}" },
     });
     // Arrow keys step a number as the platform's own number input does; Escape clears a search.
     expect(skemo.a11y.keys).toEqual(["Enter", "ArrowUp", "ArrowDown", "Escape"]);
@@ -124,6 +131,7 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
       [{ "prop:max": "filled" }, { kind: ["number", "date", "time"] }],
       [{ stepper: "true" }, { kind: ["number"] }],
       [{ "prop:step": "filled" }, { kind: ["number"] }],
+      [{ "slot:disabled-reason": "filled" }, { disabled: ["true"] }],
     ]);
     expect(rulesOf(judge({ kind: "text", stepper: true }, {}))).toEqual([
       ["ero-prop-constraint", "error"],
@@ -193,9 +201,9 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
   it("the brief of the kampo stays under 750 with time, the stepper and the step", () => {
     const brief = briefOf(kampo);
     expect(brief.axes.map((axis) => axis.name)).toEqual(["kind", "size"]);
-    expect(brief.props?.map((prop) => prop.name)).toEqual(
-      expect.arrayContaining(["stepper", "step"]),
-    );
+    // Spec 029 ②b-1: stepper is a boolean, it stands in flags.
+    expect(brief.flags).toContain("stepper");
+    expect(brief.props?.map((prop) => prop.name)).toEqual(expect.arrayContaining(["step"]));
     const bytes = Buffer.byteLength(JSON.stringify(brief), "utf8");
     expect(Math.ceil(bytes / 3), `${bytes} bytes`).toBeLessThanOrEqual(750);
   });

@@ -278,7 +278,8 @@ test("fm-sxaltilo is upgraded in its section, unchecked, checked and disabled", 
   const section = page.locator("#fm-vitrino-sxaltilo");
   await expect(section.locator("thead")).toContainText("checked");
   await expect(section.getByRole("switch", { checked: true })).toHaveCount(3);
-  await expect(section.getByRole("switch", { checked: false })).toHaveCount(6);
+  // Spec 029 ②b-1 M-5: rest, disabled and loading unchecked in every size.
+  await expect(section.getByRole("switch", { checked: false })).toHaveCount(9);
   const disabled = section.locator("fm-sxaltilo[disabled]").first().locator("button");
   await expect(disabled).toBeDisabled();
 });
@@ -293,7 +294,8 @@ test("fm-markobutono is upgraded in its section, ticked, required, invalid and d
   await expect(section.locator("thead")).toContainText("checked");
   await expect(section.locator("thead")).toContainText("invalid");
   await expect(section.getByRole("checkbox", { checked: true })).toHaveCount(3);
-  await expect(section.getByRole("checkbox", { checked: false })).toHaveCount(12);
+  // Spec 029 ②b-1 M-5: a column loading beside required, invalid and disabled.
+  await expect(section.getByRole("checkbox", { checked: false })).toHaveCount(15);
   await expect(section.locator('fm-markobutono[invalid] [slot="error"]')).toHaveCount(3);
   const invalid = section.locator("fm-markobutono[invalid]").first().locator("button");
   await expect(invalid).toHaveAttribute("aria-invalid", "true");
@@ -310,9 +312,10 @@ test("fm-elekto is upgraded in its section with three options, required, invalid
   const section = page.locator("#fm-vitrino-elekto");
   await expect(section.locator("thead")).toContainText("required");
   await expect(section.locator("thead")).toContainText("invalid");
-  await expect(section.getByRole("radiogroup")).toHaveCount(12);
-  await expect(section.getByRole("radio", { checked: true })).toHaveCount(12);
-  await expect(section.getByRole("radio", { checked: false })).toHaveCount(24);
+  // Spec 029 ②b-1 M-5: five columns with loading, in three sizes.
+  await expect(section.getByRole("radiogroup")).toHaveCount(15);
+  await expect(section.getByRole("radio", { checked: true })).toHaveCount(15);
+  await expect(section.getByRole("radio", { checked: false })).toHaveCount(30);
   await expect(section.locator('fm-elekto[invalid] [slot="error"]')).toHaveCount(3);
   const invalid = section.locator("fm-elekto[invalid]").first().getByRole("radiogroup");
   await expect(invalid).toHaveAttribute("aria-invalid", "true");
@@ -330,7 +333,8 @@ test("fm-elektilo is upgraded in its section with the prompt and three options, 
   const section = page.locator("#fm-vitrino-elektilo");
   await expect(section.locator("thead")).toContainText("required");
   await expect(section.locator("thead")).toContainText("invalid");
-  await expect(section.getByRole("combobox")).toHaveCount(12);
+  // Spec 029 ②b-1 M-5: a column loading, in three sizes.
+  await expect(section.getByRole("combobox")).toHaveCount(15);
   const first = section.getByRole("combobox").first();
   await expect(first).toHaveValue("");
   await expect(first.locator("option")).toHaveText(["Bitte wählen", "Eins", "Zwei", "Drei"]);
@@ -351,7 +355,8 @@ test("fm-tekstareo is upgraded in its section in every kind × size, required, i
   const section = page.locator("#fm-vitrino-tekstareo");
   await expect(section.locator("thead")).toContainText("required");
   await expect(section.locator("thead")).toContainText("invalid");
-  await expect(section.getByRole("textbox")).toHaveCount(24);
+  // Spec 029 ②b-1 M-5: a column loading, two kinds in three sizes.
+  await expect(section.getByRole("textbox")).toHaveCount(30);
   expect(
     await section
       .getByRole("textbox")
@@ -624,7 +629,9 @@ test("fm-faldilo and fm-kompletigilo are upgraded in their sections, axe-clean",
   page,
 }) => {
   await open(page);
-  await expect(page.locator("#fm-vitrino-faldilo").getByRole("group")).toHaveCount(2);
+  // Spec 029 ②b-1 M-1: a column disabled beside rest and open.
+  await expect(page.locator("#fm-vitrino-faldilo").getByRole("group")).toHaveCount(3);
+  await expect(page.locator("#fm-vitrino-faldilo fm-faldilo[disabled]")).toHaveCount(1);
   await expect(page.locator("#fm-vitrino-faldilo fm-faldilo[open]")).toHaveCount(1);
   // Nachlese 4 N-9: a column loading besides required, disabled, invalid and expanded (3 × 6).
   await expect(page.locator("#fm-vitrino-kompletigilo fm-kompletigilo")).toHaveCount(18);
@@ -1490,7 +1497,8 @@ test("fm-datelektilo is upgraded in its section, opened and moved by keyboard; a
   await page.clock.setFixedTime(new Date("2026-10-22T10:00:00"));
   await open(page);
   const section = page.locator("#fm-vitrino-datelektilo");
-  await expect(section.locator("fm-datelektilo")).toHaveCount(8);
+  // Abnahme #122: two rows, five columns (loading added).
+  await expect(section.locator("fm-datelektilo")).toHaveCount(10);
   const first = section.locator("fm-datelektilo").first();
   await expect(first.locator('input[part="control"]')).toHaveValue("24.10.2026");
   expect(await axeViolations(page, "#fm-vitrino-datelektilo")).toEqual([]);
@@ -1780,4 +1788,40 @@ test("the KontrastParoj of one combination are the same table in every density a
   });
   expect(island.unikaj).toBeGreaterThan(0);
   expect(island.al).toBeGreaterThan(island.unikaj);
+});
+
+// Spec 029 ②b-1 M-1: the section grundo – every Ero disabled with a reason; the kampo is reached
+// by Tab and shows its reason; axe without a finding.
+test("the reasons for disabled: reachable, shown on focus, axe-clean", async ({ page }) => {
+  await open(page);
+  const section = page.locator("#fm-vitrino-grundo");
+  await expect(section.locator("tbody tr")).toHaveCount(15);
+  const kampo = section.locator("fm-kampo");
+  await kampo.getByRole("textbox").focus();
+  await expect(kampo.getByText("Erst nach der Freigabe")).toBeVisible();
+  expect(await axeViolations(page, "#fm-vitrino-grundo")).toEqual([]);
+});
+
+// Abnahme #122: the section loeschen – the clear button shows with a value and nowhere else; it
+// stands inside the field's border; axe without a finding.
+test("the clear buttons: with a value only, inside the field, axe-clean", async ({ page }) => {
+  await open(page);
+  const section = page.locator("#fm-vitrino-loeschen");
+  await expect(section.locator("tbody tr")).toHaveCount(5);
+  for (const [column, shows] of [
+    [1, true],
+    [2, false],
+    [3, false],
+    [4, false],
+  ] as const) {
+    const cells = section.locator(`tbody tr td:nth-of-type(${column})`);
+    await expect(cells).toHaveCount(5);
+    for (let index = 0; index < 5; index++) {
+      const clear = cells.nth(index).locator('[part="clear"]');
+      if (shows) await expect(clear).toBeVisible();
+      // Not shown: absent or hidden (an element may keep its button, hidden, in its shadow root).
+      else if ((await clear.count()) > 0) await expect(clear).toBeHidden();
+    }
+  }
+  expect(await axeViolations(page, "#fm-vitrino-loeschen")).toEqual([]);
 });

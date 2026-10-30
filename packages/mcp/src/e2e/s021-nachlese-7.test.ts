@@ -23,7 +23,7 @@ type Judged = {
   valid: boolean;
   violations: { issue: { rule: string; message: string } }[];
 };
-type Brief = { ero: string; props?: { name: string; type: string }[] };
+type Brief = { ero: string; props?: { name: string; type: string }[]; flags?: string[] };
 
 let client: Connected["client"];
 
@@ -123,6 +123,7 @@ describe("the brief of the Eroj names the new props (B-1, B-2, B-4, B-9)", () =>
     ["saltligilo", "focus-only"],
   ])("%s has %s as a boolean prop", async (name, prop) => {
     const brief = await output<Brief>(client, "get_ero", { name, brief: true });
-    expect(brief.props).toContainEqual({ name: prop, type: "boolean" });
+    // Spec 029 ②b-1: a boolean stands in flags.
+    expect(brief.flags).toContain(prop);
   });
 });
