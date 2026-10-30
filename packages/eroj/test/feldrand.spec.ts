@@ -243,33 +243,50 @@ const AFTER_TEXT: Readonly<Record<string, string>> = {
 
 test.describe("Abnahme #122: markobutono and sxaltilo show the spinner directly after the text", () => {
   for (const [name, markup] of Object.entries(AFTER_TEXT)) {
+    // Every width from 8 to 22rem in quarter steps: where the last line of the text fills its
+    // line, the spinner must not wrap to a line of its own (seen in CI with other fonts).
     test(name, async ({ page }) => {
-      await serve(page, out, `<div style="inline-size: 14rem">${markup}</div>`);
-      const spot = await page.locator("body > div > *").evaluate((host) => {
+      await serve(page, out, `<div id="box" style="inline-size: 14rem">${markup}</div>`);
+      const spots = await page.locator("#box > *").evaluate(async (host) => {
+        const box = host.parentElement as HTMLElement;
         const spinner = (host.shadowRoot as ShadowRoot).querySelector(
           '[part="spinner"]',
         ) as HTMLElement;
-        // The text of the label: the host's own text nodes (slotted), their last line box.
-        const range = document.createRange();
-        const text = [...host.childNodes].filter((node) => node.nodeType === Node.TEXT_NODE);
-        range.setStartBefore(text[0] as Node);
-        range.setEndAfter(text[text.length - 1] as Node);
-        const lines = [...range.getClientRects()].filter((rect) => rect.width > 0);
-        const last = lines[lines.length - 1] as DOMRect;
-        const s = spinner.getBoundingClientRect();
-        return {
-          visible: s.width > 0 && !spinner.hidden,
-          gap: s.left - last.right,
-          middle: (s.top + s.bottom) / 2,
-          top: last.top,
-          bottom: last.bottom,
-        };
+        const measured = [];
+        for (let rem = 8; rem <= 22; rem += 0.25) {
+          box.style.inlineSize = `${rem}rem`;
+          await new Promise((resolve) => requestAnimationFrame(() => resolve(undefined)));
+          // The text of the label: the host's own text nodes (slotted), their last line box.
+          const range = document.createRange();
+          const text = [...host.childNodes].filter((node) => node.nodeType === Node.TEXT_NODE);
+          range.setStartBefore(text[0] as Node);
+          range.setEndAfter(text[text.length - 1] as Node);
+          const lines = [...range.getClientRects()].filter((rect) => rect.width > 0);
+          const last = lines[lines.length - 1] as DOMRect;
+          const s = spinner.getBoundingClientRect();
+          measured.push({
+            rem,
+            visible: s.width > 0 && !spinner.hidden,
+            gap: s.left - last.right,
+            middle: (s.top + s.bottom) / 2,
+            top: last.top,
+            bottom: last.bottom,
+          });
+        }
+        return measured;
       });
-      expect(spot.visible, "shows").toBe(true);
-      expect(spot.gap, "directly after the text").toBeGreaterThanOrEqual(-0.5);
-      expect(spot.gap, "directly after the text").toBeLessThanOrEqual(16);
-      expect(spot.middle, "on the text's last line").toBeGreaterThanOrEqual(spot.top - 0.5);
-      expect(spot.middle, "on the text's last line").toBeLessThanOrEqual(spot.bottom + 0.5);
+      for (const spot of spots) {
+        const at = `${spot.rem}rem`;
+        expect(spot.visible, `${at}: shows`).toBe(true);
+        expect(spot.gap, `${at}: directly after the text`).toBeGreaterThanOrEqual(-0.5);
+        expect(spot.gap, `${at}: directly after the text`).toBeLessThanOrEqual(16);
+        expect(spot.middle, `${at}: on the text's last line`).toBeGreaterThanOrEqual(
+          spot.top - 0.5,
+        );
+        expect(spot.middle, `${at}: on the text's last line`).toBeLessThanOrEqual(
+          spot.bottom + 0.5,
+        );
+      }
     });
   }
 });
