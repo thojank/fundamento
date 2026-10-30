@@ -26,7 +26,8 @@ export function resolutionsOf(modelo: Modelo): readonly ResolvedCombination[] {
   if (entries === undefined) {
     entries = allAssignments(modelo).map((assignment) => ({
       assignment,
-      resolution: resolveCombination(modelo, assignment),
+      // Read by the rules alone: the values need no copy each (AK-07, Spec 029 ②b-1b).
+      resolution: resolveCombination(modelo, assignment, { shared: true }),
     }));
     cache.set(modelo, entries);
   }

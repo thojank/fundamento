@@ -1,7 +1,7 @@
 // The ID registry `ids.lock.json` (FR-05a) as pure functions: parse, validate, serialize,
 // allocate and retire. File I/O lives in `lock-file.ts`.
 
-import { createModeloAjv, getModeloValidator, type ValidateFunction } from "../contracts/ajv.js";
+import { getModeloValidator, sharedModeloAjv, type ValidateFunction } from "../contracts/ajv.js";
 import type { EntityType, IdsLock } from "../contracts/entity-ids.js";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { IdGenerator } from "./ulid-source.js";
@@ -35,7 +35,7 @@ export function serializeIdsLock(lock: IdsLock): string {
 let lockValidator: ValidateFunction | undefined;
 
 function getLockValidator(): ValidateFunction {
-  lockValidator ??= getModeloValidator(createModeloAjv(), "IdsLock");
+  lockValidator ??= getModeloValidator(sharedModeloAjv(), "IdsLock");
   return lockValidator;
 }
 

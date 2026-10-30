@@ -3,7 +3,7 @@
 // schema/common.json. Compiled with the Modelo's Ajv setup, so tools and Modelo agree.
 
 import { readFileSync } from "node:fs";
-import { createModeloAjv, type ValidateFunction } from "@fundamento/modelo";
+import { sharedModeloAjv, type ValidateFunction } from "@fundamento/modelo";
 
 /**
  * The ten read-only tools of FR-16, then the Gvidanto tools of Spec 002, the Ero tools of
@@ -61,15 +61,19 @@ function readSchema(relative: string): Record<string, unknown> {
 
 /** Compiles every tool schema once (Ajv draft 2020-12, strict, with the Modelo schema). */
 export function compileToolSchemas(): CompiledTool[] {
-  const ajv = createModeloAjv();
+  // The process's one Ajv (Spec 029 ②b-1b, AK-07): the Modelo schema the tools refer to is
+  // compiled once; the common schema is added once.
+  const ajv = sharedModeloAjv();
   const common = readSchema("common.json");
-  ajv.addSchema(common);
+  if (ajv.getSchema(COMMON_ID) === undefined) ajv.addSchema(common);
   const envelopeSchema = { $ref: `${COMMON_ID}#/$defs/ErrorEnvelope` };
   const error = { schema: envelopeSchema, validate: ajv.compile(envelopeSchema) };
   return TOOL_NAMES.map((name) => {
     const compile = (kind: "input" | "output"): CompiledSchema => {
       const schema = readSchema(`tools/${name}.${kind}.json`);
-      return { schema, validate: ajv.compile(schema) };
+      // A second server in the process takes the validator the first compiled (same $id).
+      const known = typeof schema.$id === "string" ? ajv.getSchema(schema.$id) : undefined;
+      return { schema, validate: known ?? ajv.compile(schema) };
     };
     return { name, input: compile("input"), output: compile("output"), error };
   });
