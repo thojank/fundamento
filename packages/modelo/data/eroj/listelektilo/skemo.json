@@ -281,6 +281,9 @@
       "clear": {
         "size": {
           "fixed": "size.icon.medium"
+        },
+        "width": {
+          "fixed": "size.target.min"
         }
       }
     },

@@ -1166,7 +1166,9 @@ describe("the Vitrino shows the clear button of the fields (Abnahme #122)", () =
     expect(datumoj.loeschen).toContain(
       '<th scope="col">mit Wert</th><th scope="col">leer</th><th scope="col">disabled</th><th scope="col">readonly</th>',
     );
-    expect((datumoj.loeschen ?? "").match(/ clearable/g)).toHaveLength(20);
+    // elektilo and kompletigilo have no readonly in their Skemo: their cell says so.
+    expect((datumoj.loeschen ?? "").match(/ clearable/g)).toHaveLength(18);
+    expect((datumoj.loeschen ?? "").match(/<td>kein readonly<\/td>/g)).toHaveLength(2);
   });
 
   it("the date picker and the styled list show the column loading", () => {

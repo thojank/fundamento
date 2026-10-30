@@ -1502,7 +1502,12 @@ export function loeschenMarkup(eroj: readonly LoadedEro[]): string | undefined {
     const inner = ["elektilo", "listelektilo", "kompletigilo"].includes(name) ? options : "";
     const cell = (attributes: string) =>
       `<td><${tag} clearable${attributes}>Beispiel${inner}</${tag}></td>`;
-    return `<tr><th scope="row">${tag}</th>${cell(` value="${value}"`)}${cell("")}${cell(` value="${value}" disabled`)}${cell(` value="${value}" readonly`)}</tr>`;
+    // A field without readonly in its Skemo (a select of the platform cannot be read-only) says
+    // so instead of an attribute it would ignore.
+    const readonly = entry.skemo.props.some((prop) => prop.name === "readonly")
+      ? cell(` value="${value}" readonly`)
+      : "<td>kein readonly</td>";
+    return `<tr><th scope="row">${tag}</th>${cell(` value="${value}"`)}${cell("")}${cell(` value="${value}" disabled`)}${readonly}</tr>`;
   });
   return `<table><caption>Löschen-Knopf im Feld: mit Wert, leer, deaktiviert, schreibgeschützt</caption><thead><tr><th scope="col">Ero</th><th scope="col">mit Wert</th><th scope="col">leer</th><th scope="col">disabled</th><th scope="col">readonly</th></tr></thead><tbody>${rows.join("")}</tbody></table>`;
 }

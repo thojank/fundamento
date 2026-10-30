@@ -1497,7 +1497,8 @@ test("fm-datelektilo is upgraded in its section, opened and moved by keyboard; a
   await page.clock.setFixedTime(new Date("2026-10-22T10:00:00"));
   await open(page);
   const section = page.locator("#fm-vitrino-datelektilo");
-  await expect(section.locator("fm-datelektilo")).toHaveCount(8);
+  // Abnahme #122: two rows, five columns (loading added).
+  await expect(section.locator("fm-datelektilo")).toHaveCount(10);
   const first = section.locator("fm-datelektilo").first();
   await expect(first.locator('input[part="control"]')).toHaveValue("24.10.2026");
   expect(await axeViolations(page, "#fm-vitrino-datelektilo")).toEqual([]);
@@ -1818,7 +1819,8 @@ test("the clear buttons: with a value only, inside the field, axe-clean", async 
     for (let index = 0; index < 5; index++) {
       const clear = cells.nth(index).locator('[part="clear"]');
       if (shows) await expect(clear).toBeVisible();
-      else await expect(clear).toHaveCount(0);
+      // Not shown: absent or hidden (an element may keep its button, hidden, in its shadow root).
+      else if ((await clear.count()) > 0) await expect(clear).toBeHidden();
     }
   }
   expect(await axeViolations(page, "#fm-vitrino-loeschen")).toEqual([]);

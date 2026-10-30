@@ -9198,6 +9198,16 @@
               }
             }
           }
+        },
+        "width": {
+          "$type": "dimension",
+          "$value": "{size.target.min}",
+          "$description": "elektilo: clear.width (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M657ZC7EEA50ZGVRMGVZ3G98"
+            }
+          }
         }
       }
     },
@@ -11588,6 +11598,16 @@
               }
             }
           }
+        },
+        "width": {
+          "$type": "dimension",
+          "$value": "{size.target.min}",
+          "$description": "kampo: decrement.width (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M657ZC7EEA50ZGVRMGVZ3G99"
+            }
+          }
         }
       },
       "increment": {
@@ -11624,6 +11644,16 @@
               }
             }
           }
+        },
+        "width": {
+          "$type": "dimension",
+          "$value": "{size.target.min}",
+          "$description": "kampo: increment.width (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M657ZC7EEA50ZGVRMGVZ3G9A"
+            }
+          }
         }
       },
       "clear": {
@@ -11658,6 +11688,16 @@
                   "id": "tok_01M653YTE671DR6PT85RTE3QAX"
                 }
               }
+            }
+          }
+        },
+        "width": {
+          "$type": "dimension",
+          "$value": "{size.target.min}",
+          "$description": "kampo: clear.width (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M657ZC7EEA50ZGVRMGVZ3G9B"
             }
           }
         }
@@ -12789,6 +12829,16 @@
                   "id": "tok_01M653YTE671DR6PT85RTE3QB0"
                 }
               }
+            }
+          }
+        },
+        "width": {
+          "$type": "dimension",
+          "$value": "{size.target.min}",
+          "$description": "kompletigilo: clear.width (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M657ZC7EEA50ZGVRMGVZ3G9C"
             }
           }
         }
@@ -14216,6 +14266,16 @@
           "$extensions": {
             "com.ciferecigo.fundamento": {
               "id": "tok_01M63SXQ7DT7MKBHBJ3CTYK304"
+            }
+          }
+        },
+        "width": {
+          "$type": "dimension",
+          "$value": "{size.target.min}",
+          "$description": "listelektilo: clear.width (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M657ZC7EEA50ZGVRMGVZ3G9D"
             }
           }
         }

@@ -19,12 +19,22 @@ const CLEAR =
  */
 const SUMMARY = /^ero\.faldilo\.summary\.(color\.(hover|focus|disabled)|fill\.disabled)$/;
 
+/**
+ * Abnahme #122: every button at the end of a field stays a target of at least size.target.min
+ * (WCAG 2.5.8) while its icon is as large as the field's – its width, the web's square minimum.
+ */
+const TARGET =
+  /^ero\.(kampo\.(clear|decrement|increment)|elektilo\.clear|listelektilo\.clear|kompletigilo\.clear)\.width$/;
+
 /** Whether a token was added after main's record. */
 export const addedSinceMain = (name: string): boolean =>
-  SPINNER.test(name) || CLEAR.test(name) || SUMMARY.test(name);
+  SPINNER.test(name) || CLEAR.test(name) || SUMMARY.test(name) || TARGET.test(name);
 
-/** How many tokens ②b added so far (M-5: 12 fields × 3; M-6 with Abnahme #122: 11; M-1: 4). */
-export const ADDED_SINCE_MAIN = 51;
+/**
+ * How many tokens ②b added so far (M-5: 12 fields × 3; M-6 with Abnahme #122: 11; M-1: 4; the
+ * targets of Abnahme #122: 6).
+ */
+export const ADDED_SINCE_MAIN = 57;
 
 /** ②b-1 M-1: tokens main had under another name; each keeps main's value. */
 const MOVED: Readonly<Record<string, string>> = {

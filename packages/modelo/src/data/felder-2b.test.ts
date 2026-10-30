@@ -85,15 +85,17 @@ describe("Spec 029 ②b-1 M-6: a clear button in the field", () => {
         kind: "boolean",
         default: ero === "plurelektilo",
       });
-      // Abnahme #122: no longer a small control – the icon of the field (feldrand.test.ts).
+      // Abnahme #122: no longer a small control – the icon of the field, the button around it a
+      // target of at least size.target.min (feldrand.test.ts).
+      const target = { width: { fixed: "size.target.min" } };
       expect(skemo.parts.clear).toEqual(
         ero === "plurelektilo"
           ? { size: { fixed: "size.control.small" } }
           : ero === "listelektilo"
-            ? { size: { fixed: "size.icon.medium" } }
+            ? { size: { fixed: "size.icon.medium" }, ...target }
             : ero === "datelektilo"
               ? { size: { fixed: "size.target.min" } }
-              : { size: { by: ["size"] } },
+              : { size: { by: ["size"] }, ...target },
       );
     },
   );

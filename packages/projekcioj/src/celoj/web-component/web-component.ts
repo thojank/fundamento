@@ -898,6 +898,11 @@ function declarations(
   if (property === "position") {
     return [`justify-content: ${token === "end" ? "flex-end" : "flex-start"};`];
   }
+  // Abnahme #122: a button at the end of a field shows its icon as large as the field's and stays a
+  // target of at least its width (WCAG 2.5.8), square.
+  if (property === "width" && isBoxedField(skemo) && (skemo.trailing ?? []).includes(part)) {
+    return [`min-inline-size: ${variable(token)};`, `min-block-size: ${variable(token)};`];
+  }
   // The stroke of a border (Spec 011 ③, D-10): a stroke.* token is the border style (dashed for
   // an empty state); none draws no border in that combination.
   if (property === "stroke") {
@@ -2046,10 +2051,14 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
     if (property !== "size" || !COMPOSED_BUTONO_PARTS.includes(part)) return;
     // A butono with a word (the clear of a multi-select) gets its height alone: it keeps its padding.
     if (!lines.some((line) => line.startsWith("inline-size:"))) return;
+    // Abnahme #122: at the end of a field the control keeps the part's target (its minimum).
+    const target = trailing && skemo.parts[part]?.width !== undefined;
     add(onEach(selector, "::part(control)"), [
       "inline-size: inherit;",
       "block-size: inherit;",
-      "min-block-size: 0;",
+      ...(target
+        ? ["min-inline-size: inherit;", "min-block-size: inherit;"]
+        : ["min-block-size: 0;"]),
       "padding-inline: 0;",
     ]);
   };

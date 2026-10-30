@@ -91,15 +91,20 @@ describe("Abnahme #122: the right edge of a field set in Figma", () => {
     expect(labelRow === undefined ? undefined : find(labelRow, "spinner")).toBeUndefined();
   });
 
-  it("the ✕ is as large as the field's icon, the calendar of a date picker drawn", async () => {
+  it("the ✕ is as large as the field's icon, the button around it the target; the calendar of a date picker drawn", async () => {
     const elektilo = await variantOf("elektilo", "size=medium, state=rest");
-    expect(geometry(find(elektilo, "clear") as DoubleNode).width).toBe(
-      geometry(find(elektilo, "indicator") as DoubleNode).width,
-    );
     const datelektilo = await variantOf("datelektilo", "mode=single, expanded=false, state=rest");
     const trigger = find(datelektilo, "trigger") as DoubleNode;
     expect(trigger.children.length, "the calendar's glyphs").toBeGreaterThan(0);
-    expect(geometry(find(datelektilo, "clear") as DoubleNode).width).toBe(geometry(trigger).width);
+    const glyphOf = (clear: DoubleNode) => geometry(clear.children[0] as DoubleNode).width;
+    const clear = find(elektilo, "clear") as DoubleNode;
+    expect(glyphOf(clear)).toBe(geometry(find(elektilo, "indicator") as DoubleNode).width);
+    // The button is the target (size.target.min, as large as the calendar's trigger).
+    expect(geometry(clear).width).toBe(geometry(trigger).width);
+    expect(geometry(clear).height).toBe(geometry(trigger).width);
+    const dateClear = find(datelektilo, "clear") as DoubleNode;
+    expect(glyphOf(dateClear)).toBe(geometry(trigger).width);
+    expect(geometry(dateClear).width).toBe(geometry(trigger).width);
   });
 
   it.each(CASES)("$set: as wide as a field stands, not its words alone", async (entry) => {

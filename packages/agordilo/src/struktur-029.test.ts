@@ -31,9 +31,10 @@ describe("Spec 029 ①: the structure of komuna 0.2 for the Agordilo", () => {
     // Spec 029 ②b-1: the spinner of the fields (M-5, 36 Ero-Tokens) and the clear button of four
     // more fields (M-6, 4) are part of the structure; so is the faldilo's summary by state
     // (M-1: its colour at rest, hover, focus and disabled, its fill disabled); Abnahme #122: the
-    // clear button as large as the field's icon, the steppers of a number at icon size.
+    // clear button as large as the field's icon, the steppers of a number at icon size, each a
+    // target of at least size.target.min (width).
     expect(structure.fingerprint).toBe(
-      "45a194d78a982c4e3519986554286f905c748b9a0e165be889bff4c48cd3c43b",
+      "0b0d678759cbf48c86cd334a1a77d9e35b40aa260b5ba6725804f043c7eced34",
     );
   });
 

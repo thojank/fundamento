@@ -279,10 +279,10 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
   "spinner.color": [{ node: "spinner-mark", fields: ["strokes"], paint: true }],
   "spinner.inline-padding": [{ node: "label-row", fields: ["itemSpacing"] }],
   // Spec 029 ②b-1 M-6: the clear button at the end of a field's control and its glyphs.
-  "clear.size": [
-    { node: "clear", fields: ["width", "height"] },
-    { node: "clear-glyph-*", fields: ["width", "height"] },
-  ],
+  // Abnahme #122: the glyph as large as the field's icon, the button around it at least its
+  // target (width: the least width and height, square), the glyph in its middle.
+  "clear.size": [{ node: "clear-glyph-*", fields: ["width", "height"] }],
+  "clear.width": [{ node: "clear", fields: ["minWidth", "minHeight"] }],
   // A typography token is a composite; Figma holds its fields as separate variables (F9). Bound
   // to the bare name, the size never arrived — there is no variable of that name. Family and cut
   // are bound too (F30), so the label follows the brand when the mode changes instead of keeping
@@ -1342,6 +1342,23 @@ const INDICATOR_LAYOUT: Readonly<Record<string, string>> = {
 };
 
 /**
+ * The clear button of a field (Abnahme #122): its glyph in the middle of a box that hugs it and
+ * is at least the button's target (minWidth, minHeight bound to clear.width).
+ */
+const TARGET_LAYOUT: Readonly<Record<string, string | number>> = {
+  layoutMode: "HORIZONTAL",
+  primaryAxisAlignItems: "CENTER",
+  counterAxisAlignItems: "CENTER",
+  layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
  * The surface of a card (Spec 015 ③, plan ③ D-05): a column (vertical: the media above the
  * body) or a row (horizontal: the media at the start, the body beside it) of the width the plan
  * writes, hugging its height; the border lies in the size (border-box) and the surface clips
@@ -1618,6 +1635,7 @@ const CARD_MEDIA_LAYOUT = ${JSON.stringify(CARD_MEDIA_LAYOUT)};
 const WRAP_SIZING = ${JSON.stringify(WRAP_SIZING)};
 const MARK_NEUTRAL = ${JSON.stringify(MARK_NEUTRAL)};
 const INDICATOR_LAYOUT = ${JSON.stringify(INDICATOR_LAYOUT)};
+const TARGET_LAYOUT = ${JSON.stringify(TARGET_LAYOUT)};
 const STRUCTURE_BINDINGS = ${JSON.stringify(STRUCTURE_BINDINGS)};
 const STRETCH = ${JSON.stringify(STRETCH)};
 const IKONOJ = ${JSON.stringify(plan.ikonoj ?? { names: [], mirror: [], glyphs: {} })};
@@ -6337,7 +6355,7 @@ async function applyComponents(variables, warnings) {
       }
       if (clearFrame !== undefined) {
         own(clearFrame, NEUTRAL);
-        own(clearFrame, INDICATOR_LAYOUT);
+        own(clearFrame, TARGET_LAYOUT);
         own(clearFrame, IN_FLOW);
         toggled.push({ part: "clear", node: clearFrame });
         const drawn = drawGlyphs(clearFrame, icons.clear, "clear-", glyphMeasures, "clear-mark");

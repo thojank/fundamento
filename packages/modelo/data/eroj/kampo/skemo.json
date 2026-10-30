@@ -252,6 +252,9 @@
           "by": [
             "size"
           ]
+        },
+        "width": {
+          "fixed": "size.target.min"
         }
       },
       "increment": {
@@ -259,6 +262,9 @@
           "by": [
             "size"
           ]
+        },
+        "width": {
+          "fixed": "size.target.min"
         }
       },
       "clear": {
@@ -266,6 +272,9 @@
           "by": [
             "size"
           ]
+        },
+        "width": {
+          "fixed": "size.target.min"
         }
       },
       "spinner": {

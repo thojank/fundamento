@@ -294,6 +294,9 @@
           "by": [
             "size"
           ]
+        },
+        "width": {
+          "fixed": "size.target.min"
         }
       }
     },

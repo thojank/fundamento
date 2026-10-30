@@ -85,10 +85,12 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
       "motion",
     ]);
     expect(parts.slice(11)).toEqual(["decrement", "increment", "clear", "spinner"]);
-    expect(skemo.parts.decrement).toEqual({ size: { by: ["size"] } });
-    expect(skemo.parts.increment).toEqual({ size: { by: ["size"] } });
-    // Abnahme #122: inside the field's border, as large as an icon of the field's size.
-    expect(skemo.parts.clear).toEqual({ size: { by: ["size"] } });
+    // Abnahme #122: inside the field's border, as large as an icon of the field's size, each a
+    // target of at least size.target.min.
+    const button = { size: { by: ["size"] }, width: { fixed: "size.target.min" } };
+    expect(skemo.parts.decrement).toEqual(button);
+    expect(skemo.parts.increment).toEqual(button);
+    expect(skemo.parts.clear).toEqual(button);
     const sizes = skemo.bindings.filter(
       (binding) => binding.part === "decrement" && binding.property === "size",
       "spinner",
