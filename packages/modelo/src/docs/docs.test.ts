@@ -4031,6 +4031,24 @@ describe("Spec 033 documentation (specs/033-markenassistent)", () => {
     }
     expect(read("specs/033-markenassistent/tasks.md")).toContain("## S3");
   });
+
+  it("S4 (Weg C): the plan names the research agent, observation, the confirmation, local and the trial run", () => {
+    const plan = read("specs/033-markenassistent/plan.md");
+    const s4 = plan.slice(plan.indexOf("## S4"));
+    for (const term of [
+      "Recherche-Agent",
+      "Beobachtung",
+      "Bestätigung",
+      "lokal",
+      "Tokens",
+      "Kosten",
+      "Dauer",
+      "### Messanleitung",
+    ]) {
+      expect(s4, term).toContain(term);
+    }
+    expect(read("specs/033-markenassistent/tasks.md")).toContain("## S4");
+  });
 });
 
 // Spec 029 ②b-1 (Maintainer 29.10.): the brief of get_ero lists the booleans in flags – a change

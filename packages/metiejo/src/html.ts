@@ -521,6 +521,17 @@ if (asistantoData && marko) {
     meldung((result.body.satzoj || []).join(" "));
     location.reload();
   });
+  // Spec 033 S4: a brand only named – the research agent, with the confirmation.
+  const esplori = document.querySelector("[data-mt-esploro-sendi]");
+  if (esplori) esplori.addEventListener("click", async () => {
+    const value = (selector) => { const el = document.querySelector(selector); return (el && el.getAttribute("value")) || ""; };
+    const rajtoj = document.querySelector("[data-mt-esploro-rajtoj]");
+    meldung("Ich recherchiere …");
+    const result = await post("esplori", { nomo: value("[data-mt-esploro-nomo]"), url: value("[data-mt-esploro-url]"), rajtoj: !!rajtoj && rajtoj.hasAttribute("checked") });
+    if (!result.ok) { meldung(result.body.satz || "Die Recherche ging nicht."); return; }
+    meldung(result.body.antwort || "");
+    location.reload();
+  });
   const konfirmi = document.querySelector("[data-mt-konfirmi]");
   if (konfirmi) konfirmi.addEventListener("click", async () => {
     const rajtoj = document.querySelector("[data-mt-rajtoj]");

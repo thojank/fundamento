@@ -80,3 +80,26 @@
 | Commits | rot `590bef2`, grün im Folgecommit (Hash im PR) |
 | Grün gemessen | Metiejo 27 Dateien / 257 Tests; Lint sauber |
 | Probelauf | 100 % in 36,2 s, 6 847 Tokens, 7 Anfragen, ≈ 0,0014 $; Vitrino und Figma mit der Marke |
+
+## S4 – Weg C: Recherche-Agent
+
+**Branch:** `261029-spec-033-s4-weg-c` (auf S3).
+
+### A – Rot zuerst
+- [x] **T3331 Tests:** Metiejo `src/esploro/esploro.test.ts` (öffentliche Adressen, Werkzeuge, Website und Presseseite mit URL als Herkunft, Ablehnung und sechs Seiten, ohne Modell mit Adresse) und `servilo-esploro.test.ts` (Bestätigung zu Beginn, Kroniko, Hinweis mit fremder Marke und lokal, ohne Modell, Abschnitt im Assistenten); Doku-Test S4. Rot in `680a46a`: Modul fehlt, Server 5, Doku 1. Danach im Test-Double die Markenseite ergänzt, damit `seitoj` nur gelesene Seiten zählt.
+
+### B – Grün
+- [x] **T3332 Agent:** `esploro.ts` (D-13–D-15); `legiPagxon` und `markoLigiloj` in `retejo.ts`.
+- [x] **T3333 Server und Bildschirm:** Route `esplori`, `avertoOf` mit fremder Marke auf „Fertig“, im Studio und in der Kroniko, Abschnitt „Recherche“ im Assistenten, Client-Skript.
+- [x] **T3334 Probelauf Abnahme 3** (plan).
+
+### C – Abschluss
+- [x] **T3335 Doku:** plan S4, tasks, Vojmapo.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits | rot `680a46a`, grün im Folgecommit (Hash im PR) |
+| Grün gemessen | Metiejo 29 Dateien / 267 Tests; Lint sauber |
+| Probelauf | 2 Seiten, 6 Vorschläge, 1 521 Tokens, 3 Anfragen, 5,6 s, ≈ 0,0003 $ |

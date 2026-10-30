@@ -103,6 +103,7 @@ export function asistantoScreen(input: AsistantoInput): string {
       ? ""
       : `<fm-avizo intent="info" data-mt-propono><span slot="heading">Vorschlag aus deinem Material</span><fm-teksto>${escapeHtml(input.propono.satz)}</fm-teksto><fm-teksto kind="caption">Herkunft: ${input.propono.herkunft.map((entry) => escapeHtml(entry.loko === undefined ? entry.dosiero : `${entry.dosiero}, ${entry.loko}`)).join(" · ")}</fm-teksto></fm-avizo>`;
   const material = `<fm-faldilo data-mt-materialo><span slot="summary">Material deiner Marke (Screenshot, Logo, PDF, Schrift oder Link)</span><fm-alsxutilo name="materialo" accept=".png,.svg,.pdf,.woff2,.woff,.ttf,.otf" data-mt-materialo-dosiero>Datei</fm-alsxutilo><fm-kampo name="url" type="url" data-mt-materialo-url>Link auf eine Webseite</fm-kampo><fm-markobutono name="rajtoj-materialo" value="ja" data-mt-materialo-rajtoj>${escapeHtml(KONFIRMO_TEKSTO)}</fm-markobutono><fm-butono emphasis="medium" data-mt-materialo-legi>Material lesen</fm-butono></fm-faldilo>`;
+  const esploro = `<fm-faldilo data-mt-esploro><span slot="summary">Bestehende Marke nur genannt (Recherche)</span><fm-kampo name="nomo" data-mt-esploro-nomo>Name der Marke</fm-kampo><fm-kampo name="url" type="url" data-mt-esploro-url>Adresse der Website (optional)</fm-kampo><fm-markobutono name="rajtoj-esploro" value="ja" data-mt-esploro-rajtoj>${escapeHtml(KONFIRMO_TEKSTO)}</fm-markobutono><fm-teksto kind="caption">Der Assistent liest öffentliche Seiten und misst Farben, Schriften, Radien und Abstände; er übernimmt keine Texte, Bilder oder Dateien. Das Ergebnis bleibt lokal.</fm-teksto><fm-butono emphasis="medium" data-mt-esploro-sendi>Recherchieren</fm-butono></fm-faldilo>`;
   const previewSrc = `/marko/${encodeURIComponent(name)}/vorschau?sxtupo=studio-${studio}&breite=mittel`;
   const body = `<fm-sxelo>
 <span slot="brand">Markenassistent</span>
@@ -123,6 +124,7 @@ ${dialog}
 <fm-butono emphasis="high" data-mt-babilo-sendi${input.ki.pret ? "" : " disabled"}>Senden</fm-butono>
 ${propono}
 ${material}
+${esploro}
 <fm-teksto kind="caption" data-mt-freigabe-satz>${escapeHtml(releaseHint)}</fm-teksto>
 <fm-butono emphasis="medium" data-mt-faceto-ago="akcepto">Vorschlag übernehmen</fm-butono>
 <fm-butono emphasis="high" data-mt-faceto-ago="liberigo"${releasable ? "" : " disabled"}>Freigeben</fm-butono>

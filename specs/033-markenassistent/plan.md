@@ -316,3 +316,83 @@ Die Daten des Kreilo: `file:///Users/thorstenjankowski/n8n-compose/20260918_fund
 cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
 pnpm --filter @fundamento/metiejo exec vitest run src/kreilo src/asistanto src/enportilo
 ```
+
+## S4 – Weg C: Recherche-Agent
+
+**Branch:** `261029-spec-033-s4-weg-c` (auf S3) · **Datum:** 2026-10-29 · **Stand:** gebaut, Abnahme offen.
+
+### Zusammenfassung
+
+1. **Recherche-Agent** (`packages/metiejo/src/esploro/esploro.ts`).
+   - Das Sprachmodell wählt nur, welche öffentlichen Seiten gelesen werden: die Website der genannten Marke (aus seinem Wissen oder aus der Adresse, die die Person angibt), dazu höchstens zwei Presse- oder Markenseiten aus den Links, die die Startseite nennt.
+   - Lesen und Messen macht der Enportilo aus S2: Farben, Schriften, Radien und Abstände, jeweils mit URL und Zeile. Der Agent setzt keinen Wert und übernimmt keine Texte, Bilder oder Dateien; das ist **Beobachtung** nach Art. V.
+   - Seine Werkzeuge: `lies_seite` (eine Seite mit ihren Stylesheets; gibt die Presse- und Markenseiten derselben Website zurück) und `trovoj` (was bisher gefunden ist).
+2. **Nur öffentliche Adressen:** `http`/`https` mit einem Hostnamen, der einen Punkt hat. Ausgeschlossen sind `localhost`, `.local`, `.internal`, private, Loopback- und Link-Local-Netze (IPv4 und IPv6) und andere Protokolle. Es werden **höchstens sechs Seiten** gelesen; eine abgelehnte Adresse steht im Ergebnis und in der Kroniko.
+3. **Ohne Sprachmodell** liest die Recherche eine angegebene Adresse samt der verlinkten Presse- und Markenseiten. Ohne Adresse und ohne Modell sagt ein Satz, was fehlt.
+4. **Amendment v2.5:**
+   - Die **Bestätigung** kommt zu Beginn; ohne sie startet der Agent nicht (409).
+   - Nennung (Name, Adresse), Bestätigung, jeder Vorschlag und der Zug des Agenten (Tokens, gelesene und abgelehnte Seiten) stehen in der Kroniko.
+   - Der **Hinweis vor dem Export** nennt die fremde Marke und dass das Ergebnis **lokal** bleibt und nicht veröffentlicht wird. Er steht auf „Fertig“, im Studio und beim Export in der Kroniko, und das gilt für jede Marke mit fremder Basis, also auch für Weg B.
+5. **Im Assistenten:** der Abschnitt „Bestehende Marke nur genannt (Recherche)“ mit Name, Adresse (optional), Bestätigung und „Recherchieren“. Die Vorschläge erscheinen wie in Weg B mit Herkunft im Schritt; „Vorschlag übernehmen“ legt sie über den Entwurf.
+
+### Entwurfsentscheidungen
+
+#### D-13 Das Modell wählt Seiten, nicht Werte
+Die Rolle des Sprachmodells ist die Auswahl: Welche Seite gehört zur genannten Marke, welche Unterseite ist eine Presse- oder Markenseite. Werte entstehen nur aus Messungen des Enportilo, mit Herkunft. So bleibt die Regel „nie Rohwerte an den Reglern vorbei“ auch in Weg C erhalten.
+
+#### D-14 Keine Websuche
+Der Werkzeugkasten hat keine Suchmaschine; die `.env` nennt keinen Such-Dienst. Der Agent nennt die Adresse aus seinem Wissen, oder die Person gibt sie an. Eine Suche wäre ein neuer Anbieter mit eigenem Schlüssel und eigenen Kosten (O-8).
+
+#### D-15 Schutz vor lokalen Adressen
+Die Adresse kommt vom Modell, also von außen; der Agent liest deshalb nichts im lokalen oder privaten Netz (SSRF). Geprüft werden Protokoll, Hostname und IP-Literale. Ein Hostname, der erst über DNS auf eine private Adresse zeigt, ist nicht abgefangen (B-10).
+
+### Probeläufe
+
+**Abnahme 3** am 2026-10-29 mit `mistral/ministral-14b-2512`, Kostengrenze 30 000 Tokens, Wegwerf-Marke in einem temporären Ordner. Genannt war nur „Wikipedia“, eine offene und bekannte Marke. Gemessene Werte der genannten Marke stehen nach Art. V nicht im Repo, nur Seiten, Zahlen und Aufwand.
+
+| Was | Ergebnis |
+|---|---|
+| gelesene Seiten (vom Agenten gewählt) | `https://www.wikipedia.org/`, `https://foundation.wikimedia.org/` |
+| abgelehnte Adressen | keine |
+| Vorschläge | 6 Schritte (Leitfarbe, Neutraltöne, Statusfarben, Schrift, Form, Raum), je mit URL und Zeile |
+| Kroniko | `kreo fremda konfirmo` + 6 × `propono` + `babilo` |
+| Hinweis vor dem Export | nennt „Wikipedia“ und „lokal“ |
+| **Dauer** | **5,6 s** |
+| **Tokens** / Anfragen | **1 521** (1 397 + 124) / 3 |
+| **Kosten** | ≈ **0,0003 $** (0,20 $ je Mio. Tokens, B-3) |
+
+Kein Schlüssel stand in Kroniko oder Log.
+
+### Abweichungen
+
+1. **Keine Websuche** (D-14): Die Spec sagt „sucht öffentliche Quellen“. Der Agent findet sie aus seinem Wissen, aus der angegebenen Adresse und aus den Links der Startseite.
+2. **Hinweis für jede fremde Basis:** Den Satz „Das Ergebnis bleibt lokal“ bekommt jede Marke mit fremder Basis (Nennung, Upload, Link), nicht nur Weg C.
+
+### Befunde / Mankoj
+
+- **B-10 DNS-Rebinding** (D-15): Ein öffentlicher Hostname, der auf eine private Adresse auflöst, wird nicht erkannt. Für einen Server, der nur auf dem eigenen Rechner läuft, ist das Risiko gering; für den späteren Betrieb als Dienst (Spec zur Delegation) gehört eine Prüfung nach der Namensauflösung dazu.
+
+### Offen (für den Maintainer)
+
+- **O-8 Websuche** (D-14): ein Such-Dienst als Werkzeug des Agenten, mit eigenem Schlüssel in der `.env`? Vorschlag: erst, wenn Weg C ohne Adresse zu oft daneben liegt.
+
+### Messanleitung
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm install && pnpm build
+pnpm fm metiejo --open
+```
+
+1. Eine Marke anlegen, `http://localhost:7301/asistanto/<marke>/gvidkoloro` öffnen und „Bestehende Marke nur genannt (Recherche)“ aufklappen.
+2. Einen Namen eingeben, ohne Kästchen „Recherchieren“: Die Meldung bittet um die Bestätigung. Mit Kästchen: Nach einigen Sekunden nennt die Meldung die gelesenen Seiten; die Schritte zeigen „Vorschlag aus deinem Material“ mit URL und Zeile.
+3. Ohne Sprachmodell in der `.env`: mit Adresse liest die Recherche diese Adresse; ohne Adresse sagt sie, was fehlt.
+4. `http://localhost:7301/marko/<marke>/fertig`: Der Hinweis nennt die Marke und „Das Ergebnis bleibt lokal und wird nicht veröffentlicht.“
+5. Die Kroniko: `file:///Users/thorstenjankowski/Fundamento/marken/<marke>/kroniko.jsonl` mit `fremda` (`kiel: nennung`), `konfirmo`, `propono` und `babilo` (Tokens, Seiten).
+
+**Tests:**
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm --filter @fundamento/metiejo exec vitest run src/esploro src/enportilo
+```

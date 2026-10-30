@@ -30,7 +30,7 @@ import {
   type ValidationIssue,
   WCAG2_METRIC,
 } from "@fundamento/modelo";
-import { AVERTO_EKSPORTO, KONFIRMO_TEKSTO } from "./asistanto/averto.js";
+import { avertoOf, KONFIRMO_TEKSTO } from "./asistanto/averto.js";
 import { babili } from "./asistanto/babilo.js";
 import { asistantoScreen } from "./asistanto/ekrano.js";
 import { Laborejo } from "./asistanto/iloj.js";
@@ -58,6 +58,7 @@ import {
 import { proponojOf } from "./enportilo/rekono.js";
 import type { Trovo } from "./enportilo/trovo.js";
 import type { Settings } from "./env.js";
+import { esplori } from "./esploro/esploro.js";
 import { CLIENT_SCRIPT, escapeHtml, previewDocument } from "./html.js";
 import { identOf } from "./ident.js";
 import { type Klartext, klartextOf, satzOf, vorschlagOf } from "./klartext.js";
@@ -134,6 +135,8 @@ export interface ServiloOptions {
     /** Tokens one chat turn may use at most (Kostengrenze); default 60 000. */
     limo?: number;
   };
+  /** Spec 033 S4: how the research agent reaches public pages; a test passes its own. */
+  esploro?: { fetch?: (url: string, init?: RequestInit) => Promise<Response> };
 }
 
 export interface ServiloIo {
@@ -382,6 +385,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       expert: expertOf(draft?.agordo ?? { name: "", leitfarbe: "#000000" }),
       regler,
       ikonoGewichte,
+      ...(name === undefined ? {} : { averto: avertoOf(fremdaOf(name)) }),
       ...extra,
     };
     if (name !== undefined && draft !== undefined && marko !== undefined) {
@@ -428,7 +432,12 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       ...(options.npm === undefined ? {} : { npm: options.npm }),
     });
     // Constitution v2.5, Art. VI: the notice before the export, with the export in the Kroniko.
-    kroniko(name, { ago: "averto", fonto: "sistemo", teksto: AVERTO_EKSPORTO, detaloj: { celoj } });
+    kroniko(name, {
+      ago: "averto",
+      fonto: "sistemo",
+      teksto: avertoOf(fremdaOf(name)),
+      detaloj: { celoj },
+    });
     draft.eksporto = {
       sentences: result.ok ? result.sentences : [],
       issues: result.ok
@@ -1080,7 +1089,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       return;
     }
     const asistantoApi =
-      /^\/api\/marko\/([a-z0-9-]+)\/(stato|asistanto|faceto|fremda|konfirmo|materialo|kreilo)$/.exec(
+      /^\/api\/marko\/([a-z0-9-]+)\/(stato|asistanto|faceto|fremda|konfirmo|materialo|kreilo|esplori)$/.exec(
         path,
       );
     if (asistantoApi !== null) {
@@ -1231,6 +1240,96 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         }
         kroniko(name, { ago, fonto: "regilo", faceto });
         sendJson(response, { rev: draft.rev, stato: statoOf(name, draft) });
+        return;
+      }
+      if (action === "esplori") {
+        // Spec 033 S4 (Weg C): a brand only named – the confirmation first (Amendment v2.5), then the
+        // research agent; proposals with the URL as provenance; the result stays local.
+        if (body.rajtoj !== true) {
+          sendJson(
+            response,
+            {
+              satz: `Bestätigung zuerst: Eine Marke, die auf einer bestehenden aufbaut, recherchiert der Assistent erst, wenn du bestätigst: ${KONFIRMO_TEKSTO}`,
+            },
+            409,
+          );
+          return;
+        }
+        const nomo = typeof body.nomo === "string" ? body.nomo.trim() : "";
+        const url =
+          typeof body.url === "string" && body.url.trim() !== "" ? body.url.trim() : undefined;
+        const provider = options.ki?.provider;
+        if (nomo === "") {
+          sendJson(response, { satz: "Nenne die Marke, auf der deine aufbaut." }, 422);
+          return;
+        }
+        if (provider === undefined && url === undefined) {
+          sendJson(
+            response,
+            { satz: `Ohne Sprachmodell braucht die Recherche eine Adresse der Marke. ${kiSatz()}` },
+            503,
+          );
+          return;
+        }
+        kroniko(name, {
+          ago: "fremda",
+          fonto: "regilo",
+          detaloj: { kiel: "nennung", nomo, ...(url === undefined ? {} : { url }) },
+        });
+        kroniko(name, {
+          ago: "konfirmo",
+          fonto: "regilo",
+          teksto: KONFIRMO_TEKSTO,
+          detaloj: { nennung: nomo },
+        });
+        try {
+          const result = await esplori({
+            nomo,
+            ...(url === undefined ? {} : { url }),
+            ...(provider === undefined ? {} : { provider }),
+            ...(options.ki?.fetch === undefined ? {} : { fetch: options.ki.fetch }),
+            ...(options.esploro?.fetch === undefined ? {} : { pageFetch: options.esploro.fetch }),
+            ...(options.ki?.sleep === undefined ? {} : { sleep: options.ki.sleep }),
+            budget: new Budget(options.ki?.limo ?? 60_000),
+            bases,
+            log: (line) => io.stderr(`${redact(line)}\n`),
+          });
+          writeProponoj(options.workdir, name, result.proponoj);
+          for (const propono of result.proponoj) {
+            kroniko(name, {
+              ago: "propono",
+              fonto: "agento",
+              faceto: propono.faceto,
+              teksto: propono.satz,
+              detaloj: { agordo: propono.agordo, herkunft: propono.herkunft, nennung: nomo },
+            });
+          }
+          kroniko(name, {
+            ago: "babilo",
+            fonto: "agento",
+            teksto: `Recherche zu „${nomo}“`,
+            ...(provider === undefined ? {} : { modelo: provider.toString() }),
+            kosto: result.kosto,
+            detaloj: {
+              antwort: result.antwort,
+              seitoj: result.seitoj,
+              abgelehnt: result.abgelehnt,
+            },
+          });
+          sendJson(response, {
+            proponoj: result.proponoj,
+            seitoj: result.seitoj,
+            abgelehnt: result.abgelehnt,
+            antwort: result.antwort,
+            kosto: result.kosto,
+          });
+        } catch (error) {
+          sendJson(
+            response,
+            { satz: redact(error instanceof Error ? error.message : String(error)) },
+            502,
+          );
+        }
         return;
       }
       if (action === "kreilo") {
@@ -1702,6 +1801,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         response,
         studioScreen({
           page,
+          averto: avertoOf(fremdaOf(name)),
           marko: {
             name,
             agordo: draft.agordo,
