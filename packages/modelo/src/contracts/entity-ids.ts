@@ -26,6 +26,8 @@ export const ENTITY_ID_PREFIXES = {
   // Spec 030: a task of the north-star catalogue and one of its acceptance criteria.
   tasko: "tsk",
   kriterio: "kri",
+  // Spec 033 S1: one visual aspect of the brand model (data/facetoj.json).
+  faceto: "fac",
 } as const satisfies Record<EntityType, string>;
 
 export type IdPrefix = (typeof ENTITY_ID_PREFIXES)[EntityType];
@@ -48,6 +50,7 @@ export const ENTITY_TYPES = [
   "ikono",
   "tasko",
   "kriterio",
+  "faceto",
 ] as const satisfies readonly EntityType[];
 
 /**

@@ -19,15 +19,33 @@ import {
 } from "@fundamento/agordilo";
 import {
   buildModelo,
+  defaultModeloSource,
   eroKontrastParojOf,
   kontrastSojlojOf,
   type Modelo,
   readDtcgColor,
+  readFacetoj,
   reguloIn,
   resolveCombination,
   type ValidationIssue,
   WCAG2_METRIC,
 } from "@fundamento/modelo";
+import { AVERTO_EKSPORTO, KONFIRMO_TEKSTO } from "./asistanto/averto.js";
+import { babili } from "./asistanto/babilo.js";
+import { asistantoScreen } from "./asistanto/ekrano.js";
+import { Laborejo } from "./asistanto/iloj.js";
+import { Budget, CostLimitReached, type Fetch, type Provider } from "./asistanto/ki.js";
+import {
+  appendKroniko,
+  type KronikoEro,
+  type KronikoInput,
+  readKroniko,
+} from "./asistanto/kroniko.js";
+import {
+  facetojOfAgordoDiff,
+  type Vollstaendigkeit,
+  vollstaendigkeitOf,
+} from "./asistanto/stato.js";
 import { buildOf, expertHinweis, standOf } from "./eksperto.js";
 import { EKSPORTO_CELOJ, type EksportoCelo, exportMarko } from "./eksporto.js";
 import type { Settings } from "./env.js";
@@ -92,6 +110,19 @@ export interface ServiloOptions {
   npm?: NpmDeps;
   /** The commit the Metiejo runs on (Nachlese 10 N-5); default: the checkout's, unknown outside one. */
   stand?: string;
+  /**
+   * The language model of the Asistanto (Spec 033 S1): the provider of the .env with its key, held
+   * on this server only; absent without FM_KI_ANBIETER, FM_KI_MODELL and the key, then `satz` says
+   * what is missing. `fetch` and `sleep` for tests.
+   */
+  ki?: {
+    provider?: Provider;
+    satz?: string;
+    fetch?: Fetch;
+    sleep?: (ms: number) => Promise<void>;
+    /** Tokens one chat turn may use at most (Kostengrenze); default 60 000. */
+    limo?: number;
+  };
 }
 
 export interface ServiloIo {
@@ -251,6 +282,15 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
   const privata = privataState(options.settings);
   const ikonoGewichte = ["regular", ...Object.keys(bases.structure.ikonoGewichte?.glyphs ?? {})];
   const regler = reglerOf(bases.gestalt);
+  // Spec 033 S1: the brand model, the chat of each brand and its tokens since the start.
+  const facetojFile = readFacetoj(defaultModeloSource().dataDir);
+  if (facetojFile === undefined) throw new Error("data/facetoj.json fehlt im Modelo.");
+  const facetoj = facetojFile;
+  const babiloj = new Map<string, { role: "user" | "assistant"; content: string }[]>();
+  const sumoj = new Map<string, { enigo: number; eligo: number; ms: number }>();
+  const redact = (text: string): string => options.ki?.provider?.redact(text) ?? text;
+  const kroniko = (name: string, entry: KronikoInput): KronikoEro =>
+    appendKroniko(options.workdir, name, entry, redact);
 
   const draftOf = (name: string): Draft | undefined => {
     const held = drafts.get(name);
@@ -262,10 +302,25 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     return draft;
   };
 
-  const setDraft = (name: string, draft: Draft, agordo: Agordo): void => {
+  /**
+   * Every change of a draft goes through here (Spec 033 S1): a new rev, the draft on disk, and one
+   * Kroniko entry per Faceto it touched, with its source – the sliders of Schnellstart and Studio,
+   * or the chat with its model.
+   */
+  const setDraft = (
+    name: string,
+    draft: Draft,
+    agordo: Agordo,
+    fonto: KronikoEro["fonto"] = "regilo",
+    modelo?: string,
+  ): void => {
+    const before = draft.agordo;
     draft.agordo = agordo;
     draft.rev++;
     writeDraft(options.workdir, name, agordo);
+    for (const faceto of facetojOfAgordoDiff(facetoj, modeloOf(), before, agordo)) {
+      kroniko(name, { ago: "sxangxo", fonto, faceto, ...(modelo === undefined ? {} : { modelo }) });
+    }
   };
 
   const expertOf = (agordo: Agordo): ScreenInput["expert"] => {
@@ -344,6 +399,8 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       fonts,
       ...(options.npm === undefined ? {} : { npm: options.npm }),
     });
+    // Constitution v2.5, Art. VI: the notice before the export, with the export in the Kroniko.
+    kroniko(name, { ago: "averto", fonto: "sistemo", teksto: AVERTO_EKSPORTO, detaloj: { celoj } });
     draft.eksporto = {
       sentences: result.ok ? result.sentences : [],
       issues: result.ok
@@ -371,6 +428,55 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     structureModelo ??= buildModelo(bases.structure.files).modelo;
     return structureModelo;
   };
+
+  // Spec 033 S1: the state of the brand model of a draft – the Kroniko, and the open problems of the
+  // check (a fixed rule, or an adjustable one without its Jugxo).
+  const statoOf = (name: string, draft: Draft): Vollstaendigkeit =>
+    vollstaendigkeitOf({
+      facetoj,
+      modelo: modeloOf(),
+      agordo: draft.agordo,
+      kroniko: readKroniko(options.workdir, name),
+      probleme: pruefungOf(draft).raporto.violations.filter(
+        (violation) => violation.fixed || violation.jugxo === undefined,
+      ),
+    });
+
+  /** The foreign brand the brand builds on, and whether its confirmation came after (Art. VI, 1). */
+  const fremdaOf = (
+    name: string,
+  ): { kiel: string; nomo?: string; konfirmita: boolean } | undefined => {
+    let fremda: { kiel: string; nomo?: string; konfirmita: boolean } | undefined;
+    for (const entry of readKroniko(options.workdir, name)) {
+      if (entry.ago === "fremda") {
+        const detaloj = (entry.detaloj ?? {}) as { kiel?: unknown; nomo?: unknown };
+        const kiel = typeof detaloj.kiel === "string" ? detaloj.kiel : "nennung";
+        const nomo = typeof detaloj.nomo === "string" ? detaloj.nomo : undefined;
+        fremda = { kiel, ...(nomo === undefined ? {} : { nomo }), konfirmita: false };
+      }
+      if (entry.ago === "konfirmo" && fremda !== undefined) fremda.konfirmita = true;
+    }
+    return fremda;
+  };
+
+  /** The tools of the Asistanto on one draft; a change goes through setDraft with the chat as source. */
+  const laborejoOf = (name: string, draft: Draft, modelo: string): Laborejo =>
+    new Laborejo({
+      bases,
+      agordo: () => draft.agordo,
+      apliki: (next) => setDraft(name, draft, next, "babilo", modelo),
+      probleme: () =>
+        pruefungOf(draft).raporto.violations.filter(
+          (violation) => violation.fixed || violation.jugxo === undefined,
+        ),
+      kroniko: () => readKroniko(options.workdir, name),
+      kontrolita: true,
+      pruefung: () => klartextOfDraft(draft),
+    });
+
+  const kiSatz = (): string =>
+    options.ki?.satz ??
+    "Kein Sprachmodell eingerichtet: Setze FM_KI_ANBIETER, FM_KI_MODELL und den Schlüssel des Anbieters in der .env des Checkouts.";
 
   /** A sentence of a refusal in German: the rule by its German name, else its translated statement. */
   const satzDe = (violation: { rule: string; subject: string; combination?: string }): string => {
@@ -876,7 +982,227 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         return;
       }
       drafts.set(name, { agordo: created.marko.agordo, rev: 1 });
+      kroniko(name, { ago: "kreo", fonto: "sistemo", detaloj: { basis } });
       redirect(response, `/marko/${encodeURIComponent(name)}/farbe`);
+      return;
+    }
+
+    // Spec 033 S1: the Asistanto – its screen, the state, the chat, the steps, the confirmation.
+    const asistanto = /^\/asistanto\/([a-z0-9-]+)(?:\/([a-z]+))?$/.exec(path);
+    if (asistanto !== null && method === "GET") {
+      const [, name = "", page] = asistanto;
+      const draft = draftOf(name);
+      if (draft === undefined) {
+        notFound(response);
+        return;
+      }
+      const stato = statoOf(name, draft);
+      const current =
+        stato.facetoj.find((entry) => entry.name === page) ??
+        (page === undefined ? undefined : null);
+      if (current === null) {
+        notFound(response);
+        return;
+      }
+      if (current === undefined) {
+        const next =
+          stato.facetoj.find((entry) => entry.stato !== "freigegeben") ?? stato.facetoj[0];
+        redirect(response, `/asistanto/${encodeURIComponent(name)}/${next?.name ?? ""}`);
+        return;
+      }
+      const faceto = facetoj.facetoj.find((entry) => entry.name === current.name);
+      const fremda = fremdaOf(name);
+      const provider = options.ki?.provider;
+      sendHtml(
+        response,
+        asistantoScreen({
+          marko: { name, label: draft.agordo.etikedoj?.marko ?? name, rev: draft.rev },
+          faceto: { ...current, kialo: faceto?.kialo ?? "" },
+          vollstaendigkeit: stato,
+          historio: babiloj.get(name) ?? [],
+          ki:
+            provider === undefined
+              ? { pret: false, satz: kiSatz() }
+              : { pret: true, modelo: provider.toString() },
+          ...(fremda === undefined ? {} : { fremda }),
+          sumo: sumoj.get(name) ?? { enigo: 0, eligo: 0, ms: 0 },
+        }),
+      );
+      return;
+    }
+    const asistantoApi =
+      /^\/api\/marko\/([a-z0-9-]+)\/(stato|asistanto|faceto|fremda|konfirmo)$/.exec(path);
+    if (asistantoApi !== null) {
+      const [, name = "", action = ""] = asistantoApi;
+      const draft = draftOf(name);
+      if (draft === undefined) {
+        sendJson(response, { satz: "Diese Marke gibt es nicht." }, 404);
+        return;
+      }
+      if (action === "stato" && method === "GET") {
+        const stato = statoOf(name, draft);
+        const fremda = fremdaOf(name);
+        sendJson(response, {
+          rev: draft.rev,
+          prozent: stato.prozent,
+          definiert: stato.definiert,
+          facetoj: stato.facetoj,
+          nochNicht: stato.nochNicht,
+          ...(fremda === undefined ? {} : { fremda }),
+        });
+        return;
+      }
+      if (method !== "POST") {
+        notFound(response);
+        return;
+      }
+      let body: Record<string, unknown> = {};
+      try {
+        const parsed: unknown = JSON.parse((await readBody(request)) || "{}");
+        if (isRecord(parsed)) body = parsed;
+      } catch {
+        sendJson(response, { satz: "Die Anfrage ist kein JSON." }, 400);
+        return;
+      }
+      if (action === "asistanto") {
+        const provider = options.ki?.provider;
+        if (provider === undefined) {
+          sendJson(response, { satz: kiSatz() }, 503);
+          return;
+        }
+        const fremda = fremdaOf(name);
+        if (fremda !== undefined && !fremda.konfirmita) {
+          sendJson(
+            response,
+            {
+              satz: "Bitte zuerst die Bestätigung: Die Marke baut auf einer bestehenden Marke auf (Art. VI).",
+            },
+            409,
+          );
+          return;
+        }
+        const teksto = typeof body.teksto === "string" ? body.teksto.trim() : "";
+        if (teksto === "") {
+          sendJson(response, { satz: "Schreib, was du ändern möchtest." }, 422);
+          return;
+        }
+        const faceto = typeof body.faceto === "string" ? body.faceto : undefined;
+        const historio = babiloj.get(name) ?? [];
+        try {
+          const result = await babili({
+            provider,
+            laborejo: laborejoOf(name, draft, provider.toString()),
+            historio: historio.slice(-12),
+            teksto,
+            ...(faceto === undefined ? {} : { faceto }),
+            budget: new Budget(options.ki?.limo ?? 60_000),
+            ...(options.ki?.fetch === undefined ? {} : { fetch: options.ki.fetch }),
+            ...(options.ki?.sleep === undefined ? {} : { sleep: options.ki.sleep }),
+            log: (line) => io.stderr(`${redact(line)}\n`),
+          });
+          babiloj.set(name, [
+            ...historio,
+            { role: "user", content: teksto },
+            { role: "assistant", content: result.antwort },
+          ]);
+          const sumo = sumoj.get(name) ?? { enigo: 0, eligo: 0, ms: 0 };
+          sumoj.set(name, {
+            enigo: sumo.enigo + result.kosto.enigo,
+            eligo: sumo.eligo + result.kosto.eligo,
+            ms: sumo.ms + result.kosto.ms,
+          });
+          kroniko(name, {
+            ago: "babilo",
+            fonto: "babilo",
+            ...(faceto === undefined ? {} : { faceto }),
+            teksto,
+            modelo: provider.toString(),
+            kosto: result.kosto,
+            detaloj: { antwort: result.antwort, iloj: result.iloj, atendoj: result.atendoj },
+          });
+          sendJson(response, {
+            antwort: result.antwort,
+            rev: draft.rev,
+            kosto: result.kosto,
+            atendoj: result.atendoj,
+            sxangxoj: result.sxangxoj,
+            stato: statoOf(name, draft),
+          });
+        } catch (error) {
+          const satz =
+            error instanceof CostLimitReached
+              ? `Die Kostengrenze dieser Runde ist erreicht (${error.limit} Tokens). Formuliere den Wunsch kürzer oder in mehreren Schritten.`
+              : redact(error instanceof Error ? error.message : String(error));
+          sendJson(response, { satz }, 502);
+        }
+        return;
+      }
+      if (action === "faceto") {
+        const faceto = typeof body.faceto === "string" ? body.faceto : "";
+        const ago = body.ago;
+        const stand = statoOf(name, draft).facetoj.find((entry) => entry.name === faceto);
+        if (
+          stand === undefined ||
+          (ago !== "akcepto" && ago !== "liberigo" && ago !== "remalfermo")
+        ) {
+          sendJson(response, { satz: "Unbekannter Schritt oder unbekannte Aktion." }, 422);
+          return;
+        }
+        if (ago === "liberigo" && stand.stato === "offen") {
+          sendJson(
+            response,
+            { satz: "Übernimm den Vorschlag oder passe ihn an, dann kannst du freigeben." },
+            422,
+          );
+          return;
+        }
+        if (ago === "liberigo" && !stand.gruen) {
+          sendJson(
+            response,
+            {
+              satz: `Die Prüfung meldet ${stand.probleme} offene Probleme in diesem Schritt. Löse sie oder halte die Abweichung als Jugxo fest, dann kannst du freigeben.`,
+            },
+            422,
+          );
+          return;
+        }
+        if (ago === "remalfermo" && stand.stato !== "freigegeben") {
+          sendJson(response, { satz: "Der Schritt ist nicht freigegeben." }, 422);
+          return;
+        }
+        kroniko(name, { ago, fonto: "regilo", faceto });
+        sendJson(response, { rev: draft.rev, stato: statoOf(name, draft) });
+        return;
+      }
+      if (action === "fremda") {
+        const kiel =
+          body.kiel === "upload" || body.kiel === "link" || body.kiel === "agento"
+            ? body.kiel
+            : "nennung";
+        const nomo =
+          typeof body.nomo === "string" && body.nomo.trim() !== "" ? body.nomo.trim() : undefined;
+        kroniko(name, {
+          ago: "fremda",
+          fonto: "regilo",
+          detaloj: { kiel, ...(nomo === undefined ? {} : { nomo }) },
+        });
+        sendJson(response, { bestaetigung: "noetig", satz: KONFIRMO_TEKSTO });
+        return;
+      }
+      if (action === "konfirmo") {
+        if (body.rajtoj !== true) {
+          sendJson(
+            response,
+            { satz: "Bestätige, dass du die Rechte hast oder die Verantwortung übernimmst." },
+            422,
+          );
+          return;
+        }
+        kroniko(name, { ago: "konfirmo", fonto: "regilo", teksto: KONFIRMO_TEKSTO });
+        sendJson(response, { ok: true });
+        return;
+      }
+      notFound(response);
       return;
     }
 

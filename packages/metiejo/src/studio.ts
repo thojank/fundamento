@@ -26,6 +26,7 @@ import {
   WCAG2_METRIC,
 } from "@fundamento/modelo";
 import { nomoSpan, tekstoSpan } from "@fundamento/projekcioj";
+import { AVERTO_EKSPORTO } from "./asistanto/averto.js";
 import { escapeHtml, jsonIsland, screenDocument } from "./html.js";
 import { markoLabel } from "./ident.js";
 import { dimensioNomoj } from "./lingvo.js";
@@ -998,13 +999,14 @@ export function studioScreen(input: StudioInput): string {
 <span slot="principal">Marke ${escapeHtml(label)} · Prüfung: <fm-insigno intent="${input.probleme === 0 ? "success" : "warning"}" id="mt-probleme">${input.probleme} ${input.probleme === 1 ? "Problem" : "Probleme"}</fm-insigno> <fm-butono emphasis="high" size="small" data-mt-post="/studio/${encodeURIComponent(name)}/speichern">Speichern</fm-butono></span>
 ${input.message === undefined ? "" : `<fm-avizo slot="notices" intent="success">${escapeHtml(input.message)}</fm-avizo>`}
 <fm-avizo slot="notices" intent="warning" id="mt-studio-meldung" hidden></fm-avizo>
+<fm-avizo slot="notices" intent="info" data-mt-averto>${escapeHtml(AVERTO_EKSPORTO)}</fm-avizo>
 ${expertHinweisHtml(input.expert)}
 <fm-pagxo>
 <fm-titolo slot="title" level="1" focusable>${tekstoSpan(page.key, escapeHtml(page.title))}</fm-titolo>
 <fm-teksto slot="subtitle">${escapeHtml(page.hint)}</fm-teksto>
 ${expertLink}
 <section class="mt-studio">
-<div><fm-navigado label="Studio" page="${page.key}" orientation="vertical">${nav}<a href="/marko/${encodeURIComponent(name)}/farbe" data-page="schnellstart">Schnellstart</a></fm-navigado>${komponentoNav(name, input.komponentoj ?? [], input.kombination)}</div>
+<div><fm-navigado label="Studio" page="${page.key}" orientation="vertical">${nav}<a href="/marko/${encodeURIComponent(name)}/farbe" data-page="schnellstart">Schnellstart</a><a href="/asistanto/${encodeURIComponent(name)}" data-page="asistanto">Assistent</a></fm-navigado>${komponentoNav(name, input.komponentoj ?? [], input.kombination)}</div>
 <div class="mt-studio-vorschau"><div class="mt-zeile">${toggles}</div><iframe data-mt-vorschau data-mt-src="${previewSrc}" title="Vorschau der Marke"></iframe></div>
 <fm-formularo label="${escapeHtml(page.title)}" data-action="${pageUrl(name, page.key, input.kombination)}">
 ${groups}

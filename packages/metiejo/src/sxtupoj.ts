@@ -14,6 +14,7 @@ import {
   reglerValue,
 } from "@fundamento/agordilo";
 import { oklchColor, srgbComponentsOf } from "@fundamento/modelo";
+import { AVERTO_EKSPORTO } from "./asistanto/averto.js";
 import { escapeHtml, jsonIsland, screenDocument } from "./html.js";
 import { markoLabel } from "./ident.js";
 import type { Klartext } from "./klartext.js";
@@ -394,6 +395,12 @@ function problems(input: ScreenInput): string {
         `<fm-avizo slot="problems" intent="${input.privata.result.startsWith("Kein Push") ? "warning" : "success"}">${escapeHtml(input.privata.result)}</fm-avizo>`,
       );
     }
+  }
+  if (input.sxtupo === "fertig") {
+    // Constitution v2.5, Art. VI, 2: before every export a visible notice of possible confusability.
+    parts.push(
+      `<fm-avizo slot="problems" intent="info" data-mt-averto>${escapeHtml(AVERTO_EKSPORTO)}</fm-avizo>`,
+    );
   }
   if (input.sxtupo === "fertig" && input.eksporto !== undefined) {
     for (const sentence of input.eksporto.sentences) {

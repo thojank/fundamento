@@ -3,6 +3,13 @@
 // preview and the report in plain words, the export and the local server. The modules under node/
 // are the command lines (check:tiparoj, tiparoj:import).
 
+export * from "./asistanto/averto.js";
+export * from "./asistanto/babilo.js";
+export * from "./asistanto/ekrano.js";
+export * from "./asistanto/iloj.js";
+export * from "./asistanto/ki.js";
+export * from "./asistanto/kroniko.js";
+export * from "./asistanto/stato.js";
 export * from "./eksporto.js";
 export * from "./env.js";
 export * from "./html.js";

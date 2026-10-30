@@ -120,6 +120,15 @@ export function collectIdOccurrences(files: ModeloFiles): IdOccurrence[] {
     }
   }
 
+  // Spec 033 S1: every Faceto of the brand model carries a fac_ ID.
+  const facetoj = files.data["facetoj.json"];
+  if (facetoj !== undefined) {
+    for (const { entry, index } of rawEntries(facetoj.value, "facetoj")) {
+      const pointer = `/facetoj/${index}`;
+      add("faceto", facetoj.file, pointer, entry, pointer);
+    }
+  }
+
   // Spec 003: each Ero file holds an Ero and its Skemo, two entities with their own IDs.
   for (const document of files.eroj) {
     const value = isJsonObject(document.value) ? document.value : undefined;

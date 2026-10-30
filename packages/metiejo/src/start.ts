@@ -5,7 +5,7 @@
 import { execFile } from "node:child_process";
 import { homedir } from "node:os";
 import { resolve } from "node:path";
-import { markenDirOf, readSettings } from "./env.js";
+import { markenDirOf, readKi, readSettings } from "./env.js";
 import { defaultDeps } from "./privata.js";
 import { CHECKOUT_ROOT } from "./root.js";
 import { startServilo } from "./servilo.js";
@@ -109,6 +109,7 @@ export async function runMetiejo(
         root,
         settings,
         npm: defaultNpmDeps(),
+        ki: readKi(root),
         ...(settings.tiparojRepo === undefined ? {} : { deps: defaultDeps(settings.tiparojRepo) }),
       },
       io,

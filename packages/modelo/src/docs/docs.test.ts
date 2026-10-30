@@ -683,8 +683,10 @@ describe("Spec 004 documentation (T001, Art. V Benchmark-Aspekto)", () => {
   // 8915fa6 mit v2.2 und den offenen PR #100 (O-1), der keine Nummer beansprucht.
   // Seit Spec 029 ① (Amendment v2.4, freigegeben am 2026-10-23, 21:56) 2.4: bestimmt gegen main
   // d29a5206 mit v2.3; die Spec nennt die Nummer.
-  it("the Constitution header says version 2.4 and the history names v2.3 with the Ero-Tokens", () => {
-    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.4 · /);
+  // Seit Spec 033 S1 (Amendment v2.5, freigegeben am 2026-10-24, 13:41) 2.5: bestimmt gegen main
+  // 05f122dc mit v2.4 und ohne offenen PR; die Spec nennt die Nummer.
+  it("the Constitution header says version 2.5 and the history names v2.3 with the Ero-Tokens", () => {
+    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.5 · /);
     expect(constitution).toContain("v2.3 (Spec 024");
     expect(constitution).toContain("Terminologie **Ero-Tokeno**");
   });
@@ -3379,7 +3381,10 @@ describe("Spec 029 ① documentation (specs/029-fonto-astryx)", () => {
 
   it("the Constitution is v2.4 with the Fonto in Art. V, VII, the terminology and the history", () => {
     const constitution = read(".specify/memory/constitution.md");
-    expect(constitution).toContain("Version 2.4 · 2026-10-23");
+    // Since Spec 033 S1 the header says 2.5; v2.4 stands in the history.
+    expect(constitution).toContain(
+      "v2.4 (Spec 029, freigegeben vom Maintainer am 2026-10-23, 21:56)",
+    );
     expect(constitution).toContain("**Fonto (offene Quelle).**");
     expect(constitution).toContain("| **Fonto** |");
     expect(constitution).toContain("die Fonto-ID und den Quellpfad (Datei, Schlüssel)");
@@ -3907,6 +3912,88 @@ describe("Nachlese 12 documentation (specs/034-nachlese-12)", () => {
     }
     expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
     expect(read("docs/vojmapo.md")).toContain("Nachlese 12");
+  });
+});
+
+// Spec 033 S1 (Markenassistent, 2026-10-29): specs/033-markenassistent carries the spec unchanged;
+// Constitution Amendment v2.5 (freigegeben vom Maintainer am 24.10., 13:41): Art. VI „Plattform und
+// Herausgeber“ word for word, the terms of the brand's record and of the assistant, the history;
+// the plan with the decisions, the measuring guide with full paths, cd and file:// links and the
+// tokens, cost and duration of the trial runs; tasks with the red commit.
+describe("Spec 033 documentation (specs/033-markenassistent)", () => {
+  it("the spec is copied unchanged", () => {
+    const spec = read("specs/033-markenassistent/spec.md");
+    expect(createHash("sha256").update(spec).digest("hex")).toBe(
+      "b940b1fa224ece614c5302d392565c667b51180235356ac684f7edec1379f644",
+    );
+  });
+
+  it("the Constitution is v2.5 with „Plattform und Herausgeber“ in Art. VI, the new terms and the history", () => {
+    const constitution = read(".specify/memory/constitution.md");
+    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.5 · 2026-10-24/);
+    const article = constitution.slice(
+      constitution.indexOf("## Artikel VI"),
+      constitution.indexOf("## Artikel VII"),
+    );
+    for (const sentence of [
+      "**Plattform und Herausgeber.** Für Marken, die ein Nutzer mit Fundamentos Werkzeugen anlegt, ist Fundamento Plattform. Die Verantwortung für Marken- und Urheberrechte trägt der Nutzer. Das Werkzeug blockiert nicht. Es tut dreierlei:",
+      "1. Es holt eine **Bestätigung** ein, sobald eine Marke auf einer fremden Marke aufbaut (Upload, Link oder Nennung): Der Nutzer hat die Rechte oder übernimmt die Verantwortung.",
+      "2. Es zeigt **vor jedem Export und jeder Veröffentlichung** einen sichtbaren Hinweis auf mögliche Verwechselbarkeit.",
+      "3. Es hält beides im **Protokoll der Marke** fest, mit Zeitpunkt.",
+      "Für alles, was Fundamento selbst herausgibt (Kern-Repo, Vitrino, Beispielmarken, Pakete, Doku), ist Fundamento Herausgeber. Dafür gelten Art. V und „Kein Trittbrett“ unverändert. Testnachbauten fremder Marken bleiben lokal und werden nie veröffentlicht.",
+      "Wird Fundamento als Dienst für andere betrieben, gehören Nutzungsbedingungen mit dieser Zusicherung und ein Meldeweg für Beschwerden dazu. Das regelt die Spec zur Delegation.",
+    ]) {
+      expect(article, sentence.slice(0, 40)).toContain(sentence);
+    }
+    // After „Kein Trittbrett“, before „Lücken werden geführt“.
+    expect(article.indexOf("**Kein Trittbrett.**")).toBeLessThan(
+      article.indexOf("**Plattform und Herausgeber.**"),
+    );
+    expect(article.indexOf("**Plattform und Herausgeber.**")).toBeLessThan(
+      article.indexOf("**Lücken werden geführt (Manko).**"),
+    );
+    expect(constitution).toContain("| **Kroniko** |");
+    expect(constitution).toContain("| **Asistanto** |");
+    expect(constitution).toContain("v2.5 (Spec 033");
+    const ontologio = JSON.parse(read("packages/modelo/data/ontologio.json")) as {
+      concepts: { term: string }[];
+    };
+    const terms = ontologio.concepts.map((concept) => concept.term);
+    for (const term of ["Kroniko", "Asistanto", "Faceto"]) expect(terms).toContain(term);
+  });
+
+  it("plan and tasks carry the decisions, the trial runs and the guide", () => {
+    const plan = read("specs/033-markenassistent/plan.md");
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Constitution Amendment v2.5",
+      "### Entwurfsentscheidungen",
+      "### Probeläufe",
+      "### Abweichungen",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### Messanleitung",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const term of [
+      "Kroniko",
+      "Faceto",
+      "Asistanto",
+      "ministral-14b-2512",
+      ":free",
+      "Tokens",
+      "Kosten",
+      "Dauer",
+      "cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds",
+      "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/",
+    ]) {
+      expect(plan, term).toContain(term);
+    }
+    const tasks = read("specs/033-markenassistent/tasks.md");
+    for (const text of [plan, tasks]) expect(text).not.toContain("ciferecigo");
+    expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Spec 033");
   });
 });
 

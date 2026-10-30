@@ -541,6 +541,74 @@
       ]
     },
     {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Kroniko",
+      "term": "Kroniko",
+      "inScheme": "terminologio",
+      "prefLabel": {
+        "eo": "Kroniko",
+        "en": "brand record",
+        "de": "Protokoll der Marke"
+      },
+      "altLabel": {
+        "en": [
+          "brand log",
+          "record of a brand",
+          "brand history"
+        ],
+        "de": [
+          "Markenprotokoll",
+          "Protokoll",
+          "Verlauf der Marke"
+        ]
+      },
+      "definition": {
+        "en": "The record of a brand (Constitution v2.5, Art. VI): every proposal, change, release, confirmation and notice with time, source, model and cost, one machine-readable entry per line in marken/<name>/kroniko.jsonl, built so that it can go on as a table with person and role.",
+        "de": "Das Protokoll einer Marke (Constitution v2.5, Art. VI): jeder Vorschlag, jede Änderung, jede Freigabe, jede Bestätigung und jeder Hinweis mit Zeit, Quelle, Modell und Kosten, je Zeile ein maschinenlesbarer Eintrag in marken/<name>/kroniko.jsonl, so gebaut, dass es als Tabelle mit Person und Rolle weitergeführt werden kann."
+      },
+      "broader": [
+        "#Aspekto"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Agordilo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Asistanto",
+      "term": "Asistanto",
+      "inScheme": "terminologio",
+      "prefLabel": {
+        "eo": "Asistanto",
+        "en": "brand assistant",
+        "de": "Markenassistent"
+      },
+      "altLabel": {
+        "en": [
+          "assistant",
+          "brand wizard"
+        ],
+        "de": [
+          "Assistent",
+          "Markenassistent"
+        ]
+      },
+      "definition": {
+        "en": "The brand assistant (Spec 033): goes through the Facetoj of a brand step by step, proposes per Faceto, changes the brand only through the tools of the Agordilo and waits for the person's release; used by chat or speech beside the Studio.",
+        "de": "Der Markenassistent (Spec 033): geht die Facetoj einer Marke Schritt für Schritt durch, schlägt je Faceto vor, ändert die Marke nur über die Werkzeuge des Agordilo und wartet auf die Freigabe der Person; bedient per Chat oder Sprache neben dem Studio."
+      },
+      "broader": [
+        "#Agordilo"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Agordilo"
+        }
+      ]
+    },
+    {
       "uri": "https://fundamento.ciferecigo.com/ontologio#Sxablono",
       "term": "Sxablono",
       "inScheme": "terminologio",
@@ -1095,6 +1163,40 @@
         {
           "predicate": "references",
           "target": "#Regulo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Faceto",
+      "term": "Faceto",
+      "inScheme": "modelo",
+      "notation": "faceto",
+      "prefLabel": {
+        "eo": "Faceto",
+        "en": "facet",
+        "de": "Faceto"
+      },
+      "altLabel": {
+        "en": [
+          "visual aspect",
+          "aspect of a brand"
+        ],
+        "de": [
+          "visueller Aspekt",
+          "Aspekt der Marke"
+        ]
+      },
+      "definition": {
+        "en": "One visual aspect of a brand in the brand model, scope 1 (data/facetoj.json, Spec 033): lead colour, neutrals, status colours, modes, type, shape, space, elevation, motion, focus, element sizes or icons, with its weight and Kialo and the tokens it owns; open, defined or released in the assistant. Each Faceto has a fac_ ID.",
+        "de": "Ein visueller Aspekt einer Marke im Markenmodell, Umfang 1 (data/facetoj.json, Spec 033): Leitfarbe, Neutraltöne, Statusfarben, Modi, Schrift, Form, Raum, Elevation, Bewegung, Fokus, Elementgrößen oder Icons, mit Gewicht und Kialo und den Tokens, die zu ihm gehören; im Assistenten offen, definiert oder freigegeben. Jede Faceto hat eine fac_-ID."
+      },
+      "broader": [
+        "#Modelo"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Tavolo"
         }
       ]
     },

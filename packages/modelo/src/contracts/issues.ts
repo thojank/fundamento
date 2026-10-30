@@ -255,6 +255,9 @@ export const RULE_IDS = [
   "nordstelo-sxablono-unknown",
   "nordstelo-ero-unknown",
   "nordstelo-regulo-unknown",
+  // Spec 033 S1: every token of the core belongs to exactly one Faceto of the brand model.
+  "faceto-token-unassigned",
+  "faceto-token-twice",
   // Projekcio lints (Spec 003, D-17)
   "css-physical-property",
   "ero-hardcoded-string",

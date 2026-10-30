@@ -34,6 +34,8 @@ export const SCHEMA_DEFS = {
   tradukoj: "Tradukoj",
   tradukojFile: "TradukojFile",
   nordsteloFile: "NordsteloFile",
+  facetojFile: "FacetojFile",
+  kronikoEro: "KronikoEro",
   sxablono: "Sxablono",
   sxablonoFile: "SxablonoFile",
   sxablonoUzoFile: "SxablonoUzoFile",
@@ -71,6 +73,8 @@ export const OPTIONAL_DATA_FILE_SCHEMA_DEFS = {
   "fontoj.json": "FontojFile",
   // Spec 030: the catalogue of tasks of the north-star measure and the weights of its score.
   "nordstelo.json": "NordsteloFile",
+  // Spec 033 S1: the brand model, scope 1 – the visual aspects of a brand with weights and tokens.
+  "facetoj.json": "FacetojFile",
 } as const;
 
 export type OptionalDataFileName = keyof typeof OPTIONAL_DATA_FILE_SCHEMA_DEFS;
