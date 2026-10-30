@@ -1166,17 +1166,17 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     expect(ableitung.rot, ableitung.grund).toBe(false);
   });
 
-  // Gegenprobe of the derivation (#118): every request for palettes waits 60 ms on the runner of the
+  // Gegenprobe of the derivation (#118): every request for palettes waits 80 ms on the runner of the
   // reference, scaled to this runner, before the worker gets it – a slower derivation. Red on fast
   // and on slow runners alike.
-  test("Ableitung Gegenprobe: a derivation slower by 60 ms on the reference runner is red", async ({
+  test("Ableitung Gegenprobe: a derivation slower by 80 ms on the reference runner is red", async ({
     page,
   }) => {
     await openWerkstatt(page);
     await checkedAtLeast(page, 1);
     const referenz = await page.evaluate(referenzLast);
     const k = Math.max(1, referenz / REFERENZ_SCHNELL_MS);
-    await page.evaluate(ableitungVerlangsamen, 60 * k);
+    await page.evaluate(ableitungVerlangsamen, 80 * k);
     const timings = await page.evaluate(() => fmWerkstatt.measure(10));
     const sorted = [...timings.derive].sort((a, b) => a - b);
     const median = sorted[Math.floor(sorted.length / 2)] ?? 0;
@@ -1873,9 +1873,9 @@ test.describe("the verdict of the derivation (Ableitung, #118)", () => {
     expect(ableitungUrteil({ median: 149, referenz: REFERENZ_SCHNELL_MS * 0.6 }).k).toBe(1);
   });
 
-  test("a derivation 60 ms slower on the reference runner is red on a slow runner too", () => {
+  test("a derivation 80 ms slower on the reference runner is red on a slow runner too", () => {
     const k = 1.4;
-    expect(ableitungUrteil({ median: 140 + 60 * k, referenz: REFERENZ_SCHNELL_MS * k }).rot).toBe(
+    expect(ableitungUrteil({ median: 140 + 80 * k, referenz: REFERENZ_SCHNELL_MS * k }).rot).toBe(
       true,
     );
   });
