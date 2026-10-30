@@ -684,7 +684,7 @@ if (kreilo && marko) {
 // The one draft: when the assistant or the Studio changed it elsewhere, follow.
 if (marko && (asistantoData || (sxtupo && sxtupo.startsWith("studio-")))) {
   setInterval(async () => {
-    if (sending || document.hidden) return;
+    if (sending || studioSendet || document.hidden) return;
     const response = await fetch("/api/marko/" + marko + "/stato").catch(() => undefined);
     if (!response || !response.ok) return;
     const stato = await response.json();
