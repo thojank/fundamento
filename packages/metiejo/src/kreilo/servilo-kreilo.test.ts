@@ -53,7 +53,7 @@ beforeAll(async () => {
     },
     { stderr: () => {} },
   );
-  for (const name of ["pano", "arbo"]) {
+  for (const name of ["pano", "arbo", "fajro"]) {
     await fetch(`${servilo.url}/marko`, {
       method: "POST",
       headers: { "content-type": "application/x-www-form-urlencoded" },
@@ -184,5 +184,32 @@ describe("Weg A: a new brand from the entry questions (Spec 033 S3)", () => {
       (entry) => entry.ago === "sxangxo" && entry.faceto === "gvidkoloro",
     );
     expect(change?.fonto).toBe("babilo");
+  });
+});
+
+// Spec 035, Befund 4.2: the second, clearly different colour of an inspiration image is an open
+// proposal of the step „Leitfarbe und Akzente“ with its origin, and in the Kroniko.
+describe("Weg A: an accent from the inspiration (Spec 035, Befund 4.2)", () => {
+  const image = encodePng(20, 20, (_x, y) =>
+    y < 12 ? [0xe4, 0x57, 0x2e, 255] : y < 17 ? [0x17, 0xb3, 0xa8, 255] : [0xfa, 0xfa, 0xf8, 255],
+  ).toString("base64");
+
+  it("the accent waits as a proposal of the lead colour's step, with image and share, recorded in the Kroniko", async () => {
+    const response = await post("/api/marko/fajro/kreilo", {
+      celo: "Ein Café am Hafen.",
+      karaktero: { "ruhig-lebhaft": 1 },
+      festgelegt: {},
+      inspiro: [{ filename: "inspiration.png", base64: image }],
+      rajtoj: true,
+    });
+    expect(response.status).toBe(200);
+    const html = await (await fetch(`${servilo.url}/asistanto/fajro/gvidkoloro`)).text();
+    expect(html).toContain("data-mt-propono");
+    expect(html).toContain("#17b3a8");
+    expect(html).toContain("inspiration.png, 25,0 % der Fläche");
+    const proposal = readKroniko(workdir, "fajro").findLast(
+      (entry) => entry.ago === "propono" && entry.faceto === "gvidkoloro",
+    );
+    expect(JSON.stringify(proposal?.detaloj)).toContain("#17b3a8");
   });
 });
