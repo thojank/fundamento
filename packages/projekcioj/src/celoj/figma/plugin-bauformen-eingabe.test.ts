@@ -399,11 +399,12 @@ describe("the elektilo is drawn as the field of the kampo with the chevron in it
     const { double } = await drawn();
     const kampo = pageNodes(double).find((child) => child.name === "kampo");
     const control = descendant(kampo?.children[0], "control");
-    // Spec 029 ②b-1b M-2 (A-kampo-4): the room of the status icon before the clear button.
+    // Spec 029 ②b-1b M-2 (A-kampo-4): the room of the status icon in the control; Spec 035 2.1
+    // (Skemo trailing): first at the end, before the spinner.
     expect(control?.children.map((child) => child.name)).toEqual([
       "text",
-      "spinner",
       "status-icon",
+      "spinner",
       "clear",
     ]);
   });

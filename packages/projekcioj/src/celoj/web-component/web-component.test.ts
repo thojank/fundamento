@@ -677,8 +677,8 @@ describe("Web Component Celo for the elektilo (Spec 010 ④)", () => {
       "required-mark",
       "row",
       "control",
-      "status-icon",
       "end",
+      "status-icon",
       "spinner",
       "help",
       "error",
@@ -2253,9 +2253,10 @@ describe("Web Component Celo for the kampo of Spec 025 ① (time, stepper, clear
   it("renders the stepper and the clear button as composed butono with their icons and words", () => {
     const element = files["eroj/src/generated/fm-kampo.ts"] ?? "";
     // Abnahme #122: the end – spinner, then the buttons – lies inside the row, over the input;
-    // Spec 029 ②b-1b M-2 (A-kampo-4): the status icon after the input, in the row.
+    // Spec 029 ②b-1b M-2 (A-kampo-4), Spec 035 2.1 (Skemo trailing): the status icon first in
+    // the end, before the spinner.
     expect(element).toContain(
-      '<div part="row"><input part="control" id="control"><span part="status-icon" aria-hidden="true" hidden><fm-ikono size="small"></fm-ikono></span><span part="end"><span part="spinner" aria-hidden="true" hidden>',
+      '<div part="row"><input part="control" id="control"><span part="end"><span part="status-icon" aria-hidden="true" hidden><fm-ikono size="small"></fm-ikono></span><span part="spinner" aria-hidden="true" hidden>',
     );
     const kampoCss = JSON.parse(
       /export const KAMPO_CSS = (".*");/s.exec(
