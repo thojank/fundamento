@@ -67,10 +67,12 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       ["disabled-dates", "string", false, undefined],
       ["required", "boolean", false, false],
       ["disabled", "boolean", false, false],
+      ["loading", "boolean", false, false],
       ["readonly", "boolean", false, false],
       ["invalid", "boolean", false, false],
       ["expanded", "boolean", false, false],
       ["name", "string", false, undefined],
+      ["clearable", "boolean", false, false],
     ]);
     expect(skemo?.props.find((prop) => prop.name === "mode")?.values).toEqual(["single", "range"]);
     for (const prop of skemo?.props ?? []) {
@@ -88,6 +90,8 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       { name: "label", default: true, text: true },
       { name: "help", text: true },
       { name: "error", text: true },
+      // Spec 029 ②b-1 M-1: the reason for disabled.
+      { name: "disabled-reason", text: true },
     ]);
   });
 
@@ -116,8 +120,11 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       "focus-ring",
       "box",
       "motion",
+      "spinner",
+      "clear",
     ]);
-    expect(skemo?.parts.trigger).toEqual({ size: { fixed: "size.control.medium" } });
+    // Abnahme #122: the calendar inside the field, the target of a pointer (as komuna from the Fonto).
+    expect(skemo?.parts.trigger).toEqual({ size: { fixed: "size.target.min" } });
     expect(skemo?.parts.calendar).toEqual({
       fill: { fixed: "color.background.raised" },
       radius: { fixed: "radius.role.surface" },
@@ -215,8 +222,9 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
     expect(skemo?.a11y).toEqual({
       role: "textbox",
       name: ["slot:label"],
-      description: ["slot:help", "slot:error"],
+      description: ["slot:help", "slot:error", "slot:disabled-reason"],
       states: {
+        loading: ["aria-busy"],
         required: ["aria-required"],
         invalid: ["aria-invalid"],
         disabled: ["aria-disabled"],
@@ -236,6 +244,8 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
         "Escape",
       ],
       texts: {
+        "clear-name": { de: "{label} leeren", en: "Clear {label}" },
+        loading: { de: "lädt", en: "loading" },
         required: { de: "erforderlich", en: "required" },
         "trigger-name": { de: "Kalender öffnen", en: "Open calendar" },
         "prev-name": { de: "Voriger Monat", en: "Previous month" },
@@ -268,6 +278,7 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       [{ "prop:value": "filled" }, { mode: ["single"] }],
       [{ "prop:value-start": "filled" }, { mode: ["range"] }],
       [{ "prop:value-end": "filled" }, { mode: ["range"] }],
+      [{ "slot:disabled-reason": "filled" }, { disabled: ["true"] }],
     ]);
     for (const constraint of skemo?.constraints ?? []) expect(constraint.kialo).toMatch(/because/);
   });

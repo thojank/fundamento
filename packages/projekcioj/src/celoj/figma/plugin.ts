@@ -50,6 +50,12 @@ import {
 
 /** The nodes of one variant the plugin draws, outside in (F11). */
 type PartNode =
+  // Spec 029 ②b-1 M-5: the row of a field's label and its spinner.
+  | "label-row"
+  | "spinner"
+  | "spinner-mark"
+  | "clear"
+  | "clear-glyph-*"
   | "focus-ring"
   | "focus-gap"
   | "control"
@@ -268,6 +274,15 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
   "box.gap": [{ node: "control", fields: ["itemSpacing"] }],
   "box.radius": [{ node: "control", fields: ["cornerRadius"] }],
   "label.color": [{ node: "label", fields: ["fills"], paint: true }],
+  // Spec 029 ②b-1 M-5: the spinner beside a field's label — its box, its arc, the room before it.
+  "spinner.size": [{ node: "spinner", fields: ["width", "height"] }],
+  "spinner.color": [{ node: "spinner-mark", fields: ["strokes"], paint: true }],
+  "spinner.inline-padding": [{ node: "label-row", fields: ["itemSpacing"] }],
+  // Spec 029 ②b-1 M-6: the clear button at the end of a field's control and its glyphs.
+  // Abnahme #122: the glyph as large as the field's icon, the button around it at least its
+  // target (width: the least width and height, square), the glyph in its middle.
+  "clear.size": [{ node: "clear-glyph-*", fields: ["width", "height"] }],
+  "clear.width": [{ node: "clear", fields: ["minWidth", "minHeight"] }],
   // A typography token is a composite; Figma holds its fields as separate variables (F9). Bound
   // to the bare name, the size never arrived — there is no variable of that name. Family and cut
   // are bound too (F30), so the label follows the brand when the mode changes instead of keeping
@@ -936,6 +951,20 @@ const TOGGLE_LAYOUT = {
 };
 
 /**
+ * The label of a field in a row with its spinner (Spec 029 ②b-1 M-5): the text, then the arc of
+ * the loading state beside it, centred on one line; the gap is bound to spinner.inline-padding.
+ */
+const LABEL_ROW_LAYOUT = { ...TOGGLE_LAYOUT };
+
+/**
+ * The width a field set stands at (Abnahme #122): the Fonto lets a field take the width of its
+ * container (width 100 %), so Figma needs a width of its own for the set – 256, the width the
+ * Eroj's browser checks give a field (16 rem); an instance stretches as it is placed. Below it, a
+ * field hugged its words alone (85–132 wide).
+ */
+const FIELD_WIDTH = 256;
+
+/**
  * The column beside the box of a checkbox (Spec 010 ②, D-09): the label, then the error under it,
  * at the start; the box stands at the first line (the field aligns its row at the start), as on
  * the web.
@@ -1313,6 +1342,23 @@ const INDICATOR_LAYOUT: Readonly<Record<string, string>> = {
 };
 
 /**
+ * The clear button of a field (Abnahme #122): its glyph in the middle of a box that hugs it and
+ * is at least the button's target (minWidth, minHeight bound to clear.width).
+ */
+const TARGET_LAYOUT: Readonly<Record<string, string | number>> = {
+  layoutMode: "HORIZONTAL",
+  primaryAxisAlignItems: "CENTER",
+  counterAxisAlignItems: "CENTER",
+  layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
  * The surface of a card (Spec 015 ③, plan ③ D-05): a column (vertical: the media above the
  * body) or a row (horizontal: the media at the start, the body beside it) of the width the plan
  * writes, hugging its height; the border lies in the size (border-box) and the surface clips
@@ -1454,7 +1500,11 @@ const STRETCH: Readonly<
     }
   >
 > = {
-  field: { fill: ["field", "row", "focus-ring", "focus-gap", "control"], wrap: ["help", "error"] },
+  // Abnahme #122: the typed text fills the control, so what stands at its end stands at its end.
+  field: {
+    fill: ["field", "row", "focus-ring", "focus-gap", "control"],
+    wrap: ["text", "help", "error"],
+  },
   upload: { fill: ["field", "dropzone"], wrap: ["help", "error"] },
   slider: { fill: ["field", "row", "track"], wrap: ["help", "error"] },
   separator: { fill: ["control"] },
@@ -1558,6 +1608,8 @@ const VITRINO_TRIGGER_WORD = ${JSON.stringify(VITRINO_TRIGGER_TEXT)};
 const HUG_LAYOUT = ${JSON.stringify(HUG_LAYOUT)};
 const FIELD_LAYOUT = ${JSON.stringify(FIELD_LAYOUT)};
 const TOGGLE_LAYOUT = ${JSON.stringify(TOGGLE_LAYOUT)};
+const LABEL_ROW_LAYOUT = ${JSON.stringify(LABEL_ROW_LAYOUT)};
+const FIELD_WIDTH = ${JSON.stringify(FIELD_WIDTH)};
 const TEXTS_LAYOUT = ${JSON.stringify(TEXTS_LAYOUT)};
 const SURFACE_LAYOUT = ${JSON.stringify(SURFACE_LAYOUT)};
 const CONTENT_LAYOUT = ${JSON.stringify(CONTENT_LAYOUT)};
@@ -1583,6 +1635,7 @@ const CARD_MEDIA_LAYOUT = ${JSON.stringify(CARD_MEDIA_LAYOUT)};
 const WRAP_SIZING = ${JSON.stringify(WRAP_SIZING)};
 const MARK_NEUTRAL = ${JSON.stringify(MARK_NEUTRAL)};
 const INDICATOR_LAYOUT = ${JSON.stringify(INDICATOR_LAYOUT)};
+const TARGET_LAYOUT = ${JSON.stringify(TARGET_LAYOUT)};
 const STRUCTURE_BINDINGS = ${JSON.stringify(STRUCTURE_BINDINGS)};
 const STRETCH = ${JSON.stringify(STRETCH)};
 const IKONOJ = ${JSON.stringify(plan.ikonoj ?? { names: [], mirror: [], glyphs: {} })};
@@ -2587,6 +2640,65 @@ function shadowEffects(shadow, variables) {
  * The vector of a check mark in its frame (Spec 010 ②, D-09): found by its mark; on a frame the
  * run imported from the sign, the vector the import made, marked from now on.
  */
+/**
+ * The label of a field and, where the plan draws a spinner (Spec 029 ②b-1 M-5), the row that
+ * holds it with the arc of the loading state beside it. A label an older run made directly in the
+ * holder moves into the row, never twice. The spinner is shown by the BOOLEAN property loading
+ * (toggled); its box, arc and the room before it are bound (spinner.*). Returns the label, the
+ * node that stands in the holder's order, and the nodes to bind.
+ */
+function labelOf(holder, component, toggled, into, spread) {
+  if (typeof component.spinner !== "string") {
+    const label = part(holder, "label", () => figma.createText());
+    return { label, placed: label, nodes: {} };
+  }
+  const row = part(holder, "label-row", () => figma.createFrame());
+  const older = ours(holder, "part", "label");
+  if (older !== undefined && older.parent !== row) row.insertChild(0, older);
+  const label = part(row, "label", () => figma.createText());
+  // Abnahme #122: the spinner of a field with a box stands in its control (into), at the end; a
+  // spinner an older run left beside the label moves there, never twice.
+  const besideLabel = into !== undefined ? ours(row, "part", "spinner") : undefined;
+  if (besideLabel !== undefined) into.appendChild(besideLabel);
+  const spinner = part(into || row, "spinner", () => figma.createNodeFromSvg(component.spinner));
+  (into === undefined ? [label, spinner] : [label]).forEach((child, index) => {
+    if (row.children.indexOf(child) !== index) row.insertChild(index, child);
+  });
+  // A field without a box (a choice, a slider, an upload) shows it at the end of the label's
+  // line, across the field: in the field on the right, not beside the label.
+  if (spread === true) own(row, { primaryAxisAlignItems: "SPACE_BETWEEN", layoutSizingHorizontal: "FILL" });
+  const mark = vectorPartOf(spinner, "spinner-mark");
+  own(row, NEUTRAL);
+  own(row, LABEL_ROW_LAYOUT);
+  own(row, IN_FLOW);
+  own(spinner, NEUTRAL);
+  own(spinner, INDICATOR_LAYOUT);
+  own(spinner, IN_FLOW);
+  if (mark) own(mark, arcNeutral(component.spinner));
+  // Shown by loading in a set; an example outside a set (the upload's) shows the field at rest.
+  if (toggled !== undefined) toggled.push({ part: "spinner", node: spinner });
+  else own(spinner, { visible: false });
+  const nodes = { "label-row": row, spinner };
+  if (mark) nodes["spinner-mark"] = mark;
+  return { label, placed: row, nodes };
+}
+
+/**
+ * The vector of a sign or glyph as its own part (Spec 029 ②b-1): named apart from the mark of a
+ * sign, so that no lookup takes a field's spinner or clear glyph for the mark of its chevron.
+ */
+function vectorPartOf(holder, name) {
+  let found = ours(holder, "part", name);
+  if (found === undefined) {
+    found = holder.children.filter((child) => child.type === "VECTOR")[0];
+    if (found === undefined) return undefined;
+    fresh.add(found.id);
+    found.setSharedPluginData(NAMESPACE, "part", name);
+  }
+  write(found, "name", name);
+  return found;
+}
+
 function markOf(indicator) {
   let found = ours(indicator, "part", "mark");
   if (found === undefined) {
@@ -2718,10 +2830,14 @@ function shape(node, values) {
   values.layoutSizingHorizontal = "FILL";
   // A row that grows keeps its content at the start, its indicator at the end, as on the web; at
   // the width it hugs the alignment shows nothing (Abnahme 3).
-  if (values.layoutMode === "HORIZONTAL" && values.primaryAxisAlignItems === "CENTER") {
+  // The layout mode may be written already, by a child flushed first (see \`flush\`).
+  const across = (values.layoutMode || node.layoutMode) === "HORIZONTAL";
+  if (across && values.primaryAxisAlignItems === "CENTER") {
     const last = node.children[node.children.length - 1];
     const marked = last !== undefined && (last.name === "indicator" || last.name === "icon-end");
-    values.primaryAxisAlignItems = marked ? "SPACE_BETWEEN" : "MIN";
+    // Abnahme #122: the control of a field holds its text, which fills it; its end follows.
+    const typed = node.children.some((child) => child.name === "text");
+    values.primaryAxisAlignItems = marked && !typed ? "SPACE_BETWEEN" : "MIN";
   }
 }
 
@@ -2763,7 +2879,7 @@ function settle(node, stampValue) {
   for (const before of shaped.before) before();
   const bound = boundId(node, "width") !== undefined;
   if (!bound) write(node, "layoutSizingHorizontal", "HUG");
-  const width = node.width;
+  const width = Math.max(node.width, shaped.minWidth || 0);
   const height = node.height;
   for (const [id] of parts) {
     const part = shaped.nodes.get(id);
@@ -2796,6 +2912,8 @@ function shapingOf(component, variant, node) {
     before: [],
     after: [],
     stretch: stretch,
+    // Abnahme #122: a field stands at least as wide as a field (FIELD_WIDTH), not its words alone.
+    minWidth: component.structure === "field" ? FIELD_WIDTH : 0,
   };
 }
 
@@ -3509,7 +3627,7 @@ async function applyComponents(variables, warnings) {
     bound.opacity = component.surface.opacity;
     gather(node).fills = [bound];
   }
-  function drawGlyphs(holder, name, prefix, measures) {
+  function drawGlyphs(holder, name, prefix, measures, markPart) {
     const nodes = {};
     Object.keys(IKONOJ.glyphs).forEach((aspekto, index) => {
       const svg = (IKONOJ.glyphs[aspekto] || {})[name];
@@ -3517,7 +3635,7 @@ async function applyComponents(variables, warnings) {
         typeof svg === "string" ? figma.createNodeFromSvg(svg) : figma.createFrame(),
       );
       if (holder.children.indexOf(frame) !== index) holder.insertChild(index, frame);
-      const vector = markOf(frame);
+      const vector = markPart === undefined ? markOf(frame) : vectorPartOf(frame, markPart);
       own(frame, NEUTRAL);
       own(frame, INDICATOR_LAYOUT);
       own(frame, IN_FLOW);
@@ -3663,14 +3781,15 @@ async function applyComponents(variables, warnings) {
    * filled with its dot, the others with the ground and the dot at opacity 0. The focus ring shows
    * on the first option only, in the focus variant.
    */
-  async function drawChoice(node, component, variant, report, labels) {
+  async function drawChoice(node, component, variant, report, labels, toggled) {
     const field = part(node, "field", () => figma.createFrame());
-    const label = part(field, "label", () => figma.createText());
+    const labelled = labelOf(field, component, toggled, undefined, true);
+    const label = labelled.label;
     const list = part(field, "options", () => figma.createFrame());
     const texts = component.texts || {};
     const help = typeof texts.help === "string" ? part(field, "help", () => figma.createText()) : undefined;
     const error = typeof texts.error === "string" ? part(field, "error", () => figma.createText()) : undefined;
-    const order = [label, list, help, error].filter((each) => each !== undefined);
+    const order = [labelled.placed, list, help, error].filter((each) => each !== undefined);
     order.forEach((child, index) => {
       if (field.children.indexOf(child) !== index) field.insertChild(index, child);
     });
@@ -3718,7 +3837,8 @@ async function applyComponents(variables, warnings) {
     own(node, HUG_LAYOUT);
     own(field, FIELD_LAYOUT);
     own(list, FIELD_LAYOUT);
-    const measures = bind({ label, field, options: list, help, error }, variant, variables, component.structure);
+    const measures = bind(Object.assign({ label, field, options: list, help, error }, labelled.nodes), variant, variables, component.structure);
+    for (const each of [labelled.nodes["label-row"], labelled.nodes.spinner, labelled.nodes["spinner-mark"]]) if (each !== undefined) flush(each);
     for (const each of rows) {
       own(each.row, TOGGLE_LAYOUT);
       for (const frame of [each.ring, each.gap]) own(frame, HUG_LAYOUT);
@@ -4955,12 +5075,13 @@ async function applyComponents(variables, warnings) {
    * The example (the spec's „mit zwei Dateien") lists the files below: a row each with name, size
    * and a remove stand-in in the butono's look (composed.remove) with the icon close.
    */
-  async function drawUpload(node, component, variant, report, labels, example) {
+  async function drawUpload(node, component, variant, report, labels, example, toggled) {
     const texts = component.texts || {};
     const icons = variant.icons || {};
     const composed = component.composed || {};
     const field = part(node, "field", () => figma.createFrame());
-    const label = part(field, "label", () => figma.createText());
+    const labelled = labelOf(field, component, toggled, undefined, true);
+    const label = labelled.label;
     const zone = part(field, "dropzone", () => figma.createFrame());
     const ring = part(zone, "focus-ring", () => figma.createFrame());
     const gap = part(ring, "focus-gap", () => figma.createFrame());
@@ -4984,7 +5105,7 @@ async function applyComponents(variables, warnings) {
       });
       return { n, file, row, name, size, remove, removeIcon };
     });
-    [label, zone, help, error].concat(list !== undefined ? [list] : []).forEach((child, index) => {
+    [labelled.placed, zone, help, error].concat(list !== undefined ? [list] : []).forEach((child, index) => {
       if (field.children.indexOf(child) !== index) field.insertChild(index, child);
     });
     [ring, hint].forEach((child, index) => {
@@ -5051,6 +5172,7 @@ async function applyComponents(variables, warnings) {
         "focus-ring": ring, "focus-gap": gap, control: choose, choose,
       },
       list !== undefined ? { "file-list": list } : {},
+      labelled.nodes,
     );
     for (const row of rows) {
       nodes["file-row-" + row.n] = row.row;
@@ -5059,6 +5181,7 @@ async function applyComponents(variables, warnings) {
       nodes["remove-" + row.n] = row.remove;
     }
     for (const measure of bind(nodes, variant, variables, component.structure)) measures.push(measure);
+    for (const each of [labelled.nodes["label-row"], labelled.nodes.spinner, labelled.nodes["spinner-mark"]]) if (each !== undefined) flush(each);
     // The button that chooses looks like the butono it composes (emphasis medium), its word and
     // its icon too; every remove like a butono of emphasis low with the icon close.
     if (composed.choose !== undefined) {
@@ -5089,13 +5212,14 @@ async function applyComponents(variables, warnings) {
    * thumb (two with range, placed on the fill's ends); the number field is a stand-in in the kampo's
    * look (composed.number) with the value's words, shown only where the variant has a field.
    */
-  async function drawSlider(node, component, variant, report, labels) {
+  async function drawSlider(node, component, variant, report, labels, toggled) {
     const texts = component.texts || {};
     const composed = component.composed || {};
     const spec = component.slider || { share: 0.5, start: 0.25, end: 0.75 };
     const ranged = variant.props.range === "true";
     const field = part(node, "field", () => figma.createFrame());
-    const label = part(field, "label", () => figma.createText());
+    const labelled = labelOf(field, component, toggled, undefined, true);
+    const label = labelled.label;
     const row = part(field, "row", () => figma.createFrame());
     const minLabel = part(row, "min-label", () => figma.createText());
     const track = part(row, "track", () => figma.createFrame());
@@ -5116,7 +5240,7 @@ async function applyComponents(variables, warnings) {
     const numberText = part(number, "number-text", () => figma.createText());
     const help = part(field, "help", () => figma.createText());
     const error = part(field, "error", () => figma.createText());
-    [label, row, help, error].forEach((child, index) => {
+    [labelled.placed, row, help, error].forEach((child, index) => {
       if (field.children.indexOf(child) !== index) field.insertChild(index, child);
     });
     [minLabel, track, maxLabel, number].forEach((child, index) => {
@@ -5163,7 +5287,9 @@ async function applyComponents(variables, warnings) {
       thumb, "max-label": maxLabel, number, help, error,
     };
     if (thumbEnd) nodes["thumb-end"] = thumbEnd;
+    Object.assign(nodes, labelled.nodes);
     const measures = bind(nodes, variant, variables, component.structure);
+    for (const each of [labelled.nodes["label-row"], labelled.nodes.spinner, labelled.nodes["spinner-mark"]]) if (each !== undefined) flush(each);
     // The ring of the second thumb takes the same bindings as the first (focus-ring, focus-gap).
     if (ringEnd && gapEnd && thumbEnd) {
       const look = { "focus-ring": ringEnd, "focus-gap": gapEnd, control: thumbEnd };
@@ -5777,7 +5903,7 @@ async function applyComponents(variables, warnings) {
       }
       // A radio group (Spec 010 ③, D-07) is drawn as a choice, in a function of its own.
       if (component.structure === "choice") {
-        await drawChoice(node, component, variant, report, labels);
+        await drawChoice(node, component, variant, report, labels, toggled);
         if (existing === undefined) made.push(node);
         continue;
       }
@@ -5880,13 +6006,13 @@ async function applyComponents(variables, warnings) {
       }
       // An upload (Spec 015 ②) is drawn in a function of its own.
       if (component.structure === "upload") {
-        await drawUpload(node, component, variant, report, labels, undefined);
+        await drawUpload(node, component, variant, report, labels, undefined, toggled);
         if (existing === undefined) made.push(node);
         continue;
       }
       // A slider (Spec 025 ①): the track with its fill and thumbs, in a function of its own.
       if (component.structure === "slider") {
-        await drawSlider(node, component, variant, report, labels);
+        await drawSlider(node, component, variant, report, labels, toggled);
         if (existing === undefined) made.push(node);
         continue;
       }
@@ -5919,8 +6045,13 @@ async function applyComponents(variables, warnings) {
       // A date picker (Spec 025 ②, plan ② D-12): the field holds a row of the ring around the
       // control and the trigger, then the calendar — the plan's month — before help and error.
       const dated = isField && component.calendar !== undefined;
-      const row = dated ? part(field, "row", () => figma.createFrame()) : undefined;
-      const ring = part(row || field || node, "focus-ring", () => figma.createFrame());
+      // Abnahme #122: the calendar's trigger stands in the control, at its end; the row an older
+      // run made beside the ring gives the ring back to the field and goes.
+      const oldRow = dated ? ours(field, "part", "row") : undefined;
+      const row = undefined;
+      const oldRing = oldRow !== undefined ? ours(oldRow, "part", "focus-ring") : undefined;
+      if (oldRing !== undefined) field.appendChild(oldRing);
+      const ring = part(field || node, "focus-ring", () => figma.createFrame());
       const gap = part(ring, "focus-gap", () => figma.createFrame());
       const control =
         ours(gap, "part", "control") ??
@@ -5928,7 +6059,20 @@ async function applyComponents(variables, warnings) {
         part(gap, "control", () => figma.createFrame());
       if (control.parent !== gap) gap.appendChild(control);
       write(control, "name", "control");
-      const label = part(labelParent || control, "label", () => figma.createText());
+      // Spec 029 ②b-1 M-5: a field's label stands in a row with its spinner (labelOf).
+      const labelled = labelParent !== undefined
+        ? labelOf(
+            labelParent,
+            component,
+            toggled,
+            isField ? control : undefined,
+            // Abnahme #122: a toggle shows it directly after its label (trailingAfter), else at
+            // the end of the label's line.
+            !isField && component.spinnerAfter !== "label",
+          )
+        : { label: part(control, "label", () => figma.createText()), placed: undefined, nodes: {} };
+      const label = labelled.label;
+      const labelPlaced = labelled.placed || label;
       // The icons the variant composes (Spec 014 ②, G3): the icon-start of a button before its
       // label, the chevron of a select in its indicator — glyph frames per Aspekto, bound below.
       const icons = variant.icons || {};
@@ -5943,13 +6087,15 @@ async function applyComponents(variables, warnings) {
         if (control.children.indexOf(iconEnd) !== control.children.length - 1) control.appendChild(iconEnd);
         toggled.push({ part: "icon-end", node: iconEnd });
       }
-      if (isField && field.children.indexOf(label) !== 0) field.insertChild(0, label);
-      if (row !== undefined && field.children.indexOf(row) !== 1) field.insertChild(1, row);
-      const trigger = row !== undefined ? part(row, "trigger", () => figma.createFrame()) : undefined;
-      if (row !== undefined && trigger !== undefined) {
-        if (row.children.indexOf(ring) !== 0) row.insertChild(0, ring);
-        if (row.children.indexOf(trigger) !== 1) row.insertChild(1, trigger);
-      }
+      // Spec 029 ②b-1 M-6: the clear button of a field at the end of its control, shown by the
+      // BOOLEAN clearable (toggled, connected below).
+      const clearFrame = typeof icons.clear === "string" ? part(control, "clear", () => figma.createFrame()) : undefined;
+      if (isField && field.children.indexOf(labelPlaced) !== 0) field.insertChild(0, labelPlaced);
+      if (dated && field.children.indexOf(ring) !== 1) field.insertChild(1, ring);
+      const oldTrigger = oldRow !== undefined ? ours(oldRow, "part", "trigger") : undefined;
+      if (oldTrigger !== undefined) control.appendChild(oldTrigger);
+      if (oldRow !== undefined) oldRow.remove();
+      const trigger = dated ? part(control, "trigger", () => figma.createFrame()) : undefined;
       const calendar = dated ? part(field, "calendar", () => figma.createFrame()) : undefined;
       if (calendar !== undefined && field.children.indexOf(calendar) !== 2) field.insertChild(2, calendar);
       const head = calendar !== undefined ? part(calendar, "head", () => figma.createFrame()) : undefined;
@@ -5989,9 +6135,9 @@ async function applyComponents(variables, warnings) {
         }
       }
       const dateTexts = (monthText !== undefined ? [monthText] : []).concat(weekdayTexts).concat(cells.map((cell) => cell.text));
-      if (isToggle && column === undefined && field.children.indexOf(label) !== 1) field.insertChild(1, label);
+      if (isToggle && column === undefined && field.children.indexOf(labelPlaced) !== 1) field.insertChild(1, labelPlaced);
       if (column !== undefined && field.children.indexOf(column) !== 1) field.insertChild(1, column);
-      if (column !== undefined && column.children.indexOf(label) !== 0) column.insertChild(0, label);
+      if (column !== undefined && column.children.indexOf(labelPlaced) !== 0) column.insertChild(0, labelPlaced);
       const textNode = isField ? part(control, "text", () => figma.createText()) : undefined;
       // The chevron of a select (Spec 010 ④, D-07): its sign at the end of the field's control,
       // after the text, imported once like the check mark; a text field has no sign.
@@ -6006,6 +6152,16 @@ async function applyComponents(variables, warnings) {
         : undefined;
       if (fieldSign && control.children.indexOf(indicator) !== control.children.length - 1) {
         control.appendChild(indicator);
+      }
+      // Abnahme #122: the control of a field, from the start: its text, then at its end from the
+      // inside out the spinner, the clear button, the chevron or the calendar – all inside it
+      // (insertChild takes the child out first, then places it).
+      if (isField) {
+        const order = [textNode, labelled.nodes.spinner, clearFrame, fieldSign ? indicator : undefined, trigger]
+          .filter((child) => child !== undefined);
+        order.forEach((child, index) => {
+          if (control.children.indexOf(child) !== index) control.insertChild(index, child);
+        });
       }
       const mark = indicator !== undefined && typeof component.sign === "string" ? markOf(indicator) : undefined;
       // A field with suggestions (Spec 014 ⑤): the listbox under the field, its rows the entries
@@ -6111,12 +6267,11 @@ async function applyComponents(variables, warnings) {
       // an auto-layout frame (F11). The variant, ring and gap wrap their content.
       for (const frame of [node, ring, gap]) own(frame, HUG_LAYOUT);
       if (field) own(field, isToggle ? TOGGLE_LAYOUT : FIELD_LAYOUT);
-      if (dated && row !== undefined && trigger !== undefined && calendar !== undefined && head !== undefined && weekdays !== undefined) {
+      if (dated && trigger !== undefined && calendar !== undefined && head !== undefined && weekdays !== undefined) {
         // The row lines up the ring and the trigger; the trigger and the month buttons hold their
         // glyphs in a fixed box the plan sizes; the calendar is a column as wide as its token,
         // shown where the variant is expanded; head, weekdays and weeks are rows, every cell a
         // fixed box with its day centred.
-        own(row, TOGGLE_LAYOUT);
         for (const holder of [trigger, prev, next]) {
           own(holder, CONTROL_LAYOUT);
           own(holder, { layoutSizingHorizontal: "FIXED", layoutSizingVertical: "FIXED" });
@@ -6206,6 +6361,21 @@ async function applyComponents(variables, warnings) {
         Object.assign(glyphNodes, drawn.nodes);
         iconSlots.push({ name: "icon-end", instance: drawn.instance, main: drawn.main });
       }
+      if (clearFrame !== undefined) {
+        own(clearFrame, NEUTRAL);
+        own(clearFrame, TARGET_LAYOUT);
+        own(clearFrame, IN_FLOW);
+        toggled.push({ part: "clear", node: clearFrame });
+        const drawn = drawGlyphs(clearFrame, icons.clear, "clear-", glyphMeasures, "clear-mark");
+        Object.assign(glyphNodes, drawn);
+        const colour = typeof component.clearColor === "string" ? variables.get(component.clearColor) : undefined;
+        if (colour !== undefined) {
+          for (const [key, node] of Object.entries(drawn)) {
+            if (key.indexOf("clear-mark-") !== 0) continue;
+            gather(node).fills = [figma.variables.setBoundVariableForPaint({ type: "SOLID", color: { r: 0, g: 0, b: 0 } }, "color", colour)];
+          }
+        }
+      }
       if (column) {
         own(column, TEXTS_LAYOUT);
         // The box stands at the first line of its label (D-09), as on the web.
@@ -6233,7 +6403,10 @@ async function applyComponents(variables, warnings) {
         nodes["weekday-" + (index + 1)] = each;
       });
       Object.assign(nodes, glyphNodes);
+      Object.assign(nodes, labelled.nodes);
+      if (clearFrame !== undefined) nodes.clear = clearFrame;
       const measures = bind(nodes, variant, variables, component.structure);
+      for (const each of [labelled.nodes["label-row"], labelled.nodes.spinner, labelled.nodes["spinner-mark"]]) if (each !== undefined) flush(each);
       // The cells of a date picker (Spec 025 ②) are bound one by one: every cell its ground, size,
       // radius and the role of its day; the chosen day, the days between the ends, today and the
       // days outside the month take their own looks (logical names of the same nodes).
@@ -6299,6 +6472,8 @@ async function applyComponents(variables, warnings) {
       // Everything gathered is written once, layout before the parts inside it; the measures
       // are bound after that, when every frame has its layout.
       for (const each of frames.concat(texts).concat(mark ? [mark] : [])) flush(each);
+      // Spec 029 ②b-1 M-6: the clear button after its control, so the control's layout is its own.
+      if (clearFrame !== undefined) flush(clearFrame);
       // A font binding is the one Figma may refuse — when a font of some mode is missing, the
       // file cannot show it (F30). Refused is no reason to stop: the label keeps the written font
       // of the base combination, and the run says which binding did not take.
@@ -6769,8 +6944,16 @@ function measureLayout(set, component) {
     if (gap !== undefined) found["focus-gap"] = gap;
     const control = gap === undefined ? undefined : ours(gap, "part", "control");
     if (control !== undefined) found.control = control;
-    const label = control === undefined ? undefined : ours(field || control, "part", "label");
+    const labelRow = field === undefined ? undefined : ours(field, "part", "label-row");
+    const label = control === undefined
+      ? undefined
+      : ours(field || control, "part", "label") ?? (labelRow === undefined ? undefined : ours(labelRow, "part", "label"));
     if (label !== undefined) found.label = label;
+    if (labelRow !== undefined) {
+      found["label-row"] = labelRow;
+      const spinner = ours(labelRow, "part", "spinner");
+      if (spinner !== undefined) found.spinner = spinner;
+    }
     if (row !== undefined) {
       const optionLabel = ours(row, "part", "option-label");
       if (optionLabel !== undefined) found["option-label"] = optionLabel;

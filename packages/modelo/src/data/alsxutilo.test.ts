@@ -56,6 +56,7 @@ describe("alsxutilo in the repo Modelo (section ②, G1, G2)", () => {
       ["dropzone", "boolean", false, false],
       ["required", "boolean", false, false],
       ["disabled", "boolean", false, false],
+      ["loading", "boolean", false, false],
       ["invalid", "boolean", false, false],
       ["name", "string", false, undefined],
     ]);
@@ -64,6 +65,8 @@ describe("alsxutilo in the repo Modelo (section ②, G1, G2)", () => {
       { name: "label", default: true, text: true },
       { name: "help", text: true },
       { name: "error", text: true },
+      // Spec 029 ②b-1 M-1: the reason for disabled.
+      { name: "disabled-reason", text: true },
     ]);
     // dropzone keys the border and the room around the button: an axis beside the state.
     expect(variantKeys(skemoOrThrow())).toEqual(["dropzone", "state"]);
@@ -87,6 +90,7 @@ describe("alsxutilo in the repo Modelo (section ②, G1, G2)", () => {
       "focus-ring",
       "box",
       "motion",
+      "spinner",
     ]);
     const kampo = eroNamed("kampo")?.skemo;
     for (const part of ["required-mark", "help", "error", "focus-ring", "motion"]) {
@@ -126,14 +130,16 @@ describe("alsxutilo in the repo Modelo (section ②, G1, G2)", () => {
     expect(skemo?.a11y).toEqual({
       role: "button",
       name: ["slot:label"],
-      description: ["slot:help", "slot:error"],
+      description: ["slot:help", "slot:error", "slot:disabled-reason"],
       states: {
+        loading: ["aria-busy"],
         required: ["aria-required"],
         invalid: ["aria-invalid"],
         disabled: ["aria-disabled"],
       },
       keys: ["Space", "Enter"],
       texts: {
+        loading: { de: "lädt", en: "loading" },
         required: { de: "erforderlich", en: "required" },
         "choose-name": { de: "Datei auswählen", en: "Choose file" },
         "drop-hint-name": { de: "oder hierher ziehen", en: "or drop it here" },
@@ -157,6 +163,7 @@ describe("alsxutilo in the repo Modelo (section ②, G1, G2)", () => {
       [{ "slot:help": "empty" }, { "prop:accept": ["empty"] }],
       // Nachlese 5 O-10: prop:<name> reads the number max-size too – the second half of the duty.
       [{ "slot:help": "empty" }, { "prop:max-size": ["empty"] }],
+      [{ "slot:disabled-reason": "filled" }, { disabled: ["true"] }],
     ]);
     expect(skemo?.constraints?.[1]?.kialo).toContain("file-constraints-stated");
     expect(skemo?.constraints?.[2]?.kialo).toBe(skemo?.constraints?.[1]?.kialo);

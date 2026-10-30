@@ -8,12 +8,12 @@
       "dropzone=true, state=disabled": "a42eeb2b8dbe2bfc",
       "dropzone=true, state=invalid": "456502460e3506fb",
       "dropzone=true, state=dragover": "659e335e9c7bbe10",
-      "dropzone=false, state=rest": "2588557f5fafae07",
-      "dropzone=false, state=hover": "eafb16ae912feb26",
-      "dropzone=false, state=focus": "91f02599ba2ea138",
-      "dropzone=false, state=disabled": "24f0a53cfac2c506",
-      "dropzone=false, state=invalid": "0d7174d0d6862eae",
-      "dropzone=false, state=dragover": "de2910059be0c194"
+      "dropzone=false, state=rest": "26bc407537000bd0",
+      "dropzone=false, state=hover": "1f17516c875be2c2",
+      "dropzone=false, state=focus": "f7a4519dbed5dfe2",
+      "dropzone=false, state=disabled": "5a465526d2dd8b34",
+      "dropzone=false, state=invalid": "81da4a763a379426",
+      "dropzone=false, state=dragover": "6a08d908c030b115"
     }
   },
   "apartigilo": {
@@ -128,41 +128,41 @@
   "datelektilo": {
     "set": "3888x796\nmode=single, expanded=true, state=rest@4,4\nmode=single, expanded=true, state=hover@652,4\nmode=single, expanded=true, state=focus@1300,4\nmode=single, expanded=true, state=disabled@1948,4\nmode=single, expanded=true, state=readonly@2596,4\nmode=single, expanded=true, state=invalid@3244,4\nmode=single, expanded=false, state=rest@4,298.5\nmode=single, expanded=false, state=hover@652,298.5\nmode=single, expanded=false, state=focus@1300,298.5\nmode=single, expanded=false, state=disabled@1948,298.5\nmode=single, expanded=false, state=readonly@2596,298.5\nmode=single, expanded=false, state=invalid@3244,298.5\nmode=range, expanded=true, state=rest@4,402\nmode=range, expanded=true, state=hover@652,402\nmode=range, expanded=true, state=focus@1300,402\nmode=range, expanded=true, state=disabled@1948,402\nmode=range, expanded=true, state=readonly@2596,402\nmode=range, expanded=true, state=invalid@3244,402\nmode=range, expanded=false, state=rest@4,696.5\nmode=range, expanded=false, state=hover@652,696.5\nmode=range, expanded=false, state=focus@1300,696.5\nmode=range, expanded=false, state=disabled@1948,696.5\nmode=range, expanded=false, state=readonly@2596,696.5\nmode=range, expanded=false, state=invalid@3244,696.5",
     "variants": {
-      "mode=single, expanded=true, state=rest": "39d7b3c293abce1a",
-      "mode=single, expanded=true, state=hover": "b50f7c133e7bdf39",
-      "mode=single, expanded=true, state=focus": "c04ee794b4e12fcb",
-      "mode=single, expanded=true, state=disabled": "e8167875f2eb18a0",
-      "mode=single, expanded=true, state=readonly": "9a6e61de4e550b8a",
-      "mode=single, expanded=true, state=invalid": "ab8a3c6bc4a5119f",
-      "mode=single, expanded=false, state=rest": "d59c257d10e19eef",
-      "mode=single, expanded=false, state=hover": "126f888ed52d2395",
-      "mode=single, expanded=false, state=focus": "0a5275315d124a48",
-      "mode=single, expanded=false, state=disabled": "ebde828fff8fed75",
-      "mode=single, expanded=false, state=readonly": "f107a09d7805dc21",
-      "mode=single, expanded=false, state=invalid": "b12721ba99d75163",
-      "mode=range, expanded=true, state=rest": "532cdb679cfcc9d6",
-      "mode=range, expanded=true, state=hover": "b9ebb70b2acd65e5",
-      "mode=range, expanded=true, state=focus": "81a9812dd9fdd9ad",
-      "mode=range, expanded=true, state=disabled": "dc86ba1e9673146c",
-      "mode=range, expanded=true, state=readonly": "cb38a741e7e80d7e",
-      "mode=range, expanded=true, state=invalid": "b23cca4d3759e692",
-      "mode=range, expanded=false, state=rest": "9146f6f2cfcaa49e",
-      "mode=range, expanded=false, state=hover": "0f529417bb649191",
-      "mode=range, expanded=false, state=focus": "cfc250558852d449",
-      "mode=range, expanded=false, state=disabled": "56a6794c5cf19e4b",
-      "mode=range, expanded=false, state=readonly": "5866595c8add64ea",
-      "mode=range, expanded=false, state=invalid": "4b09d4c809856fb3"
+      "mode=single, expanded=true, state=rest": "5e52e3b06829233a",
+      "mode=single, expanded=true, state=hover": "c4ffad2b56c60d27",
+      "mode=single, expanded=true, state=focus": "5effac52f576284f",
+      "mode=single, expanded=true, state=disabled": "c9726067a8d18cde",
+      "mode=single, expanded=true, state=readonly": "90e1136daea05e9c",
+      "mode=single, expanded=true, state=invalid": "673e8f48b3dd6ec9",
+      "mode=single, expanded=false, state=rest": "490a2c0fd48ad1c6",
+      "mode=single, expanded=false, state=hover": "a99bd7d5c87a84f6",
+      "mode=single, expanded=false, state=focus": "05704cb682eb1a1d",
+      "mode=single, expanded=false, state=disabled": "45e1fc80adeaa41e",
+      "mode=single, expanded=false, state=readonly": "3f7692661f54a0db",
+      "mode=single, expanded=false, state=invalid": "71ce93999f97f73f",
+      "mode=range, expanded=true, state=rest": "8c6fdd8c380073d0",
+      "mode=range, expanded=true, state=hover": "3a94d102472b5519",
+      "mode=range, expanded=true, state=focus": "8f0de733e07b8c19",
+      "mode=range, expanded=true, state=disabled": "296a9de832b8204d",
+      "mode=range, expanded=true, state=readonly": "5944fd6cb4fec75c",
+      "mode=range, expanded=true, state=invalid": "5a38279c2a83a1aa",
+      "mode=range, expanded=false, state=rest": "67686604d3c1ee3e",
+      "mode=range, expanded=false, state=hover": "c1f0e011a88d33f8",
+      "mode=range, expanded=false, state=focus": "c16c84877ce25f14",
+      "mode=range, expanded=false, state=disabled": "386df20829a5389c",
+      "mode=range, expanded=false, state=readonly": "1dfc042764c346fd",
+      "mode=range, expanded=false, state=invalid": "f59489f67c978bb1"
     }
   },
   "dialogo": {
     "set": "968x1262\nsize=small, reason=none, state=rest@4,4\nsize=small, reason=optional, state=rest@4,143\nsize=small, reason=required, state=rest@4,389\nsize=medium, reason=none, state=rest@4,635\nsize=medium, reason=optional, state=rest@4,774\nsize=medium, reason=required, state=rest@4,1020",
     "variants": {
-      "size=small, reason=none, state=rest": "73e24cb170eeda2f",
-      "size=small, reason=optional, state=rest": "9b17b94270d9a36f",
-      "size=small, reason=required, state=rest": "9b17b94270d9a36f",
-      "size=medium, reason=none, state=rest": "88b42155305dee03",
-      "size=medium, reason=optional, state=rest": "308627d5049daf84",
-      "size=medium, reason=required, state=rest": "308627d5049daf84"
+      "size=small, reason=none, state=rest": "3f9faccbba2a4074",
+      "size=small, reason=optional, state=rest": "5aeeaa0746bfb57c",
+      "size=small, reason=required, state=rest": "5aeeaa0746bfb57c",
+      "size=medium, reason=none, state=rest": "18973bf7489dfe32",
+      "size=medium, reason=optional, state=rest": "c496314ff824166a",
+      "size=medium, reason=required, state=rest": "c496314ff824166a"
     }
   },
   "elektilo": {
@@ -219,24 +219,24 @@
   "glitilo": {
     "set": "1497.6x380\nrange=true, field=true, state=rest@4,4\nrange=true, field=true, state=hover@253.6,4\nrange=true, field=true, state=focus@503.2,4\nrange=true, field=true, state=pressed@752.8,4\nrange=true, field=true, state=disabled@1002.4,4\nrange=true, field=true, state=invalid@1252,4\nrange=true, field=false, state=rest@4,111.5\nrange=true, field=false, state=hover@253.6,111.5\nrange=true, field=false, state=focus@503.2,111.5\nrange=true, field=false, state=pressed@752.8,111.5\nrange=true, field=false, state=disabled@1002.4,111.5\nrange=true, field=false, state=invalid@1252,111.5\nrange=false, field=true, state=rest@4,194\nrange=false, field=true, state=hover@253.6,194\nrange=false, field=true, state=focus@503.2,194\nrange=false, field=true, state=pressed@752.8,194\nrange=false, field=true, state=disabled@1002.4,194\nrange=false, field=true, state=invalid@1252,194\nrange=false, field=false, state=rest@4,301.5\nrange=false, field=false, state=hover@253.6,301.5\nrange=false, field=false, state=focus@503.2,301.5\nrange=false, field=false, state=pressed@752.8,301.5\nrange=false, field=false, state=disabled@1002.4,301.5\nrange=false, field=false, state=invalid@1252,301.5",
     "variants": {
-      "range=true, field=true, state=rest": "4b85736fb6dfc2d5",
-      "range=true, field=true, state=hover": "a653997b08d32988",
-      "range=true, field=true, state=focus": "54990eb363e4aa1f",
-      "range=true, field=true, state=pressed": "e383470a867ba384",
-      "range=true, field=true, state=disabled": "24d89129c3ff93ff",
-      "range=true, field=true, state=invalid": "6c612a1593c34129",
+      "range=true, field=true, state=rest": "7ab66816295865b3",
+      "range=true, field=true, state=hover": "548077d0b405641f",
+      "range=true, field=true, state=focus": "2e555dc0bb32844a",
+      "range=true, field=true, state=pressed": "2ccb6f832f3678e8",
+      "range=true, field=true, state=disabled": "dcec4975e28555b0",
+      "range=true, field=true, state=invalid": "d6352964417ab15e",
       "range=true, field=false, state=rest": "a08b60530a18a7da",
       "range=true, field=false, state=hover": "465e6b055209c585",
       "range=true, field=false, state=focus": "4a355b882e5b76b8",
       "range=true, field=false, state=pressed": "901b4a0c92045145",
       "range=true, field=false, state=disabled": "dd991a874b52f69b",
       "range=true, field=false, state=invalid": "9906d246284c209a",
-      "range=false, field=true, state=rest": "440d92865e01027a",
-      "range=false, field=true, state=hover": "5a077092dac73b97",
-      "range=false, field=true, state=focus": "c05dfa5afdadea12",
-      "range=false, field=true, state=pressed": "20746147e6db1a4d",
-      "range=false, field=true, state=disabled": "dd6299d06f19b1f4",
-      "range=false, field=true, state=invalid": "ab6b161cd2073e83",
+      "range=false, field=true, state=rest": "6dd19c9e2578834e",
+      "range=false, field=true, state=hover": "95f0631798f7de08",
+      "range=false, field=true, state=focus": "b128923ec4359b79",
+      "range=false, field=true, state=pressed": "487f7e81bf7d7efc",
+      "range=false, field=true, state=disabled": "9b114477fc81a459",
+      "range=false, field=true, state=invalid": "25f19c372f639615",
       "range=false, field=false, state=rest": "32868fb459a5f678",
       "range=false, field=false, state=hover": "8fdd7d829d62a37b",
       "range=false, field=false, state=focus": "e270e985bdeca94f",
@@ -583,12 +583,12 @@
   "kampo": {
     "set": "664.8x308\nsize=small, state=rest@4,4\nsize=small, state=hover@114.8,4\nsize=small, state=focus@225.6,4\nsize=small, state=disabled@336.4,4\nsize=small, state=readonly@447.2,4\nsize=small, state=invalid@558,4\nsize=medium, state=rest@4,97\nsize=medium, state=hover@114.8,97\nsize=medium, state=focus@225.6,97\nsize=medium, state=disabled@336.4,97\nsize=medium, state=readonly@447.2,97\nsize=medium, state=invalid@558,97\nsize=large, state=rest@4,200.5\nsize=large, state=hover@114.8,200.5\nsize=large, state=focus@225.6,200.5\nsize=large, state=disabled@336.4,200.5\nsize=large, state=readonly@447.2,200.5\nsize=large, state=invalid@558,200.5",
     "variants": {
-      "size=small, state=rest": "9ca67065aa6eb15e",
-      "size=small, state=hover": "1d33166e02f47169",
-      "size=small, state=focus": "aeece764ee62c473",
-      "size=small, state=disabled": "7d2cf3be9d08798d",
-      "size=small, state=readonly": "21a573448031441c",
-      "size=small, state=invalid": "02622d0e608be089",
+      "size=small, state=rest": "85d97b4915192ebb",
+      "size=small, state=hover": "c79b0e6beede17c1",
+      "size=small, state=focus": "1e7f3661193379c0",
+      "size=small, state=disabled": "1aa4c0c34389d62f",
+      "size=small, state=readonly": "f39123ac0171e728",
+      "size=small, state=invalid": "1c9fb9f0ad44e9cb",
       "size=medium, state=rest": "bbd4d5996fb2857c",
       "size=medium, state=hover": "a5dea9b1fe704923",
       "size=medium, state=focus": "58581e02ee545099",
@@ -606,8 +606,8 @@
   "karto": {
     "set": "648x507\norientation=vertical, state=rest@4,4\norientation=horizontal, state=rest@4,364",
     "variants": {
-      "orientation=vertical, state=rest": "276914b620943422",
-      "orientation=horizontal, state=rest": "1262d3b7259d15d1"
+      "orientation=vertical, state=rest": "413bfd3d34d2486c",
+      "orientation=horizontal, state=rest": "0c13486dd0515ebf"
     }
   },
   "kodbloko": {
@@ -620,31 +620,31 @@
   "kompletigilo": {
     "set": "3240x949\nsize=small, expanded=true, state=rest@4,4\nsize=small, expanded=true, state=hover@652,4\nsize=small, expanded=true, state=focus@1300,4\nsize=small, expanded=true, state=disabled@1948,4\nsize=small, expanded=true, state=invalid@2596,4\nsize=small, expanded=false, state=rest@4,208\nsize=small, expanded=false, state=hover@652,208\nsize=small, expanded=false, state=focus@1300,208\nsize=small, expanded=false, state=disabled@1948,208\nsize=small, expanded=false, state=invalid@2596,208\nsize=medium, expanded=true, state=rest@4,301\nsize=medium, expanded=true, state=hover@652,301\nsize=medium, expanded=true, state=focus@1300,301\nsize=medium, expanded=true, state=disabled@1948,301\nsize=medium, expanded=true, state=invalid@2596,301\nsize=medium, expanded=false, state=rest@4,515.5\nsize=medium, expanded=false, state=hover@652,515.5\nsize=medium, expanded=false, state=focus@1300,515.5\nsize=medium, expanded=false, state=disabled@1948,515.5\nsize=medium, expanded=false, state=invalid@2596,515.5\nsize=large, expanded=true, state=rest@4,619\nsize=large, expanded=true, state=hover@652,619\nsize=large, expanded=true, state=focus@1300,619\nsize=large, expanded=true, state=disabled@1948,619\nsize=large, expanded=true, state=invalid@2596,619\nsize=large, expanded=false, state=rest@4,841.5\nsize=large, expanded=false, state=hover@652,841.5\nsize=large, expanded=false, state=focus@1300,841.5\nsize=large, expanded=false, state=disabled@1948,841.5\nsize=large, expanded=false, state=invalid@2596,841.5",
     "variants": {
-      "size=small, expanded=true, state=rest": "6b6ae0a382356266",
-      "size=small, expanded=true, state=hover": "13f10fa1557ad669",
-      "size=small, expanded=true, state=focus": "97e622998f57b1ae",
-      "size=small, expanded=true, state=disabled": "3a68f006312301dc",
-      "size=small, expanded=true, state=invalid": "3e68ba137ffe80cf",
+      "size=small, expanded=true, state=rest": "e1e4811442078819",
+      "size=small, expanded=true, state=hover": "8407a11a24492a4c",
+      "size=small, expanded=true, state=focus": "fed5b3aaf10ef7e3",
+      "size=small, expanded=true, state=disabled": "cbe617bb8d300c4c",
+      "size=small, expanded=true, state=invalid": "a282531a82d77d50",
       "size=small, expanded=false, state=rest": "598d5d7cbb8e56d4",
       "size=small, expanded=false, state=hover": "f217b86c8426ee2a",
       "size=small, expanded=false, state=focus": "a6945cb985599787",
       "size=small, expanded=false, state=disabled": "b99d9fd7bc7a8404",
       "size=small, expanded=false, state=invalid": "ae8604564eaa61a3",
-      "size=medium, expanded=true, state=rest": "ee8f8870eebfdcdf",
-      "size=medium, expanded=true, state=hover": "c9c52c4c4c6e399c",
-      "size=medium, expanded=true, state=focus": "0ce762860a607dec",
-      "size=medium, expanded=true, state=disabled": "1125eebcd1fb72d8",
-      "size=medium, expanded=true, state=invalid": "34ef5d8ca4dafffc",
+      "size=medium, expanded=true, state=rest": "101e27b45c712092",
+      "size=medium, expanded=true, state=hover": "08f26af13e16ee61",
+      "size=medium, expanded=true, state=focus": "dd105a7468f01a61",
+      "size=medium, expanded=true, state=disabled": "9a09bae56d559a26",
+      "size=medium, expanded=true, state=invalid": "78095c454fdbac18",
       "size=medium, expanded=false, state=rest": "10d68468edf71069",
       "size=medium, expanded=false, state=hover": "7f3abb5fc4a86655",
       "size=medium, expanded=false, state=focus": "237927a8967d578e",
       "size=medium, expanded=false, state=disabled": "ac4778b79b454268",
       "size=medium, expanded=false, state=invalid": "2a6a06bdb85652e9",
-      "size=large, expanded=true, state=rest": "a6bb879ef9ed4228",
-      "size=large, expanded=true, state=hover": "a2932f02bf468c4b",
-      "size=large, expanded=true, state=focus": "341ee7f0d7326df7",
-      "size=large, expanded=true, state=disabled": "82cfba35df61ceae",
-      "size=large, expanded=true, state=invalid": "ab0633e1ee56ee5c",
+      "size=large, expanded=true, state=rest": "30dbbc92fc2ee6c3",
+      "size=large, expanded=true, state=hover": "a178f18f713c11ef",
+      "size=large, expanded=true, state=focus": "8aa70b27f67efb4b",
+      "size=large, expanded=true, state=disabled": "279de813d5e8aff0",
+      "size=large, expanded=true, state=invalid": "06135a734ba2578f",
       "size=large, expanded=false, state=rest": "227af7a645db7087",
       "size=large, expanded=false, state=hover": "f9115fee082daad2",
       "size=large, expanded=false, state=focus": "38c08a4ac54c3ef0",
@@ -655,10 +655,10 @@
   "konsileto": {
     "set": "152.8x154\nplacement=block-start, state=rest@4,4\nplacement=block-end, state=rest@4,50\nplacement=inline-start, state=rest@4,96\nplacement=inline-end, state=rest@4,127",
     "variants": {
-      "placement=block-start, state=rest": "f02336d8ed14cea9",
-      "placement=block-end, state=rest": "0d96395d85bbf2e8",
-      "placement=inline-start, state=rest": "48763deb8a9ee837",
-      "placement=inline-end, state=rest": "26dda0836b0d1a60"
+      "placement=block-start, state=rest": "fbfd8edd37c8c36b",
+      "placement=block-end, state=rest": "9a5b31ae8bc4e4e1",
+      "placement=inline-start, state=rest": "75ea6c995ac79681",
+      "placement=inline-end, state=rest": "661984872e3dc883"
     }
   },
   "langetaro": {
@@ -708,12 +708,12 @@
   "listelektilo": {
     "set": "3888x318\nexpanded=true, state=rest@4,4\nexpanded=true, state=hover@652,4\nexpanded=true, state=focus@1300,4\nexpanded=true, state=disabled@1948,4\nexpanded=true, state=readonly@2596,4\nexpanded=true, state=invalid@3244,4\nexpanded=false, state=rest@4,218.5\nexpanded=false, state=hover@652,218.5\nexpanded=false, state=focus@1300,218.5\nexpanded=false, state=disabled@1948,218.5\nexpanded=false, state=readonly@2596,218.5\nexpanded=false, state=invalid@3244,218.5",
     "variants": {
-      "expanded=true, state=rest": "b3b1a1bc27155746",
-      "expanded=true, state=hover": "a9f3e24b98976dc6",
-      "expanded=true, state=focus": "7bdf89c934d98237",
-      "expanded=true, state=disabled": "e876586c11f04a9b",
-      "expanded=true, state=readonly": "b37ebddae15f9787",
-      "expanded=true, state=invalid": "37633d51646cc6df",
+      "expanded=true, state=rest": "5fa6cff25db31d87",
+      "expanded=true, state=hover": "1160da217472fb0a",
+      "expanded=true, state=focus": "11077b811604dd3b",
+      "expanded=true, state=disabled": "02e0fc0870b2fcd5",
+      "expanded=true, state=readonly": "f4fb7a1e93bcf87a",
+      "expanded=true, state=invalid": "dada1e2c70294531",
       "expanded=false, state=rest": "70f654aa575a45c5",
       "expanded=false, state=hover": "3e2edea08d81b8ff",
       "expanded=false, state=focus": "6571e9ecdecf0635",
@@ -723,7 +723,7 @@
     }
   },
   "lokredaktilo": {
-    "set": "1065.6x112\nediting=true, state=rest@4,4\nediting=true, state=hover@181.6,4\nediting=true, state=focus@359.2,4\nediting=true, state=disabled@536.8,4\nediting=true, state=readonly@714.4,4\nediting=true, state=invalid@892,4\nediting=false, state=rest@4,60\nediting=false, state=hover@181.6,60\nediting=false, state=focus@359.2,60\nediting=false, state=disabled@536.8,60\nediting=false, state=readonly@714.4,60\nediting=false, state=invalid@892,60",
+    "set": "1281.6x112\nediting=true, state=rest@4,4\nediting=true, state=hover@217.6,4\nediting=true, state=focus@431.2,4\nediting=true, state=disabled@644.8,4\nediting=true, state=readonly@858.4,4\nediting=true, state=invalid@1072,4\nediting=false, state=rest@4,60\nediting=false, state=hover@217.6,60\nediting=false, state=focus@431.2,60\nediting=false, state=disabled@644.8,60\nediting=false, state=readonly@858.4,60\nediting=false, state=invalid@1072,60",
     "variants": {
       "editing=true, state=rest": "9905922f9f98635e",
       "editing=true, state=hover": "f7bf604e0a8ca174",
@@ -731,12 +731,12 @@
       "editing=true, state=disabled": "d4c5f7d46a26a27b",
       "editing=true, state=readonly": "bb27b867f82256fe",
       "editing=true, state=invalid": "c14a15d8950d312d",
-      "editing=false, state=rest": "9905922f9f98635e",
-      "editing=false, state=hover": "f7bf604e0a8ca174",
-      "editing=false, state=focus": "a1c935c57de310b1",
-      "editing=false, state=disabled": "d4c5f7d46a26a27b",
-      "editing=false, state=readonly": "bb27b867f82256fe",
-      "editing=false, state=invalid": "c14a15d8950d312d"
+      "editing=false, state=rest": "62eac2740e79df30",
+      "editing=false, state=hover": "11f377774cecb347",
+      "editing=false, state=focus": "e7c95d6041747808",
+      "editing=false, state=disabled": "02a178078deaaee5",
+      "editing=false, state=readonly": "4ae27afdc038785b",
+      "editing=false, state=invalid": "2d3aef8a180d9dba"
     }
   },
   "markdovido": {
@@ -781,12 +781,12 @@
     }
   },
   "menuo": {
-    "set": "2592x127\nstate=rest@4,4\nstate=hover@652,4\nstate=focus@1300,4\nstate=disabled@1948,4",
+    "set": "2592x136\nstate=rest@4,4\nstate=hover@652,4\nstate=focus@1300,4\nstate=disabled@1948,4",
     "variants": {
-      "state=rest": "4612b25d6d03d3d6",
-      "state=hover": "87a5972a8430a552",
-      "state=focus": "a69b79355f1f96ce",
-      "state=disabled": "68f56b666005a397"
+      "state=rest": "80a7b83887148911",
+      "state=hover": "3dd51ce4e4b6ad02",
+      "state=focus": "cd81bb518583cb55",
+      "state=disabled": "8032ff157d56432f"
     }
   },
   "mezurilo": {
@@ -818,19 +818,19 @@
   "plenstato": {
     "set": "109.2x148.01\nkind=loading, state=rest@4,4\nkind=empty, state=rest@4,86",
     "variants": {
-      "kind=loading, state=rest": "b9e0d6d33dc55f2c",
-      "kind=empty, state=rest": "e48ef2db7284f27d"
+      "kind=loading, state=rest": "91ae2963f736cd3a",
+      "kind=empty, state=rest": "f06df8791ccfa135"
     }
   },
   "plurelektilo": {
     "set": "3888x318\nexpanded=true, state=rest@4,4\nexpanded=true, state=hover@652,4\nexpanded=true, state=focus@1300,4\nexpanded=true, state=disabled@1948,4\nexpanded=true, state=readonly@2596,4\nexpanded=true, state=invalid@3244,4\nexpanded=false, state=rest@4,218.5\nexpanded=false, state=hover@652,218.5\nexpanded=false, state=focus@1300,218.5\nexpanded=false, state=disabled@1948,218.5\nexpanded=false, state=readonly@2596,218.5\nexpanded=false, state=invalid@3244,218.5",
     "variants": {
-      "expanded=true, state=rest": "2c4b8c350e8380fa",
-      "expanded=true, state=hover": "254e82fa068e816d",
-      "expanded=true, state=focus": "12ea08c484a182d2",
-      "expanded=true, state=disabled": "cf1d42c458e61ebf",
-      "expanded=true, state=readonly": "f53d75130643a76e",
-      "expanded=true, state=invalid": "c2d9b66665658054",
+      "expanded=true, state=rest": "e9c730410cce95c4",
+      "expanded=true, state=hover": "a31e604c57ebba56",
+      "expanded=true, state=focus": "53019d3e7e8bd2f8",
+      "expanded=true, state=disabled": "fe53841316e05c9f",
+      "expanded=true, state=readonly": "34e48f31a86b16fd",
+      "expanded=true, state=invalid": "c80cf1c7ce2967da",
       "expanded=false, state=rest": "697db8f2c9002cbb",
       "expanded=false, state=hover": "593237a064099620",
       "expanded=false, state=focus": "62405fe9f0d43704",
@@ -1051,7 +1051,7 @@
   "sxvebilo": {
     "set": "648x88\nstate=rest@4,4",
     "variants": {
-      "state=rest": "84a2260680bfe0f5"
+      "state=rest": "ddc39e35b405fba8"
     }
   },
   "tabelo": {

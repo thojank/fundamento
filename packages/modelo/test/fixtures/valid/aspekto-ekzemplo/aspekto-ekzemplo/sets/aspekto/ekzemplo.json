@@ -2814,6 +2814,22 @@
           "$type": "cubicBezier",
           "$value": "{motion.easing.standard}"
         }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
+        }
       }
     },
     "apartigilo": {
@@ -3696,7 +3712,7 @@
       "trigger": {
         "size": {
           "$type": "dimension",
-          "$value": "{size.control.medium}"
+          "$value": "{size.target.min}"
         }
       },
       "calendar": {
@@ -3943,6 +3959,28 @@
         "easing": {
           "$type": "cubicBezier",
           "$value": "{motion.easing.standard}"
+        }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
+        }
+      },
+      "clear": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.target.min}"
         }
       }
     },
@@ -4306,6 +4344,44 @@
           "$type": "cubicBezier",
           "$value": "{motion.easing.standard}"
         }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
+        }
+      },
+      "clear": {
+        "size": {
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.icon.small}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.icon.medium}"
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{size.icon.large}"
+            }
+          }
+        },
+        "width": {
+          "$type": "dimension",
+          "$value": "{size.target.min}"
+        }
       }
     },
     "elekto": {
@@ -4564,6 +4640,22 @@
           "$type": "cubicBezier",
           "$value": "{motion.easing.standard}"
         }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
+        }
       }
     },
     "faldilo": {
@@ -4580,11 +4672,29 @@
           "focus": {
             "$type": "color",
             "$value": "{color.action.tertiary.rest}"
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{color.action.tertiary.disabled}"
           }
         },
         "color": {
-          "$type": "color",
-          "$value": "{color.text.default}"
+          "rest": {
+            "$type": "color",
+            "$value": "{color.text.default}"
+          },
+          "hover": {
+            "$type": "color",
+            "$value": "{color.text.default}"
+          },
+          "focus": {
+            "$type": "color",
+            "$value": "{color.text.default}"
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{color.text.disabled}"
+          }
         },
         "typography": {
           "$type": "typography",
@@ -4879,6 +4989,22 @@
         "easing": {
           "$type": "cubicBezier",
           "$value": "{motion.easing.standard}"
+        }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
         }
       }
     },
@@ -5302,17 +5428,21 @@
           "size": {
             "small": {
               "$type": "dimension",
-              "$value": "{size.control.small}"
+              "$value": "{size.icon.small}"
             },
             "medium": {
               "$type": "dimension",
-              "$value": "{size.control.medium}"
+              "$value": "{size.icon.medium}"
             },
             "large": {
               "$type": "dimension",
-              "$value": "{size.control.large}"
+              "$value": "{size.icon.large}"
             }
           }
+        },
+        "width": {
+          "$type": "dimension",
+          "$value": "{size.target.min}"
         }
       },
       "increment": {
@@ -5320,23 +5450,59 @@
           "size": {
             "small": {
               "$type": "dimension",
-              "$value": "{size.control.small}"
+              "$value": "{size.icon.small}"
             },
             "medium": {
               "$type": "dimension",
-              "$value": "{size.control.medium}"
+              "$value": "{size.icon.medium}"
             },
             "large": {
               "$type": "dimension",
-              "$value": "{size.control.large}"
+              "$value": "{size.icon.large}"
             }
           }
+        },
+        "width": {
+          "$type": "dimension",
+          "$value": "{size.target.min}"
         }
       },
       "clear": {
         "size": {
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.icon.small}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.icon.medium}"
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{size.icon.large}"
+            }
+          }
+        },
+        "width": {
           "$type": "dimension",
-          "$value": "{size.control.small}"
+          "$value": "{size.target.min}"
+        }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
         }
       }
     },
@@ -5797,6 +5963,44 @@
         "radius": {
           "$type": "dimension",
           "$value": "{radius.role.control}"
+        }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
+        }
+      },
+      "clear": {
+        "size": {
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.icon.small}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.icon.medium}"
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{size.icon.large}"
+            }
+          }
+        },
+        "width": {
+          "$type": "dimension",
+          "$value": "{size.target.min}"
         }
       }
     },
@@ -6422,6 +6626,32 @@
           "$type": "cubicBezier",
           "$value": "{motion.easing.standard}"
         }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
+        }
+      },
+      "clear": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.medium}"
+        },
+        "width": {
+          "$type": "dimension",
+          "$value": "{size.target.min}"
+        }
       }
     },
     "lokredaktilo": {
@@ -6771,6 +7001,22 @@
         "easing": {
           "$type": "cubicBezier",
           "$value": "{motion.easing.standard}"
+        }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
         }
       }
     },
@@ -7670,6 +7916,22 @@
           "$type": "cubicBezier",
           "$value": "{motion.easing.standard}"
         }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
+        }
       }
     },
     "saltligilo": {
@@ -8354,6 +8616,22 @@
           "$type": "cubicBezier",
           "$value": "{motion.easing.standard}"
         }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
+        }
       }
     },
     "sxvebilo": {
@@ -8801,6 +9079,22 @@
         "easing": {
           "$type": "cubicBezier",
           "$value": "{motion.easing.standard}"
+        }
+      },
+      "spinner": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "inline": {
+          "padding": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
         }
       }
     },

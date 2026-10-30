@@ -61,6 +61,8 @@ describe("get_ero brief (Spec 007 A8)", () => {
       "axes",
       "boundary",
       "ero",
+      // Spec 029 ②b-1: the booleans without an axis, by name.
+      "flags",
       "instead",
       // Nachlese 5 N5-3: the props without an axis, with their type.
       "props",

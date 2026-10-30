@@ -310,7 +310,7 @@ describe("Web Component Celo for the sxaltilo (Spec 010 ①)", () => {
   it("renders a button with role switch as the track, the knob in it and the label beside it", () => {
     const templates = [...sxaltiloElement.matchAll(/`(<[^`]*)`/g)].map((m) => m[1] ?? "");
     expect(templates.flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]))).toEqual(
-      ["field", "control", "indicator", "label"],
+      ["field", "control", "indicator", "label", "spinner"],
     );
     expect(sxaltiloElement).toContain('role="switch"');
     expect(sxaltiloElement).toContain('aria-labelledby="label"');
@@ -379,6 +379,8 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
       "indicator",
       "label",
       "required-mark",
+      // Abnahme #122 (decision 30.10.): the spinner directly after the text, in the label.
+      "spinner",
       "error",
     ]);
     expect(markobutonoElement).toContain('role="checkbox"');
@@ -394,7 +396,14 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
       expect(template).not.toMatch(/>[^<\s$][^<]*</);
     }
     // The switch is unchanged: no mark, no error, no sign in its knob (① D-09).
-    expect(parts(sxaltiloElement)).toEqual(["field", "control", "indicator", "label"]);
+    expect(parts(sxaltiloElement)).toEqual([
+      "field",
+      "control",
+      "indicator",
+      "label",
+      // Abnahme #122: the spinner at the end of the field, after the label.
+      "spinner",
+    ]);
     expect(sxaltiloElement).toContain('role="switch"');
   });
 
@@ -484,6 +493,7 @@ describe("Web Component Celo for the elekto (Spec 010 ③)", () => {
       "field",
       "label",
       "required-mark",
+      "spinner",
       "options",
       "help",
       "error",
@@ -510,6 +520,8 @@ describe("Web Component Celo for the elekto (Spec 010 ③)", () => {
       "indicator",
       "label",
       "required-mark",
+      // Abnahme #122 (decision 30.10.): the spinner directly after the text, in the label.
+      "spinner",
       "error",
     ]);
     expect(markobutonoElement).not.toContain("slotAssignment");
@@ -602,7 +614,10 @@ describe("Web Component Celo for the elektilo (Spec 010 ④)", () => {
       "field",
       "label",
       "required-mark",
+      "row",
       "control",
+      "end",
+      "spinner",
       "indicator",
       "help",
       "error",
@@ -633,6 +648,8 @@ describe("Web Component Celo for the elektilo (Spec 010 ④)", () => {
       "required-mark",
       "row",
       "control",
+      "end",
+      "spinner",
       "help",
       "error",
       "decrement",
@@ -680,25 +697,26 @@ describe("Web Component Celo for the elektilo (Spec 010 ④)", () => {
     expect(elektiloCss).toContain("border-color: var(--fm-color-status-danger-border);");
     expect(elektiloCss).toContain("min-block-size: var(--fm-size-control-medium);");
     expect(elektiloCss).not.toContain("[readonly]");
-    // The kampo keeps its own placeholder rule and has no chevron.
+    // The kampo keeps its own placeholder rule and has no chevron (the end's shared structure
+    // names it, no rule of the kampo looks or sizes it).
     expect(kampoCss).toContain('[part="control"]::placeholder');
-    expect(kampoCss).not.toContain("indicator");
+    expect(kampoCss).not.toContain('[part="indicator"] {');
   });
 
-  it("lays the chevron over the end of the select from tokens only: the text ends a gap before it (D-06)", () => {
+  it("lays the end – spinner, clear button, chevron – over the end of the select, inside its border, from tokens only (Abnahme #122)", () => {
     expect(elektiloCss).toContain(
-      ':where([part="field"]) > div { display: flex; align-items: center; }',
+      ':where([part="end"]) { position: absolute; inset: 0; display: flex; align-items: center; justify-content: flex-end; box-sizing: border-box; pointer-events: none; }',
     );
     expect(elektiloCss).toContain("pointer-events: none;");
+    // The control keeps the room of its end (measured by the element), the end its border and
+    // inline padding away from the edge, the gap of the box between its parts.
     expect(elektiloCss).toContain(
-      "padding-inline-end: calc(var(--fm-spacing-medium) + var(--fm-size-icon-medium) + var(--fm-spacing-small));",
+      "padding-inline-end: calc(var(--fm-spacing-medium) + var(--fm-end));",
     );
     expect(elektiloCss).toContain(
-      "margin-inline-start: calc(-1 * (var(--fm-size-icon-small) + var(--fm-spacing-small) + var(--fm-border-width-default)));",
+      "padding-inline-end: calc(var(--fm-spacing-medium) + var(--fm-border-width-default));",
     );
-    expect(elektiloCss).toContain(
-      "margin-inline-end: calc(var(--fm-spacing-medium) + var(--fm-border-width-default));",
-    );
+    expect(elektiloCss).toContain("gap: var(--fm-spacing-small);");
   });
 
   it("keeps every design property a token and logical (Art. X gate 1)", () => {
@@ -800,7 +818,17 @@ describe("Web Component Celo for the tekstareo (Spec 011 ②)", () => {
     templates(source).flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]));
 
   it("renders the field of the kampo around a native textarea", () => {
-    expect(parts(element)).toEqual(["field", "label", "required-mark", "control", "help", "error"]);
+    expect(parts(element)).toEqual([
+      "field",
+      "label",
+      "required-mark",
+      "row",
+      "control",
+      "end",
+      "spinner",
+      "help",
+      "error",
+    ]);
     expect(element).toContain('<textarea part="control" id="control"></textarea>');
     expect(element).toContain('<label part="label" for="control">');
     expect(element).toContain("static formAssociated = true;");
@@ -1689,7 +1717,8 @@ describe("Web Component Celo for the overlays (Spec 014 ④)", () => {
     expect(element).toContain('<div part="control" role="menu" popover="auto"></div>');
     expect(element).toContain('role="menuitem"');
     expect(element).toContain(
-      '<fm-butono part="trigger" emphasis="low"><fm-ikono name="more"></fm-ikono></fm-butono>',
+      // Spec 029 ②b-1 M-1: the reason for disabled handed on to the own trigger, which shows it.
+      '<fm-butono part="trigger" emphasis="low"><fm-ikono name="more"></fm-ikono><slot name="disabled-reason" slot="disabled-reason"></slot></fm-butono>',
     );
     expect(element).toContain('"aria-haspopup"');
     expect(element).toContain('new CustomEvent("select"');
@@ -2175,7 +2204,10 @@ describe("Web Component Celo for the glitilo (Spec 025 ①)", () => {
 describe("Web Component Celo for the kampo of Spec 025 ① (time, stepper, clear)", () => {
   it("renders the stepper and the clear button as composed butono with their icons and words", () => {
     const element = files["eroj/src/generated/fm-kampo.ts"] ?? "";
-    expect(element).toContain('<div part="row"><input part="control" id="control"></div>');
+    // Abnahme #122: the end – spinner, then the buttons – lies inside the row, over the input.
+    expect(element).toContain(
+      '<div part="row"><input part="control" id="control"><span part="end"><span part="spinner" aria-hidden="true" hidden>',
+    );
     const kampoCss = JSON.parse(
       /export const KAMPO_CSS = (".*");/s.exec(
         files["eroj/src/generated/kampo.styles.ts"] ?? "",
@@ -2202,13 +2234,14 @@ describe("Web Component Celo for the kampo of Spec 025 ① (time, stepper, clear
     expect(files["eroj/src/generated/fm-tekstareo.ts"] ?? "").not.toContain('part="decrement"');
   });
 
-  it("the stylesheet sizes the stepper buttons by size and the clear button small; the parity inventory stays size × state", () => {
+  it("the stylesheet sizes the stepper buttons and the clear button by size like the icons of the field (Abnahme #122); the parity inventory stays size × state", () => {
     const styles = files["eroj/src/generated/kampo.styles.ts"] ?? "";
     const css = JSON.parse(/export const KAMPO_CSS = (".*");/s.exec(styles)?.[1] ?? '""') as string;
     expect(css).toContain('[part="decrement"]');
     expect(css).toContain('[part="increment"]');
     expect(css).toContain('[part="clear"]');
-    expect(css).toContain("inline-size: var(--fm-size-control-small);");
+    expect(css).toContain("inline-size: var(--fm-size-icon-small);");
+    expect(css).not.toContain("inline-size: var(--fm-size-control-small);");
     expect(componentCssIssues("kampo.css", css)).toEqual([]);
     const inventory = stylesheetInventory(styles);
     expect(inventory.props).toEqual({ size: ["small", "medium", "large"] });
@@ -2262,7 +2295,9 @@ describe("Web Component Celo for the datelektilo (Spec 025 ②)", () => {
   });
 
   it("the stylesheet lays out the row, the calendar popover, the grid of rows of seven cells; the cell's looks by attribute; keywords and 0 only in the structure", () => {
-    expect(css).toContain(':where([part="row"]) { display: flex; align-items: center; }');
+    expect(css).toContain(
+      ':where([part="row"]) { position: relative; display: flex; align-items: center; }',
+    );
     expect(css).toContain(':where([part="row"]) > [part="control"] { flex: 1 1 auto; }');
     expect(css).toContain(':where([part="trigger"], [part="prev"], [part="next"]) { flex: none; }');
     expect(css).toContain(':where([part="field"]) { anchor-name: --fm-field; }');
@@ -2307,10 +2342,11 @@ describe("Web Component Celo for the datelektilo (Spec 025 ②)", () => {
       '[part="field"] [part="cell"][data-outside="true"]:not([aria-selected="true"]) {\n  color: var(--fm-color-text-muted);',
     );
     expect(css).not.toContain(':where([part="field"]) [part="cell"][aria-selected="true"]');
-    // The trigger takes the field's control size, prev and next the small one; the calendar its
-    // surface, shadow, layer, width and padding; its height none while closed.
+    // The trigger takes the least target (Abnahme #122: inside the field like the Fonto's), prev
+    // and next the small control; the calendar its surface, shadow, layer, width and padding; its
+    // height none while closed.
     expect(css).toContain(
-      ':where([part="field"]) [part="trigger"] {\n  inline-size: var(--fm-size-control-medium);\n  block-size: var(--fm-size-control-medium);',
+      ':where([part="field"]) [part="trigger"] {\n  inline-size: var(--fm-size-target-min);\n  block-size: var(--fm-size-target-min);',
     );
     expect(css).toContain(
       ':where([part="field"]) [part="prev"] {\n  inline-size: var(--fm-size-control-small);',
@@ -2386,8 +2422,10 @@ describe("Web Component Celo for the selection Eroj (Spec 025 ③)", () => {
   it("the listelektilo: a button of role combobox over a popover listbox; options with icon and description; the item by active and selected", () => {
     const element = files["eroj/src/generated/fm-listelektilo.ts"] ?? "";
     expect(element).toContain(
-      '<button part="control" id="control" type="button" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="listbox"><span part="text" id="text"></span><span part="indicator" aria-hidden="true">',
+      '<button part="control" id="control" type="button" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="listbox"><span part="text" id="text"></span></button><span part="end"><span part="spinner" aria-hidden="true" hidden>',
     );
+    // Abnahme #122: the chevron lies in the end, after the spinner and the clear button.
+    expect(element).toContain('</span><span part="indicator" aria-hidden="true">');
     expect(element).toContain(
       '<div part="listbox" role="listbox" id="listbox" popover="manual"></div>',
     );
@@ -2410,8 +2448,9 @@ describe("Web Component Celo for the selection Eroj (Spec 025 ③)", () => {
   it("the plurelektilo: a button over a multiselectable listbox with a filter, check marks and a clear butono", () => {
     const element = files["eroj/src/generated/fm-plurelektilo.ts"] ?? "";
     expect(element).toContain(
-      '<button part="control" id="control" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="listbox"><span part="text" id="text"></span><span part="indicator" aria-hidden="true">',
+      '<button part="control" id="control" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="listbox"><span part="text" id="text"></span></button><span part="end"><span part="spinner" aria-hidden="true" hidden>',
     );
+    expect(element).toContain('</span><span part="indicator" aria-hidden="true">');
     // A listbox owns options alone (ARIA; axe aria-required-children, Abweichung 4 of plan ③): the
     // popover is a panel, the rows' holder is the listbox.
     expect(element).toContain(

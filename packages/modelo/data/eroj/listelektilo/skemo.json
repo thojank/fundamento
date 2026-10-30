@@ -32,6 +32,12 @@
         "description": "Cannot be used: the list does not open; skipped by the keyboard."
       },
       {
+        "name": "loading",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-5: the application loads or checks (a value saved, a list fetched, a file examined): the field says so (aria-busy, described by a11y.texts loading) and shows the turning spinner; it stays operable."
+      },
+      {
         "name": "readonly",
         "kind": "boolean",
         "default": false,
@@ -53,6 +59,12 @@
         "name": "name",
         "kind": "string",
         "description": "The name under which the form sends the choice."
+      },
+      {
+        "name": "clearable",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-6: a clear button in the field, shown while it has a value and is neither disabled nor read-only, named „{label} leeren“; a press empties the value and returns the focus to the field."
       }
     ],
     "states": [
@@ -84,6 +96,10 @@
       },
       {
         "name": "error",
+        "text": true
+      },
+      {
+        "name": "disabled-reason",
         "text": true
       }
     ],
@@ -250,8 +266,32 @@
         "easing": {
           "fixed": "motion.easing.standard"
         }
+      },
+      "spinner": {
+        "size": {
+          "fixed": "size.icon.small"
+        },
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "inline-padding": {
+          "fixed": "spacing.small"
+        }
+      },
+      "clear": {
+        "size": {
+          "fixed": "size.icon.medium"
+        },
+        "width": {
+          "fixed": "size.target.min"
+        }
       }
     },
+    "trailing": [
+      "spinner",
+      "clear",
+      "indicator"
+    ],
     "bindings": [
       {
         "part": "label",
@@ -413,7 +453,8 @@
       ],
       "description": [
         "slot:help",
-        "slot:error"
+        "slot:error",
+        "slot:disabled-reason"
       ],
       "states": {
         "selected": [
@@ -433,6 +474,9 @@
         ],
         "expanded": [
           "aria-expanded"
+        ],
+        "loading": [
+          "aria-busy"
         ]
       },
       "keys": [
@@ -448,6 +492,14 @@
         "required": {
           "de": "erforderlich",
           "en": "required"
+        },
+        "loading": {
+          "de": "lädt",
+          "en": "loading"
+        },
+        "clear-name": {
+          "de": "{label} leeren",
+          "en": "Clear {label}"
         }
       }
     },
@@ -479,6 +531,17 @@
           ]
         },
         "kialo": "Two reasons why one cannot choose are one too many, because disabled wins."
+      },
+      {
+        "when": {
+          "slot:disabled-reason": "filled"
+        },
+        "allowed": {
+          "disabled": [
+            "true"
+          ]
+        },
+        "kialo": "A reason without disabled is a contradiction, because it says why something is blocked that is not."
       }
     ],
     "goals": [

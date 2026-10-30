@@ -25,6 +25,8 @@ const role = (name: string | undefined) => traRolojFigmaName(name, prepared.inpu
 // around the track (control) with the knob (indicator) in it, the label beside. The knob stands
 // at the start or the end of the track as the variant says; the gap between track and label is
 // the field's. Measured in f10b-5 (the double knows the slice of the API the plugin uses).
+// Spec 029 ②b-1 M-5: the label of every field stands in a row with its spinner (label-row), shown by
+// the BOOLEAN property loading; the label itself is the row's first child.
 describe("the sxaltilo is drawn as a toggle: track, knob, label beside (Spec 010 ①)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
   const bound = (node: DoubleNode | undefined, field: string) =>
@@ -47,7 +49,7 @@ describe("the sxaltilo is drawn as a toggle: track, knob, label beside (Spec 010
     const { variant } = await drawn();
     const on = variant("checked=true, size=medium, state=rest");
     const field = on?.children.find((child) => child.name === "field");
-    expect(field?.children.map((child) => child.name)).toEqual(["focus-ring", "label"]);
+    expect(field?.children.map((child) => child.name)).toEqual(["focus-ring", "label-row"]);
     expect(field?.properties.layoutMode).toBe("HORIZONTAL");
     const control = descendant(on, "control");
     expect(control?.children.map((child) => child.name)).toEqual(["indicator"]);
@@ -117,7 +119,7 @@ describe("the markobutono is drawn as a toggle: box, check mark, label and error
     expect(field?.properties.counterAxisAlignItems).toBe("MIN");
     const texts = field?.children.find((child) => child.name === "texts");
     expect(texts?.properties.layoutMode).toBe("VERTICAL");
-    expect(texts?.children.map((child) => child.name)).toEqual(["label", "error"]);
+    expect(texts?.children.map((child) => child.name)).toEqual(["label-row", "error"]);
     expect(descendant(on, "label")?.properties.characters).toBe("Option");
     expect(descendant(on, "error")?.properties.characters).toBe("Fehler");
     const control = descendant(on, "control");
@@ -184,7 +186,10 @@ describe("the markobutono is drawn as a toggle: box, check mark, label and error
     const on = set?.children.find(
       (child) => child.name === "checked=true, size=medium, state=rest",
     );
-    expect(on?.children[0]?.children.map((child) => child.name)).toEqual(["focus-ring", "label"]);
+    expect(on?.children[0]?.children.map((child) => child.name)).toEqual([
+      "focus-ring",
+      "label-row",
+    ]);
     expect(descendant(on, "indicator")?.children).toEqual([]);
   });
 
@@ -238,7 +243,7 @@ describe("the elekto is drawn as a choice: question, options with circle and dot
     const field = rest?.children.find((child) => child.name === "field");
     expect(field?.properties.layoutMode).toBe("VERTICAL");
     expect(field?.children.map((child) => child.name)).toEqual([
-      "label",
+      "label-row",
       "options",
       "help",
       "error",
@@ -338,13 +343,19 @@ describe("the elektilo is drawn as the field of the kampo with the chevron in it
     const field = rest?.children.find((child) => child.name === "field");
     expect(field?.properties.layoutMode).toBe("VERTICAL");
     expect(field?.children.map((child) => child.name)).toEqual([
-      "label",
+      "label-row",
       "focus-ring",
       "help",
       "error",
     ]);
     const control = descendant(rest, "control");
-    expect(control?.children.map((child) => child.name)).toEqual(["text", "indicator"]);
+    // Abnahme #122: the end of the field from the inside out, all in the control.
+    expect(control?.children.map((child) => child.name)).toEqual([
+      "text",
+      "spinner",
+      "clear",
+      "indicator",
+    ]);
     expect(control?.properties.layoutMode).toBe("HORIZONTAL");
     expect(descendant(rest, "label")?.properties.characters).toBe("Auswahl");
     expect(descendant(rest, "text")?.properties.characters).toBe("Bitte wählen");
@@ -390,7 +401,7 @@ describe("the elektilo is drawn as the field of the kampo with the chevron in it
     const { double } = await drawn();
     const kampo = pageNodes(double).find((child) => child.name === "kampo");
     const control = descendant(kampo?.children[0], "control");
-    expect(control?.children.map((child) => child.name)).toEqual(["text"]);
+    expect(control?.children.map((child) => child.name)).toEqual(["text", "spinner", "clear"]);
   });
 
   it("a second run writes nothing new", async () => {
@@ -435,7 +446,7 @@ describe("the tekstareo is drawn as the field of the kampo: kind × size × stat
     expect(bound(descendant(code, "text"), "fontFamily")).toBe("typography/code/font-family");
     expect(bound(descendant(text, "text"), "fontSize")).toBe("typography/body/1/font-size");
     const control = descendant(text, "control");
-    expect(control?.children.map((child) => child.name)).toEqual(["text"]);
+    expect(control?.children.map((child) => child.name)).toEqual(["text", "spinner"]);
     expect(control?.boundVariables.minHeight).toBeUndefined();
     expect(control?.properties.layoutSizingVertical).toBe("HUG");
     expect(descendant(text, "text")?.properties.characters).toBe("Beispiel\n\n\n");
@@ -761,7 +772,7 @@ describe("the plugin draws the alsxutilo (Spec 015 ②)", () => {
       const field = descendant(variant, "field");
       expect(field?.properties.layoutMode, variant.name).toBe("VERTICAL");
       expect(field?.children.map((child) => child.name)).toEqual([
-        "label",
+        "label-row",
         "dropzone",
         "help",
         "error",
@@ -908,7 +919,12 @@ describe("the plugin draws the glitilo (Spec 025 ①)", () => {
     for (const variant of set?.children ?? []) {
       const field = descendant(variant, "field");
       expect(field?.properties.layoutMode, variant.name).toBe("VERTICAL");
-      expect(field?.children.map((child) => child.name)).toEqual(["label", "row", "help", "error"]);
+      expect(field?.children.map((child) => child.name)).toEqual([
+        "label-row",
+        "row",
+        "help",
+        "error",
+      ]);
       const row = descendant(variant, "row");
       expect(row?.properties.layoutMode, variant.name).toBe("HORIZONTAL");
       expect(row?.children.map((child) => child.name)).toEqual([
@@ -965,7 +981,7 @@ describe("the plugin draws the datelektilo (Spec 025 ②)", () => {
       )?.[0]?.boundVariables?.color?.name,
     );
 
-  it("every variant: the field with its row and trigger; the calendar only where expanded, with head, weekdays and six weeks; the looks of the cells bound; a second run writes nothing", async () => {
+  it("every variant: the field with its ring and the trigger in its control; the calendar only where expanded, with head, weekdays and six weeks; the looks of the cells bound; a second run writes nothing", async () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     const set = pageNodes(double).find((node) => node.name === "datelektilo");
@@ -974,16 +990,22 @@ describe("the plugin draws the datelektilo (Spec 025 ②)", () => {
       const field = descendant(variant, "field");
       expect(field?.properties.layoutMode, variant.name).toBe("VERTICAL");
       expect(field?.children.map((child) => child.name)).toEqual([
-        "label",
-        "row",
+        "label-row",
+        "focus-ring",
         "calendar",
         "help",
         "error",
       ]);
-      const row = descendant(variant, "row");
-      expect(row?.properties.layoutMode, variant.name).toBe("HORIZONTAL");
-      expect(row?.children.map((child) => child.name)).toEqual(["focus-ring", "trigger"]);
-      expect(descendant(variant, "control")).toBeDefined();
+      // Abnahme #122: the trigger stands at the end of the control, inside the field's border.
+      expect(descendant(variant, "row"), variant.name).toBeUndefined();
+      const control = descendant(variant, "control");
+      expect(control?.properties.layoutMode, variant.name).toBe("HORIZONTAL");
+      expect(control?.children.map((child) => child.name)).toEqual([
+        "text",
+        "spinner",
+        "clear",
+        "trigger",
+      ]);
       const ranged = variant.name.includes("mode=range");
       expect(descendant(variant, "text")?.properties.characters).toBe(
         ranged ? "06.10.2026 – 10.10.2026" : "24.10.2026",
@@ -1013,7 +1035,7 @@ describe("the plugin draws the datelektilo (Spec 025 ②)", () => {
       for (const week of ["week-1", "week-6"]) {
         expect(descendant(variant, week)?.children, variant.name).toHaveLength(7);
       }
-      expect(bound(descendant(variant, "trigger"), "width")).toBe("size/control/medium");
+      expect(bound(descendant(variant, "trigger"), "width")).toBe("size/target/min");
       expect(bound(descendant(variant, "cell-4"), "width")).toBe("size/target/min");
       expect(bound(descendant(variant, "cell-4"), "cornerRadius")).toBe("radius/role/control");
       // The 28th of September stands first, outside the month; the 1st is the fourth cell.
