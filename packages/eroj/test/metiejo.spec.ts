@@ -109,3 +109,30 @@ test.describe("Metiejo (Nachlese 10)", () => {
     await expect(wahl.locator('[data-fm-teksto="lingvo"]')).toHaveText("Language");
   });
 });
+
+// Spec 035, Befund 4.4 (plan Spec 033, Abweichung 1): a change in the chat makes a step defined and
+// releasable. In the acceptance „Freigeben“ stayed off until „Vorschlag übernehmen“ reloaded the page:
+// the screen showed the new state but not the button. The change here comes over the one draft (as
+// the chat's tools write it, without a language model in the test); the screen follows by itself.
+test.describe("Markenassistent (Spec 035, Befund 4.4)", () => {
+  test("after a change elsewhere the step shows it can be released, and the release works without „Vorschlag übernehmen“", async ({
+    page,
+  }) => {
+    await brand(page, "Freigabe");
+    await page.goto(`${base}/asistanto/freigabe/formo`);
+    const release = page.locator('fm-butono[data-mt-faceto-ago="liberigo"]');
+    await expect(release).toHaveAttribute("disabled", "");
+    const changed = await fetch(`${base}/api/marko/freigabe/entwurf`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ form: { radius: 1.6 } }),
+    });
+    expect(changed.ok).toBe(true);
+    await expect(release).not.toHaveAttribute("disabled");
+    await expect(page.locator("[data-mt-freigabe-satz]")).toHaveText("Bereit zur Freigabe.");
+    await release.click();
+    await expect(page.locator("[data-mt-freigabe-satz]")).toHaveText(
+      "Freigegeben. Du kannst den Schritt wieder öffnen.",
+    );
+  });
+});
