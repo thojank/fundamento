@@ -5,16 +5,27 @@
 //      start values scales their duration (the tokens follow the prompts of the Asistanto, not the
 //      model);
 //   3. the start values of the trial runs of S1–S5 (data/takso.json).
-// A path is the sum of its turns and its local time. The counter sums the Kroniko of one brand.
+// A path is the sum of its turns and its local steps (Kreilo with the releases, export,
+// projections). The export and the projections write their duration into the Kroniko (O-10); the
+// estimate takes their median like the time of the model, the start value only as the fallback.
+// The counter sums the Kroniko of one brand.
 
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
-import { KRONIKO_FILE, type KronikoEro, readKroniko } from "../asistanto/kroniko.js";
+import { basename, dirname, join } from "node:path";
+import { appendKroniko, KRONIKO_FILE, type KronikoEro, readKroniko } from "../asistanto/kroniko.js";
 import { kostoOf, PREZOJ, type PrezojDatoj } from "./prezoj.js";
 
 export type Zugo = "kreilo" | "babilo" | "parolo" | "esploro" | "materialo";
 export type Vojo = "A" | "B" | "C";
 export type Bazo = "protokoll" | "nordstern" | "start";
+/** The local steps of a path: the Kreilo with the releases, the export, the projections. */
+export type Pasxo = "kreilo" | "eksporto" | "projekcioj";
+
+/** A local step measured in the Kroniko (O-10). */
+export interface LokaMezuro {
+  pasxo: Pasxo;
+  ms: number;
+}
 
 export interface ZugoMezuro {
   requests: number;
@@ -35,7 +46,10 @@ export interface Starto {
   modelo: string;
   dato: string;
   zugoj: Record<Zugo, ZugoMezuro & { fonto: string }>;
-  vojoj: Record<Vojo, { zugoj: Partial<Record<Zugo, number>>; lokaMs: number; fonto: string }>;
+  vojoj: Record<
+    Vojo,
+    { zugoj: Partial<Record<Zugo, number>>; loka: Partial<Record<Pasxo, number>>; fonto: string }
+  >;
 }
 
 export interface Takso extends ZugoMezuro {
@@ -45,6 +59,11 @@ export interface Takso extends ZugoMezuro {
   /** Turns of the Kroniko behind a Protokoll estimate. */
   n: number;
   modelo: string;
+  /**
+   * The local time of a path (in `ms` already): `n` measurements of the Kroniko behind it, per
+   * step how many; a step without one stands at its start value.
+   */
+  loka?: { ms: number; n: number; mezuritaj: Partial<Record<Pasxo, number>> };
 }
 
 export const TAKSO_URL = new URL("../../data/takso.json", import.meta.url);
@@ -142,6 +161,8 @@ function median(values: number[]): number {
 interface TaksoInput {
   modelo: string;
   mezuroj?: readonly Mezuro[];
+  /** The local steps measured in the Kroniko of the brands (O-10). */
+  lokaj?: readonly LokaMezuro[];
   rapidoj?: ReadonlyMap<string, number>;
   starto?: Starto;
   prezoj?: PrezojDatoj;
@@ -209,7 +230,9 @@ export function taksi(input: TaksoInput & ({ vojo: Vojo } | { zugo: Zugo })): Ta
     }
   }
   if (!model) bazo = "start";
-  if ("vojo" in input) sum.ms += starto.vojoj[input.vojo].lokaMs;
+  const loka =
+    "vojo" in input ? lokaTakso(starto.vojoj[input.vojo].loka, input.lokaj ?? []) : undefined;
+  if (loka !== undefined) sum.ms += loka.ms;
   const chat = model ? kostoOf(input.modelo, sum, prezoj) : 0;
   const speech =
     sum.sekundoj > 0
@@ -223,7 +246,86 @@ export function taksi(input: TaksoInput & ({ vojo: Vojo } | { zugo: Zugo })): Ta
     bazo,
     n,
     modelo: input.modelo,
+    ...(loka === undefined ? {} : { loka }),
   };
+}
+
+/** The local time of a path: per step the median of the Kroniko, else its start value. */
+function lokaTakso(
+  start: Partial<Record<Pasxo, number>>,
+  lokaj: readonly LokaMezuro[],
+): NonNullable<Takso["loka"]> {
+  let ms = 0;
+  let n = 0;
+  const mezuritaj: Partial<Record<Pasxo, number>> = {};
+  for (const [pasxo, fallback] of Object.entries(start) as [Pasxo, number][]) {
+    const measured = lokaj.filter((entry) => entry.pasxo === pasxo).map((entry) => entry.ms);
+    if (measured.length === 0) {
+      ms += fallback;
+      continue;
+    }
+    ms += median(measured);
+    n += measured.length;
+    mezuritaj[pasxo] = measured.length;
+  }
+  return { ms, n, mezuritaj };
+}
+
+const PASXO_NOMO: Record<Pasxo, string> = {
+  kreilo: "Kreilo",
+  eksporto: "Export",
+  projekcioj: "Projektionen",
+};
+
+/** The export and the projections in the Kroniko (O-10): `ago` eksporto with step and duration. */
+export function lokaMezurojOf(entries: readonly KronikoEro[]): LokaMezuro[] {
+  const lokaj: LokaMezuro[] = [];
+  for (const entry of entries) {
+    if (entry.ago !== "eksporto") continue;
+    const detaloj = record(entry.detaloj);
+    if (
+      typeof detaloj.ms !== "number" ||
+      !(detaloj.pasxo === "eksporto" || detaloj.pasxo === "projekcioj")
+    )
+      continue;
+    lokaj.push({ pasxo: detaloj.pasxo, ms: detaloj.ms });
+  }
+  return lokaj;
+}
+
+/** Writes a local step with its duration into the Kroniko of a brand (O-10). */
+export function notiLokan(
+  workdir: string,
+  name: string,
+  step: {
+    pasxo: Exclude<Pasxo, "kreilo">;
+    ms: number;
+    partoj?: Record<string, number>;
+    celoj?: readonly string[];
+  },
+): KronikoEro {
+  return appendKroniko(workdir, name, {
+    ago: "eksporto",
+    fonto: "sistemo",
+    detaloj: {
+      pasxo: step.pasxo,
+      ms: Math.round(step.ms),
+      ...(step.partoj === undefined ? {} : { partoj: step.partoj }),
+      ...(step.celoj === undefined ? {} : { celoj: [...step.celoj] }),
+    },
+  });
+}
+
+/**
+ * The brand of a config in its export folder, `<workdir>/<name>/eksporto/fundamento.config.json`,
+ * when the brand has a Kroniko; undefined for any other config.
+ */
+export function markoOfEksporto(config: string): { workdir: string; name: string } | undefined {
+  const eksporto = dirname(config);
+  if (basename(eksporto) !== "eksporto") return undefined;
+  const marko = dirname(eksporto);
+  if (!existsSync(join(marko, KRONIKO_FILE))) return undefined;
+  return { workdir: dirname(marko), name: basename(marko) };
 }
 
 const grouped = (value: number) => String(value).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
@@ -256,7 +358,12 @@ export function taksoSatz(takso: Takso, starto: Starto = STARTO): string {
           ? `Probeläufe vom ${starto.dato.split("-").reverse().join(".")}`
           : `Startwerte, gemessen mit ${starto.modelo}`;
   const usd = dollarsOf(takso.usd, takso.modelo);
-  return `≈ ${secondsOf(takso.ms)} · ≈ ${grouped(rounded)} Tokens · ${takso.usd === undefined ? usd : `≈ ${usd}`} · Grundlage: ${bazo}`;
+  const measured = Object.entries(takso.loka?.mezuritaj ?? {}) as [Pasxo, number][];
+  const loka =
+    measured.length === 0
+      ? ""
+      : `; lokal aus dem Protokoll: ${measured.map(([pasxo, count]) => `${PASXO_NOMO[pasxo]} (${count})`).join(", ")}`;
+  return `≈ ${secondsOf(takso.ms)} · ≈ ${grouped(rounded)} Tokens · ${takso.usd === undefined ? usd : `≈ ${usd}`} · Grundlage: ${bazo}${loka}`;
 }
 
 export interface Zaehlilo {

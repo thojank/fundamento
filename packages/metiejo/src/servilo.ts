@@ -103,8 +103,10 @@ import {
   screen,
 } from "./sxtupoj.js";
 import {
+  lokaMezurojOf,
   mezurojOf,
   nordsteloRapidoj,
+  notiLokan,
   readKronikoj,
   STARTO,
   type Takso,
@@ -400,10 +402,12 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     const modelo = options.ki?.provider?.toString() ?? STARTO.modelo;
     rapidoj ??= nordsteloRapidoj(join(options.root, ".fundamento", "nordstelo"));
     const speeds = rapidoj;
-    const mezuroj = mezurojOf(readKronikoj(options.workdir));
+    const kronikoj = readKronikoj(options.workdir);
+    const mezuroj = mezurojOf(kronikoj);
+    const lokaj = lokaMezurojOf(kronikoj);
     const withSatz = (takso: Takso) => ({ ...takso, satz: taksoSatz(takso) });
     const of = (input: { vojo: Vojo } | { zugo: Zugo }) =>
-      withSatz(taksi({ ...input, modelo, mezuroj, rapidoj: speeds }));
+      withSatz(taksi({ ...input, modelo, mezuroj, lokaj, rapidoj: speeds }));
     return {
       modelo,
       vojoj: { A: of({ vojo: "A" }), B: of({ vojo: "B" }), C: of({ vojo: "C" }) },
@@ -520,8 +524,10 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       options.deps?.cacheDir ?? join(options.root, "nenie"),
       options.workdir,
     );
+    const started = Date.now();
+    const written = celoj.length === 0 ? (["aspekto"] as const) : celoj;
     const result = await exportMarko(options.workdir, name, draft.agordo, bases, {
-      celoj: celoj.length === 0 ? ["aspekto"] : celoj,
+      celoj: written,
       fonts,
       ...(options.npm === undefined ? {} : { npm: options.npm }),
     });
@@ -532,6 +538,14 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       teksto: avertoOf(fremdaOf(name)),
       detaloj: { celoj },
     });
+    // Spec 033 S6 (O-10): the duration of a written export, for the estimate of the local time.
+    if (result.ok)
+      notiLokan(options.workdir, name, {
+        pasxo: "eksporto",
+        ms: Date.now() - started,
+        ...(result.partoj === undefined ? {} : { partoj: result.partoj }),
+        celoj: written,
+      });
     draft.eksporto = {
       sentences: result.ok ? result.sentences : [],
       issues: result.ok
