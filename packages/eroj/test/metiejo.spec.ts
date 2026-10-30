@@ -143,3 +143,66 @@ test.describe("Markenassistent (Spec 035, Befund 4.4)", () => {
     );
   });
 });
+
+// Spec 035, Befund 4.5.2: the left bar of the assistant shows the state of every step (offen,
+// definiert, freigegeben, Prüfung offen), and a long name wraps instead of running out of its column.
+test.describe("Markenassistent (Spec 035, Befund 4.5.2)", () => {
+  test("every step shows its state, and long names wrap without ellipsis or overflow", async ({
+    page,
+  }) => {
+    await brand(page, "Leiste");
+    await page.goto(`${base}/asistanto/leiste/gvidkoloro`);
+    const nav = page.locator('fm-navigado[label="Schritte"]');
+    const steps = nav.locator(":scope > a[href^='/asistanto/leiste/']:not([data-page='komenco'])");
+    await expect(steps).toHaveCount(12);
+    // The navigado has decorated its links (the current page) before anything is read.
+    await expect(steps.first()).toHaveAttribute("aria-current", "page");
+    const badges = await nav.evaluate((host) =>
+      [...host.querySelectorAll(":scope > a")]
+        .filter((link) => /^\/asistanto\/[^/]+\/(?!komenco$)/.test(link.getAttribute("href") ?? ""))
+        .map((link) => {
+          const name = link.getAttribute("data-page") ?? "";
+          const badge = link.querySelector(`[data-mt-faceto-stato="${name}"]`);
+          const box = badge?.getBoundingClientRect();
+          return {
+            name,
+            text: badge?.textContent?.trim() ?? null,
+            visible: box !== undefined && box.width > 0 && box.height > 0,
+          };
+        }),
+    );
+    expect(badges).toHaveLength(12);
+    for (const badge of badges) {
+      expect.soft(badge.visible, badge.name).toBe(true);
+      expect
+        .soft(badge.text, badge.name)
+        .toMatch(/^(offen|definiert|freigegeben)( · Prüfung offen)?$/);
+    }
+    // A long invented name in the first step, as a brand's own step names may be one day.
+    await steps
+      .first()
+      .evaluate((link) =>
+        link.prepend(
+          document.createTextNode("Wolkenfinkenfederleichtigkeitsprobe und Abendrotschimmer "),
+        ),
+      );
+    const geometry = await nav.evaluate((host) => {
+      const column = host.getBoundingClientRect();
+      return [...host.querySelectorAll(":scope > a")].map((link) => {
+        const box = link.getBoundingClientRect();
+        const style = getComputedStyle(link);
+        return {
+          text: (link.textContent ?? "").trim().slice(0, 40),
+          overflow: link.scrollWidth - link.clientWidth,
+          beyond: box.right - column.right,
+          ellipsis: style.textOverflow,
+        };
+      });
+    });
+    for (const link of geometry) {
+      expect.soft(link.overflow, link.text).toBeLessThanOrEqual(1);
+      expect.soft(link.beyond, link.text).toBeLessThanOrEqual(1);
+      expect.soft(link.ellipsis, link.text).not.toBe("ellipsis");
+    }
+  });
+});
