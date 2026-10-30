@@ -1,9 +1,9 @@
 /* Synthetic test page for Weg C (Spec 035, Befund 4.1): the secondary colour is the most frequent
    colour of the CSS; the defining colour of the brand is not in the CSS at all. */
 :root {
-  --brand-accent: #d9480f;
-  --text: #1f2328;
-  --flaeche: #ffffff;
+  --fm-brand-accent: #d9480f;
+  --fm-text: #1f2328;
+  --fm-flaeche: #ffffff;
 }
 body {
   margin: 0;
@@ -49,7 +49,7 @@ h1 {
   display: inline-block;
   padding: 12px;
   border-radius: 6px;
-  background: var(--brand-accent);
+  background: var(--fm-brand-accent);
   color: #ffffff;
 }
 a:hover {
