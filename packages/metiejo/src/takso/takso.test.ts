@@ -7,12 +7,15 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
-import type { KronikoEro } from "../asistanto/kroniko.js";
+import { type KronikoEro, readKroniko } from "../asistanto/kroniko.js";
 import { kostoOf, PREZOJ, prezoOf } from "./prezoj.js";
 import {
+  lokaMezurojOf,
   type Mezuro,
+  markoOfEksporto,
   mezurojOf,
   nordsteloRapidoj,
+  notiLokan,
   STARTO,
   taksi,
   taksoSatz,
@@ -207,5 +210,63 @@ describe("the estimate before the start, per path and model (Spec 033 S6)", () =
       modelo: MINISTRAL,
     });
     expect(satz).toBe("≈ 36 s · ≈ 6 850 Tokens · ≈ 0,0014 $ · Grundlage: Protokoll (4 Züge)");
+  });
+});
+
+// O-10 (Maintainer, 2026-10-30, Variante b): the duration of the export and of the projections goes
+// into the Kroniko; the estimate takes it like the time of the model, the start value only as the
+// fallback.
+describe("the local time of a path from the Kroniko (Spec 033 S6, O-10)", () => {
+  const eksporto = (pasxo: string, ms: number) =>
+    ero({ ago: "eksporto", fonto: "sistemo", detaloj: { pasxo, ms } });
+
+  it("the start value stays the fallback: Kreilo, export and projections together are the 28 s of before", () => {
+    const loka = STARTO.vojoj.A.loka;
+    expect((loka.kreilo ?? 0) + (loka.eksporto ?? 0) + (loka.projekcioj ?? 0)).toBe(28_000);
+    expect(taksi({ vojo: "A", modelo: MINISTRAL }).loka).toMatchObject({ ms: 28_000, n: 0 });
+  });
+
+  it("reads the export and the projections from the Kroniko, nothing else", () => {
+    expect(
+      lokaMezurojOf([
+        eksporto("eksporto", 5000),
+        eksporto("projekcioj", 7000),
+        ero({ ago: "averto", fonto: "sistemo" }),
+        ero({ ago: "eksporto", fonto: "sistemo", detaloj: { pasxo: "eksporto" } }),
+      ]),
+    ).toEqual([
+      { pasxo: "eksporto", ms: 5000 },
+      { pasxo: "projekcioj", ms: 7000 },
+    ]);
+  });
+
+  it("takes the median of the measured steps, the start value for a step without measurement", () => {
+    const lokaj = lokaMezurojOf([
+      eksporto("eksporto", 4000),
+      eksporto("eksporto", 6000),
+      eksporto("eksporto", 5000),
+      eksporto("projekcioj", 7000),
+    ]);
+    const measured = taksi({ vojo: "A", modelo: MINISTRAL, lokaj });
+    const start = taksi({ vojo: "A", modelo: MINISTRAL });
+    const kreilo = STARTO.vojoj.A.loka.kreilo ?? 0;
+    expect(measured.loka).toMatchObject({ ms: kreilo + 5000 + 7000, n: 4 });
+    expect(measured.ms - start.ms).toBe(kreilo + 12_000 - 28_000);
+    expect(taksoSatz(measured)).toContain("lokal aus dem Protokoll: Export (3), Projektionen (1)");
+  });
+
+  it("finds the brand of an export folder and writes the step into its Kroniko", () => {
+    const workdir = join(scratch, "marken-o10");
+    mkdirSync(join(workdir, "pano", "eksporto"), { recursive: true });
+    writeFileSync(join(workdir, "pano", "kroniko.jsonl"), "");
+    const config = join(workdir, "pano", "eksporto", "fundamento.config.json");
+    expect(markoOfEksporto(config)).toEqual({ workdir, name: "pano" });
+    expect(markoOfEksporto(join(scratch, "fundamento.config.json"))).toBeUndefined();
+    notiLokan(workdir, "pano", { pasxo: "projekcioj", ms: 6800, celoj: ["vitrino"] });
+    expect(readKroniko(workdir, "pano").at(-1)).toMatchObject({
+      ago: "eksporto",
+      fonto: "sistemo",
+      detaloj: { pasxo: "projekcioj", ms: 6800, celoj: ["vitrino"] },
+    });
   });
 });

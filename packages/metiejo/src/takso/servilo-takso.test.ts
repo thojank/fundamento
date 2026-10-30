@@ -117,6 +117,37 @@ describe("the estimate before the start (Spec 033 S6)", () => {
   });
 });
 
+describe("the local time from the Kroniko (Spec 033 S6, O-10)", () => {
+  it("the export writes its duration and its parts into the Kroniko, and the estimate of Weg A takes it", {
+    timeout: 120_000,
+  }, async () => {
+    const saved = await fetch(`${servilo.url}/studio/kosto/speichern`, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "eksporto-aspekto=ja&eksporto-css=ja",
+      redirect: "manual",
+    });
+    expect(saved.status).toBe(303);
+    const entry = readKroniko(workdir, "kosto").findLast((ero) => ero.ago === "eksporto");
+    expect(entry?.fonto).toBe("sistemo");
+    const detaloj = entry?.detaloj as {
+      pasxo: string;
+      ms: number;
+      partoj: Record<string, number>;
+      celoj: string[];
+    };
+    expect(detaloj.pasxo).toBe("eksporto");
+    expect(detaloj.ms).toBeGreaterThan(0);
+    expect(Object.keys(detaloj.partoj)).toEqual(["paket", "projekcioj", "pruefung"]);
+    expect(detaloj.celoj).toEqual(["aspekto", "css"]);
+    const takso = (await (await fetch(`${servilo.url}/api/marko/kosto/takso`)).json()) as {
+      vojoj: { A: { loka: { n: number }; satz: string } };
+    };
+    expect(takso.vojoj.A.loka.n).toBeGreaterThanOrEqual(1);
+    expect(takso.vojoj.A.satz).toContain("lokal aus dem Protokoll: Export");
+  });
+});
+
 describe("the counter during the work (Spec 033 S6)", () => {
   it("counts tokens, dollars and time of every turn from the Kroniko, also after a restart", async () => {
     const turn = await post(servilo.url, "/api/marko/kosto/asistanto", {

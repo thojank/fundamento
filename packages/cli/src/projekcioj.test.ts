@@ -9,7 +9,7 @@
 // .fundamento/projekcioj` auf und prüft das Ergebnis).
 
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -122,4 +122,31 @@ describe("fm projekcioj build (T008)", () => {
     };
     expect(manifest.celoj).toEqual(["make-kit"]);
   }, 60_000);
+});
+
+// Spec 033 S6, O-10: the projections of a brand's export say how long they took in its Kroniko, so
+// the estimate of Weg A takes the measured time. A config outside a brand's export folder writes
+// nothing. Budget: 2,1 s local with the real Modelo and one Celo; 30 s cover a slow runner.
+describe("fm projekcioj build in the export folder of a brand (Spec 033 S6)", () => {
+  it("writes its duration into the Kroniko of the brand", { timeout: 30_000 }, () => {
+    const workdir = mkdtempSync(join(tmpdir(), "fm-cli-kroniko-"));
+    const eksporto = join(workdir, "pano", "eksporto");
+    mkdirSync(eksporto, { recursive: true });
+    writeFileSync(join(workdir, "pano", "kroniko.jsonl"), "");
+    writeFileSync(join(eksporto, "fundamento.config.json"), '{ "aspektoj": [] }\n');
+    const { run } = build(["--config", join(eksporto, "fundamento.config.json"), "--celo", "css"]);
+    expect(run.status).toBe(0);
+    const lines = readFileSync(join(workdir, "pano", "kroniko.jsonl"), "utf8")
+      .trim()
+      .split("\n");
+    const entry = JSON.parse(lines.at(-1) ?? "{}") as {
+      ago: string;
+      fonto: string;
+      detaloj: { pasxo: string; ms: number; celoj: string[] };
+    };
+    expect(entry).toMatchObject({ ago: "eksporto", fonto: "sistemo" });
+    expect(entry.detaloj).toMatchObject({ pasxo: "projekcioj", celoj: ["css"] });
+    expect(entry.detaloj.ms).toBeGreaterThan(0);
+    expect(run.stdout).toContain("Kroniko");
+  });
 });
