@@ -16,6 +16,7 @@ const cli = join(repoRoot, "packages/cli/dist/index.js");
 let server: ChildProcess | undefined;
 let base = "";
 let workdir = "";
+let stopping = false;
 
 /**
  * Starts the Metiejo on a port of 7310–7399 (7301 stays free for a person's own server): the
@@ -33,16 +34,21 @@ function start(port: number): Promise<ChildProcess | undefined> {
       said += chunk.toString("utf8");
       if (said.includes(`http://localhost:${port}`)) done(child);
     });
-    // A server that fails after it listened says why, for the report of the run (a stop ends with 0).
-    child.once("exit", (code) => {
-      if (code !== 0 && said.includes(`http://localhost:${port}`))
-        console.error(`the Metiejo on ${port} ended (${code}): ${said}`);
+    // A server that ends after it listened, but not by afterAll, says how, for the report of the run.
+    child.once("exit", (code, signal) => {
+      if (!stopping && said.includes(`http://localhost:${port}`))
+        console.error(
+          `the Metiejo on ${port} ended (${code ?? signal}) before the tests did: ${said}`,
+        );
       done(undefined);
     });
   });
 }
 
 test.beforeAll(async () => {
+  // Fully parallel, a worker may run afterAll and beforeAll more than once: every start is new.
+  server = undefined;
+  stopping = false;
   workdir = mkdtempSync(join(tmpdir(), "fm-studio-035-"));
   const first = test.info().workerIndex * 3;
   for (let attempt = 0; attempt < 30 && server === undefined; attempt += 1) {
@@ -54,6 +60,7 @@ test.beforeAll(async () => {
 });
 
 test.afterAll(() => {
+  stopping = true;
   server?.kill();
   rmSync(workdir, { recursive: true, force: true });
 });
