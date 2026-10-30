@@ -30,9 +30,13 @@
   - H `20261029-1126`: F 74,2 gegen 0 35,2 (Spec 030: 69 gegen 72,9), 314 Anfragen, ≤ 0,81 $
   - K `20261029-1127`: F 76 gegen 0 33,3 (Spec 030: 74,9 gegen 47,6), 333 Anfragen, 0 $
   - `restaro` je 0 abweichend
-- [ ] **T3406 ② Reihe O** mit `/tmp/n12-o-reihe.sh`: drei Messpunkte, Kontingent 1 000 Anfragen am Tag.
+- [x] **T3406 ② Reihe O** mit `/tmp/n12-o-reihe.sh`, Werkzeug `269b4ff`:
+  - Ausgangslinie `20261029-1143`: F 68,2 gegen 0 36,1, 5 von 40 ohne Seite
+  - nach den Korrekturen `20261029-1306`: F 85,2 gegen 0 36,1, 6 von 40
+  - nach der Fonto `20261029-1437`: am Tageslimit pausiert, am 30.10. fortgesetzt, Abbruch bei 9 von 40 ohne Seite – **Reihe O nicht messbar mit diesem Anbieter**
 - [x] **T3407 Größe und Pixelvergleich der Vitrino:** komuna und ekzemplo 15,1 → 7,7 MB, 16 von 16 Abschnitten pixelgleich.
-- [ ] **T3408 M5 in der CI:** mindestens zehn Läufe nach der Änderung, nach Runner-Klasse; Dauer der Vitrino-Jobs vorher und nachher.
+- [x] **T3408 M5 in der CI:** 11 Versuche nach der Änderung nach Runner-Klasse; Gegenprobe 2 in 6 von 6 Läufen rot; Dauer der Vitrino-Jobs vorher 9,6 min (10 Läufe), nachher 9,1 min (8 Läufe).
+- [x] **T3412 B-4 für H und K** neu gerechnet (Nachtrag vom 29.10.): H unverändert, K Ausgangslinie und nach den Korrekturen mit unterer Grenze.
 - [x] **T3409 Doku:** plan, tasks, Vojmapo.
 - [x] **T3410 Zweite Gegenprobe von M5** (Nachtrag des Maintainers vom 29.10.): Stil und Layout von 80 ms ohne langes Skript. Rot in `7d53853`, die Hilfe `stilBlockadeEinbauen` grün. Gemessen: 97 ms je Umschalten, Skripte 9 ms, Perzentil 207 ms.
 - [x] **T3411 B-4:** Ein Ergebnis ohne Seite zählt seinen eigenen Aufwand. Rot in `c136046`, grün im Folgecommit.
