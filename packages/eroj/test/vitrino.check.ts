@@ -1201,6 +1201,100 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     expect(timings.scriptLongest).toBeGreaterThan(M5_GRENZE_MS);
   });
 
+  // Spec 035 Befund 1.2: the calibration of Gegenprobe 2 must hold 80 ms of style and layout on
+  // every runner, or stop and say so. Two runners it did not hold on, replayed the same on every
+  // machine (one forced layout of the block after the other):
+  // - #115 (CI, 30.10.): right after the block had grown to 16 000 elements two switches cost more
+  //   than 100 ms; an eighth less was too little, so it went back to 16 000 elements and took the
+  //   next two switches – 72 ms – as the result (71.8 ms in the log).
+  // - CPU throttled ×4 (locally, 30.10., one run in six): the first switch of the first 2 000
+  //   elements also laid them out and cost more than 100 ms, so it never grew; 2 000 elements,
+  //   23.4 ms.
+  const LAEUFER = [
+    {
+      name: "#115",
+      /** Style and layout per element of the block: 16 000 elements cost 75.2 ms. */
+      msJeElement: 0.0047,
+      /** The noise of the runner, one factor per forced layout, in this order and then again. */
+      folge: [1, 0.99, 1.01, 0.98, 1.02, 1.36, 1.38, 1.02, 0.99, 0.97, 0.955],
+    },
+    {
+      name: "CPU gedrosselt ×4",
+      /** 2 000 elements cost 23.4 ms. */
+      msJeElement: 0.0117,
+      /** The first switch after the block grew lays the new elements out, too. */
+      folge: [5, 1, 1.02, 0.98, 1, 0.99, 1.01, 1, 0.98, 1.02],
+    },
+  ];
+
+  /**
+   * A runner for the calibration that does not depend on the machine (runs in the page): the
+   * page's clock stands still, except when the layout of the block is forced; then it advances by
+   * `msJeElement` per element of the block times the next factor of `folge`. The real layout of
+   * the block is skipped, so the run is quick and the result is the same everywhere.
+   */
+  function gedachterLaeufer(laeufer: { msJeElement: number; folge: number[] }): void {
+    let uhr = 0;
+    let index = 0;
+    performance.now = () => uhr;
+    const original = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "offsetHeight");
+    Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+      configurable: true,
+      get(this: HTMLElement) {
+        if (this.id !== "fm-m5-stilblockade") return original?.get?.call(this);
+        const faktor = laeufer.folge[index % laeufer.folge.length] ?? 1;
+        index += 1;
+        uhr += this.childElementCount * laeufer.msJeElement * faktor;
+        return 0;
+      },
+    });
+  }
+
+  /** The block measured again after the calibration: the median of five switches (in the page). */
+  function stilBlockadeNachmessen(): number {
+    const host = document.getElementById("fm-m5-stilblockade");
+    if (host === null) return 0;
+    const umschalten = () => {
+      host.classList.toggle("an");
+      const started = performance.now();
+      void host.offsetHeight;
+      return performance.now() - started;
+    };
+    umschalten();
+    const werte = [umschalten(), umschalten(), umschalten(), umschalten(), umschalten()];
+    return werte.sort((a, b) => a - b)[2] ?? 0;
+  }
+
+  for (const laeufer of LAEUFER)
+    test(`M5 Gegenprobe 2, calibration (Befund 1.2): on a runner like ${laeufer.name} the block holds 80 ms of style and layout`, async ({
+      page,
+    }) => {
+      await page.setContent("<!doctype html><html><head></head><body></body></html>");
+      await page.evaluate(gedachterLaeufer, laeufer);
+      const last = await page.evaluate(stilBlockadeEinbauen, 80);
+      const nachgemessen = await page.evaluate(stilBlockadeNachmessen);
+      process.stderr.write(
+        `M5 Gegenprobe 2, Kalibrierung (Läufer wie ${laeufer.name}): ${last.elemente} Elemente, Stil und Layout ${last.kosten.toFixed(1)} ms, nachgemessen ${nachgemessen.toFixed(1)} ms\n`,
+      );
+      expect(last.kosten).toBeGreaterThanOrEqual(80);
+      expect(nachgemessen).toBeGreaterThanOrEqual(80);
+    });
+
+  test("M5 Gegenprobe 2, calibration (Befund 1.2): under CPU throttling (rate 4) the block holds 80 ms of style and layout", async ({
+    page,
+  }) => {
+    await page.setContent("<!doctype html><html><head></head><body></body></html>");
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
+    const last = await page.evaluate(stilBlockadeEinbauen, 80);
+    const nachgemessen = await page.evaluate(stilBlockadeNachmessen);
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
+    process.stderr.write(
+      `M5 Gegenprobe 2, Kalibrierung (${test.info().project.name}, CPU gedrosselt ×4): ${last.elemente} Elemente, Stil und Layout ${last.kosten.toFixed(1)} ms, nachgemessen ${nachgemessen.toFixed(1)} ms\n`,
+    );
+    expect(last.kosten).toBeGreaterThanOrEqual(80);
+  });
+
   test("the Werkstatt is keyboard-operable and announces the report politely", async ({ page }) => {
     await openWerkstatt(page, { name: "flava", leitfarbe: "#F5C400" });
     await checkedAtLeast(page, 1);
