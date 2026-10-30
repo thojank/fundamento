@@ -1151,3 +1151,26 @@ describe("the Vitrino shows every Ero disabled with a reason (Spec 029 ②b-1 M-
     );
   });
 });
+
+// Abnahme #122, 5: the clear button to be seen – the five fields with a clear button in the field,
+// with a value, empty, disabled and read-only; the column loading for the date picker and the
+// styled list too.
+describe("the Vitrino shows the clear button of the fields (Abnahme #122)", () => {
+  it("the section loeschen: five fields, four columns", () => {
+    expect(html).toContain('id="fm-vitrino-loeschen"');
+    const rows = [...(datumoj.loeschen ?? "").matchAll(/<th scope="row">fm-([a-z]+)<\/th>/g)].map(
+      (match) => match[1],
+    );
+    expect(rows).toEqual(["kampo", "elektilo", "listelektilo", "kompletigilo", "datelektilo"]);
+    expect(datumoj.loeschen).toContain(
+      '<th scope="col">mit Wert</th><th scope="col">leer</th><th scope="col">disabled</th><th scope="col">readonly</th>',
+    );
+    expect((datumoj.loeschen ?? "").match(/ clearable/g)).toHaveLength(20);
+  });
+
+  it("the date picker and the styled list show the column loading", () => {
+    for (const ero of ["datelektilo", "listelektilo"]) {
+      expect(datumoj.eroj[ero], ero).toMatch(new RegExp(`<fm-${ero}[^>]* loading[ >]`));
+    }
+  });
+});

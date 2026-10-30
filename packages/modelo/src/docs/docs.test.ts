@@ -3927,3 +3927,14 @@ describe("Spec 029 ②b-1: the CHANGELOG names the flags of the brief for MCP cl
     expect(unreleased).toContain("`props`");
   });
 });
+
+// Abnahme #122, 6: the plan said that clearing a field says input and change; the elektilo and the
+// listelektilo say change alone, as when a person chooses (their Skemo names change alone). The
+// plan says so, with the reason.
+describe("Abnahme #122: the plan names the events of clearing as the elements say them", () => {
+  it("M-6: input and change where the Skemo names both, change alone at elektilo and listelektilo", () => {
+    const plan = read("specs/029-fonto-astryx/plan.md");
+    expect(plan).not.toContain("ein Druck leert den Wert, sagt input und change");
+    expect(plan).toContain("elektilo und listelektilo sagen beim Leeren nur change");
+  });
+});
