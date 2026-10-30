@@ -153,6 +153,10 @@
 - [x] **T3361 B-13:** `scripts/abnahme-weg-a.ts` mit Uhr und CPU je Schritt und der Last. Gemessen: Skript unter Last und ohne, Vergleich S3/S6 alt/S6 neu, `node`/`tsx`, Eingaben. Ergebnis im plan. Startwerte unverändert (O-10).
 - [x] **T3362 tsx:** devDependency der Metiejo statt `npx`. Abnahmeliste oben im plan, O-9 entschieden. Doku-Test rot in `de96b86`.
 
+### E – O-10 (Variante b)
+- [x] **T3363 Tests:** `takso.test.ts` (Startwert in der Summe 28 s, Messungen aus der Kroniko, Median je Schritt mit Rückfall, Marke des Exportordners), `kroniko.test.ts` (Eintrag `eksporto` gegen das Schema), `servilo-takso.test.ts` (Export schreibt Dauer und Teile, Schätzung nimmt sie), CLI `projekcioj.test.ts` (Build im Exportordner schreibt in die Kroniko). Rot in `587d69a`, Doku-Test rot in `d0748f5`.
+- [x] **T3364 Umsetzung:** `ago` `eksporto` in Schema und Typen; `exportMarko` mit Teilen, `notiLokan` im Server; `fm projekcioj build` mit `markoOfEksporto`; `lokaMezurojOf` und die lokalen Schritte in `taksi`; `takso.json` mit `loka` je Schritt (D-22).
+
 ### Messungen
 
 | Was | Wert |

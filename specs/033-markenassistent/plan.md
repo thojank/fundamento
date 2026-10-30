@@ -92,6 +92,7 @@ cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds && pnpm --filter 
 - Im Assistenten steht neben dem Modell „bisher … Tokens · … $ · … s · … Anfragen“. Der Zähler wächst mit jeder Antwort und steht nach einem Neustart von `pnpm fm metiejo` wieder da.
 - Das Skript spielt Weg A durch (Abnahme 5, etwa 0,0015 $). Es druckt die Schätzung vor dem Start, je Schritt Uhr und CPU, die Last des Rechners, das Verhältnis Schätzung/gemessen und „Schlüssel in Kroniko oder Log: nein“.
 - Die Preise: `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/packages/metiejo/data/prezoj.json`.
+- Nach dem Lauf des Skripts oder nach „Speichern“ im Studio und `fm projekcioj build` im Exportordner endet die Zeile von Weg A in `takso` mit „lokal aus dem Protokoll: Export (…), Projektionen (…)“ (O-10).
 
 ## S1 – Amendment v2.5, Markenmodell, Ablauf neben dem Studio, Chat über Werkzeuge, Freigabe, Kroniko, Bestätigung und Hinweis
 
@@ -186,7 +187,7 @@ Gemessen am 2026-10-29 ohne Sprachmodell (die Züge des Modells trafen die Schä
 - **Was die Zeit kostet:** Ein CPU-Profil des Exports zeigt breite Arbeit ohne einzelnen Ausreißer. Es werden alle Kombinationen aufgelöst (`resolve`, `overlay`), Kontraste geprüft (`alirebleco/color`), kanonisch serialisiert und das Figma-Plugin gebaut; etwa 10 % entfallen auf die Speicherbereinigung.
 - **Abnahme 5:** Für ihren Lauf ist die Last nicht festgehalten. Ihr Muster (Export 12,7 s, Projektionen ≈ 21 s) gleicht den Läufen unter Last. Das Skript schreibt die Last deshalb jetzt in jeden Lauf.
 
-Die Startwerte bleiben wie gesetzt (lokal 28 s, Mittel aus 16,0 und 40,2 s). Auf einem freien Rechner braucht Weg A lokal etwa 15 s; mit 11–12 s Modellzeit schätzt der Startwert die Dauer dann etwa 1,5-fach zu hoch (O-10).
+Die Startwerte bleiben in der Summe wie gesetzt (lokal 28 s, Mittel aus 16,0 und 40,2 s). Auf einem freien Rechner braucht Weg A lokal etwa 15 s. Seit O-10 kommen Export und Projektionen deshalb aus der Kroniko, sobald sie dort stehen; der Startwert ist nur noch der Rückfall.
 
 ### Abweichungen
 
@@ -630,6 +631,12 @@ pnpm --filter @fundamento/metiejo exec vitest run src/parolo src/asistanto
    - **B-4:** `chatCompletion` zählt die Tokens jedes Versuchs, auch die von Antworten ohne Nachricht, die vorher dem Budget belastet, aber nicht gemeldet wurden. Bei einem Fehler hängt die Anfrage ihren eigenen Aufwand an (`spent`), ein Zug die Kosten des ganzen Zugs (`kosto`).
    - Der Server hält einen Zug, der mit Fehler endet, mit diesem eigenen Aufwand und dem Grund in der Kroniko fest (Chat, Kreilo, Recherche). Der Zähler zählt ihn damit, und nichts von einem Zug, der gleichzeitig lief. `runAgent` der Nordstelo zählt die fehlgeschlagene Anfrage ebenso mit.
 7. **`tsx` als devDependency der Metiejo:** Die Probeläufe liegen als `packages/metiejo/scripts/abnahme-weg-a.ts` im Repo und laufen mit `pnpm --filter @fundamento/metiejo exec tsx …` statt über einen Download aus npm.
+8. **Lokale Zeit aus der Kroniko (O-10, Variante b):** Export und Projektionen schreiben ihre Dauer in die Kroniko, als neue Art `ago` `eksporto` mit Quelle `sistemo`.
+   - **Export:** Jeder geschriebene Export („Speichern“ in Schnellstart und Studio) hält fest: `pasxo` `eksporto`, `ms`, die Teile (`paket`, `projekcioj` für CSS und Figma, `pruefung` für die Byteprüfung) und die Ziele.
+   - **Projektionen:** `fm projekcioj build` mit einer Konfiguration im Exportordner einer Marke (`marken/<marke>/eksporto/fundamento.config.json`) hält `pasxo` `projekcioj` mit `ms` und den gebauten Celoj fest und sagt das in einer Zeile. Eine Konfiguration anderswo schreibt nichts.
+   - **Schätzung:** Die lokale Zeit von Weg A besteht aus drei Schritten: Kreilo mit den Freigaben, Export, Projektionen. Je Schritt nimmt sie den Median aus der Kroniko aller Marken, wie die Zeit des Modells. Der Startwert gilt nur als Rückfall für einen Schritt ohne Messung.
+   - **Startwert:** Die bisherigen 28 s sind nach den Anteilen der Messung je Schritt aus B-13 aufgeteilt (3,5 / 10,2 / 14,3 s); die Summe bleibt 28 s.
+   - **Anzeige:** Die Zeile der Schätzung nennt die gemessenen Schritte, zum Beispiel „lokal aus dem Protokoll: Export (3), Projektionen (1)“.
 
 ### Entwurfsentscheidungen
 
@@ -641,6 +648,11 @@ Die Kroniko hält jeden Zug mit Modell und Kosten fest. Liest der Zähler sie, s
 
 #### D-21 Grenzen nur, wenn sie gesetzt sind
 Der Server bekommt `ki.limoj` von `start.ts`. Tests ohne Grenzen laufen ohne Wartezeit; der Probelauf und `pnpm fm metiejo` laufen mit den Grenzen des Anbieters.
+
+#### D-22 Lokale Schritte wie Züge des Modells (O-10)
+Die Dauer eines Schritts misst, wer ihn ausführt: der Server den Export, der CLI-Befehl die Projektionen. Beide schreiben in die Kroniko der Marke, denn dort liest die Schätzung schon die Züge des Modells. Anders als Tokens hängt die lokale Zeit nicht am Modell, deshalb zählen die Messungen aller Marken für jedes Modell. Den Kreilo misst noch niemand; er bleibt beim Startwert (3,5 s von 28 s).
+
+Die Projektionen finden ihre Marke über den Ort der Konfiguration. Das ist der Ort, den der Export selbst schreibt, und eine zusätzliche Option für den Befehl braucht es dafür nicht.
 
 ### Probeläufe
 
@@ -664,7 +676,7 @@ Kein Schlüssel stand in Kroniko oder Log. Kosten der Probeläufe dieser Stufe: 
 
 ### Abweichungen
 
-1. **Lokale Zeit nur aus Probeläufen:** Die Spec nennt als spätere Grundlage das Protokoll. Für die Züge des Modells gilt das, die lokale Zeit eines Wegs (Freigaben, Export, Projektionen) steht aber nicht in der Kroniko und bleibt ein Startwert (B-13).
+1. **Kreilo noch aus dem Startwert:** Die Spec nennt als spätere Grundlage das Protokoll. Für die Züge des Modells und seit O-10 für Export und Projektionen gilt das; den lokalen Teil des Kreilo (mit den Freigaben, etwa 1,7 s) misst noch niemand.
 2. **Zeit im Zähler ist die des Sprachmodells** mit Transkription, nicht die Zeit, die die Person im Assistenten verbringt.
 3. **B-4 zwischen S1 und S5:** Seit S1 geht die Anfrage der Nordstelo über `chatCompletion` der Metiejo. Beim Neuaufsetzen auf #116 bleibt in S1 bis S5 der Aufwand am Fehler erhalten, aber nur bis zur letzten erfolgreichen Anfrage. Die Tokens einer fehlgeschlagenen Anfrage (Antworten ohne Nachricht) zählt erst S6 wieder mit, wie #116 es tat.
 
@@ -676,7 +688,7 @@ Kein Schlüssel stand in Kroniko oder Log. Kosten der Probeläufe dieser Stufe: 
 ### Offen (für den Maintainer)
 
 - **O-9 entschieden (Maintainer, 2026-10-29):** kein Preis für `mistral-large-latest`, das Modell ist im Tarif nicht verfügbar. Der Maintainer stellt die `.env` selbst um; „Kosten unbekannt“ bleibt das richtige Verhalten für ein Modell ohne Preis.
-- **O-10 Lokale Zeit der Startwerte:** 28 s gelten bis zur Entscheidung weiter. Auf einem freien Rechner wären es etwa 15 s (B-13). Entweder auf 15 s setzen oder die Dauer des Exports in die Kroniko schreiben (Vorschlag bei B-13).
+- **O-10 entschieden (Maintainer, 2026-10-30): Variante b.** Die Dauer von Export und Projektionen steht in der Kroniko, die Schätzung nutzt sie wie die Zeit des Modells, der Startwert bleibt nur als Rückfall. Umgesetzt in S6 (Zusammenfassung Punkt 8, D-22).
 
 ### Messanleitung
 
@@ -699,6 +711,17 @@ pnpm fm metiejo --open
    pnpm --filter @fundamento/metiejo exec tsx scripts/abnahme-weg-a.ts --laeufe 3
    pnpm --filter @fundamento/metiejo exec tsx scripts/abnahme-weg-a.ts --mit-modell
    ```
+8. Lokale Zeit aus der Kroniko (O-10).
+   - Im Studio „Speichern“ drücken. Danach steht in `file:///Users/thorstenjankowski/Fundamento/marken/<marke>/kroniko.jsonl` ein Eintrag `"ago":"eksporto"` mit `pasxo`, `ms` und `partoj`.
+   - Die Projektionen der Marke bauen:
+
+     ```sh
+     cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+     pnpm fm projekcioj build --config /Users/thorstenjankowski/Fundamento/marken/<marke>/eksporto/fundamento.config.json --out /Users/thorstenjankowski/Fundamento/marken/<marke>/eksporto/projekcioj
+     ```
+
+     Die letzte Zeile lautet „… s in der Kroniko der Marke <marke> festgehalten.“
+   - `http://localhost:7301/api/marko/<marke>/takso`: Die Zeile von Weg A endet mit „lokal aus dem Protokoll: Export (1), Projektionen (1)“.
 
 **Tests:**
 
