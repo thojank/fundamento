@@ -2345,6 +2345,10 @@
             "$ref": "#/$defs/Name"
           }
         },
+        "trailingAfter": {
+          "description": "Where a field without a border shows the parts of trailing: directly after the text of this part, its label (Spec 029 ②b-1, Abnahme #122, decision of the maintainer 30.10.: markobutono, sxaltilo). Without it they stand at the field's own end.",
+          "$ref": "#/$defs/Name"
+        },
         "constraints": {
           "type": "array",
           "items": {

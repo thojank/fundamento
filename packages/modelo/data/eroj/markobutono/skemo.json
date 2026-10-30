@@ -178,6 +178,7 @@
     "trailing": [
       "spinner"
     ],
+    "trailingAfter": "label",
     "bindings": [
       {
         "part": "label",

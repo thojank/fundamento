@@ -124,6 +124,8 @@ export interface ElementNames {
   breadcrumb?: boolean;
   /** Spec 025 ① (plan ① D-05): a field with the parts decrement and increment — the kampo shows its step buttons and its clear button. */
   stepper?: boolean;
+  /** Abnahme #122 (Skemo trailingAfter): the spinner of a toggle directly after the text of its label. */
+  afterLabel?: boolean;
   /** Spec 025 ② (plan ② D-11): a textbox with a calendar part — the datelektilo, a field with a trigger and a popover calendar. */
   datepicker?: boolean;
   /**
@@ -456,16 +458,20 @@ function toggleMarkup(
   role: string,
   slots: NonNullable<ElementNames["slots"]>,
   marked: boolean,
+  afterLabel = false,
 ): string {
   const mark = marked
     ? `<span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span>`
     : "";
-  const label = `<label part="label" id="label" for="control"><slot></slot>${mark}</label>`;
+  // Abnahme #122 (decision of the maintainer, 30.10.; Skemo trailingAfter): the spinner directly
+  // after the text of the label – after its last line, before an error under it; hidden from the
+  // name (aria-hidden). Without trailingAfter at the end of the field.
+  const inLabel = afterLabel ? SPINNER : "";
+  const label = `<label part="label" id="label" for="control"><slot></slot>${mark}${inLabel}</label>`;
   const texts = textsMarkup(slots);
   const beside = texts === "" ? label : `<div>${label}${texts}</div>`;
   const sign = role === "checkbox" ? IKONO_CHECK : (signOf(role) ?? "");
-  // Abnahme #122: the spinner at the end of the field, after the label, not in it.
-  return `<div part="field"><button part="control" id="control" type="button" role="${role}" aria-labelledby="label"><span part="indicator">${sign}</span></button>${beside}${SPINNER}<span id="fm-texts" hidden></span></div>`;
+  return `<div part="field"><button part="control" id="control" type="button" role="${role}" aria-labelledby="label"><span part="indicator">${sign}</span></button>${beside}${afterLabel ? "" : SPINNER}<span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -797,10 +803,22 @@ function markup(
   icon = false,
   breadcrumb = false,
   stepper = false,
+  afterLabel = false,
 ): string {
   const reasoned = slots.some((slot) => slot.name === "disabled-reason");
   const own = slots.filter((slot) => slot.name !== "disabled-reason");
-  const body = hostMarkup(host, own, role, marked, indicator, dismiss, icon, breadcrumb, stepper);
+  const body = hostMarkup(
+    host,
+    own,
+    role,
+    marked,
+    indicator,
+    dismiss,
+    icon,
+    breadcrumb,
+    stepper,
+    afterLabel,
+  );
   if (!reasoned) return body;
   if (host === "menu") {
     return body.replace(
@@ -821,6 +839,7 @@ function hostMarkup(
   icon = false,
   breadcrumb = false,
   stepper = false,
+  afterLabel = false,
 ): string {
   if (host === "text") return textMarkup(slots);
   if (host === "slider") return sliderMarkup(slots);
@@ -851,7 +870,7 @@ function hostMarkup(
   if (host === "suggest") return fieldMarkup(slots, false, true);
   if (host === "disclosure") return disclosureMarkup();
   if (host === "dialog") return dialogMarkup();
-  if (host === "toggle") return toggleMarkup(role, slots, marked);
+  if (host === "toggle") return toggleMarkup(role, slots, marked, afterLabel);
   if (host === "group") return groupMarkup(slots, marked);
   if (host === "select") return selectMarkup(slots, role);
   const before = slots.filter((slot) => slot.default !== true && slot.name.endsWith("-start"));
@@ -884,6 +903,7 @@ export function elementSource({
   icon = false,
   breadcrumb = false,
   stepper = false,
+  afterLabel = false,
   slots = [
     { name: "label", default: true },
     { name: "icon-start", decorative: true },
@@ -5635,7 +5655,7 @@ ${autoField}${isAvatar ? '  /** The picture an avatar shows and whether it has l
       sheet.replaceSync(CSS);
     }
     root.adoptedStyleSheets = [sheet];
-    root.innerHTML = \`${markup(host, slots, role, marked, indicator, dismiss, icon, breadcrumb, stepper)}\`;
+    root.innerHTML = \`${markup(host, slots, role, marked, indicator, dismiss, icon, breadcrumb, stepper, afterLabel)}\`;
     const control = root.querySelector("${control}");
     ${
       // Spec 025 ③ (plan ③ D-18): an inline editor has no label slot — its name is the prop label

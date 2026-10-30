@@ -128,6 +128,6 @@
 - [x] **T2952 M-6 Löschen-Knopf:** rot in `9b81ad3`, grün im Folgecommit (Modelo, Web, Figma; Brief des kampo 740).
 - [x] **T2955 Brief: Boolean-Props kompakt** (Entscheidung 29.10.): rot in `0d464a0`; `flags` im Brief und im Ausgabeschema von get_ero, `props` ohne Booleans; kampo 740 → 682 von 750.
 - [x] **T2953 M-1 Grund für „deaktiviert“:** rot in `cc50ea5`, grün im Folgecommit (Modelo, Web mit eingebettetem konsileto, faldilo `disabled`, Figma 8 Varianten des faldilo).
-- [x] **T2956 Abnahme #122 rechter Feldrand:** rot in `61cf5be5` und `51a65efc` (Ziel der Knöpfe), grün im Folgecommit (`trailing` im Skemo, Ziel `width`, Web-Ende im Feld, Figma im Control, Vitrino Löschen und loading, Bericht der Ereignisse korrigiert).
+- [x] **T2956 Abnahme #122 rechter Feldrand:** rot in `61cf5be5`, `51a65efc` (Ziel der Knöpfe) und `b6415047` (Spinner hinter dem Text bei markobutono, sxaltilo; Entscheidung 30.10.), grün im jeweiligen Folgecommit (`trailing` im Skemo, Ziel `width`, Web-Ende im Feld, Figma im Control, Vitrino Löschen und loading, Bericht der Ereignisse korrigiert).
 - [ ] T2954 M-2 Status warning/success
 

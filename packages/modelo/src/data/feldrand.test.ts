@@ -60,7 +60,7 @@ describe("Abnahme #122: the right edge of the fields, one rule in the Skemo", ()
   // web and in Figma; every other field at its own end.
   it("markobutono and sxaltilo: the end directly after the label's text (trailingAfter)", () => {
     for (const ero of Object.keys(TRAILING)) {
-      const after = (skemoOf(ero) as { trailingAfter?: string }).trailingAfter;
+      const after = skemoOf(ero).trailingAfter;
       expect(after, ero).toBe(["markobutono", "sxaltilo"].includes(ero) ? "label" : undefined);
       if (after !== undefined) expect(skemoOf(ero).parts[after], ero).toBeDefined();
     }

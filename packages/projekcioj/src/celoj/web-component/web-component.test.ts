@@ -379,8 +379,9 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
       "indicator",
       "label",
       "required-mark",
-      "error",
+      // Abnahme #122 (decision 30.10.): the spinner directly after the text, in the label.
       "spinner",
+      "error",
     ]);
     expect(markobutonoElement).toContain('role="checkbox"');
     expect(markobutonoElement).toContain('aria-labelledby="label"');
@@ -519,8 +520,9 @@ describe("Web Component Celo for the elekto (Spec 010 ③)", () => {
       "indicator",
       "label",
       "required-mark",
-      "error",
+      // Abnahme #122 (decision 30.10.): the spinner directly after the text, in the label.
       "spinner",
+      "error",
     ]);
     expect(markobutonoElement).not.toContain("slotAssignment");
   });

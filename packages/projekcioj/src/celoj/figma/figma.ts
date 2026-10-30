@@ -1170,6 +1170,11 @@ export interface FigmaComponentSet {
    */
   spinner?: string;
   /**
+   * Where a field without a border shows its spinner (Skemo trailingAfter, Abnahme #122): "label"
+   * directly after the label's text (markobutono, sxaltilo); without it at the field's end.
+   */
+  spinnerAfter?: string;
+  /**
    * The variable the glyph of a field's clear button is filled with (Spec 029 ②b-1 M-6): the label
    * colour of the butono of emphasis low the web composes.
    */
@@ -3561,6 +3566,7 @@ function componentSetOf(
       : {}),
     ...(sign === undefined ? {} : { sign }),
     ...(skemo.parts.spinner === undefined ? {} : { spinner: STATE_SIGN }),
+    ...(skemo.trailingAfter === undefined ? {} : { spinnerAfter: skemo.trailingAfter }),
     ...(clearsInField(skemo) ? { clearColor: variableName(CLEAR_ICON_COLOR) } : {}),
     ...(options === undefined ? {} : { entry: options }),
     ...(example === undefined ? {} : { example }),

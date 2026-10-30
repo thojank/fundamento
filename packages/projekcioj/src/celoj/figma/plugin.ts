@@ -6061,7 +6061,15 @@ async function applyComponents(variables, warnings) {
       write(control, "name", "control");
       // Spec 029 ②b-1 M-5: a field's label stands in a row with its spinner (labelOf).
       const labelled = labelParent !== undefined
-        ? labelOf(labelParent, component, toggled, isField ? control : undefined)
+        ? labelOf(
+            labelParent,
+            component,
+            toggled,
+            isField ? control : undefined,
+            // Abnahme #122: a toggle shows it directly after its label (trailingAfter), else at
+            // the end of the label's line.
+            !isField && component.spinnerAfter !== "label",
+          )
         : { label: part(control, "label", () => figma.createText()), placed: undefined, nodes: {} };
       const label = labelled.label;
       const labelPlaced = labelled.placed || label;
