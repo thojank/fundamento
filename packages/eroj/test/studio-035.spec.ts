@@ -33,7 +33,12 @@ function start(port: number): Promise<ChildProcess | undefined> {
       said += chunk.toString("utf8");
       if (said.includes(`http://localhost:${port}`)) done(child);
     });
-    child.once("exit", () => done(undefined));
+    // A server that fails after it listened says why, for the report of the run (a stop ends with 0).
+    child.once("exit", (code) => {
+      if (code !== 0 && said.includes(`http://localhost:${port}`))
+        console.error(`the Metiejo on ${port} ended (${code}): ${said}`);
+      done(undefined);
+    });
   });
 }
 
@@ -167,7 +172,10 @@ test.describe("Studio (Spec 035 Teil 3)", () => {
         ),
     );
     await feld.fill(neu);
-    expect((await gesetzt).status()).toBeLessThan(400);
+    const antwort = await gesetzt;
+    expect(antwort.status()).toBeLessThan(400);
+    // A sending of the page's formularo leads back to the page: wait until it is there.
+    if (antwort.status() === 303) await page.waitForURL(/\?rueckmeldung=\d+$/);
     await expect(reihe.locator("fm-insigno")).toHaveText("gesetzt");
     // One source of state: the row says the value the swatch shows, and the draft holds it.
     await expect(reihe.locator('fm-teksto[kind="caption"]').first()).toContainText(`Wert: ${neu}`);
@@ -219,7 +227,7 @@ test.describe("Studio (Spec 035 Teil 3)", () => {
         ),
     );
     await wahl.locator("select").selectOption("color.palette.neutral.100");
-    await gesendet;
+    if ((await gesendet).status() === 303) await page.waitForURL(/\?rueckmeldung=\d+$/);
     const fehler = zeile(page, "color.text.default").locator(
       'fm-elektilo[name="color.text.default"] [slot="error"]',
     );
