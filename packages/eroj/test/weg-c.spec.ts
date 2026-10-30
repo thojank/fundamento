@@ -4,7 +4,8 @@
 // request answered from the fixture files (no network). The defining colour of page A stands only
 // in its large image and its logo; the CSS names a secondary colour more often.
 
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { expect, test } from "@playwright/test";
@@ -33,6 +34,12 @@ interface EsploroModule {
 }
 interface BildiloModule {
   playwrightBildilo(): Bildilo;
+}
+interface MaterialoModule {
+  legiMaterialon(
+    input: { filename: string; bytes: Buffer },
+    options: Record<string, unknown>,
+  ): Promise<{ trovoj: { kind: string; valoro: string | number }[]; satzoj: string[] }>;
 }
 interface IndexModule {
   loadBases(): unknown;
@@ -86,5 +93,30 @@ test.describe("Weg C with Chromium (Spec 035, Befund 4.1)", () => {
     expect(result.proponoj[0]?.faceto).toBe("gvidkoloro");
     const lead = result.proponoj[0]?.agordo.leitfarbe ?? "";
     expect(distance(lead, PRAEGEND), `${lead} statt ${PRAEGEND}`).toBeLessThanOrEqual(4);
+  });
+});
+
+test.describe("JPG and WebP with Chromium (Spec 035, Befund 4.5.6, D-11)", () => {
+  test("Chromium decodes the synthetic JPG and WebP; the Enportilo measures their colour by area", async () => {
+    const { legiMaterialon } = await load<MaterialoModule>("enportilo/materialo.js");
+    const { playwrightBildilo } = await load<BildiloModule>("enportilo/bildilo.js");
+    const bildilo = playwrightBildilo();
+    const workdir = mkdtempSync(join(tmpdir(), "fm-weg-c-bild-"));
+    try {
+      for (const filename of ["bild.jpg", "bild.webp"]) {
+        const read = await legiMaterialon(
+          { filename, bytes: fixture(filename) },
+          { workdir, name: "ekzemplo", familyOf: () => "", bildilo },
+        );
+        expect(read.satzoj, filename).toEqual([]);
+        const largest = String(read.trovoj[0]?.valoro ?? "");
+        expect(
+          distance(largest, PRAEGEND),
+          `${filename}: ${largest} statt ${PRAEGEND}`,
+        ).toBeLessThanOrEqual(8);
+      }
+    } finally {
+      rmSync(workdir, { recursive: true, force: true });
+    }
   });
 });
