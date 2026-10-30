@@ -226,4 +226,45 @@ describe("one turn of the chat (Spec 033 S1)", () => {
     expect(String(error)).not.toContain(KEY);
     expect(JSON.stringify(provider)).not.toContain(KEY);
   });
+
+  // Spec 035, Befund 4.3: „Komplett abrunden“ set the radius to the end of its slider – no pill –
+  // and the answer said „vollständig abgerundet“. The tools decide what changed (D-18); at the end
+  // of a slider the answer says so.
+  it("a claim of full rounding without the pill is corrected; the end of the slider is said", async () => {
+    const { work, agordo } = laborejo();
+    const { fetch } = scripted([
+      { body: toolCall("setze_regler", { regler: "form.radius", wert: 2 }) },
+      { body: answer("Die Ecken sind jetzt vollständig abgerundet.") },
+    ]);
+    const result = await babili({
+      provider,
+      fetch,
+      laborejo: work,
+      historio: [],
+      teksto: "Komplett abrunden bitte.",
+      budget: new Budget(20_000),
+    });
+    expect(agordo().form?.radius).toBe(2);
+    expect(result.sxangxoj).toEqual(["formo"]);
+    expect(result.antwort).not.toMatch(/^Die Ecken sind jetzt vollständig abgerundet/);
+    expect(result.antwort).toMatch(/keine Pillen?/);
+    expect(result.antwort).toMatch(/Ende des Reglers/);
+  });
+
+  it("with the pill chosen by the tool, the same claim stands", async () => {
+    const { work } = laborejo();
+    const { fetch } = scripted([
+      { body: toolCall("waehle_form", { bedienelemente: "pille" }) },
+      { body: answer("Die Bedienelemente sind jetzt vollständig abgerundet, als Pille.") },
+    ]);
+    const result = await babili({
+      provider,
+      fetch,
+      laborejo: work,
+      historio: [],
+      teksto: "Komplett abrunden bitte.",
+      budget: new Budget(20_000),
+    });
+    expect(result.antwort).toBe("Die Bedienelemente sind jetzt vollständig abgerundet, als Pille.");
+  });
 });

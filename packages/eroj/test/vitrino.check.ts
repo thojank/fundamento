@@ -1356,6 +1356,39 @@ test.describe("the Werkstatt, stage 2 (Spec 019 ②)", () => {
     await expect.poll(async () => (await state(page)).agordo.form).toBeUndefined();
   });
 
+  // Spec 035, Befund 4.3 (V-3): „Komplett abrunden“ ended at radius 2, no pill. One step past the
+  // end of the radius slider is the choice „Pille“: controls fully rounded, cards stay bounded.
+  test("one step past the end of the radius slider is the pill: controls fully rounded, cards bounded (Spec 035 V-3)", async ({
+    page,
+  }) => {
+    await openWerkstatt(page);
+    await checkedAtLeast(page, 1);
+    const button = () =>
+      page
+        .locator("#fm-vitrino-butono fm-butono")
+        .first()
+        .locator("button")
+        .evaluate((element) => getComputedStyle(element).borderTopLeftRadius);
+    const surface = () => property(page, "#fm-vitrino-karto fm-karto", "--fm-radius-role-surface");
+    await slide(page, "fm-werkstatt-form-radius", 2);
+    await expect.poll(button).toBe("8px");
+    const bounded = await surface();
+    await slide(page, "fm-werkstatt-form-radius", 2.05);
+    await expect.poll(button).toBe("9999px");
+    await expect(page.locator('output[for="fm-werkstatt-form-radius"]')).toHaveText("Pille");
+    expect(await surface()).toBe(bounded);
+    expect(Number.parseFloat(bounded)).toBeLessThan(100);
+    await expect
+      .poll(async () => (await state(page)).agordo)
+      .toMatchObject({
+        form: { radius: 2 },
+        festgelegt: { "radius.role.control": { alias: "radius.full" } },
+      });
+    await slide(page, "fm-werkstatt-form-radius", 1.5);
+    await expect.poll(button).toBe("6px");
+    await expect.poll(async () => (await state(page)).agordo.festgelegt).toBeUndefined();
+  });
+
   test("undo and redo in the page's memory, with the buttons and with Ctrl+Z / Shift+Ctrl+Z", async ({
     page,
   }) => {
