@@ -100,6 +100,8 @@ test.describe("fm-datelektilo behaviour", () => {
       "required-mark",
       "row",
       "control",
+      "end",
+      "spinner",
       "trigger",
       "calendar",
       "head",

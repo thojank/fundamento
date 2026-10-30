@@ -106,6 +106,7 @@ test.describe("fm-glitilo behaviour", () => {
       "thumb",
       "max-label",
       "number",
+      "spinner",
       "help",
       "error",
     ]);

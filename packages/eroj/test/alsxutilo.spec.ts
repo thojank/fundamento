@@ -94,6 +94,8 @@ test.describe("fm-alsxutilo behaviour", () => {
       "choose",
       "control",
       "drop-hint",
+      "end",
+      "spinner",
       "help",
       "error",
       "file-list",

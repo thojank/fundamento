@@ -195,7 +195,7 @@ describe("check_usage with the Uzo (T024)", () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.issues[0]?.path).toBe("check_usage/instances/0/slots/badge");
-    expect(result.allowed).toEqual(["label", "icon-start", "icon-end"]);
+    expect(result.allowed).toEqual(["label", "icon-start", "icon-end", "disabled-reason"]);
   });
 
   it("full-width is allowed in an action-bar or under viewport=compact, not elsewhere", () => {

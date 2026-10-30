@@ -530,7 +530,7 @@
           }
         },
         "props": {
-          "description": "Every other prop of the Skemo with its type, in Skemo order (Nachlese 5 N5-3): what may be set beyond the axes, such as loading at the kompletigilo. Absent when every prop is an axis.",
+          "description": "Every other prop of the Skemo that is no boolean, with its type, in Skemo order (Nachlese 5 N5-3; booleans stand in flags since Spec 029 ②b-1): what may be set beyond the axes. Absent when there is none.",
           "type": "array",
           "items": {
             "type": "object",
@@ -544,6 +544,14 @@
             },
             "required": ["name", "type"],
             "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "flags": {
+          "description": "Every boolean prop that is no axis, by name, in Skemo order (Spec 029 ②b-1): what may be switched on beyond the axes, such as loading or clearable at a field. Absent when there is none.",
+          "type": "array",
+          "items": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
           },
           "minItems": 1
         },

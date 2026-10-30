@@ -51,6 +51,7 @@ type Brief = {
   ero: string;
   axes: { name: string }[];
   props?: { name: string; type: string }[];
+  flags?: string[];
 };
 
 let client: Connected["client"];
@@ -83,7 +84,8 @@ describe("the Gvidanto dialogs of the acceptance of Nachlese 4 (Nachlese 5 ②)"
 
   it("A2 (N5-3): the brief of the kompletigilo names loading as a boolean prop", async () => {
     const brief = await output<Brief>(client, "get_ero", { name: "kompletigilo", brief: true });
-    expect(brief.props).toContainEqual({ name: "loading", type: "boolean" });
+    // Spec 029 ②b-1: a boolean stands in flags.
+    expect(brief.flags).toContain("loading");
     expect(brief.axes.map((axis) => axis.name)).not.toContain("loading");
   });
 
