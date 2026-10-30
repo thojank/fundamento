@@ -123,12 +123,34 @@ async function follow(response) {
   document.open(); document.write(html); document.close();
 }
 
+// Spec 035 Teil 3 (3.1): the formularo of a Studio page sends the values a person changed – its
+// fields lie in the groups, not among its children – to the page, which takes them and leads back.
+const studioSeite = !!sxtupo && (sxtupo.startsWith("studio-") || sxtupo.startsWith("komponento-"));
+const studioAnfang = new Map();
+for (const control of document.querySelectorAll("fm-formularo[data-action] [data-mt-festlegen][name]")) studioAnfang.set(control, control.getAttribute("value") ?? "");
+function studioWerte(form) {
+  const values = {};
+  for (const control of form.querySelectorAll("[data-mt-festlegen][name]")) {
+    const now = String(control.value ?? control.getAttribute("value") ?? "");
+    if (now !== studioAnfang.get(control)) values[control.getAttribute("name")] = now;
+  }
+  return values;
+}
+let studioSendet = false;
+async function sendForm(form, values) {
+  if (studioSeite) {
+    // One sending at a time: Enter, Übernehmen and a changed control are the same sending.
+    if (studioSendet) return;
+    studioSendet = true;
+    Object.assign(values, studioWerte(form));
+  }
+  const response = await fetch(form.getAttribute("data-action"), { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: encode(values) });
+  await follow(response);
+}
 for (const form of document.querySelectorAll("fm-formularo[data-action]")) {
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const values = event.detail && event.detail.values ? event.detail.values : {};
-    const response = await fetch(form.getAttribute("data-action"), { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: encode(values) });
-    await follow(response);
+    await sendForm(form, event.detail && event.detail.values ? event.detail.values : {});
   });
 }
 
