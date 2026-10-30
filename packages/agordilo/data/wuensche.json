@@ -1,8 +1,18 @@
 {
-  "description": "The wish vocabulary of propose_agordo (Spec 019 ③, G6, E3): each word of a wish moves sliders of the Agordo by a step, with a kialo. Data, not code; no language model. Vague words such as 'moderner' are deliberately missing: a wish the vocabulary does not know moves nothing, and the answer asks back (ask-human). A step on leitfarbe.ton turns the hue of the lead colour by that many degrees towards the warm (60°, orange) or the cool (240°, blue) pole.",
+  "description": "The wish vocabulary of propose_agordo (Spec 019 ③, G6, E3): each word of a wish moves sliders of the Agordo by a step (schritt), or to the next of its stops (stufe, Spec 035 V-3: stufen per slider, then the choice after the last stop), with a kialo. Data, not code; no language model. Vague words such as 'moderner' are deliberately missing: a wish the vocabulary does not know moves nothing, and the answer asks back (ask-human). A step on leitfarbe.ton turns the hue of the lead colour by that many degrees towards the warm (60°, orange) or the cool (240°, blue) pole.",
   "pole": {
     "warm": 60,
     "kuehl": 240
+  },
+  "stufen": {
+    "form.radius": {
+      "werte": [0, 0.5, 1, 2],
+      "danach": {
+        "regler": "form.bedienelemente",
+        "wert": "pille"
+      },
+      "kialo": "Spec 035, V-3: Ein relativer Wunsch zur Form geht eine Stufe: eckig 0, leicht gerundet 0,5, rund 1, ganz rund 2 (die Wahl des Schnellstarts), danach die Pille für Bedienelemente. Jede Stufe halbiert oder verdoppelt den Radius der Bedienelemente; von 2 auf 1,6 sah man kaum etwas."
+    }
   },
   "wuensche": [
     {
@@ -88,10 +98,10 @@
       "bewegungen": [
         {
           "regler": "form.radius",
-          "schritt": 0.4
+          "stufe": 1
         }
       ],
-      "kialo": "runder: größere Radien, weil weiche Ecken freundlicher und weniger technisch wirken.",
+      "kialo": "runder: eine Stufe größere Radien (am Ende des Reglers die Pille für Bedienelemente), weil weiche Ecken freundlicher und weniger technisch wirken.",
       "gegenteil": "eckiger"
     },
     {
@@ -101,10 +111,10 @@
       "bewegungen": [
         {
           "regler": "form.radius",
-          "schritt": -0.4
+          "stufe": -1
         }
       ],
-      "kialo": "eckiger: kleinere Radien, weil scharfe Ecken genauer und sachlicher wirken.",
+      "kialo": "eckiger: eine Stufe kleinere Radien (von der Pille zuerst zurück zum Radius), weil scharfe Ecken genauer und sachlicher wirken.",
       "gegenteil": "runder"
     },
     {

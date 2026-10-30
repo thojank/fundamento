@@ -4,7 +4,14 @@
 // the same everywhere. Pure.
 
 import type { Agordo } from "./agordo.js";
-import { type GestaltBasis, gestaltSliders } from "./gestalt.js";
+import {
+  BEDIENFORM_LABEL,
+  BEDIENFORM_PATH,
+  bedienformOf,
+  type GestaltBasis,
+  gestaltSliders,
+  withBedienform,
+} from "./gestalt.js";
 
 export type ReglerGroup = "farbe" | "form" | "raum" | "schrift";
 
@@ -17,6 +24,8 @@ export interface Regler {
   max: number;
   standard: number;
   step: number;
+  /** The stop past the end of the slider: a choice the slider reaches beyond its max (V-3). */
+  ende?: { path: string; wert: string; label: string };
 }
 
 const STAGE1: readonly Regler[] = [
@@ -73,19 +82,34 @@ const LABELS: Readonly<Record<string, string>> = {
 export const IKONO_PATH = "ikono.gewicht";
 export const IKONO_LABEL = "Icon-Gewicht";
 
+/** The value of a choice the sliders name (the icon weight, the form of the controls). */
+export function wahlValue(agordo: Agordo, path: string): string | undefined {
+  if (path === BEDIENFORM_PATH) return bedienformOf(agordo);
+  if (path === IKONO_PATH) return agordo.ikono?.gewicht ?? "regular";
+  return undefined;
+}
+
+const ENDE: Readonly<Record<string, Regler["ende"]>> = {
+  "form.radius": { path: BEDIENFORM_PATH, wert: "pille", label: "Pille" },
+};
+
 /** Every slider of the Agordo, in the order of the panel. */
 export function reglerOf(basis: GestaltBasis): Regler[] {
   return [
     ...STAGE1,
-    ...gestaltSliders(basis).map((slider) => ({
-      path: slider.path,
-      group: slider.path.split(".")[0] as ReglerGroup,
-      label: LABELS[slider.path] ?? slider.path,
-      min: slider.min,
-      max: slider.max,
-      standard: slider.standard,
-      step: slider.step,
-    })),
+    ...gestaltSliders(basis).map((slider) => {
+      const ende = ENDE[slider.path];
+      return {
+        path: slider.path,
+        group: slider.path.split(".")[0] as ReglerGroup,
+        label: LABELS[slider.path] ?? slider.path,
+        min: slider.min,
+        max: slider.max,
+        standard: slider.standard,
+        step: slider.step,
+        ...(ende === undefined ? {} : { ende }),
+      };
+    }),
   ];
 }
 
@@ -100,13 +124,16 @@ export function reglerValue(agordo: Agordo, regler: Regler): number {
 
 /**
  * The Agordo with a slider set, or taken back to its standard (`undefined`): the field goes, and
- * a group that is empty then goes with it (W-8). Works for `ikono.gewicht` as well.
+ * a group that is empty then goes with it (W-8). Works for `ikono.gewicht` and the form of the
+ * controls (`form.bedienelemente`, V-3) as well.
  */
 export function withRegler(
   agordo: Agordo,
   path: string,
   value: number | string | undefined,
 ): Agordo {
+  if (path === BEDIENFORM_PATH)
+    return withBedienform(agordo, value === "pille" ? "pille" : "radius");
   const [group = "", key = ""] = path.split(".");
   const next = structuredClone(agordo) as unknown as Groups;
   const own = { ...(next[group] ?? {}) };
@@ -138,6 +165,14 @@ export function reglerDiff(before: Agordo, after: Agordo, basis: GestaltBasis): 
       label: "Leitfarbe",
       vorher: before.leitfarbe,
       nachher: after.leitfarbe,
+    });
+  }
+  if (bedienformOf(before) !== bedienformOf(after)) {
+    diff.push({
+      path: BEDIENFORM_PATH,
+      label: BEDIENFORM_LABEL,
+      vorher: bedienformOf(before),
+      nachher: bedienformOf(after),
     });
   }
   const weight = (agordo: Agordo) => agordo.ikono?.gewicht ?? "regular";
