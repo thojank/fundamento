@@ -113,3 +113,31 @@ describe("Spec 035 Teil 3: the formularo of a Studio page (3.1)", () => {
     expect(save.headers.get("location")).toBe("/studio/quarzwelle/farbe?gespeichert=1");
   });
 });
+
+describe("Spec 035 Teil 3: a refusal at its field (3.3)", () => {
+  it("shows a value the check refuses at its field – rule, message, suggestion – and keeps the draft", async () => {
+    const before = await stand();
+    const response = await get("/studio/quarzwelle/raum", form("size.scale.600=8"));
+    expect(response.status).toBe(303);
+    expect((await stand()).rev).toBe(before.rev);
+    expect(before.festgelegt["size.scale.600"]).toBeUndefined();
+    const page = await (await get(response.headers.get("location") ?? "")).text();
+    const row = /<div class="mt-reihe" data-mt-token="size\.scale\.600">.*?<\/fm-kampo>/s.exec(
+      page,
+    )?.[0];
+    expect(row).toBeDefined();
+    expect(row).toMatch(/<fm-kampo [^>]*name="size\.scale\.600" value="\d+"[^>]* invalid/);
+    expect(row).toContain('slot="error"');
+    expect(row).toContain('data-mt-regel="touch-target-min"');
+    expect(row).toContain("Vorschlag:");
+  });
+
+  it("refuses a field that is no number at its field without a change", async () => {
+    const before = await stand();
+    const response = await get("/studio/quarzwelle/raum", form("spacing.scale.500=zwanzig"));
+    expect(response.status).toBe(303);
+    expect((await stand()).rev).toBe(before.rev);
+    const page = await (await get(response.headers.get("location") ?? "")).text();
+    expect(page).toContain('data-mt-regel="number-invalid"');
+  });
+});

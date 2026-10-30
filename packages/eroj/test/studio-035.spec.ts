@@ -175,4 +175,59 @@ test.describe("Studio (Spec 035 Teil 3)", () => {
     const wert = (await stand(request, id)).festgelegt["color.palette.neutral.500"]?.wert;
     expect(JSON.stringify(wert)).toContain(neu);
   });
+
+  test("3.3: a value the check refuses (Enter on the page Raum) shows at its field, with the rule and the suggestion, and the field shows the value that holds", async ({
+    page,
+    request,
+  }) => {
+    const id = await marke(request, "Quarzwelle Regel");
+    await page.goto(`${base}/studio/${id}/raum`);
+    const kampo = zeile(page, "size.scale.600").locator('fm-kampo[name="size.scale.600"]');
+    const vorher = (await kampo.getAttribute("value")) ?? "";
+    const rev = (await stand(request, id)).rev;
+    const gesendet = sendung(page, `/studio/${id}/raum`);
+    await kampo.locator("input").fill("8");
+    await kampo.locator("input").press("Enter");
+    expect((await gesendet).status()).toBe(303);
+    await page.waitForURL(new RegExp(`/studio/${id}/raum\\?rueckmeldung=\\d+$`));
+    const fehler = zeile(page, "size.scale.600").locator(
+      'fm-kampo[name="size.scale.600"] [slot="error"]',
+    );
+    await expect(fehler).toBeVisible();
+    await expect(fehler).toHaveAttribute("data-mt-regel", "touch-target-min");
+    await expect(fehler).toContainText("touch-target-min");
+    await expect(fehler).toContainText("Vorschlag:");
+    await expect(kampo.locator("input")).toHaveValue(vorher);
+    expect((await stand(request, id)).rev).toBe(rev);
+  });
+
+  test("3.3: a choice the check refuses (page Semantik) shows at its field, and the choice is reset", async ({
+    page,
+    request,
+  }) => {
+    const id = await marke(request, "Quarzwelle Wahl");
+    await page.goto(`${base}/studio/${id}/semantik`);
+    const wahl = zeile(page, "color.text.default").locator(
+      'fm-elektilo[name="color.text.default"]',
+    );
+    const vorher = (await wahl.getAttribute("value")) ?? "";
+    const gesendet = page.waitForResponse(
+      (response) =>
+        response.request().method() === "POST" &&
+        [`/api/marko/${id}/festlegen`, `/studio/${id}/semantik`].includes(
+          new URL(response.url()).pathname,
+        ),
+    );
+    await wahl.locator("select").selectOption("color.palette.neutral.100");
+    await gesendet;
+    const fehler = zeile(page, "color.text.default").locator(
+      'fm-elektilo[name="color.text.default"] [slot="error"]',
+    );
+    await expect(fehler).toBeVisible();
+    const regel = (await fehler.getAttribute("data-mt-regel")) ?? "";
+    expect(regel).toMatch(/^(contrast-below-threshold|text-hierarchy)$/);
+    await expect(fehler).toContainText(regel);
+    await expect(fehler).toContainText("Vorschlag:");
+    await expect(wahl.locator("select")).toHaveValue(vorher);
+  });
 });
