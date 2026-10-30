@@ -47,6 +47,8 @@ export interface AsistantoInput {
   fremda?: { kiel: string; nomo?: string; konfirmita: boolean };
   /** Tokens and time of the chat of this brand since the server started. */
   sumo: { enigo: number; eligo: number; ms: number };
+  /** Spec 033 S2: the open proposal of the Enportilo for this step, with its provenance. */
+  propono?: { satz: string; herkunft: readonly { dosiero: string; loko?: string }[] };
 }
 
 const facetoUrl = (name: string, faceto: string) =>
@@ -96,6 +98,11 @@ export function asistantoScreen(input: AsistantoInput): string {
       (entry) => `${escapeHtml(entry.nomo)} (Umfang ${entry.umfang}): noch nicht Teil des Modells`,
     )
     .join(" · ");
+  const propono =
+    input.propono === undefined
+      ? ""
+      : `<fm-avizo intent="info" data-mt-propono><span slot="heading">Vorschlag aus deinem Material</span><fm-teksto>${escapeHtml(input.propono.satz)}</fm-teksto><fm-teksto kind="caption">Herkunft: ${input.propono.herkunft.map((entry) => escapeHtml(entry.loko === undefined ? entry.dosiero : `${entry.dosiero}, ${entry.loko}`)).join(" · ")}</fm-teksto></fm-avizo>`;
+  const material = `<fm-faldilo data-mt-materialo><span slot="summary">Material deiner Marke (Screenshot, Logo, PDF, Schrift oder Link)</span><fm-alsxutilo name="materialo" accept=".png,.svg,.pdf,.woff2,.woff,.ttf,.otf" data-mt-materialo-dosiero>Datei</fm-alsxutilo><fm-kampo name="url" type="url" data-mt-materialo-url>Link auf eine Webseite</fm-kampo><fm-markobutono name="rajtoj-materialo" value="ja" data-mt-materialo-rajtoj>${escapeHtml(KONFIRMO_TEKSTO)}</fm-markobutono><fm-butono emphasis="medium" data-mt-materialo-legi>Material lesen</fm-butono></fm-faldilo>`;
   const previewSrc = `/marko/${encodeURIComponent(name)}/vorschau?sxtupo=studio-${studio}&breite=mittel`;
   const body = `<fm-sxelo>
 <span slot="brand">Markenassistent</span>
@@ -114,6 +121,8 @@ ${dialog}
 <div data-mt-babilo-listo>${chatHtml(input.historio)}</div>
 <fm-tekstareo name="teksto" rows="3" data-mt-babilo-teksto${input.ki.pret ? "" : " disabled"}>Deine Nachricht</fm-tekstareo>
 <fm-butono emphasis="high" data-mt-babilo-sendi${input.ki.pret ? "" : " disabled"}>Senden</fm-butono>
+${propono}
+${material}
 <fm-teksto kind="caption" data-mt-freigabe-satz>${escapeHtml(releaseHint)}</fm-teksto>
 <fm-butono emphasis="medium" data-mt-faceto-ago="akcepto">Vorschlag übernehmen</fm-butono>
 <fm-butono emphasis="high" data-mt-faceto-ago="liberigo"${releasable ? "" : " disabled"}>Freigeben</fm-butono>

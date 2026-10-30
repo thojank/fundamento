@@ -165,6 +165,9 @@ importers:
       '@fundamento/projekcioj':
         specifier: workspace:*
         version: link:../projekcioj
+      postcss:
+        specifier: ^8.5.28
+        version: 8.5.28
     devDependencies:
       '@types/node':
         specifier: ^24.13.5
