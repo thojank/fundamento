@@ -13,7 +13,10 @@ import { esplori, ILOJ_ESPLORO, permesataAdreso } from "./esploro.js";
 const bases = loadBases();
 const provider = new Provider("mistral", "ministral-14b-2512", "sk-esploro");
 /** Spec 035 4.1: every page renders as an empty white screen; its colours come from the CSS. */
-const bildilo = { bildigi: async () => ({ bildo: blanka(), logoj: [] }) };
+const bildilo = {
+  bildigi: async () => ({ bildo: blanka(), logoj: [] }),
+  malkodi: async () => blanka(),
+};
 
 const pages: Record<string, { type: string; body: string }> = {
   "https://pano.example/": {

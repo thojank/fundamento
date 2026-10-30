@@ -37,7 +37,7 @@ ${sliders}
 <fm-kampo name="farbe" data-mt-kreilo-farbe placeholder="#a0522d">Farbe (Hex, falls schon gewählt)</fm-kampo>
 <fm-kampo name="schrift" data-mt-kreilo-schrift placeholder="zum Beispiel Inter">Schrift (Name, falls schon gewählt)</fm-kampo>
 <fm-titolo level="2">Inspiration</fm-titolo>
-<fm-alsxutilo name="inspiro" accept=".png,.svg,.pdf" multiple data-mt-kreilo-inspiro>Bilder, die die Stimmung zeigen</fm-alsxutilo>
+<fm-alsxutilo name="inspiro" accept=".png,.jpg,.jpeg,.webp,.svg,.pdf" multiple data-mt-kreilo-inspiro>Bilder, die die Stimmung zeigen</fm-alsxutilo>
 <fm-markobutono name="rajtoj-inspiro" value="ja" data-mt-kreilo-rajtoj>${escapeHtml(KONFIRMO_TEKSTO)}</fm-markobutono>
 ${
   input.takso === undefined

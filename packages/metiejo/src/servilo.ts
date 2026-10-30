@@ -173,8 +173,8 @@ export interface ServiloOptions {
   parolo?: { provider?: Provider; satz?: string; fetch?: Fetch };
   /**
    * Spec 033 S4: how the research agent reaches public pages; a test passes its own. Spec 035 4.1:
-   * the browser that renders them – default Playwright, imported on the first page; a test passes a
-   * double.
+   * the browser that renders them and decodes a JPG or WebP upload (4.5.6) – default Playwright,
+   * imported on the first need; a test passes a double.
    */
   esploro?: { fetch?: (url: string, init?: RequestInit) => Promise<Response>; bildilo?: Bildilo };
 }
@@ -1591,6 +1591,8 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           return;
         }
         const trovoj: Trovo[] = [];
+        // Spec 035 4.5.6: what the person should know of an image (no browser for a JPG or WebP).
+        const notoj: string[] = [];
         for (const image of inspiro) {
           try {
             const read = await legiMaterialon(
@@ -1598,9 +1600,10 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
                 filename: typeof image.filename === "string" ? image.filename : "",
                 bytes: Buffer.from(typeof image.base64 === "string" ? image.base64 : "", "base64"),
               },
-              { workdir: options.workdir, name, familyOf: familyOfFilename },
+              { workdir: options.workdir, name, familyOf: familyOfFilename, bildilo },
             );
             trovoj.push(...read.trovoj);
+            notoj.push(...read.satzoj);
             kroniko(name, {
               ago: "fremda",
               fonto: "regilo",
@@ -1714,7 +1717,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         );
         sendJson(response, {
           facetoj: result.facetoj,
-          satz: result.satz,
+          satz: [result.satz, ...notoj].join(" "),
           rev: draft.rev,
           stato: statoOf(name, draft),
           ...(turn === undefined ? {} : { antwort: turn.antwort, kosto: turn.kosto }),
@@ -1752,6 +1755,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
                 : { tiparojRepo: options.settings.tiparojRepo }),
               ...(options.deps === undefined ? {} : { deps: options.deps }),
               familyOf: familyOfFilename,
+              bildilo,
             },
           );
         } catch (error) {

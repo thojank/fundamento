@@ -5,6 +5,10 @@
 // Every request of the page goes through the fetch it is given (the guarded fetch of Weg C, D-15);
 // only GET, nothing is posted. Without Playwright or without Chromium the renderer throws SenBrowser,
 // and Weg C reads the code alone and says so in one sentence.
+//
+// Befund 4.5.6 (D-11): the same browser decodes an uploaded JPG or WebP – Node decodes neither –
+// into pixels for the Enportilo: drawn into a canvas, at most MAX_RANDO px on the longer edge, and
+// handed over as a PNG, which the Enportilo decodes itself.
 
 import { type Bildo, decodePng } from "./png.js";
 import type { RetejoFetch } from "./retejo.js";
@@ -18,6 +22,8 @@ const LOAD_MS = 20_000;
 const IDLE_MS = 5_000;
 /** The largest file a rendered page may load (as for a stylesheet of Weg C, 2 MB, plus images). */
 const MAX_DOSIERO = 8 * 1024 * 1024;
+/** A decoded upload is scaled to at most this many px on its longer edge (shares stay). */
+export const MAX_RANDO = 1024;
 
 /** The sentence when the page could only be read from its code. */
 export const OHNE_BROWSER =
@@ -46,8 +52,13 @@ export interface Pagxo {
   fetch: RetejoFetch;
 }
 
+/** The image types the browser decodes for the Enportilo. */
+export type BildTipo = "image/jpeg" | "image/webp";
+
 export interface Bildilo {
   bildigi(pagxo: Pagxo): Promise<Bildigo>;
+  /** The pixels of a JPG or WebP; throws SenBrowser without a browser. */
+  malkodi(bytes: Uint8Array, tipo: BildTipo): Promise<Bildo>;
 }
 
 /** No browser: Playwright is not installed, or Chromium does not start. */
@@ -68,6 +79,7 @@ interface PwRoute {
   abort(code: string): Promise<void>;
 }
 interface PwPage {
+  setContent(html: string): Promise<void>;
   goto(url: string, options: { waitUntil: "load"; timeout: number }): Promise<unknown>;
   waitForLoadState(state: "networkidle", options: { timeout: number }): Promise<void>;
   evaluate(expression: string): Promise<unknown>;
@@ -123,6 +135,26 @@ const LOGOJ = `(() => {
   return boxes.slice(0, 10);
 })()`;
 
+const KUNTEKSTO = {
+  viewport: { width: VIDO.width, height: VIDO.height },
+  deviceScaleFactor: 1,
+  serviceWorkers: "block",
+} as const;
+
+/** Draws an image of a data URL into a canvas, at most MAX_RANDO px, and returns it as PNG. */
+const malkodilo = (dataUrl: string) => `(async () => {
+  const image = new Image();
+  image.src = ${JSON.stringify(dataUrl)};
+  await image.decode();
+  const scale = Math.min(1, ${MAX_RANDO} / Math.max(image.naturalWidth, image.naturalHeight));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+  canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+  canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/png");
+})()`;
+const PNG_DATUMO = "data:image/png;base64,";
+
 function kestojOf(value: unknown): Kesto[] {
   if (!Array.isArray(value)) return [];
   return value.flatMap((entry: unknown) => {
@@ -144,7 +176,7 @@ function kestojOf(value: unknown): Kesto[] {
  */
 export function playwrightBildilo(ladi: Ladilo = ladiPlaywright): Bildilo {
   let modulo: PlaywrightModulo | undefined;
-  const browser = async (): Promise<PwBrowser> => {
+  const launch = async (): Promise<PwBrowser> => {
     if (modulo === undefined) {
       let loaded: unknown;
       try {
@@ -167,13 +199,9 @@ export function playwrightBildilo(ladi: Ladilo = ladiPlaywright): Bildilo {
   };
   return {
     async bildigi(pagxo) {
-      const chromium = await browser();
+      const chromium = await launch();
       try {
-        const context = await chromium.newContext({
-          viewport: { width: VIDO.width, height: VIDO.height },
-          deviceScaleFactor: 1,
-          serviceWorkers: "block",
-        });
+        const context = await chromium.newContext(KUNTEKSTO);
         let served = false;
         await context.route("**/*", async (route) => {
           const request = route.request();
@@ -231,6 +259,27 @@ export function playwrightBildilo(ladi: Ladilo = ladiPlaywright): Bildilo {
           },
         });
         return { bildo: decodePng(png), logoj };
+      } finally {
+        await chromium.close();
+      }
+    },
+    async malkodi(bytes, tipo) {
+      const chromium = await launch();
+      try {
+        // A blank page: no route, no network; the image comes as a data URL.
+        const page = await (await chromium.newContext(KUNTEKSTO)).newPage();
+        await page.setContent("<!doctype html><title>malkodi</title>");
+        let png: unknown;
+        try {
+          png = await page.evaluate(
+            malkodilo(`data:${tipo};base64,${Buffer.from(bytes).toString("base64")}`),
+          );
+        } catch {
+          throw new Error("Das Bild ließ sich nicht dekodieren.");
+        }
+        if (typeof png !== "string" || !png.startsWith(PNG_DATUMO))
+          throw new Error("Das Bild ließ sich nicht dekodieren.");
+        return decodePng(Buffer.from(png.slice(PNG_DATUMO.length), "base64"));
       } finally {
         await chromium.close();
       }

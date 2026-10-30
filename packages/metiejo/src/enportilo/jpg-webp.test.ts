@@ -145,7 +145,9 @@ describe("JPG and WebP in both upload fields (Spec 035, Befund 4.5.6)", () => {
       (entry) => entry.ago === "propono" && entry.faceto === "gvidkoloro",
     );
     expect(
-      (lead?.detaloj?.herkunft as { dosiero: string }[] | undefined)?.map((at) => at.dosiero),
+      (lead?.detaloj as { herkunft?: { dosiero: string }[] } | undefined)?.herkunft?.map(
+        (at) => at.dosiero,
+      ),
     ).toEqual(expect.arrayContaining(["bild.jpg"]));
   });
 

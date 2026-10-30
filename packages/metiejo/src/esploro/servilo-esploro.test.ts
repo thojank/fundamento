@@ -37,7 +37,10 @@ const pageFetch = async (url: string) =>
       )
     : new Response("", { status: 404 });
 /** Spec 035 4.1: every page renders as an empty white screen; its colours come from the CSS. */
-const bildilo = { bildigi: async () => ({ bildo: blanka(), logoj: [] }) };
+const bildilo = {
+  bildigi: async () => ({ bildo: blanka(), logoj: [] }),
+  malkodi: async () => blanka(),
+};
 const llmFetch = async () =>
   new Response(
     JSON.stringify(
