@@ -38,18 +38,21 @@ describe("faldilo in the repo Modelo (section ⑤, G1, G2)", () => {
     expect(modelo.eroj).toHaveLength(40);
   });
 
-  it("has open (a keyed boolean, the axis) and group as props; the states of the summary; summary and content slots", () => {
+  it("has open (a keyed boolean, the axis), group and disabled as props; the states of the summary; summary, content and disabled-reason slots", () => {
     expect(skemo?.props.map((prop) => [prop.name, prop.kind, prop.default])).toEqual([
       ["open", "boolean", false],
       ["group", "string", undefined],
+      // Spec 029 ②b-1 M-1 (A-faldilo-3): a section that cannot open for now, with its reason.
+      ["disabled", "boolean", false],
     ]);
-    expect(skemo?.states).toEqual(["rest", "hover", "focus"]);
+    expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled"]);
     expect(skemo?.slots).toEqual([
       { name: "summary", text: true },
       { name: "content", default: true },
+      { name: "disabled-reason", text: true },
     ]);
     expect(variantKeys(skemoOrThrow())).toEqual(["open", "state"]);
-    expect(combinationsOf(skemoOrThrow(), ["open", "state"])).toHaveLength(6);
+    expect(combinationsOf(skemoOrThrow(), ["open", "state"])).toHaveLength(8);
   });
 
   it("names its parts: the summary as a row by state, the chevron by open, content, box, motion, focus ring", () => {
@@ -63,7 +66,7 @@ describe("faldilo in the repo Modelo (section ⑤, G1, G2)", () => {
     ]);
     expect(skemo?.parts.summary).toEqual({
       fill: { by: ["state"] },
-      color: { fixed: "color.text.default" },
+      color: { by: ["state"] },
       typography: { fixed: "typography.label.1" },
       height: { fixed: "size.target.min" },
       "inline-padding": { fixed: "spacing.medium" },
@@ -85,7 +88,8 @@ describe("faldilo in the repo Modelo (section ⑤, G1, G2)", () => {
     expect(skemo?.a11y).toEqual({
       role: "group",
       name: ["slot:summary"],
-      states: { open: ["aria-expanded"] },
+      description: ["slot:disabled-reason"],
+      states: { open: ["aria-expanded"], disabled: ["aria-disabled"] },
       keys: ["Enter", "Space"],
     });
   });

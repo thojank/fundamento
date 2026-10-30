@@ -67,6 +67,12 @@
         "description": "Not available; skipped by the keyboard."
       },
       {
+        "name": "loading",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-5: the application loads or checks (a value saved, a list fetched, a file examined): the field says so (aria-busy, described by a11y.texts loading) and shows the turning spinner; it stays operable."
+      },
+      {
         "name": "readonly",
         "kind": "boolean",
         "default": false,
@@ -112,6 +118,10 @@
       },
       {
         "name": "max-label",
+        "text": true
+      },
+      {
+        "name": "disabled-reason",
         "text": true
       }
     ],
@@ -227,8 +237,22 @@
         "easing": {
           "fixed": "motion.easing.standard"
         }
+      },
+      "spinner": {
+        "size": {
+          "fixed": "size.icon.small"
+        },
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "inline-padding": {
+          "fixed": "spacing.small"
+        }
       }
     },
+    "trailing": [
+      "spinner"
+    ],
     "bindings": [
       {
         "part": "label",
@@ -342,7 +366,8 @@
       ],
       "description": [
         "slot:help",
-        "slot:error"
+        "slot:error",
+        "slot:disabled-reason"
       ],
       "states": {
         "required": [
@@ -356,6 +381,9 @@
         ],
         "readonly": [
           "aria-readonly"
+        ],
+        "loading": [
+          "aria-busy"
         ]
       },
       "keys": [
@@ -380,6 +408,10 @@
         "max-label-name": {
           "de": "Bis",
           "en": "To"
+        },
+        "loading": {
+          "de": "lädt",
+          "en": "loading"
         }
       }
     },
@@ -437,6 +469,17 @@
           ]
         },
         "kialo": "An upper value needs a second thumb to stand against; without range the one value is value."
+      },
+      {
+        "when": {
+          "slot:disabled-reason": "filled"
+        },
+        "allowed": {
+          "disabled": [
+            "true"
+          ]
+        },
+        "kialo": "A reason without disabled is a contradiction, because it says why something is blocked that is not."
       }
     ],
     "goals": [

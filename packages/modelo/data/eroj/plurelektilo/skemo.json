@@ -53,6 +53,12 @@
         "description": "Cannot be used: the list does not open; skipped by the keyboard."
       },
       {
+        "name": "loading",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-5: the application loads or checks (a value saved, a list fetched, a file examined): the field says so (aria-busy, described by a11y.texts loading) and shows the turning spinner; it stays operable."
+      },
+      {
         "name": "readonly",
         "kind": "boolean",
         "default": false,
@@ -74,6 +80,12 @@
         "name": "name",
         "kind": "string",
         "description": "The name under which the form sends the choice."
+      },
+      {
+        "name": "clearable",
+        "kind": "boolean",
+        "default": true,
+        "description": "Spec 029 ②b-1 M-6: the button that clears every chosen value (Alle abwählen) is shown; true by default, as before."
       }
     ],
     "states": [
@@ -105,6 +117,10 @@
       },
       {
         "name": "error",
+        "text": true
+      },
+      {
+        "name": "disabled-reason",
         "text": true
       }
     ],
@@ -283,8 +299,23 @@
         "easing": {
           "fixed": "motion.easing.standard"
         }
+      },
+      "spinner": {
+        "size": {
+          "fixed": "size.icon.small"
+        },
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "inline-padding": {
+          "fixed": "spacing.small"
+        }
       }
     },
+    "trailing": [
+      "spinner",
+      "indicator"
+    ],
     "bindings": [
       {
         "part": "label",
@@ -462,7 +493,8 @@
       ],
       "description": [
         "slot:help",
-        "slot:error"
+        "slot:error",
+        "slot:disabled-reason"
       ],
       "states": {
         "selected": [
@@ -482,6 +514,9 @@
         ],
         "expanded": [
           "aria-expanded"
+        ],
+        "loading": [
+          "aria-busy"
         ]
       },
       "keys": [
@@ -509,6 +544,10 @@
         "values-invalid": {
           "de": "Wähle höchstens {max}.",
           "en": "Choose at most {max}."
+        },
+        "loading": {
+          "de": "lädt",
+          "en": "loading"
         }
       }
     },
@@ -544,6 +583,17 @@
           ]
         },
         "kialo": "Two reasons why one cannot choose are one too many, because disabled wins."
+      },
+      {
+        "when": {
+          "slot:disabled-reason": "filled"
+        },
+        "allowed": {
+          "disabled": [
+            "true"
+          ]
+        },
+        "kialo": "A reason without disabled is a contradiction, because it says why something is blocked that is not."
       }
     ],
     "goals": [

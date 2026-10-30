@@ -101,6 +101,18 @@
         "name": "step",
         "kind": "string",
         "description": "How far one step button or one arrow key moves a number (constraint: only with kind number); 1 without it."
+      },
+      {
+        "name": "loading",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-5: the application loads or checks (a value saved, a list fetched, a file examined): the field says so (aria-busy, described by a11y.texts loading) and shows the turning spinner; it stays operable."
+      },
+      {
+        "name": "clearable",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-6: a clear button in the field, shown while it has a value and is neither disabled nor read-only, named „{label} leeren“; a press empties the value and returns the focus to the field."
       }
     ],
     "states": [
@@ -123,6 +135,10 @@
       },
       {
         "name": "error",
+        "text": true
+      },
+      {
+        "name": "disabled-reason",
         "text": true
       }
     ],
@@ -236,6 +252,9 @@
           "by": [
             "size"
           ]
+        },
+        "width": {
+          "fixed": "size.target.min"
         }
       },
       "increment": {
@@ -243,14 +262,39 @@
           "by": [
             "size"
           ]
+        },
+        "width": {
+          "fixed": "size.target.min"
         }
       },
       "clear": {
         "size": {
-          "fixed": "size.control.small"
+          "by": [
+            "size"
+          ]
+        },
+        "width": {
+          "fixed": "size.target.min"
+        }
+      },
+      "spinner": {
+        "size": {
+          "fixed": "size.icon.small"
+        },
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "inline-padding": {
+          "fixed": "spacing.small"
         }
       }
     },
+    "trailing": [
+      "spinner",
+      "clear",
+      "decrement",
+      "increment"
+    ],
     "bindings": [
       {
         "part": "label",
@@ -453,12 +497,36 @@
         "token": "spacing.medium"
       },
       {
+        "part": "clear",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "clear",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "clear",
+        "property": "size",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.icon.large"
+      },
+      {
         "part": "decrement",
         "property": "size",
         "when": {
           "size": "small"
         },
-        "token": "size.control.small"
+        "token": "size.icon.small"
       },
       {
         "part": "decrement",
@@ -466,7 +534,7 @@
         "when": {
           "size": "medium"
         },
-        "token": "size.control.medium"
+        "token": "size.icon.medium"
       },
       {
         "part": "decrement",
@@ -474,7 +542,7 @@
         "when": {
           "size": "large"
         },
-        "token": "size.control.large"
+        "token": "size.icon.large"
       },
       {
         "part": "increment",
@@ -482,7 +550,7 @@
         "when": {
           "size": "small"
         },
-        "token": "size.control.small"
+        "token": "size.icon.small"
       },
       {
         "part": "increment",
@@ -490,7 +558,7 @@
         "when": {
           "size": "medium"
         },
-        "token": "size.control.medium"
+        "token": "size.icon.medium"
       },
       {
         "part": "increment",
@@ -498,7 +566,7 @@
         "when": {
           "size": "large"
         },
-        "token": "size.control.large"
+        "token": "size.icon.large"
       }
     ],
     "a11y": {
@@ -508,7 +576,8 @@
       ],
       "description": [
         "slot:help",
-        "slot:error"
+        "slot:error",
+        "slot:disabled-reason"
       ],
       "states": {
         "required": [
@@ -522,6 +591,9 @@
         ],
         "readonly": [
           "aria-readonly"
+        ],
+        "loading": [
+          "aria-busy"
         ]
       },
       "keys": [
@@ -544,8 +616,12 @@
           "en": "Increase"
         },
         "clear-name": {
-          "de": "Suche leeren",
-          "en": "Clear search"
+          "de": "{label} leeren",
+          "en": "Clear {label}"
+        },
+        "loading": {
+          "de": "lädt",
+          "en": "loading"
         }
       }
     },
@@ -629,6 +705,17 @@
           ]
         },
         "kialo": "A step needs a scale, because only a number moves by a step; a text has none."
+      },
+      {
+        "when": {
+          "slot:disabled-reason": "filled"
+        },
+        "allowed": {
+          "disabled": [
+            "true"
+          ]
+        },
+        "kialo": "A reason without disabled is a contradiction, because it says why something is blocked that is not."
       }
     ],
     "goals": [

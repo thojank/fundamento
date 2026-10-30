@@ -28,8 +28,13 @@ describe("Spec 029 ①: the structure of komuna 0.2 for the Agordilo", () => {
     const structure = readStructure();
     expect(structure.fingerprint).toBe(storedSha("aspekto-provo/aspekto-provo"));
     expect(structure.fingerprint).toBe(storedSha("aspekto-provo-kompakta/aspekto-provo-kompakta"));
+    // Spec 029 ②b-1: the spinner of the fields (M-5, 36 Ero-Tokens) and the clear button of four
+    // more fields (M-6, 4) are part of the structure; so is the faldilo's summary by state
+    // (M-1: its colour at rest, hover, focus and disabled, its fill disabled); Abnahme #122: the
+    // clear button as large as the field's icon, the steppers of a number at icon size, each a
+    // target of at least size.target.min (width).
     expect(structure.fingerprint).toBe(
-      "554efc71d758d8147e8b63c17a9eba094fae50633007826afc0bb1cfa2ea36e7",
+      "0b0d678759cbf48c86cd334a1a77d9e35b40aa260b5ba6725804f043c7eced34",
     );
   });
 

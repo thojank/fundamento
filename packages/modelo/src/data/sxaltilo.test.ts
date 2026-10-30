@@ -74,10 +74,15 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
       ["checked", "boolean", false],
       ["size", ["small", "medium", "large"], "medium"],
       ["disabled", "boolean", false],
+      ["loading", "boolean", false],
       ["name", "string", undefined],
     ]);
     expect(skemo.states).toEqual(["rest", "hover", "focus", "disabled"]);
-    expect(skemo.slots).toEqual([{ name: "label", default: true, text: true, beside: true }]);
+    expect(skemo.slots).toEqual([
+      { name: "label", default: true, text: true, beside: true },
+      // Spec 029 ②b-1 M-1: the reason for disabled.
+      { name: "disabled-reason", text: true },
+    ]);
   });
 
   it("names its parts like the butono and the kampo, plus the indicator (D-02)", () => {
@@ -88,6 +93,7 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
       "indicator",
       "label",
       "motion",
+      "spinner",
       "surface",
     ]);
     const tokens = [
@@ -140,8 +146,10 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
     expect(skemo.a11y).toEqual({
       role: "switch",
       name: ["slot:label"],
-      states: { checked: ["aria-checked"], disabled: ["aria-disabled"] },
+      description: ["slot:disabled-reason"],
+      states: { checked: ["aria-checked"], disabled: ["aria-disabled"], loading: ["aria-busy"] },
       keys: ["Space", "Enter"],
+      texts: { loading: { de: "lädt", en: "loading" } },
     });
   });
 

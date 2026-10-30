@@ -101,6 +101,7 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
         ["placeholder", "string", undefined],
         ["required", "boolean", false],
         ["disabled", "boolean", false],
+        ["loading", "boolean", false],
         ["readonly", "boolean", false],
         ["invalid", "boolean", false],
         ["size", ["small", "medium", "large"], "medium"],
@@ -116,6 +117,8 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
       { name: "label", default: true, text: true },
       { name: "help", text: true },
       { name: "error", text: true },
+      // Spec 029 ②b-1 M-1: the reason for disabled.
+      { name: "disabled-reason", text: true },
     ]);
   });
 
@@ -169,15 +172,19 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
     expect(skemo?.a11y).toEqual({
       role: "textbox",
       name: ["slot:label"],
-      description: ["slot:help", "slot:error"],
+      description: ["slot:help", "slot:error", "slot:disabled-reason"],
       states: {
+        loading: ["aria-busy"],
         required: ["aria-required"],
         invalid: ["aria-invalid"],
         disabled: ["aria-disabled"],
         readonly: ["aria-readonly"],
       },
       keys: [],
-      texts: { required: { de: "erforderlich", en: "required" } },
+      texts: {
+        required: { de: "erforderlich", en: "required" },
+        loading: { de: "lädt", en: "loading" },
+      },
     });
   });
 

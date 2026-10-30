@@ -62,6 +62,12 @@
         "description": "Cannot be used: the field takes no text, the calendar does not open; skipped by the keyboard."
       },
       {
+        "name": "loading",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-5: the application loads or checks (a value saved, a list fetched, a file examined): the field says so (aria-busy, described by a11y.texts loading) and shows the turning spinner; it stays operable."
+      },
+      {
         "name": "readonly",
         "kind": "boolean",
         "default": false,
@@ -83,6 +89,12 @@
         "name": "name",
         "kind": "string",
         "description": "The name under which the form sends the date (ISO), a range as one ISO interval (start/end)."
+      },
+      {
+        "name": "clearable",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-6: a clear button in the field, shown while it has a value and is neither disabled nor read-only, named „{label} leeren“; a press empties the value and returns the focus to the field."
       }
     ],
     "states": [
@@ -105,6 +117,10 @@
       },
       {
         "name": "error",
+        "text": true
+      },
+      {
+        "name": "disabled-reason",
         "text": true
       }
     ],
@@ -153,7 +169,7 @@
       },
       "trigger": {
         "size": {
-          "fixed": "size.control.medium"
+          "fixed": "size.target.min"
         }
       },
       "calendar": {
@@ -306,8 +322,29 @@
         "easing": {
           "fixed": "motion.easing.standard"
         }
+      },
+      "spinner": {
+        "size": {
+          "fixed": "size.icon.small"
+        },
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "inline-padding": {
+          "fixed": "spacing.small"
+        }
+      },
+      "clear": {
+        "size": {
+          "fixed": "size.target.min"
+        }
       }
     },
+    "trailing": [
+      "spinner",
+      "clear",
+      "trigger"
+    ],
     "bindings": [
       {
         "part": "label",
@@ -485,7 +522,8 @@
       ],
       "description": [
         "slot:help",
-        "slot:error"
+        "slot:error",
+        "slot:disabled-reason"
       ],
       "states": {
         "required": [
@@ -502,6 +540,9 @@
         ],
         "expanded": [
           "aria-expanded"
+        ],
+        "loading": [
+          "aria-busy"
         ]
       },
       "keys": [
@@ -540,6 +581,14 @@
         "value-end-invalid": {
           "de": "Wähle ein Ende nach dem Anfang.",
           "en": "Choose an end after the start."
+        },
+        "loading": {
+          "de": "lädt",
+          "en": "loading"
+        },
+        "clear-name": {
+          "de": "{label} leeren",
+          "en": "Clear {label}"
         }
       }
     },
@@ -608,6 +657,17 @@
           ]
         },
         "kialo": "An end needs a start to stand against, because without mode range the one date is value."
+      },
+      {
+        "when": {
+          "slot:disabled-reason": "filled"
+        },
+        "allowed": {
+          "disabled": [
+            "true"
+          ]
+        },
+        "kialo": "A reason without disabled is a contradiction, because it says why something is blocked that is not."
       }
     ],
     "goals": [

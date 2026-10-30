@@ -142,6 +142,12 @@ export interface GetEroBrief {
    * prop is an axis.
    */
   props?: { name: string; type: SkemoProp["kind"] }[];
+  /**
+   * Every boolean prop that is no axis, by name, in Skemo order (Spec 029 ②b-1, Maintainer 29.10.):
+   * the brief stays under its ceiling of 750 as the fields gain loading, clearable and status.
+   * Absent when there is none.
+   */
+  flags?: string[];
   /** Props without a default (the caller has to decide them) and slots the Uzo requires. */
   required: { props: string[]; slots: string[] };
   instead?: { goal: string; ero: string | null; kialo: string }[];
@@ -459,9 +465,14 @@ export function briefOf(entry: LoadedEro): GetEroBrief {
   // largest).
   const axisNames = new Set(brief.axes.map((axis) => axis.name));
   const props = skemo.props
-    .filter((prop) => !axisNames.has(prop.name))
+    .filter((prop) => !axisNames.has(prop.name) && prop.kind !== "boolean")
     .map((prop) => ({ name: prop.name, type: prop.kind }));
   if (props.length > 0) brief.props = props;
+  // Spec 029 ②b-1 (Maintainer 29.10.): a boolean is its name alone.
+  const flags = skemo.props
+    .filter((prop) => !axisNames.has(prop.name) && prop.kind === "boolean")
+    .map((prop) => prop.name);
+  if (flags.length > 0) brief.flags = flags;
   if (uzo === undefined) {
     brief.issues = [
       {

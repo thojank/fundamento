@@ -40,6 +40,8 @@ describe("the kampo of Spec 025 ②: the date range goes to the datelektilo (Ark
       "autocomplete",
       "stepper",
       "step",
+      "loading",
+      "clearable",
     ]);
     expect(Object.keys(kampo.skemo.parts)).toContain("decrement");
     expect(kampo.skemo.props.find((prop) => prop.name === "kind")?.values).toContain("date");

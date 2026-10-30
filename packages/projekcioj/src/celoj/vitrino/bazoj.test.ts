@@ -70,7 +70,11 @@ describe("Spec 029 ① 5: the foundation pages", () => {
 
   it("Tokens: every token with its level, its value per brand and mode and its origin, searchable", () => {
     const tokenoj = datumoj.bazoj?.tokenoj ?? [];
-    expect(tokenoj.length).toBe(1608);
+    // Spec 029 ②b-1: the spinner of the twelve fields (M-5, 36), the clear button of four (M-6, 4)
+    // and the faldilo's summary by state (M-1: 5 added, its one colour gone); Abnahme #122: the
+    // clear button of kampo, kompletigilo and elektilo by size (3 for 1 each, +6) and the target of
+    // the six buttons at the end of a field (+6).
+    expect(tokenoj.length).toBe(1664);
     const levels = new Set(tokenoj.map((token) => token.ebeno));
     expect(levels).toEqual(new Set(["grundlage", "rolle", "ero"]));
     const text = tokenoj.find((token) => token.name === "color.text.default");

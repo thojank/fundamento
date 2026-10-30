@@ -44,6 +44,12 @@
         "description": "Not available; skipped by the keyboard, nothing can be chosen or dropped."
       },
       {
+        "name": "loading",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-5: the application loads or checks (a value saved, a list fetched, a file examined): the field says so (aria-busy, described by a11y.texts loading) and shows the turning spinner; it stays operable."
+      },
+      {
         "name": "invalid",
         "kind": "boolean",
         "default": false,
@@ -75,6 +81,10 @@
       },
       {
         "name": "error",
+        "text": true
+      },
+      {
+        "name": "disabled-reason",
         "text": true
       }
     ],
@@ -209,8 +219,22 @@
         "easing": {
           "fixed": "motion.easing.standard"
         }
+      },
+      "spinner": {
+        "size": {
+          "fixed": "size.icon.small"
+        },
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "inline-padding": {
+          "fixed": "spacing.small"
+        }
       }
     },
+    "trailing": [
+      "spinner"
+    ],
     "bindings": [
       {
         "part": "label",
@@ -342,7 +366,8 @@
       ],
       "description": [
         "slot:help",
-        "slot:error"
+        "slot:error",
+        "slot:disabled-reason"
       ],
       "states": {
         "required": [
@@ -353,6 +378,9 @@
         ],
         "disabled": [
           "aria-disabled"
+        ],
+        "loading": [
+          "aria-busy"
         ]
       },
       "keys": [
@@ -387,6 +415,10 @@
         "max-size-invalid": {
           "de": "{file} ist zu groß: Wähle eine Datei bis {max-size}.",
           "en": "{file} is too large: choose a file up to {max-size}."
+        },
+        "loading": {
+          "de": "lädt",
+          "en": "loading"
         }
       }
     },
@@ -433,6 +465,17 @@
           ]
         },
         "kialo": "Who learns the allowed files only from the error makes the mistake twice: a field with accept or max-size states the kinds and the size in its help, 'PDF, höchstens 5 MB' (file-constraints-stated)."
+      },
+      {
+        "when": {
+          "slot:disabled-reason": "filled"
+        },
+        "allowed": {
+          "disabled": [
+            "true"
+          ]
+        },
+        "kialo": "A reason without disabled is a contradiction, because it says why something is blocked that is not."
       }
     ],
     "goals": [

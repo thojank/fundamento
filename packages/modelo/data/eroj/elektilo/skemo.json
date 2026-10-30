@@ -49,6 +49,12 @@
         "description": "Not available; skipped by the keyboard, the list does not open."
       },
       {
+        "name": "loading",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-5: the application loads or checks (a value saved, a list fetched, a file examined): the field says so (aria-busy, described by a11y.texts loading) and shows the turning spinner; it stays operable."
+      },
+      {
         "name": "name",
         "kind": "string",
         "description": "The name in the form; without effect in a design tool, like type on the butono."
@@ -57,6 +63,12 @@
         "name": "empty-label",
         "kind": "string",
         "description": "The text of a chosen empty option, 'Alle', 'keine Auswahl': the first option, with the value \"\", selectable; it replaces the placeholder (constraint) and counts as an option (Regulo option-labels-distinct)."
+      },
+      {
+        "name": "clearable",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-6: a clear button in the field, shown while it has a value and is neither disabled nor read-only, named „{label} leeren“; a press empties the value and returns the focus to the field."
       }
     ],
     "states": [
@@ -87,6 +99,10 @@
       },
       {
         "name": "error",
+        "text": true
+      },
+      {
+        "name": "disabled-reason",
         "text": true
       }
     ],
@@ -204,8 +220,34 @@
         "easing": {
           "fixed": "motion.easing.standard"
         }
+      },
+      "spinner": {
+        "size": {
+          "fixed": "size.icon.small"
+        },
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "inline-padding": {
+          "fixed": "spacing.small"
+        }
+      },
+      "clear": {
+        "size": {
+          "by": [
+            "size"
+          ]
+        },
+        "width": {
+          "fixed": "size.target.min"
+        }
       }
     },
+    "trailing": [
+      "spinner",
+      "clear",
+      "indicator"
+    ],
     "bindings": [
       {
         "part": "label",
@@ -414,6 +456,30 @@
           "size": "large"
         },
         "token": "size.icon.large"
+      },
+      {
+        "part": "clear",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "clear",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "clear",
+        "property": "size",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.icon.large"
       }
     ],
     "a11y": {
@@ -423,7 +489,8 @@
       ],
       "description": [
         "slot:help",
-        "slot:error"
+        "slot:error",
+        "slot:disabled-reason"
       ],
       "states": {
         "selected": [
@@ -437,6 +504,9 @@
         ],
         "disabled": [
           "aria-disabled"
+        ],
+        "loading": [
+          "aria-busy"
         ]
       },
       "keys": [
@@ -449,6 +519,14 @@
         "required": {
           "de": "erforderlich",
           "en": "required"
+        },
+        "loading": {
+          "de": "lädt",
+          "en": "loading"
+        },
+        "clear-name": {
+          "de": "{label} leeren",
+          "en": "Clear {label}"
         }
       }
     },
@@ -480,6 +558,17 @@
           ]
         },
         "kialo": "An empty option beside a prompt is the same first line twice, because both stand in the closed field for 'nothing chosen'; the empty option replaces the prompt."
+      },
+      {
+        "when": {
+          "slot:disabled-reason": "filled"
+        },
+        "allowed": {
+          "disabled": [
+            "true"
+          ]
+        },
+        "kialo": "A reason without disabled is a contradiction, because it says why something is blocked that is not."
       }
     ],
     "goals": [

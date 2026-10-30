@@ -3909,3 +3909,32 @@ describe("Nachlese 12 documentation (specs/034-nachlese-12)", () => {
     expect(read("docs/vojmapo.md")).toContain("Nachlese 12");
   });
 });
+
+// Spec 029 ②b-1 (Maintainer 29.10.): the brief of get_ero lists the booleans in flags – a change
+// for MCP clients, in the CHANGELOG ahead of the next release, with one sentence on the switch.
+describe("Spec 029 ②b-1: the CHANGELOG names the flags of the brief for MCP clients", () => {
+  it("has the unreleased section with the note for MCP clients", () => {
+    const changelog = read("CHANGELOG.md");
+    const unreleased = changelog.slice(
+      changelog.indexOf("## Unveröffentlicht"),
+      changelog.indexOf("## 0.2.0"),
+    );
+    expect(changelog.indexOf("## Unveröffentlicht")).toBeGreaterThan(-1);
+    expect(changelog.indexOf("## Unveröffentlicht")).toBeLessThan(changelog.indexOf("## 0.2.0"));
+    expect(unreleased).toContain("### Hinweis für MCP-Clients");
+    expect(unreleased).toContain("`get_ero`");
+    expect(unreleased).toContain("`flags`");
+    expect(unreleased).toContain("`props`");
+  });
+});
+
+// Abnahme #122, 6: the plan said that clearing a field says input and change; the elektilo and the
+// listelektilo say change alone, as when a person chooses (their Skemo names change alone). The
+// plan says so, with the reason.
+describe("Abnahme #122: the plan names the events of clearing as the elements say them", () => {
+  it("M-6: input and change where the Skemo names both, change alone at elektilo and listelektilo", () => {
+    const plan = read("specs/029-fonto-astryx/plan.md");
+    expect(plan).not.toContain("ein Druck leert den Wert, sagt input und change");
+    expect(plan).toContain("elektilo und listelektilo sagen beim Leeren nur change");
+  });
+});
