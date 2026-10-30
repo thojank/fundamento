@@ -1180,6 +1180,11 @@ export interface FigmaComponentSet {
    */
   clearColor?: string;
   /**
+   * Spec 029 ②b-1b M-2 (A-kampo-4): the field keeps the room of its status icon in every variant
+   * (the variants of a row stay one size); the sign shows where the variant has a status (icons).
+   */
+  statusIcon?: true;
+  /**
    * The axes of the variants that are no axes of the Skemo's parts (Spec 014 ②, plan ② D-08): the
    * name of an icon — one variant per name of the Ikonaro, drawn in its own column, while the
    * Skemo keys no part by it. The parity inventory leaves them out of the variant key.
@@ -2635,6 +2640,28 @@ function withClear(
   return clearsInField(skemo) ? { ...(icons ?? {}), clear: "close" } : icons;
 }
 
+/** Spec 029 ②b-1b M-2 (A-kampo-4): the Ikonaro's sign of each status a field can show. */
+const STATUS_SIGNS: Readonly<Record<string, string>> = {
+  invalid: "danger",
+  warning: "warning",
+  success: "success",
+};
+
+/**
+ * Spec 029 ②b-1b M-2 (A-kampo-4): a field with the part status-icon shows the sign of its status
+ * at the end of its control – danger where invalid, warning, success – and none in any other state.
+ */
+function withStatus(
+  skemo: LoadedEro["skemo"],
+  icons: Record<string, string> | undefined,
+  combination: Readonly<Record<string, string>>,
+): Record<string, string> | undefined {
+  const sign = STATUS_SIGNS[combination.state ?? ""];
+  return skemo.parts["status-icon"] !== undefined && sign !== undefined
+    ? { ...(icons ?? {}), "status-icon": sign }
+    : icons;
+}
+
 /**
  * The colour of the clear button's icon (Spec 029 ②b-1 M-6): the web composes a butono of
  * emphasis low, so its glyph takes that butono's label colour at rest.
@@ -3046,7 +3073,11 @@ function componentSetOf(
     const [onlyCase] = [...cases];
     const textCase = cases.size <= 1 ? (onlyCase ?? "ORIGINAL") : TEXT_CASE_VARIES;
     const shadow = shadowOf(combination);
-    const icons = withClear(skemo, iconsOf(skemo, structure, combination));
+    const icons = withStatus(
+      skemo,
+      withClear(skemo, iconsOf(skemo, structure, combination)),
+      combination,
+    );
     return {
       props: { ...combination },
       ...(icons === undefined ? {} : { icons }),
@@ -3576,6 +3607,7 @@ function componentSetOf(
     ...(skemo.parts.spinner === undefined ? {} : { spinner: STATE_SIGN }),
     ...(skemo.trailingAfter === undefined ? {} : { spinnerAfter: skemo.trailingAfter }),
     ...(clearsInField(skemo) ? { clearColor: variableName(CLEAR_ICON_COLOR) } : {}),
+    ...(skemo.parts["status-icon"] === undefined ? {} : { statusIcon: true as const }),
     ...(options === undefined ? {} : { entry: options }),
     ...(example === undefined ? {} : { example }),
     ...(examples === undefined ? {} : { examples }),

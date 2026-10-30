@@ -215,7 +215,12 @@ describe("list_eroj and the brief (acceptance 1)", () => {
     expect(brief.purpose).toBe(markobutono.purpose);
     expect(brief.required).toEqual({ props: [], slots: ["label"] });
     // Spec 011 ① (O-3): checked keys the parts, so it is an axis of the brief too.
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["checked", "size"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual([
+      "checked",
+      "size",
+      "intent",
+      "message-position",
+    ]);
     expect(brief.instead?.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["immediate", "sxaltilo"],
       ["choose-one-of-few", "elekto"],

@@ -56,6 +56,10 @@ type PartNode =
   | "spinner-mark"
   | "clear"
   | "clear-glyph-*"
+  // Spec 029 ②b-1b M-2 (A-kampo-4): the status icon at the end of a field's control.
+  | "status-icon"
+  | "status-icon-glyph-*"
+  | "status-icon-mark-*"
   | "focus-ring"
   | "focus-gap"
   | "control"
@@ -283,6 +287,12 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
   // target (width: the least width and height, square), the glyph in its middle.
   "clear.size": [{ node: "clear-glyph-*", fields: ["width", "height"] }],
   "clear.width": [{ node: "clear", fields: ["minWidth", "minHeight"] }],
+  // Spec 029 ②b-1b M-2 (A-kampo-4): the status icon of a field, its box, glyphs and colour.
+  "status-icon.size": [
+    { node: "status-icon", fields: ["width", "height"] },
+    { node: "status-icon-glyph-*", fields: ["width", "height"] },
+  ],
+  "status-icon.color": [{ node: "status-icon-mark-*", fields: ["fills"], paint: true }],
   // A typography token is a composite; Figma holds its fields as separate variables (F9). Bound
   // to the bare name, the size never arrived — there is no variable of that name. Family and cut
   // are bound too (F30), so the label follows the brand when the mode changes instead of keeping
@@ -6090,6 +6100,9 @@ async function applyComponents(variables, warnings) {
       // Spec 029 ②b-1 M-6: the clear button of a field at the end of its control, shown by the
       // BOOLEAN clearable (toggled, connected below).
       const clearFrame = typeof icons.clear === "string" ? part(control, "clear", () => figma.createFrame()) : undefined;
+      // Spec 029 ②b-1b M-2 (A-kampo-4): the sign of the field's status at the end of its control,
+      // where the variant has a status (danger, warning, success).
+      const statusFrame = component.statusIcon === true ? part(control, "status-icon", () => figma.createFrame()) : undefined;
       if (isField && field.children.indexOf(labelPlaced) !== 0) field.insertChild(0, labelPlaced);
       if (dated && field.children.indexOf(ring) !== 1) field.insertChild(1, ring);
       const oldTrigger = oldRow !== undefined ? ours(oldRow, "part", "trigger") : undefined;
@@ -6155,9 +6168,10 @@ async function applyComponents(variables, warnings) {
       }
       // Abnahme #122: the control of a field, from the start: its text, then at its end from the
       // inside out the spinner, the clear button, the chevron or the calendar – all inside it
-      // (insertChild takes the child out first, then places it).
+      // (insertChild takes the child out first, then places it). Spec 029 ②b-1b M-2 (A-kampo-4):
+      // the status icon before the clear button, in the same order, so a second run moves nothing.
       if (isField) {
-        const order = [textNode, labelled.nodes.spinner, clearFrame, fieldSign ? indicator : undefined, trigger]
+        const order = [textNode, labelled.nodes.spinner, statusFrame, clearFrame, fieldSign ? indicator : undefined, trigger]
           .filter((child) => child !== undefined);
         order.forEach((child, index) => {
           if (control.children.indexOf(child) !== index) control.insertChild(index, child);
@@ -6376,6 +6390,17 @@ async function applyComponents(variables, warnings) {
           }
         }
       }
+      if (statusFrame !== undefined) {
+        own(statusFrame, NEUTRAL);
+        own(statusFrame, INDICATOR_LAYOUT);
+        own(statusFrame, IN_FLOW);
+        // The room stays in every variant; the sign only where the variant has a status.
+        if (typeof icons["status-icon"] === "string") {
+          Object.assign(glyphNodes, drawGlyphs(statusFrame, icons["status-icon"], "status-icon-", glyphMeasures, "status-icon-mark"));
+        } else {
+          for (const child of statusFrame.children.slice()) child.remove();
+        }
+      }
       if (column) {
         own(column, TEXTS_LAYOUT);
         // The box stands at the first line of its label (D-09), as on the web.
@@ -6405,6 +6430,7 @@ async function applyComponents(variables, warnings) {
       Object.assign(nodes, glyphNodes);
       Object.assign(nodes, labelled.nodes);
       if (clearFrame !== undefined) nodes.clear = clearFrame;
+      if (statusFrame !== undefined) nodes["status-icon"] = statusFrame;
       const measures = bind(nodes, variant, variables, component.structure);
       for (const each of [labelled.nodes["label-row"], labelled.nodes.spinner, labelled.nodes["spinner-mark"]]) if (each !== undefined) flush(each);
       // The cells of a date picker (Spec 025 ②) are bound one by one: every cell its ground, size,
@@ -6474,6 +6500,8 @@ async function applyComponents(variables, warnings) {
       for (const each of frames.concat(texts).concat(mark ? [mark] : [])) flush(each);
       // Spec 029 ②b-1 M-6: the clear button after its control, so the control's layout is its own.
       if (clearFrame !== undefined) flush(clearFrame);
+      // The status icon stands in the order of the control above; written like the clear button.
+      if (statusFrame !== undefined) flush(statusFrame);
       // A font binding is the one Figma may refuse — when a font of some mode is missing, the
       // file cannot show it (F30). Refused is no reason to stop: the label keeps the written font
       // of the base combination, and the run says which binding did not take.

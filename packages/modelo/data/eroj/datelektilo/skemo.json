@@ -101,6 +101,28 @@
         "kind": "string",
         "shown": true,
         "description": "The visible label written as an attribute (Spec 029 ②b-1b, Nachlese 12): <fm-datelektilo label=\"E-Mail\"> shows it where the label slot's text would stand and names the control by it, so the simplest way to write the field is labelled; the slot's text wins where both are given."
+      },
+      {
+        "name": "intent",
+        "kind": "enum",
+        "values": [
+          "neutral",
+          "success",
+          "warning",
+          "danger"
+        ],
+        "default": "neutral",
+        "description": "Spec 029 ②b-1b M-2: the status of the field, as avizo and insigno name it. warning and success show their message (slot message) and the border of their status; danger is what invalid says – invalid stays its short form, and a filled error slot shows it too."
+      },
+      {
+        "name": "message-position",
+        "kind": "enum",
+        "values": [
+          "below",
+          "joined"
+        ],
+        "default": "below",
+        "description": "Spec 029 ②b-1b M-2: where the message and the error stand – below the field with the space of the field, or joined to it without that space. Never only in a tooltip: the message must be seen (error-not-color-only, error-says-what-to-do)."
       }
     ],
     "states": [
@@ -109,7 +131,9 @@
       "focus",
       "disabled",
       "readonly",
-      "invalid"
+      "invalid",
+      "warning",
+      "success"
     ],
     "slots": [
       {
@@ -124,6 +148,11 @@
       {
         "name": "error",
         "text": true
+      },
+      {
+        "name": "message",
+        "text": true,
+        "beside": true
       },
       {
         "name": "disabled-reason",
@@ -344,6 +373,16 @@
         "size": {
           "fixed": "size.target.min"
         }
+      },
+      "message": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
       }
     },
     "trailing": [
@@ -519,6 +558,46 @@
           "expanded": "true"
         },
         "token": "size.container.medium"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "warning"
+        },
+        "token": "color.status.warning.border"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "success"
+        },
+        "token": "color.status.success.border"
+      },
+      {
+        "part": "message",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.text.muted"
+      },
+      {
+        "part": "message",
+        "property": "color",
+        "when": {
+          "state": "warning"
+        },
+        "token": "color.status.warning.text"
+      },
+      {
+        "part": "message",
+        "property": "color",
+        "when": {
+          "state": "success"
+        },
+        "token": "color.status.success.text"
       }
     ],
     "a11y": {
@@ -530,6 +609,7 @@
       "description": [
         "slot:help",
         "slot:error",
+        "slot:message",
         "slot:disabled-reason"
       ],
       "states": {
@@ -675,6 +755,30 @@
           ]
         },
         "kialo": "A reason without disabled is a contradiction, because it says why something is blocked that is not."
+      },
+      {
+        "when": {
+          "slot:message": "filled"
+        },
+        "allowed": {
+          "intent": [
+            "success",
+            "warning"
+          ]
+        },
+        "kialo": "A message without a warning or a success has no status to say, because an error stands in the slot error and a hint in help."
+      },
+      {
+        "when": {
+          "invalid": "true"
+        },
+        "allowed": {
+          "intent": [
+            "neutral",
+            "danger"
+          ]
+        },
+        "kialo": "invalid is the short form of danger, because a field is wrong or it is not; with a warning or a success it would say two things at once."
       }
     ],
     "goals": [

@@ -78,10 +78,14 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
       ["name", "string", undefined],
       // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
       ["label", "string", undefined],
+      // Spec 029 ②b-1b M-2: the status of the field.
+      ["intent", ["neutral", "success", "warning", "danger"], "neutral"],
+      ["message-position", ["below", "joined"], "below"],
     ]);
-    expect(skemo.states).toEqual(["rest", "hover", "focus", "disabled"]);
+    expect(skemo.states).toEqual(["rest", "hover", "focus", "disabled", "warning", "success"]);
     expect(skemo.slots).toEqual([
       { name: "label", default: true, text: true, beside: true },
+      { name: "message", text: true, beside: true },
       // Spec 029 ②b-1 M-1: the reason for disabled.
       { name: "disabled-reason", text: true },
     ]);
@@ -94,6 +98,7 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
       "focus-ring",
       "indicator",
       "label",
+      "message",
       "motion",
       "spinner",
       "surface",
@@ -141,14 +146,14 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
     expect(boundToken(skemo, "indicator", "radius", {})?.token).toBe("radius.role.pill");
     expect(boundToken(skemo, "box", "gap", {})?.token).toBe("spacing.small");
     // checked × size × state: the Figma set is 2 × 3 × 4 (E2).
-    expect(combinationsOf(skemo, ["checked", "size", "state"])).toHaveLength(24);
+    expect(combinationsOf(skemo, ["checked", "size", "state"])).toHaveLength(36);
   });
 
   it("speaks role switch: name from the label, checked as aria-checked, Space and Enter, no required (D-08)", () => {
     expect(skemo.a11y).toEqual({
       role: "switch",
       name: ["slot:label", "prop:label"],
-      description: ["slot:disabled-reason"],
+      description: ["slot:message", "slot:disabled-reason"],
       states: { checked: ["aria-checked"], disabled: ["aria-disabled"], loading: ["aria-busy"] },
       keys: ["Space", "Enter"],
       texts: { loading: { de: "lädt", en: "loading" } },
@@ -183,6 +188,7 @@ describe("the Uzo of the sxaltilo (section 1, G5, D-13)", () => {
     );
     expect(uzo?.slots).toEqual({
       label: { accepts: ["text"], required: true, max: 1, nesting: 0 },
+      message: { accepts: ["text"], max: 1, nesting: 0 },
     });
     expect(uzo?.layout).toEqual({ size: "content", wrap: "never" });
   });

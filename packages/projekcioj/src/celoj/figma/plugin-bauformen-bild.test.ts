@@ -41,10 +41,38 @@ const WANTED: Readonly<Record<string, { befund: string; match?: string }>> = {
   faldilo: {
     befund: "M-1: the summary's colour by state, the state disabled added (open × state = 8).",
   },
+  // Spec 029 ②b-1b M-2: the states warning and success are new variants of every field; the
+  // variants main had paint as before (match names no variant of main), only their places move.
+  ...Object.fromEntries(
+    [
+      "alsxutilo",
+      "datelektilo",
+      "elektilo",
+      "elekto",
+      "glitilo",
+      "kompletigilo",
+      "listelektilo",
+      "markobutono",
+      "plurelektilo",
+      "sxaltilo",
+      "tekstareo",
+    ].map((set) => [
+      set,
+      {
+        befund: "M-2: the states warning and success added, the set laid out anew.",
+        match: "state=warning",
+      },
+    ]),
+  ),
   // Spec 029 ②b-1, Abnahme #122: one rule for the end of a field with a box (Skemo trailing) –
   // spinner, clear button, then the chevron or the calendar, all in the control, inside its
   // border; the ✕ as large as the chevron or the calendar; the field at least FIELD_WIDTH wide.
-  kampo: { befund: "Abnahme #122: spinner and clear button in the control, the field 256 wide." },
+  // Spec 029 ②b-1b M-2 (A-kampo-4): every variant of the kampo keeps the room of its status
+  // icon in the control, so the variants of a row stay one size.
+  kampo: {
+    befund:
+      "Abnahme #122: spinner and clear button in the control, the field 256 wide; M-2: the room of the status icon in the control (A-kampo-4).",
+  },
   tekstareo: { befund: "Abnahme #122: the spinner in the control, the field 256 wide." },
   elektilo: {
     befund: "Abnahme #122: spinner, clear button, chevron in the control; the field 256 wide.",

@@ -34,7 +34,7 @@ test.describe("fm-sxaltilo behaviour", () => {
             n.getAttribute("part"),
           ),
         ),
-    ).toEqual(["field", "control", "indicator", "label", "spinner"]);
+    ).toEqual(["field", "control", "indicator", "label", "spinner", "message"]);
   });
 
   test("a click on the track or the label, Space and Enter switch it; checked is reflected, input and change are fired", async ({

@@ -47,6 +47,12 @@ export interface ResolveCombinationOptions {
    * core token are ignored. Override-ambiguity warnings are not computed in this mode.
    */
   names?: readonly string[];
+  /**
+   * The values stay the overlay's own instead of a copy each (Spec 029 ②b-1b, AK-07): for a
+   * caller that only reads them – the resolutions every validation rule shares. Every other
+   * caller gets copies it may change.
+   */
+  shared?: boolean;
 }
 
 /**
@@ -173,7 +179,7 @@ export function resolveCombination(
     const resolved: ResolvedToken = {
       id: coreToken.id ?? "",
       type: coreToken.type,
-      value: cloneValue(result.value),
+      value: options.shared === true ? result.value : cloneValue(result.value),
       origin:
         winner.set.package === undefined
           ? { set: winner.set.name, setId: winner.set.id ?? "" }
@@ -181,7 +187,8 @@ export function resolveCombination(
       aliasChain: result.aliasChain.map((link) => ({ ...link })),
     };
     if (result.fieldAliases !== undefined) {
-      resolved.fieldAliases = cloneValue(result.fieldAliases);
+      resolved.fieldAliases =
+        options.shared === true ? result.fieldAliases : cloneValue(result.fieldAliases);
     }
     // textTransform is a field of its own: the last active set that states it wins (D-11). A
     // whole-value alias that states none follows its chain (Constitution v2.3: an Ero-Token on a

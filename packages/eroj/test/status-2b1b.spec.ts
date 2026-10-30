@@ -123,11 +123,24 @@ test.describe("Spec 029 ②b-1b M-2: the kampo's status", () => {
     test(`intent=${intent}: the border of its status, the status icon ${sign} beside it, unheard`, async ({
       page,
     }) => {
-      await serve(page, out, `<fm-kampo intent="${intent}">Name</fm-kampo>`);
-      const control = page.locator("fm-kampo").locator('[part="control"]');
-      const border = await control.evaluate((element) => getComputedStyle(element).borderTopColor);
-      expect(border).toBe(await roleColour(page, `color.status.${intent}.border`));
-      const icon = page.locator("fm-kampo").locator('[part="status-icon"]');
+      await serve(
+        page,
+        out,
+        `<fm-kampo id="k" intent="${intent}">Name</fm-kampo><fm-kampo id="i" invalid>Name</fm-kampo>`,
+      );
+      const borderOf = (id: string) =>
+        page
+          .locator(`#${id}`)
+          .locator('[part="control"]')
+          .evaluate((element) => getComputedStyle(element).borderTopColor);
+      // danger is invalid: the border of an invalid field (its Ero-Token); warning and success the
+      // border of their status.
+      expect(await borderOf("k")).toBe(
+        intent === "danger"
+          ? await borderOf("i")
+          : await roleColour(page, `color.status.${intent}.border`),
+      );
+      const icon = page.locator("#k").locator('[part="status-icon"]');
       await expect(icon).toBeVisible();
       await expect(icon).toHaveAttribute("aria-hidden", "true");
       await expect(icon.locator("fm-ikono")).toHaveAttribute("name", sign);

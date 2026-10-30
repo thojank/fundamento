@@ -57,16 +57,19 @@ test.describe("fm-kampo behaviour", () => {
       // Spec 025 ① (plan ① D-05): the input stands in a row that takes the step buttons and the
       // clear button when the kind asks for them; a text field has none.
       // Abnahme #122: the spinner at the end of the row, over the input.
+      // Spec 029 ②b-1b M-2: the status icon in the row after the input, the message after the error.
     ).toEqual([
       "field",
       "label",
       "required-mark",
       "row",
       "control",
+      "status-icon",
       "end",
       "spinner",
       "help",
       "error",
+      "message",
     ]);
   });
 

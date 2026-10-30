@@ -66,6 +66,7 @@ test.describe("fm-elekto behaviour", () => {
       ...["option", "control", "indicator", "option-label"],
       "help",
       "error",
+      "message",
     ]);
   });
 

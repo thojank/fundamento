@@ -82,13 +82,25 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
         ["name", "string", undefined],
         // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
         ["label", "string", undefined],
+        // Spec 029 ②b-1b M-2: the status of the field.
+        ["intent", ["neutral", "success", "warning", "danger"], "neutral"],
+        ["message-position", ["below", "joined"], "below"],
       ],
     );
-    expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled", "invalid"]);
+    expect(skemo?.states).toEqual([
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "invalid",
+      "warning",
+      "success",
+    ]);
     // Label and error stand beside the box, on the ground of the container (① D-07).
     expect(skemo?.slots).toEqual([
       { name: "label", default: true, text: true, beside: true },
       { name: "error", text: true, beside: true },
+      { name: "message", text: true, beside: true },
       // Spec 029 ②b-1 M-1: the reason for disabled.
       { name: "disabled-reason", text: true },
     ]);
@@ -102,6 +114,7 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
       "focus-ring",
       "indicator",
       "label",
+      "message",
       "motion",
       "required-mark",
       "spinner",
@@ -164,14 +177,14 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
     expect(boundToken(skemo, "box", "gap", {})?.token).toBe("spacing.small");
     expect(boundToken(skemo, "border", "width", {})?.token).toBe("border.width.default");
     // checked × size × state: the Figma set is 2 × 3 × 5 (E2).
-    expect(combinationsOf(skemo, ["checked", "size", "state"])).toHaveLength(30);
+    expect(combinationsOf(skemo, ["checked", "size", "state"])).toHaveLength(42);
   });
 
   it("speaks role checkbox: name from the label, description from the error, Space, required in de and en like the kampo", () => {
     expect(skemo?.a11y).toEqual({
       role: "checkbox",
       name: ["slot:label", "prop:label"],
-      description: ["slot:error", "slot:disabled-reason"],
+      description: ["slot:error", "slot:message", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],
         checked: ["aria-checked"],
@@ -208,6 +221,7 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
     ).toEqual({
       "slot:label": "filled",
       "slot:error": "filled",
+      "slot:message": "empty",
       "slot:disabled-reason": "empty",
     });
   });
@@ -241,6 +255,7 @@ describe("the Uzo of the markobutono (section 2, G5)", () => {
     expect(uzo?.slots).toEqual({
       label: { accepts: ["text"], required: true, max: 1, nesting: 0 },
       error: { accepts: ["text"], max: 1, nesting: 0 },
+      message: { accepts: ["text"], max: 1, nesting: 0 },
     });
     // The spec says with-text for "long labels break"; in the schema with-text is the link's
     // break inside running text, standing alone never (Spec 008 D-04). allowed says what the

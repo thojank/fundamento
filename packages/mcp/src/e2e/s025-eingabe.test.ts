@@ -135,7 +135,7 @@ describe("the input dialogs of the spec (Spec 025 ①)", () => {
     expect(listed.eroj).toHaveLength(40);
     expect(listed.eroj.map((ero) => ero.name)).toContain("glitilo");
     const brief = await output<Brief>(client, "get_ero", { name: "glitilo", brief: true });
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["field"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["field", "intent", "message-position"]);
     // Spec 029 ②b-1: a boolean stands in flags.
     expect(brief.flags).toContain("range");
     expect(brief.required).toEqual({ props: [], slots: ["label"] });

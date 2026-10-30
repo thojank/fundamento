@@ -23,7 +23,7 @@
           ]
         },
         "ero": "tekstareo",
-        "kialo": "Several lines need a field that grows, because one line hides them."
+        "kialo": "Several lines need a growing field, because one line hides them."
       },
       {
         "goal": "choose-many",
@@ -82,7 +82,7 @@
           ]
         },
         "ero": "sxaltilo",
-        "kialo": "A setting on or off shows its state, because a text would have to be read to know it; sxaltilo when it applies at once (in a form, applied with it: markobutono)."
+        "kialo": "A setting on or off shows its state, because a text must be read to know it; sxaltilo when it applies at once (in a form, applied with it: markobutono)."
       },
       {
         "goal": "suggestions",
@@ -100,7 +100,7 @@
           ]
         },
         "ero": "kompletigilo",
-        "kialo": "Suggestions are picked while typing, because the list shortens as one types."
+        "kialo": "Suggestions are picked while typing, because the list shortens."
       },
       {
         "goal": "approximate",
@@ -117,7 +117,7 @@
           ]
         },
         "ero": "glitilo",
-        "kialo": "A value set by feel is dragged, because a hand finds a position faster."
+        "kialo": "A value set by feel is dragged, because a hand finds it faster."
       },
       {
         "goal": "single-value",
@@ -134,7 +134,7 @@
           ]
         },
         "ero": "lokredaktilo",
-        "kialo": "A value is changed in place, because a form for one value is a detour."
+        "kialo": "A value changes in place, because a form for one value is a detour."
       }
     ],
     "boundary": [
@@ -298,6 +298,13 @@
         "nesting": 0
       },
       "error": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      },
+      "message": {
         "accepts": [
           "text"
         ],

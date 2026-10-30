@@ -61,18 +61,31 @@ describe("alsxutilo in the repo Modelo (section ②, G1, G2)", () => {
       ["name", "string", false, undefined],
       // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
       ["label", "string", false, undefined],
+      // Spec 029 ②b-1b M-2: the status of the field.
+      ["intent", "enum", false, "neutral"],
+      ["message-position", "enum", false, "below"],
     ]);
-    expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled", "invalid", "dragover"]);
+    expect(skemo?.states).toEqual([
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "invalid",
+      "warning",
+      "success",
+      "dragover",
+    ]);
     expect(skemo?.slots).toEqual([
       { name: "label", default: true, text: true },
       { name: "help", text: true },
       { name: "error", text: true },
+      { name: "message", text: true, beside: true },
       // Spec 029 ②b-1 M-1: the reason for disabled.
       { name: "disabled-reason", text: true },
     ]);
     // dropzone keys the border and the room around the button: an axis beside the state.
     expect(variantKeys(skemoOrThrow())).toEqual(["dropzone", "state"]);
-    expect(combinationsOf(skemoOrThrow(), ["dropzone", "state"])).toHaveLength(12);
+    expect(combinationsOf(skemoOrThrow(), ["dropzone", "state"])).toHaveLength(16);
   });
 
   it("names its parts: the field's label, mark, help and error; the dropzone with its border and hint; the composed button; the list of files; ring, box and motion — no new token (E1)", () => {
@@ -93,6 +106,7 @@ describe("alsxutilo in the repo Modelo (section ②, G1, G2)", () => {
       "box",
       "motion",
       "spinner",
+      "message",
     ]);
     const kampo = eroNamed("kampo")?.skemo;
     for (const part of ["required-mark", "help", "error", "focus-ring", "motion"]) {
@@ -132,7 +146,7 @@ describe("alsxutilo in the repo Modelo (section ②, G1, G2)", () => {
     expect(skemo?.a11y).toEqual({
       role: "button",
       name: ["slot:label", "prop:label"],
-      description: ["slot:help", "slot:error", "slot:disabled-reason"],
+      description: ["slot:help", "slot:error", "slot:message", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],
         required: ["aria-required"],
@@ -166,6 +180,9 @@ describe("alsxutilo in the repo Modelo (section ②, G1, G2)", () => {
       // Nachlese 5 O-10: prop:<name> reads the number max-size too – the second half of the duty.
       [{ "slot:help": "empty" }, { "prop:max-size": ["empty"] }],
       [{ "slot:disabled-reason": "filled" }, { disabled: ["true"] }],
+      // Spec 029 ②b-1b M-2: the status of the field.
+      [{ "slot:message": "filled" }, { intent: ["success", "warning"] }],
+      [{ invalid: "true" }, { intent: ["neutral", "danger"] }],
     ]);
     expect(skemo?.constraints?.[1]?.kialo).toContain("file-constraints-stated");
     expect(skemo?.constraints?.[2]?.kialo).toBe(skemo?.constraints?.[1]?.kialo);
@@ -257,7 +274,7 @@ describe("the Uzo of the alsxutilo (section ②, G2)", () => {
   it("the brief names dropzone as the axis and the label as the duty, and stays under 750", () => {
     if (alsxutilo === undefined) throw new Error("missing");
     const brief = briefOf(alsxutilo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["dropzone"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["dropzone", "intent", "message-position"]);
     expect(brief.required).toEqual({ props: [], slots: ["label"] });
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
   });

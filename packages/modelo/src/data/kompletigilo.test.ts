@@ -56,8 +56,19 @@ describe("kompletigilo in the repo Modelo (section ⑤, G1, G2)", () => {
       ["clearable", "boolean", false],
       // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
       ["label", "string", undefined],
+      // Spec 029 ②b-1b M-2: the status of the field.
+      ["intent", "enum", "neutral"],
+      ["message-position", "enum", "below"],
     ]);
-    expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled", "invalid"]);
+    expect(skemo?.states).toEqual([
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "invalid",
+      "warning",
+      "success",
+    ]);
     expect(skemo?.slots).toEqual([
       { name: "label", default: true, text: true },
       // Nachlese 4 N-8 (O-23): the suggestion the keyboard stands on is a state of its entry too.
@@ -68,6 +79,7 @@ describe("kompletigilo in the repo Modelo (section ⑤, G1, G2)", () => {
       },
       { name: "help", text: true },
       { name: "error", text: true },
+      { name: "message", text: true, beside: true },
       // Spec 029 ②b-1 M-1: the reason for disabled.
       { name: "disabled-reason", text: true },
     ]);
@@ -125,7 +137,12 @@ describe("kompletigilo in the repo Modelo (section ⑤, G1, G2)", () => {
   it("speaks role combobox like the elektilo, expanded as aria-expanded; announces the suggestions (texts) (G5)", () => {
     expect(skemo?.a11y.role).toBe("combobox");
     expect(skemo?.a11y.name).toEqual(["slot:label", "prop:label"]);
-    expect(skemo?.a11y.description).toEqual(["slot:help", "slot:error", "slot:disabled-reason"]);
+    expect(skemo?.a11y.description).toEqual([
+      "slot:help",
+      "slot:error",
+      "slot:message",
+      "slot:disabled-reason",
+    ]);
     expect(skemo?.a11y.states).toEqual({
       selected: ["aria-selected"],
       required: ["aria-required"],
@@ -197,7 +214,14 @@ describe("the Uzo of the kompletigilo (section ⑤, G6)", () => {
     const brief = briefOf(kompletigilo);
     // selected is the state of an entry; the brief names it as an axis (Spec 011 ① O-3), and
     // active, the second state of the entry, too (Nachlese 4 N-8).
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "expanded", "selected", "active"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual([
+      "size",
+      "expanded",
+      "intent",
+      "message-position",
+      "selected",
+      "active",
+    ]);
     expect(brief.required).toEqual({ props: [], slots: ["label", "options"] });
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
   });

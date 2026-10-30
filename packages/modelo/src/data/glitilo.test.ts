@@ -71,9 +71,21 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       ["name", "string", false, undefined],
       // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
       ["label", "string", false, undefined],
+      // Spec 029 ②b-1b M-2: the status of the field.
+      ["intent", "enum", false, "neutral"],
+      ["message-position", "enum", false, "below"],
     ]);
     // E2: the dragged thumb is pressed, the name the butono has for it — no new state name.
-    expect(skemo?.states).toEqual(["rest", "hover", "focus", "pressed", "disabled", "invalid"]);
+    expect(skemo?.states).toEqual([
+      "rest",
+      "hover",
+      "focus",
+      "pressed",
+      "disabled",
+      "invalid",
+      "warning",
+      "success",
+    ]);
     // field keys the part number (none without); range keys no part: it is an axis of the set alone.
     expect(variantKeys(skemoOrThrow())).toEqual(["field", "state"]);
   });
@@ -83,6 +95,7 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       { name: "label", default: true, text: true },
       { name: "help", text: true },
       { name: "error", text: true },
+      { name: "message", text: true, beside: true },
       { name: "min-label", text: true },
       { name: "max-label", text: true },
       // Spec 029 ②b-1 M-1: the reason for disabled.
@@ -106,6 +119,7 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       "box",
       "motion",
       "spinner",
+      "message",
     ]);
     expect(skemo?.parts.track).toEqual({
       fill: { fixed: "color.background.sunken" },
@@ -161,7 +175,7 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
     expect(skemo?.a11y).toEqual({
       role: "slider",
       name: ["slot:label", "prop:label"],
-      description: ["slot:help", "slot:error", "slot:disabled-reason"],
+      description: ["slot:help", "slot:error", "slot:message", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],
         required: ["aria-required"],
@@ -208,6 +222,9 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       [{ "prop:value-start": "filled" }, { range: ["true"] }],
       [{ "prop:value-end": "filled" }, { range: ["true"] }],
       [{ "slot:disabled-reason": "filled" }, { disabled: ["true"] }],
+      // Spec 029 ②b-1b M-2: the status of the field.
+      [{ "slot:message": "filled" }, { intent: ["success", "warning"] }],
+      [{ invalid: "true" }, { intent: ["neutral", "danger"] }],
     ]);
     for (const constraint of skemo?.constraints ?? []) expect(constraint.kialo).not.toBe("");
   });
@@ -308,7 +325,7 @@ describe("the Uzo of the glitilo (section ①, G2)", () => {
   it("the brief names field as the axis and the label as the duty, lists range among the props, and stays under 750", () => {
     if (glitilo === undefined) throw new Error("missing");
     const brief = briefOf(glitilo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["field"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["field", "intent", "message-position"]);
     // Spec 029 ②b-1: a boolean stands in flags.
     expect(brief.flags).toContain("range");
     expect(brief.required).toEqual({ props: [], slots: ["label"] });

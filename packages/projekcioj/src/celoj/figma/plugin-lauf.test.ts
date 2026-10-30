@@ -1318,8 +1318,9 @@ describe("a failed run leaves everything readable in the console (F21)", () => {
     expect(partial.variables).toBeGreaterThan(0);
     expect(butonoOf(partial.components)?.set).toBe("butono");
     // Spec 014 ②: the icon-start of every variant takes two creations more per variant, so the
-    // abort comes two variants earlier.
-    expect(butonoOf(partial.components)?.created).toHaveLength(37);
+    // abort comes two variants earlier. Spec 029 ②b-1b M-2: the variables of the field states
+    // come before the butono, so it comes four variants earlier still.
+    expect(butonoOf(partial.components)?.created).toHaveLength(33);
   });
 
   it("prints the report of a good run as one JSON string too", async () => {

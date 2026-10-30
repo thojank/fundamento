@@ -59,7 +59,8 @@ describe("Spec 029 ②b-1b M-2: the status of every field", () => {
       const { skemo, uzo } = entryOf(ero);
       expect(skemo.states).toContain("warning");
       expect(skemo.states).toContain("success");
-      expect(skemo.slots).toContainEqual({ name: "message", text: true });
+      // beside where the field's other texts stand beside it (elekto, markobutono, sxaltilo).
+      expect(skemo.slots).toContainEqual(expect.objectContaining({ name: "message", text: true }));
       expect(skemo.a11y.description).toContain("slot:message");
       expect(uzo?.slots.message).toMatchObject({ accepts: ["text"], max: 1 });
       // The message speaks next to the error, never instead of the reason for disabled.
@@ -80,7 +81,7 @@ describe("Spec 029 ②b-1b M-2: the status of every field", () => {
         (binding) =>
           binding.part === "message" &&
           binding.property === "color" &&
-          binding.when.state === state,
+          binding.when?.state === state,
       )?.token;
     expect(bound("rest")).toBe("color.text.muted");
     expect(bound("warning")).toBe("color.status.warning.text");
@@ -93,7 +94,7 @@ describe("Spec 029 ②b-1b M-2: the status of every field", () => {
       const { skemo } = entryOf(ero);
       const danger = skemo.bindings.filter(
         (binding) =>
-          binding.when.state === "invalid" && binding.token.startsWith("color.status.danger."),
+          binding.when?.state === "invalid" && binding.token.startsWith("color.status.danger."),
       );
       for (const binding of danger) {
         for (const intent of ["warning", "success"]) {
@@ -101,7 +102,7 @@ describe("Spec 029 ②b-1b M-2: the status of every field", () => {
             (candidate) =>
               candidate.part === binding.part &&
               candidate.property === binding.property &&
-              candidate.when.state === intent &&
+              candidate.when?.state === intent &&
               JSON.stringify({ ...candidate.when, state: "invalid" }) ===
                 JSON.stringify(binding.when),
           );
@@ -144,7 +145,7 @@ describe("Spec 029 ②b-1b M-2: the status of every field", () => {
         (binding) =>
           binding.part === "status-icon" &&
           binding.property === "color" &&
-          binding.when.state === state,
+          binding.when?.state === state,
       )?.token;
     expect(bound("invalid")).toBe("color.status.danger.text");
     expect(bound("warning")).toBe("color.status.warning.text");

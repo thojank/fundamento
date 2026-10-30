@@ -221,6 +221,11 @@ export interface VitrinoDatumoj {
    */
   loeschen?: string;
   /**
+   * Spec 029 ②b-1b M-2: every field with the status warning and success and its message, below
+   * and joined, and invalid beside them; absent where no Ero has message-position.
+   */
+  statuso?: string;
+  /**
    * Per Sxablono its example at the three container widths schmal, mittel, breit (Spec 020, G2):
    * the layout follows the container, so the same element shows each of its layouts.
    */
@@ -1518,6 +1523,40 @@ function loeschenOf(eroj: readonly LoadedEro[]): { loeschen?: string } {
   return loeschen === undefined ? {} : { loeschen };
 }
 
+/** The example message of the Vitrino (Spec 029 ②b-1b M-2). */
+export const VITRINO_STATUS_MESSAGE = "Bitte noch einmal prüfen";
+
+/**
+ * Every field with message-position in its status (Spec 029 ②b-1b M-2): one row each – warning
+ * below, success joined, danger (invalid) – with the content its Skemo asks for.
+ */
+export function statusoMarkup(eroj: readonly LoadedEro[]): string | undefined {
+  const fields = eroj.filter((entry) =>
+    entry.skemo.props.some((prop) => prop.name === "message-position"),
+  );
+  if (fields.length === 0) return undefined;
+  const message = `<span slot="message">${VITRINO_STATUS_MESSAGE}</span>`;
+  const rows = fields.map((entry) => {
+    const tag = `fm-${entry.ero.name}`;
+    const slots = entry.skemo.slots.map((slot) => slot.name);
+    const options = slots.includes("options")
+      ? VITRINO_OPTIONS.slice(0, 2)
+          .map((word, index) => `<data slot="options" value="${index + 1}">${word}</data>`)
+          .join("")
+      : "";
+    const cell = (attributes: string, inner: string) =>
+      `<td><${tag} ${attributes}>Beispiel${options}${inner}</${tag}></td>`;
+    return `<tr><th scope="row">${tag}</th>${cell('intent="warning"', message)}${cell('intent="success" message-position="joined"', message)}${cell('intent="danger"', "")}</tr>`;
+  });
+  return `<table><caption>Status der Felder: Warnung mit Meldung darunter, Erfolg am Feld, Fehler</caption><thead><tr><th scope="col">Ero</th><th scope="col">warning</th><th scope="col">success, joined</th><th scope="col">danger</th></tr></thead><tbody>${rows.join("")}</tbody></table>`;
+}
+
+/** The section statuso where a field has message-position (exact optional properties). */
+function statusoOf(eroj: readonly LoadedEro[]): { statuso?: string } {
+  const statuso = statusoMarkup(eroj);
+  return statuso === undefined ? {} : { statuso };
+}
+
 /** The section grundo where an Ero has the slot disabled-reason (exact optional properties). */
 function grundoOf(eroj: readonly LoadedEro[]): { grundo?: string } {
   const grundo = grundoMarkup(eroj);
@@ -1850,6 +1889,7 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
     eroj: erojMarkup(modelo.eroj, modelo.ikonaro),
     ...grundoOf(modelo.eroj),
     ...loeschenOf(modelo.eroj),
+    ...statusoOf(modelo.eroj),
     sxablonoj: sxablonojMarkup(modelo.sxablonoj ?? []),
     a11yRoloj: Object.fromEntries(
       modelo.eroj.map((entry) => [entry.ero.name, entry.skemo.a11y.role]),

@@ -100,9 +100,20 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
         ["orientation", ["vertical", "horizontal"], "vertical"],
         // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
         ["label", "string", undefined],
+        // Spec 029 ②b-1b M-2: the status of the field.
+        ["intent", ["neutral", "success", "warning", "danger"], "neutral"],
+        ["message-position", ["below", "joined"], "below"],
       ],
     );
-    expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled", "invalid"]);
+    expect(skemo?.states).toEqual([
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "invalid",
+      "warning",
+      "success",
+    ]);
   });
 
   it("has the slots label, options, help and error beside the circles; every option is an entry with the key selected (E7)", () => {
@@ -116,6 +127,7 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
       },
       { name: "help", text: true, beside: true },
       { name: "error", text: true, beside: true },
+      { name: "message", text: true, beside: true },
       // Spec 029 ②b-1 M-1: the reason for disabled.
       { name: "disabled-reason", text: true },
     ]);
@@ -130,6 +142,7 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
       "help",
       "indicator",
       "label",
+      "message",
       "motion",
       "option-label",
       "options",
@@ -157,8 +170,8 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
     expect(variantKeys(skemo)).toEqual(["size", "state"]);
     expect(styledProps(skemo)).toEqual(["size"]);
     // size × state: the Figma set is 3 × 5, every variant with options chosen and not (G7).
-    expect(combinationsOf(skemo, variantKeys(skemo))).toHaveLength(15);
-    expect(combinationsOf(skemo, ["selected", "state"])).toHaveLength(10);
+    expect(combinationsOf(skemo, variantKeys(skemo))).toHaveLength(21);
+    expect(combinationsOf(skemo, ["selected", "state"])).toHaveLength(14);
   });
 
   it("fills the circle by selected and state, borders it by state, with the role tokens of G3 like the markobutono", () => {
@@ -234,7 +247,7 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
     expect(skemo?.a11y).toEqual({
       role: "radiogroup",
       name: ["slot:label", "prop:label"],
-      description: ["slot:help", "slot:error", "slot:disabled-reason"],
+      description: ["slot:help", "slot:error", "slot:message", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],
         selected: ["aria-checked"],
@@ -273,6 +286,7 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
       "slot:options": "filled",
       "slot:help": "empty",
       "slot:error": "empty",
+      "slot:message": "empty",
       "slot:disabled-reason": "empty",
     });
   });
@@ -312,6 +326,7 @@ describe("the Uzo of the elekto (section 3, G5)", () => {
       options: { accepts: ["text"], required: true, min: 2, nesting: 0 },
       help: { accepts: ["text"], max: 1, nesting: 0 },
       error: { accepts: ["text"], max: 1, nesting: 0 },
+      message: { accepts: ["text"], max: 1, nesting: 0 },
     });
     expect(uzo?.layout).toEqual({ size: "content", wrap: "never" });
   });
@@ -383,7 +398,13 @@ describe("the Uzo of the elekto (section 3, G5)", () => {
     if (elekto === undefined) throw new Error("elekto missing");
     const brief = briefOf(elekto);
     // Spec 011 ① (O-3): selected, the state of one entry, is an axis of the brief too.
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "orientation", "selected"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual([
+      "size",
+      "orientation",
+      "intent",
+      "message-position",
+      "selected",
+    ]);
     expect(brief.required).toEqual({ props: [], slots: ["label", "options"] });
     const bytes = Buffer.byteLength(JSON.stringify(brief), "utf8");
     expect(Math.ceil(bytes / 3), `${bytes} bytes`).toBeLessThanOrEqual(750);
@@ -431,6 +452,7 @@ describe("the cross-links of G5 (one Ero per entry)", () => {
     expect(markobutono?.skemo.slots.map((slot) => slot.name)).toEqual([
       "label",
       "error",
+      "message",
       "disabled-reason",
     ]);
   });

@@ -115,6 +115,7 @@ test.describe("fm-datelektilo behaviour", () => {
       "cell",
       "help",
       "error",
+      "message",
     ]);
   });
 

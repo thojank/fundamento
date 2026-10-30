@@ -148,10 +148,10 @@ describe("komponentoView of the butono", () => {
       bases,
       DEFAULT_KOMBINATION,
     );
-    expect(sxaltilo.verhalten.find((entry) => entry.name.includes("position"))?.values).toEqual([
-      "start",
-      "end",
-    ]);
+    expect(
+      // The knob's position, a term of its part (message-position, Spec 029 ②b-1b M-2, is a prop).
+      sxaltilo.verhalten.find((entry) => entry.name.endsWith(".position"))?.values,
+    ).toEqual(["start", "end"]);
   });
 
   it("shows the usage in German: purpose, instead with reasons, keyboard, writing rules, do and don't", () => {

@@ -16,7 +16,8 @@ import { defaultModeloSource } from "../load/source.js";
 import { validateModelo } from "../validate/validate-modelo.js";
 
 // Spec 025 ①: the step buttons and the clear button are the kampo's own (kind number, search).
-const KAMPO_OWN = ["decrement", "increment", "clear"];
+// Spec 029 ②b-1b M-2: the status icon is the kampo's own (A-kampo-4).
+const KAMPO_OWN = ["decrement", "increment", "clear", "status-icon"];
 
 const { modelo } = loadModelo(defaultModeloSource());
 if (modelo === undefined) throw new Error("the repo Modelo must load");
@@ -108,6 +109,9 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
         ["name", "string", undefined],
         // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
         ["label", "string", undefined],
+        // Spec 029 ②b-1b M-2: the status of the field.
+        ["intent", ["neutral", "success", "warning", "danger"], "neutral"],
+        ["message-position", ["below", "joined"], "below"],
       ],
     );
     // Spec 029 ②b-1b (Nachlese 12): label is a prop now, shown as the visible label.
@@ -115,11 +119,20 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
   });
 
   it("knows the states rest, hover, focus, disabled and invalid (G2); readonly is a prop the platform speaks, no state of its own", () => {
-    expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled", "invalid"]);
+    expect(skemo?.states).toEqual([
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "invalid",
+      "warning",
+      "success",
+    ]);
     expect(skemo?.slots).toEqual([
       { name: "label", default: true, text: true },
       { name: "help", text: true },
       { name: "error", text: true },
+      { name: "message", text: true, beside: true },
       // Spec 029 ②b-1 M-1: the reason for disabled.
       { name: "disabled-reason", text: true },
     ]);
@@ -168,14 +181,14 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
     // kind keys a part now: it is an axis of the variants, with size (2 × 3 × 5 = 30).
     expect(styledProps(skemo)).toEqual(["kind", "size"]);
     expect(variantKeys(skemo)).toEqual(["kind", "size", "state"]);
-    expect(combinationsOf(skemo, ["kind", "size", "state"])).toHaveLength(30);
+    expect(combinationsOf(skemo, ["kind", "size", "state"])).toHaveLength(42);
   });
 
   it("speaks role textbox like the kampo: name, description, states, required in de and en; no key of its own", () => {
     expect(skemo?.a11y).toEqual({
       role: "textbox",
       name: ["slot:label", "prop:label"],
-      description: ["slot:help", "slot:error", "slot:disabled-reason"],
+      description: ["slot:help", "slot:error", "slot:message", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],
         required: ["aria-required"],
@@ -218,6 +231,7 @@ describe("the Uzo of the tekstareo (section ②, G5)", () => {
       label: { accepts: ["text"], required: true, max: 1, nesting: 0 },
       help: { accepts: ["text"], max: 1, nesting: 0 },
       error: { accepts: ["text"], max: 1, nesting: 0 },
+      message: { accepts: ["text"], max: 1, nesting: 0 },
     });
     expect(uzo?.layout).toEqual({ size: "container", wrap: "never" });
   });
@@ -262,7 +276,12 @@ describe("the Uzo of the tekstareo (section ②, G5)", () => {
   it("the brief names the purpose, kind and size, the label as a duty, and stays under 750", () => {
     if (tekstareo === undefined) throw new Error("tekstareo missing");
     const brief = briefOf(tekstareo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["kind", "size"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual([
+      "kind",
+      "size",
+      "intent",
+      "message-position",
+    ]);
     expect(brief.required).toEqual({ props: [], slots: ["label"] });
     const bytes = Buffer.byteLength(JSON.stringify(brief), "utf8");
     expect(Math.ceil(bytes / 3), `${bytes} bytes`).toBeLessThanOrEqual(750);

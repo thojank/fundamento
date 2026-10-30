@@ -4,7 +4,7 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, isAbsolute, join, resolve } from "node:path";
-import { createModeloAjv, getConfigValidator, type ValidateFunction } from "../contracts/ajv.js";
+import { getConfigValidator, sharedModeloAjv, type ValidateFunction } from "../contracts/ajv.js";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { FundamentoConfigJson } from "../generated/config-schema.js";
 import { parseStrictJson } from "../json/strict-json.js";
@@ -30,7 +30,7 @@ export interface ReadKonfiguroResult {
 let validator: ValidateFunction | undefined;
 
 function getValidator(): ValidateFunction {
-  validator ??= getConfigValidator(createModeloAjv());
+  validator ??= getConfigValidator(sharedModeloAjv());
   return validator;
 }
 

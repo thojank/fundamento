@@ -56,6 +56,7 @@ test.describe("fm-tekstareo behaviour", () => {
       "spinner",
       "help",
       "error",
+      "message",
     ]);
   });
 

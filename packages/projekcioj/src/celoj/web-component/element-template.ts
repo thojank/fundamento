@@ -128,6 +128,8 @@ export interface ElementNames {
   afterLabel?: boolean;
   /** Spec 029 ②b-1b (Nachlese 12): the prop label is shown (`shown`) – label="…" is the visible label of a field. */
   shownLabel?: boolean;
+  /** Spec 029 ②b-1b M-2 (A-kampo-4): the part status-icon – the field shows the icon of its status in its row. */
+  statusIcon?: boolean;
   /** Spec 025 ② (plan ② D-11): a textbox with a calendar part — the datelektilo, a field with a trigger and a popover calendar. */
   datepicker?: boolean;
   /**
@@ -290,7 +292,8 @@ function textsMarkup(slots: NonNullable<ElementNames["slots"]>): string {
     .filter((slot) => slot.default !== true && slot.decorative !== true && slot.list !== true)
     .map(
       (slot) =>
-        `<span part="${slot.name}" id="${slot.name}" hidden${slot.name === "error" ? ' aria-live="polite"' : ""}><slot name="${slot.name}"></slot></span>`,
+        // Spec 029 ②b-1b M-2: the message of a warning or a success is said politely, as the error.
+        `<span part="${slot.name}" id="${slot.name}" hidden${slot.name === "error" || slot.name === "message" ? ' aria-live="polite"' : ""}><slot name="${slot.name}"></slot></span>`,
     )
     .join("");
 }
@@ -306,6 +309,7 @@ function fieldMarkup(
   suggest = false,
   stepper = false,
   datepicker = false,
+  statusIcon = false,
 ): string {
   // A text area (Spec 011 ②, D-11): the platform's textarea in place of the input. A field with
   // suggestions (Spec 014 ⑤, D-03): the input as a combobox over a listbox — a popover of the
@@ -337,9 +341,12 @@ function fieldMarkup(
   // Spec 029 ②b-1, Abnahme #122: every field is a row of its control and its end – inside the
   // field's border, from the inside out the spinner, the clear button, the steppers or the
   // calendar (the Skemo's trailing); the element puts the buttons it makes in their place.
+  // Spec 029 ②b-1b M-2 (A-kampo-4): the icon of the field's status after the input, heard not –
+  // the message or the error says the status in words.
   void stepper;
   void suggest;
-  const row = `<div part="row">${native}<span part="end">${SPINNER}${trigger}</span></div>`;
+  const status = statusIcon ? STATUS_ICON : "";
+  const row = `<div part="row">${native}${status}<span part="end">${SPINNER}${trigger}</span></div>`;
   return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label>${row}${calendar}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
 }
 
@@ -702,6 +709,10 @@ function disclosureMarkup(): string {
   return '<details part="control"><summary part="summary"><slot name="summary"></slot><fm-ikono part="indicator" name="chevron-right"></fm-ikono></summary><div part="content"><slot></slot></div><span id="fm-texts" hidden></span></details>';
 }
 
+/** The status icon of a field (Spec 029 ②b-1b M-2): hidden while the field is neutral. */
+const STATUS_ICON =
+  '<span part="status-icon" aria-hidden="true" hidden><fm-ikono size="small"></fm-ikono></span>';
+
 /** One row of the suggestions (Spec 014 ⑤): an option of the listbox, chosen with the keys or a click. */
 const SUGGESTION_ROW = '<div part="suggestion" role="option" aria-selected="false"></div>';
 
@@ -725,7 +736,7 @@ function separatorMarkup(): string {
  * the list of the chosen files follows, and a live region says how many there are.
  */
 function uploadMarkup(): string {
-  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><div part="dropzone"><span part="picker"><fm-butono part="choose" emphasis="medium" inert><fm-ikono slot="icon-start" name="upload"></fm-ikono><span id="choose-text"></span></fm-butono><input part="control" id="control" type="file"></span><span part="drop-hint" id="drop-hint" hidden></span><span part="end">${SPINNER}</span></div><span part="help" id="help" hidden><slot name="help"></slot></span><span part="error" id="error" hidden aria-live="polite"><slot name="error"></slot><span id="file-error"></span></span><ul part="file-list" hidden></ul><span part="count" role="status" aria-live="polite" class="fm-hidden"></span><span id="fm-texts" hidden></span></div>`;
+  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><div part="dropzone"><span part="picker"><fm-butono part="choose" emphasis="medium" inert><fm-ikono slot="icon-start" name="upload"></fm-ikono><span id="choose-text"></span></fm-butono><input part="control" id="control" type="file"></span><span part="drop-hint" id="drop-hint" hidden></span><span part="end">${SPINNER}</span></div><span part="help" id="help" hidden><slot name="help"></slot></span><span part="error" id="error" hidden aria-live="polite"><slot name="error"></slot><span id="file-error"></span></span><span part="message" id="message" hidden aria-live="polite"><slot name="message"></slot></span><ul part="file-list" hidden></ul><span part="count" role="status" aria-live="polite" class="fm-hidden"></span><span id="fm-texts" hidden></span></div>`;
 }
 
 /** One chosen file (Spec 015 ②): its name, its size and the butono that removes it. */
@@ -807,6 +818,7 @@ function markup(
   breadcrumb = false,
   stepper = false,
   afterLabel = false,
+  statusIcon = false,
 ): string {
   const reasoned = slots.some((slot) => slot.name === "disabled-reason");
   const own = slots.filter((slot) => slot.name !== "disabled-reason");
@@ -821,6 +833,7 @@ function markup(
     breadcrumb,
     stepper,
     afterLabel,
+    statusIcon,
   );
   if (!reasoned) return body;
   if (host === "menu") {
@@ -843,6 +856,7 @@ function hostMarkup(
   breadcrumb = false,
   stepper = false,
   afterLabel = false,
+  statusIcon = false,
 ): string {
   if (host === "text") return textMarkup(slots);
   if (host === "slider") return sliderMarkup(slots);
@@ -863,7 +877,7 @@ function hostMarkup(
   if (host === "codeblock") return codeblockMarkup();
   if (host === "markdown") return markdownMarkup();
   if (host === "tabs") return tabsMarkup();
-  if (host === "input") return fieldMarkup(slots, false, false, stepper);
+  if (host === "input") return fieldMarkup(slots, false, false, stepper, false, statusIcon);
   if (host === "datepicker") return fieldMarkup(slots, false, false, false, true);
   if (host === "chip") return chipMarkup();
   if (host === "listselect") return listMarkup(slots, false);
@@ -908,6 +922,7 @@ export function elementSource({
   stepper = false,
   afterLabel = false,
   shownLabel = false,
+  statusIcon = false,
   slots = [
     { name: "label", default: true },
     { name: "icon-start", decorative: true },
@@ -1211,6 +1226,10 @@ export function elementSource({
     if (HAS_PROP.has("invalid")) {
       const invalid = this.propValue("invalid") === true || this.#filled("error");
       if (invalid) control.setAttribute("aria-invalid", "true");
+      else control.removeAttribute("aria-invalid");
+    } else if (HAS_PROP.has("intent")) {
+      // Spec 029 ②b-1b M-2: a switch has no invalid; its status danger is spoken as aria-invalid.
+      if (this.propValue("intent") === "danger") control.setAttribute("aria-invalid", "true");
       else control.removeAttribute("aria-invalid");
     }
 `
@@ -5341,6 +5360,8 @@ ${
         thumb.setAttribute("aria-valuetext", format.format(now));
         thumb.setAttribute("aria-labelledby", ranged ? (index === 0 ? "label from" : "label to") : "label");
         thumb.tabIndex = disabled ? -1 : 0;
+        // Spec 029 ②b-1b M-2: the thumb carries the field's status, as it carries its states.
+        thumb.setAttribute("data-status", String(this.propValue("intent") ?? "neutral"));
         for (const [attribute, on] of [
           ["aria-disabled", disabled],
           ["aria-readonly", readonly],
@@ -5659,7 +5680,7 @@ ${autoField}${isAvatar ? '  /** The picture an avatar shows and whether it has l
       sheet.replaceSync(CSS);
     }
     root.adoptedStyleSheets = [sheet];
-    root.innerHTML = \`${markup(host, slots, role, marked, indicator, dismiss, icon, breadcrumb, stepper, afterLabel)}\`;
+    root.innerHTML = \`${markup(host, slots, role, marked, indicator, dismiss, icon, breadcrumb, stepper, afterLabel, statusIcon)}\`;
     const control = root.querySelector("${control}");
     ${
       // Spec 025 ③ (plan ③ D-18): an inline editor has no label slot — its name is the prop label
@@ -5765,6 +5786,10 @@ ${autoDisconnect}
     // while the attribute is absent and false only as name="false"; every other boolean is the
     // presence of its attribute.
     if (prop.kind === "boolean") {
+      // Spec 029 ②b-1b M-2: invalid is the short form of intent="danger" – either says it.
+      if (name === "invalid" && HAS_PROP.has("intent") && this.getAttribute("intent") === "danger") {
+        return true;
+      }
       return prop.default === true ? this.getAttribute(name) !== "false" : this.hasAttribute(name);
     }
     const raw = this.getAttribute(name);
@@ -5852,7 +5877,34 @@ ${blocks ? "    this.#unreason();\n" : ""}    for (const [name, value] of Object
     if (HAS_PROP.has("disabled") && "disabled" in control) {
       (control as HTMLButtonElement).disabled = this.propValue("disabled") === true;
     }
-    if (HAS_PROP.has("loading")) {
+    // Spec 029 ②b-1b M-2: the status of a field (warning, success) as a state of its own –
+    // data-status on the field and its control; intent alone is the axis of avizo and insigno.
+    if (HAS_PROP.has("message-position")) {
+      const status = String(this.propValue("intent") ?? "neutral");
+      root.setAttribute("data-status", status);
+      if (root !== control) control.setAttribute("data-status", status);
+    }
+${
+  statusIcon
+    ? `    // Spec 029 ②b-1b M-2 (A-kampo-4): the status icon names the status beside its colour – danger
+    // while invalid (or an error is given), else the intent; none while neutral.
+    {
+      const sign = this.shadowRoot?.querySelector('[part="status-icon"]');
+      const status =
+        this.propValue("invalid") === true || this.#filled("error")
+          ? "danger"
+          : String(this.propValue("intent") ?? "neutral");
+      if (sign instanceof HTMLElement) {
+        sign.hidden = status === "neutral";
+        const glyph = sign.querySelector("fm-ikono");
+        if (glyph !== null && status !== "neutral" && glyph.getAttribute("name") !== status) {
+          glyph.setAttribute("name", status);
+        }
+      }
+    }
+`
+    : ""
+}    if (HAS_PROP.has("loading")) {
       const busy = this.propValue("loading") === true;
       // A button that works ignores activation; a field that loads (Nachlese 4 N-9, Spec 029 ②b-1
       // M-5) stays operable — the person keeps typing or choosing — and is only busy, with the

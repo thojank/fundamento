@@ -139,6 +139,13 @@
         ],
         "max": 1,
         "nesting": 0
+      },
+      "message": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
       }
     },
     "layout": {

@@ -149,7 +149,9 @@ describe("Spec 029 ②b-1: the brief lists boolean props as flags", () => {
       "loading",
       "clearable",
     ]);
-    expect(Math.ceil(Buffer.byteLength(JSON.stringify(brief)) / 3)).toBeLessThanOrEqual(700);
+    // Spec 029 ②b-1b: intent and message-position (M-2) and the shown label take the room flags
+    // made; the ceiling of 750 stays (eroj.test.ts), 700 was the measure of ②b-1 alone.
+    expect(Math.ceil(Buffer.byteLength(JSON.stringify(brief)) / 3)).toBeLessThan(750);
   });
 });
 

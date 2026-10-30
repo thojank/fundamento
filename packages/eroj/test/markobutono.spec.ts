@@ -38,7 +38,16 @@ test.describe("fm-markobutono behaviour", () => {
           ),
         ),
       // Abnahme #122 (decision 30.10.): the spinner directly after the text of the label.
-    ).toEqual(["field", "control", "indicator", "label", "required-mark", "spinner", "error"]);
+    ).toEqual([
+      "field",
+      "control",
+      "indicator",
+      "label",
+      "required-mark",
+      "spinner",
+      "error",
+      "message",
+    ]);
   });
 
   // Nachlese 4 N-7 (Spec 014 ② O-7): the check mark is the Ikonaro's check in the size of the

@@ -981,10 +981,13 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
       autocomplete: "TEXT",
       stepper: "BOOLEAN",
       step: "TEXT",
-      state: ["rest", "hover", "focus", "disabled", "readonly", "invalid"],
+      // Spec 029 ②b-1b M-2: the status of a field, its message beside help and error.
+      intent: ["neutral", "success", "warning", "danger"],
+      "message-position": ["below", "joined"],
+      state: ["rest", "hover", "focus", "disabled", "readonly", "invalid", "warning", "success"],
     });
-    expect(set?.variants).toHaveLength(3 * 6);
-    expect(set?.grid).toMatchObject({ rows: 3, columns: 6 });
+    expect(set?.variants).toHaveLength(3 * 8);
+    expect(set?.grid).toMatchObject({ rows: 3, columns: 8 });
   });
 
   it("binds the parts of the field and releases the placeholder and the mark (B-2)", () => {
@@ -1002,7 +1005,12 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
     expect(rest?.notDrawn?.["required-mark.color"]).toBe("jug_01M4S2R85WRAC5SV7CARH8RE7S");
     expect(rest?.notDrawn?.["placeholder.color"]).toBeUndefined();
     expect(rest?.paints?.["placeholder.color"]).toMatchObject({ hex: expect.stringMatching(/^#/) });
-    expect(set?.texts).toEqual({ text: "Beispiel", help: "Hinweis", error: "Fehler" });
+    expect(set?.texts).toEqual({
+      text: "Beispiel",
+      help: "Hinweis",
+      error: "Fehler",
+      message: "Nachricht",
+    });
     expect(butonoOf(plan.components)?.texts).toBeUndefined();
     // Spec 029 ①: size.control.medium is the element size md of the Fonto (32).
     expect(rest?.geometry?.["box.height"]).toBe("32px");
@@ -1019,6 +1027,8 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
       "disabled",
       "readonly",
       "invalid",
+      "warning",
+      "success",
     ]);
     expect(items.kampo?.props.kind).toEqual([
       "text",
@@ -1221,14 +1231,18 @@ describe("Figma plan for the sxaltilo (Spec 010 ①)", () => {
       size: ["small", "medium", "large"],
       disabled: "BOOLEAN",
       name: "TEXT",
-      state: ["rest", "hover", "focus", "disabled"],
+      // Spec 029 ②b-1b M-2: the status of a field, its message beside help and error.
+      intent: ["neutral", "success", "warning", "danger"],
+      "message-position": ["below", "joined"],
+      state: ["rest", "hover", "focus", "disabled", "warning", "success"],
     });
-    expect(set?.variants).toHaveLength(2 * 3 * 4);
+    expect(set?.variants).toHaveLength(2 * 3 * 6);
     expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["checked", "size", "state"]);
-    expect(set?.grid).toMatchObject({ rows: 6, columns: 4 });
+    expect(set?.grid).toMatchObject({ rows: 6, columns: 6 });
     expect(set?.description).toBe(sxaltilo?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Einstellung");
-    expect(set?.texts).toBeUndefined();
+    // Spec 029 ②b-1b M-2: the switch shows the message of its status.
+    expect(set?.texts).toEqual({ message: "Nachricht" });
   });
 
   it("places the knob at the start unchecked and at the end checked (D-04)", () => {
@@ -1258,7 +1272,14 @@ describe("Figma plan for the sxaltilo (Spec 010 ①)", () => {
   it("states the sxaltilo in the parity inventory: checked a boolean, its paints per checked", () => {
     const items = figmaPlanInventory(plan);
     expect(items.sxaltilo?.props.checked).toEqual(["boolean"]);
-    expect(items.sxaltilo?.states).toEqual(["rest", "hover", "focus", "disabled"]);
+    expect(items.sxaltilo?.states).toEqual([
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "warning",
+      "success",
+    ]);
     expect(items.sxaltilo?.values["indicator.fill@checked=true,size=medium,state=rest"]).toMatch(
       /^#[0-9a-f]{6}$/,
     );
@@ -1290,21 +1311,24 @@ describe("Figma plan for the markobutono (Spec 010 ②)", () => {
       size: ["small", "medium", "large"],
       disabled: "BOOLEAN",
       name: "TEXT",
-      state: ["rest", "hover", "focus", "disabled", "invalid"],
+      // Spec 029 ②b-1b M-2: the status of a field, its message beside help and error.
+      intent: ["neutral", "success", "warning", "danger"],
+      "message-position": ["below", "joined"],
+      state: ["rest", "hover", "focus", "disabled", "invalid", "warning", "success"],
     });
-    expect(set?.variants).toHaveLength(2 * 3 * 5);
+    expect(set?.variants).toHaveLength(2 * 3 * 7);
     expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["checked", "size", "state"]);
-    expect(set?.grid).toMatchObject({ rows: 6, columns: 5 });
+    expect(set?.grid).toMatchObject({ rows: 6, columns: 7 });
     expect(set?.description).toBe(markobutono?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Option");
-    expect(set?.texts).toEqual({ error: "Fehler" });
+    expect(set?.texts).toEqual({ error: "Fehler", message: "Nachricht" });
     // Nachlese 4 N-7 (Spec 014 ② O-7): the check mark is the Ikonaro's check, no sign.
     expect(set?.sign).toBeUndefined();
     for (const each of set?.variants ?? []) expect(each.icons).toEqual({ indicator: "check" });
-    // The switch keeps its knob: no sign, no texts.
+    // The switch keeps its knob: no sign; its one text is the message of its status (②b-1b M-2).
     const sxaltilo = plan.components.find((component) => component.set === "sxaltilo");
     expect(sxaltilo?.sign).toBeUndefined();
-    expect(sxaltilo?.texts).toBeUndefined();
+    expect(sxaltilo?.texts).toEqual({ message: "Nachricht" });
   });
 
   it("binds the box by checked and state, its border by state, the check mark where checked (G3)", () => {
@@ -1342,7 +1366,15 @@ describe("Figma plan for the markobutono (Spec 010 ②)", () => {
   it("states the markobutono in the parity inventory: checked a boolean, the mark's paint only where checked", () => {
     const items = figmaPlanInventory(plan);
     expect(items.markobutono?.props.checked).toEqual(["boolean"]);
-    expect(items.markobutono?.states).toEqual(["rest", "hover", "focus", "disabled", "invalid"]);
+    expect(items.markobutono?.states).toEqual([
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "invalid",
+      "warning",
+      "success",
+    ]);
     expect(
       items.markobutono?.values["indicator.color@checked=true,size=medium,state=rest"],
     ).toMatch(/^#[0-9a-f]{6}$/);
@@ -1376,14 +1408,17 @@ describe("Figma plan for the elekto (Spec 010 ③)", () => {
       disabled: "BOOLEAN",
       name: "TEXT",
       orientation: ["vertical", "horizontal"],
-      state: ["rest", "hover", "focus", "disabled", "invalid"],
+      // Spec 029 ②b-1b M-2: the status of a field, its message beside help and error.
+      intent: ["neutral", "success", "warning", "danger"],
+      "message-position": ["below", "joined"],
+      state: ["rest", "hover", "focus", "disabled", "invalid", "warning", "success"],
     });
-    expect(set?.variants).toHaveLength(3 * 5);
+    expect(set?.variants).toHaveLength(3 * 7);
     expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["size", "state"]);
-    expect(set?.grid).toMatchObject({ rows: 3, columns: 5 });
+    expect(set?.grid).toMatchObject({ rows: 3, columns: 7 });
     expect(set?.description).toBe(elekto?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Frage");
-    expect(set?.texts).toEqual({ help: "Hinweis", error: "Fehler" });
+    expect(set?.texts).toEqual({ help: "Hinweis", error: "Fehler", message: "Nachricht" });
     expect(set?.entry).toEqual({ key: "selected", texts: ["Eins", "Zwei", "Drei"], selected: 0 });
     expect(set?.sign).toMatch(/^<svg [^>]*viewBox="0 0 16 16"/);
     // The dot as a path: Figma imports one vector, as for the check mark (② D-09).
@@ -1430,7 +1465,15 @@ describe("Figma plan for the elekto (Spec 010 ③)", () => {
     const items = figmaPlanInventory(plan);
     expect(items.elekto?.props.size).toEqual(["small", "medium", "large"]);
     expect(items.elekto?.props.selected).toBeUndefined();
-    expect(items.elekto?.states).toEqual(["rest", "hover", "focus", "disabled", "invalid"]);
+    expect(items.elekto?.states).toEqual([
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "invalid",
+      "warning",
+      "success",
+    ]);
     expect(items.elekto?.values["surface.fill@selected=true,size=medium,state=rest"]).toMatch(
       /^#[0-9a-f]{6}$/,
     );
@@ -1473,16 +1516,29 @@ describe("Figma plan for the elektilo (Spec 010 ④)", () => {
       name: "TEXT",
       // Spec 011 ① (D-09): the empty option is a property of the plan; the set shows the prompt.
       "empty-label": "TEXT",
-      state: ["rest", "hover", "focus", "disabled", "invalid"],
+      // Spec 029 ②b-1b M-2: the status of a field, its message beside help and error.
+      intent: ["neutral", "success", "warning", "danger"],
+      "message-position": ["below", "joined"],
+      state: ["rest", "hover", "focus", "disabled", "invalid", "warning", "success"],
     });
-    expect(set?.variants).toHaveLength(3 * 5);
+    expect(set?.variants).toHaveLength(3 * 7);
     expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["size", "state"]);
-    expect(set?.grid).toMatchObject({ rows: 3, columns: 5 });
+    expect(set?.grid).toMatchObject({ rows: 3, columns: 7 });
     expect(set?.description).toBe(elektilo?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Auswahl");
-    expect(set?.texts).toEqual({ text: "Bitte wählen", help: "Hinweis", error: "Fehler" });
+    expect(set?.texts).toEqual({
+      text: "Bitte wählen",
+      help: "Hinweis",
+      error: "Fehler",
+      message: "Nachricht",
+    });
     // The kampo keeps its example; only the select shows a prompt.
-    expect(kampoSet?.texts).toEqual({ text: "Beispiel", help: "Hinweis", error: "Fehler" });
+    expect(kampoSet?.texts).toEqual({
+      text: "Beispiel",
+      help: "Hinweis",
+      error: "Fehler",
+      message: "Nachricht",
+    });
     // No options are drawn: the list is the platform's (E3).
     expect(set?.entry).toBeUndefined();
     // Spec 014 ②: the chevron is an ikono of the plan (chevron-down per variant), no sign.
@@ -1521,7 +1577,15 @@ describe("Figma plan for the elektilo (Spec 010 ④)", () => {
     const items = figmaPlanInventory(plan);
     expect(items.elektilo?.props.size).toEqual(["small", "medium", "large"]);
     expect(items.elektilo?.props.selected).toBeUndefined();
-    expect(items.elektilo?.states).toEqual(["rest", "hover", "focus", "disabled", "invalid"]);
+    expect(items.elektilo?.states).toEqual([
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "invalid",
+      "warning",
+      "success",
+    ]);
     expect(items.elektilo?.values["indicator.color@size=medium,state=rest"]).toMatch(
       /^#[0-9a-f]{6}$/,
     );
@@ -1564,15 +1628,23 @@ describe("Figma plan for the tekstareo (Spec 011 ②)", () => {
       invalid: "BOOLEAN",
       size: ["small", "medium", "large"],
       name: "TEXT",
-      state: ["rest", "hover", "focus", "disabled", "invalid"],
+      // Spec 029 ②b-1b M-2: the status of a field, its message beside help and error.
+      intent: ["neutral", "success", "warning", "danger"],
+      "message-position": ["below", "joined"],
+      state: ["rest", "hover", "focus", "disabled", "invalid", "warning", "success"],
     });
-    expect(set?.variants).toHaveLength(2 * 3 * 5);
+    expect(set?.variants).toHaveLength(2 * 3 * 7);
     expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["kind", "size", "state"]);
-    expect(set?.grid).toMatchObject({ rows: 6, columns: 5 });
+    expect(set?.grid).toMatchObject({ rows: 6, columns: 7 });
     expect(set?.description).toBe(tekstareo?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Beschriftung");
     // The example, then three empty lines: four rows, the Skemo's default of `rows`.
-    expect(set?.texts).toEqual({ text: "Beispiel\n\n\n", help: "Hinweis", error: "Fehler" });
+    expect(set?.texts).toEqual({
+      text: "Beispiel\n\n\n",
+      help: "Hinweis",
+      error: "Fehler",
+      message: "Nachricht",
+    });
     expect(kampoSet?.texts?.text).toBe("Beispiel");
     expect(set?.sign).toBeUndefined();
     expect(set?.entry).toBeUndefined();
@@ -1641,7 +1713,15 @@ describe("Figma plan for the tekstareo (Spec 011 ②)", () => {
     expect(items.tekstareo?.props.kind).toEqual(["text", "code"]);
     expect(items.tekstareo?.props.rows).toEqual(["number"]);
     expect(items.tekstareo?.props.size).toEqual(["small", "medium", "large"]);
-    expect(items.tekstareo?.states).toEqual(["rest", "hover", "focus", "disabled", "invalid"]);
+    expect(items.tekstareo?.states).toEqual([
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "invalid",
+      "warning",
+      "success",
+    ]);
     expect(items.tekstareo?.values["placeholder.color@kind=code,size=medium,state=rest"]).toMatch(
       /^#[0-9a-f]{6}$/,
     );
@@ -3175,7 +3255,7 @@ describe("the Figma plan draws the faldilo and the kompletigilo (Spec 014 ⑤)",
   it("the kompletigilo: a field of size × expanded × state with the listbox of three suggestions where expanded, the shadow bound", () => {
     const kompletigilo = set("kompletigilo");
     expect(kompletigilo?.structure).toBe("field");
-    expect(kompletigilo?.variants).toHaveLength(3 * 2 * 5);
+    expect(kompletigilo?.variants).toHaveLength(3 * 2 * 7);
     const open = kompletigilo?.variants.find(
       (variant) =>
         variant.props.size === "medium" &&
@@ -3295,13 +3375,15 @@ describe("the Figma plan draws the alsxutilo (Spec 015 ②)", () => {
 
   it("an upload of dropzone × state, twelve variants, the label a field's word", () => {
     expect(set?.structure).toBe("upload");
-    expect(set?.variants).toHaveLength(12);
+    expect(set?.variants).toHaveLength(16);
     expect(set?.properties.state).toEqual([
       "rest",
       "hover",
       "focus",
       "disabled",
       "invalid",
+      "warning",
+      "success",
       "dragover",
     ]);
     expect(set?.label).toEqual({ property: "label", defaultValue: "Beschriftung" });
@@ -3650,7 +3732,7 @@ describe("the Figma plan draws the glitilo (Spec 025 ①)", () => {
     expect(structureOf("slider")).toBe("slider");
     expect(set?.structure).toBe("slider");
     expect(set?.extraAxes).toEqual(["range"]);
-    expect(set?.variants).toHaveLength(24);
+    expect(set?.variants).toHaveLength(32);
     expect(set?.properties.state).toEqual([
       "rest",
       "hover",
@@ -3658,6 +3740,8 @@ describe("the Figma plan draws the glitilo (Spec 025 ①)", () => {
       "pressed",
       "disabled",
       "invalid",
+      "warning",
+      "success",
     ]);
     expect(set?.properties).toMatchObject({
       range: "BOOLEAN",
@@ -3673,7 +3757,7 @@ describe("the Figma plan draws the glitilo (Spec 025 ①)", () => {
       "min-label": "0",
       "max-label": "100",
     });
-    expect(set?.grid).toMatchObject({ rows: 4, columns: 6 });
+    expect(set?.grid).toMatchObject({ rows: 4, columns: 8 });
   });
 
   it("binds fill and thumb by state, the track once, the number part only with field; the thumb size.target.min", () => {
@@ -3738,7 +3822,7 @@ describe("the Figma plan draws the datelektilo (Spec 025 ②)", () => {
   it("a field of mode × expanded × state, twenty-four variants; the label a field's word; the texts the Vitrino's; the calendar of the plan", () => {
     expect(set?.structure).toBe("field");
     expect(set?.extraAxes).toEqual(["mode"]);
-    expect(set?.variants).toHaveLength(24);
+    expect(set?.variants).toHaveLength(32);
     expect(set?.properties.state).toEqual([
       "rest",
       "hover",
@@ -3746,6 +3830,8 @@ describe("the Figma plan draws the datelektilo (Spec 025 ②)", () => {
       "disabled",
       "readonly",
       "invalid",
+      "warning",
+      "success",
     ]);
     expect(set?.properties).toMatchObject({ mode: ["single", "range"], expanded: "BOOLEAN" });
     expect(set?.label).toEqual({ property: "label", defaultValue: "Beschriftung" });
@@ -3766,7 +3852,7 @@ describe("the Figma plan draws the datelektilo (Spec 025 ②)", () => {
     expect(set?.calendar?.days[0]).toEqual({ text: "28", outside: true });
     expect(set?.calendar?.days[3]).toEqual({ text: "1", outside: false });
     expect(set?.calendar?.days[41]).toEqual({ text: "8", outside: true });
-    expect(set?.grid).toMatchObject({ rows: 4, columns: 6 });
+    expect(set?.grid).toMatchObject({ rows: 4, columns: 8 });
   });
 
   it("binds the field as the kampo, the trigger, the calendar and the cell's looks; the calendar only where expanded; the icons of trigger, prev and next", () => {
@@ -3862,7 +3948,7 @@ describe("the Figma plan draws the selection Eroj (Spec 025 ③)", () => {
     for (const name of ["listelektilo", "plurelektilo"]) {
       const field = set(name);
       expect(field?.structure, name).toBe("field");
-      expect(field?.variants, name).toHaveLength(12);
+      expect(field?.variants, name).toHaveLength(16);
       expect(field?.entry, name).toEqual({
         key: "selected",
         texts: ["Eins", "Zwei", "Drei"],
