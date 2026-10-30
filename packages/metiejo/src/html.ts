@@ -348,6 +348,10 @@ function wertOf(control) {
 }
 for (const control of document.querySelectorAll("[data-mt-festlegen]")) {
   control.addEventListener("change", async () => {
+    // Spec 035 Teil 3 (3.2): a value of a Studio page goes through the page's formularo, and the page
+    // comes back from the server – row, swatch, origin and check from one state.
+    const form = studioSeite && control.hasAttribute("name") ? control.closest("fm-formularo[data-action]") : null;
+    if (form) { await sendForm(form, {}); return; }
     const value = wertOf(control);
     if (!value) { studioMeldung("Kein gültiger Wert.", "danger"); return; }
     const body = { token: control.getAttribute("data-mt-festlegen"), ...value };
