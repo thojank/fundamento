@@ -10,7 +10,7 @@ import { projectModeloSource } from "@fundamento/modelo";
 import { buildProjekcioj, VITRINO_FILE } from "@fundamento/projekcioj";
 import { expect, type Locator, type Page, test } from "@playwright/test";
 import { axeViolations, contrast } from "./alirebleco.js";
-import { M5_GRENZE_MS, m5Urteil, stilBlockadeEinbauen } from "./m5.js";
+import { M5_GRENZE_MS, m5Urteil, stilBlockadeEinbauen, stilBlockadeMeldung } from "./m5.js";
 import { EKZEMPLO_CONFIG, ORIGIN } from "./serve.js";
 
 test.describe.configure({ mode: "serial" });
@@ -1163,10 +1163,10 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     await openWerkstatt(page);
     await checkedAtLeast(page, 1);
     const last = await page.evaluate(stilBlockadeEinbauen, 80);
-    process.stderr.write(
-      `M5 Gegenprobe 2: ${last.elemente} Elemente, Stil und Layout ${last.kosten.toFixed(0)} ms je Umschalten\n`,
-    );
-    expect(last.kosten).toBeGreaterThanOrEqual(80);
+    const meldung = stilBlockadeMeldung(last, 80, test.info().project.name);
+    process.stderr.write(`${meldung}\n`);
+    expect(last.gehalten, meldung).toBe(true);
+    expect(last.kosten, meldung).toBeGreaterThanOrEqual(80);
     const timings = await page.evaluate(() => fmWerkstatt.measure(10));
     const urteil = m5Urteil(timings);
     process.stderr.write(
@@ -1279,6 +1279,24 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
       expect(last.kosten).toBeGreaterThanOrEqual(80);
       expect(nachgemessen).toBeGreaterThanOrEqual(80);
     });
+
+  test("M5 Gegenprobe 2, calibration (Befund 1.2): at the upper bound of elements it stops and names the elements, the cost and the runner", async ({
+    page,
+  }) => {
+    await page.setContent("<!doctype html><html><head></head><body></body></html>");
+    // A runner on which even the upper bound of elements costs only a quarter of 80 ms.
+    await page.evaluate(gedachterLaeufer, { msJeElement: 20 / 1_024_000, folge: [1] });
+    const last = await page.evaluate(stilBlockadeEinbauen, 80);
+    const meldung = stilBlockadeMeldung(last, 80, test.info().project.name);
+    process.stderr.write(`${meldung}\n`);
+    expect(last.obergrenze).toBe(1_024_000);
+    expect(last.elemente).toBe(last.obergrenze);
+    expect(last.gehalten).toBe(false);
+    expect(last.kosten).toBeCloseTo(20, 6);
+    expect(meldung).toBe(
+      `M5 Gegenprobe 2 (${test.info().project.name}): Kalibrierung an der Obergrenze von 1024000 Elementen abgebrochen – 1024000 Elemente, Stil und Layout 20.0 ms je Umschalten, verlangt 80 ms`,
+    );
+  });
 
   test("M5 Gegenprobe 2, calibration (Befund 1.2): under CPU throttling (rate 4) the block holds 80 ms of style and layout", async ({
     page,
