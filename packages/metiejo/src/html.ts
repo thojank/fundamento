@@ -144,8 +144,23 @@ async function sendForm(form, values) {
     studioSendet = true;
     Object.assign(values, studioWerte(form));
   }
+  if (studioSeite) {
+    try { sessionStorage.setItem("mt-studio-scroll", location.pathname + " " + Math.round(scrollY)); } catch {}
+  }
   const response = await fetch(form.getAttribute("data-action"), { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: encode(values) });
   await follow(response);
+}
+// Spec 035 Teil 3 (3.3): the page after its formularo stands where the person was; a refused value
+// is brought into view at its field.
+if (studioSeite && new URLSearchParams(location.search).has("rueckmeldung")) {
+  try {
+    const [where, y] = (sessionStorage.getItem("mt-studio-scroll") || "").split(" ");
+    if (where === location.pathname) scrollTo(0, Number(y) || 0);
+    sessionStorage.removeItem("mt-studio-scroll");
+  } catch {}
+  const refused = document.querySelector("[data-mt-ablehnung]");
+  const field = refused && refused.closest("[data-mt-festlegen]");
+  if (refused) (field || refused).scrollIntoView({ block: "center" });
 }
 for (const form of document.querySelectorAll("fm-formularo[data-action]")) {
   form.addEventListener("submit", async (event) => {

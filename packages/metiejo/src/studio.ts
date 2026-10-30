@@ -187,6 +187,8 @@ export interface StudioRow {
   schreibweise?: string;
   /** The family of a font role as the brand names it, for the search per role. */
   schrift?: { rolle: string; family?: string; license?: string };
+  /** Spec 035 Teil 3 (3.3): values of this row's fields the last sending refused, at the field. */
+  ablehnungen?: StudioAblehnung[];
 }
 
 export interface StudioGroup {
@@ -871,19 +873,36 @@ function schattenControl(row: StudioRow, modus?: string): string {
 export const feldName = (token: string, modus?: string): string =>
   modus === undefined ? token : `${token}@${modus}`;
 
+/** A refusal at its field (Spec 035 3.3): the message, the suggestion and the rule it names. */
+const ablehnungText = (ablehnung: StudioAblehnung): string =>
+  `${escapeHtml(ablehnung.message)} Vorschlag: ${escapeHtml(ablehnung.suggestion)} (Regel ${escapeHtml(ablehnung.rule)})`;
+
 function control(row: StudioRow, modus?: string): string {
-  const base = `data-mt-festlegen="${escapeHtml(row.token)}" data-mt-art="${row.art}"${modus === undefined ? "" : ` data-mt-modus="${escapeHtml(modus)}"`}`;
+  const ablehnung = row.ablehnungen?.find((entry) => entry.path === feldName(row.token, modus));
+  const html = controlOf(row, modus, ablehnung);
+  if (ablehnung === undefined || row.art !== "color") return html;
+  // A native colour field has no error of its own: the refusal stands right beside it.
+  return `${html}<fm-avizo intent="danger" data-mt-ablehnung="${escapeHtml(ablehnung.path)}" data-mt-regel="${escapeHtml(ablehnung.rule)}">${ablehnungText(ablehnung)}</fm-avizo>`;
+}
+
+function controlOf(row: StudioRow, modus?: string, ablehnung?: StudioAblehnung): string {
+  // The error of the field (an Ero's error slot), with the rule as data for a reader of the page.
+  const fehler =
+    ablehnung === undefined
+      ? ""
+      : `<span slot="error" data-mt-ablehnung="${escapeHtml(ablehnung.path)}" data-mt-regel="${escapeHtml(ablehnung.rule)}">${ablehnungText(ablehnung)}</span>`;
+  const base = `data-mt-festlegen="${escapeHtml(row.token)}" data-mt-art="${row.art}"${modus === undefined ? "" : ` data-mt-modus="${escapeHtml(modus)}"`}${ablehnung === undefined ? "" : row.art === "color" ? ' aria-invalid="true"' : " invalid"}`;
   const label = modus === undefined ? "Wert" : (modus.split("=")[1] ?? modus);
   switch (row.art) {
     case "schatten":
       return row.schatten === undefined
-        ? `<fm-tekstareo kind="code" name="${escapeHtml(row.token)}" rows="3" value="${escapeHtml(JSON.stringify(row.value))}" ${base}>${escapeHtml(label)} als JSON</fm-tekstareo>`
+        ? `<fm-tekstareo kind="code" name="${escapeHtml(row.token)}" rows="3" value="${escapeHtml(JSON.stringify(row.value))}" ${base}>${escapeHtml(label)} als JSON${fehler}</fm-tekstareo>`
         : schattenControl(row, modus);
     case "alias": {
       const current = modus?.startsWith("color-scheme=")
         ? (row.dunkel?.alias ?? row.alias)
         : row.alias;
-      return `<fm-elektilo name="${escapeHtml(feldName(row.token, modus))}" value="${escapeHtml(current ?? "")}" size="small" ${base}>${escapeHtml(label)}${(
+      return `<fm-elektilo name="${escapeHtml(feldName(row.token, modus))}" value="${escapeHtml(current ?? "")}" size="small" ${base}>${escapeHtml(label)}${fehler}${(
         row.candidates ?? []
       )
         .map(
@@ -895,11 +914,11 @@ function control(row: StudioRow, modus?: string): string {
     case "color":
       return `<input type="color" name="${escapeHtml(feldName(row.token, modus))}" value="${escapeHtml(row.shown)}" aria-label="${escapeHtml(`${row.label} ${label}`)}" ${base}>`;
     case "dimension":
-      return `<fm-kampo kind="number" name="${escapeHtml(row.token)}" value="${escapeHtml(String(isRecord(row.value) ? row.value.value : row.value))}" size="small" data-mt-einheit="${escapeHtml(row.unit ?? "px")}" ${base}>${escapeHtml(label)} (${escapeHtml(row.unit ?? "px")})</fm-kampo>`;
+      return `<fm-kampo kind="number" name="${escapeHtml(row.token)}" value="${escapeHtml(String(isRecord(row.value) ? row.value.value : row.value))}" size="small" data-mt-einheit="${escapeHtml(row.unit ?? "px")}" ${base}>${escapeHtml(label)} (${escapeHtml(row.unit ?? "px")})${fehler}</fm-kampo>`;
     case "number":
-      return `<fm-kampo kind="number" name="${escapeHtml(row.token)}" value="${escapeHtml(String(row.value))}" size="small" ${base}>${escapeHtml(label)}</fm-kampo>`;
+      return `<fm-kampo kind="number" name="${escapeHtml(row.token)}" value="${escapeHtml(String(row.value))}" size="small" ${base}>${escapeHtml(label)}${fehler}</fm-kampo>`;
     default:
-      return `<fm-tekstareo kind="code" name="${escapeHtml(row.token)}" rows="3" value="${escapeHtml(JSON.stringify(row.value))}" ${base}>${escapeHtml(label)} als JSON</fm-tekstareo>`;
+      return `<fm-tekstareo kind="code" name="${escapeHtml(row.token)}" rows="3" value="${escapeHtml(JSON.stringify(row.value))}" ${base}>${escapeHtml(label)} als JSON${fehler}</fm-tekstareo>`;
   }
 }
 
@@ -1188,6 +1207,23 @@ export function studioAenderungen(
     }
   }
   return { aenderungen, abgelehnt };
+}
+
+/** The rows of a page with the refusals of the last sending at their fields (Spec 035 3.3). */
+export function mitRueckmeldung(
+  groups: readonly StudioGroup[],
+  rueckmeldung: StudioRueckmeldung | undefined,
+): StudioGroup[] {
+  if (rueckmeldung === undefined || rueckmeldung.abgelehnt.length === 0) return [...groups];
+  return groups.map((entry) => ({
+    ...entry,
+    rows: entry.rows.map((row) => {
+      const ablehnungen = rueckmeldung.abgelehnt.filter(
+        (ablehnung) => ablehnung.path === row.token || ablehnung.path.startsWith(`${row.token}@`),
+      );
+      return ablehnungen.length === 0 ? row : { ...row, ablehnungen };
+    }),
+  }));
 }
 
 /**

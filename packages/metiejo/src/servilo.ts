@@ -96,6 +96,7 @@ import {
   composeDraft,
   isStudioPage,
   kombinationOf,
+  mitRueckmeldung,
   type StudioGroup,
   type StudioRueckmeldung,
   studioAenderungen,
@@ -2086,7 +2087,16 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       sendHtml(
         response,
         komponentoScreen({
-          view: komponentoView(ref, draft.agordo, bases, kombination, zeloOf(url.searchParams)),
+          view: (() => {
+            const view = komponentoView(
+              ref,
+              draft.agordo,
+              bases,
+              kombination,
+              zeloOf(url.searchParams),
+            );
+            return { ...view, groups: mitRueckmeldung(view.groups, rueckmeldung) };
+          })(),
           marko: {
             name,
             agordo: draft.agordo,
@@ -2160,7 +2170,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
             rev: draft.rev,
           },
           kombination,
-          groups: studioRows(page, draft.agordo, bases, kombination),
+          groups: mitRueckmeldung(studioRows(page, draft.agordo, bases, kombination), rueckmeldung),
           probleme: problemeOf(derivation),
           ...(message === undefined ? {} : { message }),
           ...(feedback.problem === undefined ? {} : { problem: feedback.problem }),
