@@ -263,7 +263,9 @@
       },
       "clear": {
         "size": {
-          "fixed": "size.control.small"
+          "by": [
+            "size"
+          ]
         }
       },
       "spinner": {
@@ -278,6 +280,12 @@
         }
       }
     },
+    "trailing": [
+      "spinner",
+      "clear",
+      "decrement",
+      "increment"
+    ],
     "bindings": [
       {
         "part": "label",
@@ -480,12 +488,36 @@
         "token": "spacing.medium"
       },
       {
+        "part": "clear",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "clear",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "clear",
+        "property": "size",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.icon.large"
+      },
+      {
         "part": "decrement",
         "property": "size",
         "when": {
           "size": "small"
         },
-        "token": "size.control.small"
+        "token": "size.icon.small"
       },
       {
         "part": "decrement",
@@ -493,7 +525,7 @@
         "when": {
           "size": "medium"
         },
-        "token": "size.control.medium"
+        "token": "size.icon.medium"
       },
       {
         "part": "decrement",
@@ -501,7 +533,7 @@
         "when": {
           "size": "large"
         },
-        "token": "size.control.large"
+        "token": "size.icon.large"
       },
       {
         "part": "increment",
@@ -509,7 +541,7 @@
         "when": {
           "size": "small"
         },
-        "token": "size.control.small"
+        "token": "size.icon.small"
       },
       {
         "part": "increment",
@@ -517,7 +549,7 @@
         "when": {
           "size": "medium"
         },
-        "token": "size.control.medium"
+        "token": "size.icon.medium"
       },
       {
         "part": "increment",
@@ -525,7 +557,7 @@
         "when": {
           "size": "large"
         },
-        "token": "size.control.large"
+        "token": "size.icon.large"
       }
     ],
     "a11y": {

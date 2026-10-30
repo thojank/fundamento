@@ -330,10 +330,13 @@ function fieldMarkup(
   const calendar = datepicker
     ? '<div part="calendar" id="calendar" role="dialog" popover="manual" aria-modal="false" aria-labelledby="month"><div part="head"><fm-butono part="prev" emphasis="low" size="small"><fm-ikono slot="icon-start" name="chevron-left"></fm-ikono></fm-butono><span part="month" id="month" aria-live="polite"></span><fm-butono part="next" emphasis="low" size="small"><fm-ikono slot="icon-start" name="chevron-right"></fm-ikono></fm-butono></div><div part="grid" role="grid" aria-labelledby="month"><div part="weekdays" role="row"></div></div></div>'
     : "";
-  // Spec 029 ②b-1 M-6: a field with suggestions has a row too, for its clear button.
-  const row =
-    stepper || datepicker || suggest ? `<div part="row">${native}${trigger}</div>` : native;
-  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span>${SPINNER}</label>${row}${calendar}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+  // Spec 029 ②b-1, Abnahme #122: every field is a row of its control and its end – inside the
+  // field's border, from the inside out the spinner, the clear button, the steppers or the
+  // calendar (the Skemo's trailing); the element puts the buttons it makes in their place.
+  void stepper;
+  void suggest;
+  const row = `<div part="row">${native}<span part="end">${SPINNER}${trigger}</span></div>`;
+  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label>${row}${calendar}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -368,15 +371,18 @@ const MULTI_ITEM_ROW =
  * where the summary says so.
  */
 function listMarkup(slots: NonNullable<ElementNames["slots"]>, multi: boolean): string {
+  // Abnahme #122: the chevron stands in the end of the row, inside the button's border, after the
+  // spinner and the clear button (a button holds no button).
+  const end = `<span part="end">${SPINNER}<span part="indicator" aria-hidden="true">${IKONO_CHEVRON}</span></span>`;
   const button = multi
-    ? `<button part="control" id="control" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="listbox"><span part="text" id="text"></span><span part="indicator" aria-hidden="true">${IKONO_CHEVRON}</span></button><div part="tags" hidden></div>`
-    : `<div part="row"><button part="control" id="control" type="button" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="listbox"><span part="text" id="text"></span><span part="indicator" aria-hidden="true">${IKONO_CHEVRON}</span></button></div>`;
+    ? `<div part="row"><button part="control" id="control" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="listbox"><span part="text" id="text"></span></button>${end}</div><div part="tags" hidden></div>`
+    : `<div part="row"><button part="control" id="control" type="button" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="listbox"><span part="text" id="text"></span></button>${end}</div>`;
   // A listbox owns options alone (ARIA, axe aria-required-children): the multi-select's popover is
   // a panel that holds the filter, the listbox of the rows (items) and the clear butono.
   const listbox = multi
     ? '<div part="listbox" id="panel" popover="manual"><input part="filter" type="search" aria-controls="listbox" autocomplete="off" hidden><div part="items" role="listbox" id="listbox" aria-multiselectable="true"></div><fm-butono part="clear" emphasis="low" size="small"></fm-butono></div>'
     : '<div part="listbox" role="listbox" id="listbox" popover="manual"></div>';
-  return `<div part="field"><label part="label" id="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span>${SPINNER}</label>${button}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+  return `<div part="field"><label part="label" id="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label>${button}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -412,7 +418,7 @@ function sliderMarkup(slots: NonNullable<ElementNames["slots"]>): string {
   const texts = textsMarkup(
     slots.filter((slot) => slot.name !== "min-label" && slot.name !== "max-label"),
   );
-  return `<div part="field"><span part="label" id="label"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span>${SPINNER}</span><div part="row"><span part="min-label" id="min-label"><slot name="min-label"></slot></span><div part="track" id="control"><div part="fill"></div><div part="thumb" id="thumb-start" role="slider" tabindex="0" aria-labelledby="label from"></div><div part="thumb" id="thumb-end" role="slider" tabindex="0" hidden></div></div><span part="max-label" id="max-label"><slot name="max-label"></slot></span><fm-kampo part="number" kind="number" hidden><span id="number-label"></span></fm-kampo></div>${texts}<span id="from" hidden></span><span id="to" hidden></span><span id="fm-texts" hidden></span></div>`;
+  return `<div part="field"><span part="label" id="label"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></span><div part="row"><span part="min-label" id="min-label"><slot name="min-label"></slot></span><div part="track" id="control"><div part="fill"></div><div part="thumb" id="thumb-start" role="slider" tabindex="0" aria-labelledby="label from"></div><div part="thumb" id="thumb-end" role="slider" tabindex="0" hidden></div></div><span part="max-label" id="max-label"><slot name="max-label"></slot></span><fm-kampo part="number" kind="number" hidden><span id="number-label"></span></fm-kampo>${SPINNER}</div>${texts}<span id="from" hidden></span><span id="to" hidden></span><span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -435,7 +441,7 @@ function dialogMarkup(): string {
  */
 function selectMarkup(slots: NonNullable<ElementNames["slots"]>, role: string): string {
   void role;
-  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span>${SPINNER}</label><div><select part="control" id="control"></select><span part="indicator" aria-hidden="true">${IKONO_CHEVRON}</span></div>${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><div part="row"><select part="control" id="control"></select><span part="end">${SPINNER}<span part="indicator" aria-hidden="true">${IKONO_CHEVRON}</span></span></div>${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -454,11 +460,12 @@ function toggleMarkup(
   const mark = marked
     ? `<span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span>`
     : "";
-  const label = `<label part="label" id="label" for="control"><slot></slot>${mark}${SPINNER}</label>`;
+  const label = `<label part="label" id="label" for="control"><slot></slot>${mark}</label>`;
   const texts = textsMarkup(slots);
   const beside = texts === "" ? label : `<div>${label}${texts}</div>`;
   const sign = role === "checkbox" ? IKONO_CHECK : (signOf(role) ?? "");
-  return `<div part="field"><button part="control" id="control" type="button" role="${role}" aria-labelledby="label"><span part="indicator">${sign}</span></button>${beside}<span id="fm-texts" hidden></span></div>`;
+  // Abnahme #122: the spinner at the end of the field, after the label, not in it.
+  return `<div part="field"><button part="control" id="control" type="button" role="${role}" aria-labelledby="label"><span part="indicator">${sign}</span></button>${beside}${SPINNER}<span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -471,7 +478,7 @@ function groupMarkup(slots: NonNullable<ElementNames["slots"]>, marked: boolean)
   const mark = marked
     ? `<span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span>`
     : "";
-  return `<div part="field" id="control" role="radiogroup" aria-labelledby="label"><span part="label" id="label"><slot></slot>${mark}${SPINNER}</span><div part="options"></div>${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+  return `<div part="field" id="control" role="radiogroup" aria-labelledby="label"><span part="label" id="label"><slot></slot>${mark}</span>${SPINNER}<div part="options"></div>${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -709,7 +716,7 @@ function separatorMarkup(): string {
  * the list of the chosen files follows, and a live region says how many there are.
  */
 function uploadMarkup(): string {
-  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span>${SPINNER}</label><div part="dropzone"><span part="picker"><fm-butono part="choose" emphasis="medium" inert><fm-ikono slot="icon-start" name="upload"></fm-ikono><span id="choose-text"></span></fm-butono><input part="control" id="control" type="file"></span><span part="drop-hint" id="drop-hint" hidden></span></div><span part="help" id="help" hidden><slot name="help"></slot></span><span part="error" id="error" hidden aria-live="polite"><slot name="error"></slot><span id="file-error"></span></span><ul part="file-list" hidden></ul><span part="count" role="status" aria-live="polite" class="fm-hidden"></span><span id="fm-texts" hidden></span></div>`;
+  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><div part="dropzone"><span part="picker"><fm-butono part="choose" emphasis="medium" inert><fm-ikono slot="icon-start" name="upload"></fm-ikono><span id="choose-text"></span></fm-butono><input part="control" id="control" type="file"></span><span part="drop-hint" id="drop-hint" hidden></span><span part="end">${SPINNER}</span></div><span part="help" id="help" hidden><slot name="help"></slot></span><span part="error" id="error" hidden aria-live="polite"><slot name="error"></slot><span id="file-error"></span></span><ul part="file-list" hidden></ul><span part="count" role="status" aria-live="polite" class="fm-hidden"></span><span id="fm-texts" hidden></span></div>`;
 }
 
 /** One chosen file (Spec 015 ②): its name, its size and the butono that removes it. */
@@ -1022,6 +1029,57 @@ export function elementSource({
         { capture: true },
       );
     }
+`
+    : "";
+  // Spec 029 ②b-1, Abnahme #122: a field whose end holds spinner, clear button and its icon.
+  const hasEnd = [
+    "input",
+    "textarea",
+    "select",
+    "listselect",
+    "multiselect",
+    "suggest",
+    "datepicker",
+  ].includes(host);
+  const endMethods = hasEnd
+    ? `
+  /** Watches the parts of the end: the room the control keeps for them follows their size. */
+  #endObserver: ResizeObserver | undefined;
+
+  /** The parts of the end in the Skemo's order, from the inside out (trailing). */
+  #orderEnd(): void {
+    const end = this.shadowRoot?.querySelector('[part="end"]');
+    if (!(end instanceof HTMLElement)) return;
+    const rank = (node: Element) => {
+      const index = TRAILING.indexOf(node.getAttribute("part") ?? "");
+      return index === -1 ? TRAILING.length : index;
+    };
+    const children = [...end.children];
+    for (const child of children) this.#endObserver?.observe(child);
+    const sorted = [...children].sort((a, b) => rank(a) - rank(b));
+    if (sorted.every((node, index) => node === children[index])) return;
+    for (const node of sorted) end.append(node);
+  }
+
+  /**
+   * The room the control keeps at its end (Abnahme #122): the width of the parts shown there and
+   * the gap before them; the field keeps its width when one comes or goes.
+   */
+  #endRoom(): void {
+    const end = this.shadowRoot?.querySelector('[part="end"]');
+    if (!(end instanceof HTMLElement)) return;
+    const boxes = [...end.children]
+      .map((child) => child.getBoundingClientRect())
+      .filter((box) => box.width > 0);
+    let room = 0;
+    if (boxes.length > 0) {
+      const start = Math.min(...boxes.map((box) => box.left));
+      const stop = Math.max(...boxes.map((box) => box.right));
+      room = stop - start + (Number.parseFloat(getComputedStyle(end).columnGap) || 0);
+    }
+    const value = String(Math.ceil(room)) + "px";
+    if (this.#root.style.getPropertyValue("--fm-end") !== value) this.#root.style.setProperty("--fm-end", value);
+  }
 `
     : "";
   const reasonMethods = blocks
@@ -5167,19 +5225,19 @@ ${
    * (before it the decrement, after it the others), taken away otherwise; undefined when not wanted.
    */
   #fieldButton(part: "decrement" | "increment" | "clear", wanted: boolean): HTMLElement | undefined {
-    const row = this.shadowRoot?.querySelector('[part="row"]');
-    const present = row?.querySelector('[part="' + part + '"]');
+    // Abnahme #122: in the end of the row, inside the field's border, in the Skemo's order.
+    const end = this.shadowRoot?.querySelector('[part="end"]');
+    const present = end?.querySelector(':scope > [part="' + part + '"]');
     if (!wanted) {
       present?.remove();
       return undefined;
     }
     if (present instanceof HTMLElement) return present;
-    if (!(row instanceof HTMLElement)) return undefined;
+    if (!(end instanceof HTMLElement)) return undefined;
     const markup = part === "decrement" ? \`${DECREMENT_BUTTON}\` : part === "increment" ? \`${INCREMENT_BUTTON}\` : \`${CLEAR_BUTTON}\`;
-    if (part === "decrement") this.#control.insertAdjacentHTML("beforebegin", markup);
-    else if (part === "increment") this.#control.insertAdjacentHTML("afterend", markup);
-    else row.insertAdjacentHTML("beforeend", markup);
-    const made = row.querySelector('[part="' + part + '"]');
+    end.insertAdjacentHTML("beforeend", markup);
+    this.#orderEnd();
+    const made = end.querySelector(':scope > [part="' + part + '"]');
     return made instanceof HTMLElement ? made : undefined;
   }
 
@@ -5493,6 +5551,8 @@ const DESCRIPTION = (("description" in SKEMO.a11y ? SKEMO.a11y.description : [])
 const HAS_PROP = new Set(PROPS.map((prop) => prop.name));
 /** The named slots of the Skemo, decorative ones aside: a live region shows each while it has content. */
 const NAMED_SLOTS: readonly string[] = ${JSON.stringify(namedSlots)};
+/** The parts at the end of the field, from the inside out (Spec 029 ②b-1, Abnahme #122). */
+const TRAILING = (("trailing" in SKEMO ? SKEMO.trailing : []) ?? []) as readonly string[];
 /** The name the Skemo gives the default slot (Nachlese 11 B-2); slot="<it>" means the default slot. */
 const DEFAULT_SLOT: string | undefined = ${defaultSlot === undefined ? "undefined" : JSON.stringify(defaultSlot)};
 /**
@@ -5613,7 +5673,14 @@ ${
       attributeFilter: ["slot"],
     });
 `
-}${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${datepickerInit}${chipInit}${listInit}${editorInit}${uploadInit}${sliderInit}${fieldExtrasInit}${reasonInit}${avatarInit}${isCodeblock ? codeblockInit : ""}${skipInit}${
+}${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${datepickerInit}${chipInit}${listInit}${editorInit}${uploadInit}${sliderInit}${fieldExtrasInit}${reasonInit}${
+  hasEnd
+    ? `    // Abnahme #122: the end's parts in their order, their room kept by the control.
+    if (typeof ResizeObserver !== "undefined") this.#endObserver = new ResizeObserver(() => this.#endRoom());
+    this.#orderEnd();
+`
+    : ""
+}${avatarInit}${isCodeblock ? codeblockInit : ""}${skipInit}${
   host === "button"
     ? `    // A word written into the default slot later (the alsxutilo writes its own) changes the
     // form: the render looks again (Spec 029 ①b, Abnahme 28.10.).
@@ -5790,17 +5857,21 @@ ${
       };
       const off = this.propValue("disabled") === true || this.propValue("readonly") === true;
       const wanted = this.propValue("clearable") === true && filled && !off;
-      const holder = ${isSelect ? "control.parentElement" : "root.querySelector('[part=\"row\"]')"};
+      // Abnahme #122: in the end of the row, inside the field's border, before the field's icon.
+      const holder = root.querySelector('[part="end"]');
       let clear = holder?.querySelector(':scope > [part="clear"]');
       if (!wanted) clear?.remove();
       else if (holder instanceof HTMLElement) {
         if (!(clear instanceof HTMLElement)) {
-          ${
+          holder.insertAdjacentHTML("beforeend", ${JSON.stringify(CLEAR_BUTTON)});
+          this.#orderEnd();
+          clear = holder.querySelector(':scope > [part="clear"]');${
             isDatepicker
-              ? `holder.querySelector('[part="trigger"]')?.insertAdjacentHTML("beforebegin", ${JSON.stringify(CLEAR_BUTTON)});`
-              : `holder.insertAdjacentHTML("beforeend", ${JSON.stringify(CLEAR_BUTTON)});`
+              ? `
+          // As large as the calendar beside it: the trigger's size, its glyph too.
+          clear?.setAttribute("size", holder.querySelector('[part="trigger"]')?.getAttribute("size") ?? "medium");`
+              : ""
           }
-          clear = holder.querySelector(':scope > [part="clear"]');
           clear?.addEventListener("click", (event) => {
             event.stopPropagation();
             this.#clearValue();
@@ -5890,7 +5961,10 @@ ${
     }
 `
     : ""
-}    if (heard.length > 0) {
+}    // Abnahme #122: the mark shows what is required (and an external link), never that a field
+    // loads – loading is heard ("lädt"), not marked.
+    const marking = ${isStatic ? "heard.length > 0" : 'Object.keys(TEXTS).some((prop) => prop !== "loading" && this.propValue(prop) === true)'};
+${hasEnd ? "    this.#orderEnd();\n    this.#endRoom();\n" : ""}    if (marking) {
       root.setAttribute("data-marked", "true");
       if (root !== control) control.setAttribute("data-marked", "true");
     } else {
@@ -6006,7 +6080,7 @@ ${
     : `    if (!(this.#control instanceof HTMLButtonElement)) return;
 ${toggleActivate}`
 }  }
-${groupMethods}${selectMethods}${inputMethods}${fieldExtrasMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${autoMethods}${tabsMethods}${overlayMethods}${tooltipMethods}${reasonMethods}${menuMethods}${suggestMethods}${datepickerMethods}${chipMethods}${listMethods}${editorMethods}${uploadMethods}${sliderMethods}${choiceValidityMethods}${isCodeblock ? codeblockMethods : ""}${isMarkdown ? markdownMethods : ""}
+${groupMethods}${selectMethods}${inputMethods}${fieldExtrasMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${autoMethods}${tabsMethods}${overlayMethods}${tooltipMethods}${reasonMethods}${endMethods}${menuMethods}${suggestMethods}${datepickerMethods}${chipMethods}${listMethods}${editorMethods}${uploadMethods}${sliderMethods}${choiceValidityMethods}${isCodeblock ? codeblockMethods : ""}${isMarkdown ? markdownMethods : ""}
 }
 
 /**

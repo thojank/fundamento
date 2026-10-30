@@ -349,7 +349,13 @@ describe("the elektilo is drawn as the field of the kampo with the chevron in it
       "error",
     ]);
     const control = descendant(rest, "control");
-    expect(control?.children.map((child) => child.name)).toEqual(["text", "clear", "indicator"]);
+    // Abnahme #122: the end of the field from the inside out, all in the control.
+    expect(control?.children.map((child) => child.name)).toEqual([
+      "text",
+      "spinner",
+      "clear",
+      "indicator",
+    ]);
     expect(control?.properties.layoutMode).toBe("HORIZONTAL");
     expect(descendant(rest, "label")?.properties.characters).toBe("Auswahl");
     expect(descendant(rest, "text")?.properties.characters).toBe("Bitte wählen");
@@ -395,7 +401,7 @@ describe("the elektilo is drawn as the field of the kampo with the chevron in it
     const { double } = await drawn();
     const kampo = pageNodes(double).find((child) => child.name === "kampo");
     const control = descendant(kampo?.children[0], "control");
-    expect(control?.children.map((child) => child.name)).toEqual(["text", "clear"]);
+    expect(control?.children.map((child) => child.name)).toEqual(["text", "spinner", "clear"]);
   });
 
   it("a second run writes nothing new", async () => {
@@ -440,7 +446,7 @@ describe("the tekstareo is drawn as the field of the kampo: kind × size × stat
     expect(bound(descendant(code, "text"), "fontFamily")).toBe("typography/code/font-family");
     expect(bound(descendant(text, "text"), "fontSize")).toBe("typography/body/1/font-size");
     const control = descendant(text, "control");
-    expect(control?.children.map((child) => child.name)).toEqual(["text"]);
+    expect(control?.children.map((child) => child.name)).toEqual(["text", "spinner"]);
     expect(control?.boundVariables.minHeight).toBeUndefined();
     expect(control?.properties.layoutSizingVertical).toBe("HUG");
     expect(descendant(text, "text")?.properties.characters).toBe("Beispiel\n\n\n");
@@ -975,7 +981,7 @@ describe("the plugin draws the datelektilo (Spec 025 ②)", () => {
       )?.[0]?.boundVariables?.color?.name,
     );
 
-  it("every variant: the field with its row and trigger; the calendar only where expanded, with head, weekdays and six weeks; the looks of the cells bound; a second run writes nothing", async () => {
+  it("every variant: the field with its ring and the trigger in its control; the calendar only where expanded, with head, weekdays and six weeks; the looks of the cells bound; a second run writes nothing", async () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     const set = pageNodes(double).find((node) => node.name === "datelektilo");
@@ -985,15 +991,21 @@ describe("the plugin draws the datelektilo (Spec 025 ②)", () => {
       expect(field?.properties.layoutMode, variant.name).toBe("VERTICAL");
       expect(field?.children.map((child) => child.name)).toEqual([
         "label-row",
-        "row",
+        "focus-ring",
         "calendar",
         "help",
         "error",
       ]);
-      const row = descendant(variant, "row");
-      expect(row?.properties.layoutMode, variant.name).toBe("HORIZONTAL");
-      expect(row?.children.map((child) => child.name)).toEqual(["focus-ring", "trigger"]);
-      expect(descendant(variant, "control")).toBeDefined();
+      // Abnahme #122: the trigger stands at the end of the control, inside the field's border.
+      expect(descendant(variant, "row"), variant.name).toBeUndefined();
+      const control = descendant(variant, "control");
+      expect(control?.properties.layoutMode, variant.name).toBe("HORIZONTAL");
+      expect(control?.children.map((child) => child.name)).toEqual([
+        "text",
+        "spinner",
+        "clear",
+        "trigger",
+      ]);
       const ranged = variant.name.includes("mode=range");
       expect(descendant(variant, "text")?.properties.characters).toBe(
         ranged ? "06.10.2026 – 10.10.2026" : "24.10.2026",
@@ -1023,7 +1035,7 @@ describe("the plugin draws the datelektilo (Spec 025 ②)", () => {
       for (const week of ["week-1", "week-6"]) {
         expect(descendant(variant, week)?.children, variant.name).toHaveLength(7);
       }
-      expect(bound(descendant(variant, "trigger"), "width")).toBe("size/control/medium");
+      expect(bound(descendant(variant, "trigger"), "width")).toBe("size/target/min");
       expect(bound(descendant(variant, "cell-4"), "width")).toBe("size/target/min");
       expect(bound(descendant(variant, "cell-4"), "cornerRadius")).toBe("radius/role/control");
       // The 28th of September stands first, outside the month; the 1st is the fourth cell.

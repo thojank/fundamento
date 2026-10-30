@@ -1047,11 +1047,11 @@ describe("the Vitrino shows the glitilo and the kampo additions (Spec 025 ①)",
 // the help, a date range — each at rest, required, disabled and invalid; the dates are the
 // Vitrino's (October 2026), the same the Figma set shows.
 describe("the Vitrino shows the datelektilo (Spec 025 ②)", () => {
-  it("two rows, four columns; the dates of the Vitrino; the error only under invalid", () => {
+  it("two rows, five columns (Abnahme #122: loading); the dates of the Vitrino; the error only under invalid", () => {
     const grid = datumoj.eroj.datelektilo ?? "";
-    expect((grid.match(/<fm-datelektilo /g) ?? []).length).toBe(8);
+    expect((grid.match(/<fm-datelektilo /g) ?? []).length).toBe(10);
     expect(grid).toContain(
-      '<th scope="col">rest</th><th scope="col">required</th><th scope="col">disabled</th><th scope="col">invalid</th>',
+      '<th scope="col">rest</th><th scope="col">required</th><th scope="col">disabled</th><th scope="col">invalid</th><th scope="col">loading</th>',
     );
     expect(grid).toContain(
       '<fm-datelektilo value="2026-10-24">einzeln<span slot="help">Ein Datum ab heute.</span></fm-datelektilo>',
@@ -1080,7 +1080,8 @@ describe("the Vitrino shows the selection Eroj (Spec 025 ③)", () => {
 
   it("the listelektilo: options with icon and description in the columns of a field", () => {
     const grid = datumoj.eroj.listelektilo ?? "";
-    expect((grid.match(/<fm-listelektilo /g) ?? []).length).toBe(4);
+    // Abnahme #122: the column loading added.
+    expect((grid.match(/<fm-listelektilo /g) ?? []).length).toBe(5);
     expect(grid).toContain(
       '<data slot="options" value="eu" icon="info" description="27 Staaten">Europa</data>',
     );

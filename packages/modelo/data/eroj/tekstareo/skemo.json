@@ -221,6 +221,9 @@
         }
       }
     },
+    "trailing": [
+      "spinner"
+    ],
     "bindings": [
       {
         "part": "label",

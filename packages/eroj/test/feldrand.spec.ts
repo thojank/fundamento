@@ -3,6 +3,7 @@
 // that order from the inside out; the field keeps its width when the clear button comes and goes;
 // the ✕ is as large as the field's icon; the spinner stands in the field, not beside the label.
 
+import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
 import { buildProjections, serve } from "./serve.js";
 
@@ -142,6 +143,50 @@ test.describe("Abnahme #122: the right edge of a field, inside its border", () =
   });
 });
 
+// The ✕ and the steppers show their icon as large as the field's, yet stay a target for the
+// pointer (WCAG 2.2, 2.5.8): at least size.target.min, their control inside their part.
+test("every button at the end of a field is a target of at least 24 × 24, its control inside it (axe target-size)", async ({
+  page,
+}) => {
+  await serve(
+    page,
+    out,
+    [
+      ...["kampo", "elektilo", "listelektilo", "kompletigilo", "datelektilo"].map((ero) =>
+        (BOXED[ero] ?? "").replace(" loading", ""),
+      ),
+      '<fm-kampo kind="number" stepper value="3">Anzahl</fm-kampo>',
+      '<fm-elektilo clearable size="small" value="deutschland">Land klein<option value="deutschland">Deutschland</option></fm-elektilo>',
+    ].join(""),
+  );
+  await page.waitForTimeout(50);
+  const buttons = await page.evaluate(() =>
+    [...document.querySelectorAll("body *")].flatMap((host) =>
+      [...(host.shadowRoot?.querySelectorAll("fm-butono") ?? [])]
+        .filter((button) => !(button as HTMLElement).hidden && !button.closest('[part="calendar"]'))
+        .map((button) => {
+          const outer = button.getBoundingClientRect();
+          const control = button.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+          const inner = control.getBoundingClientRect();
+          return {
+            name: `${host.localName} ${button.getAttribute("part")}`,
+            width: outer.width,
+            height: outer.height,
+            inside: inner.width <= outer.width + 0.5 && inner.height <= outer.height + 0.5,
+          };
+        }),
+    ),
+  );
+  expect(buttons.length).toBeGreaterThanOrEqual(8);
+  for (const button of buttons) {
+    expect(button.width, button.name).toBeGreaterThanOrEqual(24);
+    expect(button.height, button.name).toBeGreaterThanOrEqual(24);
+    expect(button.inside, button.name).toBe(true);
+  }
+  const axe = await new AxeBuilder({ page }).withRules(["target-size"]).analyze();
+  expect(axe.violations.map((violation) => violation.id)).toEqual([]);
+});
+
 /** The fields without a box of their own: the spinner at the end of the field, not in the label. */
 const UNBOXED: Readonly<Record<string, string>> = {
   glitilo: "<fm-glitilo loading>Lautstärke</fm-glitilo>",
@@ -160,13 +205,16 @@ test.describe("Abnahme #122: the spinner of a field without a box of its own", (
         const spinner = root.querySelector('[part="spinner"]') as HTMLElement;
         const label = root.querySelector('[part="label"]') as HTMLElement;
         const zone = root.querySelector('[part="dropzone"]');
+        const field = (root.querySelector('[part="field"]') as HTMLElement).getBoundingClientRect();
         const s = spinner.getBoundingClientRect();
         const l = label.getBoundingClientRect();
         const z = zone?.getBoundingClientRect();
         return {
           inLabel: label.contains(spinner),
           visible: s.width > 0 && !spinner.hidden,
-          after: s.left >= l.right - 0.5,
+          // At the end of the field: after the label in its line, or at the field's inline end
+          // (a label that spans the field, the slider's and the choice's).
+          after: s.left >= l.right - 0.5 || Math.abs(s.right - field.right) <= 1,
           inZone:
             z === undefined
               ? true
@@ -175,7 +223,7 @@ test.describe("Abnahme #122: the spinner of a field without a box of its own", (
       });
       expect(spot.visible, "shows").toBe(true);
       expect(spot.inLabel, "not in the label").toBe(false);
-      expect(spot.after, "after the label").toBe(true);
+      expect(spot.after, "at the end of the field").toBe(true);
       expect(spot.inZone, "inside the dropzone of an upload").toBe(true);
     });
   }

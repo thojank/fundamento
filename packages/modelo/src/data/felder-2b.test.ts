@@ -78,14 +78,23 @@ const CLEARABLE = [
 
 describe("Spec 029 ②b-1 M-6: a clear button in the field", () => {
   it.each(CLEARABLE)(
-    "%s: a boolean clearable and the part clear in a small control's size",
+    "%s: a boolean clearable and the part clear as large as the field's icon (Abnahme #122)",
     (ero) => {
       const skemo = skemoOf(ero);
       expect(skemo.props.find((prop) => prop.name === "clearable")).toMatchObject({
         kind: "boolean",
         default: ero === "plurelektilo",
       });
-      expect(skemo.parts.clear).toEqual({ size: { fixed: "size.control.small" } });
+      // Abnahme #122: no longer a small control – the icon of the field (feldrand.test.ts).
+      expect(skemo.parts.clear).toEqual(
+        ero === "plurelektilo"
+          ? { size: { fixed: "size.control.small" } }
+          : ero === "listelektilo"
+            ? { size: { fixed: "size.icon.medium" } }
+            : ero === "datelektilo"
+              ? { size: { fixed: "size.target.min" } }
+              : { size: { by: ["size"] } },
+      );
     },
   );
 

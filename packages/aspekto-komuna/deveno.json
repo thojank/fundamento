@@ -7297,6 +7297,17 @@
       "maniero": "prenita"
     },
     {
+      "token": "ero.elektilo.clear.size.size.medium",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"md\"} rest, hell: [object Object] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.icon.small}",
+      "maniero": "derivita",
+      "noto": "Abnahme #122: das ✕ ist so groß wie der Pfeil des Feldes (ero.elektilo.indicator.size, gemessen an der Fonto)."
+    },
+    {
       "token": "ero.elektilo.indicator.size.size.large",
       "aro": "core",
       "fonto": "astryx",
@@ -7307,6 +7318,105 @@
       "maniero": "adaptita",
       "jugxo": "jug_01M5ZT2Z2V5GMPZXTDV3BK8PRE",
       "kialo": "Die Fonto zeichnet 16 px; ein Ziel für den Zeiger braucht 24 px (touch-target-min, WCAG 2.5.8): size.target.min."
+    },
+    {
+      "token": "ero.elektilo.clear.size.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"lg\"} rest, hell: [object Object] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.target.min}",
+      "maniero": "derivita",
+      "noto": "Abnahme #122: das ✕ ist so groß wie der Pfeil des Feldes (ero.elektilo.indicator.size, gemessen an der Fonto)."
+    },
+    {
+      "token": "ero.kompletigilo.clear.size.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"lg\"} rest, hell: [object Object] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.target.min}",
+      "maniero": "derivita",
+      "noto": "Abnahme #122: die Icons am Ende eines Feldes sind so groß wie der Pfeil eines Feldes derselben Größe (ero.elektilo.indicator.size, gemessen an der Fonto)."
+    },
+    {
+      "token": "ero.kompletigilo.clear.size.size.medium",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"md\"} rest, hell: [object Object] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.icon.small}",
+      "maniero": "derivita",
+      "noto": "Abnahme #122: die Icons am Ende eines Feldes sind so groß wie der Pfeil eines Feldes derselben Größe (ero.elektilo.indicator.size, gemessen an der Fonto)."
+    },
+    {
+      "token": "ero.kampo.increment.size.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"lg\"} rest, hell: [object Object] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.target.min}",
+      "maniero": "derivita",
+      "noto": "Abnahme #122: die Icons am Ende eines Feldes sind so groß wie der Pfeil eines Feldes derselben Größe (ero.elektilo.indicator.size, gemessen an der Fonto)."
+    },
+    {
+      "token": "ero.kampo.increment.size.size.medium",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"md\"} rest, hell: [object Object] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.icon.small}",
+      "maniero": "derivita",
+      "noto": "Abnahme #122: die Icons am Ende eines Feldes sind so groß wie der Pfeil eines Feldes derselben Größe (ero.elektilo.indicator.size, gemessen an der Fonto)."
+    },
+    {
+      "token": "ero.kampo.decrement.size.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"lg\"} rest, hell: [object Object] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.target.min}",
+      "maniero": "derivita",
+      "noto": "Abnahme #122: die Icons am Ende eines Feldes sind so groß wie der Pfeil eines Feldes derselben Größe (ero.elektilo.indicator.size, gemessen an der Fonto)."
+    },
+    {
+      "token": "ero.kampo.decrement.size.size.medium",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"md\"} rest, hell: [object Object] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.icon.small}",
+      "maniero": "derivita",
+      "noto": "Abnahme #122: die Icons am Ende eines Feldes sind so groß wie der Pfeil eines Feldes derselben Größe (ero.elektilo.indicator.size, gemessen an der Fonto)."
+    },
+    {
+      "token": "ero.kampo.clear.size.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"lg\"} rest, hell: [object Object] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.target.min}",
+      "maniero": "derivita",
+      "noto": "Abnahme #122: die Icons am Ende eines Feldes sind so groß wie der Pfeil eines Feldes derselben Größe (ero.elektilo.indicator.size, gemessen an der Fonto)."
+    },
+    {
+      "token": "ero.kampo.clear.size.size.medium",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"md\"} rest, hell: [object Object] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.icon.small}",
+      "maniero": "derivita",
+      "noto": "Abnahme #122: die Icons am Ende eines Feldes sind so groß wie der Pfeil eines Feldes derselben Größe (ero.elektilo.indicator.size, gemessen an der Fonto)."
     },
     {
       "token": "ero.elektilo.help.color",
@@ -10872,6 +10982,17 @@
       "fontoValoro": "16px",
       "valoro": "{size.icon.small}",
       "maniero": "prenita"
+    },
+    {
+      "token": "ero.listelektilo.clear.size",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {} rest, hell: span[data-state] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.icon.small}",
+      "maniero": "derivita",
+      "noto": "Abnahme #122: das ✕ ist so groß wie der Pfeil des Feldes (ero.listelektilo.indicator.size, gemessen an der Fonto)."
     },
     {
       "token": "ero.listelektilo.listbox.fill",

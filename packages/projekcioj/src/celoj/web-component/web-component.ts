@@ -174,6 +174,28 @@ const isField = (skemo: Skemo): boolean =>
   isSuggest(skemo) ||
   isListy(skemo);
 
+/**
+ * Whether the Ero is a field with a box whose end holds parts (Spec 029 ②b-1, Abnahme #122): a
+ * field of the Skemo with trailing parts – they stand inside its border.
+ */
+const isBoxedField = (skemo: Skemo): boolean => skemo.trailing !== undefined && isField(skemo);
+
+/**
+ * Layout of the end of a field (Abnahme #122), keywords and 0 only: the row is the anchor, the
+ * control fills it; the end lies over the whole row and puts its parts at the inline end, each at
+ * its own size, centred (a text area: at the top); only its buttons take the pointer.
+ */
+const endStructure = (textarea: boolean): string =>
+  [
+    ":host { --fm-end: 0px; }",
+    ':where([part="row"]) { position: relative; display: flex; align-items: center; }',
+    ':where([part="row"]) > [part="control"] { flex: 1 1 auto; }',
+    `:where([part="end"]) { position: absolute; inset: 0; display: flex; align-items: ${textarea ? "flex-start" : "center"}; justify-content: flex-end; box-sizing: border-box; pointer-events: none; }`,
+    ':where([part="end"]) > * { flex: none; pointer-events: auto; }',
+    ':where([part="end"]) > :is([part="indicator"], [part="spinner"]) { pointer-events: none; }',
+    ':where([part="end"]) > [hidden] { display: none; }',
+  ].join("\n");
+
 /** Whether the Ero is a text area (Spec 011 ②, D-11): a textbox over several lines, with rows. */
 export const isMultiline = (skemo: Skemo): boolean =>
   skemo.props.some((prop) => prop.name === "rows");
@@ -276,6 +298,9 @@ const uploadStructure = (disables: boolean): string =>
     ':where([part="file-name"]) { overflow-wrap: anywhere; }',
     ':where([part="field"]:not([data-marked="true"])) [part="required-mark"] { display: none; }',
     HIDDEN_TEXT,
+    // Abnahme #122: the spinner at the end of the dropzone, inside its border: its end takes the
+    // rest of the line and puts it at the inline end.
+    ':where([part="dropzone"]) > [part="end"] { display: flex; flex: 1 1 auto; justify-content: flex-end; }',
   ].join("\n");
 
 /**
@@ -1834,20 +1859,19 @@ const selectStructure: readonly string[] = [
 ];
 
 /**
- * Where the chevron of a select stands (Spec 010 ④, D-06), per combination of the props that key
- * the measures: inside the end of the control, its border and inline padding away from the edge;
- * the text of the select ends a gap before it. Arithmetic over the bound tokens only — the
- * inline padding, the size of the indicator, the gap of the box and the border width — so every
- * design value is still a token (Art. X gate 1). Celo knowledge (Art. VIII): the Skemo says that a
- * chevron is part of the field, the Web Celo where it stands.
+ * The end of a field (Spec 029 ②b-1, Abnahme #122; before for the chevron of a select, Spec 010 ④
+ * D-06), per combination of the props that key the measures: the parts at the end (the Skemo's
+ * trailing) stand inside the control's border and inline padding, the gap of the box between them;
+ * the control keeps the room they take (--fm-end, measured by the element), so the field keeps its
+ * width when one comes or goes. Arithmetic over the bound tokens only — inline padding, gap and
+ * border width — so every design value is still a token (Art. X gate 1). Celo knowledge (Art.
+ * VIII): the Skemo says which parts stand at the end and in which order, the Web Celo where.
  */
-function selectRules(skemo: Skemo, owner?: string): [string, string[]][] {
-  const keys = [
-    ...new Set([
-      ...keysOf(skemo, skemo.parts.box?.["inline-padding"]),
-      ...keysOf(skemo, skemo.parts.indicator?.size),
-    ]),
-  ].filter((key) => key !== STATE_KEY);
+function endRules(skemo: Skemo, owner?: string): [string, string[]][] {
+  const keys = [...new Set(keysOf(skemo, skemo.parts.box?.["inline-padding"]))].filter(
+    (key) => key !== STATE_KEY,
+  );
+  const textarea = isTextarea(skemo);
   const rules: [string, string[]][] = [];
   for (const combination of combinationsOf(skemo, keys)) {
     const token = (part: string, property: string) => {
@@ -1857,24 +1881,24 @@ function selectRules(skemo: Skemo, owner?: string): [string, string[]][] {
         : named(owner, skemo, part, property, combination, bound);
     };
     const padding = token("box", "inline-padding");
-    const size = token("indicator", "size");
     const gap = token("box", "gap");
     const border = token("border", "width");
-    if (
-      [padding, size, gap, border].some((value) => value === undefined || isBindingKeyword(value))
-    )
+    if ([padding, gap, border].some((value) => value === undefined || isBindingKeyword(value)))
       continue;
     const v = (name: string | undefined) => variable(name ?? "");
     const data = keys.map((key) => `[data-${key}="${combination[key] ?? ""}"]`).join("");
+    // The control keeps room for what stands at its end (--fm-end, measured by the element).
     rules.push([
-      fieldPartSelector("box", "inline-padding", data, "", true),
-      [`padding-inline-end: calc(${v(padding)} + ${v(size)} + ${v(gap)});`],
+      `:where([part="field"]${data}) [part="control"]`,
+      [`padding-inline-end: calc(${v(padding)} + var(--fm-end));`],
     ]);
+    // The end lies over the row, its parts inside the border and the inline padding.
     rules.push([
-      fieldPartSelector("indicator", "size", data, "", true),
+      `:where([part="field"]${data}) [part="end"]`,
       [
-        `margin-inline-start: calc(-1 * (${v(size)} + ${v(padding)} + ${v(border)}));`,
-        `margin-inline-end: calc(${v(padding)} + ${v(border)});`,
+        `padding-inline-end: calc(${v(padding)} + ${v(border)});`,
+        `gap: ${v(gap)};`,
+        ...(textarea ? [`padding-block-start: calc(${v(border)} + ${v(gap)});`] : []),
       ],
     ]);
   }
@@ -2007,6 +2031,18 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
   // padding – so its square never runs over the part. ::part(control) is what fm-butono exposes;
   // inherit takes the size the part was given.
   const sized = (part: string, property: string, selector: string, lines: readonly string[]) => {
+    // Abnahme #122: an icon at the end of a field shows its glyph at the size of its part – the ✕
+    // as large as the chevron or the calendar of the field.
+    const trailing = isBoxedField(skemo) && (skemo.trailing ?? []).includes(part);
+    if (property === "size" && trailing) {
+      const box = lines.filter(
+        (line) => line.startsWith("inline-size:") || line.startsWith("block-size:"),
+      );
+      if (box.length > 0) {
+        add(onEach(selector, " fm-ikono"), box);
+        add(onEach(selector, " fm-ikono::part(glyph)"), box);
+      }
+    }
     if (property !== "size" || !COMPOSED_BUTONO_PARTS.includes(part)) return;
     // A butono with a word (the clear of a multi-select) gets its height alone: it keeps its padding.
     if (!lines.some((line) => line.startsWith("inline-size:"))) return;
@@ -2106,8 +2142,8 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
     add(':where([part="row"])', ["display: flex;", "align-items: center;"]);
     add(':where([part="row"]) > [part="control"]', ["flex: 1 1 auto;", "min-inline-size: 0;"]);
   }
-  // Spec 029 ②b-1 M-5: the spinner of a field stands beside the label while the field loads (the
-  // element takes its hidden away); its arc fills its box.
+  // Spec 029 ②b-1 M-5: the spinner of a field shows while the field loads (the element takes its
+  // hidden away); its arc fills its box. Abnahme #122: at the end of the field, not in its label.
   if (skemo.parts.spinner !== undefined) {
     add(':where([part="field"]) [part="spinner"]:not([hidden])', [
       "display: inline-block;",
@@ -2115,9 +2151,29 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
       "vertical-align: middle;",
     ]);
     add(':where([part="field"]) [part="spinner"] > svg', ["display: block;"]);
+    // Abnahme #122: the spinner of a radio group stands at the end of its first line, not in its
+    // label; the label keeps the room of the spinner and the room before it while it shows.
+    const spinnerSize = skemo.parts.spinner.size;
+    const spinnerRoom = skemo.parts.spinner["inline-padding"];
+    if (
+      isGroup(skemo) &&
+      spinnerSize !== undefined &&
+      "fixed" in spinnerSize &&
+      spinnerRoom !== undefined &&
+      "fixed" in spinnerRoom
+    ) {
+      add(':where([part="field"])', ["position: relative;"]);
+      add(':where([part="field"]) > [part="spinner"]', [
+        "position: absolute;",
+        "align-self: flex-end;",
+      ]);
+      add(':where([part="field"]:has(> [part="spinner"]:not([hidden]))) [part="label"]', [
+        `padding-inline-end: calc(${variable(named(owner, skemo, "spinner", "size", {}, spinnerSize.fixed))} + ${variable(named(owner, skemo, "spinner", "inline-padding", {}, spinnerRoom.fixed))});`,
+      ]);
+    }
   }
-  // The place of the chevron of a select comes last (D-06): it refines the inline padding.
-  const placed = isSelect(skemo) ? selectRules(skemo, owner) : [];
+  // The end of a field comes last (Abnahme #122): it refines the inline padding of the control.
+  const placed = isBoxedField(skemo) ? endRules(skemo, owner) : [];
   const tokenRules = [...fixedRules.entries(), ...keyedRules.entries(), ...placed].map(
     ([selector, lines]) => `${selector} {\n${lines.map((line) => `  ${line}`).join("\n")}\n}`,
   );
@@ -2204,7 +2260,8 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
                                                           );
   // A skip link adds its place above the page to a control's structure (Spec 014 ②, D-07).
   const floating = isSkip(skemo) ? `\n${skipStructure}` : "";
-  return `${base}${floating}\n${[...tokenRules, ...undrawn].join("\n")}\n`;
+  const ending = isBoxedField(skemo) ? `\n${endStructure(isTextarea(skemo))}` : "";
+  return `${base}${floating}${ending}\n${[...tokenRules, ...undrawn].join("\n")}\n`;
 }
 
 function keysOf(skemo: Skemo, source: SkemoPartSource | undefined, depth = 0): string[] {

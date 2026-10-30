@@ -64,7 +64,30 @@ describe("Abnahme #122: the right edge of the fields, one rule in the Skemo", ()
       expect(sizeOf("kampo", "increment", size)).toBe(`size.icon.${size}`);
     }
     expect(sizeOf("listelektilo", "clear")).toBe(sizeOf("listelektilo", "indicator"));
-    expect(sizeOf("datelektilo", "trigger")).toBe("size.icon.medium");
+    // The calendar keeps the target of a pointer (the Fonto draws 16 px, komuna takes 24 px with
+    // its Jugxo, touch-target-min); the ✕ beside it is as large.
+    expect(sizeOf("datelektilo", "trigger")).toBe("size.target.min");
     expect(sizeOf("datelektilo", "clear")).toBe(sizeOf("datelektilo", "trigger"));
+  });
+
+  // WCAG 2.2, 2.5.8: a button at the end shows its icon at the field's size, yet stays a target of
+  // at least size.target.min – its width (the web's minimum, square).
+  it("every button at the end is a target of at least size.target.min", () => {
+    const buttons: readonly (readonly [string, string])[] = [
+      ["kampo", "clear"],
+      ["kampo", "decrement"],
+      ["kampo", "increment"],
+      ["elektilo", "clear"],
+      ["listelektilo", "clear"],
+      ["kompletigilo", "clear"],
+    ];
+    for (const [ero, part] of buttons) {
+      const width = skemoOf(ero).parts[part]?.width;
+      expect(width !== undefined && "fixed" in width ? width.fixed : width, `${ero}.${part}`).toBe(
+        "size.target.min",
+      );
+    }
+    // The calendar and its ✕ are as large as the target already.
+    expect(sizeOf("datelektilo", "trigger")).toBe("size.target.min");
   });
 });

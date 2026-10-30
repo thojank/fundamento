@@ -453,6 +453,7 @@ ${Object.entries(datumoj.eroj)
     ),
   )
   .join("\n")}
+${datumoj.loeschen === undefined ? "" : section("loeschen", "Löschen", datumoj.loeschen)}
 ${datumoj.grundo === undefined ? "" : section("grundo", "Grund für „deaktiviert“", datumoj.grundo)}
 ${
   Object.keys(datumoj.sxablonoj).length === 0

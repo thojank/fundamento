@@ -1800,3 +1800,26 @@ test("the reasons for disabled: reachable, shown on focus, axe-clean", async ({ 
   await expect(kampo.getByText("Erst nach der Freigabe")).toBeVisible();
   expect(await axeViolations(page, "#fm-vitrino-grundo")).toEqual([]);
 });
+
+// Abnahme #122: the section loeschen – the clear button shows with a value and nowhere else; it
+// stands inside the field's border; axe without a finding.
+test("the clear buttons: with a value only, inside the field, axe-clean", async ({ page }) => {
+  await open(page);
+  const section = page.locator("#fm-vitrino-loeschen");
+  await expect(section.locator("tbody tr")).toHaveCount(5);
+  for (const [column, shows] of [
+    [1, true],
+    [2, false],
+    [3, false],
+    [4, false],
+  ] as const) {
+    const cells = section.locator(`tbody tr td:nth-of-type(${column})`);
+    await expect(cells).toHaveCount(5);
+    for (let index = 0; index < 5; index++) {
+      const clear = cells.nth(index).locator('[part="clear"]');
+      if (shows) await expect(clear).toBeVisible();
+      else await expect(clear).toHaveCount(0);
+    }
+  }
+  expect(await axeViolations(page, "#fm-vitrino-loeschen")).toEqual([]);
+});

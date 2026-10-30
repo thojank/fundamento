@@ -41,6 +41,27 @@ const WANTED: Readonly<Record<string, { befund: string; match?: string }>> = {
   faldilo: {
     befund: "M-1: the summary's colour by state, the state disabled added (open × state = 8).",
   },
+  // Spec 029 ②b-1, Abnahme #122: one rule for the end of a field with a box (Skemo trailing) –
+  // spinner, clear button, then the chevron or the calendar, all in the control, inside its
+  // border; the ✕ as large as the chevron or the calendar; the field at least FIELD_WIDTH wide.
+  kampo: { befund: "Abnahme #122: spinner and clear button in the control, the field 256 wide." },
+  tekstareo: { befund: "Abnahme #122: the spinner in the control, the field 256 wide." },
+  elektilo: {
+    befund: "Abnahme #122: spinner, clear button, chevron in the control; the field 256 wide.",
+  },
+  listelektilo: {
+    befund: "Abnahme #122: spinner, clear button, chevron in the control; the field 256 wide.",
+  },
+  plurelektilo: {
+    befund: "Abnahme #122: spinner and chevron in the control; the field 256 wide.",
+  },
+  kompletigilo: {
+    befund: "Abnahme #122: spinner and clear button in the control; the field 256 wide.",
+  },
+  datelektilo: {
+    befund:
+      "Abnahme #122: spinner, clear button, calendar in the control (the row gone); 256 wide.",
+  },
 };
 
 /**

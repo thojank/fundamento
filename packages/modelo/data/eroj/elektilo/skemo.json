@@ -234,10 +234,17 @@
       },
       "clear": {
         "size": {
-          "fixed": "size.control.small"
+          "by": [
+            "size"
+          ]
         }
       }
     },
+    "trailing": [
+      "spinner",
+      "clear",
+      "indicator"
+    ],
     "bindings": [
       {
         "part": "label",
@@ -441,6 +448,30 @@
       },
       {
         "part": "indicator",
+        "property": "size",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.icon.large"
+      },
+      {
+        "part": "clear",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "clear",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "clear",
         "property": "size",
         "when": {
           "size": "large"

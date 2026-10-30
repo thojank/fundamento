@@ -3774,7 +3774,7 @@ describe("the Figma plan draws the datelektilo (Spec 025 ②)", () => {
     expect(closed?.bindings).toMatchObject({
       "surface.fill": "color/background/default",
       "border.color": "color/border/default",
-      "trigger.size": "size/control/medium",
+      "trigger.size": "size/target/min",
       "calendar.fill": "color/background/raised",
       "calendar.radius": "radius/role/surface",
       "calendar.width": "size/container/small",

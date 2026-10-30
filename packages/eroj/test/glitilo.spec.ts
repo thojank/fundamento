@@ -98,7 +98,6 @@ test.describe("fm-glitilo behaviour", () => {
       "field",
       "label",
       "required-mark",
-      "spinner",
       "row",
       "min-label",
       "track",
@@ -107,6 +106,7 @@ test.describe("fm-glitilo behaviour", () => {
       "thumb",
       "max-label",
       "number",
+      "spinner",
       "help",
       "error",
     ]);

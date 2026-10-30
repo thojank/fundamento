@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 import { projectModeloSource, resolveCombination } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../build.js";
-import { ADDED_SINCE_MAIN, mainRows } from "./neu-seit-main.js";
+import { ADDED_SINCE_MAIN, mainRows, REMOVED_SINCE_MAIN } from "./neu-seit-main.js";
 
 const CXIUJ = fileURLToPath(
   new URL(
@@ -60,7 +60,7 @@ describe("Spec 029 ① 1: komuna-0-2 keeps today's komuna", () => {
         key.split("&").map((pair) => pair.split("=") as [string, string]),
       );
       const { tokens } = resolveCombination(modelo, { aspekto: "komuna-0-2", ...assignment });
-      expect(Object.keys(tokens)).toHaveLength(BAZO.tokens + ADDED_SINCE_MAIN);
+      expect(Object.keys(tokens)).toHaveLength(BAZO.tokens + ADDED_SINCE_MAIN - REMOVED_SINCE_MAIN);
       if (hashOf(tokens) !== expected) differences.push(key);
     }
     expect(Object.keys(BAZO.kombinoj)).toHaveLength(72);

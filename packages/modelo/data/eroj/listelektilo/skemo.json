@@ -280,10 +280,15 @@
       },
       "clear": {
         "size": {
-          "fixed": "size.control.small"
+          "fixed": "size.icon.medium"
         }
       }
     },
+    "trailing": [
+      "spinner",
+      "clear",
+      "indicator"
+    ],
     "bindings": [
       {
         "part": "label",

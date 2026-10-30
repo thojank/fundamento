@@ -216,6 +216,11 @@ export interface VitrinoDatumoj {
    */
   grundo?: string;
   /**
+   * Abnahme #122: the five fields with a clear button in the field – with a value, empty,
+   * disabled and read-only; absent where no Ero has one.
+   */
+  loeschen?: string;
+  /**
    * Per Sxablono its example at the three container widths schmal, mittel, breit (Spec 020, G2):
    * the layout follows the container, so the same element shows each of its layouts.
    */
@@ -676,7 +681,8 @@ function listselectMarkup(tag: string): string {
     (region) =>
       `<data slot="options" value="${region.value}"${region.icon === undefined ? "" : ` icon="${region.icon}"`}${region.description === undefined ? "" : ` description="${region.description}"`}${region.disabled === true ? " disabled" : ""}>${region.text}</data>`,
   ).join("");
-  const columns = ["required", "disabled", "invalid"];
+  // Abnahme #122: the column loading as at every field (Spec 029 ②b-1 M-5).
+  const columns = ["required", "disabled", "invalid", "loading"];
   const cells = [undefined, ...columns]
     .map(
       (column) =>
@@ -806,7 +812,8 @@ function datepickerMarkup(tag: string): string {
       ` mode="range" value-start="${VITRINO_DATE.start}" value-end="${VITRINO_DATE.end}"`,
     ],
   ];
-  const columns = ["required", "disabled", "invalid"];
+  // Abnahme #122: the column loading as at every field (Spec 029 ②b-1 M-5).
+  const columns = ["required", "disabled", "invalid", "loading"];
   const body = rows
     .map(([head, attributes]) => {
       const cells = [undefined, ...columns]
@@ -1464,6 +1471,48 @@ export function grundoMarkup(eroj: readonly LoadedEro[]): string | undefined {
   return `<table><caption>Deaktiviert mit Grund: mit Tab erreichbar, der Grund erscheint bei Fokus und Zeiger</caption><thead><tr><th scope="col">Ero</th><th scope="col">disabled</th></tr></thead><tbody>${rows.join("")}</tbody></table>`;
 }
 
+/** The fields of the section loeschen, in the order a form names them (Abnahme #122). */
+const LOESCHEN_EROJ = ["kampo", "elektilo", "listelektilo", "kompletigilo", "datelektilo"] as const;
+
+/**
+ * The clear button of the fields (Abnahme #122): each field with a clear button in the field, with
+ * a value (the button shows), empty (none), disabled and read-only (none either).
+ */
+export function loeschenMarkup(eroj: readonly LoadedEro[]): string | undefined {
+  const fields = LOESCHEN_EROJ.flatMap((name) => {
+    const entry = eroj.find((candidate) => candidate.ero.name === name);
+    const clearable = entry?.skemo.props.find((prop) => prop.name === "clearable");
+    return entry === undefined || clearable === undefined ? [] : [entry];
+  });
+  if (fields.length === 0) return undefined;
+  const options = VITRINO_OPTIONS.slice(0, 2)
+    .map((word, index) => `<data slot="options" value="${index + 1}">${word}</data>`)
+    .join("");
+  const rows = fields.map((entry) => {
+    const name = entry.ero.name;
+    const tag = `fm-${name}`;
+    const value =
+      name === "kampo"
+        ? "Anna"
+        : name === "kompletigilo"
+          ? (VITRINO_OPTIONS[0] ?? "")
+          : name === "datelektilo"
+            ? VITRINO_DATE.value
+            : "1";
+    const inner = ["elektilo", "listelektilo", "kompletigilo"].includes(name) ? options : "";
+    const cell = (attributes: string) =>
+      `<td><${tag} clearable${attributes}>Beispiel${inner}</${tag}></td>`;
+    return `<tr><th scope="row">${tag}</th>${cell(` value="${value}"`)}${cell("")}${cell(` value="${value}" disabled`)}${cell(` value="${value}" readonly`)}</tr>`;
+  });
+  return `<table><caption>Löschen-Knopf im Feld: mit Wert, leer, deaktiviert, schreibgeschützt</caption><thead><tr><th scope="col">Ero</th><th scope="col">mit Wert</th><th scope="col">leer</th><th scope="col">disabled</th><th scope="col">readonly</th></tr></thead><tbody>${rows.join("")}</tbody></table>`;
+}
+
+/** The section loeschen where a field has a clear button (exact optional properties). */
+function loeschenOf(eroj: readonly LoadedEro[]): { loeschen?: string } {
+  const loeschen = loeschenMarkup(eroj);
+  return loeschen === undefined ? {} : { loeschen };
+}
+
 /** The section grundo where an Ero has the slot disabled-reason (exact optional properties). */
 function grundoOf(eroj: readonly LoadedEro[]): { grundo?: string } {
   const grundo = grundoMarkup(eroj);
@@ -1795,6 +1844,7 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
     }),
     eroj: erojMarkup(modelo.eroj, modelo.ikonaro),
     ...grundoOf(modelo.eroj),
+    ...loeschenOf(modelo.eroj),
     sxablonoj: sxablonojMarkup(modelo.sxablonoj ?? []),
     a11yRoloj: Object.fromEntries(
       modelo.eroj.map((entry) => [entry.ero.name, entry.skemo.a11y.role]),

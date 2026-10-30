@@ -123,7 +123,8 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       "spinner",
       "clear",
     ]);
-    expect(skemo?.parts.trigger).toEqual({ size: { fixed: "size.control.medium" } });
+    // Abnahme #122: the calendar inside the field, the target of a pointer (as komuna from the Fonto).
+    expect(skemo?.parts.trigger).toEqual({ size: { fixed: "size.target.min" } });
     expect(skemo?.parts.calendar).toEqual({
       fill: { fixed: "color.background.raised" },
       radius: { fixed: "radius.role.surface" },

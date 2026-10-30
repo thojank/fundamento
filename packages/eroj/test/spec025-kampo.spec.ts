@@ -31,9 +31,23 @@ test.describe("fm-kampo of Spec 025 ①: stepper, clear, time", () => {
     page,
   }) => {
     await serve(page, out, field('kind="text" value="abc"'));
-    expect(await visibleParts(page)).toEqual(["field", "label", "required-mark", "row", "control"]);
+    expect(await visibleParts(page)).toEqual([
+      "field",
+      "label",
+      "required-mark",
+      "row",
+      "control",
+      "end",
+    ]);
     await serve(page, out, field('kind="number" value="3"'));
-    expect(await visibleParts(page)).toEqual(["field", "label", "required-mark", "row", "control"]);
+    expect(await visibleParts(page)).toEqual([
+      "field",
+      "label",
+      "required-mark",
+      "row",
+      "control",
+      "end",
+    ]);
   });
 
   test("number with stepper: two butono named by the Modelo with the ikono subtract and add step the value by step within min and max; input and change are said", async ({
@@ -137,7 +151,14 @@ test.describe("fm-kampo of Spec 025 ①: stepper, clear, time", () => {
     await expect
       .poll(() => warnings.filter((text) => text.includes('stepper="true"')).length)
       .toBeGreaterThan(0);
-    expect(await visibleParts(page)).toEqual(["field", "label", "required-mark", "row", "control"]);
+    expect(await visibleParts(page)).toEqual([
+      "field",
+      "label",
+      "required-mark",
+      "row",
+      "control",
+      "end",
+    ]);
   });
 
   // Spec 029 ②b-1 M-6: the clear button is named after the field's label („{label} leeren“), as

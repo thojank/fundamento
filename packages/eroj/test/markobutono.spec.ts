@@ -37,7 +37,8 @@ test.describe("fm-markobutono behaviour", () => {
             n.getAttribute("part"),
           ),
         ),
-    ).toEqual(["field", "control", "indicator", "label", "required-mark", "spinner", "error"]);
+      // Abnahme #122: the spinner at the end of the field, after the column of label and error.
+    ).toEqual(["field", "control", "indicator", "label", "required-mark", "error", "spinner"]);
   });
 
   // Nachlese 4 N-7 (Spec 014 ② O-7): the check mark is the Ikonaro's check in the size of the

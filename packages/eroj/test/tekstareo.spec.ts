@@ -46,7 +46,17 @@ test.describe("fm-tekstareo behaviour", () => {
             n.getAttribute("part"),
           ),
         ),
-    ).toEqual(["field", "label", "required-mark", "spinner", "control", "help", "error"]);
+    ).toEqual([
+      "field",
+      "label",
+      "required-mark",
+      "row",
+      "control",
+      "end",
+      "spinner",
+      "help",
+      "error",
+    ]);
   });
 
   // Nachbesserung F-8 (Abnahme 16.10.): as the kampo — an empty, untouched required area shows no

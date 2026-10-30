@@ -8,11 +8,13 @@ import { describe, expect, it } from "vitest";
 import { komuna02PluginCode, modelDouble, once, pageNodes, run } from "./plugin-test-helpers.js";
 import type { DoubleNode } from "./test-doubles/plugin.js";
 
-const drawn = once(async () => {
+/** One run of the plan in the double, read by every case. */
+async function draw() {
   const double = modelDouble();
   await run(double, komuna02PluginCode());
   return double;
-});
+}
+const drawn = once(draw);
 
 const geometry = (node: DoubleNode) =>
   node as unknown as { x: number; y: number; width: number; height: number; visible: boolean };

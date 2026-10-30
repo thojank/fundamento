@@ -169,7 +169,7 @@
       },
       "trigger": {
         "size": {
-          "fixed": "size.control.medium"
+          "fixed": "size.target.min"
         }
       },
       "calendar": {
@@ -336,10 +336,15 @@
       },
       "clear": {
         "size": {
-          "fixed": "size.control.small"
+          "fixed": "size.target.min"
         }
       }
     },
+    "trailing": [
+      "spinner",
+      "clear",
+      "trigger"
+    ],
     "bindings": [
       {
         "part": "label",

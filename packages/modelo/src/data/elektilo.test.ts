@@ -169,7 +169,10 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
         !KAMPO_OWN.includes(binding.part) &&
         (binding.when?.state === undefined || skemo.states.includes(binding.when.state)),
     );
-    expect(skemo.bindings.filter((binding) => binding.part !== "indicator")).toEqual(shared);
+    // Abnahme #122: the clear button is each field's own, as large as its icon.
+    expect(
+      skemo.bindings.filter((binding) => binding.part !== "indicator" && binding.part !== "clear"),
+    ).toEqual(shared);
     const tokens = skemo.bindings.map((binding) => binding.token);
     expect(
       tokens.filter((token) => token.startsWith("color.palette.") || token.includes(".scale.")),

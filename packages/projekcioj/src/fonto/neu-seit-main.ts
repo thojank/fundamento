@@ -5,8 +5,13 @@
 /** ②b-1 M-5: the spinner of the twelve fields (size, colour, room beside the label). */
 const SPINNER = /^ero\.[a-z]+\.spinner\.(size|color|inline\.padding)$/;
 
-/** ②b-1 M-6: the clear button of the four fields that had none (kampo and plurelektilo had one). */
-const CLEAR = /^ero\.(elektilo|listelektilo|datelektilo|kompletigilo)\.clear\.size$/;
+/**
+ * ②b-1 M-6: the clear button of the four fields that had none (kampo and plurelektilo had one);
+ * Abnahme #122: as large as the field's icon, by size where the field has sizes – the kampo's too
+ * (its one token of main is gone, see REMOVED).
+ */
+const CLEAR =
+  /^ero\.(listelektilo|datelektilo)\.clear\.size$|^ero\.(kampo|elektilo|kompletigilo)\.clear\.size\.size\.(small|medium|large)$/;
 
 /**
  * ②b-1 M-1: the summary of the faldilo by state, now that it can be disabled – its colour on
@@ -18,8 +23,8 @@ const SUMMARY = /^ero\.faldilo\.summary\.(color\.(hover|focus|disabled)|fill\.di
 export const addedSinceMain = (name: string): boolean =>
   SPINNER.test(name) || CLEAR.test(name) || SUMMARY.test(name);
 
-/** How many tokens ②b added so far (M-5: 12 fields × 3; M-6: 4; M-1: 4). */
-export const ADDED_SINCE_MAIN = 44;
+/** How many tokens ②b added so far (M-5: 12 fields × 3; M-6 with Abnahme #122: 11; M-1: 4). */
+export const ADDED_SINCE_MAIN = 51;
 
 /** ②b-1 M-1: tokens main had under another name; each keeps main's value. */
 const MOVED: Readonly<Record<string, string>> = {
@@ -29,15 +34,46 @@ const MOVED: Readonly<Record<string, string>> = {
 /** The name a token had in main's record. */
 export const mainNameOf = (name: string): string => MOVED[name] ?? name;
 
+/**
+ * Abnahme #122 (Maintainer, 30.10.): tokens main had whose value changed on purpose – the
+ * steppers of a number and the calendar of a date picker sit inside the field's border, at the
+ * size of an icon and of a pointer's target. Each is compared with the role main bound it to,
+ * resolved in the combination: the roles keep main's values, so main's row comes back.
+ */
+const CHANGED: Readonly<Record<string, string>> = {
+  "ero.kampo.decrement.size.size.small": "size.control.small",
+  "ero.kampo.decrement.size.size.medium": "size.control.medium",
+  "ero.kampo.decrement.size.size.large": "size.control.large",
+  "ero.kampo.increment.size.size.small": "size.control.small",
+  "ero.kampo.increment.size.size.medium": "size.control.medium",
+  "ero.kampo.increment.size.size.large": "size.control.large",
+  "ero.datelektilo.trigger.size": "size.control.medium",
+};
+
+/** Abnahme #122: a token main had that is gone (replaced by its sizes), with main's role. */
+const REMOVED: Readonly<Record<string, { type: string; role: string }>> = {
+  "ero.kampo.clear.size": { type: "dimension", role: "size.control.small" },
+};
+
+/** How many tokens of main are gone (REMOVED). */
+export const REMOVED_SINCE_MAIN = Object.keys(REMOVED).length;
+
 /** The rows of main's hash: every token main had, under main's name, in main's order. */
 export function mainRows(
   tokens: Readonly<Record<string, { type?: unknown; value?: unknown }>>,
   keep: (name: string) => boolean,
   canonical: (value: unknown) => unknown,
 ): [string, unknown, unknown][] {
-  return Object.keys(tokens)
+  const rows: [string, unknown, unknown][] = Object.keys(tokens)
     .filter((name) => !addedSinceMain(name) && keep(name))
-    .map((name) => [mainNameOf(name), name] as const)
-    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
-    .map(([main, name]) => [main, tokens[name]?.type, canonical(tokens[name]?.value)]);
+    .map((name) => [
+      mainNameOf(name),
+      tokens[name]?.type,
+      canonical(tokens[CHANGED[name] ?? name]?.value),
+    ]);
+  for (const [name, { type, role }] of Object.entries(REMOVED)) {
+    if (tokens[name] === undefined && tokens[role] !== undefined && keep(name))
+      rows.push([name, type, canonical(tokens[role]?.value)]);
+  }
+  return rows.sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
 }

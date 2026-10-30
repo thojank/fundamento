@@ -312,6 +312,10 @@
         }
       }
     },
+    "trailing": [
+      "spinner",
+      "indicator"
+    ],
     "bindings": [
       {
         "part": "label",
