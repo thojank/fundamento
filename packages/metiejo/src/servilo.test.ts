@@ -106,7 +106,10 @@ describe("a brand through the steps", () => {
       redirect: "manual",
     });
     expect(response.status).toBe(200);
-    expect(await response.text()).toMatch(/Kennung/);
+    const html = await response.text();
+    expect(html).toMatch(/Kennung/);
+    // Spec 035, Befund 4.5.5: the example is an invented name, not a foreign brand.
+    expect(html).toContain("zum Beispiel „Quendolin“ (Kennung quendolin)");
   });
 
   it("the draft takes a value and the preview stylesheet carries the brand", async () => {
