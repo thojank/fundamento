@@ -107,6 +107,25 @@ describe("Abnahme #122: the right edge of a field set in Figma", () => {
     expect(geometry(dateClear).width).toBe(geometry(trigger).width);
   });
 
+  // Decision of the maintainer (30.10.): markobutono and sxaltilo show the spinner directly after
+  // the label's text, as the web does – in the row of the label, which hugs them.
+  it.each(["markobutono", "sxaltilo"])("%s: the spinner directly after the label", async (set) => {
+    const double = await drawn();
+    const name = pageNodes(double)
+      .find((candidate) => candidate.name === set)
+      ?.children.map((child) => child.name)
+      .find((each) => each.includes("size=medium") && each.includes("state=rest"));
+    const variant = await variantOf(set, name ?? "");
+    const row = find(variant, "label-row") as DoubleNode;
+    expect(row.children.map((child) => child.name)).toEqual(["label", "spinner"]);
+    expect(row.properties.layoutSizingHorizontal ?? "HUG").toBe("HUG");
+    expect(row.properties.primaryAxisAlignItems ?? "MIN").toBe("MIN");
+    const label = boxIn(find(row, "label") as DoubleNode, variant);
+    const spinner = boxIn(find(row, "spinner") as DoubleNode, variant);
+    expect(spinner.left - label.right).toBeGreaterThanOrEqual(-0.5);
+    expect(spinner.left - label.right).toBeLessThanOrEqual(16);
+  });
+
   it.each(CASES)("$set: as wide as a field stands, not its words alone", async (entry) => {
     const variant = await variantOf(entry.set, entry.variant);
     expect(geometry(variant).width).toBeGreaterThanOrEqual(240);

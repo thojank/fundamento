@@ -55,6 +55,17 @@ describe("Abnahme #122: the right edge of the fields, one rule in the Skemo", ()
     },
   );
 
+  // Decision of the maintainer (30.10.): a field without a border whose label stands beside its
+  // control (markobutono, sxaltilo) shows its end directly after the text of the label, in the
+  // web and in Figma; every other field at its own end.
+  it("markobutono and sxaltilo: the end directly after the label's text (trailingAfter)", () => {
+    for (const ero of Object.keys(TRAILING)) {
+      const after = (skemoOf(ero) as { trailingAfter?: string }).trailingAfter;
+      expect(after, ero).toBe(["markobutono", "sxaltilo"].includes(ero) ? "label" : undefined);
+      if (after !== undefined) expect(skemoOf(ero).parts[after], ero).toBeDefined();
+    }
+  });
+
   it("the ✕ is as large as the field's icon: the chevron, the calendar, else the icon of the size", () => {
     for (const size of ["small", "medium", "large"]) {
       expect(sizeOf("elektilo", "clear", size)).toBe(sizeOf("elektilo", "indicator", size));

@@ -191,8 +191,6 @@ test("every button at the end of a field is a target of at least 24 × 24, its c
 const UNBOXED: Readonly<Record<string, string>> = {
   glitilo: "<fm-glitilo loading>Lautstärke</fm-glitilo>",
   elekto: `<fm-elekto name="v" loading>Versandart${options("Standard", "Express")}</fm-elekto>`,
-  markobutono: "<fm-markobutono loading>Newsletter</fm-markobutono>",
-  sxaltilo: "<fm-sxaltilo loading>Benachrichtigungen</fm-sxaltilo>",
   alsxutilo: "<fm-alsxutilo loading>Lebenslauf</fm-alsxutilo>",
 };
 
@@ -225,6 +223,53 @@ test.describe("Abnahme #122: the spinner of a field without a box of its own", (
       expect(spot.inLabel, "not in the label").toBe(false);
       expect(spot.after, "at the end of the field").toBe(true);
       expect(spot.inZone, "inside the dropzone of an upload").toBe(true);
+    });
+  }
+});
+
+// Decision of the maintainer (30.10.): markobutono and sxaltilo have no border; their spinner
+// stands directly after the text of their label – after its last line where it wraps, before an
+// error under it, however long that is.
+const AFTER_TEXT: Readonly<Record<string, string>> = {
+  "markobutono, short": "<fm-markobutono loading>Newsletter</fm-markobutono>",
+  "markobutono, wrapping":
+    "<fm-markobutono loading>Ich habe die Allgemeinen Geschäftsbedingungen gelesen und akzeptiere sie</fm-markobutono>",
+  "markobutono, with a longer error":
+    '<fm-markobutono loading invalid>AGB<span slot="error">Bitte bestätigen Sie die Bedingungen, um fortzufahren.</span></fm-markobutono>',
+  "sxaltilo, short": "<fm-sxaltilo loading>Benachrichtigungen</fm-sxaltilo>",
+  "sxaltilo, wrapping":
+    "<fm-sxaltilo loading>Benachrichtigungen per E-Mail und in der App für alle Projekte senden</fm-sxaltilo>",
+};
+
+test.describe("Abnahme #122: markobutono and sxaltilo show the spinner directly after the text", () => {
+  for (const [name, markup] of Object.entries(AFTER_TEXT)) {
+    test(name, async ({ page }) => {
+      await serve(page, out, `<div style="inline-size: 14rem">${markup}</div>`);
+      const spot = await page.locator("body > div > *").evaluate((host) => {
+        const spinner = (host.shadowRoot as ShadowRoot).querySelector(
+          '[part="spinner"]',
+        ) as HTMLElement;
+        // The text of the label: the host's own text nodes (slotted), their last line box.
+        const range = document.createRange();
+        const text = [...host.childNodes].filter((node) => node.nodeType === Node.TEXT_NODE);
+        range.setStartBefore(text[0] as Node);
+        range.setEndAfter(text[text.length - 1] as Node);
+        const lines = [...range.getClientRects()].filter((rect) => rect.width > 0);
+        const last = lines[lines.length - 1] as DOMRect;
+        const s = spinner.getBoundingClientRect();
+        return {
+          visible: s.width > 0 && !spinner.hidden,
+          gap: s.left - last.right,
+          middle: (s.top + s.bottom) / 2,
+          top: last.top,
+          bottom: last.bottom,
+        };
+      });
+      expect(spot.visible, "shows").toBe(true);
+      expect(spot.gap, "directly after the text").toBeGreaterThanOrEqual(-0.5);
+      expect(spot.gap, "directly after the text").toBeLessThanOrEqual(16);
+      expect(spot.middle, "on the text's last line").toBeGreaterThanOrEqual(spot.top - 0.5);
+      expect(spot.middle, "on the text's last line").toBeLessThanOrEqual(spot.bottom + 0.5);
     });
   }
 });
