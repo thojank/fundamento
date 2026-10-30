@@ -293,8 +293,10 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
     expect(invalid.length).toBeGreaterThan(0);
     const withError = cells.filter((cell) => cell.includes('<span slot="error">Fehler</span>'));
     expect(withError).toEqual(invalid);
-    // The butono and the ligilo have no help or error slot: their cells stay as they were.
-    expect(html.match(/<fm-butono[^>]*>[^<]*<span/g)).toBeNull();
+    // The butono and the ligilo have no help or error slot: their cells stay as they were (the
+    // section grundo of Spec 029 ②b-1 M-1 gives the butono its reason).
+    const spans = html.match(/<fm-butono[^>]*>[^<]*<span/g) ?? [];
+    expect(spans.filter((cell) => cell !== "<fm-butono disabled>Beispiel<span")).toEqual([]);
   });
 
   // F-6 (Spec 009 C8): the slot table did not say that the label of the kampo is a duty.
@@ -485,7 +487,8 @@ describe("the Vitrino shows the elekto with three options, required, invalid and
         `<fm-elekto size="${size}" value="1" invalid>${size}${OPTIONS}<span slot="help">Hinweis</span><span slot="error">Fehler</span></fm-elekto>`,
       );
     }
-    expect(grid.match(/<data slot="options"/g)).toHaveLength(3 * 4 * 3);
+    // Spec 029 ②b-1 M-5: a fifth column, loading.
+    expect(grid.match(/<data slot="options"/g)).toHaveLength(3 * 5 * 3);
     expect(grid.match(/slot="error"/g)).toHaveLength(3);
     expect(VITRINO_OPTIONS).toEqual(["Eins", "Zwei", "Drei"]);
   });
@@ -517,7 +520,8 @@ describe("the Vitrino shows the elektilo closed with the prompt, required, inval
       );
     }
     expect(grid).not.toMatch(/<fm-elektilo[^>]* value=/);
-    expect(grid.match(/<data slot="options"/g)).toHaveLength(3 * 4 * 3);
+    // Spec 029 ②b-1 M-5: a fifth column, loading.
+    expect(grid.match(/<data slot="options"/g)).toHaveLength(3 * 5 * 3);
     expect(grid.match(/slot="error"/g)).toHaveLength(3);
     expect(VITRINO_PROMPT).toBe("Bitte wählen");
     // The radio group keeps its first option chosen.
@@ -840,11 +844,12 @@ describe("the Vitrino shows the pagxigilo and the spuro (Spec 015 ①)", () => {
 // dropzone, required, disabled and invalid — each with accept and max-size and a help that names
 // kinds and size (file-constraints-stated); the error only under invalid.
 describe("the Vitrino shows the alsxutilo (Spec 015 ②)", () => {
-  it("one row, five columns, accept and max-size, the help names kinds and size", () => {
+  it("one row, six columns, accept and max-size, the help names kinds and size", () => {
     const grid = datumoj.eroj.alsxutilo ?? "";
-    expect((grid.match(/<fm-alsxutilo /g) ?? []).length).toBe(5);
+    // Spec 029 ②b-1 M-5: loading as a column of its own.
+    expect((grid.match(/<fm-alsxutilo /g) ?? []).length).toBe(6);
     expect(grid).toContain(
-      '<th scope="col">rest</th><th scope="col">dropzone</th><th scope="col">required</th><th scope="col">disabled</th><th scope="col">invalid</th>',
+      '<th scope="col">rest</th><th scope="col">dropzone</th><th scope="col">required</th><th scope="col">disabled</th><th scope="col">loading</th><th scope="col">invalid</th>',
     );
     expect(grid).toContain(
       '<fm-alsxutilo max-size="5000000" accept=".pdf,.png" dropzone>rest<span slot="help">PDF oder PNG, höchstens 5 MB</span></fm-alsxutilo>',
@@ -1042,11 +1047,11 @@ describe("the Vitrino shows the glitilo and the kampo additions (Spec 025 ①)",
 // the help, a date range — each at rest, required, disabled and invalid; the dates are the
 // Vitrino's (October 2026), the same the Figma set shows.
 describe("the Vitrino shows the datelektilo (Spec 025 ②)", () => {
-  it("two rows, four columns; the dates of the Vitrino; the error only under invalid", () => {
+  it("two rows, five columns (Abnahme #122: loading); the dates of the Vitrino; the error only under invalid", () => {
     const grid = datumoj.eroj.datelektilo ?? "";
-    expect((grid.match(/<fm-datelektilo /g) ?? []).length).toBe(8);
+    expect((grid.match(/<fm-datelektilo /g) ?? []).length).toBe(10);
     expect(grid).toContain(
-      '<th scope="col">rest</th><th scope="col">required</th><th scope="col">disabled</th><th scope="col">invalid</th>',
+      '<th scope="col">rest</th><th scope="col">required</th><th scope="col">disabled</th><th scope="col">invalid</th><th scope="col">loading</th>',
     );
     expect(grid).toContain(
       '<fm-datelektilo value="2026-10-24">einzeln<span slot="help">Ein Datum ab heute.</span></fm-datelektilo>',
@@ -1075,7 +1080,8 @@ describe("the Vitrino shows the selection Eroj (Spec 025 ③)", () => {
 
   it("the listelektilo: options with icon and description in the columns of a field", () => {
     const grid = datumoj.eroj.listelektilo ?? "";
-    expect((grid.match(/<fm-listelektilo /g) ?? []).length).toBe(4);
+    // Abnahme #122: the column loading added.
+    expect((grid.match(/<fm-listelektilo /g) ?? []).length).toBe(5);
     expect(grid).toContain(
       '<data slot="options" value="eu" icon="info" description="27 Staaten">Europa</data>',
     );
@@ -1113,5 +1119,61 @@ describe("the Vitrino shows the selection Eroj (Spec 025 ③)", () => {
     expect(grid).toContain(
       '<fm-lokredaktilo label="Titel" value="" editing invalid><span slot="error">',
     );
+  });
+});
+
+// Spec 029 ②b-1 M-1: the reason for disabled, to be seen – every Ero with the slot, disabled with
+// the example reason, in a section of its own (the grids of the Eroj keep their counts).
+describe("the Vitrino shows every Ero disabled with a reason (Spec 029 ②b-1 M-1)", () => {
+  it("one row per Ero with the slot disabled-reason, in the section grundo", () => {
+    expect(html).toContain('id="fm-vitrino-grundo"');
+    const rows = [...(datumoj.grundo ?? "").matchAll(/<th scope="row">fm-([a-z]+)<\/th>/g)].map(
+      (match) => match[1],
+    );
+    expect(rows).toEqual([
+      "alsxutilo",
+      "butono",
+      "datelektilo",
+      "elektilo",
+      "elekto",
+      "faldilo",
+      "glitilo",
+      "kampo",
+      "kompletigilo",
+      "listelektilo",
+      "markobutono",
+      "menuo",
+      "plurelektilo",
+      "sxaltilo",
+      "tekstareo",
+    ]);
+    expect(datumoj.grundo).toContain(
+      '<fm-kampo disabled>Beispiel<span slot="disabled-reason">Erst nach der Freigabe</span></fm-kampo>',
+    );
+  });
+});
+
+// Abnahme #122, 5: the clear button to be seen – the five fields with a clear button in the field,
+// with a value, empty, disabled and read-only; the column loading for the date picker and the
+// styled list too.
+describe("the Vitrino shows the clear button of the fields (Abnahme #122)", () => {
+  it("the section loeschen: five fields, four columns", () => {
+    expect(html).toContain('id="fm-vitrino-loeschen"');
+    const rows = [...(datumoj.loeschen ?? "").matchAll(/<th scope="row">fm-([a-z]+)<\/th>/g)].map(
+      (match) => match[1],
+    );
+    expect(rows).toEqual(["kampo", "elektilo", "listelektilo", "kompletigilo", "datelektilo"]);
+    expect(datumoj.loeschen).toContain(
+      '<th scope="col">mit Wert</th><th scope="col">leer</th><th scope="col">disabled</th><th scope="col">readonly</th>',
+    );
+    // elektilo and kompletigilo have no readonly in their Skemo: their cell says so.
+    expect((datumoj.loeschen ?? "").match(/ clearable/g)).toHaveLength(18);
+    expect((datumoj.loeschen ?? "").match(/<td>kein readonly<\/td>/g)).toHaveLength(2);
+  });
+
+  it("the date picker and the styled list show the column loading", () => {
+    for (const ero of ["datelektilo", "listelektilo"]) {
+      expect(datumoj.eroj[ero], ero).toMatch(new RegExp(`<fm-${ero}[^>]* loading[ >]`));
+    }
   });
 });

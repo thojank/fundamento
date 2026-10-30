@@ -65,6 +65,7 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       ["field", "boolean", false, false],
       ["required", "boolean", false, false],
       ["disabled", "boolean", false, false],
+      ["loading", "boolean", false, false],
       ["readonly", "boolean", false, false],
       ["invalid", "boolean", false, false],
       ["name", "string", false, undefined],
@@ -82,6 +83,8 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       { name: "error", text: true },
       { name: "min-label", text: true },
       { name: "max-label", text: true },
+      // Spec 029 ②b-1 M-1: the reason for disabled.
+      { name: "disabled-reason", text: true },
     ]);
   });
 
@@ -100,6 +103,7 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       "focus-ring",
       "box",
       "motion",
+      "spinner",
     ]);
     expect(skemo?.parts.track).toEqual({
       fill: { fixed: "color.background.sunken" },
@@ -155,8 +159,9 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
     expect(skemo?.a11y).toEqual({
       role: "slider",
       name: ["slot:label"],
-      description: ["slot:help", "slot:error"],
+      description: ["slot:help", "slot:error", "slot:disabled-reason"],
       states: {
+        loading: ["aria-busy"],
         required: ["aria-required"],
         invalid: ["aria-invalid"],
         disabled: ["aria-disabled"],
@@ -173,6 +178,7 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
         "End",
       ],
       texts: {
+        loading: { de: "lädt", en: "loading" },
         required: { de: "erforderlich", en: "required" },
         "min-label-name": { de: "Von", en: "From" },
         "max-label-name": { de: "Bis", en: "To" },
@@ -199,6 +205,7 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       [{ disabled: "true" }, { readonly: ["false"] }],
       [{ "prop:value-start": "filled" }, { range: ["true"] }],
       [{ "prop:value-end": "filled" }, { range: ["true"] }],
+      [{ "slot:disabled-reason": "filled" }, { disabled: ["true"] }],
     ]);
     for (const constraint of skemo?.constraints ?? []) expect(constraint.kialo).not.toBe("");
   });
@@ -300,7 +307,8 @@ describe("the Uzo of the glitilo (section ①, G2)", () => {
     if (glitilo === undefined) throw new Error("missing");
     const brief = briefOf(glitilo);
     expect(brief.axes.map((axis) => axis.name)).toEqual(["field"]);
-    expect(brief.props?.map((prop) => prop.name)).toContain("range");
+    // Spec 029 ②b-1: a boolean stands in flags.
+    expect(brief.flags).toContain("range");
     expect(brief.required).toEqual({ props: [], slots: ["label"] });
     const bytes = Buffer.byteLength(JSON.stringify(brief), "utf8");
     expect(Math.ceil(bytes / 3), `${bytes} bytes`).toBeLessThanOrEqual(750);

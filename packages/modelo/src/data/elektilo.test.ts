@@ -109,9 +109,11 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
         ["invalid", "boolean", false],
         ["size", ["small", "medium", "large"], "medium"],
         ["disabled", "boolean", false],
+        ["loading", "boolean", false],
         ["name", "string", undefined],
         // Spec 011 ① (plan ① D-09): a chosen empty option, 'Alle', 'keine Auswahl', value "".
         ["empty-label", "string", undefined],
+        ["clearable", "boolean", false],
       ],
     );
     expect(skemo?.props.find((prop) => prop.name === "placeholder")?.description).toMatch(
@@ -140,6 +142,8 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       },
       { name: "help", text: true },
       { name: "error", text: true },
+      // Spec 029 ②b-1 M-1: the reason for disabled.
+      { name: "disabled-reason", text: true },
     ]);
   });
 
@@ -148,6 +152,7 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
     expect(Object.keys(skemo.parts).sort()).toEqual(
       [
         ...Object.keys(kampo.skemo.parts).filter((part) => !KAMPO_OWN.includes(part)),
+        "clear",
         "indicator",
       ].sort(),
     );
@@ -164,7 +169,10 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
         !KAMPO_OWN.includes(binding.part) &&
         (binding.when?.state === undefined || skemo.states.includes(binding.when.state)),
     );
-    expect(skemo.bindings.filter((binding) => binding.part !== "indicator")).toEqual(shared);
+    // Abnahme #122: the clear button is each field's own, as large as its icon.
+    expect(
+      skemo.bindings.filter((binding) => binding.part !== "indicator" && binding.part !== "clear"),
+    ).toEqual(shared);
     const tokens = skemo.bindings.map((binding) => binding.token);
     expect(
       tokens.filter((token) => token.startsWith("color.palette.") || token.includes(".scale.")),
@@ -198,18 +206,27 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
     expect(skemo?.a11y).toEqual({
       role: "combobox",
       name: ["slot:label"],
-      description: ["slot:help", "slot:error"],
+      description: ["slot:help", "slot:error", "slot:disabled-reason"],
       states: {
+        loading: ["aria-busy"],
         selected: ["aria-selected"],
         required: ["aria-required"],
         invalid: ["aria-invalid"],
         disabled: ["aria-disabled"],
       },
       keys: ["ArrowUp", "ArrowDown", "Enter", "Escape"],
-      texts: { required: { de: "erforderlich", en: "required" } },
+      texts: {
+        "clear-name": { de: "{label} leeren", en: "Clear {label}" },
+        required: { de: "erforderlich", en: "required" },
+        loading: { de: "lädt", en: "loading" },
+      },
     });
     // Spec 025 ①: the kampo speaks its buttons too; required is the shared word.
-    expect(skemo?.a11y.texts).toEqual({ required: kampo?.skemo.a11y.texts?.required });
+    expect(skemo?.a11y.texts).toEqual({
+      required: kampo?.skemo.a11y.texts?.required,
+      loading: kampo?.skemo.a11y.texts?.loading,
+      "clear-name": kampo?.skemo.a11y.texts?.["clear-name"],
+    });
   });
 
   it("forbids an error text without invalid, like the kampo (constraint, Spec 009 D-04)", () => {
@@ -219,7 +236,8 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
     // The first constraint is the kampo's; the second is the elektilo's own (Spec 011 ①: no
     // empty-label beside a placeholder).
     expect(skemo.constraints?.[0]).toEqual(kampo?.skemo.constraints?.[0]);
-    expect(skemo.constraints).toHaveLength(2);
+    // Spec 029 ②b-1 M-1: and a reason only with disabled.
+    expect(skemo.constraints).toHaveLength(3);
     expect(
       slotStates(skemo, {
         ero: "elektilo",
@@ -232,6 +250,7 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       "slot:options": "filled",
       "slot:help": "empty",
       "slot:error": "empty",
+      "slot:disabled-reason": "empty",
     });
   });
 

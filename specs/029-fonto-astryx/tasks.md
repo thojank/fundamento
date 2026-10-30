@@ -120,3 +120,14 @@
 | Rot gemessen | Doku-Test 7 von 8 rot |
 | Grün gemessen | Doku-Test 8 von 8; Modelo gesamt und Lint im PR |
 | Abgleich | 40 Eroj, 240 Zeilen: 27 übernehmen, 72 anpassen, 141 behalten; 14 Muster; 45 fehlende Gattungen (33 Eroj-Runde 6) |
+
+## ②b-1 Felder (M-5, M-6, M-1, M-2)
+
+- [x] **T2950 M-5 rot** in `ac0fe9b` (Skemo 23, Browser 12, Figma 12).
+- [x] **T2951 M-5 grün:** Modelo, Web, Figma, Vitrino; Erwartungen der bestehenden Tests nachgezogen (Teile, Props, Zählungen, Prüfsummen).
+- [x] **T2952 M-6 Löschen-Knopf:** rot in `9b81ad3`, grün im Folgecommit (Modelo, Web, Figma; Brief des kampo 740).
+- [x] **T2955 Brief: Boolean-Props kompakt** (Entscheidung 29.10.): rot in `0d464a0`; `flags` im Brief und im Ausgabeschema von get_ero, `props` ohne Booleans; kampo 740 → 682 von 750.
+- [x] **T2953 M-1 Grund für „deaktiviert“:** rot in `cc50ea5`, grün im Folgecommit (Modelo, Web mit eingebettetem konsileto, faldilo `disabled`, Figma 8 Varianten des faldilo).
+- [x] **T2956 Abnahme #122 rechter Feldrand:** rot in `61cf5be5`, `51a65efc` (Ziel der Knöpfe) und `b6415047` (Spinner hinter dem Text bei markobutono, sxaltilo; Entscheidung 30.10.), grün im jeweiligen Folgecommit (`trailing` im Skemo, Ziel `width`, Web-Ende im Feld, Figma im Control, Vitrino Löschen und loading, Bericht der Ereignisse korrigiert).
+- [ ] T2954 M-2 Status warning/success
+

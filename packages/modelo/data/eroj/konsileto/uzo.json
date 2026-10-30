@@ -44,7 +44,7 @@
     "boundary": [
       {
         "case": "tooltip-on-disabled",
-        "action": "ask-human",
+        "action": "not-supported",
         "keywords": {
           "en": [
             "greyed",
@@ -57,7 +57,7 @@
             "gesperrt"
           ]
         },
-        "kialo": "A disabled control takes no focus and on many platforms no hover, so its tooltip is never reached by keyboard — because the hint hangs on a control nobody can reach, a person decides whether the reason stands visibly beside the control instead."
+        "kialo": "A konsileto on a disabled control is not reached by keyboard — because the disabled Ero says its reason itself: slot disabled-reason, shown in its own konsileto (Spec 029 ②b-1 M-1)."
       }
     ],
     "composes": {
