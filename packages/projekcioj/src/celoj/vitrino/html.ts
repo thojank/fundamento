@@ -97,6 +97,9 @@ th, td { text-align: start; padding: var(--fm-spacing-small); border-block-end: 
 .fm-werkstatt-celo { inline-size: 5.5rem; font: inherit; padding: var(--fm-spacing-small); border: var(--fm-border-width-default) solid var(--fm-color-border-default); border-radius: var(--fm-radius-role-control); background-color: var(--fm-color-background-default); color: var(--fm-color-text-default); }
 tr[data-fm-superskribita="true"] th { text-decoration: underline; }
 .fm-werkstatt-flankoj { display: grid; grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr)); gap: var(--fm-spacing-large); align-items: start; }
+/* Abnahme #122: a side scrolls what is wider than its column (a table with the column loading), so
+   no field of one side lies under the other. */
+.fm-werkstatt-flankoj > [data-fm-side] { min-inline-size: 0; overflow-x: auto; }
 [data-fm-side] { padding: var(--fm-spacing-large); background-color: var(--fm-${VITRINO_SURFACE.replaceAll(".", "-")}); color: var(--fm-color-text-default); font-family: var(--fm-typography-body-1-font-family); border: var(--fm-border-width-default) solid var(--fm-color-border-subtle); display: flex; flex-direction: column; gap: var(--fm-spacing-large); }
 /* Spec 019 ② (G5): in the Werkstatt every section of the Vitrino and every clone on the two sides
    of the comparison skip the work of rendering while off screen, so a slider recomputes what is
@@ -453,6 +456,8 @@ ${Object.entries(datumoj.eroj)
     ),
   )
   .join("\n")}
+${datumoj.loeschen === undefined ? "" : section("loeschen", "Löschen", datumoj.loeschen)}
+${datumoj.grundo === undefined ? "" : section("grundo", "Grund für „deaktiviert“", datumoj.grundo)}
 ${
   Object.keys(datumoj.sxablonoj).length === 0
     ? ""

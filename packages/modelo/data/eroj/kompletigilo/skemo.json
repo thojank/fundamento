@@ -76,6 +76,12 @@
         "kind": "boolean",
         "default": false,
         "description": "The application loads new suggestions for the typed text (a search on a server): the field says so (aria-busy and a live region with the text of a11y.texts loading) and stays operable; the list keeps what it has until the application sets the new options."
+      },
+      {
+        "name": "clearable",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-6: a clear button in the field, shown while it has a value and is neither disabled nor read-only, named „{label} leeren“; a press empties the value and returns the focus to the field."
       }
     ],
     "states": [
@@ -106,6 +112,10 @@
       },
       {
         "name": "error",
+        "text": true
+      },
+      {
+        "name": "disabled-reason",
         "text": true
       }
     ],
@@ -267,8 +277,33 @@
         "radius": {
           "fixed": "radius.role.control"
         }
+      },
+      "spinner": {
+        "size": {
+          "fixed": "size.icon.small"
+        },
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "inline-padding": {
+          "fixed": "spacing.small"
+        }
+      },
+      "clear": {
+        "size": {
+          "by": [
+            "size"
+          ]
+        },
+        "width": {
+          "fixed": "size.target.min"
+        }
       }
     },
+    "trailing": [
+      "spinner",
+      "clear"
+    ],
     "bindings": [
       {
         "part": "label",
@@ -501,6 +536,30 @@
           "active": "false"
         },
         "token": "color.background.raised"
+      },
+      {
+        "part": "clear",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "clear",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "clear",
+        "property": "size",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.icon.large"
       }
     ],
     "a11y": {
@@ -510,7 +569,8 @@
       ],
       "description": [
         "slot:help",
-        "slot:error"
+        "slot:error",
+        "slot:disabled-reason"
       ],
       "states": {
         "selected": [
@@ -554,6 +614,10 @@
         "loading": {
           "de": "lädt",
           "en": "loading"
+        },
+        "clear-name": {
+          "de": "{label} leeren",
+          "en": "Clear {label}"
         }
       }
     },
@@ -582,6 +646,17 @@
           ]
         },
         "kialo": "An error text without the error state is a contradiction a screen reader cannot resolve: it reads a fault on a field that says it is fine."
+      },
+      {
+        "when": {
+          "slot:disabled-reason": "filled"
+        },
+        "allowed": {
+          "disabled": [
+            "true"
+          ]
+        },
+        "kialo": "A reason without disabled is a contradiction, because it says why something is blocked that is not."
       }
     ],
     "goals": [

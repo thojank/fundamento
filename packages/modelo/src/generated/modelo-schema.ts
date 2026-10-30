@@ -1495,6 +1495,16 @@ export interface Skemo {
    * The events the element says (Spec 025 ①, plan ① D-01): change, input, a cancelable remove; unique by name (skemo-event-invalid). Absent for an Ero that says none.
    */
   events?: SkemoEvent[];
+  /**
+   * The parts at the inline end of a field, from the inside out (Spec 029 ②b-1, Abnahme #122): status icon, spinner, clear button, the field's own icon (chevron, calendar, steppers). Where the field has a box, they sit inside its border; the field keeps its width when one comes or goes.
+   *
+   * @minItems 1
+   */
+  trailing?: Name[];
+  /**
+   * Where a field without a border shows the parts of trailing: directly after the text of this part, its label (Spec 029 ②b-1, Abnahme #122, decision of the maintainer 30.10.: markobutono, sxaltilo). Without it they stand at the field's own end.
+   */
+  trailingAfter?: string;
   constraints?: SkemoConstraint[];
   /**
    * The goals a user may have with the Ero (delete, save, cancel); suggest_ero matches a word of the user against their keywords. Called goals, not intents, so that the word intent is free for a prop (Spec 007, OP-4, F1-T00).

@@ -62,6 +62,8 @@ describe("butono in the repo Modelo (T007)", () => {
       "label",
       "icon-start",
       "icon-end",
+      // Spec 029 ②b-1 M-1: the reason for disabled.
+      "disabled-reason",
     ]);
   });
 

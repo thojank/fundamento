@@ -78,6 +78,7 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
         ["invalid", "boolean", false],
         ["size", ["small", "medium", "large"], "medium"],
         ["disabled", "boolean", false],
+        ["loading", "boolean", false],
         ["name", "string", undefined],
       ],
     );
@@ -86,6 +87,8 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
     expect(skemo?.slots).toEqual([
       { name: "label", default: true, text: true, beside: true },
       { name: "error", text: true, beside: true },
+      // Spec 029 ②b-1 M-1: the reason for disabled.
+      { name: "disabled-reason", text: true },
     ]);
   });
 
@@ -99,6 +102,7 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
       "label",
       "motion",
       "required-mark",
+      "spinner",
       "surface",
     ]);
     const tokens = [
@@ -165,18 +169,25 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
     expect(skemo?.a11y).toEqual({
       role: "checkbox",
       name: ["slot:label"],
-      description: ["slot:error"],
+      description: ["slot:error", "slot:disabled-reason"],
       states: {
+        loading: ["aria-busy"],
         checked: ["aria-checked"],
         required: ["aria-required"],
         invalid: ["aria-invalid"],
         disabled: ["aria-disabled"],
       },
       keys: ["Space"],
-      texts: { required: { de: "erforderlich", en: "required" } },
+      texts: {
+        required: { de: "erforderlich", en: "required" },
+        loading: { de: "lädt", en: "loading" },
+      },
     });
     // Spec 025 ①: the kampo speaks its buttons too; required is the shared word.
-    expect(skemo?.a11y.texts).toEqual({ required: kampo?.skemo.a11y.texts?.required });
+    expect(skemo?.a11y.texts).toEqual({
+      required: kampo?.skemo.a11y.texts?.required,
+      loading: kampo?.skemo.a11y.texts?.loading,
+    });
   });
 
   it("forbids an error text without invalid, like the kampo (constraint, Spec 009 D-04)", () => {
@@ -192,7 +203,11 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
         label: "Ich akzeptiere die AGB",
         texts: { error: "x" },
       }),
-    ).toEqual({ "slot:label": "filled", "slot:error": "filled" });
+    ).toEqual({
+      "slot:label": "filled",
+      "slot:error": "filled",
+      "slot:disabled-reason": "empty",
+    });
   });
 
   it("knows the goals agree (required) and opt-in with whole words, no preposition", () => {
