@@ -249,23 +249,23 @@ describe("K-1 to K-6 of Spec 024 in the Schnellstart", () => {
     const response = await get("/marko", {
       method: "POST",
       headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: "name=Bluna+Marke&basis=komuna",
+      body: "name=Quendolin+Marke&basis=komuna",
       redirect: "manual",
     });
     expect(response.status).toBe(303);
-    expect(response.headers.get("location")).toBe("/marko/bluna-marke/farbe");
-    const html = await (await get("/marko/bluna-marke/farbe")).text();
-    expect(html).toContain("Bluna Marke");
-    expect(html).toContain("(bluna-marke)");
+    expect(response.headers.get("location")).toBe("/marko/quendolin-marke/farbe");
+    const html = await (await get("/marko/quendolin-marke/farbe")).text();
+    expect(html).toContain("Quendolin Marke");
+    expect(html).toContain("(quendolin-marke)");
     const draft = await (
-      await get("/api/marko/bluna-marke/entwurf", {
+      await get("/api/marko/quendolin-marke/entwurf", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: "{}",
       })
     ).json();
     expect((draft as { agordo: { etikedoj?: { marko?: string } } }).agordo.etikedoj?.marko).toBe(
-      "Bluna Marke",
+      "Quendolin Marke",
     );
   });
 

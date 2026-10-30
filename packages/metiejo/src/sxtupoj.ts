@@ -294,7 +294,7 @@ function fields(input: ScreenInput): string {
                   `<data slot="options" value="${escapeHtml(name)}">${escapeHtml(name)}</data>`,
               )
               .join("")}</fm-elektilo>`;
-      return `<fm-kampo name="name" required autocomplete="off" placeholder="Bluna">Name der Marke<span slot="help">So, wie du ihn schreibst. Kennung: <output data-mt-kennung aria-live="polite">–</output></span></fm-kampo><fm-elekto name="basis" value="leer">Womit fängst du an?<data slot="options" value="leer">Leer: nur der Name und eine Leitfarbe zum Ändern</data><data slot="options" value="komuna">Beispiel komuna: die Farbe und die Schriften der Referenz</data><data slot="options" value="komuna-0-2">Beispiel komuna-0-2: die Referenz, wie sie vor den neuen Grundlagen aussah</data>${
+      return `<fm-kampo name="name" required autocomplete="off" placeholder="Quendolin">Name der Marke<span slot="help">So, wie du ihn schreibst. Kennung: <output data-mt-kennung aria-live="polite">–</output></span></fm-kampo><fm-elekto name="basis" value="leer">Womit fängst du an?<data slot="options" value="leer">Leer: nur der Name und eine Leitfarbe zum Ändern</data><data slot="options" value="komuna">Beispiel komuna: die Farbe und die Schriften der Referenz</data><data slot="options" value="komuna-0-2">Beispiel komuna-0-2: die Referenz, wie sie vor den neuen Grundlagen aussah</data>${
         input.markoj.length === 0
           ? ""
           : '<data slot="options" value="oeffnen">Vorhandene Marke öffnen</data>'

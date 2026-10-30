@@ -290,7 +290,7 @@ function readBody(request: IncomingMessage, limit = 32 * 1024 * 1024): Promise<s
 /** The German sentence of an issue the start screen shows. */
 function problemSentence(issue: MetiejoIssue | ValidationIssue, name: string): string {
   if (issue.rule === "name-invalid") {
-    return `„${name}“ ergibt keine Kennung: Der Name braucht mindestens einen Buchstaben oder eine Ziffer, zum Beispiel „Bluna“ (Kennung bluna).`;
+    return `„${name}“ ergibt keine Kennung: Der Name braucht mindestens einen Buchstaben oder eine Ziffer, zum Beispiel „Quendolin“ (Kennung quendolin).`;
   }
   if (issue.rule === "marko-exists")
     return `Die Marke „${name}“ gibt es schon. Öffne sie unter „Vorhandene Marke öffnen“.`;

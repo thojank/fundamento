@@ -57,7 +57,7 @@ test.describe("Metiejo (Nachlese 10)", () => {
   test("N-2/N-3: an existing brand opens without a name and without an error; the button says Öffnen", async ({
     page,
   }) => {
-    await brand(page, "Bluna");
+    await brand(page, "Quendolin");
     await page.goto(`${base}/`);
     const name = page.locator('fm-kampo[name="name"]');
     await expect(page.getByRole("button", { name: "Anlegen" })).toBeVisible();
@@ -66,9 +66,9 @@ test.describe("Metiejo (Nachlese 10)", () => {
     await expect(name).toBeHidden();
     expect(await name.evaluate((host) => host.hasAttribute("required"))).toBe(false);
     expect(await name.evaluate((host) => host.hasAttribute("invalid"))).toBe(false);
-    await page.locator('fm-elektilo[name="oeffnen"] select').selectOption("bluna");
+    await page.locator('fm-elektilo[name="oeffnen"] select').selectOption("quendolin");
     await page.getByRole("button", { name: "Öffnen" }).click();
-    await page.waitForURL(/\/marko\/bluna\//);
+    await page.waitForURL(/\/marko\/quendolin\//);
     await page.goto(`${base}/`);
     await choose(page, 'fm-elekto[name="basis"]', "Vorhandene Marke öffnen");
     await choose(

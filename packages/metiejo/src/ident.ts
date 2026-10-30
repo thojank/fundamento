@@ -1,4 +1,4 @@
-// K-1 (Spec 024): a brand is named as written („Bluna“, „Über Größe & Co.“); the app derives the
+// K-1 (Spec 024): a brand is named as written („Quendolin“, „Über Größe & Co.“); the app derives the
 // identifier — a Name of the Modelo: lowercase letters, digits, single hyphens — and shows it
 // small beside the name. Pure.
 
