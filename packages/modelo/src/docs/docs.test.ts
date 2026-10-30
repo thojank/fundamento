@@ -4124,4 +4124,13 @@ describe("Spec 033 documentation (specs/033-markenassistent)", () => {
     expect(s6).toMatch(/B-13[^\n]*Ursache/);
     expect(s6).toMatch(/O-9[^\n]*entschieden/);
   });
+
+  it("S6 names the decision on O-10: export and projections in the Kroniko, the start value as fallback", () => {
+    const plan = read("specs/033-markenassistent/plan.md");
+    const s6 = plan.slice(plan.indexOf("## S6"));
+    expect(s6).toMatch(/O-10[^\n]*entschieden/);
+    for (const term of ["ago` `eksporto", "lokal aus dem Protokoll", "Rückfall"]) {
+      expect(s6, term).toContain(term);
+    }
+  });
 });
