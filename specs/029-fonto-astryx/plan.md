@@ -1492,4 +1492,5 @@ Rot in `61cf5be5`, das Ziel der Knöpfe rot in `51a65efc`, der Spinner hinter de
 
 ### Messungen
 
-- perf AK-07 (Start bis zum ersten describe), Budget 2000 ms, wird im Bericht jedes Laufs beobachtet, das Budget bleibt (Auftrag 30.10.): 1893 ms beim Stand `29708e81`; nach dem Spinner hinter dem Text 1961, 1901 und 1906 ms (drei Läufe auf derselben Maschine) – 40 bis 100 ms Luft, die Streuung zwischen Läufen ist so groß wie der Abstand zum Budget.
+- perf AK-07 (Start bis zum ersten describe), Budget 2000 ms, wird im Bericht jedes Laufs beobachtet, das Budget bleibt (Auftrag 30.10.). Läufe auf dieser Maschine: 1893 ms bei `29708e81`; 1961, 1901, 1906 ms bei `4b43c501`; 1938, 1951, 1984 ms bei `a35ae64b`.
+- Gegenmessung main gegen den Zweig, abwechselnd auf derselben Maschine (`a35ae64b` gegen main `04b68b79`, je vier Läufe): main 1947, 1896, 1873, 1869 ms (Median etwa 1880); Zweig 1960, 1971, 1978, 1971 ms (Median etwa 1970). Der Zweig ②b-1 kostet den Start damit etwa 90 ms; die Luft zum Budget ist etwa 30 ms. Das Laden des Modelo ist es nicht (`loadModelo` etwa 100 ms auf beiden Seiten); die Ursache liegt anderswo im Start des MCP-Servers und ist noch nicht gefunden.
