@@ -59,6 +59,7 @@ test.describe("fm-elekto behaviour", () => {
       "field",
       "label",
       "required-mark",
+      "spinner",
       "options",
       ...["option", "control", "indicator", "option-label"],
       ...["option", "control", "indicator", "option-label"],

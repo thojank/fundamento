@@ -167,9 +167,11 @@ describe("B-1: a container Ero fills the width of its instance", () => {
     const indicator = sized(named(instance, "indicator")[0]).width;
     instance.resize(400, instance.height);
     expect(sized(named(instance, "indicator")[0]).width).toBe(indicator);
-    // The chevron stands at the end of the control, as on the web.
+    // The chevron stands at the end of the control, as on the web: the text fills the control
+    // (Abnahme #122), the parts of its end follow it.
     const control = named(instance, "control")[0] as DoubleNode;
-    expect(control.properties.primaryAxisAlignItems).toBe("SPACE_BETWEEN");
+    expect(control.properties.primaryAxisAlignItems).toBe("MIN");
+    expect(named(instance, "text")[0]?.properties.layoutSizingHorizontal).toBe("FILL");
     instance.remove();
   });
 

@@ -424,7 +424,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         // Spec 010 ③: the elekto has size × state = 15 variants.
         { set: "elekto", created: 15, updated: 0 },
         // Spec 014 ⑤: the faldilo has open × state = 6 variants.
-        { set: "faldilo", created: 6, updated: 0 },
+        // Spec 029 ②b-1 M-1: open × the four states, disabled among them.
+        { set: "faldilo", created: 8, updated: 0 },
         // Spec 025 ①: the glitilo has range × field × state = 24 variants (range an axis of its own).
         { set: "glitilo", created: 24, updated: 0 },
         // Spec 014 ②: the ikono has name × size × intent = 285 variants in one state (Spec 015

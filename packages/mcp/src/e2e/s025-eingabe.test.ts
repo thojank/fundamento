@@ -44,6 +44,7 @@ type Brief = {
   axes: { name: string; values: string[] }[];
   props?: { name: string; type: string }[];
   required: { props: string[]; slots: string[] };
+  flags?: string[];
 };
 type Full = { skemo: { events?: { name: string; cancelable?: boolean }[] } };
 type Listed = { eroj: { name: string }[] };
@@ -135,7 +136,8 @@ describe("the input dialogs of the spec (Spec 025 ①)", () => {
     expect(listed.eroj.map((ero) => ero.name)).toContain("glitilo");
     const brief = await output<Brief>(client, "get_ero", { name: "glitilo", brief: true });
     expect(brief.axes.map((axis) => axis.name)).toEqual(["field"]);
-    expect(brief.props?.map((prop) => prop.name)).toContain("range");
+    // Spec 029 ②b-1: a boolean stands in flags.
+    expect(brief.flags).toContain("range");
     expect(brief.required).toEqual({ props: [], slots: ["label"] });
     const full = await output<Full>(client, "get_ero", { name: "glitilo" });
     expect(full.skemo.events?.map((event) => event.name)).toEqual(["input", "change"]);

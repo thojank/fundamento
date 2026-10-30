@@ -100,7 +100,7 @@
           ]
         },
         "ero": "kompletigilo",
-        "kialo": "Typed and picked from suggestions is the kompletigilo's, because the list shortens while typing."
+        "kialo": "Suggestions are picked while typing, because the list shortens as one types."
       },
       {
         "goal": "approximate",
@@ -117,7 +117,7 @@
           ]
         },
         "ero": "glitilo",
-        "kialo": "A value set by feel is dragged, because the hand finds a position faster than a number."
+        "kialo": "A value set by feel is dragged, because a hand finds a position faster."
       },
       {
         "goal": "single-value",
@@ -134,7 +134,7 @@
           ]
         },
         "ero": "lokredaktilo",
-        "kialo": "A value changed in a view is the lokredaktilo's, because a form for one value is a detour."
+        "kialo": "A value is changed in place, because a form for one value is a detour."
       }
     ],
     "boundary": [

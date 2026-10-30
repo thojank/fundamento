@@ -99,6 +99,8 @@ describe("kampo in the repo Modelo (T004)", () => {
       ["autocomplete", "string", undefined],
       ["stepper", "boolean", false],
       ["step", "string", undefined],
+      ["loading", "boolean", false],
+      ["clearable", "boolean", false],
     ]);
     expect(skemo.props.map((prop) => prop.name)).not.toContain("label");
     expect(skemo.props.map((prop) => prop.name)).not.toContain("type");
@@ -107,6 +109,8 @@ describe("kampo in the repo Modelo (T004)", () => {
       ["label", true],
       ["help", true],
       ["error", true],
+      // Spec 029 ②b-1 M-1: the reason for disabled.
+      ["disabled-reason", true],
     ]);
   });
 
@@ -137,6 +141,7 @@ describe("kampo in the repo Modelo (T004)", () => {
       "motion",
       "placeholder",
       "required-mark",
+      "spinner",
       "surface",
       "text",
     ]);
@@ -165,8 +170,9 @@ describe("kampo in the repo Modelo (T004)", () => {
   it("speaks role textbox: name from the label, description from help then error, the states, required in de and en (D-02)", () => {
     expect(skemo.a11y.role).toBe("textbox");
     expect(skemo.a11y.name).toEqual(["slot:label"]);
-    expect(skemo.a11y.description).toEqual(["slot:help", "slot:error"]);
+    expect(skemo.a11y.description).toEqual(["slot:help", "slot:error", "slot:disabled-reason"]);
     expect(skemo.a11y.states).toEqual({
+      loading: ["aria-busy"],
       required: ["aria-required"],
       invalid: ["aria-invalid"],
       disabled: ["aria-disabled"],
@@ -175,9 +181,11 @@ describe("kampo in the repo Modelo (T004)", () => {
     // Spec 025 ①: the words of the step buttons and the clear button (<part>-name).
     expect(skemo.a11y.texts).toEqual({
       required: { de: "erforderlich", en: "required" },
+      loading: { de: "lädt", en: "loading" },
       "decrement-name": { de: "Verringern", en: "Decrease" },
       "increment-name": { de: "Erhöhen", en: "Increase" },
-      "clear-name": { de: "Suche leeren", en: "Clear search" },
+      // Spec 029 ②b-1 M-6: named after the field's label, as every clear button.
+      "clear-name": { de: "{label} leeren", en: "Clear {label}" },
     });
     // Spec 011 ① (O-7): Enter in the one-line field sends the form, so the Skemo names the key.
     // Spec 025 ①: the arrows step a number, Escape clears a search.
@@ -222,7 +230,12 @@ describe("kampo in the repo Modelo (T004)", () => {
     expect(forbiddenBy(skemo, { disabled: "true", readonly: "false" })).toBeUndefined();
     expect(
       slotStates(skemo, { ero: "kampo", props: {}, label: "E-Mail", texts: { error: "x" } }),
-    ).toEqual({ "slot:label": "filled", "slot:help": "empty", "slot:error": "filled" });
+    ).toEqual({
+      "slot:label": "filled",
+      "slot:help": "empty",
+      "slot:error": "filled",
+      "slot:disabled-reason": "empty",
+    });
     const result = evaluateUsage(modelo, [
       { ero: "kampo", props: {}, label: "E-Mail", texts: { error: "Gib eine Adresse mit @ ein" } },
     ]);

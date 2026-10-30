@@ -1101,12 +1101,13 @@ describe("the label default follows the role of the Ero (M-3)", () => {
     const of = (name: string) => defaultsOf(pageNodes(double).find((child) => child.name === name));
     // Spec 027 B-6: the icon slots of the butono are switches of their own (icon-start, icon-end).
     expect(of("butono")).toEqual(["Aktion"]);
-    expect(of("elekto")).toEqual(["Frage"]);
-    expect(of("kampo")).toEqual(["Beschriftung"]);
+    // Spec 029 ②b-1 M-5: every field has the BOOLEAN loading, off by default.
+    expect(of("elekto")).toEqual(["Frage", false]);
+    expect(of("kampo")).toEqual(["Beschriftung", false, false]);
     // Nachlese 5 O-41: the BOOLEAN external beside the label, hidden by default.
     expect(of("ligilo")).toEqual(["Ziel", false]);
-    expect(of("markobutono")).toEqual(["Option"]);
-    expect(of("sxaltilo")).toEqual(["Einstellung"]);
+    expect(of("markobutono")).toEqual(["Option", false]);
+    expect(of("sxaltilo")).toEqual(["Einstellung", false]);
     // Spec 011 ③ (plan ③ D-14): the badge, the notice (with its BOOLEAN dismissible beside the
     // label) and the state, whose word is the structure's.
     expect(of("insigno")).toEqual(["Status"]);

@@ -19,12 +19,19 @@
         "name": "group",
         "kind": "string",
         "description": "Disclosures with the same group open one at a time (an accordion): the platform's name of the details, so opening one closes the others."
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②b-1 M-1 (A-faldilo-3): the section cannot open or close for now; with a disabled-reason it stays reachable and says why."
       }
     ],
     "states": [
       "rest",
       "hover",
-      "focus"
+      "focus",
+      "disabled"
     ],
     "slots": [
       {
@@ -34,6 +41,10 @@
       {
         "name": "content",
         "default": true
+      },
+      {
+        "name": "disabled-reason",
+        "text": true
       }
     ],
     "parts": {
@@ -44,7 +55,9 @@
           ]
         },
         "color": {
-          "fixed": "color.text.default"
+          "by": [
+            "state"
+          ]
         },
         "typography": {
           "fixed": "typography.label.1"
@@ -145,6 +158,46 @@
           "open": "false"
         },
         "token": "color.text.subtle"
+      },
+      {
+        "part": "summary",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "summary",
+        "property": "color",
+        "when": {
+          "state": "hover"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "summary",
+        "property": "color",
+        "when": {
+          "state": "focus"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "summary",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.text.disabled"
+      },
+      {
+        "part": "summary",
+        "property": "fill",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.action.tertiary.disabled"
       }
     ],
     "a11y": {
@@ -152,9 +205,15 @@
       "name": [
         "slot:summary"
       ],
+      "description": [
+        "slot:disabled-reason"
+      ],
       "states": {
         "open": [
           "aria-expanded"
+        ],
+        "disabled": [
+          "aria-disabled"
         ]
       },
       "keys": [
@@ -183,6 +242,19 @@
         },
         "props": {},
         "regulo": "disclosure-label-names-content"
+      }
+    ],
+    "constraints": [
+      {
+        "when": {
+          "slot:disabled-reason": "filled"
+        },
+        "allowed": {
+          "disabled": [
+            "true"
+          ]
+        },
+        "kialo": "A reason without disabled is a contradiction, because it says why something is blocked that is not."
       }
     ]
   }

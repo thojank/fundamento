@@ -91,7 +91,11 @@ export function bildOf(variant: DoubleNode): string[] {
       } else {
         const fill = paints(child.properties.fills);
         const stroke = paints(child.properties.strokes);
-        const effects = JSON.stringify(child.properties.effects ?? []);
+        // The variables a shadow binds by name: their ids follow the order the file was filled in
+        // and change with every variable added before them (Spec 029 ②b-1), the picture does not.
+        const effects = JSON.stringify(child.properties.effects ?? [], (key, value) =>
+          key === "id" ? undefined : value,
+        );
         // A frame that paints one edge alone (the line of a quote, of a row) is that line: where
         // the rest of the frame reaches paints nothing.
         const sides = ["Top", "Right", "Bottom", "Left"].filter(
