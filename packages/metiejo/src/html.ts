@@ -459,8 +459,16 @@ function karto(rolle, text) {
   const who = document.createElement("fm-teksto");
   who.setAttribute("kind", "caption");
   who.textContent = rolle === "user" ? "Du" : "Assistent";
-  const body = document.createElement("fm-teksto");
-  body.textContent = text;
+  // Spec 035, Befund 4.5.3 (D-02): an answer of the model is the source of a Markdown view, built
+  // from text alone; never markup of the model. What the person wrote stays text.
+  let body;
+  if (rolle === "user") {
+    body = document.createElement("fm-teksto");
+    body.textContent = text;
+  } else {
+    body = document.createElement("fm-markdovido");
+    body.setAttribute("source", text);
+  }
   card.append(who, body);
   list.append(card);
 }

@@ -68,10 +68,21 @@ function facetoLink(name: string, faceto: FacetoStand, current: string): string 
   return `<a href="${facetoUrl(name, faceto.name)}" data-page="${escapeHtml(faceto.name)}"${faceto.name === current ? ' aria-current="page"' : ""}><span>${escapeHtml(faceto.nomo)}</span> <span class="mt-schritt-stato"><fm-insigno intent="${STATO_INTENT[faceto.stato]}" data-mt-faceto-stato="${escapeHtml(faceto.name)}">${STATO_NOMOJ[faceto.stato]}${mark}</fm-insigno></span></a>`;
 }
 
+/**
+ * The text of a chat message (Spec 035, Befund 4.5.3, D-02): what the person wrote is text; what the
+ * model answered is the source of an fm-markdovido, which builds emphasis, lists and links from text
+ * alone – no markup of the answer is parsed, so nothing of it runs.
+ */
+function nachrichtHtml(entry: AsistantoInput["historio"][number]): string {
+  return entry.role === "user"
+    ? `<fm-teksto>${escapeHtml(entry.content)}</fm-teksto>`
+    : `<fm-markdovido source="${escapeHtml(entry.content).replaceAll("\n", "&#10;")}"></fm-markdovido>`;
+}
+
 function chatHtml(historio: AsistantoInput["historio"]): string {
   const items = historio.map(
     (entry) =>
-      `<fm-karto data-mt-rolle="${entry.role}"><fm-teksto kind="caption">${entry.role === "user" ? "Du" : "Assistent"}</fm-teksto><fm-teksto>${escapeHtml(entry.content)}</fm-teksto></fm-karto>`,
+      `<fm-karto data-mt-rolle="${entry.role}"><fm-teksto kind="caption">${entry.role === "user" ? "Du" : "Assistent"}</fm-teksto>${nachrichtHtml(entry)}</fm-karto>`,
   );
   return items.length === 0
     ? '<fm-karto data-mt-rolle="assistant"><fm-teksto kind="caption">Assistent</fm-teksto><fm-teksto>Sag mir, was du an diesem Schritt ändern möchtest, zum Beispiel „wärmer“, „runder“ oder „Akzent in Petrol“. Ich setze es über die Regler, und die Prüfung läuft mit.</fm-teksto></fm-karto>'
