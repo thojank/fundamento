@@ -254,3 +254,56 @@ test.describe("Markenassistent (Spec 035, Befund 4.5.3)", () => {
     expect.soft(seen.stars).toBe(false);
   });
 });
+
+// Spec 035, Befund 4.5.1: a proposal shows what it means – the swatch of its colour, a crop of the
+// material and the preview before and with the proposal on the real Eroj of the brand.
+test.describe("Markenassistent (Spec 035, Befund 4.5.1)", () => {
+  test("the proposal of the material shows its colour, its crop and the Eroj before and after", async ({
+    page,
+  }) => {
+    await brand(page, "Vergleich");
+    // An invented screenshot, drawn by the browser: a band of petrol over a light ground.
+    const base64 = await page.evaluate(() => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 40;
+      canvas.height = 30;
+      const context = canvas.getContext("2d");
+      if (context === null) return "";
+      context.fillStyle = "#f4f4f2";
+      context.fillRect(0, 0, 40, 30);
+      context.fillStyle = "#0f766e";
+      context.fillRect(0, 0, 30, 8);
+      return canvas.toDataURL("image/png").split(",")[1] ?? "";
+    });
+    const read = await fetch(`${base}/api/marko/vergleich/materialo`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ filename: "bildschirm.png", base64, rajtoj: true }),
+    });
+    expect(read.status).toBe(200);
+    await page.goto(`${base}/asistanto/vergleich/gvidkoloro`);
+    const proposal = page.locator("fm-avizo[data-mt-propono]");
+    await expect(proposal.locator("[data-mt-propono-satz]")).toHaveText("Leitfarbe #0f766e.");
+    const swatch = proposal.locator('[data-mt-propono-farbe="#0f766e"]');
+    await expect(swatch).toHaveCSS("background-color", "rgb(15, 118, 110)");
+    const crop = proposal.locator("img[data-mt-propono-ausschnitt]");
+    await expect(crop).toBeVisible();
+    expect(
+      await crop.evaluate((image: HTMLImageElement) =>
+        image.decode().then(() => image.naturalWidth),
+      ),
+    ).toBe(40);
+    // The same Ero in both frames: the main button of the preview, before and with the proposal.
+    const fill = async (selector: string) => {
+      const button = page.frameLocator(selector).locator('fm-butono[emphasis="high"]').first();
+      await expect(button).toBeVisible();
+      return button.evaluate((host) => {
+        const control = host.shadowRoot?.querySelector("button") ?? host;
+        return getComputedStyle(control).backgroundColor;
+      });
+    };
+    const before = await fill("iframe[data-mt-vorschau]");
+    const after = await fill("iframe[data-mt-vorschau-propono]");
+    expect(after).not.toBe(before);
+  });
+});
