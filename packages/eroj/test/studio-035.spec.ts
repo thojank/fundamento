@@ -147,4 +147,32 @@ test.describe("Studio (Spec 035 Teil 3)", () => {
     await page.getByRole("button", { name: "Übernehmen" }).click();
     await uebernommen(page, request, id, vorher, gesendet);
   });
+
+  test("3.2: after „gesetzt“ on the page Farbe the row and the swatch show the same value", async ({
+    page,
+    request,
+  }) => {
+    const id = await marke(request, "Quarzwelle Farbe");
+    await page.goto(`${base}/studio/${id}/farbe`);
+    const reihe = zeile(page, "color.palette.neutral.500");
+    const feld = reihe.locator('input[type="color"]:not([data-mt-modus])');
+    const vorher = await feld.inputValue();
+    const neu = vorher === "#3a6b5c" ? "#5c3a6b" : "#3a6b5c";
+    // The change goes to the server (festlegen, or the page's formularo); its answer comes first.
+    const gesetzt = page.waitForResponse(
+      (response) =>
+        response.request().method() === "POST" &&
+        [`/api/marko/${id}/festlegen`, `/studio/${id}/farbe`].includes(
+          new URL(response.url()).pathname,
+        ),
+    );
+    await feld.fill(neu);
+    expect((await gesetzt).status()).toBeLessThan(400);
+    await expect(reihe.locator("fm-insigno")).toHaveText("gesetzt");
+    // One source of state: the row says the value the swatch shows, and the draft holds it.
+    await expect(reihe.locator('fm-teksto[kind="caption"]').first()).toContainText(`Wert: ${neu}`);
+    await expect(reihe.locator('input[type="color"]:not([data-mt-modus])')).toHaveValue(neu);
+    const wert = (await stand(request, id)).festgelegt["color.palette.neutral.500"]?.wert;
+    expect(JSON.stringify(wert)).toContain(neu);
+  });
 });
