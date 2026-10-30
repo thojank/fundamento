@@ -206,3 +206,51 @@ test.describe("Markenassistent (Spec 035, Befund 4.5.2)", () => {
     }
   });
 });
+
+// Spec 035, Befund 4.5.3 (D-02): the chat showed Markdown raw (`**1,75**`). An answer is shown as
+// Eroj built from its text (fm-markdovido); nothing of a model's answer becomes HTML. The language
+// model is a double: the route of the chat answers with what a model could say.
+test.describe("Markenassistent (Spec 035, Befund 4.5.3)", () => {
+  test("an answer with Markdown shows emphasis, and HTML in it creates no element and runs nothing", async ({
+    page,
+  }) => {
+    await brand(page, "Antwort");
+    await page.goto(`${base}/asistanto/antwort/gvidkoloro`);
+    const rev = Number(await page.locator("html").getAttribute("data-mt-rev"));
+    const antwort =
+      'Die Dichte steht jetzt auf **1,75**.\n\n<img src=x onerror="window.fmXss=1"><script>window.fmXss=2</script>';
+    await page.route("**/api/marko/antwort/asistanto", (route) =>
+      route.fulfill({ json: { antwort, rev } }),
+    );
+    // Without a model the screen keeps the chat off; the double stands in for the model.
+    await page.evaluate(() => {
+      for (const element of document.querySelectorAll(
+        "[data-mt-babilo-teksto], [data-mt-babilo-sendi]",
+      ))
+        element.removeAttribute("disabled");
+      document.querySelector("[data-mt-babilo-teksto]")?.setAttribute("value", "Dichter, bitte.");
+    });
+    await page.locator("fm-butono[data-mt-babilo-sendi]").click();
+    const card = page.locator('[data-mt-babilo-listo] fm-karto[data-mt-rolle="assistant"]').last();
+    await expect(card).toContainText("1,75");
+    await expect.soft(card.locator("strong")).toHaveText("1,75");
+    const seen = await card.evaluate((host) => {
+      const all: Element[] = [];
+      const walk = (node: Element | ShadowRoot) => {
+        for (const child of node.querySelectorAll("*")) {
+          all.push(child);
+          if (child.shadowRoot) walk(child.shadowRoot);
+        }
+      };
+      walk(host);
+      return {
+        elements: all.filter((element) => ["img", "script"].includes(element.localName)).length,
+        stars: (host.textContent ?? "").includes("**"),
+        ran: (window as unknown as { fmXss?: number }).fmXss ?? null,
+      };
+    });
+    expect.soft(seen.elements).toBe(0);
+    expect.soft(seen.ran).toBeNull();
+    expect.soft(seen.stars).toBe(false);
+  });
+});
