@@ -4049,6 +4049,23 @@ describe("Spec 033 documentation (specs/033-markenassistent)", () => {
     }
     expect(read("specs/033-markenassistent/tasks.md")).toContain("## S4");
   });
+
+  it("S5 (Sprache): the plan names Voxtral with its exact model, the browser fallback and the trial run", () => {
+    const plan = read("specs/033-markenassistent/plan.md");
+    const s5 = plan.slice(plan.indexOf("## S5"));
+    for (const term of [
+      "voxtral-mini-transcribe-3-0",
+      "Web Speech API",
+      "parolo",
+      "Tokens",
+      "Kosten",
+      "Dauer",
+      "### Messanleitung",
+    ]) {
+      expect(s5, term).toContain(term);
+    }
+    expect(read("specs/033-markenassistent/tasks.md")).toContain("## S5");
+  });
 });
 
 // Spec 029 ②b-1 (Maintainer 29.10.): the brief of get_ero lists the booleans in flags – a change

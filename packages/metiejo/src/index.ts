@@ -18,6 +18,7 @@ export * from "./klartext.js";
 export * from "./kontrolo.js";
 export * from "./marko.js";
 export * from "./nordstelo.js";
+export * from "./parolo/parolo.js";
 export * from "./privata.js";
 export * from "./root.js";
 export * from "./servilo.js";

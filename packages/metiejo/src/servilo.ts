@@ -83,6 +83,7 @@ import {
   writeDraft,
 } from "./marko.js";
 import { NORDSTELO_DIR, type NordsteloHistorio, nordsteloScreen } from "./nordstelo.js";
+import { transkribi } from "./parolo/parolo.js";
 import { type PrivataDeps, privataState, uploadFont } from "./privata.js";
 import { composeDraft, isStudioPage, kombinationOf, studioRows, studioScreen } from "./studio.js";
 import {
@@ -135,6 +136,11 @@ export interface ServiloOptions {
     /** Tokens one chat turn may use at most (Kostengrenze); default 60 000. */
     limo?: number;
   };
+  /**
+   * Spec 033 S5: speech in over Voxtral – the Mistral provider with the transcription model, from
+   * MISTRAL_API_KEY; absent without it (the browser's Web Speech API takes over). `fetch` for tests.
+   */
+  parolo?: { provider?: Provider; satz?: string; fetch?: Fetch };
   /** Spec 033 S4: how the research agent reaches public pages; a test passes its own. */
   esploro?: { fetch?: (url: string, init?: RequestInit) => Promise<Response> };
 }
@@ -497,11 +503,16 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
   };
 
   /** The tools of the Asistanto on one draft; a change goes through setDraft with the chat as source. */
-  const laborejoOf = (name: string, draft: Draft, modelo: string): Laborejo =>
+  const laborejoOf = (
+    name: string,
+    draft: Draft,
+    modelo: string,
+    fonto: "babilo" | "parolo" = "babilo",
+  ): Laborejo =>
     new Laborejo({
       bases,
       agordo: () => draft.agordo,
-      apliki: (next) => setDraft(name, draft, next, "babilo", modelo),
+      apliki: (next) => setDraft(name, draft, next, fonto, modelo),
       probleme: () =>
         pruefungOf(draft).raporto.violations.filter(
           (violation) => violation.fixed || violation.jugxo === undefined,
@@ -510,6 +521,89 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       kontrolita: true,
       pruefung: () => klartextOfDraft(draft),
     });
+
+  /**
+   * One chat turn of a brand (Spec 033 S1, S5): written or spoken, the same tools, the same Kroniko,
+   * with its source. The answer is the body and the status of the response.
+   */
+  const chatTurn = async (
+    name: string,
+    draft: Draft,
+    teksto: string,
+    faceto: string | undefined,
+    fonto: "babilo" | "parolo",
+    detaloj: Record<string, unknown> = {},
+  ): Promise<{ status: number; body: Record<string, unknown> }> => {
+    const provider = options.ki?.provider;
+    if (provider === undefined) return { status: 503, body: { satz: kiSatz() } };
+    const fremda = fremdaOf(name);
+    if (fremda !== undefined && !fremda.konfirmita) {
+      return {
+        status: 409,
+        body: {
+          satz: "Bitte zuerst die Bestätigung: Die Marke baut auf einer bestehenden Marke auf (Art. VI).",
+        },
+      };
+    }
+    if (teksto === "")
+      return { status: 422, body: { satz: "Schreib oder sag, was du ändern möchtest." } };
+    const historio = babiloj.get(name) ?? [];
+    try {
+      const result = await babili({
+        provider,
+        laborejo: laborejoOf(name, draft, provider.toString(), fonto),
+        historio: historio.slice(-12),
+        teksto,
+        ...(faceto === undefined ? {} : { faceto }),
+        budget: new Budget(options.ki?.limo ?? 60_000),
+        ...(options.ki?.fetch === undefined ? {} : { fetch: options.ki.fetch }),
+        ...(options.ki?.sleep === undefined ? {} : { sleep: options.ki.sleep }),
+        log: (line) => io.stderr(`${redact(line)}\n`),
+      });
+      babiloj.set(name, [
+        ...historio,
+        { role: "user", content: teksto },
+        { role: "assistant", content: result.antwort },
+      ]);
+      const sumo = sumoj.get(name) ?? { enigo: 0, eligo: 0, ms: 0 };
+      sumoj.set(name, {
+        enigo: sumo.enigo + result.kosto.enigo,
+        eligo: sumo.eligo + result.kosto.eligo,
+        ms: sumo.ms + result.kosto.ms,
+      });
+      kroniko(name, {
+        ago: "babilo",
+        fonto,
+        ...(faceto === undefined ? {} : { faceto }),
+        teksto,
+        modelo: provider.toString(),
+        kosto: result.kosto,
+        detaloj: {
+          antwort: result.antwort,
+          iloj: result.iloj,
+          atendoj: result.atendoj,
+          ...detaloj,
+        },
+      });
+      return {
+        status: 200,
+        body: {
+          antwort: result.antwort,
+          rev: draft.rev,
+          kosto: result.kosto,
+          atendoj: result.atendoj,
+          sxangxoj: result.sxangxoj,
+          stato: statoOf(name, draft),
+        },
+      };
+    } catch (error) {
+      const satz =
+        error instanceof CostLimitReached
+          ? `Die Kostengrenze dieser Runde ist erreicht (${error.limit} Tokens). Formuliere den Wunsch kürzer oder in mehreren Schritten.`
+          : redact(error instanceof Error ? error.message : String(error));
+      return { status: 502, body: { satz } };
+    }
+  };
 
   const kiSatz = (): string =>
     options.ki?.satz ??
@@ -1078,6 +1172,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
               : { pret: true, modelo: provider.toString() },
           ...(fremda === undefined ? {} : { fremda }),
           sumo: sumoj.get(name) ?? { enigo: 0, eligo: 0, ms: 0 },
+          parolo: options.parolo?.provider?.toString(),
           ...(() => {
             const propono = readProponoj(options.workdir, name).find(
               (entry) => entry.faceto === current.name,
@@ -1089,7 +1184,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       return;
     }
     const asistantoApi =
-      /^\/api\/marko\/([a-z0-9-]+)\/(stato|asistanto|faceto|fremda|konfirmo|materialo|kreilo|esplori)$/.exec(
+      /^\/api\/marko\/([a-z0-9-]+)\/(stato|asistanto|faceto|fremda|konfirmo|materialo|kreilo|esplori|parolo)$/.exec(
         path,
       );
     if (asistantoApi !== null) {
@@ -1125,76 +1220,62 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         return;
       }
       if (action === "asistanto") {
-        const provider = options.ki?.provider;
-        if (provider === undefined) {
-          sendJson(response, { satz: kiSatz() }, 503);
-          return;
-        }
-        const fremda = fremdaOf(name);
-        if (fremda !== undefined && !fremda.konfirmita) {
+        const teksto = typeof body.teksto === "string" ? body.teksto.trim() : "";
+        const faceto = typeof body.faceto === "string" ? body.faceto : undefined;
+        // Spec 033 S5: the browser's own recognition sends its transcript with speech as the source.
+        const fonto = body.fonto === "parolo" ? "parolo" : "babilo";
+        const turn = await chatTurn(name, draft, teksto, faceto, fonto);
+        sendJson(response, turn.body, turn.status);
+        return;
+      }
+      if (action === "parolo") {
+        // Spec 033 S5: a recording, transcribed by Voxtral on this server, becomes a chat turn.
+        const parolo = options.parolo?.provider;
+        if (parolo === undefined) {
           sendJson(
             response,
             {
-              satz: "Bitte zuerst die Bestätigung: Die Marke baut auf einer bestehenden Marke auf (Art. VI).",
+              satz:
+                options.parolo?.satz ??
+                "Sprache über Voxtral braucht MISTRAL_API_KEY in der .env. Ohne ihn erkennt der Browser die Sprache selbst (Web Speech API), wo er das kann.",
             },
-            409,
+            503,
           );
           return;
         }
-        const teksto = typeof body.teksto === "string" ? body.teksto.trim() : "";
-        if (teksto === "") {
-          sendJson(response, { satz: "Schreib, was du ändern möchtest." }, 422);
+        const audio =
+          typeof body.audio === "string" ? Buffer.from(body.audio, "base64") : Buffer.alloc(0);
+        if (audio.length === 0) {
+          sendJson(response, { satz: "Die Aufnahme ist leer." }, 422);
+          return;
+        }
+        let transkribo: Awaited<ReturnType<typeof transkribi>>;
+        try {
+          transkribo = await transkribi(
+            parolo,
+            audio,
+            typeof body.mime === "string" ? body.mime : "audio/webm",
+            {
+              ...(options.parolo?.fetch === undefined ? {} : { fetch: options.parolo.fetch }),
+            },
+          );
+        } catch (error) {
+          sendJson(
+            response,
+            { satz: redact(error instanceof Error ? error.message : String(error)) },
+            502,
+          );
           return;
         }
         const faceto = typeof body.faceto === "string" ? body.faceto : undefined;
-        const historio = babiloj.get(name) ?? [];
-        try {
-          const result = await babili({
-            provider,
-            laborejo: laborejoOf(name, draft, provider.toString()),
-            historio: historio.slice(-12),
-            teksto,
-            ...(faceto === undefined ? {} : { faceto }),
-            budget: new Budget(options.ki?.limo ?? 60_000),
-            ...(options.ki?.fetch === undefined ? {} : { fetch: options.ki.fetch }),
-            ...(options.ki?.sleep === undefined ? {} : { sleep: options.ki.sleep }),
-            log: (line) => io.stderr(`${redact(line)}\n`),
-          });
-          babiloj.set(name, [
-            ...historio,
-            { role: "user", content: teksto },
-            { role: "assistant", content: result.antwort },
-          ]);
-          const sumo = sumoj.get(name) ?? { enigo: 0, eligo: 0, ms: 0 };
-          sumoj.set(name, {
-            enigo: sumo.enigo + result.kosto.enigo,
-            eligo: sumo.eligo + result.kosto.eligo,
-            ms: sumo.ms + result.kosto.ms,
-          });
-          kroniko(name, {
-            ago: "babilo",
-            fonto: "babilo",
-            ...(faceto === undefined ? {} : { faceto }),
-            teksto,
-            modelo: provider.toString(),
-            kosto: result.kosto,
-            detaloj: { antwort: result.antwort, iloj: result.iloj, atendoj: result.atendoj },
-          });
-          sendJson(response, {
-            antwort: result.antwort,
-            rev: draft.rev,
-            kosto: result.kosto,
-            atendoj: result.atendoj,
-            sxangxoj: result.sxangxoj,
-            stato: statoOf(name, draft),
-          });
-        } catch (error) {
-          const satz =
-            error instanceof CostLimitReached
-              ? `Die Kostengrenze dieser Runde ist erreicht (${error.limit} Tokens). Formuliere den Wunsch kürzer oder in mehreren Schritten.`
-              : redact(error instanceof Error ? error.message : String(error));
-          sendJson(response, { satz }, 502);
-        }
+        const turn = await chatTurn(name, draft, transkribo.teksto, faceto, "parolo", {
+          transkribo: {
+            modelo: parolo.toString(),
+            ms: transkribo.ms,
+            ...(transkribo.sekundoj === undefined ? {} : { sekundoj: transkribo.sekundoj }),
+          },
+        });
+        sendJson(response, { teksto: transkribo.teksto, ...turn.body }, turn.status);
         return;
       }
       if (action === "faceto") {

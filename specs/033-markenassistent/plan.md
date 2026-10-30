@@ -396,3 +396,88 @@ pnpm fm metiejo --open
 cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
 pnpm --filter @fundamento/metiejo exec vitest run src/esploro src/enportilo
 ```
+
+## S5 – Sprache: Voxtral, Browser als Rückfall
+
+**Branch:** `261029-spec-033-s5-sprache` (auf S4) · **Datum:** 2026-10-29 · **Stand:** gebaut, Abnahme offen.
+
+### Zusammenfassung
+
+1. **Transkription** (`packages/metiejo/src/parolo/parolo.ts`).
+   - Voxtral mit dem genauen Modellnamen aus dem Konto des Maintainers: `voxtral-mini-transcribe-3-0`.
+   - Die Aufnahme geht als multipart an `/audio/transcriptions` von Mistral, Sprache `de`.
+   - Der Schlüssel steht nur im Header `authorization`. Eine Fehlermeldung des Anbieters wird geschwärzt, bevor sie weitergeht.
+2. **Server:** `POST /api/marko/<marke>/parolo` nimmt die Aufnahme (Base64, MIME-Typ, Schritt).
+   - Der Server transkribiert sie und führt mit dem Text denselben Chat-Zug wie beim Tippen, also nur über die Werkzeuge.
+   - In der Kroniko steht der Zug mit der Quelle **`parolo`**, dazu die Transkription (Modell, Millisekunden, Sekunden Audio).
+   - Der Schlüssel geht nie an den Browser.
+3. **Rückfall Browser:** Ohne `MISTRAL_API_KEY` erkennt der Browser die Sprache selbst über die **Web Speech API** (`SpeechRecognition`), wo er das kann.
+   - Der erkannte Text geht an den Chat, mit derselben Quelle `parolo`.
+   - Ohne Voxtral sagt die Route in einem Satz, dass `MISTRAL_API_KEY` fehlt und der Browser übernimmt.
+4. **Im Assistenten:** Neben dem Chat gibt es den Knopf „Sprechen“ und den Schalter „Antworten vorlesen“ (`speechSynthesis` des Browsers). Eine Zeile nennt den Weg der Sprache, Voxtral auf dem lokalen Server oder den Browser.
+5. **Antworten ohne Änderung** (Befund des Probelaufs, B-11): Behauptet das Modell eine Änderung, ohne dass ein Werkzeug etwas gesetzt hat, erinnert der Zug es einmal daran. Daraufhin ruft es das Werkzeug auf oder sagt, dass nichts geändert ist. Bleibt es bei der Behauptung, beginnt die Antwort mit „Es wurde nichts geändert.“ Dazu kommt Regel 6 im Systemtext. Das gilt für Tippen und Sprechen.
+
+### Entwurfsentscheidungen
+
+#### D-16 Sprache ist nur ein anderer Weg zum selben Chat-Zug
+Die Transkription ergibt Text. Danach läuft alles wie beim Tippen: Werkzeuge, Budget, 429-Wartezeiten, Kroniko. Es gibt keinen eigenen Pfad, an dem ein gesprochener Wert an den Reglern vorbeikäme. `chatTurn` in `servilo.ts` ist dafür aus der Chat-Route herausgezogen.
+
+#### D-17 Voxtral über den Schlüssel, nicht über `FM_KI_ANBIETER`
+Die Transkription nimmt `MISTRAL_API_KEY`, gleich welcher Anbieter für den Chat eingestellt ist. Der Chat kann also über OpenRouter `:free` laufen und die Sprache über Voxtral. Das Modell ist fest (`PAROLO_MODELO`) und nicht über die `.env` wählbar, damit kein teureres Modell hineinrutscht.
+
+#### D-18 Ehrliche Antwort statt Vertrauen
+Ob sich etwas geändert hat, bestimmen allein die Werkzeuge (`sxangxoj`), nicht der Text des Modells. Erkannt werden Behauptungen wie „habe … erhöht“, „wurde … gesetzt“, „ist jetzt“, auch mit Dezimalpunkt dazwischen. Ein Satz, der sagt, dass nichts geändert wurde, zählt nicht als Behauptung. Die Erinnerung kostet höchstens eine Anfrage mehr und läuft unter derselben Kostengrenze.
+
+### Probeläufe
+
+**Abnahme 4 (Sprache)** am 2026-10-29: ein Satz, mit `say -v Anna` als WAV erzeugt (54 618 Bytes, 1 s), gesprochen an eine Wegwerf-Marke im temporären Ordner. Transkription mit `mistral/voxtral-mini-transcribe-3-0`, Chat mit `mistral/ministral-14b-2512` (die `.env` nennt `mistral-large-latest`, der Probelauf hat das überschrieben), Kostengrenze 30 000 Tokens.
+
+| Was | Lauf 1 | Lauf 2 (nach B-11) |
+|---|---|---|
+| Transkript | „Mach die Ecken etwas runder.“ (richtig) | „Mach die Ecken etwas runder.“ (richtig) |
+| Voxtral | 462 ms, 1 s Audio | 436 ms, 1 s Audio |
+| Werkzeuge | nur `regler` (lesen) | `regler`, `setze_regler` |
+| Geändert | **nichts**, die Antwort behauptete aber „Radius von 1 auf 1,5 erhöht“ → B-11 | `formo` (Radius 1,5), die Antwort stimmt |
+| Kroniko | `babilo` mit Quelle `parolo` und Transkription | ebenso |
+| **Dauer** (Aufnahme bis Antwort) | **4,7 s** | **10,6 s** |
+| **Tokens** / Anfragen (Chat) | **2 558** (2 490 + 68) / 2 | **4 013** (3 942 + 71) / 3 |
+| **Kosten** Chat | ≈ **0,0005 $** | ≈ **0,0008 $** (0,20 $ je Mio. Tokens, B-3) |
+| **Kosten** Voxtral | 1 s Audio, Preis je Minute nicht geprüft (B-12) | ebenso |
+
+Kein Schlüssel stand in Kroniko oder Log. In Lauf 2 rief das Modell `setze_regler` von sich aus auf, die Erinnerung war nicht nötig. Dass sie greift, zeigen die Tests mit einem gescripteten Modell.
+
+### Abweichungen
+
+1. **Vorlesen nur über den Browser:** Die Spec nennt Sprache „ein und aus“. Antworten liest `speechSynthesis` des Browsers vor. Eine Sprachausgabe über einen Anbieter (Text-to-Speech) wäre ein weiteres Modell mit eigenen Kosten; dafür gibt es keine Freigabe.
+2. **Ehrliche Antwort (B-11)** kam als Befund aus dem Probelauf dazu und gilt auch für den getippten Chat.
+
+### Befunde / Mankoj
+
+- **B-11 Behauptete Änderung ohne Werkzeug** (Lauf 1): `ministral-14b-2512` las den Bereich des Reglers und antwortete, es habe den Radius erhöht, ohne `setze_regler` aufzurufen. Die Werkzeuge haben nichts geändert, die Regel „nie Rohwerte an den Reglern vorbei“ war also nicht verletzt; falsch war nur die Antwort. Behoben ist das mit D-18, die Tests kamen zuerst.
+- **B-12 Preis von Voxtral:** Der Preis je Minute für `voxtral-mini-transcribe-3-0` ist auf der Seite von Mistral nicht geprüft. Bei 1 s je Satz ist er klein. In S6 kommt er als Datum mit Preis in die Preisdaten.
+- Die Web Speech API gibt es nicht in jedem Browser (Firefox hat keine Erkennung). Dort meldet „Sprechen“ ohne `MISTRAL_API_KEY`: „Dieser Browser erkennt keine Sprache. Schreib deinen Wunsch oder setze MISTRAL_API_KEY für Voxtral.“
+
+### Offen (für den Maintainer)
+
+- keine neuen Punkte.
+
+### Messanleitung
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm install && pnpm build
+pnpm fm metiejo --open
+```
+
+1. Eine Marke anlegen und `http://localhost:7301/asistanto/<marke>/formo` öffnen. Unter dem Chat stehen „Sprechen“ und „Antworten vorlesen“. Die Zeile darunter nennt „Voxtral (mistral/voxtral-mini-transcribe-3-0) auf dem lokalen Server“, wenn `MISTRAL_API_KEY` in der `.env` steht, sonst den Browser.
+2. „Sprechen“ drücken, „Mach die Ecken etwas runder“ sagen, noch einmal drücken. Der Text erscheint im Chat, die Antwort darunter, die Vorschau wird runder.
+3. „Antworten vorlesen“ einschalten und noch einen Satz sagen. Der Browser liest die Antwort vor.
+4. Ohne `MISTRAL_API_KEY` (Zeile in der `.env` auskommentieren, Server neu starten): In Chrome oder Safari erkennt der Browser die Sprache selbst.
+5. Die Kroniko: `file:///Users/thorstenjankowski/Fundamento/marken/<marke>/kroniko.jsonl`. Der Zug hat `"fonto":"parolo"` und unter `detaloj.transkribo` Modell, Millisekunden und Sekunden.
+
+**Tests:**
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm --filter @fundamento/metiejo exec vitest run src/parolo src/asistanto
+```

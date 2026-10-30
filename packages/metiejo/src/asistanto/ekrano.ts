@@ -47,6 +47,8 @@ export interface AsistantoInput {
   fremda?: { kiel: string; nomo?: string; konfirmita: boolean };
   /** Tokens and time of the chat of this brand since the server started. */
   sumo: { enigo: number; eligo: number; ms: number };
+  /** Spec 033 S5: the Voxtral model when the server transcribes; absent: the browser's recognition. */
+  parolo?: string | undefined;
   /** Spec 033 S2: the open proposal of the Enportilo for this step, with its provenance. */
   propono?: { satz: string; herkunft: readonly { dosiero: string; loko?: string }[] };
 }
@@ -122,6 +124,9 @@ ${dialog}
 <div data-mt-babilo-listo>${chatHtml(input.historio)}</div>
 <fm-tekstareo name="teksto" rows="3" data-mt-babilo-teksto${input.ki.pret ? "" : " disabled"}>Deine Nachricht</fm-tekstareo>
 <fm-butono emphasis="high" data-mt-babilo-sendi${input.ki.pret ? "" : " disabled"}>Senden</fm-butono>
+<fm-butono emphasis="medium" data-mt-parolo data-mt-parolo-voxtral="${input.parolo === undefined ? "ne" : "ja"}"${input.ki.pret ? "" : " disabled"}>Sprechen</fm-butono>
+<fm-sxaltilo name="vorlesen" data-mt-vorlesen>Antworten vorlesen</fm-sxaltilo>
+<fm-teksto kind="caption" data-mt-parolo-satz>${escapeHtml(input.parolo === undefined ? "Sprache: Der Browser erkennt sie selbst (Web Speech API), wo er das kann." : `Sprache: Voxtral (${input.parolo}) auf dem lokalen Server.`)}</fm-teksto>
 ${propono}
 ${material}
 ${esploro}

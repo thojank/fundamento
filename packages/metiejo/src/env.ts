@@ -6,7 +6,8 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { type Provider, providerOf } from "./asistanto/ki.js";
+import { Provider, providerOf } from "./asistanto/ki.js";
+import { PAROLO_MODELO } from "./parolo/parolo.js";
 
 /** The variables of the spec, in its order (§4.3). */
 export const ENV_NAMES = [
@@ -121,6 +122,29 @@ export function kiOf(values: Partial<Record<EnvName, string>>): {
 export function readKi(root: string): { provider?: Provider; satz?: string } {
   const file = join(root, ".env");
   return kiOf(existsSync(file) ? parseEnv(readFileSync(file, "utf8")) : {});
+}
+
+/**
+ * Speech in over Voxtral (Spec 033 S5): the Mistral provider with the transcription model, from
+ * MISTRAL_API_KEY whatever FM_KI_ANBIETER says; absent without the key – the browser's Web Speech
+ * API takes over.
+ */
+export function paroloOf(values: Partial<Record<EnvName, string>>): {
+  provider?: Provider;
+  satz?: string;
+} {
+  const key = values.MISTRAL_API_KEY ?? "";
+  return key === ""
+    ? {
+        satz: "Sprache über Voxtral braucht MISTRAL_API_KEY in der .env. Ohne ihn erkennt der Browser die Sprache selbst (Web Speech API), wo er das kann.",
+      }
+    : { provider: new Provider("mistral", PAROLO_MODELO, key) };
+}
+
+/** Speech in of `<root>/.env`; see paroloOf. */
+export function readParolo(root: string): { provider?: Provider; satz?: string } {
+  const file = join(root, ".env");
+  return paroloOf(existsSync(file) ? parseEnv(readFileSync(file, "utf8")) : {});
 }
 
 /** Reads `<root>/.env` when it exists; nothing else is ever read (§4.3). */

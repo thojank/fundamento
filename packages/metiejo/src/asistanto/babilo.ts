@@ -22,6 +22,7 @@ export const SYSTEM_ASISTANTO = [
   "3. Die Freigabe eines Schritts gibt nur die Person mit dem Knopf „Freigeben“. Du gibst nichts frei und sagst nie, ein Schritt sei freigegeben.",
   "4. Bleib bei der aktuellen Faceto, wenn die Person nicht ausdrücklich eine andere meint.",
   "5. Wenn ein Werkzeug ablehnt, nenne den Grund und schlage einen erlaubten Weg vor.",
+  "6. Sag nie, du hättest etwas geändert, wenn kein Werkzeug es gesetzt hat. Lesen (stato, regler, pruefe) ändert nichts.",
   "Antworte auf Deutsch, kurz und ohne Fachbegriffe des Vortaro.",
 ].join("\n");
 
@@ -52,6 +53,16 @@ export interface BabiloRezulto {
   atendoj: number;
 }
 
+// Probe run S5, 29.10.: an answer that says a value was raised, set or made – while no tool changed
+// anything. A sentence that says nothing was changed is not a claim.
+const BEHAUPTUNG =
+  /\b(habe|hab|wurde|wurden)\b(?:[^.!?]|\d\.\d)*\b(geändert|erhöht|gesenkt|gesetzt|gemacht|angepasst|verringert|verstärkt|abgeschwächt|gewählt)\b|\b(ist|sind) (jetzt|nun)\b/i;
+const VERNEINT = /\bnichts?\b[^.!?]*\b(geändert|gesetzt)\b/i;
+const behauptet = (said: string) => BEHAUPTUNG.test(said) && !VERNEINT.test(said);
+export const ERINNERUNG =
+  "Du hast mit keinem Werkzeug etwas gesetzt, es wurde also nichts geändert. Ruf jetzt das passende Werkzeug auf (zum Beispiel setze_regler) oder sag, dass nichts geändert ist.";
+export const NICHTS_GEAENDERT = "Es wurde nichts geändert.";
+
 export async function babili(options: BabiloOptions): Promise<BabiloRezulto> {
   const { provider, laborejo, budget } = options;
   const started = Date.now();
@@ -76,6 +87,7 @@ export async function babili(options: BabiloOptions): Promise<BabiloRezulto> {
   let requests = 0;
   let atendoj = 0;
   let toolCalls = 0;
+  let erinnert = false;
   const chat = {
     ...(options.fetch === undefined ? {} : { fetch: options.fetch }),
     ...(options.sleep === undefined ? {} : { sleep: options.sleep }),
@@ -98,10 +110,18 @@ export async function babili(options: BabiloOptions): Promise<BabiloRezulto> {
     if (requested.length === 0 || !offer) {
       const said = typeof result.message.content === "string" ? result.message.content.trim() : "";
       const sxangxoj = laborejo.facetoj.facetoj.filter((entry) => changed.has(entry.name));
+      const claims = sxangxoj.length === 0 && behauptet(said);
+      if (claims && !erinnert) {
+        erinnert = true;
+        messages.push({ role: "assistant", content: said }, { role: "user", content: ERINNERUNG });
+        continue;
+      }
       // Probe run 29.10.: a model may answer with nothing after a tool; the person still gets a sentence.
       const antwort =
         said !== ""
-          ? said
+          ? claims
+            ? `${NICHTS_GEAENDERT} ${said}`
+            : said
           : sxangxoj.length > 0
             ? `Geändert: ${sxangxoj.map((entry) => entry.nomo.de).join(", ")}. Sieh dir die Vorschau an.`
             : "Ich habe nichts geändert. Sag es anders, zum Beispiel „wärmer“, „runder“ oder eine Farbe als #rrggbb.";

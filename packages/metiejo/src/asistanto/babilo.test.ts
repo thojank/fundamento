@@ -131,6 +131,52 @@ describe("one turn of the chat (Spec 033 S1)", () => {
     expect(nothing.antwort).toMatch(/nichts geändert/);
   });
 
+  // Probe run S5, 29.10. (ministral): after reading the sliders, the model said it had raised the
+  // radius – and had called no tool that changes anything.
+  it("an answer that claims a change no tool made gets one reminder; the model then calls the tool", async () => {
+    const { work, agordo } = laborejo();
+    const { fetch, requests } = scripted([
+      { body: toolCall("regler", { faceto: "formo" }) },
+      { body: answer("Ich habe den Radius von 1 auf 1,5 erhöht.") },
+      { body: toolCall("setze_regler", { regler: "form.radius", wert: 1.5 }) },
+      { body: answer("Jetzt ist der Radius 1,5.") },
+    ]);
+    const result = await babili({
+      provider,
+      fetch,
+      laborejo: work,
+      historio: [],
+      teksto: "runder",
+      budget: new Budget(20_000),
+    });
+    expect(result.sxangxoj).toEqual(["formo"]);
+    expect(agordo().form?.radius).toBe(1.5);
+    expect(result.antwort).toBe("Jetzt ist der Radius 1,5.");
+    const reminder = (
+      requests[2]?.body.messages as { role: string; content: string }[] | undefined
+    )?.at(-1);
+    expect(reminder?.role).toBe("user");
+    expect(reminder?.content).toContain("nichts geändert");
+  });
+
+  it("if the model still claims a change without a tool, the answer says that nothing was changed", async () => {
+    const { work } = laborejo();
+    const { fetch } = scripted([
+      { body: answer("Ich habe die Ecken runder gemacht.") },
+      { body: answer("Der Radius der Ecken wurde auf **1.5** erhöht.") },
+    ]);
+    const result = await babili({
+      provider,
+      fetch,
+      laborejo: work,
+      historio: [],
+      teksto: "runder",
+      budget: new Budget(20_000),
+    });
+    expect(result.sxangxoj).toEqual([]);
+    expect(result.antwort).toMatch(/^Es wurde nichts geändert\./);
+  });
+
   it("on 429 the turn waits, says so, and goes on", async () => {
     const { work } = laborejo();
     const waits: number[] = [];
