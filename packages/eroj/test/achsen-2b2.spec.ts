@@ -584,3 +584,137 @@ test.describe("②b-2 A-apartigilo-1, A-spuro-1, A-karto-1, A-avataro-1, A-avizo
     expect(await radius("c")).not.toBe("0px");
   });
 });
+
+test.describe("②b-2 A-tabelo-1, A-markdovido-1, A-plenstato-1/2, A-teksto-1: density, lines, compact, label", () => {
+  const TABLE =
+    '<table slot="content"><thead><tr><th scope="col">Name</th><th scope="col">Status</th></tr></thead><tbody><tr><th scope="row">Fokus</th><td>gültig</td></tr><tr><th scope="row">Kontrast</th><td>Entwurf</td></tr></tbody></table>';
+  const table = (id: string, attributes: string) =>
+    `<fm-tabelo id="${id}" ${attributes}>Standards${TABLE}</fm-tabelo>`;
+
+  test("tabelo: density default lies between compact and comfortable", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      table("c", 'density="compact"') +
+        table("d", 'density="default"') +
+        table("f", 'density="comfortable"') +
+        table("n", ""),
+    );
+    const height = (id: string) =>
+      page
+        .locator(`#${id} tbody td`)
+        .first()
+        .evaluate((cell) => Math.round(cell.getBoundingClientRect().height));
+    const [compact, middle, comfortable, none] = [
+      await height("c"),
+      await height("d"),
+      await height("f"),
+      await height("n"),
+    ];
+    expect(compact).toBeLessThan(middle);
+    expect(middle).toBeLessThan(comfortable);
+    expect(none).toBe(comfortable);
+  });
+
+  test("tabelo: lines draws the rows (as before), the columns, a grid or none", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      table("r", "") +
+        table("c", 'lines="columns"') +
+        table("g", 'lines="grid"') +
+        table("x", 'lines="none"'),
+    );
+    const edges = (id: string) =>
+      page
+        .locator(`#${id} tbody td`)
+        .first()
+        .evaluate((cell) => {
+          const style = getComputedStyle(cell);
+          return { below: style.borderBottomStyle, before: style.borderLeftStyle };
+        });
+    expect(await edges("r")).toEqual({ below: "solid", before: "none" });
+    expect(await edges("c")).toEqual({ below: "none", before: "solid" });
+    expect(await edges("g")).toEqual({ below: "solid", before: "solid" });
+    expect(await edges("x")).toEqual({ below: "none", before: "none" });
+    // The first cell of a row has no line before it.
+    const first = await page
+      .locator("#g tbody th")
+      .first()
+      .evaluate((cell) => getComputedStyle(cell).borderLeftStyle);
+    expect(first).toBe("none");
+  });
+
+  test("markdovido: density compact sets the blocks closer", async ({ page }) => {
+    const source = "Erster Absatz.&#10;&#10;Zweiter Absatz.";
+    await serve(
+      page,
+      out,
+      `<fm-markdovido id="d" source="${source}"></fm-markdovido><fm-markdovido id="c" density="compact" source="${source}"></fm-markdovido>`,
+    );
+    const gap = (id: string) =>
+      page.locator(`#${id}`).evaluate((host) => {
+        const blocks = [...host.children] as HTMLElement[];
+        const [a, b] = blocks;
+        return Math.round(
+          (b?.getBoundingClientRect().top ?? 0) - (a?.getBoundingClientRect().bottom ?? 0),
+        );
+      });
+    expect(await gap("c")).toBeLessThan(await gap("d"));
+  });
+
+  test("plenstato: compact takes less room and smaller text", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      '<fm-plenstato id="n" kind="empty">Noch keine Standards.</fm-plenstato><fm-plenstato id="c" kind="empty" compact>Noch keine Standards.</fm-plenstato>',
+    );
+    const look = (id: string) =>
+      page.locator(`#${id}`).evaluate((host) => {
+        const control = host.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+        const style = getComputedStyle(control);
+        return {
+          padding: Number.parseFloat(style.paddingLeft),
+          font: Number.parseFloat(getComputedStyle(host).fontSize),
+          height: control.getBoundingClientRect().height,
+        };
+      });
+    const normal = await look("n");
+    const compact = await look("c");
+    expect(compact.padding).toBeLessThan(normal.padding);
+    expect(compact.height).toBeLessThan(normal.height);
+  });
+
+  test("teksto: kind label writes in the label role; tabular sets figures of one width", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<fm-teksto id="l" kind="label">Status</fm-teksto><fm-teksto id="t" tabular>1 234,50</fm-teksto><fm-teksto id="b">1 234,50</fm-teksto>',
+    );
+    const style = (id: string) =>
+      page.locator(`#${id}`).evaluate((host) => {
+        const control = host.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+        const computed = getComputedStyle(control);
+        return {
+          size: computed.fontSize,
+          weight: computed.fontWeight,
+          numeric: computed.fontVariantNumeric,
+        };
+      });
+    const label = await page.evaluate(() => {
+      const root = getComputedStyle(document.documentElement);
+      return {
+        size: root.getPropertyValue("--fm-typography-label-1-font-size").trim(),
+        weight: root.getPropertyValue("--fm-typography-label-1-font-weight").trim(),
+      };
+    });
+    const shown = await style("l");
+    expect(shown.weight).toBe(label.weight);
+    expect((await style("t")).numeric).toBe("tabular-nums");
+    expect((await style("b")).numeric).toBe("normal");
+  });
+});
