@@ -381,7 +381,12 @@ describe("plurelektilo (D-16): several values from a long list, filterable, the 
       ["intent", "enum", "neutral"],
       ["message-position", "enum", "below"],
     ]);
-    expect(skemo?.props.find((prop) => prop.name === "summary")?.values).toEqual(["count", "tags"]);
+    // Spec 036 Teil 5 ②b-2 (A-plurelektilo-1): labels between count and tags.
+    expect(skemo?.props.find((prop) => prop.name === "summary")?.values).toEqual([
+      "count",
+      "labels",
+      "tags",
+    ]);
     expect(skemo?.states).toEqual([
       "rest",
       "hover",
