@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest";
 import { GRUND_HELL } from "../../test-doubles/uebernahme.js";
 import {
   bildPng,
+  ELEVATION_FLACH,
+  ELEVATION_SCHATTEN,
   FORM_KARTE,
   FORM_KNOPF,
   FORM_PILLE,
@@ -47,5 +49,22 @@ describe("Spec 036 Teil 4: shapes in an image", () => {
     }
     expect(stufeOf({ radius: 16, height: 32 })).toBe("pille");
     expect(stufeOf({ radius: 10, height: 32 })).toBe(1);
+  });
+
+  it("a soft band under a card is a shadow of as many rows; no band, or one dark line, is none", () => {
+    expect(analyse(ELEVATION_SCHATTEN).formen.map((forma) => forma.schatten)).toEqual([6]);
+    expect(analyse(ELEVATION_FLACH).formen.map((forma) => forma.schatten)).toEqual([0]);
+    const karte = ELEVATION_FLACH.rechtecke[0];
+    if (karte === undefined) throw new Error("no card");
+    const linie = {
+      x: karte.x,
+      y: karte.y + karte.height,
+      width: karte.width,
+      height: 1,
+      radius: 0,
+      farbe: "#c9bfae",
+    };
+    const mitLinie = { ...ELEVATION_FLACH, rechtecke: [karte, linie] };
+    expect(analyse(mitLinie).formen.find((forma) => forma.art === "karte")?.schatten).toBe(0);
   });
 });

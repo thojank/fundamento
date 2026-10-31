@@ -3,7 +3,8 @@
 // the declarations come the colours (literal, and a custom property once more for every var() that
 // uses it), the font families by role (headings: display, code: code, else body), the radii and the
 // spacing (padding and gap) in px, each with the file and the line. Generic families, 0, pills and
-// percentages do not count. A bot challenge instead of the page (a status that refuses automatic
+// percentages do not count. Spec 036 Teil 4: a drawn shadow (box-shadow, or a custom property named
+// for shadow or elevation, not inset) is a finding too, for the step „Elevation“. A bot challenge instead of the page (a status that refuses automatic
 // readers, the markers of a challenge) is Blokita: nothing of it is read (Spec 035, Befund 4.1).
 
 import postcss from "postcss";
@@ -75,6 +76,16 @@ function px(value: string): number | undefined {
   if (match === null) return undefined;
   const number = Number(match[1]) * (match[2] === "px" ? 1 : 16);
   return Number.isFinite(number) ? number : undefined;
+}
+
+/** The largest length of a drawn shadow in px; undefined for none, an inset or no length. */
+function shadowLength(value: string): number | undefined {
+  if (/\b(none|inset)\b/.test(value)) return undefined;
+  const lengths = [...value.matchAll(/(-?\d*\.?\d+)(px|rem|em)\b/g)].map(
+    (match) => Math.abs(Number(match[1])) * (match[2] === "px" ? 1 : 16),
+  );
+  const largest = Math.max(0, ...lengths);
+  return largest > 0 ? largest : undefined;
 }
 
 const roleOf = (selector: string): "body" | "display" | "code" =>
@@ -206,6 +217,11 @@ function readSheet(
       if (first !== undefined && first > 0 && first < 100) {
         out.push({ kind: "radiuso", valoro: first, pezo: 1, herkunft: at(line) });
       }
+    }
+    if (prop === "box-shadow" || (prop.startsWith("--") && /shadow|elevation/.test(prop))) {
+      const length = shadowLength(value);
+      if (length !== undefined)
+        out.push({ kind: "ombro", valoro: length, pezo: 1, herkunft: at(line) });
     }
     if (prop === "padding" || prop === "gap" || prop === "row-gap" || prop === "column-gap") {
       for (const part of value.split(/\s+/)) {
