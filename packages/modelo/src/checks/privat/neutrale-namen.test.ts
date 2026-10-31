@@ -31,6 +31,7 @@ import {
 import {
   composedWordExpression,
   EXCEPTIONS_FILE,
+  FORMATTER,
   GENERATORS,
   mapIdentifiers,
   mapText,
@@ -397,6 +398,29 @@ describe("the generators (technical spec, Teil 6)", () => {
     expect(report.generatedChanges).toEqual([generatedPath]);
     expect(report.left).toEqual([]);
     expect(report.generators.map((generator) => generator.code)).toEqual([0, 0, 0]);
+  });
+
+  // A rule can lengthen a line past the formatter's width or leave `x["fundamento"]` where Biome
+  // wants a key; the formatter of the checkout runs over the changed files before the generators
+  // (found by the trial run on a scratch copy of the repo, S36-5.1).
+  it("runs the checkout's formatter over the changed files first, where it has one", () => {
+    const root = gitRepo({ ...fixtureFiles(), "biome.json": "{}\n" });
+    const calls: (readonly string[])[] = [];
+    const report = runCodemod({
+      root,
+      runCommand: (command) => {
+        calls.push(command);
+        return 0;
+      },
+    });
+    expect(calls).toHaveLength(1);
+    const [command = []] = calls;
+    expect(command.slice(0, FORMATTER.command.length)).toEqual(FORMATTER.command);
+    expect(command.slice(FORMATTER.command.length)).toEqual(
+      report.changed.map((change) => change.path),
+    );
+    expect(report.generators.map((generator) => generator.id)).toEqual([FORMATTER.id]);
+    expect(runCodemod({ root, runCommand: () => 1 }).generators).toEqual([]);
   });
 
   it("fails when a generator fails, and stops there", () => {
