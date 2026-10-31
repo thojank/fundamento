@@ -53,6 +53,13 @@ import {
   type Vollstaendigkeit,
   vollstaendigkeitOf,
 } from "./asistanto/stato.js";
+import {
+  aktionsWortOf,
+  istZweitfarbe,
+  SEKUNDO_NOT_ACTION,
+  zweitfarbeAblehnungOf,
+  zweitfarbeAlsAktionOf,
+} from "./asistanto/zweitfarbe-aktion.js";
 import { buildOf, expertHinweis, standOf } from "./eksperto.js";
 import { EKSPORTO_CELOJ, type EksportoCelo, exportMarko } from "./eksporto.js";
 import { type Bildilo, playwrightBildilo } from "./enportilo/bildilo.js";
@@ -688,6 +695,34 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         },
       };
     }
+    // Spec 036, Befund 2.2: the Zweitfarbe never goes on buttons, links or the focus – a wish for
+    // it is refused in the person's words before any model is asked, and nothing changes.
+    const ablehnung = zweitfarbeAlsAktionOf(teksto);
+    if (ablehnung !== undefined) {
+      babiloj.set(name, [
+        ...(babiloj.get(name) ?? []),
+        { role: "user", content: teksto },
+        { role: "assistant", content: ablehnung },
+      ]);
+      kroniko(name, {
+        ago: "babilo",
+        fonto,
+        ...(faceto === undefined ? {} : { faceto }),
+        teksto,
+        detaloj: { antwort: ablehnung, abgelehnt: SEKUNDO_NOT_ACTION, ...detaloj },
+      });
+      return {
+        status: 200,
+        body: {
+          antwort: ablehnung,
+          rev: draft.rev,
+          atendoj: 0,
+          sxangxoj: [],
+          stato: statoOf(name, draft),
+          zaehlilo: zaehliloOf(name),
+        },
+      };
+    }
     if (teksto === "")
       return { status: 422, body: { satz: "Schreib oder sag, was du ändern möchtest." } };
     const historio = babiloj.get(name) ?? [];
@@ -999,6 +1034,21 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
             ],
           },
           422,
+        );
+        return;
+      }
+      // Spec 036, Befund 2.2: a button, a link or the focus on the Zweitfarbe is refused in the
+      // person's words (Regulo sekundo-not-action) before the draft changes.
+      const ziel = aktionsWortOf(token);
+      if (ziel !== undefined && istZweitfarbe(alias)) {
+        reply(
+          {
+            satz: zweitfarbeAblehnungOf([ziel]),
+            vorschlag: "Wähle eine Stufe der Leitfarbe oder der Neutraltöne.",
+            betroffen: [SEKUNDO_NOT_ACTION],
+            rule: SEKUNDO_NOT_ACTION,
+          },
+          409,
         );
         return;
       }
