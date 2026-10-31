@@ -489,3 +489,126 @@ describe("②b-2 A-ikono-2, A-signeto-2, A-avataro-2, A-pagxigilo-2, A-langetaro
     },
   );
 });
+
+/**
+ * The looks of the rest (S36-4.2): A-apartigilo-1 (emphasis), A-spuro-1 (emphasis), A-karto-1
+ * (tone), A-avataro-1 (corner), A-avizo-1 (frame) – each a new enum prop after every prop of
+ * 0.2.0, its default the look the Ero had; the keyed part properties bind by it.
+ */
+const LOOKS: Readonly<
+  Record<
+    string,
+    {
+      prop: string;
+      values: string[];
+      default: string;
+      keyed: Record<string, Record<string, string>>;
+    }
+  >
+> = {
+  apartigilo: {
+    prop: "emphasis",
+    values: ["low", "high"],
+    default: "low",
+    keyed: {
+      "line.width": { low: "border.width.default", high: "border.width.strong" },
+      "line.color": { low: "color.border.subtle", high: "color.border.default" },
+    },
+  },
+  karto: {
+    prop: "tone",
+    values: ["default", "muted", "none"],
+    default: "default",
+    keyed: {
+      "surface.fill": {
+        default: "color.background.raised",
+        muted: "color.background.sunken",
+        none: "inherit",
+      },
+      "surface.shadow": { default: "elevation.shadow.raised", muted: "none", none: "none" },
+    },
+  },
+  avataro: {
+    prop: "corner",
+    values: ["round", "soft", "square"],
+    default: "round",
+    keyed: {
+      "image.radius": { round: "radius.full", soft: "radius.small", square: "radius.none" },
+      "initials.radius": { round: "radius.full", soft: "radius.small", square: "radius.none" },
+    },
+  },
+  avizo: {
+    prop: "frame",
+    values: ["card", "band"],
+    default: "card",
+    keyed: { "box.radius": { card: "radius.role.surface", band: "radius.none" } },
+  },
+};
+
+describe("②b-2 A-apartigilo-1, A-karto-1, A-avataro-1, A-avizo-1: the looks", () => {
+  it.each(Object.entries(LOOKS))(
+    "%s: the new prop, last, its default the look it had",
+    (ero, look) => {
+      expect(entryOf(ero).skemo.props.at(-1)).toMatchObject({
+        name: look.prop,
+        kind: "enum",
+        values: look.values,
+        default: look.default,
+      });
+    },
+  );
+
+  it.each(Object.entries(LOOKS))("%s: each keyed part property binds by it", (ero, look) => {
+    for (const [path, byValue] of Object.entries(look.keyed)) {
+      const [part = "", property = ""] = path.split(".");
+      const source = entryOf(ero).skemo.parts[part]?.[property as "size"];
+      expect(source && "by" in source ? source.by : undefined, `${ero}.${path}`).toEqual([
+        look.prop,
+      ]);
+      for (const [value, token] of Object.entries(byValue)) {
+        expect(
+          boundOf(ero, part, property, { [look.prop]: value }),
+          `${ero}.${path}@${value}`,
+        ).toBe(token);
+      }
+    }
+  });
+
+  it.each(Object.entries(LOOKS))("%s: the brief names the axis, under 750", (ero, look) => {
+    const brief = briefOf(entryOf(ero));
+    expect(brief.axes).toContainEqual({
+      name: look.prop,
+      values: look.values,
+      default: look.default,
+    });
+    expect(tokensOf(brief)).toBeLessThan(750);
+  });
+});
+
+describe("②b-2 A-spuro-1: emphasis", () => {
+  it("spuro: emphasis medium | low, the last prop; low writes the links in the subtle text", () => {
+    expect(entryOf("spuro").skemo.props.at(-1)).toMatchObject({
+      name: "emphasis",
+      kind: "enum",
+      values: ["medium", "low"],
+      default: "medium",
+    });
+    expect(entryOf("spuro").skemo.parts.item?.color).toEqual({
+      by: ["emphasis", "current", "state"],
+    });
+    const color = (emphasis: string, current: string, state: string) =>
+      boundOf("spuro", "item", "color", { emphasis, current, state });
+    expect(color("medium", "false", "rest")).toBe("color.link.rest");
+    expect(color("medium", "false", "hover")).toBe("color.link.hover");
+    expect(color("low", "false", "rest")).toBe("color.text.subtle");
+    expect(color("low", "false", "hover")).toBe("color.text.default");
+    expect(color("low", "true", "rest")).toBe(color("medium", "true", "rest"));
+    const brief = briefOf(entryOf("spuro"));
+    expect(brief.axes).toContainEqual({
+      name: "emphasis",
+      values: ["medium", "low"],
+      default: "medium",
+    });
+    expect(tokensOf(brief)).toBeLessThan(750);
+  });
+});
