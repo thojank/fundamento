@@ -82,6 +82,8 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
       // Spec 029 ②b-1b M-2: the status of the field.
       ["intent", ["neutral", "success", "warning", "danger"], "neutral"],
       ["message-position", ["below", "joined"], "below"],
+      // Spec 036 Teil 5 ②b-2 (A-sxaltilo-1): the side of the label, the last prop.
+      ["label-side", ["start", "end"], "end"],
     ]);
     expect(skemo.states).toEqual(["rest", "hover", "focus", "disabled", "warning", "success"]);
     expect(skemo.slots).toEqual([

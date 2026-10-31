@@ -1237,6 +1237,8 @@ describe("Figma plan for the sxaltilo (Spec 010 ①)", () => {
       // Spec 029 ②b-1b M-2: the status of a field, its message beside help and error.
       intent: ["neutral", "success", "warning", "danger"],
       "message-position": ["below", "joined"],
+      // Spec 036 Teil 5 ②b-2 (A-sxaltilo-1): the side of the label, a property and no variant.
+      "label-side": ["start", "end"],
       state: ["rest", "hover", "focus", "disabled", "warning", "success"],
     });
     expect(set?.variants).toHaveLength(2 * 2 * 6);

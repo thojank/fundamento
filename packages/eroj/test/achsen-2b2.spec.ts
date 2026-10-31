@@ -111,7 +111,7 @@ test.describe("②b-2 A-sxaltilo-1: label-side", () => {
     await serve(
       page,
       out,
-      '<fm-sxaltilo id="e">Benachrichtigungen</fm-sxaltilo><br><fm-sxaltilo id="s" label-side="start">Benachrichtigungen</fm-sxaltilo>',
+      '<div><fm-sxaltilo id="e">Benachrichtigungen</fm-sxaltilo></div><div><fm-sxaltilo id="s" label-side="start">Benachrichtigungen</fm-sxaltilo></div>',
     );
     const placed = (id: string) =>
       page.locator(`#${id}`).evaluate((host) => {
@@ -120,7 +120,7 @@ test.describe("②b-2 A-sxaltilo-1: label-side", () => {
           root.querySelector('[part="control"]') as HTMLElement
         ).getBoundingClientRect();
         const label = (root.querySelector('[part="label"]') as HTMLElement).getBoundingClientRect();
-        const box = host.getBoundingClientRect();
+        const box = (root.querySelector('[part="field"]') as HTMLElement).getBoundingClientRect();
         return {
           labelFirst: label.right <= control.left,
           controlFirst: control.right <= label.left,
