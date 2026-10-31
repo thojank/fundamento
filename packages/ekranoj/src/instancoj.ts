@@ -5,6 +5,7 @@
 // from the element's own and unslotted text; the nearest `fm-*` ancestor as container; the language
 // of the screen. A difference between this check (D-04) and K3 is shown, not hidden.
 
+import { LIGILAJ_ATRIBUTOJ } from "./navigado.js";
 import type { Fakto, FaktoElemento, Malobservo, ToolBridge } from "./tipoj.js";
 
 /** One use of an Ero, the input of check_usage (the Modelo's `EroInstance`, restated). */
@@ -20,8 +21,16 @@ export interface EroInstanco {
 
 /** What the instances need of a Skemo: the typed props and the slot names. */
 export interface EroSkemo {
-  props: { name: string; kind: "enum" | "boolean" | "string" | "number"; values?: string[] }[];
+  props: {
+    name: string;
+    kind: "enum" | "boolean" | "string" | "number";
+    values?: string[];
+    /** The prop must be set (S037-04, additive). */
+    required?: boolean;
+  }[];
   slots: { name: string; default?: boolean }[];
+  /** The ARIA role the Skemo gives the Ero (`a11y.role`; S037-04, additive). */
+  rolo?: string;
 }
 
 /** Reads the Skemo of an Ero by name; undefined when the name is no Ero. */
@@ -54,7 +63,14 @@ export function skemoDe(respondo: string): EroSkemo | undefined {
       const values = Array.isArray(prop.values)
         ? prop.values.filter((value): value is string => typeof value === "string")
         : undefined;
-      return [{ name: prop.name, kind, ...(values === undefined ? {} : { values }) }];
+      return [
+        {
+          name: prop.name,
+          kind,
+          ...(values === undefined ? {} : { values }),
+          ...(prop.required === true ? { required: true } : {}),
+        },
+      ];
     },
   );
   const slots = (Array.isArray(body.skemo.slots) ? body.skemo.slots : []).flatMap((slot) =>
@@ -62,7 +78,8 @@ export function skemoDe(respondo: string): EroSkemo | undefined {
       ? [{ name: slot.name, ...(slot.default === true ? { default: true } : {}) }]
       : [],
   );
-  return { props, slots };
+  const rolo = isObject(body.skemo.a11y) ? body.skemo.a11y.role : undefined;
+  return { props, slots, ...(typeof rolo === "string" ? { rolo } : {}) };
 }
 
 /** A reader over the bridge with one `get_ero` per name and run (cached, also the misses). */
@@ -261,4 +278,40 @@ export async function kontroliUzon(
   if (instancoj.length === 0) return { instancoj, malobservoj: [] };
   const respondo = await ponto.call("check_usage", { instances: instancoj });
   return { instancoj, malobservoj: malobservojDe(respondo, instancoj) };
+}
+
+/**
+ * Which Eroj of the screens are links and where they carry their target, read from their Skemoj
+ * (S037-07 Befund 1, the same rule as nordstelo's `faktojPorNavigado`): an Ero whose Skemo gives it
+ * the ARIA role `link` and exactly one required string prop holds its target in that prop. The
+ * documented fallback (`LIGILAJ_ATRIBUTOJ`) stays for an Ero whose Skemo is not readable; a
+ * readable Skemo overrides it. Nothing about a single Ero is typed here.
+ */
+export async function ligilajAtributojDe(
+  faktoj: Readonly<Record<string, Fakto>>,
+  legi: SkemoLegilo,
+): Promise<Record<string, string>> {
+  const atributoj: Record<string, string> = { ...LIGILAJ_ATRIBUTOJ };
+  // In order of first use, as check_usage reads the Skemoj (one get_ero per name and run).
+  const tags = [
+    ...new Set(
+      Object.values(faktoj).flatMap((fakto) =>
+        fakto.elements.flatMap((element) =>
+          fmNomo(element.tag) === undefined ? [] : [element.tag],
+        ),
+      ),
+    ),
+  ];
+  for (const tag of tags) {
+    const skemo = await legi(fmNomo(tag) ?? "");
+    if (skemo === undefined) continue;
+    const celoj = skemo.props.filter((prop) => prop.kind === "string" && prop.required === true);
+    const celo = celoj[0];
+    if (skemo.rolo === "link" && celoj.length === 1 && celo !== undefined) {
+      atributoj[tag] = celo.name;
+    } else {
+      delete atributoj[tag];
+    }
+  }
+  return atributoj;
 }

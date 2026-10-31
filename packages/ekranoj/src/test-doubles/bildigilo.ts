@@ -1,7 +1,9 @@
-// A renderer double (C-6 `Bildigilo`): no browser. The facts are the links and `fm-*` elements of
-// the fragment between <body> and </body>, rendered light and dark without axe findings (or with
-// the findings a test gives), photos are empty. Records every document.
+// A renderer double (C-6 `Bildigilo`): no browser. The facts are the elements of the agent
+// fragment (inside the frame's markers, else between <body> and </body>; the frame's back-link is
+// never a fact, D-27), rendered light and dark without axe findings (or with the findings a test
+// gives), photos are empty. Records every document.
 
+import { fragmentoEl } from "../konstruo.js";
 import type {
   Bildigilo,
   BildigoRezulto,
@@ -29,7 +31,10 @@ export class BildigiloDouble implements Bildigilo {
     opcioj: { aspektoj: readonly string[]; varianto: Varianto },
   ): Promise<BildigoRezulto> {
     this.dokumentoj.push({ dokumento, aspektoj: opcioj.aspektoj, varianto: opcioj.varianto });
-    const body = /<body[^>]*>([\s\S]*)<\/body>/i.exec(dokumento.html)?.[1] ?? dokumento.html;
+    const body =
+      fragmentoEl(dokumento.html) ??
+      /<body[^>]*>([\s\S]*)<\/body>/i.exec(dokumento.html)?.[1] ??
+      dokumento.html;
     const elements: FaktoElemento[] = [];
     for (const trovo of body.matchAll(/<([a-z][a-z0-9-]*)([^>]*)>/g)) {
       const attrs: Record<string, string> = {};

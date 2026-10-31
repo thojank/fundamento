@@ -1,6 +1,10 @@
 // Navigation of a flow (D-05, formula D-28, contract C-4): pure, from the stored facts. The agent
 // writes the navigation inside its fragment (D-27); the frame's back-link to the overview is not in
-// the facts. A link is the `href` of any element of the fragment.
+// the facts. A link is the `href` of any element of the fragment, and – for an Ero that is a link
+// but carries its target in a prop (the Modelo's link Ero has `to`, no `href`; S037-07 Befund 1) –
+// the value of that prop. Which Eroj are links and which prop holds the target comes from their
+// Skemo (`ligilajAtributojDe` in instancoj.ts); without a readable Skemo the documented fallback
+// `LIGILAJ_ATRIBUTOJ` applies. The facts themselves are never changed: they stay a twin of the DOM.
 
 import type { EkranaNavigado, Fakto, Kanto, NavigadoRezulto, Plano } from "./tipoj.js";
 
@@ -30,12 +34,39 @@ export function legiLigilon(href: string, slugs: ReadonlySet<string>): Ligilo {
   return slug !== undefined && slugs.has(slug) ? { speco: "ekrano", slug } : { speco: "morta" };
 }
 
+/**
+ * The fallback when no Skemo is readable: the Modelo's link Ero (role `link` in its Skemo) carries
+ * its target in its one required string prop `to`. Only this documented default is typed here; the
+ * run reads the map from the Skemoj over MCP and passes it as `ligilaAtributoj`.
+ */
+export const LIGILAJ_ATRIBUTOJ: Readonly<Record<string, string>> = Object.freeze({
+  "fm-ligilo": "to",
+});
+
+/** The link target of an element: its `href`, else the target prop of a link Ero. */
+export function celoDeElemento(
+  element: { tag: string; attrs: Readonly<Record<string, string>> },
+  ligilaAtributoj: Readonly<Record<string, string>> = LIGILAJ_ATRIBUTOJ,
+): string | undefined {
+  const href = element.attrs.href;
+  if (href !== undefined) return href;
+  const prop = Object.hasOwn(ligilaAtributoj, element.tag)
+    ? ligilaAtributoj[element.tag]
+    : undefined;
+  return prop === undefined ? undefined : element.attrs[prop];
+}
+
 export interface NavigadoOpcioj {
   /**
    * The screens the overview links to. Default: every planned screen with facts – the generated
    * overview links every screen that was built.
    */
   eniroj?: readonly string[];
+  /**
+   * Tag → prop that holds the target, for Eroj whose Skemo says they are links (S037-04,
+   * additive). Default: `LIGILAJ_ATRIBUTOJ`. `href` wins where both are set.
+   */
+  ligilaAtributoj?: Readonly<Record<string, string>>;
 }
 
 /**
@@ -60,7 +91,7 @@ export function navigado(
     const own = new Set<string>();
     const mortaj: string[] = [];
     for (const element of built(slug)?.elements ?? []) {
-      const href = element.attrs.href;
+      const href = celoDeElemento(element, opcioj.ligilaAtributoj);
       if (href === undefined) continue;
       const ligilo = legiLigilon(href, slugs);
       if (ligilo.speco === "ekrano") own.add(ligilo.slug);

@@ -5,8 +5,11 @@
 // its fragment and the findings in the next round; a green one is carried forward and marked
 // (D-26). After the last round every finding left is a deviation with rule, place and reason. One
 // metiejo Budget over the whole run: at the limit the run stops before the request and keeps what
-// it has (AC-9). Without an `eligo` seam (S037-04) the run writes nothing and only returns.
+// it has (AC-9). Without an `eligo` seam (S037-04) the run writes nothing and only returns; with
+// it, the brand is built once into `<out>/marko/` (Variante F) before the first request and the
+// seam writes the run folder (eligo.ts).
 
+import { join } from "node:path";
 import { Budget } from "@fundamento/metiejo";
 import {
   type AgentaManko,
@@ -18,7 +21,7 @@ import {
 } from "./agento.js";
 import { statikaFakto } from "./fakto-statika.js";
 import { gardiModelon } from "./gardo.js";
-import { kontroliUzon, type SkemoLegilo, skemoLegiloDe } from "./instancoj.js";
+import { kontroliUzon, ligilajAtributojDe, type SkemoLegilo, skemoLegiloDe } from "./instancoj.js";
 import { haltigoDe, kostoDe, taksiKostojn } from "./kostoj.js";
 import { filtriIlojn } from "./mcp-kliento.js";
 import { navigado } from "./navigado.js";
@@ -323,6 +326,21 @@ export async function kuruEkranojn(
   deps.log(takso.satz);
   await deps.takso?.(takso);
 
+  // The output starts before the first request: the brand build once per run (Variante F only –
+  // Variante 0 has no Fundamento CSS and no Eroj, D-34), then the seam. A failing brand build is a
+  // setup error and is thrown before anything is asked.
+  if (deps.eligo !== undefined) {
+    const marko =
+      varianto === "F" ? await deps.marko.konstrui(join(enigo.out, "marko")) : undefined;
+    await deps.eligo.komenco?.({
+      enigo,
+      varianto,
+      lingvo,
+      bildigilo: deps.bildigilo !== undefined,
+      ...(marko === undefined ? {} : { marko }),
+    });
+  }
+
   const budget = new Budget(enigo.maksTokenoj);
   const peno: Peno = {
     inputTokens: 0,
@@ -565,7 +583,12 @@ async function kontroliRondon(k: RondoKunteksto): Promise<Rondo> {
       faktoj[ekrano.slug] = statikaFakto(fragmento, lingvo);
     }
   }
-  const nav = navigado(plano, faktoj);
+  // Links of Eroj that carry their target in a prop (S037-07 Befund 1): which ones, from the Skemo.
+  const nav = navigado(
+    plano,
+    faktoj,
+    k.legi === undefined ? {} : { ligilaAtributoj: await ligilajAtributojDe(faktoj, k.legi) },
+  );
   const rondo: Rondo = {};
   for (const ekrano of plano.ekranoj) {
     const ekde = k.verdaEkde.get(ekrano.slug);
