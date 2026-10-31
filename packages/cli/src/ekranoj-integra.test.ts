@@ -169,13 +169,15 @@ const NENIAM_VERDA: Taksilo = {
 };
 
 /** A small brand build: one stylesheet (for the tests that are not about the brand). */
-const ETA_MARKO: Marko = {
-  async konstrui(dir) {
-    await mkdir(join(dir, "css"), { recursive: true });
-    writeFileSync(join(dir, "css", "fundamento.css"), ":root { --fm-provo: 1px; }\n");
-    return { css: ["css/fundamento.css"] };
-  },
-};
+function etaMarko(): Marko {
+  return {
+    async konstrui(dir) {
+      await mkdir(join(dir, "css"), { recursive: true });
+      writeFileSync(join(dir, "css", "fundamento.css"), ":root { --fm-provo: 1px; }\n");
+      return { css: ["css/fundamento.css"] };
+    },
+  };
+}
 
 interface Spuro {
   babiloj: number;
@@ -200,7 +202,7 @@ function arangxo(opcioj: Opcioj = {}) {
   const bildigilo = new BildigiloDouble();
   const spuro: Spuro = { babiloj: 0, gvidantoj: 0 };
   const taksilo = opcioj.taksilo === "reala" ? undefined : (opcioj.taksilo ?? NENIAM_VERDA);
-  const marko = opcioj.marko === "reala" ? undefined : (opcioj.marko ?? ETA_MARKO);
+  const marko = opcioj.marko === "reala" ? undefined : (opcioj.marko ?? etaMarko());
   const medio: Partial<EkranojMedio> = {
     tty: () => false,
     chat: (e) => {
