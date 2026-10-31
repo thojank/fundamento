@@ -103,3 +103,53 @@ test.describe("②b-2 A-markobutono-1: a read-only checkbox", () => {
     expect(sent).toBe("on");
   });
 });
+
+test.describe("②b-2 A-sxaltilo-1: label-side", () => {
+  test("start puts the label before the switch, end after it; the field keeps its size", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<fm-sxaltilo id="e">Benachrichtigungen</fm-sxaltilo><br><fm-sxaltilo id="s" label-side="start">Benachrichtigungen</fm-sxaltilo>',
+    );
+    const placed = (id: string) =>
+      page.locator(`#${id}`).evaluate((host) => {
+        const root = host.shadowRoot as ShadowRoot;
+        const control = (
+          root.querySelector('[part="control"]') as HTMLElement
+        ).getBoundingClientRect();
+        const label = (root.querySelector('[part="label"]') as HTMLElement).getBoundingClientRect();
+        const box = host.getBoundingClientRect();
+        return {
+          labelFirst: label.right <= control.left,
+          controlFirst: control.right <= label.left,
+          size: [Math.round(box.width), Math.round(box.height)],
+        };
+      });
+    const end = await placed("e");
+    const start = await placed("s");
+    expect(end).toMatchObject({ controlFirst: true, labelFirst: false });
+    expect(start).toMatchObject({ labelFirst: true, controlFirst: false });
+    expect(start.size).toEqual(end.size);
+  });
+
+  test("start follows the writing direction: in right-to-left the label stands right", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<div dir="rtl"><fm-sxaltilo id="s" label-side="start">Benachrichtigungen</fm-sxaltilo></div>',
+    );
+    const labelRight = await page.locator("#s").evaluate((host) => {
+      const root = host.shadowRoot as ShadowRoot;
+      const control = (
+        root.querySelector('[part="control"]') as HTMLElement
+      ).getBoundingClientRect();
+      const label = (root.querySelector('[part="label"]') as HTMLElement).getBoundingClientRect();
+      return label.left >= control.right;
+    });
+    expect(labelRight).toBe(true);
+  });
+});
