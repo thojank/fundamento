@@ -16,14 +16,15 @@ import {
   poentiFluon,
   poentiKuron,
 } from "./poentoj.js";
-import { konstantaTaksilo, taksiloDeKatalogo } from "./test-doubles/taksilo.js";
+import { taksiloPorMezuro } from "./raporto.js";
+import { konstantaTaksilo } from "./test-doubles/taksilo.js";
 
 const { modelo } = loadModelo(defaultModeloSource());
 if (modelo === undefined) throw new Error("the repository Modelo must load");
 const tasko = trovuTaskon("liste-filter-detail");
 if (tasko === undefined) throw new Error("the flow liste-filter-detail must exist");
 const katalogo = legiKatalogon();
-const taksilo = taksiloDeKatalogo({ modelo, katalogo, tasko });
+const taksilo = taksiloPorMezuro({ modelo, katalogo, tasko });
 
 const fixtures = fileURLToPath(new URL("../../test/fixtures/ablauf/", import.meta.url));
 const runs = readdirSync(fixtures, { withFileTypes: true })
@@ -174,7 +175,7 @@ describe("the score of a flow per screen", () => {
         tasko: own,
         varianto: run.varianto,
         kuro,
-        taksilo: taksiloDeKatalogo({ modelo, katalogo, tasko: own }),
+        taksilo: taksiloPorMezuro({ modelo, katalogo, tasko: own }),
         modelo,
       };
       const first = poentiKuron(input);

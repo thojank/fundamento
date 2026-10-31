@@ -16,9 +16,9 @@ import {
   type Modelo,
   type NordsteloFile,
 } from "@fundamento/modelo";
+import { ekranoTaksilo } from "../ekrano-taksilo.js";
 import { median } from "../report.js";
-import { scoreBoth } from "../score.js";
-import { type AblaufTasko, taskoDe, trovuTaskon } from "./katalogo.js";
+import { type AblaufTasko, kriteriojDe, trovuTaskon } from "./katalogo.js";
 import { type FluaPoento, legiKatalogon, legiKuron, poentiKuron } from "./poentoj.js";
 
 /**
@@ -251,29 +251,21 @@ export const lastoSuperKernoj = (sxargo: KuroSxargo): boolean =>
   Math.max(sxargo.antaux.l1, sxargo.post.l1) > sxargo.kernoj;
 
 /**
- * The scorer of the measurement: nordstelo's unchanged scoring in the weighting of the Modelo
- * catalogue (`scoreBoth(…).nova`: its weights and its gate, read from the catalogue, never
- * copied), each screen a Tasko in memory (`taskoDe`) – the recipe of C-3/C-8.
- * SEAM (S037-05, C-8): once `ekranoTaksilo` is on branch A, S037-12/13 switch this to
- * `ekranoTaksilo({ modelo, katalogo, kriterioj: kriteriojDe(tasko) })`; the scores must stay equal.
+ * The scorer of the measurement: the nordstelo adapter of ekranoj (C-8, `ekranoTaksilo`) with the
+ * K6 criteria of the flow and its slug, so the Tasko of a screen is named `<flow>/<screen>` – the
+ * same scorer `fm ekranoj` uses (weights and gate read from the Modelo catalogue, never copied).
  */
 export function taksiloPorMezuro(e: {
   modelo: Modelo;
   katalogo: NordsteloFile;
   tasko: AblaufTasko;
 }): Taksilo {
-  return {
-    taksi({ fakto, ekrano, varianto }) {
-      const own = e.tasko.ekranoj.find((entry) => entry.slug === ekrano.slug);
-      if (own === undefined)
-        throw new Error(`Screen ${ekrano.slug} gehört nicht zu ${e.tasko.slug}.`);
-      const result = scoreBoth(
-        { facts: fakto, tasko: taskoDe(e.tasko, own), variant: varianto, modelo: e.modelo },
-        e.katalogo,
-      ).nova;
-      return { k: result.k, total: result.total, mankoj: result.gaps };
-    },
-  };
+  return ekranoTaksilo({
+    modelo: e.modelo,
+    katalogo: e.katalogo,
+    kriterioj: kriteriojDe(e.tasko),
+    tasko: e.tasko.slug,
+  });
 }
 
 export interface RaportoOpcioj {
