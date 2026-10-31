@@ -5,6 +5,7 @@
 // a stylesheet. A material without a calm area leaves the step open.
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { encodePng } from "../test-doubles/png.js";
 import {
   GRUND_DUNKEL,
   GRUND_HELL,
@@ -106,5 +107,13 @@ describe("Spec 036 Teil 4: Neutraltöne from the ground and the surface (4.1)", 
     const html = await (await fetch(`${servilo.url}/asistanto/hela/neutralaj`)).text();
     expect(html).toContain("data-mt-propono");
     expect(html).toContain(`Grundfläche ${GRUND_HELL.grund}, ${GRUND_HELL.ziel.grundAnteil} %`);
+  });
+  it("a material without a calm area leaves the neutrals open, with a sentence", async () => {
+    const bunt = encodePng(30, 30, (x) =>
+      x < 10 ? [0xc2, 0x25, 0x5c, 255] : x < 20 ? [0x25, 0x63, 0xeb, 255] : [0x16, 0xa3, 0x4a, 255],
+    );
+    const vorschlag = await neutraltoeneOf("bunta", { filename: "bunt.png", bytes: bunt });
+    expect(vorschlag?.offen).toBe(true);
+    expect(vorschlag?.satz).toContain("Neutraltöne bleiben offen");
   });
 });
