@@ -105,6 +105,12 @@ jobs:
       - name: "Check: Fontoj"
         run: pnpm check:fontoj
 
+      # Spec 036 Teil 6 (6.4, D-10): no versioned file names the word of R-12 or the private font
+      # repository. The check scans `git ls-files` and knows both names only by hash; the verbatim
+      # spec copies are its only exceptions, pinned by SHA-256.
+      - name: "Check: Privat"
+        run: pnpm check:privat
+
       # F23: the release path itself, on every PR — both kits built as release.yml builds them,
       # packed as a dry run. A broken release path turns red here, not in the maintainer's run.
       - name: "Check: Release"
