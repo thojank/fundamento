@@ -374,6 +374,7 @@ describe("the generators (technical spec, Teil 6)", () => {
       ...fixtureFiles(),
       "package.json": `${JSON.stringify({ scripts: { build: "x", "vortaro:ero-tokenoj": "x" } })}\n`,
       "packages/modelo/package.json": `${JSON.stringify({ scripts: { "generate:types": "x" } })}\n`,
+      "packages/agordilo/package.json": `${JSON.stringify({ scripts: { fixtures: "x" } })}\n`,
       [generatedPath]: `// $id ${old.schemaBase}modelo.schema.json\n`,
     });
 
@@ -397,7 +398,23 @@ describe("the generators (technical spec, Teil 6)", () => {
     expect(report.skipped.generated).toEqual([generatedPath]);
     expect(report.generatedChanges).toEqual([generatedPath]);
     expect(report.left).toEqual([]);
-    expect(report.generators.map((generator) => generator.code)).toEqual([0, 0, 0]);
+    expect(report.generators.map((generator) => generator.code)).toEqual(GENERATORS.map(() => 0));
+  });
+
+  // The Agordilo's derived fixtures (aspekto-provo, aspekto-provo-kompakta) name the fingerprint of
+  // the structure they were derived from, and fixtures/stufe1-provo.json keeps the checksums of
+  // the stage-1 derivation; both cover content with the extension key, so they are derived again
+  // after the Ero-Tokens, by the Agordilo, not rewritten as text (S36-5.2, found by the run).
+  it("derives the Agordilo's fixtures and the stage-1 checksums again, last", () => {
+    expect(GENERATORS.map((generator) => generator.id)).toEqual([
+      "schema-types",
+      "build",
+      "ero-tokenoj",
+      "agordilo-fixtures",
+    ]);
+    const agordilo = GENERATORS.find((generator) => generator.id === "agordilo-fixtures");
+    expect(agordilo?.manifest).toBe("packages/agordilo/package.json");
+    expect(agordilo?.command).toEqual(["pnpm", "--filter", "@fundamento/agordilo", "fixtures"]);
   });
 
   // A rule can lengthen a line past the formatter's width or leave `x["fundamento"]` where Biome
