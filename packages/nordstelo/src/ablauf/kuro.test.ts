@@ -7,7 +7,13 @@ import { existsSync, mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { MalpermesitaModelo, PERMESITA_MODELO, type Varianto } from "@fundamento/ekranoj";
+import {
+  kunigiMankojn,
+  MalpermesitaModelo,
+  type Manko,
+  PERMESITA_MODELO,
+  type Varianto,
+} from "@fundamento/ekranoj";
 import { defaultModeloSource, loadModelo, type Modelo } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { type AblaufTasko, planoDe, trovuTaskon } from "./katalogo.js";
@@ -237,6 +243,40 @@ describe("the measurement „ganzer Ablauf“", () => {
     expect(raporto.md).toContain("## Runde 1 gegen Runde 3 je Aufgabe");
     expect(raporto.md).toContain(`| ${LFD} | 1 | 100 | 44,4 | +55,6 |`);
     expect(raporto.md).toContain("ja, seit Runde 1");
+  });
+
+  it("writes the gaps of every run to mankoj.json, so fm ekranoj mankoj finds the measurement (Teil 3)", async () => {
+    const out = mkdtempSync(join(tmpdir(), "s037-ablauf-"));
+    const manko = (tasko: string): Manko => ({
+      speco: "sxablono",
+      nomo: "filtroliste",
+      ofteco: 1,
+      taskoj: [tasko === LFD ? "standards-liste" : "kennzahlen"],
+      ekzemplo: "Liste mit Filter über der Tabelle",
+      propono: "Sxablono für eine gefilterte Liste",
+      celo: "muster-rondo-2",
+    });
+    const { kuruEkranojn } = duoblaKuro({
+      faktoj,
+      mankoj: (tasko, varianto) => (varianto === "F" ? [manko(tasko)] : []),
+    });
+    const { dir } = await kuriAblaufon(
+      { taskoj: [LFD, UK], maksTokenoj: 1_000_000, out },
+      deps({ kuruEkranojn }),
+    );
+    for (const tasko of [LFD, UK]) {
+      for (const varianto of ["F", "0"] as const) {
+        const file = join(kuroDir(dir, tasko, varianto, 1), "mankoj.json");
+        expect(existsSync(file), file).toBe(true);
+        expect(JSON.parse(readFileSync(file, "utf8"))).toEqual(
+          varianto === "F" ? [manko(tasko)] : [],
+        );
+      }
+    }
+    const kunigitaj = kunigiMankojn([dir]);
+    expect(kunigitaj).toHaveLength(1);
+    expect(kunigitaj[0]).toMatchObject({ nomo: "filtroliste", ofteco: 2 });
+    expect([...(kunigitaj[0]?.taskoj ?? [])].sort()).toEqual(["kennzahlen", "standards-liste"]);
   });
 
   it("refuses another model before any request: no folder, no dependency, no run (D-19)", async () => {

@@ -12,6 +12,7 @@ import type {
   Fakto,
   FaktoBildigo,
   KuruEkranojn,
+  Manko,
   Peno,
   Rondo,
   Varianto,
@@ -102,6 +103,8 @@ export interface DuoblaVoko {
 export function duoblaKuro(e: {
   faktoj: (tasko: string, varianto: Varianto) => Record<string, Record<string, Fakto>>;
   sendojPerRondo?: number;
+  /** The gaps the run reports (Teil 3), per flow and variant; default none. */
+  mankoj?: (tasko: string, varianto: Varianto) => Manko[];
 }): { kuruEkranojn: KuruEkranojn; vokoj: DuoblaVoko[] } {
   const vokoj: DuoblaVoko[] = [];
   const kuruEkranojn: KuruEkranojn = async (enigo, deps) => {
@@ -166,7 +169,7 @@ export function duoblaKuro(e: {
       plano,
       rondoj,
       restantaj: [],
-      mankoj: [],
+      mankoj: e.mankoj?.(tasko, varianto) ?? [],
       peno,
       kosto: {},
       ...(haltigo === undefined ? {} : { haltigo }),
