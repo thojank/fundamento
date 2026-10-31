@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest";
 import { GRUND_HELL } from "../../test-doubles/uebernahme.js";
 import {
   bildPng,
+  DICHTE_KOMPAKT,
+  DICHTE_LUFTIG,
   ELEVATION_FLACH,
   ELEVATION_SCHATTEN,
   FORM_KARTE,
@@ -14,6 +16,7 @@ import {
 import { decodePng } from "../png.js";
 import { bildAnalyseOf } from "./bildformen.js";
 import { UEBERNAHME } from "./datoj.js";
+import { dichteOf } from "./dichte.js";
 import { stufeOf } from "./form.js";
 
 const analyse = (bild: Parameters<typeof bildPng>[0]) => bildAnalyseOf(decodePng(bildPng(bild)));
@@ -66,5 +69,14 @@ describe("Spec 036 Teil 4: shapes in an image", () => {
     };
     const mitLinie = { ...ELEVATION_FLACH, rechtecke: [karte, linie] };
     expect(analyse(mitLinie).formen.find((forma) => forma.art === "karte")?.schatten).toBe(0);
+  });
+
+  it("blocks and gaps are counted without the margins; their ratio gives the class from the data", () => {
+    expect(analyse(DICHTE_LUFTIG).abstaende).toEqual({ bloecke: [16, 16, 16], luecken: [30, 30] });
+    expect(analyse(DICHTE_KOMPAKT).abstaende.luecken).toEqual([4, 4, 4, 4]);
+    const { kompakt_bis, luftig_ab } = UEBERNAHME.dichte;
+    expect(dichteOf(kompakt_bis - 0.01)).toBe("kompakt");
+    expect(dichteOf((kompakt_bis + luftig_ab) / 2)).toBe("ausgewogen");
+    expect(dichteOf(luftig_ab)).toBe("luftig");
   });
 });

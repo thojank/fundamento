@@ -51,6 +51,15 @@ export interface UebernahmeDatoj {
     eckig_bis_px: number;
     kialo: string;
   };
+  dichte: {
+    bloecke_min: number;
+    kompakt_bis: number;
+    luftig_ab: number;
+    abstand: Record<"kompakt" | "ausgewogen" | "luftig", number>;
+    link_kompakt_bis: number;
+    link_luftig_ab: number;
+    kialo: string;
+  };
 }
 
 export const UEBERNAHME_URL = new URL("../../../data/kreilo.json", import.meta.url);

@@ -178,6 +178,15 @@
       "stufen_namen": { "0": "eckig", "0.5": "leicht gerundet", "1": "rund", "2": "ganz rund" },
       "eckig_bis_px": 1.5,
       "kialo": "Spec 036, Befund 4.1 (Form): Der Radius eines Knopfs im Bild zählt im Verhältnis zu seiner Höhe – so ist er unabhängig von der Größe des Bildes. Bezug ist ein Bedienelement von 32 px Höhe (size.control.medium) mit radius.medium (10 px) bei Stufe 1: das Verhältnis 0,31; Stufe 0,5 gibt 0,16, Stufe 2 gibt 0,62 und ist schon ganz rund. Die Grenzen liegen zwischen den Stufen (0 · 0,5 · 1 · 2, dieselben wie bei „runder“/„eckiger“); ab 0,47 ist der Knopf ganz rund, das ist die Pille, die nur die Bedienelemente rundet und Karten ihren Radius lässt. Eine Karte allein sagt nur „eckig“ (Radius bis eckig_bis_px), denn ohne Knopf fehlt der Maßstab, an dem ein runder Radius eine Stufe wäre."
+    },
+    "dichte": {
+      "bloecke_min": 3,
+      "kompakt_bis": 0.5,
+      "luftig_ab": 1.2,
+      "abstand": { "kompakt": 0.85, "ausgewogen": 1, "luftig": 1.25 },
+      "link_kompakt_bis": 0.9,
+      "link_luftig_ab": 1.15,
+      "kialo": "Spec 036, Befund 4.1 (Dichte, grob): Im Bild ist die Dichte das Verhältnis des mittleren Abstands zwischen den Blöcken zur mittleren Größe der Blöcke (Zeilen und Spalten, Median), gemessen ab bloecke_min Blöcken – mit weniger ist es kein Abstand, sondern ein Einzelstück. Unter kompakt_bis ist das Material kompakt (der Abstand ist weniger als halb so groß wie ein Block), ab luftig_ab luftig (mehr Abstand als Block), dazwischen ausgewogen. Vorgeschlagen wird raum.abstand aus abstand: eine Stufe des Wunsches „kompakter“/„luftiger“ (0,15) unter bzw. über dem Standard, ausgewogen bleibt beim Standard. Bei einem Link misst die Erkennung den Innenabstand der Stilvorlage als Faktor; bis link_kompakt_bis heißt er kompakt, ab link_luftig_ab luftig."
     }
   }
 }
