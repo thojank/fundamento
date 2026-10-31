@@ -128,6 +128,16 @@ const WANTED_2B2: Readonly<Record<string, readonly { befund: string; match?: str
       [{ befund: "②b-2 A-*-2: size large gone, two sizes.", match: "size=large" }],
     ]),
   ),
+  // A-listelektilo-2, A-plurelektilo-2, A-datelektilo-2: size is an axis of the variants – every
+  // variant has a new name (size=… among its axes), the sets lie in three times as many cells.
+  // WANTED already lets every variant of these sets go (Abnahme #122, Spec 035 2.3.1); named here
+  // for ②b-2 so the reason stands where the change is.
+  ...Object.fromEntries(
+    ["listelektilo", "plurelektilo", "datelektilo"].map((set) => [
+      set,
+      [{ befund: "②b-2 A-*-2: size an axis of the variants, three sizes; the set laid out anew." }],
+    ]),
+  ),
 };
 
 /** One run of the plan in the double, read by every case (Vitest collects nothing here). */
