@@ -2,7 +2,7 @@
 
 **Spec:** [`spec.md`](spec.md) (Fassung vom 2026-10-31, 7 016 Bytes, unverändert kopiert; SHA-256 `0780c57eb387b9aa34d98ea31bab223fe92f8f3e52af0a3a19b3db877deaed89`) · **Basis:** `main` `f2b5a058` (`f2b5a0585b772dc4cd83eb672a4bd956242610a8`, Merge #129, Spec 035 vollständig; beim Start des Laufs am 2026-10-31 nach `git fetch origin` unverändert) · **Regel 0** gilt: der Weg, den das Repo schon geht, sonst die kleinste Änderung mit Eintrag hier. **Keine Budgets und keine Grenzen angehoben. Nichts gemergt.**
 
-**Datum:** 2026-10-31 · **Stand (S037-12, Abschluss):** Teil 1 und Teil 3 in PR A, Teil 2 in PR B, beide offen und nicht gemergt; Modellläufe 1.8 und 2.4 gelaufen (Teilergebnisse, 0,4802 $ von 1,00 $); Wiederholung 2.5 blockiert (Spec 036 Teil 5 nicht auf `main`); Beiträge aller Tickets S037-01 bis S037-11 hier zusammengeführt, Bericht am Ende. Offen nur S037-13 (integrierte Testsuite).
+**Datum:** 2026-10-31 · **Stand (S037-13, letztes Ticket):** Teil 1 und Teil 3 in PR A, Teil 2 in PR B, beide offen und nicht gemergt; Modellläufe 1.8 und 2.4 gelaufen (Teilergebnisse, 0,4802 $ von 1,00 $); Wiederholung 2.5 blockiert (Spec 036 Teil 5 nicht auf `main`); Beiträge aller Tickets S037-01 bis S037-12 hier zusammengeführt. S037-13 hat die Befunde S037-10-1, -2, -6 und -7 rot/grün behoben, die integrierte Testsuite ergänzt und die Abdeckungskarte AC-1 bis AC-16 eingetragen (Bericht › „Testabdeckung“). Bericht am Ende.
 
 **Ablage (D-02, D-35):** `spec.md`, `plan.md` und `tasks.md` liegen nur auf Branch A. Jedes Ticket schreibt seinen Beitrag zusätzlich in eine eigene Datei außerhalb des Repos (`s037-beitraege/<Ticket>.md` im Feature-Ordner der Purple-Doku); die Beiträge der Kette B und des Betriebs (S037-07 bis S037-11) hat S037-12 hier zusammengeführt (Entscheidungen mit Zuordnung der vorläufigen IDs, D-176).
 
@@ -10,8 +10,8 @@
 
 | PR | Branch | Basis | Worktree | Inhalt | Kopf | Stand |
 |---|---|---|---|---|---|---|
-| A „Spec 037 – Ablauf Screens“ | `261031-spec-037-ekranoj` | `main` (`f2b5a058`) | `/tmp/s037-a` | Teil 1, Teil 3, `specs/037-agenten-ekranoj/` | Doku-Commit von S037-12 (Code-Stand `5a912063`) | [#131](https://github.com/thojank/fundamento/pull/131) offen, kein Entwurf, nicht gemergt |
-| B „Spec 037 – Messung“ | `261031-spec-037-mezuro` | Branch A | `/tmp/s037-b` | Teil 2 | auf den Doku-Commit von S037-12 neu aufgesetzt (vorher `07585b5e`; aktueller Kopf im PR, D-178) | [#132](https://github.com/thojank/fundamento/pull/132) offen, kein Entwurf, nicht gemergt, gestapelt auf #131 |
+| A „Spec 037 – Ablauf Screens“ | `261031-spec-037-ekranoj` | `main` (`f2b5a058`) | `/tmp/s037-a` | Teil 1, Teil 3, `specs/037-agenten-ekranoj/` | Doku-Commit von S037-13 (Code-Stand `5f184b93`) | [#131](https://github.com/thojank/fundamento/pull/131) offen, kein Entwurf, nicht gemergt |
+| B „Spec 037 – Messung“ | `261031-spec-037-mezuro` | Branch A | `/tmp/s037-b` | Teil 2 | auf den Doku-Commit von S037-13 neu aufgesetzt (vorher `1ae9894f`, davor `07585b5e`; aktueller Kopf im PR, D-178, D-194) | [#132](https://github.com/thojank/fundamento/pull/132) offen, kein Entwurf, nicht gemergt, gestapelt auf #131 |
 
 Kein PR aus dem p0-Branch. Commits nur über das Schutzwerkzeug `commit` (Noreply-Identität je Befehl, D-14).
 
@@ -82,6 +82,8 @@ Bindend (R-5). Bedarf in einer Tabu-Datei wird kein Patch, sondern ein „Befund
 
 - S037-06 (Befund 1 aus S037-05): axe-core lud vor jedem Lauf die Stylesheets per XMLHttpRequest vor; unter `file://` blockiert Chromium das mit einem Konsolenfehler, und jeder echte Screen hatte K1 = 0 (nie grün). Jetzt lädt axe nur die Medien vor (`AXE_ANTAUXSXARGO`, D-104); die Ergebnisse gleichen dem Render von nordstelo, echte Konsolenfehler der Seite bleiben in den Fakten. Rauchtest mit Attrappen-Modell, echtem Gvidanto, echter Bewertung und Chromium: K1 = 1 in jeder Runde, beide Screens ab Runde 2 grün (`/tmp/s037-logs/smoke/261031-s037-06-k1/`). Rot `6c256265`, grün `b5e9b25a`; dazu `25932e8b` (eigener Farbwert im Adapter-Test, Modelo-Clean-Room, D-115).
 
+- S037-13 (Befunde aus S037-10, je rot/grün): **leere Antwort** – eine Antwort ohne Markup (leer oder nur ein `mankoj`-Block) wird einmal in derselben Unterhaltung ohne Werkzeuge nachgefragt (eine Anfrage im bestehenden Budget, keine neue Grenze); bleibt auch die zweite leer, trägt der Screen den Hinderungsgrund `leere-antwort` (nie grün, Befund mit Regel, Ort, Grund), eine Logzeile, die Runde läuft weiter, die Rohantworten liegen redigiert in `rondoj/<n>/<slug>.respondo.txt` (D-184, D-185; rot `d32e62bb`, grün `069ff999`). **Schätzung** – `TOKENOJ_EKRANO_RONDO_F` = 70 000 aus den Abnahme-Läufen statt 40 000 (D-186; rot `73a63449`, grün `b0c6fa28`). **Übernommene Werte und Variante 0** – ein durch einen Halt nicht neu gebauter Screen trägt `portitaEl` und im Bericht „übernommen aus R<n>“; Variante 0 schreibt keine Bewertungslücken in `mankoj.json` (D-187; rot `bca52e70`, grün `54ead00b`). Dazu die integrierte Testsuite (Abschnitt Bericht › „Testabdeckung“).
+
 ### Teil 3 – Lücken als Rückmeldung (PR A)
 
 - S037-06, 3.1: `packages/ekranoj/src/mankoj.ts`. Jeder Lauf schreibt in `mankoj.json` (und als Tabelle in `raporto.md`, Abschnitt „Lücken (Teil 3)“) alle Lücken aus vier Quellen (C-7): K5-Lücken der Bewertung im letzten Stand eines Screens (`rebuilt-ero`, `raw-value`), `check_usage`-Fehler im letzten Stand, `suggest_ero`-Aufrufe ohne Treffer (über eine beobachtende Brücke im Lauf erfasst) und die Lücken, die der Agent im ```` ```mankoj ````-Block meldet; gewünschte Werkzeuge, die der Gvidanto schon hat, fallen weg. `kunigiMankojn(ordner)` führt Läufe zusammen (Anzahl summiert, Aufgaben `<Lauf>/<Screen>` vereinigt, sortiert nach Anzahl, dann Name – unabhängig von der Reihenfolge der Ordner), `mankojMarkdown` druckt die Tabelle der Kennzahl, erweitert um Aufgaben, Beispielstelle, Vorschlag und Ziel. Befehl `fm ekranoj mankoj <ordner…> [--out <datei>] [--json]` (D-29): Tabelle, mit `--out` zusätzlich JSON; keine Ordner oder ein fehlender Ordner → Exit 2 mit strukturierter Meldung; Optionen eines Laufs im Untermodus abgelehnt. Regeln für Art, Ziel und Vorschlag: Abschnitt „Lückenliste“. Rot `74681016`, grün `4d7a1b27`.
@@ -99,7 +101,7 @@ Bindend (R-5). Bedarf in einer Tabu-Datei wird kein Patch, sondern ein „Befund
 - **Was es gibt:** `fm ekranoj "<Satz>"` baut aus einem Satz und einer Marke bis zu 5 verlinkte Screens, prüft sie selbst (`check_usage`, axe hell/dunkel, K1–K7, Navigation) und verbessert sie bis zu dreimal; Ausgabeordner mit `superrigardo.html` (über `file://`), Fotos, `raporto.md/json`, `mankoj.json`. `fm ekranoj mankoj <ordner…>` führt die Lücken vieler Läufe zusammen. `pnpm nordstelo --art ablauf` misst den Aufgabentyp „ganzer Ablauf“ in der Kennzahl.
 - **Wo:** Paket `packages/ekranoj` (PR A), Befehl `packages/cli/src/commands/ekranoj.ts` (PR A), Adapter `packages/nordstelo/src/ekrano-taksilo.ts` (PR A), Messung `packages/nordstelo/src/ablauf/` (PR B).
 - **Wie ausführen:** Abschnitt „Messanleitung“ (Befehle im Checkout `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds`, `file://`-Links, Kostenschätzung mit den gemessenen Werten).
-- **Was die echten Läufe zeigen:** der Ablauf funktioniert von Satz bis Bericht und hält jede Tokengrenze; die Qualität ist noch nicht grün (0 grüne Screens in den Abnahmen, 2 von 4 grün in Variante F von `anmelden-und-konto`), vor allem wegen leerer Antworten des Agenten (Befund S037-10-1) und einer 3–4-fach zu niedrigen Schätzung (Befund S037-10-2), durch die die Scheiben nur Teilergebnisse tragen. Variante F liegt in `anmelden-und-konto` in Runde 3 um 51,5 Punkte über Variante 0 (über der Streuung 16,7).
+- **Was die echten Läufe zeigen:** der Ablauf funktioniert von Satz bis Bericht und hält jede Tokengrenze; die Qualität ist noch nicht grün (0 grüne Screens in den Abnahmen, 2 von 4 grün in Variante F von `anmelden-und-konto`), vor allem wegen leerer Antworten des Agenten (Befund S037-10-1) und einer 3–4-fach zu niedrigen Schätzung (Befund S037-10-2), durch die die Scheiben nur Teilergebnisse tragen – beide in S037-13 behoben. Variante F liegt in `anmelden-und-konto` in Runde 3 um 51,5 Punkte über Variante 0 (über der Streuung 16,7). Mit dem echten Gvidanto und dem echten Bewerter ist ein Fragment nur aus Eroj in Runde 1 grün (integrierter Test, Befund S037-13-1): der grüne Weg trägt von Satz bis Bericht.
 
 ## Entscheidungen, vom Maintainer zu bestätigen
 
@@ -163,7 +165,7 @@ Der Lauf ist unbeaufsichtigt (R-1). Wo die Quell-Spec offen lässt, gilt der Vor
 | D-38 | Agent plant mehr als 5 Screens | Abgelehnt, einmal mit Hinweis auf die Grenze neu angefragt; zweiter zu langer Plan → die ersten 5 in der Reihenfolge des Agenten, Kanten zu gestrichenen Screens entfernt, im Bericht vermerkt. | S037-03. | angewandt |
 | D-39 | Marken in der Messung | „ganzer Ablauf“ rendert jeden Screen in den vier Repo-Marken von `ASPEKTOJ` (Konfiguration cxiuj) × hell/dunkel, Kontrast Standard; `fm ekranoj` rendert seine eine Marke × hell/dunkel. Werte werden nicht 1:1 mit Seitenwerten der Reihe K verglichen (im Bericht gesagt). S037-08 darf das mit festgehaltenem Grund einengen. | S037-08. | angewandt |
 
-### Entscheidungen aus dem Lauf (D-40 bis D-183)
+### Entscheidungen aus dem Lauf (D-40 bis D-196)
 
 Die Tickets nummerierten vorläufig `D-<Ticket>-<n>`; S037-12 hat sie in Ticket-Reihenfolge (S037-01 bis S037-12) als D-40 bis D-183 vergeben, D-ORCH-1 des Orchestrators als D-59 nach S037-02 (D-175). Im Text von plan und tasks stehen nur noch die neuen Nummern (D-176); die Spalte „vorläufig“ und die Zuordnung führen zu den Beitragsdateien `s037-beitraege/<Ticket>.md`.
 
@@ -182,6 +184,7 @@ Die Tickets nummerierten vorläufig `D-<Ticket>-<n>`; S037-12 hat sie in Ticket-
 | S037-10 | D-S037-10-1 … -9 | D-160 … D-168 |
 | S037-11 | D-S037-11-1 … -5 | D-169 … D-173 |
 | S037-12 | D-S037-12-1 … -10 | D-174 … D-183 |
+| S037-13 | D-S037-13-1 … -13 | D-184 … D-196 |
 
 Regel: `D-S037-<tt>-<n>` → D-(Anfang des Tickets + n − 1), z. B. D-S037-06-13 → D-116, D-S037-10-5 → D-164.
 
@@ -331,6 +334,19 @@ Regel: `D-S037-<tt>-<n>` → D-(Anfang des Tickets + n − 1), z. B. D-S037-06-1
 | D-181 | D-S037-12-8 | Messanleitung für den Maintainer | Befehle direkt im Checkout `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds` (der Maintainer entscheidet selbst, ob Spec 036 misst); Branches per `git switch --detach origin/<branch>` (keine lokalen Branches, B wird mit `--force-with-lease` neu geschrieben). Reservierung und Buchung über das Schutzwerkzeug sind angegeben, damit das Ledger vollständig bleibt; der Weg im Stil des Laufs (Scratch-Worktree, `mezuri`) steht daneben. | Messanleitung | angewandt |
 | D-182 | D-S037-12-9 | Nachprobe gegen bewegte 036-Refs | Seit S037-11 haben sich die lokalen 036-Branches `t1-abnahme` (`ff20545f`, 55 Dateien) und `t6-neutrale-namen` (`fd27376b`, 43 Dateien) bewegt. Paarweise `git merge-tree --write-tree` gegen den Kopf von PR B (enthält A): alle fünf lokalen 036-Branches sauber, Überschneidung weiter nur `ci.yml` und `workflow.test.ts` (t6). Die Kettenprobe von S037-11 bleibt gültig; „Später prüfen“ gilt weiter. | Konfliktprüfung | angewandt |
 | D-183 | D-S037-12-10 | Wächter weiterlaufen lassen | `gardisto` (PID 61094) bleibt an; S037-12 beendet keinen laufenden Prozess. Er liest Refs und `fetch`t nur alle 5 min; abschalten mit `/tmp/s037-werkzeug/gardisto stopp`, wenn keine Messung mehr geplant ist. | Wächter | angewandt |
+| D-184 | D-S037-13-1 | Antwort ohne Markup (Befund S037-10-1) | Eine Antwort ohne Markup (leer oder nur ein `mankoj`-Block) wird einmal in derselben Unterhaltung ohne Werkzeuge nachgefragt (`REDEMANDO_F`/`REDEMANDO_0`) – eine Anfrage unter dem Budget des Laufs, keine neue Grenze; bleibt auch die zweite leer, steht `leere-antwort` als erster Hinderungsgrund, der Screen ist nie grün (auch wenn die leere Seite gut bewertet würde), der Befund hat Regel, Ort und Grund; eine Logzeile; die Runde läuft weiter, der Screen zählt als gebaut. | ekranoj `agento.ts`, `rondoj.ts` | angewandt |
+| D-185 | D-S037-13-2 | Rohantwort ablegen | Nur bei leerem Bau: beide Antworten in `rondoj/<n>/<slug>.respondo.txt` über den neuen, additiven Haken `EkranojEligo.respondo`; `eligoDe({ redakti })` schwärzt vor dem Schreiben, die cli reicht `provider.redact` durch. Nicht jede Antwort: Größe und Schlüsselrisiko. | ekranoj `eligo.ts`, cli | angewandt |
+| D-186 | D-S037-13-3 | Wert der Schätzkonstante F (Befund S037-10-2) | 70 000 Tokens je Screen-Runde: abnahme-komuna verbrauchte 213 397 Tokens für Plan + 3 gebaute Screen-Runden (≈ 69 500, provo gleich); nicht der Messpunkt-Wert ≈ 176 000 (vier Marken, mehr Werkzeugaufrufe, andere Last). Schätzwert, keine Grenze (`audit-ac4`: „Schätzwert, keine Grenze“). Rot-Test: die Schätzung für Plan + 3 Screen-Runden deckt die gemessenen 213 397. Folge: die Schätzung sagt jetzt vor dem Start, dass 250 000 für zwei Screens × 3 Runden (≈ 425 000) und 2 000 000 für vier Abläufe (≈ 3 024 000) nur Teilergebnisse tragen; nichts angehoben. | ekranoj `kostoj.ts` | angewandt, **zu bestätigen** |
+| D-187 | D-S037-13-4 | Befunde S037-10-6 und -7 mitnehmen | Klein und testbar, also rot/grün: `RondoEkrano.portitaEl` und „übernommen aus R<n>“ in `raporto.md`/`raporto.json`; Variante 0 ohne Bewertungslücken (K5) in `mankoj.json` (die Messung erbt das über `rezulto.mankoj`). Der Log-Teil von S037-10-6 war kein Fehler: „Runde 2: registrieren gebaut“ stammt aus Variante 0 (nicht grün, ohne Werkzeuge neu gebaut). | ekranoj `rondoj.ts`, `eligo.ts`, `mankoj.ts` | angewandt |
+| D-188 | D-S037-13-5 | Echter Gvidanto in der cli-Suite | Der Test ersetzt nur die Fabrik `gvidanto` und startet dieselbe Verdrahtung mit dem gebauten Einstieg (`node packages/cli/dist/index.js mcp [--config]` über `konektiGvidanton`): die registrierte Fabrik löst `../index.js` relativ zum Befehlsmodul auf, unter Vitest aus den Quellen ist das die TypeScript-Datei. Bewerter und Markenbau echt, wo das Kriterium davon handelt (AC-6, AC-7). | cli-Tests | angewandt |
+| D-189 | D-S037-13-6 | AC-7 integriert | Zwei Läufe mit echtem Markenbau (projekcioj `css`, `make-kit`) für komuna und provo; jedes Fragment (Screens und Runden) byte-gleich; Tokenwerte aus der `marko/css/fundamento.css` jedes Laufs gelesen, nicht getippt; dazu Farbliterale, `--fm-`-Rohwerte, `style` und Markennamen. Die Grenze 5 (V-2) steht im AC-6-Test als Wert der Spec, nicht abgeleitet. | cli-Tests | angewandt |
+| D-190 | D-S037-13-7 | AC-10 über den gebauten Stand | `arkitekturo.test.ts` liest auch `dist/**` (`.js`, `.d.ts`); in `.d.ts` zählt jede Angabe als Typ-Import; jede Quelle muss gebaut sein. `vitest.config.ts` baut außerhalb von turbo das Paket selbst mit (`--filter=@fundamento/ekranoj...`), damit `dist` frisch ist; die Mutationsläufe setzen `TURBO_HASH`, damit die veränderte Ausgabe bleibt. | ekranoj-Tests | angewandt |
+| D-191 | D-S037-13-8 | Dokumente als Test | `packages/ekranoj/src/doku.test.ts` (Vorbild `metiejo/src/docs-024.test.ts`): AC-1 (Hash, plan und tasks daneben), AC-15 (Abschnitte, V-1 bis V-4, D-01 bis D-13) und die Form von AC-16 (Bericht am Ende, beide PR-Links, Merge-Position, Schritte fortlaufend); der Inhalt bleibt Durchsicht. | ekranoj-Tests | angewandt |
+| D-192 | D-S037-13-9 | AC-11 Ende zu Ende in nordstelo | Das echte `kuruEkranojn` mit Gvidanto im Prozess (`connectGvidanto`, der echte MCP-Server), echtem Bewerter und einem Renderer, der die gespeicherten Fakten von `liste-filter-detail` abspielt (Runde n → gespeicherte Runde n, sonst die letzte davor); `Date.now` eingefroren (K7 ms). Erwartetes JSON einmal aus dem Lauf erzeugt und als `test/fixtures/ablauf/integra-raporto.json` committet (eine Datei: jeder Ordner dort ist für `poentoj.test.ts` ein gespeicherter Ablauf). | nordstelo-Tests (PR B) | angewandt |
+| D-193 | D-S037-13-10 | Nicht verdoppelt | Unbekanntes `--art` und die Modellwache der Messung sind schon gedeckt (`cli-ablauf.test.ts` › „refuses an unknown --art with a usage error, exit 2, nothing read or built“, „exits 2 before any request when the .env names another model (D-19)“; `kuro.test.ts` › „refuses another model before any request: no folder, no dependency, no run (D-19)“). | – | angewandt |
+| D-194 | D-S037-13-11 | SHAs der Kette B aus S037-13 | Wie D-178: tasks und plan nennen die B-Commits auf dem Stand von A `5f184b93` (vor diesem Doku-Commit); nach dem Neuaufsetzen stehen die neuen SHAs im PR-Text von #132 und in der Beitragsdatei S037-13. | tasks, PR B | angewandt, **zu bestätigen** |
+| D-195 | D-S037-13-12 | Korrektur eines Tests | Der Wächter der Modelo (`src/ci/test-setup.test.ts`, kein `await` auf Modulebene) meldete die Marken-Attrappe des neuen cli-Tests; eigener Test-Commit `5f184b93`, keine Umschreibung gepushter Geschichte. Der noch ungepushte B-Test-Commit wurde einmal geändert (erwartetes JSON als Datei statt Ordner), vor jedem Push. | Tests | angewandt |
+| D-196 | D-S037-13-13 | Lieferpunkt 1.7 | Jetzt „erledigt“: Schätzung aus gemessenen Werten, die gedruckte Schätzung sagt vor dem Start, ob die Grenze den Lauf trägt; Zähler und Grenze halten. Der höhere Wert des Messpunkts ist eine andere Last und wird mit 2.5 nachgemessen. | Bericht | angewandt |
 
 ## Entwurf: Bewertung Navigation (D-05) und Muster (D-06)
 
@@ -385,18 +401,22 @@ Geprüft in S037-06 (3.2): die Werkzeugliste `TOOL_NAMES` in `packages/mcp/src/s
 | S037-09-1 | Spec 036 misst lokal (Chromium unter `/tmp/s036-*`); die Sperre war von 10:45Z bis 13:39Z meist belegt. | Zustand | im Hintergrund warten | Hinweis | – |
 | S037-09-2 | Messungen von 036 ohne die genannten Werkzeuge (z. B. Zeittests per Vitest ohne Browser) erkennt der Prozess-Scan nicht; 036 hat keinen Marker „Messung läuft“ im plan. | Wächter `/tmp/s037-werkzeug/sperre.mjs` | Marker im plan von 036 vereinbaren; Liste der Werkzeuge erweitern | offen | Absprache mit 036 |
 | S037-09-3 | Eigene Befehle mit einem Muster in der Befehlszeile und Arbeitsverzeichnis außerhalb `/tmp/s037-*` setzen das Fenster zurück (vorsichtig, nie zu früh frei). | Wächter | – | Hinweis | – |
-| **S037-10-1** | **Leeres Fragment gilt als gebaut (Defekt):** 3 von 14 echten Bauten (komuna/detail R1, provo/liste R1, Messpunkt anmelden F R1) lieferten ein leeres Fragment, obwohl das Werkzeuglimit nicht erreicht war (15, 11, 12 von 24 Aufrufen); der Screen bekommt K1 = 0 („empty page“) und kostet eine ganze Runde; die Rohantwort wird nicht gespeichert. | `packages/ekranoj/src/agento.ts` (`konstruiEkranon`, `eltiriRespondon`) | (a) leeres `fragmento` = Fehlschlag: einmal in derselben Unterhaltung nachfragen („Antworte jetzt nur mit dem Fragment in einem html-Block“), sonst `malhelpoj: ["leere-antwort"]` mit Logzeile; (b) letzte Antwort redigiert als `rondoj/<n>/<slug>.respondo.txt` ablegen. Rot-Test: Chat-Attrappe mit leerer letzter Nachricht bzw. nur einem `mankoj`-Block. | **offen – Kandidat für S037-13 (rot/grün)** | – |
-| **S037-10-2** | **Schätzkonstante F 3–4-fach zu niedrig:** `TOKENOJ_EKRANO_RONDO_F` = 40 000; gemessen ≈ 70 000 je Screen-Runde (Abnahme: Plan + 3 Bauten ≈ 213 000) und ≈ 176 000 (Messpunkt: 1 404 652 Tokens für 8 gebaute Screen-Runden, 62 Anfragen, 153 Werkzeugaufrufe). Folge: keine Abnahme erreicht Runde 3 in 250 000, der Messpunkt deckt 1¼ von 4 Abläufen. | `packages/ekranoj/src/kostoj.ts` | Konstante auf den gemessenen Median setzen (Quelle im Kommentar: S037-10), mit 2.5 nachmessen; Werkzeugantworten kürzen (MG-2, MG-3). Eine Schätzkonstante ist keine Grenze (AC-5: „Schätzwert, keine Grenze“). | **offen – Kandidat für S037-13 (rot/grün)** | – |
+| **S037-10-1** | **Leeres Fragment gilt als gebaut (Defekt):** 3 von 14 echten Bauten (komuna/detail R1, provo/liste R1, Messpunkt anmelden F R1) lieferten ein leeres Fragment, obwohl das Werkzeuglimit nicht erreicht war (15, 11, 12 von 24 Aufrufen); der Screen bekommt K1 = 0 („empty page“) und kostet eine ganze Runde; die Rohantwort wird nicht gespeichert. | `packages/ekranoj/src/agento.ts` (`konstruiEkranon`, `eltiriRespondon`) | (a) leeres `fragmento` = Fehlschlag: einmal in derselben Unterhaltung nachfragen („Antworte jetzt nur mit dem Fragment in einem html-Block“), sonst `malhelpoj: ["leere-antwort"]` mit Logzeile; (b) letzte Antwort redigiert als `rondoj/<n>/<slug>.respondo.txt` ablegen. Rot-Test: Chat-Attrappe mit leerer letzter Nachricht bzw. nur einem `mankoj`-Block. | erledigt (`d32e62bb` rot, `069ff999` grün, D-184, D-185) | – |
+| **S037-10-2** | **Schätzkonstante F 3–4-fach zu niedrig:** `TOKENOJ_EKRANO_RONDO_F` = 40 000; gemessen ≈ 70 000 je Screen-Runde (Abnahme: Plan + 3 Bauten ≈ 213 000) und ≈ 176 000 (Messpunkt: 1 404 652 Tokens für 8 gebaute Screen-Runden, 62 Anfragen, 153 Werkzeugaufrufe). Folge: keine Abnahme erreicht Runde 3 in 250 000, der Messpunkt deckt 1¼ von 4 Abläufen. | `packages/ekranoj/src/kostoj.ts` | Konstante auf den gemessenen Median setzen (Quelle im Kommentar: S037-10), mit 2.5 nachmessen; Werkzeugantworten kürzen (MG-2, MG-3). Eine Schätzkonstante ist keine Grenze (AC-5: „Schätzwert, keine Grenze“). | erledigt: 70 000 (`73a63449` rot, `b0c6fa28` grün, D-186); mit 2.5 nachmessen | – |
 | S037-10-3 | Kurze Testläufe von 036 blieben dem Wächter (60-s-Takt) verborgen: `mezuri` sah um 13:40:42Z/13:41:12Z Prozesse von 036, `sperre.stato` blieb „frei“; provo startete 31 s, der Messpunkt 87 s nach dem letzten gesehenen 036-Prozess. Keine Überschneidung belegt. | Schutzwerkzeug `gardisto`, `mezuri` | Ablehnung durch `mezuri` setzt „belegt seit jetzt“; Takt 10–15 s; `mezuri` prüft im Lauf alle 15 s | offen | – |
 | S037-10-4 | Spec 036 begann während des Messpunkts zu messen (13:49:32Z, `/tmp/s036-t1/packages/eroj`): `anmelden-und-konto` 0 (Ende) und `liste-filter-detail` F gestört; umgekehrt kann unsere Last (bis 24,4) die Messung von 036 beeinflusst haben. | Messpunkt | 036 informieren; Werte „gestört“ nicht vergleichen | offen (nicht wiederholt, D-164) | Absprache mit 036 |
 | S037-10-5 | Last > Kerne beim Start von komuna (11,58 bei 10 Kernen) und nach `anmelden-und-konto` F (24,4, vermutlich der eigene Renderer: 4 Marken × hell/dunkel je Screen und Runde). | Läufe | Dauern markiert, nicht verglichen | Hinweis | – |
-| S037-10-6 | Bericht zeigt nicht neu gebaute Screens wie gebaute (komuna R2/detail zeigt Werte von R1 ohne Hinweis; Log „gebaut“ auch für grüne, nicht angefragte Screens). | `packages/ekranoj/src/eligo.ts`/`rondoj.ts`; B `ablauf/kuro.ts` (Log) | „übernommen aus R<n>“ kennzeichnen; Log „übernommen“ | offen (klein) | – |
-| S037-10-7 | Lückenliste enthält K5-Lücken der Variante 0 („Ero für a/h1/button/input“) – Absicht der Vergleichsvariante, keine Lücke des Systems. | `packages/ekranoj/src/mankoj.ts` bzw. B `ablauf/kuro.ts` | in Variante 0 keine K5-Lücken nach `mankoj.json`, oder `kunigiMankojn` überspringt `varianto: "0"` | offen (klein) | – |
+| S037-10-6 | Bericht zeigt nicht neu gebaute Screens wie gebaute (komuna R2/detail zeigt Werte von R1 ohne Hinweis; Log „gebaut“ auch für grüne, nicht angefragte Screens). | `packages/ekranoj/src/eligo.ts`/`rondoj.ts`; B `ablauf/kuro.ts` (Log) | „übernommen aus R<n>“ kennzeichnen; Log „übernommen“ | erledigt im Bericht (`bca52e70` rot, `54ead00b` grün, D-187); das Log war richtig (Variante 0) | – |
+| S037-10-7 | Lückenliste enthält K5-Lücken der Variante 0 („Ero für a/h1/button/input“) – Absicht der Vergleichsvariante, keine Lücke des Systems. | `packages/ekranoj/src/mankoj.ts` bzw. B `ablauf/kuro.ts` | in Variante 0 keine K5-Lücken nach `mankoj.json`, oder `kunigiMankojn` überspringt `varianto: "0"` | erledigt: Variante 0 ohne Bewertungslücken (`bca52e70` rot, `54ead00b` grün, D-187); alte Laufordner behalten sie | – |
 | S037-10-8 | Kleinigkeiten: Schätzzeile im Abnahme-Log doppelt; Tabelleninhalt in `fm-tabelo` und `fm-titolo` mit `<span slot="label">` in Systemschrift (K2 meldete `markdovido.slot=source`); der Agent verwies auf `edit.html` außerhalb des Plans (toter Verweis). | Abnahme-Läufe | – | Hinweis | – |
 | S037-11-1 | Beim Lauf gab es keinen PR von Spec 036; die Tabelle „überschneidende Dateien je PR“ steht je Branch. | Konfliktprüfung | „Später prüfen“ | Hinweis | – |
 | S037-11-2 | In der Vorschau kollidieren 036 Teil 1 (`t1-form`) und 036 Teil 6 in `CHANGELOG.md` – 036-intern, mit und ohne 037 identisch. | `CHANGELOG.md` (037 berührt sie nicht) | beide Einträge behalten (036 D-26) | Hinweis | 036 Teil 6 |
 | S037-11-3 | Das Teil-6-Skript läuft über den Symlink `/tmp` still mit Exit 0 und tut nichts (Main-Wächter vergleicht `import.meta.url` mit `argv[1]`). | `scripts/neutrale-namen/codemod.mjs` (036, nicht geändert) | aus dem Repo oder über `/private/tmp` starten | Hinweis | 036 Teil 6 |
 | S037-12-1 | Lokale 036-Branches haben sich seit S037-11 bewegt (`t1-abnahme` `ff20545f`, `t6-neutrale-namen` `fd27376b`); paarweise Probemerges gegen den Kopf von PR B sauber, Überschneidung weiter nur Graubereich (D-182). | Konfliktprüfung | „Später prüfen“ vor jedem Merge | Hinweis | – |
+| S037-13-1 | Mit echtem Gvidanto, echtem Bewerter und Renderer-Attrappe ist ein Fragment nur aus Eroj (Überschrift-Ero, Absatz, `fm-ligilo to` mit `placement="standalone"`) in Runde 1 grün: D-04 ist von Satz bis Bericht erreichbar; die nicht grünen Abnahmen lagen an den Antworten des Agenten. | `packages/cli/src/ekranoj-integra.test.ts` | – | Hinweis | – |
+| S037-13-2 | `faktojPorNavigado` ändert für die Modelo des Repos das Ergebnis nicht mehr: `navigado` liest `fm-ligilo to` schon über `LIGILAJ_ATRIBUTOJ` (D-81). Eine lokale Mutation, die den Link-Ero in der Messung übersieht, blieb deshalb grün; erst eine Mutation im Weg der Schleife (`ligilajAtributojDe`) zeigte den Test rot. Die Funktion zählt für eine Modelo mit einem anderen Link-Ero. | `packages/nordstelo/src/ablauf/poentoj.ts`, `packages/ekranoj/src/navigado.ts` | behalten (Modelo-unabhängig); oder den Standard in ekranoj nur ohne Skemo-Karte nehmen | Hinweis | – |
+| S037-13-3 | Zwei Wächter halten die Markenwerkstatt vom Agenten fern (Erlaubnisliste in `mcp-kliento.ts`, `ofertotajIloj` in `agento.ts`); eine Mutation an nur einem blieb grün, beide zusammen rot. Absicht (doppelte Sicherung). | ekranoj | – | Hinweis | – |
+| S037-13-4 | Der Wächter der Modelo (`src/ci/test-setup.test.ts`) meldete ein `await` auf Modulebene im neuen cli-Test. | `packages/cli/src/ekranoj-integra.test.ts` | Attrappe als Funktion | erledigt (`5f184b93`, D-195) | – |
 
 ## Messungen
 
@@ -641,7 +661,7 @@ Alle Befehle im Checkout des Maintainers `/Users/thorstenjankowski/n8n-compose/2
 
 **Ohne Kosten ansehen (Ergebnisse des Laufs):** Abnahme komuna file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec037/abnahme/komuna/superrigardo.html · provo file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec037/abnahme/provo/superrigardo.html · Messpunkt file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec037/ablauf/messpunkt-1/20261031-1342/raporto.md
 
-**Kostenschätzung mit den gemessenen Werten (Befund S037-10-2):** die Schätzung, die `fm ekranoj` und die Messung vor dem Start drucken, rechnet mit 40 000 Tokens je Screen-Runde in Variante F; gemessen sind ≈ 70 000 (Abnahme) bis ≈ 176 000 (Messung mit Gvidanto und mehr Werkzeugaufrufen). Preis 0,20 $ je 1 Mio. Tokens (ein und aus). Die Grenze `--max-tokens` hält immer (Halt vor der Anfrage, Teilbericht, Exit 0).
+**Kostenschätzung mit den gemessenen Werten (Befund S037-10-2, behoben in S037-13, D-186):** die Schätzung, die `fm ekranoj` und die Messung vor dem Start drucken, rechnet jetzt mit 70 000 Tokens je Screen-Runde in Variante F (Abnahme gemessen); der Messpunkt brauchte ≈ 176 000 (mehr Werkzeugaufrufe). Preis 0,20 $ je 1 Mio. Tokens (ein und aus). Die Grenze `--max-tokens` hält immer (Halt vor der Anfrage, Teilbericht, Exit 0).
 
 ### Teil 1 und 3 – `fm ekranoj` (PR A)
 
@@ -669,7 +689,7 @@ git switch -
 
 Erwartet:
 
-- Erste Zeile vor jeder Anfrage: `Schätzung: 2 Screens × 3 Runden (Variante F) + Plananfrage ≈ 245.000 Tokens, ≈ 0,049 $ (mistral/ministral-14b-2512); Grenze 250.000 Tokens.` **Gemessen** (S037-10): nach Plan und 3 Bauten ≈ 213 000 Tokens (0,043 $) – mit 250 000 endet der Lauf nach Runde 1–2 an der Tokengrenze (Teilbericht). Drei volle Runden mit 2 Screens brauchen nach den gemessenen Werten ≈ 450 000 Tokens ≈ 0,09 $ (`--max-tokens 450000` – eine Entscheidung des Maintainers; der Lauf hat keine Grenze angehoben). Ohne `--ekranoj` plant der Agent bis zu 5 Screens (Schätzung 605 000, gemessen eher ≈ 1,1 Mio. Tokens ≈ 0,22 $).
+- Erste Zeile vor jeder Anfrage: `Schätzung: 2 Screens × 3 Runden (Variante F) + Plananfrage ≈ 425.000 Tokens, ≈ 0,085 $ (mistral/ministral-14b-2512); über der Grenze von 250.000 Tokens – der Lauf hält vorher an und liefert ein Teilergebnis.` (seit S037-13 mit dem gemessenen Wert, D-186). **Gemessen** (S037-10): nach Plan und 3 Bauten ≈ 213 000 Tokens (0,043 $) – mit 250 000 endet der Lauf nach Runde 1–2 an der Tokengrenze (Teilbericht). Drei volle Runden mit 2 Screens brauchen ≈ 425 000–450 000 Tokens ≈ 0,09 $ (`--max-tokens 450000` – eine Entscheidung des Maintainers; der Lauf hat keine Grenze angehoben). Ohne `--ekranoj` plant der Agent bis zu 5 Screens (Schätzung ≈ 1 055 000 Tokens ≈ 0,21 $). Eine Antwort ohne Markup wird einmal nachgefragt; bleibt sie leer, steht `leere-antwort` im Bericht und die Rohantworten liegen redigiert in `rondoj/<n>/<slug>.respondo.txt`.
 - Am Ende zwei Links: `Übersicht: file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/ekranoj/<JJMMTT-HHMM>-eine-verwaltung-fuer/superrigardo.html` und `Bericht: file:///…/raporto.md` (provo in einem eigenen Ordner, in derselben Minute mit Suffix `-2`). Die Übersicht verlinkt jeden Screen; jeder Screen hat oben „Zur Übersicht“. provo-Screens tragen `data-fm-aspekto="provo"`.
 - `fm ekranoj mankoj …` druckt die Tabelle `| # | Art | Lücke | Anzahl | Aufgaben | Beispielstelle | Vorschlag | Ziel |`; mit `--out <datei>` zusätzlich JSON.
 - Echtes Chromium (für Fotos und axe) muss lokal installiert sein (`pnpm --filter @fundamento/eroj exec playwright install chromium`); ohne Browser gibt es keine Fotos, einen Satz im Bericht und keinen grünen Screen.
@@ -689,7 +709,7 @@ node packages/nordstelo/dist/cli.js --art ablauf \
 git switch -
 ```
 
-Erwartet: erste Logzeile „Schätzung … 8 Läufe, 1764000 Tokens, 0.3528 $; Grenze 2000000 Tokens“; Bericht `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec037/ablauf/messpunkt-2/<JJJJMMTT-HHMM>/raporto.md` und `raporto.json`; neu bauen ohne Modell mit `raporto(dir)` aus `packages/nordstelo/dist/ablauf/raporto.js`. **Gemessen** (S037-10): Variante F eines Ablaufs mit 4 Screens ≈ 1,4 Mio. Tokens ≈ 0,28 $ (3 Runden, früh grüne Screens nicht neu gebaut), Variante 0 ≈ 30 000 Tokens ≈ 0,006 $ – **mit 2 000 000 Tokens (0,40 $) wird etwa ein Ablauf F + 0 vollständig, der zweite nur angefangen.** Alle vier Abläufe vollständig: ≈ 4,5–5,7 Mio. Tokens ≈ 0,9–1,15 $ (über jeder Scheibe von D-11). Vorher Befunde S037-10-1 und S037-10-2 beheben lassen.
+Erwartet: erste Logzeile „Schätzung: 8 Läufe, 3024000 Tokens, 0.6048 $; Grenze 2000000 Tokens.“ (seit S037-13 mit 70 000 je Screen-Runde F, D-186; vorher 1 764 000); Bericht `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec037/ablauf/messpunkt-2/<JJJJMMTT-HHMM>/raporto.md` und `raporto.json`; neu bauen ohne Modell mit `raporto(dir)` aus `packages/nordstelo/dist/ablauf/raporto.js`. **Gemessen** (S037-10): Variante F eines Ablaufs mit 4 Screens ≈ 1,4 Mio. Tokens ≈ 0,28 $ (3 Runden, früh grüne Screens nicht neu gebaut), Variante 0 ≈ 30 000 Tokens ≈ 0,006 $ – **mit 2 000 000 Tokens (0,40 $) wird etwa ein Ablauf F + 0 vollständig, der zweite nur angefangen.** Alle vier Abläufe vollständig: ≈ 4,5–5,7 Mio. Tokens ≈ 0,9–1,15 $ (über jeder Scheibe von D-11). Die Befunde S037-10-1 und S037-10-2 sind in S037-13 behoben.
 
 ### Teil 2.5 – Wiederholung auf dem dann aktuellen `main`
 
@@ -701,7 +721,7 @@ Erst nach dem Merge von Spec 036 bis einschließlich Teil 5 (in der 036-Reihenfo
 
 **Grund:** Teil 5 von Spec 036 ist nicht gemergt. Am Ende des Laufs (2026-10-31, 14:00Z, nach `git fetch origin`) ist `origin/main` = `f2b5a058` (Merge #129, Basis dieses Laufs); Spec 036 hat keinen PR, ihre Teile 2–5 existieren noch nicht. Kein Lauf, keine Kosten, keine Reservierung; Scheibe Wiederholung 0,40 $ frei.
 
-**Vorher beheben lassen:** Befund S037-10-1 (leeres Fragment gilt als gebaut – sonst misst 2.5 vor allem leere Antworten) und Befund S037-10-2 (Schätzkonstante, damit die Schätzung vor dem Start stimmt). Beide sind kleine rot/grün-Korrekturen in `packages/ekranoj/src/{agento,kostoj}.ts` (PR A).
+**Vorher behoben (S037-13):** Befund S037-10-1 (leeres Fragment gilt als gebaut – jetzt eine Nachfrage, sonst `leere-antwort`, D-184) und Befund S037-10-2 (Schätzkonstante 70 000, D-186), rot/grün in PR A.
 
 **Anleitung für den Maintainer** (nach den Schritten 4–6 im Bericht; Wächter optional: `/tmp/s037-werkzeug/gardisto stand` zeigt, ob 036 misst – nach einem Neustart des Rechners `gardisto start`; `/tmp` überlebt den Neustart nicht immer):
 
@@ -747,7 +767,7 @@ nohup $W/mezuri wiederholung-ablauf "2.5 Wiederholung" --cwd /tmp/s037-main2 -- 
 # Aufräumen: git -C $P0 worktree remove /tmp/s037-main2
 ```
 
-**Schätzung (ehrlich):** Die Messung druckt vor dem Start 1 764 000 Tokens ≈ 0,35 $ (Konstanten von D-20, 3–4-fach zu niedrig, Befund S037-10-2). Nach den gemessenen Werten von S037-10 (≈ 176 000 Tokens je F-Screen-Runde, ≈ 1,4 Mio. Tokens ≈ 0,28 $ für `anmelden-und-konto` F, ≈ 0,006 $ für dessen Variante 0) trägt die Scheibe von **0,40 $ höchstens einen F-Ablauf mit 4 Screens und seine Variante 0**; der zweite Ablauf wird nur angefangen, die übrigen starten nicht (Teilbericht, Exit 0). Für einen sauberen Vergleich mit dem einzigen ungestörten Wert des ersten Messpunkts empfiehlt sich `--taskoj anmelden-und-konto` (≈ 1,43 Mio. Tokens ≈ 0,29 $). Beide Stände kommen in den Bericht (Abschnitt „Messungen“ › 2.5).
+**Schätzung (ehrlich):** Die Messung druckt vor dem Start seit S037-13 3 024 000 Tokens ≈ 0,60 $ für vier Abläufe (70 000 je F-Screen-Runde, D-186; vorher 1 764 000 ≈ 0,35 $, Befund S037-10-2) – über der Grenze 2 000 000, also ein Teilergebnis. Nach den gemessenen Werten von S037-10 (≈ 176 000 Tokens je F-Screen-Runde, ≈ 1,4 Mio. Tokens ≈ 0,28 $ für `anmelden-und-konto` F, ≈ 0,006 $ für dessen Variante 0) trägt die Scheibe von **0,40 $ höchstens einen F-Ablauf mit 4 Screens und seine Variante 0**; der zweite Ablauf wird nur angefangen, die übrigen starten nicht (Teilbericht, Exit 0). Für einen sauberen Vergleich mit dem einzigen ungestörten Wert des ersten Messpunkts empfiehlt sich `--taskoj anmelden-und-konto` (≈ 1,43 Mio. Tokens ≈ 0,29 $). Beide Stände kommen in den Bericht (Abschnitt „Messungen“ › 2.5).
 
 ### 2.4 Rest des ersten Messpunkts (nicht gemessen, Budget)
 
@@ -759,7 +779,7 @@ W=/tmp/s037-werkzeug
 $W/kosten reservieren <praefix>-liste-filter-detail "2.4 Rest" 0,40
 node packages/nordstelo/dist/cli.js --art ablauf --taskoj liste-filter-detail --varianten F,0 --ripetoj 1 \
   --max-tokens 2000000 --out .fundamento/spec037/ablauf/messpunkt-2 --ledger .fundamento/spec037 --env .env --json
-# danach kosten buchen aus .fundamento/spec037/ablauf/messpunkt-2/<id>/raporto.json → sumo; erst nach Befund S037-10-2 sinnvoll
+# danach kosten buchen aus .fundamento/spec037/ablauf/messpunkt-2/<id>/raporto.json → sumo (Befund S037-10-2 ist seit S037-13 behoben)
 ```
 
 ### Sonst
@@ -768,14 +788,14 @@ Keine weiteren Einträge. (Erledigt im Lauf: Modelo-Suite auf Branch A, S037-02 
 
 ## Bericht
 
-**Stand 2026-10-31 (S037-12).** Zwei PRs offen, keiner gemergt, keiner Entwurf, kein Auto-Merge: PR A [#131](https://github.com/thojank/fundamento/pull/131) (Basis `main`) und PR B [#132](https://github.com/thojank/fundamento/pull/132) (gestapelt auf #131, neu aufgesetzt auf den Doku-Commit von S037-12). `main` hat sich nicht bewegt (`origin/main` = `f2b5a058`, Merge #129); Spec 036 hat keinen PR. **Keine Budgets und keine Grenzen angehoben.** Modellkosten **0,4802 $ von 1,00 $**, nur `ministral-14b-2512`, eigenes Ledger. Lieferliste: **15 erledigt, 3 teilweise (1.7, 1.8, 2.4), 0 offen, 1 blockiert (2.5)**. Abnahmekriterien: 15 erfüllt, AC-13 teilweise. Offen für S037-13: integrierte Testsuite; Kandidaten für kleine rot/grün-Korrekturen: Befunde S037-10-1 und S037-10-2. Plan: https://github.com/thojank/fundamento/blob/261031-spec-037-ekranoj/specs/037-agenten-ekranoj/plan.md · Aufgaben: https://github.com/thojank/fundamento/blob/261031-spec-037-ekranoj/specs/037-agenten-ekranoj/tasks.md
+**Stand 2026-10-31 (S037-13, letztes Ticket).** Zwei PRs offen, keiner gemergt, keiner Entwurf, kein Auto-Merge: PR A [#131](https://github.com/thojank/fundamento/pull/131) (Basis `main`) und PR B [#132](https://github.com/thojank/fundamento/pull/132) (gestapelt auf #131, neu aufgesetzt auf den Doku-Commit von S037-13). `main` hat sich nicht bewegt (`origin/main` = `f2b5a058`, Merge #129); Spec 036 hat keinen PR. **Keine Budgets und keine Grenzen angehoben.** Modellkosten **0,4802 $ von 1,00 $**, nur `ministral-14b-2512`, eigenes Ledger. Lieferliste: **16 erledigt, 2 teilweise (1.8, 2.4), 0 offen, 1 blockiert (2.5)**. Abnahmekriterien: 15 erfüllt, AC-13 teilweise; jedes AC hat einen Test oder einen Prüfnachweis (Abschnitt „Testabdeckung“). S037-13: Befunde S037-10-1, -2, -6, -7 rot/grün behoben, integrierte Testsuite (cli, ekranoj, nordstelo), jede neue Prüfung an einer lokalen Mutation rot gesehen. Plan: https://github.com/thojank/fundamento/blob/261031-spec-037-ekranoj/specs/037-agenten-ekranoj/plan.md · Aufgaben: https://github.com/thojank/fundamento/blob/261031-spec-037-ekranoj/specs/037-agenten-ekranoj/tasks.md
 
 ### PRs je Teil
 
 | Teil | PR | Basis | Kopf | CI-Stand (Lauf) | rot → grün |
 |---|---|---|---|---|---|
-| 1, 3, `specs/037-agenten-ekranoj/` | #131 https://github.com/thojank/fundamento/pull/131 | `main` (`f2b5a058`) | Doku-Commit von S037-12 (Code-Stand `5a912063`) | grün 15/15 auf `5a912063`: [41200798254](https://github.com/thojank/fundamento/actions/runs/41200798254) (Vorlauf 41200767014 auf `a4270d0f` durch Push abgebrochen); der Lauf auf dem Doku-Kopf wird im Hintergrund beobachtet (`/tmp/s037-logs/pr-131-ci-final.log`), S037-13 trägt ihn nach | Tabelle unten |
-| 2 | #132 https://github.com/thojank/fundamento/pull/132 | `261031-spec-037-ekranoj` (#131) | neu aufgesetzt auf den Doku-Commit von S037-12, Kopf im PR-Text (vorher `07585b5e`) | grün 15/15 auf `07585b5e`: [41201263661](https://github.com/thojank/fundamento/actions/runs/41201263661); Lauf auf dem neuen Kopf im Hintergrund (`/tmp/s037-logs/pr-132-ci-final.log`) | Tabelle unten |
+| 1, 3, `specs/037-agenten-ekranoj/` | #131 https://github.com/thojank/fundamento/pull/131 | `main` (`f2b5a058`) | Doku-Commit von S037-13 (Code-Stand `5f184b93`) | grün 15/15 auf `5a912063`: [41200798254](https://github.com/thojank/fundamento/actions/runs/41200798254); auf dem Doku-Kopf von S037-12 `8dc670fd`: [41209238357](https://github.com/thojank/fundamento/actions/runs/41209238357) **15/15**; auf dem Code-Stand von S037-13 `5f184b93`: [41213019006](https://github.com/thojank/fundamento/actions/runs/41213019006) **success, 15/15**; auf dem Doku-Kopf von S037-13: im Hintergrund beobachtet (`/tmp/s037-logs/pr-131-ci-s13.log`, Stand im PR-Text) | Tabelle unten |
+| 2 | #132 https://github.com/thojank/fundamento/pull/132 | `261031-spec-037-ekranoj` (#131) | neu aufgesetzt auf den Doku-Commit von S037-13, Kopf im PR-Text (vorher `1ae9894f`, davor `07585b5e`) | grün 15/15 auf `07585b5e`: [41201263661](https://github.com/thojank/fundamento/actions/runs/41201263661); auf `1ae9894f`: [41209342665](https://github.com/thojank/fundamento/actions/runs/41209342665) **15/15**; auf dem neuen Kopf: im Hintergrund beobachtet (`/tmp/s037-logs/pr-132-ci-s13.log`, Stand im PR-Text) | Tabelle unten |
 
 **Rote und grüne Commits je Lieferpunkt:**
 
@@ -789,14 +809,19 @@ Keine weiteren Einträge. (Erledigt im Lauf: Modelo-Suite auf Branch A, S037-02 
 | A | 1.4 K1 unter `file://` (S037-05-1) | `6c256265` | `b5e9b25a` |
 | A | Modelo-Clean-Room im Adapter-Test (S037-06-1) | roter Stand `a74125cf` | `25932e8b` |
 | A | 3.1 Lückenliste `mankoj` | `74681016` | `4d7a1b27` |
-| A | Doku (spec, plan, tasks, Bericht) | – | `736a17cd`, `a6558e6a`, `48b1bd60`, `2d644fc7`, `cac6f213`, `a4270d0f`, `5a912063`, Doku-Commit von S037-12 |
+| A | 1.3 Antwort ohne Markup (S037-10-1) | `d32e62bb` | `069ff999` |
+| A | 1.7 Schätzung aus Messwerten (S037-10-2) | `73a63449` | `b0c6fa28` |
+| A | 1.6, 3.1 übernommene Werte, Lücken der Variante 0 (S037-10-6, -7) | `bca52e70` | `54ead00b` |
+| A | Tests gegen das integrierte Ergebnis (nur Tests, je an einer lokalen Mutation rot) | – | `efdaf90d`, `854cfad4`, `46cba39b`, `5f184b93` |
+| A | Doku (spec, plan, tasks, Bericht) | – | `736a17cd`, `a6558e6a`, `48b1bd60`, `2d644fc7`, `cac6f213`, `a4270d0f`, `5a912063`, `8dc670fd`, Doku-Commit von S037-13 |
 | B | 2.1, 2.2 Katalog, Muster, Bewertung | `f460e1ef` | `f7a58882` |
 | B | 2.3 Lauf `--art ablauf` und Bericht | `8061cc29` | `53933318` |
 | B | 2.3/3.1 `mankoj.json` je Messlauf | `7d0fa453` | `46021ce9` |
 | B | 2.2 Navigation in ekranoj und Messung gleich | roter Stand = auf `5a912063` neu aufgesetzter Branch | `0651b957` |
 | B | 2.2 Bewertung über `ekranoTaksilo` (keine Zahl geändert) | – (D-150) | `07585b5e` |
+| B | AC-11 Ende zu Ende, Gleichlauf C-8/D-05, Katalogzahlen (nur Tests, je an einer lokalen Mutation rot) | – | `394acab6` (Stand auf A `5f184b93`, D-194) |
 
-SHAs der Kette B auf dem Stand `5a912063`; nach dem Neuaufsetzen durch S037-12 tragen dieselben Patches neue SHAs (Liste im PR-Text #132, D-178). Tests: A auf `4d7a1b27`/`5a912063` ekranoj 118/118, cli 96/96, nordstelo 75/75, Modelo 4147/4147, Wächtertest Spec 035 AC-11 4/4, `pnpm build` 9/9, `pnpm lint` 20/20, `test:browser` 3/3 (lokal, echtes Chromium); B auf dem Code-Stand von `07585b5e` nordstelo 125/125, ekranoj 118/118, cli 96/96, `pnpm lint` 20/20. Kein Test ruft einen Anbieter oder das Netz.
+SHAs der Kette B bis S037-12 auf dem Stand `5a912063`, der Test-Commit von S037-13 auf `5f184b93`; nach jedem Neuaufsetzen tragen dieselben Patches neue SHAs (Liste im PR-Text #132, D-178, D-194). Tests (S037-13): A auf `5f184b93` ekranoj 134/134, cli 105/105, nordstelo 75/75, Modelo 4147/4147, Wächtertest Spec 035 AC-11 4/4, `pnpm build` 9/9, `pnpm lint` 20/20, `test:browser` 3/3 (lokal, echtes Chromium, 16,81 s); B nordstelo 130/130, ekranoj 134/134, cli 105/105, Modelo 4147/4147, `pnpm lint` 20/20. Kein Test ruft einen Anbieter oder das Netz; kein `.only`/`.skip`.
 
 **Messanleitung je PR:** im plan, Abschnitt „Messanleitung“ (Checkout `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds`, `cd`, `git switch --detach origin/<branch>`, `pnpm install --frozen-lockfile && pnpm build`, Befehle, `file://`-Links, Kosten mit gemessenen Werten). Einstieg ohne Kosten: file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec037/abnahme/komuna/superrigardo.html · file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec037/abnahme/provo/superrigardo.html · file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec037/ablauf/messpunkt-1/20261031-1342/raporto.md
 
@@ -806,11 +831,11 @@ SHAs der Kette B auf dem Stand `5a912063`; nach dem Neuaufsetzen durch S037-12 t
 |---|---|---|---|---|
 | 1.1 | Eingabe: Satz, Marke (`--config`), optional ≤ 5 Screens | erledigt | `fm ekranoj "<Satz>" [--config] [--ekranoj]`; 6 Namen → Exit 2 ohne Anfrage (V-2) | #131 |
 | 1.2 | Plan ≤ 5 Screens mit Zweck und Kanten, als Datei | erledigt | `validiPlanon`, `plano.json`; zu langer Agentenplan einmal neu angefragt, dann gekürzt (D-38) | #131 |
-| 1.3 | Bauen nur über die MCP-Werkzeuge | erledigt | 12 Bauwerkzeuge, Markenwerkstatt nie angeboten; AC-10-Test. Befund S037-10-1 (leeres Fragment) offen | #131 |
+| 1.3 | Bauen nur über die MCP-Werkzeuge | erledigt | 12 Bauwerkzeuge, Markenwerkstatt nie angeboten; AC-10-Test (auch über `dist`); Befund S037-10-1 behoben (Nachfrage, sonst `leere-antwort`, D-184) | #131 |
 | 1.4 | Prüfen: `check_usage`, axe hell/dunkel, K1–K7 deterministisch | erledigt | K1 unter `file://` korrigiert (S037-05-1); kein Modell als Richter | #131 |
 | 1.5 | Verbessern ≤ 3 Runden oder bis grün, Restabweichungen mit Regel und Grund | erledigt | AC-8-Test; echte Läufe mit Rückmeldung je Runde | #131 |
-| 1.6 | Ausgabe: Screens, Übersicht, Fotos hell/dunkel, Bericht | erledigt | Ordner nach AC-6 in beiden Abnahmen; Kleinigkeit S037-10-6 offen | #131 |
-| 1.7 | Kosten: Schätzung vor dem Start, Zähler, `--max-tokens` | **teilweise** | Zähler und Grenze halten (Halt vor der Anfrage, Teilbericht); die Schätzung ist 3–4-fach zu niedrig (Befund S037-10-2) und taugt so nicht zum Planen | #131 |
+| 1.6 | Ausgabe: Screens, Übersicht, Fotos hell/dunkel, Bericht | erledigt | Ordner nach AC-6 in beiden Abnahmen und im integrierten Test; S037-10-6 behoben („übernommen aus R<n>“) | #131 |
+| 1.7 | Kosten: Schätzung vor dem Start, Zähler, `--max-tokens` | erledigt | Zähler und Grenze halten (Halt vor der Anfrage, Teilbericht); Schätzung seit S037-13 aus gemessenen Werten (70 000 je F-Screen-Runde, D-186, D-196), sie sagt vor dem Start, ob die Grenze den Lauf trägt; mit 2.5 nachmessen | #131 |
 | 1.8 | Abnahme-Läufe komuna und provo mit Modell, Last | **teilweise** | beide gelaufen, Ordner vollständig, provo trägt provo; Halt an der Tokengrenze 250 000 nach 2 bzw. 1 Runde, 0 von 2 Screens grün, je ein leeres Fragment (S037-10-1) | #131 |
 | 1.9 | Markenfreiheit | erledigt | rein (Attrappe) und in echtem Chromium (`test:browser`, T3710); im echten Lauf 0 Farbliterale in den Fragmenten | #131 |
 | 2.1 | Aufgabenart „ganzer Ablauf“, 5 Aufgaben mit 3–5 Screens | erledigt | `katalogo.ts`, 17 Screens, 26 Kanten | #132 |
@@ -824,26 +849,24 @@ SHAs der Kette B auf dem Stand `5a912063`; nach dem Neuaufsetzen durch S037-12 t
 | Q-2 | Konfliktprüfung gegen 036 und Merge-Position | erledigt | kein PR von 036; Probemerges gegen den gepushten und die lokalen 036-Branches sauber, Teil-6-Skript ohne Änderung an 037; „Später prüfen“ bleibt | plan |
 | Q-3 | Bericht im Format von Spec 035 | erledigt | dieser Abschnitt | plan |
 
-**Zahl:** 15 erledigt, 3 teilweise, 0 offen, 1 blockiert.
+**Zahl:** 16 erledigt, 2 teilweise, 0 offen, 1 blockiert.
 
 ### Befunde
 
-Vollständig im Abschnitt „Befunde“ (Datei, Grund, Vorschlag, Stand, passender Teil von 036). **Befund Tabu:** S037-02-1 `workspace.test.ts` – erledigt über D-59 (zu bestätigen). **Manko Gvidanto:** MG-1 bis MG-6 offen (Gvidanto-Runde nach Spec 036, nicht Teil 6). **Sonstige (27):** 7 erledigt, 1 umgangen, 10 Hinweise, 9 offen:
+Vollständig im Abschnitt „Befunde“ (Datei, Grund, Vorschlag, Stand, passender Teil von 036). **Befund Tabu:** S037-02-1 `workspace.test.ts` – erledigt über D-59 (zu bestätigen). **Manko Gvidanto:** MG-1 bis MG-6 offen (Gvidanto-Runde nach Spec 036, nicht Teil 6). **Sonstige (31):** 12 erledigt, 1 umgangen, 13 Hinweise, 5 offen (S037-13 hat S037-10-1, -2, -6, -7 erledigt und S037-13-1 bis -4 ergänzt):
 
 | Befund | Inhalt | Was der Maintainer tun kann |
 |---|---|---|
-| S037-10-1 | Leeres Fragment gilt als gebaut (3 von 14 echten Bauten) – Defekt in `packages/ekranoj/src/agento.ts`. | rot/grün beheben (S037-13 oder Folgerunde): einmal nachfragen, sonst `leere-antwort`; Rohantwort ablegen. Vor 2.5. |
-| S037-10-2 | Schätzkonstante F 40 000 statt gemessen ≈ 70 000–176 000 Tokens je Screen-Runde (`packages/ekranoj/src/kostoj.ts`). | Konstante auf den Messwert setzen (Schätzwert, keine Grenze); mit 2.5 nachmessen; MG-2/MG-3 senken die Kosten. |
+| S037-10-1, -2, -6, -7 | Leeres Fragment, Schätzkonstante, übernommene Werte, Variante-0-Lücken. | erledigt in S037-13 (rot/grün in PR A, D-184 bis D-187); 2.5 misst mit den Korrekturen. |
 | S037-10-3 | Wächter übersah kurze 036-Läufe (60-s-Takt). | Werkzeug: Ablehnung durch `mezuri` setzt „belegt“, Takt 10–15 s. |
 | S037-10-4 | 036 maß während des Messpunkts; Wechselwirkung in beide Richtungen möglich. | 036 informieren; gestörte Werte nicht vergleichen. |
-| S037-10-6 | Bericht kennzeichnet übernommene Werte nicht. | kleine Korrektur in `eligo.ts`/`rondoj.ts`. |
-| S037-10-7 | Variante-0-Lücken in der Lückenliste. | 0 in `mankoj.json` ohne K5-Lücken. |
+| S037-13-2 | `faktojPorNavigado` ist für die Modelo des Repos ohne Wirkung (ekranoj liest `fm-ligilo to` selbst). | behalten (zählt für eine Modelo mit anderem Link-Ero) oder vereinfachen. |
 | S037-09-2 | Messungen von 036 ohne Browser erkennt der Wächter nicht; kein Marker im plan von 036. | Marker „Messung läuft“ mit 036 vereinbaren. |
 | S037-04-1, S037-06-3 | Uzo von `ligilo` (`placement="standalone"`), fehlende Schrittanzeige. | Eroj-Runde 6/7. |
 
 ### Entscheidungen
 
-V-1 bis V-4 und D-01 bis D-13 angewandt; D-14 bis D-39 aus der Implementierungs-Spec angewandt; **D-40 bis D-183 aus dem Lauf** (Tabelle „Entscheidungen aus dem Lauf“ mit Zuordnung der vorläufigen IDs; 144 Einträge). Alle sind vom Maintainer zu bestätigen; **ausdrücklich zur Bestätigung gestellt:** **D-12/D-14** (Identität je Befehl statt `git config`), **D-27** (Navigation im Fragment, Rahmen nur Rücklink), **D-40** (Upstream-Einträge des Branches), **D-59/D-60** (`workspace.test.ts` als Graubereich), **D-138** (D-39 nicht eingeengt, hoher Kontrast mitgerendert), **D-164** (gestörter Messpunkt nicht wiederholt), **D-174** (2.5 blockiert), **D-178** (SHAs der Kette B nach dem Neuaufsetzen nur im PR-Text).
+V-1 bis V-4 und D-01 bis D-13 angewandt; D-14 bis D-39 aus der Implementierungs-Spec angewandt; **D-40 bis D-196 aus dem Lauf** (Tabelle „Entscheidungen aus dem Lauf“ mit Zuordnung der vorläufigen IDs; 157 Einträge). Alle sind vom Maintainer zu bestätigen; **ausdrücklich zur Bestätigung gestellt:** **D-12/D-14** (Identität je Befehl statt `git config`), **D-27** (Navigation im Fragment, Rahmen nur Rücklink), **D-40** (Upstream-Einträge des Branches), **D-59/D-60** (`workspace.test.ts` als Graubereich), **D-138** (D-39 nicht eingeengt, hoher Kontrast mitgerendert), **D-164** (gestörter Messpunkt nicht wiederholt), **D-174** (2.5 blockiert), **D-178**/**D-194** (SHAs der Kette B nach dem Neuaufsetzen nur im PR-Text), **D-186** (Schätzkonstante 70 000).
 
 ### Messungen
 
@@ -862,7 +885,7 @@ Ledger `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/
 
 ### Neustarts bekannter Zeittests (R-8)
 
-Keine. In den Läufen 41200798254 (#131) und 41201263661 (#132) war kein Job rot; M5 p90 0 ms (Grenze 50 ms), Ableitung median 146,7 bzw. 145,0 ms (gerechnet 94,8 bzw. 93,2 ms, Grenze 150 ms), Gegenproben wie verlangt rot. `.fundamento/spec037/r8.tsv` nicht angelegt. Für die neuen Köpfe nach S037-12 gilt R-8 frisch (höchstens ein Neustart je PR, Kopf und Job über `/tmp/s037-werkzeug/r8`).
+Keine. In den Läufen 41200798254 und 41209238357 (#131) sowie 41201263661 und 41209342665 (#132) war kein Job rot (je 15/15); Läufe auf den Köpfen von S037-13 im PR-Text; M5 p90 0 ms (Grenze 50 ms), Ableitung median 146,7 bzw. 145,0 ms (gerechnet 94,8 bzw. 93,2 ms, Grenze 150 ms), Gegenproben wie verlangt rot. `.fundamento/spec037/r8.tsv` nicht angelegt. Für die neuen Köpfe nach S037-12 gilt R-8 frisch (höchstens ein Neustart je PR, Kopf und Job über `/tmp/s037-werkzeug/r8`).
 
 ### `main`
 
@@ -880,6 +903,66 @@ Keine. In den Läufen 41200798254 (#131) und 41201263661 (#132) war kein Job rot
 - **AC-14:** `/tmp/s037-werkzeug/pruefen --diff origin/main..HEAD` (A) und `--diff origin/261031-spec-037-ekranoj..HEAD` (B) vor jedem Push „sauber“ (Zeilen, Pfade, Nachrichten, Autor und Committer jedes Commits – nur die Noreply-Adresse); `pruefen --datei` auf `plan.md`, `tasks.md`, der Commit-Nachricht und beiden PR-Texten sauber.
 - **Tests ohne Fokus/Überspringen:** `grep -rn "\.only(\|\.skip(" packages/ekranoj/src packages/cli/src packages/nordstelo/src` in A und B ohne Treffer.
 
+### Testabdeckung (S037-13)
+
+Jedes Abnahmekriterium hat einen Test (Datei › Name) oder einen Prüfnachweis. `cli/…/ekranoj-integra.test.ts` = `packages/cli/src/ekranoj-integra.test.ts` (Befehl über seine Fabrik, Skript-Agent, Renderer-Attrappe, **echter Gvidanto** `fm mcp` aus `dist` als Kindprozess, echter Bewerter und Markenbau, wo das Kriterium davon handelt); `nordstelo/…/integra.test.ts` = `packages/nordstelo/src/ablauf/integra.test.ts` (PR B, echtes `kuruEkranojn`, Gvidanto im Prozess, gespeicherte Fakten).
+
+| AC | Test (Datei › Name) oder Nachweis |
+|---|---|
+| AC-1 | `packages/ekranoj/src/doku.test.ts` › „copies the spec byte for byte and keeps plan and tasks beside it (AC-1)“; Hash zusätzlich im Abschnitt „Prüfungen“ |
+| AC-2 | nicht automatisierbar: Nachweis im plan, Bericht › „PRs je Teil“ (#131 Basis `main`, #132 gestapelt auf #131, keiner gemergt; `gh pr view`) |
+| AC-3 | nicht automatisierbar: Nachweis im plan, Bericht › „Prüfungen vor dem letzten Push“ (Tabu-Suche über `git diff --name-only`) und Abgrenzung › „Tatsächlich berührte Dateien“ |
+| AC-4 | nicht automatisierbar (Arbeitsweise): Nachweis in tasks.md (rot/grün-SHAs mit „Beleg rot“) und in der Mutationstabelle unten für reine Test-Commits |
+| AC-5 | nicht automatisierbar: Nachweis im plan, Bericht › „Prüfungen vor dem letzten Push“ (`audit-ac4`, S037-13 erneut „sauber“) |
+| AC-6 | `cli/…/ekranoj-integra.test.ts` › „builds at most five screens into the folder of §2.4, the overview links every screen and the report has every section“ und › „asks the real Gvidanto: its tools, its prompt, get_ero and check_usage answer from the Modelo“; `packages/ekranoj/src/eligo.test.ts` › „writes every file of the layout“, › „links every screen and the report from the overview, and every link resolves“, › „writes the report with every section of Lieferliste 1.6“; `packages/cli/src/ekranoj.test.ts` › „builds the screens and ends with file:// links to the overview and the report (US-1, AC-6)“; `packages/ekranoj/src/bildigilo.browser.test.ts` › „opens the overview via file://: Eroj defined, every screen and the report linked (AC-6)“ (`test:browser`) |
+| AC-7 | `cli/…/ekranoj-integra.test.ts` › „writes byte-identical fragments for komuna and provo, without colour literal, raw --fm- value or token value of either brand“; `packages/ekranoj/src/eligo.test.ts` › „gives byte-identical fragments and screens that differ only in the brand“; `packages/ekranoj/src/bildigilo.browser.test.ts` › „shows the brand: the same fragment, another computed colour of an Ero part (AC-7)“ (`test:browser`) |
+| AC-8 | `cli/…/ekranoj-integra.test.ts` › „runs exactly three rounds with a scorer that is never green, and reports every remaining deviation with rule, place and reason“; `packages/ekranoj/src/rondoj.test.ts` › „runs exactly three rounds when the scorer is never green, and every remaining finding is a deviation with regulo and kialo“, › „stops after round 2 when all screens are green then, and carries round 3 forward marked green since round 2“ |
+| AC-9 | `cli/…/ekranoj-integra.test.ts` › „stops at --max-tokens with a partial report that names the stop, exits 0 and prints the file:// links“; `packages/cli/src/ekranoj.test.ts` › „prints the estimate and exits 2 without --ja when there is no terminal (D-37)“, › „passes --max-tokens through: a run stopped at the limit reports partly and exits 0 (AC-9)“; `packages/ekranoj/src/rondoj.test.ts` › „stops before the request that would pass --max-tokens, keeps the partial result and names the reached round“, › „computes the estimate before the first request and hands it out first“; `packages/ekranoj/src/kostoj.test.ts` › „covers what the acceptance run komuna spent on a plan and three screen-rounds (S037-10 Befund 2)“ |
+| AC-10 | `packages/ekranoj/src/arkitekturo.test.ts` › „imports nothing of nordstelo, mcp, eroj or the Gvidanto, and the Modelo for types only“, › „builds every source, and the built output (dist) imports none of them either (S037-13)“, › „depends on none of them in package.json“, › „finds every forbidden form in a sample (the check can fail)“ |
+| AC-11 | `nordstelo/…/integra.test.ts` › „gives the same records and the same report twice, equal to the committed expected JSON“, › „scores the same facts with the same K1–K5 through fm ekranoj's adapter and the measurement's, K6 only with criteria“, › „computes the same navigation in ekranoj's loop (Skemo over the Gvidanto) and in the measurement (Modelo)“, › „reports the navigation of the real loop unchanged in the measurement's report“, › „plans every run, screen and estimate of a whole measurement from the catalogue (only „5 Aufgaben, 3–5 Screens“ is fixed)“; `packages/nordstelo/src/ablauf/katalogo.test.ts` › „has the five flows of the source spec, in its order, with 3 to 5 screens each“; `poentoj.test.ts` › „measures the navigation through ekranoj: a missing edge and a dead link (D-05)“; `raporto.test.ts` › „is rebuilt from the stored records byte for byte (determinism, AC-11)“; `kuro.test.ts` › „reports F against 0 and round 1 against round 3 per flow and per screen, from the fixtures (AC-11)“ |
+| AC-12 | nicht automatisierbar: Nachweis im plan, Abschnitt „Modellkosten“ (Ledger, nur `ministral-14b-2512`, je Lauf Tokens, Kosten, Dauer, Commit, Last). Die Modellwache selbst ist getestet: `packages/ekranoj/src/gardo.test.ts` › „refuses any other provider or model with a structured error and no key“, `cli/…/ekranoj-integra.test.ts` › „refuses another model of the .env with exit 2 before any request and before the Gvidanto“, `packages/nordstelo/src/ablauf/cli-ablauf.test.ts` › „exits 2 before any request when the .env names another model (D-19)“ |
+| AC-13 | nicht automatisierbar: Nachweis im plan, Abschnitt „Prüfprotokoll Messsperre“ (teilweise, D-180) |
+| AC-14 | nicht automatisierbar: Nachweis im plan, Bericht › „Prüfungen vor dem letzten Push“ (`pruefen` über Diffs, Commits, PR-Texte). Am Lauf getestet: `cli/…/ekranoj-integra.test.ts` › „writes the key of the .env into no file of the run and prints it nowhere“, `packages/cli/src/ekranoj.test.ts` › „never prints or writes the key of the .env“, › „keeps the raw answers of a build without markup, redacted, and marks the screen (S037-10 Befund 1)“ |
+| AC-15 | `packages/ekranoj/src/doku.test.ts` › „holds the decisions to confirm, Blockiert and the Lückenliste in plan.md (AC-15)“; Inhalt: Durchsicht des plans |
+| AC-16 | `packages/ekranoj/src/doku.test.ts` › „ends with the Bericht: both PR links, the merge position with the conflict check, the maintainer's steps in order (AC-16)“ (Form); Inhalt nicht automatisierbar: Nachweis im plan, Abschnitt „Konfliktprüfung und Merge-Position“ |
+
+V-2 (≤ 5 Screens) zusätzlich: `cli/…/ekranoj-integra.test.ts` › „refuses six screen names with exit 2: no request, no Gvidanto, no folder“. `--art ablauf` (unbekannte Art, anderes Modell) ist schon durch `cli-ablauf.test.ts` und `kuro.test.ts` gedeckt (D-193).
+
+**Mutationsnachweis der neuen Tests** (lokal, nicht committet, danach zurückgesetzt; Logs `/tmp/s037-logs/s037-13-mutationen-{a,a2,b,doku}.log`):
+
+| # | Test | Mutation | rote Zeile |
+|---|---|---|---|
+| M1 | AC-6 Ordner | `MAKS_EKRANOJ = 6` (`ekranoj/src/plano.ts`) | `AssertionError: expected '' to match /gekürzt auf die ersten 5/` |
+| M2a | echter Gvidanto | Prompt des Gvidanto nicht gelesen (`rondoj.ts`) | `expected { role: 'system', …(1) } to deeply equal { role: 'system', …(1) }` |
+| M2b | echter Gvidanto | beide Wächter der Markenwerkstatt aus (`mcp-kliento.ts`, `agento.ts`) | `expected [ 'describe', 'list_dimensioj', …(21) ] to not include 'save_agordo'` |
+| M3 | AC-7 integriert | Rahmen schreibt die Marke ins Fragment (`konstruo.ts`) | `ekranoj/detail.html: expected '<i data-a="provo"></i><main>…' to be '<i data-a="komuna"></i><main>…'` |
+| M4 | AC-8 integriert | `MAKS_RONDOJ = 2` | `expected 2 to be 3` |
+| M5 | AC-9 integriert | Halt an `--max-tokens` endet mit Exit 1 (cli) | `expected { code: 1, …(1) } to deeply equal { code: +0, stderr: Any<String> }` |
+| M6 | V-2 | Eingabeprobleme ignoriert (cli) | `expected 'Probe der Schwärzung: ‹Schlüssel›\nGv…' to contain '/ekranoj plan-too-many-screens'` |
+| M7 | Modellwache | Wache der cli aus | `expected +0 to be 2` |
+| M8 | Schlüssel | keine Schwärzung (cli) | `expected 'Probe der Schwärzung: attrappe-schlue…' to contain 'Probe der Schwärzung: ‹Schlüssel›'` |
+| M9 | AC-10 `dist` | `import "@fundamento/nordstelo"` in `dist/rondoj.js` | `expected [ { file: 'dist/rondoj.js', …(2) } ] to deeply equal []` (`"rule": "forbidden-import"`) |
+| M10 | AC-10 `dist` | `dist/kostoj.d.ts` gelöscht | `expected [ 'kostoj.d.ts' ] to deeply equal []` |
+| M11 | AC-1 | ein Byte an `spec.md` | `expected 'b31a85be8e29674ad0fb883b1c6d3b1476070…' to be '0780c57eb387b9aa34d98ea31bab223fe92f8…'` |
+| M12 | AC-15 | Abschnitt „Blockiert“ umbenannt | `expected '' not to be ''` |
+| M13 | AC-16 | Schritt 3 der Maintainer-Liste als 4 | `expected [ 1, 2, 4, 4, 5, 6, 7, 8, 9, 10 ] to deeply equal [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]` |
+| B-M1 | AC-11 Determinismus | Zufallswert in `lauf.json` (`kuro.ts`) | `expected { …(45) } to deeply equal { …(45) }` (`"commit": "abc1234-0.91…"` gegen `"abc1234-0.19…"`) |
+| B-M2 | AC-11 erwartetes JSON | `STREUUNG_REIHE_K = 16.8` | `- "reiheK": 16.7 / + "reiheK": 16.8` |
+| B-M3 | K1–K5 gleich | Adapter bewertet K4 mit Kriterien anders (`ekrano-taksilo.ts`) | `expected [ 'F R1 standards-liste K4', …(5) ] to deeply equal []` |
+| B-M4b | Navigation gleich | Schleife erkennt den Link-Ero nicht (`ekranoj/src/instancoj.ts`, ekranoj neu gebaut) | `expected { kvoto: 0.25, …(4) } to deeply equal { kvoto: 0.5, …(4) }` |
+| B-M5 | Navigation im Bericht | jeder Screen „kompleta“ (`poentoj.ts`) | `+ "F R1 standard-detail kompleta", + "F R2 standard-detail kompleta"` |
+| B-M6 | Katalogzahlen | Schätzung zählt nur den letzten Lauf (`kuro.ts`) | `expected 'Schätzung: 10 Läufe, 18000 Tokens, 0.…' to match /^Schätzung: 10 Läufe, 3672000 Tokens/` |
+
+Ohne Wirkung blieben (und sind Befunde, keine Lücke der Tests): M2 (nur einer der zwei Wächter der Markenwerkstatt aus – der andere hält, S037-13-3), B-M4 (Messung übersieht den Link-Ero – der Standard von ekranoj liest ihn trotzdem, S037-13-2), und ein erster M9 (Zeile hinter dem Kommentar `//# sourceMappingURL` angehängt – Fehler der Mutation, wiederholt als eigene Zeile). Das erwartete JSON von B lag beim Mutationslauf noch unter `integra/raporto.json`; seither `integra-raporto.json` (gleiche Prüfung, D-192).
+
+### Prüfungen vor dem letzten Push (S037-13)
+
+- **AC-1:** SHA-256 von `spec.md` unverändert `0780c57e…deaed89` (auch als Test, `doku.test.ts`).
+- **AC-3 (Tabu):** `git diff --name-only origin/main...HEAD` (A) ohne Tabu-Pfad; neue oder geänderte Dateien von S037-13 nur unter `packages/ekranoj/**`, `packages/cli/src/{commands/ekranoj.ts,ekranoj.test.ts,ekranoj-integra.test.ts}` und `specs/037-agenten-ekranoj/`; Graubereich unverändert die vier Dateien. B: nur `packages/nordstelo/src/ablauf/**`, `packages/nordstelo/test/fixtures/ablauf/**`, `packages/nordstelo/src/cli.ts`.
+- **AC-5:** `audit-ac4 origin/main..HEAD PR-A` → „2 Geändert in bestehenden Dateien (0)“, „3 Neue Grenzen und Zeitlimits (12)“, `TOKENOJ_*` als „Schätzwert, keine Grenze“ (jetzt 70 000), **„Ergebnis: sauber – nichts angehoben, keine bestehende Grenze geändert“** (`/tmp/s037-logs/s037-13-audit-ac4-a.txt`). Die Nachfrage bei leerer Antwort ist eine Anfrage im bestehenden Budget, keine neue Grenze; kein Zeitlimit neu oder geändert.
+- **AC-14:** `pruefen --staged`, `--datei` (jede Commit-Nachricht, plan, tasks, PR-Texte) und `--diff` beider Spannen „sauber“; Autor und Committer nur die Noreply-Adresse.
+- **Tests:** kein `.only`/`.skip` in `packages/{ekranoj,cli,nordstelo}/src`.
+
 ### Prüfung gegen die Abnahmekriterien
 
 | AC | Ergebnis | Beleg |
@@ -887,26 +970,26 @@ Keine. In den Läufen 41200798254 (#131) und 41201263661 (#132) war kein Job rot
 | AC-1 | erfüllt | SHA-256 oben; `plan.md`, `tasks.md` daneben |
 | AC-2 | erfüllt | #131 von `main` `f2b5a058` (= `main` beim Start, unverändert), #132 gestapelt auf #131 und auf dessen letzten Kopf neu aufgesetzt (`--force-with-lease`); keiner gemergt |
 | AC-3 | erfüllt | Prüfungen oben; Graubereich-Dateien einzeln im Abschnitt „Konfliktprüfung“ und in „Tatsächlich berührte Dateien“ |
-| AC-4 | erfüllt, mit vier begründeten Sonderfällen | jede Codeänderung mit rotem Vorgänger (tasks.md, „Beleg rot“); Sonderfälle: `d944ff68` und `25932e8b` (roter Stand = bestehender Commit `999cf1c7` bzw. `a74125cf`), `0651b957` (roter Stand = neu aufgesetzter Branch), `07585b5e` (keine Verhaltensänderung, D-150); ein Test von `53933318` kam mit dem grünen Commit und wurde an einer lokalen Mutation rot gesehen |
+| AC-4 | erfüllt, mit vier begründeten Sonderfällen | jede Codeänderung mit rotem Vorgänger (tasks.md, „Beleg rot“), auch die drei Korrekturen von S037-13; reine Test-Commits von S037-13 je an einer lokalen Mutation rot (Abschnitt „Testabdeckung“); Sonderfälle: `d944ff68` und `25932e8b` (roter Stand = bestehender Commit `999cf1c7` bzw. `a74125cf`), `0651b957` (roter Stand = neu aufgesetzter Branch), `07585b5e` (keine Verhaltensänderung, D-150); ein Test von `53933318` kam mit dem grünen Commit und wurde an einer lokalen Mutation rot gesehen |
 | AC-5 | erfüllt | `audit-ac4` A und B „sauber“ |
-| AC-6 | erfüllt | Attrappen-Tests (T3703, T3711) und echte Abnahme komuna (Ordner mit 2 Screens, Übersicht über `file://`, Fotos hell/dunkel, Bericht nach 1.6); Qualität nicht grün (1.8 teilweise) |
-| AC-7 | erfüllt | `test:browser` (T3710, gleiches HTML, verschiedene berechnete Farben) und echte Abnahme provo (D-167) |
-| AC-8 | erfüllt | T3702 (Attrappe nie grün → genau 3 Runden, jede Abweichung mit Regel und Grund) |
-| AC-9 | erfüllt | T3702/T3704 (Halt vor der Anfrage, Teilbericht, Exit 0); in allen drei echten Läufen bestätigt |
-| AC-10 | erfüllt | `packages/ekranoj/src/arkitekturo.test.ts` (Modulgraph, Negativprobe) |
-| AC-11 | erfüllt | `poentoj.test.ts`, `kuro.test.ts`, `raporto.test.ts` (gleiche Fakten → gleiches Ergebnis, Bericht byte-gleich neu gebaut, F/0 und R1/R3) |
+| AC-6 | erfüllt | integrierter Test mit echtem Gvidanto, Bewerter und Markenbau (T3746), Attrappen-Tests (T3703, T3711) und echte Abnahme komuna (Ordner mit 2 Screens, Übersicht über `file://`, Fotos hell/dunkel, Bericht nach 1.6); Qualität nicht grün (1.8 teilweise) |
+| AC-7 | erfüllt | `test:browser` (T3710, gleiches HTML, verschiedene berechnete Farben), integrierter Test mit echtem Markenbau komuna/provo (T3746) und echte Abnahme provo (D-167) |
+| AC-8 | erfüllt | T3702 (Attrappe nie grün → genau 3 Runden, jede Abweichung mit Regel und Grund), durch den Befehl mit echtem Gvidanto T3746 |
+| AC-9 | erfüllt | T3702/T3704 (Halt vor der Anfrage, Teilbericht, Exit 0), durch den Befehl mit echtem Gvidanto T3746; Schätzung aus Messwerten (T3741/T3744); in allen drei echten Läufen bestätigt |
+| AC-10 | erfüllt | `packages/ekranoj/src/arkitekturo.test.ts` (Modulgraph der Quellen und seit S037-13 des gebauten `dist`, Negativproben) |
+| AC-11 | erfüllt | `poentoj.test.ts`, `kuro.test.ts`, `raporto.test.ts` (gleiche Fakten → gleiches Ergebnis, Bericht byte-gleich neu gebaut, F/0 und R1/R3); Ende zu Ende mit dem echten `kuruEkranojn` und Gleichlauf beider Wege `integra.test.ts` (T3749) |
 | AC-12 | erfüllt | 0,4802 $ ≤ 1,00 $, nur `ministral-14b-2512`, eigenes Ledger, jeder Lauf mit Tokens, Kosten, Dauer, Commit, Last (Abschnitt „Modellkosten“) |
 | AC-13 | **teilweise** | Prüfprotokoll vor jedem Start „frei“; der Messpunkt überschnitt sich ab 13:49:32Z mit einer Messung von 036 (als „gestört“ markiert, nicht verglichen), und zwei Starts lagen 31 s bzw. 87 s nach 036-Prozessen, die nur `mezuri` sah (D-180, S037-10-3) |
 | AC-14 | erfüllt | `pruefen` über beide Diffs, Commits (inkl. Autor/Committer), PR-Texte, Logs und Berichte sauber |
 | AC-15 | erfüllt | Abschnitte „Entscheidungen, vom Maintainer zu bestätigen“ (V-1 bis V-4, D-01 bis D-183), „Blockiert“, „Lückenliste“ (echte Läufe) |
 | AC-16 | erfüllt | dieser Bericht: PR-Links, Merge-Position mit Konfliktprüfung, Schritte in Reihenfolge |
 
-S037-13 legt die Abdeckungskarte AC → Test an und prüft AC-4/AC-6–AC-11 gegen das integrierte Ergebnis.
+Abdeckungskarte AC → Test und Mutationsnachweis: Abschnitt „Testabdeckung (S037-13)“ oben.
 
 ### Was der Maintainer tun soll, in Reihenfolge
 
-1. **Bericht lesen**, „Blockiert“ ansehen; V-1 bis V-4, D-01 bis D-183 bestätigen oder ändern – zuerst die ausdrücklich gestellten (D-12/D-14, D-27, D-40, D-59/D-60, D-138, D-164, D-174, D-178).
-2. **Befunde S037-10-1 und S037-10-2 beheben lassen** (kleine rot/grün-Korrekturen in PR A; S037-13 kann sie aufnehmen) – vor jeder weiteren Messung.
+1. **Bericht lesen**, „Blockiert“ ansehen; V-1 bis V-4, D-01 bis D-196 bestätigen oder ändern – zuerst die ausdrücklich gestellten (D-12/D-14, D-27, D-40, D-59/D-60, D-138, D-164, D-174, D-178, D-186, D-194).
+2. **Korrekturen aus S037-13 durchsehen:** Befunde S037-10-1 (Nachfrage, sonst `leere-antwort`), S037-10-2 (Schätzkonstante 70 000, D-186), S037-10-6/-7 sind rot/grün in PR A behoben; D-184 bis D-196 bestätigen.
 3. **Abnahme:** die Übersichten des Laufs über `file://` öffnen und durchklicken (Links oben); bei Bedarf `fm ekranoj` mit komuna und provo selbst laufen lassen (Messanleitung Teil 1, ≈ 0,04–0,09 $ je Lauf).
 4. **Spec 036 Teil 1 → 2a → 2b → Teil 5 (②b-2 … ③) → Teil 3 → Teil 4 mergen** (036-Reihenfolge). Sobald 036-PRs existieren: „Später prüfen“ (Abschnitt „Konfliktprüfung“) vor dem nächsten Schritt.
 5. **PR A #131 auf das neue `main` aufsetzen** (lassen): bei Konflikt im Lockfile `pnpm install` neu erzeugen; in `ci.yml`, `workflow.test.ts`, `workspace.test.ts` beide Wörter bzw. Zeilen behalten. CI abwarten (R-8 einmal für bekannte Zeittests).
