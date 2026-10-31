@@ -6,6 +6,7 @@ import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { kahelojElProponoj } from "./buehne.js";
 import { parseEnv, settingsOf } from "./env.js";
 import { MARKEN_DIR } from "./marko.js";
 import type { PrivataDeps } from "./privata.js";
@@ -72,5 +73,29 @@ describe("Spec 036, Befund 3.4: material comes back as tiles with a colour and i
       { farbo: "#f4f4f2", anteil: 80 },
       { farbo: "#0f766e", anteil: 20 },
     ]);
+  });
+});
+
+describe("Spec 036, Befund 3.4: research comes back as tiles of its proposals' colours", () => {
+  it("a colour with a measured share keeps it; a colour from the code alone says it has none", () => {
+    expect(
+      kahelojElProponoj([
+        {
+          faceto: "gvidkoloro",
+          agordo: { leitfarbe: "#0F766E" } as never,
+          satz: "Leitfarbe #0f766e.",
+          herkunft: [
+            { dosiero: "https://ekzemplo.invalid/", loko: "41,5 % des Bildschirms" },
+            { dosiero: "https://ekzemplo.invalid/s.css", loko: "Zeile 3" },
+          ],
+        },
+        {
+          faceto: "statoj",
+          agordo: { statoj: { danger: "#b42318" } } as never,
+          satz: "Fehlerfarbe #b42318.",
+          herkunft: [{ dosiero: "https://ekzemplo.invalid/s.css", loko: "Zeile 9" }],
+        },
+      ]),
+    ).toEqual([{ farbo: "#0f766e", anteil: 42 }, { farbo: "#b42318" }]);
   });
 });

@@ -231,12 +231,15 @@ export function asistantoScreen(input: AsistantoInput): string {
     .join(" · ");
   const propono = input.propono === undefined ? "" : proponoHtml(name, input.propono);
   // Spec 033 S6: the estimate before the start, beside the action it is for.
-  const takso = (zugo: keyof NonNullable<AsistantoInput["takso"]>, label: string) =>
+  // In a dialog the estimate stands in its content (slot).
+  const takso = (zugo: keyof NonNullable<AsistantoInput["takso"]>, label: string, slot?: string) =>
     input.takso === undefined
       ? ""
-      : `<fm-teksto kind="caption" data-mt-takso-${zugo}>${escapeHtml(label)} ${escapeHtml(input.takso[zugo])}</fm-teksto>`;
-  const material = `<fm-faldilo data-mt-materialo><span slot="summary">Material deiner Marke (Screenshot, Logo, PDF, Schrift oder Link)</span><fm-alsxutilo name="materialo" accept=".png,.jpg,.jpeg,.webp,.svg,.pdf,.woff2,.woff,.ttf,.otf" data-mt-materialo-dosiero>Datei</fm-alsxutilo><fm-kampo name="url" type="url" data-mt-materialo-url>Link auf eine Webseite</fm-kampo><fm-markobutono name="rajtoj-materialo" value="ja" data-mt-materialo-rajtoj>${escapeHtml(KONFIRMO_TEKSTO)}</fm-markobutono>${takso("materialo", "je Datei")}<fm-butono emphasis="medium" data-mt-materialo-legi>Material lesen</fm-butono></fm-faldilo>`;
-  const esploro = `<fm-faldilo data-mt-esploro><span slot="summary">Bestehende Marke nur genannt (Recherche)</span><fm-kampo name="nomo" data-mt-esploro-nomo>Name der Marke</fm-kampo><fm-kampo name="url" type="url" data-mt-esploro-url>Adresse der Website (optional)</fm-kampo><fm-markobutono name="rajtoj-esploro" value="ja" data-mt-esploro-rajtoj>${escapeHtml(KONFIRMO_TEKSTO)}</fm-markobutono><fm-teksto kind="caption">Der Assistent liest öffentliche Seiten und misst Farben, Schriften, Radien und Abstände; er übernimmt keine Texte, Bilder oder Dateien. Das Ergebnis bleibt lokal.</fm-teksto>${takso("esploro", "Recherche")}<fm-butono emphasis="medium" data-mt-esploro-sendi>Recherchieren</fm-butono></fm-faldilo>`;
+      : `<fm-teksto${slot === undefined ? "" : ` slot="${slot}"`} kind="caption" data-mt-takso-${zugo}>${escapeHtml(label)} ${escapeHtml(input.takso[zugo])}</fm-teksto>`;
+  // Spec 036, Befund 3.4: material and research open in a dialog (fm-dialogo) instead of a fold; what
+  // they find comes back as tiles in it (buehne-klient.ts), the proposal on the stage right first.
+  const material = `<fm-dialogo size="medium" data-mt-materialo><span slot="heading">Material deiner Marke</span><span slot="message">Screenshot, Logo, PDF, Schrift oder Link. Der Assistent misst Farben, Schriften, Radien und Abstände; der Vorschlag erscheint auf der Bühne zuerst rechts.</span><fm-alsxutilo slot="content" name="materialo" accept=".png,.jpg,.jpeg,.webp,.svg,.pdf,.woff2,.woff,.ttf,.otf" data-mt-materialo-dosiero>Datei</fm-alsxutilo><fm-kampo slot="content" name="url" type="url" data-mt-materialo-url>Link auf eine Webseite</fm-kampo><fm-markobutono slot="content" name="rajtoj-materialo" value="ja" data-mt-materialo-rajtoj>${escapeHtml(KONFIRMO_TEKSTO)}</fm-markobutono>${takso("materialo", "je Datei", "content")}<fm-avizo slot="content" intent="info" hidden data-mt-dialogo-meldung></fm-avizo><div slot="content" class="mt-kaheloj" data-mt-kaheloj></div><fm-butono slot="actions" emphasis="low">Schließen</fm-butono><fm-butono slot="actions" emphasis="high" data-mt-materialo-legi>Material lesen</fm-butono></fm-dialogo>`;
+  const esploro = `<fm-dialogo size="medium" data-mt-esploro><span slot="heading">Bestehende Marke recherchieren</span><span slot="message">Der Assistent liest öffentliche Seiten und misst Farben, Schriften, Radien und Abstände; er übernimmt keine Texte, Bilder oder Dateien. Das Ergebnis bleibt lokal.</span><fm-kampo slot="content" name="nomo" data-mt-esploro-nomo>Name der Marke</fm-kampo><fm-kampo slot="content" name="url" type="url" data-mt-esploro-url>Adresse der Website (optional)</fm-kampo><fm-markobutono slot="content" name="rajtoj-esploro" value="ja" data-mt-esploro-rajtoj>${escapeHtml(KONFIRMO_TEKSTO)}</fm-markobutono>${takso("esploro", "Recherche", "content")}<fm-avizo slot="content" intent="info" hidden data-mt-dialogo-meldung></fm-avizo><div slot="content" class="mt-kaheloj" data-mt-kaheloj></div><fm-butono slot="actions" emphasis="low">Schließen</fm-butono><fm-butono slot="actions" emphasis="high" data-mt-esploro-sendi>Recherchieren</fm-butono></fm-dialogo>`;
   // Spec 036, Befund 3.1: the preview is the stage – two thirds of the width (buehne.ts).
   const vorschau = buehneHtml({ name, studio, faceto: faceto.name });
   const body = `<fm-sxelo>
@@ -252,6 +255,7 @@ ${dialog}
 <div class="mt-schritte"><fm-navigado label="Schritte" page="${escapeHtml(faceto.name)}" orientation="vertical">${nav}<a href="/studio/${encodeURIComponent(name)}/${studio}" data-page="studio">Studio</a><a href="/asistanto/${encodeURIComponent(name)}/komenco" data-page="komenco">Einstiegsfragen</a></fm-navigado><fm-teksto kind="caption">${nochNicht}</fm-teksto>
 <div class="mt-babilo">
 ${propono}
+<div class="mt-zeile"><fm-butono emphasis="medium" data-mt-dialogo-oeffnen="materialo">Material hinzufügen</fm-butono><fm-butono emphasis="medium" data-mt-dialogo-oeffnen="esploro">Recherche</fm-butono></div>
 ${material}
 ${esploro}
 <fm-teksto kind="caption" data-mt-freigabe-satz>${escapeHtml(releaseHint)}</fm-teksto>

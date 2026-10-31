@@ -433,8 +433,9 @@ test.describe("Bühne (Spec 036, Befund 3.4)", () => {
     // No fold any more: a button beside the steps opens the dialog.
     await expect(page.locator("fm-faldilo[data-mt-materialo]")).toHaveCount(0);
     await page.getByRole("button", { name: "Material hinzufügen" }).click();
-    const dialog = page.getByRole("dialog", { name: "Material deiner Marke" });
-    await expect(dialog).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "Material deiner Marke" })).toBeVisible();
+    // Its fields, actions and tiles are the host's children (slotted into the platform's dialog).
+    const dialog = page.locator("fm-dialogo[data-mt-materialo]");
     await dialog
       .locator("[data-mt-materialo-dosiero]")
       .locator('input[type="file"]')
@@ -447,7 +448,7 @@ test.describe("Bühne (Spec 036, Befund 3.4)", () => {
     await dialog.getByRole("button", { name: "Material lesen" }).click();
     // The tiles stand in the dialog: the larger colour first, each with its patch and its share.
     await expect(dialog.locator("[data-mt-kaheloj] fm-karto")).toHaveCount(2);
-    expect(await kachelnOf(page.locator("fm-dialogo[data-mt-materialo]"))).toEqual([
+    expect(await kachelnOf(dialog)).toEqual([
       { farbe: "rgb(244, 244, 242)", name: "Farbfläche #f4f4f2", text: "#f4f4f2 Anteil 80 %" },
       { farbe: "rgb(15, 118, 110)", name: "Farbfläche #0f766e", text: "#0f766e Anteil 20 %" },
     ]);
@@ -483,13 +484,15 @@ test.describe("Bühne (Spec 036, Befund 3.4)", () => {
       }),
     );
     await page.getByRole("button", { name: "Recherche", exact: true }).click();
-    const dialog = page.getByRole("dialog", { name: "Bestehende Marke recherchieren" });
-    await expect(dialog).toBeVisible();
+    await expect(
+      page.getByRole("dialog", { name: "Bestehende Marke recherchieren" }),
+    ).toBeVisible();
+    const dialog = page.locator("fm-dialogo[data-mt-esploro]");
     await dialog.getByRole("textbox", { name: "Name der Marke" }).fill("Ekzemplo");
     await dialog.locator("[data-mt-esploro-rajtoj]").click();
     await dialog.getByRole("button", { name: "Recherchieren" }).click();
     await expect(dialog.locator("[data-mt-kaheloj] fm-karto")).toHaveCount(2);
-    expect(await kachelnOf(page.locator("fm-dialogo[data-mt-esploro]"))).toEqual([
+    expect(await kachelnOf(dialog)).toEqual([
       { farbe: "rgb(15, 118, 110)", name: "Farbfläche #0f766e", text: "#0f766e Anteil 62 %" },
       { farbe: "rgb(244, 244, 242)", name: "Farbfläche #f4f4f2", text: "#f4f4f2 Anteil 38 %" },
     ]);

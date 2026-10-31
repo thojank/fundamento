@@ -25,7 +25,10 @@ export const BUEHNE_CSS = `.mt-buehne-layout { display: grid; grid-template-colu
 .mt-chatleiste { display: flex; flex-direction: column; gap: var(--fm-spacing-small); padding: var(--fm-spacing-medium); border: var(--fm-border-width-default) solid var(--fm-color-border-subtle); border-radius: var(--fm-radius-role-surface); background-color: var(--fm-color-background-default); }
 .mt-chatleiste-eingabe { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--fm-spacing-small); align-items: end; }
 .mt-buehne-layout[data-mt-schmal] .mt-chatleiste-eingabe { grid-template-columns: minmax(0, 1fr); }
-.mt-letzte-antwort { display: flex; flex-direction: column; gap: var(--fm-spacing-xsmall); }`;
+.mt-letzte-antwort { display: flex; flex-direction: column; gap: var(--fm-spacing-xsmall); }
+.mt-kaheloj { display: grid; grid-template-columns: repeat(var(--fm-layout-columns-4), minmax(0, 1fr)); gap: var(--fm-spacing-small); }
+.mt-kaheloj:empty { display: none; }
+.mt-kahelo-farbo { display: block; block-size: var(--fm-size-scale-1000); border: var(--fm-border-width-default) solid var(--fm-color-border-subtle); border-radius: var(--fm-radius-role-control); }`;
 
 /**
  * The stage's client: the narrow window from the Vortaro's expanded breakpoint, light or dark for
@@ -90,6 +93,103 @@ if (buehneLayout) {
         letzte.replaceChildren(...(caption ? [caption] : []), antwort);
       }
     }).observe(liste, { childList: true });
+    // Befund 3.4: material and research open in a dialog (fm-dialogo); what they find comes back as
+    // tiles in it – a colour patch and its share – and the proposal stands on the stage right first.
+    // Closing the dialog after a reading loads the screen anew (the proposal beside the steps).
+    const dialogoj = {
+      materialo: document.querySelector("fm-dialogo[data-mt-materialo]"),
+      esploro: document.querySelector("fm-dialogo[data-mt-esploro]"),
+    };
+    let gelesen = false;
+    const dialogMeldung = (dialog, text) => {
+      const box = dialog.querySelector("[data-mt-dialogo-meldung]");
+      if (!box) return;
+      box.textContent = text;
+      box.hidden = text === "";
+    };
+    const zeigeKahelojn = (dialog, kaheloj) => {
+      const ujo = dialog.querySelector("[data-mt-kaheloj]");
+      if (!ujo) return;
+      const tiles = [];
+      for (const kahelo of kaheloj) {
+        const farbo = String(kahelo.farbo || "").toLowerCase();
+        if (!/^#[0-9a-f]{6}$/.test(farbo)) continue;
+        const karto = document.createElement("fm-karto");
+        karto.setAttribute("level", "3");
+        const patch = document.createElement("span");
+        patch.setAttribute("slot", "media");
+        patch.setAttribute("role", "img");
+        patch.setAttribute("aria-label", "Farbfläche " + farbo);
+        patch.setAttribute("data-mt-kahelo-farbo", farbo);
+        patch.className = "mt-kahelo-farbo";
+        patch.style.backgroundColor = farbo;
+        const heading = document.createElement("span");
+        heading.setAttribute("slot", "heading");
+        heading.textContent = farbo;
+        const share = document.createElement("fm-teksto");
+        share.setAttribute("slot", "content");
+        share.textContent = typeof kahelo.anteil === "number" ? "Anteil " + kahelo.anteil + " %" : "Anteil nicht gemessen";
+        karto.append(patch, heading, " ", share);
+        tiles.push(karto);
+      }
+      ujo.replaceChildren(...tiles);
+    };
+    for (const opener of document.querySelectorAll("[data-mt-dialogo-oeffnen]")) {
+      opener.addEventListener("click", () => {
+        const dialog = dialogoj[opener.getAttribute("data-mt-dialogo-oeffnen")];
+        if (dialog) dialog.setAttribute("open", "");
+      });
+    }
+    for (const dialog of Object.values(dialogoj)) {
+      if (!dialog) continue;
+      dialog.addEventListener("cancel", () => { if (gelesen) location.reload(); });
+      // The root carries data-mt-scheme (D-S36-3.1-9): a change in a dialog stays in the dialog.
+      dialog.addEventListener("change", (event) => event.stopPropagation());
+    }
+    const checked = (dialog, selector) => {
+      const box = dialog.querySelector(selector);
+      return !!box && box.hasAttribute("checked");
+    };
+    const wertIn = (dialog, selector) => {
+      const element = dialog.querySelector(selector);
+      return (element && element.getAttribute("value")) || "";
+    };
+    // Spec 033 S2: a file of fm-alsxutilo or a link, with the confirmation.
+    if (dialogoj.materialo) dialogoj.materialo.addEventListener("confirm", async (event) => {
+      event.preventDefault();
+      const dialog = dialogoj.materialo;
+      const picker = dialog.querySelector("[data-mt-materialo-dosiero]");
+      const url = wertIn(dialog, "[data-mt-materialo-url]");
+      const file = picker && picker.files && picker.files[0];
+      const rajtoj = checked(dialog, "[data-mt-materialo-rajtoj]");
+      let value;
+      if (file) {
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        let binary = "";
+        for (let index = 0; index < bytes.length; index += 0x8000) binary += String.fromCharCode(...bytes.subarray(index, index + 0x8000));
+        value = { filename: file.name, base64: btoa(binary), rajtoj };
+      } else if (url !== "") value = { url, rajtoj };
+      else { dialogMeldung(dialog, "Wähle eine Datei oder gib einen Link an."); return; }
+      dialogMeldung(dialog, "Ich lese das Material …");
+      const result = await post("materialo", value);
+      if (!result.ok) { dialogMeldung(dialog, result.body.satz || "Das Material ließ sich nicht lesen."); return; }
+      zeigeKahelojn(dialog, result.body.kaheloj || []);
+      dialogMeldung(dialog, [...(result.body.satzoj || []), "Der Vorschlag steht auf der Bühne rechts."].join(" "));
+      gelesen = true;
+      refreshNachher();
+    });
+    // Spec 033 S4: a brand only named – the research agent, with the confirmation.
+    if (dialogoj.esploro) dialogoj.esploro.addEventListener("confirm", async (event) => {
+      event.preventDefault();
+      const dialog = dialogoj.esploro;
+      dialogMeldung(dialog, "Ich recherchiere …");
+      const result = await post("esplori", { nomo: wertIn(dialog, "[data-mt-esploro-nomo]"), url: wertIn(dialog, "[data-mt-esploro-url]"), rajtoj: checked(dialog, "[data-mt-esploro-rajtoj]") });
+      if (!result.ok) { dialogMeldung(dialog, result.body.satz || "Die Recherche ging nicht."); return; }
+      zeigeKahelojn(dialog, result.body.kaheloj || []);
+      dialogMeldung(dialog, result.body.antwort || "");
+      gelesen = true;
+      refreshNachher();
+    });
     // Every handler of the screen is bound now (this part runs last): the stage can be used.
     buehne.setAttribute("data-mt-bereit", "");
   }

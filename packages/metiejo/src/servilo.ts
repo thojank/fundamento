@@ -54,6 +54,7 @@ import {
   type Vollstaendigkeit,
   vollstaendigkeitOf,
 } from "./asistanto/stato.js";
+import { kahelojElProponoj, kahelojElTrovoj } from "./buehne.js";
 import { buildOf, expertHinweis, standOf } from "./eksperto.js";
 import { EKSPORTO_CELOJ, type EksportoCelo, exportMarko } from "./eksporto.js";
 import { type Bildilo, playwrightBildilo } from "./enportilo/bildilo.js";
@@ -1708,6 +1709,8 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           });
           sendJson(response, {
             proponoj: result.proponoj,
+            // Spec 036, Befund 3.4: the colours of the proposals, as tiles for the dialog.
+            kaheloj: kahelojElProponoj(result.proponoj),
             seitoj: result.seitoj,
             abgelehnt: result.abgelehnt,
             antwort: result.antwort,
@@ -1966,7 +1969,13 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
             detaloj: { agordo: propono.agordo, herkunft: propono.herkunft },
           });
         }
-        sendJson(response, { proponoj, satzoj: read.satzoj, trovoj: read.trovoj.length });
+        // Spec 036, Befund 3.4: what the reading found, as tiles for the dialog.
+        sendJson(response, {
+          proponoj,
+          satzoj: read.satzoj,
+          trovoj: read.trovoj.length,
+          kaheloj: kahelojElTrovoj(read.trovoj),
+        });
         return;
       }
       if (action === "fremda") {
