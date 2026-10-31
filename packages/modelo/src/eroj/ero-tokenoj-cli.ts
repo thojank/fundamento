@@ -18,6 +18,7 @@ import type { IdsLock } from "../contracts/entity-ids.js";
 import { CORE_SET_NAME } from "../contracts/grammar.js";
 import type { ValidationIssue } from "../contracts/issues.js";
 import type { ModeloSource } from "../contracts/modelo.js";
+import { normalizeNames } from "../contracts/names.js";
 import { allocateIds, retireId, serializeIdsLock } from "../ids/lock.js";
 import { createIdGenerator, systemUlidSource } from "../ids/ulid-source.js";
 import { ASPEKTO_DIMENSIO, referenceAspektoOf } from "../load/build.js";
@@ -294,7 +295,7 @@ export function planEroTokenoj(
     if (core === undefined) throw new Error("The Vortaro has no core set.");
     const corePath = join(root, core.file);
     const coreText = readFileSync(corePath, "utf8");
-    const existing = existingNodes(JSON.parse(coreText) as Json);
+    const existing = existingNodes(normalizeNames(JSON.parse(coreText) as Json, coreText));
     const missing = tokens.filter((token) => !existing.has(token.name));
     const lockPath = join(source.dataDir, "ids.lock.json");
     const ids = new Map<string, string>();
@@ -344,7 +345,7 @@ export function planEroTokenoj(
     if (set === undefined) continue;
     const path = join(root, set.file);
     const text = readFileSync(path, "utf8");
-    const existing = existingNodes(JSON.parse(text) as Json);
+    const existing = existingNodes(normalizeNames(JSON.parse(text) as Json, text));
     const groups = groupsOf(
       tokens,
       (token) => existing.get(token.name) ?? { $type: token.type, $value: `{${token.alias}}` },

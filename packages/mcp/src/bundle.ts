@@ -3,7 +3,7 @@
 // validate structuredContent without fetching the Modelo schema.
 
 import { readFileSync } from "node:fs";
-import { readModeloSchema } from "@fundamento/modelo";
+import { normalizeNames, readModeloSchema } from "@fundamento/modelo";
 
 const MODELO_REF = "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/";
 const COMMON_REF = "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/";
@@ -15,11 +15,8 @@ let pools: Record<string, Json> | undefined;
 function definitionPools(): Record<string, Json> {
   if (pools === undefined) {
     const modelo = readModeloSchema().$defs as Record<string, Json>;
-    const common = (
-      JSON.parse(readFileSync(new URL("../schema/common.json", import.meta.url), "utf8")) as {
-        $defs: Record<string, Json>;
-      }
-    ).$defs;
+    const text = readFileSync(new URL("../schema/common.json", import.meta.url), "utf8");
+    const common = normalizeNames(JSON.parse(text) as { $defs: Record<string, Json> }, text).$defs;
     pools = { modelo, common };
   }
   return pools;
@@ -59,7 +56,8 @@ function strip(schema: Json): Json {
 
 /** A self-contained copy of a tool schema, its root one object (Nachlese 11 B-3). */
 export function bundleSchema(schema: Json): Json {
-  return withDefinitions(oneObject(strip(schema)));
+  // Spec 036 6.3: a schema with the IDs of either form refers to the same definitions.
+  return withDefinitions(oneObject(strip(normalizeNames(schema))));
 }
 
 const COMBINATORS = ["oneOf", "anyOf", "allOf"] as const;

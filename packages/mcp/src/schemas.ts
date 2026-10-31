@@ -3,7 +3,12 @@
 // schema/common.json. Compiled with the Modelo's Ajv setup, so tools and Modelo agree.
 
 import { readFileSync } from "node:fs";
-import { sharedModeloAjv, type ValidateFunction } from "@fundamento/modelo";
+import {
+  addSchemaWithBothIds,
+  normalizeNames,
+  sharedModeloAjv,
+  type ValidateFunction,
+} from "@fundamento/modelo";
 
 /**
  * The ten read-only tools of FR-16, then the Gvidanto tools of Spec 002, the Ero tools of
@@ -55,8 +60,10 @@ export interface CompiledTool {
   error: CompiledSchema;
 }
 
+/** A schema file, its IDs in the form the code writes (Spec 036 6.3: either form is read). */
 function readSchema(relative: string): Record<string, unknown> {
-  return JSON.parse(readFileSync(new URL(relative, SCHEMA_DIR), "utf8")) as Record<string, unknown>;
+  const text = readFileSync(new URL(relative, SCHEMA_DIR), "utf8");
+  return normalizeNames(JSON.parse(text) as Record<string, unknown>, text);
 }
 
 /** Compiles every tool schema once (Ajv draft 2020-12, strict, with the Modelo schema). */
@@ -65,7 +72,8 @@ export function compileToolSchemas(): CompiledTool[] {
   // compiled once; the common schema is added once.
   const ajv = sharedModeloAjv();
   const common = readSchema("common.json");
-  if (ajv.getSchema(COMMON_ID) === undefined) ajv.addSchema(common);
+  // For one version the common schema is also known by the ID of the other form (Spec 036 6.3).
+  if (ajv.getSchema(COMMON_ID) === undefined) addSchemaWithBothIds(ajv, common);
   const envelopeSchema = { $ref: `${COMMON_ID}#/$defs/ErrorEnvelope` };
   const error = { schema: envelopeSchema, validate: ajv.compile(envelopeSchema) };
   return TOOL_NAMES.map((name) => {

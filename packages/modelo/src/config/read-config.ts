@@ -6,6 +6,7 @@ import { createRequire } from "node:module";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { getConfigValidator, sharedModeloAjv, type ValidateFunction } from "../contracts/ajv.js";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
+import { normalizeNames } from "../contracts/names.js";
 import type { FundamentoConfigJson } from "../generated/config-schema.js";
 import { parseStrictJson } from "../json/strict-json.js";
 
@@ -90,8 +91,10 @@ export function readKonfiguro(file: string, displayFile = file): ReadKonfiguroRe
   if (parsed.issues.length > 0) {
     return { issues: parsed.issues };
   }
+  // Spec 036 6.3: a `$schema` with the config schema's ID of either form is read in the new form.
+  const value = normalizeNames(parsed.value, text);
   const validate = getValidator();
-  if (!validate(parsed.value)) {
+  if (!validate(value)) {
     return {
       issues: (validate.errors ?? []).map((error) => ({
         rule: "config-invalid",
@@ -108,7 +111,7 @@ export function readKonfiguro(file: string, displayFile = file): ReadKonfiguroRe
     };
   }
   // The validator has just proven the shape.
-  const config = parsed.value as FundamentoConfigJson;
+  const config = value as FundamentoConfigJson;
   const baseDir = dirname(resolve(file));
   const issues: ValidationIssue[] = [];
   const aspektoPackages: string[] = [];

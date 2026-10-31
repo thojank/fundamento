@@ -5,6 +5,7 @@ import { type Dirent, existsSync, readdirSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { ModeloSource } from "../contracts/modelo.js";
+import { normalizeNames } from "../contracts/names.js";
 import {
   DATA_FILE_SCHEMA_DEFS,
   type DataFileName,
@@ -118,7 +119,10 @@ export function readModeloFiles(source: ModeloSource): ReadModeloFilesResult {
     }
     const parsed = parseStrictJson(text, file);
     issues.push(...parsed.issues);
-    return parsed.issues.length === 0 ? { file, value: parsed.value } : undefined;
+    // Spec 036 6.3: the old and the new identifiers are read, in the form the code writes.
+    return parsed.issues.length === 0
+      ? { file, value: normalizeNames(parsed.value, text) }
+      : undefined;
   };
 
   const setsDir = join(source.vortaroDir, SETS_DIR_NAME);
