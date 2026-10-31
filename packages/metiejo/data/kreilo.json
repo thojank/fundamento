@@ -73,6 +73,14 @@
     "bunt_anteil_max": 3,
     "kialo": "Spec 036, Befund 2.1 (V-1): Eine Marke darf unbunt sein. Sie ist es, wenn sehr dunkle Neutraltöne – Chroma unter neutral_bis (so liest auch die Ableitung des Agordilo eine Farbe ohne Farbton) und Helligkeit bis dunkel_bis – mindestens dunkel_anteil_min Prozent der gefundenen Farbe decken und kräftige Farben – Chroma ab bunt_ab wie beim Akzent und dunkler als pastell_ab (ab da zählt ein bunter Ton als Pastell) – zusammen unter bunt_anteil_max Prozent bleiben. Dann wird der häufigste sehr dunkle Neutralton die Leitfarbe statt einer bunten Nebenfarbe; die bunten Töne bleiben Akzente und werden im Satz genannt, nicht still genommen. Verweise erkennt man dann nicht an der Farbe, sondern an der Unterstreichung (Regulo link-distinct-from-text)."
   },
+  "weg_c": {
+    "logo": 4,
+    "erster_bildschirm": 2,
+    "darunter": 1,
+    "grosses_bild": 6,
+    "grosses_bild_ab": 0.25,
+    "kialo": "Spec 035 D-73 und Spec 036, Befund 2.3: Weg C misst eine gerenderte Seite nach Fläche, und jedes Pixel zählt nach seinem Ort – im Logo mit Gewicht logo, im ersten Bildschirm mit erster_bildschirm, darunter mit darunter. Ein großes Bild im ersten Bildschirm – ein Foto als img, im picture-Element oder als Hintergrundbild eines Elements (nicht der Seite selbst und kein gekacheltes Muster) – ist gewählter Inhalt, kein Hintergrund, und zählt mit Gewicht 6 (grosses_bild). Groß ist es, wenn sein Teil im ersten Bildschirm mindestens 25 % des Bildschirms deckt (grosses_bild_ab): Kacheln, Teaser und Vorschaubilder bleiben darunter, ein Schlüsselbild liegt darüber. An der Schwelle wiegt das Bild so viel wie der übrige erste Bildschirm (25 % × 6 = 75 % × 2), jedes größere mehr; die Bildschirme darunter bleiben beim Hintergrund, eine Seite mit farbigem Hintergrund über drei Bildschirme braucht also ein deutlich größeres Bild, bevor dessen Farbe vorn liegt. Je Pixel liegt das große Bild über dem Logo, weil sich die Farbe eines Fotos auf viele Töne verteilt (Licht, Schatten, Hintergrund des Fotos), das Logo meist nur eine Farbe hat; ein Pixel in beiden zählt mit dem höheren Gewicht."
+  },
   "tiparoj": [
     {
       "kiam": { "sachlich-verspielt": ">0" },

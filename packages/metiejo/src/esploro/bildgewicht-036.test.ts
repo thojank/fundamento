@@ -9,6 +9,8 @@
 
 import { describe, expect, it } from "vitest";
 import { Budget } from "../asistanto/ki.js";
+import { VIDO } from "../enportilo/bildilo.js";
+import { grandaBildoOf, pezojOfEkrano } from "../enportilo/farboj.js";
 import { KREILO } from "../kreilo/kreilo.js";
 import {
   bildschirmFoto,
@@ -69,5 +71,57 @@ describe("the picture weight of Weg C (Spec 036, Befund 2.3)", () => {
     });
     expect(lead?.agordo.leitfarbe).not.toBe(HINTERGRUND);
     expect(lead?.herkunft.map((entry) => entry.dosiero)).toContain(FOTO_URL);
+  });
+
+  it("keeps the background as the lead when the picture is small or not reported", async () => {
+    // A teaser of 400 × 300 px (12 % of the screen) is no large picture; a double without boxes
+    // measures as Weg C did before.
+    for (const bildoj of [[{ ...FOTO_KESTO, width: 400, height: 300 }], []]) {
+      const lead = await leadOf(bildoj);
+      expect(lead?.agordo).toEqual({ leitfarbe: HINTERGRUND });
+    }
+  });
+});
+
+describe("the weight of a pixel of a rendered page (Spec 035 D-73, Spec 036 Befund 2.3)", () => {
+  const { logo, erster_bildschirm, darunter, grosses_bild, grosses_bild_ab } = KREILO.weg_c;
+  const screen = VIDO.width * VIDO.height;
+
+  it("counts as large only the part of a picture in the first screen, from grosses_bild_ab of it", () => {
+    const side = Math.ceil(Math.sqrt(grosses_bild_ab * screen));
+    expect(grandaBildoOf({ x: 0, y: 0, width: side, height: side }, VIDO)).toEqual({
+      x: 0,
+      y: 0,
+      width: side,
+      height: side,
+    });
+    expect(grandaBildoOf({ x: 0, y: 0, width: side - 2, height: side - 2 }, VIDO)).toBeUndefined();
+    // Below the first screen: no part in it.
+    expect(
+      grandaBildoOf({ x: 0, y: VIDO.height, width: VIDO.width, height: VIDO.height }, VIDO),
+    ).toBeUndefined();
+    // Half of a full-width picture of 800 px reaches into the first screen: that half counts.
+    expect(
+      grandaBildoOf({ x: -40, y: VIDO.height / 2, width: VIDO.width + 80, height: 800 }, VIDO),
+    ).toEqual({ x: 0, y: VIDO.height / 2, width: VIDO.width, height: VIDO.height / 2 });
+  });
+
+  it("weighs logo, large picture, first screen and below; a pixel in two counts with the higher", () => {
+    // At 1/8 of the viewport, three screens high, as the renderer doubles return a page.
+    const width = VIDO.width / 8;
+    const at = (pezoj: Uint8Array, x: number, y: number) => pezoj[(y / 8) * width + x / 8];
+    const without = pezojOfEkrano(width, 300, VIDO, [LOGO_FOTO]);
+    expect([at(without, 32, 32), at(without, 800, 400), at(without, 800, 1600)]).toEqual([
+      logo,
+      erster_bildschirm,
+      darunter,
+    ]);
+    const hero = { x: 0, y: 0, width: VIDO.width, height: VIDO.height * 2 };
+    const pezoj = pezojOfEkrano(width, 300, VIDO, [LOGO_FOTO], [hero, FOTO_KESTO]);
+    expect([at(pezoj, 32, 32), at(pezoj, 800, 400), at(pezoj, 800, 1600)]).toEqual([
+      Math.max(logo, grosses_bild),
+      grosses_bild,
+      darunter,
+    ]);
   });
 });

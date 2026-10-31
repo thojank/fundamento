@@ -1,7 +1,8 @@
-// The data of the Kreilo (Spec 033 S3; Spec 035, Befund 4.2; Spec 036, Befund 2.1): kreilo.json
-// with its pairs of opposites, the anchors of the lead colour, the font rules, the thresholds of the
-// accent and of an achromatic brand. Its own module, so that the Enportilo (rekono.ts) reads the
-// thresholds without importing the Kreilo, which imports the Enportilo.
+// The data of the Kreilo (Spec 033 S3; Spec 035, Befund 4.2; Spec 036, Befunde 2.1 and 2.3):
+// kreilo.json with its pairs of opposites, the anchors of the lead colour, the font rules, the
+// thresholds of the accent and of an achromatic brand, and the weights of Weg C. Its own module, so
+// that the Enportilo (rekono.ts, farboj.ts) reads them without importing the Kreilo, which imports
+// the Enportilo.
 
 import { readFileSync } from "node:fs";
 
@@ -51,6 +52,20 @@ export interface KreiloDatoj {
     pastell_ab: number;
     /** Percent of the colour found that strong colours (colourful, not pastel) cover less than. */
     bunt_anteil_max: number;
+    kialo: string;
+  };
+  /**
+   * Spec 035 D-73 and Spec 036, Befund 2.3: the weight of a pixel of a page rendered by Weg C, by
+   * its place – integers, as the weights of the pixels are bytes.
+   */
+  weg_c: {
+    logo: number;
+    erster_bildschirm: number;
+    darunter: number;
+    /** A large picture of the first screen (img, picture, background image of an element). */
+    grosses_bild: number;
+    /** Share of the first screen from which the part of a picture in it counts as large. */
+    grosses_bild_ab: number;
     kialo: string;
   };
 }

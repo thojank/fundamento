@@ -1,37 +1,70 @@
 // The dominant colours of an image (Spec 033 S2): pixels in buckets of 5 bits per channel, the mean of
 // each bucket, the share of the area; transparent pixels do not count. With weights per pixel (Weg C,
-// Spec 035 Befund 4.1) the share is one of the weighted area: the logo and the first screen of a
-// rendered page count more. Pure.
+// Spec 035 Befund 4.1) the share is one of the weighted area: the logo, a large picture of the first
+// screen (Spec 036, Befund 2.3) and the first screen of a rendered page count more. The weights are
+// data (kreilo.json, weg_c). Pure apart from reading them.
 
+import { KREILO } from "../kreilo/datoj.js";
 import type { Kesto } from "./bildilo.js";
 import { hexOf, type Trovo } from "./trovo.js";
 
 /** Weg C: a pixel of the logo counts this often, one of the first screen this often, any other once. */
-export const LOGO_PEZO = 4;
-export const SUPRA_PEZO = 2;
+export const LOGO_PEZO = KREILO.weg_c.logo;
+export const SUPRA_PEZO = KREILO.weg_c.erster_bildschirm;
+/** Weg C: a pixel of a large picture of the first screen (Spec 036, Befund 2.3). */
+export const GRANDA_BILDO_PEZO = KREILO.weg_c.grosses_bild;
 
 /**
- * The weight of every pixel of a rendered page: LOGO_PEZO inside a logo, SUPRA_PEZO on the first
- * screen, 1 below it. The image may be scaled against the viewport (a double); boxes scale alike.
+ * The part of a picture inside the first screen, if it covers at least `grosses_bild_ab` of the
+ * screen (kreilo.json, weg_c); undefined for a smaller picture or one below the first screen.
+ */
+export function grandaBildoOf(
+  bildo: Kesto,
+  vido: { width: number; height: number },
+): Kesto | undefined {
+  const left = Math.max(0, bildo.x);
+  const right = Math.min(vido.width, bildo.x + bildo.width);
+  const top = Math.max(0, bildo.y);
+  const bottom = Math.min(vido.height, bildo.y + bildo.height);
+  if (right <= left || bottom <= top) return undefined;
+  const area = (right - left) * (bottom - top);
+  return area >= KREILO.weg_c.grosses_bild_ab * vido.width * vido.height
+    ? { x: left, y: top, width: right - left, height: bottom - top }
+    : undefined;
+}
+
+/**
+ * The weight of every pixel of a rendered page: SUPRA_PEZO on the first screen, the weight below
+ * it, GRANDA_BILDO_PEZO on the part of a large picture in the first screen, LOGO_PEZO inside a
+ * logo; a pixel in several of them counts with the highest. The image may be scaled against the
+ * viewport (a double); boxes scale alike.
  */
 export function pezojOfEkrano(
   width: number,
   height: number,
   vido: { width: number; height: number },
   logoj: readonly Kesto[],
+  bildoj: readonly Kesto[] = [],
 ): Uint8Array {
   const scale = width / vido.width;
   const fold = vido.height * scale;
   const pezoj = new Uint8Array(width * height);
   for (let y = 0; y < height; y++)
-    pezoj.fill(y < fold ? SUPRA_PEZO : 1, y * width, (y + 1) * width);
-  for (const logo of logoj) {
-    const left = Math.max(0, Math.floor(logo.x * scale));
-    const right = Math.min(width, Math.ceil((logo.x + logo.width) * scale));
-    const top = Math.max(0, Math.floor(logo.y * scale));
-    const bottom = Math.min(height, Math.ceil((logo.y + logo.height) * scale));
-    for (let y = top; y < bottom; y++) pezoj.fill(LOGO_PEZO, y * width + left, y * width + right);
+    pezoj.fill(y < fold ? SUPRA_PEZO : KREILO.weg_c.darunter, y * width, (y + 1) * width);
+  const raise = (box: Kesto, pezo: number) => {
+    const left = Math.max(0, Math.floor(box.x * scale));
+    const right = Math.min(width, Math.ceil((box.x + box.width) * scale));
+    const top = Math.max(0, Math.floor(box.y * scale));
+    const bottom = Math.min(height, Math.ceil((box.y + box.height) * scale));
+    for (let y = top; y < bottom; y++)
+      for (let index = y * width + left; index < y * width + right; index++)
+        if ((pezoj[index] ?? 0) < pezo) pezoj[index] = pezo;
+  };
+  for (const bildo of bildoj) {
+    const granda = grandaBildoOf(bildo, vido);
+    if (granda !== undefined) raise(granda, GRANDA_BILDO_PEZO);
   }
+  for (const logo of logoj) raise(logo, LOGO_PEZO);
   return pezoj;
 }
 
