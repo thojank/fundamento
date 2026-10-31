@@ -12,11 +12,12 @@
 export const ABLEITUNG_GRENZE_MS = 150;
 
 /**
- * The reference load on the fast CI runners (median), the runner the limit of 150 ms stands for.
- * Provisional: the local reference (37.3 ms) times the ratio of the fast CI runner to this machine
- * in the derivation (101 / 76 ms); set from CI measurements of the reference (PR, follow-up commit).
+ * The reference load on the fast CI runners (median), the runner the limit of 150 ms stands for:
+ * the median reference of the fast runners in ableitung-kalibrierung.tsv (Spec 035 Befund 1.1;
+ * 5 of 16 attempts, 38.7–46.2 ms). It replaces the provisional 50 ms (local reference times the
+ * ratio of the fast CI runner to the local machine); a test ties it to the table.
  */
-export const REFERENZ_SCHNELL_MS = 50;
+export const REFERENZ_SCHNELL_MS = 41.5;
 
 export interface AbleitungUrteil {
   rot: boolean;
