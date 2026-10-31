@@ -238,3 +238,21 @@ describe("②b-2 A-kompletigilo-1, A-alsxutilo-1, A-tekstareo-1: the numbers", (
     expect(uzo?.boundary.map((boundary) => boundary.case)).not.toContain("character-count");
   });
 });
+
+/** A-plurelektilo-1: summary takes a third value, labels (the chosen options' words). */
+describe("②b-2 A-plurelektilo-1: summary labels", () => {
+  it("plurelektilo: summary count | labels | tags, default count; the brief names it", () => {
+    expect(propOf("plurelektilo", "summary")).toMatchObject({
+      kind: "enum",
+      values: ["count", "labels", "tags"],
+      default: "count",
+    });
+    const brief = briefOf(entryOf("plurelektilo"));
+    expect(brief.axes).toContainEqual({
+      name: "summary",
+      values: ["count", "labels", "tags"],
+      default: "count",
+    });
+    expect(tokensOf(brief)).toBeLessThan(750);
+  });
+});

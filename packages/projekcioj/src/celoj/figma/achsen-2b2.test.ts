@@ -47,3 +47,9 @@ describe("②b-2 A-kompletigilo-1, A-alsxutilo-1, A-tekstareo-1 in Figma: the nu
     expect(setOf(name).properties[prop]).toBe("NUMBER");
   });
 });
+
+describe("②b-2 A-plurelektilo-1 in Figma: summary labels", () => {
+  it("plurelektilo: summary count | labels | tags among the properties", () => {
+    expect(setOf("plurelektilo").properties.summary).toEqual(["count", "labels", "tags"]);
+  });
+});
