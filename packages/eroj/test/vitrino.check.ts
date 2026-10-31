@@ -19,7 +19,14 @@ import {
   referenzLast,
 } from "./ableitung.js";
 import { axeViolations, contrast } from "./alirebleco.js";
-import { M5_GRENZE_MS, m5Urteil, stilBlockadeEinbauen, stilBlockadeMeldung } from "./m5.js";
+import {
+  M5_GRENZE_MS,
+  type M5Messung,
+  type M5Urteil,
+  m5Urteil,
+  stilBlockadeEinbauen,
+  stilBlockadeMeldung,
+} from "./m5.js";
 import { EKZEMPLO_CONFIG, ORIGIN } from "./serve.js";
 
 test.describe.configure({ mode: "serial" });
@@ -1602,12 +1609,14 @@ test.describe("the Werkstatt, stage 2 (Spec 019 ②)", () => {
       .toMatchObject({ display: { family: "Fundamento Nicht Installiert" } });
   });
 
-  test("G5: 50 changes of a slider never block the main thread longer than 50 ms; the check runs in a worker", async ({
-    page,
-  }) => {
-    await openWerkstatt(page);
-    await checkedAtLeast(page, 1);
-    expect((await state(page)).worker).toBe(true);
+  /**
+   * G5's measurement: `count` changes of a slider by keyboard, the Long Tasks and the work of
+   * scripts per frame while they are derived and checked. Spec 036 Befund 1.7: the reference load
+   * of the runner is measured beside it (ableitung.ts), so the verdict counts on the runner of the
+   * reference.
+   */
+  async function g5Messen(page: Page, count: number): Promise<M5Messung & { referenz: number }> {
+    const referenz = await page.evaluate(referenzLast);
     await page.evaluate(() => {
       const box = globalThis as unknown as { fmLong: number[]; fmScripts: number[] };
       box.fmLong = [];
@@ -1625,7 +1634,7 @@ test.describe("the Werkstatt, stage 2 (Spec 019 ②)", () => {
     const checked = (await state(page)).checked;
     const slider = page.locator("#fm-werkstatt-helligkeit");
     await slider.focus();
-    for (let index = 0; index < 50; index += 1) {
+    for (let index = 0; index < count; index += 1) {
       await page.keyboard.press(index % 2 === 0 ? "ArrowRight" : "ArrowLeft");
       await page.keyboard.press("ArrowRight");
     }
@@ -1635,12 +1644,54 @@ test.describe("the Werkstatt, stage 2 (Spec 019 ②)", () => {
       const box = globalThis as unknown as { fmLong: number[]; fmScripts: number[] };
       return { longTasks: box.fmLong, scripts: box.fmScripts };
     });
-    // Nachlese 12 ③: each Long Task belongs to one of the 50 changes; the others blocked less.
+    // Nachlese 12 ③: each Long Task belongs to one of the changes; the others blocked less.
     const perChange = [
       ...longTasks,
-      ...Array.from({ length: Math.max(0, 50 - longTasks.length) }, () => 0),
+      ...Array.from({ length: Math.max(0, count - longTasks.length) }, () => 0),
     ];
-    expect(m5Urteil({ perChange, scriptLongest: Math.max(0, ...scripts) }).gruende).toEqual([]);
+    return { perChange, scriptLongest: Math.max(0, ...scripts), referenz };
+  }
+
+  /** The line of G5's verdict in the log: the reference, the factor, the counted and the measured. */
+  const g5Zeile = (titel: string, messung: M5Messung & { referenz: number }, urteil: M5Urteil) =>
+    `${titel} (${test.info().project.name}): Referenz ${messung.referenz.toFixed(1)} ms (k ${urteil.k.toFixed(2)}), Skripte längstens ${messung.scriptLongest.toFixed(0)} ms, auf den Bezugsrunner gerechnet ${(messung.scriptLongest / urteil.k).toFixed(1)} ms; Blockade je Änderung p90 ${urteil.perzentil.toFixed(1)} ms (Grenze ${M5_GRENZE_MS} ms)${urteil.gruende.length > 0 ? ` – ${urteil.gruende.join("; ")}` : ""}\n`;
+
+  test("G5: 50 changes of a slider never block the main thread longer than 50 ms; the check runs in a worker", async ({
+    page,
+  }) => {
+    await openWerkstatt(page);
+    await checkedAtLeast(page, 1);
+    expect((await state(page)).worker).toBe(true);
+    const messung = await g5Messen(page, 50);
+    const urteil = m5Urteil(messung);
+    process.stderr.write(g5Zeile("G5 Urteil", messung, urteil));
+    expect(urteil.gruende).toEqual([]);
+  });
+
+  // Spec 036 Befund 1.7: the Gegenprobe of G5. Every hand-over of the Werkstatt to its worker waits
+  // 80 ms on the runner of the reference, scaled to this runner (80 × k), on the main thread – a
+  // script that blocks. Red on fast and on slow runners alike; the limit stays 50 ms.
+  test("G5 Gegenprobe: a script block of 80 ms on the reference runner in the Werkstatt makes G5 red", async ({
+    page,
+  }) => {
+    await openWerkstatt(page);
+    await checkedAtLeast(page, 1);
+    const k = Math.max(1, (await page.evaluate(referenzLast)) / REFERENZ_SCHNELL_MS);
+    await page.evaluate((ms) => {
+      const post = Worker.prototype.postMessage;
+      Worker.prototype.postMessage = function (this: Worker, ...args: unknown[]) {
+        const until = performance.now() + ms;
+        while (performance.now() < until) {
+          // the artificial block
+        }
+        return (post as (...rest: unknown[]) => void).apply(this, args);
+      } as typeof Worker.prototype.postMessage;
+    }, 80 * k);
+    const messung = await g5Messen(page, 10);
+    const urteil = m5Urteil(messung);
+    process.stderr.write(g5Zeile("G5 Gegenprobe", messung, urteil));
+    expect(urteil.rot).toBe(true);
+    expect(urteil.gruende[0]).toMatch(/^Skripte blockieren \d+ ms auf dem Bezugsrunner/);
   });
 
   test("browser and CLI agree on provo-kompakta: the report, value for value (G5)", async ({
@@ -1961,6 +2012,42 @@ test.describe("the verdict of G5 on the runner of the reference (Spec 036 Befund
     };
     const urteil = m5Urteil(messung);
     expect(urteil.gruende).toEqual([]);
+  });
+
+  test("on the reference runner the limit is 50 ms as before; a faster machine is not held stricter", () => {
+    expect(
+      m5Urteil({ perChange: zeros(50), scriptLongest: 51, referenz: REFERENZ_SCHNELL_MS }).rot,
+    ).toBe(true);
+    expect(
+      m5Urteil({ perChange: zeros(50), scriptLongest: 50, referenz: REFERENZ_SCHNELL_MS }).rot,
+    ).toBe(false);
+    expect(
+      m5Urteil({ perChange: zeros(50), scriptLongest: 51, referenz: REFERENZ_SCHNELL_MS * 0.6 }).k,
+    ).toBe(1);
+    expect(
+      m5Urteil({ perChange: zeros(50), scriptLongest: 51, referenz: REFERENZ_SCHNELL_MS * 0.6 })
+        .rot,
+    ).toBe(true);
+  });
+
+  test("the Gegenprobe: a script of 80 ms on the reference runner is red on the slow runner too", () => {
+    const k = (langsam?.referenz ?? 0) / REFERENZ_SCHNELL_MS;
+    expect(k).toBeGreaterThan(1);
+    const urteil = m5Urteil({
+      perChange: [...zeros(49), 80 * k],
+      scriptLongest: 80 * k,
+      referenz: langsam?.referenz ?? 0,
+    });
+    expect(urteil.rot).toBe(true);
+    expect(urteil.gruende[0]).toBe(
+      `Skripte blockieren 80 ms auf dem Bezugsrunner (gemessen ${Math.round(80 * k)} ms, k ${k.toFixed(2)}) in einem Frame (Grenze 50 ms)`,
+    );
+  });
+
+  test("without a reference (M5) the verdict counts as measured, as before", () => {
+    const urteil = m5Urteil({ perChange: [...zeros(49), 61], scriptLongest: 61 });
+    expect(urteil.k).toBe(1);
+    expect(urteil.gruende).toEqual(["Skripte blockieren 61 ms in einem Frame (Grenze 50 ms)"]);
   });
 });
 
