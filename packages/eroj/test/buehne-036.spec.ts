@@ -499,3 +499,58 @@ test.describe("Bühne (Spec 036, Befund 3.4)", () => {
     await expect(dialog).toContainText("Petrol führt, der Grund ist hell.");
   });
 });
+
+test.describe("Bühne (Spec 036, Befund 3.5)", () => {
+  test("3.5: a component with an open problem has a frame in the warning colour and its sentence on hover and on focus", async ({
+    page,
+  }) => {
+    const fehler = fehlerOf(page);
+    const id = await marke(page.request, "Probomarko Pruefung");
+    await page.setViewportSize(WIDE);
+    await oeffne(page, id);
+    const jetzt = page.frameLocator(JETZT);
+    const markiert = jetzt.locator('[data-mt-pruefung="offen"]');
+    await expect(jetzt.locator("fm-pagxo").first()).toBeVisible();
+    await expect(markiert).toHaveCount(0);
+    // The quieter text as strong as the default text: an open problem of the check (text-hierarchy).
+    const gesetzt = await page.request.post(`${base}/api/marko/${id}/festlegen`, {
+      data: { token: "color.text.subtle", alias: "color.palette.neutral.1000" },
+    });
+    expect(gesetzt.status()).toBe(200);
+    await oeffne(page, id);
+    // The cut at the end: the whole stage shows „Jetzt“.
+    const schieber = page.locator("[data-mt-buehne]").getByRole("slider");
+    await schieber.focus();
+    await page.keyboard.press("End");
+    await expect(markiert.first()).toBeVisible();
+    const komponente = markiert.first();
+    // The frame: the warning colour of the Vortaro, read from its token in the frame itself.
+    const rahmen = await komponente.evaluate((element) => {
+      const probe = document.createElement("span");
+      probe.style.color = "var(--fm-color-status-warning-border)";
+      document.body.append(probe);
+      const warnung = getComputedStyle(probe).color;
+      probe.remove();
+      const style = getComputedStyle(element);
+      return { farbe: style.outlineColor, stil: style.outlineStyle, warnung };
+    });
+    expect(rahmen.stil).toBe("solid");
+    expect(rahmen.farbe).toBe(rahmen.warnung);
+    const satz = (await komponente.getAttribute("data-mt-pruefung-satz")) ?? "";
+    expect(satz).toMatch(/^[^\n]+\.$/);
+    const tooltip = jetzt.getByRole("tooltip");
+    // Hover …
+    await komponente.hover();
+    await expect(tooltip).toBeVisible();
+    await expect(tooltip).toHaveText(satz);
+    await page.mouse.move(0, 0);
+    await expect(tooltip).toBeHidden();
+    // … and focus: the component is reached by the keyboard and describes itself with the sentence.
+    expect(await komponente.evaluate((element) => (element as HTMLElement).tabIndex)).toBe(0);
+    await komponente.focus();
+    await expect(tooltip).toBeVisible();
+    await expect(tooltip).toHaveText(satz);
+    await expect(komponente).toHaveAccessibleDescription(satz);
+    expect(fehler).toEqual([]);
+  });
+});

@@ -1,6 +1,8 @@
 // Spec 036 Teil 3 through the local server, Befunde 3.4 and 3.5. 3.4: what material and research
 // found comes back as tiles – a colour and its share of everything the reading saw, the largest
-// first – so the dialog can show them. Without a language model; the material is invented.
+// first – so the dialog can show them. 3.5: the open problems of the check reach the stage's page
+// per component (`data-` marking): which Ero, in which variant, and the check's own sentence.
+// Without a language model; the material is invented.
 
 import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -97,5 +99,44 @@ describe("Spec 036, Befund 3.4: research comes back as tiles of its proposals' c
         },
       ]),
     ).toEqual([{ farbo: "#0f766e", anteil: 42 }, { farbo: "#b42318" }]);
+  });
+});
+
+interface Pruefmarko {
+  ero: string;
+  satz: string;
+}
+
+/** The check's marks of a preview page: the JSON island the page's client reads, if any. */
+async function markojOf(query: string): Promise<Pruefmarko[] | undefined> {
+  const html = await (await fetch(`${servilo.url}/marko/probomarko/vorschau?${query}`)).text();
+  const island = /<script type="application\/json" id="mt-pruefung">([^<]*)<\/script>/.exec(html);
+  return island?.[1] === undefined ? undefined : (JSON.parse(island[1]) as Pruefmarko[]);
+}
+
+describe("Spec 036, Befund 3.5: the check reaches the stage per component", () => {
+  it("without an open problem the stage's page carries no mark", async () => {
+    expect(await markojOf("sxtupo=buehne-farbe&breite=mittel")).toEqual([]);
+  });
+
+  it("an open problem marks every component that shows the token, with the check's own sentence", async () => {
+    // The quieter text as strong as the default text: the text levels are not distinguishable
+    // (text-hierarchy, an adjustable rule without its Jugxo – an open problem of the step).
+    const set = await post("/api/marko/probomarko/festlegen", {
+      token: "color.text.subtle",
+      alias: "color.palette.neutral.1000",
+    });
+    expect(set.status).toBe(200);
+    const markoj = await markojOf("sxtupo=buehne-farbe&breite=mittel");
+    expect(markoj?.map((marko) => marko.ero)).toEqual(
+      expect.arrayContaining(["insigno", "teksto"]),
+    );
+    const pruefung = (await (await post("/api/marko/probomarko/pruefung", {})).json()) as {
+      html: string;
+    };
+    for (const marko of markoj ?? []) {
+      expect(marko.satz).toMatch(/^[^\n]+\.$/);
+      expect(pruefung.html).toContain(marko.satz);
+    }
   });
 });
