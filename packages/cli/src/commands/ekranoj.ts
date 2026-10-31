@@ -21,6 +21,7 @@ import type {
   EkranojEnigo,
   EkranojRezulto,
   GvidantoKonekto,
+  KostoTakso,
   Marko,
   Problemo,
   Taksilo,
@@ -82,7 +83,8 @@ Options:
                       the current directory). Only mistral/ministral-14b-2512 is allowed
   --ledger <dir>      Folder of anfragoj.json, the requests per day (default: ${DEFAULT_DIR})
   --ja                Start without asking after the estimate (needed without a terminal)
-  --json              Print the summary as JSON
+  --json              Print the summary as JSON; on exit 2 one JSON document
+                      { ok: false, problemoj: [{ path, rule, message, suggestion }], takso? }
   -h, --help          Show this help
 
 Sub-mode:
@@ -90,7 +92,7 @@ Sub-mode:
                       Eroj, Sxablonoj and Gvidanto tools. A sentence that is exactly the word
                       "${MANKOJ_MODUSO}" is read as this sub-mode. A folder may also hold runs
                       (e.g. ${DEFAULT_DIR}). Prints the table; --out <file> also writes the
-                      list as JSON, --json prints it as JSON. No .env, no model is needed.
+                      list as a JSON array, --json prints the same array. No .env, no model.
 
 Exit codes: 0 screens built (also a run stopped by --max-tokens), 1 no screen could be built,
 2 usage error, missing .env, model not allowed, or the start not confirmed.
@@ -306,6 +308,36 @@ export function frazoSlug(frazo: string, slugDe: (teksto: string) => string): st
 
 const formati = (p: Problemo): string => `${p.path} ${p.rule}: ${p.message} ${p.suggestion}`;
 
+/**
+ * An exit 2 (QA-2-1): with --json one document `{ ok: false, problemoj, takso? }` on stdout, as
+ * `fm modelo validate --json` reports; without it each problem and the closing line on stderr.
+ */
+function malsukceso(
+  context: CliContext,
+  json: boolean,
+  problemoj: readonly Problemo[],
+  e: { prefikso?: string; fino?: string; takso?: KostoTakso } = {},
+): number {
+  if (json) {
+    const dok = { ok: false, problemoj, ...(e.takso === undefined ? {} : { takso: e.takso }) };
+    context.stdout(`${JSON.stringify(dok, null, 2)}\n`);
+  } else {
+    const prefikso = e.prefikso ?? COMMAND_LINE;
+    for (const problemo of problemoj) context.stderr(`${prefikso}: ${formati(problemo)}\n`);
+    if (e.fino !== undefined) context.stderr(`${e.fino}\n`);
+  }
+  return EXIT_USAGE;
+}
+
+/** Whether `--json` stands among the options (before `--`), also when the flags do not parse. */
+function jsonPetita(args: readonly string[]): boolean {
+  for (const arg of args) {
+    if (arg === "--") return false;
+    if (arg === "--json") return true;
+  }
+  return false;
+}
+
 const mesagxoDe = (eraro: unknown): string =>
   eraro instanceof Error ? eraro.message : String(eraro);
 
@@ -344,11 +376,10 @@ async function kuriMankojn(
     mankoj = ek.kunigiMankojn(dosierujoj.map((dir) => resolve(context.baseDir, dir)));
   } catch (eraro) {
     if (!(eraro instanceof ek.MankojEraro)) throw eraro;
-    for (const problemo of eraro.problemoj) {
-      context.stderr(`${COMMAND_LINE} ${MANKOJ_MODUSO}: ${formati(problemo)}\n`);
-    }
-    context.stderr("Nothing was merged.\n");
-    return EXIT_USAGE;
+    return malsukceso(context, values.json === true, eraro.problemoj, {
+      prefikso: `${COMMAND_LINE} ${MANKOJ_MODUSO}`,
+      fino: "Nothing was merged.",
+    });
   }
   const out = typeof values.out === "string" ? resolve(context.baseDir, values.out) : undefined;
   if (out !== undefined) {
@@ -356,7 +387,8 @@ async function kuriMankojn(
     writeFileSync(out, ek.stabilaJson(mankoj));
   }
   if (values.json === true) {
-    context.stdout(`${JSON.stringify({ mankoj }, null, 2)}\n`);
+    // The same bytes as the --out file: the bare array of kunigiMankojn (QA-2-2, D-S037-QA-2).
+    context.stdout(ek.stabilaJson(mankoj));
   } else {
     context.stdout(
       [
@@ -456,32 +488,48 @@ async function run(
   };
   const problemoj = ek.kontroliEnigon(enigo).filter((p) => p.rule !== "gvidanto-missing");
   if (problemoj.length > 0) {
-    for (const problemo of problemoj) context.stderr(`${COMMAND_LINE}: ${formati(problemo)}\n`);
-    context.stderr("Nothing was started.\n");
-    return EXIT_USAGE;
+    return malsukceso(context, json, problemoj, { fino: "Nothing was started." });
   }
 
   // The .env and the model guard (D-19), before any request can be made.
   const envDosiero = resolve(context.baseDir, typeof values.env === "string" ? values.env : ".env");
   const agordoj = medio.legiEnv(envDosiero);
   if (agordoj === undefined) {
-    context.stderr(
-      `${COMMAND_LINE}: no .env at ${envDosiero}. Create it with FM_KI_ANBIETER, FM_KI_MODELL and the key, or pass --env <file>.\n`,
-    );
-    return EXIT_USAGE;
+    if (!json) {
+      context.stderr(
+        `${COMMAND_LINE}: no .env at ${envDosiero}. Create it with FM_KI_ANBIETER, FM_KI_MODELL and the key, or pass --env <file>.\n`,
+      );
+      return EXIT_USAGE;
+    }
+    return malsukceso(context, json, [
+      {
+        path: "/env",
+        rule: "env-missing",
+        message: `No .env at ${envDosiero}.`,
+        suggestion:
+          "Create it with FM_KI_ANBIETER, FM_KI_MODELL and the key, or pass --env <file>.",
+      },
+    ]);
   }
   let provider: Provider;
   try {
     provider = providerOf(agordoj);
     const malpermesoj = ek.kontroliModelon(provider);
-    if (malpermesoj.length > 0) {
-      for (const problemo of malpermesoj) context.stderr(`${COMMAND_LINE}: ${formati(problemo)}\n`);
-      return EXIT_USAGE;
-    }
+    if (malpermesoj.length > 0) return malsukceso(context, json, malpermesoj);
   } catch (eraro) {
     // providerOf names the variable that is missing, never a value.
-    context.stderr(`${COMMAND_LINE}: ${mesagxoDe(eraro)}\n`);
-    return EXIT_USAGE;
+    if (!json) {
+      context.stderr(`${COMMAND_LINE}: ${mesagxoDe(eraro)}\n`);
+      return EXIT_USAGE;
+    }
+    return malsukceso(context, json, [
+      {
+        path: "/env",
+        rule: "env-invalid",
+        message: mesagxoDe(eraro),
+        suggestion: "Set FM_KI_ANBIETER, FM_KI_MODELL and the key of the provider in the .env.",
+      },
+    ]);
   }
   const redakti = (teksto: string): string => provider.redact(teksto);
   const log = (linio: string): void => context.stderr(`${redakti(linio)}\n`);
@@ -491,14 +539,44 @@ async function run(
   (json ? context.stderr : context.stdout)(`${takso.satz}\n`);
   if (values.ja !== true) {
     if (!medio.tty()) {
-      context.stderr(
-        `${COMMAND_LINE}: without a terminal the run starts only with --ja (estimate above). Nothing was started.\n`,
+      if (!json) {
+        context.stderr(
+          `${COMMAND_LINE}: without a terminal the run starts only with --ja (estimate above). Nothing was started.\n`,
+        );
+        return EXIT_USAGE;
+      }
+      return malsukceso(
+        context,
+        json,
+        [
+          {
+            path: "/ja",
+            rule: "confirmation-missing",
+            message: "Without a terminal the run starts only with --ja. Nothing was started.",
+            suggestion: "Read the estimate (takso) and pass --ja to start the run.",
+          },
+        ],
+        { takso },
       );
-      return EXIT_USAGE;
     }
     if (!(await medio.demandi("Lauf starten? [j/N] "))) {
-      context.stderr(`${COMMAND_LINE}: not confirmed. Nothing was started.\n`);
-      return EXIT_USAGE;
+      if (!json) {
+        context.stderr(`${COMMAND_LINE}: not confirmed. Nothing was started.\n`);
+        return EXIT_USAGE;
+      }
+      return malsukceso(
+        context,
+        json,
+        [
+          {
+            path: "/ja",
+            rule: "not-confirmed",
+            message: "The run was not confirmed. Nothing was started.",
+            suggestion: "Answer j, or pass --ja to start without asking.",
+          },
+        ],
+        { takso },
+      );
     }
   }
 
@@ -525,8 +603,19 @@ async function run(
   } catch (eraro) {
     // Only setup errors are thrown (input, model, Gvidanto, brand build); the run itself ends
     // with a stop reason instead.
-    context.stderr(`${COMMAND_LINE}: ${redakti(mesagxoDe(eraro))}\n`);
-    return EXIT_USAGE;
+    if (!json) {
+      context.stderr(`${COMMAND_LINE}: ${redakti(mesagxoDe(eraro))}\n`);
+      return EXIT_USAGE;
+    }
+    return malsukceso(context, json, [
+      {
+        path: "/",
+        rule: "setup-failed",
+        message: redakti(mesagxoDe(eraro)),
+        suggestion:
+          "Check the Gvidanto, the brand build of --config and the browser, then start again.",
+      },
+    ]);
   } finally {
     await bildigilo?.close();
     await gvidanto?.fermi();
@@ -565,9 +654,17 @@ export function ekranojKomando(anstatauxoj: Partial<EkranojMedio> = {}): Command
     name: "ekranoj",
     summary: "Build up to five linked, self-checked screens from one sentence (Spec 037).",
     help: EKRANOJ_HELPO,
-    run: (args, context) => {
+    run: async (args, context) => {
       medio ??= { ...realaMedio(), ...anstatauxoj };
-      return run(args, context, medio);
+      try {
+        return await run(args, context, medio);
+      } catch (eraro) {
+        // A usage error with --json is a JSON document too (QA-2-1); without it the CLI edge prints it.
+        if (!(eraro instanceof UsageError) || !jsonPetita(args)) throw eraro;
+        return malsukceso(context, true, [
+          { path: "/", rule: "usage", message: eraro.message, suggestion: eraro.hints.join(" ") },
+        ]);
+      }
     },
   };
 }
