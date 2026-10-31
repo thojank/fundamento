@@ -22,10 +22,10 @@ const SUMMARY = /^ero\.faldilo\.summary\.(color\.(hover|focus|disabled)|fill\.di
 /**
  * Abnahme #122: every button at the end of a field stays a target of at least size.target.min
  * (WCAG 2.5.8) while its icon is as large as the field's – its width, the web's square minimum.
- * Spec 035 2.3.1: the trigger of the datelektilo too, its calendar as large as a chevron.
+ * Spec 035 2.3.1 and 2.3.3: the trigger and the ✕ of the datelektilo too, as large as a chevron.
  */
 const TARGET =
-  /^ero\.(kampo\.(clear|decrement|increment)|elektilo\.clear|listelektilo\.clear|kompletigilo\.clear|datelektilo\.trigger)\.width$/;
+  /^ero\.(kampo\.(clear|decrement|increment)|elektilo\.clear|listelektilo\.clear|kompletigilo\.clear|datelektilo\.(trigger|clear))\.width$/;
 
 /** The twelve fields of ②b-1 M-2 and M-5. */
 const FIELDS =
@@ -49,9 +49,10 @@ export const addedSinceMain = (name: string): boolean =>
 
 /**
  * How many tokens ②b added so far (M-5: 12 fields × 3; M-6 with Abnahme #122: 11; M-1: 4; the
- * targets of Abnahme #122: 6; M-2: 216), and Spec 035 2.3 (the trigger's target: 1).
+ * targets of Abnahme #122: 6; M-2: 216), and Spec 035 2.3 (the targets of the date picker's
+ * trigger and ✕: 2).
  */
-export const ADDED_SINCE_MAIN = 274;
+export const ADDED_SINCE_MAIN = 275;
 
 /** ②b-1 M-1: tokens main had under another name; each keeps main's value. */
 const MOVED: Readonly<Record<string, string>> = {

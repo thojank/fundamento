@@ -36,7 +36,7 @@ describe("Spec 029 ①: the structure of komuna 0.2 for the Agordilo", () => {
     // twelve fields, the message and the kampo's status icon; Spec 035 2.3: the calendar and the ✕
     // of the date picker at the size of an icon with their targets, read-only as rest.
     expect(structure.fingerprint).toBe(
-      "cb727e3716c2a0820a220539f80c096be15e7853ceccb407971dbee2d98210f6",
+      "58d27790ebe066c5195455f91f494fa5c6707a7f68da3cc9b0a4a6b7ef815fa7",
     );
   });
 

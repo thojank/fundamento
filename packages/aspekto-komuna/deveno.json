@@ -7430,6 +7430,17 @@
       "noto": "Abnahme #122: die Icons am Ende eines Feldes sind so groß wie der Pfeil eines Feldes derselben Größe (ero.elektilo.indicator.size, gemessen an der Fonto)."
     },
     {
+      "token": "ero.datelektilo.clear.size",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"md\"} rest, hell: [object Object] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.icon.small}",
+      "maniero": "derivita",
+      "noto": "Spec 035 2.3.3: das ✕ des datelektilo ist so groß wie das des kampo der Größe medium (ero.kampo.clear.size.size.medium) und wie der Kalender daneben."
+    },
+    {
       "token": "ero.elektilo.help.color",
       "aro": "core",
       "fonto": "astryx",
