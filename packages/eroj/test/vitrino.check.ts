@@ -223,8 +223,11 @@ test("the contrast table shows WCAG, APCA and the change against the comparison 
     // (8550 → 8586, advisory, 2 × 18 combinations). Spec 035 2.3.4: a read-only field shows the
     // look of rest (kampo, listelektilo, plurelektilo, datelektilo; komuna's datelektilo takes the
     // surface and the label colour of rest), so the pairs of readonly are those of rest, advisory
-    // where they miss the APCA band (8586 → 8694; all 144 combinations 14166 → 14184).
-    "In den 72 Kombinationen des Vergleichsstands: 8694 gegen 1296 (Veränderung +7398)",
+    // where they miss the APCA band (8586 → 8694; all 144 combinations 14166 → 14184). Spec 036
+    // Befund 2.2 (V-2): the four pairs of the Zweitfarbe's roles, advisory where they miss the APCA
+    // band (8694 → 8820: badge 54, illustration 36, highlight surface 18, chart 18; every WCAG
+    // threshold holds, the lowest 4.8:1).
+    "In den 72 Kombinationen des Vergleichsstands: 8820 gegen 1296 (Veränderung +7524)",
   );
 });
 
