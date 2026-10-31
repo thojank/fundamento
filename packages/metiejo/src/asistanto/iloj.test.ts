@@ -39,6 +39,7 @@ describe("the tools of the assistant (Spec 033 S1)", () => {
       "setze_farbe",
       "waehle_schrift",
       "waehle_ikono_gewicht",
+      "waehle_form",
       "pruefe",
     ]);
     for (const tool of ILOJ) {
@@ -124,5 +125,33 @@ describe("the tools of the assistant (Spec 033 S1)", () => {
     const { work } = laborejo();
     const result = await call(work, "setze_token", { token: "color.text.default", wert: "#000" });
     expect(result.ok).toBe(false);
+  });
+
+  // Spec 035, Befund 4.3 (V-3): „Pille“ by chat; at the end of a slider the tools say so.
+  it("waehle_form makes the controls pills and takes that back; it names the choices", async () => {
+    const { work, agordo, applied } = laborejo();
+    const pill = await call(work, "waehle_form", { bedienelemente: "pille" });
+    expect(pill.ok).toBe(true);
+    expect(pill.facetoj).toEqual(["formo"]);
+    expect(agordo().festgelegt?.["radius.role.control"]).toEqual({ alias: "radius.full" });
+    expect(applied.at(-1)).toEqual(["formo"]);
+    expect((await call(work, "waehle_form", { bedienelemente: "radius" })).ok).toBe(true);
+    expect(agordo().festgelegt).toBeUndefined();
+    expect((await call(work, "waehle_form", { bedienelemente: "oval" })).ok).toBe(false);
+    const regler = await call(work, "regler", { faceto: "formo" });
+    expect(regler.bedienelemente).toEqual({ wert: "radius", wahl: ["radius", "pille"] });
+  });
+
+  it("at the end of the radius slider the tools report the limit and the way on: the pill", async () => {
+    const { work } = laborejo();
+    const end = await call(work, "setze_regler", { regler: "form.radius", wert: 2 });
+    expect(end.ok).toBe(true);
+    expect(end.amEnde).toEqual([{ path: "form.radius", grenze: 2 }]);
+    expect(String(end.grenze)).toMatch(/Ende des Reglers.*Pille/);
+    await call(work, "waehle_form", { bedienelemente: "pille" });
+    const beyond = await call(work, "bewege", { wunsch: "runder" });
+    expect(beyond.bewegt).toEqual([]);
+    expect(beyond.facetoj).toEqual([]);
+    expect(String(beyond.grenze)).toMatch(/Pille/);
   });
 });

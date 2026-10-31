@@ -57,7 +57,7 @@ test.describe("Metiejo (Nachlese 10)", () => {
   test("N-2/N-3: an existing brand opens without a name and without an error; the button says Öffnen", async ({
     page,
   }) => {
-    await brand(page, "Bluna");
+    await brand(page, "Quendolin");
     await page.goto(`${base}/`);
     const name = page.locator('fm-kampo[name="name"]');
     await expect(page.getByRole("button", { name: "Anlegen" })).toBeVisible();
@@ -66,9 +66,9 @@ test.describe("Metiejo (Nachlese 10)", () => {
     await expect(name).toBeHidden();
     expect(await name.evaluate((host) => host.hasAttribute("required"))).toBe(false);
     expect(await name.evaluate((host) => host.hasAttribute("invalid"))).toBe(false);
-    await page.locator('fm-elektilo[name="oeffnen"] select').selectOption("bluna");
+    await page.locator('fm-elektilo[name="oeffnen"] select').selectOption("quendolin");
     await page.getByRole("button", { name: "Öffnen" }).click();
-    await page.waitForURL(/\/marko\/bluna\//);
+    await page.waitForURL(/\/marko\/quendolin\//);
     await page.goto(`${base}/`);
     await choose(page, 'fm-elekto[name="basis"]', "Vorhandene Marke öffnen");
     await choose(
@@ -107,5 +107,207 @@ test.describe("Metiejo (Nachlese 10)", () => {
     });
     expect(outline).toBe("none");
     await expect(wahl.locator('[data-fm-teksto="lingvo"]')).toHaveText("Language");
+  });
+});
+
+// Spec 035, Befund 4.4 (plan Spec 033, Abweichung 1): a change in the chat makes a step defined and
+// releasable. In the acceptance „Freigeben“ stayed off until „Vorschlag übernehmen“ reloaded the page:
+// the screen showed the new state but not the button. The change here comes over the one draft (as
+// the chat's tools write it, without a language model in the test); the screen follows by itself.
+test.describe("Markenassistent (Spec 035, Befund 4.4)", () => {
+  test("after a change elsewhere the step shows it can be released, and the release works without „Vorschlag übernehmen“", async ({
+    page,
+  }) => {
+    await brand(page, "Freigabe");
+    await page.goto(`${base}/asistanto/freigabe/formo`);
+    const release = page.locator('fm-butono[data-mt-faceto-ago="liberigo"]');
+    await expect(release).toHaveAttribute("disabled", "");
+    // The screen asks for the state every few seconds; the answer after the change is the one.
+    const followed = page.waitForResponse(
+      async (response) =>
+        response.url().endsWith("/api/marko/freigabe/stato") &&
+        ((await response.json()) as { rev: number }).rev > 1,
+    );
+    const changed = await fetch(`${base}/api/marko/freigabe/entwurf`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ form: { radius: 1.6 } }),
+    });
+    expect(changed.ok).toBe(true);
+    await followed;
+    await expect(release).not.toHaveAttribute("disabled");
+    await expect(page.locator("[data-mt-freigabe-satz]")).toHaveText("Bereit zur Freigabe.");
+    await release.click();
+    await expect(page.locator("[data-mt-freigabe-satz]")).toHaveText(
+      "Freigegeben. Du kannst den Schritt wieder öffnen.",
+    );
+  });
+});
+
+// Spec 035, Befund 4.5.2: the left bar of the assistant shows the state of every step (offen,
+// definiert, freigegeben, Prüfung offen), and a long name wraps instead of running out of its column.
+test.describe("Markenassistent (Spec 035, Befund 4.5.2)", () => {
+  test("every step shows its state, and long names wrap without ellipsis or overflow", async ({
+    page,
+  }) => {
+    await brand(page, "Leiste");
+    await page.goto(`${base}/asistanto/leiste/gvidkoloro`);
+    const nav = page.locator('fm-navigado[label="Schritte"]');
+    const steps = nav.locator(":scope > a[href^='/asistanto/leiste/']:not([data-page='komenco'])");
+    await expect(steps).toHaveCount(12);
+    // The navigado has decorated its links (the current page) before anything is read.
+    await expect(steps.first()).toHaveAttribute("aria-current", "page");
+    const badges = await nav.evaluate((host) =>
+      [...host.querySelectorAll(":scope > a")]
+        .filter((link) => /^\/asistanto\/[^/]+\/(?!komenco$)/.test(link.getAttribute("href") ?? ""))
+        .map((link) => {
+          const name = link.getAttribute("data-page") ?? "";
+          const badge = link.querySelector(`[data-mt-faceto-stato="${name}"]`);
+          const box = badge?.getBoundingClientRect();
+          return {
+            name,
+            text: badge?.textContent?.trim() ?? null,
+            visible: box !== undefined && box.width > 0 && box.height > 0,
+          };
+        }),
+    );
+    expect(badges).toHaveLength(12);
+    for (const badge of badges) {
+      expect.soft(badge.visible, badge.name).toBe(true);
+      expect
+        .soft(badge.text, badge.name)
+        .toMatch(/^(offen|definiert|freigegeben)( · Prüfung offen)?$/);
+    }
+    // A long invented name in the first step, as a brand's own step names may be one day.
+    await steps
+      .first()
+      .evaluate((link) =>
+        link.prepend(
+          document.createTextNode("Wolkenfinkenfederleichtigkeitsprobe und Abendrotschimmer "),
+        ),
+      );
+    const geometry = await nav.evaluate((host) => {
+      const column = host.getBoundingClientRect();
+      return [...host.querySelectorAll(":scope > a")].map((link) => {
+        const box = link.getBoundingClientRect();
+        const style = getComputedStyle(link);
+        return {
+          text: (link.textContent ?? "").trim().slice(0, 40),
+          overflow: link.scrollWidth - link.clientWidth,
+          beyond: box.right - column.right,
+          ellipsis: style.textOverflow,
+        };
+      });
+    });
+    for (const link of geometry) {
+      expect.soft(link.overflow, link.text).toBeLessThanOrEqual(1);
+      expect.soft(link.beyond, link.text).toBeLessThanOrEqual(1);
+      expect.soft(link.ellipsis, link.text).not.toBe("ellipsis");
+    }
+  });
+});
+
+// Spec 035, Befund 4.5.3 (D-02): the chat showed Markdown raw (`**1,75**`). An answer is shown as
+// Eroj built from its text (fm-markdovido); nothing of a model's answer becomes HTML. The language
+// model is a double: the route of the chat answers with what a model could say.
+test.describe("Markenassistent (Spec 035, Befund 4.5.3)", () => {
+  test("an answer with Markdown shows emphasis, and HTML in it creates no element and runs nothing", async ({
+    page,
+  }) => {
+    await brand(page, "Antwort");
+    await page.goto(`${base}/asistanto/antwort/gvidkoloro`);
+    const rev = Number(await page.locator("html").getAttribute("data-mt-rev"));
+    const antwort =
+      'Die Dichte steht jetzt auf **1,75**.\n\n<img src=x onerror="window.fmXss=1"><script>window.fmXss=2</script>';
+    await page.route("**/api/marko/antwort/asistanto", (route) =>
+      route.fulfill({ json: { antwort, rev } }),
+    );
+    // Without a model the screen keeps the chat off; the double stands in for the model.
+    await page.evaluate(() => {
+      for (const element of document.querySelectorAll(
+        "[data-mt-babilo-teksto], [data-mt-babilo-sendi]",
+      ))
+        element.removeAttribute("disabled");
+      document.querySelector("[data-mt-babilo-teksto]")?.setAttribute("value", "Dichter, bitte.");
+    });
+    await page.locator("fm-butono[data-mt-babilo-sendi]").click();
+    const card = page.locator('[data-mt-babilo-listo] fm-karto[data-mt-rolle="assistant"]').last();
+    await expect(card).toContainText("1,75");
+    await expect.soft(card.locator("strong")).toHaveText("1,75");
+    const seen = await card.evaluate((host) => {
+      const all: Element[] = [];
+      const walk = (node: Element | ShadowRoot) => {
+        for (const child of node.querySelectorAll("*")) {
+          all.push(child);
+          if (child.shadowRoot) walk(child.shadowRoot);
+        }
+      };
+      walk(host);
+      return {
+        elements: all.filter((element) => ["img", "script"].includes(element.localName)).length,
+        stars: (host.textContent ?? "").includes("**"),
+        ran: (window as unknown as { fmXss?: number }).fmXss ?? null,
+      };
+    });
+    expect.soft(seen.elements).toBe(0);
+    expect.soft(seen.ran).toBeNull();
+    expect.soft(seen.stars).toBe(false);
+  });
+});
+
+// Spec 035, Befund 4.5.1: a proposal shows what it means – the swatch of its colour, a crop of the
+// material and the preview before and with the proposal on the real Eroj of the brand.
+test.describe("Markenassistent (Spec 035, Befund 4.5.1)", () => {
+  test("the proposal of the material shows its colour, its crop and the Eroj before and after", async ({
+    page,
+  }) => {
+    await brand(page, "Vergleich");
+    // An invented screenshot, drawn by the browser: a band of petrol over a light ground.
+    const base64 = await page.evaluate(() => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 40;
+      canvas.height = 30;
+      const context = canvas.getContext("2d");
+      if (context === null) return "";
+      context.fillStyle = "#f4f4f2";
+      context.fillRect(0, 0, 40, 30);
+      context.fillStyle = "#0f766e";
+      context.fillRect(0, 0, 30, 8);
+      return canvas.toDataURL("image/png").split(",")[1] ?? "";
+    });
+    const read = await fetch(`${base}/api/marko/vergleich/materialo`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ filename: "bildschirm.png", base64, rajtoj: true }),
+    });
+    expect(read.status).toBe(200);
+    await page.goto(`${base}/asistanto/vergleich/gvidkoloro`);
+    const proposal = page.locator("fm-avizo[data-mt-propono]");
+    await expect(proposal.locator("[data-mt-propono-satz]")).toHaveText("Leitfarbe #0f766e.");
+    const swatch = proposal.locator('[data-mt-propono-farbe="#0f766e"]');
+    await expect(swatch).toHaveCSS("background-color", "rgb(15, 118, 110)");
+    const crop = proposal.locator("img[data-mt-propono-ausschnitt]");
+    await expect(crop).toBeVisible();
+    expect(
+      await crop.evaluate((image: HTMLImageElement) =>
+        image.decode().then(() => image.naturalWidth),
+      ),
+    ).toBe(40);
+    // The same Ero in both frames: the main button of the preview, before and with the proposal.
+    const fill = async (selector: string) => {
+      const button = page.frameLocator(selector).locator('fm-butono[emphasis="high"]').first();
+      await expect(button).toBeVisible();
+      const read = () =>
+        button.evaluate((host) => {
+          const control = host.shadowRoot?.querySelector("button") ?? host;
+          return getComputedStyle(control).backgroundColor;
+        });
+      // The frame's stylesheet arrives after its Eroj (WebKit): wait until the fill is painted.
+      await expect.poll(read).not.toBe("rgba(0, 0, 0, 0)");
+      return read();
+    };
+    const before = await fill("iframe[data-mt-vorschau]");
+    const after = await fill("iframe[data-mt-vorschau-propono]");
+    expect(after).not.toBe(before);
   });
 });

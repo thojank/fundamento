@@ -139,3 +139,14 @@ describe("Runde 2: the step Schrift names the role of the font", () => {
     expect(screenInventory(html).mainButtons).toBeLessThanOrEqual(1);
   });
 });
+
+// Spec 035, Befund 4.5.5 (Art. VI, „Kein Trittbrett“): the placeholder of the brand's name was a
+// real, foreign brand. It is an invented name now, roughly checked against known brands.
+describe("Spec 035, Befund 4.5.5: the placeholder of the name", () => {
+  it("is the invented name Quendolin", () => {
+    const html = screen(exampleScreenInput("start"));
+    expect(html).toContain(
+      '<fm-kampo name="name" required autocomplete="off" placeholder="Quendolin">',
+    );
+  });
+});

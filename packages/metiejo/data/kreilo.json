@@ -57,6 +57,13 @@
     "farbton": { "-2": 45, "-1": 70, "0": 175, "1": 225, "2": 260 },
     "kialo": "Ohne festgelegte Farbe und ohne Inspiration gibt der Charakter die Leitfarbe: warm–kühl den Farbton (warme Orange- und Goldtöne bis kühle Blautöne, die Mitte ein Petrol), ruhig–lebhaft die Sättigung, die Helligkeit eine Stufe, auf der die Ableitung beide Modi bedienen kann."
   },
+  "akzent": {
+    "chroma_min": 0.05,
+    "abstand_min": 0.15,
+    "anteil_min": 10,
+    "gleich_bis": 0.05,
+    "kialo": "Spec 035, Befund 4.2: Eine zweite Farbe der Inspiration wird Akzent, wenn sie kräftig ist (Chroma ab chroma_min wie bei der Leitfarbe), sich deutlich von der Leitfarbe unterscheidet (Abstand in der Farbebene von OKLab, ohne Helligkeit, ab abstand_min; so zählt ein dunklerer Ton derselben Farbe nicht) und einen relevanten Teil der Fläche deckt (ab anteil_min Prozent der gefundenen Farbe; Töne bis gleich_bis Abstand zählen zusammen). Der Akzent ist ein Vorschlag mit Herkunft (Bild, Anteil), im Schritt „Leitfarbe und Akzente“ und in der Kroniko; gesetzt wird er nicht: Die Marke hat eine Markenpalette, und die Prüfung lässt an Rollen nur Verweise auf Paletten zu (color-semantic-literal)."
+  },
   "tiparoj": [
     {
       "kiam": { "sachlich-verspielt": ">0" },

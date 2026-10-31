@@ -1,13 +1,18 @@
 // The tools of the Asistanto (Spec 033 S1): the language model sets nothing past the rules. It calls
 // these tools; the Agordilo and the Reguloj decide. They move the sliders of the Agordilo (by a wish
 // of the vocabulary, with the checks where the server derives, or to a value inside the slider's
-// range), set the lead and status colours, choose a webfont of the catalogue and the icon weight, and
-// read the state and the check. There is no tool that writes a token value (festgelegt) and none that
-// releases a step: the release is the person's. Every answer is JSON the model reads; a refusal names
-// the range or the choices, never throws.
+// range), set the lead and status colours, choose a webfont of the catalogue, the icon weight and
+// the form of the controls (Spec 035 V-3: „Pille“, the alias the Schnellstart sets too), and read the
+// state and the check. There is no tool that writes a free token value (festgelegt) and none that
+// releases a step: the release is the person's. At the end of a slider the answer says so (Spec 035,
+// Befund 4.3). Every answer is JSON the model reads; a refusal names the range or the choices, never
+// throws.
 
 import {
   type Agordo,
+  BEDIENFORM_PATH,
+  BEDIENFORMEN,
+  bedienformOf,
   IKONO_PATH,
   parseAgordoColor,
   proponoOf,
@@ -114,6 +119,14 @@ export const ILOJ: readonly ToolInfo[] = [
     inputSchema: object({ gewicht: { type: "string", enum: [...IKONO_GEWICHTE] } }, ["gewicht"]),
   },
   {
+    name: "waehle_form",
+    description:
+      "Wählt die Form der Bedienelemente: radius (die Ecken folgen dem Regler form.radius) oder pille (voll gerundet, wie eine Pille; Karten und Flächen bleiben begrenzt). Vollständig abgerundet ist nur die Pille, nicht das Ende des Reglers.",
+    inputSchema: object({ bedienelemente: { type: "string", enum: [...BEDIENFORMEN] } }, [
+      "bedienelemente",
+    ]),
+  },
+  {
     name: "pruefe",
     description:
       "Die Prüfung der Marke in Klartext: was gut ist, was angepasst wurde, welche Probleme offen sind.",
@@ -215,8 +228,35 @@ function reglerOfFaceto(work: Laborejo, name: string): Record<string, unknown> |
     extra.ikono = { gewicht: agordo.ikono?.gewicht ?? "regular", wahl: IKONO_GEWICHTE };
   }
   if (faceto.agordo.includes("schriften")) extra.schriften = agordo.schriften ?? {};
+  if (faceto.agordo.includes("form.radius")) {
+    extra.bedienelemente = { wert: bedienformOf(agordo), wahl: BEDIENFORMEN };
+  }
   if (faceto.dimensioj !== undefined) extra.dimensioj = faceto.dimensioj;
   return { faceto: name, nomo: faceto.nomo.de, regler, ...extra };
+}
+
+const zahl = (value: number) => String(value).replace(".", ",");
+
+/**
+ * What the assistant says at the end of a slider (Spec 035, Befund 4.3): the limit, and past the
+ * radius slider's end the choice that goes on (the pill) – or that it is set already.
+ */
+function grenzeSatz(
+  work: Laborejo,
+  agordo: Agordo,
+  amEnde: readonly { path: string; grenze: number }[],
+) {
+  const saetze = amEnde.map(({ path, grenze }) => {
+    const regler = work.regloj.find((entry) => entry.path === path);
+    const label = regler?.label ?? path;
+    const ende = regler?.ende;
+    const head = `${label} steht am Ende des Reglers (${zahl(grenze)})`;
+    if (ende === undefined || regler === undefined || grenze < regler.max) return `${head}.`;
+    return bedienformOf(agordo) === ende.wert
+      ? `${head}, und die Bedienelemente sind schon voll gerundet (${ende.label}); runder geht es nicht.`
+      : `${head}; voll gerundete Bedienelemente sind die Wahl „${ende.label}“ (waehle_form), die Bedienelemente sind noch keine ${ende.label}n.`;
+  });
+  return saetze.length === 0 ? {} : { grenze: saetze.join(" ") };
 }
 
 /** Calls one tool on the Laborejo; the answer is the JSON text the model reads. */
@@ -274,6 +314,7 @@ export async function vokiIlon(
         saetze: propono.saetze,
         unbekannt: propono.unbekannt,
         amEnde: propono.amEnde,
+        ...grenzeSatz(work, work.options.agordo(), propono.amEnde),
         ...("angehalten" in propono && propono.angehalten !== undefined
           ? { angehalten: propono.angehalten }
           : {}),
@@ -298,9 +339,17 @@ export async function vokiIlon(
         );
       }
       const applied = work.apply(withRegler(agordo, path, wert));
+      const amEnde = wert >= regler.max || wert <= regler.min ? [{ path, grenze: wert }] : [];
       return "fehler" in applied
         ? fail(applied.fehler)
-        : done({ regler: path, wert, facetoj: applied.facetoj });
+        : done({
+            regler: path,
+            wert,
+            facetoj: applied.facetoj,
+            ...(amEnde.length === 0
+              ? {}
+              : { amEnde, ...grenzeSatz(work, work.options.agordo(), amEnde) }),
+          });
     }
     case "setze_farbe": {
       const rolle = string(args.rolle);
@@ -354,6 +403,16 @@ export async function vokiIlon(
       return "fehler" in applied
         ? fail(applied.fehler)
         : done({ gewicht, facetoj: applied.facetoj });
+    }
+    case "waehle_form": {
+      const form = string(args.bedienelemente);
+      if (!(BEDIENFORMEN as readonly string[]).includes(form)) {
+        return fail(`Die Form ${form} gibt es nicht.`, { wahl: BEDIENFORMEN });
+      }
+      const applied = work.apply(withRegler(agordo, BEDIENFORM_PATH, form));
+      return "fehler" in applied
+        ? fail(applied.fehler)
+        : done({ bedienelemente: form, facetoj: applied.facetoj });
     }
     case "pruefe": {
       const klartext = work.options.pruefung?.();

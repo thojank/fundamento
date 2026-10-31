@@ -41,6 +41,7 @@ import {
   structureModelo,
   type Vorschlag,
   vorschlagSatz,
+  wahlValue,
   withRegler,
 } from "@fundamento/agordilo/browser";
 import {
@@ -75,6 +76,29 @@ const GROUPS = [
 ] as const;
 
 /** The id of a slider: stage 1 keeps its ids of Spec 016 (fm-werkstatt-helligkeit …). */
+/**
+ * Spec 035, V-3: a slider with a stop past its end (form.radius → „Pille“) reaches it one step
+ * beyond its max; the position of an Agordo on it, and the Agordo of a position.
+ */
+const reglerTop = (regler: Regler): number =>
+  regler.ende === undefined ? regler.max : regler.max + regler.step;
+
+function reglerPosition(agordo: Agordo, regler: Regler): number {
+  const ende = regler.ende;
+  return ende !== undefined && wahlValue(agordo, ende.path) === ende.wert
+    ? reglerTop(regler)
+    : reglerValue(agordo, regler);
+}
+
+function atPosition(agordo: Agordo, regler: Regler, position: number | undefined): Agordo {
+  const ende = regler.ende;
+  if (ende === undefined) return withRegler(agordo, regler.path, position);
+  if (position !== undefined && position > regler.max) {
+    return withRegler(withRegler(agordo, regler.path, regler.max), ende.path, ende.wert);
+  }
+  return withRegler(withRegler(agordo, ende.path, undefined), regler.path, position);
+}
+
 function reglerId(path: string): string {
   const [group, key] = path.split(".");
   return group === "regler" || group === "neutral"
@@ -868,7 +892,7 @@ class Werkstatt {
     const host = byId("fm-werkstatt-ujo");
     const slider = (regler: Regler) => {
       const id = reglerId(regler.path);
-      return `<div class="fm-werkstatt-regilo"><label for="${id}">${esc(regler.label)}</label><output for="${id}">${regler.standard}</output><input type="range" id="${id}" min="${regler.min}" max="${regler.max}" step="${regler.step}" value="${regler.standard}"><fm-butono size="small" emphasis="low" data-fm-rekomenci-regilo="${esc(regler.path)}">Zurücksetzen<span class="fm-werkstatt-kasxita"> ${esc(regler.label)}</span></fm-butono></div>`;
+      return `<div class="fm-werkstatt-regilo"><label for="${id}">${esc(regler.label)}${regler.ende === undefined ? "" : `<span class="fm-werkstatt-kasxita"> (nach dem Ende: ${esc(regler.ende.label)})</span>`}</label><output for="${id}">${regler.standard}</output><input type="range" id="${id}" min="${regler.min}" max="${reglerTop(regler)}" step="${regler.step}" value="${regler.standard}"><fm-butono size="small" emphasis="low" data-fm-rekomenci-regilo="${esc(regler.path)}">Zurücksetzen<span class="fm-werkstatt-kasxita"> ${esc(regler.label)}</span></fm-butono></div>`;
     };
     const sliders = (group: string) =>
       this.#regloj
@@ -975,7 +999,7 @@ ${groupOf("ikonoj", "Icons", `<fm-elektilo id="fm-werkstatt-ikono-gewicht" value
     for (const regler of this.#regloj) {
       const input = byId<HTMLInputElement>(reglerId(regler.path));
       input.addEventListener("input", () => {
-        this.setAgordo(withRegler(this.state.agordo, regler.path, Number(input.value)), {
+        this.setAgordo(atPosition(this.state.agordo, regler, Number(input.value)), {
           record: regler.path,
         });
       });
@@ -986,7 +1010,13 @@ ${groupOf("ikonoj", "Icons", `<fm-elektilo id="fm-werkstatt-ikono-gewicht" value
       );
       const path = button?.dataset.fmRekomenciRegilo;
       if (path === undefined) return;
-      this.setAgordo(withRegler(this.state.agordo, path, undefined), { record: `reset:${path}` });
+      const regler = this.#regloj.find((entry) => entry.path === path);
+      this.setAgordo(
+        regler === undefined
+          ? withRegler(this.state.agordo, path, undefined)
+          : atPosition(this.state.agordo, regler, undefined),
+        { record: `reset:${path}` },
+      );
     });
     const gewicht = byId("fm-werkstatt-ikono-gewicht");
     const onWeight = () => {
@@ -1094,12 +1124,13 @@ ${groupOf("ikonoj", "Icons", `<fm-elektilo id="fm-werkstatt-ikono-gewicht" value
       }
     }
     for (const regler of this.#regloj) {
-      const value = reglerValue(agordo, regler);
+      const value = reglerPosition(agordo, regler);
       const id = reglerId(regler.path);
       const input = byId<HTMLInputElement>(id);
       if (Number(input.value) !== value) input.value = String(value);
       const output = document.querySelector<HTMLOutputElement>(`output[for="${id}"]`);
-      if (output !== null) output.value = String(value);
+      const shown = value > regler.max ? (regler.ende?.label ?? String(value)) : String(value);
+      if (output !== null) output.value = shown;
     }
     const gewicht = byId("fm-werkstatt-ikono-gewicht");
     const weight = agordo.ikono?.gewicht ?? this.#referenceStyle;

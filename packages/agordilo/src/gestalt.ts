@@ -42,6 +42,34 @@ export const BODY_TEXT_MIN_PX = 14;
 const GRID = 4;
 const FINE_GRID = 2;
 
+/**
+ * The form of the controls (Spec 035, V-3): a choice beside the radius slider, its stop past the
+ * end. „pille“ points radius.role.control at radius.full – the alias the Schnellstart sets for
+ * „ganz rund“ (Spec 024 K-5) – so controls are fully rounded while cards and surfaces
+ * (radius.role.surface) keep their bounded radius. Named in a diff like a slider.
+ */
+export const BEDIENFORM_PATH = "form.bedienelemente";
+export const BEDIENFORM_LABEL = "Bedienelemente";
+export const BEDIENFORMEN = ["radius", "pille"] as const;
+export type Bedienform = (typeof BEDIENFORMEN)[number];
+const PILLE_TOKEN = "radius.role.control";
+const PILLE_ALIAS = "radius.full";
+
+/** Whether the controls of an Agordo are pills. */
+export function bedienformOf(agordo: Agordo): Bedienform {
+  return agordo.festgelegt?.[PILLE_TOKEN]?.alias === PILLE_ALIAS ? "pille" : "radius";
+}
+
+/** The Agordo with the controls as pills or back on the radius; an empty festgelegt goes. */
+export function withBedienform(agordo: Agordo, form: Bedienform): Agordo {
+  const festgelegt = { ...(agordo.festgelegt ?? {}) };
+  if (form === "pille") festgelegt[PILLE_TOKEN] = { alias: PILLE_ALIAS };
+  else if (bedienformOf(agordo) === "pille") delete festgelegt[PILLE_TOKEN];
+  else return agordo;
+  const { festgelegt: _before, ...rest } = agordo;
+  return Object.keys(festgelegt).length === 0 ? (rest as Agordo) : { ...rest, festgelegt };
+}
+
 /** The radii form.radius multiplies (G2); radius.none and radius.full stay. */
 const RADII = ["radius.small", "radius.medium", "radius.large", "radius.xlarge"];
 const SHADOW_COLORS = ["color.shadow.key", "color.shadow.ambient"];
@@ -303,9 +331,11 @@ export function deriveGestalt(agordo: Agordo, basis: GestaltBasis): Gestalt {
   const main = new Map<string, unknown>();
   const dark = new Map<string, unknown>();
 
-  // form.radius: radius.small … xlarge, whole px.
+  // form.radius: radius.small … xlarge, whole px; Spec 035 V-3: the pill points the controls' role
+  // at radius.full (as the Agordo's festgelegt does), so the Werkstatt shows it live.
   const radius = at("form.radius");
   for (const name of RADII) put(main, core, name, scaled(core.get(name), radius, roundHalf));
+  if (bedienformOf(agordo) === "pille") put(main, core, PILLE_TOKEN, `{${PILLE_ALIAS}}`);
 
   // form.rahmen: border.width.scale.*, never below 1 px; the focus ring keeps the reference's width.
   const rahmen = at("form.rahmen");

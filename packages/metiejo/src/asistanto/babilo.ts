@@ -3,6 +3,7 @@
 // never releases a step. Tokens, requests, waits after 429 and time are counted for the Kroniko and
 // the counter on the screen; a budget stops the turn before a call that would pass it.
 
+import { bedienformOf } from "@fundamento/agordilo";
 import { ILOJ, type Laborejo, vokiIlon } from "./iloj.js";
 import {
   type Budget,
@@ -25,6 +26,7 @@ export const SYSTEM_ASISTANTO = [
   "4. Bleib bei der aktuellen Faceto, wenn die Person nicht ausdrücklich eine andere meint.",
   "5. Wenn ein Werkzeug ablehnt, nenne den Grund und schlage einen erlaubten Weg vor.",
   "6. Sag nie, du hättest etwas geändert, wenn kein Werkzeug es gesetzt hat. Lesen (stato, regler, pruefe) ändert nichts.",
+  "7. Meldet ein Werkzeug das Ende eines Reglers, sag das. Vollständig abgerundet sind Bedienelemente nur als Pille (waehle_form), nicht am Ende von form.radius.",
   "Antworte auf Deutsch, kurz und ohne Fachbegriffe des Vortaro.",
 ].join("\n");
 
@@ -65,6 +67,14 @@ export const ERINNERUNG =
   "Du hast mit keinem Werkzeug etwas gesetzt, es wurde also nichts geändert. Ruf jetzt das passende Werkzeug auf (zum Beispiel setze_regler) oder sag, dass nichts geändert ist.";
 export const NICHTS_GEAENDERT = "Es wurde nichts geändert.";
 
+// Spec 035, Befund 4.3: „Komplett abrunden“ ended at radius 2 and the answer said „vollständig
+// abgerundet“. Fully rounded controls are the pill only; the tools decide (D-18), so a claim of full
+// rounding without the pill is replaced by what the tools did.
+const VOLL_RUND =
+  /\b(vollständig|komplett|ganz|völlig|voll)\s+(ab)?gerundet\b|\b(ganz|komplett|völlig)\s+rund\b/i;
+export const KEINE_PILLE = "Nicht vollständig abgerundet: Die Bedienelemente sind keine Pillen.";
+export const PILLE_HINWEIS = "Voll gerundet sind sie mit der Wahl „Pille“.";
+
 export async function babili(options: BabiloOptions): Promise<BabiloRezulto> {
   const { provider, laborejo, budget } = options;
   const started = Date.now();
@@ -83,6 +93,8 @@ export async function babili(options: BabiloOptions): Promise<BabiloRezulto> {
     { role: "user", content: options.teksto },
   ];
   const changed = new Set<string>();
+  // The limits the tools reported in this turn (Spec 035, Befund 4.3), each said once.
+  const grenzen: string[] = [];
   const calls: BabiloRezulto["iloj"] = [];
   let enigo = 0;
   let eligo = 0;
@@ -125,14 +137,24 @@ export async function babili(options: BabiloOptions): Promise<BabiloRezulto> {
         continue;
       }
       // Probe run 29.10.: a model may answer with nothing after a tool; the person still gets a sentence.
-      const antwort =
-        said !== ""
+      const geaendert = `Geändert: ${sxangxoj.map((entry) => entry.nomo.de).join(", ")}.`;
+      const unrund = VOLL_RUND.test(said) && bedienformOf(laborejo.options.agordo()) !== "pille";
+      const answered = unrund
+        ? [
+            KEINE_PILLE,
+            grenzen.length > 0 ? grenzen.join(" ") : PILLE_HINWEIS,
+            ...(sxangxoj.length > 0 ? [geaendert] : []),
+          ].join(" ")
+        : said !== ""
           ? claims
             ? `${NICHTS_GEAENDERT} ${said}`
             : said
           : sxangxoj.length > 0
-            ? `Geändert: ${sxangxoj.map((entry) => entry.nomo.de).join(", ")}. Sieh dir die Vorschau an.`
+            ? `${geaendert} Sieh dir die Vorschau an.`
             : "Ich habe nichts geändert. Sag es anders, zum Beispiel „wärmer“, „runder“ oder eine Farbe als #rrggbb.";
+      // At the end of a slider the answer says so, unless it does already.
+      const unsaid = unrund ? [] : grenzen.filter(() => !/\bEnde\b/.test(answered));
+      const antwort = [answered, ...unsaid].join(" ");
       return {
         antwort: provider.redact(antwort),
         sxangxoj: sxangxoj.map((entry) => entry.name),
@@ -157,8 +179,11 @@ export async function babili(options: BabiloOptions): Promise<BabiloRezulto> {
       const answer = await vokiIlon(laborejo, entry.function.name, args);
       let ok = false;
       try {
-        const parsed = JSON.parse(answer) as { ok?: boolean; facetoj?: unknown };
+        const parsed = JSON.parse(answer) as { ok?: boolean; facetoj?: unknown; grenze?: unknown };
         ok = parsed.ok === true;
+        if (typeof parsed.grenze === "string" && !grenzen.includes(parsed.grenze)) {
+          grenzen.push(parsed.grenze);
+        }
         if (Array.isArray(parsed.facetoj) && entry.function.name !== "stato") {
           for (const name of parsed.facetoj) if (typeof name === "string") changed.add(name);
         }

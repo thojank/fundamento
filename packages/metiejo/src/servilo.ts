@@ -58,6 +58,7 @@ import { EKSPORTO_CELOJ, type EksportoCelo, exportMarko } from "./eksporto.js";
 import { type Bildilo, playwrightBildilo } from "./enportilo/bildilo.js";
 import {
   legiMaterialon,
+  MATERIALO_DIR,
   NeLegebla,
   readProponoj,
   takeProponon,
@@ -85,7 +86,9 @@ import {
   listMarkoj,
   MARKEN_DIR,
   type MetiejoIssue,
+  markoDir,
   readMarko,
+  safeFilename,
   saveMarko,
   storeUpload,
   writeDraft,
@@ -225,6 +228,15 @@ const TYPES: Readonly<Record<string, string>> = {
   ".woff": "font/woff",
 };
 
+/** The images of a brand's material a proposal shows as its crop (Spec 035, Befund 4.5.1). */
+const MATERIALO_BILDOJ: Readonly<Record<string, string>> = {
+  ".png": "image/png",
+  ".svg": "image/svg+xml",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+};
+
 const LOOPBACK = [HTTP_HOST, "localhost", "[::1]"];
 
 /** The groups of the Agordo a draft patch may touch. */
@@ -308,7 +320,7 @@ function readBody(request: IncomingMessage, limit = 32 * 1024 * 1024): Promise<s
 /** The German sentence of an issue the start screen shows. */
 function problemSentence(issue: MetiejoIssue | ValidationIssue, name: string): string {
   if (issue.rule === "name-invalid") {
-    return `„${name}“ ergibt keine Kennung: Der Name braucht mindestens einen Buchstaben oder eine Ziffer, zum Beispiel „Bluna“ (Kennung bluna).`;
+    return `„${name}“ ergibt keine Kennung: Der Name braucht mindestens einen Buchstaben oder eine Ziffer, zum Beispiel „Quendolin“ (Kennung quendolin).`;
   }
   if (issue.rule === "marko-exists")
     return `Die Marke „${name}“ gibt es schon. Öffne sie unter „Vorhandene Marke öffnen“.`;
@@ -1735,6 +1747,19 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
             detaloj: { herkunft: result.herkunft[faceto] ?? [], kreilo: { celo, karaktero } },
           });
         }
+        // Spec 035, Befund 4.2: the accent of the inspiration waits as an open proposal of its step;
+        // „Vorschlag übernehmen“ lays it on the draft, and the check decides as for every proposal.
+        if (result.akzent !== undefined) {
+          const { faceto, agordo: patch, satz, herkunft, farbe, anteil, abstand } = result.akzent;
+          writeProponoj(options.workdir, name, [{ faceto, agordo: patch, satz, herkunft }]);
+          kroniko(name, {
+            ago: "propono",
+            fonto: "agento",
+            faceto,
+            teksto: satz,
+            detaloj: { herkunft, akzent: { farbe, anteil, abstand } },
+          });
+        }
         // With a model, no fixed colour and no inspiration, the model chooses the lead colour.
         const provider = options.ki?.provider;
         const colourFixed =
@@ -2196,6 +2221,32 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       return;
     }
 
+    // Spec 035, Befund 4.5.1: the material of a brand, shown as the crop of a proposal – an image
+    // of the brand's own material folder, sent so that nothing in it runs (an SVG opened alone).
+    const materialo = /^\/marko\/([a-z0-9-]+)\/materialo\/([^/]+)$/.exec(path);
+    if (materialo !== null && method === "GET") {
+      const [, name = "", raw = ""] = materialo;
+      let file = "";
+      try {
+        file = safeFilename(decodeURIComponent(raw));
+      } catch {}
+      const type = MATERIALO_BILDOJ[extname(file).toLowerCase()];
+      const where = join(markoDir(options.workdir, name), MATERIALO_DIR, file);
+      if (draftOf(name) === undefined || type === undefined || file === "" || !existsSync(where)) {
+        notFound(response);
+        return;
+      }
+      response
+        .writeHead(200, {
+          "content-type": type,
+          "x-content-type-options": "nosniff",
+          "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'; sandbox",
+          "cache-control": "no-store",
+        })
+        .end(readFileSync(where));
+      return;
+    }
+
     const marko = /^\/marko\/([a-z0-9-]+)\/([a-z]+)(\.css)?$/.exec(path);
     if (marko !== null) {
       const [, name = "", key = "", css] = marko;
@@ -2204,21 +2255,31 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         notFound(response);
         return;
       }
+      // Spec 035, Befund 4.5.1: the preview with an open proposal laid on the draft (the draft stays).
+      const propono = url.searchParams.get("propono");
+      const shown = (): Agordo => {
+        if (propono === null) return draft.agordo;
+        const open = readProponoj(options.workdir, name).find((entry) => entry.faceto === propono);
+        return open === undefined
+          ? draft.agordo
+          : (readAgordo(mergedAgordo(draft.agordo, open.agordo)).agordo ?? draft.agordo);
+      };
       if (method === "GET" && key === "vorschau" && css === ".css") {
         response
           .writeHead(200, { "content-type": TYPES[".css"] ?? "" })
-          .end(previewCss(draft.agordo, bases));
+          .end(previewCss(shown(), bases));
         return;
       }
       if (method === "GET" && key === "vorschau" && url.searchParams.has("sxtupo")) {
         const sxtupo = url.searchParams.get("sxtupo") ?? "vorschau";
         const breite = url.searchParams.get("breite") ?? "mittel";
+        const agordo = shown();
         sendHtml(
           response,
           previewDocument({
             name,
-            cssHref: `/marko/${encodeURIComponent(name)}/vorschau.css?rev=${draft.rev}`,
-            fontFace: fontFaceOf(draft.agordo),
+            cssHref: `/marko/${encodeURIComponent(name)}/vorschau.css?rev=${draft.rev}${propono === null ? "" : `&propono=${encodeURIComponent(propono)}`}`,
+            fontFace: fontFaceOf(agordo),
             scheme: url.searchParams.get("scheme") === "dark" ? "dark" : "light",
             attributes: Object.fromEntries(
               (["density", "contrast", "viewport"] as const)
@@ -2232,7 +2293,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
                 ? sxtupo
                 : "vorschau",
               breite,
-              draft.agordo,
+              agordo,
               zeloOf(url.searchParams),
             ),
           }),

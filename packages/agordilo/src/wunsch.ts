@@ -9,13 +9,31 @@ import { parseAgordoColor } from "./agordo.js";
 import type { Calibration } from "./calibration.js";
 import { type Derivation, deriveAspekto } from "./derive.js";
 import type { GestaltBasis } from "./gestalt.js";
-import { type ReglerDiff, reglerDiff, reglerOf, reglerValue, withRegler } from "./regler.js";
+import {
+  type ReglerDiff,
+  reglerDiff,
+  reglerOf,
+  reglerValue,
+  wahlValue,
+  withRegler,
+} from "./regler.js";
 import type { Structure } from "./structure.js";
 
-/** A movement of a slider by a step, or of the lead colour's hue (`leitfarbe.ton`, degrees). */
+/**
+ * A movement of a slider by a step, or of the lead colour's hue (`leitfarbe.ton`, degrees); or by
+ * a number of its stops (`stufe`, Spec 035 V-3), where the vocabulary names stops for the slider.
+ */
 export interface Bewegung {
   regler: string;
-  schritt: number;
+  schritt?: number;
+  stufe?: number;
+}
+
+/** The stops of a slider (Spec 035, V-3) and the choice past the last one. */
+export interface Stufen {
+  werte: number[];
+  danach?: { regler: string; wert: string };
+  kialo?: string;
 }
 
 export interface WunschEintrag {
@@ -32,6 +50,8 @@ export interface Wuensche {
   description?: string;
   /** The hues the warm and the cool words turn towards (OKLCH degrees). */
   pole: { warm: number; kuehl: number };
+  /** Per slider the stops a relative wish moves between (Spec 035, V-3). */
+  stufen?: Record<string, Stufen>;
   wuensche: WunschEintrag[];
 }
 
@@ -154,15 +174,46 @@ export function proponoOf(
     }
     next = withRegler(next, path, clamped);
   };
+  /** One stop up or down (V-3): past the last stop the choice after it, back from it first. */
+  const step = (path: string, stufen: Stufen, direction: number) => {
+    const regler = regloj.find((entry) => entry.path === path);
+    if (regler === undefined) return;
+    const value = reglerValue(next, regler);
+    const danach = stufen.danach;
+    const beyond = danach !== undefined && wahlValue(next, danach.regler) === danach.wert;
+    const at = (wert: number) => round3(Math.min(regler.max, Math.max(regler.min, wert)));
+    if (direction > 0) {
+      const higher = stufen.werte.find((wert) => wert > value + 1e-9);
+      if (higher !== undefined) set(path, at(higher));
+      else if (danach !== undefined && !beyond) next = withRegler(next, danach.regler, danach.wert);
+      else if (!amEnde.some((entry) => entry.path === path))
+        amEnde.push({ path, grenze: regler.max });
+      return;
+    }
+    if (danach !== undefined && beyond) {
+      next = withRegler(next, danach.regler, undefined);
+      return;
+    }
+    const lower = [...stufen.werte].reverse().find((wert) => wert < value - 1e-9);
+    if (lower !== undefined) set(path, at(lower));
+    else if (!amEnde.some((entry) => entry.path === path))
+      amEnde.push({ path, grenze: regler.min });
+  };
   for (const entry of treffer) {
     for (const bewegung of entry.bewegungen) {
+      const stufen = wuensche.stufen?.[bewegung.regler];
+      if (bewegung.stufe !== undefined && stufen !== undefined) {
+        step(bewegung.regler, stufen, bewegung.stufe);
+        continue;
+      }
+      const schritt = bewegung.schritt ?? 0;
       if (bewegung.regler === LEITFARBE_TON) {
-        const pole = bewegung.schritt >= 0 ? wuensche.pole.warm : wuensche.pole.kuehl;
-        next = { ...next, leitfarbe: turnHue(next.leitfarbe, pole, Math.abs(bewegung.schritt)) };
+        const pole = schritt >= 0 ? wuensche.pole.warm : wuensche.pole.kuehl;
+        next = { ...next, leitfarbe: turnHue(next.leitfarbe, pole, Math.abs(schritt)) };
         continue;
       }
       const regler = regloj.find((candidate) => candidate.path === bewegung.regler);
-      if (regler !== undefined) set(regler.path, reglerValue(next, regler) + bewegung.schritt);
+      if (regler !== undefined) set(regler.path, reglerValue(next, regler) + schritt);
     }
   }
   for (const [path, value] of Object.entries(eingabe.regler ?? {})) {

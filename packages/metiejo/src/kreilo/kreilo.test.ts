@@ -5,8 +5,11 @@
 // colours of the inspiration, then the colour the character gives.
 
 import type { Agordo } from "@fundamento/agordilo";
-import { parseAgordoColor, reglerOf, reglerValue } from "@fundamento/agordilo";
+import { deriveAspekto, parseAgordoColor, reglerOf, reglerValue } from "@fundamento/agordilo";
 import { describe, expect, it } from "vitest";
+import { farbojOfPixels } from "../enportilo/farboj.js";
+import { decodePng } from "../enportilo/png.js";
+import { encodePng } from "../test-doubles/png.js";
 import { loadBases } from "../vorschau.js";
 import { KREILO, kreiloProponoj } from "./kreilo.js";
 
@@ -130,5 +133,70 @@ describe("a proposal per Faceto from the entry questions (Spec 033 S3)", () => {
       loko: expect.stringContaining("lebhaft"),
     });
     expect(result.satz.length).toBeGreaterThan(20);
+  });
+});
+
+// Spec 035, Befund 4.2: from a picture with orange-red and a strong turquoise only the orange came.
+// The picture is synthetic (generated here with the test double of the PNG encoder, read through
+// the Enportilo's own decoder and area measurement, as an upload of the entry questions would be).
+describe("an accent from the inspiration (Spec 035, Befund 4.2)", () => {
+  const ORANGE = [0xe4, 0x57, 0x2e, 255];
+  const TUERKIS = [0x17, 0xb3, 0xa8, 255];
+  const WEISS = [0xfa, 0xfa, 0xf8, 255];
+  /** 20 × 20 px: 60 % orange-red, then `second` on the given rows, the rest white. */
+  const picture = (second: number[], rows: number) =>
+    farbojOfPixels(
+      decodePng(encodePng(20, 20, (_x, y) => (y < 12 ? ORANGE : y < 12 + rows ? second : WEISS)))
+        .rgba,
+      "inspiration.png",
+    );
+
+  it("orange-red and a strong turquoise: the lead colour plus the turquoise as accent, with its origin", () => {
+    const result = kreiloProponoj({ inspiro: picture(TUERKIS, 5) }, start, bases);
+    expect(result.agordo.leitfarbe).toBe("#e4572e");
+    expect(result.akzent?.farbe).toBe("#17b3a8");
+    expect(result.akzent?.faceto).toBe("gvidkoloro");
+    expect(result.akzent?.anteil).toBe(25);
+    expect(result.akzent?.herkunft[0]).toEqual({
+      dosiero: "inspiration.png",
+      loko: "25,0 % der Fläche",
+    });
+    expect(result.akzent?.abstand).toBeGreaterThanOrEqual(KREILO.akzent.abstand_min);
+    expect(result.akzent?.satz).toContain("#17b3a8");
+    expect(result.akzent?.satz).toContain("25 %");
+  });
+
+  it("the accent is proposed, not set: the brand has one brand palette, and the check refuses a literal brand surface", () => {
+    const result = kreiloProponoj({ inspiro: picture(TUERKIS, 5) }, start, bases);
+    expect(result.akzent?.agordo).toEqual({});
+    expect(result.agordo.festgelegt).toBeUndefined();
+    expect(
+      result.akzent?.satz.split(/[.!?](\s|$)/).filter((part) => part.trim() !== ""),
+    ).toHaveLength(1);
+    // Why it stays a proposal: as a value of the brand surface the check refuses it (fixed rule).
+    const literal = deriveAspekto(
+      {
+        ...result.agordo,
+        festgelegt: {
+          "color.brand.fill": {
+            wert: { colorSpace: "srgb", components: [0.0902, 0.702, 0.6588], hex: "#17b3a8" },
+          },
+        },
+      },
+      bases.structure,
+      bases.calibration,
+    );
+    expect(
+      literal.raporto.violations
+        .filter((violation) => violation.fixed)
+        .map((violation) => violation.rule),
+    ).toContain("color-semantic-literal");
+  });
+
+  it("no accent from a shade of the lead colour, nor from a colour with too small a share", () => {
+    const shade = kreiloProponoj({ inspiro: picture([0xb0, 0x3e, 0x1c, 255], 5) }, start, bases);
+    expect(shade.akzent).toBeUndefined();
+    const speck = kreiloProponoj({ inspiro: picture(TUERKIS, 1) }, start, bases);
+    expect(speck.akzent).toBeUndefined();
   });
 });

@@ -165,3 +165,35 @@ describe("the states of the Facetoj (Spec 033 S1)", () => {
     ).toEqual(["spaco", "movo"]);
   });
 });
+
+// Spec 035, Befund 4.4 (plan Spec 033, Abweichung 1): a change in the chat makes a step defined and
+// releasable – without „Vorschlag übernehmen“. Whether a step can be released, and the sentence
+// beside the button, are part of the state, so the screen can follow after a chat turn.
+describe("releasable after a change in the chat (Spec 035, Befund 4.4)", () => {
+  const agordo = { name: "lumo", leitfarbe: "#2f6fdb" };
+  const base = { facetoj, modelo, agordo, probleme: [] };
+
+  it("a change in the chat: defined, releasable, ready – no take-over of a proposal needed", () => {
+    const formo = stand({ ...base, kroniko: [at("kreo"), at("sxangxo", "formo")] }, "formo");
+    expect(formo?.stato).toBe("definiert");
+    expect(formo?.freigebbar).toBe(true);
+    expect(formo?.freigabeSatz).toBe("Bereit zur Freigabe.");
+  });
+
+  it("an open step is not releasable and says how it becomes so; a red check holds the release", () => {
+    const open = stand({ ...base, kroniko: [at("kreo")] }, "formo");
+    expect(open?.freigebbar).toBe(false);
+    expect(open?.freigabeSatz).toMatch(/Chat|Regler/);
+    const red = stand(
+      {
+        ...base,
+        kroniko: [at("kreo"), at("sxangxo", "formo")],
+        probleme: [{ subject: "radius.medium" }],
+      },
+      "formo",
+    );
+    expect(red?.stato).toBe("definiert");
+    expect(red?.freigebbar).toBe(false);
+    expect(red?.freigabeSatz).toMatch(/1 offenes Problem/);
+  });
+});

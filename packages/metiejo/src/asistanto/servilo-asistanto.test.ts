@@ -156,6 +156,24 @@ describe("the assistant beside the Studio (Spec 033 S1)", () => {
     expect((await stato()).facetoj.find((faceto) => faceto.name === "formo")?.stato).toBe(
       "definiert",
     );
+    // Spec 035, Befund 4.4: the answer of the turn says the step can be released now.
+    const step = (
+      body as unknown as { stato: { facetoj: { name: string; freigebbar?: boolean }[] } }
+    ).stato.facetoj.find((faceto) => faceto.name === "formo");
+    expect(step?.freigebbar).toBe(true);
+  });
+
+  it("Spec 035, Befund 4.4: after the change in the chat the step is released without „Vorschlag übernehmen“", async () => {
+    const released = await post("/api/marko/lumo/faceto", { faceto: "formo", ago: "liberigo" });
+    expect(released.status).toBe(200);
+    expect((await stato()).facetoj.find((faceto) => faceto.name === "formo")?.stato).toBe(
+      "freigegeben",
+    );
+    const agoj = readKroniko(workdir, "lumo")
+      .filter((entry) => entry.faceto === "formo")
+      .map((entry) => entry.ago);
+    expect(agoj).not.toContain("akcepto");
+    expect(agoj.at(-1)).toBe("liberigo");
   });
 
   it("a change at the Studio's sliders is the same draft: a new rev and a Kroniko entry from the slider", async () => {
