@@ -3,6 +3,7 @@
 // are the maintainer's acceptance (Messanleitung in the contribution of S36-1.3).
 // 1.6 elekto: an option not chosen is an empty ring – no dot, its circle not filled like the
 // chosen one or like its own border.
+// 1.6 markobutono, sxaltilo: the label in the middle of its box or switch, not above it.
 
 import { describe, expect, it } from "vitest";
 import { modelDouble, once, pageNodes, repoFiles, run } from "./plugin-test-helpers.js";
@@ -96,6 +97,67 @@ describe("Spec 036 1.6: an elekto option not chosen is an empty ring in Figma", 
         }
       }
       expect(filled).toEqual([]);
+    });
+  }
+});
+
+/** Where a node lies in its variant: its place and that of every layer between them. */
+function placeIn(variant: DoubleNode, node: DoubleNode) {
+  let x = 0;
+  let y = 0;
+  for (let current: DoubleNode | undefined = node; current !== undefined && current !== variant; ) {
+    const box = current as unknown as { x: number; y: number };
+    x += box.x;
+    y += box.y;
+    current = current.parent;
+  }
+  const { width, height } = node as unknown as { width: number; height: number };
+  return { x, y, width, height };
+}
+
+/** The rounding of the double's picture (test-doubles/bild.ts): two places. */
+const round = (value: number) => Math.round(value * 100) / 100;
+
+/**
+ * The vertical middle Figma gives a node: the double lays every child at the start of its row
+ * (it knows no counterAxisAlignItems), Figma centres it where the row says CENTER. So the middle
+ * of a node is that of the outermost row above it that centres its children across – each row of
+ * that chain centres the next one in it – or the node's own where its parent does not centre it.
+ */
+function middleIn(variant: DoubleNode, node: DoubleNode) {
+  let centred = node;
+  for (
+    let parent = node.parent;
+    parent !== undefined &&
+    parent !== variant &&
+    parent.properties.layoutMode === "HORIZONTAL" &&
+    parent.properties.counterAxisAlignItems === "CENTER";
+    parent = parent.parent
+  ) {
+    centred = parent;
+  }
+  const box = placeIn(variant, centred);
+  return round(box.y + box.height / 2);
+}
+
+describe("Spec 036 1.6: the label of markobutono and sxaltilo in the middle of its box or switch in Figma", () => {
+  for (const set of ["markobutono", "sxaltilo"]) {
+    it(`${set}, every variant: the middle of the label's line is the middle of the control`, async () => {
+      const off: string[] = [];
+      for (const variant of await variantsOf(set)) {
+        const control = find(variant, "control") as DoubleNode;
+        const label = find(variant, "label") as DoubleNode;
+        const box = placeIn(variant, control);
+        const line = placeIn(variant, label);
+        const middle = middleIn(variant, control);
+        const labelMiddle = middleIn(variant, label);
+        if (middle !== labelMiddle)
+          off.push(`${variant.name}: control ${middle}, label ${labelMiddle}`);
+        expect(line.x, `${variant.name}: the label right of the control`).toBeGreaterThanOrEqual(
+          box.x + box.width,
+        );
+      }
+      expect(off).toEqual([]);
     });
   }
 });
