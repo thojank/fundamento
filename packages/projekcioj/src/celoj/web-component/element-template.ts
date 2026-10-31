@@ -4835,7 +4835,15 @@ ${
 ${
   isMultiselect
     ? `      const known = chosen.filter((value) => entries.some((entry) => entry.value === value));
-      const shown = known.length === 0 && placeholder !== "" ? placeholder : known.length + " " + word("options-count");
+      // Spec 036 Teil 5 ②b-2 (A-plurelektilo-1): summary labels names the chosen options by their
+      // words, in the order of the values; count says how many.
+      const labels = known.map((value) => entries.find((entry) => entry.value === value)?.text ?? value);
+      const shown =
+        known.length === 0 && placeholder !== ""
+          ? placeholder
+          : this.propValue("summary") === "labels" && known.length > 0
+            ? labels.join(", ")
+            : known.length + " " + word("options-count");
       const tags = this.shadowRoot?.querySelector('[part="tags"]');
       if (tags instanceof HTMLElement) {
         const asTags = this.propValue("summary") === "tags";

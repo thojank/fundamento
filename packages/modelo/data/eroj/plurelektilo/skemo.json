@@ -30,10 +30,11 @@
         "kind": "enum",
         "values": [
           "count",
+          "labels",
           "tags"
         ],
         "default": "count",
-        "description": "How the field shows the chosen values: as a count ('3 gewählt') or as removable tags (composed signeto)."
+        "description": "How the field shows the chosen values: as a count ('3 gewählt'), as the words of the chosen options in the order of the values (labels; Spec 029 ②a, A-plurelektilo-1), or as removable tags (composed signeto)."
       },
       {
         "name": "placeholder",
