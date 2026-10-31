@@ -4,10 +4,14 @@
 // the light neutrals give the tint of the neutrals; the most frequent family per role becomes the
 // font (a webfont of the catalogue, else a licensed font that is named and not included); the median
 // radius and spacing become the factors of the Agordo against the structure. A value beyond a
-// slider's end is proposed at the end, and the sentence says so. Pure apart from the catalogue.
+// slider's end is proposed at the end, and the sentence says so. An achromatic brand (Spec 036,
+// Befund 2.1) – very dark neutrals carry its material, strong colours stay a small share – gets its
+// most frequent very dark neutral as the lead colour, and the sentence names the colourful tones it
+// did not take. Pure apart from the catalogue and the thresholds of kreilo.json.
 
-import { type Agordo, parseAgordoColor, reglerOf } from "@fundamento/agordilo";
+import { type Agordo, type OklchColor, parseAgordoColor, reglerOf } from "@fundamento/agordilo";
 import { buildModelo, resolveCombination } from "@fundamento/modelo";
+import { KREILO } from "../kreilo/datoj.js";
 import { fontoOf, licencedFonto, readTiparoj, type Tiparoj } from "../tiparoj.js";
 import type { Bases } from "../vorschau.js";
 import type { Herkunft, Trovo } from "./trovo.js";
@@ -104,6 +108,39 @@ function clampedFactor(
   return { value, atEnd: value !== raw };
 }
 
+type Colour = ReturnType<typeof grouped>[number] & { oklch: OklchColor | undefined };
+
+/**
+ * The lead colour of an achromatic brand (Spec 036, Befund 2.1, V-1), undefined for any other: very
+ * dark neutrals cover at least `dunkel_anteil_min` per cent of the colour found and strong colours
+ * (colourful and darker than a pastel) less than `bunt_anteil_max` per cent (kreilo.json, unbunt).
+ * The lead is the most frequent very dark neutral; the colourful tones found are named, not taken.
+ */
+function unbuntOf(colours: readonly Colour[], total: number): Propono | undefined {
+  const { neutral_bis, dunkel_bis, dunkel_anteil_min, bunt_ab, pastell_ab, bunt_anteil_max } =
+    KREILO.unbunt;
+  const share = (entries: readonly Colour[]) =>
+    (100 * entries.reduce((sum, colour) => sum + colour.pezo, 0)) / total;
+  const dark = colours.filter(
+    (colour) =>
+      colour.oklch !== undefined && colour.oklch.c < neutral_bis && colour.oklch.l <= dunkel_bis,
+  );
+  const colourful = colours.filter(
+    (colour) => colour.oklch !== undefined && colour.oklch.c >= bunt_ab,
+  );
+  const strong = colourful.filter((colour) => (colour.oklch?.l ?? 1) < pastell_ab);
+  const ink = [...dark].sort((a, b) => b.pezo - a.pezo)[0];
+  if (ink === undefined || share(dark) < dunkel_anteil_min || share(strong) >= bunt_anteil_max)
+    return undefined;
+  const tones = colourful.slice(0, 3).map((colour) => String(colour.valoro));
+  return {
+    faceto: "gvidkoloro",
+    agordo: { leitfarbe: String(ink.valoro) },
+    satz: `Leitfarbe ${ink.valoro}: deine Marke ist unbunt – sehr dunkle Neutraltöne tragen ${percent(share(dark))} % der gefundenen Farbe, kräftige Farben nur ${percent(share(strong))} %.${tones.length === 0 ? "" : ` Die bunten Töne ${tones.join(", ")} sind kleine Akzente und nicht die Leitfarbe.`} Verweise erkennt man dann an der Unterstreichung, nicht an der Farbe.`,
+    herkunft: ink.herkunft,
+  };
+}
+
 export function proponojOf(trovoj: readonly Trovo[], bases: Bases): Propono[] {
   const proponoj: Propono[] = [];
   const colours = grouped(trovoj.filter((trovo) => trovo.kind === "farbo")).map((group) => ({
@@ -112,12 +149,17 @@ export function proponojOf(trovoj: readonly Trovo[], bases: Bases): Propono[] {
   }));
   const totalColour = colours.reduce((sum, colour) => sum + colour.pezo, 0) || 1;
   const saturated = colours.filter((colour) => (colour.oklch?.c ?? 0) >= SATURATED);
+  const unbunt = unbuntOf(colours, totalColour);
   // Probe run 29.10.: the lead colour is a strong colour of middle lightness – a style sheet full of
   // palette steps would otherwise make its most frequent light tint the lead.
   const lead =
-    [...saturated]
-      .filter((colour) => (colour.oklch?.l ?? 0) >= 0.3 && (colour.oklch?.l ?? 0) <= 0.8)
-      .sort((a, b) => b.pezo * (b.oklch?.c ?? 0) - a.pezo * (a.oklch?.c ?? 0))[0] ?? saturated[0];
+    unbunt !== undefined
+      ? undefined
+      : ([...saturated]
+          .filter((colour) => (colour.oklch?.l ?? 0) >= 0.3 && (colour.oklch?.l ?? 0) <= 0.8)
+          .sort((a, b) => b.pezo * (b.oklch?.c ?? 0) - a.pezo * (a.oklch?.c ?? 0))[0] ??
+        saturated[0]);
+  if (unbunt !== undefined) proponoj.push(unbunt);
   if (lead !== undefined) {
     proponoj.push({
       faceto: "gvidkoloro",

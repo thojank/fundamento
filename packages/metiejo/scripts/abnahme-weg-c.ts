@@ -15,16 +15,22 @@
 //   cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
 //   pnpm build
 //   pnpm --filter @fundamento/metiejo exec tsx scripts/abnahme-weg-c.ts [--mit-modell]
-//     [--env <Pfad der .env>, ohne: die .env des Checkouts]
+//     [--env <Pfad der .env>, ohne: die .env des Checkouts] [--unbunt]
+//
+// Spec 036, Befund 2.1: with --unbunt the page is the synthetic achromatic brand „Inko“ of the tests
+// (src/test-doubles/unbunt/, inko.example): black, white and cream with three small pastel accents.
+// The script prints the proposed lead colour, whether it is a very dark neutral, and its sentence.
 
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { cpus, loadavg, tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { fetchInko, INKO, INKO_URL } from "../src/test-doubles/unbunt.js";
 import { fetchA, MARKO_URL, NEBEN, PRAEGEND } from "../src/test-doubles/weg-c.js";
 
 const root = resolve(import.meta.dirname, "..", "..", "..");
 const args = process.argv.slice(2);
 const mitModell = args.includes("--mit-modell");
+const unbunt = args.includes("--unbunt");
 const m = (await import(
   join(root, "packages/metiejo/dist/index.js")
 )) as typeof import("../src/index.js");
@@ -52,7 +58,7 @@ const servilo = await m.startServilo(
     root: scratch,
     settings: m.settingsOf({}),
     ki: ki.provider === undefined ? {} : { ...ki, limo: 30_000, limoj: m.LIMOJ[ki.provider.name] },
-    esploro: { fetch: fetchA },
+    esploro: { fetch: unbunt ? fetchInko : fetchA },
   },
   { stderr: (text) => log.push(text) },
 );
@@ -65,11 +71,15 @@ await fetch(`${servilo.url}/marko`, {
 const response = await fetch(`${servilo.url}/api/marko/ekzemplo/esplori`, {
   method: "POST",
   headers: { "content-type": "application/json" },
-  body: JSON.stringify({ nomo: "Ekzemplo", url: MARKO_URL, rajtoj: true }),
+  body: JSON.stringify({
+    nomo: unbunt ? "Inko" : "Ekzemplo",
+    url: unbunt ? INKO_URL : MARKO_URL,
+    rajtoj: true,
+  }),
 });
 const body = (await response.json()) as {
   satz?: string;
-  proponoj?: { faceto: string; agordo: { leitfarbe?: string } }[];
+  proponoj?: { faceto: string; agordo: { leitfarbe?: string }; satz?: string }[];
   seitoj?: string[];
   antwort?: string;
   notoj?: string[];
@@ -85,14 +95,22 @@ rmSync(scratch, { recursive: true, force: true });
 const kosto = body.kosto ?? { enigo: 0, eligo: 0, ms: 0, requests: 0 };
 const modelo = ki.provider?.toString();
 const usd = modelo === undefined ? 0 : m.kostoOf(modelo, kosto);
-const lead = body.proponoj?.find((propono) => propono.faceto === "gvidkoloro")?.agordo.leitfarbe;
+const gvidkoloro = body.proponoj?.find((propono) => propono.faceto === "gvidkoloro");
+const lead = gvidkoloro?.agordo.leitfarbe;
 console.log(`\nWeg C ${modelo === undefined ? "ohne Sprachmodell" : `mit ${modelo}`}`);
 console.log(`  Last (Mittel 1 min): ${loadavg()[0]?.toFixed(1)} bei ${cpus().length} Kernen`);
 if (!response.ok) console.log(`  Antwort des Servers ${response.status}: ${body.satz ?? ""}`);
 console.log(`  Seiten gelesen: ${(body.seitoj ?? []).join(", ") || "keine"}`);
-console.log(
-  `  Leitfarbe: ${lead ?? "keine"} – prägende Farbe ${PRAEGEND} ${lead === PRAEGEND ? "getroffen" : `verfehlt${lead === NEBEN ? ` (Nebenfarbe ${NEBEN} aus dem CSS)` : ""}`}`,
-);
+if (unbunt) {
+  console.log(
+    `  Leitfarbe: ${lead ?? "keine"} – unbunte Marke, Tinte ${INKO} ${lead === INKO ? "getroffen" : "verfehlt"}`,
+  );
+  console.log(`  Satz: ${gvidkoloro?.satz ?? "keiner"}`);
+} else {
+  console.log(
+    `  Leitfarbe: ${lead ?? "keine"} – prägende Farbe ${PRAEGEND} ${lead === PRAEGEND ? "getroffen" : `verfehlt${lead === NEBEN ? ` (Nebenfarbe ${NEBEN} aus dem CSS)` : ""}`}`,
+  );
+}
 console.log(`  Hinweise: ${(body.notoj ?? []).join(" ") || "keine"}`);
 console.log(`  Antwort: ${body.antwort ?? ""}`);
 console.log(

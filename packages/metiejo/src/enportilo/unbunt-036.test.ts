@@ -22,7 +22,9 @@ import {
 } from "../test-doubles/unbunt.js";
 import { blanka } from "../test-doubles/weg-c.js";
 import { loadBases } from "../vorschau.js";
+import { farbojOfPixels } from "./farboj.js";
 import { legiMaterialon } from "./materialo.js";
+import type { Bildo } from "./png.js";
 import { type Propono, proponojOf } from "./rekono.js";
 
 const bases = loadBases();
@@ -91,5 +93,25 @@ describe("an achromatic brand (Spec 036, Befund 2.1, V-1)", () => {
     expect(result.seitoj).toEqual([INKO_URL]);
     expect(result.proponoj[0]?.faceto).toBe("gvidkoloro");
     expectAchromaticLead(result.proponoj, INKO_URL);
+  });
+
+  it("leaves a colourful brand colourful: black text and a small strong colour keep that colour", () => {
+    // White page, a line of black text (10 %), a teal button (4 %): strong colours reach
+    // bunt_anteil_max, so the brand is not achromatic and the teal stays its lead colour.
+    const width = 50;
+    const height = 20;
+    const rgba = new Uint8Array(width * height * 4);
+    for (let y = 0; y < height; y++)
+      for (let x = 0; x < width; x++) {
+        const pixel =
+          y < 2 ? [0x11, 0x11, 0x11] : y >= 18 && x < 20 ? [0x0f, 0x76, 0x6e] : [255, 255, 255];
+        rgba.set([...pixel, 255], (y * width + x) * 4);
+      }
+    const bildo: Bildo = { width, height, rgba };
+    const lead = proponojOf(farbojOfPixels(bildo.rgba, "seite.png"), bases).find(
+      (propono) => propono.faceto === "gvidkoloro",
+    );
+    expect(lead?.agordo).toEqual({ leitfarbe: "#0f766e" });
+    expect(lead?.satz).not.toContain("unbunt");
   });
 });
