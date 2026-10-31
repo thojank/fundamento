@@ -41,7 +41,7 @@ describe("the sxaltilo is drawn as a toggle: track, knob, label beside (Spec 010
 
   it("draws every variant of checked × size × state, named by the plan", async () => {
     const { set } = await drawn();
-    expect(set?.children).toHaveLength(24);
+    expect(set?.children).toHaveLength(36);
     expect(set?.children[0]?.name).toBe("checked=true, size=small, state=rest");
   });
 
@@ -49,7 +49,8 @@ describe("the sxaltilo is drawn as a toggle: track, knob, label beside (Spec 010
     const { variant } = await drawn();
     const on = variant("checked=true, size=medium, state=rest");
     const field = on?.children.find((child) => child.name === "field");
-    expect(field?.children.map((child) => child.name)).toEqual(["focus-ring", "label-row"]);
+    // Spec 029 ②b-1b M-2: the label and the message of the status stand in a column beside it.
+    expect(field?.children.map((child) => child.name)).toEqual(["focus-ring", "texts"]);
     expect(field?.properties.layoutMode).toBe("HORIZONTAL");
     const control = descendant(on, "control");
     expect(control?.children.map((child) => child.name)).toEqual(["indicator"]);
@@ -106,7 +107,7 @@ describe("the markobutono is drawn as a toggle: box, check mark, label and error
 
   it("draws every variant of checked × size × state, named by the plan", async () => {
     const { set } = await drawn();
-    expect(set?.children).toHaveLength(30);
+    expect(set?.children).toHaveLength(42);
     expect(set?.children[0]?.name).toBe("checked=true, size=small, state=rest");
   });
 
@@ -179,17 +180,14 @@ describe("the markobutono is drawn as a toggle: box, check mark, label and error
     expect(indicator.children.map((child) => child.name)).toEqual(glyphFrames);
   });
 
-  it("keeps the switch's knob a filled frame without a sign or a column (Spec 010 ①)", async () => {
+  it("keeps the switch's knob a filled frame without a sign (Spec 010 ①); its texts a column since ②b-1b M-2", async () => {
     const double = modelDouble();
     await run(double, source);
     const set = pageNodes(double).find((child) => child.name === "sxaltilo");
     const on = set?.children.find(
       (child) => child.name === "checked=true, size=medium, state=rest",
     );
-    expect(on?.children[0]?.children.map((child) => child.name)).toEqual([
-      "focus-ring",
-      "label-row",
-    ]);
+    expect(on?.children[0]?.children.map((child) => child.name)).toEqual(["focus-ring", "texts"]);
     expect(descendant(on, "indicator")?.children).toEqual([]);
   });
 
@@ -233,7 +231,7 @@ describe("the elekto is drawn as a choice: question, options with circle and dot
 
   it("draws every variant of size × state, named by the plan", async () => {
     const { set } = await drawn();
-    expect(set?.children).toHaveLength(15);
+    expect(set?.children).toHaveLength(21);
     expect(set?.children[0]?.name).toBe("size=small, state=rest");
   });
 
@@ -332,7 +330,7 @@ describe("the elektilo is drawn as the field of the kampo with the chevron in it
 
   it("draws every variant of size × state, named by the plan, and no list", async () => {
     const { set } = await drawn();
-    expect(set?.children).toHaveLength(15);
+    expect(set?.children).toHaveLength(21);
     expect(set?.children[0]?.name).toBe("size=small, state=rest");
     expect(set?.children.some((child) => /open/.test(child.name))).toBe(false);
   });
@@ -401,7 +399,14 @@ describe("the elektilo is drawn as the field of the kampo with the chevron in it
     const { double } = await drawn();
     const kampo = pageNodes(double).find((child) => child.name === "kampo");
     const control = descendant(kampo?.children[0], "control");
-    expect(control?.children.map((child) => child.name)).toEqual(["text", "spinner", "clear"]);
+    // Spec 029 ②b-1b M-2 (A-kampo-4): the room of the status icon in the control; Spec 035 2.1
+    // (Skemo trailing): first at the end, before the spinner.
+    expect(control?.children.map((child) => child.name)).toEqual([
+      "text",
+      "status-icon",
+      "spinner",
+      "clear",
+    ]);
   });
 
   it("a second run writes nothing new", async () => {
@@ -431,7 +436,7 @@ describe("the tekstareo is drawn as the field of the kampo: kind × size × stat
 
   it("draws every variant of kind × size × state, named by the plan", async () => {
     const { set } = await drawn();
-    expect(set?.children).toHaveLength(30);
+    expect(set?.children).toHaveLength(42);
     expect(set?.children[0]?.name).toBe("kind=text, size=small, state=rest");
     expect(
       set?.children.some((child) => child.name === "kind=code, size=large, state=invalid"),
@@ -767,7 +772,7 @@ describe("the plugin draws the alsxutilo (Spec 015 ②)", () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     const set = pageNodes(double).find((node) => node.name === "alsxutilo");
-    expect(set?.children).toHaveLength(12);
+    expect(set?.children).toHaveLength(16);
     for (const variant of set?.children ?? []) {
       const field = descendant(variant, "field");
       expect(field?.properties.layoutMode, variant.name).toBe("VERTICAL");
@@ -915,7 +920,7 @@ describe("the plugin draws the glitilo (Spec 025 ①)", () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     const set = pageNodes(double).find((node) => node.name === "glitilo");
-    expect(set?.children).toHaveLength(24);
+    expect(set?.children).toHaveLength(32);
     for (const variant of set?.children ?? []) {
       const field = descendant(variant, "field");
       expect(field?.properties.layoutMode, variant.name).toBe("VERTICAL");
@@ -985,7 +990,7 @@ describe("the plugin draws the datelektilo (Spec 025 ②)", () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     const set = pageNodes(double).find((node) => node.name === "datelektilo");
-    expect(set?.children).toHaveLength(24);
+    expect(set?.children).toHaveLength(32);
     for (const variant of set?.children ?? []) {
       const field = descendant(variant, "field");
       expect(field?.properties.layoutMode, variant.name).toBe("VERTICAL");
@@ -1093,8 +1098,8 @@ describe("the plugin draws the selection Eroj (Spec 025 ③)", () => {
     );
     // 160, not 240 (plan ③ Abweichung 3): the constraint selected ⇒ mode selectable prunes the set.
     expect(sets.signeto?.children).toHaveLength(160);
-    expect(sets.listelektilo?.children).toHaveLength(12);
-    expect(sets.plurelektilo?.children).toHaveLength(12);
+    expect(sets.listelektilo?.children).toHaveLength(16);
+    expect(sets.plurelektilo?.children).toHaveLength(16);
     expect(sets.lokredaktilo?.children).toHaveLength(12);
     const open = sets.listelektilo?.children.find(
       (child) => child.name === "expanded=true, state=rest",

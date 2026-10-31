@@ -109,6 +109,7 @@ test.describe("fm-glitilo behaviour", () => {
       "spinner",
       "help",
       "error",
+      "message",
     ]);
   });
 

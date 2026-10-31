@@ -98,6 +98,7 @@ test.describe("fm-alsxutilo behaviour", () => {
       "spinner",
       "help",
       "error",
+      "message",
       "file-list",
       "count",
     ]);

@@ -134,7 +134,9 @@ function fieldPartSelector(
   // The chevron of a select is an element of its own beside the select (D-06).
   if (part === "indicator") return `:where(${root}) [part="indicator"]`;
   if (part === "focus-ring") return `:where(${root}) [part="control"]:focus-visible`;
-  if (["label", "help", "error", "required-mark"].includes(part)) {
+  // Spec 029 ②b-1b M-2: the message of a warning or a success beside help and error, and the
+  // kampo's status icon in its row – each an element of its own, in the state of the field.
+  if (["label", "help", "error", "message", "status-icon", "required-mark"].includes(part)) {
     return `:where(${root}) [part="${part}"]`;
   }
   // The listbox of a field with suggestions (Spec 014 ⑤) and its rows: the suggestion by its
@@ -192,7 +194,7 @@ const endStructure = (textarea: boolean): string =>
     ':where([part="row"]) > [part="control"] { flex: 1 1 auto; }',
     `:where([part="end"]) { position: absolute; inset: 0; display: flex; align-items: ${textarea ? "flex-start" : "center"}; justify-content: flex-end; box-sizing: border-box; pointer-events: none; }`,
     ':where([part="end"]) > * { flex: none; pointer-events: auto; }',
-    ':where([part="end"]) > :is([part="indicator"], [part="spinner"]) { pointer-events: none; }',
+    ':where([part="end"]) > :is([part="status-icon"], [part="indicator"], [part="spinner"]) { pointer-events: none; }',
     ':where([part="end"]) > [hidden] { display: none; }',
   ].join("\n");
 
@@ -318,6 +320,9 @@ const SLIDER_STATES: Readonly<Record<string, string | undefined>> = {
   pressed: ":active",
   disabled: '[aria-disabled="true"]',
   invalid: '[aria-invalid="true"]',
+  // Spec 029 ②b-1b M-2: the thumb carries the field's status.
+  warning: '[data-status="warning"]',
+  success: '[data-status="success"]',
 };
 
 /**
@@ -749,7 +754,8 @@ function togglePartSelector(part: string, property: string, data: string, state:
   if (part === "box" && property === "gap") return `:where(${root})`;
   if (part === "focus-ring") return `:where(${root}) [part="control"]:focus-visible`;
   if (part === "indicator" && property !== "position") return `:where(${root}) [part="indicator"]`;
-  if (["label", "error", "required-mark"].includes(part)) return `:where(${root}) [part="${part}"]`;
+  if (["label", "error", "message", "required-mark"].includes(part))
+    return `:where(${root}) [part="${part}"]`;
   return `:where(${root}) [part="control"]`;
 }
 
@@ -763,6 +769,9 @@ const isGroup = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "group";
  */
 const GROUP_STATES: Readonly<Record<string, string | undefined>> = {
   invalid: '[aria-invalid="true"]',
+  // Spec 029 ②b-1b M-2: warning and success as the group's status.
+  warning: '[data-status="warning"]',
+  success: '[data-status="success"]',
   disabled: '[aria-disabled="true"]',
 };
 const ROW_STATES: Readonly<Record<string, string | undefined>> = {
@@ -791,7 +800,7 @@ function groupPartSelector(
   if (part === "box" && property === "gap") return `:where(${root} ${row})`;
   if (part === "focus-ring")
     return `:where(${root} [part="option"]:focus-visible) [part="control"]`;
-  if (["label", "help", "error", "required-mark"].includes(part)) {
+  if (["label", "help", "error", "message", "required-mark"].includes(part)) {
     return `:where(${root}) [part="${part}"]`;
   }
   if (part === "option-label" || part === "indicator")
@@ -813,6 +822,9 @@ const STATE_SELECTORS: Readonly<Record<string, string | undefined>> = {
   invalid: '[aria-invalid="true"]',
   readonly: "[readonly]",
   loading: '[aria-busy="true"]',
+  // Spec 029 ②b-1b M-2: the status of a field (data-status; danger is invalid, aria-invalid).
+  warning: '[data-status="warning"]',
+  success: '[data-status="success"]',
   // Spec 029 ②b-1 M-1: disabled with a reason, the control stays reachable (aria-disabled, marked
   // by the element) and looks as disabled as without one.
   disabled: ":is(:disabled, [data-fm-reasoned])",
@@ -829,6 +841,8 @@ const STATE_ORDER = [
   "hover",
   "pressed",
   "invalid",
+  "warning",
+  "success",
   "readonly",
   "loading",
   // Spec 015 ② (plan ② D-05): files dragged over the dropzone, before disabled.
@@ -2291,7 +2305,15 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
   // A skip link adds its place above the page to a control's structure (Spec 014 ②, D-07).
   const floating = isSkip(skemo) ? `\n${skipStructure}` : "";
   const ending = isBoxedField(skemo) ? `\n${endStructure(isTextarea(skemo))}` : "";
-  return `${base}${floating}${ending}\n${[...tokenRules, ...undrawn].join("\n")}\n`;
+  // Spec 029 ②b-1b M-2: joined sets the message and the error against the field – they take back
+  // the field's gap above them (the same token the gap binds); below keeps it.
+  const source = skemo.parts.box?.gap;
+  const gap = source !== undefined && "fixed" in source ? source.fixed : undefined;
+  const joined =
+    skemo.props.some((prop) => prop.name === "message-position") && gap !== undefined
+      ? `\n:where([part="field"][data-message-position="joined"]) > :is([part="message"], [part="error"]) { margin-block-start: calc(-1 * ${variable(named(owner, skemo, "box", "gap", {}, gap))}); }`
+      : "";
+  return `${base}${floating}${ending}${joined}\n${[...tokenRules, ...undrawn].join("\n")}\n`;
 }
 
 function keysOf(skemo: Skemo, source: SkemoPartSource | undefined, depth = 0): string[] {
@@ -2455,6 +2477,10 @@ export function elementNamesOf(
     // Spec 025 ① (plan ① D-05): a field with step buttons (the kampo) shows them in a row.
     stepper: entry.skemo.parts.decrement !== undefined,
     afterLabel: entry.skemo.trailingAfter === "label",
+    shownLabel: entry.skemo.props.some((prop) => prop.name === "label" && prop.shown === true),
+    statusIcon: entry.skemo.parts["status-icon"] !== undefined,
+    // Abnahme #122, Spec 035 2.1: the end of a field in the order of the Skemo's trailing.
+    trailing: entry.skemo.trailing ?? [],
     // Spec 025 ② (plan ② D-11): a field with a calendar part is the date picker.
     datepicker: isDatepicker(entry.skemo),
     marked: entry.skemo.parts["required-mark"] !== undefined,
@@ -2592,6 +2618,8 @@ function stateOf(selector: string): string {
   if (selector.includes(":active")) return "pressed";
   if (selector.includes(":visited")) return "visited";
   if (selector.includes('[aria-invalid="true"]')) return "invalid";
+  if (selector.includes('[data-status="warning"]')) return "warning";
+  if (selector.includes('[data-status="success"]')) return "success";
   if (selector.includes("[readonly]")) return "readonly";
   return "rest";
 }
@@ -2645,6 +2673,9 @@ export function stylesheetInventory(moduleText: string): ParityItem {
       for (const [, name = "", value = ""] of compound.matchAll(
         /\[data-([a-z0-9-]+)="([^"]*)"\]/g,
       )) {
+        // Spec 029 ②b-1b M-2: data-status is the field's state (read above), message-position
+        // places the message (no axis of the Skemo, no look of its own): neither is a keyed prop.
+        if (name === "status" || name === "message-position") continue;
         const values = props.get(name) ?? [];
         if (!values.includes(value)) values.push(value);
         props.set(name, values);

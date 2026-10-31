@@ -310,7 +310,7 @@ describe("Web Component Celo for the sxaltilo (Spec 010 ①)", () => {
   it("renders a button with role switch as the track, the knob in it and the label beside it", () => {
     const templates = [...sxaltiloElement.matchAll(/`(<[^`]*)`/g)].map((m) => m[1] ?? "");
     expect(templates.flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]))).toEqual(
-      ["field", "control", "indicator", "label", "spinner"],
+      ["field", "control", "indicator", "label", "spinner", "message"],
     );
     expect(sxaltiloElement).toContain('role="switch"');
     expect(sxaltiloElement).toContain('aria-labelledby="label"');
@@ -347,7 +347,14 @@ describe("Web Component Celo for the sxaltilo (Spec 010 ①)", () => {
       checked: ["boolean"],
       size: ["small", "medium", "large"],
     });
-    expect([...inventory.states].sort()).toEqual(["disabled", "focus", "hover", "rest"]);
+    expect([...inventory.states].sort()).toEqual([
+      "disabled",
+      "focus",
+      "hover",
+      "rest",
+      "success",
+      "warning",
+    ]);
   });
 });
 
@@ -382,6 +389,7 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
       // Abnahme #122 (decision 30.10.): the spinner directly after the text, in the label.
       "spinner",
       "error",
+      "message",
     ]);
     expect(markobutonoElement).toContain('role="checkbox"');
     expect(markobutonoElement).toContain('aria-labelledby="label"');
@@ -395,7 +403,8 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
     for (const template of templates(markobutonoElement)) {
       expect(template).not.toMatch(/>[^<\s$][^<]*</);
     }
-    // The switch is unchanged: no mark, no error, no sign in its knob (① D-09).
+    // The switch is unchanged: no mark, no error, no sign in its knob (① D-09); ②b-1b M-2 gives it
+    // the message of its status.
     expect(parts(sxaltiloElement)).toEqual([
       "field",
       "control",
@@ -403,6 +412,7 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
       "label",
       // Abnahme #122: the spinner at the end of the field, after the label.
       "spinner",
+      "message",
     ]);
     expect(sxaltiloElement).toContain('role="switch"');
   });
@@ -465,7 +475,15 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
       checked: ["boolean"],
       size: ["small", "medium", "large"],
     });
-    expect([...inventory.states].sort()).toEqual(["disabled", "focus", "hover", "invalid", "rest"]);
+    expect([...inventory.states].sort()).toEqual([
+      "disabled",
+      "focus",
+      "hover",
+      "invalid",
+      "rest",
+      "success",
+      "warning",
+    ]);
   });
 });
 
@@ -497,6 +515,7 @@ describe("Web Component Celo for the elekto (Spec 010 ③)", () => {
       "options",
       "help",
       "error",
+      "message",
       "option",
       "control",
       "indicator",
@@ -523,6 +542,7 @@ describe("Web Component Celo for the elekto (Spec 010 ③)", () => {
       // Abnahme #122 (decision 30.10.): the spinner directly after the text, in the label.
       "spinner",
       "error",
+      "message",
     ]);
     expect(markobutonoElement).not.toContain("slotAssignment");
   });
@@ -582,7 +602,15 @@ describe("Web Component Celo for the elekto (Spec 010 ③)", () => {
   it("states size as its only styled prop and the five states in the stylesheet inventory (parity)", () => {
     const inventory = stylesheetInventory(elektoStyles);
     expect(inventory.props).toEqual({ size: ["small", "medium", "large"] });
-    expect([...inventory.states].sort()).toEqual(["disabled", "focus", "hover", "invalid", "rest"]);
+    expect([...inventory.states].sort()).toEqual([
+      "disabled",
+      "focus",
+      "hover",
+      "invalid",
+      "rest",
+      "success",
+      "warning",
+    ]);
   });
 });
 
@@ -621,6 +649,7 @@ describe("Web Component Celo for the elektilo (Spec 010 ④)", () => {
       "indicator",
       "help",
       "error",
+      "message",
     ]);
     expect(elektiloElement).toContain('<select part="control" id="control"></select>');
     expect(elektiloElement).toContain('<label part="label" for="control">');
@@ -649,9 +678,11 @@ describe("Web Component Celo for the elektilo (Spec 010 ④)", () => {
       "row",
       "control",
       "end",
+      "status-icon",
       "spinner",
       "help",
       "error",
+      "message",
       "decrement",
       "increment",
       "clear",
@@ -727,7 +758,15 @@ describe("Web Component Celo for the elektilo (Spec 010 ④)", () => {
   it("states size as its only styled prop and the five states in the stylesheet inventory (parity)", () => {
     const inventory = stylesheetInventory(elektiloStyles);
     expect(inventory.props).toEqual({ size: ["small", "medium", "large"] });
-    expect([...inventory.states].sort()).toEqual(["disabled", "focus", "hover", "invalid", "rest"]);
+    expect([...inventory.states].sort()).toEqual([
+      "disabled",
+      "focus",
+      "hover",
+      "invalid",
+      "rest",
+      "success",
+      "warning",
+    ]);
   });
 });
 
@@ -828,6 +867,7 @@ describe("Web Component Celo for the tekstareo (Spec 011 ②)", () => {
       "spinner",
       "help",
       "error",
+      "message",
     ]);
     expect(element).toContain('<textarea part="control" id="control"></textarea>');
     expect(element).toContain('<label part="label" for="control">');
@@ -865,7 +905,15 @@ describe("Web Component Celo for the tekstareo (Spec 011 ②)", () => {
   it("states kind and size and the five states in the stylesheet inventory (parity)", () => {
     const inventory = stylesheetInventory(styles);
     expect(inventory.props).toEqual({ kind: ["text", "code"], size: ["small", "medium", "large"] });
-    expect([...inventory.states].sort()).toEqual(["disabled", "focus", "hover", "invalid", "rest"]);
+    expect([...inventory.states].sort()).toEqual([
+      "disabled",
+      "focus",
+      "hover",
+      "invalid",
+      "rest",
+      "success",
+      "warning",
+    ]);
   });
 });
 
@@ -1975,7 +2023,7 @@ describe("Web Component Celo for the alsxutilo (Spec 015 ②)", () => {
     const inventory = stylesheetInventory(files["eroj/src/generated/alsxutilo.styles.ts"] ?? "");
     expect(inventory.props).toEqual({ dropzone: ["boolean"] });
     expect([...inventory.states].sort()).toEqual(
-      ["disabled", "dragover", "focus", "hover", "invalid", "rest"].sort(),
+      ["disabled", "dragover", "focus", "hover", "invalid", "rest", "warning", "success"].sort(),
     );
   });
 });
@@ -2191,7 +2239,7 @@ describe("Web Component Celo for the glitilo (Spec 025 ①)", () => {
     const inventory = stylesheetInventory(files["eroj/src/generated/glitilo.styles.ts"] ?? "");
     expect(inventory.props).toEqual({ field: ["boolean"] });
     expect([...inventory.states].sort()).toEqual(
-      ["disabled", "focus", "hover", "invalid", "pressed", "rest"].sort(),
+      ["disabled", "focus", "hover", "invalid", "pressed", "rest", "warning", "success"].sort(),
     );
   });
 });
@@ -2204,9 +2252,11 @@ describe("Web Component Celo for the glitilo (Spec 025 ①)", () => {
 describe("Web Component Celo for the kampo of Spec 025 ① (time, stepper, clear)", () => {
   it("renders the stepper and the clear button as composed butono with their icons and words", () => {
     const element = files["eroj/src/generated/fm-kampo.ts"] ?? "";
-    // Abnahme #122: the end – spinner, then the buttons – lies inside the row, over the input.
+    // Abnahme #122: the end – spinner, then the buttons – lies inside the row, over the input;
+    // Spec 029 ②b-1b M-2 (A-kampo-4), Spec 035 2.1 (Skemo trailing): the status icon first in
+    // the end, before the spinner.
     expect(element).toContain(
-      '<div part="row"><input part="control" id="control"><span part="end"><span part="spinner" aria-hidden="true" hidden>',
+      '<div part="row"><input part="control" id="control"><span part="end"><span part="status-icon" aria-hidden="true" hidden><fm-ikono size="small"></fm-ikono></span><span part="spinner" aria-hidden="true" hidden>',
     );
     const kampoCss = JSON.parse(
       /export const KAMPO_CSS = (".*");/s.exec(
@@ -2368,7 +2418,7 @@ describe("Web Component Celo for the datelektilo (Spec 025 ②)", () => {
     const inventory = stylesheetInventory(files["eroj/src/generated/datelektilo.styles.ts"] ?? "");
     expect(inventory.props).toEqual({ expanded: ["boolean"] });
     expect([...inventory.states].sort()).toEqual(
-      ["disabled", "focus", "hover", "invalid", "readonly", "rest"].sort(),
+      ["disabled", "focus", "hover", "invalid", "readonly", "rest", "warning", "success"].sort(),
     );
   });
 });

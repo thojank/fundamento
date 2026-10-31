@@ -405,7 +405,7 @@ describe("every bound paint shows the plan's colour after the first and the seco
       // Spec 008: two sets; the ligilo has placement × size × state = 30 variants.
       components: [
         // Spec 015 ②: the alsxutilo has dropzone × state = 12 variants.
-        { set: "alsxutilo", created: 12, updated: 0 },
+        { set: "alsxutilo", created: 16, updated: 0 },
         // Spec 014 ②: the apartigilo has orientation = 2 variants in one state.
         { set: "apartigilo", created: 2, updated: 0 },
         // Spec 011 ④: the atributlisto has layout = 3 variants in one state (auto since Spec 014 ①).
@@ -416,31 +416,31 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "avizo", created: 4, updated: 0 },
         { set: "butono", created: 72, updated: 0 },
         // Spec 025 ②: the datelektilo, mode × expanded × state.
-        { set: "datelektilo", created: 24, updated: 0 },
+        { set: "datelektilo", created: 32, updated: 0 },
         // Spec 011 ②: the dialogo has size × reason = 6 variants in one state.
         { set: "dialogo", created: 6, updated: 0 },
         // Spec 010 ④: the elektilo has size × state = 15 variants.
-        { set: "elektilo", created: 15, updated: 0 },
-        // Spec 010 ③: the elekto has size × state = 15 variants.
-        { set: "elekto", created: 15, updated: 0 },
+        { set: "elektilo", created: 21, updated: 0 },
+        // Spec 010 ③: the elekto has size × state = 15 variants (②b-1b M-2: 21, warning and success).
+        { set: "elekto", created: 21, updated: 0 },
         // Spec 014 ⑤: the faldilo has open × state = 6 variants.
         // Spec 029 ②b-1 M-1: open × the four states, disabled among them.
         { set: "faldilo", created: 8, updated: 0 },
         // Spec 025 ①: the glitilo has range × field × state = 24 variants (range an axis of its own).
-        { set: "glitilo", created: 24, updated: 0 },
+        { set: "glitilo", created: 32, updated: 0 },
         // Spec 014 ②: the ikono has name × size × intent = 285 variants in one state (Spec 015
         // ②: seventeen names with upload; Spec 025 ①: nineteen with add and subtract).
         { set: "ikono", created: 315, updated: 0 },
         // Spec 011 ③: the insigno has intent × size = 10 variants in one state.
         { set: "insigno", created: 10, updated: 0 },
         // Spec 009: the kampo has size × state = 18 variants.
-        { set: "kampo", created: 18, updated: 0 },
+        { set: "kampo", created: 24, updated: 0 },
         // Spec 015 ③: the karto has orientation = 2 variants in one state (an axis of its own).
         { set: "karto", created: 2, updated: 0 },
         // Spec 020 ③: the kodbloko has state = 2 variants (copyable keys no part, no axis).
         { set: "kodbloko", created: 2, updated: 0 },
         // Spec 014 ⑤: the kompletigilo has size × expanded × state = 30 variants.
-        { set: "kompletigilo", created: 30, updated: 0 },
+        { set: "kompletigilo", created: 42, updated: 0 },
         // Spec 014 ④: the konsileto has placement = 4 variants in one state (an axis of its own).
         { set: "konsileto", created: 4, updated: 0 },
         // Spec 011 ⑤: the langetaro has state = 4 variants (active is the state of one tab, E7;
@@ -450,12 +450,12 @@ describe("every bound paint shows the plan's colour after the first and the seco
         // Spec 025 ③: the listelektilo and the plurelektilo have expanded × state = 12 variants,
         // the lokredaktilo editing × state = 12; the signeto mode × selected × size × intent ×
         // state, 160 after the constraint selected ⇒ mode selectable.
-        { set: "listelektilo", created: 12, updated: 0 },
+        { set: "listelektilo", created: 16, updated: 0 },
         { set: "lokredaktilo", created: 12, updated: 0 },
         // Spec 020 ③: the markdovido has one variant (source and start-level are no axes).
         { set: "markdovido", created: 1, updated: 0 },
         // Spec 010 ②: the markobutono has checked × size × state = 30 variants.
-        { set: "markobutono", created: 30, updated: 0 },
+        { set: "markobutono", created: 42, updated: 0 },
         // Spec 014 ④: the menuo has state = 4 variants (the states of an entry).
         { set: "menuo", created: 4, updated: 0 },
         // Spec 011 ④: the mezurilo has intent = 4 variants in one state (value, min, max are
@@ -468,19 +468,19 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "pagxigilo", created: 4, updated: 0 },
         // Spec 011 ③: the plenstato has kind = 2 variants in one state.
         { set: "plenstato", created: 2, updated: 0 },
-        { set: "plurelektilo", created: 12, updated: 0 },
+        { set: "plurelektilo", created: 16, updated: 0 },
         // Spec 014 ②: the saltligilo has state = 2 variants (rest and focus).
         { set: "saltligilo", created: 2, updated: 0 },
         { set: "signeto", created: 160, updated: 0 },
         { set: "spuro", created: 3, updated: 0 },
         // Spec 010 ①: the sxaltilo has checked × size × state = 24 variants.
-        { set: "sxaltilo", created: 24, updated: 0 },
+        { set: "sxaltilo", created: 36, updated: 0 },
         // Spec 014 ④: the sxvebilo has one variant (placement and open are no axes).
         { set: "sxvebilo", created: 1, updated: 0 },
         // Spec 011 ④: the tabelo has density × state = 6 variants (the states of the sort button).
         { set: "tabelo", created: 6, updated: 0 },
         // Spec 011 ②: the tekstareo has kind × size × state = 30 variants.
-        { set: "tekstareo", created: 30, updated: 0 },
+        { set: "tekstareo", created: 42, updated: 0 },
         // Spec 014 ③: the teksto has kind × size × emphasis = 15 variants, the titolo size = 7.
         { set: "teksto", created: 15, updated: 0 },
         { set: "titolo", created: 7, updated: 0 },

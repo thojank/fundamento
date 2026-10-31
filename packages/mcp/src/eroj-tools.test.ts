@@ -3,6 +3,7 @@
 
 import { checkUsage, getEro, listEroj, suggestEro } from "@fundamento/modelo";
 import { afterAll, describe, expect, it } from "vitest";
+import { compileToolSchemas } from "./schemas.js";
 import { call, closeClients, connect, EKZEMPLO_CONFIG, output } from "./test-doubles/client.js";
 
 afterAll(closeClients);
@@ -232,5 +233,27 @@ describe("check_usage (FR-13)", () => {
     });
     expect(result.isError).toBe(true);
     expect(result.structuredContent?.allowed).toEqual(["high", "medium", "low"]);
+  });
+});
+
+// Spec 035 2.2: the brief of every field, as the server answers it, names label="…" as shown and
+// passes the output schema of get_ero (the list of the ceiling above misses listelektilo and
+// plurelektilo; this test reads the fields from the Regulo field-label-visible).
+describe("get_ero brief: the visible label of the fields (Spec 035 2.2)", () => {
+  it("every field's brief names label with shown and passes the output schema", async () => {
+    const { client, served } = await connect({ config: EKZEMPLO_CONFIG });
+    const schema = compileToolSchemas().find((tool) => tool.name === "get_ero");
+    if (schema === undefined) throw new Error("get_ero schema missing");
+    const fields =
+      served.modelo.reguloj.find((regulo) => regulo.name === "field-label-visible")?.appliesTo
+        ?.eroj ?? [];
+    expect(fields).toHaveLength(12);
+    for (const name of fields) {
+      const answer = await output<{ props?: unknown[] }>(client, "get_ero", { name, brief: true });
+      expect(answer.props, name).toContainEqual({ name: "label", type: "string", shown: true });
+      expect(schema.output.validate(answer), JSON.stringify(schema.output.validate.errors)).toBe(
+        true,
+      );
+    }
   });
 });

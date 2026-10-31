@@ -218,8 +218,10 @@ test("the contrast table shows WCAG, APCA and the change against the comparison 
     // beside the declared ones (eroKontrastParojOf, 89 → 280 pairs), every one advisory where it
     // misses the APCA band (2646 → 8496; plan ①b, B-1b-1). Abnahme 28.10.: the medium button,
     // the avataro's initials and the unselected signeto take the Fonto's translucent fill (8 %),
-    // advisory beside text on it (8496 → 8550; every WCAG threshold holds).
-    "In den 72 Kombinationen des Vergleichsstands: 8550 gegen 1296 (Veränderung +7254)",
+    // advisory beside text on it (8496 → 8550; every WCAG threshold holds). Spec 029 ②b-1b M-2:
+    // the glitilo's label in the states warning and success on its track, the pair of rest again
+    // (8550 → 8586, advisory, 2 × 18 combinations).
+    "In den 72 Kombinationen des Vergleichsstands: 8586 gegen 1296 (Veränderung +7290)",
   );
 });
 
@@ -1973,6 +1975,18 @@ test("the clear buttons: with a value only, inside the field, axe-clean", async 
     }
   }
   expect(await axeViolations(page, "#fm-vitrino-loeschen")).toEqual([]);
+});
+
+// Spec 029 ②b-1b M-2: the section statuso – every field in warning, success and danger; the
+// kampo's message shows, its status icon too; axe without a finding.
+test("the status of the fields: messages and the kampo's sign, axe-clean", async ({ page }) => {
+  await open(page);
+  const section = page.locator("#fm-vitrino-statuso");
+  await expect(section.locator("tbody tr")).toHaveCount(12);
+  const kampo = section.locator('fm-kampo[intent="warning"]');
+  await expect(kampo.getByText("Bitte noch einmal prüfen")).toBeVisible();
+  await expect(kampo.locator('[part="status-icon"]')).toBeVisible();
+  expect(await axeViolations(page, "#fm-vitrino-statuso")).toEqual([]);
 });
 
 // The verdict of the derivation (#118), with the values measured in CI.

@@ -540,6 +540,10 @@
               },
               "type": {
                 "enum": ["string", "boolean", "number", "enum"]
+              },
+              "shown": {
+                "description": "The prop is shown where the slot of the same name would stand (Spec 029 ②b-1b, Nachlese 12): label=\"…\" at a field is its visible label. Absent where the prop is not shown (the label of an icon-only butono is a hidden name).",
+                "const": true
               }
             },
             "required": ["name", "type"],

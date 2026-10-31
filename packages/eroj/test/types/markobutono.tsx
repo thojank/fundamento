@@ -25,10 +25,8 @@ export const wrongSize = (
   <Markobutono size="huge">Newsletter</Markobutono>
 );
 
-export const noLabelProp = (
-  // @ts-expect-error the label is the children, never a prop (G1)
-  <Markobutono label="Newsletter">Newsletter</Markobutono>
-);
+// Spec 029 ②b-1b (Nachlese 12): the label is the children or the prop label – both are shown.
+export const labelProp = <Markobutono label="Newsletter" />;
 
 export const noIndeterminate = (
   // @ts-expect-error indeterminate is a boundary, not a prop (section 2)

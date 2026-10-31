@@ -19,7 +19,8 @@ const skemoOf = (ero: string) => {
 
 /** The parts at the end of each field, from the inside out. */
 const TRAILING: Readonly<Record<string, readonly string[]>> = {
-  kampo: ["spinner", "clear", "decrement", "increment"],
+  // Spec 035 2.1 (Nachtrag 30.10.): the status icon of M-2 first, before the spinner.
+  kampo: ["status-icon", "spinner", "clear", "decrement", "increment"],
   tekstareo: ["spinner"],
   elektilo: ["spinner", "clear", "indicator"],
   listelektilo: ["spinner", "clear", "indicator"],

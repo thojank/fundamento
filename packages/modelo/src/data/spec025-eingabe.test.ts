@@ -49,7 +49,15 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
       "autocomplete",
     ]);
     // Spec 029 ②b-1 M-5: loading after them, as every new prop.
-    expect(names.slice(12)).toEqual(["stepper", "step", "loading", "clearable"]);
+    expect(names.slice(12)).toEqual([
+      "stepper",
+      "step",
+      "loading",
+      "clearable",
+      "label",
+      "intent",
+      "message-position",
+    ]);
     expect(skemo.props.find((prop) => prop.name === "kind")?.values).toEqual([
       "text",
       "email",
@@ -66,7 +74,16 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
       default: false,
     });
     expect(skemo.props.find((prop) => prop.name === "step")).toMatchObject({ kind: "string" });
-    expect(skemo.states).toEqual(["rest", "hover", "focus", "disabled", "readonly", "invalid"]);
+    expect(skemo.states).toEqual([
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "readonly",
+      "invalid",
+      "warning",
+      "success",
+    ]);
   });
 
   it("keeps every part of 0.2.0 and adds decrement, increment and clear — composed butono in the field's size, no new token (E1)", () => {
@@ -84,7 +101,14 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
       "box",
       "motion",
     ]);
-    expect(parts.slice(11)).toEqual(["decrement", "increment", "clear", "spinner"]);
+    expect(parts.slice(11)).toEqual([
+      "decrement",
+      "increment",
+      "clear",
+      "spinner",
+      "message",
+      "status-icon",
+    ]);
     // Abnahme #122: inside the field's border, as large as an icon of the field's size, each a
     // target of at least size.target.min.
     const button = { size: { by: ["size"] }, width: { fixed: "size.target.min" } };
@@ -132,6 +156,9 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
       [{ stepper: "true" }, { kind: ["number"] }],
       [{ "prop:step": "filled" }, { kind: ["number"] }],
       [{ "slot:disabled-reason": "filled" }, { disabled: ["true"] }],
+      // Spec 029 ②b-1b M-2: the status of the field.
+      [{ "slot:message": "filled" }, { intent: ["success", "warning"] }],
+      [{ invalid: "true" }, { intent: ["neutral", "danger"] }],
     ]);
     expect(rulesOf(judge({ kind: "text", stepper: true }, {}))).toEqual([
       ["ero-prop-constraint", "error"],
@@ -200,7 +227,12 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
 
   it("the brief of the kampo stays under 750 with time, the stepper and the step", () => {
     const brief = briefOf(kampo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["kind", "size"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual([
+      "kind",
+      "size",
+      "intent",
+      "message-position",
+    ]);
     // Spec 029 ②b-1: stepper is a boolean, it stands in flags.
     expect(brief.flags).toContain("stepper");
     expect(brief.props?.map((prop) => prop.name)).toEqual(expect.arrayContaining(["step"]));

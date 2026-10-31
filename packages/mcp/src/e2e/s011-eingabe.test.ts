@@ -204,7 +204,12 @@ describe("list_eroj and the briefs (acceptance 1)", () => {
     // The served Modelo sorts keys (export, deterministic): actions before heading.
     expect(dialogo.required).toEqual({ props: [], slots: ["actions", "heading"] });
     const tekstareo = await output<Brief>(client, "get_ero", { name: "tekstareo", brief: true });
-    expect(tekstareo.axes.map((axis) => axis.name)).toEqual(["kind", "size"]);
+    expect(tekstareo.axes.map((axis) => axis.name)).toEqual([
+      "kind",
+      "size",
+      "intent",
+      "message-position",
+    ]);
     expect(tekstareo.required).toEqual({ props: [], slots: ["label"] });
   });
 });

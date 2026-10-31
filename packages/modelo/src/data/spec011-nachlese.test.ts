@@ -24,7 +24,7 @@ describe("O-3: the brief names boolean axes and the state of an entry", () => {
       expect(
         axes.map((axis) => axis.name),
         name,
-      ).toEqual(["checked", "size"]);
+      ).toEqual(["checked", "size", "intent", "message-position"]);
       expect(axes.find((axis) => axis.name === "checked")).toEqual({
         name: "checked",
         values: ["true", "false"],
@@ -37,9 +37,16 @@ describe("O-3: the brief names boolean axes and the state of an entry", () => {
     expect(briefOf(ero("elekto")).axes.map((axis) => axis.name)).toEqual([
       "size",
       "orientation",
+      "intent",
+      "message-position",
       "selected",
     ]);
-    expect(briefOf(ero("elektilo")).axes.map((axis) => axis.name)).toEqual(["size", "selected"]);
+    expect(briefOf(ero("elektilo")).axes.map((axis) => axis.name)).toEqual([
+      "size",
+      "intent",
+      "message-position",
+      "selected",
+    ]);
     for (const name of ["elekto", "elektilo"]) {
       expect(
         briefOf(ero(name)).axes.find((axis) => axis.name === "selected"),
@@ -53,7 +60,12 @@ describe("O-3: the brief names boolean axes and the state of an entry", () => {
   });
 
   it("a boolean that keys no part is no axis: required, invalid, disabled, readonly, loading, external", () => {
-    expect(briefOf(ero("kampo")).axes.map((axis) => axis.name)).toEqual(["kind", "size"]);
+    expect(briefOf(ero("kampo")).axes.map((axis) => axis.name)).toEqual([
+      "kind",
+      "size",
+      "intent",
+      "message-position",
+    ]);
     expect(briefOf(ero("butono")).axes.map((axis) => axis.name)).toEqual([
       "emphasis",
       "intent",

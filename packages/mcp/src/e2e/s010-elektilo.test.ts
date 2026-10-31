@@ -257,7 +257,12 @@ describe("list_eroj and the brief (acceptance 1, 7)", () => {
     expect(brief.purpose).toBe(elektilo.purpose);
     expect(brief.required).toEqual({ props: [], slots: ["label", "options"] });
     // Spec 011 ① (O-3): selected, the state of one option, is an axis of the brief too.
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "selected"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual([
+      "size",
+      "intent",
+      "message-position",
+      "selected",
+    ]);
     expect(brief.instead?.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["choose-few", "elekto"],
       // Spec 014 ⑤: covered by the kompletigilo.

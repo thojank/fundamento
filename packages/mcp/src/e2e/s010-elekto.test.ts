@@ -208,7 +208,13 @@ describe("list_eroj and the brief (acceptance 1)", () => {
     expect(brief.purpose).toBe(elekto.purpose);
     expect(brief.required).toEqual({ props: [], slots: ["label", "options"] });
     // Spec 011 ① (O-3): selected, the state of one option, is an axis of the brief too.
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "orientation", "selected"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual([
+      "size",
+      "orientation",
+      "intent",
+      "message-position",
+      "selected",
+    ]);
     expect(brief.instead?.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["choose-many", "elektilo"],
       ["yes-no", "markobutono"],

@@ -32,9 +32,10 @@ describe("Spec 029 ①: the structure of komuna 0.2 for the Agordilo", () => {
     // more fields (M-6, 4) are part of the structure; so is the faldilo's summary by state
     // (M-1: its colour at rest, hover, focus and disabled, its fill disabled); Abnahme #122: the
     // clear button as large as the field's icon, the steppers of a number at icon size, each a
-    // target of at least size.target.min (width).
+    // target of at least size.target.min (width); ②b-1b M-2: the states warning and success of the
+    // twelve fields, the message and the kampo's status icon.
     expect(structure.fingerprint).toBe(
-      "0b0d678759cbf48c86cd334a1a77d9e35b40aa260b5ba6725804f043c7eced34",
+      "21ffe38cbee4f4c8ae11bb38efc0aa3bdfd6401e2b64487531868935ce8f47fb",
     );
   });
 

@@ -20,7 +20,8 @@ import { defaultModeloSource } from "../load/source.js";
 import { validateModelo } from "../validate/validate-modelo.js";
 
 // Spec 025 ①: the step buttons and the clear button are the kampo's own (kind number, search).
-const KAMPO_OWN = ["decrement", "increment", "clear"];
+// Spec 029 ②b-1b M-2: the status icon is the kampo's own (A-kampo-4).
+const KAMPO_OWN = ["decrement", "increment", "clear", "status-icon"];
 
 const { modelo } = loadModelo(defaultModeloSource());
 if (modelo === undefined) throw new Error("the repo Modelo must load");
@@ -114,6 +115,11 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
         // Spec 011 ① (plan ① D-09): a chosen empty option, 'Alle', 'keine Auswahl', value "".
         ["empty-label", "string", undefined],
         ["clearable", "boolean", false],
+        // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
+        ["label", "string", undefined],
+        // Spec 029 ②b-1b M-2: the status of the field.
+        ["intent", ["neutral", "success", "warning", "danger"], "neutral"],
+        ["message-position", ["below", "joined"], "below"],
       ],
     );
     expect(skemo?.props.find((prop) => prop.name === "placeholder")?.description).toMatch(
@@ -122,7 +128,15 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
   });
 
   it("knows the states rest, hover, focus, disabled and invalid; open is no state, the list is the platform's (E3)", () => {
-    expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled", "invalid"]);
+    expect(skemo?.states).toEqual([
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "invalid",
+      "warning",
+      "success",
+    ]);
     for (const word of ["open", "opened", "expanded"]) {
       expect(skemo?.states).not.toContain(word);
       expect(skemo?.props.map((prop) => prop.name)).not.toContain(word);
@@ -142,6 +156,7 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       },
       { name: "help", text: true },
       { name: "error", text: true },
+      { name: "message", text: true, beside: true },
       // Spec 029 ②b-1 M-1: the reason for disabled.
       { name: "disabled-reason", text: true },
     ]);
@@ -199,14 +214,14 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
     if (skemo === undefined) throw new Error("elektilo missing");
     expect(variantKeys(skemo)).toEqual(["size", "state"]);
     expect(styledProps(skemo)).toEqual(["size"]);
-    expect(combinationsOf(skemo, variantKeys(skemo))).toHaveLength(15);
+    expect(combinationsOf(skemo, variantKeys(skemo))).toHaveLength(21);
   });
 
   it("speaks role combobox: name from the label, description from help and error, ArrowUp/Down, Enter, Escape, required like the kampo (G4)", () => {
     expect(skemo?.a11y).toEqual({
       role: "combobox",
-      name: ["slot:label"],
-      description: ["slot:help", "slot:error", "slot:disabled-reason"],
+      name: ["slot:label", "prop:label"],
+      description: ["slot:help", "slot:error", "slot:message", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],
         selected: ["aria-selected"],
@@ -237,7 +252,7 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
     // empty-label beside a placeholder).
     expect(skemo.constraints?.[0]).toEqual(kampo?.skemo.constraints?.[0]);
     // Spec 029 ②b-1 M-1: and a reason only with disabled.
-    expect(skemo.constraints).toHaveLength(3);
+    expect(skemo.constraints).toHaveLength(5);
     expect(
       slotStates(skemo, {
         ero: "elektilo",
@@ -250,6 +265,7 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       "slot:options": "filled",
       "slot:help": "empty",
       "slot:error": "empty",
+      "slot:message": "empty",
       "slot:disabled-reason": "empty",
     });
   });
@@ -280,6 +296,7 @@ describe("the Uzo of the elektilo (section 4, G5)", () => {
       options: { accepts: ["text"], required: true, min: 2, nesting: 0 },
       help: { accepts: ["text"], max: 1, nesting: 0 },
       error: { accepts: ["text"], max: 1, nesting: 0 },
+      message: { accepts: ["text"], max: 1, nesting: 0 },
     });
     expect(uzo?.layout).toEqual({ size: "container", wrap: "never" });
     expect(uzo?.layout).toEqual(kampo?.uzo?.layout);
@@ -362,7 +379,12 @@ describe("the Uzo of the elektilo (section 4, G5)", () => {
     if (elektilo === undefined) throw new Error("elektilo missing");
     const brief = briefOf(elektilo);
     // Spec 011 ① (O-3): selected, the state of one entry, is an axis of the brief too.
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "selected"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual([
+      "size",
+      "intent",
+      "message-position",
+      "selected",
+    ]);
     expect(brief.required).toEqual({ props: [], slots: ["label", "options"] });
     const { bytes, units } = briefUnits("elektilo");
     expect(units, `${bytes} bytes`).toBeLessThanOrEqual(750);

@@ -42,7 +42,9 @@ test.describe("Nachlese 7 ① (0.1.1)", () => {
       out,
       '<fm-dialogo id="d" open>Standard löschen?<span slot="message">Der Standard gilt danach nicht mehr im Projekt.</span><fm-butono slot="actions" emphasis="low">Abbrechen</fm-butono><fm-butono slot="actions" emphasis="high" intent="danger">Löschen</fm-butono></fm-dialogo>',
     );
-    const message = page.locator("#d").locator('[part="message"]');
+    // The dialogo's own paragraph (its reason field, a tekstareo, has a part message of its own
+    // since Spec 029 ②b-1b M-2).
+    const message = page.locator("#d").locator('p[part="message"]');
     await expect(message).toBeVisible();
     // The paragraph holds a slot: the words are the slotted span's, seen through the paragraph.
     const words = page.locator('#d [slot="message"]');

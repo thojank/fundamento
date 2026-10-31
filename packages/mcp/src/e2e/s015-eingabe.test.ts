@@ -113,7 +113,7 @@ describe("the input dialogs of the spec (Spec 015 ②)", () => {
     expect(listed.eroj).toHaveLength(40);
     expect(listed.eroj[0]?.name).toBe("alsxutilo");
     const brief = await output<Brief>(client, "get_ero", { name: "alsxutilo", brief: true });
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["dropzone"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["dropzone", "intent", "message-position"]);
     expect(brief.required).toEqual({ props: [], slots: ["label"] });
   });
 });

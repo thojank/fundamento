@@ -1177,3 +1177,18 @@ describe("the Vitrino shows the clear button of the fields (Abnahme #122)", () =
     }
   });
 });
+
+// Spec 029 ②b-1b M-2: the status of the fields, to be seen – every field with warning (below),
+// success (joined) and danger, in a section of its own.
+describe("the Vitrino shows every field in its status (Spec 029 ②b-1b M-2)", () => {
+  it("one row per field with message-position, in the section statuso", () => {
+    expect(html).toContain('id="fm-vitrino-statuso"');
+    const rows = [...(datumoj.statuso ?? "").matchAll(/<th scope="row">fm-([a-z]+)<\/th>/g)].map(
+      (match) => match[1],
+    );
+    expect(rows).toHaveLength(12);
+    expect(datumoj.statuso).toContain(
+      '<fm-kampo intent="success" message-position="joined">Beispiel<span slot="message">Bitte noch einmal prüfen</span></fm-kampo>',
+    );
+  });
+});

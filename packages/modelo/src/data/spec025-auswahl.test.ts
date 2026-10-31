@@ -226,8 +226,21 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       "expanded",
       "name",
       "clearable",
+      // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
+      "label",
+      "intent",
+      "message-position",
     ]);
-    expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled", "readonly", "invalid"]);
+    expect(skemo?.states).toEqual([
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "readonly",
+      "invalid",
+      "warning",
+      "success",
+    ]);
     expect(skemo?.slots).toEqual([
       { name: "label", default: true, text: true },
       {
@@ -237,6 +250,7 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       },
       { name: "help", text: true },
       { name: "error", text: true },
+      { name: "message", text: true, beside: true },
       // Spec 029 ②b-1 M-1: the reason for disabled.
       { name: "disabled-reason", text: true },
     ]);
@@ -263,6 +277,7 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       "motion",
       "spinner",
       "clear",
+      "message",
     ]);
     expect(skemo?.parts.item).toEqual({
       color: { by: ["selected"] },
@@ -290,8 +305,8 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
   it("speaks role combobox (select-only): the keys of APG with Home, End and Space; the chosen option is aria-selected; events change", () => {
     expect(skemo?.a11y).toEqual({
       role: "combobox",
-      name: ["slot:label"],
-      description: ["slot:help", "slot:error", "slot:disabled-reason"],
+      name: ["slot:label", "prop:label"],
+      description: ["slot:help", "slot:error", "slot:message", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],
         selected: ["aria-selected"],
@@ -360,9 +375,23 @@ describe("plurelektilo (D-16): several values from a long list, filterable, the 
       ["expanded", "boolean", false],
       ["name", "string", undefined],
       ["clearable", "boolean", true],
+      // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
+      ["label", "string", undefined],
+      // Spec 029 ②b-1b M-2: the status of the field.
+      ["intent", "enum", "neutral"],
+      ["message-position", "enum", "below"],
     ]);
     expect(skemo?.props.find((prop) => prop.name === "summary")?.values).toEqual(["count", "tags"]);
-    expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled", "readonly", "invalid"]);
+    expect(skemo?.states).toEqual([
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "readonly",
+      "invalid",
+      "warning",
+      "success",
+    ]);
     expect(skemo?.slots.find((slot) => slot.name === "options")?.entry).toEqual({
       key: "selected",
       equals: "values",
@@ -391,6 +420,7 @@ describe("plurelektilo (D-16): several values from a long list, filterable, the 
       "box",
       "motion",
       "spinner",
+      "message",
     ]);
     expect(skemo?.parts.check).toEqual({
       color: { by: ["selected"] },
@@ -409,8 +439,8 @@ describe("plurelektilo (D-16): several values from a long list, filterable, the 
   it("speaks role listbox (multiselectable): Space toggles, Enter and Escape close; the count of the chosen is said; the words of count, clear and the limit", () => {
     expect(skemo?.a11y).toEqual({
       role: "listbox",
-      name: ["slot:label"],
-      description: ["slot:help", "slot:error", "slot:disabled-reason"],
+      name: ["slot:label", "prop:label"],
+      description: ["slot:help", "slot:error", "slot:message", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],
         selected: ["aria-selected"],

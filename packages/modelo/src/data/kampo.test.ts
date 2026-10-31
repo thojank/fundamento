@@ -101,14 +101,31 @@ describe("kampo in the repo Modelo (T004)", () => {
       ["step", "string", undefined],
       ["loading", "boolean", false],
       ["clearable", "boolean", false],
+      // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
+      ["label", "string", undefined],
+      // Spec 029 ②b-1b M-2: the status of the field.
+      ["intent", ["neutral", "success", "warning", "danger"], "neutral"],
+      ["message-position", ["below", "joined"], "below"],
     ]);
-    expect(skemo.props.map((prop) => prop.name)).not.toContain("label");
+    // Spec 029 ②b-1b (Nachlese 12): label is a prop now, shown as the visible label.
+    expect(skemo.props.find((prop) => prop.name === "label")?.shown).toBe(true);
     expect(skemo.props.map((prop) => prop.name)).not.toContain("type");
-    expect(skemo.states).toEqual(["rest", "hover", "focus", "disabled", "readonly", "invalid"]);
+    expect(skemo.states).toEqual([
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "readonly",
+      "invalid",
+      "warning",
+      "success",
+    ]);
     expect(skemo.slots.map((slot) => [slot.name, slot.text])).toEqual([
       ["label", true],
       ["help", true],
       ["error", true],
+      // Spec 029 ②b-1b M-2: the message of a warning or a success.
+      ["message", true],
       // Spec 029 ②b-1 M-1: the reason for disabled.
       ["disabled-reason", true],
     ]);
@@ -130,7 +147,6 @@ describe("kampo in the repo Modelo (T004)", () => {
     expect(Object.keys(skemo.parts).sort()).toEqual([
       "border",
       "box",
-      // Spec 025 ①: the clear button of a search, the step buttons of a number (composed butono).
       "clear",
       "decrement",
       "error",
@@ -138,10 +154,12 @@ describe("kampo in the repo Modelo (T004)", () => {
       "help",
       "increment",
       "label",
+      "message",
       "motion",
       "placeholder",
       "required-mark",
       "spinner",
+      "status-icon",
       "surface",
       "text",
     ]);
@@ -164,13 +182,18 @@ describe("kampo in the repo Modelo (T004)", () => {
       "spacing.medium",
     );
     expect(boundToken(skemo, "box", "height", { size: "small" })?.token).toBe("size.control.small");
-    expect(combinationsOf(skemo, ["size", "state"])).toHaveLength(18);
+    expect(combinationsOf(skemo, ["size", "state"])).toHaveLength(24);
   });
 
   it("speaks role textbox: name from the label, description from help then error, the states, required in de and en (D-02)", () => {
     expect(skemo.a11y.role).toBe("textbox");
-    expect(skemo.a11y.name).toEqual(["slot:label"]);
-    expect(skemo.a11y.description).toEqual(["slot:help", "slot:error", "slot:disabled-reason"]);
+    expect(skemo.a11y.name).toEqual(["slot:label", "prop:label"]);
+    expect(skemo.a11y.description).toEqual([
+      "slot:help",
+      "slot:error",
+      "slot:message",
+      "slot:disabled-reason",
+    ]);
     expect(skemo.a11y.states).toEqual({
       loading: ["aria-busy"],
       required: ["aria-required"],
@@ -234,6 +257,7 @@ describe("kampo in the repo Modelo (T004)", () => {
       "slot:label": "filled",
       "slot:help": "empty",
       "slot:error": "filled",
+      "slot:message": "empty",
       "slot:disabled-reason": "empty",
     });
     const result = evaluateUsage(modelo, [
@@ -268,6 +292,7 @@ describe("the Uzo of the kampo (T004, A3)", () => {
       label: { accepts: ["text"], required: true, max: 1, nesting: 0 },
       help: { accepts: ["text"], max: 1, nesting: 0 },
       error: { accepts: ["text"], max: 1, nesting: 0 },
+      message: { accepts: ["text"], max: 1, nesting: 0 },
     });
     expect(uzo?.layout).toEqual({ size: "container", wrap: "never" });
     expect(uzo?.purpose).toBe(
@@ -622,7 +647,12 @@ describe("the kampo of Spec 011 ①: password, number and date", () => {
 
   it("the brief of the kampo stays under 750 with the three kinds and the three boundaries", () => {
     const brief = briefOf(kampo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["kind", "size"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual([
+      "kind",
+      "size",
+      "intent",
+      "message-position",
+    ]);
     expect(brief.boundary?.map((entry) => entry.case)).toContain("reveal-password");
     const bytes = Buffer.byteLength(JSON.stringify(brief), "utf8");
     expect(Math.ceil(bytes / 3), `${bytes} bytes`).toBeLessThanOrEqual(750);

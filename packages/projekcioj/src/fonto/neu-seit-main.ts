@@ -26,15 +26,31 @@ const SUMMARY = /^ero\.faldilo\.summary\.(color\.(hover|focus|disabled)|fill\.di
 const TARGET =
   /^ero\.(kampo\.(clear|decrement|increment)|elektilo\.clear|listelektilo\.clear|kompletigilo\.clear)\.width$/;
 
+/** The twelve fields of ②b-1 M-2 and M-5. */
+const FIELDS =
+  "(kampo|tekstareo|elektilo|listelektilo|plurelektilo|kompletigilo|datelektilo|glitilo|elekto|markobutono|sxaltilo|alsxutilo)";
+
+/**
+ * ②b-1b M-2: the status of the fields – every part keyed by the state in the states warning and
+ * success, the part message in every state, the kampo's status icon (A-kampo-4).
+ */
+const STATUS = new RegExp(
+  `^ero\\.${FIELDS}\\.([a-z-]+\\.)+(warning|success)$|^ero\\.${FIELDS}\\.message\\.|^ero\\.kampo\\.status\\.icon\\.`,
+);
+
 /** Whether a token was added after main's record. */
 export const addedSinceMain = (name: string): boolean =>
-  SPINNER.test(name) || CLEAR.test(name) || SUMMARY.test(name) || TARGET.test(name);
+  SPINNER.test(name) ||
+  CLEAR.test(name) ||
+  SUMMARY.test(name) ||
+  TARGET.test(name) ||
+  STATUS.test(name);
 
 /**
  * How many tokens ②b added so far (M-5: 12 fields × 3; M-6 with Abnahme #122: 11; M-1: 4; the
- * targets of Abnahme #122: 6).
+ * targets of Abnahme #122: 6; M-2: 216).
  */
-export const ADDED_SINCE_MAIN = 57;
+export const ADDED_SINCE_MAIN = 273;
 
 /** ②b-1 M-1: tokens main had under another name; each keeps main's value. */
 const MOVED: Readonly<Record<string, string>> = {

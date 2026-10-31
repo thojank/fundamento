@@ -141,7 +141,7 @@ export interface GetEroBrief {
    * may set beyond the axes — loading at the kompletigilo, min-chars, value. Absent when every
    * prop is an axis.
    */
-  props?: { name: string; type: SkemoProp["kind"] }[];
+  props?: { name: string; type: SkemoProp["kind"]; shown?: true }[];
   /**
    * Every boolean prop that is no axis, by name, in Skemo order (Spec 029 ②b-1, Maintainer 29.10.):
    * the brief stays under its ceiling of 750 as the fields gain loading, clearable and status.
@@ -466,7 +466,13 @@ export function briefOf(entry: LoadedEro): GetEroBrief {
   const axisNames = new Set(brief.axes.map((axis) => axis.name));
   const props = skemo.props
     .filter((prop) => !axisNames.has(prop.name) && prop.kind !== "boolean")
-    .map((prop) => ({ name: prop.name, type: prop.kind }));
+    // Spec 029 ②b-1b (Nachlese 12): a prop the Ero shows says so – label="…" at a field is its
+    // visible label, the butono's label a hidden name.
+    .map((prop) => ({
+      name: prop.name,
+      type: prop.kind,
+      ...(prop.shown === true ? { shown: true as const } : {}),
+    }));
   if (props.length > 0) brief.props = props;
   // Spec 029 ②b-1 (Maintainer 29.10.): a boolean is its name alone.
   const flags = skemo.props

@@ -28,10 +28,8 @@ export const wrongKind = (
   <Tekstareo kind="rich">Begründung</Tekstareo>
 );
 
-export const noLabelProp = (
-  // @ts-expect-error the label is the children, never a prop (G1)
-  <Tekstareo label="Begründung">Begründung</Tekstareo>
-);
+// Spec 029 ②b-1b (Nachlese 12): the label is the children or the prop label – both are shown.
+export const labelProp = <Tekstareo label="Begründung" />;
 
 export const rowsIsANumber = (
   // @ts-expect-error rows is a number

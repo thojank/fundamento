@@ -1175,10 +1175,20 @@ export interface FigmaComponentSet {
    */
   spinnerAfter?: string;
   /**
+   * The parts at the end of a field, from the inside out (the Skemo's trailing; Abnahme #122,
+   * Spec 035 2.1): the plugin puts them in its control in this order, after the text.
+   */
+  trailing?: readonly string[];
+  /**
    * The variable the glyph of a field's clear button is filled with (Spec 029 ②b-1 M-6): the label
    * colour of the butono of emphasis low the web composes.
    */
   clearColor?: string;
+  /**
+   * Spec 029 ②b-1b M-2 (A-kampo-4): the field keeps the room of its status icon in every variant
+   * (the variants of a row stay one size); the sign shows where the variant has a status (icons).
+   */
+  statusIcon?: true;
   /**
    * The axes of the variants that are no axes of the Skemo's parts (Spec 014 ②, plan ② D-08): the
    * name of an icon — one variant per name of the Ikonaro, drawn in its own column, while the
@@ -1528,6 +1538,11 @@ export interface FigmaComponentSet {
    * per combination cannot be the default of 72 templates. Every instance may override it.
    */
   label?: { property: string; defaultValue: string };
+  /**
+   * Spec 029 ②b-1b (Nachlese 12): the string props the Ero shows in the slot of the same name
+   * (`shown`, the label of a field); in Figma that slot's TEXT property is the prop, no second one.
+   */
+  shown?: string[];
   /**
    * Every font the set can need, over **all** combinations, with the Aspektoj that ask for it
    * (F30). A binding to a font variable only holds once every value the variable takes is loaded,
@@ -2630,6 +2645,28 @@ function withClear(
   return clearsInField(skemo) ? { ...(icons ?? {}), clear: "close" } : icons;
 }
 
+/** Spec 029 ②b-1b M-2 (A-kampo-4): the Ikonaro's sign of each status a field can show. */
+const STATUS_SIGNS: Readonly<Record<string, string>> = {
+  invalid: "danger",
+  warning: "warning",
+  success: "success",
+};
+
+/**
+ * Spec 029 ②b-1b M-2 (A-kampo-4): a field with the part status-icon shows the sign of its status
+ * at the end of its control – danger where invalid, warning, success – and none in any other state.
+ */
+function withStatus(
+  skemo: LoadedEro["skemo"],
+  icons: Record<string, string> | undefined,
+  combination: Readonly<Record<string, string>>,
+): Record<string, string> | undefined {
+  const sign = STATUS_SIGNS[combination.state ?? ""];
+  return skemo.parts["status-icon"] !== undefined && sign !== undefined
+    ? { ...(icons ?? {}), "status-icon": sign }
+    : icons;
+}
+
 /**
  * The colour of the clear button's icon (Spec 029 ②b-1 M-6): the web composes a butono of
  * emphasis low, so its glyph takes that butono's label colour at rest.
@@ -2657,6 +2694,9 @@ function componentSetOf(
         };
   const properties: FigmaComponentSet["properties"] = {};
   for (const prop of skemo.props) {
+    // Spec 029 ②b-1b (Nachlese 12): a shown prop is the slot's text in Figma (the TEXT property
+    // label the set already has), no second property.
+    if (prop.shown === true) continue;
     if (prop.kind === "enum") properties[prop.name] = [...(prop.values ?? [])];
     else if (prop.kind === "boolean") properties[prop.name] = "BOOLEAN";
     else if (prop.kind === "number") properties[prop.name] = "NUMBER";
@@ -3038,7 +3078,11 @@ function componentSetOf(
     const [onlyCase] = [...cases];
     const textCase = cases.size <= 1 ? (onlyCase ?? "ORIGINAL") : TEXT_CASE_VARIES;
     const shadow = shadowOf(combination);
-    const icons = withClear(skemo, iconsOf(skemo, structure, combination));
+    const icons = withStatus(
+      skemo,
+      withClear(skemo, iconsOf(skemo, structure, combination)),
+      combination,
+    );
     return {
       props: { ...combination },
       ...(icons === undefined ? {} : { icons }),
@@ -3567,7 +3611,9 @@ function componentSetOf(
     ...(sign === undefined ? {} : { sign }),
     ...(skemo.parts.spinner === undefined ? {} : { spinner: STATE_SIGN }),
     ...(skemo.trailingAfter === undefined ? {} : { spinnerAfter: skemo.trailingAfter }),
+    ...(skemo.trailing === undefined ? {} : { trailing: [...skemo.trailing] }),
     ...(clearsInField(skemo) ? { clearColor: variableName(CLEAR_ICON_COLOR) } : {}),
+    ...(skemo.parts["status-icon"] === undefined ? {} : { statusIcon: true as const }),
     ...(options === undefined ? {} : { entry: options }),
     ...(example === undefined ? {} : { example }),
     ...(examples === undefined ? {} : { examples }),
@@ -3582,6 +3628,9 @@ function componentSetOf(
     ...(uzo === undefined ? {} : { uzo }),
     // Spec 027 B-1: an Ero that takes the width of its container (Uzo layout size container).
     ...(entry.uzo?.layout?.size === "container" ? { stretch: true } : {}),
+    ...(skemo.props.some((prop) => prop.shown === true)
+      ? { shown: skemo.props.filter((prop) => prop.shown === true).map((prop) => prop.name) }
+      : {}),
     properties,
     variants,
     pluginData: { fundamento: { ero: entry.ero.name, skemo: skemo.id, version } },
@@ -3915,6 +3964,9 @@ export function figmaPlanInventory(plan: unknown): Record<string, ParityItem> {
           values === "BOOLEAN" ? "boolean" : values === "NUMBER" ? "number" : "string",
         ];
     }
+    // Spec 029 ②b-1b (Nachlese 12): the TEXT property of the label slot declares the shown prop
+    // label too – one text in Figma, as the attribute and the slot are one label on the page.
+    for (const name of component.shown ?? []) props[name] ??= ["string"];
     const states = component.properties[STATE_KEY];
     // F8: the side states what the plugin applies — the paint with its deckkraft, or the marker
     // for a binding whose alpha is not the same in every mode.

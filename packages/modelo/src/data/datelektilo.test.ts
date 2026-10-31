@@ -73,6 +73,11 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       ["expanded", "boolean", false, false],
       ["name", "string", false, undefined],
       ["clearable", "boolean", false, false],
+      // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
+      ["label", "string", false, undefined],
+      // Spec 029 ②b-1b M-2: the status of the field.
+      ["intent", "enum", false, "neutral"],
+      ["message-position", "enum", false, "below"],
     ]);
     expect(skemo?.props.find((prop) => prop.name === "mode")?.values).toEqual(["single", "range"]);
     for (const prop of skemo?.props ?? []) {
@@ -80,7 +85,16 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       expect(prop.description).not.toMatch(/\bweekday\b.*\bprop\b/);
     }
     // The states of a field (as the kampo's); the cell's own looks are parts, not states (E2).
-    expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled", "readonly", "invalid"]);
+    expect(skemo?.states).toEqual([
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "readonly",
+      "invalid",
+      "warning",
+      "success",
+    ]);
     // expanded keys the calendar (none while closed); mode keys no part: an axis of the set alone.
     expect(variantKeys(skemoOrThrow())).toEqual(["expanded", "state"]);
   });
@@ -90,6 +104,7 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       { name: "label", default: true, text: true },
       { name: "help", text: true },
       { name: "error", text: true },
+      { name: "message", text: true, beside: true },
       // Spec 029 ②b-1 M-1: the reason for disabled.
       { name: "disabled-reason", text: true },
     ]);
@@ -122,6 +137,7 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       "motion",
       "spinner",
       "clear",
+      "message",
     ]);
     // Abnahme #122: the calendar inside the field, the target of a pointer (as komuna from the Fonto).
     expect(skemo?.parts.trigger).toEqual({ size: { fixed: "size.target.min" } });
@@ -221,8 +237,8 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
   it("speaks role textbox: name from the label, description from help then error, the states with expanded, the keys of the APG date picker dialog, the words of trigger, prev, next and the two messages (value-invalid, value-end-invalid) in de and en", () => {
     expect(skemo?.a11y).toEqual({
       role: "textbox",
-      name: ["slot:label"],
-      description: ["slot:help", "slot:error", "slot:disabled-reason"],
+      name: ["slot:label", "prop:label"],
+      description: ["slot:help", "slot:error", "slot:message", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],
         required: ["aria-required"],
@@ -279,6 +295,9 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       [{ "prop:value-start": "filled" }, { mode: ["range"] }],
       [{ "prop:value-end": "filled" }, { mode: ["range"] }],
       [{ "slot:disabled-reason": "filled" }, { disabled: ["true"] }],
+      // Spec 029 ②b-1b M-2: the status of the field.
+      [{ "slot:message": "filled" }, { intent: ["success", "warning"] }],
+      [{ invalid: "true" }, { intent: ["neutral", "danger"] }],
     ]);
     for (const constraint of skemo?.constraints ?? []) expect(constraint.kialo).toMatch(/because/);
   });
@@ -379,7 +398,12 @@ describe("the Uzo of the datelektilo (section ②, G2)", () => {
   it("the brief names mode and expanded as the axes and the label as the duty, lists disabled-dates among the props, and stays under 750", () => {
     if (datelektilo === undefined) throw new Error("missing");
     const brief = briefOf(datelektilo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["mode", "expanded"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual([
+      "mode",
+      "expanded",
+      "intent",
+      "message-position",
+    ]);
     expect(brief.props?.map((prop) => prop.name)).toContain("disabled-dates");
     expect(brief.required).toEqual({ props: [], slots: ["label"] });
     const bytes = Buffer.byteLength(JSON.stringify(brief), "utf8");

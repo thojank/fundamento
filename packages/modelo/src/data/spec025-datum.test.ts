@@ -42,6 +42,10 @@ describe("the kampo of Spec 025 ②: the date range goes to the datelektilo (Ark
       "step",
       "loading",
       "clearable",
+      // Spec 029 ②b-1b (Nachlese 12): the visible label as an attribute.
+      "label",
+      "intent",
+      "message-position",
     ]);
     expect(Object.keys(kampo.skemo.parts)).toContain("decrement");
     expect(kampo.skemo.props.find((prop) => prop.name === "kind")?.values).toContain("date");

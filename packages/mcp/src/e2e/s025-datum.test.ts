@@ -135,7 +135,12 @@ describe("the date dialogs of the spec (Spec 025 ②)", () => {
     expect(listed.eroj).toHaveLength(40);
     expect(listed.eroj.map((ero) => ero.name)).toContain("datelektilo");
     const brief = await output<Brief>(client, "get_ero", { name: "datelektilo", brief: true });
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["mode", "expanded"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual([
+      "mode",
+      "expanded",
+      "intent",
+      "message-position",
+    ]);
     expect(brief.props?.map((prop) => prop.name)).toContain("disabled-dates");
     expect(brief.required).toEqual({ props: [], slots: ["label"] });
     const full = await output<Full>(client, "get_ero", { name: "datelektilo" });

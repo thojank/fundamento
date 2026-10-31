@@ -321,8 +321,12 @@ export function hitsGoal(
 
 /** The visible text of an instance: the label slot, else the label prop (icon-only). */
 export function textOf(instance: EroInstance): string | undefined {
-  const text = instance.label ?? instance.props.label;
-  return typeof text === "string" && text.trim() !== "" ? text : undefined;
+  // Spec 035 2.2: an empty or blank text of the element leaves the label to the prop, as the
+  // element shows it (Spec 029 ②b-1b: the slot wins only while it holds text).
+  for (const text of [instance.label, instance.props.label]) {
+    if (typeof text === "string" && text.trim() !== "") return text;
+  }
+  return undefined;
 }
 
 /** The default source of a text rule: the label (Spec 007); Spec 009 adds `of`. */
@@ -1080,7 +1084,7 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
           instance: [index],
           message: `Instance ${index} of ${ero.ero.name} has no visible label${typeof instance.props.placeholder === "string" ? ` (only the placeholder "${instance.props.placeholder}")` : ""}.`,
           suggestion:
-            "Give the label as slot text; a placeholder disappears while typing and names nothing afterwards.",
+            'Give the label as the text of the element or as label="…" (both are shown, Nachlese 12); a placeholder disappears while typing and names nothing afterwards.',
         },
       ];
     }),
@@ -1097,7 +1101,7 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
             instance: [index],
             message: `Instance ${index} of ${ero.ero.name} has the placeholder "${placeholder}" and no label: the placeholder stands in for the label.`,
             suggestion:
-              "Give the label as slot text and keep the placeholder as an example of a value.",
+              'Give the label as the text of the element or as label="…" and keep the placeholder as an example of a value.',
           },
         ];
       }

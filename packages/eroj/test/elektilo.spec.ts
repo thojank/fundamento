@@ -60,6 +60,7 @@ test.describe("fm-elektilo behaviour", () => {
       "indicator",
       "help",
       "error",
+      "message",
     ]);
     // The chevron is a sign of the projection: hidden from assistive technology, no text.
     await expect(page.locator("#a").locator('[part="indicator"]')).toHaveAttribute(
