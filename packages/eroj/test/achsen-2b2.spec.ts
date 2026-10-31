@@ -153,3 +153,65 @@ test.describe("②b-2 A-sxaltilo-1: label-side", () => {
     expect(labelRight).toBe(true);
   });
 });
+
+test.describe("②b-2 A-kompletigilo-1: max-suggestions", () => {
+  test("shows at most max-suggestions matches and says how many it shows", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      `<fm-kompletigilo max-suggestions="2">Land${options("Albanien", "Andorra", "Armenien", "Aserbaidschan")}</fm-kompletigilo>`,
+    );
+    const input = page.locator("fm-kompletigilo").locator("input");
+    await input.fill("a");
+    const rows = page.locator("fm-kompletigilo").locator('[part="suggestion"]');
+    await expect(rows).toHaveCount(2);
+    await expect(page.locator("fm-kompletigilo").locator('[part="count"]')).toContainText("2");
+  });
+});
+
+test.describe("②b-2 A-alsxutilo-1: max-files", () => {
+  test("more files than max-files: the form is held with the Modelo's words, the error shows", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<form id="f"><fm-alsxutilo name="belege" multiple max-files="2">Belege</fm-alsxutilo></form>',
+    );
+    const input = page.locator("fm-alsxutilo").locator('input[type="file"]');
+    const file = (name: string) => ({ name, mimeType: "text/plain", buffer: Buffer.from(name) });
+    await input.setInputFiles([file("a.txt"), file("b.txt"), file("c.txt")]);
+    const valid = await page.evaluate(() =>
+      (document.querySelector("#f") as HTMLFormElement).checkValidity(),
+    );
+    expect(valid).toBe(false);
+    await expect(page.locator("fm-alsxutilo").locator('[part="error"]')).toContainText("2");
+    await input.setInputFiles([file("a.txt"), file("b.txt")]);
+    const fine = await page.evaluate(() =>
+      (document.querySelector("#f") as HTMLFormElement).checkValidity(),
+    );
+    expect(fine).toBe(true);
+  });
+});
+
+test.describe("②b-2 A-tekstareo-1: max-length with its count", () => {
+  test("the area takes at most max-length characters; the count says how many, and describes it", async ({
+    page,
+  }) => {
+    await serve(page, out, '<fm-tekstareo max-length="10" lang="de">Begründung</fm-tekstareo>');
+    const area = page.locator("fm-tekstareo").locator("textarea");
+    await area.fill("");
+    await area.pressSequentially("abcdefghijklmn");
+    await expect(area).toHaveValue("abcdefghij");
+    const count = page.locator("fm-tekstareo").locator('[part="count"]');
+    await expect(count).toBeVisible();
+    await expect(count).toContainText("10");
+    const described = await area.evaluate((element) => element.getAttribute("aria-describedby"));
+    expect(described ?? "").toContain("max-length");
+  });
+
+  test("without max-length no count is shown", async ({ page }) => {
+    await serve(page, out, "<fm-tekstareo>Begründung</fm-tekstareo>");
+    await expect(page.locator("fm-tekstareo").locator('[part="count"]')).toBeHidden();
+  });
+});

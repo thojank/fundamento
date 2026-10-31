@@ -189,3 +189,52 @@ describe("②b-2 A-sxaltilo-1: label-side", () => {
     expect(tokensOf(brief)).toBeLessThan(750);
   });
 });
+
+/**
+ * A-kompletigilo-1 (max-suggestions), A-alsxutilo-1 (max-files), A-tekstareo-1 (max-length with
+ * its count; the boundary character-count decided, ②a-3): numbers after every prop they had.
+ */
+const NUMBERS: Readonly<Record<string, string>> = {
+  kompletigilo: "max-suggestions",
+  alsxutilo: "max-files",
+  tekstareo: "max-length",
+};
+
+describe("②b-2 A-kompletigilo-1, A-alsxutilo-1, A-tekstareo-1: the numbers", () => {
+  it.each(Object.entries(NUMBERS))("%s: %s, a number and the last prop", (ero, name) => {
+    const { skemo } = entryOf(ero);
+    expect(skemo.props.at(-1)?.name).toBe(name);
+    expect(propOf(ero, name)).toMatchObject({ kind: "number" });
+    expect(briefOf(entryOf(ero)).props).toContainEqual({ name, type: "number" });
+    expect(tokensOf(briefOf(entryOf(ero)))).toBeLessThan(750);
+  });
+
+  it("alsxutilo: max-files only with multiple, and the Modelo's words for too many files", () => {
+    const { skemo } = entryOf("alsxutilo");
+    expect(skemo.constraints).toContainEqual(
+      expect.objectContaining({
+        when: { "prop:max-files": "filled" },
+        allowed: { multiple: ["true"] },
+      }),
+    );
+    const words = skemo.a11y.texts?.["max-files-invalid"];
+    expect(words?.de).toContain("{max-files}");
+    expect(words?.en).toContain("{max-files}");
+    const judged = evaluateUsage(modelo, [
+      { ero: "alsxutilo", props: { "max-files": 3 }, label: "Belege", lingvo: "de" },
+    ]);
+    expect(judged.violations.map((violation) => violation.issue.rule)).toContain(
+      "ero-prop-constraint",
+    );
+  });
+
+  it("tekstareo: max-length shows a count that describes the area; character-count is decided", () => {
+    const { skemo, uzo } = entryOf("tekstareo");
+    expect(skemo.parts.count).toBeDefined();
+    expect(skemo.a11y.description).toContain("prop:max-length");
+    const words = skemo.a11y.texts?.count;
+    expect(words?.de).toContain("{max-length}");
+    expect(words?.en).toContain("{max-length}");
+    expect(uzo?.boundary.map((boundary) => boundary.case)).not.toContain("character-count");
+  });
+});
