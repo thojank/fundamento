@@ -1,6 +1,6 @@
 // Spec 029 ① 5: the foundation pages of the Vitrino – Tokens, Farbe, Elevation, Form, Abstände,
 // Typografie, Bewegung, Icons – with texts of their own, the Lingvo-Schalter and the chosen brand.
-// Built here with all five brands (fundamento.cxiuj.config.json), as the maintainer opens it.
+// Built here with all six brands (fundamento.cxiuj.config.json), as the maintainer opens it.
 
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -92,6 +92,7 @@ describe("Spec 029 ① 5: the foundation pages", () => {
       "provo",
       "provo-kompakta",
       "komuna-0-2",
+      "dukolora",
     ]);
     expect(html).toMatch(/<input[^>]*type="search"[^>]*data-fm-bazoj-sercxo/);
   });

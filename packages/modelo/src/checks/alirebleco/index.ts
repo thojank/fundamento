@@ -36,11 +36,13 @@ export * from "./metrics.js";
  * `dist/checks/alirebleco`.
  */
 // Spec 029 ①: and komuna-0-2, komuna as it was before the Fonto — every check runs for every brand.
+// Spec 036, Befund 2.2 (V-2): and dukolora, the example of a brand with a Zweitfarbe.
 export const KNOWN_ASPEKTO_FIXTURES: readonly string[] = [
   "ekzemplo",
   "provo",
   "provo-kompakta",
   "komuna-0-2",
+  "dukolora",
 ];
 
 export function knownAspektoConfigs(): { name: string; configFile: string }[] {
