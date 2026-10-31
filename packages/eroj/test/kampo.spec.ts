@@ -66,6 +66,8 @@ test.describe("fm-kampo behaviour", () => {
       "row",
       "control",
       "end",
+      // Spec 036 Teil 5 ②b-2 (A-kampo-1): the unit of a number, innermost in the end.
+      "unit",
       "status-icon",
       "spinner",
       "help",

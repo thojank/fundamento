@@ -352,8 +352,11 @@ function fieldMarkup(
   // error says the status in words.
   void stepper;
   void suggest;
+  // Spec 036 Teil 5 ②b-2 (A-kampo-1): the unit of a number, the innermost part of the end – right
+  // after the value, inside the border; it describes the field (prop:unit).
+  const unit = trailing.includes("unit") ? '<span part="unit" id="unit" hidden></span>' : "";
   const end = endMarkup(
-    { "status-icon": statusIcon ? STATUS_ICON : "", spinner: SPINNER, trigger },
+    { unit, "status-icon": statusIcon ? STATUS_ICON : "", spinner: SPINNER, trigger },
     trailing,
   );
   const row = `<div part="row">${native}${end}</div>`;
@@ -1659,6 +1662,10 @@ ${
       // the field, each refusing at its bound; a search shows its clear button while it has a value.
       // A time (E6) is the platform's own input like a date: kind is its type, min and max its bounds.
       {
+        // Spec 036 Teil 5 ②b-2 (A-kampo-1): the unit's words; shown while given (prop:unit).
+        const unitPart = this.shadowRoot?.getElementById("unit");
+        const unitText = String(this.propValue("unit") ?? "");
+        if (unitPart instanceof HTMLElement && unitPart.textContent !== unitText) unitPart.textContent = unitText;
         const stepperOn = kind === "number" && this.propValue("stepper") === true;
         const searching = kind === "search";
         if (kind === "time") control.removeAttribute("inputmode");

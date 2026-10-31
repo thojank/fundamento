@@ -1,5 +1,5 @@
 {
-  "source": "packages/modelo/test/fixtures/valid/aspekto-provo/aspekto-provo auf main ac5deb3 (Spec 016, Agordilo Stufe 1); Prüfsummen nach O-1 (Spec 024, die Stufen 25, 150, 850, 975 der farbigen Paletten) neu gerechnet; nach Spec 025 ① (Glyphen add und subtract der Ikonaro) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (elekto, markobutono und sxaltilo ohne die Größe large) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (Zähler des tekstareo) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (drei Größen bei listelektilo, plurelektilo, datelektilo) neu gerechnet",
+  "source": "packages/modelo/test/fixtures/valid/aspekto-provo/aspekto-provo auf main ac5deb3 (Spec 016, Agordilo Stufe 1); Prüfsummen nach O-1 (Spec 024, die Stufen 25, 150, 850, 975 der farbigen Paletten) neu gerechnet; nach Spec 025 ① (Glyphen add und subtract der Ikonaro) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (elekto, markobutono und sxaltilo ohne die Größe large) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (Zähler des tekstareo) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (drei Größen bei listelektilo, plurelektilo, datelektilo) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (Einheit des kampo) neu gerechnet",
   "agordo": {
     "name": "provo",
     "owner": "Provo (fictitious, test only)",
@@ -28,7 +28,7 @@
   },
   "sha256": {
     "$themes.json": "32d20d206abf9b832c41c26c654fb33aef9694a5661ff89655091a4aae9931d3",
-    "aspekto.json": "a630c953c7ff37e87821e2a2b244a3d914dd7e67af1baed0ab93ca706c571352",
+    "aspekto.json": "1a98498768cb44403b10cc472b6c9c66a9e45244829eb248fb3cd889b09b0fb6",
     "ids.lock.json": "19279ae73d078332a67f90d7e401fa8878e9fc7794e8496809c133730e1e564e",
     "ikonoj/LICENSE": "ddbe6082ec3cf979db47e5af549d2849c5d6182b3e005ef91ce1dbb9eb122f11",
     "ikonoj/add.svg": "4baa2c668c8800442d47ab39d716e35142c125a9146efefa50f701e9622f2000",
@@ -55,6 +55,6 @@
     "raporto.json": "57935ec410a3ed16ca05a82de51869e8b86b03d7142c173c39d1eea172a59f93",
     "raporto.md": "c2bccbdc7ba7ad8170f2acda727f9b46b49a19b1243b1f7937446aaaacb34f2a",
     "sets/aspekto/provo+color-scheme/dark.json": "4e9efc4e7d34a6eaad46b1c022e18344e118f17b12935e0b93cd4497d8aa30ad",
-    "sets/aspekto/provo.json": "5b98a01894ad5aa52f94db8e14f060144b110a9bcb73ad7a40fa76ebd2ff8bed"
+    "sets/aspekto/provo.json": "6d64079a8dbe83481a5c87e757962c019bb7f9828f265a0ad30079ac9d04cea9"
   }
 }

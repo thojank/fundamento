@@ -5729,6 +5729,28 @@
             }
           }
         }
+      },
+      "unit": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "typography": {
+          "size": {
+            "small": {
+              "$type": "typography",
+              "$value": "{typography.body.2}"
+            },
+            "medium": {
+              "$type": "typography",
+              "$value": "{typography.body.1}"
+            },
+            "large": {
+              "$type": "typography",
+              "$value": "{typography.body.1}"
+            }
+          }
+        }
       }
     },
     "karto": {

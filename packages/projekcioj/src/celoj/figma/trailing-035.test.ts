@@ -78,8 +78,9 @@ function shown(sets: DoubleNode[], set: string, name: string) {
 }
 
 describe("Spec 035 2.1: the plan carries the Skemo's trailing", () => {
+  // Spec 036 Teil 5 ②b-2 (A-kampo-1): the unit of a number stands innermost, before the status icon.
   it("the kampo's trailing names the status icon first, before the spinner", () => {
-    expect(trailingOf("kampo")?.slice(0, 3)).toEqual(["status-icon", "spinner", "clear"]);
+    expect(trailingOf("kampo")?.slice(0, 4)).toEqual(["unit", "status-icon", "spinner", "clear"]);
   });
 
   it.each(CASES)("$set: the plan's component carries the Skemo's trailing", ({ set }) => {

@@ -79,8 +79,8 @@ describe("Spec 029 ① 5: the foundation pages", () => {
     // Spec 036 Befund 2.2: the Zweitfarbe, 12 steps and 5 roles (+17).
     // Spec 036 Teil 5 ②b-2: elekto, markobutono and sxaltilo lose their size large (−8); the count
     // of the tekstareo (A-tekstareo-1, +2); listelektilo, plurelektilo and datelektilo by size
-    // (A-*-2: 17 tokens become 51, +34).
-    expect(tokenoj.length).toBe(1928);
+    // (A-*-2: 17 tokens become 51, +34); the unit of the kampo (A-kampo-1, +4).
+    expect(tokenoj.length).toBe(1932);
     const levels = new Set(tokenoj.map((token) => token.ebeno));
     expect(levels).toEqual(new Set(["grundlage", "rolle", "ero"]));
     const text = tokenoj.find((token) => token.name === "color.text.default");

@@ -46,6 +46,8 @@ describe("the kampo of Spec 025 ②: the date range goes to the datelektilo (Ark
       "label",
       "intent",
       "message-position",
+      // Spec 036 Teil 5 ②b-2 (A-kampo-1).
+      "unit",
     ]);
     expect(Object.keys(kampo.skemo.parts)).toContain("decrement");
     expect(kampo.skemo.props.find((prop) => prop.name === "kind")?.values).toContain("date");

@@ -106,13 +106,14 @@ const CHANGED: Readonly<Record<string, string>> = {
  * MOVED_2B2).
  */
 const ACHSEN_2B2 =
-  /^ero\.tekstareo\.count\.(color|typography)$|^ero\.(listelektilo|plurelektilo|datelektilo)\.(label\.typography|text\.typography|box\.height|box\.inline\.padding|indicator\.size|clear\.size|trigger\.size)\.size\.(small|large)$/;
+  /^ero\.tekstareo\.count\.(color|typography)$|^ero\.kampo\.unit\.(color|typography\.size\.(small|medium|large))$|^ero\.(listelektilo|plurelektilo|datelektilo)\.(label\.typography|text\.typography|box\.height|box\.inline\.padding|indicator\.size|clear\.size|trigger\.size)\.size\.(small|large)$/;
 
 /**
  * How many tokens ②b-2 added, counted beside ADDED_SINCE_MAIN (A-tekstareo-1: 2; A-listelektilo-2:
- * 6 × 2, A-plurelektilo-2: 5 × 2, A-datelektilo-2: 6 × 2).
+ * 6 × 2, A-plurelektilo-2: 5 × 2, A-datelektilo-2: 6 × 2; A-kampo-1: the unit's colour and its
+ * typography by size, 4).
  */
-export const ADDED_BY_2B2 = 2 + 12 + 10 + 12;
+export const ADDED_BY_2B2 = 2 + 12 + 10 + 12 + 4;
 
 /**
  * The ✕ of listelektilo and datelektilo came after main (②b-1 M-6, CLEAR); ②b-2 keys it by size,

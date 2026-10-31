@@ -4585,9 +4585,9 @@
         "celo": "figma"
       },
       "decision": "approved",
-      "kialo": "Der Zähler des tekstareo (Teil count) zählt, was eine Person getippt hat: Das Feld im Komponentenset ist leer und zeigt den Platzhalter, also gibt es nichts zu zählen, und der Zähler hat in Figma keinen Knoten (FIGMA_NOT_DRAWN), wie die Farbe des getippten Textes (jug_01M4S2R85WRAC5SV7CARH8RE7S). Das Prop max-length steht als NUMBER-Eigenschaft im Set. Zeichnet das Plugin eines Tages ein gefülltes Feld, entfällt dieser Eintrag.",
+      "kialo": "Der Zähler des tekstareo (Teil count) zählt, was eine Person getippt hat, und die Einheit des kampo (Teil unit) steht hinter einer getippten Zahl: Das Feld im Komponentenset ist leer und zeigt den Platzhalter, also gibt es nichts zu zählen und keine Zahl, und beide Teile haben in Figma keinen Knoten (FIGMA_NOT_DRAWN), wie die Farbe des getippten Textes (jug_01M4S2R85WRAC5SV7CARH8RE7S). Die Props max-length und unit stehen als NUMBER- und TEXT-Eigenschaft im Set. Zeichnet das Plugin eines Tages ein gefülltes Feld, entfällt dieser Eintrag.",
       "date": "2026-10-31",
-      "context": "Spec 036 Teil 5 ②b-2 (Spec 029 abgleich.json A-tekstareo-1, Auflage ②a-3): max-length mit Zähler; check:parity meldet die Werte des Teils count als freigegeben (parity-part-not-drawn), keine Differenz. Von P0 angelegt, zur Bestätigung durch den Maintainer."
+      "context": "Spec 036 Teil 5 ②b-2 (Spec 029 abgleich.json A-tekstareo-1 mit Auflage ②a-3, A-kampo-1): max-length mit Zähler, unit der Zahl; check:parity meldet die Werte der Teile count und unit als freigegeben (parity-part-not-drawn), keine Differenz. Von P0 angelegt, zur Bestätigung durch den Maintainer."
     }
   ]
 }

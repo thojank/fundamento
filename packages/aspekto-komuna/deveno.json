@@ -9441,6 +9441,17 @@
       "maniero": "prenita"
     },
     {
+      "token": "ero.kampo.unit.typography.size.small",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/TextInput/TextInput.tsx",
+      "sxlosilo": "TextInput {\"size\":\"sm\"} rest, hell: [object Object] font-size, font-weight, line-height (gemessen)",
+      "fontoValoro": "14px 400 / 20.0004px",
+      "valoro": "{typography.body.1}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-kampo-1): wie ero.kampo.text.typography.size.small."
+    },
+    {
       "token": "ero.kampo.text.typography.size.medium",
       "aro": "core",
       "fonto": "astryx",
@@ -9451,6 +9462,17 @@
       "maniero": "prenita"
     },
     {
+      "token": "ero.kampo.unit.typography.size.medium",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/TextInput/TextInput.tsx",
+      "sxlosilo": "TextInput {\"size\":\"md\"} rest, hell: [object Object] font-size, font-weight, line-height (gemessen)",
+      "fontoValoro": "14px 400 / 20.0004px",
+      "valoro": "{typography.body.1}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-kampo-1): wie ero.kampo.text.typography.size.medium."
+    },
+    {
       "token": "ero.kampo.text.typography.size.large",
       "aro": "core",
       "fonto": "astryx",
@@ -9459,6 +9481,17 @@
       "fontoValoro": "14px 400 / 20.0004px",
       "valoro": "{typography.body.1}",
       "maniero": "prenita"
+    },
+    {
+      "token": "ero.kampo.unit.typography.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/TextInput/TextInput.tsx",
+      "sxlosilo": "TextInput {\"size\":\"lg\"} rest, hell: [object Object] font-size, font-weight, line-height (gemessen)",
+      "fontoValoro": "14px 400 / 20.0004px",
+      "valoro": "{typography.body.1}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-kampo-1): wie ero.kampo.text.typography.size.large."
     },
     {
       "token": "ero.kampo.help.color",
