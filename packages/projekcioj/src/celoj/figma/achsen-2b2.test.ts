@@ -29,3 +29,11 @@ describe("②b-2 A-elektilo-1, A-markobutono-1 in Figma: readonly a boolean, no 
     expect(set.variants.filter((variant) => variant.props.state === "readonly")).toEqual([]);
   });
 });
+
+describe("②b-2 A-sxaltilo-1 in Figma: label-side a property, no variant (layout, as orientation)", () => {
+  it("sxaltilo: label-side start | end among the properties; the variants stay checked × size × state", () => {
+    const set = setOf("sxaltilo");
+    expect(set.properties["label-side"]).toEqual(["start", "end"]);
+    expect(Object.keys(set.variants[0]?.props ?? {})).toEqual(["checked", "size", "state"]);
+  });
+});

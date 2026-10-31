@@ -152,3 +152,40 @@ describe("②b-2 A-elektilo-1, A-markobutono-1: readonly", () => {
     for (const ero of withReadonly) expect(propOf(ero, "readonly"), ero).toBeDefined();
   });
 });
+
+/** A-sxaltilo-1: the side of the label, `label-side` start | end, the last prop. */
+describe("②b-2 A-sxaltilo-1: label-side", () => {
+  it("sxaltilo: label-side start | end after every prop it had, default end", () => {
+    const { skemo } = entryOf("sxaltilo");
+    const names = skemo.props.map((prop) => prop.name);
+    expect(names.slice(0, -1)).toEqual([
+      "checked",
+      "size",
+      "disabled",
+      "loading",
+      "name",
+      "label",
+      "intent",
+      "message-position",
+    ]);
+    expect(propOf("sxaltilo", "label-side")).toMatchObject({
+      kind: "enum",
+      values: ["start", "end"],
+      default: "end",
+    });
+    // Layout, no token: it keys no part (as the orientation of the elekto).
+    expect(skemo.bindings.filter((binding) => binding.when?.["label-side"] !== undefined)).toEqual(
+      [],
+    );
+  });
+
+  it("sxaltilo: the brief names label-side as an axis, under 750", () => {
+    const brief = briefOf(entryOf("sxaltilo"));
+    expect(brief.axes).toContainEqual({
+      name: "label-side",
+      values: ["start", "end"],
+      default: "end",
+    });
+    expect(tokensOf(brief)).toBeLessThan(750);
+  });
+});
