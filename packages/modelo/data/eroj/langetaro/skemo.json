@@ -19,6 +19,17 @@
         "name": "selected",
         "kind": "string",
         "description": "The id of the chosen tab: the tab whose id is this value is the active one (SkemoSlot.entry active); without it the first tab. An application that keeps the tab in its route sets it itself."
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "default": "medium",
+        "description": "Spec 029 ②a (A-langetaro-2): three sizes, as the fields and buttons the tabs stand beside; medium as before. Every tab keeps the minimum target size (touch-target-min)."
       }
     ],
     "states": [
@@ -49,10 +60,14 @@
           ]
         },
         "height": {
-          "fixed": "size.target.min"
+          "by": [
+            "size"
+          ]
         },
         "inline-padding": {
-          "fixed": "spacing.medium"
+          "by": [
+            "size"
+          ]
         }
       },
       "tabs": {
@@ -62,7 +77,9 @@
           ]
         },
         "typography": {
-          "fixed": "typography.label.1"
+          "by": [
+            "size"
+          ]
         },
         "weight": {
           "by": [
@@ -191,6 +208,78 @@
           "active": "false"
         },
         "token": "none"
+      },
+      {
+        "part": "tab",
+        "property": "height",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.target.min"
+      },
+      {
+        "part": "tab",
+        "property": "height",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.target.min"
+      },
+      {
+        "part": "tab",
+        "property": "height",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.control.large"
+      },
+      {
+        "part": "tab",
+        "property": "inline-padding",
+        "when": {
+          "size": "small"
+        },
+        "token": "spacing.small"
+      },
+      {
+        "part": "tab",
+        "property": "inline-padding",
+        "when": {
+          "size": "medium"
+        },
+        "token": "spacing.medium"
+      },
+      {
+        "part": "tab",
+        "property": "inline-padding",
+        "when": {
+          "size": "large"
+        },
+        "token": "spacing.large"
+      },
+      {
+        "part": "tabs",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.label.2"
+      },
+      {
+        "part": "tabs",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "tabs",
+        "property": "typography",
+        "when": {
+          "size": "large"
+        },
+        "token": "typography.label.1"
       }
     ],
     "a11y": {

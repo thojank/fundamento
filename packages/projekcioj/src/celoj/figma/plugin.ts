@@ -5522,7 +5522,7 @@ async function applyComponents(variables, warnings) {
     // for the whole set, so its text is not connected to the label property; a connection an
     // earlier run made is taken off.
     const one = spec !== undefined && spec.oneInitial !== undefined &&
-      variant.props[spec.oneInitial.prop] === spec.oneInitial.value
+      spec.oneInitial.values.includes(variant.props[spec.oneInitial.prop] ?? "")
       ? spec.oneInitial.text
       : undefined;
     if (one !== undefined) {

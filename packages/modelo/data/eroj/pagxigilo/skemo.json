@@ -47,6 +47,16 @@
         "kind": "number",
         "default": 1,
         "description": "How many pages stand on either side of the current one before an ellipsis; the first and the last page always stand."
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium"
+        ],
+        "default": "medium",
+        "description": "Spec 029 ②a (A-pagxigilo-2): small below a dense table – smaller text, arrows and room in the item; medium as before. The item keeps the minimum target size (touch-target-min)."
       }
     ],
     "states": [
@@ -81,7 +91,9 @@
           ]
         },
         "typography": {
-          "fixed": "typography.label.1"
+          "by": [
+            "size"
+          ]
         },
         "weight": {
           "by": [
@@ -98,7 +110,9 @@
           "fixed": "radius.role.control"
         },
         "inline-padding": {
-          "fixed": "spacing.small"
+          "by": [
+            "size"
+          ]
         }
       },
       "border": {
@@ -116,7 +130,9 @@
           "fixed": "color.navigation.text.rest"
         },
         "typography": {
-          "fixed": "typography.label.1"
+          "by": [
+            "size"
+          ]
         },
         "width": {
           "fixed": "size.target.min"
@@ -124,12 +140,16 @@
       },
       "prev": {
         "size": {
-          "fixed": "size.icon.medium"
+          "by": [
+            "size"
+          ]
         }
       },
       "next": {
         "size": {
-          "fixed": "size.icon.medium"
+          "by": [
+            "size"
+          ]
         }
       },
       "box": {
@@ -325,6 +345,86 @@
           "current": "false"
         },
         "token": "none"
+      },
+      {
+        "part": "item",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.label.2"
+      },
+      {
+        "part": "item",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "item",
+        "property": "inline-padding",
+        "when": {
+          "size": "small"
+        },
+        "token": "spacing.xsmall"
+      },
+      {
+        "part": "item",
+        "property": "inline-padding",
+        "when": {
+          "size": "medium"
+        },
+        "token": "spacing.small"
+      },
+      {
+        "part": "ellipsis",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.label.2"
+      },
+      {
+        "part": "ellipsis",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "prev",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "prev",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "next",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "next",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
       }
     ],
     "a11y": {

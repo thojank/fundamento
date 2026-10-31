@@ -1379,12 +1379,13 @@ export interface FigmaComponentSet {
     fill: { binding: string; paint: FigmaPaint };
     color: { binding: string; paint: FigmaPaint };
     /**
-     * The smallest size shows one initial (Nachlese 5 N5-5, Spec 015 ③ O-18): the variants whose
-     * `prop` has `value` (the first of the size axis) write `text`, the first initial of the
-     * Vitrino's, unconnected to the label property — a text property holds one value for the
-     * whole set, and two initials stood over the circle of 20 px.
+     * The small sizes show one initial (Nachlese 5 N5-5, Spec 015 ③ O-18): the variants whose
+     * `prop` has one of `values` (the sizes before the default; Spec 036 Teil 5 ②b-2: x-small and
+     * small) write `text`, the first initial of the Vitrino's, unconnected to the label property —
+     * a text property holds one value for the whole set, and two initials stood over the circle
+     * of 20 px.
      */
-    oneInitial?: { prop: string; value: string; text: string };
+    oneInitial?: { prop: string; values: string[]; text: string };
   };
   card?: {
     width: number;
@@ -3521,9 +3522,14 @@ function componentSetOf(
   // An avatar (Spec 015 ③, plan ③ D-11): the Vitrino's silhouette on the stand-in's ground.
   const silhouette =
     structure === "avatar" ? avatarSilhouetteOf(VITRINO_AVATAR.picture) : undefined;
-  // Nachlese 5 N5-5 (O-18): the smallest size – the first value of the size axis – shows one
-  // initial, the first grapheme of the Vitrino's initials, as the web does.
-  const smallest = skemo.props.find((prop) => prop.name === AVATAR_SIZE_PROP)?.values?.[0];
+  // Nachlese 5 N5-5 (O-18): the small sizes – every value of the size axis before its default
+  // (Spec 036 Teil 5 ②b-2, A-avataro-2: x-small and small) – show one initial, the first grapheme
+  // of the Vitrino's initials, as the web does.
+  const sizeProp = skemo.props.find((prop) => prop.name === AVATAR_SIZE_PROP);
+  const smallSizes = (sizeProp?.values ?? []).slice(
+    0,
+    Math.max(0, (sizeProp?.values ?? []).indexOf(String(sizeProp?.default ?? ""))),
+  );
   const firstInitial = [
     ...new Intl.Segmenter("de", { granularity: "grapheme" }).segment(VITRINO_AVATAR.initials),
   ][0]?.segment;
@@ -3533,9 +3539,9 @@ function componentSetOf(
           picture: silhouette,
           fill: { binding: variableName(STAND_IN_FILL), paint: mediaFill },
           color: { binding: variableName(STAND_IN_COLOR), paint: mediaColor },
-          ...(smallest === undefined || firstInitial === undefined
+          ...(smallSizes.length === 0 || firstInitial === undefined
             ? {}
-            : { oneInitial: { prop: AVATAR_SIZE_PROP, value: smallest, text: firstInitial } }),
+            : { oneInitial: { prop: AVATAR_SIZE_PROP, values: smallSizes, text: firstInitial } }),
         }
       : undefined;
   return {

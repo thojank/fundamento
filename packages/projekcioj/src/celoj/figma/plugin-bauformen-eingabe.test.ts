@@ -521,7 +521,7 @@ describe("the dialogo is drawn as a dialog: surface with heading, message, reaso
     return { double, set, variant, report, dialogo };
   });
 
-  it("draws the six variants of size × reason, named by the plan, in one column", async () => {
+  it("draws the nine variants of size × reason, named by the plan, in one column", async () => {
     const { set, dialogo } = await drawn();
     expect(set?.children.map((child) => child.name)).toEqual([
       "size=small, reason=none, state=rest",
@@ -530,9 +530,13 @@ describe("the dialogo is drawn as a dialog: surface with heading, message, reaso
       "size=medium, reason=none, state=rest",
       "size=medium, reason=optional, state=rest",
       "size=medium, reason=required, state=rest",
+      // Spec 036 Teil 5 ②b-2 (A-dialogo-2): full, the whole viewport.
+      "size=full, reason=none, state=rest",
+      "size=full, reason=optional, state=rest",
+      "size=full, reason=required, state=rest",
     ]);
     expect(dialogo?.layout.columns).toBe(1);
-    expect(dialogo?.layout.rows).toBe(6);
+    expect(dialogo?.layout.rows).toBe(9);
   });
 
   it("stacks heading, message, content and actions in the surface, its width bound by size", async () => {
@@ -1108,7 +1112,8 @@ describe("the plugin draws the selection Eroj (Spec 025 ③)", () => {
       ]),
     );
     // 160, not 240 (plan ③ Abweichung 3): the constraint selected ⇒ mode selectable prunes the set.
-    expect(sets.signeto?.children).toHaveLength(160);
+    // Spec 036 Teil 5 ②b-2 (A-signeto-2): × three sizes instead of two – 240, not 360.
+    expect(sets.signeto?.children).toHaveLength(240);
     // Spec 036 Teil 5 ②b-2 (A-listelektilo-2, A-plurelektilo-2): three sizes each.
     expect(sets.listelektilo?.children).toHaveLength(3 * 16);
     expect(sets.plurelektilo?.children).toHaveLength(3 * 16);

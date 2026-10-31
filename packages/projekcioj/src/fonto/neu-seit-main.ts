@@ -75,7 +75,8 @@ const MOVED: Readonly<Record<string, string>> = {
 };
 
 /** The name a token had in main's record. */
-export const mainNameOf = (name: string): string => MOVED[name] ?? MOVED_2B2[name] ?? name;
+export const mainNameOf = (name: string): string =>
+  MOVED[name] ?? MOVED_2B2[name] ?? REST_2B2.moved[name] ?? name;
 
 /**
  * Abnahme #122 (Maintainer, 30.10.): tokens main had whose value changed on purpose – the
@@ -100,6 +101,45 @@ const CHANGED: Readonly<Record<string, string>> = {
 };
 
 /**
+ * Spec 036 Teil 5 ②b-2, the other Eroj (S36-4.2): per row group the tokens it added (`added`, a
+ * pattern and their number) and the tokens main had that a new axis keys now (`moved`: new name →
+ * main's name; each keeps main's value, the default value of the axis carries it).
+ */
+const REST_2B2 = (() => {
+  const groups: { pattern: string; added: number; moved: Record<string, string> }[] = [
+    // A-ikono-2 (x-small: 1), A-signeto-2 (large: 2), A-avataro-2 (x-small and x-large of the box
+    // and the initials: 4), A-pagxigilo-2 (small of five: 5), A-langetaro-2 (small and large of
+    // three: 6), A-dialogo-2 (full: the width and the radius; the radius of medium: 3).
+    {
+      pattern:
+        "^ero\\.ikono\\.box\\.size\\.size\\.x\\.small$|^ero\\.signeto\\.box\\.(height|inline\\.padding)\\.size\\.large$|^ero\\.avataro\\.(box\\.size|initials\\.typography)\\.size\\.x\\.(small|large)$|^ero\\.pagxigilo\\.(item\\.typography|item\\.inline\\.padding|ellipsis\\.typography|prev\\.size|next\\.size)\\.size\\.small$|^ero\\.langetaro\\.(tab\\.height|tab\\.inline\\.padding|tabs\\.typography)\\.size\\.(small|large)$|^ero\\.dialogo\\.surface\\.(width\\.size\\.full|radius\\.size\\.(medium|full))$",
+      added: 1 + 2 + 4 + 5 + 6 + 3,
+      moved: {
+        ...Object.fromEntries(
+          [
+            "pagxigilo.item.typography",
+            "pagxigilo.item.inline.padding",
+            "pagxigilo.ellipsis.typography",
+            "pagxigilo.prev.size",
+            "pagxigilo.next.size",
+            "langetaro.tab.height",
+            "langetaro.tab.inline.padding",
+            "langetaro.tabs.typography",
+          ].map((path) => [`ero.${path}.size.medium`, `ero.${path}`]),
+        ),
+        "ero.dialogo.surface.radius.size.small": "ero.dialogo.surface.radius",
+      },
+    },
+  ];
+  const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
+  return {
+    test: (name: string) => pattern.test(name),
+    added: groups.reduce((sum, group) => sum + group.added, 0),
+    moved: Object.assign({}, ...groups.map((group) => group.moved)) as Record<string, string>,
+  };
+})();
+
+/**
  * Spec 036 Teil 5 ②b-2 (Spec 029 abgleich.json, aspects "achsen" and "groessen"): the tokens of the
  * new axes and values – the count of the tekstareo (A-tekstareo-1); the sizes small and large of
  * listelektilo, plurelektilo and datelektilo (A-*-2; their size medium is the token main had, see
@@ -113,7 +153,7 @@ const ACHSEN_2B2 =
  * 6 × 2, A-plurelektilo-2: 5 × 2, A-datelektilo-2: 6 × 2; A-kampo-1: the unit's colour and its
  * typography by size, 4).
  */
-export const ADDED_BY_2B2 = 2 + 12 + 10 + 12 + 4;
+export const ADDED_BY_2B2 = 2 + 12 + 10 + 12 + 4 + REST_2B2.added;
 
 /**
  * The ✕ of listelektilo and datelektilo came after main (②b-1 M-6, CLEAR); ②b-2 keys it by size,
@@ -122,7 +162,8 @@ export const ADDED_BY_2B2 = 2 + 12 + 10 + 12 + 4;
 const CLEAR_2B2 = /^ero\.(listelektilo|datelektilo)\.clear\.size\.size\.medium$/;
 
 /** Whether a token was added by ②b-2 after main's record. */
-export const addedBy2b2 = (name: string): boolean => ACHSEN_2B2.test(name) || CLEAR_2B2.test(name);
+export const addedBy2b2 = (name: string): boolean =>
+  ACHSEN_2B2.test(name) || CLEAR_2B2.test(name) || REST_2B2.test(name);
 
 /**
  * ②b-2 (A-datelektilo-2): the calendar's size medium is the token whose value changed on purpose

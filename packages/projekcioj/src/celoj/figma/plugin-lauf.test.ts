@@ -1291,7 +1291,8 @@ describe("a failed run leaves everything readable in the console (F21)", () => {
           // four variants are made first; the run fails in the butono. Spec 015 ②: the
           // alsxutilo's twelve before them; Spec 015 ③: and the avataro's three.
           // Spec 027 B-6: the ikono's 315 variants are made first, so its icon slots hold them.
-          if (++made === 315 + 12 + 3 + 3 + 4 + 40)
+          // Spec 036 Teil 5 ②b-2: the ikono has 420 (A-ikono-2), the avataro five (A-avataro-2).
+          if (++made === 420 + 12 + 3 + 5 + 4 + 40)
             throw new Error("in set_layoutMode: Cannot delete occupied row/column.");
           return create();
         },

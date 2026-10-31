@@ -976,13 +976,17 @@ describe("Web Component Celo for the dialogo (Spec 011 ②)", () => {
 
   it("styles the surface from tokens: width by size, backdrop, shadow, radius and border; the reason only with a reason", () => {
     expect(css).toContain(
-      ':where([part="control"][data-size="small"]) {\n  inline-size: var(--fm-size-container-small);',
+      ':where([part="control"][data-size="small"]) {\n  border-radius: var(--fm-radius-role-surface);\n  inline-size: var(--fm-size-container-small);',
     );
     expect(css).toContain(
       ':where([part="control"])::backdrop {\n  background-color: var(--fm-color-backdrop);\n}',
     );
     expect(css).toContain("box-shadow: var(--fm-elevation-shadow-modal);");
+    // Spec 036 Teil 5 ②b-2 (A-dialogo-2): the radius by size, none for full.
     expect(css).toContain("border-radius: var(--fm-radius-role-surface);");
+    expect(css).toContain(
+      ':where([part="control"][data-size="full"]) {\n  border-radius: var(--fm-radius-none);\n  inline-size: var(--fm-size-container-max);',
+    );
     expect(css).toContain("border-color: var(--fm-color-border-default);");
     expect(css).toContain(
       ':where([part="control"]) [part="heading"] {\n  color: var(--fm-color-text-default);\n  font-family: var(--fm-typography-headline-4-font-family);',
@@ -1004,7 +1008,7 @@ describe("Web Component Celo for the dialogo (Spec 011 ②)", () => {
   it("states size and reason and the one state rest in the stylesheet inventory (parity)", () => {
     const inventory = stylesheetInventory(styles);
     expect(inventory.props).toEqual({
-      size: ["small", "medium"],
+      size: ["small", "medium", "full"],
       reason: ["none", "optional", "required"],
     });
     expect([...inventory.states]).toEqual(["rest"]);
@@ -1506,9 +1510,10 @@ describe("Web Component Celo for the langetaro (Spec 011 ⑤)", () => {
     expect(cssPhysicalPropertyIssues("langetaro.css", css)).toEqual([]);
   });
 
-  it("states no styled prop and the states rest, hover, focus and disabled in the stylesheet inventory (parity)", () => {
+  it("states size and the states rest, hover, focus and disabled in the stylesheet inventory (parity)", () => {
     const inventory = stylesheetInventory(styles);
-    expect(inventory.props).toEqual({});
+    // Spec 036 Teil 5 ②b-2 (A-langetaro-2): size keys the tabs.
+    expect(inventory.props).toEqual({ size: ["small", "medium", "large"] });
     expect([...inventory.states].sort()).toEqual(["disabled", "focus", "hover", "rest"]);
   });
 });
@@ -2167,7 +2172,7 @@ describe("Web Component Celo for the avataro (Spec 015 ③)", () => {
 
   it("the parity inventory names size and the one state rest", () => {
     const inventory = stylesheetInventory(files["eroj/src/generated/avataro.styles.ts"] ?? "");
-    expect(inventory.props).toEqual({ size: ["small", "medium", "large"] });
+    expect(inventory.props).toEqual({ size: ["x-small", "small", "medium", "large", "x-large"] });
     expect(inventory.states).toEqual(["rest"]);
   });
 });
@@ -2479,7 +2484,7 @@ describe("Web Component Celo for the selection Eroj (Spec 025 ③)", () => {
     const inventory = stylesheetInventory(files["eroj/src/generated/signeto.styles.ts"] ?? "");
     expect(inventory.props).toEqual({
       selected: ["boolean"],
-      size: ["small", "medium"],
+      size: ["small", "medium", "large"],
       intent: ["neutral", "info", "success", "warning", "danger"],
     });
   });

@@ -20,10 +20,11 @@
         "kind": "enum",
         "values": [
           "small",
-          "medium"
+          "medium",
+          "full"
         ],
         "default": "small",
-        "description": "The width of the surface on the scale of the containers (size.container.*): small for a question, medium for a form."
+        "description": "The width of the surface on the scale of the containers (size.container.*): small for a question, medium for a form. Spec 029 ②a (A-dialogo-2): full takes the whole viewport, for long forms and for the narrow screen; no free widths – the steps come from the container tokens."
       },
       {
         "name": "reason",
@@ -76,7 +77,9 @@
           "fixed": "color.background.raised"
         },
         "radius": {
-          "fixed": "radius.role.surface"
+          "by": [
+            "size"
+          ]
         },
         "width": {
           "by": [
@@ -155,6 +158,14 @@
         "token": "size.container.medium"
       },
       {
+        "part": "surface",
+        "property": "width",
+        "when": {
+          "size": "full"
+        },
+        "token": "size.container.max"
+      },
+      {
         "part": "reason",
         "property": "height",
         "when": {
@@ -177,6 +188,30 @@
           "reason": "required"
         },
         "token": "size.control.large"
+      },
+      {
+        "part": "surface",
+        "property": "radius",
+        "when": {
+          "size": "small"
+        },
+        "token": "radius.role.surface"
+      },
+      {
+        "part": "surface",
+        "property": "radius",
+        "when": {
+          "size": "medium"
+        },
+        "token": "radius.role.surface"
+      },
+      {
+        "part": "surface",
+        "property": "radius",
+        "when": {
+          "size": "full"
+        },
+        "token": "radius.none"
       }
     ],
     "a11y": {

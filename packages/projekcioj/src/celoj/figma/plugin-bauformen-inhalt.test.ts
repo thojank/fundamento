@@ -1458,21 +1458,22 @@ describe("the langetaro is drawn as tabs: the list with three tabs, the first ac
       double.figma,
     )) as Report;
     const set = pageNodes(double).find((child) => child.name === "langetaro");
-    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    // Spec 036 Teil 5 ②b-2 (A-langetaro-2): size × state; medium is what the tabs were.
+    const variant = (name: string) =>
+      set?.children.find((child) => child.name === name.replace(/^state=/, "size=medium, state="));
     const langetaro = report.components.find((component) => component.set === "langetaro");
     return { double, set, variant, report, langetaro };
   });
 
-  it("draws four variants by state: the list row with three entries and the panel below, each tab ring → gap → tab with its text", async () => {
+  it("draws twelve variants by size and state: the list row with three entries and the panel below, each tab ring → gap → tab with its text", async () => {
     const { set, variant, langetaro } = await drawn();
-    expect(set?.children.map((child) => child.name)).toEqual([
-      "state=rest",
-      "state=hover",
-      "state=focus",
-      "state=disabled",
-    ]);
+    expect(set?.children.map((child) => child.name)).toEqual(
+      ["small", "medium", "large"].flatMap((size) =>
+        ["rest", "hover", "focus", "disabled"].map((state) => `size=${size}, state=${state}`),
+      ),
+    );
     expect(langetaro?.layout.columns).toBe(4);
-    expect(langetaro?.layout.rows).toBe(1);
+    expect(langetaro?.layout.rows).toBe(3);
     const rest = variant("state=rest");
     expect(rest?.properties.layoutMode).toBe("VERTICAL");
     expect(rest?.children.map((child) => child.name)).toEqual(["control", "panel"]);
@@ -1643,11 +1644,12 @@ describe("icons are drawn from the glyphs of every Aspekto and switch with the b
     return { double, report, setOf };
   });
 
-  it("the set ikono: 315 variants, each the control with one glyph frame per Aspekto, visible by the brand variable, filled in the bound colour, sized by the token", async () => {
+  it("the set ikono: 420 variants, each the control with one glyph frame per Aspekto, visible by the brand variable, filled in the bound colour, sized by the token", async () => {
     const { setOf, report } = await drawn();
     const set = setOf("ikono");
-    // Spec 025 ①: nineteen names (add, subtract) × 3 sizes × 5 intents.
-    expect(set?.children).toHaveLength(315);
+    // Spec 025 ①: nineteen names (add, subtract) × 3 sizes × 5 intents; Spec 036 Teil 5 ②b-2
+    // (A-ikono-2): 21 names × 4 sizes × 5 intents.
+    expect(set?.children).toHaveLength(420);
     const variant = set?.children.find(
       (child) => child.name === "name=close, size=medium, intent=neutral, state=rest",
     );
@@ -2190,22 +2192,27 @@ describe("the plugin draws the avataro (Spec 015 ③)", () => {
     );
   type Definitions = Record<string, { type: string; defaultValue: string | boolean }>;
 
-  it("three sizes: the box, the initials circle with „EM“, the image circle with the silhouette; the image toggle; the example „mit Bild“ after the set", async () => {
+  it("five sizes: the box, the initials circle with „EM“, the image circle with the silhouette; the image toggle; the example „mit Bild“ after the set", async () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     const set = pageNodes(double).find((node) => node.name === "avataro");
+    // Spec 036 Teil 5 ②b-2 (A-avataro-2): five sizes.
     expect(set?.children.map((child) => child.name)).toEqual([
+      "size=x-small, state=rest",
       "size=small, state=rest",
       "size=medium, state=rest",
       "size=large, state=rest",
+      "size=x-large, state=rest",
     ]);
     const definitions = (set?.properties.componentPropertyDefinitions ?? {}) as Definitions;
     const image = Object.keys(definitions).find((key) => key.startsWith("image#"));
     expect(definitions[image ?? ""]).toEqual({ type: "BOOLEAN", defaultValue: false });
     const sizes: Record<string, string> = {
+      "x-small": "size/icon/small",
       small: "size/icon/medium",
       medium: "size/icon/large",
       large: "size/control/large",
+      "x-large": "size/scale/1000",
     };
     for (const variant of set?.children ?? []) {
       const size = sizes[variant.name.slice("size=".length, variant.name.indexOf(","))];
@@ -2221,7 +2228,8 @@ describe("the plugin draws the avataro (Spec 015 ③)", () => {
       const text = descendant(initials, "initials-text");
       // Nachlese 5 N5-5 (O-18): the smallest size shows one initial – „EM“ stood over the circle
       // of 20 px; the label property holds both, so the smallest size's text is not connected.
-      if (variant.name.startsWith("size=small")) {
+      // Spec 036 Teil 5 ②b-2 (A-avataro-2): the sizes before medium, x-small and small.
+      if (variant.name.startsWith("size=x-small") || variant.name.startsWith("size=small")) {
         expect(text?.properties.characters, variant.name).toBe("E");
         // Spec 027 B-4: its one initial is a TEXT property of its own, not the label.
         expect(text?.properties.componentPropertyReferences, variant.name).toEqual({
@@ -2234,10 +2242,15 @@ describe("the plugin draws the avataro (Spec 015 ③)", () => {
         });
       }
       expect(paintOf(text)).toBe("color/text/subtle");
+      const fontOf: Record<string, string> = {
+        "x-small": "typography/caption/font-size",
+        small: "typography/label/2/font-size",
+        medium: "typography/label/2/font-size",
+        large: "typography/label/1/font-size",
+        "x-large": "typography/headline/4/font-size",
+      };
       expect(bound(text, "fontSize")).toBe(
-        variant.name.startsWith("size=large")
-          ? "typography/label/1/font-size"
-          : "typography/label/2/font-size",
+        fontOf[variant.name.slice("size=".length, variant.name.indexOf(","))],
       );
       const picture = descendant(box, "image");
       expect(bound(picture, "cornerRadius")).toBe("radius/full");

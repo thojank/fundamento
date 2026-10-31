@@ -118,7 +118,9 @@ describe("Spec 029 ①b b): the Ero-Tokens of komuna after the Fonto", () => {
     expect(heading?.fontSize?.value).toBe(20);
     expect(heading?.fontWeight).toBe(600);
     expect(px(light, "ero.dialogo.box.inline.padding")).toBe(16);
-    expect(px(light, "ero.dialogo.surface.radius")).toBe(12);
+    // Spec 036 Teil 5 ②b-2 (A-dialogo-2): the radius by size; small and medium keep it.
+    expect(px(light, "ero.dialogo.surface.radius.size.small")).toBe(12);
+    expect(px(light, "ero.dialogo.surface.radius.size.medium")).toBe(12);
     expect(hex(light, "ero.dialogo.border.color")).toBe(hex(light, "ero.dialogo.surface.fill"));
   });
 

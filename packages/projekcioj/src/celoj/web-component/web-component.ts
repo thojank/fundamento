@@ -2046,6 +2046,11 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
   // a fixed rule (focus-visible: the ring and the focus colour) must still come after rest.
   const fixedRules = new Map<string, string[]>();
   const keyedRules = new Map<string, string[]>();
+  // Spec 036 Teil 5 ②b-2 (A-pagxigilo-2, A-langetaro-2): the weight of a part whose typography is
+  // keyed stands after it – both say font-weight with one specificity, and the weight (the current
+  // page, the active tab) must win over the role's own weight, as it did while the typography was
+  // fixed (fixed rules stand first).
+  const weightRules = new Map<string, string[]>();
   let rules = fixedRules;
   const add = (selector: string, lines: readonly string[]) => {
     if (lines.length === 0) return;
@@ -2121,9 +2126,12 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
       if (keys.length > 0) keyed.push({ part, property, keys });
     }
   }
+  const lateWeight = (part: string, property: string) =>
+    property === "weight" && keysOf(skemo, skemo.parts[part]?.typography).length > 0;
   for (const state of STATE_ORDER) {
     for (const { part, property, keys } of keyed) {
       if (!keys.includes(STATE_KEY) && state !== "rest") continue;
+      rules = lateWeight(part, property) ? weightRules : keyedRules;
       for (const combination of combinationsOf(skemo, keys)) {
         if (keys.includes(STATE_KEY) && combination[STATE_KEY] !== state) continue;
         const bound = boundToken(skemo, part, property, combination);
@@ -2141,6 +2149,7 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
       }
     }
   }
+  rules = keyedRules;
   // Spec 029 ①b (Abnahme 28.10., O-1b-4): a button without a word is its icon – square, the
   // height of its size on both sides (the same Ero-Token), without inline padding; last, so it
   // refines the padding of the size. Where an Ero sizes the part it composes (the trigger of the
@@ -2224,9 +2233,12 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
   }
   // The end of a field comes last (Abnahme #122): it refines the inline padding of the control.
   const placed = isBoxedField(skemo) ? endRules(skemo, owner) : [];
-  const tokenRules = [...fixedRules.entries(), ...keyedRules.entries(), ...placed].map(
-    ([selector, lines]) => `${selector} {\n${lines.map((line) => `  ${line}`).join("\n")}\n}`,
-  );
+  const tokenRules = [
+    ...fixedRules.entries(),
+    ...keyedRules.entries(),
+    ...weightRules.entries(),
+    ...placed,
+  ].map(([selector, lines]) => `${selector} {\n${lines.map((line) => `  ${line}`).join("\n")}\n}`);
   const undrawn = isStatus(skemo)
     ? statusUndrawn(skemo)
     : isMeter(skemo)
@@ -2651,11 +2663,12 @@ export function stylesheetInventory(moduleText: string): ParityItem {
     // A light-DOM host (Spec 011 ④, E10) writes the combination on itself: fm-tabelo[data-…].
     // An icon (Spec 014 ②): its glyph is its control; a heading (Spec 014 ③): its text.
     // A pagination (Spec 015 ①): the states stand on its items in the list (the navigado's own
-    // list carries only its orientation, no state and no prop of the Skemo's).
+    // list carries only its orientation, no state and no prop of the Skemo's). Spec 036 Teil 5
+    // ②b-2 (A-pagxigilo-2): the size of a pagination stands on its list, before its items.
     if (
       !selector.includes('[part="control"]') &&
       !selector.includes('[part="field"]') &&
-      !selector.includes('[part="list"] [part="item"]') &&
+      !/\[part="list"\](?:\[data-[a-z0-9-]+="[^"]*"\])* \[part="item"\]/.test(selector) &&
       !selector.includes('[part="glyph"]') &&
       !selector.includes('[part="text"]') &&
       !selector.trim().startsWith("fm-")
