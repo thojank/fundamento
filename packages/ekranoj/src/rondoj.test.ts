@@ -254,6 +254,19 @@ describe("token limit (AC-9, D-20)", () => {
     expect(rezulto.notoj?.some((noto) => noto.includes("Kostengrenze von 200 Tokens"))).toBe(true);
   });
 
+  it("marks a screen the stop left unbuilt in a round as carried over from its round (S037-10 Befund 6)", async () => {
+    const chat = new SkriptaModelo(skripto(PLANO), { modelo: PERMESITA_MODELO });
+    // 120 tokens per request: liste#1, detail#1, liste#2 = 360; detail#2 would bring 480 > 400.
+    const rezulto = await kuruEkranojn(enigoDe({ maksTokenoj: 400 }), depsDe({ chat }));
+    expect(konstruoj(chat)).toEqual(["liste#1", "detail#1", "liste#2"]);
+    expect(rezulto.haltigo).toBe("max-tokens");
+    expect(rezulto.rondoj).toHaveLength(2);
+    expect(rezulto.rondoj[1]?.detail?.portitaEl).toBe(1);
+    expect(rezulto.rondoj[1]?.detail?.fragmento).toBe(fragmentoDe(PLANO, "detail", 1));
+    expect(rezulto.rondoj[1]?.liste?.portitaEl).toBeUndefined();
+    expect(rezulto.rondoj[0]?.detail?.portitaEl).toBeUndefined();
+  });
+
   it("stops cleanly at the provider's day limit with haltigo tagolimo", async () => {
     const chat = new SkriptaModelo(
       (peto, index) =>
@@ -504,6 +517,16 @@ describe("Variante 0 (D-34) and no renderer", () => {
     expect(rezulto.rondoj[0]?.liste?.fragmento).toContain("<!doctype html>");
     expect(bildigilo.dokumentoj[0]?.dokumento.html).toContain('<!doctype html><html lang="de">');
     expect(bildigilo.dokumentoj[0]?.varianto).toBe("0");
+  });
+
+  it("writes no gap of Variante 0 into the result (S037-10 Befund 7)", async () => {
+    const chat = new SkriptaModelo(
+      () => respondo("```html\n<!doctype html><html><body><button>OK</button></body></html>\n```"),
+      { modelo: PERMESITA_MODELO },
+    );
+    const rezulto = await kuruEkranojn(enigoDe({ varianto: "0" }), depsDe({ chat }));
+    expect(rezulto.rondoj[2]?.liste?.taksado.mankoj.length).toBeGreaterThan(0);
+    expect(rezulto.mankoj).toEqual([]);
   });
 
   it("never turns a screen green without a renderer and says why", async () => {

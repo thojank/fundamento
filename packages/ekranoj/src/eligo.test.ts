@@ -156,6 +156,47 @@ describe("the raw answer of an empty build (S037-10 Befund 1)", () => {
   });
 });
 
+describe("values carried over by a stop (S037-10 Befund 6)", () => {
+  it("says in raporto.md and raporto.json which screens a round did not rebuild", async () => {
+    const dir = join(RADIKO, "261031-1400-uebernommen");
+    // 1 200 tokens per request: three builds in round 1, liste#2 → 4 800; detail#2 would pass 5 500.
+    await kuruEkranojn(
+      {
+        frazo: "Standards wie Standard A-12 für Team Nord verwalten",
+        marko: "komuna",
+        out: dir,
+        maksTokenoj: 5_500,
+        plano: PLANO,
+      },
+      {
+        chat: new SkriptaModelo(skripto(), { modelo: PERMESITA_MODELO }),
+        tools: new MemoraPonto(),
+        taksilo: new TaksiloDouble(() => ({ ...VERDA, k: { ...VERDA.k, K5: 0 } })),
+        bildigilo: new BildigiloDouble(),
+        marko: new MarkoDouble("komuna"),
+        nun: () => new Date("2026-10-31T12:00:00Z"),
+        log: () => undefined,
+        eligo: eligoDe(),
+      },
+    );
+    const raporto = JSON.parse(legi(dir, "raporto.json")) as {
+      rondoj: { ekranoj: Record<string, { portitaEl?: number }> }[];
+    };
+    const portitaj = raporto.rondoj.map((r) =>
+      ["liste", "detail", "bearbeiten"].map((slug) => r.ekranoj[slug]?.portitaEl),
+    );
+    expect(portitaj).toEqual([
+      [undefined, undefined, undefined],
+      [undefined, 1, 1],
+    ]);
+    const runde2 = legi(dir, "raporto.md").split("### Runde 2")[1]?.split("### ")[0] ?? "";
+    const vicoj = runde2
+      .split("\n")
+      .filter((linio) => /^\| (liste|detail|bearbeiten) \|/.test(linio));
+    expect(vicoj.map((vico) => vico.includes("übernommen aus R1"))).toEqual([false, true, true]);
+  });
+});
+
 describe("output folder (§2.4, Lieferliste 1.6, AC-6)", () => {
   it("writes every file of the layout", async () => {
     const { dir } = await kuro({ nomo: "261031-1200-standards" });

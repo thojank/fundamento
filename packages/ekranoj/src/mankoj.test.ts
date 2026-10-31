@@ -200,6 +200,26 @@ describe("mankojDeKuro: the gaps of one run from every source", () => {
     ...e,
   });
 
+  it("takes no scorer gap of Variante 0: its native HTML is the point of the comparison (S037-10 Befund 7)", () => {
+    const lasta = {
+      liste: stato({
+        taksado: {
+          ...taksado({ K5: 0 }),
+          mankoj: [
+            { kind: "rebuilt-ero", key: "button" },
+            { kind: "raw-value", key: "color" },
+          ],
+        },
+      }),
+    };
+    const enigo = { slugoj: ["liste"], lasta, agentaj: [], sugestojSenTrafo: [], iloj: [] };
+    expect(mankojDeKuro({ ...enigo, varianto: "0" })).toEqual([]);
+    expect(mankojDeKuro({ ...enigo, varianto: "F" }).map((m) => m.nomo)).toEqual([
+      "Ero für button",
+      "Gestaltung über color",
+    ]);
+  });
+
   it("takes K5 gaps and check_usage errors of the last state, suggest_ero misses and the agent's gaps", () => {
     const mankoj = mankojDeKuro({
       slugoj: ["liste", "detail"],
