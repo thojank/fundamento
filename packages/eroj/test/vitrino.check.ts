@@ -9,6 +9,15 @@ import { fileURLToPath } from "node:url";
 import { projectModeloSource } from "@fundamento/modelo";
 import { buildProjekcioj, VITRINO_FILE } from "@fundamento/projekcioj";
 import { expect, type Locator, type Page, test } from "@playwright/test";
+import {
+  ABLEITUNG_GRENZE_MS,
+  ableitungUrteil,
+  ableitungVerlangsamen,
+  bezugswertOf,
+  kalibrierungLesen,
+  REFERENZ_SCHNELL_MS,
+  referenzLast,
+} from "./ableitung.js";
 import { axeViolations, contrast } from "./alirebleco.js";
 import { M5_GRENZE_MS, m5Urteil, stilBlockadeEinbauen } from "./m5.js";
 import { EKZEMPLO_CONFIG, ORIGIN } from "./serve.js";
@@ -1122,6 +1131,8 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
         }
       }).observe({ type: "long-animation-frame" });
     });
+    // Ableitung (Nachlese 12, #118): the runner's speed, from a fixed reference load beside it.
+    const referenz = await page.evaluate(referenzLast);
     const timings = await page.evaluate(() => fmWerkstatt.measure(50));
     const frames = await page.evaluate(
       () => (globalThis as unknown as { fmFrames: unknown[] }).fmFrames,
@@ -1149,7 +1160,33 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
       `M5 Urteil (${test.info().project.name}): Skripte längstens ${timings.scriptLongest.toFixed(0)} ms; Blockade je Änderung p90 ${urteil.perzentil.toFixed(0)} ms, längste ${timings.longest.toFixed(0)} ms\n`,
     );
     expect(urteil.gruende).toEqual([]);
-    expect(derive.median).toBeLessThan(150);
+    // The derivation in the median at most 150 ms, on the runner of the reference (ableitung.ts).
+    const ableitung = ableitungUrteil({ median: derive.median, referenz });
+    process.stderr.write(
+      `Ableitung Urteil (${test.info().project.name}): Referenz ${referenz.toFixed(1)} ms (k ${ableitung.k.toFixed(2)}), Ableitung median ${derive.median.toFixed(1)} ms, auf den Bezugsrunner gerechnet ${ableitung.normiert.toFixed(1)} ms (Grenze ${ABLEITUNG_GRENZE_MS} ms)\n`,
+    );
+    expect(ableitung.rot, ableitung.grund).toBe(false);
+  });
+
+  // Gegenprobe of the derivation (#118): every request for palettes waits 80 ms on the runner of the
+  // reference, scaled to this runner, before the worker gets it – a slower derivation. Red on fast
+  // and on slow runners alike.
+  test("Ableitung Gegenprobe: a derivation slower by 80 ms on the reference runner is red", async ({
+    page,
+  }) => {
+    await openWerkstatt(page);
+    await checkedAtLeast(page, 1);
+    const referenz = await page.evaluate(referenzLast);
+    const k = Math.max(1, referenz / REFERENZ_SCHNELL_MS);
+    await page.evaluate(ableitungVerlangsamen, 80 * k);
+    const timings = await page.evaluate(() => fmWerkstatt.measure(10));
+    const sorted = [...timings.derive].sort((a, b) => a - b);
+    const median = sorted[Math.floor(sorted.length / 2)] ?? 0;
+    const ableitung = ableitungUrteil({ median, referenz });
+    process.stderr.write(
+      `Ableitung Gegenprobe: Referenz ${referenz.toFixed(1)} ms (k ${ableitung.k.toFixed(2)}), Ableitung median ${median.toFixed(1)} ms, normiert ${ableitung.normiert.toFixed(1)} ms\n`,
+    );
+    expect(ableitung.rot).toBe(true);
   });
 
   // Nachlese 12 ③ (zweite Gegenprobe, Maintainer 29.10.): a block of 80 ms of style and layout,
@@ -1824,4 +1861,56 @@ test("the clear buttons: with a value only, inside the field, axe-clean", async 
     }
   }
   expect(await axeViolations(page, "#fm-vitrino-loeschen")).toEqual([]);
+});
+
+// The verdict of the derivation (#118), with the values measured in CI.
+test.describe("the verdict of the derivation (Ableitung, #118)", () => {
+  test("a slow runner: 152.8 ms with a reference 1.4 times the fast runner's stays green", () => {
+    expect(ableitungUrteil({ median: 152.8, referenz: REFERENZ_SCHNELL_MS * 1.4 }).rot).toBe(false);
+  });
+
+  test("on the reference runner the limit is 150 ms as before; a faster machine is not held stricter", () => {
+    expect(ableitungUrteil({ median: 151, referenz: REFERENZ_SCHNELL_MS }).rot).toBe(true);
+    expect(ableitungUrteil({ median: 149, referenz: REFERENZ_SCHNELL_MS }).rot).toBe(false);
+    expect(ableitungUrteil({ median: 149, referenz: REFERENZ_SCHNELL_MS * 0.6 }).k).toBe(1);
+  });
+
+  test("a derivation 80 ms slower on the reference runner is red on a slow runner too", () => {
+    const k = 1.4;
+    expect(ableitungUrteil({ median: 140 + 80 * k, referenz: REFERENZ_SCHNELL_MS * k }).rot).toBe(
+      true,
+    );
+  });
+});
+
+// Spec 035 Befund 1.1 (D-13): the Bezugswert comes from the calibration in CI, not from a guess.
+// ableitung-kalibrierung.tsv holds every attempt of the job „Rendered checks (Make Kit, Quickstart,
+// Vitrino-Werkstatt)“ on the rebased head (two chains, PR rerun and workflow_dispatch). The reference
+// and the median of the derivation do not depend on REFERENZ_SCHNELL_MS, so the table stays valid
+// when the constant follows it; the Gegenprobe columns were measured with the constant of that head.
+test.describe("the Bezugswert of the derivation from the calibration in CI (Spec 035 Befund 1.1)", () => {
+  const versuche = kalibrierungLesen(
+    readFileSync(new URL("./ableitung-kalibrierung.tsv", import.meta.url), "utf8"),
+  );
+
+  test("the table holds at least ten attempts of one head, on fast and on slow runners", () => {
+    expect(versuche.length).toBeGreaterThanOrEqual(10);
+    expect(new Set(versuche.map((versuch) => versuch.head)).size).toBe(1);
+    expect(versuche.some((versuch) => versuch.klasse === "schnell")).toBe(true);
+    expect(versuche.some((versuch) => versuch.klasse === "langsam")).toBe(true);
+  });
+
+  test("the Gegenprobe was red on a fast and on a slow runner", () => {
+    for (const klasse of ["schnell", "langsam"] as const) {
+      const rot = versuche.filter((versuch) => versuch.klasse === klasse && versuch.gegenprobeRot);
+      expect(rot.length, `Gegenprobe rot auf ${klasse}en Runnern`).toBeGreaterThan(0);
+      for (const versuch of rot) {
+        expect(versuch.gegenprobeNormiert).toBeGreaterThan(ABLEITUNG_GRENZE_MS);
+      }
+    }
+  });
+
+  test("REFERENZ_SCHNELL_MS is the median reference of the fast runners in the table", () => {
+    expect(REFERENZ_SCHNELL_MS).toBe(bezugswertOf(versuche));
+  });
 });
