@@ -175,7 +175,8 @@ function chatHtml(historio: AsistantoInput["historio"]): string {
 /** The last answer of the assistant, else its greeting: what the bar shows of the chat. */
 function letzteAntwortHtml(historio: AsistantoInput["historio"]): string {
   const last = historio.findLast((entry) => entry.role === "assistant");
-  return `<div class="mt-letzte-antwort" data-mt-letzte-antwort><fm-teksto kind="caption">Letzte Antwort</fm-teksto>${last === undefined ? `<fm-teksto>${GRUSS}</fm-teksto>` : nachrichtHtml(last)}</div>`;
+  // Spec 036, Befund 3.6: a polite live region – a new answer is said, the history is not.
+  return `<div class="mt-letzte-antwort" data-mt-letzte-antwort aria-live="polite"><fm-teksto kind="caption">Letzte Antwort</fm-teksto>${last === undefined ? `<fm-teksto>${GRUSS}</fm-teksto>` : nachrichtHtml(last)}</div>`;
 }
 
 /**

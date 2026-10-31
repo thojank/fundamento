@@ -89,8 +89,11 @@ if (buehneLayout) {
         if (!quelle) continue;
         const antwort = document.createElement("fm-markdovido");
         antwort.setAttribute("source", quelle.getAttribute("source") || "");
+        // Befund 3.6: the region stays and keeps its caption; only the answer in it is new, so a
+        // screen reader says the answer and nothing else (aria-live="polite").
         const caption = letzte.querySelector('fm-teksto[kind="caption"]');
-        letzte.replaceChildren(...(caption ? [caption] : []), antwort);
+        for (const child of [...letzte.children]) if (child !== caption) child.remove();
+        letzte.append(antwort);
       }
     }).observe(liste, { childList: true });
     // Befund 3.4: material and research open in a dialog (fm-dialogo); what they find comes back as

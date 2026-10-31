@@ -15,6 +15,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type APIRequestContext, expect, type Page, test } from "@playwright/test";
+import { axeViolations } from "./alirebleco.js";
 
 const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
 const cli = join(repoRoot, "packages/cli/dist/index.js");
@@ -149,14 +150,18 @@ test.describe("Bühne (Spec 036, Befund 3.1)", () => {
     const frame = page.frameLocator("[data-mt-buehne] iframe[data-mt-vorschau]");
     for (const ero of ["fm-sxelo", "fm-pagxo", "fm-butono", "fm-karto", "fm-formularo", "fm-avizo"])
       await expect(frame.locator(ero).first(), ero).toBeVisible();
-    const defined = await frame
-      .locator("body")
-      .evaluate(() =>
-        ["fm-sxelo", "fm-pagxo", "fm-butono", "fm-karto", "fm-formularo", "fm-avizo"].filter(
-          (name) => customElements.get(name) === undefined,
-        ),
-      );
-    expect(defined).toEqual([]);
+    // The frame's module defines the Eroj after its markup is visible (WebKit: measurably later).
+    await expect
+      .poll(() =>
+        frame
+          .locator("body")
+          .evaluate(() =>
+            ["fm-sxelo", "fm-pagxo", "fm-butono", "fm-karto", "fm-formularo", "fm-avizo"].filter(
+              (name) => customElements.get(name) === undefined,
+            ),
+          ),
+      )
+      .toEqual([]);
     expect(fehler).toEqual([]);
   });
 
@@ -381,7 +386,9 @@ test.describe("Bühne (Spec 036, Befund 3.3)", () => {
     await leiste.getByRole("button", { name: "Senden" }).click();
     await expect(leiste.locator("[data-mt-letzte-antwort]")).toContainText(antwort);
     const karten = verlauf.locator("[data-mt-babilo-listo] fm-karto");
-    await expect(karten.last()).toBeHidden();
+    // Closed: not rendered. WebKit keeps a layout box for the content of a closed details (its
+    // content-visibility hides it), which Playwright's visibility counts; checkVisibility does not.
+    await expect.poll(() => karten.last().evaluate((karte) => karte.checkVisibility())).toBe(false);
     await verlauf.getByText("Verlauf", { exact: true }).click();
     await expect(verlauf).toHaveAttribute("open", "");
     await expect(karten.last()).toBeVisible();
@@ -618,4 +625,98 @@ test.describe("Bühne (Spec 036, Befund 3.6)", () => {
     await expect(page.locator("[data-mt-letzte-antwort]")).toContainText("Gern.");
     await expect(eingabe).toHaveValue("");
   });
+
+  test("3.6: slider and switch are operable by the keyboard, with their roles and names", async ({
+    page,
+  }) => {
+    const id = await marke(page.request, "Probomarko Tasten");
+    await page.setViewportSize(WIDE);
+    await oeffne(page, id);
+    const buehne = page.locator("[data-mt-buehne]");
+    const schnitt = () =>
+      page
+        .locator("[data-mt-buehne-rahmen]")
+        .evaluate((rahmen) => (rahmen as HTMLElement).style.getPropertyValue("--mt-schnitt"));
+    const schieber = buehne.getByRole("slider", { name: "Jetzt und mit dem Vorschlag" });
+    await schieber.focus();
+    await expect(schieber).toBeFocused();
+    expect(await schnitt()).toBe("50%");
+    for (const [taste, wert] of [
+      ["ArrowRight", "51%"],
+      ["ArrowUp", "52%"],
+      ["ArrowLeft", "51%"],
+      ["ArrowDown", "50%"],
+      ["Home", "0%"],
+      ["End", "100%"],
+    ] as const) {
+      await page.keyboard.press(taste);
+      await expect.poll(schnitt, taste).toBe(wert);
+    }
+    await page.keyboard.press("PageDown");
+    await expect.poll(async () => Number.parseFloat(await schnitt()), "PageDown").toBeLessThan(100);
+    // Narrow: the switch takes the slider's place – Space and Enter, as the Ero says.
+    await page.setViewportSize({ width: 800, height: 900 });
+    const umschalter = buehne.getByRole("switch", { name: "Mit dem Vorschlag" });
+    await expect(umschalter).toBeVisible();
+    await umschalter.focus();
+    await page.keyboard.press("Space");
+    await expect(umschalter).toBeChecked();
+    await expect(buehne).toHaveAttribute("data-mt-zeige-vorschlag", "");
+    await page.keyboard.press("Enter");
+    await expect(umschalter).not.toBeChecked();
+    await expect(buehne).not.toHaveAttribute("data-mt-zeige-vorschlag", "");
+  });
+});
+
+for (const [breite, ansicht] of [
+  ["breit", WIDE],
+  ["schmal", { width: 800, height: 900 }],
+] as const) {
+  for (const schema of ["hell", "dunkel"] as const) {
+    test(`3.6: axe finds nothing on the stage – ${schema}, ${breite}, with the marks of the check`, async ({
+      page,
+    }) => {
+      const id = await marke(page.request, `Probomarko Axe ${schema} ${breite}`);
+      const gesetzt = await page.request.post(`${base}/api/marko/${id}/festlegen`, {
+        data: { token: "color.text.subtle", alias: "color.palette.neutral.1000" },
+      });
+      expect(gesetzt.status()).toBe(200);
+      await page.setViewportSize(ansicht);
+      await oeffne(page, id);
+      const jetzt = page.frameLocator(JETZT);
+      if (schema === "dunkel") {
+        await page
+          .locator("[data-mt-buehne]")
+          .getByRole("radiogroup", { name: "Darstellung" })
+          .getByRole("radio", { name: "Dunkel" })
+          .click();
+        await expect(jetzt.locator("html")).toHaveAttribute("data-fm-color-scheme", "dark");
+      }
+      await expect(jetzt.locator('[data-mt-pruefung="offen"]').first()).toBeAttached();
+      expect(await axeViolations(page)).toEqual([]);
+    });
+  }
+}
+
+test("3.6: axe finds nothing with the material dialog open and its tiles shown", async ({
+  page,
+}) => {
+  const id = await marke(page.request, "Probomarko Axe Dialog");
+  await page.setViewportSize(WIDE);
+  await oeffne(page, id);
+  await page.getByRole("button", { name: "Material hinzufügen" }).click();
+  const dialog = page.locator("fm-dialogo[data-mt-materialo]");
+  await expect(page.getByRole("dialog", { name: "Material deiner Marke" })).toBeVisible();
+  await dialog
+    .locator("[data-mt-materialo-dosiero]")
+    .locator('input[type="file"]')
+    .setInputFiles({
+      name: "bildschirm.png",
+      mimeType: "image/png",
+      buffer: await bildschirm(page),
+    });
+  await dialog.locator("[data-mt-materialo-rajtoj]").click();
+  await dialog.getByRole("button", { name: "Material lesen" }).click();
+  await expect(dialog.locator("[data-mt-kaheloj] fm-karto")).toHaveCount(2);
+  expect(await axeViolations(page)).toEqual([]);
 });

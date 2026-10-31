@@ -544,6 +544,12 @@ if (asistantoData && marko) {
     zeigeKosto(result.body);
   };
   if (send) send.addEventListener("click", submit);
+  // Spec 036, Befund 3.6 (Manko E7): Enter sends, Shift+Enter makes a new line.
+  if (input) input.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" || event.shiftKey || event.isComposing || input.hasAttribute("disabled")) return;
+    event.preventDefault();
+    submit();
+  });
   for (const button of document.querySelectorAll("[data-mt-faceto-ago]")) {
     button.addEventListener("click", async () => {
       const result = await post("faceto", { faceto: asistantoData.faceto, ago: button.getAttribute("data-mt-faceto-ago") });
