@@ -182,6 +182,7 @@ describe("output folder (§2.4, Lieferliste 1.6, AC-6)", () => {
       "### Runde 2",
       "### Runde 3",
       "## Verbleibende Abweichungen",
+      "## Lücken (Teil 3)",
       "## Aufwand und Kosten",
       "## Halt",
     ]);

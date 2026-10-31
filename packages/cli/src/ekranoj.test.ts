@@ -285,9 +285,76 @@ describe("fm ekranoj: nothing starts before the input, the model and the user ag
 
   it("reads a sentence that is exactly „mankoj“ as the sub-mode, never as a run (D-29)", async () => {
     const a = arangxo();
-    await expect(a.kuri(["mankoj"])).rejects.toThrow(/mankoj/);
+    // The sub-mode without folders is a usage error (exit 2), not a run of the sentence „mankoj“.
+    await expect(a.kuri(["mankoj"])).rejects.toThrow(/mankoj <ordner/);
     expect(a.spuro.chatFabrikoj).toHaveLength(0);
+    expect(a.spuro.gvidantoj).toHaveLength(0);
     expect(a.babilo.petoj).toHaveLength(0);
+  });
+});
+
+describe("fm ekranoj mankoj: the Lückenliste of runs (Teil 3, D-29)", () => {
+  const fiksajxoj = join(repoRoot, "packages/ekranoj/test/fixtures/mankoj");
+  const kuroj = ["261031-1000-standards", "261031-1100-teams"].map((kuro) => join(fiksajxoj, kuro));
+  const KAPO = "| # | Art | Lücke | Anzahl | Aufgaben | Beispielstelle | Vorschlag | Ziel |";
+
+  it("prints the merged table of two runs and starts nothing", async () => {
+    const a = arangxo();
+    const run = await a.kuri(["mankoj", ...kuroj]);
+    expect(run.code).toBe(0);
+    const linioj = run.stdout.split("\n");
+    expect(linioj).toContain(KAPO);
+    const vicoj = linioj.filter((linio) => /^\| \d+ \|/.test(linio));
+    const { kunigiMankojn } = await import("@fundamento/ekranoj");
+    const mankoj = kunigiMankojn(kuroj);
+    expect(vicoj).toHaveLength(mankoj.length);
+    expect(vicoj[0]).toContain(`| ${mankoj[0]?.nomo} | ${mankoj[0]?.ofteco} |`);
+    expect(a.spuro.chatFabrikoj).toHaveLength(0);
+    expect(a.spuro.gvidantoj).toHaveLength(0);
+    expect(a.babilo.petoj).toHaveLength(0);
+  });
+
+  it("writes the list as JSON with --out, and prints it as JSON with --json", async () => {
+    const a = arangxo();
+    const { kunigiMankojn, stabilaJson } = await import("@fundamento/ekranoj");
+    const run = await a.kuri(["mankoj", ...kuroj, "--out", "luecken/mankoj.json"]);
+    expect(run.code).toBe(0);
+    const dosiero = join(a.baseDir, "luecken", "mankoj.json");
+    expect(readFileSync(dosiero, "utf8")).toBe(stabilaJson(kunigiMankojn(kuroj)));
+    expect(run.stdout).toContain(KAPO);
+    expect(run.stdout).toContain(dosiero);
+
+    const j = arangxo();
+    const jsonRun = await j.kuri(["mankoj", ...kuroj, "--json"]);
+    expect(jsonRun.code).toBe(0);
+    expect(JSON.parse(jsonRun.stdout)).toEqual({ mankoj: kunigiMankojn(kuroj) });
+  });
+
+  it("exits 2 with structured problems for a folder that does not exist", async () => {
+    const a = arangxo();
+    const run = await a.kuri(["mankoj", kuroj[0] ?? "", "nicht-da"]);
+    expect(run.code).toBe(2);
+    expect(run.stderr).toMatch(/\/1 folder-missing: .*nicht-da/);
+    expect(run.stdout).toBe("");
+  });
+
+  it("refuses the options of a run in the sub-mode", async () => {
+    for (const opcio of [
+      ["--ja"],
+      ["--ekranoj", "liste"],
+      ["--max-tokens", "5"],
+      ["--config", "x.json"],
+    ]) {
+      await expect(arangxo().kuri(["mankoj", ...kuroj, ...opcio])).rejects.toThrow(
+        new RegExp(`${opcio[0]}.*mankoj|mankoj.*${opcio[0]}`),
+      );
+    }
+  });
+
+  it("exits 2 from the command line without folders", () => {
+    const run = fm(["ekranoj", "mankoj"]);
+    expect(run.code).toBe(2);
+    expect(run.stderr).toContain("mankoj <ordner");
   });
 });
 
