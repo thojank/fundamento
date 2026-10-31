@@ -91,6 +91,18 @@ describe("prompt gvidanto", () => {
     expect(rule14).toMatch(/holds for that set alone/);
   });
 
+  // Spec 035 2.2 (Befund der Nordstern-Kennzahl): in the series H and K agents left the label of a
+  // field out, wrote only a placeholder or only an aria-label. The prompt says how a field gets its
+  // visible label, in both ways the element shows (Spec 029 ②b-1b), so no agent has to guess.
+  it('rule 8 says how a field gets its visible label: the text of the element or label="…"', () => {
+    const rule8 = text.split("\n").find((line) => line.startsWith("8. ")) ?? "";
+    expect(rule8).toMatch(/A field's label is visible text/);
+    expect(rule8).toContain("`<fm-kampo>E-Mail</fm-kampo>`");
+    expect(rule8).toContain('`<fm-kampo label="E-Mail">`');
+    expect(rule8).toMatch(/`shown`/);
+    expect(rule8).toMatch(/a placeholder or an `aria-label` alone is no label/);
+  });
+
   it("asks for check_usage before a handover (Spec 003 T025)", () => {
     expect(text).toMatch(/Before you hand over a design or code, call `check_usage`/);
   });
