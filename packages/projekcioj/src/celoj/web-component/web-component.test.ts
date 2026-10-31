@@ -1124,7 +1124,11 @@ describe("Web Component Celo for the avizo (Spec 011 ③)", () => {
 
   it("states intent and the one state rest in the stylesheet inventory (parity)", () => {
     const inventory = stylesheetInventory(styles);
-    expect(inventory.props).toEqual({ intent: ["info", "success", "warning", "danger"] });
+    // Spec 036 Teil 5 ②b-2 (A-avizo-1): frame keys the radius.
+    expect(inventory.props).toEqual({
+      intent: ["info", "success", "warning", "danger"],
+      frame: ["card", "band"],
+    });
     expect(inventory.states).toEqual(["rest"]);
   });
 });
@@ -2112,14 +2116,20 @@ describe("Web Component Celo for the karto (Spec 015 ③)", () => {
     expect(css).toContain(':where([part="control"]) [part="body"] {');
     expect(css).toContain("padding: var(--fm-spacing-medium);");
     expect(css).toContain("font-size: var(--fm-typography-headline-4-font-size);");
-    expect(css).not.toContain("[data-");
+    // Spec 036 Teil 5 ②b-2 (A-karto-1): the surface by emphasis – the only data attribute; low
+    // takes the ground of the host.
+    expect([...new Set(css.match(/\[data-[a-z-]+=/g) ?? [])]).toEqual(["[data-emphasis="]);
+    expect(css).toContain(
+      ':where([part="control"][data-emphasis="low"]) {\n  background-color: inherit;\n}',
+    );
     expect(componentCssIssues("karto.css", css)).toEqual([]);
     expect(cssPhysicalPropertyIssues("karto.css", css)).toEqual([]);
   });
 
-  it("the parity inventory names no prop and the one state rest", () => {
+  it("the parity inventory names emphasis and the one state rest", () => {
     const inventory = stylesheetInventory(files["eroj/src/generated/karto.styles.ts"] ?? "");
-    expect(inventory.props).toEqual({});
+    // Spec 036 Teil 5 ②b-2 (A-karto-1).
+    expect(inventory.props).toEqual({ emphasis: ["high", "medium", "low"] });
     expect(inventory.states).toEqual(["rest"]);
   });
 });
@@ -2170,9 +2180,13 @@ describe("Web Component Celo for the avataro (Spec 015 ③)", () => {
     expect(cssPhysicalPropertyIssues("avataro.css", css)).toEqual([]);
   });
 
-  it("the parity inventory names size and the one state rest", () => {
+  it("the parity inventory names size, corner and the one state rest", () => {
     const inventory = stylesheetInventory(files["eroj/src/generated/avataro.styles.ts"] ?? "");
-    expect(inventory.props).toEqual({ size: ["x-small", "small", "medium", "large", "x-large"] });
+    // Spec 036 Teil 5 ②b-2 (A-avataro-1, A-avataro-2).
+    expect(inventory.props).toEqual({
+      size: ["x-small", "small", "medium", "large", "x-large"],
+      corner: ["round", "soft", "square"],
+    });
     expect(inventory.states).toEqual(["rest"]);
   });
 });

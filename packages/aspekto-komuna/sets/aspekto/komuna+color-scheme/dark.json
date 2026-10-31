@@ -1314,8 +1314,12 @@
     "karto": {
       "surface": {
         "fill": {
-          "$type": "color",
-          "$value": "{color.background.canvas}"
+          "emphasis": {
+            "high": {
+              "$type": "color",
+              "$value": "{color.background.canvas}"
+            }
+          }
         }
       }
     },

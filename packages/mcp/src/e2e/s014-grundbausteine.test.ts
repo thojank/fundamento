@@ -126,7 +126,8 @@ describe("list_eroj, the briefs and columns-from", () => {
     expect(icon.axes.map((axis) => axis.name)).toEqual(["name", "size", "intent"]);
     expect(icon.required).toEqual({ props: ["name"], slots: [] });
     const divider = await output<Brief>(client, "get_ero", { name: "apartigilo", brief: true });
-    expect(divider.axes.map((axis) => axis.name)).toEqual(["orientation"]);
+    // Spec 036 Teil 5 ②b-2: the new axis of the look.
+    expect(divider.axes.map((axis) => axis.name)).toEqual(["orientation", "emphasis"]);
     const skip = await output<Brief>(client, "get_ero", { name: "saltligilo", brief: true });
     expect(skip.required).toEqual({ props: ["to"], slots: ["label"] });
     for (const brief of [icon, divider, skip]) {

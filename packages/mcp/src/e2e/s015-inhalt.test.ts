@@ -160,10 +160,11 @@ describe("the content dialogs of the spec (Spec 015 ③)", () => {
     expect(listed.eroj).toHaveLength(40);
     expect(listed.eroj.map((entry) => entry.name)).toContain("karto");
     const brief = await output<Brief>(client, "get_ero", { name: "karto", brief: true });
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["level", "orientation"]);
+    // Spec 036 Teil 5 ②b-2: the new axis of the look.
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["level", "orientation", "emphasis"]);
     expect(brief.required).toEqual({ props: ["level"], slots: ["heading"] });
     const avatar = await output<Brief>(client, "get_ero", { name: "avataro", brief: true });
-    expect(avatar.axes.map((axis) => axis.name)).toEqual(["size"]);
+    expect(avatar.axes.map((axis) => axis.name)).toEqual(["size", "corner"]);
     expect(avatar.required).toEqual({ props: ["name"], slots: [] });
   });
 });

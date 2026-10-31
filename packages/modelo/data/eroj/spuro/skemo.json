@@ -18,6 +18,16 @@
         "name": "page",
         "kind": "string",
         "description": "The key of the current page: the item whose key (its data-page, else its destination) is this value is the current one (SkemoSlot.entry current); empty, the last item is."
+      },
+      {
+        "name": "emphasis",
+        "kind": "enum",
+        "values": [
+          "medium",
+          "low"
+        ],
+        "default": "medium",
+        "description": "Spec 029 ②a (A-spuro-1): medium writes the levels as links, as before; low in the subtle text, a supporting trail beside a heading."
       }
     ],
     "states": [
@@ -40,6 +50,7 @@
       "item": {
         "color": {
           "by": [
+            "emphasis",
             "current",
             "state"
           ]
@@ -96,6 +107,7 @@
         "part": "item",
         "property": "color",
         "when": {
+          "emphasis": "medium",
           "current": "false",
           "state": "rest"
         },
@@ -105,6 +117,7 @@
         "part": "item",
         "property": "color",
         "when": {
+          "emphasis": "medium",
           "current": "false",
           "state": "hover"
         },
@@ -114,6 +127,7 @@
         "part": "item",
         "property": "color",
         "when": {
+          "emphasis": "medium",
           "current": "false",
           "state": "focus"
         },
@@ -123,6 +137,7 @@
         "part": "item",
         "property": "color",
         "when": {
+          "emphasis": "medium",
           "current": "true",
           "state": "rest"
         },
@@ -132,6 +147,7 @@
         "part": "item",
         "property": "color",
         "when": {
+          "emphasis": "medium",
           "current": "true",
           "state": "hover"
         },
@@ -141,6 +157,67 @@
         "part": "item",
         "property": "color",
         "when": {
+          "emphasis": "medium",
+          "current": "true",
+          "state": "focus"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "emphasis": "low",
+          "current": "false",
+          "state": "rest"
+        },
+        "token": "color.text.subtle"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "emphasis": "low",
+          "current": "false",
+          "state": "hover"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "emphasis": "low",
+          "current": "false",
+          "state": "focus"
+        },
+        "token": "color.text.subtle"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "emphasis": "low",
+          "current": "true",
+          "state": "rest"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "emphasis": "low",
+          "current": "true",
+          "state": "hover"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "emphasis": "low",
           "current": "true",
           "state": "focus"
         },

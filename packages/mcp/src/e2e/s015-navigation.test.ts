@@ -119,7 +119,8 @@ describe("the navigation dialogs of the spec (Spec 015 ①)", () => {
     expect(pager.axes.map((axis) => axis.name)).toEqual(["mode", "size", "current"]);
     expect(pager.required).toEqual({ props: ["page", "total-pages"], slots: [] });
     const trail = await output<Brief>(client, "get_ero", { name: "spuro", brief: true });
-    expect(trail.axes.map((axis) => axis.name)).toEqual(["current"]);
+    // Spec 036 Teil 5 ②b-2: the new axis of the look.
+    expect(trail.axes.map((axis) => axis.name)).toEqual(["emphasis", "current"]);
     expect(trail.required).toEqual({ props: [], slots: ["items"] });
   });
 });

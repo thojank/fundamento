@@ -211,7 +211,8 @@ describe("list_eroj and the briefs", () => {
     expect(insigno.axes.map((axis) => axis.name)).toEqual(["intent", "size"]);
     expect(insigno.required).toEqual({ props: [], slots: ["label"] });
     const avizoBrief = await output<Brief>(client, "get_ero", { name: "avizo", brief: true });
-    expect(avizoBrief.axes.map((axis) => axis.name)).toEqual(["intent"]);
+    // Spec 036 Teil 5 ②b-2: the new axis of the look.
+    expect(avizoBrief.axes.map((axis) => axis.name)).toEqual(["intent", "frame"]);
     expect(avizoBrief.required).toEqual({ props: [], slots: ["message"] });
     const state = await output<Brief>(client, "get_ero", { name: "plenstato", brief: true });
     expect(state.axes.map((axis) => axis.name)).toEqual(["kind"]);

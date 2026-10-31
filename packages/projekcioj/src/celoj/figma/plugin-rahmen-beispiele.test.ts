@@ -567,7 +567,8 @@ describe("the plugin draws the breadcrumb in one row with a chevron between two 
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     const set = pageNodes(double).find((node) => node.name === "spuro");
-    expect(set?.children).toHaveLength(3);
+    // Spec 036 Teil 5 ②b-2 (A-spuro-1): emphasis × state.
+    expect(set?.children).toHaveLength(2 * 3);
     for (const variant of set?.children ?? []) {
       const control = descendant(variant, "control");
       expect(control?.properties.layoutMode, variant.name).toBe("HORIZONTAL");

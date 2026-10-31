@@ -165,21 +165,24 @@ describe("the avizo is drawn as a notice: surface with accent, heading, message,
       double.figma,
     )) as Report;
     const set = pageNodes(double).find((child) => child.name === "avizo");
-    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    // Spec 036 Teil 5 ②b-2 (A-avizo-1): intent × frame; card is the notice it was.
+    const variant = (name: string) =>
+      set?.children.find(
+        (child) => child.name === name.replace(", state=", ", frame=card, state="),
+      );
     const avizo = report.components.find((component) => component.set === "avizo");
     return { double, set, variant, report, avizo };
   });
 
-  it("draws four variants by intent, the control a row with the accent at its start, the texts column and the dismiss frame", async () => {
+  it("draws eight variants by intent and frame, the control a row with the accent at its start, the texts column and the dismiss frame", async () => {
     const { set, variant, avizo } = await drawn();
-    expect(set?.children.map((child) => child.name)).toEqual([
-      "intent=info, state=rest",
-      "intent=success, state=rest",
-      "intent=warning, state=rest",
-      "intent=danger, state=rest",
-    ]);
+    expect(set?.children.map((child) => child.name)).toEqual(
+      ["info", "success", "warning", "danger"].flatMap((intent) =>
+        ["card", "band"].map((frame) => `intent=${intent}, frame=${frame}, state=rest`),
+      ),
+    );
     expect(avizo?.layout.columns).toBe(1);
-    expect(avizo?.layout.rows).toBe(4);
+    expect(avizo?.layout.rows).toBe(8);
     const info = variant("intent=info, state=rest");
     expect(info?.children.map((child) => child.name)).toEqual(["control"]);
     const control = descendant(info, "control");
@@ -303,7 +306,7 @@ describe("the avizo is drawn as a notice: surface with accent, heading, message,
           .find((variable) => variable.name === name)
           ?.resolveForConsumer(node as DoubleNode).value,
       );
-    expect(set?.children).toHaveLength(4);
+    expect(set?.children).toHaveLength(4 * 2);
     for (const variant of set?.children ?? []) {
       const control = descendant(variant, "control");
       const texts = descendant(variant, "texts");
@@ -1730,7 +1733,9 @@ describe("icons are drawn from the glyphs of every Aspekto and switch with the b
   it("the avizo draws the icon of its intent before its texts, in the status text colour; the dialog shows the help of its reason (O-5)", async () => {
     const { setOf } = await drawn();
     const avizo = setOf("avizo");
-    const danger = avizo?.children.find((child) => child.name === "intent=danger, state=rest");
+    const danger = avizo?.children.find(
+      (child) => child.name === "intent=danger, frame=card, state=rest",
+    );
     const control = descendant(danger, "control");
     expect(control?.children.map((child) => child.name)).toEqual(["icon", "texts", "dismiss"]);
     const icon = descendant(danger, "icon");
@@ -1755,14 +1760,20 @@ describe("icons are drawn from the glyphs of every Aspekto and switch with the b
   it("draws the apartigilo as a line and the saltligilo as a control; writes nothing new on a second run", async () => {
     const { double, setOf } = await drawn();
     const apartigilo = setOf("apartigilo");
+    // Spec 036 Teil 5 ②b-2 (A-apartigilo-1): orientation × emphasis; low is the line it was.
     expect(apartigilo?.children.map((child) => child.name)).toEqual([
-      "orientation=horizontal, state=rest",
-      "orientation=vertical, state=rest",
+      "orientation=horizontal, emphasis=low, state=rest",
+      "orientation=horizontal, emphasis=high, state=rest",
+      "orientation=vertical, emphasis=low, state=rest",
+      "orientation=vertical, emphasis=high, state=rest",
     ]);
     const horizontal = descendant(apartigilo?.children[0], "control");
     expect(paintOf(horizontal, "strokes")).toBe("color/border/subtle");
     expect(bound(horizontal, "strokeTopWeight")).toBe("border/width/default");
-    const vertical = descendant(apartigilo?.children[1], "control");
+    const strong = descendant(apartigilo?.children[1], "control");
+    expect(paintOf(strong, "strokes")).toBe("color/border/default");
+    expect(bound(strong, "strokeTopWeight")).toBe("border/width/strong");
+    const vertical = descendant(apartigilo?.children[2], "control");
     expect(bound(vertical, "strokeLeftWeight")).toBe("border/width/default");
     expect(bound(vertical, "height")).toBe("size/control/medium");
     const saltligilo = setOf("saltligilo");
@@ -1953,14 +1964,32 @@ describe("the plugin draws the karto (Spec 015 ③)", () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     const set = pageNodes(double).find((node) => node.name === "karto");
-    expect(set?.children.map((child) => child.name)).toEqual([
-      "orientation=vertical, state=rest",
-      "orientation=horizontal, state=rest",
-    ]);
+    // Spec 036 Teil 5 ②b-2 (A-karto-1): orientation × emphasis; high is the card it was.
+    expect(set?.children.map((child) => child.name)).toEqual(
+      ["vertical", "horizontal"].flatMap((orientation) =>
+        ["high", "medium", "low"].map(
+          (emphasis) => `orientation=${orientation}, emphasis=${emphasis}, state=rest`,
+        ),
+      ),
+    );
     const definitions = (set?.properties.componentPropertyDefinitions ?? {}) as Definitions;
     const media = Object.keys(definitions).find((key) => key.startsWith("media#"));
     expect(definitions[media ?? ""]).toEqual({ type: "BOOLEAN", defaultValue: true });
-    for (const variant of set?.children ?? []) {
+    // medium: the sunken ground without a shadow; low: no fill and no shadow.
+    for (const [emphasis, fill] of [
+      ["medium", "color/background/sunken"],
+      ["low", undefined],
+    ] as const) {
+      const other = descendant(
+        set?.children.find((child) => child.name.includes(`emphasis=${emphasis}`)),
+        "surface",
+      );
+      expect(paintOf(other), emphasis).toBe(fill);
+      expect((other?.properties.effects ?? []) as unknown[], emphasis).toEqual([]);
+    }
+    for (const variant of (set?.children ?? []).filter((child) =>
+      child.name.includes("emphasis=high"),
+    )) {
       const horizontal = variant.name.includes("horizontal");
       const surface = descendant(variant, "surface");
       expect(surface?.properties.layoutMode, variant.name).toBe(
@@ -2068,9 +2097,13 @@ describe("the karto's heading fills the body in every variant (K-1)", () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     const cards = cardsOf(double);
+    // Spec 036 Teil 5 ②b-2 (A-karto-1): orientation × emphasis.
     expect(cards.map((card) => card.name)).toEqual([
-      "orientation=vertical, state=rest",
-      "orientation=horizontal, state=rest",
+      ...["vertical", "horizontal"].flatMap((orientation) =>
+        ["high", "medium", "low"].map(
+          (emphasis) => `orientation=${orientation}, emphasis=${emphasis}, state=rest`,
+        ),
+      ),
       "karto – ohne Bild",
     ]);
     const narrow: string[] = [];
@@ -2197,13 +2230,18 @@ describe("the plugin draws the avataro (Spec 015 ③)", () => {
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     const set = pageNodes(double).find((node) => node.name === "avataro");
     // Spec 036 Teil 5 ②b-2 (A-avataro-2): five sizes.
-    expect(set?.children.map((child) => child.name)).toEqual([
-      "size=x-small, state=rest",
-      "size=small, state=rest",
-      "size=medium, state=rest",
-      "size=large, state=rest",
-      "size=x-large, state=rest",
-    ]);
+    // Spec 036 Teil 5 ②b-2 (A-avataro-1): five sizes × three corners.
+    expect(set?.children.map((child) => child.name)).toEqual(
+      ["x-small", "small", "medium", "large", "x-large"].flatMap((size) =>
+        ["round", "soft", "square"].map((corner) => `size=${size}, corner=${corner}, state=rest`),
+      ),
+    );
+    const radiusOf = (name: string) =>
+      name.includes("corner=soft")
+        ? "radius/small"
+        : name.includes("corner=square")
+          ? "radius/none"
+          : "radius/full";
     const definitions = (set?.properties.componentPropertyDefinitions ?? {}) as Definitions;
     const image = Object.keys(definitions).find((key) => key.startsWith("image#"));
     expect(definitions[image ?? ""]).toEqual({ type: "BOOLEAN", defaultValue: false });
@@ -2224,7 +2262,7 @@ describe("the plugin draws the avataro (Spec 015 ③)", () => {
       }
       const initials = descendant(box, "initials");
       expect(paintOf(initials)).toBe("color/background/sunken");
-      expect(bound(initials, "cornerRadius")).toBe("radius/full");
+      expect(bound(initials, "cornerRadius")).toBe(radiusOf(variant.name));
       const text = descendant(initials, "initials-text");
       // Nachlese 5 N5-5 (O-18): the smallest size shows one initial – „EM“ stood over the circle
       // of 20 px; the label property holds both, so the smallest size's text is not connected.
@@ -2253,7 +2291,7 @@ describe("the plugin draws the avataro (Spec 015 ③)", () => {
         fontOf[variant.name.slice("size=".length, variant.name.indexOf(","))],
       );
       const picture = descendant(box, "image");
-      expect(bound(picture, "cornerRadius")).toBe("radius/full");
+      expect(bound(picture, "cornerRadius")).toBe(radiusOf(variant.name));
       expect(picture?.properties.clipsContent).toBe(true);
       expect(paintOf(picture)).toBe("color/background/sunken");
       expect(picture?.properties.visible).toBe(false);

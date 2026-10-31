@@ -181,9 +181,12 @@ describe("a flipped prop value in one artefact fails the check (AK-04)", () => {
 
   it("the React declaration file", () => {
     const dir = flipped((root) =>
-      edit(join(root, "make-kit/komuna/dist/index.d.ts"), (text) =>
-        text.replace('"low"', '"loww"'),
-      ),
+      // Spec 036 Teil 5 ②b-2: the apartigilo before the butono says "low" too (emphasis); the
+      // flip stays in the butono's declaration.
+      edit(join(root, "make-kit/komuna/dist/index.d.ts"), (text) => {
+        const at = text.indexOf("export interface ButonoProps");
+        return text.slice(0, at) + text.slice(at).replace('"low"', '"loww"');
+      }),
     );
     expectFlip(dir, "react", "emphasis", "loww");
   });

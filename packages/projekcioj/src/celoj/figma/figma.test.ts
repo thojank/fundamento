@@ -2082,7 +2082,9 @@ describe("Figma plan for the insigno (Spec 011 ③)", () => {
 describe("Figma plan for the avizo (Spec 011 ③)", () => {
   const set = plan.components.find((component) => component.set === "avizo");
   const avizo = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "avizo");
-  const variant = (intent: string) => set?.variants.find((entry) => entry.props.intent === intent);
+  // Spec 036 Teil 5 ②b-2 (A-avizo-1): intent × frame; card is the notice it was.
+  const variant = (intent: string) =>
+    set?.variants.find((entry) => entry.props.intent === intent && entry.props.frame === "card");
 
   it("plans a notice of intent in one state; dismissible a BOOLEAN that shows the dismiss part; the word Meldung and the words of heading and details", () => {
     expect(structureOf("status")).toBe("notice");
@@ -2093,11 +2095,12 @@ describe("Figma plan for the avizo (Spec 011 ③)", () => {
     expect(set?.properties).toEqual({
       intent: ["info", "success", "warning", "danger"],
       dismissible: "BOOLEAN",
+      frame: ["card", "band"],
       state: ["rest"],
     });
-    expect(set?.variants).toHaveLength(4);
-    expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["intent", "state"]);
-    expect(set?.grid).toMatchObject({ rows: 4, columns: 1 });
+    expect(set?.variants).toHaveLength(4 * 2);
+    expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["intent", "frame", "state"]);
+    expect(set?.grid).toMatchObject({ rows: 8, columns: 1 });
     expect(set?.description).toBe(avizo?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Meldung");
     expect(set?.texts).toEqual({ heading: "Überschrift", details: "Einzelheit" });
@@ -2169,14 +2172,23 @@ describe("Figma plan for the avizo (Spec 011 ③)", () => {
     expect(items.avizo?.props).toEqual({
       intent: ["info", "success", "warning", "danger"],
       dismissible: ["boolean"],
+      frame: ["card", "band"],
     });
     expect(items.avizo?.states).toEqual(["rest"]);
-    expect(items.avizo?.values["surface.fill@intent=info,state=rest"]).toMatch(/^#[0-9a-f]{6}/);
-    expect(items.avizo?.values["accent.color@intent=danger,state=rest"]).toMatch(/^#[0-9a-f]{6}/);
-    expect(items.avizo?.values["message.color@intent=success,state=rest"]).toMatch(/^#[0-9a-f]{6}/);
-    expect(items.avizo?.values["accent.width@intent=info,state=rest"]).toMatch(/px$/);
-    expect(items.avizo?.values["dismiss.size@intent=info,state=rest"]).toMatch(/px$/);
-    expect(items.avizo?.values["box.inline-padding@intent=warning,state=rest"]).toMatch(/px$/);
+    expect(items.avizo?.values["surface.fill@frame=card,intent=info,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}/,
+    );
+    expect(items.avizo?.values["accent.color@frame=card,intent=danger,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}/,
+    );
+    expect(items.avizo?.values["message.color@frame=card,intent=success,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}/,
+    );
+    expect(items.avizo?.values["accent.width@frame=card,intent=info,state=rest"]).toMatch(/px$/);
+    expect(items.avizo?.values["dismiss.size@frame=card,intent=info,state=rest"]).toMatch(/px$/);
+    expect(items.avizo?.values["box.inline-padding@frame=card,intent=warning,state=rest"]).toMatch(
+      /px$/,
+    );
   });
 });
 
@@ -3063,15 +3075,22 @@ describe("the Figma plan draws icons (Spec 014 ②)", () => {
   it("draws the apartigilo as a separator with both orientations, and the saltligilo as a control in rest and focus", () => {
     const apartigilo = plan.components.find((component) => component.set === "apartigilo");
     expect(apartigilo?.structure).toBe("separator");
+    // Spec 036 Teil 5 ②b-2 (A-apartigilo-1): orientation × emphasis; low is the line it was.
     expect(apartigilo?.variants.map((variant) => variant.props)).toEqual([
-      { orientation: "horizontal", state: "rest" },
-      { orientation: "vertical", state: "rest" },
+      { orientation: "horizontal", emphasis: "low", state: "rest" },
+      { orientation: "horizontal", emphasis: "high", state: "rest" },
+      { orientation: "vertical", emphasis: "low", state: "rest" },
+      { orientation: "vertical", emphasis: "high", state: "rest" },
     ]);
     expect(apartigilo?.variants[0]?.bindings).toEqual({
       "line.color": "color/border/subtle",
       "line.width": "border/width/default",
     });
-    expect(apartigilo?.variants[1]?.bindings["box.height"]).toBe("size/control/medium");
+    expect(apartigilo?.variants[1]?.bindings).toEqual({
+      "line.color": "color/border/default",
+      "line.width": "border/width/strong",
+    });
+    expect(apartigilo?.variants[2]?.bindings["box.height"]).toBe("size/control/medium");
     expect(apartigilo?.label).toBeUndefined();
     // Nachlese 4 N-6 (F-7): each orientation once more between two words of the Vitrino, the
     // texts bound to the role of running text — the line is seen where it divides.
@@ -3121,7 +3140,7 @@ describe("the Figma plan draws icons (Spec 014 ②)", () => {
       false,
     );
     expect(
-      inventory.apartigilo?.values["line.color@orientation=horizontal,state=rest"],
+      inventory.apartigilo?.values["line.color@emphasis=low,orientation=horizontal,state=rest"],
     ).toBeDefined();
     expect(
       Object.keys(inventory.butono?.values ?? {}).some((key) => key.startsWith("icon.color@")),
@@ -3375,8 +3394,11 @@ describe("the Figma plan draws the pagxigilo and the spuro (Spec 015 ①)", () =
   it("the spuro: state as a breadcrumb with three levels, the last current, the chevron between two", () => {
     const spuro = set("spuro");
     expect(spuro?.structure).toBe("breadcrumb");
-    expect(spuro?.variants).toHaveLength(3);
-    const rest = spuro?.variants.find((variant) => variant.props.state === "rest");
+    // Spec 036 Teil 5 ②b-2 (A-spuro-1): emphasis × state; medium is the trail it was.
+    expect(spuro?.variants).toHaveLength(2 * 3);
+    const rest = spuro?.variants.find(
+      (variant) => variant.props.state === "rest" && variant.props.emphasis === "medium",
+    );
     expect(rest?.icons).toEqual({ separator: "chevron-right" });
     expect(rest?.bindings).toMatchObject({
       "separator.color": "color/text/muted",
@@ -3497,16 +3519,19 @@ describe("the Figma plan draws the karto (Spec 015 ③)", () => {
     expect(structureOf("article")).toBe("card");
     expect(set?.structure).toBe("card");
     expect(set?.extraAxes).toEqual(["orientation"]);
-    expect(set?.variants.map((variant) => variant.props)).toEqual([
-      { orientation: "vertical", state: "rest" },
-      { orientation: "horizontal", state: "rest" },
-    ]);
-    expect(set?.grid).toMatchObject({ rows: 2, columns: 1 });
+    // Spec 036 Teil 5 ②b-2 (A-karto-1): orientation × emphasis; high is the card it was.
+    expect(set?.variants.map((variant) => variant.props)).toEqual(
+      ["vertical", "horizontal"].flatMap((orientation) =>
+        ["high", "medium", "low"].map((emphasis) => ({ orientation, emphasis, state: "rest" })),
+      ),
+    );
+    expect(set?.grid).toMatchObject({ rows: 6, columns: 1 });
     // The media is no prop of the Skemo: a toggle, not a property.
     expect(set?.properties).toEqual({
       level: ["1", "2", "3", "4", "5", "6"],
       orientation: ["vertical", "horizontal"],
       standalone: "BOOLEAN",
+      emphasis: ["high", "medium", "low"],
       state: ["rest"],
     });
     expect(set?.toggles).toEqual([{ property: "media", part: "media", defaultValue: true }]);
@@ -3521,7 +3546,7 @@ describe("the Figma plan draws the karto (Spec 015 ③)", () => {
     expect(set?.examples).toEqual([
       {
         name: "karto – ohne Bild",
-        variant: { orientation: "vertical", state: "rest" },
+        variant: { orientation: "vertical", emphasis: "high", state: "rest" },
         padding: expect.any(Number),
         toggled: { media: false },
       },
@@ -3534,7 +3559,9 @@ describe("the Figma plan draws the karto (Spec 015 ③)", () => {
         color: { binding: "color/text/subtle" },
       },
     });
-    for (const variant of set?.variants ?? []) {
+    for (const variant of (set?.variants ?? []).filter(
+      (entry) => entry.props.emphasis === "high",
+    )) {
       expect(variant.bindings).toEqual({
         "surface.fill": "color/background/raised",
         "surface.radius": "radius/role/surface",
@@ -3556,6 +3583,15 @@ describe("the Figma plan draws the karto (Spec 015 ③)", () => {
         variable: "elevation/shadow/raised",
       });
     }
+    // medium: the sunken ground without a shadow; low: no ground of its own and no shadow.
+    const of = (emphasis: string) =>
+      set?.variants.find(
+        (entry) => entry.props.emphasis === emphasis && entry.props.orientation === "vertical",
+      );
+    expect(of("medium")?.bindings["surface.fill"]).toBe("color/background/sunken");
+    expect(of("medium")?.shadow).toBeUndefined();
+    expect(of("low")?.bindings["surface.fill"]).toBeUndefined();
+    expect(of("low")?.shadow).toBeUndefined();
     // The actions in the Vitrino's order look like a butono of emphasis high and low, the badge
     // like an insigno of intent neutral — roles read from their Skemoj, not the karto's.
     expect(set?.composed?.["action-1"]).toMatchObject({
@@ -3590,10 +3626,17 @@ describe("the Figma plan draws the karto (Spec 015 ③)", () => {
       level: ["1", "2", "3", "4", "5", "6"],
       orientation: ["vertical", "horizontal"],
       standalone: ["boolean"],
+      emphasis: ["high", "medium", "low"],
     });
     expect(items.karto?.states).toEqual(["rest"]);
-    // The orientation is no key (extraAxes); the composed looks and the media are no part.
-    expect(items.karto?.values).toEqual({
+    // The orientation is no key (extraAxes); the composed looks and the media are no part. Spec 036
+    // Teil 5 ②b-2 (A-karto-1): every value by emphasis; high is the card it was.
+    const high = Object.fromEntries(
+      Object.entries(items.karto?.values ?? {})
+        .filter(([key]) => key.includes("emphasis=high"))
+        .map(([key, value]) => [key.replace("emphasis=high,", ""), value]),
+    );
+    expect(high).toEqual({
       "surface.fill@state=rest": expect.stringMatching(/^#[0-9a-f]{6}$/),
       // Spec 029 ①: the container radius of the Fonto; its border a translucent overlay.
       "surface.radius@state=rest": "12px",
@@ -3609,6 +3652,8 @@ describe("the Figma plan draws the karto (Spec 015 ③)", () => {
       "box.inline-padding@state=rest": "11px",
       "box.gap@state=rest": "4px",
     });
+    expect(items.karto?.values["surface.fill@emphasis=medium,state=rest"]).toMatch(/^#/);
+    expect(items.karto?.values["surface.fill@emphasis=low,state=rest"]).toBeUndefined();
   });
 });
 
@@ -3628,20 +3673,19 @@ describe("the Figma plan draws the avataro (Spec 015 ③)", () => {
     expect(ikono?.extraAxes).toEqual(["name"]);
     expect(set?.structure).toBe("avatar");
     expect(set?.extraAxes).toBeUndefined();
-    // Spec 036 Teil 5 ②b-2 (A-avataro-2): five sizes.
-    expect(set?.variants.map((variant) => variant.props)).toEqual([
-      { size: "x-small", state: "rest" },
-      { size: "small", state: "rest" },
-      { size: "medium", state: "rest" },
-      { size: "large", state: "rest" },
-      { size: "x-large", state: "rest" },
-    ]);
-    expect(set?.grid).toMatchObject({ rows: 5, columns: 1 });
+    // Spec 036 Teil 5 ②b-2 (A-avataro-2, A-avataro-1): five sizes × three corners.
+    expect(set?.variants.map((variant) => variant.props)).toEqual(
+      ["x-small", "small", "medium", "large", "x-large"].flatMap((size) =>
+        ["round", "soft", "square"].map((corner) => ({ size, corner, state: "rest" })),
+      ),
+    );
+    expect(set?.grid).toMatchObject({ rows: 15, columns: 1 });
     expect(set?.properties).toEqual({
       name: "TEXT",
       picture: "TEXT",
       size: ["x-small", "small", "medium", "large", "x-large"],
       decorative: "BOOLEAN",
+      corner: ["round", "soft", "square"],
       state: ["rest"],
     });
     expect(set?.label).toEqual({ property: "label", defaultValue: VITRINO_AVATAR.initials });
@@ -3649,7 +3693,7 @@ describe("the Figma plan draws the avataro (Spec 015 ③)", () => {
     expect(set?.examples).toEqual([
       {
         name: "avataro – mit Bild",
-        variant: { size: "medium", state: "rest" },
+        variant: { size: "medium", corner: "round", state: "rest" },
         padding: expect.any(Number),
         toggled: { image: true },
       },
@@ -3682,15 +3726,18 @@ describe("the Figma plan draws the avataro (Spec 015 ③)", () => {
       large: "typography/label/1",
       "x-large": "typography/headline/4",
     };
+    // Spec 036 Teil 5 ②b-2 (A-avataro-1): the radii by corner.
+    const radii = { round: "radius/full", soft: "radius/small", square: "radius/none" };
     for (const variant of set?.variants ?? []) {
       const size = variant.props.size as keyof typeof sizes;
+      const corner = variant.props.corner as keyof typeof radii;
       expect(variant.bindings).toEqual({
         "box.size": sizes[size],
-        "image.radius": "radius/full",
+        "image.radius": radii[corner],
         "initials.fill": "color/background/sunken",
         "initials.color": "color/text/subtle",
         "initials.typography": roles[size],
-        "initials.radius": "radius/full",
+        "initials.radius": radii[corner],
       });
       expect(variant.icons).toBeUndefined();
       expect(variant.notDrawn).toEqual({});
@@ -3704,10 +3751,18 @@ describe("the Figma plan draws the avataro (Spec 015 ③)", () => {
       picture: ["string"],
       size: ["x-small", "small", "medium", "large", "x-large"],
       decorative: ["boolean"],
+      corner: ["round", "soft", "square"],
     });
     expect(items.avataro?.states).toEqual(["rest"]);
     const hex = expect.stringMatching(/^#[0-9a-f]{6}$/);
-    expect(items.avataro?.values).toEqual(
+    // Spec 036 Teil 5 ②b-2 (A-avataro-1): every value by corner too; round is the avatar it was.
+    const round = Object.fromEntries(
+      Object.entries(items.avataro?.values ?? {})
+        .filter(([key]) => key.includes("corner=round"))
+        .map(([key, value]) => [key.replace("corner=round,", ""), value]),
+    );
+    expect(items.avataro?.values["image.radius@corner=square,size=medium,state=rest"]).toBe("0px");
+    expect(round).toEqual(
       Object.fromEntries(
         [
           // Spec 029 ①b: the sizes sm/md/lg of the Fonto's avatar; Spec 036 Teil 5 ②b-2

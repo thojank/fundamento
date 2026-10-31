@@ -41,6 +41,8 @@ describe("spuro in the repo Modelo (section ①, G1, G2)", () => {
     expect(skemo?.props.map((prop) => [prop.name, prop.kind, prop.required ?? false])).toEqual([
       ["label", "string", false],
       ["page", "string", false],
+      // Spec 036 Teil 5 ②b-2 (A-spuro-1): medium the links, low the subtle text.
+      ["emphasis", "enum", false],
     ]);
     expect(skemo?.states).toEqual(["rest", "hover", "focus"]);
     expect(skemo?.slots).toEqual([
@@ -49,8 +51,8 @@ describe("spuro in the repo Modelo (section ①, G1, G2)", () => {
     expect(entryKeysOf(skemoOrThrow())).toEqual([
       { slot: "items", key: "current", equals: "page" },
     ]);
-    expect(variantKeys(skemoOrThrow())).toEqual(["state"]);
-    expect(combinationsOf(skemoOrThrow(), ["state"])).toHaveLength(3);
+    expect(variantKeys(skemoOrThrow())).toEqual(["emphasis", "state"]);
+    expect(combinationsOf(skemoOrThrow(), ["emphasis", "state"])).toHaveLength(6);
   });
 
   it("names its parts: the item as a link by current and state, the separator, box and focus ring; the current item text, not a link, in weight", () => {
@@ -62,7 +64,7 @@ describe("spuro in the repo Modelo (section ①, G1, G2)", () => {
       "focus-ring",
     ]);
     expect(skemo?.parts.item).toEqual({
-      color: { by: ["current", "state"] },
+      color: { by: ["emphasis", "current", "state"] },
       typography: { fixed: "typography.label.1" },
       weight: { by: ["current"] },
     });
@@ -78,8 +80,9 @@ describe("spuro in the repo Modelo (section ①, G1, G2)", () => {
       gap: { fixed: "spacing.xsmall" },
       height: { fixed: "size.target.min" },
     });
+    // Spec 036 Teil 5 ②b-2 (A-spuro-1): emphasis medium is the trail it was.
     const bound = (part: string, property: string, when: Record<string, string>) =>
-      boundToken(skemoOrThrow(), part, property, when)?.token;
+      boundToken(skemoOrThrow(), part, property, { emphasis: "medium", ...when })?.token;
     expect(bound("item", "color", { current: "false", state: "rest" })).toBe("color.link.rest");
     expect(bound("item", "color", { current: "false", state: "hover" })).toBe("color.link.hover");
     expect(bound("item", "color", { current: "true", state: "rest" })).toBe("color.text.default");
@@ -168,7 +171,7 @@ describe("the Uzo of the spuro (section ①, G2)", () => {
   it("the brief names current as the axis and the items as a duty, and stays under 750", () => {
     if (spuro === undefined) throw new Error("missing");
     const brief = briefOf(spuro);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["current"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["emphasis", "current"]);
     expect(brief.required).toEqual({ props: [], slots: ["items"] });
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
   });

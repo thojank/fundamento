@@ -2582,12 +2582,28 @@
     "apartigilo": {
       "line": {
         "color": {
-          "$type": "color",
-          "$value": "{color.border.subtle}"
+          "emphasis": {
+            "low": {
+              "$type": "color",
+              "$value": "{color.border.subtle}"
+            },
+            "high": {
+              "$type": "color",
+              "$value": "{color.border.default}"
+            }
+          }
         },
         "width": {
-          "$type": "dimension",
-          "$value": "{border.width.default}"
+          "emphasis": {
+            "low": {
+              "$type": "dimension",
+              "$value": "{border.width.default}"
+            },
+            "high": {
+              "$type": "dimension",
+              "$value": "{border.width.strong}"
+            }
+          }
         }
       },
       "box": {
@@ -2656,8 +2672,20 @@
     "avataro": {
       "image": {
         "radius": {
-          "$type": "dimension",
-          "$value": "{radius.full}"
+          "corner": {
+            "round": {
+              "$type": "dimension",
+              "$value": "{radius.full}"
+            },
+            "soft": {
+              "$type": "dimension",
+              "$value": "{radius.small}"
+            },
+            "square": {
+              "$type": "dimension",
+              "$value": "{radius.none}"
+            }
+          }
         }
       },
       "initials": {
@@ -2696,8 +2724,20 @@
           }
         },
         "radius": {
-          "$type": "dimension",
-          "$value": "{radius.full}"
+          "corner": {
+            "round": {
+              "$type": "dimension",
+              "$value": "{radius.full}"
+            },
+            "soft": {
+              "$type": "dimension",
+              "$value": "{radius.small}"
+            },
+            "square": {
+              "$type": "dimension",
+              "$value": "{radius.none}"
+            }
+          }
         }
       },
       "box": {
@@ -2858,8 +2898,16 @@
           "$value": "{spacing.small}"
         },
         "radius": {
-          "$type": "dimension",
-          "$value": "{radius.role.surface}"
+          "frame": {
+            "card": {
+              "$type": "dimension",
+              "$value": "{radius.role.surface}"
+            },
+            "band": {
+              "$type": "dimension",
+              "$value": "{radius.none}"
+            }
+          }
         }
       }
     },
@@ -5798,16 +5846,28 @@
     "karto": {
       "surface": {
         "fill": {
-          "$type": "color",
-          "$value": "{color.background.raised}"
+          "emphasis": {
+            "high": {
+              "$type": "color",
+              "$value": "{color.background.raised}"
+            },
+            "medium": {
+              "$type": "color",
+              "$value": "{color.background.sunken}"
+            }
+          }
         },
         "radius": {
           "$type": "dimension",
           "$value": "{radius.role.surface}"
         },
         "shadow": {
-          "$type": "shadow",
-          "$value": "{elevation.shadow.raised}"
+          "emphasis": {
+            "high": {
+              "$type": "shadow",
+              "$value": "{elevation.shadow.raised}"
+            }
+          }
         }
       },
       "border": {
@@ -9064,33 +9124,69 @@
     "spuro": {
       "item": {
         "color": {
-          "current": {
-            "true": {
-              "rest": {
-                "$type": "color",
-                "$value": "{color.text.default}"
-              },
-              "hover": {
-                "$type": "color",
-                "$value": "{color.text.default}"
-              },
-              "focus": {
-                "$type": "color",
-                "$value": "{color.text.default}"
+          "emphasis": {
+            "medium": {
+              "current": {
+                "true": {
+                  "rest": {
+                    "$type": "color",
+                    "$value": "{color.text.default}"
+                  },
+                  "hover": {
+                    "$type": "color",
+                    "$value": "{color.text.default}"
+                  },
+                  "focus": {
+                    "$type": "color",
+                    "$value": "{color.text.default}"
+                  }
+                },
+                "false": {
+                  "rest": {
+                    "$type": "color",
+                    "$value": "{color.link.rest}"
+                  },
+                  "hover": {
+                    "$type": "color",
+                    "$value": "{color.link.hover}"
+                  },
+                  "focus": {
+                    "$type": "color",
+                    "$value": "{color.link.rest}"
+                  }
+                }
               }
             },
-            "false": {
-              "rest": {
-                "$type": "color",
-                "$value": "{color.link.rest}"
-              },
-              "hover": {
-                "$type": "color",
-                "$value": "{color.link.hover}"
-              },
-              "focus": {
-                "$type": "color",
-                "$value": "{color.link.rest}"
+            "low": {
+              "current": {
+                "true": {
+                  "rest": {
+                    "$type": "color",
+                    "$value": "{color.text.default}"
+                  },
+                  "hover": {
+                    "$type": "color",
+                    "$value": "{color.text.default}"
+                  },
+                  "focus": {
+                    "$type": "color",
+                    "$value": "{color.text.default}"
+                  }
+                },
+                "false": {
+                  "rest": {
+                    "$type": "color",
+                    "$value": "{color.text.subtle}"
+                  },
+                  "hover": {
+                    "$type": "color",
+                    "$value": "{color.text.default}"
+                  },
+                  "focus": {
+                    "$type": "color",
+                    "$value": "{color.text.subtle}"
+                  }
+                }
               }
             }
           }
