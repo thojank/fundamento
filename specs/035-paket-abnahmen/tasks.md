@@ -118,5 +118,5 @@
 ## Abschluss
 
 - [x] **T3574** CI aller sieben PRs, zwei R-8-Neustarts grün, Kosten 0,18296 $ ≤ 0,50 $, `main` unverändert, Überschneidungen und Merge-Reihenfolge geprüft.
-- [ ] **T3575 Doku:** plan, tasks und Bericht zusammengeführt (PAK-5.2).
+- [x] **T3575 Doku:** plan, tasks und Bericht zusammengeführt (PAK-5.2) – `01d3c2a3`; SHA im Folgecommit nachgetragen.
 - [ ] **T3576** Doku-Test und Audit AC-1 bis AC-11 (PAK-6.1).
