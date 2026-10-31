@@ -1,0 +1,906 @@
+{
+  "$comment": "Spec 036 Teil 5 ②b-2 (AC-14, Arkitekturo-Vertrag): die Props jedes Ero im Release 0.2.0 (Commit 7aa400a8, packages/modelo/data/eroj/*/skemo.json), Name, Art und die Werte eines Enums. Erzeugt aus git show 7aa400a8, nicht von Hand.",
+  "release": "0.2.0",
+  "commit": "7aa400a8703bcae07b5e2792bd0c966ab06a8de0",
+  "eroj": {
+    "alsxutilo": [
+      {
+        "name": "accept",
+        "kind": "string"
+      },
+      {
+        "name": "max-size",
+        "kind": "number"
+      },
+      {
+        "name": "multiple",
+        "kind": "boolean"
+      },
+      {
+        "name": "dropzone",
+        "kind": "boolean"
+      },
+      {
+        "name": "required",
+        "kind": "boolean"
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean"
+      },
+      {
+        "name": "invalid",
+        "kind": "boolean"
+      },
+      {
+        "name": "name",
+        "kind": "string"
+      }
+    ],
+    "apartigilo": [
+      {
+        "name": "orientation",
+        "kind": "enum",
+        "values": [
+          "horizontal",
+          "vertical"
+        ]
+      },
+      {
+        "name": "decorative",
+        "kind": "boolean"
+      }
+    ],
+    "atributlisto": [
+      {
+        "name": "layout",
+        "kind": "enum",
+        "values": [
+          "columns",
+          "stacked",
+          "auto"
+        ]
+      },
+      {
+        "name": "label",
+        "kind": "string"
+      }
+    ],
+    "avataro": [
+      {
+        "name": "name",
+        "kind": "string"
+      },
+      {
+        "name": "picture",
+        "kind": "string"
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ]
+      },
+      {
+        "name": "decorative",
+        "kind": "boolean"
+      }
+    ],
+    "avizo": [
+      {
+        "name": "intent",
+        "kind": "enum",
+        "values": [
+          "info",
+          "success",
+          "warning",
+          "danger"
+        ]
+      },
+      {
+        "name": "dismissible",
+        "kind": "boolean"
+      }
+    ],
+    "butono": [
+      {
+        "name": "emphasis",
+        "kind": "enum",
+        "values": [
+          "high",
+          "medium",
+          "low"
+        ]
+      },
+      {
+        "name": "intent",
+        "kind": "enum",
+        "values": [
+          "neutral",
+          "danger"
+        ]
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ]
+      },
+      {
+        "name": "type",
+        "kind": "enum",
+        "values": [
+          "button",
+          "submit",
+          "reset"
+        ]
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean"
+      },
+      {
+        "name": "loading",
+        "kind": "boolean"
+      },
+      {
+        "name": "full-width",
+        "kind": "boolean"
+      },
+      {
+        "name": "label",
+        "kind": "string"
+      }
+    ],
+    "dialogo": [
+      {
+        "name": "open",
+        "kind": "boolean"
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium"
+        ]
+      },
+      {
+        "name": "reason",
+        "kind": "enum",
+        "values": [
+          "none",
+          "optional",
+          "required"
+        ]
+      }
+    ],
+    "elektilo": [
+      {
+        "name": "value",
+        "kind": "string"
+      },
+      {
+        "name": "placeholder",
+        "kind": "string"
+      },
+      {
+        "name": "required",
+        "kind": "boolean"
+      },
+      {
+        "name": "invalid",
+        "kind": "boolean"
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ]
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean"
+      },
+      {
+        "name": "name",
+        "kind": "string"
+      },
+      {
+        "name": "empty-label",
+        "kind": "string"
+      }
+    ],
+    "elekto": [
+      {
+        "name": "value",
+        "kind": "string"
+      },
+      {
+        "name": "required",
+        "kind": "boolean"
+      },
+      {
+        "name": "invalid",
+        "kind": "boolean"
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ]
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean"
+      },
+      {
+        "name": "name",
+        "kind": "string"
+      },
+      {
+        "name": "orientation",
+        "kind": "enum",
+        "values": [
+          "vertical",
+          "horizontal"
+        ]
+      }
+    ],
+    "faldilo": [
+      {
+        "name": "open",
+        "kind": "boolean"
+      },
+      {
+        "name": "group",
+        "kind": "string"
+      }
+    ],
+    "ikono": [
+      {
+        "name": "name",
+        "kind": "enum",
+        "values": [
+          "check",
+          "chevron-down",
+          "chevron-left",
+          "chevron-right",
+          "close",
+          "collapse",
+          "danger",
+          "expand",
+          "external",
+          "info",
+          "more",
+          "search",
+          "sort-ascending",
+          "sort-descending",
+          "success",
+          "upload",
+          "warning"
+        ]
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ]
+      },
+      {
+        "name": "intent",
+        "kind": "enum",
+        "values": [
+          "neutral",
+          "info",
+          "success",
+          "warning",
+          "danger"
+        ]
+      },
+      {
+        "name": "label",
+        "kind": "string"
+      }
+    ],
+    "insigno": [
+      {
+        "name": "intent",
+        "kind": "enum",
+        "values": [
+          "neutral",
+          "info",
+          "success",
+          "warning",
+          "danger"
+        ]
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium"
+        ]
+      }
+    ],
+    "kampo": [
+      {
+        "name": "kind",
+        "kind": "enum",
+        "values": [
+          "text",
+          "email",
+          "tel",
+          "url",
+          "search",
+          "password",
+          "number",
+          "date"
+        ]
+      },
+      {
+        "name": "value",
+        "kind": "string"
+      },
+      {
+        "name": "placeholder",
+        "kind": "string"
+      },
+      {
+        "name": "required",
+        "kind": "boolean"
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean"
+      },
+      {
+        "name": "readonly",
+        "kind": "boolean"
+      },
+      {
+        "name": "invalid",
+        "kind": "boolean"
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ]
+      },
+      {
+        "name": "name",
+        "kind": "string"
+      },
+      {
+        "name": "min",
+        "kind": "string"
+      },
+      {
+        "name": "max",
+        "kind": "string"
+      },
+      {
+        "name": "autocomplete",
+        "kind": "string"
+      }
+    ],
+    "karto": [
+      {
+        "name": "level",
+        "kind": "enum",
+        "values": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ]
+      },
+      {
+        "name": "orientation",
+        "kind": "enum",
+        "values": [
+          "vertical",
+          "horizontal"
+        ]
+      },
+      {
+        "name": "standalone",
+        "kind": "boolean"
+      }
+    ],
+    "kodbloko": [
+      {
+        "name": "copyable",
+        "kind": "boolean"
+      }
+    ],
+    "kompletigilo": [
+      {
+        "name": "value",
+        "kind": "string"
+      },
+      {
+        "name": "placeholder",
+        "kind": "string"
+      },
+      {
+        "name": "required",
+        "kind": "boolean"
+      },
+      {
+        "name": "invalid",
+        "kind": "boolean"
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ]
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean"
+      },
+      {
+        "name": "name",
+        "kind": "string"
+      },
+      {
+        "name": "allow-free",
+        "kind": "boolean"
+      },
+      {
+        "name": "min-chars",
+        "kind": "number"
+      },
+      {
+        "name": "expanded",
+        "kind": "boolean"
+      },
+      {
+        "name": "loading",
+        "kind": "boolean"
+      }
+    ],
+    "konsileto": [
+      {
+        "name": "for",
+        "kind": "string"
+      },
+      {
+        "name": "placement",
+        "kind": "enum",
+        "values": [
+          "block-start",
+          "block-end",
+          "inline-start",
+          "inline-end"
+        ]
+      }
+    ],
+    "langetaro": [
+      {
+        "name": "label",
+        "kind": "string"
+      },
+      {
+        "name": "selected",
+        "kind": "string"
+      }
+    ],
+    "ligilo": [
+      {
+        "name": "to",
+        "kind": "string"
+      },
+      {
+        "name": "placement",
+        "kind": "enum",
+        "values": [
+          "inline",
+          "standalone"
+        ]
+      },
+      {
+        "name": "external",
+        "kind": "boolean"
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ]
+      },
+      {
+        "name": "label",
+        "kind": "string"
+      }
+    ],
+    "markdovido": [
+      {
+        "name": "source",
+        "kind": "string"
+      },
+      {
+        "name": "start-level",
+        "kind": "enum",
+        "values": [
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ]
+      }
+    ],
+    "markobutono": [
+      {
+        "name": "checked",
+        "kind": "boolean"
+      },
+      {
+        "name": "required",
+        "kind": "boolean"
+      },
+      {
+        "name": "invalid",
+        "kind": "boolean"
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ]
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean"
+      },
+      {
+        "name": "name",
+        "kind": "string"
+      }
+    ],
+    "menuo": [
+      {
+        "name": "label",
+        "kind": "string"
+      },
+      {
+        "name": "placement",
+        "kind": "enum",
+        "values": [
+          "block-start",
+          "block-end",
+          "inline-start",
+          "inline-end"
+        ]
+      },
+      {
+        "name": "open",
+        "kind": "boolean"
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean"
+      }
+    ],
+    "mezurilo": [
+      {
+        "name": "value",
+        "kind": "number"
+      },
+      {
+        "name": "min",
+        "kind": "number"
+      },
+      {
+        "name": "max",
+        "kind": "number"
+      },
+      {
+        "name": "intent",
+        "kind": "enum",
+        "values": [
+          "neutral",
+          "success",
+          "warning",
+          "danger"
+        ]
+      },
+      {
+        "name": "label-hidden",
+        "kind": "boolean"
+      }
+    ],
+    "navigado": [
+      {
+        "name": "orientation",
+        "kind": "enum",
+        "values": [
+          "horizontal",
+          "vertical"
+        ]
+      },
+      {
+        "name": "label",
+        "kind": "string"
+      },
+      {
+        "name": "page",
+        "kind": "string"
+      }
+    ],
+    "pagxigilo": [
+      {
+        "name": "page",
+        "kind": "string"
+      },
+      {
+        "name": "total-pages",
+        "kind": "number"
+      },
+      {
+        "name": "label",
+        "kind": "string"
+      },
+      {
+        "name": "mode",
+        "kind": "enum",
+        "values": [
+          "button",
+          "link"
+        ]
+      },
+      {
+        "name": "href-template",
+        "kind": "string"
+      },
+      {
+        "name": "siblings",
+        "kind": "number"
+      }
+    ],
+    "plenstato": [
+      {
+        "name": "kind",
+        "kind": "enum",
+        "values": [
+          "loading",
+          "empty"
+        ]
+      }
+    ],
+    "saltligilo": [
+      {
+        "name": "to",
+        "kind": "string"
+      },
+      {
+        "name": "focus-only",
+        "kind": "boolean"
+      }
+    ],
+    "spuro": [
+      {
+        "name": "label",
+        "kind": "string"
+      },
+      {
+        "name": "page",
+        "kind": "string"
+      }
+    ],
+    "sxaltilo": [
+      {
+        "name": "checked",
+        "kind": "boolean"
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ]
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean"
+      },
+      {
+        "name": "name",
+        "kind": "string"
+      }
+    ],
+    "sxvebilo": [
+      {
+        "name": "label",
+        "kind": "string"
+      },
+      {
+        "name": "placement",
+        "kind": "enum",
+        "values": [
+          "block-start",
+          "block-end",
+          "inline-start",
+          "inline-end"
+        ]
+      },
+      {
+        "name": "open",
+        "kind": "boolean"
+      }
+    ],
+    "tabelo": [
+      {
+        "name": "density",
+        "kind": "enum",
+        "values": [
+          "comfortable",
+          "compact"
+        ]
+      },
+      {
+        "name": "caption-hidden",
+        "kind": "boolean"
+      },
+      {
+        "name": "sort",
+        "kind": "string"
+      },
+      {
+        "name": "direction",
+        "kind": "enum",
+        "values": [
+          "ascending",
+          "descending"
+        ]
+      }
+    ],
+    "tekstareo": [
+      {
+        "name": "kind",
+        "kind": "enum",
+        "values": [
+          "text",
+          "code"
+        ]
+      },
+      {
+        "name": "value",
+        "kind": "string"
+      },
+      {
+        "name": "rows",
+        "kind": "number"
+      },
+      {
+        "name": "placeholder",
+        "kind": "string"
+      },
+      {
+        "name": "required",
+        "kind": "boolean"
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean"
+      },
+      {
+        "name": "readonly",
+        "kind": "boolean"
+      },
+      {
+        "name": "invalid",
+        "kind": "boolean"
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ]
+      },
+      {
+        "name": "name",
+        "kind": "string"
+      }
+    ],
+    "teksto": [
+      {
+        "name": "kind",
+        "kind": "enum",
+        "values": [
+          "body",
+          "caption",
+          "kicker",
+          "code"
+        ]
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "1",
+          "2"
+        ]
+      },
+      {
+        "name": "emphasis",
+        "kind": "enum",
+        "values": [
+          "high",
+          "medium",
+          "low"
+        ]
+      }
+    ],
+    "titolo": [
+      {
+        "name": "level",
+        "kind": "enum",
+        "values": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ]
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "display-1",
+          "display-2",
+          "display-3",
+          "headline-1",
+          "headline-2",
+          "headline-3",
+          "headline-4"
+        ]
+      },
+      {
+        "name": "focusable",
+        "kind": "boolean"
+      }
+    ]
+  }
+}
