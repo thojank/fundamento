@@ -77,8 +77,9 @@ describe("Spec 029 ① 5: the foundation pages", () => {
     // message and the kampo's status icon (216). Spec 035 2.3.1 and 2.3.3: the targets of the date
     // picker's trigger and ✕ (+2). Spec 036 Befund 1.1: radius.role.multiline (+1).
     // Spec 036 Befund 2.2: the Zweitfarbe, 12 steps and 5 roles (+17).
-    // Spec 036 Teil 5 ②b-2: elekto, markobutono and sxaltilo lose their size large (−8).
-    expect(tokenoj.length).toBe(1892);
+    // Spec 036 Teil 5 ②b-2: elekto, markobutono and sxaltilo lose their size large (−8); the count
+    // of the tekstareo (A-tekstareo-1, +2).
+    expect(tokenoj.length).toBe(1894);
     const levels = new Set(tokenoj.map((token) => token.ebeno));
     expect(levels).toEqual(new Set(["grundlage", "rolle", "ero"]));
     const text = tokenoj.find((token) => token.name === "color.text.default");

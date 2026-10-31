@@ -1640,6 +1640,8 @@ describe("Figma plan for the tekstareo (Spec 011 ②)", () => {
       // Spec 029 ②b-1b M-2: the status of a field, its message beside help and error.
       intent: ["neutral", "success", "warning", "danger"],
       "message-position": ["below", "joined"],
+      // Spec 036 Teil 5 ②b-2 (A-tekstareo-1): the most characters.
+      "max-length": "NUMBER",
       state: ["rest", "hover", "focus", "disabled", "invalid", "warning", "success"],
     });
     expect(set?.variants).toHaveLength(2 * 3 * 7);
@@ -1684,6 +1686,8 @@ describe("Figma plan for the tekstareo (Spec 011 ②)", () => {
     expect(rest?.notDrawn).toEqual({
       "text.color": "jug_01M4S2R85WRAC5SV7CARH8RE7S",
       "required-mark.color": "jug_01M4S2R85WRAC5SV7CARH8RE7S",
+      // Spec 036 Teil 5 ②b-2 (A-tekstareo-1): the count of typed characters, in an empty field.
+      "count.color": FIGMA_NOT_DRAWN["tekstareo:count"],
     });
     expect(rest?.hidden).toBeUndefined();
     // The code role asks for the mono family in every brand (F30).

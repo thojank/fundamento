@@ -4577,6 +4577,17 @@
       "kialo": "Zufallstreffer, keine Übernahme: color.palette.danger.900 steht seit Spec 004 T006 (2026-09-20) im Vortaro-Kern, einen Monat bevor der Benchmark Astryx gemessen wurde (2026-10-23). Der Wert folgt aus Fundamentos eigener Palette: Die dunklen Stufen der Gefahrenfarbe liegen außerhalb von sRGB, Grün und Blau fallen auf 0, Rot steht auf zwei Stellen gerundet. Ein solcher reiner Rotton hat nur einen freien Kanal mit rund hundert möglichen Werten; dass eine Liste mit 1647 Farben einen davon kennt, ist Zufall.",
       "date": "2026-10-24",
       "context": "Spec 032 ② (Entscheidung des Maintainers vom 24.10.2026): Probelauf der Clean-Room-Prüfung gegen research/benchmark-astryx-2026-10.md auf main d29a5206, Liste benchmark-astryx-weitere (die übrigen Themes und der Basis-Satz, nicht theme-neutral). Treffer in packages/vortaro/sets/core.json (color.palette.danger.900) und in specs/004-komparo/plan.md (V2, Beobachtung zu danger 800–950). Ausgenommen über packages/modelo/src/checks/clean-room/hazardaj-trafoj.json mit Fingerprint und Quelle, nur als Hash; jeder andere Treffer dieser Liste bleibt ein Befund."
+    },
+    {
+      "id": "jug_01M69HFBBF3PH19R6G7A8G95HB",
+      "ref": {
+        "artikolo": "VIII",
+        "celo": "figma"
+      },
+      "decision": "approved",
+      "kialo": "Der Zähler des tekstareo (Teil count) zählt, was eine Person getippt hat: Das Feld im Komponentenset ist leer und zeigt den Platzhalter, also gibt es nichts zu zählen, und der Zähler hat in Figma keinen Knoten (FIGMA_NOT_DRAWN), wie die Farbe des getippten Textes (jug_01M4S2R85WRAC5SV7CARH8RE7S). Das Prop max-length steht als NUMBER-Eigenschaft im Set. Zeichnet das Plugin eines Tages ein gefülltes Feld, entfällt dieser Eintrag.",
+      "date": "2026-10-31",
+      "context": "Spec 036 Teil 5 ②b-2 (Spec 029 abgleich.json A-tekstareo-1, Auflage ②a-3): max-length mit Zähler; check:parity meldet die Werte des Teils count als freigegeben (parity-part-not-drawn), keine Differenz. Von P0 angelegt, zur Bestätigung durch den Maintainer."
     }
   ]
 }

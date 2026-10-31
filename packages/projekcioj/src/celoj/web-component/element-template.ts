@@ -357,7 +357,9 @@ function fieldMarkup(
     trailing,
   );
   const row = `<div part="row">${native}${end}</div>`;
-  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label>${row}${calendar}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+  // Spec 036 Teil 5 ②b-2 (A-tekstareo-1): the count of a text area with max-length, under it.
+  const count = textarea ? '<span part="count" id="max-length" hidden></span>' : "";
+  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label>${row}${count}${calendar}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -1697,6 +1699,22 @@ ${
       control.setAttribute("rows", String(rows ?? ""));
       if (kind === "code") control.setAttribute("spellcheck", "false");
       else control.removeAttribute("spellcheck");
+      // Spec 036 Teil 5 ②b-2 (A-tekstareo-1): max-length is the platform's limit; the count under
+      // the area says how many characters of how many and describes the area (prop:max-length).
+      const most = Number(this.propValue("max-length"));
+      const counted = this.shadowRoot?.getElementById("max-length");
+      if (Number.isInteger(most) && most > 0) {
+        (control as HTMLTextAreaElement).maxLength = most;
+        const number = new Intl.NumberFormat(this.#lingvo());
+        const words = TEXTS["count-count"]?.[this.#lingvo()] ?? TEXTS["count-count"]?.en ?? "";
+        const said = words
+          .replace("{count}", number.format((control as HTMLTextAreaElement).value.length))
+          .replace("{max-length}", number.format(most));
+        if (counted instanceof HTMLElement && counted.textContent !== said) counted.textContent = said;
+      } else {
+        control.removeAttribute("maxlength");
+        if (counted instanceof HTMLElement) counted.textContent = "";
+      }
 `
 }${
   isDatepicker
@@ -3167,7 +3185,11 @@ ${
     const chosen = this.#entries().find((entry) => entry.value === this.getAttribute("value"));
     // The text of a chosen option shows no list of its own.
     if (chosen !== undefined && chosen.text.toLowerCase() === typed && !this.#suggestTyped) return [];
-    return this.#entries().filter((entry) => entry.text.toLowerCase().includes(typed));
+    const matches = this.#entries().filter((entry) => entry.text.toLowerCase().includes(typed));
+    // Spec 036 Teil 5 ②b-2 (A-kompletigilo-1): at most max-suggestions, the first matches; the
+    // count heard is the count shown.
+    const most = Number(this.propValue("max-suggestions"));
+    return Number.isInteger(most) && most > 0 ? matches.slice(0, most) : matches;
   }
 
   /** Writes the rows of the listbox from the matches and tells how many there are. */
@@ -3996,6 +4018,19 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
     const bound = this.propValue("max-size");
     const limit = typeof bound === "string" && bound !== "" ? Number(bound) : 0;
     const word = (key: string): string => TEXTS[key]?.[language] ?? TEXTS[key]?.en ?? "";
+    // Spec 036 Teil 5 ②b-2 (A-alsxutilo-1): more files than max-files hold the form, in the
+    // Modelo's words with the count and the most.
+    const most = Number(this.propValue("max-files"));
+    if (Number.isInteger(most) && most > 0 && this.#files.length > most) {
+      const number = new Intl.NumberFormat(language);
+      return {
+        flags: { rangeOverflow: true },
+        message: this.#fill(word("max-files-invalid"), {
+          count: number.format(this.#files.length),
+          "max-files": number.format(most),
+        }),
+      };
+    }
     for (const file of this.#files) {
       if (kinds.length > 0 && !kinds.some((kind) => this.#fits(file, kind))) {
         return {

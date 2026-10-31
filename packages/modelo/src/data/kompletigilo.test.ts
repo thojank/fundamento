@@ -59,6 +59,8 @@ describe("kompletigilo in the repo Modelo (section ⑤, G1, G2)", () => {
       // Spec 029 ②b-1b M-2: the status of the field.
       ["intent", "enum", "neutral"],
       ["message-position", "enum", "below"],
+      // Spec 036 Teil 5 ②b-2 (A-kompletigilo-1): the most suggestions, the last prop.
+      ["max-suggestions", "number", undefined],
     ]);
     expect(skemo?.states).toEqual([
       "rest",

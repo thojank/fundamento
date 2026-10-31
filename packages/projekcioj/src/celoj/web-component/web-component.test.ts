@@ -868,6 +868,8 @@ describe("Web Component Celo for the tekstareo (Spec 011 ②)", () => {
       "control",
       "end",
       "spinner",
+      // Spec 036 Teil 5 ②b-2 (A-tekstareo-1): the count of max-length under the area.
+      "count",
       "help",
       "error",
       "message",

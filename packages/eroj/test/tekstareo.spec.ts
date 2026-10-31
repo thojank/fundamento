@@ -54,6 +54,8 @@ test.describe("fm-tekstareo behaviour", () => {
       "control",
       "end",
       "spinner",
+      // Spec 036 Teil 5 ②b-2 (A-tekstareo-1): the count of max-length, hidden without it.
+      "count",
       "help",
       "error",
       "message",

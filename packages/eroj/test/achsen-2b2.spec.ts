@@ -176,21 +176,19 @@ test.describe("②b-2 A-alsxutilo-1: max-files", () => {
     await serve(
       page,
       out,
-      '<form id="f"><fm-alsxutilo name="belege" multiple max-files="2">Belege</fm-alsxutilo></form>',
+      '<form id="f"><fm-alsxutilo name="belege" multiple max-files="2">Belege</fm-alsxutilo></form><form id="g"><fm-alsxutilo name="belege" multiple max-files="2">Belege</fm-alsxutilo></form>',
     );
-    const input = page.locator("fm-alsxutilo").locator('input[type="file"]');
     const file = (name: string) => ({ name, mimeType: "text/plain", buffer: Buffer.from(name) });
-    await input.setInputFiles([file("a.txt"), file("b.txt"), file("c.txt")]);
-    const valid = await page.evaluate(() =>
-      (document.querySelector("#f") as HTMLFormElement).checkValidity(),
-    );
-    expect(valid).toBe(false);
-    await expect(page.locator("fm-alsxutilo").locator('[part="error"]')).toContainText("2");
-    await input.setInputFiles([file("a.txt"), file("b.txt")]);
-    const fine = await page.evaluate(() =>
-      (document.querySelector("#f") as HTMLFormElement).checkValidity(),
-    );
-    expect(fine).toBe(true);
+    const inputOf = (form: string) =>
+      page.locator(`#${form} fm-alsxutilo`).locator('input[type="file"]');
+    const valid = (form: string) =>
+      page.evaluate((id) => (document.getElementById(id) as HTMLFormElement).checkValidity(), form);
+    // The chosen files add up (Spec 015 ②): three in one field, two in the other.
+    await inputOf("f").setInputFiles([file("a.txt"), file("b.txt"), file("c.txt")]);
+    expect(await valid("f")).toBe(false);
+    await expect(page.locator("#f fm-alsxutilo").locator('[part="error"]')).toContainText("2");
+    await inputOf("g").setInputFiles([file("a.txt"), file("b.txt")]);
+    expect(await valid("g")).toBe(true);
   });
 });
 
