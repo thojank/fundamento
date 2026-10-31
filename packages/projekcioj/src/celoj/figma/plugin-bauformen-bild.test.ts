@@ -138,6 +138,17 @@ const WANTED_2B2: Readonly<Record<string, readonly { befund: string; match?: str
       [{ befund: "②b-2 A-*-2: size an axis of the variants, three sizes; the set laid out anew." }],
     ]),
   ),
+  // S36-4.2, the sizes of the rest. A new value of an axis adds variants (the set laid out anew):
+  // ikono x-small (A-ikono-2), signeto large (A-signeto-2), avataro x-small and x-large
+  // (A-avataro-2). A new size axis renames every variant and keys its variables by size (same
+  // values): pagxigilo (A-pagxigilo-2), langetaro (A-langetaro-2). dialogo full (A-dialogo-2): a
+  // third size, and the radius of small and medium is the variable of its size now (same value).
+  ikono: [{ befund: "②b-2 A-ikono-2: size x-small.", match: "size=x-small" }],
+  signeto: [{ befund: "②b-2 A-signeto-2: size large.", match: "size=large" }],
+  avataro: [{ befund: "②b-2 A-avataro-2: sizes x-small and x-large.", match: "size=x-" }],
+  pagxigilo: [{ befund: "②b-2 A-pagxigilo-2: size an axis of the variants." }],
+  langetaro: [{ befund: "②b-2 A-langetaro-2: size an axis of the variants." }],
+  dialogo: [{ befund: "②b-2 A-dialogo-2: size full; the radius by size." }],
 };
 
 /** One run of the plan in the double, read by every case (Vitest collects nothing here). */
