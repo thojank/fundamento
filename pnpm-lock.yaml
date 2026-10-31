@@ -49,6 +49,9 @@ importers:
       '@fundamento/agordilo':
         specifier: workspace:*
         version: link:../agordilo
+      '@fundamento/ekranoj':
+        specifier: workspace:*
+        version: link:../ekranoj
       '@fundamento/mcp':
         specifier: workspace:*
         version: link:../mcp
@@ -58,6 +61,9 @@ importers:
       '@fundamento/modelo':
         specifier: workspace:*
         version: link:../modelo
+      '@fundamento/nordstelo':
+        specifier: workspace:*
+        version: link:../nordstelo
       '@fundamento/projekcioj':
         specifier: workspace:*
         version: link:../projekcioj
@@ -262,6 +268,9 @@ importers:
       '@axe-core/playwright':
         specifier: 4.13.0
         version: 4.13.0(playwright-core@1.63.0)
+      '@fundamento/ekranoj':
+        specifier: workspace:*
+        version: link:../ekranoj
       '@fundamento/eroj':
         specifier: workspace:*
         version: link:../eroj
