@@ -4,8 +4,10 @@
 // uses it), the font families by role (headings: display, code: code, else body), the radii and the
 // spacing (padding and gap) in px, each with the file and the line. Generic families, 0, pills and
 // percentages do not count. Spec 036 Teil 4: a drawn shadow (box-shadow, or a custom property named
-// for shadow or elevation, not inset) is a finding too, for the step „Elevation“. A bot challenge instead of the page (a status that refuses automatic
-// readers, the markers of a challenge) is Blokita: nothing of it is read (Spec 035, Befund 4.1).
+// for shadow or elevation, not inset) is a finding too, for the step „Elevation“, and a colour that
+// paints a background says so (the ground of the neutrals is never the text). A bot challenge
+// instead of the page (a status that refuses automatic readers, the markers of a challenge) is
+// Blokita: nothing of it is read (Spec 035, Befund 4.1).
 
 import postcss from "postcss";
 import { coloursIn, type Herkunft, lineOf, type Trovo } from "./trovo.js";
@@ -143,12 +145,16 @@ interface Sheet {
   firstLine: number;
 }
 
+/** A declaration that paints an area: a background, or a custom property named for one. */
+const BACKGROUND = /^(background|background-color)$|^--(.*-)?(bg|background|surface|canvas)(-.*)?$/;
+
 function readSheet(
   sheet: Sheet & { root: postcss.Root },
   colours: Map<string, Trovo>,
   variables: ReadonlyMap<string, string>,
   uses: Map<string, number>,
   out: Trovo[],
+  flaechen: Set<string>,
 ): void {
   const root = sheet.root;
   const at = (line: number | undefined): Herkunft => ({
@@ -162,16 +168,19 @@ function readSheet(
     if (COLOUR_PROPS.test(prop)) {
       // Probe run 29.10.: a colour the sheet names as its brand's weighs more than a palette step.
       const weight = BRAND_NAME.test(prop) ? 1 + BRAND_BONUS : 1;
+      const background = BACKGROUND.test(prop);
       for (const colour of coloursIn(value)) {
         const known = colours.get(colour);
         if (known !== undefined) known.pezo += weight;
         else
           colours.set(colour, { kind: "farbo", valoro: colour, pezo: weight, herkunft: at(line) });
+        if (background) flaechen.add(colour);
       }
       for (const use of value.matchAll(/var\(\s*(--[\w-]+)/g)) {
         const colour = variables.get(use[1] ?? "");
         // Counted at the end: a variable is often used above the line that defines it.
         if (colour !== undefined) uses.set(colour, (uses.get(colour) ?? 0) + weight);
+        if (colour !== undefined && background) flaechen.add(colour);
       }
     }
     // Probe run 29.10.: a brand's CSS keeps radius, families and spacing in custom properties; their
@@ -316,10 +325,15 @@ export async function legiPagxon(
   const rest: Trovo[] = [];
   const variables = colourVariables(parsed.map((sheet) => sheet.root));
   const uses = new Map<string, number>();
-  for (const sheet of parsed) readSheet(sheet, colours, variables, uses, rest);
+  const flaechen = new Set<string>();
+  for (const sheet of parsed) readSheet(sheet, colours, variables, uses, rest, flaechen);
   for (const [colour, weight] of uses) {
     const known = colours.get(colour);
     if (known !== undefined) known.pezo += weight;
+  }
+  for (const colour of flaechen) {
+    const known = colours.get(colour);
+    if (known !== undefined) known.flaeche = true;
   }
   return { trovoj: [...colours.values(), ...rest], ligiloj: markoLigiloj(page, url), html: page };
 }

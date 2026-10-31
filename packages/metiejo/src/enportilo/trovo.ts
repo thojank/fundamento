@@ -18,6 +18,8 @@ export interface Trovo {
   valoro: string | number;
   /** For a font: the role it was found in. */
   rolo?: "body" | "display" | "code";
+  /** For a colour: declared as a background somewhere (Spec 036 Teil 4: the ground of the neutrals). */
+  flaeche?: true;
   pezo: number;
   herkunft: Herkunft;
 }

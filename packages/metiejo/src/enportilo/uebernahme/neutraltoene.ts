@@ -30,8 +30,11 @@ const comma = (value: number) => String(value).replace(".", ",");
 /** The colours of the reading, equal ones summed, with their share of the colour found. */
 function areasOf(eniro: SchrittEniro): Area[] {
   const sums = new Map<string, { pezo: number; herkunft: TrovoHerkunft }>();
+  // A stylesheet says which colours paint a background; only those can be the ground or a surface
+  // (its text colour is often named more often than its ground).
+  const flaechen = eniro.trovoj.some((trovo) => trovo.kind === "farbo" && trovo.flaeche === true);
   for (const trovo of eniro.trovoj) {
-    if (trovo.kind !== "farbo") continue;
+    if (trovo.kind !== "farbo" || (flaechen && trovo.flaeche !== true)) continue;
     const hex = String(trovo.valoro).toLowerCase();
     const entry = sums.get(hex) ?? { pezo: 0, herkunft: trovo.herkunft };
     entry.pezo += trovo.pezo;
