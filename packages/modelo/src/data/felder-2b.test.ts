@@ -94,7 +94,8 @@ describe("Spec 029 ②b-1 M-6: a clear button in the field", () => {
           : ero === "listelektilo"
             ? { size: { fixed: "size.icon.medium" }, ...target }
             : ero === "datelektilo"
-              ? { size: { fixed: "size.target.min" } }
+              ? // Spec 035 2.3.3: the kampo's ✕ (size medium), the button the target.
+                { size: { fixed: "size.icon.medium" }, ...target }
               : { size: { by: ["size"] }, ...target },
       );
     },

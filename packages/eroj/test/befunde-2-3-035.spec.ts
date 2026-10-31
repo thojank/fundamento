@@ -74,3 +74,47 @@ test.describe("Spec 035 2.3.1: the calendar as large as the chevron of the elekt
     });
   }
 });
+
+/** What the ✕ of a field shows: its button's size, the glyph's box, markup and colour. */
+async function crossOf(page: Page, id: string) {
+  return page.evaluate((id) => {
+    const clear = document.getElementById(id)?.shadowRoot?.querySelector('[part="clear"]');
+    const icon = clear?.querySelector("fm-ikono");
+    const glyph = icon?.shadowRoot?.querySelector('[part="glyph"]');
+    if (clear === null || clear === undefined || icon === null || icon === undefined) return null;
+    const box = icon.getBoundingClientRect();
+    const target = clear.getBoundingClientRect();
+    return {
+      size: clear.getAttribute("size"),
+      name: icon.getAttribute("name"),
+      iconSize: icon.getAttribute("size"),
+      glyph: [box.width, box.height],
+      markup: glyph?.innerHTML ?? "",
+      color: glyph === null || glyph === undefined ? "" : getComputedStyle(glyph).color,
+      target: [target.width, target.height],
+    };
+  }, id);
+}
+
+test.describe("Spec 035 2.3.3: the ✕ of the datelektilo as large and as strong as the kampo's", () => {
+  for (const { aspekto, scheme } of BRANDS) {
+    test(`${aspekto}, ${scheme}: the same button, the same glyph at the same size and colour; a target of at least 24 × 24 px`, async ({
+      page,
+    }) => {
+      await open(page, aspekto, scheme);
+      const kampo = await crossOf(page, "kampo");
+      const datelektilo = await crossOf(page, "datelektilo");
+      expect(kampo, "the kampo's ✕").not.toBeNull();
+      expect(datelektilo, "the datelektilo's ✕").not.toBeNull();
+      expect(datelektilo?.size, "the button's size").toBe(kampo?.size);
+      expect(datelektilo?.name, "the glyph").toBe(kampo?.name);
+      expect(datelektilo?.iconSize, "the glyph's size").toBe(kampo?.iconSize);
+      expect(datelektilo?.glyph, "the glyph's box").toEqual(kampo?.glyph);
+      expect(datelektilo?.markup, "the glyph's drawing (its strokes)").toBe(kampo?.markup);
+      expect(datelektilo?.color, "the glyph's colour").toBe(kampo?.color);
+      for (const side of datelektilo?.target ?? []) {
+        expect(side, "the target").toBeGreaterThanOrEqual(TARGET_MIN);
+      }
+    });
+  }
+});

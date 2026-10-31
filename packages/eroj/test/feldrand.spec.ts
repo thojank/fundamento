@@ -124,9 +124,11 @@ test.describe("Abnahme #122: the right edge of a field, inside its border", () =
       out,
       `<div style="inline-size: 20rem">${(BOXED.elektilo ?? "").replace(" loading", "")}${(BOXED.datelektilo ?? "").replace(" loading", "")}</div>`,
     );
-    // Spec 035 2.3.1: the calendar became as large as the chevron; the ✕ of the date picker
-    // follows with 2.3.3 (as large as the kampo's) and comes back into this list there.
-    for (const [ero, icon] of [["elektilo", "indicator"]] as const) {
+    // Spec 035 2.3.1 and 2.3.3: the calendar as large as the chevron, the ✕ beside it too.
+    for (const [ero, icon] of [
+      ["elektilo", "indicator"],
+      ["datelektilo", "trigger"],
+    ] as const) {
       const sizes = await page.locator(`fm-${ero}`).evaluate((host, iconPart) => {
         const root = host.shadowRoot as ShadowRoot;
         const glyph = (part: string) => {

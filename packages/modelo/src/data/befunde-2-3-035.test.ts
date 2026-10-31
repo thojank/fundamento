@@ -67,3 +67,21 @@ describe("Spec 035 2.3.1: the calendar as large as the chevron of the elektilo",
     },
   );
 });
+
+describe("Spec 035 2.3.3: the ✕ of the datelektilo as large as the kampo's", () => {
+  it("the Skemo: the clear button's size is the kampo's (size medium), its width the target", () => {
+    expect(tokenOf("datelektilo", "clear", "size")).toBe(
+      tokenOf("kampo", "clear", "size", "medium"),
+    );
+    expect(tokenOf("datelektilo", "clear", "width")).toBe(tokenOf("kampo", "clear", "width"));
+  });
+
+  it.each(COMBINATIONS)("$aspekto, $scheme: the ✕ resolves to the kampo's", (at) => {
+    expect(resolvedOf(at, "ero.datelektilo.clear.size")).toBe(
+      resolvedOf(at, "ero.kampo.clear.size.size.medium"),
+    );
+    expect(resolvedOf(at, "ero.datelektilo.clear.width")).toBe(
+      resolvedOf(at, "ero.kampo.clear.width"),
+    );
+  });
+});

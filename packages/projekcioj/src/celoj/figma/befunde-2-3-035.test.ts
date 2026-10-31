@@ -135,3 +135,47 @@ describe("Spec 035 2.3.1: the calendar of the datelektilo as large as the chevro
     }
   });
 });
+
+describe("Spec 035 2.3.3: the ✕ of the datelektilo as large and as strong as the kampo's", () => {
+  it("every variant: the ✕'s glyphs bound to the field's clear size, as large as the kampo's (size medium)", async () => {
+    const kampo = glyphsOf(find(await variantOf("kampo", "size=medium, state=rest"), "clear"));
+    expect(kampo.length, "the kampo's ✕").toBeGreaterThan(0);
+    const side = geometry(kampo[0] as DoubleNode).width;
+    for (const variant of await variantsOf("datelektilo")) {
+      const glyphs = glyphsOf(find(variant, "clear"));
+      expect(glyphs.length, `${variant.name}: the ✕'s glyphs`).toBe(kampo.length);
+      for (const glyph of glyphs) {
+        expect(glyph.boundVariables.width?.name, `${variant.name}: ${glyph.name}`).toBe(
+          "ero/datelektilo/clear/size",
+        );
+        expect(
+          [geometry(glyph).width, geometry(glyph).height],
+          `${variant.name}: ${glyph.name} as large as the kampo's`,
+        ).toEqual([side, side]);
+      }
+    }
+  });
+
+  it("every variant: the ✕ stays a target of at least size.target.min, its glyph painted as the kampo's", async () => {
+    const paintOf = (node: DoubleNode | undefined) => {
+      const [paint] = (node?.properties.fills ?? []) as {
+        boundVariables?: { color?: { name?: string } };
+      }[];
+      return paint?.boundVariables?.color?.name;
+    };
+    const kampo = glyphsOf(find(await variantOf("kampo", "size=medium, state=rest"), "clear"));
+    const cross = paintOf(kampo[0]?.children[0]);
+    expect(cross, "the kampo's ✕ is painted").toBeDefined();
+    for (const variant of await variantsOf("datelektilo")) {
+      const clear = find(variant, "clear") as DoubleNode;
+      expect(clear.boundVariables.minWidth?.name, `${variant.name}: minWidth`).toBe(
+        "ero/datelektilo/clear/width",
+      );
+      expect(geometry(clear).width, `${variant.name}: width`).toBeGreaterThanOrEqual(TARGET_MIN);
+      expect(geometry(clear).height, `${variant.name}: height`).toBeGreaterThanOrEqual(TARGET_MIN);
+      for (const glyph of glyphsOf(clear)) {
+        expect(paintOf(glyph.children[0]), `${variant.name}: ${glyph.name}`).toBe(cross);
+      }
+    }
+  });
+});
