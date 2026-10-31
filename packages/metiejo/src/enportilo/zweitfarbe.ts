@@ -63,9 +63,14 @@ export type ZweitfarbeBefund = ZweitfarbeGesetzt | ZweitfarbeLeer;
 export const istGesetzt = (befund: ZweitfarbeBefund | undefined): befund is ZweitfarbeGesetzt =>
   befund !== undefined && "zweitfarbe" in befund;
 
-/** Where a finding stands, in the form of the Agordo: a file of an image or a PDF. */
+/**
+ * Where a finding stands, in the form of the Agordo: a page or stylesheet read from an address (Weg
+ * C, a link of Weg B), else a file of an image or a PDF.
+ */
 function agordoHerkunftOf(herkunft: Herkunft, farbe: string, anteil: number): AgordoHerkunft {
   const merkmal = `Farbe ${farbe}${herkunft.loko === undefined ? "" : ` (${herkunft.loko})`}`;
+  if (/^https?:\/\//i.test(herkunft.dosiero))
+    return { quelle: "link", adresse: herkunft.dosiero, merkmal, anteil };
   const quelle = /\.pdf$/i.test(herkunft.dosiero) ? "pdf" : "bild";
   return { quelle, datei: herkunft.dosiero, merkmal, anteil };
 }
