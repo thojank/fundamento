@@ -472,6 +472,8 @@ export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
   // Spec 008 (A2, plan D-13): the two Skemo-level Reguloj of the ligilo.
   "link-not-color-only": linkNotColorOnly,
   "external-link-marked": externalLinkMarked,
+  /** Spec 036, Befund 2.1 (V-1): a link as dark as the text keeps its underline. */
+  "link-distinct-from-text": perCombination("link-distinct-from-text"),
   // Spec 009 (A2, plan D-07): the two Skemo-level Reguloj of the kampo.
   "required-marked": requiredMarked,
   "error-not-color-only": errorNotColorOnly,

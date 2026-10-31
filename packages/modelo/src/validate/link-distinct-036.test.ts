@@ -51,4 +51,10 @@ describe("link-distinct-from-text (Spec 036, Befund 2.1, V-1)", () => {
     expect(issue?.suggestion).toMatch(/not .*colourful|no colourful/);
     expect(issue?.regulo?.name).toBe(RULE);
   });
+
+  it("accepts the same achromatic brand with its underline", () => {
+    const report = validateModelo(fixtureModeloSource(fixtureRoot("valid", FIXTURE)));
+    expect(report.errors).toEqual([]);
+    expect(report.warnings).toEqual([]);
+  });
 });

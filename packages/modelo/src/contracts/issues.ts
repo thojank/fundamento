@@ -201,6 +201,8 @@ export const RULE_IDS = [
   "traduko-orphaned",
   "link-not-color-only",
   "external-link-marked",
+  // Spec 036, Befund 2.1 (V-1): a link as dark as the text needs its underline (a Regulo name).
+  "link-distinct-from-text",
   // Spec 009 (plan D-05, D-07): a slot the name depends on that the Uzo does not require, and the
   // Reguloj of the kampo that judge the Skemo or an instance (their rule IDs are the Regulo names).
   "uzo-slot-required-missing",
