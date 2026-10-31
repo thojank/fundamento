@@ -52,9 +52,7 @@ const WANTED: Readonly<Record<string, { befund: string; match?: string }>> = {
       "glitilo",
       "kompletigilo",
       "listelektilo",
-      "markobutono",
       "plurelektilo",
-      "sxaltilo",
       "tekstareo",
     ].map((set) => [
       set,
@@ -73,6 +71,18 @@ const WANTED: Readonly<Record<string, { befund: string; match?: string }>> = {
     befund:
       "Abnahme #122: spinner and clear button in the control, the field 256 wide; M-2: the room of the status icon in the control (A-kampo-4).",
   },
+  // Spec 036 1.6: the label of a checkbox and a switch in the middle of its box or switch – its
+  // line as high as the ring, the label centred in it (every variant: the label lies lower, the
+  // variant as high as the ring); with M-2 above, the states warning and success added.
+  ...Object.fromEntries(
+    ["markobutono", "sxaltilo"].map((set) => [
+      set,
+      {
+        befund:
+          "M-2: the states warning and success added. Spec 036 1.6: the label in the middle of its box or switch.",
+      },
+    ]),
+  ),
   tekstareo: { befund: "Abnahme #122: the spinner in the control, the field 256 wide." },
   elektilo: {
     befund: "Abnahme #122: spinner, clear button, chevron in the control; the field 256 wide.",
