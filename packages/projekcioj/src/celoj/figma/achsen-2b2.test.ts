@@ -84,3 +84,18 @@ describe("②b-2 A-ikono-2, A-signeto-2, A-avataro-2, A-pagxigilo-2, A-langetaro
     expect([...sizes].sort()).toEqual([...values].sort());
   });
 });
+
+describe("②b-2 A-apartigilo-1, A-spuro-1, A-karto-1, A-avataro-1, A-avizo-1 in Figma: the looks", () => {
+  it.each([
+    ["apartigilo", "emphasis", ["low", "high"]],
+    ["spuro", "emphasis", ["medium", "low"]],
+    ["karto", "tone", ["default", "muted", "none"]],
+    ["avataro", "corner", ["round", "soft", "square"]],
+    ["avizo", "frame", ["card", "band"]],
+  ])("%s: %s a variant axis with every value", (name, prop, values) => {
+    const set = setOf(name);
+    expect(set.properties[prop]).toEqual(values);
+    const seen = new Set(set.variants.map((variant) => variant.props[prop]));
+    expect([...seen].sort()).toEqual([...values].sort());
+  });
+});

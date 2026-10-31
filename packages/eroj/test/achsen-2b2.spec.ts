@@ -473,3 +473,110 @@ test.describe("②b-2 A-dialogo-2: size full", () => {
     expect(right).toBeLessThanOrEqual(600);
   });
 });
+
+test.describe("②b-2 A-apartigilo-1, A-spuro-1, A-karto-1, A-avataro-1, A-avizo-1: the looks", () => {
+  test("apartigilo: emphasis high draws a stronger line; no emphasis is low", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      '<div style="inline-size:200px"><fm-apartigilo id="h" emphasis="high"></fm-apartigilo><fm-apartigilo id="l" emphasis="low"></fm-apartigilo><fm-apartigilo id="n"></fm-apartigilo></div>',
+    );
+    const line = (id: string) =>
+      page.locator(`#${id}`).evaluate((host) => {
+        const control = host.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+        const style = getComputedStyle(control);
+        const width = Math.max(
+          ...["borderTopWidth", "borderBottomWidth", "borderLeftWidth", "borderRightWidth"].map(
+            (key) => Number.parseFloat(style[key as "borderTopWidth"]),
+          ),
+        );
+        return { width, color: style.borderTopColor || style.borderBottomColor };
+      });
+    const high = await line("h");
+    const low = await line("l");
+    expect(high.width).toBeGreaterThan(low.width);
+    expect(await line("n")).toEqual(low);
+  });
+
+  test("spuro: emphasis low writes the links in the subtle text, not the link colour", async ({
+    page,
+  }) => {
+    const trail = (attributes: string, id: string) =>
+      `<fm-spuro id="${id}" label="Pfad" ${attributes}><a href="#a">Start</a><a href="#b">Projekte</a><span>Fundamento</span></fm-spuro>`;
+    await serve(page, out, trail('emphasis="low"', "l") + trail("", "m"));
+    const colorOf = (id: string) =>
+      page
+        .locator(`#${id} a`)
+        .first()
+        .evaluate((link) => getComputedStyle(link).color);
+    const subtle = await page.evaluate(() => {
+      const probe = document.createElement("span");
+      probe.style.color = "var(--fm-color-text-subtle)";
+      document.body.append(probe);
+      const value = getComputedStyle(probe).color;
+      probe.remove();
+      return value;
+    });
+    expect(await colorOf("l")).toBe(subtle);
+    expect(await colorOf("m")).not.toBe(subtle);
+  });
+
+  test("karto: tone muted takes the sunken ground, none no ground and no shadow", async ({
+    page,
+  }) => {
+    const card = (attributes: string, id: string) =>
+      `<fm-karto id="${id}" ${attributes}><span slot="heading">Standard</span><span slot="content">Inhalt</span></fm-karto>`;
+    await serve(page, out, card("", "d") + card('tone="muted"', "m") + card('tone="none"', "n"));
+    const look = (id: string) =>
+      page.locator(`#${id}`).evaluate((host) => {
+        const control = host.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+        const style = getComputedStyle(control);
+        return { fill: style.backgroundColor, shadow: style.boxShadow };
+      });
+    const plain = await look("d");
+    const muted = await look("m");
+    const none = await look("n");
+    expect(muted.fill).not.toBe(plain.fill);
+    expect(muted.shadow).toBe("none");
+    expect(none).toEqual({ fill: "rgba(0, 0, 0, 0)", shadow: "none" });
+    expect(plain.shadow).not.toBe("none");
+  });
+
+  test("avataro: corner soft rounds less than round, square not at all", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      ["round", "soft", "square"]
+        .map(
+          (corner) =>
+            `<fm-avataro id="${corner}" name="Erika Mustermann" size="large" corner="${corner}"></fm-avataro>`,
+        )
+        .join(""),
+    );
+    const radius = (id: string) =>
+      page.locator(`#${id}`).evaluate((host) => {
+        const initials = host.shadowRoot?.querySelector('[part="initials"]') as HTMLElement;
+        return Number.parseFloat(getComputedStyle(initials).borderTopLeftRadius);
+      });
+    const round = await radius("round");
+    const soft = await radius("soft");
+    expect(soft).toBeGreaterThan(0);
+    expect(soft).toBeLessThan(round);
+    expect(await radius("square")).toBe(0);
+  });
+
+  test("avizo: frame band has no rounded edge, card keeps it", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      '<fm-avizo id="b" frame="band">Gespeichert.</fm-avizo><fm-avizo id="c">Gespeichert.</fm-avizo>',
+    );
+    const radius = (id: string) =>
+      page.locator(`#${id}`).evaluate((host) => {
+        const control = host.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+        return getComputedStyle(control).borderTopLeftRadius;
+      });
+    expect(await radius("b")).toBe("0px");
+    expect(await radius("c")).not.toBe("0px");
+  });
+});
