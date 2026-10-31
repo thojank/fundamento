@@ -12511,7 +12511,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.plenstato.text.typography",
+      "token": "ero.plenstato.text.typography.compact.false",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/EmptyState/EmptyState.tsx",
@@ -12531,7 +12531,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.plenstato.box.inline.padding",
+      "token": "ero.plenstato.box.inline.padding.compact.false",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/EmptyState/EmptyState.tsx",

@@ -140,6 +140,18 @@ const REST_2B2 = (() => {
         ),
       },
     },
+    // A-markdovido-1 (density compact of the gap: 1), A-plenstato-1/2 (compact of the room and
+    // the text: 2), A-tabelo-1 (density default of the cell: 2), A-teksto-1 (kind label: 1).
+    {
+      pattern:
+        "^ero\\.markdovido\\.box\\.gap\\.density\\.compact$|^ero\\.plenstato\\.(box\\.inline\\.padding|text\\.typography)\\.compact\\.true$|^ero\\.tabelo\\.cell\\.(inline\\.padding|height)\\.density\\.default$|^ero\\.teksto\\.text\\.typography\\.kind\\.label\\.size\\.1$",
+      added: 1 + 2 + 2 + 1,
+      moved: {
+        "ero.markdovido.box.gap.density.default": "ero.markdovido.box.gap",
+        "ero.plenstato.box.inline.padding.compact.false": "ero.plenstato.box.inline.padding",
+        "ero.plenstato.text.typography.compact.false": "ero.plenstato.text.typography",
+      },
+    },
   ];
   const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
   return {

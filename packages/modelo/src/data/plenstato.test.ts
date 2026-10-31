@@ -44,6 +44,8 @@ describe("plenstato in the repo Modelo (section ③, G1, G2)", () => {
         required: true,
         description: expect.stringContaining("loads"),
       },
+      // Spec 036 Teil 5 ②b-2 (A-plenstato-1/2): the compact state.
+      expect.objectContaining({ name: "compact", kind: "boolean", default: false }),
     ]);
     expect(skemo?.states).toEqual(["rest"]);
   });
@@ -94,12 +96,15 @@ describe("plenstato in the repo Modelo (section ③, G1, G2)", () => {
     expect(skemo.parts.text?.color).toEqual({ fixed: "color.text.muted" });
     expect(skemo.parts.motion?.duration).toEqual({ fixed: "motion.duration.slow" });
     expect(skemo.parts.motion?.easing).toEqual({ fixed: "motion.easing.standard" });
-    expect(skemo.parts.box?.["inline-padding"]).toEqual({ fixed: "spacing.large" });
+    expect(skemo.parts.box?.["inline-padding"]).toEqual({ by: ["compact"] });
+    expect(boundToken(skemo, "box", "inline-padding", { compact: "false" })?.token).toBe(
+      "spacing.large",
+    );
     // No fill: the text stands on the ground of the container, so no pair is needed (G3).
     expect(skemo.parts.surface?.fill).toBeUndefined();
-    expect(styledProps(skemo)).toEqual(["kind"]);
-    expect(variantKeys(skemo)).toEqual(["kind", "state"]);
-    expect(combinationsOf(skemo, variantKeys(skemo))).toHaveLength(2);
+    expect(styledProps(skemo)).toEqual(["kind", "compact"]);
+    expect(variantKeys(skemo)).toEqual(["kind", "compact", "state"]);
+    expect(combinationsOf(skemo, variantKeys(skemo))).toHaveLength(4);
   });
 
   it("speaks role status, named by its text, no key; 'lädt' is heard while loading (G4)", () => {
@@ -172,7 +177,8 @@ describe("the Uzo of the plenstato (section ③, G5)", () => {
   it("the brief names kind as axis and duty, the text as a duty, and stays under 750", () => {
     if (plenstato === undefined) throw new Error("missing");
     const brief = briefOf(plenstato);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["kind"]);
+    // Spec 036 Teil 5 ②b-2 (A-plenstato-1): compact keys the parts, an axis as checked of a switch.
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["kind", "compact"]);
     expect(brief.required).toEqual({ props: ["kind"], slots: ["text"] });
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
   });

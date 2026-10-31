@@ -13,11 +13,12 @@
         "name": "density",
         "kind": "enum",
         "values": [
-          "comfortable",
-          "compact"
+          "compact",
+          "default",
+          "comfortable"
         ],
         "default": "comfortable",
-        "description": "The room in every cell (padding and minimum height from spacing and size roles)."
+        "description": "The room in every cell (padding and minimum height from spacing and size roles). Spec 029 ②a (A-tabelo-1): three values by the names of the Dimensio density; default lies between compact and comfortable (its room the step between their spacing roles), comfortable stays the default."
       },
       {
         "name": "caption-hidden",
@@ -39,6 +40,18 @@
         ],
         "default": "ascending",
         "description": "The direction of the sorted column."
+      },
+      {
+        "name": "lines",
+        "kind": "enum",
+        "values": [
+          "rows",
+          "columns",
+          "grid",
+          "none"
+        ],
+        "default": "rows",
+        "description": "Spec 029 ②a (A-tabelo-1, ②a-6): which lines the table draws between its cells – rows as before, columns, grid (both) or none. Layout, no token: the line keeps the border's colour and width."
       }
     ],
     "states": [
@@ -163,6 +176,14 @@
         "part": "cell",
         "property": "inline-padding",
         "when": {
+          "density": "default"
+        },
+        "token": "spacing.scale.150"
+      },
+      {
+        "part": "cell",
+        "property": "inline-padding",
+        "when": {
           "density": "compact"
         },
         "token": "spacing.small"
@@ -174,6 +195,14 @@
           "density": "comfortable"
         },
         "token": "size.control.large"
+      },
+      {
+        "part": "cell",
+        "property": "height",
+        "when": {
+          "density": "default"
+        },
+        "token": "size.control.medium"
       },
       {
         "part": "cell",

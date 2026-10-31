@@ -2203,17 +2203,23 @@ describe("Figma plan for the avizo (Spec 011 ③)", () => {
 describe("Figma plan for the plenstato (Spec 011 ③)", () => {
   const set = plan.components.find((component) => component.set === "plenstato");
   const plenstato = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "plenstato");
-  const variant = (kind: string) => set?.variants.find((entry) => entry.props.kind === kind);
+  // Spec 036 Teil 5 ②b-2 (A-plenstato-1/2): kind × compact; false is the state it was.
+  const variant = (kind: string) =>
+    set?.variants.find((entry) => entry.props.kind === kind && entry.props.compact === "false");
 
   it("plans a state of kind in one state, with the purpose, the word Zustand (the structure's, not the role's) and the arc as its sign", () => {
     expect(structureOf("status", ["surface", "border", "indicator", "text", "motion"])).toBe(
       "state",
     );
     expect(set?.structure).toBe("state");
-    expect(set?.properties).toEqual({ kind: ["loading", "empty"], state: ["rest"] });
-    expect(set?.variants).toHaveLength(2);
-    expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["kind", "state"]);
-    expect(set?.grid).toMatchObject({ rows: 2, columns: 1 });
+    expect(set?.properties).toEqual({
+      kind: ["loading", "empty"],
+      compact: "BOOLEAN",
+      state: ["rest"],
+    });
+    expect(set?.variants).toHaveLength(2 * 2);
+    expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["kind", "compact", "state"]);
+    expect(set?.grid).toMatchObject({ rows: 4, columns: 1 });
     expect(set?.description).toBe(plenstato?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Zustand");
     expect(set?.sign).toBe(STATE_SIGN);
@@ -2282,19 +2288,25 @@ describe("Figma plan for the plenstato (Spec 011 ③)", () => {
 
   it("states the plenstato in the parity inventory: kind, the state rest, the indicator's colour while loading only, no motion", () => {
     const items = figmaPlanInventory(plan);
-    expect(items.plenstato?.props).toEqual({ kind: ["loading", "empty"] });
+    expect(items.plenstato?.props).toEqual({ kind: ["loading", "empty"], compact: ["boolean"] });
     expect(items.plenstato?.states).toEqual(["rest"]);
-    expect(items.plenstato?.values["indicator.color@kind=loading,state=rest"]).toMatch(
-      /^#[0-9a-f]{6}/,
-    );
-    expect(items.plenstato?.values["indicator.color@kind=empty,state=rest"]).toBeUndefined();
+    expect(
+      items.plenstato?.values["indicator.color@compact=false,kind=loading,state=rest"],
+    ).toMatch(/^#[0-9a-f]{6}/);
+    expect(
+      items.plenstato?.values["indicator.color@compact=false,kind=empty,state=rest"],
+    ).toBeUndefined();
     // Spec 029 ①: the border of the Fonto is a translucent overlay (8 % black, 10 % white).
-    expect(items.plenstato?.values["border.color@kind=empty,state=rest"]).toMatch(
+    expect(items.plenstato?.values["border.color@compact=false,kind=empty,state=rest"]).toMatch(
       /^(#[0-9a-f]{6}|alpha varies by mode)/,
     );
-    expect(items.plenstato?.values["text.color@kind=loading,state=rest"]).toMatch(/^#[0-9a-f]{6}/);
-    expect(items.plenstato?.values["indicator.size@kind=loading,state=rest"]).toMatch(/px$/);
-    expect(items.plenstato?.values["border.width@kind=empty,state=rest"]).toBe("1px");
+    expect(items.plenstato?.values["text.color@compact=false,kind=loading,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}/,
+    );
+    expect(items.plenstato?.values["indicator.size@compact=false,kind=loading,state=rest"]).toMatch(
+      /px$/,
+    );
+    expect(items.plenstato?.values["border.width@compact=false,kind=empty,state=rest"]).toBe("1px");
     expect(
       Object.keys(items.plenstato?.values ?? {}).some(
         (key) => key.startsWith("motion.") || key.startsWith("border.stroke"),
@@ -2446,16 +2458,18 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
   it("plans a table of density × state with the purpose, the word Beschriftung, the Vitrino's table, the chevron and caption-hidden as a BOOLEAN that hides the caption", () => {
     expect(structureOf("table")).toBe("table");
     expect(set?.structure).toBe("table");
+    // Spec 036 Teil 5 ②b-2 (A-tabelo-1): three densities; lines a property, no variant.
     expect(set?.properties).toEqual({
-      density: ["comfortable", "compact"],
+      density: ["compact", "default", "comfortable"],
       "caption-hidden": "BOOLEAN",
       sort: "TEXT",
       direction: ["ascending", "descending"],
+      lines: ["rows", "columns", "grid", "none"],
       state: ["rest", "hover", "focus"],
     });
-    expect(set?.variants).toHaveLength(6);
+    expect(set?.variants).toHaveLength(3 * 3);
     expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["density", "state"]);
-    expect(set?.grid).toMatchObject({ rows: 2, columns: 3 });
+    expect(set?.grid).toMatchObject({ rows: 3, columns: 3 });
     expect(set?.description).toBe(tabelo?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Beschriftung");
     // Head + 3 rows × 3 columns, the last numeric, the first sorted ascending (the spec's set).
@@ -2479,14 +2493,9 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
     ]);
     expect(set?.texts).toBeUndefined();
     expect(set?.example).toBeUndefined();
-    expect(set?.variants.map((entry) => entry.focusVisible)).toEqual([
-      false,
-      false,
-      true,
-      false,
-      false,
-      true,
-    ]);
+    expect(set?.variants.map((entry) => entry.focusVisible)).toEqual(
+      [1, 2, 3].flatMap(() => [false, false, true]),
+    );
   });
 
   it("binds head, cells by density, row header, border, region, the sort button by state, its indicator and the focus ring; draws them all", () => {
@@ -2562,10 +2571,11 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
   it("states the tabelo in the parity inventory: density, caption-hidden a boolean, sort a string, direction, three states, the sort fill per state", () => {
     const items = figmaPlanInventory(plan);
     expect(items.tabelo?.props).toEqual({
-      density: ["comfortable", "compact"],
+      density: ["compact", "default", "comfortable"],
       "caption-hidden": ["boolean"],
       sort: ["string"],
       direction: ["ascending", "descending"],
+      lines: ["rows", "columns", "grid", "none"],
     });
     expect(items.tabelo?.states).toEqual(["rest", "hover", "focus"]);
     expect(items.tabelo?.values["sort.fill@density=comfortable,state=rest"]).toBeDefined();
@@ -3181,10 +3191,11 @@ describe("the Figma plan draws the titolo and the teksto as text (Spec 014 ③)"
     expect(titolo?.label).toEqual({ property: "label", defaultValue: "Überschrift" });
   });
 
-  it("the teksto: kind × size × emphasis (fifteen), the text in the role and the colour, the word Text", () => {
+  it("the teksto: kind × size × emphasis (eighteen), the text in the role and the colour, the word Text", () => {
     const teksto = plan.components.find((component) => component.set === "teksto");
     expect(teksto?.structure).toBe("badge");
-    expect(teksto?.variants).toHaveLength(15);
+    // Spec 036 Teil 5 ②b-2 (A-teksto-1): kind label (size 1) × three emphases.
+    expect(teksto?.variants).toHaveLength(18);
     const code = teksto?.variants.find(
       (variant) => variant.props.kind === "code" && variant.props.emphasis === "low",
     );

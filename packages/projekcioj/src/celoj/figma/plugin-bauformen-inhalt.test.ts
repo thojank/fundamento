@@ -384,19 +384,25 @@ describe("the plenstato is drawn as a state: the column with the arc, the text a
       double.figma,
     )) as Report;
     const set = pageNodes(double).find((child) => child.name === "plenstato");
-    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    // Spec 036 Teil 5 ②b-2 (A-plenstato-1/2): kind × compact; false is the state it was.
+    const variant = (name: string) =>
+      set?.children.find(
+        (child) => child.name === name.replace(", state=", ", compact=false, state="),
+      );
     const plenstato = report.components.find((component) => component.set === "plenstato");
     return { double, set, variant, report, plenstato };
   });
 
-  it("draws two variants by kind: the border dashed where empty, its paint invisible where loading", async () => {
+  it("draws four variants by kind and compact: the border dashed where empty, its paint invisible where loading", async () => {
     const { set, variant, plenstato } = await drawn();
     expect(set?.children.map((child) => child.name)).toEqual([
-      "kind=loading, state=rest",
-      "kind=empty, state=rest",
+      "kind=loading, compact=true, state=rest",
+      "kind=loading, compact=false, state=rest",
+      "kind=empty, compact=true, state=rest",
+      "kind=empty, compact=false, state=rest",
     ]);
     expect(plenstato?.layout.columns).toBe(1);
-    expect(plenstato?.layout.rows).toBe(2);
+    expect(plenstato?.layout.rows).toBe(4);
     const loading = descendant(variant("kind=loading, state=rest"), "control");
     const empty = descendant(variant("kind=empty, state=rest"), "control");
     for (const [control, kind] of [
@@ -816,18 +822,16 @@ describe("the tabelo is drawn as a table: caption, region with head and three ro
   const REST = "density=comfortable, state=rest";
   const FOCUS = "density=comfortable, state=focus";
 
-  it("draws six variants of density × state: the caption above the region with head and three rows of three cells", async () => {
+  it("draws nine variants of density × state: the caption above the region with head and three rows of three cells", async () => {
     const { set, variant, tabelo } = await drawn();
-    expect(set?.children.map((child) => child.name)).toEqual([
-      "density=comfortable, state=rest",
-      "density=comfortable, state=hover",
-      "density=comfortable, state=focus",
-      "density=compact, state=rest",
-      "density=compact, state=hover",
-      "density=compact, state=focus",
-    ]);
+    // Spec 036 Teil 5 ②b-2 (A-tabelo-1): three densities.
+    expect(set?.children.map((child) => child.name)).toEqual(
+      ["compact", "default", "comfortable"].flatMap((density) =>
+        ["rest", "hover", "focus"].map((state) => `density=${density}, state=${state}`),
+      ),
+    );
     expect(tabelo?.layout.columns).toBe(3);
-    expect(tabelo?.layout.rows).toBe(2);
+    expect(tabelo?.layout.rows).toBe(3);
     const rest = variant(REST);
     expect(rest?.properties.layoutMode).toBe("VERTICAL");
     expect(rest?.children.map((child) => child.name)).toEqual(["caption", "region"]);

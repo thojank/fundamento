@@ -38,6 +38,8 @@ describe("the Eroj of Spec 020 ③", () => {
     expect(entry?.skemo.props.map((prop) => [prop.name, prop.kind, prop.default])).toEqual([
       ["source", "string", undefined],
       ["start-level", "enum", "2"],
+      // Spec 036 Teil 5 ②b-2 (A-markdovido-1).
+      ["density", "enum", "default"],
     ]);
     expect(entry?.skemo.props.find((prop) => prop.name === "start-level")?.values).toEqual([
       "2",

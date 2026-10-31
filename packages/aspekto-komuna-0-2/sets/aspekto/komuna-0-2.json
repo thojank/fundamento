@@ -7312,8 +7312,16 @@
     "markdovido": {
       "box": {
         "gap": {
-          "$type": "dimension",
-          "$value": "{spacing.medium}"
+          "density": {
+            "default": {
+              "$type": "dimension",
+              "$value": "{spacing.medium}"
+            },
+            "compact": {
+              "$type": "dimension",
+              "$value": "{spacing.small}"
+            }
+          }
         }
       },
       "quote": {
@@ -8200,8 +8208,16 @@
           "$value": "{color.text.muted}"
         },
         "typography": {
-          "$type": "typography",
-          "$value": "{typography.body.1}"
+          "compact": {
+            "true": {
+              "$type": "typography",
+              "$value": "{typography.body.2}"
+            },
+            "false": {
+              "$type": "typography",
+              "$value": "{typography.body.1}"
+            }
+          }
         }
       },
       "actions": {
@@ -8223,8 +8239,16 @@
       "box": {
         "inline": {
           "padding": {
-            "$type": "dimension",
-            "$value": "{spacing.large}"
+            "compact": {
+              "true": {
+                "$type": "dimension",
+                "$value": "{spacing.small}"
+              },
+              "false": {
+                "$type": "dimension",
+                "$value": "{spacing.large}"
+              }
+            }
           }
         },
         "gap": {
@@ -9630,26 +9654,34 @@
         "inline": {
           "padding": {
             "density": {
-              "comfortable": {
-                "$type": "dimension",
-                "$value": "{spacing.medium}"
-              },
               "compact": {
                 "$type": "dimension",
                 "$value": "{spacing.small}"
+              },
+              "default": {
+                "$type": "dimension",
+                "$value": "{spacing.scale.150}"
+              },
+              "comfortable": {
+                "$type": "dimension",
+                "$value": "{spacing.medium}"
               }
             }
           }
         },
         "height": {
           "density": {
-            "comfortable": {
-              "$type": "dimension",
-              "$value": "{size.control.large}"
-            },
             "compact": {
               "$type": "dimension",
               "$value": "{size.control.small}"
+            },
+            "default": {
+              "$type": "dimension",
+              "$value": "{size.control.medium}"
+            },
+            "comfortable": {
+              "$type": "dimension",
+              "$value": "{size.control.large}"
             }
           }
         }
@@ -10102,6 +10134,14 @@
                 "1": {
                   "$type": "typography",
                   "$value": "{typography.code}"
+                }
+              }
+            },
+            "label": {
+              "size": {
+                "1": {
+                  "$type": "typography",
+                  "$value": "{typography.label.1}"
                 }
               }
             }

@@ -452,8 +452,9 @@ const codeblockStructure = (): string =>
  */
 export const isMarkdown = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "markdown";
 
-function markdownPartSelector(part: string): string {
-  const root = '[part="control"]';
+function markdownPartSelector(part: string, data = ""): string {
+  // Spec 036 Teil 5 ②b-2 (A-markdovido-1): the density stands on the control.
+  const root = `[part="control"]${data}`;
   if (part === "quote") return `:where(${root}) > slot::slotted(blockquote)`;
   if (part === "indent") return `:where(${root}) > slot::slotted(:is(ul, ol))`;
   return `:where(${root})`;
@@ -1412,6 +1413,8 @@ const paragraphStructure: string = [
   ':host([kind="code"]) { display: inline; }',
   ':where([part="control"]) { display: block; box-sizing: border-box; margin: 0; overflow-wrap: anywhere; }',
   ':where([part="control"][data-kind="code"]) { display: inline; }',
+  // Spec 036 Teil 5 ②b-2 (A-teksto-1): tabular sets figures of one width (the host's attribute).
+  ':host([tabular]) :where([part="control"]) { font-variant-numeric: tabular-nums; }',
 ].join("\n");
 
 /**
@@ -1750,10 +1753,20 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
   ): string[] => {
     if (isBindingKeyword(bound)) return keywordDeclarations(part, property, bound);
     const token = named(owner, skemo, part, property, combination, bound);
-    // The border of a table lies under every cell (Spec 011 ④, D-09): the block-end edge.
+    // The border of a table lies under every cell (Spec 011 ④, D-09): the block-end edge; Spec
+    // 036 Teil 5 ②b-2 (A-tabelo-1): and before every cell but the first of its row, where lines
+    // draws the columns – one colour and one width for both (the structure says which shows).
     if (table && part === "border") {
-      if (property === "color") return [`border-block-end-color: ${variable(token)};`];
-      if (property === "width") return [`border-block-end-width: ${variable(token)};`];
+      if (property === "color")
+        return [
+          `border-block-end-color: ${variable(token)};`,
+          `border-inline-start-color: ${variable(token)};`,
+        ];
+      if (property === "width")
+        return [
+          `border-block-end-width: ${variable(token)};`,
+          `border-inline-start-width: ${variable(token)};`,
+        ];
     }
     if (part === "focus-ring" && property === "color") {
       const offset = offsetOf(owner, skemo, "focus-ring");
@@ -1847,6 +1860,10 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
         ? [
             `${tag} > table { border-collapse: collapse; caption-side: top; }`,
             `${tag} > table :is(td, th) { text-align: start; box-sizing: border-box; border-block-end-style: solid; }`,
+            // Spec 036 Teil 5 ②b-2 (A-tabelo-1): lines – the rows as before; the columns, a grid
+            // or none (the host's attribute, no data attribute: no axis of the Skemo's).
+            `${tag}:is([lines="columns"], [lines="none"]) > table :is(td, th) { border-block-end-style: none; }`,
+            `${tag}:is([lines="columns"], [lines="grid"]) > table :is(td, th) + :is(td, th) { border-inline-start-style: solid; }`,
             `${tag} > table :is(td, th)[numeric] { text-align: end; font-variant-numeric: tabular-nums; }`,
             `${tag} > table > thead th > button { display: inline-flex; align-items: center; appearance: none; border-style: none; cursor: pointer; font: inherit; color: inherit; text-align: inherit; }`,
             `${tag} > table > thead th > button > fm-ikono { flex: none; }`,
@@ -2429,7 +2446,7 @@ function selectorOf(
     return sliderPartSelector(part, property, data, combination[STATE_KEY] ?? "rest");
   }
   if (isCodeblock(skemo)) return codeblockPartSelector(part, data);
-  if (isMarkdown(skemo)) return markdownPartSelector(part);
+  if (isMarkdown(skemo)) return markdownPartSelector(part, data);
   if (isCard(skemo)) return cardPartSelector(part, data);
   if (isAvatar(skemo)) return avatarPartSelector(part, data);
   // Spec 025 ③: the chip and the inline editor carry their states as the control speaks them.
