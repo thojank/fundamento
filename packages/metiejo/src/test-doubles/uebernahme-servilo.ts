@@ -10,12 +10,15 @@ import { parseEnv, settingsOf } from "../env.js";
 import { MARKEN_DIR } from "../marko.js";
 import { type Servilo, startServilo } from "../servilo.js";
 import { SABLO_CSS, SABLO_HTML } from "./uebernahme.js";
+import { STUFEN_CSS, STUFEN_HTML } from "./uebernahme-bilder.js";
 
 export interface UebernahmeServilo {
   url: string;
   workdir: string;
   /** The address of the page of Sablo. */
   seite: string;
+  /** The address of the page of Sablo for form, elevation and density (radius, padding, shadow). */
+  stufen: string;
   /** Creates a brand on the base komuna. */
   marko(name: string): Promise<void>;
   /** Reads one material with the confirmation: a file (name, bytes) or a link. */
@@ -32,6 +35,14 @@ export async function startUebernahme(): Promise<UebernahmeServilo> {
   const workdir = join(root, MARKEN_DIR);
   mkdirSync(workdir, { recursive: true });
   const site: Server = createServer((request, response) => {
+    if (request.url === "/stufen.css") {
+      response.writeHead(200, { "content-type": "text/css" }).end(STUFEN_CSS);
+      return;
+    }
+    if (request.url === "/stufen") {
+      response.writeHead(200, { "content-type": "text/html" }).end(STUFEN_HTML);
+      return;
+    }
     if (request.url === "/stilo.css") {
       response.writeHead(200, { "content-type": "text/css" }).end(SABLO_CSS);
       return;
@@ -48,6 +59,7 @@ export async function startUebernahme(): Promise<UebernahmeServilo> {
     url: servilo.url,
     workdir,
     seite,
+    stufen: `${seite}stufen`,
     async marko(name) {
       await fetch(`${servilo.url}/marko`, {
         method: "POST",
