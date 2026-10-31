@@ -47,15 +47,36 @@ export function m5Urteil(messung: M5Messung): M5Urteil {
   return { rot: gruende.length > 0, perzentil: p, gruende };
 }
 
+/** The block of Gegenprobe 2 as calibrated on this runner. */
+export interface StilBlockade {
+  /** The elements of the block. */
+  elemente: number;
+  /** Style and layout of one switch of the block (ms): the lowest of three medians of five. */
+  kosten: number;
+  /** Whether the block held `ziel` ms; false only where the upper bound of elements stopped it. */
+  gehalten: boolean;
+  /** The fixed upper bound of elements of the block. */
+  obergrenze: number;
+}
+
 /**
  * The second Gegenprobe (Nachlese 12 ③, maintainer 29.10.): a block of `ziel` ms of style and
  * layout, no long script. Runs in the page (page.evaluate; no closure over this module): a block of
- * elements laid out off screen is doubled until one recalculation of its style and layout, forced
- * once here to measure it, costs at least `ziel` ms on this runner. Then every hand-over of the
- * Werkstatt to its worker switches a class on the block and reads nothing, so the cost falls in the
- * rendering of the next frame – the block a slow Werkstatt would cause, not a script of its own.
+ * elements laid out off screen grows until one recalculation of its style and layout, forced here
+ * to measure it, costs at least `ziel` ms on this runner. Then every hand-over of the Werkstatt to
+ * its worker switches a class on the block and reads nothing, so the cost falls in the rendering
+ * of the next frame – the block a slow Werkstatt would cause, not a script of its own.
+ *
+ * Spec 035 Befund 1.2: the cost of a switch is noisy (#115: more than 100 ms right after the block
+ * grew, 72 ms a moment later at the same size). So a measurement is the median of five switches
+ * after one that is not counted (it lays out the elements just added), and the block only counts
+ * as calibrated once three such medians in a row reach `ziel`; until then it grows by a quarter.
+ * The number of elements has a fixed upper bound; there the calibration stops with `gehalten`
+ * false and the caller fails with `stilBlockadeMeldung`.
  */
-export function stilBlockadeEinbauen(ziel: number): { elemente: number; kosten: number } {
+export function stilBlockadeEinbauen(ziel: number): StilBlockade {
+  // About 40 000 elements make 80 ms on a fast machine, 16 000 to 28 000 on the CI runners.
+  const obergrenze = 1_024_000;
   const host = document.createElement("div");
   host.id = "fm-m5-stilblockade";
   host.setAttribute("aria-hidden", "true");
@@ -77,37 +98,62 @@ export function stilBlockadeEinbauen(ziel: number): { elemente: number; kosten: 
     host.append(fragment);
     elemente += count;
   };
-  const kosten = () => {
+  const shrink = (count: number) => {
+    for (let index = 0; index < count; index++) host.lastElementChild?.remove();
+    elemente -= count;
+  };
+  const umschalten = () => {
     host.classList.toggle("an");
     const started = performance.now();
     void host.offsetHeight;
     return performance.now() - started;
   };
+  // One switch not counted, then the median of five.
+  const messen = () => {
+    umschalten();
+    const werte = [umschalten(), umschalten(), umschalten(), umschalten(), umschalten()];
+    return werte.sort((a, b) => a - b)[2] ?? 0;
+  };
+  // Held: the lowest of three medians in a row.
+  const halten = () => Math.min(messen(), messen(), messen());
   grow(2000);
-  let last = kosten();
-  while (last < ziel && elemente < 2_000_000) {
-    grow(elemente);
-    last = Math.min(kosten(), kosten());
+  let kosten = messen();
+  while (kosten < ziel && elemente < obergrenze) {
+    grow(Math.min(elemente, obergrenze - elemente));
+    kosten = messen();
   }
   // Doubling overshoots: take off an eighth at a time while the block still costs `ziel`, so the
   // Gegenprobe stays near the limit (80 ms, not 160).
-  while (last > ziel * 1.25) {
+  while (kosten > ziel * 1.25) {
     const step = Math.floor(elemente / 8);
-    for (let index = 0; index < step; index++) host.lastElementChild?.remove();
-    const smaller = Math.min(kosten(), kosten());
+    shrink(step);
+    const smaller = messen();
     if (smaller < ziel) {
       grow(step);
-      elemente -= step;
-      last = Math.min(kosten(), kosten());
       break;
     }
-    elemente -= step;
-    last = smaller;
+    kosten = smaller;
+  }
+  kosten = halten();
+  while (kosten < ziel && elemente < obergrenze) {
+    grow(Math.min(Math.ceil(elemente / 4), obergrenze - elemente));
+    kosten = halten();
   }
   const post = Worker.prototype.postMessage;
   Worker.prototype.postMessage = function (this: Worker, ...args: unknown[]) {
     host.classList.toggle("an");
     return (post as (...rest: unknown[]) => void).apply(this, args);
   } as typeof Worker.prototype.postMessage;
-  return { elemente, kosten: last };
+  return { elemente, kosten, gehalten: kosten >= ziel, obergrenze };
+}
+
+/**
+ * The line of Gegenprobe 2 about its block, naming the runner (the Playwright project); at the
+ * upper bound it is the failure message: elements, the cost reached, the runner.
+ */
+export function stilBlockadeMeldung(blockade: StilBlockade, ziel: number, runner: string): string {
+  const stand = `${blockade.elemente} Elemente, Stil und Layout ${blockade.kosten.toFixed(1)} ms je Umschalten`;
+  return blockade.gehalten
+    ? `M5 Gegenprobe 2 (${runner}): ${stand} (gehalten, verlangt ${ziel} ms)`
+    : `M5 Gegenprobe 2 (${runner}): Kalibrierung an der Obergrenze von ${blockade.obergrenze} Elementen abgebrochen – ${stand}, verlangt ${ziel} ms`;
 }

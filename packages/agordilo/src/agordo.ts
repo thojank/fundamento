@@ -4,10 +4,10 @@
 
 import {
   type Agordo,
-  createModeloAjv,
   documentSchemaIssues,
   oklchComponentsOf,
   SCHEMA_DEFS,
+  sharedModeloAjv,
   type ValidationIssue,
 } from "@fundamento/modelo";
 
@@ -25,8 +25,6 @@ export interface ReadAgordoResult {
   agordo?: Agordo;
   issues: ValidationIssue[];
 }
-
-let sharedAjv: ReturnType<typeof createModeloAjv> | undefined;
 
 const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 const OKLCH = /^oklch\(\s*([0-9]*\.?[0-9]+)(%?)\s+([0-9]*\.?[0-9]+)\s+([0-9]*\.?[0-9]+)\s*\)$/;
@@ -68,10 +66,11 @@ function colourPointers(agordo: Agordo): { pointer: string; text: string }[] {
  * another document (`aspekto.json`, `/agordilo/agordo`). Never throws.
  */
 export function readAgordo(value: unknown, file = "agordo.json", at = ""): ReadAgordoResult {
-  sharedAjv ??= createModeloAjv();
   const inFile = (issue: ValidationIssue): ValidationIssue =>
     at === "" ? issue : { ...issue, path: issue.path.replace(`${file}#`, `${file}#${at}`) };
-  const issues = documentSchemaIssues({ file, value }, SCHEMA_DEFS.agordo, sharedAjv).map(inFile);
+  const issues = documentSchemaIssues({ file, value }, SCHEMA_DEFS.agordo, sharedModeloAjv()).map(
+    inFile,
+  );
   if (issues.length > 0) return { issues };
   const agordo = value as Agordo;
   for (const { pointer, text } of colourPointers(agordo)) {

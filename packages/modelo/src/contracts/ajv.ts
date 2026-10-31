@@ -27,6 +27,19 @@ export function createModeloAjv(): ModeloAjv {
   return ajv;
 }
 
+let shared: ModeloAjv | undefined;
+
+/**
+ * The one Ajv instance of the process (Spec 029 ②b-1b, AK-07): every reader of the Modelo schema
+ * – the validation, the config, the ID lock, the tools of the Gvidanto, the Agordilo – compiles
+ * against it, so each part of the schema is compiled once; five instances compiled the shared
+ * parts five times on every start (about 400 ms of the 2 s of AK-07).
+ */
+export function sharedModeloAjv(): ModeloAjv {
+  shared ??= createModeloAjv();
+  return shared;
+}
+
 /** The compiled validator of `fundamento.config.json` (D-07). */
 export function getConfigValidator(ajv: ModeloAjv): ValidateFunction {
   const validate = ajv.getSchema(CONFIG_SCHEMA_ID);

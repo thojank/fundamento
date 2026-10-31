@@ -30,4 +30,33 @@ describe("resolutionsOf", () => {
     expect(resolutionsOf(modelo)).toBe(resolutionsOf(modelo));
     expect(resolutionsOf(load())).not.toBe(resolutionsOf(modelo));
   });
+
+  // Spec 035 Befund 1.3 (AK-07): the validation rules only read these resolutions, so the start
+  // copies no value of them. A whole-value alias holds the very value of its target; copying every
+  // value of every core token in every combination (144 at the heaviest fixture) was part of the
+  // start of the MCP server.
+  it("holds an alias's target value itself, without a copy per token (Spec 035 Befund 1.3, AK-07)", () => {
+    const modelo = load();
+    const first = resolutionsOf(modelo)[0];
+    if (first === undefined) throw new Error("valid/minimal has a combination");
+    const { tokens } = first.resolution;
+    const targetOf = (token: { aliasChain: { token: string }[] }) =>
+      token.aliasChain.at(-1)?.token ?? "";
+    const aliases = Object.entries(tokens).filter(
+      ([, token]) =>
+        token.aliasChain.length > 0 &&
+        typeof token.value === "object" &&
+        Object.hasOwn(tokens, targetOf(token)),
+    );
+    expect(aliases.length).toBeGreaterThan(0);
+    for (const [name, token] of aliases) {
+      const target = targetOf(token);
+      expect(tokens[target]?.value, `${name} -> ${target}`).toBe(token.value);
+    }
+    // resolveCombination itself still hands out copies a caller may change.
+    const [name, token] = aliases[0] ?? [];
+    const copied = resolveCombination(modelo, first.assignment).tokens[name ?? ""];
+    expect(copied?.value).toEqual(token?.value);
+    expect(copied?.value).not.toBe(token?.value);
+  });
 });
