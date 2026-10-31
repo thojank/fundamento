@@ -54,6 +54,8 @@ const CHECK_SUMMARIES: Readonly<Record<CheckName, string>> = {
     "Every value taken from a Fonto: pinned Fonto with its licence text, provenance that matches, a Jugxo per adaptation.",
   dokumentaro:
     "Every Uzo has when-not, do-dont and keyboard in German and English, none a placeholder.",
+  privat:
+    "No tracked file names the word of Spec 036 R-12 or the private font repository (git ls-files, by hash).",
 };
 
 export const HELP = [
