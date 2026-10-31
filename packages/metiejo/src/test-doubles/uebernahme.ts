@@ -93,6 +93,21 @@ main { background-color: ${GRUND_HELL.grund}; }
 .knopf { background: ${GRUND_HELL.leitfarbe}; color: #ffffff; }
 `;
 
+/**
+ * A page of Sablo whose text colour is named more often than its light ground (Spec 036 Teil 4,
+ * measured at real brands): the ground of the neutrals is a background, never the colour of text.
+ */
+export const TEXT_HTML =
+  '<!doctype html><html lang="de"><head><title>Sablo</title><link rel="stylesheet" href="/text.css"></head><body><h1>Sablo</h1><p>Brot.</p><div class="karte"><a class="knopf" href="/">Sablo</a></div></body></html>';
+export const TEXT_FARBE = "#2b2622";
+export const TEXT_CSS = `body { background: ${GRUND_HELL.grund}; color: ${TEXT_FARBE}; }
+h1, h2 { color: ${TEXT_FARBE}; }
+p { color: ${TEXT_FARBE}; }
+a { color: ${TEXT_FARBE}; border-bottom: 1px solid ${TEXT_FARBE}; }
+.karte { background-color: ${GRUND_HELL.flaeche}; }
+.knopf { background: ${GRUND_HELL.leitfarbe}; color: ${TEXT_FARBE}; }
+`;
+
 /** The committed copies for the Messanleitung (uebernahme/). */
 export const uebernahmeFixture = (name: string): Buffer =>
   readFileSync(new URL(`./uebernahme/${name}`, import.meta.url));
