@@ -114,6 +114,22 @@ const WANTED: Readonly<Record<string, { befund: string; match?: string }>> = {
  */
 const STRETCHED: Readonly<Record<string, { reason: string; match: string; count: number }>> = {};
 
+/**
+ * Spec 036 Teil 5 ②b-2 (Spec 029 abgleich.json, aspects "achsen" and "groessen"): wanted changes of
+ * the axes and values, set → the changes, each with the variants whose name holds `match` (all
+ * without) and the Befund. Kept beside WANTED, so a set may carry the changes of several steps.
+ */
+const WANTED_2B2: Readonly<Record<string, readonly { befund: string; match?: string }[]>> = {
+  // A-elekto-2, A-markobutono-2, A-sxaltilo-2 (②a-2): two sizes; the variants of size large are
+  // gone (large is a deprecated alias of medium, no variant), the set lies two rows instead of three.
+  ...Object.fromEntries(
+    ["elekto", "markobutono", "sxaltilo"].map((set) => [
+      set,
+      [{ befund: "②b-2 A-*-2: size large gone, two sizes.", match: "size=large" }],
+    ]),
+  ),
+};
+
 /** One run of the plan in the double, read by every case (Vitest collects nothing here). */
 async function draw() {
   const double = modelDouble();
@@ -180,13 +196,19 @@ describe("the sets in their default size look as on main (Spec 027, Abnahme 3)",
           return true;
         }
         const stretched = STRETCHED[name];
-        return stretched !== undefined && variant.includes(stretched.match);
+        if (stretched !== undefined && variant.includes(stretched.match)) return true;
+        return (WANTED_2B2[name] ?? []).some(
+          (change) => change.match === undefined || variant.includes(change.match),
+        );
       };
       for (const [variant, hash] of Object.entries(before.variants)) {
         if (now?.variants[variant] !== hash && !allowed(variant))
           differing.push(`${name}: ${variant}`);
       }
-      const whole = WANTED[name] !== undefined || STRETCHED[name] !== undefined;
+      const whole =
+        WANTED[name] !== undefined ||
+        STRETCHED[name] !== undefined ||
+        WANTED_2B2[name] !== undefined;
       if (now?.set !== before.set && !whole) differing.push(`${name}: Lage der Varianten`);
     }
     expect(differing).toEqual([]);
