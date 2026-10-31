@@ -14,6 +14,7 @@ import {
   type ModeloJson,
   type ModeloSource,
   modeloFromExport,
+  normalizeNames,
   projectModeloSource,
   readModeloFiles,
   readModeloSchema,
@@ -63,7 +64,11 @@ function loadServedModelo(options: LoadOptions): Omit<Served, "workdir"> {
       schemaJson: read(EXPORT_FILE_NAMES.schema),
       rezolvojJson: read(EXPORT_FILE_NAMES.rezolvoj),
     };
-    const modeloJson = JSON.parse(exportFiles.modeloJson) as ModeloJson;
+    // Spec 036 6.3: an export written with the identifiers of either form is read in the new form.
+    const modeloJson = normalizeNames(
+      JSON.parse(exportFiles.modeloJson) as ModeloJson,
+      exportFiles.modeloJson,
+    );
     return {
       modeloJson,
       modelo: modeloFromExport(modeloJson),
