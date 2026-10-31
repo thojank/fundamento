@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { type Fakto, navigado } from "./index.js";
+import { type Fakto, LIGILAJ_ATRIBUTOJ, navigado } from "./index.js";
 import { faktoKunLigiloj, planoKun } from "./test-doubles/faktoj.js";
 
 // planoKun(3): liste → detail → bearbeiten (two planned edges).
@@ -99,5 +99,56 @@ describe("navigado (C-4, D-05, D-28)", () => {
     expect(navigado(plano, links).neatingeblaj).toEqual([]);
     // Entered only at the first screen, the missing edge cuts off the third.
     expect(navigado(plano, links, { eniroj: ["liste"] }).neatingeblaj).toEqual(["bearbeiten"]);
+  });
+});
+
+// S037-07 Befund 1 (routed to S037-04): the Modelo's link Ero carries its target in a prop, not in
+// `href`. A link written correctly with Fundamento must count as an edge.
+describe("navigado with the link prop of an Ero (S037-04)", () => {
+  const kunEro = (slug: string, attrs: Record<string, string>, tag = "fm-ligilo"): Fakto => ({
+    ...faktoKunLigiloj([]),
+    elements: [{ tag, attrs, parent: -1, text: `Weiter zu ${slug}` }],
+  });
+  const duaPlano = planoKun(2); // liste → detail
+
+  it('counts <fm-ligilo to="detail.html"> as the planned edge by default', () => {
+    const result = navigado(duaPlano, {
+      liste: kunEro("detail", { to: "detail.html" }),
+      detail: faktoKunLigiloj([]),
+    });
+    expect(result.mankantajKantoj).toEqual([]);
+    expect(result.kvoto).toBe(1);
+    expect(result.perEkrano.liste).toEqual({ kompleta: true, mankantaj: [], mortaj: [] });
+  });
+
+  it("documents its fallback: only the Modelo's link Ero and its target prop", () => {
+    expect(LIGILAJ_ATRIBUTOJ).toEqual({ "fm-ligilo": "to" });
+  });
+
+  it("reads the target prop the caller names (from the Skemo) and a dead target as dead", () => {
+    const faktoj = {
+      liste: kunEro("detail", { celo: "archiv.html" }, "fm-saltilo"),
+      detail: faktoKunLigiloj([]),
+    };
+    expect(navigado(duaPlano, faktoj).mankantajKantoj).toEqual([{ de: "liste", al: "detail" }]);
+    const result = navigado(duaPlano, faktoj, { ligilaAtributoj: { "fm-saltilo": "celo" } });
+    expect(result.mortajLigiloj).toEqual([{ de: "liste", href: "archiv.html" }]);
+  });
+
+  it("prefers href over the target prop and leaves the stored facts untouched", () => {
+    const fakto = kunEro("detail", { to: "detail.html", href: "archiv.html" });
+    const antaue = JSON.stringify(fakto);
+    const result = navigado(duaPlano, { liste: fakto, detail: faktoKunLigiloj([]) });
+    expect(result.mortajLigiloj).toEqual([{ de: "liste", href: "archiv.html" }]);
+    expect(JSON.stringify(fakto)).toBe(antaue);
+    expect(fakto.elements[0]?.attrs.href).toBe("archiv.html");
+  });
+
+  it("does not read the target prop on other tags", () => {
+    const result = navigado(duaPlano, {
+      liste: kunEro("detail", { to: "detail.html" }, "div"),
+      detail: faktoKunLigiloj([]),
+    });
+    expect(result.mankantajKantoj).toEqual([{ de: "liste", al: "detail" }]);
   });
 });

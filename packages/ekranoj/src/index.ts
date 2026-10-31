@@ -4,9 +4,12 @@
 // and the costs.
 
 export * from "./agento.js";
+export * from "./bildigilo.js";
+export * from "./eligo.js";
 export * from "./fakto-statika.js";
 export * from "./gardo.js";
 export * from "./instancoj.js";
+export * from "./konstruo.js";
 export * from "./kostoj.js";
 export * from "./mcp-kliento.js";
 export * from "./navigado.js";

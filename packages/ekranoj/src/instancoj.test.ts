@@ -5,6 +5,8 @@ import {
   type EroSkemo,
   instancojElFakto,
   kontroliUzon,
+  LIGILAJ_ATRIBUTOJ,
+  ligilajAtributojDe,
   malobservojDe,
   skemoDe,
   skemoLegiloDe,
@@ -156,5 +158,73 @@ describe("instances from facts (D-32)", () => {
     );
     expect(sen).toEqual({ instancoj: [], malobservoj: [] });
     expect(ponto.vokoj.filter((voko) => voko.name === "check_usage")).toHaveLength(2);
+  });
+});
+
+// S037-07 Befund 1: which Eroj are links and where their target stands comes from the Skemo
+// (a11y role `link`, its one required string prop), read over MCP – nothing typed here but the
+// invented test Ero.
+describe("link props from the Skemo (S037-04)", () => {
+  const SALTILO = {
+    ero: { id: "ero-saltilo", name: "saltilo", description: "Ein Verweis" },
+    skemo: {
+      props: [
+        { name: "celo", kind: "string", required: true },
+        { name: "titolo", kind: "string" },
+      ],
+      slots: [{ name: "label", default: true }],
+      a11y: { role: "link" },
+    },
+  };
+
+  it("reads the role and the required props of a get_ero answer", () => {
+    expect(skemoDe(JSON.stringify(SALTILO))).toEqual({
+      props: [
+        { name: "celo", kind: "string", required: true },
+        { name: "titolo", kind: "string" },
+      ],
+      slots: [{ name: "label", default: true }],
+      rolo: "link",
+    });
+  });
+
+  it("maps every link Ero of the facts to its target prop, over the documented fallback", async () => {
+    const fakto: Fakto = {
+      ...FAKTO,
+      elements: [
+        { tag: "fm-saltilo", attrs: { celo: "detail.html" }, parent: -1, text: "Weiter" },
+        { tag: "fm-butono", attrs: {}, parent: -1, text: "Speichern" },
+      ],
+    };
+    const legi = async (nomo: string): Promise<EroSkemo | undefined> =>
+      nomo === "saltilo" ? skemoDe(JSON.stringify(SALTILO)) : skemoj.get(nomo);
+    expect(await ligilajAtributojDe({ liste: fakto }, legi)).toEqual({
+      ...LIGILAJ_ATRIBUTOJ,
+      "fm-saltilo": "celo",
+    });
+    // Without a readable Skemo the documented fallback stays.
+    expect(await ligilajAtributojDe({ liste: fakto }, async () => undefined)).toEqual(
+      LIGILAJ_ATRIBUTOJ,
+    );
+  });
+
+  it("does not take an Ero that is no link or has no single required string prop", async () => {
+    const fakto: Fakto = {
+      ...FAKTO,
+      elements: [{ tag: "fm-saltilo", attrs: {}, parent: -1, text: "" }],
+    };
+    const duaj = {
+      ...SALTILO,
+      skemo: {
+        ...SALTILO.skemo,
+        props: [...SALTILO.skemo.props, { name: "alia", kind: "string", required: true }],
+      },
+    };
+    const neLigilo = { ...SALTILO, skemo: { ...SALTILO.skemo, a11y: { role: "button" } } };
+    for (const body of [duaj, neLigilo]) {
+      expect(
+        await ligilajAtributojDe({ liste: fakto }, async () => skemoDe(JSON.stringify(body))),
+      ).toEqual(LIGILAJ_ATRIBUTOJ);
+    }
   });
 });

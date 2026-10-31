@@ -18,11 +18,14 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
+    "test:browser": "vitest run --config vitest.browser.config.ts",
     "lint": "tsc -p tsconfig.json --noEmit && biome check ."
   },
   "dependencies": {
+    "@axe-core/playwright": "4.13.0",
     "@fundamento/metiejo": "workspace:*",
-    "@modelcontextprotocol/client": "2.0.0"
+    "@modelcontextprotocol/client": "2.0.0",
+    "playwright": "1.63.0"
   },
   "devDependencies": {
     "@types/node": "^24.13.5",

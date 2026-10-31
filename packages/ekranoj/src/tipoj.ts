@@ -237,9 +237,20 @@ export interface Bildigilo {
   close(): Promise<void>;
 }
 
+/**
+ * What a brand build wrote (S037-04, D-24): the stylesheets and the self-contained Eroj bundle a
+ * screen must load, as paths relative to the `marko/` folder (an absolute path inside it is read
+ * relative to it). `skripto` is an ES module without imports (the Make-Kit `element.js`); ekranoj
+ * writes it once more as a classic script, because Chromium refuses module scripts under `file://`.
+ */
+export interface MarkoKonstruo {
+  css: string[];
+  skripto?: string;
+}
+
 /** The brand build: writes it into `<out>/marko/` and says what a screen must load. */
 export interface Marko {
-  konstrui(dir: string): Promise<{ css: string[]; skripto?: string }>;
+  konstrui(dir: string): Promise<MarkoKonstruo>;
 }
 
 export interface EkranojDeps {
@@ -265,6 +276,11 @@ export interface EkranojDeps {
  * returned.
  */
 export interface EkranojEligo {
+  /**
+   * The run starts writing (S037-04, additive): called once, after the estimate and before the
+   * first request, with the brand build when one was made (Variante F only, D-34).
+   */
+  komenco?(e: EligoKomenco): void | Promise<void>;
   /** The screen document of a fragment: frame, brand build, back-link (D-24, D-27, D-34). */
   dokumento?(e: {
     ekrano: PlanoEkrano;
@@ -279,6 +295,17 @@ export interface EkranojEligo {
   rondo?(e: { rondo: number; stato: Rondo; plano: Plano }): void | Promise<void>;
   /** The run ended (also a partial one): the whole result. */
   fino?(rezulto: EkranojRezulto): void | Promise<void>;
+}
+
+/** The start of the output (S037-04): input, variant, language, renderer present, brand build. */
+export interface EligoKomenco {
+  enigo: EkranojEnigo;
+  varianto: Varianto;
+  lingvo: string;
+  /** A renderer (browser) is there; without one: no photos, axe not checked, never green. */
+  bildigilo: boolean;
+  /** The brand build in `<out>/marko/`; absent for Variante 0 (no Fundamento CSS/Eroj, D-34). */
+  marko?: MarkoKonstruo;
 }
 
 /** The cost estimate before the start (D-20). */
