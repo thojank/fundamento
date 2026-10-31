@@ -133,3 +133,24 @@ describe("a relative wish moves by one visible stop of the form (V-3)", () => {
     }
   });
 });
+
+// Spec 036 Befund 1.2: „eckiger“ from the pill went back to the value of the slider – from a pill
+// chosen at 0.5 a step of the wish ended at 0.5. The stops are 0 · 0.5 · 1 · 2 · Pille; one stop
+// back from the pill is 2, whatever the slider held (data/wuensche.json, D-83 as Spec 036 changes it).
+describe("eckiger from the pill goes one stop back, to 2 (Spec 036 Befund 1.2)", () => {
+  it("from a pill at any value of the slider, eckiger ends at 2 with the controls on the radius", () => {
+    for (const radius of [0, 0.5, 1, 1.6, 2]) {
+      const pill = withRegler({ ...BASE, form: { radius } }, BEDIENFORM_PATH, "pille");
+      const back = proponoOf(pill, { wunsch: "eckiger" }, wuensche, basis);
+      expect(bedienformOf(back.agordo), `Pille bei ${radius}`).toBe("radius");
+      expect(back.agordo.form?.radius, `Pille bei ${radius}`).toBe(2);
+    }
+  });
+
+  it("from a pill without a slider value too: the controls on the radius, the slider on 2", () => {
+    const pill = withRegler(BASE, BEDIENFORM_PATH, "pille");
+    const back = proponoOf(pill, { wunsch: "eckiger" }, wuensche, basis);
+    expect(bedienformOf(back.agordo)).toBe("radius");
+    expect(back.agordo.form?.radius).toBe(2);
+  });
+});
