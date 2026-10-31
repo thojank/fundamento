@@ -55,6 +55,7 @@ import {
   vollstaendigkeitOf,
 } from "./asistanto/stato.js";
 import { kahelojElProponoj, kahelojElTrovoj } from "./buehne.js";
+import { pruefmarkojOf, pruefungHtml } from "./buehne-pruefung.js";
 import { buildOf, expertHinweis, standOf } from "./eksperto.js";
 import { EKSPORTO_CELOJ, type EksportoCelo, exportMarko } from "./eksporto.js";
 import { type Bildilo, playwrightBildilo } from "./enportilo/bildilo.js";
@@ -2367,17 +2368,31 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
                 .map((key) => [`data-fm-${key}`, url.searchParams.get(key) ?? ""])
                 .filter(([, value]) => value !== ""),
             ),
-            body: previewBody(
-              isSxtupoKey(sxtupo) ||
-                sxtupo.startsWith("studio-") ||
-                sxtupo.startsWith("komponento-") ||
-                sxtupo.startsWith("buehne-")
-                ? sxtupo
-                : "vorschau",
-              breite,
-              agordo,
-              zeloOf(url.searchParams),
-            ),
+            body:
+              previewBody(
+                isSxtupoKey(sxtupo) ||
+                  sxtupo.startsWith("studio-") ||
+                  sxtupo.startsWith("komponento-") ||
+                  sxtupo.startsWith("buehne-")
+                  ? sxtupo
+                  : "vorschau",
+                breite,
+                agordo,
+                zeloOf(url.searchParams),
+              ) +
+              // Spec 036, Befund 3.5: the stage's frame „Jetzt“ shows the open problems of the
+              // draft's check per component (the step's state counts the same problems).
+              (sxtupo.startsWith("buehne-") && propono === null
+                ? pruefungHtml(
+                    pruefmarkojOf(
+                      pruefungOf(draft).raporto.violations.filter(
+                        (violation) => violation.fixed || violation.jugxo === undefined,
+                      ),
+                      modeloOf(),
+                      satzOf,
+                    ),
+                  )
+                : ""),
           }),
         );
         return;

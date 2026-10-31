@@ -9,6 +9,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { kahelojElProponoj } from "./buehne.js";
+import { pruefmarkojOf } from "./buehne-pruefung.js";
 import { parseEnv, settingsOf } from "./env.js";
 import { MARKEN_DIR } from "./marko.js";
 import type { PrivataDeps } from "./privata.js";
@@ -138,5 +139,66 @@ describe("Spec 036, Befund 3.5: the check reaches the stage per component", () =
       expect(marko.satz).toMatch(/^[^\n]+\.$/);
       expect(pruefung.html).toContain(marko.satz);
     }
+  });
+
+  it("only the stage's frame „Jetzt“ is marked: other preview pages and the proposal's frame stay as they were", async () => {
+    expect(await markojOf("sxtupo=farbe&breite=mittel")).toBeUndefined();
+    expect(await markojOf("sxtupo=studio-farbe&breite=mittel")).toBeUndefined();
+    expect(await markojOf("sxtupo=buehne-farbe&breite=mittel&propono=gvidkoloro")).toBeUndefined();
+  });
+});
+
+describe("Spec 036, Befund 3.5: which components show a problem's token", () => {
+  it("a pair of contrast marks the Eroj that bind its foreground, in their variant; states do not narrow", () => {
+    const modelo = {
+      kontrastParoj: [
+        {
+          id: "kpa_attrappe",
+          name: "text-on-action",
+          foreground: "color.text.on-action",
+          background: "color.action.primary.rest",
+          kategorio: "text-normal",
+        },
+      ],
+      eroj: [
+        {
+          ero: { name: "butono" },
+          skemo: {
+            props: [
+              { name: "emphasis", kind: "enum", values: ["high", "low"], default: "high" },
+              { name: "disabled", kind: "boolean", default: false },
+            ],
+            bindings: [
+              {
+                part: "label",
+                property: "color",
+                when: { emphasis: "high", disabled: "false", state: "rest" },
+                token: "color.text.on-action",
+              },
+              { part: "surface", property: "fill", token: "color.action.primary.rest" },
+            ],
+          },
+        },
+      ],
+    } as never;
+    const violation = {
+      rule: "contrast-below-threshold",
+      fixed: true,
+      subject: "text-on-action",
+      path: "kontrastParo/text-on-action",
+      message: "",
+      cause: "",
+      suggestion: "",
+    };
+    expect(pruefmarkojOf([violation], modelo, () => "Zu wenig Kontrast.")).toEqual([
+      {
+        ero: "butono",
+        kiam: [
+          { prop: "disabled", wert: "false", bool: true, standard: true },
+          { prop: "emphasis", wert: "high", bool: false, standard: true },
+        ],
+        satz: "Zu wenig Kontrast.",
+      },
+    ]);
   });
 });
