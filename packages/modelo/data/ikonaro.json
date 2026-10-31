@@ -1,5 +1,5 @@
 {
-  "$schema": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/IkonaroFile",
+  "$schema": "urn:fundamento:schema:modelo#/$defs/IkonaroFile",
   "ikonaro": [
     {
       "id": "iko_01M5GCQBAPAJAWMNPC5DR8VMEE",

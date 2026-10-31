@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/list_jugxoj.output.json",
+  "$id": "urn:fundamento:schema:mcp:list_jugxoj.output",
   "title": "list_jugxoj output",
   "description": "Jugxoj, optionally by reference or Aspekto.",
   "type": "object",
@@ -8,7 +8,7 @@
     "jugxoj": {
       "type": "array",
       "items": {
-        "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Jugxo"
+        "$ref": "urn:fundamento:schema:modelo#/$defs/Jugxo"
       }
     }
   },

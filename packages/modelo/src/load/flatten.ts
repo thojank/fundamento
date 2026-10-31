@@ -138,7 +138,7 @@ export function flattenTokenTree(tree: unknown, file: string): FlattenResult {
   return { tokens, issues };
 }
 
-/** The `$extensions["com.ciferecigo.fundamento"]` object of a token, group or set root, if any. */
+/** The `$extensions["fundamento"]` object of a token, group or set root, if any. */
 export function fundamentoExtension(node: unknown): JsonObject | undefined {
   if (!isJsonObject(node) || !isJsonObject(node.$extensions)) {
     return undefined;

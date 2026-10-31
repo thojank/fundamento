@@ -2,7 +2,7 @@
 
 **Plan:** [`plan.md`](plan.md) (D-01–D-20, R1–R3) · **Data model:** [`data-model.md`](data-model.md) · **Contracts:** [`contracts/mcp-tools.md`](contracts/mcp-tools.md) · **Status:** approved by the maintainer 2026-09-19 (incl. R3 additions, R4 and both sequencing changes) · **Date:** 2026-09-19
 
-The stage order was set by the maintainer: README → Regularo → komuna repair → KontrastParo `aux` → SDK migration → Gvidanto tools → Ontologio → acceptance (S7, perf) → ciferecigo outside the repo, as the last task after the merge. One PR at the end of Phase 2, as in Phase 1.
+The stage order was set by the maintainer: README → Regularo → komuna repair → KontrastParo `aux` → SDK migration → Gvidanto tools → Ontologio → acceptance (S7, perf) → privata outside the repo, as the last task after the merge. One PR at the end of Phase 2, as in Phase 1.
 
 **Rule for every task (Art. X, Jugxo `jug_01M2VRT7KQ77W91MVXB4GXSRZ4`):**
 1. **Red:** write the tests and fixtures listed under *Red*, run them, and watch them fail for the expected reason. Record the failing command and one failing assertion in the commit message.
@@ -123,10 +123,10 @@ The stage order was set by the maintainer: README → Regularo → komuna repair
   - Red: `invalid/regulo-text-hierarchy-flat-dark-high` (0/50/100: two issues) and `invalid/regulo-text-hierarchy-flat-light-high` (1000/950/900 on a ramp whose 950 and 900 lie 0.023 apart); unit tests for the message and for `regulo-sojlo-missing` on text-hierarchy (6 failed); then `sojlo` on the repo Regulo: `fm modelo validate` 2 errors (komuna dark/high), 5 with ekzemplo (plus ekzemplo light/high subtle); `data/text-hierarchy.test.ts` with the target steps and the 0.05 step (6 failed).
   - Green: checker measures neighbouring roles after compositing; `text-hierarchy` needs `sojlo`; core `color-scheme/dark+contrast/high` subtle `neutral.100`, muted `neutral.200`; ekzemplo light/high subtle `neutral.900`, muted `neutral.800`; fixtures that copy the base get the repaired steps (light/high muted `800`, dark/high `200/300`).
 
-## Stage 8 – ciferecigo (last, after the merge, outside the repository)
+## Stage 8 – privata (last, after the merge, outside the repository)
 
-- [ ] **T026 Re-derive ciferecigo against the new core** (spec edge case; maintainer request)
-  - Red: `pnpm fm modelo validate --aspekto ../fundamento-aspekto-ciferecigo` against the merged core fails with `aspekto-incomplete` for the four `color.status.<s>.border` and with `text-hierarchy` under high contrast (and `state-distinct` where the package's states fall under 0.05).
+- [ ] **T026 Re-derive privata against the new core** (spec edge case; maintainer request)
+  - Red: `pnpm fm modelo validate --aspekto ../fundamento-tiparoj-privataj` against the merged core fails with `aspekto-incomplete` for the four `color.status.<s>.border` and with `text-hierarchy` under high contrast (and `state-distinct` where the package's states fall under 0.05).
   - Green: extend `scripts/derive.mjs` and `DERIVATION.md`: status borders (≥ 3:1, so the amber warning fill in light can pass through `aux`), the text hierarchy under high contrast following the core repair, states by Rule 8 with the 0.05 threshold. Re-run `scripts/check.mjs` and the preview.
   - Done when: `fm modelo validate --aspekto …` exits 0; `check:alirebleco` passes for the composition; `check:clean-room` in the core is green; archive handed to the maintainer (not pushed); the findings go into a short note in `research.md` of Spec 002. Visual review by the maintainer.
 
@@ -164,6 +164,6 @@ The stage order was set by the maintainer: README → Regularo → komuna repair
 | AK-10 | every task (Done when), T025 |
 | AK-11 | done (plan) |
 | D-20 (README) | T001, T025 |
-| ciferecigo re-derivation | T026 |
+| privata re-derivation | T026 |
 
 Consistency check before tasks (Governance, `/speckit.analyze` scope): every FR and AK of the spec maps to at least one task; every task maps to a plan decision; no task needs a new package (Art. XI); the lockfile changes in T015 only; no task lowers a threshold.

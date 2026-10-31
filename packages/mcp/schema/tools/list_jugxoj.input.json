@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/list_jugxoj.input.json",
+  "$id": "urn:fundamento:schema:mcp:list_jugxoj.input",
   "title": "list_jugxoj input",
   "description": "Jugxoj, optionally by reference or Aspekto.",
   "type": "object",
@@ -8,18 +8,18 @@
     "ref": {
       "oneOf": [
         {
-          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/JugxoReguloRef"
+          "$ref": "urn:fundamento:schema:modelo#/$defs/JugxoReguloRef"
         },
         {
-          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/JugxoEroRef"
+          "$ref": "urn:fundamento:schema:modelo#/$defs/JugxoEroRef"
         },
         {
-          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/JugxoArtikoloRef"
+          "$ref": "urn:fundamento:schema:modelo#/$defs/JugxoArtikoloRef"
         }
       ]
     },
     "aspekto": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
     }
   },
   "additionalProperties": false

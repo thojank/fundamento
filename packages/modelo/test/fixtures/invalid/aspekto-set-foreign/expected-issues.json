@@ -3,7 +3,7 @@
   "issues": [
     {
       "rule": "aspekto-set-foreign",
-      "path": "aspekto-ekzemplo/sets/aspekto/neutra.json#/$extensions/com.ciferecigo.fundamento/kondicxoj"
+      "path": "aspekto-ekzemplo/sets/aspekto/neutra.json#/$extensions/fundamento/kondicxoj"
     }
   ]
 }

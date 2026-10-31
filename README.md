@@ -323,4 +323,4 @@ No font files are shipped (Spec 000 FR-18): Aspektoj reference font families, an
 
 ## License
 
-MIT · Author: Thorsten Jankowski · [ciferecigo.com](https://ciferecigo.com)
+MIT · Author: Thorsten Jankowski

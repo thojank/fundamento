@@ -1,6 +1,6 @@
 {
   "$extensions": {
-    "com.ciferecigo.fundamento": {
+    "fundamento": {
       "id": "set_01M2WRK8G0DDDDDDDDDDDDDDDN",
       "kondicxoj": []
     }
@@ -20,7 +20,7 @@
             "hex": "#ffffff"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDDS"
             }
           }
@@ -36,7 +36,7 @@
             "hex": "#1a1a1a"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDDT"
             }
           }
@@ -52,7 +52,7 @@
             "hex": "#000000"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDDV"
             }
           }
@@ -63,7 +63,7 @@
       "default": {
         "$value": "{color.palette.neutral.900}",
         "$extensions": {
-          "com.ciferecigo.fundamento": {
+          "fundamento": {
             "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDDW",
             "role": "foreground"
           }
@@ -82,7 +82,7 @@
           "hex": "#808080"
         },
         "$extensions": {
-          "com.ciferecigo.fundamento": {
+          "fundamento": {
             "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDDX",
             "role": "border"
           }
@@ -93,7 +93,7 @@
       "default": {
         "$value": "{color.palette.neutral.0}",
         "$extensions": {
-          "com.ciferecigo.fundamento": {
+          "fundamento": {
             "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDDY",
             "role": "background"
           }
@@ -124,7 +124,7 @@
         }
       },
       "$extensions": {
-        "com.ciferecigo.fundamento": {
+        "fundamento": {
           "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDDZ"
         }
       }
@@ -138,7 +138,7 @@
         "unit": "px"
       },
       "$extensions": {
-        "com.ciferecigo.fundamento": {
+        "fundamento": {
           "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDE0"
         }
       }
@@ -155,7 +155,7 @@
                 "$value": "{color.background.default}",
                 "$description": "butono: surface.fill when emphasis=high, state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                 "$extensions": {
-                  "com.ciferecigo.fundamento": {
+                  "fundamento": {
                     "id": "tok_01M5GF2QS7JT05JZ7MZYE0CHB9",
                     "role": "ero"
                   }
@@ -171,7 +171,7 @@
           "$value": "{color.text.default}",
           "$description": "butono: label.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M5GF2QS89W9VYM6DZ2H2CG8A",
               "role": "ero"
             }
@@ -184,7 +184,7 @@
           "$value": "{spacing.small}",
           "$description": "butono: box.gap (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M5GF2QS89W9VYM6DZ2H2CG8B"
             }
           }

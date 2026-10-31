@@ -4,7 +4,7 @@
 
 ## Zweck
 
-Phase 1 macht aus dem Fundament ein benutzbares Token-System. Drei Dinge entstehen: (1) ein vollständiges Vortaro mit echten Werten, gemessen an der Abdeckungs-Checkliste reifer Systeme; (2) die Referenzmarke **Komuna** als erstes Aspekto-Paket plus die Fähigkeit, Aspektoj von außerhalb des Repos einzubinden, nachgewiesen mit der proprietären Marke **ciferecigo** in einem privaten Repo; (3) der MCP-Server als erste Schnittstelle des Systems, über den ein Agent alles fragen kann, was das Modelo weiß.
+Phase 1 macht aus dem Fundament ein benutzbares Token-System. Drei Dinge entstehen: (1) ein vollständiges Vortaro mit echten Werten, gemessen an der Abdeckungs-Checkliste reifer Systeme; (2) die Referenzmarke **Komuna** als erstes Aspekto-Paket plus die Fähigkeit, Aspektoj von außerhalb des Repos einzubinden, nachgewiesen mit der proprietären Marke **privata** in einem privaten Repo; (3) der MCP-Server als erste Schnittstelle des Systems, über den ein Agent alles fragen kann, was das Modelo weiß.
 
 Diese Spec ist zugleich das **Constitution Amendment auf v1.3** (Artikel IV, V, VI; siehe „Constitution-Änderungen"). Technologieauswahl wie in Spec 000 (`global/tech-stack.md`); der MCP-Server nutzt das offizielle TypeScript-SDK des Model Context Protocol.
 
@@ -13,7 +13,7 @@ Diese Spec ist zugleich das **Constitution Amendment auf v1.3** (Artikel IV, V, 
 - Eroj, Skemoj, Sxablonoj → Phase 3/4
 - Gvidanto als Agent mit eigener Dialogführung → Phase 2; Phase 1 liefert nur die MCP-Werkzeuge, die er braucht
 - Generatoren für CSS, Tailwind, Figma, Penpot → ab Phase 5; Phase 1 liefert die Daten und die Namensableitung, keine Dateien
-- Enportilo (Brand-Import) → Phase 7; `ciferecigo` wird in Phase 1 von Hand als Aspekto-Paket angelegt, und dieser Vorgang ist der Vorlauf für den Enportilo
+- Enportilo (Brand-Import) → Phase 7; `privata` wird in Phase 1 von Hand als Aspekto-Paket angelegt, und dieser Vorgang ist der Vorlauf für den Enportilo
 - Fontdateien im Kern-Repo; Geist wird referenziert, nicht mitgeliefert → Phase 5 (Asset-Pipeline)
 - Icons → Phase 5
 
@@ -41,13 +41,13 @@ Ein Autor legt einen zweiten Aspekto an. Sein Set muss **jeden** Token des Kerns
 
 ### S4 – Externes Aspekto-Paket (Markeninhaber)
 
-Die Marke `ciferecigo` liegt in einem eigenen privaten Repository (`thojank/fundamento-aspekto-ciferecigo`) mit eigener Lizenz. Sie hat dieselbe Paketstruktur wie `komuna`: `aspekto.json` (Metadaten: Name, Eigentümer, Lizenz, Schriftlizenzhinweis), `sets/` (das Aspekto-Set und Konjunktions-Sets), eigene IDs in einer eigenen `ids.lock.json` mit eigenem Präfix-Namensraum. Ein Fundamento-Projekt bindet sie über eine Konfigurationsdatei ein (`fundamento.config.json`: Liste der Aspekto-Pakete); Validierung, Auflösung, Prüfungen und Export behandeln externe Aspektoj genau wie interne. Die Schrift N27 wird als Familienname mit Fallback-Stack referenziert; keine Fontdatei liegt im Kern-Repo, und der Kern baut ohne das externe Paket.
+Die Marke `privata` liegt in einem eigenen privaten Repository (`$FM_TIPAROJ_REPO`) mit eigener Lizenz. Sie hat dieselbe Paketstruktur wie `komuna`: `aspekto.json` (Metadaten: Name, Eigentümer, Lizenz, Schriftlizenzhinweis), `sets/` (das Aspekto-Set und Konjunktions-Sets), eigene IDs in einer eigenen `ids.lock.json` mit eigenem Präfix-Namensraum. Ein Fundamento-Projekt bindet sie über eine Konfigurationsdatei ein (`fundamento.config.json`: Liste der Aspekto-Pakete); Validierung, Auflösung, Prüfungen und Export behandeln externe Aspektoj genau wie interne. Die Schrift N27 wird als Familienname mit Fallback-Stack referenziert; keine Fontdatei liegt im Kern-Repo, und der Kern baut ohne das externe Paket.
 
 *Warum:* Artikel IV und V. Eine Unternehmensmarke muss Fundamento nutzen können, ohne etwas offenzulegen, und der Kern darf nie von einer proprietären Marke abhängen. Das ist zugleich das Ziel-Format für den Enportilo (Phase 7): Was er erzeugt, ist genau ein solches Paket.
 
 ### S5 – Typografie, die Marken tragen kann (Designer)
 
-Die Typografie-Rollen des Vortaro (Display, Headline in Stufen, Body, Label, Caption, Code, Kicker) sind Composites mit Familie, Größe, Gewicht, Zeilenhöhe, Laufweite und Textumwandlung. Sie sind je Aspekto und je Dimensio überschreibbar: `komuna` nutzt moderate Werte; `ciferecigo` setzt Display-Rollen auf Gewicht 100–200, Zeilenhöhe unter 0,8 und negative Laufweite, Kicker in Versalien mit positiver Laufweite. Beides ist ohne Schemaänderung ausdrückbar, und `viewport` verändert Größen, Zeilenhöhen und Laufweiten; `density` verändert keine Typografie (Regulo `density-affects-layout-only`).
+Die Typografie-Rollen des Vortaro (Display, Headline in Stufen, Body, Label, Caption, Code, Kicker) sind Composites mit Familie, Größe, Gewicht, Zeilenhöhe, Laufweite und Textumwandlung. Sie sind je Aspekto und je Dimensio überschreibbar: `komuna` nutzt moderate Werte; `privata` setzt Display-Rollen auf Gewicht 100–200, Zeilenhöhe unter 0,8 und negative Laufweite, Kicker in Versalien mit positiver Laufweite. Beides ist ohne Schemaänderung ausdrückbar, und `viewport` verändert Größen, Zeilenhöhen und Laufweiten; `density` verändert keine Typografie (Regulo `density-affects-layout-only`).
 
 *Warum:* Artikel IV („Adaption in allen Aspekten"). Eine Marke, deren Charakter in der Typografie liegt, ist der harte Testfall für das Token-Schema; Farbe allein beweist nichts.
 
@@ -71,9 +71,9 @@ Alle Antworten sind JSON mit stabilen Feldnamen; der Server ist in Phase 1 **les
 
 Aus den MCP-Antworten allein muss sich dieser Dialog bilden lassen:
 
-> „Was gibt's hier?" → „Fundamento v0.1.0: sechs Dimensioj, zwei Aspektoj (`komuna`, Referenz unter MIT mit Geist; `ciferecigo`, extern, proprietär mit N27), N Tokens in M Typen (Anzahl je Token-Gruppe: color …, typography …, …), K Regeln mit Begründung, eine Jugxo, keine Eroj."
-> „Welche Farbe hat primärer Text in ciferecigo im Dark Mode?" → „`color.text.default` = `#f1efe9`, aus Set `aspekto/ciferecigo+color-scheme/dark`, Alias auf `color.palette.neutral.50`."
-> „Warum gibt es keine Schatten in ciferecigo?" → „Regel `elevation-flat-brand` (Kialo: Die Marke arbeitet mit Fugen und Linien statt Tiefe; Schatten würden die Flächigkeit brechen). `elevation.*` ist in `aspekto/ciferecigo` auf `none` gesetzt."
+> „Was gibt's hier?" → „Fundamento v0.1.0: sechs Dimensioj, zwei Aspektoj (`komuna`, Referenz unter MIT mit Geist; `privata`, extern, proprietär mit N27), N Tokens in M Typen (Anzahl je Token-Gruppe: color …, typography …, …), K Regeln mit Begründung, eine Jugxo, keine Eroj."
+> „Welche Farbe hat primärer Text in privata im Dark Mode?" → „`color.text.default` = `#f1efe9`, aus Set `aspekto/privata+color-scheme/dark`, Alias auf `color.palette.neutral.50`."
+> „Warum gibt es keine Schatten in privata?" → „Regel `elevation-flat-brand` (Kialo: Die Marke arbeitet mit Fugen und Linien statt Tiefe; Schatten würden die Flächigkeit brechen). `elevation.*` ist in `aspekto/privata` auf `none` gesetzt."
 
 *Warum:* Artikel VII. Die Doku ist das Modelo, gelesen durch einen Agenten.
 
@@ -89,14 +89,14 @@ Aus den MCP-Antworten allein muss sich dieser Dialog bilden lassen:
 - FR-05: `fontFamily`-Tokens tragen einen Stack (`["Geist", "system-ui", "sans-serif"]`); Fontdateien liegen nicht im Kern-Repo. Lizenz und Bezugsquelle je Familie stehen in den Aspekto-Metadaten (FR-11).
 - FR-06: `motion`-Tokens: Dauern (`fast`, `medium`, `slow`, `deliberate`) und Easings (`standard`, `emphasized`, `enter`, `exit`); `motion=reduced` setzt Dauern auf `0ms` und Easings auf `linear`.
 - FR-07: `layout`-Tokens je `viewport`: Spalten, Gutter, Rand, Container-Maximalbreite; `density` skaliert Spacing und Komponentenhöhen über Aliasse, nicht über neue Werte.
-- FR-08: Rollen-Annotationen (`$extensions["com.ciferecigo.fundamento"].role`) für alle Farb-Tokens, und KontrastParoj für jede Text-/UI-auf-Hintergrund-Kombination, die das Vortaro definiert (Regulo `contrast-pairs-declared` wird erzwungen).
+- FR-08: Rollen-Annotationen (`$extensions["fundamento"].role`) für alle Farb-Tokens, und KontrastParoj für jede Text-/UI-auf-Hintergrund-Kombination, die das Vortaro definiert (Regulo `contrast-pairs-declared` wird erzwungen).
 
 ### Aspektoj
 - FR-09: `komuna` wird die Referenzmarke: Umbenennung des Phase-0-Wertes `neutra` → `komuna` bei unveränderter ID (Nachweis der ID-Stabilität; ein Test prüft, dass die ID gleich blieb und `ids.lock.json` keine neue ID enthält).
 - FR-10: Das Modelo markiert genau einen Aspekto als Kern-Referenz (`core.referenceAspekto = "komuna"`); sein Set ist leer, seine Werte liegen im Kern. Jeder andere Aspekto muss vollständig sein: Validierung `aspekto-incomplete` listet fehlende Tokens. Konjunktions-Sets eines Aspekto sind davon ausgenommen (sie überschreiben nur Deltas).
 - FR-11: Aspekto-Paket-Format: Ordner mit `aspekto.json` (Schema: `id`, `name`, `owner`, `license` (SPDX oder `proprietary`), `fonts[]` mit `family`, `license`, `source`, `redistributable`), `sets/aspekto/<name>.json` und optionale `sets/aspekto/<name>+<dimensio>/<valoro>.json`, eigene `ids.lock.json` mit Paket-Präfix im ID-Namensraum (`tok_cif_…` o. ä., Plan entscheidet), `$themes.json`-Fragment. `komuna` liegt als `packages/aspekto-komuna` im Kern-Repo und nutzt dasselbe Format.
 - FR-12: Einbindung externer Aspektoj über `fundamento.config.json` (Liste von Paketpfaden oder npm-Namen). Validierung, Auflösung, Prüfungen und Export laufen über Kern + alle konfigurierten Aspektoj; der Kern baut und besteht ohne externe Pakete.
-- FR-13: `ciferecigo` als externes Paket im privaten Repo `thojank/fundamento-aspekto-ciferecigo`: vollständiges Set, Konjunktions-Sets für `color-scheme/dark` und `contrast/high`, Metadaten mit `license: proprietary`, Font `N27` (`redistributable: false`, Fallback-Stack). Werte laut Anhang A. Das Paket wird von P0 im Kern-Workspace angelegt und dann in das private Repo überführt; im Kern-Repo bleibt nur ein Testfixture mit einem **fiktiven** externen Aspekto (`aspekto-ekzemplo`), damit CI den externen Pfad prüft, ohne ciferecigo zu enthalten.
+- FR-13: `privata` als externes Paket im privaten Repo `$FM_TIPAROJ_REPO`: vollständiges Set, Konjunktions-Sets für `color-scheme/dark` und `contrast/high`, Metadaten mit `license: proprietary`, Font `N27` (`redistributable: false`, Fallback-Stack). Werte laut Anhang A. Das Paket wird von P0 im Kern-Workspace angelegt und dann in das private Repo überführt; im Kern-Repo bleibt nur ein Testfixture mit einem **fiktiven** externen Aspekto (`aspekto-ekzemplo`), damit CI den externen Pfad prüft, ohne privata zu enthalten.
 - FR-14: Die IDs aller Phase-0-Tokens bleiben erhalten; neue Tokens erhalten neue IDs über `id:new`; keine `retired`-IDs in Phase 1.
 
 ### MCP-Server
@@ -127,7 +127,7 @@ Aus den MCP-Antworten allein muss sich dieser Dialog bilden lassen:
 - Neue Pakete: `@fundamento/aspekto-komuna`, `@fundamento/mcp`; `packages/vortaro` bleibt der Kern. Höchstens drei neue Pakete (Artikel XI): es sind zwei.
 - MCP über das offizielle TypeScript-SDK, keine eigene Protokollimplementierung (Artikel XI).
 - Geist unter OFL 1.1 (Quelle in `research.md`); im Kern-Repo nur der Familienname, keine Dateien.
-- ciferecigo-Werte (Anhang A) dürfen im Kern-Repo nur in dieser Spec und in `research.md` stehen, nicht in Code, Daten oder Fixtures (Artikel V gilt sinngemäß auch für die eigene proprietäre Marke; das Fixture nutzt erfundene Werte).
+- privata-Werte (Anhang A) dürfen im Kern-Repo nur in dieser Spec und in `research.md` stehen, nicht in Code, Daten oder Fixtures (Artikel V gilt sinngemäß auch für die eigene proprietäre Marke; das Fixture nutzt erfundene Werte).
 - Test-first mit rotem Lauf vor der Implementierung (Jugxo `jug_01M2VRT7KQ77W91MVXB4GXSRZ4`).
 
 ---
@@ -154,16 +154,16 @@ Aus den MCP-Antworten allein muss sich dieser Dialog bilden lassen:
 - AK-05: Typografie-Rollen sind in `komuna` und im externen Fixture unterschiedlich belegt (Gewicht, Zeilenhöhe, Laufweite) und in `viewport=compact` verändert, in `density=compact` unverändert; Auflösung mit Herkunft zeigt das je Feld.
 - AK-06: MCP-Server startet, alle zehn Werkzeuge antworten mit schema-konformem JSON; ein Integrationstest spielt den Dialog aus S7 mit dem Fixture-Aspekto durch und rechnet jede Aussage aus den Antworten nach.
 - AK-07: `resolve` unter 100 ms, Start unter 2 s (gemessen im Test, mit Toleranz für CI).
-- AK-08: Kern-Repo enthält keine ciferecigo-Werte außerhalb von Spec und Research (Clean-Room-Prüfung erweitert um eine Allowlist der Dateien, die Markenwerte enthalten dürfen).
+- AK-08: Kern-Repo enthält keine privata-Werte außerhalb von Spec und Research (Clean-Room-Prüfung erweitert um eine Allowlist der Dateien, die Markenwerte enthalten dürfen).
 - AK-09: `plan.md` mit Compliance Review gegen Constitution v1.3; Penpot-Import je Aspekto dokumentiert (Ergebnis darf „mit Abweichungen" sein).
 - AK-10: Byte-identischer Export bei zweimaligem Build, mit und ohne externes Paket.
 - AK-11: Keine `[NEEDS CLARIFICATION]` offen.
 
 ---
 
-## Anhang A – ciferecigo (Werte für das private Aspekto-Paket)
+## Anhang A – privata (Werte für das private Aspekto-Paket)
 
-Quelle: `assets/style.css` der Website ciferecigo.de, Stand 2026-09. Diese Werte gehen **nur** in das private Paket.
+Quelle: `assets/style.css` der Website privata.example, Stand 2026-09. Diese Werte gehen **nur** in das private Paket.
 
 | Bereich | Wert |
 |---|---|

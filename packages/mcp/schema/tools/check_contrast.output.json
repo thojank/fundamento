@@ -1,18 +1,18 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/check_contrast.output.json",
+  "$id": "urn:fundamento:schema:mcp:check_contrast.output",
   "title": "check_contrast output",
   "description": "Results grouped by identical result (ratio at two decimals, truncated; threshold; passed; for pairs with aux also branch and aux ratio), each with the complete list of its combinations.",
   "type": "object",
   "properties": {
     "foreground": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenName"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/TokenName"
     },
     "background": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenName"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/TokenName"
     },
     "kategorio": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/KontrastKategorio"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/KontrastKategorio"
     },
     "kategorioSource": { "enum": ["input", "declared", "role"] },
     "declared": {
@@ -22,10 +22,10 @@
           "type": "object",
           "properties": {
             "id": {
-              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/KontrastParoId"
+              "$ref": "urn:fundamento:schema:modelo#/$defs/KontrastParoId"
             },
             "name": {
-              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+              "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
             },
             "position": { "enum": ["main", "aux"] },
             "kialo": { "type": "string", "minLength": 1 }

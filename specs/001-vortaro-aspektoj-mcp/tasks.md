@@ -2,7 +2,7 @@
 
 **Plan:** [`plan.md`](plan.md) (D-01–D-18, K1–K5) · **Data model:** [`data-model.md`](data-model.md) · **Status:** approved by the maintainer 2026-09-19 (incl. the `it.fails` exception T012–T015) · **Date:** 2026-09-19
 
-Order follows the plan's "Build order". The ciferecigo package is the last task.
+Order follows the plan's "Build order". The privata package is the last task.
 
 **Rule for every task (Art. X, Jugxo `jug_01M2VRT7KQ77W91MVXB4GXSRZ4`):**
 1. **Red:** write the tests/fixtures listed under *Red*, run them, and observe them fail for the expected reason. Record the failing command and one failing assertion in the task's PR/commit message.
@@ -130,12 +130,12 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
   - Red: `docs/docs.test.ts` extended: README lists the new commands and the per-Aspekto Penpot folder; `plan.md` Traceability maps every FR/AK of Spec 001 to task IDs; no Anhang-A value outside the allowlist (reuses T022).
   - Green: README, plan traceability, "Penpot import result" left as "pending maintainer verification".
 
-## Stage 7 – ciferecigo (last)
+## Stage 7 – privata (last)
 
-- [x] **T030 ciferecigo package outside the core repository** (D-18, FR-13, Q3, Q5; delivered as an archive 2026-09-19 with DERIVATION.md Rules 1–6 and the preview `preview/index.html`; accepted, the visual review is done by the maintainer with the preview)
-  - Red: create the empty package skeleton in the p0 workspace at `../fundamento-aspekto-ciferecigo` (`aspekto.json`, empty set, `link:`/`file:` dev dependencies on the core) and run `pnpm fm modelo validate --aspekto ../fundamento-aspekto-ciferecigo`; it must fail with `aspekto-incomplete` for every core token.
+- [x] **T030 privata package outside the core repository** (D-18, FR-13, Q3, Q5; delivered as an archive 2026-09-19 with DERIVATION.md Rules 1–6 and the preview `preview/index.html`; accepted, the visual review is done by the maintainer with the preview)
+  - Red: create the empty package skeleton in the p0 workspace at `../fundamento-tiparoj-privataj` (`aspekto.json`, empty set, `link:`/`file:` dev dependencies on the core) and run `pnpm fm modelo validate --aspekto ../fundamento-tiparoj-privataj`; it must fail with `aspekto-incomplete` for every core token.
   - Green: derive all values by the D-18 rules; write `DERIVATION.md` (OKLCH ramp with anchors and resulting steps, scales taken from komuna, typography roles, every contrast-driven step change); sets incl. the dark and high-contrast conjunctions; Aspekto Reguloj with kialo (from Anhang A).
-  - Done when: `fm modelo validate --aspekto …` exits 0; `check:alirebleco` passes for the composition; `check:clean-room` in the core is still green (nothing leaked into `repos/fundamento`); archive `fundamento-aspekto-ciferecigo.tar.gz` (without `node_modules`) handed to the maintainer; `research.md` §10 (Enportilo findings; §8 holds the APCA and AK-07 baselines) committed in the core. Visual review by the maintainer.
+  - Done when: `fm modelo validate --aspekto …` exits 0; `check:alirebleco` passes for the composition; `check:clean-room` in the core is still green (nothing leaked into `repos/fundamento`); archive `fundamento-tiparoj-privataj.tar.gz` (without `node_modules`) handed to the maintainer; `research.md` §10 (Enportilo findings; §8 holds the APCA and AK-07 baselines) committed in the core. Visual review by the maintainer.
 
 ---
 

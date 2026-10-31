@@ -153,7 +153,7 @@ describe("set-override-has-extensions allows textTransform only (D-11)", () => {
   const rules = (extension: Record<string, unknown>) => {
     const root = mutatedMinimal((edit) =>
       edit(HIGH, (value: { color: { text: { default: Record<string, unknown> } } }) => {
-        value.color.text.default.$extensions = { "com.ciferecigo.fundamento": extension };
+        value.color.text.default.$extensions = { fundamento: extension };
       }),
     );
     roots.push(root);

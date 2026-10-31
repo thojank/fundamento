@@ -109,7 +109,7 @@ function withValuesOf(core: unknown, frozen: unknown): unknown {
   );
 }
 
-const EXTENSION = "com.ciferecigo.fundamento";
+const EXTENSION = "fundamento";
 
 /**
  * The structure of komuna 0.2 (Spec 029 ①): komuna took the values of a Fonto, but every derived

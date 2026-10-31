@@ -212,4 +212,4 @@ Der Satz, den diese Spec belegen soll:
 - Rote Tests zuerst. Je PR ein Bericht im bekannten Format, dazu die Benchmark-Kennzahlen.
 - Im plan steht eine Messanleitung mit vollständigen Pfaden im Checkout `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds`, mit `cd` und `file://`-Links; für Figma der Build mit Testmarken und eine neue leere Datei.
 - **Clean Room:** Du öffnest keine fremden Systeme. Grundlage ist diese Spec samt `research/benchmark-carbon-2026-10.md`.
-- ciferecigo kommt nirgends vor.
+- privata kommt nirgends vor.

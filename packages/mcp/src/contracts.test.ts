@@ -5,7 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { compileToolSchemas, TOOL_NAMES } from "./schemas.js";
 
-const MODELO_ID = "https://ciferecigo.com/fundamento/schema/modelo.schema.json";
+const MODELO_ID = "urn:fundamento:schema:modelo";
 const validators = compileToolSchemas();
 
 const ISSUE = {
@@ -273,17 +273,17 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
     input: { term: "Marke" },
     output: {
       term: "Aspekto",
-      uri: "https://fundamento.ciferecigo.com/ontologio#Aspekto",
+      uri: "urn:fundamento:ontologio#Aspekto",
       inScheme: "terminologio",
       prefLabel: { eo: "Aspekto", en: "brand theme", de: "Markenausprägung" },
       altLabel: { en: ["brand"], de: ["Marke"] },
       definition: { en: "One brand's complete assignment.", de: "Eine vollständige Belegung." },
-      broader: [{ term: "Modelo", uri: "https://fundamento.ciferecigo.com/ontologio#Modelo" }],
+      broader: [{ term: "Modelo", uri: "urn:fundamento:ontologio#Modelo" }],
       related: [],
       relations: [
         {
           predicate: "assigns",
-          target: { term: "Vortaro", uri: "https://fundamento.ciferecigo.com/ontologio#Vortaro" },
+          target: { term: "Vortaro", uri: "urn:fundamento:ontologio#Vortaro" },
         },
       ],
       matchedBy: "altLabel",

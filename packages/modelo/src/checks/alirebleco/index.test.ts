@@ -400,7 +400,7 @@ describe("KontrastParo with a backdrop (translucent background)", () => {
         (colour.background as Record<string, unknown>).overlay = {
           $value: { colorSpace: "srgb", components: [0, 0, 0], alpha: 0.12, hex: "#000000" },
           $extensions: {
-            "com.ciferecigo.fundamento": {
+            fundamento: {
               id: "tok_01K5FMAJ0K2ES2P0S3VGVDAXAA",
               role: "background",
             },
@@ -453,13 +453,13 @@ describe("KontrastParo with a backdrop (translucent background)", () => {
         };
         const step = (hex: string, component: number, id: string) => ({
           $value: { colorSpace: "srgb", components: [component, component, component], hex },
-          $extensions: { "com.ciferecigo.fundamento": { id, role: "palette" } },
+          $extensions: { fundamento: { id, role: "palette" } },
         });
         const neutral = model.color.palette.neutral as Record<string, unknown>;
         neutral["500"] = step("#8a8a8a", 0.541, "tok_01K5FMAJ0K2ES2P0S3VGVDAXAE");
         const alias = (target: string, id: string) => ({
           $value: `{${target}}`,
-          $extensions: { "com.ciferecigo.fundamento": { id, role: "background" } },
+          $extensions: { fundamento: { id, role: "background" } },
         });
         // raised is white, sunken a mid grey: the same overlay passes on one and fails on the other.
         model.color.background.raised = alias(
@@ -473,7 +473,7 @@ describe("KontrastParo with a backdrop (translucent background)", () => {
         model.color.background.overlay = {
           $value: { colorSpace: "srgb", components: [0, 0, 0], alpha: 0.12, hex: "#000000" },
           $extensions: {
-            "com.ciferecigo.fundamento": {
+            fundamento: {
               id: "tok_01K5FMAJ0K2ES2P0S3VGVDAXAA",
               role: "background",
             },

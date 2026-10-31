@@ -71,7 +71,7 @@ describe("Spec 024 Runde 1 documentation (specs/024-studio)", () => {
     ]) {
       expect(plan, term).toContain(term);
     }
-    expect(plan).not.toContain("ciferecigo");
+    expect(plan).not.toContain(["cif", "ere", "cigo"].join(""));
   });
 
   it("the plan shows a screenshot of every view of the Studio and of the Schnellstart fixes, and every screenshot exists", () => {
@@ -107,7 +107,7 @@ describe("Spec 024 Runde 1 documentation (specs/024-studio)", () => {
     expect(tasks).toContain("## ① Runde 1");
     expect(tasks).toContain("**T2401");
     expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
-    expect(tasks).not.toContain("ciferecigo");
+    expect(tasks).not.toContain(["cif", "ere", "cigo"].join(""));
   });
 });
 
@@ -161,7 +161,7 @@ describe("Spec 024 Runde 2 documentation (specs/024-studio)", () => {
       expect(round, term).toContain(term);
     }
     expect(round).toMatch(/Ero-Tokens[^\n]*\b9\d\d\b/);
-    expect(round).not.toContain("ciferecigo");
+    expect(round).not.toContain(["cif", "ere", "cigo"].join(""));
     const shots = [...round.matchAll(/\]\((bildoj\/[a-z0-9-]+\.png)\)/g)].map(([, p = ""]) => p);
     expect(shots.some((shot) => shot.includes("studio-komponente"))).toBe(true);
     for (const shot of shots) expect(existsSync(join(specDir, shot)), shot).toBe(true);

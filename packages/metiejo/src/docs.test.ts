@@ -40,7 +40,7 @@ describe("Spec 023 Runde 1 documentation (specs/023-werkstatt-konfigurilo)", () 
     }
     expect(plan).toContain("metiejo");
     expect(plan).toContain("F-13");
-    expect(plan).not.toContain("ciferecigo");
+    expect(plan).not.toContain(["cif", "ere", "cigo"].join(""));
   });
 
   it("the plan shows a screenshot of every step, and every screenshot exists", () => {
@@ -78,6 +78,6 @@ describe("Spec 023 Runde 1 documentation (specs/023-werkstatt-konfigurilo)", () 
     expect(tasks).toContain("## ① Runde 1");
     expect(tasks).toContain("**T2301");
     expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
-    expect(tasks).not.toContain("ciferecigo");
+    expect(tasks).not.toContain(["cif", "ere", "cigo"].join(""));
   });
 });

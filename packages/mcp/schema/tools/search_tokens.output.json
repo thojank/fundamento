@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/search_tokens.output.json",
+  "$id": "urn:fundamento:schema:mcp:search_tokens.output",
   "title": "search_tokens output",
   "description": "Search tokens by prefix, type, role or text.",
   "type": "object",
@@ -12,7 +12,7 @@
     "tokens": {
       "type": "array",
       "items": {
-        "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenInventoryEntry"
+        "$ref": "urn:fundamento:schema:modelo#/$defs/TokenInventoryEntry"
       }
     }
   },

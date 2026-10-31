@@ -211,7 +211,7 @@ describe("shared constants", () => {
       "decorative",
       "ero",
     ]);
-    expect(FUNDAMENTO_EXTENSION_KEY).toBe("com.ciferecigo.fundamento");
+    expect(FUNDAMENTO_EXTENSION_KEY).toBe("fundamento");
     expect(CHECK_NAMES).toEqual([
       "vortaro-lint",
       "parity",

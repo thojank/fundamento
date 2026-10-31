@@ -24,7 +24,7 @@ import { isRecord as isJsonObject } from "./record.js";
 import { referencePackage, type Structure } from "./structure.js";
 import { AGORDILO_VERSION } from "./version.js";
 
-export const EXTENSION_KEY = "com.ciferecigo.fundamento";
+export const EXTENSION_KEY = "fundamento";
 const FONT_ROLES = ["display", "body", "code"] as const;
 const PALETTE_TOKEN = /^color\.palette\.([a-z]+)\.(\d+)$/;
 

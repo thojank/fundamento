@@ -283,9 +283,9 @@ describe("pnpm vortaro:ero-tokenoj", () => {
       ids: Record<string, { type: string }>;
     };
     const rest = written.ero.butono.surface.fill.emphasis.high?.rest as
-      | { $extensions: { "com.ciferecigo.fundamento": { id: string } } }
+      | { $extensions: { fundamento: { id: string } } }
       | undefined;
-    const id = rest?.$extensions["com.ciferecigo.fundamento"].id ?? "";
+    const id = rest?.$extensions["fundamento"].id ?? "";
     expect(lock.ids[id]?.type).toBe("token");
     // The hand-written part of the core is untouched: the first lines are the same bytes.
     expect(

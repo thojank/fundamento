@@ -10,7 +10,7 @@ import { readModeloSchema } from "../contracts/schema.js";
 
 export const ONTOLOGIO_URL = new URL("../../data/ontologio.json", import.meta.url);
 export const ONTOLOGIO_SCHEMA_URL = new URL("../../schema/ontologio.schema.json", import.meta.url);
-export const ONTOLOGIO_BASE = "https://fundamento.ciferecigo.com/ontologio";
+export const ONTOLOGIO_BASE = "urn:fundamento:ontologio";
 
 export interface OntologioConcept {
   uri: string;

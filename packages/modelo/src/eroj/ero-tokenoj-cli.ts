@@ -236,16 +236,14 @@ export interface EroTokenojPlan {
 /** The ID a core node carries in its Fundamento extension, or an empty string. */
 function idOf(node: Json): string {
   const extension = isObject(node.$extensions) ? node.$extensions : {};
-  const own = isObject(extension["com.ciferecigo.fundamento"])
-    ? extension["com.ciferecigo.fundamento"]
-    : {};
+  const own = isObject(extension["fundamento"]) ? extension["fundamento"] : {};
   return typeof own.id === "string" ? own.id : "";
 }
 
 /** The Fundamento extension of a core Ero-Token: its ID and, for a colour, the role ero. */
 function extensionOf(id: string, token: EroTokeno): Json {
   return {
-    "com.ciferecigo.fundamento": {
+    fundamento: {
       id,
       ...(token.type === "color" ? { role: ERO_TOKEN_ROLE } : {}),
     },
@@ -256,15 +254,13 @@ function extensionOf(id: string, token: EroTokeno): Json {
 function withRole(node: Json, token: EroTokeno): Json {
   if (token.type !== "color") return node;
   const extension = isObject(node.$extensions) ? node.$extensions : {};
-  const own = isObject(extension["com.ciferecigo.fundamento"])
-    ? extension["com.ciferecigo.fundamento"]
-    : {};
+  const own = isObject(extension["fundamento"]) ? extension["fundamento"] : {};
   if (own.role !== undefined) return node;
   return {
     ...node,
     $extensions: {
       ...extension,
-      "com.ciferecigo.fundamento": { ...own, role: ERO_TOKEN_ROLE },
+      fundamento: { ...own, role: ERO_TOKEN_ROLE },
     },
   };
 }

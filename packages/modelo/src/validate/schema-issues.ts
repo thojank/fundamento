@@ -17,7 +17,7 @@ import type { ModeloDocument, ModeloFiles } from "../load/files.js";
 import { checkTokenName } from "../nomreguloj/token-name.js";
 import { isJsonObject, pointerSegments, valueAtPointer } from "./raw.js";
 
-const EXT = "/\\$extensions/com\\.ciferecigo\\.fundamento";
+const EXT = "/\\$extensions/fundamento";
 
 /**
  * Pointers (of the error, or of the missing member for `required`) that a semantic rule or

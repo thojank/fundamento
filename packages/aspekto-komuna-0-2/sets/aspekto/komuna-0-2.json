@@ -1,6 +1,6 @@
 {
   "$extensions": {
-    "com.ciferecigo.fundamento": {
+    "fundamento": {
       "id": "set_malnova_01M5N7CKCZR2X2FQ93PWV05F64",
       "kondicxoj": ["aspekto=komuna-0-2"]
     }
@@ -1789,7 +1789,7 @@
         "lineHeight": "{font.lineheight.kicker}"
       },
       "$extensions": {
-        "com.ciferecigo.fundamento": {
+        "fundamento": {
           "textTransform": "uppercase"
         }
       }

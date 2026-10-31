@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/check_usage.output.json",
+  "$id": "urn:fundamento:schema:mcp:check_usage.output",
   "title": "check_usage output",
   "description": "What the Ero Reguloj say about the given instances (Spec 003 FR-13, contracts/mcp-tools §3). Each violation names the instances it is about and carries the Regulo with its kialo.",
   "type": "object",
@@ -28,7 +28,7 @@
                 "minItems": 1
               },
               "issue": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/Issue"
+                "$ref": "urn:fundamento:schema:mcp:common#/$defs/Issue"
               }
             },
             "required": ["instance", "issue"],
@@ -47,7 +47,7 @@
                 "minItems": 1
               },
               "issue": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/Issue"
+                "$ref": "urn:fundamento:schema:mcp:common#/$defs/Issue"
               }
             },
             "required": ["sxablono", "issue"],

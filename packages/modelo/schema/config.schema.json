@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/config.schema.json",
+  "$id": "urn:fundamento:schema:config",
   "title": "fundamento.config.json",
   "description": "Project configuration (Spec 001, D-07). It selects Aspekto packages and nothing else; it is not part of the Modelo. The reference Aspekto is stated only in the Modelo (core.referenceAspekto).",
   "type": "object",

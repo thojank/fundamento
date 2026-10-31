@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/save_agordo.output.json",
+  "$id": "urn:fundamento:schema:mcp:save_agordo.output",
   "title": "save_agordo output",
   "description": "What save_agordo wrote, or would write: the path relative to the working directory, whether a file was there, the Agordo with its historio, the new entry, the bytes of the file, and the report's summary. writes is true only after confirm.",
   "type": "object",
@@ -16,10 +16,10 @@
       "type": "boolean"
     },
     "agordo": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Agordo"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/Agordo"
     },
     "entry": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/AgordoHistorio"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/AgordoHistorio"
     },
     "text": {
       "type": "string",
