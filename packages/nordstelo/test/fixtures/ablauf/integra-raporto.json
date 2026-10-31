@@ -1,0 +1,645 @@
+{
+  "id": "20261031-1200",
+  "komparoj": {
+    "ekranoj": [
+      {
+        "0": {
+          "R1": 44.4,
+          "R3": 44.4,
+          "delto": 0
+        },
+        "F": {
+          "R1": 100,
+          "R3": 100,
+          "delto": 0
+        },
+        "ekrano": "standards-liste",
+        "f0R3": {
+          "0": 44.4,
+          "F": 100,
+          "delto": 55.6
+        },
+        "tasko": "liste-filter-detail"
+      },
+      {
+        "0": {
+          "R1": 44.4,
+          "R3": 44.4,
+          "delto": 0
+        },
+        "F": {
+          "R1": 100,
+          "R3": 100,
+          "delto": 0
+        },
+        "ekrano": "standard-detail",
+        "f0R3": {
+          "0": 44.4,
+          "F": 100,
+          "delto": 55.6
+        },
+        "tasko": "liste-filter-detail"
+      },
+      {
+        "0": {
+          "R1": 44.4,
+          "R3": 44.4,
+          "delto": 0
+        },
+        "F": {
+          "R1": 100,
+          "R3": 100,
+          "delto": 0
+        },
+        "ekrano": "standard-verlauf",
+        "f0R3": {
+          "0": 44.4,
+          "F": 100,
+          "delto": 55.6
+        },
+        "tasko": "liste-filter-detail"
+      }
+    ],
+    "f0": [
+      {
+        "enStreuung": false,
+        "navigado": {
+          "0": 1,
+          "F": 0.5,
+          "delto": -0.5
+        },
+        "rondo": "1",
+        "sxablonoj": {
+          "0": 1,
+          "F": 0.75,
+          "delto": -0.25
+        },
+        "tasko": "liste-filter-detail",
+        "total": {
+          "0": 44.4,
+          "F": 100,
+          "delto": 55.6
+        }
+      },
+      {
+        "enStreuung": false,
+        "navigado": {
+          "0": 1,
+          "F": 1,
+          "delto": 0
+        },
+        "rondo": "3",
+        "sxablonoj": {
+          "0": 1,
+          "F": 1,
+          "delto": 0
+        },
+        "tasko": "liste-filter-detail",
+        "total": {
+          "0": 44.4,
+          "F": 100,
+          "delto": 55.6
+        }
+      }
+    ],
+    "r1r3": [
+      {
+        "enStreuung": true,
+        "navigado": {
+          "R1": 0.5,
+          "R3": 1,
+          "delto": 0.5
+        },
+        "sxablonoj": {
+          "R1": 0.75,
+          "R3": 1,
+          "delto": 0.25
+        },
+        "tasko": "liste-filter-detail",
+        "total": {
+          "R1": 100,
+          "R3": 100,
+          "delto": 0
+        },
+        "varianto": "F"
+      },
+      {
+        "enStreuung": true,
+        "navigado": {
+          "R1": 1,
+          "R3": 1,
+          "delto": 0
+        },
+        "sxablonoj": {
+          "R1": 1,
+          "R3": 1,
+          "delto": 0
+        },
+        "tasko": "liste-filter-detail",
+        "total": {
+          "R1": 44.4,
+          "R3": 44.4,
+          "delto": 0
+        },
+        "varianto": "0"
+      }
+    ]
+  },
+  "kuroj": [
+    {
+      "eraro": null,
+      "faritajRondoj": 3,
+      "haltigo": null,
+      "lastoSuperKernoj": false,
+      "nekomencita": false,
+      "notoj": [],
+      "peno": {
+        "bytes": 175,
+        "inputTokens": 2000,
+        "ms": 0,
+        "outputTokens": 500,
+        "requests": 5,
+        "toolCalls": 0
+      },
+      "restantaj": 0,
+      "ripeto": 1,
+      "rondoj": {
+        "1": {
+          "ekranoj": {
+            "standard-detail": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "kompleta": false,
+              "total": 100,
+              "unueca": false,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "standard-verlauf": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "kompleta": true,
+              "total": 100,
+              "unueca": true,
+              "verda": true,
+              "verdaEkde": null
+            },
+            "standards-liste": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "kompleta": true,
+              "total": 100,
+              "unueca": false,
+              "verda": true,
+              "verdaEkde": null
+            }
+          },
+          "fluo": {
+            "k": {
+              "K1": 1,
+              "K2": 1,
+              "K3": 1,
+              "K4": 1,
+              "K5": 1,
+              "K6": 1
+            },
+            "konstruitaj": 3,
+            "navigado": 0.5,
+            "planitaj": 3,
+            "sxablonoj": 0.75,
+            "total": 100
+          }
+        },
+        "2": {
+          "ekranoj": {
+            "standard-detail": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "kompleta": false,
+              "total": 100,
+              "unueca": false,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "standard-verlauf": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "kompleta": true,
+              "total": 100,
+              "unueca": true,
+              "verda": true,
+              "verdaEkde": 1
+            },
+            "standards-liste": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "kompleta": true,
+              "total": 100,
+              "unueca": false,
+              "verda": true,
+              "verdaEkde": 1
+            }
+          },
+          "fluo": {
+            "k": {
+              "K1": 1,
+              "K2": 1,
+              "K3": 1,
+              "K4": 1,
+              "K5": 1,
+              "K6": 1
+            },
+            "konstruitaj": 3,
+            "navigado": 0.5,
+            "planitaj": 3,
+            "sxablonoj": 0.75,
+            "total": 100
+          }
+        },
+        "3": {
+          "ekranoj": {
+            "standard-detail": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "kompleta": true,
+              "total": 100,
+              "unueca": true,
+              "verda": true,
+              "verdaEkde": null
+            },
+            "standard-verlauf": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "kompleta": true,
+              "total": 100,
+              "unueca": true,
+              "verda": true,
+              "verdaEkde": 1
+            },
+            "standards-liste": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "kompleta": true,
+              "total": 100,
+              "unueca": true,
+              "verda": true,
+              "verdaEkde": 1
+            }
+          },
+          "fluo": {
+            "k": {
+              "K1": 1,
+              "K2": 1,
+              "K3": 1,
+              "K4": 1,
+              "K5": 1,
+              "K6": 1
+            },
+            "konstruitaj": 3,
+            "navigado": 1,
+            "planitaj": 3,
+            "sxablonoj": 1,
+            "total": 100
+          }
+        }
+      },
+      "sxargo": {
+        "antaux": {
+          "l1": 1,
+          "l15": 3,
+          "l5": 2
+        },
+        "kernoj": 10,
+        "post": {
+          "l1": 1,
+          "l15": 3,
+          "l5": 2
+        }
+      },
+      "tasko": "liste-filter-detail",
+      "usd": 0.0005,
+      "varianto": "F"
+    },
+    {
+      "eraro": null,
+      "faritajRondoj": 3,
+      "haltigo": null,
+      "lastoSuperKernoj": false,
+      "nekomencita": false,
+      "notoj": [],
+      "peno": {
+        "bytes": 175,
+        "inputTokens": 3600,
+        "ms": 0,
+        "outputTokens": 900,
+        "requests": 9,
+        "toolCalls": 0
+      },
+      "restantaj": 12,
+      "ripeto": 1,
+      "rondoj": {
+        "1": {
+          "ekranoj": {
+            "standard-detail": {
+              "k": {
+                "K1": 1,
+                "K2": null,
+                "K3": null,
+                "K4": 0,
+                "K5": 0,
+                "K6": 1
+              },
+              "kompleta": true,
+              "total": 44.4,
+              "unueca": true,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "standard-verlauf": {
+              "k": {
+                "K1": 1,
+                "K2": null,
+                "K3": null,
+                "K4": 0,
+                "K5": 0,
+                "K6": 1
+              },
+              "kompleta": true,
+              "total": 44.4,
+              "unueca": true,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "standards-liste": {
+              "k": {
+                "K1": 1,
+                "K2": null,
+                "K3": null,
+                "K4": 0,
+                "K5": 0,
+                "K6": 1
+              },
+              "kompleta": true,
+              "total": 44.4,
+              "unueca": true,
+              "verda": false,
+              "verdaEkde": null
+            }
+          },
+          "fluo": {
+            "k": {
+              "K1": 1,
+              "K2": null,
+              "K3": null,
+              "K4": 0,
+              "K5": 0,
+              "K6": 1
+            },
+            "konstruitaj": 3,
+            "navigado": 1,
+            "planitaj": 3,
+            "sxablonoj": 1,
+            "total": 44.4
+          }
+        },
+        "2": {
+          "ekranoj": {
+            "standard-detail": {
+              "k": {
+                "K1": 1,
+                "K2": null,
+                "K3": null,
+                "K4": 0,
+                "K5": 0,
+                "K6": 1
+              },
+              "kompleta": true,
+              "total": 44.4,
+              "unueca": true,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "standard-verlauf": {
+              "k": {
+                "K1": 1,
+                "K2": null,
+                "K3": null,
+                "K4": 0,
+                "K5": 0,
+                "K6": 1
+              },
+              "kompleta": true,
+              "total": 44.4,
+              "unueca": true,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "standards-liste": {
+              "k": {
+                "K1": 1,
+                "K2": null,
+                "K3": null,
+                "K4": 0,
+                "K5": 0,
+                "K6": 1
+              },
+              "kompleta": true,
+              "total": 44.4,
+              "unueca": true,
+              "verda": false,
+              "verdaEkde": null
+            }
+          },
+          "fluo": {
+            "k": {
+              "K1": 1,
+              "K2": null,
+              "K3": null,
+              "K4": 0,
+              "K5": 0,
+              "K6": 1
+            },
+            "konstruitaj": 3,
+            "navigado": 1,
+            "planitaj": 3,
+            "sxablonoj": 1,
+            "total": 44.4
+          }
+        },
+        "3": {
+          "ekranoj": {
+            "standard-detail": {
+              "k": {
+                "K1": 1,
+                "K2": null,
+                "K3": null,
+                "K4": 0,
+                "K5": 0,
+                "K6": 1
+              },
+              "kompleta": true,
+              "total": 44.4,
+              "unueca": true,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "standard-verlauf": {
+              "k": {
+                "K1": 1,
+                "K2": null,
+                "K3": null,
+                "K4": 0,
+                "K5": 0,
+                "K6": 1
+              },
+              "kompleta": true,
+              "total": 44.4,
+              "unueca": true,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "standards-liste": {
+              "k": {
+                "K1": 1,
+                "K2": null,
+                "K3": null,
+                "K4": 0,
+                "K5": 0,
+                "K6": 1
+              },
+              "kompleta": true,
+              "total": 44.4,
+              "unueca": true,
+              "verda": false,
+              "verdaEkde": null
+            }
+          },
+          "fluo": {
+            "k": {
+              "K1": 1,
+              "K2": null,
+              "K3": null,
+              "K4": 0,
+              "K5": 0,
+              "K6": 1
+            },
+            "konstruitaj": 3,
+            "navigado": 1,
+            "planitaj": 3,
+            "sxablonoj": 1,
+            "total": 44.4
+          }
+        }
+      },
+      "sxargo": {
+        "antaux": {
+          "l1": 1,
+          "l15": 3,
+          "l5": 2
+        },
+        "kernoj": 10,
+        "post": {
+          "l1": 1,
+          "l15": 3,
+          "l5": 2
+        }
+      },
+      "tasko": "liste-filter-detail",
+      "usd": 0.0009,
+      "varianto": "0"
+    }
+  ],
+  "lauf": {
+    "commit": "abc1234",
+    "kiModelo": "mistral/ministral-14b-2512",
+    "lingvo": "de",
+    "maksTokenoj": 1000000,
+    "markoj": [
+      "komuna",
+      "ekzemplo",
+      "provo",
+      "provo-kompakta"
+    ],
+    "ripetoj": 1,
+    "takso": {
+      "tokenoj": 648000,
+      "usd": 0.1296
+    },
+    "taskoj": [
+      "liste-filter-detail"
+    ],
+    "varianten": [
+      "F",
+      "0"
+    ]
+  },
+  "streuung": {
+    "fonto": "specs/034-nachlese-12/plan.md, „Streuung (H 9,8, K 16,7)“",
+    "reiheK": 16.7
+  },
+  "sumo": {
+    "anfragoj": 14,
+    "haltigoj": [],
+    "kuroj": 2,
+    "nekomencitaj": 0,
+    "tokenoj": {
+      "eligo": 1400,
+      "enigo": 5600
+    },
+    "usd": 0.0014
+  }
+}
