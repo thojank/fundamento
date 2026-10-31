@@ -9680,7 +9680,7 @@
       "dosiero": "packages/core/src/CodeBlock/CodeBlock.tsx",
       "sxlosilo": "CodeBlock {} rest, hell: [object Object] border-radius (gemessen)",
       "fontoValoro": "10px",
-      "valoro": "{radius.role.control}",
+      "valoro": "{radius.role.multiline}",
       "maniero": "prenita"
     },
     {
@@ -14253,7 +14253,7 @@
       "dosiero": "packages/core/src/TextArea/TextArea.tsx",
       "sxlosilo": "TextArea {\"size\":\"sm\"} rest, hell: [object Object] border-radius (gemessen)",
       "fontoValoro": "10px",
-      "valoro": "{radius.role.control}",
+      "valoro": "{radius.role.multiline}",
       "maniero": "prenita"
     },
     {

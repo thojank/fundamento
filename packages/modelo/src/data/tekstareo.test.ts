@@ -162,6 +162,11 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
       for (const [property, source] of Object.entries(properties)) {
         if (part === "box" && property === "height") continue;
         if (part === "text" && property === "typography") continue;
+        // Spec 036 Befund 1.1: several lines keep a bounded radius at the pill (radius.role.multiline).
+        if (part === "box" && property === "radius") {
+          expect(skemo.parts.box?.radius).toEqual({ fixed: "radius.role.multiline" });
+          continue;
+        }
         expect(skemo.parts[part]?.[property as "color"], `${part}.${property}`).toEqual(source);
       }
     }

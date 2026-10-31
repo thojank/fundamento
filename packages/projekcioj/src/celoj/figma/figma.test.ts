@@ -3172,7 +3172,8 @@ describe("the Figma plan draws the overlays (Spec 014 ④)", () => {
     ]);
     expect(konsileto?.variants[0]?.bindings).toMatchObject({
       "surface.fill": "color/background/inverse",
-      "surface.radius": "radius/role/control",
+      // Spec 036 Befund 1.1: a tooltip of several lines keeps a bounded radius at the pill.
+      "surface.radius": "radius/role/multiline",
       "text.color": "color/text/inverse",
       "text.typography": "typography/caption",
       "box.inline-padding": "spacing/small",
