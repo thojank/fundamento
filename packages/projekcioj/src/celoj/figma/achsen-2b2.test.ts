@@ -133,3 +133,11 @@ describe("②b-2 layout and purpose in Figma: properties, no variants", () => {
     expect(set.variants.some((variant) => prop in variant.props)).toBe(false);
   });
 });
+
+describe("②b-2 A-pagxigilo-1 in Figma: summary a property; the set shows the pages", () => {
+  it("pagxigilo: summary pages | count | compact among the properties, no variant", () => {
+    const set = setOf("pagxigilo");
+    expect(set.properties.summary).toEqual(["pages", "count", "compact"]);
+    expect(set.variants.some((variant) => "summary" in variant.props)).toBe(false);
+  });
+});
