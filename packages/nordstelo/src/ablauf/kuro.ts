@@ -210,13 +210,15 @@ function skribiSeMankas(file: string, content: string): void {
 }
 
 /**
- * Stores what the run returned in the layout of an ekranoj run folder (D-33): `plano.json` and,
- * per round, `rondoj/<n>/<slug>.fakto.json` and the fragment `rondoj/<n>/<slug>.html`. Files the
+ * Stores what the run returned in the layout of an ekranoj run folder (D-33): `plano.json`,
+ * `mankoj.json` (Teil 3) and, per round, `rondoj/<n>/<slug>.fakto.json` and the fragment `rondoj/<n>/<slug>.html`. Files the
  * run wrote itself (ekranoj from S037-04 on) are kept as they are.
  */
 export function skribiRondojn(dir: string, rezulto: EkranojRezulto): void {
   mkdirSync(dir, { recursive: true });
   skribiSeMankas(join(dir, "plano.json"), stabilaJson(rezulto.plano));
+  // Teil 3: the gaps of the run, so `fm ekranoj mankoj <run folder>` finds the measurement too.
+  skribiSeMankas(join(dir, "mankoj.json"), stabilaJson(rezulto.mankoj));
   for (const [index, rondo] of rezulto.rondoj.entries()) {
     const rondoDir = join(dir, "rondoj", String(index + 1));
     mkdirSync(rondoDir, { recursive: true });

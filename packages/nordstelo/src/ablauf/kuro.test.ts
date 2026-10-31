@@ -276,7 +276,12 @@ describe("the measurement „ganzer Ablauf“", () => {
     const kunigitaj = kunigiMankojn([dir]);
     expect(kunigitaj).toHaveLength(1);
     expect(kunigitaj[0]).toMatchObject({ nomo: "filtroliste", ofteco: 2 });
-    expect([...(kunigitaj[0]?.taskoj ?? [])].sort()).toEqual(["kennzahlen", "standards-liste"]);
+    // The places are named by the run folder below the measurement and the screen.
+    const id = dir.split("/").at(-1) ?? "";
+    expect([...(kunigitaj[0]?.taskoj ?? [])].sort()).toEqual([
+      `${id}/${LFD}/F/1/standards-liste`,
+      `${id}/${UK}/F/1/kennzahlen`,
+    ]);
   });
 
   it("refuses another model before any request: no folder, no dependency, no run (D-19)", async () => {
