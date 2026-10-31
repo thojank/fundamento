@@ -1191,6 +1191,12 @@ export interface FigmaComponentSet {
    */
   triggerColor?: string;
   /**
+   * Spec 036 D-64: the month buttons of a date picker's calendar are butono of emphasis low and
+   * size small on the web (MONTH_BUTTON); their glyphs take that butono's icon size and are filled
+   * with its label colour, as the clear button's and the calendar's.
+   */
+  monthIcon?: { size: string; color: string };
+  /**
    * Spec 029 ②b-1b M-2 (A-kampo-4): the field keeps the room of its status icon in every variant
    * (the variants of a row stay one size); the sign shows where the variant has a status (icons).
    */
@@ -2679,6 +2685,28 @@ function withStatus(
  */
 const CLEAR_ICON_COLOR = "ero.butono.label.color.emphasis.low.intent.neutral.rest";
 
+/**
+ * The month buttons of a date picker's calendar (Spec 036 D-64), as the web composes them: a
+ * butono of emphasis low and size small with an icon (web-component element template).
+ */
+const MONTH_BUTTON = { ero: "butono", size: "small" } as const;
+
+/**
+ * The size and colour of the glyphs of the month buttons (Spec 036 D-64): the icon size of the
+ * butono they are on the web, its Ero-Token derived from its Skemo, and the label colour of the
+ * butono of emphasis low the clear button takes too. Undefined without a butono in the Modelo.
+ */
+function monthIconOf(eroj: readonly LoadedEro[]): { size: string; color: string } | undefined {
+  const butono = eroj.find((candidate) => candidate.ero.name === MONTH_BUTTON.ero);
+  const size =
+    butono === undefined
+      ? undefined
+      : eroTokenOf(butono, "icon", "size", { size: MONTH_BUTTON.size });
+  return size === undefined
+    ? undefined
+    : { size: variableName(size), color: variableName(CLEAR_ICON_COLOR) };
+}
+
 /** The component set of one Ero: every variant with its variable bindings (D-12). */
 function componentSetOf(
   entry: LoadedEro,
@@ -2689,6 +2717,7 @@ function componentSetOf(
   eroj: readonly LoadedEro[] = [],
 ): FigmaComponentSet {
   const skemo = entry.skemo;
+  const monthIcon = monthIconOf(eroj);
   const description = entry.uzo?.purpose.replace(/\s*\n\s*/g, " ").trim();
   const uzo =
     entry.uzo === undefined
@@ -3621,6 +3650,9 @@ function componentSetOf(
     ...(clearsInField(skemo) ? { clearColor: variableName(CLEAR_ICON_COLOR) } : {}),
     ...((skemo.trailing ?? []).includes("trigger")
       ? { triggerColor: variableName(CLEAR_ICON_COLOR) }
+      : {}),
+    ...(skemo.parts.prev !== undefined && skemo.parts.next !== undefined && monthIcon !== undefined
+      ? { monthIcon }
       : {}),
     ...(skemo.parts["status-icon"] === undefined ? {} : { statusIcon: true as const }),
     ...(options === undefined ? {} : { entry: options }),

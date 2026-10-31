@@ -6336,8 +6336,29 @@ async function applyComponents(variables, warnings) {
             gather(node).fills = [figma.variables.setBoundVariableForPaint({ type: "SOLID", color: { r: 0, g: 0, b: 0 } }, "color", calendarColour)];
           }
         }
-        Object.assign(glyphNodes, drawGlyphs(prev, icons.prev || "chevron-left", "prev-", glyphMeasures));
-        Object.assign(glyphNodes, drawGlyphs(next, icons.next || "chevron-right", "next-", glyphMeasures));
+        // Spec 036 D-64: the month buttons are butono of emphasis low and size small on the web; their
+        // glyphs take that butono's icon size and its label colour, as the ✕ and the calendar do –
+        // a glyph without a size stood at the size of its SVG, a vector without a fill painted nothing.
+        const monthGlyphs = Object.assign(
+          {},
+          drawGlyphs(prev, icons.prev || "chevron-left", "prev-", glyphMeasures),
+          drawGlyphs(next, icons.next || "chevron-right", "next-", glyphMeasures),
+        );
+        Object.assign(glyphNodes, monthGlyphs);
+        const monthIcon = component.monthIcon || {};
+        const monthSize = typeof monthIcon.size === "string" ? variables.get(monthIcon.size) : undefined;
+        const monthColour = typeof monthIcon.color === "string" ? variables.get(monthIcon.color) : undefined;
+        for (const [key, node] of Object.entries(monthGlyphs)) {
+          const glyph = key.indexOf("prev-glyph-") === 0 || key.indexOf("next-glyph-") === 0;
+          const vector = key.indexOf("prev-mark-") === 0 || key.indexOf("next-mark-") === 0;
+          if (glyph && monthSize !== undefined) {
+            glyphMeasures.push({ node, field: "width", variable: monthSize });
+            glyphMeasures.push({ node, field: "height", variable: monthSize });
+          }
+          if (vector && monthColour !== undefined) {
+            gather(node).fills = [figma.variables.setBoundVariableForPaint({ type: "SOLID", color: { r: 0, g: 0, b: 0 } }, "color", monthColour)];
+          }
+        }
         own(calendar, SURFACE_LAYOUT);
         own(calendar, { visible: (variant.hidden || []).indexOf("calendar") === -1 });
         own(head, TOGGLE_LAYOUT);
