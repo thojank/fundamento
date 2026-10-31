@@ -1,0 +1,211 @@
+# Spec 037 – Agenten bauen Screens (Etappe 11) – Plan
+
+**Spec:** [`spec.md`](spec.md) (Fassung vom 2026-10-31, 7 016 Bytes, unverändert kopiert; SHA-256 `0780c57eb387b9aa34d98ea31bab223fe92f8f3e52af0a3a19b3db877deaed89`) · **Basis:** `main` `f2b5a058` (`f2b5a0585b772dc4cd83eb672a4bd956242610a8`, Merge #129, Spec 035 vollständig; beim Start des Laufs am 2026-10-31 nach `git fetch origin` unverändert) · **Regel 0** gilt: der Weg, den das Repo schon geht, sonst die kleinste Änderung mit Eintrag hier. **Keine Budgets und keine Grenzen angehoben. Nichts gemergt.**
+
+**Datum:** 2026-10-31 · **Stand:** T0 (S037-01) erledigt: Arbeitsplatz, Schutzwerkzeug, Spec-Kopie und Gerüst. Noch kein Code, kein PR, kein Modelllauf (0,00 $ von 1,00 $).
+
+**Ablage (D-02, D-35):** `spec.md`, `plan.md` und `tasks.md` liegen nur auf Branch A. Jedes Ticket schreibt seinen Beitrag zusätzlich in eine eigene Datei außerhalb des Repos (`s037-beitraege/<Ticket>.md` im Feature-Ordner der Purple-Doku); die Tickets der Kette B und des Betriebs werden am Ende (S037-12) hier zusammengeführt.
+
+### Branches und PRs
+
+| PR | Branch | Basis | Worktree | Inhalt | Stand |
+|---|---|---|---|---|---|
+| A „Spec 037 – Ablauf Screens“ | `261031-spec-037-ekranoj` | `main` (`f2b5a058`) | `/tmp/s037-a` | Teil 1, Teil 3, `specs/037-agenten-ekranoj/` | Branch gepusht, noch kein PR |
+| B „Spec 037 – Messung“ | `261031-spec-037-mezuro` | Branch A | `/tmp/s037-b` | Teil 2 | noch nicht angelegt |
+
+Kein PR aus dem p0-Branch. Commits nur über das Schutzwerkzeug `commit` (Noreply-Identität je Befehl, D-14).
+
+## Abgrenzung zu Spec 036
+
+Bindend (R-5). Bedarf in einer Tabu-Datei wird kein Patch, sondern ein „Befund Tabu“ mit Datei, Grund, Vorschlag und dem Teil von Spec 036, in den er passen würde.
+
+### Tabu für 037
+
+- `packages/metiejo/**` – die Kostenlogik aus Spec 033 S6 wird nur über die bestehenden Exporte von `@fundamento/metiejo` gelesen und aufgerufen.
+- `packages/modelo/src/gvidanto/**`, `packages/modelo/src/eroj/**` (Skemoj, Ero-Tokens), `packages/eroj/**`, `packages/vortaro/**`
+- `packages/mcp/**` (Schema und Werkzeuge; das ganze Paket gilt als tabu)
+- `packages/projekcioj/**` (nur aufrufen, z. B. den Build der Marke)
+- Außerdem unberührt: `packages/modelo/**` bis auf das eine Wort in `src/ci/workflow.test.ts` (D-15), insbesondere `packages/modelo/src/nordstelo/katalogo.ts` und `packages/modelo/data/**` (D-01).
+
+### Frei für 037
+
+- PR A: `packages/ekranoj/**` (neu) · `packages/cli/src/commands/ekranoj.ts`, neue Testdateien in `packages/cli/src/`, `packages/cli/src/cli.ts` (zwei Zeilen), `packages/cli/package.json` (Abhängigkeiten) · `packages/nordstelo/src/ekrano-taksilo.ts` (+ Test), `packages/nordstelo/src/index.ts` (eine Zeile), `packages/nordstelo/package.json` (Abhängigkeit) · `specs/037-agenten-ekranoj/**`.
+- PR B: `packages/nordstelo/src/ablauf/**`, `packages/nordstelo/test/fixtures/ablauf/**`, `packages/nordstelo/src/cli.ts` (nur die Weiche `--art ablauf`).
+
+### Graubereich (D-01, D-15)
+
+- `pnpm-lock.yaml` (neues Paket), `.github/workflows/ci.yml` (ein Wort in der `unit`-Matrix), `packages/modelo/src/ci/workflow.test.ts` (ein Wort in `UNIT_PACKAGES`).
+- Nicht berührt: `CHANGELOG.md` (ekranoj ist privat), `THIRD_PARTY_NOTICES.md` (keine neue fremde Abhängigkeit), Wurzel-`package.json`, `turbo.json`, `pnpm-workspace.yaml` (`packages/*` deckt das neue Paket). Wird eine davon doch nötig: eigene Entscheidung und Eintrag in der Konfliktprüfung.
+
+### Tatsächlich berührte Dateien
+
+| Datei | PR | Art | Commit |
+|---|---|---|---|
+| `specs/037-agenten-ekranoj/spec.md` | A | frei, neu (byte-gleich) | Gerüst-Commit (S037-01) |
+| `specs/037-agenten-ekranoj/plan.md` | A | frei, neu | Gerüst-Commit (S037-01) |
+| `specs/037-agenten-ekranoj/tasks.md` | A | frei, neu | Gerüst-Commit (S037-01) |
+
+## Zusammenfassung je Teil
+
+### Teil 1 – Ablauf „Screens bauen“ (`fm ekranoj`, PR A)
+
+Noch offen.
+
+### Teil 3 – Lücken als Rückmeldung (PR A)
+
+Noch offen.
+
+### Teil 2 – Messung „ganzer Ablauf“ (PR B)
+
+Noch offen.
+
+### Über alle Teile
+
+Noch offen.
+
+## Entscheidungen, vom Maintainer zu bestätigen
+
+Der Lauf ist unbeaufsichtigt (R-1). Wo die Quell-Spec offen lässt, gilt der Vorschlag. „angewandt“ = so umgesetzt; „vorgesehen“ = gilt, Umsetzung im genannten Ticket; **zu bestätigen** = ausdrücklich zur Bestätigung gestellt. Alle Einträge sind vom Maintainer zu bestätigen.
+
+### Vorschläge der Quell-Spec (V-1 bis V-4)
+
+| ID | Vorschlag | Ergebnis im Lauf | Stand |
+|---|---|---|---|
+| V-1 | Neues Paket `packages/ekranoj` (Esperanto „Bildschirme“), nutzt die MCP-Werkzeuge als Client. | Paket entsteht ab S037-02. | vorgesehen |
+| V-2 | Der Agent leitet **höchstens 5 Screens** ab (mit Zweck je Screen und Navigation). Eine vom Nutzer übergebene Liste mit mehr als 5 Screens wird abgelehnt (klare Meldung), nicht gekürzt. | `validiPlanon` (S037-02), Ablehnung vor jeder Anfrage (S037-03, S037-05). | vorgesehen |
+| V-3 | **Höchstens drei Runden** Prüfen → Verbessern oder bis grün; danach Abweichungen mit Regel und Grund im Bericht. | `MAKS_RONDOJ = 3` (S037-02), Schleife S037-03. | vorgesehen |
+| V-4 | **Zwei PRs, gestapelt:** PR A „Spec 037 – Ablauf Screens“ (Teil 1 und 3), PR B „Spec 037 – Messung“ (Teil 2) auf PR A. | Branch A `261031-spec-037-ekranoj` von `f2b5a058` angelegt und gepusht (S037-01); Branch B ab S037-07. | angewandt (Branch A) |
+
+### Entscheidungen des Auftrags (D-01 bis D-13)
+
+| ID | Frage | Vorschlag | Ergebnis im Lauf | Stand |
+|---|---|---|---|---|
+| D-01 | Graubereich-Dateien | Minimal, nur Anhängen, keine neue fremde Abhängigkeit (Playwright, axe-core und das MCP-SDK sind im Workspace schon vorhanden); `packages/modelo/src/nordstelo/katalogo.ts` wird **nicht** geändert, der Katalog „ganzer Ablauf“ liegt als neue Datei in `packages/nordstelo`. Jede Berührung steht in der Konfliktprüfung. | Liste im Abschnitt „Graubereich“; tatsächliche Berührungen in „Tatsächlich berührte Dateien“. | vorgesehen |
+| D-02 | Ablage von spec, plan, tasks | `specs/037-agenten-ekranoj/` liegt in PR A; plan/tasks werden dort in eigenen Doku-Commits fortgeschrieben; PR B wird am Ende auf den letzten Stand von PR A neu aufgesetzt. | Gerüst-Commit auf Branch A (S037-01). | angewandt |
+| D-03 | Abhängigkeitsrichtung | `ekranoj` hängt **nicht** von `nordstelo` ab; die Bewertung (K1–K7) wird über eine Schnittstelle hineingereicht. `nordstelo` (neue Aufgabenart) und `cli` (`fm ekranoj`) verdrahten. So entsteht kein Zyklus. | Schnittstelle `Taksilo` (S037-02), Adapter in nordstelo (S037-05). | vorgesehen |
+| D-04 | Was „grün“ heißt | Ein Screen ist grün, wenn K1 = 1, keine Verstöße von `check_usage` mit Schwere Fehler, axe ohne Befund in hell und dunkel, K5 = 1 und Navigation vollständig. Hinweise (nicht Fehler) beenden die Schleife nicht vorzeitig, stehen aber im Bericht. | Reine Funktion (S037-02). | vorgesehen |
+| D-05 | „Navigation vollständig“ (deterministisch) | Jede im Plan genannte Kante (Screen → Screen) ist als Verweis vorhanden; jeder Verweis zeigt auf einen existierenden Screen; jeder Screen ist von der Übersicht erreichbar. Anteil = vorhandene geplante Kanten / geplante Kanten; tote Verweise ziehen ab. | Formel D-28; in ekranoj (D-22), S037-02. | vorgesehen |
+| D-06 | „Gleiche Muster für gleiche Zwecke“ (deterministisch) | Zwecke werden aus dem Plan und den Fakten des gerenderten Screens bestimmt (Hauptnavigation, Hauptaktion, Formularfeld je Eingabeart, Liste/Tabelle, Statusmeldung, Seitenkopf). Je Zweck muss über alle Screens dasselbe Ero (Tag und prägende Props wie Variante) bzw. dieselbe Sxablono verwendet werden. Anteil = einheitliche Zwecke / vorkommende Zwecke. In Variante 0 werden native Elemente und Klassen statt Eroj verglichen. | In nordstelo `src/ablauf/` (D-22), S037-07. | vorgesehen |
+| D-07 | Variante 0 in der Schleife | Variante 0 (ohne Fundamento) bekommt ebenfalls bis zu drei Runden mit den Prüfungen, die für sie gelten (K1, K4 axe, K5, Navigation, Muster); K2/K3 entfallen wie in Spec 030. Verglichen wird F gegen 0 je Runde 1 und Runde 3. | S037-02 (Grün für Variante 0), S037-03, S037-08. | vorgesehen |
+| D-08 | Messung von Spec 036 erkennen | Vor jedem Messlauf: keine Prozesse der Messwerkzeuge (Kennzahl, Abnahmeskripte, Browser) aus dem Worktree von Spec 036 aktiv, mindestens 5 min am Stück; zusätzlich der jüngste Stand im plan von 036 (lokal lesbar), ob eine Messung läuft. Warten im Hintergrund. | Wächter `gardisto` (S037-09); der plan von 036 wird nur über Git-Refs gelesen, nie aus dessen Worktree. | vorgesehen |
+| D-09 | Last je Messwert | Wie Spec 033 B-13: Lastmittel 1/5/15 min und Zahl der Kerne vor und nach jedem Lauf; fremde Messprozesse (ja/nein) als eigene Spalte. | Spalten `last_vor`, `last_nach`, `kerne`, `fremde_messung` im Kosten-Ledger (S037-01); Erfassung über `mezuri` (S037-09). | vorgesehen |
+| D-10 | Eigenes Ledger | Kosten-Ledger und Anfragen-Zähler unter `.fundamento/spec037/` (nicht im Repo), getrennt von `.fundamento/nordstelo` und von Spec 036. Die Grenzen des Anbieters je Tag bleiben unverändert (Anbieter-weit gültig; ein 429 ist ein Befund, kein Anlass zum Anheben). | `kostoj.tsv`, `r8.tsv` und `identitaet` unter `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec037/` (S037-01). | angewandt |
+| D-11 | Budget-Aufteilung (Obergrenzen, keine Ziele) | Abnahme-Läufe komuna + provo ≤ 0,10 $; erster Messpunkt Teil 2 ≤ 0,40 $; Wiederholung auf dem dann aktuellen `main` ≤ 0,40 $; Rest Reserve. Bei Knappheit gilt die Reihenfolge: Abnahme-Läufe → Messpunkt F (Runde 1 und 3) → Messpunkt 0 → Wiederholung. | Werkzeug `kosten` lehnt eine Reservierung über die Scheibe oder über 1,00 $ ab (Exit 3); Scheibe über das Präfix der Lauf-ID (D-S037-01-2). | angewandt (Werkzeug) |
+| D-12 | Commit-Identität | Wie Spec 036 Teil 6: im Checkout dieses Laufs lokal `user.email` auf die Noreply-Adresse von GitHub für `thojank` setzen; Historie bleibt unverändert. | Nicht wörtlich: Alle Worktrees teilen ein Git-Verzeichnis mit der Sitzung von Spec 036, ein `git config` hätte auch deren Identität geändert. Stattdessen D-14. | abgewandelt, **zu bestätigen** |
+| D-13 | Inhalt der Screens | Beispielinhalte nur neutral und erfunden (z. B. „Standard A-12“, „Team Nord“); keine echten Marken, Firmen oder Personen. | Gilt für Prompts, Attrappen, Katalogtexte und den Abnahme-Satz; `pruefen` prüft jede Zeile gegen die lokale Markenliste. | vorgesehen |
+
+### Entscheidungen der Implementierungs-Spec (D-14 bis D-39)
+
+| ID | Frage | Wahl | Ergebnis im Lauf | Stand |
+|---|---|---|---|---|
+| D-14 | D-12 ohne die gemeinsame Git-Konfiguration anzufassen | Identität je Befehl über das Schutzwerkzeug `commit` (`git -c user.name=… -c user.email=<id>+thojank@users.noreply.github.com`), auch für rebase und cherry-pick; kein Schreiben mit `git config` (das Git-Verzeichnis ist mit Spec 036 geteilt). Prüfung: `git log --format='%ae %ce' origin/main..HEAD` zeigt nur die Noreply-Adresse. | Probe-Commit in einem Probe-Repo unter `/tmp`: Autor und Committer = Noreply-Adresse, keine `user.email` in dessen lokaler Konfiguration; `user.email` im p0-Worktree unverändert (Hash-Vergleich vor/nach). Gerüst-Commit über `commit`. | angewandt |
+| D-15 | CI-Platz für das neue Paket | `ekranoj` an `UNIT_PACKAGES` in `packages/modelo/src/ci/workflow.test.ts` und an die `unit`-Matrix in `.github/workflows/ci.yml` anhängen (Graubereich, je ein Wort). | S037-02. | vorgesehen |
+| D-16 | Bibliothek für den MCP-Client | `@modelcontextprotocol/client` 2.0.0 (exakt), Transport `./stdio`; das in der technischen Spec genannte `@modelcontextprotocol/sdk` gibt es im Workspace nicht. | S037-03. | vorgesehen |
+| D-17 | Browser-Tests | Der `test` von ekranoj läuft ohne Browser (Renderer-Attrappe); echtes Chromium (AC-7 berechnete Farben, axe-Rauchtest, Öffnen über `file://`) in `test:browser` (lokal, `vitest.browser.config.ts`); Ergebnisse in tasks.md. Kein Überspringen. | S037-04. | vorgesehen |
+| D-18 | Name der Anbieter-Schnittstelle | `ChatModel` (englisch), nicht `Modelo` – Modelo ist der verbindliche Begriff für das Datenmodell. | S037-02. | vorgesehen |
+| D-19 | Modellwache | `PERMESITA_MODELO = "mistral/ministral-14b-2512"` (verglichen mit `provider.toString()`); `fm ekranoj` und `nordstelo --art ablauf` beenden sich bei jedem anderen Modell mit Exit 2 vor jeder Anfrage. | S037-02 (Funktion), S037-05, S037-08. | vorgesehen |
+| D-20 | Kostenschätzung | Tokens je Screen und Runde als benannte Konstanten mit Quelle (Mediane Reihe K: F ≈ 40 000, 0 ≈ 2 000, Plan-Anfrage ≈ 5 000); $ über `kostoOf`; unbekannter Preis → „Kosten unbekannt“, nie 0. | S037-03. | vorgesehen |
+| D-21 | Anfragen-Ledger | `fm ekranoj --ledger <dir>` (Standard `<baseDir>/.fundamento/ekranoj`) für `anfragoj.json`; alle Messläufe schreiben nur unter `.fundamento/spec037/`; dort führt das Schutzwerkzeug `kosten` die `kostoj.tsv` (Werkzeug, kein Produktcode). | S037-05, S037-10. | vorgesehen |
+| D-22 | Wo D-05 und D-06 liegen | D-05 in ekranoj (D-04 braucht es schon in PR A); die Aufgabenart in nordstelo importiert es (kein `nordstelo/src/ablauf/navigado.ts`). D-06 in `nordstelo/src/ablauf/sxablonoj-samaj.ts` (PR B); der Laufbericht von ekranoj hat keine Muster-Spalte. | S037-02, S037-07. | vorgesehen |
+| D-23 | Identität des Katalogs | Eigener Typ in `nordstelo/src/ablauf/katalogo.ts`; stabile Slugs als IDs (keine ULIDs, nichts in `ids.lock.json` oder `packages/modelo/data/**`); nur im Speicher in die Form `Tasko` für `score()` gebracht. | S037-07. | vorgesehen |
+| D-24 | Screens unter `file://` | Wahl im Ticket (Vorbild: das Vitrino bindet das in sich geschlossene Make-Kit-Bündel der Elemente inline ein); Bedingung: Screens rendern Eroj, wenn sie in Chromium über `file://` geöffnet werden, und das Fragment des Agenten bleibt markenfrei. Gewählter Weg wird festgehalten. | S037-04. | vorgesehen |
+| D-25 | Läufe in die Scheiben einpassen | Jeder Modelllauf: zuerst Schätzung; `--max-tokens` = Scheibe in Tokens (0,20 $ je 1 Mio.): Abnahme je 250 000 (komuna, provo), Messpunkt 2 000 000, Wiederholung 2 000 000. Liegt die Schätzung über der Scheibe, wird vor dem Start verkleinert (Abnahme: `--ekranoj` mit 3 Namen; Messung: Aufgaben in Katalogreihenfolge, F vor 0). Teilergebnis = als Teilergebnis berichtet. | S037-10. | vorgesehen |
+| D-26 | „Runde 3“ eines früh grünen Screens | Sein letzter Stand wird fortgeschrieben und mit „grün seit Runde n“ markiert. | S037-03. | vorgesehen |
+| D-27 | Navigation und Rahmen | Der Agent schreibt die Navigation in sein Fragment; der Rahmen ergänzt nur einen Rückverweis auf die Übersicht (`data-ekranoj-kadro`), der aus den Fakten und aus D-05 ausgenommen ist. Abweichung von der technischen Spec, Grund: D-05 muss den Agenten messen. | S037-04. | vorgesehen, **zu bestätigen** |
+| D-28 | Formel D-05 | `max(0, vorhandene − tote) / geplante`; je Screen „kompleta“ (alle geplanten ausgehenden Kanten vorhanden, kein toter Verweis). | S037-02. | vorgesehen |
+| D-29 | Lücken zusammenführen | `fm ekranoj mankoj <ordner…>` (Untermodus desselben Befehls über das erste Argument; ein Satz, der genau „mankoj“ lautet, gilt als Untermodus – in `--help` beschrieben). | S037-06. | vorgesehen |
+| D-30 | Anmeldung im cli | Eine Import-Zeile und ein Eintrag in `ENTRIES` in `cli.ts`; ekranoj und nordstelo werden per dynamischem `import()` erst in `run` geladen (der Wächtertest AC-11 aus Spec 035 bleibt grün). | S037-05. | vorgesehen |
+| D-31 | Bewertungs-Adapter | `nordstelo/src/ekrano-taksilo.ts` in PR A plus eine Export-Zeile in `nordstelo/src/index.ts`; nordstelo bekommt die Abhängigkeit `@fundamento/ekranoj` in PR A. `score.ts` unverändert. | S037-05. | vorgesehen |
+| D-32 | Instanzen für `check_usage` | In ekranoj aus den Fakten plus `get_ero` (MCP) gebaut; die private Funktion `instancesOf` von nordstelo bleibt privat. Ein Unterschied zwischen `check_usage` über MCP (D-04) und K3 wird gezeigt, nicht versteckt. | S037-03. | vorgesehen |
+| D-33 | Gespeicherte Fakten | `rondoj/<n>/<slug>.fakto.json` und `plano.json` je Lauf → nordstelo bewertet deterministisch neu. | S037-04, S037-07. | vorgesehen |
+| D-34 | Variante 0 in ekranoj | Keine Werkzeuge, kein Fundamento-CSS, keine Eroj; der Agent schreibt je Screen ein ganzes HTML-Dokument (wie `PROMPT_0` in nordstelo); gerendert über Media Features; der Rahmen fügt nur den Rückverweis ein. | S037-03, S037-04. | vorgesehen |
+| D-35 | Wo SHAs stehen | Tickets der Kette A: tasks.md auf Branch A (Doku-Commit) und eigene Beitragsdatei; Kette B und Betrieb: Beitragsdatei, von S037-12 in tasks.md übernommen. | So angelegt (S037-01). | angewandt |
+| D-36 | Schutzwerkzeug | Angepasste Kopie von `/tmp/s035-werkzeug` unter `/tmp/s037-werkzeug`; die Obergrenze 1,00 $ gehört Spec 037; Werkzeug und Ledger von Spec 035 bleiben unberührt. | `filtern` unverändert, `pruefen`, `kosten`, `r8`, `audit-ac4`, `README.md` angepasst, `commit` und `selbsttest` neu; Selbsttest 45 von 45 Fällen grün (S037-01). | angewandt |
+| D-37 | Bestätigung der Schätzung | Ohne `--ja`: im Terminal Rückfrage (Standard nein); ohne Terminal Exit 2 nach Ausgabe der Schätzung. Messläufe geben `--ja` mit. | S037-05. | vorgesehen |
+| D-38 | Agent plant mehr als 5 Screens | Abgelehnt, einmal mit Hinweis auf die Grenze neu angefragt; zweiter zu langer Plan → die ersten 5 in der Reihenfolge des Agenten, Kanten zu gestrichenen Screens entfernt, im Bericht vermerkt. | S037-03. | vorgesehen |
+| D-39 | Marken in der Messung | „ganzer Ablauf“ rendert jeden Screen in den vier Repo-Marken von `ASPEKTOJ` (Konfiguration cxiuj) × hell/dunkel, Kontrast Standard; `fm ekranoj` rendert seine eine Marke × hell/dunkel. Werte werden nicht 1:1 mit Seitenwerten der Reihe K verglichen (im Bericht gesagt). S037-08 darf das mit festgehaltenem Grund einengen. | S037-08. | vorgesehen |
+
+### Entscheidungen aus dem Lauf (ab D-40)
+
+Vorläufige IDs `D-<Ticket>-<n>`; S037-12 nummeriert sie als D-40 ff. und hält die Zuordnung fest.
+
+| vorläufig | Frage | Wahl und Grund | gilt in | Stand |
+|---|---|---|---|---|
+| D-S037-01-1 | Upstream-Einträge des neuen Branches | `git worktree add -b … origin/main` trägt nach der Git-Voreinstellung `branch.261031-spec-037-ekranoj.remote/merge` (auf `origin/main`) in die gemeinsame Konfiguration ein; `git push -u` setzt sie auf den eigenen Remote-Branch. Beides sind vom Auftrag vorgegebene Befehle und betreffen nur den Branch von 037, keine Identität; ein `git config` wurde nicht aufgerufen. | Arbeitsplatz | angewandt, **zu bestätigen** |
+| D-S037-01-2 | Scheibe einer Reservierung (D-11) | Aus dem Präfix der Lauf-ID: `abnahme-…` 0,10 $, `messpunkt-…` 0,40 $, `wiederholung-…` 0,40 $, `reserve-…` 0,10 $ (Rest bis 1,00 $); ohne Präfix Exit 2. Die vorgegebenen Spalten des Ledgers haben keine Spalte für die Scheibe, und die Lauf-IDs der Abnahme folgen dem Schema schon. | Schutzwerkzeug | angewandt |
+| D-S037-01-3 | Last im Kosten-Ledger | `kosten buchen` nimmt optional vier weitere Werte (Last vor, Last nach, Kerne, fremde Messung ja/nein), damit `mezuri` (S037-09) die Last mitbucht; die Form mit acht Werten bleibt gültig (Spalten leer). | Schutzwerkzeug | angewandt |
+| D-S037-01-4 | Identitätsprüfung in `pruefen --diff` | Autor und Committer (Name und E-Mail) werden wie Zeilen geprüft (Schlüssel, Marken, Wort aus R-12); die E-Mail muss genau die Noreply-Adresse aus `.fundamento/spec037/identitaet` sein (ohne diese Datei: die Form `<id>+thojank@users.noreply.github.com`). Gemeldete Orte (Pfade, Identitäten) verdecken das Wort aus R-12 und Markennamen, damit die Ausgabe selbst sauber bleibt. | Schutzwerkzeug | angewandt |
+| D-S037-01-5 | Selbsttest | Neu geschrieben statt übernommen: Die Fassung von Spec 035 prüfte die Ausnahme für deren spec.md (in 037 gibt es keine) und legte ihre Markenprobe unter dem Ordner von Spec 035 an. Die Markenprobe von 037 liegt nur kurz unter `.fundamento/spec037/` und wird gelöscht. | Schutzwerkzeug | angewandt |
+| D-S037-01-6 | Grenzen-Suche `audit-ac4` | Läuft in `/tmp/s037-a`, lässt `specs/037-agenten-ekranoj/**` aus und sucht zusätzlich nach den Grenzen von Spec 037 und R-4 (`MAKS_EKRANOJ`, `MAKS_RONDOJ`, `maksTokenoj`, `max-tokens`, `LIMOJ`, `Budget(`, 150, 2000, 1,00 $). S037-06 darf weiter anpassen. | Schutzwerkzeug | angewandt |
+| D-S037-01-7 | Nummern in tasks.md | T3701 ff. in der Reihenfolge Teil 1, Teil 3, Teil 2, Abschluss, je eine Zeile pro Lieferpunkt der Tickets S037-01 bis S037-13; S037-12 darf feiner schneiden und neu nummerieren (wie Spec 035 D-111). | tasks.md | angewandt |
+
+## Entwurf: Bewertung Navigation (D-05) und Muster (D-06)
+
+Platzhalter. Die Begründung entsteht in S037-07 (Beitragsdatei) und wird von S037-12 hier eingetragen. Vorab festgelegt: Formel D-05 nach D-28, Ort nach D-22.
+
+## Befunde
+
+### Befund Tabu
+
+Noch keine.
+
+### Manko Gvidanto
+
+Noch keine (Prüfung der Werkzeugliste in S037-06, 3.2).
+
+### Sonstige
+
+Noch keine.
+
+## Messungen
+
+Noch keine. Jeder Wert erhält Lastmittel 1/5/15 min und Kerne vor und nach dem Lauf sowie „fremde Messung ja/nein“ (D-09); Zeitwerte mit Last über der Zahl der Kerne werden markiert und nicht verglichen.
+
+### Abnahme-Läufe komuna und provo (1.8)
+
+Noch offen (S037-10).
+
+### F gegen 0 und Runde 1 gegen Runde 3, je Aufgabe und Screen (2.3, 2.4)
+
+Noch offen (S037-10). Streuung Reihe K 16,7 aus Spec 034 (`specs/034-nachlese-12/plan.md`).
+
+### Wiederholung auf dem dann aktuellen `main` (2.5)
+
+Noch offen (S037-12).
+
+## Prüfprotokoll Messsperre
+
+Jeder Freigabeentscheid vor einem Modelllauf (D-08, AC-13): Zeit, Treffer Prozesse, Treffer plan von Spec 036, Last 1/5/15, Kerne, frei. Noch keiner (Wächter in S037-09).
+
+| Zeit | Lauf | Treffer Prozesse | Treffer plan 036 | Last 1/5/15 | Kerne | frei |
+|---|---|---|---|---|---|---|
+
+## Modellkosten
+
+Nur `ministral-14b-2512`, zusammen höchstens 1,00 $, eigenes Ledger `kostoj.tsv` unter `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec037/` (D-10), Scheiben nach D-11. Stand: kein Lauf, 0,00 $ gebucht, 0,00 $ reserviert.
+
+| Lauf-ID | Zweck | Modell | Anfragen | Tokens ein / aus | Kosten $ | Dauer | Commit | Last vor / nach | Kerne | fremde Messung |
+|---|---|---|---|---|---|---|---|---|---|---|
+
+## Lückenliste
+
+Über alle Läufe (Teil 3, 3.1), Eingabe für Eroj-Runde 6/7 und Muster-Runde 2. Noch keine Läufe.
+
+| # | Art | Lücke | Anzahl | Aufgaben | Beispielstelle | Vorschlag | Ziel |
+|---|---|---|---|---|---|---|---|
+
+## Konfliktprüfung und Merge-Position
+
+Noch offen (S037-11). Vorgesehene Position: nach Teil 5 von Spec 036, vor deren Teil 6. Vorgehen: offene PRs von Spec 036 mit Head-SHA, überschneidende Dateien je PR, Probemerges mit `git merge-tree --write-tree` in der Reihenfolge `main` → 036 Teil 1–5 → PR A → PR B → 036 Teil 6, Probelauf des Skripts aus Teil 6 auf einer Kopie von PR B (falls im PR).
+
+## Messanleitung
+
+Noch offen (S037-12). Alle Befehle im Checkout des Maintainers `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds` (mit `cd`), Ergebnisse unter `.fundamento/ekranoj/` bzw. `.fundamento/spec037/` mit `file://`-Links.
+
+## Blockiert
+
+Keine Einträge.
+
+## Bericht
+
+Folgt am Ende des Laufs (S037-12) im Format von Spec 035.
