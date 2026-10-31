@@ -18,7 +18,11 @@ export const KARAKTERO_WEG_A: Readonly<Record<string, number>> = {
 type Rgba = [number, number, number, number];
 const bild = (pixel: (x: number, y: number) => Rgba) => encodePng(48, 32, pixel);
 
-/** The two inspiration images of Weg A, 48 × 32 px each, as PNG. */
+/**
+ * The two inspiration images of Weg A, 48 × 32 px each, as PNG: the crust of a loaf over the crumb,
+ * and wheat with cornflowers – the cornflower blue is the second strong colour, clearly apart from
+ * the lead colour of the crust, so the Kreilo proposes it as an accent (Spec 036, D-99).
+ */
 export function inspiroWegA(): { filename: string; bytes: Buffer }[] {
   return [
     {
@@ -27,7 +31,13 @@ export function inspiroWegA(): { filename: string; bytes: Buffer }[] {
     },
     {
       filename: "weizen.png",
-      bytes: bild((x) => (x < 16 ? [0xd9, 0xa4, 0x41, 255] : [0xfa, 0xf4, 0xea, 255])),
+      bytes: bild((x) =>
+        x < 16
+          ? [0xd9, 0xa4, 0x41, 255]
+          : x < 32
+            ? [0x3b, 0x6f, 0xd1, 255]
+            : [0xfa, 0xf4, 0xea, 255],
+      ),
     },
   ];
 }

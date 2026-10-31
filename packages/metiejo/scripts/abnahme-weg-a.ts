@@ -5,7 +5,8 @@
 // measurement (±50 %) and the counter of the Kroniko.
 //
 // Without --mit-modell no language model is asked (0 tokens): the Kreilo takes the lead colour from
-// the images, the two wishes are left out – for the local steps only. With --mit-modell the chat runs
+// the images and proposes the second strong colour of the images as an accent (Spec 036, D-99), the
+// two wishes are left out – for the local steps only. With --mit-modell the chat runs
 // over Mistral ministral-14b-2512 (the maintainer's tariff) whatever the .env names, with a cost limit
 // of 30 000 tokens per turn and the provider's limits (LIMOJ). The key never leaves the server: the
 // script prints only whether it stands in the Kroniko or the log.
@@ -158,7 +159,21 @@ async function lauf(nummer: number): Promise<Record<string, number>> {
     Number(new RegExp(`^${label}\\s+([\\d.]+)`, "m").exec(projekcioj.stderr)?.[1] ?? 0);
   schritt("Projektionen", Math.round((seconds("user") + seconds("sys")) * 1000));
   const gesamt = Date.now() - start;
-  const raw = readFileSync(join(workdir, "pano", "kroniko.jsonl"), "utf8") + log.join("");
+  const kroniko = readFileSync(join(workdir, "pano", "kroniko.jsonl"), "utf8");
+  const raw = kroniko + log.join("");
+  // Spec 036, D-99: the accent the Kreilo proposed from the images, as the Kroniko records it.
+  const akzent = kroniko
+    .split("\n")
+    .filter((line) => line.trim() !== "")
+    .map(
+      (line) =>
+        (
+          JSON.parse(line) as {
+            detaloj?: { akzent?: { farbe: string; anteil: number; abstand: number } };
+          }
+        ).detaloj?.akzent,
+    )
+    .find((entry) => entry !== undefined);
   await servilo.close();
   const A = takso.vojoj.A;
   const tokens = fertig.zaehlilo.enigo + fertig.zaehlilo.eligo;
@@ -173,6 +188,9 @@ async function lauf(nummer: number): Promise<Record<string, number>> {
   console.log(`  ${"gesamt".padEnd(26)} ${(gesamt / 1000).toFixed(1)} s`);
   console.log(
     `  freigegeben ${fertig.prozent} %, exportierbar ${pruefung.exportable}, Export ${existsSync(eksporto) ? readdirSync(eksporto).join(", ") : "fehlt"}`,
+  );
+  console.log(
+    `  Akzent: ${akzent === undefined ? "keiner vorgeschlagen" : `${akzent.farbe} vorgeschlagen (${akzent.anteil} % der Fläche, Abstand ${String(akzent.abstand).replace(".", ",")})`}`,
   );
   console.log(`  Zähler: ${fertig.zaehlilo.satz}`);
   if (mitModell)
