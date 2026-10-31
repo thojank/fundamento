@@ -337,7 +337,14 @@ describe("fm ekranoj mankoj: the Lückenliste of runs (Teil 3, D-29)", () => {
     const j = arangxo();
     const jsonRun = await j.kuri(["mankoj", ...kuroj, "--json"]);
     expect(jsonRun.code).toBe(0);
-    expect(JSON.parse(jsonRun.stdout)).toEqual({ mankoj: kunigiMankojn(kuroj) });
+    expect(JSON.parse(jsonRun.stdout)).toEqual(kunigiMankojn(kuroj));
+  });
+
+  it("prints with --json exactly what --out writes, byte for byte (QA-2-2)", async () => {
+    const a = arangxo();
+    const run = await a.kuri(["mankoj", ...kuroj, "--out", "luecken/mankoj.json", "--json"]);
+    expect(run.code).toBe(0);
+    expect(run.stdout).toBe(readFileSync(join(a.baseDir, "luecken", "mankoj.json"), "utf8"));
   });
 
   it("exits 2 with structured problems for a folder that does not exist", async () => {
@@ -365,6 +372,83 @@ describe("fm ekranoj mankoj: the Lückenliste of runs (Teil 3, D-29)", () => {
     const run = fm(["ekranoj", "mankoj"]);
     expect(run.code).toBe(2);
     expect(run.stderr).toContain("mankoj <ordner");
+  });
+});
+
+/** The one JSON document of a failed `--json` run on stdout (QA-2-1, as `fm modelo validate --json`). */
+function jsonEraro(stdout: string) {
+  const dok = JSON.parse(stdout) as {
+    ok: boolean;
+    problemoj: { path: string; rule: string; message: string; suggestion: string }[];
+    takso?: { tokenoj: number; satz: string };
+  };
+  expect(dok.ok).toBe(false);
+  expect(dok.problemoj.length).toBeGreaterThan(0);
+  for (const problemo of dok.problemoj) {
+    for (const ero of ["path", "rule", "message", "suggestion"] as const) {
+      expect(typeof problemo[ero], ero).toBe("string");
+    }
+  }
+  return dok;
+}
+
+describe("fm ekranoj --json: every exit 2 is one JSON document on stdout (QA-2-1)", () => {
+  it("names the V-2 problem of six screens as JSON, before any request", async () => {
+    const a = arangxo();
+    const run = await a.kuri([FRAZO, "--ekranoj", "a,b,c,d,e,f", "--json"]);
+    expect(run.code).toBe(2);
+    expect(jsonEraro(run.stdout).problemoj).toContainEqual(
+      expect.objectContaining({ path: "/ekranoj", rule: "plan-too-many-screens" }),
+    );
+    expect(a.babilo.petoj).toHaveLength(0);
+  });
+
+  it("names the model guard as JSON, never the key (D-19)", async () => {
+    const a = arangxo({
+      env: `FM_KI_ANBIETER=mistral\nFM_KI_MODELL=mistral-large-latest\nMISTRAL_API_KEY=${SXLOSILO}\n`,
+    });
+    const run = await a.kuri([FRAZO, "--ja", "--json"]);
+    expect(run.code).toBe(2);
+    expect(jsonEraro(run.stdout).problemoj).toContainEqual(
+      expect.objectContaining({ path: "FM_KI_MODELL", rule: "model-not-allowed" }),
+    );
+    expect(`${run.stdout}${run.stderr}`).not.toContain(SXLOSILO);
+    expect(a.spuro.chatFabrikoj).toHaveLength(0);
+  });
+
+  it("holds the estimate and the missing --ja without a terminal (D-37)", async () => {
+    const a = arangxo({ tty: false });
+    const run = await a.kuri([FRAZO, "--ekranoj", "liste,detail", "--json"]);
+    expect(run.code).toBe(2);
+    const dok = jsonEraro(run.stdout);
+    expect(dok.takso?.tokenoj).toBe(425_000);
+    expect(dok.takso?.satz).toContain("Schätzung: 2 Screens × 3 Runden");
+    expect(dok.problemoj).toContainEqual(expect.objectContaining({ path: "/ja" }));
+    expect(a.babilo.petoj).toHaveLength(0);
+  });
+
+  it("answers a missing .env, a usage error and the sub-mode's problems as JSON", async () => {
+    const kazoj: [ReturnType<typeof arangxo>, string[]][] = [
+      [arangxo({ env: undefined }), [FRAZO, "--ja", "--json"]],
+      [arangxo(), [FRAZO, "--max-token", "5", "--json"]],
+      [arangxo(), ["--ja", "--json"]],
+      [arangxo(), ["mankoj", "--json"]],
+      [arangxo(), ["mankoj", "--ja", "nicht-da", "--json"]],
+      [arangxo(), ["mankoj", "nicht-da", "--json"]],
+    ];
+    for (const [a, args] of kazoj) {
+      const run = await a.kuri(args);
+      expect(run.code, args.join(" ")).toBe(2);
+      jsonEraro(run.stdout);
+    }
+  });
+
+  it("prints the JSON from the command line, too", () => {
+    const run = fm(["ekranoj", FRAZO, "--ekranoj", "a,b,c,d,e,f", "--json"]);
+    expect(run.code).toBe(2);
+    expect(jsonEraro(run.stdout).problemoj).toContainEqual(
+      expect.objectContaining({ path: "/ekranoj", rule: "plan-too-many-screens" }),
+    );
   });
 });
 
