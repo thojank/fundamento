@@ -109,7 +109,8 @@ describe("rule catalog (§2.6)", () => {
     // Spec 029 ①: the six rules of check:fontoj.
     // Spec 032 ②: clean-room-spuroj-invalid and clean-room-jugxo-missing.
     // Spec 033 S1: faceto-token-unassigned and faceto-token-twice.
-    expect(RULE_IDS).toHaveLength(194);
+    // Spec 036 Teil 5 ②b-2: prop-value-deprecated.
+    expect(RULE_IDS).toHaveLength(195);
     for (const rule of [
       "agordo-jugxo-fixed",
       "raporto-out-of-sync",

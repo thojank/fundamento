@@ -34,9 +34,10 @@ describe("Spec 029 ①: the structure of komuna 0.2 for the Agordilo", () => {
     // clear button as large as the field's icon, the steppers of a number at icon size, each a
     // target of at least size.target.min (width); ②b-1b M-2: the states warning and success of the
     // twelve fields, the message and the kampo's status icon; Spec 035 2.3: the calendar and the ✕
-    // of the date picker at the size of an icon with their targets, read-only as rest.
+    // of the date picker at the size of an icon with their targets, read-only as rest. Spec 036
+    // Teil 5 ②b-2: elekto, markobutono and sxaltilo in two sizes (large a deprecated alias).
     expect(structure.fingerprint).toBe(
-      "29ad86eb2c3eebf284a8b420956ec3fb4f26b091d597d0f57c541b77d52584c1",
+      "68dafaa09e3431331d75c0af183053f262b4d743bb06d425ea1fcf4cdb642a4f",
     );
   });
 

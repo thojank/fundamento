@@ -345,7 +345,8 @@ describe("Web Component Celo for the sxaltilo (Spec 010 ①)", () => {
     const inventory = stylesheetInventory(sxaltiloStyles);
     expect(inventory.props).toEqual({
       checked: ["boolean"],
-      size: ["small", "medium", "large"],
+      // Spec 036 Teil 5 ②b-2 (A-sxaltilo-2, A-markobutono-2): two sizes.
+      size: ["small", "medium"],
     });
     expect([...inventory.states].sort()).toEqual([
       "disabled",
@@ -473,7 +474,8 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
     const inventory = stylesheetInventory(markobutonoStyles);
     expect(inventory.props).toEqual({
       checked: ["boolean"],
-      size: ["small", "medium", "large"],
+      // Spec 036 Teil 5 ②b-2 (A-sxaltilo-2, A-markobutono-2): two sizes.
+      size: ["small", "medium"],
     });
     expect([...inventory.states].sort()).toEqual([
       "disabled",
@@ -601,7 +603,8 @@ describe("Web Component Celo for the elekto (Spec 010 ③)", () => {
 
   it("states size as its only styled prop and the five states in the stylesheet inventory (parity)", () => {
     const inventory = stylesheetInventory(elektoStyles);
-    expect(inventory.props).toEqual({ size: ["small", "medium", "large"] });
+    // Spec 036 Teil 5 ②b-2 (A-elekto-2): two sizes.
+    expect(inventory.props).toEqual({ size: ["small", "medium"] });
     expect([...inventory.states].sort()).toEqual([
       "disabled",
       "focus",

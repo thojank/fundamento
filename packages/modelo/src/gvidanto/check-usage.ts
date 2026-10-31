@@ -50,7 +50,13 @@ function propIssue(
         allowed: skemo.props.map((candidate) => candidate.name),
       };
     }
-    if (prop.kind === "enum" && !(prop.values ?? []).includes(String(value))) {
+    // Spec 036 Teil 5 ②b-2 (Spec 029 ②a-2): a deprecated value is no invalid input; the judgement
+    // warns about it (prop-value-deprecated).
+    if (
+      prop.kind === "enum" &&
+      !(prop.values ?? []).includes(String(value)) &&
+      prop.deprecatedValues?.[String(value)] === undefined
+    ) {
       return {
         issue: invalid(
           path,

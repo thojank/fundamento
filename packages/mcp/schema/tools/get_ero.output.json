@@ -523,6 +523,12 @@
               "slot": {
                 "description": "The slot whose entries carry this state (Spec 011 ① O-3): selected is the state of one option of the slot options, no prop of the Ero.",
                 "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+              },
+              "deprecated": {
+                "description": "Values still accepted for one release, each with the value it renders as (Spec 036 Teil 5 ②b-2, Spec 029 ②a-2): write the value they name.",
+                "type": "object",
+                "additionalProperties": { "type": "string" },
+                "minProperties": 1
               }
             },
             "required": ["name", "values"],

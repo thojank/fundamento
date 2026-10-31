@@ -60,8 +60,9 @@ test.describe("fm-markobutono behaviour", () => {
     await expect(ikono).toHaveCount(1);
     await expect(ikono).toHaveAttribute("name", "check");
     await expect(ikono).toHaveAttribute("size", "small");
+    // Spec 036 Teil 5 ②b-2 (A-markobutono-2, ②a-2): large is a deprecated alias of medium.
     await page.locator("#a").evaluate((element) => element.setAttribute("size", "large"));
-    await expect(ikono).toHaveAttribute("size", "large");
+    await expect(ikono).toHaveAttribute("size", "medium");
     expect(await page.locator("#a").locator('[part="indicator"] svg').count()).toBe(0);
     const opacity = () =>
       page

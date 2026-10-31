@@ -4706,10 +4706,6 @@
             "medium": {
               "$type": "typography",
               "$value": "{typography.label.1}"
-            },
-            "large": {
-              "$type": "typography",
-              "$value": "{typography.label.1}"
             }
           }
         }
@@ -4753,10 +4749,6 @@
                 "$value": "{typography.body.2}"
               },
               "medium": {
-                "$type": "typography",
-                "$value": "{typography.body.1}"
-              },
-              "large": {
                 "$type": "typography",
                 "$value": "{typography.body.1}"
               }
@@ -4922,10 +4914,6 @@
             "medium": {
               "$type": "dimension",
               "$value": "{size.icon.medium}"
-            },
-            "large": {
-              "$type": "dimension",
-              "$value": "{size.icon.large}"
             }
           }
         }
@@ -7520,10 +7508,6 @@
             "medium": {
               "$type": "typography",
               "$value": "{typography.label.1}"
-            },
-            "large": {
-              "$type": "typography",
-              "$value": "{typography.label.1}"
             }
           }
         }
@@ -7676,10 +7660,6 @@
             "medium": {
               "$type": "dimension",
               "$value": "{size.icon.medium}"
-            },
-            "large": {
-              "$type": "dimension",
-              "$value": "{size.icon.large}"
             }
           }
         }
@@ -9230,10 +9210,6 @@
             "medium": {
               "$type": "typography",
               "$value": "{typography.label.1}"
-            },
-            "large": {
-              "$type": "typography",
-              "$value": "{typography.label.1}"
             }
           }
         }
@@ -9368,10 +9344,6 @@
             "medium": {
               "$type": "dimension",
               "$value": "{size.control.medium}"
-            },
-            "large": {
-              "$type": "dimension",
-              "$value": "{size.control.large}"
             }
           }
         },
@@ -9450,10 +9422,6 @@
             "medium": {
               "$type": "dimension",
               "$value": "{size.icon.medium}"
-            },
-            "large": {
-              "$type": "dimension",
-              "$value": "{size.icon.large}"
             }
           }
         },

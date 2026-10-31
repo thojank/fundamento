@@ -76,7 +76,8 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
         ["checked", "boolean", false],
         ["required", "boolean", false],
         ["invalid", "boolean", false],
-        ["size", ["small", "medium", "large"], "medium"],
+        // Spec 036 Teil 5 ②b-2 (A-*-2, ②a-2): two sizes; large a deprecated alias of medium.
+        ["size", ["small", "medium"], "medium"],
         ["disabled", "boolean", false],
         ["loading", "boolean", false],
         ["name", "string", undefined],
@@ -169,15 +170,15 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
 
   it("sizes the check mark from size.icon.*, the box is the mark plus its border, radius control", () => {
     if (skemo === undefined) throw new Error("markobutono missing");
-    for (const size of ["small", "medium", "large"]) {
+    for (const size of ["small", "medium"]) {
       expect(boundToken(skemo, "indicator", "size", { size })?.token).toBe(`size.icon.${size}`);
     }
     expect(skemo.parts.box?.width).toBeUndefined();
     expect(boundToken(skemo, "box", "radius", {})?.token).toBe("radius.role.control");
     expect(boundToken(skemo, "box", "gap", {})?.token).toBe("spacing.small");
     expect(boundToken(skemo, "border", "width", {})?.token).toBe("border.width.default");
-    // checked × size × state: the Figma set is 2 × 3 × 5 (E2).
-    expect(combinationsOf(skemo, ["checked", "size", "state"])).toHaveLength(42);
+    // checked × size × state: the Figma set is 2 × 2 × 7 since ②b-2 (E2, A-markobutono-2).
+    expect(combinationsOf(skemo, ["checked", "size", "state"])).toHaveLength(28);
   });
 
   it("speaks role checkbox: name from the label, description from the error, Space, required in de and en like the kampo", () => {

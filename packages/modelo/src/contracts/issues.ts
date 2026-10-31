@@ -195,6 +195,9 @@ export const RULE_IDS = [
   "skemo-a11y-invalid",
   // Spec 025 ① (plan ① D-01): the events of a Skemo, unique by name and no name of a prop.
   "skemo-event-invalid",
+  // Spec 036 Teil 5 ②b-2 (Spec 029 ②a-2): an instance gives a value its Skemo keeps only as a
+  // deprecated alias (check_usage warns and names the value it stands for).
+  "prop-value-deprecated",
   "uzo-boundary-covered",
   // Nachlese 8 ③: a text without its translation, a translation without its text.
   "traduko-missing",

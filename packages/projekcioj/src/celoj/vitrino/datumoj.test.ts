@@ -434,7 +434,7 @@ describe("the Vitrino shows the sxaltilo checked and unchecked (Spec 010 ①)", 
     expect(grid).toContain(
       '<th scope="col">rest</th><th scope="col">checked</th><th scope="col">disabled</th>',
     );
-    for (const size of ["small", "medium", "large"]) {
+    for (const size of ["small", "medium"]) {
       expect(grid).toContain(`<fm-sxaltilo size="${size}">${size}</fm-sxaltilo>`);
       expect(grid).toContain(`<fm-sxaltilo size="${size}" checked>${size}</fm-sxaltilo>`);
       expect(grid).toContain(`<fm-sxaltilo size="${size}" disabled>${size}</fm-sxaltilo>`);
@@ -451,14 +451,15 @@ describe("the Vitrino shows the markobutono ticked, required, invalid and disabl
     expect(grid).toContain(
       '<th scope="col">rest</th><th scope="col">checked</th><th scope="col">required</th><th scope="col">invalid</th><th scope="col">disabled</th>',
     );
-    for (const size of ["small", "medium", "large"]) {
+    for (const size of ["small", "medium"]) {
       expect(grid).toContain(`<fm-markobutono size="${size}">${size}</fm-markobutono>`);
       expect(grid).toContain(`<fm-markobutono size="${size}" checked>${size}</fm-markobutono>`);
       expect(grid).toContain(
         `<fm-markobutono size="${size}" invalid>${size}<span slot="error">Fehler</span></fm-markobutono>`,
       );
     }
-    expect(grid.match(/slot="error"/g)).toHaveLength(3);
+    // Spec 036 Teil 5 ②b-2 (A-markobutono-2): a row per size, two sizes.
+    expect(grid.match(/slot="error"/g)).toHaveLength(2);
   });
 
   it("says that the label of the checkbox may break", () => {
@@ -479,7 +480,7 @@ describe("the Vitrino shows the elekto with three options, required, invalid and
     expect(grid).toContain(
       '<th scope="col">rest</th><th scope="col">required</th><th scope="col">invalid</th><th scope="col">disabled</th>',
     );
-    for (const size of ["small", "medium", "large"]) {
+    for (const size of ["small", "medium"]) {
       expect(grid).toContain(
         `<fm-elekto size="${size}" value="1">${size}${OPTIONS}<span slot="help">Hinweis</span></fm-elekto>`,
       );
@@ -488,8 +489,9 @@ describe("the Vitrino shows the elekto with three options, required, invalid and
       );
     }
     // Spec 029 ②b-1 M-5: a fifth column, loading.
-    expect(grid.match(/<data slot="options"/g)).toHaveLength(3 * 5 * 3);
-    expect(grid.match(/slot="error"/g)).toHaveLength(3);
+    // Spec 036 Teil 5 ②b-2 (A-elekto-2): a row per size, two sizes.
+    expect(grid.match(/<data slot="options"/g)).toHaveLength(2 * 5 * 3);
+    expect(grid.match(/slot="error"/g)).toHaveLength(2);
     expect(VITRINO_OPTIONS).toEqual(["Eins", "Zwei", "Drei"]);
   });
 

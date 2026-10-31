@@ -72,7 +72,8 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
   it("has checked, size, disabled and name as props; no label, required or invalid (G1, G2)", () => {
     expect(skemo.props.map((prop) => [prop.name, prop.values ?? prop.kind, prop.default])).toEqual([
       ["checked", "boolean", false],
-      ["size", ["small", "medium", "large"], "medium"],
+      // Spec 036 Teil 5 ②b-2 (A-sxaltilo-2, ②a-2): two sizes; large a deprecated alias of medium.
+      ["size", ["small", "medium"], "medium"],
       ["disabled", "boolean", false],
       ["loading", "boolean", false],
       ["name", "string", undefined],
@@ -138,15 +139,15 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
   it("places the knob at start or end by checked, as a term (D-04), and sizes it from role tokens (D-05)", () => {
     expect(boundToken(skemo, "indicator", "position", { checked: "false" })?.token).toBe("start");
     expect(boundToken(skemo, "indicator", "position", { checked: "true" })?.token).toBe("end");
-    for (const size of ["small", "medium", "large"]) {
+    for (const size of ["small", "medium"]) {
       expect(boundToken(skemo, "indicator", "size", { size })?.token).toBe(`size.icon.${size}`);
       expect(boundToken(skemo, "box", "width", { size })?.token).toBe(`size.control.${size}`);
     }
     expect(boundToken(skemo, "box", "radius", {})?.token).toBe("radius.role.pill");
     expect(boundToken(skemo, "indicator", "radius", {})?.token).toBe("radius.role.pill");
     expect(boundToken(skemo, "box", "gap", {})?.token).toBe("spacing.small");
-    // checked × size × state: the Figma set is 2 × 3 × 4 (E2).
-    expect(combinationsOf(skemo, ["checked", "size", "state"])).toHaveLength(36);
+    // checked × size × state: the Figma set is 2 × 2 × 6 since ②b-2 (E2, A-sxaltilo-2).
+    expect(combinationsOf(skemo, ["checked", "size", "state"])).toHaveLength(24);
   });
 
   it("speaks role switch: name from the label, checked as aria-checked, Space and Enter, no required (D-08)", () => {

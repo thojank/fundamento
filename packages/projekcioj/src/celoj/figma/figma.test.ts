@@ -1231,7 +1231,7 @@ describe("Figma plan for the sxaltilo (Spec 010 ①)", () => {
       // Spec 029 ②b-1 M-5: loading shows the spinner (a BOOLEAN of the set).
       loading: "BOOLEAN",
       checked: "BOOLEAN",
-      size: ["small", "medium", "large"],
+      size: ["small", "medium"],
       disabled: "BOOLEAN",
       name: "TEXT",
       // Spec 029 ②b-1b M-2: the status of a field, its message beside help and error.
@@ -1239,9 +1239,9 @@ describe("Figma plan for the sxaltilo (Spec 010 ①)", () => {
       "message-position": ["below", "joined"],
       state: ["rest", "hover", "focus", "disabled", "warning", "success"],
     });
-    expect(set?.variants).toHaveLength(2 * 3 * 6);
+    expect(set?.variants).toHaveLength(2 * 2 * 6);
     expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["checked", "size", "state"]);
-    expect(set?.grid).toMatchObject({ rows: 6, columns: 6 });
+    expect(set?.grid).toMatchObject({ rows: 4, columns: 6 });
     expect(set?.description).toBe(sxaltilo?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Einstellung");
     // Spec 029 ②b-1b M-2: the switch shows the message of its status.
@@ -1311,7 +1311,7 @@ describe("Figma plan for the markobutono (Spec 010 ②)", () => {
       checked: "BOOLEAN",
       required: "BOOLEAN",
       invalid: "BOOLEAN",
-      size: ["small", "medium", "large"],
+      size: ["small", "medium"],
       disabled: "BOOLEAN",
       name: "TEXT",
       // Spec 029 ②b-1b M-2: the status of a field, its message beside help and error.
@@ -1319,9 +1319,9 @@ describe("Figma plan for the markobutono (Spec 010 ②)", () => {
       "message-position": ["below", "joined"],
       state: ["rest", "hover", "focus", "disabled", "invalid", "warning", "success"],
     });
-    expect(set?.variants).toHaveLength(2 * 3 * 7);
+    expect(set?.variants).toHaveLength(2 * 2 * 7);
     expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["checked", "size", "state"]);
-    expect(set?.grid).toMatchObject({ rows: 6, columns: 7 });
+    expect(set?.grid).toMatchObject({ rows: 4, columns: 7 });
     expect(set?.description).toBe(markobutono?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Option");
     expect(set?.texts).toEqual({ error: "Fehler", message: "Nachricht" });
@@ -1407,7 +1407,7 @@ describe("Figma plan for the elekto (Spec 010 ③)", () => {
       value: "TEXT",
       required: "BOOLEAN",
       invalid: "BOOLEAN",
-      size: ["small", "medium", "large"],
+      size: ["small", "medium"],
       disabled: "BOOLEAN",
       name: "TEXT",
       orientation: ["vertical", "horizontal"],
@@ -1416,9 +1416,9 @@ describe("Figma plan for the elekto (Spec 010 ③)", () => {
       "message-position": ["below", "joined"],
       state: ["rest", "hover", "focus", "disabled", "invalid", "warning", "success"],
     });
-    expect(set?.variants).toHaveLength(3 * 7);
+    expect(set?.variants).toHaveLength(2 * 7);
     expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["size", "state"]);
-    expect(set?.grid).toMatchObject({ rows: 3, columns: 7 });
+    expect(set?.grid).toMatchObject({ rows: 2, columns: 7 });
     expect(set?.description).toBe(elekto?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Frage");
     expect(set?.texts).toEqual({ help: "Hinweis", error: "Fehler", message: "Nachricht" });
@@ -1466,7 +1466,7 @@ describe("Figma plan for the elekto (Spec 010 ③)", () => {
 
   it("states the elekto in the parity inventory: size only, the circle and the dot per value of selected", () => {
     const items = figmaPlanInventory(plan);
-    expect(items.elekto?.props.size).toEqual(["small", "medium", "large"]);
+    expect(items.elekto?.props.size).toEqual(["small", "medium"]);
     expect(items.elekto?.props.selected).toBeUndefined();
     expect(items.elekto?.states).toEqual([
       "rest",
@@ -1489,7 +1489,7 @@ describe("Figma plan for the elekto (Spec 010 ③)", () => {
     expect(
       items.elekto?.values["indicator.color@selected=false,size=small,state=focus"],
     ).toBeUndefined();
-    expect(items.elekto?.values["options.gap@size=large,state=rest"]).toBe("8px");
+    expect(items.elekto?.values["options.gap@size=medium,state=rest"]).toBe("8px");
   });
 });
 

@@ -9934,16 +9934,6 @@
                   "id": "tok_01M5GF0TQY40AAXJHBF90R5XAE"
                 }
               }
-            },
-            "large": {
-              "$type": "typography",
-              "$value": "{typography.label.1}",
-              "$description": "elekto: label.typography when size=large (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
-              "$extensions": {
-                "com.ciferecigo.fundamento": {
-                  "id": "tok_01M5GF0TQY40AAXJHBF90R5XAF"
-                }
-              }
             }
           }
         }
@@ -10048,16 +10038,6 @@
                 "$extensions": {
                   "com.ciferecigo.fundamento": {
                     "id": "tok_01M5GF0TQY40AAXJHBF90R5XAP"
-                  }
-                }
-              },
-              "large": {
-                "$type": "typography",
-                "$value": "{typography.body.1}",
-                "$description": "elekto: option-label.typography when size=large (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
-                "$extensions": {
-                  "com.ciferecigo.fundamento": {
-                    "id": "tok_01M5GF0TQY40AAXJHBF90R5XAQ"
                   }
                 }
               }
@@ -10438,16 +10418,6 @@
               "$extensions": {
                 "com.ciferecigo.fundamento": {
                   "id": "tok_01M5GF0TQY40AAXJHBF90R5XBH"
-                }
-              }
-            },
-            "large": {
-              "$type": "dimension",
-              "$value": "{size.icon.large}",
-              "$description": "elekto: indicator.size when size=large (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
-              "$extensions": {
-                "com.ciferecigo.fundamento": {
-                  "id": "tok_01M5GF0TQY40AAXJHBF90R5XBJ"
                 }
               }
             }
@@ -16363,16 +16333,6 @@
                   "id": "tok_01M5GF0TQY40AAXJHBF90R5XKK"
                 }
               }
-            },
-            "large": {
-              "$type": "typography",
-              "$value": "{typography.label.1}",
-              "$description": "markobutono: label.typography when size=large (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
-              "$extensions": {
-                "com.ciferecigo.fundamento": {
-                  "id": "tok_01M5GF0TQY40AAXJHBF90R5XKM"
-                }
-              }
             }
           }
         }
@@ -16730,16 +16690,6 @@
               "$extensions": {
                 "com.ciferecigo.fundamento": {
                   "id": "tok_01M5GF0TQY40AAXJHBF90R5XMC"
-                }
-              }
-            },
-            "large": {
-              "$type": "dimension",
-              "$value": "{size.icon.large}",
-              "$description": "markobutono: indicator.size when size=large (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
-              "$extensions": {
-                "com.ciferecigo.fundamento": {
-                  "id": "tok_01M5GF0TQY40AAXJHBF90R5XMD"
                 }
               }
             }
@@ -20247,16 +20197,6 @@
                   "id": "tok_01M5GF0TQY40AAXJHBF90R5XRV"
                 }
               }
-            },
-            "large": {
-              "$type": "typography",
-              "$value": "{typography.label.1}",
-              "$description": "sxaltilo: label.typography when size=large (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
-              "$extensions": {
-                "com.ciferecigo.fundamento": {
-                  "id": "tok_01M5GF0TQY40AAXJHBF90R5XRW"
-                }
-              }
             }
           }
         }
@@ -20577,16 +20517,6 @@
                   "id": "tok_01M5GF0TQY40AAXJHBF90R5XSF"
                 }
               }
-            },
-            "large": {
-              "$type": "dimension",
-              "$value": "{size.control.large}",
-              "$description": "sxaltilo: box.width when size=large (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
-              "$extensions": {
-                "com.ciferecigo.fundamento": {
-                  "id": "tok_01M5GF0TQY40AAXJHBF90R5XSG"
-                }
-              }
             }
           }
         },
@@ -20771,16 +20701,6 @@
               "$extensions": {
                 "com.ciferecigo.fundamento": {
                   "id": "tok_01M5GF0TQY40AAXJHBF90R5XSW"
-                }
-              }
-            },
-            "large": {
-              "$type": "dimension",
-              "$value": "{size.icon.large}",
-              "$description": "sxaltilo: indicator.size when size=large (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
-              "$extensions": {
-                "com.ciferecigo.fundamento": {
-                  "id": "tok_01M5GF0TQY40AAXJHBF90R5XSX"
                 }
               }
             }

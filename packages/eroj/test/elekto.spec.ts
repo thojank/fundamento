@@ -232,7 +232,8 @@ test.describe("fm-elekto measures (G3, D-05)", () => {
   test("the circle is the dot's box plus its border, round; the dot shows on the chosen option only", async ({
     page,
   }) => {
-    const sizes = ["small", "medium", "large"] as const;
+    // Spec 036 Teil 5 ②b-2 (A-elekto-2): two sizes.
+    const sizes = ["small", "medium"] as const;
     await serve(
       page,
       out,
