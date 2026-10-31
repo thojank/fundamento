@@ -16,7 +16,9 @@ import { beforeAll, describe, expect, it } from "vitest";
 import {
   type Agordo,
   composeFiles,
+  type Derivation,
   derivationBasis,
+  deriveAspekto,
   loadCalibration,
   packageDocuments,
   packageLabel,
@@ -49,9 +51,17 @@ function lightness(tokens: Record<string, { value: unknown }>, name: string): nu
 const LEAD_ROLES = ["color.action.primary.rest", "color.link.rest"] as const;
 
 describe("a very dark neutral lead colour (Spec 036, Befund 2.1, V-1)", () => {
+  let derivation: Derivation;
   let tokensOf: ReturnType<typeof resolver>;
   beforeAll(() => {
+    derivation = deriveAspekto(INK, readStructure(), loadCalibration());
     tokensOf = resolver(INK);
+  });
+
+  it("derives an exportable Aspekto that passes every check", () => {
+    expect(derivation.issues).toEqual([]);
+    expect(derivation.raporto.violations).toEqual([]);
+    expect(derivation.exportable).toBe(true);
   });
 
   it("gives the actions and links of the light mode the lead colour, not a mid grey", () => {
@@ -64,5 +74,19 @@ describe("a very dark neutral lead colour (Spec 036, Befund 2.1, V-1)", () => {
       .filter((entry) => entry.delta > 0.05)
       .map((entry) => `${entry.role} ${entry.delta.toFixed(3)} from the lead colour`);
     expect(off).toEqual([]);
+  });
+
+  it("keeps the high-contrast light mode at least as dark as the default for those roles", () => {
+    const base = tokensOf({ "color-scheme": "light", contrast: "default" });
+    const high = tokensOf({ "color-scheme": "light", contrast: "high" });
+    const lighter = LEAD_ROLES.filter(
+      (role) => lightness(high, role) > lightness(base, role) + 1e-9,
+    );
+    expect(lighter).toEqual([]);
+  });
+
+  it("keeps the dark mode light on dark: actions and links stay far lighter than the lead", () => {
+    const tokens = tokensOf({ "color-scheme": "dark", contrast: "default" });
+    for (const role of LEAD_ROLES) expect(lightness(tokens, role), role).toBeGreaterThan(0.6);
   });
 });

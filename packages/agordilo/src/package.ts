@@ -2,7 +2,9 @@
 // the main set `aspekto/<name>` that assigns every token of the Vortaro (the six palettes new,
 // everything else as the structure writes it), the conjunction sets of the reference Aspekto with
 // their roles unchanged, `ids.lock.json`, the glyphs of the reference and the Jugxoj the Agordo
-// records. `$themes.json` and the report follow once the Modelo is composed (derive.ts). Pure.
+// records. `$themes.json` and the report follow once the Modelo is composed (derive.ts). A very
+// dark neutral lead colour re-points the roles of the lead colour (unbunt.ts, Spec 036 Befund 2.1)
+// in the main set and in a set of the brand's own for the high-contrast light mode. Pure.
 
 import {
   type AspektoFile,
@@ -22,6 +24,7 @@ import { derivedIdGenerator, namespaceOf } from "./ids.js";
 import type { DerivedPalettes, DerivedStep, ModeOverride } from "./palettes.js";
 import { isRecord as isJsonObject } from "./record.js";
 import { referencePackage, type Structure } from "./structure.js";
+import { UNBUNT_HIGH_KONDICXOJ, unbuntRoles } from "./unbunt.js";
 import { AGORDILO_VERSION } from "./version.js";
 
 export const EXTENSION_KEY = "com.ciferecigo.fundamento";
@@ -318,6 +321,8 @@ export function packageDocuments(
   const json: Record<string, unknown> = {};
   const sets: { name: string; path: string }[] = [];
   const core = structure.files.sets.find((set) => set.name === CORE_SET_NAME);
+  const high = structure.files.sets.find((set) => set.name === "contrast/high");
+  const unbunt = unbuntRoles(agordo, palettes, core?.value, high?.value);
   const mainName = `aspekto/${name}`;
   const mainPath = `sets/${mainName}.json`;
   json[mainPath] = rewriteSet(
@@ -329,6 +334,8 @@ export function packageDocuments(
       const set = agordo.festgelegt?.[token];
       if (set?.alias !== undefined) return `{${set.alias}}`;
       if (set?.wert !== undefined) return set.wert;
+      const unbuntAlias = unbunt?.main.get(token);
+      if (unbuntAlias !== undefined) return unbuntAlias;
       const step = byToken.get(token);
       if (step !== undefined) return colorValue(step);
       if (gestalt?.main.has(token) === true) return gestalt.main.get(token);
@@ -406,6 +413,24 @@ export function packageDocuments(
     json[path] = withTokens(
       rewriteSet({}, mint("tokenSet"), [`aspekto=${name}`, kondicxo], (_token, value) => value),
       typedTokens(structure, tokens),
+    );
+    sets.push({ name: setName, path });
+  }
+
+  // Spec 036, Befund 2.1: the roles of a very dark neutral lead colour in the high-contrast light
+  // mode, so that mode is never lighter than the default (the generic contrast/high set moves
+  // them one step down the ramp from the reference step).
+  if (unbunt !== undefined && unbunt.high.size > 0) {
+    const setName = `${mainName}+${UNBUNT_HIGH_KONDICXOJ.join("+").replaceAll("=", "/")}`;
+    const path = `sets/${setName}.json`;
+    json[path] = withTokens(
+      rewriteSet(
+        {},
+        mint("tokenSet"),
+        [`aspekto=${name}`, ...UNBUNT_HIGH_KONDICXOJ],
+        (_token, value) => value,
+      ),
+      typedTokens(structure, unbunt.high),
     );
     sets.push({ name: setName, path });
   }
