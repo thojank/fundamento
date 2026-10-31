@@ -154,6 +154,9 @@ describe("Chromium (D-17, local)", () => {
         expect(fakto?.elements.some((e) => e.attrs.href?.includes("superrigardo"))).toBe(false);
         expect(fakto?.elements[0]?.tag).toBe("main");
         expect(fakto?.aria.some((a) => a.role === "heading" && a.level === 1)).toBe(true);
+        // No console error of a clean screen under file:// – axe's stylesheet preload is no error
+        // of the screen (S037-05 Befund 1; else K1 = 0 for every real screen).
+        expect(fakto?.console).toEqual([]);
         for (const nomo of [`${slug}-hela.png`, `${slug}-malhela.png`]) {
           const png = readFileSync(join(dir, "bildoj", nomo));
           expect(png.subarray(1, 4).toString("latin1")).toBe("PNG");

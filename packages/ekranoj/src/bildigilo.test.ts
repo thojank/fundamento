@@ -11,6 +11,12 @@ import {
   SKEMOJ_BILDIGO,
   WCAG_ETIKEDOJ,
 } from "./index.js";
+import {
+  antauxsxargataj,
+  CORS_ERARO,
+  RetumiloDouble,
+  VERA_ERARO,
+} from "./test-doubles/retumilo.js";
 
 describe("kreiBildigilon without a browser", () => {
   it("gives no renderer and one log line when Playwright cannot be loaded", async () => {
@@ -75,5 +81,60 @@ describe("render settings (as nordstelo)", () => {
       { role: "link", name: 'Weiter zu "Detail"' },
       { role: "button", name: "Speichern" },
     ]);
+  });
+});
+
+// S037-05 Befund 1: axe-core preloads the stylesheets by XMLHttpRequest; under file:// Chromium
+// blocks that with a console error, and an error in the console makes K1 = 0 – no real screen could
+// ever turn green. The console must keep the errors of the page, not the ones axe causes.
+describe("the console of a render (S037-05 Befund 1)", () => {
+  const dokumento = (html: string) => ({ slug: "liste", html });
+
+  it("records no error that axe's stylesheet preload causes, light and dark", async () => {
+    const retumilo = new RetumiloDouble();
+    const bildigilo = await kreiBildigilon({
+      importi: async () => retumilo.playwright(),
+      importiAxe: async () => retumilo.axe(),
+    });
+    const { fakto } = await (bildigilo?.render(dokumento("<main><p>Team Nord</p></main>"), {
+      aspektoj: ["komuna"],
+      varianto: "F",
+    }) ?? Promise.reject(new Error("kein Renderer")));
+    expect(retumilo.axeOpcioj).toHaveLength(SKEMOJ_BILDIGO.length);
+    expect(fakto.console).toEqual([]);
+    expect(fakto.console).not.toContain(CORS_ERARO);
+  });
+
+  it("keeps the genuine errors of the page", async () => {
+    const retumilo = new RetumiloDouble();
+    const bildigilo = await kreiBildigilon({
+      importi: async () => retumilo.playwright(),
+      importiAxe: async () => retumilo.axe(),
+    });
+    const { fakto } = await (bildigilo?.render(
+      dokumento('<main data-eraro="1"><p>Team Nord</p></main>'),
+      { aspektoj: ["komuna"], varianto: "F" },
+    ) ?? Promise.reject(new Error("kein Renderer")));
+    expect(fakto.console).toEqual([VERA_ERARO]);
+  });
+
+  it("still runs the WCAG 2.2 A/AA tags and still preloads media (no-autoplay-audio, wcag2a)", async () => {
+    const retumilo = new RetumiloDouble();
+    const bildigilo = await kreiBildigilon({
+      importi: async () => retumilo.playwright(),
+      importiAxe: async () => retumilo.axe(),
+    });
+    await bildigilo?.render(dokumento("<main></main>"), { aspektoj: ["komuna"], varianto: "F" });
+    for (const opcioj of retumilo.axeOpcioj) {
+      expect(opcioj?.runOnly).toEqual({ type: "tag", values: [...WCAG_ETIKEDOJ] });
+      expect(antauxsxargataj(opcioj)).toEqual(["media"]);
+    }
+  });
+
+  it("models axe-core's preload rule: default and true preload the CSSOM, assets choose", () => {
+    expect(antauxsxargataj(undefined)).toEqual(["cssom", "media"]);
+    expect(antauxsxargataj({ preload: true })).toEqual(["cssom", "media"]);
+    expect(antauxsxargataj({ preload: false })).toEqual([]);
+    expect(antauxsxargataj({ preload: { assets: ["media"] } })).toEqual(["media"]);
   });
 });

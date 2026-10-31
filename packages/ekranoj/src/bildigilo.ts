@@ -44,8 +44,8 @@ export interface PlaywrightModulo {
   chromium: { launch(): Promise<Browser> };
 }
 
-/** What the renderer needs of the axe-core Playwright module. */
-interface AxeModulo {
+/** What the renderer needs of the axe-core Playwright module (the real one, or a test's stand-in). */
+export interface AxeModulo {
   AxeBuilder: new (opcioj: {
     page: Page;
   }) => {
@@ -62,6 +62,8 @@ export interface BildigiloOpcioj {
   log?: (linio: string) => void;
   /** How Playwright is loaded (tests replace it); default: the literal `import("playwright")`. */
   importi?: () => Promise<PlaywrightModulo>;
+  /** How axe-core's Playwright module is loaded (tests replace it); default: the literal import. */
+  importiAxe?: () => Promise<AxeModulo>;
 }
 
 const ARIA_LINIO = /^\s*-\s+([a-z]+)(?:\s+"((?:[^"\\]|\\.)*)")?(.*)$/;
@@ -233,7 +235,10 @@ export async function kreiBildigilon(opcioj: BildigiloOpcioj = {}): Promise<Bild
   let axe: AxeModulo;
   try {
     const playwright = await importi();
-    axe = (await import("@axe-core/playwright")) as unknown as AxeModulo;
+    axe = await (
+      opcioj.importiAxe ??
+      (async () => (await import("@axe-core/playwright")) as unknown as AxeModulo)
+    )();
     browser = await playwright.chromium.launch();
   } catch (eraro) {
     opcioj.log?.(
