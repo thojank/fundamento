@@ -228,3 +228,47 @@ test.describe("②b-2 A-plurelektilo-1: summary labels", () => {
     await expect(page.locator("fm-plurelektilo").locator('[part="tags"]')).toBeHidden();
   });
 });
+
+test.describe("②b-2 A-listelektilo-2, A-plurelektilo-2, A-datelektilo-2: size", () => {
+  const FIELDS: Readonly<Record<string, (attributes: string) => string>> = {
+    listelektilo: (a) =>
+      `<fm-listelektilo ${a}>Region${options("Europa", "Asien")}</fm-listelektilo>`,
+    plurelektilo: (a) =>
+      `<fm-plurelektilo ${a}>Standards${options("Kontrast", "Fokus")}</fm-plurelektilo>`,
+    datelektilo: (a) => `<fm-datelektilo ${a}>Lieferdatum</fm-datelektilo>`,
+  };
+  for (const [ero, markup] of Object.entries(FIELDS)) {
+    test(`${ero}: each size as high as the kampo of that size; no size is medium`, async ({
+      page,
+    }) => {
+      const sizes = ["small", "medium", "large"];
+      await serve(
+        page,
+        out,
+        [
+          ...sizes.map((size) => `<div id="${ero}-${size}">${markup(`size="${size}"`)}</div>`),
+          ...sizes.map(
+            (size) => `<div id="kampo-${size}"><fm-kampo size="${size}">Name</fm-kampo></div>`,
+          ),
+          `<div id="${ero}-none">${markup("")}</div>`,
+        ].join(""),
+      );
+      const height = (id: string, tag: string) =>
+        page.locator(`#${id} ${tag}`).evaluate((host) => {
+          const control = host.shadowRoot?.querySelector(
+            '[part="row"], [part="control"]',
+          ) as HTMLElement;
+          return Math.round(control.getBoundingClientRect().height);
+        });
+      const heights: number[] = [];
+      for (const size of sizes) {
+        const own = await height(`${ero}-${size}`, `fm-${ero}`);
+        expect(own, `${ero} ${size}`).toBe(await height(`kampo-${size}`, "fm-kampo"));
+        heights.push(own);
+      }
+      expect(heights[0]).toBeLessThan(heights[1] ?? 0);
+      expect(heights[1]).toBeLessThan(heights[2] ?? 0);
+      expect(await height(`${ero}-none`, `fm-${ero}`)).toBe(heights[1]);
+    });
+  }
+});
