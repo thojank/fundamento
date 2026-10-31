@@ -19,7 +19,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { cpus, loadavg, tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { encodePng } from "../src/test-doubles/png.js";
+import { CELO_WEG_A, inspiroWegA, KARAKTERO_WEG_A } from "../src/test-doubles/weg-a.js";
 
 const root = resolve(import.meta.dirname, "..", "..", "..");
 const args = process.argv.slice(2);
@@ -40,11 +40,6 @@ if (mitModell && ki.provider === undefined) throw new Error("MISTRAL_API_KEY feh
 const secrets = [env.MISTRAL_API_KEY, env.OPENROUTER_API_KEY, env.OPENAI_API_KEY].filter(
   (value): value is string => typeof value === "string" && value.length > 8,
 );
-
-const CELO =
-  "Eine Bäckerei für die Nachbarschaft. Ehrliches Brot, früh am Morgen gebacken. Für Familien und Leute auf dem Weg zur Arbeit. Warm und freundlich, nicht schick. Man soll sich willkommen fühlen.";
-const png = (pixel: (x: number, y: number) => [number, number, number, number]) =>
-  encodePng(48, 32, pixel).toString("base64");
 
 async function lauf(nummer: number): Promise<Record<string, number>> {
   // B-13: per step the wall clock and the CPU time of this process (the server runs in it); for the
@@ -97,25 +92,13 @@ async function lauf(nummer: number): Promise<Record<string, number>> {
   };
   schritt("Marke anlegen, Schätzung");
   const kreilo = await post("/api/marko/pano/kreilo", {
-    celo: CELO,
-    karaktero: {
-      "ruhig-lebhaft": -1,
-      "klassisch-modern": -1,
-      "warm-kuehl": -2,
-      "sachlich-verspielt": 1,
-      "leicht-kraeftig": 0,
-    },
+    celo: CELO_WEG_A,
+    karaktero: KARAKTERO_WEG_A,
     festgelegt: {},
-    inspiro: [
-      {
-        filename: "kruste.png",
-        base64: png((_x, y) => (y < 20 ? [0x9c, 0x5a, 0x2b, 255] : [0xf3, 0xe6, 0xcf, 255])),
-      },
-      {
-        filename: "weizen.png",
-        base64: png((x) => (x < 16 ? [0xd9, 0xa4, 0x41, 255] : [0xfa, 0xf4, 0xea, 255])),
-      },
-    ],
+    inspiro: inspiroWegA().map(({ filename, bytes }) => ({
+      filename,
+      base64: bytes.toString("base64"),
+    })),
     rajtoj: true,
   });
   if (!kreilo.ok) throw new Error(`Kreilo: ${kreilo.status}`);
