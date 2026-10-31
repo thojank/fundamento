@@ -66,9 +66,8 @@ describe("the picture weight of Weg C (Spec 036, Befund 2.3)", () => {
 
   it("names the colour of the large product photo of the first screen as the lead, not the background", async () => {
     const lead = await leadOf([FOTO_KESTO]);
-    expect(lead?.agordo, `${lead?.agordo.leitfarbe} statt ${PRODUKT}`).toEqual({
-      leitfarbe: PRODUKT,
-    });
+    // Spec 036, Befund 2.2: the proposal may also lay the page's other colour as the Zweitfarbe.
+    expect(lead?.agordo.leitfarbe, `${lead?.agordo.leitfarbe} statt ${PRODUKT}`).toBe(PRODUKT);
     expect(lead?.agordo.leitfarbe).not.toBe(HINTERGRUND);
     expect(lead?.herkunft.map((entry) => entry.dosiero)).toContain(FOTO_URL);
   });
@@ -78,7 +77,7 @@ describe("the picture weight of Weg C (Spec 036, Befund 2.3)", () => {
     // measures as Weg C did before.
     for (const bildoj of [[{ ...FOTO_KESTO, width: 400, height: 300 }], []]) {
       const lead = await leadOf(bildoj);
-      expect(lead?.agordo).toEqual({ leitfarbe: HINTERGRUND });
+      expect(lead?.agordo.leitfarbe).toBe(HINTERGRUND);
     }
   });
 });

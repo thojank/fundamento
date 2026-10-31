@@ -1772,17 +1772,17 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
             detaloj: { herkunft: result.herkunft[faceto] ?? [], kreilo: { celo, karaktero } },
           });
         }
-        // Spec 035, Befund 4.2: the accent of the inspiration waits as an open proposal of its step;
-        // „Vorschlag übernehmen“ lays it on the draft, and the check decides as for every proposal.
+        // Spec 036, Befund 2.2 (Spec 035 D-80 superseded): the second colour of the inspiration is
+        // the Zweitfarbe of the draft, set with its origin like the lead colour; the Kroniko records
+        // it with its measure (the accent of Spec 035, Befund 4.2).
         if (result.akzent !== undefined) {
           const { faceto, agordo: patch, satz, herkunft, farbe, anteil, abstand } = result.akzent;
-          writeProponoj(options.workdir, name, [{ faceto, agordo: patch, satz, herkunft }]);
           kroniko(name, {
             ago: "propono",
             fonto: "agento",
             faceto,
             teksto: satz,
-            detaloj: { herkunft, akzent: { farbe, anteil, abstand } },
+            detaloj: { herkunft, akzent: { farbe, anteil, abstand }, agordo: patch },
           });
         }
         // With a model, no fixed colour and no inspiration, the model chooses the lead colour.

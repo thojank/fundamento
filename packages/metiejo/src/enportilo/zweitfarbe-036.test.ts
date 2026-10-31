@@ -29,6 +29,7 @@ import {
   TINTE,
   TUERKIS,
   unbuntPng,
+  ZIEGEL,
   zweifarbigPdf,
   zweifarbigPng,
 } from "../test-doubles/zweitfarbe.js";
@@ -200,10 +201,16 @@ describe("an achromatic brand and its Zweitfarbe", () => {
   });
 });
 
+// D-S36-2.4-6: the brand of these two tests has the calm brick red as its lead colour – the
+// orange-red alone already breaks palette-aligned (an adjustable rule of the lead colour's ramp, not
+// of the Zweitfarbe; the check proposes a calmer lead colour), which would hide what is tested here.
 describe("the brand with the Zweitfarbe passes the checks; actions stay with the lead colour", () => {
   const ACTION = /^color\.(action|link|focus)\./;
-  const withZweitfarbe = () =>
-    kreiloProponoj({ inspiro: bild(zweifarbigPng(), "inspiration.png") }, start, bases).agordo;
+  /** The draft after taking the proposal of Weg B from the picture brick red and turquoise. */
+  const withZweitfarbe = (): Agordo => ({
+    ...start,
+    ...gvidkoloro(bild(zweifarbigPng(TUERKIS, 5, ZIEGEL), "material.png"))?.agordo,
+  });
 
   it("no sekundo-not-action, and every action, link and focus role is the same as without it", () => {
     const agordo = withZweitfarbe();

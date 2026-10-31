@@ -7,7 +7,8 @@
 // slider's end is proposed at the end, and the sentence says so. An achromatic brand (Spec 036,
 // Befund 2.1) – very dark neutrals carry its material, strong colours stay a small share – gets its
 // most frequent very dark neutral as the lead colour, and the sentence names the colourful tones it
-// did not take. Pure apart from the catalogue and the thresholds of kreilo.json.
+// did not take. Beside the lead colour the same material gives the Zweitfarbe (Spec 036, Befund
+// 2.2, zweitfarbe.ts). Pure apart from the catalogue and the thresholds of kreilo.json.
 
 import { type Agordo, type OklchColor, parseAgordoColor, reglerOf } from "@fundamento/agordilo";
 import { buildModelo, resolveCombination } from "@fundamento/modelo";
@@ -15,6 +16,7 @@ import { KREILO } from "../kreilo/datoj.js";
 import { fontoOf, licencedFonto, readTiparoj, type Tiparoj } from "../tiparoj.js";
 import type { Bases } from "../vorschau.js";
 import type { Herkunft, Trovo } from "./trovo.js";
+import { mitZweitfarbe, zweitfarbeOf } from "./zweitfarbe.js";
 
 export interface Propono {
   faceto: string;
@@ -159,14 +161,20 @@ export function proponojOf(trovoj: readonly Trovo[], bases: Bases): Propono[] {
           .filter((colour) => (colour.oklch?.l ?? 0) >= 0.3 && (colour.oklch?.l ?? 0) <= 0.8)
           .sort((a, b) => b.pezo * (b.oklch?.c ?? 0) - a.pezo * (a.oklch?.c ?? 0))[0] ??
         saturated[0]);
-  if (unbunt !== undefined) proponoj.push(unbunt);
+  if (unbunt !== undefined)
+    proponoj.push(mitZweitfarbe(unbunt, zweitfarbeOf(trovoj, String(unbunt.agordo.leitfarbe))));
   if (lead !== undefined) {
-    proponoj.push({
-      faceto: "gvidkoloro",
-      agordo: { leitfarbe: String(lead.valoro) },
-      satz: `Leitfarbe ${lead.valoro}: die stärkste kräftige Farbe deines Materials (${percent((100 * lead.pezo) / totalColour)} % der gefundenen Farbe).`,
-      herkunft: lead.herkunft,
-    });
+    proponoj.push(
+      mitZweitfarbe(
+        {
+          faceto: "gvidkoloro",
+          agordo: { leitfarbe: String(lead.valoro) },
+          satz: `Leitfarbe ${lead.valoro}: die stärkste kräftige Farbe deines Materials (${percent((100 * lead.pezo) / totalColour)} % der gefundenen Farbe).`,
+          herkunft: lead.herkunft,
+        },
+        zweitfarbeOf(trovoj, String(lead.valoro)),
+      ),
+    );
   }
   const neutrals = colours.filter(
     (colour) => colour.oklch !== undefined && colour.oklch.c < SATURATED && colour.oklch.l > 0.85,

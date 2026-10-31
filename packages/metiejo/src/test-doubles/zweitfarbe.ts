@@ -14,6 +14,11 @@ import { NEBEN, PRAEGEND } from "./weg-c.js";
 export const ORANGEROT = "#e4572e";
 /** The second strong colour of the two-colour image: clearly apart from the orange-red. */
 export const TUERKIS = "#17b3a8";
+/**
+ * A calm brick red: as a lead colour its ramp stays aligned with the others (palette-aligned), so
+ * the brand with the turquoise as its Zweitfarbe passes every check without a Jugxo.
+ */
+export const ZIEGEL = "#774638";
 /** A darker tone of the orange-red: strong, a fair share, but the same colour. */
 export const SCHATTEN = "#b03e1c";
 /** The ink of an achromatic image. */
@@ -32,11 +37,11 @@ const rgba = (hex: string): number[] => [
 const WEISS = "#fafaf8";
 
 /**
- * 20 × 20 px: 60 % orange-red, then `second` on `rows` rows (5 rows = 25 %), the rest white – the
- * picture of the accent test of Spec 035, Befund 4.2.
+ * 20 × 20 px: 60 % orange-red (or `lead`), then `second` on `rows` rows (5 rows = 25 %), the rest
+ * white – the picture of the accent test of Spec 035, Befund 4.2.
  */
-export const zweifarbigPng = (second = TUERKIS, rows = 5): Buffer =>
-  encodePng(20, 20, (_x, y) => rgba(y < 12 ? ORANGEROT : y < 12 + rows ? second : WEISS));
+export const zweifarbigPng = (second = TUERKIS, rows = 5, lead = ORANGEROT): Buffer =>
+  encodePng(20, 20, (_x, y) => rgba(y < 12 ? lead : y < 12 + rows ? second : WEISS));
 
 /** 20 × 20 px: 50 % ink, 30 % `second`, 20 % white – an achromatic brand with one other tone. */
 export const unbuntPng = (second: string): Buffer =>
