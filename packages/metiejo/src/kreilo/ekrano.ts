@@ -1,7 +1,9 @@
 // The entry questions of the Kreilo (Spec 033 S3, Weg A) as a screen of Eroj: what the brand stands
 // for and for whom (fm-tekstareo), its character as five sliders between opposites (fm-glitilo with
 // the poles as min-label and max-label), what is already fixed (fm-kampo), inspiration images
-// (fm-alsxutilo) with the confirmation of Amendment v2.5. Pure.
+// (fm-alsxutilo) with the confirmation of Amendment v2.5. After the proposal the link „Weiter zum
+// Assistenten“ appears when the person must first read a sentence of the inspiration (Spec 036,
+// D-95: no browser). Pure.
 
 import { KONFIRMO_TEKSTO } from "../asistanto/averto.js";
 import { escapeHtml, jsonIsland, screenDocument } from "../html.js";
@@ -45,6 +47,7 @@ ${
     : `<fm-teksto kind="caption" data-mt-takso-vojo>Schätzung für den Weg bis 100 % (mit zwei Wünschen im Chat) ${escapeHtml(input.takso.vojo)}</fm-teksto><fm-teksto kind="caption" data-mt-takso-kreilo>Ohne festgelegte Farbe und ohne Inspiration wählt das Modell die Leitfarbe, dazu ${escapeHtml(input.takso.kreilo)}</fm-teksto>`
 }
 <fm-butono emphasis="high" data-mt-kreilo-sendi>Vorschlag machen</fm-butono>
+<fm-ligilo to="/asistanto/${encodeURIComponent(name)}/gvidkoloro" placement="standalone" data-mt-kreilo-weiter hidden>Weiter zum Assistenten</fm-ligilo>
 </section>
 </fm-pagxo>
 </fm-sxelo>

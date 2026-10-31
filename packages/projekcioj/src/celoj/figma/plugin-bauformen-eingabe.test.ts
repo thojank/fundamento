@@ -120,7 +120,10 @@ describe("the markobutono is drawn as a toggle: box, check mark, label and error
     expect(field?.properties.counterAxisAlignItems).toBe("MIN");
     const texts = field?.children.find((child) => child.name === "texts");
     expect(texts?.properties.layoutMode).toBe("VERTICAL");
-    expect(texts?.children.map((child) => child.name)).toEqual(["label-row", "error"]);
+    // Spec 036 1.6: the label row stands in the label's line, beside a strut as high as the ring.
+    expect(texts?.children.map((child) => child.name)).toEqual(["label-line", "error"]);
+    const line = texts?.children.find((child) => child.name === "label-line");
+    expect(line?.children.map((child) => child.name)).toEqual(["label-row", "label-strut"]);
     expect(descendant(on, "label")?.properties.characters).toBe("Option");
     expect(descendant(on, "error")?.properties.characters).toBe("Fehler");
     const control = descendant(on, "control");

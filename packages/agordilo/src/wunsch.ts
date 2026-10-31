@@ -29,10 +29,14 @@ export interface Bewegung {
   stufe?: number;
 }
 
-/** The stops of a slider (Spec 035, V-3) and the choice past the last one. */
+/**
+ * The stops of a slider (Spec 035, V-3) and the choice past the last one; `zurueck` is the stop a
+ * step back from that choice lands on (Spec 036 Befund 1.2: from the pill to 2, not to the value the
+ * slider held).
+ */
 export interface Stufen {
   werte: number[];
-  danach?: { regler: string; wert: string };
+  danach?: { regler: string; wert: string; zurueck?: number };
   kialo?: string;
 }
 
@@ -174,7 +178,10 @@ export function proponoOf(
     }
     next = withRegler(next, path, clamped);
   };
-  /** One stop up or down (V-3): past the last stop the choice after it, back from it first. */
+  /**
+   * One stop up or down (V-3): past the last stop the choice after it; back from it to the stop the
+   * vocabulary names (Spec 036 Befund 1.2), else to the slider as it is.
+   */
   const step = (path: string, stufen: Stufen, direction: number) => {
     const regler = regloj.find((entry) => entry.path === path);
     if (regler === undefined) return;
@@ -192,6 +199,7 @@ export function proponoOf(
     }
     if (danach !== undefined && beyond) {
       next = withRegler(next, danach.regler, undefined);
+      if (danach.zurueck !== undefined) set(path, at(danach.zurueck));
       return;
     }
     const lower = [...stufen.werte].reverse().find((wert) => wert < value - 1e-9);

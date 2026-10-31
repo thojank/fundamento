@@ -1097,26 +1097,6 @@
           }
         }
       },
-      "surface": {
-        "fill": {
-          "selected": {
-            "false": {
-              "rest": {
-                "$type": "color",
-                "$value": "{color.palette.neutral.50}"
-              },
-              "focus": {
-                "$type": "color",
-                "$value": "{color.palette.neutral.50}"
-              },
-              "invalid": {
-                "$type": "color",
-                "$value": "{color.palette.neutral.50}"
-              }
-            }
-          }
-        }
-      },
       "border": {
         "color": {
           "invalid": {

@@ -52,9 +52,7 @@ const WANTED: Readonly<Record<string, { befund: string; match?: string }>> = {
       "glitilo",
       "kompletigilo",
       "listelektilo",
-      "markobutono",
       "plurelektilo",
-      "sxaltilo",
       "tekstareo",
     ].map((set) => [
       set,
@@ -73,6 +71,18 @@ const WANTED: Readonly<Record<string, { befund: string; match?: string }>> = {
     befund:
       "Abnahme #122: spinner and clear button in the control, the field 256 wide; M-2: the room of the status icon in the control (A-kampo-4).",
   },
+  // Spec 036 1.6: the label of a checkbox and a switch in the middle of its box or switch – its
+  // line as high as the ring, the label centred in it (every variant: the label lies lower, the
+  // variant as high as the ring); with M-2 above, the states warning and success added.
+  ...Object.fromEntries(
+    ["markobutono", "sxaltilo"].map((set) => [
+      set,
+      {
+        befund:
+          "M-2: the states warning and success added. Spec 036 1.6: the label in the middle of its box or switch.",
+      },
+    ]),
+  ),
   tekstareo: { befund: "Abnahme #122: the spinner in the control, the field 256 wide." },
   elektilo: {
     befund: "Abnahme #122: spinner, clear button, chevron in the control; the field 256 wide.",
@@ -89,9 +99,11 @@ const WANTED: Readonly<Record<string, { befund: string; match?: string }>> = {
   // Spec 035 2.3.1: the calendar in the trigger as large as the chevron of the elektilo (its glyph
   // bound to trigger.size, the trigger at least trigger.width), its vector painted as the ✕ –
   // every variant of the date picker shows it now (32 of 32 in the full picture).
+  // Spec 036 D-64: the month buttons of the open calendar show their chevrons – glyphs at the
+  // icon size of a small butono, vectors painted as the ✕ (the 16 variants with expanded=true).
   datelektilo: {
     befund:
-      "Abnahme #122: spinner, clear button, calendar in the control (the row gone); 256 wide. Spec 035 2.3.1: the calendar as large as the chevron, painted as the ✕.",
+      "Abnahme #122: spinner, clear button, calendar in the control (the row gone); 256 wide. Spec 035 2.3.1: the calendar as large as the chevron, painted as the ✕. Spec 036 D-64: the month buttons' chevrons sized and painted.",
   },
 };
 

@@ -44,7 +44,7 @@
           "fixed": "color.background.inverse"
         },
         "radius": {
-          "fixed": "radius.role.control"
+          "fixed": "radius.role.multiline"
         },
         "shadow": {
           "fixed": "elevation.shadow.overlay"
