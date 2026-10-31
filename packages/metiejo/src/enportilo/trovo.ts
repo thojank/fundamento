@@ -20,6 +20,8 @@ export interface Trovo {
   rolo?: "body" | "display" | "code";
   /** For a colour: declared as a background somewhere (Spec 036 Teil 4: the ground of the neutrals). */
   flaeche?: true;
+  /** For a colour: the background of html, body or :root – the page's own ground. */
+  seitengrund?: true;
   pezo: number;
   herkunft: Herkunft;
 }

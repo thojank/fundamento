@@ -22,6 +22,8 @@ interface Area {
   /** Percent of the colour found. */
   anteil: number;
   herkunft: TrovoHerkunft;
+  /** Painted on html, body or :root of a stylesheet: the page's own ground. */
+  seitengrund: boolean;
 }
 
 const round2 = (value: number) => Math.round(value * 100) / 100;
@@ -29,15 +31,16 @@ const comma = (value: number) => String(value).replace(".", ",");
 
 /** The colours of the reading, equal ones summed, with their share of the colour found. */
 function areasOf(eniro: SchrittEniro): Area[] {
-  const sums = new Map<string, { pezo: number; herkunft: TrovoHerkunft }>();
+  const sums = new Map<string, { pezo: number; herkunft: TrovoHerkunft; seitengrund: boolean }>();
   // A stylesheet says which colours paint a background; only those can be the ground or a surface
   // (its text colour is often named more often than its ground).
   const flaechen = eniro.trovoj.some((trovo) => trovo.kind === "farbo" && trovo.flaeche === true);
   for (const trovo of eniro.trovoj) {
     if (trovo.kind !== "farbo" || (flaechen && trovo.flaeche !== true)) continue;
     const hex = String(trovo.valoro).toLowerCase();
-    const entry = sums.get(hex) ?? { pezo: 0, herkunft: trovo.herkunft };
+    const entry = sums.get(hex) ?? { pezo: 0, herkunft: trovo.herkunft, seitengrund: false };
     entry.pezo += trovo.pezo;
+    if (trovo.seitengrund === true) entry.seitengrund = true;
     sums.set(hex, entry);
   }
   const total = [...sums.values()].reduce((sum, entry) => sum + entry.pezo, 0);
@@ -47,7 +50,15 @@ function areasOf(eniro: SchrittEniro): Area[] {
       const oklch = parseAgordoColor(hex);
       return oklch === undefined
         ? []
-        : [{ hex, oklch, anteil: (100 * entry.pezo) / total, herkunft: entry.herkunft }];
+        : [
+            {
+              hex,
+              oklch,
+              anteil: (100 * entry.pezo) / total,
+              herkunft: entry.herkunft,
+              seitengrund: entry.seitengrund,
+            },
+          ];
     })
     .sort((a, b) => b.anteil - a.anteil);
 }
@@ -76,12 +87,14 @@ export const NEUTRALTOENE: Schritt = {
   vorschlagOf: (eniro) => {
     const data = UEBERNAHME.neutraltoene;
     const calm = areasOf(eniro).filter((area) => area.oklch.c < data.chroma_bis);
-    const grund = calm[0];
-    if (grund === undefined || grund.anteil < data.grund_anteil_min)
+    // A stylesheet that paints html or body names its ground: that colour, whatever its share.
+    const seite = calm.find((area) => area.seitengrund);
+    const grund = seite ?? calm[0];
+    if (grund === undefined || (seite === undefined && grund.anteil < data.grund_anteil_min))
       return { schritt: "neutraltoene", offen: true, satz: OFFEN };
     const hell = grund.oklch.l >= data.hell_ab;
     const flaeche = calm
-      .slice(1)
+      .filter((area) => area !== grund)
       .find(
         (area) => area.anteil >= data.flaeche_anteil_min && area.oklch.l >= data.hell_ab === hell,
       );
