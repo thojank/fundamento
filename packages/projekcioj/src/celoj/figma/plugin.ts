@@ -6153,6 +6153,11 @@ async function applyComponents(variables, warnings) {
         }
       }
       const dateTexts = (monthText !== undefined ? [monthText] : []).concat(weekdayTexts).concat(cells.map((cell) => cell.text));
+      // Spec 035 2.3.2: a toggle shows its box first, its texts to its right, as on the web. The
+      // ring is placed first, the texts after it: every move goes towards the start – Figma
+      // counts the index of a move towards the end before it takes the child out (insertChild(1,
+      // texts) left the texts first), a move towards the start lands where it is told.
+      if (isToggle && field.children.indexOf(ring) !== 0) field.insertChild(0, ring);
       if (isToggle && column === undefined && field.children.indexOf(labelPlaced) !== 1) field.insertChild(1, labelPlaced);
       if (column !== undefined && field.children.indexOf(column) !== 1) field.insertChild(1, column);
       if (column !== undefined && column.children.indexOf(labelPlaced) !== 0) column.insertChild(0, labelPlaced);
