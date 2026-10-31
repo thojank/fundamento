@@ -39,6 +39,7 @@ export declare function mapText(
   path: string,
 ): { text: string; counts: Record<string, number> };
 export declare function mapIdentifiers(text: string): string;
+export declare function legacyIdentifiers(value: unknown): unknown;
 
 export interface Generator {
   readonly id: string;
