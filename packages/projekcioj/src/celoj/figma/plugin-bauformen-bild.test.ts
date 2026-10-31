@@ -99,9 +99,11 @@ const WANTED: Readonly<Record<string, { befund: string; match?: string }>> = {
   // Spec 035 2.3.1: the calendar in the trigger as large as the chevron of the elektilo (its glyph
   // bound to trigger.size, the trigger at least trigger.width), its vector painted as the ✕ –
   // every variant of the date picker shows it now (32 of 32 in the full picture).
+  // Spec 036 D-64: the month buttons of the open calendar show their chevrons – glyphs at the
+  // icon size of a small butono, vectors painted as the ✕ (the 16 variants with expanded=true).
   datelektilo: {
     befund:
-      "Abnahme #122: spinner, clear button, calendar in the control (the row gone); 256 wide. Spec 035 2.3.1: the calendar as large as the chevron, painted as the ✕.",
+      "Abnahme #122: spinner, clear button, calendar in the control (the row gone); 256 wide. Spec 035 2.3.1: the calendar as large as the chevron, painted as the ✕. Spec 036 D-64: the month buttons' chevrons sized and painted.",
   },
 };
 
