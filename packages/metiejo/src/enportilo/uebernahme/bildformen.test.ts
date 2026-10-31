@@ -79,4 +79,47 @@ describe("Spec 036 Teil 4: shapes in an image", () => {
     expect(dichteOf((kompakt_bis + luftig_ab) / 2)).toBe("ausgewogen");
     expect(dichteOf(luftig_ab)).toBe("luftig");
   });
+
+  it("smoothed edges as in a screenshot: the radius within half a pixel, the stage of a sharp button 0", () => {
+    const { leitfarbe } = GRUND_HELL;
+    for (const [radius, height, stufe] of [
+      [3, 46, 0],
+      [10, 32, 1],
+      [5, 40, 0.5],
+    ] as const) {
+      const bild = {
+        width: 400,
+        height: 400,
+        grund: "#ffffff",
+        glatt: true,
+        rechtecke: [{ x: 40, y: 60, width: 250, height, radius, farbe: leitfarbe }],
+      };
+      const [knopf] = analyse(bild).formen;
+      expect(knopf?.art, `${radius}/${height}`).toBe("knopf");
+      expect(Math.abs((knopf?.radius ?? 0) - radius), `${radius}/${height}`).toBeLessThanOrEqual(
+        0.5,
+      );
+      expect(stufeOf(knopf ?? { radius: 0, height: 1 }), `${radius}/${height}`).toBe(stufe);
+    }
+  });
+
+  it("an area over nearly the whole picture is the page, not a card", () => {
+    const { flaeche, leitfarbe } = GRUND_HELL;
+    const seite = { x: 10, y: 10, width: 380, height: 280, radius: 8, farbe: flaeche };
+    const inhalt = ["#3d3427", leitfarbe, "#2255aa"].map((farbe, index) => ({
+      x: 15,
+      y: 15 + index * 92,
+      width: 370,
+      height: 88,
+      radius: 0,
+      farbe,
+    }));
+    const formen = analyse({
+      width: 400,
+      height: 300,
+      grund: "#e5e5e5",
+      rechtecke: [seite, ...inhalt],
+    }).formen;
+    expect(formen.filter((forma) => forma.width >= 0.9 * 400)).toEqual([]);
+  });
 });

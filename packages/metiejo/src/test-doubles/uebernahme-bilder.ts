@@ -25,6 +25,8 @@ export interface Bild {
   height: number;
   grund: string;
   rechtecke: readonly Rechteck[];
+  /** Smoothed edges, as in a screenshot (not in the committed pictures). */
+  glatt?: boolean;
 }
 
 const rgbOf = (hex: string): [number, number, number] => [
@@ -33,10 +35,8 @@ const rgbOf = (hex: string): [number, number, number] => [
   Number.parseInt(hex.slice(5, 7), 16),
 ];
 
-/** Whether the centre of pixel (x, y) lies in the rounded rectangle. */
-function inside(rechteck: Rechteck, x: number, y: number): boolean {
-  const px = x + 0.5;
-  const py = y + 0.5;
+/** Whether the point (px, py) lies in the rounded rectangle. */
+function inside(rechteck: Rechteck, px: number, py: number): boolean {
   if (px < rechteck.x || py < rechteck.y) return false;
   if (px > rechteck.x + rechteck.width || py > rechteck.y + rechteck.height) return false;
   const r = rechteck.radius;
@@ -58,17 +58,35 @@ function shadowOf(rechteck: Rechteck, x: number, y: number): number {
   return SCHATTEN_ALPHA * (1 - (below - 1) / rows);
 }
 
-/** The picture as a PNG: the ground, then each shape with its shadow, later ones on top. */
+/** The colour at the point (px, py): the ground, then each shape with its shadow, later on top. */
+function colourAt(bild: Bild, px: number, py: number): [number, number, number] {
+  let colour = rgbOf(bild.grund);
+  for (const rechteck of bild.rechtecke) {
+    const alpha = shadowOf(rechteck, Math.floor(px), Math.floor(py));
+    if (alpha > 0)
+      colour = colour.map((channel) => Math.round(channel * (1 - alpha))) as typeof colour;
+    if (inside(rechteck, px, py)) colour = rgbOf(rechteck.farbe);
+  }
+  return colour;
+}
+
+/** Samples per pixel edge of a smoothed picture (4 × 4), as a browser smooths a rounded corner. */
+const GLATT = 4;
+
+/**
+ * The picture as a PNG. A pixel belongs to a shape when its centre does; a smoothed picture
+ * (`glatt`) mixes the colours of 4 × 4 points per pixel instead, like the edges of a screenshot.
+ */
 export function bildPng(bild: Bild): Buffer {
   return encodePng(bild.width, bild.height, (x, y) => {
-    let colour = rgbOf(bild.grund);
-    for (const rechteck of bild.rechtecke) {
-      const alpha = shadowOf(rechteck, x, y);
-      if (alpha > 0)
-        colour = colour.map((channel) => Math.round(channel * (1 - alpha))) as typeof colour;
-      if (inside(rechteck, x, y)) colour = rgbOf(rechteck.farbe);
-    }
-    return [...colour, 255];
+    if (bild.glatt !== true) return [...colourAt(bild, x + 0.5, y + 0.5), 255];
+    const sum = [0, 0, 0];
+    for (let i = 0; i < GLATT; i++)
+      for (let j = 0; j < GLATT; j++) {
+        const colour = colourAt(bild, x + (i + 0.5) / GLATT, y + (j + 0.5) / GLATT);
+        for (let k = 0; k < 3; k++) sum[k] = (sum[k] ?? 0) + (colour[k] ?? 0);
+      }
+    return [...sum.map((value) => Math.round(value / (GLATT * GLATT))), 255];
   });
 }
 
