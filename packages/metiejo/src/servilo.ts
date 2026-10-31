@@ -33,7 +33,14 @@ import {
 import { avertoOf, KONFIRMO_TEKSTO } from "./asistanto/averto.js";
 import { babili } from "./asistanto/babilo.js";
 import { asistantoScreen } from "./asistanto/ekrano.js";
-import { Laborejo } from "./asistanto/iloj.js";
+import {
+  aktionsWortOf,
+  istZweitfarbe,
+  Laborejo,
+  SEKUNDO_NOT_ACTION,
+  zweitfarbeAblehnungOf,
+  zweitfarbeAlsAktionOf,
+} from "./asistanto/iloj.js";
 import { Budget, CostLimitReached, type Fetch, type Provider } from "./asistanto/ki.js";
 import {
   appendKroniko,
@@ -53,13 +60,6 @@ import {
   type Vollstaendigkeit,
   vollstaendigkeitOf,
 } from "./asistanto/stato.js";
-import {
-  aktionsWortOf,
-  istZweitfarbe,
-  SEKUNDO_NOT_ACTION,
-  zweitfarbeAblehnungOf,
-  zweitfarbeAlsAktionOf,
-} from "./asistanto/zweitfarbe-aktion.js";
 import { buildOf, expertHinweis, standOf } from "./eksperto.js";
 import { EKSPORTO_CELOJ, type EksportoCelo, exportMarko } from "./eksporto.js";
 import { type Bildilo, playwrightBildilo } from "./enportilo/bildilo.js";

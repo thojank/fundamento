@@ -45,6 +45,15 @@ import {
 } from "./stato.js";
 import { zweitfarbeAlsAktionOf } from "./zweitfarbe-aktion.js";
 
+// What the assistant refuses of the Zweitfarbe, for the server's chat and Studio (Spec 036, 2.2).
+export {
+  aktionsWortOf,
+  istZweitfarbe,
+  SEKUNDO_NOT_ACTION,
+  zweitfarbeAblehnungOf,
+  zweitfarbeAlsAktionOf,
+} from "./zweitfarbe-aktion.js";
+
 export const STATUS_ROLLEN = ["success", "warning", "danger", "info"] as const;
 export const SCHRIFT_ROLLEN = ["display", "body", "code"] as const;
 

@@ -199,6 +199,14 @@ async function lauf(nummer: number): Promise<Record<string, number>> {
   console.log(
     `  Schlüssel in Kroniko oder Log: ${secrets.some((secret) => raw.includes(secret)) ? "JA – FEHLER" : "nein"}`,
   );
+  // Spec 036, Befund 2.2: the Zweitfarbe the images set, from the saved Agordo – or why none.
+  const { zweitfarbe } = JSON.parse(readFileSync(join(workdir, "pano", "agordo.json"), "utf8")) as {
+    zweitfarbe?: { farbe: string; herkunft?: { datei?: string; anteil?: number } };
+  };
+  const ohne = raw.match(/Keine Zweitfarbe: [^"\n]*/)?.[0];
+  console.log(
+    `  Zweitfarbe: ${zweitfarbe === undefined ? (ohne ?? "keine") : `${zweitfarbe.farbe} gesetzt${zweitfarbe.herkunft === undefined ? "" : ` (aus ${zweitfarbe.herkunft.datei ?? "dem Material"}, ${zweitfarbe.herkunft.anteil ?? "?"} % der gefundenen Farbe)`}`}`,
+  );
   rmSync(scratch, { recursive: true, force: true });
   return Object.fromEntries([
     ...Object.entries(schritte).map(([name, { ms }]) => [name, ms]),
