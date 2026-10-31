@@ -9,11 +9,16 @@ Changes of the published packages (the Make Kits `@fundamento/make-kit-<aspekto>
 - Neu, additiv: Die zwölf Felder (`fm-kampo`, `fm-tekstareo`, `fm-elektilo`, `fm-listelektilo`, `fm-plurelektilo`, `fm-kompletigilo`, `fm-datelektilo`, `fm-glitilo`, `fm-elekto`, `fm-markobutono`, `fm-sxaltilo`, `fm-alsxutilo`) haben die Prop `label`. `label="…"` ist eine sichtbare Beschriftung: Der Text steht dort, wo der Text des Elements stünde, und benennt das Feld; wo beides steht, gewinnt der Text des Elements. Keine Prop aus 0.2.0 ändert ihre Bedeutung (Arkitekturo-Vertrag); ein Feld ohne `label` sieht aus wie bisher.
   Wer `label` bisher als nicht deklariertes Attribut an ein Feld schrieb (in 0.2.0 ohne Wirkung, in HTML wie in React), sieht diesen Text jetzt als Beschriftung, solange das Element keinen eigenen Text hat; wer das nicht will, entfernt das Attribut.
   (Spec 029 ②b-1b und Spec 035 2.2, D-04 zur Bestätigung durch den Maintainer.)
+- Veraltet: `size="large"` an `fm-elekto`, `fm-markobutono` und `fm-sxaltilo` gibt es ein Release lang nur noch als Alias auf `medium` – das Element zeichnet `medium` und warnt in der Konsole, `check_usage` warnt (`prop-value-deprecated`), der React-Typ nimmt den Wert weiter an. Danach entfällt er; bitte `size="medium"` schreiben.
+  (Spec 029 ②a-2, umgesetzt in Spec 036 Teil 5 ②b-2.)
+- Neu, additiv (Spec 036 Teil 5 ②b-2): `readonly` an `fm-elektilo` und `fm-markobutono`, `label-side` an `fm-sxaltilo`, `max-suggestions` an `fm-kompletigilo`, `max-files` an `fm-alsxutilo`, `max-length` mit Zähler an `fm-tekstareo`, `summary="labels"` an `fm-plurelektilo`, `size` an `fm-listelektilo`, `fm-plurelektilo` und `fm-datelektilo`, `unit` an `fm-kampo`. Ohne diese Attribute sieht und verhält sich jedes Element wie bisher.
 
 ### Hinweis für MCP-Clients
 
 - Breaking für Clients, die das Kurzprofil lesen: `get_ero` mit `brief` nennt Boolean-Props, die keine Achse sind, jetzt nur mit ihrem Namen in `flags`; `props` enthält nur noch die übrigen Props mit Typ. Wer Boolean-Props bisher in `props` suchte (etwa `disabled` oder `loading`), liest sie jetzt aus `flags`.
   (Spec 029 ②b-1, Entscheidung des Maintainers vom 2026-10-29; das Ausgabeschema von `get_ero` kennt `flags`.)
+- Additiv: Eine Achse im Kurzprofil von `get_ero` kann `deprecated` tragen – Werte, die ein Release lang noch angenommen werden, je mit dem Wert, für den sie stehen (`size` von elekto, markobutono, sxaltilo: `{ "large": "medium" }`). `check_usage` meldet einen solchen Wert als Warnung `prop-value-deprecated`.
+  (Spec 036 Teil 5 ②b-2.)
 
 ## 0.2.0
 
