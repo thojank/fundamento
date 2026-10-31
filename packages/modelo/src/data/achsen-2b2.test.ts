@@ -344,3 +344,24 @@ describe("②b-2 A-listelektilo-2, A-plurelektilo-2, A-datelektilo-2: size", () 
     expect(tokensOf(brief)).toBeLessThan(750);
   });
 });
+
+/** A-kampo-1: the unit of a number as text, `unit`, inside the field after the value. */
+describe("②b-2 A-kampo-1: unit", () => {
+  it("kampo: unit a string, the last prop, only with kind number; heard as the description", () => {
+    const { skemo } = entryOf("kampo");
+    expect(skemo.props.at(-1)).toMatchObject({ name: "unit", kind: "string" });
+    expect(skemo.constraints).toContainEqual(
+      expect.objectContaining({ when: { "prop:unit": "filled" }, allowed: { kind: ["number"] } }),
+    );
+    expect(skemo.a11y.description).toContain("prop:unit");
+    // Inside the border, right after the value: the innermost part at the end of the field.
+    expect(skemo.trailing?.[0]).toBe("unit");
+    expect(skemo.parts.unit?.color).toEqual({ fixed: "color.text.muted" });
+  });
+
+  it("kampo: the brief names unit and stays under 750", () => {
+    const brief = briefOf(entryOf("kampo"));
+    expect(brief.props).toContainEqual({ name: "unit", type: "string" });
+    expect(tokensOf(brief)).toBeLessThan(750);
+  });
+});

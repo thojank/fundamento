@@ -272,3 +272,32 @@ test.describe("②b-2 A-listelektilo-2, A-plurelektilo-2, A-datelektilo-2: size"
     });
   }
 });
+
+test.describe("②b-2 A-kampo-1: unit", () => {
+  test("a number shows its unit inside the field after the value and is described by it", async ({
+    page,
+  }) => {
+    await serve(page, out, '<fm-kampo kind="number" value="12" unit="kg">Gewicht</fm-kampo>');
+    const host = page.locator("fm-kampo");
+    const unit = host.locator('[part="unit"]');
+    await expect(unit).toBeVisible();
+    await expect(unit).toHaveText("kg");
+    const placed = await host.evaluate((element) => {
+      const root = element.shadowRoot as ShadowRoot;
+      const control = (
+        root.querySelector('[part="control"]') as HTMLElement
+      ).getBoundingClientRect();
+      const mark = (root.querySelector('[part="unit"]') as HTMLElement).getBoundingClientRect();
+      return mark.left >= control.left && mark.right <= control.right;
+    });
+    expect(placed).toBe(true);
+    await expect(
+      host.getByRole("spinbutton").or(host.getByRole("textbox")),
+    ).toHaveAccessibleDescription(/kg/);
+  });
+
+  test("without unit nothing is shown", async ({ page }) => {
+    await serve(page, out, '<fm-kampo kind="number" value="12">Gewicht</fm-kampo>');
+    await expect(page.locator("fm-kampo").locator('[part="unit"]')).toBeHidden();
+  });
+});

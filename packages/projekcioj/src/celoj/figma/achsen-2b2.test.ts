@@ -62,3 +62,9 @@ describe("②b-2 A-listelektilo-2, A-plurelektilo-2, A-datelektilo-2 in Figma: s
     expect([...sizes]).toEqual(["small", "medium", "large"]);
   });
 });
+
+describe("②b-2 A-kampo-1 in Figma: unit a text of the set", () => {
+  it("kampo: unit is a TEXT property", () => {
+    expect(setOf("kampo").properties.unit).toBe("TEXT");
+  });
+});
