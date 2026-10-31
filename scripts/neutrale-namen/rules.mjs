@@ -349,7 +349,8 @@ export function legacyIdentifiers(value, parentKey, grandKey) {
  * Generators whose outputs are regenerated instead of text-replaced (technical spec, Teil 6). A
  * generator runs only when its script exists in the checkout; `outputs` are path prefixes the
  * text rules leave alone while the generator runs. `build` comes before the Ero-Tokens because
- * their CLI runs from `dist`, which must carry the new extension key.
+ * their CLI runs from `dist`, which must carry the new extension key; the Agordilo's fixtures come
+ * last, derived from the structure with the new Ero-Tokens.
  */
 export const GENERATORS = Object.freeze([
   {
@@ -371,6 +372,16 @@ export const GENERATORS = Object.freeze([
     manifest: "package.json",
     script: "vortaro:ero-tokenoj",
     command: ["pnpm", "vortaro:ero-tokenoj"],
+    outputs: [],
+  },
+  {
+    // The Agordilo's derived fixtures name the fingerprint of the structure, and the stage-1
+    // checksums cover sets with the extension key: derived again from the renamed structure
+    // (S36-5.2). Runs from `dist`, after `build`, and after the Ero-Tokens it derives from.
+    id: "agordilo-fixtures",
+    manifest: "packages/agordilo/package.json",
+    script: "fixtures",
+    command: ["pnpm", "--filter", "@fundamento/agordilo", "fixtures"],
     outputs: [],
   },
 ]);
