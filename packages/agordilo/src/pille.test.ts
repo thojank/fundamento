@@ -79,9 +79,11 @@ describe("a relative wish moves by one visible stop of the form (V-3)", () => {
 
   it("names the stops of the form as data: eckig 0, leicht 0.5, rund 1, ganz rund 2, then Pille", () => {
     expect(wuensche.stufen?.["form.radius"]?.werte).toEqual([0, 0.5, 1, 2]);
+    // Spec 036 Befund 1.2: one stop back from the pill is 2 (zurueck).
     expect(wuensche.stufen?.["form.radius"]?.danach).toEqual({
       regler: BEDIENFORM_PATH,
       wert: "pille",
+      zurueck: 2,
     });
   });
 
