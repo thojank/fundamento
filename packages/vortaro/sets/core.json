@@ -18764,6 +18764,43 @@
           }
         }
       },
+      "summary": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.navigation.text.rest}",
+          "$description": "pagxigilo: summary.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M6A2FN6828DXQPCP2YDHEG54",
+              "role": "ero"
+            }
+          }
+        },
+        "typography": {
+          "size": {
+            "small": {
+              "$type": "typography",
+              "$value": "{typography.label.2}",
+              "$description": "pagxigilo: summary.typography when size=small (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "com.ciferecigo.fundamento": {
+                  "id": "tok_01M6A2FN69FJ08QDTHH4QZ2CPW"
+                }
+              }
+            },
+            "medium": {
+              "$type": "typography",
+              "$value": "{typography.label.1}",
+              "$description": "pagxigilo: summary.typography when size=medium (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "com.ciferecigo.fundamento": {
+                  "id": "tok_01M6A2FN69FJ08QDTHH4QZ2CPX"
+                }
+              }
+            }
+          }
+        }
+      },
       "prev": {
         "size": {
           "size": {

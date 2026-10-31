@@ -48,6 +48,8 @@ describe("pagxigilo in the repo Modelo (section ①, G1, G2)", () => {
       ["siblings", "number", false, 1],
       // Spec 036 Teil 5 ②b-2 (A-pagxigilo-2): small and medium, the last prop.
       ["size", "enum", false, "medium"],
+      // Spec 036 Teil 5 ②b-2 (A-pagxigilo-1): what stands between the arrows.
+      ["summary", "enum", false, "pages"],
     ]);
     expect(skemo?.props.find((prop) => prop.name === "mode")?.values).toEqual(["button", "link"]);
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled"]);
@@ -68,6 +70,8 @@ describe("pagxigilo in the repo Modelo (section ①, G1, G2)", () => {
       "item",
       "border",
       "ellipsis",
+      // Spec 036 Teil 5 ②b-2 (A-pagxigilo-1): the place between the arrows.
+      "summary",
       "prev",
       "next",
       "box",
@@ -120,6 +124,11 @@ describe("pagxigilo in the repo Modelo (section ①, G1, G2)", () => {
         "prev-name": { de: "Vorherige Seite", en: "Previous page" },
         "next-name": { de: "Nächste Seite", en: "Next page" },
         "items-name": { de: "Seite", en: "Page" },
+        // Spec 036 Teil 5 ②b-2 (A-pagxigilo-1).
+        "summary-count": {
+          de: "Seite {page} von {total-pages}",
+          en: "Page {page} of {total-pages}",
+        },
       },
     });
   });
@@ -172,7 +181,7 @@ describe("the Uzo of the pagxigilo (section ①, G2)", () => {
   it("the brief names mode and current as axes, page and total-pages as duties, and stays under 750", () => {
     if (pagxigilo === undefined) throw new Error("missing");
     const brief = briefOf(pagxigilo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["mode", "size", "current"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["mode", "size", "summary", "current"]);
     expect(brief.required).toEqual({ props: ["page", "total-pages"], slots: [] });
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
   });

@@ -82,8 +82,8 @@ describe("Spec 029 ① 5: the foundation pages", () => {
     // (A-*-2: 17 tokens become 51, +34); the unit of the kampo (A-kampo-1, +4). S36-4.2: the sizes
     // of ikono, signeto, avataro, pagxigilo, langetaro and dialogo (A-*-2: +30, −9 fixed tokens now
     // keyed by size); the looks of apartigilo, spuro, karto, avataro and avizo (+27, −13);
-    // markdovido, plenstato, tabelo, teksto (+9, −3).
-    expect(tokenoj.length).toBe(1973);
+    // markdovido, plenstato, tabelo, teksto (+9, −3); the summary of the pagxigilo (+3).
+    expect(tokenoj.length).toBe(1976);
     const levels = new Set(tokenoj.map((token) => token.ebeno));
     expect(levels).toEqual(new Set(["grundlage", "rolle", "ero"]));
     const text = tokenoj.find((token) => token.name === "color.text.default");
