@@ -105,6 +105,8 @@ test.describe("fm-glitilo behaviour", () => {
       "thumb",
       "thumb",
       "max-label",
+      // Spec 036 Teil 5 ②b-2 (A-glitilo-1): the value as text, hidden without readout text.
+      "readout",
       "number",
       "spinner",
       "help",

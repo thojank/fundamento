@@ -369,6 +369,9 @@ const sliderStructure = (disables: boolean): string =>
     ':host(:dir(rtl)) :where([part="thumb"]) { transform: translateX(50%); }',
     ':where([part="thumb"]:focus:not(:focus-visible)) { outline-width: 0; }',
     ':where([part="thumb"][hidden], [part="number"][hidden]) { display: none; }',
+    // Spec 036 Teil 5 ②b-2 (A-glitilo-1): the value as text beside the track, on one line.
+    ':where([part="readout"]) { flex: none; white-space: nowrap; }',
+    ':where([part="readout"][hidden]) { display: none; }',
     ...(disables ? [':where([part="thumb"][aria-disabled="true"]) { cursor: not-allowed; }'] : []),
     ':where([part="min-label"], [part="max-label"]) { white-space: nowrap; }',
     ':where([part="number"]) { flex: none; inline-size: 0; }',

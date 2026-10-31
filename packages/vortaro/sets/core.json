@@ -11800,6 +11800,29 @@
           }
         }
       },
+      "readout": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}",
+          "$description": "glitilo: readout.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M6A40RAFZ03K5NH9VTY381D9",
+              "role": "ero"
+            }
+          }
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.label.1}",
+          "$description": "glitilo: readout.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M6A40RAG8VKFRAVBC2EJ73E7"
+            }
+          }
+        }
+      },
       "number": {
         "width": {
           "field": {

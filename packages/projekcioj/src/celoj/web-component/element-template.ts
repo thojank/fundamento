@@ -454,7 +454,7 @@ function sliderMarkup(slots: NonNullable<ElementNames["slots"]>): string {
   const texts = textsMarkup(
     slots.filter((slot) => slot.name !== "min-label" && slot.name !== "max-label"),
   );
-  return `<div part="field"><span part="label" id="label"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></span><div part="row"><span part="min-label" id="min-label"><slot name="min-label"></slot></span><div part="track" id="control"><div part="fill"></div><div part="thumb" id="thumb-start" role="slider" tabindex="0" aria-labelledby="label from"></div><div part="thumb" id="thumb-end" role="slider" tabindex="0" hidden></div></div><span part="max-label" id="max-label"><slot name="max-label"></slot></span><fm-kampo part="number" kind="number" hidden><span id="number-label"></span></fm-kampo>${SPINNER}</div>${texts}<span id="from" hidden></span><span id="to" hidden></span><span id="fm-texts" hidden></span></div>`;
+  return `<div part="field"><span part="label" id="label"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></span><div part="row"><span part="min-label" id="min-label"><slot name="min-label"></slot></span><div part="track" id="control"><div part="fill"></div><div part="thumb" id="thumb-start" role="slider" tabindex="0" aria-labelledby="label from"></div><div part="thumb" id="thumb-end" role="slider" tabindex="0" hidden></div></div><span part="max-label" id="max-label"><slot name="max-label"></slot></span><span part="readout" aria-hidden="true" hidden></span><fm-kampo part="number" kind="number" hidden><span id="number-label"></span></fm-kampo>${SPINNER}</div>${texts}<span id="from" hidden></span><span id="to" hidden></span><span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -1798,6 +1798,13 @@ ${
       flags = { badInput: true };
       const reason = this.#dateTyped.reason;
       if (own === "") message = (TEXTS[reason]?.[this.#lingvo()] ?? TEXTS[reason]?.en ?? "").replace("{example}", this.#dateFormat(this.#dateToday()));
+    } else if (kind === "datepicker" && this.#dateSpan() !== "") {
+      // Spec 036 Teil 5 ②b-2 (A-datelektilo-1): a range shorter than min-span or longer than
+      // max-span – the Modelo's words with the number of days.
+      const span = this.#dateSpan();
+      flags = span === "min-span" ? { rangeUnderflow: true } : { rangeOverflow: true };
+      const key = span + "-invalid";
+      if (own === "") message = (TEXTS[key]?.[this.#lingvo()] ?? TEXTS[key]?.en ?? "").replace("{" + span + "}", String(this.getAttribute(span) ?? ""));
     } else `
         : ""
     }if (required && text === "") {
@@ -4639,6 +4646,24 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
     }
   }
 
+  /** Spec 036 Teil 5 ②b-2 (A-datelektilo-1): the bound a chosen range breaks, min-span or max-span, else "". */
+  #dateSpan(): "" | "min-span" | "max-span" {
+    if (!this.#dateRanged()) return "";
+    const { start, end } = this.#dateValues();
+    if (start === undefined || end === undefined) return "";
+    const days = Math.round((Date.parse(end + "T00:00:00Z") - Date.parse(start + "T00:00:00Z")) / 86400000) + 1;
+    const bound = (name: string) => {
+      const raw = this.getAttribute(name);
+      const number = raw === null || raw.trim() === "" ? 0 : Number(raw);
+      return Number.isFinite(number) && number > 0 ? number : undefined;
+    };
+    const least = bound("min-span");
+    const most = bound("max-span");
+    if (least !== undefined && days < least) return "min-span";
+    if (most !== undefined && days > most) return "max-span";
+    return "";
+  }
+
   /** Takes a day: the value (single), or the start and then the end of a range — an end before the start starts anew. */
   #calendarPick(iso: string): void {
     if (this.#dateDisabled(iso) || this.propValue("disabled") === true || this.propValue("readonly") === true) return;
@@ -5568,10 +5593,26 @@ ${
       const end = share(ranged ? (values[1] ?? max) : (values[0] ?? min));
       control.style.setProperty("--fm-fill-start", String(start) + "%");
       control.style.setProperty("--fm-fill-size", String(Math.max(0, end - start)) + "%");
+      // Spec 036 Teil 5 ②b-2 (A-glitilo-1): readout field is what field said; readout text shows
+      // the value (or the range) beside the track, not heard again (the thumbs say it).
+      const readout = String(this.propValue("readout") ?? "none");
+      const fielded = this.propValue("field") === true || readout === "field";
+      if (root.getAttribute("data-field") !== String(fielded)) root.setAttribute("data-field", String(fielded));
+      const said = shadow?.querySelector('[part="readout"]');
+      if (said instanceof HTMLElement) {
+        const text =
+          readout !== "text" || values[0] === undefined
+            ? ""
+            : ranged && values[1] !== undefined
+              ? format.format(values[0]) + " – " + format.format(values[1])
+              : format.format(values[0]);
+        if (said.textContent !== text) said.textContent = text;
+        if (said.hidden !== (text === "")) said.hidden = text === "";
+      }
       const number = shadow?.querySelector('[part="number"]');
       if (number instanceof HTMLElement) {
         // The field beside the track shows one value (Spec 025 ①, plan ① Abweichung): hidden with range.
-        number.hidden = this.propValue("field") !== true || ranged;
+        number.hidden = !fielded || ranged;
         number.setAttribute("min", String(min));
         number.setAttribute("max", String(max));
         number.setAttribute("step", String(this.#sliderBounds()[2]));
@@ -5652,8 +5693,10 @@ ${
     const ranged = this.propValue("range") === true;
     const values = this.#sliderValues();
     let next = this.#sliderClamp(raw);
-    if (ranged && index === 0 && values[1] !== undefined) next = Math.min(next, values[1]);
-    if (ranged && index === 1 && values[0] !== undefined) next = Math.max(next, values[0]);
+    // Spec 036 Teil 5 ②b-2 (A-glitilo-1): with min-distance the thumbs stop that far apart.
+    const gap = ranged ? Math.max(0, Number(this.getAttribute("min-distance")) || 0) : 0;
+    if (ranged && index === 0 && values[1] !== undefined) next = Math.min(next, values[1] - gap);
+    if (ranged && index === 1 && values[0] !== undefined) next = Math.max(next, values[0] + gap);
     const name = ranged ? (index === 0 ? "value-start" : "value-end") : "value";
     this.#reported = true;
     if (values[index] !== next) {
