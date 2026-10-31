@@ -64,9 +64,18 @@ describe("writers write only the new identifiers (Spec 036 6.3)", () => {
     );
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    const text = JSON.stringify(result.files);
-    expect(text).toContain(`"${NEW_NAMES.extensionKey}"`);
-    expect(oldIn(text)).toEqual([]);
+    const { modeloJson, schemaJson, rezolvojJson, vortaro } = result.files;
+    const texts = [
+      modeloJson,
+      schemaJson,
+      rezolvojJson,
+      ...Object.values(vortaro).flatMap(Object.values),
+    ];
+    for (const text of texts) expect(oldIn(text)).toEqual([]);
+    const schema = JSON.parse(schemaJson) as {
+      $defs: { TokenExtensions: { properties: Record<string, unknown> } };
+    };
+    expect(Object.keys(schema.$defs.TokenExtensions.properties)).toEqual([NEW_NAMES.extensionKey]);
   });
 
   it("the Agordilo's derived packages in the fixtures (its committed output) name only the new identifiers", () => {
