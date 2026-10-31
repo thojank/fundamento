@@ -1937,6 +1937,33 @@ test.describe("the verdict of M5 (Nachlese 12 ③)", () => {
   });
 });
 
+// Spec 036 Befund 1.7 (Spec 035 B-5.1-2): G5 was red on a slow runner – run 41140304922, attempt
+// 2, job 124356708815: „Skripte blockieren 61 ms in einem Frame (Grenze 50 ms)“. The reference
+// load of the same attempt (ableitung-kalibrierung.tsv) says it was a slow runner. Replayed with the
+// values of that log: the verdict G5 takes – the blocks of 50 changes, the longest work of scripts in
+// one frame and the reference load beside them – is judged on the runner of the reference, as the
+// derivation of M5 is; the limit stays 50 ms.
+test.describe("the verdict of G5 on the runner of the reference (Spec 036 Befund 1.7)", () => {
+  const zeros = (count: number) => Array.from({ length: count }, () => 0);
+  const versuche = kalibrierungLesen(
+    readFileSync(new URL("./ableitung-kalibrierung.tsv", import.meta.url), "utf8"),
+  );
+  const langsam = versuche.find(
+    (versuch) => versuch.lauf === "41140304922" && versuch.versuch === 2,
+  );
+
+  test("a slow runner like run 41140304922, attempt 2: scripts of 61 ms in one frame stay green", () => {
+    expect(langsam?.klasse).toBe("langsam");
+    const messung = {
+      perChange: [...zeros(49), 61],
+      scriptLongest: 61,
+      referenz: langsam?.referenz ?? 0,
+    };
+    const urteil = m5Urteil(messung);
+    expect(urteil.gruende).toEqual([]);
+  });
+});
+
 // Nachlese 12 ④: the KontrastParoj of a combination are stored once and referred to from every
 // density, viewport and motion; the table of the section is the same in each of them.
 test("the KontrastParoj of one combination are the same table in every density and motion (Nachlese 12 ④)", async ({
