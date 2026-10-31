@@ -1938,10 +1938,16 @@ const toggleStructure = (
   wraps: boolean,
   texts: boolean,
   marked: boolean,
+  sided = false,
 ): string =>
   [
     ":host { display: inline-block; vertical-align: middle; }",
     `:where([part="field"]) { display: inline-flex; align-items: ${texts ? "flex-start" : "center"}; }`,
+    // Spec 036 Teil 5 ②b-2 (A-sxaltilo-1): label-side start puts the label before the control, in
+    // the writing direction (a row reversed, so right-to-left mirrors it too); where the Skemo has it.
+    ...(sided
+      ? [':where([part="field"][data-label-side="start"]) { flex-direction: row-reverse; }']
+      : []),
     ...(texts ? [':where([part="field"]) > div { display: flex; flex-direction: column; }'] : []),
     ':where([part="control"]) { display: inline-flex; align-items: center; box-sizing: border-box; margin: 0; padding: 0; border-style: solid; cursor: pointer; appearance: none; transition-property: background-color, border-color; }',
     ':where([part="indicator"]) { display: block; flex: none; transition-property: background-color; }',
@@ -2296,6 +2302,9 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
                                                             ),
                                                             skemo.parts["required-mark"] !==
                                                               undefined,
+                                                            skemo.props.some(
+                                                              (prop) => prop.name === "label-side",
+                                                            ),
                                                           )
                                                         : structure(
                                                             uzo?.layout.wrap === "with-text",
@@ -2675,7 +2684,8 @@ export function stylesheetInventory(moduleText: string): ParityItem {
       )) {
         // Spec 029 ②b-1b M-2: data-status is the field's state (read above), message-position
         // places the message (no axis of the Skemo, no look of its own): neither is a keyed prop.
-        if (name === "status" || name === "message-position") continue;
+        // Spec 036 Teil 5 ②b-2 (A-sxaltilo-1): label-side places the label, as message-position.
+        if (name === "status" || name === "message-position" || name === "label-side") continue;
         const values = props.get(name) ?? [];
         if (!values.includes(value)) values.push(value);
         props.set(name, values);

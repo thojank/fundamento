@@ -72,6 +72,16 @@
         ],
         "default": "below",
         "description": "Spec 029 ②b-1b M-2: where the message and the error stand – below the field with the space of the field, or joined to it without that space. Never only in a tooltip: the message must be seen (error-not-color-only, error-says-what-to-do)."
+      },
+      {
+        "name": "label-side",
+        "kind": "enum",
+        "values": [
+          "start",
+          "end"
+        ],
+        "default": "end",
+        "description": "Spec 029 ②a (A-sxaltilo-1): the side of the label in the writing direction – end after the switch, as before, or start before it (a list of settings with their switches in one column at the end). Layout, no token: it keys no part; right-to-left mirrors it."
       }
     ],
     "states": [
