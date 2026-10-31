@@ -4,6 +4,12 @@ Changes of the published packages (the Make Kits `@fundamento/make-kit-<aspekto>
 
 ## Unveröffentlicht
 
+### Hinweis für Nutzer
+
+- Neu, additiv: Die zwölf Felder (`fm-kampo`, `fm-tekstareo`, `fm-elektilo`, `fm-listelektilo`, `fm-plurelektilo`, `fm-kompletigilo`, `fm-datelektilo`, `fm-glitilo`, `fm-elekto`, `fm-markobutono`, `fm-sxaltilo`, `fm-alsxutilo`) haben die Prop `label`. `label="…"` ist eine sichtbare Beschriftung: Der Text steht dort, wo der Text des Elements stünde, und benennt das Feld; wo beides steht, gewinnt der Text des Elements. Keine Prop aus 0.2.0 ändert ihre Bedeutung (Arkitekturo-Vertrag); ein Feld ohne `label` sieht aus wie bisher.
+  Wer `label` bisher als nicht deklariertes Attribut an ein Feld schrieb (in 0.2.0 ohne Wirkung, in HTML wie in React), sieht diesen Text jetzt als Beschriftung, solange das Element keinen eigenen Text hat; wer das nicht will, entfernt das Attribut.
+  (Spec 029 ②b-1b und Spec 035 2.2, D-04 zur Bestätigung durch den Maintainer.)
+
 ### Hinweis für MCP-Clients
 
 - Breaking für Clients, die das Kurzprofil lesen: `get_ero` mit `brief` nennt Boolean-Props, die keine Achse sind, jetzt nur mit ihrem Namen in `flags`; `props` enthält nur noch die übrigen Props mit Typ. Wer Boolean-Props bisher in `props` suchte (etwa `disabled` oder `loading`), liest sie jetzt aus `flags`.
