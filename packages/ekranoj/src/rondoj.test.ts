@@ -296,7 +296,7 @@ describe("token limit (AC-9, D-20)", () => {
     expect(okazoj[0]).toBe("takso");
     expect(okazoj.indexOf("takso")).toBeLessThan(okazoj.indexOf("send"));
     expect(linioj[0]).toBe(takso?.satz);
-    expect(takso).toMatchObject({ ekranoj: 2, rondoj: 3, planPeto: true, tokenoj: 245_000 });
+    expect(takso).toMatchObject({ ekranoj: 2, rondoj: 3, planPeto: true, tokenoj: 425_000 });
     expect(rezulto.takso).toEqual(takso);
   });
 });

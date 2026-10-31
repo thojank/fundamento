@@ -16,10 +16,23 @@ import { respondo, SkriptaModelo } from "./test-doubles/chat.js";
 import type { ChatModel } from "./tipoj.js";
 
 describe("estimate (D-20)", () => {
-  it("names its constants with the Reihe K medians", () => {
+  it("names its constants: F from the acceptance runs of S037-10, 0 and the plan from Reihe K", () => {
     expect([TOKENOJ_EKRANO_RONDO_F, TOKENOJ_EKRANO_RONDO_0, TOKENOJ_PLANO]).toEqual([
-      40_000, 2_000, 5_000,
+      70_000, 2_000, 5_000,
     ]);
+  });
+
+  it("covers what the acceptance run komuna spent on a plan and three screen-rounds (S037-10 Befund 2)", () => {
+    // abnahme-komuna: plan request + 3 built screen-rounds = 210 402 tokens in + 2 995 out.
+    const gemessen = 210_402 + 2_995;
+    const takso = taksiKostojn({
+      ekranoj: 1,
+      rondoj: 3,
+      varianto: "F",
+      planPeto: true,
+      maksTokenoj: 250_000,
+    });
+    expect(takso.tokenoj).toBeGreaterThanOrEqual(gemessen);
   });
 
   it("counts screens × rounds × tokens + the plan request and prices them with kostoOf", () => {
@@ -33,14 +46,14 @@ describe("estimate (D-20)", () => {
     expect(takso).toMatchObject({
       ekranoj: 3,
       rondoj: 3,
-      tokenoj: 365_000,
+      tokenoj: 635_000,
       superasLimon: true,
       maksTokenoj: 250_000,
     });
-    expect(takso.usd).toBeCloseTo(0.073, 10);
+    expect(takso.usd).toBeCloseTo(0.127, 10);
     expect(takso.satz).toContain("3 Screens × 3 Runden (Variante F) + Plananfrage");
-    expect(takso.satz).toContain("365.000 Tokens");
-    expect(takso.satz).toContain("0,073 $");
+    expect(takso.satz).toContain("635.000 Tokens");
+    expect(takso.satz).toContain("0,127 $");
     expect(takso.satz).toContain("Teilergebnis");
   });
 

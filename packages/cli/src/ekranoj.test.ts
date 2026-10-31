@@ -250,6 +250,9 @@ describe("fm ekranoj: nothing starts before the input, the model and the user ag
     const run = await a.kuri([FRAZO, "--ekranoj", "liste,detail"]);
     expect(run.code).toBe(2);
     expect(run.stdout).toContain("Schätzung: 2 Screens × 3 Runden");
+    // 2 × 3 × 70 000 + 5 000 (S037-10 Befund 2): above the acceptance slice, said before the start.
+    expect(run.stdout).toContain("≈ 425.000 Tokens");
+    expect(run.stdout).toContain("über der Grenze von 250.000 Tokens");
     expect(run.stdout).toContain("$");
     expect(run.stderr).toContain("--ja");
     expect(a.babilo.petoj).toHaveLength(0);
