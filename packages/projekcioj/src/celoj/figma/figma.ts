@@ -199,6 +199,8 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   // Spec 036 Teil 5 ②b-2 (A-pagxigilo-1): the summary of a pagination stands for summary count or
   // compact only, a property in Figma; the set shows the pages.
   "pagxigilo:summary": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  // Spec 036 Teil 5 ②b-2 (A-atributlisto-1): the button for the rest stands with max-entries only.
+  "atributlisto:more": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
   "listelektilo:icon": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
   "listelektilo:description": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
   "plurelektilo:filter": "jug_01M5H5HFYHBZB8R9TVTJE9874J",

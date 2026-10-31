@@ -2622,6 +2622,9 @@ describe("Figma plan for the atributlisto (Spec 011 ④)", () => {
     expect(set?.properties).toEqual({
       layout: ["columns", "stacked", "auto"],
       label: "TEXT",
+      // Spec 036 Teil 5 ②b-2 (A-atributlisto-1/3): properties, no variant.
+      "max-entries": "NUMBER",
+      expanded: "BOOLEAN",
       state: ["rest"],
     });
     expect(set?.variants).toHaveLength(3);
@@ -2658,6 +2661,10 @@ describe("Figma plan for the atributlisto (Spec 011 ④)", () => {
       "list.gap": "spacing/large",
       "box.gap": "spacing/small",
       "box.inline-padding": "spacing/large",
+      // Spec 036 Teil 5 ②b-2 (A-atributlisto-1): the button for the rest, bound, not drawn.
+      "more.fill": "color/action/tertiary/rest",
+      "more.color": "color/action/tertiary/text",
+      "more.typography": "typography/label/2",
     });
     expect(variant("stacked")?.bindings["box.inline-padding"]).toBe("spacing/xsmall");
     expect(variant("auto")?.bindings["box.inline-padding"]).toBe("spacing/large");
@@ -2667,7 +2674,11 @@ describe("Figma plan for the atributlisto (Spec 011 ④)", () => {
       "box.inline-padding",
       "list.gap",
     ]);
-    expect(columns?.notDrawn).toEqual({});
+    // Spec 036 Teil 5 ②b-2 (A-atributlisto-1): the button for the rest is released (Jugxo).
+    expect(columns?.notDrawn).toEqual({
+      "more.color": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+      "more.fill": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+    });
     expect(columns?.hidden).toBeUndefined();
     expect(columns?.stroke).toBeUndefined();
     expect(columns?.font).toBeUndefined();
@@ -2679,6 +2690,8 @@ describe("Figma plan for the atributlisto (Spec 011 ④)", () => {
     expect(items.atributlisto?.props).toEqual({
       layout: ["columns", "stacked", "auto"],
       label: ["string"],
+      "max-entries": ["number"],
+      expanded: ["boolean"],
     });
     expect(items.atributlisto?.states).toEqual(["rest"]);
     expect(items.atributlisto?.values["term.color@layout=columns,state=rest"]).toMatch(

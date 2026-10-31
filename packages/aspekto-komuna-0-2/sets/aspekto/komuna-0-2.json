@@ -2667,6 +2667,20 @@
             }
           }
         }
+      },
+      "more": {
+        "fill": {
+          "$type": "color",
+          "$value": "{color.action.tertiary.rest}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.action.tertiary.text}"
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.label.2}"
+        }
       }
     },
     "avataro": {
