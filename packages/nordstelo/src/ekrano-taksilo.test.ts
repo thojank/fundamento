@@ -50,7 +50,7 @@ const MANKA = [
     "fm-formularo",
     {},
     h("fm-kampo", { kind: "email", farbe: "rot" }, "E-Mail"),
-    h("button", { style: "color: #c00" }, "Anmelden"),
+    h("button", { style: "color: #3b5f2a" }, "Anmelden"),
   ),
 ];
 
