@@ -1,6 +1,6 @@
 {
   "name": "@fundamento/ekranoj",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Fundamento Ekranoj (Spec 037): one sentence and one brand become up to five linked, self-checked screens. An MCP client only; the scorer, the tools, the chat model, the renderer and the brand build are injected.",
   "license": "MIT",
   "private": true,
