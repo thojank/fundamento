@@ -566,7 +566,7 @@
     {
       "id": "reg_01M4S1ZR7F1KE1AV1C7X5W8GD5",
       "name": "field-label-visible",
-      "statement": "A kampo, a sxaltilo, a markobutono, an elekto, an elektilo or a tekstareo always has a visible label; an empty label slot is a violation.",
+      "statement": "A kampo, a sxaltilo, a markobutono, an elekto, an elektilo or a tekstareo always has a visible label: the text of its label slot or label=\"…\", shown where that text would stand; a field with neither is a violation.",
       "kialo": "WCAG 3.3.2 (Labels or Instructions): a placeholder disappears while typing, and a label only a screen reader hears does not help the sighted person who finds the field half filled.",
       "scope": "eroj: kampo, sxaltilo, markobutono, elekto, elektilo and tekstareo instances; the label slot has text; kompletigilo instances alike (Spec 014 ⑤, G8); glitilo instances alike (Spec 025 ①, E5); datelektilo instances alike (Spec 025 ②, E5); listelektilo, plurelektilo instances alike (Spec 025 ③, E5)",
       "checkability": "automatic",

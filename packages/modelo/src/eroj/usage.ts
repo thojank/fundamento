@@ -321,8 +321,12 @@ export function hitsGoal(
 
 /** The visible text of an instance: the label slot, else the label prop (icon-only). */
 export function textOf(instance: EroInstance): string | undefined {
-  const text = instance.label ?? instance.props.label;
-  return typeof text === "string" && text.trim() !== "" ? text : undefined;
+  // Spec 035 2.2: an empty or blank text of the element leaves the label to the prop, as the
+  // element shows it (Spec 029 ②b-1b: the slot wins only while it holds text).
+  for (const text of [instance.label, instance.props.label]) {
+    if (typeof text === "string" && text.trim() !== "") return text;
+  }
+  return undefined;
 }
 
 /** The default source of a text rule: the label (Spec 007); Spec 009 adds `of`. */

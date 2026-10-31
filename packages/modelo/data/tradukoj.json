@@ -77,7 +77,7 @@
       "reg_01M4RYCWPBKKHNBR908WP6Y6V2/kialo": "Eine Adresse ist für eine Person schwer zu lesen und zu hören; technische Dokumentation darf eine zeigen, mit einem Jugxo der Marke.",
       "reg_01M4RYCWPBKKHNBR908WP6Y6V2/statement": "Die Beschriftung eines ligilo sind Wörter, keine Adresse (kein http, https oder www).",
       "reg_01M4S1ZR7F1KE1AV1C7X5W8GD5/kialo": "WCAG 3.3.2 Beschriftungen (Labels) oder Anweisungen: Ein Platzhalter verschwindet beim Tippen, und eine Beschriftung, die nur ein Screenreader hört, hilft der sehenden Person nicht, die das Feld halb ausgefüllt vorfindet.",
-      "reg_01M4S1ZR7F1KE1AV1C7X5W8GD5/statement": "Ein kampo, ein sxaltilo, ein markobutono, ein elekto, ein elektilo oder ein tekstareo hat immer eine sichtbare Beschriftung; ein leerer Slot label ist ein Verstoß.",
+      "reg_01M4S1ZR7F1KE1AV1C7X5W8GD5/statement": "Ein kampo, ein sxaltilo, ein markobutono, ein elekto, ein elektilo oder ein tekstareo hat immer eine sichtbare Beschriftung: den Text seines Slots label oder label=\"…\", gezeigt, wo dieser Text stünde; ein Feld ohne beides ist ein Verstoß.",
       "reg_01M4S1ZR7GEPZSTB9ES3REK3TX/kialo": "Ein Platzhalter verschwindet beim Tippen (WCAG 3.3.2 Beschriftungen (Labels) oder Anweisungen), und ein Beispiel, das die Beschriftung wiederholt, sagt nichts.",
       "reg_01M4S1ZR7GEPZSTB9ES3REK3TX/statement": "Der Platzhalter eines kampo, eines elektilo oder eines tekstareo ist nicht die Beschriftung: Ein Platzhalter ohne Beschriftung ist ein Verstoß, ein Platzhalter gleich der Beschriftung eine Warnung.",
       "reg_01M4S1ZR7GEPZSTB9ES3REK3TY/kialo": "WCAG 3.3.3 Fehlerempfehlung: „Ungültig“ lässt die Person raten; ein Satz mit Verb und Objekt nennt den Ausweg.",
