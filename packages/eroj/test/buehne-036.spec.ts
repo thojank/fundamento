@@ -5,7 +5,9 @@
 // buttons, card, form, messages) in light and in dark, switchable. 3.2: two frames laid one over
 // the other, „Jetzt“ and „Mit dem Vorschlag“ (the existing `propono`), cut by a slider; in a narrow
 // window a switch takes its place. A proposal appears right first; „Übernehmen“ lays it on the draft
-// through the existing route, and the left frame shows it (the rev, Spec 033 D-05).
+// through the existing route, and the left frame shows it (the rev, Spec 033 D-05). 3.3: the chat is
+// a bar below the stage – input, last answer, speak, read aloud, counter – with its history in a
+// fold (fm-faldilo). The language model is a double of the chat's route.
 
 import { type ChildProcess, spawn } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
@@ -311,5 +313,74 @@ test.describe("Bühne (Spec 036, Befund 3.2)", () => {
     };
     await expect(page.locator("html")).toHaveAttribute("data-mt-rev", String(stato.rev));
     await expect.poll(() => knopf(page, JETZT)).toBe(vorschlag);
+  });
+});
+
+test.describe("Bühne (Spec 036, Befund 3.3)", () => {
+  test("3.3: the chat is a bar below the stage – input, last answer, speak, read aloud, counter", async ({
+    page,
+    request,
+  }) => {
+    const fehler = fehlerOf(page);
+    const id = await marke(request, "Probomarko Leiste");
+    await page.setViewportSize(WIDE);
+    await oeffne(page, id);
+    const buehne = page.locator("[data-mt-buehne]");
+    const leiste = page.locator("[data-mt-chatleiste]");
+    await expect(leiste).toBeVisible();
+    const stage = await buehne.evaluate((element) => element.getBoundingClientRect().toJSON());
+    const bar = await leiste.evaluate((element) => element.getBoundingClientRect().toJSON());
+    // Below the stage, in its column.
+    expect(bar.top).toBeGreaterThanOrEqual(stage.bottom);
+    expect(Math.round(bar.left)).toBeGreaterThanOrEqual(Math.round(stage.left));
+    expect(Math.round(bar.right)).toBeLessThanOrEqual(Math.round(stage.right));
+    await expect(leiste.getByRole("textbox", { name: "Deine Nachricht" })).toBeVisible();
+    await expect(leiste.getByRole("button", { name: "Senden" })).toBeVisible();
+    await expect(leiste.getByRole("button", { name: "Sprechen" })).toBeVisible();
+    await expect(leiste.getByRole("switch", { name: "Antworten vorlesen" })).toBeVisible();
+    const zaehler = leiste.locator("[data-mt-zaehlilo]");
+    await expect(zaehler).toBeVisible();
+    await expect(zaehler).not.toHaveText("");
+    await expect(leiste.locator("[data-mt-letzte-antwort]")).toBeVisible();
+    // The chat stands only in the bar, not beside the stage as well.
+    await expect(page.locator("[data-mt-babilo-teksto]")).toHaveCount(1);
+    expect(fehler).toEqual([]);
+  });
+
+  test("3.3: the last answer stands in the bar; the history opens in a fold", async ({
+    page,
+    request,
+  }) => {
+    const id = await marke(request, "Probomarko Verlauf");
+    await page.setViewportSize(WIDE);
+    await oeffne(page, id);
+    const leiste = page.locator("[data-mt-chatleiste]");
+    const verlauf = leiste.locator("fm-faldilo[data-mt-verlauf]");
+    await expect(verlauf).toBeVisible();
+    await expect(verlauf).not.toHaveAttribute("open", "");
+    const rev = Number(await page.locator("html").getAttribute("data-mt-rev"));
+    const antwort = "Die Ecken sind auf der Bühne rechts runder.";
+    await page.route(`**/api/marko/${id}/asistanto`, (route) =>
+      route.fulfill({ json: { antwort, rev } }),
+    );
+    // Without a model the screen keeps the chat off; the double stands in for the model.
+    await page.evaluate(() => {
+      for (const element of document.querySelectorAll(
+        "[data-mt-babilo-teksto], [data-mt-babilo-sendi]",
+      ))
+        element.removeAttribute("disabled");
+      document.querySelector("[data-mt-babilo-teksto]")?.setAttribute("value", "Runder, bitte.");
+    });
+    await leiste.getByRole("button", { name: "Senden" }).click();
+    await expect(leiste.locator("[data-mt-letzte-antwort]")).toContainText(antwort);
+    const karten = verlauf.locator("[data-mt-babilo-listo] fm-karto");
+    await expect(karten.last()).toBeHidden();
+    await verlauf.getByText("Verlauf", { exact: true }).click();
+    await expect(verlauf).toHaveAttribute("open", "");
+    await expect(karten.last()).toBeVisible();
+    await expect(karten.last()).toContainText(antwort);
+    await expect(verlauf.locator('fm-karto[data-mt-rolle="user"]').last()).toContainText(
+      "Runder, bitte.",
+    );
   });
 });
