@@ -35,6 +35,7 @@ export interface UebernahmeDatoj {
     knopf_seiten_max: number;
     kontrast_knopf: number;
     karte_min: number;
+    karte_max: number;
     kontrast_karte: number;
     schatten_zeilen_min: number;
     schatten_zeilen_max: number;

@@ -175,6 +175,47 @@ function rowLab(bildo: Bildo, y: number, from: number, to: number): [number, num
   return n === 0 ? [0, 0, 0] : oklabOf(r / n, g / n, b / n);
 }
 
+/**
+ * The area the corners of a shape miss, in px: per row from the left and from the right, each pixel
+ * counts by how little of the shape's colour it holds (a smoothed edge mixes the shape with what is
+ * around it), up to the first pixel fully of the shape. Crisp edges count whole pixels.
+ */
+function missingOf(
+  bildo: Bildo,
+  area: Flaeche,
+  colour: readonly [number, number, number],
+  around: readonly [number, number, number],
+): number {
+  const direction = colour.map((channel, k) => channel - (around[k] ?? 0));
+  const norm = direction.reduce((sum, value) => sum + value * value, 0);
+  if (norm === 0) return 0;
+  const coverage = (x: number, y: number) => {
+    const at = (y * bildo.width + x) * 4;
+    let dot = 0;
+    for (let k = 0; k < 3; k++)
+      dot += ((bildo.rgba[at + k] ?? 0) - (around[k] ?? 0)) * (direction[k] ?? 0);
+    return Math.min(1, Math.max(0, dot / norm));
+  };
+  let missing = 0;
+  for (let y = area.minY; y <= area.maxY; y++) {
+    let left = area.minX;
+    for (; left <= area.maxX; left++) {
+      const covered = coverage(left, y);
+      if (covered >= FULL) break;
+      missing += 1 - covered;
+    }
+    for (let x = area.maxX; x > left; x--) {
+      const covered = coverage(x, y);
+      if (covered >= FULL) break;
+      missing += 1 - covered;
+    }
+  }
+  return missing;
+}
+
+/** A pixel this close to the shape's colour belongs to it wholly (the 5-bit key allows as much). */
+const FULL = 0.9;
+
 /** Rows of a soft shadow under the shape: darker than around it, lighter row by row. */
 function shadowRows(bildo: Bildo, area: Flaeche, around: [number, number, number]): number {
   const data = UEBERNAHME.bild;
@@ -293,10 +334,6 @@ export function bildAnalyseOf(bildo: Bildo): BildAnalyse {
     if (labels[midY * width + area.maxX] !== area.label) continue;
     if (labels[area.minY * width + midX] !== area.label) continue;
     if (labels[area.maxY * width + midX] !== area.label) continue;
-    const radius = Math.min(
-      Math.sqrt(Math.max(0, w * h - spans) / (4 - Math.PI)),
-      Math.min(w, h) / 2,
-    );
     const colour: [number, number, number] = [
       area.r / area.count,
       area.g / area.count,
@@ -304,10 +341,15 @@ export function bildAnalyseOf(bildo: Bildo): BildAnalyse {
     ];
     const ax = area.minX >= 2 ? area.minX - 2 : area.maxX + 2;
     const at = (midY * width + Math.min(width - 1, ax)) * 4;
-    const around = oklabOf(
+    const aroundRgb: [number, number, number] = [
       bildo.rgba[at] ?? groundRgb[0],
       bildo.rgba[at + 1] ?? groundRgb[1],
       bildo.rgba[at + 2] ?? groundRgb[2],
+    ];
+    const around = oklabOf(...aroundRgb);
+    const radius = Math.min(
+      Math.sqrt(missingOf(bildo, area, colour, aroundRgb) / (4 - Math.PI)),
+      Math.min(w, h) / 2,
     );
     const contrast = distance(oklabOf(...colour), around);
     const ratio = w / h;
@@ -317,10 +359,13 @@ export function bildAnalyseOf(bildo: Bildo): BildAnalyse {
       ratio >= data.knopf_seiten_min &&
       ratio <= data.knopf_seiten_max &&
       contrast >= data.kontrast_knopf;
+    // An area over nearly the whole picture is the page (or its content area), not a card on it.
     const karte =
       !knopf &&
       w >= data.karte_min * width &&
       h >= data.karte_min * height &&
+      w <= data.karte_max * width &&
+      h <= data.karte_max * height &&
       contrast >= data.kontrast_karte;
     if (!knopf && !karte) continue;
     formen.push({
