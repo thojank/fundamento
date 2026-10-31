@@ -206,12 +206,7 @@ export function asistantoScreen(input: AsistantoInput): string {
   const material = `<fm-faldilo data-mt-materialo><span slot="summary">Material deiner Marke (Screenshot, Logo, PDF, Schrift oder Link)</span><fm-alsxutilo name="materialo" accept=".png,.jpg,.jpeg,.webp,.svg,.pdf,.woff2,.woff,.ttf,.otf" data-mt-materialo-dosiero>Datei</fm-alsxutilo><fm-kampo name="url" type="url" data-mt-materialo-url>Link auf eine Webseite</fm-kampo><fm-markobutono name="rajtoj-materialo" value="ja" data-mt-materialo-rajtoj>${escapeHtml(KONFIRMO_TEKSTO)}</fm-markobutono>${takso("materialo", "je Datei")}<fm-butono emphasis="medium" data-mt-materialo-legi>Material lesen</fm-butono></fm-faldilo>`;
   const esploro = `<fm-faldilo data-mt-esploro><span slot="summary">Bestehende Marke nur genannt (Recherche)</span><fm-kampo name="nomo" data-mt-esploro-nomo>Name der Marke</fm-kampo><fm-kampo name="url" type="url" data-mt-esploro-url>Adresse der Website (optional)</fm-kampo><fm-markobutono name="rajtoj-esploro" value="ja" data-mt-esploro-rajtoj>${escapeHtml(KONFIRMO_TEKSTO)}</fm-markobutono><fm-teksto kind="caption">Der Assistent liest öffentliche Seiten und misst Farben, Schriften, Radien und Abstände; er übernimmt keine Texte, Bilder oder Dateien. Das Ergebnis bleibt lokal.</fm-teksto>${takso("esploro", "Recherche")}<fm-butono emphasis="medium" data-mt-esploro-sendi>Recherchieren</fm-butono></fm-faldilo>`;
   // Spec 036, Befund 3.1: the preview is the stage – two thirds of the width (buehne.ts).
-  const vorschau = buehneHtml({
-    name,
-    studio,
-    faceto: faceto.name,
-    propono: input.propono !== undefined,
-  });
+  const vorschau = buehneHtml({ name, studio, faceto: faceto.name });
   const body = `<fm-sxelo>
 <span slot="brand">Markenassistent</span>
 <span slot="principal">Marke ${escapeHtml(marko.label)} · <fm-mezurilo value="${vollstaendigkeit.prozent}" min="0" max="100" data-mt-prozent>Vollständig (Umfang 1, visuell)</fm-mezurilo> <fm-teksto kind="caption" data-mt-definiert>freigegeben ${vollstaendigkeit.prozent} % · definiert ${vollstaendigkeit.definiert} %</fm-teksto></span>
@@ -236,7 +231,6 @@ ${propono}
 ${material}
 ${esploro}
 <fm-teksto kind="caption" data-mt-freigabe-satz>${escapeHtml(releaseHint)}</fm-teksto>
-<fm-butono emphasis="medium" data-mt-faceto-ago="akcepto">Vorschlag übernehmen</fm-butono>
 <fm-butono emphasis="high" data-mt-faceto-ago="liberigo"${releasable ? "" : " disabled"}>Freigeben</fm-butono>
 <fm-butono emphasis="low" data-mt-faceto-ago="remalfermo"${faceto.stato === "freigegeben" ? "" : " disabled"}>Wieder öffnen</fm-butono>
 <fm-butono emphasis="low" data-mt-fremda>Baut auf einer bestehenden Marke auf</fm-butono>

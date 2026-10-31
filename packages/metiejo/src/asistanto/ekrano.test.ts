@@ -104,7 +104,9 @@ describe("Spec 035, Befund 4.5.1: a proposal shows what it means, in one sentenc
       /<iframe data-mt-vorschau-propono data-mt-src="\/marko\/lumo\/vorschau\?sxtupo=buehne-farbe&amp;breite=mittel&amp;propono=gvidkoloro"/,
     );
     expect(html).toContain("Mit dem Vorschlag");
-    expect(asistantoScreen(inputOf())).not.toContain("data-mt-vorschau-propono");
+    // Spec 036, Befund 3.2: the stage always lays the two frames on each other; without an open
+    // proposal the right one shows the draft as well (Spec 035 D-92).
+    expect(asistantoScreen(inputOf())).toContain("data-mt-vorschau-propono");
   });
 
   it("every proposal of the Enportilo and of Weg A is one sentence, and keeps what is not set", () => {

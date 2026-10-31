@@ -50,6 +50,7 @@ import {
 } from "./asistanto/limoj.js";
 import {
   facetojOfAgordoDiff,
+  freigabeOf,
   type Vollstaendigkeit,
   vollstaendigkeitOf,
 } from "./asistanto/stato.js";
@@ -636,17 +637,21 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     return fremda;
   };
 
-  /** The tools of the Asistanto on one draft; a change goes through setDraft with the chat as source. */
+  /**
+   * The tools of the Asistanto on one draft; a change goes through setDraft with the chat as source,
+   * or – a turn on the stage (Spec 036, Befund 3.2) – to the copy it works on.
+   */
   const laborejoOf = (
     name: string,
     draft: Draft,
     modelo: string,
     fonto: "babilo" | "parolo" = "babilo",
+    apliki: (next: Agordo) => void = (next) => setDraft(name, draft, next, fonto, modelo),
   ): Laborejo =>
     new Laborejo({
       bases,
       agordo: () => draft.agordo,
-      apliki: (next) => setDraft(name, draft, next, fonto, modelo),
+      apliki,
       probleme: () =>
         pruefungOf(draft).raporto.violations.filter(
           (violation) => violation.fixed || violation.jugxo === undefined,
@@ -655,6 +660,55 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       kontrolita: true,
       pruefung: () => klartextOfDraft(draft),
     });
+
+  /**
+   * Spec 036, Befund 3.2: a turn for a step appears on the stage first. It works on a copy of the
+   * draft with the step's open proposal laid on it, so a second wish builds on the first; the draft
+   * (the frame „Jetzt“) stays until „Übernehmen“.
+   */
+  const buehneOf = (
+    name: string,
+    draft: Draft,
+    faceto: string,
+  ): { kopio: Draft; sxangxita: boolean } => {
+    const open = readProponoj(options.workdir, name).find((entry) => entry.faceto === faceto);
+    const agordo =
+      open === undefined
+        ? draft.agordo
+        : (readAgordo(mergedAgordo(draft.agordo, open.agordo)).agordo ?? draft.agordo);
+    return { kopio: { agordo, rev: draft.rev }, sxangxita: false };
+  };
+
+  /**
+   * What a turn changed on its copy becomes the open proposal of its step (the frame „Mit dem
+   * Vorschlag“): the groups of the Agordo that differ from the draft, with the origin of the
+   * proposal it builds on. The Kroniko names the chat or speech as its source.
+   */
+  const proponoOfBuehne = (
+    name: string,
+    draft: Draft,
+    next: Agordo,
+    turn: { faceto: string; fonto: "babilo" | "parolo"; modelo: string; satz: string },
+  ): void => {
+    const before = draft.agordo as unknown as Record<string, unknown>;
+    const patch = Object.fromEntries(
+      Object.entries(next).filter(
+        ([key, value]) => JSON.stringify(value) !== JSON.stringify(before[key]),
+      ),
+    ) as Partial<Agordo>;
+    if (Object.keys(patch).length === 0) return;
+    const open = readProponoj(options.workdir, name).find((entry) => entry.faceto === turn.faceto);
+    writeProponoj(options.workdir, name, [
+      { faceto: turn.faceto, agordo: patch, satz: turn.satz, herkunft: open?.herkunft ?? [] },
+    ]);
+    kroniko(name, {
+      ago: "propono",
+      fonto: turn.fonto,
+      faceto: turn.faceto,
+      teksto: turn.satz,
+      modelo: turn.modelo,
+    });
+  };
 
   /**
    * One chat turn of a brand (Spec 033 S1, S5): written or spoken, the same tools, the same Kroniko,
@@ -682,10 +736,18 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     if (teksto === "")
       return { status: 422, body: { satz: "Schreib oder sag, was du ändern möchtest." } };
     const historio = babiloj.get(name) ?? [];
+    const buehne = faceto === undefined ? undefined : buehneOf(name, draft, faceto);
     try {
       const result = await babili({
         provider,
-        laborejo: laborejoOf(name, draft, provider.toString(), fonto),
+        laborejo:
+          buehne === undefined
+            ? laborejoOf(name, draft, provider.toString(), fonto)
+            : laborejoOf(name, buehne.kopio, provider.toString(), fonto, (next) => {
+                buehne.kopio.agordo = next;
+                buehne.kopio.rev++;
+                buehne.sxangxita = true;
+              }),
         historio: historio.slice(-12),
         teksto,
         ...(faceto === undefined ? {} : { faceto }),
@@ -714,6 +776,13 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           ...detaloj,
         },
       });
+      if (buehne?.sxangxita === true && faceto !== undefined)
+        proponoOfBuehne(name, draft, buehne.kopio.agordo, {
+          faceto,
+          fonto,
+          modelo: provider.toString(),
+          satz: result.antwort,
+        });
       return {
         status: 200,
         body: {
@@ -1523,11 +1592,8 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           return;
         }
         if (ago === "liberigo" && stand.stato === "offen") {
-          sendJson(
-            response,
-            { satz: "Übernimm den Vorschlag oder passe ihn an, dann kannst du freigeben." },
-            422,
-          );
+          // D-S36-1.2-9: the sentence the screen shows for an open step (stato.ts).
+          sendJson(response, { satz: freigabeOf(stand).freigabeSatz }, 422);
           return;
         }
         if (ago === "liberigo" && !stand.gruen) {
@@ -1549,7 +1615,13 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           const propono = takeProponon(options.workdir, name, faceto);
           if (propono !== undefined) {
             const { agordo } = readAgordo(mergedAgordo(draft.agordo, propono.agordo));
-            if (agordo !== undefined) setDraft(name, draft, agordo, "agento");
+            // Spec 036, Befund 3.2: a proposal of the chat or of speech is taken as their change.
+            const quelle = readKroniko(options.workdir, name).findLast(
+              (entry) => entry.ago === "propono" && entry.faceto === faceto,
+            );
+            if (agordo !== undefined && (quelle?.fonto === "babilo" || quelle?.fonto === "parolo"))
+              setDraft(name, draft, agordo, quelle.fonto, quelle.modelo);
+            else if (agordo !== undefined) setDraft(name, draft, agordo, "agento");
           }
         }
         kroniko(name, { ago, fonto: "regilo", faceto });

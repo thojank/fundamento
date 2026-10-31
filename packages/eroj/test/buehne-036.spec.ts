@@ -103,6 +103,12 @@ const pxOf = (page: Page, property: string) =>
 
 const WIDE = { width: 1440, height: 900 };
 
+/** Opens a step of the assistant and waits until the stage's client has bound its handlers. */
+async function oeffne(page: Page, id: string, faceto = "gvidkoloro"): Promise<void> {
+  await page.goto(`${base}/asistanto/${id}/${faceto}`);
+  await expect(page.locator("[data-mt-buehne]")).toHaveAttribute("data-mt-bereit", "");
+}
+
 test.describe("Bühne (Spec 036, Befund 3.1)", () => {
   test("3.1: the stage takes about two thirds of the content width; the step bar stays", async ({
     page,
@@ -155,7 +161,7 @@ test.describe("Bühne (Spec 036, Befund 3.1)", () => {
   test("3.1: light and dark are switchable on the stage", async ({ page, request }) => {
     const id = await marke(request, "Probomarko Dunkel");
     await page.setViewportSize(WIDE);
-    await page.goto(`${base}/asistanto/${id}/gvidkoloro`);
+    await oeffne(page, id);
     const buehne = page.locator("[data-mt-buehne]");
     const wahl = buehne.getByRole("radiogroup", { name: "Darstellung" });
     await expect(wahl).toBeVisible();
@@ -198,6 +204,7 @@ async function material(page: Page, request: APIRequestContext, id: string): Pro
 /** Which frame of the stage a person sees at a point of it, given as a share of its width. */
 const sichtbarBei = (page: Page, anteil: number) =>
   page.locator("[data-mt-buehne-rahmen]").evaluate((rahmen, share) => {
+    rahmen.scrollIntoView({ block: "center" });
     const box = rahmen.getBoundingClientRect();
     const hit = document.elementFromPoint(box.left + box.width * share, box.top + box.height / 2);
     if (hit === null) return "nichts";
@@ -230,10 +237,11 @@ test.describe("Bühne (Spec 036, Befund 3.2)", () => {
     const fehler = fehlerOf(page);
     const id = await marke(request, "Probomarko Schieber");
     await page.setViewportSize(WIDE);
-    await page.goto(`${base}/asistanto/${id}/gvidkoloro`);
+    await oeffne(page, id);
     const buehne = page.locator("[data-mt-buehne]");
-    await expect(buehne.getByText("Jetzt", { exact: true })).toBeVisible();
-    await expect(buehne.getByText("Mit dem Vorschlag", { exact: true })).toBeVisible();
+    const beschriftung = buehne.locator("[data-mt-buehne-beschriftung]");
+    await expect(beschriftung.getByText("Jetzt", { exact: true })).toBeVisible();
+    await expect(beschriftung.getByText("Mit dem Vorschlag", { exact: true })).toBeVisible();
     // Both frames on the same place of the stage.
     const boxes = await page.locator("[data-mt-buehne-rahmen] iframe").evaluateAll((frames) =>
       frames.map((frame) => {
@@ -260,7 +268,7 @@ test.describe("Bühne (Spec 036, Befund 3.2)", () => {
     const id = await marke(request, "Probomarko Schmal");
     const grenze = { width: 800, height: 900 };
     await page.setViewportSize(grenze);
-    await page.goto(`${base}/asistanto/${id}/gvidkoloro`);
+    await oeffne(page, id);
     const breakpoint = await pxOf(page, "--fm-size-breakpoint-expanded");
     expect(grenze.width).toBeLessThan(breakpoint);
     const buehne = page.locator("[data-mt-buehne]");
@@ -283,9 +291,9 @@ test.describe("Bühne (Spec 036, Befund 3.2)", () => {
   }) => {
     const id = await marke(request, "Probomarko Material");
     await page.setViewportSize(WIDE);
-    await page.goto(`${base}/asistanto/${id}/gvidkoloro`);
+    await oeffne(page, id);
     await material(page, request, id);
-    await page.goto(`${base}/asistanto/${id}/gvidkoloro`);
+    await oeffne(page, id);
     const vorher = Number(await page.locator("html").getAttribute("data-mt-rev"));
     const jetzt = await knopf(page, JETZT);
     const vorschlag = await knopf(page, VORSCHLAG);

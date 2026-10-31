@@ -105,7 +105,9 @@ describe("the assistant beside the Studio (Spec 033 S1)", () => {
     expect(html).toContain('href="/studio/lumo/farbe"');
   });
 
-  it("a sentence in the chat goes over a tool into the draft; the Kroniko names source, model and cost", async () => {
+  // Spec 036, Befund 3.2: the change of a turn appears on the stage first, as the step's open
+  // proposal; „Übernehmen“ lays it on the draft (before, the turn changed the draft at once).
+  it("a sentence in the chat goes over a tool into the step's proposal and, taken, into the draft; the Kroniko names source, model and cost", async () => {
     replies.push(
       {
         choices: [
@@ -145,25 +147,34 @@ describe("the assistant beside the Studio (Spec 033 S1)", () => {
       kosto: { enigo: number };
     };
     expect(body.antwort).toBe("Die Ecken sind jetzt runder.");
-    expect(body.rev).toBeGreaterThan(before);
+    expect(body.rev).toBe(before);
     expect(body.kosto.enigo).toBe(1700);
-    const entries = readKroniko(workdir, "lumo");
-    const change = entries.find((entry) => entry.ago === "sxangxo" && entry.faceto === "formo");
+    const proposed = readKroniko(workdir, "lumo").find(
+      (entry) => entry.ago === "propono" && entry.faceto === "formo",
+    );
+    expect(proposed?.fonto).toBe("babilo");
+    expect(proposed?.modelo).toBe("mistral/ministral-14b-2512");
+    const turn = readKroniko(workdir, "lumo").findLast((entry) => entry.ago === "babilo");
+    expect(turn?.kosto?.enigo).toBe(1700);
+    expect((await stato()).facetoj.find((faceto) => faceto.name === "formo")?.stato).toBe("offen");
+    const taken = (await (
+      await post("/api/marko/lumo/faceto", { faceto: "formo", ago: "akcepto" })
+    ).json()) as { rev: number; stato: { facetoj: { name: string; freigebbar?: boolean }[] } };
+    expect(taken.rev).toBeGreaterThan(before);
+    const change = readKroniko(workdir, "lumo").find(
+      (entry) => entry.ago === "sxangxo" && entry.faceto === "formo",
+    );
     expect(change?.fonto).toBe("babilo");
     expect(change?.modelo).toBe("mistral/ministral-14b-2512");
-    const turn = entries.findLast((entry) => entry.ago === "babilo");
-    expect(turn?.kosto?.enigo).toBe(1700);
     expect((await stato()).facetoj.find((faceto) => faceto.name === "formo")?.stato).toBe(
       "definiert",
     );
-    // Spec 035, Befund 4.4: the answer of the turn says the step can be released now.
-    const step = (
-      body as unknown as { stato: { facetoj: { name: string; freigebbar?: boolean }[] } }
-    ).stato.facetoj.find((faceto) => faceto.name === "formo");
+    // Spec 035, Befund 4.4: the answer of „Übernehmen“ says the step can be released now.
+    const step = taken.stato.facetoj.find((faceto) => faceto.name === "formo");
     expect(step?.freigebbar).toBe(true);
   });
 
-  it("Spec 035, Befund 4.4: after the change in the chat the step is released without „Vorschlag übernehmen“", async () => {
+  it("Spec 035, Befund 4.4: after the chat's proposal is taken the step is released at once", async () => {
     const released = await post("/api/marko/lumo/faceto", { faceto: "formo", ago: "liberigo" });
     expect(released.status).toBe(200);
     expect((await stato()).facetoj.find((faceto) => faceto.name === "formo")?.stato).toBe(
@@ -172,8 +183,8 @@ describe("the assistant beside the Studio (Spec 033 S1)", () => {
     const agoj = readKroniko(workdir, "lumo")
       .filter((entry) => entry.faceto === "formo")
       .map((entry) => entry.ago);
-    expect(agoj).not.toContain("akcepto");
-    expect(agoj.at(-1)).toBe("liberigo");
+    // Spec 036, Befund 3.2: the turn, its proposal, taken, released – nothing between.
+    expect(agoj.slice(-5)).toEqual(["babilo", "propono", "sxangxo", "akcepto", "liberigo"]);
   });
 
   it("a change at the Studio's sliders is the same draft: a new rev and a Kroniko entry from the slider", async () => {

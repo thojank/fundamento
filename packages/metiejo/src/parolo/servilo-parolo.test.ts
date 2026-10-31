@@ -132,7 +132,8 @@ describe("speech (Spec 033 S5)", () => {
     const turn = entries.findLast((entry) => entry.ago === "babilo");
     expect(turn?.fonto).toBe("parolo");
     expect(JSON.stringify(turn?.detaloj)).toContain(PAROLO_MODELO);
-    expect(entries.findLast((entry) => entry.ago === "sxangxo")?.fonto).toBe("parolo");
+    // Spec 036, Befund 3.2: the change waits on the stage as the step's proposal, from speech.
+    expect(entries.findLast((entry) => entry.ago === "propono")?.fonto).toBe("parolo");
   });
 
   it("the browser's own recognition sends its transcript to the chat, with speech as the source", async () => {
