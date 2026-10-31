@@ -1,0 +1,29 @@
+{
+  "reguloj": [
+    {
+      "id": "reg_01K5FMAJ0J14KNVH5BXJ93VFBG",
+      "name": "semantic-colors-alias-palette",
+      "statement": "Semantic color tokens reference palette tokens instead of literal values.",
+      "kialo": "A palette change then reaches every semantic use in one place.",
+      "scope": "vortaro",
+      "checkability": "manual"
+    },
+    {
+      "id": "reg_01M69KMBHKSYSAQ2TJGQ177ASK",
+      "name": "sekundo-not-action",
+      "statement": "No action, link or focus role aliases the Zweitfarbe: color.action.*, color.link.* and color.focus.* never alias a step of color.palette.sekundo or a role of color.sekundo, in any set.",
+      "kialo": "The lead colour marks what can be done; a second colour on actions would make two kinds of action.",
+      "scope": "vortaro: color.action.*, color.link.*, color.focus.* in every set",
+      "checkability": "automatic",
+      "appliesTo": {
+        "tokens": [
+          "color.action",
+          "color.link",
+          "color.focus",
+          "color.palette.sekundo",
+          "color.sekundo"
+        ]
+      }
+    }
+  ]
+}

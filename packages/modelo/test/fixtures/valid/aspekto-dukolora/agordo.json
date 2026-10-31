@@ -1,0 +1,18 @@
+{
+  "name": "dukolora",
+  "owner": "Dukolora (fictitious, test only)",
+  "license": "MIT",
+  "leitfarbe": "#c2410c",
+  "zweitfarbe": {
+    "farbe": "#0f8f86",
+    "herkunft": {
+      "quelle": "bild",
+      "datei": "zwei-farben.png",
+      "merkmal": "zweite prägende Farbe der Fläche",
+      "anteil": 18
+    }
+  },
+  "neutral": {
+    "toenung": 0.1
+  }
+}
