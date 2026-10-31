@@ -486,12 +486,19 @@ function node(
       self.children.push(child);
       context.version++;
     },
+    // insertChild(index, child) of a child already in this parent (Spec 035 2.3.2, plugin
+    // acceptance of 30.10.): Figma counts the index in the list before it takes the child out, so
+    // a child moved towards the end lands one place before the index – the plugin's
+    // insertChild(1, texts) left the texts of the markobutono before its box, where a double that
+    // takes the child out first put them after it. A belief from that acceptance until measured.
     insertChild(index, child) {
       refuseInInstance(self);
+      const from = child.parent === recorded ? self.children.indexOf(child) : -1;
+      const at = from !== -1 && from < index ? index - 1 : index;
       child.parent?.children.splice(child.parent.children.indexOf(child), 1);
       if (child.parent !== recorded) (child as unknown as { leaveCell?: () => void }).leaveCell?.();
       child.parent = recorded;
-      self.children.splice(index, 0, child);
+      self.children.splice(at, 0, child);
       context.version++;
     },
     // resize(width, height) (F-4, Spec 011 ③ acceptance) — a **belief** about the Plugin API until

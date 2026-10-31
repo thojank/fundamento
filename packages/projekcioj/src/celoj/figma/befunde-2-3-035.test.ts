@@ -179,3 +179,61 @@ describe("Spec 035 2.3.3: the ✕ of the datelektilo as large and as strong as t
     }
   });
 });
+
+describe("Spec 035 2.3.2: the box of a toggle left of its texts in Figma, as on the web", () => {
+  it("the double moves a child within its parent as Figma does (the acceptance of 30.10.)", () => {
+    const api = modelDouble().figma as { createFrame: () => DoubleNode };
+    const parent = api.createFrame();
+    const [a, b, c] = [0, 1, 2].map((index) => {
+      const child = api.createFrame();
+      child.name = String.fromCharCode(97 + index);
+      parent.appendChild(child);
+      return child as DoubleNode;
+    });
+    const names = () => parent.children.map((child) => child.name).join("");
+    // Towards the end: one place before the index, counted before the child is taken out.
+    parent.insertChild(1, a as DoubleNode);
+    expect(names()).toBe("abc");
+    parent.insertChild(2, a as DoubleNode);
+    expect(names()).toBe("bac");
+    // Towards the start: at the index.
+    parent.insertChild(0, c as DoubleNode);
+    expect(names()).toBe("cba");
+    expect(b).toBeDefined();
+  });
+
+  for (const set of ["markobutono", "sxaltilo"]) {
+    it(`${set}, every variant: the ring with the box first, its texts after it, to its right`, async () => {
+      for (const variant of await variantsOf(set)) {
+        const field = find(variant, "field") as DoubleNode;
+        const order = field.children
+          .map((child) => child.name)
+          .filter((name) => name === "focus-ring" || name === "texts");
+        expect(order, variant.name).toEqual(["focus-ring", "texts"]);
+        const ring = geometry(find(field, "focus-ring") as DoubleNode);
+        const texts = geometry(find(field, "texts") as DoubleNode);
+        expect(texts.x, `${variant.name}: the texts right of the box`).toBeGreaterThanOrEqual(
+          ring.x + ring.width,
+        );
+      }
+    });
+  }
+
+  it("elekto, every variant: in every option the ring with the box first, its label to its right", async () => {
+    for (const variant of await variantsOf("elekto")) {
+      const options = find(variant, "options") as DoubleNode;
+      expect(options.children.length, variant.name).toBeGreaterThan(0);
+      for (const option of options.children) {
+        expect(
+          option.children.map((child) => child.name),
+          `${variant.name}: ${option.name}`,
+        ).toEqual(["focus-ring", "option-label"]);
+        const ring = geometry(option.children[0] as DoubleNode);
+        const label = geometry(option.children[1] as DoubleNode);
+        expect(label.x, `${variant.name}: ${option.name}`).toBeGreaterThanOrEqual(
+          ring.x + ring.width,
+        );
+      }
+    }
+  });
+});
