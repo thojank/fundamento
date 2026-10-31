@@ -614,3 +614,107 @@ describe("②b-2 A-spuro-1: emphasis", () => {
     expect(tokensOf(brief)).toBeLessThan(750);
   });
 });
+
+/**
+ * The density and the lines (S36-4.2): A-tabelo-1 (density three values, the lines `lines` – not
+ * `rules`, ②a-6), A-markdovido-1 (density), A-plenstato-1/2 (compact), A-teksto-1 (kind label,
+ * tabular).
+ */
+describe("②b-2 A-tabelo-1: density in three values and the lines", () => {
+  it("tabelo: density compact | default | comfortable, comfortable stays the default", () => {
+    expect(propOf("tabelo", "density")).toMatchObject({
+      kind: "enum",
+      values: ["compact", "default", "comfortable"],
+      default: "comfortable",
+    });
+    // comfortable and compact keep their tokens; default lies between them.
+    expect(boundOf("tabelo", "cell", "height", { density: "comfortable" })).toBe(
+      "size.control.large",
+    );
+    expect(boundOf("tabelo", "cell", "height", { density: "default" })).toBe("size.control.medium");
+    expect(boundOf("tabelo", "cell", "height", { density: "compact" })).toBe("size.control.small");
+    expect(boundOf("tabelo", "cell", "inline-padding", { density: "default" })).toBe(
+      "spacing.medium",
+    );
+  });
+
+  it("tabelo: lines rows | columns | grid | none, the last prop, default rows – a layout, no token", () => {
+    const { skemo } = entryOf("tabelo");
+    expect(skemo.props.at(-1)).toMatchObject({
+      name: "lines",
+      kind: "enum",
+      values: ["rows", "columns", "grid", "none"],
+      default: "rows",
+    });
+    expect(skemo.bindings.filter((binding) => binding.when?.lines !== undefined)).toEqual([]);
+    // ②a-6: the name is lines; rules is confused with the Reguloj and is no prop.
+    expect(propOf("tabelo", "rules")).toBeUndefined();
+  });
+
+  it("tabelo: the brief names density and lines, under 750", () => {
+    const brief = briefOf(entryOf("tabelo"));
+    expect(brief.axes).toContainEqual({
+      name: "density",
+      values: ["compact", "default", "comfortable"],
+      default: "comfortable",
+    });
+    expect(brief.axes).toContainEqual({
+      name: "lines",
+      values: ["rows", "columns", "grid", "none"],
+      default: "rows",
+    });
+    expect(tokensOf(brief)).toBeLessThan(750);
+  });
+});
+
+describe("②b-2 A-markdovido-1, A-plenstato-1/2, A-teksto-1: density, compact, label, tabular", () => {
+  it("markdovido: density default | compact, the last prop; the gap of the blocks by it", () => {
+    expect(entryOf("markdovido").skemo.props.at(-1)).toMatchObject({
+      name: "density",
+      kind: "enum",
+      values: ["default", "compact"],
+      default: "default",
+    });
+    expect(boundOf("markdovido", "box", "gap", { density: "default" })).toBe("spacing.medium");
+    expect(boundOf("markdovido", "box", "gap", { density: "compact" })).toBe("spacing.small");
+  });
+
+  it("plenstato: compact a boolean, the last prop; room and text by it", () => {
+    expect(entryOf("plenstato").skemo.props.at(-1)).toMatchObject({
+      name: "compact",
+      kind: "boolean",
+      default: false,
+    });
+    expect(boundOf("plenstato", "box", "inline-padding", { compact: "false" })).toBe(
+      "spacing.large",
+    );
+    expect(boundOf("plenstato", "box", "inline-padding", { compact: "true" })).toBe(
+      "spacing.small",
+    );
+    expect(boundOf("plenstato", "text", "typography", { compact: "true" })).toBe(
+      "typography.body.2",
+    );
+  });
+
+  it("teksto: kind takes label (typography.label.1); tabular a boolean, the last prop", () => {
+    expect(propOf("teksto", "kind")?.values).toEqual([
+      "body",
+      "caption",
+      "kicker",
+      "code",
+      "label",
+    ]);
+    expect(boundOf("teksto", "text", "typography", { kind: "label", size: "1" })).toBe(
+      "typography.label.1",
+    );
+    expect(entryOf("teksto").skemo.props.at(-1)).toMatchObject({
+      name: "tabular",
+      kind: "boolean",
+      default: false,
+    });
+  });
+
+  it.each(["markdovido", "plenstato", "teksto"])("%s: the brief stays under 750", (ero) => {
+    expect(tokensOf(briefOf(entryOf(ero)))).toBeLessThan(750);
+  });
+});

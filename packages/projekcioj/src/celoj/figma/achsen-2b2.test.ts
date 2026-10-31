@@ -99,3 +99,22 @@ describe("②b-2 A-apartigilo-1, A-spuro-1, A-karto-1, A-avataro-1, A-avizo-1 in
     expect([...seen].sort()).toEqual([...values].sort());
   });
 });
+
+describe("②b-2 A-tabelo-1, A-markdovido-1, A-plenstato-1, A-teksto-1 in Figma", () => {
+  it("tabelo: density with three values a variant axis; lines a property, no variant", () => {
+    const set = setOf("tabelo");
+    expect(set.properties.density).toEqual(["compact", "default", "comfortable"]);
+    expect(new Set(set.variants.map((variant) => variant.props.density)).size).toBe(3);
+    expect(set.properties.lines).toEqual(["rows", "columns", "grid", "none"]);
+    expect(set.variants.some((variant) => "lines" in variant.props)).toBe(false);
+  });
+
+  it("markdovido density, plenstato compact, teksto kind label: axes of the variants", () => {
+    expect(setOf("markdovido").properties.density).toEqual(["default", "compact"]);
+    expect(setOf("plenstato").variants.some((variant) => variant.props.compact === "true")).toBe(
+      true,
+    );
+    expect(setOf("teksto").properties.kind).toContain("label");
+    expect(setOf("teksto").properties.tabular).toBe("BOOLEAN");
+  });
+});
