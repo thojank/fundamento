@@ -14,7 +14,7 @@ import { type PrivataDeps, uploadFont } from "../privata.js";
 import { type Bildilo, type BildTipo, playwrightBildilo, SenBrowser } from "./bildilo.js";
 import { farbojOfPixels } from "./farboj.js";
 import { legiPdf } from "./pdf.js";
-import { decodePng } from "./png.js";
+import { type Bildo, decodePng } from "./png.js";
 import type { Propono } from "./rekono.js";
 import { legiRetejon, type RetejoFetch } from "./retejo.js";
 import { legiSvg } from "./svg.js";
@@ -69,6 +69,8 @@ export interface MaterialoRezulto {
   /** The name of the material for the Kroniko: the file or the address. */
   nomo: string;
   kiel: "upload" | "link";
+  /** The pixels of an image (Spec 036 Teil 4: form, elevation and density are read from them). */
+  bildo?: Bildo;
 }
 
 function storeMaterialo(workdir: string, name: string, filename: string, bytes: Buffer): string {
@@ -139,6 +141,7 @@ export async function legiMaterialon(
         satzoj: [],
         nomo: filename,
         kiel: "upload",
+        bildo,
       };
     } catch (error) {
       if (!(error instanceof SenBrowser)) throw error;
@@ -155,12 +158,18 @@ export async function legiMaterialon(
   if (extension !== ".png" && extension !== ".svg" && extension !== ".pdf")
     throw new NeLegebla(LEGEBLA);
   storeMaterialo(options.workdir, options.name, filename, bytes);
+  if (extension === ".png") {
+    const bildo = decodePng(bytes);
+    return {
+      trovoj: farbojOfPixels(bildo.rgba, filename),
+      satzoj: [],
+      nomo: filename,
+      kiel: "upload",
+      bildo,
+    };
+  }
   const trovoj =
-    extension === ".png"
-      ? farbojOfPixels(decodePng(bytes).rgba, filename)
-      : extension === ".svg"
-        ? legiSvg(bytes.toString("utf8"), filename)
-        : legiPdf(bytes, filename);
+    extension === ".svg" ? legiSvg(bytes.toString("utf8"), filename) : legiPdf(bytes, filename);
   return { trovoj, satzoj: [], nomo: filename, kiel: "upload" };
 }
 

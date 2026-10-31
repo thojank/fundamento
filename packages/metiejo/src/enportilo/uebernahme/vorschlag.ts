@@ -6,6 +6,7 @@
 // Pure: the reading of the Enportilo comes in, the proposals go out.
 
 import type { Agordo } from "@fundamento/agordilo";
+import type { Bildo } from "../png.js";
 import type { Propono } from "../rekono.js";
 import type { Trovo } from "../trovo.js";
 
@@ -84,6 +85,8 @@ export interface SchrittEniro {
   kunteksto: Kunteksto;
   /** The lead colour the neutrals are tinted towards when the material proposes none (the draft's). */
   leitfarbe?: string;
+  /** The pixels of an image: form, elevation and density are read from its shapes (bildformen.ts). */
+  bildo?: Bildo;
 }
 
 export interface Schritt {

@@ -2,6 +2,7 @@
 // into one proposal per step plus the proposals per Faceto for the store (`propono` route, D-04).
 // To add or replace a step: a module exporting a `Schritt`, listed here at its place in SCHRITT_IDS.
 
+import type { Bildo } from "../png.js";
 import type { Propono } from "../rekono.js";
 import type { Trovo } from "../trovo.js";
 import { DICHTE } from "./dichte.js";
@@ -45,7 +46,7 @@ export interface Uebernahme {
  * the same findings) and the material it came from in, one proposal per step out.
  */
 export function uebernahmeOf(
-  rezulto: { trovoj: readonly Trovo[]; kiel: "upload" | "link"; nomo: string },
+  rezulto: { trovoj: readonly Trovo[]; kiel: "upload" | "link"; nomo: string; bildo?: Bildo },
   proponoj: readonly Propono[],
   leitfarbe?: string,
 ): Uebernahme {
@@ -54,6 +55,7 @@ export function uebernahmeOf(
     proponoj,
     kunteksto: kuntekstoOf(rezulto),
     ...(leitfarbe === undefined ? {} : { leitfarbe }),
+    ...(rezulto.bildo === undefined ? {} : { bildo: rezulto.bildo }),
   };
   const vorschlagoj = SCHRITTE.map((schritt) => schritt.vorschlagOf(eniro));
   return { vorschlagoj, proponoj: proponojKunVorschlagoj(proponoj, vorschlagoj, SCHRITTE) };

@@ -148,6 +148,36 @@
       "ersatz": { "sans-serif": "Inter", "serif": "Source Serif 4", "monospace": "JetBrains Mono" },
       "namensteil_min": 4,
       "kialo": "Spec 036, Befund 4.1 und Randfall „Schrift nicht erkannt“: Eine Schrift des Materials, die im Katalog steht (tiparoj.json, wie die Erkennung sie findet) oder als Schriftdatei hochgeladen ist, ist erkannt. Steht sie nur mit Namen im Material und nicht im Katalog, schlägt der Schritt eine ähnliche Webfont vor, nie eine Schrift ohne Herkunft: zuerst eine Familie des Katalogs mit einem gemeinsamen Namensteil von mindestens namensteil_min Zeichen (ohne Stilworte wie Bold oder Pro und ohne die allgemeinen Wörter der Art wie Sans oder Serif), verrät der Name eine Art, nur Familien dieser Art, bei Gleichstand die kürzere, dann nach dem Alphabet; sonst nach der Art, die der Name verrät (kategorien, das erste passende Wort gilt, sans vor serif), die Webfont ersatz dieser Art – dieselben Familien, die der Kreilo für sachliche und klassische Marken nimmt, und eine Code-Schrift. Verrät der Name nichts, bleibt die Schrift offen, und der Satz nennt den gefundenen Namen."
+    },
+    "bild": {
+      "flaeche_min": 0.0005,
+      "flaeche_min_px": 40,
+      "fuellung_min": 0.85,
+      "knopf_hoehe_min_px": 12,
+      "knopf_hoehe_max": 0.2,
+      "knopf_seiten_min": 1.6,
+      "knopf_seiten_max": 8,
+      "kontrast_knopf": 0.1,
+      "karte_min": 0.12,
+      "kontrast_karte": 0.01,
+      "schatten_zeilen_min": 2,
+      "schatten_zeilen_max": 16,
+      "schatten_dunkler_ab": 0.004,
+      "schatten_dunkler_max": 0.2,
+      "belegt_ab": 0.02,
+      "luecke_min_px": 3,
+      "kialo": "Spec 036, Befund 4.1 (Form, Elevation, Dichte aus einem Bild): Der Grund ist die häufigste Farbe (5 Bit je Kanal). Eine zusammenhängende andere Farbe ist eine Form, wenn sie mindestens flaeche_min des Bildes (und flaeche_min_px Pixel) deckt, den Bildrand nicht berührt (sonst ist sie ein Streifen des Grunds), ihren Rahmen bis auf vier runde Ecken zu mindestens fuellung_min füllt (eine Pille füllt ihn zu 0,93, ein Kreis nur zu 0,79) und gerade Kanten hat. Ein Knopf ist niedrig und breit – mindestens knopf_hoehe_min_px hoch, höchstens knopf_hoehe_max der Bildhöhe, knopf_seiten_min bis knopf_seiten_max mal so breit wie hoch (breiter ist eine Textzeile) – und hebt sich mit einem Abstand in OKLab von mindestens kontrast_knopf von seiner Umgebung ab; eine Karte ist in beiden Richtungen mindestens karte_min des Bildes groß und darf leise sein (kontrast_karte: eine helle Fläche auf hellem Grund). Ein Schatten ist ein weiches Band unter der Form: mindestens schatten_zeilen_min Zeilen (eine einzelne dunkle Zeile ist eine Linie), jede um schatten_dunkler_ab bis schatten_dunkler_max in der OKLab-Helligkeit dunkler als neben der Form und Zeile für Zeile heller; gesucht wird höchstens schatten_zeilen_max Zeilen tief. Für die Dichte zählt eine Zeile (oder Spalte) als belegt, wenn mindestens belegt_ab ihrer Pixel nicht Grund sind; Lücken unter luecke_min_px sind die Kanten von Buchstaben, kein Abstand."
+    },
+    "form": {
+      "stufen": [
+        { "bis": 0.08, "stufe": 0 },
+        { "bis": 0.23, "stufe": 0.5 },
+        { "bis": 0.4, "stufe": 1 },
+        { "bis": 0.47, "stufe": 2 }
+      ],
+      "stufen_namen": { "0": "eckig", "0.5": "leicht gerundet", "1": "rund", "2": "ganz rund" },
+      "eckig_bis_px": 1.5,
+      "kialo": "Spec 036, Befund 4.1 (Form): Der Radius eines Knopfs im Bild zählt im Verhältnis zu seiner Höhe – so ist er unabhängig von der Größe des Bildes. Bezug ist ein Bedienelement von 32 px Höhe (size.control.medium) mit radius.medium (10 px) bei Stufe 1: das Verhältnis 0,31; Stufe 0,5 gibt 0,16, Stufe 2 gibt 0,62 und ist schon ganz rund. Die Grenzen liegen zwischen den Stufen (0 · 0,5 · 1 · 2, dieselben wie bei „runder“/„eckiger“); ab 0,47 ist der Knopf ganz rund, das ist die Pille, die nur die Bedienelemente rundet und Karten ihren Radius lässt. Eine Karte allein sagt nur „eckig“ (Radius bis eckig_bis_px), denn ohne Knopf fehlt der Maßstab, an dem ein runder Radius eine Stufe wäre."
     }
   }
 }
