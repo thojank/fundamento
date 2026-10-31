@@ -297,6 +297,34 @@ const errorNotColorOnly: Enforcer = (modelo, regulo) => {
   return issues;
 };
 
+/** Spec 036, Befund 2.2 (V-2): the palette and the roles of the Zweitfarbe. */
+const SEKUNDO = /^color\.(palette\.sekundo|sekundo)\./;
+/** The roles that mark what a person can do: actions, links and the focus. */
+const ACTION_ROLE = /^color\.(action|link|focus)\./;
+
+/**
+ * Spec 036, Befund 2.2 (V-2) `sekundo-not-action`: the Zweitfarbe decorates and sorts, it never
+ * acts. In every set, an action, link or focus role – or an Ero-Token whose core value is one –
+ * that aliases a step of color.palette.sekundo or a role of color.sekundo is an error at its place.
+ */
+const sekundoNotAction: Enforcer = (modelo) => {
+  const core = modelo.setoj.find((set) => set.name === CORE_SET_NAME)?.tokens ?? {};
+  const guarded = (name: string): boolean =>
+    ACTION_ROLE.test(name) ||
+    (isEroTokenName(name) && ACTION_ROLE.test(aliasTarget(core[name]?.value) ?? ""));
+  return modelo.setoj.flatMap((set) =>
+    Object.values(set.tokens)
+      .filter((token) => guarded(token.name) && SEKUNDO.test(aliasTarget(token.value) ?? ""))
+      .map((token) => ({
+        rule: "sekundo-not-action" as const,
+        severity: "error" as const,
+        path: formatIssuePath(token.location),
+        message: `${token.name} in ${set.name} aliases ${aliasTarget(token.value)}, the Zweitfarbe: an action, a link or the focus never takes the second colour of the brand.`,
+        suggestion: `Point ${token.name} back at the lead colour (a step of color.palette.accent or the neutral ramp, as the structure does) and keep the Zweitfarbe for highlight surfaces, illustrations, badges and charts (color.sekundo.*).`,
+      })),
+  );
+};
+
 /** Enforceable Reguloj by name. A Regulo declared "automatic" must have an entry here. */
 export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
   /**
@@ -474,6 +502,8 @@ export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
   "external-link-marked": externalLinkMarked,
   /** Spec 036, Befund 2.1 (V-1): a link as dark as the text keeps its underline. */
   "link-distinct-from-text": perCombination("link-distinct-from-text"),
+  /** Spec 036, Befund 2.2 (V-2): the Zweitfarbe is never an action, a link or the focus. */
+  "sekundo-not-action": sekundoNotAction,
   // Spec 009 (A2, plan D-07): the two Skemo-level Reguloj of the kampo.
   "required-marked": requiredMarked,
   "error-not-color-only": errorNotColorOnly,
