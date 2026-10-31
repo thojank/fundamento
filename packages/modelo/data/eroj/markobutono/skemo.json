@@ -84,6 +84,12 @@
         ],
         "default": "below",
         "description": "Spec 029 ②b-1b M-2: where the message and the error stand – below the field with the space of the field, or joined to it without that space. Never only in a tooltip: the message must be seen (error-not-color-only, error-says-what-to-do)."
+      },
+      {
+        "name": "readonly",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②a (A-markobutono-1): can be read and focused, not changed – neither pointer, Space nor the label turns it; its value is sent with the form. Looks as at rest (Spec 035 V-1)."
       }
     ],
     "states": [
@@ -418,6 +424,9 @@
         ],
         "loading": [
           "aria-busy"
+        ],
+        "readonly": [
+          "aria-readonly"
         ]
       },
       "keys": [

@@ -1317,6 +1317,8 @@ describe("Figma plan for the markobutono (Spec 010 ②)", () => {
       // Spec 029 ②b-1b M-2: the status of a field, its message beside help and error.
       intent: ["neutral", "success", "warning", "danger"],
       "message-position": ["below", "joined"],
+      // Spec 036 Teil 5 ②b-2: read-only, a BOOLEAN of the set (no variant, V-1).
+      readonly: "BOOLEAN",
       state: ["rest", "hover", "focus", "disabled", "invalid", "warning", "success"],
     });
     expect(set?.variants).toHaveLength(2 * 2 * 7);
@@ -1522,6 +1524,8 @@ describe("Figma plan for the elektilo (Spec 010 ④)", () => {
       // Spec 029 ②b-1b M-2: the status of a field, its message beside help and error.
       intent: ["neutral", "success", "warning", "danger"],
       "message-position": ["below", "joined"],
+      // Spec 036 Teil 5 ②b-2: read-only, a BOOLEAN of the set (no variant, V-1).
+      readonly: "BOOLEAN",
       state: ["rest", "hover", "focus", "disabled", "invalid", "warning", "success"],
     });
     expect(set?.variants).toHaveLength(3 * 7);

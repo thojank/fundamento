@@ -1267,6 +1267,9 @@ export function elementSource({
     const checked = this.propValue("checked") === true;
     control.setAttribute("aria-checked", String(checked));
     this.#internals.setFormValue(checked ? "on" : null);
+    // Spec 036 Teil 5 ②b-2 (A-markobutono-1): read-only is spoken; activation keeps the value.
+    if (this.#readOnly()) control.setAttribute("aria-readonly", "true");
+    else control.removeAttribute("aria-readonly");
     // A checkbox (Spec 010 ②, D-08): required is spoken as aria-required and is the validity of
     // the form — a required box left empty keeps the form from being sent, with the text of
     // a11y.texts.required as its message; invalid is spoken as aria-invalid and set by a filled
@@ -1393,6 +1396,10 @@ export function elementSource({
     const invalid = this.propValue("invalid") === true || this.#filled("error");
     if (invalid) select.setAttribute("aria-invalid", "true");
     else select.removeAttribute("aria-invalid");
+    // Spec 036 Teil 5 ②b-2 (A-elektilo-1): read-only is spoken; the platform's select has no
+    // read-only, so the element keeps the list closed and the value as it is (constructor).
+    if (this.#readOnly()) select.setAttribute("aria-readonly", "true");
+    else select.removeAttribute("aria-readonly");
 `
     : "";
   // The constructor of a select (Spec 010 ④, D-06): it follows the options of the light DOM, and a
@@ -1406,7 +1413,29 @@ export function elementSource({
       attributes: true,
       attributeFilter: ["slot", "value"],
     });
-    control.addEventListener("change", () => {
+    // Spec 036 Teil 5 ②b-2 (A-elektilo-1): read-only, the list does not open and no key chooses;
+    // Tab and Escape stay the page's. A choice that came through anyway is taken back unsaid.
+    const keep = (event: Event) => {
+      if (!this.#readOnly()) return;
+      if (event instanceof KeyboardEvent && (event.key === "Tab" || event.key === "Escape")) return;
+      event.preventDefault();
+    };
+    for (const type of ["pointerdown", "mousedown", "keydown"]) control.addEventListener(type, keep);
+    control.addEventListener(
+      "input",
+      (event) => {
+        if (!this.#readOnly()) return;
+        event.stopImmediatePropagation();
+        this.#render();
+      },
+      { capture: true },
+    );
+    control.addEventListener("change", (event) => {
+      if (this.#readOnly()) {
+        event.stopImmediatePropagation();
+        this.#render();
+        return;
+      }
       const chosen = (control as HTMLSelectElement).value;
       if (this.getAttribute("value") !== chosen) this.setAttribute("value", chosen);
       this.dispatchEvent(new Event("change", { bubbles: true }));
@@ -6229,7 +6258,21 @@ ${isSelect || isListselect ? "" : '    this.dispatchEvent(new Event("input", { b
     });
   }
 
+  /**
+   * Read-only (Spec 036 Teil 5 ②b-2, A-elektilo-1, A-markobutono-1): the value can be read and
+   * focused, not changed; disabled wins over it. False where the Skemo has no readonly.
+   */
+  #readOnly(): boolean {
+    return this.propValue("readonly") === true && this.propValue("disabled") !== true;
+  }
+
   #activate(event: Event): void {
+    // Spec 036 Teil 5 ②b-2 (A-markobutono-1): a read-only toggle does not turn.
+    if (this.#readOnly()) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
     if (this.propValue("loading") === true || this.propValue("disabled") === true) {
       event.preventDefault();
       event.stopImmediatePropagation();

@@ -120,6 +120,8 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
         // Spec 029 ②b-1b M-2: the status of the field.
         ["intent", ["neutral", "success", "warning", "danger"], "neutral"],
         ["message-position", ["below", "joined"], "below"],
+        // Spec 036 Teil 5 ②b-2 (A-elektilo-1): read-only, the last prop.
+        ["readonly", "boolean", false],
       ],
     );
     expect(skemo?.props.find((prop) => prop.name === "placeholder")?.description).toMatch(
@@ -228,6 +230,7 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
         required: ["aria-required"],
         invalid: ["aria-invalid"],
         disabled: ["aria-disabled"],
+        readonly: ["aria-readonly"],
       },
       keys: ["ArrowUp", "ArrowDown", "Enter", "Escape"],
       texts: {
