@@ -86,9 +86,12 @@ const WANTED: Readonly<Record<string, { befund: string; match?: string }>> = {
   kompletigilo: {
     befund: "Abnahme #122: spinner and clear button in the control; the field 256 wide.",
   },
+  // Spec 035 2.3.1: the calendar in the trigger as large as the chevron of the elektilo (its glyph
+  // bound to trigger.size, the trigger at least trigger.width), its vector painted as the ✕ –
+  // every variant of the date picker shows it now (32 of 32 in the full picture).
   datelektilo: {
     befund:
-      "Abnahme #122: spinner, clear button, calendar in the control (the row gone); 256 wide.",
+      "Abnahme #122: spinner, clear button, calendar in the control (the row gone); 256 wide. Spec 035 2.3.1: the calendar as large as the chevron, painted as the ✕.",
   },
 };
 
