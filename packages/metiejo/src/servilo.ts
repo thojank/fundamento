@@ -253,6 +253,7 @@ const PATCHABLE = new Set([
   "ziele",
   "festgelegt",
   "etikedoj",
+  "zweitfarbe",
 ]);
 
 /** An Agordo with a proposal laid over it: objects merged one level deep, values replaced. */
@@ -280,6 +281,14 @@ export function patched(agordo: Agordo, patch: Record<string, unknown>): Agordo 
   const next = structuredClone(agordo) as unknown as Record<string, unknown>;
   for (const [key, value] of Object.entries(patch)) {
     if (!PATCHABLE.has(key)) continue;
+    // Spec 036, Befund 2.2: the Zweitfarbe is one value with its origin – replaced as a whole (a
+    // colour typed by hand has none); null or an empty colour removes it („Keine Zweitfarbe“).
+    if (key === "zweitfarbe") {
+      if (value === null || (isRecord(value) && (value.farbe === "" || value.farbe === null)))
+        delete next[key];
+      else next[key] = value;
+      continue;
+    }
     if (value === null) {
       delete next[key];
       continue;
@@ -1161,9 +1170,18 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     switch (key) {
       case "farbe": {
         const leitfarbe = values.get("leitfarbe");
-        return leitfarbe === null || leitfarbe === ""
-          ? draft.agordo
-          : patched(draft.agordo, { leitfarbe });
+        const withLead =
+          leitfarbe === null || leitfarbe === ""
+            ? draft.agordo
+            : patched(draft.agordo, { leitfarbe });
+        // Spec 036, Befund 2.2: the field of the Zweitfarbe goes with the step; empty is none.
+        const zweitfarbe = values.get("zweitfarbe");
+        if (zweitfarbe === null || zweitfarbe.trim() === (draft.agordo.zweitfarbe?.farbe ?? ""))
+          return withLead;
+        const next = patched(withLead, {
+          zweitfarbe: zweitfarbe.trim() === "" ? null : { farbe: zweitfarbe.trim() },
+        });
+        return readAgordo(next).agordo === undefined ? withLead : next;
       }
       case "schrift": {
         const id = values.get("tiparo");
@@ -1389,6 +1407,13 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
               ? { pret: false, satz: kiSatz() }
               : { pret: true, modelo: provider.toString() },
           ...(fremda === undefined ? {} : { fremda }),
+          // Spec 036, Befund 2.2: the step that names the Agordo field shows the Zweitfarbe.
+          ...(faceto?.agordo.includes("zweitfarbe") === true
+            ? {
+                zweitfarbe:
+                  draft.agordo.zweitfarbe === undefined ? {} : { wert: draft.agordo.zweitfarbe },
+              }
+            : {}),
           zaehlilo: zaehliloOf(name).satz,
           takso: (() => {
             const taksoj = taksojOf();

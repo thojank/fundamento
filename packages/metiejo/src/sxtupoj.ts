@@ -209,6 +209,37 @@ export function hexOf(colour: string): string {
     .join("")}`;
 }
 
+/** The words the field of the Zweitfarbe uses: what it colours, and what never. */
+const ZWEITFARBE_HILFE =
+  "Für Hervorhebungsflächen, Illustrationen, Abzeichen und Diagramme. Knöpfe, Links und der Fokusrahmen bleiben in der Leitfarbe.";
+
+/**
+ * The field of the Zweitfarbe (Spec 036, Befund 2.2) in the step „Leitfarbe und Akzente“ – on the
+ * Schnellstart's colour step and in the assistant: its colour as a swatch and as text to edit, where
+ * it came from (the material, or the person), „Keine Zweitfarbe“ when there is none, and a button
+ * that clears it. Eroj only (M-2); the field sends its value live like the lead colour's picker, the
+ * button the patch that removes it.
+ */
+export function zweitfarbeFeldHtml(zweitfarbe: Agordo["zweitfarbe"]): string {
+  const farbe = zweitfarbe?.farbe;
+  const herkunft = zweitfarbe?.herkunft;
+  const stand =
+    farbe === undefined
+      ? "Keine Zweitfarbe"
+      : herkunft === undefined
+        ? "Von dir gesetzt."
+        : `${herkunft.quelle === "link" ? `Von der Seite ${herkunft.adresse ?? herkunft.merkmal}` : `Aus deinem Material: ${herkunft.datei ?? herkunft.merkmal}`}${herkunft.anteil === undefined ? "" : `, ${herkunft.anteil} % der gefundenen Farbe`}.`;
+  const swatch =
+    farbe === undefined
+      ? ""
+      : `<span class="mt-propono-farbe" role="img" aria-label="Zweitfarbe ${escapeHtml(farbe)}" style="background-color: ${hexOf(farbe)}"></span>`;
+  const entfernen =
+    farbe === undefined
+      ? ""
+      : `<fm-butono emphasis="low" data-apply="${escapeHtml(JSON.stringify({ zweitfarbe: null }))}" data-mt-zweitfarbe-entfernen>Keine Zweitfarbe</fm-butono>`;
+  return `<div class="mt-zweitfarbe" data-mt-zweitfarbe="${escapeHtml(farbe ?? "keine")}"><span class="mt-zeile">${swatch}<fm-kampo name="zweitfarbe" value="${escapeHtml(farbe ?? "")}" placeholder="z. B. #0f8f86" autocomplete="off" data-live="zweitfarbe.farbe">Zweitfarbe<span slot="help">${ZWEITFARBE_HILFE}</span></fm-kampo></span><fm-teksto kind="caption" data-mt-zweitfarbe-stand>${escapeHtml(stand)}</fm-teksto>${entfernen}</div>`;
+}
+
 const stepLine = (key: SxtupoKey): string =>
   `Schritt ${SXTUPOJ.findIndex((sxtupo) => sxtupo.key === key) + 1} von ${SXTUPOJ.length}`;
 
@@ -308,7 +339,7 @@ function fields(input: ScreenInput): string {
     case "farbe": {
       if (marko === undefined) return "";
       const hex = hexOf(marko.agordo.leitfarbe);
-      return `<div class="mt-koloro"><input type="color" name="leitfarbe" value="${hex}" data-live="leitfarbe" aria-labelledby="mt-koloro-label"><fm-teksto id="mt-koloro-label">Leitfarbe <output aria-live="polite">${hex}</output></fm-teksto></div>`;
+      return `<div class="mt-koloro"><input type="color" name="leitfarbe" value="${hex}" data-live="leitfarbe" aria-labelledby="mt-koloro-label"><fm-teksto id="mt-koloro-label">Leitfarbe <output aria-live="polite">${hex}</output></fm-teksto></div>${zweitfarbeFeldHtml(marko.agordo.zweitfarbe)}`;
     }
     case "schrift": {
       if (marko === undefined) return "";

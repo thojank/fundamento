@@ -8,6 +8,7 @@
 import type { Agordo } from "@fundamento/agordilo";
 import { escapeHtml, jsonIsland, screenDocument } from "../html.js";
 import type { StudioPage } from "../studio.js";
+import { zweitfarbeFeldHtml } from "../sxtupoj.js";
 import { KONFIRMO_TEKSTO } from "./averto.js";
 import type { FacetoStand, FacetoStato, Vollstaendigkeit } from "./stato.js";
 
@@ -46,6 +47,8 @@ export interface AsistantoInput {
   historio: readonly { role: "user" | "assistant"; content: string }[];
   ki: { pret: boolean; modelo?: string; satz?: string };
   fremda?: { kiel: string; nomo?: string; konfirmita: boolean };
+  /** Spec 036, Befund 2.2: the step that holds the Zweitfarbe shows its field (absent: none). */
+  zweitfarbe?: { wert?: Agordo["zweitfarbe"] };
   /** Spec 033 S6: the counter of this brand from its Kroniko – tokens, dollars, time, requests. */
   zaehlilo: string;
   /** Spec 033 S6: the estimates before the start, one line each. */
@@ -232,6 +235,7 @@ ${vorschau}
 <fm-sxaltilo name="vorlesen" data-mt-vorlesen>Antworten vorlesen</fm-sxaltilo>
 <fm-teksto kind="caption" data-mt-parolo-satz>${escapeHtml(input.parolo === undefined ? "Sprache: Der Browser erkennt sie selbst (Web Speech API), wo er das kann." : `Sprache: Voxtral (${input.parolo}) auf dem lokalen Server.`)}</fm-teksto>
 ${takso("babilo", "Schätzung je Wunsch")}${input.parolo === undefined ? "" : takso("parolo", "gesprochen")}
+${input.zweitfarbe === undefined ? "" : zweitfarbeFeldHtml(input.zweitfarbe.wert)}
 ${propono}
 ${material}
 ${esploro}
