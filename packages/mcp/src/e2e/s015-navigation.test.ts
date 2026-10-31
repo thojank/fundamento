@@ -116,7 +116,7 @@ describe("the navigation dialogs of the spec (Spec 015 ①)", () => {
     expect(listed.eroj.map((entry) => entry.name)).toContain("spuro");
     const pager = await output<Brief>(client, "get_ero", { name: "pagxigilo", brief: true });
     // Spec 036 Teil 5 ②b-2 (A-pagxigilo-2): size after mode.
-    expect(pager.axes.map((axis) => axis.name)).toEqual(["mode", "size", "current"]);
+    expect(pager.axes.map((axis) => axis.name)).toEqual(["mode", "size", "summary", "current"]);
     expect(pager.required).toEqual({ props: ["page", "total-pages"], slots: [] });
     const trail = await output<Brief>(client, "get_ero", { name: "spuro", brief: true });
     // Spec 036 Teil 5 ②b-2: the new axis of the look.

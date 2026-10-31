@@ -846,8 +846,18 @@ test.describe("②b-2 A-pagxigilo-1: summary", () => {
     const summary = page.locator("#c").locator('[part="summary"]');
     await expect(summary).toContainText("5 / 10");
     await expect(summary).toContainText("Seite 5 von 10");
-    const shown = await summary.evaluate((node) => (node as HTMLElement).innerText.trim());
-    expect(shown).toBe("5 / 10");
+    // Seen: the numbers (the words are clipped from sight); heard: the words (the numbers hidden).
+    const parts = await summary.evaluate((node) =>
+      [...node.children].map((child) => ({
+        text: child.textContent,
+        hidden: child.getAttribute("aria-hidden") === "true",
+        clipped: getComputedStyle(child).clipPath !== "none",
+      })),
+    );
+    expect(parts).toEqual([
+      { text: "5 / 10", hidden: true, clipped: false },
+      { text: "Seite 5 von 10", hidden: false, clipped: true },
+    ]);
     await expect(page.locator("#p").getByRole("button", { name: "Seite 5" })).toHaveCount(1);
   });
 });

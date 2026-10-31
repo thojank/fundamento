@@ -152,6 +152,12 @@ const REST_2B2 = (() => {
         "ero.plenstato.text.typography.compact.false": "ero.plenstato.text.typography",
       },
     },
+    // A-pagxigilo-1 (the part summary: its colour and its typography by size, 3).
+    {
+      pattern: "^ero\\.pagxigilo\\.summary\\.(color|typography\\.size\\.(small|medium))$",
+      added: 3,
+      moved: {},
+    },
   ];
   const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
   return {

@@ -8464,6 +8464,24 @@
           "$value": "{size.target.min}"
         }
       },
+      "summary": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.navigation.text.rest}"
+        },
+        "typography": {
+          "size": {
+            "small": {
+              "$type": "typography",
+              "$value": "{typography.label.2}"
+            },
+            "medium": {
+              "$type": "typography",
+              "$value": "{typography.label.1}"
+            }
+          }
+        }
+      },
       "prev": {
         "size": {
           "size": {

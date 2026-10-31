@@ -57,6 +57,17 @@
         ],
         "default": "medium",
         "description": "Spec 029 ②a (A-pagxigilo-2): small below a dense table – smaller text, arrows and room in the item; medium as before. The item keeps the minimum target size (touch-target-min)."
+      },
+      {
+        "name": "summary",
+        "kind": "enum",
+        "values": [
+          "pages",
+          "count",
+          "compact"
+        ],
+        "default": "pages",
+        "description": "Spec 029 ②a (A-pagxigilo-1): what stands between the arrows – pages, the pages with the current one and its siblings, as before; count, the words of the place („Seite 5 von 10“); compact, the numbers alone („5 / 10“), heard as the words. Dots belong to a carousel, an input field is rare."
       }
     ],
     "states": [
@@ -136,6 +147,16 @@
         },
         "width": {
           "fixed": "size.target.min"
+        }
+      },
+      "summary": {
+        "color": {
+          "fixed": "color.navigation.text.rest"
+        },
+        "typography": {
+          "by": [
+            "size"
+          ]
         }
       },
       "prev": {
@@ -425,6 +446,22 @@
           "size": "medium"
         },
         "token": "size.icon.medium"
+      },
+      {
+        "part": "summary",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.label.2"
+      },
+      {
+        "part": "summary",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.label.1"
       }
     ],
     "a11y": {
@@ -457,6 +494,10 @@
         "items-name": {
           "de": "Seite",
           "en": "Page"
+        },
+        "summary-count": {
+          "de": "Seite {page} von {total-pages}",
+          "en": "Page {page} of {total-pages}"
         }
       }
     },

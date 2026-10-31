@@ -1354,6 +1354,10 @@ const paginationStructure: string = [
   ':where([part="item"]:focus:not(:focus-visible)) { outline-width: 0; }',
   ':where([part="item"][aria-disabled="true"]) { cursor: not-allowed; }',
   ':where([part="ellipsis"]) { display: inline-flex; align-items: center; justify-content: center; }',
+  // Spec 036 Teil 5 ②b-2 (A-pagxigilo-1): the summary between the arrows stays on one line; the
+  // words of compact are heard, not seen.
+  ':where([part="summary"]) { display: inline-flex; align-items: center; white-space: nowrap; }',
+  HIDDEN_TEXT,
 ].join("\n");
 
 const tabsStructure: string = [

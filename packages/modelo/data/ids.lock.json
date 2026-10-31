@@ -1240,6 +1240,10 @@
       "status": "active",
       "type": "jugxo"
     },
+    "jug_01M6A2EXBGT5473CTBGY1WRV5E": {
+      "status": "active",
+      "type": "jugxo"
+    },
     "kpa_01M2VEEE9HREQTY2499C9JS05Q": {
       "status": "active",
       "type": "kontrastParo"
@@ -10497,6 +10501,18 @@
       "type": "token"
     },
     "tok_01M6A09K1179V5104FG32A56RN": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M6A2FN6828DXQPCP2YDHEG54": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M6A2FN69FJ08QDTHH4QZ2CPW": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M6A2FN69FJ08QDTHH4QZ2CPX": {
       "status": "active",
       "type": "token"
     },
