@@ -1550,6 +1550,49 @@ test.describe("the Werkstatt, stage 2 (Spec 019 ②)", () => {
     await expect.poll(async () => (await state(page)).agordo.festgelegt).toBeUndefined();
   });
 
+  // Spec 036 Befund 1.1: the pill rounds only single-line controls. The text area (several lines),
+  // the code block and the tooltip keep a bounded radius at the pill, drawn as the browser draws it.
+  test("at the pill the tekstareo, the kodbloko and the konsileto keep a bounded radius (Spec 036 Befund 1.1)", async ({
+    page,
+  }) => {
+    await openWerkstatt(page);
+    await checkedAtLeast(page, 1);
+    const button = () =>
+      page
+        .locator("#fm-vitrino-butono fm-butono")
+        .first()
+        .locator("button")
+        .evaluate((element) => getComputedStyle(element).borderTopLeftRadius);
+    await slide(page, "fm-werkstatt-form-radius", 2.05);
+    await expect.poll(button).toBe("9999px");
+    const drawn = await page
+      .locator("#fm-vitrino-tekstareo fm-tekstareo")
+      .first()
+      .evaluate((element) => {
+        const control = element.shadowRoot?.querySelector('[part="control"]');
+        return control === null || control === undefined
+          ? ""
+          : getComputedStyle(control).borderTopLeftRadius;
+      });
+    const bounded = {
+      tekstareo: drawn,
+      kodbloko: await property(
+        page,
+        "#fm-vitrino-kodbloko fm-kodbloko",
+        "--fm-ero-kodbloko-box-radius",
+      ),
+      konsileto: await property(
+        page,
+        "#fm-vitrino-konsileto fm-konsileto",
+        "--fm-ero-konsileto-surface-radius",
+      ),
+    };
+    for (const [ero, radius] of Object.entries(bounded)) {
+      expect(radius, ero).not.toBe("9999px");
+      expect(Number.parseFloat(radius), `${ero}: ${radius}`).toBeLessThan(100);
+    }
+  });
+
   test("undo and redo in the page's memory, with the buttons and with Ctrl+Z / Shift+Ctrl+Z", async ({
     page,
   }) => {
