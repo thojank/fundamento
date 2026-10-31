@@ -44,6 +44,16 @@ export const SISTEMO_F = [
   'Fehlt dir eine Ero, ein Sxablono oder ein Werkzeug, nenne es danach in einem ```mankoj-Block als JSON-Liste: [{"speco": "ero" | "sxablono" | "ilo", "nomo": "…", "ekzemplo": "wofür du es gebraucht hättest", "propono": "was es können sollte"}].',
 ].join("\n");
 
+/**
+ * The question when a build answer held no markup (S037-10 Befund 1): asked once, in the same
+ * conversation and without tools – one more request inside the run's budget, no new limit.
+ */
+export const REDEMANDO_F =
+  "Deine Antwort enthielt kein Fragment. Antworte jetzt nur mit dem Fragment in einem ```html-Block.";
+/** The same for Variante 0, which writes a whole document. */
+export const REDEMANDO_0 =
+  "Deine Antwort enthielt kein HTML-Dokument. Antworte jetzt nur mit dem HTML-Dokument in einem ```html-Block.";
+
 /** Variante 0 (D-34): the same words as nordstelo's PROMPT_0. */
 export const PROMPT_0 =
   "Baue es als HTML. Antworte nur mit dem HTML-Dokument in einem ```html-Block.";
@@ -374,6 +384,14 @@ export interface KonstruoPeto {
   maksIlaRezulto?: number;
 }
 
+/** What one build conversation gave: the markup, the agent's gaps, and whether it stayed empty. */
+export interface KonstruoRezulto {
+  fragmento: string;
+  mankoj: AgentaManko[];
+  /** No markup, also after asking once more (S037-10 Befund 1): the raw answers, in order. */
+  malplena?: { respondoj: string[] };
+}
+
 /** The task of one screen: the flow, the screen, its planned links, and in a later round the findings. */
 export function taskoDe(peto: KonstruoPeto): string {
   const { plano, ekrano } = peto;
@@ -414,13 +432,37 @@ export function ofertotajIloj(iloj: readonly ToolInfo[]): ToolInfo[] {
 }
 
 /**
- * One build conversation (round 1 build, later rounds improve): Variante F with tools until the
- * agent answers or the calls are used up, Variante 0 one request without tools. Errors of the model
- * (`CostLimitReached`, `DayLimitReached`, …) pass through unchanged.
+ * An answer without markup (empty, or only a `mankoj` block): the agent is asked once more in the
+ * same conversation, without tools. Markup in the second answer is taken; else the screen stays
+ * empty and both raw answers are returned for the report folder (S037-10 Befund 1).
  */
-export async function konstruiEkranon(
+async function redemandi(
   peto: KonstruoPeto,
-): Promise<{ fragmento: string; mankoj: AgentaManko[] }> {
+  messages: ChatMessage[],
+  unua: string,
+  legita: { mankoj: AgentaManko[] },
+): Promise<KonstruoRezulto> {
+  messages.push({ role: "assistant", content: unua });
+  messages.push({ role: "user", content: peto.varianto === "F" ? REDEMANDO_F : REDEMANDO_0 });
+  const respondo = await sendiSubBudgxeto(peto.chat, peto.budget, messages);
+  kalkuli(peto.peno, respondo);
+  const dua = respondo.message.content ?? "";
+  const duaLegita = eltiriRespondon(dua, peto.varianto);
+  const mankoj = [...legita.mankoj];
+  for (const manko of duaLegita.mankoj) {
+    if (!mankoj.some((m) => m.speco === manko.speco && m.nomo === manko.nomo)) mankoj.push(manko);
+  }
+  if (duaLegita.fragmento !== "") return { fragmento: duaLegita.fragmento, mankoj };
+  return { fragmento: "", mankoj, malplena: { respondoj: [unua, dua] } };
+}
+
+/**
+ * One build conversation (round 1 build, later rounds improve): Variante F with tools until the
+ * agent answers or the calls are used up, Variante 0 one request without tools. An answer without
+ * markup is asked once more (`redemandi`). Errors of the model (`CostLimitReached`,
+ * `DayLimitReached`, …) pass through unchanged.
+ */
+export async function konstruiEkranon(peto: KonstruoPeto): Promise<KonstruoRezulto> {
   const maksVokoj = peto.maksIlojVokoj ?? 24;
   const maksRezulto = peto.maksIlaRezulto ?? 20_000;
   const tasko = taskoDe(peto);
@@ -449,7 +491,9 @@ export async function konstruiEkranon(
     const { message } = respondo;
     const petitaj = message.tool_calls ?? [];
     if (petitaj.length === 0 || peto.ponto === undefined || peto.varianto === "0") {
-      return eltiriRespondon(message.content ?? "", peto.varianto);
+      const content = message.content ?? "";
+      const legita = eltiriRespondon(content, peto.varianto);
+      return legita.fragmento === "" ? redemandi(peto, messages, content, legita) : legita;
     }
     messages.push({ role: "assistant", content: message.content ?? "", tool_calls: petitaj });
     for (const voko of petitaj) {

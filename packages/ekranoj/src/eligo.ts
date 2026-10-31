@@ -6,6 +6,7 @@
 //   bildoj/<slug>-hela.png, -malhela.png
 //   rondoj/<n>/<slug>.html           state of every round (D-26: carried rounds included)
 //   rondoj/<n>/<slug>.fakto.json     the facts each round was scored on (D-33)
+//   rondoj/<n>/<slug>.respondo.txt   the raw answers of a build without markup (S037-10 Befund 1)
 //
 // `eligoDe` is the `EkranojEligo` seam of `kuruEkranojn`: it writes as the run goes (documents
 // before their render, photos, rounds) and everything once more at the end from the result, so a
@@ -514,6 +515,23 @@ export function raportoMarkdown(r: RaportoJson): string {
 export interface EligoOpcioj {
   /** The commit of the Fundamento checkout the run comes from (report „Eingabe“). */
   commit?: string;
+  /**
+   * Takes secrets out of a model answer before it is written (`rondoj/<n>/<slug>.respondo.txt`);
+   * the cli passes the provider's `redact`.
+   */
+  redakti?: (teksto: string) => string;
+}
+
+/** The raw answers of an empty build as one text file (S037-10 Befund 1). */
+export function respondoTeksto(respondoj: readonly string[]): string {
+  return `${respondoj
+    .map((respondo, index) =>
+      [
+        index === 0 ? "--- Antwort ---" : `--- Antwort ${index + 1} (nach der Nachfrage) ---`,
+        respondo,
+      ].join("\n"),
+    )
+    .join("\n")}\n`;
 }
 
 function skribi(dosiero: string, enhavo: string | Uint8Array): void {
@@ -608,6 +626,14 @@ export function eligoDe(opcioj: EligoOpcioj = {}): EkranojEligo {
       skribi(join(out, "bildoj", `${e.slug}-hela.png`), e.bildigo.bildoj.hela);
       skribi(join(out, "bildoj", `${e.slug}-malhela.png`), e.bildigo.bildoj.malhela);
       bildoj.add(e.slug);
+    },
+
+    respondo(e) {
+      const teksto = respondoTeksto(e.respondoj);
+      skribi(
+        join(out, "rondoj", String(e.rondo), `${e.slug}.respondo.txt`),
+        opcioj.redakti === undefined ? teksto : opcioj.redakti(teksto),
+      );
     },
 
     rondo(e) {

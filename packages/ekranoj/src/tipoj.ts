@@ -158,7 +158,9 @@ export type Malhelpo =
   | "axe-hela"
   | "axe-malhela"
   | "K5"
-  | "navigado";
+  | "navigado"
+  /** The agent answered without markup, also after being asked once more (S037-10 Befund 1). */
+  | "leere-antwort";
 
 export interface VerdaEnigo {
   varianto: Varianto;
@@ -291,6 +293,11 @@ export interface EkranojEligo {
   }): EkranaDokumento | Promise<EkranaDokumento>;
   /** A screen was rendered in round `rondo` (photos for `bildoj/`, facts for `rondoj/<n>/`). */
   bildigita?(e: { rondo: number; slug: string; bildigo: BildigoRezulto }): void | Promise<void>;
+  /**
+   * A screen's build ended without markup, also after asking once more (S037-10 Befund 1): the raw
+   * answers of that conversation, for `rondoj/<n>/<slug>.respondo.txt`.
+   */
+  respondo?(e: { rondo: number; slug: string; respondoj: readonly string[] }): void | Promise<void>;
   /** A round was checked: its state per screen. */
   rondo?(e: { rondo: number; stato: Rondo; plano: Plano }): void | Promise<void>;
   /** The run ended (also a partial one): the whole result. */

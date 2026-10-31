@@ -520,7 +520,7 @@ async function run(
       marko: markoKonstruo,
       nun: () => medio.nun(),
       log,
-      eligo: ek.eligoDe(commit === undefined ? {} : { commit }),
+      eligo: ek.eligoDe({ ...(commit === undefined ? {} : { commit }), redakti }),
     });
   } catch (eraro) {
     // Only setup errors are thrown (input, model, Gvidanto, brand build); the run itself ends

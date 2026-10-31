@@ -59,9 +59,12 @@ class Babilo implements ChatModel {
   readonly modelo = `mistral/${PERMESITA}`;
   readonly petoj: ChatMessage[][] = [];
   readonly #eraro: Error | undefined;
+  readonly #malplena: string | undefined;
 
-  constructor(opcioj: { eraro?: Error } = {}) {
+  /** `malplena`: the screen whose every answer holds no markup (an empty html block). */
+  constructor(opcioj: { eraro?: Error; malplena?: string } = {}) {
     this.#eraro = opcioj.eraro;
+    this.#malplena = opcioj.malplena;
   }
 
   async send(messages: readonly ChatMessage[]): Promise<ChatRespondo> {
@@ -78,6 +81,10 @@ class Babilo implements ChatModel {
       return respondo(`\`\`\`json\n${JSON.stringify(plano)}\n\`\`\``);
     }
     const slug = /Baue jetzt den Screen „[^“]*“ \(([a-z0-9-]+)\.html\)/.exec(tasko)?.[1] ?? "x";
+    if (slug === this.#malplena) {
+      // An answer that repeats the key: written only redacted (respondo.txt), never as it is.
+      return respondo(`Kein Fragment, nur ${SXLOSILO}.\n\`\`\`html\n\`\`\``);
+    }
     const celoj = /Laut Plan verweist dieser Screen auf: ([^\n]*)\./.exec(tasko)?.[1] ?? "";
     const ligiloj = celoj
       .split(", ")
@@ -457,6 +464,23 @@ describe("fm ekranoj: a run", () => {
     expect(run.code).toBe(0);
     expect(a.spuro.markoj).toEqual(["provo"]);
     expect(a.spuro.gvidantoj).toEqual([config]);
+  });
+
+  it("keeps the raw answers of a build without markup, redacted, and marks the screen (S037-10 Befund 1)", async () => {
+    const a = arangxo({ babilo: new Babilo({ malplena: "detail" }) });
+    const out = join(a.baseDir, "lauf");
+    const run = await a.kuri([FRAZO, "--ekranoj", "liste,detail", "--out", out, "--ja"]);
+    expect(run.code).toBe(0);
+    expect(run.stderr).toContain("Runde 1: detail – leere Antwort, auch nach einer Nachfrage");
+    const respondo = readFileSync(join(out, "rondoj", "1", "detail.respondo.txt"), "utf8");
+    expect(respondo.split("Kein Fragment, nur ‹Schlüssel›.")).toHaveLength(3);
+    for (const dosiero of dosieroj(out)) {
+      expect(readFileSync(dosiero, "utf8"), dosiero).not.toContain(SXLOSILO);
+    }
+    const raporto = JSON.parse(readFileSync(join(out, "raporto.json"), "utf8")) as {
+      rondoj: { ekranoj: Record<string, { malhelpoj: string[] }> }[];
+    };
+    expect(raporto.rondoj[0]?.ekranoj.detail?.malhelpoj[0]).toBe("leere-antwort");
   });
 
   it("never prints or writes the key of the .env", async () => {

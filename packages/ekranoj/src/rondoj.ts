@@ -222,6 +222,9 @@ const K_TROVOJ: Record<string, { mesagxo: string; sugesto: string; kialo: string
 
 const AXE_KIALO = "D-04: axe-core (WCAG 2.2 A/AA) muss hell und dunkel ohne Befund sein.";
 
+/** The marker of a screen whose build answer held no markup, also after one more question. */
+export const MALPLENA_RESPONDO = "leere-antwort" satisfies Malhelpo;
+
 /** The findings of one checked screen: what the next round gets and what is left at the end. */
 export function trovojDe(e: {
   slug: string;
@@ -232,6 +235,16 @@ export function trovojDe(e: {
   malhelpoj: readonly Malhelpo[];
 }): Trovo[] {
   const trovoj: Trovo[] = [];
+  if (e.malhelpoj.includes(MALPLENA_RESPONDO)) {
+    trovoj.push({
+      regulo: MALPLENA_RESPONDO,
+      loko: `${e.slug}.html`,
+      mesagxo: "Die Antwort enthielt kein Markup, auch nicht nach einer Nachfrage.",
+      sugesto: "Das ganze Fragment in einem ```html-Block senden.",
+      kialo:
+        "Eine Antwort ohne Markup ist kein gebauter Screen, auch nach einer Nachfrage nicht (S037-10 Befund 1).",
+    });
+  }
   for (const m of e.malobservoj) {
     if (m.severity !== "error") continue;
     trovoj.push({
@@ -508,11 +521,12 @@ export async function kuruEkranojn(
 
   for (let r = 1; r <= MAKS_RONDOJ && haltigo === undefined; r += 1) {
     let konstruitaj = 0;
+    const malplenaj = new Set<string>();
     for (const ekrano of plano.ekranoj) {
       if (verdaEkde.has(ekrano.slug)) continue;
       const antaua = lastaStato.get(ekrano.slug);
       try {
-        const { fragmento, mankoj } = await konstruiEkranon({
+        const { fragmento, mankoj, malplena } = await konstruiEkranon({
           chat: deps.chat,
           budget,
           peno,
@@ -543,7 +557,18 @@ export async function kuruEkranojn(
           );
           if (!jam) agentajMankoj.push({ slug: ekrano.slug, manko });
         }
-        deps.log(`Runde ${r}: ${ekrano.slug} gebaut`);
+        if (malplena === undefined) {
+          deps.log(`Runde ${r}: ${ekrano.slug} gebaut`);
+        } else {
+          // S037-10 Befund 1: no markup after one more question – marked, the round goes on.
+          malplenaj.add(ekrano.slug);
+          deps.log(`Runde ${r}: ${ekrano.slug} – leere Antwort, auch nach einer Nachfrage`);
+          await deps.eligo?.respondo?.({
+            rondo: r,
+            slug: ekrano.slug,
+            respondoj: malplena.respondoj,
+          });
+        }
       } catch (error) {
         halti(error, `in Runde ${r} bei ${ekrano.slug}`);
         break;
@@ -560,6 +585,7 @@ export async function kuruEkranojn(
       deps,
       legi,
       fragmentoj,
+      malplenaj,
       verdaEkde,
       lastaStato,
       notoj,
@@ -582,6 +608,8 @@ interface RondoKunteksto {
   deps: EkranojDeps;
   legi: SkemoLegilo | undefined;
   fragmentoj: ReadonlyMap<string, string>;
+  /** Screens whose build of this round ended without markup (S037-10 Befund 1). */
+  malplenaj: ReadonlySet<string>;
   verdaEkde: Map<string, number>;
   lastaStato: Map<string, RondoEkrano>;
   notoj: string[];
@@ -660,15 +688,21 @@ async function kontroliRondon(k: RondoKunteksto): Promise<Rondo> {
       fakto,
       kompleta: navigadoEkrano.kompleta,
     });
+    // An empty answer is never a green screen, whatever the score of the empty page says.
+    const malplena = k.malplenaj.has(ekrano.slug);
+    const malhelpoj: Malhelpo[] = malplena
+      ? [MALPLENA_RESPONDO, ...decido.malhelpoj]
+      : decido.malhelpoj;
+    const verda = decido.verda && !malplena;
     const stato: RondoEkrano = {
       taksado,
       malobservoj,
       navigado: navigadoEkrano,
-      verda: decido.verda,
-      malhelpoj: decido.malhelpoj,
+      verda,
+      malhelpoj,
       fragmento,
       fakto,
-      trovoj: decido.verda
+      trovoj: verda
         ? []
         : trovojDe({
             slug: ekrano.slug,
@@ -676,12 +710,12 @@ async function kontroliRondon(k: RondoKunteksto): Promise<Rondo> {
             malobservoj,
             fakto,
             navigado: navigadoEkrano,
-            malhelpoj: decido.malhelpoj,
+            malhelpoj,
           }),
     };
     rondo[ekrano.slug] = stato;
     k.lastaStato.set(ekrano.slug, stato);
-    if (decido.verda) k.verdaEkde.set(ekrano.slug, r);
+    if (verda) k.verdaEkde.set(ekrano.slug, r);
   }
   return rondo;
 }
