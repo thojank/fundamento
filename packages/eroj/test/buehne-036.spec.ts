@@ -2,7 +2,10 @@
 // Started as a person starts it (`fm metiejo`), with an invented brand and without a language model.
 // 3.1: the preview is the stage – about two thirds of the content width at a wide window (the
 // tolerance is the grid's own gutter, a token of the Vortaro) – and shows a page of real Eroj (head,
-// buttons, card, form, messages) in light and in dark, switchable.
+// buttons, card, form, messages) in light and in dark, switchable. 3.2: two frames laid one over
+// the other, „Jetzt“ and „Mit dem Vorschlag“ (the existing `propono`), cut by a slider; in a narrow
+// window a switch takes its place. A proposal appears right first; „Übernehmen“ lays it on the draft
+// through the existing route, and the left frame shows it (the rev, Spec 033 D-05).
 
 import { type ChildProcess, spawn } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
@@ -169,5 +172,136 @@ test.describe("Bühne (Spec 036, Befund 3.1)", () => {
     await expect.poll(async () => (await grund()).background).not.toBe(hell.background);
     await wahl.getByRole("radio", { name: "Hell" }).click();
     await expect.poll(async () => (await grund()).scheme).toBe("light");
+  });
+});
+
+/** An invented screenshot, drawn by the browser: a band of petrol over a light ground. */
+async function material(page: Page, request: APIRequestContext, id: string): Promise<void> {
+  const base64 = await page.evaluate(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 40;
+    canvas.height = 30;
+    const context = canvas.getContext("2d");
+    if (context === null) return "";
+    context.fillStyle = "#f4f4f2";
+    context.fillRect(0, 0, 40, 30);
+    context.fillStyle = "#0f766e";
+    context.fillRect(0, 0, 30, 8);
+    return canvas.toDataURL("image/png").split(",")[1] ?? "";
+  });
+  const read = await request.post(`${base}/api/marko/${id}/materialo`, {
+    data: { filename: "bildschirm.png", base64, rajtoj: true },
+  });
+  expect(read.status()).toBe(200);
+}
+
+/** Which frame of the stage a person sees at a point of it, given as a share of its width. */
+const sichtbarBei = (page: Page, anteil: number) =>
+  page.locator("[data-mt-buehne-rahmen]").evaluate((rahmen, share) => {
+    const box = rahmen.getBoundingClientRect();
+    const hit = document.elementFromPoint(box.left + box.width * share, box.top + box.height / 2);
+    if (hit === null) return "nichts";
+    if (hit.hasAttribute("data-mt-vorschau-propono")) return "vorschlag";
+    if (hit.hasAttribute("data-mt-vorschau")) return "jetzt";
+    return hit.localName;
+  }, anteil);
+
+/** The fill of the first main button in a frame of the stage, once the frame has painted it. */
+async function knopf(page: Page, selector: string): Promise<string> {
+  const button = page.frameLocator(selector).locator('fm-butono[emphasis="high"]').first();
+  await expect(button).toBeVisible();
+  const read = () =>
+    button.evaluate((host) => {
+      const control = host.shadowRoot?.querySelector("button") ?? host;
+      return getComputedStyle(control).backgroundColor;
+    });
+  await expect.poll(read).not.toBe("rgba(0, 0, 0, 0)");
+  return read();
+}
+
+const JETZT = "[data-mt-buehne] iframe[data-mt-vorschau]";
+const VORSCHLAG = "[data-mt-buehne] iframe[data-mt-vorschau-propono]";
+
+test.describe("Bühne (Spec 036, Befund 3.2)", () => {
+  test("3.2: two frames lie on each other; the slider cuts them – left now, right with the proposal", async ({
+    page,
+    request,
+  }) => {
+    const fehler = fehlerOf(page);
+    const id = await marke(request, "Probomarko Schieber");
+    await page.setViewportSize(WIDE);
+    await page.goto(`${base}/asistanto/${id}/gvidkoloro`);
+    const buehne = page.locator("[data-mt-buehne]");
+    await expect(buehne.getByText("Jetzt", { exact: true })).toBeVisible();
+    await expect(buehne.getByText("Mit dem Vorschlag", { exact: true })).toBeVisible();
+    // Both frames on the same place of the stage.
+    const boxes = await page.locator("[data-mt-buehne-rahmen] iframe").evaluateAll((frames) =>
+      frames.map((frame) => {
+        const box = frame.getBoundingClientRect();
+        return [box.left, box.top, box.width, box.height].map(Math.round);
+      }),
+    );
+    expect(boxes).toHaveLength(2);
+    expect(boxes[1]).toEqual(boxes[0]);
+    const schieber = buehne.getByRole("slider", { name: "Jetzt und mit dem Vorschlag" });
+    await expect(schieber).toBeVisible();
+    await expect(buehne.getByRole("switch")).toBeHidden();
+    await expect.poll(() => sichtbarBei(page, 0.25)).toBe("jetzt");
+    await expect.poll(() => sichtbarBei(page, 0.75)).toBe("vorschlag");
+    await schieber.focus();
+    await page.keyboard.press("Home");
+    await expect.poll(() => sichtbarBei(page, 0.25)).toBe("vorschlag");
+    await page.keyboard.press("End");
+    await expect.poll(() => sichtbarBei(page, 0.75)).toBe("jetzt");
+    expect(fehler).toEqual([]);
+  });
+
+  test("3.2: in a narrow window a switch takes the slider's place", async ({ page, request }) => {
+    const id = await marke(request, "Probomarko Schmal");
+    const grenze = { width: 800, height: 900 };
+    await page.setViewportSize(grenze);
+    await page.goto(`${base}/asistanto/${id}/gvidkoloro`);
+    const breakpoint = await pxOf(page, "--fm-size-breakpoint-expanded");
+    expect(grenze.width).toBeLessThan(breakpoint);
+    const buehne = page.locator("[data-mt-buehne]");
+    const umschalter = buehne.getByRole("switch", { name: "Mit dem Vorschlag" });
+    await expect(umschalter).toBeVisible();
+    await expect(buehne.getByRole("slider")).toBeHidden();
+    await expect.poll(() => sichtbarBei(page, 0.5)).toBe("jetzt");
+    await expect.poll(() => sichtbarBei(page, 0.9)).toBe("jetzt");
+    await umschalter.click();
+    await expect(umschalter).toBeChecked();
+    await expect.poll(() => sichtbarBei(page, 0.1)).toBe("vorschlag");
+    await expect.poll(() => sichtbarBei(page, 0.5)).toBe("vorschlag");
+    await umschalter.click();
+    await expect.poll(() => sichtbarBei(page, 0.5)).toBe("jetzt");
+  });
+
+  test("3.2: the material's proposal stands right first; „Übernehmen“ brings it to the left frame", async ({
+    page,
+    request,
+  }) => {
+    const id = await marke(request, "Probomarko Material");
+    await page.setViewportSize(WIDE);
+    await page.goto(`${base}/asistanto/${id}/gvidkoloro`);
+    await material(page, request, id);
+    await page.goto(`${base}/asistanto/${id}/gvidkoloro`);
+    const vorher = Number(await page.locator("html").getAttribute("data-mt-rev"));
+    const jetzt = await knopf(page, JETZT);
+    const vorschlag = await knopf(page, VORSCHLAG);
+    expect(vorschlag).not.toBe(jetzt);
+    const uebernehmen = page.locator("[data-mt-buehne]").getByRole("button", {
+      name: "Übernehmen",
+      exact: true,
+    });
+    await uebernehmen.click();
+    await expect
+      .poll(async () => Number(await page.locator("html").getAttribute("data-mt-rev")))
+      .toBeGreaterThan(vorher);
+    const stato = (await (await request.get(`${base}/api/marko/${id}/stato`)).json()) as {
+      rev: number;
+    };
+    await expect(page.locator("html")).toHaveAttribute("data-mt-rev", String(stato.rev));
+    await expect.poll(() => knopf(page, JETZT)).toBe(vorschlag);
   });
 });
