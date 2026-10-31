@@ -10220,7 +10220,7 @@
             "false": {
               "rest": {
                 "$type": "color",
-                "$value": "{color.palette.neutral.900}",
+                "$value": "{color.background.default}",
                 "$description": "elekto: surface.fill when selected=false, state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                 "$extensions": {
                   "com.ciferecigo.fundamento": {
@@ -10242,7 +10242,7 @@
               },
               "focus": {
                 "$type": "color",
-                "$value": "{color.palette.neutral.900}",
+                "$value": "{color.background.default}",
                 "$description": "elekto: surface.fill when selected=false, state=focus (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                 "$extensions": {
                   "com.ciferecigo.fundamento": {
@@ -10253,7 +10253,7 @@
               },
               "disabled": {
                 "$type": "color",
-                "$value": "{color.palette.neutral.400}",
+                "$value": "{color.background.default}",
                 "$description": "elekto: surface.fill when selected=false, state=disabled (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                 "$extensions": {
                   "com.ciferecigo.fundamento": {
@@ -10264,7 +10264,7 @@
               },
               "invalid": {
                 "$type": "color",
-                "$value": "{color.palette.neutral.900}",
+                "$value": "{color.background.default}",
                 "$description": "elekto: surface.fill when selected=false, state=invalid (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                 "$extensions": {
                   "com.ciferecigo.fundamento": {
