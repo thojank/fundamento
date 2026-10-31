@@ -3860,7 +3860,9 @@ describe("the Figma plan draws the datelektilo (Spec 025 ②)", () => {
     expect(closed?.bindings).toMatchObject({
       "surface.fill": "color/background/default",
       "border.color": "color/border/default",
-      "trigger.size": "size/target/min",
+      // Spec 035 2.3.1: the calendar as large as the chevron, the trigger the target.
+      "trigger.size": "size/icon/medium",
+      "trigger.width": "size/target/min",
       "calendar.fill": "color/background/raised",
       "calendar.radius": "radius/role/surface",
       "calendar.width": "size/container/small",

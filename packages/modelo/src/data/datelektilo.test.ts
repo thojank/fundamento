@@ -140,7 +140,11 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       "message",
     ]);
     // Abnahme #122: the calendar inside the field, the target of a pointer (as komuna from the Fonto).
-    expect(skemo?.parts.trigger).toEqual({ size: { fixed: "size.target.min" } });
+    // Spec 035 2.3.1: its glyph as large as the chevron of the elektilo, the target its width.
+    expect(skemo?.parts.trigger).toEqual({
+      size: { fixed: "size.icon.medium" },
+      width: { fixed: "size.target.min" },
+    });
     expect(skemo?.parts.calendar).toEqual({
       fill: { fixed: "color.background.raised" },
       radius: { fixed: "radius.role.surface" },

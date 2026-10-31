@@ -1040,7 +1040,12 @@ describe("the plugin draws the datelektilo (Spec 025 ②)", () => {
       for (const week of ["week-1", "week-6"]) {
         expect(descendant(variant, week)?.children, variant.name).toHaveLength(7);
       }
-      expect(bound(descendant(variant, "trigger"), "width")).toBe("size/target/min");
+      // Spec 035 2.3.1: the calendar's glyph as large as a chevron, the trigger at least the target.
+      expect(bound(descendant(variant, "trigger"), "minWidth")).toBe("size/target/min");
+      expect(bound(descendant(variant, "trigger"), "minHeight")).toBe("size/target/min");
+      expect(bound(descendant(descendant(variant, "trigger"), "glyph-komuna"), "width")).toBe(
+        "size/icon/medium",
+      );
       expect(bound(descendant(variant, "cell-4"), "width")).toBe("size/target/min");
       expect(bound(descendant(variant, "cell-4"), "cornerRadius")).toBe("radius/role/control");
       // The 28th of September stands first, outside the month; the 1st is the fourth cell.
