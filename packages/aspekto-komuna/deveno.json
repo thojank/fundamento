@@ -6885,7 +6885,17 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.dialogo.surface.radius",
+      "token": "ero.dialogo.surface.radius.size.small",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Dialog/Dialog.tsx",
+      "sxlosilo": "Dialog {} rest, hell: [object Object] border-radius (gemessen)",
+      "fontoValoro": "12px",
+      "valoro": "{radius.role.surface}",
+      "maniero": "prenita"
+    },
+    {
+      "token": "ero.dialogo.surface.radius.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/Dialog/Dialog.tsx",
@@ -10569,7 +10579,7 @@
       "noto": "durchsichtig wie die Fonto"
     },
     {
-      "token": "ero.langetaro.tab.height",
+      "token": "ero.langetaro.tab.height.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/TabList/TabList.tsx",
@@ -10579,7 +10589,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.langetaro.tab.inline.padding",
+      "token": "ero.langetaro.tab.inline.padding.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/TabList/TabList.tsx",
@@ -10611,7 +10621,7 @@
       "kialo": "KontrastParo ero.langetaro.tabs.color.active.false+ero.langetaro.tab.fill.hover hatte mit dem Wert der Fonto 4.47:1 (dunkel, Schwelle 4.5:1): ero.langetaro.tabs.color.active.false bleibt auf der Rolle des Skemo."
     },
     {
-      "token": "ero.langetaro.tabs.typography",
+      "token": "ero.langetaro.tabs.typography.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/TabList/TabList.tsx",
@@ -12325,7 +12335,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.pagxigilo.item.typography",
+      "token": "ero.pagxigilo.item.typography.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/Pagination/Pagination.tsx",
@@ -12367,7 +12377,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.pagxigilo.item.inline.padding",
+      "token": "ero.pagxigilo.item.inline.padding.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/Pagination/Pagination.tsx",
@@ -12409,7 +12419,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.pagxigilo.ellipsis.typography",
+      "token": "ero.pagxigilo.ellipsis.typography.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/Pagination/Pagination.tsx",
@@ -12429,7 +12439,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.pagxigilo.prev.size",
+      "token": "ero.pagxigilo.prev.size.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/Pagination/Pagination.tsx",
@@ -12439,7 +12449,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.pagxigilo.next.size",
+      "token": "ero.pagxigilo.next.size.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/Pagination/Pagination.tsx",

@@ -42,12 +42,13 @@
         "name": "size",
         "kind": "enum",
         "values": [
+          "x-small",
           "small",
           "medium",
           "large"
         ],
         "default": "medium",
-        "description": "The size of the box, size.icon.*; an Ero that composes the icon sets it to its own."
+        "description": "The size of the box, size.icon.*; an Ero that composes the icon sets it to its own. Spec 029 ②a (A-ikono-2): x-small, below small, for the status icon in a field (M-2) and dense tables."
       },
       {
         "name": "intent",
@@ -128,6 +129,14 @@
           "intent": "danger"
         },
         "token": "color.status.danger.text"
+      },
+      {
+        "part": "box",
+        "property": "size",
+        "when": {
+          "size": "x-small"
+        },
+        "token": "size.scale.100"
       },
       {
         "part": "box",

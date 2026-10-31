@@ -557,8 +557,9 @@ describe("the Vitrino shows the tekstareo and the dialogo (Spec 011 ②)", () =>
 
   it("dialogo: a row per size × reason, each cell a button that opens the closed dialog with heading, message, reason label and two actions", () => {
     const grid = datumoj.eroj.dialogo ?? "";
-    // Six, and the dialog of Nachlese 7 ② B-8 (its message in two paragraphs).
-    expect((grid.match(/<fm-dialogo /g) ?? []).length).toBe(7);
+    // Six, and the dialog of Nachlese 7 ② B-8 (its message in two paragraphs); Spec 036 Teil 5
+    // ②b-2 (A-dialogo-2): nine with full.
+    expect((grid.match(/<fm-dialogo /g) ?? []).length).toBe(10);
     expect(grid).toContain(
       '<fm-butono emphasis="medium" data-fm-opens="fm-vitrino-dialogo-small-none">Öffnen</fm-butono>',
     );
@@ -575,7 +576,7 @@ describe("the Vitrino shows the tekstareo and the dialogo (Spec 011 ②)", () =>
     expect(grid).toContain(
       'reason="none">small · none<span slot="message">Nachricht</span><span slot="reason">Begründung</span><fm-butono',
     );
-    expect((grid.match(/<span slot="reason-help">/g) ?? []).length).toBe(4);
+    expect((grid.match(/<span slot="reason-help">/g) ?? []).length).toBe(6);
     expect(grid).toContain(
       '<fm-butono slot="actions" emphasis="low">Abbrechen</fm-butono><fm-butono slot="actions" emphasis="high">Bestätigen</fm-butono>',
     );
@@ -673,11 +674,12 @@ describe("the Vitrino shows the navigado and the langetaro (Spec 011 ⑤)", () =
     expect(grid).toContain('<th scope="row">rest</th>');
   });
 
-  it("langetaro: one row, three tabs, the first selected, the panel with the first word, named", () => {
+  it("langetaro: a row per size, three tabs, the first selected, the panel with the first word, named", () => {
     const grid = datumoj.eroj.langetaro ?? "";
-    expect((grid.match(/<fm-langetaro /g) ?? []).length).toBe(1);
+    // Spec 036 Teil 5 ②b-2 (A-langetaro-2): a row per size.
+    expect((grid.match(/<fm-langetaro /g) ?? []).length).toBe(3);
     expect(grid).toContain(
-      '<fm-langetaro label="Reiter" selected="1"><data value="1">Eins</data><data value="2">Zwei</data><data value="3">Drei</data><div slot="panel">Eins</div></fm-langetaro>',
+      '<fm-langetaro size="medium" label="Reiter" selected="1"><data value="1">Eins</data><data value="2">Zwei</data><data value="3">Drei</data><div slot="panel">Eins</div></fm-langetaro>',
     );
   });
 });
@@ -825,12 +827,13 @@ describe("the Vitrino shows the faldilo and the kompletigilo (Spec 014 ⑤)", ()
 // row, named by the Modelo's word, and the spuro with three links of the Vitrino's words, the last
 // the current page.
 describe("the Vitrino shows the pagxigilo and the spuro (Spec 015 ①)", () => {
-  it("pagxigilo: one row, page 5 of 10, no children (the Modelo's word names the landmark)", () => {
+  it("pagxigilo: a row per size, page 5 of 10, no children (the Modelo's word names the landmark)", () => {
     const grid = datumoj.eroj.pagxigilo ?? "";
-    expect((grid.match(/<fm-pagxigilo /g) ?? []).length).toBe(1);
-    expect(grid).toContain('<fm-pagxigilo total-pages="10" page="5"></fm-pagxigilo>');
+    // Spec 036 Teil 5 ②b-2 (A-pagxigilo-2): a row per size.
+    expect((grid.match(/<fm-pagxigilo /g) ?? []).length).toBe(2);
+    expect(grid).toContain('<fm-pagxigilo size="medium" total-pages="10" page="5"></fm-pagxigilo>');
     expect(grid).not.toContain("unbekannt");
-    expect(grid).toContain('<th scope="row">rest</th>');
+    expect(grid).toContain('<th scope="row">medium</th>');
   });
 
   it("spuro: one row, two links and the current page as text, the Vitrino's words (the Modelo's word names the landmark)", () => {

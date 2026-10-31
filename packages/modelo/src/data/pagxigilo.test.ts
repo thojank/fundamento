@@ -46,6 +46,8 @@ describe("pagxigilo in the repo Modelo (section ①, G1, G2)", () => {
       ["mode", "enum", false, "button"],
       ["href-template", "string", false, "?page={page}"],
       ["siblings", "number", false, 1],
+      // Spec 036 Teil 5 ②b-2 (A-pagxigilo-2): small and medium, the last prop.
+      ["size", "enum", false, "medium"],
     ]);
     expect(skemo?.props.find((prop) => prop.name === "mode")?.values).toEqual(["button", "link"]);
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled"]);
@@ -55,8 +57,9 @@ describe("pagxigilo in the repo Modelo (section ①, G1, G2)", () => {
     expect(entryKeysOf(skemoOrThrow())).toEqual([
       { slot: "items", key: "current", equals: "page" },
     ]);
-    // The axis is the state alone: current is the state of one entry, no variant (E7).
-    expect(variantKeys(skemoOrThrow())).toEqual(["state"]);
+    // The axes are size and state: current is the state of one entry, no variant (E7); size since
+    // Spec 036 Teil 5 ②b-2 (A-pagxigilo-2).
+    expect(variantKeys(skemoOrThrow())).toEqual(["size", "state"]);
     expect(combinationsOf(skemoOrThrow(), ["state"])).toHaveLength(4);
   });
 
@@ -73,7 +76,7 @@ describe("pagxigilo in the repo Modelo (section ①, G1, G2)", () => {
     expect(skemo?.parts.item).toMatchObject({
       fill: { by: ["current", "state"] },
       color: { by: ["current", "state"] },
-      typography: { fixed: "typography.label.1" },
+      typography: { by: ["size"] },
       weight: { by: ["current"] },
       height: { fixed: "size.target.min" },
       width: { fixed: "size.target.min" },
@@ -83,8 +86,8 @@ describe("pagxigilo in the repo Modelo (section ①, G1, G2)", () => {
       width: { by: ["current"] },
       color: { fixed: "color.border.strong" },
     });
-    expect(skemo?.parts.prev).toEqual({ size: { fixed: "size.icon.medium" } });
-    expect(skemo?.parts.next).toEqual({ size: { fixed: "size.icon.medium" } });
+    expect(skemo?.parts.prev).toEqual({ size: { by: ["size"] } });
+    expect(skemo?.parts.next).toEqual({ size: { by: ["size"] } });
     expect(skemo?.parts.ellipsis?.color).toEqual({ fixed: "color.navigation.text.rest" });
     const bound = (part: string, property: string, when: Record<string, string>) =>
       boundToken(skemoOrThrow(), part, property, when)?.token;
@@ -169,7 +172,7 @@ describe("the Uzo of the pagxigilo (section ①, G2)", () => {
   it("the brief names mode and current as axes, page and total-pages as duties, and stays under 750", () => {
     if (pagxigilo === undefined) throw new Error("missing");
     const brief = briefOf(pagxigilo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["mode", "current"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["mode", "size", "current"]);
     expect(brief.required).toEqual({ props: ["page", "total-pages"], slots: [] });
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
   });

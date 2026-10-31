@@ -55,13 +55,14 @@ describe("avataro in the repo Modelo (section ③, G1, G2)", () => {
     ).toEqual([
       ["name", "string", true, undefined],
       ["picture", "string", false, undefined],
-      ["size", ["small", "medium", "large"], false, "medium"],
+      // Spec 036 Teil 5 ②b-2 (A-avataro-2): five sizes.
+      ["size", ["x-small", "small", "medium", "large", "x-large"], false, "medium"],
       ["decorative", "boolean", false, false],
     ]);
     expect(skemo?.states).toEqual(["rest"]);
     expect(skemo?.slots).toEqual([]);
     expect(variantKeys(skemoOrThrow())).toEqual(["size", "state"]);
-    expect(combinationsOf(skemoOrThrow(), ["size", "state"])).toHaveLength(3);
+    expect(combinationsOf(skemoOrThrow(), ["size", "state"])).toHaveLength(5);
   });
 
   it("names its parts: the round image, the initials on the sunken ground in the subtle text, the box by size — no new token, no colour from the name (E1, E8)", () => {

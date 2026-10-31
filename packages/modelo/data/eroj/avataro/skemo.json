@@ -24,12 +24,14 @@
         "name": "size",
         "kind": "enum",
         "values": [
+          "x-small",
           "small",
           "medium",
-          "large"
+          "large",
+          "x-large"
         ],
         "default": "medium",
-        "description": "The size of the circle: small and medium on the icon scale (beside a line of text), large on the control scale (a profile header), which density changes."
+        "description": "The size of the circle: small and medium on the icon scale (beside a line of text), large on the control scale (a profile header), which density changes. Spec 029 ②a (A-avataro-2): x-small for dense lists, x-large for the head of a profile."
       },
       {
         "name": "decorative",
@@ -77,6 +79,14 @@
         "part": "box",
         "property": "size",
         "when": {
+          "size": "x-small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "box",
+        "property": "size",
+        "when": {
           "size": "small"
         },
         "token": "size.icon.medium"
@@ -96,6 +106,22 @@
           "size": "large"
         },
         "token": "size.control.large"
+      },
+      {
+        "part": "box",
+        "property": "size",
+        "when": {
+          "size": "x-large"
+        },
+        "token": "size.scale.1000"
+      },
+      {
+        "part": "initials",
+        "property": "typography",
+        "when": {
+          "size": "x-small"
+        },
+        "token": "typography.caption"
       },
       {
         "part": "initials",
@@ -120,6 +146,14 @@
           "size": "large"
         },
         "token": "typography.label.1"
+      },
+      {
+        "part": "initials",
+        "property": "typography",
+        "when": {
+          "size": "x-large"
+        },
+        "token": "typography.headline.4"
       }
     ],
     "a11y": {

@@ -435,22 +435,41 @@ test.describe("②b-2 A-pagxigilo-2, A-langetaro-2: size", () => {
 });
 
 test.describe("②b-2 A-dialogo-2: size full", () => {
-  test("full takes the whole viewport without a rounded edge", async ({ page }) => {
-    await page.setViewportSize({ width: 800, height: 600 });
+  test("full is the largest container step, wider than medium, without a rounded edge", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1600, height: 900 });
     await serve(
       page,
       out,
-      '<fm-dialogo id="d" size="full" open>Befund verwerfen?<fm-butono slot="actions" emphasis="high">Verwerfen</fm-butono></fm-dialogo>',
+      '<fm-dialogo id="f" size="full" open>Befund verwerfen?<fm-butono slot="actions" emphasis="high">Verwerfen</fm-butono></fm-dialogo>',
     );
-    const surface = await page.locator("#d").evaluate((host) => {
+    const look = (id: string) =>
+      page.locator(`#${id}`).evaluate((host) => {
+        const control = host.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+        return {
+          width: Math.round(control.getBoundingClientRect().width),
+          radius: getComputedStyle(control).borderTopLeftRadius,
+        };
+      });
+    const full = await look("f");
+    expect(full).toEqual({ width: await pixelsOf(page, "--fm-size-container-max"), radius: "0px" });
+    expect(full.width).toBeGreaterThan(await pixelsOf(page, "--fm-size-container-medium"));
+  });
+
+  test("on a narrow screen full stays inside the viewport, as every modal dialog", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 600, height: 800 });
+    await serve(
+      page,
+      out,
+      '<fm-dialogo id="f" size="full" open>Befund verwerfen?<fm-butono slot="actions" emphasis="high">Verwerfen</fm-butono></fm-dialogo>',
+    );
+    const right = await page.locator("#f").evaluate((host) => {
       const control = host.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
-      const rect = control.getBoundingClientRect();
-      return {
-        width: Math.round(rect.width),
-        height: Math.round(rect.height),
-        radius: getComputedStyle(control).borderTopLeftRadius,
-      };
+      return control.getBoundingClientRect().right;
     });
-    expect(surface).toEqual({ width: 800, height: 600, radius: "0px" });
+    expect(right).toBeLessThanOrEqual(600);
   });
 });

@@ -2996,6 +2996,16 @@
         },
         "typography": {
           "size": {
+            "x": {
+              "small": {
+                "$type": "typography",
+                "$value": "{typography.caption}"
+              },
+              "large": {
+                "$type": "typography",
+                "$value": "{typography.headline.4}"
+              }
+            },
             "small": {
               "$type": "typography",
               "$value": "{typography.label.2}"
@@ -3018,6 +3028,16 @@
       "box": {
         "size": {
           "size": {
+            "x": {
+              "small": {
+                "$type": "dimension",
+                "$value": "{size.icon.small}"
+              },
+              "large": {
+                "$type": "dimension",
+                "$value": "{size.scale.1000}"
+              }
+            },
             "small": {
               "$type": "dimension",
               "$value": "{size.icon.medium}"
@@ -4237,8 +4257,20 @@
           "$value": "{color.background.raised}"
         },
         "radius": {
-          "$type": "dimension",
-          "$value": "{radius.role.surface}"
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{radius.role.surface}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{radius.role.surface}"
+            },
+            "full": {
+              "$type": "dimension",
+              "$value": "{radius.none}"
+            }
+          }
         },
         "width": {
           "size": {
@@ -4249,6 +4281,10 @@
             "medium": {
               "$type": "dimension",
               "$value": "{size.container.medium}"
+            },
+            "full": {
+              "$type": "dimension",
+              "$value": "{size.container.max}"
             }
           }
         },
@@ -5470,6 +5506,12 @@
       "box": {
         "size": {
           "size": {
+            "x": {
+              "small": {
+                "$type": "dimension",
+                "$value": "{size.scale.100}"
+              }
+            },
             "small": {
               "$type": "dimension",
               "$value": "{size.icon.small}"
@@ -6713,13 +6755,37 @@
           }
         },
         "height": {
-          "$type": "dimension",
-          "$value": "{size.target.min}"
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.target.min}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.target.min}"
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{size.control.large}"
+            }
+          }
         },
         "inline": {
           "padding": {
-            "$type": "dimension",
-            "$value": "{spacing.medium}"
+            "size": {
+              "small": {
+                "$type": "dimension",
+                "$value": "{spacing.small}"
+              },
+              "medium": {
+                "$type": "dimension",
+                "$value": "{spacing.medium}"
+              },
+              "large": {
+                "$type": "dimension",
+                "$value": "{spacing.large}"
+              }
+            }
           }
         }
       },
@@ -6737,8 +6803,20 @@
           }
         },
         "typography": {
-          "$type": "typography",
-          "$value": "{typography.label.1}"
+          "size": {
+            "small": {
+              "$type": "typography",
+              "$value": "{typography.label.2}"
+            },
+            "medium": {
+              "$type": "typography",
+              "$value": "{typography.label.1}"
+            },
+            "large": {
+              "$type": "typography",
+              "$value": "{typography.label.1}"
+            }
+          }
         },
         "weight": {
           "active": {
@@ -8269,8 +8347,16 @@
           }
         },
         "typography": {
-          "$type": "typography",
-          "$value": "{typography.label.1}"
+          "size": {
+            "small": {
+              "$type": "typography",
+              "$value": "{typography.label.2}"
+            },
+            "medium": {
+              "$type": "typography",
+              "$value": "{typography.label.1}"
+            }
+          }
         },
         "weight": {
           "current": {
@@ -8294,8 +8380,16 @@
         },
         "inline": {
           "padding": {
-            "$type": "dimension",
-            "$value": "{spacing.small}"
+            "size": {
+              "small": {
+                "$type": "dimension",
+                "$value": "{spacing.xsmall}"
+              },
+              "medium": {
+                "$type": "dimension",
+                "$value": "{spacing.small}"
+              }
+            }
           }
         }
       },
@@ -8319,8 +8413,16 @@
           "$value": "{color.navigation.text.rest}"
         },
         "typography": {
-          "$type": "typography",
-          "$value": "{typography.label.1}"
+          "size": {
+            "small": {
+              "$type": "typography",
+              "$value": "{typography.label.2}"
+            },
+            "medium": {
+              "$type": "typography",
+              "$value": "{typography.label.1}"
+            }
+          }
         },
         "width": {
           "$type": "dimension",
@@ -8329,14 +8431,30 @@
       },
       "prev": {
         "size": {
-          "$type": "dimension",
-          "$value": "{size.icon.medium}"
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.icon.small}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.icon.medium}"
+            }
+          }
         }
       },
       "next": {
         "size": {
-          "$type": "dimension",
-          "$value": "{size.icon.medium}"
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.icon.small}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.icon.medium}"
+            }
+          }
         }
       },
       "box": {
@@ -9223,6 +9341,10 @@
             "medium": {
               "$type": "dimension",
               "$value": "{size.control.medium}"
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{size.control.large}"
             }
           }
         },
@@ -9236,6 +9358,10 @@
               "medium": {
                 "$type": "dimension",
                 "$value": "{spacing.medium}"
+              },
+              "large": {
+                "$type": "dimension",
+                "$value": "{spacing.large}"
               }
             }
           }

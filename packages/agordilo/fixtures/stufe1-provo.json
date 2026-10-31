@@ -1,5 +1,5 @@
 {
-  "source": "packages/modelo/test/fixtures/valid/aspekto-provo/aspekto-provo auf main ac5deb3 (Spec 016, Agordilo Stufe 1); Prüfsummen nach O-1 (Spec 024, die Stufen 25, 150, 850, 975 der farbigen Paletten) neu gerechnet; nach Spec 025 ① (Glyphen add und subtract der Ikonaro) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (elekto, markobutono und sxaltilo ohne die Größe large) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (Zähler des tekstareo) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (drei Größen bei listelektilo, plurelektilo, datelektilo) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (Einheit des kampo) neu gerechnet",
+  "source": "packages/modelo/test/fixtures/valid/aspekto-provo/aspekto-provo auf main ac5deb3 (Spec 016, Agordilo Stufe 1); Prüfsummen nach O-1 (Spec 024, die Stufen 25, 150, 850, 975 der farbigen Paletten) neu gerechnet; nach Spec 025 ① (Glyphen add und subtract der Ikonaro) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (elekto, markobutono und sxaltilo ohne die Größe large) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (Zähler des tekstareo) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (drei Größen bei listelektilo, plurelektilo, datelektilo) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (Einheit des kampo) neu gerechnet; Spec 036 Teil 5 ②b-2 (S36-4.2): Größen",
   "agordo": {
     "name": "provo",
     "owner": "Provo (fictitious, test only)",
@@ -28,7 +28,7 @@
   },
   "sha256": {
     "$themes.json": "32d20d206abf9b832c41c26c654fb33aef9694a5661ff89655091a4aae9931d3",
-    "aspekto.json": "def6a32e21576145e64d2db73846164fc0a2995900a431355f7efb1b89fad615",
+    "aspekto.json": "d7b5265f3ba2b1237bd76f0de10fd12928524a39db6ea80874d89bab23992f17",
     "ids.lock.json": "19279ae73d078332a67f90d7e401fa8878e9fc7794e8496809c133730e1e564e",
     "ikonoj/LICENSE": "ddbe6082ec3cf979db47e5af549d2849c5d6182b3e005ef91ce1dbb9eb122f11",
     "ikonoj/add.svg": "4baa2c668c8800442d47ab39d716e35142c125a9146efefa50f701e9622f2000",
@@ -55,6 +55,6 @@
     "raporto.json": "59bac84d809ae97da61d96535f236d7bd279fc023aa632c27c2e0a17c11c8965",
     "raporto.md": "38edbdc57660e2f107cb190a8f04d82f6fdc997d96ec6cebf0eeb88202fcdda8",
     "sets/aspekto/provo+color-scheme/dark.json": "4e9efc4e7d34a6eaad46b1c022e18344e118f17b12935e0b93cd4497d8aa30ad",
-    "sets/aspekto/provo.json": "a8f7a7bf1d62e81c06b1ef1b25e85ae0243edd6874ec409fc059ba23897ae7bc"
+    "sets/aspekto/provo.json": "581c7038ff77c2d4f2e39babb6374e23463b8e701108826bff8b1f0952be0ef1"
   }
 }

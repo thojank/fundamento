@@ -41,7 +41,8 @@ describe("dialogo in the repo Modelo (section ②, E9)", () => {
     expect(skemo?.props.map((prop) => [prop.name, prop.values ?? prop.kind, prop.default])).toEqual(
       [
         ["open", "boolean", false],
-        ["size", ["small", "medium"], "small"],
+        // Spec 036 Teil 5 ②b-2 (A-dialogo-2): full, the whole viewport.
+        ["size", ["small", "medium", "full"], "small"],
         ["reason", ["none", "optional", "required"], "none"],
       ],
     );
@@ -75,7 +76,12 @@ describe("dialogo in the repo Modelo (section ②, E9)", () => {
     expect(skemo.parts.backdrop?.color).toEqual({ fixed: "color.backdrop" });
     expect(skemo.parts.surface?.fill).toEqual({ fixed: "color.background.raised" });
     expect(skemo.parts.surface?.shadow).toEqual({ fixed: "elevation.shadow.modal" });
-    expect(skemo.parts.surface?.radius).toEqual({ fixed: "radius.role.surface" });
+    // Spec 036 Teil 5 ②b-2 (A-dialogo-2): the radius by size – none for full.
+    expect(skemo.parts.surface?.radius).toEqual({ by: ["size"] });
+    expect(boundToken(skemo, "surface", "radius", { size: "small" })?.token).toBe(
+      "radius.role.surface",
+    );
+    expect(boundToken(skemo, "surface", "radius", { size: "full" })?.token).toBe("radius.none");
     expect(boundToken(skemo, "surface", "width", { size: "small" })?.token).toBe(
       "size.container.small",
     );
@@ -92,10 +98,11 @@ describe("dialogo in the repo Modelo (section ②, E9)", () => {
     expect(boundToken(skemo, "reason", "height", { reason: "required" })?.token).toBe(
       "size.control.large",
     );
-    // size and reason key parts: the axes of the Figma set, 2 × 3 (one state).
+    // size and reason key parts: the axes of the Figma set, 3 × 3 (one state; full since Spec 036
+    // Teil 5 ②b-2, A-dialogo-2).
     expect(styledProps(skemo)).toEqual(["size", "reason"]);
     expect(variantKeys(skemo)).toEqual(["size", "reason", "state"]);
-    expect(combinationsOf(skemo, ["size", "reason", "state"])).toHaveLength(6);
+    expect(combinationsOf(skemo, ["size", "reason", "state"])).toHaveLength(9);
   });
 
   it("speaks role dialog: named by the title, described by the message, Escape closes (G4)", () => {
