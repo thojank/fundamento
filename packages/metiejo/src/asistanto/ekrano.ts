@@ -158,14 +158,46 @@ function nachrichtHtml(entry: AsistantoInput["historio"][number]): string {
     : `<fm-markdovido source="${escapeHtml(entry.content).replaceAll("\n", "&#10;")}"></fm-markdovido>`;
 }
 
+/** What the assistant says before the first wish. */
+const GRUSS =
+  "Sag mir, was du an diesem Schritt ändern möchtest, zum Beispiel „wärmer“, „runder“ oder „Akzent in Petrol“. Ich setze es über die Regler, und die Prüfung läuft mit.";
+
 function chatHtml(historio: AsistantoInput["historio"]): string {
   const items = historio.map(
     (entry) =>
       `<fm-karto data-mt-rolle="${entry.role}"><fm-teksto kind="caption">${entry.role === "user" ? "Du" : "Assistent"}</fm-teksto>${nachrichtHtml(entry)}</fm-karto>`,
   );
   return items.length === 0
-    ? '<fm-karto data-mt-rolle="assistant"><fm-teksto kind="caption">Assistent</fm-teksto><fm-teksto>Sag mir, was du an diesem Schritt ändern möchtest, zum Beispiel „wärmer“, „runder“ oder „Akzent in Petrol“. Ich setze es über die Regler, und die Prüfung läuft mit.</fm-teksto></fm-karto>'
+    ? `<fm-karto data-mt-rolle="assistant"><fm-teksto kind="caption">Assistent</fm-teksto><fm-teksto>${GRUSS}</fm-teksto></fm-karto>`
     : items.join("");
+}
+
+/** The last answer of the assistant, else its greeting: what the bar shows of the chat. */
+function letzteAntwortHtml(historio: AsistantoInput["historio"]): string {
+  const last = historio.findLast((entry) => entry.role === "assistant");
+  return `<div class="mt-letzte-antwort" data-mt-letzte-antwort><fm-teksto kind="caption">Letzte Antwort</fm-teksto>${last === undefined ? `<fm-teksto>${GRUSS}</fm-teksto>` : nachrichtHtml(last)}</div>`;
+}
+
+/**
+ * Spec 036, Befund 3.3: the chat as a bar below the stage – the input with sending, speaking and
+ * reading aloud, the last answer, the model and the counter; the history in a fold (fm-faldilo).
+ */
+function chatleisteHtml(
+  input: AsistantoInput,
+  kiSatz: string,
+  takso: (zugo: keyof NonNullable<AsistantoInput["takso"]>, label: string) => string,
+): string {
+  const off = input.ki.pret ? "" : " disabled";
+  // With a model the sentence of the model names the counter; without one it stands on its own.
+  const zaehler = input.ki.pret
+    ? ""
+    : `<fm-teksto kind="caption">Zähler: <span data-mt-zaehlilo>${escapeHtml(input.zaehlilo)}</span></fm-teksto>`;
+  return `<div class="mt-chatleiste" data-mt-chatleiste>
+<div class="mt-chatleiste-eingabe"><fm-tekstareo name="teksto" rows="2" data-mt-babilo-teksto${off}>Deine Nachricht</fm-tekstareo><div class="mt-zeile"><fm-butono emphasis="high" data-mt-babilo-sendi${off}>Senden</fm-butono><fm-butono emphasis="medium" data-mt-parolo data-mt-parolo-voxtral="${input.parolo === undefined ? "ne" : "ja"}"${off}>Sprechen</fm-butono><fm-sxaltilo name="vorlesen" data-mt-vorlesen>Antworten vorlesen</fm-sxaltilo></div></div>
+${letzteAntwortHtml(input.historio)}
+<div class="mt-zeile"><fm-teksto kind="caption" data-mt-ki>${kiSatz}</fm-teksto>${zaehler}<fm-teksto kind="caption" data-mt-parolo-satz>${escapeHtml(input.parolo === undefined ? "Sprache: Der Browser erkennt sie selbst (Web Speech API), wo er das kann." : `Sprache: Voxtral (${input.parolo}) auf dem lokalen Server.`)}</fm-teksto>${takso("babilo", "Schätzung je Wunsch")}${input.parolo === undefined ? "" : takso("parolo", "gesprochen")}</div>
+<fm-faldilo data-mt-verlauf><span slot="summary">Verlauf</span><div data-mt-babilo-listo>${chatHtml(input.historio)}</div></fm-faldilo>
+</div>`;
 }
 
 export function asistantoScreen(input: AsistantoInput): string {
@@ -219,14 +251,6 @@ ${dialog}
 <section class="mt-buehne-layout" data-mt-buehne-layout>
 <div class="mt-schritte"><fm-navigado label="Schritte" page="${escapeHtml(faceto.name)}" orientation="vertical">${nav}<a href="/studio/${encodeURIComponent(name)}/${studio}" data-page="studio">Studio</a><a href="/asistanto/${encodeURIComponent(name)}/komenco" data-page="komenco">Einstiegsfragen</a></fm-navigado><fm-teksto kind="caption">${nochNicht}</fm-teksto>
 <div class="mt-babilo">
-<fm-teksto kind="caption" data-mt-ki>${kiSatz}</fm-teksto>
-<div data-mt-babilo-listo>${chatHtml(input.historio)}</div>
-<fm-tekstareo name="teksto" rows="3" data-mt-babilo-teksto${input.ki.pret ? "" : " disabled"}>Deine Nachricht</fm-tekstareo>
-<fm-butono emphasis="high" data-mt-babilo-sendi${input.ki.pret ? "" : " disabled"}>Senden</fm-butono>
-<fm-butono emphasis="medium" data-mt-parolo data-mt-parolo-voxtral="${input.parolo === undefined ? "ne" : "ja"}"${input.ki.pret ? "" : " disabled"}>Sprechen</fm-butono>
-<fm-sxaltilo name="vorlesen" data-mt-vorlesen>Antworten vorlesen</fm-sxaltilo>
-<fm-teksto kind="caption" data-mt-parolo-satz>${escapeHtml(input.parolo === undefined ? "Sprache: Der Browser erkennt sie selbst (Web Speech API), wo er das kann." : `Sprache: Voxtral (${input.parolo}) auf dem lokalen Server.`)}</fm-teksto>
-${takso("babilo", "Schätzung je Wunsch")}${input.parolo === undefined ? "" : takso("parolo", "gesprochen")}
 ${propono}
 ${material}
 ${esploro}
@@ -236,7 +260,9 @@ ${esploro}
 <fm-butono emphasis="low" data-mt-fremda>Baut auf einer bestehenden Marke auf</fm-butono>
 </div>
 </div>
-<div class="mt-buehne-spalte">${vorschau}</div>
+<div class="mt-buehne-spalte">${vorschau}
+${chatleisteHtml(input, kiSatz, takso)}
+</div>
 </section>
 </fm-pagxo>
 </fm-sxelo>

@@ -21,12 +21,16 @@ export const BUEHNE_CSS = `.mt-buehne-layout { display: grid; grid-template-colu
 .mt-buehne-layout[data-mt-schmal] [data-mt-schieber], .mt-buehne-layout[data-mt-schmal] [data-mt-buehne-beschriftung], .mt-buehne-layout[data-mt-schmal] .mt-buehne-schnitt { display: none; }
 .mt-buehne-layout[data-mt-schmal] iframe[data-mt-vorschau-propono] { clip-path: none; visibility: hidden; }
 .mt-buehne-layout[data-mt-schmal] [data-mt-zeige-vorschlag] iframe[data-mt-vorschau-propono] { visibility: visible; }
-.mt-buehne-layout[data-mt-schmal] [data-mt-zeige-vorschlag] iframe[data-mt-vorschau] { visibility: hidden; }`;
+.mt-buehne-layout[data-mt-schmal] [data-mt-zeige-vorschlag] iframe[data-mt-vorschau] { visibility: hidden; }
+.mt-chatleiste { display: flex; flex-direction: column; gap: var(--fm-spacing-small); padding: var(--fm-spacing-medium); border: var(--fm-border-width-default) solid var(--fm-color-border-subtle); border-radius: var(--fm-radius-role-surface); background-color: var(--fm-color-background-default); }
+.mt-chatleiste-eingabe { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--fm-spacing-small); align-items: end; }
+.mt-buehne-layout[data-mt-schmal] .mt-chatleiste-eingabe { grid-template-columns: minmax(0, 1fr); }
+.mt-letzte-antwort { display: flex; flex-direction: column; gap: var(--fm-spacing-xsmall); }`;
 
 /**
  * The stage's client: the narrow window from the Vortaro's expanded breakpoint, light or dark for
- * both frames, the cut of the slider and the switch. Runs inside the screens' client script
- * (html.ts), after its functions.
+ * both frames, the cut of the slider and the switch, the last answer of the chat bar. Runs inside
+ * the screens' client script (html.ts), after its functions.
  */
 export const BUEHNE_SKRIPTO = `
 // Spec 036 Teil 3: the stage of the assistant.
@@ -71,6 +75,21 @@ if (buehneLayout) {
       event.stopPropagation();
       folgeBuehne(event.target, true);
     });
+    // Befund 3.3: a new answer in the history is the bar's last answer as well – built from its
+    // text as the history builds it (fm-markdovido), never from markup.
+    const liste = document.querySelector("[data-mt-babilo-listo]");
+    const letzte = document.querySelector("[data-mt-letzte-antwort]");
+    if (liste && letzte) new MutationObserver((records) => {
+      for (const record of records) for (const node of record.addedNodes) {
+        if (!(node instanceof Element) || node.getAttribute("data-mt-rolle") !== "assistant") continue;
+        const quelle = node.querySelector("fm-markdovido");
+        if (!quelle) continue;
+        const antwort = document.createElement("fm-markdovido");
+        antwort.setAttribute("source", quelle.getAttribute("source") || "");
+        const caption = letzte.querySelector('fm-teksto[kind="caption"]');
+        letzte.replaceChildren(...(caption ? [caption] : []), antwort);
+      }
+    }).observe(liste, { childList: true });
     // Every handler of the screen is bound now (this part runs last): the stage can be used.
     buehne.setAttribute("data-mt-bereit", "");
   }

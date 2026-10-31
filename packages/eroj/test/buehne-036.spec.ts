@@ -304,10 +304,17 @@ test.describe("Bühne (Spec 036, Befund 3.2)", () => {
       name: "Übernehmen",
       exact: true,
     });
+    // The route answers after the check of the step; then the screen loads anew with the new rev.
+    const genommen = page.waitForResponse(
+      (response) =>
+        response.request().method() === "POST" &&
+        new URL(response.url()).pathname === `/api/marko/${id}/faceto`,
+    );
+    const neu = page.waitForEvent("load");
     await uebernehmen.click();
-    await expect
-      .poll(async () => Number(await page.locator("html").getAttribute("data-mt-rev")))
-      .toBeGreaterThan(vorher);
+    expect((await genommen).status()).toBe(200);
+    await neu;
+    expect(Number(await page.locator("html").getAttribute("data-mt-rev"))).toBeGreaterThan(vorher);
     const stato = (await (await request.get(`${base}/api/marko/${id}/stato`)).json()) as {
       rev: number;
     };
