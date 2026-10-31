@@ -42,6 +42,75 @@ export function ableitungUrteil(messung: { median: number; referenz: number }): 
 }
 
 /**
+ * The classes of the CI runners by the median of the derivation measured on them (Spec 034): fast
+ * below 110 ms, middle from 110 to 130 ms, slow above 130 ms.
+ */
+export const RUNNER_SCHNELL_UNTER_MS = 110;
+export const RUNNER_LANGSAM_UEBER_MS = 130;
+
+export type RunnerKlasse = "schnell" | "mittel" | "langsam";
+
+export function runnerKlasse(ableitungMedian: number): RunnerKlasse {
+  if (ableitungMedian < RUNNER_SCHNELL_UNTER_MS) return "schnell";
+  if (ableitungMedian > RUNNER_LANGSAM_UEBER_MS) return "langsam";
+  return "mittel";
+}
+
+/** One attempt of the calibration in CI (Spec 035 Befund 1.1): a row of ableitung-kalibrierung.tsv. */
+export interface KalibrierVersuch {
+  lauf: string;
+  versuch: number;
+  head: string;
+  referenz: number;
+  ableitungMedian: number;
+  gegenprobeNormiert: number;
+  gegenprobeRot: boolean;
+  klasse: RunnerKlasse;
+}
+
+/** Reads the calibration table (tab-separated, one header row; columns by name). */
+export function kalibrierungLesen(tsv: string): KalibrierVersuch[] {
+  const [kopf = "", ...zeilen] = tsv.split("\n").filter((zeile) => zeile.trim() !== "");
+  const spalten = kopf.split("\t");
+  return zeilen.map((zeile) => {
+    const werte = zeile.split("\t");
+    const wert = (name: string): string => {
+      const index = spalten.indexOf(name);
+      if (index < 0 || werte[index] === undefined) {
+        throw new Error(`ableitung-kalibrierung.tsv: column ${name} missing`);
+      }
+      return werte[index];
+    };
+    const ableitungMedian = Number(wert("ableitung_median_ms"));
+    return {
+      lauf: wert("run_id"),
+      versuch: Number(wert("attempt")),
+      head: wert("head_sha"),
+      referenz: Number(wert("referenz_ms")),
+      ableitungMedian,
+      gegenprobeNormiert: Number(wert("gegenprobe_normiert_ms")),
+      gegenprobeRot: wert("gegenprobe_rot") === "true",
+      klasse: runnerKlasse(ableitungMedian),
+    };
+  });
+}
+
+/** The median of the reference on the fast runners of the table, to a tenth of a millisecond. */
+export function bezugswertOf(versuche: readonly KalibrierVersuch[]): number {
+  const referenzen = versuche
+    .filter((versuch) => versuch.klasse === "schnell")
+    .map((versuch) => versuch.referenz)
+    .sort((a, b) => a - b);
+  if (referenzen.length === 0) throw new Error("no attempt on a fast runner in the table");
+  const mitte = Math.floor(referenzen.length / 2);
+  const median =
+    referenzen.length % 2 === 1
+      ? (referenzen[mitte] ?? 0)
+      : ((referenzen[mitte - 1] ?? 0) + (referenzen[mitte] ?? 0)) / 2;
+  return Math.round(median * 10) / 10;
+}
+
+/**
  * The reference load (runs in the page; no closure over this module): colour mathematics of the
  * kind the derivation does – conversions with cube roots, powers and angles over a fixed set of
  * values – seven times; the median in milliseconds. It touches no part of the Werkstatt, so a slower

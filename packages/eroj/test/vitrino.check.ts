@@ -13,6 +13,8 @@ import {
   ABLEITUNG_GRENZE_MS,
   ableitungUrteil,
   ableitungVerlangsamen,
+  bezugswertOf,
+  kalibrierungLesen,
   REFERENZ_SCHNELL_MS,
   referenzLast,
 } from "./ableitung.js";
@@ -1878,5 +1880,37 @@ test.describe("the verdict of the derivation (Ableitung, #118)", () => {
     expect(ableitungUrteil({ median: 140 + 80 * k, referenz: REFERENZ_SCHNELL_MS * k }).rot).toBe(
       true,
     );
+  });
+});
+
+// Spec 035 Befund 1.1 (D-13): the Bezugswert comes from the calibration in CI, not from a guess.
+// ableitung-kalibrierung.tsv holds every attempt of the job „Rendered checks (Make Kit, Quickstart,
+// Vitrino-Werkstatt)“ on the rebased head (two chains, PR rerun and workflow_dispatch). The reference
+// and the median of the derivation do not depend on REFERENZ_SCHNELL_MS, so the table stays valid
+// when the constant follows it; the Gegenprobe columns were measured with the constant of that head.
+test.describe("the Bezugswert of the derivation from the calibration in CI (Spec 035 Befund 1.1)", () => {
+  const versuche = kalibrierungLesen(
+    readFileSync(new URL("./ableitung-kalibrierung.tsv", import.meta.url), "utf8"),
+  );
+
+  test("the table holds at least ten attempts of one head, on fast and on slow runners", () => {
+    expect(versuche.length).toBeGreaterThanOrEqual(10);
+    expect(new Set(versuche.map((versuch) => versuch.head)).size).toBe(1);
+    expect(versuche.some((versuch) => versuch.klasse === "schnell")).toBe(true);
+    expect(versuche.some((versuch) => versuch.klasse === "langsam")).toBe(true);
+  });
+
+  test("the Gegenprobe was red on a fast and on a slow runner", () => {
+    for (const klasse of ["schnell", "langsam"] as const) {
+      const rot = versuche.filter((versuch) => versuch.klasse === klasse && versuch.gegenprobeRot);
+      expect(rot.length, `Gegenprobe rot auf ${klasse}en Runnern`).toBeGreaterThan(0);
+      for (const versuch of rot) {
+        expect(versuch.gegenprobeNormiert).toBeGreaterThan(ABLEITUNG_GRENZE_MS);
+      }
+    }
+  });
+
+  test("REFERENZ_SCHNELL_MS is the median reference of the fast runners in the table", () => {
+    expect(REFERENZ_SCHNELL_MS).toBe(bezugswertOf(versuche));
   });
 });
