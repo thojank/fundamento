@@ -3332,7 +3332,7 @@
           },
           "readonly": {
             "$type": "color",
-            "$value": "{color.background.sunken}"
+            "$value": "{color.background.default}"
           },
           "invalid": {
             "$type": "color",
@@ -5242,7 +5242,7 @@
           },
           "readonly": {
             "$type": "color",
-            "$value": "{color.background.sunken}"
+            "$value": "{color.background.default}"
           },
           "invalid": {
             "$type": "color",
@@ -6564,7 +6564,7 @@
           },
           "readonly": {
             "$type": "color",
-            "$value": "{color.background.sunken}"
+            "$value": "{color.background.default}"
           },
           "invalid": {
             "$type": "color",
@@ -7978,7 +7978,7 @@
           },
           "readonly": {
             "$type": "color",
-            "$value": "{color.background.sunken}"
+            "$value": "{color.background.default}"
           },
           "invalid": {
             "$type": "color",

@@ -7626,7 +7626,7 @@
           },
           "readonly": {
             "$type": "color",
-            "$value": "{color.text.default}",
+            "$value": "{color.text.muted}",
             "$description": "datelektilo: label.color when state=readonly (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
             "$extensions": {
               "com.ciferecigo.fundamento": {
@@ -7743,7 +7743,7 @@
           },
           "readonly": {
             "$type": "color",
-            "$value": "{color.background.sunken}",
+            "$value": "{color.background.raised}",
             "$description": "datelektilo: surface.fill when state=readonly (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
             "$extensions": {
               "com.ciferecigo.fundamento": {

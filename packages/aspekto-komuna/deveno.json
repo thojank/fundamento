@@ -6393,6 +6393,39 @@
       "kialo": "Die Fonto zeichnet 16 px; ein Ziel für den Zeiger braucht 24 px (touch-target-min, WCAG 2.5.8): size.target.min."
     },
     {
+      "token": "ero.datelektilo.surface.fill.readonly",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/TextInput/TextInput.tsx",
+      "sxlosilo": "TextInput {\"size\":\"sm\"} readonly, hell: [object Object] background-color (gemessen)",
+      "fontoValoro": "#ffffff",
+      "valoro": "{color.background.raised}",
+      "maniero": "derivita",
+      "noto": "Spec 035 2.3.4 (V-1): schreibgeschützt wie die Fonto – ihre Felder mit diesem Zustand (Textfeld, Auswahl, Mehrfachauswahl) zeigen das Aussehen der Ruhe; ihr Datumsfeld hat keinen, für den datelektilo gilt die Regel der anderen (wie ero.kampo.surface.fill.readonly)."
+    },
+    {
+      "token": "ero.datelektilo.surface.fill.readonly",
+      "aro": "aspekto/komuna+color-scheme/dark",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/TextInput/TextInput.tsx",
+      "sxlosilo": "TextInput {\"size\":\"sm\"} readonly, dunkel: [object Object] background-color (gemessen)",
+      "fontoValoro": "#262626",
+      "valoro": "{color.background.default}",
+      "maniero": "derivita",
+      "noto": "Spec 035 2.3.4 (V-1): schreibgeschützt wie die Fonto – ihre Felder mit diesem Zustand (Textfeld, Auswahl, Mehrfachauswahl) zeigen das Aussehen der Ruhe; ihr Datumsfeld hat keinen, für den datelektilo gilt die Regel der anderen (wie ero.kampo.surface.fill.readonly)."
+    },
+    {
+      "token": "ero.datelektilo.label.color.readonly",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/TextInput/TextInput.tsx",
+      "sxlosilo": "TextInput {\"size\":\"sm\"} readonly, hell: label color (gemessen)",
+      "fontoValoro": "#474747",
+      "valoro": "{color.text.muted}",
+      "maniero": "derivita",
+      "noto": "Spec 035 2.3.4 (V-1): schreibgeschützt wie die Fonto – ihre Felder mit diesem Zustand (Textfeld, Auswahl, Mehrfachauswahl) zeigen das Aussehen der Ruhe; ihr Datumsfeld hat keinen, für den datelektilo gilt die Regel der anderen (wie ero.kampo.label.color.readonly)."
+    },
+    {
       "token": "ero.datelektilo.calendar.fill",
       "aro": "core",
       "fonto": "astryx",

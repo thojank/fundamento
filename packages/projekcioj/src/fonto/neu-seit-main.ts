@@ -76,6 +76,12 @@ const CHANGED: Readonly<Record<string, string>> = {
   "ero.kampo.increment.size.size.medium": "size.control.medium",
   "ero.kampo.increment.size.size.large": "size.control.large",
   "ero.datelektilo.trigger.size": "size.control.medium",
+  // Spec 035 2.3.4 (V-1): read-only keeps the look of rest in every field with that state – main
+  // bound the sunken background.
+  "ero.kampo.surface.fill.readonly": "color.background.sunken",
+  "ero.datelektilo.surface.fill.readonly": "color.background.sunken",
+  "ero.listelektilo.surface.fill.readonly": "color.background.sunken",
+  "ero.plurelektilo.surface.fill.readonly": "color.background.sunken",
 };
 
 /** Abnahme #122: a token main had that is gone (replaced by its sizes), with main's role. */
