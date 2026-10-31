@@ -85,4 +85,20 @@ test.describe("Übernahme aus dem Material (Spec 036 Teil 4)", () => {
       await expect(offen).toContainText(satz?.satz ?? "–");
     }
   });
+
+  test("4.1: the neutrals of the image are proposed with the ground as provenance, before and with the proposal", async ({
+    page,
+  }) => {
+    const id = await brandWithMaterial(page, "Grundo", "grund-hell.png");
+    await page.goto(`${base}/asistanto/${id}/neutralaj`);
+    const proposal = page.locator("fm-avizo[data-mt-propono]");
+    await expect(proposal).toBeVisible();
+    // The invented ground #f3ecdf covers 70 % of the image (test-doubles/uebernahme.ts).
+    await expect(proposal).toContainText("Grundfläche #f3ecdf, 70 %");
+    await expect(proposal).toContainText("Fläche #fbf8f2, 20 %");
+    // The frame with the proposal lays it on through the propono route (D-04).
+    await expect(
+      page.locator('iframe[data-mt-src*="propono=neutralaj"], iframe[src*="propono=neutralaj"]'),
+    ).toHaveCount(1);
+  });
 });
