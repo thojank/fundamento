@@ -99,8 +99,9 @@ describe("Spec 035, Befund 4.5.1: a proposal shows what it means, in one sentenc
   it("the preview shows the step before and with the proposal, side by side", () => {
     const html = asistantoScreen(inputOf({ propono: leitfarbe }));
     expect(html).toContain("iframe data-mt-vorschau data-mt-src");
+    // Spec 036, Befund 3.1: the frames show the stage of the step's Studio page (buehne-<seite>).
     expect(html).toMatch(
-      /<iframe data-mt-vorschau-propono data-mt-src="\/marko\/lumo\/vorschau\?sxtupo=studio-farbe&amp;breite=mittel&amp;propono=gvidkoloro"/,
+      /<iframe data-mt-vorschau-propono data-mt-src="\/marko\/lumo\/vorschau\?sxtupo=buehne-farbe&amp;breite=mittel&amp;propono=gvidkoloro"/,
     );
     expect(html).toContain("Mit dem Vorschlag");
     expect(asistantoScreen(inputOf())).not.toContain("data-mt-vorschau-propono");

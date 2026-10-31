@@ -2289,7 +2289,8 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
             body: previewBody(
               isSxtupoKey(sxtupo) ||
                 sxtupo.startsWith("studio-") ||
-                sxtupo.startsWith("komponento-")
+                sxtupo.startsWith("komponento-") ||
+                sxtupo.startsWith("buehne-")
                 ? sxtupo
                 : "vorschau",
               breite,

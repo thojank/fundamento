@@ -1,11 +1,12 @@
 // The screen of the Asistanto (Spec 033 S1): the step-by-step flow beside the Studio. Left the
-// Facetoj with their states and the completeness (fm-mezurilo), in the middle the live preview of the
-// Schnellstart, right the chat (fm-karto per message, fm-tekstareo, fm-butono) and the step's
-// actions – take the proposal, release, reopen, and the link into the Studio page of the Faceto.
+// Facetoj with their states and the completeness (fm-mezurilo), the chat (fm-karto per message,
+// fm-tekstareo, fm-butono) and the step's actions – take the proposal, release, reopen, and the link
+// into the Studio page of the Faceto; on two thirds of the width the stage (Spec 036 Teil 3).
 // Built of Fundamento's own Eroj (M-2); the chat family of Eroj-Runde 7 does not exist yet, what is
 // missing is a Manko for E7, not a rebuild. Pure: the server gives the input, this module the HTML.
 
 import type { Agordo } from "@fundamento/agordilo";
+import { buehneHtml } from "../buehne.js";
 import { escapeHtml, jsonIsland, screenDocument } from "../html.js";
 import type { StudioPage } from "../studio.js";
 import { KONFIRMO_TEKSTO } from "./averto.js";
@@ -204,13 +205,13 @@ export function asistantoScreen(input: AsistantoInput): string {
       : `<fm-teksto kind="caption" data-mt-takso-${zugo}>${escapeHtml(label)} ${escapeHtml(input.takso[zugo])}</fm-teksto>`;
   const material = `<fm-faldilo data-mt-materialo><span slot="summary">Material deiner Marke (Screenshot, Logo, PDF, Schrift oder Link)</span><fm-alsxutilo name="materialo" accept=".png,.jpg,.jpeg,.webp,.svg,.pdf,.woff2,.woff,.ttf,.otf" data-mt-materialo-dosiero>Datei</fm-alsxutilo><fm-kampo name="url" type="url" data-mt-materialo-url>Link auf eine Webseite</fm-kampo><fm-markobutono name="rajtoj-materialo" value="ja" data-mt-materialo-rajtoj>${escapeHtml(KONFIRMO_TEKSTO)}</fm-markobutono>${takso("materialo", "je Datei")}<fm-butono emphasis="medium" data-mt-materialo-legi>Material lesen</fm-butono></fm-faldilo>`;
   const esploro = `<fm-faldilo data-mt-esploro><span slot="summary">Bestehende Marke nur genannt (Recherche)</span><fm-kampo name="nomo" data-mt-esploro-nomo>Name der Marke</fm-kampo><fm-kampo name="url" type="url" data-mt-esploro-url>Adresse der Website (optional)</fm-kampo><fm-markobutono name="rajtoj-esploro" value="ja" data-mt-esploro-rajtoj>${escapeHtml(KONFIRMO_TEKSTO)}</fm-markobutono><fm-teksto kind="caption">Der Assistent liest öffentliche Seiten und misst Farben, Schriften, Radien und Abstände; er übernimmt keine Texte, Bilder oder Dateien. Das Ergebnis bleibt lokal.</fm-teksto>${takso("esploro", "Recherche")}<fm-butono emphasis="medium" data-mt-esploro-sendi>Recherchieren</fm-butono></fm-faldilo>`;
-  const previewSrc = `/marko/${encodeURIComponent(name)}/vorschau?sxtupo=studio-${studio}&breite=mittel`;
-  // Spec 035, Befund 4.5.1: with an open proposal the preview shows the step now and with the
-  // proposal laid on, one above the other, on the real Eroj of the brand.
-  const vorschau =
-    input.propono === undefined
-      ? `<div class="mt-studio-vorschau"><iframe data-mt-vorschau data-mt-src="${previewSrc}" title="Vorschau der Marke"></iframe></div>`
-      : `<div class="mt-studio-vorschau" data-mt-vergleich><fm-teksto kind="caption">Jetzt</fm-teksto><iframe data-mt-vorschau data-mt-src="${previewSrc}" title="Vorschau der Marke"></iframe><fm-teksto kind="caption">Mit dem Vorschlag</fm-teksto><iframe data-mt-vorschau-propono data-mt-src="${escapeHtml(`${previewSrc}&propono=${encodeURIComponent(faceto.name)}`)}" title="Vorschau mit dem Vorschlag"></iframe></div>`;
+  // Spec 036, Befund 3.1: the preview is the stage – two thirds of the width (buehne.ts).
+  const vorschau = buehneHtml({
+    name,
+    studio,
+    faceto: faceto.name,
+    propono: input.propono !== undefined,
+  });
   const body = `<fm-sxelo>
 <span slot="brand">Markenassistent</span>
 <span slot="principal">Marke ${escapeHtml(marko.label)} · <fm-mezurilo value="${vollstaendigkeit.prozent}" min="0" max="100" data-mt-prozent>Vollständig (Umfang 1, visuell)</fm-mezurilo> <fm-teksto kind="caption" data-mt-definiert>freigegeben ${vollstaendigkeit.prozent} % · definiert ${vollstaendigkeit.definiert} %</fm-teksto></span>
@@ -220,9 +221,8 @@ ${dialog}
 <fm-titolo slot="title" level="1" focusable>${escapeHtml(faceto.nomo)}</fm-titolo>
 <fm-teksto slot="subtitle">${escapeHtml(faceto.kialo)}</fm-teksto>
 <fm-ligilo slot="actions" to="/studio/${encodeURIComponent(name)}/${studio}" placement="standalone">Im Studio bearbeiten</fm-ligilo>
-<section class="mt-studio">
-<div class="mt-schritte"><fm-navigado label="Schritte" page="${escapeHtml(faceto.name)}" orientation="vertical">${nav}<a href="/studio/${encodeURIComponent(name)}/${studio}" data-page="studio">Studio</a><a href="/asistanto/${encodeURIComponent(name)}/komenco" data-page="komenco">Einstiegsfragen</a></fm-navigado><fm-teksto kind="caption">${nochNicht}</fm-teksto></div>
-${vorschau}
+<section class="mt-buehne-layout" data-mt-buehne-layout>
+<div class="mt-schritte"><fm-navigado label="Schritte" page="${escapeHtml(faceto.name)}" orientation="vertical">${nav}<a href="/studio/${encodeURIComponent(name)}/${studio}" data-page="studio">Studio</a><a href="/asistanto/${encodeURIComponent(name)}/komenco" data-page="komenco">Einstiegsfragen</a></fm-navigado><fm-teksto kind="caption">${nochNicht}</fm-teksto>
 <div class="mt-babilo">
 <fm-teksto kind="caption" data-mt-ki>${kiSatz}</fm-teksto>
 <div data-mt-babilo-listo>${chatHtml(input.historio)}</div>
@@ -241,6 +241,8 @@ ${esploro}
 <fm-butono emphasis="low" data-mt-faceto-ago="remalfermo"${faceto.stato === "freigegeben" ? "" : " disabled"}>Wieder öffnen</fm-butono>
 <fm-butono emphasis="low" data-mt-fremda>Baut auf einer bestehenden Marke auf</fm-butono>
 </div>
+</div>
+<div class="mt-buehne-spalte">${vorschau}</div>
 </section>
 </fm-pagxo>
 </fm-sxelo>

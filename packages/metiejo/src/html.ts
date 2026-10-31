@@ -6,6 +6,7 @@
 // live value to the draft and refreshes the preview; it computes nothing. Pure.
 
 import { LINGVO_BUTTONS, LINGVO_SKRIPTO } from "@fundamento/projekcioj";
+import { BUEHNE_CSS, BUEHNE_SKRIPTO } from "./buehne-klient.js";
 import { nomojIsland } from "./lingvo.js";
 
 export const escapeHtml = (text: string): string =>
@@ -63,6 +64,7 @@ body { margin: 0; font-family: var(--fm-typography-body-1-font-family); backgrou
 .mt-gebrauch ul { margin: 0; padding-inline-start: var(--fm-spacing-large); }
 .mt-schatten { display: flex; flex-direction: column; gap: var(--fm-spacing-xsmall); }
 .mt-schatten input[type="color"] { inline-size: 2.75rem; block-size: 2.75rem; padding: 0; border: var(--fm-border-width-default) solid var(--fm-color-border-default); border-radius: var(--fm-radius-role-control); background: none; }
+${BUEHNE_CSS}
 [hidden] { display: none !important; }`;
 
 /** The layout of the preview document: the three container widths of the Vitrino, tokens only. */
@@ -734,7 +736,7 @@ if (marko && (asistantoData || (sxtupo && sxtupo.startsWith("studio-")))) {
 
 if (frame) refreshFrame();
 if (sxtupo === "farbe") check();
-`;
+${BUEHNE_SKRIPTO}`;
 
 export interface ScreenDocument {
   title: string;
