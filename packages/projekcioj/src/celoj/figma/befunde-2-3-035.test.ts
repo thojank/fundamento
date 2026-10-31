@@ -237,3 +237,59 @@ describe("Spec 035 2.3.2: the box of a toggle left of its texts in Figma, as on 
     }
   });
 });
+
+describe("Spec 035 2.3.4: read-only in Figma, one rule for the twelve fields – the look of rest", () => {
+  const READONLY_STATE = ["kampo", "listelektilo", "plurelektilo", "datelektilo"];
+  const FIELDS = [
+    "kampo",
+    "tekstareo",
+    "elektilo",
+    "listelektilo",
+    "plurelektilo",
+    "kompletigilo",
+    "datelektilo",
+    "glitilo",
+    "elekto",
+    "markobutono",
+    "sxaltilo",
+    "alsxutilo",
+  ];
+  /** The colours the double paints a variant's control, text and label with (komuna, light). */
+  const lookOf = (variant: DoubleNode) => {
+    const shown = (node: DoubleNode | undefined, field: "fills" | "strokes") => {
+      const [paint] = (node?.properties[field] ?? []) as { color?: unknown; visible?: boolean }[];
+      return paint === undefined || paint.visible === false ? null : (paint.color ?? null);
+    };
+    const control = find(variant, "control");
+    return {
+      fill: shown(control, "fills"),
+      border: shown(control, "strokes"),
+      text: shown(find(control, "text"), "fills"),
+      label: shown(find(variant, "label"), "fills"),
+    };
+  };
+
+  it("only the fields with a read-only state have read-only variants", async () => {
+    for (const set of FIELDS) {
+      const readonly = (await variantsOf(set)).filter((variant) =>
+        variant.name.includes("state=readonly"),
+      );
+      expect(readonly.length > 0, set).toBe(READONLY_STATE.includes(set));
+    }
+  });
+
+  for (const set of READONLY_STATE) {
+    it(`${set}, every read-only variant paints the fill, border, text and label of its rest`, async () => {
+      const variants = await variantsOf(set);
+      const readonly = variants.filter((variant) => variant.name.includes("state=readonly"));
+      expect(readonly.length, set).toBeGreaterThan(0);
+      for (const variant of readonly) {
+        const rest = variants.find(
+          (other) => other.name === variant.name.replace("state=readonly", "state=rest"),
+        );
+        expect(rest, `${variant.name}: its rest`).toBeDefined();
+        expect(lookOf(variant), variant.name).toEqual(lookOf(rest as DoubleNode));
+      }
+    });
+  }
+});

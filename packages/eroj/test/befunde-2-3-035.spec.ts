@@ -118,3 +118,80 @@ test.describe("Spec 035 2.3.3: the ✕ of the datelektilo as large and as strong
     });
   }
 });
+
+const optionsOf = (...words: string[]) =>
+  words.map((word) => `<data slot="options" value="${word.toLowerCase()}">${word}</data>`).join("");
+
+/** The twelve fields (Spec 029 ②b-1), each as the Vitrino writes it. */
+const FIELDS: Readonly<Record<string, (attributes: string) => string>> = {
+  kampo: (a) => `<fm-kampo ${a} value="Anna">Name</fm-kampo>`,
+  tekstareo: (a) => `<fm-tekstareo ${a} value="Weil">Begründung</fm-tekstareo>`,
+  elektilo: (a) =>
+    `<fm-elektilo ${a} value="deutschland">Land${optionsOf("Deutschland", "Österreich")}</fm-elektilo>`,
+  listelektilo: (a) =>
+    `<fm-listelektilo ${a} value="europa">Region${optionsOf("Europa", "Asien")}</fm-listelektilo>`,
+  plurelektilo: (a) =>
+    `<fm-plurelektilo ${a}>Standards${optionsOf("Kontrast", "Fokus")}</fm-plurelektilo>`,
+  kompletigilo: (a) =>
+    `<fm-kompletigilo ${a} value="Deutschland">Land${optionsOf("Deutschland", "Dänemark")}</fm-kompletigilo>`,
+  datelektilo: (a) => `<fm-datelektilo ${a} value="2026-10-30">Lieferdatum</fm-datelektilo>`,
+  glitilo: (a) => `<fm-glitilo ${a}>Lautstärke</fm-glitilo>`,
+  elekto: (a) =>
+    `<fm-elekto name="versand" ${a}>Versandart${optionsOf("Standard", "Express")}</fm-elekto>`,
+  markobutono: (a) => `<fm-markobutono ${a}>Newsletter</fm-markobutono>`,
+  sxaltilo: (a) => `<fm-sxaltilo ${a}>Benachrichtigungen</fm-sxaltilo>`,
+  alsxutilo: (a) => `<fm-alsxutilo ${a}>Lebenslauf</fm-alsxutilo>`,
+};
+
+/** What a field shows of its state: the fill, border and text of its control, its label. */
+async function lookOf(page: Page, id: string) {
+  return page.evaluate((id) => {
+    const root = document.getElementById(id)?.shadowRoot;
+    const style = (selector: string, properties: readonly string[]) => {
+      const element = root?.querySelector(selector);
+      if (element === null || element === undefined) return null;
+      const computed = getComputedStyle(element);
+      return Object.fromEntries(
+        properties.map((property) => [property, computed.getPropertyValue(property)]),
+      );
+    };
+    return {
+      control: style('[part="control"]', [
+        "background-color",
+        "border-top-color",
+        "border-inline-start-color",
+        "color",
+      ]),
+      text: style('[part="text"]', ["color"]),
+      label: style('[part="label"]', ["color"]),
+    };
+  }, id);
+}
+
+test.describe("Spec 035 2.3.4: read-only, one rule for the twelve fields – the look of rest", () => {
+  for (const { aspekto, scheme } of BRANDS) {
+    test(`${aspekto}, ${scheme}: every field read-only shows the fill, border, text and label of rest`, async ({
+      page,
+    }) => {
+      const markup = Object.entries(FIELDS)
+        .map(
+          ([ero, field]) =>
+            `<div style="inline-size: 20rem">${field(`id="${ero}-rest"`)}${field(`id="${ero}-readonly" readonly`)}</div>`,
+        )
+        .join("");
+      await serve(page, out, markup);
+      await page.evaluate(
+        ({ aspekto, scheme }) => {
+          document.documentElement.setAttribute("data-fm-aspekto", aspekto);
+          document.documentElement.setAttribute("data-fm-color-scheme", scheme);
+        },
+        { aspekto, scheme },
+      );
+      for (const ero of Object.keys(FIELDS)) {
+        const rest = await lookOf(page, `${ero}-rest`);
+        expect(rest.label, `${ero}: a label`).not.toBeNull();
+        expect(await lookOf(page, `${ero}-readonly`), `${ero}: read-only as rest`).toEqual(rest);
+      }
+    });
+  }
+});

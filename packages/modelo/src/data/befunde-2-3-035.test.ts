@@ -85,3 +85,66 @@ describe("Spec 035 2.3.3: the ✕ of the datelektilo as large as the kampo's", (
     );
   });
 });
+
+/**
+ * Spec 035 2.3.4 (V-1): read-only, one rule for all twelve fields – as the Fonto: a read-only field
+ * keeps the look of rest (its fill, border, text and label). The Fonto draws its three fields with
+ * a read-only state so; its date input has none, so the rule of the others holds for the
+ * datelektilo too. A field without a read-only state of its own shows rest by construction.
+ */
+const FIELDS = [
+  "kampo",
+  "tekstareo",
+  "elektilo",
+  "listelektilo",
+  "plurelektilo",
+  "kompletigilo",
+  "datelektilo",
+  "glitilo",
+  "elekto",
+  "markobutono",
+  "sxaltilo",
+  "alsxutilo",
+];
+const READONLY_STATE = ["kampo", "listelektilo", "plurelektilo", "datelektilo"];
+const READONLY_PROP_ONLY = ["tekstareo", "glitilo"];
+const LOOK = ["surface.fill", "border.color", "text.color", "label.color"];
+
+describe("Spec 035 2.3.4: read-only, one rule for the twelve fields – the look of rest", () => {
+  it("the twelve fields: four with a read-only state, two read-only without one, six without", () => {
+    const states = (ero: string): readonly string[] => skemoOf(ero).states;
+    const prop = (ero: string) => skemoOf(ero).props.some((each) => each.name === "readonly");
+    expect(FIELDS.filter((ero) => states(ero).includes("readonly"))).toEqual(
+      FIELDS.filter((ero) => READONLY_STATE.includes(ero)),
+    );
+    expect(FIELDS.filter((ero) => prop(ero) && !states(ero).includes("readonly"))).toEqual(
+      READONLY_PROP_ONLY,
+    );
+  });
+
+  it.each(FIELDS)("%s: the Skemo binds for read-only what it binds for rest", (ero) => {
+    for (const binding of skemoOf(ero).bindings) {
+      if (binding.when?.state !== "readonly") continue;
+      const rest = skemoOf(ero).bindings.find(
+        (other) =>
+          other.part === binding.part &&
+          other.property === binding.property &&
+          JSON.stringify({ ...other.when, state: "readonly" }) === JSON.stringify(binding.when),
+      );
+      expect(binding.token, `${ero}: ${binding.part}.${binding.property}`).toBe(rest?.token);
+    }
+  });
+
+  it.each(COMBINATIONS)(
+    "$aspekto, $scheme: every field read-only resolves to the fill, border, text and label of rest",
+    (at) => {
+      for (const ero of READONLY_STATE) {
+        for (const look of LOOK) {
+          expect(resolvedOf(at, `ero.${ero}.${look}.readonly`), `${ero}.${look}`).toBe(
+            resolvedOf(at, `ero.${ero}.${look}.rest`),
+          );
+        }
+      }
+    },
+  );
+});

@@ -203,7 +203,8 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       boundToken(skemoOrThrow(), part, property, { state, expanded })?.token;
     expect(token("surface", "fill", "rest")).toBe("color.background.default");
     expect(token("surface", "fill", "disabled")).toBe("color.background.sunken");
-    expect(token("surface", "fill", "readonly")).toBe("color.background.sunken");
+    // Spec 035 2.3.4 (V-1): read-only keeps the look of rest, as the Fonto's fields do.
+    expect(token("surface", "fill", "readonly")).toBe("color.background.default");
     expect(token("border", "color", "rest")).toBe("color.border.default");
     expect(token("border", "color", "hover")).toBe("color.border.strong");
     expect(token("border", "color", "focus")).toBe("color.border.strong");
