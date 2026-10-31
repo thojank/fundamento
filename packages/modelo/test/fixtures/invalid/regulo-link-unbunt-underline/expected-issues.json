@@ -1,0 +1,13 @@
+{
+  "description": "Spec 036, Befund 2.1 (V-1): an achromatic brand – color.link.rest and visited resolve to the colour of color.text.default – whose link in running text has no underline at rest (the Ero-Token of that cell resolves to 0px). The link then differs from the text by nothing: rejected with a suggestion to bind the underline, never by a silent turn to a colourful link.",
+  "issues": [
+    {
+      "rule": "link-distinct-from-text",
+      "path": "rezolvo(color-scheme=light,contrast=default)/ero.butono.underline.width.placement.inline.rest"
+    },
+    {
+      "rule": "link-distinct-from-text",
+      "path": "rezolvo(color-scheme=light,contrast=high)/ero.butono.underline.width.placement.inline.rest"
+    }
+  ]
+}

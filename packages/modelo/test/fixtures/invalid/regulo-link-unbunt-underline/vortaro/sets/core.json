@@ -1,0 +1,253 @@
+{
+  "$extensions": {
+    "com.ciferecigo.fundamento": {
+      "id": "set_01K5FMAJ06444R7MA0HZE3KXSJ",
+      "kondicxoj": []
+    }
+  },
+  "color": {
+    "$type": "color",
+    "palette": {
+      "neutral": {
+        "0": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1,
+              1,
+              1
+            ],
+            "hex": "#ffffff"
+          },
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01K5FMAJ0AND635FTMQ9558Y63"
+            }
+          }
+        },
+        "100": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.95,
+              0.95,
+              0.95
+            ],
+            "hex": "#f2f2f2"
+          },
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01K5FMAJ0BQ499YPVK4P8NPRZ3"
+            }
+          }
+        },
+        "900": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.1,
+              0.1,
+              0.1
+            ],
+            "hex": "#1a1a1a"
+          },
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01K5FMAJ0CGDK0SHC894P66C4B"
+            }
+          }
+        },
+        "1000": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0,
+              0
+            ],
+            "hex": "#000000"
+          },
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01K5FMAJ0DQ0T56XFQD500JQRD"
+            }
+          }
+        }
+      }
+    },
+    "background": {
+      "default": {
+        "$value": "{color.palette.neutral.100}",
+        "$description": "Default page background.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01K5FMAJ0EN8B4C4Z6KSPYEMCX",
+            "role": "background"
+          }
+        }
+      }
+    },
+    "text": {
+      "default": {
+        "$value": "{color.palette.neutral.900}",
+        "$description": "Default body text.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01K5FMAJ0FRV73CQ8J0CJ9HV5S",
+            "role": "foreground"
+          }
+        }
+      }
+    },
+    "link": {
+      "rest": {
+        "$value": "{color.palette.neutral.900}",
+        "$description": "Link text at rest.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M69E7V89NKZVVEX6KGBC4N6J",
+            "role": "foreground"
+          }
+        }
+      },
+      "visited": {
+        "$value": "{color.palette.neutral.900}",
+        "$description": "Visited link text.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M69E7V8ANSFJZZF30SRSNT1P",
+            "role": "foreground"
+          }
+        }
+      }
+    }
+  },
+  "spacing": {
+    "small": {
+      "$type": "dimension",
+      "$value": {
+        "value": 4,
+        "unit": "px"
+      },
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01K5FMAJ0GQGZMPKY9NN4KF5G6"
+        }
+      }
+    },
+    "medium": {
+      "$type": "dimension",
+      "$value": {
+        "value": 8,
+        "unit": "px"
+      },
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01K5FMAJ0H4CZYQST4Y5HHM8HV"
+        }
+      }
+    }
+  },
+  "ero": {
+    "butono": {
+      "surface": {
+        "fill": {
+          "emphasis": {
+            "high": {
+              "rest": {
+                "$type": "color",
+                "$value": "{color.background.default}",
+                "$description": "butono: surface.fill when emphasis=high, state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+                "$extensions": {
+                  "com.ciferecigo.fundamento": {
+                    "id": "tok_01M5GF2GNHE0FP5SDY0BTN4DAY",
+                    "role": "ero"
+                  }
+                }
+              },
+              "hover": {
+                "$type": "color",
+                "$value": "{color.background.default}",
+                "$description": "butono: surface.fill when emphasis=high, state=hover (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+                "$extensions": {
+                  "com.ciferecigo.fundamento": {
+                    "id": "tok_01M5GF2GNHE0FP5SDY0BTN4DAZ",
+                    "role": "ero"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "label": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}",
+          "$description": "butono: label.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF2GNHE0FP5SDY0BTN4DB0",
+              "role": "ero"
+            }
+          }
+        }
+      },
+      "box": {
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.small}",
+          "$description": "butono: box.gap (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M5GF2GNHE0FP5SDY0BTN4DB1"
+            }
+          }
+        }
+      },
+      "underline": {
+        "width": {
+          "placement": {
+            "inline": {
+              "rest": {
+                "$type": "dimension",
+                "$value": {
+                  "value": 0,
+                  "unit": "px"
+                },
+                "$description": "butono: underline.width when placement=inline, state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+                "$extensions": {
+                  "com.ciferecigo.fundamento": {
+                    "id": "tok_01M5GF2GNHE0FP5SDY0BTN4DB2"
+                  }
+                }
+              },
+              "hover": {
+                "$type": "dimension",
+                "$value": "{spacing.small}",
+                "$description": "butono: underline.width when placement=inline, state=hover (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+                "$extensions": {
+                  "com.ciferecigo.fundamento": {
+                    "id": "tok_01M69E7V8ANSFJZZF30SRSNT1Q"
+                  }
+                }
+              }
+            },
+            "standalone": {
+              "hover": {
+                "$type": "dimension",
+                "$value": "{spacing.small}",
+                "$description": "butono: underline.width when placement=standalone, state=hover (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+                "$extensions": {
+                  "com.ciferecigo.fundamento": {
+                    "id": "tok_01M5GF2GNHE0FP5SDY0BTN4DB3"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
