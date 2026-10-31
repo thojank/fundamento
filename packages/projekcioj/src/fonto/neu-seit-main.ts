@@ -84,6 +84,18 @@ const CHANGED: Readonly<Record<string, string>> = {
   "ero.plurelektilo.surface.fill.readonly": "color.background.sunken",
 };
 
+/**
+ * Spec 036 Teil 5 ②b-2 (Spec 029 abgleich.json, aspects "achsen" and "groessen"): the tokens of the
+ * new axes and values – the count of the tekstareo (A-tekstareo-1).
+ */
+const ACHSEN_2B2 = /^ero\.tekstareo\.count\.(color|typography)$/;
+
+/** How many tokens ②b-2 added (A-tekstareo-1: 2), counted beside ADDED_SINCE_MAIN. */
+export const ADDED_BY_2B2 = 2;
+
+/** Whether a token was added by ②b-2 after main's record. */
+export const addedBy2b2 = (name: string): boolean => ACHSEN_2B2.test(name);
+
 /** Abnahme #122: a token main had that is gone (replaced by its sizes), with main's role. */
 const REMOVED: Readonly<Record<string, { type: string; role: string }>> = {
   "ero.kampo.clear.size": { type: "dimension", role: "size.control.small" },
@@ -115,7 +127,7 @@ export function mainRows(
   canonical: (value: unknown) => unknown,
 ): [string, unknown, unknown][] {
   const rows: [string, unknown, unknown][] = Object.keys(tokens)
-    .filter((name) => !addedSinceMain(name) && keep(name))
+    .filter((name) => !addedSinceMain(name) && !addedBy2b2(name) && keep(name))
     .map((name) => [
       mainNameOf(name),
       tokens[name]?.type,

@@ -112,6 +112,8 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
         // Spec 029 ②b-1b M-2: the status of the field.
         ["intent", ["neutral", "success", "warning", "danger"], "neutral"],
         ["message-position", ["below", "joined"], "below"],
+        // Spec 036 Teil 5 ②b-2 (A-tekstareo-1): the most characters, the last prop.
+        ["max-length", "number", undefined],
       ],
     );
     // Spec 029 ②b-1b (Nachlese 12): label is a prop now, shown as the visible label.
@@ -140,10 +142,12 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
 
   it("names the parts of the kampo without a height of its own, and copies the kampo's bindings (Regel 0.1)", () => {
     if (skemo === undefined || kampo === undefined) throw new Error("missing");
+    // Spec 036 Teil 5 ②b-2 (A-tekstareo-1): the count of max-length is the text area's own.
     expect(Object.keys(skemo.parts).sort()).toEqual(
-      Object.keys(kampo.skemo.parts)
-        .filter((part) => !KAMPO_OWN.includes(part))
-        .sort(),
+      [
+        ...Object.keys(kampo.skemo.parts).filter((part) => !KAMPO_OWN.includes(part)),
+        "count",
+      ].sort(),
     );
     expect(skemo.parts.box?.height).toBeUndefined();
     expect(kampo.skemo.parts.box?.height).toBeDefined();
@@ -188,7 +192,14 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
     expect(skemo?.a11y).toEqual({
       role: "textbox",
       name: ["slot:label", "prop:label"],
-      description: ["slot:help", "slot:error", "slot:message", "slot:disabled-reason"],
+      // Spec 036 Teil 5 ②b-2 (A-tekstareo-1): the count of max-length describes the area too.
+      description: [
+        "slot:help",
+        "slot:error",
+        "slot:message",
+        "slot:disabled-reason",
+        "prop:max-length",
+      ],
       states: {
         loading: ["aria-busy"],
         required: ["aria-required"],
@@ -200,6 +211,10 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
       texts: {
         required: { de: "erforderlich", en: "required" },
         loading: { de: "lädt", en: "loading" },
+        "count-count": {
+          de: "{count} von {max-length} Zeichen",
+          en: "{count} of {max-length} characters",
+        },
       },
     });
   });
@@ -215,9 +230,27 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
     expect(skemo?.goals?.map((goal) => [goal.goal, goal.props, goal.regulo])).toEqual([
       ["multi-line", {}, "field-label-visible"],
     ]);
+    // Spec 036 Teil 5 ②b-2 (A-tekstareo-1): the words of the closed boundary character-count lead
+    // here, where max-length counts.
     expect(skemo?.goals?.[0]?.keywords).toEqual({
-      en: ["comment", "description", "reason", "paragraph", "multiline"],
-      de: ["kommentar", "beschreibung", "begründung", "absatz", "mehrzeilig"],
+      en: [
+        "comment",
+        "description",
+        "reason",
+        "paragraph",
+        "multiline",
+        "maxlength",
+        "character-limit",
+      ],
+      de: [
+        "kommentar",
+        "beschreibung",
+        "begründung",
+        "absatz",
+        "mehrzeilig",
+        "zeichenlimit",
+        "zeichenzähler",
+      ],
     });
   });
 });
@@ -236,11 +269,11 @@ describe("the Uzo of the tekstareo (section ②, G5)", () => {
     expect(uzo?.layout).toEqual({ size: "container", wrap: "never" });
   });
 
-  it("sends one line to the kampo; asks a person about auto-grow and a character count; stops at rich text", () => {
+  // Spec 036 Teil 5 ②b-2 (A-tekstareo-1, ②a-3): the character count is max-length, no boundary.
+  it("sends one line to the kampo; asks a person about auto-grow; stops at rich text", () => {
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([["one-line", "kampo"]]);
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
       ["auto-grow", "ask-human"],
-      ["character-count", "ask-human"],
       ["rich-text", "not-supported"],
       ["no-visible-label", "not-supported"],
     ]);
@@ -429,10 +462,7 @@ describe("check_usage and suggest_ero of the text area (G6, G7, Gvidanto)", () =
       case: "rich-text",
       action: "not-supported",
     });
-    expect(suggest("Feld mit Zeichenlimit").boundary).toMatchObject({
-      ero: "tekstareo",
-      case: "character-count",
-      action: "ask-human",
-    });
+    // Spec 036 Teil 5 ②b-2 (A-tekstareo-1): a limit of characters is the tekstareo with max-length.
+    expect(suggest("Feld mit Zeichenlimit").suggestion).toEqual({ ero: "tekstareo", props: {} });
   });
 });

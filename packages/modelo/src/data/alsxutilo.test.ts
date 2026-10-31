@@ -64,6 +64,8 @@ describe("alsxutilo in the repo Modelo (section ②, G1, G2)", () => {
       // Spec 029 ②b-1b M-2: the status of the field.
       ["intent", "enum", false, "neutral"],
       ["message-position", "enum", false, "below"],
+      // Spec 036 Teil 5 ②b-2 (A-alsxutilo-1): the most files, the last prop.
+      ["max-files", "number", false, undefined],
     ]);
     expect(skemo?.states).toEqual([
       "rest",
@@ -169,6 +171,11 @@ describe("alsxutilo in the repo Modelo (section ②, G1, G2)", () => {
           de: "{file} ist zu groß: Wähle eine Datei bis {max-size}.",
           en: "{file} is too large: choose a file up to {max-size}.",
         },
+        // Spec 036 Teil 5 ②b-2 (A-alsxutilo-1): too many files.
+        "max-files-invalid": {
+          de: "{count} Dateien gewählt: Wähle höchstens {max-files}.",
+          en: "{count} files chosen: choose at most {max-files}.",
+        },
       },
     });
   });
@@ -183,6 +190,9 @@ describe("alsxutilo in the repo Modelo (section ②, G1, G2)", () => {
       // Spec 029 ②b-1b M-2: the status of the field.
       [{ "slot:message": "filled" }, { intent: ["success", "warning"] }],
       [{ invalid: "true" }, { intent: ["neutral", "danger"] }],
+      // Spec 036 Teil 5 ②b-2 (A-alsxutilo-1): max-files needs multiple, and the help states it.
+      [{ "prop:max-files": "filled" }, { multiple: ["true"] }],
+      [{ "slot:help": "empty" }, { "prop:max-files": ["empty"] }],
     ]);
     expect(skemo?.constraints?.[1]?.kialo).toContain("file-constraints-stated");
     expect(skemo?.constraints?.[2]?.kialo).toBe(skemo?.constraints?.[1]?.kialo);

@@ -10035,6 +10035,16 @@
           "$type": "typography",
           "$value": "{typography.caption}"
         }
+      },
+      "count": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.caption}"
+        }
       }
     },
     "teksto": {

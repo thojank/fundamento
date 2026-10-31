@@ -43,23 +43,6 @@
         "kialo": "An area that grows with every line moves what stands below it while a person types, because the page reflows; whether a product wants that is a decision of a person."
       },
       {
-        "case": "character-count",
-        "action": "ask-human",
-        "keywords": {
-          "en": [
-            "characters",
-            "limit",
-            "maxlength"
-          ],
-          "de": [
-            "zeichen",
-            "zeichenzähler",
-            "zeichenlimit"
-          ]
-        },
-        "kialo": "A count of the characters left is a live text under the area, because the limit must be heard as well as seen; Fundamento has no such part yet, so a person decides."
-      },
-      {
         "case": "rich-text",
         "action": "not-supported",
         "keywords": {

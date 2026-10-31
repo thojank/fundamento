@@ -232,7 +232,7 @@ describe("②b-2 A-kompletigilo-1, A-alsxutilo-1, A-tekstareo-1: the numbers", (
     const { skemo, uzo } = entryOf("tekstareo");
     expect(skemo.parts.count).toBeDefined();
     expect(skemo.a11y.description).toContain("prop:max-length");
-    const words = skemo.a11y.texts?.count;
+    const words = skemo.a11y.texts?.["count-count"];
     expect(words?.de).toContain("{max-length}");
     expect(words?.en).toContain("{max-length}");
     expect(uzo?.boundary.map((boundary) => boundary.case)).not.toContain("character-count");
