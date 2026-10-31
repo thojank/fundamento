@@ -4,9 +4,9 @@
 // in `plano.ts`, `navigado.ts`, `verda.ts` and `gardo.ts`. Everything Modelo-specific is injected
 // (D-03), so this package never imports nordstelo, mcp, eroj or the Gvidanto (AC-10).
 
-import type { ChatMessage, ToolInfo } from "@fundamento/metiejo";
+import type { Budget, ChatMessage, ToolInfo } from "@fundamento/metiejo";
 
-export type { ChatMessage, ToolInfo };
+export type { Budget, ChatMessage, ToolInfo };
 
 /** A structured problem (code-style): where, which rule, what is wrong, what to do. */
 export interface Problemo {
@@ -121,6 +121,8 @@ export interface Malobservo {
   message: string;
   suggestion: string;
   regulo?: MalobservoRegulo;
+  /** Where on the screen (S037-03, additive): the instances the violation is about, e.g. `fm-butono „Speichern“`. */
+  loko?: string;
 }
 
 // --- C-4 Navigation ----------------------------------------------------------------------------
@@ -192,7 +194,17 @@ export interface ChatRespondo {
  * wraps metiejo's `chatCompletion` and throws its `CostLimitReached` / `DayLimitReached` unchanged.
  */
 export interface ChatModel {
-  send(messages: readonly ChatMessage[], tools?: readonly ToolInfo[]): Promise<ChatRespondo>;
+  /**
+   * One request. With a `budget` (S037-03, additive) the model checks it before the request and
+   * charges it after, as metiejo's `chatCompletion` does; the run passes one Budget for all requests.
+   */
+  send(
+    messages: readonly ChatMessage[],
+    tools?: readonly ToolInfo[],
+    budget?: Budget,
+  ): Promise<ChatRespondo>;
+  /** `<provider>/<model>` (metiejo `Provider.toString()`), for the price; absent = cost unknown. */
+  readonly modelo?: string;
 }
 
 /** The Gvidanto as the agent sees it – the shape of nordstelo's `ToolBridge`. */
@@ -241,6 +253,50 @@ export interface EkranojDeps {
   nun: () => Date;
   /** A log sink; the caller redacts keys before anything is written. */
   log: (linio: string) => void;
+  /** Receives the cost estimate before the first request (D-20; S037-03, additive). */
+  takso?: (takso: KostoTakso) => void | Promise<void>;
+  /** The seam for the screen documents and the output folder (S037-04; S037-03, additive). */
+  eligo?: EkranojEligo;
+}
+
+/**
+ * The seam between the flow and its output (S037-03 declares, S037-04 implements). Without it the
+ * flow writes nothing: a screen document is the fragment in a minimal page, and the result is only
+ * returned.
+ */
+export interface EkranojEligo {
+  /** The screen document of a fragment: frame, brand build, back-link (D-24, D-27, D-34). */
+  dokumento?(e: {
+    ekrano: PlanoEkrano;
+    fragmento: string;
+    rondo: number;
+    varianto: Varianto;
+    lingvo: string;
+  }): EkranaDokumento | Promise<EkranaDokumento>;
+  /** A screen was rendered in round `rondo` (photos for `bildoj/`, facts for `rondoj/<n>/`). */
+  bildigita?(e: { rondo: number; slug: string; bildigo: BildigoRezulto }): void | Promise<void>;
+  /** A round was checked: its state per screen. */
+  rondo?(e: { rondo: number; stato: Rondo; plano: Plano }): void | Promise<void>;
+  /** The run ended (also a partial one): the whole result. */
+  fino?(rezulto: EkranojRezulto): void | Promise<void>;
+}
+
+/** The cost estimate before the start (D-20). */
+export interface KostoTakso {
+  ekranoj: number;
+  rondoj: number;
+  varianto: Varianto;
+  /** Whether a plan request is counted (no plan given). */
+  planPeto: boolean;
+  tokenoj: number;
+  /** $ for the tokens; absent when the model or its price is unknown („Kosten unbekannt“, never 0). */
+  usd?: number;
+  modelo?: string;
+  maksTokenoj: number;
+  /** The estimate is above `maksTokenoj`: the run will likely stop early (partial result). */
+  superasLimon: boolean;
+  /** One German sentence for the console and the report. */
+  satz: string;
 }
 
 export interface EkranojEnigo {
@@ -271,6 +327,25 @@ export interface RondoEkrano {
   verda: boolean;
   /** Set when the values are carried forward from the round the screen turned green (D-26). */
   verdaEkde?: number;
+  /** What kept the screen from green (D-04 order); [] when green (S037-03, additive). */
+  malhelpoj?: Malhelpo[];
+  /** The agent fragment of this round (Variante 0: the full document) (S037-03, additive). */
+  fragmento?: string;
+  /** The facts the round was scored on (D-33; S037-03, additive). */
+  fakto?: Fakto;
+  /** The findings the next round gets as feedback (S037-03, additive). */
+  trovoj?: Trovo[];
+}
+
+/** A finding of a check, as the agent gets it for the next round and the report shows it. */
+export interface Trovo {
+  /** The rule: a Regulo name, a check_usage rule, a scorer gap kind, `axe:<id>`, `navigado-…`. */
+  regulo: string;
+  /** The place: an instance, an href, a render. */
+  loko: string;
+  mesagxo: string;
+  sugesto: string;
+  kialo: string;
 }
 
 /** Round n (index n − 1): the state per screen slug. */
@@ -317,6 +392,12 @@ export interface EkranojRezulto {
   /** Cost in $; absent when the price of the model is unknown (never 0 then, D-20). */
   kosto: { usd?: number };
   haltigo?: Haltigo;
+  /** The estimate before the start (S037-03, additive). */
+  takso?: KostoTakso;
+  /** Rounds the agent built in; `rondoj` may be longer when green screens are carried (D-26). */
+  faritajRondoj?: number;
+  /** Notes for the report: a shortened plan (D-38), the reason of a stop, a renderer error. */
+  notoj?: string[];
 }
 
 /** The whole flow (implemented in S037-03): sentence and brand in, checked screens out. */
