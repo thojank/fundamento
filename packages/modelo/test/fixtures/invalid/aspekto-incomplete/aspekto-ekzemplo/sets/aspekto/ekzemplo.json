@@ -5366,6 +5366,16 @@
           "$value": "{radius.full}"
         }
       },
+      "readout": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}"
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.label.1}"
+        }
+      },
       "number": {
         "width": {
           "field": {

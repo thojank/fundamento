@@ -289,10 +289,12 @@ const THREE_SIZES: Readonly<Record<string, readonly string[]>> = {
 
 describe("②b-2 A-listelektilo-2, A-plurelektilo-2, A-datelektilo-2: size", () => {
   it.each(Object.entries(THREE_SIZES))(
-    "%s: size small | medium | large, the last prop",
+    "%s: size small | medium | large, after the props of ②b-1b",
     (ero, keyed) => {
       const { skemo } = entryOf(ero);
-      expect(skemo.props.at(-1)?.name).toBe("size");
+      // size right after the props of ②b-1b (S36-4.2 adds min-span and max-span after it).
+      const names = skemo.props.map((prop) => prop.name);
+      expect(names[names.indexOf("size") - 1]).toBe("message-position");
       expect(propOf(ero, "size")).toMatchObject({
         kind: "enum",
         values: ["small", "medium", "large"],

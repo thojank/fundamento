@@ -74,6 +74,9 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       // Spec 029 ②b-1b M-2: the status of the field.
       ["intent", "enum", false, "neutral"],
       ["message-position", "enum", false, "below"],
+      // Spec 036 Teil 5 ②b-2 (A-glitilo-1): the readout and the least distance of the thumbs.
+      ["readout", "enum", false, "none"],
+      ["min-distance", "number", false, undefined],
     ]);
     // E2: the dragged thumb is pressed, the name the butono has for it — no new state name.
     expect(skemo?.states).toEqual([
@@ -110,6 +113,8 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       "track",
       "fill",
       "thumb",
+      // Spec 036 Teil 5 ②b-2 (A-glitilo-1): the value as text, before the field.
+      "readout",
       "number",
       "min-label",
       "max-label",
@@ -225,6 +230,8 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       // Spec 029 ②b-1b M-2: the status of the field.
       [{ "slot:message": "filled" }, { intent: ["success", "warning"] }],
       [{ invalid: "true" }, { intent: ["neutral", "danger"] }],
+      // Spec 036 Teil 5 ②b-2 (A-glitilo-1): a distance needs two thumbs.
+      [{ "prop:min-distance": "filled" }, { range: ["true"] }],
     ]);
     for (const constraint of skemo?.constraints ?? []) expect(constraint.kialo).not.toBe("");
   });
@@ -325,7 +332,12 @@ describe("the Uzo of the glitilo (section ①, G2)", () => {
   it("the brief names field as the axis and the label as the duty, lists range among the props, and stays under 750", () => {
     if (glitilo === undefined) throw new Error("missing");
     const brief = briefOf(glitilo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["field", "intent", "message-position"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual([
+      "field",
+      "intent",
+      "message-position",
+      "readout",
+    ]);
     // Spec 029 ②b-1: a boolean stands in flags.
     expect(brief.flags).toContain("range");
     expect(brief.required).toEqual({ props: [], slots: ["label"] });

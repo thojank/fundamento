@@ -80,6 +80,9 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       ["message-position", "enum", false, "below"],
       // Spec 036 Teil 5 ②b-2 (A-datelektilo-2): the sizes of the kampo, the last prop.
       ["size", "enum", false, "medium"],
+      // Spec 036 Teil 5 ②b-2 (A-datelektilo-1): the shortest and the longest span of a range.
+      ["min-span", "number", false, undefined],
+      ["max-span", "number", false, undefined],
     ]);
     expect(skemo?.props.find((prop) => prop.name === "mode")?.values).toEqual(["single", "range"]);
     for (const prop of skemo?.props ?? []) {
@@ -285,6 +288,15 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
           de: "Wähle ein Ende nach dem Anfang.",
           en: "Choose an end after the start.",
         },
+        // Spec 036 Teil 5 ②b-2 (A-datelektilo-1).
+        "min-span-invalid": {
+          de: "Wähle mindestens {min-span} Tage.",
+          en: "Choose at least {min-span} days.",
+        },
+        "max-span-invalid": {
+          de: "Wähle höchstens {max-span} Tage.",
+          en: "Choose at most {max-span} days.",
+        },
       },
     });
   });
@@ -308,6 +320,9 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       // Spec 029 ②b-1b M-2: the status of the field.
       [{ "slot:message": "filled" }, { intent: ["success", "warning"] }],
       [{ invalid: "true" }, { intent: ["neutral", "danger"] }],
+      // Spec 036 Teil 5 ②b-2 (A-datelektilo-1): a span belongs to a range.
+      [{ "prop:min-span": "filled" }, { mode: ["range"] }],
+      [{ "prop:max-span": "filled" }, { mode: ["range"] }],
     ]);
     for (const constraint of skemo?.constraints ?? []) expect(constraint.kialo).toMatch(/because/);
   });

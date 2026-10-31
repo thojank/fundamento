@@ -134,6 +134,16 @@
         ],
         "default": "medium",
         "description": "Spec 029 ②a (A-datelektilo-2): the height of the field on the scale of the kampo and the elektilo (size.control.*), so the fields of one row stand level; label, text, padding and the icon at its end follow, as at the elektilo. Medium is the field as it was."
+      },
+      {
+        "name": "min-span",
+        "kind": "number",
+        "description": "Spec 029 ②a (A-datelektilo-1): with mode range, the fewest days the range spans (start and end counted); a shorter one is invalid with the Modelo's words."
+      },
+      {
+        "name": "max-span",
+        "kind": "number",
+        "description": "Spec 029 ②a (A-datelektilo-1): with mode range, the most days the range spans (start and end counted); a longer one is invalid with the Modelo's words."
       }
     ],
     "states": [
@@ -849,6 +859,14 @@
         "clear-name": {
           "de": "{label} leeren",
           "en": "Clear {label}"
+        },
+        "min-span-invalid": {
+          "de": "Wähle mindestens {min-span} Tage.",
+          "en": "Choose at least {min-span} days."
+        },
+        "max-span-invalid": {
+          "de": "Wähle höchstens {max-span} Tage.",
+          "en": "Choose at most {max-span} days."
         }
       }
     },
@@ -952,6 +970,28 @@
           ]
         },
         "kialo": "invalid is the short form of danger, because a field is wrong or it is not; with a warning or a success it would say two things at once."
+      },
+      {
+        "when": {
+          "prop:min-span": "filled"
+        },
+        "allowed": {
+          "mode": [
+            "range"
+          ]
+        },
+        "kialo": "A span belongs to a range, because one date has no length."
+      },
+      {
+        "when": {
+          "prop:max-span": "filled"
+        },
+        "allowed": {
+          "mode": [
+            "range"
+          ]
+        },
+        "kialo": "A span belongs to a range, because one date has no length."
       }
     ],
     "goals": [

@@ -45,7 +45,10 @@ const AFTER_2B1B: ReadonlySet<string> = new Set([
   "max-length",
   "unit",
   "readout",
+  "min-distance",
   "months",
+  "min-span",
+  "max-span",
   "size",
   "select-all",
 ]);

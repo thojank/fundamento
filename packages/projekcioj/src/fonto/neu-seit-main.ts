@@ -164,6 +164,8 @@ const REST_2B2 = (() => {
       added: 3,
       moved: {},
     },
+    // A-glitilo-1 (the value as text: its colour and typography, 2).
+    { pattern: "^ero\\.glitilo\\.readout\\.(color|typography)$", added: 2, moved: {} },
   ];
   const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
   return {

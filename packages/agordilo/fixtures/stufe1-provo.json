@@ -1,5 +1,5 @@
 {
-  "source": "packages/modelo/test/fixtures/valid/aspekto-provo/aspekto-provo auf main ac5deb3 (Spec 016, Agordilo Stufe 1); Prüfsummen nach O-1 (Spec 024, die Stufen 25, 150, 850, 975 der farbigen Paletten) neu gerechnet; nach Spec 025 ① (Glyphen add und subtract der Ikonaro) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (elekto, markobutono und sxaltilo ohne die Größe large) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (Zähler des tekstareo) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (drei Größen bei listelektilo, plurelektilo, datelektilo) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (Einheit des kampo) neu gerechnet; Spec 036 Teil 5 ②b-2 (S36-4.2): Größen; Spec 036 Teil 5 ②b-2 (S36-4.2): Darstellung; Spec 036 Teil 5 ②b-2 (S36-4.2): Dichte, Linien, kompakt, label; Spec 036 Teil 5 ②b-2 (S36-4.2): summary der Seitenleiste; Spec 036 Teil 5 ②b-2 (S36-4.2): max-entries der Attributliste",
+  "source": "packages/modelo/test/fixtures/valid/aspekto-provo/aspekto-provo auf main ac5deb3 (Spec 016, Agordilo Stufe 1); Prüfsummen nach O-1 (Spec 024, die Stufen 25, 150, 850, 975 der farbigen Paletten) neu gerechnet; nach Spec 025 ① (Glyphen add und subtract der Ikonaro) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (elekto, markobutono und sxaltilo ohne die Größe large) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (Zähler des tekstareo) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (drei Größen bei listelektilo, plurelektilo, datelektilo) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (Einheit des kampo) neu gerechnet; Spec 036 Teil 5 ②b-2 (S36-4.2): Größen; Spec 036 Teil 5 ②b-2 (S36-4.2): Darstellung; Spec 036 Teil 5 ②b-2 (S36-4.2): Dichte, Linien, kompakt, label; Spec 036 Teil 5 ②b-2 (S36-4.2): summary der Seitenleiste; Spec 036 Teil 5 ②b-2 (S36-4.2): max-entries der Attributliste; Spec 036 Teil 5 ②b-2 (S36-4.2): Wertanzeige und Spannen",
   "agordo": {
     "name": "provo",
     "owner": "Provo (fictitious, test only)",
@@ -28,7 +28,7 @@
   },
   "sha256": {
     "$themes.json": "32d20d206abf9b832c41c26c654fb33aef9694a5661ff89655091a4aae9931d3",
-    "aspekto.json": "fec522374b8ad04cd300419a17539eb9372c4383de634cc4df61ee06d662970b",
+    "aspekto.json": "4e200211f51eadf93da7b22f1356c68e74f939ac218ff5771520577ee7de960c",
     "ids.lock.json": "19279ae73d078332a67f90d7e401fa8878e9fc7794e8496809c133730e1e564e",
     "ikonoj/LICENSE": "ddbe6082ec3cf979db47e5af549d2849c5d6182b3e005ef91ce1dbb9eb122f11",
     "ikonoj/add.svg": "4baa2c668c8800442d47ab39d716e35142c125a9146efefa50f701e9622f2000",
@@ -55,6 +55,6 @@
     "raporto.json": "59bac84d809ae97da61d96535f236d7bd279fc023aa632c27c2e0a17c11c8965",
     "raporto.md": "38edbdc57660e2f107cb190a8f04d82f6fdc997d96ec6cebf0eeb88202fcdda8",
     "sets/aspekto/provo+color-scheme/dark.json": "4e9efc4e7d34a6eaad46b1c022e18344e118f17b12935e0b93cd4497d8aa30ad",
-    "sets/aspekto/provo.json": "3c69024aaf4ccd5b1831c5cfbbe5a32b6636f650511aa67578f8a2e4b6af8430"
+    "sets/aspekto/provo.json": "b5c662d2c5b5ec5c318364e9574dd6722eed1beb39f04ecc0184c653678faf2c"
   }
 }
