@@ -5,9 +5,10 @@
 //
 // Allowed transitively: `@fundamento/metiejo` loads `@fundamento/agordilo`, `@fundamento/eroj`,
 // `@fundamento/modelo` and `@fundamento/projekcioj` itself; that is metiejo's graph, not ekranoj's
-// (implementation spec §2.4, AC-10). This test reads ekranoj's own sources and manifest only.
+// (implementation spec §2.4, AC-10). This test reads ekranoj's own sources, its built output
+// (`dist/**`, what the cli and nordstelo load; S037-13) and its manifest.
 
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -96,10 +97,16 @@ function targetOf(file: string, specifier: string): string | undefined {
   return undefined;
 }
 
+/**
+ * The violations of one file. A declaration file (`.d.ts`) holds types only: every specifier in it
+ * – also `import("…")` in a type – counts as a type import.
+ */
 function violationsOf(file: string, source: string): Violation[] {
   const violations: Violation[] = [];
   const name = relative(PACKAGE, file).split("\\").join("/");
-  for (const { specifier, kind } of specifiersOf(source)) {
+  const types = file.endsWith(".d.ts");
+  for (const { specifier, kind: written } of specifiersOf(source)) {
+    const kind: Kind = types ? "type" : written;
     if (specifier === "<berechnet>" || specifier.includes("${")) {
       violations.push({ file: name, specifier, rule: "dynamic-import-computed" });
       continue;
@@ -145,10 +152,38 @@ function sources(dir: string): string[] {
     .sort();
 }
 
+/** The built output: every `.js` and `.d.ts` below `dist` (source maps load nothing). */
+function built(dir: string): string[] {
+  return readdirSync(dir, { withFileTypes: true })
+    .flatMap((entry) => {
+      const path = join(dir, entry.name);
+      if (entry.isDirectory()) return built(path);
+      return entry.name.endsWith(".js") || entry.name.endsWith(".d.ts") ? [path] : [];
+    })
+    .sort();
+}
+
 describe("module graph (AC-10)", () => {
   it("imports nothing of nordstelo, mcp, eroj or the Gvidanto, and the Modelo for types only", () => {
     const files = sources(SRC);
     expect(files.map((file) => relative(SRC, file))).toContain("index.ts");
+    const violations = files.flatMap((file) => violationsOf(file, readFileSync(file, "utf8")));
+    expect(violations).toEqual([]);
+  });
+
+  it("builds every source, and the built output (dist) imports none of them either (S037-13)", () => {
+    const dist = join(PACKAGE, "dist");
+    expect(existsSync(join(dist, "index.js")), `missing ${dist}; run the build first`).toBe(true);
+    const files = built(dist);
+    const names = files.map((file) => relative(dist, file).split("\\").join("/"));
+    const missing = sources(SRC)
+      .map((file) => relative(SRC, file).split("\\").join("/"))
+      .filter((name) => !name.startsWith("test-doubles/"))
+      .flatMap((name) => {
+        const base = name.replace(/\.ts$/, "");
+        return [`${base}.js`, `${base}.d.ts`].filter((target) => !names.includes(target));
+      });
+    expect(missing).toEqual([]);
     const violations = files.flatMap((file) => violationsOf(file, readFileSync(file, "utf8")));
     expect(violations).toEqual([]);
   });
@@ -196,6 +231,34 @@ describe("module graph (AC-10)", () => {
       ["<berechnet>", "dynamic-import-computed"],
       // biome-ignore lint/suspicious/noTemplateCurlyInString: the specifier as written.
       ["../${name}.js", "dynamic-import-computed"],
+    ]);
+    // Built output: a declaration file names types only (the Modelo is allowed there), a built
+    // module must not load the Modelo at all, and neither may reach the forbidden packages.
+    const declarations = [
+      'export declare function a(): import("@fundamento/modelo").Modelo;',
+      'import type { Taksado } from "@fundamento/nordstelo";',
+      'export declare const b: import("../../mcp/dist/schemas.js").Tool;',
+    ].join("\n");
+    expect(
+      violationsOf(join(PACKAGE, "dist", "sample.d.ts"), declarations).map(
+        ({ specifier, rule }) => [specifier, rule],
+      ),
+    ).toEqual([
+      ["@fundamento/nordstelo", "forbidden-import"],
+      ["../../mcp/dist/schemas.js", "forbidden-import"],
+    ]);
+    const module = [
+      'import { loadModelo } from "@fundamento/modelo";',
+      'import { score } from "../../nordstelo/dist/index.js";',
+    ].join("\n");
+    expect(
+      violationsOf(join(PACKAGE, "dist", "sample.js"), module).map(({ specifier, rule }) => [
+        specifier,
+        rule,
+      ]),
+    ).toEqual([
+      ["@fundamento/modelo", "modelo-value-import"],
+      ["../../nordstelo/dist/index.js", "forbidden-import"],
     ]);
     expect(
       dependencyViolations({
