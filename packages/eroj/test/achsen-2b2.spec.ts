@@ -911,3 +911,67 @@ test.describe("②b-2 A-atributlisto-1, A-atributlisto-3: max-entries", () => {
     }
   });
 });
+
+test.describe("②b-2 A-glitilo-1: readout and min-distance", () => {
+  test("readout text shows the value beside the track; readout field the field, as field did", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<fm-glitilo id="t" value="40" readout="text">Lautstärke</fm-glitilo><fm-glitilo id="f" value="40" readout="field">Lautstärke</fm-glitilo><fm-glitilo id="o" value="40" field>Lautstärke</fm-glitilo><fm-glitilo id="n" value="40">Lautstärke</fm-glitilo>',
+    );
+    const look = (id: string) =>
+      page.locator(`#${id}`).evaluate((host) => {
+        const root = host.shadowRoot as ShadowRoot;
+        const readout = root.querySelector('[part="readout"]') as HTMLElement | null;
+        const number = root.querySelector('[part="number"]') as HTMLElement;
+        return {
+          text: readout !== null && !readout.hidden ? readout.textContent : null,
+          field: !number.hidden,
+          width: Math.round(number.getBoundingClientRect().width),
+        };
+      });
+    expect(await look("t")).toMatchObject({ text: "40", field: false });
+    const field = await look("f");
+    expect(field).toMatchObject({ text: null, field: true });
+    expect(field).toEqual(await look("o"));
+    expect(await look("n")).toMatchObject({ text: null, field: false });
+  });
+
+  test("min-distance keeps the thumbs apart", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      '<fm-glitilo id="r" range value-start="20" value-end="40" min-distance="10">Preis</fm-glitilo>',
+    );
+    const start = page.locator("#r").locator("#thumb-start");
+    await start.focus();
+    for (let step = 0; step < 25; step++) await page.keyboard.press("ArrowRight");
+    await expect(page.locator("#r")).toHaveAttribute("value-start", "30");
+  });
+});
+
+test.describe("②b-2 A-datelektilo-1: min-span and max-span", () => {
+  test("a range shorter than min-span or longer than max-span is invalid with the Modelo's words", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<form id="f" lang="de"><fm-datelektilo id="d" name="reise" mode="range" min-span="3" max-span="14" value-start="2026-07-01" value-end="2026-07-02">Reise</fm-datelektilo></form>',
+    );
+    const host = page.locator("#d");
+    const validity = () =>
+      host.evaluate((element) => {
+        const internals = element as unknown as { checkValidity(): boolean };
+        const form = document.getElementById("f") as HTMLFormElement;
+        return { form: form.checkValidity(), own: internals.checkValidity?.() ?? null };
+      });
+    expect((await validity()).form).toBe(false);
+    await host.evaluate((element) => element.setAttribute("value-end", "2026-07-04"));
+    expect((await validity()).form).toBe(true);
+    await host.evaluate((element) => element.setAttribute("value-end", "2026-07-31"));
+    expect((await validity()).form).toBe(false);
+  });
+});

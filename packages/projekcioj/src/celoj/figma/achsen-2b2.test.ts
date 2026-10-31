@@ -150,3 +150,18 @@ describe("②b-2 A-atributlisto-1 in Figma: max-entries a number, expanded a boo
     expect(set.variants.some((variant) => "expanded" in variant.props)).toBe(false);
   });
 });
+
+describe("②b-2 A-glitilo-1, A-datelektilo-1 in Figma: properties", () => {
+  it("glitilo: readout a property beside the axis field; min-distance a NUMBER", () => {
+    const set = setOf("glitilo");
+    expect(set.properties.readout).toEqual(["none", "text", "field"]);
+    expect(set.properties["min-distance"]).toBe("NUMBER");
+    expect(set.variants.some((variant) => "readout" in variant.props)).toBe(false);
+  });
+
+  it("datelektilo: min-span and max-span are NUMBER properties", () => {
+    const set = setOf("datelektilo");
+    expect(set.properties["min-span"]).toBe("NUMBER");
+    expect(set.properties["max-span"]).toBe("NUMBER");
+  });
+});
