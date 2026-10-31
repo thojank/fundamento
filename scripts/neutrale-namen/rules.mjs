@@ -296,6 +296,55 @@ export function mapIdentifiers(text) {
   return text;
 }
 
+/** Whether an object key is the extension key in a place where it names Fundamento's extension. */
+function isExtensionKeyPlace(parentKey, grandKey) {
+  return (
+    parentKey === "$extensions" ||
+    (parentKey === "properties" && typeof grandKey === "string" && grandKey.endsWith("Extensions"))
+  );
+}
+
+/** The old schema URL of a schema URN (inverse of `schemaUrn` for the repo's schema files). */
+function legacySchemaId(urn) {
+  const rest = urn.slice(NEW_NAMES.schemaPrefix.length);
+  const segments = rest.split(":");
+  // The repo's convention: top-level schemas end in `.schema.json`, nested ones (mcp/…) in `.json`.
+  const path = `${segments.join("/")}${segments.length > 1 ? ".json" : ".schema.json"}`;
+  return `${oldNames().schemaBase}${path}`;
+}
+
+/**
+ * The inverse of `mapIdentifiers` on a parsed JSON value (S36-5.2): writes a value with the new
+ * identifiers in the old form, for old-format fixtures composed at test time. The extension key is
+ * renamed only where it is an extension key (below `$extensions`, or in the `properties` of a
+ * schema def named `…Extensions`), schema URNs and the ontology base become the old URLs, a
+ * fragment stays. A value that is already old comes back unchanged.
+ */
+export function legacyIdentifiers(value, parentKey, grandKey) {
+  const old = oldNames();
+  if (typeof value === "string") {
+    if (value.startsWith(NEW_NAMES.schemaPrefix) && value.length > NEW_NAMES.schemaPrefix.length) {
+      const hash = value.indexOf("#");
+      const id = hash === -1 ? value : value.slice(0, hash);
+      return `${legacySchemaId(id)}${hash === -1 ? "" : value.slice(hash)}`;
+    }
+    if (value === NEW_NAMES.ontologio || value.startsWith(`${NEW_NAMES.ontologio}#`)) {
+      return `${old.ontologioBase}${value.slice(NEW_NAMES.ontologio.length)}`;
+    }
+    return value;
+  }
+  if (Array.isArray(value))
+    return value.map((item) => legacyIdentifiers(item, undefined, parentKey));
+  if (typeof value !== "object" || value === null) return value;
+  const renames = isExtensionKeyPlace(parentKey, grandKey) && !(old.extensionKey in value);
+  return Object.fromEntries(
+    Object.entries(value).map(([key, child]) => [
+      renames && key === NEW_NAMES.extensionKey ? old.extensionKey : key,
+      legacyIdentifiers(child, key, parentKey),
+    ]),
+  );
+}
+
 /**
  * Generators whose outputs are regenerated instead of text-replaced (technical spec, Teil 6). A
  * generator runs only when its script exists in the checkout; `outputs` are path prefixes the
