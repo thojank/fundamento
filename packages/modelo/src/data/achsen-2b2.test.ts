@@ -800,3 +800,40 @@ describe("②b-2 A-pagxigilo-1: summary", () => {
     expect(tokensOf(brief)).toBeLessThan(750);
   });
 });
+
+/**
+ * A-atributlisto-1, A-atributlisto-3: at most max-entries entries show; a tertiary button „3
+ * weitere anzeigen“ opens the rest (expanded, aria-expanded on the button) and „Weniger anzeigen“
+ * closes them.
+ */
+describe("②b-2 A-atributlisto-1, A-atributlisto-3: max-entries and expanded", () => {
+  it("atributlisto: max-entries a number and expanded a boolean, after every prop it had", () => {
+    const { skemo } = entryOf("atributlisto");
+    expect(skemo.props.map((prop) => prop.name)).toEqual([
+      "layout",
+      "label",
+      "max-entries",
+      "expanded",
+    ]);
+    expect(propOf("atributlisto", "max-entries")).toMatchObject({ kind: "number" });
+    expect(propOf("atributlisto", "expanded")).toMatchObject({ kind: "boolean", default: false });
+    expect(skemo.a11y.states.expanded).toEqual(["aria-expanded"]);
+  });
+
+  it("atributlisto: the part more is a tertiary action with the Modelo's words", () => {
+    const { skemo } = entryOf("atributlisto");
+    expect(skemo.parts.more).toEqual({
+      fill: { fixed: "color.action.tertiary.rest" },
+      color: { fixed: "color.action.tertiary.text" },
+      typography: { fixed: "typography.label.2" },
+    });
+    expect(skemo.a11y.texts?.["more-count"]).toEqual({
+      de: "{count} weitere anzeigen",
+      en: "Show {count} more",
+    });
+    expect(skemo.a11y.texts?.["more-name"]).toEqual({ de: "Weniger anzeigen", en: "Show fewer" });
+    const brief = briefOf(entryOf("atributlisto"));
+    expect(brief.props).toContainEqual({ name: "max-entries", type: "number" });
+    expect(tokensOf(brief)).toBeLessThan(750);
+  });
+});
