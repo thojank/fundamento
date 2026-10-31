@@ -21,18 +21,29 @@
         "kind": "boolean",
         "default": false,
         "description": "The line only decorates: nothing for assistive technology (role none). Default false: a separator between groups of content."
+      },
+      {
+        "name": "emphasis",
+        "kind": "enum",
+        "values": ["low", "high"],
+        "default": "low",
+        "description": "Spec 029 ②a (A-apartigilo-1): the strength of the line – low the fine line inside a card, as before; high the stronger line between sections."
       }
     ],
     "states": ["rest"],
     "slots": [],
     "parts": {
       "line": {
-        "color": { "fixed": "color.border.subtle" },
-        "width": { "fixed": "border.width.default" }
+        "color": { "by": ["emphasis"] },
+        "width": { "by": ["emphasis"] }
       },
       "box": { "height": { "by": ["orientation"] } }
     },
     "bindings": [
+      { "part": "line", "property": "color", "when": { "emphasis": "low" }, "token": "color.border.subtle" },
+      { "part": "line", "property": "color", "when": { "emphasis": "high" }, "token": "color.border.default" },
+      { "part": "line", "property": "width", "when": { "emphasis": "low" }, "token": "border.width.default" },
+      { "part": "line", "property": "width", "when": { "emphasis": "high" }, "token": "border.width.strong" },
       { "part": "box", "property": "height", "when": { "orientation": "horizontal" }, "token": "none" },
       {
         "part": "box",

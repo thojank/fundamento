@@ -488,7 +488,8 @@ function coverageIssues(entry: LoadedEro, at: At): void {
  * text part (a part named after a slot with `text: true`) on each part `fill` is a declared pair.
  * One issue per undeclared pair, at the first combination that uses it. A slot `beside` the
  * control (Spec 010 ①, D-07) stands on the ground of its container, not on a part of the Ero:
- * the label of a switch never lies on its track or its knob, so it is not paired with them.
+ * the label of a switch never lies on its track or its knob, so it is not paired with them; nor is
+ * a fill that inherits (Spec 036 Teil 5 ②b-2: a karto of tone none takes the ground it lies on).
  */
 function pairIssues(
   entry: LoadedEro,
@@ -522,6 +523,9 @@ function pairIssues(
         const background = boundToken(skemo, surface, "fill", combination);
         if (foreground === undefined || background === undefined) continue;
         if (invalidTokens.has(foreground.token) || invalidTokens.has(background.token)) continue;
+        // Spec 036 Teil 5 ②b-2 (A-karto-1): a fill that inherits is no ground of the Ero – the text
+        // stands on the ground of its container, as a slot beside the control (paired there).
+        if (background.token === "inherit") continue;
         const key = `${foreground.token} ${background.token}`;
         if (pairs.has(key) || reported.has(key)) continue;
         reported.add(key);

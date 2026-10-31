@@ -26,6 +26,16 @@
         "kind": "boolean",
         "default": false,
         "description": "Shows a close button (a butono with emphasis low) named by a11y.texts.dismissible; closing hides the notice and says dismiss. The element hides itself and stays in the document; the application removes it on dismiss if it wants."
+      },
+      {
+        "name": "frame",
+        "kind": "enum",
+        "values": [
+          "card",
+          "band"
+        ],
+        "default": "card",
+        "description": "Spec 029 ②a (A-avizo-1): card, a notice in the content with its rounded edge, as before; band, a band over the whole width at the top of the page, without a rounded edge (its width is the container's)."
       }
     ],
     "states": [
@@ -119,7 +129,9 @@
           "fixed": "spacing.small"
         },
         "radius": {
-          "fixed": "radius.role.surface"
+          "by": [
+            "frame"
+          ]
         }
       }
     },
@@ -219,6 +231,22 @@
           "intent": "danger"
         },
         "token": "color.status.danger.text"
+      },
+      {
+        "part": "box",
+        "property": "radius",
+        "when": {
+          "frame": "card"
+        },
+        "token": "radius.role.surface"
+      },
+      {
+        "part": "box",
+        "property": "radius",
+        "when": {
+          "frame": "band"
+        },
+        "token": "radius.none"
       }
     ],
     "a11y": {

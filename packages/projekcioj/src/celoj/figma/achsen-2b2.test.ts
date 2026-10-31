@@ -89,7 +89,7 @@ describe("②b-2 A-apartigilo-1, A-spuro-1, A-karto-1, A-avataro-1, A-avizo-1 in
   it.each([
     ["apartigilo", "emphasis", ["low", "high"]],
     ["spuro", "emphasis", ["medium", "low"]],
-    ["karto", "tone", ["default", "muted", "none"]],
+    ["karto", "emphasis", ["high", "medium", "low"]],
     ["avataro", "corner", ["round", "soft", "square"]],
     ["avizo", "frame", ["card", "band"]],
   ])("%s: %s a variant axis with every value", (name, prop, values) => {

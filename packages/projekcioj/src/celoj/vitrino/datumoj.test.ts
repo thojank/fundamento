@@ -602,11 +602,12 @@ describe("the Vitrino shows the insigno, the avizo and the plenstato (Spec 011 �
 
   it("avizo: a row per intent, the columns rest and dismissible, heading and details with their words", () => {
     const grid = datumoj.eroj.avizo ?? "";
-    // Five, and the row of Nachlese 7 ② B-5 (a list and code in the details).
-    expect((grid.match(/<tr>/g) ?? []).length).toBe(6);
+    // Five, and the row of Nachlese 7 ② B-5 (a list and code in the details); Spec 036 Teil 5
+    // ②b-2 (A-avizo-1): a row per intent × frame.
+    expect((grid.match(/<tr>/g) ?? []).length).toBe(10);
     expect(grid).toContain('<th scope="col">dismissible</th>');
     expect(grid).toContain(
-      '<fm-avizo intent="danger" dismissible>danger<span slot="heading">Überschrift</span><span slot="details">Einzelheit</span></fm-avizo>',
+      '<fm-avizo intent="danger" frame="card" dismissible>danger · card<span slot="heading">Überschrift</span><span slot="details">Einzelheit</span></fm-avizo>',
     );
   });
 
@@ -836,11 +837,12 @@ describe("the Vitrino shows the pagxigilo and the spuro (Spec 015 ①)", () => {
     expect(grid).toContain('<th scope="row">medium</th>');
   });
 
-  it("spuro: one row, two links and the current page as text, the Vitrino's words (the Modelo's word names the landmark)", () => {
+  it("spuro: a row per emphasis, two links and the current page as text, the Vitrino's words (the Modelo's word names the landmark)", () => {
     const grid = datumoj.eroj.spuro ?? "";
-    expect((grid.match(/<fm-spuro /g) ?? []).length).toBe(1);
+    // Spec 036 Teil 5 ②b-2 (A-spuro-1): a row per emphasis.
+    expect((grid.match(/<fm-spuro /g) ?? []).length).toBe(2);
     expect(grid).toContain(
-      '<fm-spuro page="3"><a href="#fm-vitrino-spuro" data-page="1">Eins</a><a href="#fm-vitrino-spuro" data-page="2">Zwei</a><span data-page="3">Drei</span></fm-spuro>',
+      '<fm-spuro emphasis="medium" page="3"><a href="#fm-vitrino-spuro" data-page="1">Eins</a><a href="#fm-vitrino-spuro" data-page="2">Zwei</a><span data-page="3">Drei</span></fm-spuro>',
     );
   });
 });

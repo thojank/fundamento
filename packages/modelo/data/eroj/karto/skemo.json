@@ -38,6 +38,17 @@
         "kind": "boolean",
         "default": true,
         "description": "Whether the content stands for itself — a project, an article, read without the page around it (an article); false makes the card a section of the page (a region). Either way it is named by its heading."
+      },
+      {
+        "name": "emphasis",
+        "kind": "enum",
+        "values": [
+          "high",
+          "medium",
+          "low"
+        ],
+        "default": "high",
+        "description": "Spec 029 ②a (A-karto-1): the surface of the card – high the raised surface with its shadow, as before; medium the sunken ground without a shadow; low takes the ground it lies on (no surface, no shadow), the border stays. The Fonto's name for this axis is not used (Spec 007 F1: emphasis and intent are the axes)."
       }
     ],
     "states": [
@@ -65,13 +76,17 @@
     "parts": {
       "surface": {
         "fill": {
-          "fixed": "color.background.raised"
+          "by": [
+            "emphasis"
+          ]
         },
         "radius": {
           "fixed": "radius.role.surface"
         },
         "shadow": {
-          "fixed": "elevation.shadow.raised"
+          "by": [
+            "emphasis"
+          ]
         }
       },
       "border": {
@@ -117,7 +132,56 @@
         }
       }
     },
-    "bindings": [],
+    "bindings": [
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "emphasis": "high"
+        },
+        "token": "color.background.raised"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "emphasis": "medium"
+        },
+        "token": "color.background.sunken"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "emphasis": "low"
+        },
+        "token": "inherit"
+      },
+      {
+        "part": "surface",
+        "property": "shadow",
+        "when": {
+          "emphasis": "high"
+        },
+        "token": "elevation.shadow.raised"
+      },
+      {
+        "part": "surface",
+        "property": "shadow",
+        "when": {
+          "emphasis": "medium"
+        },
+        "token": "none"
+      },
+      {
+        "part": "surface",
+        "property": "shadow",
+        "when": {
+          "emphasis": "low"
+        },
+        "token": "none"
+      }
+    ],
     "a11y": {
       "role": "article",
       "name": [

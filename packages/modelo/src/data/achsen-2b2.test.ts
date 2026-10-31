@@ -492,7 +492,7 @@ describe("②b-2 A-ikono-2, A-signeto-2, A-avataro-2, A-pagxigilo-2, A-langetaro
 
 /**
  * The looks of the rest (S36-4.2): A-apartigilo-1 (emphasis), A-spuro-1 (emphasis), A-karto-1
- * (tone), A-avataro-1 (corner), A-avizo-1 (frame) – each a new enum prop after every prop of
+ * (emphasis, D-S36-4.2-4), A-avataro-1 (corner), A-avizo-1 (frame) – each a new enum prop after every prop of
  * 0.2.0, its default the look the Ero had; the keyed part properties bind by it.
  */
 const LOOKS: Readonly<
@@ -515,17 +515,19 @@ const LOOKS: Readonly<
       "line.color": { low: "color.border.subtle", high: "color.border.default" },
     },
   },
+  // The Fonto's name for the axis of the karto collides with Spec 007 F1 (emphasis and intent are
+  // the axes, the word is gone from the data): emphasis high | medium | low (D-S36-4.2-4).
   karto: {
-    prop: "tone",
-    values: ["default", "muted", "none"],
-    default: "default",
+    prop: "emphasis",
+    values: ["high", "medium", "low"],
+    default: "high",
     keyed: {
       "surface.fill": {
-        default: "color.background.raised",
-        muted: "color.background.sunken",
-        none: "inherit",
+        high: "color.background.raised",
+        medium: "color.background.sunken",
+        low: "inherit",
       },
-      "surface.shadow": { default: "elevation.shadow.raised", muted: "none", none: "none" },
+      "surface.shadow": { high: "elevation.shadow.raised", medium: "none", low: "none" },
     },
   },
   avataro: {

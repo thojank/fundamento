@@ -4697,7 +4697,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.avataro.image.radius",
+      "token": "ero.avataro.image.radius.corner.round",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/Avatar/Avatar.tsx",
@@ -4728,7 +4728,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.avataro.initials.radius",
+      "token": "ero.avataro.initials.radius.corner.round",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/Avatar/Avatar.tsx",
@@ -4956,7 +4956,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.avizo.box.radius",
+      "token": "ero.avizo.box.radius.frame.card",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/Banner/Banner.tsx",
@@ -9708,7 +9708,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.karto.surface.fill",
+      "token": "ero.karto.surface.fill.emphasis.high",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/Card/Card.tsx",
@@ -9718,7 +9718,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.karto.surface.fill",
+      "token": "ero.karto.surface.fill.emphasis.high",
       "aro": "aspekto/komuna+color-scheme/dark",
       "fonto": "astryx",
       "dosiero": "packages/core/src/Card/Card.tsx",
@@ -9738,7 +9738,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.karto.surface.shadow",
+      "token": "ero.karto.surface.shadow.emphasis.high",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/Card/Card.tsx",

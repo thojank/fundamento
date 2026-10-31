@@ -407,15 +407,15 @@ describe("every bound paint shows the plan's colour after the first and the seco
         // Spec 015 ②: the alsxutilo has dropzone × state = 12 variants.
         { set: "alsxutilo", created: 16, updated: 0 },
         // Spec 014 ②: the apartigilo has orientation = 2 variants in one state.
-        { set: "apartigilo", created: 2, updated: 0 },
+        { set: "apartigilo", created: 4, updated: 0 },
         // Spec 011 ④: the atributlisto has layout = 3 variants in one state (auto since Spec 014 ①).
         { set: "atributlisto", created: 3, updated: 0 },
         // Spec 015 ③: the avataro has size = 3 variants in one state; Spec 036 Teil 5 ②b-2: 5
         // (A-avataro-2), likewise ikono × 4 sizes, dialogo × full, langetaro and pagxigilo × size,
-        // signeto × large.
-        { set: "avataro", created: 5, updated: 0 },
+        // signeto × large; the new axes of apartigilo, avataro (corner), avizo, karto and spuro.
+        { set: "avataro", created: 15, updated: 0 },
         // Spec 011 ③: the avizo has intent = 4 variants in one state (dismissible is no axis).
-        { set: "avizo", created: 4, updated: 0 },
+        { set: "avizo", created: 8, updated: 0 },
         { set: "butono", created: 72, updated: 0 },
         // Spec 025 ②: the datelektilo, mode × expanded × state.
         // Spec 036 Teil 5 ②b-2 (A-datelektilo-2): × three sizes.
@@ -440,7 +440,7 @@ describe("every bound paint shows the plan's colour after the first and the seco
         // Spec 009: the kampo has size × state = 18 variants.
         { set: "kampo", created: 24, updated: 0 },
         // Spec 015 ③: the karto has orientation = 2 variants in one state (an axis of its own).
-        { set: "karto", created: 2, updated: 0 },
+        { set: "karto", created: 6, updated: 0 },
         // Spec 020 ③: the kodbloko has state = 2 variants (copyable keys no part, no axis).
         { set: "kodbloko", created: 2, updated: 0 },
         // Spec 014 ⑤: the kompletigilo has size × expanded × state = 30 variants.
@@ -479,7 +479,7 @@ describe("every bound paint shows the plan's colour after the first and the seco
         // Spec 014 ②: the saltligilo has state = 2 variants (rest and focus).
         { set: "saltligilo", created: 2, updated: 0 },
         { set: "signeto", created: 240, updated: 0 },
-        { set: "spuro", created: 3, updated: 0 },
+        { set: "spuro", created: 6, updated: 0 },
         // Spec 010 ①: the sxaltilo has checked × size × state = 24 variants.
         // Spec 036 Teil 5 ②b-2 (A-sxaltilo-2): two sizes, 24.
         { set: "sxaltilo", created: 24, updated: 0 },

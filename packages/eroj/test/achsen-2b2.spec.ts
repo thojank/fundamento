@@ -521,12 +521,16 @@ test.describe("②b-2 A-apartigilo-1, A-spuro-1, A-karto-1, A-avataro-1, A-avizo
     expect(await colorOf("m")).not.toBe(subtle);
   });
 
-  test("karto: tone muted takes the sunken ground, none no ground and no shadow", async ({
+  test("karto: emphasis medium takes the sunken ground, low no ground and no shadow", async ({
     page,
   }) => {
     const card = (attributes: string, id: string) =>
       `<fm-karto id="${id}" ${attributes}><span slot="heading">Standard</span><span slot="content">Inhalt</span></fm-karto>`;
-    await serve(page, out, card("", "d") + card('tone="muted"', "m") + card('tone="none"', "n"));
+    await serve(
+      page,
+      out,
+      card("", "d") + card('emphasis="medium"', "m") + card('emphasis="low"', "n"),
+    );
     const look = (id: string) =>
       page.locator(`#${id}`).evaluate((host) => {
         const control = host.shadowRoot?.querySelector('[part="control"]') as HTMLElement;

@@ -886,6 +886,9 @@ function keywordDeclarations(part: string, property: string, token: string): str
     // A colour that inherits (Spec 014 ②, D-05: the glyph of a neutral icon) says so, so the
     // combination has its rule and the inventory reads the value of the axis.
     if (property === "color") return ["color: inherit;"];
+    // A fill that inherits (Spec 036 Teil 5 ②b-2, A-karto-1: emphasis low) has no surface of its
+    // own: the part takes the ground of its host, which lies on the ground of the container.
+    if (property === "fill") return ["background-color: inherit;"];
     return property === "typography" ? ["display: inline;", "white-space: normal;"] : [];
   }
   // The underline is switched off; a minimum that is none is simply not written.

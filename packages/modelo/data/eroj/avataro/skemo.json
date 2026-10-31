@@ -38,6 +38,17 @@
         "kind": "boolean",
         "default": false,
         "description": "True where the name stands right beside the avatar: then the picture is hidden from assistive technology, so the name is not heard twice."
+      },
+      {
+        "name": "corner",
+        "kind": "enum",
+        "values": [
+          "round",
+          "soft",
+          "square"
+        ],
+        "default": "round",
+        "description": "Spec 029 ②a (A-avataro-1): the shape – round for a person, as before; soft and square for a team or a thing."
       }
     ],
     "states": [
@@ -47,7 +58,9 @@
     "parts": {
       "image": {
         "radius": {
-          "fixed": "radius.full"
+          "by": [
+            "corner"
+          ]
         }
       },
       "initials": {
@@ -63,7 +76,9 @@
           ]
         },
         "radius": {
-          "fixed": "radius.full"
+          "by": [
+            "corner"
+          ]
         }
       },
       "box": {
@@ -154,6 +169,54 @@
           "size": "x-large"
         },
         "token": "typography.headline.4"
+      },
+      {
+        "part": "image",
+        "property": "radius",
+        "when": {
+          "corner": "round"
+        },
+        "token": "radius.full"
+      },
+      {
+        "part": "image",
+        "property": "radius",
+        "when": {
+          "corner": "soft"
+        },
+        "token": "radius.small"
+      },
+      {
+        "part": "image",
+        "property": "radius",
+        "when": {
+          "corner": "square"
+        },
+        "token": "radius.none"
+      },
+      {
+        "part": "initials",
+        "property": "radius",
+        "when": {
+          "corner": "round"
+        },
+        "token": "radius.full"
+      },
+      {
+        "part": "initials",
+        "property": "radius",
+        "when": {
+          "corner": "soft"
+        },
+        "token": "radius.small"
+      },
+      {
+        "part": "initials",
+        "property": "radius",
+        "when": {
+          "corner": "square"
+        },
+        "token": "radius.none"
       }
     ],
     "a11y": {

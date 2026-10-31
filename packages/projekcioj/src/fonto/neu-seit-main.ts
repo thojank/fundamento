@@ -115,6 +115,31 @@ const REST_2B2 = (() => {
         "ero.dialogo.surface.radius.size.small": "ero.dialogo.surface.radius",
       },
     },
+    // A-apartigilo-1 (emphasis high of the line's colour and width: 2), A-avataro-1 (corner soft and
+    // square of both radii: 4), A-avizo-1 (frame band: 1), A-karto-1 (emphasis medium of the fill:
+    // 1; low inherits, no shadow but high), A-spuro-1 (emphasis low of the item's colour: 6).
+    {
+      pattern:
+        "^ero\\.apartigilo\\.line\\.(color|width)\\.emphasis\\.high$|^ero\\.avataro\\.(image|initials)\\.radius\\.corner\\.(soft|square)$|^ero\\.avizo\\.box\\.radius\\.frame\\.band$|^ero\\.karto\\.surface\\.fill\\.emphasis\\.medium$|^ero\\.spuro\\.item\\.color\\.emphasis\\.low\\.",
+      added: 2 + 4 + 1 + 1 + 6,
+      moved: {
+        "ero.apartigilo.line.color.emphasis.low": "ero.apartigilo.line.color",
+        "ero.apartigilo.line.width.emphasis.low": "ero.apartigilo.line.width",
+        "ero.avataro.image.radius.corner.round": "ero.avataro.image.radius",
+        "ero.avataro.initials.radius.corner.round": "ero.avataro.initials.radius",
+        "ero.avizo.box.radius.frame.card": "ero.avizo.box.radius",
+        "ero.karto.surface.fill.emphasis.high": "ero.karto.surface.fill",
+        "ero.karto.surface.shadow.emphasis.high": "ero.karto.surface.shadow",
+        ...Object.fromEntries(
+          ["true", "false"].flatMap((current) =>
+            ["rest", "hover", "focus"].map((state) => [
+              `ero.spuro.item.color.emphasis.medium.current.${current}.${state}`,
+              `ero.spuro.item.color.current.${current}.${state}`,
+            ]),
+          ),
+        ),
+      },
+    },
   ];
   const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
   return {
