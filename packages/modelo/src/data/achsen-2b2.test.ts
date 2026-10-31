@@ -837,3 +837,60 @@ describe("②b-2 A-atributlisto-1, A-atributlisto-3: max-entries and expanded", 
     expect(tokensOf(brief)).toBeLessThan(750);
   });
 });
+
+/**
+ * The rest of S36-4.1's rows: A-glitilo-1 (readout none | text | field – field of 0.2.0 is the
+ * same as readout field; the minimum distance of the thumbs), A-datelektilo-1 (the shortest and
+ * the longest span of a range). The number of months (months 1 | 2) stays open (D-S36-4.2-7).
+ */
+describe("②b-2 A-glitilo-1: readout and min-distance", () => {
+  it("glitilo: readout none | text | field and min-distance after every prop it had", () => {
+    const { skemo } = entryOf("glitilo");
+    expect(skemo.props.slice(-2)).toMatchObject([
+      { name: "readout", kind: "enum", values: ["none", "text", "field"], default: "none" },
+      { name: "min-distance", kind: "number" },
+    ]);
+    // field (0.2.0) stays and says readout field; the field's width stays keyed by it.
+    expect(propOf("glitilo", "field")).toMatchObject({ kind: "boolean", default: false });
+    expect(String(propOf("glitilo", "field")?.description)).toContain("readout");
+    expect(skemo.parts.readout).toEqual({
+      color: { fixed: "color.text.default" },
+      typography: { fixed: "typography.label.1" },
+    });
+    expect(skemo.constraints).toContainEqual(
+      expect.objectContaining({
+        when: { "prop:min-distance": "filled" },
+        allowed: { range: ["true"] },
+      }),
+    );
+    const brief = briefOf(entryOf("glitilo"));
+    expect(brief.axes).toContainEqual({
+      name: "readout",
+      values: ["none", "text", "field"],
+      default: "none",
+    });
+    expect(tokensOf(brief)).toBeLessThan(750);
+  });
+});
+
+describe("②b-2 A-datelektilo-1: min-span and max-span", () => {
+  it("datelektilo: min-span and max-span, numbers of days, only with mode range; the Modelo's words", () => {
+    const { skemo } = entryOf("datelektilo");
+    expect(skemo.props.slice(-2)).toMatchObject([
+      { name: "min-span", kind: "number" },
+      { name: "max-span", kind: "number" },
+    ]);
+    for (const name of ["min-span", "max-span"]) {
+      expect(skemo.constraints).toContainEqual(
+        expect.objectContaining({
+          when: { [`prop:${name}`]: "filled" },
+          allowed: { mode: ["range"] },
+        }),
+      );
+      const words = skemo.a11y.texts?.[`${name}-invalid`];
+      expect(words?.de).toContain(`{${name}}`);
+      expect(words?.en).toContain(`{${name}}`);
+    }
+    expect(tokensOf(briefOf(entryOf("datelektilo")))).toBeLessThan(750);
+  });
+});
