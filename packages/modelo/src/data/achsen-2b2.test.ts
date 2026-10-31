@@ -772,3 +772,31 @@ describe("②b-2 A-faldilo-1, A-konsileto-1, A-menuo-1, A-sxvebilo-1, A-langetar
     expect(description).toContain("alertdialog");
   });
 });
+
+/** A-pagxigilo-1: summary pages | count | compact – the pages, „Seite 5 von 10“ or „5 / 10“. */
+describe("②b-2 A-pagxigilo-1: summary", () => {
+  it("pagxigilo: summary pages | count | compact, default pages, the last prop; a part summary", () => {
+    const { skemo } = entryOf("pagxigilo");
+    expect(skemo.props.at(-1)).toMatchObject({
+      name: "summary",
+      kind: "enum",
+      values: ["pages", "count", "compact"],
+      default: "pages",
+    });
+    expect(skemo.parts.summary?.color).toEqual({ fixed: "color.navigation.text.rest" });
+    expect(skemo.parts.summary?.typography).toEqual({ by: ["size"] });
+    const words = skemo.a11y.texts?.["summary-count"];
+    expect(words?.de).toBe("Seite {page} von {total-pages}");
+    expect(words?.en).toBe("Page {page} of {total-pages}");
+  });
+
+  it("pagxigilo: the brief names summary as an axis, under 750", () => {
+    const brief = briefOf(entryOf("pagxigilo"));
+    expect(brief.axes).toContainEqual({
+      name: "summary",
+      values: ["pages", "count", "compact"],
+      default: "pages",
+    });
+    expect(tokensOf(brief)).toBeLessThan(750);
+  });
+});

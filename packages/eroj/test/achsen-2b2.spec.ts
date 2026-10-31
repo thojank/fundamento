@@ -820,3 +820,34 @@ test.describe("②b-2 layout: indicator-side, justify, spread, dismiss", () => {
     expect(await purpose("d")).toBe("guarded");
   });
 });
+
+test.describe("②b-2 A-pagxigilo-1: summary", () => {
+  test("count shows „Seite 5 von 10“ between the arrows, no page buttons", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      '<fm-pagxigilo id="p" lang="de" page="5" total-pages="10" summary="count"></fm-pagxigilo>',
+    );
+    const host = page.locator("#p");
+    await expect(host.locator('[part="summary"]')).toHaveText("Seite 5 von 10");
+    await expect(host.getByRole("button", { name: /^Seite \d+$/ })).toHaveCount(0);
+    await expect(host.getByRole("button", { name: "Vorherige Seite" })).toHaveCount(1);
+    await expect(host.getByRole("button", { name: "Nächste Seite" })).toHaveCount(1);
+  });
+
+  test("compact shows „5 / 10“ and is heard as „Seite 5 von 10“; without summary the pages", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<div lang="de"><fm-pagxigilo id="c" page="5" total-pages="10" summary="compact"></fm-pagxigilo><fm-pagxigilo id="p" page="5" total-pages="10"></fm-pagxigilo></div>',
+    );
+    const summary = page.locator("#c").locator('[part="summary"]');
+    await expect(summary).toContainText("5 / 10");
+    await expect(summary).toContainText("Seite 5 von 10");
+    const shown = await summary.evaluate((node) => (node as HTMLElement).innerText.trim());
+    expect(shown).toBe("5 / 10");
+    await expect(page.locator("#p").getByRole("button", { name: "Seite 5" })).toHaveCount(1);
+  });
+});
