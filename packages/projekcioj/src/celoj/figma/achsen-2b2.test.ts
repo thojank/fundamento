@@ -37,3 +37,13 @@ describe("②b-2 A-sxaltilo-1 in Figma: label-side a property, no variant (layou
     expect(Object.keys(set.variants[0]?.props ?? {})).toEqual(["checked", "size", "state"]);
   });
 });
+
+describe("②b-2 A-kompletigilo-1, A-alsxutilo-1, A-tekstareo-1 in Figma: the numbers", () => {
+  it.each([
+    ["kompletigilo", "max-suggestions"],
+    ["alsxutilo", "max-files"],
+    ["tekstareo", "max-length"],
+  ])("%s: %s is a NUMBER of the set", (name, prop) => {
+    expect(setOf(name).properties[prop]).toBe("NUMBER");
+  });
+});
