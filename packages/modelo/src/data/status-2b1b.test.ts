@@ -36,12 +36,27 @@ const FIELDS = [
   "alsxutilo",
 ] as const;
 
+/** The props ②b-2 (Spec 036 Teil 5) appends after the status of ②b-1b. */
+const AFTER_2B1B: ReadonlySet<string> = new Set([
+  "readonly",
+  "label-side",
+  "max-suggestions",
+  "max-files",
+  "max-length",
+  "unit",
+  "readout",
+  "months",
+  "size",
+  "select-all",
+]);
+
 const tokensOf = (value: unknown) => Math.ceil(Buffer.byteLength(JSON.stringify(value)) / 3);
 
 describe("Spec 029 ②b-1b M-2: the status of every field", () => {
   it.each(FIELDS)("%s: intent and message-position, the last props", (ero) => {
     const { skemo } = entryOf(ero);
-    const names = skemo.props.map((prop) => prop.name);
+    // Spec 036 Teil 5 ②b-2: the props of the axes and values come after them.
+    const names = skemo.props.map((prop) => prop.name).filter((name) => !AFTER_2B1B.has(name));
     expect(names.slice(-2)).toEqual(["intent", "message-position"]);
     const intent = skemo.props.find((prop) => prop.name === "intent");
     expect(intent).toMatchObject({

@@ -107,11 +107,13 @@ const FIELDS = [
   "alsxutilo",
 ];
 const READONLY_STATE = ["kampo", "listelektilo", "plurelektilo", "datelektilo"];
-const READONLY_PROP_ONLY = ["tekstareo", "glitilo"];
+// Spec 036 Teil 5 ②b-2 (A-elektilo-1, A-markobutono-1): read-only at elektilo and markobutono too,
+// without a state of its own (V-1).
+const READONLY_PROP_ONLY = ["tekstareo", "elektilo", "glitilo", "markobutono"];
 const LOOK = ["surface.fill", "border.color", "text.color", "label.color"];
 
 describe("Spec 035 2.3.4: read-only, one rule for the twelve fields – the look of rest", () => {
-  it("the twelve fields: four with a read-only state, two read-only without one, six without", () => {
+  it("the twelve fields: four with a read-only state, four read-only without one, four without", () => {
     const states = (ero: string): readonly string[] => skemoOf(ero).states;
     const prop = (ero: string) => skemoOf(ero).props.some((each) => each.name === "readonly");
     expect(FIELDS.filter((ero) => states(ero).includes("readonly"))).toEqual(
