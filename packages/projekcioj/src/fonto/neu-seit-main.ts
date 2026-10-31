@@ -102,6 +102,22 @@ const CHANGED: Readonly<Record<string, string>> = {
 /** Abnahme #122: a token main had that is gone (replaced by its sizes), with main's role. */
 const REMOVED: Readonly<Record<string, { type: string; role: string }>> = {
   "ero.kampo.clear.size": { type: "dimension", role: "size.control.small" },
+  // Spec 036 Teil 5 ②b-2 (A-elekto-2, A-markobutono-2, A-sxaltilo-2, ②a-2): two sizes; large is a
+  // deprecated alias of medium and keys no token any more.
+  "ero.elekto.indicator.size.size.large": { type: "dimension", role: "size.icon.large" },
+  "ero.elekto.label.typography.size.large": { type: "typography", role: "typography.label.1" },
+  "ero.elekto.option.label.typography.size.large": {
+    type: "typography",
+    role: "typography.body.1",
+  },
+  "ero.markobutono.indicator.size.size.large": { type: "dimension", role: "size.icon.large" },
+  "ero.markobutono.label.typography.size.large": {
+    type: "typography",
+    role: "typography.label.1",
+  },
+  "ero.sxaltilo.box.width.size.large": { type: "dimension", role: "size.control.large" },
+  "ero.sxaltilo.indicator.size.size.large": { type: "dimension", role: "size.icon.large" },
+  "ero.sxaltilo.label.typography.size.large": { type: "typography", role: "typography.label.1" },
 };
 
 /** How many tokens of main are gone (REMOVED). */
@@ -121,7 +137,9 @@ export function mainRows(
       canonical(tokens[CHANGED[name] ?? name]?.value),
     ]);
   for (const [name, { type, role }] of Object.entries(REMOVED)) {
-    if (tokens[name] === undefined && tokens[role] !== undefined && keep(name))
+    // A gone token is read through its role: keep judges what it would have been (②b-2: provo
+    // leaves typography out, the large label sizes included).
+    if (tokens[name] === undefined && tokens[role] !== undefined && keep(name) && keep(role))
       rows.push([name, type, canonical(tokens[role]?.value)]);
   }
   return rows.sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));

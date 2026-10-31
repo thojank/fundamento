@@ -1368,6 +1368,12 @@ export interface SkemoProp {
    * The text of the prop is shown where the default slot of the same name would stand, while that slot is empty; the slot wins where both are given (Spec 029 ②b-1b, Befund der Nachlese 12): the label of a field written as an attribute is its visible label, never only a hidden name.
    */
   shown?: boolean;
+  /**
+   * Values of an enum that are no longer values but still accepted for one release (Spec 036 Teil 5 ②b-2, Spec 029 ②a-2), each with the value it stands for: the Ero renders that value and says the given one is deprecated (console, check_usage, the brief). A deprecated value is no value of the prop and keys no binding.
+   */
+  deprecatedValues?: {
+    [k: string]: Name;
+  };
 }
 /**
  * A named region of a Sxablono (Spec 020): what may stand in it (Ero or Sxablono names, text or icon; any content where accepts is absent), how many, which props its children must have, how many of them may be primary actions (emphasis high), and whether it is a polite live region. One region may be the default slot.

@@ -135,7 +135,17 @@ export interface GetEroBrief {
    * (checked, Spec 010 ① D-03) with true and false; and the state of one entry of a slot
    * (selected, Spec 010 ③ E7) with the slot it belongs to and no default (Spec 011 ① O-3).
    */
-  axes: { name: string; values: string[]; default?: string; slot?: string }[];
+  axes: {
+    name: string;
+    values: string[];
+    default?: string;
+    slot?: string;
+    /**
+     * Values still accepted for one release, each with the value it renders as (Spec 036 Teil 5
+     * ②b-2, Spec 029 ②a-2): an agent writes the value they name.
+     */
+    deprecated?: Record<string, string>;
+  }[];
   /**
    * Every other prop of the Skemo with its type, in Skemo order (Nachlese 5 N5-3): what an agent
    * may set beyond the axes — loading at the kompletigilo, min-chars, value. Absent when every
@@ -438,6 +448,9 @@ export function briefOf(entry: LoadedEro): GetEroBrief {
           name: prop.name,
           values: prop.kind === "enum" ? [...(prop.values ?? [])] : ["true", "false"],
           ...(prop.default === undefined ? {} : { default: String(prop.default) }),
+          ...(prop.deprecatedValues === undefined
+            ? {}
+            : { deprecated: { ...prop.deprecatedValues } }),
         })),
       ...skemo.slots.flatMap((slot) =>
         slot.entry === undefined

@@ -422,7 +422,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         // Spec 010 ④: the elektilo has size × state = 15 variants.
         { set: "elektilo", created: 21, updated: 0 },
         // Spec 010 ③: the elekto has size × state = 15 variants (②b-1b M-2: 21, warning and success).
-        { set: "elekto", created: 21, updated: 0 },
+        // Spec 036 Teil 5 ②b-2 (A-elekto-2): two sizes, 14.
+        { set: "elekto", created: 14, updated: 0 },
         // Spec 014 ⑤: the faldilo has open × state = 6 variants.
         // Spec 029 ②b-1 M-1: open × the four states, disabled among them.
         { set: "faldilo", created: 8, updated: 0 },
@@ -455,7 +456,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         // Spec 020 ③: the markdovido has one variant (source and start-level are no axes).
         { set: "markdovido", created: 1, updated: 0 },
         // Spec 010 ②: the markobutono has checked × size × state = 30 variants.
-        { set: "markobutono", created: 42, updated: 0 },
+        // Spec 036 Teil 5 ②b-2 (A-markobutono-2): two sizes, 28.
+        { set: "markobutono", created: 28, updated: 0 },
         // Spec 014 ④: the menuo has state = 4 variants (the states of an entry).
         { set: "menuo", created: 4, updated: 0 },
         // Spec 011 ④: the mezurilo has intent = 4 variants in one state (value, min, max are
@@ -474,7 +476,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "signeto", created: 160, updated: 0 },
         { set: "spuro", created: 3, updated: 0 },
         // Spec 010 ①: the sxaltilo has checked × size × state = 24 variants.
-        { set: "sxaltilo", created: 36, updated: 0 },
+        // Spec 036 Teil 5 ②b-2 (A-sxaltilo-2): two sizes, 24.
+        { set: "sxaltilo", created: 24, updated: 0 },
         // Spec 014 ④: the sxvebilo has one variant (placement and open are no axes).
         { set: "sxvebilo", created: 1, updated: 0 },
         // Spec 011 ④: the tabelo has density × state = 6 variants (the states of the sort button).

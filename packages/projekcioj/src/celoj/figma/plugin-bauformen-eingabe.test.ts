@@ -41,7 +41,7 @@ describe("the sxaltilo is drawn as a toggle: track, knob, label beside (Spec 010
 
   it("draws every variant of checked × size × state, named by the plan", async () => {
     const { set } = await drawn();
-    expect(set?.children).toHaveLength(36);
+    expect(set?.children).toHaveLength(24);
     expect(set?.children[0]?.name).toBe("checked=true, size=small, state=rest");
   });
 
@@ -107,7 +107,7 @@ describe("the markobutono is drawn as a toggle: box, check mark, label and error
 
   it("draws every variant of checked × size × state, named by the plan", async () => {
     const { set } = await drawn();
-    expect(set?.children).toHaveLength(42);
+    expect(set?.children).toHaveLength(28);
     expect(set?.children[0]?.name).toBe("checked=true, size=small, state=rest");
   });
 
@@ -234,7 +234,7 @@ describe("the elekto is drawn as a choice: question, options with circle and dot
 
   it("draws every variant of size × state, named by the plan", async () => {
     const { set } = await drawn();
-    expect(set?.children).toHaveLength(21);
+    expect(set?.children).toHaveLength(14);
     expect(set?.children[0]?.name).toBe("size=small, state=rest");
   });
 

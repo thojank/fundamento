@@ -5636,6 +5636,7 @@ const PROPS = SKEMO.props as readonly {
   name: string;
   kind: "enum" | "boolean" | "string" | "number";
   values?: readonly string[];
+  deprecatedValues?: Readonly<Record<string, string>>;
   default?: string | boolean | number;
   required?: boolean;
 }[];
@@ -5853,6 +5854,13 @@ ${autoDisconnect}
     if (prop.kind === "enum") {
       const allowed = prop.values ?? [];
       const fallback = String(prop.default ?? allowed[0] ?? "");
+      // Spec 036 Teil 5 ②b-2 (Spec 029 ②a-2): a deprecated value stands for the value it names
+      // for one release, and the developer hears so.
+      const replacement = raw === null ? undefined : prop.deprecatedValues?.[raw];
+      if (replacement !== undefined) {
+        warn(\`${tag}: \${name}="\${raw}" is deprecated; using \${replacement}. Write \${name}="\${replacement}".\`);
+        return replacement;
+      }
       if (raw !== null && !allowed.includes(raw)) {
         warn(\`${tag}: \${name}="\${raw}" is not allowed; using \${fallback} (allowed: \${allowed.join(", ")}).\`);
       }

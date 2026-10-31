@@ -58,8 +58,28 @@ export function effectiveProps(skemo: Skemo, props: EroInstance["props"]): Recor
   for (const prop of skemo.props) {
     const value = props[prop.name] ?? prop.default;
     if (value !== undefined) effective[prop.name] = String(value);
+    // Spec 036 Teil 5 ②b-2 (Spec 029 ②a-2): a deprecated value stands for the value it names.
+    const replacement = prop.deprecatedValues?.[String(value)];
+    if (replacement !== undefined) effective[prop.name] = replacement;
   }
   return effective;
+}
+
+/**
+ * The props of an instance that give a value their Skemo keeps only as a deprecated alias (Spec 036
+ * Teil 5 ②b-2, Spec 029 ②a-2), each with the value it stands for.
+ */
+export function deprecatedPropsOf(
+  skemo: Skemo,
+  props: EroInstance["props"],
+): { prop: string; value: string; replacement: string }[] {
+  return skemo.props.flatMap((prop) => {
+    const value = props[prop.name];
+    const replacement = value === undefined ? undefined : prop.deprecatedValues?.[String(value)];
+    return replacement === undefined
+      ? []
+      : [{ prop: prop.name, value: String(value), replacement }];
+  });
 }
 
 /** Lower-case words of a text, punctuation removed (NFC, Unicode letters and digits). */
@@ -1245,6 +1265,20 @@ export function evaluateUsage(modelo: Modelo, instances: readonly EroInstance[])
     }
     for (const finding of uzoFindings(index, ero, instance)) {
       at(finding.instance, finding.rule, finding.message, finding.suggestion);
+    }
+    // Spec 036 Teil 5 ②b-2 (Spec 029 ②a-2): a deprecated value renders as the value it stands for
+    // for one release; the instance hears that it should write that value.
+    for (const { prop, value, replacement } of deprecatedPropsOf(ero.skemo, instance.props)) {
+      violations.push({
+        instance: [index],
+        issue: {
+          rule: "prop-value-deprecated",
+          severity: "warning",
+          path: formatIssuePath({ file: "instances", pointer: `/${index}/props/${prop}` }),
+          message: `${prop}="${value}" of ${ero.ero.name} is deprecated and renders as ${prop}="${replacement}"; it goes with the next release.`,
+          suggestion: `Write ${prop}="${replacement}".`,
+        },
+      });
     }
   });
 
