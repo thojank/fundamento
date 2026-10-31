@@ -145,6 +145,13 @@ const WANTED_2B2: Readonly<Record<string, readonly { befund: string; match?: str
   spuro: [{ befund: "②b-2 A-spuro-1: emphasis an axis of the variants." }],
   karto: [{ befund: "②b-2 A-karto-1: emphasis an axis of the variants." }],
   avizo: [{ befund: "②b-2 A-avizo-1: frame an axis of the variants." }],
+  // S36-4.2, density and compact: markdovido density and plenstato compact are new axes (every
+  // variant renamed, the gap and the room keyed by them); tabelo density default and teksto kind
+  // label add variants and lay the set out anew.
+  markdovido: [{ befund: "②b-2 A-markdovido-1: density an axis of the variants." }],
+  plenstato: [{ befund: "②b-2 A-plenstato-1/2: compact an axis of the variants." }],
+  tabelo: [{ befund: "②b-2 A-tabelo-1: density default.", match: "density=default" }],
+  teksto: [{ befund: "②b-2 A-teksto-1: kind label.", match: "kind=label" }],
 };
 
 /** One run of the plan in the double, read by every case (Vitest collects nothing here). */
