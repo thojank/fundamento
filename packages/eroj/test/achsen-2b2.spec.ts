@@ -861,3 +861,53 @@ test.describe("②b-2 A-pagxigilo-1: summary", () => {
     await expect(page.locator("#p").getByRole("button", { name: "Seite 5" })).toHaveCount(1);
   });
 });
+
+test.describe("②b-2 A-atributlisto-1, A-atributlisto-3: max-entries", () => {
+  const LIST =
+    "<dl><dt>Name</dt><dd>Fokus</dd><dt>Status</dt><dd>gültig</dd><dt>Version</dt><dd>3</dd><dt>Autor</dt><dd>Erika</dd><dt>Stand</dt><dd>heute</dd></dl>";
+
+  test("shows max-entries entries and a button for the rest; the button opens and closes them", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      `<fm-atributlisto id="a" lang="de" label="Angaben" max-entries="2">${LIST}</fm-atributlisto>`,
+    );
+    const host = page.locator("#a");
+    const shown = () =>
+      host.evaluate(
+        (element) =>
+          [...element.querySelectorAll("dt")].filter((term) => term.checkVisibility()).length,
+      );
+    expect(await shown()).toBe(2);
+    const more = host.getByRole("button", { name: "3 weitere anzeigen" });
+    await expect(more).toHaveAttribute("aria-expanded", "false");
+    await more.click();
+    expect(await shown()).toBe(5);
+    await expect(host).toHaveAttribute("expanded", "");
+    const fewer = host.getByRole("button", { name: "Weniger anzeigen" });
+    await expect(fewer).toHaveAttribute("aria-expanded", "true");
+    await fewer.focus();
+    await page.keyboard.press("Enter");
+    expect(await shown()).toBe(2);
+  });
+
+  test("without max-entries, or with as many entries, no button", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      `<fm-atributlisto id="n">${LIST}</fm-atributlisto><fm-atributlisto id="m" max-entries="5">${LIST}</fm-atributlisto>`,
+    );
+    for (const id of ["n", "m"]) {
+      await expect(page.locator(`#${id}`).getByRole("button")).toHaveCount(0);
+      expect(
+        await page
+          .locator(`#${id}`)
+          .evaluate((element) =>
+            [...element.querySelectorAll("dt")].every((term) => term.checkVisibility()),
+          ),
+      ).toBe(true);
+    }
+  });
+});

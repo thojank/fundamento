@@ -141,3 +141,12 @@ describe("②b-2 A-pagxigilo-1 in Figma: summary a property; the set shows the p
     expect(set.variants.some((variant) => "summary" in variant.props)).toBe(false);
   });
 });
+
+describe("②b-2 A-atributlisto-1 in Figma: max-entries a number, expanded a boolean", () => {
+  it("atributlisto: the properties; the button more has no node (the set shows every entry)", () => {
+    const set = setOf("atributlisto");
+    expect(set.properties["max-entries"]).toBe("NUMBER");
+    expect(set.properties.expanded).toBe("BOOLEAN");
+    expect(set.variants.some((variant) => "expanded" in variant.props)).toBe(false);
+  });
+});
