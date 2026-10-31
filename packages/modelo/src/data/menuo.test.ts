@@ -47,6 +47,8 @@ describe("menuo in the repo Modelo (section ④, G1, G2, G4)", () => {
         ["open", "boolean", false, undefined],
         // Nachlese 7 ② B-4.
         ["disabled", "boolean", false, undefined],
+        // Spec 036 Teil 5 ②b-2 (A-menuo-1): the alignment along the side.
+        ["justify", "enum", "center", undefined],
       ],
     );
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled"]);
@@ -188,7 +190,7 @@ describe("the Uzo of the menuo (section ④, G6)", () => {
   it("the brief names placement and state as axes, the items as a duty, and stays under 750", () => {
     if (menuo === undefined) throw new Error("missing");
     const brief = briefOf(menuo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["placement"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["placement", "justify"]);
     expect(brief.required).toEqual({ props: [], slots: ["items"] });
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
   });

@@ -32,6 +32,17 @@
         "kind": "boolean",
         "default": false,
         "description": "Whether the layer is shown; the trigger toggles it, Escape and a click outside close it (light dismiss of the platform), and the attribute follows."
+      },
+      {
+        "name": "justify",
+        "kind": "enum",
+        "values": [
+          "start",
+          "center",
+          "end"
+        ],
+        "default": "center",
+        "description": "Spec 029 ②a (A-sxvebilo-1): the alignment along the side of the trigger – center as before; start at the start edge of the trigger, end at its end edge (the writing direction mirrors both). Layout, no token."
       }
     ],
     "states": [

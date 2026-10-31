@@ -1361,6 +1361,8 @@ const tabsStructure: string = [
   ':where([part="control"]) { display: flex; flex-wrap: nowrap; align-items: stretch; overflow-x: auto; box-sizing: border-box; border-block-end-style: solid; }',
   ':where([part="tab"]) { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; margin: 0; border-style: none; appearance: none; cursor: pointer; white-space: nowrap; transition-property: background-color, color, border-color; }',
   ':where([part="tab"]:focus:not(:focus-visible)) { outline-width: 0; }',
+  // Spec 036 Teil 5 ②b-2 (A-langetaro-1): spread fill shares the width of the list.
+  ':host([spread="fill"]) :where([part="tab"]) { flex: 1 1 0; }',
   ':where([part="tab"][aria-disabled="true"]) { cursor: not-allowed; }',
   ':where([part="panel"]) { display: block; }',
   ':where([part="panel"]:focus:not(:focus-visible)) { outline-width: 0; }',
@@ -1425,24 +1427,42 @@ const paragraphStructure: string = [
  * room (position-try-fallbacks). Where the platform has no anchor positioning the element writes
  * the plain place under the trigger as inline insets (the own fallback, E11).
  */
-const overlayPlace = (fallback: string, layer = '[part="control"]'): string =>
+const overlayPlace = (fallback: string, layer = '[part="control"]', justified = false): string =>
   [
     `${layer === ":host" ? ":host" : `:where(${layer})`} { position: fixed; inset: auto; margin: 0; box-sizing: border-box; position-area: ${fallback}; position-try-fallbacks: flip-block, flip-inline; }`,
     ...["block-start", "block-end", "inline-start", "inline-end"].map(
       (side) =>
         `:host([placement="${side}"])${layer === ":host" ? "" : ` ${layer}`} { position-area: ${side}; }`,
     ),
+    // Spec 036 Teil 5 ②b-2 (A-konsileto-1, A-menuo-1, A-sxvebilo-1): justify start and end span
+    // the area from the anchor's start or end edge along the side (center: the side alone). The
+    // host's attribute, no data attribute: no axis of the Skemo's.
+    ...(justified
+      ? ["block-start", "block-end", "inline-start", "inline-end"].flatMap((side) => {
+          const along = side.startsWith("block") ? "inline" : "block";
+          const host = (attributes: string) =>
+            `:host(${attributes})${layer === ":host" ? "" : ` ${layer}`}`;
+          return [
+            ["start", `span-${along}-end`],
+            ["end", `span-${along}-start`],
+          ].map(([justify, span]) =>
+            side === fallback
+              ? `${host(`[justify="${justify}"]:not([placement])`)}, ${host(`[placement="${side}"][justify="${justify}"]`)} { position-area: ${side} ${span}; }`
+              : `${host(`[placement="${side}"][justify="${justify}"]`)} { position-area: ${side} ${span}; }`,
+          );
+        })
+      : []),
   ].join("\n");
 
 /**
  * Layout of a tooltip (Spec 014 ④, D-05), keywords only: the host takes no place of its own (the
  * layer lies in the top layer); the control wraps its words and breaks a long one.
  */
-const tooltipStructure = (fallback: string): string =>
+const tooltipStructure = (fallback: string, justified = false): string =>
   [
     // The host is the layer (D-05, B-7): a popover of the platform in the tree scope of its
     // trigger, so the anchor name reaches it; the control inside is the surface.
-    overlayPlace(fallback, ":host"),
+    overlayPlace(fallback, ":host", justified),
     ":host { border-style: none; }",
     ':where([part="control"]) { border-style: none; overflow-wrap: anywhere; transition-property: opacity; }',
   ].join("\n");
@@ -1451,12 +1471,12 @@ const tooltipStructure = (fallback: string): string =>
  * Layout of a popover (Spec 014 ④, D-05), keywords only: the host stands inline where its trigger
  * stands; the control is a column of heading and content with its border; the content a column.
  */
-const popoverStructure = (fallback: string): string =>
+const popoverStructure = (fallback: string, justified = false): string =>
   [
     ":host { display: inline-block; }",
     // The slot's box wraps the slotted trigger in the shadow tree: it carries the anchor name.
     ':where(slot[name="trigger"]) { display: inline-block; }',
-    overlayPlace(fallback),
+    overlayPlace(fallback, '[part="control"]', justified),
     ':where([part="control"]) { display: flex; flex-direction: column; border-style: solid; overflow-wrap: anywhere; }',
     ':where([part="control"]:not(:popover-open)) { display: none; }',
     ':where([part="heading"]) { margin: 0; }',
@@ -1469,11 +1489,11 @@ const popoverStructure = (fallback: string): string =>
  * platform's border that stretches across the column and never wraps; a disabled row says so to
  * the pointer; a separator row is a block.
  */
-const menuStructure = (fallback: string): string =>
+const menuStructure = (fallback: string, justified = false): string =>
   [
     ":host { display: inline-block; }",
     ':where(slot[name="trigger"]) { display: inline-block; }',
-    overlayPlace(fallback),
+    overlayPlace(fallback, '[part="control"]', justified),
     ':where([part="control"]) { display: flex; flex-direction: column; align-items: stretch; border-style: solid; }',
     ':where([part="control"]:not(:popover-open)) { display: none; }',
     ':where([part="item"]) { display: flex; align-items: center; box-sizing: border-box; margin: 0; border-style: none; appearance: none; cursor: pointer; white-space: nowrap; text-align: start; transition-property: background-color, color; }',
@@ -1481,6 +1501,9 @@ const menuStructure = (fallback: string): string =>
     ':where([part="item"][aria-disabled="true"]) { cursor: not-allowed; }',
     ':where([part="separator"]) { display: block; }',
   ].join("\n");
+
+/** Spec 036 Teil 5 ②b-2: whether the overlay's Skemo has justify (A-konsileto-1 and others). */
+const justifiedOf = (skemo: Skemo): boolean => skemo.props.some((prop) => prop.name === "justify");
 
 /** The default side of an overlay's control: the Skemo's default of placement (D-05). */
 const placementOf = (skemo: Skemo): string =>
@@ -1518,6 +1541,9 @@ const disclosureStructure: string = [
   ':where([part="control"]) { display: block; }',
   ':where([part="summary"]) { display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; margin: 0; list-style: none; cursor: pointer; transition-property: background-color, color; }',
   ':where([part="summary"])::-webkit-details-marker { display: none; }',
+  // Spec 036 Teil 5 ②b-2 (A-faldilo-1): indicator-side start sets the chevron before the words
+  // (a row reversed and packed at its end, the start in the writing direction).
+  ':host([indicator-side="start"]) :where([part="summary"]) { flex-direction: row-reverse; justify-content: flex-end; }',
   ':where([part="summary"]:focus:not(:focus-visible)) { outline-width: 0; }',
   ':where([part="content"]) { display: block; overflow-wrap: anywhere; }',
 ].join("\n");
@@ -2275,11 +2301,11 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
         : isDialog(skemo)
           ? dialogStructure
           : isTooltip(skemo)
-            ? tooltipStructure(placementOf(skemo))
+            ? tooltipStructure(placementOf(skemo), justifiedOf(skemo))
             : isPopover(skemo)
-              ? popoverStructure(placementOf(skemo))
+              ? popoverStructure(placementOf(skemo), justifiedOf(skemo))
               : isMenu(skemo)
-                ? menuStructure(placementOf(skemo))
+                ? menuStructure(placementOf(skemo), justifiedOf(skemo))
                 : isIcon(skemo)
                   ? iconStructure
                   : isSeparator(skemo)

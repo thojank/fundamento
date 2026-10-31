@@ -30,6 +30,16 @@
         ],
         "default": "medium",
         "description": "Spec 029 ②a (A-langetaro-2): three sizes, as the fields and buttons the tabs stand beside; medium as before. Every tab keeps the minimum target size (touch-target-min)."
+      },
+      {
+        "name": "spread",
+        "kind": "enum",
+        "values": [
+          "content",
+          "fill"
+        ],
+        "default": "content",
+        "description": "Spec 029 ②a (A-langetaro-1): content, each tab as wide as its words, as before; fill, the tabs share the width of the list. Layout, no token."
       }
     ],
     "states": [

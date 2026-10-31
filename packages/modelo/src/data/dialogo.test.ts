@@ -44,6 +44,8 @@ describe("dialogo in the repo Modelo (section ②, E9)", () => {
         // Spec 036 Teil 5 ②b-2 (A-dialogo-2): full, the whole viewport.
         ["size", ["small", "medium", "full"], "small"],
         ["reason", ["none", "optional", "required"], "none"],
+        // Spec 036 Teil 5 ②b-2 (A-dialogo-1, M-3): the purpose.
+        ["dismiss", ["free", "guarded", "explicit"], "guarded"],
       ],
     );
     expect(skemo?.states).toEqual(["rest"]);
@@ -269,7 +271,7 @@ describe("the Uzo of the dialogo (section ②, G5)", () => {
   it("the brief names the purpose, size and reason, title and actions as duties, and stays under 750", () => {
     if (dialogo === undefined) throw new Error("dialogo missing");
     const brief = briefOf(dialogo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "reason"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "reason", "dismiss"]);
     expect(brief.required).toEqual({ props: [], slots: ["heading", "actions"] });
     const bytes = Buffer.byteLength(JSON.stringify(brief), "utf8");
     expect(Math.ceil(bytes / 3), `${bytes} bytes`).toBeLessThanOrEqual(750);
