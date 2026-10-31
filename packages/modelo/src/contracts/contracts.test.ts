@@ -109,7 +109,8 @@ describe("rule catalog (§2.6)", () => {
     // Spec 029 ①: the six rules of check:fontoj.
     // Spec 032 ②: clean-room-spuroj-invalid and clean-room-jugxo-missing.
     // Spec 033 S1: faceto-token-unassigned and faceto-token-twice.
-    expect(RULE_IDS).toHaveLength(194);
+    // Spec 036 Teil 6 (6.4): privat-vorto and privat-repo of check:privat.
+    expect(RULE_IDS).toHaveLength(196);
     for (const rule of [
       "agordo-jugxo-fixed",
       "raporto-out-of-sync",
@@ -220,6 +221,7 @@ describe("shared constants", () => {
       "clean-room",
       "ikonaro",
       "fontoj",
+      "privat",
     ]);
   });
 
