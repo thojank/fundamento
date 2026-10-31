@@ -6056,7 +6056,23 @@ async function applyComponents(variables, warnings) {
       // A checkbox (Spec 010 ②, D-09): label and error in a column beside the box.
       const toggleTexts = isToggle && Object.keys(component.texts || {}).length > 0;
       const column = toggleTexts ? part(field, "texts", () => figma.createFrame()) : undefined;
-      const labelParent = column || field;
+      // Spec 036 1.6: the label in the middle of the box or the switch. The ring stands at the top
+      // of the field; the label's line beside it is as high as the ring and holds the label in its
+      // middle. Its height comes from a strut of no width that mirrors the ring – ring, gap,
+      // control, indicator – bound to the ring's own variables (below), so it follows every mode.
+      // A label an older run left directly in the column moves into the line.
+      const labelLine = column !== undefined ? part(column, "label-line", () => figma.createFrame()) : undefined;
+      if (labelLine !== undefined) {
+        for (const older of [ours(column, "part", "label-row"), ours(column, "part", "label")]) {
+          if (older !== undefined) labelLine.insertChild(0, older);
+        }
+      }
+      const strut = labelLine !== undefined ? part(labelLine, "label-strut", () => figma.createFrame()) : undefined;
+      const strutGap = strut !== undefined ? part(strut, "label-strut-gap", () => figma.createFrame()) : undefined;
+      const strutBox = strutGap !== undefined ? part(strutGap, "label-strut-box", () => figma.createFrame()) : undefined;
+      const strutMark = strutBox !== undefined ? part(strutBox, "label-strut-mark", () => figma.createFrame()) : undefined;
+      const struts = [strut, strutGap, strutBox, strutMark].filter((each) => each !== undefined);
+      const labelParent = labelLine || column || field;
       // A date picker (Spec 025 ②, plan ② D-12): the field holds a row of the ring around the
       // control and the trigger, then the calendar — the plan's month — before help and error.
       const dated = isField && component.calendar !== undefined;
@@ -6160,7 +6176,8 @@ async function applyComponents(variables, warnings) {
       if (isToggle && field.children.indexOf(ring) !== 0) field.insertChild(0, ring);
       if (isToggle && column === undefined && field.children.indexOf(labelPlaced) !== 1) field.insertChild(1, labelPlaced);
       if (column !== undefined && field.children.indexOf(column) !== 1) field.insertChild(1, column);
-      if (column !== undefined && column.children.indexOf(labelPlaced) !== 0) column.insertChild(0, labelPlaced);
+      if (labelLine !== undefined && column.children.indexOf(labelLine) !== 0) column.insertChild(0, labelLine);
+      if (labelLine !== undefined && labelLine.children.indexOf(labelPlaced) !== 0) labelLine.insertChild(0, labelPlaced);
       const textNode = isField ? part(control, "text", () => figma.createText()) : undefined;
       // The chevron of a select (Spec 010 ④, D-07): its sign at the end of the field's control,
       // after the text, imported once like the check mark; a text field has no sign.
@@ -6281,6 +6298,8 @@ async function applyComponents(variables, warnings) {
         .concat(weeks)
         .concat(cells.map((cell) => cell.frame))
         .concat(column ? [column] : [])
+        .concat(labelLine ? [labelLine] : [])
+        .concat(struts)
         .concat(indicator ? [indicator] : [])
         .concat(listbox ? [listbox] : [])
         .concat(...suggestionRows.map((row) => [row.entry, row.ring, row.gap, row.frame]));
@@ -6429,8 +6448,17 @@ async function applyComponents(variables, warnings) {
       }
       if (column) {
         own(column, TEXTS_LAYOUT);
-        // The box stands at the first line of its label (D-09), as on the web.
+        // The box stands at the top, beside the first line of its label (D-09); Spec 036 1.6: that
+        // line is as high as the ring, the label in its middle.
         own(field, { counterAxisAlignItems: "MIN" });
+      }
+      if (labelLine !== undefined) {
+        own(labelLine, TOGGLE_LAYOUT);
+        for (const frame of [strut, strutGap]) own(frame, HUG_LAYOUT);
+        own(strutBox, CONTROL_LAYOUT);
+        own(strutMark, INDICATOR_LAYOUT);
+        // No width: the strut lends the line its height alone (resize refuses less, F-4).
+        if (strutMark.width > SMALLEST_SIZE) strutMark.resize(SMALLEST_SIZE, Math.max(strutMark.height, SMALLEST_SIZE));
       }
       if (mark) own(mark, MARK_NEUTRAL);
       // The variant lies in the grid's flow, its parts in the variant's (F14).
@@ -6524,6 +6552,23 @@ async function applyComponents(variables, warnings) {
       // Everything gathered is written once, layout before the parts inside it; the measures
       // are bound after that, when every frame has its layout.
       for (const each of frames.concat(texts).concat(mark ? [mark] : [])) flush(each);
+      // Spec 036 1.6: the strut beside the label takes the ring's height from the ring's own
+      // variables – the paddings of ring and gap, the control's minimum height and its border where
+      // the border lies in its layout, the height of the indicator.
+      if (strut !== undefined) {
+        const mirrors = [[ring, strut], [gap, strutGap], [control, strutBox], [indicator, strutMark]];
+        const bordered = control.strokesIncludedInLayout === true && Array.isArray(control.strokes) && control.strokes.length > 0;
+        for (const measure of measures.slice()) {
+          const mirror = mirrors.find((pair) => pair[0] === measure.node);
+          if (mirror === undefined) continue;
+          const fields = mirror[1] === strutMark
+            ? (measure.field === "height" ? ["height"] : [])
+            : ["paddingTop", "paddingBottom", "minHeight"].indexOf(measure.field) !== -1
+              ? [measure.field]
+              : mirror[0] === control && measure.field === "strokeWeight" && bordered ? ["paddingTop", "paddingBottom"] : [];
+          for (const field of fields) measures.push({ node: mirror[1], field, variable: measure.variable, font: false });
+        }
+      }
       // Spec 029 ②b-1 M-6: the clear button after its control, so the control's layout is its own.
       if (clearFrame !== undefined) flush(clearFrame);
       // The status icon stands in the order of the control above; written like the clear button.
