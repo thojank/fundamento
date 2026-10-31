@@ -158,6 +158,12 @@ const REST_2B2 = (() => {
       added: 3,
       moved: {},
     },
+    // A-atributlisto-1 (the button for the rest: its fill, colour and typography, 3).
+    {
+      pattern: "^ero\\.atributlisto\\.more\\.(fill|color|typography)$",
+      added: 3,
+      moved: {},
+    },
   ];
   const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
   return {

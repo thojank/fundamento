@@ -4596,9 +4596,9 @@
         "celo": "figma"
       },
       "decision": "approved",
-      "kialo": "Die Zusammenfassung der Seitenleiste (Teil summary: „Seite 5 von 10“ oder „5 / 10“) steht nur bei summary count oder compact; summary ist in Figma eine Eigenschaft, keine Achse der Varianten, und das Set zeigt die Seiten (summary pages), wie das Web ohne summary. Der Teil hat im Set darum keinen Knoten (FIGMA_NOT_DRAWN). Wird summary eines Tages eine Achse der Varianten, entfällt dieser Eintrag.",
+      "kialo": "Zwei Teile stehen nur bei einem Wert einer Eigenschaft, die in Figma keine Achse der Varianten ist: die Zusammenfassung der Seitenleiste (Teil summary bei summary count oder compact) und der Knopf der Attributliste für die übrigen Einträge (Teil more bei max-entries). Das Set zeigt den Fall ohne sie – die Seiten, alle Einträge –, wie das Web ohne diese Props; die Teile haben im Set darum keinen Knoten (FIGMA_NOT_DRAWN). Wird eine der Eigenschaften eines Tages eine Achse der Varianten, entfällt ihr Eintrag.",
       "date": "2026-10-31",
-      "context": "Spec 036 Teil 5 ②b-2 (Spec 029 abgleich.json A-pagxigilo-1): summary pages, count, compact; check:parity meldet die Werte des Teils summary als freigegeben (parity-part-not-drawn), keine Differenz. Von P0 angelegt, zur Bestätigung durch den Maintainer."
+      "context": "Spec 036 Teil 5 ②b-2 (Spec 029 abgleich.json A-pagxigilo-1, A-atributlisto-1/3): summary pages, count, compact; max-entries mit expanded; check:parity meldet die Werte der Teile summary und more als freigegeben (parity-part-not-drawn), keine Differenz. Von P0 angelegt, zur Bestätigung durch den Maintainer."
     }
   ]
 }

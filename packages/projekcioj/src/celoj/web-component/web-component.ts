@@ -238,7 +238,13 @@ export const isLight = (skemo: Skemo): boolean =>
   hostOf(skemo.a11y.role) === "light" && !isPagination(skemo);
 
 /** The parts of a light-DOM host the shadow tree holds: the scroll region and its edge. */
-const LIGHT_SHADOW_PARTS: ReadonlySet<string> = new Set(["region", "border", "focus-ring"]);
+const LIGHT_SHADOW_PARTS: ReadonlySet<string> = new Set([
+  "region",
+  "border",
+  "focus-ring",
+  // Spec 036 Teil 5 ②b-2 (A-atributlisto-1): the button for the rest of a list stands in the shadow.
+  "more",
+]);
 
 /** A pagination (Spec 015 ①, plan ① D-03): a navigation that draws its pages itself (an ellipsis part). */
 export const isPagination = (skemo: Skemo): boolean =>
@@ -1332,6 +1338,9 @@ const lightStructure = (skemo: Skemo): string =>
           ':where([part="region"]) { display: block; overflow-x: auto; box-sizing: border-box; border-style: solid; }',
           ':where([part="region"]:focus:not(:focus-visible)) { outline-width: 0; }',
           ':where([part="list"]) { display: block; }',
+          // Spec 036 Teil 5 ②b-2 (A-atributlisto-1): the button for the rest, a tertiary action.
+          ':where([part="more"]) { display: inline-flex; align-items: center; margin: 0; padding: 0; border-style: none; appearance: none; cursor: pointer; }',
+          ':where([part="more"][hidden]) { display: none; }',
         ].join("\n");
 
 /**
@@ -2452,6 +2461,7 @@ function selectorOf(
       return part === "separator" ? ':where([part="separator"])' : ':where([part="items"])';
     }
     if (isNav(skemo)) return ':where([part="list"])';
+    if (part === "more") return ':where([part="more"])';
     return part === "focus-ring"
       ? ':where([part="region"]:focus-visible)'
       : ':where([part="region"])';

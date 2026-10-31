@@ -6076,6 +6076,40 @@
             }
           }
         }
+      },
+      "more": {
+        "fill": {
+          "$type": "color",
+          "$value": "{color.action.tertiary.rest}",
+          "$description": "atributlisto: more.fill (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M6A36DNY26QV77H9VWCGHKRX",
+              "role": "ero"
+            }
+          }
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.action.tertiary.text}",
+          "$description": "atributlisto: more.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M6A36DNZFWW6R9VWHDC5JR53",
+              "role": "ero"
+            }
+          }
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.label.2}",
+          "$description": "atributlisto: more.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M6A36DNZFWW6R9VWHDC5JR54"
+            }
+          }
+        }
       }
     },
     "avataro": {

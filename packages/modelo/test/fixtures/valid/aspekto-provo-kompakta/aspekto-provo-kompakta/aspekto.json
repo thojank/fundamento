@@ -60,7 +60,7 @@
     "structure": {
       "vortaro": "0.2.0",
       "reference": "komuna",
-      "sha256": "d4150b838decea1b717469c037af8646e9ffce792997c567857df0a6b713785d"
+      "sha256": "d8381e7e085ea5c94eba33dd77d358ba1ce0d87632c08b280d027467bcd7fdde"
     },
     "agordo": {
       "name": "provo-kompakta",

@@ -2619,6 +2619,45 @@ ${
       if (name === null) list.removeAttribute("aria-label");
       else list.setAttribute("aria-label", name);
     }
+    // Spec 036 Teil 5 ②b-2 (A-atributlisto-1/3): at most max-entries entries show; the button
+    // more (a tertiary action in the shadow) shows the rest – expanded, said by aria-expanded –
+    // and hides them again. Every write first compares (the observer of the light DOM).
+    if (HAS_PROP.has("max-entries")) {
+      const most = Math.floor(Number(this.getAttribute("max-entries")));
+      const terms = [...list.querySelectorAll(":scope > dt")];
+      const limited = Number.isFinite(most) && most > 0 && terms.length > most;
+      const open = this.propValue("expanded") === true;
+      let entry = -1;
+      for (const child of [...list.children]) {
+        if (child.tagName === "DT") entry += 1;
+        const hide = limited && !open && entry >= most;
+        if (hide !== child.hasAttribute("data-fm-more")) {
+          child.toggleAttribute("data-fm-more", hide);
+          child.toggleAttribute("hidden", hide);
+        }
+      }
+      let more = this.shadowRoot?.querySelector('[part="more"]');
+      if (!(more instanceof HTMLButtonElement) && limited) {
+        const button = document.createElement("button");
+        button.setAttribute("part", "more");
+        button.setAttribute("type", "button");
+        button.addEventListener("click", () => {
+          this.toggleAttribute("expanded", this.propValue("expanded") !== true);
+        });
+        this.shadowRoot?.querySelector('[part="list"]')?.after(button);
+        more = button;
+      }
+      if (more instanceof HTMLButtonElement) {
+        if (more.hidden !== !limited) more.hidden = !limited;
+        const lingvo = this.#lingvo();
+        const say = (key: string) => TEXTS[key]?.[lingvo] ?? TEXTS[key]?.en ?? "";
+        const words = open
+          ? say("more-name")
+          : say("more-count").replace("{count}", String(Math.max(0, terms.length - most)));
+        if (more.textContent !== words) more.textContent = words;
+        if (more.getAttribute("aria-expanded") !== String(open)) more.setAttribute("aria-expanded", String(open));
+      }
+    }
     // An empty value (Spec 011 ④, D-10, G4): a dash to see, the a11y text of the default slot's
     // empty entry to hear (a11y.texts <slot>-empty), clipped from sight; a value filled in later
     // takes both away.

@@ -36,6 +36,9 @@ describe("atributlisto in the repo Modelo (section ④, G1, G2, E10)", () => {
       [
         ["layout", ["columns", "stacked", "auto"], "columns"],
         ["label", "string", undefined],
+        // Spec 036 Teil 5 ②b-2 (A-atributlisto-1/3): the most entries shown, and the rest open.
+        ["max-entries", "number", undefined],
+        ["expanded", "boolean", false],
       ],
     );
     expect(skemo?.states).toEqual(["rest"]);
@@ -49,7 +52,8 @@ describe("atributlisto in the repo Modelo (section ④, G1, G2, E10)", () => {
 
   it("names its parts: term in the muted label role, value in the default text, the gaps of the list and the box", () => {
     if (skemo === undefined) throw new Error("missing");
-    expect(Object.keys(skemo.parts).sort()).toEqual(["box", "list", "term", "value"]);
+    // Spec 036 Teil 5 ②b-2 (A-atributlisto-1): more, the button for the rest.
+    expect(Object.keys(skemo.parts).sort()).toEqual(["box", "list", "more", "term", "value"]);
     expect(skemo.parts.term?.color).toEqual({ fixed: "color.text.muted" });
     expect(skemo.parts.term?.typography).toEqual({ fixed: "typography.label.2" });
     expect(skemo.parts.value?.color).toEqual({ fixed: "color.text.default" });
@@ -81,6 +85,9 @@ describe("atributlisto in the repo Modelo (section ④, G1, G2, E10)", () => {
     expect(skemo?.a11y.name).toEqual(["prop:label"]);
     expect(skemo?.a11y.texts).toEqual({
       "entries-empty": { de: "keine Angabe", en: "not specified" },
+      // Spec 036 Teil 5 ②b-2 (A-atributlisto-1).
+      "more-count": { de: "{count} weitere anzeigen", en: "Show {count} more" },
+      "more-name": { de: "Weniger anzeigen", en: "Show fewer" },
     });
   });
 
