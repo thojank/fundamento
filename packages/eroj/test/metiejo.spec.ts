@@ -297,10 +297,14 @@ test.describe("Markenassistent (Spec 035, Befund 4.5.1)", () => {
     const fill = async (selector: string) => {
       const button = page.frameLocator(selector).locator('fm-butono[emphasis="high"]').first();
       await expect(button).toBeVisible();
-      return button.evaluate((host) => {
-        const control = host.shadowRoot?.querySelector("button") ?? host;
-        return getComputedStyle(control).backgroundColor;
-      });
+      const read = () =>
+        button.evaluate((host) => {
+          const control = host.shadowRoot?.querySelector("button") ?? host;
+          return getComputedStyle(control).backgroundColor;
+        });
+      // The frame's stylesheet arrives after its Eroj (WebKit): wait until the fill is painted.
+      await expect.poll(read).not.toBe("rgba(0, 0, 0, 0)");
+      return read();
     };
     const before = await fill("iframe[data-mt-vorschau]");
     const after = await fill("iframe[data-mt-vorschau-propono]");

@@ -41,6 +41,10 @@ body { margin: 0; font-family: var(--fm-typography-body-1-font-family); backgrou
 .mt-schritte { min-inline-size: 0; }
 .mt-schritte fm-navigado { display: flex; flex-direction: column; max-inline-size: 100%; }
 .mt-schritte fm-navigado > a { flex-wrap: wrap; white-space: normal; overflow-wrap: anywhere; max-inline-size: 100%; gap: var(--fm-spacing-xsmall); padding-block: var(--fm-spacing-xsmall); }
+.mt-studio-vorschau[data-mt-vergleich] iframe { block-size: 24rem; }
+.mt-propono-bild { display: flex; flex-wrap: wrap; gap: var(--fm-spacing-small); align-items: center; }
+.mt-propono-farbe { display: inline-block; inline-size: var(--fm-size-control-large); block-size: var(--fm-size-control-large); border: var(--fm-border-width-default) solid var(--fm-color-border-subtle); border-radius: var(--fm-radius-role-control); }
+.mt-ausschnitt { inline-size: calc(var(--fm-size-control-large) * 3); block-size: calc(var(--fm-size-control-large) * 2); object-fit: cover; object-position: top left; border: var(--fm-border-width-default) solid var(--fm-color-border-subtle); border-radius: var(--fm-radius-role-control); }
 .mt-studio-vorschau { display: flex; flex-direction: column; gap: var(--fm-spacing-small); }
 .mt-studio-vorschau iframe { inline-size: 100%; block-size: 48rem; border: var(--fm-border-width-default) dashed var(--fm-color-border-default); border-radius: var(--fm-radius-role-surface); background-color: var(--fm-color-background-canvas); }
 .mt-gruppe { display: flex; flex-direction: column; gap: var(--fm-spacing-medium); }
@@ -617,7 +621,18 @@ function zeigeKosto(body) {
   if (counter && body.zaehlilo) counter.textContent = body.zaehlilo.satz;
   if (body.atendoj > 0) meldung("Der Anbieter hat gebremst (429): " + body.atendoj + "× gewartet, dann ging es weiter.");
 }
+// Spec 035, Befund 4.5.1: the preview with the open proposal follows the draft like the other one.
+function refreshNachher() {
+  const nachher = document.querySelector("iframe[data-mt-vorschau-propono]");
+  if (!nachher) return;
+  const url = new URL(nachher.getAttribute("data-mt-src"), location.origin);
+  url.searchParams.set("rev", String(rev));
+  url.searchParams.set("scheme", scheme);
+  nachher.src = url.toString();
+}
+refreshNachher();
 function zeigeStato(stato) {
+  refreshNachher();
   if (!stato) return;
   const meter = document.querySelector("[data-mt-prozent]");
   if (meter) meter.setAttribute("value", String(stato.prozent));
