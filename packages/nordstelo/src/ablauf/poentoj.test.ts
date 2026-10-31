@@ -87,8 +87,11 @@ describe("the score of a flow per screen", () => {
   it("counts a link written with the Modelo's link Ero (its target prop, no href)", () => {
     const faktoj = faktojDe("F", "3");
     const before = JSON.stringify(faktoj);
-    // ekranoj alone reads href only: the fm-ligilo edges look missing.
-    expect(navigado(planoDe(tasko), faktoj).kvoto).toBeLessThan(1);
+    // Since S037-04 ekranoj reads the target prop of the link Ero itself (Befund 1 of S037-07):
+    // the loop of fm ekranoj and the measurement count the same edges.
+    expect(navigado(planoDe(tasko), faktoj)).toEqual(
+      navigado(planoDe(tasko), faktojPorNavigado(faktoj, modelo)),
+    );
     expect(navigado(planoDe(tasko), faktojPorNavigado(faktoj, modelo)).kvoto).toBe(1);
     expect(JSON.stringify(faktoj)).toBe(before);
   });
