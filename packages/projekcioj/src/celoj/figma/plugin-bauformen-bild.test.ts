@@ -133,10 +133,18 @@ const WANTED_2B2: Readonly<Record<string, readonly { befund: string; match?: str
   // third size, and the radius of small and medium is the variable of its size now (same value).
   ikono: [{ befund: "②b-2 A-ikono-2: size x-small.", match: "size=x-small" }],
   signeto: [{ befund: "②b-2 A-signeto-2: size large.", match: "size=large" }],
-  avataro: [{ befund: "②b-2 A-avataro-2: sizes x-small and x-large.", match: "size=x-" }],
+  avataro: [{ befund: "②b-2 A-avataro-2, A-avataro-1: sizes x-small, x-large; corner an axis." }],
   pagxigilo: [{ befund: "②b-2 A-pagxigilo-2: size an axis of the variants." }],
   langetaro: [{ befund: "②b-2 A-langetaro-2: size an axis of the variants." }],
   dialogo: [{ befund: "②b-2 A-dialogo-2: size full; the radius by size." }],
+  // S36-4.2, the looks of the rest: a new axis renames every variant and keys the variables of its
+  // parts by it (the default value draws what the set drew): apartigilo emphasis (A-apartigilo-1),
+  // spuro emphasis (A-spuro-1), karto emphasis (A-karto-1), avizo frame (A-avizo-1); avataro corner
+  // (A-avataro-1) beside its sizes above.
+  apartigilo: [{ befund: "②b-2 A-apartigilo-1: emphasis an axis of the variants." }],
+  spuro: [{ befund: "②b-2 A-spuro-1: emphasis an axis of the variants." }],
+  karto: [{ befund: "②b-2 A-karto-1: emphasis an axis of the variants." }],
+  avizo: [{ befund: "②b-2 A-avizo-1: frame an axis of the variants." }],
 };
 
 /** One run of the plan in the double, read by every case (Vitest collects nothing here). */
