@@ -2,13 +2,16 @@
 // fontoj/, as in step 2 of the Schnellstart), out of every repository; the proposals of the last
 // reading per Faceto in marken/<name>/enportilo.json until the person takes them. `legiMaterialon`
 // reads one upload or one link into findings; a licensed font goes to the private repository after
-// the check that it is private (uploadFont), as before.
+// the check that it is private (uploadFont), as before. Spec 035, Befund 4.5.6 (D-11): a JPG/JPEG or
+// WebP is checked by its bytes and decoded by the optional browser of Weg C; without one it is
+// stored all the same, and one sentence says that its colours could not be measured.
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { extname, join } from "node:path";
 import { isFontFile } from "../kontrolo.js";
 import { markoDir, safeFilename, storeUpload } from "../marko.js";
 import { type PrivataDeps, uploadFont } from "../privata.js";
+import { type Bildilo, type BildTipo, playwrightBildilo, SenBrowser } from "./bildilo.js";
 import { farbojOfPixels } from "./farboj.js";
 import { legiPdf } from "./pdf.js";
 import { decodePng } from "./png.js";
@@ -22,7 +25,22 @@ export const PROPONOJ_FILE = "enportilo.json";
 
 /** What the Enportilo reads, for the sentence of a refusal. */
 export const LEGEBLA =
-  "Der Enportilo liest PNG, SVG und PDF, Schriften (woff2, woff, ttf, otf) und Links auf Webseiten.";
+  "Der Enportilo liest PNG, JPG, WebP, SVG und PDF, Schriften (woff2, woff, ttf, otf) und Links auf Webseiten.";
+
+/** The images the browser decodes, by extension, with the name of their kind for a refusal. */
+const BILDTIPOJ: Readonly<Record<string, { tipo: BildTipo; nomo: string }>> = {
+  ".jpg": { tipo: "image/jpeg", nomo: "JPEG" },
+  ".jpeg": { tipo: "image/jpeg", nomo: "JPEG" },
+  ".webp": { tipo: "image/webp", nomo: "WebP" },
+};
+
+/** The type of an image by its first bytes (the MIME check of an upload). */
+function tipoOf(bytes: Buffer): BildTipo | undefined {
+  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "image/jpeg";
+  if (bytes.toString("latin1", 0, 4) === "RIFF" && bytes.toString("latin1", 8, 12) === "WEBP")
+    return "image/webp";
+  return undefined;
+}
 
 export class NeLegebla extends Error {}
 
@@ -39,6 +57,8 @@ export interface MaterialoOptions {
   tiparojRepo?: string;
   deps?: PrivataDeps;
   fetch?: RetejoFetch;
+  /** Decodes a JPG or WebP (Spec 035 4.5.6); default the browser of Weg C, loaded on first need. */
+  bildilo?: Bildilo;
   familyOf(filename: string): string;
 }
 
@@ -106,6 +126,31 @@ export async function legiMaterialon(
       nomo: filename,
       kiel: "upload",
     };
+  }
+  const bild = BILDTIPOJ[extension];
+  if (bild !== undefined) {
+    if (tipoOf(bytes) !== bild.tipo)
+      throw new NeLegebla(`${filename} ist kein ${bild.nomo}-Bild. ${LEGEBLA}`);
+    storeMaterialo(options.workdir, options.name, filename, bytes);
+    try {
+      const bildo = await (options.bildilo ?? playwrightBildilo()).malkodi(bytes, bild.tipo);
+      return {
+        trovoj: farbojOfPixels(bildo.rgba, filename),
+        satzoj: [],
+        nomo: filename,
+        kiel: "upload",
+      };
+    } catch (error) {
+      if (!(error instanceof SenBrowser)) throw error;
+      return {
+        trovoj: [],
+        satzoj: [
+          `Ohne Browser kann ich die Farben von ${filename} nicht messen; das Bild liegt im Material.`,
+        ],
+        nomo: filename,
+        kiel: "upload",
+      };
+    }
   }
   if (extension !== ".png" && extension !== ".svg" && extension !== ".pdf")
     throw new NeLegebla(LEGEBLA);

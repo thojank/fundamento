@@ -6,11 +6,17 @@
 
 import { describe, expect, it } from "vitest";
 import { Budget, Provider } from "../asistanto/ki.js";
+import { blanka } from "../test-doubles/weg-c.js";
 import { loadBases } from "../vorschau.js";
 import { esplori, ILOJ_ESPLORO, permesataAdreso } from "./esploro.js";
 
 const bases = loadBases();
 const provider = new Provider("mistral", "ministral-14b-2512", "sk-esploro");
+/** Spec 035 4.1: every page renders as an empty white screen; its colours come from the CSS. */
+const bildilo = {
+  bildigi: async () => ({ bildo: blanka(), logoj: [] }),
+  malkodi: async () => blanka(),
+};
 
 const pages: Record<string, { type: string; body: string }> = {
   "https://pano.example/": {
@@ -101,6 +107,7 @@ describe("the research agent (Spec 033 S4)", () => {
       provider,
       fetch,
       pageFetch,
+      bildilo,
       budget: new Budget(30_000),
       bases,
     });
@@ -141,6 +148,7 @@ describe("the research agent (Spec 033 S4)", () => {
       provider,
       fetch,
       pageFetch,
+      bildilo,
       budget: new Budget(60_000),
       bases,
     });
@@ -153,6 +161,7 @@ describe("the research agent (Spec 033 S4)", () => {
       nomo: "Pano",
       url: "https://pano.example/",
       pageFetch,
+      bildilo,
       budget: new Budget(1),
       bases,
     });

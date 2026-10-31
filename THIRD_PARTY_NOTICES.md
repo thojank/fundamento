@@ -36,3 +36,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+---
+
+## Playwright (optional runtime dependency, not a Fonto)
+
+- Package: `playwright` 1.63.0 (npm, published 2026-09-04; the release of `@playwright/test` in `packages/eroj`, so installed browsers are shared), an `optionalDependencies` entry of `@fundamento/metiejo` only
+- Reason: „Weg C: Seiten lokal rendern und nach Fläche messen, optional“ (Spec 035, Befund 4.1); the same browser decodes uploaded JPG and WebP images (Befund 4.5.6)
+- Loaded: only by a dynamic `import()` when Weg C renders its first page or an upload needs decoding; never by the start of the MCP server or of `fm`
+- Not shipped: Chromium. Install it when wanted: `pnpm --filter @fundamento/eroj exec playwright install chromium`. Without it Weg C reads the code of a page and says so in one sentence.
+- Nothing of it is taken into Fundamento; it runs on the person's machine.
+- License: Apache-2.0 (Copyright (c) Microsoft Corporation; full text: https://github.com/microsoft/playwright/blob/v1.63.0/LICENSE)
