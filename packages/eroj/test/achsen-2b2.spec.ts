@@ -301,3 +301,156 @@ test.describe("②b-2 A-kampo-1: unit", () => {
     await expect(page.locator("fm-kampo").locator('[part="unit"]')).toBeHidden();
   });
 });
+
+/** The resolved value of a custom property of the page, read through a probe (px). */
+const pixelsOf = (page: Page, variable: string) =>
+  page.evaluate((name) => {
+    const probe = document.createElement("div");
+    probe.style.setProperty("inline-size", `var(${name})`);
+    document.body.append(probe);
+    const value = probe.getBoundingClientRect().width;
+    probe.remove();
+    return Math.round(value);
+  }, variable);
+
+/** The rounded box of a part (or the host's first part) in the shadow tree of an element. */
+const partBox = (page: Page, selector: string, part: string) =>
+  page.locator(selector).evaluate((host, name) => {
+    const node = host.shadowRoot?.querySelector(`[part="${name}"]`) as HTMLElement;
+    const rect = node.getBoundingClientRect();
+    return { width: Math.round(rect.width), height: Math.round(rect.height) };
+  }, part);
+
+test.describe("②b-2 A-ikono-2, A-signeto-2, A-avataro-2: the new sizes", () => {
+  test("ikono x-small is the smallest icon, below small", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      '<fm-ikono id="xs" name="check" size="x-small"></fm-ikono><fm-ikono id="s" name="check" size="small"></fm-ikono>',
+    );
+    const xs = await partBox(page, "#xs", "glyph");
+    const s = await partBox(page, "#s", "glyph");
+    expect(xs.width).toBe(await pixelsOf(page, "--fm-size-scale-100"));
+    expect(xs.width).toBeLessThan(s.width);
+  });
+
+  test("signeto large is as high as a large control, taller than medium", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      '<fm-signeto id="l" size="large">Filter</fm-signeto><fm-signeto id="m">Filter</fm-signeto>',
+    );
+    const large = await partBox(page, "#l", "control");
+    const medium = await partBox(page, "#m", "control");
+    expect(large.height).toBe(await pixelsOf(page, "--fm-size-control-large"));
+    expect(large.height).toBeGreaterThan(medium.height);
+  });
+
+  test("avataro x-small and x-large frame the three sizes it had", async ({ page }) => {
+    const sizes = ["x-small", "small", "medium", "large", "x-large"];
+    await serve(
+      page,
+      out,
+      sizes
+        .map(
+          (size) => `<fm-avataro id="${size}" name="Erika Mustermann" size="${size}"></fm-avataro>`,
+        )
+        .join(""),
+    );
+    const widths: number[] = [];
+    for (const size of sizes) widths.push((await partBox(page, `#${size}`, "initials")).width);
+    for (let index = 1; index < widths.length; index++) {
+      expect(widths[index], sizes[index]).toBeGreaterThan(widths[index - 1] ?? 0);
+    }
+    expect(widths[0]).toBe(await pixelsOf(page, "--fm-size-icon-small"));
+    expect(widths[4]).toBe(await pixelsOf(page, "--fm-size-scale-1000"));
+  });
+});
+
+test.describe("②b-2 A-pagxigilo-2, A-langetaro-2: size", () => {
+  test("pagxigilo small writes smaller and shows smaller arrows; no size is medium", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      ["small", "medium", ""]
+        .map(
+          (size) =>
+            `<fm-pagxigilo id="p-${size || "none"}" page="2" total-pages="3" ${size ? `size="${size}"` : ""}></fm-pagxigilo>`,
+        )
+        .join(""),
+    );
+    const look = (id: string) =>
+      page.locator(`#${id}`).evaluate((host) => {
+        const root = host.shadowRoot as ShadowRoot;
+        const item = root.querySelector('[part~="item"]') as HTMLElement;
+        const arrow = root.querySelector('[part="prev"]') as Element;
+        return {
+          font: Number.parseFloat(getComputedStyle(item).fontSize),
+          arrow: Math.round(arrow.getBoundingClientRect().width),
+        };
+      });
+    const small = await look("p-small");
+    const medium = await look("p-medium");
+    expect(small.font).toBeLessThan(medium.font);
+    expect(small.arrow).toBeLessThan(medium.arrow);
+    expect(await look("p-none")).toEqual(medium);
+  });
+
+  test("langetaro: small, medium, large tabs grow; no size is medium", async ({ page }) => {
+    const sizes = ["small", "medium", "large", ""];
+    await serve(
+      page,
+      out,
+      sizes
+        .map(
+          (size) =>
+            `<fm-langetaro id="t-${size || "none"}" label="Standard" ${size ? `size="${size}"` : ""}><data value="a">Inhalt</data><data value="b">Versionen</data><div slot="panel">Der Inhalt</div></fm-langetaro>`,
+        )
+        .join(""),
+    );
+    const look = (id: string) =>
+      page.locator(`#${id}`).evaluate((host) => {
+        const tab = host.shadowRoot?.querySelector('[role="tab"]') as HTMLElement;
+        const rect = tab.getBoundingClientRect();
+        return {
+          height: Math.round(rect.height),
+          width: Math.round(rect.width),
+          font: Number.parseFloat(getComputedStyle(tab).fontSize),
+        };
+      });
+    const [small, medium, large, none] = [
+      await look("t-small"),
+      await look("t-medium"),
+      await look("t-large"),
+      await look("t-none"),
+    ];
+    expect(small.width).toBeLessThan(medium.width);
+    expect(small.font).toBeLessThan(medium.font);
+    expect(large.height).toBe(await pixelsOf(page, "--fm-size-control-large"));
+    expect(large.height).toBeGreaterThan(medium.height);
+    expect(none).toEqual(medium);
+  });
+});
+
+test.describe("②b-2 A-dialogo-2: size full", () => {
+  test("full takes the whole viewport without a rounded edge", async ({ page }) => {
+    await page.setViewportSize({ width: 800, height: 600 });
+    await serve(
+      page,
+      out,
+      '<fm-dialogo id="d" size="full" open>Befund verwerfen?<fm-butono slot="actions" emphasis="high">Verwerfen</fm-butono></fm-dialogo>',
+    );
+    const surface = await page.locator("#d").evaluate((host) => {
+      const control = host.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+      const rect = control.getBoundingClientRect();
+      return {
+        width: Math.round(rect.width),
+        height: Math.round(rect.height),
+        radius: getComputedStyle(control).borderTopLeftRadius,
+      };
+    });
+    expect(surface).toEqual({ width: 800, height: 600, radius: "0px" });
+  });
+});
