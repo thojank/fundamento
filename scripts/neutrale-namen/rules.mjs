@@ -326,5 +326,24 @@ export const GENERATORS = Object.freeze([
   },
 ]);
 
+/**
+ * The formatter of the checkout, run over the changed files before the generators: a rule can
+ * lengthen a line past the formatter's width or shorten one it had wrapped. Runs only when the
+ * checkout has `config`; the changed paths follow the command.
+ */
+export const FORMATTER = Object.freeze({
+  id: "biome",
+  config: "biome.json",
+  command: [
+    "pnpm",
+    "exec",
+    "biome",
+    "check",
+    "--write",
+    "--files-ignore-unknown=true",
+    "--no-errors-on-unmatched",
+  ],
+});
+
 /** Where the exception list lives in the checkout (shared with `check:privat`, D-23). */
 export const EXCEPTIONS_FILE = "packages/modelo/src/checks/privat/escepoj.json";

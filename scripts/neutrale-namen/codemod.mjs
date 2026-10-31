@@ -2,7 +2,8 @@
 // Spec 036 Teil 6 (D-11): the codemod that gives the public repository neutral names. Runs over
 // `git ls-files` of one checkout, applies the rule table of rules.mjs to every tracked text file
 // except the exception list (verbatim spec copies, D-23) and the outputs of generators, writes a
-// file only when its content changes, then reruns the generators that exist in the checkout.
+// file only when its content changes, formats the changed files with the checkout's formatter and
+// then reruns the generators that exist in the checkout.
 // Deterministic and idempotent: a second run changes nothing. Touches nothing outside the
 // checkout: no untracked or ignored file, no symlink, no path outside the root.
 //
@@ -17,7 +18,7 @@ import { existsSync, lstatSync, readFileSync, realpathSync, writeFileSync } from
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
-import { EXCEPTIONS_FILE, GENERATORS, mapText, oldNames } from "./rules.mjs";
+import { EXCEPTIONS_FILE, FORMATTER, GENERATORS, mapText, oldNames } from "./rules.mjs";
 
 export const EXIT_OK = 0;
 export const EXIT_FAIL = 1;
@@ -28,7 +29,8 @@ export const HELP = `Usage: node scripts/neutrale-namen/codemod.mjs [options]
 Gives the checkout neutral names (Spec 036 Teil 6): the DTCG extension key, the schema IDs, the
 ontology base, the private font repository and the remaining mentions of the old name. Runs over
 \`git ls-files\`, skips the exception list (${EXCEPTIONS_FILE}) and the outputs of
-generators, writes only on change and reruns the generators that exist (schema types, build,
+generators, writes only on change, formats the changed files with the checkout's formatter
+(Biome, if biome.json exists) and reruns the generators that exist (schema types, build,
 Ero-Tokens). A second run changes nothing.
 
 Options:
@@ -36,7 +38,8 @@ Options:
   --dry-run            List what would change; write nothing, run no generator.
   --check              Like --dry-run, but exit 1 when anything would change.
   --exceptions <file>  Exception list (default: <root>/${EXCEPTIONS_FILE}).
-  --no-generators      Do not run the generators (their outputs are then rewritten as text).
+  --no-generators      Run neither the formatter nor the generators (generated outputs are then
+                       rewritten as text).
   --json               Print the report as JSON.
   -h, --help           Show this help.
 
@@ -193,11 +196,23 @@ export function runCodemod(options) {
     if (!dryRun) writeFileSync(absolute, mapped.text);
   }
 
-  if (!dryRun && generators.length > 0) {
+  const steps = [...generators];
+  const formatter = (options.generators ?? true) && existsSync(join(root, FORMATTER.config));
+  if (formatter && report.changed.length > 0) {
+    steps.unshift({
+      id: FORMATTER.id,
+      command: [...FORMATTER.command, ...report.changed.map((change) => change.path)],
+    });
+  }
+  if (!dryRun && steps.length > 0) {
     const before = snapshot(root, files);
-    for (const generator of generators) {
+    for (const generator of steps) {
       const code = runCommand(generator.command, root);
-      report.generators.push({ id: generator.id, command: generator.command.join(" "), code });
+      const command =
+        generator.id === FORMATTER.id
+          ? `${FORMATTER.command.join(" ")} <${report.changed.length} changed files>`
+          : generator.command.join(" ");
+      report.generators.push({ id: generator.id, command, code });
       if (code !== 0) break;
     }
     const after = snapshot(root, files);

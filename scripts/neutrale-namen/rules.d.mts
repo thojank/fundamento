@@ -49,4 +49,10 @@ export interface Generator {
 }
 
 export declare const GENERATORS: readonly Generator[];
+
+export declare const FORMATTER: {
+  readonly id: "biome";
+  readonly config: "biome.json";
+  readonly command: readonly string[];
+};
 export declare const EXCEPTIONS_FILE: string;
