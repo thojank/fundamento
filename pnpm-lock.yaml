@@ -80,6 +80,9 @@ importers:
       '@fundamento/metiejo':
         specifier: workspace:*
         version: link:../metiejo
+      '@modelcontextprotocol/client':
+        specifier: 2.0.0
+        version: 2.0.0
     devDependencies:
       '@types/node':
         specifier: ^24.13.5

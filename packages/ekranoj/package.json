@@ -21,7 +21,8 @@
     "lint": "tsc -p tsconfig.json --noEmit && biome check ."
   },
   "dependencies": {
-    "@fundamento/metiejo": "workspace:*"
+    "@fundamento/metiejo": "workspace:*",
+    "@modelcontextprotocol/client": "2.0.0"
   },
   "devDependencies": {
     "@types/node": "^24.13.5",
