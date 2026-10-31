@@ -40,6 +40,8 @@ describe("sxvebilo in the repo Modelo (section ④, G1, G2, G4)", () => {
         ["label", "string", undefined, true],
         ["placement", "enum", "block-end", undefined],
         ["open", "boolean", false, undefined],
+        // Spec 036 Teil 5 ②b-2 (A-sxvebilo-1): the alignment along the side.
+        ["justify", "enum", "center", undefined],
       ],
     );
     expect(skemo?.states).toEqual(["rest"]);
@@ -139,7 +141,7 @@ describe("the Uzo of the sxvebilo (section ④, G6)", () => {
   it("the brief names placement as the axis, label, trigger and content as duties, and stays under 750", () => {
     if (sxvebilo === undefined) throw new Error("missing");
     const brief = briefOf(sxvebilo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["placement"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["placement", "justify"]);
     expect(brief.required).toEqual({ props: ["label"], slots: ["trigger", "content"] });
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
   });

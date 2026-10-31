@@ -1771,6 +1771,8 @@ describe("Figma plan for the dialogo (Spec 011 ②)", () => {
       // Spec 036 Teil 5 ②b-2 (A-dialogo-2): full, the whole viewport.
       size: ["small", "medium", "full"],
       reason: ["none", "optional", "required"],
+      // Spec 036 Teil 5 ②b-2 (A-dialogo-1, M-3): the purpose, a property, no variant.
+      dismiss: ["free", "guarded", "explicit"],
       state: ["rest"],
     });
     expect(set?.variants).toHaveLength(3 * 3);
@@ -1898,6 +1900,7 @@ describe("Figma plan for the dialogo (Spec 011 ②)", () => {
       open: ["boolean"],
       size: ["small", "medium", "full"],
       reason: ["none", "optional", "required"],
+      dismiss: ["free", "guarded", "explicit"],
     });
     expect(items.dialogo?.states).toEqual(["rest"]);
     expect(items.dialogo?.values["surface.width@reason=none,size=small,state=rest"]).toBe("400px");
@@ -2863,6 +2866,8 @@ describe("Figma plan for the langetaro (Spec 011 ⑤)", () => {
       label: "TEXT",
       selected: "TEXT",
       size: ["small", "medium", "large"],
+      // Spec 036 Teil 5 ②b-2 (A-langetaro-1): a property, no variant.
+      spread: ["content", "fill"],
       state: ["rest", "hover", "focus", "disabled"],
     });
     expect(set?.variants).toHaveLength(3 * 4);
@@ -2955,6 +2960,7 @@ describe("Figma plan for the langetaro (Spec 011 ⑤)", () => {
       label: ["string"],
       selected: ["string"],
       size: ["small", "medium", "large"],
+      spread: ["content", "fill"],
     });
     expect(items.langetaro?.states).toEqual(["rest", "hover", "focus", "disabled"]);
     const values = items.langetaro?.values ?? {};

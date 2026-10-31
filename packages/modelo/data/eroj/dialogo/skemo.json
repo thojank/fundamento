@@ -36,6 +36,17 @@
         ],
         "default": "none",
         "description": "Whether the dialog asks for a reason: none, an optional text, or a required one that locks the confirmation until text is entered. The reason is a tekstareo the dialog shows itself."
+      },
+      {
+        "name": "dismiss",
+        "kind": "enum",
+        "values": [
+          "free",
+          "guarded",
+          "explicit"
+        ],
+        "default": "guarded",
+        "description": "Spec 029 M-3 (A-dialogo-1): the purpose of the dialog – free, a hint: Escape and a click beside it close it; guarded, a form: only Escape, as before, so no input is lost by a click beside it; explicit, a duty: nothing closes it on the side, role alertdialog. The behaviour of free and explicit follows with ②b-4; here the axis."
       }
     ],
     "states": [

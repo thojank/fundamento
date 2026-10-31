@@ -472,8 +472,12 @@ describe("②b-2 A-ikono-2, A-signeto-2, A-avataro-2, A-pagxigilo-2, A-langetaro
     }
   });
 
-  it.each(["pagxigilo", "langetaro"])("%s: size is a new prop, the last one", (ero) => {
-    expect(entryOf(ero).skemo.props.at(-1)?.name).toBe("size");
+  it.each([
+    ["pagxigilo", ["page", "total-pages", "label", "mode", "href-template", "siblings"]],
+    ["langetaro", ["label", "selected"]],
+  ])("%s: size is a new prop, right after every prop it had", (ero, before) => {
+    const names = entryOf(ero).skemo.props.map((prop) => prop.name);
+    expect(names.slice(0, before.length + 1)).toEqual([...before, "size"]);
   });
 
   it.each(Object.entries(SIZES))(

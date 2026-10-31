@@ -47,6 +47,8 @@ describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
       ["selected", "string", undefined, undefined],
       // Spec 036 Teil 5 ②b-2 (A-langetaro-2): three sizes, the last prop.
       ["size", ["small", "medium", "large"], "medium", undefined],
+      // Spec 036 Teil 5 ②b-2 (A-langetaro-1): the width of the tabs.
+      ["spread", ["content", "fill"], "content", undefined],
     ]);
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled"]);
   });
@@ -206,7 +208,7 @@ describe("the Uzo of the langetaro (section ⑤, G5)", () => {
   it("the brief names active as the axis of the tabs, label as a duty, panel and tabs as duties, and stays under 750", () => {
     if (langetaro === undefined) throw new Error("missing");
     const brief = briefOf(langetaro);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "active"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "spread", "active"]);
     expect(brief.required.props).toEqual(["label"]);
     expect([...brief.required.slots].sort()).toEqual(["panel", "tabs"]);
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);

@@ -37,6 +37,17 @@
         "kind": "boolean",
         "default": false,
         "description": "Locks the trigger (Nachlese 7 ② B-4): it says aria-disabled, the menu does not open and an open one closes — for instance while a write of its row runs."
+      },
+      {
+        "name": "justify",
+        "kind": "enum",
+        "values": [
+          "start",
+          "center",
+          "end"
+        ],
+        "default": "center",
+        "description": "Spec 029 ②a (A-menuo-1): the alignment along the side of the trigger – center as before; start at the start edge of the trigger, end at its end edge (the writing direction mirrors both). Layout, no token."
       }
     ],
     "states": [

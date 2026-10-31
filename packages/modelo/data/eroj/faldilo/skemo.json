@@ -25,6 +25,16 @@
         "kind": "boolean",
         "default": false,
         "description": "Spec 029 ②b-1 M-1 (A-faldilo-3): the section cannot open or close for now; with a disabled-reason it stays reachable and says why."
+      },
+      {
+        "name": "indicator-side",
+        "kind": "enum",
+        "values": [
+          "start",
+          "end"
+        ],
+        "default": "end",
+        "description": "Spec 029 ②a (A-faldilo-1): the side of the chevron in the summary – end after the words, as before; start before them. Layout, no token; the writing direction mirrors it."
       }
     ],
     "states": [

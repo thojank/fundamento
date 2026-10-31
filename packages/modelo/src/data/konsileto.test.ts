@@ -44,6 +44,8 @@ describe("konsileto in the repo Modelo (section ④, G1, G2, G4)", () => {
       [
         ["for", "string", undefined, true],
         ["placement", "enum", "block-start", undefined],
+        // Spec 036 Teil 5 ②b-2 (A-konsileto-1): the alignment along the side.
+        ["justify", "enum", "center", undefined],
       ],
     );
     expect(skemo?.props.find((prop) => prop.name === "placement")?.values).toEqual([
@@ -144,7 +146,7 @@ describe("the Uzo of the konsileto (section ④, G6)", () => {
   it("the brief names placement as the axis, for and the label as duties, and stays under 750", () => {
     if (konsileto === undefined) throw new Error("missing");
     const brief = briefOf(konsileto);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["placement"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["placement", "justify"]);
     expect(brief.required).toEqual({ props: ["for"], slots: ["label"] });
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
   });
