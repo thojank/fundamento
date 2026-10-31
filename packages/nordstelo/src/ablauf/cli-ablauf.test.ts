@@ -2,7 +2,15 @@
 // the usage errors, the model guard before anything is built or asked, a whole run with doubles,
 // and the renderer of nordstelo as the Bildigilo of ekranoj (D-39). No browser, no provider.
 
-import { existsSync, mkdtempSync, readdirSync, readFileSync, statSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -15,6 +23,7 @@ import {
   bildigiloDeRenderer,
   HELPO_ABLAUF,
   kuriArton,
+  markoDe,
   type Preparo,
   petasArton,
 } from "./cli-ablauf.js";
@@ -204,6 +213,18 @@ describe("pnpm nordstelo --art ablauf", () => {
       /^Läufe 1 \(gebaut 1, nicht gestartet 0\) · Tokens 500 · 0\.0001 \$\nBericht: .*raporto\.md\n$/,
     );
     expect(ABLAUF_TASKOJ.length).toBeGreaterThan(1);
+  });
+
+  it("copies the one css file of the brand build of all Aspektoj into a run that asks for it", async () => {
+    const projekcioj = mkdtempSync(join(tmpdir(), "s037-marko-"));
+    mkdirSync(join(projekcioj, "css"));
+    writeFileSync(join(projekcioj, "css", "fundamento.css"), ":root{}");
+    writeFileSync(join(projekcioj, "css", "fundamento-komuna.css"), ":root{}");
+    const dir = mkdtempSync(join(tmpdir(), "s037-marko-"));
+    expect(await markoDe(projekcioj).konstrui(dir)).toEqual({
+      css: [join(dir, "css", "fundamento.css")],
+    });
+    expect(readdirSync(join(dir, "css"))).toEqual(["fundamento.css"]);
   });
 
   it("renders every screen in the four brands × light/dark, contrast default only (D-39)", async () => {

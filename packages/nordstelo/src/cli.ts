@@ -20,6 +20,7 @@ import {
   readNordstelo,
 } from "@fundamento/modelo";
 import { buildProjekcioj } from "@fundamento/projekcioj";
+import { kuriArton, petasArton } from "./ablauf/cli-ablauf.js";
 import { providerOf, runAgent } from "./agent.js";
 import type { Facts, Variant } from "./facts.js";
 import { connectGvidanto, type GvidantoModule } from "./gvidanto.js";
@@ -40,6 +41,8 @@ const HELP = `pnpm nordstelo [Optionen]           ein Lauf: Aufgaben × Variante
 pnpm nordstelo restaro <Laufordner> [--skribi]
                                      die gespeicherten Ergebnisse eines Laufs erneut bewerten; mit
                                      --skribi beide Gewichtungen nach restaro.md und in den Verlauf
+pnpm nordstelo --art ablauf [Optionen]
+                                     Messung „ganzer Ablauf“ (Spec 037); Optionen mit --art ablauf --help
 
   --env <Datei>        die .env mit FM_KI_ANBIETER, FM_KI_MODELL und dem Schlüssel (Standard: .env im Checkout)
   --taskoj <a,b>       nur diese Aufgaben (Namen aus packages/modelo/data/nordstelo.json)
@@ -330,6 +333,8 @@ async function kuri(values: Record<string, string | boolean | undefined>): Promi
 }
 
 async function main(argv: readonly string[]): Promise<number> {
+  // Spec 037 Teil 2: `--art ablauf` measures whole flows (src/ablauf/); without --art as before.
+  if (petasArton(argv)) return kuriArton(argv);
   const { values, positionals } = parseArgs({
     args: [...argv],
     allowPositionals: true,
