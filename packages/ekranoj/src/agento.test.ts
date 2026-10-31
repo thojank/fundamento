@@ -14,6 +14,8 @@ import {
   PETO_TEMPOLIMO,
   PROMPT_0,
   provizantaSkemo,
+  REDEMANDO_0,
+  REDEMANDO_F,
   SISTEMO_F,
   slugDe,
 } from "./index.js";
@@ -194,6 +196,72 @@ describe("build conversation", () => {
     expect(chat.petoj[0]?.tools).toBeUndefined();
     expect(chat.petoj[0]?.messages.map((m) => m.role)).toEqual(["user"]);
     expect(chat.petoj[0]?.messages[0]?.content.endsWith(`\n\n${PROMPT_0}`)).toBe(true);
+  });
+});
+
+describe("an answer without markup (S037-10 Befund 1)", () => {
+  const plano = planoKun(2);
+  const liste = plano.ekranoj[0] ?? { slug: "liste", titolo: "Liste", celo: "Liste" };
+  const MANKOJ_NUR = [
+    "```mankoj",
+    '[{"speco": "ilo", "nomo": "list_arangxoj", "ekzemplo": "Abstand", "propono": "Layoutmittel nennen"}]',
+    "```",
+  ].join("\n");
+
+  const konstrui = (chat: SkriptaModelo, varianto: "F" | "0" = "F") =>
+    konstruiEkranon({
+      chat,
+      budget: new Budget(1e6),
+      peno: peno(),
+      varianto,
+      ...(varianto === "F" ? { ponto: new MemoraPonto(), iloj: [ilo("describe")] } : {}),
+      plano,
+      frazo: "Standards verwalten",
+      ekrano: liste,
+      rondo: 1,
+      lingvo: "de",
+      log: () => {},
+    });
+
+  it("asks once more in the same conversation, without tools, and marks a second empty answer", async () => {
+    const chat = new SkriptaModelo((_peto, index) => respondo(index === 0 ? MANKOJ_NUR : ""));
+    const rezulto = await konstrui(chat);
+    expect(chat.petoj).toHaveLength(2);
+    const redemando = chat.petoj[1];
+    expect(redemando?.tools).toBeUndefined();
+    expect(redemando?.messages.slice(0, 2)).toEqual(chat.petoj[0]?.messages);
+    expect(redemando?.messages.at(-2)).toEqual({ role: "assistant", content: MANKOJ_NUR });
+    expect(redemando?.messages.at(-1)).toEqual({ role: "user", content: REDEMANDO_F });
+    expect(rezulto.fragmento).toBe("");
+    expect(rezulto.malplena).toEqual({ respondoj: [MANKOJ_NUR, ""] });
+    expect(rezulto.mankoj.map((manko) => manko.nomo)).toEqual(["list_arangxoj"]);
+  });
+
+  it("takes the markup of the second answer when the first was empty", async () => {
+    const chat = new SkriptaModelo((_peto, index) =>
+      respondo(index === 0 ? "   " : "```html\n<fm-butono>Weiter</fm-butono>\n```"),
+    );
+    const rezulto = await konstrui(chat);
+    expect(chat.petoj).toHaveLength(2);
+    expect(rezulto).toEqual({ fragmento: "<fm-butono>Weiter</fm-butono>", mankoj: [] });
+  });
+
+  it("asks Variante 0 for the document, once", async () => {
+    const chat = new SkriptaModelo(() => respondo(""));
+    const rezulto = await konstrui(chat, "0");
+    expect(chat.petoj).toHaveLength(2);
+    expect(chat.petoj[1]?.messages.at(-1)).toEqual({ role: "user", content: REDEMANDO_0 });
+    expect(rezulto.malplena).toEqual({ respondoj: ["", ""] });
+  });
+
+  it("asks nothing more when the answer holds markup", async () => {
+    const chat = new SkriptaModelo(() =>
+      respondo(`\`\`\`html\n<p>Team Nord</p>\n\`\`\`\n${MANKOJ_NUR}`),
+    );
+    const rezulto = await konstrui(chat);
+    expect(chat.petoj).toHaveLength(1);
+    expect(rezulto.fragmento).toBe("<p>Team Nord</p>");
+    expect(rezulto.malplena).toBeUndefined();
   });
 });
 

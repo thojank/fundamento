@@ -113,6 +113,49 @@ beforeEach(() => {
 });
 afterEach(() => vi.restoreAllMocks());
 
+describe("the raw answer of an empty build (S037-10 Befund 1)", () => {
+  it("keeps both answers of a screen without markup, redacted, as rondoj/<n>/<slug>.respondo.txt", async () => {
+    const dir = join(RADIKO, "261031-1300-leer");
+    // Only a mankoj block: no markup, so the agent is asked once more and answers the same.
+    const sen = [
+      "```mankoj",
+      '[{"speco": "ilo", "nomo": "list_arangxoj", "ekzemplo": "Abstand", "propono": "Layoutmittel"}]',
+      "```",
+    ].join("\n");
+    const chat = new SkriptaModelo(
+      (peto) => (slugDePeto(peto) === "detail" ? respondo(sen) : skripto()(peto)),
+      { modelo: PERMESITA_MODELO },
+    );
+    await kuruEkranojn(
+      {
+        frazo: "Standards wie Standard A-12 für Team Nord verwalten",
+        marko: "komuna",
+        out: dir,
+        maksTokenoj: 1_000_000,
+        plano: PLANO,
+      },
+      {
+        chat,
+        tools: new MemoraPonto(),
+        taksilo: new TaksiloDouble(() => VERDA),
+        bildigilo: new BildigiloDouble(),
+        marko: new MarkoDouble("komuna"),
+        nun: () => new Date("2026-10-31T12:00:00Z"),
+        log: () => undefined,
+        eligo: eligoDe({ redakti: (teksto) => teksto.replaceAll("Abstand", "‹geschwärzt›") }),
+      },
+    );
+    expect(dosieroj(dir).filter((dosiero) => dosiero.endsWith(".respondo.txt"))).toEqual([
+      "rondoj/1/detail.respondo.txt",
+      "rondoj/2/detail.respondo.txt",
+      "rondoj/3/detail.respondo.txt",
+    ]);
+    const teksto = legi(dir, "rondoj/1/detail.respondo.txt");
+    expect(teksto.split(sen.replaceAll("Abstand", "‹geschwärzt›"))).toHaveLength(3);
+    expect(teksto).not.toContain("Abstand");
+  });
+});
+
 describe("output folder (§2.4, Lieferliste 1.6, AC-6)", () => {
   it("writes every file of the layout", async () => {
     const { dir } = await kuro({ nomo: "261031-1200-standards" });

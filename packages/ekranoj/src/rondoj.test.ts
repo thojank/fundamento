@@ -177,6 +177,59 @@ describe("rounds (AC-8, V-3, D-26)", () => {
   });
 });
 
+describe("an answer without markup (S037-10 Befund 1)", () => {
+  it("asks once more, marks a screen whose second answer is empty too and lets the run go on", async () => {
+    const chat = new SkriptaModelo(
+      (peto) => (slugDePeto(peto) === "detail" ? respondo("") : skripto(PLANO)(peto)),
+      { modelo: PERMESITA_MODELO },
+    );
+    const linioj: string[] = [];
+    // Every score is green: only the empty answer keeps detail from green.
+    const taksilo = new TaksiloDouble(() => VERDA);
+    const rezulto = await kuruEkranojn(enigoDe(), depsDe({ chat, taksilo, linioj }));
+
+    expect(konstruoj(chat)).toEqual([
+      "liste#1",
+      "detail#1",
+      "detail#1",
+      "detail#2",
+      "detail#2",
+      "detail#3",
+      "detail#3",
+    ]);
+    expect(rezulto.faritajRondoj).toBe(3);
+    expect(rezulto.haltigo).toBeUndefined();
+    for (const rondo of rezulto.rondoj) {
+      expect(rondo.detail?.verda).toBe(false);
+      expect(rondo.detail?.malhelpoj).toEqual(["leere-antwort"]);
+      expect(rondo.detail?.trovoj?.map((t) => `${t.regulo} ${t.loko}`)).toEqual([
+        "leere-antwort detail.html",
+      ]);
+    }
+    expect(rezulto.rondoj[0]?.liste?.verda).toBe(true);
+    expect(linioj.filter((linio) => /leere Antwort/.test(linio))).toEqual([
+      "Runde 1: detail – leere Antwort, auch nach einer Nachfrage",
+      "Runde 2: detail – leere Antwort, auch nach einer Nachfrage",
+      "Runde 3: detail – leere Antwort, auch nach einer Nachfrage",
+    ]);
+    expect(rezulto.restantaj.filter((r) => r.ekrano === "detail")).toEqual([
+      {
+        ekrano: "detail",
+        regulo: "leere-antwort",
+        loko: "detail.html",
+        kialo: expect.stringContaining("Nachfrage"),
+      },
+    ]);
+  });
+
+  it("asks nothing more for a screen whose answer holds markup", async () => {
+    const chat = new SkriptaModelo(skripto(PLANO), { modelo: PERMESITA_MODELO });
+    const rezulto = await kuruEkranojn(enigoDe(), depsDe({ chat, taksilo: verdaEkde(1) }));
+    expect(konstruoj(chat)).toEqual(["liste#1", "detail#1"]);
+    expect(rezulto.rondoj[0]?.detail?.malhelpoj).toEqual([]);
+  });
+});
+
 describe("token limit (AC-9, D-20)", () => {
   it("stops before the request that would pass --max-tokens, keeps the partial result and names the reached round", async () => {
     const chat = new SkriptaModelo(skripto(PLANO), { modelo: PERMESITA_MODELO });
