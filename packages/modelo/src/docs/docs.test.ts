@@ -4153,6 +4153,26 @@ describe("Spec 029 ②b-1: the CHANGELOG names the flags of the brief for MCP cl
   });
 });
 
+// Spec 035 2.2 (D-04): label is a new prop of the 12 fields, additive (0.2.0 had no label at a
+// field; no prop of 0.2.0 changes its meaning). The CHANGELOG says it to users ahead of the next
+// release, with one sentence for code that set label as an undeclared attribute.
+describe("Spec 035 2.2: the CHANGELOG names label at the fields for users", () => {
+  it("has the note for users in the unreleased section, additive, with the sentence on migrating", () => {
+    const changelog = read("CHANGELOG.md");
+    const unreleased = changelog.slice(
+      changelog.indexOf("## Unveröffentlicht"),
+      changelog.indexOf("## 0.2.0"),
+    );
+    expect(unreleased).toContain("### Hinweis für Nutzer");
+    const note = unreleased.slice(unreleased.indexOf("### Hinweis für Nutzer"));
+    expect(note).toContain('`label="…"`');
+    expect(note).toMatch(/sichtbar/);
+    expect(note).toMatch(/additiv/);
+    expect(note).toMatch(/Arkitekturo-Vertrag/);
+    expect(note).toMatch(/Wer `label` bisher als nicht deklariertes Attribut/);
+  });
+});
+
 // Abnahme #122, 6: the plan said that clearing a field says input and change; the elektilo and the
 // listelektilo say change alone, as when a person chooses (their Skemo names change alone). The
 // plan says so, with the reason.
