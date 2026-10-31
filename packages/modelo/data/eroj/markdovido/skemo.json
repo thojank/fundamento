@@ -21,13 +21,20 @@
         "values": ["2", "3", "4", "5", "6"],
         "default": "2",
         "description": "The level of a heading # in the page: one below the page's own h1 by default, so the headings of the source keep the order of the page (Regulo heading-levels-in-order)."
+      },
+      {
+        "name": "density",
+        "kind": "enum",
+        "values": ["default", "compact"],
+        "default": "default",
+        "description": "Spec 029 ②a (A-markdovido-1): the room between the blocks, by the names of the Dimensio density – default as before; compact closer, for answers in a narrow column."
       }
     ],
     "states": ["rest"],
     "slots": [],
     "parts": {
       "box": {
-        "gap": { "fixed": "spacing.medium" }
+        "gap": { "by": ["density"] }
       },
       "quote": {
         "color": { "fixed": "color.border.default" },
@@ -38,7 +45,10 @@
         "inline-padding": { "fixed": "spacing.large" }
       }
     },
-    "bindings": [],
+    "bindings": [
+      { "part": "box", "property": "gap", "when": { "density": "default" }, "token": "spacing.medium" },
+      { "part": "box", "property": "gap", "when": { "density": "compact" }, "token": "spacing.small" }
+    ],
     "a11y": {
       "role": "document",
       "name": [],

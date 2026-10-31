@@ -600,11 +600,12 @@ test.describe("②b-2 A-tabelo-1, A-markdovido-1, A-plenstato-1/2, A-teksto-1: d
         table("f", 'density="comfortable"') +
         table("n", ""),
     );
+    // The room of a cell: its inline padding (a table cell takes no minimum height of CSS).
     const height = (id: string) =>
       page
         .locator(`#${id} tbody td`)
         .first()
-        .evaluate((cell) => Math.round(cell.getBoundingClientRect().height));
+        .evaluate((cell) => Number.parseFloat(getComputedStyle(cell).paddingLeft));
     const [compact, middle, comfortable, none] = [
       await height("c"),
       await height("d"),

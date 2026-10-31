@@ -181,7 +181,8 @@ describe("list_eroj and the briefs", () => {
       "titolo",
     ]);
     const table = await output<Brief>(client, "get_ero", { name: "tabelo", brief: true });
-    expect(table.axes.map((axis) => axis.name)).toEqual(["density", "direction"]);
+    // Spec 036 Teil 5 ②b-2 (A-tabelo-1): the lines.
+    expect(table.axes.map((axis) => axis.name)).toEqual(["density", "direction", "lines"]);
     expect(table.required).toEqual({ props: [], slots: ["caption", "content"] });
     const list = await output<Brief>(client, "get_ero", { name: "atributlisto", brief: true });
     expect(list.axes.map((axis) => axis.name)).toEqual(["layout"]);

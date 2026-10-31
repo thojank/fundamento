@@ -626,14 +626,15 @@ describe("the Vitrino shows the insigno, the avizo and the plenstato (Spec 011 �
 describe("the Vitrino shows the tabelo, the atributlisto and the mezurilo (Spec 011 ④)", () => {
   it("tabelo: a row per density, each a captioned table with a sortable head, a numeric column and three rows", () => {
     const grid = datumoj.eroj.tabelo ?? "";
-    expect((grid.match(/<fm-tabelo /g) ?? []).length).toBe(2);
+    // Spec 036 Teil 5 ②b-2 (A-tabelo-1): three densities.
+    expect((grid.match(/<fm-tabelo /g) ?? []).length).toBe(3);
     expect(grid).toContain(
       '<fm-tabelo density="compact">compact<table slot="content"><thead><tr><th scope="col" data-sort="name">Name</th>',
     );
     expect(grid).toContain('<th scope="col" numeric>Anzahl</th>');
     // Three row headers per table, plus the Vitrino's own row header per combination.
     // And the row of Nachlese 7 ② B-3 (the empty table with its butono).
-    expect((grid.match(/<th scope="row">/g) ?? []).length).toBe(9);
+    expect((grid.match(/<th scope="row">/g) ?? []).length).toBe(13);
   });
 
   it("atributlisto: a row per layout (columns, stacked, auto since Spec 014 ①), each a dl with three entries, the last value empty", () => {
@@ -760,10 +761,10 @@ describe("the Vitrino shows the titolo and the teksto (Spec 014 ③)", () => {
     expect((section.match(/<fm-titolo /g) ?? []).length).toBe(7);
   });
 
-  it("the teksto has fifteen rows of kind · size · emphasis", () => {
+  it("the teksto has eighteen rows of kind · size · emphasis", () => {
     const section = datumoj.eroj.teksto ?? "";
-    // And the code inside the line of Nachlese 7 ② B-10.
-    expect((section.match(/<fm-teksto /g) ?? []).length).toBe(16);
+    // And the code inside the line of Nachlese 7 ② B-10; Spec 036 Teil 5 ②b-2 (A-teksto-1): label.
+    expect((section.match(/<fm-teksto /g) ?? []).length).toBe(19);
     expect(section).toContain(
       '<fm-teksto kind="code" size="1" emphasis="high">code · 1 · high</fm-teksto>',
     );

@@ -633,8 +633,9 @@ describe("②b-2 A-tabelo-1: density in three values and the lines", () => {
     );
     expect(boundOf("tabelo", "cell", "height", { density: "default" })).toBe("size.control.medium");
     expect(boundOf("tabelo", "cell", "height", { density: "compact" })).toBe("size.control.small");
+    // The room of default is the step of the spacing scale between small and medium.
     expect(boundOf("tabelo", "cell", "inline-padding", { density: "default" })).toBe(
-      "spacing.medium",
+      "spacing.scale.150",
     );
   });
 

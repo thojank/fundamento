@@ -16,10 +16,11 @@
           "body",
           "caption",
           "kicker",
-          "code"
+          "code",
+          "label"
         ],
         "default": "body",
-        "description": "body is a paragraph (typography.body.<size>), caption a short text under a figure or a field (typography.caption), kicker a word over a heading (typography.kicker), code a piece of code inside a sentence (typography.code, spoken as code)."
+        "description": "body is a paragraph (typography.body.<size>), caption a short text under a figure or a field (typography.caption), kicker a word over a heading (typography.kicker), code a piece of code inside a sentence (typography.code, spoken as code). Spec 029 ②a (A-teksto-1): label for the words that name a thing (typography.label.1)."
       },
       {
         "name": "size",
@@ -41,6 +42,12 @@
         ],
         "default": "high",
         "description": "The rank of the text: high is color.text.default, medium color.text.subtle, low color.text.muted. A rank, no status — a status is an insigno or an avizo (Spec 007 F1: a status has its own Ero)."
+      },
+      {
+        "name": "tabular",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②a (A-teksto-1): figures of one width, so numbers stand under each other in a table or a sum. Layout, no token."
       }
     ],
     "states": [
@@ -113,6 +120,15 @@
           "size": "1"
         },
         "token": "typography.code"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "kind": "label",
+          "size": "1"
+        },
+        "token": "typography.label.1"
       },
       {
         "part": "text",

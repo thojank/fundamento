@@ -38,10 +38,13 @@ describe("tabelo in the repo Modelo (section ④, G1, G2, E10)", () => {
   it("has density, caption-hidden, sort (the column) and direction as props; the states of the sort button", () => {
     expect(skemo?.props.map((prop) => [prop.name, prop.values ?? prop.kind, prop.default])).toEqual(
       [
-        ["density", ["comfortable", "compact"], "comfortable"],
+        // Spec 036 Teil 5 ②b-2 (A-tabelo-1): three densities, comfortable stays the default; the
+        // lines (lines, not rules: ②a-6).
+        ["density", ["compact", "default", "comfortable"], "comfortable"],
         ["caption-hidden", "boolean", false],
         ["sort", "string", undefined],
         ["direction", ["ascending", "descending"], "ascending"],
+        ["lines", ["rows", "columns", "grid", "none"], "rows"],
       ],
     );
     expect(skemo?.states).toEqual(["rest", "hover", "focus"]);
@@ -97,7 +100,7 @@ describe("tabelo in the repo Modelo (section ④, G1, G2, E10)", () => {
     });
     expect(styledProps(skemo)).toEqual(["density"]);
     expect(variantKeys(skemo)).toEqual(["density", "state"]);
-    expect(combinationsOf(skemo, variantKeys(skemo))).toHaveLength(6);
+    expect(combinationsOf(skemo, variantKeys(skemo))).toHaveLength(9);
   });
 
   it("speaks role table, named by its caption; Enter and Space sort (G4)", () => {
@@ -192,7 +195,7 @@ describe("the Uzo of the tabelo (section ④, G5)", () => {
     if (tabelo === undefined) throw new Error("missing");
     const brief = briefOf(tabelo);
     // direction is an enum prop too: the brief names every enum prop as an axis.
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["density", "direction"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["density", "direction", "lines"]);
     expect(brief.required).toEqual({ props: [], slots: ["caption", "content"] });
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
   });

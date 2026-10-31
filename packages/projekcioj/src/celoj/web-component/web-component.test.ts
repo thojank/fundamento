@@ -1181,7 +1181,8 @@ describe("Web Component Celo for the plenstato (Spec 011 ③)", () => {
 
   it("states kind and the one state rest in the stylesheet inventory (parity)", () => {
     const inventory = stylesheetInventory(styles);
-    expect(inventory.props).toEqual({ kind: ["loading", "empty"] });
+    // Spec 036 Teil 5 ②b-2 (A-plenstato-1/2): compact keys room and text.
+    expect(inventory.props).toEqual({ kind: ["loading", "empty"], compact: ["boolean"] });
     expect(inventory.states).toEqual(["rest"]);
   });
 });
@@ -1306,7 +1307,8 @@ describe("Web Component Celo for the tabelo (Spec 011 ④)", () => {
 
   it("states density and the states rest, hover and focus in the stylesheet inventory (parity)", () => {
     const inventory = stylesheetInventory(styles);
-    expect(inventory.props).toEqual({ density: ["comfortable", "compact"] });
+    // Spec 036 Teil 5 ②b-2 (A-tabelo-1): three densities; lines is a layout, no axis.
+    expect(inventory.props).toEqual({ density: ["compact", "default", "comfortable"] });
     expect([...inventory.states].sort()).toEqual(["focus", "hover", "rest"]);
   });
 });
