@@ -14,7 +14,6 @@ import { Budget } from "@fundamento/metiejo";
 import {
   type AgentaManko,
   konstruiEkranon,
-  kunigiAgentajnMankojn,
   PlanoMalsukcesis,
   planiEkranojn,
   planoElNomoj,
@@ -23,6 +22,7 @@ import { statikaFakto } from "./fakto-statika.js";
 import { gardiModelon } from "./gardo.js";
 import { kontroliUzon, ligilajAtributojDe, type SkemoLegilo, skemoLegiloDe } from "./instancoj.js";
 import { haltigoDe, kostoDe, taksiKostojn } from "./kostoj.js";
+import { mankojDeKuro, type SugestoSenTrafo, sugestoSenTrafo } from "./mankoj.js";
 import { filtriIlojn } from "./mcp-kliento.js";
 import { navigado } from "./navigado.js";
 import { MAKS_EKRANOJ, MAKS_RONDOJ, validiPlanon } from "./plano.js";
@@ -45,6 +45,7 @@ import type {
   Rondo,
   RondoEkrano,
   Taksado,
+  ToolBridge,
   ToolInfo,
   Trovo,
   Varianto,
@@ -306,6 +307,26 @@ export function trovojDe(e: {
 
 // --- The run -----------------------------------------------------------------------------------
 
+/**
+ * The bridge of one screen's build, unchanged, that notes every `suggest_ero` call without a hit
+ * (Teil 3, S037-06): the goal the agent looked for an Ero for and did not find one.
+ */
+function observantaPonto(ponto: ToolBridge, slug: string, sugestoj: SugestoSenTrafo[]): ToolBridge {
+  return {
+    list: () => ponto.list(),
+    async call(name, args) {
+      const respondo = await ponto.call(name, args);
+      if (name === "suggest_ero" && sugestoSenTrafo(respondo)) {
+        sugestoj.push({ slug, celo: typeof args.goal === "string" ? args.goal : "" });
+      }
+      return respondo;
+    },
+    ...(ponto.prompt === undefined
+      ? {}
+      : { prompt: () => ponto.prompt?.() ?? Promise.resolve("") }),
+  };
+}
+
 const PLENA_NAVIGADO: EkranaNavigado = { kompleta: false, mankantaj: [], mortaj: [] };
 
 const mesagxoDe = (error: unknown): string =>
@@ -353,6 +374,8 @@ export async function kuruEkranojn(
   const komenco = Date.now();
   const notoj: string[] = [];
   const agentajMankoj: { slug: string; manko: AgentaManko }[] = [];
+  const sugestojSenTrafo: SugestoSenTrafo[] = [];
+  let cxiujIloj: string[] = [];
   const rondoj: Rondo[] = [];
   const fragmentoj = new Map<string, string>();
   let haltigo: Haltigo | undefined;
@@ -419,7 +442,14 @@ export async function kuruEkranojn(
       plano,
       rondoj,
       restantaj,
-      mankoj: kunigiAgentajnMankojn(agentajMankoj),
+      // Teil 3 (S037-06): every source of a gap, not only the agent's (mankoj.ts).
+      mankoj: mankojDeKuro({
+        slugoj: plano.ekranoj.map((ekrano) => ekrano.slug),
+        ...(lasta === undefined ? {} : { lasta }),
+        agentaj: agentajMankoj,
+        sugestojSenTrafo,
+        iloj: cxiujIloj,
+      }),
       peno,
       kosto: kostoDe(deps.chat.modelo, { enigo: peno.inputTokens, eligo: peno.outputTokens }),
       ...(haltigo === undefined ? {} : { haltigo }),
@@ -438,7 +468,9 @@ export async function kuruEkranojn(
   if (varianto === "F" && deps.tools !== undefined) {
     gvidanto = (await deps.tools.prompt?.()) ?? "";
     // The allowlist also for an injected bridge: only the build tools, never the brand workshop.
-    iloj = filtriIlojn(await deps.tools.list());
+    const listitaj = await deps.tools.list();
+    cxiujIloj = listitaj.map((ilo) => ilo.name);
+    iloj = filtriIlojn(listitaj);
     legi = skemoLegiloDe(deps.tools);
   }
 
@@ -485,7 +517,9 @@ export async function kuruEkranojn(
           budget,
           peno,
           varianto,
-          ...(varianto === "F" && deps.tools !== undefined ? { ponto: deps.tools } : {}),
+          ...(varianto === "F" && deps.tools !== undefined
+            ? { ponto: observantaPonto(deps.tools, ekrano.slug, sugestojSenTrafo) }
+            : {}),
           ...(gvidanto === undefined ? {} : { gvidanto }),
           iloj,
           plano,

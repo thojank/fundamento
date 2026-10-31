@@ -244,8 +244,8 @@ describe("mankojDeKuro: the gaps of one run from every source", () => {
     });
     expect(mankoj.map((m) => `${m.ofteco} ${m.speco} ${m.nomo} → ${m.celo}`)).toEqual([
       "2 ero Ero für h1 → eroj-rondo-6/7",
-      "1 sxablono Layoutmittel für margin-top → muster-rondo-2",
       "1 ero Gestaltung über color → eroj-rondo-6/7",
+      "1 sxablono Layoutmittel für margin-top → muster-rondo-2",
       "1 ero Regulo karto-titolo → eroj-rondo-6/7",
       "1 ero Zeitleiste der Prüfschritte → eroj-rondo-6/7",
       "1 ilo list_arangxoj → gvidanto",
@@ -289,24 +289,51 @@ describe("mankojDeKuro: the gaps of one run from every source", () => {
         }),
       ),
     ).toBe(false);
+    // A boundary that hands the decision to a person: Fundamento has no Ero for it (real Gvidanto).
+    expect(
+      sugestoSenTrafo(
+        JSON.stringify({
+          goal: "Zeitleiste der Prüfschritte",
+          matched: { goal: "steps", keyword: "schritte", lingvo: "de" },
+          suggestion: null,
+          boundary: {
+            ero: "navigado",
+            case: "steps",
+            action: "ask-human",
+            kialo: "Noch keine Schrittanzeige.",
+          },
+        }),
+      ),
+    ).toBe(true);
+    // A boundary that names the Ero to use instead is a hit.
+    expect(
+      sugestoSenTrafo(
+        JSON.stringify({
+          goal: "x",
+          matched: { goal: "y", keyword: "y", lingvo: "de" },
+          suggestion: null,
+          boundary: { ero: "butono", case: "y", action: "use", kialo: "Eine Aktion." },
+        }),
+      ),
+    ).toBe(false);
     expect(sugestoSenTrafo(JSON.stringify({ issues: [{ rule: "goal-empty" }] }))).toBe(false);
     expect(sugestoSenTrafo("kein JSON")).toBe(false);
   });
 });
 
 /** A Gvidanto double whose suggest_ero finds nothing for one invented goal. */
-class SercxantaPonto extends MemoraPonto {
-  override async call(name: string, args: Record<string, unknown>): Promise<string> {
-    if (name === "suggest_ero") {
-      const goal = String(args.goal ?? "");
-      if (goal === "Zeitleiste der Prüfschritte") {
-        await super.call(name, args);
-        return JSON.stringify({ goal, matched: null, suggestion: null });
-      }
-    }
-    return super.call(name, args);
-  }
-}
+const sercxantaPonto = (): MemoraPonto => {
+  const ponto = new MemoraPonto();
+  const voki = ponto.call.bind(ponto);
+  ponto.call = async (name, args) => {
+    const respondo = await voki(name, args);
+    const goal = String(args.goal ?? "");
+    return name === "suggest_ero" && goal === "Zeitleiste der Prüfschritte"
+      ? JSON.stringify({ goal, matched: null, suggestion: null })
+      : respondo;
+  };
+  return ponto;
+};
 
 describe("every run writes its gaps (mankoj.json, raporto.md)", () => {
   it("collects K5 gaps, suggest_ero misses and the agent's gaps of a run, and writes them", async () => {
@@ -335,10 +362,10 @@ describe("every run writes its gaps (mankoj.json, raporto.md)", () => {
       { frazo: plano.celo, marko: "komuna", out, maksTokenoj: 1_000_000, plano },
       {
         chat,
-        tools: new SercxantaPonto(),
+        tools: sercxantaPonto(),
         taksilo: neniamVerda(),
         bildigilo: new BildigiloDouble(),
-        marko: new MarkoDouble(),
+        marko: new MarkoDouble("komuna"),
         nun: () => new Date("2026-10-31T12:00:00Z"),
         log: () => undefined,
         eligo: eligoDe({ commit: "lokal" }),

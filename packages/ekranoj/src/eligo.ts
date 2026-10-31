@@ -22,6 +22,7 @@ import {
   klasikaSkripto,
   superrigardoHtml,
 } from "./konstruo.js";
+import { mankojMarkdown } from "./mankoj.js";
 import { MAKS_RONDOJ } from "./plano.js";
 import type {
   EkranaNavigado,
@@ -482,6 +483,9 @@ export function raportoMarkdown(r: RaportoJson): string {
     for (const a of r.restantaj) linioj.push(vico([a.ekrano, a.regulo, a.loko, a.kialo]));
   }
   linioj.push("");
+
+  // Teil 3 (S037-06): the gaps of this run, the table of the Lückenliste (also in mankoj.json).
+  linioj.push("## Lücken (Teil 3)", "", mankojMarkdown(r.mankoj).trimEnd(), "");
 
   linioj.push("## Aufwand und Kosten", "");
   linioj.push(`- Tokens ein: ${r.peno.inputTokens}`);

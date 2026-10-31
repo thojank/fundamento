@@ -3,7 +3,7 @@
 // arguments → input check (V-2, nothing started) → .env → model guard (D-19) → estimate (D-20) →
 // confirmation (`--ja`, else the terminal asks; without a terminal exit 2, D-37) → the real
 // dependencies → run → `file://` links. `fm ekranoj mankoj <ordner…>` is the sub-mode that merges
-// the gaps of runs (D-29; its body arrives with S037-06).
+// the gaps of runs into the Lückenliste (D-29, Teil 3, S037-06): no .env, no model, no Gvidanto.
 //
 // D-30: @fundamento/ekranoj and @fundamento/nordstelo are loaded with a dynamic `import()` inside
 // `run` only – `fm --help` must not load Playwright (Spec 035, AC-11). Their types are imported as
@@ -12,7 +12,7 @@
 
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { basename, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import type {
@@ -88,7 +88,9 @@ Options:
 Sub-mode:
   ${MANKOJ_MODUSO} <ordner…>    Merge the gaps (mankoj.json) of run folders into one list of missing
                       Eroj, Sxablonoj and Gvidanto tools. A sentence that is exactly the word
-                      "${MANKOJ_MODUSO}" is read as this sub-mode.
+                      "${MANKOJ_MODUSO}" is read as this sub-mode. A folder may also hold runs
+                      (e.g. ${DEFAULT_DIR}). Prints the table; --out <file> also writes the
+                      list as JSON, --json prints it as JSON. No .env, no model is needed.
 
 Exit codes: 0 screens built (also a run stopped by --max-tokens), 1 no screen could be built,
 2 usage error, missing .env, model not allowed, or the start not confirmed.
@@ -307,12 +309,66 @@ const formati = (p: Problemo): string => `${p.path} ${p.rule}: ${p.message} ${p.
 const mesagxoDe = (eraro: unknown): string =>
   eraro instanceof Error ? eraro.message : String(eraro);
 
-/** `fm ekranoj mankoj <ordner…>`: the sub-mode of D-29 (its body arrives with S037-06). */
-function kuriMankojn(): never {
-  throw new UsageError(
-    `\`${COMMAND_LINE} ${MANKOJ_MODUSO}\` (merging the gaps of runs) is not available in this build yet.`,
-    [`Run \`${COMMAND_LINE} --help\` to see the sub-mode.`],
+/** The options of the sub-mode; every other option of a run is refused there. */
+const MANKOJ_FLAGS: readonly string[] = ["out", "json"];
+
+/**
+ * `fm ekranoj mankoj <ordner…> [--out <file>] [--json]` (D-29, Teil 3): the gaps (mankoj.json) of
+ * run folders merged into the Lückenliste (C-7). Prints the table (or, with --json, the list as
+ * JSON); `--out` also writes the list as JSON. No folder → usage error; a folder that does not
+ * exist, holds no run or a broken mankoj.json → the problems, exit 2, nothing written.
+ */
+async function kuriMankojn(
+  dosierujoj: readonly string[],
+  values: Readonly<Record<string, string | boolean | (string | boolean)[] | undefined>>,
+  context: CliContext,
+): Promise<number> {
+  const fremdaj = Object.keys(values).filter(
+    (nomo) => values[nomo] !== undefined && !MANKOJ_FLAGS.includes(nomo),
   );
+  if (fremdaj.length > 0) {
+    throw new UsageError(
+      `--${fremdaj.join(", --")} is no option of \`${COMMAND_LINE} ${MANKOJ_MODUSO}\`.`,
+      [`The sub-mode takes run folders, --out <file> and --json only.`],
+    );
+  }
+  if (dosierujoj.length === 0) {
+    throw new UsageError(
+      `\`${COMMAND_LINE} ${MANKOJ_MODUSO} <ordner…>\` needs at least one run folder.`,
+      [`For example: ${COMMAND_LINE} ${MANKOJ_MODUSO} ${DEFAULT_DIR}`],
+    );
+  }
+  const ek = await import("@fundamento/ekranoj");
+  let mankoj: ReturnType<typeof ek.kunigiMankojn>;
+  try {
+    mankoj = ek.kunigiMankojn(dosierujoj.map((dir) => resolve(context.baseDir, dir)));
+  } catch (eraro) {
+    if (!(eraro instanceof ek.MankojEraro)) throw eraro;
+    for (const problemo of eraro.problemoj) {
+      context.stderr(`${COMMAND_LINE} ${MANKOJ_MODUSO}: ${formati(problemo)}\n`);
+    }
+    context.stderr("Nothing was merged.\n");
+    return EXIT_USAGE;
+  }
+  const out = typeof values.out === "string" ? resolve(context.baseDir, values.out) : undefined;
+  if (out !== undefined) {
+    mkdirSync(dirname(out), { recursive: true });
+    writeFileSync(out, ek.stabilaJson(mankoj));
+  }
+  if (values.json === true) {
+    context.stdout(`${JSON.stringify({ mankoj }, null, 2)}\n`);
+  } else {
+    context.stdout(
+      [
+        `${COMMAND_LINE} ${MANKOJ_MODUSO}: ${mankoj.length} Lücken aus ${dosierujoj.length} Ordner(n)`,
+        "",
+        ek.mankojMarkdown(mankoj).trimEnd(),
+        ...(out === undefined ? [] : ["", `Geschrieben: ${out}`]),
+        "",
+      ].join("\n"),
+    );
+  }
+  return EXIT_OK;
 }
 
 function legiMaksTokenojn(valoro: string | boolean | (string | boolean)[] | undefined): number {
@@ -351,7 +407,7 @@ async function run(
   medio: EkranojMedio,
 ): Promise<number> {
   const { values, positionals } = parseFlags(args, FLAGS, COMMAND_LINE);
-  if (positionals[0] === MANKOJ_MODUSO) return kuriMankojn();
+  if (positionals[0] === MANKOJ_MODUSO) return kuriMankojn(positionals.slice(1), values, context);
   if (positionals.length !== 1 || (positionals[0] ?? "").trim() === "") {
     throw new UsageError(
       `\`${COMMAND_LINE}\` takes exactly one sentence (Satz), got ${positionals.length} argument(s).`,
