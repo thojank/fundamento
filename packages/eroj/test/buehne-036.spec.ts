@@ -391,3 +391,108 @@ test.describe("Bühne (Spec 036, Befund 3.3)", () => {
     );
   });
 });
+
+/** The invented screenshot of material(), as the bytes of a file a person picks. */
+async function bildschirm(page: Page): Promise<Buffer> {
+  const base64 = await page.evaluate(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 40;
+    canvas.height = 30;
+    const context = canvas.getContext("2d");
+    if (context === null) return "";
+    context.fillStyle = "#f4f4f2";
+    context.fillRect(0, 0, 40, 30);
+    context.fillStyle = "#0f766e";
+    context.fillRect(0, 0, 30, 8);
+    return canvas.toDataURL("image/png").split(",")[1] ?? "";
+  });
+  return Buffer.from(base64, "base64");
+}
+
+/** The tiles of a dialog: per tile the colour of its patch and its text. */
+const kachelnOf = (dialog: ReturnType<Page["locator"]>) =>
+  dialog.locator("[data-mt-kaheloj] fm-karto").evaluateAll((tiles) =>
+    tiles.map((tile) => {
+      const patch = tile.querySelector("[data-mt-kahelo-farbo]");
+      return {
+        farbe: patch === null ? "" : getComputedStyle(patch).backgroundColor,
+        name: patch?.getAttribute("aria-label") ?? "",
+        text: (tile.textContent ?? "").replace(/\s+/g, " ").trim(),
+      };
+    }),
+  );
+
+test.describe("Bühne (Spec 036, Befund 3.4)", () => {
+  test("3.4: material opens in a dialog; what it found comes back as tiles with a colour patch and its share", async ({
+    page,
+  }) => {
+    const fehler = fehlerOf(page);
+    const id = await marke(page.request, "Probomarko Kacheln");
+    await page.setViewportSize(WIDE);
+    await oeffne(page, id);
+    // No fold any more: a button beside the steps opens the dialog.
+    await expect(page.locator("fm-faldilo[data-mt-materialo]")).toHaveCount(0);
+    await page.getByRole("button", { name: "Material hinzufügen" }).click();
+    const dialog = page.getByRole("dialog", { name: "Material deiner Marke" });
+    await expect(dialog).toBeVisible();
+    await dialog
+      .locator("[data-mt-materialo-dosiero]")
+      .locator('input[type="file"]')
+      .setInputFiles({
+        name: "bildschirm.png",
+        mimeType: "image/png",
+        buffer: await bildschirm(page),
+      });
+    await dialog.locator("[data-mt-materialo-rajtoj]").click();
+    await dialog.getByRole("button", { name: "Material lesen" }).click();
+    // The tiles stand in the dialog: the larger colour first, each with its patch and its share.
+    await expect(dialog.locator("[data-mt-kaheloj] fm-karto")).toHaveCount(2);
+    expect(await kachelnOf(page.locator("fm-dialogo[data-mt-materialo]"))).toEqual([
+      { farbe: "rgb(244, 244, 242)", name: "Farbfläche #f4f4f2", text: "#f4f4f2 Anteil 80 %" },
+      { farbe: "rgb(15, 118, 110)", name: "Farbfläche #0f766e", text: "#0f766e Anteil 20 %" },
+    ]);
+    // Closing the dialog: the proposal stands on the stage, right first.
+    await dialog.getByRole("button", { name: "Schließen" }).click();
+    await expect(page.locator("[data-mt-buehne]")).toHaveAttribute("data-mt-bereit", "");
+    await expect(page.locator("[data-mt-propono]")).toBeVisible();
+    expect(await knopf(page, VORSCHLAG)).not.toBe(await knopf(page, JETZT));
+    expect(fehler).toEqual([]);
+  });
+
+  test("3.4: research opens in a dialog; the colours of its proposals come back as tiles", async ({
+    page,
+  }) => {
+    const id = await marke(page.request, "Probomarko Recherche");
+    await page.setViewportSize(WIDE);
+    await oeffne(page, id);
+    await expect(page.locator("fm-faldilo[data-mt-esploro]")).toHaveCount(0);
+    // The research agent is a double: no model, no network.
+    await page.route(`**/api/marko/${id}/esplori`, (route) =>
+      route.fulfill({
+        json: {
+          proponoj: [],
+          seitoj: ["https://ekzemplo.invalid/"],
+          abgelehnt: [],
+          antwort: "Petrol führt, der Grund ist hell.",
+          notoj: [],
+          kaheloj: [
+            { farbo: "#0f766e", anteil: 62 },
+            { farbo: "#f4f4f2", anteil: 38 },
+          ],
+        },
+      }),
+    );
+    await page.getByRole("button", { name: "Recherche", exact: true }).click();
+    const dialog = page.getByRole("dialog", { name: "Bestehende Marke recherchieren" });
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("textbox", { name: "Name der Marke" }).fill("Ekzemplo");
+    await dialog.locator("[data-mt-esploro-rajtoj]").click();
+    await dialog.getByRole("button", { name: "Recherchieren" }).click();
+    await expect(dialog.locator("[data-mt-kaheloj] fm-karto")).toHaveCount(2);
+    expect(await kachelnOf(page.locator("fm-dialogo[data-mt-esploro]"))).toEqual([
+      { farbe: "rgb(15, 118, 110)", name: "Farbfläche #0f766e", text: "#0f766e Anteil 62 %" },
+      { farbe: "rgb(244, 244, 242)", name: "Farbfläche #f4f4f2", text: "#f4f4f2 Anteil 38 %" },
+    ]);
+    await expect(dialog).toContainText("Petrol führt, der Grund ist hell.");
+  });
+});
