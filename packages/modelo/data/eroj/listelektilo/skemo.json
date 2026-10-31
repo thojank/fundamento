@@ -93,6 +93,17 @@
         ],
         "default": "below",
         "description": "Spec 029 ②b-1b M-2: where the message and the error stand – below the field with the space of the field, or joined to it without that space. Never only in a tooltip: the message must be seen (error-not-color-only, error-says-what-to-do)."
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "default": "medium",
+        "description": "Spec 029 ②a (A-listelektilo-2): the height of the field on the scale of the kampo and the elektilo (size.control.*), so the fields of one row stand level; label, text, padding and the icon at its end follow, as at the elektilo. Medium is the field as it was."
       }
     ],
     "states": [
@@ -146,7 +157,9 @@
           ]
         },
         "typography": {
-          "fixed": "typography.label.1"
+          "by": [
+            "size"
+          ]
         }
       },
       "required-mark": {
@@ -178,7 +191,9 @@
           ]
         },
         "typography": {
-          "fixed": "typography.body.1"
+          "by": [
+            "size"
+          ]
         }
       },
       "placeholder": {
@@ -191,7 +206,9 @@
           "fixed": "color.text.muted"
         },
         "size": {
-          "fixed": "size.icon.medium"
+          "by": [
+            "size"
+          ]
         }
       },
       "listbox": {
@@ -282,10 +299,14 @@
       },
       "box": {
         "height": {
-          "fixed": "size.control.medium"
+          "by": [
+            "size"
+          ]
         },
         "inline-padding": {
-          "fixed": "spacing.medium"
+          "by": [
+            "size"
+          ]
         },
         "gap": {
           "fixed": "spacing.small"
@@ -315,7 +336,9 @@
       },
       "clear": {
         "size": {
-          "fixed": "size.icon.medium"
+          "by": [
+            "size"
+          ]
         },
         "width": {
           "fixed": "size.target.min"
@@ -529,6 +552,150 @@
           "state": "success"
         },
         "token": "color.status.success.text"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.label.2"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "large"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.body.2"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.body.1"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "size": "large"
+        },
+        "token": "typography.body.1"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.control.small"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.control.medium"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.control.large"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "small"
+        },
+        "token": "spacing.small"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "medium"
+        },
+        "token": "spacing.medium"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "large"
+        },
+        "token": "spacing.medium"
+      },
+      {
+        "part": "indicator",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "indicator",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "indicator",
+        "property": "size",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.icon.large"
+      },
+      {
+        "part": "clear",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "clear",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "clear",
+        "property": "size",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.icon.large"
       }
     ],
     "a11y": {

@@ -21,7 +21,7 @@ const CASES = [
   { set: "elektilo", state: "size=medium, state=", end: ["spinner", "clear", "indicator"] },
   {
     set: "datelektilo",
-    state: "mode=single, expanded=false, state=",
+    state: "mode=single, expanded=false, size=medium, state=",
     end: ["spinner", "clear", "trigger"],
   },
 ];

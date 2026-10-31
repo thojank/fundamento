@@ -2400,8 +2400,12 @@ describe("Web Component Celo for the datelektilo (Spec 025 ②)", () => {
     // The trigger takes the least target (Abnahme #122: inside the field like the Fonto's), its
     // calendar the size of a chevron (Spec 035 2.3.1), prev and next the small control; the
     // calendar its surface, shadow, layer, width and padding; its height none while closed.
+    // Spec 036 Teil 5 ②b-2 (A-datelektilo-2): the calendar's glyph by size, its target in every size.
     expect(css).toContain(
-      ':where([part="field"]) [part="trigger"] {\n  inline-size: var(--fm-size-icon-medium);\n  block-size: var(--fm-size-icon-medium);\n  min-inline-size: var(--fm-size-target-min);\n  min-block-size: var(--fm-size-target-min);',
+      ':where([part="field"]) [part="trigger"] {\n  min-inline-size: var(--fm-size-target-min);\n  min-block-size: var(--fm-size-target-min);',
+    );
+    expect(css).toContain(
+      ':where([part="field"][data-size="medium"]) [part="trigger"] {\n  inline-size: var(--fm-size-icon-medium);\n  block-size: var(--fm-size-icon-medium);',
     );
     expect(css).toContain(
       ':where([part="field"]) [part="prev"] {\n  inline-size: var(--fm-size-control-small);',
@@ -2421,7 +2425,11 @@ describe("Web Component Celo for the datelektilo (Spec 025 ②)", () => {
 
   it("the parity inventory reads expanded as a boolean and the six states of a field", () => {
     const inventory = stylesheetInventory(files["eroj/src/generated/datelektilo.styles.ts"] ?? "");
-    expect(inventory.props).toEqual({ expanded: ["boolean"] });
+    // Spec 036 Teil 5 ②b-2 (A-datelektilo-2): size keys the field.
+    expect(inventory.props).toEqual({
+      expanded: ["boolean"],
+      size: ["small", "medium", "large"],
+    });
     expect([...inventory.states].sort()).toEqual(
       ["disabled", "focus", "hover", "invalid", "readonly", "rest", "warning", "success"].sort(),
     );

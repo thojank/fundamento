@@ -3830,13 +3830,16 @@ describe("the Figma plan draws the datelektilo (Spec 025 ②)", () => {
       (candidate) =>
         candidate.props.mode === mode &&
         candidate.props.expanded === expanded &&
+        // Spec 036 Teil 5 ②b-2 (A-datelektilo-2): the size the date picker had, medium.
+        candidate.props.size === "medium" &&
         candidate.props.state === state,
     );
 
   it("a field of mode × expanded × state, twenty-four variants; the label a field's word; the texts the Vitrino's; the calendar of the plan", () => {
     expect(set?.structure).toBe("field");
     expect(set?.extraAxes).toEqual(["mode"]);
-    expect(set?.variants).toHaveLength(32);
+    // Spec 036 Teil 5 ②b-2 (A-datelektilo-2): three sizes.
+    expect(set?.variants).toHaveLength(3 * 32);
     expect(set?.properties.state).toEqual([
       "rest",
       "hover",
@@ -3866,7 +3869,8 @@ describe("the Figma plan draws the datelektilo (Spec 025 ②)", () => {
     expect(set?.calendar?.days[0]).toEqual({ text: "28", outside: true });
     expect(set?.calendar?.days[3]).toEqual({ text: "1", outside: false });
     expect(set?.calendar?.days[41]).toEqual({ text: "8", outside: true });
-    expect(set?.grid).toMatchObject({ rows: 4, columns: 8 });
+    // Spec 036 Teil 5 ②b-2 (A-datelektilo-2): a row of the grid per size as well.
+    expect(set?.grid).toMatchObject({ rows: 12, columns: 8 });
   });
 
   it("binds the field as the kampo, the trigger, the calendar and the cell's looks; the calendar only where expanded; the icons of trigger, prev and next", () => {
@@ -3964,7 +3968,8 @@ describe("the Figma plan draws the selection Eroj (Spec 025 ③)", () => {
     for (const name of ["listelektilo", "plurelektilo"]) {
       const field = set(name);
       expect(field?.structure, name).toBe("field");
-      expect(field?.variants, name).toHaveLength(16);
+      // Spec 036 Teil 5 ②b-2 (A-listelektilo-2, A-plurelektilo-2): three sizes.
+      expect(field?.variants, name).toHaveLength(3 * 16);
       expect(field?.entry, name).toEqual({
         key: "selected",
         texts: ["Eins", "Zwei", "Drei"],

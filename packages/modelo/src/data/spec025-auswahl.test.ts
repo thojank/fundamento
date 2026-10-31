@@ -230,6 +230,8 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       "label",
       "intent",
       "message-position",
+      // Spec 036 Teil 5 ②b-2 (A-listelektilo-2).
+      "size",
     ]);
     expect(skemo?.states).toEqual([
       "rest",
@@ -254,7 +256,8 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       // Spec 029 ②b-1 M-1: the reason for disabled.
       { name: "disabled-reason", text: true },
     ]);
-    expect(variantKeys(required(skemo))).toEqual(["expanded", "state"]);
+    // Spec 036 Teil 5 ②b-2 (A-listelektilo-2): size keys the field.
+    expect(variantKeys(required(skemo))).toEqual(["expanded", "size", "state"]);
   });
 
   it("names the parts of a field, the chevron, the listbox, the item (an option; option is a web term) with its icon and description — no new token (E1)", () => {
@@ -380,6 +383,8 @@ describe("plurelektilo (D-16): several values from a long list, filterable, the 
       // Spec 029 ②b-1b M-2: the status of the field.
       ["intent", "enum", "neutral"],
       ["message-position", "enum", "below"],
+      // Spec 036 Teil 5 ②b-2 (A-plurelektilo-2).
+      ["size", "enum", "medium"],
     ]);
     // Spec 036 Teil 5 ②b-2 (A-plurelektilo-1): labels between count and tags.
     expect(skemo?.props.find((prop) => prop.name === "summary")?.values).toEqual([

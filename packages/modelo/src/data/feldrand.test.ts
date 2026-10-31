@@ -75,13 +75,16 @@ describe("Abnahme #122: the right edge of the fields, one rule in the Skemo", ()
       expect(sizeOf("kampo", "decrement", size)).toBe(`size.icon.${size}`);
       expect(sizeOf("kampo", "increment", size)).toBe(`size.icon.${size}`);
     }
-    expect(sizeOf("listelektilo", "clear")).toBe(sizeOf("listelektilo", "indicator"));
-    // Spec 035 2.3.1: the calendar is as large as the chevron of the elektilo (the date picker has
-    // no size: the elektilo's medium); its button keeps the target of a pointer by its width.
-    expect(sizeOf("datelektilo", "trigger")).toBe(sizeOf("elektilo", "indicator", "medium"));
-    // Spec 035 2.3.3: its ✕ as large as the kampo's (size medium), as large as the calendar again.
-    expect(sizeOf("datelektilo", "clear")).toBe(sizeOf("kampo", "clear", "medium"));
-    expect(sizeOf("datelektilo", "clear")).toBe(sizeOf("datelektilo", "trigger"));
+    // Spec 036 Teil 5 ②b-2 (A-listelektilo-2, A-datelektilo-2): both have the sizes now.
+    for (const size of ["small", "medium", "large"]) {
+      expect(sizeOf("listelektilo", "clear", size)).toBe(sizeOf("listelektilo", "indicator", size));
+      // Spec 035 2.3.1: the calendar is as large as the chevron of the elektilo; its button keeps
+      // the target of a pointer by its width.
+      expect(sizeOf("datelektilo", "trigger", size)).toBe(sizeOf("elektilo", "indicator", size));
+      // Spec 035 2.3.3: its ✕ as large as the kampo's, as large as the calendar again.
+      expect(sizeOf("datelektilo", "clear", size)).toBe(sizeOf("kampo", "clear", size));
+      expect(sizeOf("datelektilo", "clear", size)).toBe(sizeOf("datelektilo", "trigger", size));
+    }
   });
 
   // WCAG 2.2, 2.5.8: a button at the end shows its icon at the field's size, yet stays a target of

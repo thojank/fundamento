@@ -43,6 +43,9 @@ async function variantOf(set: string, name: string) {
   return variant;
 }
 
+/** The size in a variant's name (Spec 036 Teil 5 ②b-2: the date picker has sizes). */
+const sizeIn = (name: string): string => /size=([a-z]+)/.exec(name)?.[1] ?? "medium";
+
 async function variantsOf(set: string) {
   const found = (await drawn()).find((node) => node.name === set);
   if (found === undefined) throw new Error(`${set} missing`);
@@ -50,22 +53,25 @@ async function variantsOf(set: string) {
 }
 
 describe("Spec 035 2.3.1: the calendar of the datelektilo as large as the chevron of the elektilo", () => {
+  // Spec 036 Teil 5 ②b-2 (A-datelektilo-2): the date picker has the sizes of the elektilo; each
+  // variant's calendar is the chevron of its size.
   it("every variant: the calendar's glyphs take the size the Skemo gives the trigger, the chevron's size", async () => {
-    const chevron = glyphsOf(
-      find(await variantOf("elektilo", "size=medium, state=rest"), "indicator"),
-    );
-    expect(chevron.length, "the chevron's glyphs").toBeGreaterThan(0);
-    const side = geometry(chevron[0] as DoubleNode).width;
     for (const variant of await variantsOf("datelektilo")) {
+      const size = sizeIn(variant.name);
+      const chevron = glyphsOf(
+        find(await variantOf("elektilo", `size=${size}, state=rest`), "indicator"),
+      );
+      expect(chevron.length, "the chevron's glyphs").toBeGreaterThan(0);
+      const side = geometry(chevron[0] as DoubleNode).width;
       const trigger = find(variant, "trigger");
       const glyphs = glyphsOf(trigger);
       expect(glyphs.length, `${variant.name}: the calendar's glyphs`).toBe(chevron.length);
       for (const glyph of glyphs) {
         expect(glyph.boundVariables.width?.name, `${variant.name}: ${glyph.name} width`).toBe(
-          "ero/datelektilo/trigger/size",
+          `ero/datelektilo/trigger/size/size/${size}`,
         );
         expect(glyph.boundVariables.height?.name, `${variant.name}: ${glyph.name} height`).toBe(
-          "ero/datelektilo/trigger/size",
+          `ero/datelektilo/trigger/size/size/${size}`,
         );
         expect(
           [geometry(glyph).width, geometry(glyph).height],
@@ -81,7 +87,10 @@ describe("Spec 035 2.3.1: the calendar of the datelektilo as large as the chevro
     );
     const scale = (glyph: DoubleNode | undefined) =>
       glyph?.children.map((child) => JSON.stringify(child.properties.constraints ?? null));
-    const variant = await variantOf("datelektilo", "mode=single, expanded=false, state=rest");
+    const variant = await variantOf(
+      "datelektilo",
+      "mode=single, expanded=false, size=medium, state=rest",
+    );
     const calendar = glyphsOf(find(variant, "trigger"));
     expect(calendar.map(scale)).toEqual(chevron.map(scale));
   });
@@ -96,7 +105,7 @@ describe("Spec 035 2.3.1: the calendar of the datelektilo as large as the chevro
       return paint?.boundVariables?.color?.name;
     };
     const clear = find(
-      await variantOf("datelektilo", "mode=single, expanded=false, state=rest"),
+      await variantOf("datelektilo", "mode=single, expanded=false, size=medium, state=rest"),
       "clear",
     );
     const cross = paintOf(glyphsOf(clear)[0]?.children[0]);
@@ -137,16 +146,17 @@ describe("Spec 035 2.3.1: the calendar of the datelektilo as large as the chevro
 });
 
 describe("Spec 035 2.3.3: the ✕ of the datelektilo as large and as strong as the kampo's", () => {
-  it("every variant: the ✕'s glyphs bound to the field's clear size, as large as the kampo's (size medium)", async () => {
-    const kampo = glyphsOf(find(await variantOf("kampo", "size=medium, state=rest"), "clear"));
-    expect(kampo.length, "the kampo's ✕").toBeGreaterThan(0);
-    const side = geometry(kampo[0] as DoubleNode).width;
+  it("every variant: the ✕'s glyphs bound to the field's clear size, as large as the kampo's of its size", async () => {
     for (const variant of await variantsOf("datelektilo")) {
+      const size = sizeIn(variant.name);
+      const kampo = glyphsOf(find(await variantOf("kampo", `size=${size}, state=rest`), "clear"));
+      expect(kampo.length, "the kampo's ✕").toBeGreaterThan(0);
+      const side = geometry(kampo[0] as DoubleNode).width;
       const glyphs = glyphsOf(find(variant, "clear"));
       expect(glyphs.length, `${variant.name}: the ✕'s glyphs`).toBe(kampo.length);
       for (const glyph of glyphs) {
         expect(glyph.boundVariables.width?.name, `${variant.name}: ${glyph.name}`).toBe(
-          "ero/datelektilo/clear/size",
+          `ero/datelektilo/clear/size/size/${size}`,
         );
         expect(
           [geometry(glyph).width, geometry(glyph).height],

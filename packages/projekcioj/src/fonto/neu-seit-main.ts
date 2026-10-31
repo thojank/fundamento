@@ -75,7 +75,7 @@ const MOVED: Readonly<Record<string, string>> = {
 };
 
 /** The name a token had in main's record. */
-export const mainNameOf = (name: string): string => MOVED[name] ?? name;
+export const mainNameOf = (name: string): string => MOVED[name] ?? MOVED_2B2[name] ?? name;
 
 /**
  * Abnahme #122 (Maintainer, 30.10.): tokens main had whose value changed on purpose – the
@@ -101,15 +101,66 @@ const CHANGED: Readonly<Record<string, string>> = {
 
 /**
  * Spec 036 Teil 5 ②b-2 (Spec 029 abgleich.json, aspects "achsen" and "groessen"): the tokens of the
- * new axes and values – the count of the tekstareo (A-tekstareo-1).
+ * new axes and values – the count of the tekstareo (A-tekstareo-1); the sizes small and large of
+ * listelektilo, plurelektilo and datelektilo (A-*-2; their size medium is the token main had, see
+ * MOVED_2B2).
  */
-const ACHSEN_2B2 = /^ero\.tekstareo\.count\.(color|typography)$/;
+const ACHSEN_2B2 =
+  /^ero\.tekstareo\.count\.(color|typography)$|^ero\.(listelektilo|plurelektilo|datelektilo)\.(label\.typography|text\.typography|box\.height|box\.inline\.padding|indicator\.size|clear\.size|trigger\.size)\.size\.(small|large)$/;
 
-/** How many tokens ②b-2 added (A-tekstareo-1: 2), counted beside ADDED_SINCE_MAIN. */
-export const ADDED_BY_2B2 = 2;
+/**
+ * How many tokens ②b-2 added, counted beside ADDED_SINCE_MAIN (A-tekstareo-1: 2; A-listelektilo-2:
+ * 6 × 2, A-plurelektilo-2: 5 × 2, A-datelektilo-2: 6 × 2).
+ */
+export const ADDED_BY_2B2 = 2 + 12 + 10 + 12;
+
+/**
+ * The ✕ of listelektilo and datelektilo came after main (②b-1 M-6, CLEAR); ②b-2 keys it by size,
+ * so its size medium is that token: still none of main's.
+ */
+const CLEAR_2B2 = /^ero\.(listelektilo|datelektilo)\.clear\.size\.size\.medium$/;
 
 /** Whether a token was added by ②b-2 after main's record. */
-export const addedBy2b2 = (name: string): boolean => ACHSEN_2B2.test(name);
+export const addedBy2b2 = (name: string): boolean => ACHSEN_2B2.test(name) || CLEAR_2B2.test(name);
+
+/**
+ * ②b-2 (A-datelektilo-2): the calendar's size medium is the token whose value changed on purpose
+ * at Abnahme #122 (CHANGED); compared with the role main bound it to.
+ */
+const CHANGED_2B2: Readonly<Record<string, string>> = {
+  "ero.datelektilo.trigger.size.size.medium": "size.control.medium",
+};
+
+/** ②b-2 (A-*-2): a field's former token is its size medium now; each keeps main's value. */
+const MOVED_2B2: Readonly<Record<string, string>> = Object.fromEntries(
+  Object.entries({
+    listelektilo: [
+      "label.typography",
+      "text.typography",
+      "box.height",
+      "box.inline.padding",
+      "indicator.size",
+      "clear.size",
+    ],
+    plurelektilo: [
+      "label.typography",
+      "text.typography",
+      "box.height",
+      "box.inline.padding",
+      "indicator.size",
+    ],
+    datelektilo: [
+      "label.typography",
+      "text.typography",
+      "box.height",
+      "box.inline.padding",
+      "trigger.size",
+      "clear.size",
+    ],
+  }).flatMap(([ero, paths]) =>
+    paths.map((path) => [`ero.${ero}.${path}.size.medium`, `ero.${ero}.${path}`]),
+  ),
+);
 
 /** Abnahme #122: a token main had that is gone (replaced by its sizes), with main's role. */
 const REMOVED: Readonly<Record<string, { type: string; role: string }>> = {
@@ -146,7 +197,7 @@ export function mainRows(
     .map((name) => [
       mainNameOf(name),
       tokens[name]?.type,
-      canonical(tokens[CHANGED[name] ?? name]?.value),
+      canonical(tokens[CHANGED[name] ?? CHANGED_2B2[name] ?? name]?.value),
     ]);
   for (const [name, { type, role }] of Object.entries(REMOVED)) {
     // A gone token is read through its role: keep judges what it would have been (②b-2: provo

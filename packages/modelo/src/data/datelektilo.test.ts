@@ -78,6 +78,8 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       // Spec 029 ②b-1b M-2: the status of the field.
       ["intent", "enum", false, "neutral"],
       ["message-position", "enum", false, "below"],
+      // Spec 036 Teil 5 ②b-2 (A-datelektilo-2): the sizes of the kampo, the last prop.
+      ["size", "enum", false, "medium"],
     ]);
     expect(skemo?.props.find((prop) => prop.name === "mode")?.values).toEqual(["single", "range"]);
     for (const prop of skemo?.props ?? []) {
@@ -96,7 +98,8 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       "success",
     ]);
     // expanded keys the calendar (none while closed); mode keys no part: an axis of the set alone.
-    expect(variantKeys(skemoOrThrow())).toEqual(["expanded", "state"]);
+    // Spec 036 Teil 5 ②b-2 (A-datelektilo-2): size keys the field.
+    expect(variantKeys(skemoOrThrow())).toEqual(["expanded", "size", "state"]);
   });
 
   it("has the slots label (default), help and error, every one a text", () => {
@@ -141,8 +144,9 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
     ]);
     // Abnahme #122: the calendar inside the field, the target of a pointer (as komuna from the Fonto).
     // Spec 035 2.3.1: its glyph as large as the chevron of the elektilo, the target its width.
+    // Spec 036 Teil 5 ②b-2 (A-datelektilo-2): by size, as the chevron of the elektilo.
     expect(skemo?.parts.trigger).toEqual({
-      size: { fixed: "size.icon.medium" },
+      size: { by: ["size"] },
       width: { fixed: "size.target.min" },
     });
     expect(skemo?.parts.calendar).toEqual({
@@ -187,9 +191,10 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       width: { fixed: "border.width.default" },
     });
     expect(skemo?.parts["outside-day"]).toEqual({ color: { fixed: "color.text.muted" } });
+    // Spec 036 Teil 5 ②b-2 (A-datelektilo-2): height and padding by size.
     expect(skemo?.parts.box).toEqual({
-      height: { fixed: "size.control.medium" },
-      "inline-padding": { fixed: "spacing.medium" },
+      height: { by: ["size"] },
+      "inline-padding": { by: ["size"] },
       gap: { fixed: "spacing.small" },
       radius: { fixed: "radius.role.control" },
     });
@@ -408,6 +413,8 @@ describe("the Uzo of the datelektilo (section ②, G2)", () => {
       "expanded",
       "intent",
       "message-position",
+      // Spec 036 Teil 5 ②b-2 (A-datelektilo-2).
+      "size",
     ]);
     expect(brief.props?.map((prop) => prop.name)).toContain("disabled-dates");
     expect(brief.required).toEqual({ props: [], slots: ["label"] });
