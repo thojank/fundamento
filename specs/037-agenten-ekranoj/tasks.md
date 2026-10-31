@@ -40,7 +40,7 @@
 
 ### C – Messung und Abschluss
 - [x] **T3716 3.2 (S037-06)** Mankoj Gvidanto: Werkzeugliste des MCP-Servers (nur gelesen) gegen den Bedarf des Ablaufs, je Lücke ein Befund mit Vorschlag im plan; kein Code in `packages/mcp`. – sechs Befunde MG-1 bis MG-6 im plan (Befunde › Manko Gvidanto), Doku-Commit von S037-06; Lückenliste im plan erstmals gefüllt (Rauchläufe, D-S037-06-15).
-- [ ] **T3717 (S037-06)** PR A „Spec 037 – Ablauf Screens“ angelegt (Basis `main`, nicht gemergt), Tabu-Suche (AC-3) und Grenzen-Suche (AC-5) sauber, PR-Text mit `pruefen` geprüft; CI-Wächter im Hintergrund.
+- [x] **T3717 (S037-06)** PR A „Spec 037 – Ablauf Screens“ angelegt (Basis `main`, nicht gemergt), Tabu-Suche (AC-3) und Grenzen-Suche (AC-5) sauber, PR-Text mit `pruefen` geprüft; CI-Wächter im Hintergrund. – [#131](https://github.com/thojank/fundamento/pull/131), kein Entwurf (D-S037-06-14), Head beim Anlegen `a4270d0f`; `pruefen --diff origin/main..HEAD` sauber, Tabu-Suche ohne Treffer, `audit-ac4` „sauber“, AC-1 Hash gleich; CI-Wächter `gh pr checks 131 --watch` → `/tmp/s037-logs/pr-a-ci.log` (liest S037-11).
 - [ ] **T3718 3.1 (S037-10, S037-12)** Lückenliste über alle Läufe im plan. (Erste Füllung aus Rauchläufen durch S037-06; S037-12 ersetzt sie.)
 
 ## Teil 2 – Messung „ganzer Ablauf“

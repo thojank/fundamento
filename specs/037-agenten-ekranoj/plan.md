@@ -10,7 +10,7 @@
 
 | PR | Branch | Basis | Worktree | Inhalt | Stand |
 |---|---|---|---|---|---|
-| A „Spec 037 – Ablauf Screens“ | `261031-spec-037-ekranoj` | `main` (`f2b5a058`) | `/tmp/s037-a` | Teil 1, Teil 3, `specs/037-agenten-ekranoj/` | Branch gepusht, noch kein PR |
+| A „Spec 037 – Ablauf Screens“ | `261031-spec-037-ekranoj` | `main` (`f2b5a058`) | `/tmp/s037-a` | Teil 1, Teil 3, `specs/037-agenten-ekranoj/` | [#131](https://github.com/thojank/fundamento/pull/131) offen (S037-06), nicht gemergt |
 | B „Spec 037 – Messung“ | `261031-spec-037-mezuro` | Branch A | `/tmp/s037-b` | Teil 2 | noch nicht angelegt |
 
 Kein PR aus dem p0-Branch. Commits nur über das Schutzwerkzeug `commit` (Noreply-Identität je Befehl, D-14).
@@ -326,7 +326,7 @@ Noch offen (S037-11). Vorgesehene Position: nach Teil 5 von Spec 036, vor deren 
 
 | PR | Nummer | Basis | Head beim Anlegen | Stand |
 |---|---|---|---|---|
-| A „Spec 037 – Ablauf Screens“ | wird nach diesem Doku-Commit angelegt | `main` | – | offen, nicht gemergt, kein Auto-Merge; CI-Wächter im Hintergrund (`/tmp/s037-logs/pr-a-ci.log`, liest S037-11) |
+| A „Spec 037 – Ablauf Screens“ | [#131](https://github.com/thojank/fundamento/pull/131) | `main` | `a4270d0f` (`a4270d0f7ec97955e4063266db9dcc0445831620`); danach der Doku-Commit mit dieser Zeile | offen, nicht gemergt, kein Auto-Merge; CI-Wächter im Hintergrund (`/tmp/s037-logs/pr-a-ci.log`, liest S037-11) |
 | B „Spec 037 – Messung“ | – | Branch A | – | folgt mit S037-08 |
 
 ### Prüfungen vor PR A (S037-06)
