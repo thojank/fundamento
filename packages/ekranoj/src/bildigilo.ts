@@ -36,6 +36,16 @@ export const WCAG_ETIKEDOJ: readonly string[] = [
 export const SKEMOJ_BILDIGO: readonly ("light" | "dark")[] = ["light", "dark"];
 /** Loading a page waits no longer than nordstelo's render (`goto` 30 000 ms, R-4). */
 export const BILDIGO_TEMPOLIMO = 30_000;
+/**
+ * What axe-core preloads before a run (S037-05 Befund 1): the media only. By default axe-core also
+ * fetches every stylesheet by XMLHttpRequest for its CSSOM; under file:// Chromium blocks that
+ * with a console error, and an error in the console is K1 = 0 – no real screen could turn green.
+ * The CSSOM serves only `css-orientation-lock`, an experimental rule the WCAG tags never run
+ * (axe excludes the tag `experimental` unless asked); the media serve `no-autoplay-audio`
+ * (wcag2a) and stay. So the results are those of nordstelo's render, and every genuine console
+ * error of the page – an Ero that fails – is still recorded. No timeout is set (axe's own stays).
+ */
+export const AXE_ANTAUXSXARGO: { readonly assets: readonly string[] } = { assets: ["media"] };
 /** The viewport of a photo, as nordstelo. */
 const VIDPUNKTO = { width: 1280, height: 900 };
 
@@ -49,9 +59,11 @@ export interface AxeModulo {
   AxeBuilder: new (opcioj: {
     page: Page;
   }) => {
-    withTags(etikedoj: string[]): {
-      exclude(selektilo: string): {
-        analyze(): Promise<{ violations: { id: string; nodes: unknown[] }[] }>;
+    options(opcioj: { preload: { assets: string[] } }): {
+      withTags(etikedoj: string[]): {
+        exclude(selektilo: string): {
+          analyze(): Promise<{ violations: { id: string; nodes: unknown[] }[] }>;
+        };
       };
     };
   };
@@ -178,7 +190,9 @@ async function bildigiUnu(
         if (bildoj[scheme] === undefined) {
           bildoj[scheme] = await page.screenshot({ fullPage: true });
         }
+        // `options` first: the builder replaces its options there, `withTags` adds to them.
         const { violations } = await new axe.AxeBuilder({ page })
+          .options({ preload: { assets: [...AXE_ANTAUXSXARGO.assets] } })
           .withTags([...WCAG_ETIKEDOJ])
           .exclude(`[${KADRO_ATRIBUTO}]`)
           .analyze();
