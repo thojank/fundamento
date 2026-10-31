@@ -10,15 +10,18 @@
         "en": "Lead colour and accents"
       },
       "pezo": 3,
-      "kialo": "Die Leitfarbe trägt die Wiedererkennung der Marke und färbt Aktionen, Verweise und die Akzentpalette; ein Fehlgriff hier fällt auf jedem Bildschirm auf, deshalb das höchste Gewicht neben der Schrift.",
+      "kialo": "Die Leitfarbe trägt die Wiedererkennung der Marke und färbt Aktionen, Verweise und die Akzentpalette; ein Fehlgriff hier fällt auf jedem Bildschirm auf, deshalb das höchste Gewicht neben der Schrift. Die Zweitfarbe (Spec 036, V-2) ist optional: eine eigene Palette mit Flächen zur Hervorhebung, Illustration, Abzeichen und Diagrammen, nie Aktionen.",
       "tokenoj": [
         "color.palette.accent",
         "color.brand",
         "color.action",
-        "color.link"
+        "color.link",
+        "color.palette.sekundo",
+        "color.sekundo"
       ],
       "agordo": [
         "leitfarbe",
+        "zweitfarbe",
         "regler.saettigung"
       ]
     },

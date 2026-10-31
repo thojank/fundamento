@@ -1,0 +1,16 @@
+{
+  "ids": {
+    "dva_dukolora_01M564XR00QEFX9W7XG6JFJ426": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "set_dukolora_01M564XR00QEFX9W7XG6JFJ427": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "set_dukolora_01M564XR00QEFX9W7XG6JFJ428": {
+      "status": "active",
+      "type": "tokenSet"
+    }
+  }
+}

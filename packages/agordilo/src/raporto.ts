@@ -4,6 +4,8 @@
 // the Agordo and the package files only, so `fm agordilo check` can rebuild them byte for byte.
 // Pure.
 
+import type { Agordo } from "./agordo.js";
+
 export interface RaportoSummary {
   /** No fixed rule violated, every adjustable violation covered by a Jugxo, the Agordo sound. */
   exportable: boolean;
@@ -20,6 +22,8 @@ export interface RaportoSummary {
  */
 export interface AgordoPatch {
   leitfarbe?: string;
+  /** Spec 036, Befund 2.2 (V-2): the Zweitfarbe with less chroma, its herkunft kept. */
+  zweitfarbe?: NonNullable<Agordo["zweitfarbe"]>;
   neutral?: { toenung: number };
   regler?: { helligkeit?: number; kontrast?: number; saettigung?: number };
   ziele?: Record<string, { hell?: number; dunkel?: number } | null>;

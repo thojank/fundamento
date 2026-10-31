@@ -141,6 +141,13 @@
       "raised": {
         "$value": "{color.palette.neutral.850}"
       }
+    },
+    "sekundo": {
+      "badge": {
+        "text": {
+          "$value": "{color.palette.sekundo.100}"
+        }
+      }
     }
   }
 }

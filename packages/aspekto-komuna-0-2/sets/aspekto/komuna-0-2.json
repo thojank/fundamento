@@ -723,6 +723,53 @@
             "hex": "#ffffff"
           }
         }
+      },
+      "sekundo": {
+        "25": {
+          "$value": "{color.palette.neutral.25}"
+        },
+        "50": {
+          "$value": "{color.palette.neutral.50}"
+        },
+        "100": {
+          "$value": "{color.palette.neutral.100}"
+        },
+        "150": {
+          "$value": "{color.palette.neutral.150}"
+        },
+        "200": {
+          "$value": "{color.palette.neutral.200}"
+        },
+        "300": {
+          "$value": "{color.palette.neutral.300}"
+        },
+        "400": {
+          "$value": "{color.palette.neutral.400}"
+        },
+        "500": {
+          "$value": "{color.palette.neutral.500}"
+        },
+        "600": {
+          "$value": "{color.palette.neutral.600}"
+        },
+        "700": {
+          "$value": "{color.palette.neutral.700}"
+        },
+        "800": {
+          "$value": "{color.palette.neutral.800}"
+        },
+        "850": {
+          "$value": "{color.palette.neutral.850}"
+        },
+        "900": {
+          "$value": "{color.palette.neutral.900}"
+        },
+        "950": {
+          "$value": "{color.palette.neutral.950}"
+        },
+        "975": {
+          "$value": "{color.palette.neutral.975}"
+        }
       }
     },
     "background": {
@@ -990,6 +1037,25 @@
     },
     "backdrop": {
       "$value": "{color.palette.shade.50}"
+    },
+    "sekundo": {
+      "surface": {
+        "$value": "{color.palette.sekundo.150}"
+      },
+      "illustration": {
+        "$value": "{color.palette.sekundo.600}"
+      },
+      "badge": {
+        "fill": {
+          "$value": "{color.palette.sekundo.150}"
+        },
+        "text": {
+          "$value": "{color.palette.sekundo.800}"
+        }
+      },
+      "chart": {
+        "$value": "{color.palette.sekundo.700}"
+      }
     }
   },
   "spacing": {

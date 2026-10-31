@@ -1894,7 +1894,7 @@ export interface AspektoAgordilo {
   agordo: Agordo;
 }
 /**
- * The recipe of a brand for the Agordilo (Spec 016, G4; Spec 019, G2): a lead colour, optional status colours, the tint of the neutrals, three sliders and font families, and the sliders of form, space, type and icon weight (stage 2), each on the structure of the Vortaro. The same Agordo derives the same Aspekto, byte for byte. owner and license fill aspekto.json; aspiroj are the brand's own goals, checked only when named; jugxoj record deviations from adjustable rules.
+ * The recipe of a brand for the Agordilo (Spec 016, G4; Spec 019, G2): a lead colour, an optional second colour (zweitfarbe, Spec 036 V-2), optional status colours, the tint of the neutrals, three sliders and font families, and the sliders of form, space, type and icon weight (stage 2), each on the structure of the Vortaro. The same Agordo derives the same Aspekto, byte for byte. owner and license fill aspekto.json; aspiroj are the brand's own goals, checked only when named; jugxoj record deviations from adjustable rules.
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "Agordo".
@@ -1904,6 +1904,7 @@ export interface Agordo {
   owner?: NonEmptyText;
   license?: License;
   leitfarbe: AgordoColor;
+  zweitfarbe?: AgordoZweitfarbe;
   zusatzfarben?: {
     success?: AgordoColor;
     warning?: AgordoColor;
@@ -1998,6 +1999,29 @@ export interface Agordo {
    * The history of the Agordo (Spec 019 ③, W-26): every save by save_agordo appends an entry. Part of the Agordo, so it travels with the file.
    */
   historio?: AgordoHistorio[];
+}
+/**
+ * The second colour of a brand (Spec 036, Befund 2.2, V-2): a colour of the same shape as leitfarbe, from which the Agordilo derives the palette color.palette.sekundo at the contrast targets of the accent ramp; the roles color.sekundo.* (highlight surface, illustration, badge, chart) take it, never an action, a link or the focus (Regulo sekundo-not-action). Absent means no Zweitfarbe: the palette is the neutral ramp. herkunft says where it was found, absent when it was entered by hand.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "AgordoZweitfarbe".
+ */
+export interface AgordoZweitfarbe {
+  farbe: AgordoColor;
+  herkunft?: AgordoHerkunft;
+}
+/**
+ * Where a value of the Agordo was found in the material of the brand (Spec 036, D-03): a picture, a PDF or a page (link), the file or the address, the feature it was read from in plain words, and the share of the found colour in per cent where one was measured.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "AgordoHerkunft".
+ */
+export interface AgordoHerkunft {
+  quelle: "bild" | "pdf" | "link";
+  datei?: NonEmptyText;
+  adresse?: NonEmptyText;
+  merkmal: NonEmptyText;
+  anteil?: number;
 }
 /**
  * Contrast targets a brand overrides per palette step (Spec 016 ②, G7): keyed by palette.step, the WCAG 2.x contrast the step should reach against the reference surface of the light mode (hell: neutral.0) or the dark mode (dunkel: neutral.1000). An override is a target, never a free colour value; the floors of kontrastSojloj still hold.

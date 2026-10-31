@@ -642,6 +642,36 @@
       "foreground": "color.status.danger.text",
       "background": "color.background.raised",
       "kategorio": "ui"
+    },
+    {
+      "id": "kpa_01M69KM5GG5PC5NS1HM36TK7DT",
+      "name": "text-default-on-sekundo-surface",
+      "foreground": "color.text.default",
+      "background": "color.sekundo.surface",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M69KM5GH0J4EBERAS7ZA57Q9",
+      "name": "sekundo-badge-text-on-badge-fill",
+      "foreground": "color.sekundo.badge.text",
+      "background": "color.sekundo.badge.fill",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M69KM5GH0J4EBERAS7ZA57QA",
+      "name": "sekundo-illustration-on-background-default",
+      "foreground": "color.sekundo.illustration",
+      "background": "color.background.default",
+      "kategorio": "ui",
+      "kialo": "WCAG 1.4.11 asks 3:1 for graphical objects that carry meaning; an illustration in the Zweitfarbe is one, so it keeps 3:1 on the page like the strong status colours."
+    },
+    {
+      "id": "kpa_01M69KM5GH0J4EBERAS7ZA57QB",
+      "name": "sekundo-chart-on-background-default",
+      "foreground": "color.sekundo.chart",
+      "background": "color.background.default",
+      "kategorio": "ui",
+      "kialo": "WCAG 1.4.11 asks 3:1 for the parts of a chart a person needs to read it; a data series in the Zweitfarbe keeps 3:1 on the page."
     }
   ]
 }

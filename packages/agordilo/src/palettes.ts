@@ -1,7 +1,9 @@
 // The six palettes of a derived Aspekto (Spec 016, G2–G4): each step at its calibrated contrast
 // target, moved by the sliders, with the tone of its source — the lead colour for accent (and,
 // tinted, for neutral), a status colour or the default tone turned towards the lead colour for the
-// status palettes. Pure.
+// status palettes. A brand with a second colour (zweitfarbe, Spec 036 Befund 2.2, V-2) gets a
+// seventh, color.palette.sekundo, at the targets of the accent ramp in the tone of that colour;
+// without one the structure's palette stays (the neutral ramp). Pure.
 
 import {
   oklchComponentsOf,
@@ -46,12 +48,32 @@ export const KONTRAST_SPREAD = 0.5;
 /** The largest WCAG 2.x contrast (white on black). */
 export const MAX_CONTRAST = 21;
 
+/** Spec 036, Befund 2.2 (V-2): the palette of the Zweitfarbe, derived only when the Agordo has one. */
+export const ZWEITFARBE_PALETTE = "sekundo";
+export type DerivedPaletteName = PaletteName | typeof ZWEITFARBE_PALETTE;
+/** Every palette the derivation can write: the six of the calibration and the Zweitfarbe. */
+export const DERIVED_PALETTES: readonly DerivedPaletteName[] = [...PALETTES, ZWEITFARBE_PALETTE];
+/** The calibrated ramp each palette is solved on: the Zweitfarbe takes the accent's targets. */
+export const CALIBRATED_RAMP: Readonly<Record<DerivedPaletteName, PaletteName>> = {
+  neutral: "neutral",
+  accent: "accent",
+  success: "success",
+  warning: "warning",
+  danger: "danger",
+  info: "info",
+  sekundo: "accent",
+};
+
 export interface PaletteSource {
   hue: number;
   /** The chroma of the reference step before the calibration profile and saettigung. */
   chroma: number;
-  origin: "leitfarbe" | "zusatzfarbe" | "default" | "toenung";
+  origin: "leitfarbe" | "zusatzfarbe" | "default" | "toenung" | "zweitfarbe";
 }
+
+/** The sources of the palettes; the Zweitfarbe's only when the Agordo names one. */
+export type PaletteSources = Record<PaletteName, PaletteSource> &
+  Partial<Record<typeof ZWEITFARBE_PALETTE, PaletteSource>>;
 
 export interface TargetFloors {
   /** Every WCAG 2.x threshold of every contrast valoro (kontrastSojloj), ascending. */
@@ -61,7 +83,7 @@ export interface TargetFloors {
 }
 
 export interface DerivedStep extends StepSolution {
-  palette: PaletteName;
+  palette: DerivedPaletteName;
   step: string;
   mode: Mode;
   /** The calibrated target of komuna in this mode. */
@@ -78,7 +100,7 @@ export interface DerivedStep extends StepSolution {
 }
 
 export interface DerivedPalettes {
-  sources: Record<PaletteName, PaletteSource>;
+  sources: PaletteSources;
   /** Every step in the light mode: the values of the main set aspekto/<name>. */
   steps: DerivedStep[];
   /** Mode-specific palette values the structure overrides in a conjunction set (dark). */
@@ -100,11 +122,8 @@ export function hueDifference(to: number, from: number): number {
 
 const normalizeHue = (hue: number): number => ((hue % 360) + 360) % 360;
 
-/** The tone of each palette's source (G4). */
-export function paletteSources(
-  agordo: Agordo,
-  calibration: Calibration,
-): Record<PaletteName, PaletteSource> {
+/** The tone of each palette's source (G4), and of the Zweitfarbe when the Agordo names one. */
+export function paletteSources(agordo: Agordo, calibration: Calibration): PaletteSources {
   const lead = parseAgordoColor(agordo.leitfarbe) ?? { l: 0, c: 0, h: 0 };
   const accent = calibration.palettes.accent;
   const turn =
@@ -121,7 +140,7 @@ export function paletteSources(
       chroma: (agordo.neutral?.toenung ?? 0) * lead.c * NEUTRAL_SHARE,
       origin: "toenung",
     },
-  } as Record<PaletteName, PaletteSource>;
+  } as PaletteSources;
   for (const status of STATUS_PALETTES) {
     const given = agordo.zusatzfarben?.[status];
     const colour = given === undefined ? undefined : parseAgordoColor(given);
@@ -130,6 +149,12 @@ export function paletteSources(
       colour === undefined
         ? { hue: normalizeHue(calibrated.hue + turn), chroma: calibrated.chroma, origin: "default" }
         : { hue: colour.h, chroma: calibrated.chroma, origin: "zusatzfarbe" };
+  }
+  // Spec 036, Befund 2.2 (V-2): the Zweitfarbe is a source like the lead colour, on the accent ramp.
+  const second =
+    agordo.zweitfarbe === undefined ? undefined : parseAgordoColor(agordo.zweitfarbe.farbe);
+  if (second !== undefined) {
+    sources[ZWEITFARBE_PALETTE] = { hue: second.h, chroma: second.c, origin: "zweitfarbe" };
   }
   return sources;
 }
@@ -188,7 +213,7 @@ const hexOf = (components: readonly number[]): string =>
     .join("")}`;
 
 function solve(
-  palette: PaletteName,
+  palette: DerivedPaletteName,
   step: string,
   calibrated: CalibratedStep,
   mode: Mode,
@@ -226,23 +251,28 @@ function solve(
   };
 }
 
-/** Derives every step of the six palettes, plus the mode-specific values the structure needs. */
+/**
+ * Derives every step of the six palettes, plus the mode-specific values the structure needs, and
+ * the palette of the Zweitfarbe when the Agordo names one (Spec 036, V-2).
+ */
 export function derivePalettes(
   agordo: Agordo,
   calibration: Calibration,
   floors: TargetFloors,
   overrides: readonly ModeOverride[] = [],
-  only: readonly PaletteName[] = PALETTES,
+  only: readonly DerivedPaletteName[] = DERIVED_PALETTES,
 ): DerivedPalettes {
   const sources = paletteSources(agordo, calibration);
   const steps: DerivedStep[] = [];
   for (const palette of only) {
-    const calibrated = calibration.palettes[palette];
+    const source = sources[palette];
+    if (source === undefined) continue;
+    const calibrated = calibration.palettes[CALIBRATED_RAMP[palette]];
     const ordered = Object.keys(calibrated.steps).sort((a, b) => Number(a) - Number(b));
     for (const step of ordered) {
       const entry = calibrated.steps[step];
       if (entry === undefined) continue;
-      steps.push(solve(palette, step, entry, "light", sources[palette], agordo, floors));
+      steps.push(solve(palette, step, entry, "light", source, agordo, floors));
     }
   }
   const modeSteps: DerivedStep[] = [];
@@ -311,7 +341,7 @@ export function withFestgelegtSteps(palettes: DerivedPalettes, agordo: Agordo): 
     if (
       palette === undefined ||
       stepName === undefined ||
-      !(PALETTES as readonly string[]).includes(palette)
+      !(DERIVED_PALETTES as readonly string[]).includes(palette)
     )
       continue;
     if (set.wert !== undefined && set.alias === undefined) {

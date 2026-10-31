@@ -7,6 +7,7 @@
 // `dukolora` (invented, test only) lives with its derived package in the Modelo fixtures.
 
 import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   buildModelo,
@@ -33,6 +34,9 @@ import {
 
 const DUKOLORA_AGORDO = fileURLToPath(
   new URL("../../modelo/test/fixtures/valid/aspekto-dukolora/agordo.json", import.meta.url),
+);
+const DUKOLORA_PACKAGE = fileURLToPath(
+  new URL("../../modelo/test/fixtures/valid/aspekto-dukolora/aspekto-dukolora/", import.meta.url),
 );
 
 /** The roles of the Zweitfarbe (Spec 036 V-2: never an action, a link or the focus). */
@@ -127,9 +131,9 @@ describe("an Agordo with a Zweitfarbe (Spec 036, Befund 2.2, V-2)", () => {
     };
     expect(parseAgordoColor(agordo.zweitfarbe?.farbe ?? "")).toBeDefined();
     expect(agordo.zweitfarbe?.herkunft?.quelle).toBe("bild");
-    const { issues } = readAgordo({ name: "dukolora", leitfarbe: "#c2410c", zweitfarbe: {} });
+    const { issues } = readAgordo({ name: "dukolora", leitfarbe: "#375479", zweitfarbe: {} });
     expect(issues.map(({ rule, path }) => ({ rule, path }))).toEqual([
-      { rule: "schema-violation", path: "agordo.json#/zweitfarbe" },
+      { rule: "schema-violation", path: "agordo.json#/zweitfarbe/farbe" },
     ]);
   });
 
@@ -137,6 +141,14 @@ describe("an Agordo with a Zweitfarbe (Spec 036, Befund 2.2, V-2)", () => {
     expect(derivation.issues).toEqual([]);
     expect(derivation.raporto.violations).toEqual([]);
     expect(derivation.exportable).toBe(true);
+  });
+
+  it("equals the committed fixture aspekto-dukolora (regenerate with fm agordilo derive)", () => {
+    // pnpm fm agordilo derive packages/modelo/test/fixtures/valid/aspekto-dukolora/agordo.json
+    //   --out packages/modelo/test/fixtures/valid/aspekto-dukolora/aspekto-dukolora
+    for (const [path, text] of Object.entries(derivation.files)) {
+      expect(readFileSync(join(DUKOLORA_PACKAGE, path), "utf8"), path).toBe(text);
+    }
   });
 
   it("writes the palette color.palette.sekundo in the tone of the Zweitfarbe", () => {

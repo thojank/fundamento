@@ -5,9 +5,9 @@ Derived by the Agordilo 0.2.0 (Spec 016). Generated with the package; do not edi
 ## Summary
 
 - Export: **allowed**
-- KontrastParoj: 6408 of 6408 evaluations pass (0 fail)
+- KontrastParoj: 6696 of 6696 evaluations pass (0 fail)
 - Violations: 0 of fixed rules, 0 of adjustable rules (0 covered by a Jugxo)
-- Hints (APCA, Aspiroj, tone): 135
+- Hints (APCA, Aspiroj, tone): 140
 
 ## Checks
 
@@ -167,6 +167,9 @@ None.
 | navigation-text-rest-on-navigation-rest | text-normal | 10.86:1 | 4.50:1 | passed | aspekto=provo-kompakta,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default |
 | navigation-text-selected-on-background-default | ui | 11.52:1 | 3.00:1 | passed | aspekto=provo-kompakta,viewport=compact,density=compact,color-scheme=dark,contrast=default,motion=default |
 | navigation-text-selected-on-navigation-selected | text-normal | 11.54:1 | 4.50:1 | passed | aspekto=provo-kompakta,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default |
+| sekundo-badge-text-on-badge-fill | text-normal | 7.81:1 | 4.50:1 | passed | aspekto=provo-kompakta,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default |
+| sekundo-chart-on-background-default | ui | 6.71:1 | 3.00:1 | passed | aspekto=provo-kompakta,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default |
+| sekundo-illustration-on-background-default | ui | 4.76:1 | 3.00:1 | passed | aspekto=provo-kompakta,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default |
 | status-danger-basic-on-background-default | ui | 5.19:1 | 3.00:1 | passed | aspekto=provo-kompakta,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default |
 | status-danger-border-on-background-default | ui | 7.33:1 | 3.00:1 | passed | aspekto=provo-kompakta,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default |
 | status-danger-border-on-background-sunken | ui | 6.10:1 | 3.00:1 | passed | aspekto=provo-kompakta,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default |
@@ -198,6 +201,7 @@ None.
 | text-default-on-background-canvas | text-normal | 11.51:1 | 4.50:1 | passed | aspekto=provo-kompakta,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default |
 | text-default-on-background-raised | text-normal | 9.39:1 | 4.50:1 | passed | aspekto=provo-kompakta,viewport=compact,density=compact,color-scheme=dark,contrast=default,motion=default |
 | text-default-on-background-sunken | text-normal | 10.49:1 | 4.50:1 | passed | aspekto=provo-kompakta,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default |
+| text-default-on-sekundo-surface | text-normal | 9.39:1 | 4.50:1 | passed | aspekto=provo-kompakta,viewport=compact,density=compact,color-scheme=dark,contrast=default,motion=default |
 | text-default-on-status-danger-weak | text-normal | 11.40:1 | 4.50:1 | passed | aspekto=provo-kompakta,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default |
 | text-default-on-status-info-weak | text-normal | 11.56:1 | 4.50:1 | passed | aspekto=provo-kompakta,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default |
 | text-default-on-status-success-weak | text-normal | 11.64:1 | 4.50:1 | passed | aspekto=provo-kompakta,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default |
@@ -234,6 +238,7 @@ None.
 - contrast-advisory – text-default-on-action-tertiary-hover (18×): KontrastParo 'text-default-on-action-tertiary-hover' (text-normal): color.text.default on color.action.tertiary.hover over color.background.sunken has APCA lightness contrast Lc 70.2 below the threshold Lc 75 of contrast=default.
 - contrast-advisory – text-subtle-on-action-tertiary-rest (18×): KontrastParo 'text-subtle-on-action-tertiary-rest' (text-normal): color.text.subtle on color.action.tertiary.rest over color.background.sunken has APCA lightness contrast Lc 73.8 below the threshold Lc 75 of contrast=default.
 - contrast-advisory – text-subtle-on-action-tertiary-hover (18×): KontrastParo 'text-subtle-on-action-tertiary-hover' (text-normal): color.text.subtle on color.action.tertiary.hover over color.background.sunken has APCA lightness contrast Lc 64.0 below the threshold Lc 75 of contrast=default.
+- contrast-advisory – sekundo-badge-text-on-badge-fill (18×): KontrastParo 'sekundo-badge-text-on-badge-fill' (text-normal): color.sekundo.badge.text on color.sekundo.badge.fill has APCA lightness contrast Lc 73.8 below the threshold Lc 75 of contrast=default.
 - contrast-advisory – text-default-on-background-sunken (18×): KontrastParo 'text-default-on-background-sunken' (text-normal): color.text.default on color.background.sunken has APCA lightness contrast Lc 84.7 below the threshold Lc 90 of contrast=high.
 - contrast-advisory – text-subtle-on-background-canvas (18×): KontrastParo 'text-subtle-on-background-canvas' (text-normal): color.text.subtle on color.background.canvas has APCA lightness contrast Lc 89.1 below the threshold Lc 90 of contrast=high.
 - contrast-advisory – text-subtle-on-background-sunken (18×): KontrastParo 'text-subtle-on-background-sunken' (text-normal): color.text.subtle on color.background.sunken has APCA lightness contrast Lc 83.4 below the threshold Lc 90 of contrast=high.
@@ -267,6 +272,8 @@ None.
 - contrast-advisory – text-default-on-action-tertiary-hover (18×): KontrastParo 'text-default-on-action-tertiary-hover' (text-normal): color.text.default on color.action.tertiary.hover over color.background.sunken has APCA lightness contrast Lc 74.8 below the threshold Lc 90 of contrast=high.
 - contrast-advisory – text-subtle-on-action-tertiary-rest (18×): KontrastParo 'text-subtle-on-action-tertiary-rest' (text-normal): color.text.subtle on color.action.tertiary.rest over color.background.sunken has APCA lightness contrast Lc 83.4 below the threshold Lc 90 of contrast=high.
 - contrast-advisory – text-subtle-on-action-tertiary-hover (18×): KontrastParo 'text-subtle-on-action-tertiary-hover' (text-normal): color.text.subtle on color.action.tertiary.hover over color.background.sunken has APCA lightness contrast Lc 73.6 below the threshold Lc 90 of contrast=high.
+- contrast-advisory – text-default-on-sekundo-surface (18×): KontrastParo 'text-default-on-sekundo-surface' (text-normal): color.text.default on color.sekundo.surface has APCA lightness contrast Lc 84.7 below the threshold Lc 90 of contrast=high.
+- contrast-advisory – sekundo-badge-text-on-badge-fill (18×): KontrastParo 'sekundo-badge-text-on-badge-fill' (text-normal): color.sekundo.badge.text on color.sekundo.badge.fill has APCA lightness contrast Lc 80.0 below the threshold Lc 90 of contrast=high.
 - contrast-advisory – text-subtle-on-background-default (18×): KontrastParo 'text-subtle-on-background-default' (text-normal): color.text.subtle on color.background.default has APCA lightness contrast Lc 74.9 below the threshold Lc 75 of contrast=default.
 - contrast-advisory – text-subtle-on-background-raised (18×): KontrastParo 'text-subtle-on-background-raised' (text-normal): color.text.subtle on color.background.raised has APCA lightness contrast Lc 69.7 below the threshold Lc 75 of contrast=default.
 - contrast-advisory – text-muted-on-background-default (18×): KontrastParo 'text-muted-on-background-default' (text-normal): color.text.muted on color.background.default has APCA lightness contrast Lc 63.5 below the threshold Lc 75 of contrast=default.
@@ -351,4 +358,6 @@ None.
 - contrast-advisory – link-hover-on-background-sunken (18×): KontrastParo 'link-hover-on-background-sunken' (text-normal): color.link.hover on color.background.sunken has APCA lightness contrast Lc 89.7 below the threshold Lc 90 of contrast=high.
 - contrast-advisory – text-subtle-on-action-tertiary-rest (18×): KontrastParo 'text-subtle-on-action-tertiary-rest' (text-normal): color.text.subtle on color.action.tertiary.rest over color.background.raised has APCA lightness contrast Lc 84.8 below the threshold Lc 90 of contrast=high.
 - contrast-advisory – text-subtle-on-action-tertiary-hover (18×): KontrastParo 'text-subtle-on-action-tertiary-hover' (text-normal): color.text.subtle on color.action.tertiary.hover over color.background.raised has APCA lightness contrast Lc 79.8 below the threshold Lc 90 of contrast=high.
+- contrast-advisory – sekundo-badge-text-on-badge-fill (18×): KontrastParo 'sekundo-badge-text-on-badge-fill' (text-normal): color.sekundo.badge.text on color.sekundo.badge.fill has APCA lightness contrast Lc 81.8 below the threshold Lc 90 of contrast=high.
+- contrast-advisory – sekundo-illustration-on-background-default (18×): KontrastParo 'sekundo-illustration-on-background-default' (ui): color.sekundo.illustration on color.background.default has APCA lightness contrast Lc 47.9 below the threshold Lc 60 of contrast=high.
 - agordilo-body-size – font.size.body.2 (3×): Body text at 12 px, below 14 px. No Regulo sets a minimum for body text (a Regulo candidate, Spec 019 G4); raise schrift.groesse to keep it readable.

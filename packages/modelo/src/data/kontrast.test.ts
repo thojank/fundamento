@@ -21,11 +21,12 @@ const has = (foreground: string, background: string) =>
 
 describe("KontrastParoj of the repo (D-12, data-model §4)", () => {
   // Spec 011 ① declared the link colours on raised and sunken (six pairs): 76 now.
-  it("declares about sixty to ninety pairs", () => {
+  it("declares about sixty to a hundred pairs", () => {
     // Spec 011 ③ added four text pairs on the weak status surfaces, ④ three ui pairs of the
-    // strong status colours on the sunken track of the meter (83).
+    // strong status colours on the sunken track of the meter (83). Spec 036 Befund 2.2 (V-2): four
+    // pairs of the roles of the Zweitfarbe (93); the range is a plausibility pin, no threshold.
     expect(modelo.kontrastParoj.length).toBeGreaterThanOrEqual(55);
-    expect(modelo.kontrastParoj.length).toBeLessThanOrEqual(90);
+    expect(modelo.kontrastParoj.length).toBeLessThanOrEqual(100);
   });
 
   it("covers status text on the weak and subtle status surfaces (K5)", () => {
