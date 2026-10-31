@@ -990,7 +990,8 @@ describe("the plugin draws the datelektilo (Spec 025 ②)", () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     const set = pageNodes(double).find((node) => node.name === "datelektilo");
-    expect(set?.children).toHaveLength(32);
+    // Spec 036 Teil 5 ②b-2 (A-datelektilo-2): three sizes.
+    expect(set?.children).toHaveLength(3 * 32);
     for (const variant of set?.children ?? []) {
       const field = descendant(variant, "field");
       expect(field?.properties.layoutMode, variant.name).toBe("VERTICAL");
@@ -1043,8 +1044,10 @@ describe("the plugin draws the datelektilo (Spec 025 ②)", () => {
       // Spec 035 2.3.1: the calendar's glyph as large as a chevron, the trigger at least the target.
       expect(bound(descendant(variant, "trigger"), "minWidth")).toBe("size/target/min");
       expect(bound(descendant(variant, "trigger"), "minHeight")).toBe("size/target/min");
+      // Spec 036 Teil 5 ②b-2 (A-datelektilo-2): the chevron's size of the variant's size.
+      const size = /size=([a-z]+)/.exec(variant.name)?.[1] ?? "medium";
       expect(bound(descendant(descendant(variant, "trigger"), "glyph-komuna"), "width")).toBe(
-        "size/icon/medium",
+        `size/icon/${size}`,
       );
       expect(bound(descendant(variant, "cell-4"), "width")).toBe("size/target/min");
       expect(bound(descendant(variant, "cell-4"), "cornerRadius")).toBe("radius/role/control");
@@ -1074,12 +1077,12 @@ describe("the plugin draws the datelektilo (Spec 025 ②)", () => {
       }
     }
     const rest = set?.children.find(
-      (child) => child.name === "mode=single, expanded=true, state=rest",
+      (child) => child.name === "mode=single, expanded=true, size=medium, state=rest",
     );
     expect(paintOf(descendant(rest, "calendar"))).toBe("color/background/raised");
     expect(paintOf(descendant(rest, "control"))).toBe("color/background/default");
     const hover = set?.children.find(
-      (child) => child.name === "mode=single, expanded=true, state=hover",
+      (child) => child.name === "mode=single, expanded=true, size=medium, state=hover",
     );
     expect(paintOf(descendant(hover, "cell-11"))).toBe("color/action/tertiary/hover");
     const before = double.snapshot();
@@ -1103,11 +1106,12 @@ describe("the plugin draws the selection Eroj (Spec 025 ③)", () => {
     );
     // 160, not 240 (plan ③ Abweichung 3): the constraint selected ⇒ mode selectable prunes the set.
     expect(sets.signeto?.children).toHaveLength(160);
-    expect(sets.listelektilo?.children).toHaveLength(16);
-    expect(sets.plurelektilo?.children).toHaveLength(16);
+    // Spec 036 Teil 5 ②b-2 (A-listelektilo-2, A-plurelektilo-2): three sizes each.
+    expect(sets.listelektilo?.children).toHaveLength(3 * 16);
+    expect(sets.plurelektilo?.children).toHaveLength(3 * 16);
     expect(sets.lokredaktilo?.children).toHaveLength(12);
     const open = sets.listelektilo?.children.find(
-      (child) => child.name === "expanded=true, state=rest",
+      (child) => child.name === "expanded=true, size=medium, state=rest",
     );
     expect(descendant(open, "listbox")?.properties.visible).toBe(true);
     expect(descendant(open, "suggestions-1")?.properties.characters).toBe("Eins");

@@ -60,7 +60,7 @@ const CASES = [
   { set: "elektilo", variant: "size=medium, state=rest", end: ["spinner", "clear", "indicator"] },
   {
     set: "datelektilo",
-    variant: "mode=single, expanded=false, state=rest",
+    variant: "mode=single, expanded=false, size=medium, state=rest",
     end: ["spinner", "clear", "trigger"],
   },
 ];
@@ -93,7 +93,10 @@ describe("Abnahme #122: the right edge of a field set in Figma", () => {
 
   it("the ✕ is as large as the field's icon, the button around it the target; the calendar of a date picker drawn", async () => {
     const elektilo = await variantOf("elektilo", "size=medium, state=rest");
-    const datelektilo = await variantOf("datelektilo", "mode=single, expanded=false, state=rest");
+    const datelektilo = await variantOf(
+      "datelektilo",
+      "mode=single, expanded=false, size=medium, state=rest",
+    );
     const trigger = find(datelektilo, "trigger") as DoubleNode;
     expect(trigger.children.length, "the calendar's glyphs").toBeGreaterThan(0);
     const glyphOf = (clear: DoubleNode) => geometry(clear.children[0] as DoubleNode).width;

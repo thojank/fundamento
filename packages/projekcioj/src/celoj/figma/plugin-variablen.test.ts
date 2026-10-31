@@ -416,7 +416,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "avizo", created: 4, updated: 0 },
         { set: "butono", created: 72, updated: 0 },
         // Spec 025 ②: the datelektilo, mode × expanded × state.
-        { set: "datelektilo", created: 32, updated: 0 },
+        // Spec 036 Teil 5 ②b-2 (A-datelektilo-2): × three sizes.
+        { set: "datelektilo", created: 96, updated: 0 },
         // Spec 011 ②: the dialogo has size × reason = 6 variants in one state.
         { set: "dialogo", created: 6, updated: 0 },
         // Spec 010 ④: the elektilo has size × state = 15 variants.
@@ -451,7 +452,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         // Spec 025 ③: the listelektilo and the plurelektilo have expanded × state = 12 variants,
         // the lokredaktilo editing × state = 12; the signeto mode × selected × size × intent ×
         // state, 160 after the constraint selected ⇒ mode selectable.
-        { set: "listelektilo", created: 16, updated: 0 },
+        // Spec 036 Teil 5 ②b-2 (A-listelektilo-2): × three sizes.
+        { set: "listelektilo", created: 48, updated: 0 },
         { set: "lokredaktilo", created: 12, updated: 0 },
         // Spec 020 ③: the markdovido has one variant (source and start-level are no axes).
         { set: "markdovido", created: 1, updated: 0 },
@@ -470,7 +472,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "pagxigilo", created: 4, updated: 0 },
         // Spec 011 ③: the plenstato has kind = 2 variants in one state.
         { set: "plenstato", created: 2, updated: 0 },
-        { set: "plurelektilo", created: 16, updated: 0 },
+        // Spec 036 Teil 5 ②b-2 (A-plurelektilo-2): × three sizes.
+        { set: "plurelektilo", created: 48, updated: 0 },
         // Spec 014 ②: the saltligilo has state = 2 variants (rest and focus).
         { set: "saltligilo", created: 2, updated: 0 },
         { set: "signeto", created: 160, updated: 0 },

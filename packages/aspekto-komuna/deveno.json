@@ -6080,7 +6080,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.datelektilo.label.typography",
+      "token": "ero.datelektilo.label.typography.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/DateInput/DateInput.tsx",
@@ -6088,6 +6088,28 @@
       "fontoValoro": "14px 500 / 20.0004px",
       "valoro": "{typography.label.1}",
       "maniero": "prenita"
+    },
+    {
+      "token": "ero.datelektilo.label.typography.size.small",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"sm\"} rest, hell: label font-size, font-weight, line-height (gemessen)",
+      "fontoValoro": "14px 500 / 20.0004px",
+      "valoro": "{typography.label.1}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-datelektilo-2): wie der elektilo derselben Größe (ero.elektilo.label.typography.size.small)."
+    },
+    {
+      "token": "ero.datelektilo.label.typography.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"lg\"} rest, hell: label font-size, font-weight, line-height (gemessen)",
+      "fontoValoro": "14px 500 / 20.0004px",
+      "valoro": "{typography.label.1}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-datelektilo-2): wie der elektilo derselben Größe (ero.elektilo.label.typography.size.large)."
     },
     {
       "token": "ero.datelektilo.required.mark.color",
@@ -6360,7 +6382,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.datelektilo.text.typography",
+      "token": "ero.datelektilo.text.typography.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/DateInput/DateInput.tsx",
@@ -6370,7 +6392,29 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.datelektilo.trigger.size",
+      "token": "ero.datelektilo.text.typography.size.small",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"sm\"} rest, hell: [object Object] font-size, font-weight, line-height (gemessen)",
+      "fontoValoro": "14px 400 / 20px",
+      "valoro": "{typography.body.1}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-datelektilo-2): wie der elektilo derselben Größe (ero.elektilo.text.typography.size.small)."
+    },
+    {
+      "token": "ero.datelektilo.text.typography.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"lg\"} rest, hell: [object Object] font-size, font-weight, line-height (gemessen)",
+      "fontoValoro": "14px 400 / 20px",
+      "valoro": "{typography.body.1}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-datelektilo-2): wie der elektilo derselben Größe (ero.elektilo.text.typography.size.large)."
+    },
+    {
+      "token": "ero.datelektilo.trigger.size.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/DateInput/DateInput.tsx",
@@ -6379,6 +6423,28 @@
       "valoro": "{size.icon.small}",
       "maniero": "derivita",
       "noto": "Spec 035 2.3.1: der Kalender ist so groß wie der Pfeil des elektilo der Größe medium (ero.elektilo.indicator.size.size.medium, gemessen an der Fonto); das Ziel des Knopfs trägt ero.datelektilo.trigger.width."
+    },
+    {
+      "token": "ero.datelektilo.trigger.size.size.small",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"sm\"} rest, hell: [object Object] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.icon.small}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-datelektilo-2): wie der elektilo derselben Größe (ero.elektilo.indicator.size.size.small)."
+    },
+    {
+      "token": "ero.datelektilo.trigger.size.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"lg\"} rest, hell: [object Object] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.target.min}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-datelektilo-2): wie der elektilo derselben Größe (ero.elektilo.indicator.size.size.large)."
     },
     {
       "token": "ero.datelektilo.trigger.width",
@@ -6715,7 +6781,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.datelektilo.box.height",
+      "token": "ero.datelektilo.box.height.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/DateInput/DateInput.tsx",
@@ -6725,7 +6791,29 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.datelektilo.box.inline.padding",
+      "token": "ero.datelektilo.box.height.size.small",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"sm\"} rest, hell: [object Object] Höhe des Elements (gemessen)",
+      "fontoValoro": "28px",
+      "valoro": "{size.control.small}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-datelektilo-2): wie der elektilo derselben Größe (ero.elektilo.box.height.size.small)."
+    },
+    {
+      "token": "ero.datelektilo.box.height.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"lg\"} rest, hell: [object Object] Höhe des Elements (gemessen)",
+      "fontoValoro": "36px",
+      "valoro": "{size.control.large}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-datelektilo-2): wie der elektilo derselben Größe (ero.elektilo.box.height.size.large)."
+    },
+    {
+      "token": "ero.datelektilo.box.inline.padding.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/DateInput/DateInput.tsx",
@@ -6733,6 +6821,28 @@
       "fontoValoro": "8px",
       "valoro": "{spacing.medium}",
       "maniero": "prenita"
+    },
+    {
+      "token": "ero.datelektilo.box.inline.padding.size.small",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/DateInput/DateInput.tsx",
+      "sxlosilo": "DateInput {} rest, hell: [object Object] padding-inline (gemessen)",
+      "fontoValoro": "8px",
+      "valoro": "{spacing.medium}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-datelektilo-2): die Größe small hält den Wert der bisherigen Größe medium."
+    },
+    {
+      "token": "ero.datelektilo.box.inline.padding.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/DateInput/DateInput.tsx",
+      "sxlosilo": "DateInput {} rest, hell: [object Object] padding-inline (gemessen)",
+      "fontoValoro": "8px",
+      "valoro": "{spacing.medium}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-datelektilo-2): die Größe large hält den Wert der bisherigen Größe medium."
     },
     {
       "token": "ero.datelektilo.box.gap",
@@ -7463,7 +7573,7 @@
       "noto": "Abnahme #122: die Icons am Ende eines Feldes sind so groß wie der Pfeil eines Feldes derselben Größe (ero.elektilo.indicator.size, gemessen an der Fonto)."
     },
     {
-      "token": "ero.datelektilo.clear.size",
+      "token": "ero.datelektilo.clear.size.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/Selector/Selector.tsx",
@@ -7472,6 +7582,28 @@
       "valoro": "{size.icon.small}",
       "maniero": "derivita",
       "noto": "Spec 035 2.3.3: das ✕ des datelektilo ist so groß wie das des kampo der Größe medium (ero.kampo.clear.size.size.medium) und wie der Kalender daneben."
+    },
+    {
+      "token": "ero.datelektilo.clear.size.size.small",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"md\"} rest, hell: [object Object] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.icon.small}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-datelektilo-2): die Größe small hält den Wert der bisherigen Größe medium."
+    },
+    {
+      "token": "ero.datelektilo.clear.size.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"lg\"} rest, hell: [object Object] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.target.min}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-datelektilo-2): wie der elektilo derselben Größe (ero.elektilo.clear.size.size.large)."
     },
     {
       "token": "ero.elektilo.help.color",
@@ -10655,7 +10787,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.listelektilo.label.typography",
+      "token": "ero.listelektilo.label.typography.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/Selector/Selector.tsx",
@@ -10663,6 +10795,28 @@
       "fontoValoro": "14px 500 / 20.0004px",
       "valoro": "{typography.label.1}",
       "maniero": "prenita"
+    },
+    {
+      "token": "ero.listelektilo.label.typography.size.small",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"sm\"} rest, hell: label font-size, font-weight, line-height (gemessen)",
+      "fontoValoro": "14px 500 / 20.0004px",
+      "valoro": "{typography.label.1}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-listelektilo-2): wie der elektilo derselben Größe (ero.elektilo.label.typography.size.small)."
+    },
+    {
+      "token": "ero.listelektilo.label.typography.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"lg\"} rest, hell: label font-size, font-weight, line-height (gemessen)",
+      "fontoValoro": "14px 500 / 20.0004px",
+      "valoro": "{typography.label.1}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-listelektilo-2): wie der elektilo derselben Größe (ero.elektilo.label.typography.size.large)."
     },
     {
       "token": "ero.listelektilo.required.mark.color",
@@ -10977,7 +11131,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.listelektilo.text.typography",
+      "token": "ero.listelektilo.text.typography.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/Selector/Selector.tsx",
@@ -10985,6 +11139,28 @@
       "fontoValoro": "14px 400 / 20px",
       "valoro": "{typography.body.1}",
       "maniero": "prenita"
+    },
+    {
+      "token": "ero.listelektilo.text.typography.size.small",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"sm\"} rest, hell: [object Object] font-size, font-weight, line-height (gemessen)",
+      "fontoValoro": "14px 400 / 20px",
+      "valoro": "{typography.body.1}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-listelektilo-2): wie der elektilo derselben Größe (ero.elektilo.text.typography.size.small)."
+    },
+    {
+      "token": "ero.listelektilo.text.typography.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"lg\"} rest, hell: [object Object] font-size, font-weight, line-height (gemessen)",
+      "fontoValoro": "14px 400 / 20px",
+      "valoro": "{typography.body.1}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-listelektilo-2): wie der elektilo derselben Größe (ero.elektilo.text.typography.size.large)."
     },
     {
       "token": "ero.listelektilo.placeholder.color",
@@ -11029,7 +11205,7 @@
       "noto": "nächste Stufe neutral.300, ΔE2000 3.9"
     },
     {
-      "token": "ero.listelektilo.indicator.size",
+      "token": "ero.listelektilo.indicator.size.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/Selector/Selector.tsx",
@@ -11039,7 +11215,29 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.listelektilo.clear.size",
+      "token": "ero.listelektilo.indicator.size.size.small",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"sm\"} rest, hell: [object Object] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.icon.small}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-listelektilo-2): wie der elektilo derselben Größe (ero.elektilo.indicator.size.size.small)."
+    },
+    {
+      "token": "ero.listelektilo.indicator.size.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"lg\"} rest, hell: [object Object] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.target.min}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-listelektilo-2): wie der elektilo derselben Größe (ero.elektilo.indicator.size.size.large)."
+    },
+    {
+      "token": "ero.listelektilo.clear.size.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/Selector/Selector.tsx",
@@ -11048,6 +11246,28 @@
       "valoro": "{size.icon.small}",
       "maniero": "derivita",
       "noto": "Abnahme #122: das ✕ ist so groß wie der Pfeil des Feldes (ero.listelektilo.indicator.size, gemessen an der Fonto)."
+    },
+    {
+      "token": "ero.listelektilo.clear.size.size.small",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {} rest, hell: span[data-state] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.icon.small}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-listelektilo-2): die Größe small hält den Wert der bisherigen Größe medium."
+    },
+    {
+      "token": "ero.listelektilo.clear.size.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"lg\"} rest, hell: [object Object] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.target.min}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-listelektilo-2): wie der elektilo derselben Größe (ero.elektilo.clear.size.size.large)."
     },
     {
       "token": "ero.listelektilo.listbox.fill",
@@ -11204,7 +11424,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.listelektilo.box.height",
+      "token": "ero.listelektilo.box.height.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/Selector/Selector.tsx",
@@ -11214,7 +11434,29 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.listelektilo.box.inline.padding",
+      "token": "ero.listelektilo.box.height.size.small",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"sm\"} rest, hell: [object Object] Höhe des Elements (gemessen)",
+      "fontoValoro": "28px",
+      "valoro": "{size.control.small}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-listelektilo-2): wie der elektilo derselben Größe (ero.elektilo.box.height.size.small)."
+    },
+    {
+      "token": "ero.listelektilo.box.height.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"lg\"} rest, hell: [object Object] Höhe des Elements (gemessen)",
+      "fontoValoro": "36px",
+      "valoro": "{size.control.large}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-listelektilo-2): wie der elektilo derselben Größe (ero.elektilo.box.height.size.large)."
+    },
+    {
+      "token": "ero.listelektilo.box.inline.padding.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/Selector/Selector.tsx",
@@ -11222,6 +11464,28 @@
       "fontoValoro": "12px",
       "valoro": "{spacing.scale.300}",
       "maniero": "prenita"
+    },
+    {
+      "token": "ero.listelektilo.box.inline.padding.size.small",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"sm\"} rest, hell: [object Object] padding-inline (gemessen)",
+      "fontoValoro": "12px",
+      "valoro": "{spacing.scale.300}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-listelektilo-2): wie der elektilo derselben Größe (ero.elektilo.box.inline.padding.size.small)."
+    },
+    {
+      "token": "ero.listelektilo.box.inline.padding.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"lg\"} rest, hell: [object Object] padding-inline (gemessen)",
+      "fontoValoro": "12px",
+      "valoro": "{spacing.scale.300}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-listelektilo-2): wie der elektilo derselben Größe (ero.elektilo.box.inline.padding.size.large)."
     },
     {
       "token": "ero.listelektilo.box.radius",
@@ -12304,7 +12568,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.plurelektilo.label.typography",
+      "token": "ero.plurelektilo.label.typography.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/MultiSelector/MultiSelector.tsx",
@@ -12312,6 +12576,28 @@
       "fontoValoro": "14px 500 / 20.0004px",
       "valoro": "{typography.label.1}",
       "maniero": "prenita"
+    },
+    {
+      "token": "ero.plurelektilo.label.typography.size.small",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"sm\"} rest, hell: label font-size, font-weight, line-height (gemessen)",
+      "fontoValoro": "14px 500 / 20.0004px",
+      "valoro": "{typography.label.1}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-plurelektilo-2): wie der elektilo derselben Größe (ero.elektilo.label.typography.size.small)."
+    },
+    {
+      "token": "ero.plurelektilo.label.typography.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"lg\"} rest, hell: label font-size, font-weight, line-height (gemessen)",
+      "fontoValoro": "14px 500 / 20.0004px",
+      "valoro": "{typography.label.1}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-plurelektilo-2): wie der elektilo derselben Größe (ero.elektilo.label.typography.size.large)."
     },
     {
       "token": "ero.plurelektilo.required.mark.color",
@@ -12626,7 +12912,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.plurelektilo.text.typography",
+      "token": "ero.plurelektilo.text.typography.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/MultiSelector/MultiSelector.tsx",
@@ -12634,6 +12920,28 @@
       "fontoValoro": "14px 400 / 20.0004px",
       "valoro": "{typography.body.1}",
       "maniero": "prenita"
+    },
+    {
+      "token": "ero.plurelektilo.text.typography.size.small",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"sm\"} rest, hell: [object Object] font-size, font-weight, line-height (gemessen)",
+      "fontoValoro": "14px 400 / 20px",
+      "valoro": "{typography.body.1}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-plurelektilo-2): wie der elektilo derselben Größe (ero.elektilo.text.typography.size.small)."
+    },
+    {
+      "token": "ero.plurelektilo.text.typography.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"lg\"} rest, hell: [object Object] font-size, font-weight, line-height (gemessen)",
+      "fontoValoro": "14px 400 / 20px",
+      "valoro": "{typography.body.1}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-plurelektilo-2): wie der elektilo derselben Größe (ero.elektilo.text.typography.size.large)."
     },
     {
       "token": "ero.plurelektilo.placeholder.color",
@@ -12678,7 +12986,7 @@
       "noto": "nächste Stufe neutral.300, ΔE2000 3.9"
     },
     {
-      "token": "ero.plurelektilo.indicator.size",
+      "token": "ero.plurelektilo.indicator.size.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/MultiSelector/MultiSelector.tsx",
@@ -12686,6 +12994,28 @@
       "fontoValoro": "16px",
       "valoro": "{size.icon.small}",
       "maniero": "prenita"
+    },
+    {
+      "token": "ero.plurelektilo.indicator.size.size.small",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"sm\"} rest, hell: [object Object] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.icon.small}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-plurelektilo-2): wie der elektilo derselben Größe (ero.elektilo.indicator.size.size.small)."
+    },
+    {
+      "token": "ero.plurelektilo.indicator.size.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"lg\"} rest, hell: [object Object] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.target.min}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-plurelektilo-2): wie der elektilo derselben Größe (ero.elektilo.indicator.size.size.large)."
     },
     {
       "token": "ero.plurelektilo.listbox.fill",
@@ -12819,7 +13149,7 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.plurelektilo.box.height",
+      "token": "ero.plurelektilo.box.height.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/MultiSelector/MultiSelector.tsx",
@@ -12829,7 +13159,29 @@
       "maniero": "prenita"
     },
     {
-      "token": "ero.plurelektilo.box.inline.padding",
+      "token": "ero.plurelektilo.box.height.size.small",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"sm\"} rest, hell: [object Object] Höhe des Elements (gemessen)",
+      "fontoValoro": "28px",
+      "valoro": "{size.control.small}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-plurelektilo-2): wie der elektilo derselben Größe (ero.elektilo.box.height.size.small)."
+    },
+    {
+      "token": "ero.plurelektilo.box.height.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"lg\"} rest, hell: [object Object] Höhe des Elements (gemessen)",
+      "fontoValoro": "36px",
+      "valoro": "{size.control.large}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-plurelektilo-2): wie der elektilo derselben Größe (ero.elektilo.box.height.size.large)."
+    },
+    {
+      "token": "ero.plurelektilo.box.inline.padding.size.medium",
       "aro": "core",
       "fonto": "astryx",
       "dosiero": "packages/core/src/MultiSelector/MultiSelector.tsx",
@@ -12837,6 +13189,28 @@
       "fontoValoro": "12px",
       "valoro": "{spacing.scale.300}",
       "maniero": "prenita"
+    },
+    {
+      "token": "ero.plurelektilo.box.inline.padding.size.small",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"sm\"} rest, hell: [object Object] padding-inline (gemessen)",
+      "fontoValoro": "12px",
+      "valoro": "{spacing.scale.300}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-plurelektilo-2): wie der elektilo derselben Größe (ero.elektilo.box.inline.padding.size.small)."
+    },
+    {
+      "token": "ero.plurelektilo.box.inline.padding.size.large",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"lg\"} rest, hell: [object Object] padding-inline (gemessen)",
+      "fontoValoro": "12px",
+      "valoro": "{spacing.scale.300}",
+      "maniero": "derivita",
+      "noto": "Spec 036 Teil 5 ②b-2 (A-plurelektilo-2): wie der elektilo derselben Größe (ero.elektilo.box.inline.padding.size.large)."
     },
     {
       "token": "ero.plurelektilo.box.gap",

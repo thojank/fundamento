@@ -76,8 +76,9 @@ describe("Spec 029 ① 5: the foundation pages", () => {
     // the six buttons at the end of a field (+6); ②b-1b M-2: the status of the twelve fields, their
     // message and the kampo's status icon (216). Spec 035 2.3.1 and 2.3.3: the targets of the date
     // picker's trigger and ✕ (+2). Spec 036 Teil 5 ②b-2: elekto, markobutono and sxaltilo lose
-    // their size large (−8); the count of the tekstareo (A-tekstareo-1, +2).
-    expect(tokenoj.length).toBe(1876);
+    // their size large (−8); the count of the tekstareo (A-tekstareo-1, +2); listelektilo,
+    // plurelektilo and datelektilo by size (A-*-2: 17 tokens become 51, +34).
+    expect(tokenoj.length).toBe(1910);
     const levels = new Set(tokenoj.map((token) => token.ebeno));
     expect(levels).toEqual(new Set(["grundlage", "rolle", "ero"]));
     const text = tokenoj.find((token) => token.name === "color.text.default");
