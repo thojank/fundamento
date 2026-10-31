@@ -131,9 +131,13 @@ for (const [ort, pfad] of [
     const entfernen = page.getByRole("button", { name: "Keine Zweitfarbe" });
     await entfernen.focus();
     const geloescht = entwurf(page, id);
+    // The button reloads the page once the draft took the patch: wait for that navigation itself,
+    // not for the load state of the page that is about to go.
+    const neuGeladen = page.waitForEvent("framenavigated", (frame) => frame === page.mainFrame());
     await page.keyboard.press("Enter");
     expect((await geloescht).status()).toBe(200);
     await expect.poll(() => zweitfarbe(id)).toBeUndefined();
+    await neuGeladen;
     await page.waitForLoadState("load");
     await expect(page.locator("[data-mt-zweitfarbe]")).toHaveAttribute(
       "data-mt-zweitfarbe",
