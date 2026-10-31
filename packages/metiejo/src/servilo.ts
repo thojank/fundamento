@@ -66,6 +66,12 @@ import {
 } from "./enportilo/materialo.js";
 import { proponojOf } from "./enportilo/rekono.js";
 import type { Trovo } from "./enportilo/trovo.js";
+import {
+  offeneSaetzeOf,
+  readVorschlagoj,
+  uebernahmeOf,
+  writeVorschlagoj,
+} from "./enportilo/uebernahme/index.js";
 import type { Settings } from "./env.js";
 import { esplori } from "./esploro/esploro.js";
 import { CLIENT_SCRIPT, escapeHtml, previewDocument } from "./html.js";
@@ -1406,12 +1412,14 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
             );
             return propono === undefined ? {} : { propono };
           })(),
+          // Spec 036 Teil 4 (4.2): the steps of this Faceto the material leaves open, named.
+          offen: offeneSaetzeOf(readVorschlagoj(options.workdir, name), current.name),
         }),
       );
       return;
     }
     const asistantoApi =
-      /^\/api\/marko\/([a-z0-9-]+)\/(stato|takso|asistanto|faceto|fremda|konfirmo|materialo|kreilo|esplori|parolo)$/.exec(
+      /^\/api\/marko\/([a-z0-9-]+)\/(stato|takso|asistanto|faceto|fremda|konfirmo|materialo|kreilo|esplori|parolo|uebernahme)$/.exec(
         path,
       );
     if (asistantoApi !== null) {
@@ -1438,6 +1446,11 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       if (action === "takso" && method === "GET") {
         // Spec 033 S6: the estimate before the start, per path and turn, and the counter so far.
         sendJson(response, { ...taksojOf(), zaehlilo: zaehliloOf(name) });
+        return;
+      }
+      if (action === "uebernahme" && method === "GET") {
+        // Spec 036 Teil 4: the proposal per step of the material read so far (AC-13).
+        sendJson(response, { vorschlagoj: readVorschlagoj(options.workdir, name) });
         return;
       }
       if (method !== "POST") {
@@ -1883,7 +1896,14 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           teksto: KONFIRMO_TEKSTO,
           detaloj: { materialo: read.nomo },
         });
-        const proponoj = proponojOf(read.trovoj, bases);
+        // Spec 036 Teil 4: one proposal per step with its provenance; the Facetoj's go to the store.
+        const uebernahme = uebernahmeOf(
+          read,
+          proponojOf(read.trovoj, bases),
+          draft.agordo.leitfarbe,
+        );
+        writeVorschlagoj(options.workdir, name, uebernahme.vorschlagoj);
+        const proponoj = uebernahme.proponoj;
         writeProponoj(options.workdir, name, proponoj);
         for (const propono of proponoj) {
           kroniko(name, {
@@ -1891,7 +1911,11 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
             fonto: "agento",
             faceto: propono.faceto,
             teksto: propono.satz,
-            detaloj: { agordo: propono.agordo, herkunft: propono.herkunft },
+            detaloj: {
+              agordo: propono.agordo,
+              herkunft: propono.herkunft,
+              ...(propono.vorschlagoj === undefined ? {} : { vorschlagoj: propono.vorschlagoj }),
+            },
           });
         }
         sendJson(response, { proponoj, satzoj: read.satzoj, trovoj: read.trovoj.length });
