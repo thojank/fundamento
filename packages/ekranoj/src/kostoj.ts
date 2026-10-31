@@ -1,5 +1,5 @@
 // Costs of a run (D-20, D-25): the estimate before the start and the one token budget of the whole
-// run. The estimate counts tokens per screen and round with the medians of Reihe K and prices them
+// run. The estimate counts tokens per screen and round with measured values and prices them
 // with metiejo's `kostoOf`; a model without a price has unknown costs, never 0. The budget is
 // metiejo's `Budget(maksTokenoj)`: it stops the run before a request whose estimate (the largest
 // request so far) would pass the limit (`CostLimitReached`); the run keeps what it built (AC-9).
@@ -16,11 +16,14 @@ import { MAKS_EKRANOJ, MAKS_RONDOJ } from "./plano.js";
 import type { ChatModel, ChatRespondo, Haltigo, KostoTakso, Varianto } from "./tipoj.js";
 
 /**
- * Tokens of one screen in one round, Variante F: Reihe K, ministral, ≈ 36–38 k input + ≈ 0,7 k
- * output per page (runs 20261029-1127 and 20261031-0044; implementation spec Blockers 8, D-20),
- * rounded up to the median of the series.
+ * Tokens of one screen in one round, Variante F – an estimate, not a limit. Measured in the model
+ * runs of Spec 037 (S037-10; `specs/037-agenten-ekranoj/plan.md`, Messungen and Befund S037-10-2): the
+ * acceptance run komuna spent 213 397 tokens on the plan request and three built screen-rounds,
+ * ≈ 70 000 per screen-round (provo alike); the measurement point spent ≈ 176 000 per screen-round
+ * (4 brands, more tool calls). The value is the acceptance one, rounded; the first estimate of
+ * Reihe K pages (≈ 40 000, D-20) was 3–4 × too low because every request resends the conversation.
  */
-export const TOKENOJ_EKRANO_RONDO_F = 40_000;
+export const TOKENOJ_EKRANO_RONDO_F = 70_000;
 /** The same for Variante 0: Reihe K ≈ 1,5 k per page, rounded up (D-20). */
 export const TOKENOJ_EKRANO_RONDO_0 = 2_000;
 /** The plan request: one sentence in, one plan of ≤ 5 screens out (D-20). */
