@@ -9,8 +9,17 @@ import { fileURLToPath } from "node:url";
 import { projectModeloSource } from "@fundamento/modelo";
 import { buildProjekcioj, VITRINO_FILE } from "@fundamento/projekcioj";
 import { expect, type Locator, type Page, test } from "@playwright/test";
+import {
+  ABLEITUNG_GRENZE_MS,
+  ableitungUrteil,
+  ableitungVerlangsamen,
+  bezugswertOf,
+  kalibrierungLesen,
+  REFERENZ_SCHNELL_MS,
+  referenzLast,
+} from "./ableitung.js";
 import { axeViolations, contrast } from "./alirebleco.js";
-import { M5_GRENZE_MS, m5Urteil, stilBlockadeEinbauen } from "./m5.js";
+import { M5_GRENZE_MS, m5Urteil, stilBlockadeEinbauen, stilBlockadeMeldung } from "./m5.js";
 import { EKZEMPLO_CONFIG, ORIGIN } from "./serve.js";
 
 test.describe.configure({ mode: "serial" });
@@ -1124,6 +1133,8 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
         }
       }).observe({ type: "long-animation-frame" });
     });
+    // Ableitung (Nachlese 12, #118): the runner's speed, from a fixed reference load beside it.
+    const referenz = await page.evaluate(referenzLast);
     const timings = await page.evaluate(() => fmWerkstatt.measure(50));
     const frames = await page.evaluate(
       () => (globalThis as unknown as { fmFrames: unknown[] }).fmFrames,
@@ -1151,7 +1162,33 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
       `M5 Urteil (${test.info().project.name}): Skripte längstens ${timings.scriptLongest.toFixed(0)} ms; Blockade je Änderung p90 ${urteil.perzentil.toFixed(0)} ms, längste ${timings.longest.toFixed(0)} ms\n`,
     );
     expect(urteil.gruende).toEqual([]);
-    expect(derive.median).toBeLessThan(150);
+    // The derivation in the median at most 150 ms, on the runner of the reference (ableitung.ts).
+    const ableitung = ableitungUrteil({ median: derive.median, referenz });
+    process.stderr.write(
+      `Ableitung Urteil (${test.info().project.name}): Referenz ${referenz.toFixed(1)} ms (k ${ableitung.k.toFixed(2)}), Ableitung median ${derive.median.toFixed(1)} ms, auf den Bezugsrunner gerechnet ${ableitung.normiert.toFixed(1)} ms (Grenze ${ABLEITUNG_GRENZE_MS} ms)\n`,
+    );
+    expect(ableitung.rot, ableitung.grund).toBe(false);
+  });
+
+  // Gegenprobe of the derivation (#118): every request for palettes waits 80 ms on the runner of the
+  // reference, scaled to this runner, before the worker gets it – a slower derivation. Red on fast
+  // and on slow runners alike.
+  test("Ableitung Gegenprobe: a derivation slower by 80 ms on the reference runner is red", async ({
+    page,
+  }) => {
+    await openWerkstatt(page);
+    await checkedAtLeast(page, 1);
+    const referenz = await page.evaluate(referenzLast);
+    const k = Math.max(1, referenz / REFERENZ_SCHNELL_MS);
+    await page.evaluate(ableitungVerlangsamen, 80 * k);
+    const timings = await page.evaluate(() => fmWerkstatt.measure(10));
+    const sorted = [...timings.derive].sort((a, b) => a - b);
+    const median = sorted[Math.floor(sorted.length / 2)] ?? 0;
+    const ableitung = ableitungUrteil({ median, referenz });
+    process.stderr.write(
+      `Ableitung Gegenprobe: Referenz ${referenz.toFixed(1)} ms (k ${ableitung.k.toFixed(2)}), Ableitung median ${median.toFixed(1)} ms, normiert ${ableitung.normiert.toFixed(1)} ms\n`,
+    );
+    expect(ableitung.rot).toBe(true);
   });
 
   // Nachlese 12 ③ (zweite Gegenprobe, Maintainer 29.10.): a block of 80 ms of style and layout,
@@ -1165,10 +1202,10 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     await openWerkstatt(page);
     await checkedAtLeast(page, 1);
     const last = await page.evaluate(stilBlockadeEinbauen, 80);
-    process.stderr.write(
-      `M5 Gegenprobe 2: ${last.elemente} Elemente, Stil und Layout ${last.kosten.toFixed(0)} ms je Umschalten\n`,
-    );
-    expect(last.kosten).toBeGreaterThanOrEqual(80);
+    const meldung = stilBlockadeMeldung(last, 80, test.info().project.name);
+    process.stderr.write(`${meldung}\n`);
+    expect(last.gehalten, meldung).toBe(true);
+    expect(last.kosten, meldung).toBeGreaterThanOrEqual(80);
     const timings = await page.evaluate(() => fmWerkstatt.measure(10));
     const urteil = m5Urteil(timings);
     process.stderr.write(
@@ -1201,6 +1238,118 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     process.stderr.write(`M5 Gegenprobe: ${urteil.gruende.join("; ")}\n`);
     expect(urteil.rot).toBe(true);
     expect(timings.scriptLongest).toBeGreaterThan(M5_GRENZE_MS);
+  });
+
+  // Spec 035 Befund 1.2: the calibration of Gegenprobe 2 must hold 80 ms of style and layout on
+  // every runner, or stop and say so. Two runners it did not hold on, replayed the same on every
+  // machine (one forced layout of the block after the other):
+  // - #115 (CI, 30.10.): right after the block had grown to 16 000 elements two switches cost more
+  //   than 100 ms; an eighth less was too little, so it went back to 16 000 elements and took the
+  //   next two switches – 72 ms – as the result (71.8 ms in the log).
+  // - CPU throttled ×4 (locally, 30.10., one run in six): the first switch of the first 2 000
+  //   elements also laid them out and cost more than 100 ms, so it never grew; 2 000 elements,
+  //   23.4 ms.
+  const LAEUFER = [
+    {
+      name: "#115",
+      /** Style and layout per element of the block: 16 000 elements cost 75.2 ms. */
+      msJeElement: 0.0047,
+      /** The noise of the runner, one factor per forced layout, in this order and then again. */
+      folge: [1, 0.99, 1.01, 0.98, 1.02, 1.36, 1.38, 1.02, 0.99, 0.97, 0.955],
+    },
+    {
+      name: "CPU gedrosselt ×4",
+      /** 2 000 elements cost 23.4 ms. */
+      msJeElement: 0.0117,
+      /** The first switch after the block grew lays the new elements out, too. */
+      folge: [5, 1, 1.02, 0.98, 1, 0.99, 1.01, 1, 0.98, 1.02],
+    },
+  ];
+
+  /**
+   * A runner for the calibration that does not depend on the machine (runs in the page): the
+   * page's clock stands still, except when the layout of the block is forced; then it advances by
+   * `msJeElement` per element of the block times the next factor of `folge`. The real layout of
+   * the block is skipped, so the run is quick and the result is the same everywhere.
+   */
+  function gedachterLaeufer(laeufer: { msJeElement: number; folge: number[] }): void {
+    let uhr = 0;
+    let index = 0;
+    performance.now = () => uhr;
+    const original = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "offsetHeight");
+    Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+      configurable: true,
+      get(this: HTMLElement) {
+        if (this.id !== "fm-m5-stilblockade") return original?.get?.call(this);
+        const faktor = laeufer.folge[index % laeufer.folge.length] ?? 1;
+        index += 1;
+        uhr += this.childElementCount * laeufer.msJeElement * faktor;
+        return 0;
+      },
+    });
+  }
+
+  /** The block measured again after the calibration: the median of five switches (in the page). */
+  function stilBlockadeNachmessen(): number {
+    const host = document.getElementById("fm-m5-stilblockade");
+    if (host === null) return 0;
+    const umschalten = () => {
+      host.classList.toggle("an");
+      const started = performance.now();
+      void host.offsetHeight;
+      return performance.now() - started;
+    };
+    umschalten();
+    const werte = [umschalten(), umschalten(), umschalten(), umschalten(), umschalten()];
+    return werte.sort((a, b) => a - b)[2] ?? 0;
+  }
+
+  for (const laeufer of LAEUFER)
+    test(`M5 Gegenprobe 2, calibration (Befund 1.2): on a runner like ${laeufer.name} the block holds 80 ms of style and layout`, async ({
+      page,
+    }) => {
+      await page.setContent("<!doctype html><html><head></head><body></body></html>");
+      await page.evaluate(gedachterLaeufer, laeufer);
+      const last = await page.evaluate(stilBlockadeEinbauen, 80);
+      const nachgemessen = await page.evaluate(stilBlockadeNachmessen);
+      process.stderr.write(
+        `M5 Gegenprobe 2, Kalibrierung (Läufer wie ${laeufer.name}): ${last.elemente} Elemente, Stil und Layout ${last.kosten.toFixed(1)} ms, nachgemessen ${nachgemessen.toFixed(1)} ms\n`,
+      );
+      expect(last.kosten).toBeGreaterThanOrEqual(80);
+      expect(nachgemessen).toBeGreaterThanOrEqual(80);
+    });
+
+  test("M5 Gegenprobe 2, calibration (Befund 1.2): at the upper bound of elements it stops and names the elements, the cost and the runner", async ({
+    page,
+  }) => {
+    await page.setContent("<!doctype html><html><head></head><body></body></html>");
+    // A runner on which even the upper bound of elements costs only a quarter of 80 ms.
+    await page.evaluate(gedachterLaeufer, { msJeElement: 20 / 1_024_000, folge: [1] });
+    const last = await page.evaluate(stilBlockadeEinbauen, 80);
+    const meldung = stilBlockadeMeldung(last, 80, test.info().project.name);
+    process.stderr.write(`${meldung}\n`);
+    expect(last.obergrenze).toBe(1_024_000);
+    expect(last.elemente).toBe(last.obergrenze);
+    expect(last.gehalten).toBe(false);
+    expect(last.kosten).toBeCloseTo(20, 6);
+    expect(meldung).toBe(
+      `M5 Gegenprobe 2 (${test.info().project.name}): Kalibrierung an der Obergrenze von 1024000 Elementen abgebrochen – 1024000 Elemente, Stil und Layout 20.0 ms je Umschalten, verlangt 80 ms`,
+    );
+  });
+
+  test("M5 Gegenprobe 2, calibration (Befund 1.2): under CPU throttling (rate 4) the block holds 80 ms of style and layout", async ({
+    page,
+  }) => {
+    await page.setContent("<!doctype html><html><head></head><body></body></html>");
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
+    const last = await page.evaluate(stilBlockadeEinbauen, 80);
+    const nachgemessen = await page.evaluate(stilBlockadeNachmessen);
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
+    process.stderr.write(
+      `M5 Gegenprobe 2, Kalibrierung (${test.info().project.name}, CPU gedrosselt ×4): ${last.elemente} Elemente, Stil und Layout ${last.kosten.toFixed(1)} ms, nachgemessen ${nachgemessen.toFixed(1)} ms\n`,
+    );
+    expect(last.kosten).toBeGreaterThanOrEqual(80);
   });
 
   test("the Werkstatt is keyboard-operable and announces the report politely", async ({ page }) => {
@@ -1838,4 +1987,56 @@ test("the status of the fields: messages and the kampo's sign, axe-clean", async
   await expect(kampo.getByText("Bitte noch einmal prüfen")).toBeVisible();
   await expect(kampo.locator('[part="status-icon"]')).toBeVisible();
   expect(await axeViolations(page, "#fm-vitrino-statuso")).toEqual([]);
+});
+
+// The verdict of the derivation (#118), with the values measured in CI.
+test.describe("the verdict of the derivation (Ableitung, #118)", () => {
+  test("a slow runner: 152.8 ms with a reference 1.4 times the fast runner's stays green", () => {
+    expect(ableitungUrteil({ median: 152.8, referenz: REFERENZ_SCHNELL_MS * 1.4 }).rot).toBe(false);
+  });
+
+  test("on the reference runner the limit is 150 ms as before; a faster machine is not held stricter", () => {
+    expect(ableitungUrteil({ median: 151, referenz: REFERENZ_SCHNELL_MS }).rot).toBe(true);
+    expect(ableitungUrteil({ median: 149, referenz: REFERENZ_SCHNELL_MS }).rot).toBe(false);
+    expect(ableitungUrteil({ median: 149, referenz: REFERENZ_SCHNELL_MS * 0.6 }).k).toBe(1);
+  });
+
+  test("a derivation 80 ms slower on the reference runner is red on a slow runner too", () => {
+    const k = 1.4;
+    expect(ableitungUrteil({ median: 140 + 80 * k, referenz: REFERENZ_SCHNELL_MS * k }).rot).toBe(
+      true,
+    );
+  });
+});
+
+// Spec 035 Befund 1.1 (D-13): the Bezugswert comes from the calibration in CI, not from a guess.
+// ableitung-kalibrierung.tsv holds every attempt of the job „Rendered checks (Make Kit, Quickstart,
+// Vitrino-Werkstatt)“ on the rebased head (two chains, PR rerun and workflow_dispatch). The reference
+// and the median of the derivation do not depend on REFERENZ_SCHNELL_MS, so the table stays valid
+// when the constant follows it; the Gegenprobe columns were measured with the constant of that head.
+test.describe("the Bezugswert of the derivation from the calibration in CI (Spec 035 Befund 1.1)", () => {
+  const versuche = kalibrierungLesen(
+    readFileSync(new URL("./ableitung-kalibrierung.tsv", import.meta.url), "utf8"),
+  );
+
+  test("the table holds at least ten attempts of one head, on fast and on slow runners", () => {
+    expect(versuche.length).toBeGreaterThanOrEqual(10);
+    expect(new Set(versuche.map((versuch) => versuch.head)).size).toBe(1);
+    expect(versuche.some((versuch) => versuch.klasse === "schnell")).toBe(true);
+    expect(versuche.some((versuch) => versuch.klasse === "langsam")).toBe(true);
+  });
+
+  test("the Gegenprobe was red on a fast and on a slow runner", () => {
+    for (const klasse of ["schnell", "langsam"] as const) {
+      const rot = versuche.filter((versuch) => versuch.klasse === klasse && versuch.gegenprobeRot);
+      expect(rot.length, `Gegenprobe rot auf ${klasse}en Runnern`).toBeGreaterThan(0);
+      for (const versuch of rot) {
+        expect(versuch.gegenprobeNormiert).toBeGreaterThan(ABLEITUNG_GRENZE_MS);
+      }
+    }
+  });
+
+  test("REFERENZ_SCHNELL_MS is the median reference of the fast runners in the table", () => {
+    expect(REFERENZ_SCHNELL_MS).toBe(bezugswertOf(versuche));
+  });
 });

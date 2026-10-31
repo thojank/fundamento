@@ -3915,6 +3915,177 @@ describe("Nachlese 12 documentation (specs/034-nachlese-12)", () => {
   });
 });
 
+// Spec 035 (Paket nach den Abnahmen vom 30.10., night run): specs/035-paket-abnahmen carries the
+// spec unchanged (AC-1) next to plan and tasks; the plan has the decisions for the maintainer with
+// V-1 to V-3, D-01 to D-14 and every further decision it names (AC-8), „Blockiert“, the picture
+// tests set anew as wanted changes for 2.1 and 2.3.1 to 2.3.4 and D-04 (AC-10), the model costs
+// with their sum within 0,50 $ for ministral-14b-2512 alone (AC-5), and the Bericht with every
+// Befund of the spec, a link per PR (AC-9) and the audit against AC-1 to AC-11. Brand names stay
+// out of this test (R-7).
+describe("Spec 035 documentation (specs/035-paket-abnahmen)", () => {
+  const SPEC_035_SHA256 = "472d2c443219a5b0c07945756386bd7d88e6a4d8db55ddd652143146f6be264a";
+  const DIR = "specs/035-paket-abnahmen";
+  const PRS = [123, 125, 126, 127, 128, 129, 130];
+  const BEFUNDE = [
+    "1.1",
+    "1.2",
+    "1.3",
+    "2.1",
+    "2.2",
+    "2.3.1",
+    "2.3.2",
+    "2.3.3",
+    "2.3.4",
+    "3.1",
+    "3.2",
+    "3.3",
+    "3.4",
+    "4.1",
+    "4.2",
+    "4.3",
+    "4.4",
+    "4.5.1",
+    "4.5.2",
+    "4.5.3",
+    "4.5.4",
+    "4.5.5",
+    "4.5.6",
+    "4.6",
+    "4.7",
+  ];
+
+  /** Rows of a Markdown table whose first cell is `id` (a table row starts with "| <id> "). */
+  const rowOf = (text: string, id: string) =>
+    text.split("\n").find((line) => line.startsWith(`| ${id} |`) || line.startsWith(`| ${id} (`));
+
+  /** Cells of a table row, without the outer pipes. */
+  const cellsOf = (row: string) =>
+    row
+      .replace(/^\|/, "")
+      .replace(/\|$/, "")
+      .split("|")
+      .map((cell) => cell.trim());
+
+  /** A German decimal („0,18296“) as a number. */
+  const zahl = (text: string) =>
+    Number(text.replace(/\*/g, "").replace(/\s/g, "").replace(",", "."));
+
+  /**
+   * The Befunde of the spec, read from its headings: "### 1.1 …" names a Befund, a numbered list
+   * under "## Teil 3" or "### 2.3" names its parts (3.1, 2.3.1, …); a heading with parts is not a
+   * Befund of its own.
+   */
+  function befundeOfSpec(spec: string): string[] {
+    const ids: string[] = [];
+    const withParts = new Set<string>();
+    let current: string | null = null;
+    for (const line of spec.split("\n")) {
+      const teil = line.match(/^## Teil (\d+)/);
+      const heading = line.match(/^### (\d+\.\d+) /);
+      const item = line.match(/^(\d+)\. /);
+      if (teil) current = teil[1] ?? null;
+      else if (heading) {
+        current = heading[1] ?? null;
+        if (current) ids.push(current);
+      } else if (/^## /.test(line)) current = null;
+      else if (current && item) {
+        ids.push(`${current}.${item[1]}`);
+        withParts.add(current);
+      }
+    }
+    return ids.filter((id) => !withParts.has(id));
+  }
+
+  it("the spec is the one of 2026-10-30, unchanged; plan and tasks lie next to it (AC-1)", () => {
+    const spec = read(`${DIR}/spec.md`);
+    expect(createHash("sha256").update(spec).digest("hex")).toBe(SPEC_035_SHA256);
+    expect(existsSync(`${repoRoot}${DIR}/plan.md`)).toBe(true);
+    expect(existsSync(`${repoRoot}${DIR}/tasks.md`)).toBe(true);
+    expect(read(`${DIR}/tasks.md`)).toContain("**T3501");
+  });
+
+  it("the Befunde read from the spec are the 25 the plan reports on", () => {
+    expect(befundeOfSpec(read(`${DIR}/spec.md`))).toEqual(BEFUNDE);
+  });
+
+  it("the plan has the decisions for the maintainer: V-1 to V-3, D-01 to D-14 and every D it names (AC-8)", () => {
+    const plan = read(`${DIR}/plan.md`);
+    const decisions = section(plan, "Entscheidungen, vom Maintainer zu bestätigen");
+    expect(decisions).not.toBe("");
+    const pre = [
+      "V-1",
+      "V-2",
+      "V-3",
+      ...Array.from({ length: 14 }, (_, i) => `D-${String(i + 1).padStart(2, "0")}`),
+    ];
+    for (const id of pre) expect(rowOf(decisions, id), id).toBeDefined();
+    const named = new Set([...plan.matchAll(/\bD-(\d{2,3})\b/g)].map((match) => match[0]));
+    for (const id of named) expect(rowOf(decisions, id), id).toBeDefined();
+    expect(plan.split("\n")).toContain("## Blockiert");
+  });
+
+  it("the picture tests set anew are listed one by one for 2.1 and 2.3.1 to 2.3.4; D-04 is in the plan (AC-10)", () => {
+    const plan = read(`${DIR}/plan.md`);
+    const pictures = section(plan, "Bildtests als gewollte Änderung neu gesetzt");
+    for (const id of ["2.1", "2.3.1", "2.3.2", "2.3.3", "2.3.4"]) {
+      const row = rowOf(pictures, id);
+      expect(row, id).toBeDefined();
+      // Befund, test or file, components and states, reason, commit: five cells, none empty.
+      const cells = cellsOf(row ?? "");
+      expect(cells, id).toHaveLength(5);
+      for (const cell of cells) expect(cell, id).not.toBe("");
+    }
+    const d04 = rowOf(section(plan, "Entscheidungen, vom Maintainer zu bestätigen"), "D-04") ?? "";
+    expect(d04).toContain("`label`");
+    expect(d04).toContain("CHANGELOG");
+  });
+
+  it("the model costs: every run with tokens, cost and duration, ministral-14b-2512 alone, the sum within 0,50 $ (AC-5)", () => {
+    const measurements = section(read(`${DIR}/plan.md`), "Messungen");
+    const costs = measurements.slice(measurements.indexOf("### Modellkosten"));
+    expect(costs.startsWith("### Modellkosten")).toBe(true);
+    const lines = costs.split("\n");
+    const runs = lines.filter((line) => line.startsWith("| `")).map(cellsOf);
+    expect(runs.length).toBeGreaterThan(0);
+    for (const [run, , model, , tokens, usd, duration] of runs) {
+      expect(model, run).toBe("`ministral-14b-2512`");
+      expect(tokens, run).toMatch(/\d \/ \d|\d\/\d/);
+      expect(zahl(usd ?? ""), run).toBeGreaterThan(0);
+      expect(duration, run).toMatch(/\d/);
+    }
+    const sumRow = lines.find((line) => line.includes("**Summe**"));
+    expect(sumRow).toBeDefined();
+    const sum = zahl(cellsOf(sumRow ?? "")[5] ?? "");
+    const added = runs.reduce((total, cells) => total + zahl(cells[5] ?? ""), 0);
+    expect(sum).toBeCloseTo(added, 5);
+    expect(sum).toBeLessThanOrEqual(0.5);
+  });
+
+  it("the Bericht has every Befund with its state and a link per PR (AC-9)", () => {
+    const report = section(read(`${DIR}/plan.md`), "Bericht");
+    expect(report).not.toBe("");
+    for (const id of BEFUNDE) {
+      expect(rowOf(report, id), id).toMatch(/^\| [\d.]+ \| (erledigt|teilweise|offen) \|/);
+    }
+    for (const nr of PRS) {
+      expect(report, `#${nr}`).toMatch(
+        new RegExp(`https://github\\.com/thojank/fundamento/pull/${nr}(?!\\d)`),
+      );
+    }
+  });
+
+  it("the Bericht carries the audit against AC-1 to AC-11, one row each with its result (PAK-6.1)", () => {
+    const report = section(read(`${DIR}/plan.md`), "Bericht");
+    const start = report.indexOf("### Prüfung gegen die Abnahmekriterien");
+    expect(start).toBeGreaterThan(-1);
+    const end = report.indexOf("\n### ", start + 1);
+    const audit = end < 0 ? report.slice(start) : report.slice(start, end);
+    for (const ac of Array.from({ length: 11 }, (_, i) => `AC-${i + 1}`)) {
+      expect(rowOf(audit, ac), ac).toMatch(/^\| AC-\d+ \| (erfüllt|nicht erfüllt|teilweise)/);
+    }
+  });
+});
+
 // Spec 033 S1 (Markenassistent, 2026-10-29): specs/033-markenassistent carries the spec unchanged;
 // Constitution Amendment v2.5 (freigegeben vom Maintainer am 24.10., 13:41): Art. VI „Plattform und
 // Herausgeber“ word for word, the terms of the brand's record and of the assistant, the history;
