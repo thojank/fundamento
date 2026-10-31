@@ -31,7 +31,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, dirname, join, relative, resolve } from "node:path";
 import type { AgentaManko } from "./agento.js";
-import type { Manko, Problemo, Rondo } from "./tipoj.js";
+import type { Manko, Problemo, Rondo, Varianto } from "./tipoj.js";
 
 /** The file of a run folder that holds its gaps. */
 export const MANKOJ_DOSIERO = "mankoj.json";
@@ -149,6 +149,11 @@ export interface KuraMankoEnigo {
   sugestojSenTrafo: readonly SugestoSenTrafo[];
   /** Every tool the Gvidanto listed (unfiltered); a wished tool of that name is no gap. */
   iloj: readonly string[];
+  /**
+   * The variant of the run. Variante 0 builds native HTML on purpose (D-34): its scorer gaps
+   * (rebuilt Eroj, raw values) are the comparison, no gap of Fundamento (S037-10 Befund 7).
+   */
+  varianto?: Varianto;
 }
 
 /** The gaps of one run (C-7), from every source of the header, sorted. */
@@ -157,7 +162,7 @@ export function mankojDeKuro(e: KuraMankoEnigo): Manko[] {
   for (const slug of e.slugoj) {
     const stato = e.lasta?.[slug];
     if (stato === undefined) continue;
-    for (const manko of stato.taksado.mankoj) {
+    for (const manko of e.varianto === "0" ? [] : stato.taksado.mankoj) {
       const okazo = okazoDeTaksado(slug, manko.kind, manko.key);
       if (okazo !== undefined) okazoj.push(okazo);
     }

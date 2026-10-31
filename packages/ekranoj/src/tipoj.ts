@@ -361,6 +361,11 @@ export interface RondoEkrano {
   verda: boolean;
   /** Set when the values are carried forward from the round the screen turned green (D-26). */
   verdaEkde?: number;
+  /**
+   * Set when a stop left the screen unbuilt in this round: the round its fragment comes from; the
+   * values are that fragment checked again (S037-10 Befund 6).
+   */
+  portitaEl?: number;
   /** What kept the screen from green (D-04 order); [] when green (S037-03, additive). */
   malhelpoj?: Malhelpo[];
   /** The agent fragment of this round (Variante 0: the full document) (S037-03, additive). */

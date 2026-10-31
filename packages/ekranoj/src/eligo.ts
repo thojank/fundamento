@@ -89,6 +89,8 @@ export interface RaportoEkrano {
   navigado: EkranaNavigado;
   verda: boolean;
   verdaEkde?: number;
+  /** Not rebuilt in this round (a stop): the round its fragment comes from (S037-10 Befund 6). */
+  portitaEl?: number;
   malhelpoj: Malhelpo[];
 }
 
@@ -203,6 +205,7 @@ function raportoEkranoDe(stato: RondoEkrano): RaportoEkrano {
     navigado: stato.navigado,
     verda: stato.verda,
     ...(stato.verdaEkde === undefined ? {} : { verdaEkde: stato.verdaEkde }),
+    ...(stato.portitaEl === undefined ? {} : { portitaEl: stato.portitaEl }),
     malhelpoj: stato.malhelpoj ?? [],
   };
 }
@@ -338,7 +341,8 @@ function verdaCxelo(ekrano: RaportoEkrano, n: number): string {
   if (ekrano.verdaEkde !== undefined && ekrano.verdaEkde < n) {
     return `grün seit Runde ${ekrano.verdaEkde}`;
   }
-  return ekrano.verda ? "ja" : "nein";
+  const verda = ekrano.verda ? "ja" : "nein";
+  return ekrano.portitaEl === undefined ? verda : `${verda}, übernommen aus R${ekrano.portitaEl}`;
 }
 
 function navigadoCxelo(navigado: EkranaNavigado): string {

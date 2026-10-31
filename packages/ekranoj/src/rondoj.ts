@@ -391,6 +391,8 @@ export async function kuruEkranojn(
   let cxiujIloj: string[] = [];
   const rondoj: Rondo[] = [];
   const fragmentoj = new Map<string, string>();
+  /** The round each fragment was built in (S037-10 Befund 6). */
+  const fragmentoRondoj = new Map<string, number>();
   let haltigo: Haltigo | undefined;
   let faritaj = 0;
 
@@ -462,6 +464,7 @@ export async function kuruEkranojn(
         agentaj: agentajMankoj,
         sugestojSenTrafo,
         iloj: cxiujIloj,
+        varianto,
       }),
       peno,
       kosto: kostoDe(deps.chat.modelo, { enigo: peno.inputTokens, eligo: peno.outputTokens }),
@@ -547,6 +550,7 @@ export async function kuruEkranojn(
           log: deps.log,
         });
         fragmentoj.set(ekrano.slug, fragmento);
+        fragmentoRondoj.set(ekrano.slug, r);
         konstruitaj += 1;
         for (const manko of mankoj) {
           const jam = agentajMankoj.some(
@@ -585,6 +589,7 @@ export async function kuruEkranojn(
       deps,
       legi,
       fragmentoj,
+      fragmentoRondoj,
       malplenaj,
       verdaEkde,
       lastaStato,
@@ -608,6 +613,7 @@ interface RondoKunteksto {
   deps: EkranojDeps;
   legi: SkemoLegilo | undefined;
   fragmentoj: ReadonlyMap<string, string>;
+  fragmentoRondoj: ReadonlyMap<string, number>;
   /** Screens whose build of this round ended without markup (S037-10 Befund 1). */
   malplenaj: ReadonlySet<string>;
   verdaEkde: Map<string, number>;
@@ -694,11 +700,16 @@ async function kontroliRondon(k: RondoKunteksto): Promise<Rondo> {
       ? [MALPLENA_RESPONDO, ...decido.malhelpoj]
       : decido.malhelpoj;
     const verda = decido.verda && !malplena;
+    // A stop left the screen unbuilt this round: its older fragment was checked again.
+    const fragmentoRondo = k.fragmentoRondoj.get(ekrano.slug);
     const stato: RondoEkrano = {
       taksado,
       malobservoj,
       navigado: navigadoEkrano,
       verda,
+      ...(fragmentoRondo === undefined || fragmentoRondo === r
+        ? {}
+        : { portitaEl: fragmentoRondo }),
       malhelpoj,
       fragmento,
       fakto,

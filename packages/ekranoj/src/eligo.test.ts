@@ -189,7 +189,10 @@ describe("values carried over by a stop (S037-10 Befund 6)", () => {
       [undefined, undefined, undefined],
       [undefined, 1, 1],
     ]);
-    const runde2 = legi(dir, "raporto.md").split("### Runde 2")[1]?.split("### ")[0] ?? "";
+    const runde2 =
+      legi(dir, "raporto.md")
+        .split("### Runde 2")[1]
+        ?.split(/\n#{2,3} /)[0] ?? "";
     const vicoj = runde2
       .split("\n")
       .filter((linio) => /^\| (liste|detail|bearbeiten) \|/.test(linio));
