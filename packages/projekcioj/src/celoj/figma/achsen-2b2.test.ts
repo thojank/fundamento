@@ -53,3 +53,12 @@ describe("②b-2 A-plurelektilo-1 in Figma: summary labels", () => {
     expect(setOf("plurelektilo").properties.summary).toEqual(["count", "labels", "tags"]);
   });
 });
+
+describe("②b-2 A-listelektilo-2, A-plurelektilo-2, A-datelektilo-2 in Figma: size a variant axis", () => {
+  it.each(["listelektilo", "plurelektilo", "datelektilo"])("%s: variants by size", (name) => {
+    const set = setOf(name);
+    expect(set.properties.size).toEqual(["small", "medium", "large"]);
+    const sizes = new Set(set.variants.map((variant) => variant.props.size));
+    expect([...sizes]).toEqual(["small", "medium", "large"]);
+  });
+});

@@ -256,3 +256,91 @@ describe("②b-2 A-plurelektilo-1: summary labels", () => {
     expect(tokensOf(brief)).toBeLessThan(750);
   });
 });
+
+/**
+ * A-listelektilo-2, A-plurelektilo-2, A-datelektilo-2: three sizes as at the kampo and the elektilo,
+ * so the fields of one row stand level; size the last prop, medium what the field was.
+ */
+const THREE_SIZES: Readonly<Record<string, readonly string[]>> = {
+  listelektilo: [
+    "label.typography",
+    "text.typography",
+    "box.height",
+    "box.inline-padding",
+    "indicator.size",
+    "clear.size",
+  ],
+  plurelektilo: [
+    "label.typography",
+    "text.typography",
+    "box.height",
+    "box.inline-padding",
+    "indicator.size",
+  ],
+  datelektilo: [
+    "label.typography",
+    "text.typography",
+    "box.height",
+    "box.inline-padding",
+    "trigger.size",
+    "clear.size",
+  ],
+};
+
+describe("②b-2 A-listelektilo-2, A-plurelektilo-2, A-datelektilo-2: size", () => {
+  it.each(Object.entries(THREE_SIZES))(
+    "%s: size small | medium | large, the last prop",
+    (ero, keyed) => {
+      const { skemo } = entryOf(ero);
+      expect(skemo.props.at(-1)?.name).toBe("size");
+      expect(propOf(ero, "size")).toMatchObject({
+        kind: "enum",
+        values: ["small", "medium", "large"],
+        default: "medium",
+      });
+      for (const path of keyed) {
+        const [part = "", property = ""] = path.split(".");
+        const source = skemo.parts[part]?.[property as "size"];
+        expect(source && "by" in source ? source.by : undefined, `${ero}.${path}`).toEqual([
+          "size",
+        ]);
+      }
+    },
+  );
+
+  it.each(Object.keys(THREE_SIZES))(
+    "%s: each size binds what the elektilo binds; medium is what it was",
+    (ero) => {
+      const { skemo } = entryOf(ero);
+      const elektilo = entryOf("elektilo").skemo;
+      const bound = (of: typeof skemo, part: string, property: string, size: string) =>
+        of.bindings.find(
+          (binding) =>
+            binding.part === part && binding.property === property && binding.when?.size === size,
+        )?.token;
+      for (const path of THREE_SIZES[ero] ?? []) {
+        const [part = "", property = ""] = path.split(".");
+        // The calendar of the date picker is as large as the chevron (Spec 035 2.3.1).
+        const like = part === "trigger" ? "indicator" : part;
+        for (const size of ["small", "large"]) {
+          expect(bound(skemo, part, property, size), `${ero}.${path}@${size}`).toBe(
+            bound(elektilo, like, property, size),
+          );
+        }
+        expect(bound(skemo, part, property, "medium"), `${ero}.${path}@medium`).toBe(
+          bound(elektilo, like, property, "medium"),
+        );
+      }
+    },
+  );
+
+  it.each(Object.keys(THREE_SIZES))("%s: the brief names size as an axis, under 750", (ero) => {
+    const brief = briefOf(entryOf(ero));
+    expect(brief.axes).toContainEqual({
+      name: "size",
+      values: ["small", "medium", "large"],
+      default: "medium",
+    });
+    expect(tokensOf(brief)).toBeLessThan(750);
+  });
+});
