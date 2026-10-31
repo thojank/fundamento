@@ -187,6 +187,8 @@ export interface StudioRow {
   schreibweise?: string;
   /** The family of a font role as the brand names it, for the search per role. */
   schrift?: { rolle: string; family?: string; license?: string };
+  /** Spec 035 Teil 3 (3.3): values of this row's fields the last sending refused, at the field. */
+  ablehnungen?: StudioAblehnung[];
 }
 
 export interface StudioGroup {
@@ -727,6 +729,8 @@ export interface StudioInput {
   /** The number of uncovered violations of the draft. */
   probleme: number;
   message?: string;
+  /** Spec 035 Teil 3: what the formularo sent and the check did not take, in one sentence. */
+  problem?: string;
   expert: { href?: string; sentence?: string; hinweis?: string };
   /** What the last change touched: the rules affected. */
   betroffen?: string[];
@@ -865,19 +869,40 @@ function schattenControl(row: StudioRow, modus?: string): string {
   return `<div class="mt-schatten" ${base} data-mt-einheit="${escapeHtml(layers[0]?.unit ?? "px")}">${fields}</div>`;
 }
 
+/** The name of a row's control in the formularo: the token, with `@<modus>` for a mode. */
+export const feldName = (token: string, modus?: string): string =>
+  modus === undefined ? token : `${token}@${modus}`;
+
+/** A refusal at its field (Spec 035 3.3): the message, the suggestion and the rule it names. */
+const ablehnungText = (ablehnung: StudioAblehnung): string =>
+  `${escapeHtml(ablehnung.message)} Vorschlag: ${escapeHtml(ablehnung.suggestion)} (Regel ${escapeHtml(ablehnung.rule)})`;
+
 function control(row: StudioRow, modus?: string): string {
-  const base = `data-mt-festlegen="${escapeHtml(row.token)}" data-mt-art="${row.art}"${modus === undefined ? "" : ` data-mt-modus="${escapeHtml(modus)}"`}`;
+  const ablehnung = row.ablehnungen?.find((entry) => entry.path === feldName(row.token, modus));
+  const html = controlOf(row, modus, ablehnung);
+  if (ablehnung === undefined || row.art !== "color") return html;
+  // A native colour field has no error of its own: the refusal stands right beside it.
+  return `${html}<fm-avizo intent="danger" data-mt-ablehnung="${escapeHtml(ablehnung.path)}" data-mt-regel="${escapeHtml(ablehnung.rule)}">${ablehnungText(ablehnung)}</fm-avizo>`;
+}
+
+function controlOf(row: StudioRow, modus?: string, ablehnung?: StudioAblehnung): string {
+  // The error of the field (an Ero's error slot), with the rule as data for a reader of the page.
+  const fehler =
+    ablehnung === undefined
+      ? ""
+      : `<span slot="error" data-mt-ablehnung="${escapeHtml(ablehnung.path)}" data-mt-regel="${escapeHtml(ablehnung.rule)}">${ablehnungText(ablehnung)}</span>`;
+  const base = `data-mt-festlegen="${escapeHtml(row.token)}" data-mt-art="${row.art}"${modus === undefined ? "" : ` data-mt-modus="${escapeHtml(modus)}"`}${ablehnung === undefined ? "" : row.art === "color" ? ' aria-invalid="true"' : " invalid"}`;
   const label = modus === undefined ? "Wert" : (modus.split("=")[1] ?? modus);
   switch (row.art) {
     case "schatten":
       return row.schatten === undefined
-        ? `<fm-tekstareo kind="code" name="${escapeHtml(row.token)}" rows="3" value="${escapeHtml(JSON.stringify(row.value))}" ${base}>${escapeHtml(label)} als JSON</fm-tekstareo>`
+        ? `<fm-tekstareo kind="code" name="${escapeHtml(row.token)}" rows="3" value="${escapeHtml(JSON.stringify(row.value))}" ${base}>${escapeHtml(label)} als JSON${fehler}</fm-tekstareo>`
         : schattenControl(row, modus);
     case "alias": {
       const current = modus?.startsWith("color-scheme=")
         ? (row.dunkel?.alias ?? row.alias)
         : row.alias;
-      return `<fm-elektilo name="${escapeHtml(`${row.token}${modus === undefined ? "" : `@${modus}`}`)}" value="${escapeHtml(current ?? "")}" size="small" ${base}>${escapeHtml(label)}${(
+      return `<fm-elektilo name="${escapeHtml(feldName(row.token, modus))}" value="${escapeHtml(current ?? "")}" size="small" ${base}>${escapeHtml(label)}${fehler}${(
         row.candidates ?? []
       )
         .map(
@@ -887,13 +912,13 @@ function control(row: StudioRow, modus?: string): string {
         .join("")}</fm-elektilo>`;
     }
     case "color":
-      return `<input type="color" value="${escapeHtml(row.shown)}" aria-label="${escapeHtml(`${row.label} ${label}`)}" ${base}>`;
+      return `<input type="color" name="${escapeHtml(feldName(row.token, modus))}" value="${escapeHtml(row.shown)}" aria-label="${escapeHtml(`${row.label} ${label}`)}" ${base}>`;
     case "dimension":
-      return `<fm-kampo kind="number" name="${escapeHtml(row.token)}" value="${escapeHtml(String(isRecord(row.value) ? row.value.value : row.value))}" size="small" data-mt-einheit="${escapeHtml(row.unit ?? "px")}" ${base}>${escapeHtml(label)} (${escapeHtml(row.unit ?? "px")})</fm-kampo>`;
+      return `<fm-kampo kind="number" name="${escapeHtml(row.token)}" value="${escapeHtml(String(isRecord(row.value) ? row.value.value : row.value))}" size="small" data-mt-einheit="${escapeHtml(row.unit ?? "px")}" ${base}>${escapeHtml(label)} (${escapeHtml(row.unit ?? "px")})${fehler}</fm-kampo>`;
     case "number":
-      return `<fm-kampo kind="number" name="${escapeHtml(row.token)}" value="${escapeHtml(String(row.value))}" size="small" ${base}>${escapeHtml(label)}</fm-kampo>`;
+      return `<fm-kampo kind="number" name="${escapeHtml(row.token)}" value="${escapeHtml(String(row.value))}" size="small" ${base}>${escapeHtml(label)}${fehler}</fm-kampo>`;
     default:
-      return `<fm-tekstareo kind="code" name="${escapeHtml(row.token)}" rows="3" value="${escapeHtml(JSON.stringify(row.value))}" ${base}>${escapeHtml(label)} als JSON</fm-tekstareo>`;
+      return `<fm-tekstareo kind="code" name="${escapeHtml(row.token)}" rows="3" value="${escapeHtml(JSON.stringify(row.value))}" ${base}>${escapeHtml(label)} als JSON${fehler}</fm-tekstareo>`;
   }
 }
 
@@ -1000,6 +1025,7 @@ export function studioScreen(input: StudioInput): string {
 <span slot="brand">Studio</span>
 <span slot="principal">Marke ${escapeHtml(label)} · Prüfung: <fm-insigno intent="${input.probleme === 0 ? "success" : "warning"}" id="mt-probleme">${input.probleme} ${input.probleme === 1 ? "Problem" : "Probleme"}</fm-insigno> <fm-butono emphasis="high" size="small" data-mt-post="/studio/${encodeURIComponent(name)}/speichern">Speichern</fm-butono></span>
 ${input.message === undefined ? "" : `<fm-avizo slot="notices" intent="success">${escapeHtml(input.message)}</fm-avizo>`}
+${input.problem === undefined ? "" : `<fm-avizo slot="notices" intent="danger">${escapeHtml(input.problem)}</fm-avizo>`}
 <fm-avizo slot="notices" intent="warning" id="mt-studio-meldung" hidden></fm-avizo>
 <fm-avizo slot="notices" intent="info" data-mt-averto>${escapeHtml(input.averto ?? AVERTO_EKSPORTO)}</fm-avizo>
 ${expertHinweisHtml(input.expert)}
@@ -1030,6 +1056,204 @@ ${input.expert.href === undefined ? `<section><fm-titolo level="2">Expertenansic
       "data-mt-scheme": input.kombination.scheme,
     },
   });
+}
+
+/** A value of the formularo the check refused or that is no value, at its field (Spec 035 3.3). */
+export interface StudioAblehnung {
+  /** The name of the field: the token, with `@<modus>` for a mode. */
+  path: string;
+  rule: string;
+  message: string;
+  suggestion: string;
+}
+
+/** A value the formularo of a Studio page sends for one control, as festlegen takes it. */
+export interface StudioAenderung {
+  /** The name of the field: the token, with `@<modus>` for a mode. */
+  path: string;
+  token: string;
+  modus?: string;
+  /** What festlegen takes: an alias or a value. */
+  festlegen: { alias: string } | { wert: unknown };
+  /** The row's name and the new value as a person reads them, for the feedback. */
+  label: string;
+  shown: string;
+}
+
+/** What the last sending of a page's formularo did (Spec 035 Teil 3), for the page after it. */
+export interface StudioRueckmeldung {
+  uebernommen: { path: string; label: string; shown: string }[];
+  abgelehnt: StudioAblehnung[];
+  betroffen: string[];
+}
+
+interface Feld {
+  row: StudioRow;
+  modus?: string;
+  art: Art;
+  /** What the control shows on the page: the value it was rendered with. */
+  current: string;
+}
+
+/** The controls of the rows by field name, as rowHtml renders them (the shadow's fields aside). */
+function feldojOf(groups: readonly StudioGroup[]): Map<string, Feld> {
+  const feldoj = new Map<string, Feld>();
+  const add = (row: StudioRow, art: Art, current: string, modus?: string) =>
+    feldoj.set(feldName(row.token, modus), {
+      row,
+      art,
+      current,
+      ...(modus === undefined ? {} : { modus }),
+    });
+  for (const row of groups.flatMap((entry) => entry.rows)) {
+    if (row.viewports !== undefined) {
+      for (const [viewport, entry] of Object.entries(row.viewports)) {
+        if (entry.alias !== undefined) add(row, "alias", entry.alias, `viewport=${viewport}`);
+      }
+      continue;
+    }
+    if (row.type !== "typography" && row.schrift === undefined) {
+      if (row.art === "alias") add(row, "alias", row.alias ?? "");
+      else if (row.art === "color") add(row, "color", row.shown);
+      else if (row.art === "dimension")
+        add(row, "dimension", String(isRecord(row.value) ? row.value.value : row.value));
+      else if (row.art === "number") add(row, "number", String(row.value));
+      else if (row.art !== "schatten" || row.schatten === undefined)
+        add(row, "json", JSON.stringify(row.value));
+    }
+    if (row.dunkel !== undefined && row.art === "alias")
+      add(row, "alias", row.dunkel.alias ?? row.alias ?? "", "color-scheme=dark");
+    if (row.dunkel !== undefined && row.art === "color")
+      add(row, "color", row.dunkel.shown, "color-scheme=dark");
+  }
+  return feldoj;
+}
+
+const HEX = /^#[0-9a-f]{6}$/i;
+
+/**
+ * The changes the formularo of a Studio page sent (Spec 035 3.1): every field of a row whose value
+ * differs from the value the page shows, read as its control's kind reads it; a field that is no
+ * value of its kind is refused at its field. Names that are no field of the page are left aside.
+ */
+export function studioAenderungen(
+  groups: readonly StudioGroup[],
+  values: URLSearchParams,
+): { aenderungen: StudioAenderung[]; abgelehnt: StudioAblehnung[] } {
+  const feldoj = feldojOf(groups);
+  const aenderungen: StudioAenderung[] = [];
+  const abgelehnt: StudioAblehnung[] = [];
+  for (const [path, raw] of values) {
+    const feld = feldoj.get(path);
+    if (feld === undefined) continue;
+    const value = raw.trim();
+    const { row, modus } = feld;
+    const refuse = (rule: string, message: string, suggestion: string) =>
+      abgelehnt.push({ path, rule, message, suggestion });
+    const change = (festlegen: StudioAenderung["festlegen"], shown: string) =>
+      aenderungen.push({
+        path,
+        token: row.token,
+        ...(modus === undefined ? {} : { modus }),
+        festlegen,
+        label: row.label,
+        shown,
+      });
+    switch (feld.art) {
+      case "alias":
+        if (value === feld.current) break;
+        if (row.candidates !== undefined && !row.candidates.includes(value))
+          refuse(
+            "alias-unknown",
+            `${value} ist keine Wahl für ${row.token}.`,
+            "Wähle einen Eintrag der Liste.",
+          );
+        else change({ alias: value }, value);
+        break;
+      case "color":
+        if (value.toLowerCase() === feld.current.toLowerCase()) break;
+        if (!HEX.test(value))
+          refuse("color-invalid", `${value} ist keine Farbe.`, "Gib eine Farbe als #rrggbb an.");
+        else change({ wert: value.toLowerCase() }, value.toLowerCase());
+        break;
+      case "dimension":
+      case "number": {
+        const number = Number(value);
+        if (value === "" || !Number.isFinite(number)) {
+          refuse(
+            "number-invalid",
+            `${value || "Ein leeres Feld"} ist keine Zahl.`,
+            "Gib eine Zahl an.",
+          );
+          break;
+        }
+        if (number === Number(feld.current)) break;
+        const unit = row.unit ?? "px";
+        if (feld.art === "number") change({ wert: number }, String(number));
+        else change({ wert: { value: number, unit } }, `${number}${unit}`);
+        break;
+      }
+      default: {
+        let parsed: unknown;
+        try {
+          parsed = JSON.parse(value);
+        } catch {
+          refuse("json-invalid", "Der Wert ist kein JSON.", "Gib den Wert als JSON an.");
+          break;
+        }
+        if (JSON.stringify(parsed) === feld.current) break;
+        change({ wert: parsed }, shownOf(parsed));
+      }
+    }
+  }
+  return { aenderungen, abgelehnt };
+}
+
+/** The rows of a page with the refusals of the last sending at their fields (Spec 035 3.3). */
+export function mitRueckmeldung(
+  groups: readonly StudioGroup[],
+  rueckmeldung: StudioRueckmeldung | undefined,
+): StudioGroup[] {
+  if (rueckmeldung === undefined || rueckmeldung.abgelehnt.length === 0) return [...groups];
+  return groups.map((entry) => ({
+    ...entry,
+    rows: entry.rows.map((row) => {
+      const ablehnungen = rueckmeldung.abgelehnt.filter(
+        (ablehnung) => ablehnung.path === row.token || ablehnung.path.startsWith(`${row.token}@`),
+      );
+      return ablehnungen.length === 0 ? row : { ...row, ablehnungen };
+    }),
+  }));
+}
+
+/**
+ * The feedback of a page after its formularo: what was taken (or that nothing changed), what was
+ * refused, and the rules the change touched.
+ */
+export function studioFeedback(rueckmeldung: StudioRueckmeldung): {
+  message?: string;
+  problem?: string;
+  betroffen?: string[];
+} {
+  const message =
+    rueckmeldung.uebernommen.length > 0
+      ? `Übernommen: ${rueckmeldung.uebernommen
+          .map((entry) => `${entry.label} (${entry.path}) = ${entry.shown}`)
+          .join("; ")}.`
+      : rueckmeldung.abgelehnt.length === 0
+        ? "Übernommen: Die Werte stehen schon so, nichts geändert."
+        : undefined;
+  const problem =
+    rueckmeldung.abgelehnt.length === 0
+      ? undefined
+      : `Nicht übernommen: ${rueckmeldung.abgelehnt
+          .map((entry) => `${entry.path}: ${entry.message} Vorschlag: ${entry.suggestion}`)
+          .join(" ")}`;
+  return {
+    ...(message === undefined ? {} : { message }),
+    ...(problem === undefined ? {} : { problem }),
+    ...(rueckmeldung.betroffen.length === 0 ? {} : { betroffen: rueckmeldung.betroffen }),
+  };
 }
 
 /** An input per page for the tests: a brand like provo with a set step and display names. */

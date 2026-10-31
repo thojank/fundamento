@@ -92,7 +92,18 @@ import {
 import { NORDSTELO_DIR, type NordsteloHistorio, nordsteloScreen } from "./nordstelo.js";
 import { transkribi } from "./parolo/parolo.js";
 import { type PrivataDeps, privataState, uploadFont } from "./privata.js";
-import { composeDraft, isStudioPage, kombinationOf, studioRows, studioScreen } from "./studio.js";
+import {
+  composeDraft,
+  isStudioPage,
+  kombinationOf,
+  mitRueckmeldung,
+  type StudioGroup,
+  type StudioRueckmeldung,
+  studioAenderungen,
+  studioFeedback,
+  studioRows,
+  studioScreen,
+} from "./studio.js";
 import {
   FORM_WAHL,
   isSxtupoKey,
@@ -192,6 +203,8 @@ interface Draft {
   upload?: { filename: string; family: string; path: string };
   privataResult?: string;
   eksporto?: { sentences: string[]; issues: string[] };
+  /** Spec 035 Teil 3: what the last sending of a Studio page's formularo did, numbered. */
+  studio?: { n: number; rueckmeldung: StudioRueckmeldung };
 }
 
 const TYPES: Readonly<Record<string, string>> = {
@@ -869,12 +882,11 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     name: string,
     draft: Draft,
     body: Record<string, unknown>,
-    response: ServerResponse,
+    reply: (value: unknown, status?: number) => void,
   ): void {
     const token = typeof body.token === "string" ? body.token : "";
     if (!/^[a-z0-9]+(\.[a-z0-9-]+)*$/.test(token)) {
-      sendJson(
-        response,
+      reply(
         {
           issues: [
             {
@@ -917,8 +929,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     } else if (typeof body.schreibweise === "string") {
       // Spec 024 ② (Schreibweise): the case of a typography role, beside its value.
       if (!["none", "uppercase", "lowercase", "capitalize"].includes(body.schreibweise)) {
-        sendJson(
-          response,
+        reply(
           {
             issues: [
               {
@@ -948,8 +959,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
             : body.wert
           : undefined;
       if (alias === undefined && wert === undefined) {
-        sendJson(
-          response,
+        reply(
           {
             issues: [
               {
@@ -977,7 +987,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     }
     const { agordo, issues } = readAgordo(next);
     if (agordo === undefined) {
-      sendJson(response, { issues }, 422);
+      reply({ issues }, 422);
       return;
     }
     let derivation: Derivation | undefined;
@@ -1006,8 +1016,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
             (entry.path === refused.path || entry.subject === refused.path),
         );
         const alias = typeof body.alias === "string" && body.alias !== "" ? body.alias : undefined;
-        sendJson(
-          response,
+        reply(
           {
             satz:
               violation === undefined
@@ -1015,6 +1024,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
                 : satzDe(violation),
             vorschlag: vorschlagDe(draft, agordo, token, modus, alias, violation, known),
             betroffen,
+            rule: refused.rule,
           },
           409,
         );
@@ -1023,13 +1033,79 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     }
     setDraft(name, draft, agordo);
     if (derivation !== undefined) draft.pruefung = { rev: draft.rev, derivation };
-    sendJson(response, {
+    reply({
       rev: draft.rev,
       herkunft: herkunftOf(agordo, token),
       probleme: problemeOf(pruefungOf(draft)),
       betroffen,
     });
   }
+
+  /**
+   * Spec 035 Teil 3 (3.1): the values the formularo of a Studio page sent, each through festlegen –
+   * the path of every change of the Studio: setDraft (a new rev), the check, a refusal with its
+   * rule. Returns the number of the feedback the page after it shows (`?rueckmeldung=<n>`).
+   */
+  const studioUebernehmen = (
+    name: string,
+    draft: Draft,
+    groups: readonly StudioGroup[],
+    values: URLSearchParams,
+  ): number => {
+    const { aenderungen, abgelehnt } = studioAenderungen(groups, values);
+    const rueckmeldung: StudioRueckmeldung = { uebernommen: [], abgelehnt, betroffen: [] };
+    for (const aenderung of aenderungen) {
+      let status = 200;
+      let answer: Record<string, unknown> = {};
+      festlegen(
+        name,
+        draft,
+        {
+          token: aenderung.token,
+          ...aenderung.festlegen,
+          ...(aenderung.modus === undefined ? {} : { modus: aenderung.modus }),
+        },
+        (value, code = 200) => {
+          status = code;
+          answer = isRecord(value) ? value : {};
+        },
+      );
+      const betroffen = Array.isArray(answer.betroffen) ? answer.betroffen.map(String) : [];
+      rueckmeldung.betroffen.push(
+        ...betroffen.filter((rule) => !rueckmeldung.betroffen.includes(rule)),
+      );
+      if (status === 200) {
+        rueckmeldung.uebernommen.push({
+          path: aenderung.path,
+          label: aenderung.label,
+          shown: aenderung.shown,
+        });
+        continue;
+      }
+      const issue =
+        Array.isArray(answer.issues) && isRecord(answer.issues[0]) ? answer.issues[0] : {};
+      rueckmeldung.abgelehnt.push({
+        path: aenderung.path,
+        rule: String(answer.rule ?? issue.rule ?? "wert-refused"),
+        message: String(answer.satz ?? issue.message ?? "Der Wert wurde nicht übernommen."),
+        suggestion: String(answer.vorschlag ?? issue.suggestion ?? "Wähle einen anderen Wert."),
+      });
+    }
+    draft.studio = { n: (draft.studio?.n ?? 0) + 1, rueckmeldung };
+    return draft.studio.n;
+  };
+  /** The page again after its formularo: its query (the combination, the cell) and the feedback. */
+  const studioZurueck = (path: string, query: URLSearchParams, n: number): string => {
+    const params = new URLSearchParams(query);
+    params.delete("gespeichert");
+    params.set("rueckmeldung", String(n));
+    return `${path}?${params.toString()}`;
+  };
+  /** The feedback a page shows when its URL names the last one. */
+  const rueckmeldungOf = (draft: Draft, query: URLSearchParams): StudioRueckmeldung | undefined =>
+    draft.studio !== undefined && query.get("rueckmeldung") === String(draft.studio.n)
+      ? draft.studio.rueckmeldung
+      : undefined;
 
   const sendHtml = (response: ServerResponse, html: string, status = 200): void => {
     response.writeHead(status, { "content-type": TYPES[".html"] ?? "text/html" }).end(html);
@@ -1900,7 +1976,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         return;
       }
       if (action === "festlegen") {
-        festlegen(name, draft, body, response);
+        festlegen(name, draft, body, (value, status) => sendJson(response, value, status));
         return;
       }
       if (action === "entwurf") {
@@ -1986,16 +2062,41 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       const [, name = "", kind = "", komponentoName = ""] = komponento;
       const draft = draftOf(name);
       const ref = komponentoRefOf(bases, kind, komponentoName);
-      if (draft === undefined || ref === undefined || method !== "GET") {
+      if (draft === undefined || ref === undefined || (method !== "GET" && method !== "POST")) {
         notFound(response);
         return;
       }
       const kombination = kombinationOf(url.searchParams);
+      if (method === "POST") {
+        // Spec 035 Teil 3 (3.1): the formularo of a component page, as on the pages of the Studio.
+        const { groups } = komponentoView(
+          ref,
+          draft.agordo,
+          bases,
+          kombination,
+          zeloOf(url.searchParams),
+        );
+        const values = new URLSearchParams(await readBody(request));
+        const n = studioUebernehmen(name, draft, groups, values);
+        redirect(response, studioZurueck(path, url.searchParams, n));
+        return;
+      }
+      const rueckmeldung = rueckmeldungOf(draft, url.searchParams);
+      const feedback = rueckmeldung === undefined ? {} : studioFeedback(rueckmeldung);
       const marko = readMarko(options.workdir, name);
       sendHtml(
         response,
         komponentoScreen({
-          view: komponentoView(ref, draft.agordo, bases, kombination, zeloOf(url.searchParams)),
+          view: (() => {
+            const view = komponentoView(
+              ref,
+              draft.agordo,
+              bases,
+              kombination,
+              zeloOf(url.searchParams),
+            );
+            return { ...view, groups: mitRueckmeldung(view.groups, rueckmeldung) };
+          })(),
           marko: {
             name,
             agordo: draft.agordo,
@@ -2007,6 +2108,8 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           komponentoj: komponentoList(bases),
           probleme: problemeOf(pruefungOf(draft)),
           expert: expertOf(draft.agordo),
+          ...(feedback.message === undefined ? {} : { message: feedback.message }),
+          ...(feedback.betroffen === undefined ? {} : { betroffen: feedback.betroffen }),
         }),
       );
       return;
@@ -2029,13 +2132,23 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         redirect(response, `/studio/${encodeURIComponent(name)}/farbe?gespeichert=1`);
         return;
       }
-      if (method !== "GET" || !isStudioPage(page)) {
+      if ((method !== "GET" && method !== "POST") || !isStudioPage(page)) {
         notFound(response);
         return;
       }
       const kombination = kombinationOf(url.searchParams);
+      if (method === "POST") {
+        // Spec 035 Teil 3 (3.1): the formularo posts the values a person changed to its page.
+        const groups = studioRows(page, draft.agordo, bases, kombination);
+        const values = new URLSearchParams(await readBody(request));
+        const n = studioUebernehmen(name, draft, groups, values);
+        redirect(response, studioZurueck(path, url.searchParams, n));
+        return;
+      }
       const marko = readMarko(options.workdir, name);
       const derivation = pruefungOf(draft);
+      const rueckmeldung = rueckmeldungOf(draft, url.searchParams);
+      const feedback = rueckmeldung === undefined ? {} : studioFeedback(rueckmeldung);
       const message =
         url.searchParams.get("gespeichert") === "1"
           ? [
@@ -2043,7 +2156,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
               ...(draft.eksporto?.sentences ?? []),
               ...(draft.eksporto?.issues ?? []),
             ].join(" ")
-          : undefined;
+          : feedback.message;
       sendHtml(
         response,
         studioScreen({
@@ -2057,9 +2170,11 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
             rev: draft.rev,
           },
           kombination,
-          groups: studioRows(page, draft.agordo, bases, kombination),
+          groups: mitRueckmeldung(studioRows(page, draft.agordo, bases, kombination), rueckmeldung),
           probleme: problemeOf(derivation),
           ...(message === undefined ? {} : { message }),
+          ...(feedback.problem === undefined ? {} : { problem: feedback.problem }),
+          ...(feedback.betroffen === undefined ? {} : { betroffen: feedback.betroffen }),
           expert: expertOf(draft.agordo),
           komponentoj: komponentoList(bases),
         }),

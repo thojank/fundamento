@@ -123,12 +123,49 @@ async function follow(response) {
   document.open(); document.write(html); document.close();
 }
 
+// Spec 035 Teil 3 (3.1): the formularo of a Studio page sends the values a person changed – its
+// fields lie in the groups, not among its children – to the page, which takes them and leads back.
+const studioSeite = !!sxtupo && (sxtupo.startsWith("studio-") || sxtupo.startsWith("komponento-"));
+const studioAnfang = new Map();
+for (const control of document.querySelectorAll("fm-formularo[data-action] [data-mt-festlegen][name]")) studioAnfang.set(control, control.getAttribute("value") ?? "");
+function studioWerte(form) {
+  const values = {};
+  for (const control of form.querySelectorAll("[data-mt-festlegen][name]")) {
+    const now = String(control.value ?? control.getAttribute("value") ?? "");
+    if (now !== studioAnfang.get(control)) values[control.getAttribute("name")] = now;
+  }
+  return values;
+}
+let studioSendet = false;
+async function sendForm(form, values) {
+  if (studioSeite) {
+    // One sending at a time: Enter, Übernehmen and a changed control are the same sending.
+    if (studioSendet) return;
+    studioSendet = true;
+    Object.assign(values, studioWerte(form));
+  }
+  if (studioSeite) {
+    try { sessionStorage.setItem("mt-studio-scroll", location.pathname + " " + Math.round(scrollY)); } catch {}
+  }
+  const response = await fetch(form.getAttribute("data-action"), { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: encode(values) });
+  await follow(response);
+}
+// Spec 035 Teil 3 (3.3): the page after its formularo stands where the person was; a refused value
+// is brought into view at its field.
+if (studioSeite && new URLSearchParams(location.search).has("rueckmeldung")) {
+  try {
+    const [where, y] = (sessionStorage.getItem("mt-studio-scroll") || "").split(" ");
+    if (where === location.pathname) scrollTo(0, Number(y) || 0);
+    sessionStorage.removeItem("mt-studio-scroll");
+  } catch {}
+  const refused = document.querySelector("[data-mt-ablehnung]");
+  const field = refused && refused.closest("[data-mt-festlegen]");
+  if (refused) (field || refused).scrollIntoView({ block: "center" });
+}
 for (const form of document.querySelectorAll("fm-formularo[data-action]")) {
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const values = event.detail && event.detail.values ? event.detail.values : {};
-    const response = await fetch(form.getAttribute("data-action"), { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: encode(values) });
-    await follow(response);
+    await sendForm(form, event.detail && event.detail.values ? event.detail.values : {});
   });
 }
 
@@ -326,6 +363,10 @@ function wertOf(control) {
 }
 for (const control of document.querySelectorAll("[data-mt-festlegen]")) {
   control.addEventListener("change", async () => {
+    // Spec 035 Teil 3 (3.2): a value of a Studio page goes through the page's formularo, and the page
+    // comes back from the server – row, swatch, origin and check from one state.
+    const form = studioSeite && control.hasAttribute("name") ? control.closest("fm-formularo[data-action]") : null;
+    if (form) { await sendForm(form, {}); return; }
     const value = wertOf(control);
     if (!value) { studioMeldung("Kein gültiger Wert.", "danger"); return; }
     const body = { token: control.getAttribute("data-mt-festlegen"), ...value };
@@ -643,7 +684,7 @@ if (kreilo && marko) {
 // The one draft: when the assistant or the Studio changed it elsewhere, follow.
 if (marko && (asistantoData || (sxtupo && sxtupo.startsWith("studio-")))) {
   setInterval(async () => {
-    if (sending || document.hidden) return;
+    if (sending || studioSendet || document.hidden) return;
     const response = await fetch("/api/marko/" + marko + "/stato").catch(() => undefined);
     if (!response || !response.ok) return;
     const stato = await response.json();
