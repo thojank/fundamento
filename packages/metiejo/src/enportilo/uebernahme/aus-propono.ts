@@ -16,7 +16,7 @@ export interface AusPropono {
   faceto: string;
   /** The value of the step in the proposal's patch. */
   wertOf(propono: Propono): unknown;
-  /** The feature, from the place the finding names (a share, a line, an embedded font). */
+  /** The feature, with the line of a style sheet where the finding names one. */
   merkmalOf(propono: Propono, loko: string | undefined): string;
   anteilOf?(propono: Propono, eniro: SchrittEniro): number | undefined;
   sicherheitOf(anteil: number | undefined): Sicherheit;
@@ -30,16 +30,18 @@ export function vorschlagAusPropono(spec: AusPropono, eniro: SchrittEniro): Vors
   if (propono === undefined || first === undefined)
     return { schritt: spec.schritt, offen: true, satz: spec.offenSatz(eniro) };
   const anteil = spec.anteilOf?.(propono, eniro);
+  // The place of a link is a line; an image or a PDF names its share, which `anteil` carries.
+  const ort = (loko: string | undefined) => (eniro.kunteksto.quelle === "link" ? loko : undefined);
   const herkunft: Herkunft = herkunftOf(
     eniro.kunteksto,
     first.dosiero,
-    spec.merkmalOf(propono, first.loko),
+    spec.merkmalOf(propono, ort(first.loko)),
     anteil,
   );
   const weitere = propono.herkunft
     .slice(1)
     .map((entry) =>
-      herkunftOf(eniro.kunteksto, entry.dosiero, spec.merkmalOf(propono, entry.loko)),
+      herkunftOf(eniro.kunteksto, entry.dosiero, spec.merkmalOf(propono, ort(entry.loko))),
     );
   return {
     schritt: spec.schritt,
