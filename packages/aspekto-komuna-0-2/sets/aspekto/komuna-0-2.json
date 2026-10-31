@@ -3431,6 +3431,10 @@
       "trigger": {
         "size": {
           "$type": "dimension",
+          "$value": "{size.icon.medium}"
+        },
+        "width": {
+          "$type": "dimension",
           "$value": "{size.target.min}"
         }
       },

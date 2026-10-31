@@ -6376,6 +6376,17 @@
       "dosiero": "packages/core/src/DateInput/DateInput.tsx",
       "sxlosilo": "DateInput {} rest, hell: div[data-size] > button:first-child inline-size (gemessen)",
       "fontoValoro": "16px",
+      "valoro": "{size.icon.small}",
+      "maniero": "derivita",
+      "noto": "Spec 035 2.3.1: der Kalender ist so groß wie der Pfeil des elektilo der Größe medium (ero.elektilo.indicator.size.size.medium, gemessen an der Fonto); das Ziel des Knopfs trägt ero.datelektilo.trigger.width."
+    },
+    {
+      "token": "ero.datelektilo.trigger.width",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/DateInput/DateInput.tsx",
+      "sxlosilo": "DateInput {} rest, hell: div[data-size] > button:first-child inline-size (gemessen)",
+      "fontoValoro": "16px",
       "valoro": "{size.target.min}",
       "maniero": "adaptita",
       "jugxo": "jug_01M5ZT2Z2V5GMPZXTDV3BK8PRE",
