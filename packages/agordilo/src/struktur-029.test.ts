@@ -4,9 +4,9 @@
 // rebuilt structure is the same document, byte for byte in canonical JSON: the same fingerprint.
 
 import { readFileSync } from "node:fs";
-import { CORE_SET_NAME } from "@fundamento/modelo";
+import { CORE_SET_NAME, convertNames, nameForm } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
-import { readStructure, referencePackage } from "./index.js";
+import { fingerprintOf, readStructure, referencePackage } from "./index.js";
 
 const storedSha = (fixture: string): string =>
   JSON.parse(
@@ -35,8 +35,10 @@ describe("Spec 029 ①: the structure of komuna 0.2 for the Agordilo", () => {
     // target of at least size.target.min (width); ②b-1b M-2: the states warning and success of the
     // twelve fields, the message and the kampo's status icon; Spec 035 2.3: the calendar and the ✕
     // of the date picker at the size of an icon with their targets, read-only as rest.
-    expect(structure.fingerprint).toBe(
-      "29ad86eb2c3eebf284a8b420956ec3fb4f26b091d597d0f57c541b77d52584c1",
+    // Spec 036 Teil 6: pinned for the structure with the new names (D-25), the same documents
+    // before and after the script run; the stored fingerprints above follow the derivation.
+    expect(fingerprintOf(convertNames(structure.files, nameForm("neutral")))).toBe(
+      "23ed25f25ea1e03c38dc53930c6df853143727ee737fdae02c35a5038f487d36",
     );
   });
 
