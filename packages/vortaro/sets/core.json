@@ -7626,7 +7626,7 @@
           },
           "readonly": {
             "$type": "color",
-            "$value": "{color.text.default}",
+            "$value": "{color.text.muted}",
             "$description": "datelektilo: label.color when state=readonly (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
             "$extensions": {
               "com.ciferecigo.fundamento": {
@@ -7743,7 +7743,7 @@
           },
           "readonly": {
             "$type": "color",
-            "$value": "{color.background.sunken}",
+            "$value": "{color.background.raised}",
             "$description": "datelektilo: surface.fill when state=readonly (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
             "$extensions": {
               "com.ciferecigo.fundamento": {
@@ -7994,11 +7994,21 @@
       "trigger": {
         "size": {
           "$type": "dimension",
-          "$value": "{size.target.min}",
+          "$value": "{size.icon.small}",
           "$description": "datelektilo: trigger.size (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
           "$extensions": {
             "com.ciferecigo.fundamento": {
               "id": "tok_01M5HW5V5QWXKDN3NKDMW7GK5C"
+            }
+          }
+        },
+        "width": {
+          "$type": "dimension",
+          "$value": "{size.target.min}",
+          "$description": "datelektilo: trigger.width (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M67P8ACY17R8C77KEFYQMN72"
             }
           }
         }
@@ -8636,11 +8646,21 @@
       "clear": {
         "size": {
           "$type": "dimension",
-          "$value": "{size.target.min}",
+          "$value": "{size.icon.small}",
           "$description": "datelektilo: clear.size (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
           "$extensions": {
             "com.ciferecigo.fundamento": {
               "id": "tok_01M63SXQ7CFDDVGS0FBNK1BZHZ"
+            }
+          }
+        },
+        "width": {
+          "$type": "dimension",
+          "$value": "{size.target.min}",
+          "$description": "datelektilo: clear.width (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M67QCABPYE776WQJP85KZ02X"
             }
           }
         }

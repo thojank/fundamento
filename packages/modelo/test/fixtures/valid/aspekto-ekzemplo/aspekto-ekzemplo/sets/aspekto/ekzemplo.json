@@ -3717,7 +3717,7 @@
           },
           "readonly": {
             "$type": "color",
-            "$value": "{color.background.sunken}"
+            "$value": "{color.background.default}"
           },
           "invalid": {
             "$type": "color",
@@ -3815,6 +3815,10 @@
       },
       "trigger": {
         "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.medium}"
+        },
+        "width": {
           "$type": "dimension",
           "$value": "{size.target.min}"
         }
@@ -4099,6 +4103,10 @@
       },
       "clear": {
         "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.medium}"
+        },
+        "width": {
           "$type": "dimension",
           "$value": "{size.target.min}"
         }
@@ -5619,7 +5627,7 @@
           },
           "readonly": {
             "$type": "color",
-            "$value": "{color.background.sunken}"
+            "$value": "{color.background.default}"
           },
           "invalid": {
             "$type": "color",
@@ -6941,7 +6949,7 @@
           },
           "readonly": {
             "$type": "color",
-            "$value": "{color.background.sunken}"
+            "$value": "{color.background.default}"
           },
           "invalid": {
             "$type": "color",
@@ -8355,7 +8363,7 @@
           },
           "readonly": {
             "$type": "color",
-            "$value": "{color.background.sunken}"
+            "$value": "{color.background.default}"
           },
           "invalid": {
             "$type": "color",

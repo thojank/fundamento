@@ -177,7 +177,8 @@ describe("kampo in the repo Modelo (T004)", () => {
     expect(fill("rest")).toBe("color.background.default");
     expect(fill("invalid")).toBe("color.background.default");
     expect(fill("disabled")).toBe("color.background.sunken");
-    expect(fill("readonly")).toBe("color.background.sunken");
+    // Spec 035 2.3.4 (V-1): read-only keeps the look of rest, as the Fonto's fields do.
+    expect(fill("readonly")).toBe("color.background.default");
     expect(boundToken(skemo, "box", "inline-padding", { size: "large" })?.token).toBe(
       "spacing.medium",
     );

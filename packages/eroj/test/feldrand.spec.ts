@@ -124,6 +124,7 @@ test.describe("Abnahme #122: the right edge of a field, inside its border", () =
       out,
       `<div style="inline-size: 20rem">${(BOXED.elektilo ?? "").replace(" loading", "")}${(BOXED.datelektilo ?? "").replace(" loading", "")}</div>`,
     );
+    // Spec 035 2.3.1 and 2.3.3: the calendar as large as the chevron, the ✕ beside it too.
     for (const [ero, icon] of [
       ["elektilo", "indicator"],
       ["datelektilo", "trigger"],

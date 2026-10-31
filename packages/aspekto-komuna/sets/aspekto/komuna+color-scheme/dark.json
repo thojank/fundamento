@@ -953,6 +953,10 @@
             "$type": "color",
             "$value": "{color.background.default}"
           },
+          "readonly": {
+            "$type": "color",
+            "$value": "{color.background.default}"
+          },
           "invalid": {
             "$type": "color",
             "$value": "{color.background.default}"

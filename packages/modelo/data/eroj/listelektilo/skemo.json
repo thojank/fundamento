@@ -376,7 +376,7 @@
         "when": {
           "state": "readonly"
         },
-        "token": "color.background.sunken"
+        "token": "color.background.default"
       },
       {
         "part": "border",

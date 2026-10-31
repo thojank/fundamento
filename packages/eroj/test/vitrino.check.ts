@@ -220,8 +220,11 @@ test("the contrast table shows WCAG, APCA and the change against the comparison 
     // the avataro's initials and the unselected signeto take the Fonto's translucent fill (8 %),
     // advisory beside text on it (8496 → 8550; every WCAG threshold holds). Spec 029 ②b-1b M-2:
     // the glitilo's label in the states warning and success on its track, the pair of rest again
-    // (8550 → 8586, advisory, 2 × 18 combinations).
-    "In den 72 Kombinationen des Vergleichsstands: 8586 gegen 1296 (Veränderung +7290)",
+    // (8550 → 8586, advisory, 2 × 18 combinations). Spec 035 2.3.4: a read-only field shows the
+    // look of rest (kampo, listelektilo, plurelektilo, datelektilo; komuna's datelektilo takes the
+    // surface and the label colour of rest), so the pairs of readonly are those of rest, advisory
+    // where they miss the APCA band (8586 → 8694; all 144 combinations 14166 → 14184).
+    "In den 72 Kombinationen des Vergleichsstands: 8694 gegen 1296 (Veränderung +7398)",
   );
 });
 

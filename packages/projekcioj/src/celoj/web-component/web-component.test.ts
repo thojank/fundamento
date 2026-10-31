@@ -2392,11 +2392,11 @@ describe("Web Component Celo for the datelektilo (Spec 025 ②)", () => {
       '[part="field"] [part="cell"][data-outside="true"]:not([aria-selected="true"]) {\n  color: var(--fm-color-text-muted);',
     );
     expect(css).not.toContain(':where([part="field"]) [part="cell"][aria-selected="true"]');
-    // The trigger takes the least target (Abnahme #122: inside the field like the Fonto's), prev
-    // and next the small control; the calendar its surface, shadow, layer, width and padding; its
-    // height none while closed.
+    // The trigger takes the least target (Abnahme #122: inside the field like the Fonto's), its
+    // calendar the size of a chevron (Spec 035 2.3.1), prev and next the small control; the
+    // calendar its surface, shadow, layer, width and padding; its height none while closed.
     expect(css).toContain(
-      ':where([part="field"]) [part="trigger"] {\n  inline-size: var(--fm-size-target-min);\n  block-size: var(--fm-size-target-min);',
+      ':where([part="field"]) [part="trigger"] {\n  inline-size: var(--fm-size-icon-medium);\n  block-size: var(--fm-size-icon-medium);\n  min-inline-size: var(--fm-size-target-min);\n  min-block-size: var(--fm-size-target-min);',
     );
     expect(css).toContain(
       ':where([part="field"]) [part="prev"] {\n  inline-size: var(--fm-size-control-small);',

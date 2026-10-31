@@ -140,7 +140,11 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       "message",
     ]);
     // Abnahme #122: the calendar inside the field, the target of a pointer (as komuna from the Fonto).
-    expect(skemo?.parts.trigger).toEqual({ size: { fixed: "size.target.min" } });
+    // Spec 035 2.3.1: its glyph as large as the chevron of the elektilo, the target its width.
+    expect(skemo?.parts.trigger).toEqual({
+      size: { fixed: "size.icon.medium" },
+      width: { fixed: "size.target.min" },
+    });
     expect(skemo?.parts.calendar).toEqual({
       fill: { fixed: "color.background.raised" },
       radius: { fixed: "radius.role.surface" },
@@ -199,7 +203,8 @@ describe("datelektilo in the repo Modelo (section ②, G1, G2)", () => {
       boundToken(skemoOrThrow(), part, property, { state, expanded })?.token;
     expect(token("surface", "fill", "rest")).toBe("color.background.default");
     expect(token("surface", "fill", "disabled")).toBe("color.background.sunken");
-    expect(token("surface", "fill", "readonly")).toBe("color.background.sunken");
+    // Spec 035 2.3.4 (V-1): read-only keeps the look of rest, as the Fonto's fields do.
+    expect(token("surface", "fill", "readonly")).toBe("color.background.default");
     expect(token("border", "color", "rest")).toBe("color.border.default");
     expect(token("border", "color", "hover")).toBe("color.border.strong");
     expect(token("border", "color", "focus")).toBe("color.border.strong");

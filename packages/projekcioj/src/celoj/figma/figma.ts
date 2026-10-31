@@ -1185,6 +1185,12 @@ export interface FigmaComponentSet {
    */
   clearColor?: string;
   /**
+   * Spec 035 2.3.1: the variable the calendar in the trigger at the end of a date picker is filled
+   * with – the web composes a butono of emphasis low there too, so its glyph takes the same label
+   * colour as the clear button's.
+   */
+  triggerColor?: string;
+  /**
    * Spec 029 ②b-1b M-2 (A-kampo-4): the field keeps the room of its status icon in every variant
    * (the variants of a row stay one size); the sign shows where the variant has a status (icons).
    */
@@ -3613,6 +3619,9 @@ function componentSetOf(
     ...(skemo.trailingAfter === undefined ? {} : { spinnerAfter: skemo.trailingAfter }),
     ...(skemo.trailing === undefined ? {} : { trailing: [...skemo.trailing] }),
     ...(clearsInField(skemo) ? { clearColor: variableName(CLEAR_ICON_COLOR) } : {}),
+    ...((skemo.trailing ?? []).includes("trigger")
+      ? { triggerColor: variableName(CLEAR_ICON_COLOR) }
+      : {}),
     ...(skemo.parts["status-icon"] === undefined ? {} : { statusIcon: true as const }),
     ...(options === undefined ? {} : { entry: options }),
     ...(example === undefined ? {} : { example }),

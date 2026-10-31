@@ -102,8 +102,11 @@ describe("Abnahme #122: the right edge of a field set in Figma", () => {
     // The button is the target (size.target.min, as large as the calendar's trigger).
     expect(geometry(clear).width).toBe(geometry(trigger).width);
     expect(geometry(clear).height).toBe(geometry(trigger).width);
+    // Spec 035 2.3.1 and 2.3.3: the ✕ of the date picker as large as the calendar beside it, both
+    // as large as a chevron; the buttons around them the target.
     const dateClear = find(datelektilo, "clear") as DoubleNode;
-    expect(glyphOf(dateClear)).toBe(geometry(trigger).width);
+    expect(glyphOf(dateClear)).toBe(glyphOf(trigger));
+    expect(glyphOf(dateClear)).toBe(glyphOf(find(elektilo, "indicator") as DoubleNode));
     expect(geometry(dateClear).width).toBe(geometry(trigger).width);
   });
 

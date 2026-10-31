@@ -5998,13 +5998,9 @@ ${
         if (!(clear instanceof HTMLElement)) {
           holder.insertAdjacentHTML("beforeend", ${JSON.stringify(CLEAR_BUTTON)});
           this.#orderEnd();
-          clear = holder.querySelector(':scope > [part="clear"]');${
-            isDatepicker
-              ? `
-          // As large as the calendar beside it: the trigger's size, its glyph too.
-          clear?.setAttribute("size", holder.querySelector('[part="trigger"]')?.getAttribute("size") ?? "medium");`
-              : ""
-          }
+          // Spec 035 2.3.3: the ✕ of a date picker is the kampo's – the same button, its glyph
+          // the size the Skemo gives the part (as large as the calendar beside it).
+          clear = holder.querySelector(':scope > [part="clear"]');
           clear?.addEventListener("click", (event) => {
             event.stopPropagation();
             this.#clearValue();

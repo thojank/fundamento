@@ -157,6 +157,8 @@ type PartNode =
   // month, next), the weekdays and the cells with their texts; the looks of a cell are logical
   // names of the same frame and text (selected, in range, today, outside).
   | "trigger"
+  // Spec 035 2.3.1: the glyph frames of the calendar in the trigger.
+  | "trigger-glyph-*"
   | "calendar"
   | "month"
   | "prev"
@@ -555,7 +557,10 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
     // next in their size; every cell its colour (the ground), size and radius, its day text in
     // its colour and role; the four looks on the cells they apply to (logical names of the same
     // nodes): the chosen day, the days between the ends, today's border, the days outside.
-    "trigger.size": [{ node: "trigger", fields: ["width", "height"] }],
+    // Spec 035 2.3.1: the calendar as large as the chevron of a select – its glyphs take the
+    // size, the trigger around them stays a target of at least its width (as the clear button).
+    "trigger.size": [{ node: "trigger-glyph-*", fields: ["width", "height"] }],
+    "trigger.width": [{ node: "trigger", fields: ["minWidth", "minHeight"] }],
     "calendar.fill": [{ node: "calendar", fields: ["fills"], paint: true }],
     "calendar.radius": [{ node: "calendar", fields: ["cornerRadius"] }],
     "calendar.width": [{ node: "calendar", fields: ["width"] }],
@@ -6148,6 +6153,11 @@ async function applyComponents(variables, warnings) {
         }
       }
       const dateTexts = (monthText !== undefined ? [monthText] : []).concat(weekdayTexts).concat(cells.map((cell) => cell.text));
+      // Spec 035 2.3.2: a toggle shows its box first, its texts to its right, as on the web. The
+      // ring is placed first, the texts after it: every move goes towards the start – Figma
+      // counts the index of a move towards the end before it takes the child out (insertChild(1,
+      // texts) left the texts first), a move towards the start lands where it is told.
+      if (isToggle && field.children.indexOf(ring) !== 0) field.insertChild(0, ring);
       if (isToggle && column === undefined && field.children.indexOf(labelPlaced) !== 1) field.insertChild(1, labelPlaced);
       if (column !== undefined && field.children.indexOf(column) !== 1) field.insertChild(1, column);
       if (column !== undefined && column.children.indexOf(labelPlaced) !== 0) column.insertChild(0, labelPlaced);
@@ -6286,15 +6296,27 @@ async function applyComponents(variables, warnings) {
       for (const frame of [node, ring, gap]) own(frame, HUG_LAYOUT);
       if (field) own(field, isToggle ? TOGGLE_LAYOUT : FIELD_LAYOUT);
       if (dated && trigger !== undefined && calendar !== undefined && head !== undefined && weekdays !== undefined) {
-        // The row lines up the ring and the trigger; the trigger and the month buttons hold their
-        // glyphs in a fixed box the plan sizes; the calendar is a column as wide as its token,
+        // The month buttons hold their glyphs in a fixed box the plan sizes; the calendar is a column as wide as its token,
         // shown where the variant is expanded; head, weekdays and weeks are rows, every cell a
         // fixed box with its day centred.
-        for (const holder of [trigger, prev, next]) {
+        for (const holder of [prev, next]) {
           own(holder, CONTROL_LAYOUT);
           own(holder, { layoutSizingHorizontal: "FIXED", layoutSizingVertical: "FIXED" });
         }
-        Object.assign(glyphNodes, drawGlyphs(trigger, icons.trigger || "calendar", "trigger-", glyphMeasures));
+        // Spec 035 2.3.1: the trigger is laid out as the clear button – the calendar in the
+        // middle of a box that hugs it and is at least the target (trigger.width).
+        own(trigger, TARGET_LAYOUT);
+        const calendarGlyphs = drawGlyphs(trigger, icons.trigger || "calendar", "trigger-", glyphMeasures);
+        Object.assign(glyphNodes, calendarGlyphs);
+        // Spec 035 2.3.1: the calendar is painted as the clear button beside it (the label colour
+        // of the butono of emphasis low the web composes); a vector without a fill paints nothing.
+        const calendarColour = typeof component.triggerColor === "string" ? variables.get(component.triggerColor) : undefined;
+        if (calendarColour !== undefined) {
+          for (const [key, node] of Object.entries(calendarGlyphs)) {
+            if (key.indexOf("trigger-mark-") !== 0) continue;
+            gather(node).fills = [figma.variables.setBoundVariableForPaint({ type: "SOLID", color: { r: 0, g: 0, b: 0 } }, "color", calendarColour)];
+          }
+        }
         Object.assign(glyphNodes, drawGlyphs(prev, icons.prev || "chevron-left", "prev-", glyphMeasures));
         Object.assign(glyphNodes, drawGlyphs(next, icons.next || "chevron-right", "next-", glyphMeasures));
         own(calendar, SURFACE_LAYOUT);

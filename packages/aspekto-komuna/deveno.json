@@ -6376,10 +6376,54 @@
       "dosiero": "packages/core/src/DateInput/DateInput.tsx",
       "sxlosilo": "DateInput {} rest, hell: div[data-size] > button:first-child inline-size (gemessen)",
       "fontoValoro": "16px",
+      "valoro": "{size.icon.small}",
+      "maniero": "derivita",
+      "noto": "Spec 035 2.3.1: der Kalender ist so groß wie der Pfeil des elektilo der Größe medium (ero.elektilo.indicator.size.size.medium, gemessen an der Fonto); das Ziel des Knopfs trägt ero.datelektilo.trigger.width."
+    },
+    {
+      "token": "ero.datelektilo.trigger.width",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/DateInput/DateInput.tsx",
+      "sxlosilo": "DateInput {} rest, hell: div[data-size] > button:first-child inline-size (gemessen)",
+      "fontoValoro": "16px",
       "valoro": "{size.target.min}",
       "maniero": "adaptita",
       "jugxo": "jug_01M5ZT2Z2V5GMPZXTDV3BK8PRE",
       "kialo": "Die Fonto zeichnet 16 px; ein Ziel für den Zeiger braucht 24 px (touch-target-min, WCAG 2.5.8): size.target.min."
+    },
+    {
+      "token": "ero.datelektilo.surface.fill.readonly",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/TextInput/TextInput.tsx",
+      "sxlosilo": "TextInput {\"size\":\"sm\"} readonly, hell: [object Object] background-color (gemessen)",
+      "fontoValoro": "#ffffff",
+      "valoro": "{color.background.raised}",
+      "maniero": "derivita",
+      "noto": "Spec 035 2.3.4 (V-1): schreibgeschützt wie die Fonto – ihre Felder mit diesem Zustand (Textfeld, Auswahl, Mehrfachauswahl) zeigen das Aussehen der Ruhe; ihr Datumsfeld hat keinen, für den datelektilo gilt die Regel der anderen (wie ero.kampo.surface.fill.readonly)."
+    },
+    {
+      "token": "ero.datelektilo.surface.fill.readonly",
+      "aro": "aspekto/komuna+color-scheme/dark",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/TextInput/TextInput.tsx",
+      "sxlosilo": "TextInput {\"size\":\"sm\"} readonly, dunkel: [object Object] background-color (gemessen)",
+      "fontoValoro": "#262626",
+      "valoro": "{color.background.default}",
+      "maniero": "derivita",
+      "noto": "Spec 035 2.3.4 (V-1): schreibgeschützt wie die Fonto – ihre Felder mit diesem Zustand (Textfeld, Auswahl, Mehrfachauswahl) zeigen das Aussehen der Ruhe; ihr Datumsfeld hat keinen, für den datelektilo gilt die Regel der anderen (wie ero.kampo.surface.fill.readonly)."
+    },
+    {
+      "token": "ero.datelektilo.label.color.readonly",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/TextInput/TextInput.tsx",
+      "sxlosilo": "TextInput {\"size\":\"sm\"} readonly, hell: label color (gemessen)",
+      "fontoValoro": "#474747",
+      "valoro": "{color.text.muted}",
+      "maniero": "derivita",
+      "noto": "Spec 035 2.3.4 (V-1): schreibgeschützt wie die Fonto – ihre Felder mit diesem Zustand (Textfeld, Auswahl, Mehrfachauswahl) zeigen das Aussehen der Ruhe; ihr Datumsfeld hat keinen, für den datelektilo gilt die Regel der anderen (wie ero.kampo.label.color.readonly)."
     },
     {
       "token": "ero.datelektilo.calendar.fill",
@@ -7417,6 +7461,17 @@
       "valoro": "{size.icon.small}",
       "maniero": "derivita",
       "noto": "Abnahme #122: die Icons am Ende eines Feldes sind so groß wie der Pfeil eines Feldes derselben Größe (ero.elektilo.indicator.size, gemessen an der Fonto)."
+    },
+    {
+      "token": "ero.datelektilo.clear.size",
+      "aro": "core",
+      "fonto": "astryx",
+      "dosiero": "packages/core/src/Selector/Selector.tsx",
+      "sxlosilo": "Selector {\"size\":\"md\"} rest, hell: [object Object] inline-size (gemessen)",
+      "fontoValoro": "16px",
+      "valoro": "{size.icon.small}",
+      "maniero": "derivita",
+      "noto": "Spec 035 2.3.3: das ✕ des datelektilo ist so groß wie das des kampo der Größe medium (ero.kampo.clear.size.size.medium) und wie der Kalender daneben."
     },
     {
       "token": "ero.elektilo.help.color",

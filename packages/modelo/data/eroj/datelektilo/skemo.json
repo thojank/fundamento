@@ -204,6 +204,9 @@
       },
       "trigger": {
         "size": {
+          "fixed": "size.icon.medium"
+        },
+        "width": {
           "fixed": "size.target.min"
         }
       },
@@ -371,6 +374,9 @@
       },
       "clear": {
         "size": {
+          "fixed": "size.icon.medium"
+        },
+        "width": {
           "fixed": "size.target.min"
         }
       },
@@ -429,7 +435,7 @@
         "when": {
           "state": "readonly"
         },
-        "token": "color.background.sunken"
+        "token": "color.background.default"
       },
       {
         "part": "border",

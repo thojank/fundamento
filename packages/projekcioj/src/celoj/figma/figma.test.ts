@@ -999,7 +999,10 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
     expect(variant("medium", "invalid")?.bindings["border.color"]).toBe(
       "color/status/danger/border",
     );
-    expect(variant("medium", "readonly")?.bindings["surface.fill"]).toBe("color/background/sunken");
+    // Spec 035 2.3.4 (V-1): read-only keeps the look of rest.
+    expect(variant("medium", "readonly")?.bindings["surface.fill"]).toBe(
+      "color/background/default",
+    );
     // F-4: the control shows the placeholder, so its colour is drawn and the typed text's is not.
     expect(rest?.notDrawn?.["text.color"]).toBe("jug_01M4S2R85WRAC5SV7CARH8RE7S");
     expect(rest?.notDrawn?.["required-mark.color"]).toBe("jug_01M4S2R85WRAC5SV7CARH8RE7S");
@@ -3860,7 +3863,9 @@ describe("the Figma plan draws the datelektilo (Spec 025 ②)", () => {
     expect(closed?.bindings).toMatchObject({
       "surface.fill": "color/background/default",
       "border.color": "color/border/default",
-      "trigger.size": "size/target/min",
+      // Spec 035 2.3.1: the calendar as large as the chevron, the trigger the target.
+      "trigger.size": "size/icon/medium",
+      "trigger.width": "size/target/min",
       "calendar.fill": "color/background/raised",
       "calendar.radius": "radius/role/surface",
       "calendar.width": "size/container/small",
