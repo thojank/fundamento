@@ -1,15 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/explain_regulo.input.json",
+  "$id": "urn:fundamento:schema:mcp:explain_regulo.input",
   "title": "explain_regulo input",
   "description": "What a Regulo says and why: statement, kialo, how it is checked, its scope and threshold, how many distinct violations the served Modelo has per Aspekto, and the Jugxoj about it. Name the Regulo by name or by ID.",
   "type": "object",
   "properties": {
     "name": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
     },
     "id": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/ReguloId"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/ReguloId"
     },
     "lingvo": {
       "description": "The language of the texts of the answer (Nachlese 8 ③): \"de\" gives the purpose, the kialoj and the Reguloj in German, from data/tradukoj.json; without it or with \"en\" English, the source. Names, cases and keywords stay.",

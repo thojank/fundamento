@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/preview_agordo.output.json",
+  "$id": "urn:fundamento:schema:mcp:preview_agordo.output",
   "title": "preview_agordo output",
   "description": "The report of the Agordilo for one Agordo (raporto.json of `fm agordilo derive`, without the pair list), the lead colour's own contrast against white and black, and the light steps of the six palettes. writes is always false.",
   "type": "object",
   "properties": {
     "aspekto": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
     },
     "exportable": {
       "type": "boolean"
@@ -125,10 +125,10 @@
             "type": "object",
             "properties": {
               "id": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/ReguloId"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/ReguloId"
               },
               "name": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
               },
               "kialo": {
                 "type": "string",

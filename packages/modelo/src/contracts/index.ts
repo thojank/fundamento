@@ -8,4 +8,5 @@ export * from "./grammar.js";
 export * from "./issues.js";
 export * from "./jugxo.js";
 export * from "./modelo.js";
+export * from "./names.js";
 export * from "./schema.js";

@@ -711,7 +711,7 @@ export interface TokenSetFile {
  * via the `definition` "SetExtensions".
  */
 export interface SetExtensions {
-  "com.ciferecigo.fundamento"?: SetFundamentoExtension;
+  fundamento?: SetFundamentoExtension;
   [k: string]: unknown;
 }
 /**
@@ -1797,7 +1797,7 @@ export interface TokenFundamentoExtension {
  * via the `definition` "TokenExtensions".
  */
 export interface TokenExtensions {
-  "com.ciferecigo.fundamento"?: TokenFundamentoExtension;
+  fundamento?: TokenFundamentoExtension;
   [k: string]: unknown;
 }
 /**
@@ -1807,7 +1807,7 @@ export interface TokenExtensions {
  * via the `definition` "GroupExtensions".
  */
 export interface GroupExtensions {
-  "com.ciferecigo.fundamento"?: never;
+  fundamento?: never;
   [k: string]: unknown;
 }
 /**

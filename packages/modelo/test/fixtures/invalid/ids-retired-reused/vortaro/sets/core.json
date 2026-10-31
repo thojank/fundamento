@@ -1,6 +1,6 @@
 {
   "$extensions": {
-    "com.ciferecigo.fundamento": {
+    "fundamento": {
       "id": "set_01M2SVWYM039AWTQ5JA8FTY23W",
       "kondicxoj": []
     }
@@ -20,7 +20,7 @@
             "hex": "#ffffff"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2SVWYM039AWTQ5JA8FTY23X"
             }
           }
@@ -36,7 +36,7 @@
             "hex": "#1a1a1a"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2SVWYM039AWTQ5JA8FTY23Y"
             }
           }
@@ -47,7 +47,7 @@
       "default": {
         "$value": "{color.palette.neutral.0}",
         "$extensions": {
-          "com.ciferecigo.fundamento": {
+          "fundamento": {
             "id": "tok_01M2SVWYM039AWTQ5JA8FTY23Z",
             "role": "background"
           }
@@ -58,7 +58,7 @@
       "default": {
         "$value": "{color.palette.neutral.900}",
         "$extensions": {
-          "com.ciferecigo.fundamento": {
+          "fundamento": {
             "id": "tok_01M2SVWYM039AWTQ5JA8FTY240",
             "role": "foreground"
           }

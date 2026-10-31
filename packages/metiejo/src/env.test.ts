@@ -137,3 +137,32 @@ describe("the files of the checkout (§4.3)", () => {
     expect(parseEnv(text)).toEqual({});
   });
 });
+
+// Spec 036 6.6 (D-22): the private font repository is reached only through FM_TIPAROJ_REPO. No code
+// finds a local folder by the repository's name, so there is no second variable: a FM_TIPAROJ_DIR
+// in the .env is unknown to the Metiejo and changes nothing.
+describe("Spec 036 6.6: the private fonts come from FM_TIPAROJ_REPO alone", () => {
+  const REPO = "beispiel/schriften-attrappe";
+  const line = (name: string, value: string) => [name, value].join("=");
+
+  it("with only FM_TIPAROJ_REPO the settings name that repository", () => {
+    const root = join(scratch, "nur-repo");
+    mkdirSync(root, { recursive: true });
+    writeFileSync(join(root, ".env"), `${line("FM_TIPAROJ_REPO", REPO)}\n`);
+    expect(readSettings(root)).toEqual({ tiparojRepo: REPO, present: ["FM_TIPAROJ_REPO"] });
+  });
+
+  it("an unknown FM_TIPAROJ_DIR in the .env changes nothing", () => {
+    const only = join(scratch, "nur-repo-2");
+    const both = join(scratch, "repo-und-ordner");
+    for (const root of [only, both]) mkdirSync(root, { recursive: true });
+    writeFileSync(join(only, ".env"), `${line("FM_TIPAROJ_REPO", REPO)}\n`);
+    writeFileSync(
+      join(both, ".env"),
+      `${line("FM_TIPAROJ_REPO", REPO)}\n${line("FM_TIPAROJ_DIR", join(scratch, "attrappe-ordner"))}\n`,
+    );
+    expect(readSettings(both)).toEqual(readSettings(only));
+    expect((ENV_NAMES as readonly string[]).includes("FM_TIPAROJ_DIR")).toBe(false);
+    expect(envExampleText()).not.toContain("FM_TIPAROJ_DIR");
+  });
+});

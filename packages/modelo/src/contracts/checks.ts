@@ -11,6 +11,9 @@ export const CHECK_NAMES = [
   "clean-room",
   "ikonaro",
   "fontoj",
+  // Spec 036 Teil 6 (6.4, D-10): no versioned file names the word of R-12 or the private font
+  // repository.
+  "privat",
 ] as const;
 
 export type CheckName = (typeof CHECK_NAMES)[number];

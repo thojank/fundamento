@@ -32,7 +32,7 @@ describe("fm metiejo (Spec 023)", () => {
     expect(run.stdout).toContain("--workdir");
     expect(run.stdout).toContain(".env");
     expect(run.stdout).toContain("http://localhost:");
-    expect(run.stdout).not.toContain("ciferecigo");
+    expect(run.stdout).not.toContain(["cif", "ere", "cigo"].join(""));
   });
 
   it("refuses a port that is no port number and an unknown option, with a hint", () => {

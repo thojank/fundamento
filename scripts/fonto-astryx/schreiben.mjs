@@ -12,7 +12,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dtcg, deveno as farbDeveno, hexOf, palette, roleOut } from "./werte.mjs";
 
 const [repo] = process.argv.slice(2);
-const EXT = "com.ciferecigo.fundamento";
+const EXT = "fundamento";
 const FONTO = "astryx";
 const F_THEME = "packages/themes/neutral/src/neutralTheme.ts";
 const F_CSS = "packages/themes/neutral/dist/theme.css";

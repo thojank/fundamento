@@ -26,7 +26,7 @@ Phase 3 pulls one Ero, `butono`, through every layer. It adds two packages, `@fu
 | Storage | Git; Skemo and Ero data as JSON in `packages/modelo/data/eroj/`; generated artifacts under `packages/*/dist` and `packages/eroj/src/generated/`, never committed |
 | Testing | Vitest (generators, schema, Gvidanto), Playwright (rendered component, accessibility, RTL, expansion, computed styles), fresh-project build tests; red before implementation for every task (Spec 002 Complexity Tracking) |
 | Performance goals | `get_ero`, `suggest_ero`, `check_usage` < 100 ms per call; generation of all projections < 10 s; Playwright suite < 5 min in CI |
-| Constraints | Plan-independent Figma path; no source only in Figma; no hardcoded values in projections (`check:vortaro-lint` now has real CSS to lint); byte-identical generation; no ciferecigo in any registry or Figma account |
+| Constraints | Plan-independent Figma path; no source only in Figma; no hardcoded values in projections (`check:vortaro-lint` now has real CSS to lint); byte-identical generation; no privata in any registry or Figma account |
 | Scale | 1 Ero, 3 variants × 2 tones × 3 sizes × 6 states; 2 test Aspektoj; 4 colour classes each; ~640 Figma variables (research §6.2) |
 
 ## Constitution Check (gate before design)
@@ -36,7 +36,7 @@ Phase 3 pulls one Ero, `butono`, through every layer. It adds two packages, `@fu
 | Constitution v1.5 ratified on `main` (`cec596d`); this spec is the amendment | pass |
 | ≤ 3 new packages (Art. XI) | pass (2: `projekcioj`, `eroj`; Make Kit packages are build outputs) |
 | Depth before breadth (Art. IX): one Ero through every layer | pass |
-| Clean room (Art. V): no benchmark content; ciferecigo stays out of registries and accounts | pass |
+| Clean room (Art. V): no benchmark content; privata stays out of registries and accounts | pass |
 | Figma path independent of Organization/Enterprise (spec clarification) | pass (D-12, D-13) |
 | Open questions | none; Q1–Q4 decided by the maintainer ("Maintainer decisions") |
 
@@ -151,10 +151,10 @@ The existing token-level `check:alirebleco` stays unchanged. Art. X gate 4 now c
 ### D-11 State text colours (FR-18, decision): still none in the core
 
 The real component uses `color.action.<v>.text` in rest, hover, pressed, focus and loading, and `color.text.disabled` in disabled.
-- Every state's label-on-surface pair is a declared KontrastParo and passes in all combinations of komuna, ekzemplo and ciferecigo (Spec 002; T026). `skemo-kontrastparo-missing` keeps it that way.
+- Every state's label-on-surface pair is a declared KontrastParo and passes in all combinations of komuna, ekzemplo and privata (Spec 002; T026). `skemo-kontrastparo-missing` keeps it that way.
 - Focus changes the ring, not the text. Loading keeps the rest surface.
 - So the real component, like the Phase-2 data, needs no per-state text colour.
-- The open finding from ciferecigo Rule 8 was solved by moving states away from the text lightness.
+- The open finding from privata Rule 8 was solved by moving states away from the text lightness.
 
 The decision stands until an Ero needs inverted text in a state (for example a filled selected state of a toggle in Phase 4); that Ero's spec introduces the token.
 
@@ -279,10 +279,10 @@ Every visible text comes from the slot or a prop; the Web Component contains no 
 
 ## Maintainer decisions (review 2026-09-19)
 
-- **Q1 – Danger tone.** A prop `tone: default | danger` and four role tokens `color.action.danger.{rest,hover,pressed,text}` in core, komuna and ekzemplo. `state-distinct` and the KontrastParoj apply to them as to every action. Breaking for external Aspektoj (completeness); ciferecigo is re-derived at the end of the phase, as a follow-up task like T026 of Spec 002.
+- **Q1 – Danger tone.** A prop `tone: default | danger` and four role tokens `color.action.danger.{rest,hover,pressed,text}` in core, komuna and ekzemplo. `state-distinct` and the KontrastParoj apply to them as to every action. Breaking for external Aspektoj (completeness); privata is re-derived at the end of the phase, as a follow-up task like T026 of Spec 002.
 - **Q2 – Make Kits on npm.** Public pre-releases under the dist-tag `next`, version 0.x, for `@fundamento/make-kit-komuna` and `@fundamento/make-kit-ekzemplo`; no organisation registry. Publishing happens after the acceptance and by the maintainer; the phase prepares `pnpm publish --dry-run` and documents the result (D-14).
-- **Q3 – ciferecigo Rule 9** stays.
-- **Q4 – sunken depth zero in ciferecigo light** is accepted. `docs/vojmapo.md` records it as a requirement for Phase 7: the Enportilo creates intermediate steps when rules collide on the ramp.
+- **Q3 – privata Rule 9** stays.
+- **Q4 – sunken depth zero in privata light** is accepted. `docs/vojmapo.md` records it as a requirement for Phase 7: the Enportilo creates intermediate steps when rules collide on the ramp.
 - **Tailwind naming** accepted as Constitution v1.6 in this phase (D-06), with a Jugxo on Article XII.
 - **Red before the implementation, without exception.**
 
@@ -347,7 +347,7 @@ One entry per Article of Constitution v1.5.
 **Verdict:** conforming
 - **No benchmark content.** No component code, names or examples from other systems. `butono`'s behaviour follows the HTML button element and WAI-ARIA, which are standards, not systems.
 - **Icons.** No icon set is shipped; icon slots take whatever the user puts in, and Figma gets a neutral placeholder square.
-- **Test account.** A separate team, no other libraries enabled (not even as AI context), no publishing into the owner's registries. ciferecigo is never loaded into Figma or a registry (spec clarification).
+- **Test account.** A separate team, no other libraries enabled (not even as AI context), no publishing into the owner's registries. privata is never loaded into Figma or a registry (spec clarification).
 
 ### Article VI – Regularo kun Kialoj
 **Verdict:** conforming

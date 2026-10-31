@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/save_agordo.input.json",
+  "$id": "urn:fundamento:schema:mcp:save_agordo.input",
   "title": "save_agordo input",
   "description": "Saves an Agordo as a JSON file (Spec 019 ③, G6, W-25, W-26) — the one tool that writes, and only with confirm: true. Without confirm it answers with what it would write and writes nothing; ask the person before you confirm. It writes only inside the server's working directory, only *.json, and never over a file that is no Agordo. Every save appends an entry to the Agordo's historio (date, the wish or „Hand“, the diff of the sliders). A fixed rule locks the save like the Werkstatt's export; an adjustable one needs a Jugxo in the Agordo. Not available over HTTP.",
   "type": "object",
   "properties": {
     "agordo": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Agordo"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/Agordo"
     },
     "pfad": {
       "type": "string",

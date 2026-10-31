@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/get_ero.output.json",
+  "$id": "urn:fundamento:schema:mcp:get_ero.output",
   "title": "get_ero output",
   "description": "One Ero as the Gvidanto states it (Spec 003 FR-13, contracts/mcp-tools §1), with its Uzo since Spec 007; or, with brief: true, the generated brief (A8).",
   "oneOf": [
@@ -11,10 +11,10 @@
           "type": "object",
           "properties": {
             "id": {
-              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/EroId"
+              "$ref": "urn:fundamento:schema:modelo#/$defs/EroId"
             },
             "name": {
-              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+              "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
             },
             "label": {
               "description": "The display name in the language asked for (Spec 026 ②), only with lingvo; the name stays the identifier.",
@@ -33,53 +33,53 @@
           "type": "object",
           "properties": {
             "id": {
-              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SkemoId"
+              "$ref": "urn:fundamento:schema:modelo#/$defs/SkemoId"
             },
             "props": {
               "type": "array",
               "items": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SkemoProp"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/SkemoProp"
               }
             },
             "states": {
               "type": "array",
               "items": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
               },
               "minItems": 1
             },
             "slots": {
               "type": "array",
               "items": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SkemoSlot"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/SkemoSlot"
               }
             },
             "parts": {
               "type": "object",
               "additionalProperties": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SkemoPart"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/SkemoPart"
               }
             },
             "bindings": {
               "type": "array",
               "items": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SkemoBinding"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/SkemoBinding"
               }
             },
             "a11y": {
-              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SkemoA11y"
+              "$ref": "urn:fundamento:schema:modelo#/$defs/SkemoA11y"
             },
             "events": {
               "description": "The events the element says (Spec 025 ①): change, input, a cancelable remove.",
               "type": "array",
               "items": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SkemoEvent"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/SkemoEvent"
               }
             },
             "goals": {
               "type": "array",
               "items": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SkemoGoal"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/SkemoGoal"
               }
             }
           },
@@ -89,7 +89,7 @@
         "reguloj": {
           "type": "array",
           "items": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/ReguloRef"
+            "$ref": "urn:fundamento:schema:mcp:common#/$defs/ReguloRef"
           }
         },
         "examples": {
@@ -98,7 +98,7 @@
             "type": "object",
             "properties": {
               "jugxo": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/JugxoId"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/JugxoId"
               },
               "decision": {
                 "enum": ["approved", "rejected", "deviation-recorded"]
@@ -108,12 +108,12 @@
                 "minLength": 1
               },
               "regulo": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/ReguloRef"
+                "$ref": "urn:fundamento:schema:mcp:common#/$defs/ReguloRef"
               },
               "instances": {
                 "type": "array",
                 "items": {
-                  "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/EroInstance"
+                  "$ref": "urn:fundamento:schema:modelo#/$defs/EroInstance"
                 },
                 "minItems": 1
               }
@@ -135,14 +135,14 @@
                 "attributes": {
                   "type": "object",
                   "propertyNames": {
-                    "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                    "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
                   },
                   "additionalProperties": {
                     "anyOf": [
                       {
                         "type": "array",
                         "items": {
-                          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                          "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
                         },
                         "minItems": 1
                       },
@@ -155,7 +155,7 @@
                 "slots": {
                   "type": "array",
                   "items": {
-                    "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                    "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
                   }
                 },
                 "defaultSlot": {
@@ -185,7 +185,7 @@
                       {
                         "type": "array",
                         "items": {
-                          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                          "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
                         },
                         "minItems": 1
                       },
@@ -203,19 +203,19 @@
               "type": "object",
               "properties": {
                 "componentSet": {
-                  "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                  "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
                 },
                 "properties": {
                   "type": "object",
                   "propertyNames": {
-                    "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                    "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
                   },
                   "additionalProperties": {
                     "anyOf": [
                       {
                         "type": "array",
                         "items": {
-                          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                          "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
                         },
                         "minItems": 1
                       },
@@ -312,13 +312,13 @@
             "instead": {
               "type": "array",
               "items": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/UzoInstead"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/UzoInstead"
               }
             },
             "boundary": {
               "type": "array",
               "items": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/UzoBoundary"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/UzoBoundary"
               },
               "minItems": 1
             },
@@ -331,7 +331,7 @@
                     "type": "object",
                     "properties": {
                       "name": {
-                        "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                        "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
                       },
                       "kialo": {
                         "type": "string",
@@ -345,13 +345,13 @@
                 "with": {
                   "type": "array",
                   "items": {
-                    "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/UzoEroRelation"
+                    "$ref": "urn:fundamento:schema:modelo#/$defs/UzoEroRelation"
                   }
                 },
                 "never": {
                   "type": "array",
                   "items": {
-                    "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/UzoEroRelation"
+                    "$ref": "urn:fundamento:schema:modelo#/$defs/UzoEroRelation"
                   }
                 },
                 "spacing": {
@@ -361,7 +361,7 @@
                       "const": "container"
                     },
                     "regulo": {
-                      "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/ReguloRef"
+                      "$ref": "urn:fundamento:schema:mcp:common#/$defs/ReguloRef"
                     }
                   },
                   "required": ["owner", "regulo"],
@@ -374,10 +374,10 @@
             "slots": {
               "type": "object",
               "propertyNames": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
               },
               "additionalProperties": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/UzoSlot"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/UzoSlot"
               }
             },
             "layout": {
@@ -404,19 +404,19 @@
                       "containers": {
                         "type": "array",
                         "items": {
-                          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                          "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
                         },
                         "minItems": 1
                       },
                       "dimensioj": {
                         "type": "object",
                         "propertyNames": {
-                          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                          "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
                         },
                         "additionalProperties": {
                           "type": "array",
                           "items": {
-                            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                            "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
                           },
                           "minItems": 1
                         }
@@ -425,7 +425,7 @@
                     "additionalProperties": false
                   },
                   "regulo": {
-                    "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/ReguloRef"
+                    "$ref": "urn:fundamento:schema:mcp:common#/$defs/ReguloRef"
                   }
                 },
                 "required": ["allowedIn", "regulo"],
@@ -438,7 +438,7 @@
                 "type": "object",
                 "properties": {
                   "regulo": {
-                    "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/ReguloRef"
+                    "$ref": "urn:fundamento:schema:mcp:common#/$defs/ReguloRef"
                   },
                   "fixed": {
                     "type": "boolean"
@@ -457,7 +457,7 @@
                       "goal": {
                         "type": "array",
                         "items": {
-                          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                          "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
                         },
                         "minItems": 1
                       },
@@ -466,7 +466,7 @@
                         "additionalProperties": {
                           "type": "array",
                           "items": {
-                            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                            "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
                           },
                           "minItems": 1
                         }
@@ -496,7 +496,7 @@
       "type": "object",
       "properties": {
         "ero": {
-          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+          "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
         },
         "purpose": {
           "type": "string",
@@ -508,12 +508,12 @@
             "type": "object",
             "properties": {
               "name": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
               },
               "values": {
                 "type": "array",
                 "items": {
-                  "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                  "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
                 },
                 "minItems": 1
               },
@@ -522,7 +522,7 @@
               },
               "slot": {
                 "description": "The slot whose entries carry this state (Spec 011 ① O-3): selected is the state of one option of the slot options, no prop of the Ero.",
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
               }
             },
             "required": ["name", "values"],
@@ -536,7 +536,7 @@
             "type": "object",
             "properties": {
               "name": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
               },
               "type": {
                 "enum": ["string", "boolean", "number", "enum"]
@@ -555,7 +555,7 @@
           "description": "Every boolean prop that is no axis, by name, in Skemo order (Spec 029 ②b-1): what may be switched on beyond the axes, such as loading or clearable at a field. Absent when there is none.",
           "type": "array",
           "items": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+            "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
           },
           "minItems": 1
         },
@@ -565,13 +565,13 @@
             "props": {
               "type": "array",
               "items": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
               }
             },
             "slots": {
               "type": "array",
               "items": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
               }
             }
           },
@@ -584,12 +584,12 @@
             "type": "object",
             "properties": {
               "goal": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
               },
               "ero": {
                 "anyOf": [
                   {
-                    "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                    "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
                   },
                   {
                     "type": "null"
@@ -612,13 +612,13 @@
             "type": "object",
             "properties": {
               "case": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
               },
               "action": {
                 "enum": ["use-instead", "ask-human", "not-supported"]
               },
               "ero": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
               }
             },
             "required": ["case", "action"],
@@ -628,7 +628,7 @@
         "issues": {
           "type": "array",
           "items": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/Issue"
+            "$ref": "urn:fundamento:schema:mcp:common#/$defs/Issue"
           }
         }
       },

@@ -5,11 +5,12 @@
 
 import { readFileSync } from "node:fs";
 import { createModeloAjv } from "../contracts/ajv.js";
+import { normalizeNames } from "../contracts/names.js";
 import { readModeloSchema } from "../contracts/schema.js";
 
 export const ONTOLOGIO_URL = new URL("../../data/ontologio.json", import.meta.url);
 export const ONTOLOGIO_SCHEMA_URL = new URL("../../schema/ontologio.schema.json", import.meta.url);
-export const ONTOLOGIO_BASE = "https://fundamento.ciferecigo.com/ontologio";
+export const ONTOLOGIO_BASE = "urn:fundamento:ontologio";
 
 export interface OntologioConcept {
   uri: string;
@@ -53,7 +54,9 @@ export function readOntologioText(): string {
 }
 
 export function readOntologio(): Ontologio {
-  return JSON.parse(readOntologioText()) as Ontologio;
+  // Spec 036 6.3: an Ontologio with the base of either form is read with the base the code writes.
+  const text = readOntologioText();
+  return normalizeNames(JSON.parse(text) as Ontologio, text);
 }
 
 /** The bold first-column terms of the table under `## Terminologio` in the Constitution. */
@@ -83,10 +86,12 @@ export function checkOntologio(
   eroNames?: readonly string[],
 ): OntologioProblem[] {
   const problems: OntologioProblem[] = [];
+  // Spec 036 6.3: the URIs of either form are checked in the form the code writes.
+  const normalized = normalizeNames(value);
   const validate = createModeloAjv().compile(
     JSON.parse(readFileSync(ONTOLOGIO_SCHEMA_URL, "utf8")) as Record<string, unknown>,
   );
-  if (!validate(value)) {
+  if (!validate(normalized)) {
     for (const error of validate.errors ?? []) {
       problems.push({
         check: "schema",
@@ -95,7 +100,7 @@ export function checkOntologio(
     }
     return problems;
   }
-  const ontologio = value as Ontologio;
+  const ontologio = normalized as Ontologio;
   const concepts = ontologio.concepts;
   const byTerm = new Map(concepts.map((concept) => [concept.term, concept]));
 

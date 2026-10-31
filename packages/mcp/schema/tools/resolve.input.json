@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/resolve.input.json",
+  "$id": "urn:fundamento:schema:mcp:resolve.input",
   "title": "resolve input",
   "description": "Resolve an assignment: value and provenance per token.",
   "type": "object",
@@ -8,7 +8,7 @@
     "assignment": {
       "type": "object",
       "propertyNames": {
-        "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+        "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
       },
       "additionalProperties": {
         "type": "string",

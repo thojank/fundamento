@@ -1,6 +1,6 @@
 {
   "$extensions": {
-    "com.ciferecigo.fundamento": {
+    "fundamento": {
       "id": "set_01K5FMAJ06444R7MA0HZE3KXSJ",
       "kondicxoj": []
     }
@@ -11,19 +11,19 @@
       "neutral": {
         "0": {
           "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "hex": "#ffffff" },
-          "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01K5FMAJ0AND635FTMQ9558Y63" } }
+          "$extensions": { "fundamento": { "id": "tok_01K5FMAJ0AND635FTMQ9558Y63" } }
         },
         "100": {
           "$value": { "colorSpace": "srgb", "components": [0.95, 0.95, 0.95], "hex": "#f2f2f2" },
-          "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01K5FMAJ0BQ499YPVK4P8NPRZ3" } }
+          "$extensions": { "fundamento": { "id": "tok_01K5FMAJ0BQ499YPVK4P8NPRZ3" } }
         },
         "900": {
           "$value": { "colorSpace": "srgb", "components": [0.1, 0.1, 0.1], "hex": "#1a1a1a" },
-          "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01K5FMAJ0CGDK0SHC894P66C4B" } }
+          "$extensions": { "fundamento": { "id": "tok_01K5FMAJ0CGDK0SHC894P66C4B" } }
         },
         "1000": {
           "$value": { "colorSpace": "srgb", "components": [0, 0, 0], "hex": "#000000" },
-          "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01K5FMAJ0DQ0T56XFQD500JQRD" } }
+          "$extensions": { "fundamento": { "id": "tok_01K5FMAJ0DQ0T56XFQD500JQRD" } }
         }
       }
     },
@@ -32,7 +32,7 @@
         "$value": "{color.palette.neutral.100}",
         "$description": "Default page background.",
         "$extensions": {
-          "com.ciferecigo.fundamento": { "id": "tok_01K5FMAJ0EN8B4C4Z6KSPYEMCX", "role": "background" }
+          "fundamento": { "id": "tok_01K5FMAJ0EN8B4C4Z6KSPYEMCX", "role": "background" }
         }
       }
     },
@@ -41,7 +41,7 @@
         "$value": "{color.palette.neutral.900}",
         "$description": "Default body text.",
         "$extensions": {
-          "com.ciferecigo.fundamento": { "id": "tok_01K5FMAJ0FRV73CQ8J0CJ9HV5S", "role": "foreground" }
+          "fundamento": { "id": "tok_01K5FMAJ0FRV73CQ8J0CJ9HV5S", "role": "foreground" }
         }
       }
     }
@@ -50,12 +50,12 @@
     "small": {
       "$type": "dimension",
       "$value": { "value": 4, "unit": "px" },
-      "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01K5FMAJ0GQGZMPKY9NN4KF5G6" } }
+      "$extensions": { "fundamento": { "id": "tok_01K5FMAJ0GQGZMPKY9NN4KF5G6" } }
     },
     "medium": {
       "$type": "dimension",
       "$value": { "value": 8, "unit": "px" },
-      "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01K5FMAJ0H4CZYQST4Y5HHM8HV" } }
+      "$extensions": { "fundamento": { "id": "tok_01K5FMAJ0H4CZYQST4Y5HHM8HV" } }
     }
   },
   "ero": {
@@ -66,7 +66,7 @@
           "$value": "{color.text.default}",
           "$description": "markobutono: label.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M5GF2CCTFB1A7KQPMVCDECEX",
               "role": "ero"
             }
@@ -79,7 +79,7 @@
           "$value": "{color.text.default}",
           "$description": "markobutono: error.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M5GF2CCVF8ZHHAJ52MF64XRA",
               "role": "ero"
             }
@@ -95,7 +95,7 @@
                 "$value": "{color.text.default}",
                 "$description": "markobutono: surface.fill when checked=true, state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                 "$extensions": {
-                  "com.ciferecigo.fundamento": {
+                  "fundamento": {
                     "id": "tok_01M5GF2CCVF8ZHHAJ52MF64XRB",
                     "role": "ero"
                   }
@@ -106,7 +106,7 @@
                 "$value": "{color.text.default}",
                 "$description": "markobutono: surface.fill when checked=true, state=invalid (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                 "$extensions": {
-                  "com.ciferecigo.fundamento": {
+                  "fundamento": {
                     "id": "tok_01M5GF2CCVF8ZHHAJ52MF64XRC",
                     "role": "ero"
                   }
@@ -119,7 +119,7 @@
                 "$value": "{color.background.default}",
                 "$description": "markobutono: surface.fill when checked=false, state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                 "$extensions": {
-                  "com.ciferecigo.fundamento": {
+                  "fundamento": {
                     "id": "tok_01M5GF2CCVF8ZHHAJ52MF64XRD",
                     "role": "ero"
                   }
@@ -130,7 +130,7 @@
                 "$value": "{color.background.default}",
                 "$description": "markobutono: surface.fill when checked=false, state=invalid (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                 "$extensions": {
-                  "com.ciferecigo.fundamento": {
+                  "fundamento": {
                     "id": "tok_01M5GF2CCVF8ZHHAJ52MF64XRE",
                     "role": "ero"
                   }
@@ -148,7 +148,7 @@
               "$value": "{color.background.default}",
               "$description": "markobutono: indicator.color when checked=true (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
               "$extensions": {
-                "com.ciferecigo.fundamento": {
+                "fundamento": {
                   "id": "tok_01M5GF2CCVF8ZHHAJ52MF64XRF",
                   "role": "ero"
                 }
@@ -161,7 +161,7 @@
           "$value": "{spacing.medium}",
           "$description": "markobutono: indicator.size (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M5GF2CCVF8ZHHAJ52MF64XRG"
             }
           }
@@ -173,7 +173,7 @@
           "$value": "{spacing.small}",
           "$description": "markobutono: box.gap (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M5GF2CCVF8ZHHAJ52MF64XRH"
             }
           }

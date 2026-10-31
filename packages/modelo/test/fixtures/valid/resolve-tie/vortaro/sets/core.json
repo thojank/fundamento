@@ -1,6 +1,6 @@
 {
   "$extensions": {
-    "com.ciferecigo.fundamento": {
+    "fundamento": {
       "id": "set_01M2WRK8G0DDDDDDDDDDDDDDDN",
       "kondicxoj": []
     }
@@ -19,7 +19,7 @@
           "hex": "#1a1a1a"
         },
         "$extensions": {
-          "com.ciferecigo.fundamento": {
+          "fundamento": {
             "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDDW",
             "role": "foreground"
           }

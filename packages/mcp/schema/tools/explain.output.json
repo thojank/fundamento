@@ -1,21 +1,21 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/explain.output.json",
+  "$id": "urn:fundamento:schema:mcp:explain.output",
   "title": "explain output",
   "description": "The explanation of one token in one combination (Spec 002 FR-10).",
   "type": "object",
   "properties": {
     "token": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenName"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/TokenName"
     },
     "id": {
       "type": "string"
     },
     "type": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/DtcgType"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/DtcgType"
     },
     "role": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenRole"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/TokenRole"
     },
     "description": {
       "type": "string"
@@ -23,7 +23,7 @@
     "assignment": {
       "type": "object",
       "additionalProperties": {
-        "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+        "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
       }
     },
     "combination": {
@@ -35,7 +35,7 @@
       "type": "object",
       "properties": {
         "set": {
-          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SetName"
+          "$ref": "urn:fundamento:schema:modelo#/$defs/SetName"
         },
         "package": {
           "type": "string",
@@ -51,10 +51,10 @@
         "type": "object",
         "properties": {
           "token": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenName"
+            "$ref": "urn:fundamento:schema:modelo#/$defs/TokenName"
           },
           "set": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SetName"
+            "$ref": "urn:fundamento:schema:modelo#/$defs/SetName"
           },
           "package": {
             "type": "string",
@@ -70,7 +70,7 @@
       "items": {
         "allOf": [
           {
-            "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/ReguloRef"
+            "$ref": "urn:fundamento:schema:mcp:common#/$defs/ReguloRef"
           }
         ],
         "type": "object",
@@ -90,7 +90,7 @@
           "issues": {
             "type": "array",
             "items": {
-              "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/Issue"
+              "$ref": "urn:fundamento:schema:mcp:common#/$defs/Issue"
             }
           }
         },
@@ -104,13 +104,13 @@
         "type": "object",
         "properties": {
           "id": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/KontrastParoId"
+            "$ref": "urn:fundamento:schema:modelo#/$defs/KontrastParoId"
           },
           "name": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+            "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
           },
           "kategorio": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/KontrastKategorio"
+            "$ref": "urn:fundamento:schema:modelo#/$defs/KontrastKategorio"
           },
           "kialo": {
             "type": "string",
@@ -130,10 +130,10 @@
             "enum": ["main", "aux", null]
           },
           "main": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/Branch"
+            "$ref": "urn:fundamento:schema:mcp:common#/$defs/Branch"
           },
           "aux": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/Branch"
+            "$ref": "urn:fundamento:schema:mcp:common#/$defs/Branch"
           }
         },
         "required": [
@@ -152,7 +152,7 @@
     "jugxoj": {
       "type": "array",
       "items": {
-        "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Jugxo"
+        "$ref": "urn:fundamento:schema:modelo#/$defs/Jugxo"
       }
     }
   },

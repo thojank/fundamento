@@ -2,6 +2,7 @@
 
 import { Ajv2020, type ValidateFunction } from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
+import { addSchemaWithBothIds } from "./names.js";
 import {
   CONFIG_SCHEMA_ID,
   MODELO_SCHEMA_ID,
@@ -15,15 +16,17 @@ export type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
 export type ModeloAjv = Ajv2020;
 
 /**
- * Creates a fresh Ajv instance with the Modelo schema registered under `MODELO_SCHEMA_ID`.
+ * Creates a fresh Ajv instance with the Modelo schema registered under `MODELO_SCHEMA_ID` (and,
+ * for one version, under the ID of the other form, Spec 036 6.3).
  * Strict mode rejects unknown keywords and ambiguous schemas; `allErrors` reports every issue.
  */
 export function createModeloAjv(): ModeloAjv {
   const ajv = new Ajv2020({ strict: true, allErrors: true });
   // ajv-formats is CommonJS; under NodeNext its default export is reached via `.default`.
   addFormats.default(ajv, ["date"]);
-  ajv.addSchema(readModeloSchema());
-  ajv.addSchema(readConfigSchema());
+  // Spec 036 6.3: for one version a schema that refers to either by its old ID resolves, too.
+  addSchemaWithBothIds(ajv, readModeloSchema());
+  addSchemaWithBothIds(ajv, readConfigSchema());
   return ajv;
 }
 

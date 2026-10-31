@@ -4,7 +4,7 @@
 
 ## Zweck
 
-Phase 1 hat gezeigt, was Prüfungen nicht sehen: In der visuellen Abnahme von ciferecigo fielen eine falsch geordnete Fläche, zusammengefallene Textrollen, Aktionszustände ohne Unterschied und eine Warnfläche auf, die nur über einen Umweg Kontrast hielt. Kein Check hatte das gemeldet. Und der Agent, der über MCP gefragt wurde, musste einen Kontrast „nach eigener Rechnung" angeben, weil kein Werkzeug ihn lieferte.
+Phase 1 hat gezeigt, was Prüfungen nicht sehen: In der visuellen Abnahme von privata fielen eine falsch geordnete Fläche, zusammengefallene Textrollen, Aktionszustände ohne Unterschied und eine Warnfläche auf, die nur über einen Umweg Kontrast hielt. Kein Check hatte das gemeldet. Und der Agent, der über MCP gefragt wurde, musste einen Kontrast „nach eigener Rechnung" angeben, weil kein Werkzeug ihn lieferte.
 
 Phase 2 macht Regeln ausführbar und das System erklärbar. Drei Dinge entstehen:
 
@@ -82,7 +82,7 @@ Ein Entwickler registriert den MCP-Server in seinem Agenten. Der Server bietet e
 - **FR-02 `text-hierarchy`** (automatic): In jeder Kombination sind die aufgelösten Werte von `color.text.default`, `.subtle` und `.muted` paarweise verschieden, und ihr Kontrast gegen `background.default` fällt in dieser Reihenfolge (default ≥ subtle ≥ muted). **Ergänzt durch T027 (2026-09-19, Befund der Gvidanto-Abnahme):** Benachbarte Textrollen (default→subtle, subtle→muted) haben in jeder Kombination einen Helligkeitsabstand |ΔL| ≥ `sojlo` in OKLCH, bestimmt nach Komposition; die Schwelle steht als Datenfeld der Regulo (0,05, gemessen in research §8.7). Kialo: Die Textrollen tragen eine Bedeutungsunterscheidung; hoher Kontrast darf sie nicht löschen. Verschieden ist nicht unterscheidbar; eine Hierarchie, die das Auge nicht sieht, existiert nicht.
 - **FR-03 `state-distinct`** (automatic): Für jede Aktionsvariante unterscheiden sich `hover`, `pressed` und `selected` in jeder Kombination wahrnehmbar von `rest`. Die Mindestdifferenz (Metrik und Schwelle) legt der Plan fest (research §2). Kialo: Ein Zustand, der aussieht wie der Ruhezustand, gibt keine Rückmeldung.
 - **FR-04 `semantic-described`** (automatic): Jeder Rollen-Token (Nicht-Primitiv) im Kern hat eine `$description`, die seinen Einsatz beschreibt, nicht seinen Wert. Kialo: Agenten lesen aus nackten Token-Dateien Werte, aber keine Gründe (research §5).
-- **FR-05 Reparatur komuna:** `komuna` erfüllt FR-01 bis FR-04 in allen 72 Kombinationen, ohne eine Schwelle zu senken. Alle Phase-1-Prüfungen bleiben grün. Ob der Kern je Aktionszustand eine eigene Textfarbe braucht (Befund aus ciferecigo, Regel 8), entscheidet der Plan; Bedingung ist nur, dass `komuna` und `ekzemplo` FR-03 erfüllen.
+- **FR-05 Reparatur komuna:** `komuna` erfüllt FR-01 bis FR-04 in allen 72 Kombinationen, ohne eine Schwelle zu senken. Alle Phase-1-Prüfungen bleiben grün. Ob der Kern je Aktionszustand eine eigene Textfarbe braucht (Befund aus privata, Regel 8), entscheidet der Plan; Bedingung ist nur, dass `komuna` und `ekzemplo` FR-03 erfüllen.
 - **FR-06 Statusränder:** Neue Rollen-Tokens `color.status.<s>.border` (Rolle `border`) für `success`, `warning`, `danger`, `info` in Kern, `komuna` und `ekzemplo`.
 - **FR-07 KontrastParo mit Alternative:** Ein KontrastParo darf eine Alternative angeben (Arbeitsname `aux`): Das Paar gilt als erfüllt, wenn das Hauptpaar oder das Alternativpaar seine Schwelle erreicht. Die Alirebleco-Prüfung meldet je Kombination, welcher Zweig erfüllt ist, und nennt bei Verletzung beide. Die Paare `status.<s>.basic` auf `background.default` bekommen `status.<s>.border` auf `background.default` als Alternative. Paare für Text sind davon ausgenommen (Schema-Regel).
 - **FR-08 Issues zitieren ihre Regulo:** Jede Meldung einer Regulo-Prüfung trägt die Regulo-ID und den Kialo-Text, damit ein Agent den Grund zitieren kann, ohne nachzuschlagen.
@@ -98,7 +98,7 @@ Ein Entwickler registriert den MCP-Server in seinem Agenten. Der Server bietet e
 
 ### Ontologio
 
-- **FR-15 `packages/modelo/data/ontologio.json`:** Je Begriff der Terminologie (Constitution v1.4, Tabelle) ein Eintrag mit stabiler URI (`https://fundamento.ciferecigo.com/ontologio#<Begriff>`), Begriff (Esperanto, x-Konvention), Bezeichnung auf Englisch und Deutsch, Definition auf Englisch und Deutsch, Oberbegriff, Beziehungen (Name, Zielbegriff). Feldnamen nach SKOS (research §4), damit ein späterer JSON-LD-Export nur einen Kontext braucht. Eigenes JSON Schema.
+- **FR-15 `packages/modelo/data/ontologio.json`:** Je Begriff der Terminologie (Constitution v1.4, Tabelle) ein Eintrag mit stabiler URI (`urn:fundamento:ontologio#<Begriff>`), Begriff (Esperanto, x-Konvention), Bezeichnung auf Englisch und Deutsch, Definition auf Englisch und Deutsch, Oberbegriff, Beziehungen (Name, Zielbegriff). Feldnamen nach SKOS (research §4), damit ein späterer JSON-LD-Export nur einen Kontext braucht. Eigenes JSON Schema.
 - **FR-16 Drift-Prüfung:** CI schlägt fehl, wenn die Begriffe der Terminologie-Tabelle in der Constitution und die Einträge der Ontologio nicht übereinstimmen, oder wenn eine Entitätsart des Modelo-Schemas keinen Ontologio-Begriff hat.
 - **FR-17 Ressource:** `fundamento://ontologio.json` als MCP-Ressource.
 
@@ -123,7 +123,7 @@ Ein Entwickler registriert den MCP-Server in seinem Agenten. Der Server bietet e
 
 - Höchstens drei neue Pakete (Art. XI); Ziel: keins.
 - Keine Schwelle wird gesenkt, um eine Regulo zu erfüllen.
-- Keine ciferecigo-Werte im Kern-Repo (unverändert AK-08 aus Spec 001).
+- Keine privata-Werte im Kern-Repo (unverändert AK-08 aus Spec 001).
 - Werkzeuge sind read-only, deterministisch, `additionalProperties: false`, Ausgaben kanonisch sortiert.
 - `explain` und `check_contrast` antworten je Aufruf unter 100 ms (Budget wie `resolve`, gemessen in `pnpm perf`).
 - Export bleibt byte-identisch über zwei Builds.
@@ -135,7 +135,7 @@ Ein Entwickler registriert den MCP-Server in seinem Agenten. Der Server bietet e
 - `check_contrast` mit einem Token, der keine Farbe ist: Issue, kein Ergebnis.
 - `check_contrast` mit einer halbtransparenten Vordergrundfarbe: Komposition über den Hintergrund wie in der Alirebleco-Prüfung.
 - Ein KontrastParo mit `aux`, dessen Hauptpaar besteht: Ergebnis „bestanden (Hauptpaar)", die Alternative wird nicht geprüft, aber angezeigt.
-- Ein externes Aspekto-Paket verletzt eine neue Kern-Regulo: `fm modelo validate --aspekto` meldet es wie jede andere Verletzung. Die Maintainer-Abnahme von ciferecigo wird mit dem neuen Kern wiederholt (manuell, außerhalb des Repos).
+- Ein externes Aspekto-Paket verletzt eine neue Kern-Regulo: `fm modelo validate --aspekto` meldet es wie jede andere Verletzung. Die Maintainer-Abnahme von privata wird mit dem neuen Kern wiederholt (manuell, außerhalb des Repos).
 - `describe_term` mit einem deutschen oder englischen Wort („Marke", „brand"): Treffer über die Bezeichnungen.
 
 ## Akzeptanzkriterien

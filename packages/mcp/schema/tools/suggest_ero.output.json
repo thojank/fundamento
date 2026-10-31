@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/suggest_ero.output.json",
+  "$id": "urn:fundamento:schema:mcp:suggest_ero.output",
   "title": "suggest_ero output",
   "description": "The Ero and the props a goal asks for, with the Regulo behind the choice (Spec 003 FR-13, contracts/mcp-tools §2; goal since F1-T00, Spec 007); or the boundary or alternative of a Uzo with its action and kialo (Spec 007 A9, D-06); or, when a boundary and a goal both hit, action ask-human with both candidates (OP-12).",
   "type": "object",
@@ -18,7 +18,7 @@
           "type": "object",
           "properties": {
             "goal": {
-              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+              "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
             },
             "keyword": {
               "type": "string",
@@ -43,7 +43,7 @@
           "type": "object",
           "properties": {
             "ero": {
-              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+              "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
             },
             "label": {
               "description": "The display name in the language asked for (Spec 026 ②), only with lingvo; the name stays the identifier.",
@@ -53,7 +53,7 @@
             "props": {
               "type": "object",
               "propertyNames": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
               },
               "additionalProperties": {
                 "anyOf": [
@@ -78,7 +78,7 @@
           "type": "object",
           "properties": {
             "sxablono": {
-              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+              "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
             },
             "label": {
               "description": "The display name in the language asked for (Spec 026 ②), only with lingvo; the name stays the identifier.",
@@ -88,7 +88,7 @@
             "props": {
               "type": "object",
               "propertyNames": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
               },
               "additionalProperties": {
                 "anyOf": [
@@ -117,10 +117,10 @@
         "type": "object",
         "properties": {
           "region": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+            "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
           },
           "ero": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+            "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
           },
           "props": {
             "type": "object",
@@ -147,7 +147,7 @@
         "type": "object",
         "properties": {
           "name": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+            "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
           },
           "required": {
             "type": "boolean"
@@ -155,7 +155,7 @@
           "accepts": {
             "type": "array",
             "items": {
-              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+              "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
             }
           }
         },
@@ -168,17 +168,17 @@
       "minLength": 1
     },
     "regulo": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/ReguloRef"
+      "$ref": "urn:fundamento:schema:mcp:common#/$defs/ReguloRef"
     },
     "boundary": {
       "description": "The boundary or alternative of a Uzo that answers (Spec 007). ask-human: a person decides; use-instead: suggestion names the Ero; not-supported: the Ero stops there.",
       "type": "object",
       "properties": {
         "ero": {
-          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+          "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
         },
         "case": {
-          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+          "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
         },
         "action": {
           "enum": ["use-instead", "ask-human", "not-supported"]
@@ -207,7 +207,7 @@
                 "const": "boundary"
               },
               "ero": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
               },
               "label": {
                 "description": "The display name in the language asked for (Spec 026 ②), only with lingvo; the name stays the identifier.",
@@ -215,7 +215,7 @@
                 "minLength": 1
               },
               "case": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
               },
               "action": {
                 "enum": ["use-instead", "ask-human", "not-supported"]
@@ -239,7 +239,7 @@
                 "const": "goal"
               },
               "ero": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
               },
               "label": {
                 "description": "The display name in the language asked for (Spec 026 ②), only with lingvo; the name stays the identifier.",
@@ -247,12 +247,12 @@
                 "minLength": 1
               },
               "goal": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
               },
               "props": {
                 "type": "object",
                 "propertyNames": {
-                  "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                  "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
                 },
                 "additionalProperties": {
                   "anyOf": [
@@ -277,7 +277,7 @@
                 "minLength": 1
               },
               "regulo": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/ReguloRef"
+                "$ref": "urn:fundamento:schema:mcp:common#/$defs/ReguloRef"
               }
             },
             "required": ["kind", "ero", "goal", "props", "keyword"],

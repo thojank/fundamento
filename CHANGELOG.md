@@ -9,6 +9,10 @@ Changes of the published packages (the Make Kits `@fundamento/make-kit-<aspekto>
 - Neu, additiv: Die zwölf Felder (`fm-kampo`, `fm-tekstareo`, `fm-elektilo`, `fm-listelektilo`, `fm-plurelektilo`, `fm-kompletigilo`, `fm-datelektilo`, `fm-glitilo`, `fm-elekto`, `fm-markobutono`, `fm-sxaltilo`, `fm-alsxutilo`) haben die Prop `label`. `label="…"` ist eine sichtbare Beschriftung: Der Text steht dort, wo der Text des Elements stünde, und benennt das Feld; wo beides steht, gewinnt der Text des Elements. Keine Prop aus 0.2.0 ändert ihre Bedeutung (Arkitekturo-Vertrag); ein Feld ohne `label` sieht aus wie bisher.
   Wer `label` bisher als nicht deklariertes Attribut an ein Feld schrieb (in 0.2.0 ohne Wirkung, in HTML wie in React), sieht diesen Text jetzt als Beschriftung, solange das Element keinen eigenen Text hat; wer das nicht will, entfernt das Attribut.
   (Spec 029 ②b-1b und Spec 035 2.2, D-04 zur Bestätigung durch den Maintainer.)
+- Neue, neutrale Namen: Der Schlüssel der Fundamento-Metadaten in `$extensions` heißt jetzt `fundamento`, die Schemata haben die IDs `urn:fundamento:schema:<name>` (z. B. `urn:fundamento:schema:modelo`, `urn:fundamento:schema:config`, `urn:fundamento:schema:mcp:common`), die Ontologio die Basis `urn:fundamento:ontologio`.
+  Für eine Version liest Fundamento auch den bisherigen Schlüssel und die bisherigen Schema- und Ontologie-IDs und rechnet sie beim Lesen in die neuen um; geschrieben wird nur noch neu. Eigene Token-Sets, Aspekto-Pakete, `fundamento.config.json` und Schemata mit Verweisen auf die Fundamento-Schemata funktionieren also unverändert weiter; wer sie umstellen will, ersetzt die alten Namen durch die neuen. Mit der nächsten Version entfällt das Lesen der alten Namen.
+  Private Schriften: In der `.env` ist nichts einzutragen; `FM_TIPAROJ_REPO` bleibt die einzige Variable.
+  (Spec 036 Teil 6, Befunde 6.1 und 6.3, D-25 zur Bestätigung durch den Maintainer.)
 
 ### Hinweis für MCP-Clients
 

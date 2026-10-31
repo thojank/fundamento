@@ -52,6 +52,8 @@ const CHECK_SUMMARIES: Readonly<Record<CheckName, string>> = {
   ikonaro: "Every Aspekto draws every Ikonaro name: square, in currentColor, with provenance.",
   fontoj:
     "Every value taken from a Fonto: pinned Fonto with its licence text, provenance that matches, a Jugxo per adaptation.",
+  privat:
+    "No tracked file names the word of Spec 036 R-12 or the private font repository (git ls-files, by hash).",
 };
 
 export const HELP = [

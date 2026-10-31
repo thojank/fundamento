@@ -1,8 +1,9 @@
 // Location and addressing of the canonical Modelo schema (`packages/modelo/schema/`).
 
 import { readFileSync } from "node:fs";
+import { normalizeNames } from "./names.js";
 
-export const MODELO_SCHEMA_ID = "https://ciferecigo.com/fundamento/schema/modelo.schema.json";
+export const MODELO_SCHEMA_ID = "urn:fundamento:schema:modelo";
 
 /** File URL of the hand-written schema. Valid from both `src/contracts/` and `dist/contracts/`. */
 export const MODELO_SCHEMA_URL = new URL("../../schema/modelo.schema.json", import.meta.url);
@@ -84,7 +85,7 @@ export function schemaRef(defName: string): string {
   return `${MODELO_SCHEMA_ID}#/$defs/${defName}`;
 }
 
-export const CONFIG_SCHEMA_ID = "https://ciferecigo.com/fundamento/schema/config.schema.json";
+export const CONFIG_SCHEMA_ID = "urn:fundamento:schema:config";
 
 /**
  * File URL of the schema of `fundamento.config.json` (D-07). It is separate from the Modelo
@@ -107,8 +108,10 @@ export function provideModeloSchemas(
 
 /** Reads the config schema from disk as a parsed JSON object. */
 export function readConfigSchema(): Record<string, unknown> {
-  if (provided !== undefined) return { ...provided.config };
-  const schema: unknown = JSON.parse(readFileSync(CONFIG_SCHEMA_URL, "utf8"));
+  if (provided !== undefined) return { ...normalizeNames(provided.config) };
+  const text = readFileSync(CONFIG_SCHEMA_URL, "utf8");
+  // Spec 036 6.3: a schema with the IDs of the other form is read in the form the code writes.
+  const schema: unknown = normalizeNames(JSON.parse(text), text);
   if (typeof schema !== "object" || schema === null || Array.isArray(schema)) {
     throw new Error(`Config schema ${CONFIG_SCHEMA_URL.href} is not a JSON object.`);
   }
@@ -117,8 +120,9 @@ export function readConfigSchema(): Record<string, unknown> {
 
 /** Reads the canonical schema from disk as a parsed JSON object. */
 export function readModeloSchema(): Record<string, unknown> {
-  if (provided !== undefined) return { ...provided.modelo };
-  const schema: unknown = JSON.parse(readFileSync(MODELO_SCHEMA_URL, "utf8"));
+  if (provided !== undefined) return { ...normalizeNames(provided.modelo) };
+  const text = readFileSync(MODELO_SCHEMA_URL, "utf8");
+  const schema: unknown = normalizeNames(JSON.parse(text), text);
   if (typeof schema !== "object" || schema === null || Array.isArray(schema)) {
     throw new Error(`Modelo schema ${MODELO_SCHEMA_URL.href} is not a JSON object.`);
   }

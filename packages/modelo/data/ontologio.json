@@ -1,6 +1,6 @@
 {
   "$schema": "../schema/ontologio.schema.json",
-  "uri": "https://fundamento.ciferecigo.com/ontologio",
+  "uri": "urn:fundamento:ontologio",
   "constitution": "1.4",
   "schemes": [
     {
@@ -99,7 +99,7 @@
   ],
   "concepts": [
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Fundamento",
+      "uri": "urn:fundamento:ontologio#Fundamento",
       "term": "Fundamento",
       "inScheme": "terminologio",
       "prefLabel": {
@@ -121,7 +121,7 @@
       }
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Modelo",
+      "uri": "urn:fundamento:ontologio#Modelo",
       "term": "Modelo",
       "inScheme": "terminologio",
       "prefLabel": {
@@ -153,7 +153,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Vortaro",
+      "uri": "urn:fundamento:ontologio#Vortaro",
       "term": "Vortaro",
       "inScheme": "terminologio",
       "prefLabel": {
@@ -186,7 +186,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Aspekto",
+      "uri": "urn:fundamento:ontologio#Aspekto",
       "term": "Aspekto",
       "inScheme": "terminologio",
       "prefLabel": {
@@ -222,7 +222,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Aspiro",
+      "uri": "urn:fundamento:ontologio#Aspiro",
       "term": "Aspiro",
       "inScheme": "terminologio",
       "prefLabel": {
@@ -252,7 +252,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Dimensio",
+      "uri": "urn:fundamento:ontologio#Dimensio",
       "term": "Dimensio",
       "inScheme": "terminologio",
       "notation": "dimensio",
@@ -289,7 +289,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Ero",
+      "uri": "urn:fundamento:ontologio#Ero",
       "term": "Ero",
       "inScheme": "terminologio",
       "notation": "ero",
@@ -315,7 +315,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Skemo",
+      "uri": "urn:fundamento:ontologio#Skemo",
       "term": "Skemo",
       "inScheme": "terminologio",
       "notation": "skemo",
@@ -347,7 +347,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Uzo",
+      "uri": "urn:fundamento:ontologio#Uzo",
       "term": "Uzo",
       "inScheme": "terminologio",
       "notation": "uzo",
@@ -398,7 +398,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Regularo",
+      "uri": "urn:fundamento:ontologio#Regularo",
       "term": "Regularo",
       "inScheme": "terminologio",
       "prefLabel": {
@@ -430,7 +430,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Jugxo",
+      "uri": "urn:fundamento:ontologio#Jugxo",
       "term": "Jugxo",
       "inScheme": "terminologio",
       "notation": "jugxo",
@@ -467,7 +467,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Manko",
+      "uri": "urn:fundamento:ontologio#Manko",
       "term": "Manko",
       "inScheme": "terminologio",
       "notation": "manko",
@@ -505,7 +505,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Fonto",
+      "uri": "urn:fundamento:ontologio#Fonto",
       "term": "Fonto",
       "inScheme": "terminologio",
       "prefLabel": {
@@ -541,7 +541,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Kroniko",
+      "uri": "urn:fundamento:ontologio#Kroniko",
       "term": "Kroniko",
       "inScheme": "terminologio",
       "prefLabel": {
@@ -576,7 +576,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Asistanto",
+      "uri": "urn:fundamento:ontologio#Asistanto",
       "term": "Asistanto",
       "inScheme": "terminologio",
       "prefLabel": {
@@ -609,7 +609,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Sxablono",
+      "uri": "urn:fundamento:ontologio#Sxablono",
       "term": "Sxablono",
       "inScheme": "terminologio",
       "notation": "sxablono",
@@ -636,7 +636,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Projekcio",
+      "uri": "urn:fundamento:ontologio#Projekcio",
       "term": "Projekcio",
       "inScheme": "terminologio",
       "notation": "projekcio",
@@ -673,7 +673,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Enportilo",
+      "uri": "urn:fundamento:ontologio#Enportilo",
       "term": "Enportilo",
       "inScheme": "terminologio",
       "prefLabel": {
@@ -704,7 +704,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Agordilo",
+      "uri": "urn:fundamento:ontologio#Agordilo",
       "term": "Agordilo",
       "inScheme": "terminologio",
       "prefLabel": {
@@ -735,7 +735,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Gvidanto",
+      "uri": "urn:fundamento:ontologio#Gvidanto",
       "term": "Gvidanto",
       "inScheme": "terminologio",
       "prefLabel": {
@@ -767,7 +767,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Celo",
+      "uri": "urn:fundamento:ontologio#Celo",
       "term": "Celo",
       "inScheme": "terminologio",
       "notation": "celo",
@@ -793,7 +793,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Tavolo",
+      "uri": "urn:fundamento:ontologio#Tavolo",
       "term": "Tavolo",
       "inScheme": "terminologio",
       "prefLabel": {
@@ -824,7 +824,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Ontologio",
+      "uri": "urn:fundamento:ontologio#Ontologio",
       "term": "Ontologio",
       "inScheme": "terminologio",
       "prefLabel": {
@@ -855,7 +855,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Ero-Tokeno",
+      "uri": "urn:fundamento:ontologio#Ero-Tokeno",
       "term": "Ero-Tokeno",
       "inScheme": "terminologio",
       "prefLabel": {
@@ -897,7 +897,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Token",
+      "uri": "urn:fundamento:ontologio#Token",
       "term": "Token",
       "inScheme": "modelo",
       "notation": "token",
@@ -929,7 +929,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#TokenSet",
+      "uri": "urn:fundamento:ontologio#TokenSet",
       "term": "TokenSet",
       "inScheme": "modelo",
       "notation": "tokenSet",
@@ -961,7 +961,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#DimensioValoro",
+      "uri": "urn:fundamento:ontologio#DimensioValoro",
       "term": "DimensioValoro",
       "inScheme": "modelo",
       "notation": "dimensioValoro",
@@ -993,7 +993,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Regulo",
+      "uri": "urn:fundamento:ontologio#Regulo",
       "term": "Regulo",
       "inScheme": "modelo",
       "notation": "regulo",
@@ -1025,7 +1025,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#KontrastParo",
+      "uri": "urn:fundamento:ontologio#KontrastParo",
       "term": "KontrastParo",
       "inScheme": "modelo",
       "notation": "kontrastParo",
@@ -1057,7 +1057,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Ikonaro",
+      "uri": "urn:fundamento:ontologio#Ikonaro",
       "term": "Ikonaro",
       "inScheme": "modelo",
       "notation": "ikono",
@@ -1095,7 +1095,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Tasko",
+      "uri": "urn:fundamento:ontologio#Tasko",
       "term": "Tasko",
       "inScheme": "modelo",
       "notation": "tasko",
@@ -1131,7 +1131,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Kriterio",
+      "uri": "urn:fundamento:ontologio#Kriterio",
       "term": "Kriterio",
       "inScheme": "modelo",
       "notation": "kriterio",
@@ -1167,7 +1167,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Faceto",
+      "uri": "urn:fundamento:ontologio#Faceto",
       "term": "Faceto",
       "inScheme": "modelo",
       "notation": "faceto",
@@ -1201,7 +1201,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Ikono",
+      "uri": "urn:fundamento:ontologio#Ikono",
       "term": "Ikono",
       "inScheme": "eroj",
       "prefLabel": {
@@ -1254,7 +1254,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#FluidaMarko",
+      "uri": "urn:fundamento:ontologio#FluidaMarko",
       "term": "FluidaMarko",
       "inScheme": "principoj",
       "prefLabel": {
@@ -1281,7 +1281,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Butono",
+      "uri": "urn:fundamento:ontologio#Butono",
       "term": "Butono",
       "inScheme": "eroj",
       "prefLabel": {
@@ -1337,7 +1337,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Elekto",
+      "uri": "urn:fundamento:ontologio#Elekto",
       "term": "Elekto",
       "inScheme": "eroj",
       "prefLabel": {
@@ -1383,7 +1383,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Elektilo",
+      "uri": "urn:fundamento:ontologio#Elektilo",
       "term": "Elektilo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -1434,7 +1434,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Ligilo",
+      "uri": "urn:fundamento:ontologio#Ligilo",
       "term": "Ligilo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -1467,7 +1467,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Kampo",
+      "uri": "urn:fundamento:ontologio#Kampo",
       "term": "Kampo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -1539,7 +1539,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Markobutono",
+      "uri": "urn:fundamento:ontologio#Markobutono",
       "term": "Markobutono",
       "inScheme": "eroj",
       "prefLabel": {
@@ -1589,7 +1589,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Sxaltilo",
+      "uri": "urn:fundamento:ontologio#Sxaltilo",
       "term": "Sxaltilo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -1634,7 +1634,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Tekstareo",
+      "uri": "urn:fundamento:ontologio#Tekstareo",
       "term": "Tekstareo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -1673,7 +1673,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Datelektilo",
+      "uri": "urn:fundamento:ontologio#Datelektilo",
       "term": "Datelektilo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -1719,7 +1719,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Dialogo",
+      "uri": "urn:fundamento:ontologio#Dialogo",
       "term": "Dialogo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -1775,7 +1775,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Insigno",
+      "uri": "urn:fundamento:ontologio#Insigno",
       "term": "Insigno",
       "inScheme": "eroj",
       "prefLabel": {
@@ -1827,7 +1827,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Avizo",
+      "uri": "urn:fundamento:ontologio#Avizo",
       "term": "Avizo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -1883,7 +1883,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Plenstato",
+      "uri": "urn:fundamento:ontologio#Plenstato",
       "term": "Plenstato",
       "inScheme": "eroj",
       "prefLabel": {
@@ -1918,7 +1918,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Tabelo",
+      "uri": "urn:fundamento:ontologio#Tabelo",
       "term": "Tabelo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -1972,7 +1972,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Atributlisto",
+      "uri": "urn:fundamento:ontologio#Atributlisto",
       "term": "Atributlisto",
       "inScheme": "eroj",
       "prefLabel": {
@@ -2026,7 +2026,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Mezurilo",
+      "uri": "urn:fundamento:ontologio#Mezurilo",
       "term": "Mezurilo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -2061,7 +2061,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Navigado",
+      "uri": "urn:fundamento:ontologio#Navigado",
       "term": "Navigado",
       "inScheme": "eroj",
       "prefLabel": {
@@ -2110,7 +2110,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Langetaro",
+      "uri": "urn:fundamento:ontologio#Langetaro",
       "term": "Langetaro",
       "inScheme": "eroj",
       "prefLabel": {
@@ -2152,7 +2152,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Apartigilo",
+      "uri": "urn:fundamento:ontologio#Apartigilo",
       "term": "Apartigilo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -2191,7 +2191,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Plurelektilo",
+      "uri": "urn:fundamento:ontologio#Plurelektilo",
       "term": "Plurelektilo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -2245,7 +2245,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Saltligilo",
+      "uri": "urn:fundamento:ontologio#Saltligilo",
       "term": "Saltligilo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -2286,7 +2286,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Titolo",
+      "uri": "urn:fundamento:ontologio#Titolo",
       "term": "Titolo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -2327,7 +2327,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Teksto",
+      "uri": "urn:fundamento:ontologio#Teksto",
       "term": "Teksto",
       "inScheme": "eroj",
       "prefLabel": {
@@ -2378,7 +2378,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Konsileto",
+      "uri": "urn:fundamento:ontologio#Konsileto",
       "term": "Konsileto",
       "inScheme": "eroj",
       "prefLabel": {
@@ -2418,7 +2418,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Sxvebilo",
+      "uri": "urn:fundamento:ontologio#Sxvebilo",
       "term": "Sxvebilo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -2462,7 +2462,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Menuo",
+      "uri": "urn:fundamento:ontologio#Menuo",
       "term": "Menuo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -2510,7 +2510,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Faldilo",
+      "uri": "urn:fundamento:ontologio#Faldilo",
       "term": "Faldilo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -2553,7 +2553,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Glitilo",
+      "uri": "urn:fundamento:ontologio#Glitilo",
       "term": "Glitilo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -2594,7 +2594,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Kompletigilo",
+      "uri": "urn:fundamento:ontologio#Kompletigilo",
       "term": "Kompletigilo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -2646,7 +2646,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Vitrino",
+      "uri": "urn:fundamento:ontologio#Vitrino",
       "term": "Vitrino",
       "inScheme": "laboro",
       "prefLabel": {
@@ -2677,7 +2677,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Vojmapo",
+      "uri": "urn:fundamento:ontologio#Vojmapo",
       "term": "Vojmapo",
       "inScheme": "laboro",
       "prefLabel": {
@@ -2702,7 +2702,7 @@
       }
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Kialo",
+      "uri": "urn:fundamento:ontologio#Kialo",
       "term": "Kialo",
       "inScheme": "laboro",
       "prefLabel": {
@@ -2733,7 +2733,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Alirebleco",
+      "uri": "urn:fundamento:ontologio#Alirebleco",
       "term": "Alirebleco",
       "inScheme": "laboro",
       "prefLabel": {
@@ -2763,7 +2763,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Internacia",
+      "uri": "urn:fundamento:ontologio#Internacia",
       "term": "Internacia",
       "inScheme": "laboro",
       "prefLabel": {
@@ -2793,7 +2793,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Komparo",
+      "uri": "urn:fundamento:ontologio#Komparo",
       "term": "Komparo",
       "inScheme": "laboro",
       "prefLabel": {
@@ -2822,7 +2822,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Etoso",
+      "uri": "urn:fundamento:ontologio#Etoso",
       "term": "Etoso",
       "inScheme": "laboro",
       "prefLabel": {
@@ -2853,7 +2853,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Komuna",
+      "uri": "urn:fundamento:ontologio#Komuna",
       "term": "Komuna",
       "inScheme": "laboro",
       "prefLabel": {
@@ -2883,7 +2883,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Ekzemplo",
+      "uri": "urn:fundamento:ontologio#Ekzemplo",
       "term": "Ekzemplo",
       "inScheme": "laboro",
       "prefLabel": {
@@ -2913,7 +2913,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Agordo",
+      "uri": "urn:fundamento:ontologio#Agordo",
       "term": "Agordo",
       "inScheme": "laboro",
       "prefLabel": {
@@ -2944,7 +2944,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Raporto",
+      "uri": "urn:fundamento:ontologio#Raporto",
       "term": "Raporto",
       "inScheme": "laboro",
       "prefLabel": {
@@ -2976,7 +2976,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Pagxigilo",
+      "uri": "urn:fundamento:ontologio#Pagxigilo",
       "term": "Pagxigilo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -3017,7 +3017,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Signeto",
+      "uri": "urn:fundamento:ontologio#Signeto",
       "term": "Signeto",
       "inScheme": "eroj",
       "prefLabel": {
@@ -3062,7 +3062,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Spuro",
+      "uri": "urn:fundamento:ontologio#Spuro",
       "term": "Spuro",
       "inScheme": "eroj",
       "prefLabel": {
@@ -3104,7 +3104,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Alsxutilo",
+      "uri": "urn:fundamento:ontologio#Alsxutilo",
       "term": "Alsxutilo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -3151,7 +3151,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Karto",
+      "uri": "urn:fundamento:ontologio#Karto",
       "term": "Karto",
       "inScheme": "eroj",
       "prefLabel": {
@@ -3216,7 +3216,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Avataro",
+      "uri": "urn:fundamento:ontologio#Avataro",
       "term": "Avataro",
       "inScheme": "eroj",
       "prefLabel": {
@@ -3261,7 +3261,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Kodbloko",
+      "uri": "urn:fundamento:ontologio#Kodbloko",
       "term": "Kodbloko",
       "inScheme": "eroj",
       "prefLabel": {
@@ -3303,7 +3303,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Listelektilo",
+      "uri": "urn:fundamento:ontologio#Listelektilo",
       "term": "Listelektilo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -3347,7 +3347,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Lokredaktilo",
+      "uri": "urn:fundamento:ontologio#Lokredaktilo",
       "term": "Lokredaktilo",
       "inScheme": "eroj",
       "prefLabel": {
@@ -3390,7 +3390,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Markdovido",
+      "uri": "urn:fundamento:ontologio#Markdovido",
       "term": "Markdovido",
       "inScheme": "eroj",
       "prefLabel": {
@@ -3441,7 +3441,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Deziraro",
+      "uri": "urn:fundamento:ontologio#Deziraro",
       "term": "Deziraro",
       "inScheme": "laboro",
       "prefLabel": {
@@ -3472,7 +3472,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Propono",
+      "uri": "urn:fundamento:ontologio#Propono",
       "term": "Propono",
       "inScheme": "laboro",
       "prefLabel": {
@@ -3503,7 +3503,7 @@
       ]
     },
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Historio",
+      "uri": "urn:fundamento:ontologio#Historio",
       "term": "Historio",
       "inScheme": "laboro",
       "prefLabel": {

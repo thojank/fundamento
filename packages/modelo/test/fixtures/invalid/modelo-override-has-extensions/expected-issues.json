@@ -3,7 +3,7 @@
   "issues": [
     {
       "rule": "set-override-has-extensions",
-      "path": "vortaro/sets/color-scheme/dark.json#/color/background/default/$extensions/com.ciferecigo.fundamento"
+      "path": "vortaro/sets/color-scheme/dark.json#/color/background/default/$extensions/fundamento"
     }
   ]
 }

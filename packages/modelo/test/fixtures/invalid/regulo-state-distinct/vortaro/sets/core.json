@@ -1,6 +1,6 @@
 {
   "$extensions": {
-    "com.ciferecigo.fundamento": {
+    "fundamento": {
       "id": "set_01K5FMAJ06444R7MA0HZE3KXSJ",
       "kondicxoj": []
     }
@@ -20,7 +20,7 @@
             "hex": "#ffffff"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01K5FMAJ0AND635FTMQ9558Y63"
             }
           }
@@ -36,7 +36,7 @@
             "hex": "#f7f7f7"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2X53D0HZVY7SPDB45S5EVHR"
             }
           }
@@ -52,7 +52,7 @@
             "hex": "#f2f2f2"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01K5FMAJ0BQ499YPVK4P8NPRZ3"
             }
           }
@@ -68,7 +68,7 @@
             "hex": "#e0e0e0"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JAT"
             }
           }
@@ -84,7 +84,7 @@
             "hex": "#cccccc"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JAV"
             }
           }
@@ -100,7 +100,7 @@
             "hex": "#afafaf"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2X58A8Y99G6QRXBKWN9TAHN"
             }
           }
@@ -116,7 +116,7 @@
             "hex": "#737373"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JAW"
             }
           }
@@ -132,7 +132,7 @@
             "hex": "#595959"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JAX"
             }
           }
@@ -148,7 +148,7 @@
             "hex": "#404040"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JAY"
             }
           }
@@ -164,7 +164,7 @@
             "hex": "#1a1a1a"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01K5FMAJ0CGDK0SHC894P66C4B"
             }
           }
@@ -180,7 +180,7 @@
             "hex": "#141414"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JAZ"
             }
           }
@@ -196,7 +196,7 @@
             "hex": "#000000"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01K5FMAJ0DQ0T56XFQD500JQRD"
             }
           }
@@ -214,7 +214,7 @@
             "hex": "#d9e6ff"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JB0"
             }
           }
@@ -230,7 +230,7 @@
             "hex": "#b3ccff"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JB1"
             }
           }
@@ -246,7 +246,7 @@
             "hex": "#8cadfa"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JB2"
             }
           }
@@ -262,7 +262,7 @@
             "hex": "#2659cc"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JB3"
             }
           }
@@ -278,7 +278,7 @@
             "hex": "#1a45a6"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JB4"
             }
           }
@@ -294,7 +294,7 @@
             "hex": "#123380"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JB5"
             }
           }
@@ -306,7 +306,7 @@
         "$value": "{color.palette.neutral.0}",
         "$description": "Default page background.",
         "$extensions": {
-          "com.ciferecigo.fundamento": {
+          "fundamento": {
             "id": "tok_01K5FMAJ0EN8B4C4Z6KSPYEMCX",
             "role": "background"
           }
@@ -316,7 +316,7 @@
         "$value": "{color.palette.neutral.50}",
         "$description": "Page canvas behind content areas.",
         "$extensions": {
-          "com.ciferecigo.fundamento": {
+          "fundamento": {
             "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JB6",
             "role": "background"
           }
@@ -326,7 +326,7 @@
         "$value": "{color.palette.neutral.0}",
         "$description": "Surfaces lifted above the page, such as cards.",
         "$extensions": {
-          "com.ciferecigo.fundamento": {
+          "fundamento": {
             "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JB7",
             "role": "background"
           }
@@ -336,7 +336,7 @@
         "$value": "{color.palette.neutral.100}",
         "$description": "Surfaces set into the page, such as wells.",
         "$extensions": {
-          "com.ciferecigo.fundamento": {
+          "fundamento": {
             "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JB8",
             "role": "background"
           }
@@ -348,7 +348,7 @@
         "$value": "{color.palette.neutral.900}",
         "$description": "Default body text.",
         "$extensions": {
-          "com.ciferecigo.fundamento": {
+          "fundamento": {
             "id": "tok_01K5FMAJ0FRV73CQ8J0CJ9HV5S",
             "role": "foreground"
           }
@@ -358,7 +358,7 @@
         "$value": "{color.palette.neutral.700}",
         "$description": "Secondary text.",
         "$extensions": {
-          "com.ciferecigo.fundamento": {
+          "fundamento": {
             "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JB9",
             "role": "foreground"
           }
@@ -368,7 +368,7 @@
         "$value": "{color.palette.neutral.600}",
         "$description": "Tertiary text such as hints.",
         "$extensions": {
-          "com.ciferecigo.fundamento": {
+          "fundamento": {
             "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JBA",
             "role": "foreground"
           }
@@ -381,7 +381,7 @@
           "$value": "{color.palette.accent.600}",
           "$description": "Primary action at rest.",
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JBB",
               "role": "background"
             }
@@ -391,7 +391,7 @@
           "$value": "{color.palette.accent.700}",
           "$description": "Primary action under the pointer.",
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JBC",
               "role": "background"
             }
@@ -401,7 +401,7 @@
           "$value": "{color.palette.accent.800}",
           "$description": "Primary action while pressed.",
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JBD",
               "role": "background"
             }
@@ -411,7 +411,7 @@
           "$value": "{color.palette.accent.700}",
           "$description": "Primary action when selected.",
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JBE",
               "role": "background"
             }
@@ -421,7 +421,7 @@
           "$value": "{color.palette.neutral.0}",
           "$description": "Label on a primary action.",
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01M2X53D0J4WQ9ZC0R6HTQ0JBF",
               "role": "foreground"
             }
@@ -438,7 +438,7 @@
         "unit": "px"
       },
       "$extensions": {
-        "com.ciferecigo.fundamento": {
+        "fundamento": {
           "id": "tok_01K5FMAJ0GQGZMPKY9NN4KF5G6"
         }
       }
@@ -450,7 +450,7 @@
         "unit": "px"
       },
       "$extensions": {
-        "com.ciferecigo.fundamento": {
+        "fundamento": {
           "id": "tok_01K5FMAJ0H4CZYQST4Y5HHM8HV"
         }
       }

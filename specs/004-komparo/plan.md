@@ -11,7 +11,7 @@ Dieser Plan ist die Ausgabe von `/speckit.plan` für **Etappe A** von Spec 004. 
 Etappe A macht drei Dinge, in dieser Reihenfolge:
 
 1. **Ziele vor Werten (FR-01, FR-02), auf zwei Ebenen.** Zwölf messbare Qualitätsziele mit Kialo. Sieben davon gelten als **Regulo** für jede Marke, weil sie Zugänglichkeit und Struktur sichern; fünf sind **Aspiroj** – Ziele, die komuna sich selbst setzt, prüfbar und begründet, aber ohne Anspruch auf andere Marken („Fluida Marko", D-03). Heute schlagen an: die Kontrast-Reserve als Regulo (kleinster Wert +3,6 %), der Abstand benachbarter Flächen als Regulo (zweimal genau 0) und drei Aspiroj von komuna (reine Endpunkte als Fläche, Reserve 10 %, eigener Dunkelmodus mit 1,3 % Abdeckung). Die Regel kommt zuerst, die Werte danach – der rote Lauf ist das Repo selbst.
-2. **komuna 2 (FR-01, FR-04).** Die Werte von komuna werden so weit geändert, wie Reguloj und eigene Aspiroj es verlangen: eigene Stufen für Flächen statt reiner Endpunkte, 56 eigene Dunkelwerte statt der gemeinsamen Umsetzung, drei enge KontrastParoj auf Reserve gebracht. `ekzemplo` zieht dort nach, wo eine **Regulo** es verlangt – nicht bei komunas Aspiroj; `ciferecigo` nach dem Merge außerhalb des Repos.
+2. **komuna 2 (FR-01, FR-04).** Die Werte von komuna werden so weit geändert, wie Reguloj und eigene Aspiroj es verlangen: eigene Stufen für Flächen statt reiner Endpunkte, 56 eigene Dunkelwerte statt der gemeinsamen Umsetzung, drei enge KontrastParoj auf Reserve gebracht. `ekzemplo` zieht dort nach, wo eine **Regulo** es verlangt – nicht bei komunas Aspiroj; `privata` nach dem Merge außerhalb des Repos.
 3. **Vitrino (FR-05 bis FR-09).** Ein neues Celo schreibt eine einzige, eigenständige HTML-Datei: Paletten mit Helligkeitskurve, Flächenfolge, Texthierarchie, Status, Aktionen, echtes `fm-butono`, Kontrastmatrix und Regularo-Ergebnis, alle Dimensioj zur Laufzeit umschaltbar und zwei Aspektoj nebeneinander (in Etappe A komuna ↔ ekzemplo).
 
 Dazu die Verfassungsänderung v1.7 (Art. V, Benchmark-Aspekto) und die Vorbereitung der Clean-Room-Prüfung auf Fingerprints fremder Benchmark-Aspektoj, damit Etappe B nur noch ihre Liste liefern muss.
@@ -36,7 +36,7 @@ Dazu die Verfassungsänderung v1.7 (Art. V, Benchmark-Aspekto) und die Vorbereit
 | ≤ 3 neue Pakete (Art. XI) | bestanden (0) |
 | Modelo-First (Art. I) | bestanden: die Vitrino ist eine Projekcio, kein handgepflegtes Dokument; jeder Wert und jede Zahl darin stammt aus dem Modelo |
 | Ein Vokabular (Art. II) | bestanden: keine neuen Tokennamen außerhalb der bestehenden Rollen; komuna 2 ändert Werte und ergänzt Palettenstufen |
-| Native Mehrmarkenfähigkeit (Art. IV) | bestanden: jede neue Regulo gilt für jede Aspekto; die Folgen für `ekzemplo` und `ciferecigo` sind Teil des Plans (D-05) |
+| Native Mehrmarkenfähigkeit (Art. IV) | bestanden: jede neue Regulo gilt für jede Aspekto; die Folgen für `ekzemplo` und `privata` sind Teil des Plans (D-05) |
 | Clean Room (Art. V) | bestanden: kein Fremdmaterial in dieser Sitzung; die Erweiterung der Fingerprint-Prüfung stärkt den Nachweis (D-10) |
 | Regeln mit Gründen (Art. VI) | bestanden: jede der acht Reguloj trägt einen Kialo, jede geht auf einen gemessenen Befund zurück |
 | Kontrolle (Art. X) | bestanden: jede Regulo ist automatisch prüfbar; die Vitrino hat eine eigene Prüfung |
@@ -143,7 +143,7 @@ Reihenfolge in der Umsetzung: erst die Regulo (rot), dann die Werte (grün). Jed
 | Aspekto | Ort | Vorgehen |
 |---|---|---|
 | `ekzemplo` | Fixture im Repo | zieht dort nach, wo eine **Regulo** es verlangt: drei enge Paare und zwei Nullabstände (research §3). komunas Aspiroj gelten für ekzemplo nicht; die Marke darf reines Weiß behalten und ihre Dunkelwerte weiter aus dem generischen Satz `color-scheme/dark` beziehen (Fluida Marko). |
-| `ciferecigo` | externes, privates Paket | nach dem Merge außerhalb des Repos neu abgeleitet, wie Spec 003 T028; die Aufgabe steht als Nachlauf in `tasks.md` und wird vom Maintainer ausgeführt |
+| `privata` | externes, privates Paket | nach dem Merge außerhalb des Repos neu abgeleitet, wie Spec 003 T028; die Aufgabe steht als Nachlauf in `tasks.md` und wird vom Maintainer ausgeführt |
 | `komparo` | Etappe B | die Reguloj gelten unverändert auch dort; abgeleitete Werte kennzeichnet Etappe B selbst (FR-13, FR-14) |
 
 Eine neue Regulo darf nie stillschweigend eine Marke aussperren: Die Aufgabe, die eine Regulo einführt, prüft im selben Lauf beide Aspektoj des Repos. Eine Aspiro darf das umgekehrt nie tun: Sie gilt nur für die Marke, die sie erklärt, und ein Negativtest hält das fest (D-03).
@@ -376,7 +376,7 @@ Keine neuen. Genutzt werden `colorjs.io` (bereits für OKLCH und APCA), Playwrig
 | I Modelo-First | Vitrino und Kennzahlen kommen aus dem Modelo; kein Wert wird in der Vorlage gepflegt (durch Test gesichert) |
 | II Unu Vortaro | keine neuen Rollen; neue Palettenstufen folgen der bestehenden Namensregel |
 | III Maschinenlesbarkeit | die Kennzahlen sind Daten (JSON-Insel, später Bericht), die Anzeige ist eine Projektion davon |
-| IV Mehrmarkenfähigkeit | jede Regulo gilt für jede Aspekto; was nur komuna will, ist eine Aspiro und bindet niemanden („Fluida Marko", D-03); die Folgen für ekzemplo und ciferecigo sind eingeplant (D-05) |
+| IV Mehrmarkenfähigkeit | jede Regulo gilt für jede Aspekto; was nur komuna will, ist eine Aspiro und bindet niemanden („Fluida Marko", D-03); die Folgen für ekzemplo und privata sind eingeplant (D-05) |
 | V Clean Room | keine Fremdquelle in dieser Sitzung; die Fingerprint-Prüfung wird stärker (D-10); v1.7 schreibt das Verfahren fest (D-11) |
 | VI Regeln mit Gründen | sieben Reguloj und vier Aspiroj, jede mit Kialo aus einem gemessenen Befund; „Befund wird Regel" ist hier wörtlich der Weg – und wo der Befund Geschmack ist, wird er Aspiro statt Regel |
 | VII Agentische Dokumentation | der Gvidanto kann nach der Etappe zusätzlich beantworten: „Wie gleichmäßig ist die Palette?", „Wie viel Reserve hat dieses Paar?" – über `explain_regulo` der neuen Reguloj |
@@ -395,7 +395,7 @@ Keine neuen. Genutzt werden `colorjs.io` (bereits für OKLCH und APCA), Playwrig
 | **JSON-Insel bis ~200 KB** | Der Browser soll nichts nachrechnen (Art. VIII). | Wenn die Datei zu groß wird: Messungen auf die sichtbare Kombination beschneiden und beim Umschalten nachrechnen – dann aber im Build, nicht im Browser. |
 | **Achter CI-Schritt** | Gerenderte Prüfungen brauchen Browser und einen vorherigen Build. | CI-Zeit steigt um etwa eine Minute; Phase 3 hat gezeigt, dass schwere Läufe außerhalb des Test-Gates gehören. |
 | **Werte in `core.json` statt im Aspekto-Paket** | komuna ist die Referenz; ihre Werte liegen historisch im Kern-Vortaro. | Unverändert aus Phase 1; die Trennung „Kern = Rollen, Aspekto = Werte" bleibt ein Thema für Phase 7. |
-| **ciferecigo außerhalb** | Privates Paket, eigener Ort. | Nachlauf nach dem Merge, wie Spec 003 T028; bis dahin ist ciferecigo gegen die neuen Reguloj ungeprüft. |
+| **privata außerhalb** | Privates Paket, eigener Ort. | Nachlauf nach dem Merge, wie Spec 003 T028; bis dahin ist privata gegen die neuen Reguloj ungeprüft. |
 | **Neuer Begriff `Aspiro`, neuer Grundsatz `FluidaMarko`** | Ohne zweite Ebene würde jede Entscheidung von komuna zur Pflicht für jede Marke. | `Aspiro` steht in der Terminologie-Tabelle (v1.7) und damit im Drift-Test; `FluidaMarko` braucht ein drittes Ontologio-Schema `principoj` und wartet auf seine eigene Spec, bevor die Constitution ihn führt (D-14). |
 | **Aspiro-Verstoß ist ein Fehler** | Ein selbst gesetztes Ziel soll nicht unbemerkt verloren gehen. | Wer ein Ziel aufgibt, muss es sichtbar in `aspekto.json` streichen oder senken; das ist gewollt, aber es kann sich bei fremden Marken wie eine Vorschrift anfühlen. Bei Bedarf auf `warning` umstellbar. |
 | **56 eigene Dunkelwerte** | komuna bestimmt seinen Dunkelmodus selbst (G9). | Mehr Werte zu pflegen; die generische Umsetzung bleibt für alle anderen Marken der bequeme Weg. |
@@ -420,7 +420,7 @@ Keine neuen. Genutzt werden `colorjs.io` (bereits für OKLCH und APCA), Playwrig
 | FR-01 | D-02, D-04 | T003, T004, T005, T006 |
 | FR-02 | D-03, D-12 | T002, T003, T004, T005 |
 | FR-03 | Clean-Room-Hinweis im Kopf, D-13 | gilt für alle Aufgaben |
-| FR-04 | D-05 | T006, T015 (Nachlauf ciferecigo, nach dem Merge) |
+| FR-04 | D-05 | T006, T015 (Nachlauf privata, nach dem Merge) |
 | FR-05 | D-06 | T007, T008 |
 | FR-06 | D-07 | T008, T009, T010 |
 | FR-07 | D-08 | T011 |

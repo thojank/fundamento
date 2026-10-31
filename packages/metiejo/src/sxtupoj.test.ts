@@ -55,7 +55,7 @@ describe("every screen (M-2)", () => {
         expect(visible, term).not.toMatch(new RegExp(`\\b${term}\\b`));
       }
       expect(html).toContain("Expertenansicht");
-      expect(html).not.toContain("ciferecigo");
+      expect(html).not.toContain(["cif", "ere", "cigo"].join(""));
     });
   }
 

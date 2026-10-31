@@ -3,7 +3,7 @@
   "issues": [
     {
       "rule": "set-kondicxoj-unknown",
-      "path": "vortaro/sets/contrast/high.json#/$extensions/com.ciferecigo.fundamento/kondicxoj/0"
+      "path": "vortaro/sets/contrast/high.json#/$extensions/fundamento/kondicxoj/0"
     }
   ]
 }

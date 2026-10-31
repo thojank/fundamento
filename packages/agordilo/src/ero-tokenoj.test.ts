@@ -98,7 +98,7 @@ describe("festgelegt on the third level (Art. IV: an alias is an assignment)", (
     const derivation = deriveAspekto(agordo, structure, calibration);
     const set = JSON.parse(derivation.files["sets/aspekto/provo.json"] ?? "{}") as Json;
     const node = nodeOf(set, "typography.label.1");
-    expect((node?.$extensions as Json | undefined)?.["com.ciferecigo.fundamento"]).toEqual({
+    expect((node?.$extensions as Json | undefined)?.["fundamento"]).toEqual({
       textTransform: "uppercase",
     });
     expect(derivation.exportable).toBe(true);

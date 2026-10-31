@@ -5,7 +5,7 @@ import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { defaultModeloSource } from "@fundamento/modelo";
+import { CONFIG_SCHEMA_ID, defaultModeloSource, MODELO_SCHEMA_ID } from "@fundamento/modelo";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildProjekcioj } from "../../build.js";
 import { VITRINO_FILE } from "./vitrino.js";
@@ -132,8 +132,9 @@ describe("the Werkstatt in the Vitrino (Spec 016 ②)", () => {
     }
     expect((data.calibration as { reference: string }).reference).toBe("komuna");
     const schemas = data.schemas as { modelo: { $id: string }; config: { $id: string } };
-    expect(schemas.modelo.$id).toContain("modelo.schema.json");
-    expect(schemas.config.$id).toContain("config.schema.json");
+    // The schemas by their IDs (Spec 036 Teil 6: the IDs are URNs, `urn:fundamento:schema:modelo`).
+    expect(schemas.modelo.$id).toBe(MODELO_SCHEMA_ID);
+    expect(schemas.config.$id).toBe(CONFIG_SCHEMA_ID);
     expect(data.reference).toBe("komuna");
   });
 

@@ -767,7 +767,7 @@ describe("capitals and tracking reach the Figma plan (F31)", () => {
       if (typeof next !== "object" || next === null) throw new Error(`no ${key}`);
       node = next as Record<string, unknown>;
     }
-    node.$extensions = { "com.ciferecigo.fundamento": { textTransform: "uppercase" } };
+    node.$extensions = { fundamento: { textTransform: "uppercase" } };
     writeFileSync(setFile, `${JSON.stringify(document, null, 2)}\n`);
     const mixed = celoInputOf(projectModeloSource(join(root, "fundamento.config.json")));
     if (!mixed.ok) throw new Error("the fixture must stay valid");

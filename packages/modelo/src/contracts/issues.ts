@@ -258,6 +258,10 @@ export const RULE_IDS = [
   // Spec 033 S1: every token of the core belongs to exactly one Faceto of the brand model.
   "faceto-token-unassigned",
   "faceto-token-twice",
+  // Spec 036 Teil 6 (6.4, D-23): check:privat – the word of R-12 and the private font repository,
+  // both known only by hash.
+  "privat-vorto",
+  "privat-repo",
   // Projekcio lints (Spec 003, D-17)
   "css-physical-property",
   "ero-hardcoded-string",

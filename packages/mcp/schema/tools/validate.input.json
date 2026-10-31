@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/validate.input.json",
+  "$id": "urn:fundamento:schema:mcp:validate.input",
   "title": "validate input",
   "description": "Validation issues of the served Modelo or of a local Aspekto package.",
   "type": "object",

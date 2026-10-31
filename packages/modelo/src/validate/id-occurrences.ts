@@ -22,7 +22,7 @@ import {
  * theme IDs repeat the DimensioValoro IDs by design.
  *
  * A present string ID points at the `id` value itself (e.g.
- * `/color/text/default/$extensions/com.ciferecigo.fundamento/id`, `/dimensioj/0/valoroj/1/id`);
+ * `/color/text/default/$extensions/fundamento/id`, `/dimensioj/0/valoroj/1/id`);
  * a missing or non-string ID gives `id: undefined` at the entity (the token, the set file root
  * `""`, `/reguloj/0`, …), which `checkIds` reports as `id-missing`.
  */

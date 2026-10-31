@@ -22,6 +22,9 @@ const CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = [
   // Spec 029 ① (Constitution v2.4): every value taken from a Fonto points at a pinned Fonto with
   // its licence text, and its provenance matches the Aspekto.
   ["Check: Fontoj", "check:fontoj"],
+  // Spec 036 Teil 6 (6.4, D-10): no versioned file names the word of R-12 or the private font
+  // repository; the check knows both only by hash.
+  ["Check: Privat", "check:privat"],
 ];
 
 /** Rendered checks of the Eroj (Spec 003 T013, plan D-09): axe-core, keyboard, focus, ARIA. */
