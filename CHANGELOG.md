@@ -15,11 +15,16 @@ Changes of the published packages (the Make Kits `@fundamento/make-kit-<aspekto>
 - Neu, additiv: die Zweitfarbe einer Marke (Spec 036, V-2) – die Palette `color.palette.sekundo` (12 Stufen von 50 bis 950) und die Rollen `color.sekundo.surface`, `color.sekundo.illustration`, `color.sekundo.badge.fill`, `color.sekundo.badge.text` und `color.sekundo.chart`, als CSS-Variablen `--fm-color-palette-sekundo-*` und `--fm-color-sekundo-*`, im Tailwind-Theme und als Figma-Variablen. Eine Marke ohne Zweitfarbe verweist dort auf ihre Neutraltöne; sie sieht aus wie bisher. Die Zweitfarbe färbt nie Aktionen, Verweise oder den Fokus (Regulo `sekundo-not-action`).
   Wer ein eigenes Aspekto-Paket pflegt, ergänzt die 17 Tokens (z. B. mit den Werten von `komuna-0-2`); ohne sie meldet die Prüfung das Paket als unvollständig (Verfassung Art. IV).
   (Spec 036 Befund 2.2, D-20 zur Entscheidung durch den Maintainer.)
+- Veraltet: `size="large"` an `fm-elekto`, `fm-markobutono` und `fm-sxaltilo` gibt es ein Release lang nur noch als Alias auf `medium` – das Element zeichnet `medium` und warnt in der Konsole, `check_usage` warnt (`prop-value-deprecated`), der React-Typ nimmt den Wert weiter an. Danach entfällt er; bitte `size="medium"` schreiben.
+  (Spec 029 ②a-2, umgesetzt in Spec 036 Teil 5 ②b-2.)
+- Neu, additiv (Spec 036 Teil 5 ②b-2): `readonly` an `fm-elektilo` und `fm-markobutono`, `label-side` an `fm-sxaltilo`, `max-suggestions` an `fm-kompletigilo`, `max-files` an `fm-alsxutilo`, `max-length` mit Zähler an `fm-tekstareo`, `summary="labels"` an `fm-plurelektilo`, `size` an `fm-listelektilo`, `fm-plurelektilo` und `fm-datelektilo`, `unit` an `fm-kampo`. Ohne diese Attribute sieht und verhält sich jedes Element wie bisher.
 
 ### Hinweis für MCP-Clients
 
 - Breaking für Clients, die das Kurzprofil lesen: `get_ero` mit `brief` nennt Boolean-Props, die keine Achse sind, jetzt nur mit ihrem Namen in `flags`; `props` enthält nur noch die übrigen Props mit Typ. Wer Boolean-Props bisher in `props` suchte (etwa `disabled` oder `loading`), liest sie jetzt aus `flags`.
   (Spec 029 ②b-1, Entscheidung des Maintainers vom 2026-10-29; das Ausgabeschema von `get_ero` kennt `flags`.)
+- Additiv: Eine Achse im Kurzprofil von `get_ero` kann `deprecated` tragen – Werte, die ein Release lang noch angenommen werden, je mit dem Wert, für den sie stehen (`size` von elekto, markobutono, sxaltilo: `{ "large": "medium" }`). `check_usage` meldet einen solchen Wert als Warnung `prop-value-deprecated`.
+  (Spec 036 Teil 5 ②b-2.)
 
 ## 0.2.0
 
