@@ -554,3 +554,68 @@ test.describe("Bühne (Spec 036, Befund 3.5)", () => {
     expect(fehler).toEqual([]);
   });
 });
+
+/** Without a model the screen keeps the chat off; a double of the chat's route stands in for it. */
+async function chatMitAttrappe(page: Page, id: string, antwort: string): Promise<string[]> {
+  const rev = Number(await page.locator("html").getAttribute("data-mt-rev"));
+  const gesendet: string[] = [];
+  await page.route(`**/api/marko/${id}/asistanto`, (route) => {
+    gesendet.push((route.request().postDataJSON() as { teksto: string }).teksto);
+    return route.fulfill({ json: { antwort, rev } });
+  });
+  await page.evaluate(() => {
+    for (const element of document.querySelectorAll(
+      "[data-mt-babilo-teksto], [data-mt-babilo-sendi]",
+    ))
+      element.removeAttribute("disabled");
+  });
+  return gesendet;
+}
+
+test.describe("Bühne (Spec 036, Befund 3.6)", () => {
+  test("3.6: a new answer is said in a polite live region – the bar's last answer", async ({
+    page,
+  }) => {
+    const id = await marke(page.request, "Probomarko Live");
+    await page.setViewportSize(WIDE);
+    await oeffne(page, id);
+    const letzte = page.locator("[data-mt-chatleiste] [data-mt-letzte-antwort]");
+    await expect(letzte).toHaveAttribute("aria-live", "polite");
+    const antwort = "Die Leitfarbe ist rechts wärmer.";
+    await chatMitAttrappe(page, id, antwort);
+    // The region stays; only the answer in it is new (the caption is not said again).
+    const caption = await letzte.locator('fm-teksto[kind="caption"]').elementHandle();
+    await page
+      .locator("[data-mt-babilo-teksto]")
+      .evaluate((element) => element.setAttribute("value", "Wärmer, bitte."));
+    await page.locator("[data-mt-chatleiste]").getByRole("button", { name: "Senden" }).click();
+    await expect(letzte).toContainText(antwort);
+    expect(
+      await letzte.evaluate(
+        (region, kept) => region.querySelector('fm-teksto[kind="caption"]') === kept,
+        caption,
+      ),
+    ).toBe(true);
+  });
+
+  test("3.6 (Manko E7): Enter sends the message, Shift+Enter makes a new line", async ({
+    page,
+  }) => {
+    const id = await marke(page.request, "Probomarko Enter");
+    await page.setViewportSize(WIDE);
+    await oeffne(page, id);
+    const gesendet = await chatMitAttrappe(page, id, "Gern.");
+    const eingabe = page
+      .locator("[data-mt-chatleiste]")
+      .getByRole("textbox", { name: "Deine Nachricht" });
+    await eingabe.click();
+    await page.keyboard.type("Runder,");
+    await page.keyboard.press("Shift+Enter");
+    await page.keyboard.type("bitte.");
+    expect(gesendet).toEqual([]);
+    await page.keyboard.press("Enter");
+    await expect.poll(() => gesendet).toEqual(["Runder,\nbitte."]);
+    await expect(page.locator("[data-mt-letzte-antwort]")).toContainText("Gern.");
+    await expect(eingabe).toHaveValue("");
+  });
+});
