@@ -44,12 +44,16 @@ Bindend (R-5). Bedarf in einer Tabu-Datei wird kein Patch, sondern ein „Befund
 | `specs/037-agenten-ekranoj/spec.md` | A | frei, neu (byte-gleich) | Gerüst-Commit (S037-01) |
 | `specs/037-agenten-ekranoj/plan.md` | A | frei, neu | Gerüst-Commit (S037-01) |
 | `specs/037-agenten-ekranoj/tasks.md` | A | frei, neu | Gerüst-Commit (S037-01) |
+| `packages/ekranoj/**` (Gerüst, `src/{tipoj,plano,navigado,verda,gardo,index}.ts`, Tests, `src/test-doubles/faktoj.ts`) | A | frei, neu | `f3137c13` (rot), `999cf1c7` (grün) – S037-02 |
+| `.github/workflows/ci.yml` | A | Graubereich, ein Wort (`ekranoj` in der `unit`-Matrix, D-15, D-S037-02-1) | `999cf1c7` – S037-02 |
+| `packages/modelo/src/ci/workflow.test.ts` | A | Graubereich, ein Wort (`ekranoj` in `UNIT_PACKAGES`, D-15, D-S037-02-1) | `999cf1c7` – S037-02 |
+| `pnpm-lock.yaml` | A | Graubereich (Importer `packages/ekranoj`, nur `@fundamento/metiejo` und vorhandene Werkzeuge) | `999cf1c7` – S037-02 |
 
 ## Zusammenfassung je Teil
 
 ### Teil 1 – Ablauf „Screens bauen“ (`fm ekranoj`, PR A)
 
-Noch offen.
+- S037-02: Paket `@fundamento/ekranoj` (privat, ESM, Vitest, ohne Browser) mit den Verträgen C-1 bis C-7 als Typen und den reinen Funktionen `validiPlanon` (V-2), `navigado` (D-05/D-28), `decidiVerdon` (D-04), `kontroliModelon`/`gardiModelon` (D-19); Modulgraph-Test AC-10; CI-Platz (D-15). Rot `f3137c13`, grün `999cf1c7` (= Basis von Branch B).
 
 ### Teil 3 – Lücken als Rückmeldung (PR A)
 
@@ -138,6 +142,18 @@ Vorläufige IDs `D-<Ticket>-<n>`; S037-12 nummeriert sie als D-40 ff. und hält 
 | D-S037-01-5 | Selbsttest | Neu geschrieben statt übernommen: Die Fassung von Spec 035 prüfte die Ausnahme für deren spec.md (in 037 gibt es keine) und legte ihre Markenprobe unter dem Ordner von Spec 035 an. Die Markenprobe von 037 liegt nur kurz unter `.fundamento/spec037/` und wird gelöscht. | Schutzwerkzeug | angewandt |
 | D-S037-01-6 | Grenzen-Suche `audit-ac4` | Läuft in `/tmp/s037-a`, lässt `specs/037-agenten-ekranoj/**` aus und sucht zusätzlich nach den Grenzen von Spec 037 und R-4 (`MAKS_EKRANOJ`, `MAKS_RONDOJ`, `maksTokenoj`, `max-tokens`, `LIMOJ`, `Budget(`, 150, 2000, 1,00 $). S037-06 darf weiter anpassen. | Schutzwerkzeug | angewandt |
 | D-S037-01-7 | Nummern in tasks.md | T3701 ff. in der Reihenfolge Teil 1, Teil 3, Teil 2, Abschluss, je eine Zeile pro Lieferpunkt der Tickets S037-01 bis S037-13; S037-12 darf feiner schneiden und neu nummerieren (wie Spec 035 D-111). | tasks.md | angewandt |
+| D-S037-02-1 | Stelle des Worts `ekranoj` in der CI-Matrix (D-15) | Alphabetisch zwischen `cli` und `mcp` eingefügt, in `ci.yml` und `UNIT_PACKAGES` gleich. Der Test vergleicht die **sortierte** Liste der Pakete mit Tests mit `UNIT_PACKAGES` und die Matrix mit `UNIT_PACKAGES`; ein Anhängen am Ende wäre rot. Weiter genau ein Wort je Datei. | `.github/workflows/ci.yml`, `packages/modelo/src/ci/workflow.test.ts` | angewandt |
+| D-S037-02-2 | Ort der Vertragstypen | Alle Typen von C-1 bis C-7 in `packages/ekranoj/src/tipoj.ts`, `index.ts` reicht sie mit `export type *` weiter; Konstanten und `validiPlanon` in `plano.ts`. Grund: der rote Commit verlangt ein `index.ts` nur mit Typen; ein Typmodul ohne Werte macht das ohne Doppelung möglich (die Namen der Dateien sind laut Spec frei). | ekranoj | angewandt |
+| D-S037-02-3 | Abhängigkeiten von ekranoj | Vorerst nur `@fundamento/metiejo` (Typen `ChatMessage`, `ToolInfo` für `ChatModel`/`ToolBridge`). `@modelcontextprotocol/client` 2.0.0, `playwright` 1.63.0, `@axe-core/playwright` 4.13.0 kommen mit S037-03/04, wenn sie gebraucht werden. `@fundamento/modelo` nicht nötig: die `check_usage`-Verletzung (`Malobservo`) ist als Zwilling von `ValidationIssue` selbst beschrieben. Über metiejo transitiv geladen (erlaubt, im AC-10-Test genannt): `@fundamento/agordilo`, `@fundamento/eroj`, `@fundamento/modelo`, `@fundamento/projekcioj`. | ekranoj | angewandt |
+| D-S037-02-4 | Was ein Verweis für D-05 ist | Außerhalb des Ablaufs (übergangen): leer, `#…`, jede URL mit Schema (`https:`, `mailto:` …) oder `//…`, `../superrigardo.html`. Verweis auf einen geplanten Slug (`x.html`, `./x.html`, `../ekranoj/x.html`, Anfrage und Anker abgeschnitten) = Kante; ungeplante Kanten zwischen geplanten Screens sind erlaubt und zählen nicht. Jeder andere relative Verweis (unbekannter Screen, falscher Ordner wie `ekranoj/x.html`, Seite ohne `.html`) ist tot. Tote Verweise zählen einmal je Screen und `href`. Nichts geplant, aber tot → `kvoto` 0. | `navigado.ts` | angewandt |
+| D-S037-02-5 | Screen ohne Fakten, Erreichbarkeit | Ein Screen ohne Fakten (nicht gebaut) ist nicht `kompleta` und nicht erreichbar. Erreichbar = Einstiege der Übersicht (Vorgabe: jeder gebaute Screen, denn die Übersicht verlinkt jeden) und von dort entlang vorhandener Verweise zwischen gebauten Screens. Optionaler dritter Parameter `{ eniroj }` (additiv zu C-4), damit eine Messung auch einen einzelnen Einstieg prüfen kann. | `navigado.ts` | angewandt |
+| D-S037-02-6 | Erweiterung von C-4 | `perEkrano[slug]` trägt neben `kompleta` additiv `mankantaj` (fehlende geplante Ziele) und `mortaj` (tote `href`s); Typ `EkranaNavigado`, auch `RondoEkrano.navigado`. Grund: der Bericht und die nächste Runde brauchen die Gründe je Screen. | ekranoj, C-4 | angewandt |
+| D-S037-02-7 | Grün-Entscheidung (C-5) | `decidiVerdon(enigo) → { verda, malhelpoj, sugestoj }`; `malhelpoj` in der Reihenfolge von D-04: `K1`, `check_usage`, `axe-nekontrolita` (kein Render hell oder kein Render dunkel – ohne Renderer also nie grün), `axe-hela`, `axe-malhela`, `K5` (auch `null`), `navigado`. `sugestoj` = Hinweise (`warning`/`info`) aus `check_usage` für den Bericht, halten nie auf; Variante 0 übergeht `check_usage` ganz. | `verda.ts` | angewandt |
+| D-S037-02-8 | Modellwache (D-19) | `kontroliModelon(provider) → Problemo[]` (Pfad `FM_KI_MODELL`, Regel `model-not-allowed`) und `gardiModelon(provider)`, das `MalpermesitaModelo` mit dem `problemo` wirft. Vergleich exakt (Groß-/Kleinschreibung zählt) mit `provider.toString()` = `<anbieter>/<modell>` aus metiejo `Provider`; der Schlüssel kommt nie in die Meldung. | `gardo.ts` | angewandt |
+| D-S037-02-9 | Regeln von `validiPlanon` | `plan-empty`, `plan-too-many-screens` (Pfad `/ekranoj`), `slug-invalid`, `slug-duplicate` (beim zweiten Vorkommen, `/ekranoj/<i>/slug`), `text-empty` (`/celo`, `/ekranoj/<i>/titolo|celo`), `edge-unknown-screen` (`/kantoj/<i>/de|al`), `edge-duplicate` (`/kantoj/<i>`); alle Probleme auf einmal, in Dokumentreihenfolge, Meldungen deutsch. | `plano.ts` | angewandt |
+| D-S037-02-10 | Prüfung des Modulgraphen (AC-10) | Kommentare werden vor der Suche entfernt (ein Kommentar lädt nichts); ein berechneter Spezifizierer in `import()` ist selbst ein Verstoß; `@fundamento/modelo` nur als `import type`/`export type`; geprüft werden alle Nicht-Test-Dateien unter `src/**` einschließlich `src/test-doubles/**` (strenger als nötig) und alle vier Abhängigkeitsfelder der `package.json`. Negativprobe als Textprobe im Test; zusätzlich lokal an einer Mutation rot gesehen. | `arkitekturo.test.ts` | angewandt |
+| D-S037-02-11 | Namen der eingespeisten Abhängigkeiten (C-6) | `EkranojDeps = { chat, tools?, taksilo, bildigilo?, marko, nun, log }`; `Bildigilo.render` nimmt ein `EkranaDokumento { slug, html, dosiero? }` statt eines bloßen Texts (S037-04 kann so von der Platte öffnen, D-24). Ergebnis: `Rondo = Record<slug, RondoEkrano>`, `RondoEkrano.verdaEkde?` (D-26), `Restanta { ekrano, regulo, loko, kialo }`, `Peno` mit den Feldnamen von nordstelo `AgentEffort`, `Manko` (C-7) schon jetzt als Typ, `Haltigo`. | ekranoj, C-6 | angewandt |
+| D-S037-02-12 | Lockfile im roten Commit | Der rote Commit enthält `pnpm-lock.yaml` nicht (wie im Ticket: Lockfile mit dem grünen Commit); lokal war `pnpm install` nötig, um die roten Tests laufen zu lassen. | Commits | angewandt |
 
 ## Entwurf: Bewertung Navigation (D-05) und Muster (D-06)
 
@@ -147,7 +163,7 @@ Platzhalter. Die Begründung entsteht in S037-07 (Beitragsdatei) und wird von S0
 
 ### Befund Tabu
 
-Noch keine.
+- **`packages/modelo/src/workspace.test.ts` (S037-02).** Der Test „has exactly the five Phase-1 packages, … the Nordstelo (Spec 030) and komuna-0-2 (Spec 029)“ vergleicht die Ordner unter `packages/` mit einer festen Liste `PACKAGES`; mit dem neuen Paket `packages/ekranoj` (V-1) ist er rot (`expected [ 'agordilo', 'aspekto-komuna', …(10) ] to deeply equal [ 'agordilo', 'aspekto-komuna', …(9) ]`, `+ "ekranoj"`). Die Datei liegt in `packages/modelo/**` außerhalb des einen Worts von D-15 und ist für 037 tabu – kein Patch. **Vorschlag:** eine Zeile `ekranoj: "@fundamento/ekranoj",` in `PACKAGES` (alphabetisch nach `cli`, mit Kommentar „Spec 037: …“), Graubereich wie D-15; die Version von ekranoj ist schon `0.2.0`, so dass auch „puts every package … on version 0.2.0“ grün bleibt. Passt als Grauzonen-Freigabe des Maintainers zu D-15 oder in Spec 036 Teil 6 (Aufräumen). Bis dahin ist die Modelo-Suite auf Branch A mit genau diesem einen Test rot.
 
 ### Manko Gvidanto
 
@@ -155,7 +171,7 @@ Noch keine (Prüfung der Werkzeugliste in S037-06, 3.2).
 
 ### Sonstige
 
-Noch keine.
+- **`$W/audit-ac4` bricht ab (S037-02).** `awk: illegal primary in regular expression … |Budget(|1[.,]00 *$ …` – das Suchmuster aus D-S037-01-6 enthält `Budget(` ohne Escape (BSD-awk). Die Grenzen-Suche lief für S037-02 deshalb nicht; von Hand geprüft: der Diff führt nur `MAKS_EKRANOJ = 5` und `MAKS_RONDOJ = 3` neu ein (Werte der Quell-Spec), hebt nichts an und setzt keine Zeitgrenze. S037-06 passt das Werkzeug an (D-S037-01-6 erlaubt es).
 
 ## Messungen
 
@@ -204,7 +220,7 @@ Noch offen (S037-12). Alle Befehle im Checkout des Maintainers `/Users/thorstenj
 
 ## Blockiert
 
-Keine Einträge.
+- **Modelo-Suite grün auf Branch A (S037-02, Abnahme „`pnpm turbo run test --filter=@fundamento/modelo` grün“).** Blockiert durch `packages/modelo/src/workspace.test.ts` (Befund Tabu oben): 1 von 4147 Tests rot, alle übrigen grün, `workflow.test.ts` grün. Befehl zum Nachweis: `cd /tmp/s037-a && pnpm turbo run test --filter=@fundamento/modelo`. Lösung: die vorgeschlagene eine Zeile nach Freigabe. Keine Kosten.
 
 ## Bericht
 
