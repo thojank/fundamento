@@ -417,6 +417,8 @@ Geprüft in S037-06 (3.2): die Werkzeugliste `TOOL_NAMES` in `packages/mcp/src/s
 | S037-13-2 | `faktojPorNavigado` ändert für die Modelo des Repos das Ergebnis nicht mehr: `navigado` liest `fm-ligilo to` schon über `LIGILAJ_ATRIBUTOJ` (D-81). Eine lokale Mutation, die den Link-Ero in der Messung übersieht, blieb deshalb grün; erst eine Mutation im Weg der Schleife (`ligilajAtributojDe`) zeigte den Test rot. Die Funktion zählt für eine Modelo mit einem anderen Link-Ero. | `packages/nordstelo/src/ablauf/poentoj.ts`, `packages/ekranoj/src/navigado.ts` | behalten (Modelo-unabhängig); oder den Standard in ekranoj nur ohne Skemo-Karte nehmen | Hinweis | – |
 | S037-13-3 | Zwei Wächter halten die Markenwerkstatt vom Agenten fern (Erlaubnisliste in `mcp-kliento.ts`, `ofertotajIloj` in `agento.ts`); eine Mutation an nur einem blieb grün, beide zusammen rot. Absicht (doppelte Sicherung). | ekranoj | – | Hinweis | – |
 | S037-13-4 | Der Wächter der Modelo (`src/ci/test-setup.test.ts`) meldete ein `await` auf Modulebene im neuen cli-Test. | `packages/cli/src/ekranoj-integra.test.ts` | Attrappe als Funktion | erledigt (`5f184b93`, D-195) | – |
+| QA-2-1 | `fm ekranoj --json` gab bei Exit 2 (V-2, Modellwächter, D-37 ohne Terminal, .env, Aufruffehler) kein JSON aus, nur Text auf stderr. | `packages/cli/src/commands/ekranoj.ts` | ein Dokument `{ ok: false, problemoj, takso? }` auf stdout wie `fm modelo validate --json` | erledigt (`277b733a` rot, `f95f83e0` grün) | – |
+| QA-2-2 | `mankoj --json` gab `{"mankoj": [...]}` aus, `--out` schrieb das Array. | `packages/cli/src/commands/ekranoj.ts` | beide das Array über `stabilaJson`, byte-gleich | erledigt (`277b733a` rot, `f95f83e0` grün) | – |
 
 ## Messungen
 
@@ -813,6 +815,7 @@ Keine weiteren Einträge. (Erledigt im Lauf: Modelo-Suite auf Branch A, S037-02 
 | A | 1.7 Schätzung aus Messwerten (S037-10-2) | `73a63449` | `b0c6fa28` |
 | A | 1.6, 3.1 übernommene Werte, Lücken der Variante 0 (S037-10-6, -7) | `bca52e70` | `54ead00b` |
 | A | Tests gegen das integrierte Ergebnis (nur Tests, je an einer lokalen Mutation rot) | – | `efdaf90d`, `854cfad4`, `46cba39b`, `5f184b93` |
+| A | 1.1, 3.1 JSON bei Fehlern von `fm ekranoj`, Form von `mankoj --json` (QA-2-1, QA-2-2) | `277b733a` | `f95f83e0` |
 | A | Doku (spec, plan, tasks, Bericht) | – | `736a17cd`, `a6558e6a`, `48b1bd60`, `2d644fc7`, `cac6f213`, `a4270d0f`, `5a912063`, `8dc670fd`, Doku-Commit von S037-13 |
 | B | 2.1, 2.2 Katalog, Muster, Bewertung | `f460e1ef` | `f7a58882` |
 | B | 2.3 Lauf `--art ablauf` und Bericht | `8061cc29` | `53933318` |
