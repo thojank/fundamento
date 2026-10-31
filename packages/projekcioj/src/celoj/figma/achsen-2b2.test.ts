@@ -21,3 +21,11 @@ describe("②b-2 A-*-2 in Figma: two sizes, large no variant", () => {
     );
   });
 });
+
+describe("②b-2 A-elektilo-1, A-markobutono-1 in Figma: readonly a boolean, no variant", () => {
+  it.each(["elektilo", "markobutono"])("%s: readonly is a BOOLEAN of the set", (name) => {
+    const set = setOf(name);
+    expect(set.properties.readonly).toBe("BOOLEAN");
+    expect(set.variants.filter((variant) => variant.props.state === "readonly")).toEqual([]);
+  });
+});
