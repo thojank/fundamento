@@ -213,3 +213,18 @@ test.describe("②b-2 A-tekstareo-1: max-length with its count", () => {
     await expect(page.locator("fm-tekstareo").locator('[part="count"]')).toBeHidden();
   });
 });
+
+test.describe("②b-2 A-plurelektilo-1: summary labels", () => {
+  test("the button names the chosen options by their words, in the order of the values", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      `<fm-plurelektilo values="fokus,kontrast" summary="labels">Standards${options("Kontrast", "Fokus", "Namen")}</fm-plurelektilo>`,
+    );
+    const text = page.locator("fm-plurelektilo").locator("#text");
+    await expect(text).toHaveText("Fokus, Kontrast");
+    await expect(page.locator("fm-plurelektilo").locator('[part="tags"]')).toBeHidden();
+  });
+});
