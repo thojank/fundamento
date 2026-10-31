@@ -1,0 +1,92 @@
+{
+  "lingvo": "de",
+  "bytes": 379,
+  "elements": [
+    {
+      "tag": "fm-navigado",
+      "attrs": {
+        "label": "Hauptnavigation",
+        "page": "standards"
+      },
+      "parent": -1,
+      "text": ""
+    },
+    {
+      "tag": "a",
+      "attrs": {
+        "href": "standards-liste.html",
+        "data-page": "standards"
+      },
+      "parent": 0,
+      "text": "Standards"
+    },
+    {
+      "tag": "fm-titolo",
+      "attrs": {
+        "level": "1",
+        "size": "headline-1"
+      },
+      "parent": -1,
+      "text": "Verlauf von Standard A-12"
+    },
+    {
+      "tag": "fm-tabelo",
+      "attrs": {},
+      "parent": -1,
+      "text": ""
+    },
+    {
+      "tag": "span",
+      "attrs": {},
+      "parent": 3,
+      "text": "Änderungen von Standard A-12"
+    },
+    {
+      "tag": "fm-ligilo",
+      "attrs": {
+        "to": "standard-detail.html",
+        "placement": "standalone"
+      },
+      "parent": -1,
+      "text": "Zurück zu Standard A-12"
+    }
+  ],
+  "aria": [
+    {
+      "role": "navigation",
+      "name": "Hauptnavigation"
+    },
+    {
+      "role": "link",
+      "name": "Standards"
+    },
+    {
+      "role": "heading",
+      "name": "Verlauf von Standard A-12",
+      "level": 1
+    },
+    {
+      "role": "table",
+      "name": "Änderungen von Standard A-12"
+    },
+    {
+      "role": "link",
+      "name": "Zurück zu Standard A-12"
+    }
+  ],
+  "console": [],
+  "renders": [
+    {
+      "aspekto": "komuna",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "komuna",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": []
+    }
+  ]
+}

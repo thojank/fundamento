@@ -1,0 +1,576 @@
+{
+  "tasko": "liste-filter-detail",
+  "varianto": "F",
+  "rondoj": {
+    "1": {
+      "tasko": "liste-filter-detail",
+      "varianto": "F",
+      "ekranoj": {
+        "standards-liste": {
+          "varianto": "F",
+          "taksado": {
+            "k": {
+              "K1": 1,
+              "K2": 1,
+              "K3": 1,
+              "K4": 1,
+              "K5": 1,
+              "K6": 1
+            },
+            "total": 100,
+            "mankoj": []
+          },
+          "navigado": {
+            "kompleta": true,
+            "mankantaj": [],
+            "mortaj": []
+          },
+          "sxablonoj": {
+            "celoj": [
+              "cxefnavigado",
+              "pagxokapo",
+              "cxefago",
+              "kampo:combobox",
+              "kampo:search",
+              "tabelo"
+            ],
+            "neunuecaj": [
+              "cxefago"
+            ],
+            "unueca": false
+          }
+        },
+        "standard-detail": {
+          "varianto": "F",
+          "taksado": {
+            "k": {
+              "K1": 1,
+              "K2": 1,
+              "K3": 1,
+              "K4": 1,
+              "K5": 1,
+              "K6": 1
+            },
+            "total": 100,
+            "mankoj": []
+          },
+          "navigado": {
+            "kompleta": false,
+            "mankantaj": [
+              "standard-verlauf"
+            ],
+            "mortaj": [
+              "archiv.html"
+            ]
+          },
+          "sxablonoj": {
+            "celoj": [
+              "cxefnavigado",
+              "pagxokapo",
+              "cxefago",
+              "listo"
+            ],
+            "neunuecaj": [
+              "cxefago"
+            ],
+            "unueca": false
+          }
+        },
+        "standard-verlauf": {
+          "varianto": "F",
+          "taksado": {
+            "k": {
+              "K1": 1,
+              "K2": 1,
+              "K3": 1,
+              "K4": 1,
+              "K5": 1,
+              "K6": 1
+            },
+            "total": 100,
+            "mankoj": []
+          },
+          "navigado": {
+            "kompleta": true,
+            "mankantaj": [],
+            "mortaj": []
+          },
+          "sxablonoj": {
+            "celoj": [
+              "cxefnavigado",
+              "pagxokapo",
+              "tabelo"
+            ],
+            "neunuecaj": [],
+            "unueca": true
+          }
+        }
+      },
+      "navigado": {
+        "kvoto": 0.5,
+        "mankantajKantoj": [
+          {
+            "de": "standard-detail",
+            "al": "standard-verlauf"
+          }
+        ],
+        "mortajLigiloj": [
+          {
+            "de": "standard-detail",
+            "href": "archiv.html"
+          }
+        ],
+        "neatingeblaj": [],
+        "perEkrano": {
+          "standards-liste": {
+            "kompleta": true,
+            "mankantaj": [],
+            "mortaj": []
+          },
+          "standard-detail": {
+            "kompleta": false,
+            "mankantaj": [
+              "standard-verlauf"
+            ],
+            "mortaj": [
+              "archiv.html"
+            ]
+          },
+          "standard-verlauf": {
+            "kompleta": true,
+            "mankantaj": [],
+            "mortaj": []
+          }
+        }
+      },
+      "sxablonoj": {
+        "kvoto": 0.75,
+        "nombritaj": 4,
+        "unuecaj": 3,
+        "celoj": {
+          "cxefnavigado": {
+            "ekranoj": [
+              "standards-liste",
+              "standard-detail",
+              "standard-verlauf"
+            ],
+            "subskriboj": {
+              "fm-navigado": [
+                "standards-liste",
+                "standard-detail",
+                "standard-verlauf"
+              ]
+            },
+            "nombrata": true,
+            "unueca": true
+          },
+          "pagxokapo": {
+            "ekranoj": [
+              "standards-liste",
+              "standard-detail",
+              "standard-verlauf"
+            ],
+            "subskriboj": {
+              "fm-titolo[size=headline-1]": [
+                "standards-liste",
+                "standard-detail",
+                "standard-verlauf"
+              ]
+            },
+            "nombrata": true,
+            "unueca": true
+          },
+          "cxefago": {
+            "ekranoj": [
+              "standards-liste",
+              "standard-detail"
+            ],
+            "subskriboj": {
+              "fm-butono[emphasis=high][intent=neutral][size=medium]": [
+                "standards-liste"
+              ],
+              "fm-butono[emphasis=medium][intent=neutral][size=medium]": [
+                "standard-detail"
+              ]
+            },
+            "nombrata": true,
+            "unueca": false
+          },
+          "kampo:combobox": {
+            "ekranoj": [
+              "standards-liste"
+            ],
+            "subskriboj": {
+              "fm-elektilo[size=medium]": [
+                "standards-liste"
+              ]
+            },
+            "nombrata": false,
+            "unueca": false
+          },
+          "kampo:search": {
+            "ekranoj": [
+              "standards-liste"
+            ],
+            "subskriboj": {
+              "fm-kampo[size=medium]": [
+                "standards-liste"
+              ]
+            },
+            "nombrata": false,
+            "unueca": false
+          },
+          "listo": {
+            "ekranoj": [
+              "standard-detail"
+            ],
+            "subskriboj": {
+              "fm-atributlisto[layout=columns]": [
+                "standard-detail"
+              ]
+            },
+            "nombrata": false,
+            "unueca": false
+          },
+          "tabelo": {
+            "ekranoj": [
+              "standards-liste",
+              "standard-verlauf"
+            ],
+            "subskriboj": {
+              "fm-tabelo[density=comfortable]": [
+                "standards-liste",
+                "standard-verlauf"
+              ]
+            },
+            "nombrata": true,
+            "unueca": true
+          }
+        },
+        "perEkrano": {
+          "standards-liste": {
+            "celoj": [
+              "cxefnavigado",
+              "pagxokapo",
+              "cxefago",
+              "kampo:combobox",
+              "kampo:search",
+              "tabelo"
+            ],
+            "neunuecaj": [
+              "cxefago"
+            ],
+            "unueca": false
+          },
+          "standard-detail": {
+            "celoj": [
+              "cxefnavigado",
+              "pagxokapo",
+              "cxefago",
+              "listo"
+            ],
+            "neunuecaj": [
+              "cxefago"
+            ],
+            "unueca": false
+          },
+          "standard-verlauf": {
+            "celoj": [
+              "cxefnavigado",
+              "pagxokapo",
+              "tabelo"
+            ],
+            "neunuecaj": [],
+            "unueca": true
+          }
+        }
+      },
+      "sumo": {
+        "konstruitaj": 3,
+        "planitaj": 3,
+        "total": 100,
+        "k": {
+          "K1": 1,
+          "K2": 1,
+          "K3": 1,
+          "K4": 1,
+          "K5": 1,
+          "K6": 1
+        },
+        "navigado": 0.5,
+        "sxablonoj": 0.75
+      }
+    },
+    "3": {
+      "tasko": "liste-filter-detail",
+      "varianto": "F",
+      "ekranoj": {
+        "standards-liste": {
+          "varianto": "F",
+          "taksado": {
+            "k": {
+              "K1": 1,
+              "K2": 1,
+              "K3": 1,
+              "K4": 1,
+              "K5": 1,
+              "K6": 1
+            },
+            "total": 100,
+            "mankoj": []
+          },
+          "navigado": {
+            "kompleta": true,
+            "mankantaj": [],
+            "mortaj": []
+          },
+          "sxablonoj": {
+            "celoj": [
+              "cxefnavigado",
+              "pagxokapo",
+              "cxefago",
+              "kampo:combobox",
+              "kampo:search",
+              "tabelo"
+            ],
+            "neunuecaj": [],
+            "unueca": true
+          }
+        },
+        "standard-detail": {
+          "varianto": "F",
+          "taksado": {
+            "k": {
+              "K1": 1,
+              "K2": 1,
+              "K3": 1,
+              "K4": 1,
+              "K5": 1,
+              "K6": 1
+            },
+            "total": 100,
+            "mankoj": []
+          },
+          "navigado": {
+            "kompleta": true,
+            "mankantaj": [],
+            "mortaj": []
+          },
+          "sxablonoj": {
+            "celoj": [
+              "cxefnavigado",
+              "pagxokapo",
+              "cxefago",
+              "listo"
+            ],
+            "neunuecaj": [],
+            "unueca": true
+          }
+        },
+        "standard-verlauf": {
+          "varianto": "F",
+          "taksado": {
+            "k": {
+              "K1": 1,
+              "K2": 1,
+              "K3": 1,
+              "K4": 1,
+              "K5": 1,
+              "K6": 1
+            },
+            "total": 100,
+            "mankoj": []
+          },
+          "navigado": {
+            "kompleta": true,
+            "mankantaj": [],
+            "mortaj": []
+          },
+          "sxablonoj": {
+            "celoj": [
+              "cxefnavigado",
+              "pagxokapo",
+              "tabelo"
+            ],
+            "neunuecaj": [],
+            "unueca": true
+          }
+        }
+      },
+      "navigado": {
+        "kvoto": 1,
+        "mankantajKantoj": [],
+        "mortajLigiloj": [],
+        "neatingeblaj": [],
+        "perEkrano": {
+          "standards-liste": {
+            "kompleta": true,
+            "mankantaj": [],
+            "mortaj": []
+          },
+          "standard-detail": {
+            "kompleta": true,
+            "mankantaj": [],
+            "mortaj": []
+          },
+          "standard-verlauf": {
+            "kompleta": true,
+            "mankantaj": [],
+            "mortaj": []
+          }
+        }
+      },
+      "sxablonoj": {
+        "kvoto": 1,
+        "nombritaj": 4,
+        "unuecaj": 4,
+        "celoj": {
+          "cxefnavigado": {
+            "ekranoj": [
+              "standards-liste",
+              "standard-detail",
+              "standard-verlauf"
+            ],
+            "subskriboj": {
+              "fm-navigado": [
+                "standards-liste",
+                "standard-detail",
+                "standard-verlauf"
+              ]
+            },
+            "nombrata": true,
+            "unueca": true
+          },
+          "pagxokapo": {
+            "ekranoj": [
+              "standards-liste",
+              "standard-detail",
+              "standard-verlauf"
+            ],
+            "subskriboj": {
+              "fm-titolo[size=headline-1]": [
+                "standards-liste",
+                "standard-detail",
+                "standard-verlauf"
+              ]
+            },
+            "nombrata": true,
+            "unueca": true
+          },
+          "cxefago": {
+            "ekranoj": [
+              "standards-liste",
+              "standard-detail"
+            ],
+            "subskriboj": {
+              "fm-butono[emphasis=high][intent=neutral][size=medium]": [
+                "standards-liste",
+                "standard-detail"
+              ]
+            },
+            "nombrata": true,
+            "unueca": true
+          },
+          "kampo:combobox": {
+            "ekranoj": [
+              "standards-liste"
+            ],
+            "subskriboj": {
+              "fm-elektilo[size=medium]": [
+                "standards-liste"
+              ]
+            },
+            "nombrata": false,
+            "unueca": false
+          },
+          "kampo:search": {
+            "ekranoj": [
+              "standards-liste"
+            ],
+            "subskriboj": {
+              "fm-kampo[size=medium]": [
+                "standards-liste"
+              ]
+            },
+            "nombrata": false,
+            "unueca": false
+          },
+          "listo": {
+            "ekranoj": [
+              "standard-detail"
+            ],
+            "subskriboj": {
+              "fm-atributlisto[layout=columns]": [
+                "standard-detail"
+              ]
+            },
+            "nombrata": false,
+            "unueca": false
+          },
+          "tabelo": {
+            "ekranoj": [
+              "standards-liste",
+              "standard-verlauf"
+            ],
+            "subskriboj": {
+              "fm-tabelo[density=comfortable]": [
+                "standards-liste",
+                "standard-verlauf"
+              ]
+            },
+            "nombrata": true,
+            "unueca": true
+          }
+        },
+        "perEkrano": {
+          "standards-liste": {
+            "celoj": [
+              "cxefnavigado",
+              "pagxokapo",
+              "cxefago",
+              "kampo:combobox",
+              "kampo:search",
+              "tabelo"
+            ],
+            "neunuecaj": [],
+            "unueca": true
+          },
+          "standard-detail": {
+            "celoj": [
+              "cxefnavigado",
+              "pagxokapo",
+              "cxefago",
+              "listo"
+            ],
+            "neunuecaj": [],
+            "unueca": true
+          },
+          "standard-verlauf": {
+            "celoj": [
+              "cxefnavigado",
+              "pagxokapo",
+              "tabelo"
+            ],
+            "neunuecaj": [],
+            "unueca": true
+          }
+        }
+      },
+      "sumo": {
+        "konstruitaj": 3,
+        "planitaj": 3,
+        "total": 100,
+        "k": {
+          "K1": 1,
+          "K2": 1,
+          "K3": 1,
+          "K4": 1,
+          "K5": 1,
+          "K6": 1
+        },
+        "navigado": 1,
+        "sxablonoj": 1
+      }
+    }
+  }
+}

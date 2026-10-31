@@ -1,0 +1,116 @@
+{
+  "lingvo": "de",
+  "bytes": 371,
+  "elements": [
+    {
+      "tag": "nav",
+      "attrs": {
+        "class": "hauptnav",
+        "aria-label": "Hauptnavigation"
+      },
+      "parent": -1,
+      "text": ""
+    },
+    {
+      "tag": "a",
+      "attrs": {
+        "href": "standards-liste.html"
+      },
+      "parent": 0,
+      "text": "Standards"
+    },
+    {
+      "tag": "h1",
+      "attrs": {
+        "class": "kopf"
+      },
+      "parent": -1,
+      "text": "Standard A-12"
+    },
+    {
+      "tag": "dl",
+      "attrs": {},
+      "parent": -1,
+      "text": ""
+    },
+    {
+      "tag": "dt",
+      "attrs": {},
+      "parent": 3,
+      "text": "Status"
+    },
+    {
+      "tag": "dd",
+      "attrs": {},
+      "parent": 3,
+      "text": "Gültig"
+    },
+    {
+      "tag": "dt",
+      "attrs": {},
+      "parent": 3,
+      "text": "Team"
+    },
+    {
+      "tag": "dd",
+      "attrs": {},
+      "parent": 3,
+      "text": "Team Nord"
+    },
+    {
+      "tag": "a",
+      "attrs": {
+        "href": "standard-verlauf.html"
+      },
+      "parent": -1,
+      "text": "Verlauf ansehen"
+    },
+    {
+      "tag": "button",
+      "attrs": {
+        "class": "knopf primaer",
+        "type": "submit"
+      },
+      "parent": -1,
+      "text": "Bearbeiten"
+    }
+  ],
+  "aria": [
+    {
+      "role": "navigation",
+      "name": "Hauptnavigation"
+    },
+    {
+      "role": "link",
+      "name": "Standards"
+    },
+    {
+      "role": "heading",
+      "name": "Standard A-12",
+      "level": 1
+    },
+    {
+      "role": "link",
+      "name": "Verlauf ansehen"
+    },
+    {
+      "role": "button",
+      "name": "Bearbeiten"
+    }
+  ],
+  "console": [],
+  "renders": [
+    {
+      "aspekto": "komuna",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "komuna",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": []
+    }
+  ]
+}

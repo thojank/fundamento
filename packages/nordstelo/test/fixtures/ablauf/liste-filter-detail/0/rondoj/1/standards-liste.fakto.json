@@ -1,0 +1,176 @@
+{
+  "lingvo": "de",
+  "bytes": 611,
+  "elements": [
+    {
+      "tag": "nav",
+      "attrs": {
+        "class": "hauptnav",
+        "aria-label": "Hauptnavigation"
+      },
+      "parent": -1,
+      "text": ""
+    },
+    {
+      "tag": "a",
+      "attrs": {
+        "href": "standards-liste.html"
+      },
+      "parent": 0,
+      "text": "Standards"
+    },
+    {
+      "tag": "h1",
+      "attrs": {
+        "class": "kopf"
+      },
+      "parent": -1,
+      "text": "Standards"
+    },
+    {
+      "tag": "form",
+      "attrs": {
+        "role": "search",
+        "aria-label": "Standards filtern"
+      },
+      "parent": -1,
+      "text": ""
+    },
+    {
+      "tag": "label",
+      "attrs": {
+        "for": "suche"
+      },
+      "parent": 3,
+      "text": "Standards suchen"
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "id": "suche",
+        "type": "search"
+      },
+      "parent": 3,
+      "text": ""
+    },
+    {
+      "tag": "label",
+      "attrs": {
+        "for": "status"
+      },
+      "parent": 3,
+      "text": "Status"
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "id": "status"
+      },
+      "parent": 3,
+      "text": ""
+    },
+    {
+      "tag": "option",
+      "attrs": {},
+      "parent": 7,
+      "text": "Gültig"
+    },
+    {
+      "tag": "button",
+      "attrs": {
+        "class": "primaer knopf",
+        "type": "submit"
+      },
+      "parent": 3,
+      "text": "Filtern"
+    },
+    {
+      "tag": "table",
+      "attrs": {
+        "class": "tabelle"
+      },
+      "parent": -1,
+      "text": ""
+    },
+    {
+      "tag": "caption",
+      "attrs": {},
+      "parent": 10,
+      "text": "Alle Standards"
+    },
+    {
+      "tag": "tr",
+      "attrs": {},
+      "parent": 10,
+      "text": ""
+    },
+    {
+      "tag": "td",
+      "attrs": {},
+      "parent": 12,
+      "text": ""
+    },
+    {
+      "tag": "a",
+      "attrs": {
+        "href": "standard-detail.html"
+      },
+      "parent": 13,
+      "text": "Standard A-12"
+    }
+  ],
+  "aria": [
+    {
+      "role": "navigation",
+      "name": "Hauptnavigation"
+    },
+    {
+      "role": "link",
+      "name": "Standards"
+    },
+    {
+      "role": "heading",
+      "name": "Standards",
+      "level": 1
+    },
+    {
+      "role": "search",
+      "name": "Standards filtern"
+    },
+    {
+      "role": "searchbox",
+      "name": "Standards suchen"
+    },
+    {
+      "role": "combobox",
+      "name": "Status"
+    },
+    {
+      "role": "button",
+      "name": "Filtern"
+    },
+    {
+      "role": "table",
+      "name": "Alle Standards"
+    },
+    {
+      "role": "link",
+      "name": "Standard A-12"
+    }
+  ],
+  "console": [],
+  "renders": [
+    {
+      "aspekto": "komuna",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "komuna",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": []
+    }
+  ]
+}
