@@ -58,6 +58,29 @@ function section(markdown: string, heading: string): string {
   return (end < 0 ? rest : rest.slice(0, end)).join("\n");
 }
 
+/** The version in the Constitution's header line (`Version 2.6 · …`). */
+function constitutionVersion(constitution: string): string {
+  return /^Version (\d+\.\d+) · /.exec(constitution.split("\n")[2] ?? "")?.[1] ?? "";
+}
+
+/**
+ * The newest version the change history of the Constitution names (`… v2.5 (Spec 033 …`): the
+ * header follows the history, so a test reads the number from the data instead of pinning it.
+ */
+function newestHistoryVersion(constitution: string): string {
+  const versions = [...section(constitution, "Governance").matchAll(/\bv(\d+)\.(\d+) \(/g)].map(
+    (match) => [Number(match[1]), Number(match[2])] as const,
+  );
+  const [major, minor] = versions.reduce(
+    (newest, version) =>
+      version[0] > newest[0] || (version[0] === newest[0] && version[1] > newest[1])
+        ? version
+        : newest,
+    [0, 0] as const,
+  );
+  return `${major}.${minor}`;
+}
+
 /** Removes fenced code blocks and inline code spans, so only prose remains. */
 function proseOnly(markdown: string): string {
   return markdown.replace(/```[\s\S]*?```/g, "").replace(/`[^`\n]*`/g, "");
@@ -685,8 +708,11 @@ describe("Spec 004 documentation (T001, Art. V Benchmark-Aspekto)", () => {
   // d29a5206 mit v2.3; die Spec nennt die Nummer.
   // Seit Spec 033 S1 (Amendment v2.5, freigegeben am 2026-10-24, 13:41) 2.5: bestimmt gegen main
   // 05f122dc mit v2.4 und ohne offenen PR; die Spec nennt die Nummer.
-  it("the Constitution header says version 2.5 and the history names v2.3 with the Ero-Tokens", () => {
-    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.5 · /);
+  // Seit Spec 036 Teil 6 (Amendment v2.6, redaktionell) liest der Test die Nummer aus den Daten: Die
+  // Kopfzeile nennt die neueste Version der Änderungshistorie, die v2.5 von Spec 033 steht darin.
+  it("the Constitution header says the newest version of the history and the history names v2.3 with the Ero-Tokens", () => {
+    expect(constitutionVersion(constitution)).toBe(newestHistoryVersion(constitution));
+    expect(constitution).toContain("v2.5 (Spec 033");
     expect(constitution).toContain("v2.3 (Spec 024");
     expect(constitution).toContain("Terminologie **Ero-Tokeno**");
   });
@@ -715,6 +741,31 @@ describe("Spec 004 documentation (T001, Art. V Benchmark-Aspekto)", () => {
 
   it("the Constitution does not yet carry the principle Fluida Marko", () => {
     expect(constitution).not.toContain("Fluida Marko");
+  });
+});
+
+// Spec 036 Teil 6 (D-24): „Constitution Amendment v2.6 (redaktionell)“. Statt des Beispielnamens
+// einer externen, proprietären Marke nennen Terminologio, Art. IV, Art. XIII und die Phasenfolge ein
+// privates Aspekto-Paket; kein Grundsatz ändert sich. Das Wort aus R-12 setzt der Test zusammen.
+describe("Spec 036 Teil 6: Constitution Amendment v2.6 (redaktionell)", () => {
+  const constitution = read(".specify/memory/constitution.md");
+  const word = ["cif", "ere", "cigo"].join("");
+
+  it("the header says 2.6 of 2026-10-31 and the history names v2.6 with its reason and migration", () => {
+    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.6 · 2026-10-31 · /);
+    expect(newestHistoryVersion(constitution)).toBe("2.6");
+    const history = section(constitution, "Governance");
+    expect(history).toContain(
+      "v2.6 (Spec 036 Teil 6, Constitution Amendment redaktionell, vom Maintainer zu bestätigen)",
+    );
+    expect(history).toContain("Migration: keine; kein Grundsatz ändert sich.");
+  });
+
+  it("the examples name a private Aspekto package, no foreign brand", () => {
+    const table = section(constitution, "Terminologio (verbindliches Vokabular)");
+    expect(table).toContain("ein privates Aspekto-Paket (extern, proprietär)");
+    expect(constitution).toContain("`fm aspekto use <aspekto>`");
+    expect(constitution.toLowerCase()).not.toContain(word);
   });
 });
 
@@ -4099,9 +4150,13 @@ describe("Spec 033 documentation (specs/033-markenassistent)", () => {
     );
   });
 
-  it("the Constitution is v2.5 with „Plattform und Herausgeber“ in Art. VI, the new terms and the history", () => {
+  it("the Constitution carries v2.5 with „Plattform und Herausgeber“ in Art. VI, the new terms and the history", () => {
     const constitution = read(".specify/memory/constitution.md");
-    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.5 · 2026-10-24/);
+    // Since Spec 036 Teil 6 (v2.6, redaktionell) the header names the newest entry of the history.
+    expect(constitutionVersion(constitution)).toBe(newestHistoryVersion(constitution));
+    expect(constitution).toContain(
+      "v2.5 (Spec 033, freigegeben vom Maintainer am 2026-10-24, 13:41)",
+    );
     const article = constitution.slice(
       constitution.indexOf("## Artikel VI"),
       constitution.indexOf("## Artikel VII"),
