@@ -125,7 +125,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [agordilo, cli, mcp, metiejo, modelo, nordstelo]
+        package: [agordilo, cli, ekranoj, mcp, metiejo, modelo, nordstelo]
     steps:
       - name: Checkout
         uses: actions/checkout@v7

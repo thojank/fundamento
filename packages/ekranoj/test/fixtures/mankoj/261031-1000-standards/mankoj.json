@@ -1,0 +1,29 @@
+[
+  {
+    "celo": "eroj-rondo-6/7",
+    "ekzemplo": "liste.html: h1 nachgebaut",
+    "nomo": "Ero für h1",
+    "ofteco": 2,
+    "propono": "Eine Ero für h1 anbieten oder suggest_ero und den Gvidanto auf die bestehende Ero führen lassen.",
+    "speco": "ero",
+    "taskoj": ["liste", "detail"]
+  },
+  {
+    "celo": "muster-rondo-2",
+    "ekzemplo": "liste.html: Liste der Standards mit Filter",
+    "nomo": "listo-kun-filtrilo",
+    "ofteco": 1,
+    "propono": "Sxablono Liste mit Filterleiste",
+    "speco": "sxablono",
+    "taskoj": ["liste"]
+  },
+  {
+    "celo": "gvidanto",
+    "ekzemplo": "detail.html: Abstände zwischen den Karten von Team Nord",
+    "nomo": "list_arangxoj",
+    "ofteco": 1,
+    "propono": "Lesewerkzeug, das die Layoutmittel (Regionen, Abstände) der Sxablonoj nennt",
+    "speco": "ilo",
+    "taskoj": ["detail"]
+  }
+]

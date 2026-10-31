@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@axe-core/playwright": "4.13.0",
+    "@fundamento/ekranoj": "workspace:*",
     "@fundamento/eroj": "workspace:*",
     "@fundamento/mcp": "workspace:*",
     "@fundamento/metiejo": "workspace:*",

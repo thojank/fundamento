@@ -73,7 +73,7 @@ const CHECKS_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
 // slower. The cut of W1 and B-12 once more: one runner per package.
 /** The packages of the unit job, a runner each: every package with tests but Projekcioj and Eroj. */
 // Spec 030: the Nordstelo's tests are pure (no browser, no provider) and join the matrix.
-const UNIT_PACKAGES = ["agordilo", "cli", "mcp", "metiejo", "modelo", "nordstelo"];
+const UNIT_PACKAGES = ["agordilo", "cli", "ekranoj", "mcp", "metiejo", "modelo", "nordstelo"];
 
 /** The job of the unit tests: one package per runner (matrix), the Projekcioj and Eroj elsewhere. */
 const UNIT_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
