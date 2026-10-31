@@ -51,3 +51,55 @@ test.describe("②b-2 A-*-2: large is a deprecated alias of medium", () => {
     });
   }
 });
+
+test.describe("②b-2 A-elektilo-1: a read-only select", () => {
+  test("is focusable and read-only, keeps its value against pointer and keys, sends it, shows no ✕", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      `<form id="f"><fm-elektilo name="land" value="at" readonly clearable>Land${options("De", "At", "Ch")}</fm-elektilo></form>`,
+    );
+    const select = page.locator("fm-elektilo").locator("select");
+    await expect(select).toHaveAttribute("aria-readonly", "true");
+    await page.keyboard.press("Tab");
+    await expect(select).toBeFocused();
+    for (const key of ["ArrowDown", "ArrowUp", "End", "Home", "c"]) await page.keyboard.press(key);
+    await select.click({ force: true });
+    await page.keyboard.press("Escape");
+    await expect(page.locator("fm-elektilo")).toHaveAttribute("value", "at");
+    await expect(select).toHaveValue("at");
+    const sent = await page.evaluate(() =>
+      new FormData(document.querySelector("#f") as HTMLFormElement).get("land"),
+    );
+    expect(sent).toBe("at");
+    await expect(page.locator("fm-elektilo").locator('[part="clear"]')).toBeHidden();
+  });
+});
+
+test.describe("②b-2 A-markobutono-1: a read-only checkbox", () => {
+  test("is focusable and read-only, does not turn by pointer, Space or its label, sends its value", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<form id="f"><fm-markobutono name="nl" checked readonly>Newsletter</fm-markobutono></form>',
+    );
+    const host = page.locator("fm-markobutono");
+    const control = host.locator('[part="control"]');
+    await expect(control).toHaveAttribute("aria-readonly", "true");
+    await page.keyboard.press("Tab");
+    await expect(control).toBeFocused();
+    await page.keyboard.press("Space");
+    await control.click();
+    await page.getByText("Newsletter").click();
+    await expect(host).toHaveAttribute("checked", "");
+    await expect(control).toHaveAttribute("aria-checked", "true");
+    const sent = await page.evaluate(() =>
+      new FormData(document.querySelector("#f") as HTMLFormElement).get("nl"),
+    );
+    expect(sent).toBe("on");
+  });
+});

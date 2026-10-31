@@ -84,3 +84,71 @@ describe("②b-2 A-*-2: two sizes, large a deprecated alias of medium (②a-2)",
     );
   });
 });
+
+/**
+ * A-elektilo-1, A-markobutono-1 (and the read-only of A-elektilo-3, A-markobutono-3): readonly, the
+ * last prop (Arkitekturo contract: every prop before it stands as it stood). Read-only keeps the
+ * look of rest (Spec 035 V-1): a prop without a state of its own, as at tekstareo and glitilo.
+ */
+const READONLY: Readonly<Record<string, readonly string[]>> = {
+  elektilo: [
+    "value",
+    "placeholder",
+    "required",
+    "invalid",
+    "size",
+    "disabled",
+    "loading",
+    "name",
+    "empty-label",
+    "clearable",
+    "label",
+    "intent",
+    "message-position",
+  ],
+  markobutono: [
+    "checked",
+    "required",
+    "invalid",
+    "size",
+    "disabled",
+    "loading",
+    "name",
+    "label",
+    "intent",
+    "message-position",
+  ],
+};
+
+describe("②b-2 A-elektilo-1, A-markobutono-1: readonly", () => {
+  it.each(Object.entries(READONLY))("%s: readonly after every prop it had", (ero, before) => {
+    const { skemo } = entryOf(ero);
+    const names = skemo.props.map((prop) => prop.name);
+    expect(names.slice(0, before.length)).toEqual(before);
+    expect(names.slice(before.length)).toEqual(["readonly"]);
+    expect(propOf(ero, "readonly")).toMatchObject({ kind: "boolean", default: false });
+    expect(skemo.a11y.states.readonly).toEqual(["aria-readonly"]);
+    // V-1: read-only looks as rest – no state of its own, no binding keyed by it.
+    expect(skemo.states).not.toContain("readonly");
+  });
+
+  it.each(Object.keys(READONLY))("%s: the brief names readonly as a flag, under 750", (ero) => {
+    const brief = briefOf(entryOf(ero));
+    expect(brief.flags).toContain("readonly");
+    expect(tokensOf(brief)).toBeLessThan(750);
+  });
+
+  it("the twelve fields: readonly wherever a value can be read but not changed", () => {
+    const withReadonly = [
+      "kampo",
+      "tekstareo",
+      "elektilo",
+      "listelektilo",
+      "plurelektilo",
+      "datelektilo",
+      "glitilo",
+      "markobutono",
+    ];
+    for (const ero of withReadonly) expect(propOf(ero, "readonly"), ero).toBeDefined();
+  });
+});
