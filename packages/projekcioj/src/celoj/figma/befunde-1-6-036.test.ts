@@ -4,6 +4,7 @@
 // 1.6 elekto: an option not chosen is an empty ring – no dot, its circle not filled like the
 // chosen one or like its own border.
 // 1.6 markobutono, sxaltilo: the label in the middle of its box or switch, not above it.
+// D-64 datelektilo: the month buttons of the open calendar show their glyphs, sized and painted.
 
 import { describe, expect, it } from "vitest";
 import { modelDouble, once, pageNodes, repoFiles, run } from "./plugin-test-helpers.js";
@@ -160,4 +161,53 @@ describe("Spec 036 1.6: the label of markobutono and sxaltilo in the middle of i
       expect(off).toEqual([]);
     });
   }
+});
+
+// D-64: the month buttons of the open calendar are butono of emphasis low and size small on the
+// web (element template: <fm-butono part="prev" emphasis="low" size="small">); their glyphs take
+// that butono's icon size and are painted as the ✕ and the calendar beside the field's text.
+describe("Spec 036 D-64: the month buttons of the open datelektilo calendar with size and fill in Figma", () => {
+  const MONTH_ICON_SIZE = "ero/butono/icon/size/size/small";
+
+  it("every variant: the glyphs of prev and next take the icon size of a small butono", async () => {
+    const unsized: string[] = [];
+    for (const variant of await variantsOf("datelektilo")) {
+      for (const button of ["prev", "next"]) {
+        const glyphs = (find(variant, button)?.children ?? []).filter((child) =>
+          child.name.startsWith("glyph-"),
+        );
+        expect(glyphs.length, `${variant.name}: ${button} holds its glyphs`).toBeGreaterThan(0);
+        for (const glyph of glyphs) {
+          const width = glyph.boundVariables.width?.name;
+          const height = glyph.boundVariables.height?.name;
+          if (width !== MONTH_ICON_SIZE || height !== MONTH_ICON_SIZE) {
+            unsized.push(`${variant.name}: ${button} ${glyph.name} ${width} × ${height}`);
+          }
+        }
+      }
+    }
+    expect(unsized).toEqual([]);
+  });
+
+  it("every variant: the vectors of prev and next are painted as the ✕ and the calendar", async () => {
+    const paint = (node: DoubleNode | undefined) => paintOf(node, "fills")?.name;
+    const unpainted: string[] = [];
+    for (const variant of await variantsOf("datelektilo")) {
+      const cross = paint(find(find(variant, "clear"), "clear-mark"));
+      const calendar = paint(find(find(variant, "trigger"), "mark"));
+      expect(cross, `${variant.name}: the ✕ is painted`).toBeDefined();
+      expect(calendar, `${variant.name}: the calendar as the ✕`).toBe(cross);
+      for (const button of ["prev", "next"]) {
+        for (const glyph of (find(variant, button)?.children ?? []).filter((child) =>
+          child.name.startsWith("glyph-"),
+        )) {
+          expect(glyph.children.length, `${variant.name}: ${button} ${glyph.name}`).toBe(1);
+          const painted = paint(glyph.children[0]);
+          if (painted !== cross)
+            unpainted.push(`${variant.name}: ${button} ${glyph.name} ${painted}`);
+        }
+      }
+    }
+    expect(unpainted).toEqual([]);
+  });
 });
