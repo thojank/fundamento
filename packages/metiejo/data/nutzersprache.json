@@ -1,0 +1,21 @@
+{
+  "$comment": "Spec 036, Befund 1.3: the words of the screen for the internal terms a model may repeat in the chat. The names of the steps (facetoj.json, nomo.de) and the labels of the sliders (Agordilo) come from their own data; here only the general terms of the brand model, longest first where a phrase carries its article. A term mapped to null has no word on the screen: the answer check drops the sentence that names it. Identifiers with an underscore (the names of the tools) and token names of the Modelo have no word either: in parentheses they are left out, elsewhere the sentence goes.",
+  "begriffe": {
+    "die Facetoj": "die Schritte",
+    "Die Facetoj": "Die Schritte",
+    "der Facetoj": "der Schritte",
+    "die Faceto": "der Schritt",
+    "Die Faceto": "Der Schritt",
+    "der Faceto": "dem Schritt",
+    "Facetoj": "Schritte",
+    "Faceto": "Schritt",
+    "Agordilo": "Regler",
+    "Reguloj": "Prüfung",
+    "Regulo": "Prüfregel",
+    "Kroniko": "Protokoll",
+    "Agordo": "Einstellungen",
+    "Aspekto": "Marke",
+    "Vortaro": null,
+    "Token": null
+  }
+}
