@@ -128,8 +128,13 @@ export interface ElementNames {
   afterLabel?: boolean;
   /** Spec 029 ②b-1b (Nachlese 12): the prop label is shown (`shown`) – label="…" is the visible label of a field. */
   shownLabel?: boolean;
-  /** Spec 029 ②b-1b M-2 (A-kampo-4): the part status-icon – the field shows the icon of its status in its row. */
+  /** Spec 029 ②b-1b M-2 (A-kampo-4): the part status-icon – the field shows the icon of its status at its end. */
   statusIcon?: boolean;
+  /**
+   * The parts at the end of a field, from the inside out (the Skemo's trailing; Abnahme #122,
+   * Spec 035 2.1): the markup puts the parts it draws in this order, the element the ones it makes.
+   */
+  trailing?: readonly string[];
   /** Spec 025 ② (plan ② D-11): a textbox with a calendar part — the datelektilo, a field with a trigger and a popover calendar. */
   datepicker?: boolean;
   /**
@@ -310,6 +315,7 @@ function fieldMarkup(
   stepper = false,
   datepicker = false,
   statusIcon = false,
+  trailing: readonly string[] = [],
 ): string {
   // A text area (Spec 011 ②, D-11): the platform's textarea in place of the input. A field with
   // suggestions (Spec 014 ⑤, D-03): the input as a combobox over a listbox — a popover of the
@@ -341,12 +347,16 @@ function fieldMarkup(
   // Spec 029 ②b-1, Abnahme #122: every field is a row of its control and its end – inside the
   // field's border, from the inside out the spinner, the clear button, the steppers or the
   // calendar (the Skemo's trailing); the element puts the buttons it makes in their place.
-  // Spec 029 ②b-1b M-2 (A-kampo-4): the icon of the field's status after the input, heard not –
-  // the message or the error says the status in words.
+  // Spec 029 ②b-1b M-2 (A-kampo-4), Spec 035 2.1: the icon of the field's status at its end too,
+  // where the Skemo's trailing puts it (first, before the spinner); heard not – the message or the
+  // error says the status in words.
   void stepper;
   void suggest;
-  const status = statusIcon ? STATUS_ICON : "";
-  const row = `<div part="row">${native}${status}<span part="end">${SPINNER}${trigger}</span></div>`;
+  const end = endMarkup(
+    { "status-icon": statusIcon ? STATUS_ICON : "", spinner: SPINNER, trigger },
+    trailing,
+  );
+  const row = `<div part="row">${native}${end}</div>`;
   return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label>${row}${calendar}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
 }
 
@@ -381,10 +391,20 @@ const MULTI_ITEM_ROW =
  * where filterable, the clear butono at its end and the chosen values as tags after the button
  * where the summary says so.
  */
-function listMarkup(slots: NonNullable<ElementNames["slots"]>, multi: boolean): string {
+function listMarkup(
+  slots: NonNullable<ElementNames["slots"]>,
+  multi: boolean,
+  trailing: readonly string[] = [],
+): string {
   // Abnahme #122: the chevron stands in the end of the row, inside the button's border, after the
-  // spinner and the clear button (a button holds no button).
-  const end = `<span part="end">${SPINNER}<span part="indicator" aria-hidden="true">${IKONO_CHEVRON}</span></span>`;
+  // spinner and the clear button (a button holds no button) – the Skemo's trailing.
+  const end = endMarkup(
+    {
+      spinner: SPINNER,
+      indicator: `<span part="indicator" aria-hidden="true">${IKONO_CHEVRON}</span>`,
+    },
+    trailing,
+  );
   const button = multi
     ? `<div part="row"><button part="control" id="control" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="listbox"><span part="text" id="text"></span></button>${end}</div><div part="tags" hidden></div>`
     : `<div part="row"><button part="control" id="control" type="button" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="listbox"><span part="text" id="text"></span></button>${end}</div>`;
@@ -450,9 +470,21 @@ function dialogMarkup(): string {
  * of the light DOM are written into the select as the platform's options when it renders; the
  * list that opens is the platform's (E3).
  */
-function selectMarkup(slots: NonNullable<ElementNames["slots"]>, role: string): string {
+function selectMarkup(
+  slots: NonNullable<ElementNames["slots"]>,
+  role: string,
+  trailing: readonly string[] = [],
+): string {
   void role;
-  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><div part="row"><select part="control" id="control"></select><span part="end">${SPINNER}<span part="indicator" aria-hidden="true">${IKONO_CHEVRON}</span></span></div>${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+  // Abnahme #122: spinner, clear button and chevron in the end, by the Skemo's trailing.
+  const end = endMarkup(
+    {
+      spinner: SPINNER,
+      indicator: `<span part="indicator" aria-hidden="true">${IKONO_CHEVRON}</span>`,
+    },
+    trailing,
+  );
+  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><div part="row"><select part="control" id="control"></select>${end}</div>${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -709,6 +741,23 @@ function disclosureMarkup(): string {
   return '<details part="control"><summary part="summary"><slot name="summary"></slot><fm-ikono part="indicator" name="chevron-right"></fm-ikono></summary><div part="content"><slot></slot></div><span id="fm-texts" hidden></span></details>';
 }
 
+/**
+ * The end of a field (Abnahme #122, Spec 035 2.1): the parts the markup draws, in the order of the
+ * Skemo's trailing from the inside out; a part the trailing does not name after those it names, in
+ * the order given. The parts the element makes (the clear button, the steppers) it puts in their
+ * place itself (#orderEnd, by the same trailing).
+ */
+function endMarkup(parts: Readonly<Record<string, string>>, trailing: readonly string[]): string {
+  const rank = (part: string) => {
+    const index = trailing.indexOf(part);
+    return index === -1 ? trailing.length : index;
+  };
+  const ordered = Object.entries(parts)
+    .filter(([, markup]) => markup !== "")
+    .sort(([a], [b]) => rank(a) - rank(b));
+  return `<span part="end">${ordered.map(([, markup]) => markup).join("")}</span>`;
+}
+
 /** The status icon of a field (Spec 029 ②b-1b M-2): hidden while the field is neutral. */
 const STATUS_ICON =
   '<span part="status-icon" aria-hidden="true" hidden><fm-ikono size="small"></fm-ikono></span>';
@@ -819,6 +868,7 @@ function markup(
   stepper = false,
   afterLabel = false,
   statusIcon = false,
+  trailing: readonly string[] = [],
 ): string {
   const reasoned = slots.some((slot) => slot.name === "disabled-reason");
   const own = slots.filter((slot) => slot.name !== "disabled-reason");
@@ -834,6 +884,7 @@ function markup(
     stepper,
     afterLabel,
     statusIcon,
+    trailing,
   );
   if (!reasoned) return body;
   if (host === "menu") {
@@ -857,6 +908,7 @@ function hostMarkup(
   stepper = false,
   afterLabel = false,
   statusIcon = false,
+  trailing: readonly string[] = [],
 ): string {
   if (host === "text") return textMarkup(slots);
   if (host === "slider") return sliderMarkup(slots);
@@ -877,19 +929,23 @@ function hostMarkup(
   if (host === "codeblock") return codeblockMarkup();
   if (host === "markdown") return markdownMarkup();
   if (host === "tabs") return tabsMarkup();
-  if (host === "input") return fieldMarkup(slots, false, false, stepper, false, statusIcon);
-  if (host === "datepicker") return fieldMarkup(slots, false, false, false, true);
+  if (host === "input")
+    return fieldMarkup(slots, false, false, stepper, false, statusIcon, trailing);
+  if (host === "datepicker")
+    return fieldMarkup(slots, false, false, false, true, statusIcon, trailing);
   if (host === "chip") return chipMarkup();
-  if (host === "listselect") return listMarkup(slots, false);
-  if (host === "multiselect") return listMarkup(slots, true);
+  if (host === "listselect") return listMarkup(slots, false, trailing);
+  if (host === "multiselect") return listMarkup(slots, true, trailing);
   if (host === "editor") return editorMarkup();
-  if (host === "textarea") return fieldMarkup(slots, true);
-  if (host === "suggest") return fieldMarkup(slots, false, true);
+  if (host === "textarea")
+    return fieldMarkup(slots, true, false, false, false, statusIcon, trailing);
+  if (host === "suggest")
+    return fieldMarkup(slots, false, true, false, false, statusIcon, trailing);
   if (host === "disclosure") return disclosureMarkup();
   if (host === "dialog") return dialogMarkup();
   if (host === "toggle") return toggleMarkup(role, slots, marked, afterLabel);
   if (host === "group") return groupMarkup(slots, marked);
-  if (host === "select") return selectMarkup(slots, role);
+  if (host === "select") return selectMarkup(slots, role, trailing);
   const before = slots.filter((slot) => slot.default !== true && slot.name.endsWith("-start"));
   const after = slots.filter((slot) => slot.default !== true && !slot.name.endsWith("-start"));
   const last = after.at(-1)?.name;
@@ -923,6 +979,7 @@ export function elementSource({
   afterLabel = false,
   shownLabel = false,
   statusIcon = false,
+  trailing = [],
   slots = [
     { name: "label", default: true },
     { name: "icon-start", decorative: true },
@@ -5680,7 +5737,7 @@ ${autoField}${isAvatar ? '  /** The picture an avatar shows and whether it has l
       sheet.replaceSync(CSS);
     }
     root.adoptedStyleSheets = [sheet];
-    root.innerHTML = \`${markup(host, slots, role, marked, indicator, dismiss, icon, breadcrumb, stepper, afterLabel, statusIcon)}\`;
+    root.innerHTML = \`${markup(host, slots, role, marked, indicator, dismiss, icon, breadcrumb, stepper, afterLabel, statusIcon, trailing)}\`;
     const control = root.querySelector("${control}");
     ${
       // Spec 025 ③ (plan ③ D-18): an inline editor has no label slot — its name is the prop label

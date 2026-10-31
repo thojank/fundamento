@@ -345,6 +345,7 @@
       }
     },
     "trailing": [
+      "status-icon",
       "spinner",
       "clear",
       "decrement",

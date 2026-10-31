@@ -6166,12 +6166,16 @@ async function applyComponents(variables, warnings) {
       if (fieldSign && control.children.indexOf(indicator) !== control.children.length - 1) {
         control.appendChild(indicator);
       }
-      // Abnahme #122: the control of a field, from the start: its text, then at its end from the
-      // inside out the spinner, the clear button, the chevron or the calendar – all inside it
-      // (insertChild takes the child out first, then places it). Spec 029 ②b-1b M-2 (A-kampo-4):
-      // the status icon before the clear button, in the same order, so a second run moves nothing.
+      // Abnahme #122, Spec 035 2.1: the control of a field, from the start: its text, then at its
+      // end the parts in the order of the Skemo's trailing (the plan's), from the inside out – the
+      // status icon (Spec 029 ②b-1b M-2, A-kampo-4), the spinner, the clear button, the chevron
+      // or the calendar – all inside it; a part the trailing does not name after those it names.
+      // insertChild takes the child out first, then places it; a second run moves nothing.
       if (isField) {
-        const order = [textNode, labelled.nodes.spinner, statusFrame, clearFrame, fieldSign ? indicator : undefined, trigger]
+        const ends = { "status-icon": statusFrame, spinner: labelled.nodes.spinner, clear: clearFrame, indicator: fieldSign ? indicator : undefined, trigger };
+        const trailing = component.trailing || [];
+        const rank = (name) => (trailing.indexOf(name) === -1 ? trailing.length : trailing.indexOf(name));
+        const order = [textNode].concat(Object.keys(ends).sort((a, b) => rank(a) - rank(b)).map((name) => ends[name]))
           .filter((child) => child !== undefined);
         order.forEach((child, index) => {
           if (control.children.indexOf(child) !== index) control.insertChild(index, child);

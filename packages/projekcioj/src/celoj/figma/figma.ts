@@ -1175,6 +1175,11 @@ export interface FigmaComponentSet {
    */
   spinnerAfter?: string;
   /**
+   * The parts at the end of a field, from the inside out (the Skemo's trailing; Abnahme #122,
+   * Spec 035 2.1): the plugin puts them in its control in this order, after the text.
+   */
+  trailing?: readonly string[];
+  /**
    * The variable the glyph of a field's clear button is filled with (Spec 029 ②b-1 M-6): the label
    * colour of the butono of emphasis low the web composes.
    */
@@ -3606,6 +3611,7 @@ function componentSetOf(
     ...(sign === undefined ? {} : { sign }),
     ...(skemo.parts.spinner === undefined ? {} : { spinner: STATE_SIGN }),
     ...(skemo.trailingAfter === undefined ? {} : { spinnerAfter: skemo.trailingAfter }),
+    ...(skemo.trailing === undefined ? {} : { trailing: [...skemo.trailing] }),
     ...(clearsInField(skemo) ? { clearColor: variableName(CLEAR_ICON_COLOR) } : {}),
     ...(skemo.parts["status-icon"] === undefined ? {} : { statusIcon: true as const }),
     ...(options === undefined ? {} : { entry: options }),

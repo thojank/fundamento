@@ -194,7 +194,7 @@ const endStructure = (textarea: boolean): string =>
     ':where([part="row"]) > [part="control"] { flex: 1 1 auto; }',
     `:where([part="end"]) { position: absolute; inset: 0; display: flex; align-items: ${textarea ? "flex-start" : "center"}; justify-content: flex-end; box-sizing: border-box; pointer-events: none; }`,
     ':where([part="end"]) > * { flex: none; pointer-events: auto; }',
-    ':where([part="end"]) > :is([part="indicator"], [part="spinner"]) { pointer-events: none; }',
+    ':where([part="end"]) > :is([part="status-icon"], [part="indicator"], [part="spinner"]) { pointer-events: none; }',
     ':where([part="end"]) > [hidden] { display: none; }',
   ].join("\n");
 
@@ -2479,6 +2479,8 @@ export function elementNamesOf(
     afterLabel: entry.skemo.trailingAfter === "label",
     shownLabel: entry.skemo.props.some((prop) => prop.name === "label" && prop.shown === true),
     statusIcon: entry.skemo.parts["status-icon"] !== undefined,
+    // Abnahme #122, Spec 035 2.1: the end of a field in the order of the Skemo's trailing.
+    trailing: entry.skemo.trailing ?? [],
     // Spec 025 ② (plan ② D-11): a field with a calendar part is the date picker.
     datepicker: isDatepicker(entry.skemo),
     marked: entry.skemo.parts["required-mark"] !== undefined,
