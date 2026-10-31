@@ -719,3 +719,104 @@ test.describe("②b-2 A-tabelo-1, A-markdovido-1, A-plenstato-1/2, A-teksto-1: d
     expect((await style("b")).numeric).toBe("normal");
   });
 });
+
+test.describe("②b-2 layout: indicator-side, justify, spread, dismiss", () => {
+  test("faldilo: indicator-side start puts the chevron before the summary", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      '<fm-faldilo id="s" indicator-side="start"><span slot="summary">Lieferbedingungen</span>Inhalt</fm-faldilo><fm-faldilo id="e"><span slot="summary">Lieferbedingungen</span>Inhalt</fm-faldilo>',
+    );
+    const order = (id: string) =>
+      page.locator(`#${id}`).evaluate((host) => {
+        const indicator = host.shadowRoot?.querySelector('[part="indicator"]') as HTMLElement;
+        const text = host.querySelector('[slot="summary"]') as HTMLElement;
+        return indicator.getBoundingClientRect().left < text.getBoundingClientRect().left
+          ? "indicator first"
+          : "text first";
+      });
+    expect(await order("s")).toBe("indicator first");
+    expect(await order("e")).toBe("text first");
+  });
+
+  test("menuo: justify start aligns the list with the start of its trigger, end with its end", async ({
+    page,
+  }) => {
+    const menu = (id: string, justify: string) =>
+      `<div style="margin: 4rem 0 0 12rem"><fm-menuo id="${id}" ${justify}><data value="a">Bearbeiten</data><data value="b">Duplizieren und weitergeben</data></fm-menuo></div>`;
+    await serve(page, out, menu("s", 'justify="start"') + menu("e", 'justify="end"'));
+    const edges = async (id: string) => {
+      await page.locator(`#${id}`).getByRole("button").first().click();
+      const result = await page.locator(`#${id}`).evaluate((host) => {
+        const trigger = host.shadowRoot?.querySelector("fm-butono") as HTMLElement;
+        const list = host.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+        const t = trigger.getBoundingClientRect();
+        const l = list.getBoundingClientRect();
+        return { start: Math.round(l.left - t.left), end: Math.round(l.right - t.right) };
+      });
+      await page.keyboard.press("Escape");
+      return result;
+    };
+    expect((await edges("s")).start).toBe(0);
+    expect((await edges("e")).end).toBe(0);
+  });
+
+  test("langetaro: spread fill shares the width among the tabs", async ({ page }) => {
+    const tabs = (id: string, spread: string) =>
+      `<div style="inline-size: 600px"><fm-langetaro id="${id}" label="Standard" ${spread}><data value="a">Inhalt</data><data value="b">Versionen</data><div slot="panel">Der Inhalt</div></fm-langetaro></div>`;
+    await serve(page, out, tabs("f", 'spread="fill"') + tabs("c", ""));
+    const widths = (id: string) =>
+      page.locator(`#${id}`).evaluate((host) => {
+        const list = host.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+        const sum = [...(host.shadowRoot?.querySelectorAll('[role="tab"]') ?? [])].reduce(
+          (total, tab) => total + tab.getBoundingClientRect().width,
+          0,
+        );
+        return { list: Math.round(list.getBoundingClientRect().width), tabs: Math.round(sum) };
+      });
+    const fill = await widths("f");
+    expect(fill.tabs).toBeGreaterThanOrEqual(fill.list - 4);
+    const content = await widths("c");
+    expect(content.tabs).toBeLessThan(content.list - 100);
+  });
+
+  test("konsileto: justify start aligns the hint with the start of its trigger", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<div style="margin: 4rem 0 0 12rem"><fm-butono id="b">Speichern und weiter</fm-butono></div><fm-konsileto id="t" for="b" justify="start">Sichert die Fassung und öffnet den nächsten Schritt</fm-konsileto>',
+    );
+    await page.locator("#b").hover();
+    await expect
+      .poll(() => page.locator("#t").evaluate((host) => host.matches(":popover-open")))
+      .toBe(true);
+    const start = await page.evaluate(() => {
+      const trigger = document.getElementById("b")?.getBoundingClientRect();
+      const hint = document.getElementById("t")?.getBoundingClientRect();
+      return Math.round((hint?.left ?? 0) - (trigger?.left ?? 0));
+    });
+    expect(start).toBe(0);
+  });
+
+  test("dialogo: the purpose stands on the dialog as data-dismiss, guarded by default", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<fm-dialogo id="x" dismiss="explicit">Befund verwerfen?</fm-dialogo><fm-dialogo id="d">Befund verwerfen?</fm-dialogo>',
+    );
+    const purpose = (id: string) =>
+      page
+        .locator(`#${id}`)
+        .evaluate(
+          (host) =>
+            host.shadowRoot?.querySelector('[part="control"]')?.getAttribute("data-dismiss") ??
+            null,
+        );
+    expect(await purpose("x")).toBe("explicit");
+    expect(await purpose("d")).toBe("guarded");
+  });
+});
