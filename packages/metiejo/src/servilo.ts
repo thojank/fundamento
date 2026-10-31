@@ -1784,6 +1784,17 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
             teksto: satz,
             detaloj: { herkunft, akzent: { farbe, anteil, abstand }, agordo: patch },
           });
+        } else if (result.zweitfarbe !== undefined && "teilsatz" in result.zweitfarbe) {
+          // A second colour too close to the lead colour sets nothing; the person reads why.
+          const { satz, grund, farbe } = result.zweitfarbe;
+          notoj.push(satz);
+          kroniko(name, {
+            ago: "propono",
+            fonto: "agento",
+            faceto: "gvidkoloro",
+            teksto: satz,
+            detaloj: { zweitfarbe: { grund, ...(farbe === undefined ? {} : { farbe }) } },
+          });
         }
         // With a model, no fixed colour and no inspiration, the model chooses the lead colour.
         const provider = options.ki?.provider;

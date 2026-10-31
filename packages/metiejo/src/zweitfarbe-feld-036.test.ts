@@ -15,7 +15,7 @@ import { parseEnv, settingsOf } from "./env.js";
 import { MARKEN_DIR, readMarko } from "./marko.js";
 import type { PrivataDeps } from "./privata.js";
 import { type Servilo, startServilo } from "./servilo.js";
-import { TUERKIS, zweifarbigPng } from "./test-doubles/zweitfarbe.js";
+import { SCHATTEN, TUERKIS, zweifarbigPng } from "./test-doubles/zweitfarbe.js";
 
 const scratch = mkdtempSync(join(tmpdir(), "fm-zweitfarbe-feld-036-"));
 const root = join(scratch, "checkout");
@@ -150,6 +150,32 @@ describe("Weg A and Weg B through the server set the Zweitfarbe (Spec 036, Befun
       (item) => item.ago === "propono" && item.faceto === "gvidkoloro",
     );
     expect(JSON.stringify(entry?.detaloj)).toContain(TUERKIS);
+  });
+
+  it("Weg A: a darker tone of the lead colour sets none; the answer and the Kroniko say why", async () => {
+    await fetch(`${servilo.url}/marko`, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "name=schatten&basis=leer",
+      redirect: "manual",
+    });
+    const response = await post("/api/marko/schatten/kreilo", {
+      celo: "Eine Werkstatt.",
+      karaktero: {},
+      festgelegt: {},
+      inspiro: [
+        { filename: "inspiration.png", base64: zweifarbigPng(SCHATTEN).toString("base64") },
+      ],
+      rajtoj: true,
+    });
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as { satz?: string };
+    expect(body.satz).toContain(`Keine Zweitfarbe: ${SCHATTEN} liegt zu nah an der Leitfarbe`);
+    expect(draft("schatten").zweitfarbe).toBeUndefined();
+    const entry = readKroniko(workdir, "schatten").findLast(
+      (item) => item.ago === "propono" && item.faceto === "gvidkoloro",
+    );
+    expect(entry?.teksto).toContain("zu nah an der Leitfarbe");
   });
 
   it("Weg B: an uploaded image proposes lead colour and Zweitfarbe; „Vorschlag übernehmen“ sets both", async () => {

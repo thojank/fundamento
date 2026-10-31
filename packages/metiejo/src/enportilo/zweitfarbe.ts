@@ -119,6 +119,36 @@ export function zweitfarbeOf(
       satz: `Zweitfarbe ${farbe}: die zweite kräftige Farbe ${woher} (${anteil} % der gefundenen Farbe), deutlich anders als die Leitfarbe ${leitfarbe}.`,
     };
   }
+  // Not taken, said why: a strong colour of its own relevant share (not counting its near tones –
+  // the lead colour's shades are near it) that lies closer to the lead colour than abstand_min.
+  // Beside an achromatic lead colour that distance is the colour's chroma: it is too pale.
+  const nah = strong
+    .filter((entry) => String(entry.trovo.valoro) !== leitfarbe && entry.abstand < abstand_min)
+    .filter((entry) => (100 * entry.trovo.pezo) / total >= anteil_min)
+    .sort((a, b) => b.trovo.pezo * b.oklch.c - a.trovo.pezo * a.oklch.c)[0];
+  if (nah !== undefined) {
+    const farbe = String(nah.trovo.valoro);
+    const unbunt = lead.c < KREILO.unbunt.neutral_bis;
+    return {
+      grund: "nah",
+      farbe,
+      satz: unbunt
+        ? `Keine Zweitfarbe: ${farbe} ist neben der unbunten Leitfarbe ${leitfarbe} zu blass, um als eigene Farbe zu wirken.`
+        : `Keine Zweitfarbe: ${farbe} liegt zu nah an der Leitfarbe ${leitfarbe} – ein anderer Ton derselben Farbe, keine eigene.`,
+      teilsatz: unbunt
+        ? `keine Zweitfarbe, denn ${farbe} ist neben der unbunten Leitfarbe zu blass`
+        : `keine Zweitfarbe, denn ${farbe} liegt zu nah an der Leitfarbe`,
+    };
+  }
+  const klein = strong.find((entry) => entry.abstand >= abstand_min);
+  if (klein !== undefined) {
+    const farbe = String(klein.trovo.valoro);
+    return {
+      grund: "klein",
+      farbe,
+      satz: `Keine Zweitfarbe: ${farbe} deckt nur ${Math.round(klein.share)} % der gefundenen Farbe – zu wenig für eine eigene Farbe der Marke.`,
+    };
+  }
   return {
     grund: "keine",
     satz: `Keine Zweitfarbe: ${woher === "deiner Inspiration" ? "in deiner Inspiration" : "in deinem Material"} finde ich keine zweite kräftige Farbe.`,
@@ -139,7 +169,8 @@ const intoFirstSentence = (satz: string, clause: string) =>
 /**
  * The proposal of the lead colour with the Zweitfarbe of the same material (Weg B, Weg C): set, it
  * lays the field with its origin and the sentence names both colours; too close, the sentence says
- * why in a clause of its first sentence – the one the assistant shows. Otherwise unchanged.
+ * why in a clause of its first sentence – the one the assistant shows. Otherwise unchanged (a colour
+ * with too small a share is no news: status colours are small).
  */
 export function mitZweitfarbe<P extends LeitfarbePropono>(
   propono: P,
@@ -169,5 +200,8 @@ export function mitZweitfarbe<P extends LeitfarbePropono>(
       herkunft,
     };
   }
+  // Too close: the step says why in the sentence it shows (kurzsatzOf keeps the clause after „; “).
+  if (befund !== undefined && "teilsatz" in befund && befund.teilsatz !== undefined)
+    return { ...propono, satz: intoFirstSentence(propono.satz, `; ${befund.teilsatz}`) };
   return propono;
 }
