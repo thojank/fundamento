@@ -1067,3 +1067,30 @@ describe("Make Kit and the Auswahl of Spec 025 ③", () => {
     }
   });
 });
+
+// Spec 035 2.2: the guideline of every field says that label="…" is shown like the children (Spec
+// 029 ②b-1b); the butono keeps label as the hidden name of its icon-only form.
+describe("Make Kit: the visible label of the fields (Spec 035 2.2)", () => {
+  const fields =
+    prepared.input.modelo.reguloj.find((regulo) => regulo.name === "field-label-visible")?.appliesTo
+      ?.eroj ?? [];
+
+  it("the Regulo field-label-visible names the 12 fields", () => {
+    expect(fields).toHaveLength(12);
+  });
+
+  it.each(ASPEKTOJ)(
+    '%s: every field\'s guideline shows label="…" as its visible label',
+    (aspekto) => {
+      for (const ero of fields) {
+        const name = ero.charAt(0).toUpperCase() + ero.slice(1);
+        expect(kit(aspekto, `guidelines/components/${ero}.md`), ero).toContain(
+          `The label is the children of\nthe component; the prop \`label\` is shown the same way (\`<${name} label="…" />\`); the children win where both are given.`,
+        );
+      }
+      expect(kit(aspekto, "guidelines/components/butono.md")).toContain(
+        "for an icon-only butono set `label` as its accessible name.",
+      );
+    },
+  );
+});
