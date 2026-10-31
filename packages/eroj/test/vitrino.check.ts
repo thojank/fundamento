@@ -401,8 +401,9 @@ test("fm-dialogo opens from its section, modal and axe-clean, and Escape closes 
 }) => {
   await open(page);
   const section = page.locator("#fm-vitrino-dialogo");
-  // Six, and the dialog of Nachlese 7 ② B-8 (its message in two paragraphs).
-  await expect(section.locator("fm-dialogo")).toHaveCount(7);
+  // Six, and the dialog of Nachlese 7 ② B-8 (its message in two paragraphs); nine since Spec 036
+  // Teil 5 ②b-2 (A-dialogo-2: size full).
+  await expect(section.locator("fm-dialogo")).toHaveCount(10);
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await section.locator('[data-fm-opens="fm-vitrino-dialogo-medium-required"]').click();
   const dialog = page.getByRole("dialog", { name: "medium · required" });
@@ -451,15 +452,17 @@ test("fm-insigno, fm-avizo and fm-plenstato are upgraded in their sections, axe-
   await expect(badges).toHaveCount(10);
   await expect(badges.first()).toHaveText(/neutral · small/);
   const notices = page.locator("#fm-vitrino-avizo fm-avizo");
-  // Eight, and the danger notice of Nachlese 7 ② B-5 (a list and code in its details).
-  await expect(notices).toHaveCount(9);
-  await expect(page.locator("#fm-vitrino-avizo").getByRole("alert")).toHaveCount(3);
-  await expect(page.locator("#fm-vitrino-avizo").getByRole("status")).toHaveCount(6);
+  // Eight, and the danger notice of Nachlese 7 ② B-5 (a list and code in its details); sixteen
+  // since Spec 036 Teil 5 ②b-2 (A-avizo-1: intent × frame).
+  await expect(notices).toHaveCount(17);
+  await expect(page.locator("#fm-vitrino-avizo").getByRole("alert")).toHaveCount(5);
+  await expect(page.locator("#fm-vitrino-avizo").getByRole("status")).toHaveCount(12);
   await expect(
     page.locator("#fm-vitrino-avizo").getByRole("button", { name: "Schließen" }),
-  ).toHaveCount(4);
+  ).toHaveCount(8);
   const states = page.locator("#fm-vitrino-plenstato fm-plenstato");
-  await expect(states).toHaveCount(2);
+  // Spec 036 Teil 5 ②b-2 (A-plenstato-1): each kind also compact.
+  await expect(states).toHaveCount(4);
   await expect(page.locator("#fm-vitrino-plenstato").getByRole("status").first()).toHaveAttribute(
     "aria-busy",
     "true",
@@ -477,16 +480,17 @@ test("fm-tabelo, fm-atributlisto and fm-mezurilo are upgraded in their sections,
 }) => {
   await open(page);
   const tables = page.locator("#fm-vitrino-tabelo fm-tabelo");
-  // Two, and the empty table of Nachlese 7 ② B-3 (its next step a butono).
-  await expect(tables).toHaveCount(3);
+  // Two, and the empty table of Nachlese 7 ② B-3 (its next step a butono); three densities since
+  // Spec 036 Teil 5 ②b-2 (A-tabelo-1).
+  await expect(tables).toHaveCount(4);
   // The section's own grid is a table too: count the tables inside the Eroj.
-  await expect(page.locator("#fm-vitrino-tabelo fm-tabelo").getByRole("table")).toHaveCount(3);
+  await expect(page.locator("#fm-vitrino-tabelo fm-tabelo").getByRole("table")).toHaveCount(4);
   await expect(
     page
       .locator("#fm-vitrino-tabelo fm-plenstato")
       .getByRole("button", { name: "Standard anlegen" }),
   ).toBeVisible();
-  await expect(page.locator("#fm-vitrino-tabelo th[data-sort] > button")).toHaveCount(2);
+  await expect(page.locator("#fm-vitrino-tabelo th[data-sort] > button")).toHaveCount(3);
   const lists = page.locator("#fm-vitrino-atributlisto fm-atributlisto");
   // Spec 014 ① (plan ① D-03): a third row, layout auto, beside columns and stacked.
   await expect(lists).toHaveCount(3);
@@ -535,9 +539,10 @@ test("fm-navigado and fm-langetaro are upgraded in their sections, axe-clean", a
   await expect(page.locator("#fm-vitrino-navigado").getByRole("link")).toHaveCount(3);
   await expect(page.locator('#fm-vitrino-navigado a[aria-current="page"]')).toHaveCount(1);
   const tabs = page.locator("#fm-vitrino-langetaro fm-langetaro");
-  await expect(tabs).toHaveCount(1);
-  await expect(page.locator("#fm-vitrino-langetaro").getByRole("tab")).toHaveCount(3);
-  await expect(page.locator("#fm-vitrino-langetaro").getByRole("tabpanel")).toHaveCount(1);
+  // Spec 036 Teil 5 ②b-2 (A-langetaro-2): a row per size.
+  await expect(tabs).toHaveCount(3);
+  await expect(page.locator("#fm-vitrino-langetaro").getByRole("tab")).toHaveCount(9);
+  await expect(page.locator("#fm-vitrino-langetaro").getByRole("tabpanel")).toHaveCount(3);
   expect(await axeViolations(page, "#fm-vitrino-navigado")).toEqual([]);
   expect(await axeViolations(page, "#fm-vitrino-langetaro")).toEqual([]);
 });
@@ -613,8 +618,9 @@ test("fm-titolo and fm-teksto are upgraded in their sections, axe-clean", async 
   await expect(page.locator("#fm-vitrino-titolo").getByRole("heading", { level: 4 })).toHaveCount(
     1,
   );
-  // Fifteen, and the text of Nachlese 7 ② B-10 with the code inside its line.
-  await expect(page.locator("#fm-vitrino-teksto fm-teksto")).toHaveCount(17);
+  // Fifteen, and the text of Nachlese 7 ② B-10 with the code inside its line; eighteen since Spec
+  // 036 Teil 5 ②b-2 (A-teksto-1: kind label).
+  await expect(page.locator("#fm-vitrino-teksto fm-teksto")).toHaveCount(20);
   await expect(page.locator("#fm-vitrino-teksto").getByRole("code")).toHaveCount(4);
   await expect(
     page.locator("#fm-vitrino-teksto").getByRole("link", { name: "Projekt A" }),
@@ -676,8 +682,11 @@ test("fm-pagxigilo and fm-spuro are upgraded in their sections, the pager usable
   page,
 }) => {
   await open(page);
-  const pager = page.locator("#fm-vitrino-pagxigilo");
-  await expect(pager.getByRole("navigation", { name: "Seitenblättern" })).toHaveCount(1);
+  // Spec 036 Teil 5 ②b-2 (A-pagxigilo-2): a row per size; the keyboard goes through medium.
+  await expect(
+    page.locator("#fm-vitrino-pagxigilo").getByRole("navigation", { name: "Seitenblättern" }),
+  ).toHaveCount(2);
+  const pager = page.locator('#fm-vitrino-pagxigilo fm-pagxigilo[size="medium"]');
   await expect(pager.getByRole("button", { name: "Seite 5", exact: true })).toHaveAttribute(
     "aria-current",
     "page",
@@ -688,10 +697,11 @@ test("fm-pagxigilo and fm-spuro are upgraded in their sections, the pager usable
     "aria-current",
     "page",
   );
+  // Spec 036 Teil 5 ②b-2 (A-spuro-1): a row per emphasis.
   const trail = page.locator("#fm-vitrino-spuro");
-  await expect(trail.getByRole("navigation", { name: "Pfad" })).toHaveCount(1);
-  await expect(trail.getByRole("listitem")).toHaveCount(3);
-  await expect(trail.getByRole("link")).toHaveCount(2);
+  await expect(trail.getByRole("navigation", { name: "Pfad" })).toHaveCount(2);
+  await expect(trail.getByRole("listitem")).toHaveCount(6);
+  await expect(trail.getByRole("link")).toHaveCount(4);
   for (const id of ["pagxigilo", "spuro"]) {
     expect(await axeViolations(page, `#fm-vitrino-${id}`), id).toEqual([]);
   }
