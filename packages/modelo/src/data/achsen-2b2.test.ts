@@ -365,3 +365,127 @@ describe("②b-2 A-kampo-1: unit", () => {
     expect(tokensOf(brief)).toBeLessThan(750);
   });
 });
+
+/** The token a binding of a part property gives in one combination, or undefined. */
+const boundOf = (ero: string, part: string, property: string, when: Record<string, string>) =>
+  entryOf(ero).skemo.bindings.find(
+    (binding) =>
+      binding.part === part &&
+      binding.property === property &&
+      Object.entries(when).every(([key, value]) => binding.when?.[key] === value),
+  )?.token;
+
+/**
+ * The sizes of the rest (S36-4.2): A-ikono-2 (x-small), A-signeto-2 (large), A-avataro-2 (five),
+ * A-pagxigilo-2 (small, medium), A-langetaro-2 (three), A-dialogo-2 (full). A new size prop
+ * stands after every prop of 0.2.0; a new value of an old size keeps every value it had.
+ */
+const SIZES: Readonly<
+  Record<
+    string,
+    { values: string[]; default: string; keyed: Record<string, Record<string, string>> }
+  >
+> = {
+  ikono: {
+    values: ["x-small", "small", "medium", "large"],
+    default: "medium",
+    keyed: { "box.size": { "x-small": "size.scale.100", small: "size.icon.small" } },
+  },
+  signeto: {
+    values: ["small", "medium", "large"],
+    default: "medium",
+    keyed: {
+      "box.height": { medium: "size.control.medium", large: "size.control.large" },
+      "box.inline-padding": { medium: "spacing.medium", large: "spacing.large" },
+    },
+  },
+  avataro: {
+    values: ["x-small", "small", "medium", "large", "x-large"],
+    default: "medium",
+    keyed: {
+      "box.size": { "x-small": "size.icon.small", "x-large": "size.scale.1000" },
+      "initials.typography": {
+        "x-small": "typography.caption",
+        "x-large": "typography.headline.4",
+      },
+    },
+  },
+  pagxigilo: {
+    values: ["small", "medium"],
+    default: "medium",
+    keyed: {
+      "item.typography": { small: "typography.label.2", medium: "typography.label.1" },
+      "item.inline-padding": { small: "spacing.xsmall", medium: "spacing.small" },
+      "ellipsis.typography": { small: "typography.label.2", medium: "typography.label.1" },
+      "prev.size": { small: "size.icon.small", medium: "size.icon.medium" },
+      "next.size": { small: "size.icon.small", medium: "size.icon.medium" },
+    },
+  },
+  langetaro: {
+    values: ["small", "medium", "large"],
+    default: "medium",
+    keyed: {
+      "tab.height": {
+        small: "size.target.min",
+        medium: "size.target.min",
+        large: "size.control.large",
+      },
+      "tab.inline-padding": {
+        small: "spacing.small",
+        medium: "spacing.medium",
+        large: "spacing.large",
+      },
+      "tabs.typography": {
+        small: "typography.label.2",
+        medium: "typography.label.1",
+        large: "typography.label.1",
+      },
+    },
+  },
+  dialogo: {
+    values: ["small", "medium", "full"],
+    default: "small",
+    keyed: {
+      "surface.width": { medium: "size.container.medium", full: "size.container.max" },
+      "surface.radius": { medium: "radius.role.surface", full: "radius.none" },
+    },
+  },
+};
+
+describe("②b-2 A-ikono-2, A-signeto-2, A-avataro-2, A-pagxigilo-2, A-langetaro-2, A-dialogo-2: sizes", () => {
+  it.each(Object.entries(SIZES))("%s: size with its values and default", (ero, expected) => {
+    expect(propOf(ero, "size")).toMatchObject({
+      kind: "enum",
+      values: expected.values,
+      default: expected.default,
+    });
+  });
+
+  it.each(Object.entries(SIZES))("%s: each keyed part property binds its size", (ero, expected) => {
+    for (const [path, bySize] of Object.entries(expected.keyed)) {
+      const [part = "", property = ""] = path.split(".");
+      const source = entryOf(ero).skemo.parts[part]?.[property as "size"];
+      expect(source && "by" in source ? source.by : undefined, `${ero}.${path}`).toEqual(["size"]);
+      for (const [size, token] of Object.entries(bySize)) {
+        expect(boundOf(ero, part, property, { size }), `${ero}.${path}@${size}`).toBe(token);
+      }
+    }
+  });
+
+  it.each(["pagxigilo", "langetaro"])("%s: size is a new prop, the last one", (ero) => {
+    expect(entryOf(ero).skemo.props.at(-1)?.name).toBe("size");
+  });
+
+  it.each(Object.entries(SIZES))(
+    "%s: the brief names size as an axis, under 750",
+    (ero, expected) => {
+      const brief = briefOf(entryOf(ero));
+      expect(brief.axes).toContainEqual({
+        name: "size",
+        values: expected.values,
+        default: expected.default,
+      });
+      expect(tokensOf(brief)).toBeLessThan(750);
+    },
+  );
+});

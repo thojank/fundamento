@@ -68,3 +68,19 @@ describe("②b-2 A-kampo-1 in Figma: unit a text of the set", () => {
     expect(setOf("kampo").properties.unit).toBe("TEXT");
   });
 });
+
+describe("②b-2 A-ikono-2, A-signeto-2, A-avataro-2, A-pagxigilo-2, A-langetaro-2, A-dialogo-2 in Figma: sizes", () => {
+  it.each([
+    ["ikono", ["x-small", "small", "medium", "large"]],
+    ["signeto", ["small", "medium", "large"]],
+    ["avataro", ["x-small", "small", "medium", "large", "x-large"]],
+    ["pagxigilo", ["small", "medium"]],
+    ["langetaro", ["small", "medium", "large"]],
+    ["dialogo", ["small", "medium", "full"]],
+  ])("%s: size a variant axis with every value", (name, values) => {
+    const set = setOf(name);
+    expect(set.properties.size).toEqual(values);
+    const sizes = new Set(set.variants.map((variant) => variant.props.size));
+    expect([...sizes].sort()).toEqual([...values].sort());
+  });
+});
