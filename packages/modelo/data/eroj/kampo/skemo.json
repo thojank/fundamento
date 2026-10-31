@@ -141,6 +141,11 @@
         ],
         "default": "below",
         "description": "Spec 029 ②b-1b M-2: where the message and the error stand – below the field with the space of the field, or joined to it without that space. Never only in a tooltip: the message must be seen (error-not-color-only, error-says-what-to-do)."
+      },
+      {
+        "name": "unit",
+        "kind": "string",
+        "description": "Spec 029 ②a (A-kampo-1): the unit of a number as text (kg, €, %), inside the field right after the value, heard with it as the description; only with kind number."
       }
     ],
     "states": [
@@ -342,9 +347,20 @@
             "state"
           ]
         }
+      },
+      "unit": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "by": [
+            "size"
+          ]
+        }
       }
     },
     "trailing": [
+      "unit",
       "status-icon",
       "spinner",
       "clear",
@@ -695,6 +711,30 @@
           "state": "success"
         },
         "token": "color.status.success.text"
+      },
+      {
+        "part": "unit",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.body.2"
+      },
+      {
+        "part": "unit",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.body.1"
+      },
+      {
+        "part": "unit",
+        "property": "typography",
+        "when": {
+          "size": "large"
+        },
+        "token": "typography.body.1"
       }
     ],
     "a11y": {
@@ -707,7 +747,8 @@
         "slot:help",
         "slot:error",
         "slot:message",
-        "slot:disabled-reason"
+        "slot:disabled-reason",
+        "prop:unit"
       ],
       "states": {
         "required": [
@@ -870,6 +911,17 @@
           ]
         },
         "kialo": "invalid is the short form of danger, because a field is wrong or it is not; with a warning or a success it would say two things at once."
+      },
+      {
+        "when": {
+          "prop:unit": "filled"
+        },
+        "allowed": {
+          "kind": [
+            "number"
+          ]
+        },
+        "kialo": "A unit belongs to a number, because a text, a date or a time has none to name."
       }
     ],
     "goals": [

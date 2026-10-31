@@ -681,6 +681,8 @@ describe("Web Component Celo for the elektilo (Spec 010 ④)", () => {
       "row",
       "control",
       "end",
+      // Spec 036 Teil 5 ②b-2 (A-kampo-1): the unit of a number, the innermost of the end.
+      "unit",
       "status-icon",
       "spinner",
       "help",
@@ -2261,7 +2263,7 @@ describe("Web Component Celo for the kampo of Spec 025 ① (time, stepper, clear
     // Spec 029 ②b-1b M-2 (A-kampo-4), Spec 035 2.1 (Skemo trailing): the status icon first in
     // the end, before the spinner.
     expect(element).toContain(
-      '<div part="row"><input part="control" id="control"><span part="end"><span part="status-icon" aria-hidden="true" hidden><fm-ikono size="small"></fm-ikono></span><span part="spinner" aria-hidden="true" hidden>',
+      '<div part="row"><input part="control" id="control"><span part="end"><span part="unit" id="unit" hidden></span><span part="status-icon" aria-hidden="true" hidden><fm-ikono size="small"></fm-ikono></span><span part="spinner" aria-hidden="true" hidden>',
     );
     const kampoCss = JSON.parse(
       /export const KAMPO_CSS = (".*");/s.exec(

@@ -984,6 +984,8 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
       // Spec 029 ②b-1b M-2: the status of a field, its message beside help and error.
       intent: ["neutral", "success", "warning", "danger"],
       "message-position": ["below", "joined"],
+      // Spec 036 Teil 5 ②b-2 (A-kampo-1): the unit of a number, a text of the set.
+      unit: "TEXT",
       state: ["rest", "hover", "focus", "disabled", "readonly", "invalid", "warning", "success"],
     });
     expect(set?.variants).toHaveLength(3 * 8);

@@ -17,7 +17,8 @@ import { validateModelo } from "../validate/validate-modelo.js";
 
 // Spec 025 ①: the step buttons and the clear button are the kampo's own (kind number, search).
 // Spec 029 ②b-1b M-2: the status icon is the kampo's own (A-kampo-4).
-const KAMPO_OWN = ["decrement", "increment", "clear", "status-icon"];
+// Spec 036 Teil 5 ②b-2 (A-kampo-1): the unit of a number is the kampo's own too.
+const KAMPO_OWN = ["decrement", "increment", "clear", "status-icon", "unit"];
 
 const { modelo } = loadModelo(defaultModeloSource());
 if (modelo === undefined) throw new Error("the repo Modelo must load");
