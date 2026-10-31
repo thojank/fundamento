@@ -719,3 +719,52 @@ describe("②b-2 A-markdovido-1, A-plenstato-1/2, A-teksto-1: density, compact, 
     expect(tokensOf(briefOf(entryOf(ero)))).toBeLessThan(750);
   });
 });
+
+/**
+ * The layout axes (S36-4.2): A-faldilo-1 (indicator-side), A-konsileto-1, A-menuo-1, A-sxvebilo-1
+ * (justify), A-langetaro-1 (spread), A-dialogo-1 (dismiss, the purpose axis of M-3 – only the axis
+ * here; roles and Escape follow in ②b-4). Each a new enum prop after every prop of 0.2.0, its
+ * default what the Ero did; a layout or a behaviour, no token: no binding keys it.
+ */
+const LAYOUTS: Readonly<Record<string, { prop: string; values: string[]; default: string }>> = {
+  faldilo: { prop: "indicator-side", values: ["start", "end"], default: "end" },
+  konsileto: { prop: "justify", values: ["start", "center", "end"], default: "center" },
+  menuo: { prop: "justify", values: ["start", "center", "end"], default: "center" },
+  sxvebilo: { prop: "justify", values: ["start", "center", "end"], default: "center" },
+  langetaro: { prop: "spread", values: ["content", "fill"], default: "content" },
+  dialogo: { prop: "dismiss", values: ["free", "guarded", "explicit"], default: "guarded" },
+};
+
+describe("②b-2 A-faldilo-1, A-konsileto-1, A-menuo-1, A-sxvebilo-1, A-langetaro-1, A-dialogo-1: layout and purpose", () => {
+  it.each(Object.entries(LAYOUTS))(
+    "%s: the new prop, last, its default what the Ero did",
+    (ero, axis) => {
+      const { skemo } = entryOf(ero);
+      expect(skemo.props.at(-1)).toMatchObject({
+        name: axis.prop,
+        kind: "enum",
+        values: axis.values,
+        default: axis.default,
+      });
+      expect(skemo.bindings.filter((binding) => binding.when?.[axis.prop] !== undefined)).toEqual(
+        [],
+      );
+    },
+  );
+
+  it.each(Object.entries(LAYOUTS))("%s: the brief names the axis, under 750", (ero, axis) => {
+    const brief = briefOf(entryOf(ero));
+    expect(brief.axes).toContainEqual({
+      name: axis.prop,
+      values: axis.values,
+      default: axis.default,
+    });
+    expect(tokensOf(brief)).toBeLessThan(750);
+  });
+
+  it("dialogo: dismiss names M-3 – free closes beside, guarded only by Escape, explicit nothing beside", () => {
+    const description = String(propOf("dialogo", "dismiss")?.description ?? "");
+    expect(description).toContain("M-3");
+    expect(description).toContain("alertdialog");
+  });
+});

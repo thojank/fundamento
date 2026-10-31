@@ -118,3 +118,18 @@ describe("②b-2 A-tabelo-1, A-markdovido-1, A-plenstato-1, A-teksto-1 in Figma"
     expect(setOf("teksto").properties.tabular).toBe("BOOLEAN");
   });
 });
+
+describe("②b-2 layout and purpose in Figma: properties, no variants", () => {
+  it.each([
+    ["faldilo", "indicator-side", ["start", "end"]],
+    ["konsileto", "justify", ["start", "center", "end"]],
+    ["menuo", "justify", ["start", "center", "end"]],
+    ["sxvebilo", "justify", ["start", "center", "end"]],
+    ["langetaro", "spread", ["content", "fill"]],
+    ["dialogo", "dismiss", ["free", "guarded", "explicit"]],
+  ])("%s: %s a property of the set, no axis of its variants", (name, prop, values) => {
+    const set = setOf(name);
+    expect(set.properties[prop]).toEqual(values);
+    expect(set.variants.some((variant) => prop in variant.props)).toBe(false);
+  });
+});
