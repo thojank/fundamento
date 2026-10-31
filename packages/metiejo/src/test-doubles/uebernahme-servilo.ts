@@ -9,7 +9,14 @@ import { join } from "node:path";
 import { parseEnv, settingsOf } from "../env.js";
 import { MARKEN_DIR } from "../marko.js";
 import { type Servilo, startServilo } from "../servilo.js";
-import { SABLO_CSS, SABLO_HTML, TEXT_CSS, TEXT_HTML } from "./uebernahme.js";
+import {
+  BAENDER_CSS,
+  BAENDER_HTML,
+  SABLO_CSS,
+  SABLO_HTML,
+  TEXT_CSS,
+  TEXT_HTML,
+} from "./uebernahme.js";
 import { STUFEN_CSS, STUFEN_HTML } from "./uebernahme-bilder.js";
 
 export interface UebernahmeServilo {
@@ -21,6 +28,8 @@ export interface UebernahmeServilo {
   stufen: string;
   /** The address of the page of Sablo whose text colour is named more often than its ground. */
   text: string;
+  /** The address of the page of Sablo with dark bands declared more often than its ground. */
+  baender: string;
   /** Creates a brand on the base komuna. */
   marko(name: string): Promise<void>;
   /** Reads one material with the confirmation: a file (name, bytes) or a link. */
@@ -37,6 +46,14 @@ export async function startUebernahme(): Promise<UebernahmeServilo> {
   const workdir = join(root, MARKEN_DIR);
   mkdirSync(workdir, { recursive: true });
   const site: Server = createServer((request, response) => {
+    if (request.url === "/baender.css") {
+      response.writeHead(200, { "content-type": "text/css" }).end(BAENDER_CSS);
+      return;
+    }
+    if (request.url === "/baender") {
+      response.writeHead(200, { "content-type": "text/html" }).end(BAENDER_HTML);
+      return;
+    }
     if (request.url === "/text.css") {
       response.writeHead(200, { "content-type": "text/css" }).end(TEXT_CSS);
       return;
@@ -71,6 +88,7 @@ export async function startUebernahme(): Promise<UebernahmeServilo> {
     seite,
     stufen: `${seite}stufen`,
     text: `${seite}text`,
+    baender: `${seite}baender`,
     async marko(name) {
       await fetch(`${servilo.url}/marko`, {
         method: "POST",

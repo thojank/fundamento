@@ -108,6 +108,22 @@ a { color: ${TEXT_FARBE}; border-bottom: 1px solid ${TEXT_FARBE}; }
 .knopf { background: ${GRUND_HELL.leitfarbe}; color: ${TEXT_FARBE}; }
 `;
 
+/**
+ * A page of Sablo with dark bands (head, foot, notices) declared more often than its light page
+ * background: the ground is what html or body paints.
+ */
+export const BAENDER_HTML =
+  '<!doctype html><html lang="de"><head><title>Sablo</title><link rel="stylesheet" href="/baender.css"></head><body><header class="kopf">Sablo</header><main><div class="karte">Brot</div></main><footer class="fuss">Sablo</footer></body></html>';
+export const BAND_FARBE = "#1c1917";
+export const BAENDER_CSS = `body { background: ${GRUND_HELL.grund}; }
+.kopf { background: ${BAND_FARBE}; }
+.fuss { background: ${BAND_FARBE}; }
+.hinweis { background: ${BAND_FARBE}; }
+.menue { background-color: ${BAND_FARBE}; }
+.karte { background: ${GRUND_HELL.flaeche}; }
+.knopf { background: ${GRUND_HELL.leitfarbe}; }
+`;
+
 /** The committed copies for the Messanleitung (uebernahme/). */
 export const uebernahmeFixture = (name: string): Buffer =>
   readFileSync(new URL(`./uebernahme/${name}`, import.meta.url));
