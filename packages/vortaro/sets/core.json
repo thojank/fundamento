@@ -2537,6 +2537,58 @@
         }
       }
     },
+    "syntax": {
+      "keyword": {
+        "$value": "{color.palette.danger.700}",
+        "$description": "Syntax colour of a keyword of a language in a code block (a word the grammar reserves).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M6BD436VB3M23YNQF3VBQYHP",
+            "role": "foreground"
+          }
+        }
+      },
+      "name": {
+        "$value": "{color.palette.info.800}",
+        "$description": "Syntax colour of a name in a code block: a function, a property, a command.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M6BD436WEFK7E6HVT3BVFG3Z",
+            "role": "foreground"
+          }
+        }
+      },
+      "string": {
+        "$value": "{color.palette.success.800}",
+        "$description": "Syntax colour of a quoted string in a code block.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M6BD436WEFK7E6HVT3BVFG40",
+            "role": "foreground"
+          }
+        }
+      },
+      "number": {
+        "$value": "{color.palette.warning.700}",
+        "$description": "Syntax colour of a number or a literal value (true, false, null) in a code block.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M6BD436WEFK7E6HVT3BVFG41",
+            "role": "foreground"
+          }
+        }
+      },
+      "comment": {
+        "$value": "{color.palette.neutral.700}",
+        "$description": "Syntax colour of a comment in a code block: quieter than the code, still readable.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M6BD436WEFK7E6HVT3BVFG42",
+            "role": "foreground"
+          }
+        }
+      }
+    },
     "brand": {
       "fill": {
         "$value": "{color.palette.neutral.900}",

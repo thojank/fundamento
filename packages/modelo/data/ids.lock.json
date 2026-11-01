@@ -1644,6 +1644,46 @@
       "status": "retired",
       "type": "kontrastParo"
     },
+    "kpa_01M6BD43K74GYNF86H3TJ319K1": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "kpa_01M6BD43K74GYNF86H3TJ319K2": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "kpa_01M6BD43K74GYNF86H3TJ319K3": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "kpa_01M6BD43K74GYNF86H3TJ319K4": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "kpa_01M6BD43K74GYNF86H3TJ319K5": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "kpa_01M6BD43K74GYNF86H3TJ319K6": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "kpa_01M6BD43K74GYNF86H3TJ319K7": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "kpa_01M6BD43K74GYNF86H3TJ319K8": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "kpa_01M6BD43K74GYNF86H3TJ319K9": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "kpa_01M6BD43K74GYNF86H3TJ319KA": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
     "kri_01M5N8ADAQMSCPB4WEG7KMF7CA": {
       "status": "active",
       "type": "kriterio"
@@ -10801,6 +10841,26 @@
       "type": "token"
     },
     "tok_01M6BCFMKBP2BP6YMQH8HRGKSY": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M6BD436VB3M23YNQF3VBQYHP": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M6BD436WEFK7E6HVT3BVFG3Z": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M6BD436WEFK7E6HVT3BVFG40": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M6BD436WEFK7E6HVT3BVFG41": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M6BD436WEFK7E6HVT3BVFG42": {
       "status": "active",
       "type": "token"
     },

@@ -441,6 +441,23 @@
         }
       }
     },
+    "syntax": {
+      "keyword": {
+        "$value": "{color.palette.danger.150}"
+      },
+      "name": {
+        "$value": "{color.palette.info.200}"
+      },
+      "string": {
+        "$value": "{color.palette.success.300}"
+      },
+      "number": {
+        "$value": "{color.palette.warning.200}"
+      },
+      "comment": {
+        "$value": "{color.palette.neutral.300}"
+      }
+    },
     "$type": "color"
   },
   "elevation": {

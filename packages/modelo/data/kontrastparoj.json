@@ -642,6 +642,76 @@
       "foreground": "color.status.danger.text",
       "background": "color.background.raised",
       "kategorio": "ui"
+    },
+    {
+      "id": "kpa_01M6BD43K74GYNF86H3TJ319K1",
+      "name": "syntax-keyword-on-background-sunken",
+      "foreground": "color.syntax.keyword",
+      "background": "color.background.sunken",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BD43K74GYNF86H3TJ319K2",
+      "name": "syntax-name-on-background-sunken",
+      "foreground": "color.syntax.name",
+      "background": "color.background.sunken",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BD43K74GYNF86H3TJ319K3",
+      "name": "syntax-string-on-background-sunken",
+      "foreground": "color.syntax.string",
+      "background": "color.background.sunken",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BD43K74GYNF86H3TJ319K4",
+      "name": "syntax-number-on-background-sunken",
+      "foreground": "color.syntax.number",
+      "background": "color.background.sunken",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BD43K74GYNF86H3TJ319K5",
+      "name": "syntax-comment-on-background-sunken",
+      "foreground": "color.syntax.comment",
+      "background": "color.background.sunken",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BD43K74GYNF86H3TJ319K6",
+      "name": "syntax-keyword-on-background-default",
+      "foreground": "color.syntax.keyword",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BD43K74GYNF86H3TJ319K7",
+      "name": "syntax-name-on-background-default",
+      "foreground": "color.syntax.name",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BD43K74GYNF86H3TJ319K8",
+      "name": "syntax-string-on-background-default",
+      "foreground": "color.syntax.string",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BD43K74GYNF86H3TJ319K9",
+      "name": "syntax-number-on-background-default",
+      "foreground": "color.syntax.number",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BD43K74GYNF86H3TJ319KA",
+      "name": "syntax-comment-on-background-default",
+      "foreground": "color.syntax.comment",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
     }
   ]
 }

@@ -137,6 +137,23 @@
         }
       }
     },
+    "syntax": {
+      "keyword": {
+        "$value": "{color.palette.danger.200}"
+      },
+      "name": {
+        "$value": "{color.palette.info.200}"
+      },
+      "string": {
+        "$value": "{color.palette.success.200}"
+      },
+      "number": {
+        "$value": "{color.palette.warning.200}"
+      },
+      "comment": {
+        "$value": "{color.palette.neutral.200}"
+      }
+    },
     "background": {
       "raised": {
         "$value": "{color.palette.neutral.850}"

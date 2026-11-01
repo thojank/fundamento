@@ -132,6 +132,23 @@
           "$value": "{color.palette.info.800}"
         }
       }
+    },
+    "syntax": {
+      "keyword": {
+        "$value": "{color.palette.danger.900}"
+      },
+      "name": {
+        "$value": "{color.palette.info.900}"
+      },
+      "string": {
+        "$value": "{color.palette.success.900}"
+      },
+      "number": {
+        "$value": "{color.palette.warning.900}"
+      },
+      "comment": {
+        "$value": "{color.palette.neutral.900}"
+      }
     }
   },
   "border": {

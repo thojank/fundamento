@@ -223,8 +223,10 @@ test("the contrast table shows WCAG, APCA and the change against the comparison 
     // (8550 → 8586, advisory, 2 × 18 combinations). Spec 035 2.3.4: a read-only field shows the
     // look of rest (kampo, listelektilo, plurelektilo, datelektilo; komuna's datelektilo takes the
     // surface and the label colour of rest), so the pairs of readonly are those of rest, advisory
-    // where they miss the APCA band (8586 → 8694; all 144 combinations 14166 → 14184).
-    "In den 72 Kombinationen des Vergleichsstands: 8694 gegen 1296 (Veränderung +7398)",
+    // where they miss the APCA band (8586 → 8694; all 144 combinations 14166 → 14184). Spec 036
+    // Teil 5 ②b-5 (①-2): ten pairs of the syntax colours, every WCAG threshold holds, advisory where
+    // they miss the APCA band (8694 → 9126).
+    "In den 72 Kombinationen des Vergleichsstands: 9126 gegen 1296 (Veränderung +7830)",
   );
 });
 

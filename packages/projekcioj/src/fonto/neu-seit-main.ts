@@ -254,6 +254,8 @@ const REST_2B5 = (() => {
   const groups: { pattern: string; added: number }[] = [
     // A-signeto-6: the radius role of a tag a person picks or removes (1).
     { pattern: "^radius\\.role\\.tag$", added: 1 },
+    // ①-2: the syntax colours, five kinds (5).
+    { pattern: "^color\\.syntax\\.(keyword|name|string|number|comment)$", added: 5 },
   ];
   const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
   return {
