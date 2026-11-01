@@ -436,3 +436,83 @@ describe("②b-3 A-sxvebilo-4: close", () => {
     expect(tokensOf(brief)).toBeLessThan(750);
   });
 });
+
+/** The new glyphs of the Ikonaro (Phosphor only): the default icon of an avatar, first and last. */
+describe("②b-3 Ikonaro: person, first, last (Phosphor)", () => {
+  const glyph = (name: string) => (modelo.ikonaro ?? []).find((ikono) => ikono.name === name);
+
+  it("the Ikonaro names person, first and last; first and last mirror, person does not", () => {
+    expect(glyph("person")?.mirror).toBeUndefined();
+    expect(glyph("first")?.mirror).toBe(true);
+    expect(glyph("last")?.mirror).toBe(true);
+    for (const name of ["person", "first", "last"]) {
+      expect(glyph(name)?.meaning.de, name).toBeTruthy();
+      expect(glyph(name)?.meaning.en, name).toBeTruthy();
+    }
+  });
+
+  it("the ikono takes the three names", () => {
+    const values = entryOf("ikono").skemo.props.find((prop) => prop.name === "name")?.values;
+    expect(values).toEqual(expect.arrayContaining(["person", "first", "last"]));
+  });
+});
+
+/** A-avataro-4: the default icon without a name (the Ikonaro's person); the status dot stays a boundary. */
+describe("②b-3 A-avataro-4: the default icon", () => {
+  it("avataro: the part icon, the last part, by size in the colour of the initials", () => {
+    const { skemo } = entryOf("avataro");
+    expect(Object.keys(skemo.parts).at(-1)).toBe("icon");
+    expect(skemo.parts.icon).toEqual({
+      size: { by: ["size"] },
+      color: { fixed: "color.text.subtle" },
+    });
+    const sizes = skemo.bindings
+      .filter((binding) => binding.part === "icon" && binding.property === "size")
+      .map((binding) => [binding.when?.size, binding.token]);
+    expect(sizes).toEqual([
+      ["x-small", "size.scale.100"],
+      ["small", "size.scale.100"],
+      ["medium", "size.icon.small"],
+      ["large", "size.icon.large"],
+      ["x-large", "size.scale.800"],
+    ]);
+  });
+
+  it("avataro: named in de and en; the Uzo names the default icon; brief under 750", () => {
+    expect(tradukoOf("avataro", "parts/icon", "de")).toBe("Symbol");
+    expect(tradukoOf("avataro", "parts/icon", "en")).toBe("Icon");
+    expect(entryOf("avataro").uzo?.purpose).toContain("person");
+    expect(tokensOf(briefOf(entryOf("avataro")))).toBeLessThan(750);
+  });
+});
+
+/** A-pagxigilo-4: buttons to the first and the last page; the page size stays a boundary. */
+describe("②b-3 A-pagxigilo-4: first, last", () => {
+  it("pagxigilo: first-last a boolean, the last prop, false by default; its words", () => {
+    const { skemo } = entryOf("pagxigilo");
+    expect(skemo.props.at(-1)).toMatchObject({
+      name: "first-last",
+      kind: "boolean",
+      default: false,
+    });
+    expect(skemo.a11y.texts?.["first-name"]).toEqual({ de: "Erste Seite", en: "First page" });
+    expect(skemo.a11y.texts?.["last-name"]).toEqual({ de: "Letzte Seite", en: "Last page" });
+  });
+
+  it("pagxigilo: the parts first and last, sized as prev and next, the last parts", () => {
+    const { skemo } = entryOf("pagxigilo");
+    expect(Object.keys(skemo.parts).slice(-2)).toEqual(["first", "last"]);
+    expect(skemo.parts.first).toEqual(skemo.parts.prev);
+    expect(skemo.parts.last).toEqual(skemo.parts.next);
+  });
+
+  it("pagxigilo: named in de and en; the brief flags first-last, under 750", () => {
+    expect(tradukoOf("pagxigilo", "props/first-last", "de")).toBe("Erste und letzte Seite");
+    expect(tradukoOf("pagxigilo", "props/first-last", "en")).toBe("First and last page");
+    expect(tradukoOf("pagxigilo", "parts/first", "de")).toBe("Erste Seite");
+    expect(tradukoOf("pagxigilo", "parts/last", "en")).toBe("Last page");
+    const brief = briefOf(entryOf("pagxigilo"));
+    expect(brief.flags).toContain("first-last");
+    expect(tokensOf(brief)).toBeLessThan(750);
+  });
+});

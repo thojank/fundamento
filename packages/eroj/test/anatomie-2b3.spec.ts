@@ -568,3 +568,51 @@ test.describe("②b-3 A-sxvebilo-4: close", () => {
     ).toHaveCount(0);
   });
 });
+
+test.describe("②b-3 A-avataro-4: the default icon", () => {
+  test("without a name the avatar shows the ikono person, unheard; with one its initials", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<fm-avataro id="ohne" decorative></fm-avataro><fm-avataro id="mit" name="Ada Lovelace"></fm-avataro>',
+    );
+    const icon = page.locator("#ohne").locator('[part="icon"]');
+    await expect(icon).toBeVisible();
+    await expect(icon).toHaveAttribute("name", "person");
+    await expect(icon).toHaveAttribute("aria-hidden", "true");
+    await expect(page.locator("#mit").locator('[part="icon"]')).toBeHidden();
+    await expect(page.locator("#mit").locator('[part="initials"]')).toHaveText("AL");
+  });
+});
+
+test.describe("②b-3 A-pagxigilo-4: first and last", () => {
+  test("with first-last a button to the first page leads and one to the last ends the row", async ({
+    page,
+  }) => {
+    await serve(page, out, '<fm-pagxigilo page="5" total-pages="10" first-last></fm-pagxigilo>');
+    const host = page.locator("fm-pagxigilo");
+    const first = host.getByRole("button", { name: "Erste Seite" });
+    const last = host.getByRole("button", { name: "Letzte Seite" });
+    await expect(first).toBeVisible();
+    await expect(last).toBeVisible();
+    await expect(first.locator('fm-ikono[name="first"]')).toHaveCount(1);
+    const items = host.locator('[part="item"]');
+    await expect(items.first()).toHaveAttribute("data-page", "1");
+    await expect(items.last()).toHaveAttribute("data-page", "10");
+    await last.click();
+    await expect(host).toHaveAttribute("page", "10");
+    await expect(host.getByRole("button", { name: "Letzte Seite" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+  });
+
+  test("without first-last the row starts with prev as before", async ({ page }) => {
+    await serve(page, out, '<fm-pagxigilo page="5" total-pages="10"></fm-pagxigilo>');
+    const host = page.locator("fm-pagxigilo");
+    await expect(host.getByRole("button", { name: "Erste Seite" })).toHaveCount(0);
+    await expect(host.locator('[part="item"]').first()).toHaveAttribute("data-arrow", "prev");
+  });
+});
