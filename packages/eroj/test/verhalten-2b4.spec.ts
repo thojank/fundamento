@@ -374,3 +374,87 @@ test.describe("②b-4 A-langetaro-4: overflow", () => {
     await expect.poll(() => inView(page, "Inhalt")).toEqual({ scrolls: true, visible: true });
   });
 });
+
+test.describe("②b-4 A-pagxigilo-6: unknown total", () => {
+  /** The names of the items of the pagination, in order, and which say they are off. */
+  const itemsOf = (page: Page) =>
+    page
+      .locator("#p")
+      .evaluate((element) =>
+        [...(element.shadowRoot?.querySelectorAll('[part="item"], [part="ellipsis"]') ?? [])].map(
+          (item) =>
+            item.getAttribute("part") === "ellipsis"
+              ? "…"
+              : `${item.getAttribute("aria-label")}${item.getAttribute("aria-disabled") === "true" ? " (aus)" : ""}${item.getAttribute("aria-current") === "page" ? " (jetzt)" : ""}`,
+        ),
+      );
+
+  test("the pages known so far, no last page, an ellipsis after them; next leads on", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<fm-pagxigilo id="p" page="5" total-pages="10" total-unknown></fm-pagxigilo>',
+    );
+    await expect(page.getByRole("navigation", { name: "Seitenblättern" })).toBeVisible();
+    expect(await itemsOf(page)).toEqual([
+      "Vorherige Seite",
+      "Seite 1",
+      "…",
+      "Seite 4",
+      "Seite 5 (jetzt)",
+      "Seite 6",
+      "…",
+      "Nächste Seite",
+    ]);
+  });
+
+  test("on the last page known so far next stays on; with the total known it is off", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<fm-pagxigilo id="p" page="10" total-pages="10" total-unknown></fm-pagxigilo>',
+    );
+    await expect(page.getByRole("button", { name: "Nächste Seite" })).not.toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+    await listen(page, "p", ["page-change"]);
+    await page.getByRole("button", { name: "Nächste Seite" }).click();
+    await expect(page.locator("#p")).toHaveAttribute("page", "11");
+    expect(await heard(page)).toEqual(["page-change"]);
+    await serve(page, out, '<fm-pagxigilo id="p" page="10" total-pages="10"></fm-pagxigilo>');
+    await expect(page.getByRole("button", { name: "Nächste Seite" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+  });
+
+  test("first-last: the first page stays, the last falls away", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      '<fm-pagxigilo id="p" page="5" total-pages="10" first-last total-unknown></fm-pagxigilo>',
+    );
+    await expect(page.getByRole("button", { name: "Erste Seite" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Letzte Seite" })).toHaveCount(0);
+  });
+
+  test("summary count says the place without a total; compact the number alone", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<fm-pagxigilo id="p" page="5" total-pages="10" summary="count" total-unknown></fm-pagxigilo>',
+    );
+    const summary = page.locator("#p").locator('[part="summary"]');
+    await expect(summary).toHaveText("Seite 5");
+    await page.locator("#p").evaluate((element) => element.setAttribute("summary", "compact"));
+    await expect(summary.locator('[aria-hidden="true"]')).toHaveText("5");
+    await expect(summary.locator(".fm-hidden")).toHaveText("Seite 5");
+  });
+});
