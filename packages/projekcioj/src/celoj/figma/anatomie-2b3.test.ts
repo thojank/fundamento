@@ -144,3 +144,12 @@ describe("②b-3 A-menuo-4 in Figma: icon and heading stand with their content",
     expectNotDrawn(key);
   });
 });
+
+describe("②b-3 A-navigado-4 in Figma: section headings and icons stand with their content", () => {
+  it.each(["navigado:section-heading", "navigado:icon"])(
+    "%s has no node and names its Jugxo",
+    (key) => {
+      expectNotDrawn(key);
+    },
+  );
+});

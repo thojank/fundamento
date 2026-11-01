@@ -223,3 +223,29 @@ describe("②b-3 A-menuo-4: icon, group-heading", () => {
     expect(tokensOf(briefOf(entryOf("menuo")))).toBeLessThan(750);
   });
 });
+
+/** A-navigado-1, A-navigado-4: sections with a heading in a vertical navigation, an icon per item. */
+describe("②b-3 A-navigado-1, A-navigado-4: section-heading, icon-start", () => {
+  it("navigado: the part section-heading, muted in the caption, with the room of an item", () => {
+    expect(entryOf("navigado").skemo.parts["section-heading"]).toEqual({
+      color: { fixed: "color.text.muted" },
+      typography: { fixed: "typography.caption" },
+      "inline-padding": { fixed: "spacing.small" },
+    });
+  });
+
+  it("navigado: the decorative slot icon-start, the last slot; the part icon; a gap in the item", () => {
+    const { skemo, uzo } = entryOf("navigado");
+    expect(skemo.slots.at(-1)).toEqual({ name: "icon-start", decorative: true });
+    expect(skemo.parts.icon).toEqual({ size: { fixed: "size.icon.medium" } });
+    expect(skemo.parts.item?.gap).toEqual({ fixed: "spacing.xsmall" });
+    expect(uzo.slots?.["icon-start"]).toEqual({ accepts: ["icon", "ikono"], max: 1, nesting: 0 });
+  });
+
+  it("navigado: named in de and en; the Uzo names the headings of sections; brief under 750", () => {
+    expect(tradukoOf("navigado", "parts/section-heading", "de")).toBe("Abschnittsüberschrift");
+    expect(tradukoOf("navigado", "slots/icon-start", "en")).toBe("Start icon");
+    expect(entryOf("navigado").uzo.purpose).toContain("heading");
+    expect(tokensOf(briefOf(entryOf("navigado")))).toBeLessThan(750);
+  });
+});
