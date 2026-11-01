@@ -322,7 +322,8 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
         readonly: ["aria-readonly"],
         expanded: ["aria-expanded"],
       },
-      keys: ["ArrowUp", "ArrowDown", "Home", "End", "Enter", "Space", "Escape"],
+      // Spec 036 Teil 5 ②b-4 (A-listelektilo-5): typed words jump.
+      keys: ["ArrowUp", "ArrowDown", "Home", "End", "Enter", "Space", "Escape", "Character"],
       texts: {
         "clear-name": { de: "{label} leeren", en: "Clear {label}" },
         required: { de: "erforderlich", en: "required" },

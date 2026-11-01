@@ -250,7 +250,8 @@
         "End",
         "Escape",
         "Enter",
-        "Space"
+        "Space",
+        "Character"
       ],
       "texts": {
         "label-empty": {

@@ -759,7 +759,8 @@
         "End",
         "Enter",
         "Space",
-        "Escape"
+        "Escape",
+        "Character"
       ],
       "texts": {
         "required": {

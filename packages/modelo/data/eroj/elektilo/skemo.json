@@ -616,8 +616,11 @@
       "keys": [
         "ArrowUp",
         "ArrowDown",
+        "Home",
+        "End",
         "Enter",
-        "Escape"
+        "Escape",
+        "Character"
       ],
       "texts": {
         "required": {

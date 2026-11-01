@@ -404,6 +404,37 @@ const MULTI_ITEM_ROW =
  * hidden (a filter) is hidden too; a row that says nothing found stays last. Nothing moves while no
  * option names a group – a list without groups keeps its rows as they were.
  */
+/**
+ * Spec 036 Teil 5 ②b-4 (A-listelektilo-5, A-menuo-5; APG typeahead): the characters typed in one
+ * go, without a pause of TYPE_AHEAD_PAUSE milliseconds and without another key in between, are the
+ * words to find; the same character again moves on to the next entry that starts with it.
+ */
+const TYPE_AHEAD_METHODS = `
+  #typed = "";
+  #typedAt = Number.NEGATIVE_INFINITY;
+
+  /** Adds the typed character to the words; a pause starts anew. */
+  #typeAhead(event: KeyboardEvent): string {
+    if (event.timeStamp - this.#typedAt > TYPE_AHEAD_PAUSE) this.#typed = "";
+    this.#typedAt = event.timeStamp;
+    this.#typed += event.key.toLowerCase();
+    return this.#typed;
+  }
+
+  /** The index of the words that start with the typed ones, from the current one on; -1 if none. */
+  #typeAheadFind(typed: string, words: readonly string[], current: number): number {
+    const repeated = [...typed].every((character) => character === typed[0]);
+    const wanted = repeated ? typed.slice(0, 1) : typed;
+    // One character (or the same again) looks after the current entry; more look from it on.
+    const from = repeated ? current + 1 : Math.max(current, 0);
+    for (let step = 0; step < words.length; step += 1) {
+      const index = (from + step) % words.length;
+      if ((words[index] ?? "").trim().toLowerCase().startsWith(wanted)) return index;
+    }
+    return -1;
+  }
+`;
+
 const GROUP_ROWS_METHOD = `
   #groupRows(holder: HTMLElement, rows: HTMLElement[], groups: string[], divided: boolean): void {
     const containers = [...holder.querySelectorAll(':scope > [part="group"]')] as HTMLElement[];
@@ -850,6 +881,14 @@ const MENU_ROW =
  */
 const MENU_ROW_ICON =
   '<button part="item" role="menuitem" type="button" tabindex="-1"><fm-ikono part="icon" aria-hidden="true" hidden></fm-ikono><slot></slot></button>';
+
+/**
+ * Spec 036 Teil 5 ②b-4 (A-menuo-5): the row of an entry with a target (attribute to) – a link with
+ * the role menuitem, because it moves the person (Regulo link-navigates-button-acts).
+ */
+const MENU_LINK_ROW = '<a part="item" role="menuitem" tabindex="-1"><slot></slot></a>';
+const MENU_LINK_ROW_ICON =
+  '<a part="item" role="menuitem" tabindex="-1"><fm-ikono part="icon" aria-hidden="true" hidden></fm-ikono><slot></slot></a>';
 
 /** A group line of a menu (Spec 014 ④): the slotted apartigilo in a row of its own. */
 const MENU_SEPARATOR = '<div part="separator" role="none"><slot></slot></div>';
@@ -3375,8 +3414,16 @@ ${
     const rows = this.#menuRows();
     const current = rows.findIndex((row) => row === this.shadowRoot?.activeElement);
     const at = enabled.indexOf(current);
+    const row = rows[current];
+    if (key === "Space" && row instanceof HTMLAnchorElement) {
+      // A link takes Enter of the platform; Space follows it as in a menu of buttons.
+      event.preventDefault();
+      row.click();
+      return;
+    }
     if (key === "Enter" || key === "Space") return;
     if (KEYS.includes(key)) {
+      this.#typed = "";
       event.preventDefault();
       if (key === "ArrowDown") this.#menuFocus(enabled[(at + 1) % enabled.length] ?? -1);
       else if (key === "ArrowUp") this.#menuFocus(enabled[(at - 1 + enabled.length) % enabled.length] ?? -1);
@@ -3388,16 +3435,15 @@ ${
       return;
     }
     if (event.key.length !== 1 || event.altKey || event.ctrlKey || event.metaKey) return;
-    const letter = event.key.toLowerCase();
-    const order = [...enabled.slice(at + 1), ...enabled.slice(0, at + 1)];
-    const found = order.find((index) => {
-      const row = rows[index];
-      const words = row === undefined ? "" : (this.#menuEntryOf(row)?.textContent ?? "");
-      return words.trim().toLowerCase().startsWith(letter);
+    // Spec 036 Teil 5 ②b-4 (A-menuo-5): the words typed in one go find the entry they start with.
+    const words = enabled.map((index) => {
+      const each = rows[index];
+      return each === undefined ? "" : (this.#menuEntryOf(each)?.textContent ?? "");
     });
-    if (found !== undefined) this.#menuFocus(found);
+    const found = this.#typeAheadFind(this.#typeAhead(event), words, at);
+    if (found !== -1) this.#menuFocus(enabled[found] ?? -1);
   }
-
+${TYPE_AHEAD_METHODS}
   /**
    * Assigns the children to the slots (manual slot assignment): every element without a slot to a
    * row of its own, made here — an apartigilo to a separator row, every other to a menu item; the
@@ -3417,18 +3463,26 @@ ${
       (holder as HTMLSlotElement).assign(...(named.get(holder.getAttribute("name") ?? "") ?? []));
     }
     const list = this.#control;
-    const wanted = entries.map((entry) => (entry.tagName.toLowerCase() === "fm-apartigilo" ? "separator" : "item"));
+    // Spec 036 Teil 5 ②b-4 (A-menuo-5): an entry with a target is a link row.
+    const wanted = entries.map((entry) =>
+      entry.tagName.toLowerCase() === "fm-apartigilo" ? "separator" : entry.hasAttribute("to") ? "link" : "item",
+    );
+    const kindOf = (child: Element) =>
+      child.getAttribute("part") === "separator" ? "separator" : child.tagName.toLowerCase() === "a" ? "link" : "item";
     // Spec 036 Teil 5 ②b-3 (A-menuo-4): the rows, also those standing in a group.
     const present = [
       ...list.querySelectorAll(':scope > [part="item"], :scope > [part="separator"], :scope > [part="group"] > [part="item"], :scope > [part="group"] > [part="separator"]'),
     ];
     const same =
       present.length === wanted.length &&
-      present.every((child, index) => child.getAttribute("part") === wanted[index]);
+      present.every((child, index) => kindOf(child) === wanted[index]);
     if (!same) {
       list.replaceChildren();
       for (const kind of wanted) {
-        list.insertAdjacentHTML("beforeend", kind === "separator" ? \`${MENU_SEPARATOR}\` : \`${menuIcon ? MENU_ROW_ICON : MENU_ROW}\`);
+        list.insertAdjacentHTML(
+          "beforeend",
+          kind === "separator" ? \`${MENU_SEPARATOR}\` : kind === "link" ? \`${menuIcon ? MENU_LINK_ROW_ICON : MENU_LINK_ROW}\` : \`${menuIcon ? MENU_ROW_ICON : MENU_ROW}\`,
+        );
       }
     }
     const rows = [
@@ -3436,7 +3490,11 @@ ${
     ] as HTMLElement[];
     entries.forEach((entry, index) => {
       const row = rows[index];
-      row?.querySelector("slot")?.assign(entry);${
+      row?.querySelector("slot")?.assign(entry);
+      if (row instanceof HTMLAnchorElement) {
+        const target = entry.getAttribute("to") ?? "";
+        if (row.getAttribute("href") !== target) row.setAttribute("href", target);
+      }${
         menuIcon
           ? `
       // Spec 036 Teil 5 ②b-3 (A-menuo-4): the icon of the entry before its words.
@@ -4043,7 +4101,7 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ["slot", "value", "disabled", "intent", "label"${menuIcon ? ', "icon"' : ""}${menuGroups ? ', "group"' : ""}],
+      attributeFilter: ["slot", "value", "disabled", "intent", "label", "to"${menuIcon ? ', "icon"' : ""}${menuGroups ? ', "group"' : ""}],
     });
     control.addEventListener("toggle", () => {
       const open = control.matches(":popover-open");
@@ -4075,6 +4133,13 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
       const row = event.composedPath().find(
         (node) => node instanceof HTMLElement && node.getAttribute("part") === "item",
       );
+      // Spec 036 Teil 5 ②b-4 (A-menuo-5): a link row navigates (the platform's), says no select
+      // and closes the menu; a disabled one goes nowhere.
+      if (row instanceof HTMLAnchorElement) {
+        if (row.getAttribute("aria-disabled") === "true") event.preventDefault();
+        else this.#overlayClose();
+        return;
+      }
       if (row instanceof HTMLElement) this.#menuChoose(row);
     });
     root.querySelector('slot[name="trigger"]')?.addEventListener("slotchange", () => this.#overlayBindTrigger());
@@ -5594,24 +5659,27 @@ ${
     rows[this.#listActive]?.scrollIntoView?.({ block: "nearest" });
   }
 
-  /** The row whose text starts with the typed letter, after the active one and around. */
-  #listFind(letter: string): HTMLElement | undefined {
+  /**
+   * The row whose text starts with the typed words, from the active one on and around (Spec 036
+   * ②b-4, A-listelektilo-5: more than one letter in one go; the same letter again moves on).
+   */
+  #listFind(typed: string): HTMLElement | undefined {
     const rows = this.#listRows().filter((row) => !row.hidden && row.getAttribute("aria-disabled") !== "true");
     const active = this.#listRows()[this.#listActive];
     const start = active === undefined ? -1 : rows.indexOf(active);
-    const around = [...rows.slice(start + 1), ...rows.slice(0, start + 1)];
-    return around.find((row) => (row.querySelector('[part="item-text"]')?.textContent ?? "").trim().toLowerCase().startsWith(letter));
+    const words = rows.map((row) => row.querySelector('[part="item-text"]')?.textContent ?? "");
+    return rows[this.#typeAheadFind(typed, words, start)];
   }
-
+${TYPE_AHEAD_METHODS}
   /** The keys of the Skemo on the button${isMultiselect ? ", the listbox and the filter" : ""}. */
   #listKey(event: KeyboardEvent): void {
     const key = event.key === " " ? "Space" : event.key;
     const open = this.#listIsOpen();
     const inFilter = event.target instanceof HTMLInputElement;
-    if (!KEYS.includes(key)) {
-      // A typed letter jumps to the option that starts with it — open, the active row; closed, the choice.
+    if (!KEYS.includes(key) || key === "Character") {
+      // Typed words jump to the option that starts with them — open, the active row; closed, the choice.
       if (!inFilter && event.key.length === 1 && /\\S/.test(event.key) && !event.ctrlKey && !event.metaKey && !event.altKey) {
-        const found = this.#listFind(event.key.toLowerCase());
+        const found = this.#listFind(this.#typeAhead(event));
         if (found === undefined) return;
         event.preventDefault();
         if (open) {
@@ -5623,6 +5691,7 @@ ${
       }
       return;
     }
+    this.#typed = "";
     if (this.propValue("disabled") === true || this.propValue("readonly") === true) return;
     if (key === "Escape") {
       if (!open) return;
@@ -6255,7 +6324,7 @@ const VALUED_TEXTS = PROPS.filter((prop) => prop.kind === "enum").flatMap((prop)
   }),
 );
 /** The keys the Skemo names (Space, Enter): a toggle turns with these alone (Spec 010 ②). */
-const KEYS = SKEMO.a11y.keys as readonly string[];${isDialog ? '\n/** The inputs Enter does not confirm from (Nachlese 7 ② B-7): no one-line text. */\nconst NOT_ONE_LINE: ReadonlySet<string> = new Set(["checkbox", "radio", "button", "submit", "reset", "file", "range", "color"]);' : ""}
+const KEYS = SKEMO.a11y.keys as readonly string[];${isMenu || isListy ? "\n/** Spec 036 ②b-4: the pause after which typed characters start new words (APG typeahead). */\nconst TYPE_AHEAD_PAUSE = 500;" : ""}${isDialog ? '\n/** The inputs Enter does not confirm from (Nachlese 7 ② B-7): no one-line text. */\nconst NOT_ONE_LINE: ReadonlySet<string> = new Set(["checkbox", "radio", "button", "submit", "reset", "file", "range", "color"]);' : ""}
 ${
   isIcon
     ? `/** The names of the Ikonaro and whether each mirrors in right-to-left writing (Spec 014 ②). */

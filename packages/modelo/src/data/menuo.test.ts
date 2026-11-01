@@ -109,6 +109,8 @@ describe("menuo in the repo Modelo (section ④, G1, G2, G4)", () => {
       "Escape",
       "Enter",
       "Space",
+      // Spec 036 Teil 5 ②b-4 (A-menuo-5): typed words move the focus.
+      "Character",
     ]);
     expect(skemo?.a11y.texts).toEqual({
       "label-empty": { de: "Weitere Aktionen", en: "More actions" },
@@ -130,8 +132,8 @@ describe("menuo in the repo Modelo (section ④, G1, G2, G4)", () => {
 describe("the Uzo of the menuo (section ④, G6)", () => {
   it("states the purpose; pages are the navigado's, values the elektilo's, one action the butono's; a submenu is not supported, checkable items ask", () => {
     expect(uzo?.purpose).toBe(
-      // Spec 036 Teil 5 ②b-3 (A-menuo-4): icon and group of an entry.
-      "Offers actions for one object behind a single button: edit, duplicate, delete; an entry may carry an icon (attribute icon) and name its group (attribute group).",
+      // Spec 036 Teil 5 ②b-3 (A-menuo-4): icon and group of an entry; ②b-4 (A-menuo-5): a target.
+      "Offers actions for one object behind a single button: edit, duplicate, delete; an entry may carry an icon (attribute icon) and name its group (attribute group); an entry with a target (attribute to) is a link to it, because it moves the person (Regulo link-navigates-button-acts).",
     );
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["navigate", "navigado"],

@@ -235,7 +235,8 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
         disabled: ["aria-disabled"],
         readonly: ["aria-readonly"],
       },
-      keys: ["ArrowUp", "ArrowDown", "Enter", "Escape"],
+      // Spec 036 Teil 5 ②b-4 (A-elektilo-5): Home, End and typed words, the platform's.
+      keys: ["ArrowUp", "ArrowDown", "Home", "End", "Enter", "Escape", "Character"],
       texts: {
         "clear-name": { de: "{label} leeren", en: "Clear {label}" },
         required: { de: "erforderlich", en: "required" },
