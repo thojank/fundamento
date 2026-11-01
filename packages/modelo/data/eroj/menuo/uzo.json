@@ -160,23 +160,104 @@
         }
       }
     ],
-    "when-not": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "when-not": [
+      {
+        "case": {
+          "de": "Die Einträge führen zu Seiten der Anwendung.",
+          "en": "The entries lead to pages of the application."
+        },
+        "ero": "navigado"
+      },
+      {
+        "case": {
+          "de": "Die Einträge sind Werte eines Felds, die mit dem Formular gesendet werden.",
+          "en": "The entries are values of a field that are sent with the form."
+        },
+        "ero": "elektilo"
+      },
+      {
+        "case": {
+          "de": "Es gibt nur eine einzige Aktion.",
+          "en": "There is only one action."
+        },
+        "ero": "butono"
       }
-    },
+    ],
     "do-dont": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
-      }
+      "do": [
+        {
+          "de": "Nenne in jedem Eintrag die Aktion als Verb und stelle gefährliche Aktionen ans Ende.",
+          "en": "Name the action in every entry as a verb and put dangerous actions at the end."
+        },
+        {
+          "de": "Gib dem Menü mit label einen Namen; ohne ihn heißt es „Weitere Aktionen“.",
+          "en": "Give the menu a name with label; without it, it is called “More actions”."
+        },
+        {
+          "de": "Trenne Gruppen von Einträgen mit einer Trennlinie oder group.",
+          "en": "Separate groups of entries with a separator or group."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Ein Untermenü an einen Eintrag hängen; teile die Einträge lieber auf zwei Menüs.",
+          "en": "Hang a submenu on an entry; split the entries over two menus instead."
+        },
+        {
+          "de": "Einträge bauen, die nach dem Schließen angehakt bleiben, denn eine Einstellung ist keine Aktion.",
+          "en": "Build entries that stay ticked after closing, because a setting is no action."
+        }
+      ]
     },
-    "keyboard": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "keyboard": [
+      {
+        "keys": [
+          "Enter",
+          "Space"
+        ],
+        "action": {
+          "de": "Auf dem Auslöser öffnen die Tasten das Menü; im Menü wählen sie den Eintrag mit dem Fokus, und das Menü schließt sich.",
+          "en": "On the trigger the keys open the menu; in the menu they choose the entry with the focus, and the menu closes."
+        }
+      },
+      {
+        "keys": [
+          "ArrowDown",
+          "ArrowUp"
+        ],
+        "action": {
+          "de": "Pfeil runter öffnet das Menü vom Auslöser aus; im Menü gehen die Tasten zum nächsten oder vorigen Eintrag, am Ende geht es von vorn weiter.",
+          "en": "Arrow Down opens the menu from the trigger; in the menu the keys move to the next or previous entry, wrapping at the end."
+        }
+      },
+      {
+        "keys": [
+          "Home",
+          "End"
+        ],
+        "action": {
+          "de": "Gehen zum ersten oder letzten Eintrag.",
+          "en": "Move to the first or last entry."
+        }
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": {
+          "de": "Schließt das Menü; der Fokus kehrt zum Auslöser zurück.",
+          "en": "Closes the menu; the focus returns to the trigger."
+        }
+      },
+      {
+        "keys": [
+          "Character"
+        ],
+        "action": {
+          "de": "Getippte Buchstaben gehen zum Eintrag, der mit ihnen beginnt.",
+          "en": "Typed letters move to the entry that starts with them."
+        }
       }
-    }
+    ]
   }
 }

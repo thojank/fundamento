@@ -200,22 +200,66 @@
         }
       }
     ],
-    "when-not": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "when-not": [
+      {
+        "case": {
+          "de": "Es gibt nur ein einziges Ziel.",
+          "en": "There is only one destination."
+        },
+        "ero": "ligilo"
+      },
+      {
+        "case": {
+          "de": "Die Person wechselt zwischen Ansichten derselben Seite.",
+          "en": "The person switches between views of the same page."
+        },
+        "ero": "langetaro"
+      },
+      {
+        "case": {
+          "de": "Gezeigt werden soll der Weg von oben zur aktuellen Seite.",
+          "en": "The path from the top to the current page is to be shown."
+        },
+        "ero": "spuro"
+      },
+      {
+        "case": {
+          "de": "Die Navigation soll als Rahmen um jede Seite der Anwendung stehen.",
+          "en": "The navigation is to stand as the frame around every page of the application."
+        },
+        "ero": "sxelo"
       }
-    },
+    ],
     "do-dont": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
-      }
+      "do": [
+        {
+          "de": "Markiere mit page die Seite, auf der die Person gerade ist.",
+          "en": "Mark with page the page the person is on."
+        },
+        {
+          "de": "Gib jeder Navigation mit label einen Namen, sobald eine Seite zwei hat.",
+          "en": "Give every navigation a name with label as soon as a page has two."
+        },
+        {
+          "de": "Gruppiere eine senkrechte Navigation in Abschnitte mit Überschrift.",
+          "en": "Group a vertical navigation into sections with a heading."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Eine zweite Ebene unter einem Eintrag aufklappen lassen.",
+          "en": "Let a second level open under an entry."
+        },
+        {
+          "de": "Die Einträge auf schmalen Bildschirmen hinter einem Menüknopf verstecken; die Navigation bricht stattdessen um.",
+          "en": "Hide the entries behind a menu button on narrow screens; the navigation wraps instead."
+        }
+      ]
     },
     "keyboard": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+      "none": {
+        "de": "Die Navigation nimmt keine eigene Taste; ihre Einträge sind Verweise, die man mit Tab erreicht und mit Enter öffnet.",
+        "en": "The navigation takes no key of its own; its entries are links reached with Tab and opened with Enter."
       }
     }
   }

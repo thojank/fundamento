@@ -183,23 +183,103 @@
         }
       }
     ],
-    "when-not": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "when-not": [
+      {
+        "case": {
+          "de": "Es gibt höchstens sieben Optionen, die als Kästchen sichtbar bleiben können.",
+          "en": "There are at most seven options, which can stay visible as boxes."
+        },
+        "ero": "markobutono"
+      },
+      {
+        "case": {
+          "de": "Gewählt wird nur ein einziger Wert.",
+          "en": "Only one value is chosen."
+        },
+        "ero": "elektilo"
+      },
+      {
+        "case": {
+          "de": "Ein einzelner Wert soll mit Vorschlägen beim Tippen gefunden werden.",
+          "en": "A single value is to be found with suggestions while typing."
+        },
+        "ero": "kompletigilo"
       }
-    },
+    ],
     "do-dont": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
-      }
+      "do": [
+        {
+          "de": "Wähle summary nach dem Platz: count für eine Zahl, labels für die Namen, tags zum einzelnen Entfernen.",
+          "en": "Choose summary by the room: count for a number, labels for the names, tags for removing one by one."
+        },
+        {
+          "de": "Setze filterable bei langen Listen.",
+          "en": "Set filterable for long lists."
+        },
+        {
+          "de": "Nenne bei max die Grenze in der Hilfe; eine weitere Option wird abgelehnt.",
+          "en": "With max, state the limit in the help; a further option is refused."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Neue Werte beim Tippen erfinden lassen, denn die Liste wüchse mit jedem Tippfehler.",
+          "en": "Let new values be made up while typing, because the list would grow with every typo."
+        },
+        {
+          "de": "Darauf bauen, dass „Alle wählen“ (select-all) über max hinaus wählt; die Zeile hält die Grenze ein.",
+          "en": "Count on “Select all” (select-all) choosing beyond max; the row keeps to the limit."
+        }
+      ]
     },
-    "keyboard": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "keyboard": [
+      {
+        "keys": [
+          "ArrowDown",
+          "ArrowUp"
+        ],
+        "action": {
+          "de": "Öffnen die Liste; in der offenen Liste markieren sie die nächste oder vorige Option.",
+          "en": "Open the list; in the open list they mark the next or previous option."
+        }
+      },
+      {
+        "keys": [
+          "Home",
+          "End"
+        ],
+        "action": {
+          "de": "Markieren die erste oder letzte Option.",
+          "en": "Mark the first or last option."
+        }
+      },
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": {
+          "de": "Öffnet die Liste; in der offenen Liste wählt die Taste die markierte Option oder nimmt sie zurück, die Liste bleibt offen.",
+          "en": "Opens the list; in the open list the key chooses the marked option or takes it back, and the list stays open."
+        }
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": {
+          "de": "Öffnet die Liste oder schließt die offene und behält die Wahl; auf der Zeile „Alle wählen“ wählt sie alle oder keine.",
+          "en": "Opens the list or closes the open one and keeps the choice; on the row “Select all” it chooses all or none."
+        }
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": {
+          "de": "Schließt die Liste und behält die Wahl.",
+          "en": "Closes the list and keeps the choice."
+        }
       }
-    }
+    ]
   }
 }

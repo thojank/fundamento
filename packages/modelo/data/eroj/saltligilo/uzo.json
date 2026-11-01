@@ -66,23 +66,58 @@
         }
       }
     ],
-    "when-not": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "when-not": [
+      {
+        "case": {
+          "de": "Ein Verweis steht mitten im Text und führt zu einer anderen Stelle.",
+          "en": "A link stands inside the text and leads to another place."
+        },
+        "ero": "ligilo"
+      },
+      {
+        "case": {
+          "de": "Der Verweis soll immer sichtbar sein.",
+          "en": "The link is to be visible at all times."
+        },
+        "ero": "navigado"
       }
-    },
+    ],
     "do-dont": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
-      }
+      "do": [
+        {
+          "de": "Stell den Sprungverweis an den Anfang der Seite, vor alles, was sich wiederholt.",
+          "en": "Place the skip link at the start of the page, before everything that repeats."
+        },
+        {
+          "de": "Lass to auf den Hauptinhalt oder ein Element zeigen, das den Fokus nehmen kann.",
+          "en": "Let to point to the main content or to an element that can take the focus."
+        },
+        {
+          "de": "Setze focus-only in einer Anwendung, deren Router den Teil der Adresse nach der Raute liest.",
+          "en": "Set focus-only in an application whose router reads the part of the address after the hash."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Den Sprungverweis immer sichtbar zeigen; er erscheint nur für die Person, die mit Tab zu ihm kommt.",
+          "en": "Show the skip link at all times; it appears only for the person who tabs to it."
+        },
+        {
+          "de": "Ihn auf ein Ziel zeigen lassen, das es auf der Seite nicht gibt.",
+          "en": "Let it point to a target that does not exist on the page."
+        }
+      ]
     },
-    "keyboard": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "keyboard": [
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": {
+          "de": "Springt zum Ziel und setzt den Fokus dorthin; mit focus-only bleibt die Adresse unverändert.",
+          "en": "Jumps to the target and moves the focus there; with focus-only the address stays unchanged."
+        }
       }
-    }
+    ]
   }
 }
