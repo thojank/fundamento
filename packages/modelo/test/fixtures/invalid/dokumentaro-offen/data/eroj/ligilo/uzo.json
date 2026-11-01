@@ -1,0 +1,66 @@
+{
+  "$schema": "../../../../../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M4RXVY3ZHKN4VH6HP2N4QE8E",
+    "ero": "ero_01M4RXVY3ZEY5Q8G0R254YQJ5F",
+    "skemo": "ske_01M4RXVY3ZEQSA2DRW3CE6330D",
+    "purpose": "Fixture Uzo: moves to another view.",
+    "instead": [],
+    "boundary": [
+      {
+        "case": "download",
+        "action": "ask-human",
+        "kialo": "A download does not leave the view; the fixture Ero does not cover it."
+      }
+    ],
+    "composes": {
+      "containers": [],
+      "with": [],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {},
+    "layout": {
+      "size": "content",
+      "wrap": "never"
+    },
+    "content": [],
+    "when-not": [
+      {
+        "case": {
+          "de": "Was auf der Ansicht etwas auslöst, ist eine Handlung.",
+          "en": "What starts something on the view is an action."
+        },
+        "ero": "butono"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Der Text sagt, wohin der Verweis führt.",
+          "en": "The text says where the link leads."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Ein Verweis, der eine Handlung auslöst.",
+          "en": "A link that starts an action."
+        }
+      ]
+    },
+    "keyboard": [
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": {
+          "de": "Folgt dem Verweis.",
+          "en": "Follows the link."
+        }
+      }
+    ]
+  }
+}

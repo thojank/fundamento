@@ -223,6 +223,7 @@ describe("shared constants", () => {
       "clean-room",
       "ikonaro",
       "fontoj",
+      "dokumentaro",
     ]);
   });
 
