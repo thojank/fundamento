@@ -165,3 +165,35 @@ describe("②b-4 A-ligilo-6: download", () => {
     expect(tokensOf(brief)).toBeLessThan(750);
   });
 });
+
+/** A-spuro-6: the middle of a long path collapses into a menuo; the boundary collapsed-middle is decided. */
+describe("②b-4 A-spuro-6: collapsed middle", () => {
+  it("spuro: max-items is a number, the last prop; the part more holds the menu, the last part", () => {
+    const { skemo } = entryOf("spuro");
+    expect(skemo.props.at(-1)).toMatchObject({ name: "max-items", kind: "number" });
+    expect(Object.keys(skemo.parts).at(-1)).toBe("more");
+    expect(skemo.a11y.texts?.["more-name"]).toEqual({
+      de: "Ausgelassene Ebenen",
+      en: "Hidden levels",
+    });
+  });
+
+  it("spuro: named in de and en; the Uzo composes the menuo; the brief under 750", () => {
+    expect(tradukoOf("spuro", "props/max-items", "de")).toBe("Höchstzahl der Einträge");
+    expect(tradukoOf("spuro", "parts/more", "de")).toBe("Ausgelassene Ebenen");
+    expect(tradukoOf("spuro", "parts/more", "en")).toBe("Hidden levels");
+    expect(entryOf("spuro").uzo?.composes.with.map((entry) => entry.ero)).toContain("menuo");
+    expect(tokensOf(briefOf(entryOf("spuro")))).toBeLessThan(750);
+  });
+
+  it("spuro: collapsed-middle left the Uzo; its words lead to the spuro", () => {
+    expect(casesOf("spuro")).toEqual([]);
+    expect(
+      modelo.tradukoj?.de?.[`${entryOf("spuro").uzo?.id}/boundary/collapsed-middle/kialo`],
+    ).toBeUndefined();
+    const goal = entryOf("spuro").skemo.goals?.[0];
+    expect(goal?.keywords.en).toEqual(expect.arrayContaining(["truncated", "collapsedpath"]));
+    expect(goal?.keywords.de).toEqual(expect.arrayContaining(["gekürzt", "verkürzt"]));
+    expect(suggest("gekürzter Pfad", "de").suggestion).toMatchObject({ ero: "spuro" });
+  });
+});

@@ -497,3 +497,63 @@ test.describe("②b-4 A-ligilo-6: download", () => {
     await expect(mark).toBeVisible();
   });
 });
+
+test.describe("②b-4 A-spuro-6: collapsed middle", () => {
+  const PATH = (attributes: string) =>
+    `<fm-spuro id="s" label="Pfad" ${attributes}><a href="#start">Start</a><a href="#projekte">Projekte</a><a href="#fundamento">Fundamento</a><a href="#specs">Specs</a><a href="#spec-036">Spec 036</a><span>Teil 5</span></fm-spuro>`;
+
+  test("with more items than max-items the middle ones stand in a menu: the first, the menu, the last ones", async ({
+    page,
+  }) => {
+    await serve(page, out, PATH('max-items="4"'));
+    const trail = page.getByRole("navigation", { name: "Pfad" });
+    await expect(trail).toMatchAriaSnapshot(`
+      - navigation "Pfad":
+        - list:
+          - listitem:
+            - link "Start"
+          - listitem:
+            - button "Ausgelassene Ebenen"
+          - listitem:
+            - link "Specs"
+          - listitem:
+            - link "Spec 036"
+          - listitem: Teil 5
+    `);
+    await expect(page.getByRole("link", { name: "Projekte" })).toHaveCount(0);
+  });
+
+  test("the menu lists the hidden levels as links; one followed moves there", async ({ page }) => {
+    await serve(page, out, PATH('max-items="4"'));
+    const more = page.getByRole("button", { name: "Ausgelassene Ebenen" });
+    await expect(more).toBeVisible();
+    await more.click();
+    const menu = page.getByRole("menu");
+    await expect(menu).toMatchAriaSnapshot(`
+      - menu:
+        - menuitem "Projekte"
+        - menuitem "Fundamento"
+    `);
+    expect(
+      await page
+        .getByRole("menuitem", { name: "Fundamento" })
+        .evaluate((row) => [row.tagName.toLowerCase(), row.getAttribute("href")]),
+    ).toEqual(["a", "#fundamento"]);
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Enter");
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#fundamento");
+  });
+
+  test("without max-items, or with few enough items, nothing collapses", async ({ page }) => {
+    await serve(page, out, PATH(""));
+    await expect(page.getByRole("listitem")).toHaveCount(6);
+    await expect(page.getByRole("button")).toHaveCount(0);
+    await page.locator("#s").evaluate((element) => element.setAttribute("max-items", "6"));
+    await expect(page.getByRole("listitem")).toHaveCount(6);
+    await expect(page.getByRole("button")).toHaveCount(0);
+    await page.locator("#s").evaluate((element) => element.setAttribute("max-items", "3"));
+    await expect(page.getByRole("listitem")).toHaveCount(4);
+    await expect(page.getByRole("button", { name: "Ausgelassene Ebenen" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Specs" })).toHaveCount(0);
+  });
+});
