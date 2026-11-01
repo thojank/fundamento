@@ -524,10 +524,20 @@ test("fm-tabelo, fm-atributlisto and fm-mezurilo are upgraded in their sections,
 test("fm-navigado and fm-langetaro are upgraded in their sections, axe-clean", async ({ page }) => {
   await open(page);
   const navigation = page.locator("#fm-vitrino-navigado fm-navigado");
-  await expect(navigation).toHaveCount(1);
-  await expect(page.locator("#fm-vitrino-navigado").getByRole("navigation")).toHaveCount(1);
-  await expect(page.locator("#fm-vitrino-navigado").getByRole("link")).toHaveCount(3);
-  await expect(page.locator('#fm-vitrino-navigado a[aria-current="page"]')).toHaveCount(1);
+  // Spec 036 Teil 5 ②b-3 (A-navigado-1, A-navigado-4): a second navigation in the row „mit Icon“,
+  // vertical, with a section heading and the icons in its links.
+  await expect(navigation).toHaveCount(2);
+  await expect(page.locator("#fm-vitrino-navigado").getByRole("navigation")).toHaveCount(2);
+  await expect(page.locator("#fm-vitrino-navigado").getByRole("link")).toHaveCount(6);
+  await expect(page.locator('#fm-vitrino-navigado a[aria-current="page"]')).toHaveCount(2);
+  await expect(
+    page.locator('#fm-vitrino-navigado fm-navigado[orientation="vertical"] > h3'),
+  ).toHaveText("Abschnitt");
+  await expect(
+    page.locator(
+      '#fm-vitrino-navigado fm-navigado[orientation="vertical"] > a > fm-ikono[slot="icon-start"]',
+    ),
+  ).toHaveCount(3);
   const tabs = page.locator("#fm-vitrino-langetaro fm-langetaro");
   // Spec 036 Teil 5 ②b-2 (A-langetaro-2): a row per size.
   await expect(tabs).toHaveCount(3);
