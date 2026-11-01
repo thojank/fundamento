@@ -138,6 +138,11 @@ export interface ElementNames {
   /** Spec 025 ② (plan ② D-11): a textbox with a calendar part — the datelektilo, a field with a trigger and a popover calendar. */
   datepicker?: boolean;
   /**
+   * Spec 036 Teil 5 ②b-3: the names of the Skemo's parts – the markup draws a new part (an
+   * option's description, a group heading, a tick) only where the Skemo has it.
+   */
+  parts?: readonly string[];
+  /**
    * The Make Kit builds one file per Aspekto: the descriptor and the stylesheet are then constants
    * above the element instead of imports (D-14).
    */
@@ -293,8 +298,12 @@ export function signOf(role: string, size = "100%"): string | undefined {
  * while empty; the error announced live. Their texts are the description of the control.
  */
 function textsMarkup(slots: NonNullable<ElementNames["slots"]>): string {
+  // Spec 036 Teil 5 ②b-3 (A-markobutono-4, A-sxaltilo-4): the help is read first, under the label,
+  // wherever the Skemo appends its slot (Arkitekturo contract); the others keep their order.
+  const first = (name: string) => (name === "help" ? 0 : 1);
   return slots
     .filter((slot) => slot.default !== true && slot.decorative !== true && slot.list !== true)
+    .sort((a, b) => first(a.name) - first(b.name))
     .map(
       (slot) =>
         // Spec 029 ②b-1b M-2: the message of a warning or a success is said politely, as the error.
@@ -539,8 +548,10 @@ function groupMarkup(slots: NonNullable<ElementNames["slots"]>, marked: boolean)
  * (control) with the dot (indicator) in it and the label of the option beside it; the option itself
  * is assigned to the row's slot. The element adds one row per option.
  */
-function rowMarkup(role: string): string {
-  return `<div part="option" role="radio" aria-checked="false" tabindex="-1"><span part="control"><span part="indicator">${signOf(role) ?? ""}</span></span><span part="option-label"><slot></slot></span></div>`;
+function rowMarkup(role: string, described = false): string {
+  // Spec 036 Teil 5 ②b-3 (A-elekto-4): the description of the option under its label, hidden
+  // while the option has none; the element writes its words from the option's attribute.
+  return `<div part="option" role="radio" aria-checked="false" tabindex="-1"><span part="control"><span part="indicator">${signOf(role) ?? ""}</span></span>${described ? '<span data-fm-option-text><span part="option-label"><slot></slot></span><span part="option-description" aria-hidden="true" hidden></span></span>' : '<span part="option-label"><slot></slot></span>'}</div>`;
 }
 
 /**
@@ -985,6 +996,7 @@ export function elementSource({
   shownLabel = false,
   statusIcon = false,
   trailing = [],
+  parts = [],
   slots = [
     { name: "label", default: true },
     { name: "icon-start", decorative: true },
@@ -1054,6 +1066,8 @@ export function elementSource({
                                                           : "button";
   const isToggle = host === "toggle";
   const isGroup = host === "group";
+  // Spec 036 Teil 5 ②b-3 (A-elekto-4): a group whose options carry a description (the part).
+  const groupDescribed = isGroup && parts.includes("option-description");
   const isSelect = host === "select";
   const isSuggest = host === "suggest";
   const isDatepicker = host === "datepicker";
@@ -1472,7 +1486,7 @@ export function elementSource({
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ["slot", "value"],
+      attributeFilter: ["slot", "value"${groupDescribed ? ', "description"' : ""}],
     });
     control.addEventListener("keydown", (event) => this.#key(event));
 `
@@ -1527,10 +1541,27 @@ export function elementSource({
     if (!(list instanceof HTMLElement)) return;
     while (list.children.length > options.length) list.lastElementChild?.remove();
     while (list.children.length < options.length) {
-      list.insertAdjacentHTML("beforeend", \`${rowMarkup(role)}\`);
+      list.insertAdjacentHTML("beforeend", \`${rowMarkup(role, groupDescribed)}\`);
     }
     options.forEach((option, index) => {
-      list.children[index]?.querySelector("slot")?.assign(option);
+      const row = list.children[index];
+      row?.querySelector("slot")?.assign(option);${
+        groupDescribed
+          ? `
+      // Spec 036 Teil 5 ②b-3 (A-elekto-4): the option's description under its label, heard as the
+      // row's description (aria-hidden, so it is no part of the name; referenced, so it is heard).
+      const description = row?.querySelector('[part="option-description"]');
+      if (row instanceof HTMLElement && description instanceof HTMLElement) {
+        const words = option.getAttribute("description") ?? "";
+        if (description.textContent !== words) description.textContent = words;
+        description.id = "option-description-" + (index + 1);
+        description.hidden = words === "";
+        row.toggleAttribute("data-described", words !== "");
+        if (words === "") row.removeAttribute("aria-describedby");
+        else row.setAttribute("aria-describedby", description.id);
+      }`
+          : ""
+      }
     });
   }
 

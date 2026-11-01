@@ -268,6 +268,14 @@
         "typography": {
           "fixed": "typography.caption"
         }
+      },
+      "option-description": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
       }
     },
     "trailing": [

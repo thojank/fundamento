@@ -1249,7 +1249,8 @@ describe("Figma plan for the sxaltilo (Spec 010 ①)", () => {
     expect(set?.description).toBe(sxaltilo?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Einstellung");
     // Spec 029 ②b-1b M-2: the switch shows the message of its status.
-    expect(set?.texts).toEqual({ message: "Nachricht" });
+    // Spec 036 Teil 5 ②b-3 (A-sxaltilo-4): and its help.
+    expect(set?.texts).toEqual({ help: "Hinweis", message: "Nachricht" });
   });
 
   it("places the knob at the start unchecked and at the end checked (D-04)", () => {
@@ -1330,14 +1331,15 @@ describe("Figma plan for the markobutono (Spec 010 ②)", () => {
     expect(set?.grid).toMatchObject({ rows: 4, columns: 7 });
     expect(set?.description).toBe(markobutono?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Option");
-    expect(set?.texts).toEqual({ error: "Fehler", message: "Nachricht" });
+    // Spec 036 Teil 5 ②b-3 (A-markobutono-4): and its help.
+    expect(set?.texts).toEqual({ error: "Fehler", help: "Hinweis", message: "Nachricht" });
     // Nachlese 4 N-7 (Spec 014 ② O-7): the check mark is the Ikonaro's check, no sign.
     expect(set?.sign).toBeUndefined();
     for (const each of set?.variants ?? []) expect(each.icons).toEqual({ indicator: "check" });
     // The switch keeps its knob: no sign; its one text is the message of its status (②b-1b M-2).
     const sxaltilo = plan.components.find((component) => component.set === "sxaltilo");
     expect(sxaltilo?.sign).toBeUndefined();
-    expect(sxaltilo?.texts).toEqual({ message: "Nachricht" });
+    expect(sxaltilo?.texts).toEqual({ help: "Hinweis", message: "Nachricht" });
   });
 
   it("binds the box by checked and state, its border by state, the check mark where checked (G3)", () => {
@@ -1467,7 +1469,11 @@ describe("Figma plan for the elekto (Spec 010 ③)", () => {
     expect(rest?.bindings["option-label.color"]).toBe("color/text/default");
     expect(rest?.bindings["label.typography"]).toBe("typography/label/1");
     expect(rest?.bindings["help.color"]).toBe("color/text/muted");
-    expect(rest?.notDrawn).toEqual({ "required-mark.color": FIGMA_NOT_DRAWN["required-mark"] });
+    // Spec 036 Teil 5 ②b-3 (A-elekto-4): the description of an option stands with its content.
+    expect(rest?.notDrawn).toEqual({
+      "required-mark.color": FIGMA_NOT_DRAWN["required-mark"],
+      "option-description.color": FIGMA_NOT_DRAWN["elekto:option-description"],
+    });
   });
 
   it("states the elekto in the parity inventory: size only, the circle and the dot per value of selected", () => {

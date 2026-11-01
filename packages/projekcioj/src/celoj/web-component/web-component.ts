@@ -764,7 +764,8 @@ function togglePartSelector(part: string, property: string, data: string, state:
   if (part === "box" && property === "gap") return `:where(${root})`;
   if (part === "focus-ring") return `:where(${root}) [part="control"]:focus-visible`;
   if (part === "indicator" && property !== "position") return `:where(${root}) [part="indicator"]`;
-  if (["label", "error", "message", "required-mark"].includes(part))
+  // Spec 036 Teil 5 ②b-3 (A-markobutono-4, A-sxaltilo-4): the help under the label, as the error.
+  if (["label", "help", "error", "message", "required-mark"].includes(part))
     return `:where(${root}) [part="${part}"]`;
   return `:where(${root}) [part="control"]`;
 }
@@ -813,7 +814,8 @@ function groupPartSelector(
   if (["label", "help", "error", "message", "required-mark"].includes(part)) {
     return `:where(${root}) [part="${part}"]`;
   }
-  if (part === "option-label" || part === "indicator")
+  // Spec 036 Teil 5 ②b-3 (A-elekto-4): the description of an option under its label.
+  if (part === "option-label" || part === "option-description" || part === "indicator")
     return `:where(${root} ${row}) [part="${part}"]`;
   return `:where(${root} ${row}) [part="control"]`;
 }
@@ -2051,6 +2053,14 @@ const groupStructure = (disables: boolean, marked: boolean): string =>
     // outline of style auto ignores its width, so outline-width 0 left it beside the ring; the
     // shorthand resets the style to none as well (0 is the one literal the token gate allows).
     ':where([part="option"]:focus) { outline: 0; }',
+    // Spec 036 Teil 5 ②b-3 (A-elekto-4): label and description stand in a column beside the circle,
+    // the circle at the top of the column; the column is no box while the option has no
+    // description (display contents), so the row stays as it was.
+    ":where([data-fm-option-text]) { display: contents; }",
+    ':where([part="option"][data-described]) { align-items: flex-start; }',
+    ':where([part="option"][data-described]) [data-fm-option-text] { display: inline-flex; flex-direction: column; align-items: flex-start; }',
+    ':where([part="option-description"]) { white-space: normal; }',
+    ':where([part="option-description"][hidden]) { display: none; }',
     ':where([part="control"]) { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; margin: 0; padding: 0; border-style: solid; flex: none; transition-property: background-color, border-color; }',
     ':where([part="indicator"]) { display: block; flex: none; transition-property: opacity; }',
     ':where([part="indicator"]) > svg { display: block; }',
@@ -2567,6 +2577,8 @@ export function elementNamesOf(
     trailing: entry.skemo.trailing ?? [],
     // Spec 025 ② (plan ② D-11): a field with a calendar part is the date picker.
     datepicker: isDatepicker(entry.skemo),
+    // Spec 036 Teil 5 ②b-3: the parts of the Skemo, for the new parts the markup draws.
+    parts: Object.keys(entry.skemo.parts),
     marked: entry.skemo.parts["required-mark"] !== undefined,
     // Spec 011 ③: a live region turns its indicator and shows a dismiss butono where the Skemo
     // has the parts.

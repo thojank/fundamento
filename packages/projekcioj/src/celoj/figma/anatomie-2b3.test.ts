@@ -23,11 +23,12 @@ const setOf = (name: string) => {
 };
 
 /** One run of the plan in the double, read by every case. */
-const drawn = once(async () => {
+async function draw() {
   const double = modelDouble();
   await run(double, komuna02PluginCode());
   return double;
-});
+}
+const drawn = once(draw);
 
 function find(node: DoubleNode, name: string): DoubleNode | undefined {
   if (node.name === name) return node;

@@ -45,6 +45,8 @@ test.describe("fm-markobutono behaviour", () => {
       "label",
       "required-mark",
       "spinner",
+      // Spec 036 Teil 5 ②b-3 (A-markobutono-4): the help under the label, before the error.
+      "help",
       "error",
       "message",
     ]);

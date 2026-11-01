@@ -91,6 +91,8 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
       { name: "message", text: true, beside: true },
       // Spec 029 ②b-1 M-1: the reason for disabled.
       { name: "disabled-reason", text: true },
+      // Spec 036 Teil 5 ②b-3 (A-sxaltilo-4): the help, appended (Arkitekturo contract).
+      { name: "help", text: true, beside: true },
     ]);
   });
 
@@ -99,6 +101,7 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
       "border",
       "box",
       "focus-ring",
+      "help",
       "indicator",
       "label",
       "message",
@@ -156,7 +159,7 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
     expect(skemo.a11y).toEqual({
       role: "switch",
       name: ["slot:label", "prop:label"],
-      description: ["slot:message", "slot:disabled-reason"],
+      description: ["slot:help", "slot:message", "slot:disabled-reason"],
       states: { checked: ["aria-checked"], disabled: ["aria-disabled"], loading: ["aria-busy"] },
       keys: ["Space", "Enter"],
       texts: { loading: { de: "lädt", en: "loading" } },
@@ -191,6 +194,7 @@ describe("the Uzo of the sxaltilo (section 1, G5, D-13)", () => {
     );
     expect(uzo?.slots).toEqual({
       label: { accepts: ["text"], required: true, max: 1, nesting: 0 },
+      help: { accepts: ["text"], max: 1, nesting: 0 },
       message: { accepts: ["text"], max: 1, nesting: 0 },
     });
     expect(uzo?.layout).toEqual({ size: "content", wrap: "never" });

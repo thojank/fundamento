@@ -176,6 +176,27 @@ const REST_2B2 = (() => {
 })();
 
 /**
+ * Spec 036 Teil 5 ②b-3 (Spec 029 abgleich.json, aspect "anatomie"; S36-4.3): per row group the
+ * tokens of the new parts (a pattern and their number); none of main's tokens moved.
+ */
+const REST_2B3 = (() => {
+  const groups: { pattern: string; added: number }[] = [
+    // A-markobutono-4, A-sxaltilo-4 (the help: its colour and typography, 2 × 2), A-elekto-4 (the
+    // description of an option: its colour and typography, 2).
+    {
+      pattern:
+        "^ero\\.(markobutono|sxaltilo)\\.help\\.(color|typography)$|^ero\\.elekto\\.option\\.description\\.(color|typography)$",
+      added: 4 + 2,
+    },
+  ];
+  const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
+  return {
+    test: (name: string) => pattern.test(name),
+    added: groups.reduce((sum, group) => sum + group.added, 0),
+  };
+})();
+
+/**
  * Spec 036 Teil 5 ②b-2 (Spec 029 abgleich.json, aspects "achsen" and "groessen"): the tokens of the
  * new axes and values – the count of the tekstareo (A-tekstareo-1); the sizes small and large of
  * listelektilo, plurelektilo and datelektilo (A-*-2; their size medium is the token main had, see
@@ -189,7 +210,7 @@ const ACHSEN_2B2 =
  * 6 × 2, A-plurelektilo-2: 5 × 2, A-datelektilo-2: 6 × 2; A-kampo-1: the unit's colour and its
  * typography by size, 4).
  */
-export const ADDED_BY_2B2 = 2 + 12 + 10 + 12 + 4 + REST_2B2.added;
+export const ADDED_BY_2B2 = 2 + 12 + 10 + 12 + 4 + REST_2B2.added + REST_2B3.added;
 
 /**
  * The ✕ of listelektilo and datelektilo came after main (②b-1 M-6, CLEAR); ②b-2 keys it by size,
@@ -197,9 +218,12 @@ export const ADDED_BY_2B2 = 2 + 12 + 10 + 12 + 4 + REST_2B2.added;
  */
 const CLEAR_2B2 = /^ero\.(listelektilo|datelektilo)\.clear\.size\.size\.medium$/;
 
-/** Whether a token was added by ②b-2 after main's record. */
+/**
+ * Whether a token was added by ②b-2 after main's record – or by ②b-3, stacked on it (REST_2B3,
+ * counted in ADDED_BY_2B2 as well).
+ */
 export const addedBy2b2 = (name: string): boolean =>
-  ACHSEN_2B2.test(name) || CLEAR_2B2.test(name) || REST_2B2.test(name);
+  ACHSEN_2B2.test(name) || CLEAR_2B2.test(name) || REST_2B2.test(name) || REST_2B3.test(name);
 
 /**
  * ②b-2 (A-datelektilo-2): the calendar's size medium is the token whose value changed on purpose

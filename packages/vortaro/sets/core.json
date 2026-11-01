@@ -10390,6 +10390,29 @@
               }
             }
           }
+        },
+        "description": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.text.muted}",
+            "$description": "elekto: option-description.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M6A959AES6NCX2CZPR6ZBQ5T",
+                "role": "ero"
+              }
+            }
+          },
+          "typography": {
+            "$type": "typography",
+            "$value": "{typography.caption}",
+            "$description": "elekto: option-description.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M6A959AES6NCX2CZPR6ZBQ5V"
+              }
+            }
+          }
         }
       },
       "required": {
@@ -17556,6 +17579,29 @@
             }
           }
         }
+      },
+      "help": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}",
+          "$description": "markobutono: help.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M6A959AES6NCX2CZPR6ZBQ5W",
+              "role": "ero"
+            }
+          }
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.caption}",
+          "$description": "markobutono: help.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M6A959AES6NCX2CZPR6ZBQ5X"
+            }
+          }
+        }
       }
     },
     "menuo": {
@@ -21916,6 +21962,29 @@
           "$extensions": {
             "com.ciferecigo.fundamento": {
               "id": "tok_01M64V8VEZYAWF9M2ZC5P98MRD"
+            }
+          }
+        }
+      },
+      "help": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}",
+          "$description": "sxaltilo: help.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M6A959AES6NCX2CZPR6ZBQ5Y",
+              "role": "ero"
+            }
+          }
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.caption}",
+          "$description": "sxaltilo: help.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M6A959AES6NCX2CZPR6ZBQ5Z"
             }
           }
         }

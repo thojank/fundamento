@@ -434,10 +434,12 @@ describe("the Vitrino shows the sxaltilo checked and unchecked (Spec 010 ①)", 
     expect(grid).toContain(
       '<th scope="col">rest</th><th scope="col">checked</th><th scope="col">disabled</th>',
     );
+    // Spec 036 Teil 5 ②b-3 (A-sxaltilo-4): every cell shows the help, as at the fields.
+    const help = '<span slot="help">Hinweis</span>';
     for (const size of ["small", "medium"]) {
-      expect(grid).toContain(`<fm-sxaltilo size="${size}">${size}</fm-sxaltilo>`);
-      expect(grid).toContain(`<fm-sxaltilo size="${size}" checked>${size}</fm-sxaltilo>`);
-      expect(grid).toContain(`<fm-sxaltilo size="${size}" disabled>${size}</fm-sxaltilo>`);
+      expect(grid).toContain(`<fm-sxaltilo size="${size}">${size}${help}</fm-sxaltilo>`);
+      expect(grid).toContain(`<fm-sxaltilo size="${size}" checked>${size}${help}</fm-sxaltilo>`);
+      expect(grid).toContain(`<fm-sxaltilo size="${size}" disabled>${size}${help}</fm-sxaltilo>`);
     }
   });
 });
@@ -451,11 +453,15 @@ describe("the Vitrino shows the markobutono ticked, required, invalid and disabl
     expect(grid).toContain(
       '<th scope="col">rest</th><th scope="col">checked</th><th scope="col">required</th><th scope="col">invalid</th><th scope="col">disabled</th>',
     );
+    // Spec 036 Teil 5 ②b-3 (A-markobutono-4): every cell shows the help, as at the fields.
+    const help = '<span slot="help">Hinweis</span>';
     for (const size of ["small", "medium"]) {
-      expect(grid).toContain(`<fm-markobutono size="${size}">${size}</fm-markobutono>`);
-      expect(grid).toContain(`<fm-markobutono size="${size}" checked>${size}</fm-markobutono>`);
+      expect(grid).toContain(`<fm-markobutono size="${size}">${size}${help}</fm-markobutono>`);
       expect(grid).toContain(
-        `<fm-markobutono size="${size}" invalid>${size}<span slot="error">Fehler</span></fm-markobutono>`,
+        `<fm-markobutono size="${size}" checked>${size}${help}</fm-markobutono>`,
+      );
+      expect(grid).toContain(
+        `<fm-markobutono size="${size}" invalid>${size}<span slot="error">Fehler</span>${help}</fm-markobutono>`,
       );
     }
     // Spec 036 Teil 5 ②b-2 (A-markobutono-2): a row per size, two sizes.
