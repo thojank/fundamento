@@ -127,22 +127,52 @@
         }
       }
     ],
-    "when-not": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "when-not": [
+      {
+        "case": {
+          "de": "Es soll ein Zustand gesagt werden, nicht wer etwas ist.",
+          "en": "A state is to be said, not who someone is."
+        },
+        "ero": "insigno"
+      },
+      {
+        "case": {
+          "de": "Gebraucht wird ein Zeichen aus dem Ikonaro, keine Person und kein Ding mit Namen.",
+          "en": "What is needed is a sign of the Ikonaro, not a person or a named thing."
+        },
+        "ero": "ikono"
       }
-    },
+    ],
     "do-dont": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
-      }
+      "do": [
+        {
+          "de": "Gib immer name an: Er ist der Name des Bildes und die Quelle der Initialen.",
+          "en": "Always give name: it is the name of the picture and the source of the initials."
+        },
+        {
+          "de": "Setze decorative, wenn der Name direkt daneben steht, damit er nicht zweimal gehört wird.",
+          "en": "Set decorative when the name stands right beside it, so it is not heard twice."
+        },
+        {
+          "de": "Nimm corner round für eine Person, soft oder square für ein Team oder ein Ding.",
+          "en": "Use corner round for a person, soft or square for a team or a thing."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Ein Logo in den Kreis setzen, denn ein Logo behält Form und Farben seiner Marke.",
+          "en": "Put a logo into the circle, because a logo keeps the shape and colours of its brand."
+        },
+        {
+          "de": "Den Status nur mit einem farbigen Punkt auf dem Bild zeigen, denn Farbe allein sagt nichts für alle.",
+          "en": "Show the status only with a coloured dot on the picture, because colour alone says nothing to everyone."
+        }
+      ]
     },
     "keyboard": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+      "none": {
+        "de": "Das Bild nimmt weder den Fokus noch eine Taste; es wird über seinen Namen gehört.",
+        "en": "The picture takes neither the focus nor a key; it is heard by its name."
       }
     }
   }

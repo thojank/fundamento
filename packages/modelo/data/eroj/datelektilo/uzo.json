@@ -184,23 +184,119 @@
         }
       }
     ],
-    "when-not": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "when-not": [
+      {
+        "case": {
+          "de": "Ein Datum liegt weit zurück, etwa ein Geburtstag, und ist schneller getippt als im Kalender gesucht.",
+          "en": "A date lies far back, such as a birthday, and is typed faster than it is found in a calendar."
+        },
+        "ero": "kampo"
+      },
+      {
+        "case": {
+          "de": "Gefragt ist eine Uhrzeit, kein Tag.",
+          "en": "A time of day is asked for, not a day."
+        },
+        "ero": "kampo"
       }
-    },
+    ],
     "do-dont": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
-      }
+      "do": [
+        {
+          "de": "Nimm mode range für einen Zeitraum; das Ende liegt nie vor dem Anfang.",
+          "en": "Use mode range for a period; the end never lies before the start."
+        },
+        {
+          "de": "Grenze mit min, max und disabled-dates ein, was gewählt werden darf, statt es erst im Fehler zu sagen.",
+          "en": "Limit with min, max and disabled-dates what may be chosen, instead of saying it only in the error."
+        },
+        {
+          "de": "Setze size wie bei den Feldern daneben, damit eine Zeile auf einer Höhe steht.",
+          "en": "Set size as for the fields beside it, so a row stands level."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Bei mode range den Wert in value setzen, denn ein Zeitraum hat value-start und value-end.",
+          "en": "Set the date in value with mode range, because a range has value-start and value-end."
+        },
+        {
+          "de": "Eine Spanne mit min-span oder max-span ohne mode range verlangen, denn ein einzelner Tag hat keine Länge.",
+          "en": "Ask for a span with min-span or max-span without mode range, because a single day has no length."
+        },
+        {
+          "de": "Den Kalender als einzigen Weg anbieten; das Datum lässt sich immer auch tippen.",
+          "en": "Offer the calendar as the only way; the date can always be typed as well."
+        }
+      ]
     },
-    "keyboard": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "keyboard": [
+      {
+        "keys": [
+          "ArrowDown"
+        ],
+        "action": {
+          "de": "Im Feld öffnet die Taste den Kalender; im Kalender springt sie eine Woche weiter.",
+          "en": "In the field the key opens the calendar; in the calendar it moves one week on."
+        }
+      },
+      {
+        "keys": [
+          "ArrowUp"
+        ],
+        "action": {
+          "de": "Im Kalender springt die Taste eine Woche zurück.",
+          "en": "In the calendar the key moves one week back."
+        }
+      },
+      {
+        "keys": [
+          "ArrowLeft",
+          "ArrowRight"
+        ],
+        "action": {
+          "de": "Im Kalender gehen die Tasten einen Tag zurück oder vor, in der Schreibrichtung.",
+          "en": "In the calendar the keys move one day back or on, in the writing direction."
+        }
+      },
+      {
+        "keys": [
+          "PageUp",
+          "PageDown"
+        ],
+        "action": {
+          "de": "Im Kalender blättern die Tasten einen Monat zurück oder vor, mit Umschalt ein Jahr.",
+          "en": "In the calendar the keys turn one month back or on, with Shift one year."
+        }
+      },
+      {
+        "keys": [
+          "Home",
+          "End"
+        ],
+        "action": {
+          "de": "Im Kalender springen die Tasten zum ersten oder letzten Tag der Woche.",
+          "en": "In the calendar the keys jump to the first or last day of the week."
+        }
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": {
+          "de": "Im Kalender wählt die Taste den markierten Tag; im Feld übernimmt sie das getippte Datum und sendet ein Formular, in dem das Feld steht.",
+          "en": "In the calendar the key picks the marked day; in the field it takes the typed date and sends a form the field stands in."
+        }
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": {
+          "de": "Schließt den Kalender, ohne einen Tag zu wählen.",
+          "en": "Closes the calendar without picking a day."
+        }
       }
-    }
+    ]
   }
 }

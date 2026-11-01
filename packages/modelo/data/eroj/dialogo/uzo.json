@@ -226,23 +226,78 @@
         }
       }
     ],
-    "when-not": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "when-not": [
+      {
+        "case": {
+          "de": "Es soll nur etwas mitgeteilt werden, ohne dass jemand entscheiden muss.",
+          "en": "Something is only to be told, without anyone having to decide."
+        },
+        "ero": "avizo"
+      },
+      {
+        "case": {
+          "de": "Die Seite soll benutzbar bleiben, während die Ebene offen ist.",
+          "en": "The page is to stay usable while the layer is open."
+        },
+        "ero": "sxvebilo"
+      },
+      {
+        "case": {
+          "de": "Das Formular ist länger als eine Bildschirmhöhe.",
+          "en": "The form is longer than one screen height."
+        },
+        "ero": "formularo"
       }
-    },
+    ],
     "do-dont": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
-      }
+      "do": [
+        {
+          "de": "Lass die Überschrift die Entscheidung nennen und die Schaltflächen die möglichen Antworten.",
+          "en": "Let the heading name the decision and the buttons the possible answers."
+        },
+        {
+          "de": "Wähle dismiss nach dem Zweck: free für einen Hinweis, guarded für ein Formular, explicit für eine Pflicht.",
+          "en": "Choose dismiss by purpose: free for a hint, guarded for a form, explicit for a duty."
+        },
+        {
+          "de": "Setze reason required, wenn eine Ablehnung begründet werden muss; die Bestätigung bleibt gesperrt, bis Text da ist.",
+          "en": "Set reason required when a rejection needs a reason; the confirmation stays locked until there is text."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Aus einem Dialog einen zweiten öffnen.",
+          "en": "Open a second dialog from a dialog."
+        },
+        {
+          "de": "Einen Dialog für eine bloße Mitteilung öffnen, die niemand beantworten muss.",
+          "en": "Open a dialog for a mere message nobody has to answer."
+        },
+        {
+          "de": "Bei dismiss explicit eine Antwort weglassen, mit der die Person den Dialog wieder verlässt.",
+          "en": "Leave out an answer with which the person leaves the dialog again when dismiss is explicit."
+        }
+      ]
     },
-    "keyboard": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "keyboard": [
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": {
+          "de": "Bricht ab und schließt den Dialog; bei dismiss explicit bleibt er offen, bis eine Antwort gewählt ist.",
+          "en": "Cancels and closes the dialog; with dismiss explicit it stays open until an answer is chosen."
+        }
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": {
+          "de": "In einem einzeiligen Feld des Inhalts bestätigt die Taste, solange die Bestätigung nicht gesperrt ist.",
+          "en": "In a one-line field of the content the key confirms, as long as the confirmation is not locked."
+        }
       }
-    }
+    ]
   }
 }

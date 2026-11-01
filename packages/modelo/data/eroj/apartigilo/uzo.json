@@ -72,22 +72,52 @@
       "wrap": "never"
     },
     "content": [],
-    "when-not": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "when-not": [
+      {
+        "case": {
+          "de": "Über der Gruppe soll ein Wort stehen, das sie benennt.",
+          "en": "A word above the group should name it."
+        },
+        "ero": "titolo"
+      },
+      {
+        "case": {
+          "de": "Der Inhalt über ein Ding soll als eigene Einheit mit Überschrift stehen.",
+          "en": "The content about one thing should stand as a unit of its own with a heading."
+        },
+        "ero": "karto"
       }
-    },
+    ],
     "do-dont": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
-      }
+      "do": [
+        {
+          "de": "Ziehe die Linie nur, wo der Abstand allein die Gruppen nicht mehr trennt.",
+          "en": "Draw the line only where space alone no longer separates the groups."
+        },
+        {
+          "de": "Nimm emphasis high zwischen Abschnitten und low innerhalb einer Karte.",
+          "en": "Use emphasis high between sections and low inside a card."
+        },
+        {
+          "de": "Setze decorative, wenn die Linie nur schmückt; ohne decorative wird sie als Trenner gehört.",
+          "en": "Set decorative when the line only decorates; without decorative it is heard as a separator."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Ein Wort in die Linie schreiben, denn das Wort wäre eine Überschrift.",
+          "en": "Write a word into the line, because the word would be a heading."
+        },
+        {
+          "de": "Mehrere Linien stapeln, um eine Grenze stärker zu machen; dafür gibt es emphasis high.",
+          "en": "Stack several lines to make a boundary stronger; emphasis high is there for that."
+        }
+      ]
     },
     "keyboard": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+      "none": {
+        "de": "Die Trennlinie nimmt weder den Fokus noch eine Taste, sie gliedert nur.",
+        "en": "The separator takes neither the focus nor a key; it only divides."
       }
     }
   }

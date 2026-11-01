@@ -191,22 +191,70 @@
         }
       }
     ],
-    "when-not": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "when-not": [
+      {
+        "case": {
+          "de": "Die Person muss etwas entscheiden, bevor es weitergeht.",
+          "en": "The person has to decide something before anything goes on."
+        },
+        "ero": "dialogo"
+      },
+      {
+        "case": {
+          "de": "Ein Zustand passt in ein bis drei Wörter neben einem Titel.",
+          "en": "A state fits into one to three words beside a title."
+        },
+        "ero": "insigno"
+      },
+      {
+        "case": {
+          "de": "Der Fehler gehört zu einem einzelnen Feld und wird dort berichtigt.",
+          "en": "The error belongs to a single field and is corrected there."
+        },
+        "ero": "kampo"
+      },
+      {
+        "case": {
+          "de": "Es geht um Inhalt über ein Ding, der so lange bleibt wie das Ding.",
+          "en": "It is content about one thing that stays as long as the thing does."
+        },
+        "ero": "karto"
       }
-    },
+    ],
     "do-dont": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
-      }
+      "do": [
+        {
+          "de": "Wähle intent nach dem, was geschah: info, success, warning oder danger für einen Fehler.",
+          "en": "Choose intent by what happened: info, success, warning, or danger for an error."
+        },
+        {
+          "de": "Sag im Text, was die Person jetzt tun kann, vor allem bei einem Fehler.",
+          "en": "Say in the text what the person can do now, above all for an error."
+        },
+        {
+          "de": "Setze dismissible, wenn der Hinweis erledigt sein kann; geschlossen bleibt er verborgen.",
+          "en": "Set dismissible when the notice can be done with; closed, it stays hidden."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Einen Hinweis von selbst verschwinden lassen, denn wer langsam liest oder vergrößert, verpasst ihn.",
+          "en": "Let a notice disappear by itself, because whoever reads slowly or zooms in misses it."
+        },
+        {
+          "de": "Mehrere Hinweise auf einmal stapeln, die um dieselbe Aufmerksamkeit streiten.",
+          "en": "Stack several notices at once that compete for the same attention."
+        },
+        {
+          "de": "Für eine bloße Auskunft intent warning oder danger nehmen, denn beide werden sofort als Alarm vorgelesen.",
+          "en": "Use intent warning or danger for mere information, because both are read out at once as an alert."
+        }
+      ]
     },
     "keyboard": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+      "none": {
+        "de": "Der Hinweis selbst nimmt keine Taste; ist er schließbar, ist sein Knopf zum Schließen eine gewöhnliche Schaltfläche für Enter und Leertaste.",
+        "en": "The notice itself takes no key; when it can be closed, its close button is an ordinary button for Enter and Space."
       }
     }
   }

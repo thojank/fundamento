@@ -273,23 +273,77 @@
         }
       }
     ],
-    "when-not": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "when-not": [
+      {
+        "case": {
+          "de": "Die Person soll zu einer anderen Ansicht oder einem anderen Ort wechseln.",
+          "en": "The person is to move to another view or place."
+        },
+        "ero": "ligilo"
+      },
+      {
+        "case": {
+          "de": "Eine Einstellung bleibt an oder aus und gilt sofort.",
+          "en": "A setting stays on or off and applies at once."
+        },
+        "ero": "sxaltilo"
+      },
+      {
+        "case": {
+          "de": "Gewählt wird einer von wenigen sichtbaren Werten, nicht eine Handlung gestartet.",
+          "en": "One of a few visible values is chosen; no action is started."
+        },
+        "ero": "elekto"
+      },
+      {
+        "case": {
+          "de": "Die Handlung lässt sich nicht rückgängig machen und braucht eine Rückfrage.",
+          "en": "The action cannot be undone and needs a question first."
+        },
+        "ero": "dialogo"
       }
-    },
+    ],
     "do-dont": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
-      }
+      "do": [
+        {
+          "de": "Nenne in der Beschriftung die Handlung als Verb; zerstört sie etwas, nenne auch den Gegenstand.",
+          "en": "Name the action in the label as a verb; when it destroys something, name the object too."
+        },
+        {
+          "de": "Setze höchstens eine Schaltfläche mit emphasis high je Behälter.",
+          "en": "Set at most one button with emphasis high per container."
+        },
+        {
+          "de": "Gib einer Schaltfläche nur mit Symbol einen Namen in label und einen Tooltip mit demselben Wort.",
+          "en": "Give a button with an icon alone a name in label and a tooltip with the same word."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Die Gefahr mit intent danger ohne emphasis high zeigen, denn sie braucht die gefüllte Fläche.",
+          "en": "Show danger with intent danger without emphasis high, because it needs the filled surface."
+        },
+        {
+          "de": "„OK“ oder „Ja“ auf eine Schaltfläche schreiben, die etwas zerstört.",
+          "en": "Write “OK” or “Yes” on a button that destroys something."
+        },
+        {
+          "de": "Eine Beschriftung über mehrere Zeilen laufen lassen; kürze sie stattdessen.",
+          "en": "Let a label run over several lines; shorten it instead."
+        }
+      ]
     },
-    "keyboard": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "keyboard": [
+      {
+        "keys": [
+          "Enter",
+          "Space"
+        ],
+        "action": {
+          "de": "Löst die Handlung aus; während loading geschieht nichts.",
+          "en": "Starts the action; while loading nothing happens."
+        }
       }
-    }
+    ]
   }
 }
