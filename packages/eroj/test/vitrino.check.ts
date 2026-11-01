@@ -449,8 +449,12 @@ test("fm-insigno, fm-avizo and fm-plenstato are upgraded in their sections, axe-
 }) => {
   await open(page);
   const badges = page.locator("#fm-vitrino-insigno fm-insigno");
-  await expect(badges).toHaveCount(10);
+  // Spec 036 Teil 5 ②b-3 (A-insigno-4): and the row „mit Icon“, an icon before the words of each.
+  await expect(badges).toHaveCount(15);
   await expect(badges.first()).toHaveText(/neutral · small/);
+  await expect(
+    page.locator('#fm-vitrino-insigno fm-insigno > fm-ikono[slot="icon-start"]'),
+  ).toHaveCount(5);
   const notices = page.locator("#fm-vitrino-avizo fm-avizo");
   // Eight, and the danger notice of Nachlese 7 ② B-5 (a list and code in its details); sixteen
   // since Spec 036 Teil 5 ②b-2 (A-avizo-1: intent × frame).
@@ -709,9 +713,11 @@ test("fm-pagxigilo and fm-spuro are upgraded in their sections, the pager usable
   );
   // Spec 036 Teil 5 ②b-2 (A-spuro-1): a row per emphasis.
   const trail = page.locator("#fm-vitrino-spuro");
-  await expect(trail.getByRole("navigation", { name: "Pfad" })).toHaveCount(2);
-  await expect(trail.getByRole("listitem")).toHaveCount(6);
-  await expect(trail.getByRole("link")).toHaveCount(4);
+  // Spec 036 Teil 5 ②b-3 (A-spuro-4): and the row „mit Icon“ per emphasis, the icon in the first item.
+  await expect(trail.getByRole("navigation", { name: "Pfad" })).toHaveCount(4);
+  await expect(trail.getByRole("listitem")).toHaveCount(12);
+  await expect(trail.getByRole("link")).toHaveCount(8);
+  await expect(trail.locator('fm-spuro > a > fm-ikono[slot="icon-start"]')).toHaveCount(2);
   for (const id of ["pagxigilo", "spuro"]) {
     expect(await axeViolations(page, `#fm-vitrino-${id}`), id).toEqual([]);
   }

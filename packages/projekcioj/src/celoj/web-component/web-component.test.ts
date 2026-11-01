@@ -206,9 +206,11 @@ describe("Web Component Celo for the ligilo (Spec 008 T015)", () => {
     expect(ligiloElement).toContain('"external noopener noreferrer"');
     expect(ligiloElement).toContain("static formAssociated = false;");
     expect(ligiloElement).toContain('customElements.define("fm-ligilo", FmLigilo)');
-    // The slots of the Skemo: the label and icon-end, no icon-start (E3).
-    expect(ligiloElement).toContain('<slot></slot><slot name="icon-end">');
-    expect(ligiloElement).not.toContain('name="icon-start"');
+    // The slots of the Skemo: the label and icon-end (E3); Spec 036 Teil 5 ②b-3 (A-ligilo-4): the
+    // icon-start before the label, as at the butono.
+    expect(ligiloElement).toContain(
+      '<slot name="icon-start"></slot><slot></slot><slot name="icon-end">',
+    );
   });
 
   it("speaks the a11y text as the description and shows the mark while external is true (D-02, D-05)", () => {
@@ -1039,7 +1041,8 @@ describe("Web Component Celo for the insigno (Spec 011 ③)", () => {
 
   it("renders a span without a role as the control, the label and the hidden description in it", () => {
     expect(parts(element)).toEqual(["control", "description"]);
-    expect(element).toContain('<span part="control"><slot></slot>');
+    // Spec 036 Teil 5 ②b-3 (A-insigno-4): the icon at the start before the label.
+    expect(element).toContain('<span part="control"><slot name="icon-start"></slot><slot></slot>');
     expect(element).toContain(
       '<span part="description" class="fm-hidden"><slot name="description"></slot></span>',
     );

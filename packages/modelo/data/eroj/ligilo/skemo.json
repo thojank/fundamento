@@ -64,6 +64,10 @@
       {
         "name": "icon-end",
         "decorative": true
+      },
+      {
+        "name": "icon-start",
+        "decorative": true
       }
     ],
     "parts": {

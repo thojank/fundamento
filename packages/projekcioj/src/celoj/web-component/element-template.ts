@@ -662,7 +662,13 @@ function textMarkup(slots: NonNullable<ElementNames["slots"]>): string {
         `<span part="${slot.name}" class="fm-hidden"><slot name="${slot.name}"></slot></span>`,
     )
     .join("");
-  return `<span part="control"><slot></slot>${hidden}<span id="fm-texts" hidden></span></span>`;
+  // Spec 036 Teil 5 ②b-3 (A-insigno-4): a decorative slot at the start (icon-start) stands before
+  // the words, in the pill.
+  const before = slots
+    .filter((slot) => slot.decorative === true && slot.name.endsWith("-start"))
+    .map((slot) => `<slot name="${slot.name}"></slot>`)
+    .join("");
+  return `<span part="control">${before}<slot></slot>${hidden}<span id="fm-texts" hidden></span></span>`;
 }
 
 /**

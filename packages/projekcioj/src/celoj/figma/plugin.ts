@@ -897,6 +897,8 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
     "item.typography": typographyOf("items-*"),
     "underline.width": [{ node: "item-*", fields: ["strokeBottomWeight"] }],
     "underline.color": [{ node: "item-*", fields: ["strokes"], paint: true }],
+    // Spec 036 Teil 5 ②b-3 (A-spuro-4): the gap between the icon of an item and its words.
+    "item.gap": [{ node: "item-*", fields: ["itemSpacing"] }],
     "separator.color": [{ node: "separator-*-mark-*", fields: ["fills"], paint: true }],
     "separator.size": [
       { node: "separator-*", fields: ["width", "height"] },

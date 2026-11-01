@@ -232,6 +232,12 @@ const REST_2B3 = (() => {
         "^ero\\.navigado\\.(item\\.gap|icon\\.size|section\\.heading\\.(color|typography|inline\\.padding))$",
       added: 1 + 3 + 1,
     },
+    // S36-4.4 A-insigno-4 (the gap between icon and words, 1), A-spuro-4 (the gap of an item for
+    // its icon, 1; the icon's size, 1).
+    {
+      pattern: "^ero\\.insigno\\.box\\.gap$|^ero\\.spuro\\.(item\\.gap|icon\\.size)$",
+      added: 1 + 2,
+    },
   ];
   const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
   return {

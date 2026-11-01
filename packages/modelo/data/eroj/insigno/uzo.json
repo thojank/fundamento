@@ -4,7 +4,7 @@
     "id": "uzo_01M51ZRGEN3VWEQ13FZS69DQ11",
     "ero": "ero_01M51ZRFPHM8B0ED97V23SDRRH",
     "skemo": "ske_01M51ZRG2J1CVQCTEDNBQPZK6D",
-    "purpose": "Names a status in one to three words next to what it describes: draft, in review, valid, 3 violations.",
+    "purpose": "Names a status in one to three words next to what it describes: draft, in review, valid, 3 violations; an icon before the words (slot icon-start) shows it beyond colour.",
     "instead": [
       {
         "goal": "sentence",
@@ -172,6 +172,14 @@
       "description": {
         "accepts": [
           "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      },
+      "icon-start": {
+        "accepts": [
+          "icon",
+          "ikono"
         ],
         "max": 1,
         "nesting": 0

@@ -599,7 +599,11 @@ describe("the Vitrino shows the tekstareo and the dialogo (Spec 011 ②)", () =>
 describe("the Vitrino shows the insigno, the avizo and the plenstato (Spec 011 ③)", () => {
   it("insigno: a row per intent × size, the label and the hidden description", () => {
     const grid = datumoj.eroj.insigno ?? "";
-    expect((grid.match(/<fm-insigno /g) ?? []).length).toBe(10);
+    // Spec 036 Teil 5 ②b-3 (A-insigno-4): and the row „mit Icon“, one per intent.
+    expect((grid.match(/<fm-insigno /g) ?? []).length).toBe(15);
+    expect(grid).toContain(
+      '<fm-insigno intent="success"><fm-ikono slot="icon-start" name="check"></fm-ikono>success</fm-insigno>',
+    );
     expect(grid).toContain(
       '<fm-insigno intent="success" size="small">success · small<span slot="description">Beschreibung</span></fm-insigno>',
     );
@@ -852,7 +856,12 @@ describe("the Vitrino shows the pagxigilo and the spuro (Spec 015 ①)", () => {
   it("spuro: a row per emphasis, two links and the current page as text, the Vitrino's words (the Modelo's word names the landmark)", () => {
     const grid = datumoj.eroj.spuro ?? "";
     // Spec 036 Teil 5 ②b-2 (A-spuro-1): a row per emphasis.
-    expect((grid.match(/<fm-spuro /g) ?? []).length).toBe(2);
+    // Spec 036 Teil 5 ②b-3 (A-spuro-4): and the row „mit Icon“ per emphasis, the icon in the
+    // first item.
+    expect((grid.match(/<fm-spuro /g) ?? []).length).toBe(4);
+    expect(grid).toContain(
+      '<fm-spuro emphasis="low" page="3"><a href="#fm-vitrino-spuro" data-page="1"><fm-ikono slot="icon-start" name="check"></fm-ikono>Eins</a>',
+    );
     expect(grid).toContain(
       '<fm-spuro emphasis="medium" page="3"><a href="#fm-vitrino-spuro" data-page="1">Eins</a><a href="#fm-vitrino-spuro" data-page="2">Zwei</a><span data-page="3">Drei</span></fm-spuro>',
     );

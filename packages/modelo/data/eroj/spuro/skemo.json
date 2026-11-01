@@ -44,6 +44,10 @@
           "key": "current",
           "equals": "page"
         }
+      },
+      {
+        "name": "icon-start",
+        "decorative": true
       }
     ],
     "parts": {
@@ -62,6 +66,9 @@
           "by": [
             "current"
           ]
+        },
+        "gap": {
+          "fixed": "spacing.xsmall"
         }
       },
       "underline": {
@@ -99,6 +106,11 @@
         },
         "color": {
           "fixed": "color.focus.inner"
+        }
+      },
+      "icon": {
+        "size": {
+          "fixed": "size.icon.small"
         }
       }
     },

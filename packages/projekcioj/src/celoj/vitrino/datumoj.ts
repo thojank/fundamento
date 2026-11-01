@@ -1412,6 +1412,7 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
   // Spec 036 Teil 5 ②b-3 (A-navigado-1, A-navigado-4): a navigation shows its items with the icon
   // in their links (slot icon-start) and in sections under a heading, standing vertically.
   const sectioned = entry.skemo.parts["section-heading"] !== undefined;
+  const trail = role === "navigation" && entry.skemo.parts.separator !== undefined;
   const withIcon =
     icon === ""
       ? ""
@@ -1429,6 +1430,12 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
                 .map(([key, value]) => ` ${key}="${value}"`)
                 .join("");
               const label = vitrinoLabelOf(combination) || VITRINO_WITH_ICON;
+              // Spec 036 Teil 5 ②b-3 (A-spuro-4): a breadcrumb shows its items, the icon in the
+              // first one (slot icon-start), the current page the last.
+              if (trail) {
+                const items = optionTexts(entry).replace(/^(<a [^>]*>)/, `$1${icon}`);
+                return `<${tag}${attributes}${required}${chosen}>${items}</${tag}>`;
+              }
               return `<${tag}${attributes}${required}>${icon}${label}</${tag}>`;
             })
             .join(" ")}</td></tr>`;

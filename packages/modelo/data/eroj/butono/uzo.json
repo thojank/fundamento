@@ -4,7 +4,7 @@
     "id": "uzo_01M4RPK0VYYXNCF41ME86Q4Z8P",
     "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5",
     "skemo": "ske_01M2XN0PWS92GP7VFHW161EH0D",
-    "purpose": "Starts an action on the current view: it saves, sends, confirms, cancels or deletes something here.",
+    "purpose": "Starts an action on the current view: it saves, sends, confirms, cancels or deletes something here; icon-end may hold an insigno, a count.",
     "instead": [
       {
         "goal": "toggle",
@@ -202,7 +202,8 @@
       "icon-end": {
         "accepts": [
           "icon",
-          "ikono"
+          "ikono",
+          "insigno"
         ],
         "max": 1,
         "nesting": 0

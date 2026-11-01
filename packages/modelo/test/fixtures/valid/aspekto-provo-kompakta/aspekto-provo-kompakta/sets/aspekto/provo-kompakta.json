@@ -5868,6 +5868,10 @@
         "radius": {
           "$type": "dimension",
           "$value": "{radius.role.pill}"
+        },
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.xsmall}"
         }
       }
     },
@@ -9896,6 +9900,10 @@
               "$value": "{font.weight.semibold}"
             }
           }
+        },
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.xsmall}"
         }
       },
       "underline": {
@@ -9942,6 +9950,12 @@
             "$type": "color",
             "$value": "{color.focus.inner}"
           }
+        }
+      },
+      "icon": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
         }
       }
     },
