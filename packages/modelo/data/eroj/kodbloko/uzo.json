@@ -4,7 +4,7 @@
     "id": "uzo_01M5D5JMAGCDCBH8FJJNN0DMKG",
     "ero": "ero_01M5D5JKHFX2EFVCS08CFE8DS5",
     "skemo": "ske_01M5D5JKXYZ7F3VJCPGRYJ8RX1",
-    "purpose": "Shows a command or a place in a file as code a person can read, select and copy: named by its caption, never cut off — a long line scrolls.",
+    "purpose": "Shows a command or a place in a file as code a person can read, select and copy: named by its caption, never cut off — a long line scrolls or wraps; line numbers, highlighted lines and colours by kind of word help to read it, never alone carry what it says.",
     "instead": [
       {
         "goal": "inline-code",
@@ -25,15 +25,6 @@
           "de": ["diff", "zeilenvergleich"]
         },
         "kialo": "A comparison of two versions line by line is no code block, because every line says what changed with a mark and a word; it stays with the application until a second one needs it."
-      },
-      {
-        "case": "syntax-highlighting",
-        "action": "not-supported",
-        "keywords": {
-          "en": ["syntax-highlighting"],
-          "de": ["syntaxhervorhebung"]
-        },
-        "kialo": "Colours per kind of word are not supported, because a colour names no word (WCAG 1.4.1) and every language would need a grammar; the code stands in one colour."
       }
     ],
     "composes": {

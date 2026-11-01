@@ -712,6 +712,41 @@
       "foreground": "color.syntax.comment",
       "background": "color.background.default",
       "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BECJQY5E4XWMB9PVAPDZJD",
+      "name": "syntax-keyword-on-background-raised",
+      "foreground": "color.syntax.keyword",
+      "background": "color.background.raised",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BECJQZHQ79BBKYTWH7VMQW",
+      "name": "syntax-name-on-background-raised",
+      "foreground": "color.syntax.name",
+      "background": "color.background.raised",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BECJQZHQ79BBKYTWH7VMQX",
+      "name": "syntax-string-on-background-raised",
+      "foreground": "color.syntax.string",
+      "background": "color.background.raised",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BECJQZHQ79BBKYTWH7VMQY",
+      "name": "syntax-number-on-background-raised",
+      "foreground": "color.syntax.number",
+      "background": "color.background.raised",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BECJQZHQ79BBKYTWH7VMQZ",
+      "name": "syntax-comment-on-background-raised",
+      "foreground": "color.syntax.comment",
+      "background": "color.background.raised",
+      "kategorio": "text-normal"
     }
   ]
 }

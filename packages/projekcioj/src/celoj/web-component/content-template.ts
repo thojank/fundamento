@@ -7,10 +7,12 @@
  * The shadow markup of a code block: the platform's figure, named by its caption (figcaption);
  * the content in pre and code, in a region that scrolls along the line and takes the focus, so a
  * keyboard can scroll it; the copy button (a butono of low emphasis, shown with copyable); the
- * polite live region that says the copy.
+ * polite live region that says the copy. Spec 036 ②b-5 (A-kodbloko-1/4, ①-2): the language beside
+ * the caption, hidden without one; a second code the block builds its lines into – numbered,
+ * highlighted, coloured by kind – shown instead of the slot while one of them is asked for.
  */
 export function codeblockMarkup(): string {
-  return '<figure part="control"><figcaption part="legend" id="caption"><slot name="caption"></slot></figcaption><div part="region" role="region" tabindex="0" aria-labelledby="caption"><pre part="text"><code><slot></slot></code></pre></div><fm-butono part="copy" emphasis="low" size="small" hidden></fm-butono><span part="announce" class="fm-hidden" role="status" aria-live="polite"></span><span id="fm-texts" hidden></span></figure>';
+  return '<figure part="control"><figcaption part="legend" id="caption"><slot name="caption"></slot><span part="language" hidden></span></figcaption><div part="region" role="region" tabindex="0" aria-labelledby="caption"><pre part="text"><code><slot></slot></code><code class="fm-lines" hidden></code></pre></div><fm-butono part="copy" emphasis="low" size="small" hidden></fm-butono><span part="announce" class="fm-hidden" role="status" aria-live="polite"></span><span id="fm-texts" hidden></span></figure>';
 }
 
 /**
@@ -23,8 +25,12 @@ export function markdownMarkup(): string {
   return '<div part="control"><slot data-fm-own></slot></div><span id="fm-texts" hidden></span>';
 }
 
-/** The copy of a code block: on a click of its button. */
+/**
+ * The copy of a code block: on a click of its button; its lines follow a change of its content
+ * (Spec 036 ②b-5).
+ */
 export const codeblockInit = `    root.querySelector('[part="copy"]')?.addEventListener("click", () => this.#copy());
+    root.querySelector("slot:not([name])")?.addEventListener("slotchange", () => this.#codeView());
 `;
 
 /** The render of a code block: the button shows with copyable, named in the document's language. */
@@ -39,6 +45,7 @@ export const codeblockRender = `    const copy = this.shadowRoot?.querySelector(
       const word = !copyable || words === undefined ? "" : (words[this.#lingvo()] ?? words.en ?? "");
       if (copy.textContent !== word) copy.textContent = word;
     }
+    this.#codeView();
 `;
 
 /** The ways of a code block: copying its content and saying so. */
@@ -52,6 +59,139 @@ export const codeblockMethods = `
           .map((node) => node.textContent ?? "")
           .join("")
       : "";
+  }
+
+  /** Spec 036 ②b-5: what the lines were built from, so a render that changes nothing builds nothing. */
+  #codeKey = "";
+
+  /**
+   * Spec 036 ②b-5 (A-kodbloko-1/4/6, ①-2): the language beside the caption; wrap on the control;
+   * with line-numbers, highlight or a language the block knows, the content as lines – each with
+   * its number (heard by no one, copied by no one), highlighted where highlight names it, its words
+   * in the parts of their kind – instead of the slot. Built with createElement and textContent.
+   */
+  #codeView(): void {
+    const root = this.shadowRoot;
+    if (root === null) return;
+    const given = this.propValue("language");
+    const language = typeof given === "string" ? given.trim() : "";
+    const label = root.querySelector('[part="language"]');
+    if (label instanceof HTMLElement) {
+      if (label.textContent !== language) label.textContent = language;
+      if (label.hidden !== (language === "")) label.hidden = language === "";
+    }
+    root.querySelector('[part="legend"]')?.toggleAttribute("data-language", language !== "");
+    root.querySelector('[part="control"]')?.toggleAttribute("data-wrap", this.propValue("wrap") === true);
+    const numbered = this.propValue("line-numbers") === true;
+    const marked = this.#markedLines();
+    const grammar = SYNTAX_GRAMMARS[SYNTAX_ALIASES[language.toLowerCase()] ?? ""];
+    const plain = root.querySelector("pre > code:not(.fm-lines)");
+    const view = root.querySelector("code.fm-lines");
+    if (!(plain instanceof HTMLElement) || !(view instanceof HTMLElement)) return;
+    const shown = numbered || marked.size > 0 || grammar !== undefined;
+    if (plain.hidden !== shown) plain.hidden = shown;
+    if (view.hidden !== !shown) view.hidden = !shown;
+    const text = shown ? this.#content() : "";
+    const key = JSON.stringify([shown, numbered, [...marked], language, text]);
+    if (key === this.#codeKey) return;
+    this.#codeKey = key;
+    if (!shown) {
+      view.replaceChildren();
+      return;
+    }
+    const words = grammar === undefined ? [{ kind: "", text }] : this.#syntaxWords(text, grammar);
+    const lines: { kind: string; text: string }[][] = [[]];
+    for (const word of words) {
+      word.text.split("\\n").forEach((piece, index) => {
+        if (index > 0) lines.push([]);
+        if (piece !== "") lines[lines.length - 1]?.push({ kind: word.kind, text: piece });
+      });
+    }
+    // A final line break ends the last line; it starts no empty one.
+    if (lines.length > 1 && text.endsWith("\\n")) lines.pop();
+    const digits = String(lines.length).length;
+    view.replaceChildren(
+      ...lines.map((line, index) => {
+        const row = document.createElement("span");
+        row.dataset.line = String(index + 1);
+        if (marked.has(index + 1)) row.setAttribute("part", "highlight");
+        if (numbered) {
+          const number = document.createElement("span");
+          number.setAttribute("part", "line-number");
+          number.setAttribute("aria-hidden", "true");
+          // Right-aligned in the code's own figures: padded to the widest number.
+          number.textContent = String(index + 1).padStart(digits, " ");
+          row.append(number);
+        }
+        const code = document.createElement("span");
+        code.className = "fm-code";
+        for (const word of line) {
+          if (word.kind === "") {
+            code.append(word.text);
+            continue;
+          }
+          const span = document.createElement("span");
+          span.setAttribute("part", word.kind);
+          span.textContent = word.text;
+          code.append(span);
+        }
+        // The line break keeps an empty line one line high; the code itself stays as written.
+        row.append(code, "\\n");
+        return row;
+      }),
+    );
+  }
+
+  /** Spec 036 ②b-5 (A-kodbloko-4): the lines highlight names – numbers and ranges from 1. */
+  #markedLines(): Set<number> {
+    const marked = new Set<number>();
+    const given = this.propValue("highlight");
+    if (typeof given !== "string") return marked;
+    for (const piece of given.split(",")) {
+      const [from, to] = piece.split("-").map((part) => Number.parseInt(part.trim(), 10));
+      if (from === undefined || !Number.isInteger(from) || from < 1) continue;
+      const last = to !== undefined && Number.isInteger(to) && to >= from ? to : from;
+      for (let line = from; line <= Math.min(last, from + 9999); line += 1) marked.add(line);
+    }
+    return marked;
+  }
+
+  /**
+   * Spec 036 ②b-5 (①-2): the words of a text by kind. At every position the first pattern of the
+   * grammar that matches takes the word; a match of kind "" and a character no pattern takes stay
+   * plain text.
+   */
+  #syntaxWords(
+    text: string,
+    grammar: readonly (readonly [string, string])[],
+  ): { kind: string; text: string }[] {
+    const rules = grammar.map(([kind, source]) => [kind, new RegExp(source, "y")] as const);
+    const words: { kind: string; text: string }[] = [];
+    let plain = "";
+    let index = 0;
+    while (index < text.length) {
+      let hit: { kind: string; text: string } | undefined;
+      for (const [kind, pattern] of rules) {
+        pattern.lastIndex = index;
+        const found = pattern.exec(text)?.[0];
+        if (found !== undefined && found !== "") {
+          hit = { kind, text: found };
+          break;
+        }
+      }
+      if (hit === undefined || hit.kind === "") {
+        const taken = hit?.text ?? text.charAt(index);
+        plain += taken;
+        index += taken.length;
+        continue;
+      }
+      if (plain !== "") words.push({ kind: "", text: plain });
+      plain = "";
+      words.push(hit);
+      index += hit.text.length;
+    }
+    if (plain !== "") words.push({ kind: "", text: plain });
+    return words;
   }
 
   /** Copies the content; the live region says it, in the document's language. */

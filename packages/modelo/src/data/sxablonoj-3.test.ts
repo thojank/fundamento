@@ -24,8 +24,13 @@ describe("the Eroj of Spec 020 ③", () => {
     const skemo = ero("kodbloko")?.skemo;
     expect(skemo?.a11y.role).toBe("figure");
     expect(skemo?.a11y.name).toEqual(["slot:caption"]);
+    // Spec 036 Teil 5 ②b-5 (A-kodbloko-1): copyable stays first; four props follow it.
     expect(skemo?.props.map((prop) => [prop.name, prop.kind, prop.default])).toEqual([
       ["copyable", "boolean", false],
+      ["line-numbers", "boolean", false],
+      ["wrap", "boolean", false],
+      ["language", "string", undefined],
+      ["highlight", "string", undefined],
     ]);
     expect(skemo?.slots.map((slot) => slot.name)).toEqual(["label", "caption"]);
     expect(skemo?.a11y.texts?.copyable).toEqual({ de: "Kopieren", en: "Copy" });

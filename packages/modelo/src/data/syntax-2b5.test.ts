@@ -1,7 +1,8 @@
 // Spec 036 Teil 5 ②b-5 (Spec 029 ①-2, O-2): colours for the kinds of words in a code block. Five
 // roles color.syntax.* – keyword, name, string, number, comment – alias steps of the brand's own
 // palettes (clean room: no value of another system), each a foreground with a declared KontrastParo
-// on the code block's ground (background.sunken) and on a highlighted line (background.default).
+// on the code block's ground (background.sunken; komuna's block lies on background.raised, from
+// the Fonto) and on a highlighted line (background.default).
 // Every Aspekto assigns them; the binding WCAG check measures every pair in every brand.
 
 import { fileURLToPath } from "node:url";
@@ -13,7 +14,7 @@ import { defaultModeloSource } from "../load/source.js";
 
 const repoRoot = fileURLToPath(new URL("../../../../", import.meta.url));
 const KINDS = ["keyword", "name", "string", "number", "comment"] as const;
-const GROUNDS = ["background-sunken", "background-default"] as const;
+const GROUNDS = ["background-sunken", "background-raised", "background-default"] as const;
 
 const { modelo } = loadModelo(defaultModeloSource());
 const core = modelo?.setoj.find((set) => set.name === CORE_SET_NAME)?.tokens ?? {};

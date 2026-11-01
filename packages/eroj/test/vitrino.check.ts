@@ -225,8 +225,8 @@ test("the contrast table shows WCAG, APCA and the change against the comparison 
     // surface and the label colour of rest), so the pairs of readonly are those of rest, advisory
     // where they miss the APCA band (8586 → 8694; all 144 combinations 14166 → 14184). Spec 036
     // Teil 5 ②b-5 (①-2): ten pairs of the syntax colours, every WCAG threshold holds, advisory where
-    // they miss the APCA band (8694 → 9126).
-    "In den 72 Kombinationen des Vergleichsstands: 9126 gegen 1296 (Veränderung +7830)",
+    // they miss the APCA band (8694 → 9126); five more on komuna's raised code block (9126 → 9288).
+    "In den 72 Kombinationen des Vergleichsstands: 9288 gegen 1296 (Veränderung +7992)",
   );
 });
 
