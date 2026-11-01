@@ -79,21 +79,6 @@
         "ero": "listelektilo"
       },
       {
-        "case": "grouped-options",
-        "action": "ask-human",
-        "keywords": {
-          "en": [
-            "optgroup",
-            "grouped"
-          ],
-          "de": [
-            "gruppiert",
-            "optionsgruppen"
-          ]
-        },
-        "kialo": "Options under headings in one list are a choice of a person, because a heading is no option and the grouping changes what the list says; Fundamento has no such Ero yet."
-      },
-      {
         "case": "no-visible-label",
         "action": "not-supported",
         "via": {

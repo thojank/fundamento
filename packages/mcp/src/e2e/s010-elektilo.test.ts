@@ -272,7 +272,7 @@ describe("list_eroj and the brief (acceptance 1, 7)", () => {
     ]);
     expect(brief.boundary?.map((entry) => [entry.case, entry.action])).toEqual([
       ["custom-popup", "use-instead"],
-      ["grouped-options", "ask-human"],
+      // Spec 036 Teil 5 ②b-4: grouped-options is decided (②a-3; the groups came with ②b-3).
       ["no-visible-label", "not-supported"],
     ]);
     const bytes = Buffer.byteLength(JSON.stringify(brief), "utf8");

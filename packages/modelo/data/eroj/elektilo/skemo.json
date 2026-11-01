@@ -711,14 +711,18 @@
             "select",
             "country",
             "language",
-            "many"
+            "many",
+            "optgroup",
+            "grouped"
           ],
           "de": [
             "liste",
             "auswählen",
             "land",
             "sprache",
-            "vielen"
+            "vielen",
+            "gruppiert",
+            "optionsgruppen"
           ]
         },
         "props": {},
