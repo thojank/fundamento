@@ -486,6 +486,13 @@ export const VITRINO_SHORT_COMMAND = "pnpm fm mcp";
 const VITRINO_COMMAND =
   "arkitekturo check --project standards --dir /home/arkitekturo/projekte/standards --format json";
 
+/**
+ * Spec 036 Teil 5 ②b-5 (A-kodbloko-1/4, ①-2): the Agordo of a brand as JSON, numbered, its third
+ * line highlighted – the words by kind in the colours of the brand.
+ */
+const VITRINO_CODE_JSON =
+  '{\n  "name": "provo",\n  "lingvo": "de",\n  "form": { "radius": 2 },\n  "pille": false\n}';
+
 /** The summary of the Vitrino's disclosure (Spec 014 ⑤); Figma shows the same word. */
 export const VITRINO_SUMMARY_TEXT = "Lieferbedingungen";
 
@@ -1130,9 +1137,23 @@ function additionRows(entry: LoadedEro, tag: string, menuItems = ""): string {
       );
     // Spec 020 ③: a command longer than the cell, so the region scrolls; with copyable.
     case "kodbloko":
-      return row(
-        "lange Zeile",
-        `<${tag} copyable><span slot="caption">${VITRINO_SLOT_TEXTS.caption ?? ""}</span>${VITRINO_COMMAND}</${tag}>`,
+      return (
+        row(
+          "lange Zeile",
+          `<${tag} copyable><span slot="caption">${VITRINO_SLOT_TEXTS.caption ?? ""}</span>${VITRINO_COMMAND}</${tag}>`,
+        ) +
+        // Spec 036 Teil 5 ②b-5 (A-kodbloko-1/4/6, ①-2): numbered, a line highlighted, the language
+        // named and its words coloured by kind; a long line that wraps.
+        (entry.skemo.props.some((prop) => prop.name === "language")
+          ? row(
+              "Zeilennummern, Sprache, hervorgehoben",
+              `<${tag} line-numbers language="json" highlight="3"><span slot="caption">Agordo</span>${VITRINO_CODE_JSON}</${tag}>`,
+            ) +
+            row(
+              "umbrechend",
+              `<${tag} wrap language="Shell"><span slot="caption">${VITRINO_SLOT_TEXTS.caption ?? ""}</span>${VITRINO_COMMAND}</${tag}>`,
+            )
+          : "")
       );
     case "teksto":
       return row(

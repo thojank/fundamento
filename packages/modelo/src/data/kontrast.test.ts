@@ -25,12 +25,12 @@ describe("KontrastParoj of the repo (D-12, data-model §4)", () => {
     // Spec 011 ③ added four text pairs on the weak status surfaces, ④ three ui pairs of the
     // strong status colours on the sunken track of the meter (83). Spec 036 Befund 2.2 (V-2): four
     // pairs of the roles of the Zweitfarbe (93); the range is a plausibility pin, no threshold.
-    // Spec 036 Teil 5 ②b-5 (①-2): the ten pairs of the syntax colours are counted on their own
-    // (syntax-2b5.test.ts: five kinds on two grounds); the bound holds for every other pair.
+    // Spec 036 Teil 5 ②b-5 (①-2): the fifteen pairs of the syntax colours are counted on their own
+    // (syntax-2b5.test.ts: five kinds on three grounds); the bound holds for every other pair.
     const others = modelo.kontrastParoj.filter((pair) => !pair.name.startsWith("syntax-"));
     expect(others.length).toBeGreaterThanOrEqual(55);
     expect(others.length).toBeLessThanOrEqual(100);
-    expect(modelo.kontrastParoj.length - others.length).toBe(10);
+    expect(modelo.kontrastParoj.length - others.length).toBe(15);
   });
 
   it("covers status text on the weak and subtle status surfaces (K5)", () => {

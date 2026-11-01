@@ -16,6 +16,7 @@ import {
   markdownMethods,
   markdownRender,
 } from "./content-template.js";
+import { syntaxConstants } from "./syntax.js";
 
 /**
  * The native control an a11y role is rendered as (Celo knowledge, Art. VIII). `toggle` is a
@@ -6404,7 +6405,7 @@ const VALUED_TEXTS = PROPS.filter((prop) => prop.kind === "enum").flatMap((prop)
 );
 /** The keys the Skemo names (Space, Enter): a toggle turns with these alone (Spec 010 ②). */
 const KEYS = SKEMO.a11y.keys as readonly string[];${isMenu || isListy ? "\n/** Spec 036 ②b-4: the pause after which typed characters start new words (APG typeahead). */\nconst TYPE_AHEAD_PAUSE = 500;" : ""}${isDialog ? '\n/** The inputs Enter does not confirm from (Nachlese 7 ② B-7): no one-line text. */\nconst NOT_ONE_LINE: ReadonlySet<string> = new Set(["checkbox", "radio", "button", "submit", "reset", "file", "range", "color"]);' : ""}
-${
+${isCodeblock ? syntaxConstants() : ""}${
   isIcon
     ? `/** The names of the Ikonaro and whether each mirrors in right-to-left writing (Spec 014 ②). */
 const IKONARO: Readonly<Record<string, boolean>> = ${JSON.stringify(Object.fromEntries(ikonaro.map((entry) => [entry.name, entry.mirror === true])))};

@@ -4,7 +4,7 @@
     "id": "ero_01M5D5JKHFX2EFVCS08CFE8DS5",
     "name": "kodbloko",
     "skemo": "ske_01M5D5JKXYZ7F3VJCPGRYJ8RX1",
-    "description": "A code block: a command to run or a place in a file, named by its caption, its content as text in the code role that scrolls along the line instead of being cut; it can offer a button that copies the text and says so."
+    "description": "A code block: a command to run or a place in a file, named by its caption, its content as text in the code role that scrolls along the line instead of being cut, or wraps; it can number its lines, highlight some of them, name its language and colour the words of a language it knows by kind, and offer a button that copies the text and says so."
   },
   "skemo": {
     "id": "ske_01M5D5JKXYZ7F3VJCPGRYJ8RX1",
@@ -15,6 +15,28 @@
         "kind": "boolean",
         "default": false,
         "description": "Shows a button (a butono of low emphasis) named by a11y.texts.copyable that copies the content; after copying the block says so politely (a11y.texts announce-name)."
+      },
+      {
+        "name": "line-numbers",
+        "kind": "boolean",
+        "default": false,
+        "description": "Numbers the lines at their start (part line-number); the numbers are heard by no one and copied by no one."
+      },
+      {
+        "name": "wrap",
+        "kind": "boolean",
+        "default": false,
+        "description": "Breaks a long line at the edge of the block instead of letting it scroll; a command keeps its spaces."
+      },
+      {
+        "name": "language",
+        "kind": "string",
+        "description": "The language of the content, as text beside the caption (part language). For a language the block knows (javascript, typescript, json, shell, css, html, python and their short names) the words take their colour by kind (parts keyword, name, string, number, comment); any other language is named and stays in one colour."
+      },
+      {
+        "name": "highlight",
+        "kind": "string",
+        "description": "The lines to highlight (part highlight): numbers and ranges counted from 1, separated by commas, e.g. 2,4-6."
       }
     ],
     "states": ["rest", "focus"],
@@ -46,6 +68,34 @@
       },
       "announce": {
         "color": { "fixed": "color.text.subtle" }
+      },
+      "line-number": {
+        "color": { "fixed": "color.text.subtle" },
+        "gap": { "fixed": "spacing.small" }
+      },
+      "highlight": {
+        "fill": { "fixed": "color.background.default" },
+        "color": { "fixed": "color.border.strong" },
+        "width": { "fixed": "border.width.focus" }
+      },
+      "language": {
+        "typography": { "fixed": "typography.caption" },
+        "color": { "fixed": "color.text.subtle" }
+      },
+      "keyword": {
+        "color": { "fixed": "color.syntax.keyword" }
+      },
+      "name": {
+        "color": { "fixed": "color.syntax.name" }
+      },
+      "string": {
+        "color": { "fixed": "color.syntax.string" }
+      },
+      "number": {
+        "color": { "fixed": "color.syntax.number" }
+      },
+      "comment": {
+        "color": { "fixed": "color.syntax.comment" }
       }
     },
     "bindings": [],
@@ -71,8 +121,8 @@
       {
         "goal": "code-block",
         "keywords": {
-          "en": ["code-block", "codeblock", "snippet", "source-excerpt"],
-          "de": ["codeblock", "quelltext", "fundstelle", "codeausschnitt"]
+          "en": ["code-block", "codeblock", "snippet", "source-excerpt", "syntax-highlighting", "highlighted-code", "line-numbers"],
+          "de": ["codeblock", "quelltext", "fundstelle", "codeausschnitt", "syntaxhervorhebung", "hervorgehobener-code", "zeilennummern"]
         },
         "props": {}
       }

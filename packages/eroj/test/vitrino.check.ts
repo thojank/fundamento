@@ -234,8 +234,9 @@ test("the contrast table shows WCAG, APCA and the change against the comparison 
     // Befund 2.2 (V-2): the four pairs of the Zweitfarbe's roles, advisory where they miss the APCA
     // band (8694 → 8820: badge 54, illustration 36, highlight surface 18, chart 18; every WCAG
     // threshold holds, the lowest 4.8:1). Spec 036 Teil 5 ②b-5 (①-2): ten pairs of the syntax
-    // colours, every WCAG threshold holds, advisory where they miss the APCA band (+432, 8820 → 9252).
-    "In den 72 Kombinationen des Vergleichsstands: 9252 gegen 1296 (Veränderung +7956)",
+    // colours, every WCAG threshold holds, advisory where they miss the APCA band (+432, 8820 → 9252);
+    // five more on komuna's raised code block (+162, 9252 → 9414).
+    "In den 72 Kombinationen des Vergleichsstands: 9414 gegen 1296 (Veränderung +8118)",
   );
 });
 

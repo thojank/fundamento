@@ -238,6 +238,17 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   // Spec 036 Teil 5 ②b-4 (A-spuro-6): the menu of the hidden levels stands only with max-items and
   // a longer trail; the set shows the trail without it.
   "spuro:more": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  // Spec 036 Teil 5 ②b-5 (A-kodbloko-1/4/6, ①-2): the numbers, a highlighted line, the language
+  // and the words by kind stand with line-numbers, highlight and language only; the set shows the
+  // block without them, its code in one colour.
+  "kodbloko:line-number": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  "kodbloko:highlight": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  "kodbloko:language": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  "kodbloko:keyword": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  "kodbloko:name": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  "kodbloko:string": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  "kodbloko:number": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  "kodbloko:comment": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
   // A-navigado-1, A-navigado-4: the heading of a section and the icon of an item stand with the
   // headings and icons a navigation holds.
   "navigado:section-heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",

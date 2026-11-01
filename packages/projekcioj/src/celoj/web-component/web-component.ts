@@ -456,11 +456,26 @@ const cardStructure: string = [
  */
 export const isCodeblock = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "codeblock";
 
+/**
+ * Spec 036 Teil 5 ②b-5 (A-kodbloko-4, ①-2): the parts of the lines the block builds – the number,
+ * a highlighted line, the words by kind – stand on elements that may carry more than one name.
+ */
+const CODEBLOCK_LINE_PARTS: ReadonlySet<string> = new Set([
+  "line-number",
+  "highlight",
+  "keyword",
+  "name",
+  "string",
+  "number",
+  "comment",
+]);
+
 function codeblockPartSelector(part: string, data: string): string {
   const root = `[part="control"]${data}`;
-  if (part === "text" || part === "legend" || part === "announce") {
+  if (part === "text" || part === "legend" || part === "announce" || part === "language") {
     return `:where(${root}) [part="${part}"]`;
   }
+  if (CODEBLOCK_LINE_PARTS.has(part)) return `:where(${root}) [part~="${part}"]`;
   if (part === "scroll-ring") return `:where(${root}) [part="region"]:focus-visible`;
   return `:where(${root})`;
 }
@@ -470,6 +485,10 @@ function codeblockPartSelector(part: string, data: string): string {
  * of its container; the figure a column; the region scrolls along the line and never wraps it
  * (a command keeps its spaces), the pre and the code without the platform's margin and font; the
  * copy button at the start, shown with copyable; the live region clipped from sight.
+ * Spec 036 Teil 5 ②b-5 (A-kodbloko-1/4): with a language the caption and the language stand at
+ * the two ends of the legend, at the figure's gap; wrap breaks the lines at the edge; the lines
+ * the block builds are the rows of a grid as wide as the widest line (a highlighted line is marked
+ * across the whole scroll width), each a row of its number (never selected) and its code.
  */
 const codeblockStructure = (): string =>
   [
@@ -480,6 +499,14 @@ const codeblockStructure = (): string =>
     ':where([part="text"]) > code { font: inherit; }',
     ':where([part="copy"]) { align-self: flex-start; }',
     ':where([part="copy"][hidden]) { display: none; }',
+    ':where([part="legend"][data-language]) { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: inherit; }',
+    ':where([part="language"][hidden], [part="text"] > code[hidden]) { display: none; }',
+    ':where([part="control"][data-wrap]) [part="text"] { white-space: pre-wrap; overflow-wrap: anywhere; }',
+    ':where([part="text"]) > code.fm-lines { display: grid; }',
+    ':where([part="control"][data-wrap]) [part="text"] > code.fm-lines { grid-template-columns: minmax(0, 1fr); }',
+    ":where(code.fm-lines) > [data-line] { display: flex; }",
+    ':where(code.fm-lines) [part~="line-number"] { flex: none; user-select: none; }',
+    ":where(code.fm-lines) .fm-code { flex: 1 1 auto; min-inline-size: 0; }",
     HIDDEN_TEXT,
   ].join("\n");
 
@@ -991,6 +1018,21 @@ function declarations(
   // side; the scroll ring's colour fills the gap between region and ring, as a focus ring's.
   if (isCodeblock(skemo) && part === "box" && property === "inline-padding") {
     return [`padding: ${variable(token)};`];
+  }
+  // Spec 036 Teil 5 ②b-5 (A-kodbloko-4): the room after a line number is its end padding; the mark
+  // of a highlighted line an inset line at its start, in the bound width and colour – it takes no
+  // room, so a highlighted line's code stands where the others' does (code reads left to right).
+  if (isCodeblock(skemo) && part === "line-number" && property === "gap") {
+    return [`padding-inline-end: ${variable(token)};`];
+  }
+  if (isCodeblock(skemo) && part === "highlight" && property === "width") return [];
+  if (isCodeblock(skemo) && part === "highlight" && property === "color") {
+    const width = fixedToken(skemo.parts[part]?.width);
+    return width === undefined
+      ? []
+      : [
+          `box-shadow: inset ${variable(named(owner, skemo, part, "width", {}, width))} 0 0 0 ${variable(token)};`,
+        ];
   }
   if (isCodeblock(skemo) && part === "scroll-ring" && property === "color") {
     const offset = offsetOf(owner, skemo, part);

@@ -4,8 +4,8 @@
   "summary": {
     "exportable": true,
     "pairs": {
-      "measured": 7416,
-      "passed": 7416,
+      "measured": 7776,
+      "passed": 7776,
       "failed": 0
     },
     "violations": {
@@ -13,7 +13,7 @@
       "adjustable": 0,
       "covered": 0
     },
-    "hints": 168
+    "hints": 178
   },
   "checks": [
     {
@@ -5529,6 +5529,66 @@
       }
     },
     {
+      "pair": "syntax-comment-on-background-raised",
+      "kategorio": "text-normal",
+      "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=dark,contrast=default,motion=default",
+      "combinations": 18,
+      "value": 5.8146,
+      "threshold": 4.5,
+      "passed": true,
+      "branch": "main",
+      "apca": {
+        "value": 58.37,
+        "threshold": 75,
+        "passed": false
+      }
+    },
+    {
+      "pair": "syntax-comment-on-background-raised",
+      "kategorio": "text-normal",
+      "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default",
+      "combinations": 18,
+      "value": 7.2271,
+      "threshold": 4.5,
+      "passed": true,
+      "branch": "main",
+      "apca": {
+        "value": 82,
+        "threshold": 75,
+        "passed": true
+      }
+    },
+    {
+      "pair": "syntax-comment-on-background-raised",
+      "kategorio": "text-normal",
+      "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=dark,contrast=high,motion=default",
+      "combinations": 18,
+      "value": 8.2891,
+      "threshold": 7,
+      "passed": true,
+      "branch": "main",
+      "apca": {
+        "value": 72.75,
+        "threshold": 90,
+        "passed": false
+      }
+    },
+    {
+      "pair": "syntax-comment-on-background-raised",
+      "kategorio": "text-normal",
+      "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=light,contrast=high,motion=default",
+      "combinations": 18,
+      "value": 13.5758,
+      "threshold": 7,
+      "passed": true,
+      "branch": "main",
+      "apca": {
+        "value": 96.41,
+        "threshold": 90,
+        "passed": true
+      }
+    },
+    {
       "pair": "syntax-comment-on-background-sunken",
       "kategorio": "text-normal",
       "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default",
@@ -5644,6 +5704,66 @@
       "branch": "main",
       "apca": {
         "value": 90.7,
+        "threshold": 90,
+        "passed": true
+      }
+    },
+    {
+      "pair": "syntax-keyword-on-background-raised",
+      "kategorio": "text-normal",
+      "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=dark,contrast=default,motion=default",
+      "combinations": 18,
+      "value": 5.5775,
+      "threshold": 4.5,
+      "passed": true,
+      "branch": "main",
+      "apca": {
+        "value": 56.39,
+        "threshold": 75,
+        "passed": false
+      }
+    },
+    {
+      "pair": "syntax-keyword-on-background-raised",
+      "kategorio": "text-normal",
+      "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=dark,contrast=high,motion=default",
+      "combinations": 18,
+      "value": 8.1065,
+      "threshold": 7,
+      "passed": true,
+      "branch": "main",
+      "apca": {
+        "value": 71.49,
+        "threshold": 90,
+        "passed": false
+      }
+    },
+    {
+      "pair": "syntax-keyword-on-background-raised",
+      "kategorio": "text-normal",
+      "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default",
+      "combinations": 18,
+      "value": 10.8333,
+      "threshold": 4.5,
+      "passed": true,
+      "branch": "main",
+      "apca": {
+        "value": 89.46,
+        "threshold": 75,
+        "passed": true
+      }
+    },
+    {
+      "pair": "syntax-keyword-on-background-raised",
+      "kategorio": "text-normal",
+      "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=light,contrast=high,motion=default",
+      "combinations": 18,
+      "value": 14.176,
+      "threshold": 7,
+      "passed": true,
+      "branch": "main",
+      "apca": {
+        "value": 95.61,
         "threshold": 90,
         "passed": true
       }
@@ -5769,6 +5889,66 @@
       }
     },
     {
+      "pair": "syntax-name-on-background-raised",
+      "kategorio": "text-normal",
+      "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=dark,contrast=default,motion=default",
+      "combinations": 18,
+      "value": 5.8833,
+      "threshold": 4.5,
+      "passed": true,
+      "branch": "main",
+      "apca": {
+        "value": 59.09,
+        "threshold": 75,
+        "passed": false
+      }
+    },
+    {
+      "pair": "syntax-name-on-background-raised",
+      "kategorio": "text-normal",
+      "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=dark,contrast=high,motion=default",
+      "combinations": 18,
+      "value": 8.3545,
+      "threshold": 7,
+      "passed": true,
+      "branch": "main",
+      "apca": {
+        "value": 73.26,
+        "threshold": 90,
+        "passed": false
+      }
+    },
+    {
+      "pair": "syntax-name-on-background-raised",
+      "kategorio": "text-normal",
+      "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default",
+      "combinations": 18,
+      "value": 10.095,
+      "threshold": 4.5,
+      "passed": true,
+      "branch": "main",
+      "apca": {
+        "value": 89.62,
+        "threshold": 75,
+        "passed": true
+      }
+    },
+    {
+      "pair": "syntax-name-on-background-raised",
+      "kategorio": "text-normal",
+      "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=light,contrast=high,motion=default",
+      "combinations": 18,
+      "value": 13.5882,
+      "threshold": 7,
+      "passed": true,
+      "branch": "main",
+      "apca": {
+        "value": 96.07,
+        "threshold": 90,
+        "passed": true
+      }
+    },
+    {
       "pair": "syntax-name-on-background-sunken",
       "kategorio": "text-normal",
       "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default",
@@ -5889,6 +6069,66 @@
       }
     },
     {
+      "pair": "syntax-number-on-background-raised",
+      "kategorio": "text-normal",
+      "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=dark,contrast=default,motion=default",
+      "combinations": 18,
+      "value": 5.7519,
+      "threshold": 4.5,
+      "passed": true,
+      "branch": "main",
+      "apca": {
+        "value": 57.9,
+        "threshold": 75,
+        "passed": false
+      }
+    },
+    {
+      "pair": "syntax-number-on-background-raised",
+      "kategorio": "text-normal",
+      "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=dark,contrast=high,motion=default",
+      "combinations": 18,
+      "value": 8.2425,
+      "threshold": 7,
+      "passed": true,
+      "branch": "main",
+      "apca": {
+        "value": 72.46,
+        "threshold": 90,
+        "passed": false
+      }
+    },
+    {
+      "pair": "syntax-number-on-background-raised",
+      "kategorio": "text-normal",
+      "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default",
+      "combinations": 18,
+      "value": 10.3054,
+      "threshold": 4.5,
+      "passed": true,
+      "branch": "main",
+      "apca": {
+        "value": 90.32,
+        "threshold": 75,
+        "passed": true
+      }
+    },
+    {
+      "pair": "syntax-number-on-background-raised",
+      "kategorio": "text-normal",
+      "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=light,contrast=high,motion=default",
+      "combinations": 18,
+      "value": 13.7632,
+      "threshold": 7,
+      "passed": true,
+      "branch": "main",
+      "apca": {
+        "value": 96.44,
+        "threshold": 90,
+        "passed": true
+      }
+    },
+    {
       "pair": "syntax-number-on-background-sunken",
       "kategorio": "text-normal",
       "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default",
@@ -6004,6 +6244,66 @@
       "branch": "main",
       "apca": {
         "value": 90.58,
+        "threshold": 90,
+        "passed": true
+      }
+    },
+    {
+      "pair": "syntax-string-on-background-raised",
+      "kategorio": "text-normal",
+      "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=dark,contrast=default,motion=default",
+      "combinations": 18,
+      "value": 6.0138,
+      "threshold": 4.5,
+      "passed": true,
+      "branch": "main",
+      "apca": {
+        "value": 60.27,
+        "threshold": 75,
+        "passed": false
+      }
+    },
+    {
+      "pair": "syntax-string-on-background-raised",
+      "kategorio": "text-normal",
+      "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=dark,contrast=high,motion=default",
+      "combinations": 18,
+      "value": 8.4619,
+      "threshold": 7,
+      "passed": true,
+      "branch": "main",
+      "apca": {
+        "value": 74.04,
+        "threshold": 90,
+        "passed": false
+      }
+    },
+    {
+      "pair": "syntax-string-on-background-raised",
+      "kategorio": "text-normal",
+      "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default",
+      "combinations": 18,
+      "value": 9.6539,
+      "threshold": 4.5,
+      "passed": true,
+      "branch": "main",
+      "apca": {
+        "value": 88.55,
+        "threshold": 75,
+        "passed": true
+      }
+    },
+    {
+      "pair": "syntax-string-on-background-raised",
+      "kategorio": "text-normal",
+      "combination": "aspekto=dukolora,viewport=compact,density=compact,color-scheme=light,contrast=high,motion=default",
+      "combinations": 18,
+      "value": 13.184,
+      "threshold": 7,
+      "passed": true,
+      "branch": "main",
+      "apca": {
+        "value": 95.5,
         "threshold": 90,
         "passed": true
       }
@@ -8043,6 +8343,36 @@
     },
     {
       "rule": "contrast-advisory",
+      "subject": "syntax-keyword-on-background-raised",
+      "message": "KontrastParo 'syntax-keyword-on-background-raised' (text-normal): color.syntax.keyword on color.background.raised has APCA lightness contrast Lc 56.3 below the threshold Lc 75 of contrast=default.",
+      "combinations": 18
+    },
+    {
+      "rule": "contrast-advisory",
+      "subject": "syntax-name-on-background-raised",
+      "message": "KontrastParo 'syntax-name-on-background-raised' (text-normal): color.syntax.name on color.background.raised has APCA lightness contrast Lc 59.0 below the threshold Lc 75 of contrast=default.",
+      "combinations": 18
+    },
+    {
+      "rule": "contrast-advisory",
+      "subject": "syntax-string-on-background-raised",
+      "message": "KontrastParo 'syntax-string-on-background-raised' (text-normal): color.syntax.string on color.background.raised has APCA lightness contrast Lc 60.2 below the threshold Lc 75 of contrast=default.",
+      "combinations": 18
+    },
+    {
+      "rule": "contrast-advisory",
+      "subject": "syntax-number-on-background-raised",
+      "message": "KontrastParo 'syntax-number-on-background-raised' (text-normal): color.syntax.number on color.background.raised has APCA lightness contrast Lc 57.8 below the threshold Lc 75 of contrast=default.",
+      "combinations": 18
+    },
+    {
+      "rule": "contrast-advisory",
+      "subject": "syntax-comment-on-background-raised",
+      "message": "KontrastParo 'syntax-comment-on-background-raised' (text-normal): color.syntax.comment on color.background.raised has APCA lightness contrast Lc 58.3 below the threshold Lc 75 of contrast=default.",
+      "combinations": 18
+    },
+    {
+      "rule": "contrast-advisory",
       "subject": "text-subtle-on-background-default",
       "message": "KontrastParo 'text-subtle-on-background-default' (text-normal): color.text.subtle on color.background.default has APCA lightness contrast Lc 87.0 below the threshold Lc 90 of contrast=high.",
       "combinations": 18
@@ -8381,6 +8711,36 @@
       "rule": "contrast-advisory",
       "subject": "syntax-comment-on-background-default",
       "message": "KontrastParo 'syntax-comment-on-background-default' (text-normal): color.syntax.comment on color.background.default has APCA lightness contrast Lc 74.9 below the threshold Lc 90 of contrast=high.",
+      "combinations": 18
+    },
+    {
+      "rule": "contrast-advisory",
+      "subject": "syntax-keyword-on-background-raised",
+      "message": "KontrastParo 'syntax-keyword-on-background-raised' (text-normal): color.syntax.keyword on color.background.raised has APCA lightness contrast Lc 71.4 below the threshold Lc 90 of contrast=high.",
+      "combinations": 18
+    },
+    {
+      "rule": "contrast-advisory",
+      "subject": "syntax-name-on-background-raised",
+      "message": "KontrastParo 'syntax-name-on-background-raised' (text-normal): color.syntax.name on color.background.raised has APCA lightness contrast Lc 73.2 below the threshold Lc 90 of contrast=high.",
+      "combinations": 18
+    },
+    {
+      "rule": "contrast-advisory",
+      "subject": "syntax-string-on-background-raised",
+      "message": "KontrastParo 'syntax-string-on-background-raised' (text-normal): color.syntax.string on color.background.raised has APCA lightness contrast Lc 74.0 below the threshold Lc 90 of contrast=high.",
+      "combinations": 18
+    },
+    {
+      "rule": "contrast-advisory",
+      "subject": "syntax-number-on-background-raised",
+      "message": "KontrastParo 'syntax-number-on-background-raised' (text-normal): color.syntax.number on color.background.raised has APCA lightness contrast Lc 72.4 below the threshold Lc 90 of contrast=high.",
+      "combinations": 18
+    },
+    {
+      "rule": "contrast-advisory",
+      "subject": "syntax-comment-on-background-raised",
+      "message": "KontrastParo 'syntax-comment-on-background-raised' (text-normal): color.syntax.comment on color.background.raised has APCA lightness contrast Lc 72.7 below the threshold Lc 90 of contrast=high.",
       "combinations": 18
     }
   ]

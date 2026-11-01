@@ -271,6 +271,13 @@ const REST_2B5 = (() => {
     { pattern: "^radius\\.role\\.tag$", added: 1 },
     // ①-2: the syntax colours, five kinds (5).
     { pattern: "^color\\.syntax\\.(keyword|name|string|number|comment)$", added: 5 },
+    // A-kodbloko-1/4/6: the line number (colour, room after it, 2), a highlighted line (fill, mark
+    // colour and width, 3), the language (typography, colour, 2), the words by kind (5).
+    {
+      pattern:
+        "^ero\\.kodbloko\\.(line\\.number\\.(color|gap)|highlight\\.(fill|color|width)|language\\.(typography|color)|(keyword|name|string|number|comment)\\.color)$",
+      added: 2 + 3 + 2 + 5,
+    },
   ];
   const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
   return {

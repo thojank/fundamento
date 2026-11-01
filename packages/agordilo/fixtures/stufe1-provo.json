@@ -28,7 +28,7 @@
   },
   "sha256": {
     "$themes.json": "32d20d206abf9b832c41c26c654fb33aef9694a5661ff89655091a4aae9931d3",
-    "aspekto.json": "e74eceeb851ebf5a549a852aca0a607469e1457385602f4279a729c1fc150ef4",
+    "aspekto.json": "04539a598e95181766d5b98c4c9dea705cf68ef230cd30bc6e638f8ec9d1a7a7",
     "ids.lock.json": "19279ae73d078332a67f90d7e401fa8878e9fc7794e8496809c133730e1e564e",
     "ikonoj/LICENSE": "ddbe6082ec3cf979db47e5af549d2849c5d6182b3e005ef91ce1dbb9eb122f11",
     "ikonoj/add.svg": "4baa2c668c8800442d47ab39d716e35142c125a9146efefa50f701e9622f2000",
@@ -56,9 +56,9 @@
     "ikonoj/success.svg": "9dad12b9422fa0917c97a728e2864deebf92a31eaf8787f6610b50f50031fdd6",
     "ikonoj/upload.svg": "58a3e265785ce61dd953378ceaef7740a7aa30d8a228e14ec17084895b01ec7c",
     "ikonoj/warning.svg": "a259c73cc10ebf602d378b0cbb84233867bfea183a7354e609ea4b274c5b869a",
-    "raporto.json": "64ea50aca46efed9e38468446e05960303109f67410e27f50aafd56290c45ccf",
-    "raporto.md": "720734a8aec74fcc8e0f600f424183073d66cc66c13256866d8fe9f3910854a1",
+    "raporto.json": "c04becc545c47932ca28e1d9ed439af4d1a3fc739eec2a1dc92148b53d8495a8",
+    "raporto.md": "112b16eeabb5f39df21055dee98ac61fc79966f39d1b80c249c3834b1ee60c31",
     "sets/aspekto/provo+color-scheme/dark.json": "db8e332442dbd12cb1136e1658907c78422b66cda6a63d8580ab75fe1cb93d68",
-    "sets/aspekto/provo.json": "f46b16c083a3e27438197acc4ae99ab2d112cf2aed3ed997f2dd29f59689e34c"
+    "sets/aspekto/provo.json": "e00a2c1a2973cb8cc68381a4a83758b8e75c55bb328b612896822e0a5a96a8e5"
   }
 }
