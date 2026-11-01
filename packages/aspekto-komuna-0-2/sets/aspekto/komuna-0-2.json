@@ -1134,6 +1134,9 @@
       },
       "pill": {
         "$value": "{radius.full}"
+      },
+      "tag": {
+        "$value": "{radius.small}"
       }
     }
   },
@@ -9405,7 +9408,7 @@
         },
         "radius": {
           "$type": "dimension",
-          "$value": "{radius.role.pill}"
+          "$value": "{radius.role.tag}"
         }
       },
       "motion": {

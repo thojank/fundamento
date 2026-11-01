@@ -2918,6 +2918,15 @@
             "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JV5"
           }
         }
+      },
+      "tag": {
+        "$value": "{radius.small}",
+        "$description": "Corner radius of tags a person picks or removes: bounded, so a tag differs from a pill-shaped status badge.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M6BCFMKBP2BP6YMQH8HRGKSY"
+          }
+        }
       }
     }
   },
@@ -21455,7 +21464,7 @@
         },
         "radius": {
           "$type": "dimension",
-          "$value": "{radius.small}",
+          "$value": "{radius.role.tag}",
           "$description": "signeto: box.radius (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
           "$extensions": {
             "com.ciferecigo.fundamento": {

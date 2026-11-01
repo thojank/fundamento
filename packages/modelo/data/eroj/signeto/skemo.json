@@ -136,7 +136,7 @@
           "fixed": "spacing.xsmall"
         },
         "radius": {
-          "fixed": "radius.role.pill"
+          "fixed": "radius.role.tag"
         }
       },
       "motion": {
