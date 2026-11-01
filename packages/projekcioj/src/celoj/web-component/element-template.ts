@@ -730,12 +730,21 @@ function lightMarkup(
   // A breadcrumb (Spec 015 ①, plan ① D-04): the nav landmark around an ordered list whose items
   // the element makes, one per link of the light DOM (manual slot assignment), a chevron between.
   if (breadcrumb) {
-    return '<nav part="list"><ol part="items"></ol></nav><slot hidden></slot><span id="fm-texts" hidden></span>';
+    // Spec 036 Teil 5 ②b-3 (A-spuro-4): the slot icon-start waits unseen until the element puts it
+    // into the first item (manual assignment).
+    const icon = slots.some((slot) => slot.name === "icon-start")
+      ? '<slot name="icon-start" hidden></slot>'
+      : "";
+    return `<nav part="list"><ol part="items"></ol></nav><slot hidden></slot>${icon}<span id="fm-texts" hidden></span>`;
   }
   // A navigation (Spec 011 ⑤, D-07): the nav landmark, named by the label prop in the render,
   // around the links of the default slot; the gap between the items is its own.
   if (role === "navigation") {
-    return '<nav part="list"><slot></slot></nav><span id="fm-texts" hidden></span>';
+    // Spec 036 Teil 5 ②b-3 (A-navigado-4): an icon given to the host stands before the items.
+    const icon = slots.some((slot) => slot.name === "icon-start")
+      ? '<slot name="icon-start"></slot>'
+      : "";
+    return `<nav part="list">${icon}<slot></slot></nav><span id="fm-texts" hidden></span>`;
   }
   const content = slots.find((slot) => slot.default !== true && slot.text !== true);
   const defaultSlot = slots.find((slot) => slot.default === true);
@@ -2544,7 +2553,10 @@ ${
     const list = this.shadowRoot?.querySelector('[part="items"]');
     if (!(list instanceof HTMLElement)) return;
     const items = [...this.children].filter((child) => child.getAttribute("slot") === null);
+    // Spec 036 Teil 5 ②b-3 (A-spuro-4): the slot icon-start leaves the items before they are made again.
+    const iconSlot = this.shadowRoot?.querySelector('slot[name="icon-start"]');
     if (list.children.length !== items.length) {
+      if (iconSlot instanceof HTMLSlotElement && list.contains(iconSlot)) this.shadowRoot?.append(iconSlot);
       list.replaceChildren();
       items.forEach((_item, index) => {
         list.insertAdjacentHTML("beforeend", ${JSON.stringify(BREADCRUMB_ENTRY)}.replace('name="item-"', 'name="item-' + index + '"'));
@@ -2552,7 +2564,7 @@ ${
     }
     items.forEach((item, index) => {
       const entry = list.children[index];
-      entry?.querySelector("slot")?.assign(item);
+      entry?.querySelector<HTMLSlotElement>('slot[name^="item-"]')?.assign(item);
       // A chevron stands between two levels only (Abnahme S-2): the last level, the current page,
       // has none. Removed, not hidden — the icon's own display would win over [hidden].
       const separator = entry?.querySelector('[part="separator"]');
@@ -2562,6 +2574,15 @@ ${
         entry?.insertAdjacentHTML("beforeend", ${JSON.stringify(BREADCRUMB_SEPARATOR)});
       }
     });
+    // Spec 036 Teil 5 ②b-3 (A-spuro-4): an icon given to the host (slot="icon-start") stands at the
+    // start of the first item, before its link; without items it waits unseen.
+    if (iconSlot instanceof HTMLSlotElement) {
+      const first = list.children[0];
+      if (first !== undefined && iconSlot.parentElement !== first) first.prepend(iconSlot);
+      if (first === undefined && list.contains(iconSlot)) this.shadowRoot?.append(iconSlot);
+      if (iconSlot.hidden !== (first === undefined)) iconSlot.hidden = first === undefined;
+      iconSlot.assign(...[...this.children].filter((child) => child.getAttribute("slot") === "icon-start"));
+    }
   }
 
   /** Writes what the Ero adds to the links (Spec 015 ①, D-04); every write first compares. */

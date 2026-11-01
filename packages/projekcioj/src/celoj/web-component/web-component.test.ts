@@ -1404,7 +1404,10 @@ describe("Web Component Celo for the navigado (Spec 011 ⑤)", () => {
   ) as string;
 
   it("renders a nav landmark around the slotted links, adopts the light stylesheet, marks the current page and composes the count", () => {
-    expect(element).toContain('<nav part="list"><slot></slot></nav>');
+    // Spec 036 Teil 5 ②b-3 (A-navigado-4): an icon given to the host stands before the links.
+    expect(element).toContain(
+      '<nav part="list"><slot name="icon-start"></slot><slot></slot></nav>',
+    );
     expect(element).toContain("document.adoptedStyleSheets");
     expect(element).toContain('setAttribute("aria-current", "page")');
     expect(element).toContain('setAttribute("aria-label"');

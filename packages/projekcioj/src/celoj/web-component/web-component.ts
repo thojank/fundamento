@@ -1379,6 +1379,18 @@ const meterStructure: string = [
  * plain frame. Everything else stands in the document's stylesheet (`lightStylesheetOf`).
  */
 /**
+ * Spec 036 Teil 5 ②b-3 (A-spuro-4): an icon given to the host stands in the first item before the
+ * link, as far from it as the icon in a link from its words (item.gap).
+ */
+function itemGapAfterIcon(skemo: Skemo, owner: string | undefined, selector: string): string[] {
+  const gap = fixedToken(skemo.parts.item?.gap);
+  if (gap === undefined) return [];
+  return [
+    `${selector} { margin-inline-end: ${variable(named(owner, skemo, "item", "gap", {}, gap))}; }`,
+  ];
+}
+
+/**
  * Spec 036 Teil 5 ②b-3 (A-atributlisto-4): the title of a list stands as far above it as two
  * entries stand apart (the list's gap); no title, no rule.
  */
@@ -1839,9 +1851,10 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
           return property === "height" ? item : undefined;
         case "focus-ring":
           return `${item}:focus-visible`;
-        // Spec 036 Teil 5 ②b-3 (A-spuro-4): the icon of an item stands in the item.
+        // Spec 036 Teil 5 ②b-3 (A-spuro-4): the icon of an item stands in the item, or is given to
+        // the host and stands at the start of the first item.
         case "icon":
-          return `${tag}${data} > * > [slot="icon-start"]`;
+          return `${tag}${data} > [slot="icon-start"], ${tag}${data} > * > [slot="icon-start"]`;
         default:
           return undefined;
       }
@@ -1854,7 +1867,7 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
         case "section-heading":
           return `${tag}${data} > :is(h2, h3, h4, h5, h6)`;
         case "icon":
-          return `${tag}${data} > a > [slot="icon-start"]`;
+          return `${tag}${data} > [slot="icon-start"], ${tag}${data} > a > [slot="icon-start"]`;
         case "item":
         case "items":
         case "underline":
@@ -2016,12 +2029,15 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
           // platform's margin, its words on one line; the icon of an item keeps its size.
           // Spec 036 Teil 5 ②b-3 (A-spuro-4): the icon of an item keeps its size.
           ...(breadcrumb && skemo.parts.icon !== undefined
-            ? [`${tag} > * > [slot="icon-start"] { flex: none; }`]
+            ? [
+                `${tag} > * > [slot="icon-start"], ${tag} > [slot="icon-start"] { flex: none; }`,
+                ...itemGapAfterIcon(skemo, owner, `${tag} > [slot="icon-start"]`),
+              ]
             : []),
           ...(nav && skemo.parts["section-heading"] !== undefined
             ? [
                 `${tag} > :is(h2, h3, h4, h5, h6) { margin: 0; white-space: nowrap; }`,
-                `${tag} > a > [slot="icon-start"] { flex: none; }`,
+                `${tag} > a > [slot="icon-start"], ${tag} > [slot="icon-start"] { flex: none; }`,
               ]
             : []),
         ]
