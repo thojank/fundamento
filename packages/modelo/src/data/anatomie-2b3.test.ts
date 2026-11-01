@@ -197,3 +197,29 @@ describe("②b-3 A-plurelektilo-1, A-plurelektilo-4: select-all", () => {
     expect(briefOf(entryOf("plurelektilo")).flags).toContain("select-all");
   });
 });
+
+/** A-menuo-4: an icon per entry, the heading of a group of entries; the divider is the apartigilo. */
+describe("②b-3 A-menuo-4: icon, group-heading", () => {
+  it("menuo: the part icon, as large as a medium icon; the row keeps a gap for it", () => {
+    const { skemo } = entryOf("menuo");
+    expect(skemo.parts.icon).toEqual({ size: { fixed: "size.icon.medium" } });
+    expect(skemo.parts.item?.gap).toEqual({ fixed: "spacing.small" });
+  });
+
+  it("menuo: the part group-heading, muted in the caption, with the room of a row", () => {
+    expect(entryOf("menuo").skemo.parts["group-heading"]).toEqual({
+      color: { fixed: "color.text.muted" },
+      typography: { fixed: "typography.caption" },
+      "inline-padding": { fixed: "spacing.medium" },
+    });
+  });
+
+  it("menuo: icon and group-heading are named; the Uzo names the attributes icon and group", () => {
+    expect(tradukoOf("menuo", "parts/icon", "de")).toBe("Symbol");
+    expect(tradukoOf("menuo", "parts/group-heading", "en")).toBe("Group heading");
+    const purpose = entryOf("menuo").uzo.purpose;
+    expect(purpose).toContain("attribute icon");
+    expect(purpose).toContain("attribute group");
+    expect(tokensOf(briefOf(entryOf("menuo")))).toBeLessThan(750);
+  });
+});

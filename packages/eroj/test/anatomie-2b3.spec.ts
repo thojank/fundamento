@@ -246,3 +246,47 @@ test.describe("②b-3 A-plurelektilo-1, A-plurelektilo-4: select-all and group h
     await expect(host.locator('[part="select-all"]')).toBeHidden();
   });
 });
+
+test.describe("②b-3 A-menuo-4: icon per entry, group headings, divider", () => {
+  test("an entry with an icon shows it before its words, unheard; groups are named by their heading", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<fm-menuo label="Aktionen"><data value="edit" icon="edit" group="Bearbeiten">Umbenennen</data><data value="copy" group="Bearbeiten">Kopieren</data><fm-apartigilo></fm-apartigilo><data value="delete" icon="close" intent="danger">Löschen</data></fm-menuo>',
+    );
+    const host = page.locator("fm-menuo");
+    await host.locator('[part="trigger"]').first().click();
+    const rows = host.locator('[part="item"]');
+    await expect(rows).toHaveCount(3);
+    const icon = rows.nth(0).locator('[part="icon"]');
+    await expect(icon).toBeVisible();
+    await expect(icon).toHaveAttribute("name", "edit");
+    await expect(icon).toHaveAttribute("aria-hidden", "true");
+    await expect(rows.nth(0)).toHaveAccessibleName("Umbenennen");
+    await expect(rows.nth(1).locator('[part="icon"]')).toBeHidden();
+    const iconBox = await icon.boundingBox();
+    const words = await rows.nth(0).boundingBox();
+    expect((iconBox?.x ?? 0) - (words?.x ?? 0)).toBeLessThan((words?.width ?? 0) / 2);
+    const group = host.locator('[role="group"]');
+    await expect(group).toHaveCount(1);
+    await expect(group).toHaveAccessibleName("Bearbeiten");
+    await expect(group.locator('[part="item"]')).toHaveCount(2);
+    await expect(host.locator('[role="separator"], [part="separator"]').first()).toBeAttached();
+    await page.keyboard.press("ArrowDown");
+    await expect(rows.nth(1)).toBeFocused();
+  });
+
+  test("entries without icon and group stand as before", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      '<fm-menuo label="Aktionen"><data value="edit">Bearbeiten</data><data value="copy">Kopieren</data></fm-menuo>',
+    );
+    const host = page.locator("fm-menuo");
+    await host.locator('[part="trigger"]').first().click();
+    await expect(host.locator('[role="group"], [part="group-heading"]')).toHaveCount(0);
+    await expect(host.locator('[part="item"] [part="icon"]').first()).toBeHidden();
+  });
+});

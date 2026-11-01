@@ -138,3 +138,9 @@ describe("②b-3 A-elektilo-4, A-listelektilo-4, A-kompletigilo-4, A-plurelektil
     expect(setOf("plurelektilo").properties["select-all"]).toBe("BOOLEAN");
   });
 });
+
+describe("②b-3 A-menuo-4 in Figma: icon and heading stand with their content", () => {
+  it.each(["menuo:icon", "menuo:group-heading"])("%s has no node and names its Jugxo", (key) => {
+    expectNotDrawn(key);
+  });
+});
