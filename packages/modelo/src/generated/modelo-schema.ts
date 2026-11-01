@@ -985,6 +985,18 @@ export interface Uzo {
   };
   layout: UzoLayout;
   content: UzoContent[];
+  /**
+   * Spec 036 Teil 5 ③ (Spec 029 ③, section „Wann nicht“): the cases the Ero is not for, each with the Ero or Sxablono to take instead; or the placeholder while the text is not written. check:dokumentaro reports a missing field and the placeholder.
+   */
+  "when-not"?: UzoWhenNot[] | UzoOffen;
+  /**
+   * Spec 036 Teil 5 ③ (Spec 029 ③, section Do/Don't): what to do with the Ero and what not, or the placeholder.
+   */
+  "do-dont"?: UzoDoDont | UzoOffen;
+  /**
+   * Spec 036 Teil 5 ③ (Spec 029 ③, section Barrierefreiheit): what each key of the Skemo (a11y.keys) does, in words; none with the reason for an Ero that takes no key; or the placeholder.
+   */
+  keyboard?: UzoKeyboardKey[] | UzoKeyboardNone | UzoOffen;
 }
 /**
  * A goal the Ero does not serve and what to take instead: another Ero, or null for 'not covered' (A2).
@@ -1192,6 +1204,73 @@ export interface UzoContent {
         kind: "not-words";
         words: Keywords;
       };
+}
+/**
+ * One case the Ero is not for (Spec 029 ③ „Wann nicht“), with the Ero or Sxablono to take instead.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "UzoWhenNot".
+ */
+export interface UzoWhenNot {
+  case: UzoTexto;
+  ero: Name;
+}
+/**
+ * A text of the documentation of an Ero in German and English (Spec 036 Teil 5 ③): the Vitrino shows the language of the Lingvo switch, get_ero the language asked for.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "UzoTexto".
+ */
+export interface UzoTexto {
+  de: NonEmptyText;
+  en: NonEmptyText;
+}
+/**
+ * The placeholder of a documentation field whose text is not written yet (Spec 036 Teil 5 ③): valid for the schema, so every Ero carries the field; an error for check:dokumentaro. get_ero leaves the field out.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "UzoOffen".
+ */
+export interface UzoOffen {
+  offen: UzoTexto;
+}
+/**
+ * Do and don't of an Ero (Spec 029 ③): at least one of each.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "UzoDoDont".
+ */
+export interface UzoDoDont {
+  /**
+   * @minItems 1
+   */
+  do: UzoTexto[];
+  /**
+   * @minItems 1
+   */
+  dont: UzoTexto[];
+}
+/**
+ * One row of the keyboard table (Spec 029 ③): the keys, as the Skemo names them in a11y.keys, and what they do.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "UzoKeyboardKey".
+ */
+export interface UzoKeyboardKey {
+  /**
+   * @minItems 1
+   */
+  keys: NonEmptyText[];
+  action: UzoTexto;
+}
+/**
+ * An Ero that takes no key, with the reason (Spec 029 ③).
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "UzoKeyboardNone".
+ */
+export interface UzoKeyboardNone {
+  none: UzoTexto;
 }
 /**
  * The words of the Gvidanto (Nachlese 8 ①, D-11): what only opens a request, per language; absent while the Modelo has none.

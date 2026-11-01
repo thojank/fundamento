@@ -265,6 +265,13 @@ export const RULE_IDS = [
   // Spec 033 S1: every token of the core belongs to exactly one Faceto of the brand model.
   "faceto-token-unassigned",
   "faceto-token-twice",
+  // Spec 036 Teil 5 ③ (Spec 029 ③): the documentation fields of the Uzo (check:dokumentaro) – a
+  // field missing, a field still holding the placeholder, when-not sending to the Ero itself, a
+  // key of the Skemo the keyboard table does not describe.
+  "dokumentaro-field-missing",
+  "dokumentaro-placeholder",
+  "dokumentaro-when-not-self",
+  "dokumentaro-keyboard-key-missing",
   // Projekcio lints (Spec 003, D-17)
   "css-physical-property",
   "ero-hardcoded-string",

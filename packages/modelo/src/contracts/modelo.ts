@@ -92,10 +92,16 @@ export type {
   Uzo,
   UzoBoundary,
   UzoContent,
+  UzoDoDont,
   UzoFile,
   UzoInstead,
+  UzoKeyboardKey,
+  UzoKeyboardNone,
   UzoLayout,
+  UzoOffen,
   UzoSlot,
+  UzoTexto,
+  UzoWhenNot,
 } from "../generated/modelo-schema.js";
 
 /** One Ero with its Skemo, loaded from `data/eroj/<name>/skemo.json` (Spec 003, D-02). */

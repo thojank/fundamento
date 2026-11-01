@@ -52,6 +52,8 @@ const CHECK_SUMMARIES: Readonly<Record<CheckName, string>> = {
   ikonaro: "Every Aspekto draws every Ikonaro name: square, in currentColor, with provenance.",
   fontoj:
     "Every value taken from a Fonto: pinned Fonto with its licence text, provenance that matches, a Jugxo per adaptation.",
+  dokumentaro:
+    "Every Uzo has when-not, do-dont and keyboard in German and English, none a placeholder.",
 };
 
 export const HELP = [

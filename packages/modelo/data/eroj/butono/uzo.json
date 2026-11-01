@@ -272,6 +272,24 @@
           }
         }
       }
-    ]
+    ],
+    "when-not": {
+      "offen": {
+        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
+        "en": "Open: the text follows (Spec 036, docs per Ero)."
+      }
+    },
+    "do-dont": {
+      "offen": {
+        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
+        "en": "Open: the text follows (Spec 036, docs per Ero)."
+      }
+    },
+    "keyboard": {
+      "offen": {
+        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
+        "en": "Open: the text follows (Spec 036, docs per Ero)."
+      }
+    }
   }
 }
