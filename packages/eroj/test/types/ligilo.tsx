@@ -37,8 +37,8 @@ export const noDisabled = (
   </Ligilo>
 );
 
-export const noIconStart = (
-  // @ts-expect-error a link has no icon-start (E3)
+// Spec 036 Teil 5 ②b-3 (A-ligilo-4): a link takes an icon at the start, as the butono does.
+export const iconStart = (
   <Ligilo to="/x" iconStart={<svg />}>
     x
   </Ligilo>
