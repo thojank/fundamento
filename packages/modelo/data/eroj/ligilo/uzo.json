@@ -188,23 +188,69 @@
         }
       }
     ],
-    "when-not": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "when-not": [
+      {
+        "case": {
+          "de": "Etwas soll hier in der Ansicht geschehen, statt woanders hinzuführen.",
+          "en": "Something is to happen here in the view, instead of leading elsewhere."
+        },
+        "ero": "butono"
+      },
+      {
+        "case": {
+          "de": "Mehrere Hauptseiten der Anwendung stehen als Liste, eine davon ist die aktuelle.",
+          "en": "Several main pages of the application stand as a list, one of them the current one."
+        },
+        "ero": "navigado"
+      },
+      {
+        "case": {
+          "de": "Gezeigt wird der Weg von oben bis zur aktuellen Seite.",
+          "en": "The path from the top down to the current page is shown."
+        },
+        "ero": "spuro"
       }
-    },
+    ],
     "do-dont": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
-      }
+      "do": [
+        {
+          "de": "Lass die Wörter das Ziel nennen, nicht die Adresse.",
+          "en": "Let the words name the destination, not the address."
+        },
+        {
+          "de": "Setze external für ein Ziel außerhalb der Anwendung; es wird sichtbar und hörbar markiert.",
+          "en": "Set external for a destination outside the application; it is marked visibly and audibly."
+        },
+        {
+          "de": "Nenne bei download in den Wörtern die Datei, ihre Art und ihre Größe.",
+          "en": "With download, name the file, its kind and its size in the words."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Einen Verweis grau und unbenutzbar zeigen; ohne Ziel ist er Text.",
+          "en": "Show a link greyed out and unusable; without a destination it is text."
+        },
+        {
+          "de": "Einen Download zugleich als external markieren, denn ein Download bleibt in der Ansicht.",
+          "en": "Mark a download as external at the same time, because a download stays in the view."
+        },
+        {
+          "de": "Einen eigenständigen Verweis über mehrere Zeilen laufen lassen.",
+          "en": "Let a standalone link run over several lines."
+        }
+      ]
     },
-    "keyboard": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "keyboard": [
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": {
+          "de": "Folgt dem Verweis; mit download übergibt er die Datei, und die Person bleibt in der Ansicht.",
+          "en": "Follows the link; with download it hands over the file and the person stays in the view."
+        }
       }
-    }
+    ]
   }
 }

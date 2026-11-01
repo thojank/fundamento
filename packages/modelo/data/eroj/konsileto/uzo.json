@@ -103,23 +103,58 @@
         }
       }
     ],
-    "when-not": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "when-not": [
+      {
+        "case": {
+          "de": "Die Person braucht den Text, um handeln zu können.",
+          "en": "The person needs the text in order to act."
+        },
+        "ero": "teksto"
+      },
+      {
+        "case": {
+          "de": "In der Ebene liegt etwas zum Bedienen, ein Verweis, ein Feld oder eine Schaltfläche.",
+          "en": "The layer holds something to operate, a link, a field or a button."
+        },
+        "ero": "sxvebilo"
       }
-    },
+    ],
     "do-dont": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
-      }
+      "do": [
+        {
+          "de": "Halte den Text kurz: ein Name oder ein kurzer Hinweis.",
+          "en": "Keep the text short: a name or a brief hint."
+        },
+        {
+          "de": "Gib einer Schaltfläche, die nur ein Symbol zeigt, einen Tooltip mit ihrem Namen.",
+          "en": "Give a button that shows only an icon a tooltip with its name."
+        },
+        {
+          "de": "Verbinde den Tooltip über for mit dem Element, das er beschreibt.",
+          "en": "Tie the tooltip with for to the element it describes."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Wichtige Angaben nur im Tooltip zeigen, denn auf Touch-Geräten erscheint er nicht.",
+          "en": "Show important information only in the tooltip, because on touch devices it does not appear."
+        },
+        {
+          "de": "Einen Tooltip an ein deaktiviertes Element hängen; dessen Grund steht im eigenen Slot disabled-reason.",
+          "en": "Attach a tooltip to a disabled element; its reason belongs in its own slot disabled-reason."
+        }
+      ]
     },
-    "keyboard": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "keyboard": [
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": {
+          "de": "Blendet den Tooltip aus; der Fokus bleibt auf dem Element, das er beschreibt.",
+          "en": "Hides the tooltip; the focus stays on the element it describes."
+        }
       }
-    }
+    ]
   }
 }

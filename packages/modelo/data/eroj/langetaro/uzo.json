@@ -162,23 +162,83 @@
         }
       }
     ],
-    "when-not": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "when-not": [
+      {
+        "case": {
+          "de": "Die Person wechselt zu einer anderen Seite der Anwendung.",
+          "en": "The person moves to another page of the application."
+        },
+        "ero": "navigado"
+      },
+      {
+        "case": {
+          "de": "Die Wahl ist ein Wert, der mit einem Formular gesendet wird.",
+          "en": "The choice is a value that is sent with a form."
+        },
+        "ero": "elekto"
+      },
+      {
+        "case": {
+          "de": "Inhalt soll verborgen sein, bis jemand ihn öffnet.",
+          "en": "Content is to stay hidden until someone opens it."
+        },
+        "ero": "faldilo"
+      },
+      {
+        "case": {
+          "de": "Es geht um die Seiten einer einzigen langen Liste.",
+          "en": "It is about the pages of one long list."
+        },
+        "ero": "pagxigilo"
       }
-    },
+    ],
     "do-dont": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
-      }
+      "do": [
+        {
+          "de": "Benenne jeden Reiter mit einem eigenen, kurzen Wort für seine Ansicht.",
+          "en": "Name every tab with a short word of its own for its view."
+        },
+        {
+          "de": "Gib der Reiterleiste mit label einen Namen, den der Screenreader hört.",
+          "en": "Give the tab bar a name with label that the screen reader hears."
+        },
+        {
+          "de": "Nimm spread fill, wenn wenige Reiter die ganze Breite teilen sollen.",
+          "en": "Use spread fill when a few tabs should share the whole width."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Reiter zum Schließen anbieten, denn ein Reiter ist eine Ansicht, kein Dokument.",
+          "en": "Offer tabs that can be closed, because a tab is a view, not a document."
+        },
+        {
+          "de": "Reiter senkrecht als Seitenleiste stapeln, denn das liest sich wie eine Navigation.",
+          "en": "Stack tabs upright as a side bar, because that reads like a navigation."
+        }
+      ]
     },
-    "keyboard": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "keyboard": [
+      {
+        "keys": [
+          "ArrowLeft",
+          "ArrowRight"
+        ],
+        "action": {
+          "de": "Wählt den vorigen oder nächsten Reiter und zeigt seine Ansicht, deaktivierte werden übersprungen, am Ende geht es von vorn weiter.",
+          "en": "Selects the previous or next tab and shows its view, skipping disabled ones and wrapping at the end."
+        }
+      },
+      {
+        "keys": [
+          "Home",
+          "End"
+        ],
+        "action": {
+          "de": "Wählt den ersten oder letzten Reiter.",
+          "en": "Selects the first or last tab."
+        }
       }
-    }
+    ]
   }
 }
