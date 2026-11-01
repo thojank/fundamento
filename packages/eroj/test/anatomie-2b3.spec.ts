@@ -137,3 +137,112 @@ test.describe("②b-3 A-alsxutilo-4: the upload icon", () => {
     await expect(page.locator("#f").locator('[part="dropzone"] > [part="icon"]')).toBeHidden();
   });
 });
+
+/** Options of two groups and one without, for the group headings (A-*-4). */
+const GROUPED_OPTIONS =
+  '<data slot="options" value="de" group="Europa">Deutschland</data><data slot="options" value="fr" group="Europa">Frankreich</data><data slot="options" value="jp" group="Asien">Japan</data><data slot="options" value="kr" group="Asien">Korea</data>';
+
+test.describe("②b-3 A-elektilo-4: group headings", () => {
+  test("options with a group stand in the platform's group, named by it; the value still chooses", async ({
+    page,
+  }) => {
+    await serve(page, out, `<fm-elektilo value="jp">Land${GROUPED_OPTIONS}</fm-elektilo>`);
+    const select = page.locator("fm-elektilo").locator("select");
+    const groups = await select.evaluate((element) =>
+      [...element.querySelectorAll("optgroup")].map((group) => [
+        group.label,
+        [...group.querySelectorAll("option")].map((option) => option.value),
+      ]),
+    );
+    expect(groups).toEqual([
+      ["Europa", ["de", "fr"]],
+      ["Asien", ["jp", "kr"]],
+    ]);
+    await expect(select).toHaveValue("jp");
+  });
+});
+
+test.describe("②b-3 A-listelektilo-4: group headings and divider", () => {
+  test("the open list shows a group per heading, a divider between two groups; the keys cross them", async ({
+    page,
+  }) => {
+    await serve(page, out, `<fm-listelektilo>Land${GROUPED_OPTIONS}</fm-listelektilo>`);
+    const host = page.locator("fm-listelektilo");
+    await host.locator("#control").click();
+    const groups = host.locator('[role="group"]');
+    await expect(groups).toHaveCount(2);
+    await expect(groups.nth(0)).toHaveAccessibleName("Europa");
+    await expect(groups.nth(1)).toHaveAccessibleName("Asien");
+    await expect(groups.nth(0).locator('[part="group-heading"]')).toHaveText("Europa");
+    await expect(groups.nth(0).locator('[role="option"]')).toHaveCount(2);
+    await expect(host.locator('[part="divider"]')).toHaveCount(1);
+    await expect(groups.nth(1).locator('[part="divider"]')).toHaveCount(1);
+    await expect(groups.nth(1).locator('[part="divider"]')).toHaveAttribute("aria-hidden", "true");
+    for (let i = 0; i < 2; i++) await page.keyboard.press("ArrowDown");
+    const active = await host
+      .locator('[part="control"]')
+      .evaluate((button) => button.getAttribute("aria-activedescendant"));
+    await expect(host.locator(`[id="${active}"]`)).toHaveText("Japan");
+  });
+
+  test("without groups the list has no group and no divider", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      '<fm-listelektilo>Land<data slot="options" value="de">Deutschland</data><data slot="options" value="fr">Frankreich</data></fm-listelektilo>',
+    );
+    const host = page.locator("fm-listelektilo");
+    await host.locator("#control").click();
+    await expect(host.locator('[role="group"]')).toHaveCount(0);
+    await expect(host.locator('[part="divider"], [part="group-heading"]')).toHaveCount(0);
+  });
+});
+
+test.describe("②b-3 A-kompletigilo-4: group headings", () => {
+  test("the suggestions stand in their groups, named by the heading", async ({ page }) => {
+    await serve(page, out, `<fm-kompletigilo>Land${GROUPED_OPTIONS}</fm-kompletigilo>`);
+    const host = page.locator("fm-kompletigilo");
+    await host.locator("input").fill("a");
+    const groups = host.locator('[role="group"]');
+    await expect(groups).toHaveCount(2);
+    await expect(groups.nth(0)).toHaveAccessibleName("Europa");
+    await expect(groups.nth(1).locator('[part="suggestion"]')).toHaveText(["Japan", "Korea"]);
+  });
+});
+
+test.describe("②b-3 A-plurelektilo-1, A-plurelektilo-4: select-all and group headings", () => {
+  test("select-all is a checkbox before the list: it chooses every option, then none", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      `<fm-plurelektilo select-all lang="de">Länder${GROUPED_OPTIONS}</fm-plurelektilo>`,
+    );
+    const host = page.locator("fm-plurelektilo");
+    await host.locator("#control").click();
+    const all = host.locator('[part="select-all"]');
+    await expect(all).toBeVisible();
+    await expect(all).toHaveAccessibleName("Alle wählen");
+    await expect(all).toHaveAttribute("role", "checkbox");
+    await expect(all).toHaveAttribute("aria-checked", "false");
+    await all.click();
+    await expect(host).toHaveAttribute("values", "de,fr,jp,kr");
+    await expect(all).toHaveAttribute("aria-checked", "true");
+    await host.locator('[part="item"]').nth(0).click();
+    await expect(all).toHaveAttribute("aria-checked", "mixed");
+    await all.click();
+    await expect(host).toHaveAttribute("values", "de,fr,jp,kr");
+    await all.click();
+    await expect(host).toHaveAttribute("values", "");
+    await expect(host.locator('[role="group"]')).toHaveCount(2);
+    await expect(host.locator('[role="group"]').nth(1)).toHaveAccessibleName("Asien");
+  });
+
+  test("without select-all no such row stands", async ({ page }) => {
+    await serve(page, out, `<fm-plurelektilo>Länder${GROUPED_OPTIONS}</fm-plurelektilo>`);
+    const host = page.locator("fm-plurelektilo");
+    await host.locator("#control").click();
+    await expect(host.locator('[part="select-all"]')).toBeHidden();
+  });
+});
