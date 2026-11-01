@@ -238,6 +238,14 @@ const REST_2B3 = (() => {
       pattern: "^ero\\.insigno\\.box\\.gap$|^ero\\.spuro\\.(item\\.gap|icon\\.size)$",
       added: 1 + 2,
     },
+    // S36-4.4 A-atributlisto-4 (the title: colour and typography, 2), A-plenstato-4 (the title, 2;
+    // the icon: size and colour, 2), A-tabelo-4 (the foot: fill, colour, typography, 3),
+    // A-sxvebilo-4 (the close button's size, 1).
+    {
+      pattern:
+        "^ero\\.(atributlisto|plenstato)\\.heading\\.(color|typography)$|^ero\\.plenstato\\.icon\\.(size|color)$|^ero\\.tabelo\\.foot\\.(fill|color|typography)$|^ero\\.sxvebilo\\.close\\.size$",
+      added: 2 + 2 + 2 + 3 + 1,
+    },
   ];
   const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
   return {

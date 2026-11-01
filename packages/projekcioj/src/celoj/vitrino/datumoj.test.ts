@@ -623,8 +623,13 @@ describe("the Vitrino shows the insigno, the avizo and the plenstato (Spec 011 �
 
   it("plenstato: a row per kind, the text alone", () => {
     const grid = datumoj.eroj.plenstato ?? "";
-    expect(grid).toContain('<fm-plenstato kind="loading">loading</fm-plenstato>');
-    expect(grid).toContain('<fm-plenstato kind="empty">empty</fm-plenstato>');
+    // Spec 036 Teil 5 ②b-3 (A-plenstato-4): with the title in every cell (F-5, the example word).
+    expect(grid).toContain(
+      '<fm-plenstato kind="loading">loading<span slot="heading">Überschrift</span></fm-plenstato>',
+    );
+    expect(grid).toContain(
+      '<fm-plenstato kind="empty">empty<span slot="heading">Überschrift</span></fm-plenstato>',
+    );
     expect(grid).not.toContain('slot="actions"');
   });
 });
@@ -652,9 +657,14 @@ describe("the Vitrino shows the tabelo, the atributlisto and the mezurilo (Spec 
     expect((grid.match(/<fm-atributlisto /g) ?? []).length).toBe(3);
     // Abnahme ① F-1: the prop value is the row's heading, never text of the list itself — a word
     // in the default slot would stand above the dl as content.
-    expect(grid).toContain('<fm-atributlisto layout="auto"><dl><dt>Version</dt><dd>3</dd>');
+    // Spec 036 Teil 5 ②b-3 (A-atributlisto-4): with the title in every cell (F-5, the example word).
+    expect(grid).toContain(
+      '<fm-atributlisto layout="auto"><span slot="heading">Überschrift</span><dl><dt>Version</dt><dd>3</dd>',
+    );
     expect(grid).not.toMatch(/<fm-atributlisto[^>]*>[^<]/);
-    expect(grid).toContain('<fm-atributlisto layout="stacked"><dl><dt>Version</dt><dd>3</dd>');
+    expect(grid).toContain(
+      '<fm-atributlisto layout="stacked"><span slot="heading">Überschrift</span><dl><dt>Version</dt><dd>3</dd>',
+    );
     expect(grid).toContain("<dt>Gültig seit</dt><dd></dd></dl></fm-atributlisto>");
   });
 

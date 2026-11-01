@@ -464,7 +464,11 @@ test.describe("②b-3 A-atributlisto-4: heading", () => {
   });
 
   test("without a heading nothing stands above the list", async ({ page }) => {
-    await serve(page, out, "<fm-atributlisto><dl><dt>Nummer</dt><dd>42</dd></dl></fm-atributlisto>");
+    await serve(
+      page,
+      out,
+      "<fm-atributlisto><dl><dt>Nummer</dt><dd>42</dd></dl></fm-atributlisto>",
+    );
     expect((await boxOf(page, "fm-atributlisto", "heading"))?.shown ?? false).toBe(false);
     await expect(page.getByRole("heading")).toHaveCount(0);
   });
@@ -484,8 +488,9 @@ test.describe("②b-3 A-plenstato-4: heading, icon", () => {
     expect(heading?.shown).toBe(true);
     expect(icon?.bottom ?? Number.POSITIVE_INFINITY).toBeLessThanOrEqual((heading?.top ?? 0) + 1);
     expect(heading?.bottom ?? Number.POSITIVE_INFINITY).toBeLessThanOrEqual((text?.top ?? 0) + 1);
+    // The title stands in the live region, so it is heard with the text.
     const status = page.locator("fm-plenstato").getByRole("status");
-    await expect(status).toContainText("Keine Treffer");
+    await expect(status.locator('[part="heading"]')).toBeVisible();
     const ikono = page.locator('fm-plenstato > fm-ikono[slot="icon"]');
     const size = await ikono.evaluate((element) => getComputedStyle(element).inlineSize);
     const large = await page.evaluate(() =>
@@ -511,10 +516,13 @@ test.describe("②b-3 A-tabelo-4: foot", () => {
       '<fm-tabelo>Umsatz<table slot="content"><thead><tr><th>Monat</th><th>Betrag</th></tr></thead><tbody><tr><td>Mai</td><td>5</td></tr></tbody><tfoot><tr><th>Summe</th><td>5</td></tr></tfoot></table></fm-tabelo>',
     );
     const looks = (selector: string) =>
-      page.locator(selector).first().evaluate((element) => {
-        const style = getComputedStyle(element);
-        return { ground: style.backgroundColor, weight: style.fontWeight };
-      });
+      page
+        .locator(selector)
+        .first()
+        .evaluate((element) => {
+          const style = getComputedStyle(element);
+          return { ground: style.backgroundColor, weight: style.fontWeight };
+        });
     const foot = await looks("fm-tabelo tfoot td");
     const body = await looks("fm-tabelo tbody td");
     const sunken = await page.evaluate(() =>
@@ -542,9 +550,9 @@ test.describe("②b-3 A-sxvebilo-4: close", () => {
     await expect(close).toBeVisible();
     await close.click();
     await expect(page.locator("fm-sxvebilo").getByRole("dialog")).toBeHidden();
-    expect(
-      await page.evaluate(() => document.activeElement?.getAttribute("slot") ?? ""),
-    ).toBe("trigger");
+    await expect
+      .poll(() => page.evaluate(() => document.activeElement?.getAttribute("slot") ?? ""))
+      .toBe("trigger");
   });
 
   test("without dismissible no close button stands", async ({ page }) => {
@@ -555,6 +563,8 @@ test.describe("②b-3 A-sxvebilo-4: close", () => {
     );
     await page.locator('fm-butono[slot="trigger"]').click();
     await expect(page.locator("fm-sxvebilo").getByRole("dialog")).toBeVisible();
-    await expect(page.locator("fm-sxvebilo").getByRole("button", { name: "Schließen" })).toHaveCount(0);
+    await expect(
+      page.locator("fm-sxvebilo").getByRole("button", { name: "Schließen" }),
+    ).toHaveCount(0);
   });
 });

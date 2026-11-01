@@ -4,7 +4,7 @@
     "id": "uzo_01M523FAR3SN5JRQRQTM841HAB",
     "ero": "ero_01M523F9YZX0X2QDED1XRNM1G4",
     "skemo": "ske_01M523FAAXJ1AADZWZ6NQRX83K",
-    "purpose": "Shows many records with the same fields as rows and columns, so a person can compare and find: standards, versions, findings.",
+    "purpose": "Shows many records with the same fields as rows and columns, so a person can compare and find: standards, versions, findings; a foot row (tfoot) holds sums.",
     "instead": [
       {
         "goal": "one-record",

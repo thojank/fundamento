@@ -2273,6 +2273,11 @@ describe("Figma plan for the plenstato (Spec 011 ③)", () => {
       "motion.easing": "motion/easing/standard",
       "box.inline-padding": "spacing/large",
       "box.gap": "spacing/small",
+      // Spec 036 Teil 5 ②b-3 (A-plenstato-4): the title and the icon, bound, not drawn.
+      "heading.color": "color/text/default",
+      "heading.typography": "typography/label/1",
+      "icon.size": "size/icon/large",
+      "icon.color": "color/text/muted",
     });
     expect(empty?.bindings).toMatchObject({ "border.stroke": "stroke/dashed" });
     expect(empty?.bindings["indicator.color"]).toBeUndefined();
@@ -2300,7 +2305,12 @@ describe("Figma plan for the plenstato (Spec 011 ③)", () => {
       "indicator.size",
       "surface.radius",
     ]);
-    expect(loading?.notDrawn).toEqual({});
+    // Spec 036 Teil 5 ②b-3 (A-plenstato-4): title and icon stand with their content (Jugxo).
+    expect(loading?.notDrawn).toEqual({
+      "heading.color": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+      "icon.color": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+      "icon.size": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+    });
     expect(loading?.font).toEqual({ family: "Geist", style: "Regular", families: ["Geist"] });
     // The stroke token reaches the plan as a STRING variable; its value is the term.
     const dashed = plan.collections
@@ -2548,6 +2558,10 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
       "focus-ring.ring": "focus/ring",
       "focus-ring.offset": "focus/offset",
       "focus-ring.color": "color/focus/inner",
+      // Spec 036 Teil 5 ②b-3 (A-tabelo-4): the foot, bound, not drawn.
+      "foot.fill": "color/background/sunken",
+      "foot.color": "color/text/default",
+      "foot.typography": "typography/label/1",
     });
     expect(variant("compact", "rest")?.bindings).toMatchObject({
       "cell.inline-padding": "spacing/small",
@@ -2580,7 +2594,11 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
       "sort-indicator.size",
       "sort.radius",
     ]);
-    expect(rest?.notDrawn).toEqual({});
+    // Spec 036 Teil 5 ②b-3 (A-tabelo-4): the foot stands with a foot row (Jugxo).
+    expect(rest?.notDrawn).toEqual({
+      "foot.color": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+      "foot.fill": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+    });
     expect(rest?.hidden).toBeUndefined();
     expect(rest?.stroke).toBeUndefined();
     // The ring around the sort button grows from the button's radius (F32), like the butono's.
@@ -2687,6 +2705,9 @@ describe("Figma plan for the atributlisto (Spec 011 ④)", () => {
       "more.fill": "color/action/tertiary/rest",
       "more.color": "color/action/tertiary/text",
       "more.typography": "typography/label/2",
+      // Spec 036 Teil 5 ②b-3 (A-atributlisto-4): the title, bound, not drawn.
+      "heading.color": "color/text/default",
+      "heading.typography": "typography/headline/4",
     });
     expect(variant("stacked")?.bindings["box.inline-padding"]).toBe("spacing/xsmall");
     expect(variant("auto")?.bindings["box.inline-padding"]).toBe("spacing/large");
@@ -2700,6 +2721,8 @@ describe("Figma plan for the atributlisto (Spec 011 ④)", () => {
     expect(columns?.notDrawn).toEqual({
       "more.color": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
       "more.fill": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+      // Spec 036 Teil 5 ②b-3 (A-atributlisto-4): the title stands with its words (Jugxo).
+      "heading.color": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
     });
     expect(columns?.hidden).toBeUndefined();
     expect(columns?.stroke).toBeUndefined();

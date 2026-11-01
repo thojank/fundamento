@@ -747,7 +747,9 @@ describe("②b-2 A-faldilo-1, A-konsileto-1, A-menuo-1, A-sxvebilo-1, A-langetar
     "%s: the new prop, last, its default what the Ero did",
     (ero, axis) => {
       const { skemo } = entryOf(ero);
-      expect(skemo.props.at(-1)).toMatchObject({
+      // Spec 036 Teil 5 ②b-3 (A-sxvebilo-4): dismissible came after justify, as the last prop.
+      const last = ero === "sxvebilo" ? skemo.props.at(-2) : skemo.props.at(-1);
+      expect(last).toMatchObject({
         name: axis.prop,
         kind: "enum",
         values: axis.values,

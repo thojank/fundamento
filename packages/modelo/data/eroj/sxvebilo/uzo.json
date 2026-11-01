@@ -4,7 +4,7 @@
     "id": "uzo_01M564NXJNCV7VW68BBE42BEA1",
     "ero": "ero_01M564NWTD0WC9QWBP0GGTQZYX",
     "skemo": "ske_01M564NX6FGBH4NHKDSHCCM5W4",
-    "purpose": "Opens a non-modal layer with content next to its trigger; the page stays usable.",
+    "purpose": "Opens a non-modal layer with content next to its trigger; the page stays usable; with dismissible a close button ends it on touch, where there is no Escape.",
     "instead": [
       {
         "goal": "decision",
