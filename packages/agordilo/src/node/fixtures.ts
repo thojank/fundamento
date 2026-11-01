@@ -5,7 +5,7 @@
 // followed by this generator, never by a hand edit or a text rule. The CLI is fixtures-cli.ts.
 
 import { createHash } from "node:crypto";
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { type Agordo, readAgordo } from "../agordo.js";
 import type { Calibration } from "../calibration.js";
@@ -32,9 +32,16 @@ export interface FixturesResult {
   readonly refused?: string;
 }
 
-/** The derived fixtures: their directory names below `validDir`. */
-export function derivedFixtures(_validDir: string): readonly string[] {
-  return ["aspekto-provo", "aspekto-provo-kompakta"];
+/**
+ * The derived fixtures: every directory below `validDir` that carries an Agordo (`agordo.json`),
+ * sorted by name. Found from the data, not from a list, so a derived brand another change adds
+ * (Spec 036 B-6.2-2: aspekto-dukolora of Teil 2b) is derived again with the others.
+ */
+export function derivedFixtures(validDir: string): readonly string[] {
+  return readdirSync(validDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && existsSync(join(validDir, entry.name, "agordo.json")))
+    .map((entry) => entry.name)
+    .sort();
 }
 
 function agordoAt(path: string): Agordo {
