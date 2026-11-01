@@ -2111,6 +2111,22 @@ ${
   const dialogInit = isDialog
     ? `    control.addEventListener("cancel", (event) => {
       event.preventDefault();
+      // Spec 036 ②b-4 (A-dialogo-5, M-3): a duty (dismiss explicit) is not closed by Escape.
+      if (this.#dismissal() === "explicit") return;
+      this.#cancel();
+    });
+    // Escape asks the platform to close; for a duty the request is taken before it is made (a
+    // second Escape without activation would otherwise close the dialog in Chromium).
+    control.addEventListener("keydown", (event) => {
+      if ((event as KeyboardEvent).key === "Escape" && this.#dismissal() === "explicit") event.preventDefault();
+    });
+    // A hint (dismiss free) closes on a click beside it: the backdrop is the dialog's own box, a
+    // click outside its border box lands on the dialog element itself.
+    control.addEventListener("click", (event) => {
+      if (event.target !== control || this.#dismissal() !== "free") return;
+      const box = control.getBoundingClientRect();
+      const { clientX: x, clientY: y } = event as MouseEvent;
+      if (x >= box.left && x <= box.right && y >= box.top && y <= box.bottom) return;
       this.#cancel();
     });
     control.addEventListener("close", () => {
@@ -2153,6 +2169,9 @@ ${
   // content is invalid.
   const dialogRender = isDialog
     ? `    const dialog = control as HTMLDialogElement;
+    // Spec 036 ②b-4 (A-dialogo-5, M-3): a duty is an alertdialog, every other purpose a dialog.
+    if (this.#dismissal() === "explicit") dialog.setAttribute("role", "alertdialog");
+    else dialog.removeAttribute("role");
     const reason = String(this.propValue("reason") ?? "none");
     const area = this.#reasonArea();
     if (area !== undefined) {
@@ -2183,6 +2202,11 @@ ${
     : "";
   const dialogMethods = isDialog
     ? `
+  /** The purpose of the dialog (Spec 029 M-3): free, guarded or explicit; guarded without the axis. */
+  #dismissal(): string {
+    return HAS_PROP.has("dismiss") ? String(this.propValue("dismiss") ?? "guarded") : "guarded";
+  }
+
   /** The reason area the dialog shows itself: a tekstareo in its shadow tree. */
   #reasonArea(): HTMLElement | undefined {
     const area = this.shadowRoot?.querySelector('[part="reason"]');
@@ -2275,14 +2299,15 @@ ${
     });
 `
       : "";
-  // The render of a live region (Spec 011 ③, D-09, D-10, G4): the role follows intent (danger is
-  // an alert), busy follows kind (loading); every named slot shows while it has content; the
+  // The render of a live region (Spec 011 ③, D-09, D-10, G4): the role follows intent (warning
+  // and danger are alerts, Spec 036 ②b-4 A-avizo-5), busy follows kind (loading); every named slot
+  // shows while it has content; the
   // dismiss butono shows while dismissible and is named by a11y.texts.dismissible; the indicator
   // turns while loading.
   const statusRender = isStatus
     ? `    if (HAS_PROP.has("intent")) {
       const intent = this.propValue("intent");
-      control.setAttribute("role", intent === "danger" ? "alert" : "status");
+      control.setAttribute("role", intent === "danger" || intent === "warning" ? "alert" : "status");
     }
     if (HAS_PROP.has("kind")) {
       const kind = this.propValue("kind");

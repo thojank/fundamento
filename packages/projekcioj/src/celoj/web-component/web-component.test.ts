@@ -1110,7 +1110,7 @@ describe("Web Component Celo for the avizo (Spec 011 ③)", () => {
     expect(element).toContain('<span part="message" id="message"><slot></slot></span>');
     expect(element).toContain('<fm-butono part="dismiss" emphasis="low" size="small" hidden>');
     expect(element).toContain(
-      'control.setAttribute("role", intent === "danger" ? "alert" : "status")',
+      'control.setAttribute("role", intent === "danger" || intent === "warning" ? "alert" : "status")',
     );
     expect(element).toContain('new CustomEvent("dismiss"');
     expect(element).toContain("static formAssociated = false;");
