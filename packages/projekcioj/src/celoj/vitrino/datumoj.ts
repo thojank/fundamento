@@ -30,6 +30,7 @@ import {
 } from "@fundamento/modelo";
 import type { CeloInput } from "../../build.js";
 import { BAZOJ_TEKSTOJ, bazojDatumoj, type VitrinoBazoj } from "./bazoj.js";
+import { DOKU_TEKSTOJ } from "./doku.js";
 
 const PALETTE = /^color\.palette\.([a-z0-9-]+)\.(\d+)$/;
 const SURFACES = [
@@ -82,6 +83,8 @@ export interface VitrinoMezuro {
 export const VITRINO_TEKSTOJ: Readonly<Record<string, { de?: string; en: string }>> = {
   // Spec 029 ① 5: the headings, texts and column heads of the foundation pages, German and English.
   ...BAZOJ_TEKSTOJ,
+  // Spec 036 Teil 5 ③: the headings and words of the documentation of every Ero.
+  ...DOKU_TEKSTOJ,
   werkstatt: { en: "Workshop" },
   paletroj: { en: "Palettes" },
   roloj: { en: "Surfaces, text, status and actions" },
