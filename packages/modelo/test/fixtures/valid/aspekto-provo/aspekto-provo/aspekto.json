@@ -65,7 +65,8 @@
       "edit": "pencil-simple",
       "first": "caret-line-left",
       "last": "caret-line-right",
-      "person": "user"
+      "person": "user",
+      "download": "download-simple"
     }
   },
   "agordilo": {
@@ -73,7 +74,7 @@
     "structure": {
       "vortaro": "0.2.0",
       "reference": "komuna",
-      "sha256": "92ce7ef7ecca92359b1d7268c6a974fe69040a49ea2618d8f30203d16f746752"
+      "sha256": "87eeca4a62bb5afe8cb1e3e5dbe79c48f95498df55ee106b2486e07580156968"
     },
     "agordo": {
       "name": "provo",

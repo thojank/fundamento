@@ -37,6 +37,7 @@
     "edit": "pencil-simple",
     "first": "caret-line-left",
     "last": "caret-line-right",
-    "person": "user"
+    "person": "user",
+    "download": "download-simple"
   }
 }

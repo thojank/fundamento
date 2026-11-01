@@ -4,7 +4,7 @@
     "id": "uzo_01M4RYCXT5HJ3776EF81MZABY4",
     "ero": "ero_01M4RYCX28WNYSGMANDBK8TK04",
     "skemo": "ske_01M4RYCXE78XSCQ4Q4V8WA4FZH",
-    "purpose": "Moves to another view or place: it opens an overview, a detail, a document or an outside site; an icon may stand before the words (slot icon-start).",
+    "purpose": "Moves to another view or place: it opens an overview, a detail, a document or an outside site; an icon may stand before the words (slot icon-start); with download it hands over a file instead, marked, the label names its type and size.",
     "instead": [
       {
         "goal": "action",
@@ -52,20 +52,6 @@
           ]
         },
         "kialo": "A link that looks like a button is read as an action, because the shape promises one; whether a brand wants that is a decision of a person, not of the Ero."
-      },
-      {
-        "case": "download",
-        "action": "ask-human",
-        "keywords": {
-          "en": [
-            "download"
-          ],
-          "de": [
-            "download",
-            "herunterladen"
-          ]
-        },
-        "kialo": "A download does not leave the view and needs a mark with type and size, because the person decides before the file arrives; Fundamento has no such mark yet."
       },
       {
         "case": "disabled-link",

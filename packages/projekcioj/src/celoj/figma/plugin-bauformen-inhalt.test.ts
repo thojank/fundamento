@@ -1653,13 +1653,14 @@ describe("icons are drawn from the glyphs of every Aspekto and switch with the b
     return { double, report, setOf };
   });
 
-  it("the set ikono: 480 variants, each the control with one glyph frame per Aspekto, visible by the brand variable, filled in the bound colour, sized by the token", async () => {
+  // Spec 036 Teil 5 ②b-4 (A-ligilo-6): 500 with download.
+  it("the set ikono: 500 variants, each the control with one glyph frame per Aspekto, visible by the brand variable, filled in the bound colour, sized by the token", async () => {
     const { setOf, report } = await drawn();
     const set = setOf("ikono");
     // Spec 025 ①: nineteen names (add, subtract) × 3 sizes × 5 intents; Spec 036 Teil 5 ②b-2
     // (A-ikono-2): 21 names × 4 sizes × 5 intents; Spec 036 Teil 5 ②b-3: 24 names (person, first,
     // last).
-    expect(set?.children).toHaveLength(480);
+    expect(set?.children).toHaveLength(500);
     const variant = set?.children.find(
       (child) => child.name === "name=close, size=medium, intent=neutral, state=rest",
     );

@@ -46,6 +46,12 @@
         "name": "label",
         "kind": "string",
         "description": "Accessible name when the label slot is empty (icon-only); never shown."
+      },
+      {
+        "name": "download",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②a (A-ligilo-6, download decided): the target is a file the link hands over; the person stays in the view. Marked visibly (the ikono download where the slot icon-end is empty) and audibly (a11y.texts download); the label names the file, its type and size („Bericht (PDF, 2 MB)“). Never external: a download stays in the view."
       }
     ],
     "states": [
@@ -340,6 +346,10 @@
         "external": {
           "de": "öffnet extern",
           "en": "opens external"
+        },
+        "download": {
+          "de": "lädt herunter",
+          "en": "downloads"
         }
       }
     },
@@ -377,6 +387,34 @@
           "external": true
         },
         "regulo": "external-link-marked"
+      },
+      {
+        "goal": "download",
+        "keywords": {
+          "en": [
+            "download"
+          ],
+          "de": [
+            "download",
+            "herunterladen"
+          ]
+        },
+        "props": {
+          "download": true
+        }
+      }
+    ],
+    "constraints": [
+      {
+        "when": {
+          "download": "true"
+        },
+        "allowed": {
+          "external": [
+            "false"
+          ]
+        },
+        "kialo": "A download hands a file over and leaves the person where they are, because the browser keeps the view; a target outside the application would open another site, and a browser does not download from there."
       }
     ]
   }

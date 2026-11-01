@@ -1,5 +1,5 @@
 {
-  "source": "packages/modelo/test/fixtures/valid/aspekto-provo/aspekto-provo auf main ac5deb3 (Spec 016, Agordilo Stufe 1); Prüfsummen nach O-1 (Spec 024, die Stufen 25, 150, 850, 975 der farbigen Paletten) neu gerechnet; nach Spec 025 ① (Glyphen add und subtract der Ikonaro) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (elekto, markobutono und sxaltilo ohne die Größe large) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (Zähler des tekstareo) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (drei Größen bei listelektilo, plurelektilo, datelektilo) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (Einheit des kampo) neu gerechnet; Spec 036 Teil 5 ②b-2 (S36-4.2): Größen; Spec 036 Teil 5 ②b-2 (S36-4.2): Darstellung; Spec 036 Teil 5 ②b-2 (S36-4.2): Dichte, Linien, kompakt, label; Spec 036 Teil 5 ②b-2 (S36-4.2): summary der Seitenleiste; Spec 036 Teil 5 ②b-2 (S36-4.2): max-entries der Attributliste; Spec 036 Teil 5 ②b-2 (S36-4.2): Wertanzeige und Spannen; Spec 036 Teil 5 ②b-3 (S36-4.3): help, option-description; Spec 036 Teil 5 ②b-3 (S36-4.3): tick, Upload-Icon; Spec 036 Teil 5 ②b-3 (S36-4.3): Gruppen, Trenner, alle wählen; Spec 036 Teil 5 ②b-3 (S36-4.3): Menü; Spec 036 Teil 5 ②b-3 (S36-4.3): Navigation; Spec 036 Teil 5 ②b-3 (S36-4.3): max-lines; Spec 036 Teil 5 ②b-3 (S36-4.4): Icon am Anfang; Spec 036 Teil 5 ②b-3 (S36-4.4): Überschriften, Symbol, Fuß, Schließen; Spec 036 Teil 5 ②b-3 (S36-4.4): Standard-Symbol, erste und letzte Seite",
+  "source": "packages/modelo/test/fixtures/valid/aspekto-provo/aspekto-provo auf main ac5deb3 (Spec 016, Agordilo Stufe 1); Prüfsummen nach O-1 (Spec 024, die Stufen 25, 150, 850, 975 der farbigen Paletten) neu gerechnet; nach Spec 025 ① (Glyphen add und subtract der Ikonaro) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (elekto, markobutono und sxaltilo ohne die Größe large) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (Zähler des tekstareo) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (drei Größen bei listelektilo, plurelektilo, datelektilo) neu gerechnet; nach Spec 036 Teil 5 ②b-2 (Einheit des kampo) neu gerechnet; Spec 036 Teil 5 ②b-2 (S36-4.2): Größen; Spec 036 Teil 5 ②b-2 (S36-4.2): Darstellung; Spec 036 Teil 5 ②b-2 (S36-4.2): Dichte, Linien, kompakt, label; Spec 036 Teil 5 ②b-2 (S36-4.2): summary der Seitenleiste; Spec 036 Teil 5 ②b-2 (S36-4.2): max-entries der Attributliste; Spec 036 Teil 5 ②b-2 (S36-4.2): Wertanzeige und Spannen; Spec 036 Teil 5 ②b-3 (S36-4.3): help, option-description; Spec 036 Teil 5 ②b-3 (S36-4.3): tick, Upload-Icon; Spec 036 Teil 5 ②b-3 (S36-4.3): Gruppen, Trenner, alle wählen; Spec 036 Teil 5 ②b-3 (S36-4.3): Menü; Spec 036 Teil 5 ②b-3 (S36-4.3): Navigation; Spec 036 Teil 5 ②b-3 (S36-4.3): max-lines; Spec 036 Teil 5 ②b-3 (S36-4.4): Icon am Anfang; Spec 036 Teil 5 ②b-3 (S36-4.4): Überschriften, Symbol, Fuß, Schließen; Spec 036 Teil 5 ②b-3 (S36-4.4): Standard-Symbol, erste und letzte Seite; S36-4.5 ②b-4 A-ligilo-6 Ikonaro download",
   "agordo": {
     "name": "provo",
     "owner": "Provo (fictitious, test only)",
@@ -28,7 +28,7 @@
   },
   "sha256": {
     "$themes.json": "32d20d206abf9b832c41c26c654fb33aef9694a5661ff89655091a4aae9931d3",
-    "aspekto.json": "945f79f915fdfeea21f58f2becf3c24c308304e918532c8a282c456621c1879e",
+    "aspekto.json": "dd6c356e623c945c56190c03728a4fabef893b5daebc334461fd6a0a28b1772b",
     "ids.lock.json": "19279ae73d078332a67f90d7e401fa8878e9fc7794e8496809c133730e1e564e",
     "ikonoj/LICENSE": "ddbe6082ec3cf979db47e5af549d2849c5d6182b3e005ef91ce1dbb9eb122f11",
     "ikonoj/add.svg": "4baa2c668c8800442d47ab39d716e35142c125a9146efefa50f701e9622f2000",
@@ -40,6 +40,7 @@
     "ikonoj/close.svg": "9bb4679a52d3dee72b089839cb2cc8e0475be4d9ca1c522d5c3c39d05b6e394a",
     "ikonoj/collapse.svg": "c5373aea766baa7578ed292adaefc3457646cebe103da68116a6949d859f8e03",
     "ikonoj/danger.svg": "191d6bf1b82bc9914f8c10323839df826e665281ff96bd92834289ab5b4c9478",
+    "ikonoj/download.svg": "cc87a34e1dd4fd571e0dcc9b6ccacc94f025d2774d2b7d3cfdb544af80b64763",
     "ikonoj/edit.svg": "68ed57acfc2c68b1d526d48a45eccb96929205e3798679243005a3df014ee1fd",
     "ikonoj/expand.svg": "5cf8f13effa4a620f3cc17e86f6199a04035431d0a5c47d1d6b12451d4a74b14",
     "ikonoj/external.svg": "11966b513a1e2af09645cf7a5867a2664bbd190658bd4281f8cb1f76cce39267",
