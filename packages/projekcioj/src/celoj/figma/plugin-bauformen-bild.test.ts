@@ -166,6 +166,17 @@ const WANTED_2B2: Readonly<Record<string, readonly { befund: string; match?: str
   teksto: [{ befund: "②b-2 A-teksto-1: kind label.", match: "kind=label" }],
 };
 
+/**
+ * Spec 036 Teil 5 ②b-3 (S36-4.3): the wanted changes of the new parts and slots, per set – kept
+ * beside WANTED and WANTED_2B2, so the merge with ②b-2 and Teil 1 stays free of conflicts.
+ */
+const WANTED_2B3: Readonly<Record<string, readonly { befund: string; match?: string }[]>> = {
+  // A-markobutono-4, A-sxaltilo-4: every variant shows the help under its label (BOOLEAN help, on
+  // by default as at the fields); the variants grow by its line, the set lies anew.
+  markobutono: [{ befund: "②b-3 A-markobutono-4: help under the label." }],
+  sxaltilo: [{ befund: "②b-3 A-sxaltilo-4: help under the label." }],
+};
+
 /** One run of the plan in the double, read by every case (Vitest collects nothing here). */
 async function draw() {
   const double = modelDouble();
@@ -233,7 +244,7 @@ describe("the sets in their default size look as on main (Spec 027, Abnahme 3)",
         }
         const stretched = STRETCHED[name];
         if (stretched !== undefined && variant.includes(stretched.match)) return true;
-        return (WANTED_2B2[name] ?? []).some(
+        return [...(WANTED_2B2[name] ?? []), ...(WANTED_2B3[name] ?? [])].some(
           (change) => change.match === undefined || variant.includes(change.match),
         );
       };
@@ -244,7 +255,8 @@ describe("the sets in their default size look as on main (Spec 027, Abnahme 3)",
       const whole =
         WANTED[name] !== undefined ||
         STRETCHED[name] !== undefined ||
-        WANTED_2B2[name] !== undefined;
+        WANTED_2B2[name] !== undefined ||
+        WANTED_2B3[name] !== undefined;
       if (now?.set !== before.set && !whole) differing.push(`${name}: Lage der Varianten`);
     }
     expect(differing).toEqual([]);
