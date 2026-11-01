@@ -249,3 +249,19 @@ describe("②b-3 A-navigado-1, A-navigado-4: section-heading, icon-start", () =>
     expect(tokensOf(briefOf(entryOf("navigado")))).toBeLessThan(750);
   });
 });
+
+/** A-teksto-1 (moved from ②b-2, D-S36-4.2-6): max-lines; the tooltip on truncation is A-teksto-4. */
+describe("②b-3 A-teksto-1: max-lines", () => {
+  it("teksto: max-lines a number, the last prop; named in de and en", () => {
+    const { skemo } = entryOf("teksto");
+    expect(skemo.props.at(-1)).toMatchObject({ name: "max-lines", kind: "number" });
+    expect(tradukoOf("teksto", "props/max-lines", "de")).toBe("Höchstzahl der Zeilen");
+    expect(tradukoOf("teksto", "props/max-lines", "en")).toBe("Maximum lines");
+  });
+
+  it("teksto: the brief names max-lines and stays under 750", () => {
+    const brief = briefOf(entryOf("teksto"));
+    expect(brief.props).toContainEqual({ name: "max-lines", type: "number" });
+    expect(tokensOf(brief)).toBeLessThan(750);
+  });
+});

@@ -153,3 +153,11 @@ describe("②b-3 A-navigado-4 in Figma: section headings and icons stand with th
     },
   );
 });
+
+describe("②b-3 A-teksto-1 in Figma: max-lines a number of the set", () => {
+  it("teksto: max-lines is a NUMBER property, no axis of the variants", () => {
+    const set = setOf("teksto");
+    expect(set.properties["max-lines"]).toBe("NUMBER");
+    expect(set.variants.some((variant) => "max-lines" in variant.props)).toBe(false);
+  });
+});

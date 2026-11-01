@@ -322,3 +322,31 @@ test.describe("②b-3 A-navigado-1, A-navigado-4: section headings and icons", (
     await expect(link).toHaveAccessibleName("Tokens");
   });
 });
+
+test.describe("②b-3 A-teksto-1: max-lines", () => {
+  const LONG =
+    "Fundamento beschreibt jede Komponente einmal im Modelo und leitet daraus Web, Figma und Dokumentation ab, damit sie nie auseinanderlaufen und jede Marke ihre eigenen Werte trägt.";
+  test("a long text stands on at most max-lines lines; it is heard in full", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      `<div style="inline-size: 12rem"><fm-teksto id="kurz" max-lines="2">${LONG}</fm-teksto><fm-teksto id="lang">${LONG}</fm-teksto></div>`,
+    );
+    const lines = (selector: string) =>
+      page.locator(selector).evaluate((host) => {
+        const control = host.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+        const height = control.getBoundingClientRect().height;
+        const line = Number.parseFloat(getComputedStyle(control).lineHeight);
+        return {
+          lines: Math.round(height / line),
+          clipped: control.scrollHeight > control.clientHeight + 1,
+        };
+      });
+    const short = await lines("#kurz");
+    const long = await lines("#lang");
+    expect(short.lines).toBe(2);
+    expect(short.clipped).toBe(true);
+    expect(long.lines).toBeGreaterThan(2);
+    await expect(page.locator("#kurz")).toHaveText(LONG);
+  });
+});
