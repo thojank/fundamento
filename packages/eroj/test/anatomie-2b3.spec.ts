@@ -616,3 +616,42 @@ test.describe("②b-3 A-pagxigilo-4: first and last", () => {
     await expect(host.locator('[part="item"]').first()).toHaveAttribute("data-arrow", "prev");
   });
 });
+
+test.describe("②b-3 A-teksto-4: the tooltip on truncation", () => {
+  const WHOLE =
+    "Fundamento beschreibt jede Komponente einmal im Modelo und leitet daraus Web, Figma und Dokumentation ab, damit sie nie auseinanderlaufen und jede Marke ihre eigenen Werte trägt.";
+  test("a cut text shows itself whole in a tooltip on hover and on focus; Escape hides it; heard once", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      `<div style="inline-size: 12rem"><fm-teksto id="kurz" max-lines="2">${WHOLE}</fm-teksto><fm-teksto id="ganz" max-lines="40">${WHOLE}</fm-teksto></div>`,
+    );
+    const control = page.locator("#kurz").locator('[part="control"]');
+    const tip = page.locator("#kurz").locator("fm-konsileto");
+    await control.hover();
+    await expect(tip).toBeVisible();
+    await expect(tip).toHaveText(WHOLE);
+    await page.mouse.move(0, 0);
+    await expect(tip).toBeHidden();
+    await page.keyboard.press("Tab");
+    await expect(tip).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(tip).toBeHidden();
+    // The whole text is in the tree already: the tooltip describes nothing.
+    await expect(control).toHaveAccessibleDescription("");
+  });
+
+  test("a text that is not cut has no tooltip and takes no focus", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      `<div style="inline-size: 12rem"><fm-teksto id="ganz" max-lines="40">${WHOLE}</fm-teksto><fm-teksto id="frei">${WHOLE}</fm-teksto></div>`,
+    );
+    for (const id of ["#ganz", "#frei"]) {
+      await expect(page.locator(id).locator("fm-konsileto")).toHaveCount(0);
+      expect(await page.locator(id).locator('[part="control"]').getAttribute("tabindex")).toBeNull();
+    }
+  });
+});

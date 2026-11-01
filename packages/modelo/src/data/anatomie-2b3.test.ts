@@ -516,3 +516,21 @@ describe("②b-3 A-pagxigilo-4: first, last", () => {
     expect(tokensOf(brief)).toBeLessThan(750);
   });
 });
+
+/** A-teksto-4: with max-lines the tooltip on truncation – a konsileto the teksto composes. */
+describe("②b-3 A-teksto-4: the tooltip on truncation", () => {
+  it("teksto: composes the konsileto for the text it cuts; no part and no token of its own", () => {
+    const { skemo, uzo } = entryOf("teksto");
+    expect(uzo?.composes.with.map((entry) => entry.ero)).toContain("konsileto");
+    expect(Object.keys(skemo.parts)).toEqual(["text"]);
+  });
+
+  it("teksto: the Uzo says so in en and de; brief under 750", () => {
+    const { uzo } = entryOf("teksto");
+    expect(uzo?.purpose).toContain("max-lines");
+    const id = uzo?.id ?? "";
+    expect(modelo.tradukoj?.de?.[`${id}/composes/with/konsileto/kialo`]).toBeTruthy();
+    expect(modelo.tradukoj?.de?.[`${id}/purpose`]).toContain("max-lines");
+    expect(tokensOf(briefOf(entryOf("teksto")))).toBeLessThan(750);
+  });
+});
