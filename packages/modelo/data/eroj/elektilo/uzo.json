@@ -312,8 +312,8 @@
           "Enter"
         ],
         "action": {
-          "de": "Öffnet die Liste oder übernimmt die markierte Option.",
-          "en": "Opens the list or takes the marked option."
+          "de": "In der offenen Liste übernimmt die Taste die markierte Option und schließt die Liste.",
+          "en": "In the open list the key takes the marked option and closes the list."
         }
       },
       {
