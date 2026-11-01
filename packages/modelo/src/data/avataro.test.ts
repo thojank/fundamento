@@ -68,7 +68,8 @@ describe("avataro in the repo Modelo (section ③, G1, G2)", () => {
   });
 
   it("names its parts: the round image, the initials on the sunken ground in the subtle text, the box by size — no new token, no colour from the name (E1, E8)", () => {
-    expect(Object.keys(skemo?.parts ?? {})).toEqual(["image", "initials", "box"]);
+    // Spec 036 Teil 5 ②b-3 (A-avataro-4): the default icon.
+    expect(Object.keys(skemo?.parts ?? {})).toEqual(["image", "initials", "box", "icon"]);
     // Spec 036 Teil 5 ②b-2 (A-avataro-1): the radii by corner, round what they were.
     const bound = (part: string, property: string, size = "medium") =>
       boundToken(skemoOrThrow(), part, property, { size, corner: "round" })?.token;
@@ -121,7 +122,10 @@ describe("avataro in the repo Modelo (section ③, G1, G2)", () => {
 
 describe("the Uzo of the avataro (section ③, G2)", () => {
   it("states the purpose; a status is the insigno's, a logo a person's; a group and a presence dot ask a person", () => {
-    expect(uzo?.purpose).toBe("Represents a person or thing with a picture or initials.");
+    // Spec 036 Teil 5 ②b-3 (A-avataro-4).
+    expect(uzo?.purpose).toBe(
+      "Represents a person or thing with a picture or initials; without a name it shows the outline of a person (the ikono person).",
+    );
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["status", "insigno"],
       ["logo", null],

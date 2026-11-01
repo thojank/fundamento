@@ -90,8 +90,9 @@ describe("Spec 029 ① 5: the foundation pages", () => {
     // the icon and the heading of a group of the menuo (+5); the section heading and the icon of
     // the navigado (+5). S36-4.4: the gap of the insigno and the icon of the spuro (+3); the titles
     // of atributlisto and plenstato, the icon of the plenstato, the foot of the tabelo and the
-    // close button of the sxvebilo (+10).
-    expect(tokenoj.length).toBe(2032);
+    // close button of the sxvebilo (+10); the default icon of the avataro and the first and last of
+    // the pagxigilo (+10).
+    expect(tokenoj.length).toBe(2042);
     const levels = new Set(tokenoj.map((token) => token.ebeno));
     expect(levels).toEqual(new Set(["grundlage", "rolle", "ero"]));
     const text = tokenoj.find((token) => token.name === "color.text.default");

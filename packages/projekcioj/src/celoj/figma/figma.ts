@@ -230,6 +230,11 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   "tabelo:foot": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
   // A-sxvebilo-4: the close button stands with dismissible only, a property.
   "sxvebilo:close": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  // A-avataro-4: the default icon stands where no name is given; A-pagxigilo-4: first and last
+  // stand with first-last only.
+  "avataro:icon": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  "pagxigilo:first": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  "pagxigilo:last": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
   // A-navigado-1, A-navigado-4: the heading of a section and the icon of an item stand with the
   // headings and icons a navigation holds.
   "navigado:section-heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",

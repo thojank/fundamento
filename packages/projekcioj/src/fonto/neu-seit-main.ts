@@ -246,6 +246,13 @@ const REST_2B3 = (() => {
         "^ero\\.(atributlisto|plenstato)\\.heading\\.(color|typography)$|^ero\\.plenstato\\.icon\\.(size|color)$|^ero\\.tabelo\\.foot\\.(fill|color|typography)$|^ero\\.sxvebilo\\.close\\.size$",
       added: 2 + 2 + 2 + 3 + 1,
     },
+    // S36-4.4 A-avataro-4 (the default icon: its size by size, 5, and its colour, 1), A-pagxigilo-4
+    // (first and last: their size by size, 2 × 2).
+    {
+      pattern:
+        "^ero\\.avataro\\.icon\\.(color|size\\.size\\.(x\\.small|small|medium|large|x\\.large))$|^ero\\.pagxigilo\\.(first|last)\\.size\\.size\\.(small|medium)$",
+      added: 5 + 1 + 4,
+    },
   ];
   const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
   return {

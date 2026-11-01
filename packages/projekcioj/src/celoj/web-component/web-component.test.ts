@@ -2165,7 +2165,8 @@ describe("Web Component Celo for the avataro (Spec 015 ③)", () => {
   it("renders the image named by the name with the picture and the initials inside; graphemes by Intl.Segmenter; no colour from the name", () => {
     const element = files["eroj/src/generated/fm-avataro.ts"] ?? "";
     expect(element).toContain(
-      '<span part="control"><img part="image" alt="" hidden><span part="initials" aria-hidden="true"></span></span>',
+      // Spec 036 Teil 5 ②b-3 (A-avataro-4): and the default icon, hidden until no name is given.
+      '<span part="control"><img part="image" alt="" hidden><span part="initials" aria-hidden="true"></span><fm-ikono part="icon" name="person" aria-hidden="true" hidden></fm-ikono></span>',
     );
     expect(element).toContain('control.setAttribute("role", "img");');
     expect(element).toContain('control.setAttribute("aria-label", avatarName);');

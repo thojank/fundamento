@@ -2801,6 +2801,38 @@
             }
           }
         }
+      },
+      "icon": {
+        "size": {
+          "size": {
+            "x": {
+              "small": {
+                "$type": "dimension",
+                "$value": "{size.scale.100}"
+              },
+              "large": {
+                "$type": "dimension",
+                "$value": "{size.scale.800}"
+              }
+            },
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.scale.100}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.icon.small}"
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{size.icon.large}"
+            }
+          }
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.subtle}"
+        }
       }
     },
     "avizo": {
@@ -8433,6 +8465,34 @@
           "color": {
             "$type": "color",
             "$value": "{color.focus.inner}"
+          }
+        }
+      },
+      "first": {
+        "size": {
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.icon.small}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.icon.medium}"
+            }
+          }
+        }
+      },
+      "last": {
+        "size": {
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.icon.small}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.icon.medium}"
+            }
           }
         }
       }

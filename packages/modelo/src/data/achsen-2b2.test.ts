@@ -782,7 +782,8 @@ describe("②b-2 A-faldilo-1, A-konsileto-1, A-menuo-1, A-sxvebilo-1, A-langetar
 describe("②b-2 A-pagxigilo-1: summary", () => {
   it("pagxigilo: summary pages | count | compact, default pages, the last prop; a part summary", () => {
     const { skemo } = entryOf("pagxigilo");
-    expect(skemo.props.at(-1)).toMatchObject({
+    // Spec 036 Teil 5 ②b-3 (A-pagxigilo-4): first-last came after it, as the last prop.
+    expect(skemo.props.at(-2)).toMatchObject({
       name: "summary",
       kind: "enum",
       values: ["pages", "count", "compact"],

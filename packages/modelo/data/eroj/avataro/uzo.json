@@ -4,7 +4,7 @@
     "id": "uzo_01M58G3DF0HATBVQF8VQ1S09F4",
     "ero": "ero_01M58G3CNE0MHGRKAJ23VNJ6P9",
     "skemo": "ske_01M58G3D1F5ABHWV5AGSE09QBV",
-    "purpose": "Represents a person or thing with a picture or initials.",
+    "purpose": "Represents a person or thing with a picture or initials; without a name it shows the outline of a person (the ikono person).",
     "instead": [
       {
         "goal": "status",

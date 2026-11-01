@@ -156,6 +156,8 @@ describe("the Uzo of the ikono (section ②, G6)", () => {
       "listelektilo",
       "plurelektilo",
       "lokredaktilo",
+      // Spec 036 Teil 5 ②b-3 (A-avataro-4): the default icon person.
+      "avataro",
     ]);
     expect(uzo?.slots).toEqual({});
     expect(uzo?.layout).toEqual({ size: "content", wrap: "never" });

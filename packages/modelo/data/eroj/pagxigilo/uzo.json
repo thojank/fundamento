@@ -4,7 +4,7 @@
     "id": "uzo_01M56F6FRPJ40E4HBAX500W489",
     "ero": "ero_01M56F6F0ZVC9VKZS57S5K58CH",
     "skemo": "ske_01M56F6FCXT3N0K796HNN80PD5",
-    "purpose": "Moves through the pages of a long list and shows which page is current.",
+    "purpose": "Moves through the pages of a long list and shows which page is current; with first-last it jumps to the first and the last page.",
     "instead": [
       {
         "goal": "load-more",

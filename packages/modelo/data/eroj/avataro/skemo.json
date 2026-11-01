@@ -87,6 +87,16 @@
             "size"
           ]
         }
+      },
+      "icon": {
+        "size": {
+          "by": [
+            "size"
+          ]
+        },
+        "color": {
+          "fixed": "color.text.subtle"
+        }
       }
     },
     "bindings": [
@@ -217,6 +227,46 @@
           "corner": "square"
         },
         "token": "radius.none"
+      },
+      {
+        "part": "icon",
+        "property": "size",
+        "when": {
+          "size": "x-small"
+        },
+        "token": "size.scale.100"
+      },
+      {
+        "part": "icon",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.scale.100"
+      },
+      {
+        "part": "icon",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "icon",
+        "property": "size",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.icon.large"
+      },
+      {
+        "part": "icon",
+        "property": "size",
+        "when": {
+          "size": "x-large"
+        },
+        "token": "size.scale.800"
       }
     ],
     "a11y": {

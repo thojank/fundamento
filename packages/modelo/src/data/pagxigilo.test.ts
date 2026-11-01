@@ -50,6 +50,8 @@ describe("pagxigilo in the repo Modelo (section ①, G1, G2)", () => {
       ["size", "enum", false, "medium"],
       // Spec 036 Teil 5 ②b-2 (A-pagxigilo-1): what stands between the arrows.
       ["summary", "enum", false, "pages"],
+      // Spec 036 Teil 5 ②b-3 (A-pagxigilo-4): the buttons to the first and the last page.
+      ["first-last", "boolean", false, false],
     ]);
     expect(skemo?.props.find((prop) => prop.name === "mode")?.values).toEqual(["button", "link"]);
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled"]);
@@ -76,6 +78,9 @@ describe("pagxigilo in the repo Modelo (section ①, G1, G2)", () => {
       "next",
       "box",
       "focus-ring",
+      // Spec 036 Teil 5 ②b-3 (A-pagxigilo-4).
+      "first",
+      "last",
     ]);
     expect(skemo?.parts.item).toMatchObject({
       fill: { by: ["current", "state"] },
@@ -129,6 +134,9 @@ describe("pagxigilo in the repo Modelo (section ①, G1, G2)", () => {
           de: "Seite {page} von {total-pages}",
           en: "Page {page} of {total-pages}",
         },
+        // Spec 036 Teil 5 ②b-3 (A-pagxigilo-4).
+        "first-name": { de: "Erste Seite", en: "First page" },
+        "last-name": { de: "Letzte Seite", en: "Last page" },
       },
     });
   });
@@ -145,7 +153,8 @@ describe("pagxigilo in the repo Modelo (section ①, G1, G2)", () => {
 describe("the Uzo of the pagxigilo (section ①, G2)", () => {
   it("states the purpose; more on demand is a butono, views are the langetaro's; infinite scroll and the page size ask", () => {
     expect(uzo?.purpose).toBe(
-      "Moves through the pages of a long list and shows which page is current.",
+      // Spec 036 Teil 5 ②b-3 (A-pagxigilo-4).
+      "Moves through the pages of a long list and shows which page is current; with first-last it jumps to the first and the last page.",
     );
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["load-more", "butono"],
