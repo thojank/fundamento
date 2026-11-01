@@ -204,3 +204,24 @@ describe("②b-3 A-sxvebilo-4 in Figma: dismissible a property, the close stands
     expectNotDrawn("sxvebilo:close");
   });
 });
+
+describe("②b-3 Ikonaro in Figma: the ikono set draws person, first and last", () => {
+  it("the name property of the ikono set takes the three", () => {
+    expect(setOf("ikono").properties.name).toEqual(
+      expect.arrayContaining(["person", "first", "last"]),
+    );
+  });
+});
+
+describe("②b-3 A-avataro-4, A-pagxigilo-4 in Figma: parts by a property value", () => {
+  it.each(["avataro:icon", "pagxigilo:first", "pagxigilo:last"])(
+    "%s has no node and names its Jugxo",
+    (key) => {
+      expectNotDrawn(key);
+    },
+  );
+
+  it("pagxigilo: first-last is a BOOLEAN of the set", () => {
+    expect(setOf("pagxigilo").properties["first-last"]).toBe("BOOLEAN");
+  });
+});
