@@ -226,23 +226,114 @@
         }
       }
     ],
-    "when-not": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "when-not": [
+      {
+        "case": {
+          "de": "Es gibt höchstens fünf Optionen, die alle sichtbar bleiben können.",
+          "en": "There are at most five options, which can all stay visible."
+        },
+        "ero": "elekto"
+      },
+      {
+        "case": {
+          "de": "Die Liste ist lang und die Person kennt einen Teil des Worts, das sie sucht.",
+          "en": "The list is long and the person knows a part of the word they look for."
+        },
+        "ero": "kompletigilo"
+      },
+      {
+        "case": {
+          "de": "Mehrere Werte aus derselben Liste sollen gewählt werden.",
+          "en": "Several values from the same list are to be chosen."
+        },
+        "ero": "plurelektilo"
+      },
+      {
+        "case": {
+          "de": "Die Optionen brauchen ein Symbol oder eine Beschreibung neben dem Wort.",
+          "en": "The options need an icon or a description beside the word."
+        },
+        "ero": "listelektilo"
       }
-    },
+    ],
     "do-dont": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
-      }
+      "do": [
+        {
+          "de": "Zeig immer eine sichtbare Beschriftung, die sagt, was gewählt wird.",
+          "en": "Always show a visible label that says what is chosen."
+        },
+        {
+          "de": "Fasse verwandte Optionen mit group unter einer Überschrift zusammen.",
+          "en": "Gather related options with group under a heading."
+        },
+        {
+          "de": "Nimm empty-label, wenn „keine Auswahl“ selbst eine gültige Antwort ist.",
+          "en": "Use empty-label when “no choice” is a valid answer itself."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Einen Platzhalter und empty-label zugleich setzen, denn beide stehen für „nichts gewählt“.",
+          "en": "Set a placeholder and empty-label at once, because both stand for “nothing chosen”."
+        },
+        {
+          "de": "Zwei Optionen mit demselben Wortlaut anbieten.",
+          "en": "Offer two options with the same wording."
+        },
+        {
+          "de": "Den Platzhalter als Beschriftung benutzen, denn er verschwindet, sobald gewählt ist.",
+          "en": "Use the placeholder as the label, because it disappears once something is chosen."
+        }
+      ]
     },
-    "keyboard": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "keyboard": [
+      {
+        "keys": [
+          "ArrowUp",
+          "ArrowDown"
+        ],
+        "action": {
+          "de": "Gehen zur vorigen oder nächsten Option, je nach Plattform öffnen sie zuerst die Liste; bei readonly ändert keine Taste den Wert.",
+          "en": "Move to the previous or next option, depending on the platform they open the list first; with readonly no key changes the value."
+        }
+      },
+      {
+        "keys": [
+          "Home",
+          "End"
+        ],
+        "action": {
+          "de": "Springen zur ersten oder letzten Option.",
+          "en": "Jump to the first or last option."
+        }
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": {
+          "de": "Öffnet die Liste oder übernimmt die markierte Option.",
+          "en": "Opens the list or takes the marked option."
+        }
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": {
+          "de": "Schließt die offene Liste, ohne die Wahl zu ändern.",
+          "en": "Closes the open list without changing the choice."
+        }
+      },
+      {
+        "keys": [
+          "Character"
+        ],
+        "action": {
+          "de": "Getippte Buchstaben springen zur Option, die mit ihnen beginnt.",
+          "en": "Typed letters jump to the option that starts with them."
+        }
       }
-    }
+    ]
   }
 }

@@ -199,22 +199,66 @@
         }
       }
     ],
-    "when-not": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "when-not": [
+      {
+        "case": {
+          "de": "Der Zustand braucht einen ganzen Satz, der erklärt.",
+          "en": "The state needs a whole sentence that explains."
+        },
+        "ero": "avizo"
+      },
+      {
+        "case": {
+          "de": "Das Etikett soll sich wählen oder entfernen lassen.",
+          "en": "The tag is to be chosen or removed."
+        },
+        "ero": "signeto"
+      },
+      {
+        "case": {
+          "de": "Ein Klick auf das Etikett soll etwas auslösen.",
+          "en": "A click on the badge is to start something."
+        },
+        "ero": "butono"
+      },
+      {
+        "case": {
+          "de": "Ein Wert liegt in einem Bereich mit Skala.",
+          "en": "A value lies in a range with a scale."
+        },
+        "ero": "mezurilo"
       }
-    },
+    ],
     "do-dont": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
-      }
+      "do": [
+        {
+          "de": "Sag den Zustand in ein bis drei Wörtern.",
+          "en": "Say the state in one to three words."
+        },
+        {
+          "de": "Nimm intent neutral für eine bloße Tatsache wie Entwurf.",
+          "en": "Use intent neutral for a plain fact such as draft."
+        },
+        {
+          "de": "Setz ein Symbol vor die Wörter, wenn der Zustand mehr als Farbe zeigen soll.",
+          "en": "Put an icon before the words when the state should show more than colour."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Nur einen Punkt oder nur eine Zahl ohne Wort zeigen.",
+          "en": "Show only a dot or only a number without a word."
+        },
+        {
+          "de": "Die Markenfarbe als Zustand nehmen, denn sie sagt keinen.",
+          "en": "Use the brand colour as a state, because it says none."
+        }
+      ]
     },
     "keyboard": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+      "none": {
+        "de": "Das Etikett nimmt weder den Fokus noch eine Taste; es wird mit dem Text gelesen, neben dem es steht.",
+        "en": "The badge takes neither the focus nor a key; it is read with the text it stands beside."
       }
     }
   }

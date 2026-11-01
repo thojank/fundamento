@@ -391,23 +391,102 @@
         }
       }
     ],
-    "when-not": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "when-not": [
+      {
+        "case": {
+          "de": "Der Text läuft über mehrere Zeilen.",
+          "en": "The text runs over several lines."
+        },
+        "ero": "tekstareo"
+      },
+      {
+        "case": {
+          "de": "Die Antwort ist eine von wenigen festen Optionen.",
+          "en": "The answer is one of a few fixed options."
+        },
+        "ero": "elekto"
+      },
+      {
+        "case": {
+          "de": "Beim Tippen sollen passende Vorschläge erscheinen.",
+          "en": "Matching suggestions are to appear while typing."
+        },
+        "ero": "kompletigilo"
+      },
+      {
+        "case": {
+          "de": "Gefragt ist ein Datum nahe heute oder ein Zeitraum mit Anfang und Ende.",
+          "en": "A date near today or a range with a start and an end is asked for."
+        },
+        "ero": "datelektilo"
+      },
+      {
+        "case": {
+          "de": "Der Wert ist eine Datei vom Gerät.",
+          "en": "The value is a file from the device."
+        },
+        "ero": "alsxutilo"
       }
-    },
+    ],
     "do-dont": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
-      }
+      "do": [
+        {
+          "de": "Lass die sichtbare Beschriftung die Angabe nennen, die gefragt ist.",
+          "en": "Let the visible label name the datum asked for."
+        },
+        {
+          "de": "Wähle kind passend zum Inhalt, damit Tastatur und Hilfen auf Touch-Geräten stimmen.",
+          "en": "Choose kind to suit the content, so the keyboard and the aids on touch devices fit."
+        },
+        {
+          "de": "Nenne bei einer Zahl die Einheit mit unit und die Grenzen mit min und max.",
+          "en": "Give a number its unit with unit and its bounds with min and max."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Den Platzhalter als Beschriftung nutzen, denn er verschwindet beim Tippen.",
+          "en": "Use the placeholder as the label, because it disappears while typing."
+        },
+        {
+          "de": "Eine Zahl mit Komma in kind number erwarten, denn number nimmt nur ganze Zahlen.",
+          "en": "Expect a number with a decimal separator in kind number, because number takes whole numbers only."
+        },
+        {
+          "de": "Eine Einheit, Schrittknöpfe oder einen Schritt (unit, stepper, step) bei einer anderen Art als number setzen.",
+          "en": "Set a unit, step buttons or a step (unit, stepper, step) with a kind other than number."
+        }
+      ]
     },
-    "keyboard": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "keyboard": [
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": {
+          "de": "Sendet das Formular, in dem das Feld steht.",
+          "en": "Sends the form the field stands in."
+        }
+      },
+      {
+        "keys": [
+          "ArrowUp",
+          "ArrowDown"
+        ],
+        "action": {
+          "de": "Erhöht oder senkt bei kind number den Wert um einen Schritt.",
+          "en": "Raises or lowers the value by one step with kind number."
+        }
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": {
+          "de": "Leert bei kind search den getippten Text.",
+          "en": "Empties the typed text with kind search."
+        }
       }
-    }
+    ]
   }
 }
