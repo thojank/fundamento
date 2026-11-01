@@ -121,3 +121,20 @@ describe("②b-3 A-alsxutilo-4 in Figma: the upload icon in the dropzone", () =>
     expect(geometry(plainZone?.children[0] as DoubleNode).visible).toBe(false);
   });
 });
+
+describe("②b-3 A-elektilo-4, A-listelektilo-4, A-kompletigilo-4, A-plurelektilo-4 in Figma", () => {
+  it.each([
+    "elektilo:group-heading",
+    "listelektilo:group-heading",
+    "listelektilo:divider",
+    "kompletigilo:group-heading",
+    "plurelektilo:group-heading",
+    "plurelektilo:select-all",
+  ])("%s has no node and names its Jugxo", (key) => {
+    expectNotDrawn(key);
+  });
+
+  it("plurelektilo: select-all is a BOOLEAN of the set", () => {
+    expect(setOf("plurelektilo").properties["select-all"]).toBe("BOOLEAN");
+  });
+});
