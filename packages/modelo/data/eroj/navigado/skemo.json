@@ -45,6 +45,10 @@
           "key": "current",
           "equals": "page"
         }
+      },
+      {
+        "name": "icon-start",
+        "decorative": true
       }
     ],
     "parts": {
@@ -54,6 +58,9 @@
             "current",
             "state"
           ]
+        },
+        "gap": {
+          "fixed": "spacing.xsmall"
         }
       },
       "items": {
@@ -104,6 +111,22 @@
         },
         "color": {
           "fixed": "color.focus.inner"
+        }
+      },
+      "section-heading": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        },
+        "inline-padding": {
+          "fixed": "spacing.small"
+        }
+      },
+      "icon": {
+        "size": {
+          "fixed": "size.icon.medium"
         }
       }
     },

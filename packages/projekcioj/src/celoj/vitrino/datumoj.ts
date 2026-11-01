@@ -926,6 +926,9 @@ export const VITRINO_ICON_EXAMPLE = "check";
 /** The head of the row that shows the variants with an icon (Spec 029 ①b d)). */
 export const VITRINO_WITH_ICON = "mit Icon";
 
+/** The heading of a section of a navigation in the Vitrino (Spec 036 Teil 5 ②b-3, A-navigado-1). */
+export const VITRINO_SECTION_HEADING = "Abschnitt";
+
 /** The sizes the Ikonaro grid of the Vitrino shows, one row each (Spec 014 ②). */
 const ICON_SIZES = ["small", "medium", "large"] as const;
 
@@ -1406,21 +1409,29 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
   // The variants with an icon: every combination of the axes that key a colour (emphasis, intent),
   // at the default of the others.
   const variantKeys = keys.filter((key) => key === "emphasis" || key === "intent");
+  // Spec 036 Teil 5 ②b-3 (A-navigado-1, A-navigado-4): a navigation shows its items with the icon
+  // in their links (slot icon-start) and in sections under a heading, standing vertically.
+  const sectioned = entry.skemo.parts["section-heading"] !== undefined;
   const withIcon =
     icon === ""
       ? ""
-      : `<tr><th scope="row">${VITRINO_WITH_ICON}</th><td>${(variantKeys.length === 0
-          ? [{}]
-          : combinationsOf(entry.skemo, variantKeys)
-        )
-          .map((combination) => {
-            const attributes = Object.entries(combination)
-              .map(([key, value]) => ` ${key}="${value}"`)
-              .join("");
-            const label = vitrinoLabelOf(combination) || VITRINO_WITH_ICON;
-            return `<${tag}${attributes}${required}>${icon}${label}</${tag}>`;
-          })
-          .join(" ")}</td></tr>`;
+      : sectioned
+        ? `<tr><th scope="row">${VITRINO_WITH_ICON}</th><td><${tag} orientation="vertical"${required} page="1"><h3>${VITRINO_SECTION_HEADING}</h3>${VITRINO_OPTIONS.map(
+            (text, index) =>
+              `<a href="#fm-vitrino-${entry.ero.name}" data-page="${index + 1}">${icon}${text}</a>`,
+          ).join("")}</${tag}></td></tr>`
+        : `<tr><th scope="row">${VITRINO_WITH_ICON}</th><td>${(variantKeys.length === 0
+            ? [{}]
+            : combinationsOf(entry.skemo, variantKeys)
+          )
+            .map((combination) => {
+              const attributes = Object.entries(combination)
+                .map(([key, value]) => ` ${key}="${value}"`)
+                .join("");
+              const label = vitrinoLabelOf(combination) || VITRINO_WITH_ICON;
+              return `<${tag}${attributes}${required}>${icon}${label}</${tag}>`;
+            })
+            .join(" ")}</td></tr>`;
   const heads = ["rest", ...columns].map((column) => `<th scope="col">${column}</th>`).join("");
   return `<table><caption>${tag}, jede Kombination der Skemo</caption><thead><tr><th scope="col">Kombination</th>${heads}</tr></thead><tbody>${rows}${kinds}${unknown}${additionRows(entry, tag)}${withIcon}</tbody></table>`;
 }

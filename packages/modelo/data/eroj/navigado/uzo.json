@@ -4,7 +4,7 @@
     "id": "uzo_01M52BHAQAJEEW2E6NPDNPQNKZ",
     "ero": "ero_01M52BH9YT0BYYTE0ZAH272Q7D",
     "skemo": "ske_01M52BHAB2CMDHZDZKT2GVAXD7",
-    "purpose": "Leads between the main pages of an application and shows where the person is.",
+    "purpose": "Leads between the main pages of an application and shows where the person is; a vertical one groups its items in sections under a heading (h2–h6), an item may show an icon (slot icon-start).",
     "instead": [
       {
         "goal": "single-link",
@@ -161,6 +161,14 @@
         ],
         "required": true,
         "min": 2,
+        "nesting": 0
+      },
+      "icon-start": {
+        "accepts": [
+          "icon",
+          "ikono"
+        ],
+        "max": 1,
         "nesting": 0
       }
     },

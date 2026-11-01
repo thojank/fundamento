@@ -1801,6 +1801,12 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
     if (nav) {
       const a = `${tag}${data} > a${entry}`;
       switch (part) {
+        // Spec 036 Teil 5 ②b-3 (A-navigado-1, A-navigado-4): the heading of a section is a
+        // heading of the platform among the links; the icon of an item stands in its link.
+        case "section-heading":
+          return `${tag}${data} > :is(h2, h3, h4, h5, h6)`;
+        case "icon":
+          return `${tag}${data} > a > [slot="icon-start"]`;
         case "item":
         case "items":
         case "underline":
@@ -1955,6 +1961,14 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
       ? [
           `${tag} > ${breadcrumb ? "*" : "a"} { display: inline-flex; align-items: center; box-sizing: border-box; white-space: nowrap; transition-property: background-color, color, text-decoration-color; }`,
           `${tag} > ${breadcrumb ? "*" : "a"}:focus:not(:focus-visible) { outline-width: 0; }`,
+          // Spec 036 Teil 5 ②b-3 (A-navigado-1, A-navigado-4): a section heading stands without the
+          // platform's margin, its words on one line; the icon of an item keeps its size.
+          ...(nav && skemo.parts["section-heading"] !== undefined
+            ? [
+                `${tag} > :is(h2, h3, h4, h5, h6) { margin: 0; white-space: nowrap; }`,
+                `${tag} > a > [slot="icon-start"] { flex: none; }`,
+              ]
+            : []),
         ]
       : table
         ? [

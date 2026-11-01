@@ -912,6 +912,8 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
     "items.typography": typographyOf("items-*"),
     "underline.width": [{ node: "item-*", fields: ["strokeBottomWeight"] }],
     "underline.color": [{ node: "item-*", fields: ["strokes"], paint: true }],
+    // Spec 036 Teil 5 ②b-3 (A-navigado-4): the gap between an item's icon and its words.
+    "item.gap": [{ node: "item-*", fields: ["itemSpacing"] }],
   },
   // A tab list (Spec 011 ⑤): the list is the control — its line the bottom stroke (colour and
   // width), its gap between the tabs; every tab its fill by state, minimum height and inline

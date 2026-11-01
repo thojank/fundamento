@@ -8022,6 +8022,10 @@
               }
             }
           }
+        },
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.xsmall}"
         }
       },
       "items": {
@@ -8098,6 +8102,30 @@
             "$type": "color",
             "$value": "{color.focus.inner}"
           }
+        }
+      },
+      "section": {
+        "heading": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.text.muted}"
+          },
+          "typography": {
+            "$type": "typography",
+            "$value": "{typography.caption}"
+          },
+          "inline": {
+            "padding": {
+              "$type": "dimension",
+              "$value": "{spacing.small}"
+            }
+          }
+        }
+      },
+      "icon": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.medium}"
         }
       }
     },
