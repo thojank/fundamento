@@ -198,3 +198,25 @@ describe("②b-4 A-spuro-6: collapsed middle", () => {
     expect(suggest("gekürzter Pfad", "de").suggestion).toMatchObject({ ero: "spuro" });
   });
 });
+
+/**
+ * ②a-3 (A-elektilo-4): the boundary grouped-options is decided – the groups of the elektilo came
+ * with ②b-3 (the platform's optgroup); the boundary left the Uzo with them only now.
+ */
+describe("②a-3 A-elektilo-4: the boundary grouped-options is decided", () => {
+  it("elektilo: grouped-options left the Uzo; the other boundaries stay", () => {
+    expect(casesOf("elektilo")).toEqual(["custom-popup", "no-visible-label"]);
+    expect(
+      modelo.tradukoj?.de?.[`${entryOf("elektilo").uzo?.id}/boundary/grouped-options/kialo`],
+    ).toBeUndefined();
+  });
+
+  it("elektilo: its words lead to the elektilo", () => {
+    const goal = entryOf("elektilo").skemo.goals?.[0];
+    expect(goal?.keywords.en).toEqual(expect.arrayContaining(["optgroup", "grouped"]));
+    expect(goal?.keywords.de).toEqual(expect.arrayContaining(["gruppiert", "optionsgruppen"]));
+    expect(suggest("Optionsgruppen im Auswahlfeld", "de").suggestion).toMatchObject({
+      ero: "elektilo",
+    });
+  });
+});
