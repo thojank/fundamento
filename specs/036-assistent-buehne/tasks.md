@@ -1,184 +1,241 @@
 # Spec 036 – Aufgaben
 
-**Spec:** [`spec.md`](spec.md) · **Plan:** [`plan.md`](plan.md) · **Basis:** `main` `f2b5a058`. Aufgaben ab T3601. Je Teil A – Rot zuerst, B – Grün, C – Messung und Abschluss. Rote Commits enden auf „(rot)“, grüne auf „(grün)“, gewollte Bildänderungen beginnen mit „Bildtest neu:“, Doku-Commits mit „Spec 036:“; Häkchen mit SHAs.
+**Spec:** [`spec.md`](spec.md) · **Plan:** [`plan.md`](plan.md) · **Basis:** `main` `f2b5a058`. Aufgaben ab T3601, je Teil A – Rot zuerst, B – Grün, C – Messung und Abschluss. Rote Commits enden auf „(rot)“, grüne auf „(grün)“, gewollte Bildänderungen beginnen mit „Bildtest neu:“, Doku-Commits mit „Spec 036:“. Häkchen mit den SHAs auf den PR-Branches (Teil 1 mit den SHAs nach der Zusammenführung, S36-1.4); offene Aufgaben ohne Häkchen, mit Grund. Entscheidungen als D-nn (vorläufige ID in Klammern), Zuordnung im plan.
 
-## Teil 1 – Fehler aus der Abnahme
+## Teil 1 – Fehler aus der Abnahme (#134, `261031-spec-036-t1-abnahme`)
 
-**Branch:** `261031-spec-036-t1-abnahme` (aus den lokalen Hilfsbranches `…-t1-form`, `…-t1-assistent`, `…-t1-figma` zusammengeführt, D-16).
-
-### A – Rot zuerst
-- [ ] **T3601 1.1** Bildtest: Vorschau mit Pille rundet `tekstareo` (Muster `redaktilo`), Karten und Flächen nicht auf `radius.full`.
-- [ ] **T3602 1.2** „Eckiger“ von der Pille geht auf Stufe 2, nicht auf den Wert des Reglers.
-- [ ] **T3603 1.3** Prüfung der Chat-Antwort mit Modell-Attrappe: keine internen Begriffe (`Faceto`, Token-Namen), sondern Wörter der Oberfläche.
-- [ ] **T3604 1.4** Weg C: Der Satz zu den gelesenen Seiten kommt aus dem Ergebnis von `esploro.ts`, nicht vom Modell.
-- [ ] **T3605 1.5** D-95 (Satz „ohne Browser“ vor der Weiterleitung), D-96 (`ekrano.ts` nutzt `freigabeOf`), D-99 (Skript von Weg A mit einem Bild mit zweiter kräftiger Farbe).
-- [ ] **T3606 1.6** Figma-Datentests: `elekto` nicht gewählt = leerer Ring; `markobutono`, `sxaltilo` Beschriftung mittig; D-64 Monatsknöpfe im offenen Kalender des `datelektilo` mit Größe und Füllung.
-- [ ] **T3607 1.7** G5: Gegenprobe zeigt das wackelige Urteil auf einem langsamen Runner (Grenze 50 ms bleibt).
-
-### B – Grün
-- [ ] **T3608 1.1, 1.2** Pille nur für Rollen einzeiliger Bedienelemente; Stufenliste 0 · 0,5 · 1 · 2 · Pille, „eckiger“ von Pille → 2 (Spec 035 D-83 hier als geändert geführt).
-- [ ] **T3609 1.3, 1.4, 1.5** je Befund grün.
-- [ ] **T3610 1.6** Figma-Generatoren und Skemoj; Messanleitung für das Plugin.
-- [ ] **T3611 1.7** G5 kalibriert: Grenze 50 ms bleibt, Urteil robust, Gegenprobe rot.
-- [ ] **T3612** „Bildtest neu: 1.1 …“ und „Bildtest neu: 1.6 …“, je Befund ein Commit (Tabelle im plan).
-
-### C – Messung und Abschluss
-- [ ] **T3613** Hilfsbranches per Rebase zusammengeführt (Form/G5 → Figma → Assistent), rote Commits auf neuen Elternteilen erneut rot.
-- [ ] **T3614 1.7** G5 je Runner (lokal ohne andere Playwright-Läufe, `uptime`; CI).
-- [ ] **T3615** PR Teil 1, Messanleitung, CI.
-
-## Teil 2a – Farbrollen: unbunte Marken und Bildgewicht
-
-**Branch:** `261031-spec-036-t2a-farbrollen` (D-02).
+Aus den lokalen Hilfsbranches `…-t1-form`, `…-t1-figma`, `…-t1-assistent` per Cherry-pick zusammengeführt (D-16, D-71 (D-S36-1.4-2)); alte SHAs der Hilfsbranches in den Beiträgen S36-1.1 bis S36-1.4.
 
 ### A – Rot zuerst
-- [ ] **T3616 2.1** Unbunte Marke: Erkennung in Weg B und Weg C, Leitfarbe Schwarz bzw. sehr dunkles Neutral statt einer bunten Nebenfarbe (V-1).
-- [ ] **T3617 2.1** Regel: Verweise bei unbunter Leitfarbe brauchen ein zweites Merkmal (z. B. Unterstreichung); fehlt es, Ablehnung mit Vorschlag.
-- [ ] **T3618 2.3** Synthetische Fixture: große Bilder im ersten Bildschirm zählen mit eigenem Gewicht (Fotos ≠ Hintergrund).
+- [x] **T3601 1.7** G5 auf dem langsamen Runner von Lauf 41140304922 nachgespielt: „Skripte blockieren 61 ms …“ rot – `83cf8bef`
+- [x] **T3602 1.2** „eckiger“ von der Pille → 2, Agordilo und MCP `propose_agordo` – `701d83d3`
+- [x] **T3603 1.1** Pille nur für einzeilige Bedienelemente: Bildtests Metiejo-Vorschau (`redaktilo`) und Werkstatt, Datentest – `1eab68f4`
+- [x] **T3604 1.6** `elekto` nicht gewählt = leerer Ring (Figma-Double, hell/dunkel) – `b0506068`
+- [x] **T3605 1.6** Beschriftung von `markobutono`/`sxaltilo` mittig zum Kästchen/Schalter – `2c53a06e`
+- [x] **T3606 1.6** Spec 035 D-64: Monatsknöpfe des offenen `datelektilo`-Kalenders mit Größe und Füllung – `f6c23f72`
+- [x] **T3607 1.3** Modell-Attrappe: interne Begriffe erreichen die Person; Systemtext nennt die Schritte nicht – `dbbfc753`
+- [x] **T3608 1.4** Modell-Attrappe: Schlusssatz des Modells wird übernommen – `4e9815bd`
+- [x] **T3609 1.5** Spec 035 D-95: Einstiegsfragen leiten weiter ohne „ohne Browser“ (Chromium, Vitest) – `eab29787`
+- [x] **T3610 1.5** Spec 035 D-96: erster Aufbau ohne `freigabeOf` – `e995351d`
+- [x] **T3611 1.5** Spec 035 D-99: Skriptbilder ohne zweite kräftige Farbe – `a83ecefa`
 
 ### B – Grün
-- [ ] **T3619 2.1** Erkennung, Ableitung im Agordilo, Regel mit Grund.
-- [ ] **T3620 2.3** Bildgewicht in Weg C.
+- [x] **T3612 1.7** G5 relativ zur Referenzlast, Grenze 50 ms, Gegenprobe 80 ms × k – `3b8257f8`
+- [x] **T3613 1.2** Stufenliste mit `zurueck: 2` in `wuensche.json`; Spec 035 D-83 für Spec 036 geändert – `e39c3ef3`
+- [x] **T3614 1.1** Rolle `radius.role.multiline`, Skemoj, Referenzmarken, Fixtures neu abgeleitet, CHANGELOG – `38212e62` (kein „Bildtest neu“-Commit, D-49 (D-S36-1.1-5))
+- [x] **T3615 1.6** komuna: Werte des nicht gewählten Kreises auf den Alias des Skemo, deveno bereinigt – `e2bcce1b`
+- [x] **T3616 1.6** `label-line` mit `label-strut` an den Variablen des Rings – `91ee07ff`; Bildtest neu `ccee6aab`
+- [x] **T3617 1.6** Plan-Feld `monthIcon`, Bindung der Monats-Glyphen – `4776abdd`; Bildtest neu `a44150f0`
+- [x] **T3618 1.3** Systemtext aus Daten, Prüfung der Antwort (`nutzersprache.ts`, `data/nutzersprache.json`) – `956e87ec`
+- [x] **T3619 1.4** `gelesenSatz` aus dem Ergebnis von `esploro.ts` – `00fc5f05`
+- [x] **T3620 1.5** Spec 035 D-95: `notoj` und Link „Weiter zum Assistenten“ – `569cc23f`
+- [x] **T3621 1.5** Spec 035 D-96: `ekrano.ts` mit `freigabeOf` – `5bde22b5`
+- [x] **T3622 1.5** Spec 035 D-99: Kornblumenblau im Skriptbild, Akzent in der Ausgabe – `ff20545f`
 
 ### C – Messung und Abschluss
-- [ ] **T3621 2.3** Weg C vorher/nachher: synthetisch und lokal mit Marke 2 (Reservierungen `2.3-weg-c-*`), Zusammenfassung im plan.
-- [ ] **T3622** AC-10: bestehende Marken pixelgleich gegenüber dem Stand direkt vor der Änderung (D-30).
-- [ ] **T3623** PR 2a, Messanleitung, CI.
+- [x] **T3623** Doku: Spec wortgleich, Gerüst von plan und tasks – `e49b4002` (D-43, D-S36-0.1-9)
+- [x] **T3624** Zusammenführung Form/G5 → Figma → Assistent per Cherry-pick, alle 11 Rot/Grün-Paare und beide Bildtest-Commits auf den neuen Eltern erneut belegt (S36-1.4)
+- [x] **T3625 1.7** G5 lokal mit `uptime` (grün, Gegenprobe rot) und in der CI (Referenz 64,5 ms, k 1,55, grün)
+- [x] **T3626** AC-10 BASIS ↔ `ff20545f` zweimal 1336/1338 (nur `elekto`@komuna, gewollt); Werkzeug `ac10` mit Abschnitten in eigener Ebene (D-70, D-S36-1.4-1)
+- [x] **T3627** PR #134, Messanleitung, CI 41218448452 grün 14/14
+- [x] **T3628** Doku: Bildschirmfotos der Bühne (D-34) – `31d9cb7c`
+- [x] **T3629** Doku: plan, tasks und Bericht konsolidiert (S36-6.3) – dieser Commit „Spec 036: plan, tasks und Bericht konsolidiert“
+- [ ] **T3630 1.6** Sichtprüfung im Figma-Desktop-Plugin (leerer Ring, Beschriftung mittig, Monatsknöpfe) – beim Maintainer (Messanleitung Teil 1)
+- [ ] **T3631 1.6** Fonto-Fall `elekto.mjs` mit `selected` korrigieren und neu messen – Folgearbeit (D-69, D-S36-1.3-8, zu entscheiden)
 
-## Teil 2b – Farbrollen: Zweitfarbe
-
-**Branch:** `261031-spec-036-t2b-zweitfarbe`, gestapelt auf 2a (D-18).
+## Teil 2a – unbunte Marken und Bildgewicht (#135, `261031-spec-036-t2a-farbrollen`)
 
 ### A – Rot zuerst
-- [ ] **T3624 2.2** Agordo-Feld Zweitfarbe, Palette und Rollen (Hervorhebungsflächen, Illustration, Abzeichen, Diagramme) im Vortaro und Modelo; Prüfung: keine Aktions-, Verweis- oder Fokusrolle verweist auf die Zweitfarbe (V-2, D-20).
-- [ ] **T3625 2.2** Kontrastpaare der neuen Rollen; Projekcioj (CSS, Figma, Tailwind, Vitrino): bestehende Ausgabezeilen byte-gleich, neue Variablen dazu.
-- [ ] **T3626 2.2** Weg A/B/C setzen die Zweitfarbe, wenn das Material sie hergibt; zu nah an der Leitfarbe → keine Zweitfarbe mit Satz; Zweitfarbe als Aktion gewünscht → Ablehnung in Nutzersprache.
+- [x] **T3632 2.1** Erkennung Weg B/C mit synthetischem Material „Inko“ – `39f7618c`
+- [x] **T3633 2.1** Ableitung: Aktionen und Verweise behalten die schwarze Leitfarbe – `7b2a8184`
+- [x] **T3634 2.1** Verweis-Regulo: negative Fixture `regulo-link-unbunt-underline` – `71813023`
+- [x] **T3635 2.3** Synthetische Seite „Ruvelo“ (Foto als img, background-image, picture), Vitest und Chromium – `805b35a1`
 
 ### B – Grün
-- [ ] **T3627 2.2** Vortaro, Modelo, Prüfungen, Projekcioj grün; Faceto „Leitfarbe und Akzente“ im Assistenten.
-- [ ] **T3628 2.2** Weg A/B/C; Vitrino zeigt eine Marke mit Zweitfarbe.
+- [x] **T3636 2.1** Schwellen `unbunt` in `kreilo.json`, Erkennung in `rekono.ts`, `abnahme-weg-c.ts --unbunt` – `9425c03d`
+- [x] **T3637 2.1** Rollen einer unbunten Leitfarbe (`agordilo/src/unbunt.ts`) – `c84b7ade`
+- [x] **T3638 2.1** Regulo `link-distinct-from-text`, positive Fixture – `2c7ea4f3`, Nachtrag `b2b6bd90`
+- [x] **T3639 2.3** Klasse „großes Bild im ersten Bildschirm“, alle Gewichte in `kreilo.json › weg_c` – `2d81d594`
 
 ### C – Messung und Abschluss
-- [ ] **T3629** AC-10: Marken ohne Zweitfarbe und `komuna-0-2` pixelgleich (D-30).
-- [ ] **T3630** PR 2b, Messanleitung, CI.
+- [x] **T3640 2.3** Weg C vorher/nachher synthetisch und Marke 2 mit `ministral-14b-2512` (0,00112 $)
+- [x] **T3641** AC-10 1338/1338 zweimal (2.1), Metiejo 30/30 (2.3)
+- [x] **T3642** PR #135, Messanleitung, CI 41227757180 grün 14/14
+- [ ] **T3643 2.1** Hilfetext von `fm agordilo derive` um die unbunte Leitfarbe ergänzen – offen (nicht Teil der Tickets)
+- [ ] **T3644 2.1** Pastellakzent als Statusfarbe unbunter Marken – offen (D-87, D-S36-2.1-13, zu entscheiden)
 
-## Teil 3 – Bühne
-
-**Branch:** `261031-spec-036-t3-buehne`.
+## Teil 2b – Zweitfarbe (#138, `261031-spec-036-t2b-zweitfarbe`, gestapelt auf 2a)
 
 ### A – Rot zuerst
-- [ ] **T3631 3.1–3.3** Browsertests: Bühne aus echten Eroj (hell/dunkel), Vorher/Nachher-Schieber (schmal: Umschalter), Chat-Leiste unter der Bühne.
-- [ ] **T3632 3.4** Material und Recherche im Dialog; Ergebnis als Kacheln mit Farbfläche und Anteil.
-- [ ] **T3633 3.5** Komponente mit offenem Problem: Rahmen in der Warnfarbe, Satz bei Hover und Fokus.
-- [ ] **T3634 3.6** Tastatur und Screenreader: Schieber und Umschalter bedienbar, Live-Region für neue Antworten, axe ohne Befund.
+- [x] **T3645 2.2** Ableitung, Palette/Rollen/Kontrastpaare/Faceto, Regulo mit Fixtures, Projekcioj der Sammlung – `00d56dee`
+- [x] **T3646 2.2** Setzen aus Weg A/B/C, Satz bei Nähe, Ablehnung als Aktion, Feld im Schritt (Vitest, Chromium) – `4a6ca1a6`
 
 ### B – Grün
-- [ ] **T3635 3.1–3.6** je Befund grün; fehlendes Ero → Manko statt Nachbau.
+- [x] **T3647 2.2** Agordo-Feld `zweitfarbe`, Palette `color.palette.sekundo`, Rollen `color.sekundo.*` in jedem Aspekto, Kontrastpaare, Faceto, Ableitung, Fixture `dukolora` – `930f1732`
+- [x] **T3648 2.2** Regulo `sekundo-not-action` – `7005a45d`
+- [x] **T3649 2.2** `dukolora` in Sammlung, Projekcioj, Vitrino, CHANGELOG – `42c69b95`; APCA-Zählung – `144286b4`
+- [x] **T3650 2.2** Feld „Zweitfarbe“ – `a091bd76`; Weg A und B setzen – `9cdd392c`; zu nah → Satz – `258c9f9f`; Ablehnung – `da8c8169`; Weg C – `7d2da236`; Skript und konfliktarme Stellen – `afe13bc4`; Browsertest – `6ff31655`
 
 ### C – Messung und Abschluss
-- [ ] **T3636 3.7** Abnahme 1 (Weg A, Reservierung `3.7-weg-a`) und ein Material-Lauf; Bildschirmfotos vorher/nachher mit erfundener Marke (D-34).
-- [ ] **T3637** PR Teil 3, Messanleitung, CI.
+- [x] **T3651** AC-10 1338/1338 zweimal (+80 `dukolora`), Zeilenvergleich der Projekcioj (0 verlorene Zeilen), Metiejo 30/30
+- [x] **T3652** PR #138, Messanleitung, CI 41244251101 grün 14/14
+- [ ] **T3653** D-20 (vollständige Tokens) – beim Maintainer, zu entscheiden
 
-## Teil 4 – Übernahme aus dem Material
-
-**Branch:** `261031-spec-036-t4-uebernahme` (D-03, D-04, D-19).
+## Teil 3 – Bühne (#136, `261031-spec-036-t3-buehne`)
 
 ### A – Rot zuerst
-- [ ] **T3638 4.1, 4.2** Vorschlag je Schritt mit Herkunft (Leitfarbe, Neutraltöne, Schrift, Form, Elevation, Dichte; Zweitfarbe mit Verweis auf 2b); kein Wert ohne Herkunft; nicht Messbares offen benannt.
-- [ ] **T3639 4.3** Synthetische Testbilder im Repo je Schritt.
+- [x] **T3654 3.1** Bühne zwei Drittel, Seite aus Eroj, hell/dunkel – `de373807`
+- [x] **T3655 3.2** Schieber, Umschalter, Übernehmen; Chat zuerst rechts – `ef4a9b78`
+- [x] **T3656 3.3** Chat-Leiste und Verlauf – `f0304f62`
+- [x] **T3657 3.4** Material/Recherche im Dialog mit Kacheln – `f2404fba`
+- [x] **T3658 3.5** Warnrahmen und Satz bei Hover und Fokus – `f2e31346`
+- [x] **T3659 3.6** Live-Region und Enter sendet – `32b70c6e`
 
 ### B – Grün
-- [ ] **T3640 4.1, 4.2** Schritt-Module unter `enportilo/`, Vorschläge über den `propono`-Weg.
-- [ ] **T3641 4.3** Skript `abnahme-weg-b.ts` für den Material-Lauf.
+- [x] **T3660 3.1** Raster 4/8 aus dem Vortaro, Seite `buehne-<seite>`, Darstellung – `068ea73c`
+- [x] **T3661 3.2** überlagerte Rahmen, fm-glitilo/fm-sxaltilo, Übernehmen, Chat-Züge als Vorschlag, Ablehnungssatz aus `freigabeOf` – `3dc5b32b`
+- [x] **T3662 3.3** Chat-Leiste – `4e71e79c`
+- [x] **T3663 3.4** fm-dialogo, `kaheloj` – `9d7567a5`
+- [x] **T3664 3.5** `buehne-pruefung.ts` – `e0efa953`
+- [x] **T3665 3.6** `aria-live`, Enter; Tastatur- und axe-Tests in drei Engines – `8c7ab1a9`
 
 ### C – Messung und Abschluss
-- [ ] **T3642 4.3** Material-Lauf synthetisch und lokal mit echten Marken (Reservierungen `4-material-*`); Tabelle je Schritt im plan.
-- [ ] **T3643** PR Teil 4, Messanleitung, CI.
+- [x] **T3666 3.7** Weg A mit Modell (`3.7-weg-a`, 0,00128 $) und Material-Lauf; Bildschirmfotos vorher/nachher (im plan, `31d9cb7c`)
+- [x] **T3667** axe 0 in drei Engines, AC-10 Metiejo 30/30, PR #136, CI 41230037829 grün 14/14
+- [ ] **T3668** Manko E7 (Rest: Chat-Familie als Ero, `aria-valuetext`) – offen, ohne neues Ero nicht lösbar
+- [ ] **T3669** B-1 bis B-4 (Chat-Herkunft, Wortlaut, Weg A übernimmt Chat-Vorschläge nicht, Konsolen-Warnungen) – Folgerunde
+
+## Teil 4 – Übernahme aus dem Material (#137, `261031-spec-036-t4-uebernahme`)
+
+### A – Rot zuerst
+- [x] **T3670 4.1/4.2** Vorschlag je Schritt mit Herkunft, Offenes benannt (AC-13) – `b32aa43f`
+- [x] **T3671 4.1** Neutraltöne – `09cdceef`; Schrift – `2a3aea58`
+- [x] **T3672 4.1** Form – `4ca58a98`; Elevation – `51852900`; Dichte – `05bc2492`
+- [x] **T3673 4.1** geglättete Ecken echter Bildschirme – `1c40010d`; Grund eines Links – `04f6a266`, `12982db8`
+
+### B – Grün
+- [x] **T3674 4.1/4.2** Module `enportilo/uebernahme/`, Speicher, Route, Hinweis „Offen“ – `54841d39`, Nachtrag `de1ad57c`
+- [x] **T3675 4.1** Neutraltöne – `5b0b0044`; Schrift – `41d9b21e`
+- [x] **T3676 4.1** Form – `10e74d20`; Elevation – `6160a6f3`; Dichte – `72412319`
+- [x] **T3677 4.1** echte Bildschirme – `68b491f0`; Grund eines Links – `32c0a682`, `a709068f`
+- [x] **T3678 4.3** Material-Lauf `abnahme-weg-b.ts` – `9de43b6d`
+
+### C – Messung und Abschluss
+- [x] **T3679 4.3** Tabelle je Schritt synthetisch und echte Marken anonym; `4-material-synth` (0,00068 $), `4-material-marken` (0,00134 $)
+- [x] **T3680** AC-10 Metiejo 30/30, PR #137, CI 41239739211 grün 14/14
+- [ ] **T3681** Weg C und Weg A an `uebernahmeOf` anschließen – offen (D-155, D-S36-3.3-11)
+- [ ] **T3682** Schwächen an echten Bildschirmen (große dunkle Flächen als Knopf, Link-Form, Link-Elevation) – Folgerunde
 
 ## Teil 5 – Spec 029 zu Ende
 
-**Branches:** Stapel `261031-spec-036-t5-2b2` → `…-t5-2b3` → `…-t5-2b4` → `…-t5-2b5` → `…-t5-3-doku` (D-05, D-29).
-
-### ②b-2 Achsen und Werte
+### ②b-2 Achsen und Werte (#139, `261031-spec-036-t5-2b2`)
 
 #### A – Rot zuerst
-- [ ] **T3644 ②b-2** Neue Achsen und Größen aus `abgleich.json`; `large` als veralteter Alias (`elekto`, `markobutono`, `sxaltilo`); `lines` statt `rules`; Zweck-Achse des `dialogo` (M-3).
+- [x] **T3683** A-elekto-2, A-markobutono-2, A-sxaltilo-2 (zwei Größen, `large` veraltet) – `2aa678c6`
+- [x] **T3684** A-elektilo-1, A-markobutono-1 (`readonly`) – `439802cc`; A-sxaltilo-1 (`label-side`) – `3cf0a622`
+- [x] **T3685** A-kompletigilo-1, A-alsxutilo-1, A-tekstareo-1 – `65a232bb`; A-plurelektilo-1 (`summary labels`) – `aec47e46`
+- [x] **T3686** A-listelektilo-2, A-plurelektilo-2, A-datelektilo-2 (drei Größen) – `f44f389d`; A-kampo-1 (`unit`) – `ce4c36bc`
+- [x] **T3687** Größen (ikono, signeto, avataro, pagxigilo, langetaro, dialogo) – `a17b9dd8`; Darstellung (apartigilo, spuro, karto, avataro, avizo) – `85e8547a`
+- [x] **T3688** Dichte, Linien, kompakt, label – `dbe195c4`; Anordnung und Zweck (M-3) – `9bba5b29`
+- [x] **T3689** summary – `53848952`; max-entries und aufgeklappt – `fc1a211b`; Wertanzeige, Mindestabstand, Spannen – `bd771762`
 
 #### B – Grün
-- [ ] **T3645 ②b-2** Skemoj, Ero-Tokens (`pnpm vortaro:ero-tokenoj`), Eroj, Projekcioj.
-- [ ] **T3646 ②b-2** „Bildtest neu: ②b-2 …“ (Tabelle im plan).
+- [x] **T3690** zwei Größen – `5866b3b2`, Nachtrag `d135e904`; Bildtest neu `8deae786`
+- [x] **T3691** `readonly` – `42099ed5`; `label-side` – `e9f680b6`; Zahlen – `27eab550`; `summary labels` – `8d6c1a3a`
+- [x] **T3692** drei Größen – `0e94ffd4`; Bildtest neu `e6e8f1a6`; `unit` – `29560bd8`
+- [x] **T3693** Größen – `bd22ba23`, Bildtest neu `0fcd9f32`; Darstellung – `80856864`, Bildtest neu `8804905c`; Dichte/Linien – `ae6a3889`, Bildtest neu `6722ce5e`
+- [x] **T3694** Anordnung und Zweck – `0ac4d373`; summary – `483f3c78`; max-entries – `9beecbe6`; Wertanzeige/Spannen – `1374b55b`
+- [x] **T3695** Arkitekturo-Test der Props von 0.2.0 (AC-14) – `d2bb1ea1`; CHANGELOG – `e8fbf716`, `d709a8c6`; Vitrino-Zählung – `55768dc1`
 
 #### C – Messung und Abschluss
-- [ ] **T3647 ②b-2** Props von 0.2.0 unverändert, Kurzprofile < 750 Tokens, AC-10 (D-30), `git merge-tree` gegen Teil 1 (D-06), PR, Messanleitung für das Plugin, CI.
+- [x] **T3696** `ac10` ganzzahlig (D-181, D-S36-4.2-1); AC-10 `f2b5a058` ↔ `55768dc1` 1218/1338 (120 gewollt); Kurzprofile < 750; Merge-tree gegen Teil 1 (D-06)
+- [x] **T3697** PR #139, CI 41256180779 (Versuch 2 grün nach Abbruch der Infrastruktur)
+- [ ] **T3698** A-datelektilo-1 `months` – offen (D-267, D-S36-4.6-16, zu entscheiden; Restarbeit im Beitrag S36-4.5)
+- [ ] **T3699** Figma-Messung im Plugin – beim Maintainer
 
-### ②b-3 Anatomie und Slots
+### ②b-3 Anatomie und Slots (#140, `261031-spec-036-t5-2b3`)
 
 #### A – Rot zuerst
-- [ ] **T3648 ②b-3** Neue Teile und Slots (Überschriften, Zähler, Fuß, Schließen, Icons, Markierungen, „alle wählen“ …).
+- [x] **T3700** Hilfe, Beschreibung der Option – `8f3b9ef8`; Markierungen, Upload-Icon – `e157293b`; Gruppen, Trenner, alle wählen – `e8eae226`
+- [x] **T3701** Menü – `b052be43`; Navigation – `dfb54c89`; `max-lines` – `4c9933a1`
+- [x] **T3702** Icon am Anfang, insigno am Ende – `57de81a0`; Überschriften, Symbol, Fuß, Schließen – `4f3c3017`; Standard-Symbol, erste/letzte Seite – `fe4d02ec`; Tooltip – `4711accb`; Icon am Host (CI-Befund) – `c37fcbb9`
 
 #### B – Grün
-- [ ] **T3649 ②b-3** Skemoj, Ero-Tokens, Eroj, Projekcioj.
-- [ ] **T3650 ②b-3** „Bildtest neu: ②b-3 …“.
+- [x] **T3703** Hilfe – `13cb7aa4`, Bildtest neu `1f86b484`; Markierungen, Upload-Icon – `060dd1ff`, Bildtest neu `23a0fc33`; Gruppen – `d3eda295`
+- [x] **T3704** Menü – `1be80caf`; Navigation – `f3788505`; `max-lines` – `91c00be3`; CHANGELOG – `72449609`; Nachträge `a9920537`, `2a79fde7`
+- [x] **T3705** Icon am Anfang – `6fb97e82`; Überschriften u. a. – `f7a9bfad`; Symbol, erste/letzte Seite – `b340315e`; Tooltip – `2aa937bf`; CHANGELOG – `fd5904b6`; Nachträge `b4f2daef`, `1bd31f2a`; Icon am Host – `f6c9f061`
 
 #### C – Messung und Abschluss
-- [ ] **T3651 ②b-3** Props von 0.2.0, Kurzprofile, AC-10, PR, Messanleitung, CI.
+- [x] **T3706** AC-10 `55768dc1` ↔ `1bd31f2a` 1385/1486 (gewollt), `1bd31f2a` ↔ `f6c9f061` 1214/1214; Kurzprofile < 750
+- [x] **T3707** PR #140, CI 41285574442 grün 14/14
+- [ ] **T3708** Figma-Messung im Plugin – beim Maintainer
 
-### ②b-4 Verhalten
+### ②b-4 Verhalten (#141, `261031-spec-036-t5-2b4`)
 
 #### A – Rot zuerst
-- [ ] **T3652 ②b-4** Springen per Tippen, Rollen nach Status und Zweck, Überlauf, Download, unbekannte Gesamtzahl, ausgelassene Mitte, Streamen.
+- [x] **T3709** Rollen nach Status und Zweck – `73b50315`; Streamen – `cd0033d3`; Springen per Tippen, Link im Menü – `2898e343`; Überlauf – `b4ce60a8`
+- [x] **T3710** unbekannte Gesamtzahl – `54a4cad5`; Download – `e78757b3`; ausgelassene Mitte – `9744ea14`; Grenze grouped-options – `c200d941`
 
 #### B – Grün
-- [ ] **T3653 ②b-4** je Verhalten grün.
-- [ ] **T3654 ②b-4** „Bildtest neu: ②b-4 …“, falls nötig.
+- [x] **T3711** `0206b5a6`, `9d51e1b7`, `242ba1ab`, `499b71b0`, `b3445a8f`, `cf3fe059`, `1b8d3b42`, `acd95072`; CHANGELOG – `47ab8f78`; Nachtrag – `1aa0d4f4`
 
 #### C – Messung und Abschluss
-- [ ] **T3655 ②b-4** Props von 0.2.0, Kurzprofile, AC-10, PR, Messanleitung, CI.
+- [x] **T3712** drei Engines 78/78; AC-10 `f6c9f061` ↔ `47ab8f78` 1582/1602 (gewollt); Kurzprofile < 750
+- [x] **T3713** PR #141, CI 41298181911 grün 14/14
 
-### ②b-5 `kodbloko`, Schrift, Form
+### ②b-5 kodbloko, Schrift, Form (#142, `261031-spec-036-t5-2b5`)
 
 #### A – Rot zuerst
-- [ ] **T3656 ②b-5** Syntaxfarben (①-2), Ersatzschrift nach Kategorie (①-7, ohne Import der Metiejo im Agordilo), `signeto` und `insigno` unterscheidbar, Vitrino-Befunde aus Spec 025.
+- [x] **T3714** Ersatzschrift nach Kategorie – `7133d0ae`; signeto/insigno – `9495fee1`; Syntaxfarben – `baf50346`; kodbloko – `980fb666`
 
 #### B – Grün
-- [ ] **T3657 ②b-5** je Punkt grün.
-- [ ] **T3658 ②b-5** „Bildtest neu: ②b-5 …“.
+- [x] **T3715** `cbb90217`, `51b83e49`, `cf838703`, `7bf59913`; CHANGELOG – `f4fff0fb`
 
 #### C – Messung und Abschluss
-- [ ] **T3659 ②b-5** Props von 0.2.0, Kurzprofile, AC-10, PR, Messanleitung, CI.
+- [x] **T3716** AC-10 `1aa0d4f4` ↔ `f4fff0fb` 1622/1662 (gewollt); drei Engines `kodbloko-2b5` 18/18; Kurzprofile < 750
+- [x] **T3717** PR #142; CI 41310052743 rot an M5 nach einem R-8-Neustart (B-6.1-1)
+- [ ] **T3718** Spec 026 O-2 (Look einer deaktivierten Zeile), O-3 (Vitrino-Zeitraum über die Monatsgrenze), glitilo B-5 – offen (D-266, D-S36-4.6-15, zu entscheiden)
+- [ ] **T3719** B-6.1-1 (M5 in CI) und B-6.2-1 (403 Kern-Tokens) vor dem Merge – beim Maintainer
 
-### ③ Doku je Ero
+### ③ Doku je Ero (#143, `261031-spec-036-t5-3-doku`)
 
 #### A – Rot zuerst
-- [ ] **T3660 ③** Doku-Felder nach Spec 029 ③ (Uzo-Felder, Prüfung, Gvidanto, Seitenaufbau).
+- [x] **T3720** Uzo-Felder und `check:dokumentaro` – `961e01dc`; `get_ero` – `318c98c4`; Vitrino-Seite – `5b639bd2`; Inhalte: rot = Stand `7273deea` (120 Platzhalter)
 
 #### B – Grün
-- [ ] **T3661 ③** Inhalte für alle Eroj; neue Felder in der vollen Antwort von `get_ero`.
+- [x] **T3721** `e35c8633`, `1b461611`, `7273deea`
+- [x] **T3722** Inhalte in fünf Stapeln – `14a78e1a`, `38f98a8c`, `534aae6c`, `e2032eb8`, `43fb4361` (Prüfung grün); Korrektur – `427f7d94`; CHANGELOG – `b07314e9`
 
 #### C – Messung und Abschluss
-- [ ] **T3662 ③** Kurzprofile < 750 Tokens (gemessen), PR, CI.
+- [x] **T3723** `check:dokumentaro` 40/40; Kurzprofile unverändert (kampo 747); `ac10` mit verborgenen Doku-Sektionen (D-283, D-S36-4.8-1); AC-10 1674/1674 zweimal
+- [x] **T3724** PR #143, CI 41327296891 grün 14/14
+- [ ] **T3725** Felder im Schema als Pflicht – beim Maintainer (D-284, D-S36-4.8-2, zu entscheiden)
 
-## Teil 6 – Neutrale Namen
-
-**Branch:** `261031-spec-036-t6-neutrale-namen` (zuletzt mergen, vorher neu aufsetzen, D-33).
+## Teil 6 – neutrale Namen (#133, `261031-spec-036-t6-neutrale-namen`)
 
 ### A – Rot zuerst
-- [ ] **T3663 6.4** `check:privat` rot auf BASIS (Zahl der Dateien im Commit); Ausnahmen nur für wortgleiche Spec-Kopien (D-14, D-23).
-- [ ] **T3664 6.2** Codemod `scripts/neutrale-namen/`: deterministisch, ein zweiter Lauf ändert nichts (D-11, D-25).
-- [ ] **T3665 6.3** Leser akzeptieren alte und neue Schlüssel bzw. IDs (Fixture im alten Format); Ausgaben nach Normalisierung alt → neu byte-gleich.
-- [ ] **T3666 6.6** Attrappen-Repo und Attrappen-Ordner: mit `FM_TIPAROJ_REPO`, mit Rückfall, ohne Variable (dieselbe Meldung wie heute).
+- [x] **T3726 6.2** Codemod-Tests – `ab843e9b`; Formatierer – `a02b1a7e`; Agordilo-Fixtures – `36e6ad19`
+- [x] **T3727 6.4** Tests von `check:privat` und Registrierung – `864116b1`; `check:privat` findet 749 Dateien auf BASIS – `d6bd5653`
+- [x] **T3728 6.3** Leser für alte und neue Namen – `6c964c43`; Schreiber nur neu, Constitution v2.6 – `11f9c367`, Korrektur `ff4f426a`
 
 ### B – Grün
-- [ ] **T3667 6.4, 6.2, 6.3** Prüfung, Skript, Leser grün; CHANGELOG „Unveröffentlicht“ › „Hinweis für Nutzer“ mit Migrationssatz.
-- [ ] **T3668 6.1** Skript-Lauf „Spec 036 Teil 6: neutrale Namen (Skript-Lauf auf `<sha>`)“; `check:privat` grün.
+- [x] **T3729 6.2** Codemod und Ausnahmeliste – `68404e74`; Formatierer – `5c1c1aaa`; Generator `agordilo fixtures` – `357c8615`
+- [x] **T3730 6.4** `check:privat`, CI-Schritt, `pnpm check` – `72c4b675`
+- [x] **T3731 6.3** Leser `contracts/names.ts` – `04ba98db`; formunabhängige Tests – `fd27376b`; CHANGELOG – `95b3bd61`
+- [x] **T3732 6.6** Tests mit Attrappen-Repo und -Ordner (ohne Rot, D-22) – `7eaa7858`
+- [x] **T3733 6.1** Skript-Lauf „Spec 036 Teil 6: neutrale Namen (Skript-Lauf auf `f2b5a058`)“ – `30ae1068`; `check:privat` 0 Treffer, zweiter Lauf 0
+- [ ] **T3734 6.2** B-6.2-2: Generator `agordilo fixtures` um `dukolora` ergänzen (rot zuerst, vor dem Lauf-Commit) – Nachbesserung im PR lief zur Zeit dieser Zusammenführung; S36-7.1 prüft
 
 ### C – Messung und Abschluss
-- [ ] **T3669 6.6** Liste der Familien vor und nach dem Skript mit der `.env` des Maintainers (nur Zahl und „gleich ja/nein“, D-28); D-22 bestätigt oder ersetzt.
-- [ ] **T3670 6.5** Anleitung Commit-Identität für den Maintainer im Bericht (eigener Checkout, GitHub „Keep my email addresses private“).
-- [ ] **T3671** PR Teil 6, Messanleitung, CI; neu aufgesetzt auf dem aktuellen `main` bzw. auf dem simulierten Endstand (D-33).
+- [x] **T3735 6.6** Familien vorher/nachher gleich (5 Familien, 374 Token; Cache 0/0); D-22 bestätigt – nichts in die `.env`
+- [x] **T3736 6.3** Byte-Vergleich 542 Dateien (532 gleich nach Abbildung, Rest erklärt)
+- [x] **T3737** PR #133, CI 41213109051 grün 14/14
+- [x] **T3738 6.5** Anleitung Commit-Identität für den Maintainer im Bericht (Schritt 9)
+- [ ] **T3739** Teil 6 vor dem Merge auf dem aktuellen `main` neu aufsetzen (D-33) – beim Maintainer, zuletzt
 
 ## Abschluss
 
-- [ ] **T3672** CI aller PRs, Neustarts nach R-8 (D-31, D-32), Kosten ≤ 0,50 $.
-- [ ] **T3673** Merge-Simulation in der vorgeschlagenen Reihenfolge mit Teil 6 zuletzt (AC-15); Konflikte mit Datei, PRs und Lösung.
-- [ ] **T3674** plan, tasks und Bericht zusammengeführt (Entscheidungen D-35 ff.); Doku-Test und Prüfung gegen AC-1 bis AC-15.
+- [x] **T3740** CI aller elf PRs gesammelt; R-8: #142 M5 einmal neu gestartet, wieder rot (B-6.1-1); #139 Abbruch der Infrastruktur einmal neu gestartet, grün; Kosten 0,00442 $ (S36-6.1)
+- [x] **T3741** Merge-Simulation in der vorgeschlagenen Reihenfolge, Teil 6 zuletzt auf dem simulierten Endstand neu gelaufen; Konflikte mit Datei, PRs, Lösung; B-6.2-1, B-6.2-2 (S36-6.2)
+- [x] **T3742** plan, tasks und Bericht zusammengeführt, Entscheidungen D-35 bis D-333 (S36-6.3) – Doku-Commits `31d9cb7c` und dieser Commit
+- [ ] **T3743** Doku-Test des Spec-036-Blocks und Prüfung gegen AC-1 bis AC-15 – S36-7.1
