@@ -4,7 +4,7 @@
     "id": "uzo_01M56F6FRPJ40E4HBAX500W48A",
     "ero": "ero_01M56F6F10RCQDAAS9X5M8ZRW4",
     "skemo": "ske_01M56F6FCXT3N0K796HNN80PD6",
-    "purpose": "Shows where the current page sits in a hierarchy and links back up to each level.",
+    "purpose": "Shows where the current page sits in a hierarchy and links back up to each level; the first item may show an icon (slot icon-start).",
     "instead": [
       {
         "goal": "main-navigation",
@@ -84,6 +84,14 @@
         ],
         "required": true,
         "min": 2,
+        "nesting": 0
+      },
+      "icon-start": {
+        "accepts": [
+          "icon",
+          "ikono"
+        ],
+        "max": 1,
         "nesting": 0
       }
     },

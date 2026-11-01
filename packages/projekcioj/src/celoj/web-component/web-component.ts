@@ -40,9 +40,15 @@ const ICONS = 'slot[name^="icon-"]::slotted(*)';
  */
 const MARK = 'slot[name^="icon-"] > fm-ikono';
 
+/**
+ * Slotted icons the part icon sizes and colours: every element in an icon slot but an insigno –
+ * Spec 036 Teil 5 ②b-3 (A-butono-4): an insigno at the end (a count) keeps its own pill.
+ */
+const SIZED_ICONS = 'slot[name^="icon-"]::slotted(:not(fm-insigno))';
+
 /** The selector of a part in the shadow tree; `control` carries the combination and state. */
 function partSelector(part: string, control: string): string {
-  if (part === "icon") return `:where(${control}) ${ICONS}, :where(${control}) ${MARK}`;
+  if (part === "icon") return `:where(${control}) ${SIZED_ICONS}, :where(${control}) ${MARK}`;
   if (part === "focus-ring") return `:where(${control}:focus-visible)`;
   return `:where(${control})`;
 }
@@ -1277,10 +1283,12 @@ const HIDDEN_TEXT =
  * Layout of static text (Spec 011 ③, D-08), keywords only: the badge is an inline block that
  * hugs its label and never wraps (the Uzo says never); no cursor, no transition, nothing to press.
  */
-const textStructure = (bordered: boolean): string =>
+const textStructure = (bordered: boolean, iconStart = false): string =>
   [
     ":host { display: inline-block; vertical-align: middle; }",
     `:where([part="control"]) { display: inline-flex; align-items: center; box-sizing: border-box; margin: 0; ${bordered ? "border-style: solid; " : ""}white-space: nowrap; }`,
+    // Spec 036 Teil 5 ②b-3 (A-insigno-4): the icon at the start keeps its own size.
+    ...(iconStart ? [`:where([part="control"]) ${ICONS} { flex: none; }`] : []),
     HIDDEN_TEXT,
   ].join("\n");
 
@@ -1794,6 +1802,9 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
           return property === "height" ? item : undefined;
         case "focus-ring":
           return `${item}:focus-visible`;
+        // Spec 036 Teil 5 ②b-3 (A-spuro-4): the icon of an item stands in the item.
+        case "icon":
+          return `${tag}${data} > * > [slot="icon-start"]`;
         default:
           return undefined;
       }
@@ -1963,6 +1974,10 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
           `${tag} > ${breadcrumb ? "*" : "a"}:focus:not(:focus-visible) { outline-width: 0; }`,
           // Spec 036 Teil 5 ②b-3 (A-navigado-1, A-navigado-4): a section heading stands without the
           // platform's margin, its words on one line; the icon of an item keeps its size.
+          // Spec 036 Teil 5 ②b-3 (A-spuro-4): the icon of an item keeps its size.
+          ...(breadcrumb && skemo.parts.icon !== undefined
+            ? [`${tag} > * > [slot="icon-start"] { flex: none; }`]
+            : []),
           ...(nav && skemo.parts["section-heading"] !== undefined
             ? [
                 `${tag} > :is(h2, h3, h4, h5, h6) { margin: 0; white-space: nowrap; }`,
@@ -2411,7 +2426,10 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
                       : isParagraph(skemo)
                         ? paragraphStructure
                         : isText(skemo)
-                          ? textStructure(bordered)
+                          ? textStructure(
+                              bordered,
+                              skemo.slots.some((slot) => slot.name === "icon-start"),
+                            )
                           : isStatus(skemo)
                             ? statusStructure(skemo)
                             : isMeter(skemo)

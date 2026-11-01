@@ -239,7 +239,8 @@ describe("the Ikonaro and the Eroj that compose the ikono (G6)", () => {
   it("the butono's icon slots accept the ikono; butono, avizo, insigno, tabelo and elektilo compose it", () => {
     const butono = eroNamed("butono")?.uzo;
     expect(butono?.slots["icon-start"]?.accepts).toEqual(["icon", "ikono"]);
-    expect(butono?.slots["icon-end"]?.accepts).toEqual(["icon", "ikono"]);
+    // Spec 036 Teil 5 ②b-3 (A-butono-4): icon-end takes an insigno too.
+    expect(butono?.slots["icon-end"]?.accepts).toEqual(["icon", "ikono", "insigno"]);
     for (const name of ["butono", "avizo", "insigno", "tabelo", "elektilo"]) {
       expect(
         eroNamed(name)?.uzo?.composes.with.map((entry) => entry.ero),

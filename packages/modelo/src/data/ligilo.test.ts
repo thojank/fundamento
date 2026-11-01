@@ -88,7 +88,8 @@ describe("ligilo in the repo Modelo (T006)", () => {
       ["label", "string", undefined],
     ]);
     expect(skemo.states).toEqual(["rest", "hover", "pressed", "focus", "visited"]);
-    expect(skemo.slots.map((slot) => slot.name)).toEqual(["label", "icon-end"]);
+    // Spec 036 Teil 5 ②b-3 (A-ligilo-4): an icon at the start, as at the butono.
+    expect(skemo.slots.map((slot) => slot.name)).toEqual(["label", "icon-end", "icon-start"]);
     expect(skemo.props.map((prop) => prop.name)).not.toContain("disabled");
     expect(skemo.constraints).toBeUndefined();
   });
@@ -202,7 +203,8 @@ describe("the Uzo of the ligilo (T006, A3)", () => {
     expect(uzo?.ero).toBe(ligilo.ero.id);
     expect(uzo?.skemo).toBe(skemo.id);
     expect(uzo?.purpose).toBe(
-      "Moves to another view or place: it opens an overview, a detail, a document or an outside site.",
+      // Spec 036 Teil 5 ②b-3 (A-ligilo-4).
+      "Moves to another view or place: it opens an overview, a detail, a document or an outside site; an icon may stand before the words (slot icon-start).",
     );
   });
 
@@ -247,6 +249,7 @@ describe("the Uzo of the ligilo (T006, A3)", () => {
     expect(uzo?.slots).toEqual({
       label: { accepts: ["text"], max: 1, nesting: 0 },
       "icon-end": { accepts: ["icon"], max: 1, nesting: 0 },
+      "icon-start": { accepts: ["icon", "ikono"], max: 1, nesting: 0 },
     });
     expect(uzo?.layout).toEqual({ size: "content", wrap: "with-text" });
   });

@@ -47,6 +47,8 @@ describe("spuro in the repo Modelo (section ①, G1, G2)", () => {
     expect(skemo?.states).toEqual(["rest", "hover", "focus"]);
     expect(skemo?.slots).toEqual([
       { name: "items", default: true, text: true, entry: { key: "current", equals: "page" } },
+      // Spec 036 Teil 5 ②b-3 (A-spuro-4): the icon of the first item, in the item.
+      { name: "icon-start", decorative: true },
     ]);
     expect(entryKeysOf(skemoOrThrow())).toEqual([
       { slot: "items", key: "current", equals: "page" },
@@ -62,11 +64,15 @@ describe("spuro in the repo Modelo (section ①, G1, G2)", () => {
       "separator",
       "box",
       "focus-ring",
+      // Spec 036 Teil 5 ②b-3 (A-spuro-4).
+      "icon",
     ]);
     expect(skemo?.parts.item).toEqual({
       color: { by: ["emphasis", "current", "state"] },
       typography: { fixed: "typography.label.1" },
       weight: { by: ["current"] },
+      // Spec 036 Teil 5 ②b-3 (A-spuro-4): the gap between the icon and the words.
+      gap: { fixed: "spacing.xsmall" },
     });
     expect(skemo?.parts.underline).toEqual({
       width: { by: ["current"] },
@@ -114,7 +120,8 @@ describe("spuro in the repo Modelo (section ①, G1, G2)", () => {
 describe("the Uzo of the spuro (section ①, G2)", () => {
   it("states the purpose; the main navigation is the navigado's, steps are not covered; a shortened path asks", () => {
     expect(uzo?.purpose).toBe(
-      "Shows where the current page sits in a hierarchy and links back up to each level.",
+      // Spec 036 Teil 5 ②b-3 (A-spuro-4).
+      "Shows where the current page sits in a hierarchy and links back up to each level; the first item may show an icon (slot icon-start).",
     );
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["main-navigation", "navigado"],

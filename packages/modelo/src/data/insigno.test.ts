@@ -93,6 +93,8 @@ describe("insigno in the repo Modelo (section ③, G1, G2)", () => {
     expect(skemo?.slots).toEqual([
       { name: "label", default: true, text: true },
       { name: "description", text: true, hidden: true },
+      // Spec 036 Teil 5 ②b-3 (A-insigno-4): an icon before the words.
+      { name: "icon-start", decorative: true },
     ]);
   });
 
@@ -181,11 +183,13 @@ describe("insigno in the repo Modelo (section ③, G1, G2)", () => {
 describe("the Uzo of the insigno (section ③, G5)", () => {
   it("states the purpose, requires the label, allows one description; size content, never wraps", () => {
     expect(uzo?.purpose).toBe(
-      "Names a status in one to three words next to what it describes: draft, in review, valid, 3 violations.",
+      // Spec 036 Teil 5 ②b-3 (A-insigno-4): the icon at the start.
+      "Names a status in one to three words next to what it describes: draft, in review, valid, 3 violations; an icon before the words (slot icon-start) shows it beyond colour.",
     );
     expect(uzo?.slots).toEqual({
       label: { accepts: ["text"], required: true, max: 1, nesting: 0 },
       description: { accepts: ["text"], max: 1, nesting: 0 },
+      "icon-start": { accepts: ["icon", "ikono"], max: 1, nesting: 0 },
     });
     expect(uzo?.layout).toEqual({ size: "content", wrap: "never" });
   });

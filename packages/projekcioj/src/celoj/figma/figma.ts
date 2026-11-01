@@ -220,6 +220,8 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   // A-menuo-4: the icon of an entry and the heading of a group stand with entries that carry them.
   "menuo:icon": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
   "menuo:group-heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  // Spec 036 Teil 5 ②b-3 (A-spuro-4): the icon of the first item stands with the icon it holds.
+  "spuro:icon": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
   // A-navigado-1, A-navigado-4: the heading of a section and the icon of an item stand with the
   // headings and icons a navigation holds.
   "navigado:section-heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
@@ -2634,7 +2636,11 @@ function iconsOf(
     skemo.props.some((prop) => prop.name === "external" && prop.kind === "boolean") &&
     skemo.slots.some((slot) => slot.name === "icon-end" && slot.decorative === true)
   ) {
-    return { "icon-end": "external" };
+    // Spec 036 Teil 5 ②b-3 (A-ligilo-4): an icon-start slot before the words, the Vitrino's
+    // example, off by default (its BOOLEAN), as at the butono.
+    return skemo.slots.some((slot) => slot.name === "icon-start" && slot.decorative === true)
+      ? { "icon-start": ICON_EXAMPLE, "icon-end": "external" }
+      : { "icon-end": "external" };
   }
   if (
     (skemo.a11y.role === "combobox" || skemo.a11y.role === "listbox") &&

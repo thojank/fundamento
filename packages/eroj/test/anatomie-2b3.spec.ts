@@ -411,7 +411,10 @@ test.describe("②b-3 A-insigno-4, A-ligilo-4, A-spuro-4: icon-start", () => {
     expect((iconBox?.x ?? 0) - (firstBox?.x ?? 0)).toBeLessThan((firstBox?.width ?? 0) / 2);
     const looks = await first.evaluate((element) => {
       const style = getComputedStyle(element);
-      return { gap: style.columnGap, icon: getComputedStyle(element.firstElementChild as Element).inlineSize };
+      return {
+        gap: style.columnGap,
+        icon: getComputedStyle(element.firstElementChild as Element).inlineSize,
+      };
     });
     expect(Number.parseFloat(looks.gap)).toBeGreaterThan(0);
     const separator = await page

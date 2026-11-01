@@ -94,7 +94,9 @@ describe("the insigno is drawn as a badge: the pill with its text (Spec 011 ③)
     expect(bound(control, "paddingLeft")).toBe("spacing/xsmall");
     expect(bound(control, "paddingRight")).toBe("spacing/xsmall");
     expect(bound(control, "cornerRadius")).toBe("radius/role/pill");
-    expect(control?.children.map((child) => child.name)).toEqual(["text"]);
+    // Spec 036 Teil 5 ②b-3 (A-insigno-4): the icon at the start before the text, hidden by default.
+    expect(control?.children.map((child) => child.name)).toEqual(["icon-start", "text"]);
+    expect(descendant(control, "icon-start")?.properties.visible).toBe(false);
     const text = descendant(small, "text");
     expect(text?.properties.characters).toBe("Status");
     expect(text?.properties.componentPropertyReferences).toMatchObject({
@@ -2193,7 +2195,9 @@ describe("the plugin draws the ligilo's external mark (Nachlese 5 O-41)", () => 
       expect(
         control?.children.map((child) => child.name),
         variant.name,
-      ).toEqual(["label", "icon-end"]);
+        // Spec 036 Teil 5 ②b-3 (A-ligilo-4): the icon at the start before the label, hidden.
+      ).toEqual(["icon-start", "label", "icon-end"]);
+      expect(descendant(control, "icon-start")?.properties.visible, variant.name).toBe(false);
       const icon = descendant(control, "icon-end");
       expect(icon?.properties.visible, variant.name).toBe(false);
       expect(icon?.properties.componentPropertyReferences).toEqual({ visible: external });

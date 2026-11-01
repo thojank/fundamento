@@ -866,13 +866,21 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
   // toggles, as dismissible), hidden by default; its size and colour those of the part icon.
   it("O-41: every variant draws the icon-end external, shown by the property external", () => {
     for (const each of set?.variants ?? []) {
-      expect(each.icons, JSON.stringify(each.props)).toEqual({ "icon-end": "external" });
+      // Spec 036 Teil 5 ②b-3 (A-ligilo-4): and the icon-start before the label, the example.
+      expect(each.icons, JSON.stringify(each.props)).toEqual({
+        "icon-start": "check",
+        "icon-end": "external",
+      });
       expect(each.bindings["icon.size"], JSON.stringify(each.props)).toBe(
         `size/icon/${each.props.size}`,
       );
       expect(each.bindings["icon.color"]).toBe(each.bindings["label.color"]);
     }
-    expect(set?.toggles).toEqual([{ property: "external", part: "icon-end", defaultValue: false }]);
+    expect(set?.toggles).toEqual([
+      { property: "external", part: "icon-end", defaultValue: false },
+      // Spec 036 Teil 5 ②b-3 (A-ligilo-4): the icon at the start, off by default.
+      { property: "icon-start", part: "icon-start", defaultValue: false },
+    ]);
     // Spec 027 B-6: the button's icon slots are switches of their own, off by default.
     expect(butonoOf(plan.components)?.toggles).toEqual([
       { property: "icon-end", part: "icon-end", defaultValue: false },
@@ -2017,7 +2025,10 @@ describe("Figma plan for the insigno (Spec 011 ③)", () => {
     expect(set?.label?.defaultValue).toBe("Status");
     expect(set?.texts).toBeUndefined();
     expect(set?.sign).toBeUndefined();
-    expect(set?.toggles).toBeUndefined();
+    // Spec 036 Teil 5 ②b-3 (A-insigno-4): the icon at the start, off by default (Spec 027 B-6).
+    expect(set?.toggles).toEqual([
+      { property: "icon-start", part: "icon-start", defaultValue: false },
+    ]);
     expect(set?.example).toBeUndefined();
     expect(
       set?.variants.every((entry) => entry.focusVisible === false && entry.radii === undefined),
@@ -2035,6 +2046,8 @@ describe("Figma plan for the insigno (Spec 011 ③)", () => {
       "box.height": "size/icon/large",
       "box.inline-padding": "spacing/small",
       "box.radius": "radius/role/pill",
+      // Spec 036 Teil 5 ②b-3 (A-insigno-4): the gap between the icon and the words.
+      "box.gap": "spacing/xsmall",
     });
     expect(variant("danger", "small")?.bindings).toMatchObject({
       "surface.fill": "color/status/danger/subtle",
@@ -2050,6 +2063,7 @@ describe("Figma plan for the insigno (Spec 011 ③)", () => {
     ]);
     expect(Object.keys(rest?.geometry ?? {}).sort()).toEqual([
       "border.width",
+      "box.gap",
       "box.height",
       "box.inline-padding",
       "box.radius",
