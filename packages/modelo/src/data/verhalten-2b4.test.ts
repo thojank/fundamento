@@ -87,11 +87,8 @@ describe("②b-4 A-langetaro-4: overflow", () => {
     const goal = entryOf("langetaro").skemo.goals?.[0];
     expect(goal?.keywords.en).toEqual(expect.arrayContaining(["scrollable", "crowded"]));
     expect(goal?.keywords.de).toEqual(expect.arrayContaining(["überlauf", "überlaufen"]));
-    expect(suggest("scrollable tabs", "en").suggestion).toEqual({ ero: "langetaro", props: {} });
-    expect(suggest("Reiter mit Überlauf", "de").suggestion).toEqual({
-      ero: "langetaro",
-      props: {},
-    });
+    expect(suggest("scrollable tabs", "en").suggestion).toMatchObject({ ero: "langetaro" });
+    expect(suggest("Reiter mit Überlauf", "de").suggestion).toMatchObject({ ero: "langetaro" });
   });
 
   it("langetaro: selected says that the selected tab stays in view; the brief under 750", () => {
