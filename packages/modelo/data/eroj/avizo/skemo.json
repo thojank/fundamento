@@ -19,7 +19,7 @@
           "danger"
         ],
         "default": "info",
-        "description": "What kind of notice: info, success, warning or danger (an error). No neutral: a notice without a kind is text. danger is spoken as an alert, the others as status (G4)."
+        "description": "What kind of notice: info, success, warning or danger (an error). No neutral: a notice without a kind is text. warning and danger are spoken as an alert, info and success as status (G4; Spec 029 A-avizo-5)."
       },
       {
         "name": "dismissible",
