@@ -52,6 +52,8 @@ describe("pagxigilo in the repo Modelo (section ①, G1, G2)", () => {
       ["summary", "enum", false, "pages"],
       // Spec 036 Teil 5 ②b-3 (A-pagxigilo-4): the buttons to the first and the last page.
       ["first-last", "boolean", false, false],
+      // Spec 036 Teil 5 ②b-4 (A-pagxigilo-6): an unknown total.
+      ["total-unknown", "boolean", false, false],
     ]);
     expect(skemo?.props.find((prop) => prop.name === "mode")?.values).toEqual(["button", "link"]);
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled"]);
