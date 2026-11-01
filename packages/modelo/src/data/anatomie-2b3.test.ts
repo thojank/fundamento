@@ -244,7 +244,7 @@ describe("②b-3 A-navigado-1, A-navigado-4: section-heading, icon-start", () =>
 
   it("navigado: named in de and en; the Uzo names the headings of sections; brief under 750", () => {
     expect(tradukoOf("navigado", "parts/section-heading", "de")).toBe("Abschnittsüberschrift");
-    expect(tradukoOf("navigado", "slots/icon-start", "en")).toBe("Start icon");
+    expect(tradukoOf("navigado", "slots/icon-start", "en")).toBe("Icon at the start");
     expect(entryOf("navigado").uzo.purpose).toContain("heading");
     expect(tokensOf(briefOf(entryOf("navigado")))).toBeLessThan(750);
   });

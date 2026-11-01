@@ -87,8 +87,9 @@ describe("Spec 029 ① 5: the foundation pages", () => {
     // help of markobutono and sxaltilo (+4), the description of an option of the elekto (+2); the
     // tick of the glitilo (+3), the upload icon of the alsxutilo (+2); the headings of option
     // groups (+11), the divider of the listelektilo (+2), „alle wählen“ of the plurelektilo (+4);
-    // the icon and the heading of a group of the menuo (+5).
-    expect(tokenoj.length).toBe(2014);
+    // the icon and the heading of a group of the menuo (+5); the section heading and the icon of
+    // the navigado (+5).
+    expect(tokenoj.length).toBe(2019);
     const levels = new Set(tokenoj.map((token) => token.ebeno));
     expect(levels).toEqual(new Set(["grundlage", "rolle", "ero"]));
     const text = tokenoj.find((token) => token.name === "color.text.default");

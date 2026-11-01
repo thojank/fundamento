@@ -675,7 +675,12 @@ describe("the Vitrino shows the tabelo, the atributlisto and the mezurilo (Spec 
 describe("the Vitrino shows the navigado and the langetaro (Spec 011 ⑤)", () => {
   it("navigado: one row, three links of the Vitrino's words, the first current, named", () => {
     const grid = datumoj.eroj.navigado ?? "";
-    expect((grid.match(/<fm-navigado /g) ?? []).length).toBe(1);
+    // Spec 036 Teil 5 ②b-3 (A-navigado-1, A-navigado-4): a second row shows the icons of the items
+    // and a section heading, standing vertically.
+    expect((grid.match(/<fm-navigado /g) ?? []).length).toBe(2);
+    expect(grid).toContain(
+      '<fm-navigado orientation="vertical" label="Navigation" page="1"><h3>Abschnitt</h3><a href="#fm-vitrino-navigado" data-page="1"><fm-ikono slot="icon-start" name="check"></fm-ikono>Eins</a>',
+    );
     expect(grid).toContain(
       '<fm-navigado label="Navigation" page="1"><a href="#fm-vitrino-navigado" data-page="1">Eins</a><a href="#fm-vitrino-navigado" data-page="2">Zwei</a>',
     );

@@ -2778,13 +2778,26 @@ describe("Figma plan for the navigado (Spec 011 ⑤)", () => {
       "box.radius": "radius/role/control",
       "box.inline-padding": "spacing/small",
       "box.gap": "spacing/xsmall",
+      // Spec 036 Teil 5 ②b-3 (A-navigado-1, A-navigado-4): the icon, the gap of an item for it,
+      // the heading of a section.
+      "icon.size": "size/icon/medium",
+      "item.gap": "spacing/xsmall",
+      "section-heading.color": "color/text/muted",
+      "section-heading.inline-padding": "spacing/small",
+      "section-heading.typography": "typography/caption",
       "focus-ring.ring": "focus/ring",
       "focus-ring.offset": "focus/offset",
       "focus-ring.color": "color/focus/inner",
     });
     // The underline is drawn, not released: its colour is a paint of the variant (B-1 releases
     // the text decoration of a link, not the block-end edge of an item).
-    expect(rest?.notDrawn).toEqual({});
+    // Spec 036 Teil 5 ②b-3 (A-navigado-1, A-navigado-4): heading of a section and icon stand with
+    // their content (FIGMA_NOT_DRAWN).
+    expect(rest?.notDrawn).toEqual({
+      "icon.size": FIGMA_NOT_DRAWN["navigado:icon"],
+      "section-heading.color": FIGMA_NOT_DRAWN["navigado:section-heading"],
+      "section-heading.inline-padding": FIGMA_NOT_DRAWN["navigado:section-heading"],
+    });
     expect(Object.keys(rest?.paints ?? {}).sort()).toEqual([
       "focus-ring.color",
       "focus-ring.ring",
@@ -2796,6 +2809,8 @@ describe("Figma plan for the navigado (Spec 011 ⑤)", () => {
       "box.inline-padding",
       "box.radius",
       "focus-ring.offset",
+      // Spec 036 Teil 5 ②b-3 (A-navigado-4).
+      "item.gap",
     ]);
     expect(rest?.underline).toBeUndefined();
     expect(rest?.hidden).toBeUndefined();
@@ -2863,7 +2878,13 @@ describe("Figma plan for the navigado (Spec 011 ⑤)", () => {
     expect(values["underline.color@state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
     expect(values["box.height@state=rest"]).toMatch(/px$/);
     expect(values["box.gap@state=focus"]).toMatch(/px$/);
-    expect(Object.values(values).some((value) => value.startsWith("not drawn"))).toBe(false);
+    // Spec 036 Teil 5 ②b-3 (A-navigado-1, A-navigado-4): only the heading of a section and the
+    // icon of an item stand with their content (Jugxo); everything else is drawn.
+    expect(
+      Object.entries(values)
+        .filter(([, value]) => value.startsWith("not drawn"))
+        .every(([key]) => key.startsWith("section-heading.") || key.startsWith("icon.")),
+    ).toBe(true);
   });
 });
 

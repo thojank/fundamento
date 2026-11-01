@@ -94,6 +94,8 @@ describe("navigado in the repo Modelo (section ⑤, G1, G2, E7)", () => {
   it("has one slot items (default): every item an entry with the key current, true for the page (E7)", () => {
     expect(skemo?.slots).toEqual([
       { name: "items", default: true, text: true, entry: { key: "current", equals: "page" } },
+      // Spec 036 Teil 5 ②b-3 (A-navigado-4): the icon of an item, in its link.
+      { name: "icon-start", decorative: true },
     ]);
     if (skemo === undefined) throw new Error("missing");
     expect(entryKeysOf(skemo)).toEqual([{ slot: "items", key: "current", equals: "page" }]);
@@ -103,13 +105,18 @@ describe("navigado in the repo Modelo (section ⑤, G1, G2, E7)", () => {
     if (skemo === undefined) throw new Error("missing");
     // The text of the items is the part named after the slot (items): so the pair rule pairs
     // its colour with the item's fill in every combination (skemo-kontrastparo-missing).
-    expect(Object.keys(skemo.parts).sort()).toEqual([
-      "box",
-      "focus-ring",
-      "item",
-      "items",
-      "underline",
-    ]);
+    expect(Object.keys(skemo.parts).sort()).toEqual(
+      [
+        "box",
+        "focus-ring",
+        "item",
+        "items",
+        // Spec 036 Teil 5 ②b-3 (A-navigado-1, A-navigado-4): the heading of a section, the icon.
+        "section-heading",
+        "icon",
+        "underline",
+      ].sort(),
+    );
     expect(skemo.parts.item?.fill).toEqual({ by: ["current", "state"] });
     expect(boundToken(skemo, "item", "fill", { current: "false", state: "rest" })?.token).toBe(
       "color.navigation.rest",
@@ -184,10 +191,13 @@ describe("navigado in the repo Modelo (section ⑤, G1, G2, E7)", () => {
 describe("the Uzo of the navigado (section ⑤, G5)", () => {
   it("states the purpose, requires at least two items; size container, wraps (horizontal breaks, the order stays)", () => {
     expect(uzo?.purpose).toBe(
-      "Leads between the main pages of an application and shows where the person is.",
+      // Spec 036 Teil 5 ②b-3 (A-navigado-1, A-navigado-4): sections and icons.
+      "Leads between the main pages of an application and shows where the person is; a vertical one groups its items in sections under a heading (h2–h6), an item may show an icon (slot icon-start).",
     );
     expect(uzo?.slots).toEqual({
       items: { accepts: ["text"], required: true, min: 2, nesting: 0 },
+      // Spec 036 Teil 5 ②b-3 (A-navigado-4).
+      "icon-start": { accepts: ["icon", "ikono"], max: 1, nesting: 0 },
     });
     expect(uzo?.layout).toEqual({ size: "container", wrap: "allowed" });
   });
