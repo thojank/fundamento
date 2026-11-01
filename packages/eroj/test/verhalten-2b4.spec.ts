@@ -458,3 +458,42 @@ test.describe("②b-4 A-pagxigilo-6: unknown total", () => {
     await expect(summary.locator(".fm-hidden")).toHaveText("Seite 5");
   });
 });
+
+test.describe("②b-4 A-ligilo-6: download", () => {
+  test("download: the platform's download, the mark is the ikono download, heard as a description", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<fm-ligilo id="a" to="/dateien/bericht.pdf" download>Bericht (PDF, 2 MB)</fm-ligilo>',
+    );
+    const link = page.getByRole("link", { name: "Bericht (PDF, 2 MB)" });
+    await expect(link).toHaveAttribute("download", "");
+    await expect(link).toHaveAttribute("href", "/dateien/bericht.pdf");
+    await expect(link).not.toHaveAttribute("rel");
+    await expect(link).toHaveAccessibleDescription("lädt herunter");
+    const mark = page.locator("#a").locator('slot[name="icon-end"] > fm-ikono');
+    await expect(mark).toHaveAttribute("name", "download");
+    await expect(mark).toBeVisible();
+    await page.evaluate(() => document.documentElement.setAttribute("lang", "en"));
+    await page.locator("#a").evaluate((element) => element.setAttribute("size", "small"));
+    await expect(link).toHaveAccessibleDescription("downloads");
+    // Without download: no download, no description, no mark.
+    await page.locator("#a").evaluate((element) => element.removeAttribute("download"));
+    await expect(link).not.toHaveAttribute("download");
+    await expect(link).toHaveAccessibleDescription("");
+    await expect(mark).toBeHidden();
+  });
+
+  test("external keeps its own mark", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      '<fm-ligilo id="a" to="https://docs.example/" external>Doku</fm-ligilo>',
+    );
+    const mark = page.locator("#a").locator('slot[name="icon-end"] > fm-ikono');
+    await expect(mark).toHaveAttribute("name", "external");
+    await expect(mark).toBeVisible();
+  });
+});

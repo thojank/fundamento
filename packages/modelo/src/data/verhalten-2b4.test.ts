@@ -119,3 +119,49 @@ describe("②b-4 A-pagxigilo-6: unknown total", () => {
     expect(tokensOf(brief)).toBeLessThan(750);
   });
 });
+
+/** A-ligilo-6: download, its icon from Phosphor; the boundary download is decided (②a-3). */
+describe("②b-4 A-ligilo-6: download", () => {
+  it("the Ikonaro names download (Phosphor download-simple), never mirrored", () => {
+    const download = modelo.ikonaro?.find((entry) => entry.name === "download");
+    expect(download?.id).toMatch(/^iko_/);
+    expect(download?.meaning.de).toContain("Herunterladen");
+    expect(download?.meaning.en).toContain("Download");
+    expect(download?.mirror).toBeUndefined();
+  });
+
+  it("ligilo: download is a boolean, off, the last prop; heard as a description in de and en", () => {
+    const { skemo } = entryOf("ligilo");
+    expect(skemo.props.at(-1)).toMatchObject({ name: "download", kind: "boolean", default: false });
+    expect(skemo.a11y.texts?.download).toEqual({ de: "lädt herunter", en: "downloads" });
+    expect(tradukoOf("ligilo", "props/download", "de")).toBe("Herunterladen");
+    expect(tradukoOf("ligilo", "props/download", "en")).toBe("Download");
+  });
+
+  it("ligilo: a download stays in the view, so it is never external", () => {
+    expect(entryOf("ligilo").skemo.constraints).toContainEqual(
+      expect.objectContaining({ when: { download: "true" }, allowed: { external: ["false"] } }),
+    );
+  });
+
+  it("ligilo: download left the Uzo; its words lead to a ligilo with download", () => {
+    expect(casesOf("ligilo")).not.toContain("download");
+    expect(
+      modelo.tradukoj?.de?.[`${entryOf("ligilo").uzo?.id}/boundary/download/kialo`],
+    ).toBeUndefined();
+    expect(suggest("Bericht herunterladen", "de").suggestion).toMatchObject({
+      ero: "ligilo",
+      props: { download: true },
+    });
+    expect(suggest("download the report", "en").suggestion).toMatchObject({
+      ero: "ligilo",
+      props: { download: true },
+    });
+  });
+
+  it("ligilo: the brief flags download, under 750", () => {
+    const brief = briefOf(entryOf("ligilo"));
+    expect(brief.flags).toContain("download");
+    expect(tokensOf(brief)).toBeLessThan(750);
+  });
+});
