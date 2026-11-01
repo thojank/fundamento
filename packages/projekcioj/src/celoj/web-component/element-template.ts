@@ -3731,6 +3731,15 @@ ${GROUP_ROWS_METHOD}
     }
 `
     : "";
+  // Spec 036 Teil 5 ②b-3 (A-teksto-4): whether the text is cut changes with the width of the
+  // paragraph – a changed size renders again (the tooltip comes or goes).
+  const paragraphInit =
+    isParagraph && parts.includes("text")
+      ? `    if (HAS_PROP.has("max-lines") && typeof ResizeObserver !== "undefined") {
+      new ResizeObserver(() => this.#render()).observe(control);
+    }
+`
+      : "";
   // A paragraph (Spec 014 ③, plan ③ D-04): inline code is spoken as code; every other kind is
   // the platform's paragraph without a role attribute.
   const paragraphRender = isParagraph
@@ -3754,6 +3763,27 @@ ${
         for (const property of ["display", "-webkit-box-orient", "-webkit-line-clamp", "overflow"]) {
           style.removeProperty(property);
         }
+      }
+      // Spec 036 Teil 5 ②b-3 (A-teksto-4): while the text is cut, a konsileto shows it whole on
+      // hover and on focus – silent, the whole text is heard already – and the paragraph takes the
+      // focus, so the keyboard reaches it too; uncut, both go.
+      const cut = clamped && control.scrollHeight > control.clientHeight + 1;
+      let tip = this.shadowRoot?.getElementById("truncated");
+      if (cut) {
+        if (control.id === "") control.id = "fm-truncated";
+        if (control.getAttribute("tabindex") !== "0") control.setAttribute("tabindex", "0");
+        if (!(tip instanceof HTMLElement)) {
+          tip = document.createElement("fm-konsileto");
+          tip.id = "truncated";
+          tip.setAttribute("data-fm-silent", "");
+          tip.setAttribute("for", control.id);
+          this.shadowRoot?.append(tip);
+        }
+        const whole = (this.textContent ?? "").replace(/\\s+/g, " ").trim();
+        if (tip.textContent !== whole) tip.textContent = whole;
+      } else {
+        if (control.hasAttribute("tabindex")) control.removeAttribute("tabindex");
+        if (tip instanceof HTMLElement) tip.remove();
       }
     }
 `
@@ -6286,7 +6316,7 @@ ${
       attributeFilter: ["slot"],
     });
 `
-}${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${datepickerInit}${chipInit}${listInit}${editorInit}${uploadInit}${sliderInit}${fieldExtrasInit}${reasonInit}${
+}${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${paragraphInit}${menuInit}${disclosureInit}${suggestInit}${datepickerInit}${chipInit}${listInit}${editorInit}${uploadInit}${sliderInit}${fieldExtrasInit}${reasonInit}${
   hasEnd
     ? `    // Abnahme #122: the end's parts in their order, their room kept by the control.
     if (typeof ResizeObserver !== "undefined") this.#endObserver = new ResizeObserver(() => this.#endRoom());

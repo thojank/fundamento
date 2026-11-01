@@ -4,7 +4,7 @@
     "id": "uzo_01M5616GCWP8C5HZTVAGHGPC97",
     "ero": "ero_01M5616FMN3GPB1J421PMMKBZ2",
     "skemo": "ske_01M5616G0WKZNS96ANV6PG3A7R",
-    "purpose": "Sets running text in the system's type roles: body, caption, kicker, inline code.",
+    "purpose": "Sets running text in the system's type roles: body, caption, kicker, inline code; with max-lines a tooltip shows the text it cuts.",
     "instead": [
       {
         "goal": "heading",
@@ -65,6 +65,10 @@
         {
           "ero": "teksto",
           "kialo": "Code inside a sentence is a teksto with kind code, because it is spoken as code in the line of the text; a paragraph never holds a paragraph."
+        },
+        {
+          "ero": "konsileto",
+          "kialo": "A text cut after max-lines shows itself whole in a konsileto on hover and on focus, because what is cut must stay readable; the whole text is heard already, so the konsileto says nothing more."
         }
       ],
       "never": [],

@@ -347,7 +347,9 @@ test.describe("②b-3 A-teksto-1: max-lines", () => {
     expect(short.lines).toBe(2);
     expect(short.clipped).toBe(true);
     expect(long.lines).toBeGreaterThan(2);
-    await expect(page.locator("#kurz")).toHaveText(LONG);
+    // S36-4.4 (A-teksto-4): the whole text in the tree, read from the light DOM – the tooltip in
+    // the shadow tree holds it too while the text is cut.
+    expect(await page.locator("#kurz").evaluate((host) => host.textContent)).toBe(LONG);
   });
 });
 
@@ -628,7 +630,7 @@ test.describe("②b-3 A-teksto-4: the tooltip on truncation", () => {
       out,
       `<div style="inline-size: 12rem"><fm-teksto id="kurz" max-lines="2">${WHOLE}</fm-teksto><fm-teksto id="ganz" max-lines="40">${WHOLE}</fm-teksto></div>`,
     );
-    const control = page.locator("#kurz").locator('[part="control"]');
+    const control = page.locator("#kurz").locator('p[part="control"]');
     const tip = page.locator("#kurz").locator("fm-konsileto");
     await control.hover();
     await expect(tip).toBeVisible();
@@ -651,7 +653,9 @@ test.describe("②b-3 A-teksto-4: the tooltip on truncation", () => {
     );
     for (const id of ["#ganz", "#frei"]) {
       await expect(page.locator(id).locator("fm-konsileto")).toHaveCount(0);
-      expect(await page.locator(id).locator('[part="control"]').getAttribute("tabindex")).toBeNull();
+      expect(
+        await page.locator(id).locator('p[part="control"]').getAttribute("tabindex"),
+      ).toBeNull();
     }
   });
 });
