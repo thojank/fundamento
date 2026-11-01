@@ -163,6 +163,8 @@ const WANTED_2B3: Readonly<Record<string, readonly { befund: string; match?: str
   // by default as at the fields); the variants grow by its line, the set lies anew.
   markobutono: [{ befund: "②b-3 A-markobutono-4: help under the label." }],
   sxaltilo: [{ befund: "②b-3 A-sxaltilo-4: help under the label." }],
+  // A-alsxutilo-4: the variants with a dropzone show the upload icon first in it.
+  alsxutilo: [{ befund: "②b-3 A-alsxutilo-4: the upload icon.", match: "dropzone=true" }],
 };
 
 /** One run of the plan in the double, read by every case (Vitest collects nothing here). */
