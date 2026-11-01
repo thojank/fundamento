@@ -161,3 +161,30 @@ describe("②b-3 A-teksto-1 in Figma: max-lines a number of the set", () => {
     expect(set.variants.some((variant) => "max-lines" in variant.props)).toBe(false);
   });
 });
+
+describe("②b-3 A-insigno-4, A-ligilo-4 in Figma: the icon at the start, off by default", () => {
+  it.each(["insigno", "ligilo"])(
+    "%s: icon-start is a BOOLEAN toggle of the set, off; every variant holds its frame before the words, hidden",
+    async (name) => {
+      expect((setOf(name) as { toggles?: readonly unknown[] }).toggles).toContainEqual({
+        property: "icon-start",
+        part: "icon-start",
+        defaultValue: false,
+      });
+      const variant = await firstVariant(name);
+      const icon = find(variant, "icon-start");
+      if (icon === undefined) throw new Error(`${name}: icon-start missing`);
+      expect(geometry(icon).visible).toBe(false);
+      const row = icon.parent as DoubleNode;
+      const words = row.children.find((child) => child.type === "TEXT");
+      expect(words).toBeDefined();
+      expect(row.children.indexOf(icon)).toBeLessThan(row.children.indexOf(words as DoubleNode));
+    },
+  );
+});
+
+describe("②b-3 A-spuro-4 in Figma: the icon of the first item stands with its content", () => {
+  it("spuro:icon has no node and names its Jugxo", () => {
+    expectNotDrawn("spuro:icon");
+  });
+});

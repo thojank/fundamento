@@ -350,3 +350,95 @@ test.describe("②b-3 A-teksto-1: max-lines", () => {
     await expect(page.locator("#kurz")).toHaveText(LONG);
   });
 });
+
+/** The left edges of two elements in the light or shadow tree, measured by the page. */
+async function leftOf(page: Page, selector: string) {
+  return (await page.locator(selector).boundingBox())?.x ?? Number.NaN;
+}
+
+test.describe("②b-3 A-insigno-4, A-ligilo-4, A-spuro-4: icon-start", () => {
+  test("an insigno shows its icon before its words, in the pill, unheard", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      '<fm-insigno id="mit" intent="success"><fm-ikono slot="icon-start" name="success"></fm-ikono>Gültig</fm-insigno><fm-insigno id="ohne" intent="success">Gültig</fm-insigno>',
+    );
+    const icon = page.locator("#mit > fm-ikono");
+    const iconBox = await icon.boundingBox();
+    const pill = await page.locator("#mit").locator('[part="control"]').boundingBox();
+    const plain = await page.locator("#ohne").locator('[part="control"]').boundingBox();
+    if (iconBox === null || pill === null || plain === null) throw new Error("no boxes");
+    expect(iconBox.width).toBeGreaterThan(0);
+    // Inside the pill, at its start; the pill grows by the icon and the gap.
+    expect(iconBox.x).toBeGreaterThanOrEqual(pill.x);
+    expect(iconBox.x - pill.x).toBeLessThan(pill.width / 2);
+    expect(pill.width).toBeGreaterThan(plain.width + iconBox.width);
+    await expect(page.locator("#mit")).toHaveText("Gültig");
+  });
+
+  test("a ligilo shows its icon before its words; its name stays the words", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      '<fm-ligilo to="#hilfe"><fm-ikono slot="icon-start" name="info"></fm-ikono>Hilfe</fm-ligilo>',
+    );
+    const control = page.locator("fm-ligilo").locator('[part="control"]');
+    await expect(control).toHaveAccessibleName("Hilfe");
+    const slot = await control.evaluate((element) =>
+      [...element.querySelectorAll("slot")].map((each) => each.getAttribute("name") ?? ""),
+    );
+    // The slot icon-start stands before the words, icon-end after them.
+    expect(slot.indexOf("icon-start")).toBeLessThan(slot.indexOf(""));
+    // The icon stands at the start of the link.
+    const start = (await control.boundingBox())?.x ?? Number.NaN;
+    expect(Math.abs((await leftOf(page, "fm-ligilo > fm-ikono")) - start)).toBeLessThanOrEqual(1);
+  });
+
+  test("a spuro shows the icon of its first item before the item's words, with a gap", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<fm-spuro label="Pfad"><a href="#start"><fm-ikono slot="icon-start" name="info"></fm-ikono>Start</a><a href="#eroj">Eroj</a><span>Knopf</span></fm-spuro>',
+    );
+    const first = page.locator("fm-spuro > a").first();
+    await expect(first).toHaveAccessibleName("Start");
+    const icon = first.locator("fm-ikono");
+    const iconBox = await icon.boundingBox();
+    const firstBox = await first.boundingBox();
+    expect(iconBox?.width).toBeGreaterThan(0);
+    expect((iconBox?.x ?? 0) - (firstBox?.x ?? 0)).toBeLessThan((firstBox?.width ?? 0) / 2);
+    const looks = await first.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return { gap: style.columnGap, icon: getComputedStyle(element.firstElementChild as Element).inlineSize };
+    });
+    expect(Number.parseFloat(looks.gap)).toBeGreaterThan(0);
+    const separator = await page
+      .locator("fm-spuro")
+      .locator('[part="separator"]')
+      .first()
+      .evaluate((element) => getComputedStyle(element).inlineSize);
+    expect(looks.icon).toBe(separator);
+  });
+});
+
+test.describe("②b-3 A-butono-4: an insigno at the end", () => {
+  test("an insigno in icon-end keeps its pill and is part of the name", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      '<fm-butono>Nachrichten<fm-insigno id="end" slot="icon-end" size="small" intent="info">12</fm-insigno></fm-butono><fm-insigno id="alone" size="small" intent="info">12</fm-insigno>',
+    );
+    const control = page.locator("fm-butono").locator('button[part="control"]');
+    await expect(control).toHaveAccessibleName("Nachrichten 12");
+    const end = await page.locator("#end").boundingBox();
+    const alone = await page.locator("#alone").boundingBox();
+    if (end === null || alone === null) throw new Error("no boxes");
+    // Not squeezed into the square of an icon: the pill as large as the same insigno alone.
+    expect(end.width).toBeCloseTo(alone.width, 1);
+    expect(end.height).toBeCloseTo(alone.height, 1);
+    const label = await control.boundingBox();
+    expect(end.x + end.width).toBeLessThanOrEqual((label?.x ?? 0) + (label?.width ?? 0));
+  });
+});
