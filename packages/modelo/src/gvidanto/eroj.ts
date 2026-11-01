@@ -25,6 +25,7 @@ import type {
   UzoLayout,
   UzoSlot,
 } from "../contracts/modelo.js";
+import { dokuTextIn, isDokuOffen } from "../eroj/dokumentaro.js";
 import { variantKeys } from "../eroj/inventories.js";
 import { labelBeside } from "../lingvo/nomoj.js";
 import { type Lingvo, reguloIn, uzoIn } from "../lingvo/tradukoj.js";
@@ -121,6 +122,13 @@ export interface UzoOutput {
         };
   };
   content: (Omit<UzoContent, "regulo"> & { regulo: ReguloRef })[];
+  /**
+   * Spec 036 Teil 5 ③ (Spec 029 ③): the documentation fields of the Uzo in the language asked
+   * for; a field that still holds the placeholder is left out, so an agent never quotes it.
+   */
+  "when-not"?: { case: string; ero: string }[];
+  "do-dont"?: { do: string[]; dont: string[] };
+  keyboard?: { keys: string[]; action: string }[] | { none: string };
 }
 
 /**
@@ -429,7 +437,43 @@ export function uzoOf(
       ...structuredClone(entry),
       regulo: reguloRefNamed(modelo, entry.regulo, lingvo),
     })),
+    ...dokuOf(uzo, lingvo),
   };
+}
+
+/**
+ * The documentation fields of a Uzo as get_ero states them (Spec 036 Teil 5 ③): every text in the
+ * language asked for, English by default as every Uzo text; a placeholder is left out.
+ */
+function dokuOf(
+  uzo: Uzo,
+  lingvo: Lingvo | undefined,
+): Pick<UzoOutput, "when-not" | "do-dont" | "keyboard"> {
+  const out: Pick<UzoOutput, "when-not" | "do-dont" | "keyboard"> = {};
+  const whenNot = uzo["when-not"];
+  if (Array.isArray(whenNot)) {
+    out["when-not"] = whenNot.map((entry) => ({
+      case: dokuTextIn(entry.case, lingvo),
+      ero: entry.ero,
+    }));
+  }
+  const doDont = uzo["do-dont"];
+  if (doDont !== undefined && !isDokuOffen(doDont) && "do" in doDont) {
+    out["do-dont"] = {
+      do: doDont.do.map((text) => dokuTextIn(text, lingvo)),
+      dont: doDont.dont.map((text) => dokuTextIn(text, lingvo)),
+    };
+  }
+  const keyboard = uzo.keyboard;
+  if (Array.isArray(keyboard)) {
+    out.keyboard = keyboard.map((row) => ({
+      keys: [...row.keys],
+      action: dokuTextIn(row.action, lingvo),
+    }));
+  } else if (keyboard !== undefined && "none" in keyboard) {
+    out.keyboard = { none: dokuTextIn(keyboard.none, lingvo) };
+  }
+  return out;
 }
 
 /** The brief answer of an Ero (A8), generated from its Skemo and Uzo. */

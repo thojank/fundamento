@@ -482,6 +482,89 @@
                 "required": ["regulo", "fixed", "check"],
                 "additionalProperties": false
               }
+            },
+            "when-not": {
+              "description": "Spec 036 Teil 5 ③ (Spec 029 ③ „Wann nicht“): the cases the Ero is not for, each with the Ero or Sxablono to take instead, in the language asked for. Absent while the Uzo holds the placeholder.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "case": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "ero": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+                  }
+                },
+                "required": ["case", "ero"],
+                "additionalProperties": false
+              }
+            },
+            "do-dont": {
+              "description": "Spec 036 Teil 5 ③ (Spec 029 ③): what to do with the Ero and what not, in the language asked for. Absent while the Uzo holds the placeholder.",
+              "type": "object",
+              "properties": {
+                "do": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "dont": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              "required": ["do", "dont"],
+              "additionalProperties": false
+            },
+            "keyboard": {
+              "description": "Spec 036 Teil 5 ③ (Spec 029 ③): what each key of the Skemo does, in the language asked for; none with the reason for an Ero that takes no key. Absent while the Uzo holds the placeholder.",
+              "oneOf": [
+                {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "keys": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "action": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": ["keys", "action"],
+                    "additionalProperties": false
+                  }
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "none": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": ["none"],
+                  "additionalProperties": false
+                }
+              ]
             }
           },
           "required": ["purpose", "instead", "boundary", "composes", "slots", "layout", "content"],
