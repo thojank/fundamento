@@ -36,6 +36,8 @@ describe("teksto in the repo Modelo (section ③, G1, G2)", () => {
       ["size", ["1", "2"], "1"],
       ["emphasis", ["high", "medium", "low"], "high"],
       ["tabular", undefined, false],
+      // Spec 036 Teil 5 ②b-3 (A-teksto-1): the most lines.
+      ["max-lines", undefined, undefined],
     ]);
     expect(skemo?.states).toEqual(["rest"]);
     expect(skemo?.slots).toEqual([{ name: "label", default: true, text: true }]);

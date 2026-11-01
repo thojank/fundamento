@@ -714,7 +714,8 @@ describe("②b-2 A-markdovido-1, A-plenstato-1/2, A-teksto-1: density, compact, 
     expect(boundOf("teksto", "text", "typography", { kind: "label", size: "1" })).toBe(
       "typography.label.1",
     );
-    expect(entryOf("teksto").skemo.props.at(-1)).toMatchObject({
+    // Spec 036 Teil 5 ②b-3 (A-teksto-1): max-lines after it.
+    expect(entryOf("teksto").skemo.props.at(-2)).toMatchObject({
       name: "tabular",
       kind: "boolean",
       default: false,

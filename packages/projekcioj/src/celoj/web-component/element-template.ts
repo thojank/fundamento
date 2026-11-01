@@ -3701,7 +3701,29 @@ ${GROUP_ROWS_METHOD}
   const paragraphRender = isParagraph
     ? `    if (String(this.propValue("kind")) === "code") control.setAttribute("role", "code");
     else control.removeAttribute("role");
+${
+  parts.includes("text")
+    ? `    // Spec 036 Teil 5 ②b-3 (A-teksto-1): max-lines cuts the text after that many lines (the
+    // platform's line clamp, written inline: a number of the instance, no design value); the whole
+    // text stays in the tree and is heard.
+    {
+      const most = Number(this.propValue("max-lines"));
+      const clamped = HAS_PROP.has("max-lines") && Number.isInteger(most) && most > 0;
+      const style = control.style;
+      if (clamped) {
+        style.setProperty("display", "-webkit-box");
+        style.setProperty("-webkit-box-orient", "vertical");
+        style.setProperty("-webkit-line-clamp", String(most));
+        style.setProperty("overflow", "hidden");
+      } else if (style.getPropertyValue("-webkit-line-clamp") !== "") {
+        for (const property of ["display", "-webkit-box-orient", "-webkit-line-clamp", "overflow"]) {
+          style.removeProperty(property);
+        }
+      }
+    }
 `
+    : ""
+}`
     : "";
   // A skip link (Spec 014 ②, plan ② D-07): an empty label shows the Modelo's words for it, in the
   // language of the document (a11y.texts label-empty), as the fallback content of the slot.

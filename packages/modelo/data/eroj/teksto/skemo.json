@@ -48,6 +48,11 @@
         "kind": "boolean",
         "default": false,
         "description": "Spec 029 ②a (A-teksto-1): figures of one width, so numbers stand under each other in a table or a sum. Layout, no token."
+      },
+      {
+        "name": "max-lines",
+        "kind": "number",
+        "description": "Spec 029 ②a (A-teksto-1): the text stands on at most this many lines and is cut at the end of the last; it is heard in full. The full text on truncation comes with A-teksto-4."
       }
     ],
     "states": [
