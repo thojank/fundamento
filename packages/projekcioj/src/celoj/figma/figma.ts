@@ -204,6 +204,9 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   // Spec 036 Teil 5 ②b-2 (A-glitilo-1): the value as text stands with readout text only, a
   // property; the set shows the slider without it (and the field by its axis field).
   "glitilo:readout": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  // Spec 036 Teil 5 ②b-3 (A-glitilo-4): the marks stand with ticks only, a property; the set shows
+  // the slider without them.
+  "glitilo:tick": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
   // Spec 036 Teil 5 ②b-3: parts that only the content of an option brings – the description of an
   // option (A-elekto-4); the set shows the Vitrino's options without it.
   "elekto:option-description": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
@@ -1354,6 +1357,8 @@ export interface FigmaComponentSet {
    * ends of the range; the plugin draws every cell from it.
    */
   calendar?: VitrinoCalendar;
+  /** Spec 036 Teil 5 ②b-3 (A-alsxutilo-4): the dropzone draws the upload icon first (part icon). */
+  zoneIcon?: boolean;
   /**
    * The table of the set (Spec 011 ④, plan ④ D-14): the head words, the rows (row header first),
    * the numeric columns, the sorted column and the direction of its sort button — the Vitrino's
@@ -3540,6 +3545,7 @@ function componentSetOf(
     ...(structure === "dialog" ? { texts: dialogTexts } : {}),
     // Spec 015 ② (plan ② D-06): the help names kinds and size (the Vitrino's), the error the
     // Vitrino's word; the button and the hint in the Modelo's words (a11y.texts).
+    ...(structure === "upload" && skemo.parts.icon !== undefined ? { zoneIcon: true } : {}),
     ...(structure === "upload"
       ? {
           texts: {

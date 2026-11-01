@@ -301,7 +301,8 @@ const uploadStructure = (disables: boolean): string =>
     ':where([part="control"]) { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }',
     ...(disables ? [':where([part="control"]:disabled) { cursor: not-allowed; }'] : []),
     ':where([part="file-list"]) { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }',
-    ':where([part="file-list"][hidden], [part="drop-hint"][hidden]) { display: none; }',
+    // Spec 036 Teil 5 ②b-3 (A-alsxutilo-4): the upload icon stands only in a dropzone.
+    ':where([part="file-list"][hidden], [part="drop-hint"][hidden], [part="icon"][hidden]) { display: none; }',
     ':where([part="file"]) { display: flex; align-items: center; }',
     ':where([part="file-name"]) { overflow-wrap: anywhere; }',
     ':where([part="field"]:not([data-marked="true"])) [part="required-mark"] { display: none; }',
@@ -372,6 +373,10 @@ const sliderStructure = (disables: boolean): string =>
     // Spec 036 Teil 5 ②b-2 (A-glitilo-1): the value as text beside the track, on one line.
     ':where([part="readout"]) { flex: none; white-space: nowrap; }',
     ':where([part="readout"][hidden]) { display: none; }',
+    // Spec 036 Teil 5 ②b-3 (A-glitilo-4): a tick stands at its step, centred on it like a thumb,
+    // in the middle of the track; under fill and thumbs, no target for the pointer.
+    ':where([part="tick"]) { position: absolute; inset-inline-start: var(--fm-tick-at); transform: translateX(-50%); pointer-events: none; }',
+    ':host(:dir(rtl)) :where([part="tick"]) { transform: translateX(50%); }',
     ...(disables ? [':where([part="thumb"][aria-disabled="true"]) { cursor: not-allowed; }'] : []),
     ':where([part="min-label"], [part="max-label"]) { white-space: nowrap; }',
     ':where([part="number"]) { flex: none; inline-size: 0; }',
@@ -984,7 +989,12 @@ function declarations(
   }
   // A slider (Spec 025 ①, D-03): fill and thumb carry a colour, as the meter's bar does (no text
   // lies on them); the number field beside the track is not shown where its width is none.
-  if (isSlider(skemo) && (part === "fill" || part === "thumb") && property === "color") {
+  // Spec 036 Teil 5 ②b-3 (A-glitilo-4): a tick is a line of its colour across the track.
+  if (
+    isSlider(skemo) &&
+    (part === "fill" || part === "thumb" || part === "tick") &&
+    property === "color"
+  ) {
     return [`background-color: ${variable(token)};`];
   }
   if (isSlider(skemo) && part === "number" && property === "width") {

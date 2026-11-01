@@ -77,6 +77,8 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       // Spec 036 Teil 5 ②b-2 (A-glitilo-1): the readout and the least distance of the thumbs.
       ["readout", "enum", false, "none"],
       ["min-distance", "number", false, undefined],
+      // Spec 036 Teil 5 ②b-3 (A-glitilo-4): the marks at every step.
+      ["ticks", "boolean", false, false],
     ]);
     // E2: the dragged thumb is pressed, the name the butono has for it — no new state name.
     expect(skemo?.states).toEqual([
@@ -125,6 +127,8 @@ describe("glitilo in the repo Modelo (section ①, G1, G2)", () => {
       "motion",
       "spinner",
       "message",
+      // Spec 036 Teil 5 ②b-3 (A-glitilo-4): the mark at a step.
+      "tick",
     ]);
     expect(skemo?.parts.track).toEqual({
       fill: { fixed: "color.background.sunken" },

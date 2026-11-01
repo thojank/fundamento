@@ -848,7 +848,8 @@ describe("②b-2 A-atributlisto-1, A-atributlisto-3: max-entries and expanded", 
 describe("②b-2 A-glitilo-1: readout and min-distance", () => {
   it("glitilo: readout none | text | field and min-distance after every prop it had", () => {
     const { skemo } = entryOf("glitilo");
-    expect(skemo.props.slice(-2)).toMatchObject([
+    // Spec 036 Teil 5 ②b-3 (A-glitilo-4): ticks after them.
+    expect(skemo.props.slice(-3, -1)).toMatchObject([
       { name: "readout", kind: "enum", values: ["none", "text", "field"], default: "none" },
       { name: "min-distance", kind: "number" },
     ]);

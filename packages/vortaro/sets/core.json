@@ -5898,6 +5898,29 @@
             }
           }
         }
+      },
+      "icon": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.large}",
+          "$description": "alsxutilo: icon.size (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M6AB9EJ153377A3F7QW2AEVQ"
+            }
+          }
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}",
+          "$description": "alsxutilo: icon.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M6AB9EJ153377A3F7QW2AEVR",
+              "role": "ero"
+            }
+          }
+        }
       }
     },
     "apartigilo": {
@@ -11975,6 +11998,39 @@
           "$extensions": {
             "com.ciferecigo.fundamento": {
               "id": "tok_01M64V8VEZYAWF9M2ZC5P98MMW"
+            }
+          }
+        }
+      },
+      "tick": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.border.strong}",
+          "$description": "glitilo: tick.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M6AB9EJ153377A3F7QW2AEVS",
+              "role": "ero"
+            }
+          }
+        },
+        "width": {
+          "$type": "dimension",
+          "$value": "{border.width.strong}",
+          "$description": "glitilo: tick.width (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M6AB9EJ153377A3F7QW2AEVT"
+            }
+          }
+        },
+        "height": {
+          "$type": "dimension",
+          "$value": "{spacing.small}",
+          "$description": "glitilo: tick.height (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M6AB9EJ153377A3F7QW2AEVV"
             }
           }
         }
