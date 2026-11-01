@@ -445,3 +445,116 @@ test.describe("②b-3 A-butono-4: an insigno at the end", () => {
     expect(end.x + end.width).toBeLessThanOrEqual((label?.x ?? 0) + (label?.width ?? 0));
   });
 });
+
+test.describe("②b-3 A-atributlisto-4: heading", () => {
+  test("the heading stands above the list, heard as a heading, and names the list", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<fm-atributlisto><span slot="heading">Vertrag</span><dl><dt>Nummer</dt><dd>42</dd><dt>Laufzeit</dt><dd>12 Monate</dd></dl></fm-atributlisto>',
+    );
+    await expect(page.getByRole("heading", { name: "Vertrag" })).toBeVisible();
+    const heading = await boxOf(page, "fm-atributlisto", "heading");
+    const list = await page.locator("fm-atributlisto > dl").boundingBox();
+    expect(heading?.shown).toBe(true);
+    expect(heading?.bottom ?? Number.POSITIVE_INFINITY).toBeLessThan(list?.y ?? 0);
+    await expect(page.locator("fm-atributlisto > dl")).toHaveAccessibleName("Vertrag");
+  });
+
+  test("without a heading nothing stands above the list", async ({ page }) => {
+    await serve(page, out, "<fm-atributlisto><dl><dt>Nummer</dt><dd>42</dd></dl></fm-atributlisto>");
+    expect((await boxOf(page, "fm-atributlisto", "heading"))?.shown ?? false).toBe(false);
+    await expect(page.getByRole("heading")).toHaveCount(0);
+  });
+});
+
+test.describe("②b-3 A-plenstato-4: heading, icon", () => {
+  test("icon, heading and text stand in a column, the icon unheard", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      '<fm-plenstato kind="empty"><fm-ikono slot="icon" name="search"></fm-ikono><span slot="heading">Keine Treffer</span>Ändere die Suche oder setze die Filter zurück.</fm-plenstato>',
+    );
+    const icon = await boxOf(page, "fm-plenstato", "icon");
+    const heading = await boxOf(page, "fm-plenstato", "heading");
+    const text = await boxOf(page, "fm-plenstato", "text");
+    expect(icon?.shown).toBe(true);
+    expect(heading?.shown).toBe(true);
+    expect(icon?.bottom ?? Number.POSITIVE_INFINITY).toBeLessThanOrEqual((heading?.top ?? 0) + 1);
+    expect(heading?.bottom ?? Number.POSITIVE_INFINITY).toBeLessThanOrEqual((text?.top ?? 0) + 1);
+    const status = page.locator("fm-plenstato").getByRole("status");
+    await expect(status).toContainText("Keine Treffer");
+    const ikono = page.locator('fm-plenstato > fm-ikono[slot="icon"]');
+    const size = await ikono.evaluate((element) => getComputedStyle(element).inlineSize);
+    const large = await page.evaluate(() =>
+      getComputedStyle(document.querySelector("fm-plenstato") as Element).getPropertyValue(
+        "--fm-ero-plenstato-icon-size",
+      ),
+    );
+    expect(size).toBe(large.trim());
+  });
+
+  test("without heading and icon the state stands as before", async ({ page }) => {
+    await serve(page, out, '<fm-plenstato kind="empty">Noch nichts da.</fm-plenstato>');
+    expect((await boxOf(page, "fm-plenstato", "heading"))?.shown ?? false).toBe(false);
+    expect((await boxOf(page, "fm-plenstato", "icon"))?.shown ?? false).toBe(false);
+  });
+});
+
+test.describe("②b-3 A-tabelo-4: foot", () => {
+  test("the foot row stands on the sunken ground in the label role", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      '<fm-tabelo>Umsatz<table slot="content"><thead><tr><th>Monat</th><th>Betrag</th></tr></thead><tbody><tr><td>Mai</td><td>5</td></tr></tbody><tfoot><tr><th>Summe</th><td>5</td></tr></tfoot></table></fm-tabelo>',
+    );
+    const looks = (selector: string) =>
+      page.locator(selector).first().evaluate((element) => {
+        const style = getComputedStyle(element);
+        return { ground: style.backgroundColor, weight: style.fontWeight };
+      });
+    const foot = await looks("fm-tabelo tfoot td");
+    const body = await looks("fm-tabelo tbody td");
+    const sunken = await page.evaluate(() =>
+      getComputedStyle(document.querySelector("fm-tabelo") as Element)
+        .getPropertyValue("--fm-ero-tabelo-foot-fill")
+        .trim(),
+    );
+    expect(sunken).not.toBe("");
+    expect(foot.ground).not.toBe(body.ground);
+    expect(foot.weight).not.toBe(body.weight);
+  });
+});
+
+test.describe("②b-3 A-sxvebilo-4: close", () => {
+  test("a dismissible popover shows a close button; it closes and gives the focus back", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<fm-sxvebilo label="Filter" dismissible><fm-butono slot="trigger">Filter</fm-butono><fm-teksto>Nur offene Aufgaben.</fm-teksto></fm-sxvebilo>',
+    );
+    await page.locator('fm-butono[slot="trigger"]').click();
+    const close = page.locator("fm-sxvebilo").getByRole("button", { name: "Schließen" });
+    await expect(close).toBeVisible();
+    await close.click();
+    await expect(page.locator("fm-sxvebilo").getByRole("dialog")).toBeHidden();
+    expect(
+      await page.evaluate(() => document.activeElement?.getAttribute("slot") ?? ""),
+    ).toBe("trigger");
+  });
+
+  test("without dismissible no close button stands", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      '<fm-sxvebilo label="Filter"><fm-butono slot="trigger">Filter</fm-butono><fm-teksto>Nur offene Aufgaben.</fm-teksto></fm-sxvebilo>',
+    );
+    await page.locator('fm-butono[slot="trigger"]').click();
+    await expect(page.locator("fm-sxvebilo").getByRole("dialog")).toBeVisible();
+    await expect(page.locator("fm-sxvebilo").getByRole("button", { name: "Schließen" })).toHaveCount(0);
+  });
+});

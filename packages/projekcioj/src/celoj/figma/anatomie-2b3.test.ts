@@ -188,3 +188,19 @@ describe("②b-3 A-spuro-4 in Figma: the icon of the first item stands with its 
     expectNotDrawn("spuro:icon");
   });
 });
+
+describe("②b-3 A-atributlisto-4, A-plenstato-4, A-tabelo-4 in Figma: parts with their content", () => {
+  it.each(["atributlisto:heading", "plenstato:heading", "plenstato:icon", "tabelo:foot"])(
+    "%s has no node and names its Jugxo",
+    (key) => {
+      expectNotDrawn(key);
+    },
+  );
+});
+
+describe("②b-3 A-sxvebilo-4 in Figma: dismissible a property, the close stands with it", () => {
+  it("sxvebilo: dismissible is a BOOLEAN of the set; the part close has no node and names its Jugxo", () => {
+    expect(setOf("sxvebilo").properties.dismissible).toBe("BOOLEAN");
+    expectNotDrawn("sxvebilo:close");
+  });
+});

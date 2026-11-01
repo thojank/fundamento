@@ -323,3 +323,116 @@ describe("②b-3 A-butono-4: icon-end takes an insigno", () => {
     expect(tokensOf(briefOf(entryOf("butono")))).toBeLessThan(750);
   });
 });
+
+/** A-atributlisto-4: the title as slot heading; the part more came with max-entries (②b-2). */
+describe("②b-3 A-atributlisto-4: heading, more", () => {
+  it("atributlisto: heading a text slot, the last slot; one text in it", () => {
+    const { skemo, uzo } = entryOf("atributlisto");
+    expect(skemo.slots.at(-1)).toEqual({ name: "heading", text: true });
+    expect(uzo?.slots.heading).toEqual({ accepts: ["text"], max: 1, nesting: 0 });
+  });
+
+  it("atributlisto: the part heading in the role of a small headline; the part more is there", () => {
+    const { skemo } = entryOf("atributlisto");
+    expect(skemo.parts.heading).toEqual({
+      color: { fixed: "color.text.default" },
+      typography: { fixed: "typography.headline.4" },
+    });
+    expect(skemo.parts.more).toBeDefined();
+  });
+
+  it("atributlisto: the heading names the list where no label does; named in de and en", () => {
+    const { skemo, uzo } = entryOf("atributlisto");
+    expect(skemo.a11y.name).toEqual(["prop:label", "slot:heading"]);
+    for (const path of ["slots/heading", "parts/heading"]) {
+      expect(tradukoOf("atributlisto", path, "de")).toBe("Überschrift");
+      expect(tradukoOf("atributlisto", path, "en")).toBe("Heading");
+    }
+    expect(uzo?.purpose).toContain("heading");
+    expect(tokensOf(briefOf(entryOf("atributlisto")))).toBeLessThan(750);
+  });
+});
+
+/** A-plenstato-4: a slot heading (where one is) and a slot icon (what is missing). */
+describe("②b-3 A-plenstato-4: heading, icon", () => {
+  it("plenstato: heading a text slot, icon a decorative slot, after the slots of 0.2.0", () => {
+    const { skemo, uzo } = entryOf("plenstato");
+    expect(skemo.slots.map((slot) => slot.name)).toEqual(["text", "actions", "heading", "icon"]);
+    expect(skemo.slots.at(-2)).toEqual({ name: "heading", text: true });
+    expect(skemo.slots.at(-1)).toEqual({ name: "icon", decorative: true });
+    expect(uzo?.slots.heading).toEqual({ accepts: ["text"], max: 1, nesting: 0 });
+    expect(uzo?.slots.icon).toEqual({ accepts: ["icon", "ikono"], max: 1, nesting: 0 });
+  });
+
+  it("plenstato: the parts heading (label role) and icon (a large, muted icon)", () => {
+    const { skemo } = entryOf("plenstato");
+    expect(skemo.parts.heading).toEqual({
+      color: { fixed: "color.text.default" },
+      typography: { fixed: "typography.label.1" },
+    });
+    expect(skemo.parts.icon).toEqual({
+      size: { fixed: "size.icon.large" },
+      color: { fixed: "color.text.muted" },
+    });
+  });
+
+  it("plenstato: named in de and en; the Uzo names both; brief under 750", () => {
+    expect(tradukoOf("plenstato", "slots/heading", "de")).toBe("Überschrift");
+    expect(tradukoOf("plenstato", "parts/heading", "en")).toBe("Heading");
+    expect(tradukoOf("plenstato", "slots/icon", "de")).toBe("Symbol");
+    expect(tradukoOf("plenstato", "parts/icon", "en")).toBe("Icon");
+    const purpose = entryOf("plenstato").uzo?.purpose;
+    expect(purpose).toContain("slot heading");
+    expect(purpose).toContain("slot icon");
+    expect(tokensOf(briefOf(entryOf("plenstato")))).toBeLessThan(750);
+  });
+});
+
+/** A-tabelo-4: the foot of a table (part foot), for sums. */
+describe("②b-3 A-tabelo-4: foot", () => {
+  it("tabelo: the part foot, the last part, on the sunken ground in the label role", () => {
+    const { skemo } = entryOf("tabelo");
+    expect(Object.keys(skemo.parts).at(-1)).toBe("foot");
+    expect(skemo.parts.foot).toEqual({
+      fill: { fixed: "color.background.sunken" },
+      color: { fixed: "color.text.default" },
+      typography: { fixed: "typography.label.1" },
+    });
+  });
+
+  it("tabelo: named in de and en; the Uzo names the foot row; brief under 750", () => {
+    expect(tradukoOf("tabelo", "parts/foot", "de")).toBe("Fuß");
+    expect(tradukoOf("tabelo", "parts/foot", "en")).toBe("Foot");
+    expect(entryOf("tabelo").uzo?.purpose).toContain("tfoot");
+    expect(tokensOf(briefOf(entryOf("tabelo")))).toBeLessThan(750);
+  });
+});
+
+/** A-sxvebilo-4: a close button (part close): on touch there is no Escape. */
+describe("②b-3 A-sxvebilo-4: close", () => {
+  it("sxvebilo: dismissible a boolean, the last prop, false by default", () => {
+    const { skemo } = entryOf("sxvebilo");
+    expect(skemo.props.at(-1)).toMatchObject({
+      name: "dismissible",
+      kind: "boolean",
+      default: false,
+    });
+  });
+
+  it("sxvebilo: the part close as large as a small control, the last part; its words", () => {
+    const { skemo } = entryOf("sxvebilo");
+    expect(Object.keys(skemo.parts).at(-1)).toBe("close");
+    expect(skemo.parts.close).toEqual({ size: { fixed: "size.control.small" } });
+    expect(skemo.a11y.texts?.["close-name"]).toEqual({ de: "Schließen", en: "Close" });
+  });
+
+  it("sxvebilo: named in de and en; the brief flags dismissible, under 750", () => {
+    expect(tradukoOf("sxvebilo", "props/dismissible", "de")).toBe("Schließbar");
+    expect(tradukoOf("sxvebilo", "props/dismissible", "en")).toBe("Dismissible");
+    expect(tradukoOf("sxvebilo", "parts/close", "de")).toBe("Schließen");
+    expect(tradukoOf("sxvebilo", "parts/close", "en")).toBe("Close");
+    const brief = briefOf(entryOf("sxvebilo"));
+    expect(brief.flags).toContain("dismissible");
+    expect(tokensOf(brief)).toBeLessThan(750);
+  });
+});
