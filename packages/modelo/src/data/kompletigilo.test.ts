@@ -177,7 +177,8 @@ describe("kompletigilo in the repo Modelo (section ⑤, G1, G2)", () => {
 describe("the Uzo of the kompletigilo (section ⑤, G6)", () => {
   it("states the purpose; a handful of fixed options is the elekto's, a fixed list the elektilo's; multi-select asks, tags are not supported", () => {
     expect(uzo?.purpose).toBe(
-      "A field that suggests matching values while the person types; the value may be one of the suggestions or, if allowed, free text.",
+      // Spec 036 Teil 5 ②b-3 (A-kompletigilo-4): options name their group.
+      "A field that suggests matching values while the person types; the value may be one of the suggestions or, if allowed, free text; options of one group name it (attribute group) and stand under its heading.",
     );
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["few-fixed-options", "elekto"],

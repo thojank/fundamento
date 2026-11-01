@@ -1586,6 +1586,8 @@ describe("Figma plan for the elektilo (Spec 010 ④)", () => {
     expect(rest?.notDrawn).toEqual({
       "text.color": "jug_01M4S2R85WRAC5SV7CARH8RE7S",
       "required-mark.color": "jug_01M4S2R85WRAC5SV7CARH8RE7S",
+      // Spec 036 Teil 5 ②b-3 (A-elektilo-4): the heading of a group stands with options in groups.
+      "group-heading.color": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
     });
     expect(rest?.hidden).toBeUndefined();
   });

@@ -210,6 +210,15 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   // Spec 036 Teil 5 ②b-3: parts that only the content of an option brings – the description of an
   // option (A-elekto-4); the set shows the Vitrino's options without it.
   "elekto:option-description": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  // A-elektilo-4, A-listelektilo-4, A-kompletigilo-4, A-plurelektilo-4: the heading of a group of
+  // options and the divider between two groups stand with options that name a group.
+  "elektilo:group-heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  "listelektilo:group-heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  "listelektilo:divider": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  "kompletigilo:group-heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  "plurelektilo:group-heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  // A-plurelektilo-1: „alle wählen“ stands with select-all only, a property.
+  "plurelektilo:select-all": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
   "listelektilo:icon": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
   "listelektilo:description": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
   "plurelektilo:filter": "jug_01M5H5HFYHBZB8R9TVTJE9874J",

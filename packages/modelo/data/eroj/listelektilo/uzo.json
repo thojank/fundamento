@@ -4,7 +4,7 @@
     "id": "uzo_01M5H5HEAT1KZ7BMRF5J3QTMGM",
     "ero": "ero_01M5H5HB465KSVH93E7B32E7YE",
     "skemo": "ske_01M5H5HCR9NKF99T4FP6VKWNH4",
-    "purpose": "Chooses one option from a styled list when options need an icon or a description.",
+    "purpose": "Chooses one option from a styled list when options need an icon or a description; options of one group name it (attribute group) and stand under its heading.",
     "instead": [
       {
         "goal": "plain-options",
