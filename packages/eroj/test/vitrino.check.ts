@@ -6,7 +6,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { projectModeloSource } from "@fundamento/modelo";
+import { getEro, loadModelo, projectModeloSource } from "@fundamento/modelo";
 import { buildProjekcioj, VITRINO_FILE } from "@fundamento/projekcioj";
 import { expect, type Locator, type Page, test } from "@playwright/test";
 import {
@@ -1962,6 +1962,74 @@ test("the Lingvo switch names the Eroj, states, values and Dimensioj in German a
   await expect(heading).toHaveText("glitilo");
   expect(new URL(page.url()).hash).not.toContain("lingvo=");
   await expect(page.locator("#fm-vitrino-butono thead th").nth(1)).toHaveText("rest");
+});
+
+// Spec 036 Teil 5 ③ (Spec 029 ③): the page of every Ero is its grid and, right after it, its
+// documentation with nine sections in order; their headings and texts follow the Lingvo switch
+// (Esperanto shows the German text), the contrast matrix per state is filled from the measured
+// KontrastParoj of the combination on screen, and the sections are axe-clean.
+test("every Ero page has the nine sections of its documentation in German and English, the contrast matrix per state filled from the measurements (Spec 036 ③)", async ({
+  page,
+}) => {
+  expect(await open(page)).toEqual([]);
+  const pages = await page.evaluate(() => {
+    const ids = [...document.querySelectorAll('main > section[id^="fm-vitrino-"]')].map(
+      (section) => section.id,
+    );
+    return ids
+      .map((id, index) => ({ ero: id.slice("fm-vitrino-".length), next: ids[index + 1] ?? "" }))
+      .filter(({ ero }) => customElements.get(`fm-${ero}`) !== undefined)
+      .map(({ ero, next }) => ({
+        ero,
+        next,
+        sekcioj: [
+          ...document.querySelectorAll(`#fm-vitrino-doku-${ero} [data-fm-doku-sekcio]`),
+        ].map((section) => section.getAttribute("data-fm-doku-sekcio")),
+      }));
+  });
+  const { modelo } = loadModelo(projectModeloSource(EKZEMPLO_CONFIG));
+  expect(pages.map(({ ero }) => ero).sort()).toEqual(
+    (modelo?.eroj ?? []).map((entry) => entry.ero.name).sort(),
+  );
+  for (const { ero, next, sekcioj } of pages) {
+    expect(next, ero).toBe(`fm-vitrino-doku-${ero}`);
+    expect(sekcioj, ero).toEqual([
+      "zweck",
+      "wann-nicht",
+      "anatomie",
+      "varianten",
+      "zustaende",
+      "do-dont",
+      "barrierefreiheit",
+      "theming",
+      "beispiele",
+    ]);
+  }
+  const doku = page.locator("#fm-vitrino-doku-butono");
+  const purpose = (lingvo: "de" | "en") => {
+    const answer = modelo === undefined ? undefined : getEro(modelo, { name: "butono", lingvo });
+    return answer?.ok === true ? (answer.output.uzo?.purpose ?? "") : "";
+  };
+  const zweck = doku.locator('[data-fm-doku-sekcio="zweck"]');
+  await expect(zweck.locator("h3")).toHaveText("Zweck");
+  await expect(zweck.locator('[data-fm-doku-lingvo="de"]')).toHaveText(purpose("de"));
+  await expect(zweck.locator('[data-fm-doku-lingvo="de"]')).toBeVisible();
+  await expect(zweck.locator('[data-fm-doku-lingvo="en"]')).toBeHidden();
+  await page.locator('button[data-fm-lingvo="en"]').click();
+  await expect(zweck.locator("h3")).toHaveText("Purpose");
+  await expect(zweck.locator('[data-fm-doku-lingvo="en"]')).toHaveText(purpose("en"));
+  await expect(zweck.locator('[data-fm-doku-lingvo="en"]')).toBeVisible();
+  await expect(zweck.locator('[data-fm-doku-lingvo="de"]')).toBeHidden();
+  await page.locator('button[data-fm-lingvo="eo"]').click();
+  // The contrast matrix: every cell with pairs carries a measured WCAG ratio of this combination.
+  const cells = doku.locator("[data-fm-doku-paroj]:not([data-fm-doku-paroj=''])");
+  expect(await cells.count()).toBeGreaterThan(0);
+  for (const text of await cells.allTextContents()) expect(text).toMatch(/\d+\.\d{2}/);
+  await page.locator('[data-fm-switch="color-scheme"][data-fm-valoro="dark"]').click();
+  await expect(cells.first()).toHaveText(/\d+\.\d{2}/);
+  for (const ero of ["butono", "kampo", "avataro"]) {
+    expect(await axeViolations(page, `#fm-vitrino-doku-${ero}`), ero).toEqual([]);
+  }
 });
 
 // Spec 029 ①b (Abnahme 28.10., 13:03): the maintainer accepts the Vitrino of every brand
