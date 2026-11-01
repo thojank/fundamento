@@ -70,21 +70,6 @@
     ],
     "boundary": [
       {
-        "case": "many-tabs",
-        "action": "ask-human",
-        "keywords": {
-          "en": [
-            "scrollable",
-            "crowded"
-          ],
-          "de": [
-            "überlauf",
-            "überlaufen"
-          ]
-        },
-        "kialo": "More tabs than the line holds need a rule for what happens to the rest (a second line, a scroll, a list), because every rule hides something; a person decides which."
-      },
-      {
         "case": "closable-tabs",
         "action": "not-supported",
         "keywords": {

@@ -3059,6 +3059,9 @@ ${
       attributeFilter: ["slot", "value", "disabled", "aria-disabled"],
     });
     control.addEventListener("keydown", (event) => this.#key(event));
+    // Spec 036 Teil 5 ②b-4 (A-langetaro-4): the bar scrolls; once laid out and whenever it becomes
+    // narrower or wider, the selected tab is brought into view.
+    if (typeof ResizeObserver !== "undefined") new ResizeObserver(() => this.#reveal()).observe(control);
     control.addEventListener("click", (event) => {
       const row = event.composedPath().find(
         (node) => node instanceof HTMLElement && node.getAttribute("part") === "tab",
@@ -3092,6 +3095,11 @@ ${
       panel.id = "panel";
       if (active === -1) panel.removeAttribute("aria-labelledby");
       else panel.setAttribute("aria-labelledby", \`tab-\${active}\`);
+    }
+    // Spec 036 Teil 5 ②b-4 (A-langetaro-4): another selected tab moves into view.
+    if (active !== this.#revealed) {
+      this.#revealed = active;
+      this.#reveal();
     }
 `
     : "";
@@ -3682,6 +3690,21 @@ ${GROUP_ROWS_METHOD}
     : "";
   const tabsMethods = isTabs
     ? `
+  /** The tab last brought into view (Spec 036 ②b-4, A-langetaro-4). */
+  #revealed = -1;
+
+  /** Scrolls the bar (only the bar, never the page) until the selected tab stands wholly in it. */
+  #reveal(): void {
+    const bar = this.#control;
+    const tab = this.#rows().find((row) => row.getAttribute("aria-selected") === "true");
+    if (tab === undefined || bar.scrollWidth <= bar.clientWidth) return;
+    const outer = bar.getBoundingClientRect();
+    const inner = tab.getBoundingClientRect();
+    // Whole pixels, rounded away from the tab: WebKit keeps scrollLeft whole and would leave a part.
+    if (inner.left < outer.left) bar.scrollLeft -= Math.ceil(outer.left - inner.left);
+    else if (inner.right > outer.right) bar.scrollLeft += Math.ceil(inner.right - outer.right);
+  }
+
   /** Focus goes to the one tab stop: the selected tab, else the first. */
   override focus(options?: FocusOptions): void {
     const rows = this.#rows();

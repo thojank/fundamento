@@ -143,8 +143,9 @@ describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
       ["switch-view", "option-labels-distinct"],
     ]);
     expect(skemo?.goals?.[0]?.keywords).toEqual({
-      en: ["tabs", "tabbar", "views", "sections"],
-      de: ["reiter", "tabs", "registerkarten", "ansichten"],
+      // Spec 036 Teil 5 ②b-4 (A-langetaro-4): the words of the decided boundary many-tabs.
+      en: ["tabs", "tabbar", "views", "sections", "scrollable", "crowded"],
+      de: ["reiter", "tabs", "registerkarten", "ansichten", "überlauf", "überlaufen"],
     });
   });
 });
@@ -182,8 +183,7 @@ describe("the Uzo of the langetaro (section ⑤, G5)", () => {
       ["list-pages", "pagxigilo"],
     ]);
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
-      // "overflow" is a web term of the Uzo (uzo-web-term): the case is named by what it is.
-      ["many-tabs", "ask-human"],
+      // Spec 036 Teil 5 ②b-4 (A-langetaro-4): many-tabs is decided – the bar scrolls (②a-3).
       ["closable-tabs", "not-supported"],
       ["manual-activation", "ask-human"],
       ["vertical-tabs", "ask-human"],

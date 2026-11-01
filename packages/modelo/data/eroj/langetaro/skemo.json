@@ -18,7 +18,7 @@
       {
         "name": "selected",
         "kind": "string",
-        "description": "The id of the chosen tab: the tab whose id is this value is the active one (SkemoSlot.entry active); without it the first tab. An application that keeps the tab in its route sets it itself."
+        "description": "The id of the chosen tab: the tab whose id is this value is the active one (SkemoSlot.entry active); without it the first tab. An application that keeps the tab in its route sets it itself. Spec 029 ②a (A-langetaro-4, many-tabs decided): more tabs than the line holds scroll in the bar, and the selected tab stays in view – when it is chosen, set or the bar becomes narrower."
       },
       {
         "name": "size",
@@ -327,13 +327,17 @@
             "tabs",
             "tabbar",
             "views",
-            "sections"
+            "sections",
+            "scrollable",
+            "crowded"
           ],
           "de": [
             "reiter",
             "tabs",
             "registerkarten",
-            "ansichten"
+            "ansichten",
+            "überlauf",
+            "überlaufen"
           ]
         },
         "props": {},
