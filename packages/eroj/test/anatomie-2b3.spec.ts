@@ -93,3 +93,47 @@ test.describe("②b-3 A-elekto-4: option-description", () => {
     await expect(description).toHaveText("Morgen da");
   });
 });
+
+test.describe("②b-3 A-glitilo-4: tick", () => {
+  test("with ticks a mark stands at every step, inside the track, unheard", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      '<fm-glitilo min="0" max="10" step="2" value="4" ticks>Stufe</fm-glitilo>',
+    );
+    const ticks = page.locator("fm-glitilo").locator('[part="tick"]');
+    await expect(ticks).toHaveCount(6);
+    const track = await page.locator("fm-glitilo").locator('[part="track"]').boundingBox();
+    const first = await ticks.nth(0).boundingBox();
+    const last = await ticks.nth(5).boundingBox();
+    if (track === null || first === null || last === null) throw new Error("no boxes");
+    const middle = (box: { x: number; width: number }) => box.x + box.width / 2;
+    expect(Math.abs(middle(first) - track.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(middle(last) - (track.x + track.width))).toBeLessThanOrEqual(1);
+    expect(first.y).toBeGreaterThanOrEqual(track.y - 1);
+    expect(first.y + first.height).toBeLessThanOrEqual(track.y + track.height + 1);
+    expect(await ticks.nth(0).getAttribute("aria-hidden")).toBe("true");
+  });
+
+  test("without ticks no mark stands", async ({ page }) => {
+    await serve(page, out, '<fm-glitilo min="0" max="10" step="2" value="4">Stufe</fm-glitilo>');
+    await expect(page.locator("fm-glitilo").locator('[part="tick"]')).toHaveCount(0);
+  });
+});
+
+test.describe("②b-3 A-alsxutilo-4: the upload icon", () => {
+  test("a dropzone shows the ikono upload first, unheard; a field without one does not", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<fm-alsxutilo id="z" dropzone>Belege</fm-alsxutilo><fm-alsxutilo id="f">Belege</fm-alsxutilo>',
+    );
+    const icon = page.locator("#z").locator('[part="dropzone"] > [part="icon"]');
+    await expect(icon).toBeVisible();
+    await expect(icon).toHaveAttribute("name", "upload");
+    await expect(icon).toHaveAttribute("aria-hidden", "true");
+    await expect(page.locator("#f").locator('[part="dropzone"] > [part="icon"]')).toBeHidden();
+  });
+});
