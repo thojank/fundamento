@@ -217,6 +217,9 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   "listelektilo:divider": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
   "kompletigilo:group-heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
   "plurelektilo:group-heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  // A-menuo-4: the icon of an entry and the heading of a group stand with entries that carry them.
+  "menuo:icon": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  "menuo:group-heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
   // A-plurelektilo-1: „alle wählen“ stands with select-all only, a property.
   "plurelektilo:select-all": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
   "listelektilo:icon": "jug_01M5H5HFYHBZB8R9TVTJE9874J",

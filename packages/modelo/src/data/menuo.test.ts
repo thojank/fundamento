@@ -71,6 +71,9 @@ describe("menuo in the repo Modelo (section ④, G1, G2, G4)", () => {
       "danger-item",
       "box",
       "focus-ring",
+      // Spec 036 Teil 5 ②b-3 (A-menuo-4): the icon of an entry, the heading of a group.
+      "icon",
+      "group-heading",
     ]);
     expect(skemo?.parts.surface?.shadow).toEqual({ fixed: "elevation.shadow.overlay" });
     expect(skemo?.parts.surface?.width).toEqual({ fixed: "size.container.small" });
@@ -81,6 +84,8 @@ describe("menuo in the repo Modelo (section ④, G1, G2, G4)", () => {
       height: { fixed: "size.target.min" },
       "inline-padding": { fixed: "spacing.medium" },
       radius: { fixed: "radius.role.control" },
+      // Spec 036 Teil 5 ②b-3 (A-menuo-4): the gap between the icon and the words.
+      gap: { fixed: "spacing.small" },
     });
     expect(skemo?.parts["danger-item"]).toEqual({ color: { fixed: "color.status.danger.text" } });
     if (skemo === undefined) throw new Error("missing");
@@ -125,7 +130,8 @@ describe("menuo in the repo Modelo (section ④, G1, G2, G4)", () => {
 describe("the Uzo of the menuo (section ④, G6)", () => {
   it("states the purpose; pages are the navigado's, values the elektilo's, one action the butono's; a submenu is not supported, checkable items ask", () => {
     expect(uzo?.purpose).toBe(
-      "Offers actions for one object behind a single button: edit, duplicate, delete.",
+      // Spec 036 Teil 5 ②b-3 (A-menuo-4): icon and group of an entry.
+      "Offers actions for one object behind a single button: edit, duplicate, delete; an entry may carry an icon (attribute icon) and name its group (attribute group).",
     );
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["navigate", "navigado"],

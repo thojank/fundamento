@@ -814,6 +814,13 @@ function menuMarkup(): string {
 const MENU_ROW =
   '<button part="item" role="menuitem" type="button" tabindex="-1"><slot></slot></button>';
 
+/**
+ * Spec 036 Teil 5 ②b-3 (A-menuo-4): the row of a menu whose Skemo has the part icon – the ikono of
+ * the entry's attribute icon before its words, unheard, hidden while the entry has none.
+ */
+const MENU_ROW_ICON =
+  '<button part="item" role="menuitem" type="button" tabindex="-1"><fm-ikono part="icon" aria-hidden="true" hidden></fm-ikono><slot></slot></button>';
+
 /** A group line of a menu (Spec 014 ④): the slotted apartigilo in a row of its own. */
 const MENU_SEPARATOR = '<div part="separator" role="none"><slot></slot></div>';
 
@@ -1170,6 +1177,9 @@ export function elementSource({
   const isTooltip = host === "tooltip";
   const isPopover = host === "popover";
   const isMenu = host === "menu";
+  // Spec 036 Teil 5 ②b-3 (A-menuo-4): a menu whose Skemo has an icon per entry and group headings.
+  const menuIcon = isMenu && parts.includes("icon");
+  const menuGroups = isMenu && parts.includes("group-heading");
   const isOverlay = isTooltip || isPopover || isMenu;
   const isCard = host === "card";
   const isAvatar = host === "avatar";
@@ -3327,19 +3337,46 @@ ${
     }
     const list = this.#control;
     const wanted = entries.map((entry) => (entry.tagName.toLowerCase() === "fm-apartigilo" ? "separator" : "item"));
+    // Spec 036 Teil 5 ②b-3 (A-menuo-4): the rows, also those standing in a group.
+    const present = [
+      ...list.querySelectorAll(':scope > [part="item"], :scope > [part="separator"], :scope > [part="group"] > [part="item"], :scope > [part="group"] > [part="separator"]'),
+    ];
     const same =
-      list.children.length === wanted.length &&
-      [...list.children].every((child, index) => child.getAttribute("part") === wanted[index]);
+      present.length === wanted.length &&
+      present.every((child, index) => child.getAttribute("part") === wanted[index]);
     if (!same) {
       list.replaceChildren();
       for (const kind of wanted) {
-        list.insertAdjacentHTML("beforeend", kind === "separator" ? \`${MENU_SEPARATOR}\` : \`${MENU_ROW}\`);
+        list.insertAdjacentHTML("beforeend", kind === "separator" ? \`${MENU_SEPARATOR}\` : \`${menuIcon ? MENU_ROW_ICON : MENU_ROW}\`);
       }
     }
+    const rows = [
+      ...list.querySelectorAll(':scope > [part="item"], :scope > [part="separator"], :scope > [part="group"] > [part="item"], :scope > [part="group"] > [part="separator"]'),
+    ] as HTMLElement[];
     entries.forEach((entry, index) => {
-      list.children[index]?.querySelector("slot")?.assign(entry);
-    });
+      const row = rows[index];
+      row?.querySelector("slot")?.assign(entry);${
+        menuIcon
+          ? `
+      // Spec 036 Teil 5 ②b-3 (A-menuo-4): the icon of the entry before its words.
+      const icon = row?.querySelector('[part="icon"]');
+      if (icon instanceof HTMLElement) {
+        const name = entry.getAttribute("icon") ?? "";
+        icon.hidden = name === "";
+        if (name !== "" && icon.getAttribute("name") !== name) icon.setAttribute("name", name);
+      }`
+          : ""
+      }
+    });${
+      menuGroups
+        ? `
+    // Spec 036 Teil 5 ②b-3 (A-menuo-4): entries of one group stand in a group under its heading;
+    // the divider stays the apartigilo the menu holds (Spec 014 ④).
+    this.#groupRows(list, rows, entries.map((entry) => entry.getAttribute("group") ?? ""), false);`
+        : ""
+    }
   }
+${menuGroups ? GROUP_ROWS_METHOD : ""}
 `
     : "";
   // The ways of a field with suggestions (Spec 014 ⑤): its options from the light DOM, the rows
@@ -3848,7 +3885,7 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ["slot", "value", "disabled", "intent", "label"],
+      attributeFilter: ["slot", "value", "disabled", "intent", "label"${menuIcon ? ', "icon"' : ""}${menuGroups ? ', "group"' : ""}],
     });
     control.addEventListener("toggle", () => {
       const open = control.matches(":popover-open");
