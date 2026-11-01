@@ -233,8 +233,9 @@ test("the contrast table shows WCAG, APCA and the change against the comparison 
     // where they miss the APCA band (8586 → 8694; all 144 combinations 14166 → 14184). Spec 036
     // Befund 2.2 (V-2): the four pairs of the Zweitfarbe's roles, advisory where they miss the APCA
     // band (8694 → 8820: badge 54, illustration 36, highlight surface 18, chart 18; every WCAG
-    // threshold holds, the lowest 4.8:1).
-    "In den 72 Kombinationen des Vergleichsstands: 8820 gegen 1296 (Veränderung +7524)",
+    // threshold holds, the lowest 4.8:1). Spec 036 Teil 5 ②b-5 (①-2): ten pairs of the syntax
+    // colours, every WCAG threshold holds, advisory where they miss the APCA band (+432, 8820 → 9252).
+    "In den 72 Kombinationen des Vergleichsstands: 9252 gegen 1296 (Veränderung +7956)",
   );
 });
 

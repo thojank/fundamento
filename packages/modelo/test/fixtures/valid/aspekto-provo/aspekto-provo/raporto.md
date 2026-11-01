@@ -5,9 +5,9 @@ Derived by the Agordilo 0.2.0 (Spec 016). Generated with the package; do not edi
 ## Summary
 
 - Export: **allowed**
-- KontrastParoj: 6696 of 6696 evaluations pass (0 fail)
+- KontrastParoj: 7416 of 7416 evaluations pass (0 fail)
 - Violations: 0 of fixed rules, 0 of adjustable rules (0 covered by a Jugxo)
-- Hints (APCA, Aspiroj, tone): 112
+- Hints (APCA, Aspiroj, tone): 138
 
 ## Checks
 
@@ -196,6 +196,16 @@ None.
 | status-warning-text-on-background-default | text-normal | 8.49:1 | 4.50:1 | passed | aspekto=provo,viewport=compact,density=compact,color-scheme=dark,contrast=default,motion=default |
 | status-warning-text-on-status-warning-subtle | text-normal | 9.67:1 | 4.50:1 | passed | aspekto=provo,viewport=compact,density=compact,color-scheme=dark,contrast=default,motion=default |
 | status-warning-text-on-status-warning-weak | text-normal | 8.61:1 | 4.50:1 | passed | aspekto=provo,viewport=compact,density=compact,color-scheme=dark,contrast=default,motion=default |
+| syntax-comment-on-background-default | text-normal | 6.87:1 | 4.50:1 | passed | aspekto=provo,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default |
+| syntax-comment-on-background-sunken | text-normal | 5.85:1 | 4.50:1 | passed | aspekto=provo,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default |
+| syntax-keyword-on-background-default | text-normal | 8.24:1 | 4.50:1 | passed | aspekto=provo,viewport=compact,density=compact,color-scheme=dark,contrast=default,motion=default |
+| syntax-keyword-on-background-sunken | text-normal | 8.99:1 | 4.50:1 | passed | aspekto=provo,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default |
+| syntax-name-on-background-default | text-normal | 8.68:1 | 4.50:1 | passed | aspekto=provo,viewport=compact,density=compact,color-scheme=dark,contrast=default,motion=default |
+| syntax-name-on-background-sunken | text-normal | 8.35:1 | 4.50:1 | passed | aspekto=provo,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default |
+| syntax-number-on-background-default | text-normal | 8.49:1 | 4.50:1 | passed | aspekto=provo,viewport=compact,density=compact,color-scheme=dark,contrast=default,motion=default |
+| syntax-number-on-background-sunken | text-normal | 8.53:1 | 4.50:1 | passed | aspekto=provo,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default |
+| syntax-string-on-background-default | text-normal | 8.87:1 | 4.50:1 | passed | aspekto=provo,viewport=compact,density=compact,color-scheme=dark,contrast=default,motion=default |
+| syntax-string-on-background-sunken | text-normal | 7.96:1 | 4.50:1 | passed | aspekto=provo,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default |
 | text-default-on-action-tertiary-hover | text-normal | 7.68:1 | 4.50:1 | passed | aspekto=provo,viewport=compact,density=compact,color-scheme=dark,contrast=default,motion=default |
 | text-default-on-action-tertiary-rest | text-normal | 9.80:1 | 4.50:1 | passed | aspekto=provo,viewport=compact,density=compact,color-scheme=dark,contrast=default,motion=default |
 | text-default-on-background-canvas | text-normal | 12.31:1 | 4.50:1 | passed | aspekto=provo,viewport=compact,density=compact,color-scheme=light,contrast=default,motion=default |
@@ -231,6 +241,7 @@ None.
 - contrast-advisory – link-rest-on-background-sunken (18×): KontrastParo 'link-rest-on-background-sunken' (text-normal): color.link.rest on color.background.sunken has APCA lightness contrast Lc 68.6 below the threshold Lc 75 of contrast=default.
 - contrast-advisory – text-default-on-action-tertiary-hover (18×): KontrastParo 'text-default-on-action-tertiary-hover' (text-normal): color.text.default on color.action.tertiary.hover over color.background.sunken has APCA lightness contrast Lc 73.8 below the threshold Lc 75 of contrast=default.
 - contrast-advisory – text-subtle-on-action-tertiary-hover (18×): KontrastParo 'text-subtle-on-action-tertiary-hover' (text-normal): color.text.subtle on color.action.tertiary.hover over color.background.sunken has APCA lightness contrast Lc 67.5 below the threshold Lc 75 of contrast=default.
+- contrast-advisory – syntax-comment-on-background-sunken (18×): KontrastParo 'syntax-comment-on-background-sunken' (text-normal): color.syntax.comment on color.background.sunken has APCA lightness contrast Lc 69.0 below the threshold Lc 75 of contrast=default.
 - contrast-advisory – text-default-on-background-sunken (18×): KontrastParo 'text-default-on-background-sunken' (text-normal): color.text.default on color.background.sunken has APCA lightness contrast Lc 88.4 below the threshold Lc 90 of contrast=high.
 - contrast-advisory – text-subtle-on-background-sunken (18×): KontrastParo 'text-subtle-on-background-sunken' (text-normal): color.text.subtle on color.background.sunken has APCA lightness contrast Lc 87.4 below the threshold Lc 90 of contrast=high.
 - contrast-advisory – text-muted-on-background-canvas (18×): KontrastParo 'text-muted-on-background-canvas' (text-normal): color.text.muted on color.background.canvas has APCA lightness contrast Lc 89.2 below the threshold Lc 90 of contrast=high.
@@ -260,6 +271,11 @@ None.
 - contrast-advisory – text-subtle-on-action-tertiary-hover (18×): KontrastParo 'text-subtle-on-action-tertiary-hover' (text-normal): color.text.subtle on color.action.tertiary.hover over color.background.sunken has APCA lightness contrast Lc 77.1 below the threshold Lc 90 of contrast=high.
 - contrast-advisory – text-default-on-sekundo-surface (18×): KontrastParo 'text-default-on-sekundo-surface' (text-normal): color.text.default on color.sekundo.surface has APCA lightness contrast Lc 88.4 below the threshold Lc 90 of contrast=high.
 - contrast-advisory – sekundo-badge-text-on-badge-fill (18×): KontrastParo 'sekundo-badge-text-on-badge-fill' (text-normal): color.sekundo.badge.text on color.sekundo.badge.fill has APCA lightness contrast Lc 84.0 below the threshold Lc 90 of contrast=high.
+- contrast-advisory – syntax-keyword-on-background-sunken (18×): KontrastParo 'syntax-keyword-on-background-sunken' (text-normal): color.syntax.keyword on color.background.sunken has APCA lightness contrast Lc 83.9 below the threshold Lc 90 of contrast=high.
+- contrast-advisory – syntax-name-on-background-sunken (18×): KontrastParo 'syntax-name-on-background-sunken' (text-normal): color.syntax.name on color.background.sunken has APCA lightness contrast Lc 83.7 below the threshold Lc 90 of contrast=high.
+- contrast-advisory – syntax-string-on-background-sunken (18×): KontrastParo 'syntax-string-on-background-sunken' (text-normal): color.syntax.string on color.background.sunken has APCA lightness contrast Lc 83.2 below the threshold Lc 90 of contrast=high.
+- contrast-advisory – syntax-number-on-background-sunken (18×): KontrastParo 'syntax-number-on-background-sunken' (text-normal): color.syntax.number on color.background.sunken has APCA lightness contrast Lc 84.1 below the threshold Lc 90 of contrast=high.
+- contrast-advisory – syntax-comment-on-background-sunken (18×): KontrastParo 'syntax-comment-on-background-sunken' (text-normal): color.syntax.comment on color.background.sunken has APCA lightness contrast Lc 84.0 below the threshold Lc 90 of contrast=high.
 - contrast-advisory – text-subtle-on-background-raised (18×): KontrastParo 'text-subtle-on-background-raised' (text-normal): color.text.subtle on color.background.raised has APCA lightness contrast Lc 74.1 below the threshold Lc 75 of contrast=default.
 - contrast-advisory – text-muted-on-background-default (18×): KontrastParo 'text-muted-on-background-default' (text-normal): color.text.muted on color.background.default has APCA lightness contrast Lc 68.1 below the threshold Lc 75 of contrast=default.
 - contrast-advisory – text-muted-on-background-canvas (18×): KontrastParo 'text-muted-on-background-canvas' (text-normal): color.text.muted on color.background.canvas has APCA lightness contrast Lc 69.7 below the threshold Lc 75 of contrast=default.
@@ -296,6 +312,16 @@ None.
 - contrast-advisory – link-rest-on-background-sunken (18×): KontrastParo 'link-rest-on-background-sunken' (text-normal): color.link.rest on color.background.sunken has APCA lightness contrast Lc 70.9 below the threshold Lc 75 of contrast=default.
 - contrast-advisory – text-subtle-on-action-tertiary-rest (18×): KontrastParo 'text-subtle-on-action-tertiary-rest' (text-normal): color.text.subtle on color.action.tertiary.rest over color.background.raised has APCA lightness contrast Lc 74.1 below the threshold Lc 75 of contrast=default.
 - contrast-advisory – text-subtle-on-action-tertiary-hover (18×): KontrastParo 'text-subtle-on-action-tertiary-hover' (text-normal): color.text.subtle on color.action.tertiary.hover over color.background.raised has APCA lightness contrast Lc 68.9 below the threshold Lc 75 of contrast=default.
+- contrast-advisory – syntax-keyword-on-background-sunken (18×): KontrastParo 'syntax-keyword-on-background-sunken' (text-normal): color.syntax.keyword on color.background.sunken has APCA lightness contrast Lc 68.6 below the threshold Lc 75 of contrast=default.
+- contrast-advisory – syntax-name-on-background-sunken (18×): KontrastParo 'syntax-name-on-background-sunken' (text-normal): color.syntax.name on color.background.sunken has APCA lightness contrast Lc 71.5 below the threshold Lc 75 of contrast=default.
+- contrast-advisory – syntax-string-on-background-sunken (18×): KontrastParo 'syntax-string-on-background-sunken' (text-normal): color.syntax.string on color.background.sunken has APCA lightness contrast Lc 72.7 below the threshold Lc 75 of contrast=default.
+- contrast-advisory – syntax-number-on-background-sunken (18×): KontrastParo 'syntax-number-on-background-sunken' (text-normal): color.syntax.number on color.background.sunken has APCA lightness contrast Lc 70.2 below the threshold Lc 75 of contrast=default.
+- contrast-advisory – syntax-comment-on-background-sunken (18×): KontrastParo 'syntax-comment-on-background-sunken' (text-normal): color.syntax.comment on color.background.sunken has APCA lightness contrast Lc 70.7 below the threshold Lc 75 of contrast=default.
+- contrast-advisory – syntax-keyword-on-background-default (18×): KontrastParo 'syntax-keyword-on-background-default' (text-normal): color.syntax.keyword on color.background.default has APCA lightness contrast Lc 66.0 below the threshold Lc 75 of contrast=default.
+- contrast-advisory – syntax-name-on-background-default (18×): KontrastParo 'syntax-name-on-background-default' (text-normal): color.syntax.name on color.background.default has APCA lightness contrast Lc 68.9 below the threshold Lc 75 of contrast=default.
+- contrast-advisory – syntax-string-on-background-default (18×): KontrastParo 'syntax-string-on-background-default' (text-normal): color.syntax.string on color.background.default has APCA lightness contrast Lc 70.1 below the threshold Lc 75 of contrast=default.
+- contrast-advisory – syntax-number-on-background-default (18×): KontrastParo 'syntax-number-on-background-default' (text-normal): color.syntax.number on color.background.default has APCA lightness contrast Lc 67.6 below the threshold Lc 75 of contrast=default.
+- contrast-advisory – syntax-comment-on-background-default (18×): KontrastParo 'syntax-comment-on-background-default' (text-normal): color.syntax.comment on color.background.default has APCA lightness contrast Lc 68.1 below the threshold Lc 75 of contrast=default.
 - contrast-advisory – text-subtle-on-background-raised (18×): KontrastParo 'text-subtle-on-background-raised' (text-normal): color.text.subtle on color.background.raised has APCA lightness contrast Lc 88.6 below the threshold Lc 90 of contrast=high.
 - contrast-advisory – text-muted-on-background-default (18×): KontrastParo 'text-muted-on-background-default' (text-normal): color.text.muted on color.background.default has APCA lightness contrast Lc 79.4 below the threshold Lc 90 of contrast=high.
 - contrast-advisory – text-muted-on-background-canvas (18×): KontrastParo 'text-muted-on-background-canvas' (text-normal): color.text.muted on color.background.canvas has APCA lightness contrast Lc 81.0 below the threshold Lc 90 of contrast=high.
@@ -333,3 +359,13 @@ None.
 - contrast-advisory – text-subtle-on-action-tertiary-hover (18×): KontrastParo 'text-subtle-on-action-tertiary-hover' (text-normal): color.text.subtle on color.action.tertiary.hover over color.background.raised has APCA lightness contrast Lc 83.6 below the threshold Lc 90 of contrast=high.
 - contrast-advisory – sekundo-badge-text-on-badge-fill (18×): KontrastParo 'sekundo-badge-text-on-badge-fill' (text-normal): color.sekundo.badge.text on color.sekundo.badge.fill has APCA lightness contrast Lc 85.4 below the threshold Lc 90 of contrast=high.
 - contrast-advisory – sekundo-illustration-on-background-default (18×): KontrastParo 'sekundo-illustration-on-background-default' (ui): color.sekundo.illustration on color.background.default has APCA lightness contrast Lc 51.7 below the threshold Lc 60 of contrast=high.
+- contrast-advisory – syntax-keyword-on-background-sunken (18×): KontrastParo 'syntax-keyword-on-background-sunken' (text-normal): color.syntax.keyword on color.background.sunken has APCA lightness contrast Lc 80.8 below the threshold Lc 90 of contrast=high.
+- contrast-advisory – syntax-name-on-background-sunken (18×): KontrastParo 'syntax-name-on-background-sunken' (text-normal): color.syntax.name on color.background.sunken has APCA lightness contrast Lc 82.6 below the threshold Lc 90 of contrast=high.
+- contrast-advisory – syntax-string-on-background-sunken (18×): KontrastParo 'syntax-string-on-background-sunken' (text-normal): color.syntax.string on color.background.sunken has APCA lightness contrast Lc 83.3 below the threshold Lc 90 of contrast=high.
+- contrast-advisory – syntax-number-on-background-sunken (18×): KontrastParo 'syntax-number-on-background-sunken' (text-normal): color.syntax.number on color.background.sunken has APCA lightness contrast Lc 81.8 below the threshold Lc 90 of contrast=high.
+- contrast-advisory – syntax-comment-on-background-sunken (18×): KontrastParo 'syntax-comment-on-background-sunken' (text-normal): color.syntax.comment on color.background.sunken has APCA lightness contrast Lc 82.1 below the threshold Lc 90 of contrast=high.
+- contrast-advisory – syntax-keyword-on-background-default (18×): KontrastParo 'syntax-keyword-on-background-default' (text-normal): color.syntax.keyword on color.background.default has APCA lightness contrast Lc 78.2 below the threshold Lc 90 of contrast=high.
+- contrast-advisory – syntax-name-on-background-default (18×): KontrastParo 'syntax-name-on-background-default' (text-normal): color.syntax.name on color.background.default has APCA lightness contrast Lc 80.0 below the threshold Lc 90 of contrast=high.
+- contrast-advisory – syntax-string-on-background-default (18×): KontrastParo 'syntax-string-on-background-default' (text-normal): color.syntax.string on color.background.default has APCA lightness contrast Lc 80.7 below the threshold Lc 90 of contrast=high.
+- contrast-advisory – syntax-number-on-background-default (18×): KontrastParo 'syntax-number-on-background-default' (text-normal): color.syntax.number on color.background.default has APCA lightness contrast Lc 79.2 below the threshold Lc 90 of contrast=high.
+- contrast-advisory – syntax-comment-on-background-default (18×): KontrastParo 'syntax-comment-on-background-default' (text-normal): color.syntax.comment on color.background.default has APCA lightness contrast Lc 79.4 below the threshold Lc 90 of contrast=high.

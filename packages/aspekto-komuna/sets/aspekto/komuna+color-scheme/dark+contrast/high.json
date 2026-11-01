@@ -52,6 +52,11 @@
         }
       }
     },
+    "syntax": {
+      "keyword": {
+        "$value": "{color.palette.danger.50}"
+      }
+    },
     "$type": "color"
   }
 }

@@ -1002,6 +1002,23 @@
         }
       }
     },
+    "syntax": {
+      "keyword": {
+        "$value": "{color.palette.danger.800}"
+      },
+      "name": {
+        "$value": "{color.palette.info.800}"
+      },
+      "string": {
+        "$value": "{color.palette.success.800}"
+      },
+      "number": {
+        "$value": "{color.palette.warning.800}"
+      },
+      "comment": {
+        "$value": "{color.palette.neutral.700}"
+      }
+    },
     "brand": {
       "fill": {
         "$value": "{color.palette.accent.800}"

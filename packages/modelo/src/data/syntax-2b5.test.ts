@@ -54,6 +54,7 @@ describe("syntax colours (①-2)", () => {
         (issue.rule === "contrast-external-aspekto" || issue.severity === "error"),
     );
     expect(failing.map((issue) => issue.message)).toEqual([]);
-    expect(result.stats.aspektoj).toBe(5);
+    // Five brands and dukolora, the sixth since Spec 036 Befund 2.2 (Teil 2b).
+    expect(result.stats.aspektoj).toBe(6);
   });
 });
