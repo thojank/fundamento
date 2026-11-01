@@ -488,9 +488,10 @@ describe("②b-3 A-avataro-4: the default icon", () => {
 
 /** A-pagxigilo-4: buttons to the first and the last page; the page size stays a boundary. */
 describe("②b-3 A-pagxigilo-4: first, last", () => {
-  it("pagxigilo: first-last a boolean, the last prop, false by default; its words", () => {
+  it("pagxigilo: first-last a boolean, after summary, false by default; its words", () => {
     const { skemo } = entryOf("pagxigilo");
-    expect(skemo.props.at(-1)).toMatchObject({
+    // Spec 036 Teil 5 ②b-4 (A-pagxigilo-6): total-unknown came after it.
+    expect(skemo.props.at(-2)).toMatchObject({
       name: "first-last",
       kind: "boolean",
       default: false,

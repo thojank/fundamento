@@ -2991,8 +2991,13 @@ ${
       const given = this.propValue("label");
       const landmark = typeof given === "string" && given !== "" ? given : word("label-empty");
       if (control.getAttribute("aria-label") !== landmark) control.setAttribute("aria-label", landmark);
-      const pageCount = Math.max(1, Math.floor(Number(this.propValue("total-pages") ?? 1)) || 1);
-      const current = Math.min(pageCount, Math.max(1, Math.floor(Number(this.propValue("page") ?? 1)) || 1));
+      // Spec 036 Teil 5 ②b-4 (A-pagxigilo-6): with total-unknown, total-pages counts the pages
+      // known so far – the current one is known – and next leads on from every page.
+      const open = HAS_PROP.has("total-unknown") && this.propValue("total-unknown") === true;
+      const known = Math.max(1, Math.floor(Number(this.propValue("total-pages") ?? 1)) || 1);
+      const asked = Math.max(1, Math.floor(Number(this.propValue("page") ?? 1)) || 1);
+      const pageCount = open ? Math.max(known, asked) : known;
+      const current = Math.min(pageCount, asked);
       const siblings = Math.max(0, Math.floor(Number(this.propValue("siblings") ?? 1)) || 0);
       const link = this.propValue("mode") === "link";
       const template = String(this.propValue("href-template") ?? "?page={page}");
@@ -3000,14 +3005,22 @@ ${
       const high = Math.min(pageCount - 1, current + siblings);
       const pages: (number | "gap")[] = [1];
       if (low > 2) pages.push("gap");
-      for (let n = low; n <= high; n += 1) pages.push(n);
-      if (high < pageCount - 1) pages.push("gap");
-      if (pageCount > 1) pages.push(pageCount);
+      if (open) {
+        // No last page: the current one and its siblings up to the known ones, then an ellipsis.
+        for (let n = low; n <= Math.min(pageCount, current + siblings); n += 1) pages.push(n);
+        pages.push("gap");
+      } else {
+        for (let n = low; n <= high; n += 1) pages.push(n);
+        if (high < pageCount - 1) pages.push("gap");
+        if (pageCount > 1) pages.push(pageCount);
+      }
       // Spec 036 Teil 5 ②b-2 (A-pagxigilo-1): summary count or compact puts the place between the
       // arrows instead of the pages – the Modelo's words (summary-count), or the numbers alone,
       // heard as the words.
       const summary = String(this.propValue("summary") ?? "pages");
-      const place = word("summary-count").replace("{page}", String(current)).replace("{total-pages}", String(pageCount));
+      const place = open
+        ? word("items-name") + " " + current
+        : word("summary-count").replace("{page}", String(current)).replace("{total-pages}", String(pageCount));
       // Spec 036 Teil 5 ②b-3 (A-pagxigilo-4): with first-last a button to the first page before prev
       // and one to the last after next, each disabled where it would stay on the page.
       const ends = this.propValue("first-last") === true;
@@ -3018,17 +3031,17 @@ ${
           ? pages.map((page) => (page === "gap" ? { kind: "gap" as const, page: 0 } : { kind: "page" as const, page }))
           : [{ kind: "summary" as const, page: current }]),
         { kind: "next", page: current + 1 },
-        ...(ends ? [{ kind: "last" as const, page: current === pageCount ? pageCount + 1 : pageCount }] : []),
+        ...(ends && !open ? [{ kind: "last" as const, page: current === pageCount ? pageCount + 1 : pageCount }] : []),
       ];
       const html = items
         .map((item) => {
           if (item.kind === "gap") return '<li part="ellipsis" aria-hidden="true">' + ${JSON.stringify(ELLIPSIS_SIGN)} + "</li>";
           if (item.kind === "summary") {
             return summary === "compact"
-              ? '<li part="summary"><span aria-hidden="true">' + current + " / " + pageCount + '</span><span class="fm-hidden">' + place + "</span></li>"
+              ? '<li part="summary"><span aria-hidden="true">' + (open ? String(current) : current + " / " + pageCount) + '</span><span class="fm-hidden">' + place + "</span></li>"
               : '<li part="summary">' + place + "</li>";
           }
-          const off = item.page < 1 || item.page > pageCount;
+          const off = item.page < 1 || (item.page > pageCount && !(open && item.kind === "next"));
           const tag = link ? "a" : "button";
           const href = link && !off ? ' href="' + template.replace("{page}", String(item.page)) + '"' : "";
           const type = link ? "" : ' type="button"';

@@ -74,6 +74,12 @@
         "kind": "boolean",
         "default": false,
         "description": "Shows a button to the first page before prev and one to the last page after next (parts first and last), named by a11y.texts first-name and last-name; each is disabled where it would stay on the page."
+      },
+      {
+        "name": "total-unknown",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②a (A-pagxigilo-6): the total is not known – a search, a log: total-pages counts the pages known so far, no last page stands and an ellipsis follows them; next leads on from every page (the application takes total-unknown away when it knows the end). summary count says the place without the total, compact the number alone; with first-last only the first page stands."
       }
     ],
     "states": [
