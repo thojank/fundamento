@@ -290,3 +290,35 @@ test.describe("②b-3 A-menuo-4: icon per entry, group headings, divider", () =>
     await expect(host.locator('[part="item"] [part="icon"]').first()).toBeHidden();
   });
 });
+
+test.describe("②b-3 A-navigado-1, A-navigado-4: section headings and icons", () => {
+  test("a vertical navigation shows its section headings, heard as headings; an item shows its icon before its words", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<fm-navigado orientation="vertical" label="Bereiche" page="tokens"><h2>Grundlagen</h2><a href="#tokens" data-page="tokens"><fm-ikono slot="icon-start" name="info"></fm-ikono>Tokens</a><a href="#regeln">Regeln</a><h2>Eroj</h2><a href="#knopf">Knopf</a></fm-navigado>',
+    );
+    // The headings stand in the light DOM, slotted into the landmark: heard as headings.
+    await expect(page.getByRole("heading", { name: "Grundlagen" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Eroj" })).toBeVisible();
+    const heading = page.locator("fm-navigado > h2").first();
+    const link = page.locator("fm-navigado > a").first();
+    const looks = await heading.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return { margin: style.marginBlockStart, size: style.fontSize };
+    });
+    expect(looks.margin).toBe("0px");
+    const linkSize = await link.evaluate((element) => getComputedStyle(element).fontSize);
+    expect(Number.parseFloat(looks.size)).toBeLessThan(Number.parseFloat(linkSize));
+    const icon = link.locator("fm-ikono");
+    const iconBox = await icon.boundingBox();
+    const linkBox = await link.boundingBox();
+    expect(iconBox?.width).toBeGreaterThan(0);
+    const gap = await link.evaluate((element) => getComputedStyle(element).columnGap);
+    expect(Number.parseFloat(gap)).toBeGreaterThan(0);
+    expect((iconBox?.x ?? 0) - (linkBox?.x ?? 0)).toBeLessThan((linkBox?.width ?? 0) / 2);
+    await expect(link).toHaveAccessibleName("Tokens");
+  });
+});
