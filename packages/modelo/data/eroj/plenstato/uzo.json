@@ -4,7 +4,7 @@
     "id": "uzo_01M51ZRGEPTH2CEY385GE1PB0M",
     "ero": "ero_01M51ZRFPJXJRYE15FEKX72M2K",
     "skemo": "ske_01M51ZRG2K24R0RFTV8RPJMHBH",
-    "purpose": "Fills an area while its content loads, or when there is none: loading standards, no standards yet.",
+    "purpose": "Fills an area while its content loads, or when there is none: loading standards, no standards yet; a title (slot heading) says where the person is, an icon (slot icon) what is missing.",
     "instead": [
       {
         "goal": "button-busy",
@@ -93,6 +93,21 @@
           "butono"
         ],
         "max": 2,
+        "nesting": 0
+      },
+      "heading": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      },
+      "icon": {
+        "accepts": [
+          "icon",
+          "ikono"
+        ],
+        "max": 1,
         "nesting": 0
       }
     },

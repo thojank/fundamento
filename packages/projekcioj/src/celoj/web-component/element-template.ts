@@ -685,7 +685,12 @@ function statusMarkup(
   icon = false,
 ): string {
   const arc = `<svg aria-hidden="true" viewBox="0 0 16 16" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="${ARC_PATH}"/></svg>`;
-  const holders = slots
+  // Spec 036 Teil 5 ②b-3 (A-plenstato-4): the title stands first among the texts, the icon of a
+  // decorative slot icon above them, unheard and hidden while empty.
+  const holders = [
+    ...slots.filter((slot) => slot.name === "heading"),
+    ...slots.filter((slot) => slot.name !== "heading"),
+  ]
     .filter((slot) => slot.decorative !== true)
     .map((slot) =>
       slot.default === true
@@ -696,7 +701,10 @@ function statusMarkup(
   // The icon of the intent (Spec 014 ②, G3, G6): an ikono named like the intent, decorative — the
   // intent word is heard already — in the colour of the part icon.
   const sign = icon ? '<span part="icon" aria-hidden="true"><fm-ikono></fm-ikono></span>' : "";
-  return `<div part="control" role="status"><span id="fm-texts" class="fm-hidden"></span>${indicator ? `<span part="indicator" aria-hidden="true">${arc}</span>` : ""}${sign}<div>${holders}</div>${dismiss ? `<fm-butono part="dismiss" emphasis="low" size="small" hidden>${CROSS}</fm-butono>` : ""}</div>`;
+  const slotted = slots.some((slot) => slot.name === "icon" && slot.decorative === true)
+    ? '<span part="icon" id="icon-slot" aria-hidden="true" hidden><slot name="icon"></slot></span>'
+    : "";
+  return `<div part="control" role="status"><span id="fm-texts" class="fm-hidden"></span>${indicator ? `<span part="indicator" aria-hidden="true">${arc}</span>` : ""}${sign}<div>${slotted}${holders}</div>${dismiss ? `<fm-butono part="dismiss" emphasis="low" size="small" hidden>${CROSS}</fm-butono>` : ""}</div>`;
 }
 
 /**
@@ -731,14 +739,19 @@ function lightMarkup(
   }
   const content = slots.find((slot) => slot.default !== true && slot.text !== true);
   const defaultSlot = slots.find((slot) => slot.default === true);
+  // Spec 036 Teil 5 ②b-3 (A-atributlisto-4): the title of a list stands above it, a heading of
+  // level 2 in the role of a small headline, hidden while its slot is empty.
+  const titled = content === undefined && slots.some((slot) => slot.name === "heading");
   const frame =
     content !== undefined
       ? `<div part="region" role="region" tabindex="0"><slot name="${content.name}"></slot></div>`
-      : `<div part="list"><slot></slot></div>`;
+      : `${titled ? '<fm-titolo part="heading" id="heading" level="2" size="headline-4" hidden><slot name="heading"></slot></fm-titolo>' : ""}<div part="list"><slot></slot></div>`;
   const hiddenDefault =
     content !== undefined && defaultSlot?.text === true ? "<slot hidden></slot>" : "";
   const hiddenNamed = slots
-    .filter((slot) => slot.default !== true && slot.text === true)
+    .filter(
+      (slot) => slot.default !== true && slot.text === true && !(titled && slot.name === "heading"),
+    )
     .map((slot) => `<slot name="${slot.name}" hidden></slot>`)
     .join("");
   return `${frame}${hiddenDefault}${hiddenNamed}<span id="fm-texts" hidden></span>`;
@@ -801,8 +814,10 @@ function tooltipMarkup(): string {
  * dialog, non-modal — holding a composed titolo as heading (level 2, the layer is a document of
  * its own) and the content.
  */
-function popoverMarkup(): string {
-  return '<slot name="trigger"></slot><div part="control" role="dialog" popover="auto" tabindex="-1"><fm-titolo part="heading" id="heading" level="2" size="headline-4"><slot name="heading"></slot></fm-titolo><div part="content"><slot></slot></div><span id="fm-texts" hidden></span></div>';
+function popoverMarkup(close = false): string {
+  // Spec 036 Teil 5 ②b-3 (A-sxvebilo-4): the close button first in the layer, hidden until
+  // dismissible – on touch there is no Escape.
+  return `<slot name="trigger"></slot><div part="control" role="dialog" popover="auto" tabindex="-1">${close ? `<fm-butono part="close" emphasis="low" size="small" hidden>${CROSS}</fm-butono>` : ""}<fm-titolo part="heading" id="heading" level="2" size="headline-4"><slot name="heading"></slot></fm-titolo><div part="content"><slot></slot></div><span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -1019,7 +1034,7 @@ function hostMarkup(
   if (host === "heading") return headingMarkup();
   if (host === "paragraph") return paragraphMarkup();
   if (host === "tooltip") return tooltipMarkup();
-  if (host === "popover") return popoverMarkup();
+  if (host === "popover") return popoverMarkup(parts.includes("close"));
   if (host === "menu") return menuMarkup();
   if (host === "meter") return meterMarkup();
   if (host === "light") return lightMarkup(slots, role, breadcrumb);
@@ -2266,6 +2281,9 @@ ${
       const holder = this.shadowRoot?.getElementById(name);
       if (holder instanceof HTMLElement) holder.hidden = !this.#filled(name);
     }
+    // Spec 036 Teil 5 ②b-3 (A-plenstato-4): the icon of the slot icon shows while it has one.
+    const iconSlot = this.shadowRoot?.getElementById("icon-slot");
+    if (iconSlot instanceof HTMLElement) iconSlot.hidden = !this.#filled("icon");
 ${
   dismiss
     ? `    const closer = this.shadowRoot?.querySelector('[part="dismiss"]');
@@ -2756,9 +2774,13 @@ ${
   }
 
   #decorateList(list: HTMLElement): void {
-    // The name of the list (Spec 011 ④, D-10): the label prop, as the platform names a list.
+    // The name of the list (Spec 011 ④, D-10): the label prop, as the platform names a list;
+    // Spec 036 Teil 5 ②b-3 (A-atributlisto-4): else its title, shown above it while it has words.
     const label = this.propValue("label");
-    const name = typeof label === "string" && label !== "" ? label : null;
+    const title = this.shadowRoot?.querySelector('[part="heading"]');
+    const titleText = title instanceof HTMLElement ? this.#slotText("heading") : "";
+    if (title instanceof HTMLElement && title.hidden !== (titleText === "")) title.hidden = titleText === "";
+    const name = typeof label === "string" && label !== "" ? label : titleText !== "" ? titleText : null;
     if (list.getAttribute("aria-label") !== name) {
       if (name === null) list.removeAttribute("aria-label");
       else list.setAttribute("aria-label", name);
@@ -3888,6 +3910,12 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
         !(trigger !== undefined && trigger.contains(next));
     });
     root.querySelector('slot[name="trigger"]')?.addEventListener("slotchange", () => this.#overlayBindTrigger());
+    // Spec 036 Teil 5 ②b-3 (A-sxvebilo-4): the close button closes the layer and the trigger takes
+    // the focus back at once (the toggle above comes a task later).
+    root.querySelector('[part="close"]')?.addEventListener("click", () => {
+      control.hidePopover();
+      this.#overlayTrigger()?.focus();
+    });
 `
     : "";
   const popoverRender = isPopover
@@ -3896,6 +3924,15 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
     else control.removeAttribute("aria-label");
     const heading = this.shadowRoot?.querySelector('[part="heading"]');
     if (heading instanceof HTMLElement) heading.hidden = !this.#filled("heading");
+    // Spec 036 Teil 5 ②b-3 (A-sxvebilo-4): the close button while dismissible, named by the Modelo.
+    const closer = this.shadowRoot?.querySelector('[part="close"]');
+    if (closer instanceof HTMLElement) {
+      const shown = HAS_PROP.has("dismissible") && this.propValue("dismissible") === true;
+      if (closer.hidden !== !shown) closer.hidden = !shown;
+      const word = TEXTS["close-name"];
+      const closeName = word?.[this.#lingvo()] ?? word?.en ?? "";
+      if (closeName !== "" && closer.getAttribute("label") !== closeName) closer.setAttribute("label", closeName);
+    }
     this.#overlaySync();
 `
     : "";

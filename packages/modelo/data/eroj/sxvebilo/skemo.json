@@ -43,6 +43,12 @@
         ],
         "default": "center",
         "description": "Spec 029 ②a (A-sxvebilo-1): the alignment along the side of the trigger – center as before; start at the start edge of the trigger, end at its end edge (the writing direction mirrors both). Layout, no token."
+      },
+      {
+        "name": "dismissible",
+        "kind": "boolean",
+        "default": false,
+        "description": "Shows a close button (a butono with emphasis low, part close) named by a11y.texts.close-name at the top of the layer; it closes the layer and the trigger takes the focus back – on touch there is no Escape."
       }
     ],
     "states": [
@@ -113,6 +119,11 @@
         "gap": {
           "fixed": "spacing.small"
         }
+      },
+      "close": {
+        "size": {
+          "fixed": "size.control.small"
+        }
       }
     },
     "bindings": [],
@@ -124,7 +135,13 @@
       "states": {},
       "keys": [
         "Escape"
-      ]
+      ],
+      "texts": {
+        "close-name": {
+          "de": "Schließen",
+          "en": "Close"
+        }
+      }
     },
     "goals": [
       {

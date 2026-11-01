@@ -2631,6 +2631,16 @@
           "$type": "typography",
           "$value": "{typography.label.2}"
         }
+      },
+      "heading": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}"
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.headline.4}"
+        }
       }
     },
     "avataro": {
@@ -8459,6 +8469,26 @@
           "$type": "dimension",
           "$value": "{spacing.small}"
         }
+      },
+      "heading": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}"
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.label.1}"
+        }
+      },
+      "icon": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.large}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        }
       }
     },
     "plurelektilo": {
@@ -9879,6 +9909,12 @@
           "$type": "dimension",
           "$value": "{spacing.small}"
         }
+      },
+      "close": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.control.small}"
+        }
       }
     },
     "tabelo": {
@@ -10022,6 +10058,20 @@
             "$type": "color",
             "$value": "{color.focus.inner}"
           }
+        }
+      },
+      "foot": {
+        "fill": {
+          "$type": "color",
+          "$value": "{color.background.sunken}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}"
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.label.1}"
         }
       }
     },

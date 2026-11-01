@@ -222,6 +222,14 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   "menuo:group-heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
   // Spec 036 Teil 5 ②b-3 (A-spuro-4): the icon of the first item stands with the icon it holds.
   "spuro:icon": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  // A-atributlisto-4, A-plenstato-4, A-tabelo-4: a title, an icon and a foot row stand with the
+  // words, the icon and the rows that bring them.
+  "atributlisto:heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  "plenstato:heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  "plenstato:icon": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  "tabelo:foot": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  // A-sxvebilo-4: the close button stands with dismissible only, a property.
+  "sxvebilo:close": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
   // A-navigado-1, A-navigado-4: the heading of a section and the icon of an item stand with the
   // headings and icons a navigation holds.
   "navigado:section-heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
@@ -1116,7 +1124,14 @@ export function labelPartOf(skemo: LoadedEro["skemo"]): string {
   if (skemo.parts.label === undefined && skemo.parts.text !== undefined) return "text";
   // Spec 014 ④ (plan ④ D-06): a popover's label property writes its heading (the part of its
   // heading slot); a menu's the word of its entries (the part item), whose role the rows take.
-  if (skemo.parts.label === undefined && skemo.parts.heading !== undefined) return "heading";
+  // Spec 036 Teil 5 ②b-3 (A-atributlisto-4): a list's title is no label – the label property names
+  // the list (aria-label), its title stands with its content.
+  if (
+    skemo.parts.label === undefined &&
+    skemo.parts.heading !== undefined &&
+    skemo.a11y.role !== "list"
+  )
+    return "heading";
   if (skemo.parts.label === undefined && skemo.parts.item !== undefined) return "item";
   // Spec 014 ⑤: a disclosure's label property writes its summary.
   if (skemo.parts.label === undefined && skemo.parts.summary !== undefined) return "summary";

@@ -267,6 +267,8 @@ const LIGHT_SHADOW_PARTS: ReadonlySet<string> = new Set([
   "focus-ring",
   // Spec 036 Teil 5 ②b-2 (A-atributlisto-1): the button for the rest of a list stands in the shadow.
   "more",
+  // Spec 036 Teil 5 ②b-3 (A-atributlisto-4): so does its title.
+  "heading",
 ]);
 
 /** A pagination (Spec 015 ①, plan ① D-03): a navigation that draws its pages itself (an ellipsis part). */
@@ -651,9 +653,13 @@ function meterPartSelector(part: string, data: string): string {
  * (data-intent, data-kind); surface, accent, border, box and motion are the control itself, every
  * other part — heading, message, details, text, actions, indicator, dismiss — its own element.
  */
-function statusPartSelector(part: string, data: string): string {
+function statusPartSelector(part: string, data: string, slottedIcon = false): string {
   const control = `[part="control"]${data}`;
   if (["surface", "accent", "border", "box", "motion"].includes(part)) return `:where(${control})`;
+  // Spec 036 Teil 5 ②b-3 (A-plenstato-4): the icon of a slot icon takes the size of its holder.
+  if (part === "icon" && slottedIcon) {
+    return `:where(${control}) [part="icon"], :where(${control}) [part="icon"] > slot::slotted(*)`;
+  }
   return `:where(${control}) [part="${part}"]`;
 }
 
@@ -1316,6 +1322,13 @@ const statusStructure = (skemo: Skemo): string => {
     ':where([part="indicator"]) { display: block; flex: none; }',
     ':where([part="indicator"]) > svg { display: block; }',
     ':where([part="dismiss"][hidden]) { display: none; }',
+    // Spec 036 Teil 5 ②b-3 (A-plenstato-4): the icon of the slot icon above the texts, centred.
+    ...(skemo.slots.some((slot) => slot.name === "icon" && slot.decorative === true)
+      ? [
+          ':where([part="icon"]) { display: block; align-self: center; }',
+          ':where([part="icon"][hidden]) { display: none; }',
+        ]
+      : []),
     HIDDEN_TEXT,
   ].join("\n");
 };
@@ -1360,7 +1373,19 @@ const meterStructure: string = [
  * is a block; a table lies in a focusable region that scrolls along the inline axis; a list in a
  * plain frame. Everything else stands in the document's stylesheet (`lightStylesheetOf`).
  */
-const lightStructure = (skemo: Skemo): string =>
+/**
+ * Spec 036 Teil 5 ②b-3 (A-atributlisto-4): the title of a list stands as far above it as two
+ * entries stand apart (the list's gap); no title, no rule.
+ */
+function titleGap(skemo: Skemo, owner?: string): string[] {
+  const gap = fixedToken(skemo.parts.list?.gap);
+  if (skemo.parts.heading === undefined || gap === undefined) return [];
+  return [
+    `:where([part="heading"]) { margin-block-end: ${variable(named(owner, skemo, "list", "gap", {}, gap))}; }`,
+  ];
+}
+
+const lightStructure = (skemo: Skemo, owner?: string): string =>
   isBreadcrumb(skemo)
     ? [
         // A breadcrumb (Spec 015 ①, plan ① D-04): the list is a row of its items that wraps; every
@@ -1387,6 +1412,10 @@ const lightStructure = (skemo: Skemo): string =>
           // Spec 036 Teil 5 ②b-2 (A-atributlisto-1): the button for the rest, a tertiary action.
           ':where([part="more"]) { display: inline-flex; align-items: center; margin: 0; padding: 0; border-style: none; appearance: none; cursor: pointer; }',
           ':where([part="more"][hidden]) { display: none; }',
+          // Spec 036 Teil 5 ②b-3 (A-atributlisto-4): the title of a list above it.
+          ':where([part="heading"]) { display: block; margin: 0; }',
+          ':where([part="heading"][hidden]) { display: none; }',
+          ...titleGap(skemo, owner),
         ].join("\n");
 
 /**
@@ -1540,6 +1569,9 @@ const popoverStructure = (fallback: string, justified = false): string =>
     ':where([part="control"]:not(:popover-open)) { display: none; }',
     ':where([part="heading"]) { margin: 0; }',
     ':where([part="content"]) { display: flex; flex-direction: column; }',
+    // Spec 036 Teil 5 ②b-3 (A-sxvebilo-4): the close button at the end of the first row.
+    ':where([part="close"]) { align-self: flex-end; }',
+    ':where([part="close"][hidden]) { display: none; }',
   ].join("\n");
 
 /**
@@ -1846,6 +1878,9 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
           return `${t} > thead th > button${state}`;
         case "sort-indicator":
           return `${t} > thead th > button > fm-ikono`;
+        // Spec 036 Teil 5 ②b-3 (A-tabelo-4): the cells of the foot (sums).
+        case "foot":
+          return `${t} > tfoot :is(td, th)`;
         case "focus-ring":
           return `${t} > thead th > button:focus-visible`;
         default:
@@ -2173,6 +2208,8 @@ const COMPOSED_BUTONO_PARTS: readonly string[] = [
   "decrement",
   "dismiss",
   "clear",
+  // Spec 036 Teil 5 ②b-3 (A-sxvebilo-4).
+  "close",
 ];
 
 /** A pseudo-element after every selector of a list (commas inside :where(…) stay). */
@@ -2449,7 +2486,7 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
                                           : isAvatar(skemo)
                                             ? avatarStructure
                                             : isLight(skemo)
-                                              ? lightStructure(skemo)
+                                              ? lightStructure(skemo, owner)
                                               : isTabs(skemo)
                                                 ? tabsStructure
                                                 : isDisclosure(skemo)
@@ -2545,12 +2582,18 @@ function selectorOf(
   // content are their own elements in it; the menu's rows carry the states.
   if (isTooltip(skemo)) return `:where([part="control"]${data})`;
   if (isPopover(skemo)) {
-    return part === "heading" || part === "content"
+    return part === "heading" || part === "content" || part === "close"
       ? `:where([part="control"]${data}) [part="${part}"]`
       : `:where([part="control"]${data})`;
   }
   if (isMenu(skemo)) return menuPartSelector(part, data, combination[STATE_KEY] ?? "rest");
-  if (isStatus(skemo)) return statusPartSelector(part, data);
+  if (isStatus(skemo)) {
+    return statusPartSelector(
+      part,
+      data,
+      skemo.slots.some((slot) => slot.name === "icon"),
+    );
+  }
   if (isMeter(skemo)) return meterPartSelector(part, data);
   if (isTabs(skemo)) return tabsPartSelector(part, data, entry, combination[STATE_KEY] ?? "rest");
   // The shadow of a light-DOM host (Spec 011 ④, E10): the region and its edge, the ring on focus;
@@ -2563,6 +2606,7 @@ function selectorOf(
     }
     if (isNav(skemo)) return ':where([part="list"])';
     if (part === "more") return ':where([part="more"])';
+    if (part === "heading") return ':where([part="heading"])';
     return part === "focus-ring"
       ? ':where([part="region"]:focus-visible)'
       : ':where([part="region"])';
@@ -2674,7 +2718,12 @@ export function elementNamesOf(
     dismiss: entry.skemo.parts.dismiss !== undefined,
     // Spec 014 ②: a status host with the part icon shows the icon of its intent; a link with a
     // layer floats (the skip link); the icon element knows the Ikonaro.
-    icon: entry.skemo.parts.icon !== undefined && hostOf(entry.skemo.a11y.role) === "status",
+    // The icon of the intent (Spec 014 ②); Spec 036 Teil 5 ②b-3 (A-plenstato-4): a slot icon
+    // brings its own icon, so the part icon is the slot's there.
+    icon:
+      entry.skemo.parts.icon !== undefined &&
+      hostOf(entry.skemo.a11y.role) === "status" &&
+      !entry.skemo.slots.some((slot) => slot.name === "icon"),
     skip: isSkip(entry.skemo),
     ikonaro: ikonaro.map((ikono) => ({
       name: ikono.name,

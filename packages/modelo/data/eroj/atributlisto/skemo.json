@@ -44,6 +44,10 @@
       {
         "name": "entries",
         "default": true
+      },
+      {
+        "name": "heading",
+        "text": true
       }
     ],
     "parts": {
@@ -88,6 +92,14 @@
         "typography": {
           "fixed": "typography.label.2"
         }
+      },
+      "heading": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.headline.4"
+        }
       }
     },
     "bindings": [
@@ -119,7 +131,8 @@
     "a11y": {
       "role": "list",
       "name": [
-        "prop:label"
+        "prop:label",
+        "slot:heading"
       ],
       "states": {
         "expanded": [

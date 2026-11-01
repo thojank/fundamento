@@ -54,6 +54,9 @@ describe("plenstato in the repo Modelo (section ③, G1, G2)", () => {
     expect(skemo?.slots).toEqual([
       { name: "text", default: true, text: true },
       { name: "actions" },
+      // Spec 036 Teil 5 ②b-3 (A-plenstato-4): the title and the icon.
+      { name: "heading", text: true },
+      { name: "icon", decorative: true },
     ]);
     expect(skemo?.constraints).toEqual([
       {
@@ -73,6 +76,9 @@ describe("plenstato in the repo Modelo (section ③, G1, G2)", () => {
       "actions",
       "border",
       "box",
+      // Spec 036 Teil 5 ②b-3 (A-plenstato-4).
+      "heading",
+      "icon",
       "indicator",
       "motion",
       "surface",
@@ -133,11 +139,15 @@ describe("plenstato in the repo Modelo (section ③, G1, G2)", () => {
 describe("the Uzo of the plenstato (section ③, G5)", () => {
   it("states the purpose, requires the text, lets actions hold up to two butono; size container, wrap allowed", () => {
     expect(uzo?.purpose).toBe(
-      "Fills an area while its content loads, or when there is none: loading standards, no standards yet.",
+      // Spec 036 Teil 5 ②b-3 (A-plenstato-4).
+      "Fills an area while its content loads, or when there is none: loading standards, no standards yet; a title (slot heading) says where the person is, an icon (slot icon) what is missing.",
     );
     expect(uzo?.slots).toEqual({
       text: { accepts: ["text"], required: true, max: 1, nesting: 0 },
       actions: { accepts: ["butono"], max: 2, nesting: 0 },
+      // Spec 036 Teil 5 ②b-3 (A-plenstato-4).
+      heading: { accepts: ["text"], max: 1, nesting: 0 },
+      icon: { accepts: ["icon", "ikono"], max: 1, nesting: 0 },
     });
     expect(uzo?.layout).toEqual({ size: "container", wrap: "allowed" });
   });

@@ -1162,7 +1162,8 @@ describe("Web Component Celo for the plenstato (Spec 011 ③)", () => {
     templates(source).flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]));
 
   it("renders a status region with the indicator, the text and the actions; busy while loading", () => {
-    expect(parts(element)).toEqual(["control", "indicator", "text", "actions"]);
+    // Spec 036 Teil 5 ②b-3 (A-plenstato-4): the icon of the slot icon and the title above the text.
+    expect(parts(element)).toEqual(["control", "indicator", "icon", "heading", "text", "actions"]);
     expect(element).toContain('<div part="control" role="status">');
     expect(element).toContain('<span part="indicator" aria-hidden="true">');
     expect(element).toContain('control.setAttribute("aria-busy", String(kind === "loading"))');

@@ -72,7 +72,9 @@ describe("tabelo in the repo Modelo (section ④, G1, G2, E10)", () => {
       "row-header",
       "sort",
       "sort-indicator",
-    ]);
+      // Spec 036 Teil 5 ②b-3 (A-tabelo-4): the foot.
+      "foot",
+    ].sort());
     // The caption is text of the Ero too (axe measured black on the dark page without it).
     expect(skemo.parts.caption?.color).toEqual({ fixed: "color.text.default" });
     expect(skemo.parts.head?.fill).toEqual({ fixed: "color.background.sunken" });
@@ -126,7 +128,8 @@ describe("tabelo in the repo Modelo (section ④, G1, G2, E10)", () => {
 describe("the Uzo of the tabelo (section ④, G5)", () => {
   it("states the purpose, requires caption and content; size container, the region scrolls (never wraps)", () => {
     expect(uzo?.purpose).toBe(
-      "Shows many records with the same fields as rows and columns, so a person can compare and find: standards, versions, findings.",
+      // Spec 036 Teil 5 ②b-3 (A-tabelo-4).
+      "Shows many records with the same fields as rows and columns, so a person can compare and find: standards, versions, findings; a foot row (tfoot) holds sums.",
     );
     expect(uzo?.slots).toEqual({
       caption: { accepts: ["text"], required: true, max: 1, nesting: 0 },

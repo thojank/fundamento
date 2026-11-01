@@ -161,6 +161,17 @@
         "color": {
           "fixed": "color.focus.inner"
         }
+      },
+      "foot": {
+        "fill": {
+          "fixed": "color.background.sunken"
+        },
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        }
       }
     },
     "bindings": [
