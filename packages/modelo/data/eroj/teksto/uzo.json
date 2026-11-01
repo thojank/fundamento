@@ -89,22 +89,66 @@
       "wrap": "allowed"
     },
     "content": [],
-    "when-not": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "when-not": [
+      {
+        "case": {
+          "de": "Der Text leitet einen Abschnitt ein.",
+          "en": "The text heads a section."
+        },
+        "ero": "titolo"
+      },
+      {
+        "case": {
+          "de": "Ein Verweis steht im fließenden Text.",
+          "en": "A reference stands inside running text."
+        },
+        "ero": "ligilo"
+      },
+      {
+        "case": {
+          "de": "Ein Zustand in ein bis drei Wörtern steht neben einem Ding.",
+          "en": "A state in one to three words stands beside a thing."
+        },
+        "ero": "insigno"
+      },
+      {
+        "case": {
+          "de": "Der Text bringt eigene Gliederung mit, als Markdown geschrieben.",
+          "en": "The text brings structure of its own, written as Markdown."
+        },
+        "ero": "markdovido"
       }
-    },
+    ],
     "do-dont": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
-      }
+      "do": [
+        {
+          "de": "Wähle kind nach der Rolle des Textes: Absatz, Bildunterschrift, Dachzeile, Code oder Bezeichnung.",
+          "en": "Choose kind by the role of the text: paragraph, caption, kicker, code or label."
+        },
+        {
+          "de": "Nimm tabular für Zahlen, die untereinander stehen sollen.",
+          "en": "Use tabular for figures that should stand below each other."
+        },
+        {
+          "de": "Begrenze mit max-lines, wo der Platz knapp ist; der volle Text bleibt hörbar.",
+          "en": "Limit with max-lines where room is tight; the full text stays audible."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Mit emphasis einen Zustand ausdrücken; dafür gibt es insigno und avizo.",
+          "en": "Express a state with emphasis; insigno and avizo are there for that."
+        },
+        {
+          "de": "Einen fetten Absatz als Überschrift ausgeben.",
+          "en": "Pass off a bold paragraph as a heading."
+        }
+      ]
     },
     "keyboard": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+      "none": {
+        "de": "Der Text nimmt keine Taste; ist er mit max-lines gekürzt, nimmt er den Fokus und zeigt den ganzen Text in einem Tooltip.",
+        "en": "The text takes no key; when max-lines cuts it, it takes the focus and shows the whole text in a tooltip."
       }
     }
   }

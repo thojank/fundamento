@@ -104,23 +104,76 @@
         }
       }
     ],
-    "when-not": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "when-not": [
+      {
+        "case": {
+          "de": "Ein Zustand soll gelesen, nicht gewählt oder entfernt werden.",
+          "en": "A state is to be read, not chosen or removed."
+        },
+        "ero": "insigno"
+      },
+      {
+        "case": {
+          "de": "Mehrere Filter über einer Liste brauchen eine gemeinsame Zeile, ein Zurücksetzen und die Zahl der Treffer.",
+          "en": "Several filters over a list need a shared row, a reset and the number of hits."
+        },
+        "ero": "filtrilo"
+      },
+      {
+        "case": {
+          "de": "Das Drücken soll eine Handlung starten, statt einen Filter an- oder auszuschalten.",
+          "en": "Pressing is to start an action instead of turning a filter on or off."
+        },
+        "ero": "butono"
       }
-    },
+    ],
     "do-dont": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
-      }
+      "do": [
+        {
+          "de": "Wähle mode nach dem Zweck: static als Wort an einem Ding, selectable als Filter, removable zum Entfernen.",
+          "en": "Choose mode by purpose: static as a word on a thing, selectable as a filter, removable for removing."
+        },
+        {
+          "de": "Halte die Beschriftung kurz, ein bis drei Wörter.",
+          "en": "Keep the label short, one to three words."
+        },
+        {
+          "de": "Nimm size large für Filterleisten auf Touch-Geräten.",
+          "en": "Use size large for filter bars on touch devices."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Ein Etikett ohne mode selectable als gewählt (selected) markieren.",
+          "en": "Mark a tag without mode selectable as chosen (selected)."
+        },
+        {
+          "de": "Jeder Kategorie eine eigene Farbe geben, die ohne Wort etwas bedeuten soll.",
+          "en": "Give every category a colour of its own that is meant to say something without a word."
+        }
+      ]
     },
-    "keyboard": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "keyboard": [
+      {
+        "keys": [
+          "Enter",
+          "Space"
+        ],
+        "action": {
+          "de": "Schaltet einen Filter mit mode selectable an oder aus.",
+          "en": "Turns a filter with mode selectable on or off."
+        }
+      },
+      {
+        "keys": [
+          "Delete",
+          "Backspace"
+        ],
+        "action": {
+          "de": "Entfernt ein Etikett mit mode removable, sofern die Anwendung das nicht verhindert.",
+          "en": "Removes a tag with mode removable, unless the application prevents it."
+        }
       }
-    }
+    ]
   }
 }

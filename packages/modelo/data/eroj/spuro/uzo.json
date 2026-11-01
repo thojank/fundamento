@@ -127,22 +127,52 @@
         }
       }
     ],
-    "when-not": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "when-not": [
+      {
+        "case": {
+          "de": "Gezeigt werden die Seiten neben der aktuellen, nicht die darüber.",
+          "en": "The pages beside the current one are shown, not those above it."
+        },
+        "ero": "navigado"
+      },
+      {
+        "case": {
+          "de": "Es gibt nur einen Weg zurück, etwa zur Übersicht.",
+          "en": "There is only one way back, such as to the overview."
+        },
+        "ero": "ligilo"
       }
-    },
+    ],
     "do-dont": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
-      }
+      "do": [
+        {
+          "de": "Lass jede Ebene ihr Ziel benennen und die letzte die aktuelle Seite sein.",
+          "en": "Let every level name its destination and the last one be the current page."
+        },
+        {
+          "de": "Begrenze lange Pfade mit max-items; die mittleren Ebenen stehen dann in einem Menü.",
+          "en": "Limit long paths with max-items; the middle levels then stand in a menu."
+        },
+        {
+          "de": "Nimm emphasis low für einen Pfad, der neben einer Überschrift nur begleitet.",
+          "en": "Use emphasis low for a path that only accompanies a heading."
+        }
+      ],
+      "dont": [
+        {
+          "de": "An einer Ebene eine Liste ihrer Nachbarseiten öffnen; der Pfad führt nur nach oben.",
+          "en": "Open a list of sibling pages at a level; the path only leads up."
+        },
+        {
+          "de": "Die Schritte eines Ablaufs als Pfad zeigen, denn ihre Reihenfolge ist keine Rangordnung.",
+          "en": "Show the steps of a process as a path, because their order is no hierarchy."
+        }
+      ]
     },
     "keyboard": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+      "none": {
+        "de": "Der Pfad nimmt keine eigene Taste; seine Ebenen sind Verweise, die man mit Tab erreicht und mit Enter öffnet, ausgelassene Ebenen öffnet ihr Menü.",
+        "en": "The path takes no key of its own; its levels are links reached with Tab and opened with Enter, and hidden levels open from their menu."
       }
     }
   }

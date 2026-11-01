@@ -153,23 +153,70 @@
         }
       }
     ],
-    "when-not": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "when-not": [
+      {
+        "case": {
+          "de": "Die Einstellung gilt erst, wenn das Formular gesendet wird.",
+          "en": "The setting applies only when the form is sent."
+        },
+        "ero": "markobutono"
+      },
+      {
+        "case": {
+          "de": "Etwas soll einmal geschehen, statt an oder aus zu bleiben.",
+          "en": "Something is to happen once, instead of staying on or off."
+        },
+        "ero": "butono"
+      },
+      {
+        "case": {
+          "de": "Es gibt mehr als zwei Zustände zur Wahl.",
+          "en": "There are more than two states to choose from."
+        },
+        "ero": "elekto"
       }
-    },
+    ],
     "do-dont": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
-      }
+      "do": [
+        {
+          "de": "Lass die Beschriftung die Einstellung nennen, nicht ihren Zustand.",
+          "en": "Let the label name the setting, not its state."
+        },
+        {
+          "de": "Wende die Änderung sofort an und setze loading, solange sie gespeichert wird.",
+          "en": "Apply the change at once and set loading while it is saved."
+        },
+        {
+          "de": "Nimm label-side start für eine Liste von Einstellungen mit den Schaltern in einer Spalte am Ende.",
+          "en": "Use label-side start for a list of settings with the switches in one column at the end."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Einen dritten, gemischten Zustand zeigen wollen.",
+          "en": "Want to show a third, mixed state."
+        },
+        {
+          "de": "Die Größe large neu setzen: Sie ist ein veralteter Name für medium und wird als medium gezeigt.",
+          "en": "Set the size large anew: it is a deprecated name for medium and is shown as medium."
+        },
+        {
+          "de": "Einen Schalter ohne sichtbare Beschriftung zeigen.",
+          "en": "Show a switch without a visible label."
+        }
+      ]
     },
-    "keyboard": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "keyboard": [
+      {
+        "keys": [
+          "Space",
+          "Enter"
+        ],
+        "action": {
+          "de": "Schaltet die Einstellung an oder aus, und sie gilt sofort.",
+          "en": "Turns the setting on or off, and it applies at once."
+        }
       }
-    }
+    ]
   }
 }

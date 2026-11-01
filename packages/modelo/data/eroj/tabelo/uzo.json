@@ -235,23 +235,66 @@
         }
       }
     ],
-    "when-not": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "when-not": [
+      {
+        "case": {
+          "de": "Gezeigt wird ein einzelner Datensatz mit Namen und Werten.",
+          "en": "A single record with names and values is shown."
+        },
+        "ero": "atributlisto"
+      },
+      {
+        "case": {
+          "de": "Ein Wert in einer Zelle soll an Ort und Stelle bearbeitet werden.",
+          "en": "A value in a cell is to be edited in place."
+        },
+        "ero": "lokredaktilo"
+      },
+      {
+        "case": {
+          "de": "Die Tabelle soll nur das Layout einer Seite ordnen.",
+          "en": "The table is only to order the layout of a page."
+        },
+        "ero": "pagxo"
       }
-    },
+    ],
     "do-dont": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
-      }
+      "do": [
+        {
+          "de": "Benenne die Tabelle mit einer Beschriftung; mit caption-hidden bleibt sie für Screenreader da.",
+          "en": "Name the table with a caption; with caption-hidden it stays for screen readers."
+        },
+        {
+          "de": "Leg die Aktionen einer Zeile hinter ein Menü in der Zeile.",
+          "en": "Put the actions of a row behind a menu in the row."
+        },
+        {
+          "de": "Wähle density und lines nach der Menge der Daten; mit dem Seitenumschalter darunter geht es durch lange Listen.",
+          "en": "Choose density and lines by the amount of data; with the pagination below, long lists are paged."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Eine Zeile nur durch Farbe hervorheben, ohne ein Wort dazu.",
+          "en": "Mark a row only by colour, without a word to it."
+        },
+        {
+          "de": "Erwarten, dass die Tabelle selbst sortiert; sie meldet den Wunsch, die Anwendung sortiert.",
+          "en": "Expect the table to sort itself; it reports the wish, and the application sorts."
+        }
+      ]
     },
-    "keyboard": {
-      "offen": {
-        "de": "Offen: der Text folgt (Spec 036, Doku je Ero).",
-        "en": "Open: the text follows (Spec 036, docs per Ero)."
+    "keyboard": [
+      {
+        "keys": [
+          "Enter",
+          "Space"
+        ],
+        "action": {
+          "de": "Auf dem Kopf einer sortierbaren Spalte bitten die Tasten, nach ihr zu sortieren; ein zweites Mal kehrt die Richtung um.",
+          "en": "On the header of a sortable column the keys ask to sort by it; a second time reverses the direction."
+        }
       }
-    }
+    ]
   }
 }
