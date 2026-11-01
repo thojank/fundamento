@@ -4166,7 +4166,8 @@ describe("the Figma plan draws the selection Eroj (Spec 025 ③)", () => {
     expect(chosen?.bindings).toMatchObject({
       "surface.fill": "color/action/primary/selected",
       "text.color": "color/action/primary/text",
-      "box.radius": "radius/role/pill",
+      // Spec 036 Teil 5 ②b-5 (A-signeto-6): a tag is bounded, the pill stays the insigno's.
+      "box.radius": "radius/role/tag",
     });
   });
 

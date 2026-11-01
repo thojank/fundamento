@@ -262,6 +262,22 @@ const REST_2B3 = (() => {
 })();
 
 /**
+ * Spec 036 Teil 5 ②b-5 (Spec 029 abgleich.json A-signeto-6, A-kodbloko-1/4/6, ①-2): the tokens
+ * added after main's record – the radius role of a tag – as a pattern and their number.
+ */
+const REST_2B5 = (() => {
+  const groups: { pattern: string; added: number }[] = [
+    // A-signeto-6: the radius role of a tag a person picks or removes (1).
+    { pattern: "^radius\\.role\\.tag$", added: 1 },
+  ];
+  const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
+  return {
+    test: (name: string) => pattern.test(name),
+    added: groups.reduce((sum, group) => sum + group.added, 0),
+  };
+})();
+
+/**
  * Spec 036 Teil 5 ②b-2 (Spec 029 abgleich.json, aspects "achsen" and "groessen"): the tokens of the
  * new axes and values – the count of the tekstareo (A-tekstareo-1); the sizes small and large of
  * listelektilo, plurelektilo and datelektilo (A-*-2; their size medium is the token main had, see
@@ -275,7 +291,7 @@ const ACHSEN_2B2 =
  * 6 × 2, A-plurelektilo-2: 5 × 2, A-datelektilo-2: 6 × 2; A-kampo-1: the unit's colour and its
  * typography by size, 4).
  */
-export const ADDED_BY_2B2 = 2 + 12 + 10 + 12 + 4 + REST_2B2.added + REST_2B3.added;
+export const ADDED_BY_2B2 = 2 + 12 + 10 + 12 + 4 + REST_2B2.added + REST_2B3.added + REST_2B5.added;
 
 /**
  * The ✕ of listelektilo and datelektilo came after main (②b-1 M-6, CLEAR); ②b-2 keys it by size,
@@ -288,7 +304,11 @@ const CLEAR_2B2 = /^ero\.(listelektilo|datelektilo)\.clear\.size\.size\.medium$/
  * counted in ADDED_BY_2B2 as well).
  */
 export const addedBy2b2 = (name: string): boolean =>
-  ACHSEN_2B2.test(name) || CLEAR_2B2.test(name) || REST_2B2.test(name) || REST_2B3.test(name);
+  ACHSEN_2B2.test(name) ||
+  CLEAR_2B2.test(name) ||
+  REST_2B2.test(name) ||
+  REST_2B3.test(name) ||
+  REST_2B5.test(name);
 
 /**
  * ②b-2 (A-datelektilo-2): the calendar's size medium is the token whose value changed on purpose
@@ -296,6 +316,9 @@ export const addedBy2b2 = (name: string): boolean =>
  */
 const CHANGED_2B2: Readonly<Record<string, string>> = {
   "ero.datelektilo.trigger.size.size.medium": "size.control.medium",
+  // Spec 036 Teil 5 ②b-5 (A-signeto-6): the tag takes radius.role.tag on purpose; in main every
+  // brand compared here gave it its pill.
+  "ero.signeto.box.radius": "radius.role.pill",
 };
 
 /** ②b-2 (A-*-2): a field's former token is its size medium now; each keeps main's value. */

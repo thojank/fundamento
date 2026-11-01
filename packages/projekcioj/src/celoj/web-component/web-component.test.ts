@@ -2511,7 +2511,8 @@ describe("Web Component Celo for the selection Eroj (Spec 025 ③)", () => {
     expect(css).toContain(
       ':where([part="control"][data-selected="true"][data-intent="neutral"]) {\n  background-color: var(--fm-color-action-primary-selected);',
     );
-    expect(css).toContain("border-radius: var(--fm-radius-role-pill);");
+    // Spec 036 Teil 5 ②b-5 (A-signeto-6): a tag is bounded, the pill stays the insigno's.
+    expect(css).toContain("border-radius: var(--fm-radius-role-tag);");
     expect(componentCssIssues("signeto.css", css)).toEqual([]);
     expect(cssPhysicalPropertyIssues("signeto.css", css)).toEqual([]);
     const inventory = stylesheetInventory(files["eroj/src/generated/signeto.styles.ts"] ?? "");

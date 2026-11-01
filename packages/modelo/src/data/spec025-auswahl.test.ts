@@ -117,7 +117,8 @@ describe("signeto (D-14): a tag — static, selectable as a filter, removable", 
       height: { by: ["size"] },
       "inline-padding": { by: ["size"] },
       gap: { fixed: "spacing.xsmall" },
-      radius: { fixed: "radius.role.pill" },
+      // Spec 036 Teil 5 ②b-5 (A-signeto-6): a tag is bounded, the pill stays the insigno's.
+      radius: { fixed: "radius.role.tag" },
     });
     if (skemo === undefined) throw new Error("missing");
     const token = (part: string, property: string, when: Record<string, string>) =>
