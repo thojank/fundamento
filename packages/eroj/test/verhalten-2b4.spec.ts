@@ -170,3 +170,136 @@ test.describe("②b-4 A-markdovido-3: streaming", () => {
     ).toBe(false);
   });
 });
+
+test.describe("②b-4 A-elektilo-5, A-listelektilo-5, A-menuo-5: jumping by typing", () => {
+  const LAENDER = [
+    ["by", "Bayern"],
+    ["be", "Berlin"],
+    ["bb", "Brandenburg"],
+    ["hb", "Bremen"],
+    ["hh", "Hamburg"],
+  ] as const;
+
+  test("elektilo: the platform's select jumps to the option that starts with the typed words; the element takes no key", async ({
+    page,
+  }) => {
+    const options = LAENDER.map(
+      ([value, words]) => `<data slot="options" value="${value}">${words}</data>`,
+    ).join("");
+    await serve(page, out, `<fm-elektilo id="e" value="hh">Land${options}</fm-elektilo>`);
+    await page.evaluate(() => {
+      (window as unknown as { taken: string[] }).taken = [];
+      window.addEventListener("keydown", (event) => {
+        if (event.defaultPrevented)
+          (window as unknown as { taken: string[] }).taken.push(event.key);
+      });
+    });
+    await page.getByRole("combobox", { name: "Land" }).focus();
+    await page.keyboard.type("bre");
+    await expect(page.locator("#e")).toHaveAttribute("value", "hb");
+    expect(await page.evaluate(() => (window as unknown as { taken: string[] }).taken)).toEqual([]);
+  });
+
+  /** The listelektilo with the states: its value, whether the list is open, the active row. */
+  const listState = (page: Page) =>
+    page.locator("#l").evaluate((element) => {
+      const rows = [...(element.shadowRoot?.querySelectorAll('[part="item"]') ?? [])];
+      const active = rows.find((row) => row.getAttribute("data-active") === "true");
+      const box = element.shadowRoot?.querySelector('[role="combobox"]');
+      const id = box?.getAttribute("aria-activedescendant");
+      const byId = id ? element.shadowRoot?.getElementById(id) : null;
+      return {
+        value: element.getAttribute("value"),
+        open: box?.getAttribute("aria-expanded") === "true",
+        active: (byId ?? active)?.getAttribute("data-value") ?? null,
+      };
+    });
+
+  const LIST = (attributes: string) =>
+    `<fm-listelektilo id="l" ${attributes}>Land${LAENDER.map(([value, words]) => `<data slot="options" value="${value}">${words}</data>`).join("")}</fm-listelektilo>`;
+
+  test("listelektilo: typed words find the option they start with – open, the active row; closed, the choice", async ({
+    page,
+  }) => {
+    await serve(page, out, LIST('value="hh"'));
+    const box = page.getByRole("combobox", { name: "Land" });
+    await box.focus();
+    await page.keyboard.type("bre");
+    expect((await listState(page)).value).toBe("hb");
+    await page.keyboard.press("ArrowDown");
+    expect((await listState(page)).open).toBe(true);
+    await page.keyboard.type("bra");
+    expect((await listState(page)).active).toBe("bb");
+    await page.keyboard.press("Enter");
+    expect((await listState(page)).value).toBe("bb");
+  });
+
+  test("listelektilo: the same letter again moves on to the next option that starts with it", async ({
+    page,
+  }) => {
+    await serve(page, out, LIST('value="hh"'));
+    await page.getByRole("combobox", { name: "Land" }).focus();
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.type("bbb");
+    expect((await listState(page)).active).toBe("bb");
+  });
+
+  const MENU =
+    '<fm-menuo id="m"><data value="edit">Bearbeiten</data><data value="rename">Benennen</data><data value="describe">Beschreiben</data><data value="help" to="#hilfe">Hilfe</data></fm-menuo>';
+
+  /** The entry that has the focus in the menu: its words. */
+  const focusedEntry = (page: Page) =>
+    page.locator("#m").evaluate((element) => {
+      const row = element.shadowRoot?.activeElement;
+      return (row?.querySelector("slot")?.assignedNodes() ?? [])
+        .map((node) => node.textContent ?? "")
+        .join("")
+        .trim();
+    });
+
+  test("menuo: typed words move the focus to the entry they start with", async ({ page }) => {
+    await serve(page, out, MENU);
+    await page.getByRole("button", { name: "Weitere Aktionen" }).focus();
+    await page.keyboard.press("ArrowDown");
+    await expect.poll(() => focusedEntry(page)).toBe("Bearbeiten");
+    await page.keyboard.type("bes");
+    await expect.poll(() => focusedEntry(page)).toBe("Beschreiben");
+    await page.keyboard.press("Home");
+    await page.keyboard.type("hi");
+    await expect.poll(() => focusedEntry(page)).toBe("Hilfe");
+  });
+
+  test("menuo: an entry with a target is a link in the menu; Enter follows it and the menu closes, no select", async ({
+    page,
+  }) => {
+    await serve(page, out, MENU);
+    await listen(page, "m", ["select"]);
+    await page.getByRole("button", { name: "Weitere Aktionen" }).click();
+    const help = page.getByRole("menuitem", { name: "Hilfe" });
+    await expect(help).toBeVisible();
+    expect(
+      await help.evaluate((row) => ({
+        tag: row.tagName.toLowerCase(),
+        href: row.getAttribute("href"),
+      })),
+    ).toEqual({ tag: "a", href: "#hilfe" });
+    await expect(page.getByRole("menu")).toMatchAriaSnapshot(`
+      - menu:
+        - menuitem "Bearbeiten"
+        - menuitem "Benennen"
+        - menuitem "Beschreiben"
+        - menuitem "Hilfe"
+    `);
+    // The other entries stay buttons: they act here.
+    expect(
+      await page
+        .getByRole("menuitem", { name: "Bearbeiten" })
+        .evaluate((row) => row.tagName.toLowerCase()),
+    ).toBe("button");
+    await help.focus();
+    await page.keyboard.press("Enter");
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe("#hilfe");
+    await expect(page.getByRole("menu")).toBeHidden();
+    expect(await heard(page)).toEqual([]);
+  });
+});

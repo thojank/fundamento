@@ -50,3 +50,25 @@ describe("②b-4 A-markdovido-3: streaming", () => {
     expect(suggest("Antwort streamen", "de").suggestion?.ero).toBe("markdovido");
   });
 });
+
+/** A-elektilo-5, A-listelektilo-5, A-menuo-5: Home, End and jumping by typing (a printable character). */
+describe("②b-4 A-elektilo-5, A-listelektilo-5, A-menuo-5: jumping by typing", () => {
+  it.each(["elektilo", "listelektilo", "menuo"])(
+    "%s: the keys name Home, End and Character (typed words jump), after the keys it had",
+    (ero) => {
+      const keys = entryOf(ero).skemo.a11y.keys;
+      expect(keys).toEqual(expect.arrayContaining(["Home", "End"]));
+      expect(keys.at(-1)).toBe("Character");
+    },
+  );
+
+  it("menuo: an entry with a target (attribute to) is a link, named in the purpose in en and de", () => {
+    const { uzo } = entryOf("menuo");
+    expect(uzo?.purpose).toContain("(attribute to)");
+    expect(modelo.tradukoj?.de?.[`${uzo?.id}/purpose`]).toContain("(Attribut to)");
+  });
+
+  it.each(["elektilo", "listelektilo", "menuo"])("%s: the brief stays under 750", (ero) => {
+    expect(tokensOf(briefOf(entryOf(ero)))).toBeLessThan(750);
+  });
+});
