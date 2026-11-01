@@ -145,6 +145,8 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
       "label",
       "message",
       "motion",
+      // Spec 036 Teil 5 ②b-3 (A-elekto-4): the description of an option.
+      "option-description",
       "option-label",
       "options",
       "required-mark",
@@ -321,7 +323,8 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
 describe("the Uzo of the elekto (section 3, G5)", () => {
   it("states the purpose of the spec, requires the label and at least two options, never breaks a line", () => {
     expect(uzo?.purpose).toBe(
-      "Chooses one of a few options that all stay visible: payment method, shipping speed, yes/no/maybe.",
+      // Spec 036 Teil 5 ②b-3 (A-elekto-4): an option may carry a description.
+      "Chooses one of a few options that all stay visible: payment method, shipping speed, yes/no/maybe; an option may carry a short description (its attribute description).",
     );
     expect(uzo?.slots).toEqual({
       label: { accepts: ["text"], required: true, max: 1, nesting: 0 },
@@ -456,6 +459,8 @@ describe("the cross-links of G5 (one Ero per entry)", () => {
       "error",
       "message",
       "disabled-reason",
+      // Spec 036 Teil 5 ②b-3 (A-markobutono-4): the help, appended.
+      "help",
     ]);
   });
 });

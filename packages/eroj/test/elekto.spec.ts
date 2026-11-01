@@ -61,9 +61,10 @@ test.describe("fm-elekto behaviour", () => {
       "required-mark",
       "spinner",
       "options",
-      ...["option", "control", "indicator", "option-label"],
-      ...["option", "control", "indicator", "option-label"],
-      ...["option", "control", "indicator", "option-label"],
+      // Spec 036 Teil 5 ②b-3 (A-elekto-4): the description of an option under its label.
+      ...["option", "control", "indicator", "option-label", "option-description"],
+      ...["option", "control", "indicator", "option-label", "option-description"],
+      ...["option", "control", "indicator", "option-label", "option-description"],
       "help",
       "error",
       "message",

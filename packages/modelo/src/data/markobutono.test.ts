@@ -106,6 +106,8 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
       { name: "message", text: true, beside: true },
       // Spec 029 ②b-1 M-1: the reason for disabled.
       { name: "disabled-reason", text: true },
+      // Spec 036 Teil 5 ②b-3 (A-markobutono-4): the help, appended (Arkitekturo contract).
+      { name: "help", text: true, beside: true },
     ]);
   });
 
@@ -115,6 +117,7 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
       "box",
       "error",
       "focus-ring",
+      "help",
       "indicator",
       "label",
       "message",
@@ -187,7 +190,7 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
     expect(skemo?.a11y).toEqual({
       role: "checkbox",
       name: ["slot:label", "prop:label"],
-      description: ["slot:error", "slot:message", "slot:disabled-reason"],
+      description: ["slot:help", "slot:error", "slot:message", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],
         checked: ["aria-checked"],
@@ -227,6 +230,7 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
       "slot:error": "filled",
       "slot:message": "empty",
       "slot:disabled-reason": "empty",
+      "slot:help": "empty",
     });
   });
 
@@ -258,6 +262,7 @@ describe("the Uzo of the markobutono (section 2, G5)", () => {
     );
     expect(uzo?.slots).toEqual({
       label: { accepts: ["text"], required: true, max: 1, nesting: 0 },
+      help: { accepts: ["text"], max: 1, nesting: 0 },
       error: { accepts: ["text"], max: 1, nesting: 0 },
       message: { accepts: ["text"], max: 1, nesting: 0 },
     });

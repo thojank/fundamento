@@ -310,7 +310,8 @@ describe("Web Component Celo for the sxaltilo (Spec 010 ①)", () => {
   it("renders a button with role switch as the track, the knob in it and the label beside it", () => {
     const templates = [...sxaltiloElement.matchAll(/`(<[^`]*)`/g)].map((m) => m[1] ?? "");
     expect(templates.flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]))).toEqual(
-      ["field", "control", "indicator", "label", "spinner", "message"],
+      // Spec 036 Teil 5 ②b-3 (A-sxaltilo-4): the help under the label, before the message.
+      ["field", "control", "indicator", "label", "spinner", "help", "message"],
     );
     expect(sxaltiloElement).toContain('role="switch"');
     expect(sxaltiloElement).toContain('aria-labelledby="label"');
@@ -389,6 +390,8 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
       "required-mark",
       // Abnahme #122 (decision 30.10.): the spinner directly after the text, in the label.
       "spinner",
+      // Spec 036 Teil 5 ②b-3 (A-markobutono-4): the help under the label, before the error.
+      "help",
       "error",
       "message",
     ]);
@@ -413,6 +416,8 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
       "label",
       // Abnahme #122: the spinner at the end of the field, after the label.
       "spinner",
+      // Spec 036 Teil 5 ②b-3 (A-sxaltilo-4): the help under the label.
+      "help",
       "message",
     ]);
     expect(sxaltiloElement).toContain('role="switch"');
@@ -522,6 +527,8 @@ describe("Web Component Celo for the elekto (Spec 010 ③)", () => {
       "control",
       "indicator",
       "option-label",
+      // Spec 036 Teil 5 ②b-3 (A-elekto-4): the description of an option under its label.
+      "option-description",
     ]);
     expect(elektoElement).toContain('role="radiogroup"');
     expect(elektoElement).toContain('aria-labelledby="label"');
@@ -543,6 +550,8 @@ describe("Web Component Celo for the elekto (Spec 010 ③)", () => {
       "required-mark",
       // Abnahme #122 (decision 30.10.): the spinner directly after the text, in the label.
       "spinner",
+      // Spec 036 Teil 5 ②b-3 (A-markobutono-4): the help under the label.
+      "help",
       "error",
       "message",
     ]);

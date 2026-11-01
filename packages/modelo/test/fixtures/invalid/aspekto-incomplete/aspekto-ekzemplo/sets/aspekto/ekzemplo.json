@@ -4906,6 +4906,16 @@
               }
             }
           }
+        },
+        "description": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.text.muted}"
+          },
+          "typography": {
+            "$type": "typography",
+            "$value": "{typography.caption}"
+          }
         }
       },
       "required": {
@@ -8059,6 +8069,16 @@
           "$type": "typography",
           "$value": "{typography.caption}"
         }
+      },
+      "help": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.caption}"
+        }
       }
     },
     "menuo": {
@@ -9994,6 +10014,16 @@
             "$type": "color",
             "$value": "{color.status.success.text}"
           }
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.caption}"
+        }
+      },
+      "help": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
         },
         "typography": {
           "$type": "typography",

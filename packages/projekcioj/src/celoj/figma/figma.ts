@@ -204,6 +204,9 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   // Spec 036 Teil 5 ②b-2 (A-glitilo-1): the value as text stands with readout text only, a
   // property; the set shows the slider without it (and the field by its axis field).
   "glitilo:readout": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  // Spec 036 Teil 5 ②b-3: parts that only the content of an option brings – the description of an
+  // option (A-elekto-4); the set shows the Vitrino's options without it.
+  "elekto:option-description": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
   "listelektilo:icon": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
   "listelektilo:description": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
   "plurelektilo:filter": "jug_01M5H5HFYHBZB8R9TVTJE9874J",

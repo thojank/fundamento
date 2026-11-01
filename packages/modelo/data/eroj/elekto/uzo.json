@@ -4,7 +4,7 @@
     "id": "uzo_01M4WT0S1KPRQ3VGRS1SQE69S3",
     "ero": "ero_01M4WT0RA8VHA64P4RFHAEBK1Q",
     "skemo": "ske_01M4WT0RNX8N08R3K1G9V0W6ZN",
-    "purpose": "Chooses one of a few options that all stay visible: payment method, shipping speed, yes/no/maybe.",
+    "purpose": "Chooses one of a few options that all stay visible: payment method, shipping speed, yes/no/maybe; an option may carry a short description (its attribute description).",
     "instead": [
       {
         "goal": "choose-many",

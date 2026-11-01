@@ -6213,7 +6213,15 @@ async function applyComponents(variables, warnings) {
       // of the plan, shown where the variant is expanded (hidden where its height is none).
       const suggests = isField && component.entry !== undefined;
       const listbox = suggests ? part(field, "listbox", () => figma.createFrame()) : undefined;
-      const help = isField ? part(field, "help", () => figma.createText()) : undefined;
+      // Spec 036 Teil 5 ②b-3 (A-markobutono-4, A-sxaltilo-4): a toggle with the slot help draws it
+      // in the column of its texts, right under the label (before the error), as the web does.
+      const toggleHelp = column !== undefined && typeof (component.texts || {}).help === "string";
+      const help = isField
+        ? part(field, "help", () => figma.createText())
+        : toggleHelp
+          ? part(column, "help", () => figma.createText())
+          : undefined;
+      if (toggleHelp && column.children.indexOf(help) !== 1) column.insertChild(1, help);
       const errorParent = isField ? field : column;
       const error =
         errorParent !== undefined && (isField || typeof (component.texts || {}).error === "string")

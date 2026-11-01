@@ -83,8 +83,9 @@ describe("Spec 029 ① 5: the foundation pages", () => {
     // of ikono, signeto, avataro, pagxigilo, langetaro and dialogo (A-*-2: +30, −9 fixed tokens now
     // keyed by size); the looks of apartigilo, spuro, karto, avataro and avizo (+27, −13);
     // markdovido, plenstato, tabelo, teksto (+9, −3); the summary of the pagxigilo (+3); the button
-    // for the rest of the atributlisto (+3); the readout of the glitilo (+2).
-    expect(tokenoj.length).toBe(1981);
+    // for the rest of the atributlisto (+3); the readout of the glitilo (+2). S36-4.3 (②b-3): the
+    // help of markobutono and sxaltilo (+4), the description of an option of the elekto (+2).
+    expect(tokenoj.length).toBe(1987);
     const levels = new Set(tokenoj.map((token) => token.ebeno));
     expect(levels).toEqual(new Set(["grundlage", "rolle", "ero"]));
     const text = tokenoj.find((token) => token.name === "color.text.default");

@@ -107,6 +107,11 @@
       {
         "name": "disabled-reason",
         "text": true
+      },
+      {
+        "name": "help",
+        "text": true,
+        "beside": true
       }
     ],
     "parts": {
@@ -210,6 +215,14 @@
           "by": [
             "state"
           ]
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "help": {
+        "color": {
+          "fixed": "color.text.muted"
         },
         "typography": {
           "fixed": "typography.caption"
@@ -477,6 +490,7 @@
         "prop:label"
       ],
       "description": [
+        "slot:help",
         "slot:message",
         "slot:disabled-reason"
       ],
