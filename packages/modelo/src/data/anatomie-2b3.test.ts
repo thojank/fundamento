@@ -265,3 +265,61 @@ describe("②b-3 A-teksto-1: max-lines", () => {
     expect(tokensOf(brief)).toBeLessThan(750);
   });
 });
+
+/** A-insigno-4, A-ligilo-4, A-spuro-4: a decorative slot icon-start, as at butono and signeto. */
+const STARTED = ["insigno", "ligilo", "spuro"] as const;
+
+describe("②b-3 A-insigno-4, A-ligilo-4, A-spuro-4: the slot icon-start", () => {
+  it.each(STARTED)("%s: icon-start a decorative slot, the last slot; one icon in it", (ero) => {
+    const { skemo, uzo } = entryOf(ero);
+    expect(skemo.slots.at(-1)).toEqual({ name: "icon-start", decorative: true });
+    expect(uzo?.slots["icon-start"]).toEqual({ accepts: ["icon", "ikono"], max: 1, nesting: 0 });
+  });
+
+  it.each(STARTED)("%s: the slot is named in de and en; the Uzo names it", (ero) => {
+    expect(tradukoOf(ero, "slots/icon-start", "de")).toBe("Symbol am Anfang");
+    expect(tradukoOf(ero, "slots/icon-start", "en")).toBe("Icon at the start");
+    expect(entryOf(ero).uzo?.purpose).toContain("icon-start");
+  });
+
+  it.each(STARTED)("%s: the brief stays under 750", (ero) => {
+    expect(tokensOf(briefOf(entryOf(ero)))).toBeLessThan(750);
+  });
+
+  it("insigno: a gap between the icon and the words", () => {
+    expect(entryOf("insigno").skemo.parts.box?.gap).toEqual({ fixed: "spacing.xsmall" });
+  });
+
+  it("spuro: the part icon as large as the separator; the item keeps a gap for it", () => {
+    const { skemo } = entryOf("spuro");
+    expect(skemo.parts.icon).toEqual({ size: { fixed: "size.icon.small" } });
+    expect(skemo.parts.item?.gap).toEqual({ fixed: "spacing.xsmall" });
+    expect(tradukoOf("spuro", "parts/icon", "de")).toBe("Symbol");
+    expect(tradukoOf("spuro", "parts/icon", "en")).toBe("Icon");
+  });
+});
+
+/** A-butono-4: the end content takes an insigno too (a count), the icon button stays a butono. */
+describe("②b-3 A-butono-4: icon-end takes an insigno", () => {
+  it("butono: the Uzo of icon-end accepts an insigno beside an icon", () => {
+    expect(entryOf("butono").uzo?.slots["icon-end"]).toEqual({
+      accepts: ["icon", "ikono", "insigno"],
+      max: 1,
+      nesting: 0,
+    });
+  });
+
+  it("butono: the slots stay those of 0.2.0", () => {
+    expect(entryOf("butono").skemo.slots.map((slot) => slot.name)).toEqual([
+      "label",
+      "icon-start",
+      "icon-end",
+      "disabled-reason",
+    ]);
+  });
+
+  it("butono: the Uzo says an insigno may count at the end; brief under 750", () => {
+    expect(entryOf("butono").uzo?.purpose).toContain("insigno");
+    expect(tokensOf(briefOf(entryOf("butono")))).toBeLessThan(750);
+  });
+});
