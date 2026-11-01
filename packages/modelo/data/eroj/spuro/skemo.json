@@ -28,6 +28,11 @@
         ],
         "default": "medium",
         "description": "Spec 029 ②a (A-spuro-1): medium writes the levels as links, as before; low in the subtle text, a supporting trail beside a heading."
+      },
+      {
+        "name": "max-items",
+        "kind": "number",
+        "description": "Spec 029 ②a (A-spuro-6, collapsed-middle decided): the most items the trail shows. With more, the middle ones collapse: the first item stands, then a menuo of the hidden levels as links (part more, named by a11y.texts more-name), then the last max-items − 1 items. Empty: every item stands, as before."
       }
     ],
     "states": [
@@ -111,6 +116,11 @@
       "icon": {
         "size": {
           "fixed": "size.icon.small"
+        }
+      },
+      "more": {
+        "gap": {
+          "sameAs": "item.gap"
         }
       }
     },
@@ -283,6 +293,10 @@
         "label-empty": {
           "de": "Pfad",
           "en": "Breadcrumb"
+        },
+        "more-name": {
+          "de": "Ausgelassene Ebenen",
+          "en": "Hidden levels"
         }
       }
     },
@@ -293,13 +307,17 @@
           "en": [
             "breadcrumb",
             "breadcrumbs",
-            "trail"
+            "trail",
+            "truncated",
+            "collapsedpath"
           ],
           "de": [
             "brotkrumen",
             "brotkrümel",
             "pfad",
-            "pfadnavigation"
+            "pfadnavigation",
+            "gekürzt",
+            "verkürzt"
           ]
         },
         "props": {},

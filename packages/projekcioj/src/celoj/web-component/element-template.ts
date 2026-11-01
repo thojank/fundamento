@@ -976,6 +976,12 @@ const BREADCRUMB_SEPARATOR =
 /** One item of a breadcrumb (Spec 015 ①): the slotted link and the chevron after it. */
 const BREADCRUMB_ENTRY = `<li part="entry"><slot name="item-"></slot>${BREADCRUMB_SEPARATOR}</li>`;
 
+/**
+ * Spec 036 Teil 5 ②b-4 (A-spuro-6): the entry of the hidden levels of a long trail – a menuo of
+ * links, its own trigger named by the Modelo's words (a11y.texts more-name) – and the chevron after it.
+ */
+const BREADCRUMB_MORE = `<li part="more"><fm-menuo></fm-menuo>${BREADCRUMB_SEPARATOR}</li>`;
+
 function tabsMarkup(): string {
   return '<div part="control" role="tablist"></div><div part="panel" role="tabpanel" tabindex="0"><slot name="panel"></slot></div><slot hidden></slot><span id="fm-texts" hidden></span>';
 }
@@ -2617,25 +2623,38 @@ ${
     const list = this.shadowRoot?.querySelector('[part="items"]');
     if (!(list instanceof HTMLElement)) return;
     const items = [...this.children].filter((child) => child.getAttribute("slot") === null);
+    // Spec 036 Teil 5 ②b-4 (A-spuro-6): with more items than max-items the middle ones collapse
+    // into a menu – the first item stands, then the menu, then the last max-items − 1 items.
+    const most = HAS_PROP.has("max-items") ? Number(this.propValue("max-items") ?? 0) : 0;
+    const collapse = Number.isInteger(most) && most >= 2 && items.length > most;
+    const hidden = collapse ? items.slice(1, items.length - (most - 1)) : [];
+    const shown = items.filter((item) => !hidden.includes(item));
+    const kinds = shown.map(() => "entry");
+    if (collapse) kinds.splice(1, 0, "more");
     // Spec 036 Teil 5 ②b-3 (A-spuro-4): the slot icon-start leaves the items before they are made again.
     const iconSlot = this.shadowRoot?.querySelector('slot[name="icon-start"]');
-    if (list.children.length !== items.length) {
+    const same = list.children.length === kinds.length && [...list.children].every((child, index) => child.getAttribute("part") === kinds[index]);
+    if (!same) {
       if (iconSlot instanceof HTMLSlotElement && list.contains(iconSlot)) this.shadowRoot?.append(iconSlot);
       list.replaceChildren();
-      items.forEach((_item, index) => {
-        list.insertAdjacentHTML("beforeend", ${JSON.stringify(BREADCRUMB_ENTRY)}.replace('name="item-"', 'name="item-' + index + '"'));
+      kinds.forEach((kind, index) => {
+        list.insertAdjacentHTML(
+          "beforeend",
+          kind === "more" ? ${JSON.stringify(BREADCRUMB_MORE)} : ${JSON.stringify(BREADCRUMB_ENTRY)}.replace('name="item-"', 'name="item-' + index + '"'),
+        );
       });
     }
-    items.forEach((item, index) => {
-      const entry = list.children[index];
-      entry?.querySelector<HTMLSlotElement>('slot[name^="item-"]')?.assign(item);
+    let at = 0;
+    [...list.children].forEach((entry, index) => {
+      if (entry.getAttribute("part") === "more") this.#more(entry, hidden);
+      else entry.querySelector<HTMLSlotElement>('slot[name^="item-"]')?.assign(shown[at++] as Element);
       // A chevron stands between two levels only (Abnahme S-2): the last level, the current page,
       // has none. Removed, not hidden — the icon's own display would win over [hidden].
-      const separator = entry?.querySelector('[part="separator"]');
-      const last = index === items.length - 1;
-      if (last && separator !== null && separator !== undefined) separator.remove();
-      if (!last && (separator === null || separator === undefined)) {
-        entry?.insertAdjacentHTML("beforeend", ${JSON.stringify(BREADCRUMB_SEPARATOR)});
+      const separator = entry.querySelector(':scope > [part="separator"]');
+      const last = index === list.children.length - 1;
+      if (last && separator !== null) separator.remove();
+      if (!last && separator === null) {
+        entry.insertAdjacentHTML("beforeend", ${JSON.stringify(BREADCRUMB_SEPARATOR)});
       }
     });
     // Spec 036 Teil 5 ②b-3 (A-spuro-4): an icon given to the host (slot="icon-start") stands at the
@@ -2647,6 +2666,30 @@ ${
       if (iconSlot.hidden !== (first === undefined)) iconSlot.hidden = first === undefined;
       iconSlot.assign(...[...this.children].filter((child) => child.getAttribute("slot") === "icon-start"));
     }
+  }
+
+  /**
+   * Spec 036 Teil 5 ②b-4 (A-spuro-6): the menu of the hidden levels – an entry with a target per
+   * hidden item (a link in the menu, A-menuo-5), its trigger named by the Modelo's words.
+   */
+  #more(entry: Element, hidden: readonly Element[]): void {
+    const menu = entry.querySelector("fm-menuo");
+    if (menu === null) return;
+    const words = TEXTS["more-name"];
+    const name = words === undefined ? "" : (words[this.#lingvo()] ?? words.en ?? "");
+    if (menu.getAttribute("label") !== name) menu.setAttribute("label", name);
+    const wanted = hidden.map((item) => ({ to: item.getAttribute("href") ?? "", words: item.textContent?.trim() ?? "" }));
+    const present = [...menu.children].map((child) => ({ to: child.getAttribute("to") ?? "", words: child.textContent ?? "" }));
+    if (JSON.stringify(wanted) === JSON.stringify(present)) return;
+    menu.replaceChildren(
+      ...wanted.map(({ to, words }, index) => {
+        const level = document.createElement("data");
+        level.value = String(index);
+        if (to !== "") level.setAttribute("to", to);
+        level.textContent = words;
+        return level;
+      }),
+    );
   }
 
   /** Writes what the Ero adds to the links (Spec 015 ①, D-04); every write first compares. */

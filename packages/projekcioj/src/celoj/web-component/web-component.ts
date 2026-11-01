@@ -1412,6 +1412,8 @@ const lightStructure = (skemo: Skemo, owner?: string): string =>
         ':where([part="items"]) { display: flex; flex-wrap: wrap; align-items: center; list-style: none; margin: 0; padding: 0; }',
         ':where([part="entry"]) { display: inline-flex; align-items: center; }',
         ':where([part="separator"]) { flex: none; }',
+        // Spec 036 Teil 5 ②b-4 (A-spuro-6): the entry of the hidden levels, a menu and the chevron.
+        ':where([part="more"]) { display: inline-flex; align-items: center; }',
       ].join("\n")
     : isNav(skemo)
       ? [
@@ -2625,6 +2627,7 @@ function selectorOf(
     // A breadcrumb (Spec 015 ①, Abnahme S-1): the chevron's size and colour on the chevron, the
     // gap on the list of the levels — the nav keeps its width, so the levels stand in one line.
     if (isBreadcrumb(skemo)) {
+      if (part === "more") return ':where([part="more"])';
       return part === "separator" ? ':where([part="separator"])' : ':where([part="items"])';
     }
     if (isNav(skemo)) return ':where([part="list"])';

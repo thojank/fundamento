@@ -43,6 +43,8 @@ describe("spuro in the repo Modelo (section ①, G1, G2)", () => {
       ["page", "string", false],
       // Spec 036 Teil 5 ②b-2 (A-spuro-1): medium the links, low the subtle text.
       ["emphasis", "enum", false],
+      // Spec 036 Teil 5 ②b-4 (A-spuro-6): the most items before the middle collapses.
+      ["max-items", "number", false],
     ]);
     expect(skemo?.states).toEqual(["rest", "hover", "focus"]);
     expect(skemo?.slots).toEqual([
@@ -66,6 +68,8 @@ describe("spuro in the repo Modelo (section ①, G1, G2)", () => {
       "focus-ring",
       // Spec 036 Teil 5 ②b-3 (A-spuro-4).
       "icon",
+      // Spec 036 Teil 5 ②b-4 (A-spuro-6).
+      "more",
     ]);
     expect(skemo?.parts.item).toEqual({
       color: { by: ["emphasis", "current", "state"] },
@@ -103,22 +107,27 @@ describe("spuro in the repo Modelo (section ①, G1, G2)", () => {
       name: ["prop:label"],
       states: { current: ["aria-current"] },
       keys: [],
-      texts: { "label-empty": { de: "Pfad", en: "Breadcrumb" } },
+      texts: {
+        "label-empty": { de: "Pfad", en: "Breadcrumb" },
+        // Spec 036 Teil 5 ②b-4 (A-spuro-6): the name of the menu of the hidden levels.
+        "more-name": { de: "Ausgelassene Ebenen", en: "Hidden levels" },
+      },
     });
   });
 
   it("knows the goal breadcrumb with the words of G3, citing link-label-names-destination", () => {
     expect(skemo?.goals?.map((goal) => goal.goal)).toEqual(["breadcrumb"]);
     expect(skemo?.goals?.[0]?.keywords).toEqual({
-      en: ["breadcrumb", "breadcrumbs", "trail"],
-      de: ["brotkrumen", "brotkrümel", "pfad", "pfadnavigation"],
+      // Spec 036 Teil 5 ②b-4 (A-spuro-6): the words of the decided boundary collapsed-middle.
+      en: ["breadcrumb", "breadcrumbs", "trail", "truncated", "collapsedpath"],
+      de: ["brotkrumen", "brotkrümel", "pfad", "pfadnavigation", "gekürzt", "verkürzt"],
     });
     expect(skemo?.goals?.[0]?.regulo).toBe("link-label-names-destination");
   });
 });
 
 describe("the Uzo of the spuro (section ①, G2)", () => {
-  it("states the purpose; the main navigation is the navigado's, steps are not covered; a shortened path asks", () => {
+  it("states the purpose; the main navigation is the navigado's, steps are not covered; a menu of siblings is not supported", () => {
     expect(uzo?.purpose).toBe(
       // Spec 036 Teil 5 ②b-3 (A-spuro-4).
       "Shows where the current page sits in a hierarchy and links back up to each level; the first item may show an icon (slot icon-start).",
@@ -127,8 +136,10 @@ describe("the Uzo of the spuro (section ①, G2)", () => {
       ["main-navigation", "navigado"],
       ["steps", null],
     ]);
+    // Spec 036 Teil 5 ②b-4 (A-spuro-6): collapsed-middle is decided (max-items); the Uzo keeps
+    // one boundary (A3): a menu of the sibling pages of a level (A-spuro-5 stays as it is).
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
-      ["collapsed-middle", "ask-human"],
+      ["sibling-menu", "not-supported"],
     ]);
     for (const entry of [...(uzo?.instead ?? []), ...(uzo?.boundary ?? [])]) {
       expect(entry.kialo).toMatch(/because/);
@@ -137,7 +148,8 @@ describe("the Uzo of the spuro (section ①, G2)", () => {
 
   it("composes at the head of the page with ligilo and ikono; at least two items; wraps; the navigado closes its boundary breadcrumb here", () => {
     expect(uzo?.composes.containers.map((container) => container.name)).toEqual(["page-header"]);
-    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["ligilo", "ikono"]);
+    // Spec 036 Teil 5 ②b-4 (A-spuro-6): the menuo of the hidden levels.
+    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["ligilo", "ikono", "menuo"]);
     expect(uzo?.slots.items).toEqual({ accepts: ["text"], required: true, min: 2, nesting: 0 });
     expect(uzo?.layout).toEqual({ size: "container", wrap: "allowed" });
     const breadcrumb = eroNamed("navigado")?.uzo?.boundary.find(

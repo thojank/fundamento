@@ -235,6 +235,9 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   "avataro:icon": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
   "pagxigilo:first": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
   "pagxigilo:last": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  // Spec 036 Teil 5 ②b-4 (A-spuro-6): the menu of the hidden levels stands only with max-items and
+  // a longer trail; the set shows the trail without it.
+  "spuro:more": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
   // A-navigado-1, A-navigado-4: the heading of a section and the icon of an item stand with the
   // headings and icons a navigation holds.
   "navigado:section-heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",

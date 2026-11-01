@@ -594,8 +594,9 @@ describe("②b-2 A-apartigilo-1, A-karto-1, A-avataro-1, A-avizo-1: the looks", 
 });
 
 describe("②b-2 A-spuro-1: emphasis", () => {
-  it("spuro: emphasis medium | low, the last prop; low writes the links in the subtle text", () => {
-    expect(entryOf("spuro").skemo.props.at(-1)).toMatchObject({
+  it("spuro: emphasis medium | low, right after the props of 0.2.0; low writes the links in the subtle text", () => {
+    // Spec 036 Teil 5 ②b-4 (A-spuro-6): max-items came after it.
+    expect(entryOf("spuro").skemo.props.at(-2)).toMatchObject({
       name: "emphasis",
       kind: "enum",
       values: ["medium", "low"],

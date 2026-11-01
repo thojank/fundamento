@@ -187,7 +187,8 @@ describe("②b-4 A-spuro-6: collapsed middle", () => {
   });
 
   it("spuro: collapsed-middle left the Uzo; its words lead to the spuro", () => {
-    expect(casesOf("spuro")).toEqual([]);
+    // The Uzo keeps one boundary (A3, minItems 1): a menu of sibling pages (A-spuro-5 stays).
+    expect(casesOf("spuro")).toEqual(["sibling-menu"]);
     expect(
       modelo.tradukoj?.de?.[`${entryOf("spuro").uzo?.id}/boundary/collapsed-middle/kialo`],
     ).toBeUndefined();
