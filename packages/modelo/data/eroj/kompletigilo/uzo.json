@@ -4,7 +4,7 @@
     "id": "uzo_01M56AF0CDZ5SFJYKYEF7VSNPT",
     "ero": "ero_01M56AEZKZ3T15QT01E88Q0HF9",
     "skemo": "ske_01M56AF004GZ2N13Y6C2K29HDY",
-    "purpose": "A field that suggests matching values while the person types; the value may be one of the suggestions or, if allowed, free text.",
+    "purpose": "A field that suggests matching values while the person types; the value may be one of the suggestions or, if allowed, free text; options of one group name it (attribute group) and stand under its heading.",
     "instead": [
       {
         "goal": "few-fixed-options",

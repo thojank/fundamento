@@ -80,7 +80,21 @@ function fieldPartSelector(
         ? `:where(${root}) [part="check"]`
         : `:where(${root}) [part="item"]${entry} [part="check"]`;
     }
-    if (["icon", "description", "filter", "clear", "tag", "listbox"].includes(part)) {
+    // Spec 036 Teil 5 ②b-3 (A-listelektilo-4, A-plurelektilo-1/-4): the heading of a group, the
+    // divider between two groups and „alle wählen“ are elements of their own.
+    if (
+      [
+        "icon",
+        "description",
+        "filter",
+        "clear",
+        "tag",
+        "listbox",
+        "group-heading",
+        "divider",
+        "select-all",
+      ].includes(part)
+    ) {
       return `:where(${root}) [part="${part}"]`;
     }
     if (part === "placeholder") {
@@ -141,7 +155,10 @@ function fieldPartSelector(
   }
   // The listbox of a field with suggestions (Spec 014 ⑤) and its rows: the suggestion by its
   // entry (aria-selected), the no-results text.
-  if (part === "listbox" || part === "no-results") return `:where(${root}) [part="${part}"]`;
+  // Spec 036 Teil 5 ②b-3 (A-kompletigilo-4, A-elektilo-4): the heading of a group of options.
+  if (part === "listbox" || part === "no-results" || part === "group-heading") {
+    return `:where(${root}) [part="${part}"]`;
+  }
   if (part === "suggestion") return `:where(${root}) [part="suggestion"]${entry}`;
   // The step buttons and the clear button of Spec 025 ① (plan ① D-05, D-06) are composed butono
   // beside the input: their size is theirs, not the input's.
@@ -1014,6 +1031,12 @@ function declarations(
         : ["border-block-end-style: solid;", `border-block-end-width: ${variable(token)};`];
     }
   }
+  // Spec 036 Teil 5 ②b-3 (A-listelektilo-4): the divider between two groups is the start edge of
+  // the later group's first line – its colour and width are the border's.
+  if (isListy(skemo) && part === "divider") {
+    if (property === "color") return [`border-block-start-color: ${variable(token)};`];
+    if (property === "width") return [`border-block-start-width: ${variable(token)};`];
+  }
   // Spec 025 ③ (plan ③ D-18): the composed field of an inline editor is as wide as its token while
   // editing and not shown while its width is none. The size of a composed butono that carries a
   // word (save and cancel of the editor, the clear of a multi-select) is its height alone: the word
@@ -1589,6 +1612,10 @@ const suggestStructure: string = [
   ':where([part="listbox"]:not(:popover-open)) { display: none; }',
   ':where([part="suggestion"]) { display: flex; align-items: center; box-sizing: border-box; cursor: pointer; white-space: nowrap; }',
   ':where([part="no-results"]) { display: block; }',
+  // Spec 036 Teil 5 ②b-3 (A-kompletigilo-4): a group of suggestions is a column under its heading.
+  ':where([part="group"]) { display: flex; flex-direction: column; }',
+  ':where([part="group"][hidden]) { display: none; }',
+  ':where([part="group-heading"]) { display: block; white-space: nowrap; }',
   HIDDEN_TEXT,
 ].join("\n");
 
@@ -1664,6 +1691,17 @@ const listStructure = (disables: boolean, multi: boolean): string =>
     ':where([part="item"][hidden]) { display: none; }',
     ':where([part="item"][aria-disabled="true"]) { cursor: not-allowed; }',
     ':where([part="item-text"]) { flex: 1 1 auto; white-space: nowrap; }',
+    // Spec 036 Teil 5 ②b-3: a group of rows is a column like the list; its heading a line of its
+    // own; the divider a line at the start of the group; „alle wählen“ a row like the others,
+    // its check mark seen only while chosen (0, the one literal of the gate) but keeping its room.
+    ':where([part="group"]) { display: flex; flex-direction: column; }',
+    ':where([part="group"][hidden]) { display: none; }',
+    ':where([part="group-heading"]) { display: block; white-space: nowrap; }',
+    ':where([part="divider"]) { display: block; border-block-start-style: solid; }',
+    ':where([part="select-all"]) { display: flex; align-items: center; box-sizing: border-box; cursor: pointer; }',
+    ':where([part="select-all"][hidden]) { display: none; }',
+    ':where([part="select-all"][aria-disabled="true"]) { cursor: not-allowed; }',
+    ':where([part="select-all"][aria-checked="false"]) fm-ikono { opacity: 0; }',
     ...(multi
       ? [
           ':where([part="filter"]) { box-sizing: border-box; margin: 0; }',

@@ -172,6 +172,8 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
         ...Object.keys(kampo.skemo.parts).filter((part) => !KAMPO_OWN.includes(part)),
         "clear",
         "indicator",
+        // Spec 036 Teil 5 ②b-3 (A-elektilo-4): the heading of a group of options.
+        "group-heading",
       ].sort(),
     );
     for (const [part, properties] of Object.entries(kampo.skemo.parts)) {
@@ -293,7 +295,8 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
 describe("the Uzo of the elektilo (section 4, G5)", () => {
   it("states the purpose of the spec, requires the label and at least two options without an upper bound, takes its width from the container", () => {
     expect(uzo?.purpose).toBe(
-      "Chooses one of many options from a list that opens on demand: country, language, year.",
+      // Spec 036 Teil 5 ②b-3 (A-elektilo-4): options name their group.
+      "Chooses one of many options from a list that opens on demand: country, language, year; options of one group name it (attribute group) and stand under its heading.",
     );
     expect(uzo?.slots).toEqual({
       label: { accepts: ["text"], required: true, max: 1, nesting: 0 },

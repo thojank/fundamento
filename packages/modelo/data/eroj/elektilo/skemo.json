@@ -292,6 +292,14 @@
         "typography": {
           "fixed": "typography.caption"
         }
+      },
+      "group-heading": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
       }
     },
     "trailing": [

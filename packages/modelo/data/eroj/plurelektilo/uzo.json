@@ -4,7 +4,7 @@
     "id": "uzo_01M5H5HEQBF3NQ5D8QXMEAJB7M",
     "ero": "ero_01M5H5HBHF1R5TVWFGZ3R1A7B5",
     "skemo": "ske_01M5H5HD4N9SNX1YS9MG9SSQ55",
-    "purpose": "Chooses several values from a long list, filterable, and shows the chosen ones as removable tags.",
+    "purpose": "Chooses several values from a long list, filterable, and shows the chosen ones as removable tags; options of one group name it (attribute group) and stand under its heading.",
     "instead": [
       {
         "goal": "few-options",

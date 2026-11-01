@@ -281,6 +281,9 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       "spinner",
       "clear",
       "message",
+      // Spec 036 Teil 5 ②b-3 (A-listelektilo-4): the heading of a group and the divider.
+      "group-heading",
+      "divider",
     ]);
     expect(skemo?.parts.item).toEqual({
       color: { by: ["selected"] },
@@ -385,6 +388,8 @@ describe("plurelektilo (D-16): several values from a long list, filterable, the 
       ["message-position", "enum", "below"],
       // Spec 036 Teil 5 ②b-2 (A-plurelektilo-2).
       ["size", "enum", "medium"],
+      // Spec 036 Teil 5 ②b-3 (A-plurelektilo-1): „alle wählen“.
+      ["select-all", "boolean", false],
     ]);
     // Spec 036 Teil 5 ②b-2 (A-plurelektilo-1): labels between count and tags.
     expect(skemo?.props.find((prop) => prop.name === "summary")?.values).toEqual([
@@ -431,6 +436,9 @@ describe("plurelektilo (D-16): several values from a long list, filterable, the 
       "motion",
       "spinner",
       "message",
+      // Spec 036 Teil 5 ②b-3 (A-plurelektilo-4, A-plurelektilo-1): the heading of a group, „alle wählen“.
+      "group-heading",
+      "select-all",
     ]);
     expect(skemo?.parts.check).toEqual({
       color: { by: ["selected"] },
@@ -467,6 +475,8 @@ describe("plurelektilo (D-16): several values from a long list, filterable, the 
         "options-count": { de: "gewählt", en: "selected" },
         "clear-name": { de: "Alle abwählen", en: "Clear all" },
         "values-invalid": { de: "Wähle höchstens {max}.", en: "Choose at most {max}." },
+        // Spec 036 Teil 5 ②b-3 (A-plurelektilo-1).
+        "select-all": { de: "Alle wählen", en: "Select all" },
       },
     });
     expect(skemo?.events?.map((event) => event.name)).toEqual(["input", "change"]);

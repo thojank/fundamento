@@ -37,7 +37,7 @@ describe("Spec 029 ①: the structure of komuna 0.2 for the Agordilo", () => {
     // of the date picker at the size of an icon with their targets, read-only as rest. Spec 036
     // Teil 5 ②b-2: elekto, markobutono and sxaltilo in two sizes (large a deprecated alias).
     expect(structure.fingerprint).toBe(
-      "1785a10c6e72ba6184396ab98db63c461c28cad5aa286c088595b5f8035a1748",
+      "f172d1106c95d2c30aaad0601941dfb51d49a61b6919c48640de04ce3e321dcc",
     );
   });
 

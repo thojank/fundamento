@@ -397,6 +397,74 @@ const MULTI_ITEM_ROW =
   '<div part="item" role="option" aria-selected="false"><fm-ikono part="check" name="check" aria-hidden="true"></fm-ikono><span part="item-text"></span></div>';
 
 /**
+ * Spec 036 Teil 5 ②b-3 (A-elektilo-4 … A-menuo-4): the rows of a run of options that name the same
+ * group (attribute group) stand in a group of their own (role group), named by its heading (role
+ * presentation, referenced); with a divider (aria-hidden) before every group but the first where
+ * the Skemo has the part. Rows without a group stand in the list itself; a group whose rows are all
+ * hidden (a filter) is hidden too; a row that says nothing found stays last. Nothing moves while no
+ * option names a group – a list without groups keeps its rows as they were.
+ */
+const GROUP_ROWS_METHOD = `
+  #groupRows(holder: HTMLElement, rows: HTMLElement[], groups: string[], divided: boolean): void {
+    const containers = [...holder.querySelectorAll(':scope > [part="group"]')] as HTMLElement[];
+    if (containers.length === 0 && groups.every((group) => group === "")) return;
+    let used = 0;
+    let previous = "";
+    let current: HTMLElement | undefined;
+    rows.forEach((row, index) => {
+      const group = groups[index] ?? "";
+      if (group === "") {
+        holder.append(row);
+        current = undefined;
+        previous = group;
+        return;
+      }
+      if (current === undefined || group !== previous) {
+        current = containers[used] ?? document.createElement("div");
+        used += 1;
+        const id = "group-heading-" + used;
+        current.setAttribute("part", "group");
+        current.setAttribute("role", "group");
+        current.setAttribute("aria-labelledby", id);
+        current.replaceChildren();
+        if (divided && used > 1) {
+          const line = document.createElement("div");
+          line.setAttribute("part", "divider");
+          line.setAttribute("aria-hidden", "true");
+          current.append(line);
+        }
+        const heading = document.createElement("div");
+        heading.setAttribute("part", "group-heading");
+        heading.setAttribute("role", "presentation");
+        heading.id = id;
+        heading.textContent = group;
+        current.append(heading);
+        holder.append(current);
+      }
+      current.append(row);
+      previous = group;
+    });
+    for (const unused of containers.slice(used)) unused.remove();
+    for (const container of holder.querySelectorAll(':scope > [part="group"]')) {
+      const shown = [...container.querySelectorAll('[role="option"], [role="menuitem"]')].some(
+        (row) => !(row as HTMLElement).hidden,
+      );
+      (container as HTMLElement).hidden = !shown;
+    }
+    const last = holder.querySelector(':scope > [part="no-results"]');
+    if (last !== null) holder.append(last);
+  }
+`;
+
+/**
+ * Spec 036 Teil 5 ②b-3 (A-plurelektilo-1, A-plurelektilo-4): „alle wählen“ – a checkbox before the
+ * list of a multi-select, outside the listbox (a listbox owns options alone), its check mark as the
+ * rows have it; hidden unless select-all, named by the Modelo's words in the render.
+ */
+const SELECT_ALL_ROW =
+  '<div part="select-all" role="checkbox" aria-checked="false" tabindex="0" hidden><fm-ikono name="check" aria-hidden="true"></fm-ikono><span id="select-all-text"></span></div>';
+
+/**
  * The shadow markup of a styled select-only list and of a multi-select (Spec 025 ③, plan ③
  * D-18): the field of the kampo — label with the mark, help and error — around a button that shows
  * the chosen option (or how many are chosen) with the chevron, and the listbox as a popover of the
@@ -409,6 +477,7 @@ function listMarkup(
   slots: NonNullable<ElementNames["slots"]>,
   multi: boolean,
   trailing: readonly string[] = [],
+  selectAll = false,
 ): string {
   // Abnahme #122: the chevron stands in the end of the row, inside the button's border, after the
   // spinner and the clear button (a button holds no button) – the Skemo's trailing.
@@ -425,7 +494,7 @@ function listMarkup(
   // A listbox owns options alone (ARIA, axe aria-required-children): the multi-select's popover is
   // a panel that holds the filter, the listbox of the rows (items) and the clear butono.
   const listbox = multi
-    ? '<div part="listbox" id="panel" popover="manual"><input part="filter" type="search" aria-controls="listbox" autocomplete="off" hidden><div part="items" role="listbox" id="listbox" aria-multiselectable="true"></div><fm-butono part="clear" emphasis="low" size="small"></fm-butono></div>'
+    ? `<div part="listbox" id="panel" popover="manual"><input part="filter" type="search" aria-controls="listbox" autocomplete="off" hidden>${selectAll ? SELECT_ALL_ROW : ""}<div part="items" role="listbox" id="listbox" aria-multiselectable="true"></div><fm-butono part="clear" emphasis="low" size="small"></fm-butono></div>`
     : '<div part="listbox" role="listbox" id="listbox" popover="manual"></div>';
   return `<div part="field"><label part="label" id="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label>${button}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
 }
@@ -885,6 +954,7 @@ function markup(
   afterLabel = false,
   statusIcon = false,
   trailing: readonly string[] = [],
+  parts: readonly string[] = [],
 ): string {
   const reasoned = slots.some((slot) => slot.name === "disabled-reason");
   const own = slots.filter((slot) => slot.name !== "disabled-reason");
@@ -901,6 +971,7 @@ function markup(
     afterLabel,
     statusIcon,
     trailing,
+    parts,
   );
   if (!reasoned) return body;
   if (host === "menu") {
@@ -925,6 +996,7 @@ function hostMarkup(
   afterLabel = false,
   statusIcon = false,
   trailing: readonly string[] = [],
+  parts: readonly string[] = [],
 ): string {
   if (host === "text") return textMarkup(slots);
   if (host === "slider") return sliderMarkup(slots);
@@ -951,7 +1023,8 @@ function hostMarkup(
     return fieldMarkup(slots, false, false, false, true, statusIcon, trailing);
   if (host === "chip") return chipMarkup();
   if (host === "listselect") return listMarkup(slots, false, trailing);
-  if (host === "multiselect") return listMarkup(slots, true, trailing);
+  if (host === "multiselect")
+    return listMarkup(slots, true, trailing, parts.includes("select-all"));
   if (host === "editor") return editorMarkup();
   if (host === "textarea")
     return fieldMarkup(slots, true, false, false, false, statusIcon, trailing);
@@ -1368,12 +1441,17 @@ export function elementSource({
     const empty = typeof emptyLabel === "string" && emptyLabel !== "";
     const options = [
       ...(empty
-        ? [{ value: "", text: emptyLabel, prompt: false }]
+        ? [{ value: "", text: emptyLabel, prompt: false, group: "" }]
         : chosen === -1
-          ? [{ value: "", text: typeof placeholder === "string" ? placeholder : "", prompt: true }]
+          ? [{ value: "", text: typeof placeholder === "string" ? placeholder : "", prompt: true, group: "" }]
           : []),
       ...entries.map((entry) => ({ ...entry, prompt: false })),
     ];
+    // Spec 036 Teil 5 ②b-3 (A-elektilo-4): options that name a group stand in the platform's
+    // optgroup, labelled by it; the list and its headings stay the platform's (E3) – a style on
+    // the optgroup would reach its options in some platforms, so the heading carries none.
+    const groupOf = (element: HTMLOptionElement): string =>
+      element.parentElement instanceof HTMLOptGroupElement ? element.parentElement.label : "";
     const same =
       select.options.length === options.length &&
       options.every((option, index) => {
@@ -1382,19 +1460,31 @@ export function elementSource({
           present !== undefined &&
           present.value === option.value &&
           present.text === option.text &&
-          present.disabled === option.prompt
+          present.disabled === option.prompt &&
+          groupOf(present) === option.group
         );
       });
     if (!same) {
-      select.replaceChildren(
-        ...options.map((option) => {
-          const element = document.createElement("option");
-          element.value = option.value;
-          element.textContent = option.text;
-          element.disabled = option.prompt;
-          return element;
-        }),
-      );
+      const children: HTMLElement[] = [];
+      let holder: HTMLOptGroupElement | undefined;
+      for (const option of options) {
+        const element = document.createElement("option");
+        element.value = option.value;
+        element.textContent = option.text;
+        element.disabled = option.prompt;
+        if (option.group === "") {
+          holder = undefined;
+          children.push(element);
+          continue;
+        }
+        if (holder === undefined || holder.label !== option.group) {
+          holder = document.createElement("optgroup");
+          holder.label = option.group;
+          children.push(holder);
+        }
+        holder.append(element);
+      }
+      select.replaceChildren(...children);
     }
     select.selectedIndex = chosen === -1 ? 0 : chosen + (empty ? 1 : 0);
     this.#internals.setFormValue(chosen === -1 ? (empty ? "" : null) : (entries[chosen]?.value ?? null));
@@ -1430,7 +1520,7 @@ export function elementSource({
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ["slot", "value"],
+      attributeFilter: ["slot", "value", "group"],
     });
     // Spec 036 Teil 5 ②b-2 (A-elektilo-1): read-only, the list does not open and no key chooses;
     // Tab and Escape stay the page's. A choice that came through anyway is taken back unsaid.
@@ -1464,13 +1554,13 @@ export function elementSource({
   // The methods of a select (Spec 010 ④, D-06): its options, read from the light DOM.
   const selectMethods = isSelect
     ? `
-  /** The options of the select: every child in the slot of the options, its value and its text. */
-  #entries(): { value: string; text: string }[] {
+  /** The options of the select: every child in the slot of the options, its value, its text and its group. */
+  #entries(): { value: string; text: string; group: string }[] {
     return [...this.children]
       .filter((child) => child.getAttribute("slot") === "${listSlot}")
       .map((child) => {
         const text = child.textContent?.trim() ?? "";
-        return { value: child.getAttribute("value") ?? text, text };
+        return { value: child.getAttribute("value") ?? text, text, group: child.getAttribute("group") ?? "" };
       });
   }
 `
@@ -3259,22 +3349,22 @@ ${
   #suggestTyped = false;
   #suggestActive = -1;
 
-  /** The options of the field: every child in the slot of the options, its value and its text. */
-  #entries(): { value: string; text: string }[] {
+  /** The options of the field: every child in the slot of the options, its value, its text and its group. */
+  #entries(): { value: string; text: string; group: string }[] {
     return [...this.children]
       .filter((child) => child.getAttribute("slot") === "options")
       .map((child) => {
         const text = child.textContent?.trim() ?? "";
-        return { value: child.getAttribute("value") ?? text, text };
+        return { value: child.getAttribute("value") ?? text, text, group: child.getAttribute("group") ?? "" };
       });
   }
-
+${GROUP_ROWS_METHOD}
   #listbox(): HTMLElement {
     return this.shadowRoot?.querySelector('[part="listbox"]') as HTMLElement;
   }
 
   /** The options that match the typed text (the text, not the value, case-insensitive). */
-  #suggestMatches(): { value: string; text: string }[] {
+  #suggestMatches(): { value: string; text: string; group: string }[] {
     const typed = (this.#control as HTMLInputElement).value.trim().toLowerCase();
     const minimum = Number(this.propValue("min-chars") ?? 1);
     if (typed.length < minimum) return [];
@@ -3289,7 +3379,7 @@ ${
   }
 
   /** Writes the rows of the listbox from the matches and tells how many there are. */
-  #suggestRows(): { value: string; text: string }[] {
+  #suggestRows(): { value: string; text: string; group: string }[] {
     const listbox = this.#listbox();
     const matches = this.#suggestMatches();
     const rows = [...listbox.querySelectorAll('[part="suggestion"]')] as HTMLElement[];
@@ -3331,6 +3421,8 @@ ${
       noResults.textContent = none;
       noResults.hidden = matches.length > 0 || !this.#suggestTyped;
     }
+    // Spec 036 Teil 5 ②b-3 (A-kompletigilo-4): the suggestions in their groups.
+    this.#groupRows(listbox, rows.slice(0, matches.length), matches.map((entry) => entry.group), false);
     if (this.#suggestActive >= matches.length) this.#suggestActive = -1;
     this.#suggestMark();
     return matches;
@@ -3885,7 +3977,7 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ["slot", "value"],
+      attributeFilter: ["slot", "value", "group"],
     });
     const input = control as HTMLInputElement;
     input.addEventListener("input", () => {
@@ -4886,7 +4978,7 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ["slot", "value", "icon", "description", "disabled"],
+      attributeFilter: ["slot", "value", "icon", "description", "disabled", "group"],
     });
     control.addEventListener("click", (event) => {
       event.stopPropagation();
@@ -4919,6 +5011,28 @@ ${
       event.stopPropagation();
       if (this.propValue("disabled") === true || this.propValue("readonly") === true) return;
       this.setAttribute("values", "");
+      this.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    // Spec 036 Teil 5 ②b-3 (A-plurelektilo-1): „alle wählen“ chooses every option that may be
+    // chosen (not disabled, within max, in their order); once all are, it takes them back.
+    // Space and Enter press it, as a checkbox.
+    this.shadowRoot?.querySelector('[part="select-all"]')?.addEventListener("keydown", (event) => {
+      if (!(event instanceof KeyboardEvent) || (event.key !== " " && event.key !== "Enter")) return;
+      event.preventDefault();
+      event.stopPropagation();
+      (event.currentTarget as HTMLElement).click();
+    });
+    this.shadowRoot?.querySelector('[part="select-all"]')?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (this.propValue("disabled") === true || this.propValue("readonly") === true) return;
+      const entries = this.#entries();
+      const chosen = this.#listValues();
+      const kept = chosen.filter((value) => entries.some((entry) => entry.value === value && entry.disabled));
+      const next =
+        this.#listAllState() === "true"
+          ? kept
+          : [...kept, ...this.#listChoosable().map((entry) => entry.value).filter((value) => !kept.includes(value))];
+      this.setAttribute("values", next.join(","));
       this.dispatchEvent(new Event("change", { bubbles: true }));
     });
     // A tag taken away (the remove of a composed signeto) takes its value out of the values.
@@ -5005,6 +5119,19 @@ ${
         filter.hidden = this.propValue("filterable") !== true;
         filter.setAttribute("aria-labelledby", "label");
       }
+      // Spec 036 Teil 5 ②b-3 (A-plurelektilo-1, A-plurelektilo-4): „alle wählen“ says whether
+      // every option that may be chosen is (within max), some are (mixed) or none.
+      const all = this.shadowRoot?.querySelector('[part="select-all"]');
+      if (all instanceof HTMLElement) {
+        all.hidden = this.propValue("select-all") !== true;
+        const text = this.shadowRoot?.getElementById("select-all-text");
+        if (text instanceof HTMLElement && text.textContent !== word("select-all")) text.textContent = word("select-all");
+        const state = this.#listAllState();
+        if (all.getAttribute("aria-checked") !== state) all.setAttribute("aria-checked", state);
+        const off = this.propValue("disabled") === true || this.propValue("readonly") === true;
+        if (off) all.setAttribute("aria-disabled", "true");
+        else all.removeAttribute("aria-disabled");
+      }
       this.#listRole().setAttribute("aria-labelledby", "label");
       const maxGiven = this.propValue("max");
       const max = typeof maxGiven === "string" && maxGiven !== "" ? Number(maxGiven) : undefined;
@@ -5072,8 +5199,8 @@ ${
     if (!event.composedPath().includes(this)) this.#listClose(false);
   };
 
-  /** The options: every child in the slot of the options with its value, text, icon, description and disabled. */
-  #entries(): { value: string; text: string; icon: string; description: string; disabled: boolean }[] {
+  /** The options: every child in the slot of the options with its value, text, icon, description, disabled and group. */
+  #entries(): { value: string; text: string; icon: string; description: string; disabled: boolean; group: string }[] {
     return [...this.children]
       .filter((child) => child.getAttribute("slot") === "${listSlot}")
       .map((child) => {
@@ -5084,11 +5211,33 @@ ${
           icon: child.getAttribute("icon") ?? "",
           description: child.getAttribute("description") ?? "",
           disabled: child.hasAttribute("disabled"),
+          group: child.getAttribute("group") ?? "",
         };
       });
   }
+${GROUP_ROWS_METHOD}
 
-  /** The chosen values: the value, or the comma-separated values of a multi-select. */
+${
+  isMultiselect
+    ? `  /** The options „alle wählen“ chooses: not disabled, in their order, as many as max allows. */
+  #listChoosable(): { value: string; disabled: boolean }[] {
+    const maxGiven = this.propValue("max");
+    const max = typeof maxGiven === "string" && maxGiven !== "" ? Number(maxGiven) : undefined;
+    const usable = this.#entries().filter((entry) => !entry.disabled);
+    return max !== undefined && Number.isFinite(max) ? usable.slice(0, Math.max(0, max)) : usable;
+  }
+
+  /** Whether the options „alle wählen“ chooses are chosen: all (true), some (mixed) or none (false). */
+  #listAllState(): "true" | "mixed" | "false" {
+    const chosen = this.#listValues();
+    const choosable = this.#listChoosable();
+    const count = choosable.filter((entry) => chosen.includes(entry.value)).length;
+    return count > 0 && count === choosable.length ? "true" : count > 0 ? "mixed" : "false";
+  }
+
+`
+    : ""
+}  /** The chosen values: the value, or the comma-separated values of a multi-select. */
   #listValues(): string[] {
     const given = String(this.propValue("${isMultiselect ? "values" : "value"}") ?? "");
     return given.split(",").map((value) => value.trim()).filter((value) => value !== "");
@@ -5161,6 +5310,8 @@ ${
         if (description.textContent !== entry.description) description.textContent = entry.description;
       }
     });
+    // Spec 036 Teil 5 ②b-3 (A-listelektilo-4, A-plurelektilo-4): the rows in their groups.
+    this.#groupRows(holder as HTMLElement, rows.slice(0, ordered.length), ordered.map((entry) => entry.group), ${parts.includes("divider")});
     if (this.#listActive >= rows.length) this.#listActive = -1;
     this.#listMark();
   }
@@ -5185,10 +5336,14 @@ ${
   isMultiselect
     ? `    const chosen = this.#listValues();
     const entries = this.#entries();
-    this.#listOrder = [
-      ...entries.filter((entry) => chosen.includes(entry.value)),
-      ...entries.filter((entry) => !chosen.includes(entry.value)),
-    ].map((entry) => entry.value);
+    // Spec 036 Teil 5 ②b-3 (A-plurelektilo-4): options in groups keep their order (the chosen
+    // first would tear the groups apart).
+    this.#listOrder = entries.some((entry) => entry.group !== "")
+      ? []
+      : [
+          ...entries.filter((entry) => chosen.includes(entry.value)),
+          ...entries.filter((entry) => !chosen.includes(entry.value)),
+        ].map((entry) => entry.value);
 `
     : ""
 }    this.#listBuild();
@@ -5974,7 +6129,7 @@ ${autoField}${isAvatar ? '  /** The picture an avatar shows and whether it has l
       sheet.replaceSync(CSS);
     }
     root.adoptedStyleSheets = [sheet];
-    root.innerHTML = \`${markup(host, slots, role, marked, indicator, dismiss, icon, breadcrumb, stepper, afterLabel, statusIcon, trailing)}\`;
+    root.innerHTML = \`${markup(host, slots, role, marked, indicator, dismiss, icon, breadcrumb, stepper, afterLabel, statusIcon, trailing, parts)}\`;
     const control = root.querySelector("${control}");
     ${
       // Spec 025 ③ (plan ③ D-18): an inline editor has no label slot — its name is the prop label

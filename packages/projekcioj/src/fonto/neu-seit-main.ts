@@ -195,6 +195,15 @@ const REST_2B3 = (() => {
         "^ero\\.glitilo\\.tick\\.(color|width|height)$|^ero\\.alsxutilo\\.icon\\.(size|color)$",
       added: 3 + 2,
     },
+    // A-elektilo-4 (the heading of a group: colour and typography, 2), A-listelektilo-4,
+    // A-kompletigilo-4, A-plurelektilo-4 (the heading with its room, 3 × 3), A-listelektilo-4 (the
+    // divider: colour and width, 2), A-plurelektilo-1 („alle wählen“: colour, typography, height,
+    // room, 4).
+    {
+      pattern:
+        "^ero\\.elektilo\\.group\\.heading\\.(color|typography)$|^ero\\.(listelektilo|kompletigilo|plurelektilo)\\.group\\.heading\\.(color|typography|inline\\.padding)$|^ero\\.listelektilo\\.divider\\.(color|width)$|^ero\\.plurelektilo\\.select\\.all\\.(color|typography|height|inline\\.padding)$",
+      added: 2 + 9 + 2 + 4,
+    },
   ];
   const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
   return {

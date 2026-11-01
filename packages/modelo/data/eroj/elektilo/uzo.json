@@ -4,7 +4,7 @@
     "id": "uzo_01M4WYFM3GF1QAY02M9D1J4M8E",
     "ero": "ero_01M4WYFKBHR43AQNZH9SSKKQTB",
     "skemo": "ske_01M4WYFKQC9XZQ48YDQN9VBD12",
-    "purpose": "Chooses one of many options from a list that opens on demand: country, language, year.",
+    "purpose": "Chooses one of many options from a list that opens on demand: country, language, year; options of one group name it (attribute group) and stand under its heading.",
     "instead": [
       {
         "goal": "choose-few",

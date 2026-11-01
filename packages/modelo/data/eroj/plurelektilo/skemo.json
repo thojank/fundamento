@@ -126,6 +126,12 @@
         ],
         "default": "medium",
         "description": "Spec 029 ②a (A-plurelektilo-2): the height of the field on the scale of the kampo and the elektilo (size.control.*), so the fields of one row stand level; label, text, padding and the icon at its end follow, as at the elektilo. Medium is the field as it was."
+      },
+      {
+        "name": "select-all",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②a (A-plurelektilo-1, A-plurelektilo-4): a row before the list that chooses every option, then none – a checkbox, mixed while some are chosen; within max only."
       }
     ],
     "states": [
@@ -376,6 +382,31 @@
         },
         "typography": {
           "fixed": "typography.caption"
+        }
+      },
+      "group-heading": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        },
+        "inline-padding": {
+          "fixed": "spacing.medium"
+        }
+      },
+      "select-all": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        },
+        "height": {
+          "fixed": "size.target.min"
+        },
+        "inline-padding": {
+          "fixed": "spacing.medium"
         }
       }
     },
@@ -777,6 +808,10 @@
         "loading": {
           "de": "lädt",
           "en": "loading"
+        },
+        "select-all": {
+          "de": "Alle wählen",
+          "en": "Select all"
         }
       }
     },

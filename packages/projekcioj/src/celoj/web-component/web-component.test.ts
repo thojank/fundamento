@@ -2549,7 +2549,8 @@ describe("Web Component Celo for the selection Eroj (Spec 025 ③)", () => {
     // A listbox owns options alone (ARIA; axe aria-required-children, Abweichung 4 of plan ③): the
     // popover is a panel, the rows' holder is the listbox.
     expect(element).toContain(
-      '<div part="listbox" id="panel" popover="manual"><input part="filter" type="search" aria-controls="listbox" autocomplete="off" hidden><div part="items" role="listbox" id="listbox" aria-multiselectable="true"></div><fm-butono part="clear" emphasis="low" size="small"></fm-butono></div>',
+      // Spec 036 Teil 5 ②b-3 (A-plurelektilo-1): „alle wählen“ between the filter and the list.
+      '<div part="listbox" id="panel" popover="manual"><input part="filter" type="search" aria-controls="listbox" autocomplete="off" hidden><div part="select-all" role="checkbox" aria-checked="false" tabindex="0" hidden><fm-ikono name="check" aria-hidden="true"></fm-ikono><span id="select-all-text"></span></div><div part="items" role="listbox" id="listbox" aria-multiselectable="true"></div><fm-butono part="clear" emphasis="low" size="small"></fm-butono></div>',
     );
     expect(element).toContain('<fm-ikono part="check" name="check" aria-hidden="true">');
     for (const key of ["options-count", "clear-name", "values-invalid"])

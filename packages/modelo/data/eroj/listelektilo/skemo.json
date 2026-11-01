@@ -353,6 +353,25 @@
         "typography": {
           "fixed": "typography.caption"
         }
+      },
+      "group-heading": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        },
+        "inline-padding": {
+          "fixed": "spacing.medium"
+        }
+      },
+      "divider": {
+        "color": {
+          "fixed": "color.border.subtle"
+        },
+        "width": {
+          "fixed": "border.width.default"
+        }
       }
     },
     "trailing": [
