@@ -40,7 +40,7 @@ describe("②b-3 A-markobutono-4, A-sxaltilo-4: the slot help", () => {
   it.each(HELPED)(
     "%s: the Uzo takes one text in help; slot and part are named in de and en",
     (ero) => {
-      expect(entryOf(ero).uzo.slots?.help).toEqual({ accepts: ["text"], max: 1, nesting: 0 });
+      expect(entryOf(ero).uzo?.slots.help).toEqual({ accepts: ["text"], max: 1, nesting: 0 });
       for (const path of ["slots/help", "parts/help"]) {
         expect(tradukoOf(ero, path, "de")).toBe("Hilfe");
         expect(tradukoOf(ero, path, "en")).toBe("Help");
@@ -151,7 +151,7 @@ describe("②b-3 A-elektilo-4, A-listelektilo-4, A-kompletigilo-4, A-plurelektil
   it.each(Object.keys(GROUPED))(
     "%s: the Uzo says that an option names its group (attribute group)",
     (ero) => {
-      expect(entryOf(ero).uzo.purpose).toContain("group");
+      expect(entryOf(ero).uzo?.purpose).toContain("group");
     },
   );
 
@@ -217,7 +217,7 @@ describe("②b-3 A-menuo-4: icon, group-heading", () => {
   it("menuo: icon and group-heading are named; the Uzo names the attributes icon and group", () => {
     expect(tradukoOf("menuo", "parts/icon", "de")).toBe("Symbol");
     expect(tradukoOf("menuo", "parts/group-heading", "en")).toBe("Group heading");
-    const purpose = entryOf("menuo").uzo.purpose;
+    const purpose = entryOf("menuo").uzo?.purpose;
     expect(purpose).toContain("attribute icon");
     expect(purpose).toContain("attribute group");
     expect(tokensOf(briefOf(entryOf("menuo")))).toBeLessThan(750);
@@ -239,13 +239,13 @@ describe("②b-3 A-navigado-1, A-navigado-4: section-heading, icon-start", () =>
     expect(skemo.slots.at(-1)).toEqual({ name: "icon-start", decorative: true });
     expect(skemo.parts.icon).toEqual({ size: { fixed: "size.icon.medium" } });
     expect(skemo.parts.item?.gap).toEqual({ fixed: "spacing.xsmall" });
-    expect(uzo.slots?.["icon-start"]).toEqual({ accepts: ["icon", "ikono"], max: 1, nesting: 0 });
+    expect(uzo?.slots["icon-start"]).toEqual({ accepts: ["icon", "ikono"], max: 1, nesting: 0 });
   });
 
   it("navigado: named in de and en; the Uzo names the headings of sections; brief under 750", () => {
     expect(tradukoOf("navigado", "parts/section-heading", "de")).toBe("Abschnittsüberschrift");
     expect(tradukoOf("navigado", "slots/icon-start", "en")).toBe("Icon at the start");
-    expect(entryOf("navigado").uzo.purpose).toContain("heading");
+    expect(entryOf("navigado").uzo?.purpose).toContain("heading");
     expect(tokensOf(briefOf(entryOf("navigado")))).toBeLessThan(750);
   });
 });
