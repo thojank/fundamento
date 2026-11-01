@@ -282,8 +282,9 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       ["choose-many", {}, "elekto-options-few"],
     ]);
     expect(skemo?.goals?.[0]?.keywords).toEqual({
-      en: ["list", "select", "country", "language", "many"],
-      de: ["liste", "auswählen", "land", "sprache", "vielen"],
+      // Spec 036 Teil 5 ②b-4: the words of the decided boundary grouped-options.
+      en: ["list", "select", "country", "language", "many", "optgroup", "grouped"],
+      de: ["liste", "auswählen", "land", "sprache", "vielen", "gruppiert", "optionsgruppen"],
     });
     const words = (skemo?.goals ?? []).flatMap((goal) => Object.values(goal.keywords).flat());
     for (const word of ["from", "of", "aus", "von", "one", "eine", "open", "öffnen", "dropdown"]) {
@@ -323,15 +324,15 @@ describe("the Uzo of the elektilo (section 4, G5)", () => {
     expect(uzo?.instead[2]?.kialo).toMatch(/plurelektilo/);
   });
 
-  it("stops at a drawn popup (the list is the platform's), asks a person about grouped options, never without a visible label", () => {
+  it("stops at a drawn popup (the list is the platform's), never without a visible label; grouped options are decided", () => {
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
       // Spec 025 ③: a drawn list is the listelektilo's.
       ["custom-popup", "use-instead"],
-      ["grouped-options", "ask-human"],
+      // Spec 036 Teil 5 ②b-4: grouped-options is decided (②a-3; the groups came with ②b-3).
       ["no-visible-label", "not-supported"],
     ]);
     expect(uzo?.boundary[0]?.kialo).toMatch(/listelektilo/);
-    expect(uzo?.boundary[2]?.via).toEqual({ regulo: "field-label-visible" });
+    expect(uzo?.boundary[1]?.via).toEqual({ regulo: "field-label-visible" });
     for (const entry of [...(uzo?.boundary ?? []), ...(uzo?.instead ?? [])]) {
       expect(entry.kialo).toMatch(/\bbecause\b/);
     }
