@@ -449,8 +449,10 @@ test("fm-insigno, fm-avizo and fm-plenstato are upgraded in their sections, axe-
   // Eight, and the danger notice of Nachlese 7 ② B-5 (a list and code in its details); sixteen
   // since Spec 036 Teil 5 ②b-2 (A-avizo-1: intent × frame).
   await expect(notices).toHaveCount(17);
-  await expect(page.locator("#fm-vitrino-avizo").getByRole("alert")).toHaveCount(5);
-  await expect(page.locator("#fm-vitrino-avizo").getByRole("status")).toHaveCount(12);
+  // Spec 036 Teil 5 ②b-4 (A-avizo-5): the warnings are alerts too – the four warning notices
+  // join the five danger notices.
+  await expect(page.locator("#fm-vitrino-avizo").getByRole("alert")).toHaveCount(9);
+  await expect(page.locator("#fm-vitrino-avizo").getByRole("status")).toHaveCount(8);
   await expect(
     page.locator("#fm-vitrino-avizo").getByRole("button", { name: "Schließen" }),
   ).toHaveCount(8);
