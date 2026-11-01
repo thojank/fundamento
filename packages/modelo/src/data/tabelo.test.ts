@@ -62,19 +62,21 @@ describe("tabelo in the repo Modelo (section ④, G1, G2, E10)", () => {
 
   it("names its parts: caption, head, cell keyed by density, row-header, border, region, sort keyed by state, sort-indicator, focus-ring", () => {
     if (skemo === undefined) throw new Error("missing");
-    expect(Object.keys(skemo.parts).sort()).toEqual([
-      "border",
-      "caption",
-      "cell",
-      "focus-ring",
-      "head",
-      "region",
-      "row-header",
-      "sort",
-      "sort-indicator",
-      // Spec 036 Teil 5 ②b-3 (A-tabelo-4): the foot.
-      "foot",
-    ].sort());
+    expect(Object.keys(skemo.parts).sort()).toEqual(
+      [
+        "border",
+        "caption",
+        "cell",
+        "focus-ring",
+        "head",
+        "region",
+        "row-header",
+        "sort",
+        "sort-indicator",
+        // Spec 036 Teil 5 ②b-3 (A-tabelo-4): the foot.
+        "foot",
+      ].sort(),
+    );
     // The caption is text of the Ero too (axe measured black on the dark page without it).
     expect(skemo.parts.caption?.color).toEqual({ fixed: "color.text.default" });
     expect(skemo.parts.head?.fill).toEqual({ fixed: "color.background.sunken" });
