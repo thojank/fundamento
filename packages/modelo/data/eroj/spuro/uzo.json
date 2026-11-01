@@ -39,19 +39,19 @@
     ],
     "boundary": [
       {
-        "case": "collapsed-middle",
-        "action": "ask-human",
+        "case": "sibling-menu",
+        "action": "not-supported",
         "keywords": {
           "en": [
-            "truncated",
-            "collapsedpath"
+            "siblingpages",
+            "levelmenu"
           ],
           "de": [
-            "gekürzt",
-            "verkürzt"
+            "geschwisterseiten",
+            "ebenenmenü"
           ]
         },
-        "kialo": "A long path shortened in the middle needs an overlay that opens the hidden levels, because what is cut away must stay reachable; a person decides whether the path wraps instead."
+        "kialo": "A level that opens a list of its sibling pages is not supported, because the item would move up and choose sideways at once; the trail leads up only, the pages beside one level belong to the navigado."
       }
     ],
     "composes": {
@@ -69,6 +69,10 @@
         {
           "ero": "ikono",
           "kialo": "The separator between two items is the ikono chevron-right, decorative, because it points down the path and mirrors in right-to-left writing."
+        },
+        {
+          "ero": "menuo",
+          "kialo": "The middle of a long trail collapses into a menu (max-items), because the levels cut away must stay reachable; its entries are links, each moves up to its level."
         }
       ],
       "never": [],
