@@ -74,3 +74,53 @@ describe("②b-3 A-elekto-4: option-description", () => {
     expect(tokensOf(briefOf(entryOf("elekto")))).toBeLessThan(750);
   });
 });
+
+/** A-glitilo-4: marks without words (part tick) at every step, with the Boolean ticks. */
+describe("②b-3 A-glitilo-4: tick", () => {
+  it("glitilo: ticks a boolean, the last prop, false by default", () => {
+    const { skemo } = entryOf("glitilo");
+    expect(skemo.props.at(-1)).toMatchObject({ name: "ticks", kind: "boolean", default: false });
+  });
+
+  it("glitilo: the part tick, the last part – a line across the track in the strong border", () => {
+    const { skemo } = entryOf("glitilo");
+    expect(Object.keys(skemo.parts).at(-1)).toBe("tick");
+    expect(skemo.parts.tick).toEqual({
+      color: { fixed: "color.border.strong" },
+      width: { fixed: "border.width.strong" },
+      height: { fixed: "spacing.small" },
+    });
+  });
+
+  it("glitilo: prop and part are named in de and en; the brief flags ticks, under 750", () => {
+    expect(tradukoOf("glitilo", "props/ticks", "de")).toBe("Markierungen");
+    expect(tradukoOf("glitilo", "props/ticks", "en")).toBe("Ticks");
+    expect(tradukoOf("glitilo", "parts/tick", "de")).toBe("Markierung");
+    expect(tradukoOf("glitilo", "parts/tick", "en")).toBe("Tick");
+    const brief = briefOf(entryOf("glitilo"));
+    expect(brief.flags).toContain("ticks");
+    expect(tokensOf(brief)).toBeLessThan(750);
+  });
+});
+
+/** A-alsxutilo-4: the upload icon in the dropzone, the ikono upload of the Ikonaro (Phosphor). */
+describe("②b-3 A-alsxutilo-4: the upload icon", () => {
+  it("alsxutilo: the part icon, the last part, as large as a large icon and muted", () => {
+    const { skemo } = entryOf("alsxutilo");
+    expect(Object.keys(skemo.parts).at(-1)).toBe("icon");
+    expect(skemo.parts.icon).toEqual({
+      size: { fixed: "size.icon.large" },
+      color: { fixed: "color.text.muted" },
+    });
+  });
+
+  it("alsxutilo: the icon is the Ikonaro's upload; the part is named in de and en", () => {
+    expect((modelo.ikonaro ?? []).map((ikono) => ikono.name)).toContain("upload");
+    expect(tradukoOf("alsxutilo", "parts/icon", "de")).toBe("Symbol");
+    expect(tradukoOf("alsxutilo", "parts/icon", "en")).toBe("Icon");
+  });
+
+  it("alsxutilo: the brief stays under 750", () => {
+    expect(tokensOf(briefOf(entryOf("alsxutilo")))).toBeLessThan(750);
+  });
+});

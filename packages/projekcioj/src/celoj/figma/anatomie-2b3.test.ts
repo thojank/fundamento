@@ -97,3 +97,27 @@ describe("②b-3 A-elekto-4 in Figma: the description of an option stands with i
     expectNotDrawn("elekto:option-description");
   });
 });
+
+describe("②b-3 A-glitilo-4 in Figma: ticks a property, the tick stands with it", () => {
+  it("glitilo: ticks is a BOOLEAN of the set; the part tick has no node and names its Jugxo", () => {
+    expect(setOf("glitilo").properties.ticks).toBe("BOOLEAN");
+    expectNotDrawn("glitilo:tick");
+  });
+});
+
+describe("②b-3 A-alsxutilo-4 in Figma: the upload icon in the dropzone", () => {
+  it("alsxutilo: a variant with a dropzone draws the icon first in the zone; without, it hides it", async () => {
+    const double = await drawn();
+    const set = pageNodes(double).find((candidate) => candidate.name === "alsxutilo");
+    const variants = set?.children ?? [];
+    const zoned = variants.find((variant) => variant.name.includes("dropzone=true"));
+    const plain = variants.find((variant) => variant.name.includes("dropzone=false"));
+    if (zoned === undefined || plain === undefined) throw new Error("alsxutilo variants missing");
+    const zone = find(zoned, "dropzone");
+    expect(zone?.children[0]?.name).toBe("icon");
+    expect(geometry(zone?.children[0] as DoubleNode).visible).toBe(true);
+    const plainZone = find(plain, "dropzone");
+    expect(plainZone?.children[0]?.name).toBe("icon");
+    expect(geometry(plainZone?.children[0] as DoubleNode).visible).toBe(false);
+  });
+});
