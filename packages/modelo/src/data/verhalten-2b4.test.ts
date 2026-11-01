@@ -19,6 +19,7 @@ const entryOf = (ero: string) => {
 const tokensOf = (value: unknown) => Math.ceil(Buffer.byteLength(JSON.stringify(value)) / 3);
 const tradukoOf = (ero: string, path: string, lingvo: "de" | "en") =>
   modelo.tradukoj?.[lingvo]?.[`${entryOf(ero).skemo.id}/${path}`];
+const casesOf = (ero: string) => entryOf(ero).uzo?.boundary.map((boundary) => boundary.case) ?? [];
 const suggest = (goal: string, lingvo?: string) => {
   const result = suggestEro(modelo, lingvo === undefined ? { goal } : { goal, lingvo });
   if (!result.ok) throw new Error(`suggest_ero ${goal} failed`);
@@ -70,5 +71,32 @@ describe("②b-4 A-elektilo-5, A-listelektilo-5, A-menuo-5: jumping by typing", 
 
   it.each(["elektilo", "listelektilo", "menuo"])("%s: the brief stays under 750", (ero) => {
     expect(tokensOf(briefOf(entryOf(ero)))).toBeLessThan(750);
+  });
+});
+
+/** A-langetaro-4: the bar scrolls, the selected tab stays visible; the boundary many-tabs is decided. */
+describe("②b-4 A-langetaro-4: overflow", () => {
+  it("langetaro: many-tabs left the Uzo (②a-3); the other boundaries stay", () => {
+    expect(casesOf("langetaro")).toEqual(["closable-tabs", "manual-activation", "vertical-tabs"]);
+    expect(
+      modelo.tradukoj?.de?.[`${entryOf("langetaro").uzo?.id}/boundary/many-tabs/kialo`],
+    ).toBeUndefined();
+  });
+
+  it("langetaro: the words of many-tabs lead to the tabs", () => {
+    const goal = entryOf("langetaro").skemo.goals?.[0];
+    expect(goal?.keywords.en).toEqual(expect.arrayContaining(["scrollable", "crowded"]));
+    expect(goal?.keywords.de).toEqual(expect.arrayContaining(["überlauf", "überlaufen"]));
+    expect(suggest("scrollable tabs", "en").suggestion).toEqual({ ero: "langetaro", props: {} });
+    expect(suggest("Reiter mit Überlauf", "de").suggestion).toEqual({
+      ero: "langetaro",
+      props: {},
+    });
+  });
+
+  it("langetaro: selected says that the selected tab stays in view; the brief under 750", () => {
+    const selected = entryOf("langetaro").skemo.props.find((prop) => prop.name === "selected");
+    expect(selected?.description).toContain("A-langetaro-4");
+    expect(tokensOf(briefOf(entryOf("langetaro")))).toBeLessThan(750);
   });
 });

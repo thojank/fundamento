@@ -303,3 +303,74 @@ test.describe("②b-4 A-elektilo-5, A-listelektilo-5, A-menuo-5: jumping by typi
     expect(await heard(page)).toEqual([]);
   });
 });
+
+test.describe("②b-4 A-langetaro-4: overflow", () => {
+  const TABS = [
+    "Inhalt",
+    "Versionen",
+    "Regeln",
+    "Prüfung",
+    "Freigaben",
+    "Verlauf",
+    "Anhänge",
+    "Notizen",
+  ];
+  const tabs = (width: string, selected: string) =>
+    `<div id="box" style="inline-size: ${width}"><fm-langetaro id="t" label="Akte" selected="${selected}">${TABS.map((words) => `<data value="${words.toLowerCase()}">${words}</data>`).join("")}<div slot="panel">Der Inhalt</div></fm-langetaro></div>`;
+
+  /** Whether the tab is wholly inside the bar's visible box; and whether the bar scrolls. */
+  const inView = (page: Page, words: string) =>
+    page.locator("#t").evaluate((element, name) => {
+      const bar = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+      const tab = [...bar.querySelectorAll('[part="tab"]')].find(
+        (row) => (row.querySelector("slot")?.assignedNodes()[0]?.textContent ?? "").trim() === name,
+      );
+      const outer = bar.getBoundingClientRect();
+      const inner = tab?.getBoundingClientRect();
+      return {
+        scrolls: bar.scrollWidth > bar.clientWidth,
+        visible:
+          inner !== undefined && inner.left >= outer.left - 0.5 && inner.right <= outer.right + 0.5,
+      };
+    }, words);
+
+  test("the bar scrolls; a tab selected at the end stands in view from the start", async ({
+    page,
+  }) => {
+    await serve(page, out, tabs("14rem", "notizen"));
+    await expect.poll(() => inView(page, "Notizen")).toEqual({ scrolls: true, visible: true });
+    await expect(page.getByRole("tab", { name: "Notizen" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+  });
+
+  test("a tab selected later moves into view", async ({ page }) => {
+    await serve(page, out, tabs("14rem", "inhalt"));
+    await expect.poll(() => inView(page, "Inhalt")).toEqual({ scrolls: true, visible: true });
+    await page.locator("#t").evaluate((element) => element.setAttribute("selected", "anhänge"));
+    await expect.poll(() => inView(page, "Anhänge")).toEqual({ scrolls: true, visible: true });
+    await page.locator("#t").evaluate((element) => element.setAttribute("selected", "inhalt"));
+    await expect.poll(() => inView(page, "Inhalt")).toEqual({ scrolls: true, visible: true });
+  });
+
+  test("when the bar becomes narrower, the selected tab stays in view", async ({ page }) => {
+    await serve(page, out, tabs("60rem", "notizen"));
+    await expect.poll(() => inView(page, "Notizen")).toEqual({ scrolls: false, visible: true });
+    await page.locator("#box").evaluate((element) => {
+      (element as HTMLElement).style.inlineSize = "12rem";
+    });
+    await expect.poll(() => inView(page, "Notizen")).toEqual({ scrolls: true, visible: true });
+  });
+
+  test("the keys move through the tabs and the tab with the focus stands in view", async ({
+    page,
+  }) => {
+    await serve(page, out, tabs("14rem", "inhalt"));
+    await page.getByRole("tab", { name: "Inhalt" }).focus();
+    await page.keyboard.press("End");
+    await expect.poll(() => inView(page, "Notizen")).toEqual({ scrolls: true, visible: true });
+    await page.keyboard.press("Home");
+    await expect.poll(() => inView(page, "Inhalt")).toEqual({ scrolls: true, visible: true });
+  });
+});
