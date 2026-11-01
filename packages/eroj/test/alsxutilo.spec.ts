@@ -90,6 +90,8 @@ test.describe("fm-alsxutilo behaviour", () => {
       "label",
       "required-mark",
       "dropzone",
+      // Spec 036 Teil 5 ②b-3 (A-alsxutilo-4): the upload icon, first in the zone.
+      "icon",
       "picker",
       "choose",
       "control",

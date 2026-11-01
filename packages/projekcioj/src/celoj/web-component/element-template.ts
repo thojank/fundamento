@@ -801,7 +801,7 @@ function separatorMarkup(): string {
  * the list of the chosen files follows, and a live region says how many there are.
  */
 function uploadMarkup(): string {
-  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><div part="dropzone"><span part="picker"><fm-butono part="choose" emphasis="medium" inert><fm-ikono slot="icon-start" name="upload"></fm-ikono><span id="choose-text"></span></fm-butono><input part="control" id="control" type="file"></span><span part="drop-hint" id="drop-hint" hidden></span><span part="end">${SPINNER}</span></div><span part="help" id="help" hidden><slot name="help"></slot></span><span part="error" id="error" hidden aria-live="polite"><slot name="error"></slot><span id="file-error"></span></span><span part="message" id="message" hidden aria-live="polite"><slot name="message"></slot></span><ul part="file-list" hidden></ul><span part="count" role="status" aria-live="polite" class="fm-hidden"></span><span id="fm-texts" hidden></span></div>`;
+  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><div part="dropzone"><fm-ikono part="icon" name="upload" aria-hidden="true" hidden></fm-ikono><span part="picker"><fm-butono part="choose" emphasis="medium" inert><fm-ikono slot="icon-start" name="upload"></fm-ikono><span id="choose-text"></span></fm-butono><input part="control" id="control" type="file"></span><span part="drop-hint" id="drop-hint" hidden></span><span part="end">${SPINNER}</span></div><span part="help" id="help" hidden><slot name="help"></slot></span><span part="error" id="error" hidden aria-live="polite"><slot name="error"></slot><span id="file-error"></span></span><span part="message" id="message" hidden aria-live="polite"><slot name="message"></slot></span><ul part="file-list" hidden></ul><span part="count" role="status" aria-live="polite" class="fm-hidden"></span><span id="fm-texts" hidden></span></div>`;
 }
 
 /** One chosen file (Spec 015 ②): its name, its size and the butono that removes it. */
@@ -3996,6 +3996,9 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
         hint.textContent = word("drop-hint-name");
         hint.hidden = this.propValue("dropzone") !== true;
       }
+      // Spec 036 Teil 5 ②b-3 (A-alsxutilo-4): the upload icon first in a dropzone, unheard.
+      const zoneIcon = shadow?.querySelector('[part="dropzone"] > [part="icon"]');
+      if (zoneIcon instanceof HTMLElement) zoneIcon.hidden = this.propValue("dropzone") !== true;
       const list = shadow?.querySelector('[part="file-list"]');
       if (list instanceof HTMLElement) {
         while (list.children.length > this.#files.length) list.lastElementChild?.remove();
@@ -5623,7 +5626,32 @@ ${
       const start = ranged ? share(values[0] ?? min) : 0;
       const end = share(ranged ? (values[1] ?? max) : (values[0] ?? min));
       control.style.setProperty("--fm-fill-start", String(start) + "%");
-      control.style.setProperty("--fm-fill-size", String(Math.max(0, end - start)) + "%");
+      control.style.setProperty("--fm-fill-size", String(Math.max(0, end - start)) + "%");${
+        parts.includes("tick")
+          ? `
+      // Spec 036 Teil 5 ②b-3 (A-glitilo-4): with ticks a mark at every step from min to max, in
+      // the track before fill and thumbs; seen, not heard (the thumbs say the value).
+      {
+        const step = this.#sliderBounds()[2];
+        const count =
+          this.propValue("ticks") === true && step > 0 && max > min
+            ? Math.floor((max - min) / step + 1e-9) + 1
+            : 0;
+        const ticks = [...control.querySelectorAll('[part="tick"]')] as HTMLElement[];
+        while (ticks.length > count) ticks.pop()?.remove();
+        while (ticks.length < count) {
+          const tick = document.createElement("span");
+          tick.setAttribute("part", "tick");
+          tick.setAttribute("aria-hidden", "true");
+          control.insertBefore(tick, control.querySelector('[part="fill"]'));
+          ticks.push(tick);
+        }
+        ticks.forEach((tick, index) => {
+          tick.style.setProperty("--fm-tick-at", String(share(min + index * step)) + "%");
+        });
+      }`
+          : ""
+      }
       // Spec 036 Teil 5 ②b-2 (A-glitilo-1): readout field is what field said; readout text shows
       // the value (or the range) beside the track, not heard again (the thumbs say it).
       const readout = String(this.propValue("readout") ?? "none");

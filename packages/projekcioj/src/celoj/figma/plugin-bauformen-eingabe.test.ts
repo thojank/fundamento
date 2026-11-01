@@ -791,7 +791,12 @@ describe("the plugin draws the alsxutilo (Spec 015 ②)", () => {
         "error",
       ]);
       const zone = descendant(variant, "dropzone");
-      expect(zone?.children.map((child) => child.name)).toEqual(["focus-ring", "drop-hint"]);
+      // Spec 036 Teil 5 ②b-3 (A-alsxutilo-4): the upload icon first in the zone.
+      expect(zone?.children.map((child) => child.name)).toEqual([
+        "icon",
+        "focus-ring",
+        "drop-hint",
+      ]);
       expect(descendant(variant, "choose-label")?.properties.characters).toBe("Datei auswählen");
       expect(descendant(variant, "help")?.properties.characters).toBe(
         "PDF oder PNG, höchstens 5 MB",

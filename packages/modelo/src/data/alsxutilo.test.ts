@@ -109,6 +109,8 @@ describe("alsxutilo in the repo Modelo (section ②, G1, G2)", () => {
       "motion",
       "spinner",
       "message",
+      // Spec 036 Teil 5 ②b-3 (A-alsxutilo-4): the upload icon in the dropzone.
+      "icon",
     ]);
     const kampo = eroNamed("kampo")?.skemo;
     for (const part of ["required-mark", "help", "error", "focus-ring", "motion"]) {

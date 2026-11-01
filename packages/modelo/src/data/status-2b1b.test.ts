@@ -51,6 +51,8 @@ const AFTER_2B1B: ReadonlySet<string> = new Set([
   "max-span",
   "size",
   "select-all",
+  // Spec 036 Teil 5 ②b-3 (A-glitilo-4).
+  "ticks",
 ]);
 
 const tokensOf = (value: unknown) => Math.ceil(Buffer.byteLength(JSON.stringify(value)) / 3);

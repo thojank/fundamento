@@ -203,6 +203,13 @@ const REST_2B3 = (() => {
         "^ero\\.(markobutono|sxaltilo)\\.help\\.(color|typography)$|^ero\\.elekto\\.option\\.description\\.(color|typography)$",
       added: 4 + 2,
     },
+    // A-glitilo-4 (the tick: its colour, width and height, 3), A-alsxutilo-4 (the upload icon: its
+    // size and colour, 2).
+    {
+      pattern:
+        "^ero\\.glitilo\\.tick\\.(color|width|height)$|^ero\\.alsxutilo\\.icon\\.(size|color)$",
+      added: 3 + 2,
+    },
   ];
   const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
   return {

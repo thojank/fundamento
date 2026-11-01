@@ -4596,9 +4596,9 @@
         "celo": "figma"
       },
       "decision": "approved",
-      "kialo": "Drei Teile stehen nur bei einem Wert einer Eigenschaft, die in Figma keine Achse der Varianten ist: die Zusammenfassung der Seitenleiste (Teil summary bei summary count oder compact), der Knopf der Attributliste für die übrigen Einträge (Teil more bei max-entries) und der Wert des Schiebereglers als Text (Teil readout bei readout text). Das Set zeigt den Fall ohne sie – die Seiten, alle Einträge, den Regler ohne Text (das Feld über seine Achse field) –, wie das Web ohne diese Props; die Teile haben im Set darum keinen Knoten (FIGMA_NOT_DRAWN). Wird eine der Eigenschaften eines Tages eine Achse der Varianten, entfällt ihr Eintrag.",
+      "kialo": "Teile stehen nur bei einem Wert einer Eigenschaft, die in Figma keine Achse der Varianten ist: die Zusammenfassung der Seitenleiste (Teil summary bei summary count oder compact), der Knopf der Attributliste für die übrigen Einträge (Teil more bei max-entries), der Wert des Schiebereglers als Text (Teil readout bei readout text) und seit ②b-3 die Markierungen des Schiebereglers (Teil tick bei ticks). Das Set zeigt den Fall ohne sie – die Seiten, alle Einträge, den Regler ohne Text und ohne Markierungen (das Feld über seine Achse field) –, wie das Web ohne diese Props; die Teile haben im Set darum keinen Knoten (FIGMA_NOT_DRAWN). Wird eine der Eigenschaften eines Tages eine Achse der Varianten, entfällt ihr Eintrag.",
       "date": "2026-10-31",
-      "context": "Spec 036 Teil 5 ②b-2 (Spec 029 abgleich.json A-pagxigilo-1, A-atributlisto-1/3, A-glitilo-1): summary pages, count, compact; max-entries mit expanded; readout none, text, field; check:parity meldet die Werte der Teile summary, more und readout als freigegeben (parity-part-not-drawn), keine Differenz. Von P0 angelegt, zur Bestätigung durch den Maintainer."
+      "context": "Spec 036 Teil 5 ②b-2 (Spec 029 abgleich.json A-pagxigilo-1, A-atributlisto-1/3, A-glitilo-1): summary pages, count, compact; max-entries mit expanded; readout none, text, field; check:parity meldet die Werte der Teile summary, more und readout als freigegeben (parity-part-not-drawn), keine Differenz. Von P0 angelegt, zur Bestätigung durch den Maintainer. Spec 036 Teil 5 ②b-3 (A-glitilo-4): ticks mit dem Teil tick."
     },
     {
       "id": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",

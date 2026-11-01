@@ -132,6 +132,12 @@
         "name": "min-distance",
         "kind": "number",
         "description": "Spec 029 ②a (A-glitilo-1): with range, the least distance between the two thumbs, in the unit of the values; a thumb stops there."
+      },
+      {
+        "name": "ticks",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②a (A-glitilo-4): a mark without words at every step between min and max, for a scale of few steps (0 to 10); the marks are seen, not heard – the value is."
       }
     ],
     "states": [
@@ -316,6 +322,17 @@
         },
         "typography": {
           "fixed": "typography.caption"
+        }
+      },
+      "tick": {
+        "color": {
+          "fixed": "color.border.strong"
+        },
+        "width": {
+          "fixed": "border.width.strong"
+        },
+        "height": {
+          "fixed": "spacing.small"
         }
       }
     },

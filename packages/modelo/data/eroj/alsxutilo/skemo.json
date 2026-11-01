@@ -280,6 +280,14 @@
         "typography": {
           "fixed": "typography.caption"
         }
+      },
+      "icon": {
+        "size": {
+          "fixed": "size.icon.large"
+        },
+        "color": {
+          "fixed": "color.text.muted"
+        }
       }
     },
     "trailing": [

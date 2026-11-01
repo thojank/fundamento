@@ -3007,6 +3007,16 @@
           "$type": "typography",
           "$value": "{typography.caption}"
         }
+      },
+      "icon": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.large}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        }
       }
     },
     "apartigilo": {
@@ -5664,6 +5674,20 @@
         "typography": {
           "$type": "typography",
           "$value": "{typography.caption}"
+        }
+      },
+      "tick": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.border.strong}"
+        },
+        "width": {
+          "$type": "dimension",
+          "$value": "{border.width.strong}"
+        },
+        "height": {
+          "$type": "dimension",
+          "$value": "{spacing.small}"
         }
       }
     },
