@@ -143,7 +143,16 @@ test.describe("fm-elektilo behaviour", () => {
       out,
       `<fm-elektilo id="a" value="de">Land${OPTIONS}</fm-elektilo><fm-elektilo id="b" disabled>Sprache${OPTIONS}</fm-elektilo><fm-elektilo id="c">Jahr${OPTIONS}</fm-elektilo>`,
     );
-    expect(skemo.a11y.keys).toEqual(["ArrowUp", "ArrowDown", "Enter", "Escape"]);
+    // Spec 036 ②b-4 (A-elektilo-5): Home, End and typed words are the platform's too.
+    expect(skemo.a11y.keys).toEqual([
+      "ArrowUp",
+      "ArrowDown",
+      "Home",
+      "End",
+      "Enter",
+      "Escape",
+      "Character",
+    ]);
     await page.keyboard.press(TAB(browserName));
     await expect(page.locator("#a")).toBeFocused();
     // The list is the platform's (E3), so are its keys: whether ArrowDown moves the choice or opens

@@ -1607,6 +1607,8 @@ const menuStructure = (fallback: string, justified = false): string =>
     ':where([part="item"]) { display: flex; align-items: center; box-sizing: border-box; margin: 0; border-style: none; appearance: none; cursor: pointer; white-space: nowrap; text-align: start; transition-property: background-color, color; }',
     ':where([part="item"]:focus:not(:focus-visible)) { outline-width: 0; }',
     ':where([part="item"][aria-disabled="true"]) { cursor: not-allowed; }',
+    // Spec 036 Teil 5 ②b-4 (A-menuo-5): an entry with a target is a link row; it looks as the others.
+    ':where(a[part="item"]) { text-decoration: none; }',
     ':where([part="separator"]) { display: block; }',
     // Spec 036 Teil 5 ②b-3 (A-menuo-4): the icon of an entry keeps its size before the words; a
     // group of entries is a column under its heading.

@@ -4,7 +4,7 @@
     "id": "uzo_01M564NXJNCV7VW68BBE42BEA2",
     "ero": "ero_01M564NWTE5K276E3M9RA00YKV",
     "skemo": "ske_01M564NX6FGBH4NHKDSHCCM5W5",
-    "purpose": "Offers actions for one object behind a single button: edit, duplicate, delete; an entry may carry an icon (attribute icon) and name its group (attribute group).",
+    "purpose": "Offers actions for one object behind a single button: edit, duplicate, delete; an entry may carry an icon (attribute icon) and name its group (attribute group); an entry with a target (attribute to) is a link to it, because it moves the person (Regulo link-navigates-button-acts).",
     "instead": [
       {
         "goal": "navigate",
