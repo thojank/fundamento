@@ -659,3 +659,43 @@ test.describe("②b-3 A-teksto-4: the tooltip on truncation", () => {
     }
   });
 });
+
+test.describe("②b-3 A-spuro-4, A-navigado-4: an icon given to the host (slot icon-start)", () => {
+  test("a spuro puts the icon at the start of its first item, before the link", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<fm-spuro label="Pfad"><fm-ikono slot="icon-start" name="info"></fm-ikono><a href="#start">Start</a><a href="#eroj">Eroj</a><span>Knopf</span></fm-spuro>',
+    );
+    const icon = page.locator("fm-spuro > fm-ikono");
+    const place = await icon.evaluate(
+      (element) => element.assignedSlot?.parentElement?.getAttribute("part") ?? "",
+    );
+    expect(place).toBe("entry");
+    const iconBox = await icon.boundingBox();
+    const linkBox = await page.locator("fm-spuro > a").first().boundingBox();
+    if (iconBox === null || linkBox === null) throw new Error("no boxes");
+    expect(iconBox.width).toBeGreaterThan(0);
+    expect(iconBox.x + iconBox.width).toBeLessThanOrEqual(linkBox.x);
+    expect(iconBox.y + iconBox.height).toBeGreaterThan(linkBox.y);
+    expect(iconBox.y).toBeLessThan(linkBox.y + linkBox.height);
+    await expect(page.locator("fm-spuro").getByRole("listitem")).toHaveCount(3);
+  });
+
+  test("a navigado shows the icon before its items", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      '<fm-navigado label="Bereiche"><fm-ikono slot="icon-start" name="info"></fm-ikono><a href="#a">Grundlagen</a><a href="#b">Eroj</a></fm-navigado>',
+    );
+    const icon = page.locator("fm-navigado > fm-ikono");
+    expect(await icon.evaluate((element) => element.assignedSlot !== null)).toBe(true);
+    const iconBox = await icon.boundingBox();
+    const linkBox = await page.locator("fm-navigado > a").first().boundingBox();
+    if (iconBox === null || linkBox === null) throw new Error("no boxes");
+    expect(iconBox.width).toBeGreaterThan(0);
+    expect(iconBox.x + iconBox.width).toBeLessThanOrEqual(linkBox.x);
+  });
+});
