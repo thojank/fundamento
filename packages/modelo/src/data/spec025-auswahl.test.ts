@@ -642,7 +642,8 @@ describe("the Ikonaro of Spec 025 ③ (G1: edit) and the dialogs of the spec (Gv
       meaning: { de: "Stift: bearbeiten", en: "Pencil: edit" },
     });
     expect(edit?.mirror).not.toBe(true);
-    expect(modelo.ikonaro).toHaveLength(24);
+    // Spec 036 Teil 5 ②b-4 (A-ligilo-6): 25 with download.
+    expect(modelo.ikonaro).toHaveLength(25);
     expect(eroNamed("ikono")?.skemo.props.find((prop) => prop.name === "name")?.values).toContain(
       "edit",
     );

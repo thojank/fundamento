@@ -55,7 +55,8 @@
       "edit": "pencil-simple",
       "first": "caret-line-left",
       "last": "caret-line-right",
-      "person": "user"
+      "person": "user",
+      "download": "download-simple"
     }
   },
   "agordilo": {
@@ -63,7 +64,7 @@
     "structure": {
       "vortaro": "0.2.0",
       "reference": "komuna",
-      "sha256": "64cca1823a9685037d60c7b6daf67e1db0bca5cf9c0512120b6fc8831a85dd34"
+      "sha256": "7df31a898dd671715daab7a1bf9836947fca517d3b5866cb321bdc6de140c776"
     },
     "agordo": {
       "name": "dukolora",

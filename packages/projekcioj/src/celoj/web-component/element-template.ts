@@ -6725,6 +6725,15 @@ ${
       }
       if (this.propValue("external") === true) control.setAttribute("rel", "external noopener noreferrer");
       else control.removeAttribute("rel");
+      // Spec 036 Teil 5 ②b-4 (A-ligilo-6): download hands the target over as a file, the platform's
+      // download; the mark of the last decorative slot is then the Ikonaro's download.
+      if (HAS_PROP.has("download")) {
+        const download = this.propValue("download") === true;
+        control.toggleAttribute("download", download);
+        const mark = this.shadowRoot?.querySelector("slot[name] > fm-ikono");
+        const sign = download ? "download" : "external";
+        if (mark instanceof HTMLElement && mark.getAttribute("name") !== sign) mark.setAttribute("name", sign);
+      }
     }
     // A field (Spec 009, D-08): the props of the Skemo on the native input, \`kind\` as its type,
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);

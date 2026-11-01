@@ -40,7 +40,7 @@ describe("Spec 029 ①: the structure of komuna 0.2 for the Agordilo", () => {
     // Spec 036 Teil 5 ②b-2: elekto, markobutono and sxaltilo in two sizes (large a deprecated
     // alias).
     expect(structure.fingerprint).toBe(
-      "64cca1823a9685037d60c7b6daf67e1db0bca5cf9c0512120b6fc8831a85dd34",
+      "7df31a898dd671715daab7a1bf9836947fca517d3b5866cb321bdc6de140c776",
     );
   });
 

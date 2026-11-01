@@ -86,12 +86,15 @@ describe("ligilo in the repo Modelo (T006)", () => {
       ["external", "boolean", false],
       ["size", ["small", "medium", "large"], "medium"],
       ["label", "string", undefined],
+      // Spec 036 Teil 5 ②b-4 (A-ligilo-6).
+      ["download", "boolean", false],
     ]);
     expect(skemo.states).toEqual(["rest", "hover", "pressed", "focus", "visited"]);
     // Spec 036 Teil 5 ②b-3 (A-ligilo-4): an icon at the start, as at the butono.
     expect(skemo.slots.map((slot) => slot.name)).toEqual(["label", "icon-end", "icon-start"]);
     expect(skemo.props.map((prop) => prop.name)).not.toContain("disabled");
-    expect(skemo.constraints).toBeUndefined();
+    // Spec 036 Teil 5 ②b-4 (A-ligilo-6): the one constraint, a download is never external.
+    expect(skemo.constraints?.map((constraint) => constraint.when)).toEqual([{ download: "true" }]);
   });
 
   it("binds only role tokens or the keywords inherit and none, never palette steps (E1, D-03)", () => {
@@ -169,6 +172,8 @@ describe("ligilo in the repo Modelo (T006)", () => {
     expect(skemo.a11y.keys).toEqual(["Enter"]);
     expect(skemo.a11y.texts).toEqual({
       external: { de: "öffnet extern", en: "opens external" },
+      // Spec 036 Teil 5 ②b-4 (A-ligilo-6).
+      download: { de: "lädt herunter", en: "downloads" },
     });
   });
 
@@ -176,6 +181,8 @@ describe("ligilo in the repo Modelo (T006)", () => {
     expect(skemo.goals?.map((goal) => [goal.goal, goal.props, goal.regulo])).toEqual([
       ["navigate", {}, "link-navigates-button-acts"],
       ["external", { external: true }, "external-link-marked"],
+      // Spec 036 Teil 5 ②b-4 (A-ligilo-6): the words of the decided boundary download.
+      ["download", { download: true }, undefined],
     ]);
     const words = (skemo.goals ?? []).flatMap((goal) => Object.values(goal.keywords).flat());
     for (const word of ["zur", "zum", "go", "open", "öffnen", "to"])
@@ -203,8 +210,8 @@ describe("the Uzo of the ligilo (T006, A3)", () => {
     expect(uzo?.ero).toBe(ligilo.ero.id);
     expect(uzo?.skemo).toBe(skemo.id);
     expect(uzo?.purpose).toBe(
-      // Spec 036 Teil 5 ②b-3 (A-ligilo-4).
-      "Moves to another view or place: it opens an overview, a detail, a document or an outside site; an icon may stand before the words (slot icon-start).",
+      // Spec 036 Teil 5 ②b-3 (A-ligilo-4), ②b-4 (A-ligilo-6).
+      "Moves to another view or place: it opens an overview, a detail, a document or an outside site; an icon may stand before the words (slot icon-start); with download it hands over a file instead, marked, the label names its type and size.",
     );
   });
 
@@ -218,10 +225,9 @@ describe("the Uzo of the ligilo (T006, A3)", () => {
     for (const entry of uzo?.instead ?? []) expect(entry.kialo).toMatch(/\bbecause\b/);
   });
 
-  it("names the four boundaries of A3 with action, via and kialo", () => {
+  it("names the boundaries of A3 with action, via and kialo; download is decided (Spec 036 ②b-4)", () => {
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action, entry.via])).toEqual([
       ["button-look", "ask-human", undefined],
-      ["download", "ask-human", undefined],
       ["disabled-link", "not-supported", undefined],
       ["multi-line-label", "not-supported", { layout: "wrap" }],
     ]);

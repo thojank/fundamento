@@ -74,7 +74,8 @@ describe("list_eroj", () => {
     expect(listEroj(modelo).eroj[20]).toMatchObject({
       name: "ligilo",
       variants: ["inline", "standalone"],
-      props: ["to", "placement", "external", "size", "label"],
+      // Spec 036 Teil 5 ②b-4 (A-ligilo-6): download.
+      props: ["to", "placement", "external", "size", "label", "download"],
     });
   });
 });

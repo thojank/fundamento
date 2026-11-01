@@ -854,6 +854,8 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
       external: "BOOLEAN",
       size: ["small", "medium", "large"],
       label: "TEXT",
+      // Spec 036 Teil 5 ②b-4 (A-ligilo-6): a BOOLEAN without a picture of its own.
+      download: "BOOLEAN",
       state: ["rest", "hover", "pressed", "focus", "visited"],
     });
     expect(set?.variants).toHaveLength(2 * 3 * 5);

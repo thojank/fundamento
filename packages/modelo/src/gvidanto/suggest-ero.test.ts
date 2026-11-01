@@ -103,6 +103,8 @@ describe("suggest_ero", () => {
       "switch-view",
       "navigate",
       "external",
+      // Spec 036 Teil 5 ②b-4 (A-ligilo-6).
+      "download",
       // Spec 025 ③: the listelektilo and the lokredaktilo.
       "styled-choice",
       "inline-edit",
