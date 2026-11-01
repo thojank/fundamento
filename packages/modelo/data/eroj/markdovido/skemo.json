@@ -28,6 +28,12 @@
         "values": ["default", "compact"],
         "default": "default",
         "description": "Spec 029 ②a (A-markdovido-1): the room between the blocks, by the names of the Dimensio density – default as before; compact closer, for answers in a narrow column."
+      },
+      {
+        "name": "streaming",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②a (A-markdovido-3): an answer still arrives – the source grows while the view is busy (aria-busy), so assistive technology reads it once it is whole. The application takes it away after the last word."
       }
     ],
     "states": ["rest"],
@@ -52,15 +58,15 @@
     "a11y": {
       "role": "document",
       "name": [],
-      "states": {},
+      "states": { "streaming": ["aria-busy"] },
       "keys": []
     },
     "goals": [
       {
         "goal": "markdown",
         "keywords": {
-          "en": ["markdown", "markdown-view", "rendered-markdown"],
-          "de": ["markdown", "markdown-text", "markdownansicht"]
+          "en": ["markdown", "markdown-view", "rendered-markdown", "streaming"],
+          "de": ["markdown", "markdown-text", "markdownansicht", "streamen"]
         },
         "props": {}
       }
