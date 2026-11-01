@@ -1551,6 +1551,12 @@ const menuStructure = (fallback: string, justified = false): string =>
     ':where([part="item"]:focus:not(:focus-visible)) { outline-width: 0; }',
     ':where([part="item"][aria-disabled="true"]) { cursor: not-allowed; }',
     ':where([part="separator"]) { display: block; }',
+    // Spec 036 Teil 5 ②b-3 (A-menuo-4): the icon of an entry keeps its size before the words; a
+    // group of entries is a column under its heading.
+    ':where([part="icon"]) { flex: none; }',
+    ':where([part="icon"][hidden]) { display: none; }',
+    ':where([part="group"]) { display: flex; flex-direction: column; align-items: stretch; }',
+    ':where([part="group-heading"]) { display: block; white-space: nowrap; }',
   ].join("\n");
 
 /** Spec 036 Teil 5 ②b-2: whether the overlay's Skemo has justify (A-konsileto-1 and others). */
@@ -1579,6 +1585,8 @@ function menuPartSelector(part: string, data: string, state: string): string {
   // (:where has none), so the keyed rule written after it does not win.
   if (part === "danger-item") return `${root} [part="item"].fm-danger`;
   if (part === "focus-ring") return `:where(${root} [part="item"]:focus-visible)`;
+  // Spec 036 Teil 5 ②b-3 (A-menuo-4): the icon of an entry and the heading of a group.
+  if (part === "icon" || part === "group-heading") return `:where(${root}) [part="${part}"]`;
   return `:where(${root})`;
 }
 

@@ -86,8 +86,9 @@ describe("Spec 029 ① 5: the foundation pages", () => {
     // for the rest of the atributlisto (+3); the readout of the glitilo (+2). S36-4.3 (②b-3): the
     // help of markobutono and sxaltilo (+4), the description of an option of the elekto (+2); the
     // tick of the glitilo (+3), the upload icon of the alsxutilo (+2); the headings of option
-    // groups (+11), the divider of the listelektilo (+2), „alle wählen“ of the plurelektilo (+4).
-    expect(tokenoj.length).toBe(2009);
+    // groups (+11), the divider of the listelektilo (+2), „alle wählen“ of the plurelektilo (+4);
+    // the icon and the heading of a group of the menuo (+5).
+    expect(tokenoj.length).toBe(2014);
     const levels = new Set(tokenoj.map((token) => token.ebeno));
     expect(levels).toEqual(new Set(["grundlage", "rolle", "ero"]));
     const text = tokenoj.find((token) => token.name === "color.text.default");

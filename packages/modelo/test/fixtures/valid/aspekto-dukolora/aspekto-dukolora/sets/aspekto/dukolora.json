@@ -8424,6 +8424,10 @@
         "radius": {
           "$type": "dimension",
           "$value": "{radius.role.control}"
+        },
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.small}"
         }
       },
       "danger": {
@@ -8459,6 +8463,30 @@
           "color": {
             "$type": "color",
             "$value": "{color.focus.inner}"
+          }
+        }
+      },
+      "icon": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.medium}"
+        }
+      },
+      "group": {
+        "heading": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.text.muted}"
+          },
+          "typography": {
+            "$type": "typography",
+            "$value": "{typography.caption}"
+          },
+          "inline": {
+            "padding": {
+              "$type": "dimension",
+              "$value": "{spacing.medium}"
+            }
           }
         }
       }

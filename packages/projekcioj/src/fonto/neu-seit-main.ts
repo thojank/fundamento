@@ -219,6 +219,12 @@ const REST_2B3 = (() => {
         "^ero\\.elektilo\\.group\\.heading\\.(color|typography)$|^ero\\.(listelektilo|kompletigilo|plurelektilo)\\.group\\.heading\\.(color|typography|inline\\.padding)$|^ero\\.listelektilo\\.divider\\.(color|width)$|^ero\\.plurelektilo\\.select\\.all\\.(color|typography|height|inline\\.padding)$",
       added: 2 + 9 + 2 + 4,
     },
+    // A-menuo-4 (the gap of a row for its icon, 1; the icon's size, 1; the heading of a group, 3).
+    {
+      pattern:
+        "^ero\\.menuo\\.(item\\.gap|icon\\.size|group\\.heading\\.(color|typography|inline\\.padding))$",
+      added: 1 + 1 + 3,
+    },
   ];
   const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
   return {

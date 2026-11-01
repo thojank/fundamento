@@ -118,6 +118,9 @@
         },
         "radius": {
           "fixed": "radius.role.control"
+        },
+        "gap": {
+          "fixed": "spacing.small"
         }
       },
       "danger-item": {
@@ -142,6 +145,22 @@
         },
         "color": {
           "fixed": "color.focus.inner"
+        }
+      },
+      "icon": {
+        "size": {
+          "fixed": "size.icon.medium"
+        }
+      },
+      "group-heading": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        },
+        "inline-padding": {
+          "fixed": "spacing.medium"
         }
       }
     },

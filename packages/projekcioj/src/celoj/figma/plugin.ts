@@ -663,6 +663,8 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
     "item.typography": typographyOf("items-*"),
     "item.height": [{ node: "item-*", fields: ["minHeight"] }],
     "item.inline-padding": [{ node: "item-*", fields: ["paddingLeft", "paddingRight"] }],
+    // Spec 036 Teil 5 ②b-3 (A-menuo-4): the gap between an entry's icon and its words.
+    "item.gap": [{ node: "item-*", fields: ["itemSpacing"] }],
     "item.radius": [{ node: "item-*", fields: ["cornerRadius"] }],
     "danger-item.color": [{ node: "danger-item", fields: ["fills"], paint: true }],
     "box.inline-padding": [{ node: "surface", fields: [...PADDINGS] }],

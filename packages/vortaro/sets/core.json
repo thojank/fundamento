@@ -18181,6 +18181,16 @@
               "id": "tok_01M5GF0TQY40AAXJHBF90R5XN4"
             }
           }
+        },
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.small}",
+          "$description": "menuo: item.gap (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M6ADARDR79WBAV8HK22ME88E"
+            }
+          }
         }
       },
       "danger": {
@@ -18252,6 +18262,55 @@
               "com.ciferecigo.fundamento": {
                 "id": "tok_01M5GF0TQY40AAXJHBF90R5XNA",
                 "role": "ero"
+              }
+            }
+          }
+        }
+      },
+      "icon": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.medium}",
+          "$description": "menuo: icon.size (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M6ADARDR79WBAV8HK22ME88F"
+            }
+          }
+        }
+      },
+      "group": {
+        "heading": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.text.muted}",
+            "$description": "menuo: group-heading.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M6ADARDR79WBAV8HK22ME88G",
+                "role": "ero"
+              }
+            }
+          },
+          "typography": {
+            "$type": "typography",
+            "$value": "{typography.caption}",
+            "$description": "menuo: group-heading.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+            "$extensions": {
+              "com.ciferecigo.fundamento": {
+                "id": "tok_01M6ADARDR79WBAV8HK22ME88H"
+              }
+            }
+          },
+          "inline": {
+            "padding": {
+              "$type": "dimension",
+              "$value": "{spacing.medium}",
+              "$description": "menuo: group-heading.inline-padding (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "com.ciferecigo.fundamento": {
+                  "id": "tok_01M6ADARDS1A6CSC5D5MN92YHZ"
+                }
               }
             }
           }
