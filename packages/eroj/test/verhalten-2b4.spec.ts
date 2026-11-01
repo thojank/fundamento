@@ -136,3 +136,37 @@ test.describe("②b-4 A-dialogo-5, M-3: the purpose decides how the dialog close
     await expect(page.getByRole("alertdialog")).toHaveCount(0);
   });
 });
+
+test.describe("②b-4 A-markdovido-3: streaming", () => {
+  test("while streaming the document is busy; the text grows; then it is not", async ({ page }) => {
+    await serve(page, out, '<fm-markdovido id="m" streaming source="Die Antwort"></fm-markdovido>');
+    const busy = () =>
+      page
+        .locator("#m")
+        .evaluate(
+          (element) =>
+            element.shadowRoot?.querySelector('[part="control"]')?.getAttribute("aria-busy") ??
+            null,
+        );
+    await expect.poll(busy).toBe("true");
+    await page
+      .locator("#m")
+      .evaluate((element) => element.setAttribute("source", "Die Antwort kommt Wort für Wort."));
+    await expect(page.locator("#m")).toContainText("Wort für Wort.");
+    expect(await busy()).toBe("true");
+    await page.locator("#m").evaluate((element) => element.removeAttribute("streaming"));
+    await expect.poll(busy).toBe(null);
+  });
+
+  test("without streaming the document is not busy", async ({ page }) => {
+    await serve(page, out, '<fm-markdovido id="m" source="Fertig."></fm-markdovido>');
+    await expect(page.locator("#m")).toContainText("Fertig.");
+    expect(
+      await page
+        .locator("#m")
+        .evaluate((element) =>
+          element.shadowRoot?.querySelector('[part="control"]')?.hasAttribute("aria-busy"),
+        ),
+    ).toBe(false);
+  });
+});
