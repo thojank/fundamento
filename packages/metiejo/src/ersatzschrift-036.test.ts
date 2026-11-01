@@ -14,7 +14,11 @@ describe("a webfont's Fonto carries category and weights (①-7)", () => {
     if (prata === undefined) throw new Error("Prata must be in the catalogue");
     const fonto = fontoOf(prata);
     expect(fonto).toMatchObject({ family: "Prata", category: "serif", weights: [400] });
-    const { issues } = readAgordo({ name: "x", leitfarbe: "#336699", schriften: { display: fonto } });
+    const { issues } = readAgordo({
+      name: "x",
+      leitfarbe: "#336699",
+      schriften: { display: fonto },
+    });
     expect(issues).toEqual([]);
   });
 

@@ -98,6 +98,9 @@ describe("fontoOf and licencedFonto (K-3)", () => {
       source: "https://fontsource.org/fonts/inter",
       redistributable: true,
       scripts: inter.scripts,
+      // Spec 036 Teil 5 ②b-5 (①-7): the category and the weights of the catalogue travel along.
+      category: "sans-serif",
+      weights: inter.weights,
     });
     const { issues } = readAgordo({ name: "x", leitfarbe: "#336699", schriften: { body: fonto } });
     expect(issues).toEqual([]);

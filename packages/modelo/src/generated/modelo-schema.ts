@@ -657,6 +657,16 @@ export interface Fonto {
    * @minItems 1
    */
   scripts: Iso15924[];
+  /**
+   * The kind of the family as the font catalogue names it (Spec 036 Teil 5, Spec 029 ①-7): the Agordilo takes the generic fallback of the family from it; absent, the fallback of the structure stays.
+   */
+  category?: "sans-serif" | "serif" | "monospace" | "display" | "handwriting" | "other" | "icons";
+  /**
+   * The weights the family has (Spec 036 Teil 5, Spec 029 B-2): every typography role in the family takes the nearest of them; absent, every weight of the structure stays.
+   *
+   * @minItems 1
+   */
+  weights?: number[];
 }
 /**
  * An Aspekto overrides an adjustable text rule of a Uzo, with the Jugxo that records the deviation (Spec 007, A7, D-03). A fixed rule cannot be overridden.

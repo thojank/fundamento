@@ -331,14 +331,32 @@ export function searchTiparoj(tiparoj: Tiparoj, query: string, limit = 12): Tipa
 
 /** The Fonto of a webfont for the Agordo (K-3): licence, source, redistributable, scripts. */
 export function fontoOf(tiparo: Tiparo): Fonto {
-  return {
+  const fonto: Fonto = {
     family: tiparo.family,
     license: tiparo.license,
     source: `https://fontsource.org/fonts/${tiparo.id}`,
     redistributable: true,
     scripts: [...tiparo.scripts],
   };
+  // Spec 036 Teil 5 ②b-5 (Spec 029 ①-7): what the catalogue knows of the family travels with it,
+  // so the Agordilo takes the fallback by category and the nearest weight without a catalogue.
+  if ((FONTO_CATEGORIES as readonly string[]).includes(tiparo.category)) {
+    fonto.category = tiparo.category as NonNullable<Fonto["category"]>;
+  }
+  if (tiparo.weights.length > 0) fonto.weights = [...tiparo.weights];
+  return fonto;
 }
+
+/** The categories of the catalogue a Fonto names (the Modelo schema's enum). */
+const FONTO_CATEGORIES = [
+  "sans-serif",
+  "serif",
+  "monospace",
+  "display",
+  "handwriting",
+  "other",
+  "icons",
+] as const;
 
 /** What a licensed font says of itself in the brand (K-3). */
 export const LICENCED_NOTE = "lizenziert, nicht enthalten";

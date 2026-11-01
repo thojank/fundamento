@@ -23,6 +23,7 @@ import type { Gestalt } from "./gestalt.js";
 import { derivedIdGenerator, namespaceOf } from "./ids.js";
 import type { DerivedPalettes, DerivedStep, ModeOverride } from "./palettes.js";
 import { isRecord as isJsonObject } from "./record.js";
+import { familyStackOf, typographyWithFontWeight } from "./schrift.js";
 import { referencePackage, type Structure } from "./structure.js";
 import { UNBUNT_HIGH_KONDICXOJ, unbuntRoles } from "./unbunt.js";
 import { AGORDILO_VERSION } from "./version.js";
@@ -197,6 +198,24 @@ function coreFontValue(structure: Structure, role: string): unknown[] {
   return Array.isArray(token.$value) ? token.$value : [];
 }
 
+/**
+ * font.weight.* of the main set: the value the Gestalt writes (stage 2, schrift.gewicht), the
+ * structure's otherwise.
+ */
+function weightTokensOf(structure: Structure, gestalt?: Gestalt): Map<string, number> {
+  const core = structure.files.sets.find((set) => set.name === CORE_SET_NAME)?.value;
+  const font = isJsonObject(core) && isJsonObject(core.font) ? core.font : {};
+  const weight = isJsonObject(font.weight) ? font.weight : {};
+  const out = new Map<string, number>();
+  for (const [key, node] of Object.entries(weight)) {
+    if (key.startsWith("$") || !isJsonObject(node) || typeof node.$value !== "number") continue;
+    const name = `font.weight.${key}`;
+    const derived = gestalt?.main.get(name);
+    out.set(name, typeof derived === "number" ? derived : node.$value);
+  }
+  return out;
+}
+
 /** The fonts of aspekto.json: the Agordo's families, the reference's for every other role. */
 function fontsOf(agordo: Agordo, structure: Structure): Fonto[] {
   const reference = referencePackage(structure).aspekto.value;
@@ -325,6 +344,7 @@ export function packageDocuments(
   const unbunt = unbuntRoles(agordo, palettes, core?.value, high?.value);
   const mainName = `aspekto/${name}`;
   const mainPath = `sets/${mainName}.json`;
+  const weightTokens = weightTokensOf(structure, gestalt);
   json[mainPath] = rewriteSet(
     core?.value,
     mint("tokenSet"),
@@ -341,7 +361,12 @@ export function packageDocuments(
       if (gestalt?.main.has(token) === true) return gestalt.main.get(token);
       const role = /^font\.family\.([a-z]+)$/.exec(token)?.[1];
       const own = role === undefined ? undefined : agordo.schriften?.[role as "display"];
-      if (own !== undefined && Array.isArray(value)) return [own.family, ...value.slice(1)];
+      // Spec 036 ②b-5 (Spec 029 ①-7): the fallback after the family follows its category.
+      if (own !== undefined && Array.isArray(value)) return familyStackOf(own, value);
+      // Spec 036 ②b-5 (Spec 029 B-2): a role in the brand font takes a weight the font has.
+      if (token.startsWith("typography.")) {
+        return typographyWithFontWeight(agordo, value, weightTokens);
+      }
       return value;
     },
   );

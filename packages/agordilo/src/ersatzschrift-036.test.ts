@@ -3,6 +3,7 @@
 // travel in the Agordo's Fonto (written by the Metiejo from its catalogue); the Agordilo reads no
 // catalogue of its own (Spec 036, Blocker 11). Without them the derivation stays as it was.
 
+import type { Fonto } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { type Agordo, deriveAspekto, loadCalibration, readAgordo, readStructure } from "./index.js";
 
@@ -25,13 +26,13 @@ function weightOf(files: Files, path: string, role: string): number | undefined 
   return typeof value === "number" ? value : undefined;
 }
 
-const SERIF = {
+const SERIF: Fonto = {
   family: "Prata",
   license: "OFL-1.1",
   source: "https://fontsource.org/fonts/prata",
   redistributable: true,
   scripts: ["Cyrl", "Latn"],
-} as const;
+};
 
 const structure = readStructure();
 const calibration = loadCalibration();
@@ -132,7 +133,9 @@ describe("the nearest weight the font has (①-7, B-2)", () => {
     const files = derive({
       name: "duona",
       leitfarbe: "#336699",
-      schriften: { body: { ...SERIF, family: "Duona", category: "sans-serif", weights: [300, 700] } },
+      schriften: {
+        body: { ...SERIF, family: "Duona", category: "sans-serif", weights: [300, 700] },
+      },
     });
     // body.1 regular 400 → 300; label.1 medium 500 → 300 (tie, lighter); kicker semibold 600 → 700.
     expect(weightOf(files, main("duona"), "body.1")).toBe(300);
