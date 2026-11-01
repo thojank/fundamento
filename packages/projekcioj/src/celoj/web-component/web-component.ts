@@ -553,7 +553,9 @@ export const isAvatar = (skemo: Skemo): boolean =>
 
 function avatarPartSelector(part: string, data: string): string {
   const root = `[part="control"]${data}`;
-  if (part === "image" || part === "initials") return `:where(${root}) [part="${part}"]`;
+  // Spec 036 Teil 5 ②b-3 (A-avataro-4): the default icon is an element of its own.
+  if (part === "image" || part === "initials" || part === "icon")
+    return `:where(${root}) [part="${part}"]`;
   return `:where(${root})`;
 }
 
@@ -570,6 +572,9 @@ const avatarStructure: string = [
   ':where([part="image"]) { display: block; object-fit: cover; }',
   ':where([part="initials"]) { display: flex; align-items: center; justify-content: center; white-space: nowrap; overflow: hidden; }',
   ':where([part="image"][hidden], [part="initials"][hidden]) { display: none; }',
+  // Spec 036 Teil 5 ②b-3 (A-avataro-4): the default icon keeps its size in the initials.
+  ':where([part="icon"]) { flex: none; }',
+  ':where([part="icon"][hidden]) { display: none; }',
 ].join("\n");
 
 /** A separator (Spec 014 ②, D-06): the control is the line. */

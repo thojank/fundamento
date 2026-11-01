@@ -147,6 +147,10 @@
         {
           "ero": "lokredaktilo",
           "kialo": "The edit button shows the pencil, because the sign is read faster than the word; the word names the value."
+        },
+        {
+          "ero": "avataro",
+          "kialo": "An avatar without a name shows the icon person in place of its initials, because an empty circle says nothing; a name, once given, says who it is."
         }
       ],
       "never": [],

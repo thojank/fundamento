@@ -634,14 +634,14 @@ describe("lokredaktilo (D-17): a single value of a view turned into a field on t
 });
 
 describe("the Ikonaro of Spec 025 ③ (G1: edit) and the dialogs of the spec (Gvidanto)", () => {
-  it("names edit, not mirrored; twenty-one names; the lokredaktilo composes the ikono", () => {
+  it("names edit, not mirrored; twenty-four names (Spec 036 Teil 5 ②b-3: person, first, last); the lokredaktilo composes the ikono", () => {
     const edit = modelo.ikonaro.find((ikono) => ikono.name === "edit");
     expect(edit).toMatchObject({
       name: "edit",
       meaning: { de: "Stift: bearbeiten", en: "Pencil: edit" },
     });
     expect(edit?.mirror).not.toBe(true);
-    expect(modelo.ikonaro).toHaveLength(21);
+    expect(modelo.ikonaro).toHaveLength(24);
     expect(eroNamed("ikono")?.skemo.props.find((prop) => prop.name === "name")?.values).toContain(
       "edit",
     );

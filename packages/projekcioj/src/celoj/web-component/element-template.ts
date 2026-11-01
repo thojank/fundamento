@@ -941,8 +941,10 @@ const TAB_ROW = '<button part="tab" role="tab" type="button"><slot></slot></butt
  * alt, the control carries the name — and the initials, both decorative; the element shows the
  * picture once it has loaded, else the initials.
  */
-function avatarMarkup(): string {
-  return '<span part="control"><img part="image" alt="" hidden><span part="initials" aria-hidden="true"></span></span><span id="fm-texts" hidden></span>';
+function avatarMarkup(icon = false): string {
+  // Spec 036 Teil 5 ②b-3 (A-avataro-4): the default icon (the Ikonaro's person), unheard, which
+  // the element puts into the initials while it has none.
+  return `<span part="control"><img part="image" alt="" hidden><span part="initials" aria-hidden="true"></span>${icon ? '<fm-ikono part="icon" name="person" aria-hidden="true" hidden></fm-ikono>' : ""}</span><span id="fm-texts" hidden></span>`;
 }
 
 /**
@@ -1041,7 +1043,7 @@ function hostMarkup(
   if (host === "pagination") return paginationMarkup();
   if (host === "upload") return uploadMarkup();
   if (host === "card") return cardMarkup();
-  if (host === "avatar") return avatarMarkup();
+  if (host === "avatar") return avatarMarkup(parts.includes("icon"));
   if (host === "codeblock") return codeblockMarkup();
   if (host === "markdown") return markdownMarkup();
   if (host === "tabs") return tabsMarkup();
@@ -2921,12 +2923,17 @@ ${
       // heard as the words.
       const summary = String(this.propValue("summary") ?? "pages");
       const place = word("summary-count").replace("{page}", String(current)).replace("{total-pages}", String(pageCount));
-      const items: { kind: "prev" | "next" | "page" | "gap" | "summary"; page: number }[] = [
+      // Spec 036 Teil 5 ②b-3 (A-pagxigilo-4): with first-last a button to the first page before prev
+      // and one to the last after next, each disabled where it would stay on the page.
+      const ends = this.propValue("first-last") === true;
+      const items: { kind: "first" | "prev" | "next" | "last" | "page" | "gap" | "summary"; page: number }[] = [
+        ...(ends ? [{ kind: "first" as const, page: current === 1 ? 0 : 1 }] : []),
         { kind: "prev", page: current - 1 },
         ...(summary === "pages"
           ? pages.map((page) => (page === "gap" ? { kind: "gap" as const, page: 0 } : { kind: "page" as const, page }))
           : [{ kind: "summary" as const, page: current }]),
         { kind: "next", page: current + 1 },
+        ...(ends ? [{ kind: "last" as const, page: current === pageCount ? pageCount + 1 : pageCount }] : []),
       ];
       const html = items
         .map((item) => {
@@ -2947,7 +2954,7 @@ ${
           const inner =
             item.kind === "page"
               ? String(item.page)
-              : '<fm-ikono part="' + item.kind + '" name="' + (item.kind === "prev" ? "chevron-left" : "chevron-right") + '"></fm-ikono>';
+              : '<fm-ikono part="' + item.kind + '" name="' + (item.kind === "prev" ? "chevron-left" : item.kind === "next" ? "chevron-right" : item.kind) + '"></fm-ikono>';
           return '<li><' + tag + ' part="item"' + type + href + arrow + marked + disabled + ' aria-label="' + name + '" data-page="' + item.page + '">' + inner + "</" + tag + ">";
         })
         .join("");
@@ -3827,7 +3834,17 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
         )
         .join("")
         .toLocaleUpperCase(lingvo);
+      // Spec 036 Teil 5 ②b-3 (A-avataro-4): without initials the default icon stands in their place.
+      const personIcon = this.shadowRoot?.querySelector('[part="icon"]');
+      if (personIcon instanceof HTMLElement && letters !== "" && personIcon.parentElement === initials) {
+        control.append(personIcon);
+      }
       if (initials.textContent !== letters) initials.textContent = letters;
+      if (personIcon instanceof HTMLElement) {
+        const bare = letters === "";
+        if (bare && personIcon.parentElement !== initials) initials.append(personIcon);
+        if (personIcon.hidden !== !bare) personIcon.hidden = !bare;
+      }
       const picture = String(this.propValue("picture") ?? "");
       if (picture !== this.#picture) {
         this.#picture = picture;

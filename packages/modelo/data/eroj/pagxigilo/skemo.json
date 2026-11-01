@@ -68,6 +68,12 @@
         ],
         "default": "pages",
         "description": "Spec 029 ②a (A-pagxigilo-1): what stands between the arrows – pages, the pages with the current one and its siblings, as before; count, the words of the place („Seite 5 von 10“); compact, the numbers alone („5 / 10“), heard as the words. Dots belong to a carousel, an input field is rare."
+      },
+      {
+        "name": "first-last",
+        "kind": "boolean",
+        "default": false,
+        "description": "Shows a button to the first page before prev and one to the last page after next (parts first and last), named by a11y.texts first-name and last-name; each is disabled where it would stay on the page."
       }
     ],
     "states": [
@@ -187,6 +193,20 @@
         },
         "color": {
           "fixed": "color.focus.inner"
+        }
+      },
+      "first": {
+        "size": {
+          "by": [
+            "size"
+          ]
+        }
+      },
+      "last": {
+        "size": {
+          "by": [
+            "size"
+          ]
         }
       }
     },
@@ -462,6 +482,38 @@
           "size": "medium"
         },
         "token": "typography.label.1"
+      },
+      {
+        "part": "first",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "first",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "last",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "last",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
       }
     ],
     "a11y": {
@@ -498,6 +550,14 @@
         "summary-count": {
           "de": "Seite {page} von {total-pages}",
           "en": "Page {page} of {total-pages}"
+        },
+        "first-name": {
+          "de": "Erste Seite",
+          "en": "First page"
+        },
+        "last-name": {
+          "de": "Letzte Seite",
+          "en": "Last page"
         }
       }
     },

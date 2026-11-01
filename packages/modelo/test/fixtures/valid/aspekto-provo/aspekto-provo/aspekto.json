@@ -62,7 +62,10 @@
       "upload": "upload-simple",
       "warning": "warning",
       "calendar": "calendar-blank",
-      "edit": "pencil-simple"
+      "edit": "pencil-simple",
+      "first": "caret-line-left",
+      "last": "caret-line-right",
+      "person": "user"
     }
   },
   "agordilo": {
@@ -70,7 +73,7 @@
     "structure": {
       "vortaro": "0.2.0",
       "reference": "komuna",
-      "sha256": "a0c209910a90f1d8b33396ebd4f4c50952df007bbbe0a95ed2684b55bdcd19d1"
+      "sha256": "92ce7ef7ecca92359b1d7268c6a974fe69040a49ea2618d8f30203d16f746752"
     },
     "agordo": {
       "name": "provo",

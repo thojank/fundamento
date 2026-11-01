@@ -3073,7 +3073,8 @@ describe("the Figma plan draws icons (Spec 014 ②)", () => {
 
   it("carries the glyphs of every Aspekto and the names that mirror; a BOOLEAN variable per Aspekto switches them", () => {
     expect(plan.ikonoj?.names).toEqual(names);
-    expect(plan.ikonoj?.mirror).toEqual(["chevron-left", "chevron-right"]);
+    // Spec 036 Teil 5 ②b-3 (A-pagxigilo-4): first and last mirror too.
+    expect(plan.ikonoj?.mirror).toEqual(["chevron-left", "chevron-right", "first", "last"]);
     expect(Object.keys(plan.ikonoj?.glyphs ?? {})).toEqual(["komuna", "ekzemplo"]);
     for (const aspekto of ["komuna", "ekzemplo"]) {
       for (const name of names) {
@@ -3823,6 +3824,14 @@ describe("the Figma plan draws the avataro (Spec 015 ③)", () => {
     };
     // Spec 036 Teil 5 ②b-2 (A-avataro-1): the radii by corner.
     const radii = { round: "radius/full", soft: "radius/small", square: "radius/none" };
+    // Spec 036 Teil 5 ②b-3 (A-avataro-4): the default icon by size.
+    const iconSizes = {
+      "x-small": "size/scale/100",
+      small: "size/scale/100",
+      medium: "size/icon/small",
+      large: "size/icon/large",
+      "x-large": "size/scale/800",
+    };
     for (const variant of set?.variants ?? []) {
       const size = variant.props.size as keyof typeof sizes;
       const corner = variant.props.corner as keyof typeof radii;
@@ -3833,9 +3842,15 @@ describe("the Figma plan draws the avataro (Spec 015 ③)", () => {
         "initials.color": "color/text/subtle",
         "initials.typography": roles[size],
         "initials.radius": radii[corner],
+        // Spec 036 Teil 5 ②b-3 (A-avataro-4): the default icon, bound, not drawn (no name).
+        "icon.size": iconSizes[size],
+        "icon.color": "color/text/subtle",
       });
       expect(variant.icons).toBeUndefined();
-      expect(variant.notDrawn).toEqual({});
+      expect(variant.notDrawn).toEqual({
+        "icon.color": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+        "icon.size": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+      });
     }
   });
 
@@ -3880,6 +3895,9 @@ describe("the Figma plan draws the avataro (Spec 015 ③)", () => {
           ],
           [`initials.color@size=${size},state=rest`, hex],
           [`initials.radius@size=${size},state=rest`, "9999px"],
+          // Spec 036 Teil 5 ②b-3 (A-avataro-4): the default icon stands without a name (Jugxo).
+          [`icon.color@size=${size},state=rest`, "not drawn (jug_01M6A2EXBGT5473CTBGY1WRV5E)"],
+          [`icon.size@size=${size},state=rest`, "not drawn (jug_01M6A2EXBGT5473CTBGY1WRV5E)"],
         ]),
       ),
     );
