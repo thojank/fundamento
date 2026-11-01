@@ -675,8 +675,9 @@ describe("②b-2 A-tabelo-1: density in three values and the lines", () => {
 });
 
 describe("②b-2 A-markdovido-1, A-plenstato-1/2, A-teksto-1: density, compact, label, tabular", () => {
-  it("markdovido: density default | compact, the last prop; the gap of the blocks by it", () => {
-    expect(entryOf("markdovido").skemo.props.at(-1)).toMatchObject({
+  it("markdovido: density default | compact, right after the props of 0.2.0; the gap of the blocks by it", () => {
+    // Spec 036 ②b-4 (A-markdovido-3): streaming follows density.
+    expect(entryOf("markdovido").skemo.props.at(-2)).toMatchObject({
       name: "density",
       kind: "enum",
       values: ["default", "compact"],

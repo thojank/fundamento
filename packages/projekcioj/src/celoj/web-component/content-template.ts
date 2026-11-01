@@ -84,6 +84,9 @@ export const markdownRender = `    // Nachlese 8 ② (F-5): the rules of the lig
       }
     }
     this.#markdownRender();
+    // Spec 036 ②b-4 (A-markdovido-3): while an answer still arrives, the view is busy.
+    if (HAS_PROP.has("streaming") && this.propValue("streaming") === true) control.setAttribute("aria-busy", "true");
+    else control.removeAttribute("aria-busy");
 `;
 
 /**
