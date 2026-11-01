@@ -97,3 +97,25 @@ describe("②b-4 A-langetaro-4: overflow", () => {
     expect(tokensOf(briefOf(entryOf("langetaro")))).toBeLessThan(750);
   });
 });
+
+/** A-pagxigilo-6: an unknown total – searches and logs – shows only „next“, no last page. */
+describe("②b-4 A-pagxigilo-6: unknown total", () => {
+  it("pagxigilo: total-unknown is a boolean, off, the last prop; named in de and en", () => {
+    const { skemo } = entryOf("pagxigilo");
+    expect(skemo.props.at(-1)).toMatchObject({
+      name: "total-unknown",
+      kind: "boolean",
+      default: false,
+    });
+    expect(tradukoOf("pagxigilo", "props/total-unknown", "de")).toBe("Gesamtzahl unbekannt");
+    expect(tradukoOf("pagxigilo", "props/total-unknown", "en")).toBe("Total unknown");
+  });
+
+  it("pagxigilo: total-pages and every prop of 0.2.0 stay as they were; the brief flags it, under 750", () => {
+    const totalPages = entryOf("pagxigilo").skemo.props.find((prop) => prop.name === "total-pages");
+    expect(totalPages).toMatchObject({ kind: "number", required: true });
+    const brief = briefOf(entryOf("pagxigilo"));
+    expect(brief.flags).toContain("total-unknown");
+    expect(tokensOf(brief)).toBeLessThan(750);
+  });
+});
