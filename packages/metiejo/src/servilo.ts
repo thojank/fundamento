@@ -685,9 +685,9 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     detaloj: Record<string, unknown> = {},
   ): Promise<{ status: number; body: Record<string, unknown> }> => {
     const provider = options.ki?.provider;
-    if (provider === undefined) return { status: 503, body: { satz: kiSatz() } };
     const fremda = fremdaOf(name);
     if (fremda !== undefined && !fremda.konfirmita) {
+      if (provider === undefined) return { status: 503, body: { satz: kiSatz() } };
       return {
         status: 409,
         body: {
@@ -723,6 +723,8 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         },
       };
     }
+    // Only now the model is needed (QA run 1: the refusal above answers without one).
+    if (provider === undefined) return { status: 503, body: { satz: kiSatz() } };
     if (teksto === "")
       return { status: 422, body: { satz: "Schreib oder sag, was du ändern möchtest." } };
     const historio = babiloj.get(name) ?? [];
