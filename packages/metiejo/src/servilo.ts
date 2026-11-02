@@ -58,8 +58,8 @@ import { EKSPORTO_CELOJ, type EksportoCelo, exportMarko } from "./eksporto.js";
 import { type Bildilo, playwrightBildilo } from "./enportilo/bildilo.js";
 import {
   legiMaterialon,
+  lesefehlerSatzOf,
   MATERIALO_DIR,
-  NeLegebla,
   readProponoj,
   takeProponon,
   writeProponoj,
@@ -1876,10 +1876,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           sendJson(
             response,
             {
-              satz:
-                error instanceof NeLegebla
-                  ? error.message
-                  : `Das Material ließ sich nicht lesen: ${error instanceof Error ? error.message : String(error)}`,
+              satz: lesefehlerSatzOf(error, typeof body.url === "string" && body.url.trim() !== ""),
             },
             422,
           );

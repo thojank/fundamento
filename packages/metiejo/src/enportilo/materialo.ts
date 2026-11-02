@@ -44,6 +44,24 @@ function tipoOf(bytes: Buffer): BildTipo | undefined {
 
 export class NeLegebla extends Error {}
 
+/**
+ * The sentence for a material that could not be read (Spec 036, QA run 1): the Enportilo's own
+ * refusals and messages are German sentences; an error of a decoder, of zlib or of the network (an
+ * error with a `code`, a RangeError, a TypeError) speaks its internal English and becomes one sentence.
+ */
+export function lesefehlerSatzOf(error: unknown, link: boolean): string {
+  if (error instanceof NeLegebla) return error.message;
+  const intern =
+    !(error instanceof Error) ||
+    error instanceof RangeError ||
+    error instanceof TypeError ||
+    typeof (error as { code?: unknown }).code === "string";
+  if (!intern) return `Das Material ließ sich nicht lesen: ${error.message}`;
+  return link
+    ? "Das Material ließ sich nicht lesen: die Seite ließ sich nicht laden."
+    : "Das Material ließ sich nicht lesen: die Datei ist beschädigt oder unvollständig.";
+}
+
 export interface MaterialoEnigo {
   filename?: string;
   bytes?: Buffer;
