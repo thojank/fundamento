@@ -335,6 +335,20 @@
                     }
                   ]
                 }
+              },
+              "zweitfarbe": {
+                "type": "object",
+                "description": "A Zweitfarbe that keeps its palette aligned: the Agordo field zweitfarbe (Spec 036 Teil 2b) with a new farbe, its herkunft kept.",
+                "properties": {
+                  "farbe": {
+                    "type": "string"
+                  },
+                  "herkunft": {
+                    "type": "object"
+                  }
+                },
+                "required": ["farbe"],
+                "additionalProperties": false
               }
             },
             "additionalProperties": false

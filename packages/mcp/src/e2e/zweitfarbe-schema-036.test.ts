@@ -29,6 +29,15 @@ describe("Spec 036 Teil 2b: the Zweitfarbe suggestion matches the output schemas
     expect(farbe).toMatch(/^#[0-9a-f]{6}$/i);
   });
 
+  it("preview_agordo: a Zweitfarbe found in material keeps its origin in the suggestion, valid by its schema", async () => {
+    const herkunft = { quelle: "bild", datei: "kiesel.png", merkmal: "Farbe #ff00ff", anteil: 20 };
+    const result = await call(client, "preview_agordo", {
+      agordo: { ...KIESELWEG, zweitfarbe: { farbe: "#ff00ff", herkunft } },
+    });
+    const violations = (result.structuredContent as { violations: Violation[] }).violations;
+    expect(violations.some((entry) => entry.apply?.zweitfarbe !== undefined)).toBe(true);
+  });
+
   it("propose_agordo: the same Agordo with a wish answers within its schema", async () => {
     const result = await call(client, "propose_agordo", {
       agordo: KIESELWEG,
