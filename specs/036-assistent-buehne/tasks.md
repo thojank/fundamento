@@ -223,13 +223,13 @@ Aus den lokalen Hilfsbranches `…-t1-form`, `…-t1-figma`, `…-t1-assistent` 
 - [x] **T3730 6.4** `check:privat`, CI-Schritt, `pnpm check` – `72c4b675`
 - [x] **T3731 6.3** Leser `contracts/names.ts` – `04ba98db`; formunabhängige Tests – `fd27376b`; CHANGELOG – `95b3bd61`
 - [x] **T3732 6.6** Tests mit Attrappen-Repo und -Ordner (ohne Rot, D-22) – `7eaa7858`
-- [x] **T3733 6.1** Skript-Lauf „Spec 036 Teil 6: neutrale Namen (Skript-Lauf auf `f2b5a058`)“ – `30ae1068`; `check:privat` 0 Treffer, zweiter Lauf 0
-- [ ] **T3734 6.2** B-6.2-2: Generator `agordilo fixtures` um `dukolora` ergänzen (rot zuerst, vor dem Lauf-Commit) – Nachbesserung im PR lief zur Zeit dieser Zusammenführung; S36-7.1 prüft
+- [x] **T3733 6.1** Skript-Lauf „Spec 036 Teil 6: neutrale Namen (Skript-Lauf auf `f2b5a058`)“ – `1445ae90` (vor S36-6.2-B2 `30ae1068`); `check:privat` 0 Treffer, zweiter Lauf 0
+- [x] **T3734 6.2** B-6.2-2: Generator `agordilo fixtures` findet jede abgeleitete Fixture aus den Daten (auch `dukolora`) – rot `45179c59`, grün `7a9193ca`, Skript-Lauf neu `1445ae90` (D-326, D-S36-6.2-B2-2)
 
 ### C – Messung und Abschluss
 - [x] **T3735 6.6** Familien vorher/nachher gleich (5 Familien, 374 Token; Cache 0/0); D-22 bestätigt – nichts in die `.env`
 - [x] **T3736 6.3** Byte-Vergleich 542 Dateien (532 gleich nach Abbildung, Rest erklärt)
-- [x] **T3737** PR #133, CI 41213109051 grün 14/14
+- [x] **T3737** PR #133, CI 41356924882 grün 14/14 auf `1445ae90` (vorher 41213109051 auf `30ae1068`)
 - [x] **T3738 6.5** Anleitung Commit-Identität für den Maintainer im Bericht (Schritt 9)
 - [ ] **T3739** Teil 6 vor dem Merge auf dem aktuellen `main` neu aufsetzen (D-33) – beim Maintainer, zuletzt
 
@@ -237,5 +237,5 @@ Aus den lokalen Hilfsbranches `…-t1-form`, `…-t1-figma`, `…-t1-assistent` 
 
 - [x] **T3740** CI aller elf PRs gesammelt; R-8: #142 M5 einmal neu gestartet, wieder rot (B-6.1-1); #139 Abbruch der Infrastruktur einmal neu gestartet, grün; Kosten 0,00442 $ (S36-6.1)
 - [x] **T3741** Merge-Simulation in der vorgeschlagenen Reihenfolge, Teil 6 zuletzt auf dem simulierten Endstand neu gelaufen; Konflikte mit Datei, PRs, Lösung; B-6.2-1, B-6.2-2 (S36-6.2)
-- [x] **T3742** plan, tasks und Bericht zusammengeführt, Entscheidungen D-35 bis D-333 (S36-6.3) – Doku-Commits `31d9cb7c` und dieser Commit
-- [ ] **T3743** Doku-Test des Spec-036-Blocks und Prüfung gegen AC-1 bis AC-15 – S36-7.1
+- [x] **T3742** plan, tasks und Bericht zusammengeführt, Entscheidungen D-35 ff. (S36-6.3; Nummern mit S36-6.2-B2 und S36-7.1 bis D-347, D-339 (D-S36-7.1-1)) – Doku-Commits `31d9cb7c` und dieser Commit
+- [x] **T3743** Doku-Test des Spec-036-Blocks (rot `03c7fe79`, grün mit diesem Commit „Spec 036: Doku-Test und AC-Urteile (grün)“) und Prüfung gegen AC-1 bis AC-15 über alle PRs (S36-7.1)
