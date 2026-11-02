@@ -6,8 +6,9 @@
 // from the page's client.
 
 import type { RaportoViolation } from "@fundamento/agordilo";
-import type { Modelo } from "@fundamento/modelo";
+import { type Modelo, skemoNomoKey } from "@fundamento/modelo";
 import { jsonIsland } from "./html.js";
+import { partLabel } from "./komponentoj.js";
 
 /** A prop of the Ero the component must carry for the mark (its variant). */
 export interface PruefKondicxo {
@@ -38,15 +39,41 @@ function tokensOf(violation: RaportoViolation, modelo: Pick<Modelo, "kontrastPar
   return [pair.foreground, ...(pair.aux === undefined ? [] : [pair.aux.foreground])];
 }
 
+/** A token path of the Vortaro (`color.text.subtle`): never in a sentence the person reads. */
+const TOKEN_PATH = /\b[a-z]+\.[a-z]+(?:\.[a-z0-9-]+)+\b/g;
+
+/**
+ * The check's sentence as the stage shows it beside a component (QA run 1): what the problem is
+ * about – a token or a pair of contrast – becomes the component and its part by their German names
+ * („Text“, „Knopf · Beschriftung“). The check's own sentence keeps the token for other surfaces.
+ */
+function buehneSatzOf(
+  satz: string,
+  violation: RaportoViolation,
+  modelo: Partial<Pick<Modelo, "tradukoj">>,
+  ero: { id?: string; name: string },
+  skemo: { id?: string },
+  part: string,
+): string {
+  const de = modelo.tradukoj?.de ?? {};
+  const eroName = (ero.id === undefined ? undefined : de[`${ero.id}/name`]) ?? ero.name;
+  const partName =
+    (skemo.id === undefined ? undefined : de[skemoNomoKey(skemo.id, "parts", part)]) ??
+    partLabel(part);
+  const ort = `„${eroName === partName ? eroName : `${eroName} · ${partName}`}“`;
+  const subject = violation.subject.replace(/\s+\(.*\)$/, "");
+  return satz.replace(subject, ort).replace(TOKEN_PATH, ort);
+}
+
 /**
  * The marks of the open problems (Befund 3.5): per Ero and variant that binds a token of a problem,
- * one mark with the sentence of the first problem that names it. Conditions of the binding that are
- * not props (states as hover or selected) do not narrow the mark: the component shows the token in
- * one of them.
+ * one mark with the sentence of the first problem that names it, naming the component instead of
+ * the token. Conditions of the binding that are not props (states as hover or selected) do not
+ * narrow the mark: the component shows the token in one of them.
  */
 export function pruefmarkojOf(
   violations: readonly RaportoViolation[],
-  modelo: Pick<Modelo, "eroj" | "kontrastParoj">,
+  modelo: Pick<Modelo, "eroj" | "kontrastParoj"> & Partial<Pick<Modelo, "tradukoj">>,
   satzOf: (violation: RaportoViolation) => string,
 ): Pruefmarko[] {
   const markoj = new Map<string, Pruefmarko>();
@@ -69,7 +96,12 @@ export function pruefmarkojOf(
           })
           .sort((a, b) => a.prop.localeCompare(b.prop));
         const key = `${ero.name} ${JSON.stringify(kiam)}`;
-        if (!markoj.has(key)) markoj.set(key, { ero: ero.name, kiam, satz: satzOf(violation) });
+        if (!markoj.has(key))
+          markoj.set(key, {
+            ero: ero.name,
+            kiam,
+            satz: buehneSatzOf(satzOf(violation), violation, modelo, ero, skemo, binding.part),
+          });
       }
     }
   }

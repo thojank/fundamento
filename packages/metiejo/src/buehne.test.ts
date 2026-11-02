@@ -120,7 +120,7 @@ describe("Spec 036, Befund 3.5: the check reaches the stage per component", () =
     expect(await markojOf("sxtupo=buehne-farbe&breite=mittel")).toEqual([]);
   });
 
-  it("an open problem marks every component that shows the token, with the check's own sentence", async () => {
+  it("an open problem marks every component that shows the token, with the check's problem in user words", async () => {
     // The quieter text as strong as the default text: the text levels are not distinguishable
     // (text-hierarchy, an adjustable rule without its Jugxo – an open problem of the step).
     const set = await post("/api/marko/probomarko/festlegen", {
@@ -137,7 +137,9 @@ describe("Spec 036, Befund 3.5: the check reaches the stage per component", () =
     };
     for (const marko of markoj ?? []) {
       expect(marko.satz).toMatch(/^[^\n]+\.$/);
-      expect(pruefung.html).toContain(marko.satz);
+      // The check's problem as the check names it; the component instead of the token (QA run 1).
+      expect(pruefung.html).toContain(marko.satz.split(" bei ")[0]);
+      expect(marko.satz).not.toContain("color.text.subtle");
     }
   });
 
