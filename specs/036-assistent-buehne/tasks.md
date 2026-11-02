@@ -239,3 +239,13 @@ Aus den lokalen Hilfsbranches `…-t1-form`, `…-t1-figma`, `…-t1-assistent` 
 - [x] **T3741** Merge-Simulation in der vorgeschlagenen Reihenfolge, Teil 6 zuletzt auf dem simulierten Endstand neu gelaufen; Konflikte mit Datei, PRs, Lösung; B-6.2-1, B-6.2-2 (S36-6.2)
 - [x] **T3742** plan, tasks und Bericht zusammengeführt, Entscheidungen D-35 ff. (S36-6.3; Nummern mit S36-6.2-B2 und S36-7.1 bis D-347, D-339 (D-S36-7.1-1)) – Doku-Commits `31d9cb7c` und dieser Commit
 - [x] **T3743** Doku-Test des Spec-036-Blocks (rot `03c7fe79`, grün mit diesem Commit „Spec 036: Doku-Test und AC-Urteile (grün)“) und Prüfung gegen AC-1 bis AC-15 über alle PRs (S36-7.1)
+
+## QA-Lauf 1 (2026-11-02)
+
+- [x] **T3744 B-QA-1** Teil 4 (#137): Schritt „Zweitfarbe“ liest die Zweitfarbe des Vorschlags – rot `1e0e4bce`, grün `0ed097cb` (D-348, D-349)
+- [x] **T3745 B-QA-6** Teil 4 (#137): unlesbares Material in Nutzersprache – rot `2b54e27e`, grün `8c798c40` (D-350)
+- [x] **T3746 B-QA-2** 2b (#138): MCP-Ausgabeschemata mit `apply.zweitfarbe` – rot `46ad7cd9`, grün `edbcfa3e` (D-351)
+- [x] **T3747 B-QA-3** 2b (#138): Begründung von „Leitfarbe und Akzente“ ohne Spec-Verweis – rot `b662fe6b`, grün `693da0cc`
+- [x] **T3748 B-QA-4** 2b (#138): Ablehnung „Zweitfarbe für Knöpfe“ auch ohne Sprachmodell – rot `c3490fe9`, grün `4d5c87ab` (D-352)
+- [x] **T3749 B-QA-5** Teil 3 (#136): Prüfsatz auf der Bühne ohne Token-Pfad – rot `cebea8c6`, grün `1414714e` (D-353)
+- [x] **T3750** Gepusht (vorwärts), PR-Texte mit Abschnitt „QA-Lauf 1 (2026-11-02)“, CI #136 grün 14/14: 41377076293, #137 grün 14/14: 41377075771, #138 grün 14/14: 41377072490; merge-tree ohne neue Konflikte; simulierter Endstand `8f18540f` mit den Fixes, Server auf 7301 neu (D-355)
