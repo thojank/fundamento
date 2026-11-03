@@ -13,7 +13,7 @@
     "Reguloj": "Prüfung",
     "Regulo": "Prüfregel",
     "Kroniko": "Protokoll",
-    "Agordo": "Einstellungen",
+    "Agordo": "Konfiguration",
     "Aspekto": "Marke",
     "Vortaro": null,
     "Token": null
@@ -114,12 +114,12 @@
     },
     "Agordo": {
       "genus_im_text": "f",
-      "genus": "pl",
+      "genus": "f",
       "formen": {
-        "nom": "Einstellungen",
-        "akk": "Einstellungen",
-        "dat": "Einstellungen",
-        "gen": "Einstellungen"
+        "nom": "Konfiguration",
+        "akk": "Konfiguration",
+        "dat": "Konfiguration",
+        "gen": "Konfiguration"
       }
     },
     "Aspekto": {
