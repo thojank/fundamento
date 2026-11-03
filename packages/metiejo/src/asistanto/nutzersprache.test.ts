@@ -57,6 +57,45 @@ describe("the check of an answer (Spec 036, Befund 1.3)", () => {
   });
 });
 
+// Nachbesserung 02.11., A-2: „die Kroniko“ became „die Protokoll“. The word of the screen brings its
+// own article: the article before the term is replaced with the term, in its case.
+describe("the article goes with the word of the screen (Spec 036, Befund 1.3, A-2)", () => {
+  it("every term with forms has its word in four cases, the bare word as in begriffe", () => {
+    const { woerter } = NUTZERSPRACHE as {
+      woerter?: Record<string, { formen: Record<string, string> }>;
+    };
+    for (const term of ["Kroniko", "Agordo", "Aspekto"]) {
+      const eintrag = woerter?.[term];
+      expect(eintrag, term).toBeDefined();
+      expect(Object.keys(eintrag?.formen ?? {}).sort(), term).toEqual(["akk", "dat", "gen", "nom"]);
+      expect(eintrag?.formen.nom, term).toBe(NUTZERSPRACHE.begriffe[term]);
+    }
+  });
+
+  it("Kroniko: the article of the Protokoll, capitalised at the start of a sentence", () => {
+    expect(check("Die Kroniko zeigt jede Änderung.")).toBe("Das Protokoll zeigt jede Änderung.");
+    expect(check("Das steht in der Kroniko.")).toBe("Das steht im Protokoll.");
+    expect(check("In der Kroniko steht es.")).toBe("Im Protokoll steht es.");
+    expect(check("Der letzte Eintrag der Kroniko ist neu.")).toBe(
+      "Der letzte Eintrag des Protokolls ist neu.",
+    );
+    expect(check("Das ist eine Kroniko.")).toBe("Das ist ein Protokoll.");
+  });
+
+  it("Agordo: the article of the Einstellungen", () => {
+    expect(check("Ich habe die Agordo gespeichert.")).toBe(
+      "Ich habe die Einstellungen gespeichert.",
+    );
+    expect(check("Das steht in der Agordo.")).toBe("Das steht in den Einstellungen.");
+  });
+
+  it("Aspekto: the article of the Marke, whatever article the model used", () => {
+    expect(check("Das Aspekto ist fertig.")).toBe("Die Marke ist fertig.");
+    expect(check("Der Aspekto passt.")).toBe("Die Marke passt.");
+    expect(check("Das passt zu dem Aspekto.")).toBe("Das passt zur Marke.");
+  });
+});
+
 describe("the system text (Spec 036, Befund 1.3)", () => {
   it("names the current step by its word and its internal name only for the tools", () => {
     const formo = facetoj.facetoj.find((faceto) => faceto.name === "formo");
