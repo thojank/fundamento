@@ -5,15 +5,31 @@
 // steps (facetoj.json, nomo.de), the labels of the sliders (Agordilo) and the general terms of
 // data/nutzersprache.json. A term without a word on the screen – a token name of the Modelo, the
 // name of a tool, a term mapped to null – is left out where it stands in parentheses; elsewhere the
-// sentence that names it is dropped. Pure.
+// sentence that names it is dropped. A term written with an article (die Kroniko) takes the article
+// of its word in the same case (das Protokoll), from the same data. Pure.
 
 import { readFileSync } from "node:fs";
 import type { Regler } from "@fundamento/agordilo";
 import type { FacetojFile, Modelo } from "@fundamento/modelo";
 
+type Kasus = "nom" | "akk" | "dat" | "gen";
+type Genus = "m" | "f" | "n" | "pl";
+type Artikelformen = Record<Genus, Record<Kasus, string | null>>;
+
 interface NutzerspracheDatoj {
   /** Internal term → word of the screen; null: there is none. */
   begriffe: Record<string, string | null>;
+  /** The German articles (A-2): per gender the form of each case. */
+  artikel?: {
+    bestimmt: Artikelformen;
+    unbestimmt: Artikelformen;
+    /** Prepositions after which an article is read as dative where it can be. */
+    dativ_nach: string[];
+    /** Preposition and article → the joined form (in dem → im). */
+    verschmelzungen: Record<string, string>;
+  };
+  /** The words of the screen a term written with an article turns into (A-2). */
+  woerter?: Record<string, { genus_im_text: Genus; genus: Genus; formen: Record<Kasus, string> }>;
 }
 
 export const NUTZERSPRACHE_URL = new URL("../../data/nutzersprache.json", import.meta.url);
@@ -63,6 +79,75 @@ const ALONE_AFTER = "(?![\\p{L}\\p{N}_])";
 /** A dotted lower-case name (form.radius, color.brand.fill) or an identifier with an underscore. */
 const BEZEICHNER = "[a-z][a-z0-9-]*(?:\\.[a-z0-9-]+)+|[a-z][a-z0-9]*(?:_[a-z0-9]+)+";
 
+const KASUS: readonly Kasus[] = ["nom", "akk", "gen", "dat"];
+const NACH_PRAEPOSITION: readonly Kasus[] = ["dat", "akk", "gen", "nom"];
+const alternativen = (list: Iterable<string>) =>
+  [...list]
+    .sort((a, b) => b.length - a.length)
+    .map(escapeRegExp)
+    .join("|");
+const gross = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
+const istGross = (text: string) => text.charAt(0) !== text.charAt(0).toLowerCase();
+
+/** An optional preposition, an article and a term of woerter (Spec 036, Befund 1.3, A-2). */
+const ARTIKEL_MUSTER = (() => {
+  const { artikel, woerter } = NUTZERSPRACHE;
+  if (artikel === undefined || woerter === undefined || Object.keys(woerter).length === 0)
+    return undefined;
+  const formen = new Set<string>();
+  for (const tabelle of [artikel.bestimmt, artikel.unbestimmt])
+    for (const kasus of Object.values(tabelle))
+      for (const form of Object.values(kasus)) if (form !== null) formen.add(form);
+  return new RegExp(
+    `${ALONE_BEFORE}(?:(${alternativen(artikel.dativ_nach)})\\s+)?${ALONE_BEFORE}(${alternativen(formen)})\\s+(${alternativen(Object.keys(woerter))})${ALONE_AFTER}`,
+    "giu",
+  );
+})();
+
+/**
+ * A term written with an article becomes the word of the screen with its own article (A-2): the
+ * case comes from the form of the article (after a preposition the dative where it can be), the
+ * gender a model gives the term decides where the form leaves it open.
+ */
+function mitArtikel(satz: string): string {
+  const { artikel, woerter } = NUTZERSPRACHE;
+  if (ARTIKEL_MUSTER === undefined || artikel === undefined || woerter === undefined) return satz;
+  return satz.replace(
+    ARTIKEL_MUSTER,
+    (match, praeposition: string | undefined, alt: string, term: string) => {
+      const wort = Object.hasOwn(woerter, term) ? woerter[term] : undefined;
+      if (wort === undefined) return match;
+      const folge = praeposition === undefined ? KASUS : NACH_PRAEPOSITION;
+      const rang = (genus: Genus, kasus: Kasus) => {
+        const fremd = genus === wort.genus_im_text ? 0 : 1;
+        return praeposition === undefined
+          ? fremd * 10 + folge.indexOf(kasus)
+          : folge.indexOf(kasus) * 10 + fremd;
+      };
+      let best: { art: "bestimmt" | "unbestimmt"; kasus: Kasus; rang: number } | undefined;
+      for (const art of ["bestimmt", "unbestimmt"] as const)
+        for (const [genus, formen] of Object.entries(artikel[art]) as [
+          Genus,
+          Artikelformen[Genus],
+        ][])
+          for (const kasus of KASUS)
+            if (
+              formen[kasus] === alt.toLowerCase() &&
+              (best?.rang ?? Infinity) > rang(genus, kasus)
+            )
+              best = { art, kasus, rang: rang(genus, kasus) };
+      if (best === undefined) return match;
+      const neu = artikel[best.art][wort.genus][best.kasus];
+      const nomen = wort.formen[best.kasus];
+      if (neu === null) return praeposition === undefined ? nomen : `${praeposition} ${nomen}`;
+      if (praeposition === undefined) return `${istGross(alt) ? gross(neu) : neu} ${nomen}`;
+      const verschmolzen = artikel.verschmelzungen[`${praeposition.toLowerCase()} ${neu}`];
+      const vorne = verschmolzen ?? `${praeposition.toLowerCase()} ${neu}`;
+      return `${istGross(praeposition) ? gross(vorne) : vorne} ${nomen}`;
+    },
+  );
+}
+
 /** The sentences and line breaks of a text, the separators kept (odd indexes). */
 const teile = (text: string): string[] => text.split(/((?<=[.!?])[ \t]+|\n+)/);
 
@@ -77,7 +162,7 @@ function satzOf(satz: string, oberflaeche: Oberflaeche, muster: RegExp): string 
     return undefined;
   };
   let dropped = false;
-  const next = satz.replace(
+  const next = mitArtikel(satz).replace(
     muster,
     (match, paren: string | undefined, bare: string | undefined) => {
       if (paren !== undefined) {
