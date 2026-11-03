@@ -62,7 +62,8 @@ describe("konsileto in the repo Modelo (section ④, G1, G2, G4)", () => {
     expect(Object.keys(skemo?.parts ?? {})).toEqual(["surface", "text", "box", "motion"]);
     expect(skemo?.parts.surface).toEqual({
       fill: { fixed: "color.background.inverse" },
-      radius: { fixed: "radius.role.control" },
+      // Spec 036 Befund 1.1: a tooltip of several lines keeps a bounded radius at the pill.
+      radius: { fixed: "radius.role.multiline" },
       shadow: { fixed: "elevation.shadow.overlay" },
       layer: { fixed: "elevation.layer.overlay" },
     });

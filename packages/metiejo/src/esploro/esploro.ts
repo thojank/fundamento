@@ -140,6 +140,15 @@ function kunEkrano(css: readonly Trovo[], ekrano: readonly Trovo[]): Trovo[] {
   ];
 }
 
+/**
+ * The sentence about the pages read (Spec 036, Befund 1.4): their count and addresses, from the
+ * result of the research – never the model's own claim about them.
+ */
+export const gelesenSatz = (seitoj: readonly string[]): string =>
+  seitoj.length === 0
+    ? "Ich konnte keine Seite lesen."
+    : `Gelesen: ${seitoj.length} ${seitoj.length === 1 ? "Seite" : "Seiten"} (${seitoj.join(", ")}).`;
+
 /** „Die Seite <url> hat“ or „Die Seiten <url>, <url> haben“: the subject of a sentence of notoj. */
 const seiten = (urls: readonly string[], one: string, many: string) =>
   urls.length === 1 ? `Die Seite ${urls[0]} ${one}` : `Die Seiten ${urls.join(", ")} ${many}`;
@@ -152,7 +161,8 @@ export const SYSTEM_ESPLORO = (nomo: string, url?: string) =>
       ? "Beginne mit der offiziellen Website der Marke, wie du sie kennst."
       : `Beginne mit ${url}.`,
     "Lies danach höchstens zwei Presse- oder Markenseiten aus den Links, die lies_seite zurückgibt. Höchstens sechs Seiten insgesamt.",
-    "Antworte am Ende in zwei Sätzen auf Deutsch, welche Seiten du gelesen hast.",
+    // Spec 036, Befund 1.4: the sentence about the pages read comes from the data, not the model.
+    "Wenn du fertig bist, antworte nur mit „Fertig.“ Den Satz zu den gelesenen Seiten schreibt Fundamento selbst.",
   ].join("\n");
 
 export async function esplori(options: EsploroOptions): Promise<EsploroRezulto> {
@@ -221,13 +231,11 @@ export async function esplori(options: EsploroOptions): Promise<EsploroRezulto> 
   let enigo = 0;
   let eligo = 0;
   let requests = 0;
-  let antwort = "";
   if (options.provider === undefined) {
     if (options.url === undefined)
       throw new Error("Ohne Sprachmodell braucht die Recherche eine Adresse.");
     const first = await read(options.url);
     for (const link of (first.ligiloj as string[] | undefined) ?? []) await read(link);
-    antwort = `Gelesen: ${seitoj.join(", ")}.`;
   } else {
     const messages: ChatMessage[] = [
       { role: "system", content: SYSTEM_ESPLORO(options.nomo, options.url) },
@@ -255,10 +263,8 @@ export async function esplori(options: EsploroOptions): Promise<EsploroRezulto> 
       eligo += result.output;
       requests += result.requests;
       const requested = result.message.tool_calls ?? [];
-      if (requested.length === 0 || !offer) {
-        antwort = typeof result.message.content === "string" ? result.message.content.trim() : "";
-        break;
-      }
+      // The model's closing words are not taken over (Spec 036, Befund 1.4).
+      if (requested.length === 0 || !offer) break;
       messages.push({
         role: "assistant",
         content: result.message.content ?? "",
@@ -286,9 +292,6 @@ export async function esplori(options: EsploroOptions): Promise<EsploroRezulto> 
         });
       }
     }
-    if (antwort === "")
-      antwort =
-        seitoj.length === 0 ? "Ich konnte keine Seite lesen." : `Gelesen: ${seitoj.join(", ")}.`;
   }
   const notoj = [
     ...(blokitaj.length === 0
@@ -303,11 +306,11 @@ export async function esplori(options: EsploroOptions): Promise<EsploroRezulto> 
           `${seiten(nedarstellbar, "ließ", "ließen")} sich nicht darstellen; ihre Farben stammen nur aus dem Code.`,
         ]),
   ];
-  // Nothing read and something blocked: whatever else the answer says can only be guessed.
-  antwort =
+  // Nothing read and something blocked: the blocked sentence says it all.
+  const antwort =
     seitoj.length === 0 && blokitaj.length > 0
       ? notoj.join(" ")
-      : [antwort, ...notoj].filter((satz) => satz !== "").join(" ");
+      : [gelesenSatz(seitoj), ...notoj].join(" ");
   return {
     seitoj,
     abgelehnt,

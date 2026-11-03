@@ -15,20 +15,7 @@ import {
   kostoOnError,
   type Provider,
 } from "./ki.js";
-
-export const SYSTEM_ASISTANTO = [
-  "Du bist der Markenassistent von Fundamento. Du hilfst einer Person, Schritt für Schritt eine vollständige, geprüfte Marke zu bauen.",
-  "Die Marke besteht aus Facetoj (visuellen Aspekten): Leitfarbe, Neutraltöne, Statusfarben, Modi, Schrift, Form, Raum, Elevation, Bewegung, Fokus, Elementgrößen, Icons. Jede ist offen, definiert oder freigegeben.",
-  "Regeln:",
-  "1. Du änderst die Marke nur über die Werkzeuge. Erfinde keine Werte und setze nichts an den Reglern vorbei: Agordilo und Reguloj entscheiden. Frag mit dem Werkzeug regler nach dem Bereich, bevor du einen Wert setzt.",
-  "2. Sag danach in ein bis zwei Sätzen, was du gesetzt hast und warum.",
-  "3. Die Freigabe eines Schritts gibt nur die Person mit dem Knopf „Freigeben“. Du gibst nichts frei und sagst nie, ein Schritt sei freigegeben.",
-  "4. Bleib bei der aktuellen Faceto, wenn die Person nicht ausdrücklich eine andere meint.",
-  "5. Wenn ein Werkzeug ablehnt, nenne den Grund und schlage einen erlaubten Weg vor.",
-  "6. Sag nie, du hättest etwas geändert, wenn kein Werkzeug es gesetzt hat. Lesen (stato, regler, pruefe) ändert nichts.",
-  "7. Meldet ein Werkzeug das Ende eines Reglers, sag das. Vollständig abgerundet sind Bedienelemente nur als Pille (waehle_form), nicht am Ende von form.radius.",
-  "Antworte auf Deutsch, kurz und ohne Fachbegriffe des Vortaro.",
-].join("\n");
+import { enUzantlingvo, oberflaecheOf, systemAsistantoOf } from "./nutzersprache.js";
 
 export interface BabiloOptions {
   provider: Provider;
@@ -81,14 +68,10 @@ export async function babili(options: BabiloOptions): Promise<BabiloRezulto> {
   const maxToolCalls = options.maxToolCalls ?? 8;
   const tools = ILOJ.map(functionOf);
   const faceto = laborejo.facetoj.facetoj.find((entry) => entry.name === options.faceto);
+  // Spec 036, Befund 1.3: what the person reads is in the words of the screen.
+  const oberflaeche = oberflaecheOf(laborejo.facetoj, laborejo.regloj, laborejo.modelo);
   const messages: ChatMessage[] = [
-    {
-      role: "system",
-      content:
-        faceto === undefined
-          ? SYSTEM_ASISTANTO
-          : `${SYSTEM_ASISTANTO}\n\nAktuelle Faceto: ${faceto.name} (${faceto.nomo.de}).`,
-    },
+    { role: "system", content: systemAsistantoOf(laborejo.facetoj, laborejo.regloj, faceto) },
     ...options.historio.map((entry) => ({ role: entry.role, content: entry.content })),
     { role: "user", content: options.teksto },
   ];
@@ -129,6 +112,9 @@ export async function babili(options: BabiloOptions): Promise<BabiloRezulto> {
     const requested = result.message.tool_calls ?? [];
     if (requested.length === 0 || !offer) {
       const said = typeof result.message.content === "string" ? result.message.content.trim() : "";
+      // The claims are judged on what the model said; the person reads it in the screen's words.
+      const gesagt = enUzantlingvo(said, oberflaeche);
+      const gemeldet = grenzen.map((satz) => enUzantlingvo(satz, oberflaeche));
       const sxangxoj = laborejo.facetoj.facetoj.filter((entry) => changed.has(entry.name));
       const claims = sxangxoj.length === 0 && behauptet(said);
       if (claims && !erinnert) {
@@ -142,18 +128,18 @@ export async function babili(options: BabiloOptions): Promise<BabiloRezulto> {
       const answered = unrund
         ? [
             KEINE_PILLE,
-            grenzen.length > 0 ? grenzen.join(" ") : PILLE_HINWEIS,
+            gemeldet.length > 0 ? gemeldet.join(" ") : PILLE_HINWEIS,
             ...(sxangxoj.length > 0 ? [geaendert] : []),
           ].join(" ")
-        : said !== ""
+        : gesagt !== ""
           ? claims
-            ? `${NICHTS_GEAENDERT} ${said}`
-            : said
+            ? `${NICHTS_GEAENDERT} ${gesagt}`
+            : gesagt
           : sxangxoj.length > 0
             ? `${geaendert} Sieh dir die Vorschau an.`
             : "Ich habe nichts geändert. Sag es anders, zum Beispiel „wärmer“, „runder“ oder eine Farbe als #rrggbb.";
       // At the end of a slider the answer says so, unless it does already.
-      const unsaid = unrund ? [] : grenzen.filter(() => !/\bEnde\b/.test(answered));
+      const unsaid = unrund ? [] : gemeldet.filter(() => !/\bEnde\b/.test(answered));
       const antwort = [answered, ...unsaid].join(" ");
       return {
         antwort: provider.redact(antwort),

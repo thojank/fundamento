@@ -2918,6 +2918,15 @@
             "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JV5"
           }
         }
+      },
+      "multiline": {
+        "$value": "{radius.medium}",
+        "$description": "Corner radius of controls whose text runs over several lines and of small surfaces with text (text area, code block, tooltip): bounded like the controls' radius, the pill never reaches it.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M68V85N9TRR8VSRDWFNY7233"
+          }
+        }
       }
     }
   },
@@ -10211,7 +10220,7 @@
             "false": {
               "rest": {
                 "$type": "color",
-                "$value": "{color.palette.neutral.900}",
+                "$value": "{color.background.default}",
                 "$description": "elekto: surface.fill when selected=false, state=rest (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                 "$extensions": {
                   "com.ciferecigo.fundamento": {
@@ -10233,7 +10242,7 @@
               },
               "focus": {
                 "$type": "color",
-                "$value": "{color.palette.neutral.900}",
+                "$value": "{color.background.default}",
                 "$description": "elekto: surface.fill when selected=false, state=focus (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                 "$extensions": {
                   "com.ciferecigo.fundamento": {
@@ -10244,7 +10253,7 @@
               },
               "disabled": {
                 "$type": "color",
-                "$value": "{color.palette.neutral.400}",
+                "$value": "{color.background.default}",
                 "$description": "elekto: surface.fill when selected=false, state=disabled (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                 "$extensions": {
                   "com.ciferecigo.fundamento": {
@@ -10255,7 +10264,7 @@
               },
               "invalid": {
                 "$type": "color",
-                "$value": "{color.palette.neutral.900}",
+                "$value": "{color.background.default}",
                 "$description": "elekto: surface.fill when selected=false, state=invalid (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
                 "$extensions": {
                   "com.ciferecigo.fundamento": {
@@ -13206,7 +13215,7 @@
         },
         "radius": {
           "$type": "dimension",
-          "$value": "{radius.role.control}",
+          "$value": "{radius.role.multiline}",
           "$description": "kodbloko: box.radius (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
           "$extensions": {
             "com.ciferecigo.fundamento": {
@@ -22024,7 +22033,7 @@
         },
         "radius": {
           "$type": "dimension",
-          "$value": "{radius.role.control}",
+          "$value": "{radius.role.multiline}",
           "$description": "tekstareo: box.radius (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
           "$extensions": {
             "com.ciferecigo.fundamento": {

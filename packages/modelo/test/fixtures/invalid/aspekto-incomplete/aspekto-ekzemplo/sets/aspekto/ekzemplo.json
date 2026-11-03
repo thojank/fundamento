@@ -1530,6 +1530,9 @@
       },
       "pill": {
         "$value": "{radius.full}"
+      },
+      "multiline": {
+        "$value": "{radius.medium}"
       }
     }
   },
@@ -6049,7 +6052,7 @@
         },
         "radius": {
           "$type": "dimension",
-          "$value": "{radius.role.control}"
+          "$value": "{radius.role.multiline}"
         },
         "gap": {
           "$type": "dimension",
@@ -6537,7 +6540,7 @@
         },
         "radius": {
           "$type": "dimension",
-          "$value": "{radius.role.control}"
+          "$value": "{radius.role.multiline}"
         },
         "shadow": {
           "$type": "shadow",
@@ -9925,7 +9928,7 @@
         },
         "radius": {
           "$type": "dimension",
-          "$value": "{radius.role.control}"
+          "$value": "{radius.role.multiline}"
         }
       },
       "motion": {
