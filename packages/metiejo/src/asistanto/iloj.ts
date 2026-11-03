@@ -409,7 +409,19 @@ export async function vokiIlon(
       if (!(BEDIENFORMEN as readonly string[]).includes(form)) {
         return fail(`Die Form ${form} gibt es nicht.`, { wahl: BEDIENFORMEN });
       }
-      const applied = work.apply(withRegler(agordo, BEDIENFORM_PATH, form));
+      let next = withRegler(agordo, BEDIENFORM_PATH, form);
+      // Spec 036, Befund 1.2 (A-1): back from the choice after the last stop, the slider lands on the
+      // stop the vocabulary names (stufen[…].danach.zurueck), as the wish path does.
+      for (const [path, stufen] of Object.entries(work.wuensche.stufen ?? {})) {
+        const danach = stufen.danach;
+        const regler = work.regloj.find((entry) => entry.path === path);
+        if (danach?.zurueck === undefined || regler === undefined) continue;
+        if (danach.regler !== BEDIENFORM_PATH || form === danach.wert) continue;
+        if (bedienformOf(agordo) !== danach.wert) continue;
+        const wert = Math.min(regler.max, Math.max(regler.min, danach.zurueck));
+        next = withRegler(next, path, wert);
+      }
+      const applied = work.apply(next);
       return "fehler" in applied
         ? fail(applied.fehler)
         : done({ bedienelemente: form, facetoj: applied.facetoj });
