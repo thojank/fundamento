@@ -4,6 +4,7 @@
 // Schnellstart already sets for „ganz rund“), cards and surfaces keep their bounded radius. A
 // relative wish moves by one stop of the form (data/wuensche.json), each a visible change.
 
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { beforeAll, describe, expect, it } from "vitest";
 import {
   type Agordo,
@@ -79,9 +80,11 @@ describe("a relative wish moves by one visible stop of the form (V-3)", () => {
 
   it("names the stops of the form as data: eckig 0, leicht 0.5, rund 1, ganz rund 2, then Pille", () => {
     expect(wuensche.stufen?.["form.radius"]?.werte).toEqual([0, 0.5, 1, 2]);
+    // Spec 036 Befund 1.2: one stop back from the pill is 2 (zurueck).
     expect(wuensche.stufen?.["form.radius"]?.danach).toEqual({
       regler: BEDIENFORM_PATH,
       wert: "pille",
+      zurueck: 2,
     });
   });
 
@@ -131,5 +134,118 @@ describe("a relative wish moves by one visible stop of the form (V-3)", () => {
       const upper = radiusOf({ ...BASE, form: { radius: wert } });
       expect(upper - lower, `${werte[index - 1]} → ${wert}`).toBeGreaterThanOrEqual(upper / 2);
     }
+  });
+});
+
+// Spec 036 Befund 1.2: „eckiger“ from the pill went back to the value of the slider – from a pill
+// chosen at 0.5 a step of the wish ended at 0.5. The stops are 0 · 0.5 · 1 · 2 · Pille; one stop
+// back from the pill is 2, whatever the slider held (data/wuensche.json, D-83 as Spec 036 changes it).
+describe("eckiger from the pill goes one stop back, to 2 (Spec 036 Befund 1.2)", () => {
+  it("from a pill at any value of the slider, eckiger ends at 2 with the controls on the radius", () => {
+    for (const radius of [0, 0.5, 1, 1.6, 2]) {
+      const pill = withRegler({ ...BASE, form: { radius } }, BEDIENFORM_PATH, "pille");
+      const back = proponoOf(pill, { wunsch: "eckiger" }, wuensche, basis);
+      expect(bedienformOf(back.agordo), `Pille bei ${radius}`).toBe("radius");
+      expect(back.agordo.form?.radius, `Pille bei ${radius}`).toBe(2);
+    }
+  });
+
+  it("from a pill without a slider value too: the controls on the radius, the slider on 2", () => {
+    const pill = withRegler(BASE, BEDIENFORM_PATH, "pille");
+    const back = proponoOf(pill, { wunsch: "eckiger" }, wuensche, basis);
+    expect(bedienformOf(back.agordo)).toBe("radius");
+    expect(back.agordo.form?.radius).toBe(2);
+  });
+});
+
+// Spec 036 Befund 1.1: the pill rounds only single-line controls. Under the pill no field of several
+// lines, no card and no surface resolves to radius.full: read from the Skemoj, which part carries a
+// radius, and from the derived set, where its Ero-Token points.
+describe("the pill reaches single-line controls only (Spec 036 Befund 1.1)", () => {
+  type Radius = { fixed?: string; by?: string[] };
+  type SkemoFile = {
+    skemo: { props?: { name: string }[]; parts: Record<string, { radius?: Radius }> };
+  };
+  const EROJ = new URL("../../modelo/data/eroj/", import.meta.url);
+  const skemoj = readdirSync(EROJ)
+    .filter((ero) => existsSync(new URL(`${ero}/skemo.json`, EROJ)))
+    .map((ero) => ({
+      ero,
+      skemo: (JSON.parse(readFileSync(new URL(`${ero}/skemo.json`, EROJ), "utf8")) as SkemoFile)
+        .skemo,
+    }));
+  /**
+   * Eroj whose text keeps its lines though the Skemo has no `rows`: the code block (its text is
+   * laid out as written, line by line). A field with `rows` is found by the prop.
+   */
+  const MEHRZEILIG = ["kodbloko"];
+
+  /** Every part that must stay bounded, with the reason read from the data. */
+  const bounded = skemoj.flatMap(({ ero, skemo }) =>
+    Object.entries(skemo.parts).flatMap(([part, properties]) => {
+      if (properties.radius === undefined) return [];
+      if (properties.radius.fixed === "radius.role.surface")
+        return [{ ero, part, grund: "Fläche (radius.role.surface)" }];
+      if (part === "surface") return [{ ero, part, grund: "Fläche (Teil surface)" }];
+      const rows = (skemo.props ?? []).some((prop) => prop.name === "rows");
+      if (part === "box" && (rows || MEHRZEILIG.includes(ero)))
+        return [{ ero, part, grund: rows ? "mehrzeilig (rows)" : "mehrzeilig (Codeblock)" }];
+      return [];
+    }),
+  );
+
+  const pill = withRegler(PILLE, BEDIENFORM_PATH, "pille");
+  const set = JSON.parse(
+    deriveAspekto(pill, readStructure(), loadCalibration()).files["sets/aspekto/provo.json"] ??
+      "{}",
+  ) as Record<string, unknown>;
+
+  /** The names an alias passes through in the derived set, from a token to its value. */
+  const chainOf = (name: string): string[] => {
+    const chain = [name];
+    let value = valueAt(set, name);
+    while (typeof value === "string" && /^\{[^}]+\}$/.test(value) && chain.length < 16) {
+      const next = value.slice(1, -1);
+      chain.push(next);
+      value = valueAt(set, next);
+    }
+    return chain;
+  };
+  /** Every Ero-Token under ero.<ero>.<part>.radius (one per combination of its keys). */
+  const radiusTokens = (ero: string, part: string): string[] => {
+    const prefix = `ero.${ero}.${part.split("-").join(".")}.radius`;
+    const out: string[] = [];
+    const walk = (node: unknown, name: string) => {
+      if (typeof node !== "object" || node === null) return;
+      if ("$value" in node) out.push(name);
+      else
+        for (const [key, child] of Object.entries(node))
+          if (!key.startsWith("$")) walk(child, `${name}.${key}`);
+    };
+    let node: unknown = set;
+    for (const key of prefix.split("."))
+      node = (node as Record<string, unknown> | undefined)?.[key];
+    walk(node, prefix);
+    return out;
+  };
+
+  it("finds the text area, the code block, cards and surfaces in the Skemoj", () => {
+    const names = bounded.map(({ ero, part }) => `${ero}.${part}`);
+    for (const expected of ["tekstareo.box", "kodbloko.box", "karto.surface", "konsileto.surface"])
+      expect(names).toContain(expected);
+  });
+
+  it("under the pill single-line controls reach radius.full (the case proves something)", () => {
+    expect(chainOf("ero.butono.box.radius")).toContain("radius.full");
+  });
+
+  it("under the pill no field of several lines, no card and no surface resolves to radius.full", () => {
+    const full = bounded.flatMap(({ ero, part, grund }) =>
+      radiusTokens(ero, part)
+        .filter((name) => chainOf(name).includes("radius.full"))
+        .map((name) => `${name} (${grund}): ${chainOf(name).join(" → ")}`),
+    );
+    expect(bounded.every(({ ero, part }) => radiusTokens(ero, part).length > 0)).toBe(true);
+    expect(full).toEqual([]);
   });
 });

@@ -233,7 +233,7 @@
           "fixed": "spacing.small"
         },
         "radius": {
-          "fixed": "radius.role.control"
+          "fixed": "radius.role.multiline"
         }
       },
       "motion": {

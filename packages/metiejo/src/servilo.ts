@@ -1819,6 +1819,8 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         sendJson(response, {
           facetoj: result.facetoj,
           satz: [result.satz, ...notoj].join(" "),
+          // Spec 036, D-95: what the person must know of the inspiration, shown before going on.
+          notoj,
           rev: draft.rev,
           stato: statoOf(name, draft),
           ...(turn === undefined ? {} : { antwort: turn.antwort, kosto: turn.kosto }),

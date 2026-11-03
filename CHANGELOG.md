@@ -9,6 +9,9 @@ Changes of the published packages (the Make Kits `@fundamento/make-kit-<aspekto>
 - Neu, additiv: Die zwölf Felder (`fm-kampo`, `fm-tekstareo`, `fm-elektilo`, `fm-listelektilo`, `fm-plurelektilo`, `fm-kompletigilo`, `fm-datelektilo`, `fm-glitilo`, `fm-elekto`, `fm-markobutono`, `fm-sxaltilo`, `fm-alsxutilo`) haben die Prop `label`. `label="…"` ist eine sichtbare Beschriftung: Der Text steht dort, wo der Text des Elements stünde, und benennt das Feld; wo beides steht, gewinnt der Text des Elements. Keine Prop aus 0.2.0 ändert ihre Bedeutung (Arkitekturo-Vertrag); ein Feld ohne `label` sieht aus wie bisher.
   Wer `label` bisher als nicht deklariertes Attribut an ein Feld schrieb (in 0.2.0 ohne Wirkung, in HTML wie in React), sieht diesen Text jetzt als Beschriftung, solange das Element keinen eigenen Text hat; wer das nicht will, entfernt das Attribut.
   (Spec 029 ②b-1b und Spec 035 2.2, D-04 zur Bestätigung durch den Maintainer.)
+- Neu, additiv: die Rolle `radius.role.multiline` (CSS `--fm-radius-role-multiline`) für mehrzeilige Felder und kleine Flächen mit Text. Die Skemoj von `fm-tekstareo`, `fm-kodbloko` und `fm-konsileto` binden ihre Rundung jetzt an diese Rolle statt an `radius.role.control`. Jedes mitgelieferte Aspekto belegt sie mit dem bisherigen Wert (`{radius.medium}`), das Bild bleibt gleich. Wählt eine Marke die Pille für Bedienelemente (`radius.role.control` auf `radius.full`), bleiben diese drei begrenzt.
+  Wer ein eigenes Aspekto-Paket pflegt, ergänzt `radius.role.multiline` mit dem Wert, den dort `radius.role.control` hat; sonst meldet die Validierung `aspekto-incomplete`.
+  (Spec 036 Befund 1.1.)
 
 ### Hinweis für MCP-Clients
 

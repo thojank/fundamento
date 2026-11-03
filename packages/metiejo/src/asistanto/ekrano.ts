@@ -9,7 +9,7 @@ import type { Agordo } from "@fundamento/agordilo";
 import { escapeHtml, jsonIsland, screenDocument } from "../html.js";
 import type { StudioPage } from "../studio.js";
 import { KONFIRMO_TEKSTO } from "./averto.js";
-import type { FacetoStand, FacetoStato, Vollstaendigkeit } from "./stato.js";
+import { type FacetoStand, type FacetoStato, freigabeOf, type Vollstaendigkeit } from "./stato.js";
 
 /** The Studio page and the Schnellstart step of each Faceto. */
 export const FACETO_STUDIO: Readonly<Record<string, StudioPage>> = {
@@ -174,15 +174,8 @@ export function asistantoScreen(input: AsistantoInput): string {
   const nav = vollstaendigkeit.facetoj
     .map((entry) => facetoLink(name, entry, faceto.name))
     .join("");
-  const releasable = faceto.stato === "definiert" && faceto.gruen;
-  const releaseHint =
-    faceto.stato === "offen"
-      ? "Übernimm den Vorschlag oder passe ihn an, dann kannst du freigeben."
-      : !faceto.gruen
-        ? `Die Prüfung meldet ${faceto.probleme} offene${faceto.probleme === 1 ? "s Problem" : " Probleme"} in diesem Schritt.`
-        : faceto.stato === "freigegeben"
-          ? "Freigegeben. Du kannst den Schritt wieder öffnen."
-          : "Bereit zur Freigabe.";
+  // Spec 036, D-96: the first render says what every later state says (stato.ts).
+  const { freigebbar: releasable, freigabeSatz: releaseHint } = freigabeOf(faceto);
   const fremda = input.fremda;
   const dialog =
     fremda !== undefined && !fremda.konfirmita

@@ -75,8 +75,8 @@ describe("Spec 029 ① 5: the foundation pages", () => {
     // clear button of kampo, kompletigilo and elektilo by size (3 for 1 each, +6) and the target of
     // the six buttons at the end of a field (+6); ②b-1b M-2: the status of the twelve fields, their
     // message and the kampo's status icon (216). Spec 035 2.3.1 and 2.3.3: the targets of the date
-    // picker's trigger and ✕ (+2).
-    expect(tokenoj.length).toBe(1882);
+    // picker's trigger and ✕ (+2). Spec 036 Befund 1.1: radius.role.multiline (+1).
+    expect(tokenoj.length).toBe(1883);
     const levels = new Set(tokenoj.map((token) => token.ebeno));
     expect(levels).toEqual(new Set(["grundlage", "rolle", "ero"]));
     const text = tokenoj.find((token) => token.name === "color.text.default");

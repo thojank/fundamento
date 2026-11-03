@@ -39,20 +39,27 @@ const STATUS = new RegExp(
   `^ero\\.${FIELDS}\\.([a-z-]+\\.)+(warning|success)$|^ero\\.${FIELDS}\\.message\\.|^ero\\.kampo\\.status\\.icon\\.`,
 );
 
+/**
+ * Spec 036 Befund 1.1: the radius role of fields of several lines and small surfaces with text,
+ * so the pill of the controls does not reach them; every brand assigns it today's value.
+ */
+const MULTILINE = /^radius\.role\.multiline$/;
+
 /** Whether a token was added after main's record. */
 export const addedSinceMain = (name: string): boolean =>
   SPINNER.test(name) ||
   CLEAR.test(name) ||
   SUMMARY.test(name) ||
   TARGET.test(name) ||
-  STATUS.test(name);
+  STATUS.test(name) ||
+  MULTILINE.test(name);
 
 /**
  * How many tokens ②b added so far (M-5: 12 fields × 3; M-6 with Abnahme #122: 11; M-1: 4; the
  * targets of Abnahme #122: 6; M-2: 216), and Spec 035 2.3 (the targets of the date picker's
- * trigger and ✕: 2).
+ * trigger and ✕: 2), and Spec 036 Befund 1.1 (radius.role.multiline: 1).
  */
-export const ADDED_SINCE_MAIN = 275;
+export const ADDED_SINCE_MAIN = 276;
 
 /** ②b-1 M-1: tokens main had under another name; each keeps main's value. */
 const MOVED: Readonly<Record<string, string>> = {
