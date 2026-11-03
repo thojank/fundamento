@@ -1,7 +1,8 @@
 // What a website says of its brand (Spec 033 S2, observation after Art. V): the HTML of the page and
 // its stylesheets – linked and inline, at most ten, each at most 2 MB – read without a browser. From
 // the declarations come the colours (literal, and a custom property once more for every var() that
-// uses it), the font families by role (headings: display, code: code, else body), the radii and the
+// uses it), the font families by role (headings: display, code: code, else body; from font-family or
+// the family part of the shorthand font, after its size – Nachbesserung A-3), the radii and the
 // spacing (padding and gap) in px, each with the file and the line. Generic families, 0, pills and
 // percentages do not count. Spec 036 Teil 4: a drawn shadow (box-shadow, or a custom property named
 // for shadow or elevation, not inset) is a finding too, for the step „Elevation“, and a colour that
@@ -11,6 +12,7 @@
 // Blokita: nothing of it is read (Spec 035, Befund 4.1).
 
 import postcss from "postcss";
+import { fontShorthandOf } from "./tiparo-kurzo.js";
 import { coloursIn, type Herkunft, lineOf, type Trovo } from "./trovo.js";
 
 export type RetejoFetch = (url: string, init?: RequestInit) => Promise<Response>;
@@ -104,6 +106,16 @@ const firstFamily = (value: string): string | undefined =>
     .split(",")
     .map((part) => part.trim().replace(/^["']|["']$/g, ""))
     .find((part) => part !== "" && !GENERIC.has(part.toLowerCase()) && !part.startsWith("var("));
+
+/**
+ * The first family of a value that may be the shorthand `font` (Nachbesserung A-3): of a shorthand
+ * only its family part, after the size – never the size; else the value as a family list.
+ */
+const firstFamilyOfFont = (value: string): string | undefined => {
+  const shorthand = fontShorthandOf(value);
+  if (shorthand === undefined) return firstFamily(value);
+  return shorthand.familioj === undefined ? undefined : firstFamily(shorthand.familioj);
+};
 
 /**
  * The colour of every custom property of the sheets, through var() chains and regardless of the
@@ -201,7 +213,7 @@ function readSheet(
           out.push({ kind: "radiuso", valoro: length, pezo: 1, herkunft: at(line) });
         }
       } else if (/family|font-(body|sans|serif|display|heading|mono|code)/.test(prop)) {
-        const family = firstFamily(value);
+        const family = firstFamilyOfFont(value);
         if (family !== undefined) {
           const rolo = /heading|display|title/.test(prop)
             ? "display"
@@ -217,8 +229,14 @@ function readSheet(
         }
       }
     }
-    if (prop === "font-family") {
-      const family = firstFamily(value);
+    if (prop === "font-family" || prop === "font") {
+      const shorthand = prop === "font" ? fontShorthandOf(value) : undefined;
+      const family =
+        prop === "font-family"
+          ? firstFamily(value)
+          : shorthand?.familioj === undefined
+            ? undefined
+            : firstFamily(shorthand.familioj);
       if (family !== undefined) {
         const selector = decl.parent?.type === "rule" ? (decl.parent as postcss.Rule).selector : "";
         out.push({
