@@ -79,7 +79,7 @@ Aus den lokalen Hilfsbranches `…-t1-form`, `…-t1-figma`, `…-t1-assistent` 
 ### C – Messung und Abschluss
 - [x] **T3651** AC-10 1338/1338 zweimal (+80 `dukolora`), Zeilenvergleich der Projekcioj (0 verlorene Zeilen), Metiejo 30/30
 - [x] **T3652** PR #138, Messanleitung, CI 41244251101 grün 14/14
-- [ ] **T3653** D-20 (vollständige Tokens) – beim Maintainer, zu entscheiden
+- [x] **T3653** D-20 (vollständige Tokens) – bestätigt (Maintainer, 02.11.)
 
 ## Teil 3 – Bühne (#136, `261031-spec-036-t3-buehne`)
 
@@ -195,7 +195,7 @@ Aus den lokalen Hilfsbranches `…-t1-form`, `…-t1-figma`, `…-t1-assistent` 
 - [x] **T3716** AC-10 `1aa0d4f4` ↔ `f4fff0fb` 1622/1662 (gewollt); drei Engines `kodbloko-2b5` 18/18; Kurzprofile < 750
 - [x] **T3717** PR #142; CI 41310052743 rot an M5 nach einem R-8-Neustart (B-6.1-1)
 - [ ] **T3718** Spec 026 O-2 (Look einer deaktivierten Zeile), O-3 (Vitrino-Zeitraum über die Monatsgrenze), glitilo B-5 – offen (D-266, D-S36-4.6-15, zu entscheiden)
-- [ ] **T3719** B-6.1-1 (M5 in CI) und B-6.2-1 (403 Kern-Tokens) vor dem Merge – beim Maintainer
+- [ ] **T3719** B-6.1-1 (M5 in CI) vor dem Merge – beim Maintainer; B-6.2-1 (403 Kern-Tokens) in #138 erledigt (T3751)
 
 ### ③ Doku je Ero (#143, `261031-spec-036-t5-3-doku`)
 
@@ -249,3 +249,14 @@ Aus den lokalen Hilfsbranches `…-t1-form`, `…-t1-figma`, `…-t1-assistent` 
 - [x] **T3748 B-QA-4** 2b (#138): Ablehnung „Zweitfarbe für Knöpfe“ auch ohne Sprachmodell – rot `c3490fe9`, grün `4d5c87ab` (D-352)
 - [x] **T3749 B-QA-5** Teil 3 (#136): Prüfsatz auf der Bühne ohne Token-Pfad – rot `cebea8c6`, grün `1414714e` (D-353)
 - [x] **T3750** Gepusht (vorwärts), PR-Texte mit Abschnitt „QA-Lauf 1 (2026-11-02)“, CI #136 grün 14/14: 41377076293, #137 grün 14/14: 41377075771, #138 grün 14/14: 41377072490; merge-tree ohne neue Konflikte; simulierter Endstand `8f18540f` mit den Fixes, Server auf 7301 neu (D-355)
+
+## Nachbesserung 02.11. (Maintainer; nachgetragen 2026-11-03)
+
+D-20, D-62, D-108 bestätigt (AC-4 erfüllt). Keine neue Merge-Simulation, nur CI je PR.
+
+- [x] **T3751 B-6.2-1** 2b (#138): Palette `color.palette.sekundo` 12 statt 15 Stufen, 17 Kern-Tokens, Teil 1 + 2b + ②b-5 = 400 – rot `58654b99`, grün `ede4f801`; CI 41689035771 grün 14/14 (D-356 bis D-362)
+- [x] **T3752 A-1** Teil 1 (#134): „eckiger“ über `waehle_form` nach der Pille aus `danach.zurueck` – rot `5ddfae84`, grün `2f447449` (D-363 bis D-365)
+- [x] **T3753 A-2** Teil 1 (#134): Artikel vor ersetzten Begriffen aus `nutzersprache.json` – rot `074db03e`, grün `4f43d45e`; CI 41681523083 grün 14/14 (D-366 bis D-371)
+- [x] **T3754 A-3** Teil 4 (#137): Kurzschreibweise `font` liefert den Familienteil (`fontShorthandOf`) – rot `529a92e7`, grün `242899d4`; CI 41682342445 grün 14/14 (D-372 bis D-375)
+- [x] **T3755** plan, tasks und Bericht nachgetragen (Abschnitt „Nachbesserung 02.11.“, AC-4 erfüllt, Zählungen des Rezepts −3, D-376, D-377) – Doku-Commit „Spec 036: Nachbesserung 02.11. im Bericht nachgetragen“
+- [ ] **T3756 B-R1-1** Agordo als „die Einstellung“ (Singular) oder Grenze annehmen – beim Maintainer, zu entscheiden (D-369)
