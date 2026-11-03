@@ -119,7 +119,6 @@ None.
 | color.palette.info.900 | light | #002c44 | 14.60:1 | 14.60:1 | yes | yes | 0.0797 → 0.0639 |
 | color.palette.info.950 | light | #002136 | 16.47:1 | 16.47:1 | yes | yes | 0.0628 → 0.0547 |
 | color.palette.info.975 | light | #071823 | 18.10:1 | 18.09:1 | yes | yes | 0.0314 → 0.0314 |
-| color.palette.sekundo.25 | light | #f3f8f7 | 1.07:1 | 1.07:1 | yes | yes | 0.0054 → 0.0054 |
 | color.palette.sekundo.50 | light | #e7f1ef | 1.16:1 | 1.16:1 | yes | yes | 0.0107 → 0.0107 |
 | color.palette.sekundo.100 | light | #d4e9e6 | 1.27:1 | 1.27:1 | yes | yes | 0.0229 → 0.0229 |
 | color.palette.sekundo.150 | light | #c3e1dd | 1.39:1 | 1.39:1 | yes | yes | 0.0313 → 0.0313 |
@@ -130,10 +129,8 @@ None.
 | color.palette.sekundo.600 | light | #00766e | 5.50:1 | 5.50:1 | yes | yes | 0.0999 → 0.0890 |
 | color.palette.sekundo.700 | light | #005d57 | 7.76:1 | 7.76:1 | yes | yes | 0.0999 → 0.0753 |
 | color.palette.sekundo.800 | light | #004540 | 10.87:1 | 10.87:1 | yes | yes | 0.0999 → 0.0615 |
-| color.palette.sekundo.850 | light | #003a36 | 12.70:1 | 12.70:1 | yes | yes | 0.0941 → 0.0547 |
 | color.palette.sekundo.900 | light | #002f2b | 14.61:1 | 14.61:1 | yes | yes | 0.0886 → 0.0478 |
 | color.palette.sekundo.950 | light | #002421 | 16.46:1 | 16.46:1 | yes | yes | 0.0704 → 0.0410 |
-| color.palette.sekundo.975 | light | #001a18 | 18.10:1 | 18.10:1 | yes | yes | 0.0352 → 0.0342 |
 | color.palette.neutral.950 | dark | #1f1f20 | 1.28:1 | 1.28:1 | yes | yes | 0.0012 → 0.0012 |
 
 ## KontrastParoj (lowest value per pair)

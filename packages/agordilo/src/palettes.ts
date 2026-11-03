@@ -2,7 +2,7 @@
 // target, moved by the sliders, with the tone of its source — the lead colour for accent (and,
 // tinted, for neutral), a status colour or the default tone turned towards the lead colour for the
 // status palettes. A brand with a second colour (zweitfarbe, Spec 036 Befund 2.2, V-2) gets a
-// seventh, color.palette.sekundo, at the targets of the accent ramp in the tone of that colour;
+// seventh, color.palette.sekundo, at twelve targets of the accent ramp in the tone of that colour;
 // without one the structure's palette stays (the neutral ramp). Pure.
 
 import {
@@ -53,6 +53,25 @@ export const ZWEITFARBE_PALETTE = "sekundo";
 export type DerivedPaletteName = PaletteName | typeof ZWEITFARBE_PALETTE;
 /** Every palette the derivation can write: the six of the calibration and the Zweitfarbe. */
 export const DERIVED_PALETTES: readonly DerivedPaletteName[] = [...PALETTES, ZWEITFARBE_PALETTE];
+/**
+ * The steps of the Zweitfarbe (Spec 036 B-6.2-1): twelve of the accent ramp's fifteen – every step
+ * a role uses (light 150/600/700/800, dark 150/300/400/800, high contrast 100/900) and the even
+ * ramp around them; 25, 850 and 975 stay with the accent, so the core keeps to 400 tokens.
+ */
+export const ZWEITFARBE_STEPS: readonly string[] = [
+  "50",
+  "100",
+  "150",
+  "200",
+  "300",
+  "400",
+  "500",
+  "600",
+  "700",
+  "800",
+  "900",
+  "950",
+];
 /** The calibrated ramp each palette is solved on: the Zweitfarbe takes the accent's targets. */
 export const CALIBRATED_RAMP: Readonly<Record<DerivedPaletteName, PaletteName>> = {
   neutral: "neutral",
@@ -268,7 +287,9 @@ export function derivePalettes(
     const source = sources[palette];
     if (source === undefined) continue;
     const calibrated = calibration.palettes[CALIBRATED_RAMP[palette]];
-    const ordered = Object.keys(calibrated.steps).sort((a, b) => Number(a) - Number(b));
+    const ordered = Object.keys(calibrated.steps)
+      .filter((step) => palette !== ZWEITFARBE_PALETTE || ZWEITFARBE_STEPS.includes(step))
+      .sort((a, b) => Number(a) - Number(b));
     for (const step of ordered) {
       const entry = calibrated.steps[step];
       if (entry === undefined) continue;

@@ -725,9 +725,6 @@
         }
       },
       "sekundo": {
-        "25": {
-          "$value": "{color.palette.neutral.25}"
-        },
         "50": {
           "$value": "{color.palette.neutral.50}"
         },
@@ -758,17 +755,11 @@
         "800": {
           "$value": "{color.palette.neutral.800}"
         },
-        "850": {
-          "$value": "{color.palette.neutral.850}"
-        },
         "900": {
           "$value": "{color.palette.neutral.900}"
         },
         "950": {
           "$value": "{color.palette.neutral.950}"
-        },
-        "975": {
-          "$value": "{color.palette.neutral.975}"
         }
       }
     },

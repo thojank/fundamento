@@ -37,7 +37,7 @@ describe("Spec 029 ①: the structure of komuna 0.2 for the Agordilo", () => {
     // of the date picker at the size of an icon with their targets, read-only as rest. Spec 036
     // Befund 2.2 (V-2): the palette color.palette.sekundo and the roles color.sekundo.*.
     expect(structure.fingerprint).toBe(
-      "dd7e3769552b640babe7be662686d52985ec95a7345ae98d8ccca18c2b2b6e87",
+      "ed9cac9d076388d4e4c0c88705f73e5d2e97f652068f168c9ef2959873f73f59",
     );
   });
 

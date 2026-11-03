@@ -57,9 +57,9 @@ export const addedSinceMain = (name: string): boolean =>
 /**
  * How many tokens ②b added so far (M-5: 12 fields × 3; M-6 with Abnahme #122: 11; M-1: 4; the
  * targets of Abnahme #122: 6; M-2: 216), and Spec 035 2.3 (the targets of the date picker's
- * trigger and ✕: 2), and Spec 036 Befund 2.2 (the Zweitfarbe: 15 steps and 5 roles, 20).
+ * trigger and ✕: 2), and Spec 036 Befund 2.2 (the Zweitfarbe: 12 steps and 5 roles, 17; B-6.2-1).
  */
-export const ADDED_SINCE_MAIN = 295;
+export const ADDED_SINCE_MAIN = 292;
 
 /** ②b-1 M-1: tokens main had under another name; each keeps main's value. */
 const MOVED: Readonly<Record<string, string>> = {

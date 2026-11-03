@@ -1815,16 +1815,6 @@
         "$description": "Transparent white: overlays for a dark surface, the counterpart of shade."
       },
       "sekundo": {
-        "25": {
-          "$value": "{color.palette.neutral.25}",
-          "$description": "Zweitfarbe, the second colour of the brand (Spec 036 V-2), step 25: komuna has none, so the step is the neutral step 25; a brand with a Zweitfarbe derives the ramp from it at the contrast targets of the accent ramp.",
-          "$extensions": {
-            "com.ciferecigo.fundamento": {
-              "id": "tok_01M69KM3ETBZENXD7RN245XKT9",
-              "role": "palette"
-            }
-          }
-        },
         "50": {
           "$value": "{color.palette.neutral.50}",
           "$description": "Zweitfarbe, the second colour of the brand (Spec 036 V-2), step 50: komuna has none, so the step is the neutral step 50; a brand with a Zweitfarbe derives the ramp from it at the contrast targets of the accent ramp.",
@@ -1925,16 +1915,6 @@
             }
           }
         },
-        "850": {
-          "$value": "{color.palette.neutral.850}",
-          "$description": "Zweitfarbe, the second colour of the brand (Spec 036 V-2), step 850: komuna has none, so the step is the neutral step 850; a brand with a Zweitfarbe derives the ramp from it at the contrast targets of the accent ramp.",
-          "$extensions": {
-            "com.ciferecigo.fundamento": {
-              "id": "tok_01M69KM3EVY2BT7XYMNZWS20WK",
-              "role": "palette"
-            }
-          }
-        },
         "900": {
           "$value": "{color.palette.neutral.900}",
           "$description": "Zweitfarbe, the second colour of the brand (Spec 036 V-2), step 900: komuna has none, so the step is the neutral step 900; a brand with a Zweitfarbe derives the ramp from it at the contrast targets of the accent ramp.",
@@ -1951,16 +1931,6 @@
           "$extensions": {
             "com.ciferecigo.fundamento": {
               "id": "tok_01M69KM3EVY2BT7XYMNZWS20WN",
-              "role": "palette"
-            }
-          }
-        },
-        "975": {
-          "$value": "{color.palette.neutral.975}",
-          "$description": "Zweitfarbe, the second colour of the brand (Spec 036 V-2), step 975: komuna has none, so the step is the neutral step 975; a brand with a Zweitfarbe derives the ramp from it at the contrast targets of the accent ramp.",
-          "$extensions": {
-            "com.ciferecigo.fundamento": {
-              "id": "tok_01M69KM3EVY2BT7XYMNZWS20WP",
               "role": "palette"
             }
           }

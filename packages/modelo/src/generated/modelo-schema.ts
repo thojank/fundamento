@@ -2001,7 +2001,7 @@ export interface Agordo {
   historio?: AgordoHistorio[];
 }
 /**
- * The second colour of a brand (Spec 036, Befund 2.2, V-2): a colour of the same shape as leitfarbe, from which the Agordilo derives the palette color.palette.sekundo at the contrast targets of the accent ramp; the roles color.sekundo.* (highlight surface, illustration, badge, chart) take it, never an action, a link or the focus (Regulo sekundo-not-action). Absent means no Zweitfarbe: the palette is the neutral ramp. herkunft says where it was found, absent when it was entered by hand.
+ * The second colour of a brand (Spec 036, Befund 2.2, V-2): a colour of the same shape as leitfarbe, from which the Agordilo derives the palette color.palette.sekundo at the contrast targets of twelve steps of the accent ramp (50 to 950, not 25, 850 and 975); the roles color.sekundo.* (highlight surface, illustration, badge, chart) take it, never an action, a link or the focus (Regulo sekundo-not-action). Absent means no Zweitfarbe: the palette is the neutral ramp. herkunft says where it was found, absent when it was entered by hand.
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "AgordoZweitfarbe".

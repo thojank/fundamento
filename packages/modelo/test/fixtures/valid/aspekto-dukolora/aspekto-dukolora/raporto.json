@@ -1263,19 +1263,6 @@
       }
     },
     {
-      "token": "color.palette.sekundo.25",
-      "mode": "light",
-      "hex": "#f3f8f7",
-      "target": 1.0746,
-      "achieved": 1.0745,
-      "onTarget": true,
-      "toneKept": true,
-      "chroma": {
-        "requested": 0.0054,
-        "kept": 0.0054
-      }
-    },
-    {
       "token": "color.palette.sekundo.50",
       "mode": "light",
       "hex": "#e7f1ef",
@@ -1406,19 +1393,6 @@
       }
     },
     {
-      "token": "color.palette.sekundo.850",
-      "mode": "light",
-      "hex": "#003a36",
-      "target": 12.7003,
-      "achieved": 12.7015,
-      "onTarget": true,
-      "toneKept": true,
-      "chroma": {
-        "requested": 0.0941,
-        "kept": 0.0547
-      }
-    },
-    {
       "token": "color.palette.sekundo.900",
       "mode": "light",
       "hex": "#002f2b",
@@ -1442,19 +1416,6 @@
       "chroma": {
         "requested": 0.0704,
         "kept": 0.041
-      }
-    },
-    {
-      "token": "color.palette.sekundo.975",
-      "mode": "light",
-      "hex": "#001a18",
-      "target": 18.0988,
-      "achieved": 18.0991,
-      "onTarget": true,
-      "toneKept": true,
-      "chroma": {
-        "requested": 0.0352,
-        "kept": 0.0342
       }
     },
     {
