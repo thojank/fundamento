@@ -48,8 +48,8 @@ const ROLES = [
   "color.sekundo.chart",
 ] as const;
 
+// Spec 036 B-6.2-1: the twelve steps of the Zweitfarbe (not the fifteen of the accent ramp).
 const STEPS = [
-  "25",
   "50",
   "100",
   "150",
@@ -60,10 +60,8 @@ const STEPS = [
   "600",
   "700",
   "800",
-  "850",
   "900",
   "950",
-  "975",
 ] as const;
 
 const COMBINATIONS = [
@@ -156,6 +154,15 @@ describe("an Agordo with a Zweitfarbe (Spec 036, Befund 2.2, V-2)", () => {
     const zweitfarbe = parseAgordoColor("#0f8f86");
     if (zweitfarbe === undefined) throw new Error("#0f8f86 does not parse");
     const tokens = withIt({ "color-scheme": "light", contrast: "default" });
+    // B-6.2-1: the set and the report name the twelve steps, no step of the accent ramp beyond.
+    expect(
+      Object.keys(set.color?.palette?.sekundo ?? {}).filter((key) => !key.startsWith("$")),
+    ).toEqual([...STEPS]);
+    expect(
+      derivation.raporto.palettes
+        .filter((step) => step.token.startsWith("color.palette.sekundo."))
+        .map((step) => step.token.slice("color.palette.sekundo.".length)),
+    ).toEqual([...STEPS]);
     for (const step of STEPS) {
       const value = set.color?.palette?.sekundo?.[step]?.$value;
       expect(readDtcgColor(value), `color.palette.sekundo.${step} is a colour`).toBeDefined();

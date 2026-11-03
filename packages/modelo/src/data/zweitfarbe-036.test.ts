@@ -18,23 +18,16 @@ const modelo: Modelo = loaded;
 const core = modelo.setoj.find((set) => set.name === "core")?.tokens ?? {};
 
 const PALETTE = "color.palette.sekundo";
-const STEPS = [
-  "25",
-  "50",
-  "100",
-  "150",
-  "200",
-  "300",
-  "400",
-  "500",
-  "600",
-  "700",
-  "800",
-  "850",
-  "900",
-  "950",
-  "975",
-];
+// Spec 036 B-6.2-1: twelve steps, not the fifteen of the accent ramp – every step a role uses
+// (light 150/600/700/800, dark 150/300/400/800, high contrast 100/900) and the even ramp around them.
+const STEPS = ["50", "100", "150", "200", "300", "400", "500", "600", "700", "800", "900", "950"];
+
+/**
+ * Spec 036 B-6.2-1: the core tokens of the first two levels may grow by 24 from 376 to the 400 of
+ * coverage.test.ts. Teil 1 adds radius.role.multiline (1), ②b-5 radius.role.tag and five
+ * color.syntax.* (6); the Zweitfarbe keeps to the rest.
+ */
+const ZWEITFARBE_CORE_BUDGET = 17;
 
 /** Role → the role it declares (Constitution: foreground, background, border …). */
 const ROLES: Readonly<Record<string, string>> = {
@@ -62,17 +55,24 @@ const PAIRS: Readonly<Record<string, [string, string, string]>> = {
 };
 
 describe("the Zweitfarbe in the Vortaro (Spec 036, Befund 2.2, V-2)", () => {
-  it("has the palette color.palette.sekundo with the steps of the accent ramp", () => {
-    const accent = Object.keys(core)
-      .filter((name) => name.startsWith("color.palette.accent."))
-      .map((name) => name.slice("color.palette.accent.".length));
-    expect(accent.sort()).toEqual([...STEPS].sort());
+  it("has the palette color.palette.sekundo with its twelve steps (B-6.2-1)", () => {
+    const steps = Object.keys(core)
+      .filter((name) => name.startsWith(`${PALETTE}.`))
+      .map((name) => name.slice(`${PALETTE}.`.length));
+    expect(steps.sort()).toEqual([...STEPS].sort());
     for (const step of STEPS) {
       const token = core[`${PALETTE}.${step}`];
       expect(token?.role, `${PALETTE}.${step}`).toBe("palette");
       // komuna has no Zweitfarbe: the palette is the neutral ramp, step for step (D-20).
       expect(aliasTarget(token?.value), `${PALETTE}.${step}`).toBe(`color.palette.neutral.${step}`);
     }
+  });
+
+  it("takes at most 17 core tokens, so Teil 1, 2b and ②b-5 together stay within 400 (B-6.2-1)", () => {
+    const own = Object.keys(core).filter(
+      (name) => name.startsWith(`${PALETTE}.`) || name.startsWith("color.sekundo."),
+    );
+    expect(own.length).toBeLessThanOrEqual(ZWEITFARBE_CORE_BUDGET);
   });
 
   it("has the roles of the Zweitfarbe on its palette, each with a role and a description", () => {
