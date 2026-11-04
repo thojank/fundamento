@@ -10,13 +10,7 @@ import { fileURLToPath } from "node:url";
 import { projectModeloSource, resolveCombination } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../build.js";
-import {
-  ADDED_BY_2B2,
-  ADDED_SINCE_MAIN,
-  addedRows,
-  mainRows,
-  REMOVED_SINCE_MAIN,
-} from "./neu-seit-main.js";
+import { addedRows, justificationsOf, mainRows, REMOVED_SINCE_MAIN } from "./neu-seit-main.js";
 
 const CXIUJ = fileURLToPath(
   new URL(
@@ -69,21 +63,28 @@ describe("Spec 029 ① 1: komuna-0-2 keeps today's komuna", () => {
     if (!prepared.ok) return;
     const { modelo } = prepared.input;
     const differences: string[] = [];
+    // Spec 040 B-4: the added rows are derived, each justified in exactly one list (293 + 168
+    // pinned before); the number of tokens is main's, less the gone ones, plus the added ones.
+    const unjustified: string[] = [];
     for (const [key, expected] of Object.entries(BAZO.kombinoj)) {
       const assignment = Object.fromEntries(
         key.split("&").map((pair) => pair.split("=") as [string, string]),
       );
       const { tokens } = resolveCombination(modelo, { aspekto: "komuna-0-2", ...assignment });
-      expect(Object.keys(tokens)).toHaveLength(
-        BAZO.tokens + ADDED_SINCE_MAIN + ADDED_BY_2B2 - REMOVED_SINCE_MAIN,
-      );
+      const { added, violations } = addedRows(Object.keys(tokens));
+      unjustified.push(...violations.map((violation) => `${key}: ${violation}`));
+      const count = BAZO.tokens - REMOVED_SINCE_MAIN + added.length;
+      if (Object.keys(tokens).length !== count) {
+        unjustified.push(`${key}: ${Object.keys(tokens).length} tokens, derived ${count}`);
+      }
       if (hashOf(tokens) !== expected) differences.push(key);
     }
     expect(Object.keys(BAZO.kombinoj)).toHaveLength(72);
+    expect(unjustified).toEqual([]);
     expect(differences).toEqual([]);
   });
 
-  it("Spec 040 B-4: one more justified row breaks the pinned sum, not the property", () => {
+  it("Spec 040 B-4: one more justified row keeps the derived sum", () => {
     expect(prepared.ok).toBe(true);
     if (!prepared.ok) return;
     const [key = "", expected] = Object.entries(BAZO.kombinoj)[0] ?? [];
@@ -102,9 +103,11 @@ describe("Spec 029 ① 1: komuna-0-2 keeps today's komuna", () => {
     expect(violations).toEqual([]);
     expect(hashOf(more)).toBe(expected);
     expect(Object.keys(more)).toHaveLength(BAZO.tokens - REMOVED_SINCE_MAIN + added.length);
-    expect(Object.keys(more)).toHaveLength(
-      BAZO.tokens + ADDED_SINCE_MAIN + ADDED_BY_2B2 - REMOVED_SINCE_MAIN,
+    // A list whose rows are all gone is named: it has gone stale.
+    const withoutSekundo = Object.keys(more).filter(
+      (name) => justificationsOf(name)[0] !== "SEKUNDO",
     );
+    expect(addedRows(withoutSekundo).violations).toEqual(["SEKUNDO: justifies no row"]);
   });
 
   it("carries komuna's fonts, Ikonaro and Aspiroj, under its own name and namespace", () => {
