@@ -6,9 +6,15 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { projectModeloSource } from "@fundamento/modelo";
+import {
+  loadModelo,
+  type Modelo,
+  projectModeloSource,
+  resolveCombination,
+} from "@fundamento/modelo";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildProjekcioj } from "../../build.js";
+import { bazojDatumoj } from "./bazoj.js";
 import { VITRINO_TEKSTOJ, type VitrinoDatumoj } from "./datumoj.js";
 import { VITRINO_FILE } from "./vitrino.js";
 
@@ -28,6 +34,59 @@ const PAGES = {
   movado: "Bewegung",
   ikonoj: "Icons",
 } as const;
+
+/** The Modelo the build reads, loaded from the same configuration – the source of the pages. */
+function sourceModelo(): Modelo {
+  const { modelo } = loadModelo(projectModeloSource(CXIUJ));
+  if (modelo === undefined) throw new Error("the configuration with all brands did not load");
+  return modelo;
+}
+
+/**
+ * Spec 040 B-4: source equals projection – the Tokens page lists every token of the source's
+ * core, each once, and no other. Derived from the source, so a token added in the Vortaro needs no
+ * new number here.
+ */
+function sourceProjectionViolations(source: Modelo, shown: readonly string[]): string[] {
+  const core = Object.keys(source.setoj.find((set) => set.name === "core")?.tokens ?? {});
+  const listed = new Set(shown);
+  const violations: string[] = [];
+  if (core.length === 0) violations.push("the source has no core token");
+  for (const name of core) if (!listed.has(name)) violations.push(`${name}: not on the page`);
+  const known = new Set(core);
+  for (const name of listed) if (!known.has(name)) violations.push(`${name}: not in the source`);
+  if (listed.size !== shown.length) violations.push(`${shown.length - listed.size} rows twice`);
+  return violations;
+}
+
+/** The source with one more literal token in the core, a copy of another one's value. */
+function withCoreToken(of: Modelo, name: string, like: string): Modelo {
+  return {
+    ...of,
+    setoj: of.setoj.map((set) => {
+      const model = set.tokens[like];
+      if (set.name !== "core" || model === undefined) return set;
+      return { ...set, tokens: { ...set.tokens, [name]: { ...model, name } } };
+    }),
+  };
+}
+
+/** The Tokens page of a source, from the base combinations of every brand, light and dark. */
+function tokenojOf(of: Modelo): string[] {
+  const defaults = Object.fromEntries(
+    of.dimensioj.map((dimensio) => [dimensio.name, dimensio.default]),
+  );
+  const aspektoj = (
+    of.dimensioj.find((dimensio) => dimensio.name === "aspekto")?.valoroj ?? []
+  ).map((valoro) => valoro.name);
+  const rezolvoj = aspektoj.flatMap((aspekto) =>
+    ["light", "dark"].map((scheme) => {
+      const assignment = { ...defaults, aspekto, "color-scheme": scheme };
+      return { assignment, tokens: resolveCombination(of, assignment).tokens };
+    }),
+  );
+  return bazojDatumoj(of, rezolvoj, aspektoj).tokenoj.map((token) => token.name);
+}
 
 const dirs: string[] = [];
 let html = "";
@@ -112,6 +171,13 @@ describe("Spec 029 ① 5: the foundation pages", () => {
       "dukolora",
     ]);
     expect(html).toMatch(/<input[^>]*type="search"[^>]*data-fm-bazoj-sercxo/);
+  });
+
+  it("Spec 040 B-4: one more token in the source breaks a pinned sum, not source = projection", () => {
+    const more = withCoreToken(sourceModelo(), "spacing.scale.450", "spacing.scale.400");
+    const shown = tokenojOf(more);
+    expect(sourceProjectionViolations(more, shown)).toEqual([]);
+    expect(shown.length).toBe(2060);
   });
 
   it("Farbe: the roles light and dark as pairs, with their contrast on the surface", () => {
