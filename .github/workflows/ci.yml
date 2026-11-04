@@ -513,6 +513,7 @@ jobs:
   # Beside the Make Kit and the quickstart it ran into the 15 minutes (run 41877598624); its tests
   # alone took up to ~13 min on a slow runner. The Vitrino runs in one engine (Chromium) on main
   # too; every part builds its projections and runs check:bazo on its own runner.
+  # Spec 040 T-7: without the timing tests, which run in the job zeittests.
   werkstatt:
     name: Rendered checks (Vitrino-Werkstatt, part ${{ matrix.parto }})
     runs-on: ubuntu-latest
@@ -641,3 +642,68 @@ jobs:
         run: pnpm check:vitrino
         env:
           VITRINO_PARTO: ${{ matrix.parto }}
+
+  # Spec 040 T-7 (AC-B6): the timing tests of the Vitrino – M5 with its Gegenproben and the
+  # calibration of the block, the Ableitung Gegenprobe, G5 and its Gegenprobe – in a job of their
+  # own, the part `zeittests` of packages/eroj/test/vitrino-partoj.ts; the Werkstatt parts leave
+  # them out. Their limits and calibration are unchanged. Red here does not block a pull request
+  # (it shows as failed, the run stays green); on main, at night and on workflow_dispatch it blocks.
+  zeittests:
+    name: Timing checks (M5, Gegenprobe, Ableitung, G5)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: ${{ github.event_name == 'pull_request' }}
+    needs: betroffen
+    env:
+      PLAYWRIGHT_ENGINES: ${{ needs.betroffen.outputs.engines }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # Spec 040 T-6 (E-9): no change reaches this job's package – it ends green and says so.
+      - name: nicht betroffen
+        if: ${{ !(needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj')) }}
+        run: 'echo "nicht betroffen: no change reaches @fundamento/eroj, this job tests nothing." | tee -a "$GITHUB_STEP_SUMMARY"'
+
+      - name: Set up pnpm
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Playwright browsers
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
+        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
+
+      - name: Turbo cache
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
+        uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-
+
+      # check:bazo spawns the built fm: the closure is the CLI's.
+      - name: Build
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
+        run: pnpm turbo run build --filter=@fundamento/cli... --cache-dir=.turbo/cache
+
+      # Spec 019 ② (M5, G5), Nachlese 12 ③, Spec 035/036 (Gegenproben, Ableitung): the timings of
+      # the Werkstatt in a browser, as before in the Werkstatt parts.
+      - name: "Check: Vitrino (Zeittests)"
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
+        run: pnpm check:vitrino
+        env:
+          VITRINO_PARTO: zeittests
