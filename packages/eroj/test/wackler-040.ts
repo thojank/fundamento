@@ -94,3 +94,17 @@ export async function gespeichert(
     page.off("response", hoeren);
   }
 }
+
+/**
+ * A page the test loads (`laden`: page.goto or page.reload) has settled (Spec 040 B-5): it loaded,
+ * its preview loaded the page's rev, and the check the step Farbe runs on load answered. Run 41920898257
+ * (WebKit, Linux) hung at „Keine Zweitfarbe“ of the Schnellstart pressed right after the test's
+ * reload, while that page still loaded its preview and checked the draft.
+ */
+export async function seiteGeladen(
+  _page: Page,
+  _id: string,
+  laden: () => Promise<unknown>,
+): Promise<void> {
+  await laden();
+}

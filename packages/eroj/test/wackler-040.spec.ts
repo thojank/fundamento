@@ -7,7 +7,7 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import { expect, test } from "@playwright/test";
-import { gespeichert } from "./wackler-040.js";
+import { gespeichert, seiteGeladen } from "./wackler-040.js";
 
 const SEITE = `<!doctype html>
 <html lang="de" data-mt-sxtupo="farbe"><head><title>Probe</title></head><body>
@@ -22,6 +22,16 @@ document.getElementById("feld").addEventListener("input", async (event) => {
   frame.src = "/vorschau?rev=" + body.rev;
   await fetch("/api/marko/probe/pruefung", { method: "POST" });
 });
+</script></body></html>`;
+
+// A page that does on load what the Schnellstart's step Farbe does: its preview loads the page's rev,
+// and the step checks the draft.
+const LADEN = `<!doctype html>
+<html lang="de" data-mt-sxtupo="farbe" data-mt-rev="3"><head><title>Probe</title></head><body>
+<div id="mt-pruefung"></div><iframe data-mt-vorschau title="Vorschau"></iframe>
+<script>
+document.querySelector("iframe[data-mt-vorschau]").src = "/vorschau?rev=3";
+fetch("/api/marko/probe/pruefung", { method: "POST" });
 </script></body></html>`;
 
 /** A request the server holds: known once it came, answered once the test lets it go. */
@@ -69,6 +79,7 @@ function html(response: ServerResponse, body: string): void {
 function antworte(request: IncomingMessage, response: ServerResponse): void {
   const url = new URL(request.url ?? "/", base);
   if (url.pathname === "/seite") html(response, SEITE);
+  else if (url.pathname === "/laden") html(response, LADEN);
   else if (url.pathname === "/vorschau" && url.searchParams.get("rev") === "1")
     html(response, "<!doctype html><p>rev 1</p>");
   else if (url.pathname === "/vorschau") vorschau.annehmen(response);
@@ -132,4 +143,33 @@ test("gespeichert() waits for the draft's answer, the preview of its rev and the
   // The check answered: settled, with the rev of the draft's answer.
   pruefung.gehalten.freigeben();
   expect(await gesetzt).toBe(2);
+});
+
+test("seiteGeladen() waits for the load, the preview of the page's rev and the check on load (Spec 040 B-5)", async ({
+  page,
+}) => {
+  vorschau = halten((response) => html(response, "<!doctype html><p>rev 3</p>"));
+  pruefung = halten((response) => {
+    response.setHeader("content-type", "application/json");
+    response.end(JSON.stringify({ html: "" }));
+  });
+  let fertig = false;
+  const geladen = seiteGeladen(page, "probe", () => page.goto(`${base}/laden`)).then(() => {
+    fertig = true;
+  });
+
+  // The page asked for the preview of rev 3 and for the check: not settled.
+  await vorschau.gehalten.gekommen;
+  await pruefung.gehalten.gekommen;
+  expect(fertig).toBe(false);
+
+  // The preview of rev 3 loaded (and with it the page), the check is still open: not settled.
+  vorschau.gehalten.freigeben();
+  await expect(page.frameLocator("iframe[data-mt-vorschau]").locator("p")).toHaveText("rev 3");
+  await page.evaluate(() => document.readyState);
+  expect(fertig).toBe(false);
+
+  // The check answered: settled.
+  pruefung.gehalten.freigeben();
+  await geladen;
 });
