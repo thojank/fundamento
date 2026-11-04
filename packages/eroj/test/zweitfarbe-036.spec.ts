@@ -9,6 +9,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type APIRequestContext, expect, type Page, test } from "@playwright/test";
+import { gespeichert, vorschauGeladen } from "./wackler-040.js";
 
 const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
 const cli = join(repoRoot, "packages/cli/dist/index.js");
@@ -117,9 +118,17 @@ for (const [ort, pfad] of [
     const feld = page.getByRole("textbox", { name: /^Zweitfarbe/ });
     await feld.focus();
     await expect(feld).toBeFocused();
-    const gesendet = entwurf(page, id);
+    // Spec 040 B-5: change only once the preview loaded what the page names, and reload only once
+    // the save has settled – the draft's answer to the whole colour, the preview of its rev, the
+    // step's check – not while the page is still busy with it.
+    await vorschauGeladen(page);
+    const gesetzt = gespeichert(
+      page,
+      id,
+      (patch) => (patch as { zweitfarbe?: { farbe?: unknown } }).zweitfarbe?.farbe === "#0f8f86",
+    );
     await page.keyboard.type("#0f8f86");
-    expect((await gesendet).status()).toBe(200);
+    await gesetzt;
     await expect.poll(() => zweitfarbe(id)).toEqual({ farbe: "#0f8f86" });
 
     await page.reload();
@@ -130,6 +139,7 @@ for (const [ort, pfad] of [
     // „Keine Zweitfarbe“ clears it: by the keyboard, and the step says so after the reload.
     const entfernen = page.getByRole("button", { name: "Keine Zweitfarbe" });
     await entfernen.focus();
+    await vorschauGeladen(page);
     const geloescht = entwurf(page, id);
     // The button reloads the page once the draft took the patch: wait for that navigation itself,
     // not for the load state of the page that is about to go.

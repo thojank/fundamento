@@ -70,7 +70,7 @@ function antworte(request: IncomingMessage, response: ServerResponse): void {
   const url = new URL(request.url ?? "/", base);
   if (url.pathname === "/seite") html(response, SEITE);
   else if (url.pathname === "/vorschau" && url.searchParams.get("rev") === "1")
-    html(response, "<!doctype html><title>rev 1</title>");
+    html(response, "<!doctype html><p>rev 1</p>");
   else if (url.pathname === "/vorschau") vorschau.annehmen(response);
   else if (url.pathname === "/api/marko/probe/pruefung") pruefung.annehmen(response);
   else if (url.pathname === "/api/marko/probe/entwurf") {
@@ -99,7 +99,7 @@ test.afterAll(async () => {
 test("gespeichert() waits for the draft's answer, the preview of its rev and the check (Spec 040 B-5)", async ({
   page,
 }) => {
-  vorschau = halten((response) => html(response, "<!doctype html><title>rev 2</title>"));
+  vorschau = halten((response) => html(response, "<!doctype html><p>rev 2</p>"));
   pruefung = halten((response) => {
     response.setHeader("content-type", "application/json");
     response.end(JSON.stringify({ html: "" }));
@@ -125,7 +125,7 @@ test("gespeichert() waits for the draft's answer, the preview of its rev and the
   // The preview of rev 2 loaded, the check is still open: not settled.
   vorschau.gehalten.freigeben();
   const rahmen = page.frameLocator("iframe[data-mt-vorschau]");
-  await expect(rahmen.locator("title")).toHaveText("rev 2");
+  await expect(rahmen.locator("p")).toHaveText("rev 2");
   await page.evaluate(() => document.readyState);
   expect(fertig).toBe(false);
 
