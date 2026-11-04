@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { configDefaults, defineConfig } from "vitest/config";
+import { vitestAusgabe } from "../../scripts/reporter/knapp-vitest.mjs";
 
 // Outside `turbo run test` (`pnpm --filter @fundamento/projekcioj test`, `vitest` in this directory) the
 // tests would run against whatever `dist` lies around, and a stale one fails far from its cause or
@@ -27,6 +28,8 @@ if (process.env.TURBO_HASH === undefined && process.env.FM_GEBAUT === undefined)
 // biome-ignore lint/style/noDefaultExport: Vitest loads its config from the default export.
 export default defineConfig({
   test: {
+    // Spec 040 T-7 (C-4): terse with FM_AUSGABE=knapp; JUnit in test-reports/vitest/ always.
+    ...vitestAusgabe("vitest", configDefaults.reporters),
     exclude: [...configDefaults.exclude, "src/perf.test.ts", "src/celoj/vitrino/bazo.test.ts"],
     testTimeout: 60_000,
   },

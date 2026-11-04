@@ -1,4 +1,5 @@
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
+import { vitestAusgabe } from "../../scripts/reporter/knapp-vitest.mjs";
 
 // The cli tests spawn the built `fm` binary. On a cold CI runner a single spawn took 5.3 s, over
 // Vitest's 5 s default, so these tests get a budget sized for a cold runner (Article X).
@@ -11,6 +12,8 @@ import { defineConfig } from "vitest/config";
 // biome-ignore lint/style/noDefaultExport: Vitest loads its config from the default export.
 export default defineConfig({
   test: {
+    // Spec 040 T-7 (C-4): terse with FM_AUSGABE=knapp; JUnit in test-reports/vitest/ always.
+    ...vitestAusgabe("vitest", configDefaults.reporters),
     testTimeout: 60_000,
     globalSetup: ["./vitest.global-setup.ts"],
   },

@@ -1,4 +1,5 @@
 import { defineConfig } from "@playwright/test";
+import { playwrightAusgabe } from "../../scripts/reporter/knapp-playwright.mjs";
 import base from "./playwright.config.js";
 import { vitrinoAuswahl } from "./test/vitrino-partoj.js";
 
@@ -12,6 +13,8 @@ import { vitrinoAuswahl } from "./test/vitrino-partoj.js";
 // biome-ignore lint/style/noDefaultExport: Playwright loads its config from the default export.
 export default defineConfig({
   ...base,
+  // Spec 040 T-7 (C-4): its reports in a folder of their own, test-reports/playwright-vitrino/.
+  reporter: playwrightAusgabe("playwright-vitrino"),
   testMatch: "**/vitrino.check.ts",
   testIgnore: [],
   timeout: 300_000,

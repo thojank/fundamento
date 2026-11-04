@@ -20,31 +20,48 @@
     },
     "test": {
       "dependsOn": ["build"],
-      "env": ["PLAYWRIGHT_ENGINES"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/scripts/reporter/**"],
+      "env": ["PLAYWRIGHT_ENGINES", "FM_AUSGABE"],
       "outputs": []
     },
     "@fundamento/agordilo#test": {
       "dependsOn": ["build"],
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/scripts/neutrale-namen/*.mjs"],
-      "env": ["PLAYWRIGHT_ENGINES"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/scripts/neutrale-namen/*.mjs",
+        "$TURBO_ROOT$/scripts/reporter/**"
+      ],
+      "env": ["PLAYWRIGHT_ENGINES", "FM_AUSGABE"],
       "outputs": []
     },
     "@fundamento/ekranoj#test": {
       "dependsOn": ["build"],
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/specs/037-agenten-ekranoj/**"],
-      "env": ["PLAYWRIGHT_ENGINES"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/specs/037-agenten-ekranoj/**",
+        "$TURBO_ROOT$/scripts/reporter/**"
+      ],
+      "env": ["PLAYWRIGHT_ENGINES", "FM_AUSGABE"],
       "outputs": []
     },
     "@fundamento/eroj#test": {
       "dependsOn": ["build", "@fundamento/cli#build"],
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/specs/004-komparo/mezuroj-main.json"],
-      "env": ["PLAYWRIGHT_ENGINES"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/specs/004-komparo/mezuroj-main.json",
+        "$TURBO_ROOT$/scripts/reporter/**"
+      ],
+      "env": ["PLAYWRIGHT_ENGINES", "FM_AUSGABE"],
       "outputs": []
     },
     "@fundamento/mcp#test": {
       "dependsOn": ["build"],
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/scripts/neutrale-namen/*.mjs"],
-      "env": ["PLAYWRIGHT_ENGINES"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/scripts/neutrale-namen/*.mjs",
+        "$TURBO_ROOT$/scripts/reporter/**"
+      ],
+      "env": ["PLAYWRIGHT_ENGINES", "FM_AUSGABE"],
       "outputs": []
     },
     "@fundamento/metiejo#test": {
@@ -53,9 +70,10 @@
         "$TURBO_DEFAULT$",
         "$TURBO_ROOT$/.env.example",
         "$TURBO_ROOT$/specs/023-werkstatt-konfigurilo/**",
-        "$TURBO_ROOT$/specs/024-studio/**"
+        "$TURBO_ROOT$/specs/024-studio/**",
+        "$TURBO_ROOT$/scripts/reporter/**"
       ],
-      "env": ["PLAYWRIGHT_ENGINES"],
+      "env": ["PLAYWRIGHT_ENGINES", "FM_AUSGABE"],
       "outputs": []
     },
     "@fundamento/modelo#test": {
@@ -74,13 +92,17 @@
         "$TURBO_ROOT$/specs/**",
         "$TURBO_ROOT$/packages/eroj/test/vitrino-partoj.ts"
       ],
-      "env": ["PLAYWRIGHT_ENGINES"],
+      "env": ["PLAYWRIGHT_ENGINES", "FM_AUSGABE"],
       "outputs": []
     },
     "@fundamento/nordstelo#test": {
       "dependsOn": ["build"],
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/specs/034-nachlese-12/plan.md"],
-      "env": ["PLAYWRIGHT_ENGINES"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/specs/034-nachlese-12/plan.md",
+        "$TURBO_ROOT$/scripts/reporter/**"
+      ],
+      "env": ["PLAYWRIGHT_ENGINES", "FM_AUSGABE"],
       "outputs": []
     },
     "@fundamento/projekcioj#test": {
@@ -91,9 +113,10 @@
         "$TURBO_ROOT$/packages/*/package.json",
         "$TURBO_ROOT$/packages/metiejo/data/tiparoj.json",
         "$TURBO_ROOT$/scripts/fonto-astryx/vergleich/**",
-        "!$TURBO_ROOT$/scripts/fonto-astryx/vergleich/node_modules/**"
+        "!$TURBO_ROOT$/scripts/fonto-astryx/vergleich/node_modules/**",
+        "$TURBO_ROOT$/scripts/reporter/**"
       ],
-      "env": ["PLAYWRIGHT_ENGINES"],
+      "env": ["PLAYWRIGHT_ENGINES", "FM_AUSGABE"],
       "outputs": []
     },
     "lint": {

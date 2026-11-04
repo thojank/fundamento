@@ -87,7 +87,7 @@ describe("the lines of the terse output (scripts/reporter/knapp.mjs, C-4)", () =
     );
   });
 
-  it("indents the first error, without colours, blank lines and frames of node_modules, cut at 20 lines", () => {
+  it("indents the first error by two spaces, without colours, blank lines and frames of node_modules, cut at 20 lines", () => {
     const stack = [
       "\u001b[31mAssertionError: expected 2 to be 3\u001b[39m",
       "",
@@ -97,7 +97,7 @@ describe("the lines of the terse output (scripts/reporter/knapp.mjs, C-4)", () =
     ].join("\n");
     expect(fehlerText(stack)).toEqual([
       "  AssertionError: expected 2 to be 3",
-      "    at /repo/packages/x/src/a.test.ts:9:19",
+      "  at /repo/packages/x/src/a.test.ts:9:19",
     ]);
     const long = Array.from({ length: 50 }, (_, index) => `line ${index}`).join("\n");
     expect(MAX_FEHLER_ZEILEN).toBe(20);

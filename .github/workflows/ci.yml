@@ -17,9 +17,14 @@ permissions:
   contents: read
 
 # No network beyond `pnpm install`: keep Turborepo telemetry off.
+# Spec 040 T-7 (C-4, AC-B10): the reporters of scripts/reporter/ print only the red tests, each with
+# its first error, and one summary line naming the full report; the full reports (JUnit, Playwright's
+# HTML report) are the artifact "testberichte-…" of every test job. Where Turborepo runs tests it
+# shows the logs of failed tasks only (--output-logs=errors-only).
 env:
   TURBO_TELEMETRY_DISABLED: "1"
   DO_NOT_TRACK: "1"
+  FM_AUSGABE: knapp
 
 # Spec 040 T-5: every job keeps the local Turborepo cache (.turbo/cache) between runs, one cache
 # per job and matrix value, and builds only what its steps need (`turbo run build --filter`). The
@@ -243,7 +248,18 @@ jobs:
       # nightly run and workflow_dispatch run every test (write only, never read: AC-B4, AC-B12).
       - name: Test
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), format('@fundamento/{0}', matrix.package)) }}
-        run: pnpm turbo run test --filter=@fundamento/${{ matrix.package }} --cache-dir=.turbo/cache --cache=${{ github.event_name == 'pull_request' && 'local:rw' || 'local:w' }}
+        run: pnpm turbo run test --filter=@fundamento/${{ matrix.package }} --cache-dir=.turbo/cache --cache=${{ github.event_name == 'pull_request' && 'local:rw' || 'local:w' }} --output-logs=errors-only
+
+      # Spec 040 T-7 (AC-B10, E-13): the full reports of the job – JUnit, in Playwright also the HTML
+      # report – after a red step too, but only where the job tested; no environment, seven days.
+      - name: Testberichte
+        if: ${{ always() && (needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), format('@fundamento/{0}', matrix.package))) }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: testberichte-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ github.run_attempt }}
+          path: packages/*/test-reports/
+          retention-days: 7
+          if-no-files-found: ignore
 
   projekcioj:
     name: Unit tests (Projekcioj, shard ${{ matrix.shard }} of 2)
@@ -302,6 +318,17 @@ jobs:
         run: pnpm --filter @fundamento/projekcioj exec vitest run --shard=${{ matrix.shard }}/2
         env:
           FM_GEBAUT: "1"
+
+      # Spec 040 T-7 (AC-B10, E-13): the full reports of the job – JUnit, in Playwright also the HTML
+      # report – after a red step too, but only where the job tested; no environment, seven days.
+      - name: Testberichte
+        if: ${{ always() && (needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/projekcioj')) }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: testberichte-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ github.run_attempt }}
+          path: packages/*/test-reports/
+          retention-days: 7
+          if-no-files-found: ignore
 
   # Spec 040 B-6: on main, in three engines, the second of two shards ran into its 15 minutes (run
   # 41886235249: 15:17), the first ended at 12:56 and 13:02 (41886235249, 41873907893). Four
@@ -380,6 +407,17 @@ jobs:
         env:
           FM_GEBAUT: "1"
 
+      # Spec 040 T-7 (AC-B10, E-13): the full reports of the job – JUnit, in Playwright also the HTML
+      # report – after a red step too, but only where the job tested; no environment, seven days.
+      - name: Testberichte
+        if: ${{ always() && (needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj')) }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: testberichte-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ github.run_attempt }}
+          path: packages/*/test-reports/
+          retention-days: 7
+          if-no-files-found: ignore
+
   # Nachlese 5 ① (D-04): the rendered checks ran 7:52 to 8:34 in one job (axe over the Eroj alone
   # 178 to 233 s, the Vitrino 104 to 140 s). axe over the Eroj is a job of its own; the Make Kit,
   # the quickstart and the Vitrino stay together. Measured in specs/018-nachlese-5/tasks.md ①.
@@ -448,6 +486,17 @@ jobs:
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm check:alirebleco-eroj --shard=${{ matrix.shard }}/3
 
+      # Spec 040 T-7 (AC-B10, E-13): the full reports of the job – JUnit, in Playwright also the HTML
+      # report – after a red step too, but only where the job tested; no environment, seven days.
+      - name: Testberichte
+        if: ${{ always() && (needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj')) }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: testberichte-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ github.run_attempt }}
+          path: packages/*/test-reports/
+          retention-days: 7
+          if-no-files-found: ignore
+
   # Spec 040 B-1: the Werkstatt left this job for a job of its own (werkstatt).
   rendered-checks:
     name: Rendered checks (Make Kit, Quickstart)
@@ -508,6 +557,17 @@ jobs:
       - name: "Check: Quickstart"
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm check:quickstart
+
+      # Spec 040 T-7 (AC-B10, E-13): the full reports of the job – JUnit, in Playwright also the HTML
+      # report – after a red step too, but only where the job tested; no environment, seven days.
+      - name: Testberichte
+        if: ${{ always() && (needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj')) }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: testberichte-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ github.run_attempt }}
+          path: packages/*/test-reports/
+          retention-days: 7
+          if-no-files-found: ignore
 
   # Spec 040 B-1: the Werkstatt of the Vitrino, in parts of packages/eroj/test/vitrino-partoj.ts.
   # Beside the Make Kit and the quickstart it ran into the 15 minutes (run 41877598624); its tests
@@ -576,6 +636,17 @@ jobs:
         env:
           VITRINO_PARTO: ${{ matrix.parto }}
 
+      # Spec 040 T-7 (AC-B10, E-13): the full reports of the job – JUnit, in Playwright also the HTML
+      # report – after a red step too, but only where the job tested; no environment, seven days.
+      - name: Testberichte
+        if: ${{ always() && (needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj')) }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: testberichte-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ github.run_attempt }}
+          path: packages/*/test-reports/
+          retention-days: 7
+          if-no-files-found: ignore
+
   # Spec 029 ①b (B-1b-6): the Vitrino without its Werkstatt, a job of its own – with the Make Kit
   # and the quickstart it ran past 15 minutes on a slow runner.
   # Spec 040 B-1: alone it ran into its 15 minutes too (runs 41873907893, 41864293712,
@@ -643,6 +714,17 @@ jobs:
         env:
           VITRINO_PARTO: ${{ matrix.parto }}
 
+      # Spec 040 T-7 (AC-B10, E-13): the full reports of the job – JUnit, in Playwright also the HTML
+      # report – after a red step too, but only where the job tested; no environment, seven days.
+      - name: Testberichte
+        if: ${{ always() && (needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj')) }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: testberichte-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ github.run_attempt }}
+          path: packages/*/test-reports/
+          retention-days: 7
+          if-no-files-found: ignore
+
   # Spec 040 T-7 (AC-B6): the timing tests of the Vitrino – M5 with its Gegenproben and the
   # calibration of the block, the Ableitung Gegenprobe, G5 and its Gegenprobe – in a job of their
   # own, the part `zeittests` of packages/eroj/test/vitrino-partoj.ts; the Werkstatt parts leave
@@ -707,3 +789,14 @@ jobs:
         run: pnpm check:vitrino
         env:
           VITRINO_PARTO: zeittests
+
+      # Spec 040 T-7 (AC-B10, E-13): the full reports of the job – JUnit, in Playwright also the HTML
+      # report – after a red step too, but only where the job tested; no environment, seven days.
+      - name: Testberichte
+        if: ${{ always() && (needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj')) }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: testberichte-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ github.run_attempt }}
+          path: packages/*/test-reports/
+          retention-days: 7
+          if-no-files-found: ignore

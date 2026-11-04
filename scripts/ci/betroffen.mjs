@@ -217,11 +217,16 @@ export function report(decision, base) {
   return `${lines.join("\n")}\n`;
 }
 
-/** The `turbo run test` arguments for a decision; undefined when nothing is affected. */
+/**
+ * The `turbo run test` arguments for a decision; undefined when nothing is affected. Spec 040 T-7:
+ * Turborepo shows the logs of failed tasks only, as in CI – with FM_AUSGABE=knapp their red tests
+ * and the summary line.
+ */
 export function testArgs(decision) {
-  if (decision.alle) return ["run", "test"];
+  const run = ["run", "test", "--output-logs=errors-only"];
+  if (decision.alle) return run;
   if (decision.pakete.length === 0) return undefined;
-  return ["run", "test", ...decision.pakete.map((name) => `--filter=${name}`)];
+  return [...run, ...decision.pakete.map((name) => `--filter=${name}`)];
 }
 
 // ── I/O at the edges ────────────────────────────────────────────────────────────────────────────

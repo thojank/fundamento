@@ -99,15 +99,31 @@ describe("the terse output of Playwright (Spec 040 T-7, C-4)", () => {
   });
 
   it("every Playwright config of the Eroj reports into a folder of its own", async () => {
-    const configs: ReadonlyArray<readonly [file: string, name: string]> = [
-      ["playwright.config.ts", "playwright"],
-      ["playwright.alirebleco.config.ts", "playwright-alirebleco"],
-      ["playwright.make-kit.config.ts", "playwright-make-kit"],
-      ["playwright.quickstart.config.ts", "playwright-quickstart"],
-      ["playwright.vitrino.config.ts", "playwright-vitrino"],
+    const configs: ReadonlyArray<readonly [file: string, name: string, load: () => unknown]> = [
+      ["playwright.config.ts", "playwright", () => import("../playwright.config.js")],
+      [
+        "playwright.alirebleco.config.ts",
+        "playwright-alirebleco",
+        () => import("../playwright.alirebleco.config.js"),
+      ],
+      [
+        "playwright.make-kit.config.ts",
+        "playwright-make-kit",
+        () => import("../playwright.make-kit.config.js"),
+      ],
+      [
+        "playwright.quickstart.config.ts",
+        "playwright-quickstart",
+        () => import("../playwright.quickstart.config.js"),
+      ],
+      [
+        "playwright.vitrino.config.ts",
+        "playwright-vitrino",
+        () => import("../playwright.vitrino.config.js"),
+      ],
     ];
-    for (const [file, name] of configs) {
-      const module: unknown = await import(`../${file}`);
+    for (const [file, name, load] of configs) {
+      const module: unknown = await load();
       const config =
         typeof module === "object" && module !== null && "default" in module
           ? module.default

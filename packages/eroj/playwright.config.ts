@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { playwrightAusgabe } from "../../scripts/reporter/knapp-playwright.mjs";
 
 const ENGINES = [
   { name: "chromium", use: { ...devices["Desktop Chrome"] } },
@@ -29,7 +30,9 @@ export default defineConfig({
   // The quickstart installs and builds a project of its own; it has its own config and CI step.
   testIgnore: "**/quickstart.spec.ts",
   timeout: 120_000,
-  reporter: [["list"]],
+  // Spec 040 T-7 (C-4): the list reporter, terse with FM_AUSGABE=knapp; JUnit (in CI also the HTML
+  // report) in test-reports/playwright/, outside the outputDir test-results/ that a run empties.
+  reporter: playwrightAusgabe("playwright"),
   // Spec 011 ① (O-21): the tests of one file run in parallel across the workers. Without this a
   // file is one worker's, and a PR run (one engine) drove the whole rendered accessibility check
   // through one worker: 396 to 423 s on the runner with seven Eroj (runs 38588087905,

@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { configDefaults, defineConfig } from "vitest/config";
+import { vitestAusgabe } from "../../scripts/reporter/knapp-vitest.mjs";
 
 // Outside `turbo run test` the tests would run against whatever `dist` of the workspace packages
 // lies around; build this package and its workspace dependencies first (Turborepo replays what is
@@ -17,5 +18,9 @@ if (process.env.TURBO_HASH === undefined) {
 
 // biome-ignore lint/style/noDefaultExport: Vitest loads its config from the default export.
 export default defineConfig({
-  test: { exclude: [...configDefaults.exclude, "**/*.browser.test.ts"] },
+  test: {
+    exclude: [...configDefaults.exclude, "**/*.browser.test.ts"],
+    // Spec 040 T-7 (C-4): terse with FM_AUSGABE=knapp; JUnit in test-reports/vitest/ always.
+    ...vitestAusgabe("vitest", configDefaults.reporters),
+  },
 });

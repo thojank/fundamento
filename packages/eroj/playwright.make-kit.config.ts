@@ -1,4 +1,5 @@
 import { defineConfig } from "@playwright/test";
+import { playwrightAusgabe } from "../../scripts/reporter/knapp-playwright.mjs";
 import base from "./playwright.config.js";
 
 // check:make-kit (Spec 003 T019, AK-08): installs the packed kit in a fresh project and builds it.
@@ -6,6 +7,8 @@ import base from "./playwright.config.js";
 // biome-ignore lint/style/noDefaultExport: Playwright loads its config from the default export.
 export default defineConfig({
   ...base,
+  // Spec 040 T-7 (C-4): its reports in a folder of their own, test-reports/playwright-make-kit/.
+  reporter: playwrightAusgabe("playwright-make-kit"),
   testMatch: "**/make-kit.check.ts",
   timeout: 900_000,
   projects: [base.projects?.[0] ?? { name: "chromium" }],
