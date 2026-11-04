@@ -8,7 +8,7 @@ import { createRequire } from "node:module";
 const [repo, fontoDir] = process.argv.slice(2);
 const require = createRequire(`${repo}/packages/modelo/package.json`);
 const Color = require("colorjs.io").default;
-const _EXT = "com.ciferecigo.fundamento";
+const _EXT = "fundamento";
 const FONTO = "astryx";
 const F_PAL = "packages/themes/neutral/src/neutralPalettes.generated.ts";
 const F_THEME = "packages/themes/neutral/src/neutralTheme.ts";

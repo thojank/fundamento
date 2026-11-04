@@ -1,6 +1,6 @@
 # Data model – Spec 002
 
-Companion to [`plan.md`](plan.md). Decision numbers (D-xx) refer to the plan. This document quotes no ciferecigo values (Spec 001 AK-08).
+Companion to [`plan.md`](plan.md). Decision numbers (D-xx) refer to the plan. This document quotes no privata values (Spec 001 AK-08).
 
 ## 1. Entities (new or changed compared with Spec 001)
 
@@ -101,7 +101,7 @@ Note on `semantic-described`: it governs every role token, so `explain` would li
 ```jsonc
 {
   "$schema": "../schema/ontologio.schema.json",
-  "uri": "https://fundamento.ciferecigo.com/ontologio",
+  "uri": "urn:fundamento:ontologio",
   "constitution": "1.4",
   "schemes": [
     { "id": "terminologio", "definition": { "en": "The binding terminology of the Constitution (table 'Terminologio').", "de": "…" } },
@@ -119,7 +119,7 @@ Note on `semantic-described`: it governs every role token, so `explain` would li
   ],
   "concepts": [
     {
-      "uri": "https://fundamento.ciferecigo.com/ontologio#Aspekto",
+      "uri": "urn:fundamento:ontologio#Aspekto",
       "term": "Aspekto",
       "inScheme": "terminologio",
       "prefLabel": { "eo": "Aspekto", "en": "brand theme", "de": "Markenausprägung" },
@@ -140,7 +140,7 @@ Field rules (schema `ontologio.schema.json`, draft 2020-12, `additionalPropertie
 
 | Field | Rule |
 |---|---|
-| `uri` | `https://fundamento.ciferecigo.com/ontologio#<term>`; unique |
+| `uri` | `urn:fundamento:ontologio#<term>`; unique |
 | `term` | Esperanto in x-convention, `^[A-Z][A-Za-z]*$` (PascalCase, as in the Constitution table and the Modelo `$defs`) |
 | `inScheme` | `terminologio` or `modelo` |
 | `notation` | optional; a value of `$defs/EntityType` when the concept denotes an entity type; unique |
@@ -265,5 +265,5 @@ All targets are roles re-pointed to palette steps; no literal enters a generic s
 ## 8. Migration
 
 - **Modelo:** additive schema fields; the Phase-1 data gains `appliesTo` (§3); existing IDs unchanged; 8 new IDs (4 `tok_`, 4 `reg_`).
-- **External Aspekto packages:** must add `color.status.<s>.border` (completeness) and may want tertiary-state and high-contrast text values that pass the new Reguloj; `fm modelo validate --aspekto <dir>` lists exactly what is missing or failing. For ciferecigo this is done outside the repo (spec edge case).
+- **External Aspekto packages:** must add `color.status.<s>.border` (completeness) and may want tertiary-state and high-contrast text values that pass the new Reguloj; `fm modelo validate --aspekto <dir>` lists exactly what is missing or failing. For privata this is done outside the repo (spec edge case).
 - **MCP clients:** no breaking change; new optional fields (`regulo` on issues, `reguloj.automatic` in `describe`), new tools, prompt and resource.

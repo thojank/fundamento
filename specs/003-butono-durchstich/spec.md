@@ -106,4 +106,4 @@ Ein Agent entwirft per Figma-MCP einen Screen mit `butono`-Instanzen. Ein Coding
 
 - **Figma-Plan:** Aufbau und Test laufen in einem Figma-Konto mit Organization/Enterprise-Funktionen. Fundamento darf davon aber **nicht abhängen**: Der Standardweg ist planunabhängig (Figma-Projekcio über die Plugin-API; Zuordnung Figma ↔ Code als Daten im Modelo, über MCP abfragbar). Code Connect ist eine **zusätzliche** Projekcio aus derselben Zuordnung, im Testkonto erprobt. Jedes Figma-Artefakt ist aus dem Repo neu erzeugbar; keine Quelle liegt nur in Figma.
 - **Trennung im Testkonto:** eigenes Team oder Projekt nur für Fundamento; keine anderen Design-System-Libraries aktiviert (auch nicht als Kontext für KI-Funktionen); keine Veröffentlichung in eine Registry des Kontoinhabers; Make Kits werden nur als öffentliches Pre-Release-Paket (komuna) oder lokal getestet. Art. V gilt unverändert.
-- **Zweite Marke für die Make-Kit-Abnahme:** das Fixture `ekzemplo`. ciferecigo wird nicht in fremde Registries oder Konten geladen.
+- **Zweite Marke für die Make-Kit-Abnahme:** das Fixture `ekzemplo`. privata wird nicht in fremde Registries oder Konten geladen.

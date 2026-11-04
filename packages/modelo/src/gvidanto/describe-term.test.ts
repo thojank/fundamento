@@ -23,15 +23,15 @@ describe("describe_term (FR-12)", () => {
     const out = success("Aspekto");
     expect(out).toMatchObject({
       term: "Aspekto",
-      uri: "https://fundamento.ciferecigo.com/ontologio#Aspekto",
+      uri: "urn:fundamento:ontologio#Aspekto",
       inScheme: "terminologio",
       matchedBy: "term",
-      broader: [{ term: "Modelo", uri: "https://fundamento.ciferecigo.com/ontologio#Modelo" }],
+      broader: [{ term: "Modelo", uri: "urn:fundamento:ontologio#Modelo" }],
       instances: { count: 2, names: ["ekzemplo", "komuna"] },
     });
     expect(out.relations).toContainEqual({
       predicate: "assigns",
-      target: { term: "Vortaro", uri: "https://fundamento.ciferecigo.com/ontologio#Vortaro" },
+      target: { term: "Vortaro", uri: "urn:fundamento:ontologio#Vortaro" },
     });
     expect(out.definition.de).toContain("Marke");
   });
@@ -128,7 +128,7 @@ describe("describe_term (FR-12)", () => {
   ])("finds Uzo from %s (%s)", (word, matchedBy) => {
     expect(success(word)).toMatchObject({
       term: "Uzo",
-      uri: "https://fundamento.ciferecigo.com/ontologio#Uzo",
+      uri: "urn:fundamento:ontologio#Uzo",
       inScheme: "terminologio",
       notation: "uzo",
       matchedBy,

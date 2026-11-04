@@ -1,6 +1,6 @@
 # Data model – Spec 001
 
-Companion to [`plan.md`](plan.md). Decision numbers (D-xx) refer to the plan. This document does not quote any ciferecigo values (AK-08).
+Companion to [`plan.md`](plan.md). Decision numbers (D-xx) refer to the plan. This document does not quote any privata values (AK-08).
 
 ## 1. Entities (new or changed compared with Spec 000)
 
@@ -75,14 +75,14 @@ packages/aspekto-komuna/
   sets/aspekto/komuna.json                         empty (kondicxoj ["aspekto=komuna"])
   sets/aspekto/komuna+color-scheme/dark.json       conjunction set (literals allowed)
 
-fundamento-aspekto-ciferecigo/   (p0 workspace, next to repos/fundamento, NOT in the core repo; delivered as an archive, D-18)
+fundamento-tiparoj-privataj/   (p0 workspace, next to repos/fundamento, NOT in the core repo; delivered as an archive, D-18)
   package.json            private; dev dependencies on the core via link:/file: ../fundamento/packages/*
   aspekto.json · ids.lock.json · $themes.json · reguloj.json
-  sets/aspekto/ciferecigo.json · sets/aspekto/ciferecigo+color-scheme/dark.json · sets/aspekto/ciferecigo+contrast/high.json
+  sets/aspekto/privata.json · sets/aspekto/privata+color-scheme/dark.json · sets/aspekto/privata+contrast/high.json
   DERIVATION.md           every derivation rule with inputs and resulting steps (Q5)
 
 fundamento.config.json    (only in projects with external Aspektoj)
-  { "aspektoj": ["../fundamento-aspekto-ciferecigo"] }
+  { "aspektoj": ["../fundamento-tiparoj-privataj"] }
 
 packages/modelo/test/fixtures/valid/aspekto-ekzemplo/
   fundamento.config.json  { "aspektoj": ["./aspekto-ekzemplo"] }
@@ -147,7 +147,7 @@ Exempt by role: `disabled` (Regulo `disabled-exempt-from-contrast`) and `decorat
 | `token-unknown` | error | `get_token` or `resolve` names a token that does not exist; `allowed` lists the nearest names (T024, T025) |
 | `nomregulo-no-target` | warning | `derive_name`: a NomRegulo gives no target (today only Tailwind: no theme namespace, or its `$type` is not allowed there); the token stays available as `--fm-*` only (FR-13b, T025) |
 
-`set-override-has-extensions` is relaxed: overrides may carry `$extensions["com.ciferecigo.fundamento"].textTransform` and nothing else.
+`set-override-has-extensions` is relaxed: overrides may carry `$extensions["fundamento"].textTransform` and nothing else.
 
 ## 6. Migration from Phase 0 (IDs unchanged, FR-09, FR-14)
 

@@ -130,7 +130,7 @@
       "id": "reg_01M2X5AMA1FH06H7BARC9QSTJB",
       "name": "surface-order",
       "statement": "In every combination of every Aspekto, the OKLCH lightness of color.background.sunken ≤ canvas ≤ default ≤ raised, in both colour schemes; transparent values are composited over color.background.default first.",
-      "kialo": "The surface hierarchy carries spatial meaning: sunken areas sit below the page and raised ones above it. A break is visible to every user and to no contrast check, so it must be checked on its own (Constitution Art. VI, finding from the ciferecigo acceptance).",
+      "kialo": "The surface hierarchy carries spatial meaning: sunken areas sit below the page and raised ones above it. A break is visible to every user and to no contrast check, so it must be checked on its own (Constitution Art. VI, finding from the acceptance of a private Aspekto).",
       "scope": "vortaro: color.background.sunken, canvas, default and raised in every combination",
       "checkability": "automatic",
       "appliesTo": {

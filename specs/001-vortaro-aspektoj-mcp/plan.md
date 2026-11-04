@@ -1,17 +1,17 @@
 # Plan – Spec 001: Vortaro mit echten Werten, Aspekto-Pakete, MCP-Server
 
-**Spec:** [`spec.md`](spec.md) (approved) · **Research:** [`research.md`](research.md) (§7 added by this plan) · **Data model:** [`data-model.md`](data-model.md) · **Contracts:** [`contracts/`](contracts/) · **Quickstart:** [`quickstart.md`](quickstart.md) · **Constitution:** v1.3 · **Status:** decisions D-01–D-18 accepted by the maintainer 2026-09-19; clarifications Q1–Q5 closed; tasks in [`tasks.md`](tasks.md): T001–T029 implemented in the repository, T030 (ciferecigo) is built outside it · **Date:** 2026-09-19 · **Base:** `main` @ `72192ec`
+**Spec:** [`spec.md`](spec.md) (approved) · **Research:** [`research.md`](research.md) (§7 added by this plan) · **Data model:** [`data-model.md`](data-model.md) · **Contracts:** [`contracts/`](contracts/) · **Quickstart:** [`quickstart.md`](quickstart.md) · **Constitution:** v1.3 · **Status:** decisions D-01–D-18 accepted by the maintainer 2026-09-19; clarifications Q1–Q5 closed; tasks in [`tasks.md`](tasks.md): T001–T029 implemented in the repository, T030 (privata) is built outside it · **Date:** 2026-09-19 · **Base:** `main` @ `72192ec`
 
 This plan is the output of `/speckit.plan` for Spec 001. It fixes the technical design of Phase 1, reviews it against every Article of Constitution v1.3 and lists the deviations under Complexity Tracking. The five clarifications raised in the first draft (Q1–Q5) were answered by the maintainer on 2026-09-19; the answers are worked into the decisions and listed in "Resolved clarifications" at the end. No `[NEEDS CLARIFICATION]` marker is open (AK-11).
 
-Per AK-08 this file contains **no** ciferecigo brand values; it refers to "Anhang A" instead.
+Per AK-08 this file contains **no** privata brand values; it refers to "Anhang A" instead.
 
 ## Summary
 
 Phase 1 turns the Phase-0 skeleton into a usable token system without adding a generator. It adds two packages (`@fundamento/aspekto-komuna`, `@fundamento/mcp`) and extends `@fundamento/modelo`, `@fundamento/vortaro` and `@fundamento/cli`.
 
 1. **Vortaro.** About 340 core tokens (target band 250–400) covering every category of Spec 000 `research.md` §4 plus the Phase-1 additions (focus role, opacity, layout per viewport, reduced motion). Two tiers everywhere: **primitives** (palettes, scales) carry literal values, **semantic/role tokens** are aliases. Generic Dimensio sets only **re-point aliases**; they never carry literals (D-03).
-2. **Aspektoj as packages.** An Aspekto is a folder with `aspekto.json`, `sets/`, its own `ids.lock.json` and a derived `$themes.json` fragment. `komuna` (the Phase-0 `neutra`, same ID) lives in `packages/aspekto-komuna`; it is the reference Aspekto whose values sit in `core`, so its own set is empty. Every other Aspekto must override **every** core token (`aspekto-incomplete`). External packages are included through `fundamento.config.json`. CI proves the external path with the invented fixture `aspekto-ekzemplo`; ciferecigo lives only in the private repository.
+2. **Aspektoj as packages.** An Aspekto is a folder with `aspekto.json`, `sets/`, its own `ids.lock.json` and a derived `$themes.json` fragment. `komuna` (the Phase-0 `neutra`, same ID) lives in `packages/aspekto-komuna`; it is the reference Aspekto whose values sit in `core`, so its own set is empty. Every other Aspekto must override **every** core token (`aspekto-incomplete`). External packages are included through `fundamento.config.json`. CI proves the external path with the invented fixture `aspekto-ekzemplo`; privata lives only in the private repository.
 3. **MCP server.** `@fundamento/mcp` on the official TypeScript SDK, stdio by default and optionally Streamable HTTP on localhost. It offers ten read-only tools and three resources over the in-memory export of the configured Modelo. `fm mcp` starts it.
 
 ## Technical Context
@@ -26,7 +26,7 @@ Phase 1 turns the Phase-0 skeleton into a usable token system without adding a g
 | Target platform | Local developer machines and CI (GitHub Actions, Ubuntu); MCP clients over stdio (Claude Code, Claude Desktop, Cursor) |
 | Project type | Library + CLI + MCP server in one monorepo |
 | Performance goals | MCP start < 2 s; `resolve` < 100 ms per assignment (FR-17, AK-07), measured in tests with a CI tolerance factor (D-17) |
-| Constraints | Offline; the core builds without external packages; byte-identical export (AK-10); no ciferecigo values in the core repository (AK-08) |
+| Constraints | Offline; the core builds without external packages; byte-identical export (AK-10); no privata values in the core repository (AK-08) |
 | Scale | ~340 tokens, 6 Dimensioj, 72 combinations per Aspekto (144 with the fixture Aspekto); ~60 KontrastParoj ≈ 4 300 contrast evaluations per Aspekto |
 
 ## Constitution Check (gate before design)
@@ -36,7 +36,7 @@ Phase 1 turns the Phase-0 skeleton into a usable token system without adding a g
 | Spec is on Constitution v1.3; the amendment FR-19 is already ratified in `.specify/memory/constitution.md` (commit `78970f9`) | pass |
 | ≤ 3 new packages (Art. XI) | pass (2) |
 | No generator, Ero or Sxablono in scope (Art. IX) | pass |
-| Clean room: ciferecigo values only in the spec and research (Art. V, AK-08) | pass, with an extended check (D-15) |
+| Clean room: privata values only in the spec and research (Art. V, AK-08) | pass, with an extended check (D-15) |
 | Open `[NEEDS CLARIFICATION]` | pass: none open (Q1–Q5 resolved 2026-09-19). `/speckit.tasks` runs only after the maintainer has reviewed the committed plan artifacts. |
 
 The design-time review is in "Constitutional Compliance Review" below.
@@ -110,7 +110,7 @@ Conjunction sets (`aspekto/X+…`) may carry literals; they belong to one Aspekt
 ### D-07 Configuration `fundamento.config.json` (FR-12)
 
 ```json
-{ "$schema": "./node_modules/@fundamento/modelo/schema/config.schema.json", "aspektoj": ["../fundamento-aspekto-ciferecigo", "@acme/aspekto-x"] }
+{ "$schema": "./node_modules/@fundamento/modelo/schema/config.schema.json", "aspektoj": ["../fundamento-tiparoj-privataj", "@acme/aspekto-x"] }
 ```
 
 - The config lists packages and nothing else (Q2). It is read from the directory the command runs in, or from `--config <file>`. Entries are resolved relative to the config file: a path, or an npm name resolved with `createRequire(<configDir>)`. No upward search, so there is no hidden behaviour.
@@ -118,7 +118,7 @@ Conjunction sets (`aspekto/X+…`) may carry literals; they belong to one Aspekt
 - No config file means core + komuna. That is the repo default, so `pnpm build` / `pnpm check` behave as in Phase 0.
 - Errors: `config-invalid` (schema), `aspekto-package-missing` (with the resolved path; the rest of the Modelo is still validated), `aspekto-name-duplicate`.
 - The config is **not** part of the Modelo; it only selects packages. The config schema lives in `packages/modelo/schema/config.schema.json`.
-- `fm modelo validate --aspekto <path>` (repeatable) validates core + komuna + the given package directories without a config file. It is the command of the ciferecigo acceptance (D-18) and is equivalent to a config listing the same paths.
+- `fm modelo validate --aspekto <path>` (repeatable) validates core + komuna + the given package directories without a config file. It is the command of the privata acceptance (D-18) and is equivalent to a config listing the same paths.
 
 ### D-08 Composition and resolution
 
@@ -141,7 +141,7 @@ S7 (question 3) and Anhang A place brand rules with a kialo in the private packa
 - Roles: `typography.display.{1,2,3}`, `headline.{1,2,3,4}`, `body.{1,2}`, `label.{1,2}`, `caption`, `code`, `kicker`, which makes 14 composites. Each field of each composite is an alias.
 - **Letter spacing is stored as a DTCG `dimension` in `px`** (the Phase-0 reference unit), per role. Relative `em` is not a DTCG unit; storing it would break Art. XII. The relative value is derivable in Projekcioj because each resolved composite carries both `letterSpacing` and `fontSize` (CSS `em` = letterSpacing / fontSize; Figma percent = letterSpacing / fontSize × 100). This conversion is a **value rule of the Projekcio documentation** (Phase 5 generators), not part of the NomReguloj: `derive_name` derives names only and never touches values. Dimension shifts move `font.size.<role>` and `font.tracking.<role>` together along their scales, so an Aspekto's relative tracking survives `viewport` (the only Dimensio that changes typography, D-03) as long as the Aspekto defines matching scale steps. A brand that needs something else uses a conjunction set.
 - `lineHeight` is a unitless DTCG `number`, as in Phase 0.
-- `textTransform` sits in `$extensions["com.ciferecigo.fundamento"].textTransform` on the composite, with the values `none | uppercase | lowercase | capitalize`, which are platform-neutral. `set-override-has-extensions` is relaxed so that overrides may carry exactly this one key (an Aspekto must be able to set its kicker to uppercase). The resolver reports it as a field with provenance.
+- `textTransform` sits in `$extensions["fundamento"].textTransform` on the composite, with the values `none | uppercase | lowercase | capitalize`, which are platform-neutral. `set-override-has-extensions` is relaxed so that overrides may carry exactly this one key (an Aspekto must be able to set its kicker to uppercase). The resolver reports it as a field with provenance.
 - `fontFamily` tokens hold a stack: komuna `["Geist", "system-ui", "sans-serif"]` and `["Geist Mono", "ui-monospace", "monospace"]`. No font file enters the repo (FR-05; research §1).
 
 ### D-12 Colour roles and KontrastParoj (FR-08)
@@ -187,13 +187,13 @@ It lives in `packages/modelo/test/fixtures/valid/aspekto-ekzemplo/` (a fixture, 
 
 The test measures the server start (spawn to first `describe` answer) and 100 `resolve` calls on the fixture config. The budgets are 2 s / 100 ms per call, with a factor-3 tolerance under `CI=true` only. That factor comes from the Phase-0 lesson with cold runners (Jugxo `jug_01M2W3K1YPP05F4XF86J71RGTK`). The timings run **alone, as their own Turborepo task `perf`** (`dependsOn: build`, not cached, `pnpm perf` = `turbo run perf --concurrency=1`) after the test step (CI and `pnpm check`), never inside the parallel test run. There they measured the machine's load: 0.76 s alone vs 3.5–7.2 s in the gate, where even the factor 3 would not hold. This was accepted by the maintainer on 2026-09-19 after the acceptance measurement and replaces the interim "factor 3 under `CI=true` or `TURBO_HASH`". The raw numbers are always logged; the first baseline is in `research.md` §8.2.
 
-### D-18 ciferecigo package (FR-13, Q3, Q5)
+### D-18 privata package (FR-13, Q3, Q5)
 
 **Where and how (Q3).**
-- P0 builds the package as a standalone folder `fundamento-aspekto-ciferecigo/` in the p0 workspace, **outside** the core repository (next to `repos/fundamento`, so the relative path from the core is `../fundamento-aspekto-ciferecigo`). It is never created inside `repos/fundamento`.
-- The private repository `thojank/fundamento-aspekto-ciferecigo` does not exist yet. P0 does not push anywhere; it delivers the folder as an archive (`fundamento-aspekto-ciferecigo.tar.gz`, without `node_modules`), and the maintainer creates the private repository and pushes.
+- P0 builds the package as a standalone folder `fundamento-tiparoj-privataj/` in the p0 workspace, **outside** the core repository (next to `repos/fundamento`, so the relative path from the core is `../fundamento-tiparoj-privataj`). It is never created inside `repos/fundamento`.
+- The private repository `$FM_TIPAROJ_REPO` does not exist yet. P0 does not push anywhere; it delivers the folder as an archive (`fundamento-tiparoj-privataj.tar.gz`, without `node_modules`), and the maintainer creates the private repository and pushes.
 - In Phase 1 the package gets the core packages only through a local path (`link:` or `file:` to `../fundamento/packages/*` in its `package.json` dev dependencies). No git dependency, no registry, no CI of its own.
-- **Acceptance:** `pnpm fm modelo validate --aspekto ../fundamento-aspekto-ciferecigo` from the core repo exits 0. That covers completeness, IDs, fonts and the Aspekto-scoped Reguloj. `check:alirebleco` runs against the same composition. The maintainer then checks the result visually.
+- **Acceptance:** `pnpm fm modelo validate --aspekto ../fundamento-tiparoj-privataj` from the core repo exits 0. That covers completeness, IDs, fonts and the Aspekto-scoped Reguloj. `check:alirebleco` runs against the same composition. The maintainer then checks the result visually.
 
 **Values (Q5).** Anhang A is the only source; the maintainer supplies no further values. P0 derives everything else by fixed rules:
 1. **Palettes:** each role palette's 11 steps (`50…950`, plus `0`/`1000` for `neutral`) come from the brand's anchor colours through a documented OKLCH lightness ramp. The anchor sits on the step whose lightness is closest to it and keeps its exact value; hue and chroma are held, lightness follows the ramp, and chroma is clipped to the sRGB gamut. Palettes without an anchor (for example status colours not covered by Anhang A) use komuna's hues on the same ramp.
@@ -292,7 +292,7 @@ One entry per Article of Constitution v1.3.
 
 ### Article V – Pura Cxambro
 **Verdict:** conforming
-- Geist is referenced by family name only (OFL 1.1, research §1); no font file is in the repo. The ciferecigo font is referenced in the private package only, with `redistributable: false` and a fallback stack.
+- Geist is referenced by family name only (OFL 1.1, research §1); no font file is in the repo. The privata font is referenced in the private package only, with `redistributable: false` and a fallback stack.
 - Anhang A values are allowed only in `spec.md` and `research.md`. The new fingerprint rule (D-15) proves that mechanically. `aspekto-ekzemplo` uses invented values; the fixture font is fictitious.
 - komuna's values are original and are not derived from any benchmark system. The benchmark list stays abstract (`research/benchmarks.md`).
 
@@ -335,7 +335,7 @@ One entry per Article of Constitution v1.3.
 **Verdict:** conforming (details in Complexity Tracking)
 - Two new packages (`aspekto-komuna`, `mcp`).
 - The SDK's low-level server is used directly; no Fundamento wrapper around it. Ajv is reused.
-- New abstractions have at least two users: the Aspekto package loader (komuna, ekzemplo, and ciferecigo in the private repo), the tool registry (ten tools), the per-Aspekto export (two Aspektoj in the test config).
+- New abstractions have at least two users: the Aspekto package loader (komuna, ekzemplo, and privata in the private repo), the tool registry (ten tools), the per-Aspekto export (two Aspektoj in the test config).
 
 ### Article XII – Interoperebleco
 **Verdict:** conforming
@@ -366,7 +366,7 @@ One entry per Article of Constitution v1.3.
 | **Conjunction approximation within one Aspekto** | The per-Aspekto folder fixes the cross-brand leak. Inside one brand, `aspekto/X+color-scheme/dark` is still `enabled` under `light` in Tokens Studio / Penpot. | Same as Phase 0; tools have no conjunction concept. D-03 keeps such sets small. |
 | **Phase-0 test fixtures still say `neutra`** | Phase-0 fixtures are self-contained test Modelos; renaming them proves nothing. The engineering standard `global/testing.md` was updated to `komuna` / `ekzemplo` on 2026-09-19. | None. |
 | **Timing tolerance in CI** (D-17) | Cold runners (Phase-0 Jugxo on Article X). | Raw timings are logged. |
-| **ciferecigo verified only locally** (D-18) | The private repository does not exist yet, and the core packages are unpublished, so the package has no CI in Phase 1 and consumes the core through a local path. | The maintainer adds CI once the core packages are published (Phase 9) or a registry is chosen. |
+| **privata verified only locally** (D-18) | The private repository does not exist yet, and the core packages are unpublished, so the package has no CI in Phase 1 and consumes the core through a local path. | The maintainer adds CI once the core packages are published (Phase 9) or a registry is chosen. |
 | **Derived brand values** (D-18) | Anhang A covers about 30 facts, while a complete Aspekto needs ~340 tokens. The rest is derived by documented rules in `DERIVATION.md`. | Visual review by the maintainer at acceptance. The findings feed the Enportilo (Phase 7, `research.md` §10). |
 
 ## Build order (orientation, not tasks)
@@ -377,11 +377,11 @@ One entry per Article of Constitution v1.3.
 4. Export per Aspekto, themes fragments, determinism.
 5. Checks: Alirebleco per Aspekto, Regularo for packages, clean-room fingerprints.
 6. MCP server and CLI, then the S7 integration test, the performance test and the quickstart test.
-7. The ciferecigo package outside the repo (D-18) with `DERIVATION.md`, validated with `fm modelo validate --aspekto`, delivered as an archive; `research.md` §10; then the Penpot import per Aspekto (manual).
+7. The privata package outside the repo (D-18) with `DERIVATION.md`, validated with `fm modelo validate --aspekto`, delivered as an archive; `research.md` §10; then the Penpot import per Aspekto (manual).
 
 ## Penpot import result
 
-**Status:** pending maintainer verification after the build (AK-09). The procedure follows Spec 000, with one import per folder `packages/modelo/dist/vortaro/<aspekto>/`. Record the Penpot version, date, result and deviations for `komuna` and for `ciferecigo` (the latter in the private repo, not here).
+**Status:** pending maintainer verification after the build (AK-09). The procedure follows Spec 000, with one import per folder `packages/modelo/dist/vortaro/<aspekto>/`. Record the Penpot version, date, result and deviations for `komuna` and for `privata` (the latter in the private repo, not here).
 
 ## Traceability (requirement → decision → tasks)
 
@@ -418,7 +418,7 @@ Answered by the maintainer on 2026-09-19.
 |---|---|---|---|
 | Q1 | May an Aspekto bring its own primitives? | No. An Aspekto introduces no tokens; brands assign the role-named core palettes (`accent` instead of a palette named after the colour). S7 example and dark-mode edge case corrected in the spec. | D-04, spec `d815ad5` |
 | Q2 | Where is the reference Aspekto stated? | Only in the Modelo (`core.referenceAspekto`). `fundamento.config.json` lists packages only. Key Entities corrected in the spec. | D-05, D-07, spec `d815ad5` |
-| Q3 | Private ciferecigo repository? | It does not exist yet; P0 does not push to it. P0 builds a standalone folder outside the core repo and delivers it as an archive; the maintainer creates the repository and pushes. Core packages come through a local path (`link:`/`file:`); no CI in Phase 1. `fm modelo validate --aspekto <path>` is part of the acceptance. | D-07, D-18 |
+| Q3 | Private privata repository? | It does not exist yet; P0 does not push to it. P0 builds a standalone folder outside the core repo and delivers it as an archive; the maintainer creates the repository and pushes. Core packages come through a local path (`link:`/`file:`); no CI in Phase 1. `fm modelo validate --aspekto <path>` is part of the acceptance. | D-07, D-18 |
 | Q4 | "Complete coverage" in the S7 dialog? | Dropped. The sentence names the Dimensioj and counts per token group; the proof is the tests (coverage, `aspekto-incomplete`). S7 corrected in the spec. | D-14, spec `d815ad5` |
 | Q5 | Values not in Anhang A? | P0 derives them: an OKLCH lightness ramp from the anchor colours, brand-neutral scales identical to komuna, typography roles with the brand font and komuna's sizes. Every rule is written into `DERIVATION.md`; findings go into `research.md` §10. Visual review at acceptance. | D-18 |
 

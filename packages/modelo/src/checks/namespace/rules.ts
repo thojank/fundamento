@@ -27,7 +27,7 @@ const ROOT_PACKAGE_JSON = "package.json";
 
 /** `fm-` plus lowercase ASCII words joined by `-`. */
 const CUSTOM_ELEMENT_PATTERN = /^fm(-[a-z0-9]+)+$/;
-const FUNDAMENTO_EXTENSION_KEY = "com.ciferecigo.fundamento";
+const FUNDAMENTO_EXTENSION_KEY = "fundamento";
 
 export interface CountedIssues {
   issues: ValidationIssue[];

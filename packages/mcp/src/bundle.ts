@@ -5,8 +5,8 @@
 import { readFileSync } from "node:fs";
 import { normalizeNames, readModeloSchema } from "@fundamento/modelo";
 
-const MODELO_REF = "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/";
-const COMMON_REF = "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/";
+const MODELO_REF = "urn:fundamento:schema:modelo#/$defs/";
+const COMMON_REF = "urn:fundamento:schema:mcp:common#/$defs/";
 
 type Json = Record<string, unknown>;
 

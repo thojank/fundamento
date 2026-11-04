@@ -1,5 +1,5 @@
 {
-  "$extensions": { "com.ciferecigo.fundamento": { "kondicxoj": ["aspekto=prova"] } },
+  "$extensions": { "fundamento": { "kondicxoj": ["aspekto=prova"] } },
   "color": {
     "$type": "color",
     "palette": {

@@ -172,7 +172,7 @@ describe("studioScreen", () => {
       expect(html).toContain("(provo)");
       const inventory = screenInventory(html);
       expect(inventory.mainButtons).toBeLessThanOrEqual(1);
-      expect(inventory.text).not.toMatch(/\bciferecigo\b/);
+      expect(inventory.text).not.toMatch(new RegExp(`\\b${["cif", "ere", "cigo"].join("")}\\b`));
       expect(html).not.toMatch(/<(button|select|textarea|h[1-6])\b/);
     });
   }

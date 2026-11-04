@@ -231,12 +231,7 @@ describe("buildModelo: robustness against structurally odd input", () => {
           "kontrastparoj.json": doc("data/kontrastparoj.json", { kontrastParoj: [null, 3, {}] }),
           "ids.lock.json": doc("data/ids.lock.json", { ids: [] }),
         },
-        [
-          null,
-          [],
-          "x",
-          { $extensions: { "com.ciferecigo.fundamento": { id: 3, kondicxoj: "a=b" } } },
-        ],
+        [null, [], "x", { $extensions: { fundamento: { id: 3, kondicxoj: "a=b" } } }],
       ),
     );
     expect(issues).toEqual([]);

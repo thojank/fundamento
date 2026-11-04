@@ -31,7 +31,7 @@ describe("collectIdOccurrences", () => {
       entityType: "token",
       location: {
         file: "vortaro/sets/core.json",
-        pointer: "/color/text/default/$extensions/com.ciferecigo.fundamento/id",
+        pointer: "/color/text/default/$extensions/fundamento/id",
       },
     });
     expect(occurrences).toContainEqual({
@@ -44,7 +44,7 @@ describe("collectIdOccurrences", () => {
       entityType: "tokenSet",
       location: {
         file: "vortaro/sets/color-scheme/dark.json",
-        pointer: "/$extensions/com.ciferecigo.fundamento/id",
+        pointer: "/$extensions/fundamento/id",
       },
     });
   });

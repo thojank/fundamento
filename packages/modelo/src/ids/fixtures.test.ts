@@ -13,7 +13,7 @@ import { parseIdsLock } from "./lock.js";
 
 const FIXTURES = fileURLToPath(new URL("../../test/fixtures/invalid/", import.meta.url));
 const CORE = "vortaro/sets/core.json";
-const EXT = "$extensions/com.ciferecigo.fundamento/id";
+const EXT = "$extensions/fundamento/id";
 
 /** The entities of both fixtures (they share one layout). */
 const ENTITIES: ReadonlyArray<[EntityType, string, string]> = [

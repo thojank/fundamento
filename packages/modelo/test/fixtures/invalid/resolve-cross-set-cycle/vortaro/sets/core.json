@@ -1,6 +1,6 @@
 {
   "$extensions": {
-    "com.ciferecigo.fundamento": {
+    "fundamento": {
       "id": "set_01M2WRK8G0DDDDDDDDDDDDDDDN",
       "kondicxoj": []
     }
@@ -10,7 +10,7 @@
     "a": {
       "$value": "{color.b}",
       "$extensions": {
-        "com.ciferecigo.fundamento": {
+        "fundamento": {
           "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDE3"
         }
       }
@@ -26,7 +26,7 @@
         "hex": "#808080"
       },
       "$extensions": {
-        "com.ciferecigo.fundamento": {
+        "fundamento": {
           "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDE4"
         }
       }

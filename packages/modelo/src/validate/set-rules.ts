@@ -174,7 +174,7 @@ function overrideIssues(set: LoadedSet, core: LoadedSet, tree: unknown): Validat
         severity: "error",
         path: formatIssuePath({ file: set.file, pointer: extensionPointer }),
         message: `The override of ${token.name} in set ${set.name} carries Fundamento $extensions; ID and role belong to the core definition only (an override may set textTransform only).`,
-        suggestion: `Remove $extensions["com.ciferecigo.fundamento"] from this override, or keep only "textTransform".`,
+        suggestion: `Remove $extensions["fundamento"] from this override, or keep only "textTransform".`,
       });
     }
   }

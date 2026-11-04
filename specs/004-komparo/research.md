@@ -121,7 +121,7 @@ Die vier erstgenannten Gruppen umfassen zusammen **56 verschiedene Tokens** (die
 | Flächen mit Abstand 0 | 2 (hell, dunkel) | 2 (hell, dunkel) |
 | eigene Dunkelwerte | 1 Token | 1 Token |
 
-Die drei engsten Paare von ekzemplo sind `status-success-on-basic` (+4,1 %), `text-muted-on-background-sunken` (+4,4 %) und `action-tertiary-text-on-action-tertiary-pressed` (+4,4 %). Jede neue Regulo trifft also beide Aspektoj im Repo; `ciferecigo` liegt außerhalb und wird nach dem Merge neu abgeleitet (wie Spec 003 T028).
+Die drei engsten Paare von ekzemplo sind `status-success-on-basic` (+4,1 %), `text-muted-on-background-sunken` (+4,4 %) und `action-tertiary-text-on-action-tertiary-pressed` (+4,4 %). Jede neue Regulo trifft also beide Aspektoj im Repo; `privata` liegt außerhalb und wird nach dem Merge neu abgeleitet (wie Spec 003 T028).
 
 ## 3b. Nachher: komuna 2 (T006, 2026-09-20)
 
@@ -173,7 +173,7 @@ Die ersten fünf Metriken rechnen auf OKLCH; die Funktion `oklchLightness` exist
 
 ## 6. Clean-Room-Fingerprints für Benchmark-Aspektoj (FR-15, vorbereitend)
 
-Heute kennt die Prüfung genau eine Fingerprintliste: `packages/modelo/src/checks/clean-room/marko-spuroj.json` (die Werte des privaten Aspekto ciferecigo aus Spec 001, nur als SHA-256). Etappe A verallgemeinert das auf mehrere Quellen mit Herkunft, ohne eine davon zu kennen:
+Heute kennt die Prüfung genau eine Fingerprintliste: `packages/modelo/src/checks/clean-room/marko-spuroj.json` (die Werte des privaten Aspekto privata aus Spec 001, nur als SHA-256). Etappe A verallgemeinert das auf mehrere Quellen mit Herkunft, ohne eine davon zu kennen:
 
 - Eine Fingerprintdatei nennt ihre Quelle: `{ "source": "komparo", "fingerprints": [...] }`. Die bestehende Form ohne `source` bleibt gültig (Herkunft dann `repo`).
 - Weitere Dateien kommen über `--spuroj <datei>` (mehrfach) oder über das Projekt-`fundamento.config.json` (`"markoSpuroj": ["…"]`), damit CI sie ohne Flag nutzen kann.

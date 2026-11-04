@@ -2,7 +2,7 @@
 
 **Plan:** [`plan.md`](plan.md) (D-01–D-18, maintainer decisions Q1–Q4, Constitution v1.6) · **Data model:** [`data-model.md`](data-model.md) · **Contracts:** [`contracts/mcp-tools.md`](contracts/mcp-tools.md), [`contracts/projekcioj.md`](contracts/projekcioj.md) · **Quickstart:** [`quickstart.md`](quickstart.md) · **Status:** approved by the maintainer 2026-09-19 with additions (T003, T011, T014, T018, T020, M2) · **Date:** 2026-09-19
 
-Implementation runs stage by stage, with a short interim report (checks green, open Jugxoj) after Stage 1 and after Stage 4; the PR follows T027. Stage order follows the plan's build order: Constitution v1.6 and the Tailwind NomRegulo → Modelo (danger tokens, Skemo, Ero Reguloj) → packages, CSS and Tailwind → Web Component and React → Figma → Make Kits → parity → Gvidanto → quickstart and docs. One PR at the end of Phase 3. The re-derivation of ciferecigo follows after the merge, outside the repository.
+Implementation runs stage by stage, with a short interim report (checks green, open Jugxoj) after Stage 1 and after Stage 4; the PR follows T027. Stage order follows the plan's build order: Constitution v1.6 and the Tailwind NomRegulo → Modelo (danger tokens, Skemo, Ero Reguloj) → packages, CSS and Tailwind → Web Component and React → Figma → Make Kits → parity → Gvidanto → quickstart and docs. One PR at the end of Phase 3. The re-derivation of privata follows after the merge, outside the repository.
 
 **Rule for every task, without exception (Art. X, Jugxo `jug_01M2VRT7KQ77W91MVXB4GXSRZ4`):**
 1. **Red:** write the tests and fixtures listed under *Red*, run them **before any implementation code exists**, and watch them fail for the expected reason. Record the failing command and one failing assertion in the commit message. No retroactive red runs.
@@ -165,7 +165,7 @@ A mutation check (one changed value must make the test fail) replaces the red ru
   - [ ] own team or project, used only for Fundamento;
   - [ ] no GroupUI library and no other design-system library enabled, also not as context for AI features;
   - [ ] nothing published into the VW registry; kits only from the public `next` pre-release or local;
-  - [ ] no ciferecigo in Figma, Make or any registry.
+  - [ ] no privata in Figma, Make or any registry.
 - **M3 – S5 / AK-10:** a real Figma draft through design agent, coding agent and checking agent.
   - **Done** (2026-10-09, 20:05–20:32): 11 of 11 checks as expected, P1 and P2 byte-identical; see `plan.md` → „Manual acceptance results“ → M3. Spec 003 accepted by the maintainer on 2026-10-09, 20:34.
 
@@ -173,10 +173,10 @@ Results go into `plan.md` → „Manual acceptance results".
 
 ## After the merge (outside the repository)
 
-- [ ] **T028 Re-derive ciferecigo against the Phase-3 core** (Q1, like T026 of Spec 002)
-  - Red: `pnpm fm modelo validate --aspekto ../fundamento-aspekto-ciferecigo` against the merged core fails with `aspekto-incomplete` for the four `color.action.danger.*` tokens.
+- [ ] **T028 Re-derive privata against the Phase-3 core** (Q1, like T026 of Spec 002)
+  - Red: `pnpm fm modelo validate --aspekto ../fundamento-tiparoj-privataj` against the merged core fails with `aspekto-incomplete` for the four `color.action.danger.*` tokens.
   - Green: `scripts/derive.mjs` and `DERIVATION.md` derive the danger action from the package's danger ramp (pairs ≥ 4.5:1 and ≥ 7:1 under high, `state-distinct` 0.05); Rule 9 stays (Q3), sunken depth zero stays (Q4); `scripts/check.mjs`, preview and screenshots.
-  - Done when: validate exits 0; `check:alirebleco` passes for the composition; archive handed to the maintainer; a note in `research.md` of Spec 003. ciferecigo is not loaded into Figma, Make or a registry.
+  - Done when: validate exits 0; `check:alirebleco` passes for the composition; archive handed to the maintainer; a note in `research.md` of Spec 003. privata is not loaded into Figma, Make or a registry.
 
 ---
 

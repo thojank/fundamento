@@ -152,6 +152,6 @@ New rule IDs: `one-primary-per-container`, `destructive-not-primary-color`, `lab
 ## 8. Migration
 
 - **Modelo:** additive. New Ero data; `appliesTo.eroj`; the Jugxo `ekzemplo` field is optional.
-- **Q1 (decided):** every non-reference Aspekto adds the four danger action tokens (ekzemplo in the repo; ciferecigo outside, re-derived at the end of the phase as in T026).
+- **Q1 (decided):** every non-reference Aspekto adds the four danger action tokens (ekzemplo in the repo; privata outside, re-derived at the end of the phase as in T026).
 - **Q2 (decided):** the ekzemplo Make Kit is MIT-licensed; the fixture's `aspekto.json` license changes from `proprietary` to `MIT`, the fictitious font stays a name without a file.
 - **Tailwind NomRegulo (D-06, Constitution v1.6):** `derive_name` returns `--color-fm-…` style names. The MCP contract shape is unchanged, and no external consumer exists. A Jugxo on Article XII records the breaking change.

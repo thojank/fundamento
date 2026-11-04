@@ -222,14 +222,14 @@ describe("checkVortaroSet", () => {
   it("rejects non-ASCII kondicxoj", () => {
     const text = JSON.stringify({
       $extensions: {
-        "com.ciferecigo.fundamento": { id: "set_x", kondicxoj: ["kolor\u015Demo=dark"] },
+        fundamento: { id: "set_x", kondicxoj: ["kolor\u015Demo=dark"] },
       },
     });
     const result = checkVortaroSet("vortaro/sets/a/b.json", text);
     expect(rulesAndPaths(result.issues)).toEqual([
       {
         rule: "namespace-non-ascii",
-        path: "vortaro/sets/a/b.json#/$extensions/com.ciferecigo.fundamento/kondicxoj/0",
+        path: "vortaro/sets/a/b.json#/$extensions/fundamento/kondicxoj/0",
       },
     ]);
   });

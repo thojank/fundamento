@@ -48,7 +48,7 @@ describe("@fundamento/aspekto-komuna (D-05)", () => {
     const set = json("sets/aspekto/komuna.json");
     expect(Object.keys(set)).toEqual(["$extensions"]);
     expect(set.$extensions).toEqual({
-      "com.ciferecigo.fundamento": {
+      fundamento: {
         id: "set_01M2VEEDW32MC4ZQPRN0GC9JRS",
         kondicxoj: ["aspekto=komuna"],
       },

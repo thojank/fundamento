@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/ontologio.schema.json",
+  "$id": "urn:fundamento:schema:ontologio",
   "title": "Fundamento Ontologio",
   "description": "The terminology of the Constitution as data (Spec 002 FR-15). Field names follow SKOS (prefLabel, altLabel, definition, broader, related, notation, inScheme) without prefix, so a JSON-LD context can map them later; named relations that SKOS lacks sit in relations with declared predicates. References to concepts are relative IRIs (#Term).",
   "type": "object",
@@ -9,7 +9,7 @@
       "type": "string"
     },
     "uri": {
-      "const": "https://fundamento.ciferecigo.com/ontologio"
+      "const": "urn:fundamento:ontologio"
     },
     "constitution": {
       "type": "string",
@@ -88,7 +88,7 @@
       "properties": {
         "uri": {
           "type": "string",
-          "pattern": "^https://fundamento\\.ciferecigo\\.com/ontologio#[A-Z][A-Za-z-]*$"
+          "pattern": "^urn:fundamento:ontologio#[A-Z][A-Za-z-]*$"
         },
         "term": {
           "type": "string",

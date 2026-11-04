@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/validate.output.json",
+  "$id": "urn:fundamento:schema:mcp:validate.output",
   "title": "validate output",
   "description": "Validation issues of the served Modelo or of a local Aspekto package.",
   "type": "object",
@@ -11,13 +11,13 @@
     "errors": {
       "type": "array",
       "items": {
-        "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/Issue"
+        "$ref": "urn:fundamento:schema:mcp:common#/$defs/Issue"
       }
     },
     "warnings": {
       "type": "array",
       "items": {
-        "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/Issue"
+        "$ref": "urn:fundamento:schema:mcp:common#/$defs/Issue"
       }
     },
     "scope": {

@@ -45,7 +45,7 @@ export const TOOL_NAMES = [
 export type ToolName = (typeof TOOL_NAMES)[number];
 
 const SCHEMA_DIR = new URL("../schema/", import.meta.url);
-const COMMON_ID = "https://ciferecigo.com/fundamento/schema/mcp/common.json";
+const COMMON_ID = "urn:fundamento:schema:mcp:common";
 
 export interface CompiledSchema {
   schema: Record<string, unknown>;

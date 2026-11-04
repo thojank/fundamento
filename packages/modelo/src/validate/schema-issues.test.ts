@@ -77,7 +77,7 @@ describe("schemaIssues", () => {
 
   it("leaves IDs to checkIds", () => {
     const files = minimalFiles();
-    objectAt(core(files), "$extensions", "com.ciferecigo.fundamento").id = "set_nope";
+    objectAt(core(files), "$extensions", "fundamento").id = "set_nope";
     delete objectAt(files.data["reguloj.json"].value, "reguloj", 0).id;
     expect(pairs(files)).toEqual([]);
   });
@@ -106,12 +106,12 @@ describe("schemaIssues", () => {
   it("reports a nested group carrying the Fundamento extension once", () => {
     const files = minimalFiles();
     objectAt(core(files), "color", "palette").$extensions = {
-      "com.ciferecigo.fundamento": { id: "tok_01K5FMAJ0AND635FTMQ9558Y63" },
+      fundamento: { id: "tok_01K5FMAJ0AND635FTMQ9558Y63" },
     };
     expect(pairs(files)).toEqual([
       {
         rule: "schema-violation",
-        path: "vortaro/sets/core.json#/color/palette/$extensions/com.ciferecigo.fundamento",
+        path: "vortaro/sets/core.json#/color/palette/$extensions/fundamento",
       },
     ]);
   });

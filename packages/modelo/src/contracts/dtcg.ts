@@ -36,7 +36,7 @@ export const TOKEN_ROLES = [
 ] as const satisfies readonly TokenRole[];
 
 /** `$extensions` key for Fundamento metadata on tokens (`id`, `role`) and sets (`id`, `kondicxoj`). */
-export const FUNDAMENTO_EXTENSION_KEY = "com.ciferecigo.fundamento";
+export const FUNDAMENTO_EXTENSION_KEY = "fundamento";
 
 /**
  * Schema def (under `#/$defs/`) of the literal `$value` per type, without the alias alternative.

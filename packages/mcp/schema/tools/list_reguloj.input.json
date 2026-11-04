@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/list_reguloj.input.json",
+  "$id": "urn:fundamento:schema:mcp:list_reguloj.input",
   "title": "list_reguloj input",
   "description": "Reguloj with their kialo, optionally with one Aspekto's own.",
   "type": "object",
   "properties": {
     "aspekto": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
     },
     "text": {
       "type": "string",

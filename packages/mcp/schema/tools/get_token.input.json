@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/get_token.input.json",
+  "$id": "urn:fundamento:schema:mcp:get_token.input",
   "title": "get_token input",
   "description": "One token with its core definition and every override.",
   "type": "object",
@@ -9,7 +9,7 @@
       "type": "object",
       "properties": {
         "name": {
-          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenName"
+          "$ref": "urn:fundamento:schema:modelo#/$defs/TokenName"
         }
       },
       "additionalProperties": false,
@@ -19,7 +19,7 @@
       "type": "object",
       "properties": {
         "id": {
-          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenId"
+          "$ref": "urn:fundamento:schema:modelo#/$defs/TokenId"
         }
       },
       "additionalProperties": false,

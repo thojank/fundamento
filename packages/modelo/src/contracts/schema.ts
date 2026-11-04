@@ -3,7 +3,7 @@
 import { readFileSync } from "node:fs";
 import { normalizeNames } from "./names.js";
 
-export const MODELO_SCHEMA_ID = "https://ciferecigo.com/fundamento/schema/modelo.schema.json";
+export const MODELO_SCHEMA_ID = "urn:fundamento:schema:modelo";
 
 /** File URL of the hand-written schema. Valid from both `src/contracts/` and `dist/contracts/`. */
 export const MODELO_SCHEMA_URL = new URL("../../schema/modelo.schema.json", import.meta.url);
@@ -85,7 +85,7 @@ export function schemaRef(defName: string): string {
   return `${MODELO_SCHEMA_ID}#/$defs/${defName}`;
 }
 
-export const CONFIG_SCHEMA_ID = "https://ciferecigo.com/fundamento/schema/config.schema.json";
+export const CONFIG_SCHEMA_ID = "urn:fundamento:schema:config";
 
 /**
  * File URL of the schema of `fundamento.config.json` (D-07). It is separate from the Modelo

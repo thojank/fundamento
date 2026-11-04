@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/modelo.schema.json",
+  "$id": "urn:fundamento:schema:modelo",
   "title": "ModeloJson",
   "description": "Canonical schema of the Fundamento Modelo. The root validates the exported modelo.json; $defs describe every Key Entity and every source-file format (set files and the data files).",
   "type": "object",
@@ -798,7 +798,7 @@
     "TokenExtensions": {
       "type": "object",
       "properties": {
-        "com.ciferecigo.fundamento": {
+        "fundamento": {
           "$ref": "#/$defs/TokenFundamentoExtension"
         }
       },
@@ -824,7 +824,7 @@
     "SetExtensions": {
       "type": "object",
       "properties": {
-        "com.ciferecigo.fundamento": {
+        "fundamento": {
           "$ref": "#/$defs/SetFundamentoExtension"
         }
       },
@@ -834,7 +834,7 @@
       "description": "Extensions of a nested group. The Fundamento key is only allowed on tokens and on the set root.",
       "type": "object",
       "properties": {
-        "com.ciferecigo.fundamento": false
+        "fundamento": false
       },
       "additionalProperties": true
     },

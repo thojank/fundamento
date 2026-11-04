@@ -77,7 +77,7 @@ Die Beispiel-Agordo `provo` (erfundene Werte: Violett `#6b4fa0`, Info-Ton `oklch
 | G2, E2 | Rollen und Zuordnung aus Kern und komuna unverändert; nur die sechs Paletten neu |
 | G5 | KontrastParoj alle Modi, `kontrastSojloj`, `text-hierarchy`, `state-distinct`, `surface-order`, Aspiroj der Agordo, APCA als Hinweis |
 | G8 | `fm agordilo derive|check`; `fm modelo validate --aspekto` grün für provo |
-| E8 | „ciferecigo“ steht in keinem Beispiel (B-3: nur im Erweiterungsschlüssel des Set-Formats) |
+| E8 | „privata“ steht in keinem Beispiel (B-3: nur im Erweiterungsschlüssel des Set-Formats) |
 
 ### Abweichungen von der Spec
 
@@ -96,7 +96,7 @@ Die Beispiel-Agordo `provo` (erfundene Werte: Violett `#6b4fa0`, Info-Ton `oklch
 
 - **B-1 `palette-aligned` gegen Kontrastziele:** komuna richtet ihre Rampen an OKLCH-L aus (0,95, 0,92, 0,86 … je Stufe, alle Paletten gleich), die Spec verlangt Kontrastziele je Stufe. Für komunas Töne fällt beides zusammen; bei satten Tönen verlangt dasselbe Kontrastziel ein anderes L (WCAG-Leuchtdichte und OKLCH-Helligkeit trennen sich mit Ton und Buntheit): Rot und Violett verletzen in M2 `palette-aligned` (0,02) an fünf Stufen, ohne dass eine Stufe ihr Ziel verfehlt. Anpassbar, also mit Jugxo exportierbar; der Vorschlag nennt die Buntheit, bei der die Rampe hält. Keine Regulo geändert (Regel 0.3), O-8.
 - **B-2 Das Neutralprofil von komuna** ist ungleichmäßig (25 und 150 bläulich, 50/100/200 fast grau) – die Flächen raised und sunken sind getönt. Die Kalibrierung trägt das in jede abgeleitete Neutralpalette.
-- **B-3 E8:** „ciferecigo“ erscheint in keinem Beispiel, aber im Erweiterungsschlüssel `com.ciferecigo.fundamento`, den jedes Set des Formats trägt (Schema). Kein Manko; festgehalten, weil E8 „nirgends“ sagt.
+- **B-3 E8:** „privata“ erscheint in keinem Beispiel, aber im Erweiterungsschlüssel `fundamento`, den jedes Set des Formats trägt (Schema). Kein Manko; festgehalten, weil E8 „nirgends“ sagt.
 - **B-4 Größe des Berichts:** `raporto.json` von provo 209 KB (345 Paar-Einträge, 108 APCA-Hinweise), `raporto.md` 54 KB (O-10).
 - **B-5 Tempo (Vorstufe zu M3):** eine Ableitung mit allen Prüfungen dauert in Node 1,6–2,1 s (Validierung und Alirebleco über 144 Kombinationen, komuna und die neue Aspekto); die Paletten allein siehe Messungen. Für ② (unter 150 ms im Browser) heißt das: Paletten live, Prüfung entprellt (die Spec lässt das zu), ggf. nur die Kombinationen der neuen Aspekto.
 - **B-6 Tonschwelle:** 50 % → Gelb und Cyan verletzen feste Regeln (Export auch mit Jugxo gesperrt); 40 % → Gelb nur `palette-aligned` (anpassbar), Cyan sauber (D-05, O-4).

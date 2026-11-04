@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/search_tokens.input.json",
+  "$id": "urn:fundamento:schema:mcp:search_tokens.input",
   "title": "search_tokens input",
   "description": "Search tokens by prefix, type, role or text.",
   "type": "object",
@@ -10,10 +10,10 @@
       "minLength": 1
     },
     "type": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/DtcgType"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/DtcgType"
     },
     "role": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenRole"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/TokenRole"
     },
     "text": {
       "type": "string",

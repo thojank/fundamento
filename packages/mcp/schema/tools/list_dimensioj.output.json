@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/list_dimensioj.output.json",
+  "$id": "urn:fundamento:schema:mcp:list_dimensioj.output",
   "title": "list_dimensioj output",
   "description": "The Dimensioj with values, default, priority and sets.",
   "type": "object",
@@ -11,14 +11,14 @@
         "type": "object",
         "properties": {
           "name": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+            "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
           },
           "priority": {
             "type": "integer",
             "minimum": 1
           },
           "default": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+            "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
           },
           "valoroj": {
             "type": "array",
@@ -26,12 +26,12 @@
               "type": "object",
               "properties": {
                 "name": {
-                  "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                  "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
                 },
                 "sets": {
                   "type": "array",
                   "items": {
-                    "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SetName"
+                    "$ref": "urn:fundamento:schema:modelo#/$defs/SetName"
                   }
                 }
               },

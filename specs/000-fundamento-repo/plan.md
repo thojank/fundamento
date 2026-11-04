@@ -13,7 +13,7 @@ Repo state at the end of Phase 0: 6 Dimensioj (13 values, 72 combinations), 10 s
 ## Architecture
 
 - **Strict input.** Modelo files are read only through `parseStrictJson` (`jsonc-parser` in strict mode plus a duplicate-key walk). Duplicate keys, comments and trailing commas are errors with a JSON-Pointer location (`src/json/`).
-- **Loader.** `loadModelo(source)` turns a Modelo root into the in-memory `Modelo`: DTCG trees are flattened into tokens by canonical name, the effective `$type` includes group inheritance, and Fundamento metadata is read from `$extensions["com.ciferecigo.fundamento"]`. It never throws; it returns structured issues (`src/load/`).
+- **Loader.** `loadModelo(source)` turns a Modelo root into the in-memory `Modelo`: DTCG trees are flattened into tokens by canonical name, the effective `$type` includes group inheritance, and Fundamento metadata is read from `$extensions["fundamento"]`. It never throws; it returns structured issues (`src/load/`).
 - **One issue shape.** Validation, checks and the CLI share `{ rule, severity, path, message, suggestion, combination? }` and one fixed rule catalog (`RULE_IDS`, 54 rules, `src/contracts/issues.ts`). Tests assert `path` and `rule`, never prose.
 - **Resolver.** `resolve(modelo, assignment)` (`src/resolve/`): fill defaults, find active sets (all `kondicxoj` hold), order them (`core` first, then by highest condition priority, then condition count, then set name; last wins), overlay, then bind aliases late against the overlaid map. Each token carries `origin {set, setId}` and an `aliasChain` with the set of every link; composite sub-field aliases are reported in `fieldAliases`.
 - **Themes derivation.** `deriveThemes` produces the Tokens-Studio `$themes.json` and `$metadata.json` from `data/dimensioj.json` and the set `kondicxoj`, using the resolver's order. The committed files are derived; validation fails on drift (`themes-out-of-sync`, `metadata-out-of-sync`).
@@ -57,8 +57,8 @@ fundamento/
 
 | Entity | Where | Key fields |
 |---|---|---|
-| Token (`tok`) | set files, DTCG 2025.10 | canonical name = dot-joined group path matching `^[a-z0-9]+(\.[a-z0-9]+)*$`; `$type`, `$value` (literal or `{alias}`), `$description`; `$extensions["com.ciferecigo.fundamento"] = { id, role? }` on the `core` definition only |
-| TokenSet (`set`) | `sets/<name>.json` | `$extensions["com.ciferecigo.fundamento"] = { id, kondicxoj: ["dimensio=valoro", …] }`; file name must equal the canonical name built from `kondicxoj` |
+| Token (`tok`) | set files, DTCG 2025.10 | canonical name = dot-joined group path matching `^[a-z0-9]+(\.[a-z0-9]+)*$`; `$type`, `$value` (literal or `{alias}`), `$description`; `$extensions["fundamento"] = { id, role? }` on the `core` definition only |
+| TokenSet (`set`) | `sets/<name>.json` | `$extensions["fundamento"] = { id, kondicxoj: ["dimensio=valoro", …] }`; file name must equal the canonical name built from `kondicxoj` |
 | Dimensio (`dim`) / DimensioValoro (`dva`) | `data/dimensioj.json` | name, unique priority (1 = lowest), default, values; `kontrastSojloj` on every `contrast` value; `aspekto {owner, licenseNote}` on every `aspekto` value |
 | Aspekto | a value of the `aspekto` Dimensio | shares its `dva_` ID; no separate entity ID |
 | Regulo (`reg`) | `data/reguloj.json` | name, statement, `kialo` (required, non-empty), scope, checkability |
@@ -238,7 +238,7 @@ One entry per Article of Constitution v1.2.
 
 **Verdict:** conforming (with the conjunction-set interop approximation in Complexity Tracking)
 
-- W3C DTCG 2025.10 is the only storage format of the Vortaro; there is no proprietary intermediate format. Fundamento metadata sits in `$extensions["com.ciferecigo.fundamento"]`, which other tools ignore.
+- W3C DTCG 2025.10 is the only storage format of the Vortaro; there is no proprietary intermediate format. Fundamento metadata sits in `$extensions["fundamento"]`, which other tools ignore.
 - Sets and themes follow the Tokens-Studio convention: one set per file, `$themes.json` (one theme group per Dimensio, one theme per value, `core` as `source`, active sets `enabled`) and `$metadata.json` (`tokenSetOrder` in resolver order). The folder is meant to import into Tokens Studio and Penpot without a converter; the Penpot result is pending (see "Penpot import result").
 - NomReguloj exist for the binding Celoj that need names in Phase 0 (CSS, Tailwind v4 `@theme`, Figma, TypeScript, DTCG), so later Celoj need no Modelo change.
 

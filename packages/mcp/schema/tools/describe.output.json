@@ -1,23 +1,23 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/describe.output.json",
+  "$id": "urn:fundamento:schema:mcp:describe.output",
   "title": "describe output",
   "description": "What is here? Overview of the served Modelo.",
   "type": "object",
   "properties": {
     "version": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Version"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/Version"
     },
     "dimensioj": {
       "type": "array",
       "items": {
-        "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+        "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
       }
     },
     "aspektoj": {
       "type": "array",
       "items": {
-        "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/AspektoSummary"
+        "$ref": "urn:fundamento:schema:mcp:common#/$defs/AspektoSummary"
       }
     },
     "tokens": {
