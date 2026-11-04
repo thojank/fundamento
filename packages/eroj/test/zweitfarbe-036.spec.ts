@@ -139,7 +139,6 @@ for (const [ort, pfad] of [
     // „Keine Zweitfarbe“ clears it: by the keyboard, and the step says so after the reload.
     const entfernen = page.getByRole("button", { name: "Keine Zweitfarbe" });
     await entfernen.focus();
-    await vorschauGeladen(page);
     const geloescht = entwurf(page, id);
     // The button reloads the page once the draft took the patch: wait for that navigation itself,
     // not for the load state of the page that is about to go.
