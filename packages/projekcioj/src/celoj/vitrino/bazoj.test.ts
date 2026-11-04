@@ -1,6 +1,6 @@
 // Spec 029 ① 5: the foundation pages of the Vitrino – Tokens, Farbe, Elevation, Form, Abstände,
 // Typografie, Bewegung, Icons – with texts of their own, the Lingvo-Schalter and the chosen brand.
-// Built here with all five brands (fundamento.cxiuj.config.json), as the maintainer opens it.
+// Built here with all six brands (fundamento.cxiuj.config.json), as the maintainer opens it.
 
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -76,7 +76,8 @@ describe("Spec 029 ① 5: the foundation pages", () => {
     // the six buttons at the end of a field (+6); ②b-1b M-2: the status of the twelve fields, their
     // message and the kampo's status icon (216). Spec 035 2.3.1 and 2.3.3: the targets of the date
     // picker's trigger and ✕ (+2). Spec 036 Befund 1.1: radius.role.multiline (+1).
-    expect(tokenoj.length).toBe(1883);
+    // Spec 036 Befund 2.2: the Zweitfarbe, 12 steps and 5 roles (+17).
+    expect(tokenoj.length).toBe(1900);
     const levels = new Set(tokenoj.map((token) => token.ebeno));
     expect(levels).toEqual(new Set(["grundlage", "rolle", "ero"]));
     const text = tokenoj.find((token) => token.name === "color.text.default");
@@ -92,6 +93,7 @@ describe("Spec 029 ① 5: the foundation pages", () => {
       "provo",
       "provo-kompakta",
       "komuna-0-2",
+      "dukolora",
     ]);
     expect(html).toMatch(/<input[^>]*type="search"[^>]*data-fm-bazoj-sercxo/);
   });

@@ -962,6 +962,23 @@
         "metric": "oklch-l-delta",
         "min": 0.3
       }
+    },
+    {
+      "id": "reg_01M69KM4J9STWVW0E2VZK64HC8",
+      "name": "sekundo-not-action",
+      "statement": "No action, link or focus colour takes the Zweitfarbe: in every set, no token of color.action.*, color.link.* or color.focus.* aliases a step of color.palette.sekundo or a role of color.sekundo, and no Ero-Token whose core value is such a role aliases them either.",
+      "kialo": "Spec 036 (V-2) gives a brand a second colour for highlight surfaces, illustrations, badges and charts, never for actions: the lead colour marks what a person can do, and a second colour on a button, a link or the focus ring would make two kinds of action that look alike and mean the same, so neither tells the person anything. The way out of a violation is the lead colour (the role's alias in the core); the Zweitfarbe stays where it decorates and sorts.",
+      "scope": "vortaro: color.action.*, color.link.*, color.focus.* and the Ero-Tokens on them, in every set, against color.palette.sekundo.* and color.sekundo.*",
+      "checkability": "automatic",
+      "appliesTo": {
+        "tokens": [
+          "color.action",
+          "color.link",
+          "color.focus",
+          "color.palette.sekundo",
+          "color.sekundo"
+        ]
+      }
     }
   ]
 }

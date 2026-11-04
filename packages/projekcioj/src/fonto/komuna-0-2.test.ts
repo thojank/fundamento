@@ -47,7 +47,15 @@ describe("Spec 029 ① 1: komuna-0-2 keeps today's komuna", () => {
     if (!prepared.ok) return;
     const aspekto = prepared.input.modelo.dimensioj.find((dimensio) => dimensio.name === "aspekto");
     const names = (aspekto?.valoroj ?? []).map((valoro) => valoro.name);
-    expect(names).toEqual(["komuna", "ekzemplo", "provo", "provo-kompakta", "komuna-0-2"]);
+    // Spec 036 Befund 2.2 (V-2): dukolora, the brand with a Zweitfarbe, after it.
+    expect(names).toEqual([
+      "komuna",
+      "ekzemplo",
+      "provo",
+      "provo-kompakta",
+      "komuna-0-2",
+      "dukolora",
+    ]);
   });
 
   it("resolves in all 72 combinations to the values of komuna on main", () => {

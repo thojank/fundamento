@@ -132,6 +132,13 @@
           "$value": "{color.palette.info.800}"
         }
       }
+    },
+    "sekundo": {
+      "badge": {
+        "text": {
+          "$value": "{color.palette.sekundo.900}"
+        }
+      }
     }
   },
   "border": {

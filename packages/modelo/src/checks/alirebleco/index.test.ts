@@ -67,7 +67,9 @@ describe("alirebleco over every known Aspekto (Nachlese 3 W2)", () => {
   it("measures the derived Aspekto provo as an external Aspekto (Spec 016 ①)", async () => {
     const result = await check({ json: true, repoRoot });
     // Spec 029 ①: and komuna-0-2, komuna as it was, measured beside them without a failing pair.
-    expect(result.stats.aspektoj).toBe(5);
+    // Spec 036 Befund 2.2: and dukolora, the brand with a Zweitfarbe.
+    expect(result.stats.aspektoj).toBe(6);
+    expect(result.stats["dukolora:errors"]).toBe(0);
     expect(result.stats["komuna-0-2:errors"]).toBe(0);
     expect(result.stats["provo:combinations"]).toBe(144);
     expect(result.stats["provo:evaluations"]).toBeGreaterThan(0);

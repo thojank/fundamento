@@ -18,7 +18,8 @@ import { MODEL_FONTS } from "./plugin-test-helpers.js";
 import { figmaDouble } from "./test-doubles/plugin.js";
 
 // Spec 029 ①: komuna-0-2, today's komuna before the Fonto, is the fifth brand of the build.
-const BRANDS = ["komuna", "ekzemplo", "provo", "provo-kompakta", "komuna-0-2"];
+// Spec 036 Befund 2.2 (V-2): dukolora, the brand with a Zweitfarbe, the sixth.
+const BRANDS = ["komuna", "ekzemplo", "provo", "provo-kompakta", "komuna-0-2", "dukolora"];
 const config = new URL(
   "../../../../modelo/test/fixtures/valid/aspekto-provo-kompakta/fundamento.cxiuj.config.json",
   import.meta.url,
@@ -48,7 +49,7 @@ describe("all example brands in one build (Spec 026 ①)", () => {
     if (out !== "") rmSync(out, { recursive: true, force: true });
   });
 
-  it("the collection aspekto has the five brands as modes, within the mode limit of Figma Professional, and every variable a value in each", () => {
+  it("the collection aspekto has the six brands as modes, within the mode limit of Figma Professional, and every variable a value in each", () => {
     const collection = plan.collections.find((candidate) => candidate.name === "aspekto");
     expect(collection?.modes).toEqual(BRANDS);
     expect(collection?.modes.length).toBeLessThanOrEqual(FIGMA_MODE_LIMIT);
@@ -64,18 +65,18 @@ describe("all example brands in one build (Spec 026 ①)", () => {
     expect(Object.keys(plan.ikonoj.glyphs)).toEqual(BRANDS);
   });
 
-  it("the plugin has an id and a name of its own that name the five brands (F-13)", () => {
+  it("the plugin has an id and a name of its own that name the six brands (F-13)", () => {
     const manifest = JSON.parse(pluginManifest(plan, "abc1234")) as { id: string; name: string };
     // Spec 027: the plugin of the Bauformen, apart from the builds before it.
     expect(manifest.id).toMatch(/^fundamento-grundlagen-[0-9a-f]{8}$/);
     expect(manifest.name).toContain(
-      "Fundamento Grundlagen 0.2.0 (abc1234 · komuna, ekzemplo, provo, provo-kompakta, komuna-0-2)",
+      "Fundamento Grundlagen 0.2.0 (abc1234 · komuna, ekzemplo, provo, provo-kompakta, komuna-0-2, dukolora)",
     );
     const built = JSON.parse(
       readFileSync(join(out, "figma/plugin/manifest.json"), "utf8"),
     ) as typeof manifest;
     expect(built.id).toBe(manifest.id);
-    expect(built.name).toContain("komuna, ekzemplo, provo, provo-kompakta, komuna-0-2");
+    expect(built.name).toContain("komuna, ekzemplo, provo, provo-kompakta, komuna-0-2, dukolora");
   });
 
   it("the plugin of the build runs in a new empty file (the double of Figma, mode limit of Professional) and makes the collection aspekto with the five modes", async () => {
@@ -99,7 +100,7 @@ describe("all example brands in one build (Spec 026 ①)", () => {
     expect(prata.filter((entry) => !entry.endsWith(" Regular"))).toEqual([]);
   });
 
-  it("the Vitrino of the build switches between the five brands", () => {
+  it("the Vitrino of the build switches between the six brands", () => {
     const html = readFileSync(join(out, VITRINO_FILE), "utf8");
     const switches = [
       ...html.matchAll(/data-fm-switch="aspekto" data-fm-valoro="([a-z0-9-]+)"/g),

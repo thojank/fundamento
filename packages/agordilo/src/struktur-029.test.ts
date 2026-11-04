@@ -36,8 +36,9 @@ describe("Spec 029 ①: the structure of komuna 0.2 for the Agordilo", () => {
     // twelve fields, the message and the kampo's status icon; Spec 035 2.3: the calendar and the ✕
     // of the date picker at the size of an icon with their targets, read-only as rest. Spec 036
     // Befund 1.1: radius.role.multiline, and the text area, the code block and the tooltip on it.
+    // Spec 036 Befund 2.2 (V-2): the palette color.palette.sekundo and the roles color.sekundo.*.
     expect(structure.fingerprint).toBe(
-      "f1cb73acab94cecf893414533f76301387455be6fa068bd22d7ce8e4da9387c9",
+      "984d278d9aeecf7e8fe9d3e653cb014678c08a3ebe691f90621ea1c169245597",
     );
   });
 

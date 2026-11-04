@@ -110,7 +110,8 @@ describe("rule catalog (§2.6)", () => {
     // Spec 032 ②: clean-room-spuroj-invalid and clean-room-jugxo-missing.
     // Spec 033 S1: faceto-token-unassigned and faceto-token-twice.
     // Spec 036 (Befund 2.1, V-1): link-distinct-from-text, the underline of a link as dark as text.
-    expect(RULE_IDS).toHaveLength(195);
+    // Spec 036 (Befund 2.2, V-2): sekundo-not-action, the Zweitfarbe never on an action.
+    expect(RULE_IDS).toHaveLength(196);
     for (const rule of [
       "agordo-jugxo-fixed",
       "raporto-out-of-sync",

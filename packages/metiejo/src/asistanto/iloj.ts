@@ -43,6 +43,16 @@ import {
   type Vollstaendigkeit,
   vollstaendigkeitOf,
 } from "./stato.js";
+import { zweitfarbeAlsAktionOf } from "./zweitfarbe-aktion.js";
+
+// What the assistant refuses of the Zweitfarbe, for the server's chat and Studio (Spec 036, 2.2).
+export {
+  aktionsWortOf,
+  istZweitfarbe,
+  SEKUNDO_NOT_ACTION,
+  zweitfarbeAblehnungOf,
+  zweitfarbeAlsAktionOf,
+} from "./zweitfarbe-aktion.js";
 
 export const STATUS_ROLLEN = ["success", "warning", "danger", "info"] as const;
 export const SCHRIFT_ROLLEN = ["display", "body", "code"] as const;
@@ -94,10 +104,10 @@ export const ILOJ: readonly ToolInfo[] = [
   {
     name: "setze_farbe",
     description:
-      "Setzt die Leitfarbe oder eine Statusfarbe (success, warning, danger, info) als Hex (#rrggbb) oder oklch(L C H). Die Ableitung macht daraus Paletten und Rollen.",
+      "Setzt die Leitfarbe, die Zweitfarbe oder eine Statusfarbe (success, warning, danger, info) als Hex (#rrggbb) oder oklch(L C H). Die Ableitung macht daraus Paletten und Rollen. Die Zweitfarbe färbt nur Hervorhebungsflächen, Illustrationen, Abzeichen und Diagramme, nie Knöpfe, Links oder den Fokus.",
     inputSchema: object(
       {
-        rolle: { type: "string", enum: ["leitfarbe", ...STATUS_ROLLEN] },
+        rolle: { type: "string", enum: ["leitfarbe", "zweitfarbe", ...STATUS_ROLLEN] },
         farbe: { type: "string" },
       },
       ["rolle", "farbe"],
@@ -223,6 +233,7 @@ function reglerOfFaceto(work: Laborejo, name: string): Record<string, unknown> |
     }));
   const extra: Record<string, unknown> = {};
   if (faceto.agordo.includes("leitfarbe")) extra.leitfarbe = agordo.leitfarbe;
+  if (faceto.agordo.includes("zweitfarbe")) extra.zweitfarbe = agordo.zweitfarbe?.farbe ?? "keine";
   if (faceto.agordo.includes("zusatzfarben")) extra.zusatzfarben = agordo.zusatzfarben ?? {};
   if (faceto.agordo.includes("ikono")) {
     extra.ikono = { gewicht: agordo.ikono?.gewicht ?? "regular", wahl: IKONO_GEWICHTE };
@@ -290,6 +301,9 @@ export async function vokiIlon(
         : done(result);
     }
     case "bewege": {
+      // Spec 036, Befund 2.2: no wish lays the Zweitfarbe on buttons, links or the focus.
+      const ablehnung = zweitfarbeAlsAktionOf(string(args.wunsch));
+      if (ablehnung !== undefined) return fail(ablehnung);
       const eingabe = { wunsch: string(args.wunsch) };
       const propono = work.options.kontrolita
         ? proposeAgordo(
@@ -354,19 +368,26 @@ export async function vokiIlon(
     case "setze_farbe": {
       const rolle = string(args.rolle);
       const farbe = string(args.farbe);
-      if (rolle !== "leitfarbe" && !(STATUS_ROLLEN as readonly string[]).includes(rolle)) {
+      if (
+        rolle !== "leitfarbe" &&
+        rolle !== "zweitfarbe" &&
+        !(STATUS_ROLLEN as readonly string[]).includes(rolle)
+      ) {
         return fail(`Die Rolle ${rolle} gibt es nicht.`, {
-          rollen: ["leitfarbe", ...STATUS_ROLLEN],
+          rollen: ["leitfarbe", "zweitfarbe", ...STATUS_ROLLEN],
         });
       }
       const colour = parseAgordoColor(farbe);
       if (colour === undefined || colour.l < 0 || colour.l > 1) {
         return fail(`„${farbe}“ ist keine Farbe. Gib sie als #rrggbb oder oklch(L C H) an.`);
       }
+      // A Zweitfarbe set in the chat is set by hand: no origin in the material.
       const next: Agordo =
         rolle === "leitfarbe"
           ? { ...agordo, leitfarbe: farbe }
-          : { ...agordo, zusatzfarben: { ...(agordo.zusatzfarben ?? {}), [rolle]: farbe } };
+          : rolle === "zweitfarbe"
+            ? { ...agordo, zweitfarbe: { farbe } }
+            : { ...agordo, zusatzfarben: { ...(agordo.zusatzfarben ?? {}), [rolle]: farbe } };
       const applied = work.apply(next);
       return "fehler" in applied
         ? fail(applied.fehler)

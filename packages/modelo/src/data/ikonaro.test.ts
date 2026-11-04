@@ -162,11 +162,11 @@ describe("data/ikonaro.json (Spec 014 ①, G3)", () => {
     expect(result.errors).toEqual([]);
     expect(result.ok).toBe(true);
     // Spec 019 ①: provo-kompakta is the fourth known Aspekto (Phosphor light); Spec 029 ①:
-    // komuna-0-2 the fifth.
+    // komuna-0-2 the fifth; Spec 036 Befund 2.2: dukolora, the brand with a Zweitfarbe, the sixth.
     expect(result.stats).toMatchObject({
       names: names.length,
-      aspektoj: 5,
-      glyphs: names.length * 5,
+      aspektoj: 6,
+      glyphs: names.length * 6,
     });
   });
 

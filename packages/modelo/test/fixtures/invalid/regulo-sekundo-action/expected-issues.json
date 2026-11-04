@@ -1,0 +1,17 @@
+{
+  "description": "Spec 036, Befund 2.2 (V-2): the Zweitfarbe on an action, a link and the focus – the primary action at rest aliases color.palette.sekundo.700 in core, the link at rest the same step in the dark mode, and the focus ring the badge fill of the Zweitfarbe in high contrast. Each is rejected with a suggestion back to the lead colour; the badge fill on the Zweitfarbe is allowed.",
+  "issues": [
+    {
+      "rule": "sekundo-not-action",
+      "path": "vortaro/sets/color-scheme/dark.json#/color/link/rest"
+    },
+    {
+      "rule": "sekundo-not-action",
+      "path": "vortaro/sets/contrast/high.json#/color/focus/ring"
+    },
+    {
+      "rule": "sekundo-not-action",
+      "path": "vortaro/sets/core.json#/color/action/primary/rest"
+    }
+  ]
+}

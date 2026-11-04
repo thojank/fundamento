@@ -33,7 +33,14 @@ import {
 import { avertoOf, KONFIRMO_TEKSTO } from "./asistanto/averto.js";
 import { babili } from "./asistanto/babilo.js";
 import { asistantoScreen } from "./asistanto/ekrano.js";
-import { Laborejo } from "./asistanto/iloj.js";
+import {
+  aktionsWortOf,
+  istZweitfarbe,
+  Laborejo,
+  SEKUNDO_NOT_ACTION,
+  zweitfarbeAblehnungOf,
+  zweitfarbeAlsAktionOf,
+} from "./asistanto/iloj.js";
 import { Budget, CostLimitReached, type Fetch, type Provider } from "./asistanto/ki.js";
 import {
   appendKroniko,
@@ -253,6 +260,7 @@ const PATCHABLE = new Set([
   "ziele",
   "festgelegt",
   "etikedoj",
+  "zweitfarbe",
 ]);
 
 /** An Agordo with a proposal laid over it: objects merged one level deep, values replaced. */
@@ -280,6 +288,14 @@ export function patched(agordo: Agordo, patch: Record<string, unknown>): Agordo 
   const next = structuredClone(agordo) as unknown as Record<string, unknown>;
   for (const [key, value] of Object.entries(patch)) {
     if (!PATCHABLE.has(key)) continue;
+    // Spec 036, Befund 2.2: the Zweitfarbe is one value with its origin – replaced as a whole (a
+    // colour typed by hand has none); null or an empty colour removes it („Keine Zweitfarbe“).
+    if (key === "zweitfarbe") {
+      if (value === null || (isRecord(value) && (value.farbe === "" || value.farbe === null)))
+        delete next[key];
+      else next[key] = value;
+      continue;
+    }
     if (value === null) {
       delete next[key];
       continue;
@@ -669,9 +685,9 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     detaloj: Record<string, unknown> = {},
   ): Promise<{ status: number; body: Record<string, unknown> }> => {
     const provider = options.ki?.provider;
-    if (provider === undefined) return { status: 503, body: { satz: kiSatz() } };
     const fremda = fremdaOf(name);
     if (fremda !== undefined && !fremda.konfirmita) {
+      if (provider === undefined) return { status: 503, body: { satz: kiSatz() } };
       return {
         status: 409,
         body: {
@@ -679,6 +695,36 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         },
       };
     }
+    // Spec 036, Befund 2.2: the Zweitfarbe never goes on buttons, links or the focus – a wish for
+    // it is refused in the person's words before any model is asked, and nothing changes.
+    const ablehnung = zweitfarbeAlsAktionOf(teksto);
+    if (ablehnung !== undefined) {
+      babiloj.set(name, [
+        ...(babiloj.get(name) ?? []),
+        { role: "user", content: teksto },
+        { role: "assistant", content: ablehnung },
+      ]);
+      kroniko(name, {
+        ago: "babilo",
+        fonto,
+        ...(faceto === undefined ? {} : { faceto }),
+        teksto,
+        detaloj: { antwort: ablehnung, abgelehnt: SEKUNDO_NOT_ACTION, ...detaloj },
+      });
+      return {
+        status: 200,
+        body: {
+          antwort: ablehnung,
+          rev: draft.rev,
+          atendoj: 0,
+          sxangxoj: [],
+          stato: statoOf(name, draft),
+          zaehlilo: zaehliloOf(name),
+        },
+      };
+    }
+    // Only now the model is needed (QA run 1: the refusal above answers without one).
+    if (provider === undefined) return { status: 503, body: { satz: kiSatz() } };
     if (teksto === "")
       return { status: 422, body: { satz: "Schreib oder sag, was du ändern möchtest." } };
     const historio = babiloj.get(name) ?? [];
@@ -993,6 +1039,21 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         );
         return;
       }
+      // Spec 036, Befund 2.2: a button, a link or the focus on the Zweitfarbe is refused in the
+      // person's words (Regulo sekundo-not-action) before the draft changes.
+      const ziel = aktionsWortOf(token);
+      if (ziel !== undefined && istZweitfarbe(alias)) {
+        reply(
+          {
+            satz: zweitfarbeAblehnungOf([ziel]),
+            vorschlag: "Wähle eine Stufe der Leitfarbe oder der Neutraltöne.",
+            betroffen: [SEKUNDO_NOT_ACTION],
+            rule: SEKUNDO_NOT_ACTION,
+          },
+          409,
+        );
+        return;
+      }
       const own = alias === undefined ? { wert } : { alias };
       const festgelegt = { ...(draft.agordo.festgelegt ?? {}) };
       const entry = festgelegt[token] ?? {};
@@ -1161,9 +1222,18 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     switch (key) {
       case "farbe": {
         const leitfarbe = values.get("leitfarbe");
-        return leitfarbe === null || leitfarbe === ""
-          ? draft.agordo
-          : patched(draft.agordo, { leitfarbe });
+        const withLead =
+          leitfarbe === null || leitfarbe === ""
+            ? draft.agordo
+            : patched(draft.agordo, { leitfarbe });
+        // Spec 036, Befund 2.2: the field of the Zweitfarbe goes with the step; empty is none.
+        const zweitfarbe = values.get("zweitfarbe");
+        if (zweitfarbe === null || zweitfarbe.trim() === (draft.agordo.zweitfarbe?.farbe ?? ""))
+          return withLead;
+        const next = patched(withLead, {
+          zweitfarbe: zweitfarbe.trim() === "" ? null : { farbe: zweitfarbe.trim() },
+        });
+        return readAgordo(next).agordo === undefined ? withLead : next;
       }
       case "schrift": {
         const id = values.get("tiparo");
@@ -1389,6 +1459,13 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
               ? { pret: false, satz: kiSatz() }
               : { pret: true, modelo: provider.toString() },
           ...(fremda === undefined ? {} : { fremda }),
+          // Spec 036, Befund 2.2: the step that names the Agordo field shows the Zweitfarbe.
+          ...(faceto?.agordo.includes("zweitfarbe") === true
+            ? {
+                zweitfarbe:
+                  draft.agordo.zweitfarbe === undefined ? {} : { wert: draft.agordo.zweitfarbe },
+              }
+            : {}),
           zaehlilo: zaehliloOf(name).satz,
           takso: (() => {
             const taksoj = taksojOf();
@@ -1747,17 +1824,28 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
             detaloj: { herkunft: result.herkunft[faceto] ?? [], kreilo: { celo, karaktero } },
           });
         }
-        // Spec 035, Befund 4.2: the accent of the inspiration waits as an open proposal of its step;
-        // „Vorschlag übernehmen“ lays it on the draft, and the check decides as for every proposal.
+        // Spec 036, Befund 2.2 (Spec 035 D-80 superseded): the second colour of the inspiration is
+        // the Zweitfarbe of the draft, set with its origin like the lead colour; the Kroniko records
+        // it with its measure (the accent of Spec 035, Befund 4.2).
         if (result.akzent !== undefined) {
           const { faceto, agordo: patch, satz, herkunft, farbe, anteil, abstand } = result.akzent;
-          writeProponoj(options.workdir, name, [{ faceto, agordo: patch, satz, herkunft }]);
           kroniko(name, {
             ago: "propono",
             fonto: "agento",
             faceto,
             teksto: satz,
-            detaloj: { herkunft, akzent: { farbe, anteil, abstand } },
+            detaloj: { herkunft, akzent: { farbe, anteil, abstand }, agordo: patch },
+          });
+        } else if (result.zweitfarbe !== undefined && "teilsatz" in result.zweitfarbe) {
+          // A second colour too close to the lead colour sets nothing; the person reads why.
+          const { satz, grund, farbe } = result.zweitfarbe;
+          notoj.push(satz);
+          kroniko(name, {
+            ago: "propono",
+            fonto: "agento",
+            faceto: "gvidkoloro",
+            teksto: satz,
+            detaloj: { zweitfarbe: { grund, ...(farbe === undefined ? {} : { farbe }) } },
           });
         }
         // With a model, no fixed colour and no inspiration, the model chooses the lead colour.

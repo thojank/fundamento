@@ -50,9 +50,10 @@ describe("check:ikonaro on the repo (Spec 014 ①)", () => {
     // Spec 016 ①: the derived Aspekto provo draws the Ikonaro of komuna, copied with the structure.
     // Spec 019 ①: provo draws it in Phosphor bold, provo-kompakta in light (ikono.gewicht).
     // Spec 029 ①: and komuna-0-2, with the glyphs of komuna as they were.
-    expect(result.stats.aspektoj).toBe(5);
+    // Spec 036 Befund 2.2: and dukolora (the brand with a Zweitfarbe), with the glyphs of komuna.
+    expect(result.stats.aspektoj).toBe(6);
     expect(result.stats.names).toBeGreaterThan(0);
-    expect(result.stats.glyphs).toBe((result.stats.names ?? 0) * 5);
+    expect(result.stats.glyphs).toBe((result.stats.names ?? 0) * 6);
     expect(result.summary).toMatch(/komuna/);
     expect(result.summary).toMatch(/ekzemplo/);
     expect(result.summary).toMatch(/provo/);

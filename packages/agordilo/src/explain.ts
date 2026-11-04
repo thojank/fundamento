@@ -19,20 +19,16 @@ import {
 } from "@fundamento/modelo";
 import type { Agordo } from "./agordo.js";
 import { parseAgordoColor } from "./agordo.js";
-import {
-  type Calibration,
-  COLOR_SCHEME,
-  type Mode,
-  type PaletteName,
-  REFERENCE_STEPS,
-} from "./calibration.js";
+import { type Calibration, COLOR_SCHEME, type Mode, REFERENCE_STEPS } from "./calibration.js";
 import {
   ACHROMATIC,
+  type DerivedPaletteName,
   type DerivedPalettes,
   type DerivedStep,
   derivePalettes,
   type ModeOverride,
   type TargetFloors,
+  ZWEITFARBE_PALETTE,
 } from "./palettes.js";
 import type { AgordoPatch } from "./raporto.js";
 import { TONE_KEEP } from "./solve.js";
@@ -161,7 +157,7 @@ export class Explainer {
   }
 
   /** Whether the ramps of `palettes` keep the structural rule (same measure as the Regulo). */
-  #rampsHold(rule: string, palettes: DerivedPalettes, palette: PaletteName): boolean {
+  #rampsHold(rule: string, palettes: DerivedPalettes, palette: DerivedPaletteName): boolean {
     const ramps = rampsOf(palettes);
     const max = this.#sojloMax(rule);
     if (rule === "palette-aligned") {
@@ -183,7 +179,7 @@ export class Explainer {
     const number = Number(subject?.[2]);
     if (subject?.[1] === undefined || !Number.isFinite(number)) return undefined;
     const ramps = rampsOf(this.#context.palettes);
-    let culprit = subject[1] as PaletteName;
+    let culprit = subject[1] as DerivedPaletteName;
     let detail = `The ramp ${culprit} advances unevenly towards step ${number}`;
     if (rule === "palette-aligned") {
       const at: { palette: string; l: number }[] = [];
@@ -201,16 +197,17 @@ export class Explainer {
         undefined,
       );
       if (worst === undefined) return undefined;
-      culprit = worst.palette as PaletteName;
+      culprit = worst.palette as DerivedPaletteName;
       const others = at.filter((entry) => entry.palette !== worst.palette).map((entry) => entry.l);
       detail = `At step ${number} the ramp ${culprit} stands at OKLCH L ${fixed(worst.l, 3)}, the other ramps between ${fixed(Math.min(...others), 3)} and ${fixed(Math.max(...others), 3)}`;
     }
     const source = this.#context.palettes.sources[culprit];
+    if (source === undefined) return undefined;
     const cause = `${detail}: every step meets its contrast target, but at hue ${fixed(source.hue, 1)}° and chroma ${fixed(source.chroma, 4)} a contrast target needs another lightness than at the hues of komuna's calibration (WCAG luminance and OKLCH lightness part with hue and chroma).`;
     return { cause, ...this.#rampSuggestion(rule, culprit) };
   }
 
-  #rampSuggestion(rule: string, palette: PaletteName): Suggestion {
+  #rampSuggestion(rule: string, palette: DerivedPaletteName): Suggestion {
     const key = `${rule}:${palette}`;
     const known = this.#suggestions.get(key);
     if (known !== undefined) return known;
@@ -234,23 +231,25 @@ export class Explainer {
       return low;
     };
     let suggestion: Suggestion;
-    if (palette === "accent") {
-      const lead = parseAgordoColor(agordo.leitfarbe) ?? { l: 0, c: 0, h: 0 };
-      const make = (share: number): Agordo => ({
-        ...agordo,
-        leitfarbe: `oklch(${fixed(lead.l, 6)} ${fixed(lead.c * share, 6)} ${fixed(lead.h, 6)})`,
-      });
+    if (palette === "accent" || palette === ZWEITFARBE_PALETTE) {
+      const lead = parseAgordoColor(colourOf(agordo, palette)) ?? { l: 0, c: 0, h: 0 };
+      const make = (share: number): Agordo =>
+        withColour(
+          agordo,
+          palette,
+          `oklch(${fixed(lead.l, 6)} ${fixed(lead.c * share, 6)} ${fixed(lead.h, 6)})`,
+        );
       const share = search(make);
       const chroma = lead.c * share;
       const anchor = derivePalettes(make(share), calibration, floors, overrides, [
-        "accent",
+        palette,
       ]).steps.find((step) => step.step === REFERENCE_STEPS.accent);
       suggestion =
         chroma < ACHROMATIC || anchor === undefined
-          ? unreachable("accent")
+          ? unreachable(palette)
           : {
-              suggestion: `Use the lead colour ${anchor.hex} (hue ${fixed(lead.h, 1)}°, chroma ${fixed(anchor.c, 4)} instead of ${fixed(lead.c, 4)}; any chroma up to ${fixed(chroma, 4)} holds): the ramp accent then keeps ${rule}.`,
-              apply: { leitfarbe: anchor.hex },
+              suggestion: `Use the ${palette === "accent" ? "lead colour" : "Zweitfarbe"} ${anchor.hex} (hue ${fixed(lead.h, 1)}°, chroma ${fixed(anchor.c, 4)} instead of ${fixed(lead.c, 4)}; any chroma up to ${fixed(chroma, 4)} holds): the ramp ${palette} then keeps ${rule}.`,
+              apply: patchOf(agordo, palette, anchor.hex),
             };
     } else if (palette === "neutral") {
       const tint = agordo.neutral?.toenung ?? 0;
@@ -289,8 +288,8 @@ export class Explainer {
     const known = this.#suggestions.get(key);
     if (known !== undefined) return known;
     const suggestion =
-      step.palette === "accent"
-        ? this.#leadSuggestion()
+      step.palette === "accent" || step.palette === ZWEITFARBE_PALETTE
+        ? this.#leadSuggestion(step.palette)
         : step.palette === "neutral"
           ? this.#tintSuggestion()
           : this.#saturationSuggestion(step.palette);
@@ -299,7 +298,7 @@ export class Explainer {
   }
 
   /** Whether every step of `palette` meets its target under `agordo`. */
-  #onTarget(agordo: Agordo, palette: PaletteName): DerivedPalettes | undefined {
+  #onTarget(agordo: Agordo, palette: DerivedPaletteName): DerivedPalettes | undefined {
     const { calibration, floors, overrides } = this.#context;
     const derived = derivePalettes(agordo, calibration, floors, overrides, [palette]);
     const all = [...derived.steps, ...derived.overrides];
@@ -307,7 +306,7 @@ export class Explainer {
   }
 
   /** The largest share of `full` (0…1) for which `make(share)` keeps `palette` on target. */
-  #largestShare(make: (share: number) => Agordo, palette: PaletteName): number {
+  #largestShare(make: (share: number) => Agordo, palette: DerivedPaletteName): number {
     let low = 0;
     let high = 1;
     for (let index = 0; index < SEARCH_ITERATIONS; index++) {
@@ -318,23 +317,27 @@ export class Explainer {
     return low;
   }
 
-  #leadSuggestion(): Suggestion {
+  /** The lead colour (accent) or the Zweitfarbe (sekundo) with less chroma, its value named. */
+  #leadSuggestion(palette: "accent" | typeof ZWEITFARBE_PALETTE): Suggestion {
     const { agordo } = this.#context;
-    const lead = parseAgordoColor(agordo.leitfarbe) ?? { l: 0, c: 0, h: 0 };
-    const withChroma = (share: number): Agordo => ({
-      ...agordo,
-      leitfarbe: `oklch(${fixed(lead.l, 6)} ${fixed(lead.c * share, 6)} ${fixed(lead.h, 6)})`,
-    });
-    const share = this.#largestShare(withChroma, "accent");
-    if (lead.c * share < ACHROMATIC) return unreachable("accent");
-    // The value named is the lead colour darkened to its step (accent.700) at the chroma that
-    // holds: entered as the lead colour, it keeps every accent step on target with its tone.
-    const derived = this.#onTarget(withChroma(share), "accent");
+    const lead = parseAgordoColor(colourOf(agordo, palette)) ?? { l: 0, c: 0, h: 0 };
+    const withChroma = (share: number): Agordo =>
+      withColour(
+        agordo,
+        palette,
+        `oklch(${fixed(lead.l, 6)} ${fixed(lead.c * share, 6)} ${fixed(lead.h, 6)})`,
+      );
+    const share = this.#largestShare(withChroma, palette);
+    if (lead.c * share < ACHROMATIC) return unreachable(palette);
+    // The value named is the colour darkened to its step (accent.700, sekundo.700 likewise) at the
+    // chroma that holds: entered as the colour, it keeps every step on target with its tone.
+    const derived = this.#onTarget(withChroma(share), palette);
     const anchor = derived?.steps.find((step) => step.step === REFERENCE_STEPS.accent);
-    if (anchor === undefined) return unreachable("accent");
+    if (anchor === undefined) return unreachable(palette);
+    const what = palette === "accent" ? "lead colour" : "Zweitfarbe";
     return {
-      suggestion: `Use the darker lead colour ${anchor.hex} (hue ${fixed(lead.h, 1)}°, chroma ${fixed(anchor.c, 4)} instead of ${fixed(lead.c, 4)}; any chroma up to ${fixed(lead.c * share, 4)} holds): every accent step then keeps its tone at its contrast target.`,
-      apply: { leitfarbe: anchor.hex },
+      suggestion: `Use the darker ${what} ${anchor.hex} (hue ${fixed(lead.h, 1)}°, chroma ${fixed(anchor.c, 4)} instead of ${fixed(lead.c, 4)}; any chroma up to ${fixed(lead.c * share, 4)} holds): every ${palette} step then keeps its tone at its contrast target.`,
+      apply: patchOf(agordo, palette, anchor.hex),
     };
   }
 
@@ -352,7 +355,7 @@ export class Explainer {
     };
   }
 
-  #saturationSuggestion(palette: PaletteName): Suggestion {
+  #saturationSuggestion(palette: DerivedPaletteName): Suggestion {
     const { agordo } = this.#context;
     const saturation = agordo.regler?.saettigung ?? 1;
     const share = this.#largestShare(
@@ -394,11 +397,13 @@ function tokenOf(step: DerivedStep): string {
   return `color.palette.${step.palette}.${step.step}${step.mode === "dark" ? " (dark)" : ""}`;
 }
 
-function originLabel(context: ExplainContext, palette: PaletteName): string {
+function originLabel(context: ExplainContext, palette: DerivedPaletteName): string {
   const source = context.palettes.sources[palette];
-  switch (source.origin) {
+  switch (source?.origin) {
     case "leitfarbe":
       return "lead colour";
+    case "zweitfarbe":
+      return "Zweitfarbe";
     case "toenung":
       return "tint (neutral.toenung)";
     case "zusatzfarbe":
@@ -408,11 +413,40 @@ function originLabel(context: ExplainContext, palette: PaletteName): string {
   }
 }
 
-function unreachable(palette: PaletteName): Suggestion {
+function unreachable(palette: DerivedPaletteName): Suggestion {
   return {
     suggestion:
       palette === "accent"
         ? "Target not reachable at this hue: choose a lead colour of another hue."
-        : `Target not reachable at this hue: choose another tone for ${palette}.`,
+        : palette === ZWEITFARBE_PALETTE
+          ? "Target not reachable at this hue: choose a Zweitfarbe of another hue."
+          : `Target not reachable at this hue: choose another tone for ${palette}.`,
   };
+}
+
+/** The colour of the Agordo a colour ramp takes its tone from: the lead colour or the Zweitfarbe. */
+function colourOf(agordo: Agordo, palette: "accent" | typeof ZWEITFARBE_PALETTE): string {
+  return palette === "accent" ? agordo.leitfarbe : (agordo.zweitfarbe?.farbe ?? "");
+}
+
+/** The Agordo with that colour replaced; the Zweitfarbe keeps its herkunft. */
+function withColour(
+  agordo: Agordo,
+  palette: "accent" | typeof ZWEITFARBE_PALETTE,
+  value: string,
+): Agordo {
+  return palette === "accent"
+    ? { ...agordo, leitfarbe: value }
+    : { ...agordo, zweitfarbe: { ...agordo.zweitfarbe, farbe: value } };
+}
+
+/** The change of the Agordo a suggestion of a colour amounts to (raporto apply). */
+function patchOf(
+  agordo: Agordo,
+  palette: "accent" | typeof ZWEITFARBE_PALETTE,
+  hex: string,
+): AgordoPatch {
+  return palette === "accent"
+    ? { leitfarbe: hex }
+    : { zweitfarbe: { ...agordo.zweitfarbe, farbe: hex } };
 }

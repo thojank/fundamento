@@ -166,9 +166,12 @@ describe("an accent from the inspiration (Spec 035, Befund 4.2)", () => {
     expect(result.akzent?.satz).toContain("25 %");
   });
 
-  it("the accent is proposed, not set: the brand has one brand palette, and the check refuses a literal brand surface", () => {
+  // Spec 036, Befund 2.2 (Spec 035 D-80 superseded): the accent is set – as the Zweitfarbe of the
+  // Agordo, its own palette with roles that are never actions – and never as a literal brand surface.
+  it("the accent is set as the Zweitfarbe, never as a literal value: the check refuses a literal brand surface", () => {
     const result = kreiloProponoj({ inspiro: picture(TUERKIS, 5) }, start, bases);
-    expect(result.akzent?.agordo).toEqual({});
+    expect(result.akzent?.agordo).toEqual({ zweitfarbe: result.agordo.zweitfarbe });
+    expect(result.agordo.zweitfarbe?.farbe).toBe("#17b3a8");
     expect(result.agordo.festgelegt).toBeUndefined();
     expect(
       result.akzent?.satz.split(/[.!?](\s|$)/).filter((part) => part.trim() !== ""),

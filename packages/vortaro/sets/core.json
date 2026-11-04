@@ -1813,6 +1813,128 @@
           }
         },
         "$description": "Transparent white: overlays for a dark surface, the counterpart of shade."
+      },
+      "sekundo": {
+        "50": {
+          "$value": "{color.palette.neutral.50}",
+          "$description": "Zweitfarbe, the second colour of the brand (Spec 036 V-2), step 50: komuna has none, so the step is the neutral step 50; a brand with a Zweitfarbe derives the ramp from it at the contrast targets of the accent ramp.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M69KM3EVY2BT7XYMNZWS20W9",
+              "role": "palette"
+            }
+          }
+        },
+        "100": {
+          "$value": "{color.palette.neutral.100}",
+          "$description": "Zweitfarbe, the second colour of the brand (Spec 036 V-2), step 100: komuna has none, so the step is the neutral step 100; a brand with a Zweitfarbe derives the ramp from it at the contrast targets of the accent ramp.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M69KM3EVY2BT7XYMNZWS20WA",
+              "role": "palette"
+            }
+          }
+        },
+        "150": {
+          "$value": "{color.palette.neutral.150}",
+          "$description": "Zweitfarbe, the second colour of the brand (Spec 036 V-2), step 150: komuna has none, so the step is the neutral step 150; a brand with a Zweitfarbe derives the ramp from it at the contrast targets of the accent ramp.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M69KM3EVY2BT7XYMNZWS20WB",
+              "role": "palette"
+            }
+          }
+        },
+        "200": {
+          "$value": "{color.palette.neutral.200}",
+          "$description": "Zweitfarbe, the second colour of the brand (Spec 036 V-2), step 200: komuna has none, so the step is the neutral step 200; a brand with a Zweitfarbe derives the ramp from it at the contrast targets of the accent ramp.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M69KM3EVY2BT7XYMNZWS20WC",
+              "role": "palette"
+            }
+          }
+        },
+        "300": {
+          "$value": "{color.palette.neutral.300}",
+          "$description": "Zweitfarbe, the second colour of the brand (Spec 036 V-2), step 300: komuna has none, so the step is the neutral step 300; a brand with a Zweitfarbe derives the ramp from it at the contrast targets of the accent ramp.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M69KM3EVY2BT7XYMNZWS20WD",
+              "role": "palette"
+            }
+          }
+        },
+        "400": {
+          "$value": "{color.palette.neutral.400}",
+          "$description": "Zweitfarbe, the second colour of the brand (Spec 036 V-2), step 400: komuna has none, so the step is the neutral step 400; a brand with a Zweitfarbe derives the ramp from it at the contrast targets of the accent ramp.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M69KM3EVY2BT7XYMNZWS20WE",
+              "role": "palette"
+            }
+          }
+        },
+        "500": {
+          "$value": "{color.palette.neutral.500}",
+          "$description": "Zweitfarbe, the second colour of the brand (Spec 036 V-2), step 500: komuna has none, so the step is the neutral step 500; a brand with a Zweitfarbe derives the ramp from it at the contrast targets of the accent ramp.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M69KM3EVY2BT7XYMNZWS20WF",
+              "role": "palette"
+            }
+          }
+        },
+        "600": {
+          "$value": "{color.palette.neutral.600}",
+          "$description": "Zweitfarbe, the second colour of the brand (Spec 036 V-2), step 600: komuna has none, so the step is the neutral step 600; a brand with a Zweitfarbe derives the ramp from it at the contrast targets of the accent ramp.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M69KM3EVY2BT7XYMNZWS20WG",
+              "role": "palette"
+            }
+          }
+        },
+        "700": {
+          "$value": "{color.palette.neutral.700}",
+          "$description": "Zweitfarbe, the second colour of the brand (Spec 036 V-2), step 700: komuna has none, so the step is the neutral step 700; a brand with a Zweitfarbe derives the ramp from it at the contrast targets of the accent ramp.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M69KM3EVY2BT7XYMNZWS20WH",
+              "role": "palette"
+            }
+          }
+        },
+        "800": {
+          "$value": "{color.palette.neutral.800}",
+          "$description": "Zweitfarbe, the second colour of the brand (Spec 036 V-2), step 800: komuna has none, so the step is the neutral step 800; a brand with a Zweitfarbe derives the ramp from it at the contrast targets of the accent ramp.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M69KM3EVY2BT7XYMNZWS20WJ",
+              "role": "palette"
+            }
+          }
+        },
+        "900": {
+          "$value": "{color.palette.neutral.900}",
+          "$description": "Zweitfarbe, the second colour of the brand (Spec 036 V-2), step 900: komuna has none, so the step is the neutral step 900; a brand with a Zweitfarbe derives the ramp from it at the contrast targets of the accent ramp.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M69KM3EVY2BT7XYMNZWS20WM",
+              "role": "palette"
+            }
+          }
+        },
+        "950": {
+          "$value": "{color.palette.neutral.950}",
+          "$description": "Zweitfarbe, the second colour of the brand (Spec 036 V-2), step 950: komuna has none, so the step is the neutral step 950; a brand with a Zweitfarbe derives the ramp from it at the contrast targets of the accent ramp.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M69KM3EVY2BT7XYMNZWS20WN",
+              "role": "palette"
+            }
+          }
+        }
       }
     },
     "background": {
@@ -2610,6 +2732,60 @@
         "com.ciferecigo.fundamento": {
           "id": "tok_01M2W9400ZA1K81R0W23SG0XXF",
           "role": "backdrop"
+        }
+      }
+    },
+    "sekundo": {
+      "surface": {
+        "$value": "{color.palette.sekundo.150}",
+        "$description": "Highlight surface in the second colour of the brand (Zweitfarbe): a band, a panel or a teaser set apart from the page; carries color.text.default. Never an action, a link or the focus (Regulo sekundo-not-action). Without a Zweitfarbe the neutral ramp.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M69KM3EVY2BT7XYMNZWS20WQ",
+            "role": "background"
+          }
+        }
+      },
+      "illustration": {
+        "$value": "{color.palette.sekundo.600}",
+        "$description": "Illustration in the Zweitfarbe: shapes and spot graphics that carry meaning, at least 3:1 on color.background.default (WCAG 1.4.11). Never an action, a link or the focus.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M69KM3EVY2BT7XYMNZWS20WR",
+            "role": "foreground"
+          }
+        }
+      },
+      "badge": {
+        "fill": {
+          "$value": "{color.palette.sekundo.150}",
+          "$description": "Fill of a badge in the Zweitfarbe (a category, a tag), with color.sekundo.badge.text on it. Never an action, a link or the focus.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M69KM3EVY2BT7XYMNZWS20WS",
+              "role": "background"
+            }
+          }
+        },
+        "text": {
+          "$value": "{color.palette.sekundo.800}",
+          "$description": "Text of a badge in the Zweitfarbe, on color.sekundo.badge.fill. Never an action, a link or the focus.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M69KM3EVY2BT7XYMNZWS20WT",
+              "role": "foreground"
+            }
+          }
+        }
+      },
+      "chart": {
+        "$value": "{color.palette.sekundo.700}",
+        "$description": "Data series of a chart in the Zweitfarbe, next to the lead colour, at least 3:1 on color.background.default (WCAG 1.4.11). Never an action, a link or the focus.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M69KM3EVY2BT7XYMNZWS20WV",
+            "role": "foreground"
+          }
         }
       }
     }

@@ -12,6 +12,9 @@ Changes of the published packages (the Make Kits `@fundamento/make-kit-<aspekto>
 - Neu, additiv: die Rolle `radius.role.multiline` (CSS `--fm-radius-role-multiline`) für mehrzeilige Felder und kleine Flächen mit Text. Die Skemoj von `fm-tekstareo`, `fm-kodbloko` und `fm-konsileto` binden ihre Rundung jetzt an diese Rolle statt an `radius.role.control`. Jedes mitgelieferte Aspekto belegt sie mit dem bisherigen Wert (`{radius.medium}`), das Bild bleibt gleich. Wählt eine Marke die Pille für Bedienelemente (`radius.role.control` auf `radius.full`), bleiben diese drei begrenzt.
   Wer ein eigenes Aspekto-Paket pflegt, ergänzt `radius.role.multiline` mit dem Wert, den dort `radius.role.control` hat; sonst meldet die Validierung `aspekto-incomplete`.
   (Spec 036 Befund 1.1.)
+- Neu, additiv: die Zweitfarbe einer Marke (Spec 036, V-2) – die Palette `color.palette.sekundo` (12 Stufen von 50 bis 950) und die Rollen `color.sekundo.surface`, `color.sekundo.illustration`, `color.sekundo.badge.fill`, `color.sekundo.badge.text` und `color.sekundo.chart`, als CSS-Variablen `--fm-color-palette-sekundo-*` und `--fm-color-sekundo-*`, im Tailwind-Theme und als Figma-Variablen. Eine Marke ohne Zweitfarbe verweist dort auf ihre Neutraltöne; sie sieht aus wie bisher. Die Zweitfarbe färbt nie Aktionen, Verweise oder den Fokus (Regulo `sekundo-not-action`).
+  Wer ein eigenes Aspekto-Paket pflegt, ergänzt die 17 Tokens (z. B. mit den Werten von `komuna-0-2`); ohne sie meldet die Prüfung das Paket als unvollständig (Verfassung Art. IV).
+  (Spec 036 Befund 2.2, D-20 zur Entscheidung durch den Maintainer.)
 
 ### Hinweis für MCP-Clients
 

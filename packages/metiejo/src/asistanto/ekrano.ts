@@ -8,6 +8,7 @@
 import type { Agordo } from "@fundamento/agordilo";
 import { escapeHtml, jsonIsland, screenDocument } from "../html.js";
 import type { StudioPage } from "../studio.js";
+import { zweitfarbeFeldHtml } from "../sxtupoj.js";
 import { KONFIRMO_TEKSTO } from "./averto.js";
 import { type FacetoStand, type FacetoStato, freigabeOf, type Vollstaendigkeit } from "./stato.js";
 
@@ -46,6 +47,8 @@ export interface AsistantoInput {
   historio: readonly { role: "user" | "assistant"; content: string }[];
   ki: { pret: boolean; modelo?: string; satz?: string };
   fremda?: { kiel: string; nomo?: string; konfirmita: boolean };
+  /** Spec 036, Befund 2.2: the step that holds the Zweitfarbe shows its field (absent: none). */
+  zweitfarbe?: { wert?: Agordo["zweitfarbe"] };
   /** Spec 033 S6: the counter of this brand from its Kroniko – tokens, dollars, time, requests. */
   zaehlilo: string;
   /** Spec 033 S6: the estimates before the start, one line each. */
@@ -228,6 +231,7 @@ ${takso("babilo", "Schätzung je Wunsch")}${input.parolo === undefined ? "" : ta
 ${propono}
 ${material}
 ${esploro}
+${input.zweitfarbe === undefined ? "" : zweitfarbeFeldHtml(input.zweitfarbe.wert)}
 <fm-teksto kind="caption" data-mt-freigabe-satz>${escapeHtml(releaseHint)}</fm-teksto>
 <fm-butono emphasis="medium" data-mt-faceto-ago="akcepto">Vorschlag übernehmen</fm-butono>
 <fm-butono emphasis="high" data-mt-faceto-ago="liberigo"${releasable ? "" : " disabled"}>Freigeben</fm-butono>

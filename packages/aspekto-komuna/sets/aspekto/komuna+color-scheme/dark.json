@@ -441,6 +441,25 @@
         }
       }
     },
+    "sekundo": {
+      "surface": {
+        "$value": "{color.palette.sekundo.800}"
+      },
+      "illustration": {
+        "$value": "{color.palette.sekundo.400}"
+      },
+      "badge": {
+        "fill": {
+          "$value": "{color.palette.sekundo.800}"
+        },
+        "text": {
+          "$value": "{color.palette.sekundo.150}"
+        }
+      },
+      "chart": {
+        "$value": "{color.palette.sekundo.300}"
+      }
+    },
     "$type": "color"
   },
   "elevation": {

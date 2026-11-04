@@ -1,0 +1,84 @@
+{
+  "id": "dva_dukolora_01M564XR00QEFX9W7XG6JFJ426",
+  "name": "dukolora",
+  "owner": "Dukolora (fictitious, test only)",
+  "license": "MIT",
+  "idNamespace": "dukolora",
+  "fonts": [
+    {
+      "family": "Geist",
+      "license": "OFL-1.1",
+      "source": "https://github.com/vercel/geist-font",
+      "redistributable": true,
+      "scripts": [
+        "Latn"
+      ]
+    },
+    {
+      "family": "Geist Mono",
+      "license": "OFL-1.1",
+      "source": "https://github.com/vercel/geist-font",
+      "redistributable": true,
+      "scripts": [
+        "Latn"
+      ]
+    }
+  ],
+  "ikonoj": {
+    "set": "Phosphor Icons",
+    "style": "regular",
+    "version": "2.1.1",
+    "license": "MIT",
+    "source": "https://github.com/phosphor-icons/core (npm @phosphor-icons/core 2.1.1, assets/regular)",
+    "read": "2026-10-17",
+    "names": {
+      "add": "plus",
+      "check": "check",
+      "chevron-down": "caret-down",
+      "chevron-left": "caret-left",
+      "chevron-right": "caret-right",
+      "close": "x",
+      "collapse": "arrows-in-simple",
+      "danger": "warning-octagon",
+      "expand": "arrows-out-simple",
+      "external": "arrow-square-out",
+      "info": "info",
+      "more": "dots-three",
+      "search": "magnifying-glass",
+      "sort-ascending": "sort-ascending",
+      "sort-descending": "sort-descending",
+      "subtract": "minus",
+      "success": "check-circle",
+      "upload": "upload-simple",
+      "warning": "warning",
+      "calendar": "calendar-blank",
+      "edit": "pencil-simple"
+    }
+  },
+  "agordilo": {
+    "version": "0.2.0",
+    "structure": {
+      "vortaro": "0.2.0",
+      "reference": "komuna",
+      "sha256": "984d278d9aeecf7e8fe9d3e653cb014678c08a3ebe691f90621ea1c169245597"
+    },
+    "agordo": {
+      "name": "dukolora",
+      "owner": "Dukolora (fictitious, test only)",
+      "license": "MIT",
+      "leitfarbe": "#375479",
+      "zweitfarbe": {
+        "farbe": "#0f8f86",
+        "herkunft": {
+          "quelle": "bild",
+          "datei": "zwei-farben.png",
+          "merkmal": "zweite prägende Farbe der Fläche",
+          "anteil": 18
+        }
+      },
+      "neutral": {
+        "toenung": 0.1
+      }
+    }
+  }
+}
