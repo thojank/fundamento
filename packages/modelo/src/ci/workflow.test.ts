@@ -123,10 +123,11 @@ const ALIREBLECO_EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string]>
 // come in two speeds (Build 7–9 s or 11–12 s), about half of each. The Vitrino is cut in two by
 // VITRINO_PARTO (playwright.vitrino.config.ts): the Werkstatt beside the Make Kit and the
 // quickstart, the rest in a job of its own – about 9 minutes each on a slow runner.
-// Spec 040 B-1: both halves ran into their 15 minutes again (runs 41873907893, 41877598624,
-// 41886235249), in Chromium alone: the Vitrino runs in one engine on main too. The Werkstatt is a
-// job of its own, the Make Kit and the quickstart stay here, and the Werkstatt and the rest of the
-// Vitrino run in parts (packages/eroj/test/vitrino-partoj.ts), a runner each.
+// Spec 040 B-1: both halves ran into their 15 minutes again, in Chromium alone (the Vitrino runs in
+// one engine on main too): the rest of the Vitrino in runs 41873907893, 41877598624 and
+// 41886235249, the Werkstatt beside the Make Kit in 41877598624. The Werkstatt is a job of its own,
+// the Make Kit and the quickstart stay here, and the Werkstatt and the rest of the Vitrino run in
+// parts (packages/eroj/test/vitrino-partoj.ts), a runner each.
 /** The job of the Make Kit and the quickstart. */
 const RENDERED_CHECK_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
   ["Playwright browsers", PLAYWRIGHT_BROWSERS],

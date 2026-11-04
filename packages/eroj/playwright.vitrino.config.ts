@@ -1,18 +1,11 @@
 import { defineConfig } from "@playwright/test";
 import base from "./playwright.config.js";
+import { vitrinoAuswahl } from "./test/vitrino-partoj.js";
 
-// Spec 029 ①b (B-1b-6): CI runs the Vitrino in two jobs – VITRINO_PARTO=werkstatt the Werkstatt,
-// VITRINO_PARTO=cetero the rest; one pattern for both, so together they are every test. Unset
-// (locally, anywhere else) the whole Vitrino runs.
-const WERKSTATT = /the Werkstatt/;
-
-function parto(): { grep: RegExp } | { grepInvert: RegExp } | Record<string, never> {
-  const value = process.env.VITRINO_PARTO;
-  if (value === undefined || value === "") return {};
-  if (value === "werkstatt") return { grep: WERKSTATT };
-  if (value === "cetero") return { grepInvert: WERKSTATT };
-  throw new Error(`VITRINO_PARTO: unknown part "${value}" (werkstatt or cetero)`);
-}
+// Spec 029 ①b (B-1b-6), Spec 040 B-1: CI runs the Vitrino in parts, a runner each – VITRINO_PARTO
+// names one of test/vitrino-partoj.ts (werkstatt-1, werkstatt-2, cetero-1 …). `werkstatt` and
+// `cetero` still select their groups; together the parts are every test (vitrino-partoj.test.ts).
+// Unset (locally, anywhere else) the whole Vitrino runs; an unknown value throws.
 
 // check:vitrino (Spec 004 T012): builds the projections and drives the one HTML file. One engine
 // is enough — the rendering of the Eroj is proved in three by the other checks.
@@ -23,5 +16,5 @@ export default defineConfig({
   testIgnore: [],
   timeout: 300_000,
   projects: [base.projects?.[0] ?? { name: "chromium" }],
-  ...parto(),
+  ...vitrinoAuswahl(process.env.VITRINO_PARTO),
 });
