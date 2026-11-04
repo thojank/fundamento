@@ -184,6 +184,10 @@ const REST_2B2 = (() => {
   ];
   const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
   return {
+    /** Spec 040 B-4: each row group a list of its own, named by its place. */
+    lists: groups.map(
+      (group, index) => [`REST_2B2 #${index + 1}`, new RegExp(group.pattern)] as const,
+    ),
     test: (name: string) => pattern.test(name),
     added: groups.reduce((sum, group) => sum + group.added, 0),
     moved: Object.assign({}, ...groups.map((group) => group.moved)) as Record<string, string>,
@@ -256,6 +260,10 @@ const REST_2B3 = (() => {
   ];
   const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
   return {
+    /** Spec 040 B-4: each row group a list of its own, named by its place. */
+    lists: groups.map(
+      (group, index) => [`REST_2B3 #${index + 1}`, new RegExp(group.pattern)] as const,
+    ),
     test: (name: string) => pattern.test(name),
     added: groups.reduce((sum, group) => sum + group.added, 0),
   };
@@ -281,6 +289,10 @@ const REST_2B5 = (() => {
   ];
   const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
   return {
+    /** Spec 040 B-4: each row group a list of its own, named by its place. */
+    lists: groups.map(
+      (group, index) => [`REST_2B5 #${index + 1}`, new RegExp(group.pattern)] as const,
+    ),
     test: (name: string) => pattern.test(name),
     added: groups.reduce((sum, group) => sum + group.added, 0),
   };
@@ -318,6 +330,53 @@ export const addedBy2b2 = (name: string): boolean =>
   REST_2B2.test(name) ||
   REST_2B3.test(name) ||
   REST_2B5.test(name);
+
+/**
+ * Spec 040 B-4: every list that justifies a token added after main's record, by name – the
+ * patterns of ②b and each row group of ②b-2, ②b-3 and ②b-5. Together they are addedSinceMain and
+ * addedBy2b2.
+ */
+const ADDED_LISTS: readonly (readonly [string, RegExp])[] = [
+  ["SPINNER", SPINNER],
+  ["CLEAR", CLEAR],
+  ["SUMMARY", SUMMARY],
+  ["TARGET", TARGET],
+  ["STATUS", STATUS],
+  ["MULTILINE", MULTILINE],
+  ["SEKUNDO", SEKUNDO],
+  ["ACHSEN_2B2", ACHSEN_2B2],
+  ["CLEAR_2B2", CLEAR_2B2],
+  ...REST_2B2.lists,
+  ...REST_2B3.lists,
+  ...REST_2B5.lists,
+];
+
+/** The lists that justify a token as added after main's record; none for a token main had. */
+export const justificationsOf = (name: string): string[] =>
+  ADDED_LISTS.filter(([, pattern]) => pattern.test(name)).map(([list]) => list);
+
+/**
+ * Spec 040 B-4: the tokens added since main's record, derived from the rows instead of a pinned
+ * sum. Every added row is justified in exactly one list, and every list justifies a row (a list
+ * that justifies none has gone stale). A row no list justifies is one of main's: the hash of
+ * main's rows catches it.
+ */
+export function addedRows(names: Iterable<string>): { added: string[]; violations: string[] } {
+  const added: string[] = [];
+  const violations: string[] = [];
+  const used = new Set<string>();
+  for (const name of names) {
+    const lists = justificationsOf(name);
+    if (lists.length === 0) continue;
+    added.push(name);
+    for (const list of lists) used.add(list);
+    if (lists.length > 1) violations.push(`${name}: justified in ${lists.join(", ")}`);
+  }
+  for (const [list] of ADDED_LISTS) {
+    if (!used.has(list)) violations.push(`${list}: justifies no row`);
+  }
+  return { added, violations };
+}
 
 /**
  * ②b-2 (A-datelektilo-2): the calendar's size medium is the token whose value changed on purpose

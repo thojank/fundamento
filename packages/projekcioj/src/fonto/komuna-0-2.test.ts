@@ -10,7 +10,13 @@ import { fileURLToPath } from "node:url";
 import { projectModeloSource, resolveCombination } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../build.js";
-import { ADDED_BY_2B2, ADDED_SINCE_MAIN, mainRows, REMOVED_SINCE_MAIN } from "./neu-seit-main.js";
+import {
+  ADDED_BY_2B2,
+  ADDED_SINCE_MAIN,
+  addedRows,
+  mainRows,
+  REMOVED_SINCE_MAIN,
+} from "./neu-seit-main.js";
 
 const CXIUJ = fileURLToPath(
   new URL(
@@ -75,6 +81,30 @@ describe("Spec 029 ① 1: komuna-0-2 keeps today's komuna", () => {
     }
     expect(Object.keys(BAZO.kombinoj)).toHaveLength(72);
     expect(differences).toEqual([]);
+  });
+
+  it("Spec 040 B-4: one more justified row breaks the pinned sum, not the property", () => {
+    expect(prepared.ok).toBe(true);
+    if (!prepared.ok) return;
+    const [key = "", expected] = Object.entries(BAZO.kombinoj)[0] ?? [];
+    const assignment = Object.fromEntries(
+      key.split("&").map((pair) => pair.split("=") as [string, string]),
+    );
+    const { tokens } = resolveCombination(prepared.input.modelo, {
+      aspekto: "komuna-0-2",
+      ...assignment,
+    });
+    // A step of the Zweitfarbe's palette beyond 950: SEKUNDO justifies it.
+    const row = "color.palette.sekundo.1000";
+    expect(tokens[row]).toBeUndefined();
+    const more = { ...tokens, [row]: { ...tokens["color.palette.sekundo.950"] } };
+    const { added, violations } = addedRows(Object.keys(more));
+    expect(violations).toEqual([]);
+    expect(hashOf(more)).toBe(expected);
+    expect(Object.keys(more)).toHaveLength(BAZO.tokens - REMOVED_SINCE_MAIN + added.length);
+    expect(Object.keys(more)).toHaveLength(
+      BAZO.tokens + ADDED_SINCE_MAIN + ADDED_BY_2B2 - REMOVED_SINCE_MAIN,
+    );
   });
 
   it("carries komuna's fonts, Ikonaro and Aspiroj, under its own name and namespace", () => {
