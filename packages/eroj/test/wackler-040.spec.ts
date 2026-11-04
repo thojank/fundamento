@@ -7,7 +7,7 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import { expect, test } from "@playwright/test";
-import { gespeichert, nachDerAbfrage, seiteGeladen } from "./wackler-040.js";
+import { assistentFolgt, gespeichert, nachDerAbfrage, seiteGeladen } from "./wackler-040.js";
 
 const SEITE = `<!doctype html>
 <html lang="de" data-mt-sxtupo="farbe"><head><title>Probe</title></head><body>
@@ -38,6 +38,17 @@ fetch("/api/marko/probe/pruefung", { method: "POST" });
 const ABFRAGE = `<!doctype html>
 <html lang="de"><head><title>Probe</title></head><body><p>Probe</p>
 <script>fetch("/api/marko/probe/stato").catch(() => undefined);</script></body></html>`;
+
+// A page that follows the draft as the assistant's steps do: its poll answers a new rev (5), and its
+// preview loads it. It polls once – the answer comes before the test waits for it.
+const FOLGT = `<!doctype html>
+<html lang="de" data-mt-rev="1"><head><title>Probe</title></head><body>
+<iframe data-mt-vorschau src="/vorschau?rev=1" title="Vorschau"></iframe>
+<script>
+fetch("/api/marko/folgt/stato").then((response) => response.json()).then((stato) => {
+  document.querySelector("iframe[data-mt-vorschau]").src = "/vorschau?rev=" + stato.rev;
+});
+</script></body></html>`;
 
 /** A request the server holds: known once it came, answered once the test lets it go. */
 interface Gehalten {
@@ -92,8 +103,12 @@ function antworte(request: IncomingMessage, response: ServerResponse): void {
     response.writeHead(200, { "content-type": "application/json" });
     response.write("{");
     stato.annehmen(response);
-  } else if (url.pathname === "/vorschau" && url.searchParams.get("rev") === "1")
-    html(response, "<!doctype html><p>rev 1</p>");
+  } else if (url.pathname === "/folgt") html(response, FOLGT);
+  else if (url.pathname === "/api/marko/folgt/stato") {
+    response.setHeader("content-type", "application/json");
+    response.end(JSON.stringify({ rev: 5 }));
+  } else if (url.pathname === "/vorschau" && ["1", "5"].includes(url.searchParams.get("rev") ?? ""))
+    html(response, `<!doctype html><p>rev ${url.searchParams.get("rev")}</p>`);
   else if (url.pathname === "/vorschau") vorschau.annehmen(response);
   else if (url.pathname === "/api/marko/probe/pruefung") pruefung.annehmen(response);
   else if (url.pathname === "/api/marko/probe/entwurf") {
@@ -209,4 +224,19 @@ test("nachDerAbfrage() waits for the poll's answer and its body (Spec 040 B-8)",
   stato.gehalten.freigeben();
   await abgefragt;
   expect(fertig).toBe(true);
+});
+
+test("assistentFolgt() counts a poll that answered before the wait began (Spec 040 B-2)", async ({
+  page,
+}) => {
+  await page.goto(`${base}/folgt`);
+  // The poll answered rev 5 and the preview loaded it – before the test waits for it.
+  await expect(page.frameLocator("iframe[data-mt-vorschau]").locator("p")).toHaveText("rev 5");
+  let gefolgt = false;
+  void assistentFolgt(page, 5)
+    .then(() => {
+      gefolgt = true;
+    })
+    .catch(() => undefined);
+  await expect.poll(() => gefolgt).toBe(true);
 });

@@ -151,3 +151,16 @@ export async function nachDerAbfrage(page: Page, id: string): Promise<void> {
   // The response event comes with the head; the poll ends with its body.
   await antwort.finished();
 }
+
+/**
+ * The assistant's page followed the draft to `rev` (Spec 040 B-2): its preview loaded that rev.
+ */
+export async function assistentFolgt(page: Page, rev: number): Promise<void> {
+  // Stub: the wait of df306c39 – the next answer of the poll with that rev, its body read.
+  await page.waitForResponse(
+    async (response) =>
+      new URL(response.url()).pathname.endsWith("/stato") &&
+      response.ok() &&
+      ((await response.json()) as { rev: number }).rev >= rev,
+  );
+}
