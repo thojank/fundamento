@@ -423,6 +423,24 @@ async function loadVitrinoGrupoj(): Promise<Record<string, string[]>> {
   return grupoj;
 }
 
+// Spec 040 T-8 (the integrated audit): the pins above name each job's steps one by one. This one
+// reads the workflow as it is and asks every job for the same shape, so a job added later – or one
+// edited by hand – cannot drop a rule the others keep: the limit of 15 minutes, the Turborepo cache
+// right before a filtered Build, the gate of betroffen in one form on every step, the reports as
+// the last step for seven days, and a matrix whose value makes the cache key and the artifact name
+// unique (the key reads matrix.package, matrix.shard or matrix.parto, else 'x' for every value).
+/** The matrix keys the cache key and the artifact name read. */
+const MATRIX_KEYS = ["package", "shard", "parto"];
+
+/**
+ * What a job breaks of the shape every job shares; empty when the workflow is consistent.
+ * `jobs` is the parsed `jobs` mapping of ci.yml.
+ */
+function jobShapeViolations(jobs: Record<string, Record<string, unknown>>): string[] {
+  void jobs;
+  return [];
+}
+
 describe("CI workflow (.github/workflows/ci.yml)", () => {
   it("exists", () => {
     expect(existsSync(workflowPath)).toBe(true);
@@ -864,6 +882,118 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     for (const [name, job] of Object.entries(loadJobs())) {
       expect(job["timeout-minutes"], name).toBeLessThanOrEqual(15);
     }
+  });
+
+  it("every job has the same shape: 15 minutes, the cache before a filtered Build, one gate on every step, the reports last for seven days (Spec 040 T-8)", () => {
+    const jobs = loadJobs();
+    expect(jobShapeViolations(jobs)).toEqual([]);
+    // Each rule turns red on its own when one job breaks it (a copy of the real workflow).
+    const broken = (
+      job: string,
+      change: (job: Record<string, unknown>, steps: Array<Record<string, unknown>>) => void,
+    ): string[] => {
+      const copy = structuredClone(jobs);
+      const target = copy[job] ?? {};
+      change(target, Array.isArray(target.steps) ? target.steps : []);
+      return jobShapeViolations(copy);
+    };
+    const named = (steps: Array<Record<string, unknown>>, name: string) =>
+      steps.find((step) => step.name === name) ?? {};
+    const cases: ReadonlyArray<readonly [job: string, rule: RegExp, violations: string[]]> = [
+      [
+        "vitrino",
+        /timeout-minutes/,
+        broken("vitrino", (job) => {
+          job["timeout-minutes"] = 20;
+        }),
+      ],
+      [
+        "checks",
+        /timeout-minutes/,
+        broken("checks", (job) => {
+          delete job["timeout-minutes"];
+        }),
+      ],
+      [
+        "unit",
+        /Turbo cache/,
+        broken("unit", (_, steps) => {
+          steps.splice(steps.indexOf(named(steps, TURBO_CACHE_STEP)), 1);
+        }),
+      ],
+      [
+        "eroj",
+        /Build/,
+        broken("eroj", (_, steps) => {
+          named(steps, "Build").run = "pnpm build";
+        }),
+      ],
+      [
+        "werkstatt",
+        /nicht betroffen/,
+        broken("werkstatt", (_, steps) => {
+          named(steps, NICHT_BETROFFEN).if = `\${{ needs.betroffen.outputs.alle != 'true' }}`;
+        }),
+      ],
+      [
+        "zeittests",
+        /gate/,
+        broken("zeittests", (_, steps) => {
+          named(steps, "Build").if = `\${{ always() }}`;
+        }),
+      ],
+      [
+        "projekcioj",
+        /gate/,
+        broken("projekcioj", (_, steps) => {
+          delete named(steps, "Test").if;
+        }),
+      ],
+      [
+        "alirebleco-eroj",
+        /retention-days/,
+        broken("alirebleco-eroj", (_, steps) => {
+          const upload = named(steps, ARTIFACT_STEP);
+          upload.with = { ...withOf(upload), "retention-days": 30 };
+        }),
+      ],
+      [
+        "rendered-checks",
+        /last step/,
+        broken("rendered-checks", (_, steps) => {
+          steps.push({ name: "Danach", run: "true" });
+        }),
+      ],
+      [
+        "eroj",
+        /matrix/,
+        broken("eroj", (job) => {
+          job.strategy = { "fail-fast": false, matrix: { engine: ["chromium", "webkit"] } };
+        }),
+      ],
+      [
+        "unit",
+        /fail-fast/,
+        broken("unit", (job) => {
+          job.strategy = { matrix: isRecord(job.strategy) ? job.strategy.matrix : {} };
+        }),
+      ],
+      [
+        "vitrino",
+        /needs/,
+        broken("vitrino", (job) => {
+          delete job.needs;
+        }),
+      ],
+    ];
+    for (const [job, rule, violations] of cases) {
+      expect(violations, `${job} ${String(rule)}`).toHaveLength(1);
+      expect(violations[0], `${job} ${String(rule)}`).toMatch(new RegExp(`^${job}: `));
+      expect(violations[0], `${job} ${String(rule)}`).toMatch(rule);
+    }
+    // The audit covers every job of the workflow, not a list of its own.
+    expect(Object.keys(jobs)).toEqual([BETROFFEN, ...Object.keys(JOBS)]);
+    expect(MATRIX_KEYS.every((key) => TURBO_CACHE_PREFIX.includes(`matrix.${key}`))).toBe(true);
   });
 
   it("has one check step for every registered check", () => {
