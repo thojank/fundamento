@@ -106,5 +106,105 @@
       "body": "Manrope",
       "kialo": "In der Mitte: eine freundliche, neutrale Grotesk, die weder klassisch noch technisch wirkt."
     }
-  ]
+  ],
+  "uebernahme": {
+    "leitfarbe": {
+      "hoch_ab_anteil": 10,
+      "kialo": "Spec 036, Befund 4.1: Die Leitfarbe übernimmt der Vorschlag je Schritt aus der Erkennung des Enportilo (rekono.ts), mit deren Herkunft. Sicher („hoch“) ist sie, wenn sie mindestens hoch_ab_anteil Prozent der gefundenen Farbe deckt – so viel, wie ein Akzent mindestens decken muss (akzent.anteil_min); darunter ist sie eine kleine Fläche und „mittel“ sicher."
+    },
+    "neutraltoene": {
+      "chroma_bis": 0.05,
+      "grund_anteil_min": 20,
+      "flaeche_anteil_min": 5,
+      "hell_ab": 0.6,
+      "getoent_ab": 0.008,
+      "farbton_abweichung_max": 45,
+      "farbtoene": [
+        { "bis": 40, "name": "rötlich" },
+        { "bis": 110, "name": "warm" },
+        { "bis": 180, "name": "grünlich" },
+        { "bis": 280, "name": "kühl" },
+        { "bis": 340, "name": "violett" },
+        { "bis": 360, "name": "rötlich" }
+      ],
+      "kialo": "Spec 036, Befund 4.1: Die Neutraltöne kommen aus den ruhigen Flächen des Materials. Ruhig ist eine Farbe unter chroma_bis (wie der Akzent und die unbunte Erkennung bunt ab 0,05 lesen). Die größte ruhige Farbe ist die Grundfläche, wenn sie mindestens grund_anteil_min Prozent der gefundenen Farbe deckt – ein Fünftel, darunter ist sie kein Grund, sondern ein Detail; die nächste ruhige Farbe derselben Helligkeit mit mindestens flaeche_anteil_min Prozent ist die Fläche darauf (Karten, Kästen). Hell ist der Grund ab der OKLCH-Helligkeit hell_ab, sonst dunkel. Getönt sind Grund und Fläche, wenn ihr gemeinsames Chroma (nach Anteil gewichtet, Farbton als Vektor gemittelt) mindestens getoent_ab beträgt; darunter sieht das Auge Grau. Die Tönung des Agordo ist das Chroma der Neutraltöne gegen ein Viertel der Leitfarbe (NEUTRAL_SHARE der Ableitung), auf 0 bis 1 begrenzt. Fundamento tönt die Neutraltöne immer zur Leitfarbe hin; weicht der Farbton des Grunds um mehr als farbton_abweichung_max Grad von ihr ab, sagt der Satz das und der Vorschlag ist nur „mittel“ sicher. Die Namen der Farbtöne (farbtoene, Grad bis ausschließlich) stehen im Satz statt einer Gradzahl. Bei einem Link zählen nur Farben, die eine Fläche malen (Hintergrund, auch über Variablen), nie die Textfarbe; malt die Stilvorlage html, body oder :root, ist diese Farbe der Grund, auch unter grund_anteil_min (gemessen an zwei echten Marken: dunkle Bänder und Text sind öfter genannt als der helle Seitengrund)."
+    },
+    "schrift": {
+      "stilworte": [
+        "regular", "bold", "light", "medium", "semibold", "extrabold", "black", "heavy", "thin",
+        "book", "italic", "oblique", "condensed", "narrow", "pro", "std", "lt", "mt", "ps", "web",
+        "neue", "next", "text", "display"
+      ],
+      "kategorien": [
+        { "wort": "mono", "kategorie": "monospace", "allgemein": true },
+        { "wort": "code", "kategorie": "monospace", "allgemein": true },
+        { "wort": "courier", "kategorie": "monospace" },
+        { "wort": "consol", "kategorie": "monospace" },
+        { "wort": "sans", "kategorie": "sans-serif", "allgemein": true },
+        { "wort": "grotesk", "kategorie": "sans-serif", "allgemein": true },
+        { "wort": "grotesque", "kategorie": "sans-serif", "allgemein": true },
+        { "wort": "gothic", "kategorie": "sans-serif", "allgemein": true },
+        { "wort": "helvetica", "kategorie": "sans-serif" },
+        { "wort": "arial", "kategorie": "sans-serif" },
+        { "wort": "verdana", "kategorie": "sans-serif" },
+        { "wort": "futura", "kategorie": "sans-serif" },
+        { "wort": "serif", "kategorie": "serif", "allgemein": true },
+        { "wort": "antiqua", "kategorie": "serif", "allgemein": true },
+        { "wort": "times", "kategorie": "serif" },
+        { "wort": "georgia", "kategorie": "serif" },
+        { "wort": "garamond", "kategorie": "serif" },
+        { "wort": "script", "kategorie": "handwriting", "allgemein": true },
+        { "wort": "hand", "kategorie": "handwriting", "allgemein": true }
+      ],
+      "kategorie_namen": {
+        "sans-serif": "serifenlos",
+        "serif": "mit Serifen",
+        "monospace": "dicktengleich",
+        "handwriting": "handschriftlich"
+      },
+      "ersatz": { "sans-serif": "Inter", "serif": "Source Serif 4", "monospace": "JetBrains Mono" },
+      "namensteil_min": 4,
+      "kialo": "Spec 036, Befund 4.1 und Randfall „Schrift nicht erkannt“: Eine Schrift des Materials, die im Katalog steht (tiparoj.json, wie die Erkennung sie findet) oder als Schriftdatei hochgeladen ist, ist erkannt. Steht sie nur mit Namen im Material und nicht im Katalog, schlägt der Schritt eine ähnliche Webfont vor, nie eine Schrift ohne Herkunft: zuerst eine Familie des Katalogs mit einem gemeinsamen Namensteil von mindestens namensteil_min Zeichen (ohne Stilworte wie Bold oder Pro und ohne die allgemeinen Wörter der Art wie Sans oder Serif), verrät der Name eine Art, nur Familien dieser Art, bei Gleichstand die kürzere, dann nach dem Alphabet; sonst nach der Art, die der Name verrät (kategorien, das erste passende Wort gilt, sans vor serif), die Webfont ersatz dieser Art – dieselben Familien, die der Kreilo für sachliche und klassische Marken nimmt, und eine Code-Schrift. Verrät der Name nichts, bleibt die Schrift offen, und der Satz nennt den gefundenen Namen."
+    },
+    "bild": {
+      "flaeche_min": 0.0005,
+      "flaeche_min_px": 40,
+      "fuellung_min": 0.85,
+      "knopf_hoehe_min_px": 12,
+      "knopf_hoehe_max": 0.2,
+      "knopf_seiten_min": 1.6,
+      "knopf_seiten_max": 8,
+      "kontrast_knopf": 0.1,
+      "karte_min": 0.12,
+      "karte_max": 0.9,
+      "kontrast_karte": 0.01,
+      "schatten_zeilen_min": 2,
+      "schatten_zeilen_max": 16,
+      "schatten_dunkler_ab": 0.004,
+      "schatten_dunkler_max": 0.2,
+      "belegt_ab": 0.02,
+      "luecke_min_px": 3,
+      "kialo": "Spec 036, Befund 4.1 (Form, Elevation, Dichte aus einem Bild): Der Grund ist die häufigste Farbe (5 Bit je Kanal). Eine zusammenhängende andere Farbe ist eine Form, wenn sie mindestens flaeche_min des Bildes (und flaeche_min_px Pixel) deckt, den Bildrand nicht berührt (sonst ist sie ein Streifen des Grunds), ihren Rahmen bis auf vier runde Ecken zu mindestens fuellung_min füllt (eine Pille füllt ihn zu 0,93, ein Kreis nur zu 0,79) und gerade Kanten hat. Ein Knopf ist niedrig und breit – mindestens knopf_hoehe_min_px hoch, höchstens knopf_hoehe_max der Bildhöhe, knopf_seiten_min bis knopf_seiten_max mal so breit wie hoch (breiter ist eine Textzeile) – und hebt sich mit einem Abstand in OKLab von mindestens kontrast_knopf von seiner Umgebung ab; eine Karte ist in beiden Richtungen mindestens karte_min und höchstens karte_max des Bildes groß (darüber ist sie die Seite oder ihr Inhaltsbereich) und darf leise sein (kontrast_karte: eine helle Fläche auf hellem Grund). Ein Schatten ist ein weiches Band unter der Form: mindestens schatten_zeilen_min Zeilen (eine einzelne dunkle Zeile ist eine Linie), jede um schatten_dunkler_ab bis schatten_dunkler_max in der OKLab-Helligkeit dunkler als neben der Form und Zeile für Zeile heller; gesucht wird höchstens schatten_zeilen_max Zeilen tief. Für die Dichte zählt eine Zeile (oder Spalte) als belegt, wenn mindestens belegt_ab ihrer Pixel nicht Grund sind; Lücken unter luecke_min_px sind die Kanten von Buchstaben, kein Abstand. Den Radius misst die Fläche, die den Ecken fehlt; ein geglättetes Randpixel zählt dabei nach seinem Anteil an der Farbe der Form (an echten Bildschirmen machte das ganze Pixel einen Radius von 3 px zu 4,8 px)."
+    },
+    "form": {
+      "stufen": [
+        { "bis": 0.08, "stufe": 0 },
+        { "bis": 0.23, "stufe": 0.5 },
+        { "bis": 0.4, "stufe": 1 },
+        { "bis": 0.47, "stufe": 2 }
+      ],
+      "stufen_namen": { "0": "eckig", "0.5": "leicht gerundet", "1": "rund", "2": "ganz rund" },
+      "eckig_bis_px": 1.5,
+      "kialo": "Spec 036, Befund 4.1 (Form): Der Radius eines Knopfs im Bild zählt im Verhältnis zu seiner Höhe – so ist er unabhängig von der Größe des Bildes. Bezug ist ein Bedienelement von 32 px Höhe (size.control.medium) mit radius.medium (10 px) bei Stufe 1: das Verhältnis 0,31; Stufe 0,5 gibt 0,16, Stufe 2 gibt 0,62 und ist schon ganz rund. Die Grenzen liegen zwischen den Stufen (0 · 0,5 · 1 · 2, dieselben wie bei „runder“/„eckiger“); ab 0,47 ist der Knopf ganz rund, das ist die Pille, die nur die Bedienelemente rundet und Karten ihren Radius lässt. Eine Karte allein sagt nur „eckig“ (Radius bis eckig_bis_px), denn ohne Knopf fehlt der Maßstab, an dem ein runder Radius eine Stufe wäre."
+    },
+    "dichte": {
+      "bloecke_min": 3,
+      "kompakt_bis": 0.5,
+      "luftig_ab": 1.2,
+      "abstand": { "kompakt": 0.85, "ausgewogen": 1, "luftig": 1.25 },
+      "link_kompakt_bis": 0.9,
+      "link_luftig_ab": 1.15,
+      "kialo": "Spec 036, Befund 4.1 (Dichte, grob): Im Bild ist die Dichte das Verhältnis des mittleren Abstands zwischen den Blöcken zur mittleren Größe der Blöcke (Zeilen und Spalten, Median), gemessen ab bloecke_min Blöcken – mit weniger ist es kein Abstand, sondern ein Einzelstück. Unter kompakt_bis ist das Material kompakt (der Abstand ist weniger als halb so groß wie ein Block), ab luftig_ab luftig (mehr Abstand als Block), dazwischen ausgewogen. Vorgeschlagen wird raum.abstand aus abstand: eine Stufe des Wunsches „kompakter“/„luftiger“ (0,15) unter bzw. über dem Standard, ausgewogen bleibt beim Standard. Bei einem Link misst die Erkennung den Innenabstand der Stilvorlage als Faktor; bis link_kompakt_bis heißt er kompakt, ab link_luftig_ab luftig."
+    }
+  }
 }

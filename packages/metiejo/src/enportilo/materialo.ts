@@ -14,7 +14,7 @@ import { type PrivataDeps, uploadFont } from "../privata.js";
 import { type Bildilo, type BildTipo, playwrightBildilo, SenBrowser } from "./bildilo.js";
 import { farbojOfPixels } from "./farboj.js";
 import { legiPdf } from "./pdf.js";
-import { decodePng } from "./png.js";
+import { type Bildo, decodePng } from "./png.js";
 import type { Propono } from "./rekono.js";
 import { legiRetejon, type RetejoFetch } from "./retejo.js";
 import { legiSvg } from "./svg.js";
@@ -44,6 +44,24 @@ function tipoOf(bytes: Buffer): BildTipo | undefined {
 
 export class NeLegebla extends Error {}
 
+/**
+ * The sentence for a material that could not be read (Spec 036, QA run 1): the Enportilo's own
+ * refusals and messages are German sentences; an error of a decoder, of zlib or of the network (an
+ * error with a `code`, a RangeError, a TypeError) speaks its internal English and becomes one sentence.
+ */
+export function lesefehlerSatzOf(error: unknown, link: boolean): string {
+  if (error instanceof NeLegebla) return error.message;
+  const intern =
+    !(error instanceof Error) ||
+    error instanceof RangeError ||
+    error instanceof TypeError ||
+    typeof (error as { code?: unknown }).code === "string";
+  if (!intern) return `Das Material ließ sich nicht lesen: ${error.message}`;
+  return link
+    ? "Das Material ließ sich nicht lesen: die Seite ließ sich nicht laden."
+    : "Das Material ließ sich nicht lesen: die Datei ist beschädigt oder unvollständig.";
+}
+
 export interface MaterialoEnigo {
   filename?: string;
   bytes?: Buffer;
@@ -69,6 +87,8 @@ export interface MaterialoRezulto {
   /** The name of the material for the Kroniko: the file or the address. */
   nomo: string;
   kiel: "upload" | "link";
+  /** The pixels of an image (Spec 036 Teil 4: form, elevation and density are read from them). */
+  bildo?: Bildo;
 }
 
 function storeMaterialo(workdir: string, name: string, filename: string, bytes: Buffer): string {
@@ -139,6 +159,7 @@ export async function legiMaterialon(
         satzoj: [],
         nomo: filename,
         kiel: "upload",
+        bildo,
       };
     } catch (error) {
       if (!(error instanceof SenBrowser)) throw error;
@@ -155,12 +176,18 @@ export async function legiMaterialon(
   if (extension !== ".png" && extension !== ".svg" && extension !== ".pdf")
     throw new NeLegebla(LEGEBLA);
   storeMaterialo(options.workdir, options.name, filename, bytes);
+  if (extension === ".png") {
+    const bildo = decodePng(bytes);
+    return {
+      trovoj: farbojOfPixels(bildo.rgba, filename),
+      satzoj: [],
+      nomo: filename,
+      kiel: "upload",
+      bildo,
+    };
+  }
   const trovoj =
-    extension === ".png"
-      ? farbojOfPixels(decodePng(bytes).rgba, filename)
-      : extension === ".svg"
-        ? legiSvg(bytes.toString("utf8"), filename)
-        : legiPdf(bytes, filename);
+    extension === ".svg" ? legiSvg(bytes.toString("utf8"), filename) : legiPdf(bytes, filename);
   return { trovoj, satzoj: [], nomo: filename, kiel: "upload" };
 }
 

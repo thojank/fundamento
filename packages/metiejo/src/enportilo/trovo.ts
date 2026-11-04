@@ -10,11 +10,18 @@ export interface Herkunft {
 }
 
 export interface Trovo {
-  kind: "farbo" | "tiparo" | "radiuso" | "spaco";
-  /** #rrggbb for a colour, the family name for a font, px for a radius or a spacing. */
+  kind: "farbo" | "tiparo" | "radiuso" | "spaco" | "ombro";
+  /**
+   * #rrggbb for a colour, the family name for a font, px for a radius or a spacing, the largest
+   * length of a shadow (Spec 036 Teil 4: a stylesheet that draws shadows).
+   */
   valoro: string | number;
   /** For a font: the role it was found in. */
   rolo?: "body" | "display" | "code";
+  /** For a colour: declared as a background somewhere (Spec 036 Teil 4: the ground of the neutrals). */
+  flaeche?: true;
+  /** For a colour: the background of html, body or :root – the page's own ground. */
+  seitengrund?: true;
   pezo: number;
   herkunft: Herkunft;
 }

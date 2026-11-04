@@ -63,6 +63,8 @@ export interface AsistantoInput {
     /** What the proposal sets (Spec 035, Befund 4.5.1: its colours are shown as swatches). */
     agordo?: Partial<Agordo>;
   };
+  /** Spec 036 Teil 4 (4.2): the sentences of the steps of this Faceto the material leaves open. */
+  offen?: readonly string[];
 }
 
 type Propono = NonNullable<AsistantoInput["propono"]>;
@@ -135,6 +137,13 @@ function proponoHtml(name: string, propono: Propono): string {
       ? ""
       : `<fm-teksto kind="caption">Herkunft: ${propono.herkunft.map((entry) => escapeHtml(entry.loko === undefined ? entry.dosiero : `${entry.dosiero}, ${entry.loko}`)).join(" · ")}</fm-teksto>`;
   return `<fm-avizo intent="info" data-mt-propono><span slot="heading">Vorschlag aus deinem Material</span><fm-teksto data-mt-propono-satz>${escapeHtml(kurzsatzOf(propono.satz))}</fm-teksto>${bild}${herkunft}</fm-avizo>`;
+}
+
+/** Spec 036 Teil 4 (4.2): what the material cannot show for this step, named as open. */
+function offenHtml(offen: readonly string[] | undefined): string {
+  return offen === undefined || offen.length === 0
+    ? ""
+    : `<fm-avizo intent="info" data-mt-offen><span slot="heading">Offen</span>${offen.map((satz) => `<fm-teksto data-mt-offen-satz>${escapeHtml(satz)}</fm-teksto>`).join("")}</fm-avizo>`;
 }
 
 const facetoUrl = (name: string, faceto: string) =>
@@ -226,7 +235,8 @@ export function asistantoScreen(input: AsistantoInput): string {
       (entry) => `${escapeHtml(entry.nomo)} (Umfang ${entry.umfang}): noch nicht Teil des Modells`,
     )
     .join(" · ");
-  const propono = input.propono === undefined ? "" : proponoHtml(name, input.propono);
+  const propono =
+    (input.propono === undefined ? "" : proponoHtml(name, input.propono)) + offenHtml(input.offen);
   // Spec 033 S6: the estimate before the start, beside the action it is for.
   // In a dialog the estimate stands in its content (slot).
   const takso = (zugo: keyof NonNullable<AsistantoInput["takso"]>, label: string, slot?: string) =>

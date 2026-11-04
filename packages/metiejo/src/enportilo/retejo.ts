@@ -1,12 +1,18 @@
 // What a website says of its brand (Spec 033 S2, observation after Art. V): the HTML of the page and
 // its stylesheets – linked and inline, at most ten, each at most 2 MB – read without a browser. From
 // the declarations come the colours (literal, and a custom property once more for every var() that
-// uses it), the font families by role (headings: display, code: code, else body), the radii and the
+// uses it), the font families by role (headings: display, code: code, else body; from font-family or
+// the family part of the shorthand font, after its size – Nachbesserung A-3), the radii and the
 // spacing (padding and gap) in px, each with the file and the line. Generic families, 0, pills and
-// percentages do not count. A bot challenge instead of the page (a status that refuses automatic
-// readers, the markers of a challenge) is Blokita: nothing of it is read (Spec 035, Befund 4.1).
+// percentages do not count. Spec 036 Teil 4: a drawn shadow (box-shadow, or a custom property named
+// for shadow or elevation, not inset) is a finding too, for the step „Elevation“, and a colour that
+// paints a background says so, the background of html or body as the page's ground (the ground of
+// the neutrals is never the text). A bot challenge
+// instead of the page (a status that refuses automatic readers, the markers of a challenge) is
+// Blokita: nothing of it is read (Spec 035, Befund 4.1).
 
 import postcss from "postcss";
+import { fontShorthandOf } from "./tiparo-kurzo.js";
 import { coloursIn, type Herkunft, lineOf, type Trovo } from "./trovo.js";
 
 export type RetejoFetch = (url: string, init?: RequestInit) => Promise<Response>;
@@ -77,6 +83,16 @@ function px(value: string): number | undefined {
   return Number.isFinite(number) ? number : undefined;
 }
 
+/** The largest length of a drawn shadow in px; undefined for none, an inset or no length. */
+function shadowLength(value: string): number | undefined {
+  if (/\b(none|inset)\b/.test(value)) return undefined;
+  const lengths = [...value.matchAll(/(-?\d*\.?\d+)(px|rem|em)\b/g)].map(
+    (match) => Math.abs(Number(match[1])) * (match[2] === "px" ? 1 : 16),
+  );
+  const largest = Math.max(0, ...lengths);
+  return largest > 0 ? largest : undefined;
+}
+
 const roleOf = (selector: string): "body" | "display" | "code" =>
   /\bh[1-6]\b|title|heading|display|hero/i.test(selector)
     ? "display"
@@ -90,6 +106,16 @@ const firstFamily = (value: string): string | undefined =>
     .split(",")
     .map((part) => part.trim().replace(/^["']|["']$/g, ""))
     .find((part) => part !== "" && !GENERIC.has(part.toLowerCase()) && !part.startsWith("var("));
+
+/**
+ * The first family of a value that may be the shorthand `font` (Nachbesserung A-3): of a shorthand
+ * only its family part, after the size – never the size; else the value as a family list.
+ */
+const firstFamilyOfFont = (value: string): string | undefined => {
+  const shorthand = fontShorthandOf(value);
+  if (shorthand === undefined) return firstFamily(value);
+  return shorthand.familioj === undefined ? undefined : firstFamily(shorthand.familioj);
+};
 
 /**
  * The colour of every custom property of the sheets, through var() chains and regardless of the
@@ -132,12 +158,17 @@ interface Sheet {
   firstLine: number;
 }
 
+/** A declaration that paints an area: a background, or a custom property named for one. */
+const BACKGROUND = /^(background|background-color)$|^--(.*-)?(bg|background|surface|canvas)(-.*)?$/;
+
 function readSheet(
   sheet: Sheet & { root: postcss.Root },
   colours: Map<string, Trovo>,
   variables: ReadonlyMap<string, string>,
   uses: Map<string, number>,
   out: Trovo[],
+  flaechen: Set<string>,
+  seitengrund: Set<string>,
 ): void {
   const root = sheet.root;
   const at = (line: number | undefined): Herkunft => ({
@@ -151,16 +182,26 @@ function readSheet(
     if (COLOUR_PROPS.test(prop)) {
       // Probe run 29.10.: a colour the sheet names as its brand's weighs more than a palette step.
       const weight = BRAND_NAME.test(prop) ? 1 + BRAND_BONUS : 1;
+      const background = BACKGROUND.test(prop);
+      const selector = decl.parent?.type === "rule" ? (decl.parent as postcss.Rule).selector : "";
+      const page =
+        background &&
+        !prop.startsWith("--") &&
+        selector.split(",").some((part) => /^\s*(html|body|:root)\s*$/.test(part));
       for (const colour of coloursIn(value)) {
         const known = colours.get(colour);
         if (known !== undefined) known.pezo += weight;
         else
           colours.set(colour, { kind: "farbo", valoro: colour, pezo: weight, herkunft: at(line) });
+        if (background) flaechen.add(colour);
+        if (page) seitengrund.add(colour);
       }
       for (const use of value.matchAll(/var\(\s*(--[\w-]+)/g)) {
         const colour = variables.get(use[1] ?? "");
         // Counted at the end: a variable is often used above the line that defines it.
         if (colour !== undefined) uses.set(colour, (uses.get(colour) ?? 0) + weight);
+        if (colour !== undefined && background) flaechen.add(colour);
+        if (colour !== undefined && page) seitengrund.add(colour);
       }
     }
     // Probe run 29.10.: a brand's CSS keeps radius, families and spacing in custom properties; their
@@ -172,7 +213,7 @@ function readSheet(
           out.push({ kind: "radiuso", valoro: length, pezo: 1, herkunft: at(line) });
         }
       } else if (/family|font-(body|sans|serif|display|heading|mono|code)/.test(prop)) {
-        const family = firstFamily(value);
+        const family = firstFamilyOfFont(value);
         if (family !== undefined) {
           const rolo = /heading|display|title/.test(prop)
             ? "display"
@@ -188,8 +229,14 @@ function readSheet(
         }
       }
     }
-    if (prop === "font-family") {
-      const family = firstFamily(value);
+    if (prop === "font-family" || prop === "font") {
+      const shorthand = prop === "font" ? fontShorthandOf(value) : undefined;
+      const family =
+        prop === "font-family"
+          ? firstFamily(value)
+          : shorthand?.familioj === undefined
+            ? undefined
+            : firstFamily(shorthand.familioj);
       if (family !== undefined) {
         const selector = decl.parent?.type === "rule" ? (decl.parent as postcss.Rule).selector : "";
         out.push({
@@ -206,6 +253,11 @@ function readSheet(
       if (first !== undefined && first > 0 && first < 100) {
         out.push({ kind: "radiuso", valoro: first, pezo: 1, herkunft: at(line) });
       }
+    }
+    if (prop === "box-shadow" || (prop.startsWith("--") && /shadow|elevation/.test(prop))) {
+      const length = shadowLength(value);
+      if (length !== undefined)
+        out.push({ kind: "ombro", valoro: length, pezo: 1, herkunft: at(line) });
     }
     if (prop === "padding" || prop === "gap" || prop === "row-gap" || prop === "column-gap") {
       for (const part of value.split(/\s+/)) {
@@ -300,10 +352,21 @@ export async function legiPagxon(
   const rest: Trovo[] = [];
   const variables = colourVariables(parsed.map((sheet) => sheet.root));
   const uses = new Map<string, number>();
-  for (const sheet of parsed) readSheet(sheet, colours, variables, uses, rest);
+  const flaechen = new Set<string>();
+  const seitengrund = new Set<string>();
+  for (const sheet of parsed)
+    readSheet(sheet, colours, variables, uses, rest, flaechen, seitengrund);
   for (const [colour, weight] of uses) {
     const known = colours.get(colour);
     if (known !== undefined) known.pezo += weight;
+  }
+  for (const colour of flaechen) {
+    const known = colours.get(colour);
+    if (known !== undefined) known.flaeche = true;
+  }
+  for (const colour of seitengrund) {
+    const known = colours.get(colour);
+    if (known !== undefined) known.seitengrund = true;
   }
   return { trovoj: [...colours.values(), ...rest], ligiloj: markoLigiloj(page, url), html: page };
 }
