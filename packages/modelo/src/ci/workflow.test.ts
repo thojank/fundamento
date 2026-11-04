@@ -59,6 +59,13 @@ const ERO_CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = 
 // Vitrino check of 40 Eroj, cut the rendered checks off at the 15-minute budget twice.
 const PLAYWRIGHT_BROWSERS =
   "pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES";
+// Spec 040 D-19: the Vitrino jobs (werkstatt, vitrino, zeittests) run playwright.vitrino.config.ts,
+// which takes the first project of the shared config alone – Chromium, whatever PLAYWRIGHT_ENGINES
+// names. They installed all three engines with `--with-deps` on main all the same, and on a slow
+// apt mirror four of them were cut off at 15 minutes in that step (PR #145). They install Chromium
+// alone and carry no PLAYWRIGHT_ENGINES.
+const PLAYWRIGHT_CHROMIUM =
+  "pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium";
 
 // Spec 040 T-5: the local Turborepo cache of every job lives on between runs (actions/cache), one
 // cache per job and matrix value. The key ends on the commit, so every run saves its cache; a run
@@ -222,7 +229,7 @@ const RENDERED_CHECK_STEPS: ReadonlyArray<readonly [name: string, run: string | 
 
 /** The job of the Werkstatt of the Vitrino, one part per runner. */
 const WERKSTATT_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
-  ["Playwright browsers", PLAYWRIGHT_BROWSERS],
+  ["Playwright browsers", PLAYWRIGHT_CHROMIUM],
   [TURBO_CACHE_STEP, undefined],
   ["Build", buildOf("werkstatt")],
   ["Check: Vitrino (Werkstatt)", "pnpm check:vitrino"],
@@ -231,7 +238,7 @@ const WERKSTATT_STEPS: ReadonlyArray<readonly [name: string, run: string | undef
 
 /** The job of the Vitrino without its Werkstatt, one part per runner. */
 const VITRINO_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
-  ["Playwright browsers", PLAYWRIGHT_BROWSERS],
+  ["Playwright browsers", PLAYWRIGHT_CHROMIUM],
   [TURBO_CACHE_STEP, undefined],
   ["Build", buildOf("vitrino")],
   ["Check: Vitrino", "pnpm check:vitrino"],
@@ -244,7 +251,7 @@ const VITRINO_STEPS: ReadonlyArray<readonly [name: string, run: string | undefin
 // (continue-on-error on pull_request) and no longer turns another part red; on main it blocks.
 /** The job of the timing tests of the Vitrino. */
 const ZEITTESTS_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
-  ["Playwright browsers", PLAYWRIGHT_BROWSERS],
+  ["Playwright browsers", PLAYWRIGHT_CHROMIUM],
   [TURBO_CACHE_STEP, undefined],
   ["Build", buildOf("zeittests")],
   ["Check: Vitrino (Zeittests)", "pnpm check:vitrino"],
@@ -278,15 +285,8 @@ const JOBS: Readonly<
   zeittests: ZEITTESTS_STEPS,
 };
 
-/** The jobs that drive a browser; each takes its engines from PLAYWRIGHT_ENGINES. */
-const RENDERED_JOBS = [
-  "eroj",
-  "alirebleco-eroj",
-  "rendered-checks",
-  "werkstatt",
-  "vitrino",
-  "zeittests",
-];
+/** The jobs that drive a browser in the engines of PLAYWRIGHT_ENGINES. */
+const RENDERED_JOBS = ["eroj", "alirebleco-eroj", "rendered-checks"];
 
 // Spec 040 T-6 (C-2, US-2): a pull request tests only the packages its change reaches. The job
 // betroffen decides it once (scripts/ci/betroffen.mjs, tested in betroffen.test.ts) and hands on
@@ -513,7 +513,7 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     }
   });
 
-  it("shards the Playwright suite of the Eroj in four and the Vitest suite of the Projekcioj in two, without fail-fast, and gives only the six rendered jobs the engines", () => {
+  it("shards the Playwright suite of the Eroj in four and the Vitest suite of the Projekcioj in two, without fail-fast, and gives only the three multi-engine jobs the engines", () => {
     expect(loadJob("eroj").strategy).toEqual({
       "fail-fast": false,
       matrix: { shard: [1, 2, 3, 4] },
@@ -527,7 +527,7 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
       const env = loadJob(name).env;
       expect(isRecord(env) && typeof env.PLAYWRIGHT_ENGINES === "string", name).toBe(true);
     }
-    for (const name of [BETROFFEN, "checks", "unit", "projekcioj"]) {
+    for (const name of [BETROFFEN, "checks", "unit", "projekcioj", ...Object.keys(VITRINO_JOBS)]) {
       expect(loadJob(name).env, name).toBeUndefined();
     }
   });
@@ -789,6 +789,16 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
       const install = loadSteps(job).find((step) => step.name === "Playwright browsers");
       expect(install?.run, job).toBe(PLAYWRIGHT_BROWSERS);
     }
+    // D-19: the Vitrino jobs install Chromium alone – the one engine their config runs, the first
+    // project of the shared config whatever PLAYWRIGHT_ENGINES names.
+    for (const job of Object.keys(VITRINO_JOBS)) {
+      const install = loadSteps(job).find((step) => step.name === "Playwright browsers");
+      expect(install?.run, job).toBe(PLAYWRIGHT_CHROMIUM);
+    }
+    const vitrino = readFileSync(`${repoRoot}packages/eroj/playwright.vitrino.config.ts`, "utf8");
+    expect(vitrino).toContain('projects: [base.projects?.[0] ?? { name: "chromium" }]');
+    const shared = readFileSync(`${repoRoot}packages/eroj/playwright.config.ts`, "utf8");
+    expect(shared).toMatch(/const ENGINES = \[\s*\{ name: "chromium",/);
     // The old rule (three engines on main, Chromium on every pull request) is gone.
     expect(readFileSync(workflowPath, "utf8")).not.toMatch(/github\.ref == 'refs\/heads\/main'/);
     // B-3 (V-8): a pull request into the rendered Eroj, the projections, the values or a
