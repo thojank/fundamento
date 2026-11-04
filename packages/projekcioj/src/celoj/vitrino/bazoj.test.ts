@@ -152,7 +152,13 @@ describe("Spec 029 ① 5: the foundation pages", () => {
     // close button of the sxvebilo (+10); the default icon of the avataro and the first and last of
     // the pagxigilo (+10). S36-4.6 (②b-5): the radius role of a tag (+1), the syntax colours (+5);
     // the line numbers, highlighted lines, language and words by kind of the kodbloko (+12).
-    expect(tokenoj.length).toBe(2060);
+    // Spec 040 B-4: no pinned number (2060 then) – the page lists exactly the source's core.
+    expect(
+      sourceProjectionViolations(
+        sourceModelo(),
+        tokenoj.map((token) => token.name),
+      ),
+    ).toEqual([]);
     const levels = new Set(tokenoj.map((token) => token.ebeno));
     expect(levels).toEqual(new Set(["grundlage", "rolle", "ero"]));
     const text = tokenoj.find((token) => token.name === "color.text.default");
@@ -173,11 +179,13 @@ describe("Spec 029 ① 5: the foundation pages", () => {
     expect(html).toMatch(/<input[^>]*type="search"[^>]*data-fm-bazoj-sercxo/);
   });
 
-  it("Spec 040 B-4: one more token in the source breaks a pinned sum, not source = projection", () => {
+  it("Spec 040 B-4: one more token in the source keeps source = projection", () => {
     const more = withCoreToken(sourceModelo(), "spacing.scale.450", "spacing.scale.400");
     const shown = tokenojOf(more);
     expect(sourceProjectionViolations(more, shown)).toEqual([]);
-    expect(shown.length).toBe(2060);
+    // A page that lost it is named.
+    const lost = shown.filter((name) => name !== "spacing.scale.450");
+    expect(sourceProjectionViolations(more, lost)).toEqual(["spacing.scale.450: not on the page"]);
   });
 
   it("Farbe: the roles light and dark as pairs, with their contrast on the surface", () => {
