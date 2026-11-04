@@ -4,7 +4,7 @@ Stand 2026-09-19.
 
 ## 1. Herkunft der Anforderungen
 
-Alle vier neuen Reguloj stammen aus der visuellen Abnahme des ciferecigo-Pakets in Phase 1 (`specs/001-vortaro-aspektoj-mcp/research.md` §10, „Befunde für Kern und Enportilo"). `check_contrast` stammt aus dem Claude-Code-Test der Phase-1-Abnahme: Auf die Frage nach dem Textkontrast in komuna dark/high antwortete der Agent mit einem Wert „nach eigener Rechnung" und dem Satz „einen Wert aus dem Tool dafür habe ich nicht". Ein Agent, der Kontrast selbst rechnet, kann sich verrechnen; das Modelo darf ihn dazu nicht zwingen (Art. III).
+Alle vier neuen Reguloj stammen aus der visuellen Abnahme des privata-Pakets in Phase 1 (`specs/001-vortaro-aspektoj-mcp/research.md` §10, „Befunde für Kern und Enportilo"). `check_contrast` stammt aus dem Claude-Code-Test der Phase-1-Abnahme: Auf die Frage nach dem Textkontrast in komuna dark/high antwortete der Agent mit einem Wert „nach eigener Rechnung" und dem Satz „einen Wert aus dem Tool dafür habe ich nicht". Ein Agent, der Kontrast selbst rechnet, kann sich verrechnen; das Modelo darf ihn dazu nicht zwingen (Art. III).
 
 ## 2. Wahrnehmbare Zustandsdifferenz (FR-03)
 
@@ -16,7 +16,7 @@ Alle vier neuen Reguloj stammen aus der visuellen Abnahme des ciferecigo-Pakets 
 
 WCAG 2.2, Verständnisdokument zu 1.4.11: Die Schwelle 3:1 gilt für die visuelle Information, die ein Bedienelement erkennbar macht; das kann die Füllung, der Rand oder sichtbarer Inhalt sein. „If a control has visible content (such as text or a sufficiently contrasting icon) … then a border or other indication of the overall boundary of the hit area is not required." Quelle: https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html
 
-Folgerung: Das Kern-Paar „Statusfläche gegen Hintergrund ≥ 3:1" ist strenger als WCAG. Die Alternative über einen Rand (FR-07) ist die kleinste Lockerung, die im Modelo prüfbar bleibt, ohne Eroj zu kennen; die weitergehende Lockerung („Text oder Icon genügt") setzt voraus, dass das System weiß, was auf der Fläche steht, und gehört in die Ero-Phase (Spec 003). Der Befund aus ciferecigo (Amber existiert erst oberhalb L ≈ 0,75, auf Papier 1,34:1) zeigt, dass ohne Alternative jede warme Marke eine olivfarbene Warnfläche bekommt.
+Folgerung: Das Kern-Paar „Statusfläche gegen Hintergrund ≥ 3:1" ist strenger als WCAG. Die Alternative über einen Rand (FR-07) ist die kleinste Lockerung, die im Modelo prüfbar bleibt, ohne Eroj zu kennen; die weitergehende Lockerung („Text oder Icon genügt") setzt voraus, dass das System weiß, was auf der Fläche steht, und gehört in die Ero-Phase (Spec 003). Der Befund aus privata (Amber existiert erst oberhalb L ≈ 0,75, auf Papier 1,34:1) zeigt, dass ohne Alternative jede warme Marke eine olivfarbene Warnfläche bekommt.
 
 ## 4. Vokabular als Daten (FR-15)
 
@@ -138,12 +138,12 @@ Stand npm-Registry, abgefragt 2026-09-19:
 
 Entscheidung und Rückfallregel: Plan D-17.
 
-## 10. T026: ciferecigo gegen den Kern nach Phase 2 (2026-09-19)
+## 10. T026: privata gegen den Kern nach Phase 2 (2026-09-19)
 
-Das Paket (v0.2.0) wurde außerhalb des Repos neu abgeleitet, als Archiv übergeben und nicht gepusht. Basis war der jüngste Stand aus der Phase-1-Abnahme (Regeln 1–8, `scripts/check.mjs`); das private Repo `thojank/fundamento-aspekto-ciferecigo` steht noch auf dem Stand davor (`e633dee`, ohne Regeln 7 und 8).
+Das Paket (v0.2.0) wurde außerhalb des Repos neu abgeleitet, als Archiv übergeben und nicht gepusht. Basis war der jüngste Stand aus der Phase-1-Abnahme (Regeln 1–8, `scripts/check.mjs`); das private Repo `$FM_TIPAROJ_REPO` steht noch auf dem Stand davor (`e633dee`, ohne Regeln 7 und 8).
 
 - **Rot gegen den neuen Kern:** `fm modelo validate --aspekto` meldete 9 Fehler: 4× `aspekto-incomplete` (die Statusränder), 2× `text-hierarchy` (dark/high 0,009; light/high subtle = muted), 3× `state-distinct` (tertiary in light, 0,009–0,014).
-- **Grün:** 0 Fehler; `check:alirebleco` über komuna + ciferecigo (144 Kombinationen) grün, `aux` trägt die Warnfläche in 36 Kombinationen (light/default und light/high); alle Abnahmeprüfungen des Pakets grün, darunter die neuen `status-border`, `text-step`, `state-step`, `warning-amber` (auch light); Ableitung deterministisch über zwei Läufe.
+- **Grün:** 0 Fehler; `check:alirebleco` über komuna + privata (144 Kombinationen) grün, `aux` trägt die Warnfläche in 36 Kombinationen (light/default und light/high); alle Abnahmeprüfungen des Pakets grün, darunter die neuen `status-border`, `text-step`, `state-step`, `warning-amber` (auch light); Ableitung deterministisch über zwei Läufe.
 - **Neue und erweiterte Regeln der Ableitung** (Enportilo-Prototyp): Regel 4 versteht `aux` (Paar erfüllt, wenn Fläche oder Rand die Schwelle hält; bei gewollter Füllung wandert der Rand); Regel 8 für jede Aktionsvariante (|ΔL| ≥ 0,05 zu rest); **Regel 9** Warnfläche auch in light amber, getragen vom Rand (Entscheidung zur Bestätigung durch den Maintainer); **Regel 10** Textrollen mindestens 0,05 auseinander, Hauptrolle behält den maximalen Kontrast.
 - **Befund für die Maintainer-Entscheidung:** Mit Regel 10 findet Regel 6 in light keine Tiefe für `background.sunken` mehr (Kandidat `neutral.300` scheitert in light/high an drei Textstufen ≥ 7:1 mit 0,05 Abstand auf sunken); sunken fällt dort auf Canvas zurück (Tiefe null), wie Regel 6 es vorsieht. Alternative: sunken je Kontrastklasse wählen (light/default mit Tiefe, light/high ohne).
 - Fallback-Tabelle: 17 Einträge (9 Kontrast-Fallbacks, 1 Hierarchie, 7 Schritte nach Regel 8 und 10), vollständig in `DERIVATION.md` des Pakets.

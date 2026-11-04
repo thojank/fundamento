@@ -1,10 +1,12 @@
 // FUND-6.1 end-to-end: the five conformance checks through the built runner, on the repo and on
 // every failing fixture (AK-05, AK-07, AK-13), plus the runner's exit-code and output contract.
 
-import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { parse } from "yaml";
+import { oldNames } from "../../../../scripts/neutrale-namen/rules.mjs";
 import { CHECK_NAMES, type CheckName, type CheckResult } from "../contracts/checks.js";
 import {
   checkFailingFixtures,
@@ -26,6 +28,20 @@ const failing = checkFailingFixtures();
 const repoRuns = new Map<CheckName, Run>();
 const fixtureRuns = new Map<string, Run>();
 
+/**
+ * Spec 036 Teil 6 (D-23): the failing fixture of check:privat is built at run time, a git
+ * repository with an old name composed by the codemod's rule table. A committed one would itself
+ * be the finding the check exists to prevent.
+ */
+function privatFixture(): string {
+  const root = tempDir("privat");
+  execFileSync("git", ["init", "-q"], { cwd: root });
+  writeFileSync(join(root, "plan.md"), `Abnahme ${oldNames().word}\n`);
+  execFileSync("git", ["add", "-A"], { cwd: root });
+  return root;
+}
+let privatRun: Run | undefined;
+
 beforeAll(async () => {
   // Parity reads what the projections emitted, so the repo run needs a build first (Spec 003
   // T021); `pnpm check:parity` does the same with `--out .fundamento/projekcioj`.
@@ -34,7 +50,7 @@ beforeAll(async () => {
   if (build.code !== 0) throw new Error(`fm projekcioj build failed: ${build.stderr}`);
   const repoArgs = (name: CheckName): string[] =>
     name === "parity" ? [name, "--json", "--projekcioj", projekcioj] : [name, "--json"];
-  const [repo, fixtures] = await Promise.all([
+  const [repo, fixtures, privat] = await Promise.all([
     Promise.all(CHECK_NAMES.map((name) => runCheck(repoArgs(name)))),
     Promise.all(
       failing.map((fixture) => {
@@ -46,7 +62,9 @@ beforeAll(async () => {
         return runCheck([fixture.expected.check, "--json", "--fixture", root, ...extra]);
       }),
     ),
+    runCheck(["privat", "--json", "--fixture", privatFixture()]),
   ]);
+  privatRun = privat;
   CHECK_NAMES.forEach((name, i) => {
     const run = repo[i];
     if (run !== undefined) repoRuns.set(name, run);
@@ -101,7 +119,15 @@ describe("AK-05: every check passes on the repo", () => {
 describe("AK-05: every check can fail", () => {
   it("AK-05: each of the five checks has at least one failing fixture", () => {
     const covered = new Set(failing.map((fixture) => fixture.expected.check));
+    if (privatRun !== undefined) covered.add("privat");
     expect([...covered].sort()).toEqual([...CHECK_NAMES].sort());
+  });
+
+  it("AK-05: check:privat --fixture <git repo built at run time> exits 1 with privat-vorto", () => {
+    if (privatRun === undefined) throw new Error("no run recorded for check:privat");
+    expect(privatRun.code, privatRun.stderr).toBe(1);
+    const result = expectCheckResult(parseJsonStdout(privatRun), "privat");
+    expect(rulesAndPaths(result.errors)).toEqual([{ rule: "privat-vorto", path: "plan.md:1:9" }]);
   });
 
   it.each(failing.map((fixture) => [fixture.expected.check, fixture.name, fixture] as const))(

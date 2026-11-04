@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/propose_agordo.output.json",
+  "$id": "urn:fundamento:schema:mcp:propose_agordo.output",
   "title": "propose_agordo output",
   "description": "The proposal of one wish: the moved Agordo, the diff, the sentence of the wish vocabulary, the report in short (summary, checks, violations with kialo, Jugxoj, like preview_agordo) and a link into the Werkstatt (#agordo= the Agordo before, #vorschlag= the proposal). An unknown wish answers with action ask-human and the known words, and moves nothing. writes is always false.",
   "type": "object",
   "properties": {
     "aspekto": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
     },
     "writes": {
       "const": false
@@ -62,7 +62,7 @@
       "minLength": 1
     },
     "agordo": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Agordo"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/Agordo"
     },
     "diff": {
       "type": "array",
@@ -247,10 +247,10 @@
             "type": "object",
             "properties": {
               "id": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/ReguloId"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/ReguloId"
               },
               "name": {
-                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
               },
               "kialo": {
                 "type": "string",

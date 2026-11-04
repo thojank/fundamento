@@ -4,7 +4,7 @@
 
 ## Zweck
 
-Wer eine Marke aufbaut, denkt visuell (Maintainer, 16.10.). Heute entsteht eine Aspekto nur von Hand oder als Ableitung im Build (ciferecigo, Phase 1). Diese Spec baut die erste Stufe der **Werkstatt**:
+Wer eine Marke aufbaut, denkt visuell (Maintainer, 16.10.). Heute entsteht eine Aspekto nur von Hand oder als Ableitung im Build (privata, Phase 1). Diese Spec baut die erste Stufe der **Werkstatt**:
 
 > Aus einer Leitfarbe, optionalen Zusatzfarben und drei Reglern entsteht in wenigen Minuten eine **vollständige, geprüfte Aspekto**. Jede Änderung ist sofort an allen Eroj in allen Modi sichtbar, mit Prüfbericht. Was eine Regel verletzt, zeigt die Werkstatt mit Ursache und Vorschlag. Sie rät nicht und verschweigt nichts.
 
@@ -31,7 +31,7 @@ Neue Begriffe „Agordo“ und „Raporto“ kommen in die Ontologio (Schema `la
 
 ## Gemeinsame Festlegungen
 
-**G1 – Art. IV bleibt.** Die Werkstatt erzeugt eine **vollständige** Aspekto: jeder Token des Vortaro belegt, nichts wird zur Laufzeit von komuna geerbt. Ableiten ist ein Schreibvorgang beim Speichern, wie bei ciferecigo. Die Herkunft steht als Metadatum in `aspekto.json`: `agordo` (die Eingabe), Version des Agordilo und Ausgangsstruktur.
+**G1 – Art. IV bleibt.** Die Werkstatt erzeugt eine **vollständige** Aspekto: jeder Token des Vortaro belegt, nichts wird zur Laufzeit von komuna geerbt. Ableiten ist ein Schreibvorgang beim Speichern, wie bei privata. Die Herkunft steht als Metadatum in `aspekto.json`: `agordo` (die Eingabe), Version des Agordilo und Ausgangsstruktur.
 
 **G2 – Rollen fest, Werte frei (W-18).** Die semantischen Rollen (`color.action.*`, `color.text.*`, `color.status.*` …) und ihre Zuordnung zu Paletten-Stufen übernimmt die Werkstatt **als Struktur** aus dem Vortaro. Neu berechnet werden die **Paletten** (`color.palette.neutral|accent|success|warning|danger|info`, Stufen wie heute). Die Zuordnung Rolle → Stufe bleibt gleich. Damit gelten alle KontrastParoj durch Konstruktion, solange die Stufen ihre Kontrastziele treffen. Eine Rolle neu zuordnen kann die Werkstatt in Stufe 1 nicht (Grenze, siehe G6).
 
@@ -123,7 +123,7 @@ Die Rolle selbst neu zuordnen ist in Stufe 1 eine Grenze (`role-remap`, ask-huma
 - **E5** Feste Regeln sperren den Export. Anpassbare Regeln brauchen einen Jugxo (D-5).
 - **E6** Stufe 1 ändert nur Farbe und Schriftnamen. Alles andere wird unverändert vollständig geschrieben.
 - **E7** Die Vitrino schreibt keine Dateien. Speichern geht über Download oder URL, das Paket entsteht über die CLI.
-- **E8** ciferecigo erscheint nirgends. Beispiele sind `provo`, komuna und ekzemplo.
+- **E8** privata erscheint nirgends. Beispiele sind `provo`, komuna und ekzemplo.
 - **E9** Namen: `Agordilo` (Paket, Terminologie), `Agordo` (Eingabe), `Raporto` (Prüfbericht), Modus „Werkstatt“ (Oberfläche, deutsch und englisch: workshop). Agordo und Raporto bestätigt der Maintainer bei ①.
 
 ## Benchmark (Art. V, öffentlich; Belege im Benchmark-Dokument)

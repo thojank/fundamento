@@ -24,6 +24,9 @@ const CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = [
   ["Check: Fontoj", "check:fontoj"],
   // Spec 036 Teil 5 ③: every Uzo has the documentation fields of its Vitrino page.
   ["Check: Dokumentaro", "check:dokumentaro"],
+  // Spec 036 Teil 6 (6.4, D-10): no versioned file names the word of R-12 or the private font
+  // repository; the check knows both only by hash.
+  ["Check: Privat", "check:privat"],
 ];
 
 /** Rendered checks of the Eroj (Spec 003 T013, plan D-09): axe-core, keyboard, focus, ARIA. */

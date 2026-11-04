@@ -1,0 +1,90 @@
+{
+  "$comment": "check:privat and scripts/neutrale-namen leave these files alone: verbatim spec copies pinned by SHA-256 (Spec 036 D-23). An entry applies only while the file has exactly this SHA-256; a listed file that is missing is fine.",
+  "escepoj": [
+    {
+      "path": "specs/000-fundamento-repo/spec.md",
+      "sha256": "40785cb6e9b99abc11e439f2d6bdf87ad31565ea10a6269e6f0660a824686d26",
+      "kialo": "Verbatim copy of the maintainer’s text, pinned by its SHA-256 in packages/modelo/src/docs/docs.test.ts; rewriting it would break that pin (Spec 036 D-23)."
+    },
+    {
+      "path": "specs/019-werkstatt-2-3/spec.md",
+      "sha256": "15353c7f24f8e681a83be6b2cb9bd0dccebf1bb3c901fd4bcb6e364d37b7333e",
+      "kialo": "Verbatim copy of the maintainer’s text, pinned by its SHA-256 in packages/modelo/src/docs/docs.test.ts; rewriting it would break that pin (Spec 036 D-23)."
+    },
+    {
+      "path": "specs/022-nachlese-8/briefing.md",
+      "sha256": "195417d7b580749509155f0366bb043cd09e034d0a59d612754fe906f90ba350",
+      "kialo": "Verbatim copy of the maintainer’s text, pinned by its SHA-256 in packages/modelo/src/docs/docs.test.ts; rewriting it would break that pin (Spec 036 D-23)."
+    },
+    {
+      "path": "specs/023-werkstatt-konfigurilo/spec.md",
+      "sha256": "6f45b41454be94623bd66f5d42fdadd000c573d7ab8384ceb67381304005f2de",
+      "kialo": "Verbatim copy of the maintainer’s text, pinned by its SHA-256 in packages/metiejo/src/docs.test.ts; rewriting it would break that pin (Spec 036 D-23)."
+    },
+    {
+      "path": "specs/024-studio/spec.md",
+      "sha256": "89c68df88799448de5b09a01fef5c91ee24cea88368d3db681815f1c44e57558",
+      "kialo": "Verbatim copy of the maintainer’s text, pinned by its SHA-256 in packages/metiejo/src/docs-024.test.ts; rewriting it would break that pin (Spec 036 D-23)."
+    },
+    {
+      "path": "specs/026-lingvo/spec.md",
+      "sha256": "e4c2d20ee3f2564efa59544f12245da11b30e1f9ccdc4d244d2db1325e823841",
+      "kialo": "Verbatim copy of the maintainer’s text, pinned by its SHA-256 in packages/modelo/src/docs/docs.test.ts; rewriting it would break that pin (Spec 036 D-23)."
+    },
+    {
+      "path": "specs/027-figma-bauformen/spec.md",
+      "sha256": "dd52d5f96901abe13077f260f69431ea9a7b1e605b2ed339de92b795700d3b41",
+      "kialo": "Verbatim copy of the maintainer’s text, pinned by its SHA-256 in packages/modelo/src/docs/docs.test.ts; rewriting it would break that pin (Spec 036 D-23)."
+    },
+    {
+      "path": "specs/028-nachlese-10/briefing.md",
+      "sha256": "85d3d11d9db05af82df9f79366bbf0b6b52357c0436fc6e9fa306f9dc28cb5f5",
+      "kialo": "Verbatim copy of the maintainer’s text, pinned by its SHA-256 in packages/modelo/src/docs/docs.test.ts; rewriting it would break that pin (Spec 036 D-23)."
+    },
+    {
+      "path": "specs/029-fonto-astryx/briefing-a-1b-2026-10-27.md",
+      "sha256": "b4a83e80e05c24addee348bcd8e043191c743ff55d7c77249942ca10c53aa994",
+      "kialo": "Verbatim copy of the maintainer’s text, pinned by its SHA-256 in packages/modelo/src/docs/docs.test.ts; rewriting it would break that pin (Spec 036 D-23)."
+    },
+    {
+      "path": "specs/029-fonto-astryx/spec.md",
+      "sha256": "36ac8edfd68a57affcce8c309be2c07c51c6c3aacfb5b9c7b33761bfd30a710a",
+      "kialo": "Verbatim copy of the maintainer’s text, pinned by its SHA-256 in packages/modelo/src/docs/docs.test.ts; rewriting it would break that pin (Spec 036 D-23)."
+    },
+    {
+      "path": "specs/030-nordstern-kennzahl/spec.md",
+      "sha256": "e17387d04c8fdd1ec8267dc46e14305f2dd84e03aac2b040ff10a893218b769d",
+      "kialo": "Verbatim copy of the maintainer’s text, pinned by its SHA-256 in packages/modelo/src/docs/docs.test.ts; rewriting it would break that pin (Spec 036 D-23)."
+    },
+    {
+      "path": "specs/031-nachlese-11/briefing.md",
+      "sha256": "16bb1cf349057b96e16280ef075ffdfb01cf5c16ad74ef8efd75f5b21514fa17",
+      "kialo": "Verbatim copy of the maintainer’s text, pinned by its SHA-256 in packages/modelo/src/docs/docs.test.ts; rewriting it would break that pin (Spec 036 D-23)."
+    },
+    {
+      "path": "specs/032-benchmark-astryx-kern/briefing.md",
+      "sha256": "8ef0197993e4c8763a9ec5031eb0e73ee37316e866ddfd754e3bc0901457d628",
+      "kialo": "Verbatim copy of the maintainer’s text, pinned by its SHA-256 in packages/modelo/src/docs/docs.test.ts; rewriting it would break that pin (Spec 036 D-23)."
+    },
+    {
+      "path": "specs/033-markenassistent/spec.md",
+      "sha256": "b940b1fa224ece614c5302d392565c667b51180235356ac684f7edec1379f644",
+      "kialo": "Verbatim copy of the maintainer’s text, pinned by its SHA-256 in packages/modelo/src/docs/docs.test.ts; rewriting it would break that pin (Spec 036 D-23)."
+    },
+    {
+      "path": "specs/034-nachlese-12/briefing.md",
+      "sha256": "d9b851b665200c2e3460132a845c3274741188a4288ff8173cdd815f1e7cdb60",
+      "kialo": "Verbatim copy of the maintainer’s text, pinned by its SHA-256 in packages/modelo/src/docs/docs.test.ts; rewriting it would break that pin (Spec 036 D-23)."
+    },
+    {
+      "path": "specs/035-paket-abnahmen/spec.md",
+      "sha256": "472d2c443219a5b0c07945756386bd7d88e6a4d8db55ddd652143146f6be264a",
+      "kialo": "Verbatim copy of the maintainer’s text, pinned by its SHA-256 in packages/modelo/src/docs/docs.test.ts; rewriting it would break that pin (Spec 036 D-23)."
+    },
+    {
+      "path": "specs/036-assistent-buehne/spec.md",
+      "sha256": "a0cc66beda58be0bcc0a4dcaf28179cd178d4ec3ed79afa51bdddfea1c55acfa",
+      "kialo": "The source spec of Spec 036, byte-identical by AC-1 and pinned by its SHA-256 (D-14, D-23); it describes the old names it removes. Lives on the Teil-1 branch, may be missing here."
+    }
+  ]
+}

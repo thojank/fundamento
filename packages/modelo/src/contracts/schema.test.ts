@@ -135,7 +135,7 @@ const samples: Sample[] = [
       {},
       {
         $description: "Core set",
-        $extensions: { "com.ciferecigo.fundamento": { id: id("set"), kondicxoj: [] } },
+        $extensions: { fundamento: { id: id("set"), kondicxoj: [] } },
         color: {
           $type: "color",
           text: {
@@ -143,7 +143,7 @@ const samples: Sample[] = [
               $value: "{color.palette.neutral.900}",
               $description: "Default text",
               $extensions: {
-                "com.ciferecigo.fundamento": { id: id("tok"), role: "foreground" },
+                fundamento: { id: id("tok"), role: "foreground" },
                 "org.example.other": { anything: true },
               },
             },
@@ -152,7 +152,7 @@ const samples: Sample[] = [
       },
       {
         $extensions: {
-          "com.ciferecigo.fundamento": {
+          fundamento: {
             id: id("set"),
             kondicxoj: ["aspekto=neutra", "color-scheme=dark"],
           },
@@ -164,11 +164,11 @@ const samples: Sample[] = [
       { "on-primary": { $type: "color", $value: color } }, // name grammar: hyphen
       { color: { $type: "colour", $value: color } }, // unknown type
       { color: { $type: "color", $value: color, extra: 1 } }, // token with child
-      { $extensions: { "com.ciferecigo.fundamento": { id: id("tok"), kondicxoj: [] } } }, // wrong prefix
-      { $extensions: { "com.ciferecigo.fundamento": { id: id("set"), kondicxoj: ["dark"] } } },
-      { $extensions: { "com.ciferecigo.fundamento": { id: id("set") } } }, // kondicxoj missing
-      setWith({ $value: color, $extensions: { "com.ciferecigo.fundamento": { role: "x" } } }),
-      { color: { $extensions: { "com.ciferecigo.fundamento": { id: id("set") } } } }, // group ext
+      { $extensions: { fundamento: { id: id("tok"), kondicxoj: [] } } }, // wrong prefix
+      { $extensions: { fundamento: { id: id("set"), kondicxoj: ["dark"] } } },
+      { $extensions: { fundamento: { id: id("set") } } }, // kondicxoj missing
+      setWith({ $value: color, $extensions: { fundamento: { role: "x" } } }),
+      { color: { $extensions: { fundamento: { id: id("set") } } } }, // group ext
       { $extends: "{other}" }, // DTCG group extension is not supported
     ],
   },

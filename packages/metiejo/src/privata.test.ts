@@ -5,13 +5,14 @@
 // repository is never touched.
 
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 import {
   cacheDirOf,
   cacheRootOf,
+  defaultDeps,
   listCachedFonts,
   type PrivataDeps,
   privataState,
@@ -134,5 +135,56 @@ describe("uploadFont (§4.5)", () => {
     expect(fonts[0]?.bytes.equals(bytes)).toBe(true);
     // Syncing again is idempotent.
     expect(await syncCache(REPO, deps("private", cache))).toBe(dir);
+  });
+});
+
+// Spec 036 6.6 (D-22): the private font repository stays as it is. The public repo reaches it only
+// through FM_TIPAROJ_REPO; its clone lies in the hash folder of the cache (the place it always had),
+// derived from the variable, never from a name in the code. A FM_TIPAROJ_DIR changes nothing.
+describe("Spec 036 6.6: the clone of the private repository (D-22)", () => {
+  const ATTRAPPE = "beispiel/schriften-attrappe";
+  const remote = join(scratch, "attrappe-remote.git");
+  execFileSync("git", ["init", "--bare", "-q", "-b", "main", remote]);
+  const work = join(scratch, "attrappe-work");
+  execFileSync("git", ["clone", "-q", remote, work]);
+  mkdirSync(join(work, "tiparoj", "attrappe-sans"), { recursive: true });
+  writeFileSync(join(work, "tiparoj", "attrappe-sans", "Attrappe-Sans.woff2"), "attrappe-bytes");
+  git(["add", "."], work);
+  git(
+    ["-c", "user.name=Attrappe", "-c", "user.email=attrappe@example.invalid", "commit", "-qm", "x"],
+    work,
+  );
+  git(["push", "-q", "origin", "HEAD:main"], work);
+
+  it("with only FM_TIPAROJ_REPO the clone lies in the hash folder of the cache and lists its fonts", async () => {
+    const cacheRoot = join(scratch, "attrappe-cache");
+    const dir = await syncCache(ATTRAPPE, {
+      ...deps("private", cacheDirOf(cacheRoot, ATTRAPPE)),
+      remoteUrl: () => remote,
+    });
+    expect(dir).toBe(cacheDirOf(cacheRoot, ATTRAPPE));
+    expect(dir.slice(cacheRoot.length)).toMatch(/^\/fundamento\/tiparoj\/[0-9a-f]{16}$/);
+    expect(listCachedFonts(dir).map((font) => font.family)).toEqual(["attrappe-sans"]);
+  });
+
+  it("the default clone follows the variable, and an unknown FM_TIPAROJ_DIR does not move it", () => {
+    const before = defaultDeps(ATTRAPPE).cacheDir;
+    expect(before).toBe(
+      cacheDirOf(cacheRootOf(process.env, process.platform, homedir()), ATTRAPPE),
+    );
+    const saved = process.env.FM_TIPAROJ_DIR;
+    process.env.FM_TIPAROJ_DIR = join(scratch, "attrappe-ordner");
+    try {
+      expect(defaultDeps(ATTRAPPE).cacheDir).toBe(before);
+    } finally {
+      if (saved === undefined) delete process.env.FM_TIPAROJ_DIR;
+      else process.env.FM_TIPAROJ_DIR = saved;
+    }
+  });
+
+  it("without the variable the sentence is the one of today, word for word", () => {
+    expect(privataState({ present: [] }).sentence).toBe(
+      "Lizenzierte Schriften brauchen dein privates Repo: Trage FM_TIPAROJ_REPO (owner/name) in die .env im Wurzelordner des Checkouts ein und starte den Konfigurator neu.",
+    );
   });
 });

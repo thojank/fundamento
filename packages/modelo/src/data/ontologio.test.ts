@@ -97,7 +97,7 @@ describe("ontologio.json (FR-15, FR-16, AK-07)", () => {
         c.concepts.push({
           ...structuredClone(c.concepts[0] as Concept),
           term: "Kromajxo",
-          uri: "https://fundamento.ciferecigo.com/ontologio#Kromajxo",
+          uri: "urn:fundamento:ontologio#Kromajxo",
         }),
       "table-term-extra",
     ],
@@ -112,7 +112,7 @@ describe("ontologio.json (FR-15, FR-16, AK-07)", () => {
       "a duplicate URI",
       (c: { concepts: Concept[] }) => {
         (c.concepts.find((x) => x.term === "Ero") as Concept).uri =
-          "https://fundamento.ciferecigo.com/ontologio#Skemo";
+          "urn:fundamento:ontologio#Skemo";
       },
       "uri",
     ],
@@ -447,7 +447,7 @@ describe("the scheme eroj (Spec 008 T009)", () => {
           copy.concepts.push({
             ...(copy.concepts.find((concept) => concept.term === "Ligilo") as Concept),
             term: "Panelo",
-            uri: "https://fundamento.ciferecigo.com/ontologio#Panelo",
+            uri: "urn:fundamento:ontologio#Panelo",
             relations: [],
           });
         }),

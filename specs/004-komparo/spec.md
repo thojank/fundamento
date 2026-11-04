@@ -55,7 +55,7 @@ Wer das Kern-Repo prüft, findet keine Spectrum-Werte oder -Namen. Die Clean-Roo
   - APCA wird berichtet (beratend, Art. X).
 - **FR-02 Ziele werden Reguloj oder Aspiroj (Fluida Marko, Maintainer-Entscheidung 2026-09-20):** Ein messbares Ziel, das **Zugänglichkeit oder Struktur** sichert, wird eine Regulo mit Kialo (Art. VI) und gilt für jede Aspekto. Ein Ziel, das **Geschmack** einer Marke ist, wird ein Entwurfsziel dieser Marke (`aspekto.json`, eigener Kialo) und wird nur für sie geprüft. Die Prüfausgabe unterscheidet „Regulo verletzt" von „Entwurfsziel verfehlt".
 - **FR-03 Unabhängige Gestaltung:** komuna 2 wird ohne Kenntnis der Spectrum-Werte gestaltet. Die Coding-Sitzung für komuna sieht nur Fundamento-Daten und Berichte mit Kennzahlen, nie Werte oder Namen aus `komparo`.
-- **FR-04 Folgen für andere Aspektoj:** ekzemplo und ciferecigo müssen die neuen Reguloj bestehen; ciferecigo wird wie in T028 neu abgeleitet.
+- **FR-04 Folgen für andere Aspektoj:** ekzemplo und privata müssen die neuen Reguloj bestehen; privata wird wie in T028 neu abgeleitet.
 
 ### Vitrino (neues Celo)
 
@@ -72,7 +72,7 @@ Wer das Kern-Repo prüft, findet keine Spectrum-Werte oder -Namen. Die Clean-Roo
 - **FR-12 Abbildung:** Eine Abbildungstabelle ordnet Spectrum-Rollen den Rollen des Fundamento-Vortaro zu. Jeder Eintrag hat eine Begründung. Nicht abbildbare Spectrum-Tokens werden gezählt und berichtet, nicht übernommen.
 - **FR-13 Vollständigkeit (Art. IV):** komparo belegt jeden Token des Vortaro. Wo Spectrum keinen Wert hat (hoher Kontrast, Motion, Dichte, Viewport-Stufen, fehlende Rollen), wird der Wert nach einer dokumentierten Regel abgeleitet und als **abgeleitet** markiert (Jugxo mit Kialo). Achsen-Zuordnung: Farbschema hell/dunkel direkt; Wireframe wird nicht übernommen und als Befund notiert; die Skala Desktop/Mobile wird einer Fundamento-Dimensio zugeordnet, die Wahl begründet der Plan.
 - **FR-14 Fairness:** Der Bericht trennt Kennzahlen über **originale** und über **abgeleitete** Werte. Abgeleitete Werte zählen nie für oder gegen Spectrum.
-- **FR-15 Fingerprints:** Das komparo-Repo erzeugt Fingerprints (SHA-256) seiner Werte wie ciferecigo. Die Clean-Room-Prüfung des Kerns prüft komuna, ekzemplo und den Kern auch dagegen.
+- **FR-15 Fingerprints:** Das komparo-Repo erzeugt Fingerprints (SHA-256) seiner Werte wie privata. Die Clean-Room-Prüfung des Kerns prüft komuna, ekzemplo und den Kern auch dagegen.
 
 ### Bericht
 
@@ -132,4 +132,4 @@ Wer das Kern-Repo prüft, findet keine Spectrum-Werte oder -Namen. Die Clean-Roo
 
 - Benchmark-Analyse: [`research/benchmark-spectrum.md`](../../research/benchmark-spectrum.md)
 - Quelle: https://github.com/adobe/spectrum-design-data (Apache-2.0)
-- Vorbild für externe Aspekto-Pakete: `fundamento-aspekto-ciferecigo` (Spec 001)
+- Vorbild für externe Aspekto-Pakete: `fundamento-tiparoj-privataj` (Spec 001)

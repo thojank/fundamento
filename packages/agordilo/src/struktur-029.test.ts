@@ -4,9 +4,9 @@
 // rebuilt structure is the same document, byte for byte in canonical JSON: the same fingerprint.
 
 import { readFileSync } from "node:fs";
-import { CORE_SET_NAME } from "@fundamento/modelo";
+import { CORE_SET_NAME, convertNames, nameForm } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
-import { readStructure, referencePackage } from "./index.js";
+import { fingerprintOf, readStructure, referencePackage } from "./index.js";
 
 const storedSha = (fixture: string): string =>
   JSON.parse(
@@ -39,8 +39,10 @@ describe("Spec 029 ①: the structure of komuna 0.2 for the Agordilo", () => {
     // Spec 036 Befund 2.2 (V-2): the palette color.palette.sekundo and the roles color.sekundo.*.
     // Spec 036 Teil 5 ②b-2: elekto, markobutono and sxaltilo in two sizes (large a deprecated
     // alias).
-    expect(structure.fingerprint).toBe(
-      "a8e9d6eaf4dedadfae591ec74874aeed8766cd56d082681102fc9f0cdbc92c5c",
+    // Spec 036 Teil 6: pinned for the structure with the new names (D-25), the same documents
+    // before and after the script run; the stored fingerprints above follow the derivation.
+    expect(fingerprintOf(convertNames(structure.files, nameForm("neutral")))).toBe(
+      "3b6d57066ca341dd5700d193263889cc34b5c54d4b2a26f5b1973a6650f31cd6",
     );
   });
 

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { flattenTokenTree, parseKondicxoj } from "./flatten.js";
 
 const FILE = "vortaro/sets/core.json";
-const EXT = "com.ciferecigo.fundamento";
+const EXT = "fundamento";
 
 describe("flattenTokenTree", () => {
   it("flattens nested groups into canonical dot-joined names with pointer locations", () => {

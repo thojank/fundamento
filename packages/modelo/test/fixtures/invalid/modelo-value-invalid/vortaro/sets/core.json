@@ -1,6 +1,6 @@
 {
   "$extensions": {
-    "com.ciferecigo.fundamento": {
+    "fundamento": {
       "id": "set_01K5FMAJ06444R7MA0HZE3KXSJ",
       "kondicxoj": []
     }
@@ -20,7 +20,7 @@
             "hex": "#ffffff"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01K5FMAJ0AND635FTMQ9558Y63"
             }
           }
@@ -36,7 +36,7 @@
             "hex": "#f2f2f2"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01K5FMAJ0BQ499YPVK4P8NPRZ3"
             }
           }
@@ -52,7 +52,7 @@
             "hex": "#1a1a1a"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01K5FMAJ0CGDK0SHC894P66C4B"
             }
           }
@@ -68,7 +68,7 @@
             "hex": "#000000"
           },
           "$extensions": {
-            "com.ciferecigo.fundamento": {
+            "fundamento": {
               "id": "tok_01K5FMAJ0DQ0T56XFQD500JQRD"
             }
           }
@@ -80,7 +80,7 @@
         "$value": "{color.palette.neutral.100}",
         "$description": "Default page background.",
         "$extensions": {
-          "com.ciferecigo.fundamento": {
+          "fundamento": {
             "id": "tok_01K5FMAJ0EN8B4C4Z6KSPYEMCX",
             "role": "background"
           }
@@ -92,7 +92,7 @@
         "$value": "{color.palette.neutral.900}",
         "$description": "Default body text.",
         "$extensions": {
-          "com.ciferecigo.fundamento": {
+          "fundamento": {
             "id": "tok_01K5FMAJ0FRV73CQ8J0CJ9HV5S",
             "role": "foreground"
           }
@@ -105,7 +105,7 @@
       "$type": "dimension",
       "$value": "4px",
       "$extensions": {
-        "com.ciferecigo.fundamento": {
+        "fundamento": {
           "id": "tok_01K5FMAJ0GQGZMPKY9NN4KF5G6"
         }
       }
@@ -117,7 +117,7 @@
         "unit": "px"
       },
       "$extensions": {
-        "com.ciferecigo.fundamento": {
+        "fundamento": {
           "id": "tok_01K5FMAJ0H4CZYQST4Y5HHM8HV"
         }
       }

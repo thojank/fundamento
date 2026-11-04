@@ -3,7 +3,7 @@
   "issues": [
     {
       "rule": "set-kondicxoj-contradictory",
-      "path": "vortaro/sets/color-scheme/light+color-scheme/dark.json#/$extensions/com.ciferecigo.fundamento/kondicxoj/1"
+      "path": "vortaro/sets/color-scheme/light+color-scheme/dark.json#/$extensions/fundamento/kondicxoj/1"
     }
   ]
 }

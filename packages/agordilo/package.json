@@ -24,7 +24,8 @@
     "test": "vitest run",
     "lint": "tsc -p tsconfig.json --noEmit && biome check .",
     "calibrate": "node dist/node/calibrate-cli.js",
-    "mezuroj": "node dist/node/mezuroj-cli.js"
+    "mezuroj": "node dist/node/mezuroj-cli.js",
+    "fixtures": "node dist/node/fixtures-cli.js"
   },
   "dependencies": {
     "@fundamento/aspekto-komuna-0-2": "workspace:*",

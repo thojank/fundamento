@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/derive_name.output.json",
+  "$id": "urn:fundamento:schema:mcp:derive_name.output",
   "title": "derive_name output",
   "description": "The name of a token in each Celo (CSS, Figma, TypeScript, Tailwind, DTCG, Penpot).",
   "type": "object",
@@ -35,7 +35,7 @@
     "issues": {
       "type": "array",
       "items": {
-        "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/Issue"
+        "$ref": "urn:fundamento:schema:mcp:common#/$defs/Issue"
       }
     }
   },

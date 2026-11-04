@@ -174,7 +174,7 @@ describe("contrast-pairs-declared counts aux members (Spec 002, D-09)", () => {
           line: {
             $value: "{color.palette.neutral.900}",
             $description: "Edge of an action.",
-            $extensions: { "com.ciferecigo.fundamento": { role: "border" } },
+            $extensions: { fundamento: { role: "border" } },
           },
         };
       });

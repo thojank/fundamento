@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/check_usage.input.json",
+  "$id": "urn:fundamento:schema:mcp:check_usage.input",
   "title": "check_usage input",
   "description": "Judges instances of a design or of code against the Ero Reguloj and the Skemo constraints. Call it before handing over a design or code.",
   "type": "object",
@@ -8,7 +8,7 @@
     "instances": {
       "type": "array",
       "items": {
-        "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/EroInstance"
+        "$ref": "urn:fundamento:schema:modelo#/$defs/EroInstance"
       },
       "minItems": 0
     },
@@ -16,7 +16,7 @@
       "description": "Instances of Sxablonoj (Spec 020): what stands in each region. Judged for required regions, accepted children, their number and props, one primary action where the region says so, and every landmark once per page; instances may then be empty.",
       "type": "array",
       "items": {
-        "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SxablonoInstance"
+        "$ref": "urn:fundamento:schema:modelo#/$defs/SxablonoInstance"
       }
     }
   },

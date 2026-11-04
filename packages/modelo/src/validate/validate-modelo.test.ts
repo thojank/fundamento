@@ -269,7 +269,7 @@ describe("rule variants", () => {
   it("reports a repeated kondicxo as contradictory", () => {
     const report = validateMutation((edit) =>
       edit("vortaro/sets/contrast/high.json", (v: SetJson) => {
-        const extension = v.$extensions["com.ciferecigo.fundamento"];
+        const extension = v.$extensions["fundamento"];
         if (extension !== undefined) extension.kondicxoj = ["contrast=high", "contrast=high"];
       }),
     );
@@ -278,7 +278,7 @@ describe("rule variants", () => {
       { rule: "metadata-out-of-sync", path: "vortaro/$metadata.json#" },
       {
         rule: "set-kondicxoj-contradictory",
-        path: "vortaro/sets/contrast/high.json#/$extensions/com.ciferecigo.fundamento/kondicxoj/1",
+        path: "vortaro/sets/contrast/high.json#/$extensions/fundamento/kondicxoj/1",
       },
     ]);
   });

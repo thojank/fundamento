@@ -46,7 +46,7 @@ Usage:
   pnpm id:new <entityType> [--count N] [--lock <path>] [--json]
       Generate N (default 1) new IDs, register them as "active" and print them,
       one per line (or as JSON with --json). Paste each ID into the entity's "id"
-      field (tokens and sets: $extensions["com.ciferecigo.fundamento"].id).
+      field (tokens and sets: $extensions["fundamento"].id).
 
   pnpm id:retire <id> [--lock <path>] [--json]
       Mark an ID "retired" after its entity was removed. A retired ID can never

@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/preview_agordo.input.json",
+  "$id": "urn:fundamento:schema:mcp:preview_agordo.input",
   "title": "preview_agordo input",
   "description": "Checks a brand recipe before anyone writes it (Spec 016 ③, G9): an Agordo — name, leitfarbe (hex or oklch()), optional zusatzfarben, neutral.toenung, regler (helligkeit, kontrast, saettigung), ziele, schriften, aspiroj, jugxoj — is derived by the Agordilo into a complete Aspekto over the repository's structure (core + komuna) and checked like the CI checks it. Answers with the report (every violation with its cause, exactly one suggestion and the kialo of its Regulo), the lead colour's own contrast and the six palettes in short. Read-only: nothing is written; the package comes from `fm agordilo derive`.",
   "type": "object",
   "properties": {
     "agordo": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Agordo"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/Agordo"
     }
   },
   "required": ["agordo"],

@@ -1,6 +1,6 @@
 {
   "$extensions": {
-    "com.ciferecigo.fundamento": {
+    "fundamento": {
       "id": "set_01K5FMAJ09A8T3D4MW25RD97BN",
       "kondicxoj": ["color-scheme=dark", "contrast=high"]
     }

@@ -18,6 +18,7 @@ import type { IdsLock } from "../contracts/entity-ids.js";
 import { CORE_SET_NAME } from "../contracts/grammar.js";
 import type { ValidationIssue } from "../contracts/issues.js";
 import type { ModeloSource } from "../contracts/modelo.js";
+import { normalizeNames } from "../contracts/names.js";
 import { allocateIds, retireId, serializeIdsLock } from "../ids/lock.js";
 import { createIdGenerator, systemUlidSource } from "../ids/ulid-source.js";
 import { ASPEKTO_DIMENSIO, referenceAspektoOf } from "../load/build.js";
@@ -235,16 +236,14 @@ export interface EroTokenojPlan {
 /** The ID a core node carries in its Fundamento extension, or an empty string. */
 function idOf(node: Json): string {
   const extension = isObject(node.$extensions) ? node.$extensions : {};
-  const own = isObject(extension["com.ciferecigo.fundamento"])
-    ? extension["com.ciferecigo.fundamento"]
-    : {};
+  const own = isObject(extension["fundamento"]) ? extension["fundamento"] : {};
   return typeof own.id === "string" ? own.id : "";
 }
 
 /** The Fundamento extension of a core Ero-Token: its ID and, for a colour, the role ero. */
 function extensionOf(id: string, token: EroTokeno): Json {
   return {
-    "com.ciferecigo.fundamento": {
+    fundamento: {
       id,
       ...(token.type === "color" ? { role: ERO_TOKEN_ROLE } : {}),
     },
@@ -255,15 +254,13 @@ function extensionOf(id: string, token: EroTokeno): Json {
 function withRole(node: Json, token: EroTokeno): Json {
   if (token.type !== "color") return node;
   const extension = isObject(node.$extensions) ? node.$extensions : {};
-  const own = isObject(extension["com.ciferecigo.fundamento"])
-    ? extension["com.ciferecigo.fundamento"]
-    : {};
+  const own = isObject(extension["fundamento"]) ? extension["fundamento"] : {};
   if (own.role !== undefined) return node;
   return {
     ...node,
     $extensions: {
       ...extension,
-      "com.ciferecigo.fundamento": { ...own, role: ERO_TOKEN_ROLE },
+      fundamento: { ...own, role: ERO_TOKEN_ROLE },
     },
   };
 }
@@ -294,7 +291,7 @@ export function planEroTokenoj(
     if (core === undefined) throw new Error("The Vortaro has no core set.");
     const corePath = join(root, core.file);
     const coreText = readFileSync(corePath, "utf8");
-    const existing = existingNodes(JSON.parse(coreText) as Json);
+    const existing = existingNodes(normalizeNames(JSON.parse(coreText) as Json, coreText));
     const missing = tokens.filter((token) => !existing.has(token.name));
     const lockPath = join(source.dataDir, "ids.lock.json");
     const ids = new Map<string, string>();
@@ -344,7 +341,7 @@ export function planEroTokenoj(
     if (set === undefined) continue;
     const path = join(root, set.file);
     const text = readFileSync(path, "utf8");
-    const existing = existingNodes(JSON.parse(text) as Json);
+    const existing = existingNodes(normalizeNames(JSON.parse(text) as Json, text));
     const groups = groupsOf(
       tokens,
       (token) => existing.get(token.name) ?? { $type: token.type, $value: `{${token.alias}}` },

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/describe_term.output.json",
+  "$id": "urn:fundamento:schema:mcp:describe_term.output",
   "title": "describe_term output",
   "description": "One concept of the Ontologio (Spec 002 FR-12) with its instances in the served Modelo where it has them.",
   "type": "object",

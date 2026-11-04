@@ -113,7 +113,8 @@ describe("rule catalog (§2.6)", () => {
     // Spec 036 (Befund 2.2, V-2): sekundo-not-action, the Zweitfarbe never on an action.
     // Spec 036 Teil 5 ②b-2: prop-value-deprecated.
     // Spec 036 Teil 5 ③: the four rules of check:dokumentaro.
-    expect(RULE_IDS).toHaveLength(201);
+    // Spec 036 Teil 6 (6.4): privat-vorto and privat-repo of check:privat.
+    expect(RULE_IDS).toHaveLength(203);
     for (const rule of [
       "agordo-jugxo-fixed",
       "raporto-out-of-sync",
@@ -214,7 +215,7 @@ describe("shared constants", () => {
       "decorative",
       "ero",
     ]);
-    expect(FUNDAMENTO_EXTENSION_KEY).toBe("com.ciferecigo.fundamento");
+    expect(FUNDAMENTO_EXTENSION_KEY).toBe("fundamento");
     expect(CHECK_NAMES).toEqual([
       "vortaro-lint",
       "parity",
@@ -225,6 +226,7 @@ describe("shared constants", () => {
       "ikonaro",
       "fontoj",
       "dokumentaro",
+      "privat",
     ]);
   });
 

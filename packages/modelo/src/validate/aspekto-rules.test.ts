@@ -35,7 +35,7 @@ function addConjunction(
 ) {
   edit(CONJ, () => ({
     $extensions: {
-      "com.ciferecigo.fundamento": {
+      fundamento: {
         id: CONJ_ID,
         kondicxoj: ["aspekto=ekzemplo", "color-scheme=dark"],
       },

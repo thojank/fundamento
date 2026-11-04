@@ -182,12 +182,12 @@ Jeder Eintrag trägt den Befund im Wortlaut der Messung und die Bedingung, unter
 
 ## Nach dem Merge (außerhalb des Repos)
 
-- [ ] **T015 ciferecigo: erst die Differenz berichten, dann neu ableiten** (FR-04, D-05; Maintainer-Auflage 2026-09-20)
-  - **Zuerst messen, nicht ändern:** den heutigen Stand von ciferecigo gegen den geänderten Kern prüfen und die Differenz berichten, bevor ein Wert angefasst wird. Der Kern hat drei generische Sätze geändert (Flächen im Dunkeln, Rand im Dunkeln, Status-Füllungen im hohen Kontrast) und vier neutrale Stufen ergänzt; ciferecigo erbt davon alles, was es nicht selbst setzt.
-  - Bericht (an den Maintainer, vor der Ableitung): welche **KontrastParoj** sich ändern und um wie viel (vorher/nachher, je Kombination), welche **Reguloj** neu anschlagen und welche still werden, welche der vier neuen Stufen fehlen (`aspekto-incomplete`), und ob ciferecigo eigene **Aspiroj** erklären will.
-  - Rot: `pnpm fm modelo validate --aspekto ../fundamento-aspekto-ciferecigo` gegen den gemergten Kern schlägt mit den neuen **Reguloj** fehl (erwartet: fehlende Stufen, Flächenabstand, Reserve).
-  - Grün: Ableitung im privaten Paket nachziehen, wie Spec 003 T028; eigene Aspiroj darf ciferecigo erklären, muss aber nicht.
-  - Fertig wenn: `validate` 0 liefert und `check:alirebleco` für die Komposition besteht. ciferecigo kommt in keine Registry, kein Figma, kein Make.
+- [ ] **T015 privata: erst die Differenz berichten, dann neu ableiten** (FR-04, D-05; Maintainer-Auflage 2026-09-20)
+  - **Zuerst messen, nicht ändern:** den heutigen Stand von privata gegen den geänderten Kern prüfen und die Differenz berichten, bevor ein Wert angefasst wird. Der Kern hat drei generische Sätze geändert (Flächen im Dunkeln, Rand im Dunkeln, Status-Füllungen im hohen Kontrast) und vier neutrale Stufen ergänzt; privata erbt davon alles, was es nicht selbst setzt.
+  - Bericht (an den Maintainer, vor der Ableitung): welche **KontrastParoj** sich ändern und um wie viel (vorher/nachher, je Kombination), welche **Reguloj** neu anschlagen und welche still werden, welche der vier neuen Stufen fehlen (`aspekto-incomplete`), und ob privata eigene **Aspiroj** erklären will.
+  - Rot: `pnpm fm modelo validate --aspekto ../fundamento-tiparoj-privataj` gegen den gemergten Kern schlägt mit den neuen **Reguloj** fehl (erwartet: fehlende Stufen, Flächenabstand, Reserve).
+  - Grün: Ableitung im privaten Paket nachziehen, wie Spec 003 T028; eigene Aspiroj darf privata erklären, muss aber nicht.
+  - Fertig wenn: `validate` 0 liefert und `check:alirebleco` für die Komposition besteht. privata kommt in keine Registry, kein Figma, kein Make.
 
 ## Nachverfolgbarkeit
 

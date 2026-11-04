@@ -1,27 +1,27 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/get_token.output.json",
+  "$id": "urn:fundamento:schema:mcp:get_token.output",
   "title": "get_token output",
   "description": "One token with its core definition and every override.",
   "type": "object",
   "properties": {
     "id": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenId"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/TokenId"
     },
     "name": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenName"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/TokenName"
     },
     "type": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/DtcgType"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/DtcgType"
     },
     "role": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenRole"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/TokenRole"
     },
     "description": {
       "type": "string"
     },
     "textTransform": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TextTransform"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/TextTransform"
     },
     "definition": {
       "type": "object",
@@ -40,7 +40,7 @@
         "type": "object",
         "properties": {
           "set": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SetName"
+            "$ref": "urn:fundamento:schema:modelo#/$defs/SetName"
           },
           "package": {
             "type": "string",
@@ -49,7 +49,7 @@
           "kondicxoj": {
             "type": "array",
             "items": {
-              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/KondicxoExpression"
+              "$ref": "urn:fundamento:schema:modelo#/$defs/KondicxoExpression"
             }
           },
           "value": {}
@@ -65,11 +65,11 @@
         "type": "object",
         "properties": {
           "aspekto": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+            "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
           },
           "aro": { "type": "string", "minLength": 1 },
           "fonto": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+            "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
           },
           "dosiero": { "type": "string", "minLength": 1 },
           "sxlosilo": { "type": "string", "minLength": 1 },
@@ -78,7 +78,7 @@
           "maniero": { "type": "string", "minLength": 1 },
           "kampo": { "type": "string", "minLength": 1 },
           "jugxo": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/JugxoId"
+            "$ref": "urn:fundamento:schema:modelo#/$defs/JugxoId"
           },
           "kialo": { "type": "string", "minLength": 1 },
           "noto": { "type": "string", "minLength": 1 }

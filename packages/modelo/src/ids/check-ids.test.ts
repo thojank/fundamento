@@ -27,14 +27,14 @@ function lockOf(entries: Record<string, [EntityType, "active" | "retired"]>): Id
 
 const CORE = "vortaro/sets/core.json";
 const idPointer = (tokenPath: string) =>
-  `/${tokenPath.split(".").join("/")}/$extensions/com.ciferecigo.fundamento/id`;
+  `/${tokenPath.split(".").join("/")}/$extensions/fundamento/id`;
 
 describe("checkIds", () => {
   it("reports nothing for consistent occurrences and lock", () => {
     const issues = checkIds(
       [
         occ(TOK_A, "token", CORE, idPointer("color.a")),
-        occ(SET_CORE, "tokenSet", CORE, "/$extensions/com.ciferecigo.fundamento/id"),
+        occ(SET_CORE, "tokenSet", CORE, "/$extensions/fundamento/id"),
       ],
       lockOf({ [TOK_A]: ["token", "active"], [SET_CORE]: ["tokenSet", "active"] }),
     );

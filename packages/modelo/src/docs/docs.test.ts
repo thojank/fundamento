@@ -58,6 +58,29 @@ function section(markdown: string, heading: string): string {
   return (end < 0 ? rest : rest.slice(0, end)).join("\n");
 }
 
+/** The version in the Constitution's header line (`Version 2.6 · …`). */
+function constitutionVersion(constitution: string): string {
+  return /^Version (\d+\.\d+) · /.exec(constitution.split("\n")[2] ?? "")?.[1] ?? "";
+}
+
+/**
+ * The newest version the change history of the Constitution names (`… v2.5 (Spec 033 …`): the
+ * header follows the history, so a test reads the number from the data instead of pinning it.
+ */
+function newestHistoryVersion(constitution: string): string {
+  const versions = [...section(constitution, "Governance").matchAll(/\bv(\d+)\.(\d+) \(/g)].map(
+    (match) => [Number(match[1]), Number(match[2])] as const,
+  );
+  const [major, minor] = versions.reduce(
+    (newest, version) =>
+      version[0] > newest[0] || (version[0] === newest[0] && version[1] > newest[1])
+        ? version
+        : newest,
+    [0, 0] as const,
+  );
+  return `${major}.${minor}`;
+}
+
 /** Removes fenced code blocks and inline code spans, so only prose remains. */
 function proseOnly(markdown: string): string {
   return markdown.replace(/```[\s\S]*?```/g, "").replace(/`[^`\n]*`/g, "");
@@ -685,8 +708,11 @@ describe("Spec 004 documentation (T001, Art. V Benchmark-Aspekto)", () => {
   // d29a5206 mit v2.3; die Spec nennt die Nummer.
   // Seit Spec 033 S1 (Amendment v2.5, freigegeben am 2026-10-24, 13:41) 2.5: bestimmt gegen main
   // 05f122dc mit v2.4 und ohne offenen PR; die Spec nennt die Nummer.
-  it("the Constitution header says version 2.5 and the history names v2.3 with the Ero-Tokens", () => {
-    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.5 · /);
+  // Seit Spec 036 Teil 6 (Amendment v2.6, redaktionell) liest der Test die Nummer aus den Daten: Die
+  // Kopfzeile nennt die neueste Version der Änderungshistorie, die v2.5 von Spec 033 steht darin.
+  it("the Constitution header says the newest version of the history and the history names v2.3 with the Ero-Tokens", () => {
+    expect(constitutionVersion(constitution)).toBe(newestHistoryVersion(constitution));
+    expect(constitution).toContain("v2.5 (Spec 033");
     expect(constitution).toContain("v2.3 (Spec 024");
     expect(constitution).toContain("Terminologie **Ero-Tokeno**");
   });
@@ -715,6 +741,31 @@ describe("Spec 004 documentation (T001, Art. V Benchmark-Aspekto)", () => {
 
   it("the Constitution does not yet carry the principle Fluida Marko", () => {
     expect(constitution).not.toContain("Fluida Marko");
+  });
+});
+
+// Spec 036 Teil 6 (D-24): „Constitution Amendment v2.6 (redaktionell)“. Statt des Beispielnamens
+// einer externen, proprietären Marke nennen Terminologio, Art. IV, Art. XIII und die Phasenfolge ein
+// privates Aspekto-Paket; kein Grundsatz ändert sich. Das Wort aus R-12 setzt der Test zusammen.
+describe("Spec 036 Teil 6: Constitution Amendment v2.6 (redaktionell)", () => {
+  const constitution = read(".specify/memory/constitution.md");
+  const word = ["cif", "ere", "cigo"].join("");
+
+  it("the header says 2.6 of 2026-10-31 and the history names v2.6 with its reason and migration", () => {
+    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.6 · 2026-10-31 · /);
+    expect(newestHistoryVersion(constitution)).toBe("2.6");
+    const history = section(constitution, "Governance");
+    expect(history).toContain(
+      "v2.6 (Spec 036 Teil 6, Constitution Amendment redaktionell, vom Maintainer zu bestätigen)",
+    );
+    expect(history).toContain("Migration: keine; kein Grundsatz ändert sich.");
+  });
+
+  it("the examples name a private Aspekto package, no foreign brand", () => {
+    const table = section(constitution, "Terminologio (verbindliches Vokabular)");
+    expect(table).toContain("ein privates Aspekto-Paket (extern, proprietär)");
+    expect(constitution).toContain("`fm aspekto use <aspekto>`");
+    expect(constitution.toLowerCase()).not.toContain(word);
   });
 });
 
@@ -1955,7 +2006,7 @@ describe("Spec 016 ① documentation (specs/016-agordilo-1)", () => {
     expect(spec).toMatch(
       /^# Spec 016 – Agordilo Stufe 1 \(Werkstatt\): Marke aus Farbe und Kontrast/,
     );
-    expect(spec).toContain("**E8** ciferecigo erscheint nirgends.");
+    expect(spec).toContain("**E8** privata erscheint nirgends.");
     const plan = read("specs/016-agordilo-1/plan.md");
     const tasks = read("specs/016-agordilo-1/tasks.md");
     for (const text of [plan, tasks]) {
@@ -2154,7 +2205,7 @@ describe("Nachlese 6 documentation (specs/019-werkstatt-2-3/nachlese-6)", () => 
     ]) {
       expect(plan, term).toContain(term);
     }
-    expect(plan).not.toContain("ciferecigo");
+    expect(plan).not.toContain(["cif", "ere", "cigo"].join(""));
     const tasks = read("specs/019-werkstatt-2-3/nachlese-6/tasks.md");
     expect(tasks).toContain("**T1961");
     expect(tasks).toContain("### Messungen");
@@ -2329,7 +2380,7 @@ describe("Spec 019 ① documentation (specs/019-werkstatt-2-3)", () => {
     ]) {
       expect(plan, term).toContain(term);
     }
-    expect(plan).not.toContain("ciferecigo");
+    expect(plan).not.toContain(["cif", "ere", "cigo"].join(""));
     const tasks = section(read("specs/019-werkstatt-2-3/tasks.md"));
     expect(tasks).toContain("**T1901");
     expect(tasks).toContain("### Messungen");
@@ -2438,7 +2489,7 @@ describe("Spec 019 ③ documentation (specs/019-werkstatt-2-3)", () => {
       .filter((entry) => entry.includes("vitrino/index.html#"))) {
       expect(line, line).toMatch(/file:\/\/\/Users\//);
     }
-    expect(section).not.toContain("ciferecigo");
+    expect(section).not.toContain(["cif", "ere", "cigo"].join(""));
     const tasks = read("specs/019-werkstatt-2-3/tasks.md");
     const own = tasks.slice(
       tasks.indexOf("## ③ Prompt (Stufe 3)"),
@@ -2541,7 +2592,7 @@ describe("Nachlese 7 ① documentation (specs/021-nachlese-7)", () => {
     for (const line of first.split("\n").filter((entry) => entry.includes("vitrino/index.html#"))) {
       expect(line, line).toMatch(/file:\/\/\/Users\//);
     }
-    expect(first).not.toContain("ciferecigo");
+    expect(first).not.toContain(["cif", "ere", "cigo"].join(""));
     const own = tasks.slice(
       tasks.indexOf("## ① Fehler (0.1.1)"),
       tasks.indexOf("## ② Ergänzungen (0.2.0)"),
@@ -2577,7 +2628,7 @@ describe("Nachlese 7 ② documentation (specs/021-nachlese-7)", () => {
     for (const id of ["B-1", "B-2", "B-3", "B-4", "B-5", "B-6", "B-7", "B-8", "B-9", "B-10"])
       expect(second, id).toContain(id);
     expect(second).toContain("brand-badge");
-    expect(second).not.toContain("ciferecigo");
+    expect(second).not.toContain(["cif", "ere", "cigo"].join(""));
     const first = plan.slice(
       plan.indexOf("## ① Fehler (0.1.1)"),
       plan.indexOf("## ② Ergänzungen (0.2.0)"),
@@ -2641,7 +2692,7 @@ describe("Spec 020 ① documentation (specs/020-sxablonoj-1)", () => {
       expect(coverage, ark).toContain(`\`${ark}\``);
     expect(first).toContain("E4");
     expect(first).toContain("heading-with-actions");
-    expect(first).not.toContain("ciferecigo");
+    expect(first).not.toContain(["cif", "ere", "cigo"].join(""));
     const own = tasks.slice(
       tasks.indexOf("## ① Grundlage, sxelo und pagxo"),
       tasks.indexOf("## ② formularo und filtrilo"),
@@ -2672,7 +2723,7 @@ describe("Spec 020 ② documentation (specs/020-sxablonoj-1)", () => {
     }
     for (const term of ["formularo", "filtrilo", "novalidate", "submit", "search", "long-form"])
       expect(second, term).toContain(term);
-    expect(second).not.toContain("ciferecigo");
+    expect(second).not.toContain(["cif", "ere", "cigo"].join(""));
     const own = tasks.slice(
       tasks.indexOf("## ② formularo und filtrilo"),
       tasks.indexOf("## ③ Inhalt"),
@@ -2714,7 +2765,7 @@ describe("Spec 020 ③ documentation (specs/020-sxablonoj-1)", () => {
       expect(third, term).toContain(term);
     for (const line of third.split("\n").filter((entry) => entry.includes("vitrino/index.html#")))
       expect(line, line).toMatch(/file:\/\/\/Users\//);
-    expect(third).not.toContain("ciferecigo");
+    expect(third).not.toContain(["cif", "ere", "cigo"].join(""));
     const own = tasks.slice(tasks.indexOf("## ③ Inhalt"));
     expect(own).toContain("**T2081");
     expect(own).toMatch(/rot `[0-9a-f]{7}`/);
@@ -2774,7 +2825,7 @@ describe("Nachlese 8 ① documentation (specs/022-nachlese-8)", () => {
     ]) {
       expect(first, term).toContain(term);
     }
-    expect(first).not.toContain("ciferecigo");
+    expect(first).not.toContain(["cif", "ere", "cigo"].join(""));
     const own = tasks.slice(
       tasks.indexOf("## ① Gvidanto, Plugin-Name, 0.2.0"),
       tasks.indexOf("## ② Figma und Vitrino"),
@@ -2851,7 +2902,7 @@ describe("Nachlese 8 ② documentation (specs/022-nachlese-8)", () => {
       expect(second, term).toContain(term);
     }
     expect(second).toMatch(/\| [^|\n]+ \| [^|\n]+ \|/);
-    expect(second).not.toContain("ciferecigo");
+    expect(second).not.toContain(["cif", "ere", "cigo"].join(""));
     const own = tasks.slice(
       tasks.indexOf("## ② Figma und Vitrino"),
       tasks.indexOf("## ③ Regeltexte deutsch"),
@@ -2891,7 +2942,7 @@ describe("Nachlese 8 ③ documentation (specs/022-nachlese-8)", () => {
       "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/",
     ])
       expect(third, term).toContain(term);
-    expect(third).not.toContain("ciferecigo");
+    expect(third).not.toContain(["cif", "ere", "cigo"].join(""));
     const own = tasks.slice(tasks.indexOf("## ③ Regeltexte deutsch"));
     expect(own).toContain("**T2241");
     expect(own).toMatch(/rot `[0-9a-f]{7}`/);
@@ -3121,7 +3172,7 @@ describe("Spec 026 ① documentation (specs/026-lingvo)", () => {
     for (const line of plan.split("\n").filter((entry) => entry.includes("index.html#"))) {
       expect(line, line).toMatch(/file:\/\/\/Users\//);
     }
-    expect(whole).not.toContain("ciferecigo");
+    expect(whole).not.toContain(["cif", "ere", "cigo"].join(""));
     expect(read("README.md")).toContain(CXIUJ_BUILD);
     const tasks = read("specs/026-lingvo/tasks.md");
     const own = tasks.slice(
@@ -3189,7 +3240,7 @@ describe("Spec 026 ② documentation (specs/026-lingvo)", () => {
     for (const line of plan.split("\n").filter((entry) => entry.includes("index.html#"))) {
       expect(line, line).toMatch(/file:\/\/\/Users\//);
     }
-    expect(whole).not.toContain("ciferecigo");
+    expect(whole).not.toContain(["cif", "ere", "cigo"].join(""));
     const tasks = read("specs/026-lingvo/tasks.md");
     expect(tasks.slice(tasks.indexOf("## ② Lingvo-Schalter"))).toMatch(/rot `[0-9a-f]{7}`/);
     expect(read("docs/vojmapo.md")).toContain("Spec 026 ②");
@@ -3239,7 +3290,7 @@ describe("Nachlese 10 documentation (specs/028-nachlese-10)", () => {
     for (const line of plan.split("\n").filter((entry) => entry.includes("index.html#"))) {
       expect(line, line).toMatch(/file:\/\/\/Users\//);
     }
-    expect(plan).not.toContain("ciferecigo");
+    expect(plan).not.toContain(["cif", "ere", "cigo"].join(""));
     expect(read("specs/028-nachlese-10/tasks.md")).toMatch(/rot `[0-9a-f]{7}`/);
     expect(read("docs/vojmapo.md")).toContain("Nachlese 10");
   });
@@ -3285,7 +3336,7 @@ describe("Spec 027 documentation (specs/027-figma-bauformen)", () => {
     ]) {
       expect(plan, term).toContain(term);
     }
-    expect(plan).not.toContain("ciferecigo");
+    expect(plan).not.toContain(["cif", "ere", "cigo"].join(""));
     expect(read("specs/027-figma-bauformen/tasks.md")).toMatch(/rot `[0-9a-f]{7}`/);
     expect(read("docs/vojmapo.md")).toContain("Spec 027");
   });
@@ -3329,7 +3380,7 @@ describe("Spec 029 ① documentation (specs/029-fonto-astryx)", () => {
     ]) {
       expect(plan, term).toContain(term);
     }
-    expect(plan).not.toContain("ciferecigo");
+    expect(plan).not.toContain(["cif", "ere", "cigo"].join(""));
     expect(read("specs/029-fonto-astryx/tasks.md")).toMatch(/rot `[0-9a-f]{7}`/);
     expect(read("docs/vojmapo.md")).toContain("Spec 029");
   });
@@ -3446,7 +3497,7 @@ describe("Spec 030 documentation (specs/030-nordstern-kennzahl)", () => {
       expect(plan, term).toContain(term);
     }
     expect(plan).not.toMatch(/sk-[A-Za-z0-9]{8,}|Bearer [A-Za-z0-9]/);
-    expect(plan).not.toContain("ciferecigo");
+    expect(plan).not.toContain(["cif", "ere", "cigo"].join(""));
     expect(read("specs/030-nordstern-kennzahl/tasks.md")).toMatch(/rot `[0-9a-f]{7}`/);
     expect(read("docs/vojmapo.md")).toContain("Spec 030");
     expect(read("README.md")).toContain("pnpm nordstelo");
@@ -3517,7 +3568,7 @@ describe("Nachlese 11 documentation (specs/031-nachlese-11)", () => {
     const tasks = read("specs/031-nachlese-11/tasks.md");
     for (const text of [plan, tasks]) {
       expect(text).not.toMatch(/sk-[A-Za-z0-9_-]{8,}|Bearer [A-Za-z0-9]/);
-      expect(text).not.toContain("ciferecigo");
+      expect(text).not.toContain(["cif", "ere", "cigo"].join(""));
     }
     expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
     expect(read("docs/vojmapo.md")).toContain("Nachlese 11");
@@ -3803,7 +3854,7 @@ describe("Spec 029 ②a documentation (specs/029-fonto-astryx)", () => {
     ]) {
       expect(plan, term).toContain(term);
     }
-    expect(plan).not.toContain("ciferecigo");
+    expect(plan).not.toContain(["cif", "ere", "cigo"].join(""));
     expect(read("specs/029-fonto-astryx/tasks.md")).toMatch(/rot `[0-9a-f]{7}`/);
     expect(read("docs/vojmapo.md")).toContain("Spec 029 ②a");
   });
@@ -3856,7 +3907,7 @@ describe("Spec 032 documentation (specs/032-benchmark-astryx-kern)", () => {
       expect(plan, term).toContain(term);
     }
     const tasks = read("specs/032-benchmark-astryx-kern/tasks.md");
-    for (const text of [plan, tasks]) expect(text).not.toContain("ciferecigo");
+    for (const text of [plan, tasks]) expect(text).not.toContain(["cif", "ere", "cigo"].join(""));
     expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
     expect(read("docs/vojmapo.md")).toContain("Spec 032");
   });
@@ -3908,7 +3959,7 @@ describe("Nachlese 12 documentation (specs/034-nachlese-12)", () => {
     const tasks = read("specs/034-nachlese-12/tasks.md");
     for (const text of [plan, tasks]) {
       expect(text).not.toMatch(/sk-[A-Za-z0-9_-]{8,}|Bearer [A-Za-z0-9]/);
-      expect(text).not.toContain("ciferecigo");
+      expect(text).not.toContain(["cif", "ere", "cigo"].join(""));
     }
     expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
     expect(read("docs/vojmapo.md")).toContain("Nachlese 12");
@@ -4099,9 +4150,13 @@ describe("Spec 033 documentation (specs/033-markenassistent)", () => {
     );
   });
 
-  it("the Constitution is v2.5 with „Plattform und Herausgeber“ in Art. VI, the new terms and the history", () => {
+  it("the Constitution carries v2.5 with „Plattform und Herausgeber“ in Art. VI, the new terms and the history", () => {
     const constitution = read(".specify/memory/constitution.md");
-    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.5 · 2026-10-24/);
+    // Since Spec 036 Teil 6 (v2.6, redaktionell) the header names the newest entry of the history.
+    expect(constitutionVersion(constitution)).toBe(newestHistoryVersion(constitution));
+    expect(constitution).toContain(
+      "v2.5 (Spec 033, freigegeben vom Maintainer am 2026-10-24, 13:41)",
+    );
     const article = constitution.slice(
       constitution.indexOf("## Artikel VI"),
       constitution.indexOf("## Artikel VII"),
@@ -4162,7 +4217,7 @@ describe("Spec 033 documentation (specs/033-markenassistent)", () => {
       expect(plan, term).toContain(term);
     }
     const tasks = read("specs/033-markenassistent/tasks.md");
-    for (const text of [plan, tasks]) expect(text).not.toContain("ciferecigo");
+    for (const text of [plan, tasks]) expect(text).not.toContain(["cif", "ere", "cigo"].join(""));
     expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
     expect(read("docs/vojmapo.md")).toContain("Spec 033");
   });

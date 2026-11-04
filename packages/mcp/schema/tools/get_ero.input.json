@@ -1,15 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/get_ero.input.json",
+  "$id": "urn:fundamento:schema:mcp:get_ero.input",
   "title": "get_ero input",
   "description": "One Ero with its Skemo, the Reguloj that judge it, the recorded examples, its projections in every Celo and, since Spec 007, its Uzo: purpose, what to use instead, boundaries (with action ask-human, use-instead or not-supported), composition, slot rules, layout and text rules, each with its kialo. Name the Ero by name or by ID. With brief: true only what a choice needs (purpose, axes with values and default, required props and slots, instead, boundary), generated and under a measured size ceiling.",
   "type": "object",
   "properties": {
     "name": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
     },
     "id": {
-      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/EroId"
+      "$ref": "urn:fundamento:schema:modelo#/$defs/EroId"
     },
     "brief": {
       "description": "Only the brief answer (Spec 007 A8): ero, purpose, axes, required, instead, boundary. The boundaries carry case, action and the Ero to use, no kialo (Nachlese 3 G4): ask without brief for the kialo. Default false.",

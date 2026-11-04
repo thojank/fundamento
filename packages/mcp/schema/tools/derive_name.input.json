@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/derive_name.input.json",
+  "$id": "urn:fundamento:schema:mcp:derive_name.input",
   "title": "derive_name input",
   "description": "The name of a token in each Celo (CSS, Figma, TypeScript, Tailwind, DTCG).",
   "type": "object",

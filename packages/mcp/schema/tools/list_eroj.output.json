@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ciferecigo.com/fundamento/schema/mcp/list_eroj.output.json",
+  "$id": "urn:fundamento:schema:mcp:list_eroj.output",
   "title": "list_eroj output",
   "description": "The Eroj of the served Modelo, in Modelo order (Spec 003 FR-13).",
   "type": "object",
@@ -11,10 +11,10 @@
         "type": "object",
         "properties": {
           "id": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/EroId"
+            "$ref": "urn:fundamento:schema:modelo#/$defs/EroId"
           },
           "name": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+            "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
           },
           "label": {
             "description": "The display name in the language asked for (Spec 026 ②), only with lingvo; the name stays the identifier.",
@@ -28,13 +28,13 @@
           "variants": {
             "type": "array",
             "items": {
-              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+              "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
             }
           },
           "props": {
             "type": "array",
             "items": {
-              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+              "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
             }
           }
         },

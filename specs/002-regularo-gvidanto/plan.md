@@ -4,7 +4,7 @@
 
 This plan is the output of `/speckit.plan` for Spec 002. It fixes the technical design of Phase 2, makes the three decisions the spec delegates to the plan (FR-03 metric and threshold, FR-05 state text colours, FR-19 SDK), reviews the design against every Article of Constitution v1.4 and lists the deviations under Complexity Tracking. `/speckit.tasks` runs only after the maintainer has reviewed these artifacts and `/speckit.analyze` has passed (Governance).
 
-Per Spec 001 AK-08 this file contains **no** ciferecigo brand values.
+Per Spec 001 AK-08 this file contains **no** privata brand values.
 
 ## Summary
 
@@ -25,7 +25,7 @@ Phase 2 adds no package. It extends `@fundamento/modelo`, `@fundamento/vortaro`,
 | Storage | Git; DTCG 2025.10 plus Tokens-Studio files for the Vortaro (unchanged); `ontologio.json` as plain JSON with its own schema |
 | Testing | Vitest 5 + fast-check; fixture-driven; the red run is observed before implementation (Jugxo `jug_01M2VRT7KQ77W91MVXB4GXSRZ4`) |
 | Performance goals | `explain` and `check_contrast` < 100 ms per call (AK-09, factor 3 under `CI=true`), measured in `pnpm perf`; MCP start < 2 s unchanged |
-| Constraints | No threshold is lowered; no ciferecigo values in the core repo; byte-identical export; tools read-only, deterministic, `additionalProperties: false`, canonically sorted |
+| Constraints | No threshold is lowered; no privata values in the core repo; byte-identical export; tools read-only, deterministic, `additionalProperties: false`, canonically sorted |
 | Scale | 344 core tokens (+4), 60 KontrastParoj (4 of them with `aux`), 14 core Reguloj (+4), 14 tools, 1 prompt, 4 resources; 72 combinations per Aspekto (144 with the fixture) |
 | Measured baseline | Full resolution of one combination ≈ 1 ms; all 144 fixture combinations ≈ 143 ms; Alirebleco over 144 combinations ≈ 300 ms (research §8.4) |
 
@@ -36,7 +36,7 @@ Phase 2 adds no package. It extends `@fundamento/modelo`, `@fundamento/vortaro`,
 | Constitution v1.4 ratified on `main` (`b811536`); this spec is the amendment | pass |
 | ≤ 3 new packages (Art. XI) | pass (0) |
 | No Ero, Skemo, Sxablono or generator in scope (Art. IX) | pass |
-| Clean room: no ciferecigo values, no benchmark content (Art. V) | pass; `check:clean-room` unchanged and green |
+| Clean room: no privata values, no benchmark content (Art. V) | pass; `check:clean-room` unchanged and green |
 | No threshold lowered to satisfy a Regulo (spec constraint, vizio principle 4) | pass: the repairs re-point roles to other palette steps (D-05, D-06) |
 | Open `[NEEDS CLARIFICATION]` | pass: none. The three delegated decisions are made in D-06, D-07 and D-17. |
 
@@ -85,7 +85,7 @@ Phase 2 adds no package. It extends `@fundamento/modelo`, `@fundamento/vortaro`,
   | `contrast/high` | subtle → `neutral.800`, muted → `neutral.800` | default → `neutral.1000`, subtle → `neutral.950`, muted → `neutral.900` |
   | `color-scheme/dark+contrast/high` | subtle → `neutral.100`, muted → `neutral.100` | default → `neutral.0` (new, required because `contrast/high` now re-points `default` and outranks `color-scheme/dark`), subtle → `neutral.50`, muted → `neutral.100` |
 
-  High contrast means maximum contrast for the main role, in both schemes (R2, R4): in light, `text.default` takes the darkest step and `950`/`900` stay for subtle and muted; in dark it takes the lightest step `neutral.0` with `50`/`100`. Boundary (R4): in dark/default pure white stays excluded, because full white on near-black halates for people with astigmatism; under `contrast=high` the user has asked for maximum contrast explicitly, so the exclusion does not apply there. This kialo is recorded in the test, which also asserts that dark/default `text.default` is not `neutral.0`. Minimum contrast over the four surfaces afterwards (komuna / ekzemplo): light/high 17.88 / 15.41 / 12.42 and 16.31 / 15.42 / 12.44; dark/high 14.59 / 13.57 / 12.42 and 14.50 / 13.59 / 12.44. A test asserts explicitly, for komuna and ekzemplo in light/high and dark/high, that the three text roles resolve to three different values, each ≥ 7:1 on all four surfaces, in falling order. Every text pair stays ≥ 7:1 under `contrast=high` (Spec 001 AK-02), and no threshold changes (research §8.3). External packages that follow the core in high contrast (ciferecigo) inherit the fix; the maintainer repeats their acceptance outside the repo (spec edge case).
+  High contrast means maximum contrast for the main role, in both schemes (R2, R4): in light, `text.default` takes the darkest step and `950`/`900` stay for subtle and muted; in dark it takes the lightest step `neutral.0` with `50`/`100`. Boundary (R4): in dark/default pure white stays excluded, because full white on near-black halates for people with astigmatism; under `contrast=high` the user has asked for maximum contrast explicitly, so the exclusion does not apply there. This kialo is recorded in the test, which also asserts that dark/default `text.default` is not `neutral.0`. Minimum contrast over the four surfaces afterwards (komuna / ekzemplo): light/high 17.88 / 15.41 / 12.42 and 16.31 / 15.42 / 12.44; dark/high 14.59 / 13.57 / 12.42 and 14.50 / 13.59 / 12.44. A test asserts explicitly, for komuna and ekzemplo in light/high and dark/high, that the three text roles resolve to three different values, each ≥ 7:1 on all four surfaces, in falling order. Every text pair stays ≥ 7:1 under `contrast=high` (Spec 001 AK-02), and no threshold changes (research §8.3). External packages that follow the core in high contrast (privata) inherit the fix; the maintainer repeats their acceptance outside the repo (spec edge case).
 
 ### D-06 `state-distinct`: metric and threshold (decision on FR-03)
 
@@ -115,8 +115,8 @@ Composition: a state with alpha < 1 is composited over `color.background.default
 
 **Decision: the core keeps one text colour per action variant (`color.action.<v>.text`). It gets no `text.hover`, `text.pressed` or `text.selected`.**
 
-- The finding from ciferecigo (research 001 §10, Rule 8) is solvable without new tokens: states move **away from the lightness of the text colour** (hover one step, pressed two). Every state then keeps its KontrastParo `action.<v>.text` on `action.<v>.<state>` and differs from `rest`. With this plan, `state-distinct` and these existing KontrastParoj together enforce exactly that. No state can collapse into `rest` and none can lose its text contrast.
-- Nine new tokens (three states × three variants) would have to be restated by every Aspekto (completeness, Art. IV) and would need nine more KontrastParoj. There is no second concrete user who needs them (Art. XI): komuna and ekzemplo pass FR-03 without them (D-06), and ciferecigo passes through Rule 8.
+- The finding from privata (research 001 §10, Rule 8) is solvable without new tokens: states move **away from the lightness of the text colour** (hover one step, pressed two). Every state then keeps its KontrastParo `action.<v>.text` on `action.<v>.<state>` and differs from `rest`. With this plan, `state-distinct` and these existing KontrastParoj together enforce exactly that. No state can collapse into `rest` and none can lose its text contrast.
+- Nine new tokens (three states × three variants) would have to be restated by every Aspekto (completeness, Art. IV) and would need nine more KontrastParoj. There is no second concrete user who needs them (Art. XI): komuna and ekzemplo pass FR-03 without them (D-06), and privata passes through Rule 8.
 - The `state-distinct` suggestion text teaches the rule: "move `<state>` away from the lightness of `color.action.<v>.text`, so it keeps its contrast".
 - Re-evaluate with the first Ero (`butono`, Phase 3). If a real state needs inverted text (for example a filled `selected` on a ghost button), that spec introduces the token with its Ero and its Skemo.
 
@@ -171,7 +171,7 @@ Input `{ name } | { id }`. Output: statement, kialo, `checkability`, `scope`, `a
 
 - **File** `packages/modelo/data/ontologio.json` with schema `packages/modelo/schema/ontologio.schema.json` (data-model §4). One `concept` per term, SKOS field names without prefix: `uri`, `prefLabel` (`eo`, `en`, `de`), `altLabel` (per language, optional), `definition` (`en`, `de`), `broader`, `related`, `notation`, `inScheme`. Named relations that SKOS lacks are in `relations: [{ predicate, target }]`, and every predicate is declared once in the file's `predicates` list. References to other concepts are relative IRIs (`#Vortaro`), so the Phase-5 `@context` only needs `@base`.
 - **Two schemes.** `terminologio` holds exactly the 17 terms of the Constitution's table. `modelo` holds the entity types of the Modelo schema that the table does not name: `Token`, `TokenSet`, `DimensioValoro`, `Regulo`, `KontrastParo`. Each concept that denotes an entity type carries the enum value as `notation` (`ero`, `tokenSet`, …).
-- **Drift test (FR-16, AK-07)** in `packages/modelo/src/data/ontologio.test.ts`, part of `pnpm test` and therefore of CI: it parses the table under `## Terminologio` in `.specify/memory/constitution.md` (first column, bold term) and requires set equality with the `terminologio` scheme; it requires every value of `$defs/EntityType` to be the `notation` of exactly one concept and every `notation` to be an entity type; it validates the file against its schema; URIs are unique and equal `https://fundamento.ciferecigo.com/ontologio#<term>`; every `broader`, `related` and relation target exists; every predicate is declared.
+- **Drift test (FR-16, AK-07)** in `packages/modelo/src/data/ontologio.test.ts`, part of `pnpm test` and therefore of CI: it parses the table under `## Terminologio` in `.specify/memory/constitution.md` (first column, bold term) and requires set equality with the `terminologio` scheme; it requires every value of `$defs/EntityType` to be the `notation` of exactly one concept and every `notation` to be an entity type; it validates the file against its schema; URIs are unique and equal `urn:fundamento:ontologio#<term>`; every `broader`, `related` and relation target exists; every predicate is declared.
 - The Ontologio describes Fundamento, not the served design system, so it is **not** part of `modelo.json`. `@fundamento/modelo` ships it in `data/` (already in `files`). The MCP resource `fundamento://ontologio.json` serves the file's bytes in every mode, including `--export`.
 - **`describe_term`** matches the term, then `prefLabel` and `altLabel` in every language, case-insensitively and after x-convention folding (`ĵ` → `jx`, …). No match gives `term-unknown` plus up to five nearest terms by edit distance over all labels (spec edge case "Marke", "brand"). The output is the concept plus `instances` from the served Modelo for the concepts that have them (contract §4: Aspekto → loaded Aspektoj, Dimensio → Dimensioj, Regulo → count and names, Jugxo → count, KontrastParo → count, Token → count, TokenSet → set names, Ero/Skemo/Sxablono → count 0 in Phase 2).
 
@@ -293,13 +293,13 @@ One entry per Article of Constitution v1.4.
 
 ### Article V – Pura Cxambro
 **Verdict:** conforming
-- No ciferecigo values in any Phase-2 artifact; the fixture's light warning fill is invented. `check:clean-room` stays green.
+- No privata values in any Phase-2 artifact; the fixture's light warning fill is invented. `check:clean-room` stays green.
 - Sources in research are specifications and public articles (WCAG, W3C SKOS/JSON-LD, CSS Color, MCP); no benchmark system's content enters the repo.
 - The benchmarks for "state difference" and "vocabulary as data" are named in research §2 and §4, as Article V requires for newly built areas.
 
 ### Article VI – Regularo kun Kialoj
 **Verdict:** conforming; this spec delivers "Befund wird Regel"
-- The three findings of the ciferecigo acceptance that no check found (surface order, text roles, states) and the finding from the agent test (descriptions) become automatic Reguloj with kialo; the warm-warning finding becomes the `aux` alternative with its own kialo.
+- The three findings of the privata acceptance that no check found (surface order, text roles, states) and the finding from the agent test (descriptions) become automatic Reguloj with kialo; the warm-warning finding becomes the `aux` alternative with its own kialo.
 - Every issue of a Regulo carries its ID and kialo (FR-08), so a reason is cited, not paraphrased.
 - New finding of this plan: the tertiary states of komuna fail `state-distinct` (hue-only `selected` in dark). It is repaired in the same phase and documented in research §8.2.
 - Deviations during implementation are recorded as Jugxoj, as in Phases 0 and 1 (the D-17 fallback names one explicitly).
@@ -362,7 +362,7 @@ One entry per Article of Constitution v1.4.
 | **ΔL instead of ΔE_OK** (D-06) | Colour-vision deficiency and a hue-only state found in komuna. | A state that differs strongly in chroma but little in lightness fails; the suggestion explains why. Revisit with Ero data in Phase 3. |
 | **No state text colours** (D-07) | No second concrete user; states can move away from the text lightness. | Re-evaluate with `butono` (Phase 3). |
 | **`contrast/high` re-points `text.default`** (D-05) | Needed to make three different steps ≥ 7:1 in light. | Forces the explicit `text.default` in `color-scheme/dark+contrast/high`; any future token re-pointed in `contrast/high` must be restated there (existing practice, now one token more). |
-| **New core tokens are breaking for external Aspektoj** (D-09, Art. IV) | Completeness means every Aspekto must set `color.status.<s>.border`. | ciferecigo must add four tokens and be re-derived for the text repair; quickstart for package authors lists the delta. |
+| **New core tokens are breaking for external Aspektoj** (D-09, Art. IV) | Completeness means every Aspekto must set `color.status.<s>.border`. | privata must add four tokens and be re-derived for the text repair; quickstart for package authors lists the delta. |
 | **SDK 2.0.0 without patch release** (D-17) | Published eight weeks ago, declared the stable line; the contract suite guards it. | Pinned exactly; fallback to 1.30.0 with a Jugxo if the suite does not pass unchanged. `zod` remains an unused transitive dependency. |
 | **Ontologio drift test reads the Constitution file** (D-14) | FR-16 compares the Constitution's table with the file. | The test depends on the table format (bold first column). A format change of the table fails the test loudly, which is intended. |
 | **Retroactive red runs** (T005–T008, T011) | The implementation was written before the red run; the red run was taken afterwards by removing the implementation temporarily. Accepted by the maintainer because the purpose holds: the tests are proven to fail. | Phase 3 again runs red before implementing. Mutation checks replace a red run only for acceptance tests (T023, T024). |
@@ -427,4 +427,4 @@ D-06 (FR-03, |ΔL| OKLCH as the data field `sojlo`), D-07 (FR-05, no state text 
 | R3 | `check_contrast` output | **Grouped by identical result** (ratio at two decimals, threshold, passed; for `aux` pairs also branch and aux ratio), each group with the complete, canonically sorted list of its combinations. Two decimals are truncated as in Alirebleco: 4.499 never appears as 4.50. | D-11, contracts §2.1 |
 | R4 | `text.default` in dark/high | **`neutral.0`**, subtle `50`, muted `100`: the maximum-contrast rule holds symmetrically. Pure white stays excluded in dark/default (halation with astigmatism); `contrast=high` is the user's explicit request for maximum contrast. Same explicit test as R2. | D-05, data-model §6 |
 
-Process: the branch is pushed, no PR until the end of Phase 2 (as in Phase 1). Task order as set by the maintainer in [`tasks.md`](tasks.md). After the merge, ciferecigo is re-derived against the new core outside the repository as the last task.
+Process: the branch is pushed, no PR until the end of Phase 2 (as in Phase 1). Task order as set by the maintainer in [`tasks.md`](tasks.md). After the merge, privata is re-derived against the new core outside the repository as the last task.
