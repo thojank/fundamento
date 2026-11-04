@@ -93,13 +93,18 @@ const PROJEKCIOJ_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
   ["Test", "pnpm --filter @fundamento/projekcioj exec vitest run --shard=${{ matrix.shard }}/2"],
 ];
 
-/** The job of the rendered Eroj: the Playwright suite in two shards (fullyParallel inside). */
+// Spec 040 B-6: on main, with three engines, the second of two shards ran into its 15 minutes
+// (run 41886235249: 15:17) and the first ended at 12:56 and 13:02 (41886235249, 41873907893). The
+// suite runs in four Playwright shards (fullyParallel: the cut goes through the tests, 474 each of
+// 1896 on main); three would leave the Firefox shard at ~12.6 to 13.2 minutes. Every shard runs the
+// unit tests of the package before its part of the suite, as with two.
+/** The job of the rendered Eroj: the Playwright suite in four shards (fullyParallel inside). */
 const EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
   ["Playwright browsers", PLAYWRIGHT_BROWSERS],
   ["Build", "pnpm build"],
   [
     "Test",
-    "pnpm --filter @fundamento/eroj exec vitest run --passWithNoTests && pnpm --filter @fundamento/eroj exec playwright test --shard=${{ matrix.shard }}/2",
+    "pnpm --filter @fundamento/eroj exec vitest run --passWithNoTests && pnpm --filter @fundamento/eroj exec playwright test --shard=${{ matrix.shard }}/4",
   ],
 ];
 
@@ -172,6 +177,7 @@ const RENDERED_JOBS = ["eroj", "alirebleco-eroj", "rendered-checks", "werkstatt"
 
 /** The names of the jobs Spec 040 B-1 cut, as the checks of a pull request show them. */
 const JOB_NAMES: Readonly<Record<string, string>> = {
+  eroj: "Rendered Eroj (Playwright, shard ${{ matrix.shard }} of 4)",
   "alirebleco-eroj":
     "Rendered accessibility (Alirebleco of the Eroj, shard ${{ matrix.shard }} of 3)",
   "rendered-checks": "Rendered checks (Make Kit, Quickstart)",
@@ -337,13 +343,16 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     }
   });
 
-  it("shards the Playwright suite of the Eroj and the Vitest suite of the Projekcioj in two, without fail-fast, and gives only the five rendered jobs the engines", () => {
-    for (const name of ["eroj", "projekcioj"]) {
-      expect(loadJob(name).strategy, name).toEqual({
-        "fail-fast": false,
-        matrix: { shard: [1, 2] },
-      });
-    }
+  it("shards the Playwright suite of the Eroj in four and the Vitest suite of the Projekcioj in two, without fail-fast, and gives only the five rendered jobs the engines", () => {
+    expect(loadJob("eroj").strategy).toEqual({
+      "fail-fast": false,
+      matrix: { shard: [1, 2, 3, 4] },
+    });
+    expect(loadJob("eroj")["timeout-minutes"]).toBe(15);
+    expect(loadJob("projekcioj").strategy).toEqual({
+      "fail-fast": false,
+      matrix: { shard: [1, 2] },
+    });
     for (const name of RENDERED_JOBS) {
       const env = loadJob(name).env;
       expect(isRecord(env) && typeof env.PLAYWRIGHT_ENGINES === "string", name).toBe(true);
