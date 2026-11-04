@@ -119,10 +119,11 @@ describe("KontrastParoj of the repo (D-12, data-model §4)", () => {
     // pairs of the roles of the Zweitfarbe (93); the range is a plausibility pin, no threshold.
     // Spec 036 Teil 5 ②b-5 (①-2): the fifteen pairs of the syntax colours are counted on their own
     // (syntax-2b5.test.ts: five kinds on three grounds); the bound holds for every other pair.
+    // Spec 040 B-4: their number is the grid of the kinds and the grounds, derived from the data.
     const others = modelo.kontrastParoj.filter((pair) => !pair.name.startsWith("syntax-"));
     expect(others.length).toBeGreaterThanOrEqual(55);
     expect(others.length).toBeLessThanOrEqual(100);
-    expect(modelo.kontrastParoj.length - others.length).toBe(15);
+    expect(syntaxGridViolations(modelo)).toEqual([]);
   });
 
   it("covers status text on the weak and subtle status surfaces (K5)", () => {
@@ -145,9 +146,10 @@ describe("KontrastParoj of the repo (D-12, data-model §4)", () => {
 });
 
 describe("AK-02: komuna text pairs reach AAA (7:1) under contrast=high", () => {
-  it("in every one of the 36 high-contrast combinations", () => {
+  it("in every high-contrast combination", () => {
+    // Spec 040 B-4: every valoro of every other Dimensio, each once (36 with the Vortaro's komuna).
+    expect(highCombinationViolations(modelo)).toEqual([]);
     const high = allAssignments(modelo).filter((assignment) => assignment.contrast === "high");
-    expect(high).toHaveLength(36);
     const textPairs = modelo.kontrastParoj.filter((pair) => pair.kategorio.startsWith("text-"));
     expect(textPairs.length).toBeGreaterThan(40);
     let minimum = Number.POSITIVE_INFINITY;
@@ -192,20 +194,24 @@ describe("AK-02: komuna text pairs reach AAA (7:1) under contrast=high", () => {
   });
 });
 
-describe("Spec 040 B-4: an added row breaks a pinned sum, not the derived property", () => {
+describe("Spec 040 B-4: an added row keeps the derived counts", () => {
   it("one more syntax kind keeps every pair in the grid", () => {
     const more = withSyntaxKind(modelo, "operator");
     expect(syntaxGridViolations(more)).toEqual([]);
-    const syntax = more.kontrastParoj.filter((pair) => pair.name.startsWith("syntax-"));
-    expect(syntax.length).toBe(15);
+  });
+
+  it("a kind without its pair on one ground is named", () => {
+    const more = withSyntaxKind(modelo, "operator");
+    const gap = more.kontrastParoj.find((pair) => pair.foreground === `${SYNTAX}operator`);
+    const fewer = { ...more, kontrastParoj: more.kontrastParoj.filter((pair) => pair !== gap) };
+    expect(syntaxGridViolations(fewer)).toEqual([
+      `${SYNTAX}operator on ${gap?.background}: 0 pairs, not 1`,
+    ]);
   });
 
   it("one more valoro of a Dimensio keeps every high-contrast combination", () => {
     const more = withValoro(modelo, "density", "spacious");
     expect(highCombinationViolations(more)).toEqual([]);
-    expect(
-      allAssignments(more).filter((assignment) => assignment.contrast === "high"),
-    ).toHaveLength(36);
   });
 });
 
