@@ -2,7 +2,7 @@
 // (zweitfarbe-036.spec.ts) against flaky waits – they wait for an event, not for the clock, and
 // change nothing in the product.
 
-import { expect, type Page, type Response } from "@playwright/test";
+import { expect, type Frame, type Page, type Response } from "@playwright/test";
 
 /**
  * Sends once more when the first attempt met a connection the server had already closed
@@ -26,6 +26,14 @@ const post =
   (response: Response): boolean =>
     response.request().method() === "POST" &&
     new URL(response.url()).pathname === `/api/marko/${id}/${aktion}`;
+
+/** As the page decides it (metiejo's html.ts): the step Farbe checks when it has a place for it. */
+const prueft = (page: Page): Promise<boolean> =>
+  page.evaluate(
+    () =>
+      document.documentElement.getAttribute("data-mt-sxtupo") === "farbe" &&
+      document.getElementById("mt-pruefung") !== null,
+  );
 
 /**
  * The preview of the page (iframe[data-mt-vorschau]) has loaded the document of `rev` – by default
@@ -82,13 +90,7 @@ export async function gespeichert(
     expect(antwort.status()).toBe(200);
     const { rev } = (await antwort.json()) as { rev: number };
     await vorschauGeladen(page, rev);
-    // As the page decides it (metiejo's html.ts): the step Farbe checks when it has a place for it.
-    const prueft = await page.evaluate(
-      () =>
-        document.documentElement.getAttribute("data-mt-sxtupo") === "farbe" &&
-        document.getElementById("mt-pruefung") !== null,
-    );
-    if (prueft) await pruefung;
+    if (await prueft(page)) await pruefung;
     return rev;
   } finally {
     page.off("response", hoeren);
@@ -97,14 +99,36 @@ export async function gespeichert(
 
 /**
  * A page the test loads (`laden`: page.goto or page.reload) has settled (Spec 040 B-5): it loaded,
- * its preview loaded the page's rev, and the check the step Farbe runs on load answered. Run 41920898257
- * (WebKit, Linux) hung at „Keine Zweitfarbe“ of the Schnellstart pressed right after the test's
- * reload, while that page still loaded its preview and checked the draft.
+ * its preview loaded the page's rev, and the check the step Farbe runs on load answered. Run
+ * 41920898257 (WebKit, Linux) hung at „Keine Zweitfarbe“ of the Schnellstart pressed right after the
+ * test's reload, while that page still loaded its preview and checked the draft: the button's own
+ * reload never came.
  */
 export async function seiteGeladen(
-  _page: Page,
-  _id: string,
+  page: Page,
+  id: string,
   laden: () => Promise<unknown>,
 ): Promise<void> {
-  await laden();
+  // Only a check of the document `laden` brings counts, not one of the page before it.
+  let neu = false;
+  let geprueft = (): void => undefined;
+  const pruefung = new Promise<void>((done) => {
+    geprueft = done;
+  });
+  const navigiert = (frame: Frame): void => {
+    if (frame === page.mainFrame()) neu = true;
+  };
+  const hoeren = (response: Response): void => {
+    if (neu && post(id, "pruefung")(response)) geprueft();
+  };
+  page.on("framenavigated", navigiert);
+  page.on("response", hoeren);
+  try {
+    await laden();
+    await vorschauGeladen(page);
+    if (await prueft(page)) await pruefung;
+  } finally {
+    page.off("framenavigated", navigiert);
+    page.off("response", hoeren);
+  }
 }

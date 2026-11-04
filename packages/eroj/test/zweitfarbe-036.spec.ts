@@ -9,7 +9,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type APIRequestContext, expect, type Page, test } from "@playwright/test";
-import { gespeichert, vorschauGeladen } from "./wackler-040.js";
+import { gespeichert, seiteGeladen } from "./wackler-040.js";
 
 const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
 const cli = join(repoRoot, "packages/cli/dist/index.js");
@@ -109,7 +109,9 @@ for (const [ort, pfad] of [
   }) => {
     const errors = errorsOf(page);
     const id = await marke(request, `Dukolora ${ort.length}`);
-    await page.goto(`${base}${pfad(id)}`);
+    // Spec 040 B-5: the test changes the step only once the page it loaded has settled – loaded,
+    // its preview of the page's rev loaded, its check on load answered.
+    await seiteGeladen(page, id, () => page.goto(`${base}${pfad(id)}`));
     const block = page.locator("[data-mt-zweitfarbe]");
     await expect(block).toHaveAttribute("data-mt-zweitfarbe", "keine");
     await expect(block.locator("[data-mt-zweitfarbe-stand]")).toHaveText("Keine Zweitfarbe");
@@ -118,10 +120,8 @@ for (const [ort, pfad] of [
     const feld = page.getByRole("textbox", { name: /^Zweitfarbe/ });
     await feld.focus();
     await expect(feld).toBeFocused();
-    // Spec 040 B-5: change only once the preview loaded what the page names, and reload only once
-    // the save has settled – the draft's answer to the whole colour, the preview of its rev, the
-    // step's check – not while the page is still busy with it.
-    await vorschauGeladen(page);
+    // Spec 040 B-5: reload only once the save has settled – the draft's answer to the whole colour,
+    // the preview of its rev, the step's check – not while the page is still busy with it.
     const gesetzt = gespeichert(
       page,
       id,
@@ -131,7 +131,8 @@ for (const [ort, pfad] of [
     await gesetzt;
     await expect.poll(() => zweitfarbe(id)).toEqual({ farbe: "#0f8f86" });
 
-    await page.reload();
+    // And press „Keine Zweitfarbe“ only once the reloaded page has settled as well (Spec 040 B-5).
+    await seiteGeladen(page, id, () => page.reload());
     await expect(block).toHaveAttribute("data-mt-zweitfarbe", "#0f8f86");
     await expect(page.getByRole("img", { name: "Zweitfarbe #0f8f86" })).toBeVisible();
     await expect(block.locator("[data-mt-zweitfarbe-stand]")).toContainText("Von dir gesetzt");
