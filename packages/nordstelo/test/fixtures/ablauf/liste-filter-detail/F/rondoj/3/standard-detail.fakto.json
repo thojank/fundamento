@@ -1,0 +1,130 @@
+{
+  "lingvo": "de",
+  "bytes": 514,
+  "elements": [
+    {
+      "tag": "fm-navigado",
+      "attrs": {
+        "label": "Hauptnavigation",
+        "page": "standards"
+      },
+      "parent": -1,
+      "text": ""
+    },
+    {
+      "tag": "a",
+      "attrs": {
+        "href": "standards-liste.html",
+        "data-page": "standards"
+      },
+      "parent": 0,
+      "text": "Standards"
+    },
+    {
+      "tag": "fm-spuro",
+      "attrs": {
+        "label": "Pfad"
+      },
+      "parent": -1,
+      "text": ""
+    },
+    {
+      "tag": "a",
+      "attrs": {
+        "href": "standards-liste.html"
+      },
+      "parent": 2,
+      "text": "Standards"
+    },
+    {
+      "tag": "fm-titolo",
+      "attrs": {
+        "level": "1",
+        "size": "headline-1"
+      },
+      "parent": -1,
+      "text": "Standard A-12"
+    },
+    {
+      "tag": "fm-atributlisto",
+      "attrs": {
+        "label": "Eigenschaften"
+      },
+      "parent": -1,
+      "text": ""
+    },
+    {
+      "tag": "div",
+      "attrs": {},
+      "parent": 5,
+      "text": "Status: Gültig, Team: Team Nord"
+    },
+    {
+      "tag": "fm-ligilo",
+      "attrs": {
+        "to": "standard-verlauf.html"
+      },
+      "parent": -1,
+      "text": "Verlauf ansehen"
+    },
+    {
+      "tag": "fm-butono",
+      "attrs": {
+        "emphasis": "high",
+        "type": "submit"
+      },
+      "parent": -1,
+      "text": "Bearbeiten"
+    }
+  ],
+  "aria": [
+    {
+      "role": "navigation",
+      "name": "Hauptnavigation"
+    },
+    {
+      "role": "link",
+      "name": "Standards"
+    },
+    {
+      "role": "navigation",
+      "name": "Pfad"
+    },
+    {
+      "role": "link",
+      "name": "Standards"
+    },
+    {
+      "role": "heading",
+      "name": "Standard A-12",
+      "level": 1
+    },
+    {
+      "role": "list",
+      "name": "Eigenschaften"
+    },
+    {
+      "role": "link",
+      "name": "Verlauf ansehen"
+    },
+    {
+      "role": "button",
+      "name": "Bearbeiten"
+    }
+  ],
+  "console": [],
+  "renders": [
+    {
+      "aspekto": "komuna",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "komuna",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": []
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "celo": "Standards wie „Standard A-12“ in einer Liste suchen und filtern, einen Standard im Detail ansehen und seinen Verlauf prüfen.",
+  "ekranoj": [
+    {
+      "slug": "standards-liste",
+      "titolo": "Standards",
+      "celo": "Alle Standards als Tabelle mit Suche und einem Filter nach Status."
+    },
+    {
+      "slug": "standard-detail",
+      "titolo": "Standard A-12",
+      "celo": "Die Eigenschaften eines Standards; zurück zur Liste und weiter zum Verlauf."
+    },
+    {
+      "slug": "standard-verlauf",
+      "titolo": "Verlauf von Standard A-12",
+      "celo": "Die Änderungen eines Standards in zeitlicher Folge."
+    }
+  ],
+  "kantoj": [
+    {
+      "de": "standards-liste",
+      "al": "standard-detail"
+    },
+    {
+      "de": "standard-detail",
+      "al": "standards-liste"
+    },
+    {
+      "de": "standard-detail",
+      "al": "standard-verlauf"
+    },
+    {
+      "de": "standard-verlauf",
+      "al": "standard-detail"
+    }
+  ]
+}

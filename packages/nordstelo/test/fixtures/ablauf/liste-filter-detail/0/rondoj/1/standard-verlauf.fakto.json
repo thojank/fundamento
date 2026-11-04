@@ -1,0 +1,91 @@
+{
+  "lingvo": "de",
+  "bytes": 313,
+  "elements": [
+    {
+      "tag": "nav",
+      "attrs": {
+        "class": "hauptnav",
+        "aria-label": "Hauptnavigation"
+      },
+      "parent": -1,
+      "text": ""
+    },
+    {
+      "tag": "a",
+      "attrs": {
+        "href": "standards-liste.html"
+      },
+      "parent": 0,
+      "text": "Standards"
+    },
+    {
+      "tag": "h1",
+      "attrs": {
+        "class": "kopf"
+      },
+      "parent": -1,
+      "text": "Verlauf von Standard A-12"
+    },
+    {
+      "tag": "table",
+      "attrs": {
+        "class": "tabelle"
+      },
+      "parent": -1,
+      "text": ""
+    },
+    {
+      "tag": "caption",
+      "attrs": {},
+      "parent": 3,
+      "text": "Änderungen von Standard A-12"
+    },
+    {
+      "tag": "a",
+      "attrs": {
+        "href": "standard-detail.html"
+      },
+      "parent": -1,
+      "text": "Zurück zu Standard A-12"
+    }
+  ],
+  "aria": [
+    {
+      "role": "navigation",
+      "name": "Hauptnavigation"
+    },
+    {
+      "role": "link",
+      "name": "Standards"
+    },
+    {
+      "role": "heading",
+      "name": "Verlauf von Standard A-12",
+      "level": 1
+    },
+    {
+      "role": "table",
+      "name": "Änderungen von Standard A-12"
+    },
+    {
+      "role": "link",
+      "name": "Zurück zu Standard A-12"
+    }
+  ],
+  "console": [],
+  "renders": [
+    {
+      "aspekto": "komuna",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "komuna",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": []
+    }
+  ]
+}

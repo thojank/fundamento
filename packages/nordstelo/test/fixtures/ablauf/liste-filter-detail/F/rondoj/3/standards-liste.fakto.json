@@ -1,0 +1,152 @@
+{
+  "lingvo": "de",
+  "bytes": 618,
+  "elements": [
+    {
+      "tag": "fm-navigado",
+      "attrs": {
+        "label": "Hauptnavigation",
+        "page": "standards"
+      },
+      "parent": -1,
+      "text": ""
+    },
+    {
+      "tag": "a",
+      "attrs": {
+        "href": "standards-liste.html",
+        "data-page": "standards"
+      },
+      "parent": 0,
+      "text": "Standards"
+    },
+    {
+      "tag": "fm-titolo",
+      "attrs": {
+        "level": "1",
+        "size": "headline-1"
+      },
+      "parent": -1,
+      "text": "Standards"
+    },
+    {
+      "tag": "fm-filtrilo",
+      "attrs": {
+        "label": "Standards filtern"
+      },
+      "parent": -1,
+      "text": ""
+    },
+    {
+      "tag": "fm-kampo",
+      "attrs": {
+        "kind": "search",
+        "label": "Standards suchen",
+        "slot": "fields"
+      },
+      "parent": 3,
+      "text": ""
+    },
+    {
+      "tag": "fm-elektilo",
+      "attrs": {
+        "label": "Status",
+        "slot": "fields"
+      },
+      "parent": 3,
+      "text": ""
+    },
+    {
+      "tag": "fm-butono",
+      "attrs": {
+        "emphasis": "high",
+        "type": "submit",
+        "slot": "actions"
+      },
+      "parent": 3,
+      "text": "Filtern"
+    },
+    {
+      "tag": "fm-tabelo",
+      "attrs": {},
+      "parent": -1,
+      "text": ""
+    },
+    {
+      "tag": "span",
+      "attrs": {},
+      "parent": 7,
+      "text": "Alle Standards"
+    },
+    {
+      "tag": "fm-ligilo",
+      "attrs": {
+        "to": "standard-detail.html"
+      },
+      "parent": 7,
+      "text": "Standard A-12"
+    },
+    {
+      "tag": "fm-insigno",
+      "attrs": {
+        "intent": "success"
+      },
+      "parent": 7,
+      "text": "Gültig"
+    }
+  ],
+  "aria": [
+    {
+      "role": "navigation",
+      "name": "Hauptnavigation"
+    },
+    {
+      "role": "link",
+      "name": "Standards"
+    },
+    {
+      "role": "heading",
+      "name": "Standards",
+      "level": 1
+    },
+    {
+      "role": "search",
+      "name": "Standards filtern"
+    },
+    {
+      "role": "textbox",
+      "name": "Standards suchen"
+    },
+    {
+      "role": "combobox",
+      "name": "Status"
+    },
+    {
+      "role": "button",
+      "name": "Filtern"
+    },
+    {
+      "role": "table",
+      "name": "Alle Standards"
+    },
+    {
+      "role": "link",
+      "name": "Standard A-12"
+    }
+  ],
+  "console": [],
+  "renders": [
+    {
+      "aspekto": "komuna",
+      "scheme": "light",
+      "contrast": "default",
+      "axe": []
+    },
+    {
+      "aspekto": "komuna",
+      "scheme": "dark",
+      "contrast": "default",
+      "axe": []
+    }
+  ]
+}
