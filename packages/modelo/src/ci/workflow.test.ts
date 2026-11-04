@@ -233,6 +233,52 @@ const JOBS: Readonly<
 /** The jobs that drive a browser; each takes its engines from PLAYWRIGHT_ENGINES. */
 const RENDERED_JOBS = ["eroj", "alirebleco-eroj", "rendered-checks", "werkstatt", "vitrino"];
 
+// Spec 040 T-6 (C-2, US-2): a pull request tests only the packages its change reaches. The job
+// betroffen decides it once (scripts/ci/betroffen.mjs, tested in betroffen.test.ts) and hands on
+// three outputs; every other job but the checks reads them. E-9: no job is skipped by an `if:` of
+// its own – a skipped job reports no check – so every step after the checkout carries the
+// condition, and one step "nicht betroffen" says why the job ends green without a test.
+const BETROFFEN = "betroffen";
+const BETROFFEN_SCRIPT = "scripts/ci/betroffen.mjs";
+const BETROFFEN_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
+  ["Affected packages", `node ${BETROFFEN_SCRIPT}`],
+];
+const BETROFFEN_OUTPUTS = {
+  pakete: "${{ steps.betroffen.outputs.pakete }}",
+  alle: "${{ steps.betroffen.outputs.alle }}",
+  engines: "${{ steps.betroffen.outputs.engines }}",
+};
+
+/** C-3: the package whose change a job tests (the checks are repo-wide and always run). */
+const JOB_PACKAGE: Readonly<Record<string, string>> = {
+  unit: "format('@fundamento/{0}', matrix.package)",
+  projekcioj: "'@fundamento/projekcioj'",
+  eroj: "'@fundamento/eroj'",
+  "alirebleco-eroj": "'@fundamento/eroj'",
+  "rendered-checks": "'@fundamento/eroj'",
+  werkstatt: "'@fundamento/eroj'",
+  vitrino: "'@fundamento/eroj'",
+};
+
+/** C-2: the job's package is affected, or everything is. */
+function affected(job: string): string {
+  return `needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), ${JOB_PACKAGE[job]})`;
+}
+
+/** The one line of a job whose package no change reaches, in its log and its step summary. */
+const NICHT_BETROFFEN = "nicht betroffen";
+
+/** B-3 (V-8): the engines of a rendered job come from betroffen, by the changed paths. */
+const ENGINES_FROM_BETROFFEN = "${{ needs.betroffen.outputs.engines }}";
+
+/** betroffen.mjs, loaded when a test needs it (a missing script fails only that test). */
+async function loadBetroffen(): Promise<{
+  decide: (input: Record<string, unknown>) => { alle: boolean; engines: string; pakete: string[] };
+  FULL_EVENTS: readonly string[];
+}> {
+  return (await import(`${repoRoot}${BETROFFEN_SCRIPT}`)) as never;
+}
+
 /** The names of the jobs Spec 040 B-1 cut, as the checks of a pull request show them. */
 const JOB_NAMES: Readonly<Record<string, string>> = {
   eroj: "Rendered Eroj (Playwright, shard ${{ matrix.shard }} of 4)",
@@ -337,12 +383,13 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
 
   it("pins every action of every job to a major version", () => {
     const jobs = Object.keys(loadJobs());
-    expect(jobs).toEqual(Object.keys(JOBS));
+    expect(jobs).toEqual([BETROFFEN, ...Object.keys(JOBS)]);
     for (const job of jobs) {
       const actions = loadSteps(job)
         .map((step) => step.uses)
         .filter((uses): uses is string => typeof uses === "string");
-      expect(actions.length, job).toBeGreaterThan(3);
+      // betroffen: checkout, pnpm and Node; every other job also the cache.
+      expect(actions.length, job).toBeGreaterThan(job === BETROFFEN ? 2 : 3);
       for (const uses of actions) {
         expect(uses, job).toMatch(/^[\w.-]+\/[\w.-]+@v\d+$/);
       }
@@ -379,9 +426,9 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     expect(installIndex).toBeGreaterThan(indexOfAction(steps, "actions/setup-node"));
   });
 
-  it("has the eight jobs checks, unit, projekcioj, eroj, alirebleco-eroj, rendered-checks, werkstatt and vitrino, each with its named steps in order after the install", () => {
-    expect(Object.keys(loadJobs())).toEqual(Object.keys(JOBS));
-    for (const [job, expected] of Object.entries(JOBS)) {
+  it("has the job betroffen and the eight jobs checks, unit, projekcioj, eroj, alirebleco-eroj, rendered-checks, werkstatt and vitrino, each with its named steps in order after the install", () => {
+    expect(Object.keys(loadJobs())).toEqual([BETROFFEN, ...Object.keys(JOBS)]);
+    for (const [job, expected] of Object.entries({ [BETROFFEN]: BETROFFEN_STEPS, ...JOBS })) {
       const steps = loadSteps(job);
       const installIndex = steps.findIndex((step) => step.run === "pnpm install --frozen-lockfile");
       expect(installIndex, job).toBeGreaterThan(0);
@@ -419,7 +466,7 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
       const env = loadJob(name).env;
       expect(isRecord(env) && typeof env.PLAYWRIGHT_ENGINES === "string", name).toBe(true);
     }
-    for (const name of ["checks", "unit", "projekcioj"]) {
+    for (const name of [BETROFFEN, "checks", "unit", "projekcioj"]) {
       expect(loadJob(name).env, name).toBeUndefined();
     }
   });
@@ -482,7 +529,10 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
   });
 
   it("restores and saves the Turborepo cache in every job right before its Build (Spec 040 T-5)", () => {
-    for (const job of Object.keys(loadJobs())) {
+    // betroffen builds nothing and caches nothing: it reads git and the graph of Turborepo.
+    expect(loadSteps(BETROFFEN).some((step) => step.name === "Build")).toBe(false);
+    expect(loadSteps(BETROFFEN).some((step) => usesAction(step, "actions/cache"))).toBe(false);
+    for (const job of Object.keys(JOBS)) {
       const steps = loadSteps(job);
       const build = steps.findIndex((step) => step.name === "Build");
       expect(build, job).toBeGreaterThan(0);
@@ -508,6 +558,7 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
         .map((step) => step.run)
         .filter((run): run is string => typeof run === "string");
       for (const run of runs) expect(run, job).not.toMatch(/\bpnpm\s+(?:run\s+)?build\b/);
+      if (job === BETROFFEN) continue;
       const build = loadSteps(job).find((step) => step.name === "Build");
       expect(build?.run, job).toBe(buildOf(job));
     }
@@ -553,6 +604,97 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
         "process.env.TURBO_HASH === undefined && process.env.FM_GEBAUT === undefined",
       );
     }
+  });
+
+  it("runs every test on main, at night and on workflow_dispatch", async () => {
+    const on = loadWorkflow().on;
+    expect(isRecord(on) && on.push).toEqual({ branches: ["main"] });
+    expect(isRecord(on) && Array.isArray(on.schedule) && on.schedule.length).toBe(1);
+    expect(isRecord(on) && "workflow_dispatch" in on).toBe(true);
+    // betroffen decides from the event itself: these three events test every package in every
+    // engine, whatever changed (AC-B4).
+    const betroffen = loadSteps(BETROFFEN).find((step) => step.name === "Affected packages");
+    expect(betroffen?.run).toBe(`node ${BETROFFEN_SCRIPT}`);
+    const { decide, FULL_EVENTS } = await loadBetroffen();
+    expect([...FULL_EVENTS].sort()).toEqual(["push", "schedule", "workflow_dispatch"]);
+    for (const event of FULL_EVENTS) {
+      const decision = decide({ event, base: "abc", changed: ["packages/metiejo/src/a.ts"] });
+      expect(decision, event).toMatchObject({ alle: true, engines: "chromium firefox webkit" });
+    }
+    // Every gated step runs when alle is true, before it looks at the packages.
+    for (const job of Object.keys(JOB_PACKAGE)) {
+      expect(affected(job), job).toMatch(/^needs\.betroffen\.outputs\.alle == 'true' \|\| /);
+    }
+    // And the unit tests read no result from the cache there (T-5).
+    expect(TEST_CACHE).toContain("'local:w'");
+  });
+
+  it("a pull request tests only the affected packages, every job stays as a check", () => {
+    const jobs = loadJobs();
+    // The job betroffen: the whole history (the merge base with the base branch), no secret, the
+    // three outputs of C-2 from its step.
+    const betroffen = loadJob(BETROFFEN);
+    expect(betroffen.needs).toBeUndefined();
+    expect(betroffen["timeout-minutes"]).toBe(15);
+    expect(betroffen.outputs).toEqual(BETROFFEN_OUTPUTS);
+    const steps = loadSteps(BETROFFEN);
+    const checkout = steps[indexOfAction(steps, "actions/checkout")];
+    expect(checkout && withOf(checkout)).toEqual({
+      "fetch-depth": 0,
+      "persist-credentials": false,
+    });
+    expect(
+      (steps.find((step) => step.run === `node ${BETROFFEN_SCRIPT}`) as { id?: unknown })?.id,
+    ).toBe(BETROFFEN);
+    // The checks are repo-wide (the Modelo checks read every package): they always run, ungated.
+    expect(jobs.checks?.needs).toBeUndefined();
+    expect(loadSteps("checks").filter((step) => "if" in step)).toEqual([]);
+    expect(Object.keys(JOB_PACKAGE)).toEqual(Object.keys(JOBS).filter((job) => job !== "checks"));
+    for (const [name, job] of Object.entries(jobs)) {
+      // E-9: no job-level if – a skipped job would report no check.
+      expect(job.if, name).toBeUndefined();
+    }
+    for (const job of Object.keys(JOB_PACKAGE)) {
+      expect(jobs[job]?.needs, job).toBe(BETROFFEN);
+      const jobSteps = loadSteps(job) as Array<Step & { if?: unknown }>;
+      // The checkout first, ungated; then the one step that says why nothing runs.
+      expect(indexOfAction(jobSteps, "actions/checkout"), job).toBe(0);
+      expect(jobSteps[0]?.if, job).toBeUndefined();
+      const [, nicht, ...rest] = jobSteps;
+      expect(nicht?.name, job).toBe(NICHT_BETROFFEN);
+      expect(nicht?.if, job).toBe(`\${{ !(${affected(job)}) }}`);
+      expect(nicht?.run, job).toMatch(
+        /^echo "nicht betroffen: .+" \| tee -a "\$GITHUB_STEP_SUMMARY"$/,
+      );
+      // Every other step – toolchain, install, browsers, cache, build, test – only when affected.
+      expect(rest.length, job).toBeGreaterThan(4);
+      for (const step of rest) {
+        expect(step.if, `${job}: ${String(step.name)}`).toBe(`\${{ ${affected(job)} }}`);
+      }
+    }
+  });
+
+  it("the engines follow the changed paths on a pull request", async () => {
+    for (const job of RENDERED_JOBS) {
+      expect(loadJob(job).env, job).toEqual({ PLAYWRIGHT_ENGINES: ENGINES_FROM_BETROFFEN });
+      expect(loadJob(job).needs, job).toBe(BETROFFEN);
+      // Only the engines the run uses are installed (Spec 025 ③).
+      const install = loadSteps(job).find((step) => step.name === "Playwright browsers");
+      expect(install?.run, job).toBe(PLAYWRIGHT_BROWSERS);
+    }
+    // The old rule (three engines on main, Chromium on every pull request) is gone.
+    expect(readFileSync(workflowPath, "utf8")).not.toContain("refs/heads/main");
+    // B-3 (V-8): a pull request into the rendered Eroj, the projections, the values or a
+    // Playwright config runs Firefox and WebKit too; any other stays in Chromium.
+    const { decide } = await loadBetroffen();
+    const engines = (file: string) =>
+      decide({ event: "pull_request", base: "abc", changed: [file] }).engines;
+    expect(engines("packages/eroj/src/butono.tsx")).toBe("chromium firefox webkit");
+    expect(engines("packages/projekcioj/src/index.ts")).toBe("chromium firefox webkit");
+    expect(engines("packages/vortaro/sets/core.json")).toBe("chromium firefox webkit");
+    expect(engines("packages/aspekto-komuna/aspekto.json")).toBe("chromium firefox webkit");
+    expect(engines("packages/eroj/playwright.vitrino.config.ts")).toBe("chromium firefox webkit");
+    expect(engines("packages/metiejo/src/ident.ts")).toBe("chromium");
   });
 
   it("keeps every job under a 15-minute budget (the wall clock stays under 12)", () => {
