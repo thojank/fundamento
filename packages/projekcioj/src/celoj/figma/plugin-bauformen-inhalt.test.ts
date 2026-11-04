@@ -94,7 +94,9 @@ describe("the insigno is drawn as a badge: the pill with its text (Spec 011 ③)
     expect(bound(control, "paddingLeft")).toBe("spacing/xsmall");
     expect(bound(control, "paddingRight")).toBe("spacing/xsmall");
     expect(bound(control, "cornerRadius")).toBe("radius/role/pill");
-    expect(control?.children.map((child) => child.name)).toEqual(["text"]);
+    // Spec 036 Teil 5 ②b-3 (A-insigno-4): the icon at the start before the text, hidden by default.
+    expect(control?.children.map((child) => child.name)).toEqual(["icon-start", "text"]);
+    expect(descendant(control, "icon-start")?.properties.visible).toBe(false);
     const text = descendant(small, "text");
     expect(text?.properties.characters).toBe("Status");
     expect(text?.properties.componentPropertyReferences).toMatchObject({
@@ -165,21 +167,24 @@ describe("the avizo is drawn as a notice: surface with accent, heading, message,
       double.figma,
     )) as Report;
     const set = pageNodes(double).find((child) => child.name === "avizo");
-    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    // Spec 036 Teil 5 ②b-2 (A-avizo-1): intent × frame; card is the notice it was.
+    const variant = (name: string) =>
+      set?.children.find(
+        (child) => child.name === name.replace(", state=", ", frame=card, state="),
+      );
     const avizo = report.components.find((component) => component.set === "avizo");
     return { double, set, variant, report, avizo };
   });
 
-  it("draws four variants by intent, the control a row with the accent at its start, the texts column and the dismiss frame", async () => {
+  it("draws eight variants by intent and frame, the control a row with the accent at its start, the texts column and the dismiss frame", async () => {
     const { set, variant, avizo } = await drawn();
-    expect(set?.children.map((child) => child.name)).toEqual([
-      "intent=info, state=rest",
-      "intent=success, state=rest",
-      "intent=warning, state=rest",
-      "intent=danger, state=rest",
-    ]);
+    expect(set?.children.map((child) => child.name)).toEqual(
+      ["info", "success", "warning", "danger"].flatMap((intent) =>
+        ["card", "band"].map((frame) => `intent=${intent}, frame=${frame}, state=rest`),
+      ),
+    );
     expect(avizo?.layout.columns).toBe(1);
-    expect(avizo?.layout.rows).toBe(4);
+    expect(avizo?.layout.rows).toBe(8);
     const info = variant("intent=info, state=rest");
     expect(info?.children.map((child) => child.name)).toEqual(["control"]);
     const control = descendant(info, "control");
@@ -303,7 +308,7 @@ describe("the avizo is drawn as a notice: surface with accent, heading, message,
           .find((variable) => variable.name === name)
           ?.resolveForConsumer(node as DoubleNode).value,
       );
-    expect(set?.children).toHaveLength(4);
+    expect(set?.children).toHaveLength(4 * 2);
     for (const variant of set?.children ?? []) {
       const control = descendant(variant, "control");
       const texts = descendant(variant, "texts");
@@ -381,19 +386,25 @@ describe("the plenstato is drawn as a state: the column with the arc, the text a
       double.figma,
     )) as Report;
     const set = pageNodes(double).find((child) => child.name === "plenstato");
-    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    // Spec 036 Teil 5 ②b-2 (A-plenstato-1/2): kind × compact; false is the state it was.
+    const variant = (name: string) =>
+      set?.children.find(
+        (child) => child.name === name.replace(", state=", ", compact=false, state="),
+      );
     const plenstato = report.components.find((component) => component.set === "plenstato");
     return { double, set, variant, report, plenstato };
   });
 
-  it("draws two variants by kind: the border dashed where empty, its paint invisible where loading", async () => {
+  it("draws four variants by kind and compact: the border dashed where empty, its paint invisible where loading", async () => {
     const { set, variant, plenstato } = await drawn();
     expect(set?.children.map((child) => child.name)).toEqual([
-      "kind=loading, state=rest",
-      "kind=empty, state=rest",
+      "kind=loading, compact=true, state=rest",
+      "kind=loading, compact=false, state=rest",
+      "kind=empty, compact=true, state=rest",
+      "kind=empty, compact=false, state=rest",
     ]);
     expect(plenstato?.layout.columns).toBe(1);
-    expect(plenstato?.layout.rows).toBe(2);
+    expect(plenstato?.layout.rows).toBe(4);
     const loading = descendant(variant("kind=loading, state=rest"), "control");
     const empty = descendant(variant("kind=empty, state=rest"), "control");
     for (const [control, kind] of [
@@ -813,18 +824,16 @@ describe("the tabelo is drawn as a table: caption, region with head and three ro
   const REST = "density=comfortable, state=rest";
   const FOCUS = "density=comfortable, state=focus";
 
-  it("draws six variants of density × state: the caption above the region with head and three rows of three cells", async () => {
+  it("draws nine variants of density × state: the caption above the region with head and three rows of three cells", async () => {
     const { set, variant, tabelo } = await drawn();
-    expect(set?.children.map((child) => child.name)).toEqual([
-      "density=comfortable, state=rest",
-      "density=comfortable, state=hover",
-      "density=comfortable, state=focus",
-      "density=compact, state=rest",
-      "density=compact, state=hover",
-      "density=compact, state=focus",
-    ]);
+    // Spec 036 Teil 5 ②b-2 (A-tabelo-1): three densities.
+    expect(set?.children.map((child) => child.name)).toEqual(
+      ["compact", "default", "comfortable"].flatMap((density) =>
+        ["rest", "hover", "focus"].map((state) => `density=${density}, state=${state}`),
+      ),
+    );
     expect(tabelo?.layout.columns).toBe(3);
-    expect(tabelo?.layout.rows).toBe(2);
+    expect(tabelo?.layout.rows).toBe(3);
     const rest = variant(REST);
     expect(rest?.properties.layoutMode).toBe("VERTICAL");
     expect(rest?.children.map((child) => child.name)).toEqual(["caption", "region"]);
@@ -1458,21 +1467,22 @@ describe("the langetaro is drawn as tabs: the list with three tabs, the first ac
       double.figma,
     )) as Report;
     const set = pageNodes(double).find((child) => child.name === "langetaro");
-    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    // Spec 036 Teil 5 ②b-2 (A-langetaro-2): size × state; medium is what the tabs were.
+    const variant = (name: string) =>
+      set?.children.find((child) => child.name === name.replace(/^state=/, "size=medium, state="));
     const langetaro = report.components.find((component) => component.set === "langetaro");
     return { double, set, variant, report, langetaro };
   });
 
-  it("draws four variants by state: the list row with three entries and the panel below, each tab ring → gap → tab with its text", async () => {
+  it("draws twelve variants by size and state: the list row with three entries and the panel below, each tab ring → gap → tab with its text", async () => {
     const { set, variant, langetaro } = await drawn();
-    expect(set?.children.map((child) => child.name)).toEqual([
-      "state=rest",
-      "state=hover",
-      "state=focus",
-      "state=disabled",
-    ]);
+    expect(set?.children.map((child) => child.name)).toEqual(
+      ["small", "medium", "large"].flatMap((size) =>
+        ["rest", "hover", "focus", "disabled"].map((state) => `size=${size}, state=${state}`),
+      ),
+    );
     expect(langetaro?.layout.columns).toBe(4);
-    expect(langetaro?.layout.rows).toBe(1);
+    expect(langetaro?.layout.rows).toBe(3);
     const rest = variant("state=rest");
     expect(rest?.properties.layoutMode).toBe("VERTICAL");
     expect(rest?.children.map((child) => child.name)).toEqual(["control", "panel"]);
@@ -1643,11 +1653,14 @@ describe("icons are drawn from the glyphs of every Aspekto and switch with the b
     return { double, report, setOf };
   });
 
-  it("the set ikono: 315 variants, each the control with one glyph frame per Aspekto, visible by the brand variable, filled in the bound colour, sized by the token", async () => {
+  // Spec 036 Teil 5 ②b-4 (A-ligilo-6): 500 with download.
+  it("the set ikono: 500 variants, each the control with one glyph frame per Aspekto, visible by the brand variable, filled in the bound colour, sized by the token", async () => {
     const { setOf, report } = await drawn();
     const set = setOf("ikono");
-    // Spec 025 ①: nineteen names (add, subtract) × 3 sizes × 5 intents.
-    expect(set?.children).toHaveLength(315);
+    // Spec 025 ①: nineteen names (add, subtract) × 3 sizes × 5 intents; Spec 036 Teil 5 ②b-2
+    // (A-ikono-2): 21 names × 4 sizes × 5 intents; Spec 036 Teil 5 ②b-3: 24 names (person, first,
+    // last).
+    expect(set?.children).toHaveLength(500);
     const variant = set?.children.find(
       (child) => child.name === "name=close, size=medium, intent=neutral, state=rest",
     );
@@ -1728,7 +1741,9 @@ describe("icons are drawn from the glyphs of every Aspekto and switch with the b
   it("the avizo draws the icon of its intent before its texts, in the status text colour; the dialog shows the help of its reason (O-5)", async () => {
     const { setOf } = await drawn();
     const avizo = setOf("avizo");
-    const danger = avizo?.children.find((child) => child.name === "intent=danger, state=rest");
+    const danger = avizo?.children.find(
+      (child) => child.name === "intent=danger, frame=card, state=rest",
+    );
     const control = descendant(danger, "control");
     expect(control?.children.map((child) => child.name)).toEqual(["icon", "texts", "dismiss"]);
     const icon = descendant(danger, "icon");
@@ -1753,14 +1768,20 @@ describe("icons are drawn from the glyphs of every Aspekto and switch with the b
   it("draws the apartigilo as a line and the saltligilo as a control; writes nothing new on a second run", async () => {
     const { double, setOf } = await drawn();
     const apartigilo = setOf("apartigilo");
+    // Spec 036 Teil 5 ②b-2 (A-apartigilo-1): orientation × emphasis; low is the line it was.
     expect(apartigilo?.children.map((child) => child.name)).toEqual([
-      "orientation=horizontal, state=rest",
-      "orientation=vertical, state=rest",
+      "orientation=horizontal, emphasis=low, state=rest",
+      "orientation=horizontal, emphasis=high, state=rest",
+      "orientation=vertical, emphasis=low, state=rest",
+      "orientation=vertical, emphasis=high, state=rest",
     ]);
     const horizontal = descendant(apartigilo?.children[0], "control");
     expect(paintOf(horizontal, "strokes")).toBe("color/border/subtle");
     expect(bound(horizontal, "strokeTopWeight")).toBe("border/width/default");
-    const vertical = descendant(apartigilo?.children[1], "control");
+    const strong = descendant(apartigilo?.children[1], "control");
+    expect(paintOf(strong, "strokes")).toBe("color/border/default");
+    expect(bound(strong, "strokeTopWeight")).toBe("border/width/strong");
+    const vertical = descendant(apartigilo?.children[2], "control");
     expect(bound(vertical, "strokeLeftWeight")).toBe("border/width/default");
     expect(bound(vertical, "height")).toBe("size/control/medium");
     const saltligilo = setOf("saltligilo");
@@ -1951,14 +1972,32 @@ describe("the plugin draws the karto (Spec 015 ③)", () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     const set = pageNodes(double).find((node) => node.name === "karto");
-    expect(set?.children.map((child) => child.name)).toEqual([
-      "orientation=vertical, state=rest",
-      "orientation=horizontal, state=rest",
-    ]);
+    // Spec 036 Teil 5 ②b-2 (A-karto-1): orientation × emphasis; high is the card it was.
+    expect(set?.children.map((child) => child.name)).toEqual(
+      ["vertical", "horizontal"].flatMap((orientation) =>
+        ["high", "medium", "low"].map(
+          (emphasis) => `orientation=${orientation}, emphasis=${emphasis}, state=rest`,
+        ),
+      ),
+    );
     const definitions = (set?.properties.componentPropertyDefinitions ?? {}) as Definitions;
     const media = Object.keys(definitions).find((key) => key.startsWith("media#"));
     expect(definitions[media ?? ""]).toEqual({ type: "BOOLEAN", defaultValue: true });
-    for (const variant of set?.children ?? []) {
+    // medium: the sunken ground without a shadow; low: no fill and no shadow.
+    for (const [emphasis, fill] of [
+      ["medium", "color/background/sunken"],
+      ["low", undefined],
+    ] as const) {
+      const other = descendant(
+        set?.children.find((child) => child.name.includes(`emphasis=${emphasis}`)),
+        "surface",
+      );
+      expect(paintOf(other), emphasis).toBe(fill);
+      expect((other?.properties.effects ?? []) as unknown[], emphasis).toEqual([]);
+    }
+    for (const variant of (set?.children ?? []).filter((child) =>
+      child.name.includes("emphasis=high"),
+    )) {
       const horizontal = variant.name.includes("horizontal");
       const surface = descendant(variant, "surface");
       expect(surface?.properties.layoutMode, variant.name).toBe(
@@ -2066,9 +2105,13 @@ describe("the karto's heading fills the body in every variant (K-1)", () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     const cards = cardsOf(double);
+    // Spec 036 Teil 5 ②b-2 (A-karto-1): orientation × emphasis.
     expect(cards.map((card) => card.name)).toEqual([
-      "orientation=vertical, state=rest",
-      "orientation=horizontal, state=rest",
+      ...["vertical", "horizontal"].flatMap((orientation) =>
+        ["high", "medium", "low"].map(
+          (emphasis) => `orientation=${orientation}, emphasis=${emphasis}, state=rest`,
+        ),
+      ),
       "karto – ohne Bild",
     ]);
     const narrow: string[] = [];
@@ -2155,7 +2198,9 @@ describe("the plugin draws the ligilo's external mark (Nachlese 5 O-41)", () => 
       expect(
         control?.children.map((child) => child.name),
         variant.name,
-      ).toEqual(["label", "icon-end"]);
+        // Spec 036 Teil 5 ②b-3 (A-ligilo-4): the icon at the start before the label, hidden.
+      ).toEqual(["icon-start", "label", "icon-end"]);
+      expect(descendant(control, "icon-start")?.properties.visible, variant.name).toBe(false);
       const icon = descendant(control, "icon-end");
       expect(icon?.properties.visible, variant.name).toBe(false);
       expect(icon?.properties.componentPropertyReferences).toEqual({ visible: external });
@@ -2190,22 +2235,32 @@ describe("the plugin draws the avataro (Spec 015 ③)", () => {
     );
   type Definitions = Record<string, { type: string; defaultValue: string | boolean }>;
 
-  it("three sizes: the box, the initials circle with „EM“, the image circle with the silhouette; the image toggle; the example „mit Bild“ after the set", async () => {
+  it("five sizes: the box, the initials circle with „EM“, the image circle with the silhouette; the image toggle; the example „mit Bild“ after the set", async () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     const set = pageNodes(double).find((node) => node.name === "avataro");
-    expect(set?.children.map((child) => child.name)).toEqual([
-      "size=small, state=rest",
-      "size=medium, state=rest",
-      "size=large, state=rest",
-    ]);
+    // Spec 036 Teil 5 ②b-2 (A-avataro-2): five sizes.
+    // Spec 036 Teil 5 ②b-2 (A-avataro-1): five sizes × three corners.
+    expect(set?.children.map((child) => child.name)).toEqual(
+      ["x-small", "small", "medium", "large", "x-large"].flatMap((size) =>
+        ["round", "soft", "square"].map((corner) => `size=${size}, corner=${corner}, state=rest`),
+      ),
+    );
+    const radiusOf = (name: string) =>
+      name.includes("corner=soft")
+        ? "radius/small"
+        : name.includes("corner=square")
+          ? "radius/none"
+          : "radius/full";
     const definitions = (set?.properties.componentPropertyDefinitions ?? {}) as Definitions;
     const image = Object.keys(definitions).find((key) => key.startsWith("image#"));
     expect(definitions[image ?? ""]).toEqual({ type: "BOOLEAN", defaultValue: false });
     const sizes: Record<string, string> = {
+      "x-small": "size/icon/small",
       small: "size/icon/medium",
       medium: "size/icon/large",
       large: "size/control/large",
+      "x-large": "size/scale/1000",
     };
     for (const variant of set?.children ?? []) {
       const size = sizes[variant.name.slice("size=".length, variant.name.indexOf(","))];
@@ -2217,11 +2272,12 @@ describe("the plugin draws the avataro (Spec 015 ③)", () => {
       }
       const initials = descendant(box, "initials");
       expect(paintOf(initials)).toBe("color/background/sunken");
-      expect(bound(initials, "cornerRadius")).toBe("radius/full");
+      expect(bound(initials, "cornerRadius")).toBe(radiusOf(variant.name));
       const text = descendant(initials, "initials-text");
       // Nachlese 5 N5-5 (O-18): the smallest size shows one initial – „EM“ stood over the circle
       // of 20 px; the label property holds both, so the smallest size's text is not connected.
-      if (variant.name.startsWith("size=small")) {
+      // Spec 036 Teil 5 ②b-2 (A-avataro-2): the sizes before medium, x-small and small.
+      if (variant.name.startsWith("size=x-small") || variant.name.startsWith("size=small")) {
         expect(text?.properties.characters, variant.name).toBe("E");
         // Spec 027 B-4: its one initial is a TEXT property of its own, not the label.
         expect(text?.properties.componentPropertyReferences, variant.name).toEqual({
@@ -2234,13 +2290,18 @@ describe("the plugin draws the avataro (Spec 015 ③)", () => {
         });
       }
       expect(paintOf(text)).toBe("color/text/subtle");
+      const fontOf: Record<string, string> = {
+        "x-small": "typography/caption/font-size",
+        small: "typography/label/2/font-size",
+        medium: "typography/label/2/font-size",
+        large: "typography/label/1/font-size",
+        "x-large": "typography/headline/4/font-size",
+      };
       expect(bound(text, "fontSize")).toBe(
-        variant.name.startsWith("size=large")
-          ? "typography/label/1/font-size"
-          : "typography/label/2/font-size",
+        fontOf[variant.name.slice("size=".length, variant.name.indexOf(","))],
       );
       const picture = descendant(box, "image");
-      expect(bound(picture, "cornerRadius")).toBe("radius/full");
+      expect(bound(picture, "cornerRadius")).toBe(radiusOf(variant.name));
       expect(picture?.properties.clipsContent).toBe(true);
       expect(paintOf(picture)).toBe("color/background/sunken");
       expect(picture?.properties.visible).toBe(false);

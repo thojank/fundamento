@@ -30,6 +30,7 @@ import {
 } from "@fundamento/modelo";
 import type { CeloInput } from "../../build.js";
 import { BAZOJ_TEKSTOJ, bazojDatumoj, type VitrinoBazoj } from "./bazoj.js";
+import { DOKU_TEKSTOJ } from "./doku.js";
 
 const PALETTE = /^color\.palette\.([a-z0-9-]+)\.(\d+)$/;
 const SURFACES = [
@@ -82,6 +83,8 @@ export interface VitrinoMezuro {
 export const VITRINO_TEKSTOJ: Readonly<Record<string, { de?: string; en: string }>> = {
   // Spec 029 ① 5: the headings, texts and column heads of the foundation pages, German and English.
   ...BAZOJ_TEKSTOJ,
+  // Spec 036 Teil 5 ③: the headings and words of the documentation of every Ero.
+  ...DOKU_TEKSTOJ,
   werkstatt: { en: "Workshop" },
   paletroj: { en: "Palettes" },
   roloj: { en: "Surfaces, text, status and actions" },
@@ -485,6 +488,13 @@ export const VITRINO_SHORT_COMMAND = "pnpm fm mcp";
 /** The command of the Vitrino's code block (Spec 020 ③): long, so the region scrolls. */
 const VITRINO_COMMAND =
   "arkitekturo check --project standards --dir /home/arkitekturo/projekte/standards --format json";
+
+/**
+ * Spec 036 Teil 5 ②b-5 (A-kodbloko-1/4, ①-2): the Agordo of a brand as JSON, numbered, its third
+ * line highlighted – the words by kind in the colours of the brand.
+ */
+const VITRINO_CODE_JSON =
+  '{\n  "name": "provo",\n  "lingvo": "de",\n  "form": { "radius": 2 },\n  "pille": false\n}';
 
 /** The summary of the Vitrino's disclosure (Spec 014 ⑤); Figma shows the same word. */
 export const VITRINO_SUMMARY_TEXT = "Lieferbedingungen";
@@ -926,6 +936,9 @@ export const VITRINO_ICON_EXAMPLE = "check";
 /** The head of the row that shows the variants with an icon (Spec 029 ①b d)). */
 export const VITRINO_WITH_ICON = "mit Icon";
 
+/** The heading of a section of a navigation in the Vitrino (Spec 036 Teil 5 ②b-3, A-navigado-1). */
+export const VITRINO_SECTION_HEADING = "Abschnitt";
+
 /** The sizes the Ikonaro grid of the Vitrino shows, one row each (Spec 014 ②). */
 const ICON_SIZES = ["small", "medium", "large"] as const;
 
@@ -1127,9 +1140,23 @@ function additionRows(entry: LoadedEro, tag: string, menuItems = ""): string {
       );
     // Spec 020 ③: a command longer than the cell, so the region scrolls; with copyable.
     case "kodbloko":
-      return row(
-        "lange Zeile",
-        `<${tag} copyable><span slot="caption">${VITRINO_SLOT_TEXTS.caption ?? ""}</span>${VITRINO_COMMAND}</${tag}>`,
+      return (
+        row(
+          "lange Zeile",
+          `<${tag} copyable><span slot="caption">${VITRINO_SLOT_TEXTS.caption ?? ""}</span>${VITRINO_COMMAND}</${tag}>`,
+        ) +
+        // Spec 036 Teil 5 ②b-5 (A-kodbloko-1/4/6, ①-2): numbered, a line highlighted, the language
+        // named and its words coloured by kind; a long line that wraps.
+        (entry.skemo.props.some((prop) => prop.name === "language")
+          ? row(
+              "Zeilennummern, Sprache, hervorgehoben",
+              `<${tag} line-numbers language="json" highlight="3"><span slot="caption">Agordo</span>${VITRINO_CODE_JSON}</${tag}>`,
+            ) +
+            row(
+              "umbrechend",
+              `<${tag} wrap language="Shell"><span slot="caption">${VITRINO_SLOT_TEXTS.caption ?? ""}</span>${VITRINO_COMMAND}</${tag}>`,
+            )
+          : "")
       );
     case "teksto":
       return row(
@@ -1406,21 +1433,36 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
   // The variants with an icon: every combination of the axes that key a colour (emphasis, intent),
   // at the default of the others.
   const variantKeys = keys.filter((key) => key === "emphasis" || key === "intent");
+  // Spec 036 Teil 5 ②b-3 (A-navigado-1, A-navigado-4): a navigation shows its items with the icon
+  // in their links (slot icon-start) and in sections under a heading, standing vertically.
+  const sectioned = entry.skemo.parts["section-heading"] !== undefined;
+  const trail = role === "navigation" && entry.skemo.parts.separator !== undefined;
   const withIcon =
     icon === ""
       ? ""
-      : `<tr><th scope="row">${VITRINO_WITH_ICON}</th><td>${(variantKeys.length === 0
-          ? [{}]
-          : combinationsOf(entry.skemo, variantKeys)
-        )
-          .map((combination) => {
-            const attributes = Object.entries(combination)
-              .map(([key, value]) => ` ${key}="${value}"`)
-              .join("");
-            const label = vitrinoLabelOf(combination) || VITRINO_WITH_ICON;
-            return `<${tag}${attributes}${required}>${icon}${label}</${tag}>`;
-          })
-          .join(" ")}</td></tr>`;
+      : sectioned
+        ? `<tr><th scope="row">${VITRINO_WITH_ICON}</th><td><${tag} orientation="vertical"${required} page="1"><h3>${VITRINO_SECTION_HEADING}</h3>${VITRINO_OPTIONS.map(
+            (text, index) =>
+              `<a href="#fm-vitrino-${entry.ero.name}" data-page="${index + 1}">${icon}${text}</a>`,
+          ).join("")}</${tag}></td></tr>`
+        : `<tr><th scope="row">${VITRINO_WITH_ICON}</th><td>${(variantKeys.length === 0
+            ? [{}]
+            : combinationsOf(entry.skemo, variantKeys)
+          )
+            .map((combination) => {
+              const attributes = Object.entries(combination)
+                .map(([key, value]) => ` ${key}="${value}"`)
+                .join("");
+              const label = vitrinoLabelOf(combination) || VITRINO_WITH_ICON;
+              // Spec 036 Teil 5 ②b-3 (A-spuro-4): a breadcrumb shows its items, the icon in the
+              // first one (slot icon-start), the current page the last.
+              if (trail) {
+                const items = optionTexts(entry).replace(/^(<a [^>]*>)/, `$1${icon}`);
+                return `<${tag}${attributes}${required}${chosen}>${items}</${tag}>`;
+              }
+              return `<${tag}${attributes}${required}>${icon}${label}</${tag}>`;
+            })
+            .join(" ")}</td></tr>`;
   const heads = ["rest", ...columns].map((column) => `<th scope="col">${column}</th>`).join("");
   return `<table><caption>${tag}, jede Kombination der Skemo</caption><thead><tr><th scope="col">Kombination</th>${heads}</tr></thead><tbody>${rows}${kinds}${unknown}${additionRows(entry, tag)}${withIcon}</tbody></table>`;
 }

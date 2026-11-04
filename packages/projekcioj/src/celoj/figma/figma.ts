@@ -191,6 +191,70 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   // sets. Keyed by Ero, because the same part name is drawn elsewhere (the icon of a butono, the
   // error and the ring of a field): `<ero>:<part>` wins over the bare part name.
   "signeto:remove": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
+  // Spec 036 Teil 5 ②b-2 (A-tekstareo-1): the count of a text area counts what a person typed; the
+  // field in the set is empty, so there is nothing to count – no node, as the typed text's colour.
+  "tekstareo:count": "jug_01M69HFBBF3PH19R6G7A8G95HB",
+  // Spec 036 Teil 5 ②b-2 (A-kampo-1): the unit stands behind a typed number; the same empty field.
+  "kampo:unit": "jug_01M69HFBBF3PH19R6G7A8G95HB",
+  // Spec 036 Teil 5 ②b-2 (A-pagxigilo-1): the summary of a pagination stands for summary count or
+  // compact only, a property in Figma; the set shows the pages.
+  "pagxigilo:summary": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  // Spec 036 Teil 5 ②b-2 (A-atributlisto-1): the button for the rest stands with max-entries only.
+  "atributlisto:more": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  // Spec 036 Teil 5 ②b-2 (A-glitilo-1): the value as text stands with readout text only, a
+  // property; the set shows the slider without it (and the field by its axis field).
+  "glitilo:readout": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  // Spec 036 Teil 5 ②b-3 (A-glitilo-4): the marks stand with ticks only, a property; the set shows
+  // the slider without them.
+  "glitilo:tick": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  // Spec 036 Teil 5 ②b-3: parts that only the content of an option brings – the description of an
+  // option (A-elekto-4); the set shows the Vitrino's options without it.
+  "elekto:option-description": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  // A-elektilo-4, A-listelektilo-4, A-kompletigilo-4, A-plurelektilo-4: the heading of a group of
+  // options and the divider between two groups stand with options that name a group.
+  "elektilo:group-heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  "listelektilo:group-heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  "listelektilo:divider": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  "kompletigilo:group-heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  "plurelektilo:group-heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  // A-menuo-4: the icon of an entry and the heading of a group stand with entries that carry them.
+  "menuo:icon": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  "menuo:group-heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  // Spec 036 Teil 5 ②b-3 (A-spuro-4): the icon of the first item stands with the icon it holds.
+  "spuro:icon": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  // A-atributlisto-4, A-plenstato-4, A-tabelo-4: a title, an icon and a foot row stand with the
+  // words, the icon and the rows that bring them.
+  "atributlisto:heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  "plenstato:heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  "plenstato:icon": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  "tabelo:foot": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  // A-sxvebilo-4: the close button stands with dismissible only, a property.
+  "sxvebilo:close": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  // A-avataro-4: the default icon stands where no name is given; A-pagxigilo-4: first and last
+  // stand with first-last only.
+  "avataro:icon": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  "pagxigilo:first": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  "pagxigilo:last": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  // Spec 036 Teil 5 ②b-4 (A-spuro-6): the menu of the hidden levels stands only with max-items and
+  // a longer trail; the set shows the trail without it.
+  "spuro:more": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  // Spec 036 Teil 5 ②b-5 (A-kodbloko-1/4/6, ①-2): the numbers, a highlighted line, the language
+  // and the words by kind stand with line-numbers, highlight and language only; the set shows the
+  // block without them, its code in one colour.
+  "kodbloko:line-number": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  "kodbloko:highlight": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  "kodbloko:language": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  "kodbloko:keyword": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  "kodbloko:name": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  "kodbloko:string": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  "kodbloko:number": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  "kodbloko:comment": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  // A-navigado-1, A-navigado-4: the heading of a section and the icon of an item stand with the
+  // headings and icons a navigation holds.
+  "navigado:section-heading": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  "navigado:icon": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+  // A-plurelektilo-1: „alle wählen“ stands with select-all only, a property.
+  "plurelektilo:select-all": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
   "listelektilo:icon": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
   "listelektilo:description": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
   "plurelektilo:filter": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
@@ -1079,7 +1143,14 @@ export function labelPartOf(skemo: LoadedEro["skemo"]): string {
   if (skemo.parts.label === undefined && skemo.parts.text !== undefined) return "text";
   // Spec 014 ④ (plan ④ D-06): a popover's label property writes its heading (the part of its
   // heading slot); a menu's the word of its entries (the part item), whose role the rows take.
-  if (skemo.parts.label === undefined && skemo.parts.heading !== undefined) return "heading";
+  // Spec 036 Teil 5 ②b-3 (A-atributlisto-4): a list's title is no label – the label property names
+  // the list (aria-label), its title stands with its content.
+  if (
+    skemo.parts.label === undefined &&
+    skemo.parts.heading !== undefined &&
+    skemo.a11y.role !== "list"
+  )
+    return "heading";
   if (skemo.parts.label === undefined && skemo.parts.item !== undefined) return "item";
   // Spec 014 ⑤: a disclosure's label property writes its summary.
   if (skemo.parts.label === undefined && skemo.parts.summary !== undefined) return "summary";
@@ -1344,6 +1415,8 @@ export interface FigmaComponentSet {
    * ends of the range; the plugin draws every cell from it.
    */
   calendar?: VitrinoCalendar;
+  /** Spec 036 Teil 5 ②b-3 (A-alsxutilo-4): the dropzone draws the upload icon first (part icon). */
+  zoneIcon?: boolean;
   /**
    * The table of the set (Spec 011 ④, plan ④ D-14): the head words, the rows (row header first),
    * the numeric columns, the sorted column and the direction of its sort button — the Vitrino's
@@ -1374,12 +1447,13 @@ export interface FigmaComponentSet {
     fill: { binding: string; paint: FigmaPaint };
     color: { binding: string; paint: FigmaPaint };
     /**
-     * The smallest size shows one initial (Nachlese 5 N5-5, Spec 015 ③ O-18): the variants whose
-     * `prop` has `value` (the first of the size axis) write `text`, the first initial of the
-     * Vitrino's, unconnected to the label property — a text property holds one value for the
-     * whole set, and two initials stood over the circle of 20 px.
+     * The small sizes show one initial (Nachlese 5 N5-5, Spec 015 ③ O-18): the variants whose
+     * `prop` has one of `values` (the sizes before the default; Spec 036 Teil 5 ②b-2: x-small and
+     * small) write `text`, the first initial of the Vitrino's, unconnected to the label property —
+     * a text property holds one value for the whole set, and two initials stood over the circle
+     * of 20 px.
      */
-    oneInitial?: { prop: string; value: string; text: string };
+    oneInitial?: { prop: string; values: string[]; text: string };
   };
   card?: {
     width: number;
@@ -2602,7 +2676,11 @@ function iconsOf(
     skemo.props.some((prop) => prop.name === "external" && prop.kind === "boolean") &&
     skemo.slots.some((slot) => slot.name === "icon-end" && slot.decorative === true)
   ) {
-    return { "icon-end": "external" };
+    // Spec 036 Teil 5 ②b-3 (A-ligilo-4): an icon-start slot before the words, the Vitrino's
+    // example, off by default (its BOOLEAN), as at the butono.
+    return skemo.slots.some((slot) => slot.name === "icon-start" && slot.decorative === true)
+      ? { "icon-start": ICON_EXAMPLE, "icon-end": "external" }
+      : { "icon-end": "external" };
   }
   if (
     (skemo.a11y.role === "combobox" || skemo.a11y.role === "listbox") &&
@@ -3516,9 +3594,14 @@ function componentSetOf(
   // An avatar (Spec 015 ③, plan ③ D-11): the Vitrino's silhouette on the stand-in's ground.
   const silhouette =
     structure === "avatar" ? avatarSilhouetteOf(VITRINO_AVATAR.picture) : undefined;
-  // Nachlese 5 N5-5 (O-18): the smallest size – the first value of the size axis – shows one
-  // initial, the first grapheme of the Vitrino's initials, as the web does.
-  const smallest = skemo.props.find((prop) => prop.name === AVATAR_SIZE_PROP)?.values?.[0];
+  // Nachlese 5 N5-5 (O-18): the small sizes – every value of the size axis before its default
+  // (Spec 036 Teil 5 ②b-2, A-avataro-2: x-small and small) – show one initial, the first grapheme
+  // of the Vitrino's initials, as the web does.
+  const sizeProp = skemo.props.find((prop) => prop.name === AVATAR_SIZE_PROP);
+  const smallSizes = (sizeProp?.values ?? []).slice(
+    0,
+    Math.max(0, (sizeProp?.values ?? []).indexOf(String(sizeProp?.default ?? ""))),
+  );
   const firstInitial = [
     ...new Intl.Segmenter("de", { granularity: "grapheme" }).segment(VITRINO_AVATAR.initials),
   ][0]?.segment;
@@ -3528,9 +3611,9 @@ function componentSetOf(
           picture: silhouette,
           fill: { binding: variableName(STAND_IN_FILL), paint: mediaFill },
           color: { binding: variableName(STAND_IN_COLOR), paint: mediaColor },
-          ...(smallest === undefined || firstInitial === undefined
+          ...(smallSizes.length === 0 || firstInitial === undefined
             ? {}
-            : { oneInitial: { prop: AVATAR_SIZE_PROP, value: smallest, text: firstInitial } }),
+            : { oneInitial: { prop: AVATAR_SIZE_PROP, values: smallSizes, text: firstInitial } }),
         }
       : undefined;
   return {
@@ -3547,6 +3630,7 @@ function componentSetOf(
     ...(structure === "dialog" ? { texts: dialogTexts } : {}),
     // Spec 015 ② (plan ② D-06): the help names kinds and size (the Vitrino's), the error the
     // Vitrino's word; the button and the hint in the Modelo's words (a11y.texts).
+    ...(structure === "upload" && skemo.parts.icon !== undefined ? { zoneIcon: true } : {}),
     ...(structure === "upload"
       ? {
           texts: {

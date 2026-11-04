@@ -147,6 +147,10 @@
         {
           "ero": "lokredaktilo",
           "kialo": "The edit button shows the pencil, because the sign is read faster than the word; the word names the value."
+        },
+        {
+          "ero": "avataro",
+          "kialo": "An avatar without a name shows the icon person in place of its initials, because an empty circle says nothing; a name, once given, says who it is."
         }
       ],
       "never": [],
@@ -185,6 +189,65 @@
           }
         }
       }
-    ]
+    ],
+    "when-not": [
+      {
+        "case": {
+          "de": "Ein Zustand soll gesagt werden, und dafür braucht es ein Wort.",
+          "en": "A state is to be said, and that needs a word."
+        },
+        "ero": "insigno"
+      },
+      {
+        "case": {
+          "de": "Gezeigt wird eine Person oder ein Ding mit Bild oder Initialen.",
+          "en": "A person or a thing is shown with a picture or initials."
+        },
+        "ero": "avataro"
+      },
+      {
+        "case": {
+          "de": "Das Symbol soll eine Handlung auslösen.",
+          "en": "The icon is to start an action."
+        },
+        "ero": "butono"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Wähle einen Namen aus dem Ikonaro, damit jede Marke das Symbol in ihrem eigenen Satz zeichnet.",
+          "en": "Choose a name from the Ikonaro, so every brand draws the icon in its own set."
+        },
+        {
+          "de": "Gib label an, sobald das Symbol etwas bedeutet; ohne label ist es Schmuck und wird nicht gehört.",
+          "en": "Give label as soon as the icon means something; without label it is decoration and not heard."
+        },
+        {
+          "de": "Setze bei einem Status-intent immer auch ein Wort daneben.",
+          "en": "Always set a word beside it with a status intent."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Ein Status-Symbol ohne label setzen, denn es bliebe für einen Screenreader stumm.",
+          "en": "Set a status icon without label, because it would stay silent for a screen reader."
+        },
+        {
+          "de": "Ein eigenes Bild außerhalb des Ikonaro als Symbol einschleusen.",
+          "en": "Smuggle in a picture of its own outside the Ikonaro as an icon."
+        },
+        {
+          "de": "Ein Symbol bewegen lassen, um etwas zu sagen.",
+          "en": "Let an icon move to say something."
+        }
+      ]
+    },
+    "keyboard": {
+      "none": {
+        "de": "Ein Symbol nimmt weder den Fokus noch eine Taste; bedienbar ist nur das Element, in dem es steht.",
+        "en": "An icon takes neither the focus nor a key; only the element it stands in can be operated."
+      }
+    }
   }
 }

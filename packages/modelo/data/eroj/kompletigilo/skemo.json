@@ -110,6 +110,11 @@
         ],
         "default": "below",
         "description": "Spec 029 ②b-1b M-2: where the message and the error stand – below the field with the space of the field, or joined to it without that space. Never only in a tooltip: the message must be seen (error-not-color-only, error-says-what-to-do)."
+      },
+      {
+        "name": "max-suggestions",
+        "kind": "number",
+        "description": "Spec 029 ②a (A-kompletigilo-1): the most suggestions the list shows at once, the best matches first; empty shows every match. The count heard is the count shown."
       }
     ],
     "states": [
@@ -342,6 +347,17 @@
         },
         "typography": {
           "fixed": "typography.caption"
+        }
+      },
+      "group-heading": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        },
+        "inline-padding": {
+          "fixed": "spacing.medium"
         }
       }
     },

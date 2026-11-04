@@ -91,12 +91,9 @@ describe("Spec 029 ②b-1 M-6: a clear button in the field", () => {
       expect(skemo.parts.clear).toEqual(
         ero === "plurelektilo"
           ? { size: { fixed: "size.control.small" } }
-          : ero === "listelektilo"
-            ? { size: { fixed: "size.icon.medium" }, ...target }
-            : ero === "datelektilo"
-              ? // Spec 035 2.3.3: the kampo's ✕ (size medium), the button the target.
-                { size: { fixed: "size.icon.medium" }, ...target }
-              : { size: { by: ["size"] }, ...target },
+          : // Spec 036 Teil 5 ②b-2 (A-listelektilo-2, A-datelektilo-2): every field with
+            // sizes keys its ✕ by them.
+            { size: { by: ["size"] }, ...target },
       );
     },
   );

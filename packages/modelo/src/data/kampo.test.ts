@@ -106,6 +106,8 @@ describe("kampo in the repo Modelo (T004)", () => {
       // Spec 029 ②b-1b M-2: the status of the field.
       ["intent", ["neutral", "success", "warning", "danger"], "neutral"],
       ["message-position", ["below", "joined"], "below"],
+      // Spec 036 Teil 5 ②b-2 (A-kampo-1): the unit of a number.
+      ["unit", "string", undefined],
     ]);
     // Spec 029 ②b-1b (Nachlese 12): label is a prop now, shown as the visible label.
     expect(skemo.props.find((prop) => prop.name === "label")?.shown).toBe(true);
@@ -162,6 +164,8 @@ describe("kampo in the repo Modelo (T004)", () => {
       "status-icon",
       "surface",
       "text",
+      // Spec 036 Teil 5 ②b-2 (A-kampo-1).
+      "unit",
     ]);
   });
 
@@ -194,6 +198,8 @@ describe("kampo in the repo Modelo (T004)", () => {
       "slot:error",
       "slot:message",
       "slot:disabled-reason",
+      // Spec 036 Teil 5 ②b-2 (A-kampo-1).
+      "prop:unit",
     ]);
     expect(skemo.a11y.states).toEqual({
       loading: ["aria-busy"],

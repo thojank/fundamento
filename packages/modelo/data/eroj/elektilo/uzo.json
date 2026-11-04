@@ -4,7 +4,7 @@
     "id": "uzo_01M4WYFM3GF1QAY02M9D1J4M8E",
     "ero": "ero_01M4WYFKBHR43AQNZH9SSKKQTB",
     "skemo": "ske_01M4WYFKQC9XZQ48YDQN9VBD12",
-    "purpose": "Chooses one of many options from a list that opens on demand: country, language, year.",
+    "purpose": "Chooses one of many options from a list that opens on demand: country, language, year; options of one group name it (attribute group) and stand under its heading.",
     "instead": [
       {
         "goal": "choose-few",
@@ -77,21 +77,6 @@
         },
         "kialo": "A drawn list with icons and descriptions is the listelektilo, because it brings its own keyboard and screen reader behaviour (Spec 025 ③ closes the boundary custom-popup); a list of words stays the platform's.",
         "ero": "listelektilo"
-      },
-      {
-        "case": "grouped-options",
-        "action": "ask-human",
-        "keywords": {
-          "en": [
-            "optgroup",
-            "grouped"
-          ],
-          "de": [
-            "gruppiert",
-            "optionsgruppen"
-          ]
-        },
-        "kialo": "Options under headings in one list are a choice of a person, because a heading is no option and the grouping changes what the list says; Fundamento has no such Ero yet."
       },
       {
         "case": "no-visible-label",
@@ -238,6 +223,115 @@
         "check": {
           "kind": "max-sentences",
           "count": 1
+        }
+      }
+    ],
+    "when-not": [
+      {
+        "case": {
+          "de": "Es gibt höchstens fünf Optionen, die alle sichtbar bleiben können.",
+          "en": "There are at most five options, which can all stay visible."
+        },
+        "ero": "elekto"
+      },
+      {
+        "case": {
+          "de": "Die Liste ist lang und die Person kennt einen Teil des Worts, das sie sucht.",
+          "en": "The list is long and the person knows a part of the word they look for."
+        },
+        "ero": "kompletigilo"
+      },
+      {
+        "case": {
+          "de": "Mehrere Werte aus derselben Liste sollen gewählt werden.",
+          "en": "Several values from the same list are to be chosen."
+        },
+        "ero": "plurelektilo"
+      },
+      {
+        "case": {
+          "de": "Die Optionen brauchen ein Symbol oder eine Beschreibung neben dem Wort.",
+          "en": "The options need an icon or a description beside the word."
+        },
+        "ero": "listelektilo"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Zeig immer eine sichtbare Beschriftung, die sagt, was gewählt wird.",
+          "en": "Always show a visible label that says what is chosen."
+        },
+        {
+          "de": "Fasse verwandte Optionen mit group unter einer Überschrift zusammen.",
+          "en": "Gather related options with group under a heading."
+        },
+        {
+          "de": "Nimm empty-label, wenn „keine Auswahl“ selbst eine gültige Antwort ist.",
+          "en": "Use empty-label when “no choice” is a valid answer itself."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Einen Platzhalter und empty-label zugleich setzen, denn beide stehen für „nichts gewählt“.",
+          "en": "Set a placeholder and empty-label at once, because both stand for “nothing chosen”."
+        },
+        {
+          "de": "Zwei Optionen mit demselben Wortlaut anbieten.",
+          "en": "Offer two options with the same wording."
+        },
+        {
+          "de": "Den Platzhalter als Beschriftung benutzen, denn er verschwindet, sobald gewählt ist.",
+          "en": "Use the placeholder as the label, because it disappears once something is chosen."
+        }
+      ]
+    },
+    "keyboard": [
+      {
+        "keys": [
+          "ArrowUp",
+          "ArrowDown"
+        ],
+        "action": {
+          "de": "Gehen zur vorigen oder nächsten Option, je nach Plattform öffnen sie zuerst die Liste; bei readonly ändert keine Taste den Wert.",
+          "en": "Move to the previous or next option, depending on the platform they open the list first; with readonly no key changes the value."
+        }
+      },
+      {
+        "keys": [
+          "Home",
+          "End"
+        ],
+        "action": {
+          "de": "Springen zur ersten oder letzten Option.",
+          "en": "Jump to the first or last option."
+        }
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": {
+          "de": "In der offenen Liste übernimmt die Taste die markierte Option und schließt die Liste.",
+          "en": "In the open list the key takes the marked option and closes the list."
+        }
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": {
+          "de": "Schließt die offene Liste, ohne die Wahl zu ändern.",
+          "en": "Closes the open list without changing the choice."
+        }
+      },
+      {
+        "keys": [
+          "Character"
+        ],
+        "action": {
+          "de": "Getippte Buchstaben springen zur Option, die mit ihnen beginnt.",
+          "en": "Typed letters jump to the option that starts with them."
         }
       }
     ]

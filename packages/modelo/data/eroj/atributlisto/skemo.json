@@ -24,6 +24,17 @@
         "name": "label",
         "kind": "string",
         "description": "The accessible name of the list when the page has more than one."
+      },
+      {
+        "name": "max-entries",
+        "kind": "number",
+        "description": "Spec 029 ②a (A-atributlisto-1): at most this many entries show; a button shows the rest („3 weitere anzeigen“). Without it every entry shows, as before. How many columns stand side by side is the container's."
+      },
+      {
+        "name": "expanded",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②a (A-atributlisto-3): the entries beyond max-entries show; the button says so (aria-expanded) and closes them again („Weniger anzeigen“)."
       }
     ],
     "states": [
@@ -33,6 +44,10 @@
       {
         "name": "entries",
         "default": true
+      },
+      {
+        "name": "heading",
+        "text": true
       }
     ],
     "parts": {
@@ -66,6 +81,25 @@
             "layout"
           ]
         }
+      },
+      "more": {
+        "fill": {
+          "fixed": "color.action.tertiary.rest"
+        },
+        "color": {
+          "fixed": "color.action.tertiary.text"
+        },
+        "typography": {
+          "fixed": "typography.label.2"
+        }
+      },
+      "heading": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.headline.4"
+        }
       }
     },
     "bindings": [
@@ -97,14 +131,27 @@
     "a11y": {
       "role": "list",
       "name": [
-        "prop:label"
+        "prop:label",
+        "slot:heading"
       ],
-      "states": {},
+      "states": {
+        "expanded": [
+          "aria-expanded"
+        ]
+      },
       "keys": [],
       "texts": {
         "entries-empty": {
           "de": "keine Angabe",
           "en": "not specified"
+        },
+        "more-count": {
+          "de": "{count} weitere anzeigen",
+          "en": "Show {count} more"
+        },
+        "more-name": {
+          "de": "Weniger anzeigen",
+          "en": "Show fewer"
         }
       }
     },

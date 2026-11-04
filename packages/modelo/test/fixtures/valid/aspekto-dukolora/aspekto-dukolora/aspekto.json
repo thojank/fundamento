@@ -52,7 +52,11 @@
       "upload": "upload-simple",
       "warning": "warning",
       "calendar": "calendar-blank",
-      "edit": "pencil-simple"
+      "edit": "pencil-simple",
+      "first": "caret-line-left",
+      "last": "caret-line-right",
+      "person": "user",
+      "download": "download-simple"
     }
   },
   "agordilo": {
@@ -60,7 +64,7 @@
     "structure": {
       "vortaro": "0.2.0",
       "reference": "komuna",
-      "sha256": "984d278d9aeecf7e8fe9d3e653cb014678c08a3ebe691f90621ea1c169245597"
+      "sha256": "a8e9d6eaf4dedadfae591ec74874aeed8766cd56d082681102fc9f0cdbc92c5c"
     },
     "agordo": {
       "name": "dukolora",

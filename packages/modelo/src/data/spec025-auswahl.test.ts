@@ -117,7 +117,8 @@ describe("signeto (D-14): a tag — static, selectable as a filter, removable", 
       height: { by: ["size"] },
       "inline-padding": { by: ["size"] },
       gap: { fixed: "spacing.xsmall" },
-      radius: { fixed: "radius.role.pill" },
+      // Spec 036 Teil 5 ②b-5 (A-signeto-6): a tag is bounded, the pill stays the insigno's.
+      radius: { fixed: "radius.role.tag" },
     });
     if (skemo === undefined) throw new Error("missing");
     const token = (part: string, property: string, when: Record<string, string>) =>
@@ -230,6 +231,8 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       "label",
       "intent",
       "message-position",
+      // Spec 036 Teil 5 ②b-2 (A-listelektilo-2).
+      "size",
     ]);
     expect(skemo?.states).toEqual([
       "rest",
@@ -254,7 +257,8 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       // Spec 029 ②b-1 M-1: the reason for disabled.
       { name: "disabled-reason", text: true },
     ]);
-    expect(variantKeys(required(skemo))).toEqual(["expanded", "state"]);
+    // Spec 036 Teil 5 ②b-2 (A-listelektilo-2): size keys the field.
+    expect(variantKeys(required(skemo))).toEqual(["expanded", "size", "state"]);
   });
 
   it("names the parts of a field, the chevron, the listbox, the item (an option; option is a web term) with its icon and description — no new token (E1)", () => {
@@ -278,6 +282,9 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
       "spinner",
       "clear",
       "message",
+      // Spec 036 Teil 5 ②b-3 (A-listelektilo-4): the heading of a group and the divider.
+      "group-heading",
+      "divider",
     ]);
     expect(skemo?.parts.item).toEqual({
       color: { by: ["selected"] },
@@ -316,7 +323,8 @@ describe("listelektilo (D-15): a styled select-only list with icons and descript
         readonly: ["aria-readonly"],
         expanded: ["aria-expanded"],
       },
-      keys: ["ArrowUp", "ArrowDown", "Home", "End", "Enter", "Space", "Escape"],
+      // Spec 036 Teil 5 ②b-4 (A-listelektilo-5): typed words jump.
+      keys: ["ArrowUp", "ArrowDown", "Home", "End", "Enter", "Space", "Escape", "Character"],
       texts: {
         "clear-name": { de: "{label} leeren", en: "Clear {label}" },
         required: { de: "erforderlich", en: "required" },
@@ -380,8 +388,17 @@ describe("plurelektilo (D-16): several values from a long list, filterable, the 
       // Spec 029 ②b-1b M-2: the status of the field.
       ["intent", "enum", "neutral"],
       ["message-position", "enum", "below"],
+      // Spec 036 Teil 5 ②b-2 (A-plurelektilo-2).
+      ["size", "enum", "medium"],
+      // Spec 036 Teil 5 ②b-3 (A-plurelektilo-1): „alle wählen“.
+      ["select-all", "boolean", false],
     ]);
-    expect(skemo?.props.find((prop) => prop.name === "summary")?.values).toEqual(["count", "tags"]);
+    // Spec 036 Teil 5 ②b-2 (A-plurelektilo-1): labels between count and tags.
+    expect(skemo?.props.find((prop) => prop.name === "summary")?.values).toEqual([
+      "count",
+      "labels",
+      "tags",
+    ]);
     expect(skemo?.states).toEqual([
       "rest",
       "hover",
@@ -421,6 +438,9 @@ describe("plurelektilo (D-16): several values from a long list, filterable, the 
       "motion",
       "spinner",
       "message",
+      // Spec 036 Teil 5 ②b-3 (A-plurelektilo-4, A-plurelektilo-1): the heading of a group, „alle wählen“.
+      "group-heading",
+      "select-all",
     ]);
     expect(skemo?.parts.check).toEqual({
       color: { by: ["selected"] },
@@ -457,6 +477,8 @@ describe("plurelektilo (D-16): several values from a long list, filterable, the 
         "options-count": { de: "gewählt", en: "selected" },
         "clear-name": { de: "Alle abwählen", en: "Clear all" },
         "values-invalid": { de: "Wähle höchstens {max}.", en: "Choose at most {max}." },
+        // Spec 036 Teil 5 ②b-3 (A-plurelektilo-1).
+        "select-all": { de: "Alle wählen", en: "Select all" },
       },
     });
     expect(skemo?.events?.map((event) => event.name)).toEqual(["input", "change"]);
@@ -614,14 +636,15 @@ describe("lokredaktilo (D-17): a single value of a view turned into a field on t
 });
 
 describe("the Ikonaro of Spec 025 ③ (G1: edit) and the dialogs of the spec (Gvidanto)", () => {
-  it("names edit, not mirrored; twenty-one names; the lokredaktilo composes the ikono", () => {
+  it("names edit, not mirrored; twenty-four names (Spec 036 Teil 5 ②b-3: person, first, last); the lokredaktilo composes the ikono", () => {
     const edit = modelo.ikonaro.find((ikono) => ikono.name === "edit");
     expect(edit).toMatchObject({
       name: "edit",
       meaning: { de: "Stift: bearbeiten", en: "Pencil: edit" },
     });
     expect(edit?.mirror).not.toBe(true);
-    expect(modelo.ikonaro).toHaveLength(21);
+    // Spec 036 Teil 5 ②b-4 (A-ligilo-6): 25 with download.
+    expect(modelo.ikonaro).toHaveLength(25);
     expect(eroNamed("ikono")?.skemo.props.find((prop) => prop.name === "name")?.values).toContain(
       "edit",
     );

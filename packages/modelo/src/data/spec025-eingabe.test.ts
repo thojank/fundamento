@@ -57,6 +57,8 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
       "label",
       "intent",
       "message-position",
+      // Spec 036 Teil 5 ②b-2 (A-kampo-1).
+      "unit",
     ]);
     expect(skemo.props.find((prop) => prop.name === "kind")?.values).toEqual([
       "text",
@@ -108,6 +110,8 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
       "spinner",
       "message",
       "status-icon",
+      // Spec 036 Teil 5 ②b-2 (A-kampo-1).
+      "unit",
     ]);
     // Abnahme #122: inside the field's border, as large as an icon of the field's size, each a
     // target of at least size.target.min.
@@ -159,6 +163,8 @@ describe("the kampo of Spec 025 ①: time, stepper and clear (Arkitekturo contra
       // Spec 029 ②b-1b M-2: the status of the field.
       [{ "slot:message": "filled" }, { intent: ["success", "warning"] }],
       [{ invalid: "true" }, { intent: ["neutral", "danger"] }],
+      // Spec 036 Teil 5 ②b-2 (A-kampo-1): a unit belongs to a number.
+      [{ "prop:unit": "filled" }, { kind: ["number"] }],
     ]);
     expect(rulesOf(judge({ kind: "text", stepper: true }, {}))).toEqual([
       ["ero-prop-constraint", "error"],

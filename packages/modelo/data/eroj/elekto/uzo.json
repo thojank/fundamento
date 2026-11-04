@@ -4,7 +4,7 @@
     "id": "uzo_01M4WT0S1KPRQ3VGRS1SQE69S3",
     "ero": "ero_01M4WT0RA8VHA64P4RFHAEBK1Q",
     "skemo": "ske_01M4WT0RNX8N08R3K1G9V0W6ZN",
-    "purpose": "Chooses one of a few options that all stay visible: payment method, shipping speed, yes/no/maybe.",
+    "purpose": "Chooses one of a few options that all stay visible: payment method, shipping speed, yes/no/maybe; an option may carry a short description (its attribute description).",
     "instead": [
       {
         "goal": "choose-many",
@@ -205,6 +205,90 @@
         "check": {
           "kind": "max-sentences",
           "count": 1
+        }
+      }
+    ],
+    "when-not": [
+      {
+        "case": {
+          "de": "Es gibt sechs oder mehr Optionen, oder ihre Zahl ist nicht bekannt.",
+          "en": "There are six or more options, or their number is not known."
+        },
+        "ero": "elektilo"
+      },
+      {
+        "case": {
+          "de": "Die Frage lässt sich mit Ja oder Nein beantworten.",
+          "en": "The question can be answered with yes or no."
+        },
+        "ero": "markobutono"
+      },
+      {
+        "case": {
+          "de": "Mehrere Optionen dürfen zugleich gewählt sein.",
+          "en": "Several options may be chosen at once."
+        },
+        "ero": "plurelektilo"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Stell die Frage in der Beschriftung und lass jede Option eine eigene Antwort sein.",
+          "en": "Put the question in the label and let every option be an answer of its own."
+        },
+        {
+          "de": "Erkläre eine Option bei Bedarf mit ihrer kurzen Beschreibung.",
+          "en": "Explain an option where needed with its short description."
+        },
+        {
+          "de": "Nimm orientation horizontal nur für bis zu drei kurze Optionen.",
+          "en": "Use orientation horizontal only for up to three short options."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Eine Gruppe mit nur einer Option bauen, denn eine Wahl braucht mindestens zwei.",
+          "en": "Build a group with a single option, because a choice needs at least two."
+        },
+        {
+          "de": "Die Größe large neu setzen: Sie ist ein veralteter Name für medium und wird als medium gezeigt.",
+          "en": "Set the size large anew: it is a deprecated name for medium and is shown as medium."
+        },
+        {
+          "de": "Optionen mit gleichem Wortlaut nebeneinanderstellen.",
+          "en": "Place options with the same wording side by side."
+        }
+      ]
+    },
+    "keyboard": [
+      {
+        "keys": [
+          "ArrowDown",
+          "ArrowRight"
+        ],
+        "action": {
+          "de": "Geht zur nächsten Option und wählt sie, nach der letzten wieder zur ersten.",
+          "en": "Moves to the next option and chooses it, after the last back to the first."
+        }
+      },
+      {
+        "keys": [
+          "ArrowUp",
+          "ArrowLeft"
+        ],
+        "action": {
+          "de": "Geht zur vorigen Option und wählt sie, vor der ersten zur letzten.",
+          "en": "Moves to the previous option and chooses it, before the first to the last."
+        }
+      },
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": {
+          "de": "Wählt die Option mit dem Fokus.",
+          "en": "Chooses the option that has the focus."
         }
       }
     ]

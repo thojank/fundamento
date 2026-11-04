@@ -45,6 +45,10 @@ describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
     ).toEqual([
       ["label", "string", undefined, true],
       ["selected", "string", undefined, undefined],
+      // Spec 036 Teil 5 ②b-2 (A-langetaro-2): three sizes, the last prop.
+      ["size", ["small", "medium", "large"], "medium", undefined],
+      // Spec 036 Teil 5 ②b-2 (A-langetaro-1): the width of the tabs.
+      ["spread", ["content", "fill"], "content", undefined],
     ]);
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled"]);
   });
@@ -84,7 +88,11 @@ describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
     expect(boundToken(skemo, "tabs", "color", { active: "false" })?.token).toBe(
       "color.text.subtle",
     );
-    expect(skemo.parts.tabs?.typography).toEqual({ fixed: "typography.label.1" });
+    // Spec 036 Teil 5 ②b-2 (A-langetaro-2): text, height and room by size; medium as before.
+    expect(skemo.parts.tabs?.typography).toEqual({ by: ["size"] });
+    expect(boundToken(skemo, "tabs", "typography", { size: "medium" })?.token).toBe(
+      "typography.label.1",
+    );
     // Spec 014 ① (Gewicht): the active tab is heavier too — weight by active, semibold where
     // active, none (the role's own weight stands) elsewhere; the indicator stays (G4).
     expect(skemo.parts.tabs?.weight).toEqual({ by: ["active"] });
@@ -92,7 +100,8 @@ describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
       "font.weight.semibold",
     );
     expect(boundToken(skemo, "tabs", "weight", { active: "false" })?.token).toBe("none");
-    expect(skemo.parts.tab?.height).toEqual({ fixed: "size.target.min" });
+    expect(skemo.parts.tab?.height).toEqual({ by: ["size"] });
+    expect(boundToken(skemo, "tab", "height", { size: "medium" })?.token).toBe("size.target.min");
     expect(skemo.parts["selected-indicator"]?.width).toEqual({ by: ["active"] });
     expect(boundToken(skemo, "selected-indicator", "width", { active: "true" })?.token).toBe(
       "border.width.strong",
@@ -113,9 +122,10 @@ describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
     expect(skemo.parts.panel?.["inline-padding"]).toEqual({ fixed: "spacing.medium" });
     // The panel is text of the Ero (axe measured black on the dark page without it, as ④ B-8).
     expect(skemo.parts.panel?.color).toEqual({ fixed: "color.text.default" });
-    expect(styledProps(skemo)).toEqual([]);
-    // The state of one entry (active) is no variant of the Ero (E7): the variants are the state alone.
-    expect(variantKeys(skemo)).toEqual(["state"]);
+    // Spec 036 Teil 5 ②b-2 (A-langetaro-2): size keys the tabs.
+    expect(styledProps(skemo)).toEqual(["size"]);
+    // The state of one entry (active) is no variant of the Ero (E7): the variants are size × state.
+    expect(variantKeys(skemo)).toEqual(["size", "state"]);
     expect(combinationsOf(skemo, ["active", "state"])).toHaveLength(8);
   });
 
@@ -133,8 +143,9 @@ describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
       ["switch-view", "option-labels-distinct"],
     ]);
     expect(skemo?.goals?.[0]?.keywords).toEqual({
-      en: ["tabs", "tabbar", "views", "sections"],
-      de: ["reiter", "tabs", "registerkarten", "ansichten"],
+      // Spec 036 Teil 5 ②b-4 (A-langetaro-4): the words of the decided boundary many-tabs.
+      en: ["tabs", "tabbar", "views", "sections", "scrollable", "crowded"],
+      de: ["reiter", "tabs", "registerkarten", "ansichten", "überlauf", "überlaufen"],
     });
   });
 });
@@ -172,8 +183,7 @@ describe("the Uzo of the langetaro (section ⑤, G5)", () => {
       ["list-pages", "pagxigilo"],
     ]);
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
-      // "overflow" is a web term of the Uzo (uzo-web-term): the case is named by what it is.
-      ["many-tabs", "ask-human"],
+      // Spec 036 Teil 5 ②b-4 (A-langetaro-4): many-tabs is decided – the bar scrolls (②a-3).
       ["closable-tabs", "not-supported"],
       ["manual-activation", "ask-human"],
       ["vertical-tabs", "ask-human"],
@@ -198,7 +208,7 @@ describe("the Uzo of the langetaro (section ⑤, G5)", () => {
   it("the brief names active as the axis of the tabs, label as a duty, panel and tabs as duties, and stays under 750", () => {
     if (langetaro === undefined) throw new Error("missing");
     const brief = briefOf(langetaro);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["active"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "spread", "active"]);
     expect(brief.required.props).toEqual(["label"]);
     expect([...brief.required.slots].sort()).toEqual(["panel", "tabs"]);
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);

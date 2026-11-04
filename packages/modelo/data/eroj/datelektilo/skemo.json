@@ -123,6 +123,27 @@
         ],
         "default": "below",
         "description": "Spec 029 ②b-1b M-2: where the message and the error stand – below the field with the space of the field, or joined to it without that space. Never only in a tooltip: the message must be seen (error-not-color-only, error-says-what-to-do)."
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "default": "medium",
+        "description": "Spec 029 ②a (A-datelektilo-2): the height of the field on the scale of the kampo and the elektilo (size.control.*), so the fields of one row stand level; label, text, padding and the icon at its end follow, as at the elektilo. Medium is the field as it was."
+      },
+      {
+        "name": "min-span",
+        "kind": "number",
+        "description": "Spec 029 ②a (A-datelektilo-1): with mode range, the fewest days the range spans (start and end counted); a shorter one is invalid with the Modelo's words."
+      },
+      {
+        "name": "max-span",
+        "kind": "number",
+        "description": "Spec 029 ②a (A-datelektilo-1): with mode range, the most days the range spans (start and end counted); a longer one is invalid with the Modelo's words."
       }
     ],
     "states": [
@@ -167,7 +188,9 @@
           ]
         },
         "typography": {
-          "fixed": "typography.label.1"
+          "by": [
+            "size"
+          ]
         }
       },
       "required-mark": {
@@ -199,12 +222,16 @@
           ]
         },
         "typography": {
-          "fixed": "typography.body.1"
+          "by": [
+            "size"
+          ]
         }
       },
       "trigger": {
         "size": {
-          "fixed": "size.icon.medium"
+          "by": [
+            "size"
+          ]
         },
         "width": {
           "fixed": "size.target.min"
@@ -341,10 +368,14 @@
       },
       "box": {
         "height": {
-          "fixed": "size.control.medium"
+          "by": [
+            "size"
+          ]
         },
         "inline-padding": {
-          "fixed": "spacing.medium"
+          "by": [
+            "size"
+          ]
         },
         "gap": {
           "fixed": "spacing.small"
@@ -374,7 +405,9 @@
       },
       "clear": {
         "size": {
-          "fixed": "size.icon.medium"
+          "by": [
+            "size"
+          ]
         },
         "width": {
           "fixed": "size.target.min"
@@ -604,6 +637,150 @@
           "state": "success"
         },
         "token": "color.status.success.text"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.label.2"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "large"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.body.2"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.body.1"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "size": "large"
+        },
+        "token": "typography.body.1"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.control.small"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.control.medium"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.control.large"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "small"
+        },
+        "token": "spacing.small"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "medium"
+        },
+        "token": "spacing.medium"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "large"
+        },
+        "token": "spacing.medium"
+      },
+      {
+        "part": "trigger",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "trigger",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "trigger",
+        "property": "size",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.icon.large"
+      },
+      {
+        "part": "clear",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "clear",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "clear",
+        "property": "size",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.icon.large"
       }
     ],
     "a11y": {
@@ -682,6 +859,14 @@
         "clear-name": {
           "de": "{label} leeren",
           "en": "Clear {label}"
+        },
+        "min-span-invalid": {
+          "de": "Wähle mindestens {min-span} Tage.",
+          "en": "Choose at least {min-span} days."
+        },
+        "max-span-invalid": {
+          "de": "Wähle höchstens {max-span} Tage.",
+          "en": "Choose at most {max-span} days."
         }
       }
     },
@@ -785,6 +970,28 @@
           ]
         },
         "kialo": "invalid is the short form of danger, because a field is wrong or it is not; with a warning or a success it would say two things at once."
+      },
+      {
+        "when": {
+          "prop:min-span": "filled"
+        },
+        "allowed": {
+          "mode": [
+            "range"
+          ]
+        },
+        "kialo": "A span belongs to a range, because one date has no length."
+      },
+      {
+        "when": {
+          "prop:max-span": "filled"
+        },
+        "allowed": {
+          "mode": [
+            "range"
+          ]
+        },
+        "kialo": "A span belongs to a range, because one date has no length."
       }
     ],
     "goals": [

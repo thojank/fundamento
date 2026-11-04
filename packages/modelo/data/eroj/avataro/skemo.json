@@ -24,18 +24,31 @@
         "name": "size",
         "kind": "enum",
         "values": [
+          "x-small",
           "small",
           "medium",
-          "large"
+          "large",
+          "x-large"
         ],
         "default": "medium",
-        "description": "The size of the circle: small and medium on the icon scale (beside a line of text), large on the control scale (a profile header), which density changes."
+        "description": "The size of the circle: small and medium on the icon scale (beside a line of text), large on the control scale (a profile header), which density changes. Spec 029 ②a (A-avataro-2): x-small for dense lists, x-large for the head of a profile."
       },
       {
         "name": "decorative",
         "kind": "boolean",
         "default": false,
         "description": "True where the name stands right beside the avatar: then the picture is hidden from assistive technology, so the name is not heard twice."
+      },
+      {
+        "name": "corner",
+        "kind": "enum",
+        "values": [
+          "round",
+          "soft",
+          "square"
+        ],
+        "default": "round",
+        "description": "Spec 029 ②a (A-avataro-1): the shape – round for a person, as before; soft and square for a team or a thing."
       }
     ],
     "states": [
@@ -45,7 +58,9 @@
     "parts": {
       "image": {
         "radius": {
-          "fixed": "radius.full"
+          "by": [
+            "corner"
+          ]
         }
       },
       "initials": {
@@ -61,7 +76,9 @@
           ]
         },
         "radius": {
-          "fixed": "radius.full"
+          "by": [
+            "corner"
+          ]
         }
       },
       "box": {
@@ -70,9 +87,27 @@
             "size"
           ]
         }
+      },
+      "icon": {
+        "size": {
+          "by": [
+            "size"
+          ]
+        },
+        "color": {
+          "fixed": "color.text.subtle"
+        }
       }
     },
     "bindings": [
+      {
+        "part": "box",
+        "property": "size",
+        "when": {
+          "size": "x-small"
+        },
+        "token": "size.icon.small"
+      },
       {
         "part": "box",
         "property": "size",
@@ -98,6 +133,22 @@
         "token": "size.control.large"
       },
       {
+        "part": "box",
+        "property": "size",
+        "when": {
+          "size": "x-large"
+        },
+        "token": "size.scale.1000"
+      },
+      {
+        "part": "initials",
+        "property": "typography",
+        "when": {
+          "size": "x-small"
+        },
+        "token": "typography.caption"
+      },
+      {
         "part": "initials",
         "property": "typography",
         "when": {
@@ -120,6 +171,102 @@
           "size": "large"
         },
         "token": "typography.label.1"
+      },
+      {
+        "part": "initials",
+        "property": "typography",
+        "when": {
+          "size": "x-large"
+        },
+        "token": "typography.headline.4"
+      },
+      {
+        "part": "image",
+        "property": "radius",
+        "when": {
+          "corner": "round"
+        },
+        "token": "radius.full"
+      },
+      {
+        "part": "image",
+        "property": "radius",
+        "when": {
+          "corner": "soft"
+        },
+        "token": "radius.small"
+      },
+      {
+        "part": "image",
+        "property": "radius",
+        "when": {
+          "corner": "square"
+        },
+        "token": "radius.none"
+      },
+      {
+        "part": "initials",
+        "property": "radius",
+        "when": {
+          "corner": "round"
+        },
+        "token": "radius.full"
+      },
+      {
+        "part": "initials",
+        "property": "radius",
+        "when": {
+          "corner": "soft"
+        },
+        "token": "radius.small"
+      },
+      {
+        "part": "initials",
+        "property": "radius",
+        "when": {
+          "corner": "square"
+        },
+        "token": "radius.none"
+      },
+      {
+        "part": "icon",
+        "property": "size",
+        "when": {
+          "size": "x-small"
+        },
+        "token": "size.scale.100"
+      },
+      {
+        "part": "icon",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.scale.100"
+      },
+      {
+        "part": "icon",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "icon",
+        "property": "size",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.icon.large"
+      },
+      {
+        "part": "icon",
+        "property": "size",
+        "when": {
+          "size": "x-large"
+        },
+        "token": "size.scale.800"
       }
     ],
     "a11y": {

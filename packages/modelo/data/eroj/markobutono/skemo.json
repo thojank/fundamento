@@ -32,11 +32,13 @@
         "kind": "enum",
         "values": [
           "small",
-          "medium",
-          "large"
+          "medium"
         ],
+        "deprecatedValues": {
+          "large": "medium"
+        },
         "default": "medium",
-        "description": "Box, check mark and label on the scale of the kampo: the check mark takes size.icon.*, the box is the mark plus its border."
+        "description": "Box, check mark and label on the scale of the kampo: the check mark takes size.icon.*, the box is the mark plus its border. Two sizes (Spec 029 ②a, A-markobutono-2); large stays one release as a deprecated alias of medium (②a-2): it renders as medium and says so."
       },
       {
         "name": "disabled",
@@ -82,6 +84,12 @@
         ],
         "default": "below",
         "description": "Spec 029 ②b-1b M-2: where the message and the error stand – below the field with the space of the field, or joined to it without that space. Never only in a tooltip: the message must be seen (error-not-color-only, error-says-what-to-do)."
+      },
+      {
+        "name": "readonly",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②a (A-markobutono-1): can be read and focused, not changed – neither pointer, Space nor the label turns it; its value is sent with the form. Looks as at rest (Spec 035 V-1)."
       }
     ],
     "states": [
@@ -113,6 +121,11 @@
       {
         "name": "disabled-reason",
         "text": true
+      },
+      {
+        "name": "help",
+        "text": true,
+        "beside": true
       }
     ],
     "parts": {
@@ -218,6 +231,14 @@
         "typography": {
           "fixed": "typography.caption"
         }
+      },
+      "help": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
       }
     },
     "trailing": [
@@ -254,14 +275,6 @@
         "property": "typography",
         "when": {
           "size": "medium"
-        },
-        "token": "typography.label.1"
-      },
-      {
-        "part": "label",
-        "property": "typography",
-        "when": {
-          "size": "large"
         },
         "token": "typography.label.1"
       },
@@ -358,14 +371,6 @@
         "token": "size.icon.medium"
       },
       {
-        "part": "indicator",
-        "property": "size",
-        "when": {
-          "size": "large"
-        },
-        "token": "size.icon.large"
-      },
-      {
         "part": "border",
         "property": "color",
         "when": {
@@ -413,6 +418,7 @@
         "prop:label"
       ],
       "description": [
+        "slot:help",
         "slot:error",
         "slot:message",
         "slot:disabled-reason"
@@ -432,6 +438,9 @@
         ],
         "loading": [
           "aria-busy"
+        ],
+        "readonly": [
+          "aria-readonly"
         ]
       },
       "keys": [

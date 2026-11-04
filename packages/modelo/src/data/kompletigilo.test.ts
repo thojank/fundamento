@@ -59,6 +59,8 @@ describe("kompletigilo in the repo Modelo (section ⑤, G1, G2)", () => {
       // Spec 029 ②b-1b M-2: the status of the field.
       ["intent", "enum", "neutral"],
       ["message-position", "enum", "below"],
+      // Spec 036 Teil 5 ②b-2 (A-kompletigilo-1): the most suggestions, the last prop.
+      ["max-suggestions", "number", undefined],
     ]);
     expect(skemo?.states).toEqual([
       "rest",
@@ -175,7 +177,8 @@ describe("kompletigilo in the repo Modelo (section ⑤, G1, G2)", () => {
 describe("the Uzo of the kompletigilo (section ⑤, G6)", () => {
   it("states the purpose; a handful of fixed options is the elekto's, a fixed list the elektilo's; multi-select asks, tags are not supported", () => {
     expect(uzo?.purpose).toBe(
-      "A field that suggests matching values while the person types; the value may be one of the suggestions or, if allowed, free text.",
+      // Spec 036 Teil 5 ②b-3 (A-kompletigilo-4): options name their group.
+      "A field that suggests matching values while the person types; the value may be one of the suggestions or, if allowed, free text; options of one group name it (attribute group) and stand under its heading.",
     );
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["few-fixed-options", "elekto"],

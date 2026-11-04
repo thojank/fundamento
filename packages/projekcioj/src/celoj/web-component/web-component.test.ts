@@ -206,9 +206,11 @@ describe("Web Component Celo for the ligilo (Spec 008 T015)", () => {
     expect(ligiloElement).toContain('"external noopener noreferrer"');
     expect(ligiloElement).toContain("static formAssociated = false;");
     expect(ligiloElement).toContain('customElements.define("fm-ligilo", FmLigilo)');
-    // The slots of the Skemo: the label and icon-end, no icon-start (E3).
-    expect(ligiloElement).toContain('<slot></slot><slot name="icon-end">');
-    expect(ligiloElement).not.toContain('name="icon-start"');
+    // The slots of the Skemo: the label and icon-end (E3); Spec 036 Teil 5 ②b-3 (A-ligilo-4): the
+    // icon-start before the label, as at the butono.
+    expect(ligiloElement).toContain(
+      '<slot name="icon-start"></slot><slot></slot><slot name="icon-end">',
+    );
   });
 
   it("speaks the a11y text as the description and shows the mark while external is true (D-02, D-05)", () => {
@@ -310,7 +312,8 @@ describe("Web Component Celo for the sxaltilo (Spec 010 ①)", () => {
   it("renders a button with role switch as the track, the knob in it and the label beside it", () => {
     const templates = [...sxaltiloElement.matchAll(/`(<[^`]*)`/g)].map((m) => m[1] ?? "");
     expect(templates.flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]))).toEqual(
-      ["field", "control", "indicator", "label", "spinner", "message"],
+      // Spec 036 Teil 5 ②b-3 (A-sxaltilo-4): the help under the label, before the message.
+      ["field", "control", "indicator", "label", "spinner", "help", "message"],
     );
     expect(sxaltiloElement).toContain('role="switch"');
     expect(sxaltiloElement).toContain('aria-labelledby="label"');
@@ -345,7 +348,8 @@ describe("Web Component Celo for the sxaltilo (Spec 010 ①)", () => {
     const inventory = stylesheetInventory(sxaltiloStyles);
     expect(inventory.props).toEqual({
       checked: ["boolean"],
-      size: ["small", "medium", "large"],
+      // Spec 036 Teil 5 ②b-2 (A-sxaltilo-2, A-markobutono-2): two sizes.
+      size: ["small", "medium"],
     });
     expect([...inventory.states].sort()).toEqual([
       "disabled",
@@ -388,6 +392,8 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
       "required-mark",
       // Abnahme #122 (decision 30.10.): the spinner directly after the text, in the label.
       "spinner",
+      // Spec 036 Teil 5 ②b-3 (A-markobutono-4): the help under the label, before the error.
+      "help",
       "error",
       "message",
     ]);
@@ -412,6 +418,8 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
       "label",
       // Abnahme #122: the spinner at the end of the field, after the label.
       "spinner",
+      // Spec 036 Teil 5 ②b-3 (A-sxaltilo-4): the help under the label.
+      "help",
       "message",
     ]);
     expect(sxaltiloElement).toContain('role="switch"');
@@ -473,7 +481,8 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
     const inventory = stylesheetInventory(markobutonoStyles);
     expect(inventory.props).toEqual({
       checked: ["boolean"],
-      size: ["small", "medium", "large"],
+      // Spec 036 Teil 5 ②b-2 (A-sxaltilo-2, A-markobutono-2): two sizes.
+      size: ["small", "medium"],
     });
     expect([...inventory.states].sort()).toEqual([
       "disabled",
@@ -520,6 +529,8 @@ describe("Web Component Celo for the elekto (Spec 010 ③)", () => {
       "control",
       "indicator",
       "option-label",
+      // Spec 036 Teil 5 ②b-3 (A-elekto-4): the description of an option under its label.
+      "option-description",
     ]);
     expect(elektoElement).toContain('role="radiogroup"');
     expect(elektoElement).toContain('aria-labelledby="label"');
@@ -541,6 +552,8 @@ describe("Web Component Celo for the elekto (Spec 010 ③)", () => {
       "required-mark",
       // Abnahme #122 (decision 30.10.): the spinner directly after the text, in the label.
       "spinner",
+      // Spec 036 Teil 5 ②b-3 (A-markobutono-4): the help under the label.
+      "help",
       "error",
       "message",
     ]);
@@ -601,7 +614,8 @@ describe("Web Component Celo for the elekto (Spec 010 ③)", () => {
 
   it("states size as its only styled prop and the five states in the stylesheet inventory (parity)", () => {
     const inventory = stylesheetInventory(elektoStyles);
-    expect(inventory.props).toEqual({ size: ["small", "medium", "large"] });
+    // Spec 036 Teil 5 ②b-2 (A-elekto-2): two sizes.
+    expect(inventory.props).toEqual({ size: ["small", "medium"] });
     expect([...inventory.states].sort()).toEqual([
       "disabled",
       "focus",
@@ -678,6 +692,8 @@ describe("Web Component Celo for the elektilo (Spec 010 ④)", () => {
       "row",
       "control",
       "end",
+      // Spec 036 Teil 5 ②b-2 (A-kampo-1): the unit of a number, the innermost of the end.
+      "unit",
       "status-icon",
       "spinner",
       "help",
@@ -865,6 +881,8 @@ describe("Web Component Celo for the tekstareo (Spec 011 ②)", () => {
       "control",
       "end",
       "spinner",
+      // Spec 036 Teil 5 ②b-2 (A-tekstareo-1): the count of max-length under the area.
+      "count",
       "help",
       "error",
       "message",
@@ -969,13 +987,17 @@ describe("Web Component Celo for the dialogo (Spec 011 ②)", () => {
 
   it("styles the surface from tokens: width by size, backdrop, shadow, radius and border; the reason only with a reason", () => {
     expect(css).toContain(
-      ':where([part="control"][data-size="small"]) {\n  inline-size: var(--fm-size-container-small);',
+      ':where([part="control"][data-size="small"]) {\n  border-radius: var(--fm-radius-role-surface);\n  inline-size: var(--fm-size-container-small);',
     );
     expect(css).toContain(
       ':where([part="control"])::backdrop {\n  background-color: var(--fm-color-backdrop);\n}',
     );
     expect(css).toContain("box-shadow: var(--fm-elevation-shadow-modal);");
+    // Spec 036 Teil 5 ②b-2 (A-dialogo-2): the radius by size, none for full.
     expect(css).toContain("border-radius: var(--fm-radius-role-surface);");
+    expect(css).toContain(
+      ':where([part="control"][data-size="full"]) {\n  border-radius: var(--fm-radius-none);\n  inline-size: var(--fm-size-container-max);',
+    );
     expect(css).toContain("border-color: var(--fm-color-border-default);");
     expect(css).toContain(
       ':where([part="control"]) [part="heading"] {\n  color: var(--fm-color-text-default);\n  font-family: var(--fm-typography-headline-4-font-family);',
@@ -997,7 +1019,7 @@ describe("Web Component Celo for the dialogo (Spec 011 ②)", () => {
   it("states size and reason and the one state rest in the stylesheet inventory (parity)", () => {
     const inventory = stylesheetInventory(styles);
     expect(inventory.props).toEqual({
-      size: ["small", "medium"],
+      size: ["small", "medium", "full"],
       reason: ["none", "optional", "required"],
     });
     expect([...inventory.states]).toEqual(["rest"]);
@@ -1019,7 +1041,8 @@ describe("Web Component Celo for the insigno (Spec 011 ③)", () => {
 
   it("renders a span without a role as the control, the label and the hidden description in it", () => {
     expect(parts(element)).toEqual(["control", "description"]);
-    expect(element).toContain('<span part="control"><slot></slot>');
+    // Spec 036 Teil 5 ②b-3 (A-insigno-4): the icon at the start before the label.
+    expect(element).toContain('<span part="control"><slot name="icon-start"></slot><slot></slot>');
     expect(element).toContain(
       '<span part="description" class="fm-hidden"><slot name="description"></slot></span>',
     );
@@ -1087,7 +1110,7 @@ describe("Web Component Celo for the avizo (Spec 011 ③)", () => {
     expect(element).toContain('<span part="message" id="message"><slot></slot></span>');
     expect(element).toContain('<fm-butono part="dismiss" emphasis="low" size="small" hidden>');
     expect(element).toContain(
-      'control.setAttribute("role", intent === "danger" ? "alert" : "status")',
+      'control.setAttribute("role", intent === "danger" || intent === "warning" ? "alert" : "status")',
     );
     expect(element).toContain('new CustomEvent("dismiss"');
     expect(element).toContain("static formAssociated = false;");
@@ -1113,7 +1136,11 @@ describe("Web Component Celo for the avizo (Spec 011 ③)", () => {
 
   it("states intent and the one state rest in the stylesheet inventory (parity)", () => {
     const inventory = stylesheetInventory(styles);
-    expect(inventory.props).toEqual({ intent: ["info", "success", "warning", "danger"] });
+    // Spec 036 Teil 5 ②b-2 (A-avizo-1): frame keys the radius.
+    expect(inventory.props).toEqual({
+      intent: ["info", "success", "warning", "danger"],
+      frame: ["card", "band"],
+    });
     expect(inventory.states).toEqual(["rest"]);
   });
 });
@@ -1135,7 +1162,8 @@ describe("Web Component Celo for the plenstato (Spec 011 ③)", () => {
     templates(source).flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]));
 
   it("renders a status region with the indicator, the text and the actions; busy while loading", () => {
-    expect(parts(element)).toEqual(["control", "indicator", "text", "actions"]);
+    // Spec 036 Teil 5 ②b-3 (A-plenstato-4): the icon of the slot icon and the title above the text.
+    expect(parts(element)).toEqual(["control", "indicator", "icon", "heading", "text", "actions"]);
     expect(element).toContain('<div part="control" role="status">');
     expect(element).toContain('<span part="indicator" aria-hidden="true">');
     expect(element).toContain('control.setAttribute("aria-busy", String(kind === "loading"))');
@@ -1166,7 +1194,8 @@ describe("Web Component Celo for the plenstato (Spec 011 ③)", () => {
 
   it("states kind and the one state rest in the stylesheet inventory (parity)", () => {
     const inventory = stylesheetInventory(styles);
-    expect(inventory.props).toEqual({ kind: ["loading", "empty"] });
+    // Spec 036 Teil 5 ②b-2 (A-plenstato-1/2): compact keys room and text.
+    expect(inventory.props).toEqual({ kind: ["loading", "empty"], compact: ["boolean"] });
     expect(inventory.states).toEqual(["rest"]);
   });
 });
@@ -1291,7 +1320,8 @@ describe("Web Component Celo for the tabelo (Spec 011 ④)", () => {
 
   it("states density and the states rest, hover and focus in the stylesheet inventory (parity)", () => {
     const inventory = stylesheetInventory(styles);
-    expect(inventory.props).toEqual({ density: ["comfortable", "compact"] });
+    // Spec 036 Teil 5 ②b-2 (A-tabelo-1): three densities; lines is a layout, no axis.
+    expect(inventory.props).toEqual({ density: ["compact", "default", "comfortable"] });
     expect([...inventory.states].sort()).toEqual(["focus", "hover", "rest"]);
   });
 });
@@ -1374,7 +1404,10 @@ describe("Web Component Celo for the navigado (Spec 011 ⑤)", () => {
   ) as string;
 
   it("renders a nav landmark around the slotted links, adopts the light stylesheet, marks the current page and composes the count", () => {
-    expect(element).toContain('<nav part="list"><slot></slot></nav>');
+    // Spec 036 Teil 5 ②b-3 (A-navigado-4): an icon given to the host stands before the links.
+    expect(element).toContain(
+      '<nav part="list"><slot name="icon-start"></slot><slot></slot></nav>',
+    );
     expect(element).toContain("document.adoptedStyleSheets");
     expect(element).toContain('setAttribute("aria-current", "page")');
     expect(element).toContain('setAttribute("aria-label"');
@@ -1499,9 +1532,10 @@ describe("Web Component Celo for the langetaro (Spec 011 ⑤)", () => {
     expect(cssPhysicalPropertyIssues("langetaro.css", css)).toEqual([]);
   });
 
-  it("states no styled prop and the states rest, hover, focus and disabled in the stylesheet inventory (parity)", () => {
+  it("states size and the states rest, hover, focus and disabled in the stylesheet inventory (parity)", () => {
     const inventory = stylesheetInventory(styles);
-    expect(inventory.props).toEqual({});
+    // Spec 036 Teil 5 ②b-2 (A-langetaro-2): size keys the tabs.
+    expect(inventory.props).toEqual({ size: ["small", "medium", "large"] });
     expect([...inventory.states].sort()).toEqual(["disabled", "focus", "hover", "rest"]);
   });
 });
@@ -2100,14 +2134,20 @@ describe("Web Component Celo for the karto (Spec 015 ③)", () => {
     expect(css).toContain(':where([part="control"]) [part="body"] {');
     expect(css).toContain("padding: var(--fm-spacing-medium);");
     expect(css).toContain("font-size: var(--fm-typography-headline-4-font-size);");
-    expect(css).not.toContain("[data-");
+    // Spec 036 Teil 5 ②b-2 (A-karto-1): the surface by emphasis – the only data attribute; low
+    // takes the ground of the host.
+    expect([...new Set(css.match(/\[data-[a-z-]+=/g) ?? [])]).toEqual(["[data-emphasis="]);
+    expect(css).toContain(
+      ':where([part="control"][data-emphasis="low"]) {\n  background-color: inherit;\n}',
+    );
     expect(componentCssIssues("karto.css", css)).toEqual([]);
     expect(cssPhysicalPropertyIssues("karto.css", css)).toEqual([]);
   });
 
-  it("the parity inventory names no prop and the one state rest", () => {
+  it("the parity inventory names emphasis and the one state rest", () => {
     const inventory = stylesheetInventory(files["eroj/src/generated/karto.styles.ts"] ?? "");
-    expect(inventory.props).toEqual({});
+    // Spec 036 Teil 5 ②b-2 (A-karto-1).
+    expect(inventory.props).toEqual({ emphasis: ["high", "medium", "low"] });
     expect(inventory.states).toEqual(["rest"]);
   });
 });
@@ -2128,7 +2168,8 @@ describe("Web Component Celo for the avataro (Spec 015 ③)", () => {
   it("renders the image named by the name with the picture and the initials inside; graphemes by Intl.Segmenter; no colour from the name", () => {
     const element = files["eroj/src/generated/fm-avataro.ts"] ?? "";
     expect(element).toContain(
-      '<span part="control"><img part="image" alt="" hidden><span part="initials" aria-hidden="true"></span></span>',
+      // Spec 036 Teil 5 ②b-3 (A-avataro-4): and the default icon, hidden until no name is given.
+      '<span part="control"><img part="image" alt="" hidden><span part="initials" aria-hidden="true"></span><fm-ikono part="icon" name="person" aria-hidden="true" hidden></fm-ikono></span>',
     );
     expect(element).toContain('control.setAttribute("role", "img");');
     expect(element).toContain('control.setAttribute("aria-label", avatarName);');
@@ -2158,9 +2199,13 @@ describe("Web Component Celo for the avataro (Spec 015 ③)", () => {
     expect(cssPhysicalPropertyIssues("avataro.css", css)).toEqual([]);
   });
 
-  it("the parity inventory names size and the one state rest", () => {
+  it("the parity inventory names size, corner and the one state rest", () => {
     const inventory = stylesheetInventory(files["eroj/src/generated/avataro.styles.ts"] ?? "");
-    expect(inventory.props).toEqual({ size: ["small", "medium", "large"] });
+    // Spec 036 Teil 5 ②b-2 (A-avataro-1, A-avataro-2).
+    expect(inventory.props).toEqual({
+      size: ["x-small", "small", "medium", "large", "x-large"],
+      corner: ["round", "soft", "square"],
+    });
     expect(inventory.states).toEqual(["rest"]);
   });
 });
@@ -2256,7 +2301,7 @@ describe("Web Component Celo for the kampo of Spec 025 ① (time, stepper, clear
     // Spec 029 ②b-1b M-2 (A-kampo-4), Spec 035 2.1 (Skemo trailing): the status icon first in
     // the end, before the spinner.
     expect(element).toContain(
-      '<div part="row"><input part="control" id="control"><span part="end"><span part="status-icon" aria-hidden="true" hidden><fm-ikono size="small"></fm-ikono></span><span part="spinner" aria-hidden="true" hidden>',
+      '<div part="row"><input part="control" id="control"><span part="end"><span part="unit" id="unit" hidden></span><span part="status-icon" aria-hidden="true" hidden><fm-ikono size="small"></fm-ikono></span><span part="spinner" aria-hidden="true" hidden>',
     );
     const kampoCss = JSON.parse(
       /export const KAMPO_CSS = (".*");/s.exec(
@@ -2395,8 +2440,12 @@ describe("Web Component Celo for the datelektilo (Spec 025 ②)", () => {
     // The trigger takes the least target (Abnahme #122: inside the field like the Fonto's), its
     // calendar the size of a chevron (Spec 035 2.3.1), prev and next the small control; the
     // calendar its surface, shadow, layer, width and padding; its height none while closed.
+    // Spec 036 Teil 5 ②b-2 (A-datelektilo-2): the calendar's glyph by size, its target in every size.
     expect(css).toContain(
-      ':where([part="field"]) [part="trigger"] {\n  inline-size: var(--fm-size-icon-medium);\n  block-size: var(--fm-size-icon-medium);\n  min-inline-size: var(--fm-size-target-min);\n  min-block-size: var(--fm-size-target-min);',
+      ':where([part="field"]) [part="trigger"] {\n  min-inline-size: var(--fm-size-target-min);\n  min-block-size: var(--fm-size-target-min);',
+    );
+    expect(css).toContain(
+      ':where([part="field"][data-size="medium"]) [part="trigger"] {\n  inline-size: var(--fm-size-icon-medium);\n  block-size: var(--fm-size-icon-medium);',
     );
     expect(css).toContain(
       ':where([part="field"]) [part="prev"] {\n  inline-size: var(--fm-size-control-small);',
@@ -2416,7 +2465,11 @@ describe("Web Component Celo for the datelektilo (Spec 025 ②)", () => {
 
   it("the parity inventory reads expanded as a boolean and the six states of a field", () => {
     const inventory = stylesheetInventory(files["eroj/src/generated/datelektilo.styles.ts"] ?? "");
-    expect(inventory.props).toEqual({ expanded: ["boolean"] });
+    // Spec 036 Teil 5 ②b-2 (A-datelektilo-2): size keys the field.
+    expect(inventory.props).toEqual({
+      expanded: ["boolean"],
+      size: ["small", "medium", "large"],
+    });
     expect([...inventory.states].sort()).toEqual(
       ["disabled", "focus", "hover", "invalid", "readonly", "rest", "warning", "success"].sort(),
     );
@@ -2458,13 +2511,14 @@ describe("Web Component Celo for the selection Eroj (Spec 025 ③)", () => {
     expect(css).toContain(
       ':where([part="control"][data-selected="true"][data-intent="neutral"]) {\n  background-color: var(--fm-color-action-primary-selected);',
     );
-    expect(css).toContain("border-radius: var(--fm-radius-role-pill);");
+    // Spec 036 Teil 5 ②b-5 (A-signeto-6): a tag is bounded, the pill stays the insigno's.
+    expect(css).toContain("border-radius: var(--fm-radius-role-tag);");
     expect(componentCssIssues("signeto.css", css)).toEqual([]);
     expect(cssPhysicalPropertyIssues("signeto.css", css)).toEqual([]);
     const inventory = stylesheetInventory(files["eroj/src/generated/signeto.styles.ts"] ?? "");
     expect(inventory.props).toEqual({
       selected: ["boolean"],
-      size: ["small", "medium"],
+      size: ["small", "medium", "large"],
       intent: ["neutral", "info", "success", "warning", "danger"],
     });
   });
@@ -2504,7 +2558,8 @@ describe("Web Component Celo for the selection Eroj (Spec 025 ③)", () => {
     // A listbox owns options alone (ARIA; axe aria-required-children, Abweichung 4 of plan ③): the
     // popover is a panel, the rows' holder is the listbox.
     expect(element).toContain(
-      '<div part="listbox" id="panel" popover="manual"><input part="filter" type="search" aria-controls="listbox" autocomplete="off" hidden><div part="items" role="listbox" id="listbox" aria-multiselectable="true"></div><fm-butono part="clear" emphasis="low" size="small"></fm-butono></div>',
+      // Spec 036 Teil 5 ②b-3 (A-plurelektilo-1): „alle wählen“ between the filter and the list.
+      '<div part="listbox" id="panel" popover="manual"><input part="filter" type="search" aria-controls="listbox" autocomplete="off" hidden><div part="select-all" role="checkbox" aria-checked="false" tabindex="0" hidden><fm-ikono name="check" aria-hidden="true"></fm-ikono><span id="select-all-text"></span></div><div part="items" role="listbox" id="listbox" aria-multiselectable="true"></div><fm-butono part="clear" emphasis="low" size="small"></fm-butono></div>',
     );
     expect(element).toContain('<fm-ikono part="check" name="check" aria-hidden="true">');
     for (const key of ["options-count", "clear-name", "values-invalid"])

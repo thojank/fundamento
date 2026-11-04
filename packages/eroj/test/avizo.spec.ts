@@ -44,7 +44,8 @@ test.describe("fm-avizo behaviour", () => {
     // In an English document the English word is heard.
     await page.evaluate(() => document.documentElement.setAttribute("lang", "en"));
     await page.locator("#a").evaluate((element) => element.setAttribute("intent", "warning"));
-    await expect(page.getByRole("status")).toHaveText(/^Warning:/);
+    // Spec 036 ②b-4 (A-avizo-5): a warning is an alert, like danger.
+    await expect(page.getByRole("alert")).toHaveText(/^Warning:/);
   });
 
   test("heading, details and actions show only while they have content; the parts of the notice", async ({

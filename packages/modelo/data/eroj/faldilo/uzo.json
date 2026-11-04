@@ -138,6 +138,60 @@
           }
         }
       }
+    ],
+    "when-not": [
+      {
+        "case": {
+          "de": "Die Person wechselt zwischen Ansichten desselben Dings, von denen immer eine zu sehen ist.",
+          "en": "The person switches between views of the same thing, one of which is always shown."
+        },
+        "ero": "langetaro"
+      },
+      {
+        "case": {
+          "de": "Jeder muss den Inhalt lesen, er darf also nicht verborgen sein.",
+          "en": "Everyone has to read the content, so it must not be hidden."
+        },
+        "ero": "teksto"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Lass die Zusammenfassung sagen, was hinter ihr steht.",
+          "en": "Let the summary say what lies behind it."
+        },
+        {
+          "de": "Gib mehreren Abschnitten dieselbe group, wenn immer nur einer offen sein soll.",
+          "en": "Give several sections the same group when only one should be open at a time."
+        },
+        {
+          "de": "Nenne bei disabled den Grund, damit der Abschnitt erreichbar bleibt und sagt, warum er zu ist.",
+          "en": "Give the reason with disabled, so the section stays reachable and says why it is closed."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Einen Abschnitt in einen zweiten schachteln, denn dann muss die Person zweimal öffnen.",
+          "en": "Nest one section in another, because then the person has to open twice."
+        },
+        {
+          "de": "Pflichtangaben oder Fehler hinter einer geschlossenen Zusammenfassung verstecken.",
+          "en": "Hide required information or errors behind a closed summary."
+        }
+      ]
+    },
+    "keyboard": [
+      {
+        "keys": [
+          "Enter",
+          "Space"
+        ],
+        "action": {
+          "de": "Öffnet oder schließt den Inhalt, wenn die Zusammenfassung den Fokus hat; bei disabled geschieht nichts.",
+          "en": "Opens or closes the content while the summary has the focus; with disabled nothing happens."
+        }
+      }
     ]
   }
 }

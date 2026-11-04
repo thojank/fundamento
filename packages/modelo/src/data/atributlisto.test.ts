@@ -36,6 +36,9 @@ describe("atributlisto in the repo Modelo (section ④, G1, G2, E10)", () => {
       [
         ["layout", ["columns", "stacked", "auto"], "columns"],
         ["label", "string", undefined],
+        // Spec 036 Teil 5 ②b-2 (A-atributlisto-1/3): the most entries shown, and the rest open.
+        ["max-entries", "number", undefined],
+        ["expanded", "boolean", false],
       ],
     );
     expect(skemo?.states).toEqual(["rest"]);
@@ -44,12 +47,25 @@ describe("atributlisto in the repo Modelo (section ④, G1, G2, E10)", () => {
   });
 
   it("has one slot entries (default): the dl with its dt/dd pairs in the light DOM (E10)", () => {
-    expect(skemo?.slots).toEqual([{ name: "entries", default: true }]);
+    expect(skemo?.slots).toEqual([
+      { name: "entries", default: true },
+      // Spec 036 Teil 5 ②b-3 (A-atributlisto-4): the title above the list.
+      { name: "heading", text: true },
+    ]);
   });
 
   it("names its parts: term in the muted label role, value in the default text, the gaps of the list and the box", () => {
     if (skemo === undefined) throw new Error("missing");
-    expect(Object.keys(skemo.parts).sort()).toEqual(["box", "list", "term", "value"]);
+    // Spec 036 Teil 5 ②b-2 (A-atributlisto-1): more, the button for the rest.
+    // Spec 036 Teil 5 ②b-3 (A-atributlisto-4): heading, the title.
+    expect(Object.keys(skemo.parts).sort()).toEqual([
+      "box",
+      "heading",
+      "list",
+      "more",
+      "term",
+      "value",
+    ]);
     expect(skemo.parts.term?.color).toEqual({ fixed: "color.text.muted" });
     expect(skemo.parts.term?.typography).toEqual({ fixed: "typography.label.2" });
     expect(skemo.parts.value?.color).toEqual({ fixed: "color.text.default" });
@@ -78,9 +94,13 @@ describe("atributlisto in the repo Modelo (section ④, G1, G2, E10)", () => {
 
   it("speaks role list, named by its label prop; an empty value is heard as 'keine Angabe' (G4, D-05)", () => {
     expect(skemo?.a11y.role).toBe("list");
-    expect(skemo?.a11y.name).toEqual(["prop:label"]);
+    // Spec 036 Teil 5 ②b-3 (A-atributlisto-4): else the title names it.
+    expect(skemo?.a11y.name).toEqual(["prop:label", "slot:heading"]);
     expect(skemo?.a11y.texts).toEqual({
       "entries-empty": { de: "keine Angabe", en: "not specified" },
+      // Spec 036 Teil 5 ②b-2 (A-atributlisto-1).
+      "more-count": { de: "{count} weitere anzeigen", en: "Show {count} more" },
+      "more-name": { de: "Weniger anzeigen", en: "Show fewer" },
     });
   });
 
@@ -96,9 +116,14 @@ describe("atributlisto in the repo Modelo (section ④, G1, G2, E10)", () => {
 describe("the Uzo of the atributlisto (section ④, G5)", () => {
   it("states the purpose, requires the entries; size container, values may wrap", () => {
     expect(uzo?.purpose).toBe(
-      "Shows the fields of one record as name and value: version, owner, valid since.",
+      // Spec 036 Teil 5 ②b-3 (A-atributlisto-4).
+      "Shows the fields of one record as name and value: version, owner, valid since; a title above them (slot heading) names the list.",
     );
-    expect(uzo?.slots).toEqual({ entries: { accepts: ["text"], required: true, nesting: 0 } });
+    expect(uzo?.slots).toEqual({
+      entries: { accepts: ["text"], required: true, nesting: 0 },
+      // Spec 036 Teil 5 ②b-3 (A-atributlisto-4).
+      heading: { accepts: ["text"], max: 1, nesting: 0 },
+    });
     expect(uzo?.layout).toMatchObject({ size: "container", wrap: "allowed" });
   });
 

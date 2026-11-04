@@ -52,7 +52,7 @@
         "name": "field",
         "kind": "boolean",
         "default": false,
-        "description": "A number field beside the track that shows the value and takes it typed (WCAG 2.5.7: dragging has an alternative without dragging; the keys are one, the field another)."
+        "description": "A number field beside the track that shows the value and takes it typed (WCAG 2.5.7: dragging has an alternative without dragging; the keys are one, the field another). Spec 029 ②a (A-glitilo-1): the same as readout field, which names it now; field stays as the props of 0.2.0 stand (Arkitekturo)."
       },
       {
         "name": "required",
@@ -116,6 +116,28 @@
         ],
         "default": "below",
         "description": "Spec 029 ②b-1b M-2: where the message and the error stand – below the field with the space of the field, or joined to it without that space. Never only in a tooltip: the message must be seen (error-not-color-only, error-says-what-to-do)."
+      },
+      {
+        "name": "readout",
+        "kind": "enum",
+        "values": [
+          "none",
+          "text",
+          "field"
+        ],
+        "default": "none",
+        "description": "Spec 029 ②a (A-glitilo-1): how the value shows beside the track – none, as before (the thumbs say it); text, the value as words beside the track; field, the number field beside it, as field did. No tooltip: it hides the value under a finger."
+      },
+      {
+        "name": "min-distance",
+        "kind": "number",
+        "description": "Spec 029 ②a (A-glitilo-1): with range, the least distance between the two thumbs, in the unit of the values; a thumb stops there."
+      },
+      {
+        "name": "ticks",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②a (A-glitilo-4): a mark without words at every step between min and max, for a scale of few steps (0 to 10); the marks are seen, not heard – the value is."
       }
     ],
     "states": [
@@ -210,6 +232,14 @@
           "fixed": "radius.full"
         }
       },
+      "readout": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        }
+      },
       "number": {
         "width": {
           "by": [
@@ -292,6 +322,17 @@
         },
         "typography": {
           "fixed": "typography.caption"
+        }
+      },
+      "tick": {
+        "color": {
+          "fixed": "color.border.strong"
+        },
+        "width": {
+          "fixed": "border.width.strong"
+        },
+        "height": {
+          "fixed": "spacing.small"
         }
       }
     },
@@ -607,6 +648,17 @@
           ]
         },
         "kialo": "invalid is the short form of danger, because a field is wrong or it is not; with a warning or a success it would say two things at once."
+      },
+      {
+        "when": {
+          "prop:min-distance": "filled"
+        },
+        "allowed": {
+          "range": [
+            "true"
+          ]
+        },
+        "kialo": "A distance needs two thumbs to keep apart, because one value stands alone."
       }
     ],
     "goals": [

@@ -25,6 +25,7 @@ import type {
   UzoLayout,
   UzoSlot,
 } from "../contracts/modelo.js";
+import { dokuTextIn, isDokuOffen } from "../eroj/dokumentaro.js";
 import { variantKeys } from "../eroj/inventories.js";
 import { labelBeside } from "../lingvo/nomoj.js";
 import { type Lingvo, reguloIn, uzoIn } from "../lingvo/tradukoj.js";
@@ -121,6 +122,13 @@ export interface UzoOutput {
         };
   };
   content: (Omit<UzoContent, "regulo"> & { regulo: ReguloRef })[];
+  /**
+   * Spec 036 Teil 5 ③ (Spec 029 ③): the documentation fields of the Uzo in the language asked
+   * for; a field that still holds the placeholder is left out, so an agent never quotes it.
+   */
+  "when-not"?: { case: string; ero: string }[];
+  "do-dont"?: { do: string[]; dont: string[] };
+  keyboard?: { keys: string[]; action: string }[] | { none: string };
 }
 
 /**
@@ -135,7 +143,17 @@ export interface GetEroBrief {
    * (checked, Spec 010 ① D-03) with true and false; and the state of one entry of a slot
    * (selected, Spec 010 ③ E7) with the slot it belongs to and no default (Spec 011 ① O-3).
    */
-  axes: { name: string; values: string[]; default?: string; slot?: string }[];
+  axes: {
+    name: string;
+    values: string[];
+    default?: string;
+    slot?: string;
+    /**
+     * Values still accepted for one release, each with the value it renders as (Spec 036 Teil 5
+     * ②b-2, Spec 029 ②a-2): an agent writes the value they name.
+     */
+    deprecated?: Record<string, string>;
+  }[];
   /**
    * Every other prop of the Skemo with its type, in Skemo order (Nachlese 5 N5-3): what an agent
    * may set beyond the axes — loading at the kompletigilo, min-chars, value. Absent when every
@@ -419,7 +437,43 @@ export function uzoOf(
       ...structuredClone(entry),
       regulo: reguloRefNamed(modelo, entry.regulo, lingvo),
     })),
+    ...dokuOf(uzo, lingvo),
   };
+}
+
+/**
+ * The documentation fields of a Uzo as get_ero states them (Spec 036 Teil 5 ③): every text in the
+ * language asked for, English by default as every Uzo text; a placeholder is left out.
+ */
+function dokuOf(
+  uzo: Uzo,
+  lingvo: Lingvo | undefined,
+): Pick<UzoOutput, "when-not" | "do-dont" | "keyboard"> {
+  const out: Pick<UzoOutput, "when-not" | "do-dont" | "keyboard"> = {};
+  const whenNot = uzo["when-not"];
+  if (Array.isArray(whenNot)) {
+    out["when-not"] = whenNot.map((entry) => ({
+      case: dokuTextIn(entry.case, lingvo),
+      ero: entry.ero,
+    }));
+  }
+  const doDont = uzo["do-dont"];
+  if (doDont !== undefined && !isDokuOffen(doDont) && "do" in doDont) {
+    out["do-dont"] = {
+      do: doDont.do.map((text) => dokuTextIn(text, lingvo)),
+      dont: doDont.dont.map((text) => dokuTextIn(text, lingvo)),
+    };
+  }
+  const keyboard = uzo.keyboard;
+  if (Array.isArray(keyboard)) {
+    out.keyboard = keyboard.map((row) => ({
+      keys: [...row.keys],
+      action: dokuTextIn(row.action, lingvo),
+    }));
+  } else if (keyboard !== undefined && "none" in keyboard) {
+    out.keyboard = { none: dokuTextIn(keyboard.none, lingvo) };
+  }
+  return out;
 }
 
 /** The brief answer of an Ero (A8), generated from its Skemo and Uzo. */
@@ -438,6 +492,9 @@ export function briefOf(entry: LoadedEro): GetEroBrief {
           name: prop.name,
           values: prop.kind === "enum" ? [...(prop.values ?? [])] : ["true", "false"],
           ...(prop.default === undefined ? {} : { default: String(prop.default) }),
+          ...(prop.deprecatedValues === undefined
+            ? {}
+            : { deprecated: { ...prop.deprecatedValues } }),
         })),
       ...skemo.slots.flatMap((slot) =>
         slot.entry === undefined

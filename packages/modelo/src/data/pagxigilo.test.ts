@@ -46,6 +46,14 @@ describe("pagxigilo in the repo Modelo (section ①, G1, G2)", () => {
       ["mode", "enum", false, "button"],
       ["href-template", "string", false, "?page={page}"],
       ["siblings", "number", false, 1],
+      // Spec 036 Teil 5 ②b-2 (A-pagxigilo-2): small and medium, the last prop.
+      ["size", "enum", false, "medium"],
+      // Spec 036 Teil 5 ②b-2 (A-pagxigilo-1): what stands between the arrows.
+      ["summary", "enum", false, "pages"],
+      // Spec 036 Teil 5 ②b-3 (A-pagxigilo-4): the buttons to the first and the last page.
+      ["first-last", "boolean", false, false],
+      // Spec 036 Teil 5 ②b-4 (A-pagxigilo-6): an unknown total.
+      ["total-unknown", "boolean", false, false],
     ]);
     expect(skemo?.props.find((prop) => prop.name === "mode")?.values).toEqual(["button", "link"]);
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled"]);
@@ -55,8 +63,9 @@ describe("pagxigilo in the repo Modelo (section ①, G1, G2)", () => {
     expect(entryKeysOf(skemoOrThrow())).toEqual([
       { slot: "items", key: "current", equals: "page" },
     ]);
-    // The axis is the state alone: current is the state of one entry, no variant (E7).
-    expect(variantKeys(skemoOrThrow())).toEqual(["state"]);
+    // The axes are size and state: current is the state of one entry, no variant (E7); size since
+    // Spec 036 Teil 5 ②b-2 (A-pagxigilo-2).
+    expect(variantKeys(skemoOrThrow())).toEqual(["size", "state"]);
     expect(combinationsOf(skemoOrThrow(), ["state"])).toHaveLength(4);
   });
 
@@ -65,15 +74,20 @@ describe("pagxigilo in the repo Modelo (section ①, G1, G2)", () => {
       "item",
       "border",
       "ellipsis",
+      // Spec 036 Teil 5 ②b-2 (A-pagxigilo-1): the place between the arrows.
+      "summary",
       "prev",
       "next",
       "box",
       "focus-ring",
+      // Spec 036 Teil 5 ②b-3 (A-pagxigilo-4).
+      "first",
+      "last",
     ]);
     expect(skemo?.parts.item).toMatchObject({
       fill: { by: ["current", "state"] },
       color: { by: ["current", "state"] },
-      typography: { fixed: "typography.label.1" },
+      typography: { by: ["size"] },
       weight: { by: ["current"] },
       height: { fixed: "size.target.min" },
       width: { fixed: "size.target.min" },
@@ -83,8 +97,8 @@ describe("pagxigilo in the repo Modelo (section ①, G1, G2)", () => {
       width: { by: ["current"] },
       color: { fixed: "color.border.strong" },
     });
-    expect(skemo?.parts.prev).toEqual({ size: { fixed: "size.icon.medium" } });
-    expect(skemo?.parts.next).toEqual({ size: { fixed: "size.icon.medium" } });
+    expect(skemo?.parts.prev).toEqual({ size: { by: ["size"] } });
+    expect(skemo?.parts.next).toEqual({ size: { by: ["size"] } });
     expect(skemo?.parts.ellipsis?.color).toEqual({ fixed: "color.navigation.text.rest" });
     const bound = (part: string, property: string, when: Record<string, string>) =>
       boundToken(skemoOrThrow(), part, property, when)?.token;
@@ -117,6 +131,14 @@ describe("pagxigilo in the repo Modelo (section ①, G1, G2)", () => {
         "prev-name": { de: "Vorherige Seite", en: "Previous page" },
         "next-name": { de: "Nächste Seite", en: "Next page" },
         "items-name": { de: "Seite", en: "Page" },
+        // Spec 036 Teil 5 ②b-2 (A-pagxigilo-1).
+        "summary-count": {
+          de: "Seite {page} von {total-pages}",
+          en: "Page {page} of {total-pages}",
+        },
+        // Spec 036 Teil 5 ②b-3 (A-pagxigilo-4).
+        "first-name": { de: "Erste Seite", en: "First page" },
+        "last-name": { de: "Letzte Seite", en: "Last page" },
       },
     });
   });
@@ -133,7 +155,8 @@ describe("pagxigilo in the repo Modelo (section ①, G1, G2)", () => {
 describe("the Uzo of the pagxigilo (section ①, G2)", () => {
   it("states the purpose; more on demand is a butono, views are the langetaro's; infinite scroll and the page size ask", () => {
     expect(uzo?.purpose).toBe(
-      "Moves through the pages of a long list and shows which page is current.",
+      // Spec 036 Teil 5 ②b-3 (A-pagxigilo-4).
+      "Moves through the pages of a long list and shows which page is current; with first-last it jumps to the first and the last page.",
     );
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["load-more", "butono"],
@@ -169,7 +192,7 @@ describe("the Uzo of the pagxigilo (section ①, G2)", () => {
   it("the brief names mode and current as axes, page and total-pages as duties, and stays under 750", () => {
     if (pagxigilo === undefined) throw new Error("missing");
     const brief = briefOf(pagxigilo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["mode", "current"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["mode", "size", "summary", "current"]);
     expect(brief.required).toEqual({ props: ["page", "total-pages"], slots: [] });
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
   });

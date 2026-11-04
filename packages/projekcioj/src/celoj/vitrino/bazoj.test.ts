@@ -77,7 +77,23 @@ describe("Spec 029 ① 5: the foundation pages", () => {
     // message and the kampo's status icon (216). Spec 035 2.3.1 and 2.3.3: the targets of the date
     // picker's trigger and ✕ (+2). Spec 036 Befund 1.1: radius.role.multiline (+1).
     // Spec 036 Befund 2.2: the Zweitfarbe, 12 steps and 5 roles (+17).
-    expect(tokenoj.length).toBe(1900);
+    // Spec 036 Teil 5 ②b-2: elekto, markobutono and sxaltilo lose their size large (−8); the count
+    // of the tekstareo (A-tekstareo-1, +2); listelektilo, plurelektilo and datelektilo by size
+    // (A-*-2: 17 tokens become 51, +34); the unit of the kampo (A-kampo-1, +4). S36-4.2: the sizes
+    // of ikono, signeto, avataro, pagxigilo, langetaro and dialogo (A-*-2: +30, −9 fixed tokens now
+    // keyed by size); the looks of apartigilo, spuro, karto, avataro and avizo (+27, −13);
+    // markdovido, plenstato, tabelo, teksto (+9, −3); the summary of the pagxigilo (+3); the button
+    // for the rest of the atributlisto (+3); the readout of the glitilo (+2). S36-4.3 (②b-3): the
+    // help of markobutono and sxaltilo (+4), the description of an option of the elekto (+2); the
+    // tick of the glitilo (+3), the upload icon of the alsxutilo (+2); the headings of option
+    // groups (+11), the divider of the listelektilo (+2), „alle wählen“ of the plurelektilo (+4);
+    // the icon and the heading of a group of the menuo (+5); the section heading and the icon of
+    // the navigado (+5). S36-4.4: the gap of the insigno and the icon of the spuro (+3); the titles
+    // of atributlisto and plenstato, the icon of the plenstato, the foot of the tabelo and the
+    // close button of the sxvebilo (+10); the default icon of the avataro and the first and last of
+    // the pagxigilo (+10). S36-4.6 (②b-5): the radius role of a tag (+1), the syntax colours (+5);
+    // the line numbers, highlighted lines, language and words by kind of the kodbloko (+12).
+    expect(tokenoj.length).toBe(2060);
     const levels = new Set(tokenoj.map((token) => token.ebeno));
     expect(levels).toEqual(new Set(["grundlage", "rolle", "ero"]));
     const text = tokenoj.find((token) => token.name === "color.text.default");

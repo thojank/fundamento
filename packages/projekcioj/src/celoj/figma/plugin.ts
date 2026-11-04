@@ -663,6 +663,8 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
     "item.typography": typographyOf("items-*"),
     "item.height": [{ node: "item-*", fields: ["minHeight"] }],
     "item.inline-padding": [{ node: "item-*", fields: ["paddingLeft", "paddingRight"] }],
+    // Spec 036 Teil 5 ②b-3 (A-menuo-4): the gap between an entry's icon and its words.
+    "item.gap": [{ node: "item-*", fields: ["itemSpacing"] }],
     "item.radius": [{ node: "item-*", fields: ["cornerRadius"] }],
     "danger-item.color": [{ node: "danger-item", fields: ["fills"], paint: true }],
     "box.inline-padding": [{ node: "surface", fields: [...PADDINGS] }],
@@ -895,6 +897,8 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
     "item.typography": typographyOf("items-*"),
     "underline.width": [{ node: "item-*", fields: ["strokeBottomWeight"] }],
     "underline.color": [{ node: "item-*", fields: ["strokes"], paint: true }],
+    // Spec 036 Teil 5 ②b-3 (A-spuro-4): the gap between the icon of an item and its words.
+    "item.gap": [{ node: "item-*", fields: ["itemSpacing"] }],
     "separator.color": [{ node: "separator-*-mark-*", fields: ["fills"], paint: true }],
     "separator.size": [
       { node: "separator-*", fields: ["width", "height"] },
@@ -910,6 +914,8 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
     "items.typography": typographyOf("items-*"),
     "underline.width": [{ node: "item-*", fields: ["strokeBottomWeight"] }],
     "underline.color": [{ node: "item-*", fields: ["strokes"], paint: true }],
+    // Spec 036 Teil 5 ②b-3 (A-navigado-4): the gap between an item's icon and its words.
+    "item.gap": [{ node: "item-*", fields: ["itemSpacing"] }],
   },
   // A tab list (Spec 011 ⑤): the list is the control — its line the bottom stroke (colour and
   // width), its gap between the tabs; every tab its fill by state, minimum height and inline
@@ -5098,6 +5104,9 @@ async function applyComponents(variables, warnings) {
     const labelled = labelOf(field, component, toggled, undefined, true);
     const label = labelled.label;
     const zone = part(field, "dropzone", () => figma.createFrame());
+    // Spec 036 Teil 5 ②b-3 (A-alsxutilo-4): the upload icon first in the zone, where the Skemo
+    // has the part; shown only where the variant has a dropzone, as on the web.
+    const zoneIcon = component.zoneIcon === true ? part(zone, "icon", () => figma.createFrame()) : undefined;
     const ring = part(zone, "focus-ring", () => figma.createFrame());
     const gap = part(ring, "focus-gap", () => figma.createFrame());
     const choose = part(gap, "choose", () => figma.createFrame());
@@ -5123,7 +5132,7 @@ async function applyComponents(variables, warnings) {
     [labelled.placed, zone, help, error].concat(list !== undefined ? [list] : []).forEach((child, index) => {
       if (field.children.indexOf(child) !== index) field.insertChild(index, child);
     });
-    [ring, hint].forEach((child, index) => {
+    (zoneIcon !== undefined ? [zoneIcon, ring, hint] : [ring, hint]).forEach((child, index) => {
       if (zone.children.indexOf(child) !== index) zone.insertChild(index, child);
     });
     [icon, chooseLabel].forEach((child, index) => {
@@ -5146,6 +5155,7 @@ async function applyComponents(variables, warnings) {
     if (example === undefined) labels.push(label);
     else if (component.label !== undefined) write(label, "characters", component.label.defaultValue);
     const frames = [node, field, zone, ring, gap, choose, icon]
+      .concat(zoneIcon !== undefined ? [zoneIcon] : [])
       .concat(list !== undefined ? [list] : [])
       .concat(...rows.map((row) => [row.row, row.remove, row.removeIcon]));
     for (const frame of frames) own(frame, NEUTRAL);
@@ -5168,6 +5178,10 @@ async function applyComponents(variables, warnings) {
     own(icon, INDICATOR_LAYOUT);
     // The hint shows only where the variant has a dropzone, as on the web (hidden, no room).
     own(hint, { visible: variant.props.dropzone === "true" });
+    if (zoneIcon !== undefined) {
+      own(zoneIcon, INDICATOR_LAYOUT);
+      own(zoneIcon, { visible: variant.props.dropzone === "true" });
+    }
     if (list !== undefined) own(list, TEXTS_LAYOUT);
     for (const row of rows) {
       own(row.row, TOGGLE_LAYOUT);
@@ -5181,11 +5195,13 @@ async function applyComponents(variables, warnings) {
     if (variant.stroke !== undefined) gather(zone).dashPattern = variant.stroke.dashPattern.slice();
     const measures = [];
     const glyphs = drawGlyphs(icon, icons["icon-start"] || "upload", "icon-", measures);
+    const zoneGlyphs = zoneIcon !== undefined ? drawGlyphs(zoneIcon, "upload", "icon-", measures) : {};
     const nodes = Object.assign(
       {
         field, label, help, error, dropzone: zone, "drop-hint": hint,
         "focus-ring": ring, "focus-gap": gap, control: choose, choose,
       },
+      zoneIcon !== undefined ? Object.assign({ icon: zoneIcon }, zoneGlyphs) : {},
       list !== undefined ? { "file-list": list } : {},
       labelled.nodes,
     );
@@ -5215,7 +5231,7 @@ async function applyComponents(variables, warnings) {
     if (variant.stroke !== undefined && variant.stroke.style === "none") {
       for (const paint of gather(zone).strokes || []) paint.visible = false;
     }
-    for (const each of frames.concat(all).concat(Object.values(glyphs))) flush(each);
+    for (const each of frames.concat(all).concat(Object.values(glyphs)).concat(Object.values(zoneGlyphs))) flush(each);
     for (const each of removeGlyphs) for (const glyph of Object.values(each)) flush(glyph);
     bindMeasures(measures, report, component, variant);
   }
@@ -5522,7 +5538,7 @@ async function applyComponents(variables, warnings) {
     // for the whole set, so its text is not connected to the label property; a connection an
     // earlier run made is taken off.
     const one = spec !== undefined && spec.oneInitial !== undefined &&
-      variant.props[spec.oneInitial.prop] === spec.oneInitial.value
+      spec.oneInitial.values.includes(variant.props[spec.oneInitial.prop] ?? "")
       ? spec.oneInitial.text
       : undefined;
     if (one !== undefined) {
@@ -6213,7 +6229,15 @@ async function applyComponents(variables, warnings) {
       // of the plan, shown where the variant is expanded (hidden where its height is none).
       const suggests = isField && component.entry !== undefined;
       const listbox = suggests ? part(field, "listbox", () => figma.createFrame()) : undefined;
-      const help = isField ? part(field, "help", () => figma.createText()) : undefined;
+      // Spec 036 Teil 5 ②b-3 (A-markobutono-4, A-sxaltilo-4): a toggle with the slot help draws it
+      // in the column of its texts, right under the label (before the error), as the web does.
+      const toggleHelp = column !== undefined && typeof (component.texts || {}).help === "string";
+      const help = isField
+        ? part(field, "help", () => figma.createText())
+        : toggleHelp
+          ? part(column, "help", () => figma.createText())
+          : undefined;
+      if (toggleHelp && column.children.indexOf(help) !== 1) column.insertChild(1, help);
       const errorParent = isField ? field : column;
       const error =
         errorParent !== undefined && (isField || typeof (component.texts || {}).error === "string")

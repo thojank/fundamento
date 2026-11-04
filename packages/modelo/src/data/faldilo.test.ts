@@ -44,6 +44,8 @@ describe("faldilo in the repo Modelo (section ⑤, G1, G2)", () => {
       ["group", "string", undefined],
       // Spec 029 ②b-1 M-1 (A-faldilo-3): a section that cannot open for now, with its reason.
       ["disabled", "boolean", false],
+      // Spec 036 Teil 5 ②b-2 (A-faldilo-1): the side of the chevron.
+      ["indicator-side", "enum", "end"],
     ]);
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled"]);
     expect(skemo?.slots).toEqual([
@@ -158,7 +160,7 @@ describe("the Uzo of the faldilo (section ⑤, G6)", () => {
   it("the brief names open as the axis, summary and content as duties, and stays under 750", () => {
     if (faldilo === undefined) throw new Error("missing");
     const brief = briefOf(faldilo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["open"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["open", "indicator-side"]);
     expect(brief.required).toEqual({ props: [], slots: ["summary", "content"] });
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
   });

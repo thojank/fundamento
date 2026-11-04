@@ -18,6 +18,12 @@
         ],
         "required": true,
         "description": "Whether the area loads (an indicator that moves, spoken as busy) or is empty (a dashed surface with the text and, if any, the next step). A duty: there is no state in between."
+      },
+      {
+        "name": "compact",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②a (A-plenstato-1/2): the state for a table or a side bar – less room and the smaller body text; without it as before."
       }
     ],
     "states": [
@@ -31,6 +37,14 @@
       },
       {
         "name": "actions"
+      },
+      {
+        "name": "heading",
+        "text": true
+      },
+      {
+        "name": "icon",
+        "decorative": true
       }
     ],
     "parts": {
@@ -67,7 +81,9 @@
           "fixed": "color.text.muted"
         },
         "typography": {
-          "fixed": "typography.body.1"
+          "by": [
+            "compact"
+          ]
         }
       },
       "actions": {
@@ -85,10 +101,28 @@
       },
       "box": {
         "inline-padding": {
-          "fixed": "spacing.large"
+          "by": [
+            "compact"
+          ]
         },
         "gap": {
           "fixed": "spacing.small"
+        }
+      },
+      "heading": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        }
+      },
+      "icon": {
+        "size": {
+          "fixed": "size.icon.large"
+        },
+        "color": {
+          "fixed": "color.text.muted"
         }
       }
     },
@@ -124,6 +158,38 @@
           "kind": "empty"
         },
         "token": "none"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "compact": "false"
+        },
+        "token": "spacing.large"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "compact": "true"
+        },
+        "token": "spacing.small"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "compact": "false"
+        },
+        "token": "typography.body.1"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "compact": "true"
+        },
+        "token": "typography.body.2"
       }
     ],
     "a11y": {

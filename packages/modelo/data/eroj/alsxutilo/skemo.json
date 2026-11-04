@@ -87,6 +87,11 @@
         ],
         "default": "below",
         "description": "Spec 029 ②b-1b M-2: where the message and the error stand – below the field with the space of the field, or joined to it without that space. Never only in a tooltip: the message must be seen (error-not-color-only, error-says-what-to-do)."
+      },
+      {
+        "name": "max-files",
+        "kind": "number",
+        "description": "Spec 029 ②a (A-alsxutilo-1): the most files a field with multiple takes; empty takes any number. More files make the field invalid with the Modelo's words (max-files-invalid); the help states the number (file-constraints-stated)."
       }
     ],
     "states": [
@@ -274,6 +279,14 @@
         },
         "typography": {
           "fixed": "typography.caption"
+        }
+      },
+      "icon": {
+        "size": {
+          "fixed": "size.icon.large"
+        },
+        "color": {
+          "fixed": "color.text.muted"
         }
       }
     },
@@ -506,6 +519,10 @@
         "loading": {
           "de": "lädt",
           "en": "loading"
+        },
+        "max-files-invalid": {
+          "de": "{count} Dateien gewählt: Wähle höchstens {max-files}.",
+          "en": "{count} files chosen: choose at most {max-files}."
         }
       }
     },
@@ -587,6 +604,28 @@
           ]
         },
         "kialo": "invalid is the short form of danger, because a field is wrong or it is not; with a warning or a success it would say two things at once."
+      },
+      {
+        "when": {
+          "prop:max-files": "filled"
+        },
+        "allowed": {
+          "multiple": [
+            "true"
+          ]
+        },
+        "kialo": "A most number of files needs a field that takes several, because one file is never too many."
+      },
+      {
+        "when": {
+          "slot:help": "empty"
+        },
+        "allowed": {
+          "prop:max-files": [
+            "empty"
+          ]
+        },
+        "kialo": "Who learns the most number of files only from the error makes the mistake twice: a field with max-files states the number in its help, 'höchstens 3 Dateien' (file-constraints-stated)."
       }
     ],
     "goals": [

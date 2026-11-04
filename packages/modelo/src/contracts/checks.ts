@@ -11,6 +11,7 @@ export const CHECK_NAMES = [
   "clean-room",
   "ikonaro",
   "fontoj",
+  "dokumentaro",
 ] as const;
 
 export type CheckName = (typeof CHECK_NAMES)[number];

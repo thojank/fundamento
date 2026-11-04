@@ -57,14 +57,17 @@ describe("karto in the repo Modelo (section ③, G1, G2)", () => {
       ["level", ["1", "2", "3", "4", "5", "6"], true, undefined],
       ["orientation", ["vertical", "horizontal"], false, "vertical"],
       ["standalone", "boolean", false, true],
+      // Spec 036 Teil 5 ②b-2 (A-karto-1): the surface by emphasis (D-S36-4.2-4).
+      ["emphasis", ["high", "medium", "low"], false, "high"],
     ]);
     // The levels are the titolo's: a card hands its own on.
     expect(skemo?.props[0]?.values).toEqual(
       eroNamed("titolo")?.skemo.props.find((prop) => prop.name === "level")?.values,
     );
     expect(skemo?.states).toEqual(["rest"]);
-    // No part is keyed by a prop: orientation is layout (Celo), standalone the landmark.
-    expect(variantKeys(skemoOrThrow())).toEqual(["state"]);
+    // Orientation is layout (Celo), standalone the landmark; emphasis keys the surface (Spec 036
+    // Teil 5 ②b-2).
+    expect(variantKeys(skemoOrThrow())).toEqual(["emphasis", "state"]);
   });
 
   it("has the slots heading (text), media, content (default), meta and actions", () => {
@@ -80,9 +83,9 @@ describe("karto in the repo Modelo (section ③, G1, G2)", () => {
   it("names its parts: the raised surface with its subtle border, heading, content, meta, actions and box — no new token (E1)", () => {
     expect(skemo?.parts).toEqual({
       surface: {
-        fill: { fixed: "color.background.raised" },
+        fill: { by: ["emphasis"] },
         radius: { fixed: "radius.role.surface" },
-        shadow: { fixed: "elevation.shadow.raised" },
+        shadow: { by: ["emphasis"] },
       },
       border: {
         color: { fixed: "color.border.subtle" },
@@ -100,7 +103,15 @@ describe("karto in the repo Modelo (section ③, G1, G2)", () => {
       actions: { gap: { fixed: "spacing.small" } },
       box: { "inline-padding": { fixed: "spacing.medium" }, gap: { fixed: "spacing.small" } },
     });
-    expect(skemo?.bindings).toEqual([]);
+    // Spec 036 Teil 5 ②b-2 (A-karto-1): the surface by emphasis is the only keyed binding.
+    expect(skemo?.bindings.map((binding) => [binding.part, binding.property])).toEqual([
+      ["surface", "fill"],
+      ["surface", "fill"],
+      ["surface", "fill"],
+      ["surface", "shadow"],
+      ["surface", "shadow"],
+      ["surface", "shadow"],
+    ]);
     // The heading lies on the raised surface: a declared pair (skemo-kontrastparo-missing silent).
     expect(
       modelo.kontrastParoj?.some(
@@ -108,7 +119,7 @@ describe("karto in the repo Modelo (section ③, G1, G2)", () => {
           pair.foreground === "color.text.default" && pair.background === "color.background.raised",
       ),
     ).toBe(true);
-    expect(boundToken(skemoOrThrow(), "surface", "fill", {})?.token).toBe(
+    expect(boundToken(skemoOrThrow(), "surface", "fill", { emphasis: "high" })?.token).toBe(
       "color.background.raised",
     );
   });
@@ -209,7 +220,7 @@ describe("the Uzo of the karto (section ③, G2)", () => {
   it("the brief names level and orientation as axes, level and heading as duties, and stays under 750", () => {
     if (karto === undefined) throw new Error("missing");
     const brief = briefOf(karto);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["level", "orientation"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["level", "orientation", "emphasis"]);
     expect(brief.required).toEqual({ props: ["level"], slots: ["heading"] });
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
   });

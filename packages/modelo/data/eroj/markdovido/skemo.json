@@ -21,13 +21,26 @@
         "values": ["2", "3", "4", "5", "6"],
         "default": "2",
         "description": "The level of a heading # in the page: one below the page's own h1 by default, so the headings of the source keep the order of the page (Regulo heading-levels-in-order)."
+      },
+      {
+        "name": "density",
+        "kind": "enum",
+        "values": ["default", "compact"],
+        "default": "default",
+        "description": "Spec 029 ②a (A-markdovido-1): the room between the blocks, by the names of the Dimensio density – default as before; compact closer, for answers in a narrow column."
+      },
+      {
+        "name": "streaming",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②a (A-markdovido-3): an answer still arrives – the source grows while the view is busy (aria-busy), so assistive technology reads it once it is whole. The application takes it away after the last word."
       }
     ],
     "states": ["rest"],
     "slots": [],
     "parts": {
       "box": {
-        "gap": { "fixed": "spacing.medium" }
+        "gap": { "by": ["density"] }
       },
       "quote": {
         "color": { "fixed": "color.border.default" },
@@ -38,19 +51,22 @@
         "inline-padding": { "fixed": "spacing.large" }
       }
     },
-    "bindings": [],
+    "bindings": [
+      { "part": "box", "property": "gap", "when": { "density": "default" }, "token": "spacing.medium" },
+      { "part": "box", "property": "gap", "when": { "density": "compact" }, "token": "spacing.small" }
+    ],
     "a11y": {
       "role": "document",
       "name": [],
-      "states": {},
+      "states": { "streaming": ["aria-busy"] },
       "keys": []
     },
     "goals": [
       {
         "goal": "markdown",
         "keywords": {
-          "en": ["markdown", "markdown-view", "rendered-markdown"],
-          "de": ["markdown", "markdown-text", "markdownansicht"]
+          "en": ["markdown", "markdown-view", "rendered-markdown", "streaming"],
+          "de": ["markdown", "markdown-text", "markdownansicht", "streamen"]
         },
         "props": {}
       }

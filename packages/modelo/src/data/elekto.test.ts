@@ -93,7 +93,8 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
         ["value", "string", undefined],
         ["required", "boolean", false],
         ["invalid", "boolean", false],
-        ["size", ["small", "medium", "large"], "medium"],
+        // Spec 036 Teil 5 ②b-2 (A-*-2, ②a-2): two sizes; large a deprecated alias of medium.
+        ["size", ["small", "medium"], "medium"],
         ["disabled", "boolean", false],
         ["loading", "boolean", false],
         ["name", "string", undefined],
@@ -144,6 +145,8 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
       "label",
       "message",
       "motion",
+      // Spec 036 Teil 5 ②b-3 (A-elekto-4): the description of an option.
+      "option-description",
       "option-label",
       "options",
       "required-mark",
@@ -169,8 +172,9 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
     expect(skemo.props.map((prop) => prop.name)).not.toContain("selected");
     expect(variantKeys(skemo)).toEqual(["size", "state"]);
     expect(styledProps(skemo)).toEqual(["size"]);
-    // size × state: the Figma set is 3 × 5, every variant with options chosen and not (G7).
-    expect(combinationsOf(skemo, variantKeys(skemo))).toHaveLength(21);
+    // size × state: the Figma set is 2 × 7 since ②b-2 (A-elekto-2), every variant with options
+    // chosen and not (G7).
+    expect(combinationsOf(skemo, variantKeys(skemo))).toHaveLength(14);
     expect(combinationsOf(skemo, ["selected", "state"])).toHaveLength(14);
   });
 
@@ -211,7 +215,7 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
 
   it("sizes the dot from size.icon.*, the circle is the dot box plus its border, radius pill, option labels in body", () => {
     if (skemo === undefined) throw new Error("elekto missing");
-    for (const size of ["small", "medium", "large"]) {
+    for (const size of ["small", "medium"]) {
       expect(boundToken(skemo, "indicator", "size", { size })?.token).toBe(`size.icon.${size}`);
     }
     expect(boundToken(skemo, "box", "radius", {})?.token).toBe("radius.role.pill");
@@ -221,7 +225,7 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
     expect(boundToken(skemo, "option-label", "typography", { size: "small" })?.token).toBe(
       "typography.body.2",
     );
-    expect(boundToken(skemo, "option-label", "typography", { size: "large" })?.token).toBe(
+    expect(boundToken(skemo, "option-label", "typography", { size: "medium" })?.token).toBe(
       "typography.body.1",
     );
     expect(boundToken(skemo, "label", "typography", { size: "medium" })?.token).toBe(
@@ -239,8 +243,8 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
     } as never);
     expect(values["surface.fill@selected=true,size=small,state=rest"]).toBe("#808080");
     expect(values["surface.fill@selected=false,size=small,state=rest"]).toBe("#808080");
-    expect(values["indicator.color@selected=true,size=large,state=focus"]).toBe("#808080");
-    expect(values["indicator.color@selected=false,size=large,state=focus"]).toBeUndefined();
+    expect(values["indicator.color@selected=true,size=medium,state=focus"]).toBe("#808080");
+    expect(values["indicator.color@selected=false,size=medium,state=focus"]).toBeUndefined();
   });
 
   it("speaks role radiogroup: name from the label, description from help and error, arrows and Space, required in de and en like the kampo", () => {
@@ -319,7 +323,8 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
 describe("the Uzo of the elekto (section 3, G5)", () => {
   it("states the purpose of the spec, requires the label and at least two options, never breaks a line", () => {
     expect(uzo?.purpose).toBe(
-      "Chooses one of a few options that all stay visible: payment method, shipping speed, yes/no/maybe.",
+      // Spec 036 Teil 5 ②b-3 (A-elekto-4): an option may carry a description.
+      "Chooses one of a few options that all stay visible: payment method, shipping speed, yes/no/maybe; an option may carry a short description (its attribute description).",
     );
     expect(uzo?.slots).toEqual({
       label: { accepts: ["text"], required: true, max: 1, nesting: 0 },
@@ -454,6 +459,8 @@ describe("the cross-links of G5 (one Ero per entry)", () => {
       "error",
       "message",
       "disabled-reason",
+      // Spec 036 Teil 5 ②b-3 (A-markobutono-4): the help, appended.
+      "help",
     ]);
   });
 });

@@ -672,6 +672,111 @@
       "background": "color.background.default",
       "kategorio": "ui",
       "kialo": "WCAG 1.4.11 asks 3:1 for the parts of a chart a person needs to read it; a data series in the Zweitfarbe keeps 3:1 on the page."
+    },
+    {
+      "id": "kpa_01M6BD43K74GYNF86H3TJ319K1",
+      "name": "syntax-keyword-on-background-sunken",
+      "foreground": "color.syntax.keyword",
+      "background": "color.background.sunken",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BD43K74GYNF86H3TJ319K2",
+      "name": "syntax-name-on-background-sunken",
+      "foreground": "color.syntax.name",
+      "background": "color.background.sunken",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BD43K74GYNF86H3TJ319K3",
+      "name": "syntax-string-on-background-sunken",
+      "foreground": "color.syntax.string",
+      "background": "color.background.sunken",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BD43K74GYNF86H3TJ319K4",
+      "name": "syntax-number-on-background-sunken",
+      "foreground": "color.syntax.number",
+      "background": "color.background.sunken",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BD43K74GYNF86H3TJ319K5",
+      "name": "syntax-comment-on-background-sunken",
+      "foreground": "color.syntax.comment",
+      "background": "color.background.sunken",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BD43K74GYNF86H3TJ319K6",
+      "name": "syntax-keyword-on-background-default",
+      "foreground": "color.syntax.keyword",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BD43K74GYNF86H3TJ319K7",
+      "name": "syntax-name-on-background-default",
+      "foreground": "color.syntax.name",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BD43K74GYNF86H3TJ319K8",
+      "name": "syntax-string-on-background-default",
+      "foreground": "color.syntax.string",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BD43K74GYNF86H3TJ319K9",
+      "name": "syntax-number-on-background-default",
+      "foreground": "color.syntax.number",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BD43K74GYNF86H3TJ319KA",
+      "name": "syntax-comment-on-background-default",
+      "foreground": "color.syntax.comment",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BECJQY5E4XWMB9PVAPDZJD",
+      "name": "syntax-keyword-on-background-raised",
+      "foreground": "color.syntax.keyword",
+      "background": "color.background.raised",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BECJQZHQ79BBKYTWH7VMQW",
+      "name": "syntax-name-on-background-raised",
+      "foreground": "color.syntax.name",
+      "background": "color.background.raised",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BECJQZHQ79BBKYTWH7VMQX",
+      "name": "syntax-string-on-background-raised",
+      "foreground": "color.syntax.string",
+      "background": "color.background.raised",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BECJQZHQ79BBKYTWH7VMQY",
+      "name": "syntax-number-on-background-raised",
+      "foreground": "color.syntax.number",
+      "background": "color.background.raised",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M6BECJQZHQ79BBKYTWH7VMQZ",
+      "name": "syntax-comment-on-background-raised",
+      "foreground": "color.syntax.comment",
+      "background": "color.background.raised",
+      "kategorio": "text-normal"
     }
   ]
 }

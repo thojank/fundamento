@@ -44,6 +44,11 @@ export interface VitrinoInput {
   /** The Werkstatt (Spec 016 ②): its data island and the bundled Agordilo; absent without a reference Aspekto. */
   werkstatt?: WerkstattDatumoj;
   werkstattJs?: string;
+  /**
+   * Spec 036 Teil 5 ③ (Spec 029 ③): per Ero the nine sections of its documentation (doku.ts);
+   * each stands right after the Ero's grid. Not part of the data island.
+   */
+  doku?: Record<string, string>;
 }
 
 const escapeHtml = (text: string): string =>
@@ -110,7 +115,18 @@ tr[data-fm-superskribita="true"] th { text-decoration: underline; }
 .fm-werkstatt-vorschlag:not([hidden]) { display: flex; flex-wrap: wrap; gap: var(--fm-spacing-medium); align-items: center; justify-content: space-between; padding: var(--fm-spacing-medium); border: var(--fm-border-width-strong) solid var(--fm-color-status-info-border); border-radius: var(--fm-radius-role-surface); background-color: var(--fm-color-status-info-subtle); color: var(--fm-color-text-default); }
 .fm-werkstatt-vorschlag p { margin: 0; }
 .fm-werkstatt-grupo { display: flex; flex-direction: column; gap: var(--fm-spacing-medium); padding-block: var(--fm-spacing-small); }
-.fm-werkstatt-kasxita { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }`;
+.fm-werkstatt-kasxita { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* Spec 036 Teil 5 ③: the documentation of an Ero in the language of the switch (Esperanto shows
+   the German text the page is written with), its wide tables in a region that scrolls. */
+:root[data-fm-lingvo="en"] [data-fm-doku-lingvo="de"], :root:not([data-fm-lingvo="en"]) [data-fm-doku-lingvo="en"] { display: none; }
+[data-fm-doku] > section { display: flex; flex-direction: column; gap: var(--fm-spacing-small); }
+[data-fm-doku] h3, [data-fm-doku] h4, [data-fm-doku] p, [data-fm-doku] ul { margin: 0; }
+.fm-doku-rollo { overflow-x: auto; }
+[data-fm-doku] a { color: var(--fm-color-link-rest); }
+[data-fm-doku] a:hover { color: var(--fm-color-link-hover); }
+[data-fm-doku] a:visited { color: var(--fm-color-link-visited); }
+.fm-doku-a11y { display: flex; flex-wrap: wrap; gap: var(--fm-spacing-medium); margin: 0; }
+.fm-doku-a11y dd { margin: 0; }`;
 
 function switcher(datumoj: VitrinoDatumoj, werkstatt: boolean): string {
   const dimensioj = datumoj.dimensioj
@@ -152,6 +168,13 @@ const section = (
   titleHtml?: string,
 ): string =>
   `<section id="fm-vitrino-${id}"${focusable ? ' tabindex="-1"' : ""}${modusOnly === undefined ? "" : ` data-fm-modus-only="${modusOnly}"${modusOnly === "werkstatt" ? " hidden" : ""}`}><h2>${titleHtml ?? (id in VITRINO_TEKSTOJ ? tekstoSpan(id, escapeHtml(title)) : escapeHtml(title))}</h2>${body}</section>`;
+
+/**
+ * The documentation section of an Ero (Spec 036 Teil 5 ③): its name and "Doku" as heading, the
+ * nine sections of doku.ts as body; shown in Ansehen, hidden in the Werkstatt.
+ */
+const dokuSection = (ero: string, body: string, key: string | undefined): string =>
+  `<section id="fm-vitrino-doku-${escapeHtml(ero)}" data-fm-doku="${escapeHtml(ero)}" data-fm-modus-only="ansehen"><h2>${nomoSpan(key, escapeHtml(ero))} · ${tekstoSpan("doku", "Doku")}</h2>${body}</section>`;
 
 /**
  * The heads of an Ero's tables with their names (Spec 026 ②): a column that is a state or a prop
@@ -403,6 +426,7 @@ export function vitrinoHtml({
   datumoj,
   werkstatt,
   werkstattJs,
+  doku,
 }: VitrinoInput): string {
   const first = datumoj.kombinoj[0] ?? "";
   const attributes = datumoj.dimensioj
@@ -445,16 +469,21 @@ ${
       )
 }
 ${Object.entries(datumoj.eroj)
-  .map(([ero, markup]) =>
-    section(
+  .map(([ero, markup]) => {
+    const grid = section(
       ero,
       ero,
       withNomoj(markup, datumoj.nomoj.eroj[ero]),
       false,
       undefined,
       nomoSpan(datumoj.nomoj.eroj[ero]?.key, escapeHtml(ero)),
-    ),
-  )
+    );
+    const own = doku?.[ero];
+    // Spec 036 Teil 5 ③: the documentation right after the grid, in Ansehen only.
+    return own === undefined
+      ? grid
+      : `${grid}\n${dokuSection(ero, own, datumoj.nomoj.eroj[ero]?.key)}`;
+  })
   .join("\n")}
 ${datumoj.loeschen === undefined ? "" : section("loeschen", "Löschen", datumoj.loeschen)}
 ${datumoj.grundo === undefined ? "" : section("grundo", "Grund für „deaktiviert“", datumoj.grundo)}

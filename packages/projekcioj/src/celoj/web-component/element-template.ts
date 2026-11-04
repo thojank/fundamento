@@ -16,6 +16,7 @@ import {
   markdownMethods,
   markdownRender,
 } from "./content-template.js";
+import { syntaxConstants } from "./syntax.js";
 
 /**
  * The native control an a11y role is rendered as (Celo knowledge, Art. VIII). `toggle` is a
@@ -137,6 +138,11 @@ export interface ElementNames {
   trailing?: readonly string[];
   /** Spec 025 ② (plan ② D-11): a textbox with a calendar part — the datelektilo, a field with a trigger and a popover calendar. */
   datepicker?: boolean;
+  /**
+   * Spec 036 Teil 5 ②b-3: the names of the Skemo's parts – the markup draws a new part (an
+   * option's description, a group heading, a tick) only where the Skemo has it.
+   */
+  parts?: readonly string[];
   /**
    * The Make Kit builds one file per Aspekto: the descriptor and the stylesheet are then constants
    * above the element instead of imports (D-14).
@@ -293,8 +299,12 @@ export function signOf(role: string, size = "100%"): string | undefined {
  * while empty; the error announced live. Their texts are the description of the control.
  */
 function textsMarkup(slots: NonNullable<ElementNames["slots"]>): string {
+  // Spec 036 Teil 5 ②b-3 (A-markobutono-4, A-sxaltilo-4): the help is read first, under the label,
+  // wherever the Skemo appends its slot (Arkitekturo contract); the others keep their order.
+  const first = (name: string) => (name === "help" ? 0 : 1);
   return slots
     .filter((slot) => slot.default !== true && slot.decorative !== true && slot.list !== true)
+    .sort((a, b) => first(a.name) - first(b.name))
     .map(
       (slot) =>
         // Spec 029 ②b-1b M-2: the message of a warning or a success is said politely, as the error.
@@ -352,12 +362,17 @@ function fieldMarkup(
   // error says the status in words.
   void stepper;
   void suggest;
+  // Spec 036 Teil 5 ②b-2 (A-kampo-1): the unit of a number, the innermost part of the end – right
+  // after the value, inside the border; it describes the field (prop:unit).
+  const unit = trailing.includes("unit") ? '<span part="unit" id="unit" hidden></span>' : "";
   const end = endMarkup(
-    { "status-icon": statusIcon ? STATUS_ICON : "", spinner: SPINNER, trigger },
+    { unit, "status-icon": statusIcon ? STATUS_ICON : "", spinner: SPINNER, trigger },
     trailing,
   );
   const row = `<div part="row">${native}${end}</div>`;
-  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label>${row}${calendar}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+  // Spec 036 Teil 5 ②b-2 (A-tekstareo-1): the count of a text area with max-length, under it.
+  const count = textarea ? '<span part="count" id="max-length" hidden></span>' : "";
+  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label>${row}${count}${calendar}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -383,6 +398,105 @@ const MULTI_ITEM_ROW =
   '<div part="item" role="option" aria-selected="false"><fm-ikono part="check" name="check" aria-hidden="true"></fm-ikono><span part="item-text"></span></div>';
 
 /**
+ * Spec 036 Teil 5 ②b-3 (A-elektilo-4 … A-menuo-4): the rows of a run of options that name the same
+ * group (attribute group) stand in a group of their own (role group), named by its heading (role
+ * presentation, referenced); with a divider (aria-hidden) before every group but the first where
+ * the Skemo has the part. Rows without a group stand in the list itself; a group whose rows are all
+ * hidden (a filter) is hidden too; a row that says nothing found stays last. Nothing moves while no
+ * option names a group – a list without groups keeps its rows as they were.
+ */
+/**
+ * Spec 036 Teil 5 ②b-4 (A-listelektilo-5, A-menuo-5; APG typeahead): the characters typed in one
+ * go, without a pause of TYPE_AHEAD_PAUSE milliseconds and without another key in between, are the
+ * words to find; the same character again moves on to the next entry that starts with it.
+ */
+const TYPE_AHEAD_METHODS = `
+  #typed = "";
+  #typedAt = Number.NEGATIVE_INFINITY;
+
+  /** Adds the typed character to the words; a pause starts anew. */
+  #typeAhead(event: KeyboardEvent): string {
+    if (event.timeStamp - this.#typedAt > TYPE_AHEAD_PAUSE) this.#typed = "";
+    this.#typedAt = event.timeStamp;
+    this.#typed += event.key.toLowerCase();
+    return this.#typed;
+  }
+
+  /** The index of the words that start with the typed ones, from the current one on; -1 if none. */
+  #typeAheadFind(typed: string, words: readonly string[], current: number): number {
+    const repeated = [...typed].every((character) => character === typed[0]);
+    const wanted = repeated ? typed.slice(0, 1) : typed;
+    // One character (or the same again) looks after the current entry; more look from it on.
+    const from = repeated ? current + 1 : Math.max(current, 0);
+    for (let step = 0; step < words.length; step += 1) {
+      const index = (from + step) % words.length;
+      if ((words[index] ?? "").trim().toLowerCase().startsWith(wanted)) return index;
+    }
+    return -1;
+  }
+`;
+
+const GROUP_ROWS_METHOD = `
+  #groupRows(holder: HTMLElement, rows: HTMLElement[], groups: string[], divided: boolean): void {
+    const containers = [...holder.querySelectorAll(':scope > [part="group"]')] as HTMLElement[];
+    if (containers.length === 0 && groups.every((group) => group === "")) return;
+    let used = 0;
+    let previous = "";
+    let current: HTMLElement | undefined;
+    rows.forEach((row, index) => {
+      const group = groups[index] ?? "";
+      if (group === "") {
+        holder.append(row);
+        current = undefined;
+        previous = group;
+        return;
+      }
+      if (current === undefined || group !== previous) {
+        current = containers[used] ?? document.createElement("div");
+        used += 1;
+        const id = "group-heading-" + used;
+        current.setAttribute("part", "group");
+        current.setAttribute("role", "group");
+        current.setAttribute("aria-labelledby", id);
+        current.replaceChildren();
+        if (divided && used > 1) {
+          const line = document.createElement("div");
+          line.setAttribute("part", "divider");
+          line.setAttribute("aria-hidden", "true");
+          current.append(line);
+        }
+        const heading = document.createElement("div");
+        heading.setAttribute("part", "group-heading");
+        heading.setAttribute("role", "presentation");
+        heading.id = id;
+        heading.textContent = group;
+        current.append(heading);
+        holder.append(current);
+      }
+      current.append(row);
+      previous = group;
+    });
+    for (const unused of containers.slice(used)) unused.remove();
+    for (const container of holder.querySelectorAll(':scope > [part="group"]')) {
+      const shown = [...container.querySelectorAll('[role="option"], [role="menuitem"]')].some(
+        (row) => !(row as HTMLElement).hidden,
+      );
+      (container as HTMLElement).hidden = !shown;
+    }
+    const last = holder.querySelector(':scope > [part="no-results"]');
+    if (last !== null) holder.append(last);
+  }
+`;
+
+/**
+ * Spec 036 Teil 5 ②b-3 (A-plurelektilo-1, A-plurelektilo-4): „alle wählen“ – a checkbox before the
+ * list of a multi-select, outside the listbox (a listbox owns options alone), its check mark as the
+ * rows have it; hidden unless select-all, named by the Modelo's words in the render.
+ */
+const SELECT_ALL_ROW =
+  '<div part="select-all" role="checkbox" aria-checked="false" tabindex="0" hidden><fm-ikono name="check" aria-hidden="true"></fm-ikono><span id="select-all-text"></span></div>';
+
+/**
  * The shadow markup of a styled select-only list and of a multi-select (Spec 025 ③, plan ③
  * D-18): the field of the kampo — label with the mark, help and error — around a button that shows
  * the chosen option (or how many are chosen) with the chevron, and the listbox as a popover of the
@@ -395,6 +509,7 @@ function listMarkup(
   slots: NonNullable<ElementNames["slots"]>,
   multi: boolean,
   trailing: readonly string[] = [],
+  selectAll = false,
 ): string {
   // Abnahme #122: the chevron stands in the end of the row, inside the button's border, after the
   // spinner and the clear button (a button holds no button) – the Skemo's trailing.
@@ -411,7 +526,7 @@ function listMarkup(
   // A listbox owns options alone (ARIA, axe aria-required-children): the multi-select's popover is
   // a panel that holds the filter, the listbox of the rows (items) and the clear butono.
   const listbox = multi
-    ? '<div part="listbox" id="panel" popover="manual"><input part="filter" type="search" aria-controls="listbox" autocomplete="off" hidden><div part="items" role="listbox" id="listbox" aria-multiselectable="true"></div><fm-butono part="clear" emphasis="low" size="small"></fm-butono></div>'
+    ? `<div part="listbox" id="panel" popover="manual"><input part="filter" type="search" aria-controls="listbox" autocomplete="off" hidden>${selectAll ? SELECT_ALL_ROW : ""}<div part="items" role="listbox" id="listbox" aria-multiselectable="true"></div><fm-butono part="clear" emphasis="low" size="small"></fm-butono></div>`
     : '<div part="listbox" role="listbox" id="listbox" popover="manual"></div>';
   return `<div part="field"><label part="label" id="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label>${button}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
 }
@@ -449,7 +564,7 @@ function sliderMarkup(slots: NonNullable<ElementNames["slots"]>): string {
   const texts = textsMarkup(
     slots.filter((slot) => slot.name !== "min-label" && slot.name !== "max-label"),
   );
-  return `<div part="field"><span part="label" id="label"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></span><div part="row"><span part="min-label" id="min-label"><slot name="min-label"></slot></span><div part="track" id="control"><div part="fill"></div><div part="thumb" id="thumb-start" role="slider" tabindex="0" aria-labelledby="label from"></div><div part="thumb" id="thumb-end" role="slider" tabindex="0" hidden></div></div><span part="max-label" id="max-label"><slot name="max-label"></slot></span><fm-kampo part="number" kind="number" hidden><span id="number-label"></span></fm-kampo>${SPINNER}</div>${texts}<span id="from" hidden></span><span id="to" hidden></span><span id="fm-texts" hidden></span></div>`;
+  return `<div part="field"><span part="label" id="label"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></span><div part="row"><span part="min-label" id="min-label"><slot name="min-label"></slot></span><div part="track" id="control"><div part="fill"></div><div part="thumb" id="thumb-start" role="slider" tabindex="0" aria-labelledby="label from"></div><div part="thumb" id="thumb-end" role="slider" tabindex="0" hidden></div></div><span part="max-label" id="max-label"><slot name="max-label"></slot></span><span part="readout" aria-hidden="true" hidden></span><fm-kampo part="number" kind="number" hidden><span id="number-label"></span></fm-kampo>${SPINNER}</div>${texts}<span id="from" hidden></span><span id="to" hidden></span><span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -534,8 +649,10 @@ function groupMarkup(slots: NonNullable<ElementNames["slots"]>, marked: boolean)
  * (control) with the dot (indicator) in it and the label of the option beside it; the option itself
  * is assigned to the row's slot. The element adds one row per option.
  */
-function rowMarkup(role: string): string {
-  return `<div part="option" role="radio" aria-checked="false" tabindex="-1"><span part="control"><span part="indicator">${signOf(role) ?? ""}</span></span><span part="option-label"><slot></slot></span></div>`;
+function rowMarkup(role: string, described = false): string {
+  // Spec 036 Teil 5 ②b-3 (A-elekto-4): the description of the option under its label, hidden
+  // while the option has none; the element writes its words from the option's attribute.
+  return `<div part="option" role="radio" aria-checked="false" tabindex="-1"><span part="control"><span part="indicator">${signOf(role) ?? ""}</span></span>${described ? '<span data-fm-option-text><span part="option-label"><slot></slot></span><span part="option-description" aria-hidden="true" hidden></span></span>' : '<span part="option-label"><slot></slot></span>'}</div>`;
 }
 
 /**
@@ -577,7 +694,13 @@ function textMarkup(slots: NonNullable<ElementNames["slots"]>): string {
         `<span part="${slot.name}" class="fm-hidden"><slot name="${slot.name}"></slot></span>`,
     )
     .join("");
-  return `<span part="control"><slot></slot>${hidden}<span id="fm-texts" hidden></span></span>`;
+  // Spec 036 Teil 5 ②b-3 (A-insigno-4): a decorative slot at the start (icon-start) stands before
+  // the words, in the pill.
+  const before = slots
+    .filter((slot) => slot.decorative === true && slot.name.endsWith("-start"))
+    .map((slot) => `<slot name="${slot.name}"></slot>`)
+    .join("");
+  return `<span part="control">${before}<slot></slot>${hidden}<span id="fm-texts" hidden></span></span>`;
 }
 
 /**
@@ -594,7 +717,12 @@ function statusMarkup(
   icon = false,
 ): string {
   const arc = `<svg aria-hidden="true" viewBox="0 0 16 16" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="${ARC_PATH}"/></svg>`;
-  const holders = slots
+  // Spec 036 Teil 5 ②b-3 (A-plenstato-4): the title stands first among the texts, the icon of a
+  // decorative slot icon above them, unheard and hidden while empty.
+  const holders = [
+    ...slots.filter((slot) => slot.name === "heading"),
+    ...slots.filter((slot) => slot.name !== "heading"),
+  ]
     .filter((slot) => slot.decorative !== true)
     .map((slot) =>
       slot.default === true
@@ -605,7 +733,10 @@ function statusMarkup(
   // The icon of the intent (Spec 014 ②, G3, G6): an ikono named like the intent, decorative — the
   // intent word is heard already — in the colour of the part icon.
   const sign = icon ? '<span part="icon" aria-hidden="true"><fm-ikono></fm-ikono></span>' : "";
-  return `<div part="control" role="status"><span id="fm-texts" class="fm-hidden"></span>${indicator ? `<span part="indicator" aria-hidden="true">${arc}</span>` : ""}${sign}<div>${holders}</div>${dismiss ? `<fm-butono part="dismiss" emphasis="low" size="small" hidden>${CROSS}</fm-butono>` : ""}</div>`;
+  const slotted = slots.some((slot) => slot.name === "icon" && slot.decorative === true)
+    ? '<span part="icon" id="icon-slot" aria-hidden="true" hidden><slot name="icon"></slot></span>'
+    : "";
+  return `<div part="control" role="status"><span id="fm-texts" class="fm-hidden"></span>${indicator ? `<span part="indicator" aria-hidden="true">${arc}</span>` : ""}${sign}<div>${slotted}${holders}</div>${dismiss ? `<fm-butono part="dismiss" emphasis="low" size="small" hidden>${CROSS}</fm-butono>` : ""}</div>`;
 }
 
 /**
@@ -631,23 +762,37 @@ function lightMarkup(
   // A breadcrumb (Spec 015 ①, plan ① D-04): the nav landmark around an ordered list whose items
   // the element makes, one per link of the light DOM (manual slot assignment), a chevron between.
   if (breadcrumb) {
-    return '<nav part="list"><ol part="items"></ol></nav><slot hidden></slot><span id="fm-texts" hidden></span>';
+    // Spec 036 Teil 5 ②b-3 (A-spuro-4): the slot icon-start waits unseen until the element puts it
+    // into the first item (manual assignment).
+    const icon = slots.some((slot) => slot.name === "icon-start")
+      ? '<slot name="icon-start" hidden></slot>'
+      : "";
+    return `<nav part="list"><ol part="items"></ol></nav><slot hidden></slot>${icon}<span id="fm-texts" hidden></span>`;
   }
   // A navigation (Spec 011 ⑤, D-07): the nav landmark, named by the label prop in the render,
   // around the links of the default slot; the gap between the items is its own.
   if (role === "navigation") {
-    return '<nav part="list"><slot></slot></nav><span id="fm-texts" hidden></span>';
+    // Spec 036 Teil 5 ②b-3 (A-navigado-4): an icon given to the host stands before the items.
+    const icon = slots.some((slot) => slot.name === "icon-start")
+      ? '<slot name="icon-start"></slot>'
+      : "";
+    return `<nav part="list">${icon}<slot></slot></nav><span id="fm-texts" hidden></span>`;
   }
   const content = slots.find((slot) => slot.default !== true && slot.text !== true);
   const defaultSlot = slots.find((slot) => slot.default === true);
+  // Spec 036 Teil 5 ②b-3 (A-atributlisto-4): the title of a list stands above it, a heading of
+  // level 2 in the role of a small headline, hidden while its slot is empty.
+  const titled = content === undefined && slots.some((slot) => slot.name === "heading");
   const frame =
     content !== undefined
       ? `<div part="region" role="region" tabindex="0"><slot name="${content.name}"></slot></div>`
-      : `<div part="list"><slot></slot></div>`;
+      : `${titled ? '<fm-titolo part="heading" id="heading" level="2" size="headline-4" hidden><slot name="heading"></slot></fm-titolo>' : ""}<div part="list"><slot></slot></div>`;
   const hiddenDefault =
     content !== undefined && defaultSlot?.text === true ? "<slot hidden></slot>" : "";
   const hiddenNamed = slots
-    .filter((slot) => slot.default !== true && slot.text === true)
+    .filter(
+      (slot) => slot.default !== true && slot.text === true && !(titled && slot.name === "heading"),
+    )
     .map((slot) => `<slot name="${slot.name}" hidden></slot>`)
     .join("");
   return `${frame}${hiddenDefault}${hiddenNamed}<span id="fm-texts" hidden></span>`;
@@ -710,8 +855,10 @@ function tooltipMarkup(): string {
  * dialog, non-modal — holding a composed titolo as heading (level 2, the layer is a document of
  * its own) and the content.
  */
-function popoverMarkup(): string {
-  return '<slot name="trigger"></slot><div part="control" role="dialog" popover="auto" tabindex="-1"><fm-titolo part="heading" id="heading" level="2" size="headline-4"><slot name="heading"></slot></fm-titolo><div part="content"><slot></slot></div><span id="fm-texts" hidden></span></div>';
+function popoverMarkup(close = false): string {
+  // Spec 036 Teil 5 ②b-3 (A-sxvebilo-4): the close button first in the layer, hidden until
+  // dismissible – on touch there is no Escape.
+  return `<slot name="trigger"></slot><div part="control" role="dialog" popover="auto" tabindex="-1">${close ? `<fm-butono part="close" emphasis="low" size="small" hidden>${CROSS}</fm-butono>` : ""}<fm-titolo part="heading" id="heading" level="2" size="headline-4"><slot name="heading"></slot></fm-titolo><div part="content"><slot></slot></div><span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -728,6 +875,21 @@ function menuMarkup(): string {
 /** One row of a menu (Spec 014 ④): a button with the role menuitem; one tab stop at a time. */
 const MENU_ROW =
   '<button part="item" role="menuitem" type="button" tabindex="-1"><slot></slot></button>';
+
+/**
+ * Spec 036 Teil 5 ②b-3 (A-menuo-4): the row of a menu whose Skemo has the part icon – the ikono of
+ * the entry's attribute icon before its words, unheard, hidden while the entry has none.
+ */
+const MENU_ROW_ICON =
+  '<button part="item" role="menuitem" type="button" tabindex="-1"><fm-ikono part="icon" aria-hidden="true" hidden></fm-ikono><slot></slot></button>';
+
+/**
+ * Spec 036 Teil 5 ②b-4 (A-menuo-5): the row of an entry with a target (attribute to) – a link with
+ * the role menuitem, because it moves the person (Regulo link-navigates-button-acts).
+ */
+const MENU_LINK_ROW = '<a part="item" role="menuitem" tabindex="-1"><slot></slot></a>';
+const MENU_LINK_ROW_ICON =
+  '<a part="item" role="menuitem" tabindex="-1"><fm-ikono part="icon" aria-hidden="true" hidden></fm-ikono><slot></slot></a>';
 
 /** A group line of a menu (Spec 014 ④): the slotted apartigilo in a row of its own. */
 const MENU_SEPARATOR = '<div part="separator" role="none"><slot></slot></div>';
@@ -785,7 +947,7 @@ function separatorMarkup(): string {
  * the list of the chosen files follows, and a live region says how many there are.
  */
 function uploadMarkup(): string {
-  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><div part="dropzone"><span part="picker"><fm-butono part="choose" emphasis="medium" inert><fm-ikono slot="icon-start" name="upload"></fm-ikono><span id="choose-text"></span></fm-butono><input part="control" id="control" type="file"></span><span part="drop-hint" id="drop-hint" hidden></span><span part="end">${SPINNER}</span></div><span part="help" id="help" hidden><slot name="help"></slot></span><span part="error" id="error" hidden aria-live="polite"><slot name="error"></slot><span id="file-error"></span></span><span part="message" id="message" hidden aria-live="polite"><slot name="message"></slot></span><ul part="file-list" hidden></ul><span part="count" role="status" aria-live="polite" class="fm-hidden"></span><span id="fm-texts" hidden></span></div>`;
+  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><div part="dropzone"><fm-ikono part="icon" name="upload" aria-hidden="true" hidden></fm-ikono><span part="picker"><fm-butono part="choose" emphasis="medium" inert><fm-ikono slot="icon-start" name="upload"></fm-ikono><span id="choose-text"></span></fm-butono><input part="control" id="control" type="file"></span><span part="drop-hint" id="drop-hint" hidden></span><span part="end">${SPINNER}</span></div><span part="help" id="help" hidden><slot name="help"></slot></span><span part="error" id="error" hidden aria-live="polite"><slot name="error"></slot><span id="file-error"></span></span><span part="message" id="message" hidden aria-live="polite"><slot name="message"></slot></span><ul part="file-list" hidden></ul><span part="count" role="status" aria-live="polite" class="fm-hidden"></span><span id="fm-texts" hidden></span></div>`;
 }
 
 /** One chosen file (Spec 015 ②): its name, its size and the butono that removes it. */
@@ -815,6 +977,12 @@ const BREADCRUMB_SEPARATOR =
 /** One item of a breadcrumb (Spec 015 ①): the slotted link and the chevron after it. */
 const BREADCRUMB_ENTRY = `<li part="entry"><slot name="item-"></slot>${BREADCRUMB_SEPARATOR}</li>`;
 
+/**
+ * Spec 036 Teil 5 ②b-4 (A-spuro-6): the entry of the hidden levels of a long trail – a menuo of
+ * links, its own trigger named by the Modelo's words (a11y.texts more-name) – and the chevron after it.
+ */
+const BREADCRUMB_MORE = `<li part="more"><fm-menuo></fm-menuo>${BREADCRUMB_SEPARATOR}</li>`;
+
 function tabsMarkup(): string {
   return '<div part="control" role="tablist"></div><div part="panel" role="tabpanel" tabindex="0"><slot name="panel"></slot></div><slot hidden></slot><span id="fm-texts" hidden></span>';
 }
@@ -828,8 +996,10 @@ const TAB_ROW = '<button part="tab" role="tab" type="button"><slot></slot></butt
  * alt, the control carries the name — and the initials, both decorative; the element shows the
  * picture once it has loaded, else the initials.
  */
-function avatarMarkup(): string {
-  return '<span part="control"><img part="image" alt="" hidden><span part="initials" aria-hidden="true"></span></span><span id="fm-texts" hidden></span>';
+function avatarMarkup(icon = false): string {
+  // Spec 036 Teil 5 ②b-3 (A-avataro-4): the default icon (the Ikonaro's person), unheard, which
+  // the element puts into the initials while it has none.
+  return `<span part="control"><img part="image" alt="" hidden><span part="initials" aria-hidden="true"></span>${icon ? '<fm-ikono part="icon" name="person" aria-hidden="true" hidden></fm-ikono>' : ""}</span><span id="fm-texts" hidden></span>`;
 }
 
 /**
@@ -869,6 +1039,7 @@ function markup(
   afterLabel = false,
   statusIcon = false,
   trailing: readonly string[] = [],
+  parts: readonly string[] = [],
 ): string {
   const reasoned = slots.some((slot) => slot.name === "disabled-reason");
   const own = slots.filter((slot) => slot.name !== "disabled-reason");
@@ -885,6 +1056,7 @@ function markup(
     afterLabel,
     statusIcon,
     trailing,
+    parts,
   );
   if (!reasoned) return body;
   if (host === "menu") {
@@ -909,6 +1081,7 @@ function hostMarkup(
   afterLabel = false,
   statusIcon = false,
   trailing: readonly string[] = [],
+  parts: readonly string[] = [],
 ): string {
   if (host === "text") return textMarkup(slots);
   if (host === "slider") return sliderMarkup(slots);
@@ -918,14 +1091,14 @@ function hostMarkup(
   if (host === "heading") return headingMarkup();
   if (host === "paragraph") return paragraphMarkup();
   if (host === "tooltip") return tooltipMarkup();
-  if (host === "popover") return popoverMarkup();
+  if (host === "popover") return popoverMarkup(parts.includes("close"));
   if (host === "menu") return menuMarkup();
   if (host === "meter") return meterMarkup();
   if (host === "light") return lightMarkup(slots, role, breadcrumb);
   if (host === "pagination") return paginationMarkup();
   if (host === "upload") return uploadMarkup();
   if (host === "card") return cardMarkup();
-  if (host === "avatar") return avatarMarkup();
+  if (host === "avatar") return avatarMarkup(parts.includes("icon"));
   if (host === "codeblock") return codeblockMarkup();
   if (host === "markdown") return markdownMarkup();
   if (host === "tabs") return tabsMarkup();
@@ -935,7 +1108,8 @@ function hostMarkup(
     return fieldMarkup(slots, false, false, false, true, statusIcon, trailing);
   if (host === "chip") return chipMarkup();
   if (host === "listselect") return listMarkup(slots, false, trailing);
-  if (host === "multiselect") return listMarkup(slots, true, trailing);
+  if (host === "multiselect")
+    return listMarkup(slots, true, trailing, parts.includes("select-all"));
   if (host === "editor") return editorMarkup();
   if (host === "textarea")
     return fieldMarkup(slots, true, false, false, false, statusIcon, trailing);
@@ -980,6 +1154,7 @@ export function elementSource({
   shownLabel = false,
   statusIcon = false,
   trailing = [],
+  parts = [],
   slots = [
     { name: "label", default: true },
     { name: "icon-start", decorative: true },
@@ -1049,6 +1224,8 @@ export function elementSource({
                                                           : "button";
   const isToggle = host === "toggle";
   const isGroup = host === "group";
+  // Spec 036 Teil 5 ②b-3 (A-elekto-4): a group whose options carry a description (the part).
+  const groupDescribed = isGroup && parts.includes("option-description");
   const isSelect = host === "select";
   const isSuggest = host === "suggest";
   const isDatepicker = host === "datepicker";
@@ -1078,6 +1255,9 @@ export function elementSource({
   const isTooltip = host === "tooltip";
   const isPopover = host === "popover";
   const isMenu = host === "menu";
+  // Spec 036 Teil 5 ②b-3 (A-menuo-4): a menu whose Skemo has an icon per entry and group headings.
+  const menuIcon = isMenu && parts.includes("icon");
+  const menuGroups = isMenu && parts.includes("group-heading");
   const isOverlay = isTooltip || isPopover || isMenu;
   const isCard = host === "card";
   const isAvatar = host === "avatar";
@@ -1267,6 +1447,9 @@ export function elementSource({
     const checked = this.propValue("checked") === true;
     control.setAttribute("aria-checked", String(checked));
     this.#internals.setFormValue(checked ? "on" : null);
+    // Spec 036 Teil 5 ②b-2 (A-markobutono-1): read-only is spoken; activation keeps the value.
+    if (this.#readOnly()) control.setAttribute("aria-readonly", "true");
+    else control.removeAttribute("aria-readonly");
     // A checkbox (Spec 010 ②, D-08): required is spoken as aria-required and is the validity of
     // the form — a required box left empty keeps the form from being sent, with the text of
     // a11y.texts.required as its message; invalid is spoken as aria-invalid and set by a filled
@@ -1346,12 +1529,17 @@ export function elementSource({
     const empty = typeof emptyLabel === "string" && emptyLabel !== "";
     const options = [
       ...(empty
-        ? [{ value: "", text: emptyLabel, prompt: false }]
+        ? [{ value: "", text: emptyLabel, prompt: false, group: "" }]
         : chosen === -1
-          ? [{ value: "", text: typeof placeholder === "string" ? placeholder : "", prompt: true }]
+          ? [{ value: "", text: typeof placeholder === "string" ? placeholder : "", prompt: true, group: "" }]
           : []),
       ...entries.map((entry) => ({ ...entry, prompt: false })),
     ];
+    // Spec 036 Teil 5 ②b-3 (A-elektilo-4): options that name a group stand in the platform's
+    // optgroup, labelled by it; the list and its headings stay the platform's (E3) – a style on
+    // the optgroup would reach its options in some platforms, so the heading carries none.
+    const groupOf = (element: HTMLOptionElement): string =>
+      element.parentElement instanceof HTMLOptGroupElement ? element.parentElement.label : "";
     const same =
       select.options.length === options.length &&
       options.every((option, index) => {
@@ -1360,19 +1548,31 @@ export function elementSource({
           present !== undefined &&
           present.value === option.value &&
           present.text === option.text &&
-          present.disabled === option.prompt
+          present.disabled === option.prompt &&
+          groupOf(present) === option.group
         );
       });
     if (!same) {
-      select.replaceChildren(
-        ...options.map((option) => {
-          const element = document.createElement("option");
-          element.value = option.value;
-          element.textContent = option.text;
-          element.disabled = option.prompt;
-          return element;
-        }),
-      );
+      const children: HTMLElement[] = [];
+      let holder: HTMLOptGroupElement | undefined;
+      for (const option of options) {
+        const element = document.createElement("option");
+        element.value = option.value;
+        element.textContent = option.text;
+        element.disabled = option.prompt;
+        if (option.group === "") {
+          holder = undefined;
+          children.push(element);
+          continue;
+        }
+        if (holder === undefined || holder.label !== option.group) {
+          holder = document.createElement("optgroup");
+          holder.label = option.group;
+          children.push(holder);
+        }
+        holder.append(element);
+      }
+      select.replaceChildren(...children);
     }
     select.selectedIndex = chosen === -1 ? 0 : chosen + (empty ? 1 : 0);
     this.#internals.setFormValue(chosen === -1 ? (empty ? "" : null) : (entries[chosen]?.value ?? null));
@@ -1393,6 +1593,10 @@ export function elementSource({
     const invalid = this.propValue("invalid") === true || this.#filled("error");
     if (invalid) select.setAttribute("aria-invalid", "true");
     else select.removeAttribute("aria-invalid");
+    // Spec 036 Teil 5 ②b-2 (A-elektilo-1): read-only is spoken; the platform's select has no
+    // read-only, so the element keeps the list closed and the value as it is (constructor).
+    if (this.#readOnly()) select.setAttribute("aria-readonly", "true");
+    else select.removeAttribute("aria-readonly");
 `
     : "";
   // The constructor of a select (Spec 010 ④, D-06): it follows the options of the light DOM, and a
@@ -1404,9 +1608,31 @@ export function elementSource({
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ["slot", "value"],
+      attributeFilter: ["slot", "value", "group"],
     });
-    control.addEventListener("change", () => {
+    // Spec 036 Teil 5 ②b-2 (A-elektilo-1): read-only, the list does not open and no key chooses;
+    // Tab and Escape stay the page's. A choice that came through anyway is taken back unsaid.
+    const keep = (event: Event) => {
+      if (!this.#readOnly()) return;
+      if (event instanceof KeyboardEvent && (event.key === "Tab" || event.key === "Escape")) return;
+      event.preventDefault();
+    };
+    for (const type of ["pointerdown", "mousedown", "keydown"]) control.addEventListener(type, keep);
+    control.addEventListener(
+      "input",
+      (event) => {
+        if (!this.#readOnly()) return;
+        event.stopImmediatePropagation();
+        this.#render();
+      },
+      { capture: true },
+    );
+    control.addEventListener("change", (event) => {
+      if (this.#readOnly()) {
+        event.stopImmediatePropagation();
+        this.#render();
+        return;
+      }
       const chosen = (control as HTMLSelectElement).value;
       if (this.getAttribute("value") !== chosen) this.setAttribute("value", chosen);
       this.dispatchEvent(new Event("change", { bubbles: true }));
@@ -1416,13 +1642,13 @@ export function elementSource({
   // The methods of a select (Spec 010 ④, D-06): its options, read from the light DOM.
   const selectMethods = isSelect
     ? `
-  /** The options of the select: every child in the slot of the options, its value and its text. */
-  #entries(): { value: string; text: string }[] {
+  /** The options of the select: every child in the slot of the options, its value, its text and its group. */
+  #entries(): { value: string; text: string; group: string }[] {
     return [...this.children]
       .filter((child) => child.getAttribute("slot") === "${listSlot}")
       .map((child) => {
         const text = child.textContent?.trim() ?? "";
-        return { value: child.getAttribute("value") ?? text, text };
+        return { value: child.getAttribute("value") ?? text, text, group: child.getAttribute("group") ?? "" };
       });
   }
 `
@@ -1438,7 +1664,7 @@ export function elementSource({
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ["slot", "value"],
+      attributeFilter: ["slot", "value"${groupDescribed ? ', "description"' : ""}],
     });
     control.addEventListener("keydown", (event) => this.#key(event));
 `
@@ -1493,10 +1719,27 @@ export function elementSource({
     if (!(list instanceof HTMLElement)) return;
     while (list.children.length > options.length) list.lastElementChild?.remove();
     while (list.children.length < options.length) {
-      list.insertAdjacentHTML("beforeend", \`${rowMarkup(role)}\`);
+      list.insertAdjacentHTML("beforeend", \`${rowMarkup(role, groupDescribed)}\`);
     }
     options.forEach((option, index) => {
-      list.children[index]?.querySelector("slot")?.assign(option);
+      const row = list.children[index];
+      row?.querySelector("slot")?.assign(option);${
+        groupDescribed
+          ? `
+      // Spec 036 Teil 5 ②b-3 (A-elekto-4): the option's description under its label, heard as the
+      // row's description (aria-hidden, so it is no part of the name; referenced, so it is heard).
+      const description = row?.querySelector('[part="option-description"]');
+      if (row instanceof HTMLElement && description instanceof HTMLElement) {
+        const words = option.getAttribute("description") ?? "";
+        if (description.textContent !== words) description.textContent = words;
+        description.id = "option-description-" + (index + 1);
+        description.hidden = words === "";
+        row.toggleAttribute("data-described", words !== "");
+        if (words === "") row.removeAttribute("aria-describedby");
+        else row.setAttribute("aria-describedby", description.id);
+      }`
+          : ""
+      }
     });
   }
 
@@ -1628,6 +1871,10 @@ ${
       // the field, each refusing at its bound; a search shows its clear button while it has a value.
       // A time (E6) is the platform's own input like a date: kind is its type, min and max its bounds.
       {
+        // Spec 036 Teil 5 ②b-2 (A-kampo-1): the unit's words; shown while given (prop:unit).
+        const unitPart = this.shadowRoot?.getElementById("unit");
+        const unitText = String(this.propValue("unit") ?? "");
+        if (unitPart instanceof HTMLElement && unitPart.textContent !== unitText) unitPart.textContent = unitText;
         const stepperOn = kind === "number" && this.propValue("stepper") === true;
         const searching = kind === "search";
         if (kind === "time") control.removeAttribute("inputmode");
@@ -1668,6 +1915,22 @@ ${
       control.setAttribute("rows", String(rows ?? ""));
       if (kind === "code") control.setAttribute("spellcheck", "false");
       else control.removeAttribute("spellcheck");
+      // Spec 036 Teil 5 ②b-2 (A-tekstareo-1): max-length is the platform's limit; the count under
+      // the area says how many characters of how many and describes the area (prop:max-length).
+      const most = Number(this.propValue("max-length"));
+      const counted = this.shadowRoot?.getElementById("max-length");
+      if (Number.isInteger(most) && most > 0) {
+        (control as HTMLTextAreaElement).maxLength = most;
+        const number = new Intl.NumberFormat(this.#lingvo());
+        const words = TEXTS["count-count"]?.[this.#lingvo()] ?? TEXTS["count-count"]?.en ?? "";
+        const said = words
+          .replace("{count}", number.format((control as HTMLTextAreaElement).value.length))
+          .replace("{max-length}", number.format(most));
+        if (counted instanceof HTMLElement && counted.textContent !== said) counted.textContent = said;
+      } else {
+        control.removeAttribute("maxlength");
+        if (counted instanceof HTMLElement) counted.textContent = "";
+      }
 `
 }${
   isDatepicker
@@ -1744,6 +2007,13 @@ ${
       flags = { badInput: true };
       const reason = this.#dateTyped.reason;
       if (own === "") message = (TEXTS[reason]?.[this.#lingvo()] ?? TEXTS[reason]?.en ?? "").replace("{example}", this.#dateFormat(this.#dateToday()));
+    } else if (kind === "datepicker" && this.#dateSpan() !== "") {
+      // Spec 036 Teil 5 ②b-2 (A-datelektilo-1): a range shorter than min-span or longer than
+      // max-span – the Modelo's words with the number of days.
+      const span = this.#dateSpan();
+      flags = span === "min-span" ? { rangeUnderflow: true } : { rangeOverflow: true };
+      const key = span + "-invalid";
+      if (own === "") message = (TEXTS[key]?.[this.#lingvo()] ?? TEXTS[key]?.en ?? "").replace("{" + span + "}", String(this.getAttribute(span) ?? ""));
     } else `
         : ""
     }if (required && text === "") {
@@ -1887,6 +2157,22 @@ ${
   const dialogInit = isDialog
     ? `    control.addEventListener("cancel", (event) => {
       event.preventDefault();
+      // Spec 036 ②b-4 (A-dialogo-5, M-3): a duty (dismiss explicit) is not closed by Escape.
+      if (this.#dismissal() === "explicit") return;
+      this.#cancel();
+    });
+    // Escape asks the platform to close; for a duty the request is taken before it is made (a
+    // second Escape without activation would otherwise close the dialog in Chromium).
+    control.addEventListener("keydown", (event) => {
+      if ((event as KeyboardEvent).key === "Escape" && this.#dismissal() === "explicit") event.preventDefault();
+    });
+    // A hint (dismiss free) closes on a click beside it: the backdrop is the dialog's own box, a
+    // click outside its border box lands on the dialog element itself.
+    control.addEventListener("click", (event) => {
+      if (event.target !== control || this.#dismissal() !== "free") return;
+      const box = control.getBoundingClientRect();
+      const { clientX: x, clientY: y } = event as MouseEvent;
+      if (x >= box.left && x <= box.right && y >= box.top && y <= box.bottom) return;
       this.#cancel();
     });
     control.addEventListener("close", () => {
@@ -1929,6 +2215,9 @@ ${
   // content is invalid.
   const dialogRender = isDialog
     ? `    const dialog = control as HTMLDialogElement;
+    // Spec 036 ②b-4 (A-dialogo-5, M-3): a duty is an alertdialog, every other purpose a dialog.
+    if (this.#dismissal() === "explicit") dialog.setAttribute("role", "alertdialog");
+    else dialog.removeAttribute("role");
     const reason = String(this.propValue("reason") ?? "none");
     const area = this.#reasonArea();
     if (area !== undefined) {
@@ -1959,6 +2248,11 @@ ${
     : "";
   const dialogMethods = isDialog
     ? `
+  /** The purpose of the dialog (Spec 029 M-3): free, guarded or explicit; guarded without the axis. */
+  #dismissal(): string {
+    return HAS_PROP.has("dismiss") ? String(this.propValue("dismiss") ?? "guarded") : "guarded";
+  }
+
   /** The reason area the dialog shows itself: a tekstareo in its shadow tree. */
   #reasonArea(): HTMLElement | undefined {
     const area = this.shadowRoot?.querySelector('[part="reason"]');
@@ -2051,14 +2345,15 @@ ${
     });
 `
       : "";
-  // The render of a live region (Spec 011 ③, D-09, D-10, G4): the role follows intent (danger is
-  // an alert), busy follows kind (loading); every named slot shows while it has content; the
+  // The render of a live region (Spec 011 ③, D-09, D-10, G4): the role follows intent (warning
+  // and danger are alerts, Spec 036 ②b-4 A-avizo-5), busy follows kind (loading); every named slot
+  // shows while it has content; the
   // dismiss butono shows while dismissible and is named by a11y.texts.dismissible; the indicator
   // turns while loading.
   const statusRender = isStatus
     ? `    if (HAS_PROP.has("intent")) {
       const intent = this.propValue("intent");
-      control.setAttribute("role", intent === "danger" ? "alert" : "status");
+      control.setAttribute("role", intent === "danger" || intent === "warning" ? "alert" : "status");
     }
     if (HAS_PROP.has("kind")) {
       const kind = this.propValue("kind");
@@ -2068,6 +2363,9 @@ ${
       const holder = this.shadowRoot?.getElementById(name);
       if (holder instanceof HTMLElement) holder.hidden = !this.#filled(name);
     }
+    // Spec 036 Teil 5 ②b-3 (A-plenstato-4): the icon of the slot icon shows while it has one.
+    const iconSlot = this.shadowRoot?.getElementById("icon-slot");
+    if (iconSlot instanceof HTMLElement) iconSlot.hidden = !this.#filled("icon");
 ${
   dismiss
     ? `    const closer = this.shadowRoot?.querySelector('[part="dismiss"]');
@@ -2326,24 +2624,73 @@ ${
     const list = this.shadowRoot?.querySelector('[part="items"]');
     if (!(list instanceof HTMLElement)) return;
     const items = [...this.children].filter((child) => child.getAttribute("slot") === null);
-    if (list.children.length !== items.length) {
+    // Spec 036 Teil 5 ②b-4 (A-spuro-6): with more items than max-items the middle ones collapse
+    // into a menu – the first item stands, then the menu, then the last max-items − 1 items.
+    const most = HAS_PROP.has("max-items") ? Number(this.propValue("max-items") ?? 0) : 0;
+    const collapse = Number.isInteger(most) && most >= 2 && items.length > most;
+    const hidden = collapse ? items.slice(1, items.length - (most - 1)) : [];
+    const shown = items.filter((item) => !hidden.includes(item));
+    const kinds = shown.map(() => "entry");
+    if (collapse) kinds.splice(1, 0, "more");
+    // Spec 036 Teil 5 ②b-3 (A-spuro-4): the slot icon-start leaves the items before they are made again.
+    const iconSlot = this.shadowRoot?.querySelector('slot[name="icon-start"]');
+    const same = list.children.length === kinds.length && [...list.children].every((child, index) => child.getAttribute("part") === kinds[index]);
+    if (!same) {
+      if (iconSlot instanceof HTMLSlotElement && list.contains(iconSlot)) this.shadowRoot?.append(iconSlot);
       list.replaceChildren();
-      items.forEach((_item, index) => {
-        list.insertAdjacentHTML("beforeend", ${JSON.stringify(BREADCRUMB_ENTRY)}.replace('name="item-"', 'name="item-' + index + '"'));
+      kinds.forEach((kind, index) => {
+        list.insertAdjacentHTML(
+          "beforeend",
+          kind === "more" ? ${JSON.stringify(BREADCRUMB_MORE)} : ${JSON.stringify(BREADCRUMB_ENTRY)}.replace('name="item-"', 'name="item-' + index + '"'),
+        );
       });
     }
-    items.forEach((item, index) => {
-      const entry = list.children[index];
-      entry?.querySelector("slot")?.assign(item);
+    let at = 0;
+    [...list.children].forEach((entry, index) => {
+      if (entry.getAttribute("part") === "more") this.#more(entry, hidden);
+      else entry.querySelector<HTMLSlotElement>('slot[name^="item-"]')?.assign(shown[at++] as Element);
       // A chevron stands between two levels only (Abnahme S-2): the last level, the current page,
       // has none. Removed, not hidden — the icon's own display would win over [hidden].
-      const separator = entry?.querySelector('[part="separator"]');
-      const last = index === items.length - 1;
-      if (last && separator !== null && separator !== undefined) separator.remove();
-      if (!last && (separator === null || separator === undefined)) {
-        entry?.insertAdjacentHTML("beforeend", ${JSON.stringify(BREADCRUMB_SEPARATOR)});
+      const separator = entry.querySelector(':scope > [part="separator"]');
+      const last = index === list.children.length - 1;
+      if (last && separator !== null) separator.remove();
+      if (!last && separator === null) {
+        entry.insertAdjacentHTML("beforeend", ${JSON.stringify(BREADCRUMB_SEPARATOR)});
       }
     });
+    // Spec 036 Teil 5 ②b-3 (A-spuro-4): an icon given to the host (slot="icon-start") stands at the
+    // start of the first item, before its link; without items it waits unseen.
+    if (iconSlot instanceof HTMLSlotElement) {
+      const first = list.children[0];
+      if (first !== undefined && iconSlot.parentElement !== first) first.prepend(iconSlot);
+      if (first === undefined && list.contains(iconSlot)) this.shadowRoot?.append(iconSlot);
+      if (iconSlot.hidden !== (first === undefined)) iconSlot.hidden = first === undefined;
+      iconSlot.assign(...[...this.children].filter((child) => child.getAttribute("slot") === "icon-start"));
+    }
+  }
+
+  /**
+   * Spec 036 Teil 5 ②b-4 (A-spuro-6): the menu of the hidden levels – an entry with a target per
+   * hidden item (a link in the menu, A-menuo-5), its trigger named by the Modelo's words.
+   */
+  #more(entry: Element, hidden: readonly Element[]): void {
+    const menu = entry.querySelector("fm-menuo");
+    if (menu === null) return;
+    const words = TEXTS["more-name"];
+    const name = words === undefined ? "" : (words[this.#lingvo()] ?? words.en ?? "");
+    if (menu.getAttribute("label") !== name) menu.setAttribute("label", name);
+    const wanted = hidden.map((item) => ({ to: item.getAttribute("href") ?? "", words: item.textContent?.trim() ?? "" }));
+    const present = [...menu.children].map((child) => ({ to: child.getAttribute("to") ?? "", words: child.textContent ?? "" }));
+    if (JSON.stringify(wanted) === JSON.stringify(present)) return;
+    menu.replaceChildren(
+      ...wanted.map(({ to, words }, index) => {
+        const level = document.createElement("data");
+        level.value = String(index);
+        if (to !== "") level.setAttribute("to", to);
+        level.textContent = words;
+        return level;
+      }),
+    );
   }
 
   /** Writes what the Ero adds to the links (Spec 015 ①, D-04); every write first compares. */
@@ -2558,12 +2905,55 @@ ${
   }
 
   #decorateList(list: HTMLElement): void {
-    // The name of the list (Spec 011 ④, D-10): the label prop, as the platform names a list.
+    // The name of the list (Spec 011 ④, D-10): the label prop, as the platform names a list;
+    // Spec 036 Teil 5 ②b-3 (A-atributlisto-4): else its title, shown above it while it has words.
     const label = this.propValue("label");
-    const name = typeof label === "string" && label !== "" ? label : null;
+    const title = this.shadowRoot?.querySelector('[part="heading"]');
+    const titleText = title instanceof HTMLElement ? this.#slotText("heading") : "";
+    if (title instanceof HTMLElement && title.hidden !== (titleText === "")) title.hidden = titleText === "";
+    const name = typeof label === "string" && label !== "" ? label : titleText !== "" ? titleText : null;
     if (list.getAttribute("aria-label") !== name) {
       if (name === null) list.removeAttribute("aria-label");
       else list.setAttribute("aria-label", name);
+    }
+    // Spec 036 Teil 5 ②b-2 (A-atributlisto-1/3): at most max-entries entries show; the button
+    // more (a tertiary action in the shadow) shows the rest – expanded, said by aria-expanded –
+    // and hides them again. Every write first compares (the observer of the light DOM).
+    if (HAS_PROP.has("max-entries")) {
+      const most = Math.floor(Number(this.getAttribute("max-entries")));
+      const terms = [...list.querySelectorAll(":scope > dt")];
+      const limited = Number.isFinite(most) && most > 0 && terms.length > most;
+      const open = this.propValue("expanded") === true;
+      let entry = -1;
+      for (const child of [...list.children]) {
+        if (child.tagName === "DT") entry += 1;
+        const hide = limited && !open && entry >= most;
+        if (hide !== child.hasAttribute("data-fm-more")) {
+          child.toggleAttribute("data-fm-more", hide);
+          child.toggleAttribute("hidden", hide);
+        }
+      }
+      let more = this.shadowRoot?.querySelector('[part="more"]');
+      if (!(more instanceof HTMLButtonElement) && limited) {
+        const button = document.createElement("button");
+        button.setAttribute("part", "more");
+        button.setAttribute("type", "button");
+        button.addEventListener("click", () => {
+          this.toggleAttribute("expanded", this.propValue("expanded") !== true);
+        });
+        this.shadowRoot?.querySelector('[part="list"]')?.after(button);
+        more = button;
+      }
+      if (more instanceof HTMLButtonElement) {
+        if (more.hidden !== !limited) more.hidden = !limited;
+        const lingvo = this.#lingvo();
+        const say = (key: string) => TEXTS[key]?.[lingvo] ?? TEXTS[key]?.en ?? "";
+        const words = open
+          ? say("more-name")
+          : say("more-count").replace("{count}", String(Math.max(0, terms.length - most)));
+        if (more.textContent !== words) more.textContent = words;
+        if (more.getAttribute("aria-expanded") !== String(open)) more.setAttribute("aria-expanded", String(open));
+      }
     }
     // An empty value (Spec 011 ④, D-10, G4): a dash to see, the a11y text of the default slot's
     // empty entry to hear (a11y.texts <slot>-empty), clipped from sight; a value filled in later
@@ -2645,8 +3035,13 @@ ${
       const given = this.propValue("label");
       const landmark = typeof given === "string" && given !== "" ? given : word("label-empty");
       if (control.getAttribute("aria-label") !== landmark) control.setAttribute("aria-label", landmark);
-      const pageCount = Math.max(1, Math.floor(Number(this.propValue("total-pages") ?? 1)) || 1);
-      const current = Math.min(pageCount, Math.max(1, Math.floor(Number(this.propValue("page") ?? 1)) || 1));
+      // Spec 036 Teil 5 ②b-4 (A-pagxigilo-6): with total-unknown, total-pages counts the pages
+      // known so far – the current one is known – and next leads on from every page.
+      const open = HAS_PROP.has("total-unknown") && this.propValue("total-unknown") === true;
+      const known = Math.max(1, Math.floor(Number(this.propValue("total-pages") ?? 1)) || 1);
+      const asked = Math.max(1, Math.floor(Number(this.propValue("page") ?? 1)) || 1);
+      const pageCount = open ? Math.max(known, asked) : known;
+      const current = Math.min(pageCount, asked);
       const siblings = Math.max(0, Math.floor(Number(this.propValue("siblings") ?? 1)) || 0);
       const link = this.propValue("mode") === "link";
       const template = String(this.propValue("href-template") ?? "?page={page}");
@@ -2654,18 +3049,43 @@ ${
       const high = Math.min(pageCount - 1, current + siblings);
       const pages: (number | "gap")[] = [1];
       if (low > 2) pages.push("gap");
-      for (let n = low; n <= high; n += 1) pages.push(n);
-      if (high < pageCount - 1) pages.push("gap");
-      if (pageCount > 1) pages.push(pageCount);
-      const items: { kind: "prev" | "next" | "page" | "gap"; page: number }[] = [
+      if (open) {
+        // No last page: the current one and its siblings up to the known ones, then an ellipsis.
+        for (let n = low; n <= Math.min(pageCount, current + siblings); n += 1) pages.push(n);
+        pages.push("gap");
+      } else {
+        for (let n = low; n <= high; n += 1) pages.push(n);
+        if (high < pageCount - 1) pages.push("gap");
+        if (pageCount > 1) pages.push(pageCount);
+      }
+      // Spec 036 Teil 5 ②b-2 (A-pagxigilo-1): summary count or compact puts the place between the
+      // arrows instead of the pages – the Modelo's words (summary-count), or the numbers alone,
+      // heard as the words.
+      const summary = String(this.propValue("summary") ?? "pages");
+      const place = open
+        ? word("items-name") + " " + current
+        : word("summary-count").replace("{page}", String(current)).replace("{total-pages}", String(pageCount));
+      // Spec 036 Teil 5 ②b-3 (A-pagxigilo-4): with first-last a button to the first page before prev
+      // and one to the last after next, each disabled where it would stay on the page.
+      const ends = this.propValue("first-last") === true;
+      const items: { kind: "first" | "prev" | "next" | "last" | "page" | "gap" | "summary"; page: number }[] = [
+        ...(ends ? [{ kind: "first" as const, page: current === 1 ? 0 : 1 }] : []),
         { kind: "prev", page: current - 1 },
-        ...pages.map((page) => (page === "gap" ? { kind: "gap" as const, page: 0 } : { kind: "page" as const, page })),
+        ...(summary === "pages"
+          ? pages.map((page) => (page === "gap" ? { kind: "gap" as const, page: 0 } : { kind: "page" as const, page }))
+          : [{ kind: "summary" as const, page: current }]),
         { kind: "next", page: current + 1 },
+        ...(ends && !open ? [{ kind: "last" as const, page: current === pageCount ? pageCount + 1 : pageCount }] : []),
       ];
       const html = items
         .map((item) => {
           if (item.kind === "gap") return '<li part="ellipsis" aria-hidden="true">' + ${JSON.stringify(ELLIPSIS_SIGN)} + "</li>";
-          const off = item.page < 1 || item.page > pageCount;
+          if (item.kind === "summary") {
+            return summary === "compact"
+              ? '<li part="summary"><span aria-hidden="true">' + (open ? String(current) : current + " / " + pageCount) + '</span><span class="fm-hidden">' + place + "</span></li>"
+              : '<li part="summary">' + place + "</li>";
+          }
+          const off = item.page < 1 || (item.page > pageCount && !(open && item.kind === "next"));
           const tag = link ? "a" : "button";
           const href = link && !off ? ' href="' + template.replace("{page}", String(item.page)) + '"' : "";
           const type = link ? "" : ' type="button"';
@@ -2676,7 +3096,7 @@ ${
           const inner =
             item.kind === "page"
               ? String(item.page)
-              : '<fm-ikono part="' + item.kind + '" name="' + (item.kind === "prev" ? "chevron-left" : "chevron-right") + '"></fm-ikono>';
+              : '<fm-ikono part="' + item.kind + '" name="' + (item.kind === "prev" ? "chevron-left" : item.kind === "next" ? "chevron-right" : item.kind) + '"></fm-ikono>';
           return '<li><' + tag + ' part="item"' + type + href + arrow + marked + disabled + ' aria-label="' + name + '" data-page="' + item.page + '">' + inner + "</" + tag + ">";
         })
         .join("");
@@ -2696,6 +3116,9 @@ ${
       attributeFilter: ["slot", "value", "disabled", "aria-disabled"],
     });
     control.addEventListener("keydown", (event) => this.#key(event));
+    // Spec 036 Teil 5 ②b-4 (A-langetaro-4): the bar scrolls; once laid out and whenever it becomes
+    // narrower or wider, the selected tab is brought into view.
+    if (typeof ResizeObserver !== "undefined") new ResizeObserver(() => this.#reveal()).observe(control);
     control.addEventListener("click", (event) => {
       const row = event.composedPath().find(
         (node) => node instanceof HTMLElement && node.getAttribute("part") === "tab",
@@ -2729,6 +3152,11 @@ ${
       panel.id = "panel";
       if (active === -1) panel.removeAttribute("aria-labelledby");
       else panel.setAttribute("aria-labelledby", \`tab-\${active}\`);
+    }
+    // Spec 036 Teil 5 ②b-4 (A-langetaro-4): another selected tab moves into view.
+    if (active !== this.#revealed) {
+      this.#revealed = active;
+      this.#reveal();
     }
 `
     : "";
@@ -3051,8 +3479,16 @@ ${
     const rows = this.#menuRows();
     const current = rows.findIndex((row) => row === this.shadowRoot?.activeElement);
     const at = enabled.indexOf(current);
+    const row = rows[current];
+    if (key === "Space" && row instanceof HTMLAnchorElement) {
+      // A link takes Enter of the platform; Space follows it as in a menu of buttons.
+      event.preventDefault();
+      row.click();
+      return;
+    }
     if (key === "Enter" || key === "Space") return;
     if (KEYS.includes(key)) {
+      this.#typed = "";
       event.preventDefault();
       if (key === "ArrowDown") this.#menuFocus(enabled[(at + 1) % enabled.length] ?? -1);
       else if (key === "ArrowUp") this.#menuFocus(enabled[(at - 1 + enabled.length) % enabled.length] ?? -1);
@@ -3064,16 +3500,15 @@ ${
       return;
     }
     if (event.key.length !== 1 || event.altKey || event.ctrlKey || event.metaKey) return;
-    const letter = event.key.toLowerCase();
-    const order = [...enabled.slice(at + 1), ...enabled.slice(0, at + 1)];
-    const found = order.find((index) => {
-      const row = rows[index];
-      const words = row === undefined ? "" : (this.#menuEntryOf(row)?.textContent ?? "");
-      return words.trim().toLowerCase().startsWith(letter);
+    // Spec 036 Teil 5 ②b-4 (A-menuo-5): the words typed in one go find the entry they start with.
+    const words = enabled.map((index) => {
+      const each = rows[index];
+      return each === undefined ? "" : (this.#menuEntryOf(each)?.textContent ?? "");
     });
-    if (found !== undefined) this.#menuFocus(found);
+    const found = this.#typeAheadFind(this.#typeAhead(event), words, at);
+    if (found !== -1) this.#menuFocus(enabled[found] ?? -1);
   }
-
+${TYPE_AHEAD_METHODS}
   /**
    * Assigns the children to the slots (manual slot assignment): every element without a slot to a
    * row of its own, made here — an apartigilo to a separator row, every other to a menu item; the
@@ -3093,20 +3528,59 @@ ${
       (holder as HTMLSlotElement).assign(...(named.get(holder.getAttribute("name") ?? "") ?? []));
     }
     const list = this.#control;
-    const wanted = entries.map((entry) => (entry.tagName.toLowerCase() === "fm-apartigilo" ? "separator" : "item"));
+    // Spec 036 Teil 5 ②b-4 (A-menuo-5): an entry with a target is a link row.
+    const wanted = entries.map((entry) =>
+      entry.tagName.toLowerCase() === "fm-apartigilo" ? "separator" : entry.hasAttribute("to") ? "link" : "item",
+    );
+    const kindOf = (child: Element) =>
+      child.getAttribute("part") === "separator" ? "separator" : child.tagName.toLowerCase() === "a" ? "link" : "item";
+    // Spec 036 Teil 5 ②b-3 (A-menuo-4): the rows, also those standing in a group.
+    const present = [
+      ...list.querySelectorAll(':scope > [part="item"], :scope > [part="separator"], :scope > [part="group"] > [part="item"], :scope > [part="group"] > [part="separator"]'),
+    ];
     const same =
-      list.children.length === wanted.length &&
-      [...list.children].every((child, index) => child.getAttribute("part") === wanted[index]);
+      present.length === wanted.length &&
+      present.every((child, index) => kindOf(child) === wanted[index]);
     if (!same) {
       list.replaceChildren();
       for (const kind of wanted) {
-        list.insertAdjacentHTML("beforeend", kind === "separator" ? \`${MENU_SEPARATOR}\` : \`${MENU_ROW}\`);
+        list.insertAdjacentHTML(
+          "beforeend",
+          kind === "separator" ? \`${MENU_SEPARATOR}\` : kind === "link" ? \`${menuIcon ? MENU_LINK_ROW_ICON : MENU_LINK_ROW}\` : \`${menuIcon ? MENU_ROW_ICON : MENU_ROW}\`,
+        );
       }
     }
+    const rows = [
+      ...list.querySelectorAll(':scope > [part="item"], :scope > [part="separator"], :scope > [part="group"] > [part="item"], :scope > [part="group"] > [part="separator"]'),
+    ] as HTMLElement[];
     entries.forEach((entry, index) => {
-      list.children[index]?.querySelector("slot")?.assign(entry);
-    });
+      const row = rows[index];
+      row?.querySelector("slot")?.assign(entry);
+      if (row instanceof HTMLAnchorElement) {
+        const target = entry.getAttribute("to") ?? "";
+        if (row.getAttribute("href") !== target) row.setAttribute("href", target);
+      }${
+        menuIcon
+          ? `
+      // Spec 036 Teil 5 ②b-3 (A-menuo-4): the icon of the entry before its words.
+      const icon = row?.querySelector('[part="icon"]');
+      if (icon instanceof HTMLElement) {
+        const name = entry.getAttribute("icon") ?? "";
+        icon.hidden = name === "";
+        if (name !== "" && icon.getAttribute("name") !== name) icon.setAttribute("name", name);
+      }`
+          : ""
+      }
+    });${
+      menuGroups
+        ? `
+    // Spec 036 Teil 5 ②b-3 (A-menuo-4): entries of one group stand in a group under its heading;
+    // the divider stays the apartigilo the menu holds (Spec 014 ④).
+    this.#groupRows(list, rows, entries.map((entry) => entry.getAttribute("group") ?? ""), false);`
+        : ""
+    }
   }
+${menuGroups ? GROUP_ROWS_METHOD : ""}
 `
     : "";
   // The ways of a field with suggestions (Spec 014 ⑤): its options from the light DOM, the rows
@@ -3116,33 +3590,37 @@ ${
   #suggestTyped = false;
   #suggestActive = -1;
 
-  /** The options of the field: every child in the slot of the options, its value and its text. */
-  #entries(): { value: string; text: string }[] {
+  /** The options of the field: every child in the slot of the options, its value, its text and its group. */
+  #entries(): { value: string; text: string; group: string }[] {
     return [...this.children]
       .filter((child) => child.getAttribute("slot") === "options")
       .map((child) => {
         const text = child.textContent?.trim() ?? "";
-        return { value: child.getAttribute("value") ?? text, text };
+        return { value: child.getAttribute("value") ?? text, text, group: child.getAttribute("group") ?? "" };
       });
   }
-
+${GROUP_ROWS_METHOD}
   #listbox(): HTMLElement {
     return this.shadowRoot?.querySelector('[part="listbox"]') as HTMLElement;
   }
 
   /** The options that match the typed text (the text, not the value, case-insensitive). */
-  #suggestMatches(): { value: string; text: string }[] {
+  #suggestMatches(): { value: string; text: string; group: string }[] {
     const typed = (this.#control as HTMLInputElement).value.trim().toLowerCase();
     const minimum = Number(this.propValue("min-chars") ?? 1);
     if (typed.length < minimum) return [];
     const chosen = this.#entries().find((entry) => entry.value === this.getAttribute("value"));
     // The text of a chosen option shows no list of its own.
     if (chosen !== undefined && chosen.text.toLowerCase() === typed && !this.#suggestTyped) return [];
-    return this.#entries().filter((entry) => entry.text.toLowerCase().includes(typed));
+    const matches = this.#entries().filter((entry) => entry.text.toLowerCase().includes(typed));
+    // Spec 036 Teil 5 ②b-2 (A-kompletigilo-1): at most max-suggestions, the first matches; the
+    // count heard is the count shown.
+    const most = Number(this.propValue("max-suggestions"));
+    return Number.isInteger(most) && most > 0 ? matches.slice(0, most) : matches;
   }
 
   /** Writes the rows of the listbox from the matches and tells how many there are. */
-  #suggestRows(): { value: string; text: string }[] {
+  #suggestRows(): { value: string; text: string; group: string }[] {
     const listbox = this.#listbox();
     const matches = this.#suggestMatches();
     const rows = [...listbox.querySelectorAll('[part="suggestion"]')] as HTMLElement[];
@@ -3184,6 +3662,8 @@ ${
       noResults.textContent = none;
       noResults.hidden = matches.length > 0 || !this.#suggestTyped;
     }
+    // Spec 036 Teil 5 ②b-3 (A-kompletigilo-4): the suggestions in their groups.
+    this.#groupRows(listbox, rows.slice(0, matches.length), matches.map((entry) => entry.group), false);
     if (this.#suggestActive >= matches.length) this.#suggestActive = -1;
     this.#suggestMark();
     return matches;
@@ -3267,6 +3747,21 @@ ${
     : "";
   const tabsMethods = isTabs
     ? `
+  /** The tab last brought into view (Spec 036 ②b-4, A-langetaro-4). */
+  #revealed = -1;
+
+  /** Scrolls the bar (only the bar, never the page) until the selected tab stands wholly in it. */
+  #reveal(): void {
+    const bar = this.#control;
+    const tab = this.#rows().find((row) => row.getAttribute("aria-selected") === "true");
+    if (tab === undefined || bar.scrollWidth <= bar.clientWidth) return;
+    const outer = bar.getBoundingClientRect();
+    const inner = tab.getBoundingClientRect();
+    // Whole pixels, rounded away from the tab: WebKit keeps scrollLeft whole and would leave a part.
+    if (inner.left < outer.left) bar.scrollLeft -= Math.ceil(outer.left - inner.left);
+    else if (inner.right > outer.right) bar.scrollLeft += Math.ceil(inner.right - outer.right);
+  }
+
   /** Focus goes to the one tab stop: the selected tab, else the first. */
   override focus(options?: FocusOptions): void {
     const rows = this.#rows();
@@ -3420,12 +3915,64 @@ ${
     }
 `
     : "";
+  // Spec 036 Teil 5 ②b-3 (A-teksto-4): whether the text is cut changes with the width of the
+  // paragraph – a changed size renders again (the tooltip comes or goes).
+  const paragraphInit =
+    isParagraph && parts.includes("text")
+      ? `    if (HAS_PROP.has("max-lines") && typeof ResizeObserver !== "undefined") {
+      new ResizeObserver(() => this.#render()).observe(control);
+    }
+`
+      : "";
   // A paragraph (Spec 014 ③, plan ③ D-04): inline code is spoken as code; every other kind is
   // the platform's paragraph without a role attribute.
   const paragraphRender = isParagraph
     ? `    if (String(this.propValue("kind")) === "code") control.setAttribute("role", "code");
     else control.removeAttribute("role");
+${
+  parts.includes("text")
+    ? `    // Spec 036 Teil 5 ②b-3 (A-teksto-1): max-lines cuts the text after that many lines (the
+    // platform's line clamp, written inline: a number of the instance, no design value); the whole
+    // text stays in the tree and is heard.
+    {
+      const most = Number(this.propValue("max-lines"));
+      const clamped = HAS_PROP.has("max-lines") && Number.isInteger(most) && most > 0;
+      const style = control.style;
+      if (clamped) {
+        style.setProperty("display", "-webkit-box");
+        style.setProperty("-webkit-box-orient", "vertical");
+        style.setProperty("-webkit-line-clamp", String(most));
+        style.setProperty("overflow", "hidden");
+      } else if (style.getPropertyValue("-webkit-line-clamp") !== "") {
+        for (const property of ["display", "-webkit-box-orient", "-webkit-line-clamp", "overflow"]) {
+          style.removeProperty(property);
+        }
+      }
+      // Spec 036 Teil 5 ②b-3 (A-teksto-4): while the text is cut, a konsileto shows it whole on
+      // hover and on focus – silent, the whole text is heard already – and the paragraph takes the
+      // focus, so the keyboard reaches it too; uncut, both go.
+      const cut = clamped && control.scrollHeight > control.clientHeight + 1;
+      let tip = this.shadowRoot?.getElementById("truncated");
+      if (cut) {
+        if (control.id === "") control.id = "fm-truncated";
+        if (control.getAttribute("tabindex") !== "0") control.setAttribute("tabindex", "0");
+        if (!(tip instanceof HTMLElement)) {
+          tip = document.createElement("fm-konsileto");
+          tip.id = "truncated";
+          tip.setAttribute("data-fm-silent", "");
+          tip.setAttribute("for", control.id);
+          this.shadowRoot?.append(tip);
+        }
+        const whole = (this.textContent ?? "").replace(/\\s+/g, " ").trim();
+        if (tip.textContent !== whole) tip.textContent = whole;
+      } else {
+        if (control.hasAttribute("tabindex")) control.removeAttribute("tabindex");
+        if (tip instanceof HTMLElement) tip.remove();
+      }
+    }
 `
+    : ""
+}`
     : "";
   // A skip link (Spec 014 ②, plan ② D-07): an empty label shows the Modelo's words for it, in the
   // language of the document (a11y.texts label-empty), as the fallback content of the slot.
@@ -3479,10 +4026,14 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
       // scripts such as Devanagari); a word's initial is its first grapheme that is a letter or a
       // digit, so a quote or a bracket before it does not count.
       const words = avatarName.split(/[\\s\\p{Pd}]+/u).filter((word) => word !== "");
-      // Nachlese 5 N5-5 (O-18): the smallest size – the first value of the size axis – carries
-      // one initial, as in Figma; two stood over its circle.
-      const smallest = PROPS.find((prop) => prop.name === "size")?.values?.[0];
-      const one = smallest !== undefined && this.propValue("size") === smallest;
+      // Nachlese 5 N5-5 (O-18): the small sizes – every value of the size axis before its default
+      // (small; since Spec 036 Teil 5 ②b-2, A-avataro-2, x-small too) – carry one initial, as in
+      // Figma; two stood over the circle.
+      const sizeProp = PROPS.find((prop) => prop.name === "size");
+      const sizeValues = sizeProp?.values ?? [];
+      const one =
+        sizeValues.indexOf(String(this.propValue("size"))) <
+        sizeValues.indexOf(String(sizeProp?.default ?? ""));
       const picked = one
         ? words.slice(0, 1)
         : words.length > 1
@@ -3497,7 +4048,17 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
         )
         .join("")
         .toLocaleUpperCase(lingvo);
+      // Spec 036 Teil 5 ②b-3 (A-avataro-4): without initials the default icon stands in their place.
+      const personIcon = this.shadowRoot?.querySelector('[part="icon"]');
+      if (personIcon instanceof HTMLElement && letters !== "" && personIcon.parentElement === initials) {
+        control.append(personIcon);
+      }
       if (initials.textContent !== letters) initials.textContent = letters;
+      if (personIcon instanceof HTMLElement) {
+        const bare = letters === "";
+        if (bare && personIcon.parentElement !== initials) initials.append(personIcon);
+        if (personIcon.hidden !== !bare) personIcon.hidden = !bare;
+      }
       const picture = String(this.propValue("picture") ?? "");
       if (picture !== this.#picture) {
         this.#picture = picture;
@@ -3580,6 +4141,12 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
         !(trigger !== undefined && trigger.contains(next));
     });
     root.querySelector('slot[name="trigger"]')?.addEventListener("slotchange", () => this.#overlayBindTrigger());
+    // Spec 036 Teil 5 ②b-3 (A-sxvebilo-4): the close button closes the layer and the trigger takes
+    // the focus back at once (the toggle above comes a task later).
+    root.querySelector('[part="close"]')?.addEventListener("click", () => {
+      control.hidePopover();
+      this.#overlayTrigger()?.focus();
+    });
 `
     : "";
   const popoverRender = isPopover
@@ -3588,6 +4155,15 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
     else control.removeAttribute("aria-label");
     const heading = this.shadowRoot?.querySelector('[part="heading"]');
     if (heading instanceof HTMLElement) heading.hidden = !this.#filled("heading");
+    // Spec 036 Teil 5 ②b-3 (A-sxvebilo-4): the close button while dismissible, named by the Modelo.
+    const closer = this.shadowRoot?.querySelector('[part="close"]');
+    if (closer instanceof HTMLElement) {
+      const shown = HAS_PROP.has("dismissible") && this.propValue("dismissible") === true;
+      if (closer.hidden !== !shown) closer.hidden = !shown;
+      const word = TEXTS["close-name"];
+      const closeName = word?.[this.#lingvo()] ?? word?.en ?? "";
+      if (closeName !== "" && closer.getAttribute("label") !== closeName) closer.setAttribute("label", closeName);
+    }
     this.#overlaySync();
 `
     : "";
@@ -3605,7 +4181,7 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ["slot", "value", "disabled", "intent", "label"],
+      attributeFilter: ["slot", "value", "disabled", "intent", "label", "to"${menuIcon ? ', "icon"' : ""}${menuGroups ? ', "group"' : ""}],
     });
     control.addEventListener("toggle", () => {
       const open = control.matches(":popover-open");
@@ -3637,6 +4213,13 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
       const row = event.composedPath().find(
         (node) => node instanceof HTMLElement && node.getAttribute("part") === "item",
       );
+      // Spec 036 Teil 5 ②b-4 (A-menuo-5): a link row navigates (the platform's), says no select
+      // and closes the menu; a disabled one goes nowhere.
+      if (row instanceof HTMLAnchorElement) {
+        if (row.getAttribute("aria-disabled") === "true") event.preventDefault();
+        else this.#overlayClose();
+        return;
+      }
       if (row instanceof HTMLElement) this.#menuChoose(row);
     });
     root.querySelector('slot[name="trigger"]')?.addEventListener("slotchange", () => this.#overlayBindTrigger());
@@ -3734,7 +4317,7 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ["slot", "value"],
+      attributeFilter: ["slot", "value", "group"],
     });
     const input = control as HTMLInputElement;
     input.addEventListener("input", () => {
@@ -3845,6 +4428,9 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
         hint.textContent = word("drop-hint-name");
         hint.hidden = this.propValue("dropzone") !== true;
       }
+      // Spec 036 Teil 5 ②b-3 (A-alsxutilo-4): the upload icon first in a dropzone, unheard.
+      const zoneIcon = shadow?.querySelector('[part="dropzone"] > [part="icon"]');
+      if (zoneIcon instanceof HTMLElement) zoneIcon.hidden = this.propValue("dropzone") !== true;
       const list = shadow?.querySelector('[part="file-list"]');
       if (list instanceof HTMLElement) {
         while (list.children.length > this.#files.length) list.lastElementChild?.remove();
@@ -3967,6 +4553,19 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
     const bound = this.propValue("max-size");
     const limit = typeof bound === "string" && bound !== "" ? Number(bound) : 0;
     const word = (key: string): string => TEXTS[key]?.[language] ?? TEXTS[key]?.en ?? "";
+    // Spec 036 Teil 5 ②b-2 (A-alsxutilo-1): more files than max-files hold the form, in the
+    // Modelo's words with the count and the most.
+    const most = Number(this.propValue("max-files"));
+    if (Number.isInteger(most) && most > 0 && this.#files.length > most) {
+      const number = new Intl.NumberFormat(language);
+      return {
+        flags: { rangeOverflow: true },
+        message: this.#fill(word("max-files-invalid"), {
+          count: number.format(this.#files.length),
+          "max-files": number.format(most),
+        }),
+      };
+    }
     for (const file of this.#files) {
       if (kinds.length > 0 && !kinds.some((kind) => this.#fits(file, kind))) {
         return {
@@ -4513,6 +5112,24 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
     }
   }
 
+  /** Spec 036 Teil 5 ②b-2 (A-datelektilo-1): the bound a chosen range breaks, min-span or max-span, else "". */
+  #dateSpan(): "" | "min-span" | "max-span" {
+    if (!this.#dateRanged()) return "";
+    const { start, end } = this.#dateValues();
+    if (start === undefined || end === undefined) return "";
+    const days = Math.round((Date.parse(end + "T00:00:00Z") - Date.parse(start + "T00:00:00Z")) / 86400000) + 1;
+    const bound = (name: string) => {
+      const raw = this.getAttribute(name);
+      const number = raw === null || raw.trim() === "" ? 0 : Number(raw);
+      return Number.isFinite(number) && number > 0 ? number : undefined;
+    };
+    const least = bound("min-span");
+    const most = bound("max-span");
+    if (least !== undefined && days < least) return "min-span";
+    if (most !== undefined && days > most) return "max-span";
+    return "";
+  }
+
   /** Takes a day: the value (single), or the start and then the end of a range — an end before the start starts anew. */
   #calendarPick(iso: string): void {
     if (this.#dateDisabled(iso) || this.propValue("disabled") === true || this.propValue("readonly") === true) return;
@@ -4701,7 +5318,7 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ["slot", "value", "icon", "description", "disabled"],
+      attributeFilter: ["slot", "value", "icon", "description", "disabled", "group"],
     });
     control.addEventListener("click", (event) => {
       event.stopPropagation();
@@ -4734,6 +5351,28 @@ ${
       event.stopPropagation();
       if (this.propValue("disabled") === true || this.propValue("readonly") === true) return;
       this.setAttribute("values", "");
+      this.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    // Spec 036 Teil 5 ②b-3 (A-plurelektilo-1): „alle wählen“ chooses every option that may be
+    // chosen (not disabled, within max, in their order); once all are, it takes them back.
+    // Space and Enter press it, as a checkbox.
+    this.shadowRoot?.querySelector('[part="select-all"]')?.addEventListener("keydown", (event) => {
+      if (!(event instanceof KeyboardEvent) || (event.key !== " " && event.key !== "Enter")) return;
+      event.preventDefault();
+      event.stopPropagation();
+      (event.currentTarget as HTMLElement).click();
+    });
+    this.shadowRoot?.querySelector('[part="select-all"]')?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (this.propValue("disabled") === true || this.propValue("readonly") === true) return;
+      const entries = this.#entries();
+      const chosen = this.#listValues();
+      const kept = chosen.filter((value) => entries.some((entry) => entry.value === value && entry.disabled));
+      const next =
+        this.#listAllState() === "true"
+          ? kept
+          : [...kept, ...this.#listChoosable().map((entry) => entry.value).filter((value) => !kept.includes(value))];
+      this.setAttribute("values", next.join(","));
       this.dispatchEvent(new Event("change", { bubbles: true }));
     });
     // A tag taken away (the remove of a composed signeto) takes its value out of the values.
@@ -4771,7 +5410,15 @@ ${
 ${
   isMultiselect
     ? `      const known = chosen.filter((value) => entries.some((entry) => entry.value === value));
-      const shown = known.length === 0 && placeholder !== "" ? placeholder : known.length + " " + word("options-count");
+      // Spec 036 Teil 5 ②b-2 (A-plurelektilo-1): summary labels names the chosen options by their
+      // words, in the order of the values; count says how many.
+      const labels = known.map((value) => entries.find((entry) => entry.value === value)?.text ?? value);
+      const shown =
+        known.length === 0 && placeholder !== ""
+          ? placeholder
+          : this.propValue("summary") === "labels" && known.length > 0
+            ? labels.join(", ")
+            : known.length + " " + word("options-count");
       const tags = this.shadowRoot?.querySelector('[part="tags"]');
       if (tags instanceof HTMLElement) {
         const asTags = this.propValue("summary") === "tags";
@@ -4811,6 +5458,19 @@ ${
       if (filter !== undefined) {
         filter.hidden = this.propValue("filterable") !== true;
         filter.setAttribute("aria-labelledby", "label");
+      }
+      // Spec 036 Teil 5 ②b-3 (A-plurelektilo-1, A-plurelektilo-4): „alle wählen“ says whether
+      // every option that may be chosen is (within max), some are (mixed) or none.
+      const all = this.shadowRoot?.querySelector('[part="select-all"]');
+      if (all instanceof HTMLElement) {
+        all.hidden = this.propValue("select-all") !== true;
+        const text = this.shadowRoot?.getElementById("select-all-text");
+        if (text instanceof HTMLElement && text.textContent !== word("select-all")) text.textContent = word("select-all");
+        const state = this.#listAllState();
+        if (all.getAttribute("aria-checked") !== state) all.setAttribute("aria-checked", state);
+        const off = this.propValue("disabled") === true || this.propValue("readonly") === true;
+        if (off) all.setAttribute("aria-disabled", "true");
+        else all.removeAttribute("aria-disabled");
       }
       this.#listRole().setAttribute("aria-labelledby", "label");
       const maxGiven = this.propValue("max");
@@ -4879,8 +5539,8 @@ ${
     if (!event.composedPath().includes(this)) this.#listClose(false);
   };
 
-  /** The options: every child in the slot of the options with its value, text, icon, description and disabled. */
-  #entries(): { value: string; text: string; icon: string; description: string; disabled: boolean }[] {
+  /** The options: every child in the slot of the options with its value, text, icon, description, disabled and group. */
+  #entries(): { value: string; text: string; icon: string; description: string; disabled: boolean; group: string }[] {
     return [...this.children]
       .filter((child) => child.getAttribute("slot") === "${listSlot}")
       .map((child) => {
@@ -4891,11 +5551,33 @@ ${
           icon: child.getAttribute("icon") ?? "",
           description: child.getAttribute("description") ?? "",
           disabled: child.hasAttribute("disabled"),
+          group: child.getAttribute("group") ?? "",
         };
       });
   }
+${GROUP_ROWS_METHOD}
 
-  /** The chosen values: the value, or the comma-separated values of a multi-select. */
+${
+  isMultiselect
+    ? `  /** The options „alle wählen“ chooses: not disabled, in their order, as many as max allows. */
+  #listChoosable(): { value: string; disabled: boolean }[] {
+    const maxGiven = this.propValue("max");
+    const max = typeof maxGiven === "string" && maxGiven !== "" ? Number(maxGiven) : undefined;
+    const usable = this.#entries().filter((entry) => !entry.disabled);
+    return max !== undefined && Number.isFinite(max) ? usable.slice(0, Math.max(0, max)) : usable;
+  }
+
+  /** Whether the options „alle wählen“ chooses are chosen: all (true), some (mixed) or none (false). */
+  #listAllState(): "true" | "mixed" | "false" {
+    const chosen = this.#listValues();
+    const choosable = this.#listChoosable();
+    const count = choosable.filter((entry) => chosen.includes(entry.value)).length;
+    return count > 0 && count === choosable.length ? "true" : count > 0 ? "mixed" : "false";
+  }
+
+`
+    : ""
+}  /** The chosen values: the value, or the comma-separated values of a multi-select. */
   #listValues(): string[] {
     const given = String(this.propValue("${isMultiselect ? "values" : "value"}") ?? "");
     return given.split(",").map((value) => value.trim()).filter((value) => value !== "");
@@ -4968,6 +5650,8 @@ ${
         if (description.textContent !== entry.description) description.textContent = entry.description;
       }
     });
+    // Spec 036 Teil 5 ②b-3 (A-listelektilo-4, A-plurelektilo-4): the rows in their groups.
+    this.#groupRows(holder as HTMLElement, rows.slice(0, ordered.length), ordered.map((entry) => entry.group), ${parts.includes("divider")});
     if (this.#listActive >= rows.length) this.#listActive = -1;
     this.#listMark();
   }
@@ -4992,10 +5676,14 @@ ${
   isMultiselect
     ? `    const chosen = this.#listValues();
     const entries = this.#entries();
-    this.#listOrder = [
-      ...entries.filter((entry) => chosen.includes(entry.value)),
-      ...entries.filter((entry) => !chosen.includes(entry.value)),
-    ].map((entry) => entry.value);
+    // Spec 036 Teil 5 ②b-3 (A-plurelektilo-4): options in groups keep their order (the chosen
+    // first would tear the groups apart).
+    this.#listOrder = entries.some((entry) => entry.group !== "")
+      ? []
+      : [
+          ...entries.filter((entry) => chosen.includes(entry.value)),
+          ...entries.filter((entry) => !chosen.includes(entry.value)),
+        ].map((entry) => entry.value);
 `
     : ""
 }    this.#listBuild();
@@ -5051,24 +5739,27 @@ ${
     rows[this.#listActive]?.scrollIntoView?.({ block: "nearest" });
   }
 
-  /** The row whose text starts with the typed letter, after the active one and around. */
-  #listFind(letter: string): HTMLElement | undefined {
+  /**
+   * The row whose text starts with the typed words, from the active one on and around (Spec 036
+   * ②b-4, A-listelektilo-5: more than one letter in one go; the same letter again moves on).
+   */
+  #listFind(typed: string): HTMLElement | undefined {
     const rows = this.#listRows().filter((row) => !row.hidden && row.getAttribute("aria-disabled") !== "true");
     const active = this.#listRows()[this.#listActive];
     const start = active === undefined ? -1 : rows.indexOf(active);
-    const around = [...rows.slice(start + 1), ...rows.slice(0, start + 1)];
-    return around.find((row) => (row.querySelector('[part="item-text"]')?.textContent ?? "").trim().toLowerCase().startsWith(letter));
+    const words = rows.map((row) => row.querySelector('[part="item-text"]')?.textContent ?? "");
+    return rows[this.#typeAheadFind(typed, words, start)];
   }
-
+${TYPE_AHEAD_METHODS}
   /** The keys of the Skemo on the button${isMultiselect ? ", the listbox and the filter" : ""}. */
   #listKey(event: KeyboardEvent): void {
     const key = event.key === " " ? "Space" : event.key;
     const open = this.#listIsOpen();
     const inFilter = event.target instanceof HTMLInputElement;
-    if (!KEYS.includes(key)) {
-      // A typed letter jumps to the option that starts with it — open, the active row; closed, the choice.
+    if (!KEYS.includes(key) || key === "Character") {
+      // Typed words jump to the option that starts with them — open, the active row; closed, the choice.
       if (!inFilter && event.key.length === 1 && /\\S/.test(event.key) && !event.ctrlKey && !event.metaKey && !event.altKey) {
-        const found = this.#listFind(event.key.toLowerCase());
+        const found = this.#listFind(this.#typeAhead(event));
         if (found === undefined) return;
         event.preventDefault();
         if (open) {
@@ -5080,6 +5771,7 @@ ${
       }
       return;
     }
+    this.#typed = "";
     if (this.propValue("disabled") === true || this.propValue("readonly") === true) return;
     if (key === "Escape") {
       if (!open) return;
@@ -5433,11 +6125,52 @@ ${
       const start = ranged ? share(values[0] ?? min) : 0;
       const end = share(ranged ? (values[1] ?? max) : (values[0] ?? min));
       control.style.setProperty("--fm-fill-start", String(start) + "%");
-      control.style.setProperty("--fm-fill-size", String(Math.max(0, end - start)) + "%");
+      control.style.setProperty("--fm-fill-size", String(Math.max(0, end - start)) + "%");${
+        parts.includes("tick")
+          ? `
+      // Spec 036 Teil 5 ②b-3 (A-glitilo-4): with ticks a mark at every step from min to max, in
+      // the track before fill and thumbs; seen, not heard (the thumbs say the value).
+      {
+        const step = this.#sliderBounds()[2];
+        const count =
+          this.propValue("ticks") === true && step > 0 && max > min
+            ? Math.floor((max - min) / step + 1e-9) + 1
+            : 0;
+        const ticks = [...control.querySelectorAll('[part="tick"]')] as HTMLElement[];
+        while (ticks.length > count) ticks.pop()?.remove();
+        while (ticks.length < count) {
+          const tick = document.createElement("span");
+          tick.setAttribute("part", "tick");
+          tick.setAttribute("aria-hidden", "true");
+          control.insertBefore(tick, control.querySelector('[part="fill"]'));
+          ticks.push(tick);
+        }
+        ticks.forEach((tick, index) => {
+          tick.style.setProperty("--fm-tick-at", String(share(min + index * step)) + "%");
+        });
+      }`
+          : ""
+      }
+      // Spec 036 Teil 5 ②b-2 (A-glitilo-1): readout field is what field said; readout text shows
+      // the value (or the range) beside the track, not heard again (the thumbs say it).
+      const readout = String(this.propValue("readout") ?? "none");
+      const fielded = this.propValue("field") === true || readout === "field";
+      if (root.getAttribute("data-field") !== String(fielded)) root.setAttribute("data-field", String(fielded));
+      const said = shadow?.querySelector('[part="readout"]');
+      if (said instanceof HTMLElement) {
+        const text =
+          readout !== "text" || values[0] === undefined
+            ? ""
+            : ranged && values[1] !== undefined
+              ? format.format(values[0]) + " – " + format.format(values[1])
+              : format.format(values[0]);
+        if (said.textContent !== text) said.textContent = text;
+        if (said.hidden !== (text === "")) said.hidden = text === "";
+      }
       const number = shadow?.querySelector('[part="number"]');
       if (number instanceof HTMLElement) {
         // The field beside the track shows one value (Spec 025 ①, plan ① Abweichung): hidden with range.
-        number.hidden = this.propValue("field") !== true || ranged;
+        number.hidden = !fielded || ranged;
         number.setAttribute("min", String(min));
         number.setAttribute("max", String(max));
         number.setAttribute("step", String(this.#sliderBounds()[2]));
@@ -5518,8 +6251,10 @@ ${
     const ranged = this.propValue("range") === true;
     const values = this.#sliderValues();
     let next = this.#sliderClamp(raw);
-    if (ranged && index === 0 && values[1] !== undefined) next = Math.min(next, values[1]);
-    if (ranged && index === 1 && values[0] !== undefined) next = Math.max(next, values[0]);
+    // Spec 036 Teil 5 ②b-2 (A-glitilo-1): with min-distance the thumbs stop that far apart.
+    const gap = ranged ? Math.max(0, Number(this.getAttribute("min-distance")) || 0) : 0;
+    if (ranged && index === 0 && values[1] !== undefined) next = Math.min(next, values[1] - gap);
+    if (ranged && index === 1 && values[0] !== undefined) next = Math.max(next, values[0] + gap);
     const name = ranged ? (index === 0 ? "value-start" : "value-end") : "value";
     this.#reported = true;
     if (values[index] !== next) {
@@ -5636,6 +6371,7 @@ const PROPS = SKEMO.props as readonly {
   name: string;
   kind: "enum" | "boolean" | "string" | "number";
   values?: readonly string[];
+  deprecatedValues?: Readonly<Record<string, string>>;
   default?: string | boolean | number;
   required?: boolean;
 }[];
@@ -5668,8 +6404,8 @@ const VALUED_TEXTS = PROPS.filter((prop) => prop.kind === "enum").flatMap((prop)
   }),
 );
 /** The keys the Skemo names (Space, Enter): a toggle turns with these alone (Spec 010 ②). */
-const KEYS = SKEMO.a11y.keys as readonly string[];${isDialog ? '\n/** The inputs Enter does not confirm from (Nachlese 7 ② B-7): no one-line text. */\nconst NOT_ONE_LINE: ReadonlySet<string> = new Set(["checkbox", "radio", "button", "submit", "reset", "file", "range", "color"]);' : ""}
-${
+const KEYS = SKEMO.a11y.keys as readonly string[];${isMenu || isListy ? "\n/** Spec 036 ②b-4: the pause after which typed characters start new words (APG typeahead). */\nconst TYPE_AHEAD_PAUSE = 500;" : ""}${isDialog ? '\n/** The inputs Enter does not confirm from (Nachlese 7 ② B-7): no one-line text. */\nconst NOT_ONE_LINE: ReadonlySet<string> = new Set(["checkbox", "radio", "button", "submit", "reset", "file", "range", "color"]);' : ""}
+${isCodeblock ? syntaxConstants() : ""}${
   isIcon
     ? `/** The names of the Ikonaro and whether each mirrors in right-to-left writing (Spec 014 ②). */
 const IKONARO: Readonly<Record<string, boolean>> = ${JSON.stringify(Object.fromEntries(ikonaro.map((entry) => [entry.name, entry.mirror === true])))};
@@ -5737,7 +6473,7 @@ ${autoField}${isAvatar ? '  /** The picture an avatar shows and whether it has l
       sheet.replaceSync(CSS);
     }
     root.adoptedStyleSheets = [sheet];
-    root.innerHTML = \`${markup(host, slots, role, marked, indicator, dismiss, icon, breadcrumb, stepper, afterLabel, statusIcon, trailing)}\`;
+    root.innerHTML = \`${markup(host, slots, role, marked, indicator, dismiss, icon, breadcrumb, stepper, afterLabel, statusIcon, trailing, parts)}\`;
     const control = root.querySelector("${control}");
     ${
       // Spec 025 ③ (plan ③ D-18): an inline editor has no label slot — its name is the prop label
@@ -5775,7 +6511,7 @@ ${
       attributeFilter: ["slot"],
     });
 `
-}${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${datepickerInit}${chipInit}${listInit}${editorInit}${uploadInit}${sliderInit}${fieldExtrasInit}${reasonInit}${
+}${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${paragraphInit}${menuInit}${disclosureInit}${suggestInit}${datepickerInit}${chipInit}${listInit}${editorInit}${uploadInit}${sliderInit}${fieldExtrasInit}${reasonInit}${
   hasEnd
     ? `    // Abnahme #122: the end's parts in their order, their room kept by the control.
     if (typeof ResizeObserver !== "undefined") this.#endObserver = new ResizeObserver(() => this.#endRoom());
@@ -5853,6 +6589,13 @@ ${autoDisconnect}
     if (prop.kind === "enum") {
       const allowed = prop.values ?? [];
       const fallback = String(prop.default ?? allowed[0] ?? "");
+      // Spec 036 Teil 5 ②b-2 (Spec 029 ②a-2): a deprecated value stands for the value it names
+      // for one release, and the developer hears so.
+      const replacement = raw === null ? undefined : prop.deprecatedValues?.[raw];
+      if (replacement !== undefined) {
+        warn(\`${tag}: \${name}="\${raw}" is deprecated; using \${replacement}. Write \${name}="\${replacement}".\`);
+        return replacement;
+      }
       if (raw !== null && !allowed.includes(raw)) {
         warn(\`${tag}: \${name}="\${raw}" is not allowed; using \${fallback} (allowed: \${allowed.join(", ")}).\`);
       }
@@ -6026,6 +6769,15 @@ ${
       }
       if (this.propValue("external") === true) control.setAttribute("rel", "external noopener noreferrer");
       else control.removeAttribute("rel");
+      // Spec 036 Teil 5 ②b-4 (A-ligilo-6): download hands the target over as a file, the platform's
+      // download; the mark of the last decorative slot is then the Ikonaro's download.
+      if (HAS_PROP.has("download")) {
+        const download = this.propValue("download") === true;
+        control.toggleAttribute("download", download);
+        const mark = this.shadowRoot?.querySelector("slot[name] > fm-ikono");
+        const sign = download ? "download" : "external";
+        if (mark instanceof HTMLElement && mark.getAttribute("name") !== sign) mark.setAttribute("name", sign);
+      }
     }
     // A field (Spec 009, D-08): the props of the Skemo on the native input, \`kind\` as its type,
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
@@ -6221,7 +6973,21 @@ ${isSelect || isListselect ? "" : '    this.dispatchEvent(new Event("input", { b
     });
   }
 
+  /**
+   * Read-only (Spec 036 Teil 5 ②b-2, A-elektilo-1, A-markobutono-1): the value can be read and
+   * focused, not changed; disabled wins over it. False where the Skemo has no readonly.
+   */
+  #readOnly(): boolean {
+    return this.propValue("readonly") === true && this.propValue("disabled") !== true;
+  }
+
   #activate(event: Event): void {
+    // Spec 036 Teil 5 ②b-2 (A-markobutono-1): a read-only toggle does not turn.
+    if (this.#readOnly()) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
     if (this.propValue("loading") === true || this.propValue("disabled") === true) {
       event.preventDefault();
       event.stopImmediatePropagation();

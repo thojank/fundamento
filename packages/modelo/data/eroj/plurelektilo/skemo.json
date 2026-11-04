@@ -30,10 +30,11 @@
         "kind": "enum",
         "values": [
           "count",
+          "labels",
           "tags"
         ],
         "default": "count",
-        "description": "How the field shows the chosen values: as a count ('3 gewählt') or as removable tags (composed signeto)."
+        "description": "How the field shows the chosen values: as a count ('3 gewählt'), as the words of the chosen options in the order of the values (labels; Spec 029 ②a, A-plurelektilo-1), or as removable tags (composed signeto)."
       },
       {
         "name": "placeholder",
@@ -114,6 +115,23 @@
         ],
         "default": "below",
         "description": "Spec 029 ②b-1b M-2: where the message and the error stand – below the field with the space of the field, or joined to it without that space. Never only in a tooltip: the message must be seen (error-not-color-only, error-says-what-to-do)."
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "default": "medium",
+        "description": "Spec 029 ②a (A-plurelektilo-2): the height of the field on the scale of the kampo and the elektilo (size.control.*), so the fields of one row stand level; label, text, padding and the icon at its end follow, as at the elektilo. Medium is the field as it was."
+      },
+      {
+        "name": "select-all",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②a (A-plurelektilo-1, A-plurelektilo-4): a row before the list that chooses every option, then none – a checkbox, mixed while some are chosen; within max only."
       }
     ],
     "states": [
@@ -167,7 +185,9 @@
           ]
         },
         "typography": {
-          "fixed": "typography.label.1"
+          "by": [
+            "size"
+          ]
         }
       },
       "required-mark": {
@@ -199,7 +219,9 @@
           ]
         },
         "typography": {
-          "fixed": "typography.body.1"
+          "by": [
+            "size"
+          ]
         }
       },
       "placeholder": {
@@ -212,7 +234,9 @@
           "fixed": "color.text.muted"
         },
         "size": {
-          "fixed": "size.icon.medium"
+          "by": [
+            "size"
+          ]
         }
       },
       "listbox": {
@@ -315,10 +339,14 @@
       },
       "box": {
         "height": {
-          "fixed": "size.control.medium"
+          "by": [
+            "size"
+          ]
         },
         "inline-padding": {
-          "fixed": "spacing.medium"
+          "by": [
+            "size"
+          ]
         },
         "gap": {
           "fixed": "spacing.small"
@@ -354,6 +382,31 @@
         },
         "typography": {
           "fixed": "typography.caption"
+        }
+      },
+      "group-heading": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        },
+        "inline-padding": {
+          "fixed": "spacing.medium"
+        }
+      },
+      "select-all": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        },
+        "height": {
+          "fixed": "size.target.min"
+        },
+        "inline-padding": {
+          "fixed": "spacing.medium"
         }
       }
     },
@@ -569,6 +622,126 @@
           "state": "success"
         },
         "token": "color.status.success.text"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.label.2"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "large"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.body.2"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.body.1"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "size": "large"
+        },
+        "token": "typography.body.1"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.control.small"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.control.medium"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.control.large"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "small"
+        },
+        "token": "spacing.small"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "medium"
+        },
+        "token": "spacing.medium"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "large"
+        },
+        "token": "spacing.medium"
+      },
+      {
+        "part": "indicator",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "indicator",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "indicator",
+        "property": "size",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.icon.large"
       }
     ],
     "a11y": {
@@ -635,6 +808,10 @@
         "loading": {
           "de": "lädt",
           "en": "loading"
+        },
+        "select-all": {
+          "de": "Alle wählen",
+          "en": "Select all"
         }
       }
     },

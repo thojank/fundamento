@@ -178,7 +178,8 @@ describe("the Uzo of the butono (T020)", () => {
     expect(uzo?.slots).toEqual({
       label: { accepts: ["text"], max: 1, nesting: 0 },
       "icon-start": { accepts: ["icon", "ikono"], max: 1, nesting: 0 },
-      "icon-end": { accepts: ["icon", "ikono"], max: 1, nesting: 0 },
+      // Spec 036 Teil 5 ②b-3 (A-butono-4): the end content takes an insigno too, a count.
+      "icon-end": { accepts: ["icon", "ikono", "insigno"], max: 1, nesting: 0 },
     });
   });
 

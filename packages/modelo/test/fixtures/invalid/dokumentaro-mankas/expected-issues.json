@@ -1,0 +1,18 @@
+{
+  "description": "Spec 036 Teil 5 ③ (Spec 029 ③): copy of valid/dokumentaro-plena whose butono lacks the three fields of its documentation – when-not, do-dont and keyboard. The Vitrino page of an Ero shows nine sections; three of them are written in the Uzo, so a Uzo without them leaves the page with holes. check:dokumentaro reports each missing field as an error.",
+  "check": "dokumentaro",
+  "issues": [
+    {
+      "rule": "dokumentaro-field-missing",
+      "path": "data/eroj/butono/uzo.json#/uzo/do-dont"
+    },
+    {
+      "rule": "dokumentaro-field-missing",
+      "path": "data/eroj/butono/uzo.json#/uzo/keyboard"
+    },
+    {
+      "rule": "dokumentaro-field-missing",
+      "path": "data/eroj/butono/uzo.json#/uzo/when-not"
+    }
+  ]
+}

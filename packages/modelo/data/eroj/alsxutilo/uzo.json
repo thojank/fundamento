@@ -187,6 +187,64 @@
           "count": 2
         }
       }
+    ],
+    "when-not": [
+      {
+        "case": {
+          "de": "Der Wert wird getippt, etwa ein Name oder eine Adresse, und liegt nicht als Datei auf dem Gerät.",
+          "en": "The value is typed, such as a name or an address, and is not a file on the device."
+        },
+        "ero": "kampo"
+      },
+      {
+        "case": {
+          "de": "Eine Datei soll nur übergeben werden, die Person lädt sie herunter statt hoch.",
+          "en": "A file is only handed over: the person downloads it instead of uploading one."
+        },
+        "ero": "ligilo"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Nenne in der Hilfe vorab, welche Dateiarten, welche Größe und wie viele Dateien erlaubt sind.",
+          "en": "State in the help, before anyone chooses, which kinds of file, which size and how many files are allowed."
+        },
+        {
+          "de": "Setze multiple, wenn mehrere Dateien zusammengehören; jede gewählte Datei lässt sich einzeln wieder entfernen.",
+          "en": "Set multiple when several files belong together; every chosen file can be removed on its own."
+        },
+        {
+          "de": "Biete die Ablagefläche nur zusätzlich an, denn die Schaltfläche allein muss alles können.",
+          "en": "Offer the drop area only as an extra, because the button alone has to do everything."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Die erlaubten Dateien erst in der Fehlermeldung verraten.",
+          "en": "Reveal the allowed files only in the error message."
+        },
+        {
+          "de": "Eine Höchstzahl an Dateien ohne multiple setzen: Eine einzelne Datei ist nie zu viele.",
+          "en": "Set a most number of files without multiple: a single file is never too many."
+        },
+        {
+          "de": "Den Fortschritt des Hochladens im Feld zeigen, denn Senden und Fortschritt gehören der Anwendung.",
+          "en": "Show the progress of the upload in the field, because sending and progress belong to the application."
+        }
+      ]
+    },
+    "keyboard": [
+      {
+        "keys": [
+          "Space",
+          "Enter"
+        ],
+        "action": {
+          "de": "Öffnet die Dateiauswahl des Geräts; auf dem Knopf neben einer gewählten Datei nimmt die Taste diese Datei aus der Liste.",
+          "en": "Opens the file chooser of the device; on the button next to a chosen file the key takes that file out of the list."
+        }
+      }
     ]
   }
 }

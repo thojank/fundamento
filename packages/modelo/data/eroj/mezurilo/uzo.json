@@ -124,6 +124,61 @@
           "count": 2
         }
       }
-    ]
+    ],
+    "when-not": [
+      {
+        "case": {
+          "de": "Der Zustand ist ein Wort und hat keine Skala.",
+          "en": "The state is a word and has no scale."
+        },
+        "ero": "insigno"
+      },
+      {
+        "case": {
+          "de": "Ein Bereich wartet, bis sein Inhalt geladen ist.",
+          "en": "An area waits until its content has loaded."
+        },
+        "ero": "plenstato"
+      },
+      {
+        "case": {
+          "de": "Viele Werte sollen miteinander verglichen werden.",
+          "en": "Many values are to be compared with each other."
+        },
+        "ero": "tabelo"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Schreib den Wert auch als Text dazu, etwa „3 von 5 geprüft“.",
+          "en": "Also write the value as text, such as “3 of 5 checked”."
+        },
+        {
+          "de": "Gib immer eine Beschriftung an; in einer Tabellenzelle darf sie mit label-hidden unsichtbar sein.",
+          "en": "Always give a label; in a table cell it may be invisible with label-hidden."
+        },
+        {
+          "de": "Lass value leer, wenn der Wert unbekannt ist.",
+          "en": "Leave value empty when the value is unknown."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Mehrere Teile in einem Balken zeigen, die nur die Farbe unterscheidet.",
+          "en": "Show several parts in one bar told apart only by colour."
+        },
+        {
+          "de": "Den Fortschritt einer laufenden Aufgabe damit zeigen, denn er bewegt sich von selbst.",
+          "en": "Show the progress of a running task with it, because that moves by itself."
+        }
+      ]
+    },
+    "keyboard": {
+      "none": {
+        "de": "Die Anzeige nimmt weder den Fokus noch eine Taste; ein Screenreader liest Name und Wert.",
+        "en": "The meter takes neither the focus nor a key; a screen reader reads its name and value."
+      }
+    }
   }
 }

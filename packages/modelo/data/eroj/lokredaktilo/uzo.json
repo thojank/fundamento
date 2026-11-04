@@ -116,6 +116,68 @@
           "count": 3
         }
       }
+    ],
+    "when-not": [
+      {
+        "case": {
+          "de": "Mehrere Werte werden zusammen bearbeitet und gemeinsam gespeichert.",
+          "en": "Several values are edited together and saved at once."
+        },
+        "ero": "formularo"
+      },
+      {
+        "case": {
+          "de": "Der Wert wird ohnehin in einem Formular eingegeben.",
+          "en": "The value is entered in a form anyway."
+        },
+        "ero": "kampo"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Nenne mit label, was der Wert ist; es wird zum Namen von Knopf und Feld.",
+          "en": "Say with label what the value is; it becomes the name of the button and the field."
+        },
+        {
+          "de": "Lass das Feld bei einem Fehler offen und sag im Fehler, was zu tun ist.",
+          "en": "Leave the field open on an error and say in the error what to do."
+        },
+        {
+          "de": "Wähle kind nach dem Wert: Text, ganze Zahl, E-Mail oder Webadresse.",
+          "en": "Choose kind by the value: text, a whole number, an e-mail or a web address."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Beim Tippen von selbst speichern, denn dann gibt es kein Abbrechen mehr.",
+          "en": "Save by itself while typing, because then there is no way to cancel."
+        },
+        {
+          "de": "Mehrere Felder an einer Stelle zugleich öffnen.",
+          "en": "Open several fields in one place at once."
+        }
+      ]
+    },
+    "keyboard": [
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": {
+          "de": "Auf dem Knopf zum Bearbeiten öffnet die Taste das Feld; im Feld speichert sie den Wert.",
+          "en": "On the edit button the key opens the field; in the field it saves the value."
+        }
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": {
+          "de": "Bricht das Bearbeiten ab; der alte Wert bleibt stehen.",
+          "en": "Cancels editing; the old value stays."
+        }
+      }
     ]
   }
 }

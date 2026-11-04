@@ -33,6 +33,8 @@ describe("apartigilo in the repo Modelo (section ②)", () => {
       [
         ["orientation", ["horizontal", "vertical"], "horizontal"],
         ["decorative", "boolean", false],
+        // Spec 036 Teil 5 ②b-2 (A-apartigilo-1): the strength of the line.
+        ["emphasis", ["low", "high"], "low"],
       ],
     );
     expect(skemo?.states).toEqual(["rest"]);
@@ -42,17 +44,25 @@ describe("apartigilo in the repo Modelo (section ②)", () => {
   it("names its parts: the line (colour and width fixed) and the box (height by orientation: none, else a control height)", () => {
     if (skemo === undefined) throw new Error("missing");
     expect(Object.keys(skemo.parts).sort()).toEqual(["box", "line"]);
+    // Spec 036 Teil 5 ②b-2 (A-apartigilo-1): by emphasis; low is the line it was.
     expect(skemo.parts.line).toEqual({
-      color: { fixed: "color.border.subtle" },
-      width: { fixed: "border.width.default" },
+      color: { by: ["emphasis"] },
+      width: { by: ["emphasis"] },
     });
+    expect(boundToken(skemo, "line", "color", { emphasis: "low" })?.token).toBe(
+      "color.border.subtle",
+    );
+    expect(boundToken(skemo, "line", "width", { emphasis: "low" })?.token).toBe(
+      "border.width.default",
+    );
     expect(skemo.parts.box?.height).toEqual({ by: ["orientation"] });
     expect(boundToken(skemo, "box", "height", { orientation: "horizontal" })?.token).toBe("none");
     expect(boundToken(skemo, "box", "height", { orientation: "vertical" })?.token).toBe(
       "size.control.medium",
     );
     // The orientation keys the box, so Figma draws both as variants (spec ②, Figma: orientation).
-    expect(variantKeys(skemo)).toEqual(["orientation", "state"]);
+    // Spec 036 Teil 5 ②b-2 (A-apartigilo-1): emphasis keys the line too.
+    expect(variantKeys(skemo)).toEqual(["orientation", "emphasis", "state"]);
   });
 
   it("speaks role separator without a name of its own (G5): a11y.name is empty, no state, no key", () => {
@@ -91,7 +101,7 @@ describe("the Uzo of the apartigilo (section ②)", () => {
   it("the brief names orientation as the axis and no duty, and stays under 750", () => {
     if (apartigilo === undefined) throw new Error("missing");
     const brief = briefOf(apartigilo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["orientation"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["orientation", "emphasis"]);
     expect(brief.required).toEqual({ props: [], slots: [] });
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
   });

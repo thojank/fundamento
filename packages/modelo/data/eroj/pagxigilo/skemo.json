@@ -47,6 +47,39 @@
         "kind": "number",
         "default": 1,
         "description": "How many pages stand on either side of the current one before an ellipsis; the first and the last page always stand."
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium"
+        ],
+        "default": "medium",
+        "description": "Spec 029 ②a (A-pagxigilo-2): small below a dense table – smaller text, arrows and room in the item; medium as before. The item keeps the minimum target size (touch-target-min)."
+      },
+      {
+        "name": "summary",
+        "kind": "enum",
+        "values": [
+          "pages",
+          "count",
+          "compact"
+        ],
+        "default": "pages",
+        "description": "Spec 029 ②a (A-pagxigilo-1): what stands between the arrows – pages, the pages with the current one and its siblings, as before; count, the words of the place („Seite 5 von 10“); compact, the numbers alone („5 / 10“), heard as the words. Dots belong to a carousel, an input field is rare."
+      },
+      {
+        "name": "first-last",
+        "kind": "boolean",
+        "default": false,
+        "description": "Shows a button to the first page before prev and one to the last page after next (parts first and last), named by a11y.texts first-name and last-name; each is disabled where it would stay on the page."
+      },
+      {
+        "name": "total-unknown",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②a (A-pagxigilo-6): the total is not known – a search, a log: total-pages counts the pages known so far, no last page stands and an ellipsis follows them; next leads on from every page (the application takes total-unknown away when it knows the end). summary count says the place without the total, compact the number alone; with first-last only the first page stands."
       }
     ],
     "states": [
@@ -81,7 +114,9 @@
           ]
         },
         "typography": {
-          "fixed": "typography.label.1"
+          "by": [
+            "size"
+          ]
         },
         "weight": {
           "by": [
@@ -98,7 +133,9 @@
           "fixed": "radius.role.control"
         },
         "inline-padding": {
-          "fixed": "spacing.small"
+          "by": [
+            "size"
+          ]
         }
       },
       "border": {
@@ -116,20 +153,36 @@
           "fixed": "color.navigation.text.rest"
         },
         "typography": {
-          "fixed": "typography.label.1"
+          "by": [
+            "size"
+          ]
         },
         "width": {
           "fixed": "size.target.min"
         }
       },
+      "summary": {
+        "color": {
+          "fixed": "color.navigation.text.rest"
+        },
+        "typography": {
+          "by": [
+            "size"
+          ]
+        }
+      },
       "prev": {
         "size": {
-          "fixed": "size.icon.medium"
+          "by": [
+            "size"
+          ]
         }
       },
       "next": {
         "size": {
-          "fixed": "size.icon.medium"
+          "by": [
+            "size"
+          ]
         }
       },
       "box": {
@@ -146,6 +199,20 @@
         },
         "color": {
           "fixed": "color.focus.inner"
+        }
+      },
+      "first": {
+        "size": {
+          "by": [
+            "size"
+          ]
+        }
+      },
+      "last": {
+        "size": {
+          "by": [
+            "size"
+          ]
         }
       }
     },
@@ -325,6 +392,134 @@
           "current": "false"
         },
         "token": "none"
+      },
+      {
+        "part": "item",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.label.2"
+      },
+      {
+        "part": "item",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "item",
+        "property": "inline-padding",
+        "when": {
+          "size": "small"
+        },
+        "token": "spacing.xsmall"
+      },
+      {
+        "part": "item",
+        "property": "inline-padding",
+        "when": {
+          "size": "medium"
+        },
+        "token": "spacing.small"
+      },
+      {
+        "part": "ellipsis",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.label.2"
+      },
+      {
+        "part": "ellipsis",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "prev",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "prev",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "next",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "next",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "summary",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.label.2"
+      },
+      {
+        "part": "summary",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "first",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "first",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "last",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "last",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
       }
     ],
     "a11y": {
@@ -357,6 +552,18 @@
         "items-name": {
           "de": "Seite",
           "en": "Page"
+        },
+        "summary-count": {
+          "de": "Seite {page} von {total-pages}",
+          "en": "Page {page} of {total-pages}"
+        },
+        "first-name": {
+          "de": "Erste Seite",
+          "en": "First page"
+        },
+        "last-name": {
+          "de": "Letzte Seite",
+          "en": "Last page"
         }
       }
     },

@@ -4,7 +4,7 @@
     "id": "uzo_01M56F6FRPJ40E4HBAX500W489",
     "ero": "ero_01M56F6F0ZVC9VKZS57S5K58CH",
     "skemo": "ske_01M56F6FCXT3N0K796HNN80PD5",
-    "purpose": "Moves through the pages of a long list and shows which page is current.",
+    "purpose": "Moves through the pages of a long list and shows which page is current; with first-last it jumps to the first and the last page.",
     "instead": [
       {
         "goal": "load-more",
@@ -105,6 +105,54 @@
       "size": "container",
       "wrap": "allowed"
     },
-    "content": []
+    "content": [],
+    "when-not": [
+      {
+        "case": {
+          "de": "Die Liste soll auf Wunsch um einen weiteren Teil länger werden.",
+          "en": "The list is to grow by one more part on demand."
+        },
+        "ero": "butono"
+      },
+      {
+        "case": {
+          "de": "Es sind Ansichten eines Dings, keine Teile einer Liste.",
+          "en": "These are views of one thing, not parts of a list."
+        },
+        "ero": "langetaro"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Wähle mode link, wenn jede Seite eine eigene Adresse hat; sonst mode button.",
+          "en": "Choose mode link when every page has an address of its own; otherwise mode button."
+        },
+        {
+          "de": "Setze total-unknown, solange das Ende der Liste nicht bekannt ist.",
+          "en": "Set total-unknown as long as the end of the list is not known."
+        },
+        {
+          "de": "Nimm size small unter einer dichten Tabelle.",
+          "en": "Use size small below a dense table."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Eine Liste beim Rollen endlos nachladen statt Seiten zu bieten, denn die Tastatur erreicht ihr Ende nie.",
+          "en": "Load a list endlessly while scrolling instead of offering pages, because the keyboard never reaches its end."
+        },
+        {
+          "de": "Die Wahl, wie viele Zeilen eine Seite hat, in den Seitenumschalter packen; sie ist eine eigene Auswahl daneben.",
+          "en": "Put the choice of how many rows a page holds into the pagination; it is a choice of its own beside it."
+        }
+      ]
+    },
+    "keyboard": {
+      "none": {
+        "de": "Der Seitenumschalter nimmt keine eigene Taste; jede Seite ist eine Schaltfläche oder ein Verweis, den man mit Tab erreicht und mit Enter wählt.",
+        "en": "The pagination takes no key of its own; every page is a button or a link reached with Tab and chosen with Enter."
+      }
+    }
   }
 }

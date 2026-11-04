@@ -140,6 +140,8 @@ describe("the date dialogs of the spec (Spec 025 ②)", () => {
       "expanded",
       "intent",
       "message-position",
+      // Spec 036 Teil 5 ②b-2 (A-datelektilo-2).
+      "size",
     ]);
     expect(brief.props?.map((prop) => prop.name)).toContain("disabled-dates");
     expect(brief.required).toEqual({ props: [], slots: ["label"] });

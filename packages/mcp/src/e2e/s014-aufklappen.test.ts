@@ -101,7 +101,7 @@ describe("list_eroj and the briefs", () => {
     const listed = await output<Listed>(client, "list_eroj", {});
     expect(listed.eroj).toHaveLength(40);
     const faldiloBrief = await output<Brief>(client, "get_ero", { name: "faldilo", brief: true });
-    expect(faldiloBrief.axes.map((axis) => axis.name)).toEqual(["open"]);
+    expect(faldiloBrief.axes.map((axis) => axis.name)).toEqual(["open", "indicator-side"]);
     expect(faldiloBrief.required).toEqual({ props: [], slots: ["content", "summary"] });
     const kompletigiloBrief = await output<Brief>(client, "get_ero", {
       name: "kompletigilo",

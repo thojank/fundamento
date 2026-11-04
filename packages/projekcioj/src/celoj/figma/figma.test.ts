@@ -854,6 +854,8 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
       external: "BOOLEAN",
       size: ["small", "medium", "large"],
       label: "TEXT",
+      // Spec 036 Teil 5 ②b-4 (A-ligilo-6): a BOOLEAN without a picture of its own.
+      download: "BOOLEAN",
       state: ["rest", "hover", "pressed", "focus", "visited"],
     });
     expect(set?.variants).toHaveLength(2 * 3 * 5);
@@ -866,13 +868,21 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
   // toggles, as dismissible), hidden by default; its size and colour those of the part icon.
   it("O-41: every variant draws the icon-end external, shown by the property external", () => {
     for (const each of set?.variants ?? []) {
-      expect(each.icons, JSON.stringify(each.props)).toEqual({ "icon-end": "external" });
+      // Spec 036 Teil 5 ②b-3 (A-ligilo-4): and the icon-start before the label, the example.
+      expect(each.icons, JSON.stringify(each.props)).toEqual({
+        "icon-start": "check",
+        "icon-end": "external",
+      });
       expect(each.bindings["icon.size"], JSON.stringify(each.props)).toBe(
         `size/icon/${each.props.size}`,
       );
       expect(each.bindings["icon.color"]).toBe(each.bindings["label.color"]);
     }
-    expect(set?.toggles).toEqual([{ property: "external", part: "icon-end", defaultValue: false }]);
+    expect(set?.toggles).toEqual([
+      { property: "external", part: "icon-end", defaultValue: false },
+      // Spec 036 Teil 5 ②b-3 (A-ligilo-4): the icon at the start, off by default.
+      { property: "icon-start", part: "icon-start", defaultValue: false },
+    ]);
     // Spec 027 B-6: the button's icon slots are switches of their own, off by default.
     expect(butonoOf(plan.components)?.toggles).toEqual([
       { property: "icon-end", part: "icon-end", defaultValue: false },
@@ -984,6 +994,8 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
       // Spec 029 ②b-1b M-2: the status of a field, its message beside help and error.
       intent: ["neutral", "success", "warning", "danger"],
       "message-position": ["below", "joined"],
+      // Spec 036 Teil 5 ②b-2 (A-kampo-1): the unit of a number, a text of the set.
+      unit: "TEXT",
       state: ["rest", "hover", "focus", "disabled", "readonly", "invalid", "warning", "success"],
     });
     expect(set?.variants).toHaveLength(3 * 8);
@@ -1231,21 +1243,24 @@ describe("Figma plan for the sxaltilo (Spec 010 ①)", () => {
       // Spec 029 ②b-1 M-5: loading shows the spinner (a BOOLEAN of the set).
       loading: "BOOLEAN",
       checked: "BOOLEAN",
-      size: ["small", "medium", "large"],
+      size: ["small", "medium"],
       disabled: "BOOLEAN",
       name: "TEXT",
       // Spec 029 ②b-1b M-2: the status of a field, its message beside help and error.
       intent: ["neutral", "success", "warning", "danger"],
       "message-position": ["below", "joined"],
+      // Spec 036 Teil 5 ②b-2 (A-sxaltilo-1): the side of the label, a property and no variant.
+      "label-side": ["start", "end"],
       state: ["rest", "hover", "focus", "disabled", "warning", "success"],
     });
-    expect(set?.variants).toHaveLength(2 * 3 * 6);
+    expect(set?.variants).toHaveLength(2 * 2 * 6);
     expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["checked", "size", "state"]);
-    expect(set?.grid).toMatchObject({ rows: 6, columns: 6 });
+    expect(set?.grid).toMatchObject({ rows: 4, columns: 6 });
     expect(set?.description).toBe(sxaltilo?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Einstellung");
     // Spec 029 ②b-1b M-2: the switch shows the message of its status.
-    expect(set?.texts).toEqual({ message: "Nachricht" });
+    // Spec 036 Teil 5 ②b-3 (A-sxaltilo-4): and its help.
+    expect(set?.texts).toEqual({ help: "Hinweis", message: "Nachricht" });
   });
 
   it("places the knob at the start unchecked and at the end checked (D-04)", () => {
@@ -1311,27 +1326,30 @@ describe("Figma plan for the markobutono (Spec 010 ②)", () => {
       checked: "BOOLEAN",
       required: "BOOLEAN",
       invalid: "BOOLEAN",
-      size: ["small", "medium", "large"],
+      size: ["small", "medium"],
       disabled: "BOOLEAN",
       name: "TEXT",
       // Spec 029 ②b-1b M-2: the status of a field, its message beside help and error.
       intent: ["neutral", "success", "warning", "danger"],
       "message-position": ["below", "joined"],
+      // Spec 036 Teil 5 ②b-2: read-only, a BOOLEAN of the set (no variant, V-1).
+      readonly: "BOOLEAN",
       state: ["rest", "hover", "focus", "disabled", "invalid", "warning", "success"],
     });
-    expect(set?.variants).toHaveLength(2 * 3 * 7);
+    expect(set?.variants).toHaveLength(2 * 2 * 7);
     expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["checked", "size", "state"]);
-    expect(set?.grid).toMatchObject({ rows: 6, columns: 7 });
+    expect(set?.grid).toMatchObject({ rows: 4, columns: 7 });
     expect(set?.description).toBe(markobutono?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Option");
-    expect(set?.texts).toEqual({ error: "Fehler", message: "Nachricht" });
+    // Spec 036 Teil 5 ②b-3 (A-markobutono-4): and its help.
+    expect(set?.texts).toEqual({ error: "Fehler", help: "Hinweis", message: "Nachricht" });
     // Nachlese 4 N-7 (Spec 014 ② O-7): the check mark is the Ikonaro's check, no sign.
     expect(set?.sign).toBeUndefined();
     for (const each of set?.variants ?? []) expect(each.icons).toEqual({ indicator: "check" });
     // The switch keeps its knob: no sign; its one text is the message of its status (②b-1b M-2).
     const sxaltilo = plan.components.find((component) => component.set === "sxaltilo");
     expect(sxaltilo?.sign).toBeUndefined();
-    expect(sxaltilo?.texts).toEqual({ message: "Nachricht" });
+    expect(sxaltilo?.texts).toEqual({ help: "Hinweis", message: "Nachricht" });
   });
 
   it("binds the box by checked and state, its border by state, the check mark where checked (G3)", () => {
@@ -1407,7 +1425,7 @@ describe("Figma plan for the elekto (Spec 010 ③)", () => {
       value: "TEXT",
       required: "BOOLEAN",
       invalid: "BOOLEAN",
-      size: ["small", "medium", "large"],
+      size: ["small", "medium"],
       disabled: "BOOLEAN",
       name: "TEXT",
       orientation: ["vertical", "horizontal"],
@@ -1416,9 +1434,9 @@ describe("Figma plan for the elekto (Spec 010 ③)", () => {
       "message-position": ["below", "joined"],
       state: ["rest", "hover", "focus", "disabled", "invalid", "warning", "success"],
     });
-    expect(set?.variants).toHaveLength(3 * 7);
+    expect(set?.variants).toHaveLength(2 * 7);
     expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["size", "state"]);
-    expect(set?.grid).toMatchObject({ rows: 3, columns: 7 });
+    expect(set?.grid).toMatchObject({ rows: 2, columns: 7 });
     expect(set?.description).toBe(elekto?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Frage");
     expect(set?.texts).toEqual({ help: "Hinweis", error: "Fehler", message: "Nachricht" });
@@ -1461,12 +1479,16 @@ describe("Figma plan for the elekto (Spec 010 ③)", () => {
     expect(rest?.bindings["option-label.color"]).toBe("color/text/default");
     expect(rest?.bindings["label.typography"]).toBe("typography/label/1");
     expect(rest?.bindings["help.color"]).toBe("color/text/muted");
-    expect(rest?.notDrawn).toEqual({ "required-mark.color": FIGMA_NOT_DRAWN["required-mark"] });
+    // Spec 036 Teil 5 ②b-3 (A-elekto-4): the description of an option stands with its content.
+    expect(rest?.notDrawn).toEqual({
+      "required-mark.color": FIGMA_NOT_DRAWN["required-mark"],
+      "option-description.color": FIGMA_NOT_DRAWN["elekto:option-description"],
+    });
   });
 
   it("states the elekto in the parity inventory: size only, the circle and the dot per value of selected", () => {
     const items = figmaPlanInventory(plan);
-    expect(items.elekto?.props.size).toEqual(["small", "medium", "large"]);
+    expect(items.elekto?.props.size).toEqual(["small", "medium"]);
     expect(items.elekto?.props.selected).toBeUndefined();
     expect(items.elekto?.states).toEqual([
       "rest",
@@ -1489,7 +1511,7 @@ describe("Figma plan for the elekto (Spec 010 ③)", () => {
     expect(
       items.elekto?.values["indicator.color@selected=false,size=small,state=focus"],
     ).toBeUndefined();
-    expect(items.elekto?.values["options.gap@size=large,state=rest"]).toBe("8px");
+    expect(items.elekto?.values["options.gap@size=medium,state=rest"]).toBe("8px");
   });
 });
 
@@ -1522,6 +1544,8 @@ describe("Figma plan for the elektilo (Spec 010 ④)", () => {
       // Spec 029 ②b-1b M-2: the status of a field, its message beside help and error.
       intent: ["neutral", "success", "warning", "danger"],
       "message-position": ["below", "joined"],
+      // Spec 036 Teil 5 ②b-2: read-only, a BOOLEAN of the set (no variant, V-1).
+      readonly: "BOOLEAN",
       state: ["rest", "hover", "focus", "disabled", "invalid", "warning", "success"],
     });
     expect(set?.variants).toHaveLength(3 * 7);
@@ -1572,6 +1596,8 @@ describe("Figma plan for the elektilo (Spec 010 ④)", () => {
     expect(rest?.notDrawn).toEqual({
       "text.color": "jug_01M4S2R85WRAC5SV7CARH8RE7S",
       "required-mark.color": "jug_01M4S2R85WRAC5SV7CARH8RE7S",
+      // Spec 036 Teil 5 ②b-3 (A-elektilo-4): the heading of a group stands with options in groups.
+      "group-heading.color": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
     });
     expect(rest?.hidden).toBeUndefined();
   });
@@ -1634,6 +1660,8 @@ describe("Figma plan for the tekstareo (Spec 011 ②)", () => {
       // Spec 029 ②b-1b M-2: the status of a field, its message beside help and error.
       intent: ["neutral", "success", "warning", "danger"],
       "message-position": ["below", "joined"],
+      // Spec 036 Teil 5 ②b-2 (A-tekstareo-1): the most characters.
+      "max-length": "NUMBER",
       state: ["rest", "hover", "focus", "disabled", "invalid", "warning", "success"],
     });
     expect(set?.variants).toHaveLength(2 * 3 * 7);
@@ -1678,6 +1706,8 @@ describe("Figma plan for the tekstareo (Spec 011 ②)", () => {
     expect(rest?.notDrawn).toEqual({
       "text.color": "jug_01M4S2R85WRAC5SV7CARH8RE7S",
       "required-mark.color": "jug_01M4S2R85WRAC5SV7CARH8RE7S",
+      // Spec 036 Teil 5 ②b-2 (A-tekstareo-1): the count of typed characters, in an empty field.
+      "count.color": FIGMA_NOT_DRAWN["tekstareo:count"],
     });
     expect(rest?.hidden).toBeUndefined();
     // The code role asks for the mono family in every brand (F30).
@@ -1756,13 +1786,16 @@ describe("Figma plan for the dialogo (Spec 011 ②)", () => {
     expect(set?.structure).toBe("dialog");
     expect(set?.properties).toEqual({
       open: "BOOLEAN",
-      size: ["small", "medium"],
+      // Spec 036 Teil 5 ②b-2 (A-dialogo-2): full, the whole viewport.
+      size: ["small", "medium", "full"],
       reason: ["none", "optional", "required"],
+      // Spec 036 Teil 5 ②b-2 (A-dialogo-1, M-3): the purpose, a property, no variant.
+      dismiss: ["free", "guarded", "explicit"],
       state: ["rest"],
     });
-    expect(set?.variants).toHaveLength(2 * 3);
+    expect(set?.variants).toHaveLength(3 * 3);
     expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["size", "reason", "state"]);
-    expect(set?.grid).toMatchObject({ rows: 6, columns: 1 });
+    expect(set?.grid).toMatchObject({ rows: 9, columns: 1 });
     expect(set?.description).toBe(dialogo?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Entscheidung");
     expect(set?.texts).toEqual(DIALOG_TEXTS);
@@ -1883,8 +1916,9 @@ describe("Figma plan for the dialogo (Spec 011 ②)", () => {
     const items = figmaPlanInventory(plan);
     expect(items.dialogo?.props).toEqual({
       open: ["boolean"],
-      size: ["small", "medium"],
+      size: ["small", "medium", "full"],
       reason: ["none", "optional", "required"],
+      dismiss: ["free", "guarded", "explicit"],
     });
     expect(items.dialogo?.states).toEqual(["rest"]);
     expect(items.dialogo?.values["surface.width@reason=none,size=small,state=rest"]).toBe("400px");
@@ -1993,7 +2027,10 @@ describe("Figma plan for the insigno (Spec 011 ③)", () => {
     expect(set?.label?.defaultValue).toBe("Status");
     expect(set?.texts).toBeUndefined();
     expect(set?.sign).toBeUndefined();
-    expect(set?.toggles).toBeUndefined();
+    // Spec 036 Teil 5 ②b-3 (A-insigno-4): the icon at the start, off by default (Spec 027 B-6).
+    expect(set?.toggles).toEqual([
+      { property: "icon-start", part: "icon-start", defaultValue: false },
+    ]);
     expect(set?.example).toBeUndefined();
     expect(
       set?.variants.every((entry) => entry.focusVisible === false && entry.radii === undefined),
@@ -2011,6 +2048,8 @@ describe("Figma plan for the insigno (Spec 011 ③)", () => {
       "box.height": "size/icon/large",
       "box.inline-padding": "spacing/small",
       "box.radius": "radius/role/pill",
+      // Spec 036 Teil 5 ②b-3 (A-insigno-4): the gap between the icon and the words.
+      "box.gap": "spacing/xsmall",
     });
     expect(variant("danger", "small")?.bindings).toMatchObject({
       "surface.fill": "color/status/danger/subtle",
@@ -2026,6 +2065,7 @@ describe("Figma plan for the insigno (Spec 011 ③)", () => {
     ]);
     expect(Object.keys(rest?.geometry ?? {}).sort()).toEqual([
       "border.width",
+      "box.gap",
       "box.height",
       "box.inline-padding",
       "box.radius",
@@ -2069,7 +2109,9 @@ describe("Figma plan for the insigno (Spec 011 ③)", () => {
 describe("Figma plan for the avizo (Spec 011 ③)", () => {
   const set = plan.components.find((component) => component.set === "avizo");
   const avizo = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "avizo");
-  const variant = (intent: string) => set?.variants.find((entry) => entry.props.intent === intent);
+  // Spec 036 Teil 5 ②b-2 (A-avizo-1): intent × frame; card is the notice it was.
+  const variant = (intent: string) =>
+    set?.variants.find((entry) => entry.props.intent === intent && entry.props.frame === "card");
 
   it("plans a notice of intent in one state; dismissible a BOOLEAN that shows the dismiss part; the word Meldung and the words of heading and details", () => {
     expect(structureOf("status")).toBe("notice");
@@ -2080,11 +2122,12 @@ describe("Figma plan for the avizo (Spec 011 ③)", () => {
     expect(set?.properties).toEqual({
       intent: ["info", "success", "warning", "danger"],
       dismissible: "BOOLEAN",
+      frame: ["card", "band"],
       state: ["rest"],
     });
-    expect(set?.variants).toHaveLength(4);
-    expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["intent", "state"]);
-    expect(set?.grid).toMatchObject({ rows: 4, columns: 1 });
+    expect(set?.variants).toHaveLength(4 * 2);
+    expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["intent", "frame", "state"]);
+    expect(set?.grid).toMatchObject({ rows: 8, columns: 1 });
     expect(set?.description).toBe(avizo?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Meldung");
     expect(set?.texts).toEqual({ heading: "Überschrift", details: "Einzelheit" });
@@ -2156,14 +2199,23 @@ describe("Figma plan for the avizo (Spec 011 ③)", () => {
     expect(items.avizo?.props).toEqual({
       intent: ["info", "success", "warning", "danger"],
       dismissible: ["boolean"],
+      frame: ["card", "band"],
     });
     expect(items.avizo?.states).toEqual(["rest"]);
-    expect(items.avizo?.values["surface.fill@intent=info,state=rest"]).toMatch(/^#[0-9a-f]{6}/);
-    expect(items.avizo?.values["accent.color@intent=danger,state=rest"]).toMatch(/^#[0-9a-f]{6}/);
-    expect(items.avizo?.values["message.color@intent=success,state=rest"]).toMatch(/^#[0-9a-f]{6}/);
-    expect(items.avizo?.values["accent.width@intent=info,state=rest"]).toMatch(/px$/);
-    expect(items.avizo?.values["dismiss.size@intent=info,state=rest"]).toMatch(/px$/);
-    expect(items.avizo?.values["box.inline-padding@intent=warning,state=rest"]).toMatch(/px$/);
+    expect(items.avizo?.values["surface.fill@frame=card,intent=info,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}/,
+    );
+    expect(items.avizo?.values["accent.color@frame=card,intent=danger,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}/,
+    );
+    expect(items.avizo?.values["message.color@frame=card,intent=success,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}/,
+    );
+    expect(items.avizo?.values["accent.width@frame=card,intent=info,state=rest"]).toMatch(/px$/);
+    expect(items.avizo?.values["dismiss.size@frame=card,intent=info,state=rest"]).toMatch(/px$/);
+    expect(items.avizo?.values["box.inline-padding@frame=card,intent=warning,state=rest"]).toMatch(
+      /px$/,
+    );
   });
 });
 
@@ -2178,17 +2230,23 @@ describe("Figma plan for the avizo (Spec 011 ③)", () => {
 describe("Figma plan for the plenstato (Spec 011 ③)", () => {
   const set = plan.components.find((component) => component.set === "plenstato");
   const plenstato = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "plenstato");
-  const variant = (kind: string) => set?.variants.find((entry) => entry.props.kind === kind);
+  // Spec 036 Teil 5 ②b-2 (A-plenstato-1/2): kind × compact; false is the state it was.
+  const variant = (kind: string) =>
+    set?.variants.find((entry) => entry.props.kind === kind && entry.props.compact === "false");
 
   it("plans a state of kind in one state, with the purpose, the word Zustand (the structure's, not the role's) and the arc as its sign", () => {
     expect(structureOf("status", ["surface", "border", "indicator", "text", "motion"])).toBe(
       "state",
     );
     expect(set?.structure).toBe("state");
-    expect(set?.properties).toEqual({ kind: ["loading", "empty"], state: ["rest"] });
-    expect(set?.variants).toHaveLength(2);
-    expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["kind", "state"]);
-    expect(set?.grid).toMatchObject({ rows: 2, columns: 1 });
+    expect(set?.properties).toEqual({
+      kind: ["loading", "empty"],
+      compact: "BOOLEAN",
+      state: ["rest"],
+    });
+    expect(set?.variants).toHaveLength(2 * 2);
+    expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["kind", "compact", "state"]);
+    expect(set?.grid).toMatchObject({ rows: 4, columns: 1 });
     expect(set?.description).toBe(plenstato?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Zustand");
     expect(set?.sign).toBe(STATE_SIGN);
@@ -2217,6 +2275,11 @@ describe("Figma plan for the plenstato (Spec 011 ③)", () => {
       "motion.easing": "motion/easing/standard",
       "box.inline-padding": "spacing/large",
       "box.gap": "spacing/small",
+      // Spec 036 Teil 5 ②b-3 (A-plenstato-4): the title and the icon, bound, not drawn.
+      "heading.color": "color/text/default",
+      "heading.typography": "typography/label/1",
+      "icon.size": "size/icon/large",
+      "icon.color": "color/text/muted",
     });
     expect(empty?.bindings).toMatchObject({ "border.stroke": "stroke/dashed" });
     expect(empty?.bindings["indicator.color"]).toBeUndefined();
@@ -2244,7 +2307,12 @@ describe("Figma plan for the plenstato (Spec 011 ③)", () => {
       "indicator.size",
       "surface.radius",
     ]);
-    expect(loading?.notDrawn).toEqual({});
+    // Spec 036 Teil 5 ②b-3 (A-plenstato-4): title and icon stand with their content (Jugxo).
+    expect(loading?.notDrawn).toEqual({
+      "heading.color": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+      "icon.color": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+      "icon.size": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+    });
     expect(loading?.font).toEqual({ family: "Geist", style: "Regular", families: ["Geist"] });
     // The stroke token reaches the plan as a STRING variable; its value is the term.
     const dashed = plan.collections
@@ -2257,19 +2325,25 @@ describe("Figma plan for the plenstato (Spec 011 ③)", () => {
 
   it("states the plenstato in the parity inventory: kind, the state rest, the indicator's colour while loading only, no motion", () => {
     const items = figmaPlanInventory(plan);
-    expect(items.plenstato?.props).toEqual({ kind: ["loading", "empty"] });
+    expect(items.plenstato?.props).toEqual({ kind: ["loading", "empty"], compact: ["boolean"] });
     expect(items.plenstato?.states).toEqual(["rest"]);
-    expect(items.plenstato?.values["indicator.color@kind=loading,state=rest"]).toMatch(
-      /^#[0-9a-f]{6}/,
-    );
-    expect(items.plenstato?.values["indicator.color@kind=empty,state=rest"]).toBeUndefined();
+    expect(
+      items.plenstato?.values["indicator.color@compact=false,kind=loading,state=rest"],
+    ).toMatch(/^#[0-9a-f]{6}/);
+    expect(
+      items.plenstato?.values["indicator.color@compact=false,kind=empty,state=rest"],
+    ).toBeUndefined();
     // Spec 029 ①: the border of the Fonto is a translucent overlay (8 % black, 10 % white).
-    expect(items.plenstato?.values["border.color@kind=empty,state=rest"]).toMatch(
+    expect(items.plenstato?.values["border.color@compact=false,kind=empty,state=rest"]).toMatch(
       /^(#[0-9a-f]{6}|alpha varies by mode)/,
     );
-    expect(items.plenstato?.values["text.color@kind=loading,state=rest"]).toMatch(/^#[0-9a-f]{6}/);
-    expect(items.plenstato?.values["indicator.size@kind=loading,state=rest"]).toMatch(/px$/);
-    expect(items.plenstato?.values["border.width@kind=empty,state=rest"]).toBe("1px");
+    expect(items.plenstato?.values["text.color@compact=false,kind=loading,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}/,
+    );
+    expect(items.plenstato?.values["indicator.size@compact=false,kind=loading,state=rest"]).toMatch(
+      /px$/,
+    );
+    expect(items.plenstato?.values["border.width@compact=false,kind=empty,state=rest"]).toBe("1px");
     expect(
       Object.keys(items.plenstato?.values ?? {}).some(
         (key) => key.startsWith("motion.") || key.startsWith("border.stroke"),
@@ -2421,16 +2495,18 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
   it("plans a table of density × state with the purpose, the word Beschriftung, the Vitrino's table, the chevron and caption-hidden as a BOOLEAN that hides the caption", () => {
     expect(structureOf("table")).toBe("table");
     expect(set?.structure).toBe("table");
+    // Spec 036 Teil 5 ②b-2 (A-tabelo-1): three densities; lines a property, no variant.
     expect(set?.properties).toEqual({
-      density: ["comfortable", "compact"],
+      density: ["compact", "default", "comfortable"],
       "caption-hidden": "BOOLEAN",
       sort: "TEXT",
       direction: ["ascending", "descending"],
+      lines: ["rows", "columns", "grid", "none"],
       state: ["rest", "hover", "focus"],
     });
-    expect(set?.variants).toHaveLength(6);
+    expect(set?.variants).toHaveLength(3 * 3);
     expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["density", "state"]);
-    expect(set?.grid).toMatchObject({ rows: 2, columns: 3 });
+    expect(set?.grid).toMatchObject({ rows: 3, columns: 3 });
     expect(set?.description).toBe(tabelo?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Beschriftung");
     // Head + 3 rows × 3 columns, the last numeric, the first sorted ascending (the spec's set).
@@ -2454,14 +2530,9 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
     ]);
     expect(set?.texts).toBeUndefined();
     expect(set?.example).toBeUndefined();
-    expect(set?.variants.map((entry) => entry.focusVisible)).toEqual([
-      false,
-      false,
-      true,
-      false,
-      false,
-      true,
-    ]);
+    expect(set?.variants.map((entry) => entry.focusVisible)).toEqual(
+      [1, 2, 3].flatMap(() => [false, false, true]),
+    );
   });
 
   it("binds head, cells by density, row header, border, region, the sort button by state, its indicator and the focus ring; draws them all", () => {
@@ -2489,6 +2560,10 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
       "focus-ring.ring": "focus/ring",
       "focus-ring.offset": "focus/offset",
       "focus-ring.color": "color/focus/inner",
+      // Spec 036 Teil 5 ②b-3 (A-tabelo-4): the foot, bound, not drawn.
+      "foot.fill": "color/background/sunken",
+      "foot.color": "color/text/default",
+      "foot.typography": "typography/label/1",
     });
     expect(variant("compact", "rest")?.bindings).toMatchObject({
       "cell.inline-padding": "spacing/small",
@@ -2521,7 +2596,11 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
       "sort-indicator.size",
       "sort.radius",
     ]);
-    expect(rest?.notDrawn).toEqual({});
+    // Spec 036 Teil 5 ②b-3 (A-tabelo-4): the foot stands with a foot row (Jugxo).
+    expect(rest?.notDrawn).toEqual({
+      "foot.color": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+      "foot.fill": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+    });
     expect(rest?.hidden).toBeUndefined();
     expect(rest?.stroke).toBeUndefined();
     // The ring around the sort button grows from the button's radius (F32), like the butono's.
@@ -2537,10 +2616,11 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
   it("states the tabelo in the parity inventory: density, caption-hidden a boolean, sort a string, direction, three states, the sort fill per state", () => {
     const items = figmaPlanInventory(plan);
     expect(items.tabelo?.props).toEqual({
-      density: ["comfortable", "compact"],
+      density: ["compact", "default", "comfortable"],
       "caption-hidden": ["boolean"],
       sort: ["string"],
       direction: ["ascending", "descending"],
+      lines: ["rows", "columns", "grid", "none"],
     });
     expect(items.tabelo?.states).toEqual(["rest", "hover", "focus"]);
     expect(items.tabelo?.values["sort.fill@density=comfortable,state=rest"]).toBeDefined();
@@ -2584,6 +2664,9 @@ describe("Figma plan for the atributlisto (Spec 011 ④)", () => {
     expect(set?.properties).toEqual({
       layout: ["columns", "stacked", "auto"],
       label: "TEXT",
+      // Spec 036 Teil 5 ②b-2 (A-atributlisto-1/3): properties, no variant.
+      "max-entries": "NUMBER",
+      expanded: "BOOLEAN",
       state: ["rest"],
     });
     expect(set?.variants).toHaveLength(3);
@@ -2620,6 +2703,13 @@ describe("Figma plan for the atributlisto (Spec 011 ④)", () => {
       "list.gap": "spacing/large",
       "box.gap": "spacing/small",
       "box.inline-padding": "spacing/large",
+      // Spec 036 Teil 5 ②b-2 (A-atributlisto-1): the button for the rest, bound, not drawn.
+      "more.fill": "color/action/tertiary/rest",
+      "more.color": "color/action/tertiary/text",
+      "more.typography": "typography/label/2",
+      // Spec 036 Teil 5 ②b-3 (A-atributlisto-4): the title, bound, not drawn.
+      "heading.color": "color/text/default",
+      "heading.typography": "typography/headline/4",
     });
     expect(variant("stacked")?.bindings["box.inline-padding"]).toBe("spacing/xsmall");
     expect(variant("auto")?.bindings["box.inline-padding"]).toBe("spacing/large");
@@ -2629,7 +2719,13 @@ describe("Figma plan for the atributlisto (Spec 011 ④)", () => {
       "box.inline-padding",
       "list.gap",
     ]);
-    expect(columns?.notDrawn).toEqual({});
+    // Spec 036 Teil 5 ②b-2 (A-atributlisto-1): the button for the rest is released (Jugxo).
+    expect(columns?.notDrawn).toEqual({
+      "more.color": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+      "more.fill": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+      // Spec 036 Teil 5 ②b-3 (A-atributlisto-4): the title stands with its words (Jugxo).
+      "heading.color": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+    });
     expect(columns?.hidden).toBeUndefined();
     expect(columns?.stroke).toBeUndefined();
     expect(columns?.font).toBeUndefined();
@@ -2641,6 +2737,8 @@ describe("Figma plan for the atributlisto (Spec 011 ④)", () => {
     expect(items.atributlisto?.props).toEqual({
       layout: ["columns", "stacked", "auto"],
       label: ["string"],
+      "max-entries": ["number"],
+      expanded: ["boolean"],
     });
     expect(items.atributlisto?.states).toEqual(["rest"]);
     expect(items.atributlisto?.values["term.color@layout=columns,state=rest"]).toMatch(
@@ -2719,13 +2817,26 @@ describe("Figma plan for the navigado (Spec 011 ⑤)", () => {
       "box.radius": "radius/role/control",
       "box.inline-padding": "spacing/small",
       "box.gap": "spacing/xsmall",
+      // Spec 036 Teil 5 ②b-3 (A-navigado-1, A-navigado-4): the icon, the gap of an item for it,
+      // the heading of a section.
+      "icon.size": "size/icon/medium",
+      "item.gap": "spacing/xsmall",
+      "section-heading.color": "color/text/muted",
+      "section-heading.inline-padding": "spacing/small",
+      "section-heading.typography": "typography/caption",
       "focus-ring.ring": "focus/ring",
       "focus-ring.offset": "focus/offset",
       "focus-ring.color": "color/focus/inner",
     });
     // The underline is drawn, not released: its colour is a paint of the variant (B-1 releases
     // the text decoration of a link, not the block-end edge of an item).
-    expect(rest?.notDrawn).toEqual({});
+    // Spec 036 Teil 5 ②b-3 (A-navigado-1, A-navigado-4): heading of a section and icon stand with
+    // their content (FIGMA_NOT_DRAWN).
+    expect(rest?.notDrawn).toEqual({
+      "icon.size": FIGMA_NOT_DRAWN["navigado:icon"],
+      "section-heading.color": FIGMA_NOT_DRAWN["navigado:section-heading"],
+      "section-heading.inline-padding": FIGMA_NOT_DRAWN["navigado:section-heading"],
+    });
     expect(Object.keys(rest?.paints ?? {}).sort()).toEqual([
       "focus-ring.color",
       "focus-ring.ring",
@@ -2737,6 +2848,8 @@ describe("Figma plan for the navigado (Spec 011 ⑤)", () => {
       "box.inline-padding",
       "box.radius",
       "focus-ring.offset",
+      // Spec 036 Teil 5 ②b-3 (A-navigado-4).
+      "item.gap",
     ]);
     expect(rest?.underline).toBeUndefined();
     expect(rest?.hidden).toBeUndefined();
@@ -2804,7 +2917,13 @@ describe("Figma plan for the navigado (Spec 011 ⑤)", () => {
     expect(values["underline.color@state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
     expect(values["box.height@state=rest"]).toMatch(/px$/);
     expect(values["box.gap@state=focus"]).toMatch(/px$/);
-    expect(Object.values(values).some((value) => value.startsWith("not drawn"))).toBe(false);
+    // Spec 036 Teil 5 ②b-3 (A-navigado-1, A-navigado-4): only the heading of a section and the
+    // icon of an item stand with their content (Jugxo); everything else is drawn.
+    expect(
+      Object.entries(values)
+        .filter(([, value]) => value.startsWith("not drawn"))
+        .every(([key]) => key.startsWith("section-heading.") || key.startsWith("icon.")),
+    ).toBe(true);
   });
 });
 
@@ -2817,7 +2936,9 @@ describe("Figma plan for the navigado (Spec 011 ⑤)", () => {
 describe("Figma plan for the langetaro (Spec 011 ⑤)", () => {
   const set = plan.components.find((component) => component.set === "langetaro");
   const langetaro = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "langetaro");
-  const variant = (state: string) => set?.variants.find((entry) => entry.props.state === state);
+  // Spec 036 Teil 5 ②b-2 (A-langetaro-2): size × state; medium is what the tabs were.
+  const variant = (state: string) =>
+    set?.variants.find((entry) => entry.props.state === state && entry.props.size === "medium");
 
   it("plans tabs of state only, with the purpose, the word Reiter, the Vitrino's words as tabs and its first word in the panel", () => {
     expect(structureOf("tablist")).toBe("tabs");
@@ -2825,11 +2946,16 @@ describe("Figma plan for the langetaro (Spec 011 ⑤)", () => {
     expect(set?.properties).toEqual({
       label: "TEXT",
       selected: "TEXT",
+      size: ["small", "medium", "large"],
+      // Spec 036 Teil 5 ②b-2 (A-langetaro-1): a property, no variant.
+      spread: ["content", "fill"],
       state: ["rest", "hover", "focus", "disabled"],
     });
-    expect(set?.variants).toHaveLength(4);
-    expect(set?.variants.every((entry) => Object.keys(entry.props).join() === "state")).toBe(true);
-    expect(set?.grid).toMatchObject({ rows: 1, columns: 4 });
+    expect(set?.variants).toHaveLength(3 * 4);
+    expect(set?.variants.every((entry) => Object.keys(entry.props).join() === "size,state")).toBe(
+      true,
+    );
+    expect(set?.grid).toMatchObject({ rows: 3, columns: 4 });
     expect(set?.description).toBe(langetaro?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Reiter");
     expect(set?.entry).toEqual({ key: "active", texts: ["Eins", "Zwei", "Drei"], selected: 0 });
@@ -2838,7 +2964,9 @@ describe("Figma plan for the langetaro (Spec 011 ⑤)", () => {
     expect(set?.sign).toBeUndefined();
     expect(set?.toggles).toBeUndefined();
     expect(set?.example).toBeUndefined();
-    expect(set?.variants.map((entry) => entry.focusVisible)).toEqual([false, false, true, false]);
+    expect(set?.variants.map((entry) => entry.focusVisible)).toEqual(
+      [1, 2, 3].flatMap(() => [false, false, true, false]),
+    );
   });
 
   it("binds the tab's fill by state, its height and padding, the list's line and gap, the panel; text colour and indicator width per value of active (E7)", () => {
@@ -2909,24 +3037,29 @@ describe("Figma plan for the langetaro (Spec 011 ⑤)", () => {
 
   it("states the langetaro in the parity inventory: label and selected strings, four states, the tab's fill per state, text and indicator per value of active", () => {
     const items = figmaPlanInventory(plan);
-    expect(items.langetaro?.props).toEqual({ label: ["string"], selected: ["string"] });
+    expect(items.langetaro?.props).toEqual({
+      label: ["string"],
+      selected: ["string"],
+      size: ["small", "medium", "large"],
+      spread: ["content", "fill"],
+    });
     expect(items.langetaro?.states).toEqual(["rest", "hover", "focus", "disabled"]);
     const values = items.langetaro?.values ?? {};
-    expect(values["tab.fill@state=rest"]).toMatch(/^#[0-9a-f]{6}\/0$/);
-    expect(values["tab.fill@state=hover"]).toMatch(/^#[0-9a-f]{6}\/0\.08$/);
-    expect(values["tabs.color@active=true,state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
-    expect(values["tabs.color@active=false,state=disabled"]).toMatch(/^#[0-9a-f]{6}$/);
-    expect(values["selected-indicator.width@active=true,state=rest"]).toMatch(/px$/);
-    expect(values["selected-indicator.width@active=false,state=rest"]).toBeUndefined();
-    expect(values["selected-indicator.color@state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
+    expect(values["tab.fill@size=medium,state=rest"]).toMatch(/^#[0-9a-f]{6}\/0$/);
+    expect(values["tab.fill@size=medium,state=hover"]).toMatch(/^#[0-9a-f]{6}\/0\.08$/);
+    expect(values["tabs.color@active=true,size=medium,state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
+    expect(values["tabs.color@active=false,size=medium,state=disabled"]).toMatch(/^#[0-9a-f]{6}$/);
+    expect(values["selected-indicator.width@active=true,size=medium,state=rest"]).toMatch(/px$/);
+    expect(values["selected-indicator.width@active=false,size=medium,state=rest"]).toBeUndefined();
+    expect(values["selected-indicator.color@size=medium,state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
     // Spec 029 ①b: the line under the tabs of the Fonto is the fine border, 8 % black in komuna
     // and opaque in ekzemplo – one paint carries one opacity, as with the karto's border (①).
-    expect(values["list.color@state=rest"]).toMatch(
+    expect(values["list.color@size=medium,state=rest"]).toMatch(
       /^(#[0-9a-f]{6}(\/0\.\d+)?$|alpha varies by mode)/,
     );
-    expect(values["list.width@state=rest"]).toMatch(/px$/);
-    expect(values["panel.color@state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
-    expect(values["panel.inline-padding@state=focus"]).toMatch(/px$/);
+    expect(values["list.width@size=medium,state=rest"]).toMatch(/px$/);
+    expect(values["panel.color@size=medium,state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
+    expect(values["panel.inline-padding@size=medium,state=focus"]).toMatch(/px$/);
     expect(Object.values(values).some((value) => value.startsWith("not drawn"))).toBe(false);
   });
 });
@@ -2942,7 +3075,8 @@ describe("the Figma plan draws icons (Spec 014 ②)", () => {
 
   it("carries the glyphs of every Aspekto and the names that mirror; a BOOLEAN variable per Aspekto switches them", () => {
     expect(plan.ikonoj?.names).toEqual(names);
-    expect(plan.ikonoj?.mirror).toEqual(["chevron-left", "chevron-right"]);
+    // Spec 036 Teil 5 ②b-3 (A-pagxigilo-4): first and last mirror too.
+    expect(plan.ikonoj?.mirror).toEqual(["chevron-left", "chevron-right", "first", "last"]);
     expect(Object.keys(plan.ikonoj?.glyphs ?? {})).toEqual(["komuna", "ekzemplo"]);
     for (const aspekto of ["komuna", "ekzemplo"]) {
       for (const name of names) {
@@ -2978,12 +3112,13 @@ describe("the Figma plan draws icons (Spec 014 ②)", () => {
     expect(ikono?.structure).toBe("icon");
     expect(ikono?.properties).toEqual({
       name: names,
-      size: ["small", "medium", "large"],
+      // Spec 036 Teil 5 ②b-2 (A-ikono-2): x-small below small.
+      size: ["x-small", "small", "medium", "large"],
       intent: ["neutral", "info", "success", "warning", "danger"],
       label: "TEXT",
       state: ["rest"],
     });
-    expect(ikono?.variants).toHaveLength(names.length * 3 * 5);
+    expect(ikono?.variants).toHaveLength(names.length * 4 * 5);
     const neutral = ikono?.variants.find(
       (variant) =>
         variant.props.name === "close" &&
@@ -3008,10 +3143,11 @@ describe("the Figma plan draws icons (Spec 014 ②)", () => {
     });
     expect(danger?.paints?.["glyph.color"]).toBeDefined();
     // The grid: a row per size × intent, a column per name (spec ②: name × size).
-    expect(ikono?.grid).toMatchObject({ rows: 15, columns: names.length });
+    expect(ikono?.grid).toMatchObject({ rows: 20, columns: names.length });
     // The rows follow the combinations of size × intent in the Skemo's order: medium/neutral is
-    // the sixth (small/neutral…danger first); the column is the name's place in the Ikonaro.
-    expect(neutral?.cell).toEqual({ row: 5, column: names.indexOf("close") });
+    // the eleventh (x-small and small, neutral…danger, first; Spec 036 Teil 5 ②b-2, A-ikono-2);
+    // the column is the name's place in the Ikonaro.
+    expect(neutral?.cell).toEqual({ row: 10, column: names.indexOf("close") });
     expect(ikono?.label).toBeUndefined();
     expect(ikono?.description).toBe(
       "Shows a symbol from the brand's icon set, decorative by default, named when it carries meaning.",
@@ -3037,15 +3173,22 @@ describe("the Figma plan draws icons (Spec 014 ②)", () => {
   it("draws the apartigilo as a separator with both orientations, and the saltligilo as a control in rest and focus", () => {
     const apartigilo = plan.components.find((component) => component.set === "apartigilo");
     expect(apartigilo?.structure).toBe("separator");
+    // Spec 036 Teil 5 ②b-2 (A-apartigilo-1): orientation × emphasis; low is the line it was.
     expect(apartigilo?.variants.map((variant) => variant.props)).toEqual([
-      { orientation: "horizontal", state: "rest" },
-      { orientation: "vertical", state: "rest" },
+      { orientation: "horizontal", emphasis: "low", state: "rest" },
+      { orientation: "horizontal", emphasis: "high", state: "rest" },
+      { orientation: "vertical", emphasis: "low", state: "rest" },
+      { orientation: "vertical", emphasis: "high", state: "rest" },
     ]);
     expect(apartigilo?.variants[0]?.bindings).toEqual({
       "line.color": "color/border/subtle",
       "line.width": "border/width/default",
     });
-    expect(apartigilo?.variants[1]?.bindings["box.height"]).toBe("size/control/medium");
+    expect(apartigilo?.variants[1]?.bindings).toEqual({
+      "line.color": "color/border/default",
+      "line.width": "border/width/strong",
+    });
+    expect(apartigilo?.variants[2]?.bindings["box.height"]).toBe("size/control/medium");
     expect(apartigilo?.label).toBeUndefined();
     // Nachlese 4 N-6 (F-7): each orientation once more between two words of the Vitrino, the
     // texts bound to the role of running text — the line is seen where it divides.
@@ -3095,7 +3238,7 @@ describe("the Figma plan draws icons (Spec 014 ②)", () => {
       false,
     );
     expect(
-      inventory.apartigilo?.values["line.color@orientation=horizontal,state=rest"],
+      inventory.apartigilo?.values["line.color@emphasis=low,orientation=horizontal,state=rest"],
     ).toBeDefined();
     expect(
       Object.keys(inventory.butono?.values ?? {}).some((key) => key.startsWith("icon.color@")),
@@ -3136,10 +3279,11 @@ describe("the Figma plan draws the titolo and the teksto as text (Spec 014 ③)"
     expect(titolo?.label).toEqual({ property: "label", defaultValue: "Überschrift" });
   });
 
-  it("the teksto: kind × size × emphasis (fifteen), the text in the role and the colour, the word Text", () => {
+  it("the teksto: kind × size × emphasis (eighteen), the text in the role and the colour, the word Text", () => {
     const teksto = plan.components.find((component) => component.set === "teksto");
     expect(teksto?.structure).toBe("badge");
-    expect(teksto?.variants).toHaveLength(15);
+    // Spec 036 Teil 5 ②b-2 (A-teksto-1): kind label (size 1) × three emphases.
+    expect(teksto?.variants).toHaveLength(18);
     const code = teksto?.variants.find(
       (variant) => variant.props.kind === "code" && variant.props.emphasis === "low",
     );
@@ -3317,8 +3461,11 @@ describe("the Figma plan draws the pagxigilo and the spuro (Spec 015 ①)", () =
   it("the pagxigilo: state as a pagination with three pages, arrows as icons, the Modelo's word as the label", () => {
     const pagxigilo = set("pagxigilo");
     expect(pagxigilo?.structure).toBe("pagination");
-    expect(pagxigilo?.variants).toHaveLength(4);
-    const rest = pagxigilo?.variants.find((variant) => variant.props.state === "rest");
+    // Spec 036 Teil 5 ②b-2 (A-pagxigilo-2): size × state; medium is what the pagination was.
+    expect(pagxigilo?.variants).toHaveLength(2 * 4);
+    const rest = pagxigilo?.variants.find(
+      (variant) => variant.props.state === "rest" && variant.props.size === "medium",
+    );
     expect(rest?.icons).toEqual({ prev: "chevron-left", next: "chevron-right" });
     expect(rest?.bindings).toMatchObject({
       "item.typography": "typography/label/1",
@@ -3346,8 +3493,11 @@ describe("the Figma plan draws the pagxigilo and the spuro (Spec 015 ①)", () =
   it("the spuro: state as a breadcrumb with three levels, the last current, the chevron between two", () => {
     const spuro = set("spuro");
     expect(spuro?.structure).toBe("breadcrumb");
-    expect(spuro?.variants).toHaveLength(3);
-    const rest = spuro?.variants.find((variant) => variant.props.state === "rest");
+    // Spec 036 Teil 5 ②b-2 (A-spuro-1): emphasis × state; medium is the trail it was.
+    expect(spuro?.variants).toHaveLength(2 * 3);
+    const rest = spuro?.variants.find(
+      (variant) => variant.props.state === "rest" && variant.props.emphasis === "medium",
+    );
     expect(rest?.icons).toEqual({ separator: "chevron-right" });
     expect(rest?.bindings).toMatchObject({
       "separator.color": "color/text/muted",
@@ -3468,16 +3618,19 @@ describe("the Figma plan draws the karto (Spec 015 ③)", () => {
     expect(structureOf("article")).toBe("card");
     expect(set?.structure).toBe("card");
     expect(set?.extraAxes).toEqual(["orientation"]);
-    expect(set?.variants.map((variant) => variant.props)).toEqual([
-      { orientation: "vertical", state: "rest" },
-      { orientation: "horizontal", state: "rest" },
-    ]);
-    expect(set?.grid).toMatchObject({ rows: 2, columns: 1 });
+    // Spec 036 Teil 5 ②b-2 (A-karto-1): orientation × emphasis; high is the card it was.
+    expect(set?.variants.map((variant) => variant.props)).toEqual(
+      ["vertical", "horizontal"].flatMap((orientation) =>
+        ["high", "medium", "low"].map((emphasis) => ({ orientation, emphasis, state: "rest" })),
+      ),
+    );
+    expect(set?.grid).toMatchObject({ rows: 6, columns: 1 });
     // The media is no prop of the Skemo: a toggle, not a property.
     expect(set?.properties).toEqual({
       level: ["1", "2", "3", "4", "5", "6"],
       orientation: ["vertical", "horizontal"],
       standalone: "BOOLEAN",
+      emphasis: ["high", "medium", "low"],
       state: ["rest"],
     });
     expect(set?.toggles).toEqual([{ property: "media", part: "media", defaultValue: true }]);
@@ -3492,7 +3645,7 @@ describe("the Figma plan draws the karto (Spec 015 ③)", () => {
     expect(set?.examples).toEqual([
       {
         name: "karto – ohne Bild",
-        variant: { orientation: "vertical", state: "rest" },
+        variant: { orientation: "vertical", emphasis: "high", state: "rest" },
         padding: expect.any(Number),
         toggled: { media: false },
       },
@@ -3505,7 +3658,9 @@ describe("the Figma plan draws the karto (Spec 015 ③)", () => {
         color: { binding: "color/text/subtle" },
       },
     });
-    for (const variant of set?.variants ?? []) {
+    for (const variant of (set?.variants ?? []).filter(
+      (entry) => entry.props.emphasis === "high",
+    )) {
       expect(variant.bindings).toEqual({
         "surface.fill": "color/background/raised",
         "surface.radius": "radius/role/surface",
@@ -3527,6 +3682,15 @@ describe("the Figma plan draws the karto (Spec 015 ③)", () => {
         variable: "elevation/shadow/raised",
       });
     }
+    // medium: the sunken ground without a shadow; low: no ground of its own and no shadow.
+    const of = (emphasis: string) =>
+      set?.variants.find(
+        (entry) => entry.props.emphasis === emphasis && entry.props.orientation === "vertical",
+      );
+    expect(of("medium")?.bindings["surface.fill"]).toBe("color/background/sunken");
+    expect(of("medium")?.shadow).toBeUndefined();
+    expect(of("low")?.bindings["surface.fill"]).toBeUndefined();
+    expect(of("low")?.shadow).toBeUndefined();
     // The actions in the Vitrino's order look like a butono of emphasis high and low, the badge
     // like an insigno of intent neutral — roles read from their Skemoj, not the karto's.
     expect(set?.composed?.["action-1"]).toMatchObject({
@@ -3561,10 +3725,17 @@ describe("the Figma plan draws the karto (Spec 015 ③)", () => {
       level: ["1", "2", "3", "4", "5", "6"],
       orientation: ["vertical", "horizontal"],
       standalone: ["boolean"],
+      emphasis: ["high", "medium", "low"],
     });
     expect(items.karto?.states).toEqual(["rest"]);
-    // The orientation is no key (extraAxes); the composed looks and the media are no part.
-    expect(items.karto?.values).toEqual({
+    // The orientation is no key (extraAxes); the composed looks and the media are no part. Spec 036
+    // Teil 5 ②b-2 (A-karto-1): every value by emphasis; high is the card it was.
+    const high = Object.fromEntries(
+      Object.entries(items.karto?.values ?? {})
+        .filter(([key]) => key.includes("emphasis=high"))
+        .map(([key, value]) => [key.replace("emphasis=high,", ""), value]),
+    );
+    expect(high).toEqual({
       "surface.fill@state=rest": expect.stringMatching(/^#[0-9a-f]{6}$/),
       // Spec 029 ①: the container radius of the Fonto; its border a translucent overlay.
       "surface.radius@state=rest": "12px",
@@ -3580,6 +3751,8 @@ describe("the Figma plan draws the karto (Spec 015 ③)", () => {
       "box.inline-padding@state=rest": "11px",
       "box.gap@state=rest": "4px",
     });
+    expect(items.karto?.values["surface.fill@emphasis=medium,state=rest"]).toMatch(/^#/);
+    expect(items.karto?.values["surface.fill@emphasis=low,state=rest"]).toBeUndefined();
   });
 });
 
@@ -3599,17 +3772,19 @@ describe("the Figma plan draws the avataro (Spec 015 ③)", () => {
     expect(ikono?.extraAxes).toEqual(["name"]);
     expect(set?.structure).toBe("avatar");
     expect(set?.extraAxes).toBeUndefined();
-    expect(set?.variants.map((variant) => variant.props)).toEqual([
-      { size: "small", state: "rest" },
-      { size: "medium", state: "rest" },
-      { size: "large", state: "rest" },
-    ]);
-    expect(set?.grid).toMatchObject({ rows: 3, columns: 1 });
+    // Spec 036 Teil 5 ②b-2 (A-avataro-2, A-avataro-1): five sizes × three corners.
+    expect(set?.variants.map((variant) => variant.props)).toEqual(
+      ["x-small", "small", "medium", "large", "x-large"].flatMap((size) =>
+        ["round", "soft", "square"].map((corner) => ({ size, corner, state: "rest" })),
+      ),
+    );
+    expect(set?.grid).toMatchObject({ rows: 15, columns: 1 });
     expect(set?.properties).toEqual({
       name: "TEXT",
       picture: "TEXT",
-      size: ["small", "medium", "large"],
+      size: ["x-small", "small", "medium", "large", "x-large"],
       decorative: "BOOLEAN",
+      corner: ["round", "soft", "square"],
       state: ["rest"],
     });
     expect(set?.label).toEqual({ property: "label", defaultValue: VITRINO_AVATAR.initials });
@@ -3617,7 +3792,7 @@ describe("the Figma plan draws the avataro (Spec 015 ③)", () => {
     expect(set?.examples).toEqual([
       {
         name: "avataro – mit Bild",
-        variant: { size: "medium", state: "rest" },
+        variant: { size: "medium", corner: "round", state: "rest" },
         padding: expect.any(Number),
         toggled: { image: true },
       },
@@ -3630,29 +3805,55 @@ describe("the Figma plan draws the avataro (Spec 015 ③)", () => {
     });
     // Nachlese 5 N5-5 (O-18): the smallest size – the first of the size axis – shows one initial,
     // the first of the Vitrino's.
-    expect(set?.avatar?.oneInitial).toEqual({ prop: "size", value: "small", text: "E" });
+    // Spec 036 Teil 5 ②b-2 (A-avataro-2): the sizes before medium, x-small and small.
+    expect(set?.avatar?.oneInitial).toEqual({
+      prop: "size",
+      values: ["x-small", "small"],
+      text: "E",
+    });
     const sizes = {
+      "x-small": "size/icon/small",
       small: "size/icon/medium",
       medium: "size/icon/large",
       large: "size/control/large",
+      "x-large": "size/scale/1000",
     };
     const roles = {
+      "x-small": "typography/caption",
       small: "typography/label/2",
       medium: "typography/label/2",
       large: "typography/label/1",
+      "x-large": "typography/headline/4",
+    };
+    // Spec 036 Teil 5 ②b-2 (A-avataro-1): the radii by corner.
+    const radii = { round: "radius/full", soft: "radius/small", square: "radius/none" };
+    // Spec 036 Teil 5 ②b-3 (A-avataro-4): the default icon by size.
+    const iconSizes = {
+      "x-small": "size/scale/100",
+      small: "size/scale/100",
+      medium: "size/icon/small",
+      large: "size/icon/large",
+      "x-large": "size/scale/800",
     };
     for (const variant of set?.variants ?? []) {
       const size = variant.props.size as keyof typeof sizes;
+      const corner = variant.props.corner as keyof typeof radii;
       expect(variant.bindings).toEqual({
         "box.size": sizes[size],
-        "image.radius": "radius/full",
+        "image.radius": radii[corner],
         "initials.fill": "color/background/sunken",
         "initials.color": "color/text/subtle",
         "initials.typography": roles[size],
-        "initials.radius": "radius/full",
+        "initials.radius": radii[corner],
+        // Spec 036 Teil 5 ②b-3 (A-avataro-4): the default icon, bound, not drawn (no name).
+        "icon.size": iconSizes[size],
+        "icon.color": "color/text/subtle",
       });
       expect(variant.icons).toBeUndefined();
-      expect(variant.notDrawn).toEqual({});
+      expect(variant.notDrawn).toEqual({
+        "icon.color": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+        "icon.size": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+      });
     }
   });
 
@@ -3661,19 +3862,30 @@ describe("the Figma plan draws the avataro (Spec 015 ③)", () => {
     expect(items.avataro?.props).toEqual({
       name: ["string"],
       picture: ["string"],
-      size: ["small", "medium", "large"],
+      size: ["x-small", "small", "medium", "large", "x-large"],
       decorative: ["boolean"],
+      corner: ["round", "soft", "square"],
     });
     expect(items.avataro?.states).toEqual(["rest"]);
     const hex = expect.stringMatching(/^#[0-9a-f]{6}$/);
-    expect(items.avataro?.values).toEqual(
+    // Spec 036 Teil 5 ②b-2 (A-avataro-1): every value by corner too; round is the avatar it was.
+    const round = Object.fromEntries(
+      Object.entries(items.avataro?.values ?? {})
+        .filter(([key]) => key.includes("corner=round"))
+        .map(([key, value]) => [key.replace("corner=round,", ""), value]),
+    );
+    expect(items.avataro?.values["image.radius@corner=square,size=medium,state=rest"]).toBe("0px");
+    expect(round).toEqual(
       Object.fromEntries(
         [
-          // Spec 029 ①b: the sizes sm/md/lg of the Fonto's avatar.
+          // Spec 029 ①b: the sizes sm/md/lg of the Fonto's avatar; Spec 036 Teil 5 ②b-2
+          // (A-avataro-2): x-small and x-large on their roles.
+          ["x-small", "16px"],
           ["small", "24px"],
           ["medium", "36px"],
 
           ["large", "48px"],
+          ["x-large", "64px"],
         ].flatMap(([size, box]) => [
           [`box.size@size=${size},state=rest`, box],
           [`image.radius@size=${size},state=rest`, "9999px"],
@@ -3686,6 +3898,9 @@ describe("the Figma plan draws the avataro (Spec 015 ③)", () => {
           ],
           [`initials.color@size=${size},state=rest`, hex],
           [`initials.radius@size=${size},state=rest`, "9999px"],
+          // Spec 036 Teil 5 ②b-3 (A-avataro-4): the default icon stands without a name (Jugxo).
+          [`icon.color@size=${size},state=rest`, "not drawn (jug_01M6A2EXBGT5473CTBGY1WRV5E)"],
+          [`icon.size@size=${size},state=rest`, "not drawn (jug_01M6A2EXBGT5473CTBGY1WRV5E)"],
         ]),
       ),
     );
@@ -3820,13 +4035,16 @@ describe("the Figma plan draws the datelektilo (Spec 025 ②)", () => {
       (candidate) =>
         candidate.props.mode === mode &&
         candidate.props.expanded === expanded &&
+        // Spec 036 Teil 5 ②b-2 (A-datelektilo-2): the size the date picker had, medium.
+        candidate.props.size === "medium" &&
         candidate.props.state === state,
     );
 
   it("a field of mode × expanded × state, twenty-four variants; the label a field's word; the texts the Vitrino's; the calendar of the plan", () => {
     expect(set?.structure).toBe("field");
     expect(set?.extraAxes).toEqual(["mode"]);
-    expect(set?.variants).toHaveLength(32);
+    // Spec 036 Teil 5 ②b-2 (A-datelektilo-2): three sizes.
+    expect(set?.variants).toHaveLength(3 * 32);
     expect(set?.properties.state).toEqual([
       "rest",
       "hover",
@@ -3856,7 +4074,8 @@ describe("the Figma plan draws the datelektilo (Spec 025 ②)", () => {
     expect(set?.calendar?.days[0]).toEqual({ text: "28", outside: true });
     expect(set?.calendar?.days[3]).toEqual({ text: "1", outside: false });
     expect(set?.calendar?.days[41]).toEqual({ text: "8", outside: true });
-    expect(set?.grid).toMatchObject({ rows: 4, columns: 8 });
+    // Spec 036 Teil 5 ②b-2 (A-datelektilo-2): a row of the grid per size as well.
+    expect(set?.grid).toMatchObject({ rows: 12, columns: 8 });
   });
 
   it("binds the field as the kampo, the trigger, the calendar and the cell's looks; the calendar only where expanded; the icons of trigger, prev and next", () => {
@@ -3923,15 +4142,16 @@ describe("the Figma plan draws the selection Eroj (Spec 025 ③)", () => {
 
   // 160, not 240 (Abweichung 3 of plan ③): the constraint selected ⇒ mode selectable prunes the
   // pressed static and removable tags, as every constraint prunes a set (combinationsOf).
-  it("the signeto: a badge of mode × selected × size × intent × state, 160 variants (the constraint prunes the pressed static and removable tags); the chosen tag takes the selected primary action", () => {
+  it("the signeto: a badge of mode × selected × size × intent × state, 240 variants (the constraint prunes the pressed static and removable tags); the chosen tag takes the selected primary action", () => {
     const signeto = set("signeto");
     expect(signeto?.structure).toBe("badge");
     expect(signeto?.extraAxes).toEqual(["mode"]);
-    expect(signeto?.variants).toHaveLength(160);
+    // Spec 036 Teil 5 ②b-2 (A-signeto-2): a third size, large.
+    expect(signeto?.variants).toHaveLength(240);
     expect(signeto?.properties).toMatchObject({
       mode: ["static", "selectable", "removable"],
       selected: "BOOLEAN",
-      size: ["small", "medium"],
+      size: ["small", "medium", "large"],
       intent: ["neutral", "info", "success", "warning", "danger"],
       state: ["rest", "hover", "focus", "disabled"],
     });
@@ -3946,7 +4166,8 @@ describe("the Figma plan draws the selection Eroj (Spec 025 ③)", () => {
     expect(chosen?.bindings).toMatchObject({
       "surface.fill": "color/action/primary/selected",
       "text.color": "color/action/primary/text",
-      "box.radius": "radius/role/pill",
+      // Spec 036 Teil 5 ②b-5 (A-signeto-6): a tag is bounded, the pill stays the insigno's.
+      "box.radius": "radius/role/tag",
     });
   });
 
@@ -3954,7 +4175,8 @@ describe("the Figma plan draws the selection Eroj (Spec 025 ③)", () => {
     for (const name of ["listelektilo", "plurelektilo"]) {
       const field = set(name);
       expect(field?.structure, name).toBe("field");
-      expect(field?.variants, name).toHaveLength(16);
+      // Spec 036 Teil 5 ②b-2 (A-listelektilo-2, A-plurelektilo-2): three sizes.
+      expect(field?.variants, name).toHaveLength(3 * 16);
       expect(field?.entry, name).toEqual({
         key: "selected",
         texts: ["Eins", "Zwei", "Drei"],

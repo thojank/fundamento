@@ -167,6 +167,61 @@
       "wrap": "allowed",
       "columns-from": "size.container.small"
     },
-    "content": []
+    "content": [],
+    "when-not": [
+      {
+        "case": {
+          "de": "Gezeigt werden die Felder eines Datensatzes als Namen und Werte.",
+          "en": "The fields of one record are shown as names and values."
+        },
+        "ero": "atributlisto"
+      },
+      {
+        "case": {
+          "de": "Es soll gesagt werden, was geschah oder worauf zu achten ist.",
+          "en": "It is to be said what happened or what to watch for."
+        },
+        "ero": "avizo"
+      },
+      {
+        "case": {
+          "de": "Ein Rahmen soll nur das Layout der Seite ordnen, ohne ein Ding zu benennen.",
+          "en": "A frame is only to order the layout of the page, without naming one thing."
+        },
+        "ero": "pagxo"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Gib jeder Karte eine Überschrift mit der Ebene, die in den Aufbau der Seite passt.",
+          "en": "Give every card a heading at the level that fits the structure of the page."
+        },
+        {
+          "de": "Beschränke dich auf höchstens zwei Aktionen.",
+          "en": "Keep to at most two actions."
+        },
+        {
+          "de": "Setze standalone false, wenn die Karte ein Abschnitt der Seite ist und nicht für sich allein steht.",
+          "en": "Set standalone false when the card is a section of the page and does not stand on its own."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Die ganze Karte zu einem Verweis machen, in dem noch Schaltflächen liegen.",
+          "en": "Make the whole card a link that still holds buttons."
+        },
+        {
+          "de": "Die Karte als bloßen Kasten um andere Teile der Seite benutzen.",
+          "en": "Use the card as a mere box around other parts of the page."
+        }
+      ]
+    },
+    "keyboard": {
+      "none": {
+        "de": "Die Karte selbst nimmt keine Taste; ihre Verweise und Schaltflächen erreicht man einzeln mit Tab.",
+        "en": "The card itself takes no key; its links and buttons are reached one by one with Tab."
+      }
+    }
   }
 }

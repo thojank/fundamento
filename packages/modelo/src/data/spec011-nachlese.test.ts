@@ -20,11 +20,18 @@ describe("O-3: the brief names boolean axes and the state of an entry", () => {
   it("checked is an axis of the sxaltilo and the markobutono: a boolean that keys their parts", () => {
     for (const name of ["sxaltilo", "markobutono"]) {
       const axes = briefOf(ero(name)).axes;
-      // In the order of the props of the Skemo: checked stands before size there.
+      // In the order of the props of the Skemo: checked stands before size there. Spec 036 Teil 5
+      // ②b-2 (A-sxaltilo-1): the switch's label-side last.
       expect(
         axes.map((axis) => axis.name),
         name,
-      ).toEqual(["checked", "size", "intent", "message-position"]);
+      ).toEqual([
+        "checked",
+        "size",
+        "intent",
+        "message-position",
+        ...(name === "sxaltilo" ? ["label-side"] : []),
+      ]);
       expect(axes.find((axis) => axis.name === "checked")).toEqual({
         name: "checked",
         values: ["true", "false"],

@@ -124,7 +124,7 @@ describe("list_eroj and the briefs", () => {
       name: "konsileto",
       brief: true,
     });
-    expect(konsiletoBrief.axes.map((axis) => axis.name)).toEqual(["placement"]);
+    expect(konsiletoBrief.axes.map((axis) => axis.name)).toEqual(["placement", "justify"]);
     expect(konsiletoBrief.required).toEqual({ props: ["for"], slots: ["label"] });
     const sxvebiloBrief = await output<Brief>(client, "get_ero", { name: "sxvebilo", brief: true });
     expect(sxvebiloBrief.required).toEqual({ props: ["label"], slots: ["content", "trigger"] });

@@ -245,11 +245,38 @@ function apcaSatz() {
     missing + "</p>";
 }
 
+// Spec 036 Teil 5 ③: the contrast matrix per state of every Ero page, from the measured pairs of
+// the combination on screen: the Ero's own pair where a brand departs from the roles (measured
+// only then), else the weakest pair of its roles – "ratio ≥ threshold" passes, "<" fails.
+function renderDoku() {
+  const rows = datumoj.mezuroj[kombino()] || [];
+  const byName = new Map(rows.map((row) => [row.paro, row]));
+  for (const cell of document.querySelectorAll("[data-fm-doku-paroj]")) {
+    const names = (name) => (cell.getAttribute(name) || "").split(" ").filter(Boolean);
+    let found;
+    for (const name of names("data-fm-doku-paro")) {
+      const row = byName.get(name);
+      if (row && (!found || row.wcag2 < found.wcag2)) found = row;
+    }
+    if (!found) {
+      for (const name of names("data-fm-doku-paroj")) {
+        const row = byName.get(name);
+        if (row && (!found || row.wcag2 < found.wcag2)) found = row;
+      }
+    }
+    const text = !found
+      ? "–"
+      : found.wcag2.toFixed(2) + (found.sojlo === undefined ? "" : (found.pasis ? " ≥ " : " < ") + found.sojlo);
+    if (cell.textContent !== text) cell.textContent = text;
+  }
+}
+
 function render() {
   document.body.setAttribute("data-fm-kombino", kombino());
   renderRoloj();
   renderBazoj();
   renderKontrasto();
+  renderDoku();
   renderRegularo();
   renderKovrado();
   renderKomparo();

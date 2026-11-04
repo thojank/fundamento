@@ -47,6 +47,8 @@ describe("menuo in the repo Modelo (section ④, G1, G2, G4)", () => {
         ["open", "boolean", false, undefined],
         // Nachlese 7 ② B-4.
         ["disabled", "boolean", false, undefined],
+        // Spec 036 Teil 5 ②b-2 (A-menuo-1): the alignment along the side.
+        ["justify", "enum", "center", undefined],
       ],
     );
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled"]);
@@ -69,6 +71,9 @@ describe("menuo in the repo Modelo (section ④, G1, G2, G4)", () => {
       "danger-item",
       "box",
       "focus-ring",
+      // Spec 036 Teil 5 ②b-3 (A-menuo-4): the icon of an entry, the heading of a group.
+      "icon",
+      "group-heading",
     ]);
     expect(skemo?.parts.surface?.shadow).toEqual({ fixed: "elevation.shadow.overlay" });
     expect(skemo?.parts.surface?.width).toEqual({ fixed: "size.container.small" });
@@ -79,6 +84,8 @@ describe("menuo in the repo Modelo (section ④, G1, G2, G4)", () => {
       height: { fixed: "size.target.min" },
       "inline-padding": { fixed: "spacing.medium" },
       radius: { fixed: "radius.role.control" },
+      // Spec 036 Teil 5 ②b-3 (A-menuo-4): the gap between the icon and the words.
+      gap: { fixed: "spacing.small" },
     });
     expect(skemo?.parts["danger-item"]).toEqual({ color: { fixed: "color.status.danger.text" } });
     if (skemo === undefined) throw new Error("missing");
@@ -102,6 +109,8 @@ describe("menuo in the repo Modelo (section ④, G1, G2, G4)", () => {
       "Escape",
       "Enter",
       "Space",
+      // Spec 036 Teil 5 ②b-4 (A-menuo-5): typed words move the focus.
+      "Character",
     ]);
     expect(skemo?.a11y.texts).toEqual({
       "label-empty": { de: "Weitere Aktionen", en: "More actions" },
@@ -123,7 +132,8 @@ describe("menuo in the repo Modelo (section ④, G1, G2, G4)", () => {
 describe("the Uzo of the menuo (section ④, G6)", () => {
   it("states the purpose; pages are the navigado's, values the elektilo's, one action the butono's; a submenu is not supported, checkable items ask", () => {
     expect(uzo?.purpose).toBe(
-      "Offers actions for one object behind a single button: edit, duplicate, delete.",
+      // Spec 036 Teil 5 ②b-3 (A-menuo-4): icon and group of an entry; ②b-4 (A-menuo-5): a target.
+      "Offers actions for one object behind a single button: edit, duplicate, delete; an entry may carry an icon (attribute icon) and name its group (attribute group); an entry with a target (attribute to) is a link to it, because it moves the person (Regulo link-navigates-button-acts).",
     );
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["navigate", "navigado"],
@@ -188,7 +198,7 @@ describe("the Uzo of the menuo (section ④, G6)", () => {
   it("the brief names placement and state as axes, the items as a duty, and stays under 750", () => {
     if (menuo === undefined) throw new Error("missing");
     const brief = briefOf(menuo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["placement"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["placement", "justify"]);
     expect(brief.required).toEqual({ props: [], slots: ["items"] });
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
   });

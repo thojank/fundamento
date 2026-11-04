@@ -1347,6 +1347,21 @@
           },
           "minItems": 1,
           "uniqueItems": true
+        },
+        "category": {
+          "description": "The kind of the family as the font catalogue names it (Spec 036 Teil 5, Spec 029 ①-7): the Agordilo takes the generic fallback of the family from it; absent, the fallback of the structure stays.",
+          "enum": ["sans-serif", "serif", "monospace", "display", "handwriting", "other", "icons"]
+        },
+        "weights": {
+          "description": "The weights the family has (Spec 036 Teil 5, Spec 029 B-2): every typography role in the family takes the nearest of them; absent, every weight of the structure stays.",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "minItems": 1,
+          "uniqueItems": true
         }
       },
       "required": ["family", "license", "source", "redistributable", "scripts"],
@@ -2266,6 +2281,17 @@
         "shown": {
           "description": "The text of the prop is shown where the default slot of the same name would stand, while that slot is empty; the slot wins where both are given (Spec 029 ②b-1b, Befund der Nachlese 12): the label of a field written as an attribute is its visible label, never only a hidden name.",
           "type": "boolean"
+        },
+        "deprecatedValues": {
+          "description": "Values of an enum that are no longer values but still accepted for one release (Spec 036 Teil 5 ②b-2, Spec 029 ②a-2), each with the value it stands for: the Ero renders that value and says the given one is deprecated (console, check_usage, the brief). A deprecated value is no value of the prop and keys no binding.",
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Name"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/Name"
+          },
+          "minProperties": 1
         }
       },
       "required": ["name", "kind"],
@@ -2797,6 +2823,50 @@
           "items": {
             "$ref": "#/$defs/UzoContent"
           }
+        },
+        "when-not": {
+          "description": "Spec 036 Teil 5 ③ (Spec 029 ③, section „Wann nicht“): the cases the Ero is not for, each with the Ero or Sxablono to take instead; or the placeholder while the text is not written. check:dokumentaro reports a missing field and the placeholder.",
+          "oneOf": [
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/UzoWhenNot"
+              }
+            },
+            {
+              "$ref": "#/$defs/UzoOffen"
+            }
+          ]
+        },
+        "do-dont": {
+          "description": "Spec 036 Teil 5 ③ (Spec 029 ③, section Do/Don't): what to do with the Ero and what not, or the placeholder.",
+          "oneOf": [
+            {
+              "$ref": "#/$defs/UzoDoDont"
+            },
+            {
+              "$ref": "#/$defs/UzoOffen"
+            }
+          ]
+        },
+        "keyboard": {
+          "description": "Spec 036 Teil 5 ③ (Spec 029 ③, section Barrierefreiheit): what each key of the Skemo (a11y.keys) does, in words; none with the reason for an Ero that takes no key; or the placeholder.",
+          "oneOf": [
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/UzoKeyboardKey"
+              }
+            },
+            {
+              "$ref": "#/$defs/UzoKeyboardNone"
+            },
+            {
+              "$ref": "#/$defs/UzoOffen"
+            }
+          ]
         }
       },
       "required": [
@@ -2811,6 +2881,97 @@
         "layout",
         "content"
       ],
+      "additionalProperties": false
+    },
+    "UzoTexto": {
+      "description": "A text of the documentation of an Ero in German and English (Spec 036 Teil 5 ③): the Vitrino shows the language of the Lingvo switch, get_ero the language asked for.",
+      "type": "object",
+      "properties": {
+        "de": {
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "en": {
+          "$ref": "#/$defs/NonEmptyText"
+        }
+      },
+      "required": ["de", "en"],
+      "additionalProperties": false
+    },
+    "UzoOffen": {
+      "description": "The placeholder of a documentation field whose text is not written yet (Spec 036 Teil 5 ③): valid for the schema, so every Ero carries the field; an error for check:dokumentaro. get_ero leaves the field out.",
+      "type": "object",
+      "properties": {
+        "offen": {
+          "$ref": "#/$defs/UzoTexto"
+        }
+      },
+      "required": ["offen"],
+      "additionalProperties": false
+    },
+    "UzoWhenNot": {
+      "description": "One case the Ero is not for (Spec 029 ③ „Wann nicht“), with the Ero or Sxablono to take instead.",
+      "type": "object",
+      "properties": {
+        "case": {
+          "$ref": "#/$defs/UzoTexto"
+        },
+        "ero": {
+          "$ref": "#/$defs/Name"
+        }
+      },
+      "required": ["case", "ero"],
+      "additionalProperties": false
+    },
+    "UzoDoDont": {
+      "description": "Do and don't of an Ero (Spec 029 ③): at least one of each.",
+      "type": "object",
+      "properties": {
+        "do": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/UzoTexto"
+          }
+        },
+        "dont": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/UzoTexto"
+          }
+        }
+      },
+      "required": ["do", "dont"],
+      "additionalProperties": false
+    },
+    "UzoKeyboardKey": {
+      "description": "One row of the keyboard table (Spec 029 ③): the keys, as the Skemo names them in a11y.keys, and what they do.",
+      "type": "object",
+      "properties": {
+        "keys": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/NonEmptyText"
+          }
+        },
+        "action": {
+          "$ref": "#/$defs/UzoTexto"
+        }
+      },
+      "required": ["keys", "action"],
+      "additionalProperties": false
+    },
+    "UzoKeyboardNone": {
+      "description": "An Ero that takes no key, with the reason (Spec 029 ③).",
+      "type": "object",
+      "properties": {
+        "none": {
+          "$ref": "#/$defs/UzoTexto"
+        }
+      },
+      "required": ["none"],
       "additionalProperties": false
     },
     "UzoInstead": {

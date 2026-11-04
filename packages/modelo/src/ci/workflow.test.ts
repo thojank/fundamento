@@ -22,6 +22,8 @@ const CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = [
   // Spec 029 ① (Constitution v2.4): every value taken from a Fonto points at a pinned Fonto with
   // its licence text, and its provenance matches the Aspekto.
   ["Check: Fontoj", "check:fontoj"],
+  // Spec 036 Teil 5 ③: every Uzo has the documentation fields of its Vitrino page.
+  ["Check: Dokumentaro", "check:dokumentaro"],
 ];
 
 /** Rendered checks of the Eroj (Spec 003 T013, plan D-09): axe-core, keyboard, focus, ARIA. */

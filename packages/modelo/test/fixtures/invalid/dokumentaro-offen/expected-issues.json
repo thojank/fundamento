@@ -1,0 +1,14 @@
+{
+  "description": "Spec 036 Teil 5 ③: copy of valid/dokumentaro-plena whose butono still holds the placeholder in when-not and describes Enter but not Space, a key its Skemo names. A placeholder is valid for the schema – every Ero carries the field before its text is written – but the documentation is not done until the text stands, so check:dokumentaro reports it like a missing field; a key the element answers to without a word on what it does leaves the keyboard table incomplete.",
+  "check": "dokumentaro",
+  "issues": [
+    {
+      "rule": "dokumentaro-keyboard-key-missing",
+      "path": "data/eroj/butono/uzo.json#/uzo/keyboard"
+    },
+    {
+      "rule": "dokumentaro-placeholder",
+      "path": "data/eroj/butono/uzo.json#/uzo/when-not"
+    }
+  ]
+}

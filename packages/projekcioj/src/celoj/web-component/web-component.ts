@@ -40,9 +40,15 @@ const ICONS = 'slot[name^="icon-"]::slotted(*)';
  */
 const MARK = 'slot[name^="icon-"] > fm-ikono';
 
+/**
+ * Slotted icons the part icon sizes and colours: every element in an icon slot but an insigno –
+ * Spec 036 Teil 5 ②b-3 (A-butono-4): an insigno at the end (a count) keeps its own pill.
+ */
+const SIZED_ICONS = 'slot[name^="icon-"]::slotted(:not(fm-insigno))';
+
 /** The selector of a part in the shadow tree; `control` carries the combination and state. */
 function partSelector(part: string, control: string): string {
-  if (part === "icon") return `:where(${control}) ${ICONS}, :where(${control}) ${MARK}`;
+  if (part === "icon") return `:where(${control}) ${SIZED_ICONS}, :where(${control}) ${MARK}`;
   if (part === "focus-ring") return `:where(${control}:focus-visible)`;
   return `:where(${control})`;
 }
@@ -80,7 +86,21 @@ function fieldPartSelector(
         ? `:where(${root}) [part="check"]`
         : `:where(${root}) [part="item"]${entry} [part="check"]`;
     }
-    if (["icon", "description", "filter", "clear", "tag", "listbox"].includes(part)) {
+    // Spec 036 Teil 5 ②b-3 (A-listelektilo-4, A-plurelektilo-1/-4): the heading of a group, the
+    // divider between two groups and „alle wählen“ are elements of their own.
+    if (
+      [
+        "icon",
+        "description",
+        "filter",
+        "clear",
+        "tag",
+        "listbox",
+        "group-heading",
+        "divider",
+        "select-all",
+      ].includes(part)
+    ) {
       return `:where(${root}) [part="${part}"]`;
     }
     if (part === "placeholder") {
@@ -141,7 +161,10 @@ function fieldPartSelector(
   }
   // The listbox of a field with suggestions (Spec 014 ⑤) and its rows: the suggestion by its
   // entry (aria-selected), the no-results text.
-  if (part === "listbox" || part === "no-results") return `:where(${root}) [part="${part}"]`;
+  // Spec 036 Teil 5 ②b-3 (A-kompletigilo-4, A-elektilo-4): the heading of a group of options.
+  if (part === "listbox" || part === "no-results" || part === "group-heading") {
+    return `:where(${root}) [part="${part}"]`;
+  }
   if (part === "suggestion") return `:where(${root}) [part="suggestion"]${entry}`;
   // The step buttons and the clear button of Spec 025 ① (plan ① D-05, D-06) are composed butono
   // beside the input: their size is theirs, not the input's.
@@ -238,7 +261,15 @@ export const isLight = (skemo: Skemo): boolean =>
   hostOf(skemo.a11y.role) === "light" && !isPagination(skemo);
 
 /** The parts of a light-DOM host the shadow tree holds: the scroll region and its edge. */
-const LIGHT_SHADOW_PARTS: ReadonlySet<string> = new Set(["region", "border", "focus-ring"]);
+const LIGHT_SHADOW_PARTS: ReadonlySet<string> = new Set([
+  "region",
+  "border",
+  "focus-ring",
+  // Spec 036 Teil 5 ②b-2 (A-atributlisto-1): the button for the rest of a list stands in the shadow.
+  "more",
+  // Spec 036 Teil 5 ②b-3 (A-atributlisto-4): so does its title.
+  "heading",
+]);
 
 /** A pagination (Spec 015 ①, plan ① D-03): a navigation that draws its pages itself (an ellipsis part). */
 export const isPagination = (skemo: Skemo): boolean =>
@@ -295,7 +326,8 @@ const uploadStructure = (disables: boolean): string =>
     ':where([part="control"]) { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }',
     ...(disables ? [':where([part="control"]:disabled) { cursor: not-allowed; }'] : []),
     ':where([part="file-list"]) { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }',
-    ':where([part="file-list"][hidden], [part="drop-hint"][hidden]) { display: none; }',
+    // Spec 036 Teil 5 ②b-3 (A-alsxutilo-4): the upload icon stands only in a dropzone.
+    ':where([part="file-list"][hidden], [part="drop-hint"][hidden], [part="icon"][hidden]) { display: none; }',
     ':where([part="file"]) { display: flex; align-items: center; }',
     ':where([part="file-name"]) { overflow-wrap: anywhere; }',
     ':where([part="field"]:not([data-marked="true"])) [part="required-mark"] { display: none; }',
@@ -363,6 +395,13 @@ const sliderStructure = (disables: boolean): string =>
     ':host(:dir(rtl)) :where([part="thumb"]) { transform: translateX(50%); }',
     ':where([part="thumb"]:focus:not(:focus-visible)) { outline-width: 0; }',
     ':where([part="thumb"][hidden], [part="number"][hidden]) { display: none; }',
+    // Spec 036 Teil 5 ②b-2 (A-glitilo-1): the value as text beside the track, on one line.
+    ':where([part="readout"]) { flex: none; white-space: nowrap; }',
+    ':where([part="readout"][hidden]) { display: none; }',
+    // Spec 036 Teil 5 ②b-3 (A-glitilo-4): a tick stands at its step, centred on it like a thumb,
+    // in the middle of the track; under fill and thumbs, no target for the pointer.
+    ':where([part="tick"]) { position: absolute; inset-inline-start: var(--fm-tick-at); transform: translateX(-50%); pointer-events: none; }',
+    ':host(:dir(rtl)) :where([part="tick"]) { transform: translateX(50%); }',
     ...(disables ? [':where([part="thumb"][aria-disabled="true"]) { cursor: not-allowed; }'] : []),
     ':where([part="min-label"], [part="max-label"]) { white-space: nowrap; }',
     ':where([part="number"]) { flex: none; inline-size: 0; }',
@@ -417,11 +456,26 @@ const cardStructure: string = [
  */
 export const isCodeblock = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "codeblock";
 
+/**
+ * Spec 036 Teil 5 ②b-5 (A-kodbloko-4, ①-2): the parts of the lines the block builds – the number,
+ * a highlighted line, the words by kind – stand on elements that may carry more than one name.
+ */
+const CODEBLOCK_LINE_PARTS: ReadonlySet<string> = new Set([
+  "line-number",
+  "highlight",
+  "keyword",
+  "name",
+  "string",
+  "number",
+  "comment",
+]);
+
 function codeblockPartSelector(part: string, data: string): string {
   const root = `[part="control"]${data}`;
-  if (part === "text" || part === "legend" || part === "announce") {
+  if (part === "text" || part === "legend" || part === "announce" || part === "language") {
     return `:where(${root}) [part="${part}"]`;
   }
+  if (CODEBLOCK_LINE_PARTS.has(part)) return `:where(${root}) [part~="${part}"]`;
   if (part === "scroll-ring") return `:where(${root}) [part="region"]:focus-visible`;
   return `:where(${root})`;
 }
@@ -431,6 +485,10 @@ function codeblockPartSelector(part: string, data: string): string {
  * of its container; the figure a column; the region scrolls along the line and never wraps it
  * (a command keeps its spaces), the pre and the code without the platform's margin and font; the
  * copy button at the start, shown with copyable; the live region clipped from sight.
+ * Spec 036 Teil 5 ②b-5 (A-kodbloko-1/4): with a language the caption and the language stand at
+ * the two ends of the legend, at the figure's gap; wrap breaks the lines at the edge; the lines
+ * the block builds are the rows of a grid as wide as the widest line (a highlighted line is marked
+ * across the whole scroll width), each a row of its number (never selected) and its code.
  */
 const codeblockStructure = (): string =>
   [
@@ -441,6 +499,14 @@ const codeblockStructure = (): string =>
     ':where([part="text"]) > code { font: inherit; }',
     ':where([part="copy"]) { align-self: flex-start; }',
     ':where([part="copy"][hidden]) { display: none; }',
+    ':where([part="legend"][data-language]) { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: inherit; }',
+    ':where([part="language"][hidden], [part="text"] > code[hidden]) { display: none; }',
+    ':where([part="control"][data-wrap]) [part="text"] { white-space: pre-wrap; overflow-wrap: anywhere; }',
+    ':where([part="text"]) > code.fm-lines { display: grid; }',
+    ':where([part="control"][data-wrap]) [part="text"] > code.fm-lines { grid-template-columns: minmax(0, 1fr); }',
+    ":where(code.fm-lines) > [data-line] { display: flex; }",
+    ':where(code.fm-lines) [part~="line-number"] { flex: none; user-select: none; }',
+    ":where(code.fm-lines) .fm-code { flex: 1 1 auto; min-inline-size: 0; }",
     HIDDEN_TEXT,
   ].join("\n");
 
@@ -452,8 +518,9 @@ const codeblockStructure = (): string =>
  */
 export const isMarkdown = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "markdown";
 
-function markdownPartSelector(part: string): string {
-  const root = '[part="control"]';
+function markdownPartSelector(part: string, data = ""): string {
+  // Spec 036 Teil 5 ②b-2 (A-markdovido-1): the density stands on the control.
+  const root = `[part="control"]${data}`;
   if (part === "quote") return `:where(${root}) > slot::slotted(blockquote)`;
   if (part === "indent") return `:where(${root}) > slot::slotted(:is(ul, ol))`;
   return `:where(${root})`;
@@ -513,7 +580,9 @@ export const isAvatar = (skemo: Skemo): boolean =>
 
 function avatarPartSelector(part: string, data: string): string {
   const root = `[part="control"]${data}`;
-  if (part === "image" || part === "initials") return `:where(${root}) [part="${part}"]`;
+  // Spec 036 Teil 5 ②b-3 (A-avataro-4): the default icon is an element of its own.
+  if (part === "image" || part === "initials" || part === "icon")
+    return `:where(${root}) [part="${part}"]`;
   return `:where(${root})`;
 }
 
@@ -530,6 +599,9 @@ const avatarStructure: string = [
   ':where([part="image"]) { display: block; object-fit: cover; }',
   ':where([part="initials"]) { display: flex; align-items: center; justify-content: center; white-space: nowrap; overflow: hidden; }',
   ':where([part="image"][hidden], [part="initials"][hidden]) { display: none; }',
+  // Spec 036 Teil 5 ②b-3 (A-avataro-4): the default icon keeps its size in the initials.
+  ':where([part="icon"]) { flex: none; }',
+  ':where([part="icon"][hidden]) { display: none; }',
 ].join("\n");
 
 /** A separator (Spec 014 ②, D-06): the control is the line. */
@@ -613,9 +685,13 @@ function meterPartSelector(part: string, data: string): string {
  * (data-intent, data-kind); surface, accent, border, box and motion are the control itself, every
  * other part — heading, message, details, text, actions, indicator, dismiss — its own element.
  */
-function statusPartSelector(part: string, data: string): string {
+function statusPartSelector(part: string, data: string, slottedIcon = false): string {
   const control = `[part="control"]${data}`;
   if (["surface", "accent", "border", "box", "motion"].includes(part)) return `:where(${control})`;
+  // Spec 036 Teil 5 ②b-3 (A-plenstato-4): the icon of a slot icon takes the size of its holder.
+  if (part === "icon" && slottedIcon) {
+    return `:where(${control}) [part="icon"], :where(${control}) [part="icon"] > slot::slotted(*)`;
+  }
   return `:where(${control}) [part="${part}"]`;
 }
 
@@ -754,7 +830,8 @@ function togglePartSelector(part: string, property: string, data: string, state:
   if (part === "box" && property === "gap") return `:where(${root})`;
   if (part === "focus-ring") return `:where(${root}) [part="control"]:focus-visible`;
   if (part === "indicator" && property !== "position") return `:where(${root}) [part="indicator"]`;
-  if (["label", "error", "message", "required-mark"].includes(part))
+  // Spec 036 Teil 5 ②b-3 (A-markobutono-4, A-sxaltilo-4): the help under the label, as the error.
+  if (["label", "help", "error", "message", "required-mark"].includes(part))
     return `:where(${root}) [part="${part}"]`;
   return `:where(${root}) [part="control"]`;
 }
@@ -803,7 +880,8 @@ function groupPartSelector(
   if (["label", "help", "error", "message", "required-mark"].includes(part)) {
     return `:where(${root}) [part="${part}"]`;
   }
-  if (part === "option-label" || part === "indicator")
+  // Spec 036 Teil 5 ②b-3 (A-elekto-4): the description of an option under its label.
+  if (part === "option-label" || part === "option-description" || part === "indicator")
     return `:where(${root} ${row}) [part="${part}"]`;
   return `:where(${root} ${row}) [part="control"]`;
 }
@@ -886,6 +964,9 @@ function keywordDeclarations(part: string, property: string, token: string): str
     // A colour that inherits (Spec 014 ②, D-05: the glyph of a neutral icon) says so, so the
     // combination has its rule and the inventory reads the value of the axis.
     if (property === "color") return ["color: inherit;"];
+    // A fill that inherits (Spec 036 Teil 5 ②b-2, A-karto-1: emphasis low) has no surface of its
+    // own: the part takes the ground of its host, which lies on the ground of the container.
+    if (property === "fill") return ["background-color: inherit;"];
     return property === "typography" ? ["display: inline;", "white-space: normal;"] : [];
   }
   // The underline is switched off; a minimum that is none is simply not written.
@@ -938,6 +1019,21 @@ function declarations(
   if (isCodeblock(skemo) && part === "box" && property === "inline-padding") {
     return [`padding: ${variable(token)};`];
   }
+  // Spec 036 Teil 5 ②b-5 (A-kodbloko-4): the room after a line number is its end padding; the mark
+  // of a highlighted line an inset line at its start, in the bound width and colour – it takes no
+  // room, so a highlighted line's code stands where the others' does (code reads left to right).
+  if (isCodeblock(skemo) && part === "line-number" && property === "gap") {
+    return [`padding-inline-end: ${variable(token)};`];
+  }
+  if (isCodeblock(skemo) && part === "highlight" && property === "width") return [];
+  if (isCodeblock(skemo) && part === "highlight" && property === "color") {
+    const width = fixedToken(skemo.parts[part]?.width);
+    return width === undefined
+      ? []
+      : [
+          `box-shadow: inset ${variable(named(owner, skemo, part, "width", {}, width))} 0 0 0 ${variable(token)};`,
+        ];
+  }
   if (isCodeblock(skemo) && part === "scroll-ring" && property === "color") {
     const offset = offsetOf(owner, skemo, part);
     return offset === undefined
@@ -969,7 +1065,12 @@ function declarations(
   }
   // A slider (Spec 025 ①, D-03): fill and thumb carry a colour, as the meter's bar does (no text
   // lies on them); the number field beside the track is not shown where its width is none.
-  if (isSlider(skemo) && (part === "fill" || part === "thumb") && property === "color") {
+  // Spec 036 Teil 5 ②b-3 (A-glitilo-4): a tick is a line of its colour across the track.
+  if (
+    isSlider(skemo) &&
+    (part === "fill" || part === "thumb" || part === "tick") &&
+    property === "color"
+  ) {
     return [`background-color: ${variable(token)};`];
   }
   if (isSlider(skemo) && part === "number" && property === "width") {
@@ -988,6 +1089,12 @@ function declarations(
         ? ["border-block-end-style: none;"]
         : ["border-block-end-style: solid;", `border-block-end-width: ${variable(token)};`];
     }
+  }
+  // Spec 036 Teil 5 ②b-3 (A-listelektilo-4): the divider between two groups is the start edge of
+  // the later group's first line – its colour and width are the border's.
+  if (isListy(skemo) && part === "divider") {
+    if (property === "color") return [`border-block-start-color: ${variable(token)};`];
+    if (property === "width") return [`border-block-start-width: ${variable(token)};`];
   }
   // Spec 025 ③ (plan ③ D-18): the composed field of an inline editor is as wide as its token while
   // editing and not shown while its width is none. The size of a composed butono that carries a
@@ -1229,10 +1336,12 @@ const HIDDEN_TEXT =
  * Layout of static text (Spec 011 ③, D-08), keywords only: the badge is an inline block that
  * hugs its label and never wraps (the Uzo says never); no cursor, no transition, nothing to press.
  */
-const textStructure = (bordered: boolean): string =>
+const textStructure = (bordered: boolean, iconStart = false): string =>
   [
     ":host { display: inline-block; vertical-align: middle; }",
     `:where([part="control"]) { display: inline-flex; align-items: center; box-sizing: border-box; margin: 0; ${bordered ? "border-style: solid; " : ""}white-space: nowrap; }`,
+    // Spec 036 Teil 5 ②b-3 (A-insigno-4): the icon at the start keeps its own size.
+    ...(iconStart ? [`:where([part="control"]) ${ICONS} { flex: none; }`] : []),
     HIDDEN_TEXT,
   ].join("\n");
 
@@ -1260,6 +1369,13 @@ const statusStructure = (skemo: Skemo): string => {
     ':where([part="indicator"]) { display: block; flex: none; }',
     ':where([part="indicator"]) > svg { display: block; }',
     ':where([part="dismiss"][hidden]) { display: none; }',
+    // Spec 036 Teil 5 ②b-3 (A-plenstato-4): the icon of the slot icon above the texts, centred.
+    ...(skemo.slots.some((slot) => slot.name === "icon" && slot.decorative === true)
+      ? [
+          ':where([part="icon"]) { display: block; align-self: center; }',
+          ':where([part="icon"][hidden]) { display: none; }',
+        ]
+      : []),
     HIDDEN_TEXT,
   ].join("\n");
 };
@@ -1304,7 +1420,31 @@ const meterStructure: string = [
  * is a block; a table lies in a focusable region that scrolls along the inline axis; a list in a
  * plain frame. Everything else stands in the document's stylesheet (`lightStylesheetOf`).
  */
-const lightStructure = (skemo: Skemo): string =>
+/**
+ * Spec 036 Teil 5 ②b-3 (A-spuro-4): an icon given to the host stands in the first item before the
+ * link, as far from it as the icon in a link from its words (item.gap).
+ */
+function itemGapAfterIcon(skemo: Skemo, owner: string | undefined, selector: string): string[] {
+  const gap = fixedToken(skemo.parts.item?.gap);
+  if (gap === undefined) return [];
+  return [
+    `${selector} { margin-inline-end: ${variable(named(owner, skemo, "item", "gap", {}, gap))}; }`,
+  ];
+}
+
+/**
+ * Spec 036 Teil 5 ②b-3 (A-atributlisto-4): the title of a list stands as far above it as two
+ * entries stand apart (the list's gap); no title, no rule.
+ */
+function titleGap(skemo: Skemo, owner?: string): string[] {
+  const gap = fixedToken(skemo.parts.list?.gap);
+  if (skemo.parts.heading === undefined || gap === undefined) return [];
+  return [
+    `:where([part="heading"]) { margin-block-end: ${variable(named(owner, skemo, "list", "gap", {}, gap))}; }`,
+  ];
+}
+
+const lightStructure = (skemo: Skemo, owner?: string): string =>
   isBreadcrumb(skemo)
     ? [
         // A breadcrumb (Spec 015 ①, plan ① D-04): the list is a row of its items that wraps; every
@@ -1314,6 +1454,8 @@ const lightStructure = (skemo: Skemo): string =>
         ':where([part="items"]) { display: flex; flex-wrap: wrap; align-items: center; list-style: none; margin: 0; padding: 0; }',
         ':where([part="entry"]) { display: inline-flex; align-items: center; }',
         ':where([part="separator"]) { flex: none; }',
+        // Spec 036 Teil 5 ②b-4 (A-spuro-6): the entry of the hidden levels, a menu and the chevron.
+        ':where([part="more"]) { display: inline-flex; align-items: center; }',
       ].join("\n")
     : isNav(skemo)
       ? [
@@ -1328,6 +1470,13 @@ const lightStructure = (skemo: Skemo): string =>
           ':where([part="region"]) { display: block; overflow-x: auto; box-sizing: border-box; border-style: solid; }',
           ':where([part="region"]:focus:not(:focus-visible)) { outline-width: 0; }',
           ':where([part="list"]) { display: block; }',
+          // Spec 036 Teil 5 ②b-2 (A-atributlisto-1): the button for the rest, a tertiary action.
+          ':where([part="more"]) { display: inline-flex; align-items: center; margin: 0; padding: 0; border-style: none; appearance: none; cursor: pointer; }',
+          ':where([part="more"][hidden]) { display: none; }',
+          // Spec 036 Teil 5 ②b-3 (A-atributlisto-4): the title of a list above it.
+          ':where([part="heading"]) { display: block; margin: 0; }',
+          ':where([part="heading"][hidden]) { display: none; }',
+          ...titleGap(skemo, owner),
         ].join("\n");
 
 /**
@@ -1350,6 +1499,10 @@ const paginationStructure: string = [
   ':where([part="item"]:focus:not(:focus-visible)) { outline-width: 0; }',
   ':where([part="item"][aria-disabled="true"]) { cursor: not-allowed; }',
   ':where([part="ellipsis"]) { display: inline-flex; align-items: center; justify-content: center; }',
+  // Spec 036 Teil 5 ②b-2 (A-pagxigilo-1): the summary between the arrows stays on one line; the
+  // words of compact are heard, not seen.
+  ':where([part="summary"]) { display: inline-flex; align-items: center; white-space: nowrap; }',
+  HIDDEN_TEXT,
 ].join("\n");
 
 const tabsStructure: string = [
@@ -1357,6 +1510,8 @@ const tabsStructure: string = [
   ':where([part="control"]) { display: flex; flex-wrap: nowrap; align-items: stretch; overflow-x: auto; box-sizing: border-box; border-block-end-style: solid; }',
   ':where([part="tab"]) { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; margin: 0; border-style: none; appearance: none; cursor: pointer; white-space: nowrap; transition-property: background-color, color, border-color; }',
   ':where([part="tab"]:focus:not(:focus-visible)) { outline-width: 0; }',
+  // Spec 036 Teil 5 ②b-2 (A-langetaro-1): spread fill shares the width of the list.
+  ':host([spread="fill"]) :where([part="tab"]) { flex: 1 1 0; }',
   ':where([part="tab"][aria-disabled="true"]) { cursor: not-allowed; }',
   ':where([part="panel"]) { display: block; }',
   ':where([part="panel"]:focus:not(:focus-visible)) { outline-width: 0; }',
@@ -1409,6 +1564,8 @@ const paragraphStructure: string = [
   ':host([kind="code"]) { display: inline; }',
   ':where([part="control"]) { display: block; box-sizing: border-box; margin: 0; overflow-wrap: anywhere; }',
   ':where([part="control"][data-kind="code"]) { display: inline; }',
+  // Spec 036 Teil 5 ②b-2 (A-teksto-1): tabular sets figures of one width (the host's attribute).
+  ':host([tabular]) :where([part="control"]) { font-variant-numeric: tabular-nums; }',
 ].join("\n");
 
 /**
@@ -1419,24 +1576,42 @@ const paragraphStructure: string = [
  * room (position-try-fallbacks). Where the platform has no anchor positioning the element writes
  * the plain place under the trigger as inline insets (the own fallback, E11).
  */
-const overlayPlace = (fallback: string, layer = '[part="control"]'): string =>
+const overlayPlace = (fallback: string, layer = '[part="control"]', justified = false): string =>
   [
     `${layer === ":host" ? ":host" : `:where(${layer})`} { position: fixed; inset: auto; margin: 0; box-sizing: border-box; position-area: ${fallback}; position-try-fallbacks: flip-block, flip-inline; }`,
     ...["block-start", "block-end", "inline-start", "inline-end"].map(
       (side) =>
         `:host([placement="${side}"])${layer === ":host" ? "" : ` ${layer}`} { position-area: ${side}; }`,
     ),
+    // Spec 036 Teil 5 ②b-2 (A-konsileto-1, A-menuo-1, A-sxvebilo-1): justify start and end span
+    // the area from the anchor's start or end edge along the side (center: the side alone). The
+    // host's attribute, no data attribute: no axis of the Skemo's.
+    ...(justified
+      ? ["block-start", "block-end", "inline-start", "inline-end"].flatMap((side) => {
+          const along = side.startsWith("block") ? "inline" : "block";
+          const host = (attributes: string) =>
+            `:host(${attributes})${layer === ":host" ? "" : ` ${layer}`}`;
+          return [
+            ["start", `span-${along}-end`],
+            ["end", `span-${along}-start`],
+          ].map(([justify, span]) =>
+            side === fallback
+              ? `${host(`[justify="${justify}"]:not([placement])`)}, ${host(`[placement="${side}"][justify="${justify}"]`)} { position-area: ${side} ${span}; }`
+              : `${host(`[placement="${side}"][justify="${justify}"]`)} { position-area: ${side} ${span}; }`,
+          );
+        })
+      : []),
   ].join("\n");
 
 /**
  * Layout of a tooltip (Spec 014 ④, D-05), keywords only: the host takes no place of its own (the
  * layer lies in the top layer); the control wraps its words and breaks a long one.
  */
-const tooltipStructure = (fallback: string): string =>
+const tooltipStructure = (fallback: string, justified = false): string =>
   [
     // The host is the layer (D-05, B-7): a popover of the platform in the tree scope of its
     // trigger, so the anchor name reaches it; the control inside is the surface.
-    overlayPlace(fallback, ":host"),
+    overlayPlace(fallback, ":host", justified),
     ":host { border-style: none; }",
     ':where([part="control"]) { border-style: none; overflow-wrap: anywhere; transition-property: opacity; }',
   ].join("\n");
@@ -1445,16 +1620,19 @@ const tooltipStructure = (fallback: string): string =>
  * Layout of a popover (Spec 014 ④, D-05), keywords only: the host stands inline where its trigger
  * stands; the control is a column of heading and content with its border; the content a column.
  */
-const popoverStructure = (fallback: string): string =>
+const popoverStructure = (fallback: string, justified = false): string =>
   [
     ":host { display: inline-block; }",
     // The slot's box wraps the slotted trigger in the shadow tree: it carries the anchor name.
     ':where(slot[name="trigger"]) { display: inline-block; }',
-    overlayPlace(fallback),
+    overlayPlace(fallback, '[part="control"]', justified),
     ':where([part="control"]) { display: flex; flex-direction: column; border-style: solid; overflow-wrap: anywhere; }',
     ':where([part="control"]:not(:popover-open)) { display: none; }',
     ':where([part="heading"]) { margin: 0; }',
     ':where([part="content"]) { display: flex; flex-direction: column; }',
+    // Spec 036 Teil 5 ②b-3 (A-sxvebilo-4): the close button at the end of the first row.
+    ':where([part="close"]) { align-self: flex-end; }',
+    ':where([part="close"][hidden]) { display: none; }',
   ].join("\n");
 
 /**
@@ -1463,18 +1641,29 @@ const popoverStructure = (fallback: string): string =>
  * platform's border that stretches across the column and never wraps; a disabled row says so to
  * the pointer; a separator row is a block.
  */
-const menuStructure = (fallback: string): string =>
+const menuStructure = (fallback: string, justified = false): string =>
   [
     ":host { display: inline-block; }",
     ':where(slot[name="trigger"]) { display: inline-block; }',
-    overlayPlace(fallback),
+    overlayPlace(fallback, '[part="control"]', justified),
     ':where([part="control"]) { display: flex; flex-direction: column; align-items: stretch; border-style: solid; }',
     ':where([part="control"]:not(:popover-open)) { display: none; }',
     ':where([part="item"]) { display: flex; align-items: center; box-sizing: border-box; margin: 0; border-style: none; appearance: none; cursor: pointer; white-space: nowrap; text-align: start; transition-property: background-color, color; }',
     ':where([part="item"]:focus:not(:focus-visible)) { outline-width: 0; }',
     ':where([part="item"][aria-disabled="true"]) { cursor: not-allowed; }',
+    // Spec 036 Teil 5 ②b-4 (A-menuo-5): an entry with a target is a link row; it looks as the others.
+    ':where(a[part="item"]) { text-decoration: none; }',
     ':where([part="separator"]) { display: block; }',
+    // Spec 036 Teil 5 ②b-3 (A-menuo-4): the icon of an entry keeps its size before the words; a
+    // group of entries is a column under its heading.
+    ':where([part="icon"]) { flex: none; }',
+    ':where([part="icon"][hidden]) { display: none; }',
+    ':where([part="group"]) { display: flex; flex-direction: column; align-items: stretch; }',
+    ':where([part="group-heading"]) { display: block; white-space: nowrap; }',
   ].join("\n");
+
+/** Spec 036 Teil 5 ②b-2: whether the overlay's Skemo has justify (A-konsileto-1 and others). */
+const justifiedOf = (skemo: Skemo): boolean => skemo.props.some((prop) => prop.name === "justify");
 
 /** The default side of an overlay's control: the Skemo's default of placement (D-05). */
 const placementOf = (skemo: Skemo): string =>
@@ -1499,6 +1688,8 @@ function menuPartSelector(part: string, data: string, state: string): string {
   // (:where has none), so the keyed rule written after it does not win.
   if (part === "danger-item") return `${root} [part="item"].fm-danger`;
   if (part === "focus-ring") return `:where(${root} [part="item"]:focus-visible)`;
+  // Spec 036 Teil 5 ②b-3 (A-menuo-4): the icon of an entry and the heading of a group.
+  if (part === "icon" || part === "group-heading") return `:where(${root}) [part="${part}"]`;
   return `:where(${root})`;
 }
 
@@ -1512,6 +1703,9 @@ const disclosureStructure: string = [
   ':where([part="control"]) { display: block; }',
   ':where([part="summary"]) { display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; margin: 0; list-style: none; cursor: pointer; transition-property: background-color, color; }',
   ':where([part="summary"])::-webkit-details-marker { display: none; }',
+  // Spec 036 Teil 5 ②b-2 (A-faldilo-1): indicator-side start sets the chevron before the words
+  // (a row reversed and packed at its end, the start in the writing direction).
+  ':host([indicator-side="start"]) :where([part="summary"]) { flex-direction: row-reverse; justify-content: flex-end; }',
   ':where([part="summary"]:focus:not(:focus-visible)) { outline-width: 0; }',
   ':where([part="content"]) { display: block; overflow-wrap: anywhere; }',
 ].join("\n");
@@ -1529,6 +1723,10 @@ const suggestStructure: string = [
   ':where([part="listbox"]:not(:popover-open)) { display: none; }',
   ':where([part="suggestion"]) { display: flex; align-items: center; box-sizing: border-box; cursor: pointer; white-space: nowrap; }',
   ':where([part="no-results"]) { display: block; }',
+  // Spec 036 Teil 5 ②b-3 (A-kompletigilo-4): a group of suggestions is a column under its heading.
+  ':where([part="group"]) { display: flex; flex-direction: column; }',
+  ':where([part="group"][hidden]) { display: none; }',
+  ':where([part="group-heading"]) { display: block; white-space: nowrap; }',
   HIDDEN_TEXT,
 ].join("\n");
 
@@ -1604,6 +1802,17 @@ const listStructure = (disables: boolean, multi: boolean): string =>
     ':where([part="item"][hidden]) { display: none; }',
     ':where([part="item"][aria-disabled="true"]) { cursor: not-allowed; }',
     ':where([part="item-text"]) { flex: 1 1 auto; white-space: nowrap; }',
+    // Spec 036 Teil 5 ②b-3: a group of rows is a column like the list; its heading a line of its
+    // own; the divider a line at the start of the group; „alle wählen“ a row like the others,
+    // its check mark seen only while chosen (0, the one literal of the gate) but keeping its room.
+    ':where([part="group"]) { display: flex; flex-direction: column; }',
+    ':where([part="group"][hidden]) { display: none; }',
+    ':where([part="group-heading"]) { display: block; white-space: nowrap; }',
+    ':where([part="divider"]) { display: block; border-block-start-style: solid; }',
+    ':where([part="select-all"]) { display: flex; align-items: center; box-sizing: border-box; cursor: pointer; }',
+    ':where([part="select-all"][hidden]) { display: none; }',
+    ':where([part="select-all"][aria-disabled="true"]) { cursor: not-allowed; }',
+    ':where([part="select-all"][aria-checked="false"]) fm-ikono { opacity: 0; }',
     ...(multi
       ? [
           ':where([part="filter"]) { box-sizing: border-box; margin: 0; }',
@@ -1688,6 +1897,10 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
           return property === "height" ? item : undefined;
         case "focus-ring":
           return `${item}:focus-visible`;
+        // Spec 036 Teil 5 ②b-3 (A-spuro-4): the icon of an item stands in the item, or is given to
+        // the host and stands at the start of the first item.
+        case "icon":
+          return `${tag}${data} > [slot="icon-start"], ${tag}${data} > * > [slot="icon-start"]`;
         default:
           return undefined;
       }
@@ -1695,6 +1908,12 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
     if (nav) {
       const a = `${tag}${data} > a${entry}`;
       switch (part) {
+        // Spec 036 Teil 5 ②b-3 (A-navigado-1, A-navigado-4): the heading of a section is a
+        // heading of the platform among the links; the icon of an item stands in its link.
+        case "section-heading":
+          return `${tag}${data} > :is(h2, h3, h4, h5, h6)`;
+        case "icon":
+          return `${tag}${data} > [slot="icon-start"], ${tag}${data} > a > [slot="icon-start"]`;
         case "item":
         case "items":
         case "underline":
@@ -1723,6 +1942,9 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
           return `${t} > thead th > button${state}`;
         case "sort-indicator":
           return `${t} > thead th > button > fm-ikono`;
+        // Spec 036 Teil 5 ②b-3 (A-tabelo-4): the cells of the foot (sums).
+        case "foot":
+          return `${t} > tfoot :is(td, th)`;
         case "focus-ring":
           return `${t} > thead th > button:focus-visible`;
         default:
@@ -1747,10 +1969,20 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
   ): string[] => {
     if (isBindingKeyword(bound)) return keywordDeclarations(part, property, bound);
     const token = named(owner, skemo, part, property, combination, bound);
-    // The border of a table lies under every cell (Spec 011 ④, D-09): the block-end edge.
+    // The border of a table lies under every cell (Spec 011 ④, D-09): the block-end edge; Spec
+    // 036 Teil 5 ②b-2 (A-tabelo-1): and before every cell but the first of its row, where lines
+    // draws the columns – one colour and one width for both (the structure says which shows).
     if (table && part === "border") {
-      if (property === "color") return [`border-block-end-color: ${variable(token)};`];
-      if (property === "width") return [`border-block-end-width: ${variable(token)};`];
+      if (property === "color")
+        return [
+          `border-block-end-color: ${variable(token)};`,
+          `border-inline-start-color: ${variable(token)};`,
+        ];
+      if (property === "width")
+        return [
+          `border-block-end-width: ${variable(token)};`,
+          `border-inline-start-width: ${variable(token)};`,
+        ];
     }
     if (part === "focus-ring" && property === "color") {
       const offset = offsetOf(owner, skemo, "focus-ring");
@@ -1839,11 +2071,30 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
       ? [
           `${tag} > ${breadcrumb ? "*" : "a"} { display: inline-flex; align-items: center; box-sizing: border-box; white-space: nowrap; transition-property: background-color, color, text-decoration-color; }`,
           `${tag} > ${breadcrumb ? "*" : "a"}:focus:not(:focus-visible) { outline-width: 0; }`,
+          // Spec 036 Teil 5 ②b-3 (A-navigado-1, A-navigado-4): a section heading stands without the
+          // platform's margin, its words on one line; the icon of an item keeps its size.
+          // Spec 036 Teil 5 ②b-3 (A-spuro-4): the icon of an item keeps its size.
+          ...(breadcrumb && skemo.parts.icon !== undefined
+            ? [
+                `${tag} > * > [slot="icon-start"], ${tag} > [slot="icon-start"] { flex: none; }`,
+                ...itemGapAfterIcon(skemo, owner, `${tag} > [slot="icon-start"]`),
+              ]
+            : []),
+          ...(nav && skemo.parts["section-heading"] !== undefined
+            ? [
+                `${tag} > :is(h2, h3, h4, h5, h6) { margin: 0; white-space: nowrap; }`,
+                `${tag} > a > [slot="icon-start"], ${tag} > [slot="icon-start"] { flex: none; }`,
+              ]
+            : []),
         ]
       : table
         ? [
             `${tag} > table { border-collapse: collapse; caption-side: top; }`,
             `${tag} > table :is(td, th) { text-align: start; box-sizing: border-box; border-block-end-style: solid; }`,
+            // Spec 036 Teil 5 ②b-2 (A-tabelo-1): lines – the rows as before; the columns, a grid
+            // or none (the host's attribute, no data attribute: no axis of the Skemo's).
+            `${tag}:is([lines="columns"], [lines="none"]) > table :is(td, th) { border-block-end-style: none; }`,
+            `${tag}:is([lines="columns"], [lines="grid"]) > table :is(td, th) + :is(td, th) { border-inline-start-style: solid; }`,
             `${tag} > table :is(td, th)[numeric] { text-align: end; font-variant-numeric: tabular-nums; }`,
             `${tag} > table > thead th > button { display: inline-flex; align-items: center; appearance: none; border-style: none; cursor: pointer; font: inherit; color: inherit; text-align: inherit; }`,
             `${tag} > table > thead th > button > fm-ikono { flex: none; }`,
@@ -1938,10 +2189,16 @@ const toggleStructure = (
   wraps: boolean,
   texts: boolean,
   marked: boolean,
+  sided = false,
 ): string =>
   [
     ":host { display: inline-block; vertical-align: middle; }",
     `:where([part="field"]) { display: inline-flex; align-items: ${texts ? "flex-start" : "center"}; }`,
+    // Spec 036 Teil 5 ②b-2 (A-sxaltilo-1): label-side start puts the label before the control, in
+    // the writing direction (a row reversed, so right-to-left mirrors it too); where the Skemo has it.
+    ...(sided
+      ? [':where([part="field"][data-label-side="start"]) { flex-direction: row-reverse; }']
+      : []),
     ...(texts ? [':where([part="field"]) > div { display: flex; flex-direction: column; }'] : []),
     ':where([part="control"]) { display: inline-flex; align-items: center; box-sizing: border-box; margin: 0; padding: 0; border-style: solid; cursor: pointer; appearance: none; transition-property: background-color, border-color; }',
     ':where([part="indicator"]) { display: block; flex: none; transition-property: background-color; }',
@@ -1983,6 +2240,14 @@ const groupStructure = (disables: boolean, marked: boolean): string =>
     // outline of style auto ignores its width, so outline-width 0 left it beside the ring; the
     // shorthand resets the style to none as well (0 is the one literal the token gate allows).
     ':where([part="option"]:focus) { outline: 0; }',
+    // Spec 036 Teil 5 ②b-3 (A-elekto-4): label and description stand in a column beside the circle,
+    // the circle at the top of the column; the column is no box while the option has no
+    // description (display contents), so the row stays as it was.
+    ":where([data-fm-option-text]) { display: contents; }",
+    ':where([part="option"][data-described]) { align-items: flex-start; }',
+    ':where([part="option"][data-described]) [data-fm-option-text] { display: inline-flex; flex-direction: column; align-items: flex-start; }',
+    ':where([part="option-description"]) { white-space: normal; }',
+    ':where([part="option-description"][hidden]) { display: none; }',
     ':where([part="control"]) { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; margin: 0; padding: 0; border-style: solid; flex: none; transition-property: background-color, border-color; }',
     ':where([part="indicator"]) { display: block; flex: none; transition-property: opacity; }',
     ':where([part="indicator"]) > svg { display: block; }',
@@ -2010,6 +2275,8 @@ const COMPOSED_BUTONO_PARTS: readonly string[] = [
   "decrement",
   "dismiss",
   "clear",
+  // Spec 036 Teil 5 ②b-3 (A-sxvebilo-4).
+  "close",
 ];
 
 /** A pseudo-element after every selector of a list (commas inside :where(…) stay). */
@@ -2040,6 +2307,11 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
   // a fixed rule (focus-visible: the ring and the focus colour) must still come after rest.
   const fixedRules = new Map<string, string[]>();
   const keyedRules = new Map<string, string[]>();
+  // Spec 036 Teil 5 ②b-2 (A-pagxigilo-2, A-langetaro-2): the weight of a part whose typography is
+  // keyed stands after it – both say font-weight with one specificity, and the weight (the current
+  // page, the active tab) must win over the role's own weight, as it did while the typography was
+  // fixed (fixed rules stand first).
+  const weightRules = new Map<string, string[]>();
   let rules = fixedRules;
   const add = (selector: string, lines: readonly string[]) => {
     if (lines.length === 0) return;
@@ -2115,9 +2387,12 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
       if (keys.length > 0) keyed.push({ part, property, keys });
     }
   }
+  const lateWeight = (part: string, property: string) =>
+    property === "weight" && keysOf(skemo, skemo.parts[part]?.typography).length > 0;
   for (const state of STATE_ORDER) {
     for (const { part, property, keys } of keyed) {
       if (!keys.includes(STATE_KEY) && state !== "rest") continue;
+      rules = lateWeight(part, property) ? weightRules : keyedRules;
       for (const combination of combinationsOf(skemo, keys)) {
         if (keys.includes(STATE_KEY) && combination[STATE_KEY] !== state) continue;
         const bound = boundToken(skemo, part, property, combination);
@@ -2135,6 +2410,7 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
       }
     }
   }
+  rules = keyedRules;
   // Spec 029 ①b (Abnahme 28.10., O-1b-4): a button without a word is its icon – square, the
   // height of its size on both sides (the same Ero-Token), without inline padding; last, so it
   // refines the padding of the size. Where an Ero sizes the part it composes (the trigger of the
@@ -2218,9 +2494,12 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
   }
   // The end of a field comes last (Abnahme #122): it refines the inline padding of the control.
   const placed = isBoxedField(skemo) ? endRules(skemo, owner) : [];
-  const tokenRules = [...fixedRules.entries(), ...keyedRules.entries(), ...placed].map(
-    ([selector, lines]) => `${selector} {\n${lines.map((line) => `  ${line}`).join("\n")}\n}`,
-  );
+  const tokenRules = [
+    ...fixedRules.entries(),
+    ...keyedRules.entries(),
+    ...weightRules.entries(),
+    ...placed,
+  ].map(([selector, lines]) => `${selector} {\n${lines.map((line) => `  ${line}`).join("\n")}\n}`);
   const undrawn = isStatus(skemo)
     ? statusUndrawn(skemo)
     : isMeter(skemo)
@@ -2237,11 +2516,11 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
         : isDialog(skemo)
           ? dialogStructure
           : isTooltip(skemo)
-            ? tooltipStructure(placementOf(skemo))
+            ? tooltipStructure(placementOf(skemo), justifiedOf(skemo))
             : isPopover(skemo)
-              ? popoverStructure(placementOf(skemo))
+              ? popoverStructure(placementOf(skemo), justifiedOf(skemo))
               : isMenu(skemo)
-                ? menuStructure(placementOf(skemo))
+                ? menuStructure(placementOf(skemo), justifiedOf(skemo))
                 : isIcon(skemo)
                   ? iconStructure
                   : isSeparator(skemo)
@@ -2251,7 +2530,10 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
                       : isParagraph(skemo)
                         ? paragraphStructure
                         : isText(skemo)
-                          ? textStructure(bordered)
+                          ? textStructure(
+                              bordered,
+                              skemo.slots.some((slot) => slot.name === "icon-start"),
+                            )
                           : isStatus(skemo)
                             ? statusStructure(skemo)
                             : isMeter(skemo)
@@ -2271,7 +2553,7 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
                                           : isAvatar(skemo)
                                             ? avatarStructure
                                             : isLight(skemo)
-                                              ? lightStructure(skemo)
+                                              ? lightStructure(skemo, owner)
                                               : isTabs(skemo)
                                                 ? tabsStructure
                                                 : isDisclosure(skemo)
@@ -2296,6 +2578,9 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
                                                             ),
                                                             skemo.parts["required-mark"] !==
                                                               undefined,
+                                                            skemo.props.some(
+                                                              (prop) => prop.name === "label-side",
+                                                            ),
                                                           )
                                                         : structure(
                                                             uzo?.layout.wrap === "with-text",
@@ -2364,12 +2649,18 @@ function selectorOf(
   // content are their own elements in it; the menu's rows carry the states.
   if (isTooltip(skemo)) return `:where([part="control"]${data})`;
   if (isPopover(skemo)) {
-    return part === "heading" || part === "content"
+    return part === "heading" || part === "content" || part === "close"
       ? `:where([part="control"]${data}) [part="${part}"]`
       : `:where([part="control"]${data})`;
   }
   if (isMenu(skemo)) return menuPartSelector(part, data, combination[STATE_KEY] ?? "rest");
-  if (isStatus(skemo)) return statusPartSelector(part, data);
+  if (isStatus(skemo)) {
+    return statusPartSelector(
+      part,
+      data,
+      skemo.slots.some((slot) => slot.name === "icon"),
+    );
+  }
   if (isMeter(skemo)) return meterPartSelector(part, data);
   if (isTabs(skemo)) return tabsPartSelector(part, data, entry, combination[STATE_KEY] ?? "rest");
   // The shadow of a light-DOM host (Spec 011 ④, E10): the region and its edge, the ring on focus;
@@ -2378,9 +2669,12 @@ function selectorOf(
     // A breadcrumb (Spec 015 ①, Abnahme S-1): the chevron's size and colour on the chevron, the
     // gap on the list of the levels — the nav keeps its width, so the levels stand in one line.
     if (isBreadcrumb(skemo)) {
+      if (part === "more") return ':where([part="more"])';
       return part === "separator" ? ':where([part="separator"])' : ':where([part="items"])';
     }
     if (isNav(skemo)) return ':where([part="list"])';
+    if (part === "more") return ':where([part="more"])';
+    if (part === "heading") return ':where([part="heading"])';
     return part === "focus-ring"
       ? ':where([part="region"]:focus-visible)'
       : ':where([part="region"])';
@@ -2405,7 +2699,7 @@ function selectorOf(
     return sliderPartSelector(part, property, data, combination[STATE_KEY] ?? "rest");
   }
   if (isCodeblock(skemo)) return codeblockPartSelector(part, data);
-  if (isMarkdown(skemo)) return markdownPartSelector(part);
+  if (isMarkdown(skemo)) return markdownPartSelector(part, data);
   if (isCard(skemo)) return cardPartSelector(part, data);
   if (isAvatar(skemo)) return avatarPartSelector(part, data);
   // Spec 025 ③: the chip and the inline editor carry their states as the control speaks them.
@@ -2483,6 +2777,8 @@ export function elementNamesOf(
     trailing: entry.skemo.trailing ?? [],
     // Spec 025 ② (plan ② D-11): a field with a calendar part is the date picker.
     datepicker: isDatepicker(entry.skemo),
+    // Spec 036 Teil 5 ②b-3: the parts of the Skemo, for the new parts the markup draws.
+    parts: Object.keys(entry.skemo.parts),
     marked: entry.skemo.parts["required-mark"] !== undefined,
     // Spec 011 ③: a live region turns its indicator and shows a dismiss butono where the Skemo
     // has the parts.
@@ -2490,7 +2786,12 @@ export function elementNamesOf(
     dismiss: entry.skemo.parts.dismiss !== undefined,
     // Spec 014 ②: a status host with the part icon shows the icon of its intent; a link with a
     // layer floats (the skip link); the icon element knows the Ikonaro.
-    icon: entry.skemo.parts.icon !== undefined && hostOf(entry.skemo.a11y.role) === "status",
+    // The icon of the intent (Spec 014 ②); Spec 036 Teil 5 ②b-3 (A-plenstato-4): a slot icon
+    // brings its own icon, so the part icon is the slot's there.
+    icon:
+      entry.skemo.parts.icon !== undefined &&
+      hostOf(entry.skemo.a11y.role) === "status" &&
+      !entry.skemo.slots.some((slot) => slot.name === "icon"),
     skip: isSkip(entry.skemo),
     ikonaro: ikonaro.map((ikono) => ({
       name: ikono.name,
@@ -2642,11 +2943,12 @@ export function stylesheetInventory(moduleText: string): ParityItem {
     // A light-DOM host (Spec 011 ④, E10) writes the combination on itself: fm-tabelo[data-…].
     // An icon (Spec 014 ②): its glyph is its control; a heading (Spec 014 ③): its text.
     // A pagination (Spec 015 ①): the states stand on its items in the list (the navigado's own
-    // list carries only its orientation, no state and no prop of the Skemo's).
+    // list carries only its orientation, no state and no prop of the Skemo's). Spec 036 Teil 5
+    // ②b-2 (A-pagxigilo-2): the size of a pagination stands on its list, before its items.
     if (
       !selector.includes('[part="control"]') &&
       !selector.includes('[part="field"]') &&
-      !selector.includes('[part="list"] [part="item"]') &&
+      !/\[part="list"\](?:\[data-[a-z0-9-]+="[^"]*"\])* \[part="item"\]/.test(selector) &&
       !selector.includes('[part="glyph"]') &&
       !selector.includes('[part="text"]') &&
       !selector.trim().startsWith("fm-")
@@ -2675,7 +2977,8 @@ export function stylesheetInventory(moduleText: string): ParityItem {
       )) {
         // Spec 029 ②b-1b M-2: data-status is the field's state (read above), message-position
         // places the message (no axis of the Skemo, no look of its own): neither is a keyed prop.
-        if (name === "status" || name === "message-position") continue;
+        // Spec 036 Teil 5 ②b-2 (A-sxaltilo-1): label-side places the label, as message-position.
+        if (name === "status" || name === "message-position" || name === "label-side") continue;
         const values = props.get(name) ?? [];
         if (!values.includes(value)) values.push(value);
         props.set(name, values);

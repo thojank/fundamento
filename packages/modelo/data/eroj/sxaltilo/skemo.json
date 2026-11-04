@@ -20,11 +20,13 @@
         "kind": "enum",
         "values": [
           "small",
-          "medium",
-          "large"
+          "medium"
         ],
+        "deprecatedValues": {
+          "large": "medium"
+        },
         "default": "medium",
-        "description": "Knob, track and label on the scale of the kampo: the knob takes size.icon.*, the track the width of size.control.*."
+        "description": "Knob, track and label on the scale of the kampo: the knob takes size.icon.*, the track the width of size.control.*. Two sizes (Spec 029 ②a, A-sxaltilo-2); large stays one release as a deprecated alias of medium (②a-2): it renders as medium and says so."
       },
       {
         "name": "disabled",
@@ -70,6 +72,16 @@
         ],
         "default": "below",
         "description": "Spec 029 ②b-1b M-2: where the message and the error stand – below the field with the space of the field, or joined to it without that space. Never only in a tooltip: the message must be seen (error-not-color-only, error-says-what-to-do)."
+      },
+      {
+        "name": "label-side",
+        "kind": "enum",
+        "values": [
+          "start",
+          "end"
+        ],
+        "default": "end",
+        "description": "Spec 029 ②a (A-sxaltilo-1): the side of the label in the writing direction – end after the switch, as before, or start before it (a list of settings with their switches in one column at the end). Layout, no token: it keys no part; right-to-left mirrors it."
       }
     ],
     "states": [
@@ -95,6 +107,11 @@
       {
         "name": "disabled-reason",
         "text": true
+      },
+      {
+        "name": "help",
+        "text": true,
+        "beside": true
       }
     ],
     "parts": {
@@ -202,6 +219,14 @@
         "typography": {
           "fixed": "typography.caption"
         }
+      },
+      "help": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
       }
     },
     "trailing": [
@@ -238,14 +263,6 @@
         "property": "typography",
         "when": {
           "size": "medium"
-        },
-        "token": "typography.label.1"
-      },
-      {
-        "part": "label",
-        "property": "typography",
-        "when": {
-          "size": "large"
         },
         "token": "typography.label.1"
       },
@@ -347,14 +364,6 @@
         "token": "size.control.medium"
       },
       {
-        "part": "box",
-        "property": "width",
-        "when": {
-          "size": "large"
-        },
-        "token": "size.control.large"
-      },
-      {
         "part": "indicator",
         "property": "fill",
         "when": {
@@ -396,14 +405,6 @@
           "size": "medium"
         },
         "token": "size.icon.medium"
-      },
-      {
-        "part": "indicator",
-        "property": "size",
-        "when": {
-          "size": "large"
-        },
-        "token": "size.icon.large"
       },
       {
         "part": "indicator",
@@ -489,6 +490,7 @@
         "prop:label"
       ],
       "description": [
+        "slot:help",
         "slot:message",
         "slot:disabled-reason"
       ],

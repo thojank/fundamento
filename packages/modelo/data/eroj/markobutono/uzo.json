@@ -125,6 +125,13 @@
         "max": 1,
         "nesting": 0
       },
+      "help": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      },
       "error": {
         "accepts": [
           "text"
@@ -171,6 +178,70 @@
         "check": {
           "kind": "min-words",
           "count": 3
+        }
+      }
+    ],
+    "when-not": [
+      {
+        "case": {
+          "de": "Die Einstellung soll sofort gelten, nicht erst beim Senden des Formulars.",
+          "en": "The setting is to apply at once, not only when the form is sent."
+        },
+        "ero": "sxaltilo"
+      },
+      {
+        "case": {
+          "de": "Genau eine von wenigen Optionen darf gewählt sein.",
+          "en": "Exactly one of a few options may be chosen."
+        },
+        "ero": "elekto"
+      },
+      {
+        "case": {
+          "de": "Aus einer langen Liste sollen mehrere Werte gewählt werden.",
+          "en": "Several values are to be chosen from a long list."
+        },
+        "ero": "plurelektilo"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Lass die sichtbare Beschriftung sagen, was das Häkchen bedeutet.",
+          "en": "Let the visible label say what the tick means."
+        },
+        {
+          "de": "Setze required für eine Zustimmung, ohne die das Formular nicht gesendet wird.",
+          "en": "Set required for a consent without which the form is not sent."
+        },
+        {
+          "de": "Stell mehrere Kästchen unter eine Überschrift des Formulars, die die gemeinsame Frage nennt.",
+          "en": "Place several boxes under a heading of the form that names the shared question."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Einen dritten, gemischten Zustand erwarten; das Kästchen kennt nur ja oder nein.",
+          "en": "Expect a third, mixed state; the box knows only yes or no."
+        },
+        {
+          "de": "Die Größe large neu setzen: Sie ist ein veralteter Name für medium und wird als medium gezeigt.",
+          "en": "Set the size large anew: it is a deprecated name for medium and is shown as medium."
+        },
+        {
+          "de": "Ein Kästchen ohne sichtbare Beschriftung zeigen.",
+          "en": "Show a box without a visible label."
+        }
+      ]
+    },
+    "keyboard": [
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": {
+          "de": "Hakt das Kästchen an oder ab; bei readonly oder disabled geschieht nichts, und Enter ändert es nicht.",
+          "en": "Ticks or unticks the box; with readonly or disabled nothing happens, and Enter does not change it."
         }
       }
     ]

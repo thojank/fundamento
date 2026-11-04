@@ -4,7 +4,7 @@
     "id": "uzo_01M5H5HEAT1KZ7BMRF5J3QTMGM",
     "ero": "ero_01M5H5HB465KSVH93E7B32E7YE",
     "skemo": "ske_01M5H5HCR9NKF99T4FP6VKWNH4",
-    "purpose": "Chooses one option from a styled list when options need an icon or a description.",
+    "purpose": "Chooses one option from a styled list when options need an icon or a description; options of one group name it (attribute group) and stand under its heading.",
     "instead": [
       {
         "goal": "plain-options",
@@ -153,6 +153,105 @@
         "check": {
           "kind": "max-sentences",
           "count": 1
+        }
+      }
+    ],
+    "when-not": [
+      {
+        "case": {
+          "de": "Die Optionen sind bloße Wörter ohne Symbol und Beschreibung.",
+          "en": "The options are plain words without an icon or a description."
+        },
+        "ero": "elektilo"
+      },
+      {
+        "case": {
+          "de": "Die Person soll die Liste durch Tippen durchsuchen.",
+          "en": "The person is to search the list by typing."
+        },
+        "ero": "kompletigilo"
+      },
+      {
+        "case": {
+          "de": "Mehrere Optionen sollen zugleich gewählt werden.",
+          "en": "Several options are to be chosen at once."
+        },
+        "ero": "plurelektilo"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Gib einer Option ein Symbol oder eine Beschreibung, wo das Wort allein nicht reicht.",
+          "en": "Give an option an icon or a description where the word alone is not enough."
+        },
+        {
+          "de": "Fasse verwandte Optionen mit group unter einer Überschrift zusammen.",
+          "en": "Gather related options with group under a heading."
+        },
+        {
+          "de": "Setze size wie bei den Feldern daneben, damit eine Zeile auf einer Höhe steht.",
+          "en": "Set size as for the fields beside it, so a row stands level."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Den Platzhalter als Beschriftung benutzen.",
+          "en": "Use the placeholder as the label."
+        },
+        {
+          "de": "Die Zustände disabled und readonly zugleich setzen; disabled gewinnt.",
+          "en": "Set the states disabled and readonly at once; disabled wins."
+        }
+      ]
+    },
+    "keyboard": [
+      {
+        "keys": [
+          "ArrowDown",
+          "ArrowUp"
+        ],
+        "action": {
+          "de": "Öffnen die Liste; in der offenen Liste markieren sie die nächste oder vorige Option.",
+          "en": "Open the list; in the open list they mark the next or previous option."
+        }
+      },
+      {
+        "keys": [
+          "Home",
+          "End"
+        ],
+        "action": {
+          "de": "Markieren die erste oder letzte Option.",
+          "en": "Mark the first or last option."
+        }
+      },
+      {
+        "keys": [
+          "Enter",
+          "Space"
+        ],
+        "action": {
+          "de": "Öffnen die Liste; in der offenen Liste wählen sie die markierte Option und schließen sie.",
+          "en": "Open the list; in the open list they choose the marked option and close it."
+        }
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": {
+          "de": "Schließt die Liste, ohne die Wahl zu ändern.",
+          "en": "Closes the list without changing the choice."
+        }
+      },
+      {
+        "keys": [
+          "Character"
+        ],
+        "action": {
+          "de": "Getippte Buchstaben finden die Option, die mit ihnen beginnt; bei geschlossener Liste wird sie gleich gewählt.",
+          "en": "Typed letters find the option that starts with them; with the list closed it is chosen at once."
         }
       }
     ]

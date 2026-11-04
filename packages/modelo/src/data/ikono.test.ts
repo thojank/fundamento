@@ -49,7 +49,9 @@ describe("ikono in the repo Modelo (section ②, G1, G2, G3)", () => {
     expect(skemo?.props.find((prop) => prop.name === "name")?.values).toEqual(
       modelo.ikonaro.map((entry) => entry.name),
     );
+    // Spec 036 Teil 5 ②b-2 (A-ikono-2): x-small below small.
     expect(skemo?.props.find((prop) => prop.name === "size")?.values).toEqual([
+      "x-small",
       "small",
       "medium",
       "large",
@@ -82,7 +84,8 @@ describe("ikono in the repo Modelo (section ②, G1, G2, G3)", () => {
     }
     expect(styledProps(skemo)).toEqual(["name", "size", "intent"].filter((key) => key !== "name"));
     expect(variantKeys(skemo)).toEqual(["size", "intent", "state"]);
-    expect(combinationsOf(skemo, ["size", "intent"])).toHaveLength(15);
+    expect(boundToken(skemo, "box", "size", { size: "x-small" })?.token).toBe("size.scale.100");
+    expect(combinationsOf(skemo, ["size", "intent"])).toHaveLength(20);
   });
 
   it("speaks role img, named by its label; no state, no key (G5)", () => {
@@ -153,6 +156,8 @@ describe("the Uzo of the ikono (section ②, G6)", () => {
       "listelektilo",
       "plurelektilo",
       "lokredaktilo",
+      // Spec 036 Teil 5 ②b-3 (A-avataro-4): the default icon person.
+      "avataro",
     ]);
     expect(uzo?.slots).toEqual({});
     expect(uzo?.layout).toEqual({ size: "content", wrap: "never" });
@@ -236,7 +241,8 @@ describe("the Ikonaro and the Eroj that compose the ikono (G6)", () => {
   it("the butono's icon slots accept the ikono; butono, avizo, insigno, tabelo and elektilo compose it", () => {
     const butono = eroNamed("butono")?.uzo;
     expect(butono?.slots["icon-start"]?.accepts).toEqual(["icon", "ikono"]);
-    expect(butono?.slots["icon-end"]?.accepts).toEqual(["icon", "ikono"]);
+    // Spec 036 Teil 5 ②b-3 (A-butono-4): icon-end takes an insigno too.
+    expect(butono?.slots["icon-end"]?.accepts).toEqual(["icon", "ikono", "insigno"]);
     for (const name of ["butono", "avizo", "insigno", "tabelo", "elektilo"]) {
       expect(
         eroNamed(name)?.uzo?.composes.with.map((entry) => entry.ero),

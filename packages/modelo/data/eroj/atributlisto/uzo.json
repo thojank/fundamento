@@ -4,7 +4,7 @@
     "id": "uzo_01M523FAR4K5YR54RGTY79QK3Y",
     "ero": "ero_01M523F9Z0MAVKZC8ZVN9RBWS4",
     "skemo": "ske_01M523FAAXJ1AADZWZ6NQRX83M",
-    "purpose": "Shows the fields of one record as name and value: version, owner, valid since.",
+    "purpose": "Shows the fields of one record as name and value: version, owner, valid since; a title above them (slot heading) names the list.",
     "instead": [
       {
         "goal": "many-records",
@@ -106,6 +106,13 @@
         ],
         "required": true,
         "nesting": 0
+      },
+      "heading": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
       }
     },
     "layout": {
@@ -113,6 +120,68 @@
       "wrap": "allowed",
       "columns-from": "size.container.small"
     },
-    "content": []
+    "content": [],
+    "when-not": [
+      {
+        "case": {
+          "de": "Viele Datensätze mit denselben Feldern sollen verglichen werden.",
+          "en": "Many records with the same fields are to be compared."
+        },
+        "ero": "tabelo"
+      },
+      {
+        "case": {
+          "de": "Ein einzelner Wert soll an Ort und Stelle geändert werden.",
+          "en": "A single value is to be changed in place."
+        },
+        "ero": "lokredaktilo"
+      },
+      {
+        "case": {
+          "de": "Mehrere Werte eines Datensatzes sollen bearbeitet und gemeinsam gesendet werden.",
+          "en": "Several values of a record are to be edited and sent together."
+        },
+        "ero": "formularo"
+      },
+      {
+        "case": {
+          "de": "Der Datensatz steht als ein Ding mit Bild und Aktionen.",
+          "en": "The record stands as one thing with an image and actions."
+        },
+        "ero": "karto"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Benenne die Liste mit label oder einer Überschrift, sobald eine Seite mehr als eine zeigt.",
+          "en": "Name the list with label or a heading as soon as a page shows more than one."
+        },
+        {
+          "de": "Begrenze lange Datensätze mit max-entries; der Rest erscheint hinter einem Knopf.",
+          "en": "Limit long records with max-entries; the rest appears behind a button."
+        },
+        {
+          "de": "Nimm layout auto, damit Name und Wert in einem schmalen Behälter untereinander rücken.",
+          "en": "Use layout auto so that name and value move below each other in a narrow container."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Eine zweite Liste in einen Wert schachteln, denn die Paare aus Name und Wert gehen dabei verloren.",
+          "en": "Nest a second list inside a value, because the pairs of name and value get lost."
+        },
+        {
+          "de": "Felder zum Bearbeiten in die Liste setzen, denn sie zeigt Werte, sie fragt keine ab.",
+          "en": "Put editable fields into the list, because it shows values and asks for none."
+        }
+      ]
+    },
+    "keyboard": {
+      "none": {
+        "de": "Die Liste selbst nimmt keine Taste; mit max-entries öffnen und schließen Enter und Leertaste auf dem Knopf die übrigen Einträge, wie bei jeder Schaltfläche.",
+        "en": "The list itself takes no key; with max-entries, Enter and Space on its button show and hide the remaining entries, as on any button."
+      }
+    }
   }
 }

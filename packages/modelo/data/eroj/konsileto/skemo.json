@@ -26,6 +26,17 @@
         ],
         "default": "block-start",
         "description": "Where the layer stands against its trigger, in logical directions (position-area of the platform); where that side has no room, the platform flips it (position-try-fallbacks). Layout, no token: it keys no part."
+      },
+      {
+        "name": "justify",
+        "kind": "enum",
+        "values": [
+          "start",
+          "center",
+          "end"
+        ],
+        "default": "center",
+        "description": "Spec 029 ②a (A-konsileto-1): the alignment along the side of the trigger – center as before; start at the start edge of the trigger, end at its end edge (the writing direction mirrors both). Layout, no token."
       }
     ],
     "states": [

@@ -97,6 +97,12 @@
         ],
         "default": "below",
         "description": "Spec 029 ②b-1b M-2: where the message and the error stand – below the field with the space of the field, or joined to it without that space. Never only in a tooltip: the message must be seen (error-not-color-only, error-says-what-to-do)."
+      },
+      {
+        "name": "readonly",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 029 ②a (A-elektilo-1): can be read and focused, not changed – the list does not open and no key chooses; the value is sent with the form. Looks as at rest (Spec 035 V-1)."
       }
     ],
     "states": [
@@ -282,6 +288,14 @@
           "by": [
             "state"
           ]
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "group-heading": {
+        "color": {
+          "fixed": "color.text.muted"
         },
         "typography": {
           "fixed": "typography.caption"
@@ -594,13 +608,19 @@
         ],
         "loading": [
           "aria-busy"
+        ],
+        "readonly": [
+          "aria-readonly"
         ]
       },
       "keys": [
         "ArrowUp",
         "ArrowDown",
+        "Home",
+        "End",
         "Enter",
-        "Escape"
+        "Escape",
+        "Character"
       ],
       "texts": {
         "required": {
@@ -691,14 +711,18 @@
             "select",
             "country",
             "language",
-            "many"
+            "many",
+            "optgroup",
+            "grouped"
           ],
           "de": [
             "liste",
             "auswählen",
             "land",
             "sprache",
-            "vielen"
+            "vielen",
+            "gruppiert",
+            "optionsgruppen"
           ]
         },
         "props": {},

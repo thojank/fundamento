@@ -85,6 +85,15 @@
       "kialo": "The status danger of an avizo and the invalid kampo need a sign beside the colour: colour alone is no information (WCAG 1.4.1). An octagon reads as stop and is told apart from warning (triangle) and close (cross) at small sizes."
     },
     {
+      "id": "iko_01M6B4JW4PNKDS4X045F2245CF",
+      "name": "download",
+      "meaning": {
+        "de": "Herunterladen: eine Datei auf das Gerät holen",
+        "en": "Download: bring a file to the device"
+      },
+      "kialo": "A ligilo with download marks with the arrow into the tray that it hands over a file and stays in the view, beside its words; the arrow points down in every writing direction, so it never mirrors."
+    },
+    {
       "id": "iko_01M5H5HFGXMZ8HEZTXA55PF2RJ",
       "name": "edit",
       "meaning": {
@@ -112,6 +121,16 @@
       "kialo": "The ligilo marks an external destination visibly and audibly (Regulo external-link-marked); the sign is the visible half. It does not mirror: the box with the arrow is read as a symbol, not as a direction."
     },
     {
+      "id": "iko_01M6APKGAY5M1GVYERDQGYG4D5",
+      "name": "first",
+      "meaning": {
+        "de": "Winkel mit Strich gegen die Leserichtung: zum Anfang",
+        "en": "Chevron with a bar backwards: to the start"
+      },
+      "kialo": "Leads to the first page of a pagxigilo with first-last, beyond the previous one; the bar says where the row ends. The direction carries the meaning, so the glyph mirrors in right-to-left writing (Internacia).",
+      "mirror": true
+    },
+    {
       "id": "iko_01M55EFZMVS7WDTJ3D55SPVHQT",
       "name": "info",
       "meaning": {
@@ -121,6 +140,16 @@
       "kialo": "The status info of an avizo needs a sign beside the colour (WCAG 1.4.1); the i in a circle is read across cultures."
     },
     {
+      "id": "iko_01M6APKGAY5M1GVYERDQGYG4D6",
+      "name": "last",
+      "meaning": {
+        "de": "Winkel mit Strich in Leserichtung: zum Ende",
+        "en": "Chevron with a bar forwards: to the end"
+      },
+      "kialo": "Leads to the last page of a pagxigilo with first-last, beyond the next one; the bar says where the row ends. The direction carries the meaning, so the glyph mirrors in right-to-left writing (Internacia).",
+      "mirror": true
+    },
+    {
       "id": "iko_01M55EFZMVS7WDTJ3D55SPVHQW",
       "name": "more",
       "meaning": {
@@ -128,6 +157,15 @@
         "en": "More actions"
       },
       "kialo": "The row actions of a tabelo and every place that hides further actions behind a menuo use the same three dots (G3 names it)."
+    },
+    {
+      "id": "iko_01M6APKGAXEZN6GE43ETD7PH0F",
+      "name": "person",
+      "meaning": {
+        "de": "Person: jemand ohne Bild und Namen",
+        "en": "Person: someone without a picture or a name"
+      },
+      "kialo": "The avataro shows a person without a name as the outline of one instead of empty initials; the sign is the same in every writing direction, so it never mirrors."
     },
     {
       "id": "iko_01M55EFZMVS7WDTJ3D55SPVHQX",

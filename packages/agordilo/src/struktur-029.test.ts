@@ -37,8 +37,10 @@ describe("Spec 029 ①: the structure of komuna 0.2 for the Agordilo", () => {
     // of the date picker at the size of an icon with their targets, read-only as rest. Spec 036
     // Befund 1.1: radius.role.multiline, and the text area, the code block and the tooltip on it.
     // Spec 036 Befund 2.2 (V-2): the palette color.palette.sekundo and the roles color.sekundo.*.
+    // Spec 036 Teil 5 ②b-2: elekto, markobutono and sxaltilo in two sizes (large a deprecated
+    // alias).
     expect(structure.fingerprint).toBe(
-      "984d278d9aeecf7e8fe9d3e653cb014678c08a3ebe691f90621ea1c169245597",
+      "a8e9d6eaf4dedadfae591ec74874aeed8766cd56d082681102fc9f0cdbc92c5c",
     );
   });
 

@@ -40,6 +40,10 @@ describe("sxvebilo in the repo Modelo (section ④, G1, G2, G4)", () => {
         ["label", "string", undefined, true],
         ["placement", "enum", "block-end", undefined],
         ["open", "boolean", false, undefined],
+        // Spec 036 Teil 5 ②b-2 (A-sxvebilo-1): the alignment along the side.
+        ["justify", "enum", "center", undefined],
+        // Spec 036 Teil 5 ②b-3 (A-sxvebilo-4): the close button.
+        ["dismissible", "boolean", false, undefined],
       ],
     );
     expect(skemo?.states).toEqual(["rest"]);
@@ -58,6 +62,8 @@ describe("sxvebilo in the repo Modelo (section ④, G1, G2, G4)", () => {
       "heading",
       "content",
       "box",
+      // Spec 036 Teil 5 ②b-3 (A-sxvebilo-4).
+      "close",
     ]);
     expect(skemo?.parts.surface).toEqual({
       fill: { fixed: "color.background.raised" },
@@ -84,6 +90,8 @@ describe("sxvebilo in the repo Modelo (section ④, G1, G2, G4)", () => {
       name: ["prop:label"],
       states: {},
       keys: ["Escape"],
+      // Spec 036 Teil 5 ②b-3 (A-sxvebilo-4): the name of the close button.
+      texts: { "close-name": { de: "Schließen", en: "Close" } },
     });
   });
 
@@ -99,7 +107,8 @@ describe("sxvebilo in the repo Modelo (section ④, G1, G2, G4)", () => {
 describe("the Uzo of the sxvebilo (section ④, G6)", () => {
   it("states the purpose; a decision is the dialogo's, a short hint the konsileto's, a list of actions the menuo's; nested is not supported, a drawer asks", () => {
     expect(uzo?.purpose).toBe(
-      "Opens a non-modal layer with content next to its trigger; the page stays usable.",
+      // Spec 036 Teil 5 ②b-3 (A-sxvebilo-4).
+      "Opens a non-modal layer with content next to its trigger; the page stays usable; with dismissible a close button ends it on touch, where there is no Escape.",
     );
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["decision", "dialogo"],
@@ -139,7 +148,7 @@ describe("the Uzo of the sxvebilo (section ④, G6)", () => {
   it("the brief names placement as the axis, label, trigger and content as duties, and stays under 750", () => {
     if (sxvebilo === undefined) throw new Error("missing");
     const brief = briefOf(sxvebilo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["placement"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["placement", "justify"]);
     expect(brief.required).toEqual({ props: ["label"], slots: ["trigger", "content"] });
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
   });

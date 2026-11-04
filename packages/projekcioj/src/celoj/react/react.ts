@@ -19,10 +19,20 @@ export function componentName(ero: LoadedEro["ero"]): string {
   return namesOf(ero).className.slice(2);
 }
 
+/** The mark of a deprecated value in a union of the declaration file (Spec 036 Teil 5 ②b-2). */
+const DEPRECATED_MARK = "/* deprecated */";
+
 function propType(prop: LoadedEro["skemo"]["props"][number]): string {
   switch (prop.kind) {
     case "enum":
-      return (prop.values ?? []).map((value) => JSON.stringify(value)).join(" | ");
+      // Spec 036 Teil 5 ②b-2 (Spec 029 ②a-2): a deprecated value still type-checks for one
+      // release, marked so; it is no value of the Skemo (the inventory leaves it out).
+      return [
+        ...(prop.values ?? []).map((value) => JSON.stringify(value)),
+        ...Object.keys(prop.deprecatedValues ?? {}).map(
+          (value) => `${DEPRECATED_MARK} ${JSON.stringify(value)}`,
+        ),
+      ].join(" | ");
     case "boolean":
       return "boolean";
     case "number":
@@ -186,7 +196,9 @@ export function reactTypesInventory(
     if (block === undefined) continue;
     const props: Record<string, string[]> = {};
     for (const [, name = "", type = ""] of block.matchAll(/^\s*([A-Za-z0-9]+)\??:\s*([^;]+);/gm)) {
-      const literals = [...type.matchAll(/"([^"]*)"/g)].map(([, value = ""]) => value);
+      const literals = [...(type.split(DEPRECATED_MARK)[0] ?? "").matchAll(/"([^"]*)"/g)].map(
+        ([, value = ""]) => value,
+      );
       if (literals.length > 0) props[kebab(name)] = literals;
       else if (["boolean", "string", "number"].includes(type.trim()))
         props[kebab(name)] = [type.trim()];

@@ -861,7 +861,7 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
 }
 
 // Spec 011 ③ (G7, plan ③ D-09): the rendered fm-avizo in every colour class: axe (role status,
-// alert for danger) on every intent with heading, message, details, an action and the dismiss
+// alert for warning and danger since Spec 036 ②b-4) on every intent with heading, message, details, an action and the dismiss
 // butono; heading and message at least 4.5:1 with the surface, the accent at least 3:1 with it;
 // the focus ring of the dismiss butono at least 3:1 with its gap and with the surface.
 const avizo = input.modelo.eroj.find((entry) => entry.ero.name === "avizo");
@@ -892,8 +892,10 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
           [aspekto, scheme, contrast],
         );
         expect(await axeViolations(page)).toEqual([]);
-        await expect(page.getByRole("alert")).toHaveCount(1);
-        await expect(page.getByRole("status")).toHaveCount(noticeCombos.length - 1);
+        // Spec 036 Teil 5 ②b-4 (A-avizo-5): warning and danger are alerts, the others status.
+        const alerts = noticeCombos.filter((c) => c.intent === "warning" || c.intent === "danger");
+        await expect(page.getByRole("alert")).toHaveCount(alerts.length);
+        await expect(page.getByRole("status")).toHaveCount(noticeCombos.length - alerts.length);
         for (const [i, c] of noticeCombos.entries()) {
           const colours = await page.locator(`#n${i}`).evaluate((element) => {
             const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;

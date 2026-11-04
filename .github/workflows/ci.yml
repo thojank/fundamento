@@ -105,6 +105,11 @@ jobs:
       - name: "Check: Fontoj"
         run: pnpm check:fontoj
 
+      # Spec 036 Teil 5 ③ (Spec 029 ③): every Uzo has the documentation fields of its Vitrino
+      # page – when-not, do-dont, keyboard – in German and English, none still the placeholder.
+      - name: "Check: Dokumentaro"
+        run: pnpm check:dokumentaro
+
       # F23: the release path itself, on every PR — both kits built as release.yml builds them,
       # packed as a dry run. A broken release path turns red here, not in the maintainer's run.
       - name: "Check: Release"

@@ -4,7 +4,7 @@
     "id": "uzo_01M5D5JMAGCDCBH8FJJNN0DMKG",
     "ero": "ero_01M5D5JKHFX2EFVCS08CFE8DS5",
     "skemo": "ske_01M5D5JKXYZ7F3VJCPGRYJ8RX1",
-    "purpose": "Shows a command or a place in a file as code a person can read, select and copy: named by its caption, never cut off — a long line scrolls.",
+    "purpose": "Shows a command or a place in a file as code a person can read, select and copy: named by its caption, never cut off — a long line scrolls or wraps; line numbers, highlighted lines and colours by kind of word help to read it, never alone carry what it says.",
     "instead": [
       {
         "goal": "inline-code",
@@ -25,15 +25,6 @@
           "de": ["diff", "zeilenvergleich"]
         },
         "kialo": "A comparison of two versions line by line is no code block, because every line says what changed with a mark and a word; it stays with the application until a second one needs it."
-      },
-      {
-        "case": "syntax-highlighting",
-        "action": "not-supported",
-        "keywords": {
-          "en": ["syntax-highlighting"],
-          "de": ["syntaxhervorhebung"]
-        },
-        "kialo": "Colours per kind of word are not supported, because a colour names no word (WCAG 1.4.1) and every language would need a grammar; the code stands in one colour."
       }
     ],
     "composes": {
@@ -77,6 +68,65 @@
       "size": "container",
       "wrap": "never"
     },
-    "content": []
+    "content": [],
+    "when-not": [
+      {
+        "case": {
+          "de": "Ein kurzes Stück Code steht mitten in einem Satz.",
+          "en": "A short piece of code stands inside a sentence."
+        },
+        "ero": "teksto"
+      },
+      {
+        "case": {
+          "de": "Die Person soll den Code selbst schreiben oder ändern.",
+          "en": "The person is to write or change the code themselves."
+        },
+        "ero": "tekstareo"
+      },
+      {
+        "case": {
+          "de": "Code ist Teil eines längeren Textes in Markdown, der als Ganzes gezeigt wird.",
+          "en": "Code is part of a longer text in Markdown that is shown as a whole."
+        },
+        "ero": "markdovido"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Benenne den Block mit einer Beschriftung, die sagt, wofür der Code steht.",
+          "en": "Name the block with a caption that says what the code is for."
+        },
+        {
+          "de": "Setze copyable bei Befehlen, die jemand in sein Terminal übernimmt.",
+          "en": "Set copyable for commands someone takes over into their terminal."
+        },
+        {
+          "de": "Nenne die Sprache mit language; hebe mit highlight nur die Zeilen hervor, um die es geht.",
+          "en": "Name the language with language; with highlight, mark only the lines that matter."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Eine lange Zeile abschneiden; sie rollt oder bricht mit wrap um.",
+          "en": "Cut off a long line; it scrolls, or breaks with wrap."
+        },
+        {
+          "de": "Etwas nur über die Farbe der Wörter oder über die Hervorhebung sagen, denn beide helfen nur beim Lesen.",
+          "en": "Say something only through the colour of the words or the highlight, because both only help reading."
+        },
+        {
+          "de": "Zwei Fassungen Zeile für Zeile vergleichen; ein Vergleich ist kein Codeblock.",
+          "en": "Compare two versions line by line; a comparison is no code block."
+        }
+      ]
+    },
+    "keyboard": {
+      "none": {
+        "de": "Der Block nimmt keine eigene Taste; sein Codebereich nimmt den Fokus, damit die Tastatur ihn rollen kann, und der Knopf zum Kopieren ist eine gewöhnliche Schaltfläche.",
+        "en": "The block takes no key of its own; its code area takes the focus so the keyboard can scroll it, and the copy button is an ordinary button."
+      }
+    }
   }
 }

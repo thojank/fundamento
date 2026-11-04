@@ -114,6 +114,71 @@ const WANTED: Readonly<Record<string, { befund: string; match?: string }>> = {
  */
 const STRETCHED: Readonly<Record<string, { reason: string; match: string; count: number }>> = {};
 
+/**
+ * Spec 036 Teil 5 ②b-2 (Spec 029 abgleich.json, aspects "achsen" and "groessen"): wanted changes of
+ * the axes and values, set → the changes, each with the variants whose name holds `match` (all
+ * without) and the Befund. Kept beside WANTED, so a set may carry the changes of several steps.
+ */
+const WANTED_2B2: Readonly<Record<string, readonly { befund: string; match?: string }[]>> = {
+  // A-elekto-2, A-markobutono-2, A-sxaltilo-2 (②a-2): two sizes; the variants of size large are
+  // gone (large is a deprecated alias of medium, no variant), the set lies two rows instead of three.
+  ...Object.fromEntries(
+    ["elekto", "markobutono", "sxaltilo"].map((set) => [
+      set,
+      [{ befund: "②b-2 A-*-2: size large gone, two sizes.", match: "size=large" }],
+    ]),
+  ),
+  // A-listelektilo-2, A-plurelektilo-2, A-datelektilo-2: size is an axis of the variants – every
+  // variant has a new name (size=… among its axes), the sets lie in three times as many cells.
+  // WANTED already lets every variant of these sets go (Abnahme #122, Spec 035 2.3.1); named here
+  // for ②b-2 so the reason stands where the change is.
+  ...Object.fromEntries(
+    ["listelektilo", "plurelektilo", "datelektilo"].map((set) => [
+      set,
+      [{ befund: "②b-2 A-*-2: size an axis of the variants, three sizes; the set laid out anew." }],
+    ]),
+  ),
+  // S36-4.2, the sizes of the rest. A new value of an axis adds variants (the set laid out anew):
+  // ikono x-small (A-ikono-2), signeto large (A-signeto-2), avataro x-small and x-large
+  // (A-avataro-2). A new size axis renames every variant and keys its variables by size (same
+  // values): pagxigilo (A-pagxigilo-2), langetaro (A-langetaro-2). dialogo full (A-dialogo-2): a
+  // third size, and the radius of small and medium is the variable of its size now (same value).
+  ikono: [{ befund: "②b-2 A-ikono-2: size x-small.", match: "size=x-small" }],
+  signeto: [{ befund: "②b-2 A-signeto-2: size large.", match: "size=large" }],
+  avataro: [{ befund: "②b-2 A-avataro-2, A-avataro-1: sizes x-small, x-large; corner an axis." }],
+  pagxigilo: [{ befund: "②b-2 A-pagxigilo-2: size an axis of the variants." }],
+  langetaro: [{ befund: "②b-2 A-langetaro-2: size an axis of the variants." }],
+  dialogo: [{ befund: "②b-2 A-dialogo-2: size full; the radius by size." }],
+  // S36-4.2, the looks of the rest: a new axis renames every variant and keys the variables of its
+  // parts by it (the default value draws what the set drew): apartigilo emphasis (A-apartigilo-1),
+  // spuro emphasis (A-spuro-1), karto emphasis (A-karto-1), avizo frame (A-avizo-1); avataro corner
+  // (A-avataro-1) beside its sizes above.
+  apartigilo: [{ befund: "②b-2 A-apartigilo-1: emphasis an axis of the variants." }],
+  spuro: [{ befund: "②b-2 A-spuro-1: emphasis an axis of the variants." }],
+  karto: [{ befund: "②b-2 A-karto-1: emphasis an axis of the variants." }],
+  avizo: [{ befund: "②b-2 A-avizo-1: frame an axis of the variants." }],
+  // S36-4.2, density and compact: markdovido density and plenstato compact are new axes (every
+  // variant renamed, the gap and the room keyed by them); tabelo density default and teksto kind
+  // label add variants and lay the set out anew.
+  markdovido: [{ befund: "②b-2 A-markdovido-1: density an axis of the variants." }],
+  plenstato: [{ befund: "②b-2 A-plenstato-1/2: compact an axis of the variants." }],
+  tabelo: [{ befund: "②b-2 A-tabelo-1: density default.", match: "density=default" }],
+  teksto: [{ befund: "②b-2 A-teksto-1: kind label.", match: "kind=label" }],
+};
+
+/**
+ * Spec 036 Teil 5 ②b-3 (S36-4.3): the wanted changes of the new parts and slots, per set – kept
+ * beside WANTED and WANTED_2B2, so the merge with ②b-2 and Teil 1 stays free of conflicts.
+ */
+const WANTED_2B3: Readonly<Record<string, readonly { befund: string; match?: string }[]>> = {
+  // A-markobutono-4, A-sxaltilo-4: every variant shows the help under its label (BOOLEAN help, on
+  // by default as at the fields); the variants grow by its line, the set lies anew.
+  markobutono: [{ befund: "②b-3 A-markobutono-4: help under the label." }],
+  sxaltilo: [{ befund: "②b-3 A-sxaltilo-4: help under the label." }],
+  // A-alsxutilo-4: the variants with a dropzone show the upload icon first in it.
+  alsxutilo: [{ befund: "②b-3 A-alsxutilo-4: the upload icon.", match: "dropzone=true" }],
+};
+
 /** One run of the plan in the double, read by every case (Vitest collects nothing here). */
 async function draw() {
   const double = modelDouble();
@@ -180,13 +245,20 @@ describe("the sets in their default size look as on main (Spec 027, Abnahme 3)",
           return true;
         }
         const stretched = STRETCHED[name];
-        return stretched !== undefined && variant.includes(stretched.match);
+        if (stretched !== undefined && variant.includes(stretched.match)) return true;
+        return [...(WANTED_2B2[name] ?? []), ...(WANTED_2B3[name] ?? [])].some(
+          (change) => change.match === undefined || variant.includes(change.match),
+        );
       };
       for (const [variant, hash] of Object.entries(before.variants)) {
         if (now?.variants[variant] !== hash && !allowed(variant))
           differing.push(`${name}: ${variant}`);
       }
-      const whole = WANTED[name] !== undefined || STRETCHED[name] !== undefined;
+      const whole =
+        WANTED[name] !== undefined ||
+        STRETCHED[name] !== undefined ||
+        WANTED_2B2[name] !== undefined ||
+        WANTED_2B3[name] !== undefined;
       if (now?.set !== before.set && !whole) differing.push(`${name}: Lage der Varianten`);
     }
     expect(differing).toEqual([]);

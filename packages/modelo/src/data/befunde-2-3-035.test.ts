@@ -47,20 +47,29 @@ const resolvedOf = (at: { aspekto: string; scheme: string }, token: string) => {
   return JSON.stringify(resolved.value);
 };
 
+/** The sizes of the fields (Spec 036 Teil 5 ②b-2: the datelektilo has them too). */
+const SIZES = ["small", "medium", "large"] as const;
+
 describe("Spec 035 2.3.1: the calendar as large as the chevron of the elektilo", () => {
-  it("the Skemo: the trigger's size is the chevron's (size medium), its width the target", () => {
-    expect(tokenOf("datelektilo", "trigger", "size")).toBe(
-      tokenOf("elektilo", "indicator", "size", "medium"),
-    );
+  // Spec 036 Teil 5 ②b-2 (A-datelektilo-2): the date picker has the sizes of the elektilo; the
+  // calendar is the chevron of each size (medium as before).
+  it("the Skemo: the trigger's size is the chevron's of each size, its width the target", () => {
+    for (const size of SIZES) {
+      expect(tokenOf("datelektilo", "trigger", "size", size)).toBe(
+        tokenOf("elektilo", "indicator", "size", size),
+      );
+    }
     expect(tokenOf("datelektilo", "trigger", "width")).toBe("size.target.min");
   });
 
   it.each(COMBINATIONS)(
     "$aspekto, $scheme: the calendar resolves to the chevron, its target to the ✕'s",
     (at) => {
-      expect(resolvedOf(at, "ero.datelektilo.trigger.size")).toBe(
-        resolvedOf(at, "ero.elektilo.indicator.size.size.medium"),
-      );
+      for (const size of SIZES) {
+        expect(resolvedOf(at, `ero.datelektilo.trigger.size.size.${size}`)).toBe(
+          resolvedOf(at, `ero.elektilo.indicator.size.size.${size}`),
+        );
+      }
       expect(resolvedOf(at, "ero.datelektilo.trigger.width")).toBe(
         resolvedOf(at, "ero.elektilo.clear.width"),
       );
@@ -69,17 +78,21 @@ describe("Spec 035 2.3.1: the calendar as large as the chevron of the elektilo",
 });
 
 describe("Spec 035 2.3.3: the ✕ of the datelektilo as large as the kampo's", () => {
-  it("the Skemo: the clear button's size is the kampo's (size medium), its width the target", () => {
-    expect(tokenOf("datelektilo", "clear", "size")).toBe(
-      tokenOf("kampo", "clear", "size", "medium"),
-    );
+  it("the Skemo: the clear button's size is the kampo's of each size, its width the target", () => {
+    for (const size of SIZES) {
+      expect(tokenOf("datelektilo", "clear", "size", size)).toBe(
+        tokenOf("kampo", "clear", "size", size),
+      );
+    }
     expect(tokenOf("datelektilo", "clear", "width")).toBe(tokenOf("kampo", "clear", "width"));
   });
 
   it.each(COMBINATIONS)("$aspekto, $scheme: the ✕ resolves to the kampo's", (at) => {
-    expect(resolvedOf(at, "ero.datelektilo.clear.size")).toBe(
-      resolvedOf(at, "ero.kampo.clear.size.size.medium"),
-    );
+    for (const size of SIZES) {
+      expect(resolvedOf(at, `ero.datelektilo.clear.size.size.${size}`)).toBe(
+        resolvedOf(at, `ero.kampo.clear.size.size.${size}`),
+      );
+    }
     expect(resolvedOf(at, "ero.datelektilo.clear.width")).toBe(
       resolvedOf(at, "ero.kampo.clear.width"),
     );
@@ -107,11 +120,13 @@ const FIELDS = [
   "alsxutilo",
 ];
 const READONLY_STATE = ["kampo", "listelektilo", "plurelektilo", "datelektilo"];
-const READONLY_PROP_ONLY = ["tekstareo", "glitilo"];
+// Spec 036 Teil 5 ②b-2 (A-elektilo-1, A-markobutono-1): read-only at elektilo and markobutono too,
+// without a state of its own (V-1).
+const READONLY_PROP_ONLY = ["tekstareo", "elektilo", "glitilo", "markobutono"];
 const LOOK = ["surface.fill", "border.color", "text.color", "label.color"];
 
 describe("Spec 035 2.3.4: read-only, one rule for the twelve fields – the look of rest", () => {
-  it("the twelve fields: four with a read-only state, two read-only without one, six without", () => {
+  it("the twelve fields: four with a read-only state, four read-only without one, four without", () => {
     const states = (ero: string): readonly string[] => skemoOf(ero).states;
     const prop = (ero: string) => skemoOf(ero).props.some((each) => each.name === "readonly");
     expect(FIELDS.filter((ero) => states(ero).includes("readonly"))).toEqual(

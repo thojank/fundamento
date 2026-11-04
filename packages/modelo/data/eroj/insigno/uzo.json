@@ -4,7 +4,7 @@
     "id": "uzo_01M51ZRGEN3VWEQ13FZS69DQ11",
     "ero": "ero_01M51ZRFPHM8B0ED97V23SDRRH",
     "skemo": "ske_01M51ZRG2J1CVQCTEDNBQPZK6D",
-    "purpose": "Names a status in one to three words next to what it describes: draft, in review, valid, 3 violations.",
+    "purpose": "Names a status in one to three words next to what it describes: draft, in review, valid, 3 violations; an icon before the words (slot icon-start) shows it beyond colour.",
     "instead": [
       {
         "goal": "sentence",
@@ -175,6 +175,14 @@
         ],
         "max": 1,
         "nesting": 0
+      },
+      "icon-start": {
+        "accepts": [
+          "icon",
+          "ikono"
+        ],
+        "max": 1,
+        "nesting": 0
       }
     },
     "layout": {
@@ -190,6 +198,68 @@
           "count": 3
         }
       }
-    ]
+    ],
+    "when-not": [
+      {
+        "case": {
+          "de": "Der Zustand braucht einen ganzen Satz, der erklärt.",
+          "en": "The state needs a whole sentence that explains."
+        },
+        "ero": "avizo"
+      },
+      {
+        "case": {
+          "de": "Das Etikett soll sich wählen oder entfernen lassen.",
+          "en": "The tag is to be chosen or removed."
+        },
+        "ero": "signeto"
+      },
+      {
+        "case": {
+          "de": "Ein Klick auf das Etikett soll etwas auslösen.",
+          "en": "A click on the badge is to start something."
+        },
+        "ero": "butono"
+      },
+      {
+        "case": {
+          "de": "Ein Wert liegt in einem Bereich mit Skala.",
+          "en": "A value lies in a range with a scale."
+        },
+        "ero": "mezurilo"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Sag den Zustand in ein bis drei Wörtern.",
+          "en": "Say the state in one to three words."
+        },
+        {
+          "de": "Nimm intent neutral für eine bloße Tatsache wie Entwurf.",
+          "en": "Use intent neutral for a plain fact such as draft."
+        },
+        {
+          "de": "Setz ein Symbol vor die Wörter, wenn der Zustand mehr als Farbe zeigen soll.",
+          "en": "Put an icon before the words when the state should show more than colour."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Nur einen Punkt oder nur eine Zahl ohne Wort zeigen.",
+          "en": "Show only a dot or only a number without a word."
+        },
+        {
+          "de": "Die Markenfarbe als Zustand nehmen, denn sie sagt keinen.",
+          "en": "Use the brand colour as a state, because it says none."
+        }
+      ]
+    },
+    "keyboard": {
+      "none": {
+        "de": "Das Etikett nimmt weder den Fokus noch eine Taste; es wird mit dem Text gelesen, neben dem es steht.",
+        "en": "The badge takes neither the focus nor a key; it is read with the text it stands beside."
+      }
+    }
   }
 }

@@ -75,7 +75,8 @@ const MOVED: Readonly<Record<string, string>> = {
 };
 
 /** The name a token had in main's record. */
-export const mainNameOf = (name: string): string => MOVED[name] ?? name;
+export const mainNameOf = (name: string): string =>
+  MOVED[name] ?? MOVED_2B2[name] ?? REST_2B2.moved[name] ?? name;
 
 /**
  * Abnahme #122 (Maintainer, 30.10.): tokens main had whose value changed on purpose – the
@@ -99,9 +100,286 @@ const CHANGED: Readonly<Record<string, string>> = {
   "ero.plurelektilo.surface.fill.readonly": "color.background.sunken",
 };
 
+/**
+ * Spec 036 Teil 5 ②b-2, the other Eroj (S36-4.2): per row group the tokens it added (`added`, a
+ * pattern and their number) and the tokens main had that a new axis keys now (`moved`: new name →
+ * main's name; each keeps main's value, the default value of the axis carries it).
+ */
+const REST_2B2 = (() => {
+  const groups: { pattern: string; added: number; moved: Record<string, string> }[] = [
+    // A-ikono-2 (x-small: 1), A-signeto-2 (large: 2), A-avataro-2 (x-small and x-large of the box
+    // and the initials: 4), A-pagxigilo-2 (small of five: 5), A-langetaro-2 (small and large of
+    // three: 6), A-dialogo-2 (full: the width and the radius; the radius of medium: 3).
+    {
+      pattern:
+        "^ero\\.ikono\\.box\\.size\\.size\\.x\\.small$|^ero\\.signeto\\.box\\.(height|inline\\.padding)\\.size\\.large$|^ero\\.avataro\\.(box\\.size|initials\\.typography)\\.size\\.x\\.(small|large)$|^ero\\.pagxigilo\\.(item\\.typography|item\\.inline\\.padding|ellipsis\\.typography|prev\\.size|next\\.size)\\.size\\.small$|^ero\\.langetaro\\.(tab\\.height|tab\\.inline\\.padding|tabs\\.typography)\\.size\\.(small|large)$|^ero\\.dialogo\\.surface\\.(width\\.size\\.full|radius\\.size\\.(medium|full))$",
+      added: 1 + 2 + 4 + 5 + 6 + 3,
+      moved: {
+        ...Object.fromEntries(
+          [
+            "pagxigilo.item.typography",
+            "pagxigilo.item.inline.padding",
+            "pagxigilo.ellipsis.typography",
+            "pagxigilo.prev.size",
+            "pagxigilo.next.size",
+            "langetaro.tab.height",
+            "langetaro.tab.inline.padding",
+            "langetaro.tabs.typography",
+          ].map((path) => [`ero.${path}.size.medium`, `ero.${path}`]),
+        ),
+        "ero.dialogo.surface.radius.size.small": "ero.dialogo.surface.radius",
+      },
+    },
+    // A-apartigilo-1 (emphasis high of the line's colour and width: 2), A-avataro-1 (corner soft and
+    // square of both radii: 4), A-avizo-1 (frame band: 1), A-karto-1 (emphasis medium of the fill:
+    // 1; low inherits, no shadow but high), A-spuro-1 (emphasis low of the item's colour: 6).
+    {
+      pattern:
+        "^ero\\.apartigilo\\.line\\.(color|width)\\.emphasis\\.high$|^ero\\.avataro\\.(image|initials)\\.radius\\.corner\\.(soft|square)$|^ero\\.avizo\\.box\\.radius\\.frame\\.band$|^ero\\.karto\\.surface\\.fill\\.emphasis\\.medium$|^ero\\.spuro\\.item\\.color\\.emphasis\\.low\\.",
+      added: 2 + 4 + 1 + 1 + 6,
+      moved: {
+        "ero.apartigilo.line.color.emphasis.low": "ero.apartigilo.line.color",
+        "ero.apartigilo.line.width.emphasis.low": "ero.apartigilo.line.width",
+        "ero.avataro.image.radius.corner.round": "ero.avataro.image.radius",
+        "ero.avataro.initials.radius.corner.round": "ero.avataro.initials.radius",
+        "ero.avizo.box.radius.frame.card": "ero.avizo.box.radius",
+        "ero.karto.surface.fill.emphasis.high": "ero.karto.surface.fill",
+        "ero.karto.surface.shadow.emphasis.high": "ero.karto.surface.shadow",
+        ...Object.fromEntries(
+          ["true", "false"].flatMap((current) =>
+            ["rest", "hover", "focus"].map((state) => [
+              `ero.spuro.item.color.emphasis.medium.current.${current}.${state}`,
+              `ero.spuro.item.color.current.${current}.${state}`,
+            ]),
+          ),
+        ),
+      },
+    },
+    // A-markdovido-1 (density compact of the gap: 1), A-plenstato-1/2 (compact of the room and
+    // the text: 2), A-tabelo-1 (density default of the cell: 2), A-teksto-1 (kind label: 1).
+    {
+      pattern:
+        "^ero\\.markdovido\\.box\\.gap\\.density\\.compact$|^ero\\.plenstato\\.(box\\.inline\\.padding|text\\.typography)\\.compact\\.true$|^ero\\.tabelo\\.cell\\.(inline\\.padding|height)\\.density\\.default$|^ero\\.teksto\\.text\\.typography\\.kind\\.label\\.size\\.1$",
+      added: 1 + 2 + 2 + 1,
+      moved: {
+        "ero.markdovido.box.gap.density.default": "ero.markdovido.box.gap",
+        "ero.plenstato.box.inline.padding.compact.false": "ero.plenstato.box.inline.padding",
+        "ero.plenstato.text.typography.compact.false": "ero.plenstato.text.typography",
+      },
+    },
+    // A-pagxigilo-1 (the part summary: its colour and its typography by size, 3).
+    {
+      pattern: "^ero\\.pagxigilo\\.summary\\.(color|typography\\.size\\.(small|medium))$",
+      added: 3,
+      moved: {},
+    },
+    // A-atributlisto-1 (the button for the rest: its fill, colour and typography, 3).
+    {
+      pattern: "^ero\\.atributlisto\\.more\\.(fill|color|typography)$",
+      added: 3,
+      moved: {},
+    },
+    // A-glitilo-1 (the value as text: its colour and typography, 2).
+    { pattern: "^ero\\.glitilo\\.readout\\.(color|typography)$", added: 2, moved: {} },
+  ];
+  const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
+  return {
+    test: (name: string) => pattern.test(name),
+    added: groups.reduce((sum, group) => sum + group.added, 0),
+    moved: Object.assign({}, ...groups.map((group) => group.moved)) as Record<string, string>,
+  };
+})();
+
+/**
+ * Spec 036 Teil 5 ②b-3 (Spec 029 abgleich.json, aspect "anatomie"; S36-4.3): per row group the
+ * tokens of the new parts (a pattern and their number); none of main's tokens moved.
+ */
+const REST_2B3 = (() => {
+  const groups: { pattern: string; added: number }[] = [
+    // A-markobutono-4, A-sxaltilo-4 (the help: its colour and typography, 2 × 2), A-elekto-4 (the
+    // description of an option: its colour and typography, 2).
+    {
+      pattern:
+        "^ero\\.(markobutono|sxaltilo)\\.help\\.(color|typography)$|^ero\\.elekto\\.option\\.description\\.(color|typography)$",
+      added: 4 + 2,
+    },
+    // A-glitilo-4 (the tick: its colour, width and height, 3), A-alsxutilo-4 (the upload icon: its
+    // size and colour, 2).
+    {
+      pattern:
+        "^ero\\.glitilo\\.tick\\.(color|width|height)$|^ero\\.alsxutilo\\.icon\\.(size|color)$",
+      added: 3 + 2,
+    },
+    // A-elektilo-4 (the heading of a group: colour and typography, 2), A-listelektilo-4,
+    // A-kompletigilo-4, A-plurelektilo-4 (the heading with its room, 3 × 3), A-listelektilo-4 (the
+    // divider: colour and width, 2), A-plurelektilo-1 („alle wählen“: colour, typography, height,
+    // room, 4).
+    {
+      pattern:
+        "^ero\\.elektilo\\.group\\.heading\\.(color|typography)$|^ero\\.(listelektilo|kompletigilo|plurelektilo)\\.group\\.heading\\.(color|typography|inline\\.padding)$|^ero\\.listelektilo\\.divider\\.(color|width)$|^ero\\.plurelektilo\\.select\\.all\\.(color|typography|height|inline\\.padding)$",
+      added: 2 + 9 + 2 + 4,
+    },
+    // A-menuo-4 (the gap of a row for its icon, 1; the icon's size, 1; the heading of a group, 3).
+    {
+      pattern:
+        "^ero\\.menuo\\.(item\\.gap|icon\\.size|group\\.heading\\.(color|typography|inline\\.padding))$",
+      added: 1 + 1 + 3,
+    },
+    // A-navigado-1, A-navigado-4 (the gap of an item for its icon, 1; the heading of a section, 3;
+    // the icon's size, 1).
+    {
+      pattern:
+        "^ero\\.navigado\\.(item\\.gap|icon\\.size|section\\.heading\\.(color|typography|inline\\.padding))$",
+      added: 1 + 3 + 1,
+    },
+    // S36-4.4 A-insigno-4 (the gap between icon and words, 1), A-spuro-4 (the gap of an item for
+    // its icon, 1; the icon's size, 1).
+    {
+      pattern: "^ero\\.insigno\\.box\\.gap$|^ero\\.spuro\\.(item\\.gap|icon\\.size)$",
+      added: 1 + 2,
+    },
+    // S36-4.4 A-atributlisto-4 (the title: colour and typography, 2), A-plenstato-4 (the title, 2;
+    // the icon: size and colour, 2), A-tabelo-4 (the foot: fill, colour, typography, 3),
+    // A-sxvebilo-4 (the close button's size, 1).
+    {
+      pattern:
+        "^ero\\.(atributlisto|plenstato)\\.heading\\.(color|typography)$|^ero\\.plenstato\\.icon\\.(size|color)$|^ero\\.tabelo\\.foot\\.(fill|color|typography)$|^ero\\.sxvebilo\\.close\\.size$",
+      added: 2 + 2 + 2 + 3 + 1,
+    },
+    // S36-4.4 A-avataro-4 (the default icon: its size by size, 5, and its colour, 1), A-pagxigilo-4
+    // (first and last: their size by size, 2 × 2).
+    {
+      pattern:
+        "^ero\\.avataro\\.icon\\.(color|size\\.size\\.(x\\.small|small|medium|large|x\\.large))$|^ero\\.pagxigilo\\.(first|last)\\.size\\.size\\.(small|medium)$",
+      added: 5 + 1 + 4,
+    },
+  ];
+  const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
+  return {
+    test: (name: string) => pattern.test(name),
+    added: groups.reduce((sum, group) => sum + group.added, 0),
+  };
+})();
+
+/**
+ * Spec 036 Teil 5 ②b-5 (Spec 029 abgleich.json A-signeto-6, A-kodbloko-1/4/6, ①-2): the tokens
+ * added after main's record – the radius role of a tag – as a pattern and their number.
+ */
+const REST_2B5 = (() => {
+  const groups: { pattern: string; added: number }[] = [
+    // A-signeto-6: the radius role of a tag a person picks or removes (1).
+    { pattern: "^radius\\.role\\.tag$", added: 1 },
+    // ①-2: the syntax colours, five kinds (5).
+    { pattern: "^color\\.syntax\\.(keyword|name|string|number|comment)$", added: 5 },
+    // A-kodbloko-1/4/6: the line number (colour, room after it, 2), a highlighted line (fill, mark
+    // colour and width, 3), the language (typography, colour, 2), the words by kind (5).
+    {
+      pattern:
+        "^ero\\.kodbloko\\.(line\\.number\\.(color|gap)|highlight\\.(fill|color|width)|language\\.(typography|color)|(keyword|name|string|number|comment)\\.color)$",
+      added: 2 + 3 + 2 + 5,
+    },
+  ];
+  const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
+  return {
+    test: (name: string) => pattern.test(name),
+    added: groups.reduce((sum, group) => sum + group.added, 0),
+  };
+})();
+
+/**
+ * Spec 036 Teil 5 ②b-2 (Spec 029 abgleich.json, aspects "achsen" and "groessen"): the tokens of the
+ * new axes and values – the count of the tekstareo (A-tekstareo-1); the sizes small and large of
+ * listelektilo, plurelektilo and datelektilo (A-*-2; their size medium is the token main had, see
+ * MOVED_2B2).
+ */
+const ACHSEN_2B2 =
+  /^ero\.tekstareo\.count\.(color|typography)$|^ero\.kampo\.unit\.(color|typography\.size\.(small|medium|large))$|^ero\.(listelektilo|plurelektilo|datelektilo)\.(label\.typography|text\.typography|box\.height|box\.inline\.padding|indicator\.size|clear\.size|trigger\.size)\.size\.(small|large)$/;
+
+/**
+ * How many tokens ②b-2 added, counted beside ADDED_SINCE_MAIN (A-tekstareo-1: 2; A-listelektilo-2:
+ * 6 × 2, A-plurelektilo-2: 5 × 2, A-datelektilo-2: 6 × 2; A-kampo-1: the unit's colour and its
+ * typography by size, 4).
+ */
+export const ADDED_BY_2B2 = 2 + 12 + 10 + 12 + 4 + REST_2B2.added + REST_2B3.added + REST_2B5.added;
+
+/**
+ * The ✕ of listelektilo and datelektilo came after main (②b-1 M-6, CLEAR); ②b-2 keys it by size,
+ * so its size medium is that token: still none of main's.
+ */
+const CLEAR_2B2 = /^ero\.(listelektilo|datelektilo)\.clear\.size\.size\.medium$/;
+
+/**
+ * Whether a token was added by ②b-2 after main's record – or by ②b-3, stacked on it (REST_2B3,
+ * counted in ADDED_BY_2B2 as well).
+ */
+export const addedBy2b2 = (name: string): boolean =>
+  ACHSEN_2B2.test(name) ||
+  CLEAR_2B2.test(name) ||
+  REST_2B2.test(name) ||
+  REST_2B3.test(name) ||
+  REST_2B5.test(name);
+
+/**
+ * ②b-2 (A-datelektilo-2): the calendar's size medium is the token whose value changed on purpose
+ * at Abnahme #122 (CHANGED); compared with the role main bound it to.
+ */
+const CHANGED_2B2: Readonly<Record<string, string>> = {
+  "ero.datelektilo.trigger.size.size.medium": "size.control.medium",
+  // Spec 036 Teil 5 ②b-5 (A-signeto-6): the tag takes radius.role.tag on purpose; in main every
+  // brand compared here gave it its pill.
+  "ero.signeto.box.radius": "radius.role.pill",
+};
+
+/** ②b-2 (A-*-2): a field's former token is its size medium now; each keeps main's value. */
+const MOVED_2B2: Readonly<Record<string, string>> = Object.fromEntries(
+  Object.entries({
+    listelektilo: [
+      "label.typography",
+      "text.typography",
+      "box.height",
+      "box.inline.padding",
+      "indicator.size",
+      "clear.size",
+    ],
+    plurelektilo: [
+      "label.typography",
+      "text.typography",
+      "box.height",
+      "box.inline.padding",
+      "indicator.size",
+    ],
+    datelektilo: [
+      "label.typography",
+      "text.typography",
+      "box.height",
+      "box.inline.padding",
+      "trigger.size",
+      "clear.size",
+    ],
+  }).flatMap(([ero, paths]) =>
+    paths.map((path) => [`ero.${ero}.${path}.size.medium`, `ero.${ero}.${path}`]),
+  ),
+);
+
 /** Abnahme #122: a token main had that is gone (replaced by its sizes), with main's role. */
 const REMOVED: Readonly<Record<string, { type: string; role: string }>> = {
   "ero.kampo.clear.size": { type: "dimension", role: "size.control.small" },
+  // Spec 036 Teil 5 ②b-2 (A-elekto-2, A-markobutono-2, A-sxaltilo-2, ②a-2): two sizes; large is a
+  // deprecated alias of medium and keys no token any more.
+  "ero.elekto.indicator.size.size.large": { type: "dimension", role: "size.icon.large" },
+  "ero.elekto.label.typography.size.large": { type: "typography", role: "typography.label.1" },
+  "ero.elekto.option.label.typography.size.large": {
+    type: "typography",
+    role: "typography.body.1",
+  },
+  "ero.markobutono.indicator.size.size.large": { type: "dimension", role: "size.icon.large" },
+  "ero.markobutono.label.typography.size.large": {
+    type: "typography",
+    role: "typography.label.1",
+  },
+  "ero.sxaltilo.box.width.size.large": { type: "dimension", role: "size.control.large" },
+  "ero.sxaltilo.indicator.size.size.large": { type: "dimension", role: "size.icon.large" },
+  "ero.sxaltilo.label.typography.size.large": { type: "typography", role: "typography.label.1" },
 };
 
 /** How many tokens of main are gone (REMOVED). */
@@ -114,14 +392,16 @@ export function mainRows(
   canonical: (value: unknown) => unknown,
 ): [string, unknown, unknown][] {
   const rows: [string, unknown, unknown][] = Object.keys(tokens)
-    .filter((name) => !addedSinceMain(name) && keep(name))
+    .filter((name) => !addedSinceMain(name) && !addedBy2b2(name) && keep(name))
     .map((name) => [
       mainNameOf(name),
       tokens[name]?.type,
-      canonical(tokens[CHANGED[name] ?? name]?.value),
+      canonical(tokens[CHANGED[name] ?? CHANGED_2B2[name] ?? name]?.value),
     ]);
   for (const [name, { type, role }] of Object.entries(REMOVED)) {
-    if (tokens[name] === undefined && tokens[role] !== undefined && keep(name))
+    // A gone token is read through its role: keep judges what it would have been (②b-2: provo
+    // leaves typography out, the large label sizes included).
+    if (tokens[name] === undefined && tokens[role] !== undefined && keep(name) && keep(role))
       rows.push([name, type, canonical(tokens[role]?.value)]);
   }
   return rows.sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));

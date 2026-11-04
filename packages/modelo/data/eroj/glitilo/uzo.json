@@ -191,6 +191,94 @@
           "count": 2
         }
       }
+    ],
+    "when-not": [
+      {
+        "case": {
+          "de": "Ein genauer Wert soll eingegeben werden, etwa eine bestimmte Zahl.",
+          "en": "An exact value is to be entered, such as a particular number."
+        },
+        "ero": "kampo"
+      },
+      {
+        "case": {
+          "de": "Es gibt nur wenige benannte Stufen statt eines Bereichs von Zahlen.",
+          "en": "There are only a few named steps instead of a range of numbers."
+        },
+        "ero": "elekto"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Nenne die Grenzen an den Enden oder in der Hilfe.",
+          "en": "Name the bounds at the ends or in the help."
+        },
+        {
+          "de": "Zeig den Wert mit readout text oder field, wenn er genau zählt; field lässt ihn auch tippen.",
+          "en": "Show the value with readout text or field where it counts exactly; field also lets it be typed."
+        },
+        {
+          "de": "Nimm range mit min-distance, wenn zwei Werte einen Mindestabstand halten müssen.",
+          "en": "Use range with min-distance when two values must keep a least distance."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Den Wert nur in einem Tooltip über dem Griff zeigen, denn der Finger verdeckt ihn.",
+          "en": "Show the value only in a tooltip above the thumb, because the finger covers it."
+        },
+        {
+          "de": "Ticks für eine Skala mit vielen Schritten setzen; sie sind für wenige gedacht, etwa null bis zehn.",
+          "en": "Set ticks for a scale with many steps; they are meant for few, such as zero to ten."
+        },
+        {
+          "de": "Einen zweiten Wert mit value-start oder value-end ohne range setzen, denn ein Griff allein hat nur value.",
+          "en": "Set a second value with value-start or value-end without range, because a single thumb has only value."
+        }
+      ]
+    },
+    "keyboard": [
+      {
+        "keys": [
+          "ArrowRight",
+          "ArrowUp"
+        ],
+        "action": {
+          "de": "Erhöht den Wert des Griffs mit dem Fokus um einen Schritt; Pfeil rechts folgt der Schreibrichtung.",
+          "en": "Raises the value of the focused thumb by one step; Arrow Right follows the writing direction."
+        }
+      },
+      {
+        "keys": [
+          "ArrowLeft",
+          "ArrowDown"
+        ],
+        "action": {
+          "de": "Senkt den Wert des Griffs mit dem Fokus um einen Schritt; Pfeil links folgt der Schreibrichtung.",
+          "en": "Lowers the value of the focused thumb by one step; Arrow Left follows the writing direction."
+        }
+      },
+      {
+        "keys": [
+          "PageUp",
+          "PageDown"
+        ],
+        "action": {
+          "de": "Erhöht oder senkt den Wert um zehn Schritte.",
+          "en": "Raises or lowers the value by ten steps."
+        }
+      },
+      {
+        "keys": [
+          "Home",
+          "End"
+        ],
+        "action": {
+          "de": "Setzt den Wert auf min oder max.",
+          "en": "Sets the value to min or max."
+        }
+      }
     ]
   }
 }

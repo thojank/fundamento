@@ -31,10 +31,11 @@
         "kind": "enum",
         "values": [
           "small",
-          "medium"
+          "medium",
+          "large"
         ],
         "default": "medium",
-        "description": "The height of the tag."
+        "description": "The height of the tag. Spec 029 ②a (A-signeto-2): large for filter bars on touch."
       },
       {
         "name": "intent",
@@ -135,7 +136,7 @@
           "fixed": "spacing.xsmall"
         },
         "radius": {
-          "fixed": "radius.role.pill"
+          "fixed": "radius.role.tag"
         }
       },
       "motion": {
@@ -526,6 +527,14 @@
       },
       {
         "part": "box",
+        "property": "height",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.control.large"
+      },
+      {
+        "part": "box",
         "property": "inline-padding",
         "when": {
           "size": "small"
@@ -539,6 +548,14 @@
           "size": "medium"
         },
         "token": "spacing.medium"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "large"
+        },
+        "token": "spacing.large"
       }
     ],
     "a11y": {

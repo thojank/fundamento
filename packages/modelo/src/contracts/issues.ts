@@ -195,6 +195,9 @@ export const RULE_IDS = [
   "skemo-a11y-invalid",
   // Spec 025 ① (plan ① D-01): the events of a Skemo, unique by name and no name of a prop.
   "skemo-event-invalid",
+  // Spec 036 Teil 5 ②b-2 (Spec 029 ②a-2): an instance gives a value its Skemo keeps only as a
+  // deprecated alias (check_usage warns and names the value it stands for).
+  "prop-value-deprecated",
   "uzo-boundary-covered",
   // Nachlese 8 ③: a text without its translation, a translation without its text.
   "traduko-missing",
@@ -262,6 +265,13 @@ export const RULE_IDS = [
   // Spec 033 S1: every token of the core belongs to exactly one Faceto of the brand model.
   "faceto-token-unassigned",
   "faceto-token-twice",
+  // Spec 036 Teil 5 ③ (Spec 029 ③): the documentation fields of the Uzo (check:dokumentaro) – a
+  // field missing, a field still holding the placeholder, when-not sending to the Ero itself, a
+  // key of the Skemo the keyboard table does not describe.
+  "dokumentaro-field-missing",
+  "dokumentaro-placeholder",
+  "dokumentaro-when-not-self",
+  "dokumentaro-keyboard-key-missing",
   // Projekcio lints (Spec 003, D-17)
   "css-physical-property",
   "ero-hardcoded-string",

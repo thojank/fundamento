@@ -80,6 +80,61 @@
       "size": "container",
       "wrap": "allowed"
     },
-    "content": []
+    "content": [],
+    "when-not": [
+      {
+        "case": {
+          "de": "Markdown soll geschrieben und dabei in einer Vorschau gezeigt werden.",
+          "en": "Markdown is to be written and shown in a preview while writing."
+        },
+        "ero": "redaktilo"
+      },
+      {
+        "case": {
+          "de": "Es ist ein schlichter Absatz ohne eigene Gliederung.",
+          "en": "It is a plain paragraph without structure of its own."
+        },
+        "ero": "teksto"
+      },
+      {
+        "case": {
+          "de": "Der Inhalt ist Code, der gelesen und kopiert werden soll.",
+          "en": "The content is code to be read and copied."
+        },
+        "ero": "kodbloko"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Setze start-level so, dass die Überschriften der Quelle unter der Überschrift der Seite folgen.",
+          "en": "Set start-level so the headings of the source follow below the heading of the page."
+        },
+        {
+          "de": "Setze streaming, solange eine Antwort noch ankommt, und nimm es nach dem letzten Wort weg.",
+          "en": "Set streaming while an answer still arrives, and take it away after the last word."
+        },
+        {
+          "de": "Nimm density compact für Antworten in einer schmalen Spalte.",
+          "en": "Use density compact for answers in a narrow column."
+        }
+      ],
+      "dont": [
+        {
+          "de": "HTML in der Quelle erwarten; es wird als Text gezeigt und nie ausgeführt.",
+          "en": "Expect HTML in the source; it is shown as text and never run."
+        },
+        {
+          "de": "Bilder in der Quelle voraussetzen; sie erscheinen nur mit ihrem Text.",
+          "en": "Count on images in the source; they appear only as their text."
+        }
+      ]
+    },
+    "keyboard": {
+      "none": {
+        "de": "Die Ansicht nimmt keine eigene Taste; Verweise im Text erreicht man mit Tab und folgt ihnen mit Enter wie jedem Verweis.",
+        "en": "The view takes no key of its own; links in the text are reached with Tab and followed with Enter like any link."
+      }
+    }
   }
 }

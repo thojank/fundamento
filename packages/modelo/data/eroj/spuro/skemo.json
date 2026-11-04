@@ -18,6 +18,21 @@
         "name": "page",
         "kind": "string",
         "description": "The key of the current page: the item whose key (its data-page, else its destination) is this value is the current one (SkemoSlot.entry current); empty, the last item is."
+      },
+      {
+        "name": "emphasis",
+        "kind": "enum",
+        "values": [
+          "medium",
+          "low"
+        ],
+        "default": "medium",
+        "description": "Spec 029 ②a (A-spuro-1): medium writes the levels as links, as before; low in the subtle text, a supporting trail beside a heading."
+      },
+      {
+        "name": "max-items",
+        "kind": "number",
+        "description": "Spec 029 ②a (A-spuro-6, collapsed-middle decided): the most items the trail shows. With more, the middle ones collapse: the first item stands, then a menuo of the hidden levels as links (part more, named by a11y.texts more-name), then the last max-items − 1 items. Empty: every item stands, as before."
       }
     ],
     "states": [
@@ -34,12 +49,17 @@
           "key": "current",
           "equals": "page"
         }
+      },
+      {
+        "name": "icon-start",
+        "decorative": true
       }
     ],
     "parts": {
       "item": {
         "color": {
           "by": [
+            "emphasis",
             "current",
             "state"
           ]
@@ -51,6 +71,9 @@
           "by": [
             "current"
           ]
+        },
+        "gap": {
+          "fixed": "spacing.xsmall"
         }
       },
       "underline": {
@@ -89,6 +112,16 @@
         "color": {
           "fixed": "color.focus.inner"
         }
+      },
+      "icon": {
+        "size": {
+          "fixed": "size.icon.small"
+        }
+      },
+      "more": {
+        "gap": {
+          "sameAs": "item.gap"
+        }
       }
     },
     "bindings": [
@@ -96,6 +129,7 @@
         "part": "item",
         "property": "color",
         "when": {
+          "emphasis": "medium",
           "current": "false",
           "state": "rest"
         },
@@ -105,6 +139,7 @@
         "part": "item",
         "property": "color",
         "when": {
+          "emphasis": "medium",
           "current": "false",
           "state": "hover"
         },
@@ -114,6 +149,7 @@
         "part": "item",
         "property": "color",
         "when": {
+          "emphasis": "medium",
           "current": "false",
           "state": "focus"
         },
@@ -123,6 +159,7 @@
         "part": "item",
         "property": "color",
         "when": {
+          "emphasis": "medium",
           "current": "true",
           "state": "rest"
         },
@@ -132,6 +169,7 @@
         "part": "item",
         "property": "color",
         "when": {
+          "emphasis": "medium",
           "current": "true",
           "state": "hover"
         },
@@ -141,6 +179,67 @@
         "part": "item",
         "property": "color",
         "when": {
+          "emphasis": "medium",
+          "current": "true",
+          "state": "focus"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "emphasis": "low",
+          "current": "false",
+          "state": "rest"
+        },
+        "token": "color.text.subtle"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "emphasis": "low",
+          "current": "false",
+          "state": "hover"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "emphasis": "low",
+          "current": "false",
+          "state": "focus"
+        },
+        "token": "color.text.subtle"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "emphasis": "low",
+          "current": "true",
+          "state": "rest"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "emphasis": "low",
+          "current": "true",
+          "state": "hover"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "emphasis": "low",
           "current": "true",
           "state": "focus"
         },
@@ -194,6 +293,10 @@
         "label-empty": {
           "de": "Pfad",
           "en": "Breadcrumb"
+        },
+        "more-name": {
+          "de": "Ausgelassene Ebenen",
+          "en": "Hidden levels"
         }
       }
     },
@@ -204,13 +307,17 @@
           "en": [
             "breadcrumb",
             "breadcrumbs",
-            "trail"
+            "trail",
+            "truncated",
+            "collapsedpath"
           ],
           "de": [
             "brotkrumen",
             "brotkrümel",
             "pfad",
-            "pfadnavigation"
+            "pfadnavigation",
+            "gekürzt",
+            "verkürzt"
           ]
         },
         "props": {},

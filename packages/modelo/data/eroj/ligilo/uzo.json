@@ -4,7 +4,7 @@
     "id": "uzo_01M4RYCXT5HJ3776EF81MZABY4",
     "ero": "ero_01M4RYCX28WNYSGMANDBK8TK04",
     "skemo": "ske_01M4RYCXE78XSCQ4Q4V8WA4FZH",
-    "purpose": "Moves to another view or place: it opens an overview, a detail, a document or an outside site.",
+    "purpose": "Moves to another view or place: it opens an overview, a detail, a document or an outside site; an icon may stand before the words (slot icon-start); with download it hands over a file instead, marked, the label names its type and size.",
     "instead": [
       {
         "goal": "action",
@@ -52,20 +52,6 @@
           ]
         },
         "kialo": "A link that looks like a button is read as an action, because the shape promises one; whether a brand wants that is a decision of a person, not of the Ero."
-      },
-      {
-        "case": "download",
-        "action": "ask-human",
-        "keywords": {
-          "en": [
-            "download"
-          ],
-          "de": [
-            "download",
-            "herunterladen"
-          ]
-        },
-        "kialo": "A download does not leave the view and needs a mark with type and size, because the person decides before the file arrives; Fundamento has no such mark yet."
       },
       {
         "case": "disabled-link",
@@ -139,6 +125,14 @@
         ],
         "max": 1,
         "nesting": 0
+      },
+      "icon-start": {
+        "accepts": [
+          "icon",
+          "ikono"
+        ],
+        "max": 1,
+        "nesting": 0
       }
     },
     "layout": {
@@ -191,6 +185,70 @@
               "www"
             ]
           }
+        }
+      }
+    ],
+    "when-not": [
+      {
+        "case": {
+          "de": "Etwas soll hier in der Ansicht geschehen, statt woanders hinzuführen.",
+          "en": "Something is to happen here in the view, instead of leading elsewhere."
+        },
+        "ero": "butono"
+      },
+      {
+        "case": {
+          "de": "Mehrere Hauptseiten der Anwendung stehen als Liste, eine davon ist die aktuelle.",
+          "en": "Several main pages of the application stand as a list, one of them the current one."
+        },
+        "ero": "navigado"
+      },
+      {
+        "case": {
+          "de": "Gezeigt wird der Weg von oben bis zur aktuellen Seite.",
+          "en": "The path from the top down to the current page is shown."
+        },
+        "ero": "spuro"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Lass die Wörter das Ziel nennen, nicht die Adresse.",
+          "en": "Let the words name the destination, not the address."
+        },
+        {
+          "de": "Setze external für ein Ziel außerhalb der Anwendung; es wird sichtbar und hörbar markiert.",
+          "en": "Set external for a destination outside the application; it is marked visibly and audibly."
+        },
+        {
+          "de": "Nenne bei download in den Wörtern die Datei, ihre Art und ihre Größe.",
+          "en": "With download, name the file, its kind and its size in the words."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Einen Verweis grau und unbenutzbar zeigen; ohne Ziel ist er Text.",
+          "en": "Show a link greyed out and unusable; without a destination it is text."
+        },
+        {
+          "de": "Einen Download zugleich als external markieren, denn ein Download bleibt in der Ansicht.",
+          "en": "Mark a download as external at the same time, because a download stays in the view."
+        },
+        {
+          "de": "Einen eigenständigen Verweis über mehrere Zeilen laufen lassen.",
+          "en": "Let a standalone link run over several lines."
+        }
+      ]
+    },
+    "keyboard": [
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": {
+          "de": "Folgt dem Verweis; mit download übergibt er die Datei, und die Person bleibt in der Ansicht.",
+          "en": "Follows the link; with download it hands over the file and the person stays in the view."
         }
       }
     ]

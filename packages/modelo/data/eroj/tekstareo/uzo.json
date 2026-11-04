@@ -43,23 +43,6 @@
         "kialo": "An area that grows with every line moves what stands below it while a person types, because the page reflows; whether a product wants that is a decision of a person."
       },
       {
-        "case": "character-count",
-        "action": "ask-human",
-        "keywords": {
-          "en": [
-            "characters",
-            "limit",
-            "maxlength"
-          ],
-          "de": [
-            "zeichen",
-            "zeichenzähler",
-            "zeichenlimit"
-          ]
-        },
-        "kialo": "A count of the characters left is a live text under the area, because the limit must be heard as well as seen; Fundamento has no such part yet, so a person decides."
-      },
-      {
         "case": "rich-text",
         "action": "not-supported",
         "keywords": {
@@ -190,6 +173,54 @@
           "count": 1
         }
       }
-    ]
+    ],
+    "when-not": [
+      {
+        "case": {
+          "de": "Es ist nur eine Zeile, etwa ein Name oder eine Adresse.",
+          "en": "It is only one line, such as a name or an address."
+        },
+        "ero": "kampo"
+      },
+      {
+        "case": {
+          "de": "Markdown soll geschrieben und dabei als Vorschau gezeigt werden.",
+          "en": "Markdown is to be written and shown as a preview while writing."
+        },
+        "ero": "redaktilo"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Wähle rows nach der Länge, die du erwartest.",
+          "en": "Choose rows by the length you expect."
+        },
+        {
+          "de": "Setze max-length, wenn es eine Grenze gibt; ein Zähler sagt dann, wie viel noch geht.",
+          "en": "Set max-length when there is a limit; a counter then says how much is left."
+        },
+        {
+          "de": "Nimm kind code für Quelltext oder Markdown, ohne Rechtschreibprüfung.",
+          "en": "Use kind code for source text or Markdown, without spell checking."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Fett, Listen oder andere Formatierung im Feld erwarten; es nimmt reinen Text.",
+          "en": "Expect bold, lists or other formatting in the field; it takes plain text."
+        },
+        {
+          "de": "Den Platzhalter als Beschriftung nutzen.",
+          "en": "Use the placeholder as the label."
+        }
+      ]
+    },
+    "keyboard": {
+      "none": {
+        "de": "Das Feld hat keine eigenen Tasten: Es nimmt Text wie jedes mehrzeilige Feld, Enter beginnt eine neue Zeile und sendet kein Formular.",
+        "en": "The field has no keys of its own: it takes text like any multi-line field, and Enter starts a new line and sends no form."
+      }
+    }
   }
 }

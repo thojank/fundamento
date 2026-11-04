@@ -27,12 +27,14 @@ import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
 import { aspektoStylesheet } from "../css/css.js";
 import { kitReferenceAspekto, kitTypesPath } from "../make-kit/make-kit.js";
 import { type VitrinoBazo, vitrinoDatumoj } from "./datumoj.js";
+import { dokuOf } from "./doku.js";
 import { vitrinoHtml, type WerkstattDatumoj } from "./html.js";
 import { bundleWerkstatt } from "./werkstatt-bundle.js";
 
 export const VITRINO_FILE = "vitrino/index.html";
 
 export * from "./datumoj.js";
+export * from "./doku.js";
 export * from "./html.js";
 
 /** The kit file the Vitrino embeds: the elements without React, for plain HTML. */
@@ -107,6 +109,8 @@ export const VITRINO_CELO: Celo = {
             input,
             ...(input.bazo === undefined ? {} : { bazo: input.bazo }),
           }),
+          // Spec 036 Teil 5 ③: the documentation of every Ero, beside the data island.
+          doku: dokuOf(input.modelo),
           ...(werkstatt === undefined ? {} : { werkstatt, werkstattJs: bundleWerkstatt() }),
         }),
       },

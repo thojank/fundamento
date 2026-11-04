@@ -31,9 +31,13 @@ describe("teksto in the repo Modelo (section ③, G1, G2)", () => {
 
   it("has kind (body, caption, kicker, code), size (1, 2; body only) and emphasis (high, medium, low) as props; one state; the label slot", () => {
     expect(skemo?.props.map((prop) => [prop.name, prop.values, prop.default])).toEqual([
-      ["kind", ["body", "caption", "kicker", "code"], "body"],
+      // Spec 036 Teil 5 ②b-2 (A-teksto-1): kind label, tabular figures.
+      ["kind", ["body", "caption", "kicker", "code", "label"], "body"],
       ["size", ["1", "2"], "1"],
       ["emphasis", ["high", "medium", "low"], "high"],
+      ["tabular", undefined, false],
+      // Spec 036 Teil 5 ②b-3 (A-teksto-1): the most lines.
+      ["max-lines", undefined, undefined],
     ]);
     expect(skemo?.states).toEqual(["rest"]);
     expect(skemo?.slots).toEqual([{ name: "label", default: true, text: true }]);
@@ -72,7 +76,7 @@ describe("teksto in the repo Modelo (section ③, G1, G2)", () => {
     );
     expect(boundToken(skemo, "text", "color", { emphasis: "low" })?.token).toBe("color.text.muted");
     expect(variantKeys(skemo)).toEqual(["kind", "size", "emphasis", "state"]);
-    expect(combinationsOf(skemo, ["kind", "size", "emphasis"])).toHaveLength(15);
+    expect(combinationsOf(skemo, ["kind", "size", "emphasis"])).toHaveLength(18);
   });
 
   it("speaks role paragraph, named by its label; code is spoken as code (Celo); no state, no key", () => {
@@ -98,7 +102,8 @@ describe("teksto in the repo Modelo (section ③, G1, G2)", () => {
 describe("the Uzo of the teksto (section ③, G6)", () => {
   it("states the purpose; a heading is the titolo, a link in the text the ligilo, a status word the insigno; rich text asks a person", () => {
     expect(uzo?.purpose).toBe(
-      "Sets running text in the system's type roles: body, caption, kicker, inline code.",
+      // Spec 036 Teil 5 ②b-3 (A-teksto-4).
+      "Sets running text in the system's type roles: body, caption, kicker, inline code; with max-lines a tooltip shows the text it cuts.",
     );
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["heading", "titolo"],
@@ -117,7 +122,13 @@ describe("the Uzo of the teksto (section ③, G6)", () => {
   it("composes in a page section with the ligilo; requires the label; size container, wraps; no text rule", () => {
     expect(uzo?.composes.containers.map((container) => container.name)).toEqual(["page-section"]);
     // Nachlese 7 ② B-10: running text holds a link, a badge and code (phrasing content).
-    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["ligilo", "insigno", "teksto"]);
+    // Spec 036 Teil 5 ②b-3 (A-teksto-4): the konsileto shows a text cut after max-lines.
+    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual([
+      "ligilo",
+      "insigno",
+      "teksto",
+      "konsileto",
+    ]);
     expect(uzo?.slots).toEqual({
       label: { accepts: ["text", "ligilo", "insigno", "teksto"], required: true, nesting: 1 },
     });

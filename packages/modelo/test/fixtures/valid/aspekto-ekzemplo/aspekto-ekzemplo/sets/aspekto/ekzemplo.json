@@ -1404,6 +1404,23 @@
         }
       }
     },
+    "syntax": {
+      "keyword": {
+        "$value": "{color.palette.danger.800}"
+      },
+      "name": {
+        "$value": "{color.palette.info.800}"
+      },
+      "string": {
+        "$value": "{color.palette.success.800}"
+      },
+      "number": {
+        "$value": "{color.palette.warning.800}"
+      },
+      "comment": {
+        "$value": "{color.palette.neutral.700}"
+      }
+    },
     "brand": {
       "fill": {
         "$value": "{color.palette.accent.200}"
@@ -1596,6 +1613,9 @@
       },
       "multiline": {
         "$value": "{radius.medium}"
+      },
+      "tag": {
+        "$value": "{radius.small}"
       }
     }
   },
@@ -2962,17 +2982,43 @@
           "$type": "typography",
           "$value": "{typography.caption}"
         }
+      },
+      "icon": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.large}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        }
       }
     },
     "apartigilo": {
       "line": {
         "color": {
-          "$type": "color",
-          "$value": "{color.border.subtle}"
+          "emphasis": {
+            "low": {
+              "$type": "color",
+              "$value": "{color.border.subtle}"
+            },
+            "high": {
+              "$type": "color",
+              "$value": "{color.border.default}"
+            }
+          }
         },
         "width": {
-          "$type": "dimension",
-          "$value": "{border.width.default}"
+          "emphasis": {
+            "low": {
+              "$type": "dimension",
+              "$value": "{border.width.default}"
+            },
+            "high": {
+              "$type": "dimension",
+              "$value": "{border.width.strong}"
+            }
+          }
         }
       },
       "box": {
@@ -3036,13 +3082,49 @@
             }
           }
         }
+      },
+      "more": {
+        "fill": {
+          "$type": "color",
+          "$value": "{color.action.tertiary.rest}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.action.tertiary.text}"
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.label.2}"
+        }
+      },
+      "heading": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}"
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.headline.4}"
+        }
       }
     },
     "avataro": {
       "image": {
         "radius": {
-          "$type": "dimension",
-          "$value": "{radius.full}"
+          "corner": {
+            "round": {
+              "$type": "dimension",
+              "$value": "{radius.full}"
+            },
+            "soft": {
+              "$type": "dimension",
+              "$value": "{radius.small}"
+            },
+            "square": {
+              "$type": "dimension",
+              "$value": "{radius.none}"
+            }
+          }
         }
       },
       "initials": {
@@ -3056,6 +3138,16 @@
         },
         "typography": {
           "size": {
+            "x": {
+              "small": {
+                "$type": "typography",
+                "$value": "{typography.caption}"
+              },
+              "large": {
+                "$type": "typography",
+                "$value": "{typography.headline.4}"
+              }
+            },
             "small": {
               "$type": "typography",
               "$value": "{typography.label.2}"
@@ -3071,13 +3163,35 @@
           }
         },
         "radius": {
-          "$type": "dimension",
-          "$value": "{radius.full}"
+          "corner": {
+            "round": {
+              "$type": "dimension",
+              "$value": "{radius.full}"
+            },
+            "soft": {
+              "$type": "dimension",
+              "$value": "{radius.small}"
+            },
+            "square": {
+              "$type": "dimension",
+              "$value": "{radius.none}"
+            }
+          }
         }
       },
       "box": {
         "size": {
           "size": {
+            "x": {
+              "small": {
+                "$type": "dimension",
+                "$value": "{size.icon.small}"
+              },
+              "large": {
+                "$type": "dimension",
+                "$value": "{size.scale.1000}"
+              }
+            },
             "small": {
               "$type": "dimension",
               "$value": "{size.icon.medium}"
@@ -3091,6 +3205,38 @@
               "$value": "{size.control.large}"
             }
           }
+        }
+      },
+      "icon": {
+        "size": {
+          "size": {
+            "x": {
+              "small": {
+                "$type": "dimension",
+                "$value": "{size.scale.100}"
+              },
+              "large": {
+                "$type": "dimension",
+                "$value": "{size.scale.800}"
+              }
+            },
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.scale.100}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.icon.small}"
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{size.icon.large}"
+            }
+          }
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.subtle}"
         }
       }
     },
@@ -3223,8 +3369,16 @@
           "$value": "{spacing.small}"
         },
         "radius": {
-          "$type": "dimension",
-          "$value": "{radius.role.surface}"
+          "frame": {
+            "card": {
+              "$type": "dimension",
+              "$value": "{radius.role.surface}"
+            },
+            "band": {
+              "$type": "dimension",
+              "$value": "{radius.none}"
+            }
+          }
         }
       }
     },
@@ -3745,8 +3899,20 @@
           }
         },
         "typography": {
-          "$type": "typography",
-          "$value": "{typography.label.1}"
+          "size": {
+            "small": {
+              "$type": "typography",
+              "$value": "{typography.label.2}"
+            },
+            "medium": {
+              "$type": "typography",
+              "$value": "{typography.label.1}"
+            },
+            "large": {
+              "$type": "typography",
+              "$value": "{typography.label.1}"
+            }
+          }
         }
       },
       "required": {
@@ -3869,14 +4035,38 @@
           }
         },
         "typography": {
-          "$type": "typography",
-          "$value": "{typography.body.1}"
+          "size": {
+            "small": {
+              "$type": "typography",
+              "$value": "{typography.body.2}"
+            },
+            "medium": {
+              "$type": "typography",
+              "$value": "{typography.body.1}"
+            },
+            "large": {
+              "$type": "typography",
+              "$value": "{typography.body.1}"
+            }
+          }
         }
       },
       "trigger": {
         "size": {
-          "$type": "dimension",
-          "$value": "{size.icon.medium}"
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.icon.small}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.icon.medium}"
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{size.icon.large}"
+            }
+          }
         },
         "width": {
           "$type": "dimension",
@@ -4117,13 +4307,37 @@
       },
       "box": {
         "height": {
-          "$type": "dimension",
-          "$value": "{size.control.medium}"
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.control.small}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.control.medium}"
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{size.control.large}"
+            }
+          }
         },
         "inline": {
           "padding": {
-            "$type": "dimension",
-            "$value": "{spacing.medium}"
+            "size": {
+              "small": {
+                "$type": "dimension",
+                "$value": "{spacing.small}"
+              },
+              "medium": {
+                "$type": "dimension",
+                "$value": "{spacing.medium}"
+              },
+              "large": {
+                "$type": "dimension",
+                "$value": "{spacing.medium}"
+              }
+            }
           }
         },
         "gap": {
@@ -4163,8 +4377,20 @@
       },
       "clear": {
         "size": {
-          "$type": "dimension",
-          "$value": "{size.icon.medium}"
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.icon.small}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.icon.medium}"
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{size.icon.large}"
+            }
+          }
         },
         "width": {
           "$type": "dimension",
@@ -4225,8 +4451,20 @@
           "$value": "{color.background.raised}"
         },
         "radius": {
-          "$type": "dimension",
-          "$value": "{radius.role.surface}"
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{radius.role.surface}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{radius.role.surface}"
+            },
+            "full": {
+              "$type": "dimension",
+              "$value": "{radius.none}"
+            }
+          }
         },
         "width": {
           "size": {
@@ -4237,6 +4475,10 @@
             "medium": {
               "$type": "dimension",
               "$value": "{size.container.medium}"
+            },
+            "full": {
+              "$type": "dimension",
+              "$value": "{size.container.max}"
             }
           }
         },
@@ -4678,6 +4920,18 @@
           "$type": "typography",
           "$value": "{typography.caption}"
         }
+      },
+      "group": {
+        "heading": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.text.muted}"
+          },
+          "typography": {
+            "$type": "typography",
+            "$value": "{typography.caption}"
+          }
+        }
       }
     },
     "elekto": {
@@ -4719,10 +4973,6 @@
               "$value": "{typography.label.2}"
             },
             "medium": {
-              "$type": "typography",
-              "$value": "{typography.label.1}"
-            },
-            "large": {
               "$type": "typography",
               "$value": "{typography.label.1}"
             }
@@ -4770,12 +5020,18 @@
               "medium": {
                 "$type": "typography",
                 "$value": "{typography.body.1}"
-              },
-              "large": {
-                "$type": "typography",
-                "$value": "{typography.body.1}"
               }
             }
+          }
+        },
+        "description": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.text.muted}"
+          },
+          "typography": {
+            "$type": "typography",
+            "$value": "{typography.caption}"
           }
         }
       },
@@ -4937,10 +5193,6 @@
             "medium": {
               "$type": "dimension",
               "$value": "{size.icon.medium}"
-            },
-            "large": {
-              "$type": "dimension",
-              "$value": "{size.icon.large}"
             }
           }
         }
@@ -5301,6 +5553,16 @@
           "$value": "{radius.full}"
         }
       },
+      "readout": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}"
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.label.1}"
+        }
+      },
       "number": {
         "width": {
           "field": {
@@ -5442,6 +5704,20 @@
           "$type": "typography",
           "$value": "{typography.caption}"
         }
+      },
+      "tick": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.border.strong}"
+        },
+        "width": {
+          "$type": "dimension",
+          "$value": "{border.width.strong}"
+        },
+        "height": {
+          "$type": "dimension",
+          "$value": "{spacing.small}"
+        }
       }
     },
     "ikono": {
@@ -5470,6 +5746,12 @@
       "box": {
         "size": {
           "size": {
+            "x": {
+              "small": {
+                "$type": "dimension",
+                "$value": "{size.scale.100}"
+              }
+            },
             "small": {
               "$type": "dimension",
               "$value": "{size.icon.small}"
@@ -5603,6 +5885,10 @@
         "radius": {
           "$type": "dimension",
           "$value": "{radius.role.pill}"
+        },
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.xsmall}"
         }
       }
     },
@@ -6054,21 +6340,55 @@
             }
           }
         }
+      },
+      "unit": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "typography": {
+          "size": {
+            "small": {
+              "$type": "typography",
+              "$value": "{typography.body.2}"
+            },
+            "medium": {
+              "$type": "typography",
+              "$value": "{typography.body.1}"
+            },
+            "large": {
+              "$type": "typography",
+              "$value": "{typography.body.1}"
+            }
+          }
+        }
       }
     },
     "karto": {
       "surface": {
         "fill": {
-          "$type": "color",
-          "$value": "{color.background.raised}"
+          "emphasis": {
+            "high": {
+              "$type": "color",
+              "$value": "{color.background.raised}"
+            },
+            "medium": {
+              "$type": "color",
+              "$value": "{color.background.sunken}"
+            }
+          }
         },
         "radius": {
           "$type": "dimension",
           "$value": "{radius.role.surface}"
         },
         "shadow": {
-          "$type": "shadow",
-          "$value": "{elevation.shadow.raised}"
+          "emphasis": {
+            "high": {
+              "$type": "shadow",
+              "$value": "{elevation.shadow.raised}"
+            }
+          }
         }
       },
       "border": {
@@ -6189,6 +6509,72 @@
         "color": {
           "$type": "color",
           "$value": "{color.text.subtle}"
+        }
+      },
+      "line": {
+        "number": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.text.subtle}"
+          },
+          "gap": {
+            "$type": "dimension",
+            "$value": "{spacing.small}"
+          }
+        }
+      },
+      "highlight": {
+        "fill": {
+          "$type": "color",
+          "$value": "{color.background.default}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.border.strong}"
+        },
+        "width": {
+          "$type": "dimension",
+          "$value": "{border.width.focus}"
+        }
+      },
+      "language": {
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.caption}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.subtle}"
+        }
+      },
+      "keyword": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.syntax.keyword}"
+        }
+      },
+      "name": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.syntax.name}"
+        }
+      },
+      "string": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.syntax.string}"
+        }
+      },
+      "number": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.syntax.number}"
+        }
+      },
+      "comment": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.syntax.comment}"
         }
       }
     },
@@ -6620,6 +7006,24 @@
           "$type": "typography",
           "$value": "{typography.caption}"
         }
+      },
+      "group": {
+        "heading": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.text.muted}"
+          },
+          "typography": {
+            "$type": "typography",
+            "$value": "{typography.caption}"
+          },
+          "inline": {
+            "padding": {
+              "$type": "dimension",
+              "$value": "{spacing.medium}"
+            }
+          }
+        }
       }
     },
     "konsileto": {
@@ -6691,13 +7095,37 @@
           }
         },
         "height": {
-          "$type": "dimension",
-          "$value": "{size.target.min}"
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.target.min}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.target.min}"
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{size.control.large}"
+            }
+          }
         },
         "inline": {
           "padding": {
-            "$type": "dimension",
-            "$value": "{spacing.medium}"
+            "size": {
+              "small": {
+                "$type": "dimension",
+                "$value": "{spacing.small}"
+              },
+              "medium": {
+                "$type": "dimension",
+                "$value": "{spacing.medium}"
+              },
+              "large": {
+                "$type": "dimension",
+                "$value": "{spacing.large}"
+              }
+            }
           }
         }
       },
@@ -6715,8 +7143,20 @@
           }
         },
         "typography": {
-          "$type": "typography",
-          "$value": "{typography.label.1}"
+          "size": {
+            "small": {
+              "$type": "typography",
+              "$value": "{typography.label.2}"
+            },
+            "medium": {
+              "$type": "typography",
+              "$value": "{typography.label.1}"
+            },
+            "large": {
+              "$type": "typography",
+              "$value": "{typography.label.1}"
+            }
+          }
         },
         "weight": {
           "active": {
@@ -6977,8 +7417,20 @@
           }
         },
         "typography": {
-          "$type": "typography",
-          "$value": "{typography.label.1}"
+          "size": {
+            "small": {
+              "$type": "typography",
+              "$value": "{typography.label.2}"
+            },
+            "medium": {
+              "$type": "typography",
+              "$value": "{typography.label.1}"
+            },
+            "large": {
+              "$type": "typography",
+              "$value": "{typography.label.1}"
+            }
+          }
         }
       },
       "required": {
@@ -7101,8 +7553,20 @@
           }
         },
         "typography": {
-          "$type": "typography",
-          "$value": "{typography.body.1}"
+          "size": {
+            "small": {
+              "$type": "typography",
+              "$value": "{typography.body.2}"
+            },
+            "medium": {
+              "$type": "typography",
+              "$value": "{typography.body.1}"
+            },
+            "large": {
+              "$type": "typography",
+              "$value": "{typography.body.1}"
+            }
+          }
         }
       },
       "placeholder": {
@@ -7117,8 +7581,20 @@
           "$value": "{color.text.muted}"
         },
         "size": {
-          "$type": "dimension",
-          "$value": "{size.icon.medium}"
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.icon.small}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.icon.medium}"
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{size.icon.large}"
+            }
+          }
         }
       },
       "listbox": {
@@ -7249,13 +7725,37 @@
       },
       "box": {
         "height": {
-          "$type": "dimension",
-          "$value": "{size.control.medium}"
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.control.small}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.control.medium}"
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{size.control.large}"
+            }
+          }
         },
         "inline": {
           "padding": {
-            "$type": "dimension",
-            "$value": "{spacing.medium}"
+            "size": {
+              "small": {
+                "$type": "dimension",
+                "$value": "{spacing.small}"
+              },
+              "medium": {
+                "$type": "dimension",
+                "$value": "{spacing.medium}"
+              },
+              "large": {
+                "$type": "dimension",
+                "$value": "{spacing.medium}"
+              }
+            }
           }
         },
         "gap": {
@@ -7295,8 +7795,20 @@
       },
       "clear": {
         "size": {
-          "$type": "dimension",
-          "$value": "{size.icon.medium}"
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.icon.small}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.icon.medium}"
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{size.icon.large}"
+            }
+          }
         },
         "width": {
           "$type": "dimension",
@@ -7341,6 +7853,34 @@
         "typography": {
           "$type": "typography",
           "$value": "{typography.caption}"
+        }
+      },
+      "group": {
+        "heading": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.text.muted}"
+          },
+          "typography": {
+            "$type": "typography",
+            "$value": "{typography.caption}"
+          },
+          "inline": {
+            "padding": {
+              "$type": "dimension",
+              "$value": "{spacing.medium}"
+            }
+          }
+        }
+      },
+      "divider": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.border.subtle}"
+        },
+        "width": {
+          "$type": "dimension",
+          "$value": "{border.width.default}"
         }
       }
     },
@@ -7465,8 +8005,16 @@
     "markdovido": {
       "box": {
         "gap": {
-          "$type": "dimension",
-          "$value": "{spacing.medium}"
+          "density": {
+            "default": {
+              "$type": "dimension",
+              "$value": "{spacing.medium}"
+            },
+            "compact": {
+              "$type": "dimension",
+              "$value": "{spacing.small}"
+            }
+          }
         }
       },
       "quote": {
@@ -7533,10 +8081,6 @@
               "$value": "{typography.label.2}"
             },
             "medium": {
-              "$type": "typography",
-              "$value": "{typography.label.1}"
-            },
-            "large": {
               "$type": "typography",
               "$value": "{typography.label.1}"
             }
@@ -7691,10 +8235,6 @@
             "medium": {
               "$type": "dimension",
               "$value": "{size.icon.medium}"
-            },
-            "large": {
-              "$type": "dimension",
-              "$value": "{size.icon.large}"
             }
           }
         }
@@ -7771,6 +8311,16 @@
             "$type": "color",
             "$value": "{color.status.success.text}"
           }
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.caption}"
+        }
+      },
+      "help": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
         },
         "typography": {
           "$type": "typography",
@@ -7865,6 +8415,10 @@
         "radius": {
           "$type": "dimension",
           "$value": "{radius.role.control}"
+        },
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.small}"
         }
       },
       "danger": {
@@ -7900,6 +8454,30 @@
           "color": {
             "$type": "color",
             "$value": "{color.focus.inner}"
+          }
+        }
+      },
+      "icon": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.medium}"
+        }
+      },
+      "group": {
+        "heading": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.text.muted}"
+          },
+          "typography": {
+            "$type": "typography",
+            "$value": "{typography.caption}"
+          },
+          "inline": {
+            "padding": {
+              "$type": "dimension",
+              "$value": "{spacing.medium}"
+            }
           }
         }
       }
@@ -8021,6 +8599,10 @@
               }
             }
           }
+        },
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.xsmall}"
         }
       },
       "items": {
@@ -8097,6 +8679,30 @@
             "$type": "color",
             "$value": "{color.focus.inner}"
           }
+        }
+      },
+      "section": {
+        "heading": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.text.muted}"
+          },
+          "typography": {
+            "$type": "typography",
+            "$value": "{typography.caption}"
+          },
+          "inline": {
+            "padding": {
+              "$type": "dimension",
+              "$value": "{spacing.small}"
+            }
+          }
+        }
+      },
+      "icon": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.medium}"
         }
       }
     },
@@ -8183,8 +8789,16 @@
           }
         },
         "typography": {
-          "$type": "typography",
-          "$value": "{typography.label.1}"
+          "size": {
+            "small": {
+              "$type": "typography",
+              "$value": "{typography.label.2}"
+            },
+            "medium": {
+              "$type": "typography",
+              "$value": "{typography.label.1}"
+            }
+          }
         },
         "weight": {
           "current": {
@@ -8208,8 +8822,16 @@
         },
         "inline": {
           "padding": {
-            "$type": "dimension",
-            "$value": "{spacing.small}"
+            "size": {
+              "small": {
+                "$type": "dimension",
+                "$value": "{spacing.xsmall}"
+              },
+              "medium": {
+                "$type": "dimension",
+                "$value": "{spacing.small}"
+              }
+            }
           }
         }
       },
@@ -8233,24 +8855,66 @@
           "$value": "{color.navigation.text.rest}"
         },
         "typography": {
-          "$type": "typography",
-          "$value": "{typography.label.1}"
+          "size": {
+            "small": {
+              "$type": "typography",
+              "$value": "{typography.label.2}"
+            },
+            "medium": {
+              "$type": "typography",
+              "$value": "{typography.label.1}"
+            }
+          }
         },
         "width": {
           "$type": "dimension",
           "$value": "{size.target.min}"
         }
       },
+      "summary": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.navigation.text.rest}"
+        },
+        "typography": {
+          "size": {
+            "small": {
+              "$type": "typography",
+              "$value": "{typography.label.2}"
+            },
+            "medium": {
+              "$type": "typography",
+              "$value": "{typography.label.1}"
+            }
+          }
+        }
+      },
       "prev": {
         "size": {
-          "$type": "dimension",
-          "$value": "{size.icon.medium}"
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.icon.small}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.icon.medium}"
+            }
+          }
         }
       },
       "next": {
         "size": {
-          "$type": "dimension",
-          "$value": "{size.icon.medium}"
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.icon.small}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.icon.medium}"
+            }
+          }
         }
       },
       "box": {
@@ -8272,6 +8936,34 @@
           "color": {
             "$type": "color",
             "$value": "{color.focus.inner}"
+          }
+        }
+      },
+      "first": {
+        "size": {
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.icon.small}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.icon.medium}"
+            }
+          }
+        }
+      },
+      "last": {
+        "size": {
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.icon.small}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.icon.medium}"
+            }
           }
         }
       }
@@ -8321,8 +9013,16 @@
           "$value": "{color.text.muted}"
         },
         "typography": {
-          "$type": "typography",
-          "$value": "{typography.body.1}"
+          "compact": {
+            "true": {
+              "$type": "typography",
+              "$value": "{typography.body.2}"
+            },
+            "false": {
+              "$type": "typography",
+              "$value": "{typography.body.1}"
+            }
+          }
         }
       },
       "actions": {
@@ -8344,13 +9044,41 @@
       "box": {
         "inline": {
           "padding": {
-            "$type": "dimension",
-            "$value": "{spacing.large}"
+            "compact": {
+              "true": {
+                "$type": "dimension",
+                "$value": "{spacing.small}"
+              },
+              "false": {
+                "$type": "dimension",
+                "$value": "{spacing.large}"
+              }
+            }
           }
         },
         "gap": {
           "$type": "dimension",
           "$value": "{spacing.small}"
+        }
+      },
+      "heading": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}"
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.label.1}"
+        }
+      },
+      "icon": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.large}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
         }
       }
     },
@@ -8391,8 +9119,20 @@
           }
         },
         "typography": {
-          "$type": "typography",
-          "$value": "{typography.label.1}"
+          "size": {
+            "small": {
+              "$type": "typography",
+              "$value": "{typography.label.2}"
+            },
+            "medium": {
+              "$type": "typography",
+              "$value": "{typography.label.1}"
+            },
+            "large": {
+              "$type": "typography",
+              "$value": "{typography.label.1}"
+            }
+          }
         }
       },
       "required": {
@@ -8515,8 +9255,20 @@
           }
         },
         "typography": {
-          "$type": "typography",
-          "$value": "{typography.body.1}"
+          "size": {
+            "small": {
+              "$type": "typography",
+              "$value": "{typography.body.2}"
+            },
+            "medium": {
+              "$type": "typography",
+              "$value": "{typography.body.1}"
+            },
+            "large": {
+              "$type": "typography",
+              "$value": "{typography.body.1}"
+            }
+          }
         }
       },
       "placeholder": {
@@ -8531,8 +9283,20 @@
           "$value": "{color.text.muted}"
         },
         "size": {
-          "$type": "dimension",
-          "$value": "{size.icon.medium}"
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.icon.small}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.icon.medium}"
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{size.icon.large}"
+            }
+          }
         }
       },
       "listbox": {
@@ -8679,13 +9443,37 @@
       },
       "box": {
         "height": {
-          "$type": "dimension",
-          "$value": "{size.control.medium}"
+          "size": {
+            "small": {
+              "$type": "dimension",
+              "$value": "{size.control.small}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{size.control.medium}"
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{size.control.large}"
+            }
+          }
         },
         "inline": {
           "padding": {
-            "$type": "dimension",
-            "$value": "{spacing.medium}"
+            "size": {
+              "small": {
+                "$type": "dimension",
+                "$value": "{spacing.small}"
+              },
+              "medium": {
+                "$type": "dimension",
+                "$value": "{spacing.medium}"
+              },
+              "large": {
+                "$type": "dimension",
+                "$value": "{spacing.medium}"
+              }
+            }
           }
         },
         "gap": {
@@ -8761,6 +9549,46 @@
         "typography": {
           "$type": "typography",
           "$value": "{typography.caption}"
+        }
+      },
+      "group": {
+        "heading": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.text.muted}"
+          },
+          "typography": {
+            "$type": "typography",
+            "$value": "{typography.caption}"
+          },
+          "inline": {
+            "padding": {
+              "$type": "dimension",
+              "$value": "{spacing.medium}"
+            }
+          }
+        }
+      },
+      "select": {
+        "all": {
+          "color": {
+            "$type": "color",
+            "$value": "{color.text.default}"
+          },
+          "typography": {
+            "$type": "typography",
+            "$value": "{typography.label.1}"
+          },
+          "height": {
+            "$type": "dimension",
+            "$value": "{size.target.min}"
+          },
+          "inline": {
+            "padding": {
+              "$type": "dimension",
+              "$value": "{spacing.medium}"
+            }
+          }
         }
       }
     },
@@ -9077,6 +9905,10 @@
             "medium": {
               "$type": "dimension",
               "$value": "{size.control.medium}"
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{size.control.large}"
             }
           }
         },
@@ -9090,6 +9922,10 @@
               "medium": {
                 "$type": "dimension",
                 "$value": "{spacing.medium}"
+              },
+              "large": {
+                "$type": "dimension",
+                "$value": "{spacing.large}"
               }
             }
           }
@@ -9100,7 +9936,7 @@
         },
         "radius": {
           "$type": "dimension",
-          "$value": "{radius.role.pill}"
+          "$value": "{radius.role.tag}"
         }
       },
       "motion": {
@@ -9117,33 +9953,69 @@
     "spuro": {
       "item": {
         "color": {
-          "current": {
-            "true": {
-              "rest": {
-                "$type": "color",
-                "$value": "{color.text.default}"
-              },
-              "hover": {
-                "$type": "color",
-                "$value": "{color.text.default}"
-              },
-              "focus": {
-                "$type": "color",
-                "$value": "{color.text.default}"
+          "emphasis": {
+            "medium": {
+              "current": {
+                "true": {
+                  "rest": {
+                    "$type": "color",
+                    "$value": "{color.text.default}"
+                  },
+                  "hover": {
+                    "$type": "color",
+                    "$value": "{color.text.default}"
+                  },
+                  "focus": {
+                    "$type": "color",
+                    "$value": "{color.text.default}"
+                  }
+                },
+                "false": {
+                  "rest": {
+                    "$type": "color",
+                    "$value": "{color.link.rest}"
+                  },
+                  "hover": {
+                    "$type": "color",
+                    "$value": "{color.link.hover}"
+                  },
+                  "focus": {
+                    "$type": "color",
+                    "$value": "{color.link.rest}"
+                  }
+                }
               }
             },
-            "false": {
-              "rest": {
-                "$type": "color",
-                "$value": "{color.link.rest}"
-              },
-              "hover": {
-                "$type": "color",
-                "$value": "{color.link.hover}"
-              },
-              "focus": {
-                "$type": "color",
-                "$value": "{color.link.rest}"
+            "low": {
+              "current": {
+                "true": {
+                  "rest": {
+                    "$type": "color",
+                    "$value": "{color.text.default}"
+                  },
+                  "hover": {
+                    "$type": "color",
+                    "$value": "{color.text.default}"
+                  },
+                  "focus": {
+                    "$type": "color",
+                    "$value": "{color.text.default}"
+                  }
+                },
+                "false": {
+                  "rest": {
+                    "$type": "color",
+                    "$value": "{color.text.subtle}"
+                  },
+                  "hover": {
+                    "$type": "color",
+                    "$value": "{color.text.default}"
+                  },
+                  "focus": {
+                    "$type": "color",
+                    "$value": "{color.text.subtle}"
+                  }
+                }
               }
             }
           }
@@ -9159,6 +10031,10 @@
               "$value": "{font.weight.semibold}"
             }
           }
+        },
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.xsmall}"
         }
       },
       "underline": {
@@ -9206,6 +10082,12 @@
             "$value": "{color.focus.inner}"
           }
         }
+      },
+      "icon": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
+        }
       }
     },
     "sxaltilo": {
@@ -9243,10 +10125,6 @@
               "$value": "{typography.label.2}"
             },
             "medium": {
-              "$type": "typography",
-              "$value": "{typography.label.1}"
-            },
-            "large": {
               "$type": "typography",
               "$value": "{typography.label.1}"
             }
@@ -9383,10 +10261,6 @@
             "medium": {
               "$type": "dimension",
               "$value": "{size.control.medium}"
-            },
-            "large": {
-              "$type": "dimension",
-              "$value": "{size.control.large}"
             }
           }
         },
@@ -9465,10 +10339,6 @@
             "medium": {
               "$type": "dimension",
               "$value": "{size.icon.medium}"
-            },
-            "large": {
-              "$type": "dimension",
-              "$value": "{size.icon.large}"
             }
           }
         },
@@ -9550,6 +10420,16 @@
           "$type": "typography",
           "$value": "{typography.caption}"
         }
+      },
+      "help": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.caption}"
+        }
       }
     },
     "sxvebilo": {
@@ -9620,6 +10500,12 @@
           "$type": "dimension",
           "$value": "{spacing.small}"
         }
+      },
+      "close": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.control.small}"
+        }
       }
     },
     "tabelo": {
@@ -9659,26 +10545,34 @@
         "inline": {
           "padding": {
             "density": {
-              "comfortable": {
-                "$type": "dimension",
-                "$value": "{spacing.medium}"
-              },
               "compact": {
                 "$type": "dimension",
                 "$value": "{spacing.small}"
+              },
+              "default": {
+                "$type": "dimension",
+                "$value": "{spacing.scale.150}"
+              },
+              "comfortable": {
+                "$type": "dimension",
+                "$value": "{spacing.medium}"
               }
             }
           }
         },
         "height": {
           "density": {
-            "comfortable": {
-              "$type": "dimension",
-              "$value": "{size.control.large}"
-            },
             "compact": {
               "$type": "dimension",
               "$value": "{size.control.small}"
+            },
+            "default": {
+              "$type": "dimension",
+              "$value": "{size.control.medium}"
+            },
+            "comfortable": {
+              "$type": "dimension",
+              "$value": "{size.control.large}"
             }
           }
         }
@@ -9755,6 +10649,20 @@
             "$type": "color",
             "$value": "{color.focus.inner}"
           }
+        }
+      },
+      "foot": {
+        "fill": {
+          "$type": "color",
+          "$value": "{color.background.sunken}"
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}"
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.label.1}"
         }
       }
     },
@@ -10082,6 +10990,16 @@
           "$type": "typography",
           "$value": "{typography.caption}"
         }
+      },
+      "count": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}"
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.caption}"
+        }
       }
     },
     "teksto": {
@@ -10121,6 +11039,14 @@
                 "1": {
                   "$type": "typography",
                   "$value": "{typography.code}"
+                }
+              }
+            },
+            "label": {
+              "size": {
+                "1": {
+                  "$type": "typography",
+                  "$value": "{typography.label.1}"
                 }
               }
             }

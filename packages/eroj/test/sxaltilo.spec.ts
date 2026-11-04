@@ -34,7 +34,8 @@ test.describe("fm-sxaltilo behaviour", () => {
             n.getAttribute("part"),
           ),
         ),
-    ).toEqual(["field", "control", "indicator", "label", "spinner", "message"]);
+      // Spec 036 Teil 5 ②b-3 (A-sxaltilo-4): the help under the label, before the message.
+    ).toEqual(["field", "control", "indicator", "label", "spinner", "help", "message"]);
   });
 
   test("a click on the track or the label, Space and Enter switch it; checked is reflected, input and change are fired", async ({

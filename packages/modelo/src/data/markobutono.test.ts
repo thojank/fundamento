@@ -76,7 +76,8 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
         ["checked", "boolean", false],
         ["required", "boolean", false],
         ["invalid", "boolean", false],
-        ["size", ["small", "medium", "large"], "medium"],
+        // Spec 036 Teil 5 ②b-2 (A-*-2, ②a-2): two sizes; large a deprecated alias of medium.
+        ["size", ["small", "medium"], "medium"],
         ["disabled", "boolean", false],
         ["loading", "boolean", false],
         ["name", "string", undefined],
@@ -85,6 +86,8 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
         // Spec 029 ②b-1b M-2: the status of the field.
         ["intent", ["neutral", "success", "warning", "danger"], "neutral"],
         ["message-position", ["below", "joined"], "below"],
+        // Spec 036 Teil 5 ②b-2 (A-markobutono-1): read-only, the last prop.
+        ["readonly", "boolean", false],
       ],
     );
     expect(skemo?.states).toEqual([
@@ -103,6 +106,8 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
       { name: "message", text: true, beside: true },
       // Spec 029 ②b-1 M-1: the reason for disabled.
       { name: "disabled-reason", text: true },
+      // Spec 036 Teil 5 ②b-3 (A-markobutono-4): the help, appended (Arkitekturo contract).
+      { name: "help", text: true, beside: true },
     ]);
   });
 
@@ -112,6 +117,7 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
       "box",
       "error",
       "focus-ring",
+      "help",
       "indicator",
       "label",
       "message",
@@ -169,28 +175,29 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
 
   it("sizes the check mark from size.icon.*, the box is the mark plus its border, radius control", () => {
     if (skemo === undefined) throw new Error("markobutono missing");
-    for (const size of ["small", "medium", "large"]) {
+    for (const size of ["small", "medium"]) {
       expect(boundToken(skemo, "indicator", "size", { size })?.token).toBe(`size.icon.${size}`);
     }
     expect(skemo.parts.box?.width).toBeUndefined();
     expect(boundToken(skemo, "box", "radius", {})?.token).toBe("radius.role.control");
     expect(boundToken(skemo, "box", "gap", {})?.token).toBe("spacing.small");
     expect(boundToken(skemo, "border", "width", {})?.token).toBe("border.width.default");
-    // checked × size × state: the Figma set is 2 × 3 × 5 (E2).
-    expect(combinationsOf(skemo, ["checked", "size", "state"])).toHaveLength(42);
+    // checked × size × state: the Figma set is 2 × 2 × 7 since ②b-2 (E2, A-markobutono-2).
+    expect(combinationsOf(skemo, ["checked", "size", "state"])).toHaveLength(28);
   });
 
   it("speaks role checkbox: name from the label, description from the error, Space, required in de and en like the kampo", () => {
     expect(skemo?.a11y).toEqual({
       role: "checkbox",
       name: ["slot:label", "prop:label"],
-      description: ["slot:error", "slot:message", "slot:disabled-reason"],
+      description: ["slot:help", "slot:error", "slot:message", "slot:disabled-reason"],
       states: {
         loading: ["aria-busy"],
         checked: ["aria-checked"],
         required: ["aria-required"],
         invalid: ["aria-invalid"],
         disabled: ["aria-disabled"],
+        readonly: ["aria-readonly"],
       },
       keys: ["Space"],
       texts: {
@@ -223,6 +230,7 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
       "slot:error": "filled",
       "slot:message": "empty",
       "slot:disabled-reason": "empty",
+      "slot:help": "empty",
     });
   });
 
@@ -254,6 +262,7 @@ describe("the Uzo of the markobutono (section 2, G5)", () => {
     );
     expect(uzo?.slots).toEqual({
       label: { accepts: ["text"], required: true, max: 1, nesting: 0 },
+      help: { accepts: ["text"], max: 1, nesting: 0 },
       error: { accepts: ["text"], max: 1, nesting: 0 },
       message: { accepts: ["text"], max: 1, nesting: 0 },
     });

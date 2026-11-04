@@ -61,9 +61,10 @@ test.describe("fm-elekto behaviour", () => {
       "required-mark",
       "spinner",
       "options",
-      ...["option", "control", "indicator", "option-label"],
-      ...["option", "control", "indicator", "option-label"],
-      ...["option", "control", "indicator", "option-label"],
+      // Spec 036 Teil 5 ②b-3 (A-elekto-4): the description of an option under its label.
+      ...["option", "control", "indicator", "option-label", "option-description"],
+      ...["option", "control", "indicator", "option-label", "option-description"],
+      ...["option", "control", "indicator", "option-label", "option-description"],
       "help",
       "error",
       "message",
@@ -232,7 +233,8 @@ test.describe("fm-elekto measures (G3, D-05)", () => {
   test("the circle is the dot's box plus its border, round; the dot shows on the chosen option only", async ({
     page,
   }) => {
-    const sizes = ["small", "medium", "large"] as const;
+    // Spec 036 Teil 5 ②b-2 (A-elekto-2): two sizes.
+    const sizes = ["small", "medium"] as const;
     await serve(
       page,
       out,

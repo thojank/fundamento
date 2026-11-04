@@ -307,7 +307,11 @@ describe("the double lays out no invisible child (N-5)", () => {
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     const set = pageNodes(double).find((child) => child.name === "plenstato");
     const variant = (name: string) => set?.children.find((child) => child.name === name);
-    const loading = descendant(variant("kind=loading, state=rest"), "control") as DoubleNode;
+    // Spec 036 Teil 5 ②b-2 (A-plenstato-1/2): compact false is the state it was.
+    const loading = descendant(
+      variant("kind=loading, compact=false, state=rest"),
+      "control",
+    ) as DoubleNode;
     expect(descendant(loading, "actions")?.properties.visible).toBe(false);
     // Arc, gap, text and paddings are whole numbers; only the hidden 0.01 placeholder (and the
     // spacing before it) made the column 78.01 high in the double — 74 in the file's terms.
@@ -316,7 +320,10 @@ describe("the double lays out no invisible child (N-5)", () => {
     const hundredths = (height: number) => Math.round(height * 100) % 50;
     expect(hundredths(size(loading).height)).toBe(0);
     // The empty variant shows its placeholder: there the 0.01 belongs to the column.
-    const empty = descendant(variant("kind=empty, state=rest"), "control") as DoubleNode;
+    const empty = descendant(
+      variant("kind=empty, compact=false, state=rest"),
+      "control",
+    ) as DoubleNode;
     expect(hundredths(size(empty).height)).toBe(1);
   });
 });

@@ -221,7 +221,8 @@ describe("list_eroj and the briefs", () => {
     expect(navigation.axes.map((axis) => axis.name)).toEqual(["orientation", "current"]);
     expect(navigation.required).toEqual({ props: ["label"], slots: ["items"] });
     const tabs = await output<Brief>(client, "get_ero", { name: "langetaro", brief: true });
-    expect(tabs.axes.map((axis) => axis.name)).toEqual(["active"]);
+    // Spec 036 Teil 5 ②b-2 (A-langetaro-2): size before the axis of the tabs.
+    expect(tabs.axes.map((axis) => axis.name)).toEqual(["size", "spread", "active"]);
     expect(tabs.required.props).toEqual(["label"]);
     expect([...tabs.required.slots].sort()).toEqual(["panel", "tabs"]);
     for (const brief of [navigation, tabs]) {

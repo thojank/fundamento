@@ -4,7 +4,7 @@
     "id": "uzo_01M5616GCWP8C5HZTVAGHGPC97",
     "ero": "ero_01M5616FMN3GPB1J421PMMKBZ2",
     "skemo": "ske_01M5616G0WKZNS96ANV6PG3A7R",
-    "purpose": "Sets running text in the system's type roles: body, caption, kicker, inline code.",
+    "purpose": "Sets running text in the system's type roles: body, caption, kicker, inline code; with max-lines a tooltip shows the text it cuts.",
     "instead": [
       {
         "goal": "heading",
@@ -65,6 +65,10 @@
         {
           "ero": "teksto",
           "kialo": "Code inside a sentence is a teksto with kind code, because it is spoken as code in the line of the text; a paragraph never holds a paragraph."
+        },
+        {
+          "ero": "konsileto",
+          "kialo": "A text cut after max-lines shows itself whole in a konsileto on hover and on focus, because what is cut must stay readable; the whole text is heard already, so the konsileto says nothing more."
         }
       ],
       "never": [],
@@ -84,6 +88,68 @@
       "size": "container",
       "wrap": "allowed"
     },
-    "content": []
+    "content": [],
+    "when-not": [
+      {
+        "case": {
+          "de": "Der Text leitet einen Abschnitt ein.",
+          "en": "The text heads a section."
+        },
+        "ero": "titolo"
+      },
+      {
+        "case": {
+          "de": "Ein Verweis steht im fließenden Text.",
+          "en": "A reference stands inside running text."
+        },
+        "ero": "ligilo"
+      },
+      {
+        "case": {
+          "de": "Ein Zustand in ein bis drei Wörtern steht neben einem Ding.",
+          "en": "A state in one to three words stands beside a thing."
+        },
+        "ero": "insigno"
+      },
+      {
+        "case": {
+          "de": "Der Text bringt eigene Gliederung mit, als Markdown geschrieben.",
+          "en": "The text brings structure of its own, written as Markdown."
+        },
+        "ero": "markdovido"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Wähle kind nach der Rolle des Textes: Absatz, Bildunterschrift, Dachzeile, Code oder Bezeichnung.",
+          "en": "Choose kind by the role of the text: paragraph, caption, kicker, code or label."
+        },
+        {
+          "de": "Nimm tabular für Zahlen, die untereinander stehen sollen.",
+          "en": "Use tabular for figures that should stand below each other."
+        },
+        {
+          "de": "Begrenze mit max-lines, wo der Platz knapp ist; der volle Text bleibt hörbar.",
+          "en": "Limit with max-lines where room is tight; the full text stays audible."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Mit emphasis einen Zustand ausdrücken; dafür gibt es insigno und avizo.",
+          "en": "Express a state with emphasis; insigno and avizo are there for that."
+        },
+        {
+          "de": "Einen fetten Absatz als Überschrift ausgeben.",
+          "en": "Pass off a bold paragraph as a heading."
+        }
+      ]
+    },
+    "keyboard": {
+      "none": {
+        "de": "Der Text nimmt keine Taste; ist er mit max-lines gekürzt, nimmt er den Fokus und zeigt den ganzen Text in einem Tooltip.",
+        "en": "The text takes no key; when max-lines cuts it, it takes the focus and shows the whole text in a tooltip."
+      }
+    }
   }
 }

@@ -46,6 +46,10 @@
         "name": "description",
         "text": true,
         "hidden": true
+      },
+      {
+        "name": "icon-start",
+        "decorative": true
       }
     ],
     "parts": {
@@ -89,6 +93,9 @@
         },
         "radius": {
           "fixed": "radius.role.pill"
+        },
+        "gap": {
+          "fixed": "spacing.xsmall"
         }
       }
     },

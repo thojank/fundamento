@@ -336,6 +336,10 @@ function eroIssues(entry: LoadedEro, uzo: JsonObject, eroNames: ReadonlySet<stri
   for (const { item, index } of objects(uzo.boundary)) {
     check(`/uzo/boundary/${index}/ero`, item.ero, "boundary");
   }
+  // Spec 036 Teil 5 ③: a case the Ero is not for names the Ero or Sxablono to take instead.
+  for (const { item, index } of objects(uzo["when-not"])) {
+    check(`/uzo/when-not/${index}/ero`, item.ero, "when-not");
+  }
   const composes = objectAt(uzo, "composes");
   for (const key of ["with", "never"] as const) {
     for (const { item, index } of objects(composes[key])) {

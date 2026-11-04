@@ -4,7 +4,7 @@
     "id": "uzo_01M51ZRGEPTH2CEY385GE1PB0M",
     "ero": "ero_01M51ZRFPJXJRYE15FEKX72M2K",
     "skemo": "ske_01M51ZRG2K24R0RFTV8RPJMHBH",
-    "purpose": "Fills an area while its content loads, or when there is none: loading standards, no standards yet.",
+    "purpose": "Fills an area while its content loads, or when there is none: loading standards, no standards yet; a title (slot heading) says where the person is, an icon (slot icon) what is missing.",
     "instead": [
       {
         "goal": "button-busy",
@@ -94,6 +94,21 @@
         ],
         "max": 2,
         "nesting": 0
+      },
+      "heading": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      },
+      "icon": {
+        "accepts": [
+          "icon",
+          "ikono"
+        ],
+        "max": 1,
+        "nesting": 0
       }
     },
     "layout": {
@@ -116,6 +131,54 @@
           "count": 3
         }
       }
-    ]
+    ],
+    "when-not": [
+      {
+        "case": {
+          "de": "Gewartet wird auf die Handlung einer Schaltfläche, die gerade arbeitet.",
+          "en": "The wait is for the action of a button that is working."
+        },
+        "ero": "butono"
+      },
+      {
+        "case": {
+          "de": "Es soll gesagt werden, dass etwas fehlgeschlagen ist.",
+          "en": "It is to be said that something failed."
+        },
+        "ero": "avizo"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Wähle kind loading, solange Inhalt lädt, und kind empty, wenn keiner da ist.",
+          "en": "Choose kind loading while content loads, and kind empty when there is none."
+        },
+        {
+          "de": "Sag im leeren Zustand, was als Nächstes zu tun ist, und biete die Aktion dazu an.",
+          "en": "Say in the empty state what to do next, and offer the action for it."
+        },
+        {
+          "de": "Nimm compact in einer Tabelle oder Seitenleiste.",
+          "en": "Use compact in a table or a side bar."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Aktionen anbieten, während noch geladen wird.",
+          "en": "Offer actions while it is still loading."
+        },
+        {
+          "de": "Graue Platzhalterformen des kommenden Inhalts zeichnen, denn sie versprechen ein Layout, das die Daten nicht haben müssen.",
+          "en": "Draw grey placeholder shapes of the coming content, because they promise a layout the data may not have."
+        }
+      ]
+    },
+    "keyboard": {
+      "none": {
+        "de": "Der Zustand selbst nimmt keine Taste; eine Aktion im leeren Zustand ist eine gewöhnliche Schaltfläche für Enter und Leertaste.",
+        "en": "The state itself takes no key; an action in the empty state is an ordinary button for Enter and Space."
+      }
+    }
   }
 }

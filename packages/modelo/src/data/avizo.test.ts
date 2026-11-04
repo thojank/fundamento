@@ -42,6 +42,8 @@ describe("avizo in the repo Modelo (section ③, G1, G2)", () => {
       [
         ["intent", INTENTS, "info"],
         ["dismissible", "boolean", false],
+        // Spec 036 Teil 5 ②b-2 (A-avizo-1): card in the content or band over the page.
+        ["frame", ["card", "band"], "card"],
       ],
     );
     expect(skemo?.states).toEqual(["rest"]);
@@ -76,11 +78,14 @@ describe("avizo in the repo Modelo (section ③, G1, G2)", () => {
     expect(skemo.parts.message?.typography).toEqual({ fixed: "typography.body.1" });
     expect(skemo.parts.details?.typography).toEqual({ fixed: "typography.caption" });
     expect(skemo.parts.dismiss?.size).toEqual({ fixed: "size.control.small" });
-    expect(skemo.parts.box?.radius).toEqual({ fixed: "radius.role.surface" });
+    expect(skemo.parts.box?.radius).toEqual({ by: ["frame"] });
+    expect(boundToken(skemo, "box", "radius", { frame: "card" })?.token).toBe(
+      "radius.role.surface",
+    );
     expect(skemo.parts.box?.["inline-padding"]).toEqual({ fixed: "spacing.medium" });
-    expect(styledProps(skemo)).toEqual(["intent"]);
-    expect(variantKeys(skemo)).toEqual(["intent", "state"]);
-    expect(combinationsOf(skemo, variantKeys(skemo))).toHaveLength(4);
+    expect(styledProps(skemo)).toEqual(["intent", "frame"]);
+    expect(variantKeys(skemo)).toEqual(["intent", "frame", "state"]);
+    expect(combinationsOf(skemo, variantKeys(skemo))).toHaveLength(8);
     for (const intent of INTENTS) {
       expect(boundToken(skemo, "surface", "fill", { intent })?.token).toBe(
         `color.status.${intent}.weak`,
@@ -223,7 +228,7 @@ describe("the Uzo of the avizo (section ③, G5)", () => {
   it("the brief names intent as the axis, the message as a duty, and stays under 750", () => {
     if (avizo === undefined) throw new Error("missing");
     const brief = briefOf(avizo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["intent"]);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["intent", "frame"]);
     expect(brief.required).toEqual({ props: [], slots: ["message"] });
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
   });

@@ -24,8 +24,13 @@ describe("the Eroj of Spec 020 ③", () => {
     const skemo = ero("kodbloko")?.skemo;
     expect(skemo?.a11y.role).toBe("figure");
     expect(skemo?.a11y.name).toEqual(["slot:caption"]);
+    // Spec 036 Teil 5 ②b-5 (A-kodbloko-1): copyable stays first; four props follow it.
     expect(skemo?.props.map((prop) => [prop.name, prop.kind, prop.default])).toEqual([
       ["copyable", "boolean", false],
+      ["line-numbers", "boolean", false],
+      ["wrap", "boolean", false],
+      ["language", "string", undefined],
+      ["highlight", "string", undefined],
     ]);
     expect(skemo?.slots.map((slot) => slot.name)).toEqual(["label", "caption"]);
     expect(skemo?.a11y.texts?.copyable).toEqual({ de: "Kopieren", en: "Copy" });
@@ -38,6 +43,10 @@ describe("the Eroj of Spec 020 ③", () => {
     expect(entry?.skemo.props.map((prop) => [prop.name, prop.kind, prop.default])).toEqual([
       ["source", "string", undefined],
       ["start-level", "enum", "2"],
+      // Spec 036 Teil 5 ②b-2 (A-markdovido-1).
+      ["density", "enum", "default"],
+      // Spec 036 Teil 5 ②b-4 (A-markdovido-3).
+      ["streaming", "boolean", false],
     ]);
     expect(entry?.skemo.props.find((prop) => prop.name === "start-level")?.values).toEqual([
       "2",

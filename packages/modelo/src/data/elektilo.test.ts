@@ -21,7 +21,8 @@ import { validateModelo } from "../validate/validate-modelo.js";
 
 // Spec 025 ①: the step buttons and the clear button are the kampo's own (kind number, search).
 // Spec 029 ②b-1b M-2: the status icon is the kampo's own (A-kampo-4).
-const KAMPO_OWN = ["decrement", "increment", "clear", "status-icon"];
+// Spec 036 Teil 5 ②b-2 (A-kampo-1): the unit of a number is the kampo's own too.
+const KAMPO_OWN = ["decrement", "increment", "clear", "status-icon", "unit"];
 
 const { modelo } = loadModelo(defaultModeloSource());
 if (modelo === undefined) throw new Error("the repo Modelo must load");
@@ -120,6 +121,8 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
         // Spec 029 ②b-1b M-2: the status of the field.
         ["intent", ["neutral", "success", "warning", "danger"], "neutral"],
         ["message-position", ["below", "joined"], "below"],
+        // Spec 036 Teil 5 ②b-2 (A-elektilo-1): read-only, the last prop.
+        ["readonly", "boolean", false],
       ],
     );
     expect(skemo?.props.find((prop) => prop.name === "placeholder")?.description).toMatch(
@@ -169,6 +172,8 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
         ...Object.keys(kampo.skemo.parts).filter((part) => !KAMPO_OWN.includes(part)),
         "clear",
         "indicator",
+        // Spec 036 Teil 5 ②b-3 (A-elektilo-4): the heading of a group of options.
+        "group-heading",
       ].sort(),
     );
     for (const [part, properties] of Object.entries(kampo.skemo.parts)) {
@@ -228,8 +233,10 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
         required: ["aria-required"],
         invalid: ["aria-invalid"],
         disabled: ["aria-disabled"],
+        readonly: ["aria-readonly"],
       },
-      keys: ["ArrowUp", "ArrowDown", "Enter", "Escape"],
+      // Spec 036 Teil 5 ②b-4 (A-elektilo-5): Home, End and typed words, the platform's.
+      keys: ["ArrowUp", "ArrowDown", "Home", "End", "Enter", "Escape", "Character"],
       texts: {
         "clear-name": { de: "{label} leeren", en: "Clear {label}" },
         required: { de: "erforderlich", en: "required" },
@@ -275,8 +282,9 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       ["choose-many", {}, "elekto-options-few"],
     ]);
     expect(skemo?.goals?.[0]?.keywords).toEqual({
-      en: ["list", "select", "country", "language", "many"],
-      de: ["liste", "auswählen", "land", "sprache", "vielen"],
+      // Spec 036 Teil 5 ②b-4: the words of the decided boundary grouped-options.
+      en: ["list", "select", "country", "language", "many", "optgroup", "grouped"],
+      de: ["liste", "auswählen", "land", "sprache", "vielen", "gruppiert", "optionsgruppen"],
     });
     const words = (skemo?.goals ?? []).flatMap((goal) => Object.values(goal.keywords).flat());
     for (const word of ["from", "of", "aus", "von", "one", "eine", "open", "öffnen", "dropdown"]) {
@@ -289,7 +297,8 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
 describe("the Uzo of the elektilo (section 4, G5)", () => {
   it("states the purpose of the spec, requires the label and at least two options without an upper bound, takes its width from the container", () => {
     expect(uzo?.purpose).toBe(
-      "Chooses one of many options from a list that opens on demand: country, language, year.",
+      // Spec 036 Teil 5 ②b-3 (A-elektilo-4): options name their group.
+      "Chooses one of many options from a list that opens on demand: country, language, year; options of one group name it (attribute group) and stand under its heading.",
     );
     expect(uzo?.slots).toEqual({
       label: { accepts: ["text"], required: true, max: 1, nesting: 0 },
@@ -315,15 +324,15 @@ describe("the Uzo of the elektilo (section 4, G5)", () => {
     expect(uzo?.instead[2]?.kialo).toMatch(/plurelektilo/);
   });
 
-  it("stops at a drawn popup (the list is the platform's), asks a person about grouped options, never without a visible label", () => {
+  it("stops at a drawn popup (the list is the platform's), never without a visible label; grouped options are decided", () => {
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
       // Spec 025 ③: a drawn list is the listelektilo's.
       ["custom-popup", "use-instead"],
-      ["grouped-options", "ask-human"],
+      // Spec 036 Teil 5 ②b-4: grouped-options is decided (②a-3; the groups came with ②b-3).
       ["no-visible-label", "not-supported"],
     ]);
     expect(uzo?.boundary[0]?.kialo).toMatch(/listelektilo/);
-    expect(uzo?.boundary[2]?.via).toEqual({ regulo: "field-label-visible" });
+    expect(uzo?.boundary[1]?.via).toEqual({ regulo: "field-label-visible" });
     for (const entry of [...(uzo?.boundary ?? []), ...(uzo?.instead ?? [])]) {
       expect(entry.kialo).toMatch(/\bbecause\b/);
     }

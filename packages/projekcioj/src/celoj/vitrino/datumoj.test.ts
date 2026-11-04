@@ -434,10 +434,12 @@ describe("the Vitrino shows the sxaltilo checked and unchecked (Spec 010 ①)", 
     expect(grid).toContain(
       '<th scope="col">rest</th><th scope="col">checked</th><th scope="col">disabled</th>',
     );
-    for (const size of ["small", "medium", "large"]) {
-      expect(grid).toContain(`<fm-sxaltilo size="${size}">${size}</fm-sxaltilo>`);
-      expect(grid).toContain(`<fm-sxaltilo size="${size}" checked>${size}</fm-sxaltilo>`);
-      expect(grid).toContain(`<fm-sxaltilo size="${size}" disabled>${size}</fm-sxaltilo>`);
+    // Spec 036 Teil 5 ②b-3 (A-sxaltilo-4): every cell shows the help, as at the fields.
+    const help = '<span slot="help">Hinweis</span>';
+    for (const size of ["small", "medium"]) {
+      expect(grid).toContain(`<fm-sxaltilo size="${size}">${size}${help}</fm-sxaltilo>`);
+      expect(grid).toContain(`<fm-sxaltilo size="${size}" checked>${size}${help}</fm-sxaltilo>`);
+      expect(grid).toContain(`<fm-sxaltilo size="${size}" disabled>${size}${help}</fm-sxaltilo>`);
     }
   });
 });
@@ -451,14 +453,19 @@ describe("the Vitrino shows the markobutono ticked, required, invalid and disabl
     expect(grid).toContain(
       '<th scope="col">rest</th><th scope="col">checked</th><th scope="col">required</th><th scope="col">invalid</th><th scope="col">disabled</th>',
     );
-    for (const size of ["small", "medium", "large"]) {
-      expect(grid).toContain(`<fm-markobutono size="${size}">${size}</fm-markobutono>`);
-      expect(grid).toContain(`<fm-markobutono size="${size}" checked>${size}</fm-markobutono>`);
+    // Spec 036 Teil 5 ②b-3 (A-markobutono-4): every cell shows the help, as at the fields.
+    const help = '<span slot="help">Hinweis</span>';
+    for (const size of ["small", "medium"]) {
+      expect(grid).toContain(`<fm-markobutono size="${size}">${size}${help}</fm-markobutono>`);
       expect(grid).toContain(
-        `<fm-markobutono size="${size}" invalid>${size}<span slot="error">Fehler</span></fm-markobutono>`,
+        `<fm-markobutono size="${size}" checked>${size}${help}</fm-markobutono>`,
+      );
+      expect(grid).toContain(
+        `<fm-markobutono size="${size}" invalid>${size}<span slot="error">Fehler</span>${help}</fm-markobutono>`,
       );
     }
-    expect(grid.match(/slot="error"/g)).toHaveLength(3);
+    // Spec 036 Teil 5 ②b-2 (A-markobutono-2): a row per size, two sizes.
+    expect(grid.match(/slot="error"/g)).toHaveLength(2);
   });
 
   it("says that the label of the checkbox may break", () => {
@@ -479,7 +486,7 @@ describe("the Vitrino shows the elekto with three options, required, invalid and
     expect(grid).toContain(
       '<th scope="col">rest</th><th scope="col">required</th><th scope="col">invalid</th><th scope="col">disabled</th>',
     );
-    for (const size of ["small", "medium", "large"]) {
+    for (const size of ["small", "medium"]) {
       expect(grid).toContain(
         `<fm-elekto size="${size}" value="1">${size}${OPTIONS}<span slot="help">Hinweis</span></fm-elekto>`,
       );
@@ -488,8 +495,9 @@ describe("the Vitrino shows the elekto with three options, required, invalid and
       );
     }
     // Spec 029 ②b-1 M-5: a fifth column, loading.
-    expect(grid.match(/<data slot="options"/g)).toHaveLength(3 * 5 * 3);
-    expect(grid.match(/slot="error"/g)).toHaveLength(3);
+    // Spec 036 Teil 5 ②b-2 (A-elekto-2): a row per size, two sizes.
+    expect(grid.match(/<data slot="options"/g)).toHaveLength(2 * 5 * 3);
+    expect(grid.match(/slot="error"/g)).toHaveLength(2);
     expect(VITRINO_OPTIONS).toEqual(["Eins", "Zwei", "Drei"]);
   });
 
@@ -555,8 +563,9 @@ describe("the Vitrino shows the tekstareo and the dialogo (Spec 011 ②)", () =>
 
   it("dialogo: a row per size × reason, each cell a button that opens the closed dialog with heading, message, reason label and two actions", () => {
     const grid = datumoj.eroj.dialogo ?? "";
-    // Six, and the dialog of Nachlese 7 ② B-8 (its message in two paragraphs).
-    expect((grid.match(/<fm-dialogo /g) ?? []).length).toBe(7);
+    // Six, and the dialog of Nachlese 7 ② B-8 (its message in two paragraphs); Spec 036 Teil 5
+    // ②b-2 (A-dialogo-2): nine with full.
+    expect((grid.match(/<fm-dialogo /g) ?? []).length).toBe(10);
     expect(grid).toContain(
       '<fm-butono emphasis="medium" data-fm-opens="fm-vitrino-dialogo-small-none">Öffnen</fm-butono>',
     );
@@ -573,7 +582,7 @@ describe("the Vitrino shows the tekstareo and the dialogo (Spec 011 ②)", () =>
     expect(grid).toContain(
       'reason="none">small · none<span slot="message">Nachricht</span><span slot="reason">Begründung</span><fm-butono',
     );
-    expect((grid.match(/<span slot="reason-help">/g) ?? []).length).toBe(4);
+    expect((grid.match(/<span slot="reason-help">/g) ?? []).length).toBe(6);
     expect(grid).toContain(
       '<fm-butono slot="actions" emphasis="low">Abbrechen</fm-butono><fm-butono slot="actions" emphasis="high">Bestätigen</fm-butono>',
     );
@@ -590,7 +599,11 @@ describe("the Vitrino shows the tekstareo and the dialogo (Spec 011 ②)", () =>
 describe("the Vitrino shows the insigno, the avizo and the plenstato (Spec 011 ③)", () => {
   it("insigno: a row per intent × size, the label and the hidden description", () => {
     const grid = datumoj.eroj.insigno ?? "";
-    expect((grid.match(/<fm-insigno /g) ?? []).length).toBe(10);
+    // Spec 036 Teil 5 ②b-3 (A-insigno-4): and the row „mit Icon“, one per intent.
+    expect((grid.match(/<fm-insigno /g) ?? []).length).toBe(15);
+    expect(grid).toContain(
+      '<fm-insigno intent="success"><fm-ikono slot="icon-start" name="check"></fm-ikono>success</fm-insigno>',
+    );
     expect(grid).toContain(
       '<fm-insigno intent="success" size="small">success · small<span slot="description">Beschreibung</span></fm-insigno>',
     );
@@ -599,18 +612,24 @@ describe("the Vitrino shows the insigno, the avizo and the plenstato (Spec 011 �
 
   it("avizo: a row per intent, the columns rest and dismissible, heading and details with their words", () => {
     const grid = datumoj.eroj.avizo ?? "";
-    // Five, and the row of Nachlese 7 ② B-5 (a list and code in the details).
-    expect((grid.match(/<tr>/g) ?? []).length).toBe(6);
+    // Five, and the row of Nachlese 7 ② B-5 (a list and code in the details); Spec 036 Teil 5
+    // ②b-2 (A-avizo-1): a row per intent × frame.
+    expect((grid.match(/<tr>/g) ?? []).length).toBe(10);
     expect(grid).toContain('<th scope="col">dismissible</th>');
     expect(grid).toContain(
-      '<fm-avizo intent="danger" dismissible>danger<span slot="heading">Überschrift</span><span slot="details">Einzelheit</span></fm-avizo>',
+      '<fm-avizo intent="danger" frame="card" dismissible>danger · card<span slot="heading">Überschrift</span><span slot="details">Einzelheit</span></fm-avizo>',
     );
   });
 
   it("plenstato: a row per kind, the text alone", () => {
     const grid = datumoj.eroj.plenstato ?? "";
-    expect(grid).toContain('<fm-plenstato kind="loading">loading</fm-plenstato>');
-    expect(grid).toContain('<fm-plenstato kind="empty">empty</fm-plenstato>');
+    // Spec 036 Teil 5 ②b-3 (A-plenstato-4): with the title in every cell (F-5, the example word).
+    expect(grid).toContain(
+      '<fm-plenstato kind="loading">loading<span slot="heading">Überschrift</span></fm-plenstato>',
+    );
+    expect(grid).toContain(
+      '<fm-plenstato kind="empty">empty<span slot="heading">Überschrift</span></fm-plenstato>',
+    );
     expect(grid).not.toContain('slot="actions"');
   });
 });
@@ -622,14 +641,15 @@ describe("the Vitrino shows the insigno, the avizo and the plenstato (Spec 011 �
 describe("the Vitrino shows the tabelo, the atributlisto and the mezurilo (Spec 011 ④)", () => {
   it("tabelo: a row per density, each a captioned table with a sortable head, a numeric column and three rows", () => {
     const grid = datumoj.eroj.tabelo ?? "";
-    expect((grid.match(/<fm-tabelo /g) ?? []).length).toBe(2);
+    // Spec 036 Teil 5 ②b-2 (A-tabelo-1): three densities.
+    expect((grid.match(/<fm-tabelo /g) ?? []).length).toBe(3);
     expect(grid).toContain(
       '<fm-tabelo density="compact">compact<table slot="content"><thead><tr><th scope="col" data-sort="name">Name</th>',
     );
     expect(grid).toContain('<th scope="col" numeric>Anzahl</th>');
     // Three row headers per table, plus the Vitrino's own row header per combination.
     // And the row of Nachlese 7 ② B-3 (the empty table with its butono).
-    expect((grid.match(/<th scope="row">/g) ?? []).length).toBe(9);
+    expect((grid.match(/<th scope="row">/g) ?? []).length).toBe(13);
   });
 
   it("atributlisto: a row per layout (columns, stacked, auto since Spec 014 ①), each a dl with three entries, the last value empty", () => {
@@ -637,9 +657,14 @@ describe("the Vitrino shows the tabelo, the atributlisto and the mezurilo (Spec 
     expect((grid.match(/<fm-atributlisto /g) ?? []).length).toBe(3);
     // Abnahme ① F-1: the prop value is the row's heading, never text of the list itself — a word
     // in the default slot would stand above the dl as content.
-    expect(grid).toContain('<fm-atributlisto layout="auto"><dl><dt>Version</dt><dd>3</dd>');
+    // Spec 036 Teil 5 ②b-3 (A-atributlisto-4): with the title in every cell (F-5, the example word).
+    expect(grid).toContain(
+      '<fm-atributlisto layout="auto"><span slot="heading">Überschrift</span><dl><dt>Version</dt><dd>3</dd>',
+    );
     expect(grid).not.toMatch(/<fm-atributlisto[^>]*>[^<]/);
-    expect(grid).toContain('<fm-atributlisto layout="stacked"><dl><dt>Version</dt><dd>3</dd>');
+    expect(grid).toContain(
+      '<fm-atributlisto layout="stacked"><span slot="heading">Überschrift</span><dl><dt>Version</dt><dd>3</dd>',
+    );
     expect(grid).toContain("<dt>Gültig seit</dt><dd></dd></dl></fm-atributlisto>");
   });
 
@@ -664,18 +689,24 @@ describe("the Vitrino shows the tabelo, the atributlisto and the mezurilo (Spec 
 describe("the Vitrino shows the navigado and the langetaro (Spec 011 ⑤)", () => {
   it("navigado: one row, three links of the Vitrino's words, the first current, named", () => {
     const grid = datumoj.eroj.navigado ?? "";
-    expect((grid.match(/<fm-navigado /g) ?? []).length).toBe(1);
+    // Spec 036 Teil 5 ②b-3 (A-navigado-1, A-navigado-4): a second row shows the icons of the items
+    // and a section heading, standing vertically.
+    expect((grid.match(/<fm-navigado /g) ?? []).length).toBe(2);
+    expect(grid).toContain(
+      '<fm-navigado orientation="vertical" label="Navigation" page="1"><h3>Abschnitt</h3><a href="#fm-vitrino-navigado" data-page="1"><fm-ikono slot="icon-start" name="check"></fm-ikono>Eins</a>',
+    );
     expect(grid).toContain(
       '<fm-navigado label="Navigation" page="1"><a href="#fm-vitrino-navigado" data-page="1">Eins</a><a href="#fm-vitrino-navigado" data-page="2">Zwei</a>',
     );
     expect(grid).toContain('<th scope="row">rest</th>');
   });
 
-  it("langetaro: one row, three tabs, the first selected, the panel with the first word, named", () => {
+  it("langetaro: a row per size, three tabs, the first selected, the panel with the first word, named", () => {
     const grid = datumoj.eroj.langetaro ?? "";
-    expect((grid.match(/<fm-langetaro /g) ?? []).length).toBe(1);
+    // Spec 036 Teil 5 ②b-2 (A-langetaro-2): a row per size.
+    expect((grid.match(/<fm-langetaro /g) ?? []).length).toBe(3);
     expect(grid).toContain(
-      '<fm-langetaro label="Reiter" selected="1"><data value="1">Eins</data><data value="2">Zwei</data><data value="3">Drei</data><div slot="panel">Eins</div></fm-langetaro>',
+      '<fm-langetaro size="medium" label="Reiter" selected="1"><data value="1">Eins</data><data value="2">Zwei</data><data value="3">Drei</data><div slot="panel">Eins</div></fm-langetaro>',
     );
   });
 });
@@ -755,10 +786,10 @@ describe("the Vitrino shows the titolo and the teksto (Spec 014 ③)", () => {
     expect((section.match(/<fm-titolo /g) ?? []).length).toBe(7);
   });
 
-  it("the teksto has fifteen rows of kind · size · emphasis", () => {
+  it("the teksto has eighteen rows of kind · size · emphasis", () => {
     const section = datumoj.eroj.teksto ?? "";
-    // And the code inside the line of Nachlese 7 ② B-10.
-    expect((section.match(/<fm-teksto /g) ?? []).length).toBe(16);
+    // And the code inside the line of Nachlese 7 ② B-10; Spec 036 Teil 5 ②b-2 (A-teksto-1): label.
+    expect((section.match(/<fm-teksto /g) ?? []).length).toBe(19);
     expect(section).toContain(
       '<fm-teksto kind="code" size="1" emphasis="high">code · 1 · high</fm-teksto>',
     );
@@ -823,19 +854,26 @@ describe("the Vitrino shows the faldilo and the kompletigilo (Spec 014 ⑤)", ()
 // row, named by the Modelo's word, and the spuro with three links of the Vitrino's words, the last
 // the current page.
 describe("the Vitrino shows the pagxigilo and the spuro (Spec 015 ①)", () => {
-  it("pagxigilo: one row, page 5 of 10, no children (the Modelo's word names the landmark)", () => {
+  it("pagxigilo: a row per size, page 5 of 10, no children (the Modelo's word names the landmark)", () => {
     const grid = datumoj.eroj.pagxigilo ?? "";
-    expect((grid.match(/<fm-pagxigilo /g) ?? []).length).toBe(1);
-    expect(grid).toContain('<fm-pagxigilo total-pages="10" page="5"></fm-pagxigilo>');
+    // Spec 036 Teil 5 ②b-2 (A-pagxigilo-2): a row per size.
+    expect((grid.match(/<fm-pagxigilo /g) ?? []).length).toBe(2);
+    expect(grid).toContain('<fm-pagxigilo size="medium" total-pages="10" page="5"></fm-pagxigilo>');
     expect(grid).not.toContain("unbekannt");
-    expect(grid).toContain('<th scope="row">rest</th>');
+    expect(grid).toContain('<th scope="row">medium</th>');
   });
 
-  it("spuro: one row, two links and the current page as text, the Vitrino's words (the Modelo's word names the landmark)", () => {
+  it("spuro: a row per emphasis, two links and the current page as text, the Vitrino's words (the Modelo's word names the landmark)", () => {
     const grid = datumoj.eroj.spuro ?? "";
-    expect((grid.match(/<fm-spuro /g) ?? []).length).toBe(1);
+    // Spec 036 Teil 5 ②b-2 (A-spuro-1): a row per emphasis.
+    // Spec 036 Teil 5 ②b-3 (A-spuro-4): and the row „mit Icon“ per emphasis, the icon in the
+    // first item.
+    expect((grid.match(/<fm-spuro /g) ?? []).length).toBe(4);
     expect(grid).toContain(
-      '<fm-spuro page="3"><a href="#fm-vitrino-spuro" data-page="1">Eins</a><a href="#fm-vitrino-spuro" data-page="2">Zwei</a><span data-page="3">Drei</span></fm-spuro>',
+      '<fm-spuro emphasis="low" page="3"><a href="#fm-vitrino-spuro" data-page="1"><fm-ikono slot="icon-start" name="check"></fm-ikono>Eins</a>',
+    );
+    expect(grid).toContain(
+      '<fm-spuro emphasis="medium" page="3"><a href="#fm-vitrino-spuro" data-page="1">Eins</a><a href="#fm-vitrino-spuro" data-page="2">Zwei</a><span data-page="3">Drei</span></fm-spuro>',
     );
   });
 });
@@ -1166,9 +1204,10 @@ describe("the Vitrino shows the clear button of the fields (Abnahme #122)", () =
     expect(datumoj.loeschen).toContain(
       '<th scope="col">mit Wert</th><th scope="col">leer</th><th scope="col">disabled</th><th scope="col">readonly</th>',
     );
-    // elektilo and kompletigilo have no readonly in their Skemo: their cell says so.
-    expect((datumoj.loeschen ?? "").match(/ clearable/g)).toHaveLength(18);
-    expect((datumoj.loeschen ?? "").match(/<td>kein readonly<\/td>/g)).toHaveLength(2);
+    // The kompletigilo has no readonly in its Skemo: its cell says so (Spec 036 Teil 5 ②b-2,
+    // A-elektilo-1: the elektilo has it since).
+    expect((datumoj.loeschen ?? "").match(/ clearable/g)).toHaveLength(19);
+    expect((datumoj.loeschen ?? "").match(/<td>kein readonly<\/td>/g)).toHaveLength(1);
   });
 
   it("the date picker and the styled list show the column loading", () => {

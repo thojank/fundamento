@@ -98,6 +98,54 @@
           "kind": "levels-in-order"
         }
       }
-    ]
+    ],
+    "when-not": [
+      {
+        "case": {
+          "de": "Neben der Überschrift sollen Aktionen und Etiketten der Seite stehen.",
+          "en": "Actions and badges of the page are to stand beside the heading."
+        },
+        "ero": "pagxo"
+      },
+      {
+        "case": {
+          "de": "Der Text leitet keinen Abschnitt ein, er soll nur hervortreten.",
+          "en": "The text heads no section; it is only to stand out."
+        },
+        "ero": "teksto"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Setze level nach dem Aufbau der Seite, ohne eine Ebene zu überspringen.",
+          "en": "Set level by the structure of the page, without skipping a level."
+        },
+        {
+          "de": "Wähle size frei für das Aussehen; level bleibt die Struktur.",
+          "en": "Choose size freely for the look; level stays the structure."
+        },
+        {
+          "de": "Setze focusable bei der Überschrift, auf die eine Anwendung nach einem Seitenwechsel den Fokus legt.",
+          "en": "Set focusable on the heading an application puts the focus on after a change of page."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Eine Ebene wählen, weil sie die passende Größe hat.",
+          "en": "Choose a level because it has the right size."
+        },
+        {
+          "de": "Selbst eine Zeile aus Überschrift und Aktionen bauen; diese Zeile gehört der Seite (pagxo).",
+          "en": "Build a row of heading and actions yourself; that row belongs to the page (pagxo)."
+        }
+      ]
+    },
+    "keyboard": {
+      "none": {
+        "de": "Die Überschrift nimmt keine Taste; mit focusable kann eine Anwendung ihr den Fokus geben, in der Tab-Reihenfolge steht sie trotzdem nicht.",
+        "en": "The heading takes no key; with focusable an application can give it the focus, yet it does not stand in the tab order."
+      }
+    }
   }
 }

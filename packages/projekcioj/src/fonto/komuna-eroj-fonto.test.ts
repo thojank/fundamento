@@ -92,7 +92,8 @@ describe("Spec 029 ①b b): the Ero-Tokens of komuna after the Fonto", () => {
   });
 
   it("karto: white, a fine border, a light shadow", () => {
-    expect(hex(light, "ero.karto.surface.fill")).toBe("#ffffff");
+    // Spec 036 Teil 5 ②b-2 (A-karto-1): the surface by emphasis, high the card it was.
+    expect(hex(light, "ero.karto.surface.fill.emphasis.high")).toBe("#ffffff");
     expect(px(light, "ero.karto.border.width")).toBe(1);
     // The fine border of the Fonto is 8 % black: composited over the white card.
     const border = light["ero.karto.border.color"]?.value as {
@@ -105,7 +106,7 @@ describe("Spec 029 ①b b): the Ero-Tokens of komuna after the Fonto", () => {
     const seen = `#${over.map((c) => c.toString(16).padStart(2, "0")).join("")}`;
     expect(contrast(seen, "#ffffff")).toBeLessThan(1.5);
     // The light shadow of the Fonto (elevation low) is the raised shadow of komuna.
-    expect(JSON.stringify(light["ero.karto.surface.shadow"]?.value)).toBe(
+    expect(JSON.stringify(light["ero.karto.surface.shadow.emphasis.high"]?.value)).toBe(
       JSON.stringify(light["elevation.shadow.raised"]?.value),
     );
   });
@@ -118,7 +119,9 @@ describe("Spec 029 ①b b): the Ero-Tokens of komuna after the Fonto", () => {
     expect(heading?.fontSize?.value).toBe(20);
     expect(heading?.fontWeight).toBe(600);
     expect(px(light, "ero.dialogo.box.inline.padding")).toBe(16);
-    expect(px(light, "ero.dialogo.surface.radius")).toBe(12);
+    // Spec 036 Teil 5 ②b-2 (A-dialogo-2): the radius by size; small and medium keep it.
+    expect(px(light, "ero.dialogo.surface.radius.size.small")).toBe(12);
+    expect(px(light, "ero.dialogo.surface.radius.size.medium")).toBe(12);
     expect(hex(light, "ero.dialogo.border.color")).toBe(hex(light, "ero.dialogo.surface.fill"));
   });
 

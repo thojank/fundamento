@@ -108,6 +108,11 @@
         ],
         "default": "below",
         "description": "Spec 029 ②b-1b M-2: where the message and the error stand – below the field with the space of the field, or joined to it without that space. Never only in a tooltip: the message must be seen (error-not-color-only, error-says-what-to-do)."
+      },
+      {
+        "name": "max-length",
+        "kind": "number",
+        "description": "Spec 029 ②a (A-tekstareo-1, ②a-3: the boundary character-count decided): the most characters the area takes; a count under the area says how many are written of how many and describes the area. Empty: no limit, no count."
       }
     ],
     "states": [
@@ -260,6 +265,14 @@
           "by": [
             "state"
           ]
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "count": {
+        "color": {
+          "fixed": "color.text.muted"
         },
         "typography": {
           "fixed": "typography.caption"
@@ -511,7 +524,8 @@
         "slot:help",
         "slot:error",
         "slot:message",
-        "slot:disabled-reason"
+        "slot:disabled-reason",
+        "prop:max-length"
       ],
       "states": {
         "required": [
@@ -539,6 +553,10 @@
         "loading": {
           "de": "lädt",
           "en": "loading"
+        },
+        "count-count": {
+          "de": "{count} von {max-length} Zeichen",
+          "en": "{count} of {max-length} characters"
         }
       }
     },
@@ -616,14 +634,18 @@
             "description",
             "reason",
             "paragraph",
-            "multiline"
+            "multiline",
+            "maxlength",
+            "character-limit"
           ],
           "de": [
             "kommentar",
             "beschreibung",
             "begründung",
             "absatz",
-            "mehrzeilig"
+            "mehrzeilig",
+            "zeichenlimit",
+            "zeichenzähler"
           ]
         },
         "props": {},

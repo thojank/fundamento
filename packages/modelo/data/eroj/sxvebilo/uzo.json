@@ -4,7 +4,7 @@
     "id": "uzo_01M564NXJNCV7VW68BBE42BEA1",
     "ero": "ero_01M564NWTD0WC9QWBP0GGTQZYX",
     "skemo": "ske_01M564NX6FGBH4NHKDSHCCM5W4",
-    "purpose": "Opens a non-modal layer with content next to its trigger; the page stays usable.",
+    "purpose": "Opens a non-modal layer with content next to its trigger; the page stays usable; with dismissible a close button ends it on touch, where there is no Escape.",
     "instead": [
       {
         "goal": "decision",
@@ -142,6 +142,66 @@
       "size": "content",
       "wrap": "allowed"
     },
-    "content": []
+    "content": [],
+    "when-not": [
+      {
+        "case": {
+          "de": "Die Person muss eine Entscheidung treffen, bevor es weitergeht.",
+          "en": "The person has to make a decision before anything goes on."
+        },
+        "ero": "dialogo"
+      },
+      {
+        "case": {
+          "de": "Es ist ein kurzer Hinweis ohne etwas zum Bedienen.",
+          "en": "It is a short hint with nothing to operate."
+        },
+        "ero": "konsileto"
+      },
+      {
+        "case": {
+          "de": "Die Ebene enthält eine Liste von Aktionen für ein Ding.",
+          "en": "The layer holds a list of actions for one thing."
+        },
+        "ero": "menuo"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Gib der Ebene mit label einen Namen; eine sichtbare Überschrift gehört in den Slot heading.",
+          "en": "Give the layer a name with label; a visible title belongs in the slot heading."
+        },
+        {
+          "de": "Setze dismissible, damit die Ebene auch auf Touch-Geräten einen Knopf zum Schließen hat.",
+          "en": "Set dismissible so the layer has a close button on touch devices too."
+        },
+        {
+          "de": "Richte die Ebene mit placement und justify am Auslöser aus.",
+          "en": "Align the layer to its trigger with placement and justify."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Eine zweite Ebene in der ersten öffnen.",
+          "en": "Open a second layer inside the first."
+        },
+        {
+          "de": "Eine Entscheidung in die Ebene legen, die ein Klick daneben verwirft.",
+          "en": "Put a decision into the layer that a click beside it throws away."
+        }
+      ]
+    },
+    "keyboard": [
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": {
+          "de": "Schließt die Ebene; lag der Fokus darin, kehrt er zum Auslöser zurück.",
+          "en": "Closes the layer; if the focus was inside, it returns to the trigger."
+        }
+      }
+    ]
   }
 }

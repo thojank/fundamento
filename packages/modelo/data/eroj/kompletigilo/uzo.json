@@ -4,7 +4,7 @@
     "id": "uzo_01M56AF0CDZ5SFJYKYEF7VSNPT",
     "ero": "ero_01M56AEZKZ3T15QT01E88Q0HF9",
     "skemo": "ske_01M56AF004GZ2N13Y6C2K29HDY",
-    "purpose": "A field that suggests matching values while the person types; the value may be one of the suggestions or, if allowed, free text.",
+    "purpose": "A field that suggests matching values while the person types; the value may be one of the suggestions or, if allowed, free text; options of one group name it (attribute group) and stand under its heading.",
     "instead": [
       {
         "goal": "few-fixed-options",
@@ -184,6 +184,85 @@
         "check": {
           "kind": "max-sentences",
           "count": 1
+        }
+      }
+    ],
+    "when-not": [
+      {
+        "case": {
+          "de": "Es gibt nur eine Handvoll fester Optionen, die alle sichtbar bleiben können.",
+          "en": "There is only a handful of fixed options, which can all stay visible."
+        },
+        "ero": "elekto"
+      },
+      {
+        "case": {
+          "de": "Die feste Liste wird durch Tippen nicht kürzer.",
+          "en": "The fixed list does not get shorter by typing."
+        },
+        "ero": "elektilo"
+      },
+      {
+        "case": {
+          "de": "Mehrere Werte sollen im selben Feld gewählt werden.",
+          "en": "Several values are to be chosen in the same field."
+        },
+        "ero": "plurelektilo"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Schreib als Platzhalter eine Aufforderung aus mindestens zwei Wörtern, etwa „Land eingeben“.",
+          "en": "Write a prompt of at least two words as the placeholder, such as “Enter country”."
+        },
+        {
+          "de": "Setze allow-free nur, wenn ein Text ohne passenden Vorschlag gültig ist.",
+          "en": "Set allow-free only when a text without a matching suggestion is valid."
+        },
+        {
+          "de": "Setze loading, solange die Anwendung neue Vorschläge holt, und begrenze die Liste mit max-suggestions.",
+          "en": "Set loading while the application fetches new suggestions, and limit the list with max-suggestions."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Einen Wert als Platzhalter vorgeben, der wie eine Antwort aussieht.",
+          "en": "Put a value as the placeholder that looks like an answer."
+        },
+        {
+          "de": "Freie Schlagwörter nacheinander tippen lassen; das unterstützt Fundamento nicht.",
+          "en": "Let free tags be typed one after another; Fundamento does not support that."
+        }
+      ]
+    },
+    "keyboard": [
+      {
+        "keys": [
+          "ArrowDown",
+          "ArrowUp"
+        ],
+        "action": {
+          "de": "Öffnen die Vorschläge und markieren den nächsten oder vorigen, am Ende geht es von vorn weiter.",
+          "en": "Open the suggestions and mark the next or previous one, wrapping at the end."
+        }
+      },
+      {
+        "keys": [
+          "Enter"
+        ],
+        "action": {
+          "de": "Übernimmt den markierten Vorschlag und schließt die Liste.",
+          "en": "Takes the marked suggestion and closes the list."
+        }
+      },
+      {
+        "keys": [
+          "Escape"
+        ],
+        "action": {
+          "de": "Schließt die Vorschläge; der getippte Text bleibt stehen.",
+          "en": "Closes the suggestions; the typed text stays."
         }
       }
     ]
