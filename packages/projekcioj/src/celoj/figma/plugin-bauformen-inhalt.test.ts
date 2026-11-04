@@ -1884,7 +1884,8 @@ describe("the plugin draws the overlays and binds the shadows (Spec 014 ④)", (
     expect(before?.properties.layoutMode).toBe("HORIZONTAL");
     const control = descendant(above, "control");
     expect(paintOf(control, "fills")).toBe("color/background/inverse");
-    expect(bound(control, "cornerRadius")).toBe("radius/role/control");
+    // Spec 036 Befund 1.1: a tooltip of several lines keeps a bounded radius at the pill.
+    expect(bound(control, "cornerRadius")).toBe("radius/role/multiline");
     const text = descendant(above, "text");
     expect(paintOf(text, "fills")).toBe("color/text/inverse");
     expect(bound(text, "fontSize")).toBe("typography/caption/font-size");

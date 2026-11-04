@@ -28,7 +28,7 @@
       },
       "box": {
         "inline-padding": { "fixed": "spacing.medium" },
-        "radius": { "fixed": "radius.role.control" },
+        "radius": { "fixed": "radius.role.multiline" },
         "gap": { "fixed": "spacing.small" }
       },
       "text": {

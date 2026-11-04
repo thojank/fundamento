@@ -1,0 +1,136 @@
+{
+  "$comment": "Spec 036, Befund 1.3: the words of the screen for the internal terms a model may repeat in the chat. The names of the steps (facetoj.json, nomo.de) and the labels of the sliders (Agordilo) come from their own data; here only the general terms of the brand model, longest first where a phrase carries its article. A term mapped to null has no word on the screen: the answer check drops the sentence that names it. Identifiers with an underscore (the names of the tools) and token names of the Modelo have no word either: in parentheses they are left out, elsewhere the sentence goes.",
+  "begriffe": {
+    "die Facetoj": "die Schritte",
+    "Die Facetoj": "Die Schritte",
+    "der Facetoj": "der Schritte",
+    "die Faceto": "der Schritt",
+    "Die Faceto": "Der Schritt",
+    "der Faceto": "dem Schritt",
+    "Facetoj": "Schritte",
+    "Faceto": "Schritt",
+    "Agordilo": "Regler",
+    "Reguloj": "Prüfung",
+    "Regulo": "Prüfregel",
+    "Kroniko": "Protokoll",
+    "Agordo": "Konfiguration",
+    "Aspekto": "Marke",
+    "Vortaro": null,
+    "Token": null
+  },
+  "artikel": {
+    "$comment": "Spec 036, Befund 1.3 (Nachbesserung 02.11., A-2): the German articles, so that an article before an internal term turns into the article of the word of the screen (die Kroniko → das Protokoll). A model writes an article in the gender it guesses for the term (genus_im_text in woerter); its form gives the case. After a preposition of dativ_nach the article is read as dative if it can be, otherwise as nominative, accusative, genitive, dative in this order. null: no article (plural without a definite article). verschmelzungen joins a preposition with the new article as German writes it. woerter: The words of the screen with their gender and their four cases, for the terms a model writes with an article. genus_im_text: the gender a model gives the term in German (Kroniko like die Chronik, Agordo like die Einstellung, Aspekto like der Aspekt); it decides only where the article alone leaves the case open (der Aspekto, der Kroniko). The nominative is the word of begriffe.",
+    "bestimmt": {
+      "m": {
+        "nom": "der",
+        "akk": "den",
+        "dat": "dem",
+        "gen": "des"
+      },
+      "f": {
+        "nom": "die",
+        "akk": "die",
+        "dat": "der",
+        "gen": "der"
+      },
+      "n": {
+        "nom": "das",
+        "akk": "das",
+        "dat": "dem",
+        "gen": "des"
+      },
+      "pl": {
+        "nom": "die",
+        "akk": "die",
+        "dat": "den",
+        "gen": "der"
+      }
+    },
+    "unbestimmt": {
+      "m": {
+        "nom": "ein",
+        "akk": "einen",
+        "dat": "einem",
+        "gen": "eines"
+      },
+      "f": {
+        "nom": "eine",
+        "akk": "eine",
+        "dat": "einer",
+        "gen": "einer"
+      },
+      "n": {
+        "nom": "ein",
+        "akk": "ein",
+        "dat": "einem",
+        "gen": "eines"
+      },
+      "pl": {
+        "nom": null,
+        "akk": null,
+        "dat": null,
+        "gen": null
+      }
+    },
+    "dativ_nach": [
+      "aus",
+      "bei",
+      "mit",
+      "nach",
+      "seit",
+      "von",
+      "zu",
+      "an",
+      "auf",
+      "in",
+      "hinter",
+      "neben",
+      "über",
+      "unter",
+      "vor",
+      "zwischen"
+    ],
+    "verschmelzungen": {
+      "an dem": "am",
+      "bei dem": "beim",
+      "in dem": "im",
+      "von dem": "vom",
+      "zu dem": "zum",
+      "zu der": "zur",
+      "an das": "ans",
+      "in das": "ins"
+    }
+  },
+  "woerter": {
+    "Kroniko": {
+      "genus_im_text": "f",
+      "genus": "n",
+      "formen": {
+        "nom": "Protokoll",
+        "akk": "Protokoll",
+        "dat": "Protokoll",
+        "gen": "Protokolls"
+      }
+    },
+    "Agordo": {
+      "genus_im_text": "f",
+      "genus": "f",
+      "formen": {
+        "nom": "Konfiguration",
+        "akk": "Konfiguration",
+        "dat": "Konfiguration",
+        "gen": "Konfiguration"
+      }
+    },
+    "Aspekto": {
+      "genus_im_text": "m",
+      "genus": "f",
+      "formen": {
+        "nom": "Marke",
+        "akk": "Marke",
+        "dat": "Marke",
+        "gen": "Marke"
+      }
+    }
+  }
+}

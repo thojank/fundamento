@@ -40,6 +40,12 @@ const STATUS = new RegExp(
 );
 
 /**
+ * Spec 036 Befund 1.1: the radius role of fields of several lines and small surfaces with text,
+ * so the pill of the controls does not reach them; every brand assigns it today's value.
+ */
+const MULTILINE = /^radius\.role\.multiline$/;
+
+/**
  * Spec 036 Befund 2.2 (V-2): the Zweitfarbe – its palette (15 steps, the neutral ramp for a brand
  * without one) and its five roles; every brand assigns them.
  */
@@ -52,14 +58,16 @@ export const addedSinceMain = (name: string): boolean =>
   SUMMARY.test(name) ||
   TARGET.test(name) ||
   STATUS.test(name) ||
+  MULTILINE.test(name) ||
   SEKUNDO.test(name);
 
 /**
  * How many tokens ②b added so far (M-5: 12 fields × 3; M-6 with Abnahme #122: 11; M-1: 4; the
  * targets of Abnahme #122: 6; M-2: 216), and Spec 035 2.3 (the targets of the date picker's
- * trigger and ✕: 2), and Spec 036 Befund 2.2 (the Zweitfarbe: 12 steps and 5 roles, 17; B-6.2-1).
+ * trigger and ✕: 2), Spec 036 Befund 1.1 (radius.role.multiline: 1), and Spec 036 Befund 2.2 (the
+ * Zweitfarbe: 12 steps and 5 roles, 17; B-6.2-1).
  */
-export const ADDED_SINCE_MAIN = 292;
+export const ADDED_SINCE_MAIN = 293;
 
 /** ②b-1 M-1: tokens main had under another name; each keeps main's value. */
 const MOVED: Readonly<Record<string, string>> = {

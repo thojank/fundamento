@@ -8,6 +8,14 @@
 //   over the changes at most 50 ms. On slow runners single frames of style and layout reach 51 to
 //   65 ms (scripts: none) in one or two of 50 changes; a Werkstatt that blocks in most changes is
 //   red all the same.
+// - G5 on the runner of the reference (Spec 036 Befund 1.7, Spec 035 B-5.1-2): a slow runner made
+//   61 ms of scripts in one frame (run 41140304922). Where the measurement brings the reference load
+//   measured beside it (ableitung.ts, referenzLast), every block counts on the runner of the
+//   reference, divided by k = referenz / REFERENZ_SCHNELL_MS and never by less than 1 – as the
+//   derivation of M5 is judged. No machine is held stricter than before; a block of 80 ms on the
+//   reference runner is red on every runner (the Gegenprobe of G5).
+
+import { REFERENZ_SCHNELL_MS } from "./ableitung.js";
 
 export const M5_GRENZE_MS = 50;
 /** The share of the changes whose longest block counts against the limit. */
@@ -18,12 +26,19 @@ export interface M5Messung {
   perChange: number[];
   /** The longest work of scripts in one frame over all changes (ms); 0 where none reached 5 ms. */
   scriptLongest: number;
+  /**
+   * The reference load measured on the same runner (ms, ableitung.ts referenzLast). Given (G5,
+   * Spec 036 Befund 1.7), the verdict counts on the runner of the reference; absent (M5), as measured.
+   */
+  referenz?: number;
 }
 
 export interface M5Urteil {
   rot: boolean;
-  /** The 90th percentile of the blocks per change (ms). */
+  /** The 90th percentile of the blocks per change (ms), counted on the runner of the reference. */
   perzentil: number;
+  /** The runner's factor: its reference over the fast runner's, at least 1; 1 without a reference. */
+  k: number;
   gruende: string[];
 }
 
@@ -34,17 +49,26 @@ export function perzentil(values: readonly number[], share: number): number {
 }
 
 export function m5Urteil(messung: M5Messung): M5Urteil {
-  const p = perzentil(messung.perChange, M5_PERZENTIL);
+  const k =
+    messung.referenz === undefined ? 1 : Math.max(1, messung.referenz / REFERENZ_SCHNELL_MS);
+  // Measured and counted alike without a reference; with one, the measured value stands beside it.
+  const gemessen = (counted: number, measured: number) =>
+    messung.referenz === undefined
+      ? `${Math.round(counted)} ms`
+      : `${Math.round(counted)} ms auf dem Bezugsrunner (gemessen ${Math.round(measured)} ms, k ${k.toFixed(2)})`;
+  const measuredP = perzentil(messung.perChange, M5_PERZENTIL);
+  const p = measuredP / k;
+  const scripts = messung.scriptLongest / k;
   const gruende: string[] = [];
-  if (messung.scriptLongest > M5_GRENZE_MS)
+  if (scripts > M5_GRENZE_MS)
     gruende.push(
-      `Skripte blockieren ${Math.round(messung.scriptLongest)} ms in einem Frame (Grenze ${M5_GRENZE_MS} ms)`,
+      `Skripte blockieren ${gemessen(scripts, messung.scriptLongest)} in einem Frame (Grenze ${M5_GRENZE_MS} ms)`,
     );
   if (p > M5_GRENZE_MS)
     gruende.push(
-      `${Math.round(M5_PERZENTIL * 100)}. Perzentil der Blockade je Änderung ${Math.round(p)} ms (Grenze ${M5_GRENZE_MS} ms)`,
+      `${Math.round(M5_PERZENTIL * 100)}. Perzentil der Blockade je Änderung ${gemessen(p, measuredP)} (Grenze ${M5_GRENZE_MS} ms)`,
     );
-  return { rot: gruende.length > 0, perzentil: p, gruende };
+  return { rot: gruende.length > 0, perzentil: p, k, gruende };
 }
 
 /** The block of Gegenprobe 2 as calibrated on this runner. */

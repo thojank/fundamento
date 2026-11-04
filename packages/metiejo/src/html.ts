@@ -713,7 +713,14 @@ if (kreilo && marko) {
     meldung("Ich mache den Vorschlag …");
     const result = await post("kreilo", { celo: attr("[data-mt-kreilo-celo]"), karaktero, festgelegt: { farbe: attr("[data-mt-kreilo-farbe]"), schrift: attr("[data-mt-kreilo-schrift]") }, inspiro, rajtoj: !!rajtoj && rajtoj.hasAttribute("checked") });
     if (!result.ok) { meldung(result.body.satz || "Der Vorschlag ging nicht."); return; }
-    location.href = "/asistanto/" + marko + "/gvidkoloro";
+    // Spec 036, D-95: a sentence the person must know of the inspiration (no browser …) is shown
+    // first; the link goes on. Without one the assistant opens at once.
+    const notoj = result.body.notoj || [];
+    const weiter = document.querySelector("[data-mt-kreilo-weiter]");
+    if (notoj.length === 0 || !weiter) { location.href = "/asistanto/" + marko + "/gvidkoloro"; return; }
+    meldung(notoj.join(" "));
+    weiter.hidden = false;
+    weiter.focus();
   });
 }
 // The one draft: when the assistant or the Studio changed it elsewhere, follow.

@@ -5,7 +5,8 @@
 // measurement (±50 %) and the counter of the Kroniko.
 //
 // Without --mit-modell no language model is asked (0 tokens): the Kreilo takes the lead colour from
-// the images, the two wishes are left out – for the local steps only. With --mit-modell the chat runs
+// the images and proposes the second strong colour of the images as an accent (Spec 036, D-99), the
+// two wishes are left out – for the local steps only. With --mit-modell the chat runs
 // over Mistral ministral-14b-2512 (the maintainer's tariff) whatever the .env names, with a cost limit
 // of 30 000 tokens per turn and the provider's limits (LIMOJ). The key never leaves the server: the
 // script prints only whether it stands in the Kroniko or the log.
@@ -19,7 +20,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { cpus, loadavg, tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { encodePng } from "../src/test-doubles/png.js";
+import { CELO_WEG_A, inspiroWegA, KARAKTERO_WEG_A } from "../src/test-doubles/weg-a.js";
 
 const root = resolve(import.meta.dirname, "..", "..", "..");
 const args = process.argv.slice(2);
@@ -40,11 +41,6 @@ if (mitModell && ki.provider === undefined) throw new Error("MISTRAL_API_KEY feh
 const secrets = [env.MISTRAL_API_KEY, env.OPENROUTER_API_KEY, env.OPENAI_API_KEY].filter(
   (value): value is string => typeof value === "string" && value.length > 8,
 );
-
-const CELO =
-  "Eine Bäckerei für die Nachbarschaft. Ehrliches Brot, früh am Morgen gebacken. Für Familien und Leute auf dem Weg zur Arbeit. Warm und freundlich, nicht schick. Man soll sich willkommen fühlen.";
-const png = (pixel: (x: number, y: number) => [number, number, number, number]) =>
-  encodePng(48, 32, pixel).toString("base64");
 
 async function lauf(nummer: number): Promise<Record<string, number>> {
   // B-13: per step the wall clock and the CPU time of this process (the server runs in it); for the
@@ -97,25 +93,13 @@ async function lauf(nummer: number): Promise<Record<string, number>> {
   };
   schritt("Marke anlegen, Schätzung");
   const kreilo = await post("/api/marko/pano/kreilo", {
-    celo: CELO,
-    karaktero: {
-      "ruhig-lebhaft": -1,
-      "klassisch-modern": -1,
-      "warm-kuehl": -2,
-      "sachlich-verspielt": 1,
-      "leicht-kraeftig": 0,
-    },
+    celo: CELO_WEG_A,
+    karaktero: KARAKTERO_WEG_A,
     festgelegt: {},
-    inspiro: [
-      {
-        filename: "kruste.png",
-        base64: png((_x, y) => (y < 20 ? [0x9c, 0x5a, 0x2b, 255] : [0xf3, 0xe6, 0xcf, 255])),
-      },
-      {
-        filename: "weizen.png",
-        base64: png((x) => (x < 16 ? [0xd9, 0xa4, 0x41, 255] : [0xfa, 0xf4, 0xea, 255])),
-      },
-    ],
+    inspiro: inspiroWegA().map(({ filename, bytes }) => ({
+      filename,
+      base64: bytes.toString("base64"),
+    })),
     rajtoj: true,
   });
   if (!kreilo.ok) throw new Error(`Kreilo: ${kreilo.status}`);
@@ -175,7 +159,21 @@ async function lauf(nummer: number): Promise<Record<string, number>> {
     Number(new RegExp(`^${label}\\s+([\\d.]+)`, "m").exec(projekcioj.stderr)?.[1] ?? 0);
   schritt("Projektionen", Math.round((seconds("user") + seconds("sys")) * 1000));
   const gesamt = Date.now() - start;
-  const raw = readFileSync(join(workdir, "pano", "kroniko.jsonl"), "utf8") + log.join("");
+  const kroniko = readFileSync(join(workdir, "pano", "kroniko.jsonl"), "utf8");
+  const raw = kroniko + log.join("");
+  // Spec 036, D-99: the accent the Kreilo proposed from the images, as the Kroniko records it.
+  const akzent = kroniko
+    .split("\n")
+    .filter((line) => line.trim() !== "")
+    .map(
+      (line) =>
+        (
+          JSON.parse(line) as {
+            detaloj?: { akzent?: { farbe: string; anteil: number; abstand: number } };
+          }
+        ).detaloj?.akzent,
+    )
+    .find((entry) => entry !== undefined);
   await servilo.close();
   const A = takso.vojoj.A;
   const tokens = fertig.zaehlilo.enigo + fertig.zaehlilo.eligo;
@@ -190,6 +188,9 @@ async function lauf(nummer: number): Promise<Record<string, number>> {
   console.log(`  ${"gesamt".padEnd(26)} ${(gesamt / 1000).toFixed(1)} s`);
   console.log(
     `  freigegeben ${fertig.prozent} %, exportierbar ${pruefung.exportable}, Export ${existsSync(eksporto) ? readdirSync(eksporto).join(", ") : "fehlt"}`,
+  );
+  console.log(
+    `  Akzent: ${akzent === undefined ? "keiner vorgeschlagen" : `${akzent.farbe} vorgeschlagen (${akzent.anteil} % der Fläche, Abstand ${String(akzent.abstand).replace(".", ",")})`}`,
   );
   console.log(`  Zähler: ${fertig.zaehlilo.satz}`);
   if (mitModell)

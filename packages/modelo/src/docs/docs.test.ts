@@ -4354,3 +4354,198 @@ describe("Abnahme #122: the plan names the events of clearing as the elements sa
     expect(plan).toContain("elektilo und listelektilo sagen beim Leeren nur change");
   });
 });
+
+// Spec 036 S36-7.1 (Markenassistent: Bühne, Farbrollen und Qualität · Spec 029 zu Ende · neutrale
+// Namen, 2026-10-31): specs/036-assistent-buehne carries the spec unchanged next to plan and tasks;
+// the plan holds every decision for the maintainer, the picture tests set anew, the model costs, the
+// answer about the private fonts, the merge order with Teil 6 last, and the Bericht with every
+// Befund, a link per PR and a verdict per acceptance criterion. Everything is read from the plan.
+describe("Spec 036 documentation (specs/036-assistent-buehne)", () => {
+  const SPEC_036_SHA256 = "a0cc66beda58be0bcc0a4dcaf28179cd178d4ec3ed79afa51bdddfea1c55acfa";
+  const DIR = "specs/036-assistent-buehne";
+  const PRS = [133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143];
+  /** The Befundliste of the spec (Teil 1 to Teil 6), in the order of the Bericht. */
+  const BEFUNDE = [
+    ...["1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "1.7"],
+    ...["2.1", "2.2", "2.3"],
+    ...["3.1", "3.2", "3.3", "3.4", "3.5", "3.6", "3.7"],
+    ...["4.1", "4.2", "4.3"],
+    ...["②b-2", "②b-3", "②b-4", "②b-5", "③"],
+    ...["6.1", "6.2", "6.3", "6.4", "6.5", "6.6"],
+  ];
+  /** Teil 5 sub-parts and Teil 1 Befunde whose picture tests changed on purpose (AC-10). */
+  const PICTURE_ROWS = ["1.1", "1.6", "②b-2", "②b-3", "②b-4", "②b-5"];
+  const VERDICT = /^(erfüllt|teilweise|nicht erfüllt)\b/;
+
+  const plan = () => read(`${DIR}/plan.md`);
+
+  /** Table rows whose first cell is `id` or starts with `id` and a space („| 1.6 `elekto` |“). */
+  const rowsOf = (text: string, id: string) =>
+    text.split("\n").filter((line) => line.startsWith(`| ${id} |`) || line.startsWith(`| ${id} `));
+
+  /** Cells of a table row, without the outer pipes. */
+  const cellsOf = (row: string) =>
+    row
+      .replace(/^\|/, "")
+      .replace(/\|$/, "")
+      .split("|")
+      .map((cell) => cell.trim());
+
+  /** The first German decimal in a cell („**0,00442 $ von 0,50 $**“ → 0.00442). */
+  const betrag = (text: string) => {
+    const match = text.replace(/\s/g, "").match(/\d+(?:,\d+)?/);
+    return match ? Number(match[0].replace(",", ".")) : Number.NaN;
+  };
+
+  /** The `###` sub-section of the Bericht with the given heading, up to the next `###`. */
+  function berichtTeil(heading: string): string {
+    const report = section(plan(), "Bericht");
+    const start = report.indexOf(`### ${heading}`);
+    if (start < 0) return "";
+    const end = report.indexOf("\n### ", start + 1);
+    return end < 0 ? report.slice(start) : report.slice(start, end);
+  }
+
+  it("the spec is the one of 2026-10-31, unchanged; plan and tasks lie next to it (AC-1)", () => {
+    const spec = read(`${DIR}/spec.md`);
+    expect(createHash("sha256").update(spec).digest("hex")).toBe(SPEC_036_SHA256);
+    expect(existsSync(`${repoRoot}${DIR}/plan.md`)).toBe(true);
+    expect(existsSync(`${repoRoot}${DIR}/tasks.md`)).toBe(true);
+    expect(read(`${DIR}/tasks.md`)).toContain("**T3601");
+  });
+
+  it("the plan has the decisions for the maintainer: V-1 to V-3, D-01 to D-34, every D it names, and Blockiert (AC-8)", () => {
+    const text = plan();
+    const decisions = section(text, "Entscheidungen, vom Maintainer zu bestätigen");
+    expect(decisions).not.toBe("");
+    const pre = [
+      "V-1",
+      "V-2",
+      "V-3",
+      ...Array.from({ length: 34 }, (_, i) => `D-${String(i + 1).padStart(2, "0")}`),
+    ];
+    for (const id of pre) expect(rowsOf(decisions, id), id).not.toHaveLength(0);
+    // A decision of an earlier spec is written „Spec 035 D-83“; every other D-nn is one of this plan.
+    const named = new Set(
+      [...text.matchAll(/(?<!Spec \d{3} )\bD-(\d{2,3})\b/g)].map((match) => match[0]),
+    );
+    expect(named.size).toBeGreaterThan(pre.length);
+    for (const id of named) expect(rowsOf(decisions, id), id).not.toHaveLength(0);
+    // The provisional IDs of the tickets (D-S36-<ticket>-<n>) each map to one numbered row.
+    const provisional = new Set(
+      [...text.matchAll(/\bD-S36-[\d.]+(?:-B2)?-\d+\b/g)].map((m) => m[0]),
+    );
+    const mapped = new Set(
+      decisions
+        .split("\n")
+        .filter((line) => /^\| D-\d+ \| D-S36-/.test(line))
+        .map((line) => cellsOf(line)[1]),
+    );
+    for (const id of provisional) expect(mapped.has(id), id).toBe(true);
+    expect(text.split("\n")).toContain("## Blockiert");
+  });
+
+  it("the picture tests set anew are listed for 1.1, 1.6 and the Teil-5 sub-parts, every „Bildtest neu“ commit of tasks among them (AC-10)", () => {
+    const pictures = section(plan(), "Bildtests als gewollte Änderung neu gesetzt");
+    expect(pictures).not.toBe("");
+    for (const id of PICTURE_ROWS) {
+      const rows = rowsOf(pictures, id);
+      expect(rows, id).not.toHaveLength(0);
+      for (const row of rows) {
+        // Befund, test or file, components and states, reason, commit: five cells, none empty.
+        const cells = cellsOf(row);
+        expect(cells, row).toHaveLength(5);
+        for (const cell of cells) expect(cell, row).not.toBe("");
+      }
+    }
+    const commits = [...read(`${DIR}/tasks.md`).matchAll(/Bildtest neu `([0-9a-f]{8})`/g)].map(
+      (match) => match[1] ?? "",
+    );
+    expect(commits.length).toBeGreaterThan(0);
+    for (const sha of commits) expect(pictures, sha).toContain(sha);
+  });
+
+  it("the model costs: every run with tokens, cost, duration and commit, ministral-14b-2512 alone, the sum within 0,50 $ (AC-5)", () => {
+    const measurements = section(plan(), "Messungen");
+    const start = measurements.indexOf("### Modellkosten");
+    expect(start).toBeGreaterThan(-1);
+    const lines = measurements.slice(start).split("\n");
+    const runs = lines.filter((line) => line.startsWith("| `")).map(cellsOf);
+    expect(runs.length).toBeGreaterThan(0);
+    for (const [run, , model, requests, tokens, usd, duration, commit] of runs) {
+      expect(model, run).toBe("`ministral-14b-2512`");
+      expect(requests, run).toMatch(/^\d+$/);
+      expect(tokens, run).toMatch(/\d \/ \d/);
+      expect(betrag(usd ?? ""), run).toBeGreaterThan(0);
+      expect(duration, run).toMatch(/\d/);
+      expect(commit, run).toMatch(/`[0-9a-f]{8}`/);
+    }
+    const sumRow = lines.find((line) => line.startsWith("| **Summe**"));
+    expect(sumRow).toBeDefined();
+    const sum = betrag(cellsOf(sumRow ?? "")[5] ?? "");
+    const added = runs.reduce((total, cells) => total + betrag(cells[5] ?? ""), 0);
+    expect(sum).toBeCloseTo(added, 5);
+    expect(sum).toBeLessThanOrEqual(0.5);
+  });
+
+  it("the plan answers yes or no about the private fonts and the .env, with the family comparison (AC-11)", () => {
+    const fonts = section(plan(), "Private Schriften und `.env`");
+    expect(fonts).not.toBe("");
+    expect(fonts).toMatch(
+      /\*\*Muss der Maintainer in seiner `\.env` etwas eintragen\? (Ja|Nein)\b/,
+    );
+    expect(fonts).toMatch(/\| \*\*(ja|nein)\*\* \|/);
+    expect(berichtTeil("Private Schriften und `.env` (6.6)")).toMatch(/\*\*(Ja|Nein)\b/);
+  });
+
+  it("the merge order with the conflict check ends with Teil 6 and names a resolution for every conflict (AC-15)", () => {
+    const merge = section(plan(), "Merge-Reihenfolge mit Konfliktprüfung");
+    expect(merge).not.toBe("");
+    const order = merge.split("\n").find((line) => line.includes("→") && line.includes("#133"));
+    expect(order).toBeDefined();
+    const numbers = [...(order ?? "").matchAll(/#(\d{3})\b/g)].map((match) => Number(match[1]));
+    expect([...new Set(numbers)].sort()).toEqual(PRS);
+    expect(numbers.at(-1)).toBe(133);
+    const steps = merge.split("\n").filter((line) => /^\| \d+ \| /.test(line));
+    expect(steps).toHaveLength(PRS.length);
+    for (const step of steps) {
+      const [, , , , conflicts, solution] = cellsOf(step);
+      if (!/^0\b/.test(conflicts ?? "")) expect(solution, step).not.toBe("–");
+    }
+    expect(cellsOf(steps.at(-1) ?? "")[1]).toContain("Teil 6 #133");
+  });
+
+  it("the Bericht has every Befund with its state, the counts add up, and a link per PR (AC-9)", () => {
+    const report = section(plan(), "Bericht");
+    expect(report).not.toBe("");
+    const states = BEFUNDE.map((id) => {
+      const row = rowsOf(berichtTeil("Befunde"), id).find((line) =>
+        /^\| \S+ \| (erledigt|teilweise|offen) \|/.test(line),
+      );
+      expect(row, id).toBeDefined();
+      return cellsOf(row ?? "")[1];
+    });
+    const count = (state: string) => states.filter((s) => s === state).length;
+    const counts = `${count("erledigt")} erledigt, ${count("teilweise")} teilweise, ${count("offen")} offen`;
+    expect(berichtTeil("Befunde")).toContain(`**Zahl:** ${counts}.`);
+    expect(report).toContain(`**${counts}**`);
+    for (const nr of PRS) {
+      expect(report, `#${nr}`).toMatch(
+        new RegExp(`https://github\\.com/thojank/fundamento/pull/${nr}(?!\\d)`),
+      );
+    }
+  });
+
+  it("the Bericht carries the check against AC-1 to AC-15, one row each with its proof and its verdict", () => {
+    const audit = berichtTeil("Prüfung gegen die Abnahmekriterien");
+    expect(audit).not.toBe("");
+    for (const ac of Array.from({ length: 15 }, (_, i) => `AC-${i + 1}`)) {
+      const row = rowsOf(audit, ac)[0];
+      expect(row, ac).toBeDefined();
+      const cells = cellsOf(row ?? "");
+      expect(cells, ac).toHaveLength(3);
+      expect(cells[1], ac).not.toBe("");
+      expect(cells[2], ac).toMatch(VERDICT);
+    }
+  });
+});
