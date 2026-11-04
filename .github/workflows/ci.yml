@@ -583,8 +583,6 @@ jobs:
       fail-fast: false
       matrix:
         parto: [werkstatt-1, werkstatt-2]
-    env:
-      PLAYWRIGHT_ENGINES: ${{ needs.betroffen.outputs.engines }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -611,9 +609,13 @@ jobs:
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm install --frozen-lockfile
 
+      # Spec 040 D-19: playwright.vitrino.config.ts runs the first project of the shared config alone,
+      # Chromium, whatever PLAYWRIGHT_ENGINES names – so Chromium alone is installed, and the job
+      # carries no PLAYWRIGHT_ENGINES. The apt packages of three engines cut four jobs off at 15 min
+      # in this step on a slow mirror (PR #145). workflow.test.ts pins this line.
       - name: Playwright browsers
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
-        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
+        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium
 
       - name: Turbo cache
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
@@ -661,8 +663,6 @@ jobs:
       fail-fast: false
       matrix:
         parto: [cetero-1, cetero-2, cetero-3]
-    env:
-      PLAYWRIGHT_ENGINES: ${{ needs.betroffen.outputs.engines }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -689,9 +689,13 @@ jobs:
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm install --frozen-lockfile
 
+      # Spec 040 D-19: playwright.vitrino.config.ts runs the first project of the shared config alone,
+      # Chromium, whatever PLAYWRIGHT_ENGINES names – so Chromium alone is installed, and the job
+      # carries no PLAYWRIGHT_ENGINES. The apt packages of three engines cut four jobs off at 15 min
+      # in this step on a slow mirror (PR #145). workflow.test.ts pins this line.
       - name: Playwright browsers
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
-        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
+        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium
 
       - name: Turbo cache
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
@@ -736,8 +740,6 @@ jobs:
     timeout-minutes: 15
     continue-on-error: ${{ github.event_name == 'pull_request' }}
     needs: betroffen
-    env:
-      PLAYWRIGHT_ENGINES: ${{ needs.betroffen.outputs.engines }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -764,9 +766,13 @@ jobs:
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm install --frozen-lockfile
 
+      # Spec 040 D-19: playwright.vitrino.config.ts runs the first project of the shared config alone,
+      # Chromium, whatever PLAYWRIGHT_ENGINES names – so Chromium alone is installed, and the job
+      # carries no PLAYWRIGHT_ENGINES. The apt packages of three engines cut four jobs off at 15 min
+      # in this step on a slow mirror (PR #145). workflow.test.ts pins this line.
       - name: Playwright browsers
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
-        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
+        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium
 
       - name: Turbo cache
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
