@@ -21,6 +21,13 @@ env:
   TURBO_TELEMETRY_DISABLED: "1"
   DO_NOT_TRACK: "1"
 
+# Spec 040 T-5: every job keeps the local Turborepo cache (.turbo/cache) between runs, one cache
+# per job and matrix value, and builds only what its steps need (`turbo run build --filter`). The
+# key ends on the commit, so every run saves; a run restores the newest cache of its job through
+# the prefix of lockfile, turbo.json and Node. Turborepo hashes the inputs of every task itself
+# (turbo.json, packages/modelo/src/ci/turbo-inputs.test.ts): a hit replays only what is unchanged.
+# No remote cache, no token.
+
 # The event is part of the group: the nightly run and a merge run share refs/heads/main and must not
 # cancel each other.
 concurrency:
@@ -65,8 +72,18 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      - name: Turbo cache
+        uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-
+
+      # Spec 040 T-5 (A-5): the checks need every package – lint builds the dependencies of each,
+      # check:parity runs fm, check:release packs the kits – so the filter names them all.
       - name: Build
-        run: pnpm build
+        run: pnpm turbo run build --filter='@fundamento/*' --cache-dir=.turbo/cache
 
       # AK-07 timings alone, in a job without a test run beside them (Spec 001 D-17).
       - name: Perf
@@ -155,13 +172,25 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      - name: Turbo cache
+        uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-
+
+      # The package and its dependencies; `turbo run test` below builds what its test waits for
+      # beyond them (turbo.json), from the same cache.
       - name: Build
-        run: pnpm build
+        run: pnpm turbo run build --filter=@fundamento/${{ matrix.package }}... --cache-dir=.turbo/cache
 
       # A new package with tests joins the matrix above (workflow.test.ts says so); the Eroj have
       # the job eroj (W1), the Projekcioj the job projekcioj.
+      # Spec 040 T-5: a pull request takes unchanged test results from the cache; main, the
+      # nightly run and workflow_dispatch run every test (write only, never read: AC-B4, AC-B12).
       - name: Test
-        run: pnpm turbo run test --filter=@fundamento/${{ matrix.package }}
+        run: pnpm turbo run test --filter=@fundamento/${{ matrix.package }} --cache-dir=.turbo/cache --cache=${{ github.event_name == 'pull_request' && 'local:rw' || 'local:w' }}
 
   projekcioj:
     name: Unit tests (Projekcioj, shard ${{ matrix.shard }} of 2)
@@ -189,13 +218,25 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      - name: Turbo cache
+        uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-
+
       - name: Build
-        run: pnpm build
+        run: pnpm turbo run build --filter=@fundamento/projekcioj... --cache-dir=.turbo/cache
 
       # Every Celo test builds and validates the whole Modelo (seconds each, 258 s for the suite on
       # ten cores): this shard of the suite, sharded by Vitest over its files.
+      # FM_GEBAUT: the Build step has built what the suite needs; Vitest does not build the whole
+      # workspace again (packages/projekcioj/vitest.config.ts).
       - name: Test
         run: pnpm --filter @fundamento/projekcioj exec vitest run --shard=${{ matrix.shard }}/2
+        env:
+          FM_GEBAUT: "1"
 
   # Spec 040 B-6: on main, in three engines, the second of two shards ran into its 15 minutes (run
   # 41886235249: 15:17), the first ended at 12:56 and 13:02 (41886235249, 41873907893). Four
@@ -240,13 +281,24 @@ jobs:
       - name: Playwright browsers
         run: pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
 
+      - name: Turbo cache
+        uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-
+
+      # Spec 040 A-4: seven specs spawn the built fm, so the closure is the CLI's.
       - name: Build
-        run: pnpm build
+        run: pnpm turbo run build --filter=@fundamento/cli... --cache-dir=.turbo/cache
 
       # The unit tests of the package (the React types, the parts of the Vitrino), then this shard
       # of the Playwright suite.
       - name: Test
         run: pnpm --filter @fundamento/eroj exec vitest run --passWithNoTests && pnpm --filter @fundamento/eroj exec playwright test --shard=${{ matrix.shard }}/4
+        env:
+          FM_GEBAUT: "1"
 
   # Nachlese 5 ① (D-04): the rendered checks ran 7:52 to 8:34 in one job (axe over the Eroj alone
   # 178 to 233 s, the Vitrino 104 to 140 s). axe over the Eroj is a job of its own; the Make Kit,
@@ -286,8 +338,16 @@ jobs:
       - name: Playwright browsers
         run: pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
 
+      - name: Turbo cache
+        uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-
+
       - name: Build
-        run: pnpm build
+        run: pnpm turbo run build --filter=@fundamento/eroj... --cache-dir=.turbo/cache
 
       # Rendered accessibility of the Eroj: axe-core, keyboard, focus ring (Spec 003 T013, D-09).
       # No `--` before the shard: pnpm would pass it on, and Playwright reads what follows a `--`
@@ -323,8 +383,16 @@ jobs:
       - name: Playwright browsers
         run: pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
 
+      - name: Turbo cache
+        uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-
+
       - name: Build
-        run: pnpm build
+        run: pnpm turbo run build --filter=@fundamento/eroj... --cache-dir=.turbo/cache
 
       # AK-08: the Make Kit installs from its tarball and builds in a fresh project (T019).
       - name: "Check: Make Kit"
@@ -369,8 +437,17 @@ jobs:
       - name: Playwright browsers
         run: pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
 
+      - name: Turbo cache
+        uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-
+
+      # check:bazo spawns the built fm: the closure is the CLI's.
       - name: Build
-        run: pnpm build
+        run: pnpm turbo run build --filter=@fundamento/cli... --cache-dir=.turbo/cache
 
       # Spec 004 AK-02, Spec 016 ②, Spec 019 ②: the Werkstatt of the Vitrino in a browser.
       - name: "Check: Vitrino (Werkstatt)"
@@ -414,8 +491,17 @@ jobs:
       - name: Playwright browsers
         run: pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
 
+      - name: Turbo cache
+        uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-
+
+      # check:bazo spawns the built fm: the closure is the CLI's.
       - name: Build
-        run: pnpm build
+        run: pnpm turbo run build --filter=@fundamento/cli... --cache-dir=.turbo/cache
 
       # Spec 004 AK-02: the Vitrino in a browser — switching, comparison, axe (T011, T012).
       - name: "Check: Vitrino"

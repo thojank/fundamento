@@ -3,13 +3,14 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/tsconfig.base.json"],
       "outputs": ["dist/**"]
     },
     "@fundamento/modelo#build": {
       "dependsOn": ["^build"],
       "inputs": [
         "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/tsconfig.base.json",
         "$TURBO_ROOT$/packages/vortaro/*.json",
         "$TURBO_ROOT$/packages/vortaro/sets/**",
         "$TURBO_ROOT$/packages/aspekto-komuna/*.json",
@@ -22,12 +23,82 @@
       "env": ["PLAYWRIGHT_ENGINES"],
       "outputs": []
     },
+    "@fundamento/agordilo#test": {
+      "dependsOn": ["build"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/scripts/neutrale-namen/*.mjs"],
+      "env": ["PLAYWRIGHT_ENGINES"],
+      "outputs": []
+    },
+    "@fundamento/ekranoj#test": {
+      "dependsOn": ["build"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/specs/037-agenten-ekranoj/**"],
+      "env": ["PLAYWRIGHT_ENGINES"],
+      "outputs": []
+    },
+    "@fundamento/eroj#test": {
+      "dependsOn": ["build", "@fundamento/cli#build"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/specs/004-komparo/mezuroj-main.json"],
+      "env": ["PLAYWRIGHT_ENGINES"],
+      "outputs": []
+    },
+    "@fundamento/mcp#test": {
+      "dependsOn": ["build"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/scripts/neutrale-namen/*.mjs"],
+      "env": ["PLAYWRIGHT_ENGINES"],
+      "outputs": []
+    },
+    "@fundamento/metiejo#test": {
+      "dependsOn": ["build", "@fundamento/cli#build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/.env.example",
+        "$TURBO_ROOT$/specs/023-werkstatt-konfigurilo/**",
+        "$TURBO_ROOT$/specs/024-studio/**"
+      ],
+      "env": ["PLAYWRIGHT_ENGINES"],
+      "outputs": []
+    },
     "@fundamento/modelo#test": {
       "dependsOn": ["build", "@fundamento/cli#build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/*",
+        "!$TURBO_ROOT$/.git",
+        "!$TURBO_ROOT$/.env",
+        "$TURBO_ROOT$/.github/**",
+        "$TURBO_ROOT$/.specify/**",
+        "$TURBO_ROOT$/docs/**",
+        "$TURBO_ROOT$/research/**",
+        "$TURBO_ROOT$/scripts/**",
+        "!$TURBO_ROOT$/scripts/**/node_modules/**",
+        "$TURBO_ROOT$/specs/**",
+        "$TURBO_ROOT$/packages/eroj/test/vitrino-partoj.ts"
+      ],
+      "env": ["PLAYWRIGHT_ENGINES"],
+      "outputs": []
+    },
+    "@fundamento/nordstelo#test": {
+      "dependsOn": ["build"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/specs/034-nachlese-12/plan.md"],
+      "env": ["PLAYWRIGHT_ENGINES"],
+      "outputs": []
+    },
+    "@fundamento/projekcioj#test": {
+      "dependsOn": ["build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/LICENSE",
+        "$TURBO_ROOT$/packages/*/package.json",
+        "$TURBO_ROOT$/packages/metiejo/data/tiparoj.json",
+        "$TURBO_ROOT$/scripts/fonto-astryx/vergleich/**",
+        "!$TURBO_ROOT$/scripts/fonto-astryx/vergleich/node_modules/**"
+      ],
+      "env": ["PLAYWRIGHT_ENGINES"],
       "outputs": []
     },
     "lint": {
       "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/tsconfig.base.json", "$TURBO_ROOT$/biome.json"],
       "outputs": []
     },
     "perf": {

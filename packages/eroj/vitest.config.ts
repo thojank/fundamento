@@ -8,7 +8,9 @@ import { defineConfig } from "vitest/config";
 // workspace first, not only this package's dependencies: tests spawn binaries of packages that
 // depend on this one (modelo's e2e suite runs `packages/cli/dist`). Turborepo replays what is
 // unchanged (0.3–0.4 s locally); a cold build took 3.7–4.4 s. Under turbo, `test` waits for `build`.
-if (process.env.TURBO_HASH === undefined) {
+// Spec 040 T-5: in CI the job's Build step has built what the job needs (a filtered
+// `turbo run build`, .github/workflows/ci.yml) and says so with FM_GEBAUT; locally it is unset.
+if (process.env.TURBO_HASH === undefined && process.env.FM_GEBAUT === undefined) {
   execFileSync("pnpm", ["turbo", "run", "build", "--output-logs=errors-only"], {
     cwd: fileURLToPath(new URL("../..", import.meta.url)),
     stdio: "inherit",
