@@ -60,9 +60,55 @@ const ERO_CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = 
 const PLAYWRIGHT_BROWSERS =
   "pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES";
 
+// Spec 040 T-5: the local Turborepo cache of every job lives on between runs (actions/cache), one
+// cache per job and matrix value. The key ends on the commit, so every run saves its cache; a run
+// restores the newest of its job through the prefix of lockfile, turbo.json and Node. Turborepo
+// hashes every task's inputs itself, so a hit replays only what is unchanged (E-6); the action is
+// pinned to its major like the others (checked: v6.1.0 is the latest release on 2026-11-04).
+/** The step that restores and saves the Turborepo cache, right before Build. */
+const TURBO_CACHE_STEP = "Turbo cache";
+const TURBO_CACHE_ACTION = "actions/cache@v6";
+const TURBO_CACHE_PREFIX =
+  "turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-";
+
+/**
+ * AC-B5: no job builds with `pnpm build` (the whole workspace); each builds what its steps need,
+ * through the cache. The checks need every package (A-5): lint builds the dependencies of every
+ * package, check:parity runs fm, check:release packs the kits. The eroj specs spawn the built fm
+ * (A-4), and check:bazo of the Werkstatt and the Vitrino does too: their closure is the CLI's.
+ */
+const BUILD_FILTERS: Readonly<Record<string, string>> = {
+  checks: "'@fundamento/*'",
+  unit: "@fundamento/${{ matrix.package }}...",
+  projekcioj: "@fundamento/projekcioj...",
+  eroj: "@fundamento/cli...",
+  "alirebleco-eroj": "@fundamento/eroj...",
+  "rendered-checks": "@fundamento/eroj...",
+  werkstatt: "@fundamento/cli...",
+  vitrino: "@fundamento/cli...",
+};
+
+function buildOf(job: string): string {
+  return `pnpm turbo run build --filter=${BUILD_FILTERS[job]} --cache-dir=.turbo/cache`;
+}
+
+/**
+ * Test results come from the cache on a pull request only. On main, at night and on
+ * workflow_dispatch the tests always run (write, never read): main tests everything (AC-B4), and
+ * the Gegenprobe (AC-B12) cannot be hidden by a hit.
+ */
+const TEST_CACHE = "--cache=${{ github.event_name == 'pull_request' && 'local:rw' || 'local:w' }}";
+
+/**
+ * Vitest called directly (not through `turbo run test`) builds the whole workspace first unless
+ * FM_GEBAUT says the job's Build step has built what the step needs (vitest.config.ts).
+ */
+const GEBAUT = { FM_GEBAUT: "1" };
+
 /** The job of the checks: build, perf, lint, the Modelo checks, release. */
-const CHECKS_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
-  ["Build", "pnpm build"],
+const CHECKS_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
+  [TURBO_CACHE_STEP, undefined],
+  ["Build", buildOf("checks")],
   // AK-07 timings run alone, outside any parallel Turborepo test run (Spec 001 D-17).
   ["Perf", "pnpm perf"],
   ["Lint", "pnpm lint"],
@@ -82,14 +128,19 @@ const CHECKS_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
 const UNIT_PACKAGES = ["agordilo", "cli", "ekranoj", "mcp", "metiejo", "modelo", "nordstelo"];
 
 /** The job of the unit tests: one package per runner (matrix), the Projekcioj and Eroj elsewhere. */
-const UNIT_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
-  ["Build", "pnpm build"],
-  ["Test", "pnpm turbo run test --filter=@fundamento/${{ matrix.package }}"],
+const UNIT_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
+  [TURBO_CACHE_STEP, undefined],
+  ["Build", buildOf("unit")],
+  [
+    "Test",
+    `pnpm turbo run test --filter=@fundamento/\${{ matrix.package }} --cache-dir=.turbo/cache ${TEST_CACHE}`,
+  ],
 ];
 
 /** The job of the Projekcioj suite: two Vitest shards (every Celo builds the whole Modelo). */
-const PROJEKCIOJ_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
-  ["Build", "pnpm build"],
+const PROJEKCIOJ_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
+  [TURBO_CACHE_STEP, undefined],
+  ["Build", buildOf("projekcioj")],
   ["Test", "pnpm --filter @fundamento/projekcioj exec vitest run --shard=${{ matrix.shard }}/2"],
 ];
 
@@ -99,9 +150,10 @@ const PROJEKCIOJ_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
 // 1896 on main); three would leave the Firefox shard at ~12.6 to 13.2 minutes. Every shard runs the
 // unit tests of the package before its part of the suite, as with two.
 /** The job of the rendered Eroj: the Playwright suite in four shards (fullyParallel inside). */
-const EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
+const EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
   ["Playwright browsers", PLAYWRIGHT_BROWSERS],
-  ["Build", "pnpm build"],
+  [TURBO_CACHE_STEP, undefined],
+  ["Build", buildOf("eroj")],
   [
     "Test",
     "pnpm --filter @fundamento/eroj exec vitest run --passWithNoTests && pnpm --filter @fundamento/eroj exec playwright test --shard=${{ matrix.shard }}/4",
@@ -116,9 +168,10 @@ const EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
 // shards (fullyParallel: one engine per shard on main). The argument goes to Playwright without a
 // `--`: pnpm passes a `--` on, and Playwright takes `--shard` after it for a file filter.
 /** The job of the rendered accessibility of the Eroj: axe, keyboard and focus ring, one shard. */
-const ALIREBLECO_EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
+const ALIREBLECO_EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
   ["Playwright browsers", PLAYWRIGHT_BROWSERS],
-  ["Build", "pnpm build"],
+  [TURBO_CACHE_STEP, undefined],
+  ["Build", buildOf("alirebleco-eroj")],
   ["Check: Alirebleco (Eroj)", "pnpm check:alirebleco-eroj --shard=${{ matrix.shard }}/3"],
 ];
 
@@ -134,24 +187,27 @@ const ALIREBLECO_EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string]>
 // the Make Kit and the quickstart stay here, and the Werkstatt and the rest of the Vitrino run in
 // parts (packages/eroj/test/vitrino-partoj.ts), a runner each.
 /** The job of the Make Kit and the quickstart. */
-const RENDERED_CHECK_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
+const RENDERED_CHECK_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
   ["Playwright browsers", PLAYWRIGHT_BROWSERS],
-  ["Build", "pnpm build"],
+  [TURBO_CACHE_STEP, undefined],
+  ["Build", buildOf("rendered-checks")],
   ["Check: Make Kit", "pnpm check:make-kit"],
   ["Check: Quickstart", "pnpm check:quickstart"],
 ];
 
 /** The job of the Werkstatt of the Vitrino, one part per runner. */
-const WERKSTATT_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
+const WERKSTATT_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
   ["Playwright browsers", PLAYWRIGHT_BROWSERS],
-  ["Build", "pnpm build"],
+  [TURBO_CACHE_STEP, undefined],
+  ["Build", buildOf("werkstatt")],
   ["Check: Vitrino (Werkstatt)", "pnpm check:vitrino"],
 ];
 
 /** The job of the Vitrino without its Werkstatt, one part per runner. */
-const VITRINO_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
+const VITRINO_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
   ["Playwright browsers", PLAYWRIGHT_BROWSERS],
-  ["Build", "pnpm build"],
+  [TURBO_CACHE_STEP, undefined],
+  ["Build", buildOf("vitrino")],
   ["Check: Vitrino", "pnpm check:vitrino"],
 ];
 
@@ -161,7 +217,9 @@ const VITRINO_JOBS: Readonly<Record<string, readonly [step: string, grupo: strin
   vitrino: ["Check: Vitrino", "cetero"],
 };
 
-const JOBS: Readonly<Record<string, ReadonlyArray<readonly [name: string, run: string]>>> = {
+const JOBS: Readonly<
+  Record<string, ReadonlyArray<readonly [name: string, run: string | undefined]>>
+> = {
   checks: CHECKS_STEPS,
   unit: UNIT_STEPS,
   projekcioj: PROJEKCIOJ_STEPS,
@@ -277,13 +335,17 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     expect(loadJob()["runs-on"]).toBe("ubuntu-latest");
   });
 
-  it("pins every action to a major version", () => {
-    const actions = loadSteps()
-      .map((step) => step.uses)
-      .filter((uses): uses is string => typeof uses === "string");
-    expect(actions.length).toBeGreaterThan(0);
-    for (const uses of actions) {
-      expect(uses).toMatch(/^[\w.-]+\/[\w.-]+@v\d+$/);
+  it("pins every action of every job to a major version", () => {
+    const jobs = Object.keys(loadJobs());
+    expect(jobs).toEqual(Object.keys(JOBS));
+    for (const job of jobs) {
+      const actions = loadSteps(job)
+        .map((step) => step.uses)
+        .filter((uses): uses is string => typeof uses === "string");
+      expect(actions.length, job).toBeGreaterThan(3);
+      for (const uses of actions) {
+        expect(uses, job).toMatch(/^[\w.-]+\/[\w.-]+@v\d+$/);
+      }
     }
   });
 
@@ -406,7 +468,10 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     }
     // No other step chooses a part: locally and anywhere else the Vitrino runs whole.
     const chosen = Object.keys(loadJobs()).flatMap((job) =>
-      loadSteps(job).filter((step) => isRecord((step as { env?: unknown }).env)),
+      loadSteps(job).filter((step) => {
+        const env = (step as { env?: unknown }).env;
+        return isRecord(env) && "VITRINO_PARTO" in env;
+      }),
     );
     expect(chosen).toHaveLength(Object.keys(VITRINO_JOBS).length);
     for (const [job, name] of Object.entries(JOB_NAMES)) {
@@ -414,6 +479,80 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     }
     const config = readFileSync(`${repoRoot}packages/eroj/playwright.vitrino.config.ts`, "utf8");
     expect(config).toContain("vitrinoAuswahl(process.env.VITRINO_PARTO)");
+  });
+
+  it("restores and saves the Turborepo cache in every job right before its Build (Spec 040 T-5)", () => {
+    for (const job of Object.keys(loadJobs())) {
+      const steps = loadSteps(job);
+      const build = steps.findIndex((step) => step.name === "Build");
+      expect(build, job).toBeGreaterThan(0);
+      const cache = steps[build - 1];
+      expect(cache?.name, job).toBe(TURBO_CACHE_STEP);
+      expect(cache?.uses, job).toBe(TURBO_CACHE_ACTION);
+      expect(cache?.uses, job).toMatch(/^actions\/cache@v\d+$/);
+      expect(cache && withOf(cache), job).toEqual({
+        path: ".turbo/cache",
+        key: `${TURBO_CACHE_PREFIX}\${{ github.sha }}`,
+        "restore-keys": `${TURBO_CACHE_PREFIX}\n`,
+      });
+      expect(
+        steps.filter((step) => usesAction(step, "actions/cache")),
+        job,
+      ).toHaveLength(1);
+    }
+  });
+
+  it("builds in no job with pnpm build: every Build is a filtered turbo run build through the cache (AC-B5)", () => {
+    for (const job of Object.keys(loadJobs())) {
+      const runs = loadSteps(job)
+        .map((step) => step.run)
+        .filter((run): run is string => typeof run === "string");
+      for (const run of runs) expect(run, job).not.toMatch(/\bpnpm\s+(?:run\s+)?build\b/);
+      const build = loadSteps(job).find((step) => step.name === "Build");
+      expect(build?.run, job).toBe(buildOf(job));
+    }
+    expect(Object.keys(BUILD_FILTERS)).toEqual(Object.keys(JOBS));
+  });
+
+  it("builds the CLI's closure where a step spawns the built fm, and @fundamento/eroj#test waits for it (A-4)", () => {
+    // The eroj specs (studio-035, zweitfarbe-036, metiejo*, buehne-036, form-036) and check:bazo
+    // start packages/cli/dist/index.js.
+    for (const job of ["eroj", "werkstatt", "vitrino"]) {
+      expect(BUILD_FILTERS[job], job).toBe("@fundamento/cli...");
+    }
+    const turbo: unknown = JSON.parse(readFileSync(`${repoRoot}turbo.json`, "utf8"));
+    const tasks = isRecord(turbo) && isRecord(turbo.tasks) ? turbo.tasks : {};
+    const eroj = tasks["@fundamento/eroj#test"];
+    expect(isRecord(eroj) ? eroj.dependsOn : undefined).toEqual(["build", "@fundamento/cli#build"]);
+  });
+
+  it("reads test results from the cache only on a pull request, and nothing from a remote cache", () => {
+    const test = loadSteps("unit").find((step) => step.name === "Test");
+    expect(test?.run).toContain(` ${TEST_CACHE}`);
+    const workflow = readFileSync(workflowPath, "utf8");
+    // The one cache mode of the workflow; builds read and write the local cache everywhere.
+    expect(workflow.match(/--cache=/g)).toHaveLength(1);
+    expect(workflow).not.toMatch(
+      /--force\b|TURBO_(?:TOKEN|TEAM|API|REMOTE)|--(?:token|team|api)\b/,
+    );
+  });
+
+  it("lets Vitest called directly skip building the whole workspace again after the job's Build", () => {
+    const direct = Object.keys(loadJobs()).flatMap((job) =>
+      loadSteps(job)
+        .filter((step) => typeof step.run === "string" && /exec vitest run/.test(step.run))
+        .map((step) => [job, step] as const),
+    );
+    expect(direct.map(([job]) => job)).toEqual(["projekcioj", "eroj"]);
+    for (const [job, step] of direct) {
+      expect((step as { env?: unknown }).env, job).toEqual(GEBAUT);
+    }
+    for (const pkg of ["projekcioj", "eroj"]) {
+      const config = readFileSync(`${repoRoot}packages/${pkg}/vitest.config.ts`, "utf8");
+      expect(config, pkg).toContain(
+        "process.env.TURBO_HASH === undefined && process.env.FM_GEBAUT === undefined",
+      );
+    }
   });
 
   it("keeps every job under a 15-minute budget (the wall clock stays under 12)", () => {
