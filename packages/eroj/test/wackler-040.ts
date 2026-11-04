@@ -9,5 +9,10 @@
  * `stand()`). Only for reads that change nothing; a second reset, and any other error, is thrown.
  */
 export async function nachEinemReset<T>(send: () => Promise<T>): Promise<T> {
-  return send();
+  try {
+    return await send();
+  } catch (error) {
+    if (!(error instanceof Error) || !error.message.includes("ECONNRESET")) throw error;
+    return send();
+  }
 }
