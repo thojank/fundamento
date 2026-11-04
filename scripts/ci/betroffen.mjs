@@ -311,7 +311,7 @@ export function collect({
     if (lokal || ref) base = mergeBase(ref, cwd, log, lokal);
     else log("betroffen: GITHUB_BASE_REF is not set");
     if (base === undefined) {
-      if (lokal) log("betroffen: could not fetch origin/main or find its merge base – testing everything");
+      if (lokal) log("betroffen: origin/main not reachable – testing everything");
       return { decision: decide({ event, base, workspace }), base };
     }
     const changed = changedFiles(base, cwd, lokal);
@@ -322,7 +322,7 @@ export function collect({
     return { decision: decide({ event, base, changed, affected, workspace, inputs }), base };
   } catch (error) {
     log(`betroffen: ${error instanceof Error ? error.message.split("\n")[0] : String(error)}`);
-    return { decision: decide({ event: event, base: undefined, workspace }), base: undefined };
+    return { decision: decide({ event, base: undefined, workspace }), base: undefined };
   }
 }
 
