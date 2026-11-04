@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, expectTypeOf, it } from "vitest";
 import type {
   DtcgType as GeneratedDtcgType,
@@ -30,6 +31,91 @@ import {
   type TokenRole,
   type ValidationIssue,
 } from "./index.js";
+
+const SRC = fileURLToPath(new URL("..", import.meta.url));
+const CATALOG_FILE = join(SRC, "contracts", "issues.ts");
+const CATALOG_START = "export const RULE_IDS = [";
+const RULE_ID_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+/**
+ * Spec 040 B-4: the rules of the catalog reported outside this package, by the package that
+ * reports them – and the one nothing reports yet. The test proves the list exact: none of them is
+ * reported in modelo's source.
+ */
+const REPORTED_ELSEWHERE: Readonly<Record<string, string>> = {
+  "agordo-jugxo-fixed": "@fundamento/agordilo",
+  "raporto-out-of-sync": "@fundamento/agordilo",
+  "agordo-save-refused": "@fundamento/mcp",
+  "nomregulo-no-target": "@fundamento/mcp",
+  // Finding of Spec 040 B-4: catalogued with the parity rules (FUND-4.4), reported by no check.
+  "parity-binding-mismatch": "none yet",
+};
+
+/** The source modelo reports its rules from: every module but the catalog, the tests and doubles. */
+function enforcerSource(): string {
+  return readdirSync(SRC, { recursive: true, encoding: "utf8" })
+    .filter(
+      (path) =>
+        path.endsWith(".ts") &&
+        !path.endsWith(".test.ts") &&
+        !path.split(/[\\/]/).some((part) => part === "test-doubles" || part === "generated") &&
+        join(SRC, path) !== CATALOG_FILE,
+    )
+    .sort()
+    .map((path) => readFileSync(join(SRC, path), "utf8"))
+    .join("\n");
+}
+
+/**
+ * Spec 040 B-4: every rule of the register has an ID (the grammar, once), documentation (a comment
+ * heads its group in the catalog's source, read as text) and a contract (a check reports it, here
+ * or in the package REPORTED_ELSEWHERE names). Derived from the register, so a new rule needs no
+ * new number here.
+ */
+function ruleCatalogViolations(
+  ids: readonly string[],
+  catalogText: string,
+  enforcers: string,
+): string[] {
+  const violations: string[] = [];
+  const lines = catalogText.slice(catalogText.indexOf(CATALOG_START)).split("\n").slice(1);
+  const documented: string[] = [];
+  let heading = false;
+  for (const line of lines) {
+    const text = line.trim();
+    if (text.startsWith("] as const")) break;
+    if (text.startsWith("//")) {
+      heading = true;
+      continue;
+    }
+    const entry = /^"([^"]+)",?$/.exec(text)?.[1];
+    if (entry === undefined) {
+      heading = false;
+      continue;
+    }
+    if (!heading) violations.push(`${entry}: no comment heads its group in the catalog`);
+    documented.push(entry);
+  }
+  if (JSON.stringify(documented) !== JSON.stringify(ids)) {
+    violations.push("the catalog's source and RULE_IDS differ");
+  }
+  const seen = new Set<string>();
+  for (const id of ids) {
+    if (!RULE_ID_PATTERN.test(id)) violations.push(`${id}: not a rule ID`);
+    if (seen.has(id)) violations.push(`${id}: twice in the catalog`);
+    seen.add(id);
+    const reported = enforcers.includes(`"${id}"`);
+    const elsewhere = REPORTED_ELSEWHERE[id];
+    if (!reported && elsewhere === undefined) violations.push(`${id}: no check reports it`);
+    if (reported && elsewhere !== undefined) {
+      violations.push(`${id}: reported in modelo, not only by ${elsewhere}`);
+    }
+  }
+  for (const id of Object.keys(REPORTED_ELSEWHERE)) {
+    if (!seen.has(id)) violations.push(`${id}: listed as reported elsewhere, not in the catalog`);
+  }
+  return violations;
+}
 
 describe("token-name grammar (FR-13a)", () => {
   it("is the exact spec pattern", () => {
@@ -197,6 +283,20 @@ describe("rule catalog (§2.6)", () => {
     expect(formatIssuePath({ file: "data/ids.lock.json", pointer: "" })).toBe(
       "data/ids.lock.json#",
     );
+  });
+});
+
+describe("Spec 040 B-4: an added rule breaks a pinned sum, not the derived property", () => {
+  it("one more documented and reported rule keeps the catalog whole", () => {
+    const added = "fixture-rule-added";
+    const catalog = readFileSync(CATALOG_FILE, "utf8").replace(
+      "] as const;",
+      `  // Spec 040 B-4: a rule a later spec adds.\n  "${added}",\n] as const;`,
+    );
+    const ids = [...RULE_IDS, added];
+    const enforcers = `${enforcerSource()}\nconst issue = { rule: "${added}" };`;
+    expect(ruleCatalogViolations(ids, catalog, enforcers)).toEqual([]);
+    expect(ids).toHaveLength(203);
   });
 });
 
