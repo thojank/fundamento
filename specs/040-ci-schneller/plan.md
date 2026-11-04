@@ -42,7 +42,7 @@ Der Lauf ist unbeaufsichtigt. Wo die Spec offen ließ, gilt der Vorschlag. „an
 | V-5 | B-5 (neu) | in PR B zusammen mit B-2 | T-3 | offen |
 | V-6 | Lokaler Befehl | `pnpm test:betroffen` | T-6 | offen |
 | V-7 | `CONTRIBUTING` gibt es nicht | neue kurze `CONTRIBUTING.md` im Wurzelverzeichnis | T-6 | offen |
-| V-8 | Engines im PR (B-3, Technische Spec) | Drei Engines, wenn eine Änderung unter `packages/eroj/**`, `packages/projekcioj/**`, `packages/vortaro/**`, `packages/aspekto-*/**` oder in einer `playwright.*.config.ts` liegt, sonst Chromium; auf `main` immer drei | T-6 | offen |
+| V-8 | Engines im PR (B-3, Technische Spec) | Drei Engines, wenn eine Änderung unter `packages/eroj/**`, `packages/projekcioj/**`, `packages/vortaro/**`, `packages/aspekto-*/**` oder in einer `playwright.*.config.ts` liegt, sonst Chromium; auf `main` immer drei | Wie vorgeschlagen in `scripts/ci/betroffen.mjs` (`needsAllEngines`); der Job `betroffen` gibt `engines` aus, die fünf gerenderten Jobs lesen `PLAYWRIGHT_ENGINES` daraus. Ergänzt: `playwright.config.ts` (ohne Mittelteil) zählt wie `playwright.*.config.ts`, gleich in welchem Paket. Bei unklarer Basis (E-7) drei Engines. Eine Wurzeldatei allein (E-8) testet alle Pakete, ändert aber die Engines nicht. `push`, `schedule` und `workflow_dispatch` haben immer drei, auch `workflow_dispatch` auf einem anderen Branch als `main` (vorher Chromium). Gepinnt in `workflow.test.ts` und `betroffen.test.ts`. | angewandt (T-6) |
 
 ### Entscheidungen der Implementierungs-Spec (D-04 bis D-17)
 
@@ -219,6 +219,25 @@ Die Jobnamen ändern sich mit PR A; die Zeilen fassen alte und neue Jobs zusamme
 | Zeittests (nachher neu, T-7) | – | offen (T-8) | | – | offen (T-8) | |
 | **Lauf gesamt** | 15:17 (begrenzt durch die Abbrüche) | offen (T-8) | | 10:59 | offen (T-8) | |
 | **Jobzeit Summe** | 99:10 | offen (T-8) | | 61:43 | offen (T-8) | |
+
+## Lokaler Befehl
+
+`pnpm test:betroffen` (V-6, US-5) ruft `node scripts/ci/betroffen.mjs --lokal --ausfuehren` auf. Beschrieben für Mitwirkende in `CONTRIBUTING.md` (V-7).
+
+1. **Basis.** `git fetch origin main --quiet`, dann `git merge-base origin/main HEAD`. Schlägt eins davon fehl, gibt es einen Hinweis aus und testet alles (E-7).
+2. **Geänderte Dateien.** `git diff --name-only --no-renames <basis>` und `git ls-files --others --exclude-standard`. Nicht committete und neue Dateien zählen also mit.
+3. **Alles betroffen** (E-8) bei einer Wurzeldatei: `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `package.json`, `turbo.json`, `tsconfig.base.json`, `.nvmrc`, `.npmrc`, `biome.json`, `.github/workflows/**`, `scripts/**`.
+4. **Sonst die betroffenen Pakete**, aus zwei Quellen:
+   - `turbo ls --filter=...[<basis>]`: die geänderten Pakete und alle, die von ihnen abhängen.
+   - Dazu jedes Paket, dessen Testaufgabe eine geänderte Datei außerhalb des Pakets hasht (`$TURBO_ROOT$/…` unter `inputs` der `<paket>#test`-Aufgaben in `turbo.json`). Ein Beispiel: `specs/**` oder `README.md` erreicht `@fundamento/modelo`. Ohne diese Ergänzung bliebe ein PR, der nur Doku ändert, ganz ohne Test, obwohl die Modelo-Tests genau diese Dateien prüfen. Die Abhängigen dieses Pakets kommen nicht dazu, denn sein Build hat sich nicht geändert.
+5. **Engines** nach V-8. Hat der Aufrufer `PLAYWRIGHT_ENGINES` gesetzt, gilt seine Wahl.
+6. **Lauf.** `turbo run test --filter=<paket> …`, bei „alles“ ohne Filter. Gesetzt ist `FM_AUSGABE=knapp`, das ab T-7 nur rote Tests und eine Summenzeile zeigt (C-4). Bis dahin bleibt die Ausgabe von Turborepo unverändert. Ist kein Paket betroffen, läuft nichts, Exit 0.
+
+`node scripts/ci/betroffen.mjs --lokal` zeigt nur die Liste. Ohne Option (in CI) gilt dieselbe Entscheidung gegen `origin/$GITHUB_BASE_REF`. Holt der Job den Ref nicht, oder fehlt die Merge-Basis, testet er alles mit Logzeile (E-7). Die Ausgaben `pakete`, `alle` und `engines` stehen in `$GITHUB_OUTPUT`, eine Begründung im Step-Summary.
+
+**Auf diesem Branch** (T-6, Basis `b500e302`): `alle: true`, weil Wurzeldateien geändert sind (`.github/workflows/ci.yml`, `package.json`, `scripts/ci/**`, `turbo.json`), und drei Engines wegen `packages/eroj/**`. `pnpm test:betroffen` testet hier also alles, wie in A-1 erwartet.
+
+**AC-B3, lokale Hälfte.** In einem Wegwerf-Worktree `/tmp/s040-probe` auf dem T-6-Kopf liegt ein Commit, der nur einen Kommentar in `packages/metiejo/src/ident.ts` ändert. Basis ist der T-6-Kopf (`GITHUB_EVENT_NAME=pull_request`). Ergebnis: `pakete=["@fundamento/cli","@fundamento/ekranoj","@fundamento/metiejo","@fundamento/nordstelo"]`, `alle=false`, `engines=chromium`. `projekcioj` und `eroj` sind nicht dabei. Der Worktree wurde danach entfernt. Der CI-Beleg folgt mit dem Probe-PR (D-04, T-8).
 
 ## Messanleitung
 
