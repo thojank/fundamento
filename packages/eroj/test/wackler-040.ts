@@ -132,3 +132,12 @@ export async function seiteGeladen(
     page.off("response", hoeren);
   }
 }
+
+/**
+ * The page's poll of the draft (GET /api/marko/<id>/stato, every 3 s on the assistant's steps) has
+ * answered, its body included (Spec 040 B-8): the next poll is one interval away. An action that
+ * reloads the page right after this cuts no poll short; WebKit reports a poll cut short by the
+ * reload as a console error ("…/stato due to access control checks.", runs 41920898257 attempt 1,
+ * buehne-036.spec.ts, and attempt 2, zweitfarbe-036.spec.ts).
+ */
+export async function nachDerAbfrage(_page: Page, _id: string): Promise<void> {}

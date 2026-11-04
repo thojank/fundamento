@@ -7,7 +7,7 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import { expect, test } from "@playwright/test";
-import { gespeichert, seiteGeladen } from "./wackler-040.js";
+import { gespeichert, nachDerAbfrage, seiteGeladen } from "./wackler-040.js";
 
 const SEITE = `<!doctype html>
 <html lang="de" data-mt-sxtupo="farbe"><head><title>Probe</title></head><body>
@@ -33,6 +33,11 @@ const LADEN = `<!doctype html>
 document.querySelector("iframe[data-mt-vorschau]").src = "/vorschau?rev=3";
 fetch("/api/marko/probe/pruefung", { method: "POST" });
 </script></body></html>`;
+
+// A page that polls the draft as the assistant's steps do (GET …/stato), here once on load.
+const ABFRAGE = `<!doctype html>
+<html lang="de"><head><title>Probe</title></head><body><p>Probe</p>
+<script>fetch("/api/marko/probe/stato").catch(() => undefined);</script></body></html>`;
 
 /** A request the server holds: known once it came, answered once the test lets it go. */
 interface Gehalten {
@@ -70,6 +75,7 @@ let server: Server;
 let base = "";
 let vorschau: ReturnType<typeof halten>;
 let pruefung: ReturnType<typeof halten>;
+let stato: ReturnType<typeof halten>;
 
 function html(response: ServerResponse, body: string): void {
   response.setHeader("content-type", "text/html; charset=utf-8");
@@ -80,7 +86,13 @@ function antworte(request: IncomingMessage, response: ServerResponse): void {
   const url = new URL(request.url ?? "/", base);
   if (url.pathname === "/seite") html(response, SEITE);
   else if (url.pathname === "/laden") html(response, LADEN);
-  else if (url.pathname === "/vorschau" && url.searchParams.get("rev") === "1")
+  else if (url.pathname === "/abfrage") html(response, ABFRAGE);
+  else if (url.pathname === "/api/marko/probe/stato") {
+    // The head and the first byte of the answer go at once, the rest once the test lets it go.
+    response.writeHead(200, { "content-type": "application/json" });
+    response.write("{");
+    stato.annehmen(response);
+  } else if (url.pathname === "/vorschau" && url.searchParams.get("rev") === "1")
     html(response, "<!doctype html><p>rev 1</p>");
   else if (url.pathname === "/vorschau") vorschau.annehmen(response);
   else if (url.pathname === "/api/marko/probe/pruefung") pruefung.annehmen(response);
@@ -172,4 +184,29 @@ test("seiteGeladen() waits for the load, the preview of the page's rev and the c
   // The check answered: settled.
   pruefung.gehalten.freigeben();
   await geladen;
+});
+
+test("nachDerAbfrage() waits for the poll's answer and its body (Spec 040 B-8)", async ({
+  page,
+}) => {
+  stato = halten((response) => response.end('"rev":4}'));
+  const kopf = page.waitForResponse(
+    (response) => new URL(response.url()).pathname === "/api/marko/probe/stato",
+  );
+  let fertig = false;
+  const abgefragt = nachDerAbfrage(page, "probe").then(() => {
+    fertig = true;
+  });
+  await page.goto(`${base}/abfrage`);
+
+  // The poll has the head of its answer, not the body: not answered.
+  await stato.gehalten.gekommen;
+  await kopf;
+  await page.evaluate(() => document.readyState);
+  expect(fertig).toBe(false);
+
+  // The body came: answered.
+  stato.gehalten.freigeben();
+  await abgefragt;
+  expect(fertig).toBe(true);
 });
