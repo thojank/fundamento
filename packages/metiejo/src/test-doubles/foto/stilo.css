@@ -1,0 +1,42 @@
+/* Synthetic test page of an invented brand for Weg C (Spec 036, Befund 2.3): the defining colour
+   stands only in the large product photo of the first screen; the background of the page is
+   another colour and fills three screens. */
+:root {
+  --fm-hintergrund: #5f86a8;
+  --fm-tinte: #1d2433;
+}
+body {
+  margin: 0;
+  background: #5f86a8;
+  color: #1d2433;
+  font-family: Inter, sans-serif;
+}
+.kapo {
+  height: 48px;
+  padding: 16px;
+}
+.logo {
+  display: block;
+}
+.held {
+  display: flex;
+  justify-content: space-between;
+  height: 600px;
+  padding: 0 40px;
+}
+.held h1 {
+  margin: 40px 0 0;
+}
+.foto {
+  display: block;
+  width: 720px;
+  height: 600px;
+  image-rendering: pixelated;
+}
+.foto-hintergrund {
+  background: url("/produkt.png") center / cover no-repeat;
+}
+main {
+  min-height: 1700px;
+  padding: 24px 40px;
+}

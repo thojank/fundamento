@@ -940,6 +940,28 @@
           "glitilo"
         ]
       }
+    },
+    {
+      "id": "reg_01M69EBRPTBSYHBK390T905QZ6",
+      "name": "link-distinct-from-text",
+      "statement": "In every combination of every Aspekto, when color.link.rest or color.link.visited differs from color.text.default by less than 0.3 in OKLCH lightness (transparent values composited over color.background.default first), the link carries a second feature: the underline of every ligilo in running text (placement inline) resolves to a width above 0 in every state.",
+      "kialo": "WCAG 1.4.1 (Use of Color) with its technique G183: a link in running text that only its colour sets apart needs 3:1 against the text, else a second feature. Spec 036 (V-1) lets a brand be achromatic – its links then take the colour of the text, and the underline is what tells the link from the sentence; a brand may re-point the Ero-Token of the underline, so the Skemo alone (link-not-color-only) does not guard it. Measured in OKLCH lightness like every colour Regulo, a difference in hue alone does not count: 3:1 between text and link lies at a difference of 0.29 for dark body text at L 0.22 and 0.33 for white text in the dark mode, so the sojlo is 0.3. The way out of a violation is the underline, never a colourful link the brand does not have.",
+      "scope": "vortaro: color.link.rest and color.link.visited against color.text.default in every combination; eroj: the Ero-Tokens of underline.width of the ligilo in placement inline",
+      "checkability": "automatic",
+      "appliesTo": {
+        "tokens": [
+          "color.link.rest",
+          "color.link.visited",
+          "color.text.default"
+        ],
+        "eroj": [
+          "ligilo"
+        ]
+      },
+      "sojlo": {
+        "metric": "oklch-l-delta",
+        "min": 0.3
+      }
     }
   ]
 }

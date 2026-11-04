@@ -7,7 +7,6 @@
 // area becomes an accent proposal (Spec 035, Befund 4.2): proposed with its origin and recorded,
 // never laid past the check. Pure apart from reading the data and the catalogue.
 
-import { readFileSync } from "node:fs";
 import {
   type Agordo,
   type OklchColor,
@@ -20,40 +19,9 @@ import { type Propono, proponojOf } from "../enportilo/rekono.js";
 import type { Herkunft, Trovo } from "../enportilo/trovo.js";
 import { fontoOf, licencedFonto, readTiparoj, type Tiparoj } from "../tiparoj.js";
 import type { Bases } from "../vorschau.js";
+import { KREILO } from "./datoj.js";
 
-export interface KreiloParo {
-  nomo: string;
-  maldekstre: string;
-  dekstre: string;
-  bewegungen: { regler: string; schritt: number }[];
-  kialo: string;
-}
-
-export interface KreiloDatoj {
-  paroj: KreiloParo[];
-  leitfarbe: {
-    helligkeit: number;
-    chroma: { basis: number; je_lebhaft: number; min: number; max: number };
-    farbton: Record<string, number>;
-    kialo: string;
-  };
-  tiparoj: { kiam: Record<string, string>; display: string; body: string; kialo: string }[];
-  /** Spec 035, Befund 4.2: when a second colour of the inspiration becomes an accent proposal. */
-  akzent: {
-    /** OKLCH chroma from which a colour counts as strong (as for the lead colour). */
-    chroma_min: number;
-    /** Distance to the lead colour in the colour plane of OKLab (a, b; lightness left out). */
-    abstand_min: number;
-    /** Percent of the colour found that the accent and its near tones cover at least. */
-    anteil_min: number;
-    /** Tones up to this distance count as one colour (an image's buckets of one colour). */
-    gleich_bis: number;
-    kialo: string;
-  };
-}
-
-export const KREILO_URL = new URL("../../data/kreilo.json", import.meta.url);
-export const KREILO: KreiloDatoj = JSON.parse(readFileSync(KREILO_URL, "utf8")) as KreiloDatoj;
+export { KREILO, KREILO_URL, type KreiloDatoj, type KreiloParo } from "./datoj.js";
 
 export interface KreiloEnigo {
   /** What the brand stands for and for whom, in the person's words. */

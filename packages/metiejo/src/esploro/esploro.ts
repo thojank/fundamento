@@ -8,7 +8,8 @@
 // at most three screens – and its screenshot measured by area like a screenshot in Weg B, the logo
 // and the first screen weighted more; the colours of the CSS only add to it (CSS_ANTEIL). A page
 // that blocks automatic reading gives no colours and one sentence; without a browser the code alone
-// is read, as before, and one sentence says so.
+// is read, as before, and one sentence says so. Spec 036, Befund 2.3: a large picture of the first
+// screen counts with its own weight (kreilo.json, weg_c) – photos are not background.
 
 import { isIP } from "node:net";
 import {
@@ -182,8 +183,8 @@ export async function esplori(options: EsploroOptions): Promise<EsploroRezulto> 
   const render = async (url: string, html: string, css: Trovo[]): Promise<Trovo[]> => {
     if (senBrowser) return css;
     try {
-      const { bildo, logoj } = await options.bildilo.bildigi({ url, html, fetch: guarded });
-      const pezoj = pezojOfEkrano(bildo.width, bildo.height, VIDO, logoj);
+      const { bildo, logoj, bildoj } = await options.bildilo.bildigi({ url, html, fetch: guarded });
+      const pezoj = pezojOfEkrano(bildo.width, bildo.height, VIDO, logoj, bildoj);
       return kunEkrano(css, farbojOfPixels(bildo.rgba, url, 8, 0.005, pezoj));
     } catch (error) {
       if (error instanceof SenBrowser) {

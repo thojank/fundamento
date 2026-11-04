@@ -82,11 +82,11 @@ describe("the article goes with the word of the screen (Spec 036, Befund 1.3, A-
     expect(check("Das ist eine Kroniko.")).toBe("Das ist ein Protokoll.");
   });
 
-  it("Agordo: the article of the Einstellungen", () => {
+  it("Agordo: the article of the Konfiguration (B-R1-1)", () => {
     expect(check("Ich habe die Agordo gespeichert.")).toBe(
-      "Ich habe die Einstellungen gespeichert.",
+      "Ich habe die Konfiguration gespeichert.",
     );
-    expect(check("Das steht in der Agordo.")).toBe("Das steht in den Einstellungen.");
+    expect(check("Das steht in der Agordo.")).toBe("Das steht in der Konfiguration.");
   });
 
   it("Aspekto: the article of the Marke, whatever article the model used", () => {

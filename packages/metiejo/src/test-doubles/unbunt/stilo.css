@@ -1,0 +1,57 @@
+/* Synthetic test page of an achromatic brand for Weg C (Spec 036, Befund 2.1): black, white and
+   cream carry the brand; three small pastel accents are its only colours. */
+:root {
+  --fm-inko: #111111;
+  --fm-kremo: #f5f0e6;
+  --fm-blanka: #ffffff;
+}
+body {
+  margin: 0;
+  background: #f5f0e6;
+  color: #111111;
+  font-family: Inter, sans-serif;
+}
+.kapo {
+  height: 48px;
+  padding: 16px;
+  background: #ffffff;
+  border-bottom: 8px solid #111111;
+}
+.logo {
+  display: block;
+}
+.held {
+  height: 280px;
+  margin: 0;
+  background: #111111;
+  color: #ffffff;
+}
+main {
+  padding: 24px;
+}
+h1 {
+  color: #111111;
+  margin: 0 0 8px;
+}
+a {
+  color: #111111;
+  text-decoration: underline;
+}
+.akcento {
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+}
+.rozo {
+  background: #f6c1cc;
+}
+.lavendo {
+  background: #cdbff0;
+}
+.persiko {
+  background: #f9d9b8;
+}
+footer {
+  background: #ffffff;
+  padding: 24px;
+}

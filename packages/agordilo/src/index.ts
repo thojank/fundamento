@@ -18,5 +18,6 @@ export * from "./raporto.js";
 export * from "./regler.js";
 export * from "./solve.js";
 export * from "./structure.js";
+export * from "./unbunt.js";
 export * from "./version.js";
 export * from "./wunsch.js";

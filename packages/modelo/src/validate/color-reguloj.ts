@@ -18,6 +18,7 @@ import { WCAG2_METRIC } from "../checks/alirebleco/metrics.js";
 import { aliasTarget, CORE_SET_NAME } from "../contracts/grammar.js";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { KontrastKategorio, Modelo, Regulo } from "../contracts/modelo.js";
+import { eroTokenNameOf } from "../eroj/ero-tokenoj.js";
 import type { ColorValue } from "../generated/modelo-schema.js";
 import { isJsonObject } from "../load/guards.js";
 import { wcag2Reserve } from "../metrikoj/contrast.js";
@@ -353,6 +354,54 @@ export const contrastReserve: CombinationChecker = (context) => {
   });
 };
 
+const LINK_ROLES = ["color.link.rest", "color.link.visited"] as const;
+const TEXT_DEFAULT = "color.text.default";
+
+/**
+ * `link-distinct-from-text` (Spec 036, Befund 2.1, V-1): when a link differs from the text by less
+ * than `sojlo.min` in OKLCH lightness – an achromatic brand gives it the colour of the text – the
+ * underline is the second feature: the Ero-Token of underline.width of every Ero the Regulo names
+ * resolves, in placement inline and in every state, to a width above 0. A cell the Skemo binds to a
+ * keyword has no token; link-not-color-only judges that.
+ */
+export const linkDistinctFromText: CombinationChecker = (context) => {
+  const min = context.regulo.sojlo?.min;
+  const text = seenColor(context, TEXT_DEFAULT);
+  if (min === undefined || text === undefined) return [];
+  const textL = oklchLightness(text);
+  const closest = LINK_ROLES.flatMap((role) => {
+    const color = seenColor(context, role);
+    return color === undefined
+      ? []
+      : [{ role, color, delta: Math.abs(oklchLightness(color) - textL) }];
+  }).sort((a, b) => a.delta - b.delta)[0];
+  if (closest === undefined || closest.delta >= min - EPSILON) return [];
+  const wanted = context.regulo.appliesTo?.eroj;
+  return context.modelo.eroj
+    .filter((entry) => wanted === undefined || wanted.includes(entry.ero.name))
+    .flatMap(({ ero, skemo }) => {
+      if (skemo.parts.underline?.width === undefined) return [];
+      return skemo.states.flatMap((state) => {
+        const name = eroTokenNameOf("ero", ero.name, skemo, "underline", "width", {
+          placement: "inline",
+          state,
+        });
+        const value = name === undefined ? undefined : context.resolution.tokens[name]?.value;
+        if (name === undefined || value === undefined) return [];
+        const width = pixelsOf(value);
+        if (width !== undefined && width > 0) return [];
+        return [
+          {
+            subject: name,
+            values: `${hexOf(closest.color)} ${hexOf(text)} ${width ?? "?"}`,
+            message: `${name} resolves to ${width ?? "no width in px"}${width === undefined ? "" : "px"}: ${ero.name} in running text has no underline in the state ${state}, while ${closest.role} differs from ${TEXT_DEFAULT} by only ${fmt3(closest.delta)} in OKLCH lightness, below ${min}: without its underline the link is not told from the sentence (WCAG 1.4.1).`,
+            suggestion: `Give ${name} (set '${originOf(context, name)}') a width above 0, e.g. the role token the Skemo binds (Regulo link-distinct-from-text); the way out is the underline, not a colourful link the brand does not have.`,
+          },
+        ];
+      });
+    });
+};
+
 /** Per-combination checkers by Regulo name (plan D-04); `explain` uses the same table. */
 export const COMBINATION_CHECKERS: Readonly<Record<string, CombinationChecker>> = {
   ...SPEC004_CHECKERS,
@@ -362,10 +411,15 @@ export const COMBINATION_CHECKERS: Readonly<Record<string, CombinationChecker>> 
   "text-hierarchy": textHierarchy,
   "state-distinct": stateDistinct,
   "touch-target-min": touchTargetMin,
+  "link-distinct-from-text": linkDistinctFromText,
 };
 
 /** Reguloj whose checker needs a `sojlo`. */
-export const NEEDS_SOJLO: ReadonlySet<string> = new Set(["state-distinct", "text-hierarchy"]);
+export const NEEDS_SOJLO: ReadonlySet<string> = new Set([
+  "state-distinct",
+  "text-hierarchy",
+  "link-distinct-from-text",
+]);
 
 /** `regulo-sojlo-missing` for a measuring Regulo declared without its threshold. */
 export function sojloIssues(modelo: Modelo, regulo: Regulo): ValidationIssue[] {

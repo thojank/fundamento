@@ -6,6 +6,10 @@
 // only GET, nothing is posted. Without Playwright or without Chromium the renderer throws SenBrowser,
 // and Weg C reads the code alone and says so in one sentence.
 //
+// Spec 036, Befund 2.3: the renderer also gives the boxes of the pictures of the first screen – img
+// (inside a picture element too) and the background image of an element, not of the page itself and
+// not a tiled pattern –, so that a large one counts with its own weight (farboj.ts, kreilo.json).
+//
 // Befund 4.5.6 (D-11): the same browser decodes an uploaded JPG or WebP – Node decodes neither –
 // into pixels for the Enportilo: drawn into a canvas, at most MAX_RANDO px on the longer edge, and
 // handed over as a PNG, which the Enportilo decodes itself.
@@ -42,6 +46,11 @@ export interface Bildigo {
   bildo: Bildo;
   /** Where the logo stands, in CSS px of the viewport. */
   logoj: Kesto[];
+  /**
+   * Where the pictures of the first screen stand (Spec 036, Befund 2.3), largest first, in CSS px
+   * of the viewport; a double may leave them out.
+   */
+  bildoj?: Kesto[];
 }
 
 export interface Pagxo {
@@ -133,6 +142,33 @@ const LOGOJ = `(() => {
     boxes.push({ x: box.left + scrollX, y: box.top + scrollY, width: box.width, height: box.height });
   }
   return boxes.slice(0, 10);
+})()`;
+
+/**
+ * The pictures that reach into the first screen (Spec 036, Befund 2.3): every loaded, visible img
+ * (a picture element shows its img) and every element below body with a background image that is
+ * a picture, not a pattern – a url() sized to cover or contain, or not repeated. Largest part in
+ * the first screen first, at most 20.
+ */
+const BILDOJ = `(() => {
+  const boxes = [];
+  const add = (element, style) => {
+    if (style.visibility === "hidden" || Number(style.opacity) === 0) return;
+    const box = element.getBoundingClientRect();
+    const y = box.top + scrollY;
+    if (box.width < 1 || box.height < 1 || y >= innerHeight) return;
+    const inside = Math.max(0, Math.min(innerWidth, box.right) - Math.max(0, box.left)) * Math.max(0, Math.min(innerHeight, y + box.height) - Math.max(0, y));
+    boxes.push({ x: box.left + scrollX, y, width: box.width, height: box.height, inside });
+  };
+  for (const image of document.images)
+    if (image.complete && image.naturalWidth > 0) add(image, getComputedStyle(image));
+  for (const element of document.body ? document.body.querySelectorAll("*") : []) {
+    const style = getComputedStyle(element);
+    if (!style.backgroundImage.includes("url(")) continue;
+    if (!/cover|contain/.test(style.backgroundSize) && !style.backgroundRepeat.includes("no-repeat")) continue;
+    add(element, style);
+  }
+  return boxes.sort((a, b) => b.inside - a.inside).slice(0, 20);
 })()`;
 
 const KUNTEKSTO = {
@@ -248,6 +284,7 @@ export function playwrightBildilo(ladi: Ladilo = ladiPlaywright): Bildilo {
           ),
         );
         const logoj = kestojOf(await page.evaluate(LOGOJ));
+        const bildoj = kestojOf(await page.evaluate(BILDOJ));
         const png = await page.screenshot({
           type: "png",
           fullPage: true,
@@ -258,7 +295,7 @@ export function playwrightBildilo(ladi: Ladilo = ladiPlaywright): Bildilo {
             height: Number.isFinite(height) ? height : VIDO.height,
           },
         });
-        return { bildo: decodePng(png), logoj };
+        return { bildo: decodePng(png), logoj, bildoj };
       } finally {
         await chromium.close();
       }
