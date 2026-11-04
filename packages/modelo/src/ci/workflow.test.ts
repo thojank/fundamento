@@ -683,7 +683,7 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
       expect(install?.run, job).toBe(PLAYWRIGHT_BROWSERS);
     }
     // The old rule (three engines on main, Chromium on every pull request) is gone.
-    expect(readFileSync(workflowPath, "utf8")).not.toContain("refs/heads/main");
+    expect(readFileSync(workflowPath, "utf8")).not.toMatch(/github\.ref == 'refs\/heads\/main'/);
     // B-3 (V-8): a pull request into the rendered Eroj, the projections, the values or a
     // Playwright config runs Firefox and WebKit too; any other stays in Chromium.
     const { decide } = await loadBetroffen();

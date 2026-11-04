@@ -11,6 +11,7 @@
   "scripts": {
     "build": "turbo run build",
     "test": "turbo run test",
+    "test:betroffen": "node scripts/ci/betroffen.mjs --lokal --ausfuehren",
     "perf": "turbo run perf --concurrency=1",
     "lint": "turbo run lint && biome check package.json biome.json turbo.json tsconfig.base.json",
     "check": "turbo run build test && pnpm perf && pnpm lint && pnpm check:vortaro-lint && pnpm check:parity && pnpm check:regularo && pnpm check:mankoj && pnpm check:alirebleco && pnpm check:clean-room && pnpm check:ikonaro && pnpm check:fontoj && pnpm check:dokumentaro && pnpm check:privat && pnpm check:alirebleco-eroj && pnpm check:make-kit && pnpm check:quickstart && pnpm check:vitrino && pnpm check:release && pnpm check:tiparoj",

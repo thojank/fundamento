@@ -35,6 +35,47 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Spec 040 T-6 (C-2, US-2, B-3): which packages a change reaches, decided once per run. A pull
+  # request tests only those (the packages it changes and every package that depends on them, from
+  # the graph of Turborepo, plus a package whose test reads a changed file from outside it, from
+  # turbo.json); a changed root file (lockfile, turbo.json, workflows, scripts/ …) or an unknown
+  # merge base tests everything (E-7, E-8). main, the nightly run and workflow_dispatch test
+  # everything in every engine (AC-B4). The other jobs read the three outputs step by step: every
+  # job still runs and reports its check, and one without a change ends green with "nicht
+  # betroffen" (E-9). The checks are repo-wide and always run.
+  betroffen:
+    name: Affected packages (betroffen)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      pakete: ${{ steps.betroffen.outputs.pakete }}
+      alle: ${{ steps.betroffen.outputs.alle }}
+      engines: ${{ steps.betroffen.outputs.engines }}
+    steps:
+      # The whole history: the merge base with the base branch of the pull request.
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      # Turborepo reads the package graph.
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Affected packages
+        id: betroffen
+        run: node scripts/ci/betroffen.mjs
+
   # Nachlese 3 W1 (Spec 011 ⑤ B-9, O-21 fortgesetzt): three jobs side by side instead of one row.
   # The one job ran the Playwright suite of the Eroj beside the spawning e2e files of modelo
   # (turbo runs the packages' tests in parallel): the hook of validate.test.ts timed out under
@@ -150,6 +191,7 @@ jobs:
     name: Unit tests (${{ matrix.package }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    needs: betroffen
     strategy:
       fail-fast: false
       matrix:
@@ -160,19 +202,28 @@ jobs:
         with:
           persist-credentials: false
 
+      # Spec 040 T-6 (E-9): no change reaches this job's package – it ends green and says so.
+      - name: nicht betroffen
+        if: ${{ !(needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), format('@fundamento/{0}', matrix.package))) }}
+        run: 'echo "nicht betroffen: no change reaches @fundamento/${{ matrix.package }}, this job tests nothing." | tee -a "$GITHUB_STEP_SUMMARY"'
+
       - name: Set up pnpm
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), format('@fundamento/{0}', matrix.package)) }}
         uses: pnpm/action-setup@v6
 
       - name: Set up Node
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), format('@fundamento/{0}', matrix.package)) }}
         uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), format('@fundamento/{0}', matrix.package)) }}
         run: pnpm install --frozen-lockfile
 
       - name: Turbo cache
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), format('@fundamento/{0}', matrix.package)) }}
         uses: actions/cache@v6
         with:
           path: .turbo/cache
@@ -183,6 +234,7 @@ jobs:
       # The package and its dependencies; `turbo run test` below builds what its test waits for
       # beyond them (turbo.json), from the same cache.
       - name: Build
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), format('@fundamento/{0}', matrix.package)) }}
         run: pnpm turbo run build --filter=@fundamento/${{ matrix.package }}... --cache-dir=.turbo/cache
 
       # A new package with tests joins the matrix above (workflow.test.ts says so); the Eroj have
@@ -190,12 +242,14 @@ jobs:
       # Spec 040 T-5: a pull request takes unchanged test results from the cache; main, the
       # nightly run and workflow_dispatch run every test (write only, never read: AC-B4, AC-B12).
       - name: Test
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), format('@fundamento/{0}', matrix.package)) }}
         run: pnpm turbo run test --filter=@fundamento/${{ matrix.package }} --cache-dir=.turbo/cache --cache=${{ github.event_name == 'pull_request' && 'local:rw' || 'local:w' }}
 
   projekcioj:
     name: Unit tests (Projekcioj, shard ${{ matrix.shard }} of 2)
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    needs: betroffen
     strategy:
       fail-fast: false
       matrix:
@@ -206,19 +260,28 @@ jobs:
         with:
           persist-credentials: false
 
+      # Spec 040 T-6 (E-9): no change reaches this job's package – it ends green and says so.
+      - name: nicht betroffen
+        if: ${{ !(needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/projekcioj')) }}
+        run: 'echo "nicht betroffen: no change reaches @fundamento/projekcioj, this job tests nothing." | tee -a "$GITHUB_STEP_SUMMARY"'
+
       - name: Set up pnpm
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/projekcioj') }}
         uses: pnpm/action-setup@v6
 
       - name: Set up Node
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/projekcioj') }}
         uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/projekcioj') }}
         run: pnpm install --frozen-lockfile
 
       - name: Turbo cache
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/projekcioj') }}
         uses: actions/cache@v6
         with:
           path: .turbo/cache
@@ -227,6 +290,7 @@ jobs:
             turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-
 
       - name: Build
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/projekcioj') }}
         run: pnpm turbo run build --filter=@fundamento/projekcioj... --cache-dir=.turbo/cache
 
       # Every Celo test builds and validates the whole Modelo (seconds each, 258 s for the suite on
@@ -234,6 +298,7 @@ jobs:
       # FM_GEBAUT: the Build step has built what the suite needs; Vitest does not build the whole
       # workspace again (packages/projekcioj/vitest.config.ts).
       - name: Test
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/projekcioj') }}
         run: pnpm --filter @fundamento/projekcioj exec vitest run --shard=${{ matrix.shard }}/2
         env:
           FM_GEBAUT: "1"
@@ -246,42 +311,55 @@ jobs:
     name: Rendered Eroj (Playwright, shard ${{ matrix.shard }} of 4)
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    needs: betroffen
     strategy:
       fail-fast: false
       matrix:
         shard: [1, 2, 3, 4]
-    # A run on main (the merge run, the nightly run) proves the rendering of the Eroj in Chromium,
-    # Firefox and WebKit (Spec 003); a PR run in Chromium only. An engine-specific defect therefore
-    # shows on main, not in the PR. Read by packages/eroj/playwright.config.ts.
+    # A run on main (the merge run, the nightly run, workflow_dispatch) proves the rendering of the
+    # Eroj in Chromium, Firefox and WebKit (Spec 003). Spec 040 B-3 (V-8): a pull request runs all
+    # three too when it changes the Eroj, the Projekcioj, the Vortaro, an Aspekto or a Playwright
+    # config, otherwise Chromium only – an engine-specific defect shows in the PR that causes it.
+    # betroffen decides it (scripts/ci/betroffen.mjs); read by packages/eroj/playwright.config.ts.
     env:
-      PLAYWRIGHT_ENGINES: ${{ (github.ref == 'refs/heads/main' && github.event_name != 'pull_request') && 'chromium firefox webkit' || 'chromium' }}
+      PLAYWRIGHT_ENGINES: ${{ needs.betroffen.outputs.engines }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
         with:
           persist-credentials: false
 
+      # Spec 040 T-6 (E-9): no change reaches this job's package – it ends green and says so.
+      - name: nicht betroffen
+        if: ${{ !(needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj')) }}
+        run: 'echo "nicht betroffen: no change reaches @fundamento/eroj, this job tests nothing." | tee -a "$GITHUB_STEP_SUMMARY"'
+
       - name: Set up pnpm
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         uses: pnpm/action-setup@v6
 
       - name: Set up Node
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm install --frozen-lockfile
 
-      # Spec 025 ③ (B-28): only the engines a run uses are installed — Chromium on a pull request,
-      # all three on main. The time of this step is apt (`--with-deps`), not the browser download
+      # Spec 025 ③ (B-28): only the engines a run uses are installed — the ones betroffen chose
+      # (Spec 040 B-3), Chromium alone on most pull requests. The time of this step is apt (`--with-deps`), not the browser download
       # (Vojmapo); on a cold runner the packages of three engines took 7 min (Läufe 39754200831,
       # 39754602800) and, with the Vitrino check of 40 Eroj, cut the rendered checks off at 15 min.
       # A cache of ~/.cache/ms-playwright was measured and taken back. workflow.test.ts pins this line.
       - name: Playwright browsers
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
 
       - name: Turbo cache
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         uses: actions/cache@v6
         with:
           path: .turbo/cache
@@ -291,11 +369,13 @@ jobs:
 
       # Spec 040 A-4: seven specs spawn the built fm, so the closure is the CLI's.
       - name: Build
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm turbo run build --filter=@fundamento/cli... --cache-dir=.turbo/cache
 
       # The unit tests of the package (the React types, the parts of the Vitrino), then this shard
       # of the Playwright suite.
       - name: Test
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm --filter @fundamento/eroj exec vitest run --passWithNoTests && pnpm --filter @fundamento/eroj exec playwright test --shard=${{ matrix.shard }}/4
         env:
           FM_GEBAUT: "1"
@@ -311,34 +391,45 @@ jobs:
     name: Rendered accessibility (Alirebleco of the Eroj, shard ${{ matrix.shard }} of 3)
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    needs: betroffen
     strategy:
       fail-fast: false
       matrix:
         shard: [1, 2, 3]
     env:
-      PLAYWRIGHT_ENGINES: ${{ (github.ref == 'refs/heads/main' && github.event_name != 'pull_request') && 'chromium firefox webkit' || 'chromium' }}
+      PLAYWRIGHT_ENGINES: ${{ needs.betroffen.outputs.engines }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
         with:
           persist-credentials: false
 
+      # Spec 040 T-6 (E-9): no change reaches this job's package – it ends green and says so.
+      - name: nicht betroffen
+        if: ${{ !(needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj')) }}
+        run: 'echo "nicht betroffen: no change reaches @fundamento/eroj, this job tests nothing." | tee -a "$GITHUB_STEP_SUMMARY"'
+
       - name: Set up pnpm
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         uses: pnpm/action-setup@v6
 
       - name: Set up Node
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm install --frozen-lockfile
 
       - name: Playwright browsers
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
 
       - name: Turbo cache
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         uses: actions/cache@v6
         with:
           path: .turbo/cache
@@ -347,12 +438,14 @@ jobs:
             turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-
 
       - name: Build
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm turbo run build --filter=@fundamento/eroj... --cache-dir=.turbo/cache
 
       # Rendered accessibility of the Eroj: axe-core, keyboard, focus ring (Spec 003 T013, D-09).
       # No `--` before the shard: pnpm would pass it on, and Playwright reads what follows a `--`
       # as file filters.
       - name: "Check: Alirebleco (Eroj)"
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm check:alirebleco-eroj --shard=${{ matrix.shard }}/3
 
   # Spec 040 B-1: the Werkstatt left this job for a job of its own (werkstatt).
@@ -360,30 +453,41 @@ jobs:
     name: Rendered checks (Make Kit, Quickstart)
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    needs: betroffen
     env:
-      PLAYWRIGHT_ENGINES: ${{ (github.ref == 'refs/heads/main' && github.event_name != 'pull_request') && 'chromium firefox webkit' || 'chromium' }}
+      PLAYWRIGHT_ENGINES: ${{ needs.betroffen.outputs.engines }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
         with:
           persist-credentials: false
 
+      # Spec 040 T-6 (E-9): no change reaches this job's package – it ends green and says so.
+      - name: nicht betroffen
+        if: ${{ !(needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj')) }}
+        run: 'echo "nicht betroffen: no change reaches @fundamento/eroj, this job tests nothing." | tee -a "$GITHUB_STEP_SUMMARY"'
+
       - name: Set up pnpm
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         uses: pnpm/action-setup@v6
 
       - name: Set up Node
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm install --frozen-lockfile
 
       - name: Playwright browsers
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
 
       - name: Turbo cache
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         uses: actions/cache@v6
         with:
           path: .turbo/cache
@@ -392,14 +496,17 @@ jobs:
             turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-
 
       - name: Build
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm turbo run build --filter=@fundamento/eroj... --cache-dir=.turbo/cache
 
       # AK-08: the Make Kit installs from its tarball and builds in a fresh project (T019).
       - name: "Check: Make Kit"
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm check:make-kit
 
       # AK-07: the quickstart of the README, run as a user would and timed (T027).
       - name: "Check: Quickstart"
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm check:quickstart
 
   # Spec 040 B-1: the Werkstatt of the Vitrino, in parts of packages/eroj/test/vitrino-partoj.ts.
@@ -410,34 +517,45 @@ jobs:
     name: Rendered checks (Vitrino-Werkstatt, part ${{ matrix.parto }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    needs: betroffen
     strategy:
       fail-fast: false
       matrix:
         parto: [werkstatt-1, werkstatt-2]
     env:
-      PLAYWRIGHT_ENGINES: ${{ (github.ref == 'refs/heads/main' && github.event_name != 'pull_request') && 'chromium firefox webkit' || 'chromium' }}
+      PLAYWRIGHT_ENGINES: ${{ needs.betroffen.outputs.engines }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
         with:
           persist-credentials: false
 
+      # Spec 040 T-6 (E-9): no change reaches this job's package – it ends green and says so.
+      - name: nicht betroffen
+        if: ${{ !(needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj')) }}
+        run: 'echo "nicht betroffen: no change reaches @fundamento/eroj, this job tests nothing." | tee -a "$GITHUB_STEP_SUMMARY"'
+
       - name: Set up pnpm
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         uses: pnpm/action-setup@v6
 
       - name: Set up Node
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm install --frozen-lockfile
 
       - name: Playwright browsers
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
 
       - name: Turbo cache
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         uses: actions/cache@v6
         with:
           path: .turbo/cache
@@ -447,10 +565,12 @@ jobs:
 
       # check:bazo spawns the built fm: the closure is the CLI's.
       - name: Build
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm turbo run build --filter=@fundamento/cli... --cache-dir=.turbo/cache
 
       # Spec 004 AK-02, Spec 016 ②, Spec 019 ②: the Werkstatt of the Vitrino in a browser.
       - name: "Check: Vitrino (Werkstatt)"
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm check:vitrino
         env:
           VITRINO_PARTO: ${{ matrix.parto }}
@@ -464,34 +584,45 @@ jobs:
     name: Rendered checks (Vitrino, part ${{ matrix.parto }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    needs: betroffen
     strategy:
       fail-fast: false
       matrix:
         parto: [cetero-1, cetero-2, cetero-3]
     env:
-      PLAYWRIGHT_ENGINES: ${{ (github.ref == 'refs/heads/main' && github.event_name != 'pull_request') && 'chromium firefox webkit' || 'chromium' }}
+      PLAYWRIGHT_ENGINES: ${{ needs.betroffen.outputs.engines }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
         with:
           persist-credentials: false
 
+      # Spec 040 T-6 (E-9): no change reaches this job's package – it ends green and says so.
+      - name: nicht betroffen
+        if: ${{ !(needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj')) }}
+        run: 'echo "nicht betroffen: no change reaches @fundamento/eroj, this job tests nothing." | tee -a "$GITHUB_STEP_SUMMARY"'
+
       - name: Set up pnpm
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         uses: pnpm/action-setup@v6
 
       - name: Set up Node
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm install --frozen-lockfile
 
       - name: Playwright browsers
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
 
       - name: Turbo cache
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         uses: actions/cache@v6
         with:
           path: .turbo/cache
@@ -501,10 +632,12 @@ jobs:
 
       # check:bazo spawns the built fm: the closure is the CLI's.
       - name: Build
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm turbo run build --filter=@fundamento/cli... --cache-dir=.turbo/cache
 
       # Spec 004 AK-02: the Vitrino in a browser — switching, comparison, axe (T011, T012).
       - name: "Check: Vitrino"
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm check:vitrino
         env:
           VITRINO_PARTO: ${{ matrix.parto }}
