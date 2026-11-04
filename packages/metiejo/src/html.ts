@@ -6,6 +6,7 @@
 // live value to the draft and refreshes the preview; it computes nothing. Pure.
 
 import { LINGVO_BUTTONS, LINGVO_SKRIPTO } from "@fundamento/projekcioj";
+import { BUEHNE_CSS, BUEHNE_SKRIPTO } from "./buehne-klient.js";
 import { nomojIsland } from "./lingvo.js";
 
 export const escapeHtml = (text: string): string =>
@@ -63,6 +64,7 @@ body { margin: 0; font-family: var(--fm-typography-body-1-font-family); backgrou
 .mt-gebrauch ul { margin: 0; padding-inline-start: var(--fm-spacing-large); }
 .mt-schatten { display: flex; flex-direction: column; gap: var(--fm-spacing-xsmall); }
 .mt-schatten input[type="color"] { inline-size: 2.75rem; block-size: 2.75rem; padding: 0; border: var(--fm-border-width-default) solid var(--fm-color-border-default); border-radius: var(--fm-radius-role-control); background: none; }
+${BUEHNE_CSS}
 [hidden] { display: none !important; }`;
 
 /** The layout of the preview document: the three container widths of the Vitrino, tokens only. */
@@ -542,6 +544,12 @@ if (asistantoData && marko) {
     zeigeKosto(result.body);
   };
   if (send) send.addEventListener("click", submit);
+  // Spec 036, Befund 3.6 (Manko E7): Enter sends, Shift+Enter makes a new line.
+  if (input) input.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" || event.shiftKey || event.isComposing || input.hasAttribute("disabled")) return;
+    event.preventDefault();
+    submit();
+  });
   for (const button of document.querySelectorAll("[data-mt-faceto-ago]")) {
     button.addEventListener("click", async () => {
       const result = await post("faceto", { faceto: asistantoData.faceto, ago: button.getAttribute("data-mt-faceto-ago") });
@@ -555,40 +563,8 @@ if (asistantoData && marko) {
     const result = await post("fremda", { kiel: "nennung", nomo });
     if (result.ok) location.reload();
   });
-  // Spec 033 S2: material of the brand – a file of fm-alsxutilo or a link – with the confirmation.
-  const legi = document.querySelector("[data-mt-materialo-legi]");
-  if (legi) legi.addEventListener("click", async () => {
-    const rajtoj = document.querySelector("[data-mt-materialo-rajtoj]");
-    const confirmed = !!rajtoj && rajtoj.hasAttribute("checked");
-    const picker = document.querySelector("[data-mt-materialo-dosiero]");
-    const link = document.querySelector("[data-mt-materialo-url]");
-    const url = (link && link.getAttribute("value")) || "";
-    const file = picker && picker.files && picker.files[0];
-    let value;
-    if (file) {
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      let binary = "";
-      for (let index = 0; index < bytes.length; index += 0x8000) binary += String.fromCharCode(...bytes.subarray(index, index + 0x8000));
-      value = { filename: file.name, base64: btoa(binary), rajtoj: confirmed };
-    } else if (url !== "") value = { url, rajtoj: confirmed };
-    else { meldung("Wähle eine Datei oder gib einen Link an."); return; }
-    meldung("Ich lese das Material …");
-    const result = await post("materialo", value);
-    if (!result.ok) { meldung(result.body.satz || "Das Material ließ sich nicht lesen."); return; }
-    meldung((result.body.satzoj || []).join(" "));
-    location.reload();
-  });
-  // Spec 033 S4: a brand only named – the research agent, with the confirmation.
-  const esplori = document.querySelector("[data-mt-esploro-sendi]");
-  if (esplori) esplori.addEventListener("click", async () => {
-    const value = (selector) => { const el = document.querySelector(selector); return (el && el.getAttribute("value")) || ""; };
-    const rajtoj = document.querySelector("[data-mt-esploro-rajtoj]");
-    meldung("Ich recherchiere …");
-    const result = await post("esplori", { nomo: value("[data-mt-esploro-nomo]"), url: value("[data-mt-esploro-url]"), rajtoj: !!rajtoj && rajtoj.hasAttribute("checked") });
-    if (!result.ok) { meldung(result.body.satz || "Die Recherche ging nicht."); return; }
-    meldung(result.body.antwort || "");
-    location.reload();
-  });
+  // Spec 033 S2 and S4: material of the brand and research open in a dialog on the stage (Spec 036,
+  // Befund 3.4); their client is the stage's (buehne-klient.ts).
   // Spec 033 S5: speech – recorded and transcribed by Voxtral on the server, else the browser's own
   // recognition; answers read aloud when the switch is on.
   const speak = document.querySelector("[data-mt-parolo]");
@@ -741,7 +717,7 @@ if (marko && (asistantoData || (sxtupo && sxtupo.startsWith("studio-")))) {
 
 if (frame) refreshFrame();
 if (sxtupo === "farbe") check();
-`;
+${BUEHNE_SKRIPTO}`;
 
 export interface ScreenDocument {
   title: string;

@@ -89,6 +89,13 @@ const TYPO_LEITER = `<div class="mt-spalte">${[
 
 const TIEFE = `<div class="mt-zeile">${KARTO}${KARTO}</div><div class="mt-spalte"><fm-avizo intent="info">Eine Meldung auf der Fläche.</fm-avizo><fm-sxvebilo label="Mehr" open><fm-butono slot="trigger" emphasis="medium">Schwebende Ebene</fm-butono><fm-teksto slot="content">Ein Popover mit dem Schatten der Marke.</fm-teksto></fm-sxvebilo></div>`;
 
+/**
+ * Spec 036, Befund 3.1 (Skizze 1 of Spec 035): the stage shows one page of the brand as a project
+ * builds it – the frame with its head and notice, the page with title, badges and actions, a card,
+ * a form and the messages – built of the Eroj and Sxablonoj above, no markup of its own.
+ */
+const BUEHNE_SEITE = `<fm-sxelo><span slot="brand">Verwaltung</span><span slot="principal">Erika Mustermann</span><fm-navigado slot="nav" label="Hauptnavigation" page="standards"><a href="#standards" data-page="standards">Standards</a><a href="#projekte" data-page="projekte">Projekte</a></fm-navigado><fm-avizo slot="notices" intent="success">Gespeichert.</fm-avizo><fm-pagxo><fm-titolo slot="title" level="1" focusable>Standards</fm-titolo><fm-insigno slot="badges" intent="success">Gültig</fm-insigno><fm-teksto slot="subtitle">Alle Standards des Projekts.</fm-teksto><fm-butono slot="actions" emphasis="high">Bearbeiten</fm-butono><fm-butono slot="actions" emphasis="medium">Teilen</fm-butono><section class="mt-spalte">${ACTIONS}${KARTO}${FORMULARO}${STATUS}</section></fm-pagxo></fm-sxelo>`;
+
 /** O-2 (Spec 024 ②): the five Sxablonoj under every page of the Grundlagen, at the middle width. */
 const MUSTER = SXABLONOJ.map((sxablono) =>
   surface(`Muster: ${sxablono.name}`, widths(sxablono.markup, "mittel")),
@@ -105,6 +112,12 @@ export function previewBody(
   zelo: Readonly<Record<string, string>> = {},
 ): string {
   if (sxtupo.startsWith("komponento-")) return komponentoPreviewOf(sxtupo, agordo, zelo);
+  // Spec 036, Befund 3.1: the stage of the assistant – the page first, then what the step's Studio
+  // page shows (`buehne-<seite>`).
+  if (sxtupo.startsWith("buehne-"))
+    return (
+      BUEHNE_SEITE + previewBody(`studio-${sxtupo.slice("buehne-".length)}`, breite, agordo, zelo)
+    );
   switch (sxtupo) {
     case "studio-farbe":
     case "studio-semantik":
