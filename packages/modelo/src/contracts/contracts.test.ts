@@ -200,7 +200,10 @@ describe("rule catalog (§2.6)", () => {
     // Spec 036 Teil 5 ②b-2: prop-value-deprecated.
     // Spec 036 Teil 5 ③: the four rules of check:dokumentaro.
     // Spec 036 Teil 6 (6.4): privat-vorto and privat-repo of check:privat.
-    expect(RULE_IDS).toHaveLength(203);
+    // Spec 040 B-4: no pinned number (203 then) – every rule has an ID, documentation and a check.
+    expect(
+      ruleCatalogViolations(RULE_IDS, readFileSync(CATALOG_FILE, "utf8"), enforcerSource()),
+    ).toEqual([]);
     for (const rule of [
       "agordo-jugxo-fixed",
       "raporto-out-of-sync",
@@ -286,7 +289,7 @@ describe("rule catalog (§2.6)", () => {
   });
 });
 
-describe("Spec 040 B-4: an added rule breaks a pinned sum, not the derived property", () => {
+describe("Spec 040 B-4: an added rule keeps the catalog whole", () => {
   it("one more documented and reported rule keeps the catalog whole", () => {
     const added = "fixture-rule-added";
     const catalog = readFileSync(CATALOG_FILE, "utf8").replace(
@@ -296,7 +299,18 @@ describe("Spec 040 B-4: an added rule breaks a pinned sum, not the derived prope
     const ids = [...RULE_IDS, added];
     const enforcers = `${enforcerSource()}\nconst issue = { rule: "${added}" };`;
     expect(ruleCatalogViolations(ids, catalog, enforcers)).toEqual([]);
-    expect(ids).toHaveLength(203);
+  });
+
+  it("names a rule without documentation or a check", () => {
+    const added = "fixture-rule-added";
+    const catalog = readFileSync(CATALOG_FILE, "utf8").replace(
+      "] as const;",
+      `\n  "${added}",\n] as const;`,
+    );
+    expect(ruleCatalogViolations([...RULE_IDS, added], catalog, enforcerSource())).toEqual([
+      `${added}: no comment heads its group in the catalog`,
+      `${added}: no check reports it`,
+    ]);
   });
 });
 
