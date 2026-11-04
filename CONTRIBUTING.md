@@ -19,7 +19,7 @@ Node 24 (`.nvmrc`) und pnpm über `packageManager` in `package.json`. Danach `pn
 1. Es holt `origin/main` (`git fetch origin main --quiet`). Gelingt das nicht, gibt es einen Hinweis aus und testet alles.
 2. Es bestimmt die geänderten Dateien seit der Abzweigung von `origin/main`.
 3. Daraus ergeben sich die betroffenen Pakete: die geänderten Pakete und alle Pakete, die von ihnen abhängen (Turborepo), dazu ein Paket, dessen Test eine geänderte Datei außerhalb des Pakets liest (`inputs` in `turbo.json`).
-4. Es ruft `turbo run test` nur für diese Pakete auf, mit `FM_AUSGABE=knapp`.
+4. Es ruft `turbo run test` nur für diese Pakete auf, mit `FM_AUSGABE=knapp` und `--output-logs=errors-only`: Die Konsole zeigt nur die Ausgabe von Paketen mit roten Tests, dazu Turborepos Zusammenfassung.
 
 Alles gilt als betroffen, wenn eine Wurzeldatei geändert ist: `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `package.json`, `turbo.json`, `tsconfig.base.json`, `.nvmrc`, `.npmrc`, `biome.json`, `.github/workflows/**` oder `scripts/**`.
 
@@ -36,11 +36,12 @@ Mit `PLAYWRIGHT_ENGINES=chromium pnpm test:betroffen` wählst du selbst.
 
 - **Pull Request:** Der Job `betroffen` bestimmt die betroffenen Pakete wie oben, gegen den Basis-Branch des PR. Jeder andere Job läuft an. Ist sein Paket nicht betroffen, überspringt er Installation, Build und Tests und endet grün mit „nicht betroffen“. So bleibt jeder Check sichtbar. Die Prüfungen im Job `checks` laufen immer, denn sie gelten für das ganze Repo. Ist die Basis unklar, laufen alle Tests.
 - **`main`, nachts und `workflow_dispatch`:** Es läuft alles, in allen drei Engines.
+- **Zeittests:** Die Zeittests der Werkstatt (M5 mit Gegenproben und Kalibrierung, Ableitung Gegenprobe, G5 mit Gegenprobe) laufen im eigenen Job „Timing checks (M5, Gegenprobe, Ableitung, G5)“, dem Teil `zeittests` der Vitrino. Im PR blockiert er nicht: Rot erscheint als fehlgeschlagener Job, der Lauf bleibt grün. Auf `main` blockiert er. Lokal: `VITRINO_PARTO=zeittests pnpm check:vitrino`.
 
 ## Wo die vollen Protokolle liegen
 
-- **Lokal:** Turborepo schreibt das ganze Protokoll jeder Aufgabe nach `packages/<paket>/.turbo/turbo-test.log`, auch wenn die Konsole wenig zeigt. Mit `FM_AUSGABE=knapp` zeigt die Konsole nur die roten Tests und eine Summenzeile mit dem Pfad des vollen Protokolls.
-- **CI:** Das Protokoll jedes Schritts steht im Lauf auf GitHub (`gh run view <id> --log`). Die vollen Testberichte hängen als Artefakte am Lauf.
+- **Lokal:** Jeder Testlauf schreibt einen JUnit-Bericht nach `packages/<paket>/test-reports/<lauf>/junit.xml` (`vitest`, `vitest-bazo`, `playwright`, `playwright-vitrino` …). Der Ordner liegt außerhalb von `test-results/`, das Playwright bei jedem Start leert, und ist nicht versioniert. Mit `FM_AUSGABE=knapp` zeigt die Konsole je rotem Test eine Zeile `✘ <datei>:<zeile> › <titel>` mit dem ersten Fehler (höchstens 20 Zeilen) und am Ende eine Summenzeile `N bestanden, M rot, K übersprungen, F wackelig in X s · Protokoll: <pfad>`, die diesen Bericht nennt. Ohne die Variable bleibt die Ausgabe wie sie war. Turborepos eigenes Protokoll jeder Aufgabe liegt in `packages/<paket>/.turbo/turbo-test.log`.
+- **CI:** Alle Jobs laufen mit `FM_AUSGABE=knapp`; das Protokoll jedes Schritts steht im Lauf auf GitHub (`gh run view <id> --log`). Die vollen Berichte (JUnit, bei Playwright auch der HTML-Bericht) hängen sieben Tage als Artefakt `testberichte-<job>-<matrixwert>-<versuch>` am Lauf: `gh run download <id> -n <name>`.
 
 ## Regeln, die hier gelten
 
@@ -58,4 +59,5 @@ Mit `PLAYWRIGHT_ENGINES=chromium pnpm test:betroffen` wählst du selbst.
   - A pull request tests only the affected packages. Every job still reports its check: a job whose package is unaffected ends green with "nicht betroffen".
   - The engines follow the changed paths: all three for the Eroj, Projekcioj, Vortaro, an Aspekto or a Playwright config, otherwise Chromium.
   - `main`, the nightly run and `workflow_dispatch` test everything in all three engines.
-- **Full logs:** locally in `packages/<package>/.turbo/turbo-test.log`. In CI, the step logs (`gh run view <id> --log`) and the test reports attached to the run as artifacts.
+  - The timing tests of the Werkstatt (M5, Gegenprobe, Ableitung, G5) run in their own job, "Timing checks". It does not block a pull request; on `main` it does.
+- **Full logs:** every test run writes a JUnit report to `packages/<package>/test-reports/<run>/junit.xml` (not versioned, outside Playwright's `test-results/`). With `FM_AUSGABE=knapp` the console shows one line per failed test with its first error and one summary line naming that report; without it the output is unchanged. In CI every job runs terse; the full reports (JUnit, plus Playwright's HTML report) are the artifact `testberichte-<job>-<matrix value>-<attempt>` of the run for seven days (`gh run download <id> -n <name>`). Turborepo's own task log stays in `packages/<package>/.turbo/turbo-test.log`.
