@@ -197,14 +197,18 @@ jobs:
       - name: Test
         run: pnpm --filter @fundamento/projekcioj exec vitest run --shard=${{ matrix.shard }}/2
 
+  # Spec 040 B-6: on main, in three engines, the second of two shards ran into its 15 minutes (run
+  # 41886235249: 15:17), the first ended at 12:56 and 13:02 (41886235249, 41873907893). Four
+  # Playwright shards (fullyParallel: the cut goes through the tests, 474 of 1896 each on main);
+  # the longest projects to ~10.4 min; three would leave the Firefox shard at 12.6 to 13.2 min.
   eroj:
-    name: Rendered Eroj (Playwright, shard ${{ matrix.shard }} of 2)
+    name: Rendered Eroj (Playwright, shard ${{ matrix.shard }} of 4)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2]
+        shard: [1, 2, 3, 4]
     # A run on main (the merge run, the nightly run) proves the rendering of the Eroj in Chromium,
     # Firefox and WebKit (Spec 003); a PR run in Chromium only. An engine-specific defect therefore
     # shows on main, not in the PR. Read by packages/eroj/playwright.config.ts.
@@ -239,9 +243,10 @@ jobs:
       - name: Build
         run: pnpm build
 
-      # The unit test of the package (the React types), then this shard of the Playwright suite.
+      # The unit tests of the package (the React types, the parts of the Vitrino), then this shard
+      # of the Playwright suite.
       - name: Test
-        run: pnpm --filter @fundamento/eroj exec vitest run --passWithNoTests && pnpm --filter @fundamento/eroj exec playwright test --shard=${{ matrix.shard }}/2
+        run: pnpm --filter @fundamento/eroj exec vitest run --passWithNoTests && pnpm --filter @fundamento/eroj exec playwright test --shard=${{ matrix.shard }}/4
 
   # Nachlese 5 ① (D-04): the rendered checks ran 7:52 to 8:34 in one job (axe over the Eroj alone
   # 178 to 233 s, the Vitrino 104 to 140 s). axe over the Eroj is a job of its own; the Make Kit,

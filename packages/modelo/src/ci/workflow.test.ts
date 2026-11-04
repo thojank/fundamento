@@ -96,7 +96,7 @@ const PROJEKCIOJ_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
 // Spec 040 B-6: on main, with three engines, the second of two shards ran into its 15 minutes
 // (run 41886235249: 15:17) and the first ended at 12:56 and 13:02 (41886235249, 41873907893). The
 // suite runs in four Playwright shards (fullyParallel: the cut goes through the tests, 474 each of
-// 1896 on main); three would leave the Firefox shard at ~12.6 to 13.1 minutes. Every shard runs the
+// 1896 on main); three would leave the Firefox shard at ~12.6 to 13.2 minutes. Every shard runs the
 // unit tests of the package before its part of the suite, as with two.
 /** The job of the rendered Eroj: the Playwright suite in four shards (fullyParallel inside). */
 const EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
