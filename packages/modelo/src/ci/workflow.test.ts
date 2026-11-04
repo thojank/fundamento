@@ -437,8 +437,58 @@ const MATRIX_KEYS = ["package", "shard", "parto"];
  * `jobs` is the parsed `jobs` mapping of ci.yml.
  */
 function jobShapeViolations(jobs: Record<string, Record<string, unknown>>): string[] {
-  void jobs;
-  return [];
+  const violations: string[] = [];
+  const gate =
+    /^needs\.betroffen\.outputs\.alle == 'true' \|\| contains\(fromJSON\(needs\.betroffen\.outputs\.pakete\), .+\)$/;
+  for (const [name, job] of Object.entries(jobs)) {
+    const fail = (rule: string) => violations.push(`${name}: ${rule}`);
+    const steps = (Array.isArray(job.steps) ? job.steps : []).filter(isRecord) as Array<
+      Step & { if?: unknown }
+    >;
+    if (job["timeout-minutes"] !== 15) fail("timeout-minutes is not 15");
+    const strategy = isRecord(job.strategy) ? job.strategy : undefined;
+    if (strategy !== undefined) {
+      const keys = isRecord(strategy.matrix) ? Object.keys(strategy.matrix) : [];
+      if (keys.length !== 1 || !MATRIX_KEYS.includes(keys[0] ?? "")) {
+        fail(`matrix key ${keys.join(", ")} is not one of ${MATRIX_KEYS.join(", ")}`);
+      }
+      if (strategy["fail-fast"] !== false) fail("fail-fast is not false");
+    }
+    if (name === BETROFFEN) continue;
+    const build = steps.findIndex((step) => step.name === "Build");
+    const run = steps[build]?.run;
+    if (build < 0 || typeof run !== "string" || !run.startsWith("pnpm turbo run build --filter=")) {
+      fail("Build is not a filtered turbo run build");
+    } else if (!run.endsWith(" --cache-dir=.turbo/cache")) {
+      fail("Build does not use .turbo/cache");
+    }
+    const cache = steps[build - 1];
+    if (cache?.name !== TURBO_CACHE_STEP || !usesAction(cache, "actions/cache")) {
+      fail("Turbo cache is not the step right before Build");
+    }
+    if (name === "checks") continue;
+    if (job.needs !== BETROFFEN) fail("needs is not betroffen");
+    const [, nicht, ...rest] = steps;
+    const ifOf = (step: (typeof steps)[number] | undefined) =>
+      typeof step?.if === "string" ? step.if : "";
+    const negated = ifOf(nicht).match(/^\$\{\{ !\((.+)\) \}\}$/)?.[1] ?? "";
+    if (nicht?.name !== NICHT_BETROFFEN || !gate.test(negated)) {
+      fail("nicht betroffen is not the second step, gated by the negated condition");
+      continue;
+    }
+    for (const step of rest) {
+      const expected =
+        step.name === ARTIFACT_STEP ? `\${{ always() && (${negated}) }}` : `\${{ ${negated} }}`;
+      if (ifOf(step) !== expected) fail(`step ${String(step.name)} has another gate`);
+    }
+    const last = steps.at(-1);
+    if (last?.name !== ARTIFACT_STEP || !usesAction(last, "actions/upload-artifact")) {
+      fail("Testberichte is not the last step");
+    } else if (withOf(last)["retention-days"] !== 7) {
+      fail("Testberichte keeps the reports for other than 7 retention-days");
+    }
+  }
+  return violations;
 }
 
 describe("CI workflow (.github/workflows/ci.yml)", () => {
@@ -961,7 +1011,7 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
         "rendered-checks",
         /last step/,
         broken("rendered-checks", (_, steps) => {
-          steps.push({ name: "Danach", run: "true" });
+          steps.push({ name: "Danach", if: named(steps, "Build").if, run: "true" });
         }),
       ],
       [
