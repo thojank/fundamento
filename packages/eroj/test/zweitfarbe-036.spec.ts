@@ -9,7 +9,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type APIRequestContext, expect, type Page, test } from "@playwright/test";
-import { gespeichert, seiteGeladen } from "./wackler-040.js";
+import { gespeichert, nachDerAbfrage, seiteGeladen } from "./wackler-040.js";
 
 const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
 const cli = join(repoRoot, "packages/cli/dist/index.js");
@@ -99,9 +99,14 @@ const entwurf = (page: Page, id: string) =>
       new URL(response.url()).pathname === `/api/marko/${id}/entwurf`,
   );
 
-for (const [ort, pfad] of [
-  ["the assistant's step „Leitfarbe und Akzente“", (id: string) => `/asistanto/${id}/gvidkoloro`],
-  ["the Schnellstart's colour step", (id: string) => `/marko/${id}/farbe`],
+// The assistant's steps poll the draft every 3 s (GET …/stato); the Schnellstart's do not.
+for (const [ort, pfad, pollt] of [
+  [
+    "the assistant's step „Leitfarbe und Akzente“",
+    (id: string) => `/asistanto/${id}/gvidkoloro`,
+    true,
+  ],
+  ["the Schnellstart's colour step", (id: string) => `/marko/${id}/farbe`, false],
 ] as const) {
   test(`${ort}: „Keine Zweitfarbe“, a colour typed with the keyboard, then cleared`, async ({
     page,
@@ -144,6 +149,9 @@ for (const [ort, pfad] of [
     // The button reloads the page once the draft took the patch: wait for that navigation itself,
     // not for the load state of the page that is about to go.
     const neuGeladen = page.waitForEvent("framenavigated", (frame) => frame === page.mainFrame());
+    // Press it right after the page's poll of the draft answered, not while one is under way: the
+    // reload would cut it short (Spec 040 B-8).
+    if (pollt) await nachDerAbfrage(page, id);
     await page.keyboard.press("Enter");
     expect((await geloescht).status()).toBe(200);
     await expect.poll(() => zweitfarbe(id)).toBeUndefined();

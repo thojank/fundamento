@@ -136,8 +136,18 @@ export async function seiteGeladen(
 /**
  * The page's poll of the draft (GET /api/marko/<id>/stato, every 3 s on the assistant's steps) has
  * answered, its body included (Spec 040 B-8): the next poll is one interval away. An action that
- * reloads the page right after this cuts no poll short; WebKit reports a poll cut short by the
- * reload as a console error ("…/stato due to access control checks.", runs 41920898257 attempt 1,
- * buehne-036.spec.ts, and attempt 2, zweitfarbe-036.spec.ts).
+ * reloads the page right after this cuts no poll short as long as the reload comes within that
+ * interval. WebKit reports a poll cut short by a reload as a console error ("…/stato due to access
+ * control checks.", run 41920898257: attempt 1 in buehne-036.spec.ts, attempt 2 in
+ * zweitfarbe-036.spec.ts). A reload slower than the interval still meets one: the page does not
+ * stop its poll when it goes (B-8, the product's, out of Spec 040's scope).
  */
-export async function nachDerAbfrage(_page: Page, _id: string): Promise<void> {}
+export async function nachDerAbfrage(page: Page, id: string): Promise<void> {
+  const antwort = await page.waitForResponse(
+    (response) =>
+      response.request().method() === "GET" &&
+      new URL(response.url()).pathname === `/api/marko/${id}/stato`,
+  );
+  // The response event comes with the head; the poll ends with its body.
+  await antwort.finished();
+}
