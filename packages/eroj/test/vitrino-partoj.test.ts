@@ -2,6 +2,10 @@
 // every test of vitrino.check.ts, no two share a test, none is empty, and the legacy values
 // `werkstatt` and `cetero` are the unions of their parts.
 //
+// Spec 040 T-7 (AC-B6): the timing tests (M5, its Gegenproben and calibration, the Ableitung
+// Gegenprobe, G5 and its Gegenprobe) run in the part `zeittests` and in no other; the pure verdicts
+// of M5, G5 and the derivation, which measure nothing, stay in `cetero`.
+//
 // Spec 040 B-7: Playwright lists the tests once, through playwright.vitrino-partoj.config.ts: a
 // project for the whole Vitrino, for every part and for both groups, each selected by Playwright
 // with the grep and grepInvert of vitrinoAuswahl(), and the project `draht` with the selection
@@ -77,6 +81,16 @@ const PARTOJ = Object.keys(VITRINO_PARTOJ);
 /** The part the real config selects: the last, the rest of its group after all others. */
 const DRAHT = PARTOJ.at(-1);
 
+/**
+ * A timing test, told by its own title, independently of vitrino-partoj.ts: it measures (M5, G5)
+ * or slows the Werkstatt down on purpose and expects red (the Gegenproben, the calibration of the
+ * block). The verdicts of M5, G5 and the derivation are describes of their own whose tests name a
+ * runner or a limit, not a measurement.
+ */
+function isZeittest(name: string): boolean {
+  return /^(?:M5|G5|Ableitung)\b/.test(name.split(" › ").at(-1) ?? "");
+}
+
 let listed = new Map<string, string[]>();
 
 /** The names of the tests Playwright selected for a value of VITRINO_PARTO ("" for unset). */
@@ -116,6 +130,9 @@ describe("the parts of the Vitrino (Spec 040 B-1)", () => {
 
   it("selects through playwright.vitrino.config.ts, from VITRINO_PARTO, what vitrinoAuswahl selects", () => {
     expect(DRAHT).toBeDefined();
+    // The rest of a group leaves out every other part of it: the most the wiring has to carry.
+    const teil = Object.values(VITRINO_PARTOJ).at(-1);
+    expect(teil !== undefined && "resto" in teil).toBe(true);
     const wired = listed.get("draht") ?? [];
     // Fewer than all: without the wiring, `draht` would list the whole Vitrino.
     expect(wired.length).toBeGreaterThan(0);
@@ -129,6 +146,25 @@ describe("the parts of the Vitrino (Spec 040 B-1)", () => {
       expect(parts.length, grupo).toBeGreaterThan(0);
       expect(sorted(select(grupo)), grupo).toEqual(sorted(parts.flatMap((parto) => select(parto))));
     }
+  });
+
+  it("runs the timing tests in the part zeittests and in no other (Spec 040 T-7, AC-B6)", () => {
+    const timing = select("").filter(isZeittest);
+    expect(timing.length).toBeGreaterThan(0);
+    expect(sorted(select("zeittests"))).toEqual(sorted(timing));
+    for (const parto of PARTOJ.filter((name) => name !== "zeittests")) {
+      expect(select(parto).filter(isZeittest), parto).toEqual([]);
+    }
+    for (const grupo of ["werkstatt", "cetero"]) {
+      expect(select(grupo).filter(isZeittest), grupo).toEqual([]);
+    }
+  });
+
+  it("keeps the pure verdicts of M5, G5 and the derivation in cetero", () => {
+    const verdicts = select("").filter((name) => /^the (?:verdict|Bezugswert) of /.test(name));
+    expect(verdicts.length).toBeGreaterThan(0);
+    const cetero = new Set(select("cetero"));
+    expect(verdicts.filter((name) => !cetero.has(name))).toEqual([]);
   });
 
   it("selects everything when unset or empty", () => {

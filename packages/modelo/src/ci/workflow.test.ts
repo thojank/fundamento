@@ -86,6 +86,7 @@ const BUILD_FILTERS: Readonly<Record<string, string>> = {
   "rendered-checks": "@fundamento/eroj...",
   werkstatt: "@fundamento/cli...",
   vitrino: "@fundamento/cli...",
+  zeittests: "@fundamento/cli...",
 };
 
 function buildOf(job: string): string {
@@ -211,10 +212,29 @@ const VITRINO_STEPS: ReadonlyArray<readonly [name: string, run: string | undefin
   ["Check: Vitrino", "pnpm check:vitrino"],
 ];
 
-/** The jobs that run the Vitrino in parts: its step, and the group of vitrino-partoj.ts. */
+// Spec 040 T-7 (AC-B6): the timing tests of the Vitrino – M5 and its Gegenproben with the
+// calibration, the Ableitung Gegenprobe, G5 and its Gegenprobe – left the Werkstatt for a job of
+// their own, the part `zeittests` of vitrino-partoj.ts. Red there does not block a pull request
+// (continue-on-error on pull_request) and no longer turns another part red; on main it blocks.
+/** The job of the timing tests of the Vitrino. */
+const ZEITTESTS_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
+  ["Playwright browsers", PLAYWRIGHT_BROWSERS],
+  [TURBO_CACHE_STEP, undefined],
+  ["Build", buildOf("zeittests")],
+  ["Check: Vitrino (Zeittests)", "pnpm check:vitrino"],
+];
+
+/** Blocking on main, the nightly run and workflow_dispatch; not on a pull request. */
+const ZEITTESTS_CONTINUE_ON_ERROR = "${{ github.event_name == 'pull_request' }}";
+
+/**
+ * The jobs that run the Vitrino in parts: its step, and the group of vitrino-partoj.ts. A group of
+ * several parts is a matrix; a group of one part names it in the step.
+ */
 const VITRINO_JOBS: Readonly<Record<string, readonly [step: string, grupo: string]>> = {
   werkstatt: ["Check: Vitrino (Werkstatt)", "werkstatt"],
   vitrino: ["Check: Vitrino", "cetero"],
+  zeittests: ["Check: Vitrino (Zeittests)", "zeittests"],
 };
 
 const JOBS: Readonly<
@@ -228,10 +248,18 @@ const JOBS: Readonly<
   "rendered-checks": RENDERED_CHECK_STEPS,
   werkstatt: WERKSTATT_STEPS,
   vitrino: VITRINO_STEPS,
+  zeittests: ZEITTESTS_STEPS,
 };
 
 /** The jobs that drive a browser; each takes its engines from PLAYWRIGHT_ENGINES. */
-const RENDERED_JOBS = ["eroj", "alirebleco-eroj", "rendered-checks", "werkstatt", "vitrino"];
+const RENDERED_JOBS = [
+  "eroj",
+  "alirebleco-eroj",
+  "rendered-checks",
+  "werkstatt",
+  "vitrino",
+  "zeittests",
+];
 
 // Spec 040 T-6 (C-2, US-2): a pull request tests only the packages its change reaches. The job
 // betroffen decides it once (scripts/ci/betroffen.mjs, tested in betroffen.test.ts) and hands on
@@ -258,6 +286,7 @@ const JOB_PACKAGE: Readonly<Record<string, string>> = {
   "rendered-checks": "'@fundamento/eroj'",
   werkstatt: "'@fundamento/eroj'",
   vitrino: "'@fundamento/eroj'",
+  zeittests: "'@fundamento/eroj'",
 };
 
 /** C-2: the job's package is affected, or everything is. */
@@ -287,6 +316,7 @@ const JOB_NAMES: Readonly<Record<string, string>> = {
   "rendered-checks": "Rendered checks (Make Kit, Quickstart)",
   werkstatt: "Rendered checks (Vitrino-Werkstatt, part ${{ matrix.parto }})",
   vitrino: "Rendered checks (Vitrino, part ${{ matrix.parto }})",
+  zeittests: "Timing checks (M5, Gegenprobe, Ableitung, G5)",
 };
 
 interface Step {
@@ -345,13 +375,17 @@ function indexOfAction(steps: readonly Step[], action: string): number {
   return steps.findIndex((step) => usesAction(step, action));
 }
 
-/**
- * The parts of the Vitrino by group, from packages/eroj/test/vitrino-partoj.ts (Spec 040 B-1), in
- * the order of its table. The module has no imports, so it loads here as it is.
- */
+/** vitrino-partoj.ts (Spec 040 B-1): the module has no imports, so it loads here as it is. */
+async function loadVitrinoPartoj(): Promise<{
+  VITRINO_PARTOJ: unknown;
+  vitrinoAuswahl: (value: string | undefined) => { grep?: RegExp[]; grepInvert?: RegExp[] };
+}> {
+  return (await import(vitrinoPartojPath)) as never;
+}
+
+/** The parts of the Vitrino by group, in the order of the table of vitrino-partoj.ts. */
 async function loadVitrinoGrupoj(): Promise<Record<string, string[]>> {
-  const module: unknown = await import(vitrinoPartojPath);
-  const table = isRecord(module) ? module.VITRINO_PARTOJ : undefined;
+  const table = (await loadVitrinoPartoj()).VITRINO_PARTOJ;
   if (!isRecord(table)) throw new Error("vitrino-partoj.ts exports no VITRINO_PARTOJ table");
   const grupoj: Record<string, string[]> = {};
   for (const [parto, teil] of Object.entries(table)) {
@@ -426,7 +460,7 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     expect(installIndex).toBeGreaterThan(indexOfAction(steps, "actions/setup-node"));
   });
 
-  it("has the job betroffen and the eight jobs checks, unit, projekcioj, eroj, alirebleco-eroj, rendered-checks, werkstatt and vitrino, each with its named steps in order after the install", () => {
+  it("has the job betroffen and the nine jobs checks, unit, projekcioj, eroj, alirebleco-eroj, rendered-checks, werkstatt, vitrino and zeittests, each with its named steps in order after the install", () => {
     expect(Object.keys(loadJobs())).toEqual([BETROFFEN, ...Object.keys(JOBS)]);
     for (const [job, expected] of Object.entries({ [BETROFFEN]: BETROFFEN_STEPS, ...JOBS })) {
       const steps = loadSteps(job);
@@ -452,7 +486,7 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     }
   });
 
-  it("shards the Playwright suite of the Eroj in four and the Vitest suite of the Projekcioj in two, without fail-fast, and gives only the five rendered jobs the engines", () => {
+  it("shards the Playwright suite of the Eroj in four and the Vitest suite of the Projekcioj in two, without fail-fast, and gives only the six rendered jobs the engines", () => {
     expect(loadJob("eroj").strategy).toEqual({
       "fail-fast": false,
       matrix: { shard: [1, 2, 3, 4] },
@@ -503,15 +537,18 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
         .sort(),
     );
     for (const [job, [name, grupo]] of Object.entries(VITRINO_JOBS)) {
-      expect(loadJob(job).strategy, job).toEqual({
-        "fail-fast": false,
-        matrix: { parto: grupoj[grupo] },
-      });
+      const partoj = grupoj[grupo] ?? [];
+      const [sola] = partoj;
+      expect(loadJob(job).strategy, job).toEqual(
+        partoj.length === 1 ? undefined : { "fail-fast": false, matrix: { parto: partoj } },
+      );
       expect(loadJob(job)["timeout-minutes"], job).toBe(15);
       const step = loadSteps(job).find((candidate) => candidate.name === name) as
         | (Step & { env?: unknown })
         | undefined;
-      expect(step?.env, job).toEqual({ VITRINO_PARTO: "${{ matrix.parto }}" });
+      expect(step?.env, job).toEqual({
+        VITRINO_PARTO: partoj.length === 1 ? sola : "${{ matrix.parto }}",
+      });
     }
     // No other step chooses a part: locally and anywhere else the Vitrino runs whole.
     const chosen = Object.keys(loadJobs()).flatMap((job) =>
@@ -526,6 +563,44 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     }
     const config = readFileSync(`${repoRoot}packages/eroj/playwright.vitrino.config.ts`, "utf8");
     expect(config).toContain("vitrinoAuswahl(process.env.VITRINO_PARTO)");
+  });
+
+  it("runs the timing checks in a job of their own: blocking on main, not on a pull request (AC-B6)", () => {
+    const job = loadJob("zeittests");
+    expect(job.name).toBe(JOB_NAMES.zeittests);
+    expect(job["timeout-minutes"]).toBe(15);
+    expect(job["continue-on-error"]).toBe(ZEITTESTS_CONTINUE_ON_ERROR);
+    expect(job.needs).toBe(BETROFFEN);
+    expect(job.strategy).toBeUndefined();
+    // No other job may fail and pass at once.
+    for (const [name, other] of Object.entries(loadJobs())) {
+      if (name !== "zeittests") expect(other["continue-on-error"], name).toBeUndefined();
+    }
+  });
+
+  it("selects no timing test in any other part of the Werkstatt or the Vitrino", async () => {
+    const { VITRINO_PARTOJ, vitrinoAuswahl } = await loadVitrinoPartoj();
+    const teil = isRecord(VITRINO_PARTOJ) ? VITRINO_PARTOJ.zeittests : undefined;
+    const prefiksoj = isRecord(teil) && Array.isArray(teil.prefiksoj) ? teil.prefiksoj : [];
+    expect(prefiksoj.length).toBeGreaterThan(0);
+    // The title path Playwright greps (root, project, file, describes, title), joined by spaces.
+    const timing = prefiksoj.map(
+      (vojo: unknown) => ` chromium vitrino.check.ts ${Array.isArray(vojo) ? vojo.join(" ") : ""}`,
+    );
+    const selects = (value: string, title: string): boolean => {
+      const { grep = [/(?:)/], grepInvert = [] } = vitrinoAuswahl(value);
+      return grep.some((re) => re.test(title)) && !grepInvert.some((re) => re.test(title));
+    };
+    for (const title of timing) expect(selects("zeittests", title), title).toBe(true);
+    const values = Object.keys(loadJobs()).flatMap((job) => {
+      const strategy = loadJob(job).strategy;
+      const matrix = isRecord(strategy) && isRecord(strategy.matrix) ? strategy.matrix : {};
+      return Array.isArray(matrix.parto) ? matrix.parto.map(String) : [];
+    });
+    expect(values.length).toBeGreaterThan(0);
+    for (const value of values) {
+      for (const title of timing) expect(selects(value, title), `${value}: ${title}`).toBe(false);
+    }
   });
 
   it("restores and saves the Turborepo cache in every job right before its Build (Spec 040 T-5)", () => {
@@ -568,7 +643,7 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
   it("builds the CLI's closure where a step spawns the built fm, and @fundamento/eroj#test waits for it (A-4)", () => {
     // The eroj specs (studio-035, zweitfarbe-036, metiejo*, buehne-036, form-036) and check:bazo
     // start packages/cli/dist/index.js.
-    for (const job of ["eroj", "werkstatt", "vitrino"]) {
+    for (const job of ["eroj", "werkstatt", "vitrino", "zeittests"]) {
       expect(BUILD_FILTERS[job], job).toBe("@fundamento/cli...");
     }
     const turbo: unknown = JSON.parse(readFileSync(`${repoRoot}turbo.json`, "utf8"));
