@@ -1,0 +1,74 @@
+{
+  "jobs": [
+    {
+      "name": "Rendered accessibility (Alirebleco of the Eroj)",
+      "startedAt": "2026-11-04T13:58:08Z",
+      "completedAt": "2026-11-04T14:13:25Z"
+    },
+    {
+      "name": "Rendered Eroj (Playwright, shard 1 of 2)",
+      "startedAt": "2026-11-04T13:58:08Z",
+      "completedAt": "2026-11-04T14:05:20Z"
+    },
+    {
+      "name": "Unit tests (Projekcioj, shard 2 of 2)",
+      "startedAt": "2026-11-04T13:58:08Z",
+      "completedAt": "2026-11-04T14:03:02Z"
+    },
+    {
+      "name": "Rendered checks (Make Kit, Quickstart, Vitrino-Werkstatt)",
+      "startedAt": "2026-11-04T13:58:08Z",
+      "completedAt": "2026-11-04T14:12:06Z"
+    },
+    {
+      "name": "Unit tests (modelo)",
+      "startedAt": "2026-11-04T13:58:09Z",
+      "completedAt": "2026-11-04T14:03:15Z"
+    },
+    {
+      "name": "Unit tests (nordstelo)",
+      "startedAt": "2026-11-04T13:58:09Z",
+      "completedAt": "2026-11-04T13:58:50Z"
+    },
+    {
+      "name": "Unit tests (mcp)",
+      "startedAt": "2026-11-04T13:58:08Z",
+      "completedAt": "2026-11-04T14:01:14Z"
+    },
+    {
+      "name": "Unit tests (cli)",
+      "startedAt": "2026-11-04T13:58:08Z",
+      "completedAt": "2026-11-04T13:59:42Z"
+    },
+    {
+      "name": "Rendered checks (Vitrino)",
+      "startedAt": "2026-11-04T13:58:08Z",
+      "completedAt": "2026-11-04T14:10:38Z"
+    },
+    {
+      "name": "Unit tests (agordilo)",
+      "startedAt": "2026-11-04T13:58:08Z",
+      "completedAt": "2026-11-04T13:59:49Z"
+    },
+    {
+      "name": "Unit tests (Projekcioj, shard 1 of 2)",
+      "startedAt": "2026-11-04T13:58:09Z",
+      "completedAt": "2026-11-04T14:03:37Z"
+    },
+    {
+      "name": "Rendered Eroj (Playwright, shard 2 of 2)",
+      "startedAt": "2026-11-04T13:58:09Z",
+      "completedAt": "2026-11-04T14:08:29Z"
+    },
+    {
+      "name": "Unit tests (metiejo)",
+      "startedAt": "2026-11-04T13:58:08Z",
+      "completedAt": "2026-11-04T14:04:54Z"
+    },
+    {
+      "name": "Build, lint and Modelo checks",
+      "startedAt": "2026-11-04T13:58:08Z",
+      "completedAt": "2026-11-04T13:59:33Z"
+    }
+  ]
+}

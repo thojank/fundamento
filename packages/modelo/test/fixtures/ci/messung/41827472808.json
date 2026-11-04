@@ -1,0 +1,74 @@
+{
+  "jobs": [
+    {
+      "name": "Rendered checks (Make Kit, Quickstart, Vitrino-Werkstatt)",
+      "startedAt": "2026-11-04T12:13:58Z",
+      "completedAt": "2026-11-04T12:25:05Z"
+    },
+    {
+      "name": "Unit tests (cli)",
+      "startedAt": "2026-11-04T12:13:57Z",
+      "completedAt": "2026-11-04T12:15:46Z"
+    },
+    {
+      "name": "Unit tests (Projekcioj, shard 1 of 2)",
+      "startedAt": "2026-11-04T12:13:57Z",
+      "completedAt": "2026-11-04T12:18:13Z"
+    },
+    {
+      "name": "Unit tests (nordstelo)",
+      "startedAt": "2026-11-04T12:13:57Z",
+      "completedAt": "2026-11-04T12:14:31Z"
+    },
+    {
+      "name": "Rendered checks (Vitrino)",
+      "startedAt": "2026-11-04T12:13:57Z",
+      "completedAt": "2026-11-04T12:23:35Z"
+    },
+    {
+      "name": "Build, lint and Modelo checks",
+      "startedAt": "2026-11-04T12:13:57Z",
+      "completedAt": "2026-11-04T12:15:33Z"
+    },
+    {
+      "name": "Unit tests (agordilo)",
+      "startedAt": "2026-11-04T12:13:57Z",
+      "completedAt": "2026-11-04T12:16:20Z"
+    },
+    {
+      "name": "Rendered Eroj (Playwright, shard 2 of 2)",
+      "startedAt": "2026-11-04T12:13:57Z",
+      "completedAt": "2026-11-04T12:25:05Z"
+    },
+    {
+      "name": "Unit tests (mcp)",
+      "startedAt": "2026-11-04T12:13:57Z",
+      "completedAt": "2026-11-04T12:16:31Z"
+    },
+    {
+      "name": "Unit tests (Projekcioj, shard 2 of 2)",
+      "startedAt": "2026-11-04T12:13:57Z",
+      "completedAt": "2026-11-04T12:19:38Z"
+    },
+    {
+      "name": "Rendered accessibility (Alirebleco of the Eroj)",
+      "startedAt": "2026-11-04T12:13:57Z",
+      "completedAt": "2026-11-04T12:29:13Z"
+    },
+    {
+      "name": "Rendered Eroj (Playwright, shard 1 of 2)",
+      "startedAt": "2026-11-04T12:13:57Z",
+      "completedAt": "2026-11-04T12:22:40Z"
+    },
+    {
+      "name": "Unit tests (modelo)",
+      "startedAt": "2026-11-04T12:13:57Z",
+      "completedAt": "2026-11-04T12:18:08Z"
+    },
+    {
+      "name": "Unit tests (metiejo)",
+      "startedAt": "2026-11-04T12:13:58Z",
+      "completedAt": "2026-11-04T12:19:13Z"
+    }
+  ]
+}
