@@ -213,8 +213,19 @@ describe("the decision of betroffen.mjs (pure)", () => {
   it("runs turbo run test on the affected packages, on all of them, or on none", () => {
     expect(
       testArgs(pr(["packages/metiejo/src/a.ts"], ["@fundamento/cli", "@fundamento/metiejo"])),
-    ).toEqual(["run", "test", "--filter=@fundamento/cli", "--filter=@fundamento/metiejo"]);
-    expect(testArgs(decide({ event: "push", workspace: WORKSPACE }))).toEqual(["run", "test"]);
+    ).toEqual([
+      "run",
+      "test",
+      "--output-logs=errors-only",
+      "--filter=@fundamento/cli",
+      "--filter=@fundamento/metiejo",
+    ]);
+    // Spec 040 T-7: Turborepo shows the logs of failed tasks only, as in CI.
+    expect(testArgs(decide({ event: "push", workspace: WORKSPACE }))).toEqual([
+      "run",
+      "test",
+      "--output-logs=errors-only",
+    ]);
     expect(testArgs(pr([]))).toBeUndefined();
   });
 });
@@ -390,6 +401,7 @@ describe("betroffen.mjs against the real workspace graph, in a git repository of
     expect(calls[0]?.args).toEqual([
       "run",
       "test",
+      "--output-logs=errors-only",
       ...METIEJO_AND_DEPENDENTS.map((n) => `--filter=${n}`),
     ]);
     expect(calls[0]?.env.FM_AUSGABE).toBe("knapp");

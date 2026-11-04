@@ -106,6 +106,25 @@ const TEST_CACHE = "--cache=${{ github.event_name == 'pull_request' && 'local:rw
  */
 const GEBAUT = { FM_GEBAUT: "1" };
 
+// Spec 040 T-7 (C-4, AC-B10): every test job prints only its red tests and one summary line
+// (FM_AUSGABE=knapp for the whole workflow; Turborepo shows the log of a failed task only), and
+// keeps the full reports – the JUnit files of Vitest and Playwright, Playwright's HTML report – as
+// an artifact of the run: last, after a red step too (always()), but only where the job tested
+// (the gate of T-6). One name per job, matrix value and attempt (an R-8 rerun uploads again); only
+// the report folders, no environment (E-13); seven days.
+/** The variable that switches the reporters of scripts/reporter/ to the terse output. */
+const AUSGABE = { FM_AUSGABE: "knapp" };
+/** Turborepo's output where it runs tests: the logs of failed tasks only. */
+const OUTPUT_LOGS = "--output-logs=errors-only";
+const ARTIFACT_STEP = "Testberichte";
+const ARTIFACT_ACTION = "actions/upload-artifact@v7";
+const ARTIFACT_WITH = {
+  name: "testberichte-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ github.run_attempt }}",
+  path: "packages/*/test-reports/",
+  "retention-days": 7,
+  "if-no-files-found": "ignore",
+};
+
 /** The job of the checks: build, perf, lint, the Modelo checks, release. */
 const CHECKS_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
   [TURBO_CACHE_STEP, undefined],
@@ -134,8 +153,9 @@ const UNIT_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]
   ["Build", buildOf("unit")],
   [
     "Test",
-    `pnpm turbo run test --filter=@fundamento/\${{ matrix.package }} --cache-dir=.turbo/cache ${TEST_CACHE}`,
+    `pnpm turbo run test --filter=@fundamento/\${{ matrix.package }} --cache-dir=.turbo/cache ${TEST_CACHE} ${OUTPUT_LOGS}`,
   ],
+  [ARTIFACT_STEP, undefined],
 ];
 
 /** The job of the Projekcioj suite: two Vitest shards (every Celo builds the whole Modelo). */
@@ -143,6 +163,7 @@ const PROJEKCIOJ_STEPS: ReadonlyArray<readonly [name: string, run: string | unde
   [TURBO_CACHE_STEP, undefined],
   ["Build", buildOf("projekcioj")],
   ["Test", "pnpm --filter @fundamento/projekcioj exec vitest run --shard=${{ matrix.shard }}/2"],
+  [ARTIFACT_STEP, undefined],
 ];
 
 // Spec 040 B-6: on main, with three engines, the second of two shards ran into its 15 minutes
@@ -159,6 +180,7 @@ const EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]
     "Test",
     "pnpm --filter @fundamento/eroj exec vitest run --passWithNoTests && pnpm --filter @fundamento/eroj exec playwright test --shard=${{ matrix.shard }}/4",
   ],
+  [ARTIFACT_STEP, undefined],
 ];
 
 // Nachlese 5 ① (D-04): the rendered checks ran 7:52 to 8:34 in one job – axe over the Eroj alone
@@ -174,6 +196,7 @@ const ALIREBLECO_EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string |
   [TURBO_CACHE_STEP, undefined],
   ["Build", buildOf("alirebleco-eroj")],
   ["Check: Alirebleco (Eroj)", "pnpm check:alirebleco-eroj --shard=${{ matrix.shard }}/3"],
+  [ARTIFACT_STEP, undefined],
 ];
 
 // Spec 029 ①b (B-1b-6): the job of the Make Kit, the quickstart and the Vitrino ran 14:34 on a
@@ -194,6 +217,7 @@ const RENDERED_CHECK_STEPS: ReadonlyArray<readonly [name: string, run: string | 
   ["Build", buildOf("rendered-checks")],
   ["Check: Make Kit", "pnpm check:make-kit"],
   ["Check: Quickstart", "pnpm check:quickstart"],
+  [ARTIFACT_STEP, undefined],
 ];
 
 /** The job of the Werkstatt of the Vitrino, one part per runner. */
@@ -202,6 +226,7 @@ const WERKSTATT_STEPS: ReadonlyArray<readonly [name: string, run: string | undef
   [TURBO_CACHE_STEP, undefined],
   ["Build", buildOf("werkstatt")],
   ["Check: Vitrino (Werkstatt)", "pnpm check:vitrino"],
+  [ARTIFACT_STEP, undefined],
 ];
 
 /** The job of the Vitrino without its Werkstatt, one part per runner. */
@@ -210,6 +235,7 @@ const VITRINO_STEPS: ReadonlyArray<readonly [name: string, run: string | undefin
   [TURBO_CACHE_STEP, undefined],
   ["Build", buildOf("vitrino")],
   ["Check: Vitrino", "pnpm check:vitrino"],
+  [ARTIFACT_STEP, undefined],
 ];
 
 // Spec 040 T-7 (AC-B6): the timing tests of the Vitrino – M5 and its Gegenproben with the
@@ -222,6 +248,7 @@ const ZEITTESTS_STEPS: ReadonlyArray<readonly [name: string, run: string | undef
   [TURBO_CACHE_STEP, undefined],
   ["Build", buildOf("zeittests")],
   ["Check: Vitrino (Zeittests)", "pnpm check:vitrino"],
+  [ARTIFACT_STEP, undefined],
 ];
 
 /** Blocking on main, the nightly run and workflow_dispatch; not on a pull request. */
@@ -741,10 +768,15 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
       expect(nicht?.run, job).toMatch(
         /^echo "nicht betroffen: .+" \| tee -a "\$GITHUB_STEP_SUMMARY"$/,
       );
-      // Every other step – toolchain, install, browsers, cache, build, test – only when affected.
+      // Every other step – toolchain, install, browsers, cache, build, test – only when affected;
+      // the reports after a red step too (T-7).
       expect(rest.length, job).toBeGreaterThan(4);
       for (const step of rest) {
-        expect(step.if, `${job}: ${String(step.name)}`).toBe(`\${{ ${affected(job)} }}`);
+        expect(step.if, `${job}: ${String(step.name)}`).toBe(
+          step.name === ARTIFACT_STEP
+            ? `\${{ always() && (${affected(job)}) }}`
+            : `\${{ ${affected(job)} }}`,
+        );
       }
     }
   });
@@ -770,6 +802,52 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     expect(engines("packages/aspekto-komuna/aspekto.json")).toBe("chromium firefox webkit");
     expect(engines("packages/eroj/playwright.vitrino.config.ts")).toBe("chromium firefox webkit");
     expect(engines("packages/metiejo/src/ident.ts")).toBe("chromium");
+  });
+
+  it("every test job uploads its full log as an artifact and prints only failures (Spec 040 T-7, AC-B10)", () => {
+    expect(loadWorkflow().env).toMatchObject(AUSGABE);
+    const testJobs = Object.keys(JOB_PACKAGE);
+    expect(testJobs).toEqual(Object.keys(JOBS).filter((job) => job !== "checks"));
+    for (const job of Object.keys(loadJobs())) {
+      const steps = loadSteps(job) as Array<Step & { if?: unknown }>;
+      const uploads = steps.filter((step) => usesAction(step, "actions/upload-artifact"));
+      if (!testJobs.includes(job)) {
+        expect(uploads, job).toEqual([]);
+        continue;
+      }
+      // One upload, the last step, pinned to its major (v7.0.2 is the latest on 2026-11-04).
+      expect(uploads, job).toHaveLength(1);
+      const upload = steps.at(-1);
+      expect(upload?.name, job).toBe(ARTIFACT_STEP);
+      expect(upload?.uses, job).toBe(ARTIFACT_ACTION);
+      expect(upload?.if, job).toBe(`\${{ always() && (${affected(job)}) }}`);
+      expect(upload && withOf(upload), job).toEqual(ARTIFACT_WITH);
+    }
+    // Unique per job: github.job differs, the matrix value and the attempt follow it.
+    expect(ARTIFACT_WITH.name).toContain("${{ github.job }}-${{ matrix.package || matrix.shard");
+    expect(ARTIFACT_WITH.name).toMatch(/\$\{\{ github\.run_attempt \}\}$/);
+    // Turborepo shows only the logs of failed tasks where it runs tests.
+    const turboTests = Object.keys(loadJobs()).flatMap((job) =>
+      loadSteps(job)
+        .map((step) => step.run)
+        .filter((run): run is string => typeof run === "string" && /turbo run test\b/.test(run)),
+    );
+    expect(turboTests.length).toBeGreaterThan(0);
+    for (const run of turboTests) expect(run).toContain(` ${OUTPUT_LOGS}`);
+    // The variable reaches the test tasks (strict env mode): the hash of each covers it, so a
+    // cached log replays in the form it was asked for.
+    const turbo: unknown = JSON.parse(readFileSync(`${repoRoot}turbo.json`, "utf8"));
+    const tasks = isRecord(turbo) && isRecord(turbo.tasks) ? turbo.tasks : {};
+    const testTasks = Object.entries(tasks).filter(
+      ([name]) => name === "test" || name.endsWith("#test"),
+    );
+    expect(testTasks.length).toBeGreaterThan(1);
+    for (const [name, task] of testTasks) {
+      const env = isRecord(task) && Array.isArray(task.env) ? task.env : [];
+      expect(env, name).toContain("FM_AUSGABE");
+    }
+    // The reports stay out of git and out of the hash of every package (TURBO_DEFAULT).
+    expect(readFileSync(`${repoRoot}.gitignore`, "utf8").split("\n")).toContain("test-reports/");
   });
 
   it("keeps every job under a 15-minute budget (the wall clock stays under 12)", () => {
