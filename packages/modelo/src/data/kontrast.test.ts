@@ -4,6 +4,7 @@
 import Color from "colorjs.io";
 import { describe, expect, it } from "vitest";
 import { SURFACE_LADDER } from "../checks/alirebleco/color.js";
+import { CORE_SET_NAME } from "../contracts/grammar.js";
 import type { Modelo } from "../contracts/modelo.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
@@ -13,6 +14,97 @@ import { resolve } from "../resolve/resolve.js";
 const { modelo: loaded } = loadModelo(defaultModeloSource());
 if (loaded === undefined) throw new Error("repo did not load");
 const modelo: Modelo = loaded;
+
+const SYNTAX = "color.syntax.";
+
+/**
+ * Spec 040 B-4: the syntax pairs are the grid of the syntax kinds of the core and the grounds the
+ * pairs use – every pair has an entry, every entry belongs to a pair. Derived from the data, so a
+ * kind or a ground added in the Vortaro needs no new number here.
+ */
+function syntaxGridViolations(of: Modelo): string[] {
+  const core = of.setoj.find((set) => set.name === CORE_SET_NAME)?.tokens ?? {};
+  const kinds = Object.keys(core).filter((name) => name.startsWith(SYNTAX));
+  const pairs = of.kontrastParoj.filter((pair) => pair.name.startsWith("syntax-"));
+  const grounds = [...new Set(pairs.map((pair) => pair.background))];
+  const violations: string[] = [];
+  if (kinds.length === 0) violations.push(`no ${SYNTAX}* token in the core`);
+  if (pairs.length === 0) violations.push("no syntax-* pair");
+  for (const foreground of kinds) {
+    for (const background of grounds) {
+      const entries = pairs.filter(
+        (pair) => pair.foreground === foreground && pair.background === background,
+      );
+      if (entries.length !== 1) {
+        violations.push(`${foreground} on ${background}: ${entries.length} pairs, not 1`);
+      }
+    }
+  }
+  for (const pair of pairs) {
+    if (!kinds.includes(pair.foreground)) {
+      violations.push(`${pair.name}: ${pair.foreground} is no ${SYNTAX}* token of the core`);
+    }
+  }
+  return violations;
+}
+
+/**
+ * Spec 040 B-4: the high-contrast combinations are every valoro of every other Dimensio, each
+ * once – the product of their numbers, counted from the Dimensioj, not from allAssignments.
+ */
+function highCombinationViolations(of: Modelo): string[] {
+  const high = allAssignments(of).filter((assignment) => assignment.contrast === "high");
+  const expected = of.dimensioj
+    .filter((dimensio) => dimensio.name !== "contrast")
+    .reduce((product, dimensio) => product * dimensio.valoroj.length, 1);
+  const violations: string[] = [];
+  const contrast = of.dimensioj.find((dimensio) => dimensio.name === "contrast");
+  if (!contrast?.valoroj.some((valoro) => valoro.name === "high")) {
+    violations.push("the Dimensio contrast has no valoro high");
+  }
+  if (high.length !== expected) {
+    violations.push(`${high.length} high-contrast combinations, the Dimensioj give ${expected}`);
+  }
+  const distinct = new Set(high.map((assignment) => JSON.stringify(assignment)));
+  if (distinct.size !== high.length) {
+    violations.push(`${high.length - distinct.size} high-contrast combinations twice`);
+  }
+  return violations;
+}
+
+/** The repo's Modelo with one more syntax kind: its token in the core and a pair on every ground. */
+function withSyntaxKind(of: Modelo, kind: string): Modelo {
+  const foreground = `${SYNTAX}${kind}`;
+  const template = of.kontrastParoj.filter((pair) => pair.foreground === `${SYNTAX}keyword`);
+  return {
+    ...of,
+    setoj: of.setoj.map((set) => {
+      const keyword = set.tokens[`${SYNTAX}keyword`];
+      if (set.name !== CORE_SET_NAME || keyword === undefined) return set;
+      return { ...set, tokens: { ...set.tokens, [foreground]: { ...keyword, name: foreground } } };
+    }),
+    kontrastParoj: [
+      ...of.kontrastParoj,
+      ...template.map((pair) => ({
+        ...pair,
+        name: pair.name.replace("-keyword-", `-${kind}-`),
+        foreground,
+      })),
+    ],
+  };
+}
+
+/** The repo's Modelo with one more valoro of a Dimensio. */
+function withValoro(of: Modelo, dimensioName: string, valoroName: string): Modelo {
+  return {
+    ...of,
+    dimensioj: of.dimensioj.map((dimensio) => {
+      const first = dimensio.valoroj[0];
+      if (dimensio.name !== dimensioName || first === undefined) return dimensio;
+      return { ...dimensio, valoroj: [...dimensio.valoroj, { ...first, name: valoroName }] };
+    }),
+  };
+}
 
 const has = (foreground: string, background: string) =>
   modelo.kontrastParoj.some(
@@ -97,6 +189,23 @@ describe("AK-02: komuna text pairs reach AAA (7:1) under contrast=high", () => {
       }
     }
     expect(minimum).toBeGreaterThanOrEqual(7);
+  });
+});
+
+describe("Spec 040 B-4: an added row breaks a pinned sum, not the derived property", () => {
+  it("one more syntax kind keeps every pair in the grid", () => {
+    const more = withSyntaxKind(modelo, "operator");
+    expect(syntaxGridViolations(more)).toEqual([]);
+    const syntax = more.kontrastParoj.filter((pair) => pair.name.startsWith("syntax-"));
+    expect(syntax.length).toBe(15);
+  });
+
+  it("one more valoro of a Dimensio keeps every high-contrast combination", () => {
+    const more = withValoro(modelo, "density", "spacious");
+    expect(highCombinationViolations(more)).toEqual([]);
+    expect(
+      allAssignments(more).filter((assignment) => assignment.contrast === "high"),
+    ).toHaveLength(36);
   });
 });
 
