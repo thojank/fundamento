@@ -1,0 +1,29 @@
+[
+  {
+    "celo": "eroj-rondo-6/7",
+    "ekzemplo": "bearbeiten.html: h1 nachgebaut",
+    "nomo": "Ero für h1",
+    "ofteco": 3,
+    "propono": "Eine Ero für h1 anbieten oder suggest_ero und den Gvidanto auf die bestehende Ero führen lassen.",
+    "speco": "ero",
+    "taskoj": ["liste", "detail", "bearbeiten"]
+  },
+  {
+    "celo": "eroj-rondo-6/7",
+    "ekzemplo": "bearbeiten.html: suggest_ero „Statusanzeige“ ohne Treffer",
+    "nomo": "Statusanzeige",
+    "ofteco": 1,
+    "propono": "Eine Ero für das Ziel „Statusanzeige“ anbieten oder das Ziel als Schlüsselwort einer bestehenden Ero aufnehmen.",
+    "speco": "ero",
+    "taskoj": ["bearbeiten"]
+  },
+  {
+    "celo": "muster-rondo-2",
+    "ekzemplo": "liste.html: Liste der Teams mit Filter",
+    "nomo": "Listo-kun-filtrilo ",
+    "ofteco": 1,
+    "propono": "",
+    "speco": "sxablono",
+    "taskoj": ["liste"]
+  }
+]

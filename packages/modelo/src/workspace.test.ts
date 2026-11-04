@@ -24,6 +24,7 @@ const PACKAGES = {
   // Spec 029 ①: komuna as it was before the Fonto, an Aspekto package of its own.
   "aspekto-komuna-0-2": "@fundamento/aspekto-komuna-0-2",
   cli: "@fundamento/cli",
+  ekranoj: "@fundamento/ekranoj",
   eroj: "@fundamento/eroj",
   mcp: "@fundamento/mcp",
   // Spec 023: the Metiejo, the brand configurator (working name).

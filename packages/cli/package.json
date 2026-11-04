@@ -24,9 +24,11 @@
   },
   "dependencies": {
     "@fundamento/agordilo": "workspace:*",
+    "@fundamento/ekranoj": "workspace:*",
     "@fundamento/mcp": "workspace:*",
     "@fundamento/metiejo": "workspace:*",
     "@fundamento/modelo": "workspace:*",
+    "@fundamento/nordstelo": "workspace:*",
     "@fundamento/projekcioj": "workspace:*"
   },
   "devDependencies": {
