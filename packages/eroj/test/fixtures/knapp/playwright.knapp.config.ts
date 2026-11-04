@@ -8,6 +8,5 @@ export default defineConfig({
   testDir: ".",
   testMatch: "knapp.fixture.ts",
   workers: 1,
-  retries: 0,
   reporter: playwrightAusgabe("knapp"),
 });
