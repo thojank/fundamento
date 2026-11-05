@@ -16,7 +16,8 @@ if (process.env.TURBO_HASH === undefined) {
 }
 
 // Unit tests only; the rendered checks in test/*.spec.ts run under Playwright (playwright.config.ts).
+// Spec 040 B-1: test/*.test.ts too, for the completeness of the Vitrino's parts (vitrino-partoj).
 // biome-ignore lint/style/noDefaultExport: Vitest loads its config from the default export.
 export default defineConfig({
-  test: { include: ["src/**/*.test.ts"] },
+  test: { include: ["src/**/*.test.ts", "test/**/*.test.ts"] },
 });

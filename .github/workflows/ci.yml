@@ -197,14 +197,18 @@ jobs:
       - name: Test
         run: pnpm --filter @fundamento/projekcioj exec vitest run --shard=${{ matrix.shard }}/2
 
+  # Spec 040 B-6: on main, in three engines, the second of two shards ran into its 15 minutes (run
+  # 41886235249: 15:17), the first ended at 12:56 and 13:02 (41886235249, 41873907893). Four
+  # Playwright shards (fullyParallel: the cut goes through the tests, 474 of 1896 each on main);
+  # the longest projects to ~10.4 min; three would leave the Firefox shard at 12.6 to 13.2 min.
   eroj:
-    name: Rendered Eroj (Playwright, shard ${{ matrix.shard }} of 2)
+    name: Rendered Eroj (Playwright, shard ${{ matrix.shard }} of 4)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2]
+        shard: [1, 2, 3, 4]
     # A run on main (the merge run, the nightly run) proves the rendering of the Eroj in Chromium,
     # Firefox and WebKit (Spec 003); a PR run in Chromium only. An engine-specific defect therefore
     # shows on main, not in the PR. Read by packages/eroj/playwright.config.ts.
@@ -239,17 +243,26 @@ jobs:
       - name: Build
         run: pnpm build
 
-      # The unit test of the package (the React types), then this shard of the Playwright suite.
+      # The unit tests of the package (the React types, the parts of the Vitrino), then this shard
+      # of the Playwright suite.
       - name: Test
-        run: pnpm --filter @fundamento/eroj exec vitest run --passWithNoTests && pnpm --filter @fundamento/eroj exec playwright test --shard=${{ matrix.shard }}/2
+        run: pnpm --filter @fundamento/eroj exec vitest run --passWithNoTests && pnpm --filter @fundamento/eroj exec playwright test --shard=${{ matrix.shard }}/4
 
   # Nachlese 5 ① (D-04): the rendered checks ran 7:52 to 8:34 in one job (axe over the Eroj alone
   # 178 to 233 s, the Vitrino 104 to 140 s). axe over the Eroj is a job of its own; the Make Kit,
   # the quickstart and the Vitrino stay together. Measured in specs/018-nachlese-5/tasks.md ①.
+  # Spec 040 B-1: on main, in three engines, the job ran into its 15 minutes (runs 41827472808,
+  # 41842873743, 41886235249) or ended 21 s short of them (41873907893). Three Playwright shards
+  # (fullyParallel); on main each shard is one engine, Firefox the longest: ~11 min of test time,
+  # ~6 min on the two workers of a runner.
   alirebleco-eroj:
-    name: Rendered accessibility (Alirebleco of the Eroj)
+    name: Rendered accessibility (Alirebleco of the Eroj, shard ${{ matrix.shard }} of 3)
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     env:
       PLAYWRIGHT_ENGINES: ${{ (github.ref == 'refs/heads/main' && github.event_name != 'pull_request') && 'chromium firefox webkit' || 'chromium' }}
     steps:
@@ -277,11 +290,14 @@ jobs:
         run: pnpm build
 
       # Rendered accessibility of the Eroj: axe-core, keyboard, focus ring (Spec 003 T013, D-09).
+      # No `--` before the shard: pnpm would pass it on, and Playwright reads what follows a `--`
+      # as file filters.
       - name: "Check: Alirebleco (Eroj)"
-        run: pnpm check:alirebleco-eroj
+        run: pnpm check:alirebleco-eroj --shard=${{ matrix.shard }}/3
 
+  # Spec 040 B-1: the Werkstatt left this job for a job of its own (werkstatt).
   rendered-checks:
-    name: Rendered checks (Make Kit, Quickstart, Vitrino-Werkstatt)
+    name: Rendered checks (Make Kit, Quickstart)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -318,19 +334,63 @@ jobs:
       - name: "Check: Quickstart"
         run: pnpm check:quickstart
 
-      # Spec 004 AK-02: the Vitrino in a browser — switching, comparison, axe (T011, T012).
-      # Spec 029 ①b (B-1b-6): here its Werkstatt, the rest in the job vitrino (VITRINO_PARTO).
+  # Spec 040 B-1: the Werkstatt of the Vitrino, in parts of packages/eroj/test/vitrino-partoj.ts.
+  # Beside the Make Kit and the quickstart it ran into the 15 minutes (run 41877598624); its tests
+  # alone took up to ~13 min on a slow runner. The Vitrino runs in one engine (Chromium) on main
+  # too; every part builds its projections and runs check:bazo on its own runner.
+  werkstatt:
+    name: Rendered checks (Vitrino-Werkstatt, part ${{ matrix.parto }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        parto: [werkstatt-1, werkstatt-2]
+    env:
+      PLAYWRIGHT_ENGINES: ${{ (github.ref == 'refs/heads/main' && github.event_name != 'pull_request') && 'chromium firefox webkit' || 'chromium' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Playwright browsers
+        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
+
+      - name: Build
+        run: pnpm build
+
+      # Spec 004 AK-02, Spec 016 ②, Spec 019 ②: the Werkstatt of the Vitrino in a browser.
       - name: "Check: Vitrino (Werkstatt)"
         run: pnpm check:vitrino
         env:
-          VITRINO_PARTO: werkstatt
+          VITRINO_PARTO: ${{ matrix.parto }}
 
   # Spec 029 ①b (B-1b-6): the Vitrino without its Werkstatt, a job of its own – with the Make Kit
   # and the quickstart it ran past 15 minutes on a slow runner.
+  # Spec 040 B-1: alone it ran into its 15 minutes too (runs 41873907893, 41864293712,
+  # 41877598624, 41886235249: ~21 min of tests on a slow runner, Chromium only). Three parts of
+  # packages/eroj/test/vitrino-partoj.ts, a runner each.
   vitrino:
-    name: Rendered checks (Vitrino)
+    name: Rendered checks (Vitrino, part ${{ matrix.parto }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        parto: [cetero-1, cetero-2, cetero-3]
     env:
       PLAYWRIGHT_ENGINES: ${{ (github.ref == 'refs/heads/main' && github.event_name != 'pull_request') && 'chromium firefox webkit' || 'chromium' }}
     steps:
@@ -361,4 +421,4 @@ jobs:
       - name: "Check: Vitrino"
         run: pnpm check:vitrino
         env:
-          VITRINO_PARTO: cetero
+          VITRINO_PARTO: ${{ matrix.parto }}
