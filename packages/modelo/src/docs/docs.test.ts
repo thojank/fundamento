@@ -4794,3 +4794,86 @@ describe("Spec 040 documentation (specs/040-ci-schneller)", () => {
     );
   });
 });
+
+describe("Spec 041 documentation (specs/041-wacklige-tests)", () => {
+  const SPEC_041_SHA256 = "3c006222b752d8921102bd1e6e787d5c072529a395cc24450cd433390003ec3f";
+  const DIR = "specs/041-wacklige-tests";
+  /** The findings of the spec, in the order of the plan (C-3); new ones (N-1 …) follow them. */
+  const BEFUNDE = ["B-8", "B-9", "B-10", "B-12", "B-13", "B-14", "B-15", "I-1"];
+  /** A proof is a run id, a command or an artifact in backticks; else it says why there is none. */
+  const PROOF = /\b\d{11}\b|`[^`]+`|nicht nachgestellt/;
+
+  const plan = () => read(`${DIR}/plan.md`);
+
+  /** Table rows whose first cell is exactly `id`. */
+  const rowsOf = (text: string, id: string) =>
+    text.split("\n").filter((line) => line.startsWith(`| ${id} |`));
+
+  /** Cells of a table row, without the outer pipes; `\|` inside a cell stays in its cell. */
+  const cellsOf = (row: string) =>
+    row
+      .replace(/^\|/, "")
+      .replace(/\|$/, "")
+      .split(/(?<!\\)\|/)
+      .map((cell) => cell.trim());
+
+  it("the spec is the source, byte for byte, and its hash stands in G-0 (AC-1)", () => {
+    const spec = read(`${DIR}/spec.md`);
+    expect(createHash("sha256").update(spec).digest("hex")).toBe(SPEC_041_SHA256);
+    expect(section(plan(), "Entscheidungen, vom Maintainer zu bestätigen")).not.toBe("");
+    const quelle = plan().slice(plan().indexOf("### G-0 Quelle"));
+    expect(quelle.slice(0, quelle.indexOf("\n### ", 1))).toContain(SPEC_041_SHA256);
+  });
+
+  it("the plan has the headings of C-3, in order", () => {
+    const lines = plan().split("\n");
+    const headings = [
+      "### G-0 Quelle",
+      "### Branches und PRs",
+      "## Entscheidungen, vom Maintainer zu bestätigen",
+      "## Befunde",
+      "## Messungen",
+      "### PR A (workflow_dispatch)",
+      "### PR B (workflow_dispatch)",
+      "### M5 p90",
+      "## Diff-Suche (AC-3)",
+      "## Messanleitung",
+      "## Blockiert",
+      "## Bericht",
+    ];
+    const at = headings.map((heading) => lines.indexOf(heading));
+    for (const [i, heading] of headings.entries()) expect(at[i], heading).toBeGreaterThan(-1);
+    expect(at).toEqual([...at].sort((a, b) => a - b));
+  });
+
+  it("the Befunde have one row each for B-8 to I-1, each with a proof or „nicht nachgestellt“ (AC-2)", () => {
+    const befunde = section(plan(), "Befunde");
+    expect(befunde).toContain("| ID | Nachweis | Ursache | Fix (rot → grün) | Ticket | Stand |");
+    for (const id of BEFUNDE) {
+      const rows = rowsOf(befunde, id);
+      expect(rows, id).toHaveLength(1);
+      const cells = cellsOf(rows[0] ?? "");
+      expect(cells, id).toHaveLength(6);
+      expect(cells[1], id).toMatch(PROOF);
+      for (const cell of cells) expect(cell, id).not.toBe("");
+    }
+  });
+
+  it("every D the plan names has its row among the decisions", () => {
+    const text = plan();
+    const decisions = section(text, "Entscheidungen, vom Maintainer zu bestätigen");
+    const named = new Set(
+      [...text.matchAll(/(?<!Spec \d{3} \(?)\bD-(\d{2,3})\b/g)].map((match) => match[0]),
+    );
+    expect(named.size).toBeGreaterThan(12);
+    for (const id of named) expect(rowsOf(decisions, id), id).toHaveLength(1);
+  });
+
+  it("tasks lists at most eight tickets", () => {
+    const tickets = read(`${DIR}/tasks.md`)
+      .split("\n")
+      .filter((line) => /^\| T\d+ \|/.test(line));
+    expect(tickets.length).toBeGreaterThan(0);
+    expect(tickets.length).toBeLessThanOrEqual(8);
+  });
+});
