@@ -8,7 +8,7 @@ Drei Spuren auf getrennten Dateien (D-08): A1 (T2 → T1 → T3, als einzige mit
 |---|---|---|---|---|---|---|
 | T1 | B-13, B-10, B-12: Bühne (WebKit) und `ECONNRESET` (D-01) | A | A1 | `packages/eroj/test/buehne-036.spec.ts`, `metiejo-036-uebernahme.spec.ts`, `wackler-040.ts`, `wackler-040.test.ts` | erledigt (B-12 Bühne behoben; B-10, B-13, B-12 Übernahme offen mit Spur) | B-12: `0bede97b` → `8cb97cc0`; Bühne-POSTs: Lauf → `888ea97a` |
 | T2 | Gerüst Spec 041; B-8: `stato`-Abruf beim Entladen beenden | A | A1 | `specs/041-wacklige-tests/{spec,plan,tasks}.md`, `packages/metiejo/src/html.ts`, `packages/eroj/test/stato-041.spec.ts` (neu) | erledigt (N-2 nachgebessert) | Gerüst `c7cbcd66`; B-8 `bd193cad`, `36a85b02` → `7e0ff9ec`; N-2 `24f2b273` → `178ed2a9` |
-| T3 | B-9 und B-15: Vorschau-Rahmen folgt der neuen `rev` in allen Browsern (D-02) | A | A1 | `packages/eroj/test/studio-035.spec.ts`; `wackler-040.ts` erst nach T1 | offen | |
+| T3 | B-9 und B-15: Vorschau-Rahmen folgt der neuen `rev` in allen Browsern (D-02); dazu N-2 (B-8) | A | A1 | `packages/eroj/test/studio-035.spec.ts`; N-2: `packages/metiejo/src/html.ts`, `packages/eroj/test/stato-041.spec.ts` | erledigt | B-9/B-15: Lauf (10/30) → `78ad9ae6`; N-2: `24f2b273` → `178ed2a9` |
 | T4 | B-14: M5-Regression in der Werkstatt finden und beheben (D-04, D-09) | A (über T6) | A2 | `packages/projekcioj/src/celoj/vitrino/**`; Wegwerf-Refs `s041-m5-*` | offen | |
 | T5 | I-1: Playwright-Browser und Systempakete aus dem Actions-Cache (D-03, D-05, D-06) | B | B | `.github/workflows/ci.yml`, `packages/modelo/src/ci/workflow.test.ts` | offen | |
 | T6 | Zusammenführen, Doku-Test, Messung, PRs, Bericht | A und B | – | `packages/modelo/src/docs/docs.test.ts`, Pins für `M5_GRENZE_MS` und das Intervall, `specs/041-wacklige-tests/{plan,tasks}.md` | offen | |
@@ -32,7 +32,10 @@ Drei Spuren auf getrennten Dateien (D-08): A1 (T2 → T1 → T3, als einzige mit
 - [x] B-12 Übernahme: Reset am POST (D-16), nicht gewickelt, offen.
 - [x] Neue Befunde N-2 (B-8-Rest, WebKit), N-3 (Portschema der Übernahme-Spec), N-4 (Firefox-Testzeit in 3.2).
 - [x] `pnpm lint` grün (erster Lauf rot an einem Wettlauf von `eroj:lint` und `eroj:build`, die beide `generate.mjs` starten; zweiter grün); `pnpm test:betroffen` rot nur an `modelo` `turbo-inputs.test.ts:679` (Hook 10 000 ms unter eigener Last, wie bei T2); dieselben sechs Pakete nacheinander (`pnpm turbo run test --concurrency=1 --continue --filter=…`, drei Engines): 14 von 15 Aufgaben grün, Eroj-Vitest 23/23, Eroj-Playwright 1911 bestanden, 1 rot (N-1), 2 übersprungen. `pnpm check:privat` grün.
-- [ ] T3: B-9, B-15.
+- [x] T3 Spuren gelesen: 41971724414 (`testberichte-eroj-3-1`), 41920898257 Versuch 2 (`testberichte-eroj-3-2`), 41931882770 Versuch 1 (`testberichte-eroj-3-1`), 42053971357 (`testberichte-eroj-3-1`, T5) nach `/tmp/s041-spur/t3/`, nur gelesen.
+- [x] T3 rot lokal: Firefox 3.4 `--repeat-each=30 --workers=10` 10/30 (7 × Testzeit = B-9, 3 × `rev=1` = B-15); Zeitstrahl: in allen 10 lud die Seite `rev` 2 in beide Rahmen, Playwright meldete kein `framenavigated`.
+- [x] T3 grün: 3.4 liest den Rahmen über `contentDocument` aus der Seite (D-18) – `78ad9ae6`; Firefox, Chromium, WebKit je `--repeat-each=90 --workers=10` 90/90.
+- [x] T3 Teil 0: N-2 (B-8) behoben – `24f2b273` → `178ed2a9` (D-17).
 - [ ] T4: B-14.
 - [ ] T5: I-1.
 - [ ] T6: Zusammenführen, Tests, Messung, PRs, Bericht.
