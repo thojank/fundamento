@@ -7,7 +7,7 @@ Drei Spuren auf getrennten Dateien (D-08): A1 (T2 → T1 → T3, als einzige mit
 | Ticket | Inhalt | PR | Spur | Dateien | Stand | rot → grün |
 |---|---|---|---|---|---|---|
 | T1 | B-13, B-10, B-12: Bühne (WebKit) und `ECONNRESET` (D-01) | A | A1 | `packages/eroj/test/buehne-036.spec.ts`, `metiejo-036-uebernahme.spec.ts`, `wackler-040.ts`, `wackler-040.test.ts` | erledigt (B-12 Bühne behoben; B-10, B-13, B-12 Übernahme offen mit Spur) | B-12: `0bede97b` → `8cb97cc0`; Bühne-POSTs: Lauf → `888ea97a` |
-| T2 | Gerüst Spec 041; B-8: `stato`-Abruf beim Entladen beenden | A | A1 | `specs/041-wacklige-tests/{spec,plan,tasks}.md`, `packages/metiejo/src/html.ts`, `packages/eroj/test/stato-041.spec.ts` (neu) | erledigt | Gerüst `c7cbcd66`; B-8 `bd193cad`, `36a85b02` → `7e0ff9ec` |
+| T2 | Gerüst Spec 041; B-8: `stato`-Abruf beim Entladen beenden | A | A1 | `specs/041-wacklige-tests/{spec,plan,tasks}.md`, `packages/metiejo/src/html.ts`, `packages/eroj/test/stato-041.spec.ts` (neu) | erledigt (N-2 nachgebessert) | Gerüst `c7cbcd66`; B-8 `bd193cad`, `36a85b02` → `7e0ff9ec`; N-2 `24f2b273` → `178ed2a9` |
 | T3 | B-9 und B-15: Vorschau-Rahmen folgt der neuen `rev` in allen Browsern (D-02) | A | A1 | `packages/eroj/test/studio-035.spec.ts`; `wackler-040.ts` erst nach T1 | offen | |
 | T4 | B-14: M5-Regression in der Werkstatt finden und beheben (D-04, D-09) | A (über T6) | A2 | `packages/projekcioj/src/celoj/vitrino/**`; Wegwerf-Refs `s041-m5-*` | offen | |
 | T5 | I-1: Playwright-Browser und Systempakete aus dem Actions-Cache (D-03, D-05, D-06) | B | B | `.github/workflows/ci.yml`, `packages/modelo/src/ci/workflow.test.ts` | offen | |
@@ -21,6 +21,7 @@ Drei Spuren auf getrennten Dateien (D-08): A1 (T2 → T1 → T3, als einzige mit
 - [x] B-8 Fix in `packages/metiejo/src/html.ts`: Abfrage bei `beforeunload` abbrechen (D-13), bei `pagehide` zusätzlich Intervall beenden, bei `pageshow` mit `persisted` genau einmal fortsetzen; 3000 ms unverändert – `7e0ff9ec`.
 - [x] B-8 grün in Chromium, Firefox und WebKit, nacheinander, je `--repeat-each=10 --workers=4`: 30/30, 30/30, 30/30.
 - [x] `pnpm lint` grün; `pnpm test:betroffen` zweimal rot nur an Zeitüberschreitungen unter der eigenen Last (B-7 aus Spec 040: `cli` `index.test.ts:343` 30 000 ms, allein grün in 14,1 s; `modelo` `turbo-inputs.test.ts` Hook 10 000 ms); dieselben sechs Pakete danach nacheinander (`--concurrency=1 --continue`): 14 von 15 Aufgaben grün, Eroj-Playwright 1911 bestanden, 1 rot (N-1, ohne Bezug zu T2), Eroj-Vitest 18/18.
+- [x] Nachbesserung N-2 (im Lauf von T3, D-17): ab `beforeunload` startet kein Takt eine Abfrage, bis die Seite bleibt – rot `24f2b273` → grün `178ed2a9`; `stato-041.spec.ts` je Engine 30/30, WebKit Bühne 3.5 `--repeat-each=150 --workers=10` 150/150 ohne „access control checks“.
 
 ## T1, T3 bis T6 im Einzelnen
 
