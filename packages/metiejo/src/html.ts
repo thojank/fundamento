@@ -700,19 +700,59 @@ if (kreilo && marko) {
   });
 }
 // The one draft: when the assistant or the Studio changed it elsewhere, follow.
+// Spec 041 B-8: the poll ends with its page. WebKit and Firefox stop a page's loads between
+// beforeunload and pagehide, and a poll they cut short surfaced as an error of the old page. So the
+// page aborts its own request at beforeunload, and no tick asks again while the page is leaving
+// (Spec 041 N-2: a navigation can take longer than an interval, and a tick in between started a
+// request the browser cut short in turn). If the page stays (a cancelled navigation), the person's
+// next key, pointer or return to the window lets the poll go on. At pagehide the interval stops as
+// well. A page the back-forward cache restores (pageshow with persisted) polls again, once; the
+// first load's pageshow starts nothing, the poll already runs. A failed request was no news
+// already; a failed body is now too.
 if (marko && (asistantoData || (sxtupo && sxtupo.startsWith("studio-")))) {
-  setInterval(async () => {
-    if (sending || studioSendet || document.hidden) return;
-    const response = await fetch("/api/marko/" + marko + "/stato").catch(() => undefined);
-    if (!response || !response.ok) return;
-    const stato = await response.json();
-    if (stato.rev === rev) return;
-    rev = stato.rev;
-    if (asistantoData) { refreshFrame(); zeigeStato(stato); return; }
-    const editing = document.activeElement && document.activeElement.closest && document.activeElement.closest("fm-formularo");
-    if (editing) meldung("Die Marke wurde im Assistenten geändert. Lade die Seite neu, um es zu sehen.");
-    else location.reload();
-  }, 3000);
+  let poll;
+  let leaving = false;
+  let pollAbort = new AbortController();
+  const abortRequest = () => {
+    pollAbort.abort();
+    pollAbort = new AbortController();
+  };
+  const follow = () => {
+    if (poll !== undefined) return;
+    poll = setInterval(async () => {
+      if (leaving || sending || studioSendet || document.hidden) return;
+      const signal = pollAbort.signal;
+      const response = await fetch("/api/marko/" + marko + "/stato", { signal }).catch(() => undefined);
+      if (!response || !response.ok) return;
+      const stato = await response.json().catch(() => undefined);
+      if (!stato || signal.aborted) return;
+      if (stato.rev === rev) return;
+      rev = stato.rev;
+      if (asistantoData) { refreshFrame(); zeigeStato(stato); return; }
+      const editing = document.activeElement && document.activeElement.closest && document.activeElement.closest("fm-formularo");
+      if (editing) meldung("Die Marke wurde im Assistenten geändert. Lade die Seite neu, um es zu sehen.");
+      else location.reload();
+    }, 3000);
+  };
+  follow();
+  const stay = () => { leaving = false; };
+  window.addEventListener("beforeunload", () => {
+    leaving = true;
+    abortRequest();
+  });
+  window.addEventListener("keydown", stay, true);
+  window.addEventListener("pointerdown", stay, true);
+  window.addEventListener("focus", stay);
+  window.addEventListener("pagehide", () => {
+    clearInterval(poll);
+    poll = undefined;
+    abortRequest();
+  });
+  window.addEventListener("pageshow", (event) => {
+    if (!event.persisted) return;
+    stay();
+    follow();
+  });
 }
 
 if (frame) refreshFrame();

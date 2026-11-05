@@ -10,14 +10,27 @@ import { expect, type Frame, type Page, type Response } from "@playwright/test";
  * alive between two reads; Node's server closes an idle connection after its keep-alive time, and a
  * read sent at that moment meets a closed connection (runs 41827472808 and 41842873743, WebKit,
  * `stand()`). Only for reads that change nothing; a second reset, and any other error, is thrown.
+ * Spec 041 B-12: Node's global fetch says the reset as „TypeError: fetch failed“ whose cause is the
+ * reset (`code` ECONNRESET, „read ECONNRESET“; run 41941052854); that counts as well.
  */
 export async function nachEinemReset<T>(send: () => Promise<T>): Promise<T> {
   try {
     return await send();
   } catch (error) {
-    if (!(error instanceof Error) || !error.message.includes("ECONNRESET")) throw error;
+    if (!istReset(error)) throw error;
     return send();
   }
+}
+
+/** A reset of the connection, as Playwright's request context or Node's fetch says it. */
+function istReset(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  if (error.message.includes("ECONNRESET")) return true;
+  if (!(error instanceof TypeError) || !(error.cause instanceof Error)) return false;
+  const { cause } = error;
+  return (
+    ("code" in cause && cause.code === "ECONNRESET") || cause.message.includes("read ECONNRESET")
+  );
 }
 
 /** A POST of the page to /api/marko/<id>/<aktion>. */
