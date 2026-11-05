@@ -12,23 +12,39 @@
 // in one engine on main too): runs 41842873743 (green), 41873907893, 41877598624 and 41886235249
 // (cut off at 15 minutes).
 // - werkstatt-1: the four axe passes over the Werkstatt (~4 × 72 s) and the stage 2 (~110 s);
-//   werkstatt-2: the rest of the Werkstatt (~360 s, the M5 timings among them). The cut between
-//   the two describes (stage 1 ~650 s, stage 2 ~110 s) would leave stage 1 above 12 minutes.
+//   werkstatt-2: the rest of the Werkstatt (~360 s, with the M5 timings that left for `zeittests`,
+//   below). The cut between the two describes (stage 1 ~650 s, stage 2 ~110 s) would leave stage 1
+//   above 12 minutes.
 // - cetero-1: the four axe passes over the whole page (~4 × 117 s); cetero-2: the fm-dialogo
 //   (~234 s) and the six largest section checks; cetero-3: the rest (~375 s).
+//
+// Spec 040 T-7 (AC-B6): the timing tests – M5 and its Gegenproben with the calibration of the
+// block, the Ableitung Gegenprobe, G5 and its Gegenprobe – are a group and a part of their own,
+// `zeittests`, in a CI job that does not block a pull request. They sit in the two describes of
+// the Werkstatt, so `werkstatt` leaves them out, and with it werkstatt-1 and werkstatt-2. They are
+// named one by one: a timing test added later lands in the rest of its group until it is named
+// here. The pure verdicts of M5, G5 and the derivation measure nothing and stay in `cetero`.
+// `zeittests` comes first in the table: the last part stays the rest of `cetero`, the selection
+// the completeness test drives through playwright.vitrino.config.ts.
 
 /** A title path from the file down: describe titles, then the beginning of a test title. */
 export type Titolvojo = readonly string[];
 
-/** The Werkstatt (its two describes) and the rest of the Vitrino. */
-export type VitrinoGrupo = "werkstatt" | "cetero";
+/** The timing tests, the Werkstatt (its two describes without them) and the rest of the Vitrino. */
+export type VitrinoGrupo = "zeittests" | "werkstatt" | "cetero";
 
 /** A part: the tests under some title paths, or the rest of its group. */
 export type VitrinoTeil =
   | { readonly grupo: VitrinoGrupo; readonly prefiksoj: readonly Titolvojo[] }
   | { readonly grupo: VitrinoGrupo; readonly resto: true };
 
-export type VitrinoParto = "werkstatt-1" | "werkstatt-2" | "cetero-1" | "cetero-2" | "cetero-3";
+export type VitrinoParto =
+  | "zeittests"
+  | "werkstatt-1"
+  | "werkstatt-2"
+  | "cetero-1"
+  | "cetero-2"
+  | "cetero-3";
 
 /** The file the parts select from; the title path of its tests starts after it. */
 const DOSIERO = "vitrino.check.ts";
@@ -36,11 +52,23 @@ const DOSIERO = "vitrino.check.ts";
 const WERKSTATT_1 = "the Werkstatt (Spec 016 ②)";
 const WERKSTATT_2 = "the Werkstatt, stage 2 (Spec 019 ②)";
 
-/** The group `werkstatt`; `cetero` is every other test of the file. */
+/** The describes of the Werkstatt; `cetero` is every other test of the file. */
 const WERKSTATT: readonly Titolvojo[] = [[WERKSTATT_1], [WERKSTATT_2]];
+
+/** The timing tests, inside the describes of the Werkstatt. */
+const ZEITTESTS: readonly Titolvojo[] = [
+  [WERKSTATT_1, "M5: derivation and check per slider change "],
+  [WERKSTATT_1, "Ableitung Gegenprobe"],
+  // "M5 Gegenprobe 2: …" and its calibration ("M5 Gegenprobe 2, calibration …").
+  [WERKSTATT_1, "M5 Gegenprobe 2"],
+  [WERKSTATT_1, "M5 Gegenprobe: "],
+  [WERKSTATT_2, "G5: 50 changes of a slider "],
+  [WERKSTATT_2, "G5 Gegenprobe"],
+];
 
 /** The parts, in the order of the CI matrices; the keys are the values of VITRINO_PARTO. */
 export const VITRINO_PARTOJ: Readonly<Record<VitrinoParto, VitrinoTeil>> = {
+  zeittests: { grupo: "zeittests", prefiksoj: ZEITTESTS },
   "werkstatt-1": {
     grupo: "werkstatt",
     prefiksoj: [[WERKSTATT_1, "axe finds nothing in the Werkstatt"], [WERKSTATT_2]],
@@ -77,11 +105,19 @@ function isParto(value: string): value is VitrinoParto {
   return Object.hasOwn(VITRINO_PARTOJ, value);
 }
 
-/** The selection of a group: the Werkstatt by its describes, the rest by leaving them out. */
+/**
+ * The selection of a group: the timing tests by name, the Werkstatt by its describes without the
+ * timing tests, the rest by leaving out both.
+ */
 function grupoAuswahl(grupo: VitrinoGrupo): { grep: RegExp[]; grepInvert: RegExp[] } {
-  return grupo === "werkstatt"
-    ? { grep: patterns(WERKSTATT), grepInvert: [] }
-    : { grep: [], grepInvert: patterns(WERKSTATT) };
+  switch (grupo) {
+    case "zeittests":
+      return { grep: patterns(ZEITTESTS), grepInvert: [] };
+    case "werkstatt":
+      return { grep: patterns(WERKSTATT), grepInvert: patterns(ZEITTESTS) };
+    case "cetero":
+      return { grep: [], grepInvert: patterns([...WERKSTATT, ...ZEITTESTS]) };
+  }
 }
 
 function auswahl(grep: RegExp[], grepInvert: RegExp[]): { grep?: RegExp[]; grepInvert?: RegExp[] } {

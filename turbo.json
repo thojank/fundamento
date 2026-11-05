@@ -3,13 +3,14 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/tsconfig.base.json"],
       "outputs": ["dist/**"]
     },
     "@fundamento/modelo#build": {
       "dependsOn": ["^build"],
       "inputs": [
         "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/tsconfig.base.json",
         "$TURBO_ROOT$/packages/vortaro/*.json",
         "$TURBO_ROOT$/packages/vortaro/sets/**",
         "$TURBO_ROOT$/packages/aspekto-komuna/*.json",
@@ -19,15 +20,108 @@
     },
     "test": {
       "dependsOn": ["build"],
-      "env": ["PLAYWRIGHT_ENGINES"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/scripts/reporter/**"],
+      "env": ["PLAYWRIGHT_ENGINES", "FM_AUSGABE"],
+      "outputs": []
+    },
+    "@fundamento/agordilo#test": {
+      "dependsOn": ["build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/scripts/neutrale-namen/*.mjs",
+        "$TURBO_ROOT$/scripts/reporter/**"
+      ],
+      "env": ["PLAYWRIGHT_ENGINES", "FM_AUSGABE"],
+      "outputs": []
+    },
+    "@fundamento/ekranoj#test": {
+      "dependsOn": ["build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/specs/037-agenten-ekranoj/**",
+        "$TURBO_ROOT$/scripts/reporter/**"
+      ],
+      "env": ["PLAYWRIGHT_ENGINES", "FM_AUSGABE"],
+      "outputs": []
+    },
+    "@fundamento/eroj#test": {
+      "dependsOn": ["build", "@fundamento/cli#build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/specs/004-komparo/mezuroj-main.json",
+        "$TURBO_ROOT$/scripts/reporter/**"
+      ],
+      "env": ["PLAYWRIGHT_ENGINES", "FM_AUSGABE"],
+      "outputs": []
+    },
+    "@fundamento/mcp#test": {
+      "dependsOn": ["build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/scripts/neutrale-namen/*.mjs",
+        "$TURBO_ROOT$/scripts/reporter/**"
+      ],
+      "env": ["PLAYWRIGHT_ENGINES", "FM_AUSGABE"],
+      "outputs": []
+    },
+    "@fundamento/metiejo#test": {
+      "dependsOn": ["build", "@fundamento/cli#build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/.env.example",
+        "$TURBO_ROOT$/specs/023-werkstatt-konfigurilo/**",
+        "$TURBO_ROOT$/specs/024-studio/**",
+        "$TURBO_ROOT$/scripts/reporter/**"
+      ],
+      "env": ["PLAYWRIGHT_ENGINES", "FM_AUSGABE"],
       "outputs": []
     },
     "@fundamento/modelo#test": {
       "dependsOn": ["build", "@fundamento/cli#build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/*",
+        "!$TURBO_ROOT$/.git",
+        "!$TURBO_ROOT$/.env",
+        "$TURBO_ROOT$/.github/**",
+        "$TURBO_ROOT$/.specify/**",
+        "$TURBO_ROOT$/docs/**",
+        "$TURBO_ROOT$/research/**",
+        "$TURBO_ROOT$/scripts/**",
+        "!$TURBO_ROOT$/scripts/**/node_modules/**",
+        "$TURBO_ROOT$/specs/**",
+        "$TURBO_ROOT$/packages/eroj/test/vitrino-partoj.ts"
+      ],
+      "env": ["PLAYWRIGHT_ENGINES", "FM_AUSGABE"],
+      "outputs": []
+    },
+    "@fundamento/nordstelo#test": {
+      "dependsOn": ["build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/specs/034-nachlese-12/plan.md",
+        "$TURBO_ROOT$/scripts/reporter/**"
+      ],
+      "env": ["PLAYWRIGHT_ENGINES", "FM_AUSGABE"],
+      "outputs": []
+    },
+    "@fundamento/projekcioj#test": {
+      "dependsOn": ["build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/LICENSE",
+        "$TURBO_ROOT$/packages/*/package.json",
+        "$TURBO_ROOT$/packages/metiejo/data/tiparoj.json",
+        "$TURBO_ROOT$/scripts/fonto-astryx/vergleich/**",
+        "!$TURBO_ROOT$/scripts/fonto-astryx/vergleich/node_modules/**",
+        "$TURBO_ROOT$/scripts/reporter/**"
+      ],
+      "env": ["PLAYWRIGHT_ENGINES", "FM_AUSGABE"],
       "outputs": []
     },
     "lint": {
       "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/tsconfig.base.json", "$TURBO_ROOT$/biome.json"],
       "outputs": []
     },
     "perf": {

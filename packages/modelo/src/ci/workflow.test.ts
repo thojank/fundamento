@@ -59,10 +59,83 @@ const ERO_CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = 
 // Vitrino check of 40 Eroj, cut the rendered checks off at the 15-minute budget twice.
 const PLAYWRIGHT_BROWSERS =
   "pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES";
+// Spec 040 D-19: the Vitrino jobs (werkstatt, vitrino, zeittests) run playwright.vitrino.config.ts,
+// which takes the first project of the shared config alone – Chromium, whatever PLAYWRIGHT_ENGINES
+// names. They installed all three engines with `--with-deps` on main all the same, and on a slow
+// apt mirror four of them were cut off at 15 minutes in that step (PR #145). They install Chromium
+// alone and carry no PLAYWRIGHT_ENGINES.
+const PLAYWRIGHT_CHROMIUM =
+  "pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium";
+
+// Spec 040 T-5: the local Turborepo cache of every job lives on between runs (actions/cache), one
+// cache per job and matrix value. The key ends on the commit, so every run saves its cache; a run
+// restores the newest of its job through the prefix of lockfile, turbo.json and Node. Turborepo
+// hashes every task's inputs itself, so a hit replays only what is unchanged (E-6); the action is
+// pinned to its major like the others (checked: v6.1.0 is the latest release on 2026-11-04).
+/** The step that restores and saves the Turborepo cache, right before Build. */
+const TURBO_CACHE_STEP = "Turbo cache";
+const TURBO_CACHE_ACTION = "actions/cache@v6";
+const TURBO_CACHE_PREFIX =
+  "turbo-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json', '.nvmrc') }}-";
+
+/**
+ * AC-B5: no job builds with `pnpm build` (the whole workspace); each builds what its steps need,
+ * through the cache. The checks need every package (A-5): lint builds the dependencies of every
+ * package, check:parity runs fm, check:release packs the kits. The eroj specs spawn the built fm
+ * (A-4), and check:bazo of the Werkstatt and the Vitrino does too: their closure is the CLI's.
+ */
+const BUILD_FILTERS: Readonly<Record<string, string>> = {
+  checks: "'@fundamento/*'",
+  unit: "@fundamento/${{ matrix.package }}...",
+  projekcioj: "@fundamento/projekcioj...",
+  eroj: "@fundamento/cli...",
+  "alirebleco-eroj": "@fundamento/eroj...",
+  "rendered-checks": "@fundamento/eroj...",
+  werkstatt: "@fundamento/cli...",
+  vitrino: "@fundamento/cli...",
+  zeittests: "@fundamento/cli...",
+};
+
+function buildOf(job: string): string {
+  return `pnpm turbo run build --filter=${BUILD_FILTERS[job]} --cache-dir=.turbo/cache`;
+}
+
+/**
+ * Test results come from the cache on a pull request only. On main, at night and on
+ * workflow_dispatch the tests always run (write, never read): main tests everything (AC-B4), and
+ * the Gegenprobe (AC-B12) cannot be hidden by a hit.
+ */
+const TEST_CACHE = "--cache=${{ github.event_name == 'pull_request' && 'local:rw' || 'local:w' }}";
+
+/**
+ * Vitest called directly (not through `turbo run test`) builds the whole workspace first unless
+ * FM_GEBAUT says the job's Build step has built what the step needs (vitest.config.ts).
+ */
+const GEBAUT = { FM_GEBAUT: "1" };
+
+// Spec 040 T-7 (C-4, AC-B10): every test job prints only its red tests and one summary line
+// (FM_AUSGABE=knapp for the whole workflow; Turborepo shows the log of a failed task only), and
+// keeps the full reports – the JUnit files of Vitest and Playwright, Playwright's HTML report – as
+// an artifact of the run: last, after a red step too (always()), but only where the job tested
+// (the gate of T-6). One name per job, matrix value and attempt (an R-8 rerun uploads again); only
+// the report folders, no environment (E-13); seven days.
+/** The variable that switches the reporters of scripts/reporter/ to the terse output. */
+const AUSGABE = { FM_AUSGABE: "knapp" };
+/** Turborepo's output where it runs tests: the logs of failed tasks only. */
+const OUTPUT_LOGS = "--output-logs=errors-only";
+const ARTIFACT_STEP = "Testberichte";
+const ARTIFACT_ACTION = "actions/upload-artifact@v7";
+const ARTIFACT_WITH = {
+  name: "testberichte-${{ github.job }}-${{ matrix.package || matrix.shard || matrix.parto || 'x' }}-${{ github.run_attempt }}",
+  path: "packages/*/test-reports/",
+  "retention-days": 7,
+  "if-no-files-found": "ignore",
+};
 
 /** The job of the checks: build, perf, lint, the Modelo checks, release. */
-const CHECKS_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
-  ["Build", "pnpm build"],
+const CHECKS_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
+  [TURBO_CACHE_STEP, undefined],
+  ["Build", buildOf("checks")],
   // AK-07 timings run alone, outside any parallel Turborepo test run (Spec 001 D-17).
   ["Perf", "pnpm perf"],
   ["Lint", "pnpm lint"],
@@ -82,15 +155,22 @@ const CHECKS_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
 const UNIT_PACKAGES = ["agordilo", "cli", "ekranoj", "mcp", "metiejo", "modelo", "nordstelo"];
 
 /** The job of the unit tests: one package per runner (matrix), the Projekcioj and Eroj elsewhere. */
-const UNIT_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
-  ["Build", "pnpm build"],
-  ["Test", "pnpm turbo run test --filter=@fundamento/${{ matrix.package }}"],
+const UNIT_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
+  [TURBO_CACHE_STEP, undefined],
+  ["Build", buildOf("unit")],
+  [
+    "Test",
+    `pnpm turbo run test --filter=@fundamento/\${{ matrix.package }} --cache-dir=.turbo/cache ${TEST_CACHE} ${OUTPUT_LOGS}`,
+  ],
+  [ARTIFACT_STEP, undefined],
 ];
 
 /** The job of the Projekcioj suite: two Vitest shards (every Celo builds the whole Modelo). */
-const PROJEKCIOJ_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
-  ["Build", "pnpm build"],
+const PROJEKCIOJ_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
+  [TURBO_CACHE_STEP, undefined],
+  ["Build", buildOf("projekcioj")],
   ["Test", "pnpm --filter @fundamento/projekcioj exec vitest run --shard=${{ matrix.shard }}/2"],
+  [ARTIFACT_STEP, undefined],
 ];
 
 // Spec 040 B-6: on main, with three engines, the second of two shards ran into its 15 minutes
@@ -99,13 +179,15 @@ const PROJEKCIOJ_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
 // 1896 on main); three would leave the Firefox shard at ~12.6 to 13.2 minutes. Every shard runs the
 // unit tests of the package before its part of the suite, as with two.
 /** The job of the rendered Eroj: the Playwright suite in four shards (fullyParallel inside). */
-const EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
+const EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
   ["Playwright browsers", PLAYWRIGHT_BROWSERS],
-  ["Build", "pnpm build"],
+  [TURBO_CACHE_STEP, undefined],
+  ["Build", buildOf("eroj")],
   [
     "Test",
     "pnpm --filter @fundamento/eroj exec vitest run --passWithNoTests && pnpm --filter @fundamento/eroj exec playwright test --shard=${{ matrix.shard }}/4",
   ],
+  [ARTIFACT_STEP, undefined],
 ];
 
 // Nachlese 5 ① (D-04): the rendered checks ran 7:52 to 8:34 in one job – axe over the Eroj alone
@@ -116,10 +198,12 @@ const EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
 // shards (fullyParallel: one engine per shard on main). The argument goes to Playwright without a
 // `--`: pnpm passes a `--` on, and Playwright takes `--shard` after it for a file filter.
 /** The job of the rendered accessibility of the Eroj: axe, keyboard and focus ring, one shard. */
-const ALIREBLECO_EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
+const ALIREBLECO_EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
   ["Playwright browsers", PLAYWRIGHT_BROWSERS],
-  ["Build", "pnpm build"],
+  [TURBO_CACHE_STEP, undefined],
+  ["Build", buildOf("alirebleco-eroj")],
   ["Check: Alirebleco (Eroj)", "pnpm check:alirebleco-eroj --shard=${{ matrix.shard }}/3"],
+  [ARTIFACT_STEP, undefined],
 ];
 
 // Spec 029 ①b (B-1b-6): the job of the Make Kit, the quickstart and the Vitrino ran 14:34 on a
@@ -134,34 +218,62 @@ const ALIREBLECO_EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string]>
 // the Make Kit and the quickstart stay here, and the Werkstatt and the rest of the Vitrino run in
 // parts (packages/eroj/test/vitrino-partoj.ts), a runner each.
 /** The job of the Make Kit and the quickstart. */
-const RENDERED_CHECK_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
+const RENDERED_CHECK_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
   ["Playwright browsers", PLAYWRIGHT_BROWSERS],
-  ["Build", "pnpm build"],
+  [TURBO_CACHE_STEP, undefined],
+  ["Build", buildOf("rendered-checks")],
   ["Check: Make Kit", "pnpm check:make-kit"],
   ["Check: Quickstart", "pnpm check:quickstart"],
+  [ARTIFACT_STEP, undefined],
 ];
 
 /** The job of the Werkstatt of the Vitrino, one part per runner. */
-const WERKSTATT_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
-  ["Playwright browsers", PLAYWRIGHT_BROWSERS],
-  ["Build", "pnpm build"],
+const WERKSTATT_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
+  ["Playwright browsers", PLAYWRIGHT_CHROMIUM],
+  [TURBO_CACHE_STEP, undefined],
+  ["Build", buildOf("werkstatt")],
   ["Check: Vitrino (Werkstatt)", "pnpm check:vitrino"],
+  [ARTIFACT_STEP, undefined],
 ];
 
 /** The job of the Vitrino without its Werkstatt, one part per runner. */
-const VITRINO_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
-  ["Playwright browsers", PLAYWRIGHT_BROWSERS],
-  ["Build", "pnpm build"],
+const VITRINO_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
+  ["Playwright browsers", PLAYWRIGHT_CHROMIUM],
+  [TURBO_CACHE_STEP, undefined],
+  ["Build", buildOf("vitrino")],
   ["Check: Vitrino", "pnpm check:vitrino"],
+  [ARTIFACT_STEP, undefined],
 ];
 
-/** The jobs that run the Vitrino in parts: its step, and the group of vitrino-partoj.ts. */
+// Spec 040 T-7 (AC-B6): the timing tests of the Vitrino – M5 and its Gegenproben with the
+// calibration, the Ableitung Gegenprobe, G5 and its Gegenprobe – left the Werkstatt for a job of
+// their own, the part `zeittests` of vitrino-partoj.ts. Red there does not block a pull request
+// (continue-on-error on pull_request) and no longer turns another part red; on main it blocks.
+/** The job of the timing tests of the Vitrino. */
+const ZEITTESTS_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
+  ["Playwright browsers", PLAYWRIGHT_CHROMIUM],
+  [TURBO_CACHE_STEP, undefined],
+  ["Build", buildOf("zeittests")],
+  ["Check: Vitrino (Zeittests)", "pnpm check:vitrino"],
+  [ARTIFACT_STEP, undefined],
+];
+
+/** Blocking on main, the nightly run and workflow_dispatch; not on a pull request. */
+const ZEITTESTS_CONTINUE_ON_ERROR = "${{ github.event_name == 'pull_request' }}";
+
+/**
+ * The jobs that run the Vitrino in parts: its step, and the group of vitrino-partoj.ts. A group of
+ * several parts is a matrix; a group of one part names it in the step.
+ */
 const VITRINO_JOBS: Readonly<Record<string, readonly [step: string, grupo: string]>> = {
   werkstatt: ["Check: Vitrino (Werkstatt)", "werkstatt"],
   vitrino: ["Check: Vitrino", "cetero"],
+  zeittests: ["Check: Vitrino (Zeittests)", "zeittests"],
 };
 
-const JOBS: Readonly<Record<string, ReadonlyArray<readonly [name: string, run: string]>>> = {
+const JOBS: Readonly<
+  Record<string, ReadonlyArray<readonly [name: string, run: string | undefined]>>
+> = {
   checks: CHECKS_STEPS,
   unit: UNIT_STEPS,
   projekcioj: PROJEKCIOJ_STEPS,
@@ -170,10 +282,58 @@ const JOBS: Readonly<Record<string, ReadonlyArray<readonly [name: string, run: s
   "rendered-checks": RENDERED_CHECK_STEPS,
   werkstatt: WERKSTATT_STEPS,
   vitrino: VITRINO_STEPS,
+  zeittests: ZEITTESTS_STEPS,
 };
 
-/** The jobs that drive a browser; each takes its engines from PLAYWRIGHT_ENGINES. */
-const RENDERED_JOBS = ["eroj", "alirebleco-eroj", "rendered-checks", "werkstatt", "vitrino"];
+/** The jobs that drive a browser in the engines of PLAYWRIGHT_ENGINES. */
+const RENDERED_JOBS = ["eroj", "alirebleco-eroj", "rendered-checks"];
+
+// Spec 040 T-6 (C-2, US-2): a pull request tests only the packages its change reaches. The job
+// betroffen decides it once (scripts/ci/betroffen.mjs, tested in betroffen.test.ts) and hands on
+// three outputs; every other job but the checks reads them. E-9: no job is skipped by an `if:` of
+// its own – a skipped job reports no check – so every step after the checkout carries the
+// condition, and one step "nicht betroffen" says why the job ends green without a test.
+const BETROFFEN = "betroffen";
+const BETROFFEN_SCRIPT = "scripts/ci/betroffen.mjs";
+const BETROFFEN_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
+  ["Affected packages", `node ${BETROFFEN_SCRIPT}`],
+];
+const BETROFFEN_OUTPUTS = {
+  pakete: "${{ steps.betroffen.outputs.pakete }}",
+  alle: "${{ steps.betroffen.outputs.alle }}",
+  engines: "${{ steps.betroffen.outputs.engines }}",
+};
+
+/** C-3: the package whose change a job tests (the checks are repo-wide and always run). */
+const JOB_PACKAGE: Readonly<Record<string, string>> = {
+  unit: "format('@fundamento/{0}', matrix.package)",
+  projekcioj: "'@fundamento/projekcioj'",
+  eroj: "'@fundamento/eroj'",
+  "alirebleco-eroj": "'@fundamento/eroj'",
+  "rendered-checks": "'@fundamento/eroj'",
+  werkstatt: "'@fundamento/eroj'",
+  vitrino: "'@fundamento/eroj'",
+  zeittests: "'@fundamento/eroj'",
+};
+
+/** C-2: the job's package is affected, or everything is. */
+function affected(job: string): string {
+  return `needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), ${JOB_PACKAGE[job]})`;
+}
+
+/** The one line of a job whose package no change reaches, in its log and its step summary. */
+const NICHT_BETROFFEN = "nicht betroffen";
+
+/** B-3 (V-8): the engines of a rendered job come from betroffen, by the changed paths. */
+const ENGINES_FROM_BETROFFEN = "${{ needs.betroffen.outputs.engines }}";
+
+/** betroffen.mjs, loaded when a test needs it (a missing script fails only that test). */
+async function loadBetroffen(): Promise<{
+  decide: (input: Record<string, unknown>) => { alle: boolean; engines: string; pakete: string[] };
+  FULL_EVENTS: readonly string[];
+}> {
+  return (await import(`${repoRoot}${BETROFFEN_SCRIPT}`)) as never;
+}
 
 /** The names of the jobs Spec 040 B-1 cut, as the checks of a pull request show them. */
 const JOB_NAMES: Readonly<Record<string, string>> = {
@@ -183,6 +343,7 @@ const JOB_NAMES: Readonly<Record<string, string>> = {
   "rendered-checks": "Rendered checks (Make Kit, Quickstart)",
   werkstatt: "Rendered checks (Vitrino-Werkstatt, part ${{ matrix.parto }})",
   vitrino: "Rendered checks (Vitrino, part ${{ matrix.parto }})",
+  zeittests: "Timing checks (M5, Gegenprobe, Ableitung, G5)",
 };
 
 interface Step {
@@ -241,13 +402,17 @@ function indexOfAction(steps: readonly Step[], action: string): number {
   return steps.findIndex((step) => usesAction(step, action));
 }
 
-/**
- * The parts of the Vitrino by group, from packages/eroj/test/vitrino-partoj.ts (Spec 040 B-1), in
- * the order of its table. The module has no imports, so it loads here as it is.
- */
+/** vitrino-partoj.ts (Spec 040 B-1): the module has no imports, so it loads here as it is. */
+async function loadVitrinoPartoj(): Promise<{
+  VITRINO_PARTOJ: unknown;
+  vitrinoAuswahl: (value: string | undefined) => { grep?: RegExp[]; grepInvert?: RegExp[] };
+}> {
+  return (await import(vitrinoPartojPath)) as never;
+}
+
+/** The parts of the Vitrino by group, in the order of the table of vitrino-partoj.ts. */
 async function loadVitrinoGrupoj(): Promise<Record<string, string[]>> {
-  const module: unknown = await import(vitrinoPartojPath);
-  const table = isRecord(module) ? module.VITRINO_PARTOJ : undefined;
+  const table = (await loadVitrinoPartoj()).VITRINO_PARTOJ;
   if (!isRecord(table)) throw new Error("vitrino-partoj.ts exports no VITRINO_PARTOJ table");
   const grupoj: Record<string, string[]> = {};
   for (const [parto, teil] of Object.entries(table)) {
@@ -256,6 +421,74 @@ async function loadVitrinoGrupoj(): Promise<Record<string, string[]>> {
     grupoj[grupo] = [...(grupoj[grupo] ?? []), parto];
   }
   return grupoj;
+}
+
+// Spec 040 T-8 (the integrated audit): the pins above name each job's steps one by one. This one
+// reads the workflow as it is and asks every job for the same shape, so a job added later – or one
+// edited by hand – cannot drop a rule the others keep: the limit of 15 minutes, the Turborepo cache
+// right before a filtered Build, the gate of betroffen in one form on every step, the reports as
+// the last step for seven days, and a matrix whose value makes the cache key and the artifact name
+// unique (the key reads matrix.package, matrix.shard or matrix.parto, else 'x' for every value).
+/** The matrix keys the cache key and the artifact name read. */
+const MATRIX_KEYS = ["package", "shard", "parto"];
+
+/**
+ * What a job breaks of the shape every job shares; empty when the workflow is consistent.
+ * `jobs` is the parsed `jobs` mapping of ci.yml.
+ */
+function jobShapeViolations(jobs: Record<string, Record<string, unknown>>): string[] {
+  const violations: string[] = [];
+  const gate =
+    /^needs\.betroffen\.outputs\.alle == 'true' \|\| contains\(fromJSON\(needs\.betroffen\.outputs\.pakete\), .+\)$/;
+  for (const [name, job] of Object.entries(jobs)) {
+    const fail = (rule: string) => violations.push(`${name}: ${rule}`);
+    const steps = (Array.isArray(job.steps) ? job.steps : []).filter(isRecord) as Array<
+      Step & { if?: unknown }
+    >;
+    if (job["timeout-minutes"] !== 15) fail("timeout-minutes is not 15");
+    const strategy = isRecord(job.strategy) ? job.strategy : undefined;
+    if (strategy !== undefined) {
+      const keys = isRecord(strategy.matrix) ? Object.keys(strategy.matrix) : [];
+      if (keys.length !== 1 || !MATRIX_KEYS.includes(keys[0] ?? "")) {
+        fail(`matrix key ${keys.join(", ")} is not one of ${MATRIX_KEYS.join(", ")}`);
+      }
+      if (strategy["fail-fast"] !== false) fail("fail-fast is not false");
+    }
+    if (name === BETROFFEN) continue;
+    const build = steps.findIndex((step) => step.name === "Build");
+    const run = steps[build]?.run;
+    if (build < 0 || typeof run !== "string" || !run.startsWith("pnpm turbo run build --filter=")) {
+      fail("Build is not a filtered turbo run build");
+    } else if (!run.endsWith(" --cache-dir=.turbo/cache")) {
+      fail("Build does not use .turbo/cache");
+    }
+    const cache = steps[build - 1];
+    if (cache?.name !== TURBO_CACHE_STEP || !usesAction(cache, "actions/cache")) {
+      fail("Turbo cache is not the step right before Build");
+    }
+    if (name === "checks") continue;
+    if (job.needs !== BETROFFEN) fail("needs is not betroffen");
+    const [, nicht, ...rest] = steps;
+    const ifOf = (step: (typeof steps)[number] | undefined) =>
+      typeof step?.if === "string" ? step.if : "";
+    const negated = ifOf(nicht).match(/^\$\{\{ !\((.+)\) \}\}$/)?.[1] ?? "";
+    if (nicht?.name !== NICHT_BETROFFEN || !gate.test(negated)) {
+      fail("nicht betroffen is not the second step, gated by the negated condition");
+      continue;
+    }
+    for (const step of rest) {
+      const expected =
+        step.name === ARTIFACT_STEP ? `\${{ always() && (${negated}) }}` : `\${{ ${negated} }}`;
+      if (ifOf(step) !== expected) fail(`step ${String(step.name)} has another gate`);
+    }
+    const last = steps.at(-1);
+    if (last?.name !== ARTIFACT_STEP || !usesAction(last, "actions/upload-artifact")) {
+      fail("Testberichte is not the last step");
+    } else if (withOf(last)["retention-days"] !== 7) {
+      fail("Testberichte keeps the reports for other than 7 retention-days");
+    }
+  }
+  return violations;
 }
 
 describe("CI workflow (.github/workflows/ci.yml)", () => {
@@ -277,13 +510,18 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     expect(loadJob()["runs-on"]).toBe("ubuntu-latest");
   });
 
-  it("pins every action to a major version", () => {
-    const actions = loadSteps()
-      .map((step) => step.uses)
-      .filter((uses): uses is string => typeof uses === "string");
-    expect(actions.length).toBeGreaterThan(0);
-    for (const uses of actions) {
-      expect(uses).toMatch(/^[\w.-]+\/[\w.-]+@v\d+$/);
+  it("pins every action of every job to a major version", () => {
+    const jobs = Object.keys(loadJobs());
+    expect(jobs).toEqual([BETROFFEN, ...Object.keys(JOBS)]);
+    for (const job of jobs) {
+      const actions = loadSteps(job)
+        .map((step) => step.uses)
+        .filter((uses): uses is string => typeof uses === "string");
+      // betroffen: checkout, pnpm and Node; every other job also the cache.
+      expect(actions.length, job).toBeGreaterThan(job === BETROFFEN ? 2 : 3);
+      for (const uses of actions) {
+        expect(uses, job).toMatch(/^[\w.-]+\/[\w.-]+@v\d+$/);
+      }
     }
   });
 
@@ -317,9 +555,9 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     expect(installIndex).toBeGreaterThan(indexOfAction(steps, "actions/setup-node"));
   });
 
-  it("has the eight jobs checks, unit, projekcioj, eroj, alirebleco-eroj, rendered-checks, werkstatt and vitrino, each with its named steps in order after the install", () => {
-    expect(Object.keys(loadJobs())).toEqual(Object.keys(JOBS));
-    for (const [job, expected] of Object.entries(JOBS)) {
+  it("has the job betroffen and the nine jobs checks, unit, projekcioj, eroj, alirebleco-eroj, rendered-checks, werkstatt, vitrino and zeittests, each with its named steps in order after the install", () => {
+    expect(Object.keys(loadJobs())).toEqual([BETROFFEN, ...Object.keys(JOBS)]);
+    for (const [job, expected] of Object.entries({ [BETROFFEN]: BETROFFEN_STEPS, ...JOBS })) {
       const steps = loadSteps(job);
       const installIndex = steps.findIndex((step) => step.run === "pnpm install --frozen-lockfile");
       expect(installIndex, job).toBeGreaterThan(0);
@@ -343,7 +581,7 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     }
   });
 
-  it("shards the Playwright suite of the Eroj in four and the Vitest suite of the Projekcioj in two, without fail-fast, and gives only the five rendered jobs the engines", () => {
+  it("shards the Playwright suite of the Eroj in four and the Vitest suite of the Projekcioj in two, without fail-fast, and gives only the three multi-engine jobs the engines", () => {
     expect(loadJob("eroj").strategy).toEqual({
       "fail-fast": false,
       matrix: { shard: [1, 2, 3, 4] },
@@ -357,7 +595,7 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
       const env = loadJob(name).env;
       expect(isRecord(env) && typeof env.PLAYWRIGHT_ENGINES === "string", name).toBe(true);
     }
-    for (const name of ["checks", "unit", "projekcioj"]) {
+    for (const name of [BETROFFEN, "checks", "unit", "projekcioj", ...Object.keys(VITRINO_JOBS)]) {
       expect(loadJob(name).env, name).toBeUndefined();
     }
   });
@@ -394,19 +632,25 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
         .sort(),
     );
     for (const [job, [name, grupo]] of Object.entries(VITRINO_JOBS)) {
-      expect(loadJob(job).strategy, job).toEqual({
-        "fail-fast": false,
-        matrix: { parto: grupoj[grupo] },
-      });
+      const partoj = grupoj[grupo] ?? [];
+      const [sola] = partoj;
+      expect(loadJob(job).strategy, job).toEqual(
+        partoj.length === 1 ? undefined : { "fail-fast": false, matrix: { parto: partoj } },
+      );
       expect(loadJob(job)["timeout-minutes"], job).toBe(15);
       const step = loadSteps(job).find((candidate) => candidate.name === name) as
         | (Step & { env?: unknown })
         | undefined;
-      expect(step?.env, job).toEqual({ VITRINO_PARTO: "${{ matrix.parto }}" });
+      expect(step?.env, job).toEqual({
+        VITRINO_PARTO: partoj.length === 1 ? sola : "${{ matrix.parto }}",
+      });
     }
     // No other step chooses a part: locally and anywhere else the Vitrino runs whole.
     const chosen = Object.keys(loadJobs()).flatMap((job) =>
-      loadSteps(job).filter((step) => isRecord((step as { env?: unknown }).env)),
+      loadSteps(job).filter((step) => {
+        const env = (step as { env?: unknown }).env;
+        return isRecord(env) && "VITRINO_PARTO" in env;
+      }),
     );
     expect(chosen).toHaveLength(Object.keys(VITRINO_JOBS).length);
     for (const [job, name] of Object.entries(JOB_NAMES)) {
@@ -416,10 +660,390 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     expect(config).toContain("vitrinoAuswahl(process.env.VITRINO_PARTO)");
   });
 
+  it("runs the timing checks in a job of their own: blocking on main, not on a pull request (AC-B6)", () => {
+    const job = loadJob("zeittests");
+    expect(job.name).toBe(JOB_NAMES.zeittests);
+    expect(job["timeout-minutes"]).toBe(15);
+    expect(job["continue-on-error"]).toBe(ZEITTESTS_CONTINUE_ON_ERROR);
+    expect(job.needs).toBe(BETROFFEN);
+    expect(job.strategy).toBeUndefined();
+    // No other job may fail and pass at once.
+    for (const [name, other] of Object.entries(loadJobs())) {
+      if (name !== "zeittests") expect(other["continue-on-error"], name).toBeUndefined();
+    }
+  });
+
+  it("selects no timing test in any other part of the Werkstatt or the Vitrino", async () => {
+    const { VITRINO_PARTOJ, vitrinoAuswahl } = await loadVitrinoPartoj();
+    const teil = isRecord(VITRINO_PARTOJ) ? VITRINO_PARTOJ.zeittests : undefined;
+    const prefiksoj = isRecord(teil) && Array.isArray(teil.prefiksoj) ? teil.prefiksoj : [];
+    expect(prefiksoj.length).toBeGreaterThan(0);
+    // The title path Playwright greps (root, project, file, describes, title), joined by spaces.
+    const timing = prefiksoj.map(
+      (vojo: unknown) => ` chromium vitrino.check.ts ${Array.isArray(vojo) ? vojo.join(" ") : ""}`,
+    );
+    const selects = (value: string, title: string): boolean => {
+      const { grep = [/(?:)/], grepInvert = [] } = vitrinoAuswahl(value);
+      return grep.some((re) => re.test(title)) && !grepInvert.some((re) => re.test(title));
+    };
+    for (const title of timing) expect(selects("zeittests", title), title).toBe(true);
+    const values = Object.keys(loadJobs()).flatMap((job) => {
+      const strategy = loadJob(job).strategy;
+      const matrix = isRecord(strategy) && isRecord(strategy.matrix) ? strategy.matrix : {};
+      return Array.isArray(matrix.parto) ? matrix.parto.map(String) : [];
+    });
+    expect(values.length).toBeGreaterThan(0);
+    for (const value of values) {
+      for (const title of timing) expect(selects(value, title), `${value}: ${title}`).toBe(false);
+    }
+  });
+
+  it("restores and saves the Turborepo cache in every job right before its Build (Spec 040 T-5)", () => {
+    // betroffen builds nothing and caches nothing: it reads git and the graph of Turborepo.
+    expect(loadSteps(BETROFFEN).some((step) => step.name === "Build")).toBe(false);
+    expect(loadSteps(BETROFFEN).some((step) => usesAction(step, "actions/cache"))).toBe(false);
+    for (const job of Object.keys(JOBS)) {
+      const steps = loadSteps(job);
+      const build = steps.findIndex((step) => step.name === "Build");
+      expect(build, job).toBeGreaterThan(0);
+      const cache = steps[build - 1];
+      expect(cache?.name, job).toBe(TURBO_CACHE_STEP);
+      expect(cache?.uses, job).toBe(TURBO_CACHE_ACTION);
+      expect(cache?.uses, job).toMatch(/^actions\/cache@v\d+$/);
+      expect(cache && withOf(cache), job).toEqual({
+        path: ".turbo/cache",
+        key: `${TURBO_CACHE_PREFIX}\${{ github.sha }}`,
+        "restore-keys": `${TURBO_CACHE_PREFIX}\n`,
+      });
+      expect(
+        steps.filter((step) => usesAction(step, "actions/cache")),
+        job,
+      ).toHaveLength(1);
+    }
+  });
+
+  it("builds in no job with pnpm build: every Build is a filtered turbo run build through the cache (AC-B5)", () => {
+    for (const job of Object.keys(loadJobs())) {
+      const runs = loadSteps(job)
+        .map((step) => step.run)
+        .filter((run): run is string => typeof run === "string");
+      for (const run of runs) expect(run, job).not.toMatch(/\bpnpm\s+(?:run\s+)?build\b/);
+      if (job === BETROFFEN) continue;
+      const build = loadSteps(job).find((step) => step.name === "Build");
+      expect(build?.run, job).toBe(buildOf(job));
+    }
+    expect(Object.keys(BUILD_FILTERS)).toEqual(Object.keys(JOBS));
+  });
+
+  it("builds the CLI's closure where a step spawns the built fm, and @fundamento/eroj#test waits for it (A-4)", () => {
+    // The eroj specs (studio-035, zweitfarbe-036, metiejo*, buehne-036, form-036) and check:bazo
+    // start packages/cli/dist/index.js.
+    for (const job of ["eroj", "werkstatt", "vitrino", "zeittests"]) {
+      expect(BUILD_FILTERS[job], job).toBe("@fundamento/cli...");
+    }
+    const turbo: unknown = JSON.parse(readFileSync(`${repoRoot}turbo.json`, "utf8"));
+    const tasks = isRecord(turbo) && isRecord(turbo.tasks) ? turbo.tasks : {};
+    const eroj = tasks["@fundamento/eroj#test"];
+    expect(isRecord(eroj) ? eroj.dependsOn : undefined).toEqual(["build", "@fundamento/cli#build"]);
+  });
+
+  it("reads test results from the cache only on a pull request, and nothing from a remote cache", () => {
+    const test = loadSteps("unit").find((step) => step.name === "Test");
+    expect(test?.run).toContain(` ${TEST_CACHE}`);
+    const workflow = readFileSync(workflowPath, "utf8");
+    // The one cache mode of the workflow; builds read and write the local cache everywhere.
+    expect(workflow.match(/--cache=/g)).toHaveLength(1);
+    expect(workflow).not.toMatch(
+      /--force\b|TURBO_(?:TOKEN|TEAM|API|REMOTE)|--(?:token|team|api)\b/,
+    );
+  });
+
+  it("lets Vitest called directly skip building the whole workspace again after the job's Build", () => {
+    const direct = Object.keys(loadJobs()).flatMap((job) =>
+      loadSteps(job)
+        .filter((step) => typeof step.run === "string" && /exec vitest run/.test(step.run))
+        .map((step) => [job, step] as const),
+    );
+    expect(direct.map(([job]) => job)).toEqual(["projekcioj", "eroj"]);
+    for (const [job, step] of direct) {
+      expect((step as { env?: unknown }).env, job).toEqual(GEBAUT);
+    }
+    for (const pkg of ["projekcioj", "eroj"]) {
+      const config = readFileSync(`${repoRoot}packages/${pkg}/vitest.config.ts`, "utf8");
+      expect(config, pkg).toContain(
+        "process.env.TURBO_HASH === undefined && process.env.FM_GEBAUT === undefined",
+      );
+    }
+  });
+
+  it("runs every test on main, at night and on workflow_dispatch", async () => {
+    const on = loadWorkflow().on;
+    expect(isRecord(on) && on.push).toEqual({ branches: ["main"] });
+    expect(isRecord(on) && Array.isArray(on.schedule) && on.schedule.length).toBe(1);
+    expect(isRecord(on) && "workflow_dispatch" in on).toBe(true);
+    // betroffen decides from the event itself: these three events test every package in every
+    // engine, whatever changed (AC-B4).
+    const betroffen = loadSteps(BETROFFEN).find((step) => step.name === "Affected packages");
+    expect(betroffen?.run).toBe(`node ${BETROFFEN_SCRIPT}`);
+    const { decide, FULL_EVENTS } = await loadBetroffen();
+    expect([...FULL_EVENTS].sort()).toEqual(["push", "schedule", "workflow_dispatch"]);
+    for (const event of FULL_EVENTS) {
+      const decision = decide({ event, base: "abc", changed: ["packages/metiejo/src/a.ts"] });
+      expect(decision, event).toMatchObject({ alle: true, engines: "chromium firefox webkit" });
+    }
+    // Every gated step runs when alle is true, before it looks at the packages.
+    for (const job of Object.keys(JOB_PACKAGE)) {
+      expect(affected(job), job).toMatch(/^needs\.betroffen\.outputs\.alle == 'true' \|\| /);
+    }
+    // And the unit tests read no result from the cache there (T-5).
+    expect(TEST_CACHE).toContain("'local:w'");
+  });
+
+  it("a pull request tests only the affected packages, every job stays as a check", () => {
+    const jobs = loadJobs();
+    // The job betroffen: the whole history (the merge base with the base branch), no secret, the
+    // three outputs of C-2 from its step.
+    const betroffen = loadJob(BETROFFEN);
+    expect(betroffen.needs).toBeUndefined();
+    expect(betroffen["timeout-minutes"]).toBe(15);
+    expect(betroffen.outputs).toEqual(BETROFFEN_OUTPUTS);
+    const steps = loadSteps(BETROFFEN);
+    const checkout = steps[indexOfAction(steps, "actions/checkout")];
+    expect(checkout && withOf(checkout)).toEqual({
+      "fetch-depth": 0,
+      "persist-credentials": false,
+    });
+    expect(
+      (steps.find((step) => step.run === `node ${BETROFFEN_SCRIPT}`) as { id?: unknown })?.id,
+    ).toBe(BETROFFEN);
+    // The checks are repo-wide (the Modelo checks read every package): they always run, ungated.
+    expect(jobs.checks?.needs).toBeUndefined();
+    expect(loadSteps("checks").filter((step) => "if" in step)).toEqual([]);
+    expect(Object.keys(JOB_PACKAGE)).toEqual(Object.keys(JOBS).filter((job) => job !== "checks"));
+    for (const [name, job] of Object.entries(jobs)) {
+      // E-9: no job-level if – a skipped job would report no check.
+      expect(job.if, name).toBeUndefined();
+    }
+    for (const job of Object.keys(JOB_PACKAGE)) {
+      expect(jobs[job]?.needs, job).toBe(BETROFFEN);
+      const jobSteps = loadSteps(job) as Array<Step & { if?: unknown }>;
+      // The checkout first, ungated; then the one step that says why nothing runs.
+      expect(indexOfAction(jobSteps, "actions/checkout"), job).toBe(0);
+      expect(jobSteps[0]?.if, job).toBeUndefined();
+      const [, nicht, ...rest] = jobSteps;
+      expect(nicht?.name, job).toBe(NICHT_BETROFFEN);
+      expect(nicht?.if, job).toBe(`\${{ !(${affected(job)}) }}`);
+      expect(nicht?.run, job).toMatch(
+        /^echo "nicht betroffen: .+" \| tee -a "\$GITHUB_STEP_SUMMARY"$/,
+      );
+      // Every other step – toolchain, install, browsers, cache, build, test – only when affected;
+      // the reports after a red step too (T-7).
+      expect(rest.length, job).toBeGreaterThan(4);
+      for (const step of rest) {
+        expect(step.if, `${job}: ${String(step.name)}`).toBe(
+          step.name === ARTIFACT_STEP
+            ? `\${{ always() && (${affected(job)}) }}`
+            : `\${{ ${affected(job)} }}`,
+        );
+      }
+    }
+  });
+
+  it("the engines follow the changed paths on a pull request", async () => {
+    for (const job of RENDERED_JOBS) {
+      expect(loadJob(job).env, job).toEqual({ PLAYWRIGHT_ENGINES: ENGINES_FROM_BETROFFEN });
+      expect(loadJob(job).needs, job).toBe(BETROFFEN);
+      // Only the engines the run uses are installed (Spec 025 ③).
+      const install = loadSteps(job).find((step) => step.name === "Playwright browsers");
+      expect(install?.run, job).toBe(PLAYWRIGHT_BROWSERS);
+    }
+    // D-19: the Vitrino jobs install Chromium alone – the one engine their config runs, the first
+    // project of the shared config whatever PLAYWRIGHT_ENGINES names.
+    for (const job of Object.keys(VITRINO_JOBS)) {
+      const install = loadSteps(job).find((step) => step.name === "Playwright browsers");
+      expect(install?.run, job).toBe(PLAYWRIGHT_CHROMIUM);
+    }
+    const vitrino = readFileSync(`${repoRoot}packages/eroj/playwright.vitrino.config.ts`, "utf8");
+    expect(vitrino).toContain('projects: [base.projects?.[0] ?? { name: "chromium" }]');
+    const shared = readFileSync(`${repoRoot}packages/eroj/playwright.config.ts`, "utf8");
+    expect(shared).toMatch(/const ENGINES = \[\s*\{ name: "chromium",/);
+    // The old rule (three engines on main, Chromium on every pull request) is gone.
+    expect(readFileSync(workflowPath, "utf8")).not.toMatch(/github\.ref == 'refs\/heads\/main'/);
+    // B-3 (V-8): a pull request into the rendered Eroj, the projections, the values or a
+    // Playwright config runs Firefox and WebKit too; any other stays in Chromium.
+    const { decide } = await loadBetroffen();
+    const engines = (file: string) =>
+      decide({ event: "pull_request", base: "abc", changed: [file] }).engines;
+    expect(engines("packages/eroj/src/butono.tsx")).toBe("chromium firefox webkit");
+    expect(engines("packages/projekcioj/src/index.ts")).toBe("chromium firefox webkit");
+    expect(engines("packages/vortaro/sets/core.json")).toBe("chromium firefox webkit");
+    expect(engines("packages/aspekto-komuna/aspekto.json")).toBe("chromium firefox webkit");
+    expect(engines("packages/eroj/playwright.vitrino.config.ts")).toBe("chromium firefox webkit");
+    expect(engines("packages/metiejo/src/ident.ts")).toBe("chromium");
+  });
+
+  it("every test job uploads its full log as an artifact and prints only failures (Spec 040 T-7, AC-B10)", () => {
+    expect(loadWorkflow().env).toMatchObject(AUSGABE);
+    const testJobs = Object.keys(JOB_PACKAGE);
+    expect(testJobs).toEqual(Object.keys(JOBS).filter((job) => job !== "checks"));
+    for (const job of Object.keys(loadJobs())) {
+      const steps = loadSteps(job) as Array<Step & { if?: unknown }>;
+      const uploads = steps.filter((step) => usesAction(step, "actions/upload-artifact"));
+      if (!testJobs.includes(job)) {
+        expect(uploads, job).toEqual([]);
+        continue;
+      }
+      // One upload, the last step, pinned to its major (v7.0.2 is the latest on 2026-11-04).
+      expect(uploads, job).toHaveLength(1);
+      const upload = steps.at(-1);
+      expect(upload?.name, job).toBe(ARTIFACT_STEP);
+      expect(upload?.uses, job).toBe(ARTIFACT_ACTION);
+      expect(upload?.if, job).toBe(`\${{ always() && (${affected(job)}) }}`);
+      expect(upload && withOf(upload), job).toEqual(ARTIFACT_WITH);
+    }
+    // Unique per job: github.job differs, the matrix value and the attempt follow it.
+    expect(ARTIFACT_WITH.name).toContain("${{ github.job }}-${{ matrix.package || matrix.shard");
+    expect(ARTIFACT_WITH.name).toMatch(/\$\{\{ github\.run_attempt \}\}$/);
+    // Turborepo shows only the logs of failed tasks where it runs tests.
+    const turboTests = Object.keys(loadJobs()).flatMap((job) =>
+      loadSteps(job)
+        .map((step) => step.run)
+        .filter((run): run is string => typeof run === "string" && /turbo run test\b/.test(run)),
+    );
+    expect(turboTests.length).toBeGreaterThan(0);
+    for (const run of turboTests) expect(run).toContain(` ${OUTPUT_LOGS}`);
+    // The variable reaches the test tasks (strict env mode): the hash of each covers it, so a
+    // cached log replays in the form it was asked for.
+    const turbo: unknown = JSON.parse(readFileSync(`${repoRoot}turbo.json`, "utf8"));
+    const tasks = isRecord(turbo) && isRecord(turbo.tasks) ? turbo.tasks : {};
+    const testTasks = Object.entries(tasks).filter(
+      ([name]) => name === "test" || name.endsWith("#test"),
+    );
+    expect(testTasks.length).toBeGreaterThan(1);
+    for (const [name, task] of testTasks) {
+      const env = isRecord(task) && Array.isArray(task.env) ? task.env : [];
+      expect(env, name).toContain("FM_AUSGABE");
+    }
+    // The reports stay out of git and out of the hash of every package (TURBO_DEFAULT).
+    expect(readFileSync(`${repoRoot}.gitignore`, "utf8").split("\n")).toContain("test-reports/");
+  });
+
   it("keeps every job under a 15-minute budget (the wall clock stays under 12)", () => {
     for (const [name, job] of Object.entries(loadJobs())) {
       expect(job["timeout-minutes"], name).toBeLessThanOrEqual(15);
     }
+  });
+
+  it("every job has the same shape: 15 minutes, the cache before a filtered Build, one gate on every step, the reports last for seven days (Spec 040 T-8)", () => {
+    const jobs = loadJobs();
+    expect(jobShapeViolations(jobs)).toEqual([]);
+    // Each rule turns red on its own when one job breaks it (a copy of the real workflow).
+    const broken = (
+      job: string,
+      change: (job: Record<string, unknown>, steps: Array<Record<string, unknown>>) => void,
+    ): string[] => {
+      const copy = structuredClone(jobs);
+      const target = copy[job] ?? {};
+      change(target, Array.isArray(target.steps) ? target.steps : []);
+      return jobShapeViolations(copy);
+    };
+    const named = (steps: Array<Record<string, unknown>>, name: string) =>
+      steps.find((step) => step.name === name) ?? {};
+    const cases: ReadonlyArray<readonly [job: string, rule: RegExp, violations: string[]]> = [
+      [
+        "vitrino",
+        /timeout-minutes/,
+        broken("vitrino", (job) => {
+          job["timeout-minutes"] = 20;
+        }),
+      ],
+      [
+        "checks",
+        /timeout-minutes/,
+        broken("checks", (job) => {
+          delete job["timeout-minutes"];
+        }),
+      ],
+      [
+        "unit",
+        /Turbo cache/,
+        broken("unit", (_, steps) => {
+          steps.splice(steps.indexOf(named(steps, TURBO_CACHE_STEP)), 1);
+        }),
+      ],
+      [
+        "eroj",
+        /Build/,
+        broken("eroj", (_, steps) => {
+          named(steps, "Build").run = "pnpm build";
+        }),
+      ],
+      [
+        "werkstatt",
+        /nicht betroffen/,
+        broken("werkstatt", (_, steps) => {
+          named(steps, NICHT_BETROFFEN).if = `\${{ needs.betroffen.outputs.alle != 'true' }}`;
+        }),
+      ],
+      [
+        "zeittests",
+        /gate/,
+        broken("zeittests", (_, steps) => {
+          named(steps, "Build").if = `\${{ always() }}`;
+        }),
+      ],
+      [
+        "projekcioj",
+        /gate/,
+        broken("projekcioj", (_, steps) => {
+          delete named(steps, "Test").if;
+        }),
+      ],
+      [
+        "alirebleco-eroj",
+        /retention-days/,
+        broken("alirebleco-eroj", (_, steps) => {
+          const upload = named(steps, ARTIFACT_STEP);
+          upload.with = { ...withOf(upload), "retention-days": 30 };
+        }),
+      ],
+      [
+        "rendered-checks",
+        /last step/,
+        broken("rendered-checks", (_, steps) => {
+          steps.push({ name: "Danach", if: named(steps, "Build").if, run: "true" });
+        }),
+      ],
+      [
+        "eroj",
+        /matrix/,
+        broken("eroj", (job) => {
+          job.strategy = { "fail-fast": false, matrix: { engine: ["chromium", "webkit"] } };
+        }),
+      ],
+      [
+        "unit",
+        /fail-fast/,
+        broken("unit", (job) => {
+          job.strategy = { matrix: isRecord(job.strategy) ? job.strategy.matrix : {} };
+        }),
+      ],
+      [
+        "vitrino",
+        /needs/,
+        broken("vitrino", (job) => {
+          delete job.needs;
+        }),
+      ],
+    ];
+    for (const [job, rule, violations] of cases) {
+      expect(violations, `${job} ${String(rule)}`).toHaveLength(1);
+      expect(violations[0], `${job} ${String(rule)}`).toMatch(new RegExp(`^${job}: `));
+      expect(violations[0], `${job} ${String(rule)}`).toMatch(rule);
+    }
+    // The audit covers every job of the workflow, not a list of its own.
+    expect(Object.keys(jobs)).toEqual([BETROFFEN, ...Object.keys(JOBS)]);
+    expect(MATRIX_KEYS.every((key) => TURBO_CACHE_PREFIX.includes(`matrix.${key}`))).toBe(true);
   });
 
   it("has one check step for every registered check", () => {

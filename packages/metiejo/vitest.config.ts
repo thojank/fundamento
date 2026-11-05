@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
+import { vitestAusgabe } from "../../scripts/reporter/knapp-vitest.mjs";
 
 // Outside `turbo run test` the tests would run against whatever `dist` lies around: the tests of
 // the command line (kontrolo-cli) and the server (the built Eroj) need this package and its
@@ -17,6 +18,8 @@ if (process.env.TURBO_HASH === undefined) {
 // biome-ignore lint/style/noDefaultExport: Vitest loads its config from the default export.
 export default defineConfig({
   test: {
+    // Spec 040 T-7 (C-4): terse with FM_AUSGABE=knapp; JUnit in test-reports/vitest/ always.
+    ...vitestAusgabe("vitest", configDefaults.reporters),
     testTimeout: 120_000,
     hookTimeout: 120_000,
     // The files of this package derive, build projections and run a server; side by side they

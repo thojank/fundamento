@@ -16,6 +16,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type APIRequestContext, expect, type Page, test } from "@playwright/test";
 import { axeViolations } from "./alirebleco.js";
+import { nachDerAbfrage } from "./wackler-040.js";
 
 const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
 const cli = join(repoRoot, "packages/cli/dist/index.js");
@@ -459,7 +460,10 @@ test.describe("Bühne (Spec 036, Befund 3.4)", () => {
       { farbe: "rgb(244, 244, 242)", name: "Farbfläche #f4f4f2", text: "#f4f4f2 Anteil 80 %" },
       { farbe: "rgb(15, 118, 110)", name: "Farbfläche #0f766e", text: "#0f766e Anteil 20 %" },
     ]);
-    // Closing the dialog: the proposal stands on the stage, right first.
+    // Closing the dialog: the proposal stands on the stage, right first. Closing after a reading
+    // reloads the screen: close right after the page's poll of the draft answered, not while one is
+    // under way – the reload would cut it short (Spec 040 B-8).
+    await nachDerAbfrage(page, id);
     await dialog.getByRole("button", { name: "Schließen" }).click();
     await expect(page.locator("[data-mt-buehne]")).toHaveAttribute("data-mt-bereit", "");
     await expect(page.locator("[data-mt-propono]")).toBeVisible();

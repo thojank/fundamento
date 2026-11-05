@@ -1,4 +1,5 @@
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
+import { vitestAusgabe } from "../../scripts/reporter/knapp-vitest.mjs";
 
 // check:bazo (Spec 004 T012): the snapshot comparison alone. It takes a measurement of all 72
 // combinations through the CLI and builds the projections three times — 106 s on the CI runner,
@@ -7,6 +8,8 @@ import { defineConfig } from "vitest/config";
 // biome-ignore lint/style/noDefaultExport: Vitest loads its config from the default export.
 export default defineConfig({
   test: {
+    // Spec 040 T-7 (C-4): terse with FM_AUSGABE=knapp; JUnit in test-reports/vitest-bazo/ always.
+    ...vitestAusgabe("vitest-bazo", configDefaults.reporters),
     include: ["src/celoj/vitrino/bazo.test.ts"],
     testTimeout: 240_000,
   },

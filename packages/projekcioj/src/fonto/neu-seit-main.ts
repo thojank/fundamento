@@ -1,6 +1,7 @@
 // Spec 029 ②b: the tokens added since the records of main (komuna-main.json, marken-main.json),
 // one entry per step. The comparisons with main stay strict for every token main had – each keeps
-// its value – and take the added ones out of the hash; their number is checked on its own.
+// its value – and take the added ones out of the hash; each added one is justified in exactly one
+// list, their number derived from the rows (Spec 040 B-4, addedRows).
 
 /** ②b-1 M-5: the spinner of the twelve fields (size, colour, room beside the label). */
 const SPINNER = /^ero\.[a-z]+\.spinner\.(size|color|inline\.padding)$/;
@@ -61,14 +62,6 @@ export const addedSinceMain = (name: string): boolean =>
   MULTILINE.test(name) ||
   SEKUNDO.test(name);
 
-/**
- * How many tokens ②b added so far (M-5: 12 fields × 3; M-6 with Abnahme #122: 11; M-1: 4; the
- * targets of Abnahme #122: 6; M-2: 216), and Spec 035 2.3 (the targets of the date picker's
- * trigger and ✕: 2), Spec 036 Befund 1.1 (radius.role.multiline: 1), and Spec 036 Befund 2.2 (the
- * Zweitfarbe: 12 steps and 5 roles, 17; B-6.2-1).
- */
-export const ADDED_SINCE_MAIN = 293;
-
 /** ②b-1 M-1: tokens main had under another name; each keeps main's value. */
 const MOVED: Readonly<Record<string, string>> = {
   "ero.faldilo.summary.color.rest": "ero.faldilo.summary.color",
@@ -101,19 +94,18 @@ const CHANGED: Readonly<Record<string, string>> = {
 };
 
 /**
- * Spec 036 Teil 5 ②b-2, the other Eroj (S36-4.2): per row group the tokens it added (`added`, a
- * pattern and their number) and the tokens main had that a new axis keys now (`moved`: new name →
+ * Spec 036 Teil 5 ②b-2, the other Eroj (S36-4.2): per row group the tokens it added (a pattern;
+ * their number in its comment) and the tokens main had that a new axis keys now (`moved`: new name →
  * main's name; each keeps main's value, the default value of the axis carries it).
  */
 const REST_2B2 = (() => {
-  const groups: { pattern: string; added: number; moved: Record<string, string> }[] = [
+  const groups: { pattern: string; moved: Record<string, string> }[] = [
     // A-ikono-2 (x-small: 1), A-signeto-2 (large: 2), A-avataro-2 (x-small and x-large of the box
     // and the initials: 4), A-pagxigilo-2 (small of five: 5), A-langetaro-2 (small and large of
     // three: 6), A-dialogo-2 (full: the width and the radius; the radius of medium: 3).
     {
       pattern:
         "^ero\\.ikono\\.box\\.size\\.size\\.x\\.small$|^ero\\.signeto\\.box\\.(height|inline\\.padding)\\.size\\.large$|^ero\\.avataro\\.(box\\.size|initials\\.typography)\\.size\\.x\\.(small|large)$|^ero\\.pagxigilo\\.(item\\.typography|item\\.inline\\.padding|ellipsis\\.typography|prev\\.size|next\\.size)\\.size\\.small$|^ero\\.langetaro\\.(tab\\.height|tab\\.inline\\.padding|tabs\\.typography)\\.size\\.(small|large)$|^ero\\.dialogo\\.surface\\.(width\\.size\\.full|radius\\.size\\.(medium|full))$",
-      added: 1 + 2 + 4 + 5 + 6 + 3,
       moved: {
         ...Object.fromEntries(
           [
@@ -136,7 +128,6 @@ const REST_2B2 = (() => {
     {
       pattern:
         "^ero\\.apartigilo\\.line\\.(color|width)\\.emphasis\\.high$|^ero\\.avataro\\.(image|initials)\\.radius\\.corner\\.(soft|square)$|^ero\\.avizo\\.box\\.radius\\.frame\\.band$|^ero\\.karto\\.surface\\.fill\\.emphasis\\.medium$|^ero\\.spuro\\.item\\.color\\.emphasis\\.low\\.",
-      added: 2 + 4 + 1 + 1 + 6,
       moved: {
         "ero.apartigilo.line.color.emphasis.low": "ero.apartigilo.line.color",
         "ero.apartigilo.line.width.emphasis.low": "ero.apartigilo.line.width",
@@ -160,7 +151,6 @@ const REST_2B2 = (() => {
     {
       pattern:
         "^ero\\.markdovido\\.box\\.gap\\.density\\.compact$|^ero\\.plenstato\\.(box\\.inline\\.padding|text\\.typography)\\.compact\\.true$|^ero\\.tabelo\\.cell\\.(inline\\.padding|height)\\.density\\.default$|^ero\\.teksto\\.text\\.typography\\.kind\\.label\\.size\\.1$",
-      added: 1 + 2 + 2 + 1,
       moved: {
         "ero.markdovido.box.gap.density.default": "ero.markdovido.box.gap",
         "ero.plenstato.box.inline.padding.compact.false": "ero.plenstato.box.inline.padding",
@@ -170,45 +160,44 @@ const REST_2B2 = (() => {
     // A-pagxigilo-1 (the part summary: its colour and its typography by size, 3).
     {
       pattern: "^ero\\.pagxigilo\\.summary\\.(color|typography\\.size\\.(small|medium))$",
-      added: 3,
       moved: {},
     },
     // A-atributlisto-1 (the button for the rest: its fill, colour and typography, 3).
     {
       pattern: "^ero\\.atributlisto\\.more\\.(fill|color|typography)$",
-      added: 3,
       moved: {},
     },
     // A-glitilo-1 (the value as text: its colour and typography, 2).
-    { pattern: "^ero\\.glitilo\\.readout\\.(color|typography)$", added: 2, moved: {} },
+    { pattern: "^ero\\.glitilo\\.readout\\.(color|typography)$", moved: {} },
   ];
   const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
   return {
+    /** Spec 040 B-4: each row group a list of its own, named by its place. */
+    lists: groups.map(
+      (group, index) => [`REST_2B2 #${index + 1}`, new RegExp(group.pattern)] as const,
+    ),
     test: (name: string) => pattern.test(name),
-    added: groups.reduce((sum, group) => sum + group.added, 0),
     moved: Object.assign({}, ...groups.map((group) => group.moved)) as Record<string, string>,
   };
 })();
 
 /**
  * Spec 036 Teil 5 ②b-3 (Spec 029 abgleich.json, aspect "anatomie"; S36-4.3): per row group the
- * tokens of the new parts (a pattern and their number); none of main's tokens moved.
+ * tokens of the new parts (a pattern; their number in its comment); none of main's tokens moved.
  */
 const REST_2B3 = (() => {
-  const groups: { pattern: string; added: number }[] = [
+  const groups: { pattern: string }[] = [
     // A-markobutono-4, A-sxaltilo-4 (the help: its colour and typography, 2 × 2), A-elekto-4 (the
     // description of an option: its colour and typography, 2).
     {
       pattern:
         "^ero\\.(markobutono|sxaltilo)\\.help\\.(color|typography)$|^ero\\.elekto\\.option\\.description\\.(color|typography)$",
-      added: 4 + 2,
     },
     // A-glitilo-4 (the tick: its colour, width and height, 3), A-alsxutilo-4 (the upload icon: its
     // size and colour, 2).
     {
       pattern:
         "^ero\\.glitilo\\.tick\\.(color|width|height)$|^ero\\.alsxutilo\\.icon\\.(size|color)$",
-      added: 3 + 2,
     },
     // A-elektilo-4 (the heading of a group: colour and typography, 2), A-listelektilo-4,
     // A-kompletigilo-4, A-plurelektilo-4 (the heading with its room, 3 × 3), A-listelektilo-4 (the
@@ -217,26 +206,22 @@ const REST_2B3 = (() => {
     {
       pattern:
         "^ero\\.elektilo\\.group\\.heading\\.(color|typography)$|^ero\\.(listelektilo|kompletigilo|plurelektilo)\\.group\\.heading\\.(color|typography|inline\\.padding)$|^ero\\.listelektilo\\.divider\\.(color|width)$|^ero\\.plurelektilo\\.select\\.all\\.(color|typography|height|inline\\.padding)$",
-      added: 2 + 9 + 2 + 4,
     },
     // A-menuo-4 (the gap of a row for its icon, 1; the icon's size, 1; the heading of a group, 3).
     {
       pattern:
         "^ero\\.menuo\\.(item\\.gap|icon\\.size|group\\.heading\\.(color|typography|inline\\.padding))$",
-      added: 1 + 1 + 3,
     },
     // A-navigado-1, A-navigado-4 (the gap of an item for its icon, 1; the heading of a section, 3;
     // the icon's size, 1).
     {
       pattern:
         "^ero\\.navigado\\.(item\\.gap|icon\\.size|section\\.heading\\.(color|typography|inline\\.padding))$",
-      added: 1 + 3 + 1,
     },
     // S36-4.4 A-insigno-4 (the gap between icon and words, 1), A-spuro-4 (the gap of an item for
     // its icon, 1; the icon's size, 1).
     {
       pattern: "^ero\\.insigno\\.box\\.gap$|^ero\\.spuro\\.(item\\.gap|icon\\.size)$",
-      added: 1 + 2,
     },
     // S36-4.4 A-atributlisto-4 (the title: colour and typography, 2), A-plenstato-4 (the title, 2;
     // the icon: size and colour, 2), A-tabelo-4 (the foot: fill, colour, typography, 3),
@@ -244,45 +229,48 @@ const REST_2B3 = (() => {
     {
       pattern:
         "^ero\\.(atributlisto|plenstato)\\.heading\\.(color|typography)$|^ero\\.plenstato\\.icon\\.(size|color)$|^ero\\.tabelo\\.foot\\.(fill|color|typography)$|^ero\\.sxvebilo\\.close\\.size$",
-      added: 2 + 2 + 2 + 3 + 1,
     },
     // S36-4.4 A-avataro-4 (the default icon: its size by size, 5, and its colour, 1), A-pagxigilo-4
     // (first and last: their size by size, 2 × 2).
     {
       pattern:
         "^ero\\.avataro\\.icon\\.(color|size\\.size\\.(x\\.small|small|medium|large|x\\.large))$|^ero\\.pagxigilo\\.(first|last)\\.size\\.size\\.(small|medium)$",
-      added: 5 + 1 + 4,
     },
   ];
   const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
   return {
+    /** Spec 040 B-4: each row group a list of its own, named by its place. */
+    lists: groups.map(
+      (group, index) => [`REST_2B3 #${index + 1}`, new RegExp(group.pattern)] as const,
+    ),
     test: (name: string) => pattern.test(name),
-    added: groups.reduce((sum, group) => sum + group.added, 0),
   };
 })();
 
 /**
  * Spec 036 Teil 5 ②b-5 (Spec 029 abgleich.json A-signeto-6, A-kodbloko-1/4/6, ①-2): the tokens
- * added after main's record – the radius role of a tag – as a pattern and their number.
+ * added after main's record – the radius role of a tag – as a pattern, their number in its comment.
  */
 const REST_2B5 = (() => {
-  const groups: { pattern: string; added: number }[] = [
+  const groups: { pattern: string }[] = [
     // A-signeto-6: the radius role of a tag a person picks or removes (1).
-    { pattern: "^radius\\.role\\.tag$", added: 1 },
+    { pattern: "^radius\\.role\\.tag$" },
     // ①-2: the syntax colours, five kinds (5).
-    { pattern: "^color\\.syntax\\.(keyword|name|string|number|comment)$", added: 5 },
+    { pattern: "^color\\.syntax\\.(keyword|name|string|number|comment)$" },
     // A-kodbloko-1/4/6: the line number (colour, room after it, 2), a highlighted line (fill, mark
     // colour and width, 3), the language (typography, colour, 2), the words by kind (5).
     {
       pattern:
         "^ero\\.kodbloko\\.(line\\.number\\.(color|gap)|highlight\\.(fill|color|width)|language\\.(typography|color)|(keyword|name|string|number|comment)\\.color)$",
-      added: 2 + 3 + 2 + 5,
     },
   ];
   const pattern = new RegExp(groups.map((group) => group.pattern).join("|"));
   return {
+    /** Spec 040 B-4: each row group a list of its own, named by its place. */
+    lists: groups.map(
+      (group, index) => [`REST_2B5 #${index + 1}`, new RegExp(group.pattern)] as const,
+    ),
     test: (name: string) => pattern.test(name),
-    added: groups.reduce((sum, group) => sum + group.added, 0),
   };
 })();
 
@@ -296,21 +284,14 @@ const ACHSEN_2B2 =
   /^ero\.tekstareo\.count\.(color|typography)$|^ero\.kampo\.unit\.(color|typography\.size\.(small|medium|large))$|^ero\.(listelektilo|plurelektilo|datelektilo)\.(label\.typography|text\.typography|box\.height|box\.inline\.padding|indicator\.size|clear\.size|trigger\.size)\.size\.(small|large)$/;
 
 /**
- * How many tokens ②b-2 added, counted beside ADDED_SINCE_MAIN (A-tekstareo-1: 2; A-listelektilo-2:
- * 6 × 2, A-plurelektilo-2: 5 × 2, A-datelektilo-2: 6 × 2; A-kampo-1: the unit's colour and its
- * typography by size, 4).
- */
-export const ADDED_BY_2B2 = 2 + 12 + 10 + 12 + 4 + REST_2B2.added + REST_2B3.added + REST_2B5.added;
-
-/**
  * The ✕ of listelektilo and datelektilo came after main (②b-1 M-6, CLEAR); ②b-2 keys it by size,
  * so its size medium is that token: still none of main's.
  */
 const CLEAR_2B2 = /^ero\.(listelektilo|datelektilo)\.clear\.size\.size\.medium$/;
 
 /**
- * Whether a token was added by ②b-2 after main's record – or by ②b-3, stacked on it (REST_2B3,
- * counted in ADDED_BY_2B2 as well).
+ * Whether a token was added by ②b-2 after main's record – or by ②b-3 and ②b-5, stacked on it
+ * (REST_2B3, REST_2B5).
  */
 export const addedBy2b2 = (name: string): boolean =>
   ACHSEN_2B2.test(name) ||
@@ -318,6 +299,53 @@ export const addedBy2b2 = (name: string): boolean =>
   REST_2B2.test(name) ||
   REST_2B3.test(name) ||
   REST_2B5.test(name);
+
+/**
+ * Spec 040 B-4: every list that justifies a token added after main's record, by name – the
+ * patterns of ②b and each row group of ②b-2, ②b-3 and ②b-5. Together they are addedSinceMain and
+ * addedBy2b2.
+ */
+const ADDED_LISTS: readonly (readonly [string, RegExp])[] = [
+  ["SPINNER", SPINNER],
+  ["CLEAR", CLEAR],
+  ["SUMMARY", SUMMARY],
+  ["TARGET", TARGET],
+  ["STATUS", STATUS],
+  ["MULTILINE", MULTILINE],
+  ["SEKUNDO", SEKUNDO],
+  ["ACHSEN_2B2", ACHSEN_2B2],
+  ["CLEAR_2B2", CLEAR_2B2],
+  ...REST_2B2.lists,
+  ...REST_2B3.lists,
+  ...REST_2B5.lists,
+];
+
+/** The lists that justify a token as added after main's record; none for a token main had. */
+export const justificationsOf = (name: string): string[] =>
+  ADDED_LISTS.filter(([, pattern]) => pattern.test(name)).map(([list]) => list);
+
+/**
+ * Spec 040 B-4: the tokens added since main's record, derived from the rows instead of a pinned
+ * sum. Every added row is justified in exactly one list, and every list justifies a row (a list
+ * that justifies none has gone stale). A row no list justifies is one of main's: the hash of
+ * main's rows catches it.
+ */
+export function addedRows(names: Iterable<string>): { added: string[]; violations: string[] } {
+  const added: string[] = [];
+  const violations: string[] = [];
+  const used = new Set<string>();
+  for (const name of names) {
+    const lists = justificationsOf(name);
+    if (lists.length === 0) continue;
+    added.push(name);
+    for (const list of lists) used.add(list);
+    if (lists.length > 1) violations.push(`${name}: justified in ${lists.join(", ")}`);
+  }
+  for (const [list] of ADDED_LISTS) {
+    if (!used.has(list)) violations.push(`${list}: justifies no row`);
+  }
+  return { added, violations };
+}
 
 /**
  * ②b-2 (A-datelektilo-2): the calendar's size medium is the token whose value changed on purpose

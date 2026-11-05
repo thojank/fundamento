@@ -1,4 +1,5 @@
 import { defineConfig } from "@playwright/test";
+import { playwrightAusgabe } from "../../scripts/reporter/knapp-playwright.mjs";
 import base from "./playwright.config.js";
 
 // check:quickstart (Spec 003 T027, AK-07): installs the packed Eroj in a fresh Vite project and
@@ -7,6 +8,8 @@ import base from "./playwright.config.js";
 // biome-ignore lint/style/noDefaultExport: Playwright loads its config from the default export.
 export default defineConfig({
   ...base,
+  // Spec 040 T-7 (C-4): its reports in a folder of their own, test-reports/playwright-quickstart/.
+  reporter: playwrightAusgabe("playwright-quickstart"),
   testMatch: "**/quickstart.spec.ts",
   testIgnore: [],
   timeout: 900_000,

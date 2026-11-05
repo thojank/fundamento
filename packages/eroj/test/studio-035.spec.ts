@@ -9,6 +9,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type APIRequestContext, expect, type Page, test } from "@playwright/test";
+import { nachEinemReset } from "./wackler-040.js";
 
 const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
 const cli = join(repoRoot, "packages/cli/dist/index.js");
@@ -85,12 +86,12 @@ interface Stand {
 
 /**
  * The rev the assistant polls (Spec 033 D-05) and the values the Studio set in the draft, read from
- * the draft on disk (entwurf.json of the brand, else its save) – reading changes nothing.
+ * the draft on disk (entwurf.json of the brand, else its save) – reading changes nothing, so a read
+ * that met a connection the server had closed is sent once more (Spec 040 B-2).
  */
 async function stand(request: APIRequestContext, id: string): Promise<Stand> {
-  const stato = (await (await request.get(`${base}/api/marko/${id}/stato`)).json()) as {
-    rev: number;
-  };
+  const antwort = await nachEinemReset(() => request.get(`${base}/api/marko/${id}/stato`));
+  const stato = (await antwort.json()) as { rev: number };
   const file = join(
     workdir,
     id,
@@ -264,13 +265,21 @@ test.describe("Studio (Spec 035 Teil 3)", () => {
       await s.goto(`${base}/studio/${id}/raum`);
       const feld = s.locator('fm-kampo[name="spacing.scale.400"] input');
       await feld.fill("18");
+      // The assistant polls /api/marko/<marke>/stato every 3 s (Spec 033 D-05); the answer with a
+      // new rev reloads its preview. Wait for that answer, not for the clock (Spec 040 B-2).
+      const abgefragt = a.waitForResponse(
+        async (response) =>
+          new URL(response.url()).pathname === `/api/marko/${id}/stato` &&
+          response.ok() &&
+          ((await response.json()) as { rev: number }).rev > vorher,
+      );
       const gesendet = sendung(s, `/studio/${id}/raum`);
       await feld.press("Enter");
       expect((await gesendet).status()).toBe(303);
       const nachher = (await stand(request, id)).rev;
       expect(nachher).toBeGreaterThan(vorher);
-      // The assistant polls /api/marko/<marke>/stato every 3 s (Spec 033 D-05); a new rev reloads
-      // its preview – within one interval and the default wait of an expectation (5 s).
+      expect(((await (await abgefragt).json()) as { rev: number }).rev).toBe(nachher);
+      // After that answer the preview follows within the default wait of an expectation (5 s).
       await expect(rahmen).toHaveAttribute("src", new RegExp(`[?&]rev=${nachher}(&|$)`));
       const vorschau = a.frameLocator("iframe[data-mt-vorschau]");
       await expect(

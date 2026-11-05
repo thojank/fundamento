@@ -6,9 +6,15 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { projectModeloSource } from "@fundamento/modelo";
+import {
+  loadModelo,
+  type Modelo,
+  projectModeloSource,
+  resolveCombination,
+} from "@fundamento/modelo";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildProjekcioj } from "../../build.js";
+import { bazojDatumoj } from "./bazoj.js";
 import { VITRINO_TEKSTOJ, type VitrinoDatumoj } from "./datumoj.js";
 import { VITRINO_FILE } from "./vitrino.js";
 
@@ -28,6 +34,59 @@ const PAGES = {
   movado: "Bewegung",
   ikonoj: "Icons",
 } as const;
+
+/** The Modelo the build reads, loaded from the same configuration – the source of the pages. */
+function sourceModelo(): Modelo {
+  const { modelo } = loadModelo(projectModeloSource(CXIUJ));
+  if (modelo === undefined) throw new Error("the configuration with all brands did not load");
+  return modelo;
+}
+
+/**
+ * Spec 040 B-4: source equals projection – the Tokens page lists every token of the source's
+ * core, each once, and no other. Derived from the source, so a token added in the Vortaro needs no
+ * new number here.
+ */
+function sourceProjectionViolations(source: Modelo, shown: readonly string[]): string[] {
+  const core = Object.keys(source.setoj.find((set) => set.name === "core")?.tokens ?? {});
+  const listed = new Set(shown);
+  const violations: string[] = [];
+  if (core.length === 0) violations.push("the source has no core token");
+  for (const name of core) if (!listed.has(name)) violations.push(`${name}: not on the page`);
+  const known = new Set(core);
+  for (const name of listed) if (!known.has(name)) violations.push(`${name}: not in the source`);
+  if (listed.size !== shown.length) violations.push(`${shown.length - listed.size} rows twice`);
+  return violations;
+}
+
+/** The source with one more literal token in the core, a copy of another one's value. */
+function withCoreToken(of: Modelo, name: string, like: string): Modelo {
+  return {
+    ...of,
+    setoj: of.setoj.map((set) => {
+      const model = set.tokens[like];
+      if (set.name !== "core" || model === undefined) return set;
+      return { ...set, tokens: { ...set.tokens, [name]: { ...model, name } } };
+    }),
+  };
+}
+
+/** The Tokens page of a source, from the base combinations of every brand, light and dark. */
+function tokenojOf(of: Modelo): string[] {
+  const defaults = Object.fromEntries(
+    of.dimensioj.map((dimensio) => [dimensio.name, dimensio.default]),
+  );
+  const aspektoj = (
+    of.dimensioj.find((dimensio) => dimensio.name === "aspekto")?.valoroj ?? []
+  ).map((valoro) => valoro.name);
+  const rezolvoj = aspektoj.flatMap((aspekto) =>
+    ["light", "dark"].map((scheme) => {
+      const assignment = { ...defaults, aspekto, "color-scheme": scheme };
+      return { assignment, tokens: resolveCombination(of, assignment).tokens };
+    }),
+  );
+  return bazojDatumoj(of, rezolvoj, aspektoj).tokenoj.map((token) => token.name);
+}
 
 const dirs: string[] = [];
 let html = "";
@@ -93,7 +152,13 @@ describe("Spec 029 ① 5: the foundation pages", () => {
     // close button of the sxvebilo (+10); the default icon of the avataro and the first and last of
     // the pagxigilo (+10). S36-4.6 (②b-5): the radius role of a tag (+1), the syntax colours (+5);
     // the line numbers, highlighted lines, language and words by kind of the kodbloko (+12).
-    expect(tokenoj.length).toBe(2060);
+    // Spec 040 B-4: no pinned number (2060 then) – the page lists exactly the source's core.
+    expect(
+      sourceProjectionViolations(
+        sourceModelo(),
+        tokenoj.map((token) => token.name),
+      ),
+    ).toEqual([]);
     const levels = new Set(tokenoj.map((token) => token.ebeno));
     expect(levels).toEqual(new Set(["grundlage", "rolle", "ero"]));
     const text = tokenoj.find((token) => token.name === "color.text.default");
@@ -112,6 +177,15 @@ describe("Spec 029 ① 5: the foundation pages", () => {
       "dukolora",
     ]);
     expect(html).toMatch(/<input[^>]*type="search"[^>]*data-fm-bazoj-sercxo/);
+  });
+
+  it("Spec 040 B-4: one more token in the source keeps source = projection", () => {
+    const more = withCoreToken(sourceModelo(), "spacing.scale.450", "spacing.scale.400");
+    const shown = tokenojOf(more);
+    expect(sourceProjectionViolations(more, shown)).toEqual([]);
+    // A page that lost it is named.
+    const lost = shown.filter((name) => name !== "spacing.scale.450");
+    expect(sourceProjectionViolations(more, lost)).toEqual(["spacing.scale.450: not on the page"]);
   });
 
   it("Farbe: the roles light and dark as pairs, with their contrast on the surface", () => {
