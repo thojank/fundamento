@@ -11,7 +11,7 @@ Drei Spuren auf getrennten Dateien (D-08): A1 (T2 → T1 → T3, als einzige mit
 | T3 | B-9 und B-15: Vorschau-Rahmen folgt der neuen `rev` in allen Browsern (D-02); dazu N-2 (B-8) | A | A1 | `packages/eroj/test/studio-035.spec.ts`; N-2: `packages/metiejo/src/html.ts`, `packages/eroj/test/stato-041.spec.ts` | erledigt | B-9/B-15: Lauf (10/30) → `78ad9ae6`; N-2: `24f2b273` → `178ed2a9` |
 | T4 | B-14: M5-Regression in der Werkstatt finden und beheben (D-04, D-09) | A (über T6) | A2 | `packages/projekcioj/src/celoj/vitrino/**`; Wegwerf-Refs `s041-m5-*` | beendet ohne Fix (kein schuldiger Commit, B-14 offen, D-23 bis D-26); kein Commit, Arbeitsbranch entfernt | – (rot: C-2 auf 41971724414, 41971858056, 41973572877) |
 | T5 | I-1: Playwright-Browser und Systempakete aus dem Actions-Cache (D-03, D-05, D-06) | B | B | `.github/workflows/ci.yml`, `packages/modelo/src/ci/workflow.test.ts` | erledigt (Treffer ohne Spiegel; Fehlschlag wie heute, D-22) | `8d84c30c` → `b3c130b9`; Treffer-Pfad `debcf62a` → `b9cde42f` |
-| T6 | Zusammenführen, Doku-Test, Messung, PRs, Bericht | A und B | – | `packages/modelo/src/docs/docs.test.ts`, `packages/eroj/test/m5-041.test.ts`, `packages/metiejo/src/stato-041.test.ts`, `specs/041-wacklige-tests/{plan,tasks}.md` | in Arbeit | `7a9e0d6a` → (grün folgt) |
+| T6 | Zusammenführen, Doku-Test, Messung, PRs, Bericht | A und B | – | `packages/modelo/src/docs/docs.test.ts`, `packages/eroj/test/m5-041.test.ts`, `packages/metiejo/src/stato-041.test.ts`, `specs/041-wacklige-tests/{plan,tasks}.md` | erledigt (PR A #148, PR B #147, je drei Läufe, Bericht) | `7a9e0d6a` → `008bef5a`; Doku „Spec 041: Messung und Bericht“ |
 
 ## T2 im Einzelnen
 
@@ -44,4 +44,9 @@ Drei Spuren auf getrennten Dateien (D-08): A1 (T2 → T1 → T3, als einzige mit
 - [x] T5 Prüfläufe: 42050500562 (Fehlschlag, speichert; I-1 nachgestellt), 42053971357 (14/14 Treffer, 0 Spiegel-`Get:`). Vitest 51/51, `pnpm lint`, `pnpm check:privat` grün.
 - [x] T6 T4 und T5 in plan und tasks eingetragen, D-Einträge von T5 (dort D-13 bis D-16) als D-19 bis D-22 und von T4 (a bis d) als D-23 bis D-26 neu nummeriert; Worktree und Branch `261105-spec-041-m5` entfernt.
 - [x] T6 Doku-Test und Pins rot `7a9e0d6a` (Befund-Zeilen B-14 und I-1 leer; Pins gegen 51/0.8/2999 und m5.ts 55/html.ts 2500 rot gesehen).
-- [ ] T6: Zusammenführen, Tests, Messung, PRs, Bericht.
+- [x] T6 lokale Prüfung auf `008bef5a`: `pnpm check:privat` grün, `pnpm lint` grün, `pnpm test:betroffen` rot nur an Zeitlimits unter Last (nordstelo), paketweise `--concurrency=1 --continue` 8 Pakete grün, Eroj 1910/1912 (N-1, N-5); B: `workflow.test.ts` 51/51.
+- [x] T6 Basis: `origin/main` = `c66ed99f`, beide Branches enthalten es; keine gemeinsame Datei (`comm -12` leer).
+- [x] T6 PRs: A https://github.com/thojank/fundamento/pull/148, B https://github.com/thojank/fundamento/pull/147, beide offen, kein Entwurf, MERGEABLE/CLEAN; CI grün (A nach einem R-8-Neustart für B-10).
+- [x] T6 Messung: A 42079221475, 42085495161, 42087222996 (alle grün, zwei mit R-8 für I-1); B 42076935265, 42080252255 (rot, N-6), 42086157431 (grün mit R-8 für B-12); M5 p90 überall ≤ 50 ms.
+- [x] T6 Diff-Suche (AC-3): nichts neu oder höher.
+- [x] T6 Bericht in `plan.md` › Bericht; Wegwerf-Refs `s041-*`: keine mehr auf `origin`.
