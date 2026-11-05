@@ -284,14 +284,17 @@ test.describe("Spec 041 B-8: the stato poll ends with its page", () => {
     expect(fehler).toEqual([]);
   });
 
-  test("beforeunload aborts the request in flight; the poll goes on while the page stays", async ({
+  test("beforeunload aborts the request in flight and no poll starts until the page is used again", async ({
     page,
     request,
   }) => {
     // WebKit and Firefox stop the old document's loads between beforeunload and pagehide (on a
     // reload, page.goto and a link alike), so the page aborts its own request at beforeunload,
-    // before the browser cuts it short. A navigation can end without leaving the page (a download,
-    // a cancelled one): then the poll goes on.
+    // before the browser cuts it short. Spec 041 N-2: a tick of the interval between beforeunload
+    // and pagehide started a new request that the browser cut short in turn (WebKit 3.5 of the
+    // Bühne, 5 of 300); a navigation can take longer than an interval (about 4 s in CI). So no tick
+    // asks after beforeunload. A navigation can end without leaving the page (a cancelled one):
+    // once the person uses the page again, the poll goes on at the interval's next tick.
     const fehler = fehlerOf(page);
     const id = await marke(request, "Probomarko Verlassen");
     await oeffne(page, id);
@@ -301,6 +304,11 @@ test.describe("Spec 041 B-8: the stato poll ends with its page", () => {
 
     await page.evaluate(() => window.dispatchEvent(new Event("beforeunload")));
     await expect.poll(gehalten.abgebrochen).toBe(true);
+    expect(await nach(page, INTERVALL_MS)).toBe(1);
+    expect(await nach(page, INTERVALL_MS * 2)).toBe(1);
+
+    // The navigation did not happen and the page stays: a key the person presses resumes the poll.
+    await page.keyboard.press("Shift");
     expect(await nach(page, INTERVALL_MS - 1)).toBe(1);
     expect(await nach(page, 1)).toBe(2);
     expect(await nach(page, INTERVALL_MS)).toBe(3);
