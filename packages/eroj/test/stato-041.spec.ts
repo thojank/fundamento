@@ -283,4 +283,27 @@ test.describe("Spec 041 B-8: the stato poll ends with its page", () => {
     expect(await nach(page, INTERVALL_MS)).toBe(4);
     expect(fehler).toEqual([]);
   });
+
+  test("beforeunload aborts the request in flight; the poll goes on while the page stays", async ({
+    page,
+    request,
+  }) => {
+    // WebKit and Firefox stop the old document's loads between beforeunload and pagehide (on a
+    // reload, page.goto and a link alike), so the page aborts its own request at beforeunload,
+    // before the browser cuts it short. A navigation can end without leaving the page (a download,
+    // a cancelled one): then the poll goes on.
+    const fehler = fehlerOf(page);
+    const id = await marke(request, "Probomarko Verlassen");
+    await oeffne(page, id);
+    const gehalten = halteErsteAbfrage(id);
+    expect(await nach(page, INTERVALL_MS)).toBe(1);
+    await gehalten.gekommen;
+
+    await page.evaluate(() => window.dispatchEvent(new Event("beforeunload")));
+    await expect.poll(gehalten.abgebrochen).toBe(true);
+    expect(await nach(page, INTERVALL_MS - 1)).toBe(1);
+    expect(await nach(page, 1)).toBe(2);
+    expect(await nach(page, INTERVALL_MS)).toBe(3);
+    expect(fehler).toEqual([]);
+  });
 });
