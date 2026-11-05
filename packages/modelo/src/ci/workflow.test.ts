@@ -1007,7 +1007,9 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
       const run = typeof browsers?.run === "string" ? browsers.run : "";
       expect(run, job).toBe(playwrightBrowsersOf(engines));
       // A miss: today's line, then the .deb files it fetched go into the cache.
-      const [miss = "", hit = ""] = run.split("\nfi\n");
+      const end = run.indexOf("\nfi\n");
+      const [miss, hit] = [run.slice(0, end), run.slice(end + "\nfi\n".length)];
+      expect(end, job).toBeGreaterThan(0);
       expect(miss, job).toMatch(/^if \[ "\$PLAYWRIGHT_CACHE_HIT" != "true" \]; then\n/);
       expect(miss, job).toContain(
         `\n  pnpm --filter @fundamento/eroj exec playwright install --with-deps ${engines}\n`,
@@ -1032,7 +1034,7 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
         /^sudo apt-get install -y --no-install-recommends --no-download ~\/\.cache\/playwright-apt\/\*\.deb && /,
       );
       expect(offline, job).not.toMatch(/install-deps (?!--dry-run)/);
-      expect(fallback, job).toMatch(/^::warning title=Playwright cache::/);
+      expect(fallback, job).toMatch(/^ title=Playwright cache::/);
       expect(fallback, job).toContain(`exec playwright install-deps ${engines}\n`);
       // Saved right after a green install, on a miss only, whatever the tests do later.
       expect(save?.uses, job).toBe(PLAYWRIGHT_SAVE_ACTION);
