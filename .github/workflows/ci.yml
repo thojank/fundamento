@@ -387,10 +387,12 @@ jobs:
       # installed Playwright version, the runner OS, architecture and image (ImageOS, ImageVersion:
       # the .deb files fit the packages of that image) and the engines of the job. A miss runs the
       # line of today and keeps the .deb files; the cache is saved right after a green install, so a
-      # red test later does not lose it. A hit downloads no browser and runs no `apt-get update`:
-      # `install-deps --dry-run` says whether a system package is missing, and only then the cached
-      # .deb files are installed with --no-download. The mirror comes back only, after a warning,
-      # when they do not cover the system. A restore that fails is a miss, never a red job.
+      # red test later does not lose it. A hit downloads no browser and runs no apt at all:
+      # `install-deps --dry-run` names the system packages that are missing, and exactly those are
+      # installed from their cached .deb files with dpkg – all of them or none. (`apt-get install
+      # --no-download ./x.deb` takes a package of the version in the image's lists from the
+      # repository and refuses: run 42050500562.) The mirror comes back only, after a warning, when
+      # the cache does not cover the system. A restore that fails is a miss, never a red job.
       # workflow.test.ts pins these four steps in every job that installs browsers.
       - name: Playwright cache key
         id: playwright-key
@@ -420,10 +422,13 @@ jobs:
             exit 0
           fi
           pnpm --filter @fundamento/eroj exec playwright install $PLAYWRIGHT_ENGINES
-          if pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run $PLAYWRIGHT_ENGINES; then
+          if report=$(pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run $PLAYWRIGHT_ENGINES); then
             exit 0
           fi
-          if sudo apt-get install -y --no-install-recommends --no-download ~/.cache/playwright-apt/*.deb && pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run $PLAYWRIGHT_ENGINES; then
+          printf '%s\n' "$report"
+          missing=$(printf '%s\n' "$report" | sed -n 's/^  \([a-z0-9][a-z0-9.+-]*\)$/\1/p')
+          debs=$(for package in $missing; do find ~/.cache/playwright-apt -maxdepth 1 -name "${package}_*.deb"; done)
+          if [ -n "$missing" ] && [ "$(echo "$debs" | wc -l)" = "$(echo "$missing" | wc -l)" ] && sudo dpkg -i $debs && pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run $PLAYWRIGHT_ENGINES; then
             exit 0
           fi
           echo "::warning title=Playwright cache::the cached apt packages do not cover the system dependencies; installing them from the mirror"
@@ -546,10 +551,13 @@ jobs:
             exit 0
           fi
           pnpm --filter @fundamento/eroj exec playwright install $PLAYWRIGHT_ENGINES
-          if pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run $PLAYWRIGHT_ENGINES; then
+          if report=$(pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run $PLAYWRIGHT_ENGINES); then
             exit 0
           fi
-          if sudo apt-get install -y --no-install-recommends --no-download ~/.cache/playwright-apt/*.deb && pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run $PLAYWRIGHT_ENGINES; then
+          printf '%s\n' "$report"
+          missing=$(printf '%s\n' "$report" | sed -n 's/^  \([a-z0-9][a-z0-9.+-]*\)$/\1/p')
+          debs=$(for package in $missing; do find ~/.cache/playwright-apt -maxdepth 1 -name "${package}_*.deb"; done)
+          if [ -n "$missing" ] && [ "$(echo "$debs" | wc -l)" = "$(echo "$missing" | wc -l)" ] && sudo dpkg -i $debs && pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run $PLAYWRIGHT_ENGINES; then
             exit 0
           fi
           echo "::warning title=Playwright cache::the cached apt packages do not cover the system dependencies; installing them from the mirror"
@@ -660,10 +668,13 @@ jobs:
             exit 0
           fi
           pnpm --filter @fundamento/eroj exec playwright install $PLAYWRIGHT_ENGINES
-          if pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run $PLAYWRIGHT_ENGINES; then
+          if report=$(pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run $PLAYWRIGHT_ENGINES); then
             exit 0
           fi
-          if sudo apt-get install -y --no-install-recommends --no-download ~/.cache/playwright-apt/*.deb && pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run $PLAYWRIGHT_ENGINES; then
+          printf '%s\n' "$report"
+          missing=$(printf '%s\n' "$report" | sed -n 's/^  \([a-z0-9][a-z0-9.+-]*\)$/\1/p')
+          debs=$(for package in $missing; do find ~/.cache/playwright-apt -maxdepth 1 -name "${package}_*.deb"; done)
+          if [ -n "$missing" ] && [ "$(echo "$debs" | wc -l)" = "$(echo "$missing" | wc -l)" ] && sudo dpkg -i $debs && pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run $PLAYWRIGHT_ENGINES; then
             exit 0
           fi
           echo "::warning title=Playwright cache::the cached apt packages do not cover the system dependencies; installing them from the mirror"
@@ -786,10 +797,13 @@ jobs:
             exit 0
           fi
           pnpm --filter @fundamento/eroj exec playwright install chromium
-          if pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run chromium; then
+          if report=$(pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run chromium); then
             exit 0
           fi
-          if sudo apt-get install -y --no-install-recommends --no-download ~/.cache/playwright-apt/*.deb && pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run chromium; then
+          printf '%s\n' "$report"
+          missing=$(printf '%s\n' "$report" | sed -n 's/^  \([a-z0-9][a-z0-9.+-]*\)$/\1/p')
+          debs=$(for package in $missing; do find ~/.cache/playwright-apt -maxdepth 1 -name "${package}_*.deb"; done)
+          if [ -n "$missing" ] && [ "$(echo "$debs" | wc -l)" = "$(echo "$missing" | wc -l)" ] && sudo dpkg -i $debs && pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run chromium; then
             exit 0
           fi
           echo "::warning title=Playwright cache::the cached apt packages do not cover the system dependencies; installing them from the mirror"
@@ -910,10 +924,13 @@ jobs:
             exit 0
           fi
           pnpm --filter @fundamento/eroj exec playwright install chromium
-          if pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run chromium; then
+          if report=$(pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run chromium); then
             exit 0
           fi
-          if sudo apt-get install -y --no-install-recommends --no-download ~/.cache/playwright-apt/*.deb && pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run chromium; then
+          printf '%s\n' "$report"
+          missing=$(printf '%s\n' "$report" | sed -n 's/^  \([a-z0-9][a-z0-9.+-]*\)$/\1/p')
+          debs=$(for package in $missing; do find ~/.cache/playwright-apt -maxdepth 1 -name "${package}_*.deb"; done)
+          if [ -n "$missing" ] && [ "$(echo "$debs" | wc -l)" = "$(echo "$missing" | wc -l)" ] && sudo dpkg -i $debs && pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run chromium; then
             exit 0
           fi
           echo "::warning title=Playwright cache::the cached apt packages do not cover the system dependencies; installing them from the mirror"
@@ -1031,10 +1048,13 @@ jobs:
             exit 0
           fi
           pnpm --filter @fundamento/eroj exec playwright install chromium
-          if pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run chromium; then
+          if report=$(pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run chromium); then
             exit 0
           fi
-          if sudo apt-get install -y --no-install-recommends --no-download ~/.cache/playwright-apt/*.deb && pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run chromium; then
+          printf '%s\n' "$report"
+          missing=$(printf '%s\n' "$report" | sed -n 's/^  \([a-z0-9][a-z0-9.+-]*\)$/\1/p')
+          debs=$(for package in $missing; do find ~/.cache/playwright-apt -maxdepth 1 -name "${package}_*.deb"; done)
+          if [ -n "$missing" ] && [ "$(echo "$debs" | wc -l)" = "$(echo "$missing" | wc -l)" ] && sudo dpkg -i $debs && pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run chromium; then
             exit 0
           fi
           echo "::warning title=Playwright cache::the cached apt packages do not cover the system dependencies; installing them from the mirror"
