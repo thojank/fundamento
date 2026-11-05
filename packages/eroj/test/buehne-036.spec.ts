@@ -71,11 +71,20 @@ test.afterAll(() => {
   rmSync(workdir, { recursive: true, force: true });
 });
 
+/**
+ * Spec 041 B-12: the test's POSTs close their connection. Playwright's request context keeps an
+ * idle connection for its next request, and the Metiejo closes an idle keep-alive connection after
+ * 5 s; a POST sent on one the server is closing met `read ECONNRESET` (locally 20 of 100 under ten
+ * workers, WebKit). A POST is never sent twice; on a connection of its own it meets no closed one.
+ */
+const EIGENE_VERBINDUNG = { connection: "close" };
+
 /** Creates an invented brand (the Schnellstart's form, empty basis) and returns its identifier. */
 async function marke(request: APIRequestContext, name: string): Promise<string> {
   const created = await request.post(`${base}/marko`, {
     form: { name, basis: "leer" },
     maxRedirects: 0,
+    headers: EIGENE_VERBINDUNG,
   });
   expect(created.status()).toBe(303);
   const location = created.headers().location ?? "";
@@ -205,6 +214,7 @@ async function material(page: Page, request: APIRequestContext, id: string): Pro
   });
   const read = await request.post(`${base}/api/marko/${id}/materialo`, {
     data: { filename: "bildschirm.png", base64, rajtoj: true },
+    headers: EIGENE_VERBINDUNG,
   });
   expect(read.status()).toBe(200);
 }
@@ -527,6 +537,7 @@ test.describe("Bühne (Spec 036, Befund 3.5)", () => {
     // The quieter text as strong as the default text: an open problem of the check (text-hierarchy).
     const gesetzt = await page.request.post(`${base}/api/marko/${id}/festlegen`, {
       data: { token: "color.text.subtle", alias: "color.palette.neutral.1000" },
+      headers: EIGENE_VERBINDUNG,
     });
     expect(gesetzt.status()).toBe(200);
     await oeffne(page, id);
