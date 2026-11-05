@@ -135,6 +135,10 @@ Kein Testfehler in den drei Läufen auf A. B-8, B-9, B-15 und B-12 (Bühne) ware
   - Artefakt `testberichte-eroj-3-1`.
 - Ein R-8-Neustart → **grün** (26 Checks bestanden).
 - „Timing checks“ grün, p90 0 ms.
+- Lauf [42092076645](https://github.com/thojank/fundamento/actions/runs/42092076645) auf `840cba19` (Doku-Commit „Messung und Bericht“, 19:15 UTC), Versuch 1, zwei Jobs nicht grün:
+  - „Rendered checks (Make Kit, Quickstart)“: 15 min in „Playwright browsers“ abgebrochen = **I-1**.
+  - „Timing checks“ **rot**: M5 p90 **53 ms**, längste 71 ms, Skripte 0 ms = **B-14**. Auf `pull_request` blockiert der Job nicht.
+  - Ein R-8-Neustart → **grün**: M5 p90 0 ms, längste 85 ms. PR #148 danach `CLEAN`.
 
 ### PR B (workflow_dispatch)
 
@@ -195,12 +199,14 @@ Gelesen mit C-2 (`testberichte-zeittests-x-<Versuch>`; „Timing checks“ lief 
 | A | 42085495161 | grün | Skripte längstens 5 ms; p90 **0 ms**, längste 56 ms |
 | A | 42087222996 | grün | Skripte längstens 0 ms; p90 **0 ms**, längste 70 ms |
 | A (PR-CI) | 42079224873 | grün | Skripte längstens 0 ms; p90 0 ms, längste 51 ms |
+| A (PR-CI, Doku-Kopf) | 42092076645 Versuch 1 | **rot** (B-14) | Skripte längstens 0 ms; p90 **53 ms**, längste 71 ms |
+| A (PR-CI, Doku-Kopf) | 42092076645 Versuch 2 | grün | Skripte längstens 0 ms; p90 0 ms, längste 85 ms |
 | B | 42076935265 | grün | Skripte längstens 0 ms; p90 0 ms, längste 54 ms |
 | B | 42080252255 | grün | Skripte längstens 0 ms; p90 0 ms, längste 87 ms |
 | B | 42086157431 | grün | Skripte längstens 0 ms; p90 0 ms, längste 62 ms |
 | B (PR-CI) | 42076893161 | grün | Skripte längstens 0 ms; p90 **50 ms**, längste 94 ms |
 
-Alle acht Läufe sind grün, auch auf B, das keinen B-14-Fix hat, und das auf demselben Werkstatt-Code wie die drei roten `main`-Läufe vom Morgen (p90 51/53/55 ms). Das stützt den Befund von T4: Das Rot hängt am Runner und an der Tageszeit, nicht an einem Commit. **Es ist kein Nachweis eines Fixes**, B-14 bleibt offen.
+Die sechs Messläufe und die ersten PR-Läufe sind grün, auch auf B, das keinen B-14-Fix hat, und das auf demselben Werkstatt-Code wie die drei roten `main`-Läufe vom Morgen (p90 51/53/55 ms). Ein PR-Lauf von A um 19:15 UTC war mit p90 53 ms wieder rot, sein Neustart Minuten später grün mit 0 ms. Das stützt den Befund von T4: Das Rot hängt am Runner und an der Tageszeit, nicht an einem Commit. **Die grünen Läufe sind kein Nachweis eines Fixes**, B-14 bleibt offen.
 
 ### T5-Prüfläufe (I-1; zählen nicht als die drei Läufe von AC-9)
 
@@ -343,7 +349,7 @@ Signatur von B-8 für T1 und T3 (D-07): Konsolenfehler „…/stato due to acces
 
 | Teil | PR | Code-Head | CI des PRs | drei `workflow_dispatch`-Läufe |
 |---|---|---|---|---|
-| A | https://github.com/thojank/fundamento/pull/148, offen, CLEAN | `008bef5a` (danach nur dieser Doku-Commit) | 42079224873: Versuch 1 rot (B-10), ein R-8-Neustart → **grün** | 42079221475 grün nach R-8 (I-1); 42085495161 **grün**; 42087222996 grün nach R-8 (I-1); „Timing checks“ 3 × grün |
+| A | https://github.com/thojank/fundamento/pull/148, offen, CLEAN | `008bef5a` (danach nur dieser Doku-Commit) | 42079224873 (`008bef5a`): Versuch 1 rot (B-10), R-8 → **grün**; 42092076645 (`840cba19`): Versuch 1 rot (I-1, B-14 mit p90 53 ms), R-8 → **grün** | 42079221475 grün nach R-8 (I-1); 42085495161 **grün**; 42087222996 grün nach R-8 (I-1); „Timing checks“ 3 × grün |
 | B | https://github.com/thojank/fundamento/pull/147, offen, CLEAN | `b9cde42f` | 42076893161: **grün** im ersten Versuch | 42076935265 **grün**; 42080252255 **rot** (B-15 + B-12, nach R-8 N-6 = B-8-Signatur, D-10); 42086157431 grün nach R-8 (B-12 Übernahme); „Timing checks“ 3 × grün |
 
 **Nachweis, dass nach dem Messkopf nur Doku kam:** `git diff --stat 008bef5a HEAD` zeigt nur `specs/041-wacklige-tests/plan.md` und `tasks.md`.
@@ -375,7 +381,7 @@ Signatur von B-8 für T1 und T3 (D-07): Konsolenfehler „…/stato due to acces
 
 ### Messungen, Diff-Suche, Neustarts
 
-- **M5 p90** (C-2) auf A: **0 / 0 / 0 ms**. Auf B: 0 / 0 / 0 ms. PR-CI A: 0 ms, PR-CI B: 50 ms. Alle grün, Grenze 50 unverändert.
+- **M5 p90** (C-2) auf A: **0 / 0 / 0 ms**. Auf B: 0 / 0 / 0 ms. PR-CI B: 50 ms. PR-CI A: 0 ms, auf dem Doku-Kopf aber **53 ms (rot)**, nach dem Neustart 0 ms. Grenze 50 unverändert.
   - Grün ist es auch auf B ohne jede Werkstatt-Änderung. Das stützt den Runner-Befund und ist **kein** Beleg eines Fixes.
   - Tabellen unter „Messungen“.
 - **Diff-Suche (AC-3):** Befehl der Spec mit den echten Branches. A hat 42 Treffer, B einen. Alle sind unverändert (`}, 3000);` eingerückt), gelesen (`INTERVALL_MS` mit `page.clock`), Kommentar, Testname, Pin oder Verbot (`SEGMENT_DOWNLOAD_TIMEOUT_MINS`). `waitForTimeout` neu: 0. `M5_GRENZE_MS = 50` und `}, 3000);` gefunden. **Nichts neu oder höher.**
@@ -388,6 +394,7 @@ Signatur von B-8 für T1 und T3 (D-07): Konsolenfehler „…/stato due to acces
   | 42079224873 (PR A) | B-10 | grün |
   | 42080252255 (B) | B-15, B-12 | wieder rot → **N-6**, kein weiterer Neustart |
   | 42086157431 (B) | B-12 | grün |
+  | 42092076645 (PR A, Doku-Kopf) | I-1, B-14 | grün |
 
 ### Prüfung gegen die Abnahmekriterien
 
@@ -398,10 +405,10 @@ Signatur von B-8 für T1 und T3 (D-07): Konsolenfehler „…/stato due to acces
 | AC-3 | erfüllt | Diff-Suche oben, nichts neu oder höher |
 | AC-4 | teilweise | B-9/B-15 warten auf den Zustand des Rahmens, 90/90 in drei Engines; B-10/B-13 ohne Fix, Ursache offen |
 | AC-5 | erfüllt | `stato-041.spec.ts` rot → grün in drei Engines, 3000 ms gepinnt; A ohne B-8-Rot |
-| AC-6 | **offen** | kein schuldiger Commit, kein Fix. Die drei p90-Werte auf A sind zwar 0 ms und „Timing checks“ 3 × grün, aber ohne Fix. Grenze 50 gepinnt, Werkstatt unverändert |
+| AC-6 | **offen** | kein schuldiger Commit, kein Fix. Die drei p90-Werte auf A sind zwar 0 ms und „Timing checks“ 3 × grün, aber ohne Fix, und die PR-CI von A war um 19:15 UTC wieder rot (p90 53 ms). Grenze 50 gepinnt, Werkstatt unverändert |
 | AC-7 | teilweise | `nachEinemReset` genau einmal und nur bei `ECONNRESET` (Unit-Fälle); Übernahme-POST bleibt offen |
 | AC-8 | erfüllt | sechs Jobs, Schlüssel Version + OS/Image + Engines, Treffer ohne Spiegel, `timeout-minutes` unverändert; Restrisiko bei Fehlschlag (D-22) |
-| AC-9 | erfüllt | beide offen, aktuelles `main`, MERGEABLE, CI grün (A nach R-8), je drei Läufe mit Tabelle, R-8 gehalten (N-6), nichts gemergt |
+| AC-9 | erfüllt | beide offen, aktuelles `main`, MERGEABLE, CI grün (A beide Male nach R-8), je drei Läufe mit Tabelle, R-8 gehalten (N-6), nichts gemergt |
 | AC-10 | erfüllt | dieser Bericht |
 
 **Zahl:** 7 erfüllt, 2 teilweise, 1 offen.
