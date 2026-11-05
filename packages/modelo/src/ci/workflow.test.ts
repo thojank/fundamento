@@ -76,6 +76,9 @@ const PLAYWRIGHT_CHROMIUM =
 // of today; a hit downloads no browser, installs only what `install-deps --dry-run` reports missing,
 // from the cached .deb files without touching the mirror, and falls back to the mirror only when
 // the cache does not cover the system (a warning, never a red job).
+// The first CI run (42050500562) showed that `apt-get install --no-download ./x.deb` does not do
+// that: a cached .deb of the version in the image's lists is taken from the repository, and
+// --no-download refuses ("Unable to fetch some archives"). dpkg installs the files as they are.
 /** The engines a job installs: betroffen's for the rendered jobs, Chromium for the Vitrino jobs. */
 const ENGINES_ARG: Readonly<Record<string, string>> = {
   eroj: "$PLAYWRIGHT_ENGINES",
@@ -116,10 +119,13 @@ function playwrightBrowsersOf(engines: string): string {
     "  exit 0",
     "fi",
     `${playwright} install ${engines}`,
-    `if ${playwright} install-deps --dry-run ${engines}; then`,
+    `if report=$(${playwright} install-deps --dry-run ${engines}); then`,
     "  exit 0",
     "fi",
-    `if sudo apt-get install -y --no-install-recommends --no-download ${PLAYWRIGHT_APT_DIR}/*.deb && ${playwright} install-deps --dry-run ${engines}; then`,
+    `printf '%s\\n' "$report"`,
+    `missing=$(printf '%s\\n' "$report" | sed -n 's/^  \\([a-z0-9][a-z0-9.+-]*\\)$/\\1/p')`,
+    `debs=$(for package in $missing; do find ${PLAYWRIGHT_APT_DIR} -maxdepth 1 -name "\${package}_*.deb"; done)`,
+    `if [ -n "$missing" ] && [ "$(echo "$debs" | wc -l)" = "$(echo "$missing" | wc -l)" ] && sudo dpkg -i $debs && ${playwright} install-deps --dry-run ${engines}; then`,
     "  exit 0",
     "fi",
     'echo "::warning title=Playwright cache::the cached apt packages do not cover the system dependencies; installing them from the mirror"',
@@ -1016,23 +1022,31 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
       );
       expect(miss, job).toContain(`-exec cp -t ${PLAYWRIGHT_APT_DIR} {} +`);
       // A hit: no --with-deps, no apt-get update, the browsers checked without a download; the
-      // system packages only when --dry-run reports one missing, from the cached .deb files with
-      // --no-download, checked again; the mirror only after a warning, when the cache falls short.
+      // system packages only when --dry-run reports one missing: exactly the packages it names,
+      // each from its cached .deb file, with dpkg (no apt, no network), all of them or none, checked
+      // again; the mirror only after a warning, when the cache falls short.
       const [offline = "", fallback = ""] = hit.split('\necho "::warning');
       expect(hit, job).not.toContain("--with-deps");
       expect(hit, job).not.toMatch(/apt-get update/);
+      expect(offline, job).not.toMatch(/apt-get|apt install/);
       expect(offline, job).toMatch(
         new RegExp(
           `^pnpm --filter @fundamento/eroj exec playwright install ${engines.replace("$", "\\$")}\n`,
         ),
       );
-      const dryRun = offline.indexOf(`install-deps --dry-run ${engines}`);
-      const apt = offline.indexOf("sudo apt-get install");
-      expect(dryRun, job).toBeGreaterThan(0);
-      expect(apt, job).toBeGreaterThan(dryRun);
-      expect(offline.slice(apt), job).toMatch(
-        /^sudo apt-get install -y --no-install-recommends --no-download ~\/\.cache\/playwright-apt\/\*\.deb && /,
+      const dryRun = offline.indexOf(
+        `report=$(pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run ${engines})`,
       );
+      const pick = offline.indexOf(`-name "\${package}_*.deb"`);
+      const dpkg = offline.indexOf("sudo dpkg -i $debs && ");
+      expect(dryRun, job).toBeGreaterThan(0);
+      expect(pick, job).toBeGreaterThan(dryRun);
+      expect(dpkg, job).toBeGreaterThan(pick);
+      expect(offline, job).toContain(`for package in $missing; do find ${PLAYWRIGHT_APT_DIR} `);
+      expect(offline, job).toContain(
+        '[ "$(echo "$debs" | wc -l)" = "$(echo "$missing" | wc -l)" ] && sudo dpkg -i',
+      );
+      expect(offline.slice(dpkg), job).toContain(`install-deps --dry-run ${engines}; then`);
       expect(offline, job).not.toMatch(/install-deps (?!--dry-run)/);
       expect(fallback, job).toMatch(/^ title=Playwright cache::/);
       expect(fallback, job).toContain(`exec playwright install-deps ${engines}\n`);
