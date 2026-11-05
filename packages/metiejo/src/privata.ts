@@ -64,7 +64,7 @@ export function cacheRootOf(
 
 /** The clone of a repository below the cache root: a hash, so the folder name carries no repository name. */
 export function cacheDirOf(cacheRoot: string, repo: string): string {
-  const hash = createHash("sha256").update(repo).digest("hex").slice(0, 16);
+  const hash = createHash("sha256").update(repo).digest("hex").slice(0, 8);
   return join(cacheRoot, "fundamento", "tiparoj", hash);
 }
 
