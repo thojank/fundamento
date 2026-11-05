@@ -16,7 +16,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type APIRequestContext, expect, type Page, test } from "@playwright/test";
 import { axeViolations } from "./alirebleco.js";
-import { nachDerAbfrage } from "./wackler-040.js";
+import { nachDerAbfrage, nachEinemReset } from "./wackler-040.js";
 
 const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
 const cli = join(repoRoot, "packages/cli/dist/index.js");
@@ -321,9 +321,10 @@ test.describe("Bühne (Spec 036, Befund 3.2)", () => {
     expect((await genommen).status()).toBe(200);
     await neu;
     expect(Number(await page.locator("html").getAttribute("data-mt-rev"))).toBeGreaterThan(vorher);
-    const stato = (await (await request.get(`${base}/api/marko/${id}/stato`)).json()) as {
-      rev: number;
-    };
+    // Spec 041 B-12: this read met a reset connection (run 41941052854, WebKit); a GET, sent once more.
+    const stato = (await (
+      await nachEinemReset(() => request.get(`${base}/api/marko/${id}/stato`))
+    ).json()) as { rev: number };
     await expect(page.locator("html")).toHaveAttribute("data-mt-rev", String(stato.rev));
     await expect.poll(() => knopf(page, JETZT)).toBe(vorschlag);
   });
