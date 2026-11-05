@@ -380,10 +380,69 @@ jobs:
       # (Spec 040 B-3), Chromium alone on most pull requests. The time of this step is apt (`--with-deps`), not the browser download
       # (Vojmapo); on a cold runner the packages of three engines took 7 min (Läufe 39754200831,
       # 39754602800) and, with the Vitrino check of 40 Eroj, cut the rendered checks off at 15 min.
-      # A cache of ~/.cache/ms-playwright was measured and taken back. workflow.test.ts pins this line.
+      # Spec 041 I-1: a slow Ubuntu mirror cut seven jobs off at 15 min in this step (runs
+      # 41920898257, 41931882770, 41936625983; 41943148273: "Fetched 114 MB in 13min 37s (140 kB/s)").
+      # A cache of ~/.cache/ms-playwright alone did not help (Spec 040 D-06): the browsers and the
+      # .deb files that `--with-deps` fetched live in the Actions cache together, keyed by the
+      # installed Playwright version, the runner OS, architecture and image (ImageOS, ImageVersion:
+      # the .deb files fit the packages of that image) and the engines of the job. A miss runs the
+      # line of today and keeps the .deb files; the cache is saved right after a green install, so a
+      # red test later does not lose it. A hit downloads no browser and runs no apt at all:
+      # `install-deps --dry-run` names the system packages that are missing, and exactly those are
+      # installed from their cached .deb files with dpkg – all of them or none. (`apt-get install
+      # --no-download ./x.deb` takes a package of the version in the image's lists from the
+      # repository and refuses: run 42050500562.) The mirror comes back only, after a warning, when
+      # the cache does not cover the system. A restore that fails is a miss, never a red job.
+      # workflow.test.ts pins these four steps in every job that installs browsers.
+      - name: Playwright cache key
+        id: playwright-key
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
+        run: echo "key=playwright-$RUNNER_OS-$RUNNER_ARCH-$ImageOS-$ImageVersion-$(node -p "require('./packages/eroj/node_modules/@playwright/test/package.json').version")-$(echo $PLAYWRIGHT_ENGINES | tr ' ' '-')" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Playwright cache
+        id: playwright-cache
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
+        continue-on-error: true
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/playwright-apt
+          key: ${{ steps.playwright-key.outputs.key }}
+
       - name: Playwright browsers
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
-        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
+        env:
+          PLAYWRIGHT_CACHE_HIT: ${{ steps.playwright-cache.outputs.cache-hit }}
+        run: |
+          if [ "$PLAYWRIGHT_CACHE_HIT" != "true" ]; then
+            pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
+            mkdir -p ~/.cache/playwright-apt
+            find /var/cache/apt/archives -maxdepth 1 -name '*.deb' -exec cp -t ~/.cache/playwright-apt {} +
+            exit 0
+          fi
+          pnpm --filter @fundamento/eroj exec playwright install $PLAYWRIGHT_ENGINES
+          if report=$(pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run $PLAYWRIGHT_ENGINES); then
+            exit 0
+          fi
+          printf '%s\n' "$report"
+          missing=$(printf '%s\n' "$report" | sed -n 's/^  \([a-z0-9][a-z0-9.+-]*\)$/\1/p')
+          debs=$(for package in $missing; do find ~/.cache/playwright-apt -maxdepth 1 -name "${package}_*.deb"; done)
+          if [ -n "$missing" ] && [ "$(echo "$debs" | wc -l)" = "$(echo "$missing" | wc -l)" ] && sudo dpkg -i $debs && pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run $PLAYWRIGHT_ENGINES; then
+            exit 0
+          fi
+          echo "::warning title=Playwright cache::the cached apt packages do not cover the system dependencies; installing them from the mirror"
+          pnpm --filter @fundamento/eroj exec playwright install-deps $PLAYWRIGHT_ENGINES
+
+      - name: Save Playwright cache
+        if: ${{ (needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj')) && steps.playwright-cache.outputs.cache-hit != 'true' }}
+        continue-on-error: true
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/playwright-apt
+          key: ${{ steps.playwright-key.outputs.key }}
 
       - name: Turbo cache
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
@@ -462,9 +521,57 @@ jobs:
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm install --frozen-lockfile
 
+      # Spec 041 I-1: the browsers and their apt packages come from the Actions cache as in the job
+      # eroj; workflow.test.ts pins these four steps.
+      - name: Playwright cache key
+        id: playwright-key
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
+        run: echo "key=playwright-$RUNNER_OS-$RUNNER_ARCH-$ImageOS-$ImageVersion-$(node -p "require('./packages/eroj/node_modules/@playwright/test/package.json').version")-$(echo $PLAYWRIGHT_ENGINES | tr ' ' '-')" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Playwright cache
+        id: playwright-cache
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
+        continue-on-error: true
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/playwright-apt
+          key: ${{ steps.playwright-key.outputs.key }}
+
       - name: Playwright browsers
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
-        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
+        env:
+          PLAYWRIGHT_CACHE_HIT: ${{ steps.playwright-cache.outputs.cache-hit }}
+        run: |
+          if [ "$PLAYWRIGHT_CACHE_HIT" != "true" ]; then
+            pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
+            mkdir -p ~/.cache/playwright-apt
+            find /var/cache/apt/archives -maxdepth 1 -name '*.deb' -exec cp -t ~/.cache/playwright-apt {} +
+            exit 0
+          fi
+          pnpm --filter @fundamento/eroj exec playwright install $PLAYWRIGHT_ENGINES
+          if report=$(pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run $PLAYWRIGHT_ENGINES); then
+            exit 0
+          fi
+          printf '%s\n' "$report"
+          missing=$(printf '%s\n' "$report" | sed -n 's/^  \([a-z0-9][a-z0-9.+-]*\)$/\1/p')
+          debs=$(for package in $missing; do find ~/.cache/playwright-apt -maxdepth 1 -name "${package}_*.deb"; done)
+          if [ -n "$missing" ] && [ "$(echo "$debs" | wc -l)" = "$(echo "$missing" | wc -l)" ] && sudo dpkg -i $debs && pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run $PLAYWRIGHT_ENGINES; then
+            exit 0
+          fi
+          echo "::warning title=Playwright cache::the cached apt packages do not cover the system dependencies; installing them from the mirror"
+          pnpm --filter @fundamento/eroj exec playwright install-deps $PLAYWRIGHT_ENGINES
+
+      - name: Save Playwright cache
+        if: ${{ (needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj')) && steps.playwright-cache.outputs.cache-hit != 'true' }}
+        continue-on-error: true
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/playwright-apt
+          key: ${{ steps.playwright-key.outputs.key }}
 
       - name: Turbo cache
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
@@ -531,9 +638,57 @@ jobs:
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
         run: pnpm install --frozen-lockfile
 
+      # Spec 041 I-1: the browsers and their apt packages come from the Actions cache as in the job
+      # eroj; workflow.test.ts pins these four steps.
+      - name: Playwright cache key
+        id: playwright-key
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
+        run: echo "key=playwright-$RUNNER_OS-$RUNNER_ARCH-$ImageOS-$ImageVersion-$(node -p "require('./packages/eroj/node_modules/@playwright/test/package.json').version")-$(echo $PLAYWRIGHT_ENGINES | tr ' ' '-')" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Playwright cache
+        id: playwright-cache
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
+        continue-on-error: true
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/playwright-apt
+          key: ${{ steps.playwright-key.outputs.key }}
+
       - name: Playwright browsers
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
-        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
+        env:
+          PLAYWRIGHT_CACHE_HIT: ${{ steps.playwright-cache.outputs.cache-hit }}
+        run: |
+          if [ "$PLAYWRIGHT_CACHE_HIT" != "true" ]; then
+            pnpm --filter @fundamento/eroj exec playwright install --with-deps $PLAYWRIGHT_ENGINES
+            mkdir -p ~/.cache/playwright-apt
+            find /var/cache/apt/archives -maxdepth 1 -name '*.deb' -exec cp -t ~/.cache/playwright-apt {} +
+            exit 0
+          fi
+          pnpm --filter @fundamento/eroj exec playwright install $PLAYWRIGHT_ENGINES
+          if report=$(pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run $PLAYWRIGHT_ENGINES); then
+            exit 0
+          fi
+          printf '%s\n' "$report"
+          missing=$(printf '%s\n' "$report" | sed -n 's/^  \([a-z0-9][a-z0-9.+-]*\)$/\1/p')
+          debs=$(for package in $missing; do find ~/.cache/playwright-apt -maxdepth 1 -name "${package}_*.deb"; done)
+          if [ -n "$missing" ] && [ "$(echo "$debs" | wc -l)" = "$(echo "$missing" | wc -l)" ] && sudo dpkg -i $debs && pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run $PLAYWRIGHT_ENGINES; then
+            exit 0
+          fi
+          echo "::warning title=Playwright cache::the cached apt packages do not cover the system dependencies; installing them from the mirror"
+          pnpm --filter @fundamento/eroj exec playwright install-deps $PLAYWRIGHT_ENGINES
+
+      - name: Save Playwright cache
+        if: ${{ (needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj')) && steps.playwright-cache.outputs.cache-hit != 'true' }}
+        continue-on-error: true
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/playwright-apt
+          key: ${{ steps.playwright-key.outputs.key }}
 
       - name: Turbo cache
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
@@ -612,10 +767,57 @@ jobs:
       # Spec 040 D-19: playwright.vitrino.config.ts runs the first project of the shared config alone,
       # Chromium, whatever PLAYWRIGHT_ENGINES names – so Chromium alone is installed, and the job
       # carries no PLAYWRIGHT_ENGINES. The apt packages of three engines cut four jobs off at 15 min
-      # in this step on a slow mirror (PR #145). workflow.test.ts pins this line.
+      # in this step on a slow mirror (PR #145). Spec 041 I-1: the browsers and their apt packages
+      # come from the Actions cache as in the job eroj; workflow.test.ts pins these four steps.
+      - name: Playwright cache key
+        id: playwright-key
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
+        run: echo "key=playwright-$RUNNER_OS-$RUNNER_ARCH-$ImageOS-$ImageVersion-$(node -p "require('./packages/eroj/node_modules/@playwright/test/package.json').version")-$(echo chromium | tr ' ' '-')" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Playwright cache
+        id: playwright-cache
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
+        continue-on-error: true
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/playwright-apt
+          key: ${{ steps.playwright-key.outputs.key }}
+
       - name: Playwright browsers
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
-        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium
+        env:
+          PLAYWRIGHT_CACHE_HIT: ${{ steps.playwright-cache.outputs.cache-hit }}
+        run: |
+          if [ "$PLAYWRIGHT_CACHE_HIT" != "true" ]; then
+            pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium
+            mkdir -p ~/.cache/playwright-apt
+            find /var/cache/apt/archives -maxdepth 1 -name '*.deb' -exec cp -t ~/.cache/playwright-apt {} +
+            exit 0
+          fi
+          pnpm --filter @fundamento/eroj exec playwright install chromium
+          if report=$(pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run chromium); then
+            exit 0
+          fi
+          printf '%s\n' "$report"
+          missing=$(printf '%s\n' "$report" | sed -n 's/^  \([a-z0-9][a-z0-9.+-]*\)$/\1/p')
+          debs=$(for package in $missing; do find ~/.cache/playwright-apt -maxdepth 1 -name "${package}_*.deb"; done)
+          if [ -n "$missing" ] && [ "$(echo "$debs" | wc -l)" = "$(echo "$missing" | wc -l)" ] && sudo dpkg -i $debs && pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run chromium; then
+            exit 0
+          fi
+          echo "::warning title=Playwright cache::the cached apt packages do not cover the system dependencies; installing them from the mirror"
+          pnpm --filter @fundamento/eroj exec playwright install-deps chromium
+
+      - name: Save Playwright cache
+        if: ${{ (needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj')) && steps.playwright-cache.outputs.cache-hit != 'true' }}
+        continue-on-error: true
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/playwright-apt
+          key: ${{ steps.playwright-key.outputs.key }}
 
       - name: Turbo cache
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
@@ -692,10 +894,57 @@ jobs:
       # Spec 040 D-19: playwright.vitrino.config.ts runs the first project of the shared config alone,
       # Chromium, whatever PLAYWRIGHT_ENGINES names – so Chromium alone is installed, and the job
       # carries no PLAYWRIGHT_ENGINES. The apt packages of three engines cut four jobs off at 15 min
-      # in this step on a slow mirror (PR #145). workflow.test.ts pins this line.
+      # in this step on a slow mirror (PR #145). Spec 041 I-1: the browsers and their apt packages
+      # come from the Actions cache as in the job eroj; workflow.test.ts pins these four steps.
+      - name: Playwright cache key
+        id: playwright-key
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
+        run: echo "key=playwright-$RUNNER_OS-$RUNNER_ARCH-$ImageOS-$ImageVersion-$(node -p "require('./packages/eroj/node_modules/@playwright/test/package.json').version")-$(echo chromium | tr ' ' '-')" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Playwright cache
+        id: playwright-cache
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
+        continue-on-error: true
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/playwright-apt
+          key: ${{ steps.playwright-key.outputs.key }}
+
       - name: Playwright browsers
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
-        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium
+        env:
+          PLAYWRIGHT_CACHE_HIT: ${{ steps.playwright-cache.outputs.cache-hit }}
+        run: |
+          if [ "$PLAYWRIGHT_CACHE_HIT" != "true" ]; then
+            pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium
+            mkdir -p ~/.cache/playwright-apt
+            find /var/cache/apt/archives -maxdepth 1 -name '*.deb' -exec cp -t ~/.cache/playwright-apt {} +
+            exit 0
+          fi
+          pnpm --filter @fundamento/eroj exec playwright install chromium
+          if report=$(pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run chromium); then
+            exit 0
+          fi
+          printf '%s\n' "$report"
+          missing=$(printf '%s\n' "$report" | sed -n 's/^  \([a-z0-9][a-z0-9.+-]*\)$/\1/p')
+          debs=$(for package in $missing; do find ~/.cache/playwright-apt -maxdepth 1 -name "${package}_*.deb"; done)
+          if [ -n "$missing" ] && [ "$(echo "$debs" | wc -l)" = "$(echo "$missing" | wc -l)" ] && sudo dpkg -i $debs && pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run chromium; then
+            exit 0
+          fi
+          echo "::warning title=Playwright cache::the cached apt packages do not cover the system dependencies; installing them from the mirror"
+          pnpm --filter @fundamento/eroj exec playwright install-deps chromium
+
+      - name: Save Playwright cache
+        if: ${{ (needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj')) && steps.playwright-cache.outputs.cache-hit != 'true' }}
+        continue-on-error: true
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/playwright-apt
+          key: ${{ steps.playwright-key.outputs.key }}
 
       - name: Turbo cache
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
@@ -769,10 +1018,57 @@ jobs:
       # Spec 040 D-19: playwright.vitrino.config.ts runs the first project of the shared config alone,
       # Chromium, whatever PLAYWRIGHT_ENGINES names – so Chromium alone is installed, and the job
       # carries no PLAYWRIGHT_ENGINES. The apt packages of three engines cut four jobs off at 15 min
-      # in this step on a slow mirror (PR #145). workflow.test.ts pins this line.
+      # in this step on a slow mirror (PR #145). Spec 041 I-1: the browsers and their apt packages
+      # come from the Actions cache as in the job eroj; workflow.test.ts pins these four steps.
+      - name: Playwright cache key
+        id: playwright-key
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
+        run: echo "key=playwright-$RUNNER_OS-$RUNNER_ARCH-$ImageOS-$ImageVersion-$(node -p "require('./packages/eroj/node_modules/@playwright/test/package.json').version")-$(echo chromium | tr ' ' '-')" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Playwright cache
+        id: playwright-cache
+        if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
+        continue-on-error: true
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/playwright-apt
+          key: ${{ steps.playwright-key.outputs.key }}
+
       - name: Playwright browsers
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}
-        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium
+        env:
+          PLAYWRIGHT_CACHE_HIT: ${{ steps.playwright-cache.outputs.cache-hit }}
+        run: |
+          if [ "$PLAYWRIGHT_CACHE_HIT" != "true" ]; then
+            pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium
+            mkdir -p ~/.cache/playwright-apt
+            find /var/cache/apt/archives -maxdepth 1 -name '*.deb' -exec cp -t ~/.cache/playwright-apt {} +
+            exit 0
+          fi
+          pnpm --filter @fundamento/eroj exec playwright install chromium
+          if report=$(pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run chromium); then
+            exit 0
+          fi
+          printf '%s\n' "$report"
+          missing=$(printf '%s\n' "$report" | sed -n 's/^  \([a-z0-9][a-z0-9.+-]*\)$/\1/p')
+          debs=$(for package in $missing; do find ~/.cache/playwright-apt -maxdepth 1 -name "${package}_*.deb"; done)
+          if [ -n "$missing" ] && [ "$(echo "$debs" | wc -l)" = "$(echo "$missing" | wc -l)" ] && sudo dpkg -i $debs && pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run chromium; then
+            exit 0
+          fi
+          echo "::warning title=Playwright cache::the cached apt packages do not cover the system dependencies; installing them from the mirror"
+          pnpm --filter @fundamento/eroj exec playwright install-deps chromium
+
+      - name: Save Playwright cache
+        if: ${{ (needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj')) && steps.playwright-cache.outputs.cache-hit != 'true' }}
+        continue-on-error: true
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/playwright-apt
+          key: ${{ steps.playwright-key.outputs.key }}
 
       - name: Turbo cache
         if: ${{ needs.betroffen.outputs.alle == 'true' || contains(fromJSON(needs.betroffen.outputs.pakete), '@fundamento/eroj') }}

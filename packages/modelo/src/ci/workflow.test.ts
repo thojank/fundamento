@@ -67,6 +67,91 @@ const PLAYWRIGHT_BROWSERS =
 const PLAYWRIGHT_CHROMIUM =
   "pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium";
 
+// Spec 041 I-1: a slow Ubuntu mirror cut seven jobs off at 15 minutes in the step "Playwright
+// browsers" (runs 41920898257, 41931882770, 41936625983; 41943148273: "Fetched 114 MB in 13min 37s
+// (140 kB/s)" from azure.archive.ubuntu.com, 181 packages for three engines). The time is the apt
+// packages of `--with-deps`, not the browser download (Spec 040 D-06, 27debafb taken back in
+// 7953106d). The browsers and the .deb files the miss path fetched live in the Actions cache, keyed
+// by the installed Playwright version, the runner image and the job's engines. A miss runs the line
+// of today; a hit downloads no browser, installs only what `install-deps --dry-run` reports missing,
+// from the cached .deb files without touching the mirror, and falls back to the mirror only when
+// the cache does not cover the system (a warning, never a red job).
+// The first CI run (42050500562) showed that `apt-get install --no-download ./x.deb` does not do
+// that: a cached .deb of the version in the image's lists is taken from the repository, and
+// --no-download refuses ("Unable to fetch some archives"). dpkg installs the files as they are.
+/** The engines a job installs: betroffen's for the rendered jobs, Chromium for the Vitrino jobs. */
+const ENGINES_ARG: Readonly<Record<string, string>> = {
+  eroj: "$PLAYWRIGHT_ENGINES",
+  "alirebleco-eroj": "$PLAYWRIGHT_ENGINES",
+  "rendered-checks": "$PLAYWRIGHT_ENGINES",
+  werkstatt: "chromium",
+  vitrino: "chromium",
+  zeittests: "chromium",
+};
+const PLAYWRIGHT_KEY_STEP = "Playwright cache key";
+const PLAYWRIGHT_RESTORE_STEP = "Restore Playwright cache";
+const PLAYWRIGHT_BROWSERS_STEP = "Playwright browsers";
+const PLAYWRIGHT_SAVE_STEP = "Save Playwright cache";
+const PLAYWRIGHT_RESTORE_ACTION = "actions/cache/restore@v6";
+const PLAYWRIGHT_SAVE_ACTION = "actions/cache/save@v6";
+/** The cached .deb files of the miss path's `--with-deps`. */
+const PLAYWRIGHT_APT_DIR = "~/.cache/playwright-apt";
+const PLAYWRIGHT_CACHE_PATH = `~/.cache/ms-playwright\n${PLAYWRIGHT_APT_DIR}\n`;
+const PLAYWRIGHT_KEY = `\${{ steps.playwright-key.outputs.key }}`;
+const PLAYWRIGHT_HIT = "steps.playwright-cache.outputs.cache-hit";
+/** The installed version of the pin in packages/eroj/package.json, read where the key is made. */
+const PLAYWRIGHT_VERSION =
+  "node -p \"require('./packages/eroj/node_modules/@playwright/test/package.json').version\"";
+
+/** The key: Playwright version + runner OS, architecture and image + the job's engines. */
+function playwrightKeyOf(engines: string): string {
+  return `echo "key=playwright-$RUNNER_OS-$RUNNER_ARCH-$ImageOS-$ImageVersion-$(${PLAYWRIGHT_VERSION})-$(echo ${engines} | tr ' ' '-')" >> "$GITHUB_OUTPUT"`;
+}
+
+/** The step "Playwright browsers": today's line on a miss, the cache without the mirror on a hit. */
+function playwrightBrowsersOf(engines: string): string {
+  const playwright = "pnpm --filter @fundamento/eroj exec playwright";
+  return [
+    'if [ "$PLAYWRIGHT_CACHE_HIT" != "true" ]; then',
+    `  ${playwright} install --with-deps ${engines}`,
+    `  mkdir -p ${PLAYWRIGHT_APT_DIR}`,
+    `  find /var/cache/apt/archives -maxdepth 1 -name '*.deb' -exec cp -t ${PLAYWRIGHT_APT_DIR} {} +`,
+    "  exit 0",
+    "fi",
+    `${playwright} install ${engines}`,
+    `if report=$(${playwright} install-deps --dry-run ${engines}); then`,
+    "  exit 0",
+    "fi",
+    `printf '%s\\n' "$report"`,
+    `missing=$(printf '%s\\n' "$report" | sed -n 's/^  \\([a-z0-9][a-z0-9.+-]*\\)$/\\1/p')`,
+    `debs=$(for package in $missing; do find ${PLAYWRIGHT_APT_DIR} -maxdepth 1 -name "\${package}_*.deb"; done)`,
+    `if [ -n "$missing" ] && [ "$(echo "$debs" | wc -l)" = "$(echo "$missing" | wc -l)" ] && sudo dpkg -i $debs && ${playwright} install-deps --dry-run ${engines}; then`,
+    "  exit 0",
+    "fi",
+    'echo "::warning title=Playwright cache::the cached apt packages do not cover the system dependencies; installing them from the mirror"',
+    `${playwright} install-deps ${engines}`,
+    "",
+  ].join("\n");
+}
+
+/** The four steps of the browsers, in order, as the step lists name them. */
+function playwrightStepsOf(
+  job: string,
+): ReadonlyArray<readonly [name: string, run: string | undefined]> {
+  const engines = ENGINES_ARG[job] ?? "";
+  return [
+    [PLAYWRIGHT_KEY_STEP, playwrightKeyOf(engines)],
+    [PLAYWRIGHT_RESTORE_STEP, undefined],
+    [PLAYWRIGHT_BROWSERS_STEP, playwrightBrowsersOf(engines)],
+    [PLAYWRIGHT_SAVE_STEP, undefined],
+  ];
+}
+
+/** The save step runs only on a miss, after a green install, in the job's gate. */
+function playwrightSaveIf(gate: string): string {
+  return `\${{ (${gate}) && ${PLAYWRIGHT_HIT} != 'true' }}`;
+}
+
 // Spec 040 T-5: the local Turborepo cache of every job lives on between runs (actions/cache), one
 // cache per job and matrix value. The key ends on the commit, so every run saves its cache; a run
 // restores the newest of its job through the prefix of lockfile, turbo.json and Node. Turborepo
@@ -180,7 +265,7 @@ const PROJEKCIOJ_STEPS: ReadonlyArray<readonly [name: string, run: string | unde
 // unit tests of the package before its part of the suite, as with two.
 /** The job of the rendered Eroj: the Playwright suite in four shards (fullyParallel inside). */
 const EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
-  ["Playwright browsers", PLAYWRIGHT_BROWSERS],
+  ...playwrightStepsOf("eroj"),
   [TURBO_CACHE_STEP, undefined],
   ["Build", buildOf("eroj")],
   [
@@ -199,7 +284,7 @@ const EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]
 // `--`: pnpm passes a `--` on, and Playwright takes `--shard` after it for a file filter.
 /** The job of the rendered accessibility of the Eroj: axe, keyboard and focus ring, one shard. */
 const ALIREBLECO_EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
-  ["Playwright browsers", PLAYWRIGHT_BROWSERS],
+  ...playwrightStepsOf("alirebleco-eroj"),
   [TURBO_CACHE_STEP, undefined],
   ["Build", buildOf("alirebleco-eroj")],
   ["Check: Alirebleco (Eroj)", "pnpm check:alirebleco-eroj --shard=${{ matrix.shard }}/3"],
@@ -219,7 +304,7 @@ const ALIREBLECO_EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string |
 // parts (packages/eroj/test/vitrino-partoj.ts), a runner each.
 /** The job of the Make Kit and the quickstart. */
 const RENDERED_CHECK_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
-  ["Playwright browsers", PLAYWRIGHT_BROWSERS],
+  ...playwrightStepsOf("rendered-checks"),
   [TURBO_CACHE_STEP, undefined],
   ["Build", buildOf("rendered-checks")],
   ["Check: Make Kit", "pnpm check:make-kit"],
@@ -229,7 +314,7 @@ const RENDERED_CHECK_STEPS: ReadonlyArray<readonly [name: string, run: string | 
 
 /** The job of the Werkstatt of the Vitrino, one part per runner. */
 const WERKSTATT_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
-  ["Playwright browsers", PLAYWRIGHT_CHROMIUM],
+  ...playwrightStepsOf("werkstatt"),
   [TURBO_CACHE_STEP, undefined],
   ["Build", buildOf("werkstatt")],
   ["Check: Vitrino (Werkstatt)", "pnpm check:vitrino"],
@@ -238,7 +323,7 @@ const WERKSTATT_STEPS: ReadonlyArray<readonly [name: string, run: string | undef
 
 /** The job of the Vitrino without its Werkstatt, one part per runner. */
 const VITRINO_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
-  ["Playwright browsers", PLAYWRIGHT_CHROMIUM],
+  ...playwrightStepsOf("vitrino"),
   [TURBO_CACHE_STEP, undefined],
   ["Build", buildOf("vitrino")],
   ["Check: Vitrino", "pnpm check:vitrino"],
@@ -251,7 +336,7 @@ const VITRINO_STEPS: ReadonlyArray<readonly [name: string, run: string | undefin
 // (continue-on-error on pull_request) and no longer turns another part red; on main it blocks.
 /** The job of the timing tests of the Vitrino. */
 const ZEITTESTS_STEPS: ReadonlyArray<readonly [name: string, run: string | undefined]> = [
-  ["Playwright browsers", PLAYWRIGHT_CHROMIUM],
+  ...playwrightStepsOf("zeittests"),
   [TURBO_CACHE_STEP, undefined],
   ["Build", buildOf("zeittests")],
   ["Check: Vitrino (Zeittests)", "pnpm check:vitrino"],
@@ -478,8 +563,39 @@ function jobShapeViolations(jobs: Record<string, Record<string, unknown>>): stri
     }
     for (const step of rest) {
       const expected =
-        step.name === ARTIFACT_STEP ? `\${{ always() && (${negated}) }}` : `\${{ ${negated} }}`;
+        step.name === ARTIFACT_STEP
+          ? `\${{ always() && (${negated}) }}`
+          : step.name === PLAYWRIGHT_SAVE_STEP
+            ? playwrightSaveIf(negated)
+            : `\${{ ${negated} }}`;
       if (ifOf(step) !== expected) fail(`step ${String(step.name)} has another gate`);
+    }
+    // Spec 041 I-1: a job that installs browsers takes them from the cache, keyed, restored without
+    // turning red, and saves them right after a green install on a miss.
+    const browsers = steps.findIndex((step) => step.name === PLAYWRIGHT_BROWSERS_STEP);
+    if (browsers >= 0) {
+      const [key, restore, , save] = steps.slice(browsers - 2, browsers + 2) as Array<
+        (typeof steps)[number] & { id?: unknown; "continue-on-error"?: unknown }
+      >;
+      const cacheWith = { path: PLAYWRIGHT_CACHE_PATH, key: PLAYWRIGHT_KEY };
+      if (
+        restore?.name !== PLAYWRIGHT_RESTORE_STEP ||
+        restore.uses !== PLAYWRIGHT_RESTORE_ACTION ||
+        restore.id !== "playwright-cache" ||
+        restore["continue-on-error"] !== true ||
+        JSON.stringify(withOf(restore)) !== JSON.stringify(cacheWith)
+      ) {
+        fail("Restore Playwright cache is not the step right before Playwright browsers");
+      } else if (key?.name !== PLAYWRIGHT_KEY_STEP || key.id !== "playwright-key") {
+        fail("Playwright cache key is not the step right before Restore Playwright cache");
+      } else if (
+        save?.name !== PLAYWRIGHT_SAVE_STEP ||
+        save.uses !== PLAYWRIGHT_SAVE_ACTION ||
+        save["continue-on-error"] !== true ||
+        JSON.stringify(withOf(save)) !== JSON.stringify(cacheWith)
+      ) {
+        fail("Save Playwright cache is not the step right after Playwright browsers");
+      }
     }
     const last = steps.at(-1);
     if (last?.name !== ARTIFACT_STEP || !usesAction(last, "actions/upload-artifact")) {
@@ -520,7 +636,8 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
       // betroffen: checkout, pnpm and Node; every other job also the cache.
       expect(actions.length, job).toBeGreaterThan(job === BETROFFEN ? 2 : 3);
       for (const uses of actions) {
-        expect(uses, job).toMatch(/^[\w.-]+\/[\w.-]+@v\d+$/);
+        // An action of a repository, or one of its sub-actions (actions/cache/restore).
+        expect(uses, job).toMatch(/^[\w.-]+\/[\w.-]+(?:\/[\w.-]+)?@v\d+$/);
       }
     }
   });
@@ -843,10 +960,119 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
         expect(step.if, `${job}: ${String(step.name)}`).toBe(
           step.name === ARTIFACT_STEP
             ? `\${{ always() && (${affected(job)}) }}`
-            : `\${{ ${affected(job)} }}`,
+            : step.name === PLAYWRIGHT_SAVE_STEP
+              ? playwrightSaveIf(affected(job))
+              : `\${{ ${affected(job)} }}`,
         );
       }
     }
+  });
+
+  it("takes the Playwright browsers and their apt packages from the Actions cache: a miss runs today's line and saves, a hit leaves the mirror alone (Spec 041 I-1, AC-8)", () => {
+    const jobs = Object.keys(loadJobs()).filter((job) =>
+      loadSteps(job).some((step) => step.name === PLAYWRIGHT_BROWSERS_STEP),
+    );
+    // D-05: all six jobs that install browsers.
+    expect(jobs).toEqual(Object.keys(ENGINES_ARG));
+    for (const job of jobs) {
+      const engines = ENGINES_ARG[job] ?? "";
+      const steps = loadSteps(job) as Array<
+        Step & { id?: unknown; if?: unknown; env?: unknown; "continue-on-error"?: unknown }
+      >;
+      const at = (name: string) => steps.findIndex((step) => step.name === name);
+      const order = [
+        PLAYWRIGHT_KEY_STEP,
+        PLAYWRIGHT_RESTORE_STEP,
+        PLAYWRIGHT_BROWSERS_STEP,
+        PLAYWRIGHT_SAVE_STEP,
+        TURBO_CACHE_STEP,
+      ].map(at);
+      expect(order[0], job).toBe(at("Install") + 1);
+      expect(
+        order.slice(1).map((index, i) => index - (order[i] ?? 0)),
+        job,
+      ).toEqual([1, 1, 1, 1]);
+      const [key, restore, browsers, save] = order.slice(0, 4).map((index) => steps[index] ?? {});
+      // The key: the installed Playwright version, runner OS, architecture and image, the engines.
+      expect(key?.id, job).toBe("playwright-key");
+      expect(key?.run, job).toBe(playwrightKeyOf(engines));
+      for (const part of ["$RUNNER_OS", "$RUNNER_ARCH", "$ImageOS", "$ImageVersion"]) {
+        expect(key?.run, `${job}: ${part}`).toContain(`-${part}-`);
+      }
+      // Restored by its exact key only (no restore-keys: a stale cache is never taken), and a
+      // restore that fails never turns the job red – the miss path runs instead.
+      expect(restore?.uses, job).toBe(PLAYWRIGHT_RESTORE_ACTION);
+      expect(restore?.id, job).toBe("playwright-cache");
+      expect(restore?.["continue-on-error"], job).toBe(true);
+      expect(restore && withOf(restore), job).toEqual({
+        path: PLAYWRIGHT_CACHE_PATH,
+        key: PLAYWRIGHT_KEY,
+      });
+      // The install reads the hit from the environment, not from an expression in the script.
+      expect(browsers?.env, job).toEqual({ PLAYWRIGHT_CACHE_HIT: `\${{ ${PLAYWRIGHT_HIT} }}` });
+      const run = typeof browsers?.run === "string" ? browsers.run : "";
+      expect(run, job).toBe(playwrightBrowsersOf(engines));
+      // A miss: today's line, then the .deb files it fetched go into the cache.
+      const end = run.indexOf("\nfi\n");
+      const [miss, hit] = [run.slice(0, end), run.slice(end + "\nfi\n".length)];
+      expect(end, job).toBeGreaterThan(0);
+      expect(miss, job).toMatch(/^if \[ "\$PLAYWRIGHT_CACHE_HIT" != "true" \]; then\n/);
+      expect(miss, job).toContain(
+        `\n  pnpm --filter @fundamento/eroj exec playwright install --with-deps ${engines}\n`,
+      );
+      expect(miss, job).toContain(`-exec cp -t ${PLAYWRIGHT_APT_DIR} {} +`);
+      // A hit: no --with-deps, no apt-get update, the browsers checked without a download; the
+      // system packages only when --dry-run reports one missing: exactly the packages it names,
+      // each from its cached .deb file, with dpkg (no apt, no network), all of them or none, checked
+      // again; the mirror only after a warning, when the cache falls short.
+      const [offline = "", fallback = ""] = hit.split('\necho "::warning');
+      expect(hit, job).not.toContain("--with-deps");
+      expect(hit, job).not.toMatch(/apt-get update/);
+      expect(offline, job).not.toMatch(/apt-get|apt install/);
+      expect(offline, job).toMatch(
+        new RegExp(
+          `^pnpm --filter @fundamento/eroj exec playwright install ${engines.replace("$", "\\$")}\n`,
+        ),
+      );
+      const dryRun = offline.indexOf(
+        `report=$(pnpm --filter @fundamento/eroj exec playwright install-deps --dry-run ${engines})`,
+      );
+      const pick = offline.indexOf(`-name "\${package}_*.deb"`);
+      const dpkg = offline.indexOf("sudo dpkg -i $debs && ");
+      expect(dryRun, job).toBeGreaterThan(0);
+      expect(pick, job).toBeGreaterThan(dryRun);
+      expect(dpkg, job).toBeGreaterThan(pick);
+      expect(offline, job).toContain(`for package in $missing; do find ${PLAYWRIGHT_APT_DIR} `);
+      expect(offline, job).toContain(
+        '[ "$(echo "$debs" | wc -l)" = "$(echo "$missing" | wc -l)" ] && sudo dpkg -i',
+      );
+      expect(offline.slice(dpkg), job).toContain(`install-deps --dry-run ${engines}; then`);
+      expect(offline, job).not.toMatch(/install-deps (?!--dry-run)/);
+      expect(fallback, job).toMatch(/^ title=Playwright cache::/);
+      expect(fallback, job).toContain(`exec playwright install-deps ${engines}\n`);
+      // Saved right after a green install, on a miss only, whatever the tests do later.
+      expect(save?.uses, job).toBe(PLAYWRIGHT_SAVE_ACTION);
+      expect(save?.if, job).toBe(playwrightSaveIf(affected(job)));
+      expect(save?.["continue-on-error"], job).toBe(true);
+      expect(save && withOf(save), job).toEqual({
+        path: PLAYWRIGHT_CACHE_PATH,
+        key: PLAYWRIGHT_KEY,
+      });
+    }
+    // The key follows the Playwright version: the exact pin of @fundamento/eroj is what is
+    // installed and what the key reads, so an update of the pin is a new key (a new cache).
+    const eroj: unknown = JSON.parse(readFileSync(`${repoRoot}packages/eroj/package.json`, "utf8"));
+    const pin =
+      isRecord(eroj) && isRecord(eroj.devDependencies)
+        ? eroj.devDependencies["@playwright/test"]
+        : undefined;
+    expect(pin).toMatch(/^\d+\.\d+\.\d+$/);
+    const installed: unknown = JSON.parse(
+      readFileSync(`${repoRoot}packages/eroj/node_modules/@playwright/test/package.json`, "utf8"),
+    );
+    expect(isRecord(installed) && installed.version).toBe(pin);
+    // No download limit raised for the cache (delivery.md: CI limits are never raised).
+    expect(readFileSync(workflowPath, "utf8")).not.toContain("SEGMENT_DOWNLOAD_TIMEOUT_MINS");
   });
 
   it("the engines follow the changed paths on a pull request", async () => {
@@ -854,14 +1080,16 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
       expect(loadJob(job).env, job).toEqual({ PLAYWRIGHT_ENGINES: ENGINES_FROM_BETROFFEN });
       expect(loadJob(job).needs, job).toBe(BETROFFEN);
       // Only the engines the run uses are installed (Spec 025 ③).
-      const install = loadSteps(job).find((step) => step.name === "Playwright browsers");
-      expect(install?.run, job).toBe(PLAYWRIGHT_BROWSERS);
+      const install = loadSteps(job).find((step) => step.name === PLAYWRIGHT_BROWSERS_STEP);
+      expect(install?.run, job).toBe(playwrightBrowsersOf("$PLAYWRIGHT_ENGINES"));
+      expect(install?.run, job).toContain(`  ${PLAYWRIGHT_BROWSERS}\n`);
     }
     // D-19: the Vitrino jobs install Chromium alone – the one engine their config runs, the first
     // project of the shared config whatever PLAYWRIGHT_ENGINES names.
     for (const job of Object.keys(VITRINO_JOBS)) {
-      const install = loadSteps(job).find((step) => step.name === "Playwright browsers");
-      expect(install?.run, job).toBe(PLAYWRIGHT_CHROMIUM);
+      const install = loadSteps(job).find((step) => step.name === PLAYWRIGHT_BROWSERS_STEP);
+      expect(install?.run, job).toBe(playwrightBrowsersOf("chromium"));
+      expect(install?.run, job).toContain(`  ${PLAYWRIGHT_CHROMIUM}\n`);
     }
     const vitrino = readFileSync(`${repoRoot}packages/eroj/playwright.vitrino.config.ts`, "utf8");
     expect(vitrino).toContain('projects: [base.projects?.[0] ?? { name: "chromium" }]');
@@ -1033,6 +1261,36 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
         /needs/,
         broken("vitrino", (job) => {
           delete job.needs;
+        }),
+      ],
+      // Spec 041 I-1: the browsers come from the cache, and the cache never turns a job red.
+      [
+        "werkstatt",
+        /Restore Playwright cache/,
+        broken("werkstatt", (_, steps) => {
+          steps.splice(steps.indexOf(named(steps, PLAYWRIGHT_RESTORE_STEP)), 1);
+        }),
+      ],
+      [
+        "eroj",
+        /Restore Playwright cache/,
+        broken("eroj", (_, steps) => {
+          delete named(steps, PLAYWRIGHT_RESTORE_STEP)["continue-on-error"];
+        }),
+      ],
+      [
+        "zeittests",
+        /Save Playwright cache/,
+        broken("zeittests", (_, steps) => {
+          const save = named(steps, PLAYWRIGHT_SAVE_STEP);
+          save.with = { ...withOf(save), key: `playwright-\${{ runner.os }}` };
+        }),
+      ],
+      [
+        "rendered-checks",
+        /gate/,
+        broken("rendered-checks", (_, steps) => {
+          named(steps, PLAYWRIGHT_SAVE_STEP).if = named(steps, "Build").if;
         }),
       ],
     ];
