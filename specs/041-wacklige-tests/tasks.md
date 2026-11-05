@@ -9,9 +9,9 @@ Drei Spuren auf getrennten Dateien (D-08): A1 (T2 → T1 → T3, als einzige mit
 | T1 | B-13, B-10, B-12: Bühne (WebKit) und `ECONNRESET` (D-01) | A | A1 | `packages/eroj/test/buehne-036.spec.ts`, `metiejo-036-uebernahme.spec.ts`, `wackler-040.ts`, `wackler-040.test.ts` | erledigt (B-12 Bühne behoben; B-10, B-13, B-12 Übernahme offen mit Spur) | B-12: `0bede97b` → `8cb97cc0`; Bühne-POSTs: Lauf → `888ea97a` |
 | T2 | Gerüst Spec 041; B-8: `stato`-Abruf beim Entladen beenden | A | A1 | `specs/041-wacklige-tests/{spec,plan,tasks}.md`, `packages/metiejo/src/html.ts`, `packages/eroj/test/stato-041.spec.ts` (neu) | erledigt (N-2 nachgebessert) | Gerüst `c7cbcd66`; B-8 `bd193cad`, `36a85b02` → `7e0ff9ec`; N-2 `24f2b273` → `178ed2a9` |
 | T3 | B-9 und B-15: Vorschau-Rahmen folgt der neuen `rev` in allen Browsern (D-02); dazu N-2 (B-8) | A | A1 | `packages/eroj/test/studio-035.spec.ts`; N-2: `packages/metiejo/src/html.ts`, `packages/eroj/test/stato-041.spec.ts` | erledigt | B-9/B-15: Lauf (10/30) → `78ad9ae6`; N-2: `24f2b273` → `178ed2a9` |
-| T4 | B-14: M5-Regression in der Werkstatt finden und beheben (D-04, D-09) | A (über T6) | A2 | `packages/projekcioj/src/celoj/vitrino/**`; Wegwerf-Refs `s041-m5-*` | offen | |
-| T5 | I-1: Playwright-Browser und Systempakete aus dem Actions-Cache (D-03, D-05, D-06) | B | B | `.github/workflows/ci.yml`, `packages/modelo/src/ci/workflow.test.ts` | offen | |
-| T6 | Zusammenführen, Doku-Test, Messung, PRs, Bericht | A und B | – | `packages/modelo/src/docs/docs.test.ts`, Pins für `M5_GRENZE_MS` und das Intervall, `specs/041-wacklige-tests/{plan,tasks}.md` | offen | |
+| T4 | B-14: M5-Regression in der Werkstatt finden und beheben (D-04, D-09) | A (über T6) | A2 | `packages/projekcioj/src/celoj/vitrino/**`; Wegwerf-Refs `s041-m5-*` | beendet ohne Fix (kein schuldiger Commit, B-14 offen, D-23 bis D-26); kein Commit, Arbeitsbranch entfernt | – (rot: C-2 auf 41971724414, 41971858056, 41973572877) |
+| T5 | I-1: Playwright-Browser und Systempakete aus dem Actions-Cache (D-03, D-05, D-06) | B | B | `.github/workflows/ci.yml`, `packages/modelo/src/ci/workflow.test.ts` | erledigt (Treffer ohne Spiegel; Fehlschlag wie heute, D-22) | `8d84c30c` → `b3c130b9`; Treffer-Pfad `debcf62a` → `b9cde42f` |
+| T6 | Zusammenführen, Doku-Test, Messung, PRs, Bericht | A und B | – | `packages/modelo/src/docs/docs.test.ts`, `packages/eroj/test/m5-041.test.ts`, `packages/metiejo/src/stato-041.test.ts`, `specs/041-wacklige-tests/{plan,tasks}.md` | in Arbeit | `7a9e0d6a` → (grün folgt) |
 
 ## T2 im Einzelnen
 
@@ -36,6 +36,12 @@ Drei Spuren auf getrennten Dateien (D-08): A1 (T2 → T1 → T3, als einzige mit
 - [x] T3 rot lokal: Firefox 3.4 `--repeat-each=30 --workers=10` 10/30 (7 × Testzeit = B-9, 3 × `rev=1` = B-15); Zeitstrahl: in allen 10 lud die Seite `rev` 2 in beide Rahmen, Playwright meldete kein `framenavigated`.
 - [x] T3 grün: 3.4 liest den Rahmen über `contentDocument` aus der Seite (D-18) – `78ad9ae6`; Firefox, Chromium, WebKit je `--repeat-each=90 --workers=10` 90/90.
 - [x] T3 Teil 0: N-2 (B-8) behoben – `24f2b273` → `178ed2a9` (D-17).
-- [ ] T4: B-14.
-- [ ] T5: I-1.
+- [x] T4 roter Nachweis: C-2 auf 41971724414, 41971858056, 41973572877: p90 51, 53, 55 ms.
+- [x] T4 Bisektion: fünf Runden auf Wegwerf-Refs `s041-m5-runde-1` … `-5`, zwölf Stände, 87 Stichproben; kein schuldiger Commit (D-23); Diagnose per CDP-Trace auf `s041-m5-diagnose` (D-25). Alle Wegwerf-Refs gelöscht, `s041-m5-fix` nie angelegt.
+- [ ] T4 Fix: keiner. B-14 offen, AC-6 offen; der Maintainer entscheidet (Bericht).
+- [x] T5 roter Nachweis I-1: sieben 15-min-Abbrüche in 41920898257, 41931882770, 41936625983; 41943148273 „Fetched 114 MB in 13min 37s (140 kB/s)“.
+- [x] T5 `workflow.test.ts` rot `8d84c30c` → `ci.yml` grün `b3c130b9`; Treffer-Pfad per `dpkg -i` rot `debcf62a` → grün `b9cde42f` (D-19).
+- [x] T5 Prüfläufe: 42050500562 (Fehlschlag, speichert; I-1 nachgestellt), 42053971357 (14/14 Treffer, 0 Spiegel-`Get:`). Vitest 51/51, `pnpm lint`, `pnpm check:privat` grün.
+- [x] T6 T4 und T5 in plan und tasks eingetragen, D-Einträge von T5 (dort D-13 bis D-16) als D-19 bis D-22 und von T4 (a bis d) als D-23 bis D-26 neu nummeriert; Worktree und Branch `261105-spec-041-m5` entfernt.
+- [x] T6 Doku-Test und Pins rot `7a9e0d6a` (Befund-Zeilen B-14 und I-1 leer; Pins gegen 51/0.8/2999 und m5.ts 55/html.ts 2500 rot gesehen).
 - [ ] T6: Zusammenführen, Tests, Messung, PRs, Bericht.
