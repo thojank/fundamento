@@ -8,7 +8,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { type APIRequestContext, expect, type Page, test } from "@playwright/test";
+import { type APIRequestContext, expect, type Locator, type Page, test } from "@playwright/test";
 import { nachEinemReset } from "./wackler-040.js";
 
 const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
@@ -102,6 +102,28 @@ async function stand(request: APIRequestContext, id: string): Promise<Stand> {
 }
 
 const zeile = (page: Page, token: string) => page.locator(`[data-mt-token="${token}"]`);
+
+/**
+ * The stylesheet of the document the preview frame has loaded (`vorschau.css?rev=<rev of that
+ * document>`), "" while its document is still loading. Read from the page that holds the frame
+ * (the frame is of the same origin), not through Playwright's frame: Spec 041 B-9/B-15, Firefox
+ * under load: both previews loaded the document of the new rev (the frames' load events in the
+ * page show it), but Playwright reported no `framenavigated` for them and kept reading the old
+ * document of rev 1 (10 of 30 locally, all 10 without the event; the 20 green ones had it). Its
+ * frame then answered with rev 1 for 5 s or not at all, until the test timeout (CI 41931882770,
+ * 41971724414; 41920898257, 42053971357). The page's own view of its frame has no such gap, and it
+ * is the same in every browser.
+ */
+const geladeneVorschau = (rahmen: Locator): Promise<string> =>
+  rahmen.evaluate((frame: HTMLIFrameElement) => {
+    const dokument = frame.contentDocument;
+    if (dokument === null || dokument.readyState !== "complete") return "";
+    return (
+      dokument
+        .querySelector('link[rel="stylesheet"][href*="vorschau.css"]')
+        ?.getAttribute("href") ?? ""
+    );
+  });
 
 /** The answer to the formularo's sending of a Studio page, before the person acts. */
 const sendung = (page: Page, path: string) =>
@@ -279,19 +301,19 @@ test.describe("Studio (Spec 035 Teil 3)", () => {
       const nachher = (await stand(request, id)).rev;
       expect(nachher).toBeGreaterThan(vorher);
       expect(((await (await abgefragt).json()) as { rev: number }).rev).toBe(nachher);
-      // After that answer the preview follows within the default wait of an expectation (5 s).
+      // After that answer the preview follows within the default wait of an expectation (5 s):
+      // the frame has loaded the document of the new rev, and that document shows the value.
       await expect(rahmen).toHaveAttribute("src", new RegExp(`[?&]rev=${nachher}(&|$)`));
-      const vorschau = a.frameLocator("iframe[data-mt-vorschau]");
-      await expect(
-        vorschau.locator('link[rel="stylesheet"][href*="vorschau.css"]'),
-      ).toHaveAttribute("href", new RegExp(`rev=${nachher}$`));
+      await expect.poll(() => geladeneVorschau(rahmen)).toMatch(new RegExp(`rev=${nachher}$`));
       await expect
         .poll(() =>
-          vorschau
-            .locator("body")
-            .evaluate((body) =>
-              getComputedStyle(body).getPropertyValue("--fm-spacing-scale-400").trim(),
-            ),
+          rahmen.evaluate((frame: HTMLIFrameElement) => {
+            const body = frame.contentDocument?.body;
+            const view = frame.contentWindow;
+            return body && view
+              ? view.getComputedStyle(body).getPropertyValue("--fm-spacing-scale-400").trim()
+              : "";
+          }),
         )
         .toBe("18px");
     } finally {
