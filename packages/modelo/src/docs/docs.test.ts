@@ -4604,3 +4604,193 @@ describe("Spec 036 documentation (specs/036-assistent-buehne)", () => {
     }
   });
 });
+
+describe("Spec 040 documentation (specs/040-ci-schneller)", () => {
+  const SPEC_040_SHA256 = "438067bda9011d449c4034e4999dd11e65289d116e2e8dc93f19798ed98d95f1";
+  const DIR = "specs/040-ci-schneller";
+  const PRS = [144, 145];
+  /** AC-A1 to AC-A6, AC-B1 to AC-B15, AC-G1 and AC-G2 of the product spec. */
+  const ACS = [
+    ...Array.from({ length: 6 }, (_, i) => `AC-A${i + 1}`),
+    ...Array.from({ length: 15 }, (_, i) => `AC-B${i + 1}`),
+    "AC-G1",
+    "AC-G2",
+  ];
+  /** B-1 to B-5 of the spec and every Befund the run found. */
+  const BEFUNDE = Array.from({ length: 10 }, (_, i) => `B-${i + 1}`);
+  const VERDICT = /^(erfüllt|teilweise|offen)\b/;
+
+  const plan = () => read(`${DIR}/plan.md`);
+
+  /** Table rows whose first cell is `id` or starts with `id` and a space. */
+  const rowsOf = (text: string, id: string) =>
+    text.split("\n").filter((line) => line.startsWith(`| ${id} |`) || line.startsWith(`| ${id} `));
+
+  /** Cells of a table row, without the outer pipes. */
+  const cellsOf = (row: string) =>
+    row
+      .replace(/^\|/, "")
+      .replace(/\|$/, "")
+      .split("|")
+      .map((cell) => cell.trim());
+
+  /** The `###` sub-section of a `##` section with the given heading, up to the next `###`. */
+  function teil(of: string, heading: string): string {
+    const text = section(plan(), of);
+    const start = text.indexOf(`### ${heading}`);
+    if (start < 0) return "";
+    const end = text.indexOf("\n### ", start + 1);
+    return end < 0 ? text.slice(start) : text.slice(start, end);
+  }
+
+  it("the spec is the source, byte for byte; its hash stands in the plan; plan and tasks lie next to it (AC-B1)", () => {
+    const spec = read(`${DIR}/spec.md`);
+    expect(createHash("sha256").update(spec).digest("hex")).toBe(SPEC_040_SHA256);
+    expect(plan()).toContain(SPEC_040_SHA256);
+    expect(existsSync(`${repoRoot}${DIR}/tasks.md`)).toBe(true);
+  });
+
+  it("tasks lists T-1 to T-8, no ninth ticket, each done with its commits (AC-B15)", () => {
+    const tasks = read(`${DIR}/tasks.md`);
+    for (let n = 1; n <= 8; n += 1) {
+      const row = rowsOf(tasks, `T-${n}`)[0];
+      expect(row, `T-${n}`).toBeDefined();
+      const cells = cellsOf(row ?? "");
+      expect(cells.at(-2), `T-${n}`).toBe("erledigt");
+      expect(cells.at(-1), `T-${n}`).toMatch(/`[0-9a-f]{8}`/);
+    }
+    expect(tasks).not.toMatch(/^\| T-9 /m);
+  });
+
+  it("the Messungen have vorher and nachher for main, the pull request and local, nothing left to T-8 (AC-B2)", () => {
+    const messungen = section(plan(), "Messungen");
+    expect(messungen).not.toBe("");
+    for (const heading of [
+      "`main` vorher",
+      "PR vorher",
+      "Lokal vorher",
+      "PR nachher",
+      "Probe-PR nachher",
+      "Lokal nachher",
+      "`main` nachher",
+      "Probe-Ticket P",
+      "Vorher und nachher je Job",
+    ]) {
+      expect(teil("Messungen", heading), heading).not.toBe("");
+    }
+    expect(messungen).not.toMatch(/offen \(T-8\)/);
+    // Every row of the summary has a value before, after and a Δ (or says why there is none).
+    const summary = teil("Messungen", "Vorher und nachher je Job")
+      .split("\n")
+      .filter(
+        (line) => line.startsWith("| ") && !line.startsWith("| Job") && !line.startsWith("|---"),
+      );
+    expect(summary.length).toBeGreaterThan(10);
+    for (const row of summary) {
+      const cells = cellsOf(row);
+      expect(cells, row).toHaveLength(7);
+      for (const cell of cells) expect(cell, row).not.toBe("");
+    }
+    // The probe ticket P: before and after, every row filled.
+    const probe = teil("Messungen", "Probe-Ticket P")
+      .split("\n")
+      .filter((line) =>
+        /^\| (Weg|Werkzeugaufrufe|Wanduhr|Test|Zeilen der Testausgabe) \|/.test(line),
+      );
+    expect(probe).toHaveLength(5);
+    for (const row of probe) expect(cellsOf(row)[2], row).not.toMatch(/^offen/);
+  });
+
+  it("the plan has the decisions D-01 ff. and V-1 to V-8, every D it names with a row, and Blockiert", () => {
+    const text = plan();
+    const decisions = section(text, "Entscheidungen, vom Maintainer zu bestätigen");
+    expect(decisions).not.toBe("");
+    for (const id of [
+      "D-01",
+      "D-02",
+      "D-03",
+      ...Array.from({ length: 8 }, (_, i) => `V-${i + 1}`),
+    ]) {
+      expect(rowsOf(decisions, id), id).not.toHaveLength(0);
+    }
+    const named = new Set(
+      [...text.matchAll(/(?<!Spec \d{3} )\bD-(\d{2,3})\b/g)].map((match) => match[0]),
+    );
+    expect(named.size).toBeGreaterThan(20);
+    for (const id of named) expect(rowsOf(decisions, id), id).not.toHaveLength(0);
+    // No decision is left to a ticket that has run.
+    expect(decisions).not.toMatch(/\| offen \((T-\d)\) \|/);
+    expect(text.split("\n")).toContain("## Blockiert");
+  });
+
+  it("the Bericht has its sections, a link per PR and the R-A diff search with its command (AC-G2, AC-A5, AC-B13)", () => {
+    const report = section(plan(), "Bericht");
+    expect(report).not.toBe("");
+    for (const heading of [
+      "PRs je Teil",
+      "Messungen",
+      "Befunde",
+      "Entscheidungen",
+      "Prüfung gegen die Abnahmekriterien",
+      "Diff-Suche R-A",
+      "Was der Maintainer tun soll",
+    ]) {
+      expect(teil("Bericht", heading), heading).not.toBe("");
+    }
+    for (const nr of PRS) {
+      expect(report, `#${nr}`).toMatch(
+        new RegExp(`https://github\\.com/thojank/fundamento/pull/${nr}(?!\\d)`),
+      );
+    }
+    const diff = teil("Bericht", "Diff-Suche R-A");
+    expect(diff).toContain("b500e302...261104-spec-040-b1-shards");
+    expect(diff).toContain("261104-spec-040-b1-shards...261104-spec-040-ci-schneller");
+    expect(diff).toContain("timeout-minutes|timeout:|Timeout\\(|retries");
+    expect(report).toMatch(/\b0 \$/);
+    // The maintainer's steps are numbered, in order.
+    const steps = teil("Bericht", "Was der Maintainer tun soll")
+      .split("\n")
+      .filter((line) => /^\d+\. /.test(line))
+      .map((line) => Number(line.split(".")[0]));
+    expect(steps.length).toBeGreaterThan(3);
+    expect(steps).toEqual(steps.map((_, i) => i + 1));
+  });
+
+  it("the Bericht names B-1 to B-10 and every other Befund with its state, and the count adds up", () => {
+    const befunde = teil("Bericht", "Befunde");
+    for (const id of BEFUNDE) {
+      const row = rowsOf(befunde, id).find((line) =>
+        /^\| \S+ \| (erledigt|teilweise|offen) \|/.test(line),
+      );
+      expect(row, id).toBeDefined();
+    }
+    // The count covers every row with a state: B-1 to B-10 and what else the run found.
+    const states = befunde
+      .split("\n")
+      .filter((line) => /^\| \S+ \| (erledigt|teilweise|offen) \|/.test(line))
+      .map((line) => cellsOf(line)[1]);
+    expect(states.length).toBeGreaterThanOrEqual(BEFUNDE.length);
+    const count = (state: string) => states.filter((s) => s === state).length;
+    expect(befunde).toContain(
+      `**Zahl:** ${count("erledigt")} erledigt, ${count("teilweise")} teilweise, ${count("offen")} offen.`,
+    );
+  });
+
+  it("the Bericht checks AC-A1 to AC-G2, one row each with its proof and its verdict", () => {
+    const audit = teil("Bericht", "Prüfung gegen die Abnahmekriterien");
+    expect(audit).not.toBe("");
+    const verdicts = ACS.map((ac) => {
+      const row = rowsOf(audit, ac)[0];
+      expect(row, ac).toBeDefined();
+      const cells = cellsOf(row ?? "");
+      expect(cells, ac).toHaveLength(3);
+      expect(cells[1], ac).toMatch(VERDICT);
+      expect(cells[2], ac).not.toBe("");
+      return (cells[1] ?? "").split(/[ ,]/)[0];
+    });
+    const count = (state: string) => verdicts.filter((v) => v === state).length;
+    expect(audit).toContain(
+      `**Zahl:** ${count("erfüllt")} erfüllt, ${count("teilweise")} teilweise, ${count("offen")} offen.`,
+    );
+  });
+});
