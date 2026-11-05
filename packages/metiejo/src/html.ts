@@ -702,12 +702,16 @@ if (kreilo && marko) {
 // The one draft: when the assistant or the Studio changed it elsewhere, follow.
 // Spec 041 B-8: the poll ends with its page. WebKit and Firefox stop a page's loads between
 // beforeunload and pagehide, and a poll they cut short surfaced as an error of the old page. So the
-// page aborts its own request at beforeunload; if the page stays (a download, a cancelled
-// navigation) the poll goes on. At pagehide the interval stops as well. A page the back-forward
-// cache restores (pageshow with persisted) polls again, once; the first load's pageshow starts
-// nothing, the poll already runs. A failed request was no news already; a failed body is now too.
+// page aborts its own request at beforeunload, and no tick asks again while the page is leaving
+// (Spec 041 N-2: a navigation can take longer than an interval, and a tick in between started a
+// request the browser cut short in turn). If the page stays (a cancelled navigation), the person's
+// next key, pointer or return to the window lets the poll go on. At pagehide the interval stops as
+// well. A page the back-forward cache restores (pageshow with persisted) polls again, once; the
+// first load's pageshow starts nothing, the poll already runs. A failed request was no news
+// already; a failed body is now too.
 if (marko && (asistantoData || (sxtupo && sxtupo.startsWith("studio-")))) {
   let poll;
+  let leaving = false;
   let pollAbort = new AbortController();
   const abortRequest = () => {
     pollAbort.abort();
@@ -716,7 +720,7 @@ if (marko && (asistantoData || (sxtupo && sxtupo.startsWith("studio-")))) {
   const follow = () => {
     if (poll !== undefined) return;
     poll = setInterval(async () => {
-      if (sending || studioSendet || document.hidden) return;
+      if (leaving || sending || studioSendet || document.hidden) return;
       const signal = pollAbort.signal;
       const response = await fetch("/api/marko/" + marko + "/stato", { signal }).catch(() => undefined);
       if (!response || !response.ok) return;
@@ -731,13 +735,24 @@ if (marko && (asistantoData || (sxtupo && sxtupo.startsWith("studio-")))) {
     }, 3000);
   };
   follow();
-  window.addEventListener("beforeunload", abortRequest);
+  const stay = () => { leaving = false; };
+  window.addEventListener("beforeunload", () => {
+    leaving = true;
+    abortRequest();
+  });
+  window.addEventListener("keydown", stay, true);
+  window.addEventListener("pointerdown", stay, true);
+  window.addEventListener("focus", stay);
   window.addEventListener("pagehide", () => {
     clearInterval(poll);
     poll = undefined;
     abortRequest();
   });
-  window.addEventListener("pageshow", (event) => { if (event.persisted) follow(); });
+  window.addEventListener("pageshow", (event) => {
+    if (!event.persisted) return;
+    stay();
+    follow();
+  });
 }
 
 if (frame) refreshFrame();
