@@ -2,7 +2,7 @@
 
 **Spec:** [`spec.md`](spec.md) (unverändert mit `cp` kopiert; SHA-256 `a8480d42f7cb2bc23d9c81a7da1bdff174254b925653372571a3a337a2b86878`) · **Aufgaben:** [`tasks.md`](tasks.md) · **Basis:** `main` `e4873c57` (Merge #148; enthält #147 und Spec 041) · **Regel 0** gilt. **Keine Grenzen, Zeitlimits, Schwellen, Abfrageintervalle, Toleranzen oder Retries angehoben. Nichts gemergt.** Kein Sprachmodell (0 $).
 
-**Datum:** 2026-11-06 · **Stand:** T1 in Arbeit (Gerüst angelegt); T2 bis T5 offen.
+**Datum:** 2026-11-06 · **Stand:** T1 fertig (Gerüst, Trace `retain-on-failure` für die Eroj-Shards, D-01 lokal bestätigt); T2 bis T5 offen.
 
 ### G-0 Quelle
 
@@ -32,9 +32,9 @@ Der Lauf ist unbeaufsichtigt. Wo die Spec offen ließ, gilt die Annahme. „ange
 
 | ID | Frage | Annahme | Warum | Stand |
 |---|---|---|---|---|
-| D-01 | Muss `ci.yml` für den Trace geändert werden? | **Wahrscheinlich nicht.** In der CI schreibt jede Eroj-Konfiguration den HTML-Bericht nach `packages/eroj/test-reports/playwright/html/` (`scripts/reporter/knapp-playwright.mjs`). Der HTML-Reporter von Playwright kopiert jeden Anhang, auch `trace.zip`, in seinen Ordner `data/`. Den lädt der bestehende Schritt „Testberichte“ (`packages/*/test-reports/`) schon als Artefakt `testberichte-eroj-<shard>-<attempt>` hoch. T1 prüft das lokal mit `CI=1`. Nur wenn der Trace dort **nicht** landet, bekommt der Job `eroj` einen eigenen Upload-Schritt **vor** „Testberichte“. Dann muss `packages/modelo/src/ci/workflow.test.ts` (`EROJ_STEPS`, „Testberichte is the last step“) im selben Commit mitziehen. Das steht dann als Abweichung vom Dateizuschnitt im Bericht. | `workflow.test.ts` pinnt die Schrittliste des Jobs `eroj` genau. Ein neuer Schritt ohne Anpassung macht `@fundamento/modelo` rot. | offen |
-| D-02 | Gilt der Trace auch für die abgeleiteten Konfigurationen? | **Nein, nur für die Eroj-Shards.** `playwright.vitrino.config.ts`, `playwright.alirebleco.config.ts`, `playwright.make-kit.config.ts` und `playwright.quickstart.config.ts` breiten `...base` aus und würden `use.trace` erben. Sie setzen `trace: "off"` ausdrücklich. `playwright.vitrino-partoj.config.ts` erbt das von der Vitrino. | Trace-Aufnahme im Job `zeittests` würde M5 verfälschen. Die Alirebleco-Shards liegen nahe an ihren 15 min (Spec 040 B-1). Die Quell-Spec sagt „für die Eroj-Shards“. | offen |
-| D-03 | Dürfen neue Dateien unter `packages/eroj/test/` entstehen außer dem Navigationstest? | **Ja, drei neue Dateien:** der Navigationstest `buehne-navigation-042.spec.ts`, ein Hilfsmodul `geladen-042.ts` (Warten auf den geladenen Zustand, genutzt von `buehne-036` und `zweitfarbe-036`) und ein Vitest-Pin `spuro-042.test.ts` (Trace-Konfiguration). **`wackler-040.ts` bleibt unverändert.** Es wird auch von `studio-035` und anderen genutzt. | Ein Hilfsmodul gehört nicht in eine `.spec.ts` (Import würde Tests doppelt registrieren). Test-first verlangt einen roten Pin vor der Konfigurationsänderung. | offen |
+| D-01 | Muss `ci.yml` für den Trace geändert werden? | **Wahrscheinlich nicht.** In der CI schreibt jede Eroj-Konfiguration den HTML-Bericht nach `packages/eroj/test-reports/playwright/html/` (`scripts/reporter/knapp-playwright.mjs`). Der HTML-Reporter von Playwright kopiert jeden Anhang, auch `trace.zip`, in seinen Ordner `data/`. Den lädt der bestehende Schritt „Testberichte“ (`packages/*/test-reports/`) schon als Artefakt `testberichte-eroj-<shard>-<attempt>` hoch. T1 prüft das lokal mit `CI=1`. Nur wenn der Trace dort **nicht** landet, bekommt der Job `eroj` einen eigenen Upload-Schritt **vor** „Testberichte“. Dann muss `packages/modelo/src/ci/workflow.test.ts` (`EROJ_STEPS`, „Testberichte is the last step“) im selben Commit mitziehen. Das steht dann als Abweichung vom Dateizuschnitt im Bericht. | `workflow.test.ts` pinnt die Schrittliste des Jobs `eroj` genau. Ein neuer Schritt ohne Anpassung macht `@fundamento/modelo` rot. | bestätigt (T1): Der Trace landet lokal mit `CI=1` als `*.zip` unter `packages/eroj/test-reports/playwright/html/data/` (Messanleitung). Keine Änderung an `ci.yml` und `workflow.test.ts`. |
+| D-02 | Gilt der Trace auch für die abgeleiteten Konfigurationen? | **Nein, nur für die Eroj-Shards.** `playwright.vitrino.config.ts`, `playwright.alirebleco.config.ts`, `playwright.make-kit.config.ts` und `playwright.quickstart.config.ts` breiten `...base` aus und würden `use.trace` erben. Sie setzen `trace: "off"` ausdrücklich. `playwright.vitrino-partoj.config.ts` erbt das von der Vitrino. | Trace-Aufnahme im Job `zeittests` würde M5 verfälschen. Die Alirebleco-Shards liegen nahe an ihren 15 min (Spec 040 B-1). Die Quell-Spec sagt „für die Eroj-Shards“. | angewandt (T1, `347a3355`; gepinnt in `packages/eroj/test/spuro-042.test.ts`) |
+| D-03 | Dürfen neue Dateien unter `packages/eroj/test/` entstehen außer dem Navigationstest? | **Ja, drei neue Dateien:** der Navigationstest `buehne-navigation-042.spec.ts`, ein Hilfsmodul `geladen-042.ts` (Warten auf den geladenen Zustand, genutzt von `buehne-036` und `zweitfarbe-036`) und ein Vitest-Pin `spuro-042.test.ts` (Trace-Konfiguration). **`wackler-040.ts` bleibt unverändert.** Es wird auch von `studio-035` und anderen genutzt. | Ein Hilfsmodul gehört nicht in eine `.spec.ts` (Import würde Tests doppelt registrieren). Test-first verlangt einen roten Pin vor der Konfigurationsänderung. | teilweise: `spuro-042.test.ts` angelegt (T1, rot `538bca43`); Navigationstest und `geladen-042.ts` offen (T2) |
 | D-04 | Nur der Hauptrahmen oder auch die Vorschau-Rahmen? | **Beide, beide bindend.** Der Navigationstest schreibt die Navigationen des Hauptrahmens mit, wie die Spec verlangt. Zusätzlich zeichnet er die beiden Vorschau-Rahmen der Bühne auf (`iframe[data-mt-vorschau]`, `iframe[data-mt-vorschau-propono]`). Eine ungewollte Navigation eines Vorschau-Rahmens ist ebenfalls ein Befund, den T2 im Produkt behebt. | Der einzige Chromium-Beleg (42113762271, `buehne-036.spec.ts:187`) wertet **im Vorschau-Rahmen** aus (`grund()` über `frameLocator`). Auf Assistenten-Seiten lädt der `stato`-Abruf bei neuer `rev` nicht die Seite neu, sondern beide Rahmen (`html.ts` › `refreshFrame()`/`zeigeStato()` → `refreshNachher()`). Wer nur den Hauptrahmen zählt, findet diese Ursache womöglich nicht. | offen |
 | D-05 | Was ist „festlegen“ im Ablauf? | Wie in Bühne 3.5: `POST /api/marko/<id>/festlegen` aus dem Test (eigene Verbindung, `connection: close`). Danach wartet der Test, bis der `stato`-Abruf der offenen Seite die neue `rev` gesehen und verarbeitet hat. Er wartet auf die Antwort des Abrufs, nie auf die Uhr. Erst dann folgt das zweite `oeffne()`. | So deckt der Ablauf die Kette `rev` → Abruf → Reaktion der Seite deterministisch ab. Das ist genau das Fenster, in dem 3.5 (B-13, Load failed) rot wurde. | offen |
 | D-06 | Wohin kommen die CI-Ergebnisse, wenn nach dem Dispatch nicht mehr gepusht wird? | In **PR-Kommentare** (PR A: Gesamtbericht-Nachtrag; PR B: eigener Lauf mit M5) und in die **Schlussantwort**. `plan.md` › Bericht (in PR A) enthält alles, was vor dem Dispatch feststeht, und sagt ausdrücklich, dass die CI-Werte im Kommentar stehen, samt Befehlen zum Nachlesen. | AC-9: kein Push nach dem Dispatch. | offen |
@@ -89,6 +89,24 @@ wc -c /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/sp
 shasum -a 256 /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec042/spec.md specs/042-buehne-m5/spec.md
 git show HEAD:specs/042-buehne-m5/spec.md | shasum -a 256
 ```
+
+```sh
+# T1: Pin der Trace-Konfiguration (rot 538bca43 → grün 347a3355)
+cd packages/eroj && FM_GEBAUT=1 FM_AUSGABE=knapp pnpm exec vitest run test/spuro-042.test.ts
+
+# T1 / D-01: Landet der Trace eines roten Tests im HTML-Bericht, den „Testberichte“ hochlädt?
+# Wegwerf-Spec packages/eroj/test/wegwerf-042.spec.ts (nie committet, danach gelöscht):
+#   page.setContent("<p>rot</p>"), dann expect(...).toHaveText("grün") – scheitert absichtlich.
+cd packages/eroj && rm -rf test-reports/playwright && \
+  CI=1 FM_AUSGABE=knapp PLAYWRIGHT_ENGINES=chromium pnpm exec playwright test test/wegwerf-042.spec.ts
+find test-reports/playwright/html/data -name '*.zip'
+unzip -l test-reports/playwright/html/data/*.zip
+rm test/wegwerf-042.spec.ts && rm -rf test-results/wegwerf-042-* test-reports/playwright
+```
+
+Fund (2026-11-06, 01:58 Ortszeit, Apple M1 Max, 10 Kerne, macOS 26.5.1, Stand `347a3355`, unter der Maschinen-Sperre): 0 bestanden, 1 rot; unter `packages/eroj/test-reports/playwright/html/data/` liegen `466791e9d3262ac46d6c8a530ed9c68f8fc4580f.zip` (7114 Byte; darin `0-trace.trace`, `0-trace.network`, `0-trace.stacks`, Bildschirmaufnahmen) und der Fehlerkontext (`.md`); daneben der Trace-Betrachter unter `html/trace/`. Der Schritt „Testberichte“ im Job `eroj` lädt `packages/*/test-reports/` schon als `testberichte-eroj-<shard>-<attempt>` hoch (`if: always()`, 7 Tage). **D-01 bestätigt: kein eigener Upload-Schritt, `ci.yml` und `workflow.test.ts` unverändert.** Die Wegwerf-Spec ist gelöscht; `test-reports/` und `test-results/` stehen in `.gitignore`.
+
+In einem Artefakt der CI liegt der Trace eines roten Eroj-Tests unter `eroj/test-reports/playwright/html/data/*.zip`; lesen mit `pnpm exec playwright show-trace <zip>` (nur lesen, nie ausführen).
 
 ## Blockiert
 
