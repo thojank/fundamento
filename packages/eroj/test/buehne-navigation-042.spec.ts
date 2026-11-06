@@ -11,7 +11,11 @@
 //   the step of the test the document came in,
 // - performance: the navigation entry of that document (`navigate`, `reload`, …),
 // - src: every assignment of an iframe's `src` in the page (the only way the client navigates a
-//   frame, html.ts › refreshFrame()/refreshNachher()), counted when it happens.
+//   frame, html.ts › refreshFrame()/refreshNachher()), counted when it happens,
+// - laden: every document a frame loaded, noted by the page that holds the frame (`load` of the
+//   iframe; Spec 043 T2, testing.md › Spec 041). In Firefox the init script did not run in the
+//   frames' documents of the step „rev“ (run 42180054807; locally 4 of 30): the frame's own entries
+//   are then missing, the page's are not. A frame's documents are the ones either source saw.
 // For the page itself `framenavigated` is reported as well, but it does not decide: Firefox misses
 // navigations there (Spec 041 B-9/B-15). Every entry also goes to a binding of the test
 // (`exposeBinding`), reported beside the others: it tells a document whose entry did not reach
@@ -23,7 +27,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type APIRequestContext, expect, type Page, test } from "@playwright/test";
-import { BUEHNE_BEREIT, rahmenBereit, seiteBereit } from "./geladen-042.js";
+import { BUEHNE_BEREIT, dokument, rahmenBereit, seiteBereit } from "./geladen-042.js";
 
 const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
 const cli = join(repoRoot, "packages/cli/dist/index.js");
@@ -102,7 +106,7 @@ const VORSCHLAG = "[data-mt-buehne] iframe[data-mt-vorschau-propono]";
 
 /** One observation: a document, a navigation entry or an assignment of a frame's src. */
 interface Eintrag {
-  quelle: "sessionStorage" | "performance" | "src" | "framenavigated" | "bindung";
+  quelle: "sessionStorage" | "performance" | "src" | "laden" | "framenavigated" | "bindung";
   /** haupt: the page; jetzt: iframe[data-mt-vorschau]; vorschlag: iframe[data-mt-vorschau-propono]. */
   rolle: string;
   schritt: string;
@@ -110,6 +114,8 @@ interface Eintrag {
   url: string;
   /** When it was noted (performance.timeOrigin + performance.now(), ms since the epoch). */
   zeit?: number;
+  /** Which document: its `performance.timeOrigin`, its own for every document. */
+  dokument?: number;
 }
 
 const PROTOKOLL = "fm-navigation-042:protokoll";
@@ -136,12 +142,13 @@ function zaehle(schluessel: { protokoll: string; schritt: string; bindung: strin
     return `anderer Rahmen ${element.outerHTML.slice(0, 80)}`;
   };
   const schritt = () => sessionStorage.getItem(schluessel.schritt) ?? "laden-1";
-  const notiere = (eintrag: Record<string, string>) => {
+  const notiere = (eintrag: Record<string, string | number>) => {
     const zeit = performance.timeOrigin + performance.now();
     const key = `${schluessel.protokoll}:${zeit}:${Math.random()}`;
-    sessionStorage.setItem(key, JSON.stringify({ ...eintrag, zeit }));
+    const vollstaendig = { dokument: performance.timeOrigin, ...eintrag, zeit };
+    sessionStorage.setItem(key, JSON.stringify(vollstaendig));
     const bindung = (window as unknown as Record<string, unknown>)[schluessel.bindung];
-    if (typeof bindung === "function") bindung({ ...eintrag, zeit });
+    if (typeof bindung === "function") bindung(vollstaendig);
   };
   const rolle = window === window.top ? "haupt" : rolleOf(window.frameElement);
   notiere({ quelle: "sessionStorage", rolle, schritt: schritt(), url: location.href });
@@ -165,6 +172,52 @@ function zaehle(schluessel: { protokoll: string; schritt: string; bindung: strin
     document.addEventListener("DOMContentLoaded", () => leistung(step), { once: true });
   }
   if (window !== window.top) return;
+  // The step a frame's document came in: the one named last before its navigation began (its
+  // timeOrigin). Each step is named before the test's trigger and only after the documents of the
+  // step before have loaded (`schritt()` below), so the load itself may be noted later.
+  const schrittBei = (beginn: number): string => {
+    const prefix = `${schluessel.schritt}:`;
+    let name = "laden-1";
+    let seit = Number.NEGATIVE_INFINITY;
+    for (let index = 0; index < sessionStorage.length; index += 1) {
+      const key = sessionStorage.key(index);
+      if (key?.startsWith(prefix) !== true) continue;
+      const genannt = Number(key.slice(prefix.length));
+      if (genannt <= beginn && genannt > seit) {
+        seit = genannt;
+        name = sessionStorage.getItem(key) ?? name;
+      }
+    }
+    return name;
+  };
+  // The page notes every document a frame loaded (`load` of the iframe, read in the capture phase).
+  document.addEventListener(
+    "load",
+    (event) => {
+      if (!(event.target instanceof HTMLIFrameElement)) return;
+      const frame = event.target;
+      const doc = frame.contentDocument;
+      if (doc === null) {
+        notiere({ quelle: "laden", rolle: rolleOf(frame), schritt: schritt(), url: "Fehlerseite" });
+        return;
+      }
+      if (doc.URL === "about:blank") return;
+      const fenster = doc.defaultView;
+      const beginn = fenster?.performance.timeOrigin ?? Number.NaN;
+      const navigation = fenster?.performance.getEntriesByType("navigation")[0] as
+        | PerformanceNavigationTiming
+        | undefined;
+      notiere({
+        quelle: "laden",
+        rolle: rolleOf(frame),
+        schritt: schrittBei(beginn),
+        typ: navigation?.type ?? "fehlt",
+        url: doc.URL,
+        dokument: beginn,
+      });
+    },
+    true,
+  );
   const src = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, "src");
   if (src?.set === undefined) return;
   Object.defineProperty(HTMLIFrameElement.prototype, "src", {
@@ -176,13 +229,16 @@ function zaehle(schluessel: { protokoll: string; schritt: string; bindung: strin
   });
 }
 
-/** Names the step the next documents come in. */
+/** Names the step the next documents come in, with the time it was named (`zaehle` › schrittBei). */
 async function schritt(page: Page, name: string, beobachtet: { schritt: string }): Promise<void> {
   beobachtet.schritt = name;
-  await page.evaluate(([key, value]) => sessionStorage.setItem(key, value), [
-    SCHRITT,
-    name,
-  ] as const);
+  await page.evaluate(
+    ([key, value]) => {
+      sessionStorage.setItem(key, value);
+      sessionStorage.setItem(`${key}:${performance.timeOrigin + performance.now()}`, value);
+    },
+    [SCHRITT, name] as const,
+  );
 }
 
 /** Both frames of the stage have loaded the document of `rev` in `scheme`. */
@@ -298,10 +354,28 @@ test("Spec 042: the stage navigates only on the test's steps – page and previe
         .map((eintrag) =>
           eintrag.typ === undefined ? eintrag.schritt : `${eintrag.schritt} ${eintrag.typ}`,
         );
+    // The documents of a frame, each once, in the order they began: every document the frame's
+    // init script noted (sessionStorage, performance) or the page saw the frame load (laden), told
+    // apart by their timeOrigin. The step and the navigation type come from the first entry noted.
+    const dokumente = (rolle: string) => {
+      const gesehen = new Map<number, { schritt: string; typ: string | undefined }>();
+      for (const eintrag of protokoll) {
+        if (eintrag.rolle !== rolle || eintrag.dokument === undefined) continue;
+        if (!["sessionStorage", "performance", "laden"].includes(eintrag.quelle)) continue;
+        const bisher = gesehen.get(eintrag.dokument);
+        gesehen.set(eintrag.dokument, {
+          schritt: bisher?.schritt ?? eintrag.schritt,
+          typ: bisher?.typ ?? eintrag.typ,
+        });
+      }
+      return [...gesehen.entries()]
+        .sort(([a], [b]) => a - b)
+        .map(([, dokument]) => `${dokument.schritt} ${dokument.typ ?? "ohne Navigationseintrag"}`);
+    };
     bericht = [...protokoll, ...gebunden]
       .map(
         (eintrag) =>
-          `${eintrag.quelle} ${eintrag.rolle} ${eintrag.schritt} ${eintrag.typ ?? "-"} ${eintrag.url}`,
+          `${eintrag.quelle} ${eintrag.rolle} ${eintrag.schritt} ${eintrag.typ ?? "-"} ${eintrag.url} ${eintrag.dokument ?? "-"}`,
       )
       .join("\n");
     return {
@@ -309,16 +383,8 @@ test("Spec 042: the stage navigates only on the test's steps – page and previe
         sessionStorage: liste("sessionStorage", "haupt"),
         performance: liste("performance", "haupt"),
       },
-      jetzt: {
-        sessionStorage: liste("sessionStorage", "jetzt"),
-        performance: liste("performance", "jetzt"),
-        src: liste("src", "jetzt"),
-      },
-      vorschlag: {
-        sessionStorage: liste("sessionStorage", "vorschlag"),
-        performance: liste("performance", "vorschlag"),
-        src: liste("src", "vorschlag"),
-      },
+      jetzt: { dokumente: dokumente("jetzt"), src: liste("src", "jetzt") },
+      vorschlag: { dokumente: dokumente("vorschlag"), src: liste("src", "vorschlag") },
       andere: protokoll.filter(
         (eintrag) => !["haupt", "jetzt", "vorschlag"].includes(eintrag.rolle),
       ),
@@ -330,23 +396,16 @@ test("Spec 042: the stage navigates only on the test's steps – page and previe
   // Five per frame, from html.ts and buehne-klient.ts: each trigger assigns the frame's src once
   // (refreshFrame() for „Jetzt“, refreshNachher() for „Mit dem Vorschlag“), each assignment is one
   // navigation of the frame, and the test waits for each frame's document before the next trigger,
-  // so no navigation replaces one under way.
+  // so no navigation replaces one under way. A frame's documents are counted from both sides (the
+  // frame's init script and the page's `load` of the iframe, Spec 043 T2); each is one document.
   const RAHMEN = ["laden-1", "dunkel", "hell", "rev", "laden-2"];
   const erwartet = {
     haupt: {
       sessionStorage: ["laden-1", "laden-2"],
       performance: ["laden-1 navigate", "laden-2 navigate"],
     },
-    jetzt: {
-      sessionStorage: RAHMEN,
-      performance: RAHMEN.map((step) => `${step} navigate`),
-      src: RAHMEN,
-    },
-    vorschlag: {
-      sessionStorage: RAHMEN,
-      performance: RAHMEN.map((step) => `${step} navigate`),
-      src: RAHMEN,
-    },
+    jetzt: { dokumente: RAHMEN.map((step) => `${step} navigate`), src: RAHMEN },
+    vorschlag: { dokumente: RAHMEN.map((step) => `${step} navigate`), src: RAHMEN },
     andere: [],
   };
   // An entry another process of the browser noted reaches this one's sessionStorage when it
@@ -356,7 +415,7 @@ test("Spec 042: the stage navigates only on the test's steps – page and previe
     await expect.poll(lesen).toEqual(erwartet);
   } catch (error) {
     throw new Error(
-      `every navigation of the stage (source role step type URL):\n${bericht}\n\n${String(error)}`,
+      `every navigation of the stage (source role step type URL document):\n${bericht}\n\n${String(error)}`,
     );
   }
   // framenavigated of the page decides nothing (Firefox misses events), but more than the test's
@@ -365,4 +424,48 @@ test("Spec 042: the stage navigates only on the test's steps – page and previe
     hauptrahmen.filter((eintrag) => !["laden-1", "laden-2"].includes(eintrag.schritt)),
     `framenavigated of the page outside the test's loads:\n${bericht}`,
   ).toEqual([]);
+});
+
+// Spec 043 / N-8 aus Spec 042: after the page loads anew, the navigation of the frame „Jetzt“ is cut
+// short (NS_BINDING_ABORTED in Firefox). Until now the page sent the frame again only on a new rev
+// of its poll, so with the same rev never. Made here without a clock: the test aborts the frame's
+// first request after the reload (`route.abort`); the frame must still show the draft's rev within
+// the default expect time.
+//
+// WebKit is a finding (Spec 043, plan.md › Befunde, Anhang D): an aborted frame navigation ends
+// there without any event – no load of the frame, none of the page, whose load came before the
+// frame's navigation started – so the page, which listens to events and never to the clock, cannot
+// learn of it. Marked as failing in WebKit: if WebKit ever says so, the mark turns red.
+test("Spec 043 / N-8 aus Spec 042: a frame whose navigation was aborted after the reload loads at once", async ({
+  page,
+  request,
+  browserName,
+}) => {
+  test.fail(
+    browserName === "webkit",
+    "Spec 043 Befund: WebKit fires no event after an aborted frame navigation",
+  );
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const id = await marke(request, "Probomarko Abbruch");
+  await page.goto(`${base}/asistanto/${id}/gvidkoloro`);
+  await seiteBereit(page, BUEHNE_BEREIT);
+  const rev = Number(await page.locator("html").getAttribute("data-mt-rev"));
+  await rahmen(page, rev, "light");
+
+  // The document of „Jetzt“: /marko/<id>/vorschau without `propono` (that is „Mit dem Vorschlag“).
+  const abgebrochen: string[] = [];
+  await page.route(
+    (url) => url.pathname === `/marko/${id}/vorschau` && !url.searchParams.has("propono"),
+    async (route) => {
+      if (abgebrochen.length > 0) return route.fallback();
+      abgebrochen.push(route.request().url());
+      return route.abort();
+    },
+  );
+  const vorher = await dokument(page);
+  await page.reload();
+  await seiteBereit(page, BUEHNE_BEREIT, vorher);
+  await rahmenBereit(page, JETZT, { rev, scheme: "light" });
+  await rahmenBereit(page, VORSCHLAG, { rev, scheme: "light" });
+  expect(abgebrochen, "the first request of „Jetzt“ after the reload was aborted").toHaveLength(1);
 });

@@ -182,12 +182,72 @@ for (const link of document.querySelectorAll("[data-href]")) {
   link.addEventListener("click", () => { location.href = link.getAttribute("data-href"); });
 }
 
+// Spec 043 / N-8 aus Spec 042: a preview frame whose navigation was cut short – an error page the
+// page cannot read, still about:blank, or the document of an older rev or scheme – is sent to the
+// expected document once more at once, not only with the next new rev of the poll (with the same
+// rev never). Driven by events, never by the clock:
+// - the frame's load: a navigation that failed with an error page (Chromium) ends there;
+// - the page's load, and the pageshow of a page the back-forward cache restores: a navigation that
+//   was cut short without a document (Firefox, NS_BINDING_ABORTED) ends before it. Only a navigation
+//   that had started counts there – the document it leaves said beforeunload. WebKit loads the page
+//   before a frame's navigation set while the page was parsed has started; that one is under way.
+// A frame that shows the expected document (path, rev, scheme) is never sent again, and each
+// expected URL is asked for again at most once, so a server that keeps failing starts no loop; after
+// that the poll and the person's actions go on as before.
+const vorschauRahmen = new Map();
+function vorschauDokument(element) {
+  try { return element.contentDocument; } catch { return null; }
+}
+function vorschauSchicken(element, stand) {
+  if (stand.beobachter) stand.beobachter.abort();
+  stand.beobachter = new AbortController();
+  stand.gestartet = false;
+  try {
+    element.contentWindow.addEventListener("beforeunload", () => { stand.gestartet = true; }, { once: true, signal: stand.beobachter.signal });
+  } catch {
+    stand.gestartet = true;
+  }
+  element.src = stand.soll;
+}
+function vorschauNochmal(element, anlass) {
+  const stand = vorschauRahmen.get(element);
+  if (!stand || stand.nochmal.has(stand.soll)) return;
+  const doc = vorschauDokument(element);
+  if (doc && doc.URL === stand.soll && doc.readyState === "complete") return;
+  // At the frame's own load only an error page counts: a document the page can read may be one a
+  // newer navigation of the frame is about to replace. At the page's load a readable document
+  // counts once the navigation away from it had started.
+  if (doc && (anlass === "rahmen" || !stand.gestartet)) return;
+  stand.nochmal.add(stand.soll);
+  vorschauSchicken(element, stand);
+}
+function vorschauSenden(element, url) {
+  let stand = vorschauRahmen.get(element);
+  if (!stand) {
+    stand = { soll: url, nochmal: new Set(), gestartet: false, beobachter: undefined };
+    vorschauRahmen.set(element, stand);
+    element.addEventListener("load", () => {
+      // A document arrived: nothing listens for beforeunload on it (a same-origin document can take
+      // over the window of the about:blank it replaces, listeners included).
+      const doc = vorschauDokument(element);
+      if (doc && doc.URL !== "about:blank") stand.beobachter.abort();
+      vorschauNochmal(element, "rahmen");
+    });
+  }
+  stand.soll = url;
+  vorschauSchicken(element, stand);
+}
+addEventListener("load", () => { for (const element of vorschauRahmen.keys()) vorschauNochmal(element, "seite"); });
+addEventListener("pageshow", (event) => {
+  if (event.persisted) for (const element of vorschauRahmen.keys()) vorschauNochmal(element, "seite");
+});
+
 function refreshFrame() {
   if (!frame || !marko) return;
   const url = new URL(frame.getAttribute("data-mt-src"), location.origin);
   url.searchParams.set("rev", String(rev));
   url.searchParams.set("scheme", scheme);
-  frame.src = url.toString();
+  vorschauSenden(frame, url.toString());
 }
 
 async function sendDraft(patch) {
@@ -645,7 +705,7 @@ function refreshNachher() {
   const url = new URL(nachher.getAttribute("data-mt-src"), location.origin);
   url.searchParams.set("rev", String(rev));
   url.searchParams.set("scheme", scheme);
-  nachher.src = url.toString();
+  vorschauSenden(nachher, url.toString());
 }
 refreshNachher();
 function zeigeStato(stato) {

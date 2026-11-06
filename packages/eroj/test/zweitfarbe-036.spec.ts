@@ -9,7 +9,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type APIRequestContext, expect, type Page, test } from "@playwright/test";
-import { BUEHNE_BEREIT, dokument, entwurfGespeichert, schrittBereit } from "./geladen-042.js";
+import {
+  BUEHNE_BEREIT,
+  dokument,
+  entwurfGespeichert,
+  schrittBereit,
+  seiteBereit,
+} from "./geladen-042.js";
 import { nachDerAbfrage } from "./wackler-040.js";
 
 const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
@@ -103,7 +109,9 @@ const entwurf = (page: Page, id: string) =>
 // The assistant's steps poll the draft every 3 s (GET …/stato); the Schnellstart's do not. Each
 // place has its own marker of a loaded screen (Spec 042 T3): the assistant's stage sets
 // `data-mt-bereit` once its client bound every handler; the Schnellstart has no such marker, so its
-// Zweitfarbe block stands for it, together with `readyState` "complete" (its module scripts ran).
+// Zweitfarbe block stands for it. That block comes from the server and `readyState` "interactive"
+// comes before the module scripts ran (Spec 043 T2): that the client ran shows the preview, which
+// only the client sends and which `schrittBereit` waits for after the screen (`rahmenBereit`).
 for (const [ort, pfad, pollt, merkmal] of [
   [
     "the assistant's step „Leitfarbe und Akzente“",
@@ -176,6 +184,37 @@ for (const [ort, pfad, pollt, merkmal] of [
       "keine",
     );
     await expect(page.getByRole("button", { name: "Keine Zweitfarbe" })).toHaveCount(0);
+    expect(errors).toEqual([]);
+  });
+
+  // Spec 043 T2: the screen is usable while its preview still loads. A frame that loads keeps the
+  // page's `readyState` at "interactive" – in run 42180054807 (Chromium) for more than 5 s, because
+  // the server first rendered the new rev or ran the check (3.3–4.3 s). `seiteBereit` waits for the
+  // marker and the new document, never for the frames; those are `rahmenBereit`'s (here through
+  // `schrittBereit`). Made without a clock: the test holds every answer of the preview back
+  // (`page.route`) until `seiteBereit` resolved, and only then lets it go.
+  test(`${ort}: the screen is ready while its preview still loads`, async ({ page, request }) => {
+    const errors = errorsOf(page);
+    const id = await marke(request, `Dukolora Rahmen ${ort.length}`);
+    let freigeben = (): void => undefined;
+    const frei = new Promise<void>((done) => {
+      freigeben = done;
+    });
+    const gehalten: string[] = [];
+    await page.route(
+      (url) => /^\/marko\/[^/]+\/vorschau$/.test(url.pathname),
+      async (route) => {
+        gehalten.push(route.request().url());
+        await frei;
+        await route.fallback();
+      },
+    );
+    await page.goto(`${base}${pfad(id)}`, { waitUntil: "domcontentloaded" });
+    await seiteBereit(page, merkmal);
+    freigeben();
+    // The client ran (it alone sends the frame) and the preview loaded the page's rev.
+    await schrittBereit(page, id, merkmal);
+    expect(gehalten, "the preview's answer was held back").not.toEqual([]);
     expect(errors).toEqual([]);
   });
 }
