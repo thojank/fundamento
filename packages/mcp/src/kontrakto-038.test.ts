@@ -141,6 +141,30 @@ describe("Spec 038 contract of the Bezug (AC-L3)", () => {
     expect(found).toEqual([]);
   });
 
+  // Spec 038 S038-06 (1.8, D-19, D-31 … D-33): what PR A adds to the contract, and only that.
+  it("adds exactly list_arangxoj and check_markup after the tools of the Bezug", () => {
+    expect(TOOL_NAMES.slice(fixtureNames.length)).toEqual(["list_arangxoj", "check_markup"]);
+  });
+
+  it("adds fields, marker and nearest as optional inputs of get_ero, get_sxablono, suggest_ero", async () => {
+    const listed = new Map(
+      (await connected.client.listTools()).tools.map((tool) => [tool.name, tool as ListedTool]),
+    );
+    const added = Object.entries(fixtureSchemas).map(([name, old]) => {
+      const now = listed.get(name)?.inputSchema ?? {};
+      const before = Object.keys((old.inputSchema.properties ?? {}) as Schema);
+      const properties = Object.keys((now.properties ?? {}) as Schema);
+      const required = (now.required ?? []) as string[];
+      const fresh = properties.filter((property) => !before.includes(property));
+      return [name, fresh, fresh.filter((property) => required.includes(property))] as const;
+    });
+    expect(added.filter(([, fresh]) => fresh.length > 0)).toEqual([
+      ["get_ero", ["fields"], []],
+      ["suggest_ero", ["nearest"], []],
+      ["get_sxablono", ["marker"], []],
+    ]);
+  });
+
   it("the prompt gvidanto keeps the text of the Bezug as its prefix", async () => {
     const prompt = await connected.client.getPrompt({ name: "gvidanto" });
     const text = prompt.messages
