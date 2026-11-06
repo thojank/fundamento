@@ -70,6 +70,8 @@ Bezug 2.5 = entfällt, ersetzt durch ‚vorher' in Lauf 4 auf Bezug-SHA
 | `packages/modelo/src/gvidanto/eroj-fields.test.ts` | frei, neu (MG-3/MG-4, 750-Token-Sweep) | `0b89cd1f` rot (S038-02), Typkorrektur im Grün-Commit |
 | `packages/modelo/src/gvidanto/eroj.ts` | frei, geändert (`fields`, `navigationOf`, `slotsOf`, Zähler) | Grün-Commit S038-02 |
 | `packages/modelo/src/contracts/issues.ts` | frei, geändert (`ero-field-unknown`, `ero-fields-invalid` angehängt) | Grün-Commit S038-02 |
+| `packages/modelo/src/gvidanto/sxablonoj-marker.test.ts` | frei, neu (MG-5) | `6546736d` rot (S038-03) |
+| `packages/modelo/src/gvidanto/sxablonoj.ts` | frei, geändert (`marker`-Eingabe, `markerOf`, `RegionMarker`) | Grün-Commit S038-03 |
 
 ## Vertrags-Fixtures (T0)
 
@@ -233,6 +235,12 @@ Vorläufige IDs aus den Beiträgen; S038-08 nummeriert sie hier durch.
 | D-S038-02-5 | Kein Kürzen umgesetzt: kein Feld trägt Beispiele (das Kurzprofil hat keine), das größte einzelne Feld in der Standardsprache ist das Kurzprofil von kampo (747). |
 | D-S038-02-6 | Rot/Grün über `pnpm test:betroffen` unter fremder Last: Eine Modelo-Änderung macht neun Pakete betroffen; Turborepo bricht beim ersten roten Task ab (keine `--continue`-Option im Skript). Rot waren nur Zeitgrenzen unveränderter Tests (Befund S038-02-2), die den Modelo-Lauf jedes Mal abbrachen. Darum liefen die übrigen Test-Tasks bei niedriger Last einzeln (`pnpm exec turbo run test --filter=@fundamento/<paket>`, gleiche Eingaben, Ergebnis im Turbo-Cache); danach zeigte **ein** `pnpm test:betroffen` alle übrigen Tasks als Cache-Treffer und den frischen Modelo-Lauf. Keine Grenze geändert, keine Datei unter `scripts/**` berührt. |
 
+| D-S038-03-1 | `markerOf(modelo, sxablono, region)` statt `markerOf(sxablono, region)` (§2.2): die Landmarke einer Region folgt aus den Rollen der Eroj, die sie annimmt, und die stehen im Modelo; das Modelo vorn wie bei jeder Gvidanto-Funktion. `region` ist die Region der Skemo (`SxablonoRegion`). |
+| D-S038-03-2 | `RegionMarker` = `{ landmark?, attribute?, slot?, default? }` – ein vierter, optionaler Schlüssel `default: true`: die Standard-Region nimmt Kinder mit `slot="<name>"` **und** Kinder ohne `slot` (so rendern alle fünf Sxablonoj), das lässt sich mit einem einzelnen `slot` nicht sagen. `slot` = Name der Region bei jeder Region (Schema `SxablonoRegion`: „each a slot in the projection“). |
+| D-S038-03-3 | Landmarke: der Name der Region steht in `a11y.landmarks` der Sxablono (sxelo `main`), oder jede angenommene Ero hat dieselbe Rolle und die ist eine Landmarke des Schemas (sxelo `nav` → navigado → `navigation`, aus der Skemo gelesen, nicht getippt). Vokabular = Enum `SxablonoA11y.landmarks`, im Code als `Record<Landmark, true>` an den generierten Typ gebunden. `attribute` bleibt leer: keine Region nennt in den Daten ein Attribut, das sie im Markup kennzeichnet (`live: "polite"` steht innen am Teil der Sxablono, nicht an den Kindern). |
+| D-S038-03-4 | Form der Antwort mit `marker: true`: `marker` als letzter Schlüssel jeder Region (Kurzprofil `regions[i]`, voll `skemo.regions[i]`), Schlüsselreihenfolge `landmark, attribute, slot, default`; sonst byte-gleich mit der Antwort ohne `marker`. `marker: false` = ohne. Kurzprofile mit Merkmalen: größtes pagxo/sxelo 327 Tokens (de), Zuwachs ≤ 64. |
+| D-S038-03-5 | Rot/Grün beobachtet wie D-S038-02-6 (`/tmp/s038-03-reihe.sh`, Kopie des Skripts aus S038-02 mit eigenen Lognamen); der erste rote `pnpm test:betroffen` brach unter fremder Last (≈ 40) an den Zeitgrenzen aus S038-02-2 in nordstelo ab, bevor modelo lief. |
+
 ## Lieferliste
 
 | # | Punkt | Stand |
@@ -242,7 +250,7 @@ Vorläufige IDs aus den Beiträgen; S038-08 nummeriert sie hier durch.
 | 1.2 | MG-2 `check_markup` | offen (S038-05, S038-06) |
 | 1.3 | MG-3 Feldauswahl `fields` | Funktion erledigt (S038-02); MCP offen (S038-06) |
 | 1.4 | MG-4 `navigation` | Funktion und Ableitung `navigationOf` erledigt (S038-02); nordstelo/ekranoj offen (S038-07) |
-| 1.5 | MG-5 Regionsmerkmale | offen (S038-03, S038-05) |
+| 1.5 | MG-5 Regionsmerkmale | Funktion erledigt (S038-03): `markerOf`, `get_sxablono` mit `marker: true`, alle 18 Regionen der 5 Sxablonoj mit Merkmal; Erkennung im Markup offen (S038-05), MCP offen (S038-06) |
 | 1.6 | MG-6 `nearest` | offen (S038-04, S038-06) |
 | 1.7 | Prompt `gvidanto` | offen (S038-06) |
 | 1.8 | Verträge | Wächter erledigt (S038-01); neue Werkzeuge offen (S038-06) |
@@ -261,7 +269,7 @@ Keine.
 
 - **Datenform von Slots (MG-3, D-38, S038-02):** Keine Skemo und keine Uzo sagt, in welcher Form ein Slot seine Daten nimmt. tabelo `content` ist in der Uzo `{ accepts: ["text"], required, max: 1, nesting: 1 }`, in der Skemo nur `{ name: "content" }` – dass dort eine native `<table>` mit Kopf- und Datenzeilen steht, kommt in keiner Antwort vor. `slots` liefert darum kein `dataForm`. Vorschlag Eroj-Runde 7: optionale Slot-Eigenschaft der Uzo (z. B. `dataForm` mit einem kleinen festen Vokabular wie `table` = `<table>` mit `<thead>`/`<tbody>`, `th`/`td`), die `slotsOf` dann unverändert durchreicht.
 
-Weitere tragen S038-03 und S038-04 ein (erwartet: Layout-Primitive Reihe/Spalte/Stapel).
+S038-03 (MG-5): keine – jedes Regionsmerkmal ist aus der Skemo ableitbar. Weitere trägt S038-04 ein (erwartet: Layout-Primitive Reihe/Spalte/Stapel).
 
 ### Sonstige
 
@@ -269,6 +277,7 @@ Weitere tragen S038-03 und S038-04 ein (erwartet: Layout-Primitive Reihe/Spalte/
 - **S038-02-1 Deutsches Kurzprofil von kampo ≥ 750:** `get_ero { name: "kampo", brief: true, lingvo: "de" }` ist schon auf dem Bezugsstand 793 Tokens (2 377 Zeichen; Englisch 747); der bestehende Test prüft nur die Standardsprache. `fields: ["brief"], lingvo: "de"` liefert es byte-gleich mit 793 (D-S038-02-2), jede Anfrage mit mehreren Feldern bleibt < 750 (`rest: ["brief"]`). Sonst kein Kurzprofil über 750 (Deutsch: butono 633, elektilo 583). Vorschlag: deutsche Texte von kampo kürzen oder die Messung auf `lingvo` erweitern – Entscheidung des Maintainers; die Grenze bleibt.
 - **S038-02-2 Zeitgrenzen bei parallelen Paketläufen (B-4):** Unter Last 26–63 (fremde Firefox-Playwright-Läufe aus `fundamento-wt-mw48j5oap3r28zm3` plus die neun eigenen Test-Tasks) liefen unveränderte Tests in Zeitgrenzen: `packages/eroj/test/{knapp-playwright,vitrino-partoj}.test.ts` (Hook 10 s, 1 Lauf), `packages/nordstelo/src/ablauf/raporto.test.ts:68/:82` (5 s) und `integra.test.ts` (Hook 10 s) in 4 von 4 parallelen Läufen, `packages/mcp/src/**` 7 Tests (30 s, 1 Lauf), `packages/cli/src/{ekranoj-integra,index}.test.ts` 3 Tests (1 Lauf). Einzeln bei Last < 10 jeweils grün. Keine Grenze angehoben, nichts geändert.
 - **S038-02-3 kampo mit brief und einem weiteren Feld:** Weil `rest` mitzählt (D-31), geht bei kampo das Kurzprofil bei **jeder** Kombination mit einem zweiten Feld nach `rest` – auch mit `navigation`, das bei kampo leer bleibt (7 der 15 Teilmengen). Ein Folgeaufruf `fields: ["brief"]` liefert es (747). Wörtliche Füllregel, kein Befund gegen die Spec; nur als Hinweis für Lauf 3 (Messung).
+- **S038-03-1 Landmarken ohne Region:** sxelo setzt `banner` (der Kopf um `brand` und `principal`), filtrilo `search` (der ganze Rahmen). Beide gehören zu keiner einzelnen Region und tragen darum kein Regionsmerkmal; erkannt werden sie am Element `fm-<name>` selbst (die Seitenregel zählt sie wie bisher über `a11y.landmarks`). Kein fehlendes Merkmal: jede der 18 Regionen hat `slot`, keine Graubereich-Datei berührt, kein Datenvorschlag nötig.
 - **S038-01-2 Lokal wackelnder Hook:** `packages/nordstelo/src/ablauf/integra.test.ts` (`beforeAll` mit `connectGvidanto()`, 10-s-Hook-Grenze) lief im ersten `pnpm test:betroffen` unter Last (fünf Pakete parallel) in die Zeitgrenze; Datei unverändert. Trefferquote im Beitrag S038-01; keine Grenze angehoben.
 
 ## Blockiert

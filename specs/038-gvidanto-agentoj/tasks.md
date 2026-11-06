@@ -13,7 +13,7 @@
 ### A – Rot zuerst
 
 - [x] **T3802 1.3, 1.4, 1.8a (S038-02)** Tests `get_ero` mit `fields` (Form, Reihenfolge, `fields: ["brief"]` ≡ `brief: true`, `role`, `navigation`, `slots`, `rest`), 750-Token-Sweep über alle Eroj × 15 Teilmengen und alle Sxablono-Kurzprofile, kampo-Fall, Negativfälle. – `0b89cd1f` (rot: `packages/modelo/src/gvidanto/eroj-fields.test.ts`, 17 von 20 rot über `pnpm test:betroffen`).
-- [ ] **T3803 1.5 (S038-03)** Tests `getSxablono(…, { marker: true })` und `markerOf`, Antworten ohne `marker` byte-gleich.
+- [x] **T3803 1.5 (S038-03)** Tests `getSxablono(…, { marker: true })` und `markerOf`, Antworten ohne `marker` byte-gleich. – `6546736d` (rot: `packages/modelo/src/gvidanto/sxablonoj-marker.test.ts`, 7 von 10 rot über `pnpm test:betroffen`).
 - [ ] **T3804 1.1, 1.6 (S038-04)** Tests `listArangxoj` und `suggestEro` mit `nearest: true`.
 - [ ] **T3805 1.2, 1.5 (S038-05)** Tests Markup-Leser, Kern `instancojElElementoj`, `checkMarkup` (positiv, Regelverstoß, unbekannte Ero, Durchreichen der Ablehnung, leeres Fragment, Sxablono-Seite, Determinismus).
 - [ ] **T3806 1.7, 1.8 (S038-06)** Tests MCP: `list_arangxoj`, `check_markup`, `fields`, `marker`, `nearest`, Prompt, `TOOL_NAMES` (D-19: `contracts.test.ts`, `nachlese-11-anbieter.test.ts`, `ekranoj/src/mcp-kliento.test.ts`).
@@ -22,7 +22,7 @@
 ### B – Grün
 
 - [x] **T3808 1.3, 1.4, 1.8a (S038-02)** `fields`, `role`, `navigation`, `slots`, `rest` (D-28, D-31), eine Link-Ableitung. `ero-field-unknown`, `ero-fields-invalid` (D-S038-02-4). – `fd4babe2` (grün: `eroj-fields.test.ts` 20/20, `pnpm test:betroffen` 18/18, D-S038-02-6).
-- [ ] **T3809 1.5 (S038-03)** `marker` je Region (D-32).
+- [x] **T3809 1.5 (S038-03)** `marker` je Region (D-32), `markerOf`, `RegionMarker` (D-S038-03-1 bis -4). – grün (SHA trägt S038-04 nach).
 - [ ] **T3810 1.1, 1.6 (S038-04)** `listArangxoj`, `nearest` (D-33).
 - [ ] **T3811 1.2, 1.5 (S038-05)** Leser (D-23), Kern (D-22), `checkMarkup` (D-29).
 - [ ] **T3812 1.7, 1.8 (S038-06)** MCP-Werkzeuge, Schemas, Prompt-Sätze, `TOOL_NAMES` am Ende.
