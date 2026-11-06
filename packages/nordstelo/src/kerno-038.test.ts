@@ -12,14 +12,14 @@ import { faktojPorNavigado } from "./ablauf/poentoj.js";
 import { score } from "./score.js";
 import { facts, h } from "./test-doubles/facts.js";
 
-vi.mock("@fundamento/modelo", async (importOriginal) => {
-  const original = await importOriginal<typeof import("@fundamento/modelo")>();
-  return {
+// No `await` at module level (modelo test-setup.test.ts): the factory returns the promise.
+vi.mock("@fundamento/modelo", (importOriginal) =>
+  importOriginal<typeof import("@fundamento/modelo")>().then((original) => ({
     ...original,
     instancojElElementoj: vi.fn(original.instancojElElementoj),
     navigationOf: vi.fn(original.navigationOf),
-  };
-});
+  })),
+);
 
 const { modelo } = loadModelo(defaultModeloSource());
 if (modelo === undefined) throw new Error("the repository Modelo must load");

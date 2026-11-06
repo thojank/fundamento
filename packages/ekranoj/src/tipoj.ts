@@ -368,6 +368,11 @@ export interface RondoEkrano {
   portitaEl?: number;
   /** What kept the screen from green (D-04 order); [] when green (S037-03, additive). */
   malhelpoj?: Malhelpo[];
+  /**
+   * The page rules of the Sxablonoj from check_markup (`sxablonoRezulto`; Spec 038, additive):
+   * hints for the report, never a reason against green (D-29). Absent when there are none.
+   */
+  sxablonajSugestoj?: Malobservo[];
   /** The agent fragment of this round (Variante 0: the full document) (S037-03, additive). */
   fragmento?: string;
   /** The facts the round was scored on (D-33; S037-03, additive). */

@@ -1,12 +1,19 @@
 // check_usage for a screen (D-32): the MCP tool judges instances, not markup. ekranoj builds them
 // from the facts of the agent fragment and the Skemo of each Ero, read over MCP with `get_ero` –
-// nordstelo's private `instancesOf` stays private (AC-10). Same reading as nordstelo: an `fm-<name>`
+// ekranoj imports no Gvidanto (AC-10; nordstelo's former `instancesOf` is the Gvidanto core
+// `instancojElElementoj` since Spec 038). Same reading as nordstelo: an `fm-<name>`
 // element whose name is an Ero; props typed by the Skemo; what stands in a named slot; the label
 // from the element's own and unslotted text; the nearest `fm-*` ancestor as container; the language
 // of the screen. A difference between this check (D-04) and K3 is shown, not hidden.
+//
+// Spec 038 (1.8c): a server that offers `check_markup` derives the instances itself, with the one
+// derivation the Gvidanto has (D-22); ekranoj then sends the fragment and reads instances and
+// judgement from the answer, the Skemo parts with `get_ero` and `fields` (one follow-up for `rest`,
+// D-28) and the link Eroj from `navigation.target`. A server without it keeps the path above
+// unchanged (D-03); the tool list decides once per run (`uzKontroliloDe`).
 
 import { LIGILAJ_ATRIBUTOJ } from "./navigado.js";
-import type { Fakto, FaktoElemento, Malobservo, ToolBridge } from "./tipoj.js";
+import type { Fakto, FaktoElemento, Malobservo, ToolBridge, ToolInfo } from "./tipoj.js";
 
 /** One use of an Ero, the input of check_usage (the Modelo's `EroInstance`, restated). */
 export interface EroInstanco {
@@ -314,4 +321,210 @@ export async function ligilajAtributojDe(
     }
   }
   return atributoj;
+}
+
+// --- Spec 038: check_markup, get_ero with fields, navigation.target ------------------------------
+
+/** The tool of a server of Spec 038 that judges markup; its presence picks the path (D-03). */
+export const MARKA_ILO = "check_markup";
+
+/** Whether a server offers check_markup: its whole tool list, read once per run, decides. */
+export function markaServilo(iloj: readonly Pick<ToolInfo, "name">[]): boolean {
+  return iloj.some((ilo) => ilo.name === MARKA_ILO);
+}
+
+/** The check of one screen: instances, check_usage violations and the page rules as hints. */
+export interface UzKontrolo {
+  instancoj: EroInstanco[];
+  malobservoj: Malobservo[];
+  /**
+   * The page rules of the Sxablonoj (`sxablonoRezulto` of check_markup): hints for the report,
+   * never a reason against green (Spec 038 D-29). Always [] on the path of Spec 037.
+   */
+  sxablonajSugestoj: Malobservo[];
+}
+
+/** The violations of a page-rule result, each at the Sxablono it is about (`fm-<name>`). */
+function sxablonajSugestojDe(rezulto: unknown, sxablonoj: unknown): Malobservo[] {
+  if (!isObject(rezulto) || !Array.isArray(rezulto.violations)) return [];
+  const nomoj = Array.isArray(sxablonoj)
+    ? sxablonoj.map((sxablono) =>
+        isObject(sxablono) && typeof sxablono.sxablono === "string" ? sxablono.sxablono : undefined,
+      )
+    : [];
+  return rezulto.violations.flatMap((violation) => {
+    if (!isObject(violation)) return [];
+    const indices = Array.isArray(violation.sxablono) ? violation.sxablono : [];
+    const loko =
+      indices.length === 0
+        ? "Screen"
+        : indices
+            .map((index) => {
+              const nomo = typeof index === "number" ? nomoj[index] : undefined;
+              return nomo === undefined ? "Screen" : `fm-${nomo}`;
+            })
+            .join(", ");
+    return malobservoDe(violation.issue, loko) ?? [];
+  });
+}
+
+const senInstanco = (): UzKontrolo => ({ instancoj: [], malobservoj: [], sxablonajSugestoj: [] });
+
+/**
+ * check_markup over MCP for one screen (Spec 038, new path): the server reads the fragment and
+ * answers with the instances and the check_usage judgement of them (`rezulto`), read as before
+ * (`malobservojDe`); a refusal gives the malobservoj of the input. An empty or whitespace-only
+ * fragment is not sent – it holds no instance, as on the old path, where check_usage is not asked
+ * without one (check_markup refuses it).
+ */
+export async function kontroliMarkon(
+  ponto: ToolBridge,
+  fragmento: string,
+  lingvo: string,
+): Promise<UzKontrolo> {
+  if (fragmento.trim() === "") return senInstanco();
+  const respondo = await ponto.call(MARKA_ILO, { fragment: fragmento, lingvo });
+  const body = parse(respondo);
+  if (!isObject(body) || !Array.isArray(body.eroj) || !isObject(body.rezulto)) {
+    return { ...senInstanco(), malobservoj: malobservojDe(respondo, []) };
+  }
+  const instancoj = body.eroj.filter(
+    (ero): ero is EroInstanco => isObject(ero) && typeof ero.ero === "string",
+  );
+  return {
+    instancoj,
+    malobservoj: malobservojDe(JSON.stringify(body.rezulto), instancoj),
+    sxablonajSugestoj: sxablonajSugestojDe(body.sxablonoRezulto, body.sxablonoj),
+  };
+}
+
+/** The parts of an Ero asked of get_ero on the new path (Spec 038 MG-3/MG-4), in this order. */
+export const ERO_KAMPOJ = ["brief", "slots", "role", "navigation"] as const;
+
+/** What get_ero with `fields` says of an Ero, after at most one follow-up for `rest`. */
+export interface EroKampoj {
+  /** The ARIA role of the Ero (`role`). */
+  rolo: string;
+  /** The prop that holds a link's target (`navigation.target`); absent: the Ero is no link. */
+  celaAtributo?: string;
+  /** The answer as read (brief keys, `slots`, …), the follow-up merged in, without `rest`. */
+  respondo: Record<string, unknown>;
+}
+
+/** Reads the parts of an Ero by name; undefined when the answer is no readable Ero. */
+export type KampaLegilo = (nomo: string) => Promise<EroKampoj | undefined>;
+
+/** The answer of get_ero with `fields`; undefined for an error or another shape. */
+function kampaRespondoDe(respondo: string): Record<string, unknown> | undefined {
+  const body = parse(respondo);
+  return isObject(body) && typeof body.ero === "string" && body.issues === undefined
+    ? body
+    : undefined;
+}
+
+/**
+ * A reader over the bridge (new path): `get_ero { name, fields }` with the four parts, and when the
+ * answer names a `rest` exactly one follow-up `get_ero { name, fields: rest }` (D-28) – never a
+ * second one. Cached per name and run, also the misses. Without a readable role the answer counts
+ * as unreadable (the fallback of the link map applies).
+ */
+export function kampaLegiloDe(ponto: ToolBridge): KampaLegilo {
+  const kasxmemoro = new Map<string, Promise<EroKampoj | undefined>>();
+  const legi = async (nomo: string): Promise<EroKampoj | undefined> => {
+    const unua = kampaRespondoDe(
+      await ponto.call("get_ero", { name: nomo, fields: [...ERO_KAMPOJ] }),
+    );
+    if (unua === undefined) return undefined;
+    const { rest, ...respondo } = unua;
+    const resto = Array.isArray(rest) ? rest.filter((ero) => typeof ero === "string") : [];
+    if (resto.length > 0) {
+      const dua = kampaRespondoDe(await ponto.call("get_ero", { name: nomo, fields: resto }));
+      if (dua !== undefined) {
+        const { rest: _ignorita, ...aldono } = dua;
+        Object.assign(respondo, aldono);
+      }
+    }
+    if (typeof respondo.role !== "string") return undefined;
+    const navigation = respondo.navigation;
+    const celo = isObject(navigation) ? navigation.target : undefined;
+    return {
+      rolo: respondo.role,
+      ...(typeof celo === "string" ? { celaAtributo: celo } : {}),
+      respondo,
+    };
+  };
+  return (nomo) => {
+    let kampoj = kasxmemoro.get(nomo);
+    if (kampoj === undefined) {
+      kampoj = legi(nomo).catch(() => undefined);
+      kasxmemoro.set(nomo, kampoj);
+    }
+    return kampoj;
+  };
+}
+
+/** Every `fm-*` tag of the screens, in order of first use. */
+const fmTagojDe = (faktoj: Readonly<Record<string, Fakto>>): string[] => [
+  ...new Set(
+    Object.values(faktoj).flatMap((fakto) =>
+      fakto.elements.flatMap((element) => (fmNomo(element.tag) === undefined ? [] : [element.tag])),
+    ),
+  ),
+];
+
+/**
+ * The link map of the new path (Spec 038 1.4): an Ero is a link where get_ero names
+ * `navigation.target`, and holds its target in that prop; a readable Ero without it is no link.
+ * The documented fallback (`LIGILAJ_ATRIBUTOJ`) stays for an Ero whose answer is not readable.
+ */
+export async function ligilajAtributojElKampoj(
+  faktoj: Readonly<Record<string, Fakto>>,
+  legi: KampaLegilo,
+): Promise<Record<string, string>> {
+  const atributoj: Record<string, string> = { ...LIGILAJ_ATRIBUTOJ };
+  for (const tag of fmTagojDe(faktoj)) {
+    const kampoj = await legi(fmNomo(tag) ?? "");
+    if (kampoj === undefined) continue;
+    if (kampoj.celaAtributo !== undefined) atributoj[tag] = kampoj.celaAtributo;
+    else delete atributoj[tag];
+  }
+  return atributoj;
+}
+
+/** How one run checks its screens and finds its link Eroj, chosen once from the tool list. */
+export interface UzKontrolilo {
+  /** `check_markup`: the server derives the instances (Spec 038); `check_usage`: Spec 037. */
+  vojo: "check_markup" | "check_usage";
+  /** The check of one screen: its facts and the fragment the agent wrote. */
+  kontroli(e: { fakto: Fakto; fragmento: string }): Promise<UzKontrolo>;
+  /** Which Eroj of the screens are links and which prop holds their target. */
+  ligilajAtributoj(faktoj: Readonly<Record<string, Fakto>>): Promise<Record<string, string>>;
+}
+
+/**
+ * The checker of a run (Spec 038 1.8c): with check_markup in the server's tool list the new path
+ * (check_markup with the fragment and the language of the facts, get_ero with `fields`), else the
+ * path of Spec 037 unchanged (`kontroliUzon`, `ligilajAtributojDe` over one `get_ero` per name).
+ */
+export function uzKontroliloDe(
+  ponto: ToolBridge,
+  iloj: readonly Pick<ToolInfo, "name">[],
+): UzKontrolilo {
+  if (markaServilo(iloj)) {
+    const legi = kampaLegiloDe(ponto);
+    return {
+      vojo: "check_markup",
+      kontroli: ({ fakto, fragmento }) => kontroliMarkon(ponto, fragmento, fakto.lingvo),
+      ligilajAtributoj: (faktoj) => ligilajAtributojElKampoj(faktoj, legi),
+    };
+  }
+  const legi = skemoLegiloDe(ponto);
+  return {
+    vojo: "check_usage",
+    kontroli: async ({ fakto }) => ({
+      ...(await kontroliUzon(ponto, fakto, legi)),
+      sxablonajSugestoj: [],
+    }),
+    ligilajAtributoj: (faktoj) => ligilajAtributojDe(faktoj, legi),
+  };
 }

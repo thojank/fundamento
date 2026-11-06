@@ -11,7 +11,7 @@
 
 import {
   checkUsage,
-  type EroInstance,
+  instancojElElementoj,
   type Modelo,
   type NordsteloFile,
   type NordsteloKontrolo,
@@ -157,27 +157,6 @@ function eroAncestor(elements: readonly Element[], index: number, known: Known):
   return -1;
 }
 
-/** The index of the nearest ancestor that is any fm-* element, -1 if none. */
-function fmAncestor(elements: readonly Element[], index: number): number {
-  let parent = elements[index]?.parent ?? -1;
-  while (parent !== -1) {
-    if ((elements[parent]?.tag ?? "").startsWith("fm-")) return parent;
-    parent = elements[parent]?.parent ?? -1;
-  }
-  return -1;
-}
-
-const childrenOf = (elements: readonly Element[], index: number): number[] =>
-  elements.flatMap((element, i) => (element.parent === index ? [i] : []));
-
-function textOf(elements: readonly Element[], index: number): string {
-  const element = elements[index];
-  if (element === undefined) return "";
-  return [element.text, ...childrenOf(elements, index).map((child) => textOf(elements, child))]
-    .filter((part) => part !== "")
-    .join(" ");
-}
-
 // --- K2: identifiers against the Modelo ---------------------------------------------------------
 
 function inventedGaps(facts: Facts, known: Known): { gaps: Gap[]; used: number } {
@@ -232,77 +211,12 @@ function inventedGaps(facts: Facts, known: Known): { gaps: Gap[]; used: number }
 }
 
 // --- K3: check_usage on the instances of the page ----------------------------------------------
+// Spec 038 (1.8b, D-22): the instances come from the Gvidanto's one derivation
+// (`instancojElElementoj`, the former private `instancesOf` moved into the Modelo), the same that
+// check_markup runs on read markup; nordstelo derives none of its own.
 
-function instancesOf(facts: Facts, known: Known): EroInstance[] {
-  const instances: EroInstance[] = [];
-  const containers = new Map<number, string>();
-  for (const [index, element] of facts.elements.entries()) {
-    const name = fmName(element.tag);
-    const entry = name === undefined ? undefined : known.eroj.get(name);
-    if (name === undefined || entry === undefined) continue;
-    const props: EroInstance["props"] = {};
-    for (const prop of entry.skemo.props) {
-      const value = element.attrs[prop.name];
-      if (value === undefined) continue;
-      if (prop.kind === "boolean") props[prop.name] = value !== "false";
-      else if (prop.kind === "number") {
-        const number = Number(value);
-        if (Number.isFinite(number)) props[prop.name] = number;
-      } else if (prop.kind === "enum") {
-        if ((prop.values ?? []).includes(value)) props[prop.name] = value;
-      } else props[prop.name] = value;
-    }
-    const slotNames = new Set((entry.skemo.slots ?? []).map((slot) => slot.name));
-    const children = childrenOf(facts.elements, index);
-    const texts: Record<string, string | string[]> = {};
-    const slots: NonNullable<EroInstance["slots"]> = {};
-    for (const child of children) {
-      const slot = facts.elements[child]?.attrs.slot;
-      if (slot === undefined || !slotNames.has(slot)) continue;
-      const childName = fmName(facts.elements[child]?.tag ?? "");
-      const filled = slots[slot] ?? [];
-      filled.push(
-        childName !== undefined && known.eroj.has(childName) ? { ero: childName } : "text",
-      );
-      slots[slot] = filled;
-      const text = textOf(facts.elements, child);
-      const previous = texts[slot];
-      texts[slot] =
-        previous === undefined
-          ? text
-          : [...(Array.isArray(previous) ? previous : [previous]), text];
-    }
-    const label = [
-      element.text,
-      ...children
-        .filter((child) => facts.elements[child]?.attrs.slot === undefined)
-        .map((child) => textOf(facts.elements, child)),
-    ]
-      .filter((part) => part !== "")
-      .join(" ");
-    const container = fmAncestor(facts.elements, index);
-    if (container !== -1 && !containers.has(container)) {
-      containers.set(
-        container,
-        `${fmName(facts.elements[container]?.tag ?? "") ?? ""}-${containers.size + 1}`,
-      );
-    }
-    const lingvo = facts.lingvo.slice(0, 2).toLowerCase();
-    instances.push({
-      ero: name,
-      props,
-      ...(label === "" ? {} : { label }),
-      ...(Object.keys(texts).length === 0 ? {} : { texts }),
-      ...(Object.keys(slots).length === 0 ? {} : { slots }),
-      ...(container === -1 ? {} : { container: containers.get(container) ?? "" }),
-      ...(/^[a-z]{2}$/.test(lingvo) ? { lingvo } : {}),
-    });
-  }
-  return instances;
-}
-
-function reguloGaps(facts: Facts, known: Known, modelo: Modelo): { gaps: Gap[]; share: number } {
-  const instances = instancesOf(facts, known);
+function reguloGaps(facts: Facts, modelo: Modelo): { gaps: Gap[]; share: number } {
+  const instances = instancojElElementoj(facts.elements, modelo, { lingvo: facts.lingvo });
   if (instances.length === 0) return { gaps: [], share: 1 };
   const result = checkUsage(modelo, { instances });
   if (!result.ok) {
@@ -548,7 +462,7 @@ export function score(input: ScoreInput): Score {
     const invented = inventedGaps(facts, known);
     gaps.push(...invented.gaps);
     k2 = invented.used === 0 ? 0 : Math.max(0, 1 - invented.gaps.length / invented.used);
-    const reguloj = reguloGaps(facts, known, modelo);
+    const reguloj = reguloGaps(facts, modelo);
     gaps.push(...reguloj.gaps);
     k3 = invented.used === 0 ? 0 : reguloj.share;
   }
