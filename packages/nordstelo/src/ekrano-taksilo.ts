@@ -8,6 +8,7 @@
 import type { Fakto, PlanoEkrano, Taksado, Taksilo, Varianto } from "@fundamento/ekranoj";
 import type { Kriterio, Modelo, NordsteloFile, Tasko } from "@fundamento/modelo";
 import type { Facts } from "./facts.js";
+import type { K8Rezulto } from "./k8/k8.js";
 import { scoreBoth } from "./score.js";
 
 export interface EkranoTaksiloOpcioj {
@@ -24,6 +25,17 @@ export interface EkranoTaksiloOpcioj {
    */
   tasko?: string;
 }
+
+/**
+ * The Taksado of ekranoj with K8 beside it (Spec 038 Lauf 2, C-E, D-94): the ekranoj type stays
+ * unchanged; `k8` exists only where the score has one.
+ */
+export type TaksadoK8 = Taksado & { k8?: K8Rezulto };
+
+/** The scorer of ekranoj whose Taksado carries K8 beside it. */
+export type TaksiloK8 = Taksilo & {
+  taksi(e: { fakto: Fakto; ekrano: PlanoEkrano; varianto: Varianto }): TaksadoK8;
+};
 
 /** C-2: the facts of ekranoj are nordstelo's facts (a compile-time assignment, no copy). */
 const factsDe = (fakto: Fakto): Facts => fakto;
@@ -42,9 +54,9 @@ function taskoDe(ekrano: PlanoEkrano, opcioj: EkranoTaksiloOpcioj): Tasko {
 }
 
 /** The `Taksilo` of ekranoj over nordstelo's score (C-8). Pure: the same facts give the same Taksado. */
-export function ekranoTaksilo(opcioj: EkranoTaksiloOpcioj): Taksilo {
+export function ekranoTaksilo(opcioj: EkranoTaksiloOpcioj): TaksiloK8 {
   return {
-    taksi(e: { fakto: Fakto; ekrano: PlanoEkrano; varianto: Varianto }): Taksado {
+    taksi(e: { fakto: Fakto; ekrano: PlanoEkrano; varianto: Varianto }): TaksadoK8 {
       const { nova } = scoreBoth(
         {
           facts: factsDe(e.fakto),
@@ -58,6 +70,7 @@ export function ekranoTaksilo(opcioj: EkranoTaksiloOpcioj): Taksilo {
         k: { ...nova.k },
         total: nova.total,
         mankoj: nova.gaps.map((gap) => ({ kind: gap.kind, key: gap.key })),
+        ...(nova.k8 === undefined ? {} : { k8: nova.k8 }),
       };
     },
   };

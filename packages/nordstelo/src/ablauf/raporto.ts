@@ -17,6 +17,7 @@ import {
   type NordsteloFile,
 } from "@fundamento/modelo";
 import { ekranoTaksilo } from "../ekrano-taksilo.js";
+import { K8_MERKMALOJ, type K8Merkmal } from "../k8/k8.js";
 import { median } from "../report.js";
 import { type AblaufTasko, kriteriojDe, trovuTaskon } from "./katalogo.js";
 import { type FluaPoento, legiKatalogon, legiKuron, poentiKuron } from "./poentoj.js";
@@ -112,6 +113,8 @@ export interface FluaValoro {
   k: Record<Kriterio, number | null>;
   navigado: number;
   sxablonoj: number;
+  /** Mean K8 kvoto over the screens with K8; absent where none has one (Spec 038, C-E). */
+  k8?: number;
 }
 
 /** One screen in one round. */
@@ -125,6 +128,19 @@ export interface EkranaValoro {
   unueca: boolean;
   verda: boolean | null;
   verdaEkde: number | null;
+  /** The K8 kvoto of the screen; absent where it has none (Spec 038, C-E). */
+  k8?: number;
+}
+
+/** One row of „K8 je Merkmal und Kombination“: means over the screens and repetitions. */
+export interface K8Vico {
+  tasko: string;
+  varianto: Varianto;
+  rondo: string;
+  aspekto: string;
+  scheme: "light" | "dark";
+  merkmaloj: Record<K8Merkmal, number>;
+  kvoto: number;
 }
 
 export interface KuroEnRaporto {
@@ -196,6 +212,8 @@ export interface RaportoDatumoj {
       f0R3: KomparoF0;
     }[];
   };
+  /** K8 per flow × variant × round × combination; absent where no screen has K8 (Spec 038). */
+  k8?: K8Vico[];
   sumo: {
     tokenoj: { enigo: number; eligo: number };
     anfragoj: number;
@@ -293,6 +311,7 @@ function valorojDe(
       unueca: ekrano.sxablonoj.unueca,
       verda: own?.verda ?? null,
       verdaEkde: own?.verdaEkde ?? null,
+      ...(ekrano.taksado?.k8 === undefined ? {} : { k8: ekrano.taksado.k8.kvoto }),
     };
   }
   return {
@@ -303,9 +322,64 @@ function valorojDe(
       k: { ...poento.sumo.k },
       navigado: poento.sumo.navigado,
       sxablonoj: poento.sumo.sxablonoj,
+      ...(poento.sumo.k8 === undefined ? {} : { k8: poento.sumo.k8 }),
     },
     ekranoj,
   };
+}
+
+const kompari = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
+
+/**
+ * Collects the K8 combinations of every scored screen per flow × variant × round × combination,
+ * over screens and repetitions, for the section „K8 je Merkmal und Kombination“ (Spec 038, C-E).
+ */
+class K8Kolektilo {
+  readonly #grupoj = new Map<
+    string,
+    {
+      vico: Omit<K8Vico, "merkmaloj" | "kvoto">;
+      valoroj: { merkmaloj: Record<K8Merkmal, number>; kvoto: number }[];
+    }
+  >();
+
+  aldoni(tasko: string, varianto: Varianto, rondo: string, poento: FluaPoento): void {
+    for (const ekrano of Object.values(poento.ekranoj)) {
+      for (const kombinacio of ekrano.taksado?.k8?.kombinacioj ?? []) {
+        const { aspekto, scheme } = kombinacio;
+        const sxlosilo = JSON.stringify([tasko, varianto, rondo, aspekto, scheme]);
+        const grupo = this.#grupoj.get(sxlosilo) ?? {
+          vico: { tasko, varianto, rondo, aspekto, scheme },
+          valoroj: [],
+        };
+        grupo.valoroj.push({ merkmaloj: kombinacio.merkmaloj, kvoto: kombinacio.kvoto });
+        this.#grupoj.set(sxlosilo, grupo);
+      }
+    }
+  }
+
+  /** The rows, sorted by flow, variant, round (as a number), brand and scheme; none without K8. */
+  vicoj(): K8Vico[] {
+    const mezo = (values: readonly number[]): number =>
+      round4(values.reduce((a, b) => a + b, 0) / values.length);
+    return [...this.#grupoj.values()]
+      .map(({ vico, valoroj }) => ({
+        ...vico,
+        merkmaloj: Object.fromEntries(
+          K8_MERKMALOJ.map((merkmal) => [merkmal, mezo(valoroj.map((v) => v.merkmaloj[merkmal]))]),
+        ) as Record<K8Merkmal, number>,
+        kvoto: mezo(valoroj.map((v) => v.kvoto)),
+      }))
+      .sort(
+        (a, b) =>
+          kompari(a.tasko, b.tasko) ||
+          kompari(a.varianto, b.varianto) ||
+          Number(a.rondo) - Number(b.rondo) ||
+          kompari(a.rondo, b.rondo) ||
+          kompari(a.aspekto, b.aspekto) ||
+          kompari(a.scheme, b.scheme),
+      );
+  }
 }
 
 // --- Building the data -------------------------------------------------------------------------
@@ -324,6 +398,7 @@ export function raportoDatumoj(dir: string, opcioj: RaportoOpcioj = {}): Raporto
     });
 
   const kuroj: KuroEnRaporto[] = [];
+  const k8Kolektilo = new K8Kolektilo();
   for (const slug of lauf.taskoj) {
     const tasko = trovuTaskon(slug);
     if (tasko === undefined) throw new Error(`Die Aufgabe ${slug} steht nicht im Katalog.`);
@@ -338,6 +413,7 @@ export function raportoDatumoj(dir: string, opcioj: RaportoOpcioj = {}): Raporto
           const poentoj = poentiKuron({ tasko, varianto, kuro: legiKuron(own), taksilo, modelo });
           for (const [n, poento] of Object.entries(poentoj.rondoj)) {
             rondoj[n] = valorojDe(poento, rekordo.stato[n]);
+            k8Kolektilo.aldoni(slug, varianto, n, poento);
           }
         }
         const usd = kostoOf(lauf.kiModelo, {
@@ -457,12 +533,14 @@ export function raportoDatumoj(dir: string, opcioj: RaportoOpcioj = {}): Raporto
   }
 
   const usdoj = kuroj.filter((kuro) => !kuro.nekomencita).map((kuro) => kuro.usd);
+  const k8Vicoj = k8Kolektilo.vicoj();
   return {
     id: basename(dir),
     lauf,
     streuung: { reiheK: STREUUNG_REIHE_K, fonto: STREUUNG_FONTO },
     kuroj,
     komparoj: { f0, r1r3, ekranoj },
+    ...(k8Vicoj.length === 0 ? {} : { k8: k8Vicoj }),
     sumo: {
       tokenoj: {
         enigo: kuroj.reduce((sumo, kuro) => sumo + kuro.peno.inputTokens, 0),
@@ -517,6 +595,10 @@ const HALTIGO_TEKSTO: Record<Haltigo, string> = {
 
 const jesNe = (value: boolean | null): string => (value === null ? "–" : value ? "ja" : "nein");
 
+/** K8 in a table cell: the value, or „nicht geprüft“ where no render carries K8 facts (D-98). */
+const k8Teksto = (value: number | undefined): string =>
+  value === undefined ? "nicht geprüft" : n(value);
+
 /** The Markdown report of the data: German, tables, no timestamp. */
 export function raportoMd(datumoj: RaportoDatumoj): string {
   const { lauf, komparoj, sumo } = datumoj;
@@ -553,13 +635,13 @@ export function raportoMd(datumoj: RaportoDatumoj): string {
     "",
     "## Anteile je Aufgabe, Variante und Runde (K1–K6; in Variante 0 gelten K2 und K3 nicht)",
     "",
-    `| Aufgabe | Variante | Wdh. | Runde | gebaut | ${KRITERIOJ.join(" | ")} | Total | Navigation | Muster |`,
-    `|---|---|---|---|---|${KRITERIOJ.map(() => "---|").join("")}---|---|---|`,
+    `| Aufgabe | Variante | Wdh. | Runde | gebaut | ${KRITERIOJ.join(" | ")} | Total | Navigation | Muster | K8 |`,
+    `|---|---|---|---|---|${KRITERIOJ.map(() => "---|").join("")}---|---|---|---|`,
   ];
   for (const kuro of datumoj.kuroj) {
     for (const [rondo, own] of Object.entries(kuro.rondoj)) {
       lines.push(
-        `| ${kuro.tasko} | ${kuro.varianto} | ${kuro.ripeto} | ${rondo} | ${own.fluo.konstruitaj}/${own.fluo.planitaj} | ${KRITERIOJ.map((k) => n(own.fluo.k[k])).join(" | ")} | ${n(own.fluo.total, 1)} | ${n(own.fluo.navigado)} | ${n(own.fluo.sxablonoj)} |`,
+        `| ${kuro.tasko} | ${kuro.varianto} | ${kuro.ripeto} | ${rondo} | ${own.fluo.konstruitaj}/${own.fluo.planitaj} | ${KRITERIOJ.map((k) => n(own.fluo.k[k])).join(" | ")} | ${n(own.fluo.total, 1)} | ${n(own.fluo.navigado)} | ${n(own.fluo.sxablonoj)} | ${k8Teksto(own.fluo.k8)} |`,
       );
     }
   }
@@ -576,8 +658,8 @@ export function raportoMd(datumoj: RaportoDatumoj): string {
     "",
     "## Je Screen und Runde (K1–K6, Navigation vollständig, Muster einheitlich, grün)",
     "",
-    `| Aufgabe | Screen | Variante | Wdh. | Runde | ${KRITERIOJ.join(" | ")} | Total | Navigation | Muster | grün |`,
-    `|---|---|---|---|---|${KRITERIOJ.map(() => "---|").join("")}---|---|---|---|`,
+    `| Aufgabe | Screen | Variante | Wdh. | Runde | ${KRITERIOJ.join(" | ")} | Total | Navigation | Muster | K8 | grün |`,
+    `|---|---|---|---|---|${KRITERIOJ.map(() => "---|").join("")}---|---|---|---|---|`,
   );
   for (const kuro of datumoj.kuroj) {
     for (const [rondo, own] of Object.entries(kuro.rondoj)) {
@@ -587,10 +669,23 @@ export function raportoMd(datumoj: RaportoDatumoj): string {
             ? `ja, seit Runde ${ekrano.verdaEkde}`
             : jesNe(ekrano.verda);
         lines.push(
-          `| ${kuro.tasko} | ${slug} | ${kuro.varianto} | ${kuro.ripeto} | ${rondo} | ${KRITERIOJ.map((k) => n(ekrano.k?.[k])).join(" | ")} | ${n(ekrano.total, 1)} | ${jesNe(ekrano.kompleta)} | ${jesNe(ekrano.unueca)} | ${verda} |`,
+          `| ${kuro.tasko} | ${slug} | ${kuro.varianto} | ${kuro.ripeto} | ${rondo} | ${KRITERIOJ.map((k) => n(ekrano.k?.[k])).join(" | ")} | ${n(ekrano.total, 1)} | ${jesNe(ekrano.kompleta)} | ${jesNe(ekrano.unueca)} | ${k8Teksto(ekrano.k8)} | ${verda} |`,
         );
       }
     }
+  }
+  if (datumoj.k8 !== undefined) {
+    lines.push(
+      "",
+      "## K8 je Merkmal und Kombination (Kontrast Standard; Mittel über Screens und Wiederholungen; neben dem Total, nicht darin)",
+      "",
+      `| Aufgabe | Variante | Runde | Marke | Schema | ${K8_MERKMALOJ.join(" | ")} | K8 |`,
+      `|---|---|---|---|---|${K8_MERKMALOJ.map(() => "---|").join("")}---|`,
+      ...datumoj.k8.map(
+        (vico) =>
+          `| ${vico.tasko} | ${vico.varianto} | ${vico.rondo} | ${vico.aspekto} | ${vico.scheme} | ${K8_MERKMALOJ.map((merkmal) => n(vico.merkmaloj[merkmal])).join(" | ")} | ${n(vico.kvoto)} |`,
+      ),
+    );
   }
   lines.push(
     "",

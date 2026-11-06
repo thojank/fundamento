@@ -1,0 +1,240 @@
+{
+  "kombinacioj": [
+    {
+      "aspekto": "ekzemplo",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "13 von 13 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `main > h1`"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "4 von 4 nativen Elementen roh (Schrift, Abstand), zuerst `main > h1`"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "4 von 12 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `main > p` (44,44 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.1667,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.6667,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "ekzemplo",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "13 von 13 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `main > h1`"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "4 von 4 nativen Elementen roh (Schrift, Abstand), zuerst `main > h1`"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "4 von 12 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `main > p` (44,44 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.1667,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.6667,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "scheme": "light"
+    },
+    {
+      "aspekto": "komuna",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "13 von 13 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `main > h1`"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "4 von 4 nativen Elementen roh (Schrift, Abstand), zuerst `main > h1`"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "3 von 12 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `main > p` (44,44 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.1875,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.75,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "komuna",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "13 von 13 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `main > h1`"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "4 von 4 nativen Elementen roh (Schrift, Abstand), zuerst `main > h1`"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "3 von 12 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `main > p` (44,44 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.1875,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.75,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "scheme": "light"
+    },
+    {
+      "aspekto": "provo",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "13 von 13 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `main > h1`"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "4 von 4 nativen Elementen roh (Schrift, Abstand), zuerst `main > h1`"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "3 von 12 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `main > p` (44,44 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.1875,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.75,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "provo",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "13 von 13 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `main > h1`"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "4 von 4 nativen Elementen roh (Schrift, Abstand), zuerst `main > h1`"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "3 von 12 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `main > p` (44,44 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.1875,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.75,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "scheme": "light"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "13 von 13 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `main > h1`"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "4 von 4 nativen Elementen roh (Schrift, Abstand), zuerst `main > h1`"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "3 von 12 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `main > p` (44,44 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.1875,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.75,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "13 von 13 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `main > h1`"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "4 von 4 nativen Elementen roh (Schrift, Abstand), zuerst `main > h1`"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "3 von 12 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `main > p` (44,44 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.1875,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.75,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "scheme": "light"
+    }
+  ],
+  "kvoto": 0.1823,
+  "mankoj": [
+    "interspacoj"
+  ]
+}

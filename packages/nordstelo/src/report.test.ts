@@ -3,7 +3,9 @@
 // Variante F; the tokens. K7 is reported, never weighted.
 
 import { describe, expect, it } from "vitest";
+import type { K8Rezulto } from "./k8/k8.js";
 import { median, type RunRecord, summarize } from "./report.js";
+import { markdownReport } from "./run.js";
 
 const run = (
   task: string,
@@ -93,5 +95,84 @@ describe("summarize", () => {
     const summary = summarize([failed, run("a", "F", 2, 80), run("a", "F", 3, 90)]);
     expect(summary.variants.F.tasks[0]?.scores).toEqual([0, 80, 90]);
     expect(summary.failed).toEqual([{ task: "a", variant: "F", repeat: 1, error: "timeout" }]);
+  });
+});
+
+// Spec 038 Lauf 2 (2.4, D-S038-13-2): K8 beside the figure, never in it; the Nordstern report has
+// a column K8 after „Markenfähigkeit“ that reads „nicht geprüft“ where no run carries K8.
+describe("K8 in the report of a run (Spec 038, 2.4)", () => {
+  const k8 = (kvoto: number): K8Rezulto => ({ kvoto, kombinacioj: [], mankoj: [] });
+  const withK8 = (record: RunRecord, kvoto: number): RunRecord => ({
+    ...record,
+    score: { ...record.score, k8: k8(kvoto) },
+  });
+  const META = {
+    id: "x",
+    dato: "2026-11-06T00:00:00Z",
+    commit: "abc1234",
+    anbieter: "openai",
+    modell: "gpt-4.1-mini",
+    maxTokens: 15_000_000,
+  };
+  const plain = [run("a", "F", 1, 90), run("a", "F", 2, 70), run("a", "0", 1, 40)];
+  const mixed = [
+    withK8(run("a", "F", 1, 90), 1),
+    withK8(run("a", "F", 2, 70), 0.1823),
+    run("a", "F", 3, 80),
+    run("a", "0", 1, 40),
+  ];
+
+  /** The table „Mittel je Kriterium“: header, separator and rows. */
+  const mittel = (text: string): string[] => {
+    const lines = text.split("\n");
+    const start = lines.findIndex((line) => line.startsWith("## Mittel je Kriterium"));
+    expect(start).toBeGreaterThanOrEqual(0);
+    const rows: string[] = [];
+    for (const line of lines.slice(start + 2)) {
+      if (line === "") break;
+      rows.push(line);
+    }
+    return rows;
+  };
+
+  it("Summary.k8 is absent when no run carries K8", () => {
+    const summary = summarize(plain);
+    expect("k8" in summary).toBe(false);
+  });
+
+  it("Summary.k8 is the mean kvoto per variant over the runs with K8, null for a variant without", () => {
+    const summary = summarize(mixed);
+    expect(summary.k8?.F).toBeCloseTo((1 + 0.1823) / 2, 2);
+    expect(summary.k8?.["0"]).toBeNull();
+    // K8 stays beside the figure: the medians are those of the same runs without K8.
+    expect(summary.variants).toEqual(
+      summarize(
+        mixed.map((record) => {
+          const { k8: _k8, ...score } = record.score;
+          return { ...record, score };
+        }),
+      ).variants,
+    );
+  });
+
+  it("markdownReport: column K8 after „Markenfähigkeit“, „nicht geprüft“ without K8", () => {
+    const [header = "", separator = "", ...rows] = mittel(markdownReport(META, summarize(plain)));
+    expect(header.endsWith("| Markenfähigkeit | K8 |")).toBe(true);
+    expect(separator.split("|").length).toBe(header.split("|").length);
+    expect(rows.length).toBeGreaterThan(0);
+    for (const row of rows) expect(row.endsWith("| nicht geprüft |")).toBe(true);
+  });
+
+  it("markdownReport: the K8 value per variant with K8, „nicht geprüft“ for a variant without", () => {
+    const summary = summarize(mixed);
+    const [header = "", , ...rows] = mittel(markdownReport(META, summary));
+    expect(header.endsWith("| Markenfähigkeit | K8 |")).toBe(true);
+    const f = rows.find((row) => row.startsWith("| F"));
+    const nul = rows.find((row) => row.startsWith("| 0"));
+    const shown = (summary.k8?.F ?? Number.NaN).toLocaleString("de-DE", {
+      maximumFractionDigits: 2,
+    });
+    expect(f?.endsWith(`| ${shown} |`)).toBe(true);
+    expect(nul?.endsWith("| nicht geprüft |")).toBe(true);
   });
 });

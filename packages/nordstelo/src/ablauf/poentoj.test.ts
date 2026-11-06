@@ -5,9 +5,10 @@
 
 import { readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { navigado, type Varianto } from "@fundamento/ekranoj";
+import { type Fakto, navigado, type Varianto } from "@fundamento/ekranoj";
 import { defaultModeloSource, loadModelo, type NordsteloFile } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
+import type { Facts, Render } from "../facts.js";
 import { planoDe, trovuTaskon } from "./katalogo.js";
 import {
   faktojPorNavigado,
@@ -208,5 +209,78 @@ describe("the score of a flow per screen", () => {
     });
     expect(fractional.length).toBeGreaterThan(0);
     expect(found).toEqual([]);
+  });
+});
+
+// Spec 038 Lauf 2 (2.4, D-S038-13-1): the K8 of each screen is read from the Taksado at runtime;
+// `sumo.k8` is the mean kvoto over the screens that carry one, and no key without any.
+describe("the score of a flow: K8 beside the total (Spec 038, 2.4)", () => {
+  const k8Renders = (
+    JSON.parse(
+      readFileSync(
+        fileURLToPath(new URL("../../test/fixtures/k8/sxablono/faktoj.json", import.meta.url)),
+        "utf8",
+      ),
+    ) as Facts
+  ).renders;
+  /** The facts of a screen with the K8 facts of the fixture on the renders of the same combination. */
+  const kunK8 = (fakto: Fakto): Fakto => {
+    const facts: Facts = fakto;
+    return {
+      ...facts,
+      renders: facts.renders.map((render): Render => {
+        const own = k8Renders.find(
+          (other) =>
+            other.aspekto === render.aspekto &&
+            other.scheme === render.scheme &&
+            other.contrast === render.contrast,
+        );
+        return own?.k8 === undefined ? render : { ...render, k8: own.k8 };
+      }),
+    };
+  };
+
+  it("has no sumo.k8 and no k8 on a screen for the stored facts", () => {
+    const poento = poentiFluon({
+      tasko,
+      varianto: "F",
+      faktoj: faktojDe("F", "1"),
+      taksilo,
+      modelo,
+    });
+    expect("k8" in poento.sumo).toBe(false);
+    for (const ekrano of Object.values(poento.ekranoj)) {
+      expect(ekrano.taksado === null || !("k8" in ekrano.taksado)).toBe(true);
+    }
+  });
+
+  it("gives sumo.k8 as the mean kvoto over the screens with K8, beside an unchanged total", () => {
+    const stored = faktojDe("F", "1");
+    const slugs = Object.keys(stored).sort();
+    const only = slugs[0] ?? "";
+    // One screen with K8, the others without: the mean is over that one screen only.
+    const partly = Object.fromEntries(
+      Object.entries(stored).map(([slug, fakto]) => [slug, slug === only ? kunK8(fakto) : fakto]),
+    );
+    const all = Object.fromEntries(
+      Object.entries(stored).map(([slug, fakto]) => [slug, kunK8(fakto)]),
+    );
+    const sen = poentiFluon({ tasko, varianto: "F", faktoj: stored, taksilo, modelo });
+    const teil = poentiFluon({ tasko, varianto: "F", faktoj: partly, taksilo, modelo });
+    const kun = poentiFluon({ tasko, varianto: "F", faktoj: all, taksilo, modelo });
+    const kvotoj = Object.values(kun.ekranoj).flatMap((ekrano) => {
+      const kvoto = ekrano.taksado?.k8?.kvoto;
+      return kvoto === undefined ? [] : [kvoto];
+    });
+    expect(kvotoj.length).toBe(slugs.length);
+    const mean = kvotoj.reduce((a, b) => a + b, 0) / kvotoj.length;
+    expect(kun.sumo.k8).toBeCloseTo(mean, 4);
+    const unua = teil.ekranoj[only]?.taksado?.k8;
+    expect(unua).toBeDefined();
+    expect(teil.sumo.k8).toBe(unua?.kvoto);
+    for (const own of [teil, kun]) {
+      expect(own.sumo.total).toBe(sen.sumo.total);
+      expect(own.sumo.k).toEqual(sen.sumo.k);
+    }
   });
 });

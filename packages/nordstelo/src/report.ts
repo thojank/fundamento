@@ -56,6 +56,11 @@ export interface Summary {
   kriteriojAntauxaj?: Record<Variant, Record<Kriterio, number | null>>;
   /** Mean share of the combinations the pages follow (Markenfähigkeit), per variant. */
   multmarkeco?: Record<Variant, number | null>;
+  /**
+   * Mean K8 kvoto per variant over the runs with K8 (Spec 038, C-E), beside the figure; null for a
+   * variant without; absent where no run carries K8.
+   */
+  k8?: Record<Variant, number | null>;
   gaps: (Gap & { count: number })[];
   tokens: { input: number; output: number };
   /** Requests to the provider over the run (Nachlese 11 ④); absent where no result counts them. */
@@ -169,6 +174,18 @@ export function summarize(records: readonly RunRecord[]): Summary {
         ),
       ),
     ),
+    // K8 beside the figure (Spec 038, C-E): only the runs with K8 count; no key without any.
+    ...(records.some((record) => record.score.k8 !== undefined)
+      ? {
+          k8: per((variant) =>
+            mean(
+              of(variant).flatMap((record) =>
+                record.score.k8 === undefined ? [] : [record.score.k8.kvoto],
+              ),
+            ),
+          ),
+        }
+      : {}),
     gaps,
     tokens: {
       input: records.reduce((sum, record) => sum + record.effort.inputTokens, 0),

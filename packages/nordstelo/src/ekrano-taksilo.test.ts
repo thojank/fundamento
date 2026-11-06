@@ -3,6 +3,8 @@
 // K7 never weighted. The recipe is the one of the „ganzer Ablauf“ measurement (PR B), so the same
 // facts give the same Taksado through `fm ekranoj` and through the measurement.
 
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import type { Fakto, PlanoEkrano, Taksado } from "@fundamento/ekranoj";
 import {
   defaultModeloSource,
@@ -13,7 +15,7 @@ import {
   type Tasko,
 } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
-import { ekranoTaksilo } from "./ekrano-taksilo.js";
+import { ekranoTaksilo, type TaksadoK8 } from "./ekrano-taksilo.js";
 import type { Facts } from "./facts.js";
 import { score, scoreBoth } from "./score.js";
 import { facts, h } from "./test-doubles/facts.js";
@@ -186,5 +188,52 @@ describe("ekranoTaksilo (C-8)", () => {
     });
     expect(Object.keys(taksado.k)).toEqual(["K1", "K2", "K3", "K4", "K5", "K6"]);
     expect(katalogo.pezoj.map((pezo) => pezo.kriterio)).not.toContain("K7");
+  });
+});
+
+// Spec 038 Lauf 2 (2.4, D-94): the adapter carries K8 beside the Taksado of ekranoj, unchanged.
+describe("ekranoTaksilo: K8 beside the Taksado (Spec 038, 2.4)", () => {
+  const k8Fakto: Fakto = JSON.parse(
+    readFileSync(
+      fileURLToPath(new URL("../test/fixtures/k8/roh/faktoj.json", import.meta.url)),
+      "utf8",
+    ),
+  ) as Facts;
+  const senK8: Fakto = {
+    ...k8Fakto,
+    renders: alFacts(k8Fakto).renders.map(({ k8: _k8, ...render }) => render),
+  };
+
+  it("taksado.k8 is scoreBoth(…).nova.k8, and k, total and mankoj stay the Taksado of the same facts", () => {
+    for (const varianto of ["F", "0"] as const) {
+      const taksilo = ekranoTaksilo({ modelo, katalogo, kriterioj });
+      const kun: TaksadoK8 = taksilo.taksi({ fakto: k8Fakto, ekrano: EKRANO, varianto });
+      const sen: TaksadoK8 = taksilo.taksi({ fakto: senK8, ekrano: EKRANO, varianto });
+      const { nova } = scoreBoth(
+        {
+          facts: alFacts(k8Fakto),
+          tasko: { ...login, id: EKRANO.slug, name: EKRANO.slug },
+          variant: varianto,
+          modelo,
+        },
+        katalogo,
+      );
+      expect(nova.k8).toBeDefined();
+      expect(kun.k8).toEqual(nova.k8);
+      expect("k8" in sen).toBe(false);
+      expect(kun.k).toEqual(sen.k);
+      expect(kun.total).toBe(sen.total);
+      expect(kun.mankoj).toEqual(sen.mankoj);
+    }
+  });
+
+  it("has no k8 key for facts without K8 facts", () => {
+    const taksado = ekranoTaksilo({ modelo, katalogo, kriterioj }).taksi({
+      fakto,
+      ekrano: EKRANO,
+      varianto: "F",
+    });
+    expect("k8" in taksado).toBe(false);
+    expect(Object.keys(taksado).sort()).toEqual(["k", "mankoj", "total"]);
   });
 });

@@ -10,6 +10,8 @@ Bezug 2.5 = entfällt, ersetzt durch ‚vorher' in Lauf 4 auf Bezug-SHA
 
 **Lauf:** 1 von 4 (T0 und Teil 1, PR A „Spec 038 – Gvidanto für Agenten“) · **Branch:** `261106-spec-038-lauf-1-pr-a-584c5e` (D-26, D-30) · **Datum:** 2026-11-06 · **Stand (S038-08, vor dem Push):** T0 und Teil 1 erledigt (L-0, 1.1 bis 1.8c), 1.9 verschoben nach Lauf 3. `pnpm check` lief einmal: rot nur durch Zeitgrenzen unter der Last des Laufs selbst, der rote Check einzeln grün (Befund S038-08-1). Prüfungen sauber, `main` unverändert, keine Überschneidung mit offenen PRs. Push, PR A, CI-Auswertung und Bericht folgen ohne Commit (D-25).
 
+**Lauf:** 2 von 4 (Teil 2, PR B „Spec 038 – K8 Erscheinung“) · Basis `main` = `f0275222` (enthält #151 = `636e7119`, #149, #150) · Branch `261106-spec-038-k8-erscheinung-0d6606` · Datum 2026-11-06 · **Stand (S038-14, vor dem Push):** Teil 2 erledigt (2.1 bis 2.4), Gegenprobe 2.3 trennt roh (K8 0,1823) von sxablono (K8 1). `pnpm check` lief einmal: rot nur durch eine Hook-Zeitgrenze in eroj unter der Last des Laufs selbst, der rote Check einzeln grün (Befund S038-14-1). Prüfungen sauber, `main` unverändert, keine offenen PRs. Push, PR B, CI-Auswertung und Bericht folgen ohne Commit (wie D-25; Lauf 3 trägt nach).
+
 **Ablage (D-21):** `spec.md`, `plan.md` und `tasks.md` kommen mit PR A auf `main`; jeder spätere Lauf ergänzt sie in seinem PR. Jedes Ticket schreibt seinen Beitrag zusätzlich in eine Datei außerhalb des Repos (`s038-beitraege/<Ticket>.md` im Feature-Ordner der Purple-Doku); S038-08 führt die Entscheidungen hier zusammen (vorläufige IDs `D-S038-0x-n` → D-39 ff.).
 
 ## Startbedingung (T0)
@@ -91,6 +93,45 @@ Bezug 2.5 = entfällt, ersetzt durch ‚vorher' in Lauf 4 auf Bezug-SHA
 | `packages/nordstelo/src/score.ts` | frei, geändert (K3 über `instancojElElementoj`, `instancesOf` und seine Helfer entfernt) | Grün-Commit S038-07 |
 | `packages/nordstelo/src/ablauf/poentoj.ts` | frei, geändert **über „nur K3“ hinaus** (D-34: `faktojPorNavigado` liest `navigationOf`) | Grün-Commit S038-07 |
 | `packages/ekranoj/src/{instancoj,rondoj,mcp-kliento,tipoj,eligo}.ts` | frei, geändert (neuer Weg mit Rückfall, Erkennung je Lauf, Allowlist + zwei, `sxablonajSugestoj` additiv in `RondoEkrano`/`RaportoEkrano`, Abschnitt im Bericht) | Grün-Commit S038-07 |
+
+### Startbedingung Lauf 2
+
+`git fetch origin` am 2026-11-06 (S038-09): `origin/main` = `f02752222867980c8c247afe160857ff6bcd7234` (Merge #150); `git merge-base --is-ancestor 636e7119 origin/main` → ja (#151 enthalten, ebenso #149 und #150). Der Branch `261106-spec-038-k8-erscheinung-0d6606` stand ohne eigene Commits auf `origin/main`. `Bezug vorher` bleibt `e4873c57` aus Lauf 1; `/tmp/s038-bezug` wird nicht neu gesetzt.
+
+### Frei/Tabu für Lauf 2
+
+**Frei (L-6, D-21):**
+
+- `packages/nordstelo/**` (Teil 2: Fakten, Sollwerte, `k8`, Fixtures, Bewertung und Berichte)
+- `specs/038-gvidanto-agentoj/{plan,tasks}.md`; `spec.md` bleibt byte-gleich
+
+**Tabu (L-5, Änderung nur als Befund hier):**
+
+- `packages/eroj/**`, `packages/metiejo/**`, `packages/ekranoj/**` (auch der Typ `Taksado`; der Zwilling des Extraktors gehört nach Lauf 3, D-06)
+- wie in Lauf 1: `packages/vortaro/**`, `packages/projekcioj/**`, `packages/agordilo/**`, `packages/cli/**`, `packages/modelo/**` (K8 nutzt nur vorhandene Exporte)
+- alle Wurzeldateien (`package.json`, `turbo.json`, `pnpm-lock.yaml`, `biome.json`, …), `.github/**`, `scripts/**`
+
+### Tatsächlich berührte Dateien Lauf 2
+
+Aus den Beiträgen `s038-beitraege/S038-1x.md` (S038-14). Alle Pfade frei (L-6); keine Tabu- und keine Graubereich-Datei. `packages/modelo/data/nordstelo.json` und `packages/ekranoj/**` unverändert.
+
+| Datei | Art | Commit |
+|---|---|---|
+| `specs/038-gvidanto-agentoj/{plan,tasks}.md` | frei, geändert (`spec.md` byte-gleich) | `3cb05a45` (S038-09), Abschluss-Commit (S038-14) |
+| `packages/nordstelo/src/facts.ts` | frei, geändert (additiv: `NativaFingrospuro`, `Tekstero`, `Interspaco`, `Sondo`, `FaktoAspekto`, optionales `Render.k8`) | `6fc15d48` rot (S038-10) |
+| `packages/nordstelo/src/k8/faktoj.test.ts` | frei, neu | `6fc15d48` rot (S038-10) |
+| `packages/nordstelo/src/k8/faktoj.ts` | frei, neu (Stub, dann `aspektoFaktojEnPagxo`, `sondojEnPagxo`, `normigiAspektoFaktojn`) | `6fc15d48` rot, `e5a58e05` grün (S038-10) |
+| `packages/nordstelo/src/k8/soloj.test.ts` | frei, neu (inkl. Literal-Wächter, prüft auch `k8.ts`) | `ef264acf` rot (S038-11) |
+| `packages/nordstelo/src/k8/soloj.ts` | frei, neu (Stub, dann `sondojDe`, `solojDe`, `SolojEraro`) | `ef264acf` rot, `81e2a98d` grün (S038-11) |
+| `packages/nordstelo/src/k8/{k8,gegenprobe,determinismo}.test.ts` | frei, neu | `111ea11b` rot (S038-12) |
+| `packages/nordstelo/src/k8/k8.ts` | frei, neu (Stub, dann `k8`, `k8Plena`, `K8_MERKMALOJ`, `MANKO_AL_MERKMAL`, `AUF_STUFO`) | `111ea11b` rot, `e054f338` grün (S038-12) |
+| `packages/nordstelo/src/index.ts` | frei, geändert (Exporte von `k8.ts`) | `111ea11b` rot (S038-12) |
+| `packages/nordstelo/test/k8/generi.mjs` | frei, neu (Generator, Teil keines Paket-Builds, D-95) | `111ea11b` rot (S038-12) |
+| `packages/nordstelo/test/fixtures/k8/{roh,sxablono}/{enigo.html,faktoj.json,atendo.json}` | frei, neu (6 Dateien, 313 812 Bytes) | `111ea11b` rot (S038-12) |
+| `packages/nordstelo/src/render.ts` | frei, geändert (Sondendokument `/k8-sondo`, optionale `RendererOptions.modelo`, `SCHEMES` exportiert) | `e054f338` grün (S038-12) |
+| `packages/nordstelo/src/{score,ekrano-taksilo,report}.test.ts`, `src/ablauf/{poentoj,raporto}.test.ts` | frei, geändert (Tests angehängt, keine Erwartung geändert) | `fc218a10` rot (S038-13) |
+| `packages/nordstelo/src/{score,ekrano-taksilo,report}.ts`, `src/ablauf/{poentoj,raporto}.ts` | frei, geändert (optionale `k8`-Schlüssel, Spalte K8, Abschnitt je Merkmal und Kombination) | `fc218a10` rot (nur Typen), `de7cb0d9` grün (S038-13) |
+| `packages/nordstelo/src/run.ts` | frei, geändert (Spalte K8 in „Mittel je Kriterium“, `k8` in `raporto.json`-Records nur bei Vorhandensein) | `de7cb0d9` grün (S038-13) |
 
 ## Vertrags-Fixtures (T0)
 
@@ -174,6 +215,8 @@ Bezug 2.5 = entfällt, ersetzt durch ‚vorher' in Lauf 4 auf Bezug-SHA
 
 `/tmp/s038-werkzeug/` (`$W`), nie im Repo: `pruefen` (`--staged`, `--datei`, `--diff`; Schlüsselmuster, echte Marken, das Wort aus R-12, der Name des privaten Schriften-Repos, alte Namen aus 036 Teil 6; Treffer nie im Klartext; `--diff` prüft auch Commit-Texte und dass Autor und Committer die Noreply-Adresse aus `$S/identitaet` tragen), `commit` (Identität je Befehl, kein `git config`), `filtern` (Logs: Farben weg, Treffer verdeckt), `audit-ac4` (Diff `origin/main..HEAD` ohne `specs/038-gvidanto-agentoj/**`; entfernte Zeilen mit Grenzmuster inkl. `750` → Exit 1), `listen-erzeugen`, `selbsttest`. Wortlisten nur lokal (`$W/listen/`, Rechte 600): Marken aus `$M/.fundamento/spec036/marken/namen.txt`, alte Namen aus `oldNames()` von `scripts/neutrale-namen/rules.mjs` des Bezugs. Selbsttest 103 von 103 OK (`/tmp/s038-logs/s038-01-selbsttest.log`).
 
+**Lauf 2 (S038-09, 2026-11-06):** `$W` vorhanden (`pruefen`, `commit`, `filtern`, `audit-ac4`, `listen/`, `selbsttest`), nicht neu gebaut; Selbsttest 103 von 103 OK (`/tmp/s038-logs/s038-09-selbsttest.log`).
+
 ## Entscheidungen, vom Maintainer zu bestätigen
 
 ### Vorschläge der Quell-Spec (V-1, V-2) und Entscheidungen des Auftrags (D-01 bis D-20)
@@ -217,17 +260,17 @@ Bezug 2.5 = entfällt, ersetzt durch ‚vorher' in Lauf 4 auf Bezug-SHA
 | D-26 | PR A direkt aus dem p0-Worktree-Branch (vom Maintainer entschieden, 2026-11-06). |
 | D-27 | Werkzeuge `$W` neu gebaut: `pruefen`, `commit`, `filtern`, `audit-ac4`; Wortlisten nur lokal. |
 | D-28 | 750 Tokens bei `fields`: Füllreihenfolge `brief → role → navigation → slots`, Rest in `rest`, ein Folgeaufruf (vom Maintainer entschieden, 2026-11-06); präzisiert durch D-31. |
-| D-29 | Seitenregeln getrennt (`sxablonoRezulto`), nicht in K3, `total`, Gate oder „grün“ (zu bestätigen). |
+| D-29 | Seitenregeln getrennt (`sxablonoRezulto`), nicht in K3, `total`, Gate oder „grün“. **bestätigt (Maintainer, 2026-11-06)** |
 
 ### Entscheidungen der Implementierungs-Spec (D-30 bis D-38)
 
 | # | Entscheidung |
 |---|---|
 | D-30 | Branch = `261106-spec-038-lauf-1-pr-a-584c5e` (Absicht von D-26; der Name im Spec-Text war ein Tippfehler). |
-| D-31 | `fields`-Antwort flach; `rest` zählt mit; kampo `["brief","slots"]` → `slots` geliefert, `rest: ["brief"]`; Messwerte: brief 2 239 Zeichen = 747 Tokens, verschachtelt 755, flach mit `rest` 752. |
-| D-32 | `get_sxablono` liefert `marker` nur mit der Eingabe `marker: true`; Schlüssel bleibt `regions`. |
-| D-33 | `suggest_ero` liefert `nearest` nur mit der Eingabe `nearest: true`; Fehlerhülle bekommt optional `nearest`. |
-| D-34 | nordstelo `faktojPorNavigado` liest die Ableitung des Gvidanto (1.4); Datei außerhalb „nur K3“ berührt. |
+| D-31 | `fields`-Antwort flach; `rest` zählt mit; kampo `["brief","slots"]` → `slots` geliefert, `rest: ["brief"]`; Messwerte: brief 2 239 Zeichen = 747 Tokens, verschachtelt 755, flach mit `rest` 752. **bestätigt (Maintainer, 2026-11-06)** |
+| D-32 | `get_sxablono` liefert `marker` nur mit der Eingabe `marker: true`; Schlüssel bleibt `regions`. **bestätigt (Maintainer, 2026-11-06)** |
+| D-33 | `suggest_ero` liefert `nearest` nur mit der Eingabe `nearest: true`; Fehlerhülle bekommt optional `nearest`. **bestätigt (Maintainer, 2026-11-06)** |
+| D-34 | nordstelo `faktojPorNavigado` liest die Ableitung des Gvidanto (1.4); Datei außerhalb „nur K3“ berührt. **bestätigt (Maintainer, 2026-11-06)** |
 | D-35 | Startbedingung 036 Teil 5 über #143 (Stapel umbasiert gemergt, #139–#142 geschlossen). |
 | D-36 | Gleichheit des neuen ekranoj-Wegs mit dem echten Server wird in nordstelo getestet (AC-10 von 037). |
 | D-37 | Vertragskatalog ohne `save_agordo`, `preview_agordo`, `propose_agordo` (schreibt / liest Dateien / absoluter Pfad in der Antwort). |
@@ -295,6 +338,92 @@ Vorläufige IDs aus den Beiträgen (`s038-beitraege/<Ticket>.md`), von S038-08 d
 | D-92 | D-S038-08-1 | `pnpm check` rot nur durch Zeitgrenzen unter der Last des ganzen Laufs (S038-08-1): kein Codefehler, darum keine Änderung und kein `pnpm test:betroffen`; der rote Check (`@fundamento/nordstelo#test`) einzeln mit `--reporter=json` grün (139/0), `src/ac8.test.ts` einzeln 0/10 rot. Keine Grenze angehoben, `pnpm check` nicht wiederholt (B-7); der Push findet statt. |
 | D-93 | D-S038-08-2 | Weil `pnpm check` die Schritte mit `&&` verkettet, liefen Lint und die Modelo-Checks nach dem Abbruch nicht. `pnpm check:privat` lief einzeln, weil AC-L9 es vor dem Push verlangt (grün); die übrigen Schritte (Lint, `check:*`) prüft der `pull_request`- und der `workflow_dispatch`-Lauf, lokal nicht noch einmal (sonst wäre es ein zweites `pnpm check` in Teilen). Biome und `tsc` liefen je Ticket sauber. |
 
+### Entscheidungen Lauf 2 (ab D-94)
+
+Aus dem Arbeitsauftrag von Lauf 2 (Abschnitt „Vorläufige Entscheidungen“), wörtlich; D-94 bis D-96 hat der Maintainer entschieden, D-97 bis D-110 sind zu bestätigen. Weitere Entscheidungen aus dem Lauf folgen fortlaufend ab D-111 (S038-14).
+
+| # | Entscheidung |
+|---|---|
+| D-94 | `Taksado.k8` über einen nordstelo-Typ `TaksadoK8 = Taksado & { k8?: K8Rezulto }`. Der Wert läuft zur Laufzeit mit, ekranoj bleibt unverändert und bekommt das typisierte Feld in Lauf 3 (**vom Maintainer entschieden, 2026-11-06**). |
+| D-95 | Fixtures `k8/{roh,sxablono}` entstehen lokal mit dem Playwright-Renderer von nordstelo über einen Generator im Paket (ohne Modell). Zwei Läufe müssen byte-gleich sein. CI prüft nur reine Funktionen auf den gespeicherten Fakten (**vom Maintainer entschieden, 2026-11-06**). |
+| D-96 | K8-Fakten nur bei Kontrast „default“: 8 Kombinationen (4 Marken × hell/dunkel). K8 des Screens = Mittel der 8 `kvoto`, dazu die Tabelle je Kombination (**vom Maintainer entschieden, 2026-11-06**). |
+| D-97 | Feld `renders[].k8` (Typ `FaktoAspekto`) statt `renders[].aspekto`, weil der Name schon die Marke trägt. Das Feld ist optional, damit `Fakto` (ekranoj) weiter `Facts` zugewiesen werden kann (C-2). |
+| D-98 | `Score.k8` steht nur da, wenn die Fakten K8-Fakten tragen. Fehlt das Feld, heißt das „nicht geprüft“. So bleiben gespeicherte Ergebnisse und `integra-raporto.json` byte-gleich. |
+| D-99 | Merkmale sind Treffer-Anteile (1 = gut). Leerer Nenner → 1 mit Grund „nichts zu prüfen“. `sxablono` ist 0 oder 1. |
+| D-100 | Das Merkmal `sxablono` kommt aus `facts.elements` über den Kern von Lauf 1 (keine neuen DOM-Fakten für Regionen). Landmarken werden nur für Bericht und Zwilling mitgespeichert. |
+| D-101 | `ersatzschrift` vergleicht die erste Familie der berechneten Schriftfamilie mit den aufgelösten Schrift-Tokens der Marke (deklariert, nicht „geladen“). Der Lade-Status wird getrennt gespeichert (Edge Case). |
+| D-102 | Fingerabdruck „Marken-Stil“: Die Schrift folgt D-101. `color`, `background-color` und `border-*-color` gehören zu den aufgelösten Farb-Tokens der Kombination; transparent und `border-style: none` zählen als passend. `padding` und `margin` sind je Seite 0 oder auf einer Stufe (0,5 px). |
+| D-103 | Geschwisterabstand nur zwischen sichtbaren Element-Geschwistern desselben Elternteils. Die Achse ergibt sich aus der Lage der Kästen. Abstand ≤ 0 (anliegend oder überlappend) zählt nicht. |
+| D-104 | `mankoj`: Die Abbildung „fehlendes Mittel aus `listArangxoj(modelo).mankoj` → Merkmal“ steht als Tabelle in `k8.ts` (`row`, `column`, `stack` → `interspacoj`). Was fehlt, liest `k8` aus der Modelo, nicht aus einer Liste. |
+| D-105 | Prädikat `k8Plena`: in jeder Kombination jedes Merkmal = 1 außer `mankoj`. Es ist die Definition von „grün/rot“ der Gegenprobe; Lauf 3 übernimmt es für D-08. |
+| D-106 | Bericht: eine Spalte „K8“ (Mittel) je Screen bzw. Lauf, dazu ein Abschnitt je Merkmal und Kombination, nur wenn K8 vorhanden ist. Im JSON steht der Schlüssel nur, wenn K8 vorhanden ist. |
+| D-107 | `soloj` löst mit derselben Belegung auf wie der Render (Marke, Farbschema, Kontrast default, Bewegung reduziert, Dichte = Standard der Modelo, weil der Renderer keine setzt). |
+| D-108 | R-8 gilt in Lauf 2 nicht: kein Neustart, ein Dispatch, kein Push danach (Go, bindend). |
+| D-109 | PR B kommt direkt aus dem p0-Worktree-Branch `261106-go-fr-spec-038-lauf-2-v-0d6606` (wie D-26). Branch tatsächlich `261106-spec-038-k8-erscheinung-0d6606` (D-S038-09-1). |
+| D-110 | Farben vergleicht K8 in der Form des Browsers. Der Extraktor misst je Kombination die berechneten Werte der Farb-Tokens der Marke über Sondenelemente; die CSS-Namen kommen aus der vorhandenen Namensableitung der CSS-Projektion. Schriften und Abstände kommen aus der Modelo. Ohne exportierte Namensableitung: Rückfall auf `readDtcgColor`/`srgbComponentsOf` mit Befund (technical-spec). |
+
+### Vorläufige Entscheidungen der Implementierungs-Spec (D-S038-…)
+
+**Ersetzt (S038-14):** umnummeriert nach D-111 ff., siehe „Entscheidungen Lauf 2 (Fortsetzung, D-111 ff.)“; die Tabelle bleibt als Stand von S038-09 stehen. Aus der Implementierungs-Spec von Lauf 2 (§5), vorläufig und vom Maintainer zu bestätigen; S038-14 nummeriert sie mit den Entscheidungen aus den Beiträgen nach D-111 ff. um (vorläufige ID in Klammern).
+
+| vorläufig | Entscheidung | Grund |
+|---|---|---|
+| D-S038-09-1 | Der PR-Branch ist der echte Worktree-Branch `261106-spec-038-k8-erscheinung-0d6606`; der Dispatch nutzt ihn mit `--ref`. D-109 und die technical-spec nennen `261106-go-fr-spec-038-lauf-2-v-0d6606`. | Diesen Branch gibt es im Worktree nicht (D-109: PR B kommt aus dem Branch des p0-Worktrees). |
+| D-S038-09-2 | Nur S038-09 und S038-14 ändern `plan.md`/`tasks.md`. S038-10 bis S038-13 schreiben in `s038-beitraege/S038-1x.md`; S038-14 führt zusammen. | Parallele Tickets an einer Datei; weniger Doku-Commits. |
+| D-S038-10-1 | Schrift eines Textlaufs = berechnete `font-family` des Elternteils im flachen Baum (`assignedSlot`, wenn geslottet). | Die Wurzel setzt keine `font-family`. Text in einem Ero-Slot rendert in der Schrift der Ero; der Host gäbe eine falsche „Ersatzschrift“. |
+| D-S038-10-2 | Sonden (`sondoj`, `tiparoj`) werden in einem eigenen Sondendokument gemessen (nur `fundamento.css`, dieselben `data-fm-*`), nicht in der Seite des Agenten. Der Extraktor ist geteilt in `aspektoFaktojEnPagxo` und `sondojEnPagxo`. | Seiten der Variante 0 laden das Stylesheet nicht; Seiten können `--fm-*` überschreiben. |
+| D-S038-10-3 | `Sondo` trägt `eco`; die Normalisierung entfernt Doppelte nach `(eco, valoro)` und behält den kleinsten Token-Namen. | 1108 Farb-Tokens × 8 Kombinationen würden jede gespeicherte Fakten-Datei aufblähen. |
+| D-S038-11-1 | K8 vergleicht Farben, Schriftfamilien **und** Abstände mit Sondenwerten. Die Modelo liefert Namen, `mankoj` und Sxablonoj. `solojDe` behält die Auflösung über die Modelo für den Generator und den Gegencheck-Test. Keine Sonde für die Wurzel-Schriftgröße (der Browser liefert px). | Die Modelo der Bewertung kennt nur komuna; die drei anderen Marken gibt es nur in der Modelo der cxiuj-Konfiguration. |
+| D-S038-11-2 | „Projektion ≠ Modelo“ ist ein CI-Test auf den Fixtures (S038-12), kein `kialo` in der Ausgabe von `k8`. | Hält `k8` unabhängig davon, welche Marken die übergebene Modelo kennt. |
+| D-S038-11-3 | Die CSS-Namen kommen aus `cssVariable` (`@fundamento/projekcioj`, exportiert). Der Rückfall aus D-110 wird nicht gebraucht. | Geprüft auf `f0275222`. |
+| D-S038-12-1 | Merkmal `sxablono` = `fm-<name>` einer Sxablono der Modelo mit ≥ 1 gefüllten Region nach dem exportierten `markerOf`. | `instancojElElementoj` liefert nur Ero-Instanzen; `sxablonojElElementoj` ist privat, modelo ist tabu. Befund für Lauf 3: die Ableitung exportieren. |
+| D-S038-12-2 | Der Einbau in `render.ts` entsteht vor dem Rot-Commit (zum Erzeugen der Fixtures) und wird mit Grün committet; der Generator läuft nach Grün noch zweimal. | Die Fixtures brauchen den Einbau; die Reihenfolge nach L-9 bleibt für den Produktcode. |
+| D-S038-12-3 | Der Renderer bekommt eine optionale Modelo-Option (Vorgabe: die Modelo des Repos, einmal geladen) und eine Route für das Sondendokument. | Die Sondennamen brauchen eine Modelo; bestehende Aufrufer bleiben unverändert. |
+| D-S038-13-1 | `poentoj` liest `k8` zur Laufzeit aus der Taksado; die Typen `Taksilo`/`PoentiEnigo` bleiben unverändert. | ekranoj ist tabu (D-94). |
+| D-S038-13-2 | Die Spalte im Nordstern-Bericht steht in „Mittel je Kriterium“ hinter „Markenfähigkeit“ in `run.ts` `markdownReport`; `Summary.k8?` nur, wenn vorhanden. | `report.ts` hat keine md-Tabelle. |
+| D-S038-14-1 | Kein eigenes Test-Ticket; die Abdeckung der AC verteilt sich auf die Tests von S038-10 bis S038-13, das Tor vor S038-14 und S038-14. | Ticketplan L-1 und Go sind bindend. |
+
+### Entscheidungen Lauf 2 (Fortsetzung, D-111 ff.)
+
+Vorläufige IDs der Implementierungs-Spec (§5) und der Beiträge `s038-beitraege/S038-1x.md`, von S038-14 je Ticket durchnummeriert: D-111 bis D-144, alle vom Maintainer zu bestätigen.
+
+| # | vorläufig | Entscheidung |
+|---|---|---|
+| D-111 | D-S038-09-1 | Der PR-Branch ist der echte Worktree-Branch `261106-spec-038-k8-erscheinung-0d6606`; der Dispatch nutzt ihn mit `--ref`. D-109 und die technical-spec nennen `261106-go-fr-spec-038-lauf-2-v-0d6606`, den es im Worktree nicht gibt. |
+| D-112 | D-S038-09-2 | Nur S038-09 und S038-14 ändern `plan.md`/`tasks.md`. S038-10 bis S038-13 schreiben in `s038-beitraege/S038-1x.md`; S038-14 führt zusammen (parallele Tickets an einer Datei, weniger Doku-Commits). |
+| D-113 | D-S038-10-1 | Schrift eines Textlaufs = berechnete `font-family` des Elternteils im flachen Baum (`assignedSlot`, wenn geslottet). Die Wurzel setzt keine `font-family`; Text in einem Ero-Slot rendert in der Schrift der Ero, der Host gäbe eine falsche „Ersatzschrift“. Lokal bestätigt (Smoke S038-10, Fixture sxablono). |
+| D-114 | D-S038-10-2 | Sonden (`sondoj`, `tiparoj`) werden in einem eigenen Sondendokument gemessen (nur `fundamento.css`, dieselben `data-fm-*`), nicht in der Seite des Agenten; Extraktor geteilt in `aspektoFaktojEnPagxo` und `sondojEnPagxo`. Seiten der Variante 0 laden das Stylesheet nicht und können `--fm-*` überschreiben. |
+| D-115 | D-S038-10-3 | `Sondo` trägt `eco`; die Normalisierung entfernt Doppelte nach `(eco, valoro)` und behält den kleinsten Token-Namen (sonst 1108 Farb-Tokens × 8 Kombinationen je Fakten-Datei). |
+| D-116 | D-S038-10-4 | `aspektoFaktojEnPagxo()` liefert `sondoj: []` und `tiparoj: []`; `sondojEnPagxo(petoj)` liefert nur diese beiden. Der Aufrufer führt zusammen: `normigiAspektoFaktojn({ ...pagxo, ...sondoj })`. |
+| D-117 | D-S038-10-5 | Ein Textlauf zählt nur gerenderten Text: die `Range` des Textknotens hat eine Box mit Breite und Höhe > 0, der Elternteil im flachen Baum ist nicht `visibility: hidden`. Eigene Textknoten werden je Elternteil im flachen Baum gruppiert (ein `Tekstero` je Element); `signoj` = Länge nach Zusammenfassen des Leerraums. |
+| D-118 | D-S038-10-6 | `orientiloj.rolo` nutzt ARIA-Landmarkenrollen (`main`, `navigation`, `banner`, `contentinfo`, `complementary`); ein explizites `role` aus der Landmarkenliste gewinnt. Landmarken werden nicht nach Sichtbarkeit gefiltert (nur gespeichert, D-100). |
+| D-119 | D-S038-10-7 | Normalisierung: `font-family`-Sonden auf die erste Familie gekürzt wie jede Familie; Farben mit zusammengefasstem Leerraum, auch um Kommas und Klammern (`rgb(1,  2,3)` → `rgb(1, 2, 3)`); Abstandssonden auf ≤ 2 Stellen; `tiparoj` ein Eintrag je Familie, `sxargita` = alle Meldungen wahr. Abstandssonde über `padding-left`, Sondenelement `div` absolut und unsichtbar, nach dem Lesen entfernt. |
+| D-120 | D-S038-10-8 | Sortierung nach Zeichencodes (nicht `localeCompare`), Zahlen numerisch; Gleichstand über das JSON des Eintrags, damit gleiche Schlüssel nie von der Eingabereihenfolge abhängen. |
+| D-121 | D-S038-11-1 | K8 vergleicht Farben, Schriftfamilien **und** Abstände mit Sondenwerten. Die Modelo liefert Namen, `mankoj` und Sxablonoj; `solojDe` behält die Auflösung über die Modelo für den Generator und den Gegencheck-Test. Keine Sonde für die Wurzel-Schriftgröße. Grund: die Modelo der Bewertung kennt nur komuna (per Test bestätigt: ekzemplo, provo, provo-kompakta lösen nur in der cxiuj-Modelo auf). |
+| D-122 | D-S038-11-2 | „Projektion ≠ Modelo“ ist ein CI-Test auf den Fixtures (S038-12), kein `kialo` in der Ausgabe von `k8`. |
+| D-123 | D-S038-11-3 | Die CSS-Namen kommen aus `cssVariable` (`@fundamento/projekcioj`, exportiert); der Rückfall aus D-110 wird nicht gebraucht (geprüft auf `f0275222`). |
+| D-124 | D-S038-11-4 | `Soloj.mankoj` ist die Projektion `{ celo }` von `listArangxoj(modelo).mankoj` (Reihenfolge erhalten, ohne `propono`). |
+| D-125 | D-S038-11-5 | Fehler von `solojDe` werden als `SolojEraro` geworfen (Felder `path`, `rule`, `message`, `suggestion`, `problemoj`), keine Union-Rückgabe; unbekannte Marke → `resolve-unknown-valoro` an `assignment/aspekto`, fremde Einheit → `k8-interspaco-nelegebla`. |
+| D-126 | D-S038-11-6 | `solojDe` setzt Kontrast nicht ausdrücklich, sondern nimmt den Standard der Modelo (dieselbe Quelle wie der Grundzustand der CSS-Projektion); Belegung `{ aspekto, color-scheme, motion: reduced }`. |
+| D-127 | D-S038-11-7 | Abstandsstufen werden dedupliziert; nicht-positive Stufen entfallen (kein Sollwert für „kein Abstand“). |
+| D-128 | D-S038-12-1 | Merkmal `sxablono` = `fm-<name>` einer Sxablono der Modelo mit ≥ 1 gefüllten Region nach dem exportierten `markerOf`. `sxablonojElElementoj` ist privat, modelo ist tabu (Befund F-S038-12-3). |
+| D-129 | D-S038-12-2 | Der Einbau in `render.ts` entsteht vor dem Rot-Commit (zum Erzeugen der Fixtures) und wird mit Grün committet; der Generator lief nach Grün noch zweimal. |
+| D-130 | D-S038-12-3 | Der Renderer bekommt eine optionale Modelo-Option (Vorgabe: die Modelo des Repos, einmal geladen) und eine Route für das Sondendokument; bestehende Aufrufer bleiben unverändert. |
+| D-131 | D-S038-12-4 | `k8.ts` exportiert zusätzlich `K8_MERKMALOJ` (Reihenfolge der Merkmale) und `AUF_STUFO = 0.5` (Definition aus D-08, benannt, keine Toleranz). Abstände werden vor dem Vergleich auf 0,01 gerundet: 0,5 liegt auf der Stufe, 0,51 nicht. |
+| D-132 | D-S038-12-5 | `kialoj`: einer je Merkmal in der Reihenfolge ersatzschrift, nativaj, interspacoj, sxablono, mit festem deutschem Wortlaut; die Zeile „Schriftquelle nicht erreichbar: …“ folgt der ersatzschrift-Zeile. „Erster Ort“ = kleinster Element- bzw. `post`-Index als Tag-Pfad mit höchstens 3 Ebenen. |
+| D-133 | D-S038-12-6 | Rundung: jedes Merkmal auf 4 Stellen; `kvoto` der Kombination = Mittel der vier gerundeten Merkmale, gerundet; `K8Rezulto.kvoto` = Mittel der Kombinationen, gerundet. `mankoj` zählen in jedem Wert mit und blockieren nur `k8Plena` nicht. |
+| D-134 | D-S038-12-7 | `nekomparebla` nur für eine Familie der eigenen Schrift-Sonden mit `sxargita: false`. Mit der CSS des Repos (kein `@font-face`) ist jedes `sxargita` wahr (F-S038-10-1); die Fixtures tragen kein `nekomparebla`. |
+| D-135 | D-S038-12-8 | render.ts: Sondendokument `/k8-sondo` als eine zusätzliche Seite je Render-Kontext, beim ersten Render mit Kontrast default nach dem Screenshot geöffnet, mit dem Kontext geschlossen; derselbe Route-Handler, dieselben `emulateMedia` und `data-fm-*`. `sondojDe(modelo)` einmal je Renderer; `SCHEMES` exportiert. |
+| D-136 | D-S038-12-9 | Generator: `sxablono/enigo.html` = Beispiel der Sxablono `pagxo` aus `listArangxoj` mit einem Textlabel im Titel („Übersicht“); der Generator prüft, dass die Datei ohne Text genau ein Beispiel ist. Er liest `stabilaJson` aus `dist/ablauf/raporto.js`. |
+| D-137 | D-S038-12-10 | Im Rot-Commit importiert `determinismo.test.ts` `SCHEMES`, das erst das grüne `render.ts` exportiert. Der Rot-Stand besteht `tsc -p tsconfig.build.json` (verlangt), nicht `tsc -p tsconfig.json`; zur Laufzeit fallen die Tests vorher am Stub-Throw. Der Grün-Stand besteht beide. |
+| D-138 | D-S038-13-1 | `poentoj` liest `k8` zur Laufzeit aus der Taksado; die Typen `Taksilo`/`PoentiEnigo` bleiben unverändert, nur der Ausgabetyp `EkranaPoento.taksado` wird `TaksadoK8 | null` (ekranoj tabu, D-94). |
+| D-139 | D-S038-13-2 | Die Spalte K8 im Nordstern-Bericht steht in „Mittel je Kriterium“ hinter „Markenfähigkeit“ (`run.ts` `markdownReport`); `Summary.k8?` nur, wenn vorhanden. |
+| D-140 | D-S038-13-3 | Die Werte je Kombination stehen in einer eigenen optionalen Liste `RaportoDatumoj.k8?: K8Vico[]` (Mittel über Screens und Wiederholungen je Aufgabe × Variante × Runde × Marke × Schema, 4 Stellen, sortiert), weil `raportoMd` nur `datumoj` sieht. |
+| D-141 | D-S038-13-4 | Die Zeile „Spec 030“ in „Mittel je Kriterium“ zeigt denselben K8-Wert wie die Zeile Nachlese 11: K8 hängt nicht von der Gewichtung ab. |
+| D-142 | D-S038-13-5 | Die Merkmalspalten tragen die Namen aus `K8_MERKMALOJ` (keine erfundenen deutschen Bezeichnungen). |
+| D-143 | D-S038-13-6 | `Summary.k8` auf 2 Stellen gerundet wie die übrigen Mittel von `summarize`; Läufe ohne K8 gehen nicht ins Mittel. |
+| D-144 | D-S038-14-1 | Kein eigenes Test-Ticket; die Abdeckung der AC verteilt sich auf die Tests von S038-10 bis S038-13, das Tor vor S038-14 und S038-14 (Ticketplan L-1 und Go bindend). |
+
 ## Lieferliste
 
 | # | Punkt | Stand |
@@ -312,12 +441,16 @@ Vorläufige IDs aus den Beiträgen (`s038-beitraege/<Ticket>.md`), von S038-08 d
 | 1.8b | nordstelo K3 | erledigt (S038-07): K3 über `instancojElElementoj`, `instancesOf` entfällt; AC-8 12/12 gleich (K3, Regulo-Lücken, Instanzen, Urteil) |
 | 1.8c | ekranoj | erledigt (S038-07): Erkennung je Lauf über die Werkzeugliste, `check_markup` (nicht bei leerem Fragment), `get_ero` mit `fields` + ein Folgeaufruf bei `rest`, `navigation.target` mit Rückfall, Seitenregeln als Hinweis; Rückfall auf den Weg von Spec 037 getestet; AC-8 8/8 gleich auf beiden Wegen |
 | 1.9 | Messung Teil 1 | verschoben nach Lauf 3 |
+| 2.1 | Fakten-Extraktor: `FaktoAspekto`, optionales `Render.k8` (S038-10), Einbau in `render.ts` (S038-12) | erledigt: Typen und `faktoj.ts` (S038-10, `6fc15d48` → `e5a58e05`, `faktoj.test.ts` 10/10, lokaler Smoke), Sondendokument in `render.ts` (S038-12, `e054f338`); die gespeicherten Fakten `k8/{roh,sxablono}/faktoj.json` stammen aus diesem Weg, vier Generatorläufe byte-gleich |
+| 2.2 | Sollwerte `soloj` (S038-11) und `k8` mit vier Merkmalen, `kvoto`, `kialoj`, `mankoj`, `k8Plena` (S038-12) | erledigt: `soloj.ts` (S038-11, `ef264acf` → `81e2a98d`, 11/11, Zahlen aus `resolve`), `k8.ts` (S038-12, `111ea11b` → `e054f338`, `k8.test.ts` 23/23); Literal-Wächter ohne Treffer in `soloj.ts` und `k8.ts` |
+| 2.3 | Fixtures `k8/{roh,sxablono}`, Gegenprobe 2.3, Determinismus-Test (S038-12) | erledigt: Gegenprobe roh K8 0,1823 (nicht `k8Plena`), sxablono K8 1 (`k8Plena`), beide byte-gleich mit `atendo.json` (Referenzrechnung des Generators, nie an `k8.ts` angepasst); „Projektion = Modelo“ in allen 8 Kombinationen beider Fixtures; `determinismo.test.ts` 6/6 |
+| 2.4 | K8 in `score`, `ekranoTaksilo`, `poentoj` und den Berichten, nicht in `total`, nicht im Gate (S038-13) | erledigt (S038-13, `fc218a10` → `de7cb0d9`, nordstelo 211/211): `Score.k8`, `TaksadoK8`, `sumo.k8`, Spalte K8 und Abschnitt je Merkmal und Kombination, `Summary.k8`; `total`, Gewichte, `KRITERIOJ` K1–K6, Gate, `nordstelo.json` und gespeicherte Ergebnisse (`integra-raporto.json`, `poentoj.json`) byte-gleich |
 
 ## Befunde
 
 ### Befund Tabu
 
-Keine.
+Keine (Lauf 1 und Lauf 2).
 
 ### Mankoj – Eroj-Runde 7
 
@@ -353,6 +486,20 @@ S038-03 (MG-5): keine – jedes Regionsmerkmal ist aus der Skemo ableitbar.
 
 - **S038-08-1 `pnpm check` rot durch Last des Laufs selbst (B-4, B-7):** `turbo run build test` startet zwölf Test-Tasks parallel (dazu Playwright in eroj), Lastmittel ≈ 44 bei 10 Kernen ohne fremde Last. `@fundamento/nordstelo#test` brach nach 76 s ab: `src/ablauf/raporto.test.ts:68` (5 s), `src/ablauf/integra.test.ts:131` (Hook 10 s) – beide unverändert, bekannt aus S038-01-2/S038-02-2 – und `src/ac8.test.ts:156` (Hook 10 s, neu in PR A: `connectGvidanto()` lädt das Modelo wie `integra.test.ts`; einzeln 1,8 s für die ganze Datei). Mit Zeitgrenzen gemeldet, beim Abbruch noch laufend: `packages/cli/src/projekcioj.test.ts:86` (10 s), `packages/modelo/src/checks/clean-room/index.test.ts:75` (30 s), beide unverändert. Einzeln bei Last ≈ 7: nordstelo 139/0; `ac8.test.ts` 0/10 rot bei Last 5–6. Trefferquoten unter der Last von `pnpm check`: je 1/1 (raporto, integra, ac8). Vorschlag (Maintainer, nicht in Lauf 1): `pnpm check` lokal mit `--concurrency` begrenzen (Wurzeldatei, tabu) oder `loadServed()` je Testprozess zwischenspeichern, damit Hooks mit `connectGvidanto()` unter Last kürzer werden; keine Grenze anheben.
 
+### Lauf 2
+
+- **F-S038-10-1 `document.fonts.check` ohne `@font-face`:** antwortet `true` für eine Familie ohne `@font-face` (Systemfamilie oder nicht installiert). `sxargita: false` erscheint darum nur, wenn ein `@font-face` existiert und nicht geladen ist; `sxargita: true` heißt nicht „Schrift vorhanden“ (D-134).
+- **F-S038-10-2 In-Page-Funktionen ohne CI:** `aspektoFaktojEnPagxo`/`sondojEnPagxo` laufen nur im Browser; CI prüft die Normalisierung und den Wächter „kein Modul“, den Browserteil belegen die erzeugten Fixtures und ein lokaler Smoke (nicht committet).
+- **F-S038-10-3 Achse nach D-103 wörtlich:** liegt `post.top ≥ antaux.bottom`, ist die Achse `y`, auch bei senkrechtem Abstand 0 und waagrechtem Abstand; ein solches Paar entfällt.
+- **F-S038-11-1 Nur `px` in der Modelo** (ID von S038-14 vergeben): Das Schema (`DimensionValue`) erlaubt nur `unit: "px"`; keine rem-Umrechnung, keine Konstante 16. Eine andere Einheit ergäbe `k8-interspaco-nelegebla` (D-125). Die Modelo exportiert keine Konstanten für `color-scheme`/`motion`; die Namen stehen als benannte Konstanten in `soloj.ts`.
+- **F-S038-12-1 Beispielformel der technical-spec:** „kleinste Stufe + 0,5 × Abstand zur nächsten + 1 px“ trifft bei komuna eine Stufe (2 + 1 + 1 = 4). Der Generator nimmt den ersten Wert, der in jeder Kombination neben jeder Stufe liegt (7 px); kein Wert von Hand.
+- **F-S038-12-2 sxablono-Fixture ohne Prüfstoff für zwei Merkmale:** `nativaj` und `interspacoj` sind dort „nichts zu prüfen“ (kein natives Element im Light-DOM, kein Paar sichtbarer Geschwister; die Struktur liegt in den Shadow-Trees). Die Trennung beruht auf `ersatzschrift` (geslotteter Titel in der Markenschrift in allen 8 Kombinationen, D-113 bestätigt) und `sxablono`. Hinweis für Lauf 3.
+- **F-S038-12-3 Sxablono-Ableitung privat:** `sxablonojElElementoj` der Modelo ist nicht exportiert; `k8.ts` wendet die Regionsregel von `markerOf` nach (D-128). Vorschlag Lauf 3: die Ableitung exportieren und in `k8.ts` nutzen.
+- **F-S038-13-1 `k8()` zweimal je Screen:** `scoreBoth` ruft `score()` für nova und antauxa; `k8()` ist rein, beide Ergebnisse gleich. Nicht optimiert.
+- **F-S038-13-2 `raporto.json`-Records ohne eigenen Test** (ID von S038-14 vergeben): `records[].k8` (kvoto) folgt demselben bedingten Spread wie `multmarkeco`; geprüft ist nur der Markdown-Fall. `TaksadoK8`/`TaksiloK8` sind nicht über `index.ts` re-exportiert (Lauf 3 entscheidet mit dem typisierten Feld in ekranoj).
+- **Hinweis R-4, Größe der Fixtures:** 313 812 Bytes gesamt, größte `roh/faktoj.json` 177 447 Bytes, vor allem deduplizierte Farb-Sonden × 8 Kombinationen. Kein Befund im Sinn von R-4, nichts gekürzt.
+- **S038-14-1 `pnpm check` rot durch Last des Laufs selbst (D-92, D-93):** Abbruch nach 17 s in `@fundamento/eroj#test`: `packages/eroj/test/vitrino-partoj.test.ts:101` „Hook timed out in 10000ms“ (`beforeAll` mit `list(DRAHT)`, Lastmittel ≈ 19). Datei fremd und unverändert, bekannt aus S038-02-2. Einzeln 5/5 grün (8/8 je Lauf, 0,7–1,8 s). nordstelo lief wegen des Abbruchs nicht zu Ende, einzeln 211/211. Keine Grenze angehoben, `pnpm check` nicht wiederholt.
+
 ## Abschluss (S038-08, vor dem Push)
 
 | Prüfung | Ergebnis |
@@ -374,4 +521,55 @@ Nichts.
 
 ## Bericht
 
-Folgt (D-25: das CI-Ergebnis steht in PR-Text, `$S/bericht-lauf-1.md` und Abschlussnachricht; Lauf 2 trägt es hier nach).
+### Bericht Lauf 1
+
+Nachgetragen in Lauf 2 (D-25, S038-09) aus `$S/bericht-lauf-1.md`.
+
+- **PR A** [#151](https://github.com/thojank/fundamento/pull/151) „Spec 038 – Gvidanto für Agenten“, Branch `261106-spec-038-lauf-1-pr-a-584c5e`, Kopf `b5442089` (`b5442089fc4a31be6667db0df0298ed3a597764b`), ein Push. Vom Maintainer gemergt als `636e7119` (Merge #151).
+- **Rot → grün:** S038-02 `0b89cd1f` → `fd4babe2` · S038-03 `6546736d` → `6ce53267` · S038-04 `9bde008b` → `2a0ee86d` · S038-05 `508d1546` → `8ef96f90` · S038-06 `d8aa8e67` → `214106c8` · S038-07 `7ba2ecd3` → `c9567b67`. Ohne Paar: T0 `9dd63115`, `4fb5b12c`, Doku `a04dd331`, `b5442089`.
+
+| Lauf | Run | Ergebnis |
+|---|---|---|
+| `pull_request` | [42173697137](https://github.com/thojank/fundamento/actions/runs/42173697137) | grün, 25/25 Jobs |
+| `workflow_dispatch` (genau einer) | [42173704369](https://github.com/thojank/fundamento/actions/runs/42173704369) | rot, 24/25 Jobs grün |
+
+| Job | `pull_request` | Dispatch | Ursache / erster Fehler |
+|---|---|---|---|
+| Affected packages; Build, lint and Modelo checks; Unit tests (7 Pakete, Projekcioj Shard 1–2); Rendered Eroj (Shard 1–4); Rendered accessibility (Shard 1–3); Rendered checks (Make Kit, Quickstart, Vitrino cetero-1..3, Vitrino-Werkstatt werkstatt-1..2) | grün | grün | |
+| **Timing checks (M5, Gegenprobe, Ableitung, G5)** | grün | **rot** | **fremd** – [Job 127747308860](https://github.com/thojank/fundamento/actions/runs/42173704369/job/127747308860), Schritt „Check: Vitrino (Zeittests)“, `packages/eroj/test/vitrino.check.ts:1140` › Werkstatt › M5 über 50 Änderungen: P90 der Blockade je Änderung 55 ms > 50 ms. Zeittest der Werkstatt (`packages/eroj/test/**`, B-5), Thema von Spec 042 PR B #149; PR A berührt eroj und projekcioj nicht. Letzter Nachtlauf auf `main` [42150040106](https://github.com/thojank/fundamento/actions/runs/42150040106) grün. |
+
+Kein roter Job mit Ursache PR A, darum kein Fix-Vorschlag (D-24 greift nicht). **Kein Rerun, kein zweiter Push.** Wackel-Quote des Zeittests `eroj/test/vitrino.check.ts:1140` auf Kopf `b5442089`: 1/2 (PR grün, Dispatch rot).
+
+### Bericht Lauf 2
+
+Stand vor dem Push (S038-14). Push, PR B, die CI beider Läufe (`pull_request` und genau ein `workflow_dispatch`) und `$S/bericht-lauf-2.md` folgen ohne Commit; das Ergebnis steht im PR-Text und im Bericht, Lauf 3 trägt es hier nach (wie D-25).
+
+- **Branch** `261106-spec-038-k8-erscheinung-0d6606` (D-111), Basis `main` `f0275222`, unverändert bis vor dem Push.
+- **Rot → grün:** S038-10 `6fc15d48` → `e5a58e05` · S038-11 `ef264acf` → `81e2a98d` · S038-12 `111ea11b` → `e054f338` · S038-13 `fc218a10` → `de7cb0d9`. Ohne Paar (Doku): `3cb05a45` (S038-09), Abschluss-Commit (S038-14).
+- **Tor vor S038-14** (Orchestrator): `FM_AUSGABE=knapp pnpm test:betroffen` exit 0, 12/12 Tasks; Tabu-Diff sauber.
+
+**Gegenprobe 2.3** (je Kombination; `mankoj` = `["interspacoj"]`):
+
+| Fixture | Kombinationen | ersatzschrift | nativaj | interspacoj | sxablono | `kvoto` |
+|---|---|---|---|---|---|---|
+| roh | ekzemplo hell/dunkel | 0 | 0 | 0,6667 | 0 | 0,1667 |
+| roh | komuna, provo, provo-kompakta je hell/dunkel | 0 | 0 | 0,75 | 0 | 0,1875 |
+| **roh** | **K8** | | | | | **0,1823**, nicht `k8Plena` |
+| sxablono | alle 8 | 1 | 1 (nichts zu prüfen) | 1 (nichts zu prüfen) | 1 | 1 |
+| **sxablono** | **K8** | | | | | **1**, `k8Plena` |
+
+**Prüfungen vor dem Push:**
+
+| Prüfung | Ergebnis |
+|---|---|
+| `FM_AUSGABE=knapp pnpm check` (einmal, 2026-11-06 10:53:38–10:53:55 CET) | rot nach 17 s in `@fundamento/eroj#test`, `vitrino-partoj.test.ts:101` Hook 10 s unter Last (S038-14-1, D-92); einzeln 5/5 grün; nordstelo einzeln 211/211; Schritte hinter `turbo run build test` wegen `&&` nicht gelaufen (D-93, CI prüft sie) |
+| `pnpm check:privat` (einzeln, D-93) | grün: 0 Fehler, 4 244 Dateien, 17 Ausnahmen unverändert |
+| `$W/pruefen --diff origin/main..HEAD`, `--datei` (plan, tasks, Nachricht) | sauber |
+| `$W/audit-ac4 origin/main..HEAD` | 0 geändert; 10 neu zur Sichtung, keine Grenze (Testnamen „weights …“, Kommentare zu K8 und `AUF_STUFO`, `timeout: 30_000` der Sondenseite = Wert der Agentenseite, `maxTokens: 15_000_000` aus `nachlese-11.test.ts` kopiert, `pezoj`-Schleife des Wächters „K8 ohne Gewicht“) |
+| Tabu-Diff `git diff --name-only origin/main...HEAD` | 31 Dateien: `packages/nordstelo/**` 29, `specs/038-gvidanto-agentoj/{plan,tasks}.md`; `spec.md` byte-gleich |
+| `.only`/`.skip` in `packages/nordstelo/src` | keiner |
+| `git check-ignore -v` (`test/fixtures/k8/{roh,sxablono}/*`, `test/k8/generi.mjs`) | kein Treffer |
+| `git fetch origin` | `origin/main` = `f0275222`, unverändert; kein `merge-tree`, kein Rebase |
+| Offene PRs (`gh pr list --state open`) | keine; keine Überschneidung |
+
+**Wackel-Tests (L-3):** `modelo/src/ci/turbo-inputs.test.ts:679` 1/2 (S038-11, fremd); `eroj/test/vitrino-partoj.test.ts:101` 1/1 unter `pnpm check`, 0/5 einzeln (S038-14); `nordstelo/src/ac8.test.ts:156`, `ablauf/integra.test.ts:131`, `ablauf/raporto.test.ts:68` 0/n in allen Läufen von S038-10 bis S038-13 (je 0/2 bis 0/3). Keiner mehr als 30-mal wiederholt, nichts geändert.

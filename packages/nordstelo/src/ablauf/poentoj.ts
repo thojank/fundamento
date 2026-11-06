@@ -14,7 +14,6 @@ import {
   type NavigadoRezulto,
   navigado,
   type Plano,
-  type Taksado,
   type Taksilo,
   type Varianto,
 } from "@fundamento/ekranoj";
@@ -25,6 +24,7 @@ import {
   navigationOf,
   readNordstelo,
 } from "@fundamento/modelo";
+import type { TaksadoK8 } from "../ekrano-taksilo.js";
 import { type AblaufTasko, planoDe } from "./katalogo.js";
 import { type EkranaSxablono, type SxablonojRezulto, sxablonojSamaj } from "./sxablonoj-samaj.js";
 
@@ -82,7 +82,8 @@ export function faktojPorNavigado(
 export interface EkranaPoento {
   varianto: Varianto;
   /** K1–K6 and the weighted total; null when the screen was not built (no facts). */
-  taksado: Taksado | null;
+  // K8 beside it where the injected scorer gives one (read at runtime, D-S038-13-1).
+  taksado: TaksadoK8 | null;
   /** D-05 for this screen (planned edges present, no dead link). */
   navigado: EkranaNavigado;
   /** D-06 of the flow, as it concerns this screen. */
@@ -109,6 +110,8 @@ export interface FluaPoento {
     navigado: number;
     /** D-06 share of the flow (separate column). */
     sxablonoj: number;
+    /** Mean K8 kvoto over the screens with K8 (separate column); absent where none has one. */
+    k8?: number;
   };
 }
 
@@ -151,6 +154,10 @@ export function poentiFluon(enigo: PoentiEnigo): FluaPoento {
     k[kriterio] =
       values.length === 0 ? null : round4(values.reduce((a, b) => a + b, 0) / values.length);
   }
+  // K8 (Spec 038, C-E): the plain `Taksilo` of ekranoj may carry it; read at runtime (D-S038-13-1).
+  const k8Kvotoj = scored.flatMap((taksado) =>
+    taksado.k8 === undefined ? [] : [taksado.k8.kvoto],
+  );
   const planitaj = plano.ekranoj.length;
   const total =
     planitaj === 0 ? 0 : round1(scored.reduce((sum, taksado) => sum + taksado.total, 0) / planitaj);
@@ -168,6 +175,9 @@ export function poentiFluon(enigo: PoentiEnigo): FluaPoento {
       k,
       navigado: round4(nav.kvoto),
       sxablonoj: round4(sxablonoj.kvoto),
+      ...(k8Kvotoj.length === 0
+        ? {}
+        : { k8: round4(k8Kvotoj.reduce((a, b) => a + b, 0) / k8Kvotoj.length) }),
     },
   };
 }
