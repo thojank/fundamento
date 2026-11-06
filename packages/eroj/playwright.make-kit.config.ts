@@ -11,5 +11,7 @@ export default defineConfig({
   reporter: playwrightAusgabe("playwright-make-kit"),
   testMatch: "**/make-kit.check.ts",
   timeout: 900_000,
+  // Spec 042 T1 (D-02): no trace here; the Eroj shards alone keep one (playwright.config.ts).
+  use: { ...base.use, trace: "off" },
   projects: [base.projects?.[0] ?? { name: "chromium" }],
 });
