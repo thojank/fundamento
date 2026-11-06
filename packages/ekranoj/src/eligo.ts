@@ -647,7 +647,13 @@ export function eligoDe(opcioj: EligoOpcioj = {}): EkranojEligo {
           skripto = KLASIKA_SKRIPTO;
         }
       }
-      marko = { css: e.marko.css.map(rel), ...(skripto === undefined ? {} : { skripto }) };
+      const { bazaTiparo } = e.marko;
+      marko = {
+        css: e.marko.css.map(rel),
+        ...(skripto === undefined ? {} : { skripto }),
+        // C-5: the base-font name of the brand build reaches every screen and the overview.
+        ...(bazaTiparo === undefined ? {} : { bazaTiparo }),
+      };
     },
 
     dokumento(e) {

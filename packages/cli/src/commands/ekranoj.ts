@@ -42,7 +42,7 @@ import {
   projectModeloSource,
   readNordstelo,
 } from "@fundamento/modelo";
-import { buildProjekcioj } from "@fundamento/projekcioj";
+import { buildProjekcioj, cssVariable } from "@fundamento/projekcioj";
 import { parseFlags, UsageError } from "../args.js";
 import { type CliContext, type Command, EXIT_FAIL, EXIT_OK, EXIT_USAGE } from "../command.js";
 
@@ -279,7 +279,11 @@ export function realaMedio(): EkranojMedio {
             );
           }
           const skripto = skriptoDe(dir, marko);
-          return { css: ["css/fundamento.css"], ...(skripto === undefined ? {} : { skripto }) };
+          return {
+            css: ["css/fundamento.css"],
+            ...(skripto === undefined ? {} : { skripto }),
+            bazaTiparo: cssVariable(BAZA_TIPARO_TOKENO),
+          };
         },
       };
     },

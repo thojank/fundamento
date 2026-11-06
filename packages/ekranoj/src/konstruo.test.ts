@@ -41,41 +41,34 @@ function regionojDe(sxablono: string): { nomoj: string[]; defauxlta: string | un
   };
 }
 
-/** Every font-family name of the Modelo's base set and of the reference brand (read, not typed). */
+/**
+ * The brand font families of the Modelo data (read, not typed): the first entry of every
+ * `font.family.*` value of the base set (the rest are generic fallbacks) and every family the
+ * reference brand declares.
+ */
 function tiparaNomoj(): string[] {
-  const nomoj = new Set<string>();
-  const iri = (valoro: unknown, ene: boolean): void => {
-    if (Array.isArray(valoro)) {
-      for (const ero of valoro) if (ene && typeof ero === "string") nomoj.add(ero);
-      for (const ero of valoro) iri(ero, ene);
-      return;
-    }
-    if (typeof valoro === "string") {
-      if (ene) nomoj.add(valoro);
-      return;
-    }
-    if (valoro === null || typeof valoro !== "object") return;
-    for (const [sxlosilo, ero] of Object.entries(valoro)) iri(ero, ene || /^famil/i.test(sxlosilo));
+  const kerno = legiJson("packages/vortaro/sets/core.json") as {
+    font: { family: Record<string, { $value?: unknown }> };
   };
-  iri(legiJson("packages/vortaro/sets/core.json"), false);
-  iri(legiJson("packages/aspekto-komuna/aspekto.json"), false);
-  // Only names: drop descriptions, types and ids the walk met below a family key.
-  return [...nomoj].filter((nomo) => /^[A-Za-z][\w -]*$/.test(nomo) && nomo.length <= 40);
+  const marko = legiJson("packages/aspekto-komuna/aspekto.json") as {
+    fonts?: { family?: unknown }[];
+  };
+  const nomoj = [
+    ...Object.values(kerno.font.family).map((tokeno) =>
+      Array.isArray(tokeno.$value) ? tokeno.$value[0] : undefined,
+    ),
+    ...(marko.fonts ?? []).map((tiparo) => tiparo.family),
+  ];
+  return [...new Set(nomoj.filter((nomo): nomo is string => typeof nomo === "string"))];
 }
 
 /** The guard on frame and overview output: no colour literal, no font name of the Modelo data. */
-function sen_literaloj(html: string): void {
+function senLiteraloj(html: string): void {
   expect(html).not.toMatch(/#[0-9a-f]{3,8}\b/i);
   expect(html).not.toMatch(/\b(?:rgba?|hsla?|oklch|oklab|lab|lch|color)\(/i);
   const nomoj = tiparaNomoj();
   expect(nomoj.length).toBeGreaterThan(0);
-  for (const nomo of nomoj) {
-    if (
-      /^(?:serif|sans-serif|monospace|cursive|fantasy|system-ui|ui-[a-z]+|fontFamily)$/.test(nomo)
-    )
-      continue;
-    expect(html, nomo).not.toContain(nomo);
-  }
+  for (const nomo of nomoj) expect(html, nomo).not.toContain(nomo);
 }
 
 const F = (aldone: Partial<Parameters<typeof ekranaDokumento>[0]> = {}) =>
@@ -160,14 +153,12 @@ describe("ekranaDokumento – Variante F (D-24, D-27)", () => {
     // Without the field: no font rule at all (the behaviour of before).
     expect(F()).not.toMatch(/font-family|<style/);
     // A name that is no custom property is never written.
-    expect(F({ marko: { ...MARKO, bazaTiparo: "Arial; color: red" } })).not.toMatch(
-      /font-family|<style/,
-    );
+    expect(F({ marko: { ...MARKO, bazaTiparo: "x; y: z" } })).not.toMatch(/font-family|<style/);
   });
 
   it("writes no colour literal and no font name of the Modelo data into the frame", () => {
-    sen_literaloj(F({ marko: { ...MARKO, bazaTiparo: BAZA_TIPARO } }));
-    sen_literaloj(F());
+    senLiteraloj(F({ marko: { ...MARKO, bazaTiparo: BAZA_TIPARO } }));
+    senLiteraloj(F());
   });
 
   it("differs between two brands only in data-fm-aspekto (AC-7)", () => {
@@ -322,8 +313,8 @@ describe("superrigardoHtml (AC-6)", () => {
   });
 
   it("writes no colour literal and no font name of the Modelo data into the overview", () => {
-    sen_literaloj(superrigardo());
-    sen_literaloj(superrigardo({ lingvo: "en" }));
+    senLiteraloj(superrigardo());
+    senLiteraloj(superrigardo({ lingvo: "en" }));
   });
 
   it("keeps the plain overview for Variante 0 (no Eroj there, D-34)", () => {

@@ -13,8 +13,17 @@
 // (`klasikaSkripto`, `marko/ekranoj-eroj.js`) and loaded with `<script src>` – instead of inlining
 // the 1.4 MB bundle into every screen and round as the Vitrino does with its one file.
 //
-// Variante 0 (D-34): the agent writes a whole document; the frame injects only the back-link and
-// brings no Fundamento CSS and no Eroj. Pure functions only; eligo.ts writes the files.
+// Spec 038 S038-19 (3.1, C-5): in Variante F the back-link is the link Ero (`fm-ligilo`, standalone)
+// inside the marked element, and – when the brand build names it – the brand's base font is set on
+// `body` through its custom property, `var(<name>)`, never a value. The rule stands unmarked in the
+// head (the body walk of the facts never sees it, and the K8 facts read the page with it). The
+// background is the stylesheet's own page block (`:where(:root)`); the frame adds none. The
+// overview of Variante F stands in the shell Sxablono (`fm-sxelo`, `fm-navigado` in `nav`,
+// `fm-pagxo` in the default region).
+//
+// Variante 0 (D-34, D-S038-19-1): the agent writes a whole document; the frame injects only the
+// plain back-link and brings no Fundamento CSS and no Eroj. Pure functions only; eligo.ts writes
+// the files.
 
 import type { Plano, Varianto } from "./tipoj.js";
 
@@ -65,20 +74,35 @@ const vojo = (teksto: string): string => teksto.split("/").map(encodeURIComponen
 
 const SUPERRIGARDO_TEKSTO: Record<string, string> = { de: "Zur Übersicht", en: "To the overview" };
 
-/** The back-link of the frame (D-27). */
-function reenLigilo(radiko: string, lingvo: string): string {
-  const teksto = SUPERRIGARDO_TEKSTO[lingvo] ?? SUPERRIGARDO_TEKSTO.de ?? "";
-  return `<p ${KADRO_ATRIBUTO}><a href="${radiko}superrigardo.html">${sxirmi(teksto)}</a></p>`;
+/**
+ * The back-link of the frame (D-27): the link Ero where the page loads the Eroj (Variante F with a
+ * bundle, 3.1), else a plain link – nothing would define `fm-ligilo` there (D-S038-19-1).
+ */
+function reenLigilo(radiko: string, lingvo: string, eroj: boolean): string {
+  const teksto = sxirmi(SUPERRIGARDO_TEKSTO[lingvo] ?? SUPERRIGARDO_TEKSTO.de ?? "");
+  const al = `${radiko}superrigardo.html`;
+  const ligilo = eroj
+    ? `<fm-ligilo to="${al}" placement="standalone">${teksto}</fm-ligilo>`
+    : `<a href="${al}">${teksto}</a>`;
+  return `<p ${KADRO_ATRIBUTO}>${ligilo}</p>`;
 }
+
+/** A CSS custom-property name (`--…`), nothing else: the only thing the font rule may name. */
+const PROPRA_ECO = /^--[A-Za-z0-9_-]+$/;
 
 /** The head lines that load the brand build from `<radiko>marko/`. */
 function markaKapo(marko: KadraMarko | undefined, radiko: string): string[] {
   if (marko === undefined) return [];
+  const tiparo = marko.bazaTiparo;
   return [
     ...marko.css.map((css) => `<link rel="stylesheet" href="${radiko}marko/${vojo(css)}">`),
     ...(marko.skripto === undefined
       ? []
       : [`<script src="${radiko}marko/${vojo(marko.skripto)}"></script>`]),
+    // C-5: the base font by its name only; a name that is no custom property is never written.
+    ...(tiparo !== undefined && PROPRA_ECO.test(tiparo)
+      ? [`<style>body { font-family: var(${tiparo}); }</style>`]
+      : []),
   ];
 }
 
@@ -119,7 +143,8 @@ const KORPO = /<body(?:\s[^>]*)?>/i;
 
 /** The screen document of a fragment (D-24, D-27, D-34). */
 export function ekranaDokumento(e: KadroEnigo): string {
-  const reen = reenLigilo(e.radiko, e.lingvo);
+  const fundamento = e.varianto === "F";
+  const reen = reenLigilo(e.radiko, e.lingvo, fundamento && e.marko?.skripto !== undefined);
   if (e.varianto === "0" && DOKUMENTO.test(e.fragmento)) {
     const korpo = KORPO.exec(e.fragmento);
     if (korpo !== null) {
@@ -130,7 +155,6 @@ export function ekranaDokumento(e: KadroEnigo): string {
     // A document without <body>: the back-link before the closing </html>.
     return e.fragmento.replace(/<\/html>/i, (fino) => `${reen}\n${fino}`);
   }
-  const fundamento = e.varianto === "F";
   return pagxo({
     lingvo: e.lingvo,
     titolo: e.titolo,
@@ -192,6 +216,7 @@ export interface SuperrigardoEnigo {
 const SUPERRIGARDO_TEKSTOJ = {
   de: {
     titolo: "Übersicht",
+    navigado: "Bericht und Screens",
     raporto: "Bericht",
     verda: "grün",
     neVerda: "nicht grün",
@@ -200,6 +225,7 @@ const SUPERRIGARDO_TEKSTOJ = {
   },
   en: {
     titolo: "Overview",
+    navigado: "Report and screens",
     raporto: "Report",
     verda: "green",
     neVerda: "not green",
@@ -210,7 +236,10 @@ const SUPERRIGARDO_TEKSTOJ = {
 
 /**
  * The overview of a run: a tile per planned screen with title, purpose, state and photo, links to
- * every built screen and to the report; the same brand build as the screens (Variante F).
+ * every built screen and to the report; the same brand build as the screens (Variante F). In
+ * Variante F it stands in the shell (3.1): the title in `brand`, the report and the built screens
+ * in an `fm-navigado` in `nav`, the tiles in the default region inside an `fm-pagxo` (regions of
+ * the Sxablonoj sxelo and pagxo). Variante 0 loads no Eroj and keeps the plain page.
  */
 export function superrigardoHtml(e: SuperrigardoEnigo): string {
   const t = e.lingvo === "en" ? SUPERRIGARDO_TEKSTOJ.en : SUPERRIGARDO_TEKSTOJ.de;
@@ -238,20 +267,42 @@ export function superrigardoHtml(e: SuperrigardoEnigo): string {
     ];
   });
   const fundamento = e.varianto === "F";
+  const raporto = `<a href="raporto.md">${sxirmi(t.raporto)}</a>`;
+  const korpo = fundamento
+    ? [
+        "<fm-sxelo>",
+        `<span slot="brand">${sxirmi(t.titolo)}</span>`,
+        `<fm-navigado slot="nav" label="${sxirmi(t.navigado)}">`,
+        raporto,
+        ...e.plano.ekranoj
+          .filter((ekrano) => konstruitaj.has(ekrano.slug))
+          .map(
+            (ekrano) => `<a href="ekranoj/${vojo(ekrano.slug)}.html">${sxirmi(ekrano.titolo)}</a>`,
+          ),
+        "</fm-navigado>",
+        "<fm-pagxo>",
+        `<h1 slot="title">${sxirmi(e.plano.celo)}</h1>`,
+        "<ul>",
+        ...kaheloj,
+        "</ul>",
+        "</fm-pagxo>",
+        "</fm-sxelo>",
+      ]
+    : [
+        "<main>",
+        `<h1>${sxirmi(e.plano.celo)}</h1>`,
+        `<p>${raporto}</p>`,
+        "<ul>",
+        ...kaheloj,
+        "</ul>",
+        "</main>",
+      ];
   return pagxo({
     lingvo: e.lingvo,
     titolo: `${t.titolo}: ${e.plano.celo}`,
     ...(fundamento ? { aspekto: e.aspekto, marko: e.marko } : {}),
     radiko: "",
     kapo: KAPO_SUPERRIGARDO,
-    korpo: [
-      "<main>",
-      `<h1>${sxirmi(e.plano.celo)}</h1>`,
-      `<p><a href="raporto.md">${sxirmi(t.raporto)}</a></p>`,
-      "<ul>",
-      ...kaheloj,
-      "</ul>",
-      "</main>",
-    ],
+    korpo,
   });
 }
