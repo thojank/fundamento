@@ -372,10 +372,20 @@ test("Spec 042: the stage navigates only on the test's steps – page and previe
 // of its poll, so with the same rev never. Made here without a clock: the test aborts the frame's
 // first request after the reload (`route.abort`); the frame must still show the draft's rev within
 // the default expect time.
+//
+// WebKit is a finding (Spec 043, plan.md › Befunde, Anhang D): an aborted frame navigation ends
+// there without any event – no load of the frame, none of the page, whose load came before the
+// frame's navigation started – so the page, which listens to events and never to the clock, cannot
+// learn of it. Marked as failing in WebKit: if WebKit ever says so, the mark turns red.
 test("Spec 043 / N-8 aus Spec 042: a frame whose navigation was aborted after the reload loads at once", async ({
   page,
   request,
+  browserName,
 }) => {
+  test.fail(
+    browserName === "webkit",
+    "Spec 043 Befund: WebKit fires no event after an aborted frame navigation",
+  );
   await page.setViewportSize({ width: 1440, height: 900 });
   const id = await marke(request, "Probomarko Abbruch");
   await page.goto(`${base}/asistanto/${id}/gvidkoloro`);
