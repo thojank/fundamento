@@ -644,9 +644,12 @@ async function kontroliRondon(k: RondoKunteksto): Promise<Rondo> {
       continue;
     }
     try {
+      // The scorer's K8 probes, when it has any (D-S038-17-2); without them the options of before.
+      const sondoPetoj = deps.taksilo.sondoPetoj;
       const bildigo = await deps.bildigilo.render(dokumento, {
         aspektoj: [k.enigo.marko],
         varianto,
+        ...(sondoPetoj === undefined ? {} : { sondoPetoj }),
       });
       faktoj[ekrano.slug] = bildigo.fakto;
       await deps.eligo?.bildigita?.({ rondo: r, slug: ekrano.slug, bildigo });
