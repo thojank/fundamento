@@ -27,6 +27,7 @@ import {
 import { labelOf } from "../lingvo/nomoj.js";
 import { type Lingvo, reguloIn, traduko } from "../lingvo/tradukoj.js";
 import { type ReguloRef, reguloRef } from "./eroj.js";
+import { editDistance } from "./nearest.js";
 
 /** The props a goal asks for, typed as an EroInstance takes them (R-9): never "true" as a text. */
 export type GoalProps = Record<string, string | number | boolean>;
@@ -38,7 +39,25 @@ export interface SuggestEroInput {
    * kialoj and Reguloj of the answer are German too (Nachlese 8 ③).
    */
   lingvo?: string;
+  /**
+   * Spec 038 MG-6 (D-33): with `true` a miss names the nearest goals of the Eroj with their
+   * keywords (`nearest`). Without it a miss answers as before; a hit never carries `nearest`.
+   */
+  nearest?: boolean;
 }
+
+/** A goal near a text no goal answers (Spec 038 MG-6): the goal, its Ero and its keywords. */
+export interface NearestGoal {
+  /** The Skemo goal. */
+  celo: string;
+  /** The Ero whose Skemo declares it. */
+  ero: string;
+  /** Its keywords, in the language asked for, else in every language (without repeats). */
+  keywords: string[];
+}
+
+/** How many goals `nearest` names at most (as many as nearestNames gives by default). */
+export const NEAREST_GOALS = 5;
 
 /** A boundary or alternative of a Uzo that answers the goal (contracts §2). */
 export interface SuggestedBoundary {
@@ -99,7 +118,7 @@ export interface SuggestedRegion {
 
 export type SuggestEroResult =
   | { ok: true; output: SuggestEroOutput }
-  | { ok: false; issues: ValidationIssue[]; allowed?: string[] };
+  | { ok: false; issues: ValidationIssue[]; allowed?: string[]; nearest?: NearestGoal[] };
 
 /** Every goal any Ero knows, in declaration order, without duplicates. */
 export function knownGoals(modelo: Modelo): string[] {
@@ -110,6 +129,45 @@ export function knownGoals(modelo: Modelo): string[] {
     }
   }
   return names;
+}
+
+/**
+ * The goals of the Eroj nearest to a text (Spec 038 MG-6): for every goal the smallest edit
+ * distance between a word of the text and the goal's name or one of its keywords (as the
+ * Gvidanto compares them: NFC, lower case, no hyphens), relative to the longer of the two; the
+ * nearest first, ties in the order of the Modelo (Ero, then goal). With lingvo only goals with
+ * keywords in that language count, and only those keywords. At most NEAREST_GOALS; none for a
+ * text without a word. Pure and deterministic.
+ */
+export function nearestGoals(modelo: Modelo, text: string, lingvo?: string): NearestGoal[] {
+  const prepared = keywordTextOf(text);
+  const words = [...new Set([...prepared.words, ...prepared.compounds].map(flatKeyword))];
+  if (words.length === 0) return [];
+  const scored: { goal: NearestGoal; score: number }[] = [];
+  for (const entry of modelo.eroj) {
+    for (const goal of entry.skemo.goals ?? []) {
+      const keywords = [
+        ...new Set(
+          Object.entries(goal.keywords)
+            .filter(([language]) => lingvo === undefined || language === lingvo)
+            .flatMap(([, list]) => list),
+        ),
+      ];
+      if (keywords.length === 0) continue;
+      let score = Number.POSITIVE_INFINITY;
+      for (const name of [goal.goal, ...keywords].map(flatKeyword)) {
+        for (const word of words) {
+          score = Math.min(score, editDistance(word, name) / Math.max(word.length, name.length));
+        }
+      }
+      scored.push({ goal: { celo: goal.goal, ero: entry.ero.name, keywords }, score });
+    }
+  }
+  // Array.prototype.sort is stable: equal scores keep the order of the Modelo.
+  return scored
+    .sort((a, b) => a.score - b.score)
+    .slice(0, NEAREST_GOALS)
+    .map(({ goal }) => goal);
 }
 
 /**
@@ -539,7 +597,12 @@ function sxablonoOutput(
  */
 export function suggestEro(modelo: Modelo, input: SuggestEroInput): SuggestEroResult {
   const result = suggestEroIn(modelo, input);
-  if (!result.ok) return result;
+  if (!result.ok) {
+    // Spec 038 MG-6 (D-33): only on request, after issues and allowed; a miss stays as it was.
+    return input.nearest === true
+      ? { ...result, nearest: nearestGoals(modelo, input.goal, input.lingvo) }
+      : result;
+  }
   const lingvo = input.lingvo === "de" || input.lingvo === "en" ? input.lingvo : undefined;
   if (lingvo === undefined) return result;
   const translated = lingvo === "de" ? answerIn(modelo, result.output, lingvo) : result.output;

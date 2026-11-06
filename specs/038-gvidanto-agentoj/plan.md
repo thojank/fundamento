@@ -72,6 +72,9 @@ Bezug 2.5 = entfällt, ersetzt durch ‚vorher' in Lauf 4 auf Bezug-SHA
 | `packages/modelo/src/contracts/issues.ts` | frei, geändert (`ero-field-unknown`, `ero-fields-invalid` angehängt) | Grün-Commit S038-02 |
 | `packages/modelo/src/gvidanto/sxablonoj-marker.test.ts` | frei, neu (MG-5) | `6546736d` rot (S038-03) |
 | `packages/modelo/src/gvidanto/sxablonoj.ts` | frei, geändert (`marker`-Eingabe, `markerOf`, `RegionMarker`) | Grün-Commit S038-03 |
+| `packages/modelo/src/gvidanto/arangxoj.test.ts`, `suggest-ero-nearest.test.ts` | frei, neu (MG-1, MG-6) | `9bde008b` rot (S038-04) |
+| `packages/modelo/src/gvidanto/arangxoj.ts` | frei, neu (`listArangxoj`, `ARANGXO_CELOJ`) | Grün-Commit S038-04 |
+| `packages/modelo/src/gvidanto/suggest-ero.ts`, `nearest.ts`, `index.ts` | frei, geändert (`nearest`, `nearestGoals`, `NEAREST_GOALS`; `editDistance` exportiert; eine Exportzeile) | Grün-Commit S038-04 |
 
 ## Vertrags-Fixtures (T0)
 
@@ -240,18 +243,26 @@ Vorläufige IDs aus den Beiträgen; S038-08 nummeriert sie hier durch.
 | D-S038-03-3 | Landmarke: der Name der Region steht in `a11y.landmarks` der Sxablono (sxelo `main`), oder jede angenommene Ero hat dieselbe Rolle und die ist eine Landmarke des Schemas (sxelo `nav` → navigado → `navigation`, aus der Skemo gelesen, nicht getippt). Vokabular = Enum `SxablonoA11y.landmarks`, im Code als `Record<Landmark, true>` an den generierten Typ gebunden. `attribute` bleibt leer: keine Region nennt in den Daten ein Attribut, das sie im Markup kennzeichnet (`live: "polite"` steht innen am Teil der Sxablono, nicht an den Kindern). |
 | D-S038-03-4 | Form der Antwort mit `marker: true`: `marker` als letzter Schlüssel jeder Region (Kurzprofil `regions[i]`, voll `skemo.regions[i]`), Schlüsselreihenfolge `landmark, attribute, slot, default`; sonst byte-gleich mit der Antwort ohne `marker`. `marker: false` = ohne. Kurzprofile mit Merkmalen: größtes pagxo/sxelo 327 Tokens (de), Zuwachs ≤ 64. |
 | D-S038-03-5 | Rot/Grün beobachtet wie D-S038-02-6 (`/tmp/s038-03-reihe.sh`, Kopie des Skripts aus S038-02 mit eigenen Lognamen); der erste rote `pnpm test:betroffen` brach unter fremder Last (≈ 40) an den Zeitgrenzen aus S038-02-2 in nordstelo ab, bevor modelo lief. |
+| D-S038-04-1 | Layout-Zwecke (`celo`) als kleines festes Vokabular `ARANGXO_CELOJ` = `spacing`, `row`, `column`, `stack`, `region` (1.1: Abstände, Reihen, Spalten, Regionen; der Stapel aus Befund 13 der Implementierungs-Spec). Beantwortet wird ein Zweck nur aus dem Modelo: `region` von jeder Sxablono und jeder ihrer Regionen, `spacing` von den Abstandsstufen des Kern-Sets, jeder Zweck von einer Ero, deren Skemo-Ziel (`goals[].goal`) so heißt (heute keine). Was unbeantwortet bleibt, steht in `mankoj` in der Reihenfolge des Vokabulars. |
+| D-S038-04-2 | Form eines Eintrags über §2.2 hinaus: `name` einer Region = `<sxablono>/<region>` (eindeutig: `fields` gibt es in filtrilo und formularo); optional `label` direkt hinter `name` nur mit `lingvo` und nur bei Ero/Sxablono (Muster Spec 026 ② wie `list_eroj`/`list_sxablonoj`; sonst ändert `lingvo` nichts); `props` = `{ name, kind?, values?, required? }` („Props mit Werten“, 1.1) – bei Sxablono/Ero aus der Skemo, bei einer Region die Props, die sie von jedem Kind verlangt (`required: true`), dann die des einen Kindes (`one`). |
+| D-S038-04-3 | Beispiele: Platzhalter `…`; Pflicht-Props mit Vorgabewert, sonst erstem Enum-Wert, Boolean ohne Wert. Region = erstes angenommenes Ero/Sxablono mit `slot` aus `markerOf` (MG-5), den Props der Region und den Pflicht-Props des Kindes; Region ohne `accepts` (pagxo `sections`, sxelo `main`, beide Standard-Region) = `…`. Sxablono = Element mit Pflicht-Props und den Beispielen ihrer Pflicht-Regionen. Keine Marke, kein Wert, kein Token. |
+| D-S038-04-4 | `interspacoj` = die direkten `dimension`-Token der Gruppe `spacing` im Kern-Set, in dessen Reihenfolge (heute `spacing.xsmall` … `spacing.xxlarge`); die Skala darunter (`spacing.scale.*`) sind Primitive, keine Stufen. Einziges Literal ist der Gruppenname, keine Tokenliste. |
+| D-S038-04-5 | `propono` englisch, ein fester Satz je Zweck, ohne Ero-Namen. Die `mankoj` der Antwort sind nicht die `mankoj` des Modelo (`data/mankoj.json`, dort ist `celo` die Ausgabe-Celo), beide werden nicht gemischt. |
+| D-S038-04-6 | `nearest` (D-33): je Ero-Ziel der kleinste Editierabstand zwischen einem Wort (auch Bindestrich-Kompositum) des Textes und dem Zielnamen oder einem Schlüsselwort (wie der Gvidanto vergleicht: NFC, klein, ohne Bindestrich), geteilt durch die Länge des längeren; Nächstes zuerst, Gleichstand in der Reihenfolge des Modelo; höchstens `NEAREST_GOALS` = 5 (wie `nearestNames`). Mit `lingvo` nur Ziele mit Schlüsselwörtern dieser Sprache und nur diese; ohne alle Sprachen ohne Doppelte. Nur Ero-Ziele (wie `allowed` = `knownGoals`), keine Sxablono-Ziele. Text ohne Wort → `[]`. `nearest: false` = ohne. `nearest.ts` exportiert dafür `editDistance` (bisher privat `distance`); `nearestNames` unverändert. |
+| D-S038-04-7 | Keine neue Regel-ID: `listArangxoj` hat keinen Fehlerweg (`lingvo` ist getypt, das MCP-Schema lehnt Anderes in S038-06 ab), `nearest` ändert keinen Fehler. |
+| D-S038-04-8 | Rot/Grün beobachtet wie D-S038-02-6 (`/tmp/s038-04-reihe.sh`); der erste Hintergrundlauf wurde nach den Einzelläufen am 30-Minuten-Limit des Werkzeugs beendet (projekcioj und `test:betroffen` noch offen), beides danach einzeln nachgeholt. |
 
 ## Lieferliste
 
 | # | Punkt | Stand |
 |---|---|---|
 | L-0 | T0: Startbedingung, Bezug-SHA, `/tmp/s038-bezug`, Vertrags- und AC-8-Fixtures, spec/plan/tasks | erledigt (S038-01) |
-| 1.1 | MG-1 `list_arangxoj` | offen (S038-04, S038-06) |
+| 1.1 | MG-1 `list_arangxoj` | Funktion erledigt (S038-04): `listArangxoj`, 5 Sxablonoj + 18 Regionen, 6 Abstandsstufen, `mankoj` row/column/stack; MCP offen (S038-06) |
 | 1.2 | MG-2 `check_markup` | offen (S038-05, S038-06) |
 | 1.3 | MG-3 Feldauswahl `fields` | Funktion erledigt (S038-02); MCP offen (S038-06) |
 | 1.4 | MG-4 `navigation` | Funktion und Ableitung `navigationOf` erledigt (S038-02); nordstelo/ekranoj offen (S038-07) |
 | 1.5 | MG-5 Regionsmerkmale | Funktion erledigt (S038-03): `markerOf`, `get_sxablono` mit `marker: true`, alle 18 Regionen der 5 Sxablonoj mit Merkmal; Erkennung im Markup offen (S038-05), MCP offen (S038-06) |
-| 1.6 | MG-6 `nearest` | offen (S038-04, S038-06) |
+| 1.6 | MG-6 `nearest` | Funktion erledigt (S038-04): `suggestEro(…, { nearest: true })`, `nearestGoals`; MCP und Hülle offen (S038-06) |
 | 1.7 | Prompt `gvidanto` | offen (S038-06) |
 | 1.8 | Verträge | Wächter erledigt (S038-01); neue Werkzeuge offen (S038-06) |
 | 1.8a | 750-Token-Test | erledigt (S038-02): 40 Eroj × 15 Teilmengen, 5 Sxablono-Kurzprofile, grün |
@@ -269,7 +280,9 @@ Keine.
 
 - **Datenform von Slots (MG-3, D-38, S038-02):** Keine Skemo und keine Uzo sagt, in welcher Form ein Slot seine Daten nimmt. tabelo `content` ist in der Uzo `{ accepts: ["text"], required, max: 1, nesting: 1 }`, in der Skemo nur `{ name: "content" }` – dass dort eine native `<table>` mit Kopf- und Datenzeilen steht, kommt in keiner Antwort vor. `slots` liefert darum kein `dataForm`. Vorschlag Eroj-Runde 7: optionale Slot-Eigenschaft der Uzo (z. B. `dataForm` mit einem kleinen festen Vokabular wie `table` = `<table>` mit `<thead>`/`<tbody>`, `th`/`td`), die `slotsOf` dann unverändert durchreicht.
 
-S038-03 (MG-5): keine – jedes Regionsmerkmal ist aus der Skemo ableitbar. Weitere trägt S038-04 ein (erwartet: Layout-Primitive Reihe/Spalte/Stapel).
+S038-03 (MG-5): keine – jedes Regionsmerkmal ist aus der Skemo ableitbar.
+
+- **Layout-Primitive Reihe, Spalten, Stapel (MG-1, S038-04):** Keine Ero hat ein Ziel `row`, `column` oder `stack`, keine Skemo eine Layout-Rolle; Abstände ordnen heute nur die Sxablonoj in ihren Regionen (Teile mit `gap` aus Abstandsstufen). `list_arangxoj` nennt die drei darum in `mankoj` (Regionen und Abstandsstufen sind vorhanden). Vorschlag Eroj-Runde 7: je ein Layout-Primitiv als Ero, deren Skemo-Ziel den Zweck trägt (`row`: Kinder nebeneinander, Lücke aus einer Abstandsstufe, Umbruch; `column`: Kinder auf den Spalten des Rasters `layout.grid.*`, unter einer Containerbreite gestapelt; `stack`: Kinder untereinander, Lücke aus einer Abstandsstufe). `listArangxoj` führt sie dann ohne Codeänderung als `kind: "ero"` und streicht das Manko (Test mit Probe-Ero).
 
 ### Sonstige
 
@@ -278,6 +291,9 @@ S038-03 (MG-5): keine – jedes Regionsmerkmal ist aus der Skemo ableitbar. Weit
 - **S038-02-2 Zeitgrenzen bei parallelen Paketläufen (B-4):** Unter Last 26–63 (fremde Firefox-Playwright-Läufe aus `fundamento-wt-mw48j5oap3r28zm3` plus die neun eigenen Test-Tasks) liefen unveränderte Tests in Zeitgrenzen: `packages/eroj/test/{knapp-playwright,vitrino-partoj}.test.ts` (Hook 10 s, 1 Lauf), `packages/nordstelo/src/ablauf/raporto.test.ts:68/:82` (5 s) und `integra.test.ts` (Hook 10 s) in 4 von 4 parallelen Läufen, `packages/mcp/src/**` 7 Tests (30 s, 1 Lauf), `packages/cli/src/{ekranoj-integra,index}.test.ts` 3 Tests (1 Lauf). Einzeln bei Last < 10 jeweils grün. Keine Grenze angehoben, nichts geändert.
 - **S038-02-3 kampo mit brief und einem weiteren Feld:** Weil `rest` mitzählt (D-31), geht bei kampo das Kurzprofil bei **jeder** Kombination mit einem zweiten Feld nach `rest` – auch mit `navigation`, das bei kampo leer bleibt (7 der 15 Teilmengen). Ein Folgeaufruf `fields: ["brief"]` liefert es (747). Wörtliche Füllregel, kein Befund gegen die Spec; nur als Hinweis für Lauf 3 (Messung).
 - **S038-03-1 Landmarken ohne Region:** sxelo setzt `banner` (der Kopf um `brand` und `principal`), filtrilo `search` (der ganze Rahmen). Beide gehören zu keiner einzelnen Region und tragen darum kein Regionsmerkmal; erkannt werden sie am Element `fm-<name>` selbst (die Seitenregel zählt sie wie bisher über `a11y.landmarks`). Kein fehlendes Merkmal: jede der 18 Regionen hat `slot`, keine Graubereich-Datei berührt, kein Datenvorschlag nötig.
+- **S038-04-1 Feldname `celo`:** `mankoj[].celo` (MG-1) und `nearest[].celo` (MG-6) meinen einen Zweck bzw. ein Ziel; in der Terminologie ist Celo die Ausgabe (so auch `data/mankoj.json`). Die Namen sind Vertrag des Maintainers und bleiben (Befund 14 der Implementierungs-Spec), kein Umbenennen.
+- **S038-04-2 Größe von `list_arangxoj`:** 1 381 Tokens (Deutsch 1 419) für 23 Einträge; kein Kurzprofil, für Listen gilt keine Grenze (`list_eroj` 5 362, `list_sxablonoj` 538). Nichts angehoben, nichts gekürzt.
+- **S038-04-3 Reichweite von `nearest`:** Der Editierabstand findet Tippfehler und wortnahe Formen („Detailansicht“ → atributlisto `details`, `deletee` → butono `destructive`), keine Synonyme („Steckbrief“ → langetaro, avizo, …). Mehr leisten nur Schlüsselwörter in den Daten (Skemoj, tabu); kein Modell (B-6).
 - **S038-01-2 Lokal wackelnder Hook:** `packages/nordstelo/src/ablauf/integra.test.ts` (`beforeAll` mit `connectGvidanto()`, 10-s-Hook-Grenze) lief im ersten `pnpm test:betroffen` unter Last (fünf Pakete parallel) in die Zeitgrenze; Datei unverändert. Trefferquote im Beitrag S038-01; keine Grenze angehoben.
 
 ## Blockiert
