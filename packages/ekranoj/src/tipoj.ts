@@ -312,6 +312,12 @@ export interface Bildigilo {
 export interface MarkoKonstruo {
   css: string[];
   skripto?: string;
+  /**
+   * The CSS custom-property name of the brand's base font (C-5, S038-19), as the brand build
+   * derives it (`--fm-…`). The frame uses it only as `var(<name>)` on `body`, never as a value;
+   * absent = no font rule.
+   */
+  bazaTiparo?: string;
 }
 
 /** The brand build: writes it into `<out>/marko/` and says what a screen must load. */

@@ -239,6 +239,27 @@ describe("output folder (§2.4, Lieferliste 1.6, AC-6)", () => {
     expect(marko.dosierujoj).toEqual([join(dir, "marko")]);
   });
 
+  it("hands the brand build's base-font name to every screen document and the overview (C-5)", async () => {
+    const bazaTiparo = "--fm-provo-tiparo";
+    const duoblo = new MarkoDouble("komuna");
+    const marko: Marko = {
+      konstrui: async (dir) => ({ ...(await duoblo.konstrui(dir)), bazaTiparo }),
+    };
+    const { dir } = await kuro({ nomo: "baza-tiparo", markoDouble: marko });
+    const dokumentoj = dosieroj(dir).filter(
+      (d) => (d.startsWith("ekranoj/") || d.startsWith("rondoj/")) && d.endsWith(".html"),
+    );
+    expect(dokumentoj.length).toBe(PLANO.ekranoj.length * 4);
+    for (const dosiero of [...dokumentoj, "superrigardo.html"]) {
+      expect(legi(dir, dosiero), dosiero).toContain(`font-family: var(${bazaTiparo})`);
+    }
+    // Without the field the documents carry no font rule (the behaviour of before).
+    const { dir: sen } = await kuro({ nomo: "sen-baza-tiparo" });
+    for (const dosiero of [...dokumentoj, "superrigardo.html"]) {
+      expect(legi(sen, dosiero), dosiero).not.toContain("font-family");
+    }
+  });
+
   it("links every screen and the report from the overview, and every link resolves", async () => {
     const { dir } = await kuro({ nomo: "superrigardo" });
     const html = legi(dir, "superrigardo.html");

@@ -38,6 +38,8 @@ export interface KadraMarko {
   css: readonly string[];
   /** The classic script (`KLASIKA_SKRIPTO`), absent when the build brought no bundle. */
   skripto?: string;
+  /** The custom-property name of the brand's base font (C-5); used only as `var(<name>)`. */
+  bazaTiparo?: string;
 }
 
 export interface KadroEnigo {

@@ -2,6 +2,7 @@
 // the Eroj as a classic script (Chromium refuses module scripts under file://), the back-link to the
 // overview outside the fragment and marked, no timestamps. And the overview (AC-6).
 
+import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { describe, expect, it } from "vitest";
 import {
@@ -21,6 +22,61 @@ import { ELEMENTA_MODULO } from "./test-doubles/marko.js";
 const FRAGMENTO =
   '<main><h1>Standard A-12</h1><fm-provilo emphasis="high">Speichern</fm-provilo><fm-ligilo to="detail.html">Weiter</fm-ligilo></main>';
 const MARKO = { css: ["css/fundamento.css"], skripto: KLASIKA_SKRIPTO };
+/** The name of the base-font property as the brand build gives it (C-5); invented, never typed in the frame. */
+const BAZA_TIPARO = "--fm-provo-tiparo";
+
+/** The repository's Modelo data, read as files (no import of the Modelo, AC-10). */
+const REPO = new URL("../../../", import.meta.url);
+const legiJson = (vojo: string): unknown => JSON.parse(readFileSync(new URL(vojo, REPO), "utf8"));
+
+/** The region names of a Sxablono's Skemo, and the one that is the default region. */
+function regionojDe(sxablono: string): { nomoj: string[]; defauxlta: string | undefined } {
+  const dosiero = legiJson(`packages/modelo/data/sxablonoj/${sxablono}/skemo.json`) as {
+    skemo: { regions: { name: string; default?: boolean }[] };
+  };
+  const regionoj = dosiero.skemo.regions;
+  return {
+    nomoj: regionoj.map((regiono) => regiono.name),
+    defauxlta: regionoj.find((regiono) => regiono.default === true)?.name,
+  };
+}
+
+/** Every font-family name of the Modelo's base set and of the reference brand (read, not typed). */
+function tiparaNomoj(): string[] {
+  const nomoj = new Set<string>();
+  const iri = (valoro: unknown, ene: boolean): void => {
+    if (Array.isArray(valoro)) {
+      for (const ero of valoro) if (ene && typeof ero === "string") nomoj.add(ero);
+      for (const ero of valoro) iri(ero, ene);
+      return;
+    }
+    if (typeof valoro === "string") {
+      if (ene) nomoj.add(valoro);
+      return;
+    }
+    if (valoro === null || typeof valoro !== "object") return;
+    for (const [sxlosilo, ero] of Object.entries(valoro)) iri(ero, ene || /^famil/i.test(sxlosilo));
+  };
+  iri(legiJson("packages/vortaro/sets/core.json"), false);
+  iri(legiJson("packages/aspekto-komuna/aspekto.json"), false);
+  // Only names: drop descriptions, types and ids the walk met below a family key.
+  return [...nomoj].filter((nomo) => /^[A-Za-z][\w -]*$/.test(nomo) && nomo.length <= 40);
+}
+
+/** The guard on frame and overview output: no colour literal, no font name of the Modelo data. */
+function sen_literaloj(html: string): void {
+  expect(html).not.toMatch(/#[0-9a-f]{3,8}\b/i);
+  expect(html).not.toMatch(/\b(?:rgba?|hsla?|oklch|oklab|lab|lch|color)\(/i);
+  const nomoj = tiparaNomoj();
+  expect(nomoj.length).toBeGreaterThan(0);
+  for (const nomo of nomoj) {
+    if (
+      /^(?:serif|sans-serif|monospace|cursive|fantasy|system-ui|ui-[a-z]+|fontFamily)$/.test(nomo)
+    )
+      continue;
+    expect(html, nomo).not.toContain(nomo);
+  }
+}
 
 const F = (aldone: Partial<Parameters<typeof ekranaDokumento>[0]> = {}) =>
   ekranaDokumento({
@@ -54,29 +110,64 @@ describe("ekranaDokumento – Variante F (D-24, D-27)", () => {
     expect(html).not.toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
   });
 
-  it("adds only a marked back-link to the overview, outside the fragment", () => {
+  it("adds only a marked fm-ligilo back to the overview, outside the fragment (3.1, AC-6)", () => {
     const html = F();
     const kadro = html.slice(0, html.indexOf(FRAGMENTO_KOMENCO));
     expect(kadro).toContain(
-      `<p ${KADRO_ATRIBUTO}><a href="../superrigardo.html">Zur Übersicht</a></p>`,
+      `<p ${KADRO_ATRIBUTO}><fm-ligilo to="../superrigardo.html" placement="standalone">Zur Übersicht</fm-ligilo></p>`,
     );
+    expect(kadro).not.toContain("<a ");
     expect(fragmentoEl(html)).not.toContain("superrigardo.html");
-    // Nothing but the back-link in the body outside the fragment.
+    // Nothing but the back-link in the body outside the fragment, and it is inside the marked element.
     const body = html.slice(html.indexOf("<body>") + 6, html.indexOf("</body>"));
     const ekster = body.replace(`${FRAGMENTO_KOMENCO}\n${FRAGMENTO}\n${FRAGMENTO_FINO}`, "");
-    expect(etikedoj(ekster)).toEqual([`<p ${KADRO_ATRIBUTO}>`, '<a href="../superrigardo.html">']);
-    expect(F({ lingvo: "en" })).toContain(">To the overview</a>");
+    expect(etikedoj(ekster)).toEqual([
+      `<p ${KADRO_ATRIBUTO}>`,
+      '<fm-ligilo to="../superrigardo.html" placement="standalone">',
+    ]);
+    expect(F({ lingvo: "en" })).toContain(">To the overview</fm-ligilo>");
+    // D-27: what the agent wrote is exactly the fragment.
+    expect(fragmentoEl(html)).toBe(FRAGMENTO);
+    expect(agentaTeksto(html)).toBe(FRAGMENTO);
   });
 
   it("writes the paths from a round folder and leaves the brand out without a build", () => {
     const html = F({ radiko: "../../" });
     expect(html).toContain('href="../../marko/css/fundamento.css"');
     expect(html).toContain(`src="../../marko/${KLASIKA_SKRIPTO}"`);
-    expect(html).toContain('<a href="../../superrigardo.html">');
+    expect(html).toContain('<fm-ligilo to="../../superrigardo.html" placement="standalone">');
     const senMarko = F({ marko: undefined });
     expect(senMarko).not.toContain("<link");
     expect(senMarko).not.toContain("<script");
     expect(fragmentoEl(senMarko)).toBe(FRAGMENTO);
+    // Without the Eroj nothing defines fm-ligilo: the back-link stays a plain link there.
+    expect(senMarko).toContain(`<p ${KADRO_ATRIBUTO}><a href="../superrigardo.html">`);
+  });
+
+  it("sets the brand's base font on body only by the variable the build names (C-5)", () => {
+    const html = F({ marko: { ...MARKO, bazaTiparo: BAZA_TIPARO } });
+    const kapo = html.slice(html.indexOf("<head>"), html.indexOf("</head>"));
+    expect(kapo).toContain(`<style>body { font-family: var(${BAZA_TIPARO}); }</style>`);
+    // Every font rule of the frame is a var(--…), never a value.
+    const reguloj = [...html.matchAll(/font-family\s*:\s*([^;}]+)/g)].map((m) =>
+      (m[1] ?? "").trim(),
+    );
+    expect(reguloj).toEqual([`var(${BAZA_TIPARO})`]);
+    // The head rule is not marked: it stays while the K8 facts are read without the frame.
+    expect(kapo).not.toContain(KADRO_ATRIBUTO);
+    expect(fragmentoEl(html)).toBe(FRAGMENTO);
+    expect(agentaTeksto(html)).toBe(FRAGMENTO);
+    // Without the field: no font rule at all (the behaviour of before).
+    expect(F()).not.toMatch(/font-family|<style/);
+    // A name that is no custom property is never written.
+    expect(F({ marko: { ...MARKO, bazaTiparo: "Arial; color: red" } })).not.toMatch(
+      /font-family|<style/,
+    );
+  });
+
+  it("writes no colour literal and no font name of the Modelo data into the frame", () => {
+    sen_literaloj(F({ marko: { ...MARKO, bazaTiparo: BAZA_TIPARO } }));
+    sen_literaloj(F());
   });
 
   it("differs between two brands only in data-fm-aspekto (AC-7)", () => {
@@ -168,6 +259,8 @@ describe("superrigardoHtml (AC-6)", () => {
       "raporto.md",
       "ekranoj/liste.html",
       "ekranoj/detail.html",
+      "ekranoj/liste.html",
+      "ekranoj/detail.html",
     ]);
     expect(html).toContain(`<script src="marko/${KLASIKA_SKRIPTO}"></script>`);
     expect(html).toContain('data-fm-aspekto="komuna"');
@@ -177,5 +270,65 @@ describe("superrigardoHtml (AC-6)", () => {
     expect(html).toContain("nicht gebaut");
     expect(html).not.toContain(KADRO_ATRIBUTO);
     expect(html).toMatch(/<!-- Generated by @fundamento\/ekranoj/);
+  });
+
+  const superrigardo = (aldone: Partial<Parameters<typeof superrigardoHtml>[0]> = {}) =>
+    superrigardoHtml({
+      plano,
+      aspekto: "komuna",
+      lingvo: "de",
+      varianto: "F",
+      marko: { ...MARKO, bazaTiparo: BAZA_TIPARO },
+      ekranoj: ["liste", "detail"],
+      bildoj: ["liste"],
+      verdaj: { liste: true, detail: false },
+      ...aldone,
+    });
+
+  it("puts the overview into the shell: brand, navigation, tiles in the default region (3.1)", () => {
+    const sxelo = regionojDe("sxelo");
+    const pagxo = regionojDe("pagxo");
+    // The Skemo names the regions this test relies on.
+    expect(sxelo.nomoj).toEqual(expect.arrayContaining(["brand", "nav"]));
+    expect(pagxo.nomoj).toContain("title");
+    const html = superrigardo();
+    const body = html.slice(html.indexOf("<body>") + 6, html.indexOf("</body>"));
+    const ene = (etikedo: string): string => {
+      const komenco = body.indexOf(`<${etikedo}`);
+      const fino = body.lastIndexOf(`</${etikedo}>`);
+      expect(komenco, etikedo).toBeGreaterThanOrEqual(0);
+      expect(fino, etikedo).toBeGreaterThan(komenco);
+      return body.slice(komenco, fino);
+    };
+    const sxeloHtml = ene("fm-sxelo");
+    // Every slot the overview names is a region of the Skemo.
+    const slotoj = [...body.matchAll(/\sslot="([^"]+)"/g)].map((m) => m[1] ?? "");
+    for (const sloto of slotoj) expect([...sxelo.nomoj, ...pagxo.nomoj]).toContain(sloto);
+    // The title in brand, the report and every built screen in fm-navigado in nav.
+    expect(sxeloHtml).toMatch(/<[a-z0-9-]+ slot="brand">Übersicht<\/[a-z0-9-]+>/);
+    const nav = ene("fm-navigado");
+    expect(body).toMatch(/<fm-navigado slot="nav" label="[^"]+">/);
+    const navHrefs = [...nav.matchAll(/<a href="([^"]+)">/g)].map((m) => m[1]);
+    expect(navHrefs).toEqual(["raporto.md", "ekranoj/liste.html", "ekranoj/detail.html"]);
+    // The tiles in the default region (main): no slot, inside fm-pagxo, below the page title.
+    expect(sxelo.defauxlta).toBe("main");
+    const pagxoHtml = ene("fm-pagxo");
+    expect(pagxoHtml).toContain(`<h1 slot="title">${plano.celo}</h1>`);
+    expect(body).toMatch(/<fm-pagxo>/);
+    expect(pagxoHtml).toMatch(/<ul>[\s\S]*<\/ul>/);
+    for (const ekrano of plano.ekranoj) expect(pagxoHtml).toContain(ekrano.celo);
+    // The shell is the whole page: no second main landmark of its own.
+    expect(body).not.toContain("<main");
+  });
+
+  it("writes no colour literal and no font name of the Modelo data into the overview", () => {
+    sen_literaloj(superrigardo());
+    sen_literaloj(superrigardo({ lingvo: "en" }));
+  });
+
+  it("keeps the plain overview for Variante 0 (no Eroj there, D-34)", () => {
+    const html = superrigardo({ varianto: "0", marko: undefined });
+    expect(html).not.toContain("<fm-");
+    expect(html).toContain("<main>");
   });
 });
