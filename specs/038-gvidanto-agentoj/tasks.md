@@ -32,5 +32,33 @@
 
 - [x] **T3814 (S038-08)** pnpm check: einmal, S038-08 – **rot** (2026-11-06 07:12–07:14 CET, `FM_AUSGABE=knapp pnpm check`, Exit 1 nach 1 min 21 s; Log `/tmp/s038-logs/s038-08-pnpm-check.log`). Abbruch im ersten Schritt `turbo run build test` bei `@fundamento/nordstelo#test`: drei Zeitgrenzen unter der Last des ganzen Laufs (zwölf Test-Tasks parallel, Lastmittel ≈ 44 bei 10 Kernen) – `src/ablauf/raporto.test.ts:68` (5 s, fremd, unverändert, S038-02-2), `src/ablauf/integra.test.ts:131` (Hook 10 s, fremd, unverändert, S038-01-2), `src/ac8.test.ts:156` (Hook 10 s mit `connectGvidanto()`, Datei aus PR A). Beim Abbruch noch laufend und mit Zeitgrenzen gemeldet: `cli/src/projekcioj.test.ts:86` (10 s), `modelo/src/checks/clean-room/index.test.ts:75` (30 s), beide fremd und unverändert. Der rote Check einzeln (`vitest run --reporter=json` in nordstelo, Last ≈ 7): 139 bestanden, 0 rot (`/tmp/s038-logs/s038-08-nordstelo-einzeln.json`); `src/ac8.test.ts` einzeln 0/10 rot bei Last 5–6. Ursache: Last, kein Codefehler; nichts geändert, keine Grenze angehoben, `pnpm check` nicht wiederholt (B-7). Die Schritte hinter `turbo run build test` liefen wegen `&&` nicht; `pnpm check:privat` lief einzeln (AC-L9, D-93): grün, 0 Fehler, 4 223 Dateien. Befund S038-08-1, D-92.
 - [x] **T3815 (S038-08)** `$W/pruefen --diff origin/main..HEAD` sauber (Diff, Commit-Texte, Identität); `$W/audit-ac4` „geändert: 1“ = bekannter Fehlalarm S038-06-2 (`packages/mcp/schema/tools/suggest_ero.input.json`, „lingvo limits“; die alte Zeile ist byte-gleich Präfix der neuen, angehängt nur der Satz zu `nearest`; kein `750`), sonst 0, keine Grenze angehoben; Tabu-Diff `git diff --name-only origin/main...HEAD` (94 Dateien) ohne Tabu-, B-5-, Lockfile-, `.github`-, `scripts`- oder Wurzeldatei, keine Graubereich-Datei; kein `.only`/`.skip`; `pnpm check:privat` grün. `git fetch origin`: `main` unverändert `e4873c57` (kein `merge-tree`, kein Rebase). Offene PRs: #149, #150 (Spec 042) ohne gemeinsame Datei. plan und tasks vervollständigt (Entscheidungen D-39 bis D-93).
-- [ ] **T3816 (S038-08)** Ein Push, PR A, ein `workflow_dispatch`-Lauf, beide Läufe je Job ausgewertet, PR-Text, `$S/bericht-lauf-1.md`. Geschieht nach diesem Commit; das Ergebnis steht ohne Commit im PR-Text und im Bericht, Lauf 2 hakt es hier ab (D-25).
+- [x] **T3816 (S038-08)** Ein Push, PR A, ein `workflow_dispatch`-Lauf, beide Läufe je Job ausgewertet, PR-Text, `$S/bericht-lauf-1.md`. Geschieht nach diesem Commit; das Ergebnis steht ohne Commit im PR-Text und im Bericht, Lauf 2 hakt es hier ab (D-25). – PR A #151, Kopf `b5442089`, ein Push, gemergt als `636e7119`. `pull_request` 42173697137 grün (25/25 Jobs); `workflow_dispatch` 42173704369 rot (24/25 Jobs): Timing checks **fremd** (Job 127747308860, `packages/eroj/test/vitrino.check.ts:1140`, M5 Werkstatt, P90 55 ms > 50 ms, Spec 042 #149; Nachtlauf `main` 42150040106 grün); kein Rerun, kein zweiter Push. Nachgetragen in Lauf 2 (D-25, S038-09; Abschnitt „Bericht Lauf 1“ in plan.md).
 - [ ] **T3817 1.9** Messung Teil 1 – verschoben nach Lauf 3.
+
+## Lauf 2 – Teil 2 (PR B „Spec 038 – K8 Erscheinung“)
+
+**Branch:** `261106-spec-038-k8-erscheinung-0d6606` (D-109, D-S038-09-1) · **Basis:** `main` `f0275222` (enthält #151 = `636e7119`). Nummerierung fortlaufend ab T3818; der Doku-Commit von S038-09 ist T3818, die Aufgaben der Implementierungs-Spec folgen um eins verschoben (T3819 ff.). SHAs und Ergebnisse trägt S038-14 aus den Beiträgen `s038-beitraege/S038-1x.md` ein (D-S038-09-2).
+
+### Nachtrag und Gerüst
+
+- [x] **T3818 D-25 (S038-09)** Nachtrag Lauf 1 in plan.md (Abschnitt „Bericht Lauf 1“: PR A #151, CI beider Läufe, Befund „fremd“), D-29 und D-31 bis D-34 bestätigt, Kopfzeile Lauf 2, Startbedingung Lauf 2, Frei/Tabu Lauf 2, Entscheidungen D-94 bis D-110, vorläufige D-S038-…, Lieferliste 2.1 bis 2.4 „offen“; T3816 abgehakt; `$W` vorhanden, Selbsttest 103/103. **Doku, kein Rot/Grün-Paar.** – Commit `Spec 038: Nachtrag Lauf 1 (D-25, CI) und Gerüst Lauf 2` (SHA trägt S038-14 ein).
+
+### A – Rot zuerst
+
+- [ ] **T3819 2.1 (S038-10)** Tests der Normalisierung und der Typen (`src/k8/faktoj.test.ts`): Rundung auf 0,01 px, gleiche Ausgabe bei vertauschter Eingabe, erste Schriftfamilie klein ohne Anführungszeichen, Doppelte entfernt, `sondoj` je `(eco, valoro)`, leere Listen, `Fakto` → `Facts` zuweisbar (C-2), In-Page-Funktionen ohne `import`/`require`. Typen in `facts.ts`, Stub `faktoj.ts`. – rot: SHA offen.
+- [ ] **T3820 2.2 (S038-11)** Tests `solojDe` je Marke × Farbschema gegen `resolve` (Zahlen aus den Daten), `interspacoj` aufsteigend, `mankoj` = `listArangxoj`, unbekannte Marke als strukturierter Fehler, `sondojDe` mit `cssVariable`, Literal-Wächter (`src/k8/soloj.test.ts`). Stub `soloj.ts`. – rot: SHA offen.
+- [ ] **T3821 2.2, 2.3 (S038-12)** Tests `k8` (Merkmale positiv/negativ, D-17, 0,5 vs. 0,51 px, „nichts zu prüfen“, `mankoj`, ohne `k8` → `undefined`, Kontrast „high“ ignoriert, `nekomparebla`), Gegenprobe 2.3, Determinismus, Gegencheck „Projektion = Modelo“; Fixtures `k8/{roh,sxablono}`, Generator `test/k8/generi.mjs`, Stub `k8.ts`, Exporte in `index.ts`. – rot: SHA offen.
+- [ ] **T3822 2.4 (S038-13)** Tests `Score.k8` mit/ohne K8-Fakten (`total`, `k`, `gaps`, `multmarkeco` gleich), `ekranoTaksilo` gibt `k8` weiter, Spalte K8 und „nicht geprüft“ im Ablauf- und Nordstern-Bericht, Abschnitt „K8 je Merkmal und Kombination“, `Summary.k8`, optional `sumo.k8`. – rot: SHA offen.
+
+### B – Grün
+
+- [ ] **T3823 2.1 (S038-10)** `src/k8/faktoj.ts`: `aspektoFaktojEnPagxo`, `sondojEnPagxo`, `normigiAspektoFaktojn` (D-S038-10-1 bis -3). – grün: SHA offen.
+- [ ] **T3824 2.2 (S038-11)** `src/k8/soloj.ts`: `sondojDe`, `solojDe` (D-107, D-S038-11-1 bis -3). – grün: SHA offen.
+- [ ] **T3825 2.2, 2.3 (S038-12)** `src/k8/k8.ts` (`k8`, `k8Plena`, `MANKO_AL_MERKMAL`) und Einbau in `render.ts` (Sondendokument, optionale Modelo-Option; D-S038-12-1 bis -3); danach Generator zweimal, `diff -r` gegen die Fixtures leer. – grün: SHA offen.
+- [ ] **T3826 2.4 (S038-13)** `score.ts`, `ekrano-taksilo.ts` (`TaksadoK8`), `ablauf/poentoj.ts`, `ablauf/raporto.ts`, `report.ts`, `run.ts` (D-94, D-98, D-106, D-S038-13-1, -2). – grün: SHA offen.
+
+### C – Abschluss
+
+- [ ] **T3827 (S038-14)** `FM_AUSGABE=knapp pnpm check` genau einmal (L-8); rot unter eigener Last nach D-92/D-93.
+- [ ] **T3828 (S038-14)** Prüfungen nach L-11: `$W/pruefen --diff origin/main..HEAD`, `$W/audit-ac4`, Tabu-Diff, kein `.only`/`.skip`, `pnpm check:privat`, `git check-ignore -v` für die neuen Fixture-Ordner, offene PRs; plan und tasks abgeschlossen (Commit `Spec 038: Abschluss Lauf 2 in plan und tasks`).
+- [ ] **T3829 (S038-14)** Ein Push, PR B, genau ein `workflow_dispatch`-Lauf, beide Läufe je Job ausgewertet (L-2, L-4), PR-Text ohne Commit, `$S/bericht-lauf-2.md`.
