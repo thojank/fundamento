@@ -7,7 +7,7 @@ Ein Strang in PR A (T1 → T2 → T3 → T5), T4 parallel in PR B im eigenen Wor
 | Ticket | Inhalt | PR | Dateien | Stand | rot → grün |
 |---|---|---|---|---|---|
 | T1 | Trace `retain-on-failure` für die Eroj-Shards (D-01, D-02); Gerüst `specs/042-buehne-m5/` | A | `specs/042-buehne-m5/{spec,plan,tasks}.md`, `packages/eroj/playwright*.config.ts` (nur `trace`), `packages/eroj/test/spuro-042.test.ts` (neu) | erledigt (D-01 bestätigt: keine Workflow-Änderung) | Gerüst `bb53f484`; Trace `538bca43` → `347a3355` |
-| T2 | Selbst-Navigation der Bühne finden (Navigationstest rot zuerst) und beheben; `buehne-036` härten (D-03 bis D-05) | A | `packages/eroj/test/buehne-036.spec.ts`, `buehne-navigation-042.spec.ts` (neu), `geladen-042.ts` (neu), `packages/metiejo/src/**` (nur die gefundene Stelle samt Test) | offen | |
+| T2 | Selbst-Navigation der Bühne finden (Navigationstest rot zuerst) und beheben; `buehne-036` härten (D-03 bis D-05) | A | `packages/eroj/test/buehne-036.spec.ts`, `buehne-navigation-042.spec.ts` (neu), `geladen-042.ts` (neu); `packages/metiejo/src/**` unverändert (D-16) | erledigt (Randfall „sofort grün“: keine Selbst-Navigation, kein Produkt-Fix) | Navigationstest sofort grün `3b2045b6` (kein Rot im Produkt, D-16); Härtung `buehne-036`: rot = CI 42113762271 → grün `77778d6a` |
 | T3 | `zweitfarbe-036.spec.ts:111` in Firefox (Testzeit 120 s) | A | `packages/eroj/test/zweitfarbe-036.spec.ts`, `geladen-042.ts` (erweitern) | offen | |
 | T4 | M5 (B-14): Stil-Neuberechnung je Schieber-Änderung begrenzen (D-08 bis D-10) | B | nur `packages/projekcioj/src/celoj/vitrino/**` | offen | |
 | T5 | Zwei PRs, je genau ein `workflow_dispatch`, Diff-Suche, Bericht (D-06, D-07) | A und B | `specs/042-buehne-m5/{plan,tasks}.md`; PR-Texte und -Kommentare | offen | |
@@ -21,6 +21,17 @@ Ein Strang in PR A (T1 → T2 → T3 → T5), T4 parallel in PR B im eigenen Wor
 - [x] Nachweis D-01 (lokal, `CI=1`, Chromium, Wegwerf-Spec nicht committet): Trace `*.zip` unter `packages/eroj/test-reports/playwright/html/data/` (plan.md › Messanleitung). Kein Upload-Schritt nötig; `ci.yml` und `workflow.test.ts` unverändert.
 - [x] `pnpm check:privat` grün (4161 Dateien, 0 Treffer); Eroj-Vitest `FM_GEBAUT=1` 43/43; `pnpm --filter @fundamento/modelo exec vitest run src/ci/workflow.test.ts` 51/51; `pnpm lint` grün (20/20 Aufgaben; in `packages/eroj` eine Warnung und ein Hinweis in `alirebleco.check.ts` und `menuo.spec.ts`, beide schon auf `e4873c57`).
 
-## T2 bis T5 im Einzelnen
+## T2 im Einzelnen
+
+- [x] CI-Spuren gelesen (nur lesen, `s042-spur/<lauf>-eroj/`): 42113762271, 42080252255, 41971858056, 41931882770 – alle noch abrufbar. Zuordnung in plan.md › Befunde.
+- [x] Navigationstest `buehne-navigation-042.spec.ts` (Ports 7371–7379): Quellen `sessionStorage`, `performance`, `src`; `framenavigated` und Bindung nur im Bericht (D-14). Erwartet: Seite 2 Ladevorgänge, je Rahmen 5 Dokumente (laden-1, dunkel, hell, rev, laden-2).
+- [x] Suche nach Rot je 30: Chromium 30/30, WebKit 30/30, Firefox 28/30 – beide Roten ein Verlust der Einträge in der gemeinsamen Liste, keine Navigation zu viel (D-13). These „die Bühne lädt sich selbst neu“ für diesen Ablauf widerlegt; kein roter Commit, kein Produkt-Fix, kein Unit-Test in Metiejo (D-16).
+- [x] Fassung mit Schlüssel je Eintrag: Firefox, Chromium, WebKit je 30/30 – `3b2045b6`. Mutationsprobe (doppelter `refreshFrame()`, Wegwerf) macht den Test rot.
+- [x] `geladen-042.ts` (V-3): `seiteBereit(page, merkmal, nicht?)`, `rahmenBereit(page, rahmen, { rev?, scheme? })`, `dokument(page)`, `BUEHNE_BEREIT` – `3b2045b6`.
+- [x] `buehne-036.spec.ts` gehärtet (AC-5, Liste der Stellen in plan.md › Messungen): je `--repeat-each=5` Chromium, Firefox, WebKit 95/95 – `77778d6a`.
+- [x] `stato-041.spec.ts` grün in drei Engines; Metiejo-Unit grün; `}, 3000);` unverändert; `pnpm lint` grün; `pnpm check:privat` 0 Treffer.
+- [ ] Offen mit Spur: B-10, B-13 (Module des zweiten Dokuments liefen nicht; Trace aus T1 beim nächsten Auftreten). Nebenbefund N-7 (Schema-Schalter an der Wurzel) beim Maintainer.
+
+## T3 bis T5 im Einzelnen
 
 Folgt mit den Tickets.
