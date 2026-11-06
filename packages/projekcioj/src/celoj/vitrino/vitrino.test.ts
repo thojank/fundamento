@@ -151,6 +151,39 @@ describe("the Werkstatt in the Vitrino (Spec 016 ②)", () => {
     expect(bundle).toContain("fmWerkstatt");
   });
 
+  // Spec 042 T4 (B-14, M5): a slider writes the draft's palettes on the root, so every element the
+  // browser styles recomputes its style. Off-screen parts of the Werkstatt are skipped by
+  // content-visibility – but Chromium applies no containment to a table, so a rule on the palette
+  // tables skipped nothing (about 1 300 elements styled anew per change), and the two sides of the
+  // comparison, each matching the whole stylesheet again, were styled even off screen.
+  describe("a slider restyles the visible part of the Werkstatt (Spec 042 T4, B-14)", () => {
+    const layout = () =>
+      (/<style id="fm-vitrino-layout">([\s\S]*?)<\/style>/.exec(html)?.[1] ?? "").replace(
+        /\/\*[\s\S]*?\*\//g,
+        "",
+      );
+    const skipped = (selector: RegExp) =>
+      [...layout().matchAll(/([^{}]+)\{([^}]*)\}/g)].some(
+        ([, selectors = "", body = ""]) =>
+          selectors.split(",").some((part) => selector.test(part.trim())) &&
+          body.includes("content-visibility: auto"),
+      );
+
+    it("wraps each palette table in a block of its own, which content-visibility skips off screen", () => {
+      const bundle =
+        /<script type="module" id="fm-vitrino-werkstatt-skripto">([\s\S]*?)<\/script>/.exec(
+          html,
+        )?.[1] ?? "";
+      expect(bundle).toContain('<div class="fm-werkstatt-paletro"><table>');
+      expect(skipped(/^#fm-werkstatt-paletroj > \.fm-werkstatt-paletro$/)).toBe(true);
+      expect(skipped(/^#fm-werkstatt-paletroj > table$/)).toBe(false);
+    });
+
+    it("skips the two sides of the comparison together while they are off screen", () => {
+      expect(skipped(/^\[data-fm-modus="werkstatt"\] \.fm-werkstatt-flankoj$/)).toBe(true);
+    });
+  });
+
   it("holds no colour of its own in the Werkstatt either", () => {
     const source = readFileSync(new URL("./werkstatt.ts", import.meta.url), "utf8");
     expect(source).not.toMatch(/#[0-9a-fA-F]{6}\b/);
