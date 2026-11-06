@@ -9,8 +9,8 @@ Ein Strang in PR A (T1 → T2 → T3 → T5), T4 parallel in PR B im eigenen Wor
 | T1 | Trace `retain-on-failure` für die Eroj-Shards (D-01, D-02); Gerüst `specs/042-buehne-m5/` | A | `specs/042-buehne-m5/{spec,plan,tasks}.md`, `packages/eroj/playwright*.config.ts` (nur `trace`), `packages/eroj/test/spuro-042.test.ts` (neu) | erledigt (D-01 bestätigt: keine Workflow-Änderung) | Gerüst `bb53f484`; Trace `538bca43` → `347a3355` |
 | T2 | Selbst-Navigation der Bühne finden (Navigationstest rot zuerst) und beheben; `buehne-036` härten (D-03 bis D-05) | A | `packages/eroj/test/buehne-036.spec.ts`, `buehne-navigation-042.spec.ts` (neu), `geladen-042.ts` (neu); `packages/metiejo/src/**` unverändert (D-16) | erledigt (Randfall „sofort grün“: keine Selbst-Navigation, kein Produkt-Fix) | Navigationstest sofort grün `3b2045b6` (kein Rot im Produkt, D-16); Härtung `buehne-036`: rot = CI 42113762271 → grün `77778d6a` |
 | T3 | `zweitfarbe-036.spec.ts:111` in Firefox (Testzeit 120 s) | A | `packages/eroj/test/zweitfarbe-036.spec.ts`, `geladen-042.ts` (erweitern) | erledigt (nicht nachgestellt, 30/30; Befund mit Spur; Datei gehärtet, D-17 bis D-19) | rot = CI 42103645313 (lokal nicht nachgestellt, kein roter Commit) → Härtung grün `8506eb80` |
-| T4 | M5 (B-14): Stil-Neuberechnung je Schieber-Änderung begrenzen (D-08 bis D-10) | B | nur `packages/projekcioj/src/celoj/vitrino/**` | offen | |
-| T5 | Zwei PRs, je genau ein `workflow_dispatch`, Diff-Suche, Bericht (D-06, D-07) | A und B | `specs/042-buehne-m5/{plan,tasks}.md`; PR-Texte und -Kommentare | offen | |
+| T4 | M5 (B-14): Stil-Neuberechnung je Schieber-Änderung begrenzen (D-08 bis D-10) | B | nur `packages/projekcioj/src/celoj/vitrino/**` (`html.ts`, `werkstatt.ts`, `vitrino.test.ts`) | erledigt (lokal; CI-Urteil im Kommentar von PR B) | `89636d4f` → `1c69db9b` |
+| T5 | Zwei PRs, je genau ein `workflow_dispatch`, Diff-Suche, Bericht (D-06, D-07) | A und B | `specs/042-buehne-m5/{plan,tasks}.md`; PR-Texte und -Kommentare | erledigt bis zum Dispatch; CI in den PR-Kommentaren (D-06) | Nachzug T2 `9a19e143` (Tupel `as const`, grün); Bericht = Commit „Spec 042: Bericht vor dem Dispatch“ |
 
 ## T1 im Einzelnen
 
@@ -42,6 +42,21 @@ Ein Strang in PR A (T1 → T2 → T3 → T5), T4 parallel in PR B im eigenen Wor
 - [x] `timeout: 120_000` unverändert; kein `waitForTimeout`, kein neues Zeitlimit, kein `retries`. `pnpm lint` grün; `pnpm check:privat` 0 Treffer.
 - [ ] Offen mit Spur: beim nächsten CI-Rot der Trace `testberichte-eroj-<shard>-<attempt>` › `eroj/test-reports/playwright/html/data/*.zip`.
 
-## T4 und T5 im Einzelnen
+## T4 im Einzelnen
 
-Folgt mit den Tickets.
+- [x] Ursache gemessen (CDP-Wegwerf-Trace): `content-visibility` auf den Palettentabellen übersprang in Chromium nichts; beide Flanken wurden außerhalb des Bildes gestylt.
+- [x] Vitest rot: Hülle je Tabelle und beide `content-visibility`-Regeln – `89636d4f`.
+- [x] Fix grün: `div.fm-werkstatt-paletro` mit `content-visibility: auto`, `.fm-werkstatt-flankoj` mit `content-visibility: auto`, `min-inline-size: min-content` auf beiden – `1c69db9b`.
+- [x] Pixelgleich (D-09): berechnete Stile 0 Abweichungen in 14 Fällen; Bildschirmfotos nur Raster-Rauschen wie vorher gegen vorher.
+- [x] Determinismus: zwei erzwungene Builds byte-gleich.
+- [x] M5 lokal (V-2): p90 0 ms vorher und nachher; CDP Stil+Layout 12,0/12,5 → 5,9/5,8 ms (plan.md › Messungen › M5). Nachher unter Fremdlast eines anderen Workspace.
+- [x] `measure()`, `m5.ts`, `vitrino.check.ts` unverändert; Vitest Vitrino 242/242; `pnpm lint` grün; `pnpm check:privat` 0 Treffer.
+
+## T5 im Einzelnen
+
+- [x] Disjunktheit (`comm -12` leer), Zonen A und B, AC-1-Hash am Kopf (5172 Byte, `a8480d42…`).
+- [x] Nachzug T2: `[SCHRITT, name] as const` in `buehne-navigation-042.spec.ts:182` (unter `noUncheckedIndexedAccess` sonst `string[]`); mit einer Wegwerf-`tsconfig` samt `test/` typrein; Chromium 1/1 – `9a19e143`.
+- [x] `pnpm check:privat`, `pnpm lint`, `pnpm test:betroffen` in A und B (plan.md › Bericht).
+- [x] Diff-Suche AC-8 mit Urteil je Treffer (plan.md › Diff-Suche).
+- [x] PR B geöffnet, dann dieser Bericht, Push und PR A.
+- [ ] Je Branch genau ein `workflow_dispatch`, Auswertung als Kommentar in PR A und PR B (nach diesem Commit; kein Push danach).
