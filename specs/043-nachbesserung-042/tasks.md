@@ -7,7 +7,7 @@ Ein Strang, ein PR (T1 → T2 → T3 → T4). Lokal nur die geänderten Spec-Dat
 | Ticket | Inhalt | Dateien | Stand | rot → grün |
 |---|---|---|---|---|
 | T1 | N-8 aus Spec 042: abgebrochenen, leeren oder alten Vorschau-Rahmen ereignisgesteuert sofort neu anfordern (D-1 bis D-3); Gerüst `specs/043-nachbesserung-042/` | `specs/043-nachbesserung-042/{spec,plan,tasks}.md`, `packages/eroj/test/buehne-navigation-042.spec.ts` (neuer Test), `packages/metiejo/src/html.ts`, `vorschau-043.test.ts` (neu) | erledigt (Chromium, Firefox behoben; WebKit Befund, D-6) | Gerüst `3c9d7d75`; N-8 `8a65d6f4` → `20f221cc` |
-| T2 | `seiteBereit` auf `readyState !== "loading"`; Firefox-Fehler im Navigationstest klären (F-2, D-4) | `packages/eroj/test/geladen-042.ts`, `zweitfarbe-036.spec.ts`, `buehne-navigation-042.spec.ts` | offen | – |
+| T2 | `seiteBereit` auf `readyState !== "loading"`; Firefox-Fehler im Navigationstest klären (F-2, D-4) | `packages/eroj/test/geladen-042.ts`, `zweitfarbe-036.spec.ts`, `buehne-navigation-042.spec.ts` | in Arbeit | `seiteBereit` `dc69bd93` → `3e4102ac`; Navigation Firefox: rot = CI 42180054807 + lokal 4/30 |
 | T3 | Übernahme WebKit: N-3-Startmuster, POST mit `connection: close` | `packages/eroj/test/metiejo-036-uebernahme.spec.ts` | offen | – |
 | T4 | Diff-Suche, ein PR, ein Push, genau ein `workflow_dispatch`, Bericht | `specs/043-nachbesserung-042/{plan,tasks}.md` | offen | – |
 
@@ -26,7 +26,10 @@ Ein Strang, ein PR (T1 → T2 → T3 → T4). Lokal nur die geänderten Spec-Dat
 
 ## T2 im Einzelnen
 
-- [ ] (offen)
+- [x] Roter Test in `zweitfarbe-036.spec.ts` („the screen is ready while its preview still loads“, für Assistent und Schnellstart): `page.route` hält jede Antwort von `/marko/<id>/vorschau` zurück, bis ein Promise des Tests sie freigibt (kein Timer); `page.goto(…, { waitUntil: "domcontentloaded" })`, `seiteBereit` muss aufgelöst sein, solange der Rahmen hängt; danach Freigabe und `schrittBereit`. Auf dem alten `seiteBereit` rot in Chromium 2/2 und Firefox 2/2, genau der CI-Fehler (`readyState` „interactive“ statt „complete“, 5 s); in WebKit grün (10/10, D-9) – `dc69bd93`.
+- [x] `seiteBereit` wartet auf `merkmal && neu && readyState !== "loading"` (Poll-Meldung „readyState not loading“, JSDoc mit dem Hinweis auf Module); Signatur, Rückgabe und Wartezeit unverändert. `rahmenBereit` liest ein Rahmen-Dokument ohne `documentElement` als „nicht geladen“ (Befund T1). `schrittBereit`: erst die `/pruefung`-Antwort, dann der Rahmen (D-8, gemessen). Kommentar in `zweitfarbe-036.spec.ts` angepasst. Roter Test danach grün in Chromium, Firefox, WebKit (je 10/10 + 6/6) – `3e4102ac`.
+- [x] Aufrufer von `seiteBereit` mit Rahmen prüfen danach `rahmenBereit`: `buehne-036.spec.ts:129` (`:131`/`:132`), `buehne-navigation-042.spec.ts` (`rahmen()` bzw. `rahmenBereit` nach jedem `seiteBereit`), `zweitfarbe-036.spec.ts` über `schrittBereit`. Schnellstart (`[data-mt-zweitfarbe]` kommt vom Server): `schrittBereit` liest danach die `/pruefung`-Antwort und den Rahmen, beides macht nur der Client.
+- [x] Nachstellung F-2 (Firefox, bestehender Navigationstest, Stand nach T1: `buehne-navigation-042.spec.ts` und `geladen-042.ts` wie in `a6fb5d6b`), `--repeat-each=30 --workers=4`: **nachgestellt, 4/30 rot**, alle vier genau wie CI 42180054807: je Rahmen fehlen „rev“ und „rev navigate“ (Expected −4, Received +0), `src` für „rev“ ist notiert, die Bindung hat nur die zwei `src`-Einträge. Das ist der rote Beleg nach F-3 (CI 42180054807 + 4/30 lokal), vor dem Fix committet.
 
 ## T3 im Einzelnen
 
