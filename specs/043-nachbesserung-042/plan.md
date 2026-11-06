@@ -193,4 +193,28 @@ git diff --name-only e5057afc
 
 ## Bericht
 
-(T4.)
+### Stand vor dem Dispatch (T4)
+
+Lokal alles grün. Der Dispatch-Lauf von `ci.yml` ist die Abnahme. Sein Ergebnis steht nicht hier, sondern im Bericht der p0-Sitzung, weil nach dem Push kein Commit mehr folgt (Anhang C, 5).
+
+| Befund | Ursache | Fix | Grundlage |
+|---|---|---|---|
+| `zweitfarbe-036:121` Chromium (Assistent, Schnellstart) | Der Server ist langsam: Kalt-Render bzw. `/pruefung` dauern 3,3–4,3 s, der Rahmen lädt dahinter, das Hauptdokument ist nach 5 s nicht „complete“. Nicht N-8. | `seiteBereit` wartet auf `readyState !== "loading"`. `rahmenBereit` prüft den Rahmen getrennt. `schrittBereit` wartet erst auf `/pruefung`, dann auf den Rahmen (D-8). | mit Trace; roter Test Chromium 2/2 und Firefox 2/2, in WebKit nicht rot (D-9) |
+| `buehne-navigation-042:200` Firefox | Das Init-Skript lief in einigen Rahmen-Dokumenten nicht (−4 Zeilen „rev“), eine Lücke des Beobachters. Nicht N-8. | Die Seite zählt die Rahmen-Dokumente mit (D-11). Die Erwartung bleibt gleich streng. | mit Trace; lokal 4/30 rot, danach 30/30 grün |
+| `metiejo-036-uebernahme:67/:89` WebKit | In CI ein Reset (`ECONNRESET`) am POST `/materialo` über eine Keep-alive-Verbindung, während `/pruefung` den Server blockiert. Lokal N-3: ein Port aus `workerIndex % 9`, unter dem der Server eines anderen Workers lief. | Der Test wartet auf seinen eigenen Server (Ports 7341–7349, URL-Zeile des Kindprozesses). Der POST geht über `request` mit `connection: close` und wird nie wiederholt. Nur der GET steht in `nachEinemReset`. | mit Trace; lokal 2/30 rot, danach je Engine 30/30 grün |
+| N-8 aus Spec 042 (Produkt) | Bricht die Navigation eines Vorschau-Rahmens ab, wurde er erst bei neuem `rev` im `stato`-Takt neu angefragt. | Ereignisgesteuert sofort neu anfordern, höchstens einmal je URL, nie bei richtig geladenem Rahmen (`html.ts`). | roter Test; Chromium und Firefox 30/30 grün. WebKit meldet den Abbruch nicht, darum `test.fail` (D-6). |
+
+**Diff-Prüfung gegen `e5057afc`:**
+- Die Wortliste aus Anhang C erscheint nur in den zwei Zeilen der byte-gleich kopierten `spec.md`, die sie zitieren.
+- `}, 3000);` ist unverändert.
+- Geänderte Dateien liegen nur in den freien Pfaden.
+- `pnpm lint` grün, `pnpm check:privat` 0 Treffer, `spec.md` SHA-256 `b260ae62…1949`.
+
+**Schlusslauf lokal** (je Datei und Engine einmal, nacheinander): `buehne-navigation-042` 2/2, `zweitfarbe-036` 5/5, `metiejo-036-uebernahme` 2/2 und `buehne-036` (unverändert) 19/19, jeweils in Chromium, Firefox und WebKit. Der N-8-Test ist in WebKit wie markiert rot. Dazu `pnpm --filter @fundamento/metiejo test` 557/557.
+
+**Vom Maintainer zu bestätigen:**
+- D-6: `test.fail` für WebKit im N-8-Test.
+- D-8: Reihenfolge in `schrittBereit`; zwei Wartezeiten hintereinander statt eines Fensters.
+- D-9: Der rote `seiteBereit`-Test ist in WebKit nicht rot.
+
+**Folge-Spec (Kandidat):** Der Server ist bei `/pruefung` und beim Kalt-Render 3,3–4,3 s blockiert.

@@ -9,7 +9,7 @@ Ein Strang, ein PR (T1 → T2 → T3 → T4). Lokal nur die geänderten Spec-Dat
 | T1 | N-8 aus Spec 042: abgebrochenen, leeren oder alten Vorschau-Rahmen ereignisgesteuert sofort neu anfordern (D-1 bis D-3); Gerüst `specs/043-nachbesserung-042/` | `specs/043-nachbesserung-042/{spec,plan,tasks}.md`, `packages/eroj/test/buehne-navigation-042.spec.ts` (neuer Test), `packages/metiejo/src/html.ts`, `vorschau-043.test.ts` (neu) | erledigt (Chromium, Firefox behoben; WebKit Befund, D-6) | Gerüst `3c9d7d75`; N-8 `8a65d6f4` → `20f221cc` |
 | T2 | `seiteBereit` auf `readyState !== "loading"`; Firefox-Fehler im Navigationstest klären (F-2, D-4) | `packages/eroj/test/geladen-042.ts`, `zweitfarbe-036.spec.ts`, `buehne-navigation-042.spec.ts` | erledigt | `seiteBereit` `dc69bd93` → `3e4102ac`; Navigation Firefox: rot = CI 42180054807 + lokal 4/30 (`b43bc7e9`) → `0b2d29c4` |
 | T3 | Übernahme WebKit: N-3-Startmuster, POST mit `connection: close` | `packages/eroj/test/metiejo-036-uebernahme.spec.ts` | erledigt | rot = CI 42180054807 (2/2) + lokal 2/30 (`154eb490`) → `a28da901` |
-| T4 | Diff-Suche, ein PR, ein Push, genau ein `workflow_dispatch`, Bericht | `specs/043-nachbesserung-042/{plan,tasks}.md` | offen | – |
+| T4 | Diff-Suche, ein PR, ein Push, genau ein `workflow_dispatch`, Bericht | `specs/043-nachbesserung-042/{plan,tasks}.md` | Bericht vor dem Dispatch; danach PR, ein Push, ein Dispatch | – |
 
 ## T1 im Einzelnen
 
@@ -51,4 +51,9 @@ Ein Strang, ein PR (T1 → T2 → T3 → T4). Lokal nur die geänderten Spec-Dat
 
 ## T4 im Einzelnen
 
-- [ ] (offen)
+- [x] Diff-Suche gegen `e5057afc` (Wortliste Anhang C): keine neue Zeile außer den zwei Zeilen der kopierten `spec.md`. `}, 3000);` unverändert. `git diff --name-only e5057afc` zeigt nur freie Pfade (9 Dateien).
+- [x] `pnpm lint` grün, `pnpm check:privat` 0 Treffer, `spec.md` 4590 Byte und SHA-256 `b260ae62…1949`.
+- [x] `pnpm --filter @fundamento/metiejo test` 557/557 grün.
+- [x] Schlusslauf lokal, nacheinander, je Engine einmal, `FM_AUSGABE=knapp`: `buehne-navigation-042` 2/2, `zweitfarbe-036` 5/5, `metiejo-036-uebernahme` 2/2, `buehne-036` 19/19, jeweils in Chromium, Firefox und WebKit grün (N-8-Test in WebKit wie markiert rot, D-6).
+- [x] Bericht vor dem Dispatch in `plan.md` › Bericht. Dies ist der letzte Commit vor dem Push.
+- [ ] PR von `main`, ein Push, genau ein `gh workflow run ci.yml --ref 261106-spec-043-nachbesserung-042-pr-d9dc59`. Das Ergebnis steht im Bericht der Sitzung, nicht im Repo, weil danach kein Push mehr folgt.
