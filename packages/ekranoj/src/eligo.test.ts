@@ -690,8 +690,8 @@ describe("tokens per screen and round, the K8 column (3.4c, AC-8)", () => {
     expect(plano).toBeDefined();
     expect(Object.keys(plano ?? {})).toEqual([...ZAEHLER].sort());
     for (const z of ZAEHLER) expect(sumo[z] + (plano?.[z] ?? Number.NaN), z).toBe(json.peno[z]);
-    // The plan request is one request of its own (C-6).
-    expect(plano?.requests).toBe(1);
+    // The plan comes with the input here, so there is no plan request: the plan row is 0.
+    for (const z of ZAEHLER) expect(plano?.[z], z).toBe(0);
   });
 
   it("shows the table with one row per built screen and round, a plan row and a sum row equal to the run totals", async () => {
@@ -701,9 +701,11 @@ describe("tokens per screen and round, the K8 column (3.4c, AC-8)", () => {
     expect(md).toContain(
       "| Screen | Runde | Tokens ein | Tokens aus | Anfragen | Werkzeugaufrufe |",
     );
+    // Rows by round, then in plan order (the keys of raporto.json are sorted, the table is not).
     const atendataj = json.rondoj.flatMap((rondo) =>
-      Object.entries(rondo.ekranoj).flatMap(([slug, e]) =>
-        e.peno === undefined
+      PLANO.ekranoj.flatMap(({ slug }) => {
+        const e = rondo.ekranoj[slug];
+        return e?.peno === undefined
           ? []
           : [
               [
@@ -713,8 +715,8 @@ describe("tokens per screen and round, the K8 column (3.4c, AC-8)", () => {
                   String,
                 ),
               ],
-            ],
-      ),
+            ];
+      }),
     );
     const p = json.penoPlano;
     const vicoj = vicojDe(md);
@@ -774,6 +776,7 @@ describe("tokens per screen and round, the K8 column (3.4c, AC-8)", () => {
       "| Screen | K1 | K2 | K3 | K4 | K5 | K6 | Total | K7 Bytes | check_usage | axe hell | axe dunkel | Navigation | grün | K8 |";
     expect(md.split(`${kapo}\n|${"---|".repeat(15)}\n`)).toHaveLength(3);
     const k8Cxeloj = md
+      .slice(0, md.indexOf("## Verbleibende Abweichungen"))
       .split("\n")
       .filter((linio) => /^\| (liste|detail) \| \d/.test(linio))
       .map((linio) => linio.slice(2, -2).split(" | ").at(-1));
