@@ -4,9 +4,20 @@
 // no K8 facts → undefined, contrast "high" ignored, and an unloaded brand font (nekomparebla).
 // Every Sollwert is read from the probes these tests build; the values are invented.
 
-import { defaultModeloSource, listArangxoj, loadModelo, markerOf } from "@fundamento/modelo";
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import {
+  checkMarkup,
+  defaultModeloSource,
+  legiMarkon,
+  listArangxoj,
+  loadModelo,
+  markerOf,
+  sxablonojElElementoj,
+} from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
-import type { Facts, FaktoAspekto, NativaFingrospuro, Render, Sondo } from "../facts.js";
+import type { Element, Facts, FaktoAspekto, NativaFingrospuro, Render, Sondo } from "../facts.js";
 import { facts, h, type Node } from "../test-doubles/facts.js";
 import {
   K8_MERKMALOJ,
@@ -541,5 +552,139 @@ describe("k8 – font source not reachable (edge case D-101)", () => {
     );
     expect("nekomparebla" in k).toBe(false);
     expect(kialoDe(k, "ersatzschrift").join()).not.toContain("Schriftquelle");
+  });
+});
+
+describe("k8 – sxablono from the Modelo's derivation (Spec 038 Lauf 3 S038-16, C-1, E-2)", () => {
+  const K8_TS = fileURLToPath(new URL("./k8.ts", import.meta.url));
+  const NORDSTELO_AC8 = fileURLToPath(new URL("../../test/fixtures/ac8/", import.meta.url));
+  const EKRANOJ_AC8 = fileURLToPath(
+    new URL("../../../ekranoj/test/fixtures/ac8/", import.meta.url),
+  );
+  const PAKETO = fileURLToPath(new URL("../../", import.meta.url));
+
+  /**
+   * The rule of Lauf 2 (D-S038-12-1) as the oracle: the first `fm-<sxablono>` with a region filled
+   * by its marker slot, or – for the default region – by a child without slot or own text; the
+   * path of three tags as k8 names it.
+   */
+  function orakolo(elementoj: readonly Element[]): {
+    valoro: number;
+    teksto: string;
+    indekso: number;
+  } {
+    const sxablonoj = new Map((modelo.sxablonoj ?? []).map((e) => [e.sxablono.name, e]));
+    for (const [indekso, elemento] of elementoj.entries()) {
+      if (!elemento.tag.startsWith("fm-")) continue;
+      const entry = sxablonoj.get(elemento.tag.slice("fm-".length));
+      if (entry === undefined) continue;
+      const markiloj = entry.skemo.regions.map((region) => markerOf(modelo, entry, region));
+      const ekzistas = (slot: string | undefined) =>
+        markiloj.some((m) => (slot === undefined ? m.default === true : m.slot === slot));
+      const plenigita =
+        (elemento.text !== "" && ekzistas(undefined)) ||
+        elementoj.some((infano) => infano.parent === indekso && ekzistas(infano.attrs.slot));
+      if (!plenigita) continue;
+      const etikedoj: string[] = [];
+      for (let nuna = indekso; nuna >= 0 && etikedoj.length < 3; ) {
+        const e = elementoj[nuna];
+        if (e === undefined) break;
+        etikedoj.unshift(e.tag);
+        nuna = e.parent;
+      }
+      return { valoro: 1, teksto: `vollständig: \`${etikedoj.join(" > ")}\``, indekso };
+    }
+    return { valoro: 0, teksto: "keine Sxablono mit erkannter Region im Markup", indekso: -1 };
+  }
+
+  /** The element lists of the AC-8 fixtures: nordstelo's facts and ekranoj's fragments, read. */
+  function ac8Elementoj(): [string, Element[]][] {
+    const json = (dir: string) =>
+      readdirSync(dir)
+        .filter((name) => name.endsWith(".json"))
+        .sort();
+    const nordstelo = json(NORDSTELO_AC8).map((name): [string, Element[]] => {
+      const fall = JSON.parse(readFileSync(join(NORDSTELO_AC8, name), "utf8")) as {
+        faktoPfad?: string;
+        facts?: Facts;
+      };
+      const fakto =
+        fall.facts ??
+        (JSON.parse(
+          readFileSync(
+            join(PAKETO, (fall.faktoPfad ?? "").replace(/^packages\/nordstelo\//, "")),
+            "utf8",
+          ),
+        ) as Facts);
+      return [`nordstelo/${name}`, fakto.elements];
+    });
+    const ekranoj = json(EKRANOJ_AC8).map((name): [string, Element[]] => {
+      const fall = JSON.parse(readFileSync(join(EKRANOJ_AC8, name), "utf8")) as {
+        fragment: string;
+      };
+      return [`ekranoj/${name}`, legiMarkon(fall.fragment).elementoj];
+    });
+    return [...nordstelo, ...ekranoj];
+  }
+
+  it("k8.ts holds no region rule of its own (no markerOf; text guard as in soloj.test.ts)", () => {
+    expect(readFileSync(K8_TS, "utf8")).not.toContain("markerOf");
+  });
+
+  it("gives check_markup's Sxablonoj with the index of their element for every AC-8 fragment", () => {
+    const abweichungen: string[] = [];
+    let kazoj = 0;
+    for (const name of readdirSync(EKRANOJ_AC8)
+      .filter((n) => n.endsWith(".json"))
+      .sort()) {
+      const { fragment } = JSON.parse(readFileSync(join(EKRANOJ_AC8, name), "utf8")) as {
+        fragment: string;
+      };
+      const { elementoj } = legiMarkon(fragment);
+      const eligo = sxablonojElElementoj(elementoj, modelo);
+      const rezulto = checkMarkup(modelo, { fragment });
+      if (!rezulto.ok) continue;
+      kazoj += 1;
+      if (
+        JSON.stringify(eligo.map(({ instanco }) => instanco)) !==
+        JSON.stringify(rezulto.output.sxablonoj)
+      )
+        abweichungen.push(`${name}: instances differ from check_markup`);
+      for (const { elemento, instanco } of eligo)
+        if (elementoj[elemento]?.tag !== `fm-${instanco.sxablono}`)
+          abweichungen.push(`${name}: index ${elemento} is no fm-${instanco.sxablono}`);
+    }
+    expect(kazoj).toBeGreaterThan(0);
+    expect(abweichungen).toEqual([]);
+  });
+
+  it("finds by the derivation the element the rule of Lauf 2 finds, for every AC-8 element list", () => {
+    const abweichungen: string[] = [];
+    const listoj = ac8Elementoj();
+    for (const [name, elementoj] of listoj) {
+      const unua = sxablonojElElementoj(elementoj, modelo).find(
+        ({ instanco }) => Object.keys(instanco.regions ?? {}).length > 0,
+      );
+      const atendo = orakolo(elementoj);
+      if ((unua?.elemento ?? -1) !== atendo.indekso)
+        abweichungen.push(`${name}: derivation ${unua?.elemento}, oracle ${atendo.teksto}`);
+    }
+    expect(listoj.length).toBeGreaterThan(0);
+    expect(abweichungen).toEqual([]);
+  });
+
+  it("gives the value and kialo of the rule of Lauf 2 for every AC-8 element list", () => {
+    const abweichungen: string[] = [];
+    let plenaj = 0;
+    for (const [name, elementoj] of ac8Elementoj()) {
+      const faktoj: Facts = { ...kun([render("komuna", fakto(KOMUNA))]), elements: elementoj };
+      const k = sola(k8(faktoj, modelo));
+      const atendo = orakolo(elementoj);
+      if (atendo.valoro === 1) plenaj += 1;
+      if (k.merkmaloj.sxablono !== atendo.valoro || kialoDe(k, "sxablono")[0] !== atendo.teksto)
+        abweichungen.push(`${name}: ${k.merkmaloj.sxablono} ${kialoDe(k, "sxablono").join()}`);
+    }
+    expect(plenaj).toBeGreaterThan(0);
+    expect(abweichungen).toEqual([]);
   });
 });

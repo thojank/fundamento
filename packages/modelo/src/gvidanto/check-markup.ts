@@ -284,7 +284,7 @@ type RegionEntry = NonNullable<SxablonoInstance["regions"]>[string][number];
  * nowhere. A child Ero stands as `{ ero, props }`, a Sxablono as `{ sxablono }`, anything else as
  * "text". Regions in the order of the Skemo, empty ones left out.
  */
-function sxablonojElElementoj(
+function sxablonInstancoj(
   elementoj: readonly GvidantoElemento[],
   modelo: Modelo,
 ): SxablonoInstance[] {
@@ -335,6 +335,24 @@ function sxablonojElElementoj(
     });
   }
   return instances;
+}
+
+/** A Sxablono instance with the index of its element in the list it was derived from. */
+export interface SxablonoEnElemento {
+  /** Index of the `fm-<name>` element in `elementoj`. */
+  elemento: number;
+  instanco: SxablonoInstance;
+}
+
+/**
+ * The one derivation of the Sxablono instances of a page (MG-5), each with the index of its
+ * element: what check_markup reports as `sxablonoj` and what K8 of nordstelo reads.
+ */
+export function sxablonojElElementoj(
+  _elementoj: readonly GvidantoElemento[],
+  _modelo: Modelo,
+): SxablonoEnElemento[] {
+  throw new Error("sxablonojElElementoj: not implemented yet (S038-16 red)");
 }
 
 // --- check_markup --------------------------------------------------------------------------------
@@ -398,7 +416,7 @@ export function checkMarkup(modelo: Modelo, input: CheckMarkupInput): CheckMarku
   // A refused input stays as check_usage words it (paths check_usage/…), so the clients' findings
   // stay what they were.
   if (!rezulto.ok) return rezulto;
-  const sxablonoj = sxablonojElElementoj(read.elementoj, modelo);
+  const sxablonoj = sxablonInstancoj(read.elementoj, modelo);
   if (sxablonoj.length === 0) {
     return { ok: true, output: { eroj, sxablonoj, rezulto: rezulto.output } };
   }
