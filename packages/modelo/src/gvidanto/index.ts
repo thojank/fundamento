@@ -1,6 +1,7 @@
 // The Gvidanto functions behind the MCP tools (Spec 002): pure answers from the Modelo.
 export * from "./arangxoj.js";
 export * from "./check-contrast.js";
+export * from "./check-markup.js";
 export * from "./check-usage.js";
 export * from "./describe-term.js";
 export * from "./eroj.js";
