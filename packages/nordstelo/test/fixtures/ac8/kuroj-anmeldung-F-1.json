@@ -1,0 +1,100 @@
+{
+  "fall": "kuroj-anmeldung-F-1",
+  "faktoPfad": "packages/nordstelo/test/fixtures/kuroj/anmeldung-F-1/fakto.json",
+  "faktoSha256": "5897eb0f3da0466626842ecda431be74844f14ff2a2d471d513c4fcbf7e35de0",
+  "tasko": "anmeldung",
+  "expected": {
+    "K3": 1,
+    "reguloGaps": [],
+    "instancoj": [
+      {
+        "ero": "kampo",
+        "props": {
+          "kind": "email",
+          "placeholder": "E-Mail",
+          "required": true,
+          "name": "email"
+        },
+        "label": "E-Mail",
+        "lingvo": "de"
+      },
+      {
+        "ero": "kampo",
+        "props": {
+          "kind": "password",
+          "placeholder": "Passwort",
+          "required": true,
+          "name": "password"
+        },
+        "label": "Passwort",
+        "lingvo": "de"
+      },
+      {
+        "ero": "butono",
+        "props": {
+          "emphasis": "high",
+          "type": "submit",
+          "label": "Anmelden"
+        },
+        "lingvo": "de"
+      }
+    ],
+    "urteil": {
+      "instances": 3,
+      "valid": true,
+      "violations": [
+        {
+          "instance": [
+            0
+          ],
+          "issue": {
+            "rule": "placeholder-not-label",
+            "severity": "warning",
+            "path": "instances#/0",
+            "message": "Instance 0 of kampo repeats its label \"E-Mail\" as the placeholder: an example that repeats the label says nothing.",
+            "suggestion": "Make the placeholder an example of a value, or leave it out.",
+            "regulo": {
+              "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3TX",
+              "name": "placeholder-not-label",
+              "kialo": "A placeholder disappears while typing (WCAG 3.3.2), and an example that repeats the label says nothing."
+            }
+          }
+        },
+        {
+          "instance": [
+            1
+          ],
+          "issue": {
+            "rule": "placeholder-not-label",
+            "severity": "warning",
+            "path": "instances#/1",
+            "message": "Instance 1 of kampo repeats its label \"Passwort\" as the placeholder: an example that repeats the label says nothing.",
+            "suggestion": "Make the placeholder an example of a value, or leave it out.",
+            "regulo": {
+              "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3TX",
+              "name": "placeholder-not-label",
+              "kialo": "A placeholder disappears while typing (WCAG 3.3.2), and an example that repeats the label says nothing."
+            }
+          }
+        },
+        {
+          "instance": [
+            2
+          ],
+          "issue": {
+            "rule": "label-names-action",
+            "severity": "warning",
+            "path": "instances#/2",
+            "message": "Instance 2 of butono says \"Anmelden\" (slot:label): it names no verb of a goal of the Ero (nothing says what happens on activation).",
+            "suggestion": "Write the text as the approved example does, e.g. \"Speichern\".",
+            "regulo": {
+              "id": "reg_01M4RPB19HEMSFTRDZNPTHJV7P",
+              "name": "label-names-action",
+              "kialo": "A person decides from the label alone what happens on activation. A verb says it; a noun or a mood makes them guess."
+            }
+          }
+        }
+      ]
+    }
+  }
+}

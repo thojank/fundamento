@@ -23,8 +23,10 @@ function klientoDouble() {
 }
 
 describe("tool allowlist (S037-03)", () => {
-  it("names the twelve build tools and keeps the brand workshop out", () => {
-    expect([...KONSTRUAJ_ILOJ]).toEqual([
+  it("names the build tools and keeps the brand workshop out", () => {
+    // Spec 038 (D-19): the twelve of Spec 037 stay the prefix, the two new tools are appended.
+    expect(KONSTRUAJ_ILOJ.slice(-2)).toEqual(["list_arangxoj", "check_markup"]);
+    expect(KONSTRUAJ_ILOJ.slice(0, -2)).toEqual([
       "describe",
       "list_eroj",
       "suggest_ero",

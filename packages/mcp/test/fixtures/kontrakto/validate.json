@@ -1,0 +1,9 @@
+[
+  {
+    "fall": "standard",
+    "eingabe": {},
+    "sha256": "eadcd3df05d11810d054b33daf706468218a92b6e5a495aef55903fb542f4230",
+    "bytes": 57,
+    "antwort": "{\"valid\":true,\"errors\":[],\"warnings\":[],\"scope\":\"served\"}"
+  }
+]

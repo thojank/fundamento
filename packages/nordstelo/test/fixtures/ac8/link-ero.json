@@ -1,0 +1,88 @@
+{
+  "fall": "link-ero",
+  "facts": {
+    "lingvo": "de",
+    "bytes": 200,
+    "elements": [
+      {
+        "tag": "fm-saltligilo",
+        "attrs": {
+          "to": "#inhalt"
+        },
+        "parent": -1,
+        "text": "Zum Inhalt"
+      },
+      {
+        "tag": "fm-ligilo",
+        "attrs": {
+          "to": "detail.html"
+        },
+        "parent": -1,
+        "text": ""
+      },
+      {
+        "tag": "span",
+        "attrs": {
+          "slot": "label"
+        },
+        "parent": 1,
+        "text": "Details anzeigen"
+      },
+      {
+        "tag": "fm-ligilo",
+        "attrs": {
+          "to": "liste.html",
+          "size": "riesig"
+        },
+        "parent": -1,
+        "text": "Zur Liste"
+      }
+    ],
+    "aria": [],
+    "console": [],
+    "renders": []
+  },
+  "tasko": "detailseite",
+  "expected": {
+    "K3": 1,
+    "reguloGaps": [],
+    "instancoj": [
+      {
+        "ero": "saltligilo",
+        "props": {
+          "to": "#inhalt"
+        },
+        "label": "Zum Inhalt",
+        "lingvo": "de"
+      },
+      {
+        "ero": "ligilo",
+        "props": {
+          "to": "detail.html"
+        },
+        "texts": {
+          "label": "Details anzeigen"
+        },
+        "slots": {
+          "label": [
+            "text"
+          ]
+        },
+        "lingvo": "de"
+      },
+      {
+        "ero": "ligilo",
+        "props": {
+          "to": "liste.html"
+        },
+        "label": "Zur Liste",
+        "lingvo": "de"
+      }
+    ],
+    "urteil": {
+      "instances": 3,
+      "valid": true,
+      "violations": []
+    }
+  }
+}

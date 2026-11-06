@@ -1,0 +1,41 @@
+{
+  "fall": "link-ero",
+  "fragment": "<fm-saltligilo to=\"#inhalt\">Zum Inhalt</fm-saltligilo>\n<fm-ligilo to=\"detail.html\"><span slot=\"label\">Details anzeigen</span></fm-ligilo>\n<fm-ligilo to=\"liste.html\" size=\"riesig\">Zur Liste</fm-ligilo>",
+  "lingvo": "de",
+  "expected": {
+    "instancoj": [
+      {
+        "ero": "saltligilo",
+        "props": {
+          "to": "#inhalt"
+        },
+        "label": "Zum Inhalt",
+        "lingvo": "de"
+      },
+      {
+        "ero": "ligilo",
+        "props": {
+          "to": "detail.html"
+        },
+        "texts": {
+          "label": "Details anzeigen"
+        },
+        "slots": {
+          "label": [
+            "text"
+          ]
+        },
+        "lingvo": "de"
+      },
+      {
+        "ero": "ligilo",
+        "props": {
+          "to": "liste.html"
+        },
+        "label": "Zur Liste",
+        "lingvo": "de"
+      }
+    ],
+    "malobservoj": []
+  }
+}

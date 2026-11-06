@@ -1,0 +1,9 @@
+[
+  {
+    "fall": "standard",
+    "eingabe": {},
+    "sha256": "e4678c366d55ac23598afe2a1ec99e898ac22e6c43c7cc91ced114bad6e30de3",
+    "bytes": 656,
+    "antwort": "{\"aspektoj\":[{\"name\":\"komuna\",\"reference\":true,\"external\":false,\"owner\":\"Fundamento\",\"license\":\"MIT\",\"fonts\":[{\"family\":\"Geist\",\"license\":\"OFL-1.1\",\"redistributable\":true,\"scripts\":[\"Latn\"]},{\"family\":\"Geist Mono\",\"license\":\"OFL-1.1\",\"redistributable\":true,\"scripts\":[\"Latn\"]}],\"id\":\"dva_01M2VEEDQEJEE7MR7JA8JRPMJB\",\"package\":\"@fundamento/aspekto-komuna\",\"sets\":[\"aspekto/komuna\",\"aspekto/komuna+color-scheme/dark\",\"aspekto/komuna+color-scheme/dark+contrast/high\",\"aspekto/komuna+color-scheme/light+contrast/high\",\"aspekto/komuna+density/comfortable\",\"aspekto/komuna+density/compact\",\"aspekto/komuna+viewport/compact\",\"aspekto/komuna+viewport/expanded\"]}]}"
+  }
+]

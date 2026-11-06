@@ -1,0 +1,16 @@
+{
+  "fall": "kuroj-fahrradfilter-0-1",
+  "faktoPfad": "packages/nordstelo/test/fixtures/kuroj/fahrradfilter-0-1/fakto.json",
+  "faktoSha256": "e1478af33dbf0eb80d9d45ddb99dde7e3d632c208c155df59039fc27221df091",
+  "tasko": "fahrradfilter",
+  "expected": {
+    "K3": 0,
+    "reguloGaps": [],
+    "instancoj": [],
+    "urteil": {
+      "instances": 0,
+      "valid": true,
+      "violations": []
+    }
+  }
+}

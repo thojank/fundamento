@@ -92,6 +92,8 @@ export interface RaportoEkrano {
   /** Not rebuilt in this round (a stop): the round its fragment comes from (S037-10 Befund 6). */
   portitaEl?: number;
   malhelpoj: Malhelpo[];
+  /** The page rules of check_markup, hints only (Spec 038 D-29); absent when there are none. */
+  sxablonajSugestoj?: Malobservo[];
 }
 
 export interface FluaNavigado {
@@ -207,6 +209,9 @@ function raportoEkranoDe(stato: RondoEkrano): RaportoEkrano {
     ...(stato.verdaEkde === undefined ? {} : { verdaEkde: stato.verdaEkde }),
     ...(stato.portitaEl === undefined ? {} : { portitaEl: stato.portitaEl }),
     malhelpoj: stato.malhelpoj ?? [],
+    ...(stato.sxablonajSugestoj === undefined
+      ? {}
+      : { sxablonajSugestoj: stato.sxablonajSugestoj }),
   };
 }
 
@@ -436,6 +441,7 @@ export function raportoMarkdown(r: RaportoJson): string {
       `|${"---|".repeat(KRITERIOJ.length + 8)}`,
     );
     const malobservoj: string[] = [];
+    const sxablonajSugestoj: string[] = [];
     const axeTrovoj: string[] = [];
     for (const [slug, ekrano] of Object.entries(rondo.ekranoj)) {
       const eraroj = ekrano.malobservoj.filter((m) => m.severity === "error").length;
@@ -458,6 +464,11 @@ export function raportoMarkdown(r: RaportoJson): string {
           `- ${slug}: ${m.rule} (${m.severity}) bei ${m.loko ?? m.path}: ${m.message}${m.regulo === undefined ? "" : ` – Regulo ${m.regulo.name}, Grund: ${m.regulo.kialo}`}`,
         );
       }
+      for (const m of ekrano.sxablonajSugestoj ?? []) {
+        sxablonajSugestoj.push(
+          `- ${slug}: ${m.rule} (${m.severity}) bei ${m.loko ?? m.path}: ${m.message}`,
+        );
+      }
       for (const [modus, stato] of [
         ["hell", ekrano.axe.hela],
         ["dunkel", ekrano.axe.malhela],
@@ -476,6 +487,14 @@ export function raportoMarkdown(r: RaportoJson): string {
     if (r.enigo.varianto === "F") {
       if (malobservoj.length === 0) linioj.push("check_usage: keine Verstöße.", "");
       else linioj.push("check_usage:", "", ...malobservoj, "");
+      if (sxablonajSugestoj.length > 0) {
+        linioj.push(
+          "Seitenregeln (Hinweis, zählt nicht für grün, D-29):",
+          "",
+          ...sxablonajSugestoj,
+          "",
+        );
+      }
     }
     if (axeTrovoj.length > 0) linioj.push("axe:", "", ...axeTrovoj, "");
   }

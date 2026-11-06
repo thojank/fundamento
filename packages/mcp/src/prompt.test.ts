@@ -103,6 +103,24 @@ describe("prompt gvidanto", () => {
     expect(rule8).toMatch(/a placeholder or an `aria-label` alone is no label/);
   });
 
+  // Spec 038 (1.7, AC-L4): one sentence per new tool and per new option, after the old text (the
+  // prefix is guarded in kontrakto-038.test.ts); each names its tool and its option.
+  it("names list_arangxoj, check_markup, fields with rest, marker and nearest in rules of their own (Spec 038)", () => {
+    const rule = (tool: string, option?: string) =>
+      text
+        .split("\n")
+        .filter((line) => /^\d+\. /.test(line))
+        .filter((line) => line.includes(`\`${tool}\``))
+        .find((line) => option === undefined || line.includes(option)) ?? "";
+    expect(rule("list_arangxoj")).toMatch(/`interspacoj`.*`mankoj`/);
+    expect(rule("check_markup")).toMatch(/`rezulto`.*`sxablonoRezulto`/);
+    expect(rule("get_ero", "`fields`")).toContain("`rest`");
+    expect(rule("get_sxablono", "`marker: true`")).toContain("`marker`");
+    expect(rule("suggest_ero", "`nearest: true`")).toContain("`nearest`");
+    const numbers = [...text.matchAll(/^(\d+)\. /gm)].map((match) => Number(match[1]));
+    expect(numbers).toEqual(numbers.map((_, index) => index + 1));
+  });
+
   it("asks for check_usage before a handover (Spec 003 T025)", () => {
     expect(text).toMatch(/Before you hand over a design or code, call `check_usage`/);
   });

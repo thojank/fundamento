@@ -12,8 +12,8 @@ import {
 
 /**
  * The ten read-only tools of FR-16, then the Gvidanto tools of Spec 002, the Ero tools of
- * Spec 003, preview_agordo of Spec 016 ③ and propose_agordo, save_agordo of Spec 019 ③, in
- * contract order.
+ * Spec 003, preview_agordo of Spec 016 ③ and propose_agordo, save_agordo of Spec 019 ③, the
+ * Sxablonoj of Spec 020 and the layout means and markup check of Spec 038, in contract order.
  */
 export const TOOL_NAMES = [
   "describe",
@@ -40,6 +40,9 @@ export const TOOL_NAMES = [
   // Spec 020 ① (G3): the Sxablonoj beside the Eroj.
   "list_sxablonoj",
   "get_sxablono",
+  // Spec 038 Teil 1 (MG-1, MG-2): appended at the end, the list before stays the prefix (D-19).
+  "list_arangxoj",
+  "check_markup",
 ] as const;
 
 export type ToolName = (typeof TOOL_NAMES)[number];

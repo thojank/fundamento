@@ -1,0 +1,11 @@
+[
+  {
+    "fall": "standard",
+    "eingabe": {
+      "term": "Aspekto"
+    },
+    "sha256": "c795da5f082294d2656194c4ee78ffc8d56b93654871a29a918e790e2bbb21e0",
+    "bytes": 790,
+    "antwort": "{\"term\":\"Aspekto\",\"uri\":\"urn:fundamento:ontologio#Aspekto\",\"inScheme\":\"terminologio\",\"prefLabel\":{\"eo\":\"Aspekto\",\"en\":\"brand theme\",\"de\":\"Markenausprägung\"},\"altLabel\":{\"en\":[\"brand\",\"theme\"],\"de\":[\"Marke\",\"Brand Theme\"]},\"definition\":{\"en\":\"One brand's complete assignment of the vocabulary, shipped as its own package inside or outside the core repository.\",\"de\":\"Eine vollständige Belegung des Vokabulars für eine Marke, als eigenes Paket im Kern-Repo oder außerhalb.\"},\"broader\":[{\"term\":\"Modelo\",\"uri\":\"urn:fundamento:ontologio#Modelo\"}],\"related\":[{\"term\":\"Dimensio\",\"uri\":\"urn:fundamento:ontologio#Dimensio\"}],\"relations\":[{\"predicate\":\"assigns\",\"target\":{\"term\":\"Vortaro\",\"uri\":\"urn:fundamento:ontologio#Vortaro\"}}],\"matchedBy\":\"term\",\"instances\":{\"count\":1,\"names\":[\"komuna\"]}}"
+  }
+]

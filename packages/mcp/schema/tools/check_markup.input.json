@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fundamento:schema:mcp:check_markup.input",
+  "title": "check_markup input",
+  "description": "Judges markup as written (Spec 038 MG-2): give the fragment as text. It derives the Ero instances (every fm-<ero> with its props, slots, texts and label) and the Sxablono instances (their regions found by the region markers of get_sxablono) and answers with them, with the judgement of check_usage on the Ero instances in rezulto and, where the markup holds a Sxablono, the page rules (regions, one primary action, landmarks) apart in sxablonoRezulto. A fragment without an Ero instance is judged with zero instances. Call it before handing over markup.",
+  "type": "object",
+  "properties": {
+    "fragment": {
+      "description": "The markup: a fragment, or a whole document whose <html lang> gives the language.",
+      "type": "string",
+      "minLength": 1
+    },
+    "lingvo": {
+      "description": "The language of the page's texts where the fragment carries no <html lang> (ISO 639-1, the first two letters count).",
+      "type": "string",
+      "minLength": 1
+    },
+    "aspekto": {
+      "description": "The Aspekto every Ero instance is shown in; check_usage validates it.",
+      "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
+    },
+    "dimensioj": {
+      "description": "Dimensio values every Ero instance is shown under, e.g. viewport=compact; check_usage validates them.",
+      "type": "object",
+      "propertyNames": { "$ref": "urn:fundamento:schema:modelo#/$defs/Name" },
+      "additionalProperties": { "$ref": "urn:fundamento:schema:modelo#/$defs/Name" }
+    }
+  },
+  "required": ["fragment"],
+  "additionalProperties": false
+}

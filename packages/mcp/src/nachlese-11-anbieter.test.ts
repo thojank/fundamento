@@ -16,6 +16,7 @@
 // required, and the Gvidanto checks every input against its own schema anyway (Nachlese 11 D-04).
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { TOOL_NAMES } from "./schemas.js";
 import { type Connected, call, closeClients, connect, preload } from "./test-doubles/client.js";
 
 afterAll(closeClients);
@@ -69,8 +70,9 @@ describe("Nachlese 11 B-3: the tools are valid functions for Anthropic, OpenAI a
     tools = (await client.listTools()).tools as typeof tools;
   });
 
-  it("lists the 23 tools", () => {
-    expect(tools).toHaveLength(23);
+  // Spec 038 (D-19): the count follows TOOL_NAMES (the 23 of the Bezug, the new tools at its end).
+  it("lists every tool of TOOL_NAMES", () => {
+    expect(tools.map((tool) => tool.name)).toEqual([...TOOL_NAMES]);
   });
 
   for (const provider of PROVIDERS) {

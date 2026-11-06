@@ -1,13 +1,26 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "get_sxablono output",
-  "description": "The Sxablono with its Skemo and its Uzo (Spec 020, G3), as the Modelo holds them; with brief: true the brief.",
+  "description": "The Sxablono with its Skemo and its Uzo (Spec 020, G3), as the Modelo holds them; with brief: true the brief. With marker: true every region carries its marker (Spec 038 MG-5).",
   "oneOf": [
     {
       "type": "object",
       "properties": {
         "sxablono": { "type": "object" },
-        "skemo": { "type": "object" },
+        "skemo": {
+          "type": "object",
+          "properties": {
+            "regions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "marker": { "$ref": "urn:fundamento:schema:mcp:common#/$defs/RegionMarker" }
+                }
+              }
+            }
+          }
+        },
         "uzo": { "type": "object" }
       },
       "required": ["sxablono", "skemo"],
@@ -19,7 +32,15 @@
         "sxablono": { "type": "string", "minLength": 1 },
         "kind": { "enum": ["layout", "page", "flow"] },
         "purpose": { "type": "string", "minLength": 1 },
-        "regions": { "type": "array", "items": { "type": "object" } },
+        "regions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "marker": { "$ref": "urn:fundamento:schema:mcp:common#/$defs/RegionMarker" }
+            }
+          }
+        },
         "props": {
           "type": "array",
           "items": {

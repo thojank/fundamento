@@ -1,0 +1,12 @@
+[
+  {
+    "fall": "standard",
+    "eingabe": {
+      "prefix": "color.action",
+      "limit": 5
+    },
+    "sha256": "e814e1b587ede7c11adc415fc3fa4b51e07151efb6b01323ef84d10b7fa62664",
+    "bytes": 913,
+    "antwort": "{\"total\":22,\"tokens\":[{\"description\":\"Danger action: fill on hover.\",\"id\":\"tok_01M2XKPB5CWJD16SX2RNJZ398S\",\"name\":\"color.action.danger.hover\",\"role\":\"background\",\"type\":\"color\"},{\"description\":\"Danger action: fill while pressed.\",\"id\":\"tok_01M2XKPB5CWJD16SX2RNJZ398T\",\"name\":\"color.action.danger.pressed\",\"role\":\"background\",\"type\":\"color\"},{\"description\":\"Danger action: fill at rest, for the main action that destroys data (butono intent=danger).\",\"id\":\"tok_01M2XKPB5B8ZHNVRJJDC0TDTBN\",\"name\":\"color.action.danger.rest\",\"role\":\"background\",\"type\":\"color\"},{\"description\":\"Danger action: label and icon on the danger fill in every state.\",\"id\":\"tok_01M2XKPB5DHNTHAYCE5HP5SQKB\",\"name\":\"color.action.danger.text\",\"role\":\"foreground\",\"type\":\"color\"},{\"description\":\"Primary action: fill when disabled.\",\"id\":\"tok_01M2W9400ZA1K81R0W23SG0XW3\",\"name\":\"color.action.primary.disabled\",\"role\":\"disabled\",\"type\":\"color\"}]}"
+  }
+]

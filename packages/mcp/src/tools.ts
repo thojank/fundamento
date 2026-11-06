@@ -28,9 +28,11 @@ import {
 import {
   CELOJ,
   type CheckContrastInput,
+  type CheckMarkupInput,
   type CheckUsageInput,
   CORE_SET_NAME,
   checkContrast,
+  checkMarkup,
   checkTokenName,
   checkUsage,
   completeAssignment,
@@ -46,8 +48,10 @@ import {
   getEro,
   getSxablono,
   isNoTarget,
+  listArangxoj,
   listEroj,
   listSxablonoj,
+  type NearestGoal,
   NOM_REGULOJ,
   oklchColor,
   resolve as resolveAssignment,
@@ -65,7 +69,11 @@ import type { ToolName } from "./schemas.js";
 
 export type ToolResult =
   | { ok: true; output: Record<string, unknown> }
-  | { ok: false; envelope: { issues: ValidationIssue[]; allowed?: string[] } };
+  | {
+      ok: false;
+      /** `nearest` only from suggest_ero with `nearest: true` (Spec 038 MG-6, D-33). */
+      envelope: { issues: ValidationIssue[]; allowed?: string[]; nearest?: NearestGoal[] };
+    };
 
 type Args = Record<string, unknown>;
 type Tool = (served: Served, args: Args) => ToolResult;
@@ -470,11 +478,14 @@ const describeTermTool: Tool = (served, args) => {
   return ok(JSON.parse(JSON.stringify(result.output)) as Record<string, unknown>);
 };
 
-/** The answer of a Gvidanto function as a tool result (Spec 002, Spec 003). */
+/**
+ * The answer of a Gvidanto function as a tool result (Spec 002, Spec 003); a refusal keeps
+ * `nearest` where the function names it (Spec 038 MG-6), after `issues` and `allowed`.
+ */
 function gvidanto(
   result:
     | { ok: true; output: unknown }
-    | { ok: false; issues: ValidationIssue[]; allowed?: string[] },
+    | { ok: false; issues: ValidationIssue[]; allowed?: string[]; nearest?: NearestGoal[] },
 ): ToolResult {
   if (!result.ok) {
     return {
@@ -482,6 +493,7 @@ function gvidanto(
       envelope: {
         issues: result.issues,
         ...(result.allowed === undefined ? {} : { allowed: result.allowed }),
+        ...(result.nearest === undefined ? {} : { nearest: result.nearest }),
       },
     };
   }
@@ -515,6 +527,18 @@ const listSxablonojTool: Tool = (served, args) =>
 /** get_sxablono (Spec 020, G3): one Sxablono with Skemo and Uzo, or its brief. */
 const getSxablonoTool: Tool = (served, args) =>
   gvidanto(getSxablono(served.modelo, args as unknown as GetSxablonoInput));
+
+/** list_arangxoj (Spec 038 MG-1): the layout means, the spacing steps as paths, the Mankoj. */
+const listArangxojTool: Tool = (served, args) =>
+  ok(
+    JSON.parse(
+      JSON.stringify(listArangxoj(served.modelo, args as { lingvo?: "de" | "en" })),
+    ) as Record<string, unknown>,
+  );
+
+/** check_markup (Spec 038 MG-2): the instances of a fragment and their judgements (D-29). */
+const checkMarkupTool: Tool = (served, args) =>
+  gvidanto(checkMarkup(served.modelo, args as unknown as CheckMarkupInput));
 
 /**
  * The structure and calibration preview_agordo derives over: the repository's core with komuna,
@@ -855,4 +879,6 @@ export const TOOLS: Record<ToolName, Tool> = {
   save_agordo: saveAgordoTool,
   list_sxablonoj: listSxablonojTool,
   get_sxablono: getSxablonoTool,
+  list_arangxoj: listArangxojTool,
+  check_markup: checkMarkupTool,
 };

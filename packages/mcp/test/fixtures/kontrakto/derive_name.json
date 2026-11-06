@@ -1,0 +1,11 @@
+[
+  {
+    "fall": "standard",
+    "eingabe": {
+      "name": "color.action.primary.rest"
+    },
+    "sha256": "68e074ed71becef06d313f02635e338021fa5f49a991b8c1dca036afdeec3095",
+    "bytes": 292,
+    "antwort": "{\"name\":\"color.action.primary.rest\",\"derivations\":{\"css\":\"--fm-color-action-primary-rest\",\"figma\":\"color/action/primary/rest\",\"typescript\":\"vortaro.color.action.primary.rest\",\"tailwind\":\"--color-fm-action-primary-rest\",\"dtcg\":\"color.action.primary.rest\",\"penpot\":\"color.action.primary.rest\"}}"
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "fall": "kuroj-anmeldung-0-1",
+  "faktoPfad": "packages/nordstelo/test/fixtures/kuroj/anmeldung-0-1/fakto.json",
+  "faktoSha256": "fd4f257fe577ed411d04d2f5d62e80a3776881f9097fd6157f3c6deafe377944",
+  "tasko": "anmeldung",
+  "expected": {
+    "K3": 0,
+    "reguloGaps": [],
+    "instancoj": [],
+    "urteil": {
+      "instances": 0,
+      "valid": true,
+      "violations": []
+    }
+  }
+}

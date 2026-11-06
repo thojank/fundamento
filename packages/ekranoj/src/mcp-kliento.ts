@@ -10,7 +10,8 @@ import type { ToolBridge, ToolInfo } from "./tipoj.js";
 /**
  * The tools an agent that builds a screen is offered (implementation spec S037-03): describe the
  * system, find and read Eroj and Sxablonoj, read tokens, read and explain Reguloj, explain terms,
- * check the use. Not offered: the brand workshop (below) and the tools about brands and their
+ * check the use; since Spec 038 the layout means (`list_arangxoj`) and the check of markup
+ * (`check_markup`). Not offered: the brand workshop (below) and the tools about brands and their
  * values (`list_aspektoj`, `list_dimensioj`, `resolve`, `validate`, `check_contrast`, …) – a
  * fragment names no brand and no value (AC-7).
  */
@@ -27,6 +28,9 @@ export const KONSTRUAJ_ILOJ = [
   "explain_regulo",
   "describe_term",
   "check_usage",
+  // Spec 038 (D-19: appended): the layout means, and the check of markup as written.
+  "list_arangxoj",
+  "check_markup",
 ] as const;
 
 /** The brand workshop: writes files or configures a brand; never offered. */

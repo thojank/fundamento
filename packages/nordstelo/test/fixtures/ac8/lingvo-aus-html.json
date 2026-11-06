@@ -1,0 +1,42 @@
+{
+  "fall": "lingvo-aus-html",
+  "facts": {
+    "lingvo": "EN-gb",
+    "bytes": 98,
+    "elements": [
+      {
+        "tag": "fm-butono",
+        "attrs": {
+          "emphasis": "low",
+          "disabled": "false"
+        },
+        "parent": -1,
+        "text": "Save"
+      }
+    ],
+    "aria": [],
+    "console": [],
+    "renders": []
+  },
+  "tasko": "anmeldung",
+  "expected": {
+    "K3": 1,
+    "reguloGaps": [],
+    "instancoj": [
+      {
+        "ero": "butono",
+        "props": {
+          "emphasis": "low",
+          "disabled": false
+        },
+        "label": "Save",
+        "lingvo": "en"
+      }
+    ],
+    "urteil": {
+      "instances": 1,
+      "valid": true,
+      "violations": []
+    }
+  }
+}

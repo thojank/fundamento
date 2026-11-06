@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fundamento:schema:mcp:list_arangxoj.input",
+  "title": "list_arangxoj input",
+  "description": "The layout means of the served Modelo (Spec 038 MG-1): what orders spacing, rows, columns and regions of a screen – the Sxablonoj and their regions with their props and a brand-free example, the spacing steps as token paths (interspacoj, never a value) – and in mankoj each layout purpose no means answers yet, with a proposal for Eroj-Runde 7. Build no replacement for a Manko. With lingvo, every Ero and Sxablono names its display name as label.",
+  "type": "object",
+  "properties": {
+    "lingvo": {
+      "description": "The language of the display names (Spec 026 ②): every Ero and Sxablono names its label beside its name.",
+      "enum": ["en", "de"]
+    }
+  },
+  "additionalProperties": false
+}

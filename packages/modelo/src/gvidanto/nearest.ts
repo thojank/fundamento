@@ -1,6 +1,7 @@
 // "Did you mean" candidates for the Gvidanto functions (Spec 002): edit distance, then name. Pure.
 
-function distance(a: string, b: string): number {
+/** The edit distance (Levenshtein) of two strings; shared with suggest_ero's nearest (Spec 038 MG-6). */
+export function editDistance(a: string, b: string): number {
   const row = Array.from({ length: b.length + 1 }, (_, index) => index);
   for (let i = 1; i <= a.length; i++) {
     let diagonal = row[0] ?? 0;
@@ -21,7 +22,7 @@ function distance(a: string, b: string): number {
 /** Up to `count` candidates closest to `wanted`. */
 export function nearestNames(wanted: string, candidates: readonly string[], count = 5): string[] {
   return [...new Set(candidates)]
-    .map((candidate) => ({ candidate, score: distance(wanted, candidate) }))
+    .map((candidate) => ({ candidate, score: editDistance(wanted, candidate) }))
     .sort((a, b) => a.score - b.score || (a.candidate < b.candidate ? -1 : 1))
     .slice(0, count)
     .map(({ candidate }) => candidate);

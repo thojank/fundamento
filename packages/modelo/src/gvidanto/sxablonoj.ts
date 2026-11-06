@@ -8,6 +8,7 @@ import type {
   LoadedSxablono,
   Modelo,
   SxablonoInstance,
+  SxablonoRegion,
   SxablonoSkemo,
   SxablonoUzo,
 } from "../contracts/modelo.js";
@@ -48,14 +49,87 @@ export type GetSxablonoInput = SxablonoSelector & {
   brief?: boolean;
   /** The language of the texts of the Uzo (Nachlese 8 ③); English without it. */
   lingvo?: Lingvo;
+  /**
+   * Spec 038 MG-5 (D-32): with `true` every region of the answer carries its `marker` – brief
+   * `regions[i].marker`, full `skemo.regions[i].marker`. Without it the answer is as before.
+   */
+  marker?: boolean;
 };
+
+/**
+ * How a region of a Sxablono is recognised in markup (Spec 038 MG-5), derived from its Skemo
+ * alone. The Sxablono stands as `fm-<name>`, every region is a named slot of it (SxablonoRegion:
+ * "each a slot in the projection"):
+ * - `landmark`: the landmark the region is, where the data says so – the region is named as one
+ *   of the Sxablono's `a11y.landmarks`, or every Ero it accepts has that landmark as its role;
+ * - `attribute`: an attribute in markup that marks the region itself; no region's data names one
+ *   (a polite live region is marked inside the element, not on its children), so it stays absent;
+ * - `slot`: the value of the `slot` attribute that puts a child into the region;
+ * - `default`: the default region also takes the children without a `slot` attribute.
+ */
+export interface RegionMarker {
+  landmark?: string;
+  attribute?: string;
+  slot?: string;
+  default?: true;
+}
+
+type Landmark = SxablonoSkemo["a11y"]["landmarks"][number];
+
+/** The landmarks the schema knows (SxablonoA11y); a role among them is a landmark. */
+const LANDMARKS: Record<Landmark, true> = {
+  banner: true,
+  navigation: true,
+  main: true,
+  search: true,
+  contentinfo: true,
+  complementary: true,
+};
+
+const isLandmark = (name: string): name is Landmark => Object.hasOwn(LANDMARKS, name);
+
+/** The landmark of a region: its own name as a landmark of the Sxablono, or its Eroj' one role. */
+function landmarkOf(
+  modelo: Modelo,
+  sxablono: LoadedSxablono,
+  region: SxablonoRegion,
+): Landmark | undefined {
+  if (isLandmark(region.name) && sxablono.skemo.a11y.landmarks.includes(region.name))
+    return region.name;
+  const accepts = region.accepts ?? [];
+  if (accepts.length === 0) return undefined;
+  const roles = new Set(
+    accepts.map(
+      (name) => modelo.eroj.find((candidate) => candidate.ero.name === name)?.skemo.a11y.role,
+    ),
+  );
+  const [role] = [...roles];
+  return roles.size === 1 && role !== undefined && isLandmark(role) ? role : undefined;
+}
+
+/** The one derivation of a region's marker (Spec 038 MG-5), for get_sxablono and check_markup. */
+export function markerOf(
+  modelo: Modelo,
+  sxablono: LoadedSxablono,
+  region: SxablonoRegion,
+): RegionMarker {
+  const landmark = landmarkOf(modelo, sxablono, region);
+  return {
+    ...(landmark === undefined ? {} : { landmark }),
+    slot: region.name,
+    ...(region.default === true ? { default: true as const } : {}),
+  };
+}
+
+/** A region of an answer, with its marker on input `marker: true`. */
+export type MarkedRegion<Region> = Region & { marker?: RegionMarker };
 
 /** The brief of a Sxablono (≤ 750 tokens): what an agent needs to build it, generated. */
 export interface SxablonoBrief {
   sxablono: string;
   kind: string;
   purpose: string;
-  regions: SxablonoSkemo["regions"][number][];
+  regions: MarkedRegion<SxablonoRegion>[];
   props: { name: string; type: string }[];
   a11y: SxablonoSkemo["a11y"];
   instead: { goal: string; use: string | null }[];
@@ -64,7 +138,7 @@ export interface SxablonoBrief {
 
 export interface SxablonoFull {
   sxablono: LoadedSxablono["sxablono"] & { label?: string };
-  skemo: SxablonoSkemo;
+  skemo: Omit<SxablonoSkemo, "regions"> & { regions: MarkedRegion<SxablonoRegion>[] };
   uzo?: SxablonoUzo;
 }
 
@@ -88,6 +162,26 @@ function briefOf(entry: LoadedSxablono): SxablonoBrief {
       ...(item.ero === undefined ? {} : { use: item.ero }),
     })),
   };
+}
+
+/**
+ * The answer with a marker after every region (Spec 038 MG-5, D-32): brief `regions[i].marker`,
+ * full `skemo.regions[i].marker`; nothing else changes.
+ */
+function withMarkers(
+  modelo: Modelo,
+  entry: LoadedSxablono,
+  output: SxablonoFull | SxablonoBrief,
+): SxablonoFull | SxablonoBrief {
+  // The regions of the answer stand in the order of the Skemo's, one for one.
+  const mark = (regions: readonly MarkedRegion<SxablonoRegion>[]): MarkedRegion<SxablonoRegion>[] =>
+    regions.map((region, index) => {
+      const own = entry.skemo.regions[index];
+      return own === undefined ? region : { ...region, marker: markerOf(modelo, entry, own) };
+    });
+  if ("skemo" in output)
+    return { ...output, skemo: { ...output.skemo, regions: mark(output.skemo.regions) } };
+  return { ...output, regions: mark(output.regions) };
 }
 
 export function getSxablono(modelo: Modelo, input: GetSxablonoInput): GetSxablonoResult {
@@ -119,20 +213,19 @@ export function getSxablono(modelo: Modelo, input: GetSxablonoInput): GetSxablon
   }
   // Nachlese 8 ③: the texts of the Uzo in the language asked for.
   const uzo = entry.uzo === undefined ? undefined : uzoIn(modelo, entry.uzo, input.lingvo);
-  if (input.brief === true)
-    return { ok: true, output: briefOf(uzo === undefined ? entry : { ...entry, uzo }) };
-  return {
-    ok: true,
-    output: {
-      sxablono: {
-        ...entry.sxablono,
-        // Spec 026 ②: the display name beside the name, with lingvo.
-        ...labelBeside(modelo, "sxablono", entry.sxablono.name, input.lingvo),
-      },
-      skemo: entry.skemo,
-      ...(uzo === undefined ? {} : { uzo }),
-    },
-  };
+  const output: SxablonoFull | SxablonoBrief =
+    input.brief === true
+      ? briefOf(uzo === undefined ? entry : { ...entry, uzo })
+      : {
+          sxablono: {
+            ...entry.sxablono,
+            // Spec 026 ②: the display name beside the name, with lingvo.
+            ...labelBeside(modelo, "sxablono", entry.sxablono.name, input.lingvo),
+          },
+          skemo: entry.skemo,
+          ...(uzo === undefined ? {} : { uzo }),
+        };
+  return { ok: true, output: input.marker === true ? withMarkers(modelo, entry, output) : output };
 }
 
 /** A region name an instance uses that its Sxablono does not have: invalid input (as a slot). */

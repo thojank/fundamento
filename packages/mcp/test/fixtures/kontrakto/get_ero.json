@@ -1,0 +1,726 @@
+[
+  {
+    "fall": "alsxutilo-brief",
+    "eingabe": {
+      "name": "alsxutilo",
+      "brief": true
+    },
+    "sha256": "3b6c861f95cb345f87d171ed58246838d11137aa8698980c814b3fa662417821",
+    "bytes": 973,
+    "antwort": "{\"ero\":\"alsxutilo\",\"axes\":[{\"name\":\"dropzone\",\"values\":[\"true\",\"false\"],\"default\":\"false\"},{\"name\":\"intent\",\"values\":[\"neutral\",\"success\",\"warning\",\"danger\"],\"default\":\"neutral\"},{\"name\":\"message-position\",\"values\":[\"below\",\"joined\"],\"default\":\"below\"}],\"required\":{\"props\":[],\"slots\":[\"label\"]},\"props\":[{\"name\":\"accept\",\"type\":\"string\"},{\"name\":\"max-size\",\"type\":\"number\"},{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"label\",\"type\":\"string\",\"shown\":true},{\"name\":\"max-files\",\"type\":\"number\"}],\"flags\":[\"multiple\",\"required\",\"disabled\",\"loading\",\"invalid\"],\"purpose\":\"Lets a person choose one or more files to send with a form, and states which files are allowed.\",\"instead\":[{\"goal\":\"text-input\",\"ero\":\"kampo\",\"kialo\":\"A value a person types is text, because nothing is chosen from the device; the kampo takes it.\"}],\"boundary\":[{\"case\":\"upload-progress\",\"action\":\"ask-human\"},{\"case\":\"image-preview\",\"action\":\"ask-human\"},{\"case\":\"camera-capture\",\"action\":\"not-supported\"}]}"
+  },
+  {
+    "fall": "alsxutilo-voll",
+    "eingabe": {
+      "name": "alsxutilo"
+    },
+    "sha256": "f8c4a7c497c21daa331dd085964bdab3cec9476e699b311f47ecb699df90e605",
+    "bytes": 24147
+  },
+  {
+    "fall": "apartigilo-brief",
+    "eingabe": {
+      "name": "apartigilo",
+      "brief": true
+    },
+    "sha256": "604b46315a59a54195fd86236a1f8924c3e9775321f6b4a040630638800ebcd7",
+    "bytes": 641,
+    "antwort": "{\"ero\":\"apartigilo\",\"axes\":[{\"name\":\"orientation\",\"values\":[\"horizontal\",\"vertical\"],\"default\":\"horizontal\"},{\"name\":\"emphasis\",\"values\":[\"low\",\"high\"],\"default\":\"low\"}],\"required\":{\"props\":[],\"slots\":[]},\"flags\":[\"decorative\"],\"purpose\":\"Separates groups of content where space alone does not.\",\"instead\":[{\"goal\":\"spacing-only\",\"ero\":null,\"kialo\":\"Where space alone tells the groups apart, a line adds noise, because every line asks to be read as a boundary; the container owns the space (spacing-owned-by-container), and a person decides whether the groups need more than it.\"}],\"boundary\":[{\"case\":\"labelled-line\",\"action\":\"ask-human\"}]}"
+  },
+  {
+    "fall": "apartigilo-voll",
+    "eingabe": {
+      "name": "apartigilo"
+    },
+    "sha256": "815b107b4fc8d76b74f58dfa89bf1bce8d20903389a266868bb86574da3ecb41",
+    "bytes": 5818,
+    "antwort": "{\"ero\":{\"id\":\"ero_01M55X2W7FMR4C5F279M85EAC2\",\"name\":\"apartigilo\",\"description\":\"A divider: a line that separates groups of content where space alone does not. Horizontal or vertical; a separator for assistive technology, or nothing at all where it only decorates.\"},\"skemo\":{\"id\":\"ske_01M55X2WKJTJVMKK7CPB0ZKHFP\",\"props\":[{\"default\":\"horizontal\",\"description\":\"horizontal draws the line across its container between groups that stand above each other; vertical draws it along the block axis between groups that stand side by side.\",\"kind\":\"enum\",\"name\":\"orientation\",\"values\":[\"horizontal\",\"vertical\"]},{\"default\":false,\"description\":\"The line only decorates: nothing for assistive technology (role none). Default false: a separator between groups of content.\",\"kind\":\"boolean\",\"name\":\"decorative\"},{\"default\":\"low\",\"description\":\"Spec 029 ②a (A-apartigilo-1): the strength of the line – low the fine line inside a card, as before; high the stronger line between sections.\",\"kind\":\"enum\",\"name\":\"emphasis\",\"values\":[\"low\",\"high\"]}],\"states\":[\"rest\"],\"slots\":[],\"parts\":{\"box\":{\"height\":{\"by\":[\"orientation\"]}},\"line\":{\"color\":{\"by\":[\"emphasis\"]},\"width\":{\"by\":[\"emphasis\"]}}},\"bindings\":[{\"part\":\"line\",\"property\":\"color\",\"token\":\"color.border.subtle\",\"when\":{\"emphasis\":\"low\"}},{\"part\":\"line\",\"property\":\"color\",\"token\":\"color.border.default\",\"when\":{\"emphasis\":\"high\"}},{\"part\":\"line\",\"property\":\"width\",\"token\":\"border.width.default\",\"when\":{\"emphasis\":\"low\"}},{\"part\":\"line\",\"property\":\"width\",\"token\":\"border.width.strong\",\"when\":{\"emphasis\":\"high\"}},{\"part\":\"box\",\"property\":\"height\",\"token\":\"none\",\"when\":{\"orientation\":\"horizontal\"}},{\"part\":\"box\",\"property\":\"height\",\"token\":\"size.control.medium\",\"when\":{\"orientation\":\"vertical\"}}],\"a11y\":{\"keys\":[],\"name\":[],\"role\":\"separator\",\"states\":{}},\"goals\":[{\"goal\":\"separate\",\"keywords\":{\"de\":[\"trennlinie\",\"trenner\",\"trennstrich\"],\"en\":[\"divider\",\"separator\",\"rule\"]},\"props\":{}}]},\"reguloj\":[{\"id\":\"reg_01M4RPB19GDEJE9T2S21VNRE0H\",\"name\":\"spacing-owned-by-container\",\"statement\":\"The space between sibling Eroj belongs to their container; an Ero carries no outer spacing.\",\"kialo\":\"An Ero does not know its neighbours. If each one brought its own distance, two Eroj side by side would add up their distances, and the rhythm of a view would depend on which Ero stands where.\",\"checkability\":\"manual\"}],\"examples\":[],\"projekcioj\":{\"webComponent\":{\"tag\":\"fm-apartigilo\",\"attributes\":{\"orientation\":[\"horizontal\",\"vertical\"],\"decorative\":\"boolean\",\"emphasis\":[\"low\",\"high\"]},\"slots\":[]},\"react\":{\"package\":\"@fundamento/eroj/react\",\"component\":\"Apartigilo\",\"props\":{\"orientation\":[\"horizontal\",\"vertical\"],\"decorative\":\"boolean\",\"emphasis\":[\"low\",\"high\"]}},\"figma\":{\"componentSet\":\"apartigilo\",\"properties\":{\"orientation\":[\"horizontal\",\"vertical\"],\"decorative\":\"boolean\",\"emphasis\":[\"low\",\"high\"],\"state\":[\"rest\"]},\"pluginData\":{\"namespace\":\"fundamento\",\"key\":\"ero\",\"value\":\"apartigilo\"}},\"css\":{\"files\":[\"fundamento.css\",\"fundamento-komuna.css\"],\"attributes\":[\"data-fm-aspekto\",\"data-fm-viewport\",\"data-fm-density\",\"data-fm-color-scheme\",\"data-fm-contrast\",\"data-fm-motion\"]},\"tailwind\":{\"classes\":{\"line.color\":[\"text-fm-border-subtle\",\"text-fm-border-default\"]}},\"makeKit\":{\"package\":\"@fundamento/make-kit-komuna\"}},\"uzo\":{\"purpose\":\"Separates groups of content where space alone does not.\",\"instead\":[{\"ero\":null,\"goal\":\"spacing-only\",\"keywords\":{\"de\":[\"abstand\",\"zwischenraum\",\"luft\"],\"en\":[\"spacing\",\"whitespace\",\"breathing\"]},\"kialo\":\"Where space alone tells the groups apart, a line adds noise, because every line asks to be read as a boundary; the container owns the space (spacing-owned-by-container), and a person decides whether the groups need more than it.\"}],\"boundary\":[{\"action\":\"ask-human\",\"case\":\"labelled-line\",\"keywords\":{\"de\":[\"beschriftete\",\"beschriftet\",\"beschriftung\"],\"en\":[\"labelled\",\"inscribed\",\"captioned\"]},\"kialo\":\"A line with a word in it is a heading of the group below or a choice between two ways, because the word carries the meaning and the line only frames it; a person decides whether it is a titolo or two paths.\"}],\"composes\":{\"containers\":[{\"kialo\":\"A section of a page separates its groups with a line where the space between them is already taken, because the eye needs one edge to stop at.\",\"name\":\"page-section\"}],\"with\":[{\"ero\":\"menuo\",\"kialo\":\"A line between groups of a menu says that the entries above and below belong to different things, because a person reads a group before the next.\"},{\"ero\":\"faldilo\",\"kialo\":\"A line between the disclosures of a group says where one entry ends and the next begins.\"}],\"never\":[],\"spacing\":{\"owner\":\"container\",\"regulo\":{\"id\":\"reg_01M4RPB19GDEJE9T2S21VNRE0H\",\"name\":\"spacing-owned-by-container\",\"statement\":\"The space between sibling Eroj belongs to their container; an Ero carries no outer spacing.\",\"kialo\":\"An Ero does not know its neighbours. If each one brought its own distance, two Eroj side by side would add up their distances, and the rhythm of a view would depend on which Ero stands where.\",\"checkability\":\"manual\"}}},\"slots\":{},\"layout\":{\"size\":\"container\",\"wrap\":\"never\"},\"content\":[],\"when-not\":[{\"case\":\"A word above the group should name it.\",\"ero\":\"titolo\"},{\"case\":\"The content about one thing should stand as a unit of its own with a heading.\",\"ero\":\"karto\"}],\"do-dont\":{\"do\":[\"Draw the line only where space alone no longer separates the groups.\",\"Use emphasis high between sections and low inside a card.\",\"Set decorative when the line only decorates; without decorative it is heard as a separator.\"],\"dont\":[\"Write a word into the line, because the word would be a heading.\",\"Stack several lines to make a boundary stronger; emphasis high is there for that.\"]},\"keyboard\":{\"none\":\"The separator takes neither the focus nor a key; it only divides.\"}}}"
+  },
+  {
+    "fall": "atributlisto-brief",
+    "eingabe": {
+      "name": "atributlisto",
+      "brief": true
+    },
+    "sha256": "e906c57ca3898a46a1439cdc4b8dda84fc7687846d20072bd67a3a8aaa2fdd52",
+    "bytes": 956,
+    "antwort": "{\"ero\":\"atributlisto\",\"axes\":[{\"name\":\"layout\",\"values\":[\"columns\",\"stacked\",\"auto\"],\"default\":\"columns\"}],\"required\":{\"props\":[],\"slots\":[\"entries\"]},\"props\":[{\"name\":\"label\",\"type\":\"string\"},{\"name\":\"max-entries\",\"type\":\"number\"}],\"flags\":[\"expanded\"],\"purpose\":\"Shows the fields of one record as name and value: version, owner, valid since; a title above them (slot heading) names the list.\",\"instead\":[{\"goal\":\"many-records\",\"ero\":\"tabelo\",\"kialo\":\"Many records with the same fields are rows and columns, because a person compares them; that is the tabelo.\"},{\"goal\":\"editable\",\"ero\":\"kampo\",\"kialo\":\"Editing is a form, not a list, because every value becomes a field with a label; the kampo in a form.\"},{\"goal\":\"as-card\",\"ero\":\"karto\",\"kialo\":\"A record shown as one thing with an image and actions is a card, because it stands with its own heading; a list of names and values shows neither.\"}],\"boundary\":[{\"case\":\"nested\",\"action\":\"not-supported\"}]}"
+  },
+  {
+    "fall": "atributlisto-voll",
+    "eingabe": {
+      "name": "atributlisto"
+    },
+    "sha256": "e0c0e5847dd51c0953b90f68a819463f2ecfb58cfb7aee9d98a5d26fd5653f38",
+    "bytes": 7813,
+    "antwort": "{\"ero\":{\"id\":\"ero_01M523F9Z0MAVKZC8ZVN9RBWS4\",\"name\":\"atributlisto\",\"description\":\"A key-value list: shows the fields of one record as name and value — version, owner, valid since. It styles the platform's own description list; an empty value shows a dash and is heard as 'not specified'.\"},\"skemo\":{\"id\":\"ske_01M523FAAXJ1AADZWZ6NQRX83M\",\"props\":[{\"default\":\"columns\",\"description\":\"Name and value side by side (columns) or one above the other (stacked); auto lays them side by side while the container is at least as wide as the Uzo's columns-from, else stacks them.\",\"kind\":\"enum\",\"name\":\"layout\",\"values\":[\"columns\",\"stacked\",\"auto\"]},{\"description\":\"The accessible name of the list when the page has more than one.\",\"kind\":\"string\",\"name\":\"label\"},{\"description\":\"Spec 029 ②a (A-atributlisto-1): at most this many entries show; a button shows the rest („3 weitere anzeigen“). Without it every entry shows, as before. How many columns stand side by side is the container's.\",\"kind\":\"number\",\"name\":\"max-entries\"},{\"default\":false,\"description\":\"Spec 029 ②a (A-atributlisto-3): the entries beyond max-entries show; the button says so (aria-expanded) and closes them again („Weniger anzeigen“).\",\"kind\":\"boolean\",\"name\":\"expanded\"}],\"states\":[\"rest\"],\"slots\":[{\"default\":true,\"name\":\"entries\"},{\"name\":\"heading\",\"text\":true}],\"parts\":{\"box\":{\"gap\":{\"fixed\":\"spacing.small\"},\"inline-padding\":{\"by\":[\"layout\"]}},\"heading\":{\"color\":{\"fixed\":\"color.text.default\"},\"typography\":{\"fixed\":\"typography.headline.4\"}},\"list\":{\"gap\":{\"fixed\":\"spacing.large\"}},\"more\":{\"color\":{\"fixed\":\"color.action.tertiary.text\"},\"fill\":{\"fixed\":\"color.action.tertiary.rest\"},\"typography\":{\"fixed\":\"typography.label.2\"}},\"term\":{\"color\":{\"fixed\":\"color.text.muted\"},\"typography\":{\"fixed\":\"typography.label.2\"}},\"value\":{\"color\":{\"fixed\":\"color.text.default\"},\"typography\":{\"fixed\":\"typography.body.2\"}}},\"bindings\":[{\"part\":\"box\",\"property\":\"inline-padding\",\"token\":\"spacing.large\",\"when\":{\"layout\":\"columns\"}},{\"part\":\"box\",\"property\":\"inline-padding\",\"token\":\"spacing.xsmall\",\"when\":{\"layout\":\"stacked\"}},{\"part\":\"box\",\"property\":\"inline-padding\",\"token\":\"spacing.large\",\"when\":{\"layout\":\"auto\"}}],\"a11y\":{\"keys\":[],\"name\":[\"prop:label\",\"slot:heading\"],\"role\":\"list\",\"states\":{\"expanded\":[\"aria-expanded\"]},\"texts\":{\"entries-empty\":{\"de\":\"keine Angabe\",\"en\":\"not specified\"},\"more-count\":{\"de\":\"{count} weitere anzeigen\",\"en\":\"Show {count} more\"},\"more-name\":{\"de\":\"Weniger anzeigen\",\"en\":\"Show fewer\"}}},\"events\":[{\"description\":\"A sortable column was pressed (detail: column, direction); sorting itself is the application's.\",\"name\":\"sort-change\"}],\"goals\":[{\"goal\":\"details\",\"keywords\":{\"de\":[\"details\",\"metadaten\",\"eigenschaften\",\"angaben\"],\"en\":[\"details\",\"metadata\",\"properties\",\"attributes\"]},\"props\":{}}]},\"reguloj\":[{\"id\":\"reg_01M4RPB19GDEJE9T2S21VNRE0H\",\"name\":\"spacing-owned-by-container\",\"statement\":\"The space between sibling Eroj belongs to their container; an Ero carries no outer spacing.\",\"kialo\":\"An Ero does not know its neighbours. If each one brought its own distance, two Eroj side by side would add up their distances, and the rhythm of a view would depend on which Ero stands where.\",\"checkability\":\"manual\"}],\"examples\":[],\"projekcioj\":{\"webComponent\":{\"tag\":\"fm-atributlisto\",\"attributes\":{\"layout\":[\"columns\",\"stacked\",\"auto\"],\"label\":\"string\",\"max-entries\":\"number\",\"expanded\":\"boolean\"},\"slots\":[\"entries\",\"heading\"],\"defaultSlot\":\"entries\"},\"react\":{\"package\":\"@fundamento/eroj/react\",\"component\":\"Atributlisto\",\"props\":{\"layout\":[\"columns\",\"stacked\",\"auto\"],\"label\":\"string\",\"maxEntries\":\"number\",\"expanded\":\"boolean\"}},\"figma\":{\"componentSet\":\"atributlisto\",\"properties\":{\"layout\":[\"columns\",\"stacked\",\"auto\"],\"label\":\"text\",\"max-entries\":\"text\",\"expanded\":\"boolean\",\"state\":[\"rest\"]},\"pluginData\":{\"namespace\":\"fundamento\",\"key\":\"ero\",\"value\":\"atributlisto\"}},\"css\":{\"files\":[\"fundamento.css\",\"fundamento-komuna.css\"],\"attributes\":[\"data-fm-aspekto\",\"data-fm-viewport\",\"data-fm-density\",\"data-fm-color-scheme\",\"data-fm-contrast\",\"data-fm-motion\"]},\"tailwind\":{\"classes\":{\"box.gap\":[\"gap-fm-small\"],\"box.inline-padding\":[\"px-fm-large\",\"px-fm-xsmall\"],\"heading.color\":[\"text-fm-text-default\"],\"list.gap\":[\"gap-fm-large\"],\"more.color\":[\"text-fm-action-tertiary-text\"],\"more.fill\":[\"bg-fm-action-tertiary-rest\"],\"term.color\":[\"text-fm-text-muted\"],\"value.color\":[\"text-fm-text-default\"]}},\"makeKit\":{\"package\":\"@fundamento/make-kit-komuna\"}},\"uzo\":{\"purpose\":\"Shows the fields of one record as name and value: version, owner, valid since; a title above them (slot heading) names the list.\",\"instead\":[{\"ero\":\"tabelo\",\"goal\":\"many-records\",\"keywords\":{\"de\":[\"datensätze\",\"tabelle\"],\"en\":[\"records\",\"table\"]},\"kialo\":\"Many records with the same fields are rows and columns, because a person compares them; that is the tabelo.\"},{\"ero\":\"kampo\",\"goal\":\"editable\",\"keywords\":{\"de\":[\"bearbeiten\",\"ändern\"],\"en\":[\"edit\",\"editable\"]},\"kialo\":\"Editing is a form, not a list, because every value becomes a field with a label; the kampo in a form.\"},{\"ero\":\"karto\",\"goal\":\"as-card\",\"keywords\":{\"de\":[\"kartenansicht\",\"kachelansicht\"],\"en\":[\"cardview\",\"cardlayout\"]},\"kialo\":\"A record shown as one thing with an image and actions is a card, because it stands with its own heading; a list of names and values shows neither.\"}],\"boundary\":[{\"action\":\"not-supported\",\"case\":\"nested\",\"keywords\":{\"de\":[\"unterliste\",\"verschachtelte\"],\"en\":[\"sublist\"]},\"kialo\":\"A list inside a value loses its pairs, because assistive technology reads one list of names and values; flatten the record or use a second list.\"}],\"composes\":{\"containers\":[{\"kialo\":\"The fields of a record stand in a section of its page, because the person reads them next to the content.\",\"name\":\"page-section\"},{\"kialo\":\"A dialog may show the fields of what it asks about, because the decision needs them in sight.\",\"name\":\"dialog\"}],\"with\":[{\"ero\":\"insigno\",\"kialo\":\"A status as a value is a badge, because a state is one or two words.\"},{\"ero\":\"ligilo\",\"kialo\":\"A value may lead somewhere, because an owner or a source is a destination.\"},{\"ero\":\"mezurilo\",\"kialo\":\"A value in a range is a meter, because a number alone has no scale.\"}],\"never\":[],\"spacing\":{\"owner\":\"container\",\"regulo\":{\"id\":\"reg_01M4RPB19GDEJE9T2S21VNRE0H\",\"name\":\"spacing-owned-by-container\",\"statement\":\"The space between sibling Eroj belongs to their container; an Ero carries no outer spacing.\",\"kialo\":\"An Ero does not know its neighbours. If each one brought its own distance, two Eroj side by side would add up their distances, and the rhythm of a view would depend on which Ero stands where.\",\"checkability\":\"manual\"}}},\"slots\":{\"entries\":{\"accepts\":[\"text\"],\"nesting\":0,\"required\":true},\"heading\":{\"accepts\":[\"text\"],\"max\":1,\"nesting\":0}},\"layout\":{\"size\":\"container\",\"wrap\":\"allowed\",\"columns-from\":\"size.container.small\"},\"content\":[],\"when-not\":[{\"case\":\"Many records with the same fields are to be compared.\",\"ero\":\"tabelo\"},{\"case\":\"A single value is to be changed in place.\",\"ero\":\"lokredaktilo\"},{\"case\":\"Several values of a record are to be edited and sent together.\",\"ero\":\"formularo\"},{\"case\":\"The record stands as one thing with an image and actions.\",\"ero\":\"karto\"}],\"do-dont\":{\"do\":[\"Name the list with label or a heading as soon as a page shows more than one.\",\"Limit long records with max-entries; the rest appears behind a button.\",\"Use layout auto so that name and value move below each other in a narrow container.\"],\"dont\":[\"Nest a second list inside a value, because the pairs of name and value get lost.\",\"Put editable fields into the list, because it shows values and asks for none.\"]},\"keyboard\":{\"none\":\"The list itself takes no key; with max-entries, Enter and Space on its button show and hide the remaining entries, as on any button.\"}}}"
+  },
+  {
+    "fall": "avataro-brief",
+    "eingabe": {
+      "name": "avataro",
+      "brief": true
+    },
+    "sha256": "ab8c43ca9c7401b83feb930b1f5e373a3b7a607ce5983d3c9419847f90db9a4b",
+    "bytes": 943,
+    "antwort": "{\"ero\":\"avataro\",\"axes\":[{\"name\":\"size\",\"values\":[\"x-small\",\"small\",\"medium\",\"large\",\"x-large\"],\"default\":\"medium\"},{\"name\":\"corner\",\"values\":[\"round\",\"soft\",\"square\"],\"default\":\"round\"}],\"required\":{\"props\":[\"name\"],\"slots\":[]},\"props\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"picture\",\"type\":\"string\"}],\"flags\":[\"decorative\"],\"purpose\":\"Represents a person or thing with a picture or initials; without a name it shows the outline of a person (the ikono person).\",\"instead\":[{\"goal\":\"status\",\"ero\":\"insigno\",\"kialo\":\"A status is a word next to what it describes, because a picture says who and not how; that is the insigno.\"},{\"goal\":\"logo\",\"ero\":null,\"kialo\":\"A logo keeps the colours and the shape of its brand, because it is the brand's own picture; a round crop with initials would change it, and Fundamento does not carry it yet.\"}],\"boundary\":[{\"case\":\"avatar-group\",\"action\":\"ask-human\"},{\"case\":\"presence-dot\",\"action\":\"ask-human\"}]}"
+  },
+  {
+    "fall": "avataro-voll",
+    "eingabe": {
+      "name": "avataro"
+    },
+    "sha256": "392e55ad86747bf5efbd0794b83636ebe8b986b7e6c01b9fc2843206ec5596b6",
+    "bytes": 13486
+  },
+  {
+    "fall": "avizo-brief",
+    "eingabe": {
+      "name": "avizo",
+      "brief": true
+    },
+    "sha256": "2500245b7f13adcabb00824e74403d02b46e906bd0d9e757db2112c2a7e30cce",
+    "bytes": 1262,
+    "antwort": "{\"ero\":\"avizo\",\"axes\":[{\"name\":\"intent\",\"values\":[\"info\",\"success\",\"warning\",\"danger\"],\"default\":\"info\"},{\"name\":\"frame\",\"values\":[\"card\",\"band\"],\"default\":\"card\"}],\"required\":{\"props\":[],\"slots\":[\"message\"]},\"flags\":[\"dismissible\"],\"purpose\":\"Tells the person in the flow of the page what happened or what to watch for: saved, could not save, import not confirmed. Closed, it hides itself and stays in the document; the application removes it on dismiss if it wants.\",\"instead\":[{\"goal\":\"needs-decision\",\"ero\":\"dialogo\",\"kialo\":\"A notice asks nothing, because it reads in the flow of the page; what needs a decision interrupts, and that is a dialogo.\"},{\"goal\":\"one-word-status\",\"ero\":\"insigno\",\"kialo\":\"One to three words next to a title are a badge, because a status is read at a glance; a notice is a sentence.\"},{\"goal\":\"field-error\",\"ero\":\"kampo\",\"kialo\":\"An error of one field stands at the field, because the person corrects it there (slot error of the kampo); a notice names what no field owns.\"},{\"goal\":\"content\",\"ero\":\"karto\",\"kialo\":\"Content about one thing is a card, because it stays as long as the thing does; a notice tells what happened.\"}],\"boundary\":[{\"case\":\"toast\",\"action\":\"not-supported\"},{\"case\":\"stacked-notices\",\"action\":\"ask-human\"}]}"
+  },
+  {
+    "fall": "avizo-voll",
+    "eingabe": {
+      "name": "avizo"
+    },
+    "sha256": "255a70b5938c1dc3319c87179714f89619b0a4e214b40597812cc4d3676ddb86",
+    "bytes": 15121
+  },
+  {
+    "fall": "butono-brief",
+    "eingabe": {
+      "name": "butono",
+      "brief": true
+    },
+    "sha256": "ee746136af5f8e7a64ff0a348c8a259948ee2ede64f188ea69e64789351d40e5",
+    "bytes": 1762,
+    "antwort": "{\"ero\":\"butono\",\"axes\":[{\"name\":\"emphasis\",\"values\":[\"high\",\"medium\",\"low\"],\"default\":\"medium\"},{\"name\":\"intent\",\"values\":[\"neutral\",\"danger\"],\"default\":\"neutral\"},{\"name\":\"size\",\"values\":[\"small\",\"medium\",\"large\"],\"default\":\"medium\"},{\"name\":\"type\",\"values\":[\"button\",\"submit\",\"reset\"],\"default\":\"button\"}],\"required\":{\"props\":[],\"slots\":[]},\"props\":[{\"name\":\"label\",\"type\":\"string\"}],\"flags\":[\"disabled\",\"loading\",\"full-width\"],\"purpose\":\"Starts an action on the current view: it saves, sends, confirms, cancels or deletes something here; icon-end may hold an insigno, a count.\",\"instead\":[{\"goal\":\"toggle\",\"ero\":\"sxaltilo\",\"kialo\":\"A setting that stays on or off needs a control that shows its state, because a button acts once and forgets; sxaltilo (in a form, applied with it: markobutono).\"},{\"goal\":\"choose-many\",\"ero\":\"elektilo\",\"kialo\":\"One of many values is a selection, not an action, because a row of buttons hides which is chosen; Fundamento covers it with elektilo.\"},{\"goal\":\"choose-few\",\"ero\":\"elekto\",\"kialo\":\"One of a few visible values is a selection, not an action, because a row of buttons hides which is chosen; Fundamento covers it with elekto.\"},{\"goal\":\"confirm\",\"ero\":\"dialogo\",\"kialo\":\"An action that cannot be undone asks first, because the question needs a title, a reason and a way out: a dialogo, not a second button.\"},{\"goal\":\"area-loading\",\"ero\":\"plenstato\",\"kialo\":\"A button loads for its own action, because the person waits for what they pressed; an area without content yet is a plenstato.\"}],\"boundary\":[{\"case\":\"navigation\",\"action\":\"use-instead\",\"ero\":\"ligilo\"},{\"case\":\"form-in-slot\",\"action\":\"not-supported\"},{\"case\":\"multi-line-label\",\"action\":\"not-supported\"},{\"case\":\"no-accessible-label\",\"action\":\"not-supported\"}]}"
+  },
+  {
+    "fall": "butono-voll",
+    "eingabe": {
+      "name": "butono"
+    },
+    "sha256": "719effbcb2a53b52dc873219f97c658c79653792e5345e92f0a270e16cad4608",
+    "bytes": 40635
+  },
+  {
+    "fall": "datelektilo-brief",
+    "eingabe": {
+      "name": "datelektilo",
+      "brief": true
+    },
+    "sha256": "fa34c0b6bd3df287dadce67f8e939b9c1cae6c6482bc2f90a4bae9b6c2c7466d",
+    "bytes": 1371,
+    "antwort": "{\"ero\":\"datelektilo\",\"axes\":[{\"name\":\"mode\",\"values\":[\"single\",\"range\"],\"default\":\"single\"},{\"name\":\"expanded\",\"values\":[\"true\",\"false\"],\"default\":\"false\"},{\"name\":\"intent\",\"values\":[\"neutral\",\"success\",\"warning\",\"danger\"],\"default\":\"neutral\"},{\"name\":\"message-position\",\"values\":[\"below\",\"joined\"],\"default\":\"below\"},{\"name\":\"size\",\"values\":[\"small\",\"medium\",\"large\"],\"default\":\"medium\"}],\"required\":{\"props\":[],\"slots\":[\"label\"]},\"props\":[{\"name\":\"value\",\"type\":\"string\"},{\"name\":\"value-start\",\"type\":\"string\"},{\"name\":\"value-end\",\"type\":\"string\"},{\"name\":\"min\",\"type\":\"string\"},{\"name\":\"max\",\"type\":\"string\"},{\"name\":\"disabled-dates\",\"type\":\"string\"},{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"label\",\"type\":\"string\",\"shown\":true},{\"name\":\"min-span\",\"type\":\"number\"},{\"name\":\"max-span\",\"type\":\"number\"}],\"flags\":[\"required\",\"disabled\",\"loading\",\"readonly\",\"invalid\",\"clearable\"],\"purpose\":\"Lets a person choose a date or a date range near today, typed or picked from a calendar.\",\"instead\":[{\"goal\":\"birthday\",\"ero\":\"kampo\",\"kialo\":\"A date far away, like a birthday, is typed, because scrolling through years and months in a calendar takes longer than typing eight digits; the kampo of kind date takes it.\"}],\"boundary\":[{\"case\":\"time-of-day\",\"action\":\"use-instead\",\"ero\":\"kampo\"},{\"case\":\"multiple-months\",\"action\":\"ask-human\"},{\"case\":\"presets\",\"action\":\"ask-human\"}]}"
+  },
+  {
+    "fall": "datelektilo-voll",
+    "eingabe": {
+      "name": "datelektilo"
+    },
+    "sha256": "01250f6d81e6928f4115fb0e2247d703a2f000225cd476ce140d0fad251b9019",
+    "bytes": 26089
+  },
+  {
+    "fall": "dialogo-brief",
+    "eingabe": {
+      "name": "dialogo",
+      "brief": true
+    },
+    "sha256": "6711cb2fbc4a8eccc87e047c14df4dff770e5fda33d0d423ea8c977e831d0a7b",
+    "bytes": 1282,
+    "antwort": "{\"ero\":\"dialogo\",\"axes\":[{\"name\":\"size\",\"values\":[\"small\",\"medium\",\"full\"],\"default\":\"small\"},{\"name\":\"reason\",\"values\":[\"none\",\"optional\",\"required\"],\"default\":\"none\"},{\"name\":\"dismiss\",\"values\":[\"free\",\"guarded\",\"explicit\"],\"default\":\"guarded\"}],\"required\":{\"props\":[],\"slots\":[\"actions\",\"heading\"]},\"flags\":[\"open\"],\"purpose\":\"Interrupts the page to ask for a decision before it happens: confirm, approve, reject with a reason. The page behind stays where it was.\",\"instead\":[{\"goal\":\"inform-only\",\"ero\":\"avizo\",\"kialo\":\"Who only informs does not interrupt, because a notice reads in the flow of the page; that is the avizo.\"},{\"goal\":\"long-form\",\"ero\":\"formularo\",\"kialo\":\"A form of more than one screen height is a page, because a dialog that scrolls hides its own actions: a formularo in a section of a pagxo; a form over several steps is still a person's decision (the boundary wizard of the formularo).\"},{\"goal\":\"non-modal\",\"ero\":\"sxvebilo\",\"kialo\":\"A layer that leaves the page usable is a popover, because a dialog takes the page until it is answered; the sxvebilo opens beside its trigger and closes on a click outside (Spec 014 ④ closes the boundary non-modal).\"}],\"boundary\":[{\"case\":\"drawer\",\"action\":\"ask-human\"},{\"case\":\"nested-dialog\",\"action\":\"not-supported\"}]}"
+  },
+  {
+    "fall": "dialogo-voll",
+    "eingabe": {
+      "name": "dialogo"
+    },
+    "sha256": "fcacbea0764fc18b5067d13c69b3453e7b5f2982ed05e5eaff6d9f29b17d4657",
+    "bytes": 19670
+  },
+  {
+    "fall": "elektilo-brief",
+    "eingabe": {
+      "name": "elektilo",
+      "brief": true
+    },
+    "sha256": "c3e30b4770cc894c18ae48de297f1a7facbd4709eea6196fa6c318d1ea2a6d9f",
+    "bytes": 1664,
+    "antwort": "{\"ero\":\"elektilo\",\"axes\":[{\"name\":\"size\",\"values\":[\"small\",\"medium\",\"large\"],\"default\":\"medium\"},{\"name\":\"intent\",\"values\":[\"neutral\",\"success\",\"warning\",\"danger\"],\"default\":\"neutral\"},{\"name\":\"message-position\",\"values\":[\"below\",\"joined\"],\"default\":\"below\"},{\"name\":\"selected\",\"values\":[\"true\",\"false\"],\"slot\":\"options\"}],\"required\":{\"props\":[],\"slots\":[\"label\",\"options\"]},\"props\":[{\"name\":\"value\",\"type\":\"string\"},{\"name\":\"placeholder\",\"type\":\"string\"},{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"empty-label\",\"type\":\"string\"},{\"name\":\"label\",\"type\":\"string\",\"shown\":true}],\"flags\":[\"required\",\"invalid\",\"disabled\",\"loading\",\"clearable\",\"readonly\"],\"purpose\":\"Chooses one of many options from a list that opens on demand: country, language, year; options of one group name it (attribute group) and stand under its heading.\",\"instead\":[{\"goal\":\"choose-few\",\"ero\":\"elekto\",\"kialo\":\"Up to five options read faster when they all stay visible, because a list hides them behind a click; Fundamento covers it with elekto.\"},{\"goal\":\"search-in-list\",\"ero\":\"kompletigilo\",\"kialo\":\"A combobox with a search in its list is the kompletigilo, because a person who knows a part of the word finds the value faster while typing; a fixed short list stays the select's (Spec 014 ⑤ closes the alternative search-in-list).\"},{\"goal\":\"multiple\",\"ero\":\"plurelektilo\",\"kialo\":\"Several values from one list are the plurelektilo's, because a select takes one; it shows the chosen as a count or as tags (Spec 025 ③ closes the alternative multiple).\"}],\"boundary\":[{\"case\":\"custom-popup\",\"action\":\"use-instead\",\"ero\":\"listelektilo\"},{\"case\":\"no-visible-label\",\"action\":\"not-supported\"}]}"
+  },
+  {
+    "fall": "elektilo-voll",
+    "eingabe": {
+      "name": "elektilo"
+    },
+    "sha256": "81bdc300b8b94131218fe623f0041c779c1df5b38d6cdb03c8fd3e8ac5540663",
+    "bytes": 35559
+  },
+  {
+    "fall": "elekto-brief",
+    "eingabe": {
+      "name": "elekto",
+      "brief": true
+    },
+    "sha256": "39c824482c3fd4c7c71dd514beffa2301e0edec74986686ef91960ecd0b3a1ef",
+    "bytes": 1612,
+    "antwort": "{\"ero\":\"elekto\",\"axes\":[{\"name\":\"size\",\"values\":[\"small\",\"medium\"],\"default\":\"medium\",\"deprecated\":{\"large\":\"medium\"}},{\"name\":\"orientation\",\"values\":[\"vertical\",\"horizontal\"],\"default\":\"vertical\"},{\"name\":\"intent\",\"values\":[\"neutral\",\"success\",\"warning\",\"danger\"],\"default\":\"neutral\"},{\"name\":\"message-position\",\"values\":[\"below\",\"joined\"],\"default\":\"below\"},{\"name\":\"selected\",\"values\":[\"true\",\"false\"],\"slot\":\"options\"}],\"required\":{\"props\":[],\"slots\":[\"label\",\"options\"]},\"props\":[{\"name\":\"value\",\"type\":\"string\"},{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"label\",\"type\":\"string\",\"shown\":true}],\"flags\":[\"required\",\"invalid\",\"disabled\",\"loading\"],\"purpose\":\"Chooses one of a few options that all stay visible: payment method, shipping speed, yes/no/maybe; an option may carry a short description (its attribute description).\",\"instead\":[{\"goal\":\"choose-many\",\"ero\":\"elektilo\",\"kialo\":\"Six or more options, or an unknown number, belong in a list that opens on demand, because a group that long is no longer read; Fundamento covers it with elektilo.\"},{\"goal\":\"yes-no\",\"ero\":\"markobutono\",\"kialo\":\"A yes or no is a check mark, because a box that is ticked or not says it with one control where two options would ask twice; Fundamento covers it with markobutono.\"},{\"goal\":\"multi\",\"ero\":\"plurelektilo\",\"kialo\":\"Several options at once are the plurelektilo's, because a radio group holds exactly one answer; it shows the chosen as a count or as tags (Spec 025 ③ closes the alternative multi).\"}],\"boundary\":[{\"case\":\"single-option\",\"action\":\"not-supported\"},{\"case\":\"no-visible-label\",\"action\":\"not-supported\"}]}"
+  },
+  {
+    "fall": "elekto-voll",
+    "eingabe": {
+      "name": "elekto"
+    },
+    "sha256": "0775f5e316d3ee08673548e1ff129940ac56bbd7815fa84e42e5658b647c3e6b",
+    "bytes": 31784
+  },
+  {
+    "fall": "faldilo-brief",
+    "eingabe": {
+      "name": "faldilo",
+      "brief": true
+    },
+    "sha256": "a60de97550261c1fb92207cc46a3ae19b0ec7323e106f60ca0e300a3e1f78628",
+    "bytes": 874,
+    "antwort": "{\"ero\":\"faldilo\",\"axes\":[{\"name\":\"open\",\"values\":[\"true\",\"false\"],\"default\":\"false\"},{\"name\":\"indicator-side\",\"values\":[\"start\",\"end\"],\"default\":\"end\"}],\"required\":{\"props\":[],\"slots\":[\"content\",\"summary\"]},\"props\":[{\"name\":\"group\",\"type\":\"string\"}],\"flags\":[\"disabled\"],\"purpose\":\"Hides secondary content behind a label the person can open; several share a group when only one should be open.\",\"instead\":[{\"goal\":\"switch-view\",\"ero\":\"langetaro\",\"kialo\":\"Views of the same thing that a person switches between are tabs, because one of them is always shown and the others wait beside it; a disclosure hides its content until it is opened.\"},{\"goal\":\"required-info\",\"ero\":\"teksto\",\"kialo\":\"What everyone has to read is not hidden, because a closed disclosure is skipped; it stands as running text on the page.\"}],\"boundary\":[{\"case\":\"nested-disclosure\",\"action\":\"ask-human\"}]}"
+  },
+  {
+    "fall": "faldilo-voll",
+    "eingabe": {
+      "name": "faldilo"
+    },
+    "sha256": "3275179a471a04635551823a2d89437f8bb5ac486ff03581b69dbaca9fb5f6d8",
+    "bytes": 12297
+  },
+  {
+    "fall": "glitilo-brief",
+    "eingabe": {
+      "name": "glitilo",
+      "brief": true
+    },
+    "sha256": "aa4358bf919cde1601dabd968c3e75ee66abeeba8193f30a4d5b5c5539f7d263",
+    "bytes": 1205,
+    "antwort": "{\"ero\":\"glitilo\",\"axes\":[{\"name\":\"field\",\"values\":[\"true\",\"false\"],\"default\":\"false\"},{\"name\":\"intent\",\"values\":[\"neutral\",\"success\",\"warning\",\"danger\"],\"default\":\"neutral\"},{\"name\":\"message-position\",\"values\":[\"below\",\"joined\"],\"default\":\"below\"},{\"name\":\"readout\",\"values\":[\"none\",\"text\",\"field\"],\"default\":\"none\"}],\"required\":{\"props\":[],\"slots\":[\"label\"]},\"props\":[{\"name\":\"min\",\"type\":\"number\"},{\"name\":\"max\",\"type\":\"number\"},{\"name\":\"step\",\"type\":\"number\"},{\"name\":\"value\",\"type\":\"number\"},{\"name\":\"value-start\",\"type\":\"number\"},{\"name\":\"value-end\",\"type\":\"number\"},{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"label\",\"type\":\"string\",\"shown\":true},{\"name\":\"min-distance\",\"type\":\"number\"}],\"flags\":[\"range\",\"required\",\"disabled\",\"loading\",\"readonly\",\"invalid\",\"ticks\"],\"purpose\":\"Sets a value, or a range between two values, within known limits by dragging or with the keys.\",\"instead\":[{\"goal\":\"exact-value\",\"ero\":\"kampo\",\"kialo\":\"An exact value is typed, because a thumb lands near a number and the field on it; the kampo of kind number takes it, with a stepper where plus and minus help.\"}],\"boundary\":[{\"case\":\"vertical-track\",\"action\":\"ask-human\"},{\"case\":\"ticks-with-labels\",\"action\":\"ask-human\"}]}"
+  },
+  {
+    "fall": "glitilo-voll",
+    "eingabe": {
+      "name": "glitilo"
+    },
+    "sha256": "dc516b895134984cad487944acb80f79c5ec17657faf016fb7b8699c8a8028a2",
+    "bytes": 25182
+  },
+  {
+    "fall": "ikono-brief",
+    "eingabe": {
+      "name": "ikono",
+      "brief": true
+    },
+    "sha256": "318c8ac9f74c6829d59621181b6198d94a1690965a0e4911c3fd347afee248d9",
+    "bytes": 1352,
+    "antwort": "{\"ero\":\"ikono\",\"axes\":[{\"name\":\"name\",\"values\":[\"add\",\"calendar\",\"check\",\"chevron-down\",\"chevron-left\",\"chevron-right\",\"close\",\"collapse\",\"danger\",\"download\",\"edit\",\"expand\",\"external\",\"first\",\"info\",\"last\",\"more\",\"person\",\"search\",\"sort-ascending\",\"sort-descending\",\"subtract\",\"success\",\"upload\",\"warning\"]},{\"name\":\"size\",\"values\":[\"x-small\",\"small\",\"medium\",\"large\"],\"default\":\"medium\"},{\"name\":\"intent\",\"values\":[\"neutral\",\"info\",\"success\",\"warning\",\"danger\"],\"default\":\"neutral\"}],\"required\":{\"props\":[\"name\"],\"slots\":[]},\"props\":[{\"name\":\"label\",\"type\":\"string\"}],\"purpose\":\"Shows a symbol from the brand's icon set, decorative by default, named when it carries meaning.\",\"instead\":[{\"goal\":\"status-only-icon\",\"ero\":\"insigno\",\"kialo\":\"A status needs a word, because colour and a shape alone are no information for everyone (WCAG 1.4.1) and a picture is not read aloud; the insigno says the status in one to three words, with an icon beside it if the Aspekto wants one.\"},{\"goal\":\"logo\",\"ero\":null,\"kialo\":\"A logo is the picture of a brand, not a sign of the system, because it keeps its own colours and proportions and never takes the text's colour; it belongs to the Aspekto as an asset of its own, which Fundamento does not carry yet.\"}],\"boundary\":[{\"case\":\"custom-svg\",\"action\":\"ask-human\"},{\"case\":\"animated-icon\",\"action\":\"not-supported\"}]}"
+  },
+  {
+    "fall": "ikono-voll",
+    "eingabe": {
+      "name": "ikono"
+    },
+    "sha256": "2857eb8a796b0451d25489e1810786051c0eea4a682318c70351741ab8829a02",
+    "bytes": 15676
+  },
+  {
+    "fall": "insigno-brief",
+    "eingabe": {
+      "name": "insigno",
+      "brief": true
+    },
+    "sha256": "8344860552fa5c7e0e376e38689cc8f27a26606be62c689a51fc5e7d2e8df3c4",
+    "bytes": 1375,
+    "antwort": "{\"ero\":\"insigno\",\"axes\":[{\"name\":\"intent\",\"values\":[\"neutral\",\"info\",\"success\",\"warning\",\"danger\"],\"default\":\"neutral\"},{\"name\":\"size\",\"values\":[\"small\",\"medium\"],\"default\":\"medium\"}],\"required\":{\"props\":[],\"slots\":[\"label\"]},\"purpose\":\"Names a status in one to three words next to what it describes: draft, in review, valid, 3 violations; an icon before the words (slot icon-start) shows it beyond colour.\",\"instead\":[{\"goal\":\"sentence\",\"ero\":\"avizo\",\"kialo\":\"A badge is read in passing, because a status is one glance; a sentence that explains is a notice (avizo).\"},{\"goal\":\"clickable\",\"ero\":\"butono\",\"kialo\":\"A badge is no control, because a label that answers a click hides an action; an action is a butono, a destination a ligilo.\"},{\"goal\":\"count-only\",\"ero\":null,\"kialo\":\"A bare number says nothing, because '3' without 'violations' is no status; a person decides what the number is.\"},{\"goal\":\"value-in-range\",\"ero\":\"mezurilo\",\"kialo\":\"A value in a range is a measure, not a status, because it has a scale; that is the mezurilo.\"},{\"goal\":\"person\",\"ero\":\"avataro\",\"kialo\":\"Who something belongs to is a person, because a face or the initials say who; that is the avataro, and the badge says how.\"}],\"boundary\":[{\"case\":\"brand-badge\",\"action\":\"ask-human\"},{\"case\":\"dot-only\",\"action\":\"not-supported\"},{\"case\":\"removable-chip\",\"action\":\"use-instead\",\"ero\":\"signeto\"}]}"
+  },
+  {
+    "fall": "insigno-voll",
+    "eingabe": {
+      "name": "insigno"
+    },
+    "sha256": "2e0046b9a3b2b1e481fb2b8833cd2cd96eb6ffa781bcb3b46ea71dd97a443213",
+    "bytes": 12737
+  },
+  {
+    "fall": "kampo-brief",
+    "eingabe": {
+      "name": "kampo",
+      "brief": true
+    },
+    "sha256": "429035dfc08054465f8b3e394d4fad90ced70c0f939413397919fd4ad5f9c464",
+    "bytes": 2239,
+    "antwort": "{\"ero\":\"kampo\",\"axes\":[{\"name\":\"kind\",\"values\":[\"text\",\"email\",\"tel\",\"url\",\"search\",\"password\",\"number\",\"date\",\"time\"],\"default\":\"text\"},{\"name\":\"size\",\"values\":[\"small\",\"medium\",\"large\"],\"default\":\"medium\"},{\"name\":\"intent\",\"values\":[\"neutral\",\"success\",\"warning\",\"danger\"],\"default\":\"neutral\"},{\"name\":\"message-position\",\"values\":[\"below\",\"joined\"],\"default\":\"below\"}],\"required\":{\"props\":[],\"slots\":[\"label\"]},\"props\":[{\"name\":\"value\",\"type\":\"string\"},{\"name\":\"placeholder\",\"type\":\"string\"},{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"min\",\"type\":\"string\"},{\"name\":\"max\",\"type\":\"string\"},{\"name\":\"autocomplete\",\"type\":\"string\"},{\"name\":\"step\",\"type\":\"string\"},{\"name\":\"label\",\"type\":\"string\",\"shown\":true},{\"name\":\"unit\",\"type\":\"string\"}],\"flags\":[\"required\",\"disabled\",\"readonly\",\"invalid\",\"stepper\",\"loading\",\"clearable\"],\"purpose\":\"Takes one line of text from a person: a name, an address, an e-mail, a number, a time, a search term.\",\"instead\":[{\"goal\":\"multi-line\",\"ero\":\"tekstareo\",\"kialo\":\"Several lines need a growing field, because one line hides them.\"},{\"goal\":\"choose-many\",\"ero\":\"elektilo\",\"kialo\":\"Many options are a list, because a field takes any text; elektilo covers it.\"},{\"goal\":\"choose-few\",\"ero\":\"elekto\",\"kialo\":\"A few options are picked, not typed, because typing errs; elekto covers it.\"},{\"goal\":\"toggle\",\"ero\":\"sxaltilo\",\"kialo\":\"A setting on or off shows its state, because a text must be read to know it; sxaltilo when it applies at once (in a form, applied with it: markobutono).\"},{\"goal\":\"suggestions\",\"ero\":\"kompletigilo\",\"kialo\":\"Suggestions are picked while typing, because the list shortens.\"},{\"goal\":\"approximate\",\"ero\":\"glitilo\",\"kialo\":\"A value set by feel is dragged, because a hand finds it faster.\"},{\"goal\":\"single-value\",\"ero\":\"lokredaktilo\",\"kialo\":\"A value changes in place, because a form for one value is a detour.\"}],\"boundary\":[{\"case\":\"reveal-password\",\"action\":\"ask-human\"},{\"case\":\"decimal\",\"action\":\"not-supported\"},{\"case\":\"date-range\",\"action\":\"use-instead\",\"ero\":\"datelektilo\"},{\"case\":\"time-zone\",\"action\":\"ask-human\"},{\"case\":\"file\",\"action\":\"use-instead\",\"ero\":\"alsxutilo\"},{\"case\":\"no-visible-label\",\"action\":\"not-supported\"},{\"case\":\"icon-in-field\",\"action\":\"not-supported\"}]}"
+  },
+  {
+    "fall": "kampo-voll",
+    "eingabe": {
+      "name": "kampo"
+    },
+    "sha256": "74c195e6eeceea76b9ef6a8741b458610ac5d2541e15cb18dc0c24ab1d9f1635",
+    "bytes": 41104
+  },
+  {
+    "fall": "karto-brief",
+    "eingabe": {
+      "name": "karto",
+      "brief": true
+    },
+    "sha256": "b10ed4ffe0d118552adc8c0bc4e0257e18841d6f5b67fb5f76768a499b33971c",
+    "bytes": 1011,
+    "antwort": "{\"ero\":\"karto\",\"axes\":[{\"name\":\"level\",\"values\":[\"1\",\"2\",\"3\",\"4\",\"5\",\"6\"]},{\"name\":\"orientation\",\"values\":[\"vertical\",\"horizontal\"],\"default\":\"vertical\"},{\"name\":\"emphasis\",\"values\":[\"high\",\"medium\",\"low\"],\"default\":\"high\"}],\"required\":{\"props\":[\"level\"],\"slots\":[\"heading\"]},\"flags\":[\"standalone\"],\"purpose\":\"Groups content about one thing into a unit: a heading, optional image and text, and up to two actions.\",\"instead\":[{\"goal\":\"data-record\",\"ero\":\"atributlisto\",\"kialo\":\"The fields of one record are names and values, because a person reads them as a list; that is the atributlisto.\"},{\"goal\":\"notice\",\"ero\":\"avizo\",\"kialo\":\"What happened or what to watch for is a notice, because it tells a state in the flow; a card holds content.\"},{\"goal\":\"layout-box\",\"ero\":null,\"kialo\":\"A card is content, not a frame for the layout, because its heading names one thing; a box around other parts is the page's.\"}],\"boundary\":[{\"case\":\"clickable-card\",\"action\":\"ask-human\"},{\"case\":\"card-grid\",\"action\":\"ask-human\"}]}"
+  },
+  {
+    "fall": "karto-voll",
+    "eingabe": {
+      "name": "karto"
+    },
+    "sha256": "2d3b429497719be1162b86369ec1a28fe084e86aaa81fa074436b7d05d8a7a4a",
+    "bytes": 9637
+  },
+  {
+    "fall": "kodbloko-brief",
+    "eingabe": {
+      "name": "kodbloko",
+      "brief": true
+    },
+    "sha256": "ce6a5e0a92d36930d1aa46f9d2b1bfea82b8e9f3854c1bec54a6fe33a5e43392",
+    "bytes": 725,
+    "antwort": "{\"ero\":\"kodbloko\",\"axes\":[],\"required\":{\"props\":[],\"slots\":[\"caption\",\"label\"]},\"props\":[{\"name\":\"language\",\"type\":\"string\"},{\"name\":\"highlight\",\"type\":\"string\"}],\"flags\":[\"copyable\",\"line-numbers\",\"wrap\"],\"purpose\":\"Shows a command or a place in a file as code a person can read, select and copy: named by its caption, never cut off — a long line scrolls or wraps; line numbers, highlighted lines and colours by kind of word help to read it, never alone carry what it says.\",\"instead\":[{\"goal\":\"inline-code\",\"ero\":\"teksto\",\"kialo\":\"A piece of code inside a sentence is a teksto with kind code, because it stands in the line of the text; a code block stands on its own.\"}],\"boundary\":[{\"case\":\"diff\",\"action\":\"ask-human\"}]}"
+  },
+  {
+    "fall": "kodbloko-voll",
+    "eingabe": {
+      "name": "kodbloko"
+    },
+    "sha256": "c4f12d23f2b40bab0b9030d5b9b5c0e3dff6147fbef0d3f427c7d7fd1c08127f",
+    "bytes": 8381
+  },
+  {
+    "fall": "kompletigilo-brief",
+    "eingabe": {
+      "name": "kompletigilo",
+      "brief": true
+    },
+    "sha256": "a0cd2283d52eea10edca9d687cbceab81ff8a0dd6963728d8d0e6253564cb1a2",
+    "bytes": 1637,
+    "antwort": "{\"ero\":\"kompletigilo\",\"axes\":[{\"name\":\"size\",\"values\":[\"small\",\"medium\",\"large\"],\"default\":\"medium\"},{\"name\":\"expanded\",\"values\":[\"true\",\"false\"],\"default\":\"false\"},{\"name\":\"intent\",\"values\":[\"neutral\",\"success\",\"warning\",\"danger\"],\"default\":\"neutral\"},{\"name\":\"message-position\",\"values\":[\"below\",\"joined\"],\"default\":\"below\"},{\"name\":\"selected\",\"values\":[\"true\",\"false\"],\"slot\":\"options\"},{\"name\":\"active\",\"values\":[\"true\",\"false\"],\"slot\":\"options\"}],\"required\":{\"props\":[],\"slots\":[\"label\",\"options\"]},\"props\":[{\"name\":\"value\",\"type\":\"string\"},{\"name\":\"placeholder\",\"type\":\"string\"},{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"min-chars\",\"type\":\"number\"},{\"name\":\"label\",\"type\":\"string\",\"shown\":true},{\"name\":\"max-suggestions\",\"type\":\"number\"}],\"flags\":[\"required\",\"invalid\",\"disabled\",\"allow-free\",\"loading\",\"clearable\"],\"purpose\":\"A field that suggests matching values while the person types; the value may be one of the suggestions or, if allowed, free text; options of one group name it (attribute group) and stand under its heading.\",\"instead\":[{\"goal\":\"few-fixed-options\",\"ero\":\"elekto\",\"kialo\":\"A handful of fixed options is a radio group, because a person sees them all at once and chooses without typing; suggestions help where the list is long.\"},{\"goal\":\"many-fixed-options-no-typing\",\"ero\":\"elektilo\",\"kialo\":\"A fixed list that typing does not shorten is a select, because the platform's list is enough and a person opens it with one click; suggestions help where the person knows a part of the word.\"}],\"boundary\":[{\"case\":\"multi-select\",\"action\":\"use-instead\",\"ero\":\"plurelektilo\"},{\"case\":\"tags\",\"action\":\"not-supported\"}]}"
+  },
+  {
+    "fall": "kompletigilo-voll",
+    "eingabe": {
+      "name": "kompletigilo"
+    },
+    "sha256": "9d6c09bbd5eae5131e8de0718f6ac1ea31011b1a6e0f71d77e7d36e8784868a5",
+    "bytes": 25466
+  },
+  {
+    "fall": "konsileto-brief",
+    "eingabe": {
+      "name": "konsileto",
+      "brief": true
+    },
+    "sha256": "95728e97117caac556f1c4683291ad93c3c6c578f69d9a87204130b6f7a8ffec",
+    "bytes": 983,
+    "antwort": "{\"ero\":\"konsileto\",\"axes\":[{\"name\":\"placement\",\"values\":[\"block-start\",\"block-end\",\"inline-start\",\"inline-end\"],\"default\":\"block-start\"},{\"name\":\"justify\",\"values\":[\"start\",\"center\",\"end\"],\"default\":\"center\"}],\"required\":{\"props\":[\"for\"],\"slots\":[\"label\"]},\"props\":[{\"name\":\"for\",\"type\":\"string\"}],\"purpose\":\"Shows the name or a short hint of a control while it is hovered or focused.\",\"instead\":[{\"goal\":\"essential-info\",\"ero\":\"teksto\",\"kialo\":\"What a person needs to act stands visibly as text — under a field as the kampo's help, elsewhere as running text — because whoever does not hover or focus never sees a tooltip, and on touch there is no hovering.\"},{\"goal\":\"interactive-content\",\"ero\":\"sxvebilo\",\"kialo\":\"A layer a person operates — a link, a field, a button in it — is a popover, because a tooltip vanishes when the pointer leaves and takes no focus; the sxvebilo stays and holds the focus.\"}],\"boundary\":[{\"case\":\"tooltip-on-disabled\",\"action\":\"not-supported\"}]}"
+  },
+  {
+    "fall": "konsileto-voll",
+    "eingabe": {
+      "name": "konsileto"
+    },
+    "sha256": "f9dcd53595528c170d8d66efaab1a785c18b321d890ec6d3e1a0e71c5e0851ec",
+    "bytes": 10364
+  },
+  {
+    "fall": "langetaro-brief",
+    "eingabe": {
+      "name": "langetaro",
+      "brief": true
+    },
+    "sha256": "b9cd328c3c193dd2f2c3671a6fbdc23586a56968f9e5814f2f53e3960df7bc0c",
+    "bytes": 1378,
+    "antwort": "{\"ero\":\"langetaro\",\"axes\":[{\"name\":\"size\",\"values\":[\"small\",\"medium\",\"large\"],\"default\":\"medium\"},{\"name\":\"spread\",\"values\":[\"content\",\"fill\"],\"default\":\"content\"},{\"name\":\"active\",\"values\":[\"true\",\"false\"],\"slot\":\"tabs\"}],\"required\":{\"props\":[\"label\"],\"slots\":[\"panel\",\"tabs\"]},\"props\":[{\"name\":\"label\",\"type\":\"string\"},{\"name\":\"selected\",\"type\":\"string\"}],\"purpose\":\"Switches between views of the same thing on one page: content, versions, rules, audit.\",\"instead\":[{\"goal\":\"form-choice\",\"ero\":\"elekto\",\"kialo\":\"A choice in a form is a value, not a switch of views, because it is sent with the form and read back as data; that is the elekto.\"},{\"goal\":\"pages\",\"ero\":\"navigado\",\"kialo\":\"Pages of an application are a navigation, because the person leaves where they are; tabs switch views of one thing and stay on the page.\"},{\"goal\":\"disclose\",\"ero\":\"faldilo\",\"kialo\":\"Content that is hidden until opened is a disclosure, because tabs always show one view; the faldilo opens and closes, several in a group one at a time.\"},{\"goal\":\"list-pages\",\"ero\":\"pagxigilo\",\"kialo\":\"The pages of one long list are a pagination, because the person moves through parts of the same list in order; tabs switch views of one thing.\"}],\"boundary\":[{\"case\":\"closable-tabs\",\"action\":\"not-supported\"},{\"case\":\"manual-activation\",\"action\":\"ask-human\"},{\"case\":\"vertical-tabs\",\"action\":\"ask-human\"}]}"
+  },
+  {
+    "fall": "langetaro-voll",
+    "eingabe": {
+      "name": "langetaro"
+    },
+    "sha256": "f223dc47fea233d64fce04e261a1eefd97e1f89395e137991149142937c6e137",
+    "bytes": 11112
+  },
+  {
+    "fall": "ligilo-brief",
+    "eingabe": {
+      "name": "ligilo",
+      "brief": true
+    },
+    "sha256": "2b0a37b1cf13f35ac0507948c80692a875263756718bd09e727edad69858b495",
+    "bytes": 1028,
+    "antwort": "{\"ero\":\"ligilo\",\"axes\":[{\"name\":\"placement\",\"values\":[\"inline\",\"standalone\"],\"default\":\"inline\"},{\"name\":\"size\",\"values\":[\"small\",\"medium\",\"large\"],\"default\":\"medium\"}],\"required\":{\"props\":[\"to\"],\"slots\":[]},\"props\":[{\"name\":\"to\",\"type\":\"string\"},{\"name\":\"label\",\"type\":\"string\"}],\"flags\":[\"external\",\"download\"],\"purpose\":\"Moves to another view or place: it opens an overview, a detail, a document or an outside site; an icon may stand before the words (slot icon-start); with download it hands over a file instead, marked, the label names its type and size.\",\"instead\":[{\"goal\":\"action\",\"ero\":\"butono\",\"kialo\":\"A link moves to another view or place and a button starts an action here, because screen readers announce them differently, the keyboard operates them differently and the way back is different; an action on a link promises a move that does not happen.\"}],\"boundary\":[{\"case\":\"button-look\",\"action\":\"ask-human\"},{\"case\":\"disabled-link\",\"action\":\"not-supported\"},{\"case\":\"multi-line-label\",\"action\":\"not-supported\"}]}"
+  },
+  {
+    "fall": "ligilo-voll",
+    "eingabe": {
+      "name": "ligilo"
+    },
+    "sha256": "92314f04cf17ad0b970420b5d99258c288b681d59fe0be688abe5206eeb66def",
+    "bytes": 25098
+  },
+  {
+    "fall": "listelektilo-brief",
+    "eingabe": {
+      "name": "listelektilo",
+      "brief": true
+    },
+    "sha256": "f4dc7789d2216e9c91fcb669d21e36f99a9efcc474fccfe35c42a66e680c22f8",
+    "bytes": 1168,
+    "antwort": "{\"ero\":\"listelektilo\",\"axes\":[{\"name\":\"expanded\",\"values\":[\"true\",\"false\"],\"default\":\"false\"},{\"name\":\"intent\",\"values\":[\"neutral\",\"success\",\"warning\",\"danger\"],\"default\":\"neutral\"},{\"name\":\"message-position\",\"values\":[\"below\",\"joined\"],\"default\":\"below\"},{\"name\":\"size\",\"values\":[\"small\",\"medium\",\"large\"],\"default\":\"medium\"},{\"name\":\"selected\",\"values\":[\"true\",\"false\"],\"slot\":\"options\"},{\"name\":\"active\",\"values\":[\"true\",\"false\"],\"slot\":\"options\"}],\"required\":{\"props\":[],\"slots\":[\"label\",\"options\"]},\"props\":[{\"name\":\"value\",\"type\":\"string\"},{\"name\":\"placeholder\",\"type\":\"string\"},{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"label\",\"type\":\"string\",\"shown\":true}],\"flags\":[\"required\",\"disabled\",\"loading\",\"readonly\",\"invalid\",\"clearable\"],\"purpose\":\"Chooses one option from a styled list when options need an icon or a description; options of one group name it (attribute group) and stand under its heading.\",\"instead\":[{\"goal\":\"plain-options\",\"ero\":\"elektilo\",\"kialo\":\"Options that are words alone are the elektilo's, because the native list is the easiest to use on every device.\"}],\"boundary\":[{\"case\":\"search-in-list\",\"action\":\"use-instead\",\"ero\":\"kompletigilo\"}]}"
+  },
+  {
+    "fall": "listelektilo-voll",
+    "eingabe": {
+      "name": "listelektilo"
+    },
+    "sha256": "1a1c124c0f34ef0226b7ba660760a71387cdf09e84e75617fb5d6d85af09fcf7",
+    "bytes": 22382
+  },
+  {
+    "fall": "lokredaktilo-brief",
+    "eingabe": {
+      "name": "lokredaktilo",
+      "brief": true
+    },
+    "sha256": "7034484f72b63376a960aa51db9a2d2d07ed0877649a212d26183ca6adcd8f75",
+    "bytes": 733,
+    "antwort": "{\"ero\":\"lokredaktilo\",\"axes\":[{\"name\":\"kind\",\"values\":[\"text\",\"number\",\"email\",\"url\"],\"default\":\"text\"},{\"name\":\"editing\",\"values\":[\"true\",\"false\"],\"default\":\"false\"}],\"required\":{\"props\":[\"label\"],\"slots\":[]},\"props\":[{\"name\":\"label\",\"type\":\"string\"},{\"name\":\"value\",\"type\":\"string\"},{\"name\":\"name\",\"type\":\"string\"}],\"flags\":[\"disabled\",\"readonly\",\"invalid\"],\"purpose\":\"Turns a single value in a view into a field on the spot, with save and cancel.\",\"instead\":[{\"goal\":\"form\",\"ero\":\"formularo\",\"kialo\":\"Several values entered together are a form, because one send covers them all; the formularo covers it.\"}],\"boundary\":[{\"case\":\"multi-field-edit\",\"action\":\"use-instead\",\"ero\":\"formularo\"},{\"case\":\"autosave\",\"action\":\"ask-human\"}]}"
+  },
+  {
+    "fall": "lokredaktilo-voll",
+    "eingabe": {
+      "name": "lokredaktilo"
+    },
+    "sha256": "c1d4fefdd94d6a287504b36773220cfe5c55e076af60973e5926a4aa75e915ef",
+    "bytes": 9761
+  },
+  {
+    "fall": "markdovido-brief",
+    "eingabe": {
+      "name": "markdovido",
+      "brief": true
+    },
+    "sha256": "13128f2d2e6e88f0caa5c9489bf120bb47059632daee03451f36f93f56f0a0f7",
+    "bytes": 725,
+    "antwort": "{\"ero\":\"markdovido\",\"axes\":[{\"name\":\"start-level\",\"values\":[\"2\",\"3\",\"4\",\"5\",\"6\"],\"default\":\"2\"},{\"name\":\"density\",\"values\":[\"default\",\"compact\"],\"default\":\"default\"}],\"required\":{\"props\":[],\"slots\":[]},\"props\":[{\"name\":\"source\",\"type\":\"string\"}],\"flags\":[\"streaming\"],\"purpose\":\"Shows content written in Markdown — a standard, a proposal, a preview — in the type and the order of the page, safely: the source is data, never markup.\",\"instead\":[{\"goal\":\"edit-markdown\",\"ero\":\"redaktilo\",\"kialo\":\"Writing Markdown with its preview is the redaktilo, because the field and the preview belong together; the markdovido only shows.\"}],\"boundary\":[{\"case\":\"images\",\"action\":\"ask-human\"},{\"case\":\"html\",\"action\":\"not-supported\"}]}"
+  },
+  {
+    "fall": "markdovido-voll",
+    "eingabe": {
+      "name": "markdovido"
+    },
+    "sha256": "f89d6621d218e823dc7dfd2e3fe7317eb1fc6d9dc525830d875c2a5c2117867e",
+    "bytes": 6664,
+    "antwort": "{\"ero\":{\"id\":\"ero_01M5D5JKHFX2EFVCS08CFE8DS6\",\"name\":\"markdovido\",\"description\":\"A Markdown view: shows a source in Markdown (CommonMark and pipe tables) with the Eroj of the system — headings, paragraphs, emphasis, code, quotes, lists to depth three, tables, rules and links — built from text alone, so nothing of the source runs.\"},\"skemo\":{\"id\":\"ske_01M5D5JKXZQ7G5DHPNSSQZ2N7C\",\"props\":[{\"description\":\"The Markdown, as text. No HTML passes: what looks like HTML is shown as text; a link takes https:, http:, mailto: or a relative target, and opens with rel noopener noreferrer; an image is shown by its text.\",\"kind\":\"string\",\"name\":\"source\"},{\"default\":\"2\",\"description\":\"The level of a heading # in the page: one below the page's own h1 by default, so the headings of the source keep the order of the page (Regulo heading-levels-in-order).\",\"kind\":\"enum\",\"name\":\"start-level\",\"values\":[\"2\",\"3\",\"4\",\"5\",\"6\"]},{\"default\":\"default\",\"description\":\"Spec 029 ②a (A-markdovido-1): the room between the blocks, by the names of the Dimensio density – default as before; compact closer, for answers in a narrow column.\",\"kind\":\"enum\",\"name\":\"density\",\"values\":[\"default\",\"compact\"]},{\"default\":false,\"description\":\"Spec 029 ②a (A-markdovido-3): an answer still arrives – the source grows while the view is busy (aria-busy), so assistive technology reads it once it is whole. The application takes it away after the last word.\",\"kind\":\"boolean\",\"name\":\"streaming\"}],\"states\":[\"rest\"],\"slots\":[],\"parts\":{\"box\":{\"gap\":{\"by\":[\"density\"]}},\"indent\":{\"inline-padding\":{\"fixed\":\"spacing.large\"}},\"quote\":{\"color\":{\"fixed\":\"color.border.default\"},\"inline-padding\":{\"fixed\":\"spacing.medium\"},\"width\":{\"fixed\":\"border.width.default\"}}},\"bindings\":[{\"part\":\"box\",\"property\":\"gap\",\"token\":\"spacing.medium\",\"when\":{\"density\":\"default\"}},{\"part\":\"box\",\"property\":\"gap\",\"token\":\"spacing.small\",\"when\":{\"density\":\"compact\"}}],\"a11y\":{\"keys\":[],\"name\":[],\"role\":\"document\",\"states\":{\"streaming\":[\"aria-busy\"]}},\"goals\":[{\"goal\":\"markdown\",\"keywords\":{\"de\":[\"markdown\",\"markdown-text\",\"markdownansicht\",\"streamen\"],\"en\":[\"markdown\",\"markdown-view\",\"rendered-markdown\",\"streaming\"]},\"props\":{}}]},\"reguloj\":[{\"id\":\"reg_01M4RPB19GDEJE9T2S21VNRE0H\",\"name\":\"spacing-owned-by-container\",\"statement\":\"The space between sibling Eroj belongs to their container; an Ero carries no outer spacing.\",\"kialo\":\"An Ero does not know its neighbours. If each one brought its own distance, two Eroj side by side would add up their distances, and the rhythm of a view would depend on which Ero stands where.\",\"checkability\":\"manual\"}],\"examples\":[],\"projekcioj\":{\"webComponent\":{\"tag\":\"fm-markdovido\",\"attributes\":{\"source\":\"string\",\"start-level\":[\"2\",\"3\",\"4\",\"5\",\"6\"],\"density\":[\"default\",\"compact\"],\"streaming\":\"boolean\"},\"slots\":[]},\"react\":{\"package\":\"@fundamento/eroj/react\",\"component\":\"Markdovido\",\"props\":{\"source\":\"string\",\"startLevel\":[\"2\",\"3\",\"4\",\"5\",\"6\"],\"density\":[\"default\",\"compact\"],\"streaming\":\"boolean\"}},\"figma\":{\"componentSet\":\"markdovido\",\"properties\":{\"source\":\"text\",\"start-level\":[\"2\",\"3\",\"4\",\"5\",\"6\"],\"density\":[\"default\",\"compact\"],\"streaming\":\"boolean\",\"state\":[\"rest\"]},\"pluginData\":{\"namespace\":\"fundamento\",\"key\":\"ero\",\"value\":\"markdovido\"}},\"css\":{\"files\":[\"fundamento.css\",\"fundamento-komuna.css\"],\"attributes\":[\"data-fm-aspekto\",\"data-fm-viewport\",\"data-fm-density\",\"data-fm-color-scheme\",\"data-fm-contrast\",\"data-fm-motion\"]},\"tailwind\":{\"classes\":{\"box.gap\":[\"gap-fm-medium\",\"gap-fm-small\"],\"indent.inline-padding\":[\"px-fm-large\"],\"quote.color\":[\"text-fm-border-default\"],\"quote.inline-padding\":[\"px-fm-medium\"]}},\"makeKit\":{\"package\":\"@fundamento/make-kit-komuna\"}},\"uzo\":{\"purpose\":\"Shows content written in Markdown — a standard, a proposal, a preview — in the type and the order of the page, safely: the source is data, never markup.\",\"instead\":[{\"ero\":\"redaktilo\",\"goal\":\"edit-markdown\",\"keywords\":{\"de\":[\"markdown-editor\"],\"en\":[\"markdown-editor\"]},\"kialo\":\"Writing Markdown with its preview is the redaktilo, because the field and the preview belong together; the markdovido only shows.\"}],\"boundary\":[{\"action\":\"ask-human\",\"case\":\"images\",\"keywords\":{\"de\":[\"markdown-bild\"],\"en\":[\"markdown-image\"]},\"kialo\":\"An image in a source is shown by its text in round 1, because where it comes from, how large it is and what it says are decisions of their own; a person decides.\"},{\"action\":\"not-supported\",\"case\":\"html\",\"keywords\":{\"de\":[\"markdown-html\"],\"en\":[\"markdown-html\"]},\"kialo\":\"HTML in a source is not passed through, because markup from data can run code in the page; it is shown as text.\"}],\"composes\":{\"containers\":[{\"kialo\":\"A Markdown view stands in a section of a page under its heading, because its own headings start one level below.\",\"name\":\"page-section\"}],\"with\":[{\"ero\":\"titolo\",\"kialo\":\"A heading of the source is a titolo, one level below the page (start-level).\"},{\"ero\":\"teksto\",\"kialo\":\"A paragraph is a teksto, inline code a teksto of kind code.\"},{\"ero\":\"tabelo\",\"kialo\":\"A pipe table is a tabelo with column headers, its alignment kept.\"},{\"ero\":\"kodbloko\",\"kialo\":\"A code block of the source is a kodbloko, because a long line scrolls instead of being cut.\"},{\"ero\":\"apartigilo\",\"kialo\":\"A rule of the source is an apartigilo.\"},{\"ero\":\"ligilo\",\"kialo\":\"A link of the source is a ligilo, with a safe target only.\"}],\"never\":[],\"spacing\":{\"owner\":\"container\",\"regulo\":{\"id\":\"reg_01M4RPB19GDEJE9T2S21VNRE0H\",\"name\":\"spacing-owned-by-container\",\"statement\":\"The space between sibling Eroj belongs to their container; an Ero carries no outer spacing.\",\"kialo\":\"An Ero does not know its neighbours. If each one brought its own distance, two Eroj side by side would add up their distances, and the rhythm of a view would depend on which Ero stands where.\",\"checkability\":\"manual\"}}},\"slots\":{},\"layout\":{\"size\":\"container\",\"wrap\":\"allowed\"},\"content\":[],\"when-not\":[{\"case\":\"Markdown is to be written and shown in a preview while writing.\",\"ero\":\"redaktilo\"},{\"case\":\"It is a plain paragraph without structure of its own.\",\"ero\":\"teksto\"},{\"case\":\"The content is code to be read and copied.\",\"ero\":\"kodbloko\"}],\"do-dont\":{\"do\":[\"Set start-level so the headings of the source follow below the heading of the page.\",\"Set streaming while an answer still arrives, and take it away after the last word.\",\"Use density compact for answers in a narrow column.\"],\"dont\":[\"Expect HTML in the source; it is shown as text and never run.\",\"Count on images in the source; they appear only as their text.\"]},\"keyboard\":{\"none\":\"The view takes no key of its own; links in the text are reached with Tab and followed with Enter like any link.\"}}}"
+  },
+  {
+    "fall": "markobutono-brief",
+    "eingabe": {
+      "name": "markobutono",
+      "brief": true
+    },
+    "sha256": "2bb0caba939a7c6981f97331f79c18fbe4f5f13d82ab44a6bfc606e476fb7ec8",
+    "bytes": 1256,
+    "antwort": "{\"ero\":\"markobutono\",\"axes\":[{\"name\":\"checked\",\"values\":[\"true\",\"false\"],\"default\":\"false\"},{\"name\":\"size\",\"values\":[\"small\",\"medium\"],\"default\":\"medium\",\"deprecated\":{\"large\":\"medium\"}},{\"name\":\"intent\",\"values\":[\"neutral\",\"success\",\"warning\",\"danger\"],\"default\":\"neutral\"},{\"name\":\"message-position\",\"values\":[\"below\",\"joined\"],\"default\":\"below\"}],\"required\":{\"props\":[],\"slots\":[\"label\"]},\"props\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"label\",\"type\":\"string\",\"shown\":true}],\"flags\":[\"required\",\"invalid\",\"disabled\",\"loading\",\"readonly\"],\"purpose\":\"Marks one option as yes or no inside a form; it applies when the form is sent: terms accepted, newsletter, remember me.\",\"instead\":[{\"goal\":\"immediate\",\"ero\":\"sxaltilo\",\"kialo\":\"A setting that applies at once is a switch, because a checkbox promises nothing until the form is sent; Fundamento covers it with sxaltilo.\"},{\"goal\":\"choose-one-of-few\",\"ero\":\"elekto\",\"kialo\":\"One of a few options is a radio group, because checkboxes let a person tick several and the form could not tell which one counts; Fundamento covers it with elekto.\"}],\"boundary\":[{\"case\":\"indeterminate\",\"action\":\"not-supported\"},{\"case\":\"checkbox-group\",\"action\":\"ask-human\"},{\"case\":\"no-visible-label\",\"action\":\"not-supported\"}]}"
+  },
+  {
+    "fall": "markobutono-voll",
+    "eingabe": {
+      "name": "markobutono"
+    },
+    "sha256": "06c6f5dd7ea00dc4bbcff9b60fb183d62c060bffe812013546e5a60bdd43219f",
+    "bytes": 24236
+  },
+  {
+    "fall": "menuo-brief",
+    "eingabe": {
+      "name": "menuo",
+      "brief": true
+    },
+    "sha256": "f6caca1eba961efc3e5b2b58f66a34502460f2b052c41aefff925c9f373ff80e",
+    "bytes": 1386,
+    "antwort": "{\"ero\":\"menuo\",\"axes\":[{\"name\":\"placement\",\"values\":[\"block-start\",\"block-end\",\"inline-start\",\"inline-end\"],\"default\":\"block-end\"},{\"name\":\"justify\",\"values\":[\"start\",\"center\",\"end\"],\"default\":\"center\"}],\"required\":{\"props\":[],\"slots\":[\"items\"]},\"props\":[{\"name\":\"label\",\"type\":\"string\"}],\"flags\":[\"open\",\"disabled\"],\"purpose\":\"Offers actions for one object behind a single button: edit, duplicate, delete; an entry may carry an icon (attribute icon) and name its group (attribute group); an entry with a target (attribute to) is a link to it, because it moves the person (Regulo link-navigates-button-acts).\",\"instead\":[{\"goal\":\"navigate\",\"ero\":\"navigado\",\"kialo\":\"A menu that leads to pages is a navigation, because an action menu fires actions on one object and a navigation moves a person through the application (G6: Menü alone is the navigado's word).\"},{\"goal\":\"choose-value\",\"ero\":\"elektilo\",\"kialo\":\"A menu whose entries are values of one field is a select, because the choice stays as the field's value and is sent with the form; a menu entry fires once and holds nothing.\"},{\"goal\":\"single-action\",\"ero\":\"butono\",\"kialo\":\"A menu with one entry hides an action behind a click, because a person opens it only to find one command; one action is a button with its name.\"}],\"boundary\":[{\"case\":\"submenu\",\"action\":\"not-supported\"},{\"case\":\"checkable-items\",\"action\":\"ask-human\"}]}"
+  },
+  {
+    "fall": "menuo-voll",
+    "eingabe": {
+      "name": "menuo"
+    },
+    "sha256": "344fdc856bc6b829c502477fe00ee69c147679680487e6585d7a72a782ca1e3a",
+    "bytes": 12882
+  },
+  {
+    "fall": "mezurilo-brief",
+    "eingabe": {
+      "name": "mezurilo",
+      "brief": true
+    },
+    "sha256": "07402c56ff77f46e6a7560a8f6506a370c14fd39dcfa2bd5378551d1b86cd0df",
+    "bytes": 842,
+    "antwort": "{\"ero\":\"mezurilo\",\"axes\":[{\"name\":\"intent\",\"values\":[\"neutral\",\"success\",\"warning\",\"danger\"],\"default\":\"neutral\"}],\"required\":{\"props\":[],\"slots\":[\"label\",\"value-text\"]},\"props\":[{\"name\":\"value\",\"type\":\"number\"},{\"name\":\"min\",\"type\":\"number\"},{\"name\":\"max\",\"type\":\"number\"}],\"flags\":[\"label-hidden\"],\"purpose\":\"Shows a known value within a known range, with its number: 66 % conform, 3 of 5 checked.\",\"instead\":[{\"goal\":\"task-progress\",\"ero\":null,\"kialo\":\"Progress of a running task moves by itself and ends, because it is a wait, not a measure; that is an Ero of its own, a person decides.\"},{\"goal\":\"status-word\",\"ero\":\"insigno\",\"kialo\":\"A state in a word is a badge, because a word has no scale; a meter shows where a number lies.\"}],\"boundary\":[{\"case\":\"chart\",\"action\":\"not-supported\"},{\"case\":\"multi-segment\",\"action\":\"not-supported\"}]}"
+  },
+  {
+    "fall": "mezurilo-voll",
+    "eingabe": {
+      "name": "mezurilo"
+    },
+    "sha256": "116adcc3977a797be6558bc1e72cbbc1555448b8cf76fec7235bde56baf4f374",
+    "bytes": 10875
+  },
+  {
+    "fall": "navigado-brief",
+    "eingabe": {
+      "name": "navigado",
+      "brief": true
+    },
+    "sha256": "94edd2cdbfb82d83217440ee270ec3ebe3f13b05b795566bff492047172c070f",
+    "bytes": 1271,
+    "antwort": "{\"ero\":\"navigado\",\"axes\":[{\"name\":\"orientation\",\"values\":[\"horizontal\",\"vertical\"],\"default\":\"horizontal\"},{\"name\":\"current\",\"values\":[\"true\",\"false\"],\"slot\":\"items\"}],\"required\":{\"props\":[\"label\"],\"slots\":[\"items\"]},\"props\":[{\"name\":\"label\",\"type\":\"string\"},{\"name\":\"page\",\"type\":\"string\"}],\"purpose\":\"Leads between the main pages of an application and shows where the person is; a vertical one groups its items in sections under a heading (h2–h6), an item may show an icon (slot icon-start).\",\"instead\":[{\"goal\":\"single-link\",\"ero\":\"ligilo\",\"kialo\":\"One link is a ligilo, because a navigation is a list of places with one marked as the current; a single destination has no list and no current.\"},{\"goal\":\"switch-view\",\"ero\":\"langetaro\",\"kialo\":\"Views of the same thing on one page are tabs, because the person stays where they are; a navigation leaves the page.\"},{\"goal\":\"steps\",\"ero\":null,\"kialo\":\"The steps of a process are no menu, because their order is the process and a person may not skip ahead; Fundamento has no step indicator yet, a person decides.\"}],\"boundary\":[{\"case\":\"submenu\",\"action\":\"ask-human\"},{\"case\":\"collapsed-mobile\",\"action\":\"not-supported\"},{\"case\":\"breadcrumb\",\"action\":\"use-instead\",\"ero\":\"spuro\"},{\"case\":\"drawer\",\"action\":\"ask-human\"}]}"
+  },
+  {
+    "fall": "navigado-voll",
+    "eingabe": {
+      "name": "navigado"
+    },
+    "sha256": "170f3bbe16db3b7b2526aef02052855c6585b35c092088db694228b2cd327422",
+    "bytes": 11298
+  },
+  {
+    "fall": "pagxigilo-brief",
+    "eingabe": {
+      "name": "pagxigilo",
+      "brief": true
+    },
+    "sha256": "4b1f3a633fb86c441dc525d82b9b78c96068db45d49010ca74c86e03eafc4a2a",
+    "bytes": 1228,
+    "antwort": "{\"ero\":\"pagxigilo\",\"axes\":[{\"name\":\"mode\",\"values\":[\"button\",\"link\"],\"default\":\"button\"},{\"name\":\"size\",\"values\":[\"small\",\"medium\"],\"default\":\"medium\"},{\"name\":\"summary\",\"values\":[\"pages\",\"count\",\"compact\"],\"default\":\"pages\"},{\"name\":\"current\",\"values\":[\"true\",\"false\"],\"slot\":\"items\"}],\"required\":{\"props\":[\"page\",\"total-pages\"],\"slots\":[]},\"props\":[{\"name\":\"page\",\"type\":\"string\"},{\"name\":\"total-pages\",\"type\":\"number\"},{\"name\":\"label\",\"type\":\"string\"},{\"name\":\"href-template\",\"type\":\"string\"},{\"name\":\"siblings\",\"type\":\"number\"}],\"flags\":[\"first-last\",\"total-unknown\"],\"purpose\":\"Moves through the pages of a long list and shows which page is current; with first-last it jumps to the first and the last page.\",\"instead\":[{\"goal\":\"load-more\",\"ero\":\"butono\",\"kialo\":\"A list that grows by one more part on demand is a button, because the person stays on one page and the list gets longer; pages are places a person can return to.\"},{\"goal\":\"views\",\"ero\":\"langetaro\",\"kialo\":\"Views of one thing on one page are tabs, because the person switches what is shown of the same thing; pages are parts of one list in order.\"}],\"boundary\":[{\"case\":\"infinite-scroll\",\"action\":\"ask-human\"},{\"case\":\"page-size-select\",\"action\":\"ask-human\"}]}"
+  },
+  {
+    "fall": "pagxigilo-voll",
+    "eingabe": {
+      "name": "pagxigilo"
+    },
+    "sha256": "7dd371e4d31ecec7744999d3da169aaeaf0f77a7d2011bccea6b633a5376bb0a",
+    "bytes": 14085
+  },
+  {
+    "fall": "plenstato-brief",
+    "eingabe": {
+      "name": "plenstato",
+      "brief": true
+    },
+    "sha256": "fae471b864098179d4367d70479edc84d938ca171f525e28ebe0d805fab7d345",
+    "bytes": 858,
+    "antwort": "{\"ero\":\"plenstato\",\"axes\":[{\"name\":\"kind\",\"values\":[\"loading\",\"empty\"]},{\"name\":\"compact\",\"values\":[\"true\",\"false\"],\"default\":\"false\"}],\"required\":{\"props\":[\"kind\"],\"slots\":[\"text\"]},\"purpose\":\"Fills an area while its content loads, or when there is none: loading standards, no standards yet; a title (slot heading) says where the person is, an icon (slot icon) what is missing.\",\"instead\":[{\"goal\":\"button-busy\",\"ero\":\"butono\",\"kialo\":\"An action that is working is the butono's own loading, because the person waits at the button they pressed; an area loads when its content is not there yet.\"},{\"goal\":\"progress-known\",\"ero\":null,\"kialo\":\"Progress of a task in percent is neither a measure like the mezurilo's nor a wait, because it moves by itself; that is an Ero of its own, a person decides.\"}],\"boundary\":[{\"case\":\"skeleton\",\"action\":\"not-supported\"}]}"
+  },
+  {
+    "fall": "plenstato-voll",
+    "eingabe": {
+      "name": "plenstato"
+    },
+    "sha256": "2b5959fc41628a7a3b0e8c670aa8349c6e3e30430dd7af30485a2bf6a0492683",
+    "bytes": 11154
+  },
+  {
+    "fall": "plurelektilo-brief",
+    "eingabe": {
+      "name": "plurelektilo",
+      "brief": true
+    },
+    "sha256": "33219c6b7b0940b653d14872492e7b6d116e643ffd7cc852b7d0c3bf8793aed4",
+    "bytes": 1528,
+    "antwort": "{\"ero\":\"plurelektilo\",\"axes\":[{\"name\":\"summary\",\"values\":[\"count\",\"labels\",\"tags\"],\"default\":\"count\"},{\"name\":\"expanded\",\"values\":[\"true\",\"false\"],\"default\":\"false\"},{\"name\":\"intent\",\"values\":[\"neutral\",\"success\",\"warning\",\"danger\"],\"default\":\"neutral\"},{\"name\":\"message-position\",\"values\":[\"below\",\"joined\"],\"default\":\"below\"},{\"name\":\"size\",\"values\":[\"small\",\"medium\",\"large\"],\"default\":\"medium\"},{\"name\":\"selected\",\"values\":[\"true\",\"false\"],\"slot\":\"options\"},{\"name\":\"active\",\"values\":[\"true\",\"false\"],\"slot\":\"options\"}],\"required\":{\"props\":[],\"slots\":[\"label\",\"options\"]},\"props\":[{\"name\":\"values\",\"type\":\"string\"},{\"name\":\"max\",\"type\":\"number\"},{\"name\":\"placeholder\",\"type\":\"string\"},{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"label\",\"type\":\"string\",\"shown\":true}],\"flags\":[\"filterable\",\"required\",\"disabled\",\"loading\",\"readonly\",\"invalid\",\"clearable\",\"select-all\"],\"purpose\":\"Chooses several values from a long list, filterable, and shows the chosen ones as removable tags; options of one group name it (attribute group) and stand under its heading.\",\"instead\":[{\"goal\":\"few-options\",\"ero\":\"markobutono\",\"kialo\":\"Up to seven options read faster as boxes that all stay visible, because a list hides them behind a click; a markobutono per option covers it.\"},{\"goal\":\"one-value\",\"ero\":\"elektilo\",\"kialo\":\"One value from a list is the elektilo's, because a single choice needs no count and no tags; with icons it is the listelektilo's, typed the kompletigilo's.\"}],\"boundary\":[{\"case\":\"create-new-value\",\"action\":\"ask-human\"}]}"
+  },
+  {
+    "fall": "plurelektilo-voll",
+    "eingabe": {
+      "name": "plurelektilo"
+    },
+    "sha256": "c5f4e06ac9ab19b1cb9a37b0d1fa6aa1b07086a9c86fedbc39fc1af1bbab6fe5",
+    "bytes": 24438
+  },
+  {
+    "fall": "saltligilo-brief",
+    "eingabe": {
+      "name": "saltligilo",
+      "brief": true
+    },
+    "sha256": "6ea5d5f81f9e9c73414d7bc3163f42c259c9def52b80bdf043181090e8273549",
+    "bytes": 535,
+    "antwort": "{\"ero\":\"saltligilo\",\"axes\":[],\"required\":{\"props\":[\"to\"],\"slots\":[\"label\"]},\"props\":[{\"name\":\"to\",\"type\":\"string\"}],\"flags\":[\"focus-only\"],\"purpose\":\"Lets keyboard users skip repeated content and jump to the main content.\",\"instead\":[{\"goal\":\"in-page-link\",\"ero\":\"ligilo\",\"kialo\":\"A reference inside the text is a link, because a reader follows it from the sentence it stands in; the skip link stands before everything and only passes over what repeats on every page.\"}],\"boundary\":[{\"case\":\"always-visible\",\"action\":\"not-supported\"}]}"
+  },
+  {
+    "fall": "saltligilo-voll",
+    "eingabe": {
+      "name": "saltligilo"
+    },
+    "sha256": "a4d1f7f1fdccde164e7a825329f268c65d617d5d30ec529cbda5767a98fbe432",
+    "bytes": 6720,
+    "antwort": "{\"ero\":{\"id\":\"ero_01M55X2W7FMR4C5F279M85EAC3\",\"name\":\"saltligilo\",\"description\":\"A skip link: the first focusable element of a page, hidden until it has the focus, then shown above everything; it jumps to the main content past the repeated parts (WCAG 2.4.1).\"},\"skemo\":{\"id\":\"ske_01M55X2WKJTJVMKK7CPB0ZKHFQ\",\"props\":[{\"description\":\"The id of the target on the same page: a landmark (main) or an element that can take the focus; the Web Celo spells it as the fragment of the link and gives the target the focus.\",\"kind\":\"string\",\"name\":\"to\",\"required\":true},{\"default\":false,\"description\":\"Gives the target the focus without changing the fragment of the page (Nachlese 7 ② B-9: a hash-routed application, whose router reads the fragment). Without it the click is cancelable: preventDefault() on it does the same — the focus moves, the fragment stays.\",\"kind\":\"boolean\",\"name\":\"focus-only\"}],\"states\":[\"rest\",\"focus\"],\"slots\":[{\"default\":true,\"name\":\"label\",\"text\":true}],\"parts\":{\"border\":{\"color\":{\"fixed\":\"color.border.strong\"},\"width\":{\"fixed\":\"border.width.default\"}},\"box\":{\"height\":{\"fixed\":\"size.target.min\"},\"inline-padding\":{\"fixed\":\"spacing.medium\"},\"radius\":{\"fixed\":\"radius.role.control\"}},\"focus-ring\":{\"color\":{\"fixed\":\"color.focus.inner\"},\"offset\":{\"fixed\":\"focus.offset\"},\"ring\":{\"fixed\":\"focus.ring\"}},\"label\":{\"color\":{\"fixed\":\"color.text.default\"},\"typography\":{\"fixed\":\"typography.label.1\"}},\"surface\":{\"fill\":{\"fixed\":\"color.background.raised\"},\"layer\":{\"fixed\":\"elevation.layer.overlay\"},\"shadow\":{\"fixed\":\"elevation.shadow.floating\"}}},\"bindings\":[],\"a11y\":{\"keys\":[\"Enter\"],\"name\":[\"slot:label\"],\"role\":\"link\",\"states\":{},\"texts\":{\"label-empty\":{\"de\":\"Zum Inhalt springen\",\"en\":\"Skip to content\"}}},\"goals\":[{\"goal\":\"skip-to-content\",\"keywords\":{\"de\":[\"sprunglink\",\"überspringen\",\"springen\"],\"en\":[\"skip\",\"skiplink\",\"jump\"]},\"props\":{},\"regulo\":\"link-label-names-destination\"}]},\"reguloj\":[{\"id\":\"reg_01M4RPB19GDEJE9T2S21VNRE0H\",\"name\":\"spacing-owned-by-container\",\"statement\":\"The space between sibling Eroj belongs to their container; an Ero carries no outer spacing.\",\"kialo\":\"An Ero does not know its neighbours. If each one brought its own distance, two Eroj side by side would add up their distances, and the rhythm of a view would depend on which Ero stands where.\",\"checkability\":\"manual\"},{\"id\":\"reg_01M4RYCWPBKKHNBR908WP6Y6V0\",\"name\":\"link-label-names-destination\",\"statement\":\"The label of a ligilo and every item of a navigado names the destination; here, click, more or link alone name none; the skip link (saltligilo) names where it jumps to: 'Zum Inhalt springen'.\",\"kialo\":\"WCAG 2.4.4 (Link Purpose in Context): a screen reader user reads the links of a page as a list, out of context; a list of here says nothing.\",\"checkability\":\"automatic\"}],\"examples\":[],\"projekcioj\":{\"webComponent\":{\"tag\":\"fm-saltligilo\",\"attributes\":{\"to\":\"string\",\"focus-only\":\"boolean\"},\"slots\":[\"label\"],\"defaultSlot\":\"label\"},\"react\":{\"package\":\"@fundamento/eroj/react\",\"component\":\"Saltligilo\",\"props\":{\"to\":\"string\",\"focusOnly\":\"boolean\"}},\"figma\":{\"componentSet\":\"saltligilo\",\"properties\":{\"to\":\"text\",\"focus-only\":\"boolean\",\"state\":[\"rest\",\"focus\"]},\"pluginData\":{\"namespace\":\"fundamento\",\"key\":\"ero\",\"value\":\"saltligilo\"}},\"css\":{\"files\":[\"fundamento.css\",\"fundamento-komuna.css\"],\"attributes\":[\"data-fm-aspekto\",\"data-fm-viewport\",\"data-fm-density\",\"data-fm-color-scheme\",\"data-fm-contrast\",\"data-fm-motion\"]},\"tailwind\":{\"classes\":{\"border.color\":[\"border-fm-border-strong\"],\"box.inline-padding\":[\"px-fm-medium\"],\"box.radius\":[\"rounded-fm-role-control\"],\"focus-ring.color\":[\"text-fm-focus-inner\"],\"label.color\":[\"text-fm-text-default\"],\"surface.fill\":[\"bg-fm-background-raised\"]}},\"makeKit\":{\"package\":\"@fundamento/make-kit-komuna\"}},\"uzo\":{\"purpose\":\"Lets keyboard users skip repeated content and jump to the main content.\",\"instead\":[{\"ero\":\"ligilo\",\"goal\":\"in-page-link\",\"keywords\":{\"de\":[\"verweis\",\"anker\",\"siehe\"],\"en\":[\"reference\",\"anchor\",\"see\"]},\"kialo\":\"A reference inside the text is a link, because a reader follows it from the sentence it stands in; the skip link stands before everything and only passes over what repeats on every page.\"}],\"boundary\":[{\"action\":\"not-supported\",\"case\":\"always-visible\",\"keywords\":{\"de\":[\"dauerhaft\",\"immer\"],\"en\":[\"permanent\",\"always\"]},\"kialo\":\"A skip link shows itself only to the person who tabs to it, because for everyone else it is a word before the content that says nothing; a link that is always shown is a place of the navigation (navigado) or a ligilo.\"}],\"composes\":{\"containers\":[{\"kialo\":\"The shell of an application holds the skip link as its first element, because the repeated parts it passes over (the navigation, the header) are the shell's and come before the content of every page.\",\"name\":\"shell\"}],\"with\":[],\"never\":[],\"spacing\":{\"owner\":\"container\",\"regulo\":{\"id\":\"reg_01M4RPB19GDEJE9T2S21VNRE0H\",\"name\":\"spacing-owned-by-container\",\"statement\":\"The space between sibling Eroj belongs to their container; an Ero carries no outer spacing.\",\"kialo\":\"An Ero does not know its neighbours. If each one brought its own distance, two Eroj side by side would add up their distances, and the rhythm of a view would depend on which Ero stands where.\",\"checkability\":\"manual\"}}},\"slots\":{\"label\":{\"accepts\":[\"text\"],\"max\":1,\"nesting\":0,\"required\":true}},\"layout\":{\"size\":\"content\",\"wrap\":\"never\"},\"content\":[{\"check\":{\"kind\":\"not-words\",\"words\":{\"de\":[\"hier\",\"klicken\",\"mehr\",\"link\"],\"en\":[\"here\",\"click\",\"more\",\"link\"]}},\"fixed\":true,\"regulo\":{\"id\":\"reg_01M4RYCWPBKKHNBR908WP6Y6V0\",\"name\":\"link-label-names-destination\",\"statement\":\"The label of a ligilo and every item of a navigado names the destination; here, click, more or link alone name none; the skip link (saltligilo) names where it jumps to: 'Zum Inhalt springen'.\",\"kialo\":\"WCAG 2.4.4 (Link Purpose in Context): a screen reader user reads the links of a page as a list, out of context; a list of here says nothing.\",\"checkability\":\"automatic\"}}],\"when-not\":[{\"case\":\"A link stands inside the text and leads to another place.\",\"ero\":\"ligilo\"},{\"case\":\"The link is to be visible at all times.\",\"ero\":\"navigado\"}],\"do-dont\":{\"do\":[\"Place the skip link at the start of the page, before everything that repeats.\",\"Let to point to the main content or to an element that can take the focus.\",\"Set focus-only in an application whose router reads the part of the address after the hash.\"],\"dont\":[\"Show the skip link at all times; it appears only for the person who tabs to it.\",\"Let it point to a target that does not exist on the page.\"]},\"keyboard\":[{\"keys\":[\"Enter\"],\"action\":\"Jumps to the target and moves the focus there; with focus-only the address stays unchanged.\"}]}}"
+  },
+  {
+    "fall": "signeto-brief",
+    "eingabe": {
+      "name": "signeto",
+      "brief": true
+    },
+    "sha256": "3c1663fd55c56807f987e7cf45d64a3e9d3fbf4c6574736a78d45c4562ae6ce2",
+    "bytes": 719,
+    "antwort": "{\"ero\":\"signeto\",\"axes\":[{\"name\":\"mode\",\"values\":[\"static\",\"selectable\",\"removable\"],\"default\":\"static\"},{\"name\":\"selected\",\"values\":[\"true\",\"false\"],\"default\":\"false\"},{\"name\":\"size\",\"values\":[\"small\",\"medium\",\"large\"],\"default\":\"medium\"},{\"name\":\"intent\",\"values\":[\"neutral\",\"info\",\"success\",\"warning\",\"danger\"],\"default\":\"neutral\"}],\"required\":{\"props\":[],\"slots\":[\"label\"]},\"flags\":[\"disabled\"],\"purpose\":\"Labels something with a category; can be chosen as a filter or removed.\",\"instead\":[{\"goal\":\"status\",\"ero\":\"insigno\",\"kialo\":\"A status is read, not pressed or removed, because it says what is, not what a person chooses; the insigno covers it.\"}],\"boundary\":[{\"case\":\"tinted-categories\",\"action\":\"ask-human\"}]}"
+  },
+  {
+    "fall": "signeto-voll",
+    "eingabe": {
+      "name": "signeto"
+    },
+    "sha256": "1a027f9c6f87eede1b50a1e83e20438cbe6ded4e8d02dc2309aae8a395409de8",
+    "bytes": 14332
+  },
+  {
+    "fall": "spuro-brief",
+    "eingabe": {
+      "name": "spuro",
+      "brief": true
+    },
+    "sha256": "ff34c2a2d34ef88f5ee468e691dfdb55df936c9781ddbad30e8504e05ce2804e",
+    "bytes": 933,
+    "antwort": "{\"ero\":\"spuro\",\"axes\":[{\"name\":\"emphasis\",\"values\":[\"medium\",\"low\"],\"default\":\"medium\"},{\"name\":\"current\",\"values\":[\"true\",\"false\"],\"slot\":\"items\"}],\"required\":{\"props\":[],\"slots\":[\"items\"]},\"props\":[{\"name\":\"label\",\"type\":\"string\"},{\"name\":\"page\",\"type\":\"string\"},{\"name\":\"max-items\",\"type\":\"number\"}],\"purpose\":\"Shows where the current page sits in a hierarchy and links back up to each level; the first item may show an icon (slot icon-start).\",\"instead\":[{\"goal\":\"main-navigation\",\"ero\":\"navigado\",\"kialo\":\"The places beside the page are a navigation, because a breadcrumb shows the ancestors above it, not the siblings; that is the navigado.\"},{\"goal\":\"steps\",\"ero\":null,\"kialo\":\"The steps of a process are no path up a hierarchy, because their order is the process and the person may not jump back freely; Fundamento has no step indicator yet, a person decides.\"}],\"boundary\":[{\"case\":\"sibling-menu\",\"action\":\"not-supported\"}]}"
+  },
+  {
+    "fall": "spuro-voll",
+    "eingabe": {
+      "name": "spuro"
+    },
+    "sha256": "e85eb46bf372d0ae88cfbecfe0274c9933140b0cacaf3f0b7a0cf3572886d946",
+    "bytes": 10319
+  },
+  {
+    "fall": "sxaltilo-brief",
+    "eingabe": {
+      "name": "sxaltilo",
+      "brief": true
+    },
+    "sha256": "7bdca8860eb6130e8a1c7649061a63010addc64c1fbce7a15b29448284351937",
+    "bytes": 1020,
+    "antwort": "{\"ero\":\"sxaltilo\",\"axes\":[{\"name\":\"checked\",\"values\":[\"true\",\"false\"],\"default\":\"false\"},{\"name\":\"size\",\"values\":[\"small\",\"medium\"],\"default\":\"medium\",\"deprecated\":{\"large\":\"medium\"}},{\"name\":\"intent\",\"values\":[\"neutral\",\"success\",\"warning\",\"danger\"],\"default\":\"neutral\"},{\"name\":\"message-position\",\"values\":[\"below\",\"joined\"],\"default\":\"below\"},{\"name\":\"label-side\",\"values\":[\"start\",\"end\"],\"default\":\"end\"}],\"required\":{\"props\":[],\"slots\":[\"label\"]},\"props\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"label\",\"type\":\"string\",\"shown\":true}],\"flags\":[\"disabled\",\"loading\"],\"purpose\":\"Turns a setting on or off and applies it at once: notifications, dark mode, a feature.\",\"instead\":[{\"goal\":\"needs-confirmation\",\"ero\":\"markobutono\",\"kialo\":\"A setting that applies only when the form is sent is a checkbox, because a switch promises that the change is already done; Fundamento covers it with markobutono.\"}],\"boundary\":[{\"case\":\"three-states\",\"action\":\"not-supported\"},{\"case\":\"no-visible-label\",\"action\":\"not-supported\"}]}"
+  },
+  {
+    "fall": "sxaltilo-voll",
+    "eingabe": {
+      "name": "sxaltilo"
+    },
+    "sha256": "c4b5ede450380775c5540f5c7fe764cde8c663407dcd482865c6808009b1081a",
+    "bytes": 23474
+  },
+  {
+    "fall": "sxvebilo-brief",
+    "eingabe": {
+      "name": "sxvebilo",
+      "brief": true
+    },
+    "sha256": "faea2307d6db8ca362224c50b932c13f3adfe6f0ab3b2aef757e6fdfd3d25f58",
+    "bytes": 1240,
+    "antwort": "{\"ero\":\"sxvebilo\",\"axes\":[{\"name\":\"placement\",\"values\":[\"block-start\",\"block-end\",\"inline-start\",\"inline-end\"],\"default\":\"block-end\"},{\"name\":\"justify\",\"values\":[\"start\",\"center\",\"end\"],\"default\":\"center\"}],\"required\":{\"props\":[\"label\"],\"slots\":[\"content\",\"trigger\"]},\"props\":[{\"name\":\"label\",\"type\":\"string\"}],\"flags\":[\"open\",\"dismissible\"],\"purpose\":\"Opens a non-modal layer with content next to its trigger; the page stays usable; with dismissible a close button ends it on touch, where there is no Escape.\",\"instead\":[{\"goal\":\"decision\",\"ero\":\"dialogo\",\"kialo\":\"A layer that asks for a decision is a dialog, because a decision must be answered before the page goes on; a popover lets the page go on and closes on a click outside.\"},{\"goal\":\"short-hint\",\"ero\":\"konsileto\",\"kialo\":\"A short hint without anything to operate is a tooltip, because it needs no focus and no close; a popover is for content a person reads or uses.\"},{\"goal\":\"actions-list\",\"ero\":\"menuo\",\"kialo\":\"A list of actions for one object is a menu, because a menu is walked with the arrow keys and names each action; a popover holds content, no list of commands.\"}],\"boundary\":[{\"case\":\"nested-popover\",\"action\":\"not-supported\"},{\"case\":\"drawer\",\"action\":\"ask-human\"}]}"
+  },
+  {
+    "fall": "sxvebilo-voll",
+    "eingabe": {
+      "name": "sxvebilo"
+    },
+    "sha256": "79517eb7da5f50e54a9936846a34dc4988ef590f4cec6ad490f92845a6e0df29",
+    "bytes": 8339
+  },
+  {
+    "fall": "tabelo-brief",
+    "eingabe": {
+      "name": "tabelo",
+      "brief": true
+    },
+    "sha256": "c6921a75321fc05cc2f2f96910af8d23e4b440d0cbdf98e01cc2cb63a98929c3",
+    "bytes": 1492,
+    "antwort": "{\"ero\":\"tabelo\",\"axes\":[{\"name\":\"density\",\"values\":[\"compact\",\"default\",\"comfortable\"],\"default\":\"comfortable\"},{\"name\":\"direction\",\"values\":[\"ascending\",\"descending\"],\"default\":\"ascending\"},{\"name\":\"lines\",\"values\":[\"rows\",\"columns\",\"grid\",\"none\"],\"default\":\"rows\"}],\"required\":{\"props\":[],\"slots\":[\"caption\",\"content\"]},\"props\":[{\"name\":\"sort\",\"type\":\"string\"}],\"flags\":[\"caption-hidden\"],\"purpose\":\"Shows many records with the same fields as rows and columns, so a person can compare and find: standards, versions, findings; a foot row (tfoot) holds sums.\",\"instead\":[{\"goal\":\"one-record\",\"ero\":\"atributlisto\",\"kialo\":\"One record has no rows to compare, because its fields are names and values; that is the atributlisto.\"},{\"goal\":\"layout-grid\",\"ero\":null,\"kialo\":\"A table for the layout of a page destroys the reading order, because assistive technology reads it as data; a person decides how the page is built.\"},{\"goal\":\"row-actions\",\"ero\":\"menuo\",\"kialo\":\"The actions on one row stand behind one button in the row as a menu, because a button per action would fill the row with controls and a person reads the data first; the menuo names each action (Spec 014 ④ closes the boundary row-actions-menu).\"}],\"boundary\":[{\"case\":\"row-selection\",\"action\":\"ask-human\"},{\"case\":\"pagination\",\"action\":\"use-instead\",\"ero\":\"pagxigilo\"},{\"case\":\"inline-edit\",\"action\":\"use-instead\",\"ero\":\"lokredaktilo\"},{\"case\":\"sticky-header\",\"action\":\"not-supported\"},{\"case\":\"row-tint\",\"action\":\"ask-human\"}]}"
+  },
+  {
+    "fall": "tabelo-voll",
+    "eingabe": {
+      "name": "tabelo"
+    },
+    "sha256": "ddbfa2a82fbff715d3fb35d4411f14d8b3898979e01dec2a3b88514d25798851",
+    "bytes": 15432
+  },
+  {
+    "fall": "tekstareo-brief",
+    "eingabe": {
+      "name": "tekstareo",
+      "brief": true
+    },
+    "sha256": "d7b9ea985a03d5815f4134f1d12f0c3febb6a94d898d602b4a6ed7ca6b5045a1",
+    "bytes": 1079,
+    "antwort": "{\"ero\":\"tekstareo\",\"axes\":[{\"name\":\"kind\",\"values\":[\"text\",\"code\"],\"default\":\"text\"},{\"name\":\"size\",\"values\":[\"small\",\"medium\",\"large\"],\"default\":\"medium\"},{\"name\":\"intent\",\"values\":[\"neutral\",\"success\",\"warning\",\"danger\"],\"default\":\"neutral\"},{\"name\":\"message-position\",\"values\":[\"below\",\"joined\"],\"default\":\"below\"}],\"required\":{\"props\":[],\"slots\":[\"label\"]},\"props\":[{\"name\":\"value\",\"type\":\"string\"},{\"name\":\"rows\",\"type\":\"number\"},{\"name\":\"placeholder\",\"type\":\"string\"},{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"label\",\"type\":\"string\",\"shown\":true},{\"name\":\"max-length\",\"type\":\"number\"}],\"flags\":[\"required\",\"disabled\",\"loading\",\"readonly\",\"invalid\"],\"purpose\":\"Takes text that runs over several lines from a person: a comment, a description, a reason.\",\"instead\":[{\"goal\":\"one-line\",\"ero\":\"kampo\",\"kialo\":\"One line of text is a field, because a text area invites more than a name or an address takes; kampo covers it.\"}],\"boundary\":[{\"case\":\"auto-grow\",\"action\":\"ask-human\"},{\"case\":\"rich-text\",\"action\":\"not-supported\"},{\"case\":\"no-visible-label\",\"action\":\"not-supported\"}]}"
+  },
+  {
+    "fall": "tekstareo-voll",
+    "eingabe": {
+      "name": "tekstareo"
+    },
+    "sha256": "29055e02cc70175d143c502b5f82ebaca90c7a04fc88ea7844a2b44c7fa47db3",
+    "bytes": 27816
+  },
+  {
+    "fall": "teksto-brief",
+    "eingabe": {
+      "name": "teksto",
+      "brief": true
+    },
+    "sha256": "302e3d9abd6703c57169027f6fde2759e51f36c9a7f511f7731278c592781fd9",
+    "bytes": 1180,
+    "antwort": "{\"ero\":\"teksto\",\"axes\":[{\"name\":\"kind\",\"values\":[\"body\",\"caption\",\"kicker\",\"code\",\"label\"],\"default\":\"body\"},{\"name\":\"size\",\"values\":[\"1\",\"2\"],\"default\":\"1\"},{\"name\":\"emphasis\",\"values\":[\"high\",\"medium\",\"low\"],\"default\":\"high\"}],\"required\":{\"props\":[],\"slots\":[\"label\"]},\"props\":[{\"name\":\"max-lines\",\"type\":\"number\"}],\"flags\":[\"tabular\"],\"purpose\":\"Sets running text in the system's type roles: body, caption, kicker, inline code; with max-lines a tooltip shows the text it cuts.\",\"instead\":[{\"goal\":\"heading\",\"ero\":\"titolo\",\"kialo\":\"A text that heads a section is a heading with a level, because a screen reader lists the levels as the table of contents and a bold paragraph is not in it; that is the titolo.\"},{\"goal\":\"link-in-text\",\"ero\":\"ligilo\",\"kialo\":\"A reference inside running text is a link, because a reader follows it from the sentence; the ligilo inline takes the text's role and breaks with it.\"},{\"goal\":\"status-word\",\"ero\":\"insigno\",\"kialo\":\"A status in one to three words beside a thing is a badge, because a status is read at a glance and never by colour alone; that is the insigno.\"}],\"boundary\":[{\"case\":\"rich-text\",\"action\":\"use-instead\",\"ero\":\"markdovido\"}]}"
+  },
+  {
+    "fall": "teksto-voll",
+    "eingabe": {
+      "name": "teksto"
+    },
+    "sha256": "32b4dc7ef60bf600645ccc25a740606ae0ece88f8fab6af71d462158f8d7fb27",
+    "bytes": 8267
+  },
+  {
+    "fall": "titolo-brief",
+    "eingabe": {
+      "name": "titolo",
+      "brief": true
+    },
+    "sha256": "71e2870470464c9c0591d4ed47f7b88387b6b4ab889362708bb037e11556fde7",
+    "bytes": 707,
+    "antwort": "{\"ero\":\"titolo\",\"axes\":[{\"name\":\"level\",\"values\":[\"1\",\"2\",\"3\",\"4\",\"5\",\"6\"]},{\"name\":\"size\",\"values\":[\"display-1\",\"display-2\",\"display-3\",\"headline-1\",\"headline-2\",\"headline-3\",\"headline-4\"]}],\"required\":{\"props\":[\"level\"],\"slots\":[\"label\"]},\"flags\":[\"focusable\"],\"purpose\":\"Names a page or section; its level is structure, its size is design.\",\"instead\":[{\"goal\":\"bold-paragraph-as-heading\",\"ero\":\"titolo\",\"kialo\":\"A bold paragraph that heads a section is a heading, because a screen reader reads the levels as the table of contents and a bold word is not in it; the titolo with its level says what the weight only shows.\"}],\"boundary\":[{\"case\":\"heading-with-actions\",\"action\":\"use-instead\",\"ero\":\"pagxo\"}]}"
+  },
+  {
+    "fall": "titolo-voll",
+    "eingabe": {
+      "name": "titolo"
+    },
+    "sha256": "f434db3dccb63f54d889aeb0aecfb44bf869afbc47db32428a2e40a5ca31e728",
+    "bytes": 11631
+  }
+]

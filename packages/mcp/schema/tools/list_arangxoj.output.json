@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fundamento:schema:mcp:list_arangxoj.output",
+  "title": "list_arangxoj output",
+  "description": "The layout means (Spec 038 MG-1): entries for Eroj, Sxablonoj and their regions by layout purpose, the spacing steps as token paths, and the purposes without a means.",
+  "type": "object",
+  "properties": {
+    "arangxoj": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The Ero or Sxablono; a region as <sxablono>/<region>.",
+            "type": "string",
+            "minLength": 1
+          },
+          "label": { "type": "string", "minLength": 1 },
+          "kind": { "enum": ["ero", "sxablono", "regiono"] },
+          "celo": { "enum": ["spacing", "row", "column", "stack", "region"] },
+          "props": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "$ref": "urn:fundamento:schema:modelo#/$defs/Name" },
+                "kind": { "enum": ["enum", "boolean", "string", "number"] },
+                "values": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [{ "type": "string" }, { "type": "number" }, { "type": "boolean" }]
+                  }
+                },
+                "required": { "const": true }
+              },
+              "required": ["name"],
+              "additionalProperties": false
+            }
+          },
+          "example": { "type": "string", "minLength": 1 }
+        },
+        "required": ["name", "kind", "celo", "props", "example"],
+        "additionalProperties": false
+      }
+    },
+    "interspacoj": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "token": { "type": "string", "minLength": 1 }
+        },
+        "required": ["token"],
+        "additionalProperties": false
+      }
+    },
+    "mankoj": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "celo": { "enum": ["spacing", "row", "column", "stack", "region"] },
+          "propono": { "type": "string", "minLength": 1 }
+        },
+        "required": ["celo", "propono"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["arangxoj", "interspacoj", "mankoj"],
+  "additionalProperties": false
+}

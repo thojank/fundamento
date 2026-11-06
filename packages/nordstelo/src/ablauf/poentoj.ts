@@ -22,6 +22,7 @@ import {
   defaultModeloSource,
   type Modelo,
   type NordsteloFile,
+  navigationOf,
   readNordstelo,
 } from "@fundamento/modelo";
 import { type AblaufTasko, planoDe } from "./katalogo.js";
@@ -49,7 +50,8 @@ export function legiKatalogon(dataDir: string = defaultModeloSource().dataDir): 
  * Skemo says it is a link (a11y role `link`) carries its target in its one required string prop
  * instead (the Modelo's fm-ligilo: no href). That target is copied to `href` of a copy of the
  * element, so a link written correctly with Fundamento counts; the stored facts stay unchanged.
- * Prop and role come from the Modelo, nothing is typed here.
+ * Prop and role come from the Modelo, nothing is typed here: since Spec 038 (1.4, D-34) through
+ * `navigationOf`, the one derivation behind get_ero's `navigation.target`.
  */
 export function faktojPorNavigado(
   faktoj: Readonly<Record<string, Fakto>>,
@@ -57,10 +59,8 @@ export function faktojPorNavigado(
 ): Record<string, Fakto> {
   const targets = new Map<string, string>();
   for (const entry of modelo.eroj) {
-    if (entry.skemo.a11y.role !== "link") continue;
-    const target = entry.skemo.props.filter((prop) => prop.kind === "string" && prop.required);
-    if (target.length === 1 && target[0] !== undefined)
-      targets.set(`fm-${entry.ero.name}`, target[0].name);
+    const navigation = navigationOf(entry);
+    if (navigation !== undefined) targets.set(`fm-${entry.ero.name}`, navigation.target);
   }
   const result: Record<string, Fakto> = {};
   for (const [slug, fakto] of Object.entries(faktoj)) {

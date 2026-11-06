@@ -1,0 +1,41 @@
+{
+  "spec": "038",
+  "bezug": "e4873c577bc90e3138279346394e11d4154883ed",
+  "erzeugtMit": "packages/mcp/test/kontrakto/generi.mjs",
+  "werkzeuge": {
+    "describe": 1,
+    "list_dimensioj": 1,
+    "list_aspektoj": 1,
+    "search_tokens": 1,
+    "get_token": 1,
+    "resolve": 2,
+    "list_reguloj": 1,
+    "list_jugxoj": 1,
+    "validate": 1,
+    "derive_name": 1,
+    "check_contrast": 1,
+    "explain": 1,
+    "explain_regulo": 1,
+    "describe_term": 1,
+    "list_eroj": 2,
+    "get_ero": 80,
+    "suggest_ero": 2,
+    "check_usage": 3,
+    "list_sxablonoj": 2,
+    "get_sxablono": 10
+  },
+  "ausgenommen": [
+    {
+      "werkzeug": "preview_agordo",
+      "grund": "reads the structure files of the repository from disk"
+    },
+    {
+      "werkzeug": "propose_agordo",
+      "grund": "answers with a file:// link to the Werkstatt that embeds the absolute repository path"
+    },
+    {
+      "werkzeug": "save_agordo",
+      "grund": "writes a file"
+    }
+  ]
+}

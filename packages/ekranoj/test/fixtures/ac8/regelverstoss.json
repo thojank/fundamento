@@ -1,0 +1,83 @@
+{
+  "fall": "regelverstoss",
+  "fragment": "<fm-dialogo open>\n  <span slot=\"heading\">Eintrag entfernen?</span>\n  <div slot=\"actions\"><fm-butono emphasis=\"high\" intent=\"danger\">Entfernen</fm-butono><fm-butono emphasis=\"high\">Abbrechen</fm-butono></div>\n</fm-dialogo>",
+  "lingvo": "de",
+  "expected": {
+    "instancoj": [
+      {
+        "ero": "dialogo",
+        "props": {
+          "open": true
+        },
+        "texts": {
+          "heading": "Eintrag entfernen?",
+          "actions": "Entfernen Abbrechen"
+        },
+        "slots": {
+          "heading": [
+            "text"
+          ],
+          "actions": [
+            "text"
+          ]
+        },
+        "lingvo": "de"
+      },
+      {
+        "ero": "butono",
+        "props": {
+          "emphasis": "high",
+          "intent": "danger"
+        },
+        "label": "Entfernen",
+        "container": "dialogo-1",
+        "lingvo": "de"
+      },
+      {
+        "ero": "butono",
+        "props": {
+          "emphasis": "high"
+        },
+        "label": "Abbrechen",
+        "container": "dialogo-1",
+        "lingvo": "de"
+      }
+    ],
+    "malobservoj": [
+      {
+        "rule": "uzo-slot-accepts",
+        "severity": "error",
+        "path": "instances#/0",
+        "message": "Instance 0 of dialogo holds text in the slot actions, which accepts butono.",
+        "suggestion": "Put butono in the slot actions.",
+        "loko": "fm-dialogo"
+      },
+      {
+        "rule": "destructive-label-names-object",
+        "severity": "error",
+        "path": "instances#/1",
+        "message": "Instance 1 of butono says \"Entfernen\" (slot:label): it names the verb \"entfernen\" but not what it acts on.",
+        "suggestion": "Write the text as the approved example does, e.g. \"Projekt löschen\".",
+        "regulo": {
+          "id": "reg_01M4RPB19HEMSFTRDZNPTHJV7Q",
+          "name": "destructive-label-names-object",
+          "kialo": "\"Löschen\" alone does not say whether the draft, the project or the account goes. Only the object makes the consequence clear before it cannot be undone."
+        },
+        "loko": "fm-butono „Entfernen“"
+      },
+      {
+        "rule": "one-primary-per-container",
+        "severity": "error",
+        "path": "instances#/1",
+        "message": "2 instances with emphasis=high in container dialogo-1 (instances 1, 2).",
+        "suggestion": "Keep one high-emphasis action per container; give the others emphasis=medium or low.",
+        "regulo": {
+          "id": "reg_01M2XMV80DG7JCJDTZGE66MGHW",
+          "name": "one-primary-per-container",
+          "kialo": "Two equal calls to action move the decision onto the user; one primary action makes the next step obvious, and every other action steps back as secondary or tertiary."
+        },
+        "loko": "fm-butono „Entfernen“, fm-butono „Abbrechen“"
+      }
+    ]
+  }
+}

@@ -1,0 +1,198 @@
+{
+  "fall": "abnahme-komuna-r2-liste",
+  "fragment": "<fm-pagxo>\n  <fm-titolo level=\"1\" slot=\"title\">Standards</fm-titolo>\n\n  <div slot=\"actions\">\n    <fm-butono emphasis=\"high\" intent=\"neutral\">\n      <span slot=\"label\">Neuen Standard erstellen</span>\n    </fm-butono>\n  </div>\n\n  <section slot=\"sections\">\n    <fm-kampo kind=\"search\" clearable>\n      <span slot=\"label\">Suche</span>\n    </fm-kampo>\n\n    <fm-tabelo density=\"comfortable\">\n      <span slot=\"caption\">Standards</span>\n      <div slot=\"content\">\n        <table>\n          <thead>\n            <tr>\n              <th>Name</th>\n              <th>Beschreibung</th>\n              <th>Aktionen</th>\n            </tr>\n          </thead>\n          <tbody>\n            <tr>\n              <td>Standard 1</td>\n              <td>Beschreibung des Standards 1</td>\n              <td>\n                <fm-menuo placement=\"block-end\" label=\"Aktionen\">\n                  <fm-ligilo to=\"detail.html\" slot=\"items\">\n                    <span slot=\"label\">Details anzeigen</span>\n                  </fm-ligilo>\n                  <fm-apartigilo orientation=\"horizontal\" slot=\"items\"></fm-apartigilo>\n                  <fm-ligilo to=\"edit.html\" slot=\"items\">\n                    <span slot=\"label\">Bearbeiten</span>\n                  </fm-ligilo>\n                </fm-menuo>\n              </td>\n            </tr>\n          </tbody>\n        </table>\n      </div>\n    </fm-tabelo>\n  </section>\n</fm-pagxo>",
+  "lingvo": "de",
+  "expected": {
+    "instancoj": [
+      {
+        "ero": "titolo",
+        "props": {
+          "level": "1"
+        },
+        "label": "Standards",
+        "container": "pagxo-1",
+        "lingvo": "de"
+      },
+      {
+        "ero": "butono",
+        "props": {
+          "emphasis": "high",
+          "intent": "neutral"
+        },
+        "texts": {
+          "label": "Neuen Standard erstellen"
+        },
+        "slots": {
+          "label": [
+            "text"
+          ]
+        },
+        "container": "pagxo-1",
+        "lingvo": "de"
+      },
+      {
+        "ero": "kampo",
+        "props": {
+          "kind": "search",
+          "clearable": true
+        },
+        "texts": {
+          "label": "Suche"
+        },
+        "slots": {
+          "label": [
+            "text"
+          ]
+        },
+        "container": "pagxo-1",
+        "lingvo": "de"
+      },
+      {
+        "ero": "tabelo",
+        "props": {
+          "density": "comfortable"
+        },
+        "texts": {
+          "caption": "Standards",
+          "content": "Name Beschreibung Aktionen Standard 1 Beschreibung des Standards 1 Details anzeigen Bearbeiten"
+        },
+        "slots": {
+          "caption": [
+            "text"
+          ],
+          "content": [
+            "text"
+          ]
+        },
+        "container": "pagxo-1",
+        "lingvo": "de"
+      },
+      {
+        "ero": "menuo",
+        "props": {
+          "label": "Aktionen",
+          "placement": "block-end"
+        },
+        "texts": {
+          "items": [
+            "Details anzeigen",
+            "",
+            "Bearbeiten"
+          ]
+        },
+        "slots": {
+          "items": [
+            {
+              "ero": "ligilo"
+            },
+            {
+              "ero": "apartigilo"
+            },
+            {
+              "ero": "ligilo"
+            }
+          ]
+        },
+        "container": "tabelo-2",
+        "lingvo": "de"
+      },
+      {
+        "ero": "ligilo",
+        "props": {
+          "to": "detail.html"
+        },
+        "texts": {
+          "label": "Details anzeigen"
+        },
+        "slots": {
+          "label": [
+            "text"
+          ]
+        },
+        "container": "menuo-3",
+        "lingvo": "de"
+      },
+      {
+        "ero": "apartigilo",
+        "props": {
+          "orientation": "horizontal"
+        },
+        "container": "menuo-3",
+        "lingvo": "de"
+      },
+      {
+        "ero": "ligilo",
+        "props": {
+          "to": "edit.html"
+        },
+        "texts": {
+          "label": "Bearbeiten"
+        },
+        "slots": {
+          "label": [
+            "text"
+          ]
+        },
+        "container": "menuo-3",
+        "lingvo": "de"
+      }
+    ],
+    "malobservoj": [
+      {
+        "rule": "label-required",
+        "severity": "error",
+        "path": "instances#/1",
+        "message": "Instance 1 of butono has neither a visible label nor a label prop.",
+        "suggestion": "Give the label as slot text, or for an icon-only button set the label prop as its accessible name.",
+        "regulo": {
+          "id": "reg_01M2XMV80DG7JCJDTZGE66MGHY",
+          "name": "label-required",
+          "kialo": "A button without a name cannot be found or understood by assistive technology, and an icon alone is not understood by everyone; the name is what a screen reader announces and what voice control listens for."
+        },
+        "loko": "fm-butono"
+      },
+      {
+        "rule": "field-label-visible",
+        "severity": "error",
+        "path": "instances#/2",
+        "message": "Instance 2 of kampo has no visible label.",
+        "suggestion": "Give the label as the text of the element or as label=\"…\" (both are shown, Nachlese 12); a placeholder disappears while typing and names nothing afterwards.",
+        "regulo": {
+          "id": "reg_01M4S1ZR7F1KE1AV1C7X5W8GD5",
+          "name": "field-label-visible",
+          "kialo": "WCAG 3.3.2 (Labels or Instructions): a placeholder disappears while typing, and a label only a screen reader hears does not help the sighted person who finds the field half filled."
+        },
+        "loko": "fm-kampo"
+      },
+      {
+        "rule": "label-names-action",
+        "severity": "warning",
+        "path": "instances#/4",
+        "message": "Instance 4 of menuo says \"Aktionen\" (slot:items): it names no verb of a goal of the Ero (nothing says what happens on activation).",
+        "suggestion": "Write a text that follows the rule: The label of a butono names its action as a verb; so does every entry of a menuo.",
+        "regulo": {
+          "id": "reg_01M4RPB19HEMSFTRDZNPTHJV7P",
+          "name": "label-names-action",
+          "kialo": "A person decides from the label alone what happens on activation. A verb says it; a noun or a mood makes them guess."
+        },
+        "loko": "fm-menuo"
+      },
+      {
+        "rule": "uzo-slot-accepts",
+        "severity": "error",
+        "path": "instances#/4",
+        "message": "Instance 4 of menuo holds the Ero ligilo in the slot items, which accepts text or ikono or apartigilo.",
+        "suggestion": "Put text or ikono or apartigilo in the slot items.",
+        "loko": "fm-menuo"
+      },
+      {
+        "rule": "uzo-slot-accepts",
+        "severity": "error",
+        "path": "instances#/4",
+        "message": "Instance 4 of menuo holds the Ero ligilo in the slot items, which accepts text or ikono or apartigilo.",
+        "suggestion": "Put text or ikono or apartigilo in the slot items.",
+        "loko": "fm-menuo"
+      }
+    ]
+  }
+}

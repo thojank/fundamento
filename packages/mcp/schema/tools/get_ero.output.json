@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:fundamento:schema:mcp:get_ero.output",
   "title": "get_ero output",
-  "description": "One Ero as the Gvidanto states it (Spec 003 FR-13, contracts/mcp-tools §1), with its Uzo since Spec 007; or, with brief: true, the generated brief (A8).",
+  "description": "One Ero as the Gvidanto states it (Spec 003 FR-13, contracts/mcp-tools §1), with its Uzo since Spec 007; or, with brief: true, the generated brief (A8). With fields only the parts asked for, with rest for what did not fit (Spec 038 MG-3, MG-4).",
   "oneOf": [
     {
       "type": "object",
@@ -719,9 +719,62 @@
           "items": {
             "$ref": "urn:fundamento:schema:mcp:common#/$defs/Issue"
           }
+        },
+        "role": {
+          "description": "With fields (Spec 038 MG-3): the ARIA role of the Ero's element, from its Skemo.",
+          "type": "string",
+          "minLength": 1
+        },
+        "navigation": {
+          "description": "With fields (Spec 038 MG-4): the prop that holds a link's target; absent for an Ero that is no link.",
+          "$ref": "urn:fundamento:schema:mcp:common#/$defs/EroNavigation"
+        },
+        "slots": {
+          "description": "With fields (Spec 038 MG-3): every slot with what it lets in.",
+          "$ref": "urn:fundamento:schema:mcp:common#/$defs/EroSlots"
+        },
+        "rest": {
+          "description": "With fields (Spec 038, D-31): the requested parts that did not fit under the size ceiling, in fill order; ask for them with fields set to rest.",
+          "type": "array",
+          "items": {
+            "$ref": "urn:fundamento:schema:mcp:common#/$defs/EroFieldName"
+          },
+          "minItems": 1
         }
       },
       "required": ["ero", "axes", "required"],
+      "additionalProperties": false
+    },
+    {
+      "description": "The parts asked for with fields, without the brief (Spec 038 MG-3, MG-4; D-31): the Ero, then role, navigation, slots as asked, and rest for what did not fit.",
+      "type": "object",
+      "properties": {
+        "ero": {
+          "$ref": "urn:fundamento:schema:modelo#/$defs/Name"
+        },
+        "role": {
+          "description": "With fields (Spec 038 MG-3): the ARIA role of the Ero's element, from its Skemo.",
+          "type": "string",
+          "minLength": 1
+        },
+        "navigation": {
+          "description": "With fields (Spec 038 MG-4): the prop that holds a link's target; absent for an Ero that is no link.",
+          "$ref": "urn:fundamento:schema:mcp:common#/$defs/EroNavigation"
+        },
+        "slots": {
+          "description": "With fields (Spec 038 MG-3): every slot with what it lets in.",
+          "$ref": "urn:fundamento:schema:mcp:common#/$defs/EroSlots"
+        },
+        "rest": {
+          "description": "With fields (Spec 038, D-31): the requested parts that did not fit under the size ceiling, in fill order; ask for them with fields set to rest.",
+          "type": "array",
+          "items": {
+            "$ref": "urn:fundamento:schema:mcp:common#/$defs/EroFieldName"
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["ero"],
       "additionalProperties": false
     }
   ]

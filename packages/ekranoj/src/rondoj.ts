@@ -1,6 +1,7 @@
 // The run (Spec 037 Teil 1, C-6 `KuruEkranojn`): estimate, plan, then at most three rounds of build
 // and check (V-3). Round 1 builds every screen; a check renders it (injected `Bildigilo`, else the
-// facts of the markup), scores it (injected `Taksilo`), asks check_usage over MCP (D-32), computes
+// facts of the markup), scores it (injected `Taksilo`), asks check_usage over MCP (D-32; since
+// Spec 038 check_markup where the server offers it, D-03), computes
 // the navigation over all screens (D-05) and decides green (D-04). A screen that is not green gets
 // its fragment and the findings in the next round; a green one is carried forward and marked
 // (D-26). After the last round every finding left is a deviation with rule, place and reason. One
@@ -20,7 +21,7 @@ import {
 } from "./agento.js";
 import { statikaFakto } from "./fakto-statika.js";
 import { gardiModelon } from "./gardo.js";
-import { kontroliUzon, ligilajAtributojDe, type SkemoLegilo, skemoLegiloDe } from "./instancoj.js";
+import { type UzKontrolilo, uzKontroliloDe } from "./instancoj.js";
 import { haltigoDe, kostoDe, taksiKostojn } from "./kostoj.js";
 import { mankojDeKuro, type SugestoSenTrafo, sugestoSenTrafo } from "./mankoj.js";
 import { filtriIlojn } from "./mcp-kliento.js";
@@ -480,14 +481,16 @@ export async function kuruEkranojn(
   // The Gvidanto: its prompt and its tools, read once per run (Variante F only).
   let gvidanto: string | undefined;
   let iloj: ToolInfo[] = [];
-  let legi: SkemoLegilo | undefined;
+  let kontrolilo: UzKontrolilo | undefined;
   if (varianto === "F" && deps.tools !== undefined) {
     gvidanto = (await deps.tools.prompt?.()) ?? "";
-    // The allowlist also for an injected bridge: only the build tools, never the brand workshop.
     const listitaj = await deps.tools.list();
     cxiujIloj = listitaj.map((ilo) => ilo.name);
+    // Spec 038 (D-03): the whole list, before the allowlist, says once per run whether the server
+    // offers check_markup – then the new path, else the path of Spec 037.
+    kontrolilo = uzKontroliloDe(deps.tools, listitaj);
+    // The allowlist also for an injected bridge: only the build tools, never the brand workshop.
     iloj = filtriIlojn(listitaj);
-    legi = skemoLegiloDe(deps.tools);
   }
 
   // The plan: given, or asked (with the user's names, or free).
@@ -587,7 +590,7 @@ export async function kuruEkranojn(
       lingvo,
       enigo,
       deps,
-      legi,
+      kontrolilo,
       fragmentoj,
       fragmentoRondoj,
       malplenaj,
@@ -611,7 +614,8 @@ interface RondoKunteksto {
   lingvo: string;
   enigo: EkranojEnigo;
   deps: EkranojDeps;
-  legi: SkemoLegilo | undefined;
+  /** How the screens are checked and the link Eroj found (Variante F with tools only). */
+  kontrolilo: UzKontrolilo | undefined;
   fragmentoj: ReadonlyMap<string, string>;
   fragmentoRondoj: ReadonlyMap<string, number>;
   /** Screens whose build of this round ended without markup (S037-10 Befund 1). */
@@ -651,11 +655,14 @@ async function kontroliRondon(k: RondoKunteksto): Promise<Rondo> {
       faktoj[ekrano.slug] = statikaFakto(fragmento, lingvo);
     }
   }
-  // Links of Eroj that carry their target in a prop (S037-07 Befund 1): which ones, from the Skemo.
+  // Links of Eroj that carry their target in a prop (S037-07 Befund 1): which ones, from the Skemo
+  // (Spec 037) or from `navigation.target` (Spec 038 1.4).
   const nav = navigado(
     plano,
     faktoj,
-    k.legi === undefined ? {} : { ligilaAtributoj: await ligilajAtributojDe(faktoj, k.legi) },
+    k.kontrolilo === undefined
+      ? {}
+      : { ligilaAtributoj: await k.kontrolilo.ligilajAtributoj(faktoj) },
   );
   const rondo: Rondo = {};
   for (const ekrano of plano.ekranoj) {
@@ -670,16 +677,18 @@ async function kontroliRondon(k: RondoKunteksto): Promise<Rondo> {
     if (fakto === undefined || fragmento === undefined) continue;
     const taksado = deps.taksilo.taksi({ fakto, ekrano, varianto });
     let malobservoj: Malobservo[] = [];
-    if (varianto === "F" && deps.tools !== undefined && k.legi !== undefined) {
+    let sxablonajSugestoj: Malobservo[] = [];
+    if (varianto === "F" && k.kontrolilo !== undefined) {
+      const ilo = k.kontrolilo.vojo;
       try {
-        malobservoj = (await kontroliUzon(deps.tools, fakto, k.legi)).malobservoj;
+        ({ malobservoj, sxablonajSugestoj } = await k.kontrolilo.kontroli({ fakto, fragmento }));
       } catch (error) {
         malobservoj = [
           {
             rule: "check-usage-unavailable",
             severity: "error",
-            path: "check_usage",
-            message: `check_usage war nicht erreichbar: ${mesagxoDe(error)}`,
+            path: ilo,
+            message: `${ilo} war nicht erreichbar: ${mesagxoDe(error)}`,
             suggestion: "Den Gvidanto prüfen (fm mcp) und den Lauf wiederholen.",
             loko: `${ekrano.slug}.html`,
           },
@@ -711,6 +720,8 @@ async function kontroliRondon(k: RondoKunteksto): Promise<Rondo> {
         ? {}
         : { portitaEl: fragmentoRondo }),
       malhelpoj,
+      // Spec 038 D-29: the page rules of the Sxablonoj, a hint for the report only.
+      ...(sxablonajSugestoj.length === 0 ? {} : { sxablonajSugestoj }),
       fragmento,
       fakto,
       trovoj: verda

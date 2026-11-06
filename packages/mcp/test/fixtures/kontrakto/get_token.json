@@ -1,0 +1,11 @@
+[
+  {
+    "fall": "standard",
+    "eingabe": {
+      "name": "color.text.default"
+    },
+    "sha256": "2db333218e85d488a09ca1de637993ac3110a7584be68d948e7be9964d4beb7c",
+    "bytes": 1471,
+    "antwort": "{\"description\":\"Default body text.\",\"id\":\"tok_01M2VEEE0QJXF3E9TY0JX4XVBG\",\"name\":\"color.text.default\",\"role\":\"foreground\",\"type\":\"color\",\"definition\":{\"set\":\"core\",\"value\":\"{color.palette.neutral.1000}\"},\"overrides\":[{\"set\":\"aspekto/komuna+color-scheme/dark\",\"kondicxoj\":[\"aspekto=komuna\",\"color-scheme=dark\"],\"value\":\"{color.palette.neutral.25}\",\"package\":\"@fundamento/aspekto-komuna\"},{\"set\":\"color-scheme/dark\",\"kondicxoj\":[\"color-scheme=dark\"],\"value\":\"{color.palette.neutral.50}\"},{\"set\":\"color-scheme/dark+contrast/high\",\"kondicxoj\":[\"color-scheme=dark\",\"contrast=high\"],\"value\":\"{color.palette.neutral.0}\"},{\"set\":\"contrast/high\",\"kondicxoj\":[\"contrast=high\"],\"value\":\"{color.palette.neutral.1000}\"}],\"deveno\":[{\"aro\":\"core\",\"aspekto\":\"komuna\",\"dosiero\":\"packages/themes/neutral/src/neutralTheme.ts\",\"fonto\":\"astryx\",\"fontoValoro\":\"#000000\",\"maniero\":\"prenita\",\"sxlosilo\":\"--color-text-primary (light: neutral.light[0])\",\"valoro\":\"{color.palette.neutral.1000}\"},{\"aro\":\"aspekto/komuna+color-scheme/dark\",\"aspekto\":\"komuna\",\"dosiero\":\"packages/themes/neutral/src/neutralTheme.ts\",\"fonto\":\"astryx\",\"fontoValoro\":\"#ffffff\",\"jugxo\":\"jug_01M5N89C1WQ308F9302JTZRVZF\",\"kialo\":\"Die Fonto setzt Text im Dunkeln reinweiß. Reines Weiß auf dunkler Fläche überstrahlt (Halation, Befund R4 von komuna): Stufe 97,5.\",\"maniero\":\"adaptita\",\"noto\":\"Fonto-Stufe wäre neutral.0\",\"sxlosilo\":\"--color-text-primary (dark: neutral.dark[100])\",\"valoro\":\"{color.palette.neutral.25}\"}]}"
+  }
+]

@@ -543,11 +543,68 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
     },
     badInput: { agordo: { name: "provo", leitfarbe: "#6b4fa0" }, pfad: "", confirm: "ja" },
   },
+  // Spec 038 MG-1 (1.1): the layout means, the spacing steps as token paths, the Mankoj.
+  list_arangxoj: {
+    input: { lingvo: "de" },
+    output: {
+      arangxoj: [
+        {
+          name: "pagxo",
+          label: "Seite",
+          kind: "sxablono",
+          celo: "region",
+          props: [{ name: "density", kind: "enum", values: ["default", "compact"] }],
+          example: '<fm-pagxo><fm-titolo slot="title">…</fm-titolo></fm-pagxo>',
+        },
+        {
+          name: "pagxo/title",
+          kind: "regiono",
+          celo: "region",
+          props: [{ name: "level", values: [1], required: true }],
+          example: '<fm-titolo slot="title" level="1">…</fm-titolo>',
+        },
+      ],
+      interspacoj: [{ token: "spacing.small" }],
+      mankoj: [{ celo: "row", propono: "Layout primitive row: …" }],
+    },
+    badInput: { lingvo: "fr" },
+  },
+  // Spec 038 MG-2 (1.2, 1.5): markup in, the instances and the judgements out.
+  check_markup: {
+    input: {
+      fragment: '<fm-butono emphasis="high">Speichern</fm-butono>',
+      lingvo: "de",
+      aspekto: "komuna",
+      dimensioj: { viewport: "compact" },
+    },
+    output: {
+      eroj: [
+        {
+          ero: "butono",
+          props: { emphasis: "high" },
+          label: "Speichern",
+          lingvo: "de",
+          aspekto: "komuna",
+          dimensioj: { viewport: "compact" },
+        },
+      ],
+      sxablonoj: [{ sxablono: "pagxo", props: {}, regions: { title: [{ ero: "titolo" }] } }],
+      rezulto: { instances: 1, valid: true, violations: [] },
+      sxablonoRezulto: {
+        instances: 1,
+        valid: false,
+        violations: [{ sxablono: [0], issue: { ...ISSUE, rule: "sxablono-region-required" } }],
+      },
+    },
+    badInput: { fragment: "" },
+  },
 };
 
 describe("tool schemas (contracts/mcp-tools.md)", () => {
+  // Spec 038 (D-19): the list of the Bezug stays the prefix; the new tools stand at its end.
   it("defines the ten tools of FR-16 and the Gvidanto tools of Spec 002 and 003, snake_case, verb first", () => {
-    expect([...TOOL_NAMES]).toEqual([
+    expect([...TOOL_NAMES].slice(-2)).toEqual(["list_arangxoj", "check_markup"]);
+    expect([...TOOL_NAMES].slice(0, -2)).toEqual([
       "describe",
       "list_dimensioj",
       "list_aspektoj",
