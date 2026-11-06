@@ -23,7 +23,16 @@ import {
 import { planoKun } from "./test-doubles/faktoj.js";
 import { MemoraPonto } from "./test-doubles/iloj.js";
 import { MALVERDA, neniamVerda, TaksiloDouble, VERDA, verdaEkde } from "./test-doubles/taksilo.js";
-import type { EkranojDeps, EkranojEnigo, KostoTakso, Plano } from "./tipoj.js";
+import type {
+  BildigoRezulto,
+  EkranaDokumento,
+  EkranojDeps,
+  EkranojEnigo,
+  KostoTakso,
+  Plano,
+  SondoPetoForma,
+  Varianto,
+} from "./tipoj.js";
 
 const PLANO: Plano = planoKun(2); // liste → detail
 
@@ -541,5 +550,68 @@ describe("Variante 0 (D-34) and no renderer", () => {
       "liste axe-nekontrolita",
       "detail axe-nekontrolita",
     ]);
+  });
+});
+
+// K8 probes (Spec 038 Lauf 3, 3.4b, D-S038-17-2): the scorer names the tokens to measure, the run
+// hands them to the renderer unchanged; a scorer without them changes nothing.
+describe("K8 probes from the scorer to the renderer (3.4b)", () => {
+  const PETOJ: readonly SondoPetoForma[] = [
+    { token: "color.text.default", css: "--fm-color-text-default", eco: "color" },
+    { token: "font.family.body", css: "--fm-font-family-body", eco: "font-family" },
+    { token: "spacing.m", css: "--fm-spacing-m", eco: "spacing" },
+  ];
+
+  /** The renderer double that also keeps the options of every render. */
+  class OpciaBildigilo extends BildigiloDouble {
+    readonly opcioj: Record<string, unknown>[] = [];
+
+    override async render(
+      dokumento: EkranaDokumento,
+      opcioj: {
+        aspektoj: readonly string[];
+        varianto: Varianto;
+        sondoPetoj?: readonly SondoPetoForma[];
+      },
+    ): Promise<BildigoRezulto> {
+      this.opcioj.push({ ...opcioj });
+      return super.render(dokumento, opcioj);
+    }
+  }
+
+  /** The scorer double with probes. */
+  class SondaTaksilo extends TaksiloDouble {
+    readonly sondoPetoj = PETOJ;
+  }
+
+  it("hands the scorer's sondoPetoj to every render", async () => {
+    const chat = new SkriptaModelo(skripto(PLANO), { modelo: PERMESITA_MODELO });
+    const bildigilo = new OpciaBildigilo();
+    await kuruEkranojn(
+      enigoDe(),
+      depsDe({ chat, bildigilo, taksilo: new SondaTaksilo(() => MALVERDA) }),
+    );
+    expect(bildigilo.opcioj).toHaveLength(bildigilo.dokumentoj.length);
+    expect(bildigilo.opcioj.length).toBeGreaterThan(0);
+    for (const opcioj of bildigilo.opcioj) expect(opcioj.sondoPetoj).toBe(PETOJ);
+  });
+
+  it("gives the renderer the options of before, and the same result, without sondoPetoj", async () => {
+    const kuri = async (taksilo: TaksiloDouble) => {
+      const chat = new SkriptaModelo(skripto(PLANO), { modelo: PERMESITA_MODELO });
+      const bildigilo = new OpciaBildigilo();
+      const rezulto = await kuruEkranojn(enigoDe(), depsDe({ chat, bildigilo, taksilo }));
+      return { rezulto, bildigilo };
+    };
+    const sen = await kuri(new TaksiloDouble(() => MALVERDA));
+    for (const opcioj of sen.bildigilo.opcioj) {
+      expect(opcioj).toStrictEqual({ aspektoj: ["komuna"], varianto: "F" });
+    }
+    const kun = await kuri(new SondaTaksilo(() => MALVERDA));
+    // The probes reach only the renderer; the double renders no K8, so the run is the same
+    // (but for the wall time of the run, which no double fixes).
+    const senTempo = (rezulto: typeof sen.rezulto) =>
+      JSON.stringify({ ...rezulto, peno: { ...rezulto.peno, ms: 0 } });
+    expect(senTempo(kun.rezulto)).toBe(senTempo(sen.rezulto));
   });
 });

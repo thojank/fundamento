@@ -5,7 +5,13 @@
 
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import type { Fakto, PlanoEkrano, Taksado } from "@fundamento/ekranoj";
+import type {
+  FaktoAspekto as EkranojFaktoAspekto,
+  Fakto,
+  FaktoBildigo,
+  PlanoEkrano,
+  Taksado,
+} from "@fundamento/ekranoj";
 import {
   defaultModeloSource,
   type Kriterio,
@@ -16,7 +22,7 @@ import {
 } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { ekranoTaksilo, type TaksadoK8 } from "./ekrano-taksilo.js";
-import type { Facts } from "./facts.js";
+import type { Facts, FaktoAspekto, Render } from "./facts.js";
 import { score, scoreBoth } from "./score.js";
 import { facts, h } from "./test-doubles/facts.js";
 
@@ -63,6 +69,12 @@ const kunMankoj: Fakto = facts(MANKA, [{ role: "button", name: "Anmelden" }], {
   console: ["TypeError: x is undefined"],
 });
 const alFacts = (valoro: Fakto): Facts => valoro;
+// C-2 of Spec 038 Lauf 3 (S038-17) at compile time: the K8 facts of the ekranoj twin are nordstelo's,
+// per render, in both directions.
+const alFaktoAspekto = (valoro: EkranojFaktoAspekto): FaktoAspekto => valoro;
+const alRender = (valoro: FaktoBildigo): Render => valoro;
+const alEkranojFaktoAspekto = (valoro: FaktoAspekto): EkranojFaktoAspekto => valoro;
+const alFaktoBildigo = (valoro: Render): FaktoBildigo => valoro;
 
 const kriterioj: Record<string, Kriterio[]> = { [EKRANO.slug]: login.kriterioj };
 
@@ -235,5 +247,26 @@ describe("ekranoTaksilo: K8 beside the Taksado (Spec 038, 2.4)", () => {
     });
     expect("k8" in taksado).toBe(false);
     expect(Object.keys(taksado).sort()).toEqual(["k", "mankoj", "total"]);
+  });
+});
+
+// Spec 038 Lauf 3 (3.4b, C-2, D-S038-17-1): the ekranoj renderer stores K8 facts per render; they
+// are nordstelo's facts type for type, so `k8()` reads them unchanged.
+describe("ekranoj K8 facts per render are nordstelo's (Spec 038, 3.4b)", () => {
+  it("carries every K8 render of the fixture through both types unchanged", () => {
+    const facts = JSON.parse(
+      readFileSync(
+        fileURLToPath(new URL("../test/fixtures/k8/roh/faktoj.json", import.meta.url)),
+        "utf8",
+      ),
+    ) as Facts;
+    const kunK8 = facts.renders.filter((render) => render.k8 !== undefined);
+    expect(kunK8.length).toBeGreaterThan(0);
+    for (const render of kunK8) {
+      expect(alRender(alFaktoBildigo(render))).toEqual(render);
+      if (render.k8 !== undefined) {
+        expect(alFaktoAspekto(alEkranojFaktoAspekto(render.k8))).toEqual(render.k8);
+      }
+    }
   });
 });

@@ -5,7 +5,18 @@
 // (D-03), so this package never imports nordstelo, mcp, eroj or the Gvidanto (AC-10).
 
 import type { Budget, ChatMessage, ToolInfo } from "@fundamento/metiejo";
+import type { FaktoAspekto, SondoPetoForma } from "./aspekto-faktoj.js";
 
+// The K8 facts twin (Spec 038 Lauf 3, C-2): its structural types, under nordstelo's names.
+export type {
+  FaktoAspekto,
+  FaktoAspektoKruda,
+  Interspaco,
+  NativaFingrospuro,
+  Sondo,
+  SondoPetoForma,
+  Tekstero,
+} from "./aspekto-faktoj.js";
 export type { Budget, ChatMessage, ToolInfo };
 
 /** A structured problem (code-style): where, which rule, what is wrong, what to do. */
@@ -66,6 +77,12 @@ export interface FaktoBildigo {
   scheme: "light" | "dark";
   contrast: "default" | "high";
   axe: { id: string; nodes: number }[];
+  /**
+   * The K8 facts of this render (Spec 038 Lauf 3, D-S038-17-1): only when the scorer asked for
+   * probes (`Taksilo.sondoPetoj`) and only at contrast „default“. Read on the screen without the
+   * frame, so every index equals the one in `Fakto.elements` (D-S038-17-3).
+   */
+  k8?: FaktoAspekto;
 }
 
 /** What the browser measured on one screen, stored with the run (D-33). */
@@ -99,6 +116,11 @@ export interface Taksado {
 /** The injected scorer (D-03); nordstelo implements it with its unchanged `score()` (C-8). */
 export interface Taksilo {
   taksi(e: { fakto: Fakto; ekrano: PlanoEkrano; varianto: Varianto }): Taksado;
+  /**
+   * The brand tokens the renderer measures in its probe document for K8 (D-S038-17-2); nordstelo
+   * fills them with `sondojDe(modelo)`. Absent: no K8 facts, K8 „nicht geprüft“.
+   */
+  sondoPetoj?: readonly SondoPetoForma[];
 }
 
 // --- check_usage -------------------------------------------------------------------------------
@@ -234,7 +256,12 @@ export interface BildigoRezulto {
 export interface Bildigilo {
   render(
     dokumento: EkranaDokumento,
-    opcioj: { aspektoj: readonly string[]; varianto: Varianto },
+    opcioj: {
+      aspektoj: readonly string[];
+      varianto: Varianto;
+      /** The probes of the scorer (`Taksilo.sondoPetoj`); absent = no K8 facts (C-2). */
+      sondoPetoj?: readonly SondoPetoForma[];
+    },
   ): Promise<BildigoRezulto>;
   close(): Promise<void>;
 }
