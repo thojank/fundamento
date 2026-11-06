@@ -27,10 +27,11 @@ export interface EkranoTaksiloOpcioj {
 }
 
 /**
- * The Taksado of ekranoj with K8 beside it (Spec 038 Lauf 2, C-E, D-94): the ekranoj type stays
- * unchanged; `k8` exists only where the score has one.
+ * The Taksado of ekranoj with K8 beside it (Spec 038 Lauf 2, C-E, D-94; Lauf 3, C-3): `k8` exists
+ * only where the score has one, and carries `plena` from `k8Plena` – the one source of the rule
+ * (D-145). It is ekranoj's `TaksadoK8Rezulto`, checked at compile time in the test.
  */
-export type TaksadoK8 = Taksado & { k8?: K8Rezulto };
+export type TaksadoK8 = Taksado & { k8?: K8Rezulto & { plena: boolean } };
 
 /** The scorer of ekranoj whose Taksado carries K8 beside it. */
 export type TaksiloK8 = Taksilo & {
@@ -70,7 +71,8 @@ export function ekranoTaksilo(opcioj: EkranoTaksiloOpcioj): TaksiloK8 {
         k: { ...nova.k },
         total: nova.total,
         mankoj: nova.gaps.map((gap) => ({ kind: gap.kind, key: gap.key })),
-        ...(nova.k8 === undefined ? {} : { k8: nova.k8 }),
+        // S038-18 red: placeholder, not the rule (the green commit sets k8Plena).
+        ...(nova.k8 === undefined ? {} : { k8: { ...nova.k8, plena: false } }),
       };
     },
   };

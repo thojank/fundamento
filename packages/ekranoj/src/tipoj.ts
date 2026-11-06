@@ -106,11 +106,46 @@ export type Varianto = "F" | "0";
 /** The six scored criteria of the north-star measure (Spec 030); K7 (effort) is never weighted. */
 export type Kriterio = "K1" | "K2" | "K3" | "K4" | "K5" | "K6";
 
+/** The four K8 features (Spec 038, D-08): the same string union as nordstelo's `K8Merkmal`. */
+export type K8Merkmal = "ersatzschrift" | "nativaj" | "interspacoj" | "sxablono";
+
+/** K8 of one brand × scheme: a structural twin of nordstelo's `K8Kombinacio` (C-3). */
+export interface TaksadoK8Kombinacio {
+  aspekto: string;
+  scheme: "light" | "dark";
+  /** Hit shares 0–1 per feature. */
+  merkmaloj: Record<K8Merkmal, number>;
+  kvoto: number;
+  /** One German sentence per feature (the place, e.g. a tag path in backticks, inside it). */
+  kialoj: { merkmal: K8Merkmal; teksto: string }[];
+  /** A brand family is declared but not loaded; the value stays computed. */
+  nekomparebla?: "tiparo-ne-sxargita";
+}
+
+/**
+ * K8 of one screen as the scorer hands it in (Spec 038 Lauf 3, C-3, D-S038-18-1): nordstelo's
+ * `K8Rezulto` plus `plena`. `plena` comes only from nordstelo's `k8Plena` (D-145); ekranoj reads
+ * it and never computes it.
+ */
+export interface TaksadoK8Rezulto {
+  kvoto: number;
+  kombinacioj: TaksadoK8Kombinacio[];
+  /** Features the Modelo has no means for (D-16): reported, never blocking. */
+  mankoj: K8Merkmal[];
+  /** Every feature is 1 in every combination, except the features in `mankoj`. */
+  plena: boolean;
+}
+
 /** The score of one screen: share per criterion (null = does not apply), total, gaps. */
 export interface Taksado {
   k: Record<Kriterio, number | null>;
   total: number;
   mankoj: { kind: string; key: string }[];
+  /**
+   * K8 beside the score (Spec 038, D-94, C-3): only when the renders carried K8 facts. It never
+   * enters `total`, the weights or the gate; with it, a screen is green only if `plena` (D-08).
+   */
+  k8?: TaksadoK8Rezulto;
 }
 
 /** The injected scorer (D-03); nordstelo implements it with its unchanged `score()` (C-8). */
@@ -182,7 +217,9 @@ export type Malhelpo =
   | "K5"
   | "navigado"
   /** The agent answered without markup, also after being asked once more (S037-10 Befund 1). */
-  | "leere-antwort";
+  | "leere-antwort"
+  /** K8 is there and not `plena` (Spec 038, D-08, D-16): the last condition. */
+  | "K8";
 
 export interface VerdaEnigo {
   varianto: Varianto;
@@ -469,6 +506,11 @@ export interface EkranojRezulto {
   faritajRondoj?: number;
   /** Notes for the report: a shortened plan (D-38), the reason of a stop, a renderer error. */
   notoj?: string[];
+  /**
+   * K8 deviations „mangels Mittel“ (Spec 038, C-4, D-16): a feature below 1 that the Modelo has
+   * no means for (`k8.mankoj`), per screen of the last round. Never blocking; absent when empty.
+   */
+  senRimedaj?: Restanta[];
 }
 
 /** The whole flow (implemented in S037-03): sentence and brand in, checked screens out. */

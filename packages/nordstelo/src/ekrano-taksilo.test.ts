@@ -11,6 +11,7 @@ import type {
   FaktoBildigo,
   PlanoEkrano,
   Taksado,
+  TaksadoK8Rezulto,
 } from "@fundamento/ekranoj";
 import {
   defaultModeloSource,
@@ -23,6 +24,9 @@ import {
 import { describe, expect, it } from "vitest";
 import { ekranoTaksilo, type TaksadoK8 } from "./ekrano-taksilo.js";
 import type { Facts, FaktoAspekto, Render } from "./facts.js";
+import type { TaksadoK8 as EniraTaksadoK8, TaksiloK8 as EniraTaksiloK8 } from "./index.js";
+import { type K8Rezulto, k8Plena } from "./k8/k8.js";
+import { sondojDe } from "./k8/soloj.js";
 import { score, scoreBoth } from "./score.js";
 import { facts, h } from "./test-doubles/facts.js";
 
@@ -231,7 +235,8 @@ describe("ekranoTaksilo: K8 beside the Taksado (Spec 038, 2.4)", () => {
         katalogo,
       );
       expect(nova.k8).toBeDefined();
-      expect(kun.k8).toEqual(nova.k8);
+      if (nova.k8 === undefined) continue;
+      expect(kun.k8).toEqual({ ...nova.k8, plena: k8Plena(nova.k8) });
       expect("k8" in sen).toBe(false);
       expect(kun.k).toEqual(sen.k);
       expect(kun.total).toBe(sen.total);
@@ -268,5 +273,66 @@ describe("ekranoj K8 facts per render are nordstelo's (Spec 038, 3.4b)", () => {
         expect(alFaktoAspekto(alEkranojFaktoAspekto(render.k8))).toEqual(render.k8);
       }
     }
+  });
+});
+
+// Spec 038 Lauf 3 (3.4, C-3, D-145, D-S038-17-2): the adapter is the one source of `plena` and
+// names the probes the renderer measures; its types are ekranoj's, checked at compile time.
+describe("ekranoTaksilo: plena and probes for ekranoj (Spec 038, 3.4)", () => {
+  const fiksajxo = (nomo: "roh" | "sxablono"): Fakto =>
+    JSON.parse(
+      readFileSync(
+        fileURLToPath(new URL(`../test/fixtures/k8/${nomo}/faktoj.json`, import.meta.url)),
+        "utf8",
+      ),
+    ) as Facts;
+
+  // C-3 at compile time: the adapter's Taksado is an ekranoj Taksado, and nordstelo's K8 with
+  // `plena` is ekranoj's TaksadoK8Rezulto (and back).
+  const alTaksado = (valoro: TaksadoK8): Taksado => valoro;
+  const alTaksadoK8Rezulto = (valoro: K8Rezulto & { plena: boolean }): TaksadoK8Rezulto => valoro;
+  const alK8Rezulto = (valoro: TaksadoK8Rezulto): K8Rezulto & { plena: boolean } => valoro;
+  // D-S038-18-3: both types come from the package entry, too.
+  const elEniro = (valoro: EniraTaksadoK8): TaksadoK8 => valoro;
+  const taksiloElEniro = (valoro: EniraTaksiloK8): EniraTaksiloK8 => valoro;
+
+  it("copies k8 with plena = k8Plena(k8) for both fixtures", () => {
+    const plenaj: boolean[] = [];
+    for (const nomo of ["roh", "sxablono"] as const) {
+      const fakto = fiksajxo(nomo);
+      const { nova } = scoreBoth(
+        {
+          facts: alFacts(fakto),
+          tasko: { ...login, id: EKRANO.slug, name: EKRANO.slug },
+          variant: "F",
+          modelo,
+        },
+        katalogo,
+      );
+      if (nova.k8 === undefined) throw new Error(`${nomo}: the fixture must carry K8 facts`);
+      const taksado = alTaksado(
+        ekranoTaksilo({ modelo, katalogo, kriterioj }).taksi({
+          fakto,
+          ekrano: EKRANO,
+          varianto: "F",
+        }),
+      );
+      expect(taksado.k8, nomo).toEqual({ ...nova.k8, plena: k8Plena(nova.k8) });
+      expect(taksado.k8?.plena, nomo).toBe(k8Plena(nova.k8));
+      if (taksado.k8 !== undefined) {
+        expect(alTaksadoK8Rezulto(alK8Rezulto(taksado.k8)), nomo).toEqual(taksado.k8);
+      }
+      plenaj.push(k8Plena(nova.k8));
+    }
+    // One fixture is plena, the other is not: both values of `plena` are carried.
+    expect(plenaj.sort()).toEqual([false, true]);
+  });
+
+  it("names the probes of the Modelo: sondoPetoj = sondojDe(modelo)", () => {
+    const taksilo = taksiloElEniro(ekranoTaksilo({ modelo, katalogo, kriterioj }));
+    expect(taksilo.sondoPetoj).toEqual(sondojDe(modelo));
+    expect(taksilo.sondoPetoj?.length ?? 0).toBeGreaterThan(0);
+    const taksado = elEniro(taksilo.taksi({ fakto, ekrano: EKRANO, varianto: "F" }));
+    expect("k8" in taksado).toBe(false);
   });
 });

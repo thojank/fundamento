@@ -9,6 +9,7 @@ import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vites
 import {
   eligoDe,
   fragmentoEl,
+  K8_MERKMALOJ,
   KLASIKA_SKRIPTO,
   kuruEkranojn,
   PERMESITA_MODELO,
@@ -27,7 +28,15 @@ import { planoKun } from "./test-doubles/faktoj.js";
 import { MemoraPonto, SKEMOJ } from "./test-doubles/iloj.js";
 import { MarkoDouble } from "./test-doubles/marko.js";
 import { TaksiloDouble, VERDA, verdaEkde } from "./test-doubles/taksilo.js";
-import type { EkranojDeps, EkranojRezulto, Marko, Plano, ToolBridge } from "./tipoj.js";
+import type {
+  EkranojDeps,
+  EkranojRezulto,
+  K8Merkmal,
+  Marko,
+  Plano,
+  TaksadoK8Rezulto,
+  ToolBridge,
+} from "./tipoj.js";
 
 const PLANO: Plano = planoKun(3); // liste → detail → bearbeiten
 const RADIKO = mkdtempSync(join(tmpdir(), "ekranoj-eligo-"));
@@ -458,5 +467,59 @@ describe("kuruEkranojn writes through the seam (S037-04)", () => {
     expect(dosieroj(dir).some((d) => d.startsWith("marko/"))).toBe(false);
     expect(legi(dir, "ekranoj/liste.html")).not.toContain("data-fm-aspekto");
     expect(legi(dir, "superrigardo.html")).toContain("ekranoj/liste.html");
+  });
+});
+
+// Spec 038 Lauf 3 (3.4a, C-4, D-16): the deviations „mangels Mittel“ get their own section in
+// raporto.md and their own list in raporto.json, only when there are any.
+describe("deviations „mangels Mittel“ in the report (3.4a, D-16)", () => {
+  const TITOLO = "## Abweichungen mangels Mittel (D-16)";
+  const k8: TaksadoK8Rezulto = {
+    kvoto: 0.9167,
+    kombinacioj: (["dark", "light"] as const).map((scheme) => ({
+      aspekto: "komuna",
+      scheme,
+      merkmaloj: Object.fromEntries(
+        K8_MERKMALOJ.map((m) => [m, m === "interspacoj" ? 0.6667 : 1]),
+      ) as Record<K8Merkmal, number>,
+      kvoto: 0.9167,
+      kialoj: K8_MERKMALOJ.map((m) => ({
+        merkmal: m,
+        teksto:
+          m === "interspacoj"
+            ? "1 von 3 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `main > p` (13 px)"
+            : "vollständig",
+      })),
+    })),
+    mankoj: ["interspacoj"],
+    plena: true,
+  };
+
+  it("shows them in raporto.md and raporto.json, and the screens stay green", async () => {
+    const { dir, rezulto } = await kuro({
+      nomo: "sen-rimedoj",
+      taksilo: new TaksiloDouble(() => ({ ...VERDA, k8 })),
+    });
+    const senRimedaj = rezulto.senRimedaj ?? [];
+    expect(senRimedaj).toHaveLength(PLANO.ekranoj.length * k8.kombinacioj.length);
+    expect(rezulto.restantaj).toEqual([]);
+    const md = legi(dir, "raporto.md");
+    const titoloj = [...md.matchAll(/^## .*$/gm)].map((m) => m[0]);
+    expect(titoloj.indexOf(TITOLO)).toBe(titoloj.indexOf("## Verbleibende Abweichungen") + 1);
+    const sekcio = md.slice(md.indexOf(TITOLO), md.indexOf("## Lücken (Teil 3)"));
+    expect(sekcio).toContain("| Screen | Regel | Ort | Grund |");
+    for (const a of senRimedaj) {
+      expect(sekcio).toContain(`| ${a.ekrano} | ${a.regulo} | ${a.loko} | ${a.kialo} |`);
+    }
+    const teksto = legi(dir, "raporto.json");
+    expect(teksto).toBe(stabilaJson(JSON.parse(teksto)));
+    expect(JSON.parse(teksto).senRimedaj).toEqual(senRimedaj);
+  });
+
+  it("has no such section and no such list without entries", async () => {
+    const { dir, rezulto } = await kuro({ nomo: "sen-sen-rimedoj" });
+    expect(rezulto.senRimedaj).toBeUndefined();
+    expect(legi(dir, "raporto.md")).not.toContain(TITOLO);
+    expect("senRimedaj" in JSON.parse(legi(dir, "raporto.json"))).toBe(false);
   });
 });

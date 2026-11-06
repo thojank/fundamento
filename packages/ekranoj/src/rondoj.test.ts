@@ -5,12 +5,15 @@
 import { CostLimitReached, DayLimitReached } from "@fundamento/metiejo";
 import { describe, expect, it } from "vitest";
 import {
+  K8_MERKMALOJ,
+  K8_REGULOJ,
   kuruEkranojn,
   MAKS_RONDOJ,
   MalpermesitaModelo,
   NevalidaEnigo,
   PERMESITA_MODELO,
   PROMPT_0,
+  trovojDe,
 } from "./index.js";
 import { BildigiloDouble } from "./test-doubles/bildigilo.js";
 import {
@@ -20,7 +23,7 @@ import {
   SkriptaModelo,
   slugDePeto,
 } from "./test-doubles/chat.js";
-import { planoKun } from "./test-doubles/faktoj.js";
+import { faktoKunLigiloj, planoKun } from "./test-doubles/faktoj.js";
 import { MemoraPonto } from "./test-doubles/iloj.js";
 import { MALVERDA, neniamVerda, TaksiloDouble, VERDA, verdaEkde } from "./test-doubles/taksilo.js";
 import type {
@@ -28,9 +31,12 @@ import type {
   EkranaDokumento,
   EkranojDeps,
   EkranojEnigo,
+  K8Merkmal,
   KostoTakso,
   Plano,
   SondoPetoForma,
+  Taksado,
+  TaksadoK8Rezulto,
   Varianto,
 } from "./tipoj.js";
 
@@ -613,5 +619,154 @@ describe("K8 probes from the scorer to the renderer (3.4b)", () => {
     const senTempo = (rezulto: typeof sen.rezulto) =>
       JSON.stringify({ ...rezulto, peno: { ...rezulto.peno, ms: 0 } });
     expect(senTempo(kun.rezulto)).toBe(senTempo(sen.rezulto));
+  });
+});
+
+// K8 findings (Spec 038 Lauf 3, 3.4a, C-4, D-16): a feature below 1 that the Modelo has a means
+// for is a finding with rule, place and reason (to the next round and `restantaj`); one without a
+// means is a deviation „mangels Mittel“ that never blocks.
+describe("K8 findings and deviations „mangels Mittel“ (3.4a, C-4)", () => {
+  const PFADO = "main > fm-karto > p";
+  const tekstoDe = (merkmal: K8Merkmal, scheme: string) =>
+    `2 von 4 Treffern für ${merkmal} in ${scheme} verfehlt, zuerst \`${PFADO}\``;
+
+  /** K8 over light and dark of `komuna`: `merkmal` at 0.5, every other feature 1. */
+  const k8Kun = (e: {
+    merkmal: K8Merkmal;
+    plena: boolean;
+    mankoj?: K8Merkmal[];
+  }): TaksadoK8Rezulto => ({
+    kvoto: 0.875,
+    kombinacioj: (["dark", "light"] as const).map((scheme) => ({
+      aspekto: "komuna",
+      scheme,
+      merkmaloj: Object.fromEntries(
+        K8_MERKMALOJ.map((m) => [m, m === e.merkmal ? 0.5 : 1]),
+      ) as Record<K8Merkmal, number>,
+      kvoto: 0.875,
+      kialoj: K8_MERKMALOJ.map((m) => ({
+        merkmal: m,
+        teksto: m === e.merkmal ? tekstoDe(m, scheme) : "vollständig",
+      })),
+    })),
+    mankoj: e.mankoj ?? [],
+    plena: e.plena,
+  });
+
+  const kunK8 = (k8: TaksadoK8Rezulto): Taksado => ({ ...VERDA, k8 });
+
+  it("names the rule of every feature", () => {
+    expect(K8_REGULOJ).toEqual({
+      ersatzschrift: "k8-ersatzschrift",
+      nativaj: "k8-nativa",
+      interspacoj: "k8-interspaco",
+      sxablono: "k8-sxablono",
+    });
+  });
+
+  it("gives one finding per combination and feature below 1, with rule, place and reason from the kialo", () => {
+    for (const merkmal of K8_MERKMALOJ) {
+      const k8 = k8Kun({ merkmal, plena: false });
+      const trovoj = trovojDe({
+        slug: "liste",
+        taksado: kunK8(k8),
+        malobservoj: [],
+        fakto: faktoKunLigiloj(["detail.html"]),
+        navigado: { kompleta: true, mankantaj: [], mortaj: [] },
+        malhelpoj: ["K8"],
+      });
+      const k8Trovoj = trovoj.filter((t) => t.regulo.startsWith("k8-"));
+      expect(k8Trovoj.length, merkmal).toBe(k8.kombinacioj.length);
+      expect(
+        k8Trovoj.map(({ regulo, loko, kialo }) => ({ regulo, loko, kialo })),
+        merkmal,
+      ).toEqual(
+        k8.kombinacioj.map((k) => ({
+          regulo: K8_REGULOJ[merkmal],
+          loko: `komuna ${k.scheme}: ${PFADO}`,
+          kialo: tekstoDe(merkmal, k.scheme),
+        })),
+      );
+      for (const trovo of k8Trovoj) {
+        expect(trovo.mesagxo, merkmal).not.toBe("");
+        expect(trovo.sugesto, merkmal).not.toBe("");
+      }
+    }
+  });
+
+  it("brings every K8 finding to the next round and into restantaj; the screen is not green", async () => {
+    for (const merkmal of K8_MERKMALOJ) {
+      const k8 = k8Kun({ merkmal, plena: false });
+      const chat = new SkriptaModelo(skripto(PLANO), { modelo: PERMESITA_MODELO });
+      const rezulto = await kuruEkranojn(
+        enigoDe(),
+        depsDe({ chat, taksilo: new TaksiloDouble(() => kunK8(k8)) }),
+      );
+      expect(rezulto.faritajRondoj, merkmal).toBe(MAKS_RONDOJ);
+      expect(rezulto.rondoj[0]?.liste?.verda, merkmal).toBe(false);
+      expect(rezulto.rondoj[0]?.liste?.malhelpoj, merkmal).toEqual(["K8"]);
+      const dua = chat.petoj.find(
+        (peto) => slugDePeto(peto) === "liste" && rondoDePeto(peto) === 2,
+      );
+      const tasko = dua?.messages.find((m) => m.role === "user")?.content ?? "";
+      expect(tasko, merkmal).toContain(K8_REGULOJ[merkmal]);
+      expect(rezulto.restantaj, merkmal).toEqual(
+        PLANO.ekranoj.flatMap(({ slug }) =>
+          k8.kombinacioj.map((k) => ({
+            ekrano: slug,
+            regulo: K8_REGULOJ[merkmal],
+            loko: `komuna ${k.scheme}: ${PFADO}`,
+            kialo: tekstoDe(merkmal, k.scheme),
+          })),
+        ),
+      );
+      expect(rezulto.senRimedaj, merkmal).toBeUndefined();
+    }
+  });
+
+  it("lists a feature below 1 without a means as a deviation „mangels Mittel“ that blocks nothing", async () => {
+    const k8 = k8Kun({ merkmal: "interspacoj", plena: true, mankoj: ["interspacoj"] });
+    const chat = new SkriptaModelo(skripto(PLANO), { modelo: PERMESITA_MODELO });
+    const rezulto = await kuruEkranojn(
+      enigoDe(),
+      depsDe({ chat, taksilo: new TaksiloDouble(() => kunK8(k8)) }),
+    );
+    expect(rezulto.faritajRondoj).toBe(1);
+    expect(rezulto.rondoj[0]?.liste?.verda).toBe(true);
+    expect(rezulto.rondoj[0]?.liste?.malhelpoj).toEqual([]);
+    expect(rezulto.restantaj).toEqual([]);
+    expect(rezulto.senRimedaj).toEqual(
+      PLANO.ekranoj.flatMap(({ slug }) =>
+        k8.kombinacioj.map((k) => ({
+          ekrano: slug,
+          regulo: K8_REGULOJ.interspacoj,
+          loko: `komuna ${k.scheme}: ${PFADO}`,
+          kialo: tekstoDe("interspacoj", k.scheme),
+        })),
+      ),
+    );
+  });
+
+  it("makes no K8 finding of a feature without a means, and none at all without k8", async () => {
+    const k8 = k8Kun({ merkmal: "interspacoj", plena: true, mankoj: ["interspacoj"] });
+    const trovoj = trovojDe({
+      slug: "liste",
+      taksado: { ...MALVERDA, k8 },
+      malobservoj: [],
+      fakto: faktoKunLigiloj(["detail.html"]),
+      navigado: { kompleta: true, mankantaj: [], mortaj: [] },
+      malhelpoj: ["K5"],
+    });
+    expect(trovoj.filter((t) => t.regulo.startsWith("k8-"))).toEqual([]);
+
+    const chat = new SkriptaModelo(skripto(PLANO), { modelo: PERMESITA_MODELO });
+    const rezulto = await kuruEkranojn(enigoDe(), depsDe({ chat }));
+    const cxiujTrovoj = rezulto.rondoj.flatMap((rondo) =>
+      Object.values(rondo).flatMap((ekrano) => ekrano.trovoj ?? []),
+    );
+    expect(cxiujTrovoj.length).toBeGreaterThan(0);
+    expect(cxiujTrovoj.filter((t) => t.regulo.startsWith("k8-"))).toEqual([]);
+    expect(rezulto.restantaj.filter((r) => r.regulo.startsWith("k8-"))).toEqual([]);
+    expect("senRimedaj" in rezulto).toBe(false);
   });
 });

@@ -35,6 +35,7 @@ import type {
   EkranojRezulto,
   Fakto,
   Haltigo,
+  K8Merkmal,
   KostoTakso,
   Malhelpo,
   Malobservo,
@@ -222,6 +223,25 @@ const K_TROVOJ: Record<string, { mesagxo: string; sugesto: string; kialo: string
 };
 
 const AXE_KIALO = "D-04: axe-core (WCAG 2.2 A/AA) muss hell und dunkel ohne Befund sein.";
+
+/**
+ * The K8 features in report order (Spec 038, D-08): nordstelo's `K8_MERKMALOJ`, restated so this
+ * package never imports nordstelo (AC-10 of 037).
+ */
+export const K8_MERKMALOJ: readonly K8Merkmal[] = [
+  "ersatzschrift",
+  "nativaj",
+  "interspacoj",
+  "sxablono",
+];
+
+/** The rule of a K8 finding per feature (C-4). */
+export const K8_REGULOJ: Readonly<Record<K8Merkmal, string>> = {
+  ersatzschrift: "k8-ersatzschrift",
+  nativaj: "k8-nativa",
+  interspacoj: "k8-interspaco",
+  sxablono: "k8-sxablono",
+};
 
 /** The marker of a screen whose build answer held no markup, also after one more question. */
 export const MALPLENA_RESPONDO = "leere-antwort" satisfies Malhelpo;
