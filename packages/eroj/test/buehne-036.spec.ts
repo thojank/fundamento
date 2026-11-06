@@ -16,6 +16,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type APIRequestContext, expect, type Page, test } from "@playwright/test";
 import { axeViolations } from "./alirebleco.js";
+import { BUEHNE_BEREIT, dokument, rahmenBereit, seiteBereit } from "./geladen-042.js";
 import { nachDerAbfrage, nachEinemReset } from "./wackler-040.js";
 
 const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
@@ -116,10 +117,25 @@ const pxOf = (page: Page, property: string) =>
 
 const WIDE = { width: 1440, height: 900 };
 
-/** Opens a step of the assistant and waits until the stage's client has bound its handlers. */
+const JETZT = "[data-mt-buehne] iframe[data-mt-vorschau]";
+const VORSCHLAG = "[data-mt-buehne] iframe[data-mt-vorschau-propono]";
+
+/**
+ * Spec 042 (V-3, AC-5): the stage is loaded – its client bound its handlers and the document is
+ * complete – and both frames show the page's rev in light (the page starts light). `nicht`: the
+ * document before an action that loads the screen anew (dokument()), which is not the one waited for.
+ */
+async function geladen(page: Page, nicht?: number): Promise<void> {
+  await seiteBereit(page, BUEHNE_BEREIT, nicht);
+  const rev = Number(await page.locator("html").getAttribute("data-mt-rev"));
+  await rahmenBereit(page, JETZT, { rev, scheme: "light" });
+  await rahmenBereit(page, VORSCHLAG, { rev, scheme: "light" });
+}
+
+/** Opens a step of the assistant and waits until the stage and its frames are loaded. */
 async function oeffne(page: Page, id: string, faceto = "gvidkoloro"): Promise<void> {
   await page.goto(`${base}/asistanto/${id}/${faceto}`);
-  await expect(page.locator("[data-mt-buehne]")).toHaveAttribute("data-mt-bereit", "");
+  await geladen(page);
 }
 
 test.describe("Bühne (Spec 036, Befund 3.1)", () => {
@@ -130,7 +146,7 @@ test.describe("Bühne (Spec 036, Befund 3.1)", () => {
     const fehler = fehlerOf(page);
     const id = await marke(request, "Probomarko Breite");
     await page.setViewportSize(WIDE);
-    await page.goto(`${base}/asistanto/${id}/gvidkoloro`);
+    await oeffne(page, id);
     const layout = page.locator("[data-mt-buehne-layout]");
     const buehne = layout.locator("[data-mt-buehne]");
     await expect(buehne).toBeVisible();
@@ -156,7 +172,7 @@ test.describe("Bühne (Spec 036, Befund 3.1)", () => {
     const fehler = fehlerOf(page);
     const id = await marke(request, "Probomarko Seite");
     await page.setViewportSize(WIDE);
-    await page.goto(`${base}/asistanto/${id}/gvidkoloro`);
+    await oeffne(page, id);
     const frame = page.frameLocator("[data-mt-buehne] iframe[data-mt-vorschau]");
     for (const ero of ["fm-sxelo", "fm-pagxo", "fm-butono", "fm-karto", "fm-formularo", "fm-avizo"])
       await expect(frame.locator(ero).first(), ero).toBeVisible();
@@ -188,13 +204,18 @@ test.describe("Bühne (Spec 036, Befund 3.1)", () => {
         scheme: document.documentElement.getAttribute("data-fm-color-scheme"),
         background: getComputedStyle(body).backgroundColor,
       }));
-    await expect.poll(async () => (await grund()).scheme).toBe("light");
+    // Spec 042 (Execution context destroyed, run 42113762271): each choice sends the frame to a new
+    // document; the read inside it waits until that document is loaded (rahmenBereit), not while
+    // the frame navigates.
+    expect((await grund()).scheme).toBe("light");
     const hell = await grund();
     await wahl.getByRole("radio", { name: "Dunkel" }).click();
-    await expect.poll(async () => (await grund()).scheme).toBe("dark");
-    await expect.poll(async () => (await grund()).background).not.toBe(hell.background);
+    await rahmenBereit(page, JETZT, { scheme: "dark" });
+    expect((await grund()).scheme).toBe("dark");
+    expect((await grund()).background).not.toBe(hell.background);
     await wahl.getByRole("radio", { name: "Hell" }).click();
-    await expect.poll(async () => (await grund()).scheme).toBe("light");
+    await rahmenBereit(page, JETZT, { scheme: "light" });
+    expect((await grund()).scheme).toBe("light");
   });
 });
 
@@ -243,9 +264,6 @@ async function knopf(page: Page, selector: string): Promise<string> {
   await expect.poll(read).not.toBe("rgba(0, 0, 0, 0)");
   return read();
 }
-
-const JETZT = "[data-mt-buehne] iframe[data-mt-vorschau]";
-const VORSCHLAG = "[data-mt-buehne] iframe[data-mt-vorschau-propono]";
 
 test.describe("Bühne (Spec 036, Befund 3.2)", () => {
   test("3.2: two frames lie on each other; the slider cuts them – left now, right with the proposal", async ({
@@ -326,10 +344,10 @@ test.describe("Bühne (Spec 036, Befund 3.2)", () => {
         response.request().method() === "POST" &&
         new URL(response.url()).pathname === `/api/marko/${id}/faceto`,
     );
-    const neu = page.waitForEvent("load");
+    const alt = await dokument(page);
     await uebernehmen.click();
     expect((await genommen).status()).toBe(200);
-    await neu;
+    await geladen(page, alt);
     expect(Number(await page.locator("html").getAttribute("data-mt-rev"))).toBeGreaterThan(vorher);
     // Spec 041 B-12: this read met a reset connection (run 41941052854, WebKit); a GET, sent once more.
     const stato = (await (
@@ -475,8 +493,9 @@ test.describe("Bühne (Spec 036, Befund 3.4)", () => {
     // reloads the screen: close right after the page's poll of the draft answered, not while one is
     // under way – the reload would cut it short (Spec 040 B-8).
     await nachDerAbfrage(page, id);
+    const alt = await dokument(page);
     await dialog.getByRole("button", { name: "Schließen" }).click();
-    await expect(page.locator("[data-mt-buehne]")).toHaveAttribute("data-mt-bereit", "");
+    await geladen(page, alt);
     await expect(page.locator("[data-mt-propono]")).toBeVisible();
     expect(await knopf(page, VORSCHLAG)).not.toBe(await knopf(page, JETZT));
     expect(fehler).toEqual([]);
@@ -707,6 +726,9 @@ for (const [breite, ansicht] of [
           .getByRole("radio", { name: "Dunkel" })
           .click();
         await expect(jetzt.locator("html")).toHaveAttribute("data-fm-color-scheme", "dark");
+        // axe reads the frames too: both loaded in dark first (Spec 042, AC-5).
+        await rahmenBereit(page, JETZT, { scheme: "dark" });
+        await rahmenBereit(page, VORSCHLAG, { scheme: "dark" });
       }
       await expect(jetzt.locator('[data-mt-pruefung="offen"]').first()).toBeAttached();
       expect(await axeViolations(page)).toEqual([]);
