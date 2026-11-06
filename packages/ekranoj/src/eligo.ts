@@ -94,7 +94,17 @@ export interface RaportoEkrano {
   malhelpoj: Malhelpo[];
   /** The page rules of check_markup, hints only (Spec 038 D-29); absent when there are none. */
   sxablonajSugestoj?: Malobservo[];
+  /**
+   * The effort of building this screen in this round (Spec 038 C-6, D-S038-21-1); absent for a
+   * screen carried forward (D-26) and for results without it.
+   */
+  peno?: Peno;
+  /** K8 of this screen (Spec 038 C-3, 3.4c): share and `plena`; absent when not checked. */
+  k8?: { kvoto: number; plena: boolean };
 }
+
+/** The counted part of an effort: what Σ screen × round + plan = run holds for (C-6). */
+export type PenoParto = Pick<Peno, "inputTokens" | "outputTokens" | "requests" | "toolCalls">;
 
 export interface FluaNavigado {
   kvoto: number;
@@ -150,6 +160,11 @@ export interface RaportoJson {
   notoj: string[];
   /** K8 deviations „mangels Mittel“ (Spec 038, C-4, D-16); absent when there are none. */
   senRimedaj?: Restanta[];
+  /**
+   * The effort of the plan request (Spec 038 C-6, D-S038-21-1): run `peno` minus the sum of every
+   * screen × round `peno`. Absent when no screen × round carries a `peno` (results before C-6).
+   */
+  penoPlano?: PenoParto;
 }
 
 export interface RaportoEnigo {

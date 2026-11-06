@@ -13,6 +13,9 @@ import {
   KLASIKA_SKRIPTO,
   kuruEkranojn,
   PERMESITA_MODELO,
+  type RaportoJson,
+  raportoDe,
+  raportoMarkdown,
   SEN_BILDIGILO_FRAZO,
   stabilaJson,
 } from "./index.js";
@@ -33,7 +36,9 @@ import type {
   EkranojRezulto,
   K8Merkmal,
   Marko,
+  Peno,
   Plano,
+  RondoEkrano,
   TaksadoK8Rezulto,
   ToolBridge,
 } from "./tipoj.js";
@@ -301,6 +306,8 @@ describe("output folder (§2.4, Lieferliste 1.6, AC-6)", () => {
       "## Verbleibende Abweichungen",
       "## Lücken (Teil 3)",
       "## Aufwand und Kosten",
+      // Spec 038 S038-21 (AC-8): the table of the effort per screen and round.
+      "### Tokens je Screen und Runde",
       "## Halt",
     ]);
     expect(md).toContain("Standards wie Standard A-12 für Team Nord verwalten");
@@ -542,5 +549,373 @@ describe("deviations „mangels Mittel“ in the report (3.4a, D-16)", () => {
     expect(rezulto.senRimedaj).toBeUndefined();
     expect(legi(dir, "raporto.md")).not.toContain(TITOLO);
     expect("senRimedaj" in JSON.parse(legi(dir, "raporto.json"))).toBe(false);
+  });
+});
+
+// Spec 038 Lauf 3 (3.4c, AC-8, C-6, D-S038-21-1): the effort per screen and round and K8 per
+// screen in the report. Pure where it can be: a hand-made result of two screens and two rounds.
+describe("tokens per screen and round, the K8 column (3.4c, AC-8)", () => {
+  const TABELO = "### Tokens je Screen und Runde";
+  const ZAEHLER = ["inputTokens", "outputTokens", "requests", "toolCalls"] as const;
+  const plano: Plano = {
+    celo: "Standards verwalten",
+    ekranoj: [
+      { slug: "liste", titolo: "Liste", celo: "Alle Standards zeigen" },
+      { slug: "detail", titolo: "Detail", celo: "Einen Standard zeigen" },
+    ],
+    kantoj: [{ de: "liste", al: "detail" }],
+  };
+  const nav = { kompleta: true, mankantaj: [], mortaj: [] };
+  const verda: RondoEkrano = {
+    taksado: { k: { K1: 1, K2: 1, K3: 1, K4: 1, K5: 1, K6: null }, total: 1, mankoj: [] },
+    malobservoj: [],
+    navigado: nav,
+    verda: true,
+    malhelpoj: [],
+  };
+  const malverda: RondoEkrano = {
+    taksado: {
+      k: { K1: 1, K2: 1, K3: 1, K4: 1, K5: 0, K6: null },
+      total: 0.7,
+      mankoj: [{ kind: "raw-value", key: "color" }],
+    },
+    malobservoj: [],
+    navigado: nav,
+    verda: false,
+    malhelpoj: ["K5"],
+  };
+  const penoDe = (
+    inputTokens: number,
+    outputTokens: number,
+    requests: number,
+    toolCalls: number,
+  ): Peno => ({ inputTokens, outputTokens, requests, toolCalls, ms: 100, bytes: 300 });
+  const k8De = (kvoto: number, plena: boolean): TaksadoK8Rezulto => ({
+    kvoto,
+    kombinacioj: [],
+    mankoj: [],
+    plena,
+  });
+  const LAUFO: Peno = {
+    inputTokens: 5000,
+    outputTokens: 900,
+    toolCalls: 7,
+    requests: 4,
+    ms: 1234,
+    bytes: 2048,
+  };
+
+  /**
+   * A result as before C-6 (no `peno` per screen and round, no `k8`), or with both. Round 2
+   * carries liste forward (D-26): it has no `peno` in either form.
+   */
+  function rezultoDe(nova: boolean): EkranojRezulto {
+    const kun = (stato: RondoEkrano, peno: Peno, k8?: TaksadoK8Rezulto): RondoEkrano =>
+      nova
+        ? {
+            ...stato,
+            peno,
+            ...(k8 === undefined ? {} : { taksado: { ...stato.taksado, k8 } }),
+          }
+        : stato;
+    return {
+      dir: "/tmp/malnova",
+      plano,
+      rondoj: [
+        {
+          liste: kun(verda, penoDe(1000, 200, 1, 2)),
+          detail: kun(malverda, penoDe(1500, 250, 1, 3), k8De(0.75, false)),
+        },
+        {
+          liste: { ...verda, verdaEkde: 1 },
+          detail: kun(verda, penoDe(1200, 150, 1, 2), k8De(1, true)),
+        },
+      ],
+      restantaj: [],
+      mankoj: [],
+      peno: LAUFO,
+      kosto: { usd: 0.0123 },
+      faritajRondoj: 2,
+    };
+  }
+  const raportoKun = (nova: boolean): RaportoJson =>
+    raportoDe({
+      id: "malnova",
+      enigo: { frazo: plano.celo, marko: "komuna", out: "/tmp/malnova", maksTokenoj: 1_000_000 },
+      varianto: "F",
+      lingvo: "de",
+      commit: "0123abc",
+      bildigilo: true,
+      rezulto: rezultoDe(nova),
+      bildoj: [],
+    });
+
+  /** The rows of the table „Tokens je Screen und Runde“ as cells, without head and rule. */
+  function vicojDe(md: string): string[][] {
+    const komenco = md.indexOf(`\n${TABELO}\n`);
+    expect(komenco).toBeGreaterThan(0);
+    const sekcio = md.slice(komenco, md.indexOf("\n## Halt\n"));
+    return sekcio
+      .split("\n")
+      .filter((linio) => linio.startsWith("| ") && !linio.startsWith("| Screen |"))
+      .map((linio) =>
+        linio
+          .slice(2, -2)
+          .split(" | ")
+          .map((cxelo) => cxelo.trim()),
+      );
+  }
+
+  it("carries peno per screen and round only for built screens, and the plan effort as its own field: Σ + plan = run", async () => {
+    const { dir, rezulto } = await kuro({ nomo: "peno-je-ekrano" });
+    const teksto = legi(dir, "raporto.json");
+    expect(teksto).toBe(stabilaJson(JSON.parse(teksto)));
+    const json = JSON.parse(teksto) as RaportoJson;
+    let konstruitaj = 0;
+    const sumo = { inputTokens: 0, outputTokens: 0, requests: 0, toolCalls: 0 };
+    json.rondoj.forEach((rondo, index) => {
+      for (const [slug, ekrano] of Object.entries(rondo.ekranoj)) {
+        // Path rondoj[n].ekranoj[slug].peno, exactly the build's effort of that round (C-6).
+        expect(ekrano.peno, `${rondo.n} ${slug}`).toEqual(rezulto.rondoj[index]?.[slug]?.peno);
+        if (ekrano.peno === undefined) continue;
+        konstruitaj += 1;
+        for (const z of ZAEHLER) sumo[z] += ekrano.peno[z];
+      }
+    });
+    // verdaEkde(2): rounds 1 and 2 are built for every screen, round 3 is carried (D-26).
+    expect(konstruitaj).toBe(PLANO.ekranoj.length * 2);
+    expect(json.rondoj[2]?.farita).toBe(false);
+    expect(Object.values(json.rondoj[2]?.ekranoj ?? {}).some((e) => "peno" in e)).toBe(false);
+    const plano = json.penoPlano;
+    expect(plano).toBeDefined();
+    expect(Object.keys(plano ?? {})).toEqual([...ZAEHLER].sort());
+    for (const z of ZAEHLER) expect(sumo[z] + (plano?.[z] ?? Number.NaN), z).toBe(json.peno[z]);
+    // The plan request is one request of its own (C-6).
+    expect(plano?.requests).toBe(1);
+  });
+
+  it("shows the table with one row per built screen and round, a plan row and a sum row equal to the run totals", async () => {
+    const { dir } = await kuro({ nomo: "peno-tabelo" });
+    const md = legi(dir, "raporto.md");
+    const json = JSON.parse(legi(dir, "raporto.json")) as RaportoJson;
+    expect(md).toContain(
+      "| Screen | Runde | Tokens ein | Tokens aus | Anfragen | Werkzeugaufrufe |",
+    );
+    const atendataj = json.rondoj.flatMap((rondo) =>
+      Object.entries(rondo.ekranoj).flatMap(([slug, e]) =>
+        e.peno === undefined
+          ? []
+          : [
+              [
+                slug,
+                String(rondo.n),
+                ...[e.peno.inputTokens, e.peno.outputTokens, e.peno.requests, e.peno.toolCalls].map(
+                  String,
+                ),
+              ],
+            ],
+      ),
+    );
+    const p = json.penoPlano;
+    const vicoj = vicojDe(md);
+    expect(vicoj).toEqual([
+      ...atendataj,
+      ["Plan", "–", ...[p?.inputTokens, p?.outputTokens, p?.requests, p?.toolCalls].map(String)],
+      [
+        "Summe",
+        "–",
+        ...[
+          json.peno.inputTokens,
+          json.peno.outputTokens,
+          json.peno.requests,
+          json.peno.toolCalls,
+        ].map(String),
+      ],
+    ]);
+    // The sum row is the column sum of the screen rows and the plan row, and the run's totals.
+    const summe = vicoj.at(-1) ?? [];
+    for (let i = 2; i < 6; i += 1) {
+      const kolumno = vicoj.slice(0, -1).reduce((s, vico) => s + Number(vico[i]), 0);
+      expect(kolumno, `Spalte ${i}`).toBe(Number(summe[i]));
+    }
+    expect(md).toContain(`- Tokens ein: ${summe[2]}`);
+    expect(md).toContain(`- Tokens aus: ${summe[3]}`);
+    expect(md).toContain(`- Anfragen: ${summe[4]}`);
+    expect(md).toContain(`- Werkzeugaufrufe: ${summe[5]}`);
+  });
+
+  it("leaves a screen carried forward without peno and without a row (D-26)", () => {
+    const raporto = raportoKun(true);
+    expect(raporto.rondoj[1]?.ekranoj.liste?.verdaEkde).toBe(1);
+    expect("peno" in (raporto.rondoj[1]?.ekranoj.liste ?? {})).toBe(false);
+    expect(raporto.rondoj[1]?.ekranoj.detail?.peno).toEqual(penoDe(1200, 150, 1, 2));
+    expect(raporto.penoPlano).toEqual({
+      inputTokens: 5000 - 1000 - 1500 - 1200,
+      outputTokens: 900 - 200 - 250 - 150,
+      requests: 4 - 3,
+      toolCalls: 7 - 7,
+    });
+    expect(vicojDe(raportoMarkdown(raporto))).toEqual([
+      ["liste", "1", "1000", "200", "1", "2"],
+      ["detail", "1", "1500", "250", "1", "3"],
+      ["detail", "2", "1200", "150", "1", "2"],
+      ["Plan", "–", "1300", "300", "1", "0"],
+      ["Summe", "–", "5000", "900", "4", "7"],
+    ]);
+  });
+
+  it("adds a K8 column to every round table: share and „vollständig“/„nicht vollständig“, or „nicht geprüft“", () => {
+    const raporto = raportoKun(true);
+    expect(raporto.rondoj[0]?.ekranoj.detail?.k8).toEqual({ kvoto: 0.75, plena: false });
+    expect(raporto.rondoj[1]?.ekranoj.detail?.k8).toEqual({ kvoto: 1, plena: true });
+    expect("k8" in (raporto.rondoj[0]?.ekranoj.liste ?? {})).toBe(false);
+    const md = raportoMarkdown(raporto);
+    const kapo =
+      "| Screen | K1 | K2 | K3 | K4 | K5 | K6 | Total | K7 Bytes | check_usage | axe hell | axe dunkel | Navigation | grün | K8 |";
+    expect(md.split(`${kapo}\n|${"---|".repeat(15)}\n`)).toHaveLength(3);
+    const k8Cxeloj = md
+      .split("\n")
+      .filter((linio) => /^\| (liste|detail) \| \d/.test(linio))
+      .map((linio) => linio.slice(2, -2).split(" | ").at(-1));
+    expect(k8Cxeloj).toEqual([
+      "nicht geprüft",
+      "0.75, nicht vollständig",
+      "nicht geprüft",
+      "1, vollständig",
+    ]);
+  });
+
+  it("gives byte-identical raporto.md and raporto.json on two calls", () => {
+    const a = raportoKun(true);
+    const b = raportoKun(true);
+    expect(stabilaJson(b)).toBe(stabilaJson(a));
+    expect(raportoMarkdown(b)).toBe(raportoMarkdown(a));
+    expect(stabilaJson(a)).toContain('"penoPlano"');
+  });
+
+  // The output of today (6d987c8e) for the old result, byte for byte. The only allowed
+  // differences are the two additions of S038-21, stated here: the K8 column („nicht geprüft“)
+  // at the end of every round table, and the (empty) table „Tokens je Screen und Runde“ with one
+  // sentence at the end of „Aufwand und Kosten“. raporto.json stays byte-identical.
+  const HEUTE = [
+    "<!-- Generated by @fundamento/ekranoj (Spec 037): report of one run. Do not edit. -->",
+    "# Bericht malnova",
+    "",
+    "## Eingabe",
+    "",
+    "- Satz: Standards verwalten",
+    "- Marke: komuna",
+    "- Commit: 0123abc",
+    "- Variante: F",
+    "- Sprache: de",
+    "- Tokengrenze: 1000000",
+    "",
+    "## Screens",
+    "",
+    "Ziel des Ablaufs: Standards verwalten",
+    "",
+    "| # | Screen | Titel | Zweck | Datei | Stand |",
+    "|---|---|---|---|---|---|",
+    "| 1 | liste | Liste | Alle Standards zeigen | – | nicht gebaut |",
+    "| 2 | detail | Detail | Einen Standard zeigen | – | nicht gebaut |",
+    "",
+    "Übergänge (Plan): liste → detail",
+    "",
+    "## Verwendete Eroj und Sxablonoj",
+    "",
+    "Keine Eroj oder Sxablonoj (fm-*) in den Screens.",
+    "",
+    "## Ergebnis je Runde",
+    "",
+    "K1–K6 aus der Bewertung (– = gilt nicht), K7 als Bytes des Markups; check_usage als Fehler/Hinweise; axe (WCAG 2.2 A/AA) als Zahl der verletzten Regeln je Modus; Navigation nach D-05.",
+    "",
+    "### Runde 1",
+    "",
+    "| Screen | K1 | K2 | K3 | K4 | K5 | K6 | Total | K7 Bytes | check_usage | axe hell | axe dunkel | Navigation | grün |",
+    "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+    "| liste | 1 | 1 | 1 | 1 | 1 | – | 1 | – | 0 Fehler, 0 Hinweise | nicht geprüft | nicht geprüft | vollständig | ja |",
+    "| detail | 1 | 1 | 1 | 1 | 0 | – | 0.7 | – | 0 Fehler, 0 Hinweise | nicht geprüft | nicht geprüft | vollständig | nein |",
+    "",
+    "Navigation (D-05): Anteil 1 · fehlende Übergänge: keine · tote Verweise: keine",
+    "",
+    "check_usage: keine Verstöße.",
+    "",
+    "### Runde 2",
+    "",
+    "| Screen | K1 | K2 | K3 | K4 | K5 | K6 | Total | K7 Bytes | check_usage | axe hell | axe dunkel | Navigation | grün |",
+    "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+    "| liste | 1 | 1 | 1 | 1 | 1 | – | 1 | – | 0 Fehler, 0 Hinweise | nicht geprüft | nicht geprüft | vollständig | grün seit Runde 1 |",
+    "| detail | 1 | 1 | 1 | 1 | 1 | – | 1 | – | 0 Fehler, 0 Hinweise | nicht geprüft | nicht geprüft | vollständig | ja |",
+    "",
+    "Navigation (D-05): Anteil 1 · fehlende Übergänge: keine · tote Verweise: keine",
+    "",
+    "check_usage: keine Verstöße.",
+    "",
+    "## Verbleibende Abweichungen",
+    "",
+    "Keine.",
+    "",
+    "## Lücken (Teil 3)",
+    "",
+    "| # | Art | Lücke | Anzahl | Aufgaben | Beispielstelle | Vorschlag | Ziel |",
+    "|---|---|---|---|---|---|---|---|",
+    "| – | – | keine Lücke | 0 | – | – | – | – |",
+    "",
+    "## Aufwand und Kosten",
+    "",
+    "- Tokens ein: 5000",
+    "- Tokens aus: 900",
+    "- Anfragen: 4",
+    "- Werkzeugaufrufe: 7",
+    "- Bytes (Markup): 2048",
+    "- Kosten: 0.012300 $",
+    "- Dauer: 1234 ms",
+    "",
+    "## Halt",
+    "",
+    "- Haltgrund: Höchstzahl von 3 Runden erreicht, nicht alle Screens grün.",
+    "- Gebaute Runden: 2 von 3",
+    "",
+  ].join("\n");
+
+  it("gives an old result without peno and k8 the output of before, plus only the empty table and the K8 column", () => {
+    const raporto = raportoKun(false);
+    // raporto.json: byte-identical to before – no peno per screen, no k8, no penoPlano.
+    const json = stabilaJson(raporto);
+    expect(json).not.toMatch(/"penoPlano"|"k8"/);
+    expect(json.match(/"peno":/g)).toHaveLength(1);
+    // The same result with peno and k8 gives the same JSON once the three new keys are removed.
+    const nova = JSON.parse(stabilaJson(raportoKun(true))) as RaportoJson;
+    delete nova.penoPlano;
+    for (const rondo of nova.rondoj) {
+      for (const ekrano of Object.values(rondo.ekranoj)) {
+        delete ekrano.peno;
+        delete ekrano.k8;
+      }
+    }
+    expect(stabilaJson(nova)).toBe(json);
+
+    // raporto.md: the two additions, then byte for byte the output of before.
+    const md = raportoMarkdown(raporto);
+    const malplena = `${TABELO}\n\nKein Aufwand je Screen und Runde erfasst.\n\n`;
+    expect(md.split(malplena)).toHaveLength(2);
+    const k8Kapo = " K8 |";
+    const vicoj = md.split("\n");
+    const tabeloj = vicoj.filter((linio) => linio.startsWith("| Screen | K1 |"));
+    expect(tabeloj).toHaveLength(2);
+    for (const kapo of tabeloj) expect(kapo.endsWith(`| grün |${k8Kapo}`)).toBe(true);
+    const sen = vicoj
+      .map((linio) => {
+        if (linio.startsWith("| Screen | K1 |")) return linio.slice(0, -k8Kapo.length);
+        if (linio === `|${"---|".repeat(15)}`) return `|${"---|".repeat(14)}`;
+        if (/^\| (liste|detail) \| \d/.test(linio)) {
+          expect(linio.endsWith(" nicht geprüft |")).toBe(true);
+          return linio.slice(0, -" nicht geprüft |".length);
+        }
+        return linio;
+      })
+      .join("\n")
+      .replace(malplena, "");
+    expect(sen).toBe(HEUTE);
   });
 });
