@@ -18,6 +18,8 @@ export default defineConfig({
   testMatch: "**/vitrino.check.ts",
   testIgnore: [],
   timeout: 300_000,
+  // Spec 042 T1 (D-02): no trace here; the Eroj shards alone keep one (playwright.config.ts).
+  use: { ...base.use, trace: "off" },
   projects: [base.projects?.[0] ?? { name: "chromium" }],
   ...vitrinoAuswahl(process.env.VITRINO_PARTO),
 });

@@ -30,6 +30,9 @@ export default defineConfig({
   // The quickstart installs and builds a project of its own; it has its own config and CI step.
   testIgnore: "**/quickstart.spec.ts",
   timeout: 120_000,
+  // Spec 042 T1 (D-01): every test records a trace, kept only when it fails. In CI the HTML report
+  // copies it into test-reports/playwright/html/data/, which the step "Testberichte" uploads.
+  use: { trace: "retain-on-failure" },
   // Spec 040 T-7 (C-4): the list reporter, terse with FM_AUSGABE=knapp; JUnit (in CI also the HTML
   // report) in test-reports/playwright/, outside the outputDir test-results/ that a run empties.
   reporter: playwrightAusgabe("playwright"),
