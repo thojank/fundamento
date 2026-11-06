@@ -8,7 +8,7 @@ Ein Strang in PR A (T1 → T2 → T3 → T5), T4 parallel in PR B im eigenen Wor
 |---|---|---|---|---|---|
 | T1 | Trace `retain-on-failure` für die Eroj-Shards (D-01, D-02); Gerüst `specs/042-buehne-m5/` | A | `specs/042-buehne-m5/{spec,plan,tasks}.md`, `packages/eroj/playwright*.config.ts` (nur `trace`), `packages/eroj/test/spuro-042.test.ts` (neu) | erledigt (D-01 bestätigt: keine Workflow-Änderung) | Gerüst `bb53f484`; Trace `538bca43` → `347a3355` |
 | T2 | Selbst-Navigation der Bühne finden (Navigationstest rot zuerst) und beheben; `buehne-036` härten (D-03 bis D-05) | A | `packages/eroj/test/buehne-036.spec.ts`, `buehne-navigation-042.spec.ts` (neu), `geladen-042.ts` (neu); `packages/metiejo/src/**` unverändert (D-16) | erledigt (Randfall „sofort grün“: keine Selbst-Navigation, kein Produkt-Fix) | Navigationstest sofort grün `3b2045b6` (kein Rot im Produkt, D-16); Härtung `buehne-036`: rot = CI 42113762271 → grün `77778d6a` |
-| T3 | `zweitfarbe-036.spec.ts:111` in Firefox (Testzeit 120 s) | A | `packages/eroj/test/zweitfarbe-036.spec.ts`, `geladen-042.ts` (erweitern) | offen | |
+| T3 | `zweitfarbe-036.spec.ts:111` in Firefox (Testzeit 120 s) | A | `packages/eroj/test/zweitfarbe-036.spec.ts`, `geladen-042.ts` (erweitern) | erledigt (nicht nachgestellt, 30/30; Befund mit Spur; Datei gehärtet, D-17 bis D-19) | rot = CI 42103645313 (lokal nicht nachgestellt, kein roter Commit) → Härtung grün `8506eb80` |
 | T4 | M5 (B-14): Stil-Neuberechnung je Schieber-Änderung begrenzen (D-08 bis D-10) | B | nur `packages/projekcioj/src/celoj/vitrino/**` | offen | |
 | T5 | Zwei PRs, je genau ein `workflow_dispatch`, Diff-Suche, Bericht (D-06, D-07) | A und B | `specs/042-buehne-m5/{plan,tasks}.md`; PR-Texte und -Kommentare | offen | |
 
@@ -32,6 +32,16 @@ Ein Strang in PR A (T1 → T2 → T3 → T5), T4 parallel in PR B im eigenen Wor
 - [x] `stato-041.spec.ts` grün in drei Engines; Metiejo-Unit grün; `}, 3000);` unverändert; `pnpm lint` grün; `pnpm check:privat` 0 Treffer.
 - [ ] Offen mit Spur: B-10, B-13 (Module des zweiten Dokuments liefen nicht; Trace aus T1 beim nächsten Auftreten). Nebenbefund N-7 (Schema-Schalter an der Wurzel) beim Maintainer.
 
-## T3 bis T5 im Einzelnen
+## T3 im Einzelnen
+
+- [x] CI-Spur 42103645313 gelesen (nur lesen, `s042-spur/42103645313-eroj/`, Artefakte abrufbar): `[firefox] zweitfarbe-036.spec.ts:111` stand 120 s in `waitForEvent("framenavigated")` von `vorschauGeladen` (`wackler-040.ts:67`) beim Neuladen `:140`. Kein Trace, kein Schnappschuss.
+- [x] Suche nach Rot: Firefox `-g "Schnellstart" --repeat-each=30` auf `34c13f0a` – 30/30 grün, nicht nachgestellt; Grenze 30 erreicht, keine weitere Suche. Befund mit Spur in plan.md › Befunde.
+- [x] Härtung AC-5: kein `framenavigated`, kein `waitForLoadState`, kein `vorschauGeladen` mehr in `zweitfarbe-036.spec.ts`; Liste der Stellen in plan.md › Messungen – `8506eb80`.
+- [x] `geladen-042.ts` erweitert (`VORSCHAU`, `abrufBeantwortet`, `schrittBereit`, `entwurfGespeichert`), bestehende Exporte unverändert; `wackler-040.ts` unverändert – `8506eb80`.
+- [x] Gehärtete Datei je `--repeat-each=10`: Firefox, Chromium, WebKit je 30/30; `buehne-036` 19/19 und `buehne-navigation-042` 1/1 in Firefox.
+- [x] `timeout: 120_000` unverändert; kein `waitForTimeout`, kein neues Zeitlimit, kein `retries`. `pnpm lint` grün; `pnpm check:privat` 0 Treffer.
+- [ ] Offen mit Spur: beim nächsten CI-Rot der Trace `testberichte-eroj-<shard>-<attempt>` › `eroj/test-reports/playwright/html/data/*.zip`.
+
+## T4 und T5 im Einzelnen
 
 Folgt mit den Tickets.
