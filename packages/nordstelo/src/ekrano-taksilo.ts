@@ -70,6 +70,7 @@ export function ekranoTaksilo(opcioj: EkranoTaksiloOpcioj): TaksiloK8 {
         k: { ...nova.k },
         total: nova.total,
         mankoj: nova.gaps.map((gap) => ({ kind: gap.kind, key: gap.key })),
+        ...(nova.k8 === undefined ? {} : { k8: nova.k8 }),
       };
     },
   };

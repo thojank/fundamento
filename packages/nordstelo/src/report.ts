@@ -174,6 +174,18 @@ export function summarize(records: readonly RunRecord[]): Summary {
         ),
       ),
     ),
+    // K8 beside the figure (Spec 038, C-E): only the runs with K8 count; no key without any.
+    ...(records.some((record) => record.score.k8 !== undefined)
+      ? {
+          k8: per((variant) =>
+            mean(
+              of(variant).flatMap((record) =>
+                record.score.k8 === undefined ? [] : [record.score.k8.kvoto],
+              ),
+            ),
+          ),
+        }
+      : {}),
     gaps,
     tokens: {
       input: records.reduce((sum, record) => sum + record.effort.inputTokens, 0),

@@ -19,7 +19,7 @@ import {
   type Tasko,
 } from "@fundamento/modelo";
 import type { Element, Facts, Render, Variant } from "./facts.js";
-import type { K8Rezulto } from "./k8/k8.js";
+import { type K8Rezulto, k8 } from "./k8/k8.js";
 
 export type Kriterio = "K1" | "K2" | "K3" | "K4" | "K5" | "K6";
 export const KRITERIOJ: readonly Kriterio[] = ["K1", "K2", "K3", "K4", "K5", "K6"];
@@ -497,6 +497,9 @@ export function score(input: ScoreInput): Score {
   }
   const k6 = decided === 0 ? null : held / decided;
 
+  // K8 beside the total (Spec 038 Lauf 2, C-E): computed once, no weight, no gate, no gap.
+  const erscheinung = k8(facts, modelo);
+
   const k: Record<Kriterio, number | null> = {
     K1: k1,
     K2: k2 === null ? null : round4(k2),
@@ -518,6 +521,7 @@ export function score(input: ScoreInput): Score {
     total: weights === 0 ? 0 : round1((100 * weighted) / weights),
     gaps: sortGaps(gaps),
     ...(gate === undefined ? {} : { multmarkeco: round4(gate.share) }),
+    ...(erscheinung === undefined ? {} : { k8: erscheinung }),
   };
 }
 

@@ -125,6 +125,9 @@ function runId(date: Date, out: string): string {
   return id;
 }
 
+/** The K8 cell where no run carries K8 facts (D-98). */
+const K8_NE_PRUEFITA = "nicht geprüft";
+
 export function failedScore(variant: Variant, error: string): Score {
   const zero = variant === "F" ? 0 : null;
   return {
@@ -189,17 +192,24 @@ export function markdownReport(
       "",
       "## Mittel je Kriterium (0–1; in Variante 0 gelten K2 und K3 nicht)",
       "",
-      `| | ${KRITERIOJ.join(" | ")} | Markenfähigkeit |`,
-      `|---|${KRITERIOJ.map(() => "---|").join("")}---|`,
+      `| | ${KRITERIOJ.join(" | ")} | Markenfähigkeit | K8 |`,
+      `|---|${KRITERIOJ.map(() => "---|").join("")}---|---|`,
     );
+    // K8 beside the figure (Spec 038, D-S038-13-2): the same facts in both weightings.
+    const k8 = (variant: Variant) => {
+      const value = summary.k8?.[variant];
+      return value === null || value === undefined ? K8_NE_PRUEFITA : n(value);
+    };
     for (const variant of ["F", "0"] as const) {
       const row = (values: Record<string, number | null>) =>
         KRITERIOJ.map((kriterio) => n(values[kriterio])).join(" | ");
       lines.push(
-        `| ${variant}${old === undefined ? "" : ", Nachlese 11"} | ${row(summary.kriterioj[variant])} | ${n(summary.multmarkeco?.[variant])} |`,
+        `| ${variant}${old === undefined ? "" : ", Nachlese 11"} | ${row(summary.kriterioj[variant])} | ${n(summary.multmarkeco?.[variant])} | ${k8(variant)} |`,
       );
       if (summary.kriteriojAntauxaj !== undefined)
-        lines.push(`| ${variant}, Spec 030 | ${row(summary.kriteriojAntauxaj[variant])} | – |`);
+        lines.push(
+          `| ${variant}, Spec 030 | ${row(summary.kriteriojAntauxaj[variant])} | – | ${k8(variant)} |`,
+        );
     }
   }
   lines.push(
@@ -426,7 +436,7 @@ export async function runNordstelo(options: RunOptions, deps: RunDeps): Promise<
   };
   writeFileSync(
     join(dir, "raporto.json"),
-    `${JSON.stringify({ ...meta, taskoj: taskoj.map((tasko) => tasko.name), variants: options.variants, repeats: options.repeats, summary, records: records.map(({ task, variant, repeat, score: s, antauxa, effort, error }) => ({ task, variant, repeat, total: s.total, k: s.k, ...(s.multmarkeco === undefined ? {} : { multmarkeco: s.multmarkeco }), ...(antauxa === undefined ? {} : { antauxa: { total: antauxa.total, k: antauxa.k } }), effort, ...(error === undefined ? {} : { error }) })) }, null, 2)}\n`,
+    `${JSON.stringify({ ...meta, taskoj: taskoj.map((tasko) => tasko.name), variants: options.variants, repeats: options.repeats, summary, records: records.map(({ task, variant, repeat, score: s, antauxa, effort, error }) => ({ task, variant, repeat, total: s.total, k: s.k, ...(s.multmarkeco === undefined ? {} : { multmarkeco: s.multmarkeco }), ...(s.k8 === undefined ? {} : { k8: s.k8.kvoto }), ...(antauxa === undefined ? {} : { antauxa: { total: antauxa.total, k: antauxa.k } }), effort, ...(error === undefined ? {} : { error }) })) }, null, 2)}\n`,
   );
   writeFileSync(join(dir, "raporto.md"), markdownReport(meta, summary));
   // Paused at the daily limit: the state stays open, the history waits for the whole run.
