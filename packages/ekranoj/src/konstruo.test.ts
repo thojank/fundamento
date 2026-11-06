@@ -26,12 +26,19 @@ const MARKO = { css: ["css/fundamento.css"], skripto: KLASIKA_SKRIPTO };
 const BAZA_TIPARO = "--fm-provo-tiparo";
 
 /** The repository's Modelo data, read as files (no import of the Modelo, AC-10). */
-const REPO = new URL("../../../", import.meta.url);
-const legiJson = (vojo: string): unknown => JSON.parse(readFileSync(new URL(vojo, REPO), "utf8"));
+const legiJson = (url: URL): unknown => JSON.parse(readFileSync(url, "utf8"));
+/** The Skemo files of the two Sxablonoj, by literal path (turbo-inputs follows only these). */
+const SKEMOJ = {
+  sxelo: new URL("../../modelo/data/sxablonoj/sxelo/skemo.json", import.meta.url),
+  pagxo: new URL("../../modelo/data/sxablonoj/pagxo/skemo.json", import.meta.url),
+} as const;
 
 /** The region names of a Sxablono's Skemo, and the one that is the default region. */
-function regionojDe(sxablono: string): { nomoj: string[]; defauxlta: string | undefined } {
-  const dosiero = legiJson(`packages/modelo/data/sxablonoj/${sxablono}/skemo.json`) as {
+function regionojDe(sxablono: keyof typeof SKEMOJ): {
+  nomoj: string[];
+  defauxlta: string | undefined;
+} {
+  const dosiero = legiJson(SKEMOJ[sxablono]) as {
     skemo: { regions: { name: string; default?: boolean }[] };
   };
   const regionoj = dosiero.skemo.regions;
@@ -47,10 +54,10 @@ function regionojDe(sxablono: string): { nomoj: string[]; defauxlta: string | un
  * reference brand declares.
  */
 function tiparaNomoj(): string[] {
-  const kerno = legiJson("packages/vortaro/sets/core.json") as {
+  const kerno = legiJson(new URL("../../vortaro/sets/core.json", import.meta.url)) as {
     font: { family: Record<string, { $value?: unknown }> };
   };
-  const marko = legiJson("packages/aspekto-komuna/aspekto.json") as {
+  const marko = legiJson(new URL("../../aspekto-komuna/aspekto.json", import.meta.url)) as {
     fonts?: { family?: unknown }[];
   };
   const nomoj = [
