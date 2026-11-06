@@ -151,6 +151,56 @@ describe("the Werkstatt in the Vitrino (Spec 016 ②)", () => {
     expect(bundle).toContain("fmWerkstatt");
   });
 
+  // Spec 042 T4 (B-14, M5): a slider writes the draft's palettes on the root, so every element the
+  // browser styles recomputes its style. Off-screen parts of the Werkstatt are skipped by
+  // content-visibility – but Chromium applies no containment to a table, so a rule on the palette
+  // tables skipped nothing (about 1 150 elements styled anew per change), and the two sides of the
+  // comparison, each matching the whole stylesheet again, were styled even off screen.
+  describe("a slider restyles the visible part of the Werkstatt (Spec 042 T4, B-14)", () => {
+    const layout = () =>
+      (/<style id="fm-vitrino-layout">([\s\S]*?)<\/style>/.exec(html)?.[1] ?? "").replace(
+        /\/\*[\s\S]*?\*\//g,
+        "",
+      );
+    const rules = (selector: RegExp) =>
+      [...layout().matchAll(/([^{}]+)\{([^}]*)\}/g)]
+        .filter(([, selectors = ""]) =>
+          selectors.split(",").some((part) => selector.test(part.trim())),
+        )
+        .map(([, , body = ""]) => body);
+    const skipped = (selector: RegExp) =>
+      rules(selector).some((body) => body.includes("content-visibility: auto"));
+
+    it("wraps each palette table in a block of its own, which content-visibility skips off screen", () => {
+      const bundle =
+        /<script type="module" id="fm-vitrino-werkstatt-skripto">([\s\S]*?)<\/script>/.exec(
+          html,
+        )?.[1] ?? "";
+      expect(bundle).toContain('<div class="fm-werkstatt-paletro"><table>');
+      expect(skipped(/^#fm-werkstatt-paletroj > \.fm-werkstatt-paletro$/)).toBe(true);
+      expect(skipped(/^#fm-werkstatt-paletroj > table$/)).toBe(false);
+    });
+
+    it("skips the two sides of the comparison together while they are off screen", () => {
+      expect(skipped(/^\[data-fm-modus="werkstatt"\] \.fm-werkstatt-flankoj$/)).toBe(true);
+    });
+
+    // Containment clips what overflows its box: on a narrow screen a table or the grid of the
+    // sides is wider than its column, and the page scrolled to show it. Each block grows to its
+    // content instead, so the pixels stay those of before (D-09).
+    it("lets no skipped block clip what overflows it: each is at least as wide as its content", () => {
+      for (const selector of [
+        /^#fm-werkstatt-paletroj > \.fm-werkstatt-paletro$/,
+        /^\[data-fm-modus="werkstatt"\] \.fm-werkstatt-flankoj$/,
+      ]) {
+        expect(
+          rules(selector).some((body) => body.includes("min-inline-size: min-content")),
+          String(selector),
+        ).toBe(true);
+      }
+    });
+  });
+
   it("holds no colour of its own in the Werkstatt either", () => {
     const source = readFileSync(new URL("./werkstatt.ts", import.meta.url), "utf8");
     expect(source).not.toMatch(/#[0-9a-fA-F]{6}\b/);

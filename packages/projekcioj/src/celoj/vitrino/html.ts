@@ -109,8 +109,17 @@ tr[data-fm-superskribita="true"] th { text-decoration: underline; }
 /* Spec 019 ② (G5): in the Werkstatt every section of the Vitrino and every clone on the two sides
    of the comparison skip the work of rendering while off screen, so a slider recomputes what is
    visible, not the page. */
-[data-fm-modus="werkstatt"] main > section:not(#fm-vitrino-werkstatt), #fm-werkstatt-paletroj > table { content-visibility: auto; contain-intrinsic-size: auto 30rem; }
+[data-fm-modus="werkstatt"] main > section:not(#fm-vitrino-werkstatt) { content-visibility: auto; contain-intrinsic-size: auto 30rem; }
 [data-fm-modus="werkstatt"] [data-fm-side] { content-visibility: auto; contain-intrinsic-size: auto 200rem; }
+/* Spec 042 T4 (B-14): a slider writes the draft's palettes on the root, so every element the
+   browser styles restyles. Each palette table stands in a block of its own (Chromium applies no
+   containment to a table, so a rule on the table skipped nothing), and the grid of the two sides
+   is skipped as a whole: off screen neither side is styled, though each matches the whole
+   stylesheet again. Containment clips what overflows, so each block is at least as wide as its
+   content (a narrow screen scrolls the page as before); until first shown it holds its place:
+   30rem for a table, one side for the grid. */
+#fm-werkstatt-paletroj > .fm-werkstatt-paletro { content-visibility: auto; contain-intrinsic-size: auto none auto 30rem; min-inline-size: min-content; }
+[data-fm-modus="werkstatt"] .fm-werkstatt-flankoj { content-visibility: auto; contain-intrinsic-size: auto none auto calc(200rem + 2 * var(--fm-spacing-large) + 2 * var(--fm-border-width-default)); min-inline-size: min-content; }
 /* Spec 019 ②: the suggestion bar of a link from propose_agordo, the groups of the panel. */
 .fm-werkstatt-vorschlag:not([hidden]) { display: flex; flex-wrap: wrap; gap: var(--fm-spacing-medium); align-items: center; justify-content: space-between; padding: var(--fm-spacing-medium); border: var(--fm-border-width-strong) solid var(--fm-color-status-info-border); border-radius: var(--fm-radius-role-surface); background-color: var(--fm-color-status-info-subtle); color: var(--fm-color-text-default); }
 .fm-werkstatt-vorschlag p { margin: 0; }

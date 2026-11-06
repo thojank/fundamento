@@ -1176,7 +1176,8 @@ ${groupOf("ikonoj", "Icons", `<fm-elektilo id="fm-werkstatt-ikono-gewicht" value
         .join("");
       container.insertAdjacentHTML(
         "beforeend",
-        `<table><caption>${esc(palette)} · Stufe, Wert, Ziel und erreichter Kontrast gegen die Bezugsfläche</caption><thead><tr><th scope="col">Stufe</th><th scope="col">Farbe</th><th scope="col">Wert</th><th scope="col">Ziel</th><th scope="col">Erreicht</th><th scope="col">Ziel überschreiben</th></tr></thead><tbody>${rows}</tbody></table>`,
+        // Spec 042 T4 (B-14): in a block of its own, which content-visibility skips off screen.
+        `<div class="fm-werkstatt-paletro"><table><caption>${esc(palette)} · Stufe, Wert, Ziel und erreichter Kontrast gegen die Bezugsfläche</caption><thead><tr><th scope="col">Stufe</th><th scope="col">Farbe</th><th scope="col">Wert</th><th scope="col">Ziel</th><th scope="col">Erreicht</th><th scope="col">Ziel überschreiben</th></tr></thead><tbody>${rows}</tbody></table></div>`,
       );
     }
     container.addEventListener("change", (event) => {
