@@ -23,7 +23,7 @@
 
 - [x] **T3808 1.3, 1.4, 1.8a (S038-02)** `fields`, `role`, `navigation`, `slots`, `rest` (D-28, D-31), eine Link-Ableitung. `ero-field-unknown`, `ero-fields-invalid` (D-S038-02-4). – `fd4babe2` (grün: `eroj-fields.test.ts` 20/20, `pnpm test:betroffen` 18/18, D-S038-02-6).
 - [x] **T3809 1.5 (S038-03)** `marker` je Region (D-32), `markerOf`, `RegionMarker` (D-S038-03-1 bis -4). – `6ce53267` (grün: `sxablonoj-marker.test.ts` 10/10, `pnpm test:betroffen` 18/18, D-S038-03-5).
-- [x] **T3810 1.1, 1.6 (S038-04)** `listArangxoj`, `ARANGXO_CELOJ`, `nearest` (D-33), `nearestGoals`, `NEAREST_GOALS` (D-S038-04-1 bis -7). – grün (SHA trägt S038-05 nach).
+- [x] **T3810 1.1, 1.6 (S038-04)** `listArangxoj`, `ARANGXO_CELOJ`, `nearest` (D-33), `nearestGoals`, `NEAREST_GOALS` (D-S038-04-1 bis -7). – `2a0ee86d` (grün: `arangxoj.test.ts` 11/11, `suggest-ero-nearest.test.ts` 9/9, `pnpm test:betroffen` 18/18, D-S038-04-8).
 - [ ] **T3811 1.2, 1.5 (S038-05)** Leser (D-23), Kern (D-22), `checkMarkup` (D-29).
 - [ ] **T3812 1.7, 1.8 (S038-06)** MCP-Werkzeuge, Schemas, Prompt-Sätze, `TOOL_NAMES` am Ende.
 - [ ] **T3813 1.4, 1.8b, 1.8c (S038-07)** nordstelo K3 über den Kern (`instancesOf` entfällt), `faktojPorNavigado` (D-34), ekranoj `check_markup` mit Rückfall.
