@@ -10,7 +10,9 @@ import {
   type Tasko,
 } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
-import { type ScoreInput, score } from "./score.js";
+import type { Facts } from "./facts.js";
+import { k8 } from "./k8/k8.js";
+import { KRITERIOJ, type ScoreInput, score, scoreBoth } from "./score.js";
 import { cleanRenders, facts, h } from "./test-doubles/facts.js";
 
 const { modelo } = loadModelo(defaultModeloSource());
@@ -186,5 +188,58 @@ describe("score (K1–K6)", () => {
     const first = input({ facts: facts(GOOD, GOOD_ARIA, { console: ["x"] }) });
     expect(score(first)).toEqual(score(structuredClone(first)));
     expect(JSON.stringify(score(first))).toBe(JSON.stringify(score(first)));
+  });
+});
+
+// Spec 038 Lauf 2 (2.4, contract C-E): K8 stands beside the total, never in it (D-98, D-106).
+describe("score: K8 beside the total (Spec 038, 2.4)", () => {
+  const k8Fakto = (name: "sxablono" | "roh"): Facts =>
+    JSON.parse(
+      readFileSync(
+        fileURLToPath(new URL(`../test/fixtures/k8/${name}/faktoj.json`, import.meta.url)),
+        "utf8",
+      ),
+    ) as Facts;
+  const senK8 = (kun: Facts): Facts => ({
+    ...kun,
+    renders: kun.renders.map(({ k8: _k8, ...render }) => render),
+  });
+
+  for (const name of ["sxablono", "roh"] as const) {
+    it(`${name}: facts with renders[].k8 give score().k8 equal to k8(facts, modelo)`, () => {
+      const kun = k8Fakto(name);
+      const result = score(input({ facts: kun }));
+      const expected = k8(kun, modelo);
+      expect(expected).toBeDefined();
+      expect(result.k8).toEqual(expected);
+    });
+
+    it(`${name}: the same facts without renders[].k8 give no k8 key, and the same k, total, gaps and gate`, () => {
+      const kun = k8Fakto(name);
+      const sen = senK8(kun);
+      expect(sen.renders.some((render) => render.k8 !== undefined)).toBe(false);
+      for (const over of [{}, { pordego: katalogo.multmarkeco?.kriterioj ?? [] }]) {
+        const withK8 = score(input({ facts: kun, ...over }));
+        const without = score(input({ facts: sen, ...over }));
+        expect("k8" in without).toBe(false);
+        expect(withK8.k).toEqual(without.k);
+        expect(withK8.total).toBe(without.total);
+        expect(withK8.gaps).toEqual(without.gaps);
+        expect(withK8.multmarkeco).toBe(without.multmarkeco);
+      }
+    });
+  }
+
+  it("scoreBoth: nova.k8 and antauxa.k8 are equal (the same facts)", () => {
+    const both = scoreBoth({ facts: k8Fakto("roh"), tasko: login, variant: "F", modelo }, katalogo);
+    expect(both.nova.k8).toBeDefined();
+    expect(both.antauxa.k8).toEqual(both.nova.k8);
+  });
+
+  it("weights no K8: neither the criteria nor the weights of the catalogue name it", () => {
+    expect(KRITERIOJ).not.toContain("K8");
+    for (const pezoj of [katalogo.pezoj, katalogo.pezojAntauxaj?.pezoj ?? []]) {
+      expect(pezoj.map((pezo) => String(pezo.kriterio))).not.toContain("K8");
+    }
   });
 });

@@ -17,6 +17,7 @@ import {
   type NordsteloFile,
 } from "@fundamento/modelo";
 import { ekranoTaksilo } from "../ekrano-taksilo.js";
+import type { K8Merkmal } from "../k8/k8.js";
 import { median } from "../report.js";
 import { type AblaufTasko, kriteriojDe, trovuTaskon } from "./katalogo.js";
 import { type FluaPoento, legiKatalogon, legiKuron, poentiKuron } from "./poentoj.js";
@@ -112,6 +113,8 @@ export interface FluaValoro {
   k: Record<Kriterio, number | null>;
   navigado: number;
   sxablonoj: number;
+  /** Mean K8 kvoto over the screens with K8; absent where none has one (Spec 038, C-E). */
+  k8?: number;
 }
 
 /** One screen in one round. */
@@ -125,6 +128,19 @@ export interface EkranaValoro {
   unueca: boolean;
   verda: boolean | null;
   verdaEkde: number | null;
+  /** The K8 kvoto of the screen; absent where it has none (Spec 038, C-E). */
+  k8?: number;
+}
+
+/** One row of „K8 je Merkmal und Kombination“: means over the screens and repetitions. */
+export interface K8Vico {
+  tasko: string;
+  varianto: Varianto;
+  rondo: string;
+  aspekto: string;
+  scheme: "light" | "dark";
+  merkmaloj: Record<K8Merkmal, number>;
+  kvoto: number;
 }
 
 export interface KuroEnRaporto {
@@ -196,6 +212,8 @@ export interface RaportoDatumoj {
       f0R3: KomparoF0;
     }[];
   };
+  /** K8 per flow × variant × round × combination; absent where no screen has K8 (Spec 038). */
+  k8?: K8Vico[];
   sumo: {
     tokenoj: { enigo: number; eligo: number };
     anfragoj: number;

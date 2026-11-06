@@ -14,7 +14,6 @@ import {
   type NavigadoRezulto,
   navigado,
   type Plano,
-  type Taksado,
   type Taksilo,
   type Varianto,
 } from "@fundamento/ekranoj";
@@ -25,6 +24,7 @@ import {
   navigationOf,
   readNordstelo,
 } from "@fundamento/modelo";
+import type { TaksadoK8 } from "../ekrano-taksilo.js";
 import { type AblaufTasko, planoDe } from "./katalogo.js";
 import { type EkranaSxablono, type SxablonojRezulto, sxablonojSamaj } from "./sxablonoj-samaj.js";
 
@@ -81,8 +81,11 @@ export function faktojPorNavigado(
 /** One screen of one round. */
 export interface EkranaPoento {
   varianto: Varianto;
-  /** K1–K6 and the weighted total; null when the screen was not built (no facts). */
-  taksado: Taksado | null;
+  /**
+   * K1–K6 and the weighted total; null when the screen was not built (no facts). K8 beside it
+   * where the injected scorer gives one (read at runtime, D-S038-13-1).
+   */
+  taksado: TaksadoK8 | null;
   /** D-05 for this screen (planned edges present, no dead link). */
   navigado: EkranaNavigado;
   /** D-06 of the flow, as it concerns this screen. */
@@ -109,6 +112,8 @@ export interface FluaPoento {
     navigado: number;
     /** D-06 share of the flow (separate column). */
     sxablonoj: number;
+    /** Mean K8 kvoto over the screens with K8 (separate column); absent where none has one. */
+    k8?: number;
   };
 }
 

@@ -19,6 +19,7 @@ import {
   type Tasko,
 } from "@fundamento/modelo";
 import type { Element, Facts, Render, Variant } from "./facts.js";
+import type { K8Rezulto } from "./k8/k8.js";
 
 export type Kriterio = "K1" | "K2" | "K3" | "K4" | "K5" | "K6";
 export const KRITERIOJ: readonly Kriterio[] = ["K1", "K2", "K3", "K4", "K5", "K6"];
@@ -62,6 +63,11 @@ export interface Score {
   gaps: Gap[];
   /** With the gate (Nachlese 11): the share of the renders whose combination the page follows. */
   multmarkeco?: number;
+  /**
+   * K8 „Erscheinung“ (Spec 038 Lauf 2, C-E): beside the total, never in it, no weight, no gate.
+   * Only where a render carries K8 facts (D-98, D-106).
+   */
+  k8?: K8Rezulto;
 }
 
 export interface ScoreInput {
