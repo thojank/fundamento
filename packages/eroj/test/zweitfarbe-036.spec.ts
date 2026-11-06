@@ -9,7 +9,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type APIRequestContext, expect, type Page, test } from "@playwright/test";
-import { gespeichert, nachDerAbfrage, seiteGeladen } from "./wackler-040.js";
+import { BUEHNE_BEREIT, dokument, entwurfGespeichert, schrittBereit } from "./geladen-042.js";
+import { nachDerAbfrage } from "./wackler-040.js";
 
 const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
 const cli = join(repoRoot, "packages/cli/dist/index.js");
@@ -99,14 +100,23 @@ const entwurf = (page: Page, id: string) =>
       new URL(response.url()).pathname === `/api/marko/${id}/entwurf`,
   );
 
-// The assistant's steps poll the draft every 3 s (GET …/stato); the Schnellstart's do not.
-for (const [ort, pfad, pollt] of [
+// The assistant's steps poll the draft every 3 s (GET …/stato); the Schnellstart's do not. Each
+// place has its own marker of a loaded screen (Spec 042 T3): the assistant's stage sets
+// `data-mt-bereit` once its client bound every handler; the Schnellstart has no such marker, so its
+// Zweitfarbe block stands for it, together with `readyState` "complete" (its module scripts ran).
+for (const [ort, pfad, pollt, merkmal] of [
   [
     "the assistant's step „Leitfarbe und Akzente“",
     (id: string) => `/asistanto/${id}/gvidkoloro`,
     true,
+    BUEHNE_BEREIT,
   ],
-  ["the Schnellstart's colour step", (id: string) => `/marko/${id}/farbe`, false],
+  [
+    "the Schnellstart's colour step",
+    (id: string) => `/marko/${id}/farbe`,
+    false,
+    "[data-mt-zweitfarbe]",
+  ],
 ] as const) {
   test(`${ort}: „Keine Zweitfarbe“, a colour typed with the keyboard, then cleared`, async ({
     page,
@@ -115,8 +125,11 @@ for (const [ort, pfad, pollt] of [
     const errors = errorsOf(page);
     const id = await marke(request, `Dukolora ${ort.length}`);
     // Spec 040 B-5: the test changes the step only once the page it loaded has settled – loaded,
-    // its preview of the page's rev loaded, its check on load answered.
-    await seiteGeladen(page, id, () => page.goto(`${base}${pfad(id)}`));
+    // its preview of the page's rev loaded, its check on load answered. Spec 042 T3: read as states
+    // of the page (`geladen-042.ts`), never as `framenavigated`, which Firefox missed for the preview
+    // in run 42103645313 (the test waited its whole 120 s at the reload below).
+    await page.goto(`${base}${pfad(id)}`);
+    await schrittBereit(page, id, merkmal);
     const block = page.locator("[data-mt-zweitfarbe]");
     await expect(block).toHaveAttribute("data-mt-zweitfarbe", "keine");
     await expect(block.locator("[data-mt-zweitfarbe-stand]")).toHaveText("Keine Zweitfarbe");
@@ -127,7 +140,7 @@ for (const [ort, pfad, pollt] of [
     await expect(feld).toBeFocused();
     // Spec 040 B-5: reload only once the save has settled – the draft's answer to the whole colour,
     // the preview of its rev, the step's check – not while the page is still busy with it.
-    const gesetzt = gespeichert(
+    const gesetzt = entwurfGespeichert(
       page,
       id,
       (patch) => (patch as { zweitfarbe?: { farbe?: unknown } }).zweitfarbe?.farbe === "#0f8f86",
@@ -137,7 +150,9 @@ for (const [ort, pfad, pollt] of [
     await expect.poll(() => zweitfarbe(id)).toEqual({ farbe: "#0f8f86" });
 
     // And press „Keine Zweitfarbe“ only once the reloaded page has settled as well (Spec 040 B-5).
-    await seiteGeladen(page, id, () => page.reload());
+    const vorDemNeuladen = await dokument(page);
+    await page.reload();
+    await schrittBereit(page, id, merkmal, vorDemNeuladen);
     await expect(block).toHaveAttribute("data-mt-zweitfarbe", "#0f8f86");
     await expect(page.getByRole("img", { name: "Zweitfarbe #0f8f86" })).toBeVisible();
     await expect(block.locator("[data-mt-zweitfarbe-stand]")).toContainText("Von dir gesetzt");
@@ -146,17 +161,16 @@ for (const [ort, pfad, pollt] of [
     const entfernen = page.getByRole("button", { name: "Keine Zweitfarbe" });
     await entfernen.focus();
     const geloescht = entwurf(page, id);
-    // The button reloads the page once the draft took the patch: wait for that navigation itself,
-    // not for the load state of the page that is about to go.
-    const neuGeladen = page.waitForEvent("framenavigated", (frame) => frame === page.mainFrame());
+    // The button reloads the page once the draft took the patch: wait for another document than
+    // this one to be loaded and settled, not for an event of the navigation (Spec 042 T3).
+    const vorDemLoeschen = await dokument(page);
     // Press it right after the page's poll of the draft answered, not while one is under way: the
     // reload would cut it short (Spec 040 B-8).
     if (pollt) await nachDerAbfrage(page, id);
     await page.keyboard.press("Enter");
     expect((await geloescht).status()).toBe(200);
     await expect.poll(() => zweitfarbe(id)).toBeUndefined();
-    await neuGeladen;
-    await page.waitForLoadState("load");
+    await schrittBereit(page, id, merkmal, vorDemLoeschen);
     await expect(page.locator("[data-mt-zweitfarbe]")).toHaveAttribute(
       "data-mt-zweitfarbe",
       "keine",
@@ -179,6 +193,7 @@ test("the Zweitfarbe from material shows its origin in the step", async ({ page,
   });
   expect(set.status()).toBe(200);
   await page.goto(`${base}/asistanto/${id}/gvidkoloro`);
+  await schrittBereit(page, id, BUEHNE_BEREIT);
   const stand = page.locator("[data-mt-zweitfarbe-stand]");
   await expect(stand).toContainText("probe.png");
   await expect(stand).toContainText("20 % der gefundenen Farbe");
