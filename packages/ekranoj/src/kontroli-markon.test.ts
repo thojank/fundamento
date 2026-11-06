@@ -128,7 +128,11 @@ describe("the path of a run (Spec 038 1.8c, D-03)", () => {
       fragment: fragmentoDe(PLANO, "liste", 1),
       lingvo: "de",
     });
-    const eroj = tools.vokoj.filter((voko) => voko.name === "get_ero");
+    // The reads of the checker; the Kurzprofile ekranoj puts into round 2 (`fields: ["brief"]`,
+    // S038-20) are asserted in rondoj.test.ts.
+    const eroj = tools.vokoj.filter(
+      (voko) => voko.name === "get_ero" && String(voko.args.fields) !== "brief",
+    );
     expect(eroj.map((voko) => voko.args)).toEqual([
       { name: "karto", fields: [...ERO_KAMPOJ] },
       { name: "butono", fields: [...ERO_KAMPOJ] },

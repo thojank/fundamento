@@ -382,6 +382,13 @@ export interface KonstruoPeto {
   maksIlojVokoj?: number;
   /** Characters of one tool result the agent gets (as nordstelo: 20 000). */
   maksIlaRezulto?: number;
+  /**
+   * Spec 038 (3.2, D-S038-20-2): the shell, read once per run when the server lists check_markup
+   * and list_arangxoj. Its presence picks the new system text and task; absent = Spec 037 path.
+   */
+  sxelo?: SxelaKunteksto;
+  /** The Kurzprofile of the Eroj in the previous round's fragment (new path, rounds 2 and 3). */
+  eroProfiloj?: readonly Profilo[];
 }
 
 /** What one build conversation gave: the markup, the agent's gaps, and whether it stayed empty. */
@@ -425,6 +432,78 @@ export function taskoDe(peto: KonstruoPeto): string {
   return linioj.join("\n");
 }
 
+// --- Spec 038: the shell in the system text, the context per screen and round (S038-20) ----------
+
+/** The tools whose presence in the run's tool list picks the shell path (D-03, D-S038-20-2). */
+export const SXELAJ_ILOJ = ["check_markup", "list_arangxoj"] as const;
+
+/** The Sxablonoj of the shell, whose Kurzprofile stand in the system text. */
+export const SXELAJ_SXABLONOJ = ["sxelo", "pagxo"] as const;
+
+/** The rule where the links to other screens belong (the form of the overview, S038-19). */
+export const NAVIGADA_REGULO = [
+  "Baue jeden Screen in der Shell: <fm-sxelo> außen, der Inhalt in ihrem Standardbereich, gern in <fm-pagxo>.",
+  'Verweise auf andere Screens des Ablaufs gehören in die Navigation der Shell: ein <fm-navigado label="…"> im slot="nav" von <fm-sxelo>, darin jeder Verweis als direktes Kind <a href="<slug>.html">.',
+].join("\n");
+
+/** One Kurzprofil read by ekranoj (not by the agent): the name and the answer as the tool gave it. */
+export interface Profilo {
+  nomo: string;
+  teksto: string;
+}
+
+/** The shell of a run: the Kurzprofile of its Sxablonoj and the layout means, read once. */
+export interface SxelaKunteksto {
+  /** `get_sxablono { name, brief: true, marker: true }`, in the order of `SXELAJ_SXABLONOJ`. */
+  profiloj: Profilo[];
+  /** The answer of `list_arangxoj`; absent when the call failed. */
+  arangxoj?: string;
+}
+
+/** Whether the run takes the shell path: the server lists check_markup and list_arangxoj. */
+export function sxelaServilo(_iloj: readonly Pick<ToolInfo, "name">[]): boolean {
+  return false;
+}
+
+/** The shell of a run over the bridge; a failing call is skipped with a log line. */
+export async function legiSxelon(
+  _ponto: ToolBridge,
+  _log: (linio: string) => void,
+): Promise<SxelaKunteksto> {
+  return { profiloj: [] };
+}
+
+/** The names of the `fm-*` tags of a fragment, sorted and once each, the shell's Sxablonoj left out. */
+export function eroNomojDe(_fragmento: string): string[] {
+  return [];
+}
+
+/** A cache of Kurzprofile per run: one read per name, misses included. */
+export type ProfilaKasxmemoro = Map<string, Promise<Profilo | undefined>>;
+
+/**
+ * The Kurzprofile `get_ero { name, fields: ["brief"] }` of the names that are Eroj; an answer
+ * that is no Ero or a failing call is skipped with a log line, never an error of the run.
+ */
+export async function legiEroProfilojn(
+  _ponto: ToolBridge,
+  _nomoj: readonly string[],
+  _kasxmemoro: ProfilaKasxmemoro,
+  _log: (linio: string) => void,
+): Promise<Profilo[]> {
+  return [];
+}
+
+/** The system text of Variante F: SISTEMO_F, the Gvidanto's prompt, and on the new path the shell. */
+export function sistemoDe(gvidanto: string, _sxelo?: SxelaKunteksto): string {
+  return gvidanto === "" ? SISTEMO_F : `${SISTEMO_F}\n\n${gvidanto}`;
+}
+
+/** The user message of the new path: plan excerpt, Kurzprofile, last fragment, findings, task. */
+export function sxelaTaskoDe(peto: KonstruoPeto): string {
+  return taskoDe(peto);
+}
+
 /** The tools a model may be offered: never a writing one, whatever the bridge lists. */
 export function ofertotajIloj(iloj: readonly ToolInfo[]): ToolInfo[] {
   const skribaj: ReadonlySet<string> = new Set(SKRIBAJ_ILOJ);
@@ -465,14 +544,14 @@ async function redemandi(
 export async function konstruiEkranon(peto: KonstruoPeto): Promise<KonstruoRezulto> {
   const maksVokoj = peto.maksIlojVokoj ?? 24;
   const maksRezulto = peto.maksIlaRezulto ?? 20_000;
-  const tasko = taskoDe(peto);
+  const nova = peto.varianto === "F" && peto.sxelo !== undefined;
+  const tasko = nova ? sxelaTaskoDe(peto) : taskoDe(peto);
   const messages: ChatMessage[] = [];
   const iloj = peto.varianto === "F" ? ofertotajIloj(peto.iloj ?? []) : [];
   if (peto.varianto === "F") {
-    const gvidanto = peto.gvidanto ?? "";
     messages.push({
       role: "system",
-      content: gvidanto === "" ? SISTEMO_F : `${SISTEMO_F}\n\n${gvidanto}`,
+      content: sistemoDe(peto.gvidanto ?? "", nova ? peto.sxelo : undefined),
     });
     messages.push({ role: "user", content: tasko });
   } else {

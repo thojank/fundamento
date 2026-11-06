@@ -449,6 +449,12 @@ export interface RondoEkrano {
   fakto?: Fakto;
   /** The findings the next round gets as feedback (S037-03, additive). */
   trovoj?: Trovo[];
+  /**
+   * The effort of building this screen in this round only (Spec 038 C-6, additive): the run's
+   * `peno` after the build minus before it. The plan request is not in it (run total only);
+   * a round carried forward (D-26) has none.
+   */
+  peno?: Peno;
 }
 
 /** A finding of a check, as the agent gets it for the next round and the report shows it. */
