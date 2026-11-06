@@ -77,6 +77,13 @@ Bezug 2.5 = entfällt, ersetzt durch ‚vorher' in Lauf 4 auf Bezug-SHA
 | `packages/modelo/src/gvidanto/suggest-ero.ts`, `nearest.ts`, `index.ts` | frei, geändert (`nearest`, `nearestGoals`, `NEAREST_GOALS`; `editDistance` exportiert; eine Exportzeile) | Grün-Commit S038-04 |
 | `packages/modelo/src/gvidanto/check-markup.test.ts` | frei, neu (MG-2: Leser, Kern, `checkMarkup`) | `508d1546` rot (S038-05) |
 | `packages/modelo/src/gvidanto/check-markup.ts`, `index.ts` | frei, neu bzw. geändert (`legiMarkon`, `instancojElElementoj`, `checkMarkup`, `GvidantoElemento`; eine Exportzeile) | Grün-Commit S038-05 |
+| `packages/mcp/src/gvidanto-038.test.ts` | frei, neu (Werkzeuge und Optionen über MCP) | `d8aa8e67` rot (S038-06) |
+| `packages/mcp/src/{kontrakto-038,prompt}.test.ts` | frei, geändert (neue Regeln angehängt: genau zwei neue Werkzeuge, neue Eingaben optional; Prompt-Sätze) | `d8aa8e67` rot (S038-06) |
+| `packages/mcp/src/{contracts,nachlese-11-anbieter}.test.ts`, `src/e2e/s7-dialog.test.ts` | frei, geändert (D-19: Werkzeugliste als Präfix + zwei, Anzahl aus `TOOL_NAMES`, Eingabe für `check_markup`) | `d8aa8e67` rot (S038-06) |
+| `packages/mcp/src/{schemas,tools}.ts` | frei, geändert (`TOOL_NAMES` + zwei am Ende, zwei Werkzeuge, `nearest` in der Fehlerhülle) | Grün-Commit S038-06 |
+| `packages/mcp/schema/tools/{list_arangxoj,check_markup}.{input,output}.json` | frei, neu | Grün-Commit S038-06 |
+| `packages/mcp/schema/tools/{get_ero,get_sxablono,suggest_ero}.input.json`, `{get_ero,get_sxablono}.output.json`, `schema/common.json` | frei, geändert (nur neue optionale Eigenschaften, neue `$defs`, Beschreibungen angehängt) | Grün-Commit S038-06 |
+| `packages/mcp/prompts/gvidanto.md` | frei, geändert (Regeln 18–22 angehängt, alter Text byte-gleich) | Grün-Commit S038-06 |
 
 ## Vertrags-Fixtures (T0)
 
@@ -259,20 +266,27 @@ Vorläufige IDs aus den Beiträgen; S038-08 nummeriert sie hier durch.
 | D-S038-05-4 | `sxablonoRezulto` = `{ instances: <Zahl der Sxablono-Instanzen>, valid: kein Fehler, violations: evaluateSxablonoUsage(…) }` (Form `CheckUsageOutput`, Verstöße mit `sxablono: [i]`); nicht über `checkUsage({ instances: [], sxablonoj })`, dessen `instances` 0 wäre. Nur mit mindestens einer Sxablono. Eine Regionsprüfung als Eingabefehler (`sxablonoInputIssue`) entfällt: Regionen entstehen nur aus bekannten Namen. |
 | D-S038-05-5 | `lingvo` = `<html lang>` des Fragments `??` Eingabe (wie `statikaFakto`, ein leeres `lang` gewinnt); `aspekto`/`dimensioj` werden hinter die Kern-Schlüssel jeder Ero-Instanz gesetzt (`dimensioj` kopiert). Eine Ablehnung von `checkUsage` geht als ganzes Ergebnis unverändert zurück (`issues`, `allowed`, Pfade `check_usage/…`); `sxablonoj` werden dann nicht berechnet. |
 | D-S038-05-6 | Rot/Grün beobachtet wie D-S038-02-6 (`/tmp/s038-05-reihe.sh`, Hintergrund mit 2 h); Grün vor dem Commit mit denselben gestagten Bytes. |
+| D-S038-06-1 | Beschreibungen: Die Wurzel-Beschreibung von `get_ero` und `get_sxablono` bleibt unverändert; `fields` und `marker` erklären sich in der Beschreibung der neuen Eigenschaft. Grund: `bundle.ts` hängt an Werkzeuge mit `oneOf` den Satz „Give exactly one of: `name` or `id`.“ **hinter** die Beschreibung; ein angehängter Satz stünde davor, und die Beschreibung des Bezugs wäre in `tools/list` kein Präfix mehr (Wächter). `suggest_ero` (ohne Kombinator) bekommt einen Satz am Ende der Wurzel-Beschreibung; die Ausgabe-Schemas von `get_ero`/`get_sxablono` je einen. |
+| D-S038-06-2 | Geteilte Formen als `$defs` in `schema/common.json` (`NearestGoal`, `UsageResult`, `RegionMarker`, `EroFieldName`, `EroNavigation`, `EroSlots`): `bundle.ts` löst nur Modelo- und Common-Verweise auf (ein lokales `#/$defs/` liest es als Modelo). `UsageResult` ist der Körper von `check_usage.output.json` (die Datei bleibt unverändert) und trägt `rezulto` und `sxablonoRezulto`. `ErrorEnvelope` bekommt optional `nearest` (Array von `NearestGoal`), `tools.ts#gvidanto()` reicht es hinter `issues`/`allowed` durch (D-33). |
+| D-S038-06-3 | `get_ero.output.json`: der Kurzprofil-Zweig nimmt optional `role`, `navigation`, `slots`, `rest`; ein dritter `oneOf`-Zweig nimmt die Antwort ohne Kurzprofil (`ero` + `role?`, `navigation?`, `slots?`, `rest?`). Die Zweige schließen sich über `axes` aus (im Kurzprofil Pflicht, im dritten unbekannt). `get_sxablono.output.json`: jede Region (Kurzprofil `regions[i]`, voll `skemo.regions[i]`) optional `marker` (`RegionMarker`). `fields` in `properties` **und** beiden Zweigen der Eingabe, Items `string` (kein Enum), `minItems: 1`, `uniqueItems: true`; `marker` ebenso in beiden Zweigen. |
+| D-S038-06-4 | `check_markup`-Eingabe: `fragment` (String, `minLength: 1`), `lingvo` (String, `minLength: 1`, kein Enum: der Kern nimmt die ersten zwei Buchstaben, „de-CH“ bleibt gültig), `aspekto` (`Name` wie in `EroInstance`), `dimensioj` (wie in `EroInstance`), sonst nichts. Eine `aspekto`, die kein Name ist, lehnt schon das Schema ab (`check_markup/aspekto`); eine unbekannte gültige lehnt `check_usage` ab und die Hülle kommt unverändert (`check_usage/instances/0/aspekto`). `list_arangxoj`-Eingabe `{ lingvo?: "en" \| "de" }`. Beide Werkzeuge `readOnlyHint: true` (Vorgabe des Servers). |
+| D-S038-06-5 | Prompt: fünf nummerierte Regeln 18–22 hinter Regel 17, je ein Satz (je Werkzeug und je Option: `list_arangxoj`, `check_markup`, `fields` mit `rest`, `marker: true`, `nearest: true`). Regel 19 nennt den Unterschied ohne Instanz ausdrücklich: `check_markup` antwortet mit `rezulto` von null Instanzen, MCP-`check_usage` lehnt eine leere Liste ohne Sxablonoj ab (Befund S038-01-1). Kein Markenwert, kein Name aus R-12. |
+| D-S038-06-6 | Tests mit festgehaltener Werkzeugliste (D-19): `contracts.test.ts` (alte Liste wörtlich als `slice(0, -2)`, die zwei Namen als `slice(-2)`; Beispiele für die zwei Werkzeuge, weil `EXAMPLES` ohne Eintrag wirft), `nachlese-11-anbieter.test.ts` (`toHaveLength(23)` → Namen gleich `TOOL_NAMES`), `e2e/s7-dialog.test.ts` (Eingabe für `check_markup`, sonst würde die Schleife „jedes Werkzeug antwortet“ mit `{}` aufrufen; Erwartung unverändert). `ekranoj/src/mcp-kliento.test.ts` bleibt in S038-06 unverändert: ekranoj prüft gegen eigene Doubles, `KONSTRUAJ_ILOJ` wächst erst in S038-07. Kein Arkitekturo- oder Nordstern-Test geändert. |
+| D-S038-06-7 | Rot/Grün beobachtet wie D-S038-02-6 (`/tmp/s038-06-reihe.sh`, Hintergrund mit 2 h); Rot und Grün je vor dem Commit mit denselben gestagten Bytes. |
 
 ## Lieferliste
 
 | # | Punkt | Stand |
 |---|---|---|
 | L-0 | T0: Startbedingung, Bezug-SHA, `/tmp/s038-bezug`, Vertrags- und AC-8-Fixtures, spec/plan/tasks | erledigt (S038-01) |
-| 1.1 | MG-1 `list_arangxoj` | Funktion erledigt (S038-04): `listArangxoj`, 5 Sxablonoj + 18 Regionen, 6 Abstandsstufen, `mankoj` row/column/stack; MCP offen (S038-06) |
-| 1.2 | MG-2 `check_markup` | Funktion erledigt (S038-05): `legiMarkon`, `instancojElElementoj`, `checkMarkup`; lokal gegen alle 20 AC-8-Fälle gleich (Befund S038-05-2); MCP offen (S038-06), nordstelo/ekranoj offen (S038-07) |
-| 1.3 | MG-3 Feldauswahl `fields` | Funktion erledigt (S038-02); MCP offen (S038-06) |
-| 1.4 | MG-4 `navigation` | Funktion und Ableitung `navigationOf` erledigt (S038-02); nordstelo/ekranoj offen (S038-07) |
-| 1.5 | MG-5 Regionsmerkmale | Funktion erledigt (S038-03): `markerOf`, `get_sxablono` mit `marker: true`, alle 18 Regionen der 5 Sxablonoj mit Merkmal; Erkennung im Markup erledigt (S038-05, `sxablonoRezulto`, D-29), MCP offen (S038-06) |
-| 1.6 | MG-6 `nearest` | Funktion erledigt (S038-04): `suggestEro(…, { nearest: true })`, `nearestGoals`; MCP und Hülle offen (S038-06) |
-| 1.7 | Prompt `gvidanto` | offen (S038-06) |
-| 1.8 | Verträge | Wächter erledigt (S038-01); neue Werkzeuge offen (S038-06) |
+| 1.1 | MG-1 `list_arangxoj` | erledigt: Funktion (S038-04), MCP-Werkzeug `list_arangxoj` (S038-06) |
+| 1.2 | MG-2 `check_markup` | Funktion erledigt (S038-05): `legiMarkon`, `instancojElElementoj`, `checkMarkup`; lokal gegen alle 20 AC-8-Fälle gleich (Befund S038-05-2); MCP-Werkzeug `check_markup` erledigt (S038-06), nordstelo/ekranoj offen (S038-07) |
+| 1.3 | MG-3 Feldauswahl `fields` | erledigt: Funktion (S038-02), `get_ero` mit `fields` über MCP (S038-06) |
+| 1.4 | MG-4 `navigation` | Funktion und Ableitung `navigationOf` erledigt (S038-02), über MCP mit `fields` (S038-06); nordstelo/ekranoj offen (S038-07) |
+| 1.5 | MG-5 Regionsmerkmale | Funktion erledigt (S038-03): `markerOf`, `get_sxablono` mit `marker: true`, alle 18 Regionen der 5 Sxablonoj mit Merkmal; Erkennung im Markup erledigt (S038-05, `sxablonoRezulto`, D-29), `get_sxablono` mit `marker: true` über MCP (S038-06) |
+| 1.6 | MG-6 `nearest` | erledigt: Funktion (S038-04), `suggest_ero` mit `nearest: true`, `nearest` in der Fehlerhülle (S038-06) |
+| 1.7 | Prompt `gvidanto` | erledigt (S038-06): Regeln 18–22 angehängt, alter Text Präfix (Wächter) |
+| 1.8 | Verträge | Wächter (S038-01) und neue Werkzeuge (S038-06) erledigt: 114 Katalogantworten byte-gleich, `TOOL_NAMES` alte Liste als Präfix + `list_arangxoj`, `check_markup`; Allowlist von ekranoj offen (S038-07) |
 | 1.8a | 750-Token-Test | erledigt (S038-02): 40 Eroj × 15 Teilmengen, 5 Sxablono-Kurzprofile, grün |
 | 1.8b | nordstelo K3 | offen (S038-07); AC-8-Fixture erledigt (S038-01) |
 | 1.8c | ekranoj | offen (S038-07); AC-8-Fixture erledigt (S038-01) |
@@ -307,6 +321,7 @@ S038-03 (MG-5): keine – jedes Regionsmerkmal ist aus der Skemo ableitbar.
 - **S038-05-3 Leeres Fragment und AC-8:** Der ekranoj-Fall `abnahme-komuna-r2-detail` hat das Fragment `""` und erwartet `instancoj: []`, `malobservoj: []`; `check_markup` lehnt `""` ab (D-S038-05-2). ekranoj darf auf dem neuen Weg für ein leeres Fragment `check_markup` nicht rufen (wie es heute ohne Instanz `check_usage` nicht ruft) – Hinweis an S038-07.
 - **S038-05-4 Beispiele von `list_arangxoj` durch `checkMarkup` (S038-04-4 erledigt, Test):** alle 23 werden ohne Ablehnung gelesen, jedes `fm-*` als Ero- oder Sxablono-Instanz erkannt; die Seitenregeln sind für alle 5 Sxablono-Beispiele erfüllt. `rezulto` ist für 9 Beispiele nicht `valid` (`field-label-visible`, `label-required`): die Beispiele lassen Beschriftungen bewusst weg (D-S038-04-3). Ob Beispiele beschriftet sein sollen, entscheidet der Maintainer.
 - **S038-05-5 Seitenregeln auf der AC-8-Seite:** Für den Fall `sxablono-seite` meldet `sxablonoRezulto` `sxablono-region-props` (titolo ohne `focusable`) und `sxablono-region-accepts` (der Wrapper `<div slot="actions">` zählt als Text). Nach D-29 nur Hinweis; `rezulto` bleibt das Urteil der Fixture.
+- **S038-06-1 Größe der Werkzeugliste:** Die Eingabeschemas in `tools/list` wachsen von 20 571 auf 21 681 Tokens (Zähler `ceil(JSON.length / 3)`): `list_arangxoj` 235, `check_markup` 476 neu; `get_ero` 463 → 636, `get_sxablono` 369 → 473, `suggest_ero` 177 → 299 durch die Beschreibungen der neuen Optionen. Ein Agent bekommt die Liste mit jeder Anfrage; für die Messung Teil 1 (Lauf 3) zählt der Zuwachs der Werkzeuge, die ekranoj anbietet (S038-07). Nichts gekürzt, keine Grenze berührt.
 - **S038-01-2 Lokal wackelnder Hook:** `packages/nordstelo/src/ablauf/integra.test.ts` (`beforeAll` mit `connectGvidanto()`, 10-s-Hook-Grenze) lief im ersten `pnpm test:betroffen` unter Last (fünf Pakete parallel) in die Zeitgrenze; Datei unverändert. Trefferquote im Beitrag S038-01; keine Grenze angehoben.
 
 ## Blockiert

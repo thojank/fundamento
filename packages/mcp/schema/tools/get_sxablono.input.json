@@ -19,6 +19,10 @@
     "lingvo": {
       "description": "The language of the texts of the answer (Nachlese 8 ③): \"de\" gives the purpose, the kialoj and the Reguloj in German, from data/tradukoj.json; without it or with \"en\" English, the source. Names, cases and keywords stay.",
       "enum": ["en", "de"]
+    },
+    "marker": {
+      "description": "With true every region of the answer carries its marker (Spec 038 MG-5): how it is recognised in markup – the slot value that puts a child into it, default where children without a slot attribute land, and the landmark it is. Brief and full answer alike. Default false.",
+      "type": "boolean"
     }
   },
   "oneOf": [
@@ -26,7 +30,8 @@
       "properties": {
         "name": true,
         "brief": true,
-        "lingvo": true
+        "lingvo": true,
+        "marker": true
       },
       "required": ["name"]
     },
@@ -34,7 +39,8 @@
       "properties": {
         "id": true,
         "brief": true,
-        "lingvo": true
+        "lingvo": true,
+        "marker": true
       },
       "required": ["id"]
     }

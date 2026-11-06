@@ -18,6 +18,15 @@
     "lingvo": {
       "description": "The language of the texts of the answer (Nachlese 8 ③): \"de\" gives the purpose, the kialoj and the Reguloj in German, from data/tradukoj.json; without it or with \"en\" English, the source. Names, cases and keywords stay.",
       "enum": ["en", "de"]
+    },
+    "fields": {
+      "description": "Only these parts of the Ero (Spec 038 MG-3, MG-4): brief (the brief answer), slots (each slot with what it lets in, default, required, how many), role (the element's ARIA role) and navigation (the prop that holds a link's target; absent for an Ero that is no link). The answer stays under the measured size ceiling: what does not fit is named in rest, ask for it with fields set to rest. Not together with brief: true.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "uniqueItems": true
     }
   },
   "oneOf": [
@@ -25,7 +34,8 @@
       "properties": {
         "name": true,
         "brief": true,
-        "lingvo": true
+        "lingvo": true,
+        "fields": true
       },
       "required": ["name"]
     },
@@ -33,7 +43,8 @@
       "properties": {
         "id": true,
         "brief": true,
-        "lingvo": true
+        "lingvo": true,
+        "fields": true
       },
       "required": ["id"]
     }

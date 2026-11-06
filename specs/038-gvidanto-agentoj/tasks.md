@@ -16,7 +16,7 @@
 - [x] **T3803 1.5 (S038-03)** Tests `getSxablono(…, { marker: true })` und `markerOf`, Antworten ohne `marker` byte-gleich. – `6546736d` (rot: `packages/modelo/src/gvidanto/sxablonoj-marker.test.ts`, 7 von 10 rot über `pnpm test:betroffen`).
 - [x] **T3804 1.1, 1.6 (S038-04)** Tests `listArangxoj` und `suggestEro` mit `nearest: true`. – `9bde008b` (rot: `packages/modelo/src/gvidanto/{arangxoj,suggest-ero-nearest}.test.ts`, 17 von 20 rot über `pnpm test:betroffen`).
 - [x] **T3805 1.2, 1.5 (S038-05)** Tests Markup-Leser, Kern `instancojElElementoj`, `checkMarkup` (positiv, Regelverstoß, unbekannte Ero, Durchreichen der Ablehnung, leeres Fragment, Sxablono-Seite, Determinismus). – `508d1546` (rot: `packages/modelo/src/gvidanto/check-markup.test.ts`, 23 von 23 rot über `pnpm test:betroffen`).
-- [ ] **T3806 1.7, 1.8 (S038-06)** Tests MCP: `list_arangxoj`, `check_markup`, `fields`, `marker`, `nearest`, Prompt, `TOOL_NAMES` (D-19: `contracts.test.ts`, `nachlese-11-anbieter.test.ts`, `ekranoj/src/mcp-kliento.test.ts`).
+- [x] **T3806 1.7, 1.8 (S038-06)** Tests MCP: `list_arangxoj`, `check_markup`, `fields`, `marker`, `nearest`, Prompt, `TOOL_NAMES`. Geänderte Tests mit festgehaltener Werkzeugliste, Grund **D-19** (alte Liste bleibt Präfix, zwei Namen am Ende): `packages/mcp/src/contracts.test.ts` (Liste als Präfix + zwei, Beispiele der zwei Werkzeuge), `packages/mcp/src/nachlese-11-anbieter.test.ts` (23 → `TOOL_NAMES`), `packages/mcp/src/e2e/s7-dialog.test.ts` (nur Eingabe für `check_markup` in der Schleife über alle Werkzeuge, Erwartung unverändert); `packages/ekranoj/src/mcp-kliento.test.ts` bleibt bis S038-07 unverändert (`KONSTRUAJ_ILOJ` wächst erst dort). – `d8aa8e67` (rot: `packages/mcp/src/gvidanto-038.test.ts` neu, dazu `kontrakto-038.test.ts`, `prompt.test.ts`, `contracts.test.ts`; `@fundamento/mcp` 466 bestanden, 32 rot über `pnpm test:betroffen`).
 - [ ] **T3807 1.4, 1.8b, 1.8c (S038-07)** Tests AC-8 in nordstelo (K3, Regulo-Lücken, Urteil; neuer ekranoj-Weg gegen den echten Server, D-36), ekranoj Erkennung, Rückfall, ein Folgeaufruf bei `rest`, `navigation.target`.
 
 ### B – Grün
@@ -25,7 +25,7 @@
 - [x] **T3809 1.5 (S038-03)** `marker` je Region (D-32), `markerOf`, `RegionMarker` (D-S038-03-1 bis -4). – `6ce53267` (grün: `sxablonoj-marker.test.ts` 10/10, `pnpm test:betroffen` 18/18, D-S038-03-5).
 - [x] **T3810 1.1, 1.6 (S038-04)** `listArangxoj`, `ARANGXO_CELOJ`, `nearest` (D-33), `nearestGoals`, `NEAREST_GOALS` (D-S038-04-1 bis -7). – `2a0ee86d` (grün: `arangxoj.test.ts` 11/11, `suggest-ero-nearest.test.ts` 9/9, `pnpm test:betroffen` 18/18, D-S038-04-8).
 - [x] **T3811 1.2, 1.5 (S038-05)** Leser (D-23), Kern (D-22), `checkMarkup` (D-29), `legiMarkon`, `GvidantoElemento` (D-S038-05-1 bis -5). – `8ef96f90` (grün: `check-markup.test.ts` 23/23, `pnpm test:betroffen` 18/18, D-S038-05-6).
-- [ ] **T3812 1.7, 1.8 (S038-06)** MCP-Werkzeuge, Schemas, Prompt-Sätze, `TOOL_NAMES` am Ende.
+- [x] **T3812 1.7, 1.8 (S038-06)** MCP-Werkzeuge, Schemas, Prompt-Sätze (Regeln 18–22), `TOOL_NAMES` am Ende (D-19), `nearest` in der Fehlerhülle (D-33) (D-S038-06-1 bis -7). – grün (SHA trägt S038-07 nach).
 - [ ] **T3813 1.4, 1.8b, 1.8c (S038-07)** nordstelo K3 über den Kern (`instancesOf` entfällt), `faktojPorNavigado` (D-34), ekranoj `check_markup` mit Rückfall.
 
 ### C – Abschluss

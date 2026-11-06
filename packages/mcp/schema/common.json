@@ -64,10 +64,143 @@
           "items": {
             "type": "string"
           }
+        },
+        "nearest": {
+          "description": "suggest_ero with nearest: true and no goal that answers (Spec 038 MG-6, D-33): the nearest goals of the Eroj, nearest first.",
+          "type": "array",
+          "items": {
+            "$ref": "urn:fundamento:schema:mcp:common#/$defs/NearestGoal"
+          }
         }
       },
       "additionalProperties": false,
       "required": ["issues"]
+    },
+    "NearestGoal": {
+      "description": "A goal near a text no goal answers (Spec 038 MG-6): the Skemo goal, the Ero that declares it and its keywords.",
+      "type": "object",
+      "properties": {
+        "celo": { "type": "string", "minLength": 1 },
+        "ero": { "$ref": "urn:fundamento:schema:modelo#/$defs/Name" },
+        "keywords": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["celo", "ero", "keywords"],
+      "additionalProperties": false
+    },
+    "UsageResult": {
+      "description": "A judgement in the form of check_usage's answer (Spec 003 FR-13): how many instances, whether they hold, and every violation with the instances or Sxablonoj it is about.",
+      "type": "object",
+      "properties": {
+        "instances": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "valid": {
+          "type": "boolean"
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "instance": {
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": 0 },
+                    "minItems": 1
+                  },
+                  "issue": { "$ref": "urn:fundamento:schema:mcp:common#/$defs/Issue" }
+                },
+                "required": ["instance", "issue"],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "sxablono": {
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": 0 },
+                    "minItems": 1
+                  },
+                  "issue": { "$ref": "urn:fundamento:schema:mcp:common#/$defs/Issue" }
+                },
+                "required": ["sxablono", "issue"],
+                "additionalProperties": false
+              }
+            ]
+          }
+        }
+      },
+      "required": ["instances", "valid", "violations"],
+      "additionalProperties": false
+    },
+    "RegionMarker": {
+      "description": "How a region of a Sxablono is recognised in markup (Spec 038 MG-5): the landmark it is, an attribute that marks it, the slot value that puts a child into it, and default where it also takes the children without a slot attribute.",
+      "type": "object",
+      "properties": {
+        "landmark": { "type": "string", "minLength": 1 },
+        "attribute": { "type": "string", "minLength": 1 },
+        "slot": { "type": "string", "minLength": 1 },
+        "default": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "EroFieldName": {
+      "description": "A part of an Ero that get_ero answers with fields (Spec 038 MG-3, MG-4).",
+      "enum": ["brief", "slots", "role", "navigation"]
+    },
+    "EroNavigation": {
+      "description": "The prop that holds the target of a link Ero (Spec 038 MG-4).",
+      "type": "object",
+      "properties": {
+        "target": { "$ref": "urn:fundamento:schema:modelo#/$defs/Name" }
+      },
+      "required": ["target"],
+      "additionalProperties": false
+    },
+    "EroSlots": {
+      "description": "Every slot of an Ero by name (Spec 038 MG-3), from Skemo and Uzo: what it lets in (text, icon, one Ero or several), its data form where the Modelo carries one, whether it is the default slot or required, and how many entries it takes.",
+      "type": "object",
+      "propertyNames": { "$ref": "urn:fundamento:schema:modelo#/$defs/Name" },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                { "enum": ["text", "icon"] },
+                {
+                  "type": "object",
+                  "properties": { "ero": { "$ref": "urn:fundamento:schema:modelo#/$defs/Name" } },
+                  "required": ["ero"],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "eroj": {
+                      "type": "array",
+                      "items": { "$ref": "urn:fundamento:schema:modelo#/$defs/Name" },
+                      "minItems": 1
+                    }
+                  },
+                  "required": ["eroj"],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "dataForm": { "type": "string", "minLength": 1 },
+          "default": { "const": true },
+          "required": { "const": true },
+          "min": { "type": "integer", "minimum": 0 },
+          "max": { "type": "integer", "minimum": 0 }
+        },
+        "required": ["content"],
+        "additionalProperties": false
+      }
     },
     "FontSummary": {
       "type": "object",

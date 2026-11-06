@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fundamento:schema:mcp:check_markup.output",
+  "title": "check_markup output",
+  "description": "The instances of the markup and their judgements (Spec 038 MG-2, D-29): rezulto is check_usage on the Ero instances; sxablonoRezulto, only where the markup holds a Sxablono, the page rules of the Sxablonoj apart.",
+  "type": "object",
+  "properties": {
+    "eroj": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:fundamento:schema:modelo#/$defs/EroInstance"
+      }
+    },
+    "sxablonoj": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:fundamento:schema:modelo#/$defs/SxablonoInstance"
+      }
+    },
+    "rezulto": {
+      "$ref": "urn:fundamento:schema:mcp:common#/$defs/UsageResult"
+    },
+    "sxablonoRezulto": {
+      "$ref": "urn:fundamento:schema:mcp:common#/$defs/UsageResult"
+    }
+  },
+  "required": ["eroj", "sxablonoj", "rezulto"],
+  "additionalProperties": false
+}
