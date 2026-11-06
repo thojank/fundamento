@@ -14,10 +14,16 @@ import { join } from "node:path";
 import { Budget } from "@fundamento/metiejo";
 import {
   type AgentaManko,
+  eroNomojDe,
   konstruiEkranon,
+  legiEroProfilojn,
+  legiSxelon,
   PlanoMalsukcesis,
+  type ProfilaKasxmemoro,
   planiEkranojn,
   planoElNomoj,
+  type SxelaKunteksto,
+  sxelaServilo,
 } from "./agento.js";
 import { statikaFakto } from "./fakto-statika.js";
 import { gardiModelon } from "./gardo.js";
@@ -524,7 +530,8 @@ export async function kuruEkranojn(
       for (let r = faritaj + 1; r <= MAKS_RONDOJ; r += 1) {
         const portita: Rondo = {};
         for (const [slug, ekrano] of Object.entries(lasta)) {
-          portita[slug] = { ...ekrano, verdaEkde: ekrano.verdaEkde ?? faritaj };
+          // C-6: a carried round has no effort of its own.
+          portita[slug] = { ...senPeno(ekrano), verdaEkde: ekrano.verdaEkde ?? faritaj };
         }
         rondoj.push(portita);
       }
@@ -593,6 +600,10 @@ export async function kuruEkranojn(
   let gvidanto: string | undefined;
   let iloj: ToolInfo[] = [];
   let kontrolilo: UzKontrolilo | undefined;
+  // Spec 038 (3.2, D-S038-20-2): the shell, read once per run on a server that lists check_markup
+  // and list_arangxoj; the Kurzprofile of the Eroj, read once per name and run.
+  let sxelo: SxelaKunteksto | undefined;
+  const profiloj: ProfilaKasxmemoro = new Map();
   if (varianto === "F" && deps.tools !== undefined) {
     gvidanto = (await deps.tools.prompt?.()) ?? "";
     const listitaj = await deps.tools.list();
@@ -602,6 +613,7 @@ export async function kuruEkranojn(
     kontrolilo = uzKontroliloDe(deps.tools, listitaj);
     // The allowlist also for an injected bridge: only the build tools, never the brand workshop.
     iloj = filtriIlojn(listitaj);
+    if (sxelaServilo(listitaj)) sxelo = await legiSxelon(deps.tools, deps.log);
   }
 
   // The plan: given, or asked (with the user's names, or free).
@@ -639,10 +651,23 @@ export async function kuruEkranojn(
   for (let r = 1; r <= MAKS_RONDOJ && haltigo === undefined; r += 1) {
     let konstruitaj = 0;
     const malplenaj = new Set<string>();
+    /** C-6: the effort of each build of this round, the run's `peno` after minus before. */
+    const penoj = new Map<string, Peno>();
     for (const ekrano of plano.ekranoj) {
       if (verdaEkde.has(ekrano.slug)) continue;
       const antaua = lastaStato.get(ekrano.slug);
+      const antauPeno = { ...peno };
+      const ekde = Date.now();
+      let bytes = 0;
       try {
+        // The Kurzprofile of the Eroj of the last fragment: read by ekranoj, no tool call of
+        // the agent; their text is input of the request (D-S038-20-2).
+        const eroProfiloj =
+          sxelo === undefined || deps.tools === undefined || antaua?.fragmento === undefined
+            ? undefined
+            : await legiEroProfilojn(deps.tools, eroNomojDe(antaua.fragmento), profiloj, (linio) =>
+                deps.log(`${ekrano.slug} Runde ${r}: ${linio}`),
+              );
         const { fragmento, mankoj, malplena } = await konstruiEkranon({
           chat: deps.chat,
           budget,
@@ -662,7 +687,10 @@ export async function kuruEkranojn(
             : { antaua: { fragmento: antaua.fragmento, trovoj: antaua.trovoj ?? [] } }),
           lingvo,
           log: deps.log,
+          ...(sxelo === undefined ? {} : { sxelo }),
+          ...(eroProfiloj === undefined ? {} : { eroProfiloj }),
         });
+        bytes = Buffer.byteLength(fragmento);
         fragmentoj.set(ekrano.slug, fragmento);
         fragmentoRondoj.set(ekrano.slug, r);
         konstruitaj += 1;
@@ -690,6 +718,8 @@ export async function kuruEkranojn(
       } catch (error) {
         halti(error, `in Runde ${r} bei ${ekrano.slug}`);
         break;
+      } finally {
+        penoj.set(ekrano.slug, penoDiferenco(peno, antauPeno, Date.now() - ekde, bytes));
       }
     }
     if (konstruitaj === 0) break;
@@ -708,6 +738,7 @@ export async function kuruEkranojn(
       verdaEkde,
       lastaStato,
       notoj,
+      penoj,
     });
     rondoj.push(rondo);
     await deps.eligo?.rondo?.({ rondo: r, stato: rondo, plano });
@@ -734,6 +765,26 @@ interface RondoKunteksto {
   verdaEkde: Map<string, number>;
   lastaStato: Map<string, RondoEkrano>;
   notoj: string[];
+  /** The effort of each build of this round (C-6); a screen not built in it has none. */
+  penoj: ReadonlyMap<string, Peno>;
+}
+
+/** The effort between two states of the run's `peno` (C-6): tokens, requests, tool calls. */
+function penoDiferenco(post: Peno, antau: Peno, ms: number, bytes: number): Peno {
+  return {
+    inputTokens: post.inputTokens - antau.inputTokens,
+    outputTokens: post.outputTokens - antau.outputTokens,
+    toolCalls: post.toolCalls - antau.toolCalls,
+    requests: post.requests - antau.requests,
+    ms,
+    bytes,
+  };
+}
+
+/** A screen state without its effort: what a round carried forward repeats (C-6, D-26). */
+function senPeno(stato: RondoEkrano): RondoEkrano {
+  const { peno: _peno, ...resto } = stato;
+  return resto;
 }
 
 /** The check of one round: render, score, check_usage, navigation over all screens, green. */
@@ -783,7 +834,7 @@ async function kontroliRondon(k: RondoKunteksto): Promise<Rondo> {
     const ekde = k.verdaEkde.get(ekrano.slug);
     const antaua = k.lastaStato.get(ekrano.slug);
     if (ekde !== undefined && antaua !== undefined) {
-      rondo[ekrano.slug] = { ...antaua, verdaEkde: ekde };
+      rondo[ekrano.slug] = { ...senPeno(antaua), verdaEkde: ekde };
       continue;
     }
     const fakto = faktoj[ekrano.slug];
@@ -825,6 +876,7 @@ async function kontroliRondon(k: RondoKunteksto): Promise<Rondo> {
     const verda = decido.verda && !malplena;
     // A stop left the screen unbuilt this round: its older fragment was checked again.
     const fragmentoRondo = k.fragmentoRondoj.get(ekrano.slug);
+    const peno = k.penoj.get(ekrano.slug);
     const stato: RondoEkrano = {
       taksado,
       malobservoj,
@@ -838,6 +890,7 @@ async function kontroliRondon(k: RondoKunteksto): Promise<Rondo> {
       ...(sxablonajSugestoj.length === 0 ? {} : { sxablonajSugestoj }),
       fragmento,
       fakto,
+      ...(peno === undefined ? {} : { peno }),
       trovoj: verda
         ? []
         : trovojDe({

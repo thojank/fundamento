@@ -461,21 +461,63 @@ export interface SxelaKunteksto {
 }
 
 /** Whether the run takes the shell path: the server lists check_markup and list_arangxoj. */
-export function sxelaServilo(_iloj: readonly Pick<ToolInfo, "name">[]): boolean {
-  return false;
+export function sxelaServilo(iloj: readonly Pick<ToolInfo, "name">[]): boolean {
+  const nomoj = new Set(iloj.map((ilo) => ilo.name));
+  return SXELAJ_ILOJ.every((nomo) => nomoj.has(nomo));
+}
+
+/** A JSON object of a tool answer, or undefined (no JSON, a list, a refusal with `issues`). */
+const respondoObjekto = (teksto: string): Record<string, unknown> | undefined => {
+  const body = parse(teksto);
+  return isObject(body) && body.issues === undefined && body.error === undefined ? body : undefined;
+};
+
+/** One read of ekranoj (not of the agent): the answer, or undefined with a log line. */
+async function antauxpreni(
+  ponto: ToolBridge,
+  nomo: string,
+  args: Record<string, unknown>,
+  log: (linio: string) => void,
+): Promise<string | undefined> {
+  const kio = `${nomo}${typeof args.name === "string" ? ` ${args.name}` : ""}`;
+  try {
+    const respondo = await ponto.call(nomo, args);
+    if (respondoObjekto(respondo) !== undefined) return respondo;
+    log(`Kurzprofil ${kio} übersprungen: keine lesbare Antwort.`);
+  } catch (error) {
+    log(
+      `Kurzprofil ${kio} übersprungen: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+  return undefined;
 }
 
 /** The shell of a run over the bridge; a failing call is skipped with a log line. */
 export async function legiSxelon(
-  _ponto: ToolBridge,
-  _log: (linio: string) => void,
+  ponto: ToolBridge,
+  log: (linio: string) => void,
 ): Promise<SxelaKunteksto> {
-  return { profiloj: [] };
+  const profiloj: Profilo[] = [];
+  for (const nomo of SXELAJ_SXABLONOJ) {
+    const teksto = await antauxpreni(
+      ponto,
+      "get_sxablono",
+      { name: nomo, brief: true, marker: true },
+      log,
+    );
+    if (teksto !== undefined) profiloj.push({ nomo, teksto });
+  }
+  const arangxoj = await antauxpreni(ponto, "list_arangxoj", {}, log);
+  return { profiloj, ...(arangxoj === undefined ? {} : { arangxoj }) };
 }
 
 /** The names of the `fm-*` tags of a fragment, sorted and once each, the shell's Sxablonoj left out. */
-export function eroNomojDe(_fragmento: string): string[] {
-  return [];
+export function eroNomojDe(fragmento: string): string[] {
+  const sxelaj: ReadonlySet<string> = new Set(SXELAJ_SXABLONOJ);
+  const nomoj = [...fragmento.matchAll(/<fm-([a-z0-9-]+)/gi)].map((m) =>
+    (m[1] ?? "").toLowerCase(),
+  );
+  return [...new Set(nomoj)].filter((nomo) => nomo !== "" && !sxelaj.has(nomo)).sort();
 }
 
 /** A cache of Kurzprofile per run: one read per name, misses included. */
@@ -486,22 +528,91 @@ export type ProfilaKasxmemoro = Map<string, Promise<Profilo | undefined>>;
  * that is no Ero or a failing call is skipped with a log line, never an error of the run.
  */
 export async function legiEroProfilojn(
-  _ponto: ToolBridge,
-  _nomoj: readonly string[],
-  _kasxmemoro: ProfilaKasxmemoro,
-  _log: (linio: string) => void,
+  ponto: ToolBridge,
+  nomoj: readonly string[],
+  kasxmemoro: ProfilaKasxmemoro,
+  log: (linio: string) => void,
 ): Promise<Profilo[]> {
-  return [];
+  const profiloj: Profilo[] = [];
+  for (const nomo of nomoj) {
+    let profilo = kasxmemoro.get(nomo);
+    if (profilo === undefined) {
+      profilo = antauxpreni(ponto, "get_ero", { name: nomo, fields: ["brief"] }, log).then(
+        (teksto) => (teksto === undefined ? undefined : { nomo, teksto }),
+      );
+      kasxmemoro.set(nomo, profilo);
+    }
+    const legita = await profilo;
+    if (legita !== undefined) profiloj.push(legita);
+  }
+  return profiloj;
 }
 
 /** The system text of Variante F: SISTEMO_F, the Gvidanto's prompt, and on the new path the shell. */
-export function sistemoDe(gvidanto: string, _sxelo?: SxelaKunteksto): string {
-  return gvidanto === "" ? SISTEMO_F : `${SISTEMO_F}\n\n${gvidanto}`;
+export function sistemoDe(gvidanto: string, sxelo?: SxelaKunteksto): string {
+  const partoj = [SISTEMO_F, ...(gvidanto === "" ? [] : [gvidanto])];
+  if (sxelo !== undefined) {
+    if (sxelo.profiloj.length > 0) {
+      partoj.push(
+        [
+          "Die Shell von Fundamento (Kurzprofile aus get_sxablono, mit den Markern der Bereiche):",
+          ...sxelo.profiloj.map((profilo) => `- fm-${profilo.nomo}: ${profilo.teksto}`),
+        ].join("\n"),
+      );
+    }
+    if (sxelo.arangxoj !== undefined) {
+      partoj.push(`Die Layout-Mittel (list_arangxoj):\n${sxelo.arangxoj}`);
+    }
+    partoj.push(NAVIGADA_REGULO);
+  }
+  return partoj.join("\n\n");
 }
 
 /** The user message of the new path: plan excerpt, Kurzprofile, last fragment, findings, task. */
 export function sxelaTaskoDe(peto: KonstruoPeto): string {
-  return taskoDe(peto);
+  const { plano, ekrano } = peto;
+  const celoj = plano.kantoj.filter((kanto) => kanto.de === ekrano.slug).map((k) => `${k.al}.html`);
+  const linioj = [
+    `Ablauf: ${plano.celo}`,
+    `Satz des Auftrags: ${peto.frazo}`,
+    "Screens des Ablaufs:",
+    ...plano.ekranoj.map((e) => `- ${e.slug}.html – ${e.titolo}: ${e.celo}`),
+    celoj.length === 0
+      ? "Laut Plan verweist dieser Screen auf keinen anderen Screen."
+      : `Laut Plan verweist dieser Screen auf: ${celoj.join(", ")}.`,
+  ];
+  const profiloj = peto.antaua === undefined ? [] : (peto.eroProfiloj ?? []);
+  if (profiloj.length > 0) {
+    linioj.push(
+      "",
+      "Kurzprofile der Eroj deines Stands (get_ero, brief):",
+      ...profiloj.map((profilo) => `- fm-${profilo.nomo}: ${profilo.teksto}`),
+    );
+  }
+  if (peto.antaua !== undefined) {
+    linioj.push(
+      "",
+      `Runde ${peto.rondo}: Dein Stand aus Runde ${peto.rondo - 1}:`,
+      "```html",
+      peto.antaua.fragmento,
+      "```",
+      "Befunde der Prüfung (JSON: regulo, loko, mesagxo, sugesto, kialo):",
+      "```json",
+      JSON.stringify(peto.antaua.trovoj, null, 2),
+      "```",
+    );
+  }
+  linioj.push(
+    "",
+    `Baue jetzt den Screen „${ekrano.titolo}“ (${ekrano.slug}.html): ${ekrano.celo}`,
+    ...(peto.antaua === undefined
+      ? []
+      : [
+          "Verbessere den Stand so, dass die Befunde verschwinden, und sende den ganzen Stand neu.",
+        ]),
+    `Sprache der Texte: ${peto.lingvo === "en" ? "Englisch" : "Deutsch"}.`,
+  );
+  return linioj.join("\n");
 }
 
 /** The tools a model may be offered: never a writing one, whatever the bridge lists. */
