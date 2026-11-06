@@ -67,6 +67,9 @@ Bezug 2.5 = entfällt, ersetzt durch ‚vorher' in Lauf 4 auf Bezug-SHA
 | `packages/mcp/src/kontrakto-038.test.ts` | frei, neu (Wächter) | T0-Commit (S038-01) |
 | `packages/nordstelo/test/fixtures/ac8/**` (12 Dateien) | frei, neu (AC-8-Fixture, nur Daten) | T0-Commit (S038-01) |
 | `packages/ekranoj/test/fixtures/ac8/**` (8 Dateien) | frei, neu (AC-8-Fixture, nur Daten) | T0-Commit (S038-01) |
+| `packages/modelo/src/gvidanto/eroj-fields.test.ts` | frei, neu (MG-3/MG-4, 750-Token-Sweep) | `0b89cd1f` rot (S038-02), Typkorrektur im Grün-Commit |
+| `packages/modelo/src/gvidanto/eroj.ts` | frei, geändert (`fields`, `navigationOf`, `slotsOf`, Zähler) | Grün-Commit S038-02 |
+| `packages/modelo/src/contracts/issues.ts` | frei, geändert (`ero-field-unknown`, `ero-fields-invalid` angehängt) | Grün-Commit S038-02 |
 
 ## Vertrags-Fixtures (T0)
 
@@ -223,6 +226,12 @@ Vorläufige IDs aus den Beiträgen; S038-08 nummeriert sie hier durch.
 | D-S038-01-6 | Gespeicherte Fakten per Pfad und SHA-256 referenziert (keine Kopie); neue Fakten inline. |
 | D-S038-01-7 | Schema-Regel des Wächters: neue Schlüssel nur in `properties`/`$defs`, `description` nur am Ende verlängert, `required` gleich, sonst alles gleich. |
 | D-S038-01-8 | `audit-ac4` meldet entfernte Zeilen mit Grenzmuster als „geändert“ (Exit 1) und hinzugefügte nur zur Sichtung; neue Tests mit `750` sind keine angehobene Grenze. |
+| D-S038-02-1 | Namen im Code englisch (code-style): `EroField`/`ERO_FIELDS` statt `EroFeld` der Spec; `ERO_FIELDS` = `["brief","slots","role","navigation"]` (Reihenfolge der Spec, zugleich `allowed`), die Füllreihenfolge `brief → role → navigation → slots` ist intern. Zähler und Decke exportiert (`answerTokens`, `ANSWER_CEILING` = 750), damit S038-03 ff. denselben Zähler nutzen. |
+| D-S038-02-2 | Eine Anfrage mit **einem** Feld bekommt es immer (der Folgeaufruf für `rest` endet dort). Mit zwei und mehr gilt die Füllregel aus D-31. Ein Feld, das allein ≥ 750 ist, ist ein Befund (S038-02-1), keine angehobene Grenze und kein endloses `rest`. In der Standardsprache tritt der Fall nicht auf. |
+| D-S038-02-3 | Form von `slots` (über §2.2 hinaus, alles optional): `content` aus `accepts` der Uzo in deren Reihenfolge – Inhaltsarten wie geschrieben (`"text"`, **`"icon"`**, die Art aus data-model §2.1, die §2.2 nicht nennt), die angenommenen Eroj als **ein** Eintrag an der Stelle der ersten (`{ ero }` bei einer, `{ eroj }` bei mehreren); dazu `default: true` (Standard-Slot der Skemo), `required: true`, `min`, `max` aus der Uzo. Ein Slot ohne Uzo-Eintrag (z. B. `disabled-reason`, karto `media`): `["text"]`, wenn die Skemo `text: true` sagt, sonst `[]`. `dataForm` nie (D-38). Größte `slots`-Antwort: dialogo, 136 Tokens mit `ero`. |
+| D-S038-02-4 | Fehler: zwei neue Regel-IDs am Ende von `RULE_IDS` – `ero-field-unknown` (`get_ero/fields/<i>`, je unbekanntem Feld) und `ero-fields-invalid` (leere Liste oder `fields` neben `brief: true` → `get_ero/fields`; ein Feld doppelt → `get_ero/fields/<i>`). `allowed` = die vier Felder. `fields` wird vor der Ero-Suche geprüft; eine unbekannte Ero mit gültigen `fields` antwortet wie ohne (`ero-unknown`). `brief: false` mit `fields` ist erlaubt. |
+| D-S038-02-5 | Kein Kürzen umgesetzt: kein Feld trägt Beispiele (das Kurzprofil hat keine), das größte einzelne Feld in der Standardsprache ist das Kurzprofil von kampo (747). |
+| D-S038-02-6 | Rot/Grün über `pnpm test:betroffen` unter fremder Last: Eine Modelo-Änderung macht neun Pakete betroffen; Turborepo bricht beim ersten roten Task ab (keine `--continue`-Option im Skript). Rot waren nur Zeitgrenzen unveränderter Tests (Befund S038-02-2), die den Modelo-Lauf jedes Mal abbrachen. Darum liefen die übrigen Test-Tasks bei niedriger Last einzeln (`pnpm exec turbo run test --filter=@fundamento/<paket>`, gleiche Eingaben, Ergebnis im Turbo-Cache); danach zeigte **ein** `pnpm test:betroffen` alle übrigen Tasks als Cache-Treffer und den frischen Modelo-Lauf. Keine Grenze geändert, keine Datei unter `scripts/**` berührt. |
 
 ## Lieferliste
 
@@ -231,13 +240,13 @@ Vorläufige IDs aus den Beiträgen; S038-08 nummeriert sie hier durch.
 | L-0 | T0: Startbedingung, Bezug-SHA, `/tmp/s038-bezug`, Vertrags- und AC-8-Fixtures, spec/plan/tasks | erledigt (S038-01) |
 | 1.1 | MG-1 `list_arangxoj` | offen (S038-04, S038-06) |
 | 1.2 | MG-2 `check_markup` | offen (S038-05, S038-06) |
-| 1.3 | MG-3 Feldauswahl `fields` | offen (S038-02, S038-06) |
-| 1.4 | MG-4 `navigation` | offen (S038-02, S038-07) |
+| 1.3 | MG-3 Feldauswahl `fields` | Funktion erledigt (S038-02); MCP offen (S038-06) |
+| 1.4 | MG-4 `navigation` | Funktion und Ableitung `navigationOf` erledigt (S038-02); nordstelo/ekranoj offen (S038-07) |
 | 1.5 | MG-5 Regionsmerkmale | offen (S038-03, S038-05) |
 | 1.6 | MG-6 `nearest` | offen (S038-04, S038-06) |
 | 1.7 | Prompt `gvidanto` | offen (S038-06) |
 | 1.8 | Verträge | Wächter erledigt (S038-01); neue Werkzeuge offen (S038-06) |
-| 1.8a | 750-Token-Test | offen (S038-02) |
+| 1.8a | 750-Token-Test | erledigt (S038-02): 40 Eroj × 15 Teilmengen, 5 Sxablono-Kurzprofile, grün |
 | 1.8b | nordstelo K3 | offen (S038-07); AC-8-Fixture erledigt (S038-01) |
 | 1.8c | ekranoj | offen (S038-07); AC-8-Fixture erledigt (S038-01) |
 | 1.9 | Messung Teil 1 | verschoben nach Lauf 3 |
@@ -250,11 +259,16 @@ Keine.
 
 ### Mankoj – Eroj-Runde 7
 
-Noch keine (S038-02 bis S038-04 tragen ein; erwartet: Datenform von tabelo, D-38; Layout-Primitive Reihe/Spalte/Stapel).
+- **Datenform von Slots (MG-3, D-38, S038-02):** Keine Skemo und keine Uzo sagt, in welcher Form ein Slot seine Daten nimmt. tabelo `content` ist in der Uzo `{ accepts: ["text"], required, max: 1, nesting: 1 }`, in der Skemo nur `{ name: "content" }` – dass dort eine native `<table>` mit Kopf- und Datenzeilen steht, kommt in keiner Antwort vor. `slots` liefert darum kein `dataForm`. Vorschlag Eroj-Runde 7: optionale Slot-Eigenschaft der Uzo (z. B. `dataForm` mit einem kleinen festen Vokabular wie `table` = `<table>` mit `<thead>`/`<tbody>`, `th`/`td`), die `slotsOf` dann unverändert durchreicht.
+
+Weitere tragen S038-03 und S038-04 ein (erwartet: Layout-Primitive Reihe/Spalte/Stapel).
 
 ### Sonstige
 
 - **S038-01-1 `check_usage` über MCP ohne Instanz:** `{ instances: [] }` wird mit `mcp-input-invalid` abgelehnt (`check_usage/instances`: mindestens 1 Element, oder `sxablonoj` nötig). Die Funktion `checkUsage` antwortet `{ instances: 0, valid: true, violations: [] }`. nordstelo und ekranoj rufen ohne Instanz nichts auf. Für `checkMarkup` (S038-05) gilt §2.2: ohne Instanz `rezulto` = Antwort der Funktion.
+- **S038-02-1 Deutsches Kurzprofil von kampo ≥ 750:** `get_ero { name: "kampo", brief: true, lingvo: "de" }` ist schon auf dem Bezugsstand 793 Tokens (2 377 Zeichen; Englisch 747); der bestehende Test prüft nur die Standardsprache. `fields: ["brief"], lingvo: "de"` liefert es byte-gleich mit 793 (D-S038-02-2), jede Anfrage mit mehreren Feldern bleibt < 750 (`rest: ["brief"]`). Sonst kein Kurzprofil über 750 (Deutsch: butono 633, elektilo 583). Vorschlag: deutsche Texte von kampo kürzen oder die Messung auf `lingvo` erweitern – Entscheidung des Maintainers; die Grenze bleibt.
+- **S038-02-2 Zeitgrenzen bei parallelen Paketläufen (B-4):** Unter Last 26–63 (fremde Firefox-Playwright-Läufe aus `fundamento-wt-mw48j5oap3r28zm3` plus die neun eigenen Test-Tasks) liefen unveränderte Tests in Zeitgrenzen: `packages/eroj/test/{knapp-playwright,vitrino-partoj}.test.ts` (Hook 10 s, 1 Lauf), `packages/nordstelo/src/ablauf/raporto.test.ts:68/:82` (5 s) und `integra.test.ts` (Hook 10 s) in 4 von 4 parallelen Läufen, `packages/mcp/src/**` 7 Tests (30 s, 1 Lauf), `packages/cli/src/{ekranoj-integra,index}.test.ts` 3 Tests (1 Lauf). Einzeln bei Last < 10 jeweils grün. Keine Grenze angehoben, nichts geändert.
+- **S038-02-3 kampo mit brief und einem weiteren Feld:** Weil `rest` mitzählt (D-31), geht bei kampo das Kurzprofil bei **jeder** Kombination mit einem zweiten Feld nach `rest` – auch mit `navigation`, das bei kampo leer bleibt (7 der 15 Teilmengen). Ein Folgeaufruf `fields: ["brief"]` liefert es (747). Wörtliche Füllregel, kein Befund gegen die Spec; nur als Hinweis für Lauf 3 (Messung).
 - **S038-01-2 Lokal wackelnder Hook:** `packages/nordstelo/src/ablauf/integra.test.ts` (`beforeAll` mit `connectGvidanto()`, 10-s-Hook-Grenze) lief im ersten `pnpm test:betroffen` unter Last (fünf Pakete parallel) in die Zeitgrenze; Datei unverändert. Trefferquote im Beitrag S038-01; keine Grenze angehoben.
 
 ## Blockiert

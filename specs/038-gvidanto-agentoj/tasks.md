@@ -8,11 +8,11 @@
 
 ### T0
 
-- [x] **T3801 L-0 (S038-01)** Startbedingung geprüft (037, 036 Teil 1–6, 040, 041 gemergt und Vorfahren von `origin/main`; `pnpm check:privat` auf dem Bezugsstand grün), Bezug-SHA `e4873c57`, `/tmp/s038-bezug` gebaut, Werkzeuge `$W` (Selbsttest 103/103), `spec.md` byte-gleich (SHA-256 `dedf2760…c6c7`), plan und tasks, Generator `packages/mcp/test/kontrakto/generi.mjs`, Vertrags-Fixtures (114 Fälle, 20 Werkzeuge, D-37) und AC-8-Fixtures (nordstelo 12, ekranoj 8) vom Bezugsstand, zwei Generatorläufe byte-gleich, `git check-ignore` ohne Treffer, Wächter `packages/mcp/src/kontrakto-038.test.ts` grün auf unverändertem Produktcode, Fehlerprobe lokal gesehen. **Wächter, kein Produktcode** – kein Rot/Grün-Paar nötig (AC-L7). – T0-Commit (SHA trägt S038-02 nach).
+- [x] **T3801 L-0 (S038-01)** Startbedingung geprüft (037, 036 Teil 1–6, 040, 041 gemergt und Vorfahren von `origin/main`; `pnpm check:privat` auf dem Bezugsstand grün), Bezug-SHA `e4873c57`, `/tmp/s038-bezug` gebaut, Werkzeuge `$W` (Selbsttest 103/103), `spec.md` byte-gleich (SHA-256 `dedf2760…c6c7`), plan und tasks, Generator `packages/mcp/test/kontrakto/generi.mjs`, Vertrags-Fixtures (114 Fälle, 20 Werkzeuge, D-37) und AC-8-Fixtures (nordstelo 12, ekranoj 8) vom Bezugsstand, zwei Generatorläufe byte-gleich, `git check-ignore` ohne Treffer, Wächter `packages/mcp/src/kontrakto-038.test.ts` grün auf unverändertem Produktcode, Fehlerprobe lokal gesehen. **Wächter, kein Produktcode** – kein Rot/Grün-Paar nötig (AC-L7). – `9dd63115` (Doku: spec, plan, tasks), `4fb5b12c` (Wächter: Generator, Fixtures, `kontrakto-038.test.ts`).
 
 ### A – Rot zuerst
 
-- [ ] **T3802 1.3, 1.4, 1.8a (S038-02)** Tests `get_ero` mit `fields` (Form, Reihenfolge, `fields: ["brief"]` ≡ `brief: true`, `role`, `navigation`, `slots`, `rest`), 750-Token-Sweep über alle Eroj × 15 Teilmengen und alle Sxablono-Kurzprofile, kampo-Fall, Negativfälle.
+- [x] **T3802 1.3, 1.4, 1.8a (S038-02)** Tests `get_ero` mit `fields` (Form, Reihenfolge, `fields: ["brief"]` ≡ `brief: true`, `role`, `navigation`, `slots`, `rest`), 750-Token-Sweep über alle Eroj × 15 Teilmengen und alle Sxablono-Kurzprofile, kampo-Fall, Negativfälle. – `0b89cd1f` (rot: `packages/modelo/src/gvidanto/eroj-fields.test.ts`, 17 von 20 rot über `pnpm test:betroffen`).
 - [ ] **T3803 1.5 (S038-03)** Tests `getSxablono(…, { marker: true })` und `markerOf`, Antworten ohne `marker` byte-gleich.
 - [ ] **T3804 1.1, 1.6 (S038-04)** Tests `listArangxoj` und `suggestEro` mit `nearest: true`.
 - [ ] **T3805 1.2, 1.5 (S038-05)** Tests Markup-Leser, Kern `instancojElElementoj`, `checkMarkup` (positiv, Regelverstoß, unbekannte Ero, Durchreichen der Ablehnung, leeres Fragment, Sxablono-Seite, Determinismus).
@@ -21,7 +21,7 @@
 
 ### B – Grün
 
-- [ ] **T3808 1.3, 1.4, 1.8a (S038-02)** `fields`, `role`, `navigation`, `slots`, `rest` (D-28, D-31), eine Link-Ableitung.
+- [x] **T3808 1.3, 1.4, 1.8a (S038-02)** `fields`, `role`, `navigation`, `slots`, `rest` (D-28, D-31), eine Link-Ableitung. `ero-field-unknown`, `ero-fields-invalid` (D-S038-02-4). – grün (SHA trägt S038-03 nach).
 - [ ] **T3809 1.5 (S038-03)** `marker` je Region (D-32).
 - [ ] **T3810 1.1, 1.6 (S038-04)** `listArangxoj`, `nearest` (D-33).
 - [ ] **T3811 1.2, 1.5 (S038-05)** Leser (D-23), Kern (D-22), `checkMarkup` (D-29).

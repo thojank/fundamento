@@ -202,6 +202,11 @@ export type GetEroInput = EroSelector & {
   brief?: boolean;
   /** The language of the texts of the Uzo and the Reguloj (Nachlese 8 ③); English without it. */
   lingvo?: Lingvo;
+  /**
+   * Only these parts of the Ero (Spec 038 MG-3/MG-4, D-28, D-31): names of ERO_FIELDS, as the
+   * caller sent them – an unknown one is refused with its index, never dropped.
+   */
+  fields?: readonly string[];
 };
 
 export type GetEroFailure = { ok: false; issues: ValidationIssue[]; allowed?: string[] };
@@ -209,6 +214,68 @@ export type GetEroFailure = { ok: false; issues: ValidationIssue[]; allowed?: st
 export type GetEroResult = { ok: true; output: GetEroOutput } | GetEroFailure;
 
 export type GetEroBriefResult = { ok: true; output: GetEroBrief } | GetEroFailure;
+
+/**
+ * The parts of an Ero get_ero answers with `fields` (Spec 038 MG-3/MG-4, D-28): in the order an
+ * agent names them; the answer is filled in FILL_ORDER.
+ */
+export const ERO_FIELDS = ["brief", "slots", "role", "navigation"] as const;
+
+export type EroField = (typeof ERO_FIELDS)[number];
+
+/** D-28: the order in which the fields enter an answer while it stays below the ceiling. */
+const FILL_ORDER: readonly EroField[] = ["brief", "role", "navigation", "slots"];
+
+/**
+ * The ceiling of every get_ero answer with `fields` (Spec 038 AC-L5), the same as of the briefs
+ * (A8): an answer stays strictly below it. Never raised (B-9).
+ */
+export const ANSWER_CEILING = 750;
+
+/** The token counter of the briefs (eroj.test.ts): JSON length / 3, rounded up. */
+export function answerTokens(answer: unknown): number {
+  return Math.ceil(JSON.stringify(answer).length / 3);
+}
+
+/** Where a link Ero carries its target (Spec 038 MG-4): the prop that holds it. */
+export interface EroNavigation {
+  target: string;
+}
+
+/**
+ * One entry of what a slot lets in: a content kind as the Uzo names it (text, icon), the one Ero
+ * it accepts, or the Eroj it accepts, in Uzo order.
+ */
+export type EroSlotContent = "text" | "icon" | { ero: string } | { eroj: string[] };
+
+/** One slot as get_ero with `fields: ["slots"]` states it, generated from Skemo and Uzo. */
+export interface EroSlot {
+  content: EroSlotContent[];
+  /**
+   * The form of the data the slot takes (Spec 038 MG-3), only where the Modelo carries one (D-38);
+   * no Skemo or Uzo does yet (the tabelo's columns and rows are a Manko of Eroj-Runde 7).
+   */
+  dataForm?: string;
+  /** The slot takes the content without a slot attribute (the Skemo's default slot). */
+  default?: true;
+  required?: true;
+  min?: number;
+  max?: number;
+}
+
+/**
+ * The answer of get_ero with `fields` (D-31): flat. With the brief delivered every key of the
+ * brief in its order, else only `ero`; then role, navigation, slots and rest, each only when it
+ * stands in the answer.
+ */
+export type GetEroFieldsOutput = { ero: string } & Partial<Omit<GetEroBrief, "ero">> & {
+    role?: string;
+    navigation?: EroNavigation;
+    slots?: Record<string, EroSlot>;
+    rest?: EroField[];
+  };
+
+export type GetEroFieldsResult = { ok: true; output: GetEroFieldsOutput } | GetEroFailure;
 
 /** `butono` → `Butono`: the React component and the class name behind `fm-butono`. */
 function pascal(name: string): string {
@@ -561,6 +628,153 @@ export function briefOf(entry: LoadedEro): GetEroBrief {
   return brief;
 }
 
+/** What a slot accepts besides an Ero name (data-model §2.1, UzoSlot `accepts`). */
+function isContentKind(accepted: string): accepted is "text" | "icon" {
+  return accepted === "text" || accepted === "icon";
+}
+
+/**
+ * Where a link Ero carries its target, read from its Skemo (Spec 038 MG-4, the rule of Spec 037
+ * D-81/D-127): an Ero with the ARIA role `link` and exactly one required string prop holds its
+ * target in that prop; any other Ero has none. The one derivation of the Gvidanto; nordstelo's
+ * navigation facts read it (D-34), nothing about a single Ero is typed here.
+ */
+export function navigationOf(entry: {
+  skemo: Pick<Skemo, "a11y" | "props">;
+}): EroNavigation | undefined {
+  if (entry.skemo.a11y.role !== "link") return undefined;
+  const targets = entry.skemo.props.filter(
+    (prop) => prop.kind === "string" && prop.required === true,
+  );
+  const target = targets[0];
+  return targets.length === 1 && target !== undefined ? { target: target.name } : undefined;
+}
+
+/** What one slot lets in: its Uzo's accepts, kinds as written, the Eroj in one entry. */
+function slotContent(slot: Skemo["slots"][number], rule: UzoSlot | undefined): EroSlotContent[] {
+  // A slot the Uzo does not describe: text where the Skemo says so, nothing known otherwise.
+  if (rule?.accepts === undefined) return slot.text === true ? ["text"] : [];
+  const eroj = rule.accepts.filter((accepted) => !isContentKind(accepted));
+  const content: EroSlotContent[] = [];
+  for (const accepted of rule.accepts) {
+    if (isContentKind(accepted)) content.push(accepted);
+    else if (accepted === eroj[0]) content.push(eroj.length === 1 ? { ero: accepted } : { eroj });
+  }
+  return content;
+}
+
+/**
+ * The slots of an Ero as get_ero with `fields` states them (Spec 038 MG-3): every slot of the
+ * Skemo in its order, with what the Uzo lets in, whether it is the default slot or required, and
+ * how many entries it takes. Generated from Skemo and Uzo only (Art. VII).
+ */
+export function slotsOf(entry: Pick<LoadedEro, "skemo" | "uzo">): Record<string, EroSlot> {
+  const slots: Record<string, EroSlot> = {};
+  for (const slot of entry.skemo.slots) {
+    const rule = entry.uzo?.slots[slot.name];
+    slots[slot.name] = {
+      content: slotContent(slot, rule),
+      ...(slot.default === true ? { default: true as const } : {}),
+      ...(rule?.required === true ? { required: true as const } : {}),
+      ...(rule?.min === undefined ? {} : { min: rule.min }),
+      ...(rule?.max === undefined ? {} : { max: rule.max }),
+    };
+  }
+  return slots;
+}
+
+/** The brief in the language asked for (Nachlese 8 ③), as get_ero with brief: true answers. */
+function briefIn(modelo: Modelo, entry: LoadedEro, lingvo: Lingvo | undefined): GetEroBrief {
+  const translated =
+    entry.uzo === undefined ? entry : { ...entry, uzo: uzoIn(modelo, entry.uzo, lingvo) };
+  return briefOf(translated);
+}
+
+/**
+ * Why a `fields` input is refused, or nothing (Spec 038 §2.2): an unknown field at its index, a
+ * field twice, an empty list, or `fields` beside `brief: true` – never ignored silently.
+ */
+function fieldsFailure(input: GetEroInput): GetEroFailure | undefined {
+  const fields: unknown = input.fields;
+  const issues: ValidationIssue[] = [];
+  const refuse = (
+    rule: "ero-field-unknown" | "ero-fields-invalid",
+    path: string,
+    message: string,
+  ) =>
+    issues.push({
+      rule,
+      severity: "error",
+      path,
+      message,
+      suggestion: `Name one or more of ${ERO_FIELDS.join(", ")} in fields, each once; brief: true is fields: ["brief"].`,
+    });
+  if (!Array.isArray(fields) || fields.length === 0) {
+    refuse("ero-fields-invalid", "get_ero/fields", "fields names no field.");
+  }
+  if (input.brief === true) {
+    refuse(
+      "ero-fields-invalid",
+      "get_ero/fields",
+      "fields and brief: true ask twice for the brief.",
+    );
+  }
+  const list: unknown[] = Array.isArray(fields) ? fields : [];
+  list.forEach((field, index) => {
+    if (typeof field !== "string" || !(ERO_FIELDS as readonly string[]).includes(field)) {
+      refuse("ero-field-unknown", `get_ero/fields/${index}`, `There is no field ${String(field)}.`);
+    } else if (list.indexOf(field) !== index) {
+      refuse("ero-fields-invalid", `get_ero/fields/${index}`, `The field ${field} stands twice.`);
+    }
+  });
+  return issues.length === 0 ? undefined : { ok: false, issues, allowed: [...ERO_FIELDS] };
+}
+
+/**
+ * The answer to get_ero with `fields` (D-28 as resolved by D-31): the requested fields in
+ * FILL_ORDER; a field enters only if the whole answer – with the `rest` of every field not (yet)
+ * in it – stays below the ceiling, else it goes to `rest`. So delivered ∪ rest = requested and
+ * every answer stays below 750. A request of one field always gets it: that is the follow-up for
+ * `rest`, and it must end there. A field that alone reaches the ceiling is a finding (S038-02),
+ * never a raised limit; navigation of an Ero that is no link is delivered as its absence.
+ */
+function fieldsAnswer(
+  modelo: Modelo,
+  entry: LoadedEro,
+  fields: readonly EroField[],
+  lingvo: Lingvo | undefined,
+): GetEroFieldsOutput {
+  const requested = FILL_ORDER.filter((field) => fields.includes(field));
+  const brief = requested.includes("brief") ? briefIn(modelo, entry, lingvo) : undefined;
+  const navigation = navigationOf(entry);
+  const slots = requested.includes("slots") ? slotsOf(entry) : undefined;
+  const compose = (delivered: ReadonlySet<EroField>, rest: EroField[]): GetEroFieldsOutput => {
+    const out: GetEroFieldsOutput =
+      brief !== undefined && delivered.has("brief") ? { ...brief } : { ero: entry.ero.name };
+    if (delivered.has("role")) out.role = entry.skemo.a11y.role;
+    if (delivered.has("navigation") && navigation !== undefined) out.navigation = { ...navigation };
+    if (slots !== undefined && delivered.has("slots")) out.slots = slots;
+    if (rest.length > 0) out.rest = rest;
+    return out;
+  };
+  if (requested.length === 1) return compose(new Set(requested), []);
+  const delivered = new Set<EroField>();
+  const rejected: EroField[] = [];
+  requested.forEach((field, index) => {
+    const tentative = compose(new Set([...delivered, field]), [
+      ...rejected,
+      ...requested.slice(index + 1),
+    ]);
+    if (answerTokens(tentative) < ANSWER_CEILING) delivered.add(field);
+    else rejected.push(field);
+  });
+  return compose(delivered, rejected);
+}
+
+export function getEro(
+  modelo: Modelo,
+  input: EroSelector & { fields: readonly string[]; brief?: boolean; lingvo?: Lingvo },
+): GetEroFieldsResult;
 export function getEro(
   modelo: Modelo,
   input: EroSelector & { brief: true; lingvo?: Lingvo },
@@ -569,8 +783,19 @@ export function getEro(
   modelo: Modelo,
   input: EroSelector & { brief?: false; lingvo?: Lingvo },
 ): GetEroResult;
-export function getEro(modelo: Modelo, input: GetEroInput): GetEroResult | GetEroBriefResult;
-export function getEro(modelo: Modelo, input: GetEroInput): GetEroResult | GetEroBriefResult {
+export function getEro(
+  modelo: Modelo,
+  input: GetEroInput,
+): GetEroResult | GetEroBriefResult | GetEroFieldsResult;
+export function getEro(
+  modelo: Modelo,
+  input: GetEroInput,
+): GetEroResult | GetEroBriefResult | GetEroFieldsResult {
+  // Spec 038 §2.2: a refused fields input says so before the Ero is looked up.
+  if (input.fields !== undefined) {
+    const refused = fieldsFailure(input);
+    if (refused !== undefined) return refused;
+  }
   const field = "id" in input ? "id" : "name";
   const wanted = "id" in input ? input.id : input.name;
   const entry = modelo.eroj.find((candidate) =>
@@ -595,11 +820,14 @@ export function getEro(modelo: Modelo, input: GetEroInput): GetEroResult | GetEr
     };
   }
   const lingvo = input.lingvo;
+  if (input.fields !== undefined) {
+    // fieldsFailure has let only names of ERO_FIELDS through.
+    const fields = input.fields as readonly EroField[];
+    return { ok: true, output: fieldsAnswer(modelo, entry, fields, lingvo) };
+  }
   if (input.brief === true) {
     // Nachlese 8 ③: the purpose and the alternatives in the language asked for.
-    const translated =
-      entry.uzo === undefined ? entry : { ...entry, uzo: uzoIn(modelo, entry.uzo, lingvo) };
-    return { ok: true, output: briefOf(translated) };
+    return { ok: true, output: briefIn(modelo, entry, lingvo) };
   }
   const { skemo } = entry;
   const uzo = uzoOf(modelo, entry.uzo, lingvo);

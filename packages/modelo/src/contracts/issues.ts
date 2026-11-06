@@ -279,6 +279,10 @@ export const RULE_IDS = [
   // Projekcio lints (Spec 003, D-17)
   "css-physical-property",
   "ero-hardcoded-string",
+  // Spec 038 MG-3 (D-28, D-31): get_ero with fields – a field it does not know, and a fields
+  // input it refuses (no field, a field twice, fields beside brief: true).
+  "ero-field-unknown",
+  "ero-fields-invalid",
 ] as const;
 
 export type RuleId = (typeof RULE_IDS)[number];

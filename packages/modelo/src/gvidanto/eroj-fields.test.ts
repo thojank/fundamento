@@ -4,15 +4,16 @@
 // answers as before (guarded byte by byte in packages/mcp/src/kontrakto-038.test.ts).
 
 import { describe, expect, it } from "vitest";
-import type { LoadedEro } from "../contracts/modelo.js";
+import type { LoadedEro, Modelo } from "../contracts/modelo.js";
 import type { Lingvo } from "../lingvo/tradukoj.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
 import { ERO_FIELDS, getEro, navigationOf, slotsOf } from "./eroj.js";
 import { getSxablono } from "./sxablonoj.js";
 
-const { modelo } = loadModelo(defaultModeloSource());
-if (modelo === undefined) throw new Error("the repository Modelo could not be loaded");
+const loaded = loadModelo(defaultModeloSource()).modelo;
+if (loaded === undefined) throw new Error("the repository Modelo could not be loaded");
+const modelo: Modelo = loaded;
 
 /** The counter of eroj.test.ts: JSON length / 3, rounded up. The spec fixes the ceiling. */
 const tokens = (answer: unknown): number => Math.ceil(JSON.stringify(answer).length / 3);
@@ -34,7 +35,7 @@ function subsets(): string[][] {
 type Answer = Record<string, unknown>;
 
 function entryNamed(name: string): LoadedEro {
-  const entry = modelo?.eroj.find((candidate) => candidate.ero.name === name);
+  const entry = modelo.eroj.find((candidate) => candidate.ero.name === name);
   if (entry === undefined) throw new Error(`the repository Modelo has no ${name}`);
   return entry;
 }
