@@ -179,7 +179,10 @@ function zaehle(schluessel: { protokoll: string; schritt: string; bindung: strin
 /** Names the step the next documents come in. */
 async function schritt(page: Page, name: string, beobachtet: { schritt: string }): Promise<void> {
   beobachtet.schritt = name;
-  await page.evaluate(([key, value]) => sessionStorage.setItem(key, value), [SCHRITT, name]);
+  await page.evaluate(([key, value]) => sessionStorage.setItem(key, value), [
+    SCHRITT,
+    name,
+  ] as const);
 }
 
 /** Both frames of the stage have loaded the document of `rev` in `scheme`. */
