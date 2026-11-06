@@ -23,7 +23,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type APIRequestContext, expect, type Page, test } from "@playwright/test";
-import { BUEHNE_BEREIT, rahmenBereit, seiteBereit } from "./geladen-042.js";
+import { BUEHNE_BEREIT, dokument, rahmenBereit, seiteBereit } from "./geladen-042.js";
 
 const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
 const cli = join(repoRoot, "packages/cli/dist/index.js");
@@ -365,4 +365,38 @@ test("Spec 042: the stage navigates only on the test's steps – page and previe
     hauptrahmen.filter((eintrag) => !["laden-1", "laden-2"].includes(eintrag.schritt)),
     `framenavigated of the page outside the test's loads:\n${bericht}`,
   ).toEqual([]);
+});
+
+// Spec 043 / N-8 aus Spec 042: after the page loads anew, the navigation of the frame „Jetzt“ is cut
+// short (NS_BINDING_ABORTED in Firefox). Until now the page sent the frame again only on a new rev
+// of its poll, so with the same rev never. Made here without a clock: the test aborts the frame's
+// first request after the reload (`route.abort`); the frame must still show the draft's rev within
+// the default expect time.
+test("Spec 043 / N-8 aus Spec 042: a frame whose navigation was aborted after the reload loads at once", async ({
+  page,
+  request,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const id = await marke(request, "Probomarko Abbruch");
+  await page.goto(`${base}/asistanto/${id}/gvidkoloro`);
+  await seiteBereit(page, BUEHNE_BEREIT);
+  const rev = Number(await page.locator("html").getAttribute("data-mt-rev"));
+  await rahmen(page, rev, "light");
+
+  // The document of „Jetzt“: /marko/<id>/vorschau without `propono` (that is „Mit dem Vorschlag“).
+  const abgebrochen: string[] = [];
+  await page.route(
+    (url) => url.pathname === `/marko/${id}/vorschau` && !url.searchParams.has("propono"),
+    async (route) => {
+      if (abgebrochen.length > 0) return route.fallback();
+      abgebrochen.push(route.request().url());
+      return route.abort();
+    },
+  );
+  const vorher = await dokument(page);
+  await page.reload();
+  await seiteBereit(page, BUEHNE_BEREIT, vorher);
+  await rahmenBereit(page, JETZT, { rev, scheme: "light" });
+  await rahmenBereit(page, VORSCHLAG, { rev, scheme: "light" });
+  expect(abgebrochen, "the first request of „Jetzt“ after the reload was aborted").toHaveLength(1);
 });
