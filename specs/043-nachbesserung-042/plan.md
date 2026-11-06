@@ -2,7 +2,7 @@
 
 **Spec:** [`spec.md`](spec.md) (unverändert mit `cp` kopiert; SHA-256 `b260ae62fbf95cba5a08454d32f5a78e615743ee57369b17cd45789b57701949`) · **Aufgaben:** [`tasks.md`](tasks.md) · **Basis:** `main` `e5057afc` (Merge #152, Spec 038 Lauf 2; seit `f027522` nur `packages/nordstelo/**` und `specs/038-gvidanto-agentoj/**` geändert) · **Branch:** `261106-spec-043-nachbesserung-042-pr-d9dc59` · **Regel 0** gilt. **Keine Grenzen, Zeitlimits, Schwellen, Abfrageintervalle, Toleranzen oder Wiederholungen angehoben. Nichts gemergt.** Kein Sprachmodell (0 $).
 
-**Datum:** 2026-11-06 · **Stand:** T1 fertig (rot `8a65d6f4` → grün `20f221cc`); T2 fertig (`seiteBereit` rot `dc69bd93` → grün `3e4102ac`; Navigationstest Firefox rot = CI + lokal 4/30 `b43bc7e9` → grün `0b2d29c4`); T3, T4 offen.
+**Datum:** 2026-11-06 · **Stand:** T1 fertig (rot `8a65d6f4` → grün `20f221cc`); T2 fertig (`seiteBereit` rot `dc69bd93` → grün `3e4102ac`; Navigationstest Firefox rot = CI + lokal 4/30 `b43bc7e9` → grün `0b2d29c4`); T3 fertig (Übernahme WebKit rot = CI + lokal 2/30 `154eb490` → grün `a28da901`); T4 offen.
 
 ### G-0 Quelle
 
@@ -41,7 +41,7 @@ Der Lauf ist unbeaufsichtigt. Wo die Spec offen ließ, gilt die Annahme. „ange
 |---|---|---|---|
 | F-1 | Laut Quelle ist N-8 „sehr wahrscheinlich“ die Ursache des Chromium-Rots in `zweitfarbe-036`. Der Trace von 42180054807 zeigt **keinen** Abbruch des Rahmens und keine Neuanfrage im `stato`-Takt; auch der Schnellstart (ohne `stato`-Takt) ist rot. Ursache ist ein **langsamer Server** (Kalt-Render bzw. `/pruefung` ≈ 3,3–4,3 s), das Hauptdokument wird erst nach mehr als 5 s „complete“ (Befunde unten). | **T1 bleibt** als eigener Produkt-Fix (N-8 ist für Nutzer sichtbar und ein Punkt der Quelle). Die rote Zeile in `zweitfarbe-036` behebt **T2** (`seiteBereit`). Im Bericht steht die Zuordnung Befund → Ursache aus dem Trace. | angewandt (Zuschnitt) |
 | F-2 | Der Firefox-Fehler in `buehne-navigation-042` ist **nicht N-8**: Die Rahmen haben `rev=2` geladen, aber das Init-Skript des Tests lief in diesen zwei Dokumenten nicht (kein Eintrag in `sessionStorage`, keiner in der Bindung). | Anhang D wörtlich: T2 versucht die Nachstellung (≤ 30). Nachgestellt → Fix nach `testing.md`; nicht nachgestellt → Befund mit Trefferquote und Spur. *Offene Frage an den Maintainer, nicht blockierend:* Gilt der Trace-Beleg selbst als „nachgestellt“? Ohne Antwort gilt die strenge Lesart. | angewandt (T2): **nachgestellt**, lokal 4/30 rot auf dem Stand nach T1, genau das Bild aus CI. Fix nach `testing.md` (D-4, D-11), `0b2d29c4`. Die offene Frage ist damit gegenstandslos. |
-| F-3 | „Roter Test zuerst“ ist für die Wackel-Fälle (T2 Firefox, T3 WebKit) nicht deterministisch ohne neue Timer zu erfüllen. | Vorbild Spec 042 T3: Rot = CI-Lauf 42180054807 bzw. lokale Trefferquote, beides **vor** dem Fix-Commit in `tasks.md`. Wo ein deterministischer roter Test möglich ist (T1, T2 `seiteBereit`), ist er Pflicht. | T2 angewandt (Navigationstest: CI 42180054807 + lokal 4/30, in `tasks.md` committet `b43bc7e9` vor dem Fix `0b2d29c4`); T3 offen |
+| F-3 | „Roter Test zuerst“ ist für die Wackel-Fälle (T2 Firefox, T3 WebKit) nicht deterministisch ohne neue Timer zu erfüllen. | Vorbild Spec 042 T3: Rot = CI-Lauf 42180054807 bzw. lokale Trefferquote, beides **vor** dem Fix-Commit in `tasks.md`. Wo ein deterministischer roter Test möglich ist (T1, T2 `seiteBereit`), ist er Pflicht. | T2 angewandt (Navigationstest: CI 42180054807 + lokal 4/30, in `tasks.md` committet `b43bc7e9` vor dem Fix `0b2d29c4`); T3 angewandt (Übernahme: CI 42180054807 2/2 + lokal 2/30, in `tasks.md` committet `154eb490` vor dem Fix `a28da901`) |
 | F-4 | Format der Ticket-IDs: Vertrag `<PREFIX>-<PHASE>.<NUM>`, Quelle und Auftrag `T1`–`T4`. | Die IDs sind **`T1`, `T2`, `T3`, `T4`**, überall gleich (Spec, Status, Commits). | angewandt |
 | F-5 | Der p0-Standard verlangt ein eigenes Test-Ticket am Ende; Anhang C verlangt genau T1–T4, keine QA-Schleife. | Anhang C gilt. Die Abnahme über alles ist der Dispatch-Lauf in T4; die Prüfung über Ticket-Grenzen hinweg gehört zu T4. | angewandt |
 
@@ -103,6 +103,13 @@ Nicht zu verwechseln mit Nachlese 10 N-8 (`html.ts`, Sprachwahl). Im Code heißt
 | F-2 Navigationstest Firefox | **Mit Trace** 42180054807 (Artefakt `testberichte-eroj-2-1`, `junit.xml`, Fehlermeldung des Tests): Für den Schritt „rev“ stehen `src jetzt rev … rev=2&scheme=light` und `src vorschlag rev … propono=gvidkoloro&rev=2&scheme=light`, in der Bindung nur `bindung jetzt rev src …` und `bindung vorschlag rev src …`; es fehlen je Rahmen `sessionStorage … rev` und `performance … rev navigate` (Diff: `Expected − 4, Received + 0`: zweimal „rev navigate“, zweimal „rev“). `rahmen(page, neu, "light")` war davor grün. **Lokal nachgestellt: 4/30 rot** (Firefox, Stand nach T1, `--repeat-each=30 --workers=4`), alle vier mit genau diesem Diff. Wegwerf-Probe nach dem Fix (30 Läufe Firefox, Init-Skript-Quelle und Seiten-Quelle getrennt protokolliert): Das Init-Skript fehlte in 9/30 Läufen in Rahmen-Dokumenten (8× „rev“, 1× „laden-2“, je beide Rahmen); die Seite sah den `load` aller fünf Dokumente je Rahmen in 30/30. Chromium und WebKit (je 10): beide Quellen vollständig. | Das Init-Skript des Tests läuft in Firefox nicht in jedem Rahmen-Dokument (Playwright/Firefox), eine Lücke des Beobachters. Nicht N-8, keine Navigation zu viel oder zu wenig. | D-11: Die Seite zählt die Rahmen-Dokumente mit (`load` des `iframe`); Erwartung gleich streng. | behoben (`0b2d29c4`) |
 | Firefox: Rahmen aus der Sitzungs-Historie (Hinweis T1) | Gelesen am Code: Firefox stellt beim Neuladen den alten Rahmen-Inhalt (altes `rev`) wieder her, setzt aber kein `src`-Attribut (das setzt nur der Client). `rahmenBereit` verlangt `doc.URL === frame.src` und `frame.src !== ""`; das wiederhergestellte Dokument zählt also erst, wenn der Client `src` gesetzt hat **und** das Dokument dieser URL geladen ist; mit `rev` aus `html[data-mt-rev]` zusätzlich nur das neue `rev`. Lokal: `zweitfarbe-036` (zweimal Neuladen je Test) Firefox 150/150 grün. | – | keiner nötig | geprüft |
 
+### Aus dem Lauf (T3)
+
+| ID | Nachweis | Ursache | Fix | Stand |
+|---|---|---|---|---|
+| Übernahme WebKit (`metiejo-036-uebernahme:67`, `:89`) | **Mit Trace** 42180054807 (Artefakt `testberichte-eroj-4-1`): je Test ein eigener Server (4.2 Port 7342, 4.1 Port 7341, Marke frisch, `POST /marko` 303), dann `POST /pruefung` 4403 bzw. 4316 ms; der Test endet mit `TypeError: fetch failed`, `[cause]: Error: read ECONNRESET` am Node-`fetch`-POST `/materialo`, gleich nachdem der Server wieder frei ist. | Die Bereitschaftsschleife (`fetch` `GET /`) ließ eine Keep-alive-Verbindung im Pool von Node; der POST nahm sie wieder, während `/pruefung` den Event-Loop blockierte. Danach schloss der Server die über seine Keep-alive-Zeit liegende Verbindung samt ungelesenem POST (Muster B-12). | `POST /materialo` über `request` mit `connection: close`, nie wiederholt; das globale `fetch` entfällt ganz. | behoben (`a28da901`) |
+| N-3 in der Übernahme (lokal) | **Lokal, ohne CI-Trace**: unveränderter Code, WebKit, `--repeat-each=15 --workers=4`, **2/30 rot**, beide 4.2 auf Port 7347, beide 120 s. (a) `POST /marko` antwortet 200 „Die Marke „Sablo“ gibt es schon“ (Trace-Ressource): Der Test sprach mit dem Server eines anderen Workers. (b) `page.goto(/asistanto/sablo/tiparo)` ohne Antwort, vermutlich derselbe fremde Server beim Beenden durch seinen Worker (ohne weiteren Beleg). | Jede Wiederholung (`--repeat-each`) läuft in eigenen Workern, `workerIndex` steigt über 8; `7341 + workerIndex % 9` traf einen belegten Port, der eigene Kindprozess endete mit EADDRINUSE, und die Schleife hielt den fremden Server für bereit. Im CI-Lauf nicht die Ursache (zwei verschiedene Ports, frische Marken). | Startmuster wie `buehne-navigation-042.spec.ts`: Warten auf die URL-Zeile des **eigenen** Kindes (stderr), bei belegtem Port der nächste in 7341–7349; keine Schleife, kein Timer. | behoben (`a28da901`) |
+
 ## Messungen
 
 ### T1 (lokal, `FM_AUSGABE=knapp`, nur `buehne-navigation-042.spec.ts`, eine Suite zur Zeit, `--workers=4`)
@@ -138,6 +145,15 @@ Messung D-8 (Wegwerf-Spec, nicht committet; Schnellstart-Farbschritt nach „Kei
 
 Typprüfung der drei geänderten Testdateien mit einer Wegwerf-`tsconfig` (wie T1): sauber (die einzigen Fehler stehen in `test/alirebleco.ts`, unverändert, über `buehne-036.spec.ts` eingebunden). `biome check` der drei Dateien sauber.
 
+### T3 (lokal, `FM_AUSGABE=knapp`, nur `metiejo-036-uebernahme.spec.ts`, eine Suite zur Zeit, `--repeat-each=15 --workers=4` = 30 Läufe; CLI-Build aktuell, Turbo-Cache)
+
+| Lauf | Chromium | Firefox | WebKit |
+|---|---|---|---|
+| Rot auf `0585ed3a` (unveränderter Test) | – | – | **2/30 rot** (N-3, siehe Befunde T3) |
+| Grün auf `a28da901` | 30/30 grün | 30/30 grün | **30/30 grün** |
+
+Typprüfung der Datei mit einer Wegwerf-`tsconfig` (außerhalb des Repos) sauber; `biome check` sauber.
+
 ## Messanleitung
 
 ```sh
@@ -163,6 +179,11 @@ done
 # T2: zweitfarbe-036 (der rote seiteBereit-Test allein: -g "still loads"), buehne-036 als unveränderter Konsument
 for e in chromium firefox webkit; do
   FM_AUSGABE=knapp PLAYWRIGHT_ENGINES=$e pnpm exec playwright test test/zweitfarbe-036.spec.ts --repeat-each=30 --workers=4
+done
+
+# T3: die Übernahme (4.1, 4.2), je Engine 30 Läufe
+for e in chromium firefox webkit; do
+  FM_AUSGABE=knapp PLAYWRIGHT_ENGINES=$e pnpm exec playwright test test/metiejo-036-uebernahme.spec.ts --repeat-each=15 --workers=4
 done
 
 # Diff-Suche: das lokale main steht auf f6f38f53 (veraltet), deshalb gegen den Commit der Basis
