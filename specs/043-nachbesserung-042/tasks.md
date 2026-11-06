@@ -8,7 +8,7 @@ Ein Strang, ein PR (T1 → T2 → T3 → T4). Lokal nur die geänderten Spec-Dat
 |---|---|---|---|---|
 | T1 | N-8 aus Spec 042: abgebrochenen, leeren oder alten Vorschau-Rahmen ereignisgesteuert sofort neu anfordern (D-1 bis D-3); Gerüst `specs/043-nachbesserung-042/` | `specs/043-nachbesserung-042/{spec,plan,tasks}.md`, `packages/eroj/test/buehne-navigation-042.spec.ts` (neuer Test), `packages/metiejo/src/html.ts`, `vorschau-043.test.ts` (neu) | erledigt (Chromium, Firefox behoben; WebKit Befund, D-6) | Gerüst `3c9d7d75`; N-8 `8a65d6f4` → `20f221cc` |
 | T2 | `seiteBereit` auf `readyState !== "loading"`; Firefox-Fehler im Navigationstest klären (F-2, D-4) | `packages/eroj/test/geladen-042.ts`, `zweitfarbe-036.spec.ts`, `buehne-navigation-042.spec.ts` | erledigt | `seiteBereit` `dc69bd93` → `3e4102ac`; Navigation Firefox: rot = CI 42180054807 + lokal 4/30 (`b43bc7e9`) → `0b2d29c4` |
-| T3 | Übernahme WebKit: N-3-Startmuster, POST mit `connection: close` | `packages/eroj/test/metiejo-036-uebernahme.spec.ts` | offen | – |
+| T3 | Übernahme WebKit: N-3-Startmuster, POST mit `connection: close` | `packages/eroj/test/metiejo-036-uebernahme.spec.ts` | in Arbeit | rot = CI 42180054807 (2/2) + lokal 2/30 |
 | T4 | Diff-Suche, ein PR, ein Push, genau ein `workflow_dispatch`, Bericht | `specs/043-nachbesserung-042/{plan,tasks}.md` | offen | – |
 
 ## T1 im Einzelnen
@@ -40,7 +40,9 @@ Ein Strang, ein PR (T1 → T2 → T3 → T4). Lokal nur die geänderten Spec-Dat
 
 ## T3 im Einzelnen
 
-- [ ] (offen)
+- [x] Rot nach F-3 (kein deterministischer roter Test ohne Uhr: der Reset braucht eine Keep-alive-Verbindung, die länger frei liegt als die Keep-alive-Zeit des Servers, während `/pruefung` den Server blockiert).
+  - **CI 42180054807, WebKit 2/2** (Artefakt `testberichte-eroj-4-1`, `junit.xml` und Traces): `:67` (4.2, Port 7342, „Sablo“) und `:89` (4.1, Port 7341, „Grundo“) je `TypeError: fetch failed`, `[cause]: Error: read ECONNRESET` am Node-`fetch`-POST `/materialo` (`:53`). Je eigener Server (zwei Ports, beide Marken frisch angelegt, `POST /marko` 303). Ablauf je Test: die Bereitschaftsschleife (`fetch` `GET /`) lässt eine Keep-alive-Verbindung im Pool von Node; der POST nimmt sie wieder, während `POST /pruefung` (4316 bzw. 4403 ms) den Server blockiert; danach schließt der Server die längst über die Keep-alive-Zeit liegende Verbindung samt ungelesenem POST (Reset, Muster B-12).
+  - **Lokal, WebKit, unveränderter Code (`0585ed3a`)**, `--repeat-each=15 --workers=4` (30 Läufe): **2/30 rot**, beide 4.2, beide auf Port 7347, beide 120 s (Test-Zeitlimit): (a) `page.waitForURL` nach „Anlegen“ – `POST /marko` antwortet 200 mit „Die Marke „Sablo“ gibt es schon“: Der Test sprach mit dem Server **eines anderen Workers** (jeder Worker legt ein frisches Arbeitsverzeichnis an), also N-3: Wiederholungen laufen je in eigenen Workern, `workerIndex` steigt über 8, `7341 + workerIndex % 9` trifft einen belegten Port, der eigene Kindprozess endet mit EADDRINUSE und die Schleife hält den fremden Server für bereit. (b) `page.goto(/asistanto/sablo/tiparo)` bekommt keine Antwort – vermutlich dieselbe Ursache (der fremde Server wird von seinem Worker beendet), ohne weiteren Beleg. Den Reset selbst zeigte die Nachstellung nicht (lokal blockiert `/pruefung` ≈ 2,6 s, unter der Keep-alive-Zeit).
 
 ## T4 im Einzelnen
 
