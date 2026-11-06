@@ -47,6 +47,7 @@ import type {
   Rondo,
   RondoEkrano,
   Taksado,
+  TaksadoK8Rezulto,
   ToolBridge,
   ToolInfo,
   Trovo,
@@ -243,6 +244,77 @@ export const K8_REGULOJ: Readonly<Record<K8Merkmal, string>> = {
   sxablono: "k8-sxablono",
 };
 
+const K8_TROVOJ: Record<K8Merkmal, { mesagxo: string; sugesto: string }> = {
+  ersatzschrift: {
+    mesagxo: "Text in Ersatzschrift",
+    sugesto:
+      "Text in Eroj und Sxablonoj setzen; keine eigene Schrift, die Schrift kommt aus der Marke.",
+  },
+  nativaj: {
+    mesagxo: "Natives Element ohne die Gestalt der Marke",
+    sugesto: "Statt des nativen Elements die passende Ero verwenden (suggest_ero).",
+  },
+  interspacoj: {
+    mesagxo: "Abstand nicht auf einer Abstandsstufe",
+    sugesto:
+      "Abstände nur über Sxablonoj und Layoutmittel (list_arangxoj), nie mit eigenen Werten.",
+  },
+  sxablono: {
+    mesagxo: "Keine Sxablono mit gefüllter Region",
+    sugesto: "Den Screen in eine Sxablono setzen (list_sxablonoj) und ihre Regionen füllen.",
+  },
+};
+
+/** One K8 feature below 1 in one combination: its place and its reason from the kialo (C-4). */
+interface K8Devio {
+  merkmal: K8Merkmal;
+  valoro: number;
+  /** `<aspekto> <scheme>`, then the tag path the kialo names (in backticks), if it names one. */
+  loko: string;
+  kialo: string;
+}
+
+/** Every feature other than 1 per combination, in the scorer's order, split by the means (D-16). */
+function k8Devioj(k8: TaksadoK8Rezulto): { kunRimedo: K8Devio[]; senRimedo: K8Devio[] } {
+  const mankoj = new Set(k8.mankoj);
+  const kunRimedo: K8Devio[] = [];
+  const senRimedo: K8Devio[] = [];
+  for (const kombinacio of k8.kombinacioj) {
+    for (const merkmal of K8_MERKMALOJ) {
+      const valoro = kombinacio.merkmaloj[merkmal];
+      if (valoro === 1) continue;
+      const tekstoj = kombinacio.kialoj
+        .filter((kialo) => kialo.merkmal === merkmal)
+        .map((kialo) => kialo.teksto);
+      const pfado = tekstoj
+        .map((teksto) => /`([^`]+)`/.exec(teksto)?.[1])
+        .find((trovita) => trovita !== undefined);
+      const devio: K8Devio = {
+        merkmal,
+        valoro,
+        loko: `${kombinacio.aspekto} ${kombinacio.scheme}${pfado === undefined ? "" : `: ${pfado}`}`,
+        kialo: tekstoj.length === 0 ? `K8 ${merkmal}: ${valoro}` : tekstoj.join("; "),
+      };
+      (mankoj.has(merkmal) ? senRimedo : kunRimedo).push(devio);
+    }
+  }
+  return { kunRimedo, senRimedo };
+}
+
+/**
+ * The K8 deviations „mangels Mittel“ of one screen (C-4, D-16): features below 1 the Modelo has no
+ * means for (`k8.mankoj`). They never keep a screen from green; the report shows them.
+ */
+export function senRimedajDe(slug: string, taksado: Taksado): Restanta[] {
+  if (taksado.k8 === undefined) return [];
+  return k8Devioj(taksado.k8).senRimedo.map((devio) => ({
+    ekrano: slug,
+    regulo: K8_REGULOJ[devio.merkmal],
+    loko: devio.loko,
+    kialo: devio.kialo,
+  }));
+}
+
 /** The marker of a screen whose build answer held no markup, also after one more question. */
 export const MALPLENA_RESPONDO = "leere-antwort" satisfies Malhelpo;
 
@@ -335,6 +407,19 @@ export function trovojDe(e: {
       sugesto: K_TROVOJ[kinds[0] ?? ""]?.sugesto ?? "",
       kialo: `D-04: grün nur mit ${k} = 1.`,
     });
+  }
+  // Spec 038 (C-4): one finding per combination and K8 feature below 1 that has a means.
+  if (e.taksado.k8 !== undefined) {
+    for (const devio of k8Devioj(e.taksado.k8).kunRimedo) {
+      const priskribo = K8_TROVOJ[devio.merkmal];
+      trovoj.push({
+        regulo: K8_REGULOJ[devio.merkmal],
+        loko: devio.loko,
+        mesagxo: `${priskribo.mesagxo} (K8 ${devio.merkmal} ${devio.valoro}, nötig ist 1).`,
+        sugesto: priskribo.sugesto,
+        kialo: devio.kialo,
+      });
+    }
   }
   return trovoj;
 }
@@ -471,6 +556,11 @@ export async function kuruEkranojn(
         });
       }
     }
+    // Spec 038 (C-4, D-16): the K8 features without a means, per screen of the last round.
+    const senRimedaj = plano.ekranoj.flatMap((ekrano) => {
+      const stato = lasta?.[ekrano.slug];
+      return stato === undefined ? [] : senRimedajDe(ekrano.slug, stato.taksado);
+    });
     peno.ms = Date.now() - komenco;
     peno.bytes = [...fragmentoj.values()].reduce((sumo, f) => sumo + Buffer.byteLength(f), 0);
     const rezulto: EkranojRezulto = {
@@ -493,6 +583,7 @@ export async function kuruEkranojn(
       takso,
       faritajRondoj: faritaj,
       notoj,
+      ...(senRimedaj.length === 0 ? {} : { senRimedaj }),
     };
     await deps.eligo?.fino?.(rezulto);
     return rezulto;

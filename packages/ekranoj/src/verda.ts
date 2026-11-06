@@ -1,7 +1,9 @@
 // The green decision of a screen (D-04, contract C-5), pure. Variante F: K1 = 1, no check_usage
 // violation of severity `error`, axe without findings in light and dark (a renderer was there),
 // K5 = 1, navigation `kompleta`. Variante 0 (D-07): the same without check_usage. Hints
-// (`warning`, `info`) never keep a screen from green; they are returned for the report.
+// (`warning`, `info`) never keep a screen from green; they are returned for the report. Spec 038
+// (D-08, D-16): when the score carries K8, also `k8.plena` – read as the scorer gives it, never
+// recomputed (D-145); without K8 the decision of before.
 
 import type { Fakto, Malhelpo, VerdaDecido, VerdaEnigo } from "./tipoj.js";
 
@@ -27,6 +29,7 @@ export function decidiVerdon(enigo: VerdaEnigo): VerdaDecido {
   if (malhela === "trovoj") malhelpoj.push("axe-malhela");
   if (k.K5 !== 1) malhelpoj.push("K5");
   if (!enigo.kompleta) malhelpoj.push("navigado");
+  if (enigo.taksado.k8 !== undefined && !enigo.taksado.k8.plena) malhelpoj.push("K8");
   const sugestoj = f
     ? enigo.malobservoj.filter((malobservo) => malobservo.severity !== "error")
     : [];

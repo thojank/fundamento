@@ -148,6 +148,8 @@ export interface RaportoJson {
   dauxroMs: number;
   takso?: KostoTakso;
   notoj: string[];
+  /** K8 deviations „mangels Mittel“ (Spec 038, C-4, D-16); absent when there are none. */
+  senRimedaj?: Restanta[];
 }
 
 export interface RaportoEnigo {
@@ -323,6 +325,9 @@ export function raportoDe(e: RaportoEnigo): RaportoJson {
     dauxroMs: rezulto.peno.ms,
     ...(rezulto.takso === undefined ? {} : { takso: rezulto.takso }),
     notoj: [...(rezulto.notoj ?? []), ...(e.notoj ?? [])],
+    ...(rezulto.senRimedaj === undefined || rezulto.senRimedaj.length === 0
+      ? {}
+      : { senRimedaj: rezulto.senRimedaj }),
   };
 }
 
@@ -507,6 +512,18 @@ export function raportoMarkdown(r: RaportoJson): string {
     for (const a of r.restantaj) linioj.push(vico([a.ekrano, a.regulo, a.loko, a.kialo]));
   }
   linioj.push("");
+
+  // Spec 038 (C-4, D-16): K8 features below 1 the Modelo has no means for; never blocking.
+  if (r.senRimedaj !== undefined && r.senRimedaj.length > 0) {
+    linioj.push("## Abweichungen mangels Mittel (D-16)", "");
+    linioj.push(
+      "K8-Merkmale unter 1, für die das Modelo kein Mittel hat. Sie halten keinen Screen von grün ab.",
+      "",
+    );
+    linioj.push(vico(["Screen", "Regel", "Ort", "Grund"]), "|---|---|---|---|");
+    for (const a of r.senRimedaj) linioj.push(vico([a.ekrano, a.regulo, a.loko, a.kialo]));
+    linioj.push("");
+  }
 
   // Teil 3 (S037-06): the gaps of this run, the table of the Lückenliste (also in mankoj.json).
   linioj.push("## Lücken (Teil 3)", "", mankojMarkdown(r.mankoj).trimEnd(), "");
