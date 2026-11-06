@@ -24,12 +24,82 @@ export interface AriaNode {
   level?: number;
 }
 
+/**
+ * The style fingerprint of one visible native element (computed values, D-102). Sides are in
+ * CSS order: top, right, bottom, left.
+ */
+export interface NativaFingrospuro {
+  /** table, a, button, input, select, textarea, h1–h6, ul, ol. */
+  tag: string;
+  /** Index in `Facts.elements` (same walk and count as `extractInPage`). */
+  elemento: number;
+  /** The element lies inside an `fm-*` Ero (only stored, D-17). */
+  enEro: boolean;
+  /** First family, unquoted, lower case. */
+  fontFamily: string;
+  color: string;
+  backgroundColor: string;
+  borderColor: [string, string, string, string];
+  borderStyle: [string, string, string, string];
+  /** px, rounded to 0.01. */
+  padding: [number, number, number, number];
+  /** px, rounded to 0.01. */
+  margin: [number, number, number, number];
+}
+
+/** A run of rendered own text of one element, in the font of its flat-tree parent (D-S038-10-1). */
+export interface Tekstero {
+  elemento: number;
+  /** First family, unquoted, lower case. */
+  fontFamily: string;
+  /** Length of the text, whitespace collapsed. */
+  signoj: number;
+}
+
+/** The gap between two adjacent visible element siblings (D-103); `gepatro` -1 is body. */
+export interface Interspaco {
+  gepatro: number;
+  antaux: number;
+  post: number;
+  akso: "y" | "x";
+  /** px, rounded to 0.01, always > 0. */
+  px: number;
+}
+
+/**
+ * The browser-computed value of one brand token (D-110), measured in the probe document
+ * (D-S038-10-2). One entry per distinct `(eco, valoro)`, `token` the smallest name with that value
+ * (D-S038-10-3). Spacing values are the px number as a string with at most two decimals.
+ */
+export interface Sondo {
+  eco: "color" | "font-family" | "spacing";
+  token: string;
+  valoro: string;
+}
+
+/** The K8 facts („Erscheinung“) of one render, normalised and sorted (Spec 038 Lauf 2). */
+export interface FaktoAspekto {
+  tekstoj: Tekstero[];
+  nativaj: NativaFingrospuro[];
+  interspacoj: Interspaco[];
+  /** Landmarks (only stored, D-100). */
+  orientiloj: { rolo: string; elemento: number }[];
+  sondoj: Sondo[];
+  /** `document.fonts.check` per brand family of the font-family probes (edge case D-101). */
+  tiparoj: { familio: string; sxargita: boolean }[];
+}
+
 /** One render in an Aspekto and a mode, with the axe-core findings (WCAG 2.2 A/AA). */
 export interface Render {
   aspekto: string;
   scheme: "light" | "dark";
   contrast: "default" | "high";
   axe: { id: string; nodes: number }[];
+  /**
+   * The K8 facts, only for contrast „default“. Optional (D-97): stored facts without it stay
+   * valid, and an ekranoj `Fakto` stays assignable to `Facts` (C-2).
+   */
+  k8?: FaktoAspekto;
 }
 
 export interface Facts {
