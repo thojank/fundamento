@@ -109,7 +109,9 @@ const entwurf = (page: Page, id: string) =>
 // The assistant's steps poll the draft every 3 s (GET …/stato); the Schnellstart's do not. Each
 // place has its own marker of a loaded screen (Spec 042 T3): the assistant's stage sets
 // `data-mt-bereit` once its client bound every handler; the Schnellstart has no such marker, so its
-// Zweitfarbe block stands for it, together with `readyState` "complete" (its module scripts ran).
+// Zweitfarbe block stands for it. That block comes from the server and `readyState` "interactive"
+// comes before the module scripts ran (Spec 043 T2): that the client ran shows the preview, which
+// only the client sends and which `schrittBereit` waits for after the screen (`rahmenBereit`).
 for (const [ort, pfad, pollt, merkmal] of [
   [
     "the assistant's step „Leitfarbe und Akzente“",
