@@ -1,0 +1,60 @@
+[
+  {
+    "fall": "positiv",
+    "eingabe": {
+      "instances": [
+        {
+          "ero": "butono",
+          "props": {
+            "emphasis": "high"
+          },
+          "container": "dialog",
+          "label": "Speichern"
+        }
+      ]
+    },
+    "sha256": "01000c28d353feb75ecdfca96ef190edd065c30005f3a76906986026b5c2501b",
+    "bytes": 44,
+    "antwort": "{\"instances\":1,\"valid\":true,\"violations\":[]}"
+  },
+  {
+    "fall": "regelverstoss",
+    "eingabe": {
+      "instances": [
+        {
+          "ero": "butono",
+          "props": {
+            "emphasis": "high"
+          },
+          "container": "dialog",
+          "label": "Speichern"
+        },
+        {
+          "ero": "butono",
+          "props": {
+            "emphasis": "high"
+          },
+          "container": "dialog",
+          "label": "Weiter"
+        }
+      ]
+    },
+    "sha256": "1ac703a47c733a0301c80c315d3d9c000696b19d8bd0a81d2aeabc3f128c303d",
+    "bytes": 591,
+    "antwort": "{\"instances\":2,\"valid\":false,\"violations\":[{\"instance\":[0,1],\"issue\":{\"rule\":\"one-primary-per-container\",\"severity\":\"error\",\"path\":\"instances#/0\",\"message\":\"2 instances with emphasis=high in container dialog (instances 0, 1).\",\"suggestion\":\"Keep one high-emphasis action per container; give the others emphasis=medium or low.\",\"regulo\":{\"id\":\"reg_01M2XMV80DG7JCJDTZGE66MGHW\",\"name\":\"one-primary-per-container\",\"kialo\":\"Two equal calls to action move the decision onto the user; one primary action makes the next step obvious, and every other action steps back as secondary or tertiary.\"}}}]}"
+  },
+  {
+    "fall": "unbekannte-ero",
+    "eingabe": {
+      "instances": [
+        {
+          "ero": "wolkenschaukel",
+          "props": {}
+        }
+      ]
+    },
+    "sha256": "ce2e1b4bc60ad10ddeccf581cff7a3fda797b7220d6aab703b622459ae801f66",
+    "bytes": 636,
+    "antwort": "{\"instances\":1,\"valid\":false,\"violations\":[{\"instance\":[0],\"issue\":{\"rule\":\"ero-unknown\",\"severity\":\"error\",\"path\":\"instances#/0\",\"message\":\"Instance 0 names the Ero wolkenschaukel, which does not exist.\",\"suggestion\":\"Use one of alsxutilo, apartigilo, atributlisto, avataro, avizo, butono, datelektilo, dialogo, elektilo, elekto, faldilo, glitilo, ikono, insigno, kampo, karto, kodbloko, kompletigilo, konsileto, langetaro, ligilo, listelektilo, lokredaktilo, markdovido, markobutono, menuo, mezurilo, navigado, pagxigilo, plenstato, plurelektilo, saltligilo, signeto, spuro, sxaltilo, sxvebilo, tabelo, tekstareo, teksto, titolo.\"}}]}"
+  }
+]

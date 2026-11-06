@@ -1,0 +1,82 @@
+{
+  "fall": "kuroj-kontakt-fehler-F-2",
+  "faktoPfad": "packages/nordstelo/test/fixtures/kuroj/kontakt-fehler-F-2/fakto.json",
+  "faktoSha256": "5c9e2f5ddfb113c2f47eae536a0955f92b3e3f11f26d4a6e049633546074583e",
+  "tasko": "kontakt-fehler",
+  "expected": {
+    "K3": 0,
+    "reguloGaps": [
+      {
+        "kind": "regulo",
+        "key": "uzo-slot-accepts"
+      },
+      {
+        "kind": "regulo",
+        "key": "uzo-slot-nesting"
+      }
+    ],
+    "instancoj": [
+      {
+        "ero": "kampo",
+        "props": {
+          "kind": "email",
+          "required": true,
+          "invalid": true,
+          "name": "email"
+        },
+        "label": "Ihre E-Mail-Adresse",
+        "texts": {
+          "error": "Bitte geben Sie eine gültige E-Mail-Adresse ein."
+        },
+        "slots": {
+          "error": [
+            {
+              "ero": "avizo"
+            }
+          ]
+        },
+        "lingvo": "de"
+      },
+      {
+        "ero": "avizo",
+        "props": {
+          "intent": "danger",
+          "dismissible": true
+        },
+        "label": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+        "container": "kampo-1",
+        "lingvo": "de"
+      }
+    ],
+    "urteil": {
+      "instances": 2,
+      "valid": false,
+      "violations": [
+        {
+          "instance": [
+            0
+          ],
+          "issue": {
+            "rule": "uzo-slot-accepts",
+            "severity": "error",
+            "path": "instances#/0",
+            "message": "Instance 0 of kampo holds the Ero avizo in the slot error, which accepts text.",
+            "suggestion": "Put text in the slot error."
+          }
+        },
+        {
+          "instance": [
+            0
+          ],
+          "issue": {
+            "rule": "uzo-slot-nesting",
+            "severity": "error",
+            "path": "instances#/0",
+            "message": "Instance 0 of kampo nests the Ero avizo in the slot error, which allows no nesting.",
+            "suggestion": "Move the inner Ero next to this one."
+          }
+        }
+      ]
+    }
+  }
+}

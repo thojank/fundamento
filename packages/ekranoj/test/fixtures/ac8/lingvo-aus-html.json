@@ -1,0 +1,19 @@
+{
+  "fall": "lingvo-aus-html",
+  "fragment": "<html lang=\"EN-gb\"><body><fm-butono emphasis=\"low\" disabled=\"false\">Save</fm-butono></body></html>",
+  "lingvo": "de",
+  "expected": {
+    "instancoj": [
+      {
+        "ero": "butono",
+        "props": {
+          "emphasis": "low",
+          "disabled": false
+        },
+        "label": "Save",
+        "lingvo": "en"
+      }
+    ],
+    "malobservoj": []
+  }
+}

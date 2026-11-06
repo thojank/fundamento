@@ -1,0 +1,46 @@
+{
+  "fall": "unbekannte-ero",
+  "facts": {
+    "lingvo": "de",
+    "bytes": 96,
+    "elements": [
+      {
+        "tag": "fm-wolkenschaukel",
+        "attrs": {},
+        "parent": -1,
+        "text": "Schaukeln"
+      },
+      {
+        "tag": "fm-butono",
+        "attrs": {
+          "emphasis": "medium"
+        },
+        "parent": -1,
+        "text": "Weiter"
+      }
+    ],
+    "aria": [],
+    "console": [],
+    "renders": []
+  },
+  "tasko": "anmeldung",
+  "expected": {
+    "K3": 1,
+    "reguloGaps": [],
+    "instancoj": [
+      {
+        "ero": "butono",
+        "props": {
+          "emphasis": "medium"
+        },
+        "label": "Weiter",
+        "lingvo": "de"
+      }
+    ],
+    "urteil": {
+      "instances": 1,
+      "valid": true,
+      "violations": []
+    }
+  }
+}

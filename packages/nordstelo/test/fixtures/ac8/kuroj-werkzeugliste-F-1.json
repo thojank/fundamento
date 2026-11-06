@@ -1,0 +1,160 @@
+{
+  "fall": "kuroj-werkzeugliste-F-1",
+  "faktoPfad": "packages/nordstelo/test/fixtures/kuroj/werkzeugliste-F-1/fakto.json",
+  "faktoSha256": "85cf4dde943e417efc2997b61f8e1ac051c94b9bef842112c08e8defb48761bd",
+  "tasko": "werkzeugliste",
+  "expected": {
+    "K3": 0,
+    "reguloGaps": [
+      {
+        "kind": "regulo",
+        "key": "field-label-visible"
+      },
+      {
+        "kind": "regulo",
+        "key": "placeholder-not-label"
+      },
+      {
+        "kind": "regulo",
+        "key": "select-placeholder-is-prompt"
+      }
+    ],
+    "instancoj": [
+      {
+        "ero": "listelektilo",
+        "props": {
+          "placeholder": "Status filtern",
+          "name": "status-filter"
+        },
+        "texts": {
+          "label": "Status",
+          "options": [
+            "Gefahr",
+            "Info",
+            "Erfolg",
+            "Warnung"
+          ]
+        },
+        "slots": {
+          "label": [
+            "text"
+          ],
+          "options": [
+            "text",
+            "text",
+            "text",
+            "text"
+          ]
+        },
+        "lingvo": "de"
+      },
+      {
+        "ero": "kompletigilo",
+        "props": {
+          "placeholder": "Suchen",
+          "name": "search"
+        },
+        "texts": {
+          "label": "Suche"
+        },
+        "slots": {
+          "label": [
+            "text"
+          ]
+        },
+        "lingvo": "de"
+      }
+    ],
+    "urteil": {
+      "instances": 2,
+      "valid": false,
+      "violations": [
+        {
+          "instance": [
+            0
+          ],
+          "issue": {
+            "rule": "field-label-visible",
+            "severity": "error",
+            "path": "instances#/0",
+            "message": "Instance 0 of listelektilo has no visible label (only the placeholder \"Status filtern\").",
+            "suggestion": "Give the label as the text of the element or as label=\"…\" (both are shown, Nachlese 12); a placeholder disappears while typing and names nothing afterwards.",
+            "regulo": {
+              "id": "reg_01M4S1ZR7F1KE1AV1C7X5W8GD5",
+              "name": "field-label-visible",
+              "kialo": "WCAG 3.3.2 (Labels or Instructions): a placeholder disappears while typing, and a label only a screen reader hears does not help the sighted person who finds the field half filled."
+            }
+          }
+        },
+        {
+          "instance": [
+            0
+          ],
+          "issue": {
+            "rule": "placeholder-not-label",
+            "severity": "error",
+            "path": "instances#/0",
+            "message": "Instance 0 of listelektilo has the placeholder \"Status filtern\" and no label: the placeholder stands in for the label.",
+            "suggestion": "Give the label as the text of the element or as label=\"…\" and keep the placeholder as an example of a value.",
+            "regulo": {
+              "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3TX",
+              "name": "placeholder-not-label",
+              "kialo": "A placeholder disappears while typing (WCAG 3.3.2), and an example that repeats the label says nothing."
+            }
+          }
+        },
+        {
+          "instance": [
+            1
+          ],
+          "issue": {
+            "rule": "field-label-visible",
+            "severity": "error",
+            "path": "instances#/1",
+            "message": "Instance 1 of kompletigilo has no visible label (only the placeholder \"Suchen\").",
+            "suggestion": "Give the label as the text of the element or as label=\"…\" (both are shown, Nachlese 12); a placeholder disappears while typing and names nothing afterwards.",
+            "regulo": {
+              "id": "reg_01M4S1ZR7F1KE1AV1C7X5W8GD5",
+              "name": "field-label-visible",
+              "kialo": "WCAG 3.3.2 (Labels or Instructions): a placeholder disappears while typing, and a label only a screen reader hears does not help the sighted person who finds the field half filled."
+            }
+          }
+        },
+        {
+          "instance": [
+            1
+          ],
+          "issue": {
+            "rule": "placeholder-not-label",
+            "severity": "error",
+            "path": "instances#/1",
+            "message": "Instance 1 of kompletigilo has the placeholder \"Suchen\" and no label: the placeholder stands in for the label.",
+            "suggestion": "Give the label as the text of the element or as label=\"…\" and keep the placeholder as an example of a value.",
+            "regulo": {
+              "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3TX",
+              "name": "placeholder-not-label",
+              "kialo": "A placeholder disappears while typing (WCAG 3.3.2), and an example that repeats the label says nothing."
+            }
+          }
+        },
+        {
+          "instance": [
+            1
+          ],
+          "issue": {
+            "rule": "select-placeholder-is-prompt",
+            "severity": "error",
+            "path": "instances#/1",
+            "message": "Instance 1 of kompletigilo says \"Suchen\" (prop:placeholder): it has 1 word, fewer than the 2 a sentence that says what to do needs.",
+            "suggestion": "Write the text as the approved example does, e.g. \"Bitte wählen\".",
+            "regulo": {
+              "id": "reg_01M4WYFMFFG2H5A04DJ6Y90WMK",
+              "name": "select-placeholder-is-prompt",
+              "kialo": "The empty field of a select shows its placeholder where a chosen option will stand; a single word there reads as an option already chosen, and a person sends the form without choosing. A prompt says that nothing is chosen yet. Unlike the placeholder of a kampo it is no example of a value: the values are the options."
+            }
+          }
+        }
+      ]
+    }
+  }
+}

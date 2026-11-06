@@ -1,0 +1,2862 @@
+{
+  "describe": {
+    "description": "What is here? Overview of the served Modelo.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "title": "describe input",
+      "description": "What is here? Overview of the served Modelo.",
+      "additionalProperties": false
+    }
+  },
+  "list_dimensioj": {
+    "description": "The Dimensioj with values, default, priority and sets.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "title": "list_dimensioj input",
+      "description": "The Dimensioj with values, default, priority and sets.",
+      "additionalProperties": false
+    }
+  },
+  "list_aspektoj": {
+    "description": "The Aspektoj with metadata, package and sets.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "title": "list_aspektoj input",
+      "description": "The Aspektoj with metadata, package and sets.",
+      "additionalProperties": false
+    }
+  },
+  "search_tokens": {
+    "description": "Search tokens by prefix, type, role or text.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "prefix": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "$ref": "#/$defs/DtcgType"
+        },
+        "role": {
+          "$ref": "#/$defs/TokenRole"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "title": "search_tokens input",
+      "description": "Search tokens by prefix, type, role or text.",
+      "additionalProperties": false,
+      "$defs": {
+        "DtcgType": {
+          "type": "string",
+          "enum": [
+            "color",
+            "dimension",
+            "fontFamily",
+            "fontWeight",
+            "duration",
+            "cubicBezier",
+            "number",
+            "strokeStyle",
+            "shadow",
+            "typography",
+            "border",
+            "gradient",
+            "transition"
+          ]
+        },
+        "TokenRole": {
+          "type": "string",
+          "enum": [
+            "palette",
+            "foreground",
+            "background",
+            "border",
+            "focus",
+            "shadow",
+            "backdrop",
+            "disabled",
+            "decorative",
+            "ero"
+          ]
+        }
+      }
+    }
+  },
+  "get_token": {
+    "description": "One token with its core definition and every override. Give exactly one of: `name` or `id`.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/TokenName"
+        },
+        "id": {
+          "$ref": "#/$defs/TokenId"
+        }
+      },
+      "title": "get_token input",
+      "description": "One token with its core definition and every override. Give exactly one of: `name` or `id`.",
+      "$defs": {
+        "TokenName": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(\\.[a-z0-9]+)*$"
+        },
+        "TokenId": {
+          "type": "string",
+          "pattern": "^tok_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        }
+      }
+    }
+  },
+  "resolve": {
+    "description": "Resolve an assignment: value and provenance per token.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "assignment": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Name"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "tokens": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "title": "resolve input",
+      "description": "Resolve an assignment: value and provenance per token.",
+      "additionalProperties": false,
+      "$defs": {
+        "Name": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        }
+      }
+    }
+  },
+  "list_reguloj": {
+    "description": "Reguloj with their kialo, optionally with one Aspekto's own.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "aspekto": {
+          "$ref": "#/$defs/Name"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "title": "list_reguloj input",
+      "description": "Reguloj with their kialo, optionally with one Aspekto's own.",
+      "additionalProperties": false,
+      "$defs": {
+        "Name": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        }
+      }
+    }
+  },
+  "list_jugxoj": {
+    "description": "Jugxoj, optionally by reference or Aspekto.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/JugxoReguloRef"
+            },
+            {
+              "$ref": "#/$defs/JugxoEroRef"
+            },
+            {
+              "$ref": "#/$defs/JugxoArtikoloRef"
+            }
+          ]
+        },
+        "aspekto": {
+          "$ref": "#/$defs/Name"
+        }
+      },
+      "title": "list_jugxoj input",
+      "description": "Jugxoj, optionally by reference or Aspekto.",
+      "additionalProperties": false,
+      "$defs": {
+        "JugxoReguloRef": {
+          "type": "object",
+          "properties": {
+            "regulo": {
+              "$ref": "#/$defs/ReguloId"
+            },
+            "celo": {
+              "description": "The Celo this Jugxo belongs to. Which names exist is knowledge of the projections and lives in code, not here (Article VIII).",
+              "$ref": "#/$defs/Name"
+            }
+          },
+          "required": [
+            "regulo"
+          ],
+          "additionalProperties": false
+        },
+        "JugxoEroRef": {
+          "type": "object",
+          "properties": {
+            "ero": {
+              "$ref": "#/$defs/EroId"
+            },
+            "celo": {
+              "description": "The Celo this Jugxo belongs to. Which names exist is knowledge of the projections and lives in code, not here (Article VIII).",
+              "$ref": "#/$defs/Name"
+            }
+          },
+          "required": [
+            "ero"
+          ],
+          "additionalProperties": false
+        },
+        "JugxoArtikoloRef": {
+          "type": "object",
+          "description": "A constitution Article (I to XIII), for Jugxoj that record a deviation from the constitution itself.",
+          "properties": {
+            "artikolo": {
+              "enum": [
+                "I",
+                "II",
+                "III",
+                "IV",
+                "V",
+                "VI",
+                "VII",
+                "VIII",
+                "IX",
+                "X",
+                "XI",
+                "XII",
+                "XIII"
+              ]
+            },
+            "celo": {
+              "description": "The Celo this Jugxo belongs to. Which names exist is knowledge of the projections and lives in code, not here (Article VIII).",
+              "$ref": "#/$defs/Name"
+            }
+          },
+          "required": [
+            "artikolo"
+          ],
+          "additionalProperties": false
+        },
+        "Name": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "ReguloId": {
+          "type": "string",
+          "pattern": "^reg_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        },
+        "EroId": {
+          "type": "string",
+          "pattern": "^ero_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        }
+      }
+    }
+  },
+  "validate": {
+    "description": "Validation issues of the served Modelo or of a local Aspekto package.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "aspektoPath": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "title": "validate input",
+      "description": "Validation issues of the served Modelo or of a local Aspekto package.",
+      "additionalProperties": false
+    }
+  },
+  "derive_name": {
+    "description": "The name of a token in each Celo (CSS, Figma, TypeScript, Tailwind, DTCG).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "celo": {
+          "enum": [
+            "css",
+            "figma",
+            "typescript",
+            "tailwind",
+            "dtcg",
+            "penpot"
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "derive_name input",
+      "description": "The name of a token in each Celo (CSS, Figma, TypeScript, Tailwind, DTCG).",
+      "additionalProperties": false
+    }
+  },
+  "check_contrast": {
+    "description": "Contrast of a foreground colour token on a background colour token: ratio, threshold, pass or fail per group of combinations, APCA as advice, and whether the pair is a declared KontrastParo. Any pair is allowed.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "foreground": {
+          "$ref": "#/$defs/TokenName"
+        },
+        "background": {
+          "$ref": "#/$defs/TokenName"
+        },
+        "assignment": {
+          "description": "One combination; missing Dimensioj take their default. Without it: every combination of every Aspekto.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/Name"
+          }
+        },
+        "kategorio": {
+          "$ref": "#/$defs/KontrastKategorio"
+        }
+      },
+      "required": [
+        "foreground",
+        "background"
+      ],
+      "title": "check_contrast input",
+      "description": "Contrast of a foreground colour token on a background colour token: ratio, threshold, pass or fail per group of combinations, APCA as advice, and whether the pair is a declared KontrastParo. Any pair is allowed.",
+      "additionalProperties": false,
+      "$defs": {
+        "TokenName": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(\\.[a-z0-9]+)*$"
+        },
+        "Name": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "KontrastKategorio": {
+          "type": "string",
+          "enum": [
+            "text-normal",
+            "text-large",
+            "ui"
+          ]
+        }
+      }
+    }
+  },
+  "explain": {
+    "description": "Why does a token have its value? Value, alias chain with set and package, the Reguloj that govern the token with kialo and result, its KontrastParoj with result, and the Jugxoj. One combination; missing Dimensioj take their default.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "$ref": "#/$defs/TokenName"
+        },
+        "assignment": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/Name"
+          }
+        }
+      },
+      "required": [
+        "token"
+      ],
+      "title": "explain input",
+      "description": "Why does a token have its value? Value, alias chain with set and package, the Reguloj that govern the token with kialo and result, its KontrastParoj with result, and the Jugxoj. One combination; missing Dimensioj take their default.",
+      "additionalProperties": false,
+      "$defs": {
+        "TokenName": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(\\.[a-z0-9]+)*$"
+        },
+        "Name": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        }
+      }
+    }
+  },
+  "explain_regulo": {
+    "description": "What a Regulo says and why: statement, kialo, how it is checked, its scope and threshold, how many distinct violations the served Modelo has per Aspekto, and the Jugxoj about it. Name the Regulo by name or by ID. Give exactly one of: `name` or `id`.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "id": {
+          "$ref": "#/$defs/ReguloId"
+        },
+        "lingvo": {
+          "description": "The language of the texts of the answer (Nachlese 8 ③): \"de\" gives the purpose, the kialoj and the Reguloj in German, from data/tradukoj.json; without it or with \"en\" English, the source. Names, cases and keywords stay.",
+          "enum": [
+            "en",
+            "de"
+          ]
+        }
+      },
+      "title": "explain_regulo input",
+      "description": "What a Regulo says and why: statement, kialo, how it is checked, its scope and threshold, how many distinct violations the served Modelo has per Aspekto, and the Jugxoj about it. Name the Regulo by name or by ID. Give exactly one of: `name` or `id`.",
+      "additionalProperties": false,
+      "$defs": {
+        "Name": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "ReguloId": {
+          "type": "string",
+          "pattern": "^reg_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        }
+      }
+    }
+  },
+  "describe_term": {
+    "description": "What does a term of Fundamento mean? Definition, broader term and relations from the Ontologio, plus its instances in the served Modelo. Accepts the Esperanto term or an English or German label, e.g. Aspekto, brand or Marke.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "term": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        }
+      },
+      "required": [
+        "term"
+      ],
+      "title": "describe_term input",
+      "description": "What does a term of Fundamento mean? Definition, broader term and relations from the Ontologio, plus its instances in the served Modelo. Accepts the Esperanto term or an English or German label, e.g. Aspekto, brand or Marke.",
+      "additionalProperties": false
+    }
+  },
+  "list_eroj": {
+    "description": "Every Ero of the served Modelo with its variants and its props. With lingvo, every Ero names its display name as label beside its name (Spec 026 ②).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "lingvo": {
+          "description": "The language of the display names (Spec 026 ②): every entry names its label beside its name.",
+          "enum": [
+            "en",
+            "de"
+          ]
+        }
+      },
+      "title": "list_eroj input",
+      "description": "Every Ero of the served Modelo with its variants and its props. With lingvo, every Ero names its display name as label beside its name (Spec 026 ②).",
+      "additionalProperties": false
+    }
+  },
+  "get_ero": {
+    "description": "One Ero with its Skemo, the Reguloj that judge it, the recorded examples, its projections in every Celo and, since Spec 007, its Uzo: purpose, what to use instead, boundaries (with action ask-human, use-instead or not-supported), composition, slot rules, layout and text rules, each with its kialo. Name the Ero by name or by ID. With brief: true only what a choice needs (purpose, axes with values and default, required props and slots, instead, boundary), generated and under a measured size ceiling. Give exactly one of: `name` or `id`.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "id": {
+          "$ref": "#/$defs/EroId"
+        },
+        "brief": {
+          "description": "Only the brief answer (Spec 007 A8): ero, purpose, axes, required, instead, boundary. The boundaries carry case, action and the Ero to use, no kialo (Nachlese 3 G4): ask without brief for the kialo. Default false.",
+          "type": "boolean"
+        },
+        "lingvo": {
+          "description": "The language of the texts of the answer (Nachlese 8 ③): \"de\" gives the purpose, the kialoj and the Reguloj in German, from data/tradukoj.json; without it or with \"en\" English, the source. Names, cases and keywords stay.",
+          "enum": [
+            "en",
+            "de"
+          ]
+        }
+      },
+      "title": "get_ero input",
+      "description": "One Ero with its Skemo, the Reguloj that judge it, the recorded examples, its projections in every Celo and, since Spec 007, its Uzo: purpose, what to use instead, boundaries (with action ask-human, use-instead or not-supported), composition, slot rules, layout and text rules, each with its kialo. Name the Ero by name or by ID. With brief: true only what a choice needs (purpose, axes with values and default, required props and slots, instead, boundary), generated and under a measured size ceiling. Give exactly one of: `name` or `id`.",
+      "additionalProperties": false,
+      "$defs": {
+        "Name": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "EroId": {
+          "type": "string",
+          "pattern": "^ero_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        }
+      }
+    }
+  },
+  "suggest_ero": {
+    "description": "Which Ero and which props a goal asks for: give the goal in one word or one sentence (\"Löschen\"). Deterministic, from the goals of the Skemoj; lingvo limits the keywords to one language; with \"de\" the kialoj and Reguloj of the answer are German (Nachlese 8 ③). The parameter is goal since F1-T00 (Spec 007, OP-4): intent is a prop.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "goal": {
+          "type": "string",
+          "minLength": 1
+        },
+        "lingvo": {
+          "enum": [
+            "en",
+            "de"
+          ]
+        }
+      },
+      "required": [
+        "goal"
+      ],
+      "title": "suggest_ero input",
+      "description": "Which Ero and which props a goal asks for: give the goal in one word or one sentence (\"Löschen\"). Deterministic, from the goals of the Skemoj; lingvo limits the keywords to one language; with \"de\" the kialoj and Reguloj of the answer are German (Nachlese 8 ③). The parameter is goal since F1-T00 (Spec 007, OP-4): intent is a prop.",
+      "additionalProperties": false
+    }
+  },
+  "check_usage": {
+    "description": "Judges instances of a design or of code against the Ero Reguloj and the Skemo constraints. Call it before handing over a design or code. Give at least one of: `instances` with at least 1 entry or `sxablonoj` with at least 1 entry.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "instances": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EroInstance"
+          },
+          "minItems": 0
+        },
+        "sxablonoj": {
+          "description": "Instances of Sxablonoj (Spec 020): what stands in each region. Judged for required regions, accepted children, their number and props, one primary action where the region says so, and every landmark once per page; instances may then be empty.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SxablonoInstance"
+          }
+        }
+      },
+      "required": [
+        "instances"
+      ],
+      "title": "check_usage input",
+      "description": "Judges instances of a design or of code against the Ero Reguloj and the Skemo constraints. Call it before handing over a design or code. Give at least one of: `instances` with at least 1 entry or `sxablonoj` with at least 1 entry.",
+      "additionalProperties": false,
+      "$defs": {
+        "EroInstance": {
+          "description": "One use of an Ero in a design or code: the input of check_usage and of a Jugxo ekzemplo.",
+          "type": "object",
+          "properties": {
+            "ero": {
+              "$ref": "#/$defs/Name"
+            },
+            "props": {
+              "type": "object",
+              "propertyNames": {
+                "$ref": "#/$defs/Name"
+              },
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  }
+                ]
+              }
+            },
+            "container": {
+              "type": "string",
+              "minLength": 1
+            },
+            "goal": {
+              "description": "The goal of the instance, a goal of its Skemo (destructive, confirm, dismiss). Called goal since F1-T00 (Spec 007, OP-4); intent is a prop.",
+              "$ref": "#/$defs/Name"
+            },
+            "label": {
+              "type": "string"
+            },
+            "lingvo": {
+              "description": "The language of the instance's texts (ISO 639-1), so that check_usage answers with an example in that language (Spec 008, plan D-06). Without it the language is read from the label.",
+              "type": "string",
+              "pattern": "^[a-z]{2}$"
+            },
+            "texts": {
+              "description": "The texts of the other text slots of the instance, by slot name (Spec 009, plan D-06): help, error. The label stays label. A slot that takes several entries gives one text per entry, as a list (Spec 010 ③, plan ③ D-09): the labels of the options.",
+              "type": "object",
+              "propertyNames": {
+                "$ref": "#/$defs/Name"
+              },
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            },
+            "aspekto": {
+              "description": "The Aspekto the instance is shown in; its overrides of adjustable text rules apply (Spec 007, A10).",
+              "$ref": "#/$defs/Name"
+            },
+            "dimensioj": {
+              "description": "Dimensio values the instance is shown under, e.g. viewport=compact (Spec 007, A6).",
+              "type": "object",
+              "propertyNames": {
+                "$ref": "#/$defs/Name"
+              },
+              "additionalProperties": {
+                "$ref": "#/$defs/Name"
+              }
+            },
+            "slots": {
+              "description": "What stands in each slot: text, an icon or another Ero by name (Spec 007, A5). An unknown Ero name is allowed here; it describes the design.",
+              "type": "object",
+              "propertyNames": {
+                "$ref": "#/$defs/Name"
+              },
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "text",
+                        "icon"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "ero": {
+                          "$ref": "#/$defs/Name"
+                        }
+                      },
+                      "required": [
+                        "ero"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "required": [
+            "ero",
+            "props"
+          ],
+          "additionalProperties": false
+        },
+        "SxablonoInstance": {
+          "description": "An instance of a Sxablono for check_usage (Spec 020, G3): its props and what stands in each region — text, an icon, an Ero (with its props) or a Sxablono by name.",
+          "type": "object",
+          "properties": {
+            "sxablono": {
+              "$ref": "#/$defs/Name"
+            },
+            "props": {
+              "type": "object",
+              "propertyNames": {
+                "$ref": "#/$defs/Name"
+              },
+              "additionalProperties": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              }
+            },
+            "regions": {
+              "type": "object",
+              "propertyNames": {
+                "$ref": "#/$defs/Name"
+              },
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "text",
+                        "icon"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "ero": {
+                          "$ref": "#/$defs/Name"
+                        },
+                        "props": {
+                          "type": "object",
+                          "propertyNames": {
+                            "$ref": "#/$defs/Name"
+                          },
+                          "additionalProperties": {
+                            "oneOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "boolean"
+                              },
+                              {
+                                "type": "number"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "ero"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "sxablono": {
+                          "$ref": "#/$defs/Name"
+                        }
+                      },
+                      "required": [
+                        "sxablono"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "required": [
+            "sxablono"
+          ],
+          "additionalProperties": false
+        },
+        "Name": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        }
+      }
+    }
+  },
+  "preview_agordo": {
+    "description": "Checks a brand recipe before anyone writes it (Spec 016 ③, G9): an Agordo — name, leitfarbe (hex or oklch()), optional zusatzfarben, neutral.toenung, regler (helligkeit, kontrast, saettigung), ziele, schriften, aspiroj, jugxoj — is derived by the Agordilo into a complete Aspekto over the repository's structure (core + komuna) and checked like the CI checks it. Answers with the report (every violation with its cause, exactly one suggestion and the kialo of its Regulo), the lead colour's own contrast and the six palettes in short. Read-only: nothing is written; the package comes from `fm agordilo derive`.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "agordo": {
+          "$ref": "#/$defs/Agordo"
+        }
+      },
+      "required": [
+        "agordo"
+      ],
+      "title": "preview_agordo input",
+      "description": "Checks a brand recipe before anyone writes it (Spec 016 ③, G9): an Agordo — name, leitfarbe (hex or oklch()), optional zusatzfarben, neutral.toenung, regler (helligkeit, kontrast, saettigung), ziele, schriften, aspiroj, jugxoj — is derived by the Agordilo into a complete Aspekto over the repository's structure (core + komuna) and checked like the CI checks it. Answers with the report (every violation with its cause, exactly one suggestion and the kialo of its Regulo), the lead colour's own contrast and the six palettes in short. Read-only: nothing is written; the package comes from `fm agordilo derive`.",
+      "additionalProperties": false,
+      "$defs": {
+        "Agordo": {
+          "description": "The recipe of a brand for the Agordilo (Spec 016, G4; Spec 019, G2): a lead colour, an optional second colour (zweitfarbe, Spec 036 V-2), optional status colours, the tint of the neutrals, three sliders and font families, and the sliders of form, space, type and icon weight (stage 2), each on the structure of the Vortaro. The same Agordo derives the same Aspekto, byte for byte. owner and license fill aspekto.json; aspiroj are the brand's own goals, checked only when named; jugxoj record deviations from adjustable rules.",
+          "type": "object",
+          "properties": {
+            "name": {
+              "$ref": "#/$defs/Name"
+            },
+            "owner": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "license": {
+              "$ref": "#/$defs/License"
+            },
+            "leitfarbe": {
+              "$ref": "#/$defs/AgordoColor"
+            },
+            "zweitfarbe": {
+              "$ref": "#/$defs/AgordoZweitfarbe"
+            },
+            "zusatzfarben": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "$ref": "#/$defs/AgordoColor"
+                },
+                "warning": {
+                  "$ref": "#/$defs/AgordoColor"
+                },
+                "danger": {
+                  "$ref": "#/$defs/AgordoColor"
+                },
+                "info": {
+                  "$ref": "#/$defs/AgordoColor"
+                }
+              },
+              "additionalProperties": false
+            },
+            "neutral": {
+              "type": "object",
+              "properties": {
+                "toenung": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            "regler": {
+              "type": "object",
+              "properties": {
+                "helligkeit": {
+                  "type": "number",
+                  "minimum": -1,
+                  "maximum": 1
+                },
+                "kontrast": {
+                  "type": "number",
+                  "minimum": -1,
+                  "maximum": 1
+                },
+                "saettigung": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2
+                }
+              },
+              "additionalProperties": false
+            },
+            "schriften": {
+              "type": "object",
+              "properties": {
+                "display": {
+                  "$ref": "#/$defs/Fonto"
+                },
+                "body": {
+                  "$ref": "#/$defs/Fonto"
+                },
+                "code": {
+                  "$ref": "#/$defs/Fonto"
+                }
+              },
+              "additionalProperties": false
+            },
+            "form": {
+              "description": "Form (Spec 019, G2): factors on the structure of the Vortaro, 1 = the structure. radius multiplies radius.small … xlarge (none and full stay), rahmen border.width.* (never below 1 px, the focus ring keeps the reference's width), schatten offset and blur of elevation.shadow.* and the opacity of color.shadow.*.",
+              "type": "object",
+              "properties": {
+                "radius": {
+                  "description": "Factor on radius.small, medium, large and xlarge; 1 = the structure.",
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2
+                },
+                "rahmen": {
+                  "description": "Factor on border.width.*; 1 = the structure.",
+                  "type": "number",
+                  "minimum": 0.5,
+                  "maximum": 2
+                },
+                "schatten": {
+                  "description": "Factor on the offsets and blur of elevation.shadow.* and the opacity of color.shadow.*; 1 = the structure, 0 = no shadow.",
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2
+                }
+              },
+              "additionalProperties": false
+            },
+            "raum": {
+              "description": "Space (Spec 019, G2): abstand multiplies spacing.scale.* (the named spacing.* and the density modes follow), hoehe the steps of size.scale.* the controls use (size.control.*), never below size.target.min.",
+              "type": "object",
+              "properties": {
+                "abstand": {
+                  "description": "Factor on spacing.scale.*; 1 = the structure.",
+                  "type": "number",
+                  "minimum": 0.75,
+                  "maximum": 1.5
+                },
+                "hoehe": {
+                  "description": "Factor on the heights of size.control.*; 1 = the structure.",
+                  "type": "number",
+                  "minimum": 0.85,
+                  "maximum": 1.25
+                }
+              },
+              "additionalProperties": false
+            },
+            "schrift": {
+              "description": "Type (Spec 019, G2): groesse shifts every font.size.* by up to two steps of the scale, skala sets the ratio of neighbouring steps of font.size.scale (the structure's median ratio is the standard), gewicht moves font.weight.* by up to two cuts. The families are schriften (stage 1).",
+              "type": "object",
+              "properties": {
+                "groesse": {
+                  "description": "−1 … 1: every font size by up to two steps of the scale smaller or larger; 0 = the structure.",
+                  "type": "number",
+                  "minimum": -1,
+                  "maximum": 1
+                },
+                "skala": {
+                  "description": "The ratio of neighbouring steps of font.size.scale; the body text keeps its size.",
+                  "type": "number",
+                  "minimum": 1.125,
+                  "maximum": 1.25
+                },
+                "gewicht": {
+                  "description": "−1 … 1: font.weight.* by up to two cuts lighter or heavier, never outside the lightest and the heaviest weight of the structure; 0 = the structure.",
+                  "type": "number",
+                  "minimum": -1,
+                  "maximum": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            "ikono": {
+              "description": "Icons (Spec 019, G2, E6): the Phosphor weight the Aspekto draws the Ikonaro in. A weight is derived only where every name of the Ikonaro has a glyph in it, with its provenance.",
+              "type": "object",
+              "properties": {
+                "gewicht": {
+                  "description": "A Phosphor weight; regular is the reference's own.",
+                  "type": "string",
+                  "enum": [
+                    "thin",
+                    "light",
+                    "regular",
+                    "bold",
+                    "fill",
+                    "duotone"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            },
+            "ziele": {
+              "$ref": "#/$defs/AgordoZieloj"
+            },
+            "aspiroj": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/AspektoAspiro"
+              }
+            },
+            "jugxoj": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/AgordoJugxo"
+              }
+            },
+            "festgelegt": {
+              "description": "Values the Studio sets (Spec 024 Runde 1, S-2): token name → what the brand sets instead of what the derivation would write. `wert` is a DTCG value for the main set, `alias` the name of a token the brand re-points to (an alias counts as an assignment, Art. IV), `modoj` the same per Dimensio condition (`color-scheme=dark`, `viewport=compact`), written into the brand's conjunction set of that condition. Schnellstart and Studio work on the same data.",
+              "type": "object",
+              "propertyNames": {
+                "$ref": "#/$defs/TokenName"
+              },
+              "additionalProperties": {
+                "$ref": "#/$defs/AgordoFestgelegt"
+              }
+            },
+            "etikedoj": {
+              "description": "Display names of the brand (Spec 024, § 3 B): `marko` for the brand as written, a palette (`color.palette.accent`) or a role (`color.text.default`) → its name as the Studio, the Vitrino and the Guidelines show it. Identifiers in every Projekcio stay canonical (Art. II).",
+              "type": "object",
+              "propertyNames": {
+                "pattern": "^[a-z0-9]+(\\.[a-z0-9-]+)*$"
+              },
+              "additionalProperties": {
+                "$ref": "#/$defs/NonEmptyText"
+              }
+            },
+            "historio": {
+              "description": "The history of the Agordo (Spec 019 ③, W-26): every save by save_agordo appends an entry. Part of the Agordo, so it travels with the file.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/AgordoHistorio"
+              }
+            }
+          },
+          "required": [
+            "name",
+            "leitfarbe"
+          ],
+          "additionalProperties": false
+        },
+        "Name": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "NonEmptyText": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "License": {
+          "description": "An SPDX license expression, or `proprietary` for rights that are not openly licensed.",
+          "type": "string",
+          "pattern": "^(proprietary|[A-Za-z0-9][A-Za-z0-9.+-]*( (AND|OR|WITH) [A-Za-z0-9][A-Za-z0-9.+-]*)*)$"
+        },
+        "AgordoColor": {
+          "description": "A colour of an Agordo (Spec 016, G4): hex with three or six digits, or CSS oklch() with lightness as a number (0…1) or a percentage, chroma and hue as numbers.",
+          "type": "string",
+          "pattern": "^(#[0-9a-fA-F]{3}|#[0-9a-fA-F]{6}|oklch\\(\\s*[0-9]*\\.?[0-9]+%?\\s+[0-9]*\\.?[0-9]+\\s+[0-9]*\\.?[0-9]+\\s*\\))$"
+        },
+        "AgordoZweitfarbe": {
+          "description": "The second colour of a brand (Spec 036, Befund 2.2, V-2): a colour of the same shape as leitfarbe, from which the Agordilo derives the palette color.palette.sekundo at the contrast targets of twelve steps of the accent ramp (50 to 950, not 25, 850 and 975); the roles color.sekundo.* (highlight surface, illustration, badge, chart) take it, never an action, a link or the focus (Regulo sekundo-not-action). Absent means no Zweitfarbe: the palette is the neutral ramp. herkunft says where it was found, absent when it was entered by hand.",
+          "type": "object",
+          "properties": {
+            "farbe": {
+              "$ref": "#/$defs/AgordoColor"
+            },
+            "herkunft": {
+              "$ref": "#/$defs/AgordoHerkunft"
+            }
+          },
+          "required": [
+            "farbe"
+          ],
+          "additionalProperties": false
+        },
+        "Fonto": {
+          "description": "A font family an Aspekto uses. Font files never enter the core repository; the fallback stack lives only in the fontFamily token value.",
+          "type": "object",
+          "properties": {
+            "family": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "license": {
+              "$ref": "#/$defs/License"
+            },
+            "source": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "redistributable": {
+              "type": "boolean"
+            },
+            "scripts": {
+              "description": "Writing systems the family covers, as ISO 15924 codes (Latn, Cyrl, Arab, Hans, …); at least one (Spec 001, T018b).",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Iso15924"
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "category": {
+              "description": "The kind of the family as the font catalogue names it (Spec 036 Teil 5, Spec 029 ①-7): the Agordilo takes the generic fallback of the family from it; absent, the fallback of the structure stays.",
+              "enum": [
+                "sans-serif",
+                "serif",
+                "monospace",
+                "display",
+                "handwriting",
+                "other",
+                "icons"
+              ]
+            },
+            "weights": {
+              "description": "The weights the family has (Spec 036 Teil 5, Spec 029 B-2): every typography role in the family takes the nearest of them; absent, every weight of the structure stays.",
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "family",
+            "license",
+            "source",
+            "redistributable",
+            "scripts"
+          ],
+          "additionalProperties": false
+        },
+        "AgordoZieloj": {
+          "description": "Contrast targets a brand overrides per palette step (Spec 016 ②, G7): keyed by palette.step, the WCAG 2.x contrast the step should reach against the reference surface of the light mode (hell: neutral.0) or the dark mode (dunkel: neutral.1000). An override is a target, never a free colour value; the floors of kontrastSojloj still hold.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^(neutral|accent|success|warning|danger|info)\\.[0-9]+$"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "hell": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 21
+              },
+              "dunkel": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 21
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "AspektoAspiro": {
+          "description": "A design goal one Aspekto sets itself (Spec 004, plan D-03): the same measurement as a Regulo, its own bound and its own reason, checked only for this Aspekto. Reguloj enforce accessibility and structure for every brand; an Aspiro is taste, and taste belongs to the brand.",
+          "type": "object",
+          "properties": {
+            "metriko": {
+              "type": "string",
+              "enum": [
+                "wcag2-reserve",
+                "oklch-l-extreme",
+                "oklch-l-step",
+                "oklch-l-step-consistency",
+                "oklch-l-align",
+                "type-scale-ratio",
+                "type-scale-consistency",
+                "dimensio-kovrado"
+              ]
+            },
+            "min": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "appliesTo": {
+              "$ref": "#/$defs/ReguloAppliesTo"
+            },
+            "dimensio": {
+              "$ref": "#/$defs/Name"
+            },
+            "valoro": {
+              "$ref": "#/$defs/Name"
+            },
+            "kialo": {
+              "$ref": "#/$defs/NonEmptyText"
+            }
+          },
+          "required": [
+            "metriko",
+            "kialo"
+          ],
+          "anyOf": [
+            {
+              "properties": {
+                "min": true
+              },
+              "required": [
+                "min"
+              ]
+            },
+            {
+              "properties": {
+                "max": true
+              },
+              "required": [
+                "max"
+              ]
+            }
+          ],
+          "additionalProperties": false
+        },
+        "AgordoJugxo": {
+          "description": "A deviation an Agordo records for an adjustable rule (Spec 016, G6, D-5): the Regulo by name, the reason, the date and the name of the person deciding. The Agordilo writes it into the package as a Jugxo; a fixed rule cannot be deviated from.",
+          "type": "object",
+          "properties": {
+            "regulo": {
+              "$ref": "#/$defs/Name"
+            },
+            "kialo": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "date": {
+              "type": "string",
+              "format": "date"
+            },
+            "name": {
+              "$ref": "#/$defs/NonEmptyText"
+            }
+          },
+          "required": [
+            "regulo",
+            "kialo",
+            "date",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        "TokenName": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(\\.[a-z0-9]+)*$"
+        },
+        "AgordoFestgelegt": {
+          "description": "A set token of the Studio (Spec 024): the value or alias for the main set of the brand (an alias wins over a value), per Dimensio condition for the brand's conjunction set of that condition, and for a typography role its case (`schreibweise`, Runde 2: the text transformation the role carries beside its value).",
+          "type": "object",
+          "properties": {
+            "wert": {},
+            "alias": {
+              "$ref": "#/$defs/TokenName"
+            },
+            "schreibweise": {
+              "$ref": "#/$defs/TextTransform"
+            },
+            "modoj": {
+              "type": "object",
+              "propertyNames": {
+                "pattern": "^[a-z-]+=[a-z0-9-]+$"
+              },
+              "additionalProperties": {
+                "$ref": "#/$defs/AgordoFestgelegtWert"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "AgordoHistorio": {
+          "description": "One save of an Agordo (Spec 019 ③, W-26): the date, the wish the movement came from (or Hand for a change by hand) and the sliders that moved, before → after.",
+          "type": "object",
+          "properties": {
+            "datum": {
+              "type": "string",
+              "format": "date"
+            },
+            "wunsch": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "diff": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "regler": {
+                    "$ref": "#/$defs/NonEmptyText"
+                  },
+                  "vorher": {
+                    "oneOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "nachher": {
+                    "oneOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "regler",
+                  "vorher",
+                  "nachher"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "datum",
+            "wunsch",
+            "diff"
+          ],
+          "additionalProperties": false
+        },
+        "AgordoHerkunft": {
+          "description": "Where a value of the Agordo was found in the material of the brand (Spec 036, D-03): a picture, a PDF or a page (link), the file or the address, the feature it was read from in plain words, and the share of the found colour in per cent where one was measured.",
+          "type": "object",
+          "properties": {
+            "quelle": {
+              "type": "string",
+              "enum": [
+                "bild",
+                "pdf",
+                "link"
+              ]
+            },
+            "datei": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "adresse": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "merkmal": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "anteil": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "required": [
+            "quelle",
+            "merkmal"
+          ],
+          "additionalProperties": false
+        },
+        "Iso15924": {
+          "description": "An ISO 15924 script code: four letters, the first uppercase (e.g. Latn, Cyrl, Hans).",
+          "type": "string",
+          "pattern": "^[A-Z][a-z]{3}$"
+        },
+        "ReguloAppliesTo": {
+          "description": "Which tokens the Regulo governs; explain finds a token's Reguloj only through this field (Spec 002, D-02). A token matches when any criterion matches. Token patterns may use * for one segment and a trailing ** for one or more.",
+          "type": "object",
+          "properties": {
+            "tokens": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/TokenPattern"
+              }
+            },
+            "roles": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/TokenRole"
+              }
+            },
+            "types": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/DtcgType"
+              }
+            },
+            "eroj": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/Name"
+              },
+              "uniqueItems": true
+            }
+          },
+          "minProperties": 1,
+          "additionalProperties": false
+        },
+        "TextTransform": {
+          "description": "Text transformation of a typography role (Spec 001, D-11). DTCG has no field for it; the values are platform-neutral.",
+          "type": "string",
+          "enum": [
+            "none",
+            "uppercase",
+            "lowercase",
+            "capitalize"
+          ]
+        },
+        "AgordoFestgelegtWert": {
+          "description": "What the brand sets for one token in one set: a DTCG value (`wert`) or the name of a token to alias (`alias`), not both.",
+          "type": "object",
+          "properties": {
+            "wert": {},
+            "alias": {
+              "$ref": "#/$defs/TokenName"
+            }
+          },
+          "additionalProperties": false,
+          "minProperties": 1,
+          "maxProperties": 1
+        },
+        "TokenPattern": {
+          "type": "string",
+          "pattern": "^(?:[a-z0-9]+|\\*)(?:\\.(?:[a-z0-9]+|\\*))*(?:\\.\\*\\*)?$"
+        },
+        "TokenRole": {
+          "type": "string",
+          "enum": [
+            "palette",
+            "foreground",
+            "background",
+            "border",
+            "focus",
+            "shadow",
+            "backdrop",
+            "disabled",
+            "decorative",
+            "ero"
+          ]
+        },
+        "DtcgType": {
+          "type": "string",
+          "enum": [
+            "color",
+            "dimension",
+            "fontFamily",
+            "fontWeight",
+            "duration",
+            "cubicBezier",
+            "number",
+            "strokeStyle",
+            "shadow",
+            "typography",
+            "border",
+            "gradient",
+            "transition"
+          ]
+        }
+      }
+    }
+  },
+  "propose_agordo": {
+    "description": "Turns a wish into visible movements of the sliders (Spec 019 ③, G6) — read-only, deterministic, no language model in the tool: the agent words it, the tool computes. Input: an Agordo, a wish in words (wunsch, German or English: ruhiger/calmer, kräftiger/bolder, wärmer/warmer, kühler/cooler, runder/rounder, eckiger/sharper, luftiger/airier, kompakter/denser, größer/larger, kleiner/smaller) and/or explicit slider values (regler: path → value, e.g. form.radius → 1.4, ikono.gewicht → bold). Answers with the new Agordo, the diff of the sliders, the report in short like preview_agordo, the sentence of the wish vocabulary that moved them and a link into the Werkstatt that shows the proposal before it holds. A wish the vocabulary does not know moves nothing: the answer asks back (action ask-human) and names the known words. A movement that would break a fixed rule stops before it. Writes nothing; save_agordo writes.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "agordo": {
+          "$ref": "#/$defs/Agordo"
+        },
+        "wunsch": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The wish as said: „Mach die Marke ruhiger“, „runder und luftiger“, „make it calmer“."
+        },
+        "regler": {
+          "type": "object",
+          "description": "Explicit values by slider path (neutral.toenung, regler.*, form.*, raum.*, schrift.*) or ikono.gewicht.",
+          "propertyNames": {
+            "pattern": "^(neutral|regler|form|raum|schrift|ikono)\\.[a-z]+$"
+          },
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "agordo"
+      ],
+      "title": "propose_agordo input",
+      "description": "Turns a wish into visible movements of the sliders (Spec 019 ③, G6) — read-only, deterministic, no language model in the tool: the agent words it, the tool computes. Input: an Agordo, a wish in words (wunsch, German or English: ruhiger/calmer, kräftiger/bolder, wärmer/warmer, kühler/cooler, runder/rounder, eckiger/sharper, luftiger/airier, kompakter/denser, größer/larger, kleiner/smaller) and/or explicit slider values (regler: path → value, e.g. form.radius → 1.4, ikono.gewicht → bold). Answers with the new Agordo, the diff of the sliders, the report in short like preview_agordo, the sentence of the wish vocabulary that moved them and a link into the Werkstatt that shows the proposal before it holds. A wish the vocabulary does not know moves nothing: the answer asks back (action ask-human) and names the known words. A movement that would break a fixed rule stops before it. Writes nothing; save_agordo writes.",
+      "additionalProperties": false,
+      "$defs": {
+        "Agordo": {
+          "description": "The recipe of a brand for the Agordilo (Spec 016, G4; Spec 019, G2): a lead colour, an optional second colour (zweitfarbe, Spec 036 V-2), optional status colours, the tint of the neutrals, three sliders and font families, and the sliders of form, space, type and icon weight (stage 2), each on the structure of the Vortaro. The same Agordo derives the same Aspekto, byte for byte. owner and license fill aspekto.json; aspiroj are the brand's own goals, checked only when named; jugxoj record deviations from adjustable rules.",
+          "type": "object",
+          "properties": {
+            "name": {
+              "$ref": "#/$defs/Name"
+            },
+            "owner": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "license": {
+              "$ref": "#/$defs/License"
+            },
+            "leitfarbe": {
+              "$ref": "#/$defs/AgordoColor"
+            },
+            "zweitfarbe": {
+              "$ref": "#/$defs/AgordoZweitfarbe"
+            },
+            "zusatzfarben": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "$ref": "#/$defs/AgordoColor"
+                },
+                "warning": {
+                  "$ref": "#/$defs/AgordoColor"
+                },
+                "danger": {
+                  "$ref": "#/$defs/AgordoColor"
+                },
+                "info": {
+                  "$ref": "#/$defs/AgordoColor"
+                }
+              },
+              "additionalProperties": false
+            },
+            "neutral": {
+              "type": "object",
+              "properties": {
+                "toenung": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            "regler": {
+              "type": "object",
+              "properties": {
+                "helligkeit": {
+                  "type": "number",
+                  "minimum": -1,
+                  "maximum": 1
+                },
+                "kontrast": {
+                  "type": "number",
+                  "minimum": -1,
+                  "maximum": 1
+                },
+                "saettigung": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2
+                }
+              },
+              "additionalProperties": false
+            },
+            "schriften": {
+              "type": "object",
+              "properties": {
+                "display": {
+                  "$ref": "#/$defs/Fonto"
+                },
+                "body": {
+                  "$ref": "#/$defs/Fonto"
+                },
+                "code": {
+                  "$ref": "#/$defs/Fonto"
+                }
+              },
+              "additionalProperties": false
+            },
+            "form": {
+              "description": "Form (Spec 019, G2): factors on the structure of the Vortaro, 1 = the structure. radius multiplies radius.small … xlarge (none and full stay), rahmen border.width.* (never below 1 px, the focus ring keeps the reference's width), schatten offset and blur of elevation.shadow.* and the opacity of color.shadow.*.",
+              "type": "object",
+              "properties": {
+                "radius": {
+                  "description": "Factor on radius.small, medium, large and xlarge; 1 = the structure.",
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2
+                },
+                "rahmen": {
+                  "description": "Factor on border.width.*; 1 = the structure.",
+                  "type": "number",
+                  "minimum": 0.5,
+                  "maximum": 2
+                },
+                "schatten": {
+                  "description": "Factor on the offsets and blur of elevation.shadow.* and the opacity of color.shadow.*; 1 = the structure, 0 = no shadow.",
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2
+                }
+              },
+              "additionalProperties": false
+            },
+            "raum": {
+              "description": "Space (Spec 019, G2): abstand multiplies spacing.scale.* (the named spacing.* and the density modes follow), hoehe the steps of size.scale.* the controls use (size.control.*), never below size.target.min.",
+              "type": "object",
+              "properties": {
+                "abstand": {
+                  "description": "Factor on spacing.scale.*; 1 = the structure.",
+                  "type": "number",
+                  "minimum": 0.75,
+                  "maximum": 1.5
+                },
+                "hoehe": {
+                  "description": "Factor on the heights of size.control.*; 1 = the structure.",
+                  "type": "number",
+                  "minimum": 0.85,
+                  "maximum": 1.25
+                }
+              },
+              "additionalProperties": false
+            },
+            "schrift": {
+              "description": "Type (Spec 019, G2): groesse shifts every font.size.* by up to two steps of the scale, skala sets the ratio of neighbouring steps of font.size.scale (the structure's median ratio is the standard), gewicht moves font.weight.* by up to two cuts. The families are schriften (stage 1).",
+              "type": "object",
+              "properties": {
+                "groesse": {
+                  "description": "−1 … 1: every font size by up to two steps of the scale smaller or larger; 0 = the structure.",
+                  "type": "number",
+                  "minimum": -1,
+                  "maximum": 1
+                },
+                "skala": {
+                  "description": "The ratio of neighbouring steps of font.size.scale; the body text keeps its size.",
+                  "type": "number",
+                  "minimum": 1.125,
+                  "maximum": 1.25
+                },
+                "gewicht": {
+                  "description": "−1 … 1: font.weight.* by up to two cuts lighter or heavier, never outside the lightest and the heaviest weight of the structure; 0 = the structure.",
+                  "type": "number",
+                  "minimum": -1,
+                  "maximum": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            "ikono": {
+              "description": "Icons (Spec 019, G2, E6): the Phosphor weight the Aspekto draws the Ikonaro in. A weight is derived only where every name of the Ikonaro has a glyph in it, with its provenance.",
+              "type": "object",
+              "properties": {
+                "gewicht": {
+                  "description": "A Phosphor weight; regular is the reference's own.",
+                  "type": "string",
+                  "enum": [
+                    "thin",
+                    "light",
+                    "regular",
+                    "bold",
+                    "fill",
+                    "duotone"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            },
+            "ziele": {
+              "$ref": "#/$defs/AgordoZieloj"
+            },
+            "aspiroj": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/AspektoAspiro"
+              }
+            },
+            "jugxoj": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/AgordoJugxo"
+              }
+            },
+            "festgelegt": {
+              "description": "Values the Studio sets (Spec 024 Runde 1, S-2): token name → what the brand sets instead of what the derivation would write. `wert` is a DTCG value for the main set, `alias` the name of a token the brand re-points to (an alias counts as an assignment, Art. IV), `modoj` the same per Dimensio condition (`color-scheme=dark`, `viewport=compact`), written into the brand's conjunction set of that condition. Schnellstart and Studio work on the same data.",
+              "type": "object",
+              "propertyNames": {
+                "$ref": "#/$defs/TokenName"
+              },
+              "additionalProperties": {
+                "$ref": "#/$defs/AgordoFestgelegt"
+              }
+            },
+            "etikedoj": {
+              "description": "Display names of the brand (Spec 024, § 3 B): `marko` for the brand as written, a palette (`color.palette.accent`) or a role (`color.text.default`) → its name as the Studio, the Vitrino and the Guidelines show it. Identifiers in every Projekcio stay canonical (Art. II).",
+              "type": "object",
+              "propertyNames": {
+                "pattern": "^[a-z0-9]+(\\.[a-z0-9-]+)*$"
+              },
+              "additionalProperties": {
+                "$ref": "#/$defs/NonEmptyText"
+              }
+            },
+            "historio": {
+              "description": "The history of the Agordo (Spec 019 ③, W-26): every save by save_agordo appends an entry. Part of the Agordo, so it travels with the file.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/AgordoHistorio"
+              }
+            }
+          },
+          "required": [
+            "name",
+            "leitfarbe"
+          ],
+          "additionalProperties": false
+        },
+        "Name": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "NonEmptyText": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "License": {
+          "description": "An SPDX license expression, or `proprietary` for rights that are not openly licensed.",
+          "type": "string",
+          "pattern": "^(proprietary|[A-Za-z0-9][A-Za-z0-9.+-]*( (AND|OR|WITH) [A-Za-z0-9][A-Za-z0-9.+-]*)*)$"
+        },
+        "AgordoColor": {
+          "description": "A colour of an Agordo (Spec 016, G4): hex with three or six digits, or CSS oklch() with lightness as a number (0…1) or a percentage, chroma and hue as numbers.",
+          "type": "string",
+          "pattern": "^(#[0-9a-fA-F]{3}|#[0-9a-fA-F]{6}|oklch\\(\\s*[0-9]*\\.?[0-9]+%?\\s+[0-9]*\\.?[0-9]+\\s+[0-9]*\\.?[0-9]+\\s*\\))$"
+        },
+        "AgordoZweitfarbe": {
+          "description": "The second colour of a brand (Spec 036, Befund 2.2, V-2): a colour of the same shape as leitfarbe, from which the Agordilo derives the palette color.palette.sekundo at the contrast targets of twelve steps of the accent ramp (50 to 950, not 25, 850 and 975); the roles color.sekundo.* (highlight surface, illustration, badge, chart) take it, never an action, a link or the focus (Regulo sekundo-not-action). Absent means no Zweitfarbe: the palette is the neutral ramp. herkunft says where it was found, absent when it was entered by hand.",
+          "type": "object",
+          "properties": {
+            "farbe": {
+              "$ref": "#/$defs/AgordoColor"
+            },
+            "herkunft": {
+              "$ref": "#/$defs/AgordoHerkunft"
+            }
+          },
+          "required": [
+            "farbe"
+          ],
+          "additionalProperties": false
+        },
+        "Fonto": {
+          "description": "A font family an Aspekto uses. Font files never enter the core repository; the fallback stack lives only in the fontFamily token value.",
+          "type": "object",
+          "properties": {
+            "family": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "license": {
+              "$ref": "#/$defs/License"
+            },
+            "source": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "redistributable": {
+              "type": "boolean"
+            },
+            "scripts": {
+              "description": "Writing systems the family covers, as ISO 15924 codes (Latn, Cyrl, Arab, Hans, …); at least one (Spec 001, T018b).",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Iso15924"
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "category": {
+              "description": "The kind of the family as the font catalogue names it (Spec 036 Teil 5, Spec 029 ①-7): the Agordilo takes the generic fallback of the family from it; absent, the fallback of the structure stays.",
+              "enum": [
+                "sans-serif",
+                "serif",
+                "monospace",
+                "display",
+                "handwriting",
+                "other",
+                "icons"
+              ]
+            },
+            "weights": {
+              "description": "The weights the family has (Spec 036 Teil 5, Spec 029 B-2): every typography role in the family takes the nearest of them; absent, every weight of the structure stays.",
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "family",
+            "license",
+            "source",
+            "redistributable",
+            "scripts"
+          ],
+          "additionalProperties": false
+        },
+        "AgordoZieloj": {
+          "description": "Contrast targets a brand overrides per palette step (Spec 016 ②, G7): keyed by palette.step, the WCAG 2.x contrast the step should reach against the reference surface of the light mode (hell: neutral.0) or the dark mode (dunkel: neutral.1000). An override is a target, never a free colour value; the floors of kontrastSojloj still hold.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^(neutral|accent|success|warning|danger|info)\\.[0-9]+$"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "hell": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 21
+              },
+              "dunkel": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 21
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "AspektoAspiro": {
+          "description": "A design goal one Aspekto sets itself (Spec 004, plan D-03): the same measurement as a Regulo, its own bound and its own reason, checked only for this Aspekto. Reguloj enforce accessibility and structure for every brand; an Aspiro is taste, and taste belongs to the brand.",
+          "type": "object",
+          "properties": {
+            "metriko": {
+              "type": "string",
+              "enum": [
+                "wcag2-reserve",
+                "oklch-l-extreme",
+                "oklch-l-step",
+                "oklch-l-step-consistency",
+                "oklch-l-align",
+                "type-scale-ratio",
+                "type-scale-consistency",
+                "dimensio-kovrado"
+              ]
+            },
+            "min": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "appliesTo": {
+              "$ref": "#/$defs/ReguloAppliesTo"
+            },
+            "dimensio": {
+              "$ref": "#/$defs/Name"
+            },
+            "valoro": {
+              "$ref": "#/$defs/Name"
+            },
+            "kialo": {
+              "$ref": "#/$defs/NonEmptyText"
+            }
+          },
+          "required": [
+            "metriko",
+            "kialo"
+          ],
+          "anyOf": [
+            {
+              "properties": {
+                "min": true
+              },
+              "required": [
+                "min"
+              ]
+            },
+            {
+              "properties": {
+                "max": true
+              },
+              "required": [
+                "max"
+              ]
+            }
+          ],
+          "additionalProperties": false
+        },
+        "AgordoJugxo": {
+          "description": "A deviation an Agordo records for an adjustable rule (Spec 016, G6, D-5): the Regulo by name, the reason, the date and the name of the person deciding. The Agordilo writes it into the package as a Jugxo; a fixed rule cannot be deviated from.",
+          "type": "object",
+          "properties": {
+            "regulo": {
+              "$ref": "#/$defs/Name"
+            },
+            "kialo": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "date": {
+              "type": "string",
+              "format": "date"
+            },
+            "name": {
+              "$ref": "#/$defs/NonEmptyText"
+            }
+          },
+          "required": [
+            "regulo",
+            "kialo",
+            "date",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        "TokenName": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(\\.[a-z0-9]+)*$"
+        },
+        "AgordoFestgelegt": {
+          "description": "A set token of the Studio (Spec 024): the value or alias for the main set of the brand (an alias wins over a value), per Dimensio condition for the brand's conjunction set of that condition, and for a typography role its case (`schreibweise`, Runde 2: the text transformation the role carries beside its value).",
+          "type": "object",
+          "properties": {
+            "wert": {},
+            "alias": {
+              "$ref": "#/$defs/TokenName"
+            },
+            "schreibweise": {
+              "$ref": "#/$defs/TextTransform"
+            },
+            "modoj": {
+              "type": "object",
+              "propertyNames": {
+                "pattern": "^[a-z-]+=[a-z0-9-]+$"
+              },
+              "additionalProperties": {
+                "$ref": "#/$defs/AgordoFestgelegtWert"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "AgordoHistorio": {
+          "description": "One save of an Agordo (Spec 019 ③, W-26): the date, the wish the movement came from (or Hand for a change by hand) and the sliders that moved, before → after.",
+          "type": "object",
+          "properties": {
+            "datum": {
+              "type": "string",
+              "format": "date"
+            },
+            "wunsch": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "diff": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "regler": {
+                    "$ref": "#/$defs/NonEmptyText"
+                  },
+                  "vorher": {
+                    "oneOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "nachher": {
+                    "oneOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "regler",
+                  "vorher",
+                  "nachher"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "datum",
+            "wunsch",
+            "diff"
+          ],
+          "additionalProperties": false
+        },
+        "AgordoHerkunft": {
+          "description": "Where a value of the Agordo was found in the material of the brand (Spec 036, D-03): a picture, a PDF or a page (link), the file or the address, the feature it was read from in plain words, and the share of the found colour in per cent where one was measured.",
+          "type": "object",
+          "properties": {
+            "quelle": {
+              "type": "string",
+              "enum": [
+                "bild",
+                "pdf",
+                "link"
+              ]
+            },
+            "datei": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "adresse": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "merkmal": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "anteil": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "required": [
+            "quelle",
+            "merkmal"
+          ],
+          "additionalProperties": false
+        },
+        "Iso15924": {
+          "description": "An ISO 15924 script code: four letters, the first uppercase (e.g. Latn, Cyrl, Hans).",
+          "type": "string",
+          "pattern": "^[A-Z][a-z]{3}$"
+        },
+        "ReguloAppliesTo": {
+          "description": "Which tokens the Regulo governs; explain finds a token's Reguloj only through this field (Spec 002, D-02). A token matches when any criterion matches. Token patterns may use * for one segment and a trailing ** for one or more.",
+          "type": "object",
+          "properties": {
+            "tokens": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/TokenPattern"
+              }
+            },
+            "roles": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/TokenRole"
+              }
+            },
+            "types": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/DtcgType"
+              }
+            },
+            "eroj": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/Name"
+              },
+              "uniqueItems": true
+            }
+          },
+          "minProperties": 1,
+          "additionalProperties": false
+        },
+        "TextTransform": {
+          "description": "Text transformation of a typography role (Spec 001, D-11). DTCG has no field for it; the values are platform-neutral.",
+          "type": "string",
+          "enum": [
+            "none",
+            "uppercase",
+            "lowercase",
+            "capitalize"
+          ]
+        },
+        "AgordoFestgelegtWert": {
+          "description": "What the brand sets for one token in one set: a DTCG value (`wert`) or the name of a token to alias (`alias`), not both.",
+          "type": "object",
+          "properties": {
+            "wert": {},
+            "alias": {
+              "$ref": "#/$defs/TokenName"
+            }
+          },
+          "additionalProperties": false,
+          "minProperties": 1,
+          "maxProperties": 1
+        },
+        "TokenPattern": {
+          "type": "string",
+          "pattern": "^(?:[a-z0-9]+|\\*)(?:\\.(?:[a-z0-9]+|\\*))*(?:\\.\\*\\*)?$"
+        },
+        "TokenRole": {
+          "type": "string",
+          "enum": [
+            "palette",
+            "foreground",
+            "background",
+            "border",
+            "focus",
+            "shadow",
+            "backdrop",
+            "disabled",
+            "decorative",
+            "ero"
+          ]
+        },
+        "DtcgType": {
+          "type": "string",
+          "enum": [
+            "color",
+            "dimension",
+            "fontFamily",
+            "fontWeight",
+            "duration",
+            "cubicBezier",
+            "number",
+            "strokeStyle",
+            "shadow",
+            "typography",
+            "border",
+            "gradient",
+            "transition"
+          ]
+        }
+      }
+    }
+  },
+  "save_agordo": {
+    "description": "Saves an Agordo as a JSON file (Spec 019 ③, G6, W-25, W-26) — the one tool that writes, and only with confirm: true. Without confirm it answers with what it would write and writes nothing; ask the person before you confirm. It writes only inside the server's working directory, only *.json, and never over a file that is no Agordo. Every save appends an entry to the Agordo's historio (date, the wish or „Hand“, the diff of the sliders). A fixed rule locks the save like the Werkstatt's export; an adjustable one needs a Jugxo in the Agordo. Not available over HTTP.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "agordo": {
+          "$ref": "#/$defs/Agordo"
+        },
+        "pfad": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The file, relative to the server's working directory (e.g. marken/provo-ruhig.json)."
+        },
+        "confirm": {
+          "type": "boolean",
+          "description": "true writes; absent or false only shows what would be written."
+        },
+        "wunsch": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The wish the change came from, for the historio entry; absent: „Hand“."
+        },
+        "datum": {
+          "type": "string",
+          "format": "date",
+          "description": "The date of the historio entry; absent: today."
+        }
+      },
+      "required": [
+        "agordo",
+        "pfad"
+      ],
+      "title": "save_agordo input",
+      "description": "Saves an Agordo as a JSON file (Spec 019 ③, G6, W-25, W-26) — the one tool that writes, and only with confirm: true. Without confirm it answers with what it would write and writes nothing; ask the person before you confirm. It writes only inside the server's working directory, only *.json, and never over a file that is no Agordo. Every save appends an entry to the Agordo's historio (date, the wish or „Hand“, the diff of the sliders). A fixed rule locks the save like the Werkstatt's export; an adjustable one needs a Jugxo in the Agordo. Not available over HTTP.",
+      "additionalProperties": false,
+      "$defs": {
+        "Agordo": {
+          "description": "The recipe of a brand for the Agordilo (Spec 016, G4; Spec 019, G2): a lead colour, an optional second colour (zweitfarbe, Spec 036 V-2), optional status colours, the tint of the neutrals, three sliders and font families, and the sliders of form, space, type and icon weight (stage 2), each on the structure of the Vortaro. The same Agordo derives the same Aspekto, byte for byte. owner and license fill aspekto.json; aspiroj are the brand's own goals, checked only when named; jugxoj record deviations from adjustable rules.",
+          "type": "object",
+          "properties": {
+            "name": {
+              "$ref": "#/$defs/Name"
+            },
+            "owner": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "license": {
+              "$ref": "#/$defs/License"
+            },
+            "leitfarbe": {
+              "$ref": "#/$defs/AgordoColor"
+            },
+            "zweitfarbe": {
+              "$ref": "#/$defs/AgordoZweitfarbe"
+            },
+            "zusatzfarben": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "$ref": "#/$defs/AgordoColor"
+                },
+                "warning": {
+                  "$ref": "#/$defs/AgordoColor"
+                },
+                "danger": {
+                  "$ref": "#/$defs/AgordoColor"
+                },
+                "info": {
+                  "$ref": "#/$defs/AgordoColor"
+                }
+              },
+              "additionalProperties": false
+            },
+            "neutral": {
+              "type": "object",
+              "properties": {
+                "toenung": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            "regler": {
+              "type": "object",
+              "properties": {
+                "helligkeit": {
+                  "type": "number",
+                  "minimum": -1,
+                  "maximum": 1
+                },
+                "kontrast": {
+                  "type": "number",
+                  "minimum": -1,
+                  "maximum": 1
+                },
+                "saettigung": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2
+                }
+              },
+              "additionalProperties": false
+            },
+            "schriften": {
+              "type": "object",
+              "properties": {
+                "display": {
+                  "$ref": "#/$defs/Fonto"
+                },
+                "body": {
+                  "$ref": "#/$defs/Fonto"
+                },
+                "code": {
+                  "$ref": "#/$defs/Fonto"
+                }
+              },
+              "additionalProperties": false
+            },
+            "form": {
+              "description": "Form (Spec 019, G2): factors on the structure of the Vortaro, 1 = the structure. radius multiplies radius.small … xlarge (none and full stay), rahmen border.width.* (never below 1 px, the focus ring keeps the reference's width), schatten offset and blur of elevation.shadow.* and the opacity of color.shadow.*.",
+              "type": "object",
+              "properties": {
+                "radius": {
+                  "description": "Factor on radius.small, medium, large and xlarge; 1 = the structure.",
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2
+                },
+                "rahmen": {
+                  "description": "Factor on border.width.*; 1 = the structure.",
+                  "type": "number",
+                  "minimum": 0.5,
+                  "maximum": 2
+                },
+                "schatten": {
+                  "description": "Factor on the offsets and blur of elevation.shadow.* and the opacity of color.shadow.*; 1 = the structure, 0 = no shadow.",
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2
+                }
+              },
+              "additionalProperties": false
+            },
+            "raum": {
+              "description": "Space (Spec 019, G2): abstand multiplies spacing.scale.* (the named spacing.* and the density modes follow), hoehe the steps of size.scale.* the controls use (size.control.*), never below size.target.min.",
+              "type": "object",
+              "properties": {
+                "abstand": {
+                  "description": "Factor on spacing.scale.*; 1 = the structure.",
+                  "type": "number",
+                  "minimum": 0.75,
+                  "maximum": 1.5
+                },
+                "hoehe": {
+                  "description": "Factor on the heights of size.control.*; 1 = the structure.",
+                  "type": "number",
+                  "minimum": 0.85,
+                  "maximum": 1.25
+                }
+              },
+              "additionalProperties": false
+            },
+            "schrift": {
+              "description": "Type (Spec 019, G2): groesse shifts every font.size.* by up to two steps of the scale, skala sets the ratio of neighbouring steps of font.size.scale (the structure's median ratio is the standard), gewicht moves font.weight.* by up to two cuts. The families are schriften (stage 1).",
+              "type": "object",
+              "properties": {
+                "groesse": {
+                  "description": "−1 … 1: every font size by up to two steps of the scale smaller or larger; 0 = the structure.",
+                  "type": "number",
+                  "minimum": -1,
+                  "maximum": 1
+                },
+                "skala": {
+                  "description": "The ratio of neighbouring steps of font.size.scale; the body text keeps its size.",
+                  "type": "number",
+                  "minimum": 1.125,
+                  "maximum": 1.25
+                },
+                "gewicht": {
+                  "description": "−1 … 1: font.weight.* by up to two cuts lighter or heavier, never outside the lightest and the heaviest weight of the structure; 0 = the structure.",
+                  "type": "number",
+                  "minimum": -1,
+                  "maximum": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            "ikono": {
+              "description": "Icons (Spec 019, G2, E6): the Phosphor weight the Aspekto draws the Ikonaro in. A weight is derived only where every name of the Ikonaro has a glyph in it, with its provenance.",
+              "type": "object",
+              "properties": {
+                "gewicht": {
+                  "description": "A Phosphor weight; regular is the reference's own.",
+                  "type": "string",
+                  "enum": [
+                    "thin",
+                    "light",
+                    "regular",
+                    "bold",
+                    "fill",
+                    "duotone"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            },
+            "ziele": {
+              "$ref": "#/$defs/AgordoZieloj"
+            },
+            "aspiroj": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/AspektoAspiro"
+              }
+            },
+            "jugxoj": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/AgordoJugxo"
+              }
+            },
+            "festgelegt": {
+              "description": "Values the Studio sets (Spec 024 Runde 1, S-2): token name → what the brand sets instead of what the derivation would write. `wert` is a DTCG value for the main set, `alias` the name of a token the brand re-points to (an alias counts as an assignment, Art. IV), `modoj` the same per Dimensio condition (`color-scheme=dark`, `viewport=compact`), written into the brand's conjunction set of that condition. Schnellstart and Studio work on the same data.",
+              "type": "object",
+              "propertyNames": {
+                "$ref": "#/$defs/TokenName"
+              },
+              "additionalProperties": {
+                "$ref": "#/$defs/AgordoFestgelegt"
+              }
+            },
+            "etikedoj": {
+              "description": "Display names of the brand (Spec 024, § 3 B): `marko` for the brand as written, a palette (`color.palette.accent`) or a role (`color.text.default`) → its name as the Studio, the Vitrino and the Guidelines show it. Identifiers in every Projekcio stay canonical (Art. II).",
+              "type": "object",
+              "propertyNames": {
+                "pattern": "^[a-z0-9]+(\\.[a-z0-9-]+)*$"
+              },
+              "additionalProperties": {
+                "$ref": "#/$defs/NonEmptyText"
+              }
+            },
+            "historio": {
+              "description": "The history of the Agordo (Spec 019 ③, W-26): every save by save_agordo appends an entry. Part of the Agordo, so it travels with the file.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/AgordoHistorio"
+              }
+            }
+          },
+          "required": [
+            "name",
+            "leitfarbe"
+          ],
+          "additionalProperties": false
+        },
+        "Name": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "NonEmptyText": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "License": {
+          "description": "An SPDX license expression, or `proprietary` for rights that are not openly licensed.",
+          "type": "string",
+          "pattern": "^(proprietary|[A-Za-z0-9][A-Za-z0-9.+-]*( (AND|OR|WITH) [A-Za-z0-9][A-Za-z0-9.+-]*)*)$"
+        },
+        "AgordoColor": {
+          "description": "A colour of an Agordo (Spec 016, G4): hex with three or six digits, or CSS oklch() with lightness as a number (0…1) or a percentage, chroma and hue as numbers.",
+          "type": "string",
+          "pattern": "^(#[0-9a-fA-F]{3}|#[0-9a-fA-F]{6}|oklch\\(\\s*[0-9]*\\.?[0-9]+%?\\s+[0-9]*\\.?[0-9]+\\s+[0-9]*\\.?[0-9]+\\s*\\))$"
+        },
+        "AgordoZweitfarbe": {
+          "description": "The second colour of a brand (Spec 036, Befund 2.2, V-2): a colour of the same shape as leitfarbe, from which the Agordilo derives the palette color.palette.sekundo at the contrast targets of twelve steps of the accent ramp (50 to 950, not 25, 850 and 975); the roles color.sekundo.* (highlight surface, illustration, badge, chart) take it, never an action, a link or the focus (Regulo sekundo-not-action). Absent means no Zweitfarbe: the palette is the neutral ramp. herkunft says where it was found, absent when it was entered by hand.",
+          "type": "object",
+          "properties": {
+            "farbe": {
+              "$ref": "#/$defs/AgordoColor"
+            },
+            "herkunft": {
+              "$ref": "#/$defs/AgordoHerkunft"
+            }
+          },
+          "required": [
+            "farbe"
+          ],
+          "additionalProperties": false
+        },
+        "Fonto": {
+          "description": "A font family an Aspekto uses. Font files never enter the core repository; the fallback stack lives only in the fontFamily token value.",
+          "type": "object",
+          "properties": {
+            "family": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "license": {
+              "$ref": "#/$defs/License"
+            },
+            "source": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "redistributable": {
+              "type": "boolean"
+            },
+            "scripts": {
+              "description": "Writing systems the family covers, as ISO 15924 codes (Latn, Cyrl, Arab, Hans, …); at least one (Spec 001, T018b).",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Iso15924"
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "category": {
+              "description": "The kind of the family as the font catalogue names it (Spec 036 Teil 5, Spec 029 ①-7): the Agordilo takes the generic fallback of the family from it; absent, the fallback of the structure stays.",
+              "enum": [
+                "sans-serif",
+                "serif",
+                "monospace",
+                "display",
+                "handwriting",
+                "other",
+                "icons"
+              ]
+            },
+            "weights": {
+              "description": "The weights the family has (Spec 036 Teil 5, Spec 029 B-2): every typography role in the family takes the nearest of them; absent, every weight of the structure stays.",
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "family",
+            "license",
+            "source",
+            "redistributable",
+            "scripts"
+          ],
+          "additionalProperties": false
+        },
+        "AgordoZieloj": {
+          "description": "Contrast targets a brand overrides per palette step (Spec 016 ②, G7): keyed by palette.step, the WCAG 2.x contrast the step should reach against the reference surface of the light mode (hell: neutral.0) or the dark mode (dunkel: neutral.1000). An override is a target, never a free colour value; the floors of kontrastSojloj still hold.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^(neutral|accent|success|warning|danger|info)\\.[0-9]+$"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "hell": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 21
+              },
+              "dunkel": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 21
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "AspektoAspiro": {
+          "description": "A design goal one Aspekto sets itself (Spec 004, plan D-03): the same measurement as a Regulo, its own bound and its own reason, checked only for this Aspekto. Reguloj enforce accessibility and structure for every brand; an Aspiro is taste, and taste belongs to the brand.",
+          "type": "object",
+          "properties": {
+            "metriko": {
+              "type": "string",
+              "enum": [
+                "wcag2-reserve",
+                "oklch-l-extreme",
+                "oklch-l-step",
+                "oklch-l-step-consistency",
+                "oklch-l-align",
+                "type-scale-ratio",
+                "type-scale-consistency",
+                "dimensio-kovrado"
+              ]
+            },
+            "min": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "appliesTo": {
+              "$ref": "#/$defs/ReguloAppliesTo"
+            },
+            "dimensio": {
+              "$ref": "#/$defs/Name"
+            },
+            "valoro": {
+              "$ref": "#/$defs/Name"
+            },
+            "kialo": {
+              "$ref": "#/$defs/NonEmptyText"
+            }
+          },
+          "required": [
+            "metriko",
+            "kialo"
+          ],
+          "anyOf": [
+            {
+              "properties": {
+                "min": true
+              },
+              "required": [
+                "min"
+              ]
+            },
+            {
+              "properties": {
+                "max": true
+              },
+              "required": [
+                "max"
+              ]
+            }
+          ],
+          "additionalProperties": false
+        },
+        "AgordoJugxo": {
+          "description": "A deviation an Agordo records for an adjustable rule (Spec 016, G6, D-5): the Regulo by name, the reason, the date and the name of the person deciding. The Agordilo writes it into the package as a Jugxo; a fixed rule cannot be deviated from.",
+          "type": "object",
+          "properties": {
+            "regulo": {
+              "$ref": "#/$defs/Name"
+            },
+            "kialo": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "date": {
+              "type": "string",
+              "format": "date"
+            },
+            "name": {
+              "$ref": "#/$defs/NonEmptyText"
+            }
+          },
+          "required": [
+            "regulo",
+            "kialo",
+            "date",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        "TokenName": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(\\.[a-z0-9]+)*$"
+        },
+        "AgordoFestgelegt": {
+          "description": "A set token of the Studio (Spec 024): the value or alias for the main set of the brand (an alias wins over a value), per Dimensio condition for the brand's conjunction set of that condition, and for a typography role its case (`schreibweise`, Runde 2: the text transformation the role carries beside its value).",
+          "type": "object",
+          "properties": {
+            "wert": {},
+            "alias": {
+              "$ref": "#/$defs/TokenName"
+            },
+            "schreibweise": {
+              "$ref": "#/$defs/TextTransform"
+            },
+            "modoj": {
+              "type": "object",
+              "propertyNames": {
+                "pattern": "^[a-z-]+=[a-z0-9-]+$"
+              },
+              "additionalProperties": {
+                "$ref": "#/$defs/AgordoFestgelegtWert"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "AgordoHistorio": {
+          "description": "One save of an Agordo (Spec 019 ③, W-26): the date, the wish the movement came from (or Hand for a change by hand) and the sliders that moved, before → after.",
+          "type": "object",
+          "properties": {
+            "datum": {
+              "type": "string",
+              "format": "date"
+            },
+            "wunsch": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "diff": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "regler": {
+                    "$ref": "#/$defs/NonEmptyText"
+                  },
+                  "vorher": {
+                    "oneOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "nachher": {
+                    "oneOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "regler",
+                  "vorher",
+                  "nachher"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "datum",
+            "wunsch",
+            "diff"
+          ],
+          "additionalProperties": false
+        },
+        "AgordoHerkunft": {
+          "description": "Where a value of the Agordo was found in the material of the brand (Spec 036, D-03): a picture, a PDF or a page (link), the file or the address, the feature it was read from in plain words, and the share of the found colour in per cent where one was measured.",
+          "type": "object",
+          "properties": {
+            "quelle": {
+              "type": "string",
+              "enum": [
+                "bild",
+                "pdf",
+                "link"
+              ]
+            },
+            "datei": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "adresse": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "merkmal": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "anteil": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "required": [
+            "quelle",
+            "merkmal"
+          ],
+          "additionalProperties": false
+        },
+        "Iso15924": {
+          "description": "An ISO 15924 script code: four letters, the first uppercase (e.g. Latn, Cyrl, Hans).",
+          "type": "string",
+          "pattern": "^[A-Z][a-z]{3}$"
+        },
+        "ReguloAppliesTo": {
+          "description": "Which tokens the Regulo governs; explain finds a token's Reguloj only through this field (Spec 002, D-02). A token matches when any criterion matches. Token patterns may use * for one segment and a trailing ** for one or more.",
+          "type": "object",
+          "properties": {
+            "tokens": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/TokenPattern"
+              }
+            },
+            "roles": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/TokenRole"
+              }
+            },
+            "types": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/DtcgType"
+              }
+            },
+            "eroj": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/Name"
+              },
+              "uniqueItems": true
+            }
+          },
+          "minProperties": 1,
+          "additionalProperties": false
+        },
+        "TextTransform": {
+          "description": "Text transformation of a typography role (Spec 001, D-11). DTCG has no field for it; the values are platform-neutral.",
+          "type": "string",
+          "enum": [
+            "none",
+            "uppercase",
+            "lowercase",
+            "capitalize"
+          ]
+        },
+        "AgordoFestgelegtWert": {
+          "description": "What the brand sets for one token in one set: a DTCG value (`wert`) or the name of a token to alias (`alias`), not both.",
+          "type": "object",
+          "properties": {
+            "wert": {},
+            "alias": {
+              "$ref": "#/$defs/TokenName"
+            }
+          },
+          "additionalProperties": false,
+          "minProperties": 1,
+          "maxProperties": 1
+        },
+        "TokenPattern": {
+          "type": "string",
+          "pattern": "^(?:[a-z0-9]+|\\*)(?:\\.(?:[a-z0-9]+|\\*))*(?:\\.\\*\\*)?$"
+        },
+        "TokenRole": {
+          "type": "string",
+          "enum": [
+            "palette",
+            "foreground",
+            "background",
+            "border",
+            "focus",
+            "shadow",
+            "backdrop",
+            "disabled",
+            "decorative",
+            "ero"
+          ]
+        },
+        "DtcgType": {
+          "type": "string",
+          "enum": [
+            "color",
+            "dimension",
+            "fontFamily",
+            "fontWeight",
+            "duration",
+            "cubicBezier",
+            "number",
+            "strokeStyle",
+            "shadow",
+            "typography",
+            "border",
+            "gradient",
+            "transition"
+          ]
+        }
+      }
+    }
+  },
+  "list_sxablonoj": {
+    "description": "Every Sxablono of the served Modelo (Spec 020): the patterns of Eroj — the frame of an application, a page — with their kind and their regions; list_eroj lists the Eroj. With lingvo, every Sxablono names its display name as label beside its name (Spec 026 ②).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "lingvo": {
+          "description": "The language of the display names (Spec 026 ②): every entry names its label beside its name.",
+          "enum": [
+            "en",
+            "de"
+          ]
+        }
+      },
+      "title": "list_sxablonoj input",
+      "description": "Every Sxablono of the served Modelo (Spec 020): the patterns of Eroj — the frame of an application, a page — with their kind and their regions; list_eroj lists the Eroj. With lingvo, every Sxablono names its display name as label beside its name (Spec 026 ②).",
+      "additionalProperties": false
+    }
+  },
+  "get_sxablono": {
+    "description": "One Sxablono (Spec 020) with its Skemo — regions with what each accepts, how many, the props its children need and whether it is a live region; landmarks, skip link and focus target; the tokens of its layout — and its Uzo: purpose, what to use instead, boundaries and composition, each with its kialo. Name it by name or by ID. With brief: true only what building it needs, generated and under a measured size ceiling. Give exactly one of: `name` or `id`.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^sxa_"
+        },
+        "brief": {
+          "description": "Only the brief answer: sxablono, kind, purpose, regions (without their descriptions), props, a11y, instead and boundary without kialo. Default false.",
+          "type": "boolean"
+        },
+        "lingvo": {
+          "description": "The language of the texts of the answer (Nachlese 8 ③): \"de\" gives the purpose, the kialoj and the Reguloj in German, from data/tradukoj.json; without it or with \"en\" English, the source. Names, cases and keywords stay.",
+          "enum": [
+            "en",
+            "de"
+          ]
+        }
+      },
+      "title": "get_sxablono input",
+      "description": "One Sxablono (Spec 020) with its Skemo — regions with what each accepts, how many, the props its children need and whether it is a live region; landmarks, skip link and focus target; the tokens of its layout — and its Uzo: purpose, what to use instead, boundaries and composition, each with its kialo. Name it by name or by ID. With brief: true only what building it needs, generated and under a measured size ceiling. Give exactly one of: `name` or `id`.",
+      "additionalProperties": false
+    }
+  }
+}

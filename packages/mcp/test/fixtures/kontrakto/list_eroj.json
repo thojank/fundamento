@@ -1,0 +1,16 @@
+[
+  {
+    "fall": "ohne-lingvo",
+    "eingabe": {},
+    "sha256": "aa26c330b7aecdd0f234bfc0ee1338e4a5774157adc62008cb2d657abdb8bee2",
+    "bytes": 16116
+  },
+  {
+    "fall": "lingvo-de",
+    "eingabe": {
+      "lingvo": "de"
+    },
+    "sha256": "8d93ce39ca77d4a46ce03dad703451e71ab2ac704cfc67fe6a13f4c16ac90e1d",
+    "bytes": 17007
+  }
+]

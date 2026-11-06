@@ -1,0 +1,159 @@
+{
+  "fall": "ero-mit-slot-daten",
+  "facts": {
+    "lingvo": "de",
+    "bytes": 278,
+    "elements": [
+      {
+        "tag": "fm-kampo",
+        "attrs": {
+          "kind": "search",
+          "clearable": ""
+        },
+        "parent": -1,
+        "text": ""
+      },
+      {
+        "tag": "span",
+        "attrs": {
+          "slot": "label"
+        },
+        "parent": 0,
+        "text": "Suche"
+      },
+      {
+        "tag": "span",
+        "attrs": {
+          "slot": "help"
+        },
+        "parent": 0,
+        "text": "Name oder Nummer"
+      },
+      {
+        "tag": "fm-tabelo",
+        "attrs": {
+          "density": "comfortable"
+        },
+        "parent": -1,
+        "text": ""
+      },
+      {
+        "tag": "span",
+        "attrs": {
+          "slot": "caption"
+        },
+        "parent": 3,
+        "text": "Werkzeuge"
+      },
+      {
+        "tag": "div",
+        "attrs": {
+          "slot": "content"
+        },
+        "parent": 3,
+        "text": ""
+      },
+      {
+        "tag": "table",
+        "attrs": {},
+        "parent": 5,
+        "text": ""
+      },
+      {
+        "tag": "tr",
+        "attrs": {},
+        "parent": 6,
+        "text": ""
+      },
+      {
+        "tag": "td",
+        "attrs": {},
+        "parent": 7,
+        "text": "Hammer"
+      },
+      {
+        "tag": "td",
+        "attrs": {},
+        "parent": 7,
+        "text": "frei"
+      }
+    ],
+    "aria": [],
+    "console": [],
+    "renders": []
+  },
+  "tasko": "werkzeugliste",
+  "expected": {
+    "K3": 0.5,
+    "reguloGaps": [
+      {
+        "kind": "regulo",
+        "key": "field-label-visible"
+      }
+    ],
+    "instancoj": [
+      {
+        "ero": "kampo",
+        "props": {
+          "kind": "search",
+          "clearable": true
+        },
+        "texts": {
+          "label": "Suche",
+          "help": "Name oder Nummer"
+        },
+        "slots": {
+          "label": [
+            "text"
+          ],
+          "help": [
+            "text"
+          ]
+        },
+        "lingvo": "de"
+      },
+      {
+        "ero": "tabelo",
+        "props": {
+          "density": "comfortable"
+        },
+        "texts": {
+          "caption": "Werkzeuge",
+          "content": "Hammer frei"
+        },
+        "slots": {
+          "caption": [
+            "text"
+          ],
+          "content": [
+            "text"
+          ]
+        },
+        "lingvo": "de"
+      }
+    ],
+    "urteil": {
+      "instances": 2,
+      "valid": false,
+      "violations": [
+        {
+          "instance": [
+            0
+          ],
+          "issue": {
+            "rule": "field-label-visible",
+            "severity": "error",
+            "path": "instances#/0",
+            "message": "Instance 0 of kampo has no visible label.",
+            "suggestion": "Give the label as the text of the element or as label=\"…\" (both are shown, Nachlese 12); a placeholder disappears while typing and names nothing afterwards.",
+            "regulo": {
+              "id": "reg_01M4S1ZR7F1KE1AV1C7X5W8GD5",
+              "name": "field-label-visible",
+              "kialo": "WCAG 3.3.2 (Labels or Instructions): a placeholder disappears while typing, and a label only a screen reader hears does not help the sighted person who finds the field half filled."
+            }
+          }
+        }
+      ]
+    }
+  }
+}

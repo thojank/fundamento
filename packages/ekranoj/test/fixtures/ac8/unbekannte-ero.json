@@ -1,0 +1,18 @@
+{
+  "fall": "unbekannte-ero",
+  "fragment": "<fm-wolkenschaukel>Schaukeln</fm-wolkenschaukel>\n<fm-butono emphasis=\"medium\">Weiter</fm-butono>",
+  "lingvo": "de",
+  "expected": {
+    "instancoj": [
+      {
+        "ero": "butono",
+        "props": {
+          "emphasis": "medium"
+        },
+        "label": "Weiter",
+        "lingvo": "de"
+      }
+    ],
+    "malobservoj": []
+  }
+}

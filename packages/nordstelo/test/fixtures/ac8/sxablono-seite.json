@@ -1,0 +1,218 @@
+{
+  "fall": "sxablono-seite",
+  "facts": {
+    "lingvo": "de",
+    "bytes": 458,
+    "elements": [
+      {
+        "tag": "fm-sxelo",
+        "attrs": {},
+        "parent": -1,
+        "text": ""
+      },
+      {
+        "tag": "span",
+        "attrs": {
+          "slot": "brand"
+        },
+        "parent": 0,
+        "text": "Beispielseite"
+      },
+      {
+        "tag": "fm-navigado",
+        "attrs": {
+          "slot": "nav",
+          "label": "Hauptnavigation"
+        },
+        "parent": 0,
+        "text": ""
+      },
+      {
+        "tag": "fm-ligilo",
+        "attrs": {
+          "to": "liste.html"
+        },
+        "parent": 2,
+        "text": "Liste"
+      },
+      {
+        "tag": "fm-pagxo",
+        "attrs": {},
+        "parent": 0,
+        "text": ""
+      },
+      {
+        "tag": "fm-titolo",
+        "attrs": {
+          "level": "1",
+          "slot": "title"
+        },
+        "parent": 4,
+        "text": "Übersicht"
+      },
+      {
+        "tag": "div",
+        "attrs": {
+          "slot": "actions"
+        },
+        "parent": 4,
+        "text": ""
+      },
+      {
+        "tag": "fm-butono",
+        "attrs": {
+          "emphasis": "high"
+        },
+        "parent": 6,
+        "text": "Neu"
+      },
+      {
+        "tag": "fm-butono",
+        "attrs": {
+          "emphasis": "high"
+        },
+        "parent": 6,
+        "text": "Export"
+      },
+      {
+        "tag": "section",
+        "attrs": {
+          "slot": "sections"
+        },
+        "parent": 4,
+        "text": ""
+      },
+      {
+        "tag": "fm-teksto",
+        "attrs": {},
+        "parent": 9,
+        "text": "Inhalt der Seite"
+      }
+    ],
+    "aria": [],
+    "console": [],
+    "renders": []
+  },
+  "tasko": "app-rahmen",
+  "expected": {
+    "K3": 0.8333,
+    "reguloGaps": [
+      {
+        "kind": "regulo",
+        "key": "one-primary-per-container"
+      }
+    ],
+    "instancoj": [
+      {
+        "ero": "navigado",
+        "props": {
+          "label": "Hauptnavigation"
+        },
+        "label": "Liste",
+        "container": "sxelo-1",
+        "lingvo": "de"
+      },
+      {
+        "ero": "ligilo",
+        "props": {
+          "to": "liste.html"
+        },
+        "label": "Liste",
+        "container": "navigado-2",
+        "lingvo": "de"
+      },
+      {
+        "ero": "titolo",
+        "props": {
+          "level": "1"
+        },
+        "label": "Übersicht",
+        "container": "pagxo-3",
+        "lingvo": "de"
+      },
+      {
+        "ero": "butono",
+        "props": {
+          "emphasis": "high"
+        },
+        "label": "Neu",
+        "container": "pagxo-3",
+        "lingvo": "de"
+      },
+      {
+        "ero": "butono",
+        "props": {
+          "emphasis": "high"
+        },
+        "label": "Export",
+        "container": "pagxo-3",
+        "lingvo": "de"
+      },
+      {
+        "ero": "teksto",
+        "props": {},
+        "label": "Inhalt der Seite",
+        "container": "pagxo-3",
+        "lingvo": "de"
+      }
+    ],
+    "urteil": {
+      "instances": 6,
+      "valid": false,
+      "violations": [
+        {
+          "instance": [
+            3
+          ],
+          "issue": {
+            "rule": "label-names-action",
+            "severity": "warning",
+            "path": "instances#/3",
+            "message": "Instance 3 of butono says \"Neu\" (slot:label): it names no verb of a goal of the Ero (nothing says what happens on activation).",
+            "suggestion": "Write the text as the approved example does, e.g. \"Speichern\".",
+            "regulo": {
+              "id": "reg_01M4RPB19HEMSFTRDZNPTHJV7P",
+              "name": "label-names-action",
+              "kialo": "A person decides from the label alone what happens on activation. A verb says it; a noun or a mood makes them guess."
+            }
+          }
+        },
+        {
+          "instance": [
+            3,
+            4
+          ],
+          "issue": {
+            "rule": "one-primary-per-container",
+            "severity": "error",
+            "path": "instances#/3",
+            "message": "2 instances with emphasis=high in container pagxo-3 (instances 3, 4).",
+            "suggestion": "Keep one high-emphasis action per container; give the others emphasis=medium or low.",
+            "regulo": {
+              "id": "reg_01M2XMV80DG7JCJDTZGE66MGHW",
+              "name": "one-primary-per-container",
+              "kialo": "Two equal calls to action move the decision onto the user; one primary action makes the next step obvious, and every other action steps back as secondary or tertiary."
+            }
+          }
+        },
+        {
+          "instance": [
+            4
+          ],
+          "issue": {
+            "rule": "label-names-action",
+            "severity": "warning",
+            "path": "instances#/4",
+            "message": "Instance 4 of butono says \"Export\" (slot:label): it names no verb of a goal of the Ero (nothing says what happens on activation).",
+            "suggestion": "Write the text as the approved example does, e.g. \"Speichern\".",
+            "regulo": {
+              "id": "reg_01M4RPB19HEMSFTRDZNPTHJV7P",
+              "name": "label-names-action",
+              "kialo": "A person decides from the label alone what happens on activation. A verb says it; a noun or a mood makes them guess."
+            }
+          }
+        }
+      ]
+    }
+  }
+}

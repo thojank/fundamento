@@ -1,0 +1,164 @@
+{
+  "fall": "regelverstoss",
+  "facts": {
+    "lingvo": "de",
+    "bytes": 221,
+    "elements": [
+      {
+        "tag": "fm-dialogo",
+        "attrs": {
+          "open": ""
+        },
+        "parent": -1,
+        "text": ""
+      },
+      {
+        "tag": "span",
+        "attrs": {
+          "slot": "heading"
+        },
+        "parent": 0,
+        "text": "Eintrag entfernen?"
+      },
+      {
+        "tag": "div",
+        "attrs": {
+          "slot": "actions"
+        },
+        "parent": 0,
+        "text": ""
+      },
+      {
+        "tag": "fm-butono",
+        "attrs": {
+          "emphasis": "high",
+          "intent": "danger"
+        },
+        "parent": 2,
+        "text": "Entfernen"
+      },
+      {
+        "tag": "fm-butono",
+        "attrs": {
+          "emphasis": "high"
+        },
+        "parent": 2,
+        "text": "Abbrechen"
+      }
+    ],
+    "aria": [],
+    "console": [],
+    "renders": []
+  },
+  "tasko": "loeschen-bestaetigen",
+  "expected": {
+    "K3": 0,
+    "reguloGaps": [
+      {
+        "kind": "regulo",
+        "key": "destructive-label-names-object"
+      },
+      {
+        "kind": "regulo",
+        "key": "one-primary-per-container"
+      },
+      {
+        "kind": "regulo",
+        "key": "uzo-slot-accepts"
+      }
+    ],
+    "instancoj": [
+      {
+        "ero": "dialogo",
+        "props": {
+          "open": true
+        },
+        "texts": {
+          "heading": "Eintrag entfernen?",
+          "actions": "Entfernen Abbrechen"
+        },
+        "slots": {
+          "heading": [
+            "text"
+          ],
+          "actions": [
+            "text"
+          ]
+        },
+        "lingvo": "de"
+      },
+      {
+        "ero": "butono",
+        "props": {
+          "emphasis": "high",
+          "intent": "danger"
+        },
+        "label": "Entfernen",
+        "container": "dialogo-1",
+        "lingvo": "de"
+      },
+      {
+        "ero": "butono",
+        "props": {
+          "emphasis": "high"
+        },
+        "label": "Abbrechen",
+        "container": "dialogo-1",
+        "lingvo": "de"
+      }
+    ],
+    "urteil": {
+      "instances": 3,
+      "valid": false,
+      "violations": [
+        {
+          "instance": [
+            0
+          ],
+          "issue": {
+            "rule": "uzo-slot-accepts",
+            "severity": "error",
+            "path": "instances#/0",
+            "message": "Instance 0 of dialogo holds text in the slot actions, which accepts butono.",
+            "suggestion": "Put butono in the slot actions."
+          }
+        },
+        {
+          "instance": [
+            1
+          ],
+          "issue": {
+            "rule": "destructive-label-names-object",
+            "severity": "error",
+            "path": "instances#/1",
+            "message": "Instance 1 of butono says \"Entfernen\" (slot:label): it names the verb \"entfernen\" but not what it acts on.",
+            "suggestion": "Write the text as the approved example does, e.g. \"Projekt löschen\".",
+            "regulo": {
+              "id": "reg_01M4RPB19HEMSFTRDZNPTHJV7Q",
+              "name": "destructive-label-names-object",
+              "kialo": "\"Löschen\" alone does not say whether the draft, the project or the account goes. Only the object makes the consequence clear before it cannot be undone."
+            }
+          }
+        },
+        {
+          "instance": [
+            1,
+            2
+          ],
+          "issue": {
+            "rule": "one-primary-per-container",
+            "severity": "error",
+            "path": "instances#/1",
+            "message": "2 instances with emphasis=high in container dialogo-1 (instances 1, 2).",
+            "suggestion": "Keep one high-emphasis action per container; give the others emphasis=medium or low.",
+            "regulo": {
+              "id": "reg_01M2XMV80DG7JCJDTZGE66MGHW",
+              "name": "one-primary-per-container",
+              "kialo": "Two equal calls to action move the decision onto the user; one primary action makes the next step obvious, and every other action steps back as secondary or tertiary."
+            }
+          }
+        }
+      ]
+    }
+  }
+}

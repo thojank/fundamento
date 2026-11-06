@@ -1,0 +1,102 @@
+{
+  "fall": "sxablono-seite",
+  "fragment": "<fm-sxelo>\n  <span slot=\"brand\">Beispielseite</span>\n  <fm-navigado slot=\"nav\" label=\"Hauptnavigation\"><fm-ligilo to=\"liste.html\">Liste</fm-ligilo></fm-navigado>\n  <fm-pagxo>\n    <fm-titolo level=\"1\" slot=\"title\">Übersicht</fm-titolo>\n    <div slot=\"actions\"><fm-butono emphasis=\"high\">Neu</fm-butono><fm-butono emphasis=\"high\">Export</fm-butono></div>\n    <section slot=\"sections\"><fm-teksto>Inhalt der Seite</fm-teksto></section>\n  </fm-pagxo>\n</fm-sxelo>",
+  "lingvo": "de",
+  "expected": {
+    "instancoj": [
+      {
+        "ero": "navigado",
+        "props": {
+          "label": "Hauptnavigation"
+        },
+        "label": "Liste",
+        "container": "sxelo-1",
+        "lingvo": "de"
+      },
+      {
+        "ero": "ligilo",
+        "props": {
+          "to": "liste.html"
+        },
+        "label": "Liste",
+        "container": "navigado-2",
+        "lingvo": "de"
+      },
+      {
+        "ero": "titolo",
+        "props": {
+          "level": "1"
+        },
+        "label": "Übersicht",
+        "container": "pagxo-3",
+        "lingvo": "de"
+      },
+      {
+        "ero": "butono",
+        "props": {
+          "emphasis": "high"
+        },
+        "label": "Neu",
+        "container": "pagxo-3",
+        "lingvo": "de"
+      },
+      {
+        "ero": "butono",
+        "props": {
+          "emphasis": "high"
+        },
+        "label": "Export",
+        "container": "pagxo-3",
+        "lingvo": "de"
+      },
+      {
+        "ero": "teksto",
+        "props": {},
+        "label": "Inhalt der Seite",
+        "container": "pagxo-3",
+        "lingvo": "de"
+      }
+    ],
+    "malobservoj": [
+      {
+        "rule": "label-names-action",
+        "severity": "warning",
+        "path": "instances#/3",
+        "message": "Instance 3 of butono says \"Neu\" (slot:label): it names no verb of a goal of the Ero (nothing says what happens on activation).",
+        "suggestion": "Write the text as the approved example does, e.g. \"Speichern\".",
+        "regulo": {
+          "id": "reg_01M4RPB19HEMSFTRDZNPTHJV7P",
+          "name": "label-names-action",
+          "kialo": "A person decides from the label alone what happens on activation. A verb says it; a noun or a mood makes them guess."
+        },
+        "loko": "fm-butono „Neu“"
+      },
+      {
+        "rule": "one-primary-per-container",
+        "severity": "error",
+        "path": "instances#/3",
+        "message": "2 instances with emphasis=high in container pagxo-3 (instances 3, 4).",
+        "suggestion": "Keep one high-emphasis action per container; give the others emphasis=medium or low.",
+        "regulo": {
+          "id": "reg_01M2XMV80DG7JCJDTZGE66MGHW",
+          "name": "one-primary-per-container",
+          "kialo": "Two equal calls to action move the decision onto the user; one primary action makes the next step obvious, and every other action steps back as secondary or tertiary."
+        },
+        "loko": "fm-butono „Neu“, fm-butono „Export“"
+      },
+      {
+        "rule": "label-names-action",
+        "severity": "warning",
+        "path": "instances#/4",
+        "message": "Instance 4 of butono says \"Export\" (slot:label): it names no verb of a goal of the Ero (nothing says what happens on activation).",
+        "suggestion": "Write the text as the approved example does, e.g. \"Speichern\".",
+        "regulo": {
+          "id": "reg_01M4RPB19HEMSFTRDZNPTHJV7P",
+          "name": "label-names-action",
+          "kialo": "A person decides from the label alone what happens on activation. A verb says it; a noun or a mood makes them guess."
+        },
+        "loko": "fm-butono „Export“"
+      }
+    ]
+  }
+}

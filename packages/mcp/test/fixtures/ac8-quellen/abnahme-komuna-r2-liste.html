@@ -1,0 +1,47 @@
+<fm-pagxo>
+  <fm-titolo level="1" slot="title">Standards</fm-titolo>
+
+  <div slot="actions">
+    <fm-butono emphasis="high" intent="neutral">
+      <span slot="label">Neuen Standard erstellen</span>
+    </fm-butono>
+  </div>
+
+  <section slot="sections">
+    <fm-kampo kind="search" clearable>
+      <span slot="label">Suche</span>
+    </fm-kampo>
+
+    <fm-tabelo density="comfortable">
+      <span slot="caption">Standards</span>
+      <div slot="content">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Beschreibung</th>
+              <th>Aktionen</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Standard 1</td>
+              <td>Beschreibung des Standards 1</td>
+              <td>
+                <fm-menuo placement="block-end" label="Aktionen">
+                  <fm-ligilo to="detail.html" slot="items">
+                    <span slot="label">Details anzeigen</span>
+                  </fm-ligilo>
+                  <fm-apartigilo orientation="horizontal" slot="items"></fm-apartigilo>
+                  <fm-ligilo to="edit.html" slot="items">
+                    <span slot="label">Bearbeiten</span>
+                  </fm-ligilo>
+                </fm-menuo>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </fm-tabelo>
+  </section>
+</fm-pagxo>

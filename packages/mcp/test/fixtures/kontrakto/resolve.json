@@ -1,0 +1,32 @@
+[
+  {
+    "fall": "komuna-light",
+    "eingabe": {
+      "assignment": {
+        "aspekto": "komuna",
+        "color-scheme": "light"
+      },
+      "tokens": [
+        "color.text"
+      ]
+    },
+    "sha256": "e6806b4b4afccbe92780ec2bb2c2ee9160d09ab2c4aba907de0c25ee245a6bad",
+    "bytes": 1779,
+    "antwort": "{\"assignment\":{\"aspekto\":\"komuna\",\"viewport\":\"medium\",\"density\":\"default\",\"color-scheme\":\"light\",\"contrast\":\"default\",\"motion\":\"default\"},\"tokens\":{\"color.text.default\":{\"id\":\"tok_01M2VEEE0QJXF3E9TY0JX4XVBG\",\"type\":\"color\",\"value\":{\"colorSpace\":\"srgb\",\"components\":[0,0,0],\"hex\":\"#000000\"},\"origin\":{\"set\":\"core\",\"setId\":\"set_01M2VEEDW32MC4ZQPRN0GC9JRR\"},\"aliasChain\":[{\"token\":\"color.text.default\",\"set\":\"core\"},{\"token\":\"color.palette.neutral.1000\",\"set\":\"core\"}]},\"color.text.disabled\":{\"id\":\"tok_01M2W9400ZA1K81R0W23SG0XVR\",\"type\":\"color\",\"value\":{\"colorSpace\":\"srgb\",\"components\":[0.5686,0.5686,0.5686],\"hex\":\"#919191\"},\"origin\":{\"set\":\"core\",\"setId\":\"set_01M2VEEDW32MC4ZQPRN0GC9JRR\"},\"aliasChain\":[{\"token\":\"color.text.disabled\",\"set\":\"core\"},{\"token\":\"color.palette.neutral.400\",\"set\":\"core\"}]},\"color.text.inverse\":{\"id\":\"tok_01M2W9400ZA1K81R0W23SG0XVQ\",\"type\":\"color\",\"value\":{\"colorSpace\":\"srgb\",\"components\":[1,1,1],\"hex\":\"#ffffff\"},\"origin\":{\"set\":\"core\",\"setId\":\"set_01M2VEEDW32MC4ZQPRN0GC9JRR\"},\"aliasChain\":[{\"token\":\"color.text.inverse\",\"set\":\"core\"},{\"token\":\"color.palette.neutral.0\",\"set\":\"core\"}]},\"color.text.muted\":{\"id\":\"tok_01M2W9400ZA1K81R0W23SG0XVP\",\"type\":\"color\",\"value\":{\"colorSpace\":\"srgb\",\"components\":[0.2784,0.2784,0.2784],\"hex\":\"#474747\"},\"origin\":{\"set\":\"core\",\"setId\":\"set_01M2VEEDW32MC4ZQPRN0GC9JRR\"},\"aliasChain\":[{\"token\":\"color.text.muted\",\"set\":\"core\"},{\"token\":\"color.palette.neutral.700\",\"set\":\"core\"}]},\"color.text.subtle\":{\"id\":\"tok_01M2W9400ZA1K81R0W23SG0XVN\",\"type\":\"color\",\"value\":{\"colorSpace\":\"srgb\",\"components\":[0.1882,0.1882,0.1882],\"hex\":\"#303030\"},\"origin\":{\"set\":\"core\",\"setId\":\"set_01M2VEEDW32MC4ZQPRN0GC9JRR\"},\"aliasChain\":[{\"token\":\"color.text.subtle\",\"set\":\"core\"},{\"token\":\"color.palette.neutral.800\",\"set\":\"core\"}]}}}"
+  },
+  {
+    "fall": "komuna-dark",
+    "eingabe": {
+      "assignment": {
+        "aspekto": "komuna",
+        "color-scheme": "dark"
+      },
+      "tokens": [
+        "color.text"
+      ]
+    },
+    "sha256": "c0a62a1af4738a08d5095c336a5e2ac017213401befb4cf83faec4daf0d09ec1",
+    "bytes": 2311,
+    "antwort": "{\"assignment\":{\"aspekto\":\"komuna\",\"viewport\":\"medium\",\"density\":\"default\",\"color-scheme\":\"dark\",\"contrast\":\"default\",\"motion\":\"default\"},\"tokens\":{\"color.text.default\":{\"id\":\"tok_01M2VEEE0QJXF3E9TY0JX4XVBG\",\"type\":\"color\",\"value\":{\"colorSpace\":\"srgb\",\"components\":[0.9725,0.9725,0.9725],\"hex\":\"#f8f8f8\"},\"origin\":{\"set\":\"aspekto/komuna+color-scheme/dark\",\"setId\":\"set_01M2VEEDW45A0B9Q4GQ465NCHN\",\"package\":\"@fundamento/aspekto-komuna\"},\"aliasChain\":[{\"token\":\"color.text.default\",\"set\":\"aspekto/komuna+color-scheme/dark\"},{\"token\":\"color.palette.neutral.25\",\"set\":\"core\"}]},\"color.text.disabled\":{\"id\":\"tok_01M2W9400ZA1K81R0W23SG0XVR\",\"type\":\"color\",\"value\":{\"colorSpace\":\"srgb\",\"components\":[0.2784,0.2784,0.2784],\"hex\":\"#474747\"},\"origin\":{\"set\":\"aspekto/komuna+color-scheme/dark\",\"setId\":\"set_01M2VEEDW45A0B9Q4GQ465NCHN\",\"package\":\"@fundamento/aspekto-komuna\"},\"aliasChain\":[{\"token\":\"color.text.disabled\",\"set\":\"aspekto/komuna+color-scheme/dark\"},{\"token\":\"color.palette.neutral.700\",\"set\":\"core\"}]},\"color.text.inverse\":{\"id\":\"tok_01M2W9400ZA1K81R0W23SG0XVQ\",\"type\":\"color\",\"value\":{\"colorSpace\":\"srgb\",\"components\":[0.0667,0.0667,0.0667],\"hex\":\"#111111\"},\"origin\":{\"set\":\"aspekto/komuna+color-scheme/dark\",\"setId\":\"set_01M2VEEDW45A0B9Q4GQ465NCHN\",\"package\":\"@fundamento/aspekto-komuna\"},\"aliasChain\":[{\"token\":\"color.text.inverse\",\"set\":\"aspekto/komuna+color-scheme/dark\"},{\"token\":\"color.palette.neutral.950\",\"set\":\"aspekto/komuna+color-scheme/dark\"}]},\"color.text.muted\":{\"id\":\"tok_01M2W9400ZA1K81R0W23SG0XVP\",\"type\":\"color\",\"value\":{\"colorSpace\":\"srgb\",\"components\":[0.6706,0.6706,0.6706],\"hex\":\"#ababab\"},\"origin\":{\"set\":\"aspekto/komuna+color-scheme/dark\",\"setId\":\"set_01M2VEEDW45A0B9Q4GQ465NCHN\",\"package\":\"@fundamento/aspekto-komuna\"},\"aliasChain\":[{\"token\":\"color.text.muted\",\"set\":\"aspekto/komuna+color-scheme/dark\"},{\"token\":\"color.palette.neutral.300\",\"set\":\"core\"}]},\"color.text.subtle\":{\"id\":\"tok_01M2W9400ZA1K81R0W23SG0XVN\",\"type\":\"color\",\"value\":{\"colorSpace\":\"srgb\",\"components\":[0.7765,0.7765,0.7765],\"hex\":\"#c6c6c6\"},\"origin\":{\"set\":\"aspekto/komuna+color-scheme/dark\",\"setId\":\"set_01M2VEEDW45A0B9Q4GQ465NCHN\",\"package\":\"@fundamento/aspekto-komuna\"},\"aliasChain\":[{\"token\":\"color.text.subtle\",\"set\":\"aspekto/komuna+color-scheme/dark\"},{\"token\":\"color.palette.neutral.200\",\"set\":\"core\"}]}}}"
+  }
+]

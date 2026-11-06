@@ -1,0 +1,16 @@
+{
+  "fall": "kuroj-detailseite-0-1",
+  "faktoPfad": "packages/nordstelo/test/fixtures/kuroj/detailseite-0-1/fakto.json",
+  "faktoSha256": "88bb798e772e9dc84a9420733edab770304b3c32d58e00566fd73a0068d971b2",
+  "tasko": "detailseite",
+  "expected": {
+    "K3": 0,
+    "reguloGaps": [],
+    "instancoj": [],
+    "urteil": {
+      "instances": 0,
+      "valid": true,
+      "violations": []
+    }
+  }
+}
