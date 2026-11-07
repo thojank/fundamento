@@ -44,12 +44,14 @@ export async function startServiloDist(): Promise<typeof startServilo> {
 /**
  * A server on a free port with an empty brand folder of its own; `extra` adds options. `start` is
  * the server of the TS source unless a test passes another; with `FM_SERVILO_044=dist` every test
- * of this spec runs the built package (the worker path), unchanged.
+ * of this spec runs the built package (the worker path), unchanged. `stderr` hears what the server
+ * says (by default nothing is kept).
  */
 export async function testServilo(
   prefix: string,
   extra: Partial<ServiloOptions> = {},
   start?: typeof startServilo,
+  stderr: (text: string) => void = () => undefined,
 ): Promise<TestServilo> {
   const starten =
     start ?? (process.env.FM_SERVILO_044 === "dist" ? await startServiloDist() : startServilo);
@@ -66,7 +68,7 @@ export async function testServilo(
   };
   const servilo = await starten(
     { port: 0, workdir, root, settings: settingsOf(parseEnv("")), deps, ...extra },
-    { stderr: () => undefined },
+    { stderr },
   );
   const anfrage: TestServilo["anfrage"] = (method, path, body, type = "application/json") =>
     new Promise<Antwort>((done, fail) => {

@@ -4,16 +4,21 @@
 // turbo), where it runs in a worker. They show: the fixed course answers the bytes of the fixture;
 // `stato` of another brand answers while a check computes; a worker that throws or dies gives the
 // answer of a throw in the main thread, starts again on the next need only and the server answers
-// on; the worker's derivation equals the main thread's. Invented brands, no model, no clock.
+// on; the worker's derivation equals the main thread's. B-10: the server starts its worker right
+// after the URL line, before any check, and close() ends it at any point of its start. Invented
+// brands, no model, no clock.
 
+import { once } from "node:events";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { isDeepStrictEqual } from "node:util";
+import type { Worker } from "node:worker_threads";
 import type { Agordo } from "@fundamento/agordilo";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import type * as Ableitungen from "./ableitungen.js";
+import { startServilo } from "./servilo.js";
 import {
   type Antwort,
   ablauf044,
@@ -218,6 +223,136 @@ if (start === 1) {
       sha256: fall("A rev1 POST pruefung kalt")?.sha256,
     });
     expect(readFileSync(starts, "utf8")).toBe("3");
+  });
+});
+
+describe("the worker starts right after the URL line, before any check (B-10, R-6)", () => {
+  // Node says `worker` on the process in the tick after a worker thread is made: the order of the
+  // URL line, the return of startServilo and the start of the worker is read from these events,
+  // never from a clock.
+  /** The events of one test in their order; `worker` once per worker thread made. */
+  let ereignisse: string[] = [];
+  let worker: Worker[] = [];
+  let naechster = (_: Worker): void => undefined;
+  /** The next worker thread made in this process. */
+  const naechsterWorker = () =>
+    new Promise<Worker>((done) => {
+      naechster = done;
+    });
+  const hoerer = (neu: Worker) => {
+    ereignisse.push("worker");
+    worker.push(neu);
+    naechster(neu);
+  };
+  /** What the server says, the URL line as `url`, every other line as itself. */
+  const stderr = (text: string) =>
+    ereignisse.push(text.startsWith("metiejo: http://localhost:") ? "url" : text);
+  beforeEach(() => {
+    ereignisse = [];
+    worker = [];
+    process.on("worker", hoerer);
+  });
+  afterEach(() => {
+    process.off("worker", hoerer);
+  });
+  const ohneStartzeilen = () =>
+    ereignisse.filter((ereignis) => !ereignis.startsWith("metiejo: FM_TIPAROJ_REPO"));
+  const fall = (name: string) => fixture().find((entry) => entry.fall === name);
+
+  it("without a request: the URL line, the return of startServilo, then one worker; the first check computes in it", async () => {
+    const gestartet = naechsterWorker();
+    const server = await testServilo("fm-vorstart-044-", {}, await startServiloDist(), stderr);
+    try {
+      ereignisse.push("zurueck");
+      await gestartet;
+      expect(ohneStartzeilen()).toEqual(["url", "zurueck", "worker"]);
+      await markeAnlegen(server, "lumeta", "leer");
+      const pruefung = await server.anfrage("POST", "/api/marko/lumeta/pruefung");
+      expect({ status: pruefung.status, sha256: sha256(pruefung.body) }).toEqual({
+        status: 200,
+        sha256: fall("A rev1 POST pruefung kalt")?.sha256,
+      });
+      // The check ran in the worker started ahead: no second one.
+      expect(worker).toHaveLength(1);
+    } finally {
+      await server.close();
+    }
+    // close() ended it.
+    expect(worker[0]?.threadId).toBe(-1);
+  });
+
+  it("close() while the worker loads ends it; close() before its turn starts none", async () => {
+    const gestartet = naechsterWorker();
+    const laedt = await testServilo("fm-vorstart-zu-044-", {}, await startServiloDist(), stderr);
+    const imLaden = await gestartet;
+    await laedt.close();
+    expect(imLaden.threadId).toBe(-1);
+
+    ereignisse = [];
+    const sofort = await testServilo(
+      "fm-vorstart-sofort-044-",
+      {},
+      await startServiloDist(),
+      stderr,
+    );
+    // In the turn startServilo returned in, before the server's next turn.
+    await sofort.close();
+    await new Promise(setImmediate);
+    await new Promise(process.nextTick);
+    expect(ohneStartzeilen()).toEqual(["url"]);
+    expect(worker).toHaveLength(1);
+  });
+
+  it("a worker that dies while it starts says nothing; the first check starts a new one and answers the bytes of the fixture", async () => {
+    const scratch = mkdtempSync(join(tmpdir(), "fm-vorstart-tod-044-"));
+    const starts = join(scratch, "starts.txt");
+    writeFileSync(starts, "0");
+    const modul = join(scratch, "worker.mjs");
+    // The first worker dies while it starts, every later one is the real one.
+    writeFileSync(
+      modul,
+      `import { readFileSync, writeFileSync } from "node:fs";
+const zaehler = ${JSON.stringify(starts)};
+const start = Number(readFileSync(zaehler, "utf8")) + 1;
+writeFileSync(zaehler, String(start));
+if (start === 1) throw new Error("the worker broke while it started");
+await import(${JSON.stringify(new URL("pruefung-worker.js", DIST).href)});
+`,
+    );
+    const gestartet = naechsterWorker();
+    const server = await testServilo(
+      "fm-vorstart-tod-044-",
+      { pruefWorker: pathToFileURL(modul) },
+      await startServiloDist(),
+      stderr,
+    );
+    try {
+      const erster = await gestartet;
+      await once(erster, "exit");
+      expect(ohneStartzeilen()).toEqual(["url", "worker"]);
+      await markeAnlegen(server, "lumeta", "leer");
+      const pruefung = await server.anfrage("POST", "/api/marko/lumeta/pruefung");
+      expect({ status: pruefung.status, sha256: sha256(pruefung.body) }).toEqual({
+        status: 200,
+        sha256: fall("A rev1 POST pruefung kalt")?.sha256,
+      });
+      expect(readFileSync(starts, "utf8")).toBe("2");
+      expect(ohneStartzeilen()).toEqual(["url", "worker", "worker"]);
+    } finally {
+      await server.close();
+      rmSync(scratch, { recursive: true, force: true });
+    }
+  });
+
+  it("on the TS source (the check in the main thread) the server starts no worker", async () => {
+    const server = await testServilo("fm-vorstart-quelle-044-", {}, startServilo, stderr);
+    try {
+      await new Promise(setImmediate);
+      await new Promise(process.nextTick);
+      expect(ohneStartzeilen()).toEqual(["url"]);
+    } finally {
+      await server.close();
+    }
   });
 });
 
