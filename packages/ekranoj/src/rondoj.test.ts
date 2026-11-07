@@ -751,9 +751,10 @@ describe("K8 probes from the scorer to the renderer (3.4b)", () => {
     }
     const kun = await kuri(new SondaTaksilo(() => MALVERDA), 7);
     // The probes reach only the renderer; the double renders no K8, so the run is the same
-    // (but for the wall time of the run, which no double fixes).
+    // (but for the wall time, which no double fixes: every `ms` – of the run and of each screen
+    // in each round – is dropped before the comparison, D-223).
     const senTempo = (rezulto: typeof sen.rezulto) =>
-      JSON.stringify({ ...rezulto, peno: { ...rezulto.peno, ms: 0 } });
+      JSON.stringify(rezulto, (sxlosilo, valoro) => (sxlosilo === "ms" ? undefined : valoro));
     expect(senTempo(kun.rezulto)).toBe(senTempo(sen.rezulto));
   });
 });
