@@ -72,6 +72,17 @@ export const SKEMOJ: Record<string, unknown> = {
   },
 };
 
+/**
+ * The constraint lines of the table's Eroj as get_ero with `fields: ["constraints"]` answers them
+ * (Spec 038 B-3, C-4): one line of allowed prop combinations, one of label rules. Invented.
+ */
+export const LIMOJ: Record<string, { props?: string; label?: string }> = {
+  butono: {
+    props: "intent=secondary only with disabled=false",
+    label: "label-names-action: Ein Label nennt die Aktion.",
+  },
+};
+
 /** The Skemoj of the table, read as ekranoj reads a get_ero answer. */
 function skemojDeTabelo(): Map<string, EroSkemo> {
   return new Map(
@@ -97,7 +108,8 @@ const nekonataEro = (path: string) => ({
 /**
  * get_ero with `fields` from the table (the shape of the Spec 038 answer, flat): `ero`, the brief
  * as its description, `role` (the Skemo's `a11y.role`, else `generic`), `navigation` for a link
- * Ero with one required string prop, `slots` by name. Nothing goes to `rest`.
+ * Ero with one required string prop, `slots` by name, `constraints` from LIMOJ (B-3). Nothing goes
+ * to `rest`.
  */
 export function kampojDeTabelo(nomo: string, fields: readonly string[]): unknown {
   const body = SKEMOJ[nomo] as
@@ -125,6 +137,8 @@ export function kampojDeTabelo(nomo: string, fields: readonly string[]): unknown
         { content: ["text"], ...(slot.default === true ? { default: true } : {}) },
       ]),
     );
+  const limoj = LIMOJ[nomo];
+  if (fields.includes("constraints") && limoj !== undefined) out.constraints = limoj;
   return out;
 }
 

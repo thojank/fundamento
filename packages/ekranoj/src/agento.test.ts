@@ -38,6 +38,7 @@ import {
   CXIUJ_ILOJ,
   ilo,
   kampojDeTabelo,
+  LIMOJ,
   MALNOVAJ_ILOJ,
   MemoraPonto,
 } from "./test-doubles/iloj.js";
@@ -441,8 +442,8 @@ describe("the shell and the context per screen and round (S038-20, AC-7)", () =>
     teksto: JSON.stringify(kampojDeTabelo(nomo, KURZPROFILAJ_KAMPOJ)),
   });
 
-  it("reads the Kurzprofile with get_ero fields brief and slots, once per name and run, and skips what is no Ero or fails", async () => {
-    expect(KURZPROFILAJ_KAMPOJ).toEqual(["brief", "slots"]);
+  it("reads the Kurzprofile with get_ero fields brief, slots and constraints, once per name and run, and skips what is no Ero or fails", async () => {
+    expect(KURZPROFILAJ_KAMPOJ).toEqual(["brief", "slots", "constraints"]);
     const ponto = new SxelaPonto(["get_ero ligilo"]);
     const kasxmemoro: ProfilaKasxmemoro = new Map();
     const linioj: string[] = [];
@@ -460,7 +461,7 @@ describe("the shell and the context per screen and round (S038-20, AC-7)", () =>
     expect(ponto.vokoj.map((voko) => voko.args)).toEqual(
       ["butono", "karto", "nekonata", "ligilo"].map((name) => ({
         name,
-        fields: ["brief", "slots"],
+        fields: ["brief", "slots", "constraints"],
       })),
     );
     expect(linioj).toHaveLength(2);
@@ -475,7 +476,7 @@ describe("the shell and the context per screen and round (S038-20, AC-7)", () =>
     await konstrui(chat, { rondo: 2, sxelo: SXELO, eroProfiloj: profiloj });
     const tasko = chat.petoj[0]?.messages[1]?.content ?? "";
     expect(tasko).toContain(
-      "Kurzprofile der Eroj deines Stands (get_ero, brief und slots – nur diese Inhalte je Slot sind erlaubt):",
+      "Kurzprofile der Eroj deines Stands (get_ero, brief, slots und constraints – nur diese Inhalte je Slot sind erlaubt; constraints nennt die erlaubten Prop-Kombinationen und die Label-Regeln):",
     );
     expect(tasko).not.toContain("Kurzprofile der Eroj deines Stands (get_ero, brief):");
     for (const nomo of ["butono", "karto"]) {
@@ -484,6 +485,28 @@ describe("the shell and the context per screen and round (S038-20, AC-7)", () =>
       expect(tasko, nomo).toContain(`- fm-${nomo}: ${JSON.stringify(kampoj)}`);
       expect(tasko, nomo).toContain(`"slots":${JSON.stringify(kampoj.slots)}`);
     }
+  });
+
+  // Spec 038 B-3 (C-4): the allowed prop combinations and the label rule stand in the Kurzprofil
+  // part of the task of round 2, never in the system text.
+  it("puts the constraint lines of round 2's Kurzprofile into the task, not into the system text (B-3)", async () => {
+    const ponto = new SxelaPonto();
+    const profiloj = await legiEroProfilojn(ponto, ["butono", "karto"], new Map(), () => {});
+    const chat = new SkriptaModelo(() => respondo("```html\n<p>x</p>\n```"));
+    await konstrui(chat, { rondo: 2, sxelo: SXELO, eroProfiloj: profiloj });
+    const sistemo = chat.petoj[0]?.messages[0]?.content ?? "";
+    const tasko = chat.petoj[0]?.messages[1]?.content ?? "";
+    const limoj = LIMOJ.butono;
+    expect(limoj?.props).toBeDefined();
+    expect(limoj?.label).toBeDefined();
+    const kurzprofiloj = tasko.slice(tasko.indexOf("Kurzprofile der Eroj deines Stands"));
+    expect(kurzprofiloj).toContain(`"constraints":${JSON.stringify(limoj)}`);
+    expect(sistemo).not.toContain(limoj?.props ?? "-");
+    expect(sistemo).not.toContain(limoj?.label ?? "-");
+    // Round 1 reads no Kurzprofil: no constraint line in its task.
+    const unua = new SkriptaModelo(() => respondo("```html\n<p>x</p>\n```"));
+    await konstrui(unua, { rondo: 1, sxelo: SXELO, eroProfiloj: profiloj });
+    expect(unua.petoj[0]?.messages[1]?.content ?? "").not.toContain(limoj?.props ?? "-");
   });
 
   it("keeps a Kurzprofil without slots (missing or in rest) as brief, with one log line and no follow-up call", async () => {

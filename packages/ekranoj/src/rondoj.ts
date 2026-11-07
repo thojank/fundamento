@@ -375,6 +375,8 @@ export function trovojDe(e: {
   fakto: Fakto;
   navigado: EkranaNavigado;
   malhelpoj: readonly Malhelpo[];
+  /** The slugs of the planned screens of the run, in plan order (F-S038-37a-1). */
+  ekranoj?: readonly string[];
 }): Trovo[] {
   const trovoj: Trovo[] = [];
   if (e.malhelpoj.includes(MALPLENA_RESPONDO)) {

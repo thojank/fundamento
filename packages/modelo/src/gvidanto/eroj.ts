@@ -264,6 +264,17 @@ export interface EroSlot {
 }
 
 /**
+ * What an Ero's data allows and how its label is judged (Spec 038 B-3, C-4), each at most one line:
+ * `props` the allowed prop combinations from the Skemo's constraints (what check_usage reports as
+ * ero-prop-constraint), `label` the Reguloj of the Uzo that judge the label. Generated from the
+ * Skemo, the Uzo and the Regularo only, never written per Ero.
+ */
+export interface EroConstraints {
+  props?: string;
+  label?: string;
+}
+
+/**
  * The answer of get_ero with `fields` (D-31): flat. With the brief delivered every key of the
  * brief in its order, else only `ero`; then role, navigation, slots and rest, each only when it
  * stands in the answer.
@@ -272,6 +283,7 @@ export type GetEroFieldsOutput = { ero: string } & Partial<Omit<GetEroBrief, "er
     role?: string;
     navigation?: EroNavigation;
     slots?: Record<string, EroSlot>;
+    constraints?: EroConstraints;
     rest?: EroField[];
   };
 
@@ -681,6 +693,18 @@ export function slotsOf(entry: Pick<LoadedEro, "skemo" | "uzo">): Record<string,
     };
   }
   return slots;
+}
+
+/**
+ * The constraint lines of an Ero (Spec 038 B-3, C-4), or nothing when its data has neither a Skemo
+ * constraint nor a label Regulo.
+ */
+export function constraintsOf(
+  _modelo: Modelo,
+  _entry: Pick<LoadedEro, "ero" | "skemo" | "uzo">,
+  _lingvo?: Lingvo,
+): EroConstraints | undefined {
+  throw new Error("S038-37b: constraintsOf is not implemented yet");
 }
 
 /** The brief in the language asked for (Nachlese 8 ③), as get_ero with brief: true answers. */

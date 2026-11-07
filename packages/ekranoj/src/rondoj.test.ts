@@ -46,6 +46,7 @@ import type {
   EkranojRezulto,
   K8Merkmal,
   KostoTakso,
+  Malobservo,
   Peno,
   Plano,
   RondoEkrano,
@@ -1106,11 +1107,14 @@ describe("the shell in the system text, the context per screen and round (S038-2
     );
     expect(
       tools.vokoj
-        .filter((voko) => voko.name === "get_ero" && String(voko.args.fields) === "brief,slots")
+        .filter(
+          (voko) =>
+            voko.name === "get_ero" && String(voko.args.fields) === "brief,slots,constraints",
+        )
         .map((voko) => voko.args.name),
     ).toEqual(["butono", "karto"]);
     expect(tasko).toContain(
-      "Kurzprofile der Eroj deines Stands (get_ero, brief und slots – nur diese Inhalte je Slot sind erlaubt):",
+      "Kurzprofile der Eroj deines Stands (get_ero, brief, slots und constraints – nur diese Inhalte je Slot sind erlaubt; constraints nennt die erlaubten Prop-Kombinationen und die Label-Regeln):",
     );
     for (const ero of [
       "Screens des Ablaufs:",
@@ -1275,5 +1279,92 @@ describe("the shell in the system text, the context per screen and round (S038-2
     expect(
       linioj.filter((linio) => linio.includes("karto") && linio.includes("nicht erreichbar")),
     ).toHaveLength(1);
+  });
+});
+
+// Spec 038 B-3 (C-4) and F-S038-37a-1: what a finding hands to the next round.
+describe("findings for the next round: the rule's suggestion and concrete targets (B-3)", () => {
+  const LOKO = "fm-butono „Löschen“";
+  const MALOBSERVOJ: Malobservo[] = [
+    {
+      rule: "ero-prop-constraint",
+      severity: "error",
+      path: "instances#/1",
+      message:
+        "Instance 1 of butono combines emphasis=medium and intent=danger, which the Skemo forbids.",
+      suggestion: "Use emphasis=high with intent=danger.",
+      loko: LOKO,
+    },
+    {
+      rule: "destructive-label-names-object",
+      severity: "error",
+      path: "instances#/1",
+      message: 'Instance 1 of butono says "Löschen": it names no object.',
+      suggestion: 'Write the text as the approved example does, e.g. "Entwurf löschen".',
+      regulo: { id: "reg-1", name: "destructive-label-names-object", kialo: "Das Objekt fehlt." },
+      loko: LOKO,
+    },
+  ];
+  const sen = { kompleta: true, mankantaj: [], mortaj: [] };
+
+  it("every finding of ero-prop-constraint and destructive-label-names-object carries the suggestion of check_usage, also the scorer's", () => {
+    const taksado: Taksado = {
+      ...MALVERDA,
+      mankoj: MALOBSERVOJ.map((m) => ({ kind: "regulo" as const, key: m.regulo?.name ?? m.rule })),
+    };
+    const trovoj = trovojDe({
+      slug: "liste",
+      taksado,
+      malobservoj: MALOBSERVOJ,
+      fakto: faktoKunLigiloj([]),
+      navigado: sen,
+      malhelpoj: ["check_usage"],
+    });
+    const malsamaj: string[] = [];
+    for (const m of MALOBSERVOJ) {
+      const regulo = m.regulo?.name ?? m.rule;
+      const pri = trovoj.filter((t) => t.regulo === regulo || t.loko === regulo);
+      // One from check_usage, one from the scorer's K3 gap.
+      if (pri.length !== 2) malsamaj.push(`${regulo}: ${pri.length} findings`);
+      for (const t of pri) {
+        if (t.sugesto !== m.suggestion) malsamaj.push(`${regulo} (${t.regulo}): ${t.sugesto}`);
+      }
+    }
+    expect(malsamaj).toEqual([]);
+  });
+
+  it("a dead link's suggestion names the planned screens, never the <slug>.html placeholder (F-S038-37a-1)", () => {
+    const trovoj = trovojDe({
+      slug: "liste",
+      taksado: VERDA,
+      malobservoj: [],
+      fakto: faktoKunLigiloj(["slug.html"]),
+      navigado: { kompleta: false, mankantaj: [], mortaj: ["slug.html"] },
+      malhelpoj: ["navigado"],
+      ekranoj: ["liste", "detail", "bearbeiten"],
+    });
+    const morta = trovoj.find((t) => t.regulo === "navigado-morta");
+    expect(morta?.sugesto).toBe(
+      "Nur auf geplante Screens verweisen: liste.html, detail.html, bearbeiten.html.",
+    );
+    expect(morta?.sugesto).not.toContain("<slug>");
+  });
+
+  it("a run hands the planned screens of its plan to the dead link's suggestion", async () => {
+    const skriptoKunMorta = (peto: Peto) => {
+      const slug = slugDePeto(peto);
+      if (slug === undefined) return respondo(`\`\`\`json\n${JSON.stringify(PLANO)}\n\`\`\``);
+      return respondo(
+        `\`\`\`html\n${fragmentoDe(PLANO, slug, rondoDePeto(peto)).replace("</nav>", '<a href="slug.html">X</a></nav>')}\n\`\`\``,
+      );
+    };
+    const chat = new SkriptaModelo(skriptoKunMorta);
+    const rezulto = await kuruEkranojn(enigoDe(), depsDe({ chat }));
+    const sugestoj = (rezulto.rondoj[0]?.liste?.trovoj ?? [])
+      .filter((t) => t.regulo === "navigado-morta")
+      .map((t) => t.sugesto);
+    expect(sugestoj).toEqual([
+      `Nur auf geplante Screens verweisen: ${PLANO.ekranoj.map((e) => `${e.slug}.html`).join(", ")}.`,
+    ]);
   });
 });
