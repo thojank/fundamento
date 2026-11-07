@@ -698,6 +698,20 @@ S038-03 (MG-5): keine – jedes Regionsmerkmal ist aus der Skemo ableitbar.
 
 - **Layout-Primitive Reihe, Spalten, Stapel (MG-1, S038-04):** Keine Ero hat ein Ziel `row`, `column` oder `stack`, keine Skemo eine Layout-Rolle; Abstände ordnen heute nur die Sxablonoj in ihren Regionen (Teile mit `gap` aus Abstandsstufen). `list_arangxoj` nennt die drei darum in `mankoj` (Regionen und Abstandsstufen sind vorhanden). Vorschlag Eroj-Runde 7: je ein Layout-Primitiv als Ero, deren Skemo-Ziel den Zweck trägt (`row`: Kinder nebeneinander, Lücke aus einer Abstandsstufe, Umbruch; `column`: Kinder auf den Spalten des Rasters `layout.grid.*`, unter einer Containerbreite gestapelt; `stack`: Kinder untereinander, Lücke aus einer Abstandsstufe). `listArangxoj` führt sie dann ohne Codeänderung als `kind: "ero"` und streicht das Manko (Test mit Probe-Ero).
 
+#### Lückenliste 4.4 (Lauf 4, S038-28)
+
+`pnpm fm ekranoj mankoj $S/ablauf/nachher $S/abnahme-l4/komuna --out $S/mankoj-nachher.json --json` (rekursiv, D-S038-28-1; kein `nachher-wdh`, keine Wiederholung) und `listArangxoj(modelo).mankoj` (nur lesen, Skript unter `/tmp`, Code-Kopf D). Zusammengeführt, ohne Doppelte, auch gegen die Einträge oben.
+
+| Manko | Art | Quelle (Ablauf/Screen bzw. `list_arangxoj`) | Häufigkeit | Vorschlag |
+|---|---|---|---|---|
+| Ziel „Inhalte anzeigen“ ohne Ero | ero (`suggest_ero` ohne Treffer) | Abnahme komuna / detail | 1 | Eine Ero für das Ziel anbieten oder das Ziel als Schlüsselwort einer bestehenden Ero aufnehmen (z. B. atributlisto, karto). |
+| Ziel „Zeitliche Folge der Änderungen eines Standards anzeigen“ ohne Ero | ero (`suggest_ero` ohne Treffer) | nachher liste-filter-detail F / standard-verlauf | 1 | Eine Ero für einen Verlauf (Zeitleiste) anbieten oder das Ziel als Schlüsselwort einer bestehenden Ero aufnehmen. |
+| Ziel „create new“ ohne Ero | ero (`suggest_ero` ohne Treffer) | nachher formular-in-schritten F / antrag-bestaetigt | 1 | Das Ziel (auch englisch) als Schlüsselwort von butono/ligilo aufnehmen. |
+| Regulo `destructive-label-names-object` bis zur letzten Runde verletzt | ero (Regulo) | Abnahme komuna / liste (`fm-butono` „Löschen“) | 1 (2 Instanzen) | Eine Variante der Ero für „Objekt löschen“ anbieten oder den Vorschlag der Regulo im Gvidanto schärfen (Objekt im Label nennen). |
+| Regulo `ero-prop-constraint` bis zur letzten Runde verletzt | ero (Regulo) | Abnahme komuna / liste (`fm-butono` `intent=danger`, `emphasis=medium`) | 1 (2 Instanzen) | Im Kurzprofil von butono die erlaubten Kombinationen von `intent` und `emphasis` nennen oder eine passende Variante anbieten. |
+| Regulo `uzo-slot-accepts` bis zur letzten Runde verletzt | ero (Regulo) | nachher formular-in-schritten F / antrag-pruefen (`fm-menuo`) | 1 | Verwandt mit „Datenform von Slots“ (oben, MG-3): was ein Slot nimmt, im Kurzprofil und in der Uzo deutlicher. |
+| Layout-Primitive `row`, `column`, `stack` | arangxo (`mankoj` je `celo`) | `list_arangxoj` | 3 | Schon oben („Layout-Primitive Reihe, Spalten, Stapel“, MG-1, S038-04); unverändert offen, nicht doppelt. |
+
 ### Sonstige
 
 - **S038-01-1 `check_usage` über MCP ohne Instanz:** `{ instances: [] }` wird mit `mcp-input-invalid` abgelehnt (`check_usage/instances`: mindestens 1 Element, oder `sxablonoj` nötig). Die Funktion `checkUsage` antwortet `{ instances: 0, valid: true, violations: [] }`. nordstelo und ekranoj rufen ohne Instanz nichts auf. Für `checkMarkup` (S038-05) gilt §2.2: ohne Instanz `rezulto` = Antwort der Funktion.
@@ -904,6 +918,119 @@ Je Screen × Schema × Marke. „vorher (neu gerendert)“ = 037-Fragmente der l
 | eroj `zweitfarbe-036.spec.ts:129/196` | 1/1 (S038-17, S038-18), 1/2 (S038-19); allein 0/1 |
 
 Alle Treffer sind Zeitgrenzen unter Last, keine Assertion; kein eigener Wackel-Test.
+
+## Läufe und Kosten (Lauf 4, S038-28)
+
+Je Lauf über `$W/kosten reservieren` und `$W/mezuri` (Sperre frei, Prüfprotokoll `$S/pruefprotokoll.tsv`, je ein Versuch, keine Ablehnung), Modell nur `ministral-14b-2512`, einer nach dem anderen in der Reihenfolge D-04, kein Test, Build oder Playwright daneben. Code-Kopf D = `bfe19023` (Grün-Commit S038-27, `pnpm build` 11:46Z aus dem Cache, Baum sauber), Bezug `e4873c57` (`/tmp/s038-bezug`, gebaut). Quelle `$S/laeufe.tsv`, `$S/kostoj.tsv`.
+
+| Lauf-ID | Zweck | Commit | Tokens ein / aus | Anfragen | Werkzeugaufrufe | $ | Dauer | Last vor → nach (1-min) | Kerne | gestört | Wiederholung |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `abnahme-komuna-l4` | 4.2a, Ziel grün (E-3) | `bfe19023` (Code-Kopf D) | 228 252 / 3 049 | 9 | 47 | 0,046260 | 57,3 s (11:45:26Z–11:46:23Z) | 5,31 → 4,06 | 10 | nein | nein |
+| `nachher-ablauf` | 4.2, alle fünf, F und 0 | `bfe19023` | 2 172 321 / 66 457 | 140 | 368 | 0,447756 | 1 843,2 s (11:46:43Z–12:17:26Z) | 3,76 → 4,32 | 10 | nein | nein |
+| `vorher-ablauf-0` | 4.1 Variante 0, alle fünf (D-207) | `e4873c57` (Bezug) | 125 139 / 104 222 | 51 | 0 | 0,045872 | 1 237,6 s (12:21:02Z–12:41:40Z) | 5,70 → 6,37 | 10 | nein | nein |
+| `vorher-ablauf-F` | 4.1 Variante F, Katalog | `e4873c57` (Bezug) | 971 573 / 13 448 | 42 | 89 | 0,197004 | 271,3 s (12:44:53Z–12:49:25Z) | 6,01 → 7,52 | 10 | nein | nein |
+
+- **`--max-tokens` aus Dollar** (⌊Rest ÷ 0,20 $ × 10⁶⌋, abgerundet auf 1 000, nie aufgerundet): abnahme Rest 0,10 − 0,047939 = 0,052061 $ → 260 305 → 260 000 möglich, gefahren mit der festen Grenze 250 000 (wie Lauf 3) · nachher 0,45 $ → 2 250 000 · vorher-0 Rest 0,30 − 0,046171 = 0,253829 $ → 1 269 145 → **1 269 000** · vorher-F Rest nach `-0` (aus `kosten stand`) 0,30 − 0,046171 − 0,045872 = 0,207957 $ → 1 039 785 → **1 039 000**. Die Ablauf-Grenze zählt Tokens ein + aus (nachher 2 238 778, vorher-F 985 021).
+- **Ledger Spec 038:** 0,876548 $ von 1,00 $ (< 1,00 $). Scheiben nach Lauf 4: `teil1-` 0,0455 von 0,05 · `abnahme-` 0,094199 von 0,10 (Rest 0,005801) · `nachher-` 0,447756 von 0,45 (Rest 0,002244) · `vorher-` 0,289047 von 0,30 (Rest 0,010953) · `wdh-` 0 von 0,10 (Reserve unberührt).
+- **Gestört:** keiner der vier Läufe (keine fremde Messung, 1-min-Last vor und nach < 10 Kerne). Darum keine Wiederholung (E-5); kein `-wdh`-Ordner, kein `--gestoert` im Vergleich.
+- **Halt:** `abnahme-komuna-l4` an der Grenze 250 000 nach Runde 1 (in Runde 2 bei liste). `nachher-ablauf`: 5 von 10 Läufen gebaut, `liste-filter-detail` F in Runde 2 durch einen Anbieterfehler (400 „Assistant message must have either content or tool_calls“) beendet, `formular-in-schritten` F an der Grenze in Runde 2, 5 Läufe nicht gestartet. `vorher-ablauf-0`: 5 von 5 gebaut, je 3 Runden. `vorher-ablauf-F`: nur `anmelden-und-konto`, Runde 1, Grenze in Runde 2; 4 Läufe nicht gestartet.
+- Laufordner: `$S/abnahme-l4/komuna`, `$S/ablauf/nachher/20261107-1146`, `$S/ablauf/vorher-0/20261107-1221`, `$S/ablauf/vorher-F/20261107-1245`.
+
+## Messung 4 – vorher/nachher je Ablauf
+
+Aus `$S/ablauf/vergleich/vergleich.md` (`pnpm nordstelo --art komparo --antaux $S/ablauf/vorher-0 --antaux $S/ablauf/vorher-F --post $S/ablauf/nachher --zusatz $M/.fundamento/spec037/ablauf/messpunkt-1 --out $S/ablauf/vergleich`, Exit 0, 10 Paare, 2 mit Δ). Letzte gespeicherte Runde, K1–K6 Anteile 0–1; Tokens je gebauter Screen-Runde ein / aus (nachher aus `penoj`, vorher und Zusatz „abgeleitet“, D-199). Streuung Reihe K 16,7 („≈“ = innerhalb). Grün nur komuna gespeichert (D-S038-27-8).
+
+| Ablauf | Var. | Seite | Runde | Total | K1 | K2 | K3 | K4 | K5 | K6 | K8 | Navigation | Muster | Tokens je Screen-Runde | grün komuna | Marker |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| anmelden-und-konto | F | vorher | 1 | 99,8 | 1 | 0,98 | 1 | 1 | 1 | 1 | nicht vorhanden | 0,33 | 0,6 | 242 893 / 3 362 (abgel.) | 2/4 | teilweise |
+| anmelden-und-konto | F | nachher | 3 | 97,7 | 1 | 0,99 | 1 | 1 | 1 | 0,88 | 0,82 | 1 | 0,75 | 97 259 / 1 213 | 0/4 | – |
+| anmelden-und-konto | F | Stand vor 036 Teil 5 | 3 | 94,5 | 1 | 0,98 | 1 | 0,75 | 1 | 0,94 | nicht vorhanden | 0,33 | 0,5 | 175 582 / 1 598 (abgel.) | 2/4 | Last > Kerne |
+| anmelden-und-konto | F | Δ | kein Δ: vorher teilweise | | | | | | | | | | | | | |
+| anmelden-und-konto | 0 | vorher | 3 | 43 | 1 | – | – | 0 | 0 | 0,94 | nicht vorhanden | 0,83 | 0,75 | 1 561 / 986 (abgel.) | 0/4 | – |
+| anmelden-und-konto | 0 | nachher | 3 | 41,2 | 1 | – | – | 0 | 0 | 0,85 | 0,1 | 0,83 | 0 | 3 609 / 1 068 | 0/4 | – |
+| anmelden-und-konto | 0 | Stand vor 036 Teil 5 | 3 | 43 | 1 | – | – | 0 | 0 | 0,94 | nicht vorhanden | 0,83 | 0,75 | 1 621 / 899 (abgel.) | 0/4 | Last > Kerne |
+| anmelden-und-konto | 0 | **Δ nachher − vorher** | | **−1,8 ≈** | 0 | – | – | 0 | 0 | −0,08 | – | 0 | −0,75 | +2 048 ein (abgel.) | | |
+| liste-filter-detail | F | vorher | – | – | | | | | | | | | | | | nicht gestartet |
+| liste-filter-detail | F | nachher | 2 | 93,4 | 1 | 0,82 | 0,98 | 1 | 1 | 0,75 | 0,8 | 0,75 | 0,5 | 43 703 / 829 | 0/3 | teilweise (Fehler R2) |
+| liste-filter-detail | F | Stand vor 036 Teil 5 | 1 | 25,3 | 1 | 0,91 | 0,83 | 0 | 1 | 0,75 | nicht vorhanden | 0 | 1 | 525 916 / 4 069 (abgel.) | 0/1 | teilweise |
+| liste-filter-detail | 0 | vorher | 3 | 35,8 | 1 | – | – | 0 | 0 | 0,61 | nicht vorhanden | 1 | 0,5 | 3 475 / 3 387 (abgel.) | 0/3 | – |
+| liste-filter-detail | 0 | nachher | 3 | 35,8 | 1 | – | – | 0 | 0 | 0,61 | 0,04 | 1 | 0 | 5 414 / 3 153 | 0/3 | – |
+| liste-filter-detail | 0 | **Δ nachher − vorher** | | **0 ≈** | 0 | – | – | 0 | 0 | 0 | – | 0 | −0,5 | +1 939 ein (abgel.) | | |
+| formular-in-schritten | F | vorher | – | – | | | | | | | | | | | | nicht gestartet |
+| formular-in-schritten | F | nachher | 2 | 95,5 | 1 | 1 | 1 | 0,88 | 1 | 0,85 | 0,87 | 0,83 | 0,5 | 99 238 / 937 | 0/4 | teilweise (Grenze R2) |
+| formular-in-schritten | 0 | vorher | 3 | 40,7 | 1 | – | – | 0 | 0 | 0,83 | nicht vorhanden | 0,5 | 0 | 2 159 / 1 690 (abgel.) | 0/4 | – |
+| formular-in-schritten | 0 | nachher | – | – | | | | | | | | | | | | nicht gestartet |
+| einstellungen-konto | F | vorher / nachher | – | – | | | | | | | | | | | | nicht gestartet / nicht gestartet |
+| einstellungen-konto | 0 | vorher | 3 | 44,4 | 1 | – | – | 0 | 0 | 1 | nicht vorhanden | 1 | 1 | 2 200 / 1 861 (abgel.) | 0/3 | – |
+| einstellungen-konto | 0 | nachher | – | – | | | | | | | | | | | | nicht gestartet |
+| uebersicht-kennzahlen | F | vorher / nachher | – | – | | | | | | | | | | | | nicht gestartet / nicht gestartet (nicht im Zusatz) |
+| uebersicht-kennzahlen | 0 | vorher | 3 | 39,5 | 1 | – | – | 0 | 0 | 0,78 | nicht vorhanden | 0,75 | 0,33 | 3 269 / 2 766 (abgel.) | 0/3 | – |
+| uebersicht-kennzahlen | 0 | nachher | – | – | | | | | | | | | | | | nicht gestartet |
+
+- **Zusatzzeile „Stand vor 036 Teil 5“:** `$M/.fundamento/spec037/ablauf/messpunkt-1/20261031-1342` (`07585b5e`), vorhanden; nur anmelden-und-konto (F, 0) und liste-filter-detail F gebaut, alle Werte „Last > Kerne“ (24,4) bzw. teilweise – Lesehilfe, kein Δ.
+- **Δ nur in zwei Paaren** (Variante 0, je ≈ innerhalb der Streuung). Alle F-Paare ohne Δ: vorher F nur `anmelden-und-konto` Runde 1 (teilweise).
+- **Teilweise / nicht gemessen, mit Befehl und Schätzung** (Schätzung F nachher 65 615 je Screen-Runde, F Bezug ≈ 227 000, Variante 0 2 000; Kosten 0,20 $ je 10⁶ Tokens):
+
+| Seite | Ablauf × Variante | Zustand | Befehl (aus `--cwd`, mit neuem Lauf-ID über `kosten`/`mezuri`) | Schätzung |
+|---|---|---|---|---|
+| nachher | liste-filter-detail F | teilweise (Fehler R2) | `pnpm nordstelo --art ablauf --taskoj liste-filter-detail --varianten F --ripetoj 1 --max-tokens 591000 --out $S/ablauf/nachher-rest --ledger $S --env $M/.env` (Code-Kopf D) | 3 × 3 × 65 615 = 590 535 (≈ 0,118 $) |
+| nachher | formular-in-schritten F | teilweise (Grenze R2) | dasselbe mit `--taskoj formular-in-schritten --varianten F,0 --max-tokens 812000` | 4 × 3 × 65 615 + 4 × 3 × 2 000 = 811 380 (≈ 0,162 $) |
+| nachher | formular-in-schritten 0 | nicht gestartet | (im Befehl darüber) | 24 000 |
+| nachher | einstellungen-konto F, 0 | nicht gestartet | `--taskoj einstellungen-konto --varianten F,0 --max-tokens 609000` | 590 535 + 18 000 = 608 535 (≈ 0,122 $) |
+| nachher | uebersicht-kennzahlen F, 0 | nicht gestartet | `--taskoj uebersicht-kennzahlen --varianten F,0 --max-tokens 609000` | 608 535 (≈ 0,122 $) |
+| vorher | anmelden-und-konto F | teilweise (Runde 1) | `pnpm nordstelo --art ablauf --taskoj anmelden-und-konto --varianten F --ripetoj 1 --max-tokens 2724000 --out $S/ablauf/vorher-F-rest --ledger $S --env $M/.env` (`/tmp/s038-bezug`) | 4 × 3 × 227 000 = 2 724 000 (≈ 0,545 $) |
+| vorher | liste-filter-detail F | nicht gestartet | dasselbe mit `--taskoj liste-filter-detail --max-tokens 2043000` | 3 × 3 × 227 000 = 2 043 000 (≈ 0,409 $) |
+| vorher | formular-in-schritten F | nicht gestartet | `--taskoj formular-in-schritten --max-tokens 2724000` | 2 724 000 (≈ 0,545 $) |
+| vorher | einstellungen-konto F | nicht gestartet | `--taskoj einstellungen-konto --max-tokens 2043000` | 2 043 000 (≈ 0,409 $) |
+| vorher | uebersicht-kennzahlen F | nicht gestartet | `--taskoj uebersicht-kennzahlen --max-tokens 2043000` | 2 043 000 (≈ 0,409 $) |
+
+  Keiner dieser Läufe ist in Spec 038 bezahlbar (Kappe 1,00 $, Rest 0,123452 $ nur als Reserve `wdh-`); sie sind Vorschläge für eine spätere Messung.
+- **Schätzkonstante gegen Messung:** nachher F je gebauter Screen-Runde aus `penoj` 97 259 (anmelden-und-konto, 12), 99 238 (formular-in-schritten, 8), 43 703 (liste-filter-detail, 6); Mittel über alle 26 = 2 080 286 ÷ 26 = 80 011 Tokens ein, also über `TOKENOJ_EKRANO_RONDO_F = 65 615` (E-6). Variante 0 nachher 3 609 / 5 414 je Screen-Runde (Schätzung 2 000), vorher 1 561 … 3 475. Bezug F 242 893 (Schätzung ≈ 227 000).
+
+## F gegen 0 und Runde 1 gegen 3
+
+| Ablauf | Seite | Total F | Total 0 | Δ F−0 |
+|---|---|---|---|---|
+| anmelden-und-konto | vorher | 99,8 (R1, teilweise) | 43 | +56,8 |
+| anmelden-und-konto | nachher | 97,7 | 41,2 | +56,5 |
+| liste-filter-detail | vorher | – | 35,8 | – |
+| liste-filter-detail | nachher | 93,4 (R2, teilweise) | 35,8 | +57,6 |
+| formular-in-schritten | vorher / nachher | – / 95,5 (R2) | 40,7 / – | – |
+| einstellungen-konto | vorher / nachher | – / – | 44,4 / – | – |
+| uebersicht-kennzahlen | vorher / nachher | – / – | 39,5 / – | – |
+
+| Ablauf | Variante | Seite | R1 | R3 | Δ R3−R1 |
+|---|---|---|---|---|---|
+| anmelden-und-konto | F | vorher | 99,8 | – (nur R1) | – |
+| anmelden-und-konto | F | nachher | 93,8 | 97,7 | +3,9 ≈ |
+| anmelden-und-konto | F | Stand vor 036 Teil 5 | 73,6 | 94,5 | +20,9 |
+| anmelden-und-konto | 0 | vorher / nachher | 41,2 / 41,2 | 43 / 41,2 | +1,8 ≈ / 0 ≈ |
+| liste-filter-detail | F | nachher | 93,4 | – (R2: 93,4) | – |
+| liste-filter-detail | 0 | vorher / nachher | 32,1 / 32,1 | 35,8 / 35,8 | +3,7 ≈ / +3,7 ≈ |
+| formular-in-schritten | F | nachher | 96,9 | – (R2: 95,5) | – |
+| formular-in-schritten | 0 | vorher | 38,9 | 40,7 | +1,8 ≈ |
+| einstellungen-konto | 0 | vorher | 35,8 | 44,4 | +8,6 ≈ |
+| uebersicht-kennzahlen | 0 | vorher | 32,1 | 39,5 | +7,4 ≈ |
+
+- F liegt vorher und nachher mit ≈ +57 Punkten über 0 (gleiche Lage wie Spec 037). Runde 3 gegen 1 bleibt innerhalb der Streuung, auf beiden Seiten.
+
+## Ziel grün (F-S038-22-4)
+
+**Ablauf nachher (`bfe19023`), letzte Runde, grün komuna** (gespeichert ist ein Grün-Zustand je Screen in `ABLAUF_MARKO` = komuna; je weiterer Marke gibt es nur K8, D-S038-27-8):
+
+| Ablauf | Variante | grün komuna | K8 je Marke (komuna / ekzemplo / provo / provo-kompakta) | `restantaj` (Zahl) |
+|---|---|---|---|---|
+| anmelden-und-konto | F | 0/4 | 0,8377 / 0,8377 / 0,7958 / 0,7958 | 35 |
+| anmelden-und-konto | 0 | 0/4 | 0,0656 / 0,0891 / 0,1172 / 0,1297 | 122 |
+| liste-filter-detail | F | 0/3 | 0,8305 / 0,8138 / 0,7944 / 0,7777 | 47 |
+| liste-filter-detail | 0 | 0/3 | 0,0439 / 0,0276 / 0,0308 / 0,0494 | 121 |
+| formular-in-schritten | F | 0/4 | 0,8917 / 0,8708 / 0,85 / 0,85 | 32 |
+| einstellungen-konto, uebersicht-kennzahlen, formular-in-schritten 0 | – | nicht gestartet | – | – |
+
+- **Grün nachher: 0 Screens** in allen gebauten Abläufen und Marken. Vorher F (Bezug, `anmelden-und-konto` Runde 1): **2/4 grün** (passwort-vergessen, registrieren, Total 100). `restantaj` je Ablauf sind nachher höher (z. B. anmelden-und-konto F 35 gegen 6 vorher), weil der Code-Kopf D die K8-Regeln mitzählt, der Bezug nicht – kein Vergleich. Die Ablaufdaten speichern `restantaj` nur als Zahl je Lauf, nicht je Regel.
+- **Abnahme komuna gegen Lauf 3:** `abnahme-komuna-l4` (`bfe19023`) **0 von 2 grün** – wie Lauf 3 (`teil1-komuna`, 0/2). Halt nach Runde 1 an der Grenze 250 000 (detail Runde 1 verbrauchte 165 247 Tokens ein und lieferte eine leere Seite). `restantaj` je Regel (11): `destructive-label-names-object` 2, `ero-prop-constraint` 2, `regulo` 2 (K3 zu diesen beiden), `k8-sxablono` 2 (detail hell/dunkel), `navigado-morta` 1, `render` 1, `K5` 1. Beispiele: liste `fm-butono` „Löschen“ („Löschen“ ohne Objekt; `intent=danger` mit `emphasis=medium`, Skemo verbietet es), liste toter Verweis `slug.html`, detail „empty page“ (K1, K5). „mangels Mittel“: `k8-interspaco` liste hell/dunkel (`fm-sxelo > fm-navigado`, 9 px).
+- **Befund (weiter 0 grün):** häufigste `restantaj` je Regel in der Abnahme: `destructive-label-names-object` und `ero-prop-constraint` (je 2, ein Button „Löschen“ zweimal, dazu je `regulo`). Die Hindernisse von Lauf 3 (`uzo-slot-accepts`, `navigado` zu nicht geplanten Screens) erscheinen in der Abnahme nicht mehr; belastbar ist das nicht (nur Runde 1, detail leer). Im Ablauf nachher bleibt `uzo-slot-accepts` (formular-in-schritten, `antrag-pruefen` `fm-menuo`). Nichts gelockert (L4-13).
+- **R-1 (Kurzprofile ohne slots):** Logzeile „ohne slots (fehlt oder in rest)“ **0-mal** in allen vier Läufen. Dreimal „Kurzprofil get_ero filtrilo/formularo übersprungen: keine lesbare Antwort“ (Abnahme 1, nachher 2) – beide Namen sind Sxablonoj, kein `get_ero`-Treffer; wie vorgesehen ohne Fehler des Laufs.
 
 ## Blockiert
 
