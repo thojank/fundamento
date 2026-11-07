@@ -1,0 +1,298 @@
+{
+  "id": "20261107-1245",
+  "komparoj": {
+    "ekranoj": [
+      {
+        "0": {
+          "R1": null,
+          "R3": null,
+          "delto": null
+        },
+        "F": {
+          "R1": 99.2,
+          "R3": null,
+          "delto": null
+        },
+        "ekrano": "anmelden",
+        "f0R3": {
+          "0": null,
+          "F": null,
+          "delto": null
+        },
+        "tasko": "anmelden-und-konto"
+      },
+      {
+        "0": {
+          "R1": null,
+          "R3": null,
+          "delto": null
+        },
+        "F": {
+          "R1": 100,
+          "R3": null,
+          "delto": null
+        },
+        "ekrano": "registrieren",
+        "f0R3": {
+          "0": null,
+          "F": null,
+          "delto": null
+        },
+        "tasko": "anmelden-und-konto"
+      },
+      {
+        "0": {
+          "R1": null,
+          "R3": null,
+          "delto": null
+        },
+        "F": {
+          "R1": 100,
+          "R3": null,
+          "delto": null
+        },
+        "ekrano": "passwort-vergessen",
+        "f0R3": {
+          "0": null,
+          "F": null,
+          "delto": null
+        },
+        "tasko": "anmelden-und-konto"
+      },
+      {
+        "0": {
+          "R1": null,
+          "R3": null,
+          "delto": null
+        },
+        "F": {
+          "R1": 100,
+          "R3": null,
+          "delto": null
+        },
+        "ekrano": "konto",
+        "f0R3": {
+          "0": null,
+          "F": null,
+          "delto": null
+        },
+        "tasko": "anmelden-und-konto"
+      }
+    ],
+    "f0": [],
+    "r1r3": [
+      {
+        "enStreuung": null,
+        "navigado": {
+          "R1": 0.3333,
+          "R3": null,
+          "delto": null
+        },
+        "sxablonoj": {
+          "R1": 0.6,
+          "R3": null,
+          "delto": null
+        },
+        "tasko": "anmelden-und-konto",
+        "total": {
+          "R1": 99.8,
+          "R3": null,
+          "delto": null
+        },
+        "varianto": "F"
+      }
+    ]
+  },
+  "kuroj": [
+    {
+      "eraro": null,
+      "faritajRondoj": 1,
+      "haltigo": "max-tokens",
+      "lastoSuperKernoj": false,
+      "nekomencita": false,
+      "notoj": [
+        "Kostengrenze von 1039000 Tokens erreicht (verbraucht: 985021) in Runde 2 bei anmelden; Teilergebnis."
+      ],
+      "peno": {
+        "bytes": 3402,
+        "inputTokens": 971573,
+        "ms": 259430,
+        "outputTokens": 13448,
+        "requests": 42,
+        "toolCalls": 89
+      },
+      "restantaj": 6,
+      "ripeto": 1,
+      "rondoj": {
+        "1": {
+          "ekranoj": {
+            "anmelden": {
+              "k": {
+                "K1": 1,
+                "K2": 0.9375,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "kompleta": false,
+              "total": 99.2,
+              "unueca": false,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "konto": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "kompleta": false,
+              "total": 100,
+              "unueca": false,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "passwort-vergessen": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "kompleta": true,
+              "total": 100,
+              "unueca": false,
+              "verda": true,
+              "verdaEkde": null
+            },
+            "registrieren": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "kompleta": true,
+              "total": 100,
+              "unueca": false,
+              "verda": true,
+              "verdaEkde": null
+            }
+          },
+          "fluo": {
+            "k": {
+              "K1": 1,
+              "K2": 0.9844,
+              "K3": 1,
+              "K4": 1,
+              "K5": 1,
+              "K6": 1
+            },
+            "konstruitaj": 4,
+            "navigado": 0.3333,
+            "planitaj": 4,
+            "sxablonoj": 0.6,
+            "total": 99.8
+          }
+        }
+      },
+      "sxargo": {
+        "antaux": {
+          "l1": 5.86,
+          "l15": 6.56,
+          "l5": 6.28
+        },
+        "kernoj": 10,
+        "post": {
+          "l1": 7.52,
+          "l15": 6.62,
+          "l5": 6.65
+        }
+      },
+      "tasko": "anmelden-und-konto",
+      "usd": 0.197004,
+      "varianto": "F"
+    }
+  ],
+  "lauf": {
+    "commit": "e4873c57",
+    "kiModelo": "mistral/ministral-14b-2512",
+    "lingvo": "de",
+    "maksTokenoj": 1039000,
+    "markoj": [
+      "komuna",
+      "ekzemplo",
+      "provo",
+      "provo-kompakta"
+    ],
+    "ripetoj": 1,
+    "takso": {
+      "tokenoj": 3570000,
+      "usd": 0.714
+    },
+    "taskoj": [
+      "anmelden-und-konto",
+      "liste-filter-detail",
+      "formular-in-schritten",
+      "einstellungen-konto",
+      "uebersicht-kennzahlen"
+    ],
+    "varianten": [
+      "F"
+    ]
+  },
+  "streuung": {
+    "fonto": "specs/034-nachlese-12/plan.md, „Streuung (H 9,8, K 16,7)“",
+    "reiheK": 16.7
+  },
+  "sumo": {
+    "anfragoj": 42,
+    "haltigoj": [
+      {
+        "haltigo": "max-tokens",
+        "ripeto": 1,
+        "tasko": "anmelden-und-konto",
+        "varianto": "F"
+      },
+      {
+        "haltigo": "max-tokens",
+        "ripeto": 1,
+        "tasko": "liste-filter-detail",
+        "varianto": "F"
+      },
+      {
+        "haltigo": "max-tokens",
+        "ripeto": 1,
+        "tasko": "formular-in-schritten",
+        "varianto": "F"
+      },
+      {
+        "haltigo": "max-tokens",
+        "ripeto": 1,
+        "tasko": "einstellungen-konto",
+        "varianto": "F"
+      },
+      {
+        "haltigo": "max-tokens",
+        "ripeto": 1,
+        "tasko": "uebersicht-kennzahlen",
+        "varianto": "F"
+      }
+    ],
+    "kuroj": 5,
+    "nekomencitaj": 4,
+    "tokenoj": {
+      "eligo": 13448,
+      "enigo": 971573
+    },
+    "usd": 0.197004
+  }
+}

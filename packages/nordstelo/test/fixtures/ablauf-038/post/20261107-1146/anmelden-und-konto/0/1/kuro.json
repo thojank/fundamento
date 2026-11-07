@@ -1,0 +1,163 @@
+{
+  "faritajRondoj": 3,
+  "notoj": [],
+  "peno": {
+    "bytes": 19434,
+    "inputTokens": 43308,
+    "ms": 192015,
+    "outputTokens": 12816,
+    "requests": 12,
+    "toolCalls": 0
+  },
+  "penoPlano": {
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "requests": 0,
+    "toolCalls": 0
+  },
+  "penoj": {
+    "1": {
+      "anmelden": {
+        "inputTokens": 305,
+        "outputTokens": 716,
+        "requests": 1,
+        "toolCalls": 0
+      },
+      "konto": {
+        "inputTokens": 285,
+        "outputTokens": 689,
+        "requests": 1,
+        "toolCalls": 0
+      },
+      "passwort-vergessen": {
+        "inputTokens": 292,
+        "outputTokens": 911,
+        "requests": 1,
+        "toolCalls": 0
+      },
+      "registrieren": {
+        "inputTokens": 285,
+        "outputTokens": 750,
+        "requests": 1,
+        "toolCalls": 0
+      }
+    },
+    "2": {
+      "anmelden": {
+        "inputTokens": 5159,
+        "outputTokens": 1104,
+        "requests": 1,
+        "toolCalls": 0
+      },
+      "konto": {
+        "inputTokens": 5068,
+        "outputTokens": 1073,
+        "requests": 1,
+        "toolCalls": 0
+      },
+      "passwort-vergessen": {
+        "inputTokens": 5254,
+        "outputTokens": 1288,
+        "requests": 1,
+        "toolCalls": 0
+      },
+      "registrieren": {
+        "inputTokens": 6031,
+        "outputTokens": 1094,
+        "requests": 1,
+        "toolCalls": 0
+      }
+    },
+    "3": {
+      "anmelden": {
+        "inputTokens": 4741,
+        "outputTokens": 1129,
+        "requests": 1,
+        "toolCalls": 0
+      },
+      "konto": {
+        "inputTokens": 5452,
+        "outputTokens": 1283,
+        "requests": 1,
+        "toolCalls": 0
+      },
+      "passwort-vergessen": {
+        "inputTokens": 4903,
+        "outputTokens": 1671,
+        "requests": 1,
+        "toolCalls": 0
+      },
+      "registrieren": {
+        "inputTokens": 5533,
+        "outputTokens": 1108,
+        "requests": 1,
+        "toolCalls": 0
+      }
+    }
+  },
+  "restantaj": 122,
+  "ripeto": 1,
+  "stato": {
+    "1": {
+      "anmelden": {
+        "verda": false
+      },
+      "konto": {
+        "verda": false
+      },
+      "passwort-vergessen": {
+        "verda": false
+      },
+      "registrieren": {
+        "verda": false
+      }
+    },
+    "2": {
+      "anmelden": {
+        "verda": false
+      },
+      "konto": {
+        "verda": false
+      },
+      "passwort-vergessen": {
+        "verda": false
+      },
+      "registrieren": {
+        "verda": false
+      }
+    },
+    "3": {
+      "anmelden": {
+        "verda": false
+      },
+      "konto": {
+        "verda": false
+      },
+      "passwort-vergessen": {
+        "verda": false
+      },
+      "registrieren": {
+        "verda": false
+      }
+    }
+  },
+  "sxargo": {
+    "antaux": {
+      "l1": 4.96,
+      "l15": 7.2,
+      "l5": 5.67
+    },
+    "kernoj": 10,
+    "post": {
+      "l1": 4.52,
+      "l15": 6.71,
+      "l5": 5.23
+    }
+  },
+  "takso": {
+    "tokenoj": 24000,
+    "usd": 0.0048
+  },
+  "tasko": "anmelden-und-konto",
+  "varianto": "0"
+}

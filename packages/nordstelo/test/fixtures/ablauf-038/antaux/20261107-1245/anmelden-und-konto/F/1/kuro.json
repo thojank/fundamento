@@ -1,0 +1,52 @@
+{
+  "faritajRondoj": 1,
+  "haltigo": "max-tokens",
+  "notoj": [
+    "Kostengrenze von 1039000 Tokens erreicht (verbraucht: 985021) in Runde 2 bei anmelden; Teilergebnis."
+  ],
+  "peno": {
+    "bytes": 3402,
+    "inputTokens": 971573,
+    "ms": 259430,
+    "outputTokens": 13448,
+    "requests": 42,
+    "toolCalls": 89
+  },
+  "restantaj": 6,
+  "ripeto": 1,
+  "stato": {
+    "1": {
+      "anmelden": {
+        "verda": false
+      },
+      "konto": {
+        "verda": false
+      },
+      "passwort-vergessen": {
+        "verda": true
+      },
+      "registrieren": {
+        "verda": true
+      }
+    }
+  },
+  "sxargo": {
+    "antaux": {
+      "l1": 5.86,
+      "l15": 6.56,
+      "l5": 6.28
+    },
+    "kernoj": 10,
+    "post": {
+      "l1": 7.52,
+      "l15": 6.62,
+      "l5": 6.65
+    }
+  },
+  "takso": {
+    "tokenoj": 840000,
+    "usd": 0.168
+  },
+  "tasko": "anmelden-und-konto",
+  "varianto": "F"
+}

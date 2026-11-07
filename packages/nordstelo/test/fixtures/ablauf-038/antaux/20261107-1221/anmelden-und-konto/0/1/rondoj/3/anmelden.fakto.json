@@ -1,0 +1,205 @@
+{
+  "aria": [
+    {
+      "level": 1,
+      "name": "Team Nord - Anmeldung",
+      "role": "heading"
+    },
+    {
+      "name": "E-Mail-Adresse eingeben",
+      "role": "textbox"
+    },
+    {
+      "name": "Passwort eingeben",
+      "role": "textbox"
+    },
+    {
+      "name": "Anmelden",
+      "role": "button"
+    },
+    {
+      "name": "Konto anlegen",
+      "role": "link"
+    },
+    {
+      "name": "Passwort vergessen?",
+      "role": "link"
+    }
+  ],
+  "bytes": 3443,
+  "console": [],
+  "elements": [
+    {
+      "attrs": {
+        "class": "login-container"
+      },
+      "parent": -1,
+      "tag": "div",
+      "text": ""
+    },
+    {
+      "attrs": {},
+      "parent": 0,
+      "tag": "h1",
+      "text": "Team Nord - Anmeldung"
+    },
+    {
+      "attrs": {
+        "action": "konto.html",
+        "method": "post"
+      },
+      "parent": 0,
+      "tag": "form",
+      "text": ""
+    },
+    {
+      "attrs": {
+        "class": "form-group"
+      },
+      "parent": 2,
+      "tag": "div",
+      "text": ""
+    },
+    {
+      "attrs": {
+        "for": "email"
+      },
+      "parent": 3,
+      "tag": "label",
+      "text": "E-Mail-Adresse"
+    },
+    {
+      "attrs": {
+        "aria-label": "E-Mail-Adresse eingeben",
+        "id": "email",
+        "name": "email",
+        "placeholder": "Ihre E-Mail-Adresse",
+        "required": "",
+        "style": "",
+        "type": "email"
+      },
+      "parent": 3,
+      "tag": "input",
+      "text": ""
+    },
+    {
+      "attrs": {
+        "class": "form-group"
+      },
+      "parent": 2,
+      "tag": "div",
+      "text": ""
+    },
+    {
+      "attrs": {
+        "for": "password"
+      },
+      "parent": 6,
+      "tag": "label",
+      "text": "Passwort"
+    },
+    {
+      "attrs": {
+        "aria-label": "Passwort eingeben",
+        "id": "password",
+        "name": "password",
+        "placeholder": "Ihr Passwort",
+        "required": "",
+        "style": "",
+        "type": "password"
+      },
+      "parent": 6,
+      "tag": "input",
+      "text": ""
+    },
+    {
+      "attrs": {
+        "type": "submit"
+      },
+      "parent": 2,
+      "tag": "button",
+      "text": "Anmelden"
+    },
+    {
+      "attrs": {
+        "class": "links"
+      },
+      "parent": 0,
+      "tag": "div",
+      "text": ""
+    },
+    {
+      "attrs": {
+        "href": "registrieren.html"
+      },
+      "parent": 10,
+      "tag": "a",
+      "text": "Konto anlegen"
+    },
+    {
+      "attrs": {},
+      "parent": 10,
+      "tag": "span",
+      "text": "oder"
+    },
+    {
+      "attrs": {
+        "href": "passwort-vergessen.html"
+      },
+      "parent": 10,
+      "tag": "a",
+      "text": "Passwort vergessen?"
+    }
+  ],
+  "lingvo": "de",
+  "renders": [
+    {
+      "aspekto": "komuna",
+      "axe": [],
+      "contrast": "default",
+      "scheme": "light"
+    },
+    {
+      "aspekto": "komuna",
+      "axe": [],
+      "contrast": "default",
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "ekzemplo",
+      "axe": [],
+      "contrast": "default",
+      "scheme": "light"
+    },
+    {
+      "aspekto": "ekzemplo",
+      "axe": [],
+      "contrast": "default",
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "provo",
+      "axe": [],
+      "contrast": "default",
+      "scheme": "light"
+    },
+    {
+      "aspekto": "provo",
+      "axe": [],
+      "contrast": "default",
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "axe": [],
+      "contrast": "default",
+      "scheme": "light"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "axe": [],
+      "contrast": "default",
+      "scheme": "dark"
+    }
+  ]
+}
