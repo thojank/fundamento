@@ -34,9 +34,9 @@ import { loadBases, startAgordo } from "./vorschau.js";
 
 /**
  * Runs of the course: 10 on a local machine; in CI fewer, so the new tests stay well inside the
- * margin of the metiejo unit job (plan.md, A-07). A parameter, not a limit.
+ * margin of the metiejo unit job (plan.md, A-07; 2 since T4, D-26). A parameter, not a limit.
  */
-const N = Number(process.env.FM_MESSUNG_044_N ?? "") || (process.env.CI === undefined ? 10 : 3);
+const N = Number(process.env.FM_MESSUNG_044_N ?? "") || (process.env.CI === undefined ? 10 : 2);
 
 const REPORT = new URL("../test-reports/messung-044.json", import.meta.url);
 
