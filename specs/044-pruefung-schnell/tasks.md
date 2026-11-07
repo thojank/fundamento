@@ -32,6 +32,7 @@ Ein Strang, ein PR (T1 → T2 → T3 → T4 → T5). Lokal nur unter der Maschin
 - [x] `messung-044`: `vorschau.css` warm meldet nur `marke-laden` (D-16); neuer Teil „außen“: `stato` B während `/pruefung` A ohne Tor (D-17).
 - [x] Grün: `ableitungen-044` (12), `stato-044` (2, unverändert seit `68014c61`), `antworten-044` (3, Test und Fixture unverändert); ganze `metiejo`-Suite unter der Sperre 578 bestanden, 0 rot in 293 s (`FM_MESSUNG_044_N=2`); `pnpm --filter @fundamento/metiejo lint` grün (eine Warnung in `komponentoj.ts`, schon auf `6a3e55e3`) – `5bcda814`.
 - [x] Messung „nach T2“ lokal unter der Sperre (N = 10) und Entscheidung zu T3 in plan.md: Ziele „`/pruefung` < 1 s“ und „`stato` während Prüfung < 200 ms“ verfehlt (1517 bzw. 1555 ms Median) → **T3 nötig** – Doku-Commit „Spec 044: Messung nach T2 …“.
+- [x] Schluss unter der Sperre: `pnpm test:betroffen` (cli, ekranoj, metiejo, modelo, nordstelo; Chromium) 14 von 14 Tasks grün; `stato-044`, `antworten-044` und die Fixture seit T1 unverändert (`git diff` leer). Nichts gepusht.
 
 ## T3 im Einzelnen
 
