@@ -54,6 +54,9 @@ export const HELPO_ABLAUF = `pnpm nordstelo --art ablauf [Optionen]
 Exit 0: Bericht geschrieben (auch wenn die Tokengrenze einen Lauf beendet hat), 1: kein Screen
 gebaut oder Fehler, 2: Aufruf, .env oder Modell nicht zulässig.`;
 
+/** The help of `--art komparo` (Spec 038 C-4); filled in with the command. */
+export const HELPO_KOMPARO = "";
+
 /** The command line asks for another kind of measurement (`--art …`). */
 export function petasArton(argv: readonly string[]): boolean {
   return argv.some((arg) => arg === "--art" || arg.startsWith("--art="));

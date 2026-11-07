@@ -22,6 +22,7 @@ import {
   type ArtoMedio,
   bildigiloDeRenderer,
   HELPO_ABLAUF,
+  HELPO_KOMPARO,
   kuriArton,
   markoDe,
   type Preparo,
@@ -34,6 +35,7 @@ import {
   faktojElDosierujo,
   kalkulantaChat,
 } from "./test-doubles/ekranoj.js";
+import { LFD, skribiLaufon, UK } from "./test-doubles/laufoj.js";
 
 const geladen = loadModelo(defaultModeloSource()).modelo;
 if (geladen === undefined) throw new Error("the repository Modelo must load");
@@ -123,12 +125,13 @@ describe("pnpm nordstelo --art ablauf", () => {
       main.indexOf("parseArgs("),
     );
     expect(cli).toContain("pnpm nordstelo --art ablauf [Optionen]");
+    expect(cli).toContain("pnpm nordstelo --art komparo");
   });
 
   it("refuses an unknown --art with a usage error, exit 2, nothing read or built", async () => {
     const own = medio(permesita);
     expect(await kuriArton(["--art", "seite"], own.medio)).toBe(2);
-    expect(own.stderr).toContain("Unbekannte Art „seite“ für --art. Erlaubt: ablauf.");
+    expect(own.stderr).toContain("Unbekannte Art „seite“ für --art. Erlaubt: ablauf, komparo.");
     expect(own.stderr).toContain("pnpm nordstelo --art ablauf [Optionen]");
     expect([own.envVokoj, own.preparoj, own.duobla.vokoj.length]).toEqual([0, 0, 0]);
     expect(await kuriArton(["--art"], own.medio)).toBe(2);
@@ -259,5 +262,171 @@ describe("pnpm nordstelo --art ablauf", () => {
     // The shared renderer is closed once by the command, not by each run.
     await bildigilo.close();
     expect(closed).toBe(0);
+  });
+});
+
+describe("pnpm nordstelo --art komparo (Spec 038 C-4)", () => {
+  function folders() {
+    const radiko = mkdtempSync(join(tmpdir(), "s038-cli-komparo-"));
+    const antaux = skribiLaufon(join(radiko, "vorher"), "20261107-0900", {
+      commit: "e4873c57",
+      kuroj: [{ tasko: LFD, varianto: "0", total: 40 }],
+    });
+    const post = skribiLaufon(join(radiko, "nachher"), "20261107-1000", {
+      commit: "c0de4d00",
+      projekcioj: true,
+      kuroj: [
+        { tasko: LFD, varianto: "0", total: 56.8, k8: 0.9, penoj: true },
+        { tasko: UK, varianto: "F", total: 90, k8: 0.9, penoj: true },
+      ],
+    });
+    return { radiko, antaux, post };
+  }
+
+  it("writes vergleich.md and vergleich.json, reads no .env and builds nothing", async () => {
+    const own = medio(permesita);
+    const { radiko, antaux } = folders();
+    const out = join(radiko, "vergleich");
+    const code = await kuriArton(
+      ["--art", "komparo", "--antaux", antaux, "--post", join(radiko, "nachher"), "--out", out],
+      own.medio,
+    );
+    expect(code, own.stderr).toBe(0);
+    const json = readFileSync(join(out, "vergleich.json"), "utf8");
+    const datumoj = JSON.parse(json) as { paroj: { tasko: string; varianto: string }[] };
+    expect(datumoj.paroj.map((p) => `${p.tasko} ${p.varianto}`)).toEqual([`${LFD} 0`, `${UK} F`]);
+    expect(readFileSync(join(out, "vergleich.md"), "utf8")).toContain("+16,8");
+    expect(own.stdout).toContain(join(out, "vergleich.md"));
+    expect([own.envVokoj, own.preparoj, own.duobla.vokoj.length]).toEqual([0, 0, 0]);
+    // Run again: the same bytes.
+    expect(
+      await kuriArton(
+        ["--art", "komparo", "--antaux", antaux, "--post", join(radiko, "nachher"), "--out", out],
+        medio(permesita).medio,
+      ),
+    ).toBe(0);
+    expect(readFileSync(join(out, "vergleich.json"), "utf8")).toBe(json);
+  });
+
+  it("marks the folders named by --gestoert and adds the extra line of --zusatz", async () => {
+    const own = medio(permesita);
+    const { radiko, antaux, post } = folders();
+    const zusatz = skribiLaufon(join(radiko, "messpunkt-1"), "20261031-1342", {
+      commit: "07585b5e",
+      projekcioj: true,
+      kuroj: [{ tasko: LFD, varianto: "0", total: 33, malnova: true }],
+    });
+    const out = join(radiko, "vergleich");
+    const code = await kuriArton(
+      [
+        "--art",
+        "komparo",
+        "--antaux",
+        antaux,
+        "--post",
+        join(radiko, "nachher"),
+        "--gestoert",
+        post,
+        "--zusatz",
+        join(radiko, "messpunkt-1"),
+        "--out",
+        out,
+        "--json",
+      ],
+      own.medio,
+    );
+    expect(code, own.stderr).toBe(0);
+    const datumoj = JSON.parse(readFileSync(join(out, "vergleich.json"), "utf8")) as {
+      laufoj: { post: { gestoerta: boolean }[]; zusatz: { id: string } | null };
+      paroj: { delto: unknown; zusatz?: { total: number } | null }[];
+    };
+    expect(datumoj.laufoj.post[0]?.gestoerta).toBe(true);
+    expect(datumoj.laufoj.zusatz?.id).toBe("20261031-1342");
+    expect(datumoj.paroj[0]?.delto).toBeNull();
+    expect(datumoj.paroj[0]?.zusatz?.total).toBe(33);
+    expect(JSON.parse(own.stdout)).toMatchObject({ vergleich: join(out, "vergleich.md") });
+    expect(zusatz).toContain("20261031-1342");
+  });
+
+  it("exits 2 with a structured problem for the same pair twice on one side, or a missing side", async () => {
+    const { radiko, antaux, post } = folders();
+    const duobla = skribiLaufon(join(radiko, "vorher-2"), "20261107-0915", {
+      commit: "e4873c57",
+      kuroj: [{ tasko: LFD, varianto: "0", total: 41 }],
+    });
+    const out = join(radiko, "vergleich");
+    const own = medio(permesita);
+    expect(
+      await kuriArton(
+        ["--art", "komparo", "--antaux", antaux, "--antaux", duobla, "--post", post, "--out", out],
+        own.medio,
+      ),
+    ).toBe(2);
+    expect(own.stderr).toContain("/antaux/1 komparo-paro-duobla");
+    expect(existsSync(join(out, "vergleich.json"))).toBe(false);
+
+    const json = medio(permesita);
+    expect(
+      await kuriArton(
+        [
+          "--art",
+          "komparo",
+          "--antaux",
+          antaux,
+          "--antaux",
+          duobla,
+          "--post",
+          post,
+          "--out",
+          out,
+          "--json",
+        ],
+        json.medio,
+      ),
+    ).toBe(2);
+    const { problemoj } = JSON.parse(json.stdout) as {
+      problemoj: { path: string; rule: string; message: string; suggestion: string }[];
+    };
+    expect(problemoj[0]).toMatchObject({ path: "/antaux/1", rule: "komparo-paro-duobla" });
+    expect(problemoj[0]?.suggestion).not.toBe("");
+
+    const sen = medio(permesita);
+    expect(await kuriArton(["--art", "komparo", "--antaux", antaux, "--out", out], sen.medio)).toBe(
+      2,
+    );
+    expect(sen.stderr).toContain("/post");
+    const nekonata = medio(permesita);
+    expect(
+      await kuriArton(
+        [
+          "--art",
+          "komparo",
+          "--antaux",
+          antaux,
+          "--post",
+          post,
+          "--gestoert",
+          radiko,
+          "--out",
+          out,
+        ],
+        nekonata.medio,
+      ),
+    ).toBe(2);
+    expect(nekonata.stderr).toContain("komparo-gestoert-nekonata");
+  });
+
+  it("shows its help, listed in the nordstelo help; the help of --art ablauf stays as it was", async () => {
+    const own = medio(permesita);
+    expect(await kuriArton(["--art", "komparo", "--help"], own.medio)).toBe(0);
+    expect(own.stdout).toBe(`${HELPO_KOMPARO}\n`);
+    for (const option of ["--antaux", "--post", "--zusatz", "--gestoert", "--out", "--json"])
+      expect(HELPO_KOMPARO).toContain(option);
+    expect(HELPO_ABLAUF).not.toContain("komparo");
+    const ablauf = medio(permesita);
+    expect(await kuriArton(["--art", "ablauf", "--help"], ablauf.medio)).toBe(0);
+    expect(ablauf.stdout).toBe(`${HELPO_ABLAUF}\n`);
+    // Options of the comparison are no options of the measurement.
+    expect(await kuriArton(["--art", "ablauf", "--antaux", "x"], medio(permesita).medio)).toBe(2);
   });
 });
