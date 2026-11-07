@@ -9,6 +9,7 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import {
+  anbieterfehlerojDe,
   type ChatModel,
   type EkranojDeps,
   type EkranojRezulto,
@@ -17,6 +18,7 @@ import {
   MalpermesitaModelo,
   type Peno,
   type Problemo,
+  purigiTekston,
   type Taksilo,
   taksoPorEnigo,
   type Varianto,
@@ -279,6 +281,12 @@ export function penojDe(rezulto: EkranojRezulto): Pick<KuroRekordo, "penoj" | "p
   return Object.keys(penoj).length === 0 ? {} : { penoj, penoPlano: plano };
 }
 
+/** `anbieterfehleroj` of a result for `kuro.json` (C-1): cleaned, absent when there are none. */
+function anbieterfehlerojKampo(rezulto: EkranojRezulto): Pick<KuroRekordo, "anbieterfehleroj"> {
+  const anbieterfehleroj = anbieterfehlerojDe(rezulto);
+  return anbieterfehleroj === undefined ? {} : { anbieterfehleroj };
+}
+
 /** The whole measurement: every run, its records, then the report. */
 export async function kuriAblaufon(opcioj: AblaufOpcioj, deps: AblaufDeps): Promise<AblaufRezulto> {
   // D-19: another model is refused before anything else happens – no folder, no request.
@@ -421,16 +429,20 @@ export async function kuriAblaufon(opcioj: AblaufOpcioj, deps: AblaufDeps): Prom
           restantaj: rezulto.restantaj.length,
           notoj: rezulto.notoj ?? [],
           sxargo: { antaux: antaux.sxargo, post: post.sxargo, kernoj: post.kernoj },
+          // Spec 038 A-1 (C-1): the caught provider errors, cleaned once more; absent when none.
+          ...anbieterfehlerojKampo(rezulto),
         };
       } catch (error) {
         if (error instanceof MalpermesitaModelo) throw error;
         const post = deps.sxargo();
+        const anbieterfehleroj = anbieterfehlerojDe(error);
         rekordo = {
           tasko: tasko.slug,
           varianto,
           ripeto,
           haltigo: "eraro",
-          eraro: mesagxoDe(error),
+          // A-1: a provider message may hold parts of the request – cleaned before it is written.
+          eraro: purigiTekston(mesagxoDe(error)),
           faritajRondoj: 0,
           // What the run used before the error still counts.
           peno: {
@@ -442,6 +454,7 @@ export async function kuriAblaufon(opcioj: AblaufOpcioj, deps: AblaufDeps): Prom
           restantaj: 0,
           notoj: [],
           sxargo: { antaux: antaux.sxargo, post: post.sxargo, kernoj: post.kernoj },
+          ...(anbieterfehleroj === undefined ? {} : { anbieterfehleroj }),
         };
         deps.log(`${tasko.slug} ${varianto}-${ripeto}: Fehler: ${rekordo.eraro}`);
       }

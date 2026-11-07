@@ -9,6 +9,7 @@
 // (key patterns, Authorization, query) before it is logged or written.
 
 import type { Budget, ChatMessage, ToolInfo } from "@fundamento/metiejo";
+import { haltigoDe, sendiSubBudgxeto } from "./kostoj.js";
 import type { ChatModel, ChatRespondo, Peno } from "./tipoj.js";
 
 /** What the run did after a caught provider error (C-1). */
@@ -47,29 +48,137 @@ export interface AnbieterKlaso {
   mesagxo: string;
 }
 
+const ENTFERNT = "[entfernt]";
+
+/**
+ * The cleaning rules, in order: a header value first (with its scheme), then Bearer values, key
+ * patterns (`sk-…`, 32 or more letters mixed with digits in one piece – Mistral's keys) and every
+ * query string (`?a=b&c=d` → `?[entfernt]`).
+ */
+const PURIGOJ: readonly (readonly [RegExp, string])[] = [
+  [
+    /\b(authorization|proxy-authorization|x-api-key|api[-_]?key)(["']?\s*[:=]\s*["']?)(?:(?:bearer|basic)\s+)?[^\s"',;}&]+/gi,
+    `$1$2${ENTFERNT}`,
+  ],
+  [/\b(bearer)\s+(?!\[entfernt\])[^\s"',;}]+/gi, `$1 ${ENTFERNT}`],
+  [/\bsk-[A-Za-z0-9_-]{8,}/g, ENTFERNT],
+  [/\b(?=[A-Za-z0-9]*\d)(?=[A-Za-z0-9]*[A-Za-z])[A-Za-z0-9]{32,}\b/g, ENTFERNT],
+  [/[?&][\w.~-]+=[^\s"'<>]*/g, `?${ENTFERNT}`],
+];
+
 /** Takes secrets out of a text: key patterns, Authorization/Bearer, query strings. */
-export function purigiTekston(_teksto: string): string {
-  throw new Error("S038-32: purigiTekston ne implementita");
+export function purigiTekston(teksto: string): string {
+  let purigita = teksto;
+  for (const [sxablono, anstataux] of PURIGOJ) purigita = purigita.replace(sxablono, anstataux);
+  return purigita;
 }
 
 /** {@link purigiTekston}, then cut to {@link MAKS_MESAGXO} characters (C-1 `mesagxo`). */
-export function purigiMesagxon(_teksto: string): string {
-  throw new Error("S038-32: purigiMesagxon ne implementita");
+export function purigiMesagxon(teksto: string): string {
+  return purigiTekston(teksto).slice(0, MAKS_MESAGXO);
 }
+
+/** The message of metiejo's `chatCompletion` for a status it does not retry (any more). */
+const STATUSA_MESAGXO = /^Anbieter \S+ antwortet (\d{3})\b/;
+/** metiejo's answer without a message after its own retries. */
+const SEN_MESAGXO = /^Anbieter \S+: Antwort ohne Nachricht/;
+/** A network error or a timeout as `String(error)` of fetch. */
+const RETA_MESAGXO =
+  /fetch failed|network|socket hang up|ECONNRESET|ECONNREFUSED|ETIMEDOUT|ENOTFOUND|EAI_AGAIN|EPIPE|UND_ERR|TimeoutError|AbortError|terminated/i;
 
 /** The class of an error of a request; undefined = not a provider error (it passes through). */
-export function klasigiEraron(_error: unknown): AnbieterKlaso | undefined {
-  throw new Error("S038-32: klasigiEraron ne implementita");
+export function klasigiEraron(error: unknown): AnbieterKlaso | undefined {
+  if (!(error instanceof Error)) return undefined;
+  if (haltigoDe(error) !== undefined) return undefined;
+  const mesagxo = purigiMesagxon(error.message);
+  const statusa = STATUSA_MESAGXO.exec(error.message);
+  if (statusa !== null) {
+    const status = Number(statusa[1]);
+    const speco: AnbieterKlaso["speco"] =
+      status === 401 || status === 403
+        ? "halto"
+        : status === 429 || status >= 500
+          ? "ripeto"
+          : status === 400
+            ? "purigo"
+            : "rezigno";
+    return { status, speco, mesagxo };
+  }
+  // Anything else thrown inside chatCompletion carries `spent` (fetch, the body, no message).
+  if (SEN_MESAGXO.test(error.message) || RETA_MESAGXO.test(error.message) || "spent" in error) {
+    return { status: 0, speco: "ripeto", mesagxo };
+  }
+  return undefined;
 }
 
-/** The message list of a resend after a 400. */
-export function puriMesagxojn(_messages: readonly ChatMessage[]): ChatMessage[] {
-  throw new Error("S038-32: puriMesagxojn ne implementita");
+/**
+ * The message list of a resend after a 400: no assistant message without content and without
+ * tool_calls, no tool answer without its call, no two user messages in a row (joined).
+ */
+export function puriMesagxojn(messages: readonly ChatMessage[]): ChatMessage[] {
+  const purigitaj: ChatMessage[] = [];
+  const vokoj = new Set<string>();
+  for (const mesagxo of messages) {
+    if (mesagxo.role === "assistant") {
+      const ilaj = mesagxo.tool_calls ?? [];
+      if (ilaj.length === 0 && (mesagxo.content ?? "").trim() === "") continue;
+      for (const voko of ilaj) vokoj.add(voko.id);
+    }
+    if (mesagxo.role === "tool" && !vokoj.has(mesagxo.tool_call_id ?? "")) continue;
+    const antaua = purigitaj.at(-1);
+    if (mesagxo.role === "user" && antaua?.role === "user") {
+      purigitaj[purigitaj.length - 1] = {
+        ...antaua,
+        content: `${antaua.content}\n\n${mesagxo.content}`,
+      };
+      continue;
+    }
+    purigitaj.push({ ...mesagxo });
+  }
+  return purigitaj;
+}
+
+const AGOJ: ReadonlySet<string> = new Set<AnbieterAgo>([
+  "ripeto",
+  "purigo",
+  "nova-konversacio",
+  "portita",
+  "rezigno",
+]);
+
+function cxuAnbieterEraro(valoro: unknown): valoro is AnbieterEraro {
+  if (typeof valoro !== "object" || valoro === null) return false;
+  const e = valoro as Record<string, unknown>;
+  return (
+    typeof e.ekrano === "string" &&
+    typeof e.rondo === "number" &&
+    typeof e.provo === "number" &&
+    typeof e.status === "number" &&
+    typeof e.mesagxo === "string" &&
+    typeof e.ago === "string" &&
+    AGOJ.has(e.ago)
+  );
+}
+
+/** An entry with its message cleaned once more (idempotent), keys in C-1 order. */
+export function puraEro(e: AnbieterEraro): AnbieterEraro {
+  return {
+    ekrano: e.ekrano,
+    rondo: e.rondo,
+    provo: e.provo,
+    status: e.status,
+    mesagxo: purigiMesagxon(e.mesagxo),
+    ago: e.ago,
+  };
 }
 
 /** The entries an error carries out of `kuruEkranojn` (cleaned), undefined when none. */
-export function anbieterfehlerojDe(_error: unknown): AnbieterEraro[] | undefined {
-  throw new Error("S038-32: anbieterfehlerojDe ne implementita");
+export function anbieterfehlerojDe(error: unknown): AnbieterEraro[] | undefined {
+  if (typeof error !== "object" || error === null) return undefined;
+  const eroj = (error as { anbieterfehleroj?: unknown }).anbieterfehleroj;
+  if (!Array.isArray(eroj)) return undefined;
+  const validaj = eroj.filter(cxuAnbieterEraro).map(puraEro);
+  return validaj.length === 0 ? undefined : validaj;
 }
 
 /** The request layer gave up on a request (after its repeats or its clean resend). */
@@ -108,14 +217,95 @@ export interface FehlerKaptilo {
   log: (linio: string) => void;
 }
 
-/** One request with the catch layer: repeats, clean resend, else {@link AnbieterRezigno}. */
-export async function sendiKunKapto(
-  _chat: ChatModel,
-  _budget: Budget,
-  _peno: Peno,
-  _messages: ChatMessage[],
-  _tools: readonly ToolInfo[] | undefined,
-  _kaptilo: FehlerKaptilo,
-): Promise<ChatRespondo> {
-  throw new Error("S038-32: sendiKunKapto ne implementita");
+const AGO_TEKSTOJ: Readonly<Record<AnbieterAgo, string>> = {
+  ripeto: "neuer Versuch nach einer Wartezeit",
+  purigo: "neu mit bereinigter Nachrichtenliste",
+  "nova-konversacio": "neu in einem frischen Gespräch",
+  portita: "der Screen behält das Fragment der Vorrunde",
+  rezigno: "aufgegeben",
+};
+
+/** Notes one caught error: the entry (C-1) and a log line, both cleaned. */
+export function noti(
+  kaptilo: FehlerKaptilo,
+  status: number,
+  mesagxo: string,
+  ago: AnbieterAgo,
+): void {
+  const ero = puraEro({
+    ekrano: kaptilo.ekrano,
+    rondo: kaptilo.rondo,
+    provo: kaptilo.provo,
+    status,
+    mesagxo,
+    ago,
+  });
+  kaptilo.eroj.push(ero);
+  const kie = ero.ekrano === PLANA_EKRANO ? "Plananfrage" : `${ero.ekrano} Runde ${ero.rondo}`;
+  kaptilo.log(
+    `${kie}: Anbieterfehler ${ero.status} (Versuch ${ero.provo}): ${ero.mesagxo} – ${AGO_TEKSTOJ[ago]}`,
+  );
 }
+
+/** What a failed call spent (metiejo `error.spent`) into the run's effort. */
+function kalkuliElspezon(peno: Peno, error: unknown): void {
+  if (typeof error !== "object" || error === null) return;
+  const spent = (error as { spent?: { input?: unknown; output?: unknown; requests?: unknown } })
+    .spent;
+  if (spent === undefined || spent === null) return;
+  const nombro = (valoro: unknown) => (typeof valoro === "number" && valoro > 0 ? valoro : 0);
+  peno.inputTokens += nombro(spent.input);
+  peno.outputTokens += nombro(spent.output);
+  peno.requests += nombro(spent.requests);
+}
+
+/**
+ * One request with the catch layer (A-1): after a 429, a 5xx or a network error it waits and
+ * repeats (at most {@link MAKS_RIPETOJ} times), after a 400 it resends once with the cleaned list
+ * (the conversation keeps the cleaned list). Any other provider error, or one left after that,
+ * becomes {@link AnbieterRezigno} for the screen layer; 401/403 become {@link SxlosiloMalakceptita};
+ * the limits and every non-provider error pass through unchanged. Every failed attempt counts in
+ * `peno` with what it spent.
+ */
+export async function sendiKunKapto(
+  chat: ChatModel,
+  budget: Budget,
+  peno: Peno,
+  messages: ChatMessage[],
+  tools: readonly ToolInfo[] | undefined,
+  kaptilo: FehlerKaptilo,
+): Promise<ChatRespondo> {
+  let ripetoj = 0;
+  let purigita = false;
+  for (;;) {
+    try {
+      return await sendiSubBudgxeto(chat, budget, messages, tools);
+    } catch (error) {
+      kalkuliElspezon(peno, error);
+      const klaso = klasigiEraron(error);
+      if (klaso === undefined) throw error;
+      if (klaso.speco === "halto") throw new SxlosiloMalakceptita(klaso.status, klaso.mesagxo);
+      kaptilo.provo += 1;
+      if (klaso.speco === "ripeto" && ripetoj < MAKS_RIPETOJ) {
+        const atendo = RIPETA_ATENDO[ripetoj] ?? RIPETA_ATENDO.at(-1) ?? 0;
+        ripetoj += 1;
+        noti(kaptilo, klaso.status, klaso.mesagxo, "ripeto");
+        await kaptilo.dormi(atendo);
+        continue;
+      }
+      if (klaso.speco === "purigo" && !purigita) {
+        purigita = true;
+        noti(kaptilo, klaso.status, klaso.mesagxo, "purigo");
+        messages.splice(0, messages.length, ...puriMesagxojn(messages));
+        continue;
+      }
+      throw new AnbieterRezigno(klaso.status, klaso.mesagxo);
+    }
+  }
+}
+
+/** The real wait before a repeat (tests inject their own `dormi`). */
+export const realaDormo = (ms: number): Promise<void> =>
+  new Promise((finis) => {
+    setTimeout(finis, ms);
+  });

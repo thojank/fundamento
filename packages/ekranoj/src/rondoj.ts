@@ -15,6 +15,8 @@ import { Budget } from "@fundamento/metiejo";
 import {
   type AgentaManko,
   eroNomojDe,
+  type KonstruoPeto,
+  type KonstruoRezulto,
   konstruiEkranon,
   legiEroProfilojn,
   legiSxelon,
@@ -25,6 +27,15 @@ import {
   type SxelaKunteksto,
   sxelaServilo,
 } from "./agento.js";
+import {
+  type AnbieterEraro,
+  AnbieterRezigno,
+  type FehlerKaptilo,
+  noti,
+  PLANA_EKRANO,
+  purigiTekston,
+  realaDormo,
+} from "./anbieterfehleroj.js";
 import { statikaFakto } from "./fakto-statika.js";
 import { gardiModelon } from "./gardo.js";
 import { type UzKontrolilo, uzKontroliloDe } from "./instancoj.js";
@@ -324,6 +335,38 @@ export function senRimedajDe(slug: string, taksado: Taksado): Restanta[] {
 /** The marker of a screen whose build answer held no markup, also after one more question. */
 export const MALPLENA_RESPONDO = "leere-antwort" satisfies Malhelpo;
 
+/** The marker of a screen-round that ended on provider errors (Spec 038 A-1). */
+export const ANBIETERFEHLER: Malhelpo = "anbieterfehler";
+
+/**
+ * One build with the screen layer of A-1: when the request layer gives up, a screen with a
+ * fragment of an earlier round keeps it (`portita`, undefined back); one without is asked once in
+ * a fresh conversation (`nova-konversacio`), and when that gives up too, it stays without
+ * (`rezigno`, undefined back). Every other error passes through.
+ */
+async function konstruiKunKapto(
+  peto: KonstruoPeto & { kaptilo: FehlerKaptilo },
+  havasAntauan: boolean,
+): Promise<KonstruoRezulto | undefined> {
+  try {
+    return await konstruiEkranon(peto);
+  } catch (error) {
+    if (!(error instanceof AnbieterRezigno)) throw error;
+    if (havasAntauan) {
+      noti(peto.kaptilo, error.status, error.mesagxo, "portita");
+      return undefined;
+    }
+    noti(peto.kaptilo, error.status, error.mesagxo, "nova-konversacio");
+  }
+  try {
+    return await konstruiEkranon(peto);
+  } catch (error) {
+    if (!(error instanceof AnbieterRezigno)) throw error;
+    noti(peto.kaptilo, error.status, error.mesagxo, "rezigno");
+    return undefined;
+  }
+}
+
 /** The findings of one checked screen: what the next round gets and what is left at the end. */
 export function trovojDe(e: {
   slug: string;
@@ -462,6 +505,24 @@ export async function kuruEkranojn(
   enigo: EkranojEnigo,
   deps: EkranojDeps,
 ): Promise<EkranojRezulto> {
+  // Spec 038 A-1 (C-1): the caught provider errors of the run; an error that still leaves the run
+  // carries them out (nordstelo's error path writes them into kuro.json).
+  const anbieterfehleroj: AnbieterEraro[] = [];
+  try {
+    return await kuri(enigo, deps, anbieterfehleroj);
+  } catch (error) {
+    if (error instanceof Error && anbieterfehleroj.length > 0) {
+      Object.assign(error, { anbieterfehleroj: [...anbieterfehleroj] });
+    }
+    throw error;
+  }
+}
+
+async function kuri(
+  enigo: EkranojEnigo,
+  deps: EkranojDeps,
+  anbieterfehleroj: AnbieterEraro[],
+): Promise<EkranojRezulto> {
   const varianto: Varianto = enigo.varianto ?? "F";
   const lingvo = enigo.lingvo ?? "de";
   if (deps.chat.modelo !== undefined) gardiModelon({ toString: () => deps.chat.modelo ?? "" });
@@ -507,6 +568,17 @@ export async function kuruEkranojn(
   const fragmentoRondoj = new Map<string, number>();
   let haltigo: Haltigo | undefined;
   let faritaj = 0;
+  const dormi = deps.dormi ?? realaDormo;
+  /** Screens left without any fragment by provider errors (A-1): their reason in `restantaj`. */
+  const senFragmento = new Set<string>();
+  const kaptiloDe = (ekrano: string, rondo: number): FehlerKaptilo => ({
+    ekrano,
+    rondo,
+    provo: 0,
+    eroj: anbieterfehleroj,
+    dormi,
+    log: deps.log,
+  });
 
   const halti = (error: unknown, kie: string): void => {
     const kialo = haltigoDe(error);
@@ -516,7 +588,10 @@ export async function kuruEkranojn(
         `Kostengrenze von ${enigo.maksTokenoj} Tokens erreicht (verbraucht: ${budget.spent}) ${kie}; Teilergebnis.`,
       );
     } else {
-      notoj.push(`${kialo === "tagolimo" ? "Tageslimit" : "Fehler"} ${kie}: ${mesagxoDe(error)}`);
+      // A-1: a provider message may hold parts of the request – cleaned before it is noted.
+      notoj.push(
+        `${kialo === "tagolimo" ? "Tageslimit" : "Fehler"} ${kie}: ${purigiTekston(mesagxoDe(error))}`,
+      );
     }
     deps.log(notoj.at(-1) ?? "");
   };
@@ -549,7 +624,9 @@ export async function kuruEkranojn(
               ? "Die Tokengrenze war erreicht, bevor der Screen gebaut wurde."
               : haltigo === "tagolimo"
                 ? "Das Tageslimit des Anbieters war erreicht, bevor der Screen gebaut wurde."
-                : "Der Screen wurde nicht gebaut.",
+                : senFragmento.has(ekrano.slug)
+                  ? "Anbieterfehler: der Screen blieb nach Wiederholungen und einem frischen Gespräch ohne Fragment (AK-2)."
+                  : "Der Screen wurde nicht gebaut.",
         });
         continue;
       }
@@ -591,6 +668,7 @@ export async function kuruEkranojn(
       faritajRondoj: faritaj,
       notoj,
       ...(senRimedaj.length === 0 ? {} : { senRimedaj }),
+      ...(anbieterfehleroj.length === 0 ? {} : { anbieterfehleroj: [...anbieterfehleroj] }),
     };
     await deps.eligo?.fino?.(rezulto);
     return rezulto;
@@ -622,13 +700,30 @@ export async function kuruEkranojn(
     plano = enigo.plano;
   } else {
     try {
-      const planita = await planiEkranojn({
+      // A-1: the plan request with the catch layer; when it gives up, one fresh plan request, then
+      // the run stops with the reason (no screen started, not an AK-2 violation).
+      const kaptilo = kaptiloDe(PLANA_EKRANO, 0);
+      const planPeto = {
         chat: deps.chat,
         budget,
         peno,
         frazo: enigo.frazo,
         ...(enigo.ekranoj === undefined ? {} : { nomoj: enigo.ekranoj }),
-      });
+        kaptilo,
+      };
+      let planita: Awaited<ReturnType<typeof planiEkranojn>>;
+      try {
+        planita = await planiEkranojn(planPeto);
+      } catch (error) {
+        if (!(error instanceof AnbieterRezigno)) throw error;
+        noti(kaptilo, error.status, error.mesagxo, "nova-konversacio");
+        try {
+          planita = await planiEkranojn(planPeto);
+        } catch (dua) {
+          if (dua instanceof AnbieterRezigno) noti(kaptilo, dua.status, dua.mesagxo, "rezigno");
+          throw dua;
+        }
+      }
       plano = planita.plano;
       notoj.push(...planita.notoj);
     } catch (error) {
@@ -651,6 +746,8 @@ export async function kuruEkranojn(
   for (let r = 1; r <= MAKS_RONDOJ && haltigo === undefined; r += 1) {
     let konstruitaj = 0;
     const malplenaj = new Set<string>();
+    /** A-1: screens whose build of this round ended on provider errors (fragment of before or none). */
+    const anbieterfehleraj = new Set<string>();
     /** C-6: the effort of each build of this round with a request (D-203), `peno` after – before. */
     const penoj = new Map<string, Peno>();
     for (const ekrano of plano.ekranoj) {
@@ -668,7 +765,7 @@ export async function kuruEkranojn(
             : await legiEroProfilojn(deps.tools, eroNomojDe(antaua.fragmento), profiloj, (linio) =>
                 deps.log(`${ekrano.slug} Runde ${r}: ${linio}`),
               );
-        const { fragmento, mankoj, malplena } = await konstruiEkranon({
+        const konstruoPeto: KonstruoPeto & { kaptilo: FehlerKaptilo } = {
           chat: deps.chat,
           budget,
           peno,
@@ -689,7 +786,25 @@ export async function kuruEkranojn(
           log: deps.log,
           ...(sxelo === undefined ? {} : { sxelo }),
           ...(eroProfiloj === undefined ? {} : { eroProfiloj }),
-        });
+          kaptilo: kaptiloDe(ekrano.slug, r),
+        };
+        const konstruo = await konstruiKunKapto(konstruoPeto, antaua?.fragmento !== undefined);
+        if (konstruo === undefined) {
+          // A-1: the screen-round ends on provider errors; the run goes on with the next screen.
+          anbieterfehleraj.add(ekrano.slug);
+          if (antaua?.fragmento === undefined) {
+            if (!fragmentoj.has(ekrano.slug)) senFragmento.add(ekrano.slug);
+            notoj.push(
+              `Runde ${r}: ${ekrano.slug} blieb nach Anbieterfehlern ohne Fragment, auch in einem frischen Gespräch (AK-2 verletzt).`,
+            );
+            deps.log(notoj.at(-1) ?? "");
+          } else {
+            deps.log(`Runde ${r}: ${ekrano.slug} – Anbieterfehler, Fragment der Vorrunde behalten`);
+          }
+          continue;
+        }
+        const { fragmento, mankoj, malplena } = konstruo;
+        senFragmento.delete(ekrano.slug);
         bytes = Buffer.byteLength(fragmento);
         fragmentoj.set(ekrano.slug, fragmento);
         fragmentoRondoj.set(ekrano.slug, r);
@@ -725,7 +840,9 @@ export async function kuruEkranojn(
         if (diferenco.requests > 0) penoj.set(ekrano.slug, diferenco);
       }
     }
-    if (konstruitaj === 0) break;
+    // A-1: a round whose builds all ended on provider errors still counts and is checked (the
+    // screens keep their fragments); the run ends only by „all green“ or three rounds.
+    if (konstruitaj === 0 && anbieterfehleraj.size === 0) break;
     faritaj = r;
     const rondo = await kontroliRondon({
       r,
@@ -738,6 +855,7 @@ export async function kuruEkranojn(
       fragmentoj,
       fragmentoRondoj,
       malplenaj,
+      anbieterfehleraj,
       verdaEkde,
       lastaStato,
       notoj,
@@ -765,6 +883,8 @@ interface RondoKunteksto {
   fragmentoRondoj: ReadonlyMap<string, number>;
   /** Screens whose build of this round ended without markup (S037-10 Befund 1). */
   malplenaj: ReadonlySet<string>;
+  /** Screens whose build of this round ended on provider errors (Spec 038 A-1). */
+  anbieterfehleraj: ReadonlySet<string>;
   verdaEkde: Map<string, number>;
   lastaStato: Map<string, RondoEkrano>;
   notoj: string[];
@@ -873,10 +993,13 @@ async function kontroliRondon(k: RondoKunteksto): Promise<Rondo> {
     });
     // An empty answer is never a green screen, whatever the score of the empty page says.
     const malplena = k.malplenaj.has(ekrano.slug);
-    const malhelpoj: Malhelpo[] = malplena
-      ? [MALPLENA_RESPONDO, ...decido.malhelpoj]
-      : decido.malhelpoj;
-    const verda = decido.verda && !malplena;
+    // A-1: a screen not built this round because of provider errors is not green this round.
+    const anbieterfehlera = k.anbieterfehleraj.has(ekrano.slug);
+    const malhelpoj: Malhelpo[] = [];
+    if (anbieterfehlera) malhelpoj.push(ANBIETERFEHLER);
+    if (malplena) malhelpoj.push(MALPLENA_RESPONDO);
+    malhelpoj.push(...decido.malhelpoj);
+    const verda = decido.verda && !malplena && !anbieterfehlera;
     // A stop left the screen unbuilt this round: its older fragment was checked again.
     const fragmentoRondo = k.fragmentoRondoj.get(ekrano.slug);
     const peno = k.penoj.get(ekrano.slug);

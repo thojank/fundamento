@@ -16,6 +16,7 @@
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, isAbsolute, join, relative } from "node:path";
+import { type AnbieterEraro, puraEro } from "./anbieterfehleroj.js";
 import {
   ekranaDokumento,
   type KadraMarko,
@@ -165,6 +166,11 @@ export interface RaportoJson {
    * screen × round `peno`. Absent when no screen × round carries a `peno` (results before C-6).
    */
   penoPlano?: PenoParto;
+  /**
+   * Every caught provider error of the run (Spec 038 A-1, C-1), messages cleaned; absent when
+   * nothing was caught.
+   */
+  anbieterfehleroj?: AnbieterEraro[];
 }
 
 export interface RaportoEnigo {
@@ -372,6 +378,10 @@ export function raportoDe(e: RaportoEnigo): RaportoJson {
       ? {}
       : { senRimedaj: rezulto.senRimedaj }),
     ...(penoPlano === undefined ? {} : { penoPlano }),
+    // Spec 038 A-1 (C-1): cleaned once more before anything is written.
+    ...(rezulto.anbieterfehleroj === undefined || rezulto.anbieterfehleroj.length === 0
+      ? {}
+      : { anbieterfehleroj: rezulto.anbieterfehleroj.map(puraEro) }),
   };
 }
 
@@ -598,6 +608,23 @@ export function raportoMarkdown(r: RaportoJson): string {
     );
     linioj.push(vico(["Screen", "Regel", "Ort", "Grund"]), "|---|---|---|---|");
     for (const a of r.senRimedaj) linioj.push(vico([a.ekrano, a.regulo, a.loko, a.kialo]));
+    linioj.push("");
+  }
+
+  // Spec 038 A-1 (C-1): the caught provider errors, in order; messages already cleaned.
+  if (r.anbieterfehleroj !== undefined && r.anbieterfehleroj.length > 0) {
+    linioj.push("## Anbieterfehler", "");
+    linioj.push(
+      "Abgefangene Fehler des Anbieters (Meldung ohne Schlüssel). Sie haben den Lauf nicht beendet.",
+      "",
+    );
+    linioj.push(
+      vico(["Screen", "Runde", "Versuch", "Status", "Meldung", "Folge"]),
+      "|---|---|---|---|---|---|",
+    );
+    for (const e of r.anbieterfehleroj) {
+      linioj.push(vico([e.ekrano, e.rondo, e.provo, e.status, e.mesagxo, e.ago]));
+    }
     linioj.push("");
   }
 

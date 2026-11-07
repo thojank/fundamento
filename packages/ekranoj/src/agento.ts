@@ -15,6 +15,7 @@ import {
   type Provider,
   type ToolInfo,
 } from "@fundamento/metiejo";
+import { type FehlerKaptilo, sendiKunKapto } from "./anbieterfehleroj.js";
 import { gardiModelon } from "./gardo.js";
 import { sendiSubBudgxeto } from "./kostoj.js";
 import { SKRIBAJ_ILOJ } from "./mcp-kliento.js";
@@ -277,6 +278,34 @@ export class PlanoMalsukcesis extends Error {
   }
 }
 
+/**
+ * The assistant message of an answer as it goes back into the conversation (Spec 038 A-1,
+ * F-S038-28-1): never one without content and without tool_calls – Mistral refuses that with 400
+ * („Assistant message must have either content or tool_calls, but not none.“). An answer with
+ * tool calls stays as it was; an empty one is left out.
+ */
+export function asistantaMesagxoDe(
+  content: string | null | undefined,
+  toolCalls?: ChatMessage["tool_calls"],
+): ChatMessage | undefined {
+  const teksto = content ?? "";
+  if (toolCalls !== undefined && toolCalls.length > 0) {
+    return { role: "assistant", content: teksto, tool_calls: toolCalls };
+  }
+  return teksto.trim() === "" ? undefined : { role: "assistant", content: teksto };
+}
+
+/** One request: through the catch layer of provider errors when the run gives one (A-1). */
+function sendi(
+  peto: { chat: ChatModel; budget: Budget; peno: Peno; kaptilo?: FehlerKaptilo },
+  messages: ChatMessage[],
+  tools?: readonly ToolInfo[],
+) {
+  return peto.kaptilo === undefined
+    ? sendiSubBudgxeto(peto.chat, peto.budget, messages, tools)
+    : sendiKunKapto(peto.chat, peto.budget, peto.peno, messages, tools, peto.kaptilo);
+}
+
 /** Counts a response into the effort of the run. */
 function kalkuli(peno: Peno, respondo: { input: number; output: number; requests: number }): void {
   peno.inputTokens += respondo.input;
@@ -291,6 +320,8 @@ export interface PlanPeto {
   frazo: string;
   /** The user's screen names: the agent plans purposes and edges for exactly these. */
   nomoj?: readonly string[];
+  /** The catch layer of provider errors (Spec 038 A-1); absent = errors pass through. */
+  kaptilo?: FehlerKaptilo;
 }
 
 /**
@@ -314,7 +345,7 @@ export async function planiEkranojn(peto: PlanPeto): Promise<{ plano: Plano; not
   ];
   const notoj: string[] = [];
   for (let provo = 1; ; provo += 1) {
-    const respondo = await sendiSubBudgxeto(peto.chat, peto.budget, messages);
+    const respondo = await sendi(peto, messages);
     kalkuli(peto.peno, respondo);
     const answer = respondo.message.content ?? "";
     const legita = legiPlanon(answer);
@@ -345,7 +376,8 @@ export async function planiEkranojn(peto: PlanPeto): Promise<{ plano: Plano; not
         : validiPlanon(plano);
     if (plano !== undefined && problemoj.length === 0) return { plano, notoj };
     if (provo >= 2) throw new PlanoMalsukcesis(problemoj);
-    messages.push({ role: "assistant", content: answer });
+    const asistanta = asistantaMesagxoDe(answer);
+    if (asistanta !== undefined) messages.push(asistanta);
     messages.push({
       role: "user",
       content: [
@@ -389,6 +421,8 @@ export interface KonstruoPeto {
   sxelo?: SxelaKunteksto;
   /** The Kurzprofile of the Eroj in the previous round's fragment (new path, rounds 2 and 3). */
   eroProfiloj?: readonly Profilo[];
+  /** The catch layer of provider errors of this screen-round (Spec 038 A-1); absent = pass. */
+  kaptilo?: FehlerKaptilo;
 }
 
 /** What one build conversation gave: the markup, the agent's gaps, and whether it stayed empty. */
@@ -672,9 +706,11 @@ async function redemandi(
   unua: string,
   legita: { mankoj: AgentaManko[] },
 ): Promise<KonstruoRezulto> {
-  messages.push({ role: "assistant", content: unua });
+  // A-1: an empty first answer is not sent back (Mistral refuses it with 400, F-S038-28-1).
+  const asistanta = asistantaMesagxoDe(unua);
+  if (asistanta !== undefined) messages.push(asistanta);
   messages.push({ role: "user", content: peto.varianto === "F" ? REDEMANDO_F : REDEMANDO_0 });
-  const respondo = await sendiSubBudgxeto(peto.chat, peto.budget, messages);
+  const respondo = await sendi(peto, messages);
   kalkuli(peto.peno, respondo);
   const dua = respondo.message.content ?? "";
   const duaLegita = eltiriRespondon(dua, peto.varianto);
@@ -717,12 +753,7 @@ export async function konstruiEkranon(peto: KonstruoPeto): Promise<KonstruoRezul
   let vokoj = 0;
   for (;;) {
     const proponi = peto.varianto === "F" && iloj.length > 0 && vokoj < maksVokoj;
-    const respondo = await sendiSubBudgxeto(
-      peto.chat,
-      peto.budget,
-      messages,
-      proponi ? iloj : undefined,
-    );
+    const respondo = await sendi(peto, messages, proponi ? iloj : undefined);
     kalkuli(peto.peno, respondo);
     const { message } = respondo;
     const petitaj = message.tool_calls ?? [];
@@ -731,7 +762,9 @@ export async function konstruiEkranon(peto: KonstruoPeto): Promise<KonstruoRezul
       const legita = eltiriRespondon(content, peto.varianto);
       return legita.fragmento === "" ? redemandi(peto, messages, content, legita) : legita;
     }
-    messages.push({ role: "assistant", content: message.content ?? "", tool_calls: petitaj });
+    // Has tool_calls, so never empty (A-1); the same message as before.
+    const asistanta = asistantaMesagxoDe(message.content, petitaj);
+    if (asistanta !== undefined) messages.push(asistanta);
     for (const voko of petitaj) {
       vokoj += 1;
       peto.peno.toolCalls += 1;
