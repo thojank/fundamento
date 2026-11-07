@@ -43,6 +43,8 @@ pnpm nordstelo restaro <Laufordner> [--skribi]
                                      --skribi beide Gewichtungen nach restaro.md und in den Verlauf
 pnpm nordstelo --art ablauf [Optionen]
                                      Messung „ganzer Ablauf“ (Spec 037); Optionen mit --art ablauf --help
+pnpm nordstelo --art komparo --antaux <Ordner> --post <Ordner> --out <Ordner>
+                                     Vergleich 4.3 vorher/nachher (Spec 038); Optionen mit --art komparo --help
 
   --env <Datei>        die .env mit FM_KI_ANBIETER, FM_KI_MODELL und dem Schlüssel (Standard: .env im Checkout)
   --taskoj <a,b>       nur diese Aufgaben (Namen aus packages/modelo/data/nordstelo.json)

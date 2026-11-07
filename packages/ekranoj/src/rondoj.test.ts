@@ -7,15 +7,22 @@ import { describe, expect, it } from "vitest";
 import {
   K8_MERKMALOJ,
   K8_REGULOJ,
+  KURZPROFILAJ_KAMPOJ,
   kuruEkranojn,
   MAKS_EKRANOJ,
   MAKS_RONDOJ,
   MalpermesitaModelo,
   NAVIGADA_REGULO,
   NevalidaEnigo,
+  navigadaReguloDe,
   PERMESITA_MODELO,
   PROMPT_0,
+  type RaportoJson,
+  raportoDe,
+  raportoMarkdown,
   SISTEMO_F,
+  TOKENOJ_EKRANO_RONDO_F,
+  TOKENOJ_PLANO,
   trovojDe,
 } from "./index.js";
 import { BildigiloDouble } from "./test-doubles/bildigilo.js";
@@ -28,13 +35,14 @@ import {
   slugDePeto,
 } from "./test-doubles/chat.js";
 import { faktoKunLigiloj, planoKun } from "./test-doubles/faktoj.js";
-import { CXIUJ_ILOJ, MALNOVAJ_ILOJ, MemoraPonto } from "./test-doubles/iloj.js";
+import { CXIUJ_ILOJ, kampojDeTabelo, MALNOVAJ_ILOJ, MemoraPonto } from "./test-doubles/iloj.js";
 import { MALVERDA, neniamVerda, TaksiloDouble, VERDA, verdaEkde } from "./test-doubles/taksilo.js";
 import type {
   BildigoRezulto,
   EkranaDokumento,
   EkranojDeps,
   EkranojEnigo,
+  EkranojRezulto,
   K8Merkmal,
   KostoTakso,
   Peno,
@@ -344,8 +352,108 @@ describe("token limit (AC-9, D-20)", () => {
     expect(okazoj[0]).toBe("takso");
     expect(okazoj.indexOf("takso")).toBeLessThan(okazoj.indexOf("send"));
     expect(linioj[0]).toBe(takso?.satz);
-    expect(takso).toMatchObject({ ekranoj: 2, rondoj: 3, planPeto: true, tokenoj: 425_000 });
+    expect(takso).toMatchObject({
+      ekranoj: 2,
+      rondoj: 3,
+      planPeto: true,
+      tokenoj: 2 * 3 * TOKENOJ_EKRANO_RONDO_F + TOKENOJ_PLANO,
+    });
     expect(rezulto.takso).toEqual(takso);
+  });
+});
+
+describe("Grenze vor der ersten Anfrage einer Runde (S038-25, I-1, D-203, C-2)", () => {
+  const ZAEHLER = ["inputTokens", "outputTokens", "requests", "toolCalls"] as const;
+
+  /** Σ over screens × rounds of `peno`; with a given plan there is no plan request. */
+  function sumoDe(rezulto: EkranojRezulto): Record<(typeof ZAEHLER)[number], number> {
+    const sumo = { inputTokens: 0, outputTokens: 0, requests: 0, toolCalls: 0 };
+    for (const rondo of rezulto.rondoj) {
+      for (const stato of Object.values(rondo)) {
+        if (stato.peno === undefined) continue;
+        for (const z of ZAEHLER) sumo[z] += stato.peno[z];
+      }
+    }
+    return sumo;
+  }
+
+  const raportoMdDe = (rezulto: EkranojRezulto): { md: string; json: RaportoJson } => {
+    const json = raportoDe({
+      id: "s038-25",
+      enigo: enigoDe(),
+      varianto: "F",
+      lingvo: "de",
+      bildigilo: true,
+      rezulto,
+      bildoj: [],
+    });
+    return { md: raportoMarkdown(json), json };
+  };
+
+  it("Grenze vor der ersten Anfrage einer Runde: no peno and no report row for a build that never asked", async () => {
+    const chat = new SkriptaModelo(skripto(PLANO), { modelo: PERMESITA_MODELO });
+    // 120 tokens per request: liste#1, detail#1, liste#2 = 360; detail#2 would bring 480 > 400.
+    const rezulto = await kuruEkranojn(enigoDe({ maksTokenoj: 400 }), depsDe({ chat }));
+    expect(konstruoj(chat)).toEqual(["liste#1", "detail#1", "liste#2"]);
+    expect(rezulto.haltigo).toBe("max-tokens");
+    const detail = rezulto.rondoj[1]?.detail;
+    expect(detail?.portitaEl).toBe(1);
+    expect(detail).toBeDefined();
+    expect(detail).not.toHaveProperty("peno");
+    // The builds that asked keep their effort.
+    expect(rezulto.rondoj[1]?.liste?.peno?.requests).toBe(1);
+    expect(rezulto.rondoj[0]?.detail?.peno?.requests).toBe(1);
+
+    const { md, json } = raportoMdDe(rezulto);
+    expect(md).toContain("| liste | 2 |");
+    expect(md).not.toContain("| detail | 2 |");
+    expect(json.rondoj[1]?.ekranoj.detail?.portitaEl).toBe(1);
+    expect("peno" in (json.rondoj[1]?.ekranoj.detail ?? {})).toBe(false);
+    // Σ screens × rounds + plan = run, for every counter (D-191); the plan is given: plan = 0.
+    const sumo = sumoDe(rezulto);
+    for (const z of ZAEHLER) {
+      expect(sumo[z] + (json.penoPlano?.[z] ?? Number.NaN), z).toBe(rezulto.peno[z]);
+      expect(json.penoPlano?.[z], z).toBe(0);
+    }
+  });
+
+  it("keeps the row of a build that asked at least once but left no fragment (stop in the tool loop)", async () => {
+    // Every build asks describe once, then sends its fragment; 120 tokens per request.
+    const chat = new SkriptaModelo(
+      (peto) => {
+        const slug = slugDePeto(peto);
+        if (slug === undefined) return skripto(PLANO)(peto);
+        if (!peto.messages.some((m) => m.role === "tool")) {
+          return ilaRespondo([{ name: "describe" }]);
+        }
+        return skripto(PLANO)(peto);
+      },
+      { modelo: PERMESITA_MODELO },
+    );
+    // liste#1, detail#1, liste#2 = 6 requests = 720; detail#2 asks once (840), its second
+    // request would bring 960 > 900.
+    const rezulto = await kuruEkranojn(enigoDe({ maksTokenoj: 900 }), depsDe({ chat }));
+    expect(rezulto.haltigo).toBe("max-tokens");
+    expect(konstruoj(chat)).toEqual([
+      "liste#1",
+      "liste#1",
+      "detail#1",
+      "detail#1",
+      "liste#2",
+      "liste#2",
+      "detail#2",
+    ]);
+    const detail = rezulto.rondoj[1]?.detail;
+    expect(detail?.portitaEl).toBe(1);
+    expect(detail?.peno).toMatchObject({ inputTokens: 100, outputTokens: 20, requests: 1 });
+
+    const { md, json } = raportoMdDe(rezulto);
+    expect(md).toContain("| detail | 2 | 100 | 20 | 1 |");
+    const sumo = sumoDe(rezulto);
+    for (const z of ZAEHLER) {
+      expect(sumo[z] + (json.penoPlano?.[z] ?? Number.NaN), z).toBe(rezulto.peno[z]);
+      expect(json.penoPlano?.[z], z).toBe(0);
+    }
   });
 });
 
@@ -936,6 +1044,8 @@ describe("the shell in the system text, the context per screen and round (S038-2
     for (const ero of [PROFILO_SXELO, PROFILO_PAGXO, ARANGXOJ, NAVIGADA_REGULO]) {
       expect(sistemo).toContain(ero);
     }
+    // The rule names exactly the built screens of the run, in plan order (S038-24 F-2).
+    expect(sistemo).toContain(navigadaReguloDe(PLANO.ekranoj.map((ekrano) => ekrano.slug)));
     // Read once per run by ekranoj, not by the agent.
     expect(tools.vokoj.filter((voko) => voko.name === "get_sxablono").map((v) => v.args)).toEqual([
       { name: "sxelo", brief: true, marker: true },
@@ -952,15 +1062,19 @@ describe("the shell in the system text, the context per screen and round (S038-2
     const antaua = rezulto.rondoj[0]?.liste;
     const fragmento = antaua?.fragmento ?? "-";
     const trovoj = JSON.stringify(antaua?.trovoj ?? [], null, 2);
-    // The Kurzprofile of the Eroj of the last fragment (fm-karto, fm-butono), sorted.
+    // The Kurzprofile of the Eroj of the last fragment (fm-karto, fm-butono), sorted: brief and
+    // slots as the answer gives them (S038-24 F-1).
     const profiloj = ["butono", "karto"].map((nomo) =>
-      JSON.stringify({ ero: nomo, description: nomo === "butono" ? "Eine Aktion" : "Eine Karte" }),
+      JSON.stringify(kampojDeTabelo(nomo, KURZPROFILAJ_KAMPOJ)),
     );
     expect(
       tools.vokoj
-        .filter((voko) => voko.name === "get_ero" && String(voko.args.fields) === "brief")
+        .filter((voko) => voko.name === "get_ero" && String(voko.args.fields) === "brief,slots")
         .map((voko) => voko.args.name),
     ).toEqual(["butono", "karto"]);
+    expect(tasko).toContain(
+      "Kurzprofile der Eroj deines Stands (get_ero, brief und slots – nur diese Inhalte je Slot sind erlaubt):",
+    );
     for (const ero of [
       "Screens des Ablaufs:",
       "- liste.html – Titel liste: Zweck von liste",
@@ -1116,8 +1230,8 @@ describe("the shell in the system text, the context per screen and round (S038-2
     expect(sistemo).toContain(PROFILO_SXELO);
     expect(sistemo).not.toContain(PROFILO_PAGXO);
     const dua = konversacioj(chat).get("liste#2")?.[0]?.messages[1]?.content ?? "";
-    expect(dua).toContain(JSON.stringify({ ero: "butono", description: "Eine Aktion" }));
-    expect(dua).not.toContain(JSON.stringify({ ero: "karto", description: "Eine Karte" }));
+    expect(dua).toContain(JSON.stringify(kampojDeTabelo("butono", KURZPROFILAJ_KAMPOJ)));
+    expect(dua).not.toContain(JSON.stringify(kampojDeTabelo("karto", KURZPROFILAJ_KAMPOJ)));
     expect(
       linioj.filter((linio) => linio.includes("pagxo") && linio.includes("nicht erreichbar")),
     ).toHaveLength(1);

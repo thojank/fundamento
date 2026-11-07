@@ -1,0 +1,27 @@
+{
+  "commit": "e4873c57",
+  "kiModelo": "mistral/ministral-14b-2512",
+  "lingvo": "de",
+  "maksTokenoj": 1039000,
+  "markoj": [
+    "komuna",
+    "ekzemplo",
+    "provo",
+    "provo-kompakta"
+  ],
+  "ripetoj": 1,
+  "takso": {
+    "tokenoj": 3570000,
+    "usd": 0.714
+  },
+  "taskoj": [
+    "anmelden-und-konto",
+    "liste-filter-detail",
+    "formular-in-schritten",
+    "einstellungen-konto",
+    "uebersicht-kennzahlen"
+  ],
+  "varianten": [
+    "F"
+  ]
+}

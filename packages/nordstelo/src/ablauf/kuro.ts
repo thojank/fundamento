@@ -31,6 +31,7 @@ import {
   kuroDir,
   LAUF_DOSIERO,
   type LaufRekordo,
+  type PenoKvar,
   type StatoEkrano,
   type Sxargo,
   skribiRaporton,
@@ -249,6 +250,35 @@ function statoDe(rezulto: EkranojRezulto): KuroRekordo["stato"] {
   return stato;
 }
 
+const PENO_KAMPOJ = ["inputTokens", "outputTokens", "requests", "toolCalls"] as const;
+
+/**
+ * The effort per round and screen of a run (Spec 038 C-3): `RondoEkrano.peno` of ekranoj, the
+ * four counters only, and the plan share = run `peno` − Σ of them (as ekranoj's `penoPlanoDe`).
+ * A screen without `peno` has no entry; without any, neither field.
+ */
+export function penojDe(rezulto: EkranojRezulto): Pick<KuroRekordo, "penoj" | "penoPlano"> {
+  const penoj: Record<string, Record<string, PenoKvar>> = {};
+  const plano: PenoKvar = { inputTokens: 0, outputTokens: 0, requests: 0, toolCalls: 0 };
+  for (const kampo of PENO_KAMPOJ) plano[kampo] = rezulto.peno[kampo];
+  for (const [index, rondo] of rezulto.rondoj.entries()) {
+    const own: Record<string, PenoKvar> = {};
+    for (const slug of Object.keys(rondo).sort()) {
+      const peno = rondo[slug]?.peno;
+      if (peno === undefined) continue;
+      own[slug] = {
+        inputTokens: peno.inputTokens,
+        outputTokens: peno.outputTokens,
+        requests: peno.requests,
+        toolCalls: peno.toolCalls,
+      };
+      for (const kampo of PENO_KAMPOJ) plano[kampo] -= peno[kampo];
+    }
+    if (Object.keys(own).length > 0) penoj[String(index + 1)] = own;
+  }
+  return Object.keys(penoj).length === 0 ? {} : { penoj, penoPlano: plano };
+}
+
 /** The whole measurement: every run, its records, then the report. */
 export async function kuriAblaufon(opcioj: AblaufOpcioj, deps: AblaufDeps): Promise<AblaufRezulto> {
   // D-19: another model is refused before anything else happens – no folder, no request.
@@ -378,6 +408,7 @@ export async function kuriAblaufon(opcioj: AblaufOpcioj, deps: AblaufDeps): Prom
           ...(rezulto.haltigo === undefined ? {} : { haltigo: rezulto.haltigo }),
           faritajRondoj: rezulto.faritajRondoj ?? rezulto.rondoj.length,
           peno: rezulto.peno,
+          ...penojDe(rezulto),
           ...(rezulto.takso === undefined
             ? {}
             : {

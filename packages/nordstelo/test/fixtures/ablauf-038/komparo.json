@@ -1,0 +1,637 @@
+{
+  "f0": [
+    {
+      "antaux": {
+        "0": 43,
+        "F": 99.8,
+        "delto": 56.8,
+        "enStreuung": false
+      },
+      "post": {
+        "0": 41.2,
+        "F": 97.7,
+        "delto": 56.5,
+        "enStreuung": false
+      },
+      "tasko": "anmelden-und-konto"
+    }
+  ],
+  "laufoj": {
+    "antaux": [
+      {
+        "commit": "e4873c57",
+        "gestoerta": false,
+        "id": "20261107-1221",
+        "kiModelo": "mistral/ministral-14b-2512",
+        "kunK8": false,
+        "kunPenoj": false,
+        "nekomencitaj": [],
+        "ripetoj": 1,
+        "taskoj": [
+          "anmelden-und-konto",
+          "liste-filter-detail",
+          "formular-in-schritten",
+          "einstellungen-konto",
+          "uebersicht-kennzahlen"
+        ],
+        "varianten": [
+          "0"
+        ]
+      },
+      {
+        "commit": "e4873c57",
+        "gestoerta": false,
+        "id": "20261107-1245",
+        "kiModelo": "mistral/ministral-14b-2512",
+        "kunK8": false,
+        "kunPenoj": false,
+        "nekomencitaj": [],
+        "ripetoj": 1,
+        "taskoj": [
+          "anmelden-und-konto",
+          "liste-filter-detail",
+          "formular-in-schritten",
+          "einstellungen-konto",
+          "uebersicht-kennzahlen"
+        ],
+        "varianten": [
+          "F"
+        ]
+      }
+    ],
+    "post": [
+      {
+        "commit": "bfe19023",
+        "gestoerta": false,
+        "id": "20261107-1146",
+        "kiModelo": "mistral/ministral-14b-2512",
+        "kunK8": true,
+        "kunPenoj": true,
+        "nekomencitaj": [],
+        "ripetoj": 1,
+        "taskoj": [
+          "anmelden-und-konto",
+          "liste-filter-detail",
+          "formular-in-schritten",
+          "einstellungen-konto",
+          "uebersicht-kennzahlen"
+        ],
+        "varianten": [
+          "F",
+          "0"
+        ]
+      }
+    ],
+    "zusatz": null
+  },
+  "paroj": [
+    {
+      "antaux": {
+        "commit": "e4873c57",
+        "ekranoj": 4,
+        "k": {
+          "K1": 1,
+          "K2": 0.9844,
+          "K3": 1,
+          "K4": 1,
+          "K5": 1,
+          "K6": 1
+        },
+        "k7": {
+          "bytes": 3402,
+          "inputTokens": 971573,
+          "ms": 259430,
+          "outputTokens": 13448,
+          "requests": 42,
+          "toolCalls": 89
+        },
+        "k8": null,
+        "k8JeMarko": {},
+        "lastaRondo": "1",
+        "lastoSuperKernoj": false,
+        "lauf": "20261107-1245",
+        "markoj": [
+          "teilweise"
+        ],
+        "navigado": 0.3333,
+        "nekomencitaj": [],
+        "r1r3": {
+          "R1": 99.8,
+          "R3": null,
+          "delto": null
+        },
+        "ripetoj": [
+          1
+        ],
+        "sxablonoj": 0.6,
+        "sxargoj": [
+          {
+            "antaux": {
+              "l1": 5.86,
+              "l15": 6.56,
+              "l5": 6.28
+            },
+            "kernoj": 10,
+            "post": {
+              "l1": 7.52,
+              "l15": 6.62,
+              "l5": 6.65
+            }
+          }
+        ],
+        "tokenoj": {
+          "abgeleitet": true,
+          "jeEkrano": null,
+          "konstruitajEkranRondoj": 4,
+          "mezo": {
+            "eligo": 3362,
+            "enigo": 242893
+          },
+          "penoPlano": null
+        },
+        "total": 99.8,
+        "verdaj": {
+          "komuna": 2
+        }
+      },
+      "antauxKialo": null,
+      "delto": null,
+      "post": {
+        "commit": "bfe19023",
+        "ekranoj": 4,
+        "k": {
+          "K1": 1,
+          "K2": 0.9861,
+          "K3": 1,
+          "K4": 1,
+          "K5": 1,
+          "K6": 0.875
+        },
+        "k7": {
+          "bytes": 3891,
+          "inputTokens": 1167110,
+          "ms": 830155,
+          "outputTokens": 14552,
+          "requests": 65,
+          "toolCalls": 188
+        },
+        "k8": 0.8168,
+        "k8JeMarko": {
+          "ekzemplo": 0.8377,
+          "komuna": 0.8377,
+          "provo": 0.7958,
+          "provo-kompakta": 0.7958
+        },
+        "lastaRondo": "3",
+        "lastoSuperKernoj": false,
+        "lauf": "20261107-1146",
+        "markoj": [],
+        "navigado": 1,
+        "nekomencitaj": [],
+        "r1r3": {
+          "R1": 93.8,
+          "R3": 97.7,
+          "delto": 3.9
+        },
+        "ripetoj": [
+          1
+        ],
+        "sxablonoj": 0.75,
+        "sxargoj": [
+          {
+            "antaux": {
+              "l1": 4.76,
+              "l15": 10.18,
+              "l5": 8.16
+            },
+            "kernoj": 10,
+            "post": {
+              "l1": 4.96,
+              "l15": 7.2,
+              "l5": 5.67
+            }
+          }
+        ],
+        "tokenoj": {
+          "abgeleitet": false,
+          "jeEkrano": {
+            "anmelden": {
+              "jeRondo": {
+                "1": {
+                  "inputTokens": 48260,
+                  "outputTokens": 890,
+                  "requests": 3,
+                  "toolCalls": 28
+                },
+                "2": {
+                  "inputTokens": 34129,
+                  "outputTokens": 602,
+                  "requests": 2,
+                  "toolCalls": 12
+                },
+                "3": {
+                  "inputTokens": 29816,
+                  "outputTokens": 1067,
+                  "requests": 2,
+                  "toolCalls": 7
+                }
+              },
+              "sumo": {
+                "inputTokens": 112205,
+                "outputTokens": 2559,
+                "requests": 7,
+                "toolCalls": 47
+              }
+            },
+            "konto": {
+              "jeRondo": {
+                "1": {
+                  "inputTokens": 260827,
+                  "outputTokens": 2880,
+                  "requests": 15,
+                  "toolCalls": 23
+                },
+                "2": {
+                  "inputTokens": 49553,
+                  "outputTokens": 484,
+                  "requests": 3,
+                  "toolCalls": 11
+                },
+                "3": {
+                  "inputTokens": 63010,
+                  "outputTokens": 1821,
+                  "requests": 4,
+                  "toolCalls": 8
+                }
+              },
+              "sumo": {
+                "inputTokens": 373390,
+                "outputTokens": 5185,
+                "requests": 22,
+                "toolCalls": 42
+              }
+            },
+            "passwort-vergessen": {
+              "jeRondo": {
+                "1": {
+                  "inputTokens": 120763,
+                  "outputTokens": 891,
+                  "requests": 6,
+                  "toolCalls": 18
+                },
+                "2": {
+                  "inputTokens": 31592,
+                  "outputTokens": 1061,
+                  "requests": 2,
+                  "toolCalls": 10
+                },
+                "3": {
+                  "inputTokens": 157954,
+                  "outputTokens": 1450,
+                  "requests": 8,
+                  "toolCalls": 19
+                }
+              },
+              "sumo": {
+                "inputTokens": 310309,
+                "outputTokens": 3402,
+                "requests": 16,
+                "toolCalls": 47
+              }
+            },
+            "registrieren": {
+              "jeRondo": {
+                "1": {
+                  "inputTokens": 119993,
+                  "outputTokens": 1240,
+                  "requests": 6,
+                  "toolCalls": 19
+                },
+                "2": {
+                  "inputTokens": 179534,
+                  "outputTokens": 1602,
+                  "requests": 10,
+                  "toolCalls": 20
+                },
+                "3": {
+                  "inputTokens": 71679,
+                  "outputTokens": 564,
+                  "requests": 4,
+                  "toolCalls": 13
+                }
+              },
+              "sumo": {
+                "inputTokens": 371206,
+                "outputTokens": 3406,
+                "requests": 20,
+                "toolCalls": 52
+              }
+            }
+          },
+          "konstruitajEkranRondoj": 12,
+          "mezo": {
+            "eligo": 1213,
+            "enigo": 97259
+          },
+          "penoPlano": {
+            "inputTokens": 0,
+            "outputTokens": 0,
+            "requests": 0,
+            "toolCalls": 0
+          }
+        },
+        "total": 97.7,
+        "verdaj": {
+          "komuna": 0
+        }
+      },
+      "postKialo": null,
+      "senDelto": "vorher teilweise",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "antaux": {
+        "commit": "e4873c57",
+        "ekranoj": 4,
+        "k": {
+          "K1": 1,
+          "K2": null,
+          "K3": null,
+          "K4": 0,
+          "K5": 0,
+          "K6": 0.9375
+        },
+        "k7": {
+          "bytes": 16066,
+          "inputTokens": 18734,
+          "ms": 156312,
+          "outputTokens": 11827,
+          "requests": 12,
+          "toolCalls": 0
+        },
+        "k8": null,
+        "k8JeMarko": {},
+        "lastaRondo": "3",
+        "lastoSuperKernoj": false,
+        "lauf": "20261107-1221",
+        "markoj": [],
+        "navigado": 0.8333,
+        "nekomencitaj": [],
+        "r1r3": {
+          "R1": 41.2,
+          "R3": 43,
+          "delto": 1.8
+        },
+        "ripetoj": [
+          1
+        ],
+        "sxablonoj": 0.75,
+        "sxargoj": [
+          {
+            "antaux": {
+              "l1": 5.21,
+              "l15": 5.54,
+              "l5": 5.03
+            },
+            "kernoj": 10,
+            "post": {
+              "l1": 8.17,
+              "l15": 5.94,
+              "l5": 6.24
+            }
+          }
+        ],
+        "tokenoj": {
+          "abgeleitet": true,
+          "jeEkrano": null,
+          "konstruitajEkranRondoj": 12,
+          "mezo": {
+            "eligo": 986,
+            "enigo": 1561
+          },
+          "penoPlano": null
+        },
+        "total": 43,
+        "verdaj": {
+          "komuna": 0
+        }
+      },
+      "antauxKialo": null,
+      "delto": {
+        "enStreuung": true,
+        "k": {
+          "K1": 0,
+          "K2": null,
+          "K3": null,
+          "K4": 0,
+          "K5": 0,
+          "K6": -0.0833
+        },
+        "k8": null,
+        "navigado": 0,
+        "sxablonoj": -0.75,
+        "tokenojAbgeleitet": true,
+        "tokenojEnigo": 2048,
+        "total": -1.8
+      },
+      "post": {
+        "commit": "bfe19023",
+        "ekranoj": 4,
+        "k": {
+          "K1": 1,
+          "K2": null,
+          "K3": null,
+          "K4": 0,
+          "K5": 0,
+          "K6": 0.8542
+        },
+        "k7": {
+          "bytes": 19434,
+          "inputTokens": 43308,
+          "ms": 192015,
+          "outputTokens": 12816,
+          "requests": 12,
+          "toolCalls": 0
+        },
+        "k8": 0.1004,
+        "k8JeMarko": {
+          "ekzemplo": 0.0891,
+          "komuna": 0.0656,
+          "provo": 0.1172,
+          "provo-kompakta": 0.1297
+        },
+        "lastaRondo": "3",
+        "lastoSuperKernoj": false,
+        "lauf": "20261107-1146",
+        "markoj": [],
+        "navigado": 0.8333,
+        "nekomencitaj": [],
+        "r1r3": {
+          "R1": 41.2,
+          "R3": 41.2,
+          "delto": 0
+        },
+        "ripetoj": [
+          1
+        ],
+        "sxablonoj": 0,
+        "sxargoj": [
+          {
+            "antaux": {
+              "l1": 4.96,
+              "l15": 7.2,
+              "l5": 5.67
+            },
+            "kernoj": 10,
+            "post": {
+              "l1": 4.52,
+              "l15": 6.71,
+              "l5": 5.23
+            }
+          }
+        ],
+        "tokenoj": {
+          "abgeleitet": false,
+          "jeEkrano": {
+            "anmelden": {
+              "jeRondo": {
+                "1": {
+                  "inputTokens": 305,
+                  "outputTokens": 716,
+                  "requests": 1,
+                  "toolCalls": 0
+                },
+                "2": {
+                  "inputTokens": 5159,
+                  "outputTokens": 1104,
+                  "requests": 1,
+                  "toolCalls": 0
+                },
+                "3": {
+                  "inputTokens": 4741,
+                  "outputTokens": 1129,
+                  "requests": 1,
+                  "toolCalls": 0
+                }
+              },
+              "sumo": {
+                "inputTokens": 10205,
+                "outputTokens": 2949,
+                "requests": 3,
+                "toolCalls": 0
+              }
+            },
+            "konto": {
+              "jeRondo": {
+                "1": {
+                  "inputTokens": 285,
+                  "outputTokens": 689,
+                  "requests": 1,
+                  "toolCalls": 0
+                },
+                "2": {
+                  "inputTokens": 5068,
+                  "outputTokens": 1073,
+                  "requests": 1,
+                  "toolCalls": 0
+                },
+                "3": {
+                  "inputTokens": 5452,
+                  "outputTokens": 1283,
+                  "requests": 1,
+                  "toolCalls": 0
+                }
+              },
+              "sumo": {
+                "inputTokens": 10805,
+                "outputTokens": 3045,
+                "requests": 3,
+                "toolCalls": 0
+              }
+            },
+            "passwort-vergessen": {
+              "jeRondo": {
+                "1": {
+                  "inputTokens": 292,
+                  "outputTokens": 911,
+                  "requests": 1,
+                  "toolCalls": 0
+                },
+                "2": {
+                  "inputTokens": 5254,
+                  "outputTokens": 1288,
+                  "requests": 1,
+                  "toolCalls": 0
+                },
+                "3": {
+                  "inputTokens": 4903,
+                  "outputTokens": 1671,
+                  "requests": 1,
+                  "toolCalls": 0
+                }
+              },
+              "sumo": {
+                "inputTokens": 10449,
+                "outputTokens": 3870,
+                "requests": 3,
+                "toolCalls": 0
+              }
+            },
+            "registrieren": {
+              "jeRondo": {
+                "1": {
+                  "inputTokens": 285,
+                  "outputTokens": 750,
+                  "requests": 1,
+                  "toolCalls": 0
+                },
+                "2": {
+                  "inputTokens": 6031,
+                  "outputTokens": 1094,
+                  "requests": 1,
+                  "toolCalls": 0
+                },
+                "3": {
+                  "inputTokens": 5533,
+                  "outputTokens": 1108,
+                  "requests": 1,
+                  "toolCalls": 0
+                }
+              },
+              "sumo": {
+                "inputTokens": 11849,
+                "outputTokens": 2952,
+                "requests": 3,
+                "toolCalls": 0
+              }
+            }
+          },
+          "konstruitajEkranRondoj": 12,
+          "mezo": {
+            "eligo": 1068,
+            "enigo": 3609
+          },
+          "penoPlano": {
+            "inputTokens": 0,
+            "outputTokens": 0,
+            "requests": 0,
+            "toolCalls": 0
+          }
+        },
+        "total": 41.2,
+        "verdaj": {
+          "komuna": 0
+        }
+      },
+      "postKialo": null,
+      "senDelto": null,
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    }
+  ],
+  "streuung": {
+    "fonto": "specs/034-nachlese-12/plan.md, „Streuung (H 9,8, K 16,7)“",
+    "reiheK": 16.7
+  }
+}

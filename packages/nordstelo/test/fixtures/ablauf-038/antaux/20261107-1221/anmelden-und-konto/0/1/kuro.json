@@ -1,0 +1,77 @@
+{
+  "faritajRondoj": 3,
+  "notoj": [],
+  "peno": {
+    "bytes": 16066,
+    "inputTokens": 18734,
+    "ms": 156312,
+    "outputTokens": 11827,
+    "requests": 12,
+    "toolCalls": 0
+  },
+  "restantaj": 17,
+  "ripeto": 1,
+  "stato": {
+    "1": {
+      "anmelden": {
+        "verda": false
+      },
+      "konto": {
+        "verda": false
+      },
+      "passwort-vergessen": {
+        "verda": false
+      },
+      "registrieren": {
+        "verda": false
+      }
+    },
+    "2": {
+      "anmelden": {
+        "verda": false
+      },
+      "konto": {
+        "verda": false
+      },
+      "passwort-vergessen": {
+        "verda": false
+      },
+      "registrieren": {
+        "verda": false
+      }
+    },
+    "3": {
+      "anmelden": {
+        "verda": false
+      },
+      "konto": {
+        "verda": false
+      },
+      "passwort-vergessen": {
+        "verda": false
+      },
+      "registrieren": {
+        "verda": false
+      }
+    }
+  },
+  "sxargo": {
+    "antaux": {
+      "l1": 5.21,
+      "l15": 5.54,
+      "l5": 5.03
+    },
+    "kernoj": 10,
+    "post": {
+      "l1": 8.17,
+      "l15": 5.94,
+      "l5": 6.24
+    }
+  },
+  "takso": {
+    "tokenoj": 24000,
+    "usd": 0.0048
+  },
+  "tasko": "anmelden-und-konto",
+  "varianto": "0"
+}

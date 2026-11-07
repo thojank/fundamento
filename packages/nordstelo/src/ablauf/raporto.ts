@@ -58,6 +58,9 @@ export interface StatoEkrano {
   verdaEkde?: number;
 }
 
+/** The four counters of an effort that add up across builds (Spec 038 C-3; not `ms`/`bytes`). */
+export type PenoKvar = Pick<Peno, "inputTokens" | "outputTokens" | "requests" | "toolCalls">;
+
 /** `kuro.json`: one ekranoj run of a flow, a variant and a repetition. */
 export interface KuroRekordo {
   tasko: string;
@@ -70,6 +73,14 @@ export interface KuroRekordo {
   eraro?: string;
   faritajRondoj: number;
   peno: Peno;
+  /**
+   * The effort of each build per round and screen, from `RondoEkrano.peno` of ekranoj (Spec 038
+   * C-3, additive): round number → screen slug → the four counters. A build without `peno` (no
+   * request, a carried round, a result before C-6) has no entry; a run without any has no field.
+   */
+  penoj?: Record<string, Record<string, PenoKvar>>;
+  /** The run `peno` minus every entry of {@link penoj}: the share outside the builds (C-3). */
+  penoPlano?: PenoKvar;
   /** The estimate of ekranoj before the run (D-20). */
   takso?: { tokenoj: number; usd?: number };
   /** Round number → screen slug → green state. */

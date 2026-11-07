@@ -1,0 +1,213 @@
+{
+  "aria": [
+    {
+      "name": "Zum Inhalt springen",
+      "role": "link"
+    },
+    {
+      "name": "",
+      "role": "banner"
+    },
+    {
+      "name": "Team Nord",
+      "role": "link"
+    },
+    {
+      "name": "Hauptnavigation",
+      "role": "navigation"
+    },
+    {
+      "level": 2,
+      "name": "Navigation",
+      "role": "heading"
+    },
+    {
+      "name": "",
+      "role": "main"
+    },
+    {
+      "level": 1,
+      "name": "Anmeldung",
+      "role": "heading"
+    },
+    {
+      "name": "E-Mail",
+      "role": "textbox"
+    },
+    {
+      "name": "Passwort",
+      "role": "textbox"
+    },
+    {
+      "name": "Anmelden",
+      "role": "button"
+    },
+    {
+      "name": "Konto anlegen",
+      "role": "link"
+    },
+    {
+      "name": "Passwort vergessen",
+      "role": "link"
+    }
+  ],
+  "bytes": 850,
+  "console": [],
+  "elements": [
+    {
+      "attrs": {},
+      "parent": -1,
+      "tag": "fm-sxelo",
+      "text": ""
+    },
+    {
+      "attrs": {
+        "slot": "brand",
+        "to": "/"
+      },
+      "parent": 0,
+      "tag": "fm-ligilo",
+      "text": "Team Nord"
+    },
+    {
+      "attrs": {
+        "data-orientation": "horizontal",
+        "label": "Hauptnavigation",
+        "page": "anmelden",
+        "slot": "nav"
+      },
+      "parent": 0,
+      "tag": "fm-navigado",
+      "text": ""
+    },
+    {
+      "attrs": {
+        "level": "2"
+      },
+      "parent": 2,
+      "tag": "fm-titolo",
+      "text": "Navigation"
+    },
+    {
+      "attrs": {
+        "slot": "main"
+      },
+      "parent": 0,
+      "tag": "fm-main",
+      "text": ""
+    },
+    {
+      "attrs": {
+        "level": "1"
+      },
+      "parent": 4,
+      "tag": "fm-titolo",
+      "text": "Anmeldung"
+    },
+    {
+      "attrs": {},
+      "parent": 4,
+      "tag": "fm-section",
+      "text": ""
+    },
+    {
+      "attrs": {
+        "kind": "email",
+        "label": "E-Mail",
+        "slot": "content"
+      },
+      "parent": 6,
+      "tag": "fm-kampo",
+      "text": ""
+    },
+    {
+      "attrs": {
+        "kind": "password",
+        "label": "Passwort",
+        "slot": "content"
+      },
+      "parent": 6,
+      "tag": "fm-kampo",
+      "text": ""
+    },
+    {
+      "attrs": {
+        "label": "Anmelden",
+        "slot": "actions",
+        "type": "submit"
+      },
+      "parent": 4,
+      "tag": "fm-butono",
+      "text": ""
+    },
+    {
+      "attrs": {
+        "slot": "actions",
+        "to": "registrieren.html"
+      },
+      "parent": 4,
+      "tag": "fm-ligilo",
+      "text": "Konto anlegen"
+    },
+    {
+      "attrs": {
+        "slot": "actions",
+        "to": "passwort-vergessen.html"
+      },
+      "parent": 4,
+      "tag": "fm-ligilo",
+      "text": "Passwort vergessen"
+    }
+  ],
+  "lingvo": "de",
+  "renders": [
+    {
+      "aspekto": "komuna",
+      "axe": [],
+      "contrast": "default",
+      "scheme": "light"
+    },
+    {
+      "aspekto": "komuna",
+      "axe": [],
+      "contrast": "default",
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "ekzemplo",
+      "axe": [],
+      "contrast": "default",
+      "scheme": "light"
+    },
+    {
+      "aspekto": "ekzemplo",
+      "axe": [],
+      "contrast": "default",
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "provo",
+      "axe": [],
+      "contrast": "default",
+      "scheme": "light"
+    },
+    {
+      "aspekto": "provo",
+      "axe": [],
+      "contrast": "default",
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "axe": [],
+      "contrast": "default",
+      "scheme": "light"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "axe": [],
+      "contrast": "default",
+      "scheme": "dark"
+    }
+  ]
+}

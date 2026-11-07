@@ -651,7 +651,7 @@ export async function kuruEkranojn(
   for (let r = 1; r <= MAKS_RONDOJ && haltigo === undefined; r += 1) {
     let konstruitaj = 0;
     const malplenaj = new Set<string>();
-    /** C-6: the effort of each build of this round, the run's `peno` after minus before. */
+    /** C-6: the effort of each build of this round with a request (D-203), `peno` after – before. */
     const penoj = new Map<string, Peno>();
     for (const ekrano of plano.ekranoj) {
       if (verdaEkde.has(ekrano.slug)) continue;
@@ -719,7 +719,10 @@ export async function kuruEkranojn(
         halti(error, `in Runde ${r} bei ${ekrano.slug}`);
         break;
       } finally {
-        penoj.set(ekrano.slug, penoDiferenco(peno, antauPeno, Date.now() - ekde, bytes));
+        // Spec 038 I-1 (D-203, C-2): only a build that sent at least one request has an effort of
+        // its own; a stop before its first request leaves no entry (and no report row).
+        const diferenco = penoDiferenco(peno, antauPeno, Date.now() - ekde, bytes);
+        if (diferenco.requests > 0) penoj.set(ekrano.slug, diferenco);
       }
     }
     if (konstruitaj === 0) break;

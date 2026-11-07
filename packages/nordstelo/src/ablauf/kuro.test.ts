@@ -8,10 +8,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  type KuruEkranojn,
   kunigiMankojn,
   MalpermesitaModelo,
   type Manko,
   PERMESITA_MODELO,
+  type Peno,
   type Varianto,
 } from "@fundamento/ekranoj";
 import { defaultModeloSource, loadModelo, type Modelo } from "@fundamento/modelo";
@@ -20,7 +22,13 @@ import { type AblaufTasko, planoDe, trovuTaskon } from "./katalogo.js";
 import { type AblaufDeps, kunKomunaBudgxeto, kuriAblaufon, validiAblaufon } from "./kuro.js";
 import type { FluaPoento, KuraPoento } from "./poentoj.js";
 import { legiKatalogon } from "./poentoj.js";
-import { type KuroRekordo, kuroDir, type LaufRekordo, taksiloPorMezuro } from "./raporto.js";
+import {
+  type KuroRekordo,
+  kuroDir,
+  type LaufRekordo,
+  type PenoKvar,
+  taksiloPorMezuro,
+} from "./raporto.js";
 import {
   ASPEKTOJ_DUOBLAJ,
   duoblaKuro,
@@ -360,6 +368,77 @@ describe("the measurement „ganzer Ablauf“", () => {
     );
     expect(raporto.datumoj.kuroj.map((k) => k.lastoSuperKernoj)).toEqual([false, true]);
     expect(raporto.md.match(/\(Last > Kerne\)/g)).toHaveLength(1);
+  });
+
+  it("stores the effort per round and screen of ekranoj as penoj in kuro.json, and the plan share (C-3, AC-6a)", async () => {
+    const out = mkdtempSync(join(tmpdir(), "s038-penoj-"));
+    const duobla = duoblaKuro({ faktoj, sendojPerRondo: 1 });
+    // The double of ekranoj with `peno` per build: F every screen in rounds 1 and 2 except the
+    // first screen in round 2 (no request there); 0 without any `peno` (a result before C-6).
+    const kunPenoj: KuruEkranojn = async (enigo, d) => {
+      const rezulto = await duobla.kuruEkranojn(enigo, d);
+      const unua = rezulto.plano.ekranoj[0]?.slug;
+      return {
+        ...rezulto,
+        rondoj: rezulto.rondoj.map((rondo, index) =>
+          Object.fromEntries(
+            Object.entries(rondo).map(([slug, ekrano]) => {
+              const kun = enigo.varianto === "F" && index < 2 && !(index === 1 && slug === unua);
+              const peno: Peno = {
+                inputTokens: 100 + index,
+                outputTokens: 20,
+                requests: 1,
+                toolCalls: 2,
+                ms: 7,
+                bytes: 9,
+              };
+              return [slug, kun ? { ...ekrano, peno } : ekrano];
+            }),
+          ),
+        ),
+      };
+    };
+    const { dir } = await kuriAblaufon(
+      { taskoj: [LFD], maksTokenoj: 1_000_000, out },
+      deps({ kuruEkranojn: kunPenoj }),
+    );
+    const F = kuroJson(dir, LFD, "F");
+    const slugoj = Object.keys(F.stato["1"] ?? {}).sort();
+    expect(slugoj.length).toBeGreaterThan(1);
+    const unua = taskoDe(LFD).ekranoj[0]?.slug;
+    const dua = Object.keys(F.stato["2"] ?? {})
+      .filter((slug) => slug !== unua)
+      .sort();
+    expect(dua.length).toBeGreaterThan(0);
+    const kvar = (index: number): PenoKvar => ({
+      inputTokens: 100 + index,
+      outputTokens: 20,
+      requests: 1,
+      toolCalls: 2,
+    });
+    expect(F.penoj).toEqual({
+      "1": Object.fromEntries(slugoj.map((slug) => [slug, kvar(0)])),
+      "2": Object.fromEntries(dua.map((slug) => [slug, kvar(1)])),
+    });
+    // Σ penoj + penoPlano = the run peno for the four counters (D-191).
+    const sumo = (kampo: keyof PenoKvar) =>
+      Object.values(F.penoj ?? {})
+        .flatMap((rondo) => Object.values(rondo))
+        .reduce((a, peno) => a + peno[kampo], 0);
+    expect(F.penoPlano).toEqual({
+      inputTokens: F.peno.inputTokens - sumo("inputTokens"),
+      outputTokens: F.peno.outputTokens - sumo("outputTokens"),
+      requests: F.peno.requests - sumo("requests"),
+      toolCalls: F.peno.toolCalls - sumo("toolCalls"),
+    });
+    // No `peno` anywhere: neither field; the other fields as before.
+    const nul = kuroJson(dir, LFD, "0");
+    expect("penoj" in nul).toBe(false);
+    expect("penoPlano" in nul).toBe(false);
+    const { penoj: _penoj, penoPlano: _penoPlano, ...senPenoj } = F;
+    expect(Object.keys(senPenoj).sort()).toEqual(Object.keys(nul).sort());
+    // The report data never carry penoj (integra-raporto.json stays byte-identical).
+    expect(readFileSync(join(dir, "raporto.json"), "utf8")).not.toContain("penoj");
   });
 
   it("checks the settings with structured problems", () => {

@@ -18,17 +18,19 @@ import {
   type KuruEkranojn,
   MalpermesitaModelo,
   type Marko,
+  type Problemo,
   type Varianto,
 } from "@fundamento/ekranoj";
 import { type Provider, parseEnv, providerOf } from "@fundamento/metiejo";
 import { defaultModeloSource, loadModelo, type Modelo } from "@fundamento/modelo";
 import type { Facts, Variant } from "../facts.js";
+import { type KomparoFlanko, komparo, komparoMd, NevalidaKomparo, trovuLaufon } from "./komparo.js";
 import { type AblaufDeps, kuriAblaufon, NevalidaAblauf, validiAblaufon } from "./kuro.js";
 import { legiKatalogon } from "./poentoj.js";
-import { type Sxargo, sxargoDe, taksiloPorMezuro } from "./raporto.js";
+import { type Sxargo, stabilaJson, sxargoDe, taksiloPorMezuro } from "./raporto.js";
 
 /** The values `--art` takes. */
-export const ARTOJ = ["ablauf"] as const;
+export const ARTOJ = ["ablauf", "komparo"] as const;
 
 /** The token limit of a measurement without `--max-tokens`: the slice of one Messpunkt (D-25). */
 export const ABLAUF_MAKS_TOKENOJ = 2_000_000;
@@ -53,6 +55,23 @@ export const HELPO_ABLAUF = `pnpm nordstelo --art ablauf [Optionen]
 
 Exit 0: Bericht geschrieben (auch wenn die Tokengrenze einen Lauf beendet hat), 1: kein Screen
 gebaut oder Fehler, 2: Aufruf, .env oder Modell nicht zulässig.`;
+
+export const HELPO_KOMPARO = `pnpm nordstelo --art komparo --antaux <Ordner> --post <Ordner> --out <Ordner> [Optionen]
+                                     Vergleich 4.3 (Spec 038): vorher gegen nachher je Ablauf ×
+                                     Variante aus den gespeicherten Daten (lauf.json, raporto.json,
+                                     kuro.json) – keine neue Bewertung, kein Modell, kein Browser
+
+  --antaux <Ordner>    Seite „vorher“: ein Laufordner (mit lauf.json) oder ein Ordner mit genau
+                       einem; mehrfach möglich, je Ablauf × Variante höchstens ein Ordner
+  --post <Ordner>      Seite „nachher“, wie --antaux
+  --zusatz <Ordner>    die Zusatzzeile „Stand vor 036 Teil 5“ (steht daneben, wird nicht verglichen)
+  --gestoert <Ordner>  ein gestörter Lauf (laeufe.tsv): seine Werte sind markiert, kein Δ;
+                       mehrfach möglich, muss einer der Ordner oben sein
+  --out <Ordner>       schreibt vergleich.md und vergleich.json
+  --json               die Zusammenfassung (bei Exit 2 die Probleme) als JSON
+
+Exit 0: Vergleich geschrieben, 1: Fehler beim Lesen, 2: Aufruf oder Ordner nicht zulässig
+(z. B. dasselbe Paar Ablauf × Variante zweimal auf einer Seite).`;
 
 /** The command line asks for another kind of measurement (`--art …`). */
 export function petasArton(argv: readonly string[]): boolean {
@@ -240,11 +259,149 @@ export function realaMedio(root: string = ROOT): ArtoMedio {
 const mesagxoDe = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
+/** The value of `--art` on the command line (`--art x` or `--art=x`). */
+function artoDe(argv: readonly string[]): string | undefined {
+  for (const [index, arg] of argv.entries()) {
+    if (arg === "--art") return argv[index + 1];
+    if (arg.startsWith("--art=")) return arg.slice("--art=".length);
+  }
+  return undefined;
+}
+
+/**
+ * `pnpm nordstelo --art komparo` (Spec 038 C-4): reads stored folders only – no .env, no model,
+ * no build. Every problem of the call at once, structured, exit 2.
+ */
+function kuriKomparon(argv: readonly string[], medio: ArtoMedio): number {
+  let values: {
+    antaux?: string[];
+    post?: string[];
+    zusatz?: string;
+    gestoert?: string[];
+    out?: string;
+    json?: boolean;
+    help?: boolean;
+  };
+  try {
+    ({ values } = parseArgs({
+      args: [...argv],
+      allowPositionals: false,
+      options: {
+        art: { type: "string" },
+        antaux: { type: "string", multiple: true },
+        post: { type: "string", multiple: true },
+        zusatz: { type: "string" },
+        gestoert: { type: "string", multiple: true },
+        out: { type: "string" },
+        json: { type: "boolean" },
+        help: { type: "boolean", short: "h" },
+      },
+    }));
+  } catch (error) {
+    medio.stderr(`${mesagxoDe(error)}\n\n${HELPO_KOMPARO}\n`);
+    return 2;
+  }
+  if (values.help === true) {
+    medio.stdout(`${HELPO_KOMPARO}\n`);
+    return 0;
+  }
+  const raporti = (problemoj: readonly Problemo[]): number => {
+    medio.stderr(
+      `${problemoj.map((p) => `${p.path} ${p.rule}: ${p.message} ${p.suggestion}`).join("\n")}\n`,
+    );
+    if (values.json === true) medio.stdout(stabilaJson({ problemoj }));
+    return 2;
+  };
+  const problemoj: Problemo[] = [];
+  const antaux = values.antaux ?? [];
+  const post = values.post ?? [];
+  if (antaux.length === 0)
+    problemoj.push({
+      path: "/antaux",
+      rule: "komparo-flanko-mankas",
+      message: "Die Seite „vorher“ fehlt.",
+      suggestion: "--antaux <Laufordner> angeben (mehrfach möglich).",
+    });
+  if (post.length === 0)
+    problemoj.push({
+      path: "/post",
+      rule: "komparo-flanko-mankas",
+      message: "Die Seite „nachher“ fehlt.",
+      suggestion: "--post <Laufordner> angeben (mehrfach möglich).",
+    });
+  if (values.out === undefined)
+    problemoj.push({
+      path: "/out",
+      rule: "komparo-out-mankas",
+      message: "Der Ordner für vergleich.md und vergleich.json fehlt.",
+      suggestion: "--out <Ordner> angeben.",
+    });
+  // A disturbed folder is named as given or as its run folder; it must be one of the sides.
+  const laufDe = (dir: string): string | undefined => {
+    try {
+      return trovuLaufon(dir);
+    } catch {
+      return undefined;
+    }
+  };
+  const cxiuj = [...antaux, ...post, ...(values.zusatz === undefined ? [] : [values.zusatz])];
+  const konataj = new Set(
+    cxiuj.flatMap((dir) => [resolve(dir), laufDe(dir)].filter((d) => d !== undefined)),
+  );
+  const gestoert = new Set((values.gestoert ?? []).map((dir) => resolve(dir)));
+  for (const [index, dir] of (values.gestoert ?? []).entries()) {
+    if (konataj.has(resolve(dir))) continue;
+    problemoj.push({
+      path: `/gestoert/${index}`,
+      rule: "komparo-gestoert-nekonata",
+      message: `--gestoert ${dir} ist keiner der Ordner von --antaux, --post oder --zusatz.`,
+      suggestion: "Den gestörten Ordner so angeben wie bei --antaux/--post oder seinen Laufordner.",
+    });
+  }
+  if (problemoj.length > 0) return raporti(problemoj);
+
+  const flanko = (dir: string): KomparoFlanko => {
+    const lauf = laufDe(dir);
+    const gestoerta = gestoert.has(resolve(dir)) || (lauf !== undefined && gestoert.has(lauf));
+    return { dir: resolve(dir), ...(gestoerta ? { gestoerta } : {}) };
+  };
+  const out = resolve(String(values.out));
+  try {
+    const datumoj = komparo(
+      antaux.map(flanko),
+      post.map(flanko),
+      values.zusatz === undefined ? {} : { zusatz: flanko(values.zusatz) },
+    );
+    mkdirSync(out, { recursive: true });
+    const md = join(out, "vergleich.md");
+    const json = join(out, "vergleich.json");
+    writeFileSync(json, stabilaJson(datumoj));
+    writeFileSync(md, komparoMd(datumoj));
+    const resumo = {
+      vergleich: md,
+      vergleichJson: json,
+      paroj: datumoj.paroj.length,
+      kunDelto: datumoj.paroj.filter((paro) => paro.delto !== null).length,
+    };
+    if (values.json === true) medio.stdout(`${JSON.stringify(resumo, null, 2)}\n`);
+    else
+      medio.stdout(
+        `Vergleich: ${resumo.paroj} Paare Ablauf × Variante, ${resumo.kunDelto} mit Δ\nBericht: ${md}\n`,
+      );
+    return 0;
+  } catch (error) {
+    if (error instanceof NevalidaKomparo) return raporti(error.problemoj);
+    medio.stderr(`${mesagxoDe(error)}\n`);
+    return 1;
+  }
+}
+
 /** `pnpm nordstelo --art …`: the exit code. */
 export async function kuriArton(
   argv: readonly string[],
   medio: ArtoMedio = realaMedio(),
 ): Promise<number> {
+  if (artoDe(argv) === "komparo") return kuriKomparon(argv, medio);
   const uzo = (mesagxo: string): number => {
     medio.stderr(`${mesagxo}\n\n${HELPO_ABLAUF}\n`);
     return 2;
