@@ -3,7 +3,9 @@
 // cold and warm) runs N times, each run its own test. The report – median and maximum per route,
 // temperature and step, N, the commit and the machine – goes to test-reports/messung-044.json and
 // one short line per step to the log. This file checks the form only (every step there, every
-// number ≥ 0), never a duration: the numbers are for the plan, not a limit.
+// number ≥ 0), never a duration: the numbers are for the plan, not a limit. Since T2 a second part
+// times from outside, without a gate, how long the `stato` of a checked brand takes while the check
+// of another brand runs.
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { cpus } from "node:os";
@@ -20,7 +22,9 @@ import { standOf } from "./eksperto.js";
 import type { MessEintrag, MessSchritt } from "./messung.js";
 import {
   ablauf044,
+  entwurf,
   MARKEN_044,
+  markeAnlegen,
   type TestServilo,
   testServilo,
 } from "./test-doubles/servilo-044.js";
@@ -34,7 +38,10 @@ const N = Number(process.env.FM_MESSUNG_044_N ?? "") || (process.env.CI === unde
 
 const REPORT = new URL("../test-reports/messung-044.json", import.meta.url);
 
-/** The steps each request reports, by route; the check and the stylesheet only when they ran. */
+/**
+ * The steps each request reports, by route; the check and the stylesheet only when they ran. Since
+ * T2 a warm stylesheet comes from the shared store: it reports `marke-laden` only (V-2).
+ */
 const SCHRITTE_JE_ROUTE: Readonly<Record<string, readonly MessSchritt[]>> = {
   pruefung: ["marke-laden", "css-js"],
   stato: ["marke-laden"],
@@ -71,6 +78,15 @@ const einzeln: Record<"structureModelo" | "Struktur-Anteil" | "derivationBasis",
   structureModelo: [],
   "Struktur-Anteil": [],
   derivationBasis: [],
+};
+/**
+ * Spec 044 T2 (step 5), measured from outside (the client's time from sending to the whole
+ * answer): the `stato` of a checked brand sent right after the `/pruefung` of another brand's new
+ * rev, and that `/pruefung` itself.
+ */
+const aussen: Record<"GET stato B während POST pruefung A" | "POST pruefung A", number[]> = {
+  "GET stato B während POST pruefung A": [],
+  "POST pruefung A": [],
 };
 
 beforeAll(async () => {
@@ -116,6 +132,15 @@ afterAll(async () => {
       tabelle.push({
         zeile: `einzeln ${zeile}`,
         schritt: "ableitung",
+        n: values.length,
+        median: round(median(values)),
+        max: round(Math.max(...values)),
+      });
+  for (const [zeile, values] of Object.entries(aussen))
+    if (values.length > 0)
+      tabelle.push({
+        zeile: `außen ${zeile}`,
+        schritt: "gesamt",
         n: values.length,
         median: round(median(values)),
         max: round(Math.max(...values)),
@@ -177,7 +202,13 @@ describe(`the measure of the fixed course (Spec 044, N = ${N})`, () => {
         anfrage.eintraege = gruppe;
         const schritte = gruppe.map((eintrag) => eintrag.schritt);
         const route = anfrage.route;
-        const erwartet = [...(SCHRITTE_JE_ROUTE[route] ?? []), "warten", "gesamt"];
+        const erwartet = [
+          ...(route === "vorschau.css" && anfrage.fall.endsWith(" warm")
+            ? ["marke-laden"]
+            : (SCHRITTE_JE_ROUTE[route] ?? [])),
+          "warten",
+          "gesamt",
+        ];
         // The first request of a rev computes the check: the cold `/pruefung`.
         if (route === "pruefung" && anfrage.fall.endsWith(" kalt"))
           erwartet.push("ableitung+pruefung");
@@ -207,6 +238,35 @@ describe(`the measure of the fixed course (Spec 044, N = ${N})`, () => {
       );
       const agordo = startAgordo("lumeta", "leer");
       einzeln.derivationBasis.push(zeit(() => derivationBasis(agordo, structure, calibration)));
+    });
+  }
+});
+
+describe(`stato while another brand's check runs (Spec 044 T2, from outside, N = ${N})`, () => {
+  const A = "lumeta-w";
+  const B = "brikola-w";
+  beforeAll(async () => {
+    await markeAnlegen(server, A, "leer");
+    await markeAnlegen(server, B, "leer");
+    // B is checked on its rev: its `stato` needs no computation of its own.
+    expect((await server.anfrage("POST", `/api/marko/${B}/pruefung`)).status).toBe(200);
+  });
+  for (let lauf = 1; lauf <= N; lauf++) {
+    it(`run ${lauf}: the stato of B is answered`, async () => {
+      // A new rev of A each run (invented colours), so its `/pruefung` computes.
+      await entwurf(server, A, { leitfarbe: lauf % 2 === 0 ? "#336699" : "#7a3e9d" });
+      const startA = performance.now();
+      const pruefung = server
+        .anfrage("POST", `/api/marko/${A}/pruefung`)
+        .then((antwort) => ({ antwort, ms: performance.now() - startA }));
+      const startB = performance.now();
+      const stato = await server.anfrage("GET", `/api/marko/${B}/stato`);
+      const msB = performance.now() - startB;
+      const a = await pruefung;
+      expect([a.antwort.status, stato.status]).toEqual([200, 200]);
+      expect(msB >= 0 && a.ms >= 0).toBe(true);
+      aussen["GET stato B während POST pruefung A"].push(msB);
+      aussen["POST pruefung A"].push(a.ms);
     });
   }
 });

@@ -1,7 +1,7 @@
 // Spec 044 (D-03, V-2): where the time of a request goes. With a sink in `ServiloOptions.messung`
 // each measured request reports, when its response is finished, one entry per step it ran – the
 // summed duration of that step – then `warten` (from entering the handler to the start of its own
-// work) and `gesamt` (from entering the handler to the end of the response). Without a sink nothing
+// work, plus the time it waited on a shared computation another request runs) and `gesamt` (from entering the handler to the end of the response). Without a sink nothing
 // is measured, written or reported: every step just runs. Node's `performance` only.
 
 import type { ServerResponse } from "node:http";
@@ -40,10 +40,19 @@ export interface Messung {
   schritt<T>(schritt: MessSchritt, work: () => T): T;
   /** The rev the request found (its draft's, when it was loaded). */
   rev(rev: number): void;
+  /**
+   * Time the request waited on a computation another request runs (the shared check or stylesheet,
+   * Spec 044 V-5); it counts to `warten`.
+   */
+  warten(ms: number): void;
 }
 
 /** Runs every step unmeasured: the measure of a server without a sink. */
-export const OHNE_MESSUNG: Messung = { schritt: (_schritt, work) => work(), rev: () => undefined };
+export const OHNE_MESSUNG: Messung = {
+  schritt: (_schritt, work) => work(),
+  rev: () => undefined,
+  warten: () => undefined,
+};
 
 /**
  * The measure of a request to `route` of `marke`, entered at `eingang` (`performance.now()`); its
@@ -63,6 +72,7 @@ export function messungOf(
   const offen: number[] = [];
   let beginn: number | undefined;
   let rev = 0;
+  let geteilt = 0;
   response.once("finish", () => {
     const ende = performance.now();
     const report = (schritt: MessSchritt, ms: number) => senke({ route, marke, rev, schritt, ms });
@@ -70,7 +80,7 @@ export function messungOf(
       const ms = dauer[schritt];
       if (ms !== undefined) report(schritt, ms);
     }
-    report("warten", (beginn ?? ende) - eingang);
+    report("warten", (beginn ?? ende) - eingang + geteilt);
     report("gesamt", ende - eingang);
   });
   return {
@@ -90,6 +100,9 @@ export function messungOf(
     },
     rev: (value) => {
       rev = value;
+    },
+    warten: (ms) => {
+      geteilt += ms;
     },
   };
 }

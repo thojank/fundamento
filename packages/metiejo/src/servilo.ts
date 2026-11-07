@@ -30,6 +30,7 @@ import {
   type ValidationIssue,
   WCAG2_METRIC,
 } from "@fundamento/modelo";
+import { cssSpeicherOf, type PruefEintrag, type PruefTor, pruefSpeicherOf } from "./ableitungen.js";
 import { avertoOf, KONFIRMO_TEKSTO } from "./asistanto/averto.js";
 import { babili } from "./asistanto/babilo.js";
 import { asistantoScreen } from "./asistanto/ekrano.js";
@@ -219,6 +220,11 @@ export interface ServiloOptions {
    * entry per step when the response is finished; absent, nothing is measured.
    */
   messung?: MessSenke;
+  /**
+   * Spec 044 (V-3): a test seam awaited inside the shared check before it computes, once per
+   * computation; absent in production (no await, no difference).
+   */
+  pruefTor?: PruefTor;
 }
 
 export interface ServiloIo {
@@ -234,8 +240,8 @@ export interface Servilo {
 interface Draft {
   agordo: Agordo;
   rev: number;
-  /** The derivation with every check of the draft at `checked`, so a page needs it once per change. */
-  pruefung?: { rev: number; derivation: Derivation };
+  /** The check of the draft's rev (Spec 044, V-5): one shared computation per change. */
+  pruefung?: PruefEintrag;
   upload?: { filename: string; family: string; path: string };
   privataResult?: string;
   eksporto?: { sentences: string[]; issues: string[] };
@@ -405,6 +411,16 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
   const bases: Bases = loadBases();
   const tiparoj = readTiparoj();
   const drafts = new Map<string, Draft>();
+  // Spec 044 (V-5): the check per draft and rev, the stylesheet of the preview per brand, rev and
+  // proposal; each computed once and shared by the requests that ask while it runs.
+  const pruefSpeicher = pruefSpeicherOf(
+    async (agordo) => checkDraft(agordo, bases),
+    options.pruefTor,
+  );
+  const cssSpeicher = cssSpeicherOf(
+    async (agordo, messung) => previewCss(agordo, bases, messung),
+    (marke) => drafts.get(marke)?.rev,
+  );
   const erojDist = join(
     dirname(fileURLToPath(import.meta.resolve("@fundamento/eroj/package.json"))),
     "dist",
@@ -538,12 +554,14 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     };
   };
 
+  /** The input of a screen; `stand` is the draft as a request found it (Spec 044, V-5.4). */
   const inputOf = (
     key: SxtupoKey,
     name: string | undefined,
     extra: Partial<ScreenInput> = {},
+    stand?: Pick<Draft, "agordo" | "rev">,
   ): ScreenInput => {
-    const draft = name === undefined ? undefined : draftOf(name);
+    const draft = name === undefined ? undefined : (stand ?? draftOf(name));
     const marko = name === undefined ? undefined : readMarko(options.workdir, name);
     const input: ScreenInput = {
       sxtupo: key,
@@ -566,16 +584,31 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     return input;
   };
 
-  /** The derivation with every check of a draft, once per revision. */
-  const pruefungOf = (draft: Draft, messung: Messung = OHNE_MESSUNG): Derivation => {
-    if (draft.pruefung?.rev !== draft.rev) {
-      draft.pruefung = {
-        rev: draft.rev,
-        derivation: messung.schritt("ableitung+pruefung", () => checkDraft(draft.agordo, bases)),
-      };
-    }
-    return draft.pruefung.derivation;
+  /**
+   * The derivation with every check of a draft, once per revision (Spec 044, V-5): of the draft's
+   * Agordo and rev when asked, shared by every request that asks while it runs.
+   */
+  const pruefungOf = (
+    name: string,
+    draft: Draft,
+    messung: Messung = OHNE_MESSUNG,
+  ): Promise<Derivation> => pruefSpeicher.pruefung(draft, name, messung);
+  /**
+   * The check for the synchronous tools of the Asistanto (Spec 044, A-03): the shared result when
+   * it is there, else computed here as before and entered for its rev.
+   */
+  const pruefungJetzt = (draft: Draft): Derivation => {
+    const fertig = pruefSpeicher.fertig(draft);
+    if (fertig !== undefined) return fertig;
+    const derivation = checkDraft(draft.agordo, bases);
+    pruefSpeicher.eintragen(draft, derivation);
+    return derivation;
   };
+  /** The open problems of a check: a fixed rule, or an adjustable one without its Jugxo. */
+  const offeneProblemeOf = (derivation: Derivation) =>
+    derivation.raporto.violations.filter(
+      (violation) => violation.fixed || violation.jugxo === undefined,
+    );
   const problemeOf = (derivation: Derivation): number => {
     const { violations } = derivation.raporto.summary;
     return violations.fixed + violations.adjustable - violations.covered;
@@ -626,8 +659,12 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     };
   };
 
-  const klartextOfDraft = (draft: Draft, messung: Messung = OHNE_MESSUNG): Klartext => {
-    const { raporto } = pruefungOf(draft, messung);
+  const klartextOfDraft = async (
+    name: string,
+    draft: Draft,
+    messung: Messung = OHNE_MESSUNG,
+  ): Promise<Klartext> => {
+    const { raporto } = await pruefungOf(name, draft, messung);
     return messung.schritt("css-js", () => klartextOf(raporto));
   };
 
@@ -651,16 +688,30 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
 
   // Spec 033 S1: the state of the brand model of a draft – the Kroniko, and the open problems of the
   // check (a fixed rule, or an adjustable one without its Jugxo).
-  const statoOf = (name: string, draft: Draft, messung: Messung = OHNE_MESSUNG): Vollstaendigkeit =>
-    vollstaendigkeitOf({
-      facetoj,
-      modelo: modeloOf(),
-      agordo: draft.agordo,
-      kroniko: readKroniko(options.workdir, name),
-      probleme: pruefungOf(draft, messung).raporto.violations.filter(
-        (violation) => violation.fixed || violation.jugxo === undefined,
-      ),
-    });
+  // Spec 044 (V-5.4): of the draft as the request found it – its Agordo and Kroniko at the start,
+  // the check of that rev.
+  const statoOf = async (
+    name: string,
+    draft: Draft,
+    messung: Messung = OHNE_MESSUNG,
+  ): Promise<Vollstaendigkeit> => {
+    const modelo = modeloOf();
+    const agordo = draft.agordo;
+    const kroniko = readKroniko(options.workdir, name);
+    const probleme = offeneProblemeOf(await pruefungOf(name, draft, messung));
+    return vollstaendigkeitOf({ facetoj, modelo, agordo, kroniko, probleme });
+  };
+  /**
+   * For a change: the state of the draft as it is when the change goes on; its rev may move while
+   * the check runs, then the state of the new rev.
+   */
+  const statoJetzt = async (name: string, draft: Draft): Promise<Vollstaendigkeit> => {
+    for (;;) {
+      const rev = draft.rev;
+      const stato = await statoOf(name, draft);
+      if (draft.rev === rev) return stato;
+    }
+  };
 
   /** The foreign brand the brand builds on, and whether its confirmation came after (Art. VI, 1). */
   const fremdaOf = (
@@ -694,13 +745,10 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       bases,
       agordo: () => draft.agordo,
       apliki,
-      probleme: () =>
-        pruefungOf(draft).raporto.violations.filter(
-          (violation) => violation.fixed || violation.jugxo === undefined,
-        ),
+      probleme: () => offeneProblemeOf(pruefungJetzt(draft)),
       kroniko: () => readKroniko(options.workdir, name),
       kontrolita: true,
-      pruefung: () => klartextOfDraft(draft),
+      pruefung: () => klartextOf(pruefungJetzt(draft).raporto),
     });
 
   /**
@@ -798,7 +846,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           rev: draft.rev,
           atendoj: 0,
           sxangxoj: [],
-          stato: statoOf(name, draft),
+          stato: await statoOf(name, draft),
           zaehlilo: zaehliloOf(name),
         },
       };
@@ -807,6 +855,10 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     if (provider === undefined) return { status: 503, body: { satz: kiSatz() } };
     if (teksto === "")
       return { status: 422, body: { satz: "Schreib oder sag, was du ändern möchtest." } };
+    // Spec 044 (A-03): the tools of a turn stay synchronous; the shared check of the draft is
+    // awaited before the turn, so they find it. A failed check fails where it fails today (when a
+    // tool or the answer needs it), so its error is not raised here.
+    await pruefungOf(name, draft).catch(() => undefined);
     const historio = babiloj.get(name) ?? [];
     const buehne = faceto === undefined ? undefined : buehneOf(name, draft, faceto);
     try {
@@ -863,7 +915,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           kosto: result.kosto,
           atendoj: result.atendoj,
           sxangxoj: result.sxangxoj,
-          stato: statoOf(name, draft),
+          stato: await statoOf(name, draft),
           zaehlilo: zaehliloOf(name),
         },
       };
@@ -1038,12 +1090,13 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     return "Wähle einen anderen Wert.";
   };
 
-  function festlegen(
+  async function festlegen(
     name: string,
     draft: Draft,
     body: Record<string, unknown>,
     reply: (value: unknown, status?: number) => void,
-  ): void {
+  ): Promise<void> {
+    const rev = draft.rev;
     const token = typeof body.token === "string" ? body.token : "";
     if (!/^[a-z0-9]+(\.[a-z0-9-]+)*$/.test(token)) {
       reply(
@@ -1168,7 +1221,9 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     let derivation: Derivation | undefined;
     let betroffen: string[] = [];
     if (checked) {
-      const before = pruefungOf(draft);
+      const before = await pruefungOf(name, draft);
+      // Spec 044: the draft moved on while its check ran; the setting goes onto the draft as it is.
+      if (draft.rev !== rev) return festlegen(name, draft, body, reply);
       derivation = checkDraft(agordo, bases);
       const known = new Set(before.issues.map((issue) => `${issue.rule} ${issue.path}`));
       const fresh = derivation.issues.filter(
@@ -1207,11 +1262,12 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       }
     }
     setDraft(name, draft, agordo);
-    if (derivation !== undefined) draft.pruefung = { rev: draft.rev, derivation };
+    // V-5.5: the check of the new rev is the one just computed.
+    if (derivation !== undefined) pruefSpeicher.eintragen(draft, derivation);
     reply({
       rev: draft.rev,
       herkunft: herkunftOf(agordo, token),
-      probleme: problemeOf(pruefungOf(draft)),
+      probleme: problemeOf(await pruefungOf(name, draft)),
       betroffen,
     });
   }
@@ -1221,18 +1277,18 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
    * the path of every change of the Studio: setDraft (a new rev), the check, a refusal with its
    * rule. Returns the number of the feedback the page after it shows (`?rueckmeldung=<n>`).
    */
-  const studioUebernehmen = (
+  const studioUebernehmen = async (
     name: string,
     draft: Draft,
     groups: readonly StudioGroup[],
     values: URLSearchParams,
-  ): number => {
+  ): Promise<number> => {
     const { aenderungen, abgelehnt } = studioAenderungen(groups, values);
     const rueckmeldung: StudioRueckmeldung = { uebernommen: [], abgelehnt, betroffen: [] };
     for (const aenderung of aenderungen) {
       let status = 200;
       let answer: Record<string, unknown> = {};
-      festlegen(
+      await festlegen(
         name,
         draft,
         {
@@ -1531,7 +1587,9 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         return;
       }
       messung.rev(draft.rev);
-      const stato = statoOf(name, draft, messung);
+      // Spec 044 (V-5.4): the page shows the draft as the request found it, with the check of that rev.
+      const { agordo, rev } = draft;
+      const stato = await statoOf(name, draft, messung);
       const current =
         stato.facetoj.find((entry) => entry.name === page) ??
         (page === undefined ? undefined : null);
@@ -1551,7 +1609,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       sendHtml(
         response,
         asistantoScreen({
-          marko: { name, label: draft.agordo.etikedoj?.marko ?? name, rev: draft.rev },
+          marko: { name, label: agordo.etikedoj?.marko ?? name, rev },
           faceto: { ...current, kialo: faceto?.kialo ?? "" },
           vollstaendigkeit: stato,
           historio: babiloj.get(name) ?? [],
@@ -1563,8 +1621,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           // Spec 036, Befund 2.2: the step that names the Agordo field shows the Zweitfarbe.
           ...(faceto?.agordo.includes("zweitfarbe") === true
             ? {
-                zweitfarbe:
-                  draft.agordo.zweitfarbe === undefined ? {} : { wert: draft.agordo.zweitfarbe },
+                zweitfarbe: agordo.zweitfarbe === undefined ? {} : { wert: agordo.zweitfarbe },
               }
             : {}),
           zaehlilo: zaehliloOf(name).satz,
@@ -1604,10 +1661,12 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       }
       messung.rev(draft.rev);
       if (action === "stato" && method === "GET") {
-        const stato = statoOf(name, draft, messung);
+        // Spec 044 (V-5.4): the state of the rev the request found.
+        const rev = draft.rev;
+        const stato = await statoOf(name, draft, messung);
         const fremda = fremdaOf(name);
         sendJson(response, {
-          rev: draft.rev,
+          rev,
           prozent: stato.prozent,
           definiert: stato.definiert,
           facetoj: stato.facetoj,
@@ -1701,7 +1760,9 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       if (action === "faceto") {
         const faceto = typeof body.faceto === "string" ? body.faceto : "";
         const ago = body.ago;
-        const stand = statoOf(name, draft).facetoj.find((entry) => entry.name === faceto);
+        const stand = (await statoJetzt(name, draft)).facetoj.find(
+          (entry) => entry.name === faceto,
+        );
         if (
           stand === undefined ||
           (ago !== "akcepto" && ago !== "liberigo" && ago !== "remalfermo")
@@ -1743,7 +1804,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           }
         }
         kroniko(name, { ago, fonto: "regilo", faceto });
-        sendJson(response, { rev: draft.rev, stato: statoOf(name, draft) });
+        sendJson(response, { rev: draft.rev, stato: await statoOf(name, draft) });
         return;
       }
       if (action === "esplori") {
@@ -1970,6 +2031,8 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           trovoj.some((trovo) => trovo.kind === "farbo");
         let turn: Awaited<ReturnType<typeof babili>> | undefined;
         if (provider !== undefined && !colourFixed) {
+          // Spec 044 (A-03): as in a chat turn, the shared check first; its error stays where it is.
+          await pruefungOf(name, draft).catch(() => undefined);
           try {
             turn = await babili({
               provider,
@@ -2025,7 +2088,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           // Spec 036, D-95: what the person must know of the inspiration, shown before going on.
           notoj,
           rev: draft.rev,
-          stato: statoOf(name, draft),
+          stato: await statoOf(name, draft),
           ...(turn === undefined ? {} : { antwort: turn.antwort, kosto: turn.kosto }),
         });
         return;
@@ -2194,7 +2257,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       }
       messung.rev(draft.rev);
       if (action === "pruefung") {
-        const klartext = klartextOfDraft(draft, messung);
+        const klartext = await klartextOfDraft(name, draft, messung);
         sendJson(response, {
           ...klartext,
           html: messung.schritt("css-js", () => klartextHtml(klartext, { firstAsMain: true })),
@@ -2239,7 +2302,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         return;
       }
       if (action === "festlegen") {
-        festlegen(name, draft, body, (value, status) => sendJson(response, value, status));
+        await festlegen(name, draft, body, (value, status) => sendJson(response, value, status));
         return;
       }
       if (action === "entwurf") {
@@ -2340,10 +2403,12 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           zeloOf(url.searchParams),
         );
         const values = new URLSearchParams(await readBody(request));
-        const n = studioUebernehmen(name, draft, groups, values);
+        const n = await studioUebernehmen(name, draft, groups, values);
         redirect(response, studioZurueck(path, url.searchParams, n));
         return;
       }
+      // Spec 044 (V-5.4): the page shows the draft as the request found it, with the check of that rev.
+      const { agordo, rev } = draft;
       const rueckmeldung = rueckmeldungOf(draft, url.searchParams);
       const feedback = rueckmeldung === undefined ? {} : studioFeedback(rueckmeldung);
       const marko = readMarko(options.workdir, name);
@@ -2351,26 +2416,19 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         response,
         komponentoScreen({
           view: (() => {
-            const view = komponentoView(
-              ref,
-              draft.agordo,
-              bases,
-              kombination,
-              zeloOf(url.searchParams),
-            );
+            const view = komponentoView(ref, agordo, bases, kombination, zeloOf(url.searchParams));
             return { ...view, groups: mitRueckmeldung(view.groups, rueckmeldung) };
           })(),
           marko: {
             name,
-            agordo: draft.agordo,
-            saved:
-              marko !== undefined && JSON.stringify(marko.agordo) === JSON.stringify(draft.agordo),
-            rev: draft.rev,
+            agordo,
+            saved: marko !== undefined && JSON.stringify(marko.agordo) === JSON.stringify(agordo),
+            rev,
           },
           kombination,
           komponentoj: komponentoList(bases),
-          probleme: problemeOf(pruefungOf(draft)),
-          expert: expertOf(draft.agordo),
+          probleme: problemeOf(await pruefungOf(name, draft)),
+          expert: expertOf(agordo),
           ...(feedback.message === undefined ? {} : { message: feedback.message }),
           ...(feedback.betroffen === undefined ? {} : { betroffen: feedback.betroffen }),
         }),
@@ -2404,12 +2462,14 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         // Spec 035 Teil 3 (3.1): the formularo posts the values a person changed to its page.
         const groups = studioRows(page, draft.agordo, bases, kombination);
         const values = new URLSearchParams(await readBody(request));
-        const n = studioUebernehmen(name, draft, groups, values);
+        const n = await studioUebernehmen(name, draft, groups, values);
         redirect(response, studioZurueck(path, url.searchParams, n));
         return;
       }
+      // Spec 044 (V-5.4): the page shows the draft as the request found it, with the check of that rev.
+      const { agordo, rev } = draft;
       const marko = readMarko(options.workdir, name);
-      const derivation = pruefungOf(draft);
+      const derivation = await pruefungOf(name, draft);
       const rueckmeldung = rueckmeldungOf(draft, url.searchParams);
       const feedback = rueckmeldung === undefined ? {} : studioFeedback(rueckmeldung);
       const message =
@@ -2427,18 +2487,17 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           averto: avertoOf(fremdaOf(name)),
           marko: {
             name,
-            agordo: draft.agordo,
-            saved:
-              marko !== undefined && JSON.stringify(marko.agordo) === JSON.stringify(draft.agordo),
-            rev: draft.rev,
+            agordo,
+            saved: marko !== undefined && JSON.stringify(marko.agordo) === JSON.stringify(agordo),
+            rev,
           },
           kombination,
-          groups: mitRueckmeldung(studioRows(page, draft.agordo, bases, kombination), rueckmeldung),
+          groups: mitRueckmeldung(studioRows(page, agordo, bases, kombination), rueckmeldung),
           probleme: problemeOf(derivation),
           ...(message === undefined ? {} : { message }),
           ...(feedback.problem === undefined ? {} : { problem: feedback.problem }),
           ...(feedback.betroffen === undefined ? {} : { betroffen: feedback.betroffen }),
-          expert: expertOf(draft.agordo),
+          expert: expertOf(agordo),
           komponentoj: komponentoList(bases),
         }),
       );
@@ -2499,53 +2558,63 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           : (readAgordo(mergedAgordo(draft.agordo, open.agordo)).agordo ?? draft.agordo);
       };
       if (method === "GET" && key === "vorschau" && css === ".css") {
-        response
-          .writeHead(200, { "content-type": TYPES[".css"] ?? "" })
-          .end(previewCss(messung.schritt("marke-laden", shown), bases, messung));
+        // Spec 044 (A-02, B-4): the stylesheet of the rev and the proposal the request found, from
+        // the shared store. The head goes out first as before: a failed derivation still ends the
+        // response with 200 and an empty body (the server's catch), not with 500.
+        response.writeHead(200, { "content-type": TYPES[".css"] ?? "" });
+        const rev = draft.rev;
+        const agordo = messung.schritt("marke-laden", shown);
+        response.end(await cssSpeicher.css(name, rev, propono ?? "", agordo, messung));
         return;
       }
       if (method === "GET" && key === "vorschau" && url.searchParams.has("sxtupo")) {
         const sxtupo = url.searchParams.get("sxtupo") ?? "vorschau";
         const breite = url.searchParams.get("breite") ?? "mittel";
+        // Spec 044 (A-04, V-5.4): of the draft as the request found it. Only the stage's frame
+        // „Jetzt“ waits for the check of that rev; every other frame waits for nothing.
+        const rev = draft.rev;
         const agordo = messung.schritt("marke-laden", shown);
+        const teile = messung.schritt("css-js", () => ({
+          fontFace: fontFaceOf(agordo),
+          scheme:
+            url.searchParams.get("scheme") === "dark" ? ("dark" as const) : ("light" as const),
+          attributes: Object.fromEntries(
+            (["density", "contrast", "viewport"] as const)
+              .map((key) => [`data-fm-${key}`, url.searchParams.get(key) ?? ""])
+              .filter(([, value]) => value !== ""),
+          ),
+          body: previewBody(
+            isSxtupoKey(sxtupo) ||
+              sxtupo.startsWith("studio-") ||
+              sxtupo.startsWith("komponento-") ||
+              sxtupo.startsWith("buehne-")
+              ? sxtupo
+              : "vorschau",
+            breite,
+            agordo,
+            zeloOf(url.searchParams),
+          ),
+        }));
+        // Spec 036, Befund 3.5: the stage's frame „Jetzt“ shows the open problems of the draft's
+        // check per component (the step's state counts the same problems).
+        const derivation =
+          sxtupo.startsWith("buehne-") && propono === null
+            ? await pruefungOf(name, draft, messung)
+            : undefined;
         sendHtml(
           response,
           messung.schritt("css-js", () =>
             previewDocument({
               name,
-              cssHref: `/marko/${encodeURIComponent(name)}/vorschau.css?rev=${draft.rev}${propono === null ? "" : `&propono=${encodeURIComponent(propono)}`}`,
-              fontFace: fontFaceOf(agordo),
-              scheme: url.searchParams.get("scheme") === "dark" ? "dark" : "light",
-              attributes: Object.fromEntries(
-                (["density", "contrast", "viewport"] as const)
-                  .map((key) => [`data-fm-${key}`, url.searchParams.get(key) ?? ""])
-                  .filter(([, value]) => value !== ""),
-              ),
+              cssHref: `/marko/${encodeURIComponent(name)}/vorschau.css?rev=${rev}${propono === null ? "" : `&propono=${encodeURIComponent(propono)}`}`,
+              fontFace: teile.fontFace,
+              scheme: teile.scheme,
+              attributes: teile.attributes,
               body:
-                previewBody(
-                  isSxtupoKey(sxtupo) ||
-                    sxtupo.startsWith("studio-") ||
-                    sxtupo.startsWith("komponento-") ||
-                    sxtupo.startsWith("buehne-")
-                    ? sxtupo
-                    : "vorschau",
-                  breite,
-                  agordo,
-                  zeloOf(url.searchParams),
-                ) +
-                // Spec 036, Befund 3.5: the stage's frame „Jetzt“ shows the open problems of the
-                // draft's check per component (the step's state counts the same problems).
-                (sxtupo.startsWith("buehne-") && propono === null
-                  ? pruefungHtml(
-                      pruefmarkojOf(
-                        pruefungOf(draft, messung).raporto.violations.filter(
-                          (violation) => violation.fixed || violation.jugxo === undefined,
-                        ),
-                        modeloOf(),
-                        satzOf,
-                      ),
-                    )
-                  : ""),
+                teile.body +
+                (derivation === undefined
+                  ? ""
+                  : pruefungHtml(pruefmarkojOf(offeneProblemeOf(derivation), modeloOf(), satzOf))),
             }),
           ),
         );
@@ -2645,14 +2714,16 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           delete draft.privataResult;
         }
       }
+      // Spec 044 (V-5.4): the page shows the draft as the request found it, with the check of that rev.
+      const stand = { agordo: draft.agordo, rev: draft.rev };
       if (key === "fertig") {
-        extra.klartext = klartextOfDraft(draft);
+        extra.klartext = await klartextOfDraft(name, draft);
         if (url.searchParams.get("gespeichert") === "1") {
           extra.message = "Gespeichert.";
           if (draft.eksporto !== undefined) extra.eksporto = draft.eksporto;
         }
       }
-      sendHtml(response, screen(inputOf(key, name, extra)));
+      sendHtml(response, screen(inputOf(key, name, extra, stand)));
       return;
     }
     notFound(response);
