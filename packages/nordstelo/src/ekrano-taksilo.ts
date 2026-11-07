@@ -4,11 +4,14 @@
 // its gate of Markenfähigkeit (`multmarkeco`) –, a screen turned into a Tasko in memory only. K6
 // comes from the criteria handed in per screen slug (none for `fm ekranoj`: K6 is null and not
 // weighted); K7, the effort, is counted by ekranoj and never weighted. `score.ts` stays unchanged.
+// Spec 038 Lauf 3 (C-3, D-145): the scorer names the K8 probes (`sondoPetoj`) and is the one
+// source of `k8.plena`.
 
 import type { Fakto, PlanoEkrano, Taksado, Taksilo, Varianto } from "@fundamento/ekranoj";
 import type { Kriterio, Modelo, NordsteloFile, Tasko } from "@fundamento/modelo";
 import type { Facts } from "./facts.js";
-import type { K8Rezulto } from "./k8/k8.js";
+import { type K8Rezulto, k8Plena } from "./k8/k8.js";
+import { sondojDe } from "./k8/soloj.js";
 import { scoreBoth } from "./score.js";
 
 export interface EkranoTaksiloOpcioj {
@@ -27,10 +30,11 @@ export interface EkranoTaksiloOpcioj {
 }
 
 /**
- * The Taksado of ekranoj with K8 beside it (Spec 038 Lauf 2, C-E, D-94): the ekranoj type stays
- * unchanged; `k8` exists only where the score has one.
+ * The Taksado of ekranoj with K8 beside it (Spec 038 Lauf 2, C-E, D-94; Lauf 3, C-3): `k8` exists
+ * only where the score has one, and carries `plena` from `k8Plena` – the one source of the rule
+ * (D-145). It is ekranoj's `TaksadoK8Rezulto`, checked at compile time in the test.
  */
-export type TaksadoK8 = Taksado & { k8?: K8Rezulto };
+export type TaksadoK8 = Taksado & { k8?: K8Rezulto & { plena: boolean } };
 
 /** The scorer of ekranoj whose Taksado carries K8 beside it. */
 export type TaksiloK8 = Taksilo & {
@@ -56,6 +60,8 @@ function taskoDe(ekrano: PlanoEkrano, opcioj: EkranoTaksiloOpcioj): Tasko {
 /** The `Taksilo` of ekranoj over nordstelo's score (C-8). Pure: the same facts give the same Taksado. */
 export function ekranoTaksilo(opcioj: EkranoTaksiloOpcioj): TaksiloK8 {
   return {
+    // The probes the renderer measures for K8 (D-S038-17-2), from the same Modelo.
+    sondoPetoj: sondojDe(opcioj.modelo),
     taksi(e: { fakto: Fakto; ekrano: PlanoEkrano; varianto: Varianto }): TaksadoK8 {
       const { nova } = scoreBoth(
         {
@@ -70,7 +76,8 @@ export function ekranoTaksilo(opcioj: EkranoTaksiloOpcioj): TaksiloK8 {
         k: { ...nova.k },
         total: nova.total,
         mankoj: nova.gaps.map((gap) => ({ kind: gap.kind, key: gap.key })),
-        ...(nova.k8 === undefined ? {} : { k8: nova.k8 }),
+        // D-145: `plena` has one source, nordstelo's k8Plena; ekranoj only reads it.
+        ...(nova.k8 === undefined ? {} : { k8: { ...nova.k8, plena: k8Plena(nova.k8) } }),
       };
     },
   };

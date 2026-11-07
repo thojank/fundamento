@@ -14,10 +14,16 @@ import { join } from "node:path";
 import { Budget } from "@fundamento/metiejo";
 import {
   type AgentaManko,
+  eroNomojDe,
   konstruiEkranon,
+  legiEroProfilojn,
+  legiSxelon,
   PlanoMalsukcesis,
+  type ProfilaKasxmemoro,
   planiEkranojn,
   planoElNomoj,
+  type SxelaKunteksto,
+  sxelaServilo,
 } from "./agento.js";
 import { statikaFakto } from "./fakto-statika.js";
 import { gardiModelon } from "./gardo.js";
@@ -35,6 +41,7 @@ import type {
   EkranojRezulto,
   Fakto,
   Haltigo,
+  K8Merkmal,
   KostoTakso,
   Malhelpo,
   Malobservo,
@@ -46,6 +53,7 @@ import type {
   Rondo,
   RondoEkrano,
   Taksado,
+  TaksadoK8Rezulto,
   ToolBridge,
   ToolInfo,
   Trovo,
@@ -223,6 +231,96 @@ const K_TROVOJ: Record<string, { mesagxo: string; sugesto: string; kialo: string
 
 const AXE_KIALO = "D-04: axe-core (WCAG 2.2 A/AA) muss hell und dunkel ohne Befund sein.";
 
+/**
+ * The K8 features in report order (Spec 038, D-08): nordstelo's `K8_MERKMALOJ`, restated so this
+ * package never imports nordstelo (AC-10 of 037).
+ */
+export const K8_MERKMALOJ: readonly K8Merkmal[] = [
+  "ersatzschrift",
+  "nativaj",
+  "interspacoj",
+  "sxablono",
+];
+
+/** The rule of a K8 finding per feature (C-4). */
+export const K8_REGULOJ: Readonly<Record<K8Merkmal, string>> = {
+  ersatzschrift: "k8-ersatzschrift",
+  nativaj: "k8-nativa",
+  interspacoj: "k8-interspaco",
+  sxablono: "k8-sxablono",
+};
+
+const K8_TROVOJ: Record<K8Merkmal, { mesagxo: string; sugesto: string }> = {
+  ersatzschrift: {
+    mesagxo: "Text in Ersatzschrift",
+    sugesto:
+      "Text in Eroj und Sxablonoj setzen; keine eigene Schrift, die Schrift kommt aus der Marke.",
+  },
+  nativaj: {
+    mesagxo: "Natives Element ohne die Gestalt der Marke",
+    sugesto: "Statt des nativen Elements die passende Ero verwenden (suggest_ero).",
+  },
+  interspacoj: {
+    mesagxo: "Abstand nicht auf einer Abstandsstufe",
+    sugesto:
+      "Abstände nur über Sxablonoj und Layoutmittel (list_arangxoj), nie mit eigenen Werten.",
+  },
+  sxablono: {
+    mesagxo: "Keine Sxablono mit gefüllter Region",
+    sugesto: "Den Screen in eine Sxablono setzen (list_sxablonoj) und ihre Regionen füllen.",
+  },
+};
+
+/** One K8 feature below 1 in one combination: its place and its reason from the kialo (C-4). */
+interface K8Devio {
+  merkmal: K8Merkmal;
+  valoro: number;
+  /** `<aspekto> <scheme>`, then the tag path the kialo names (in backticks), if it names one. */
+  loko: string;
+  kialo: string;
+}
+
+/** Every feature other than 1 per combination, in the scorer's order, split by the means (D-16). */
+function k8Devioj(k8: TaksadoK8Rezulto): { kunRimedo: K8Devio[]; senRimedo: K8Devio[] } {
+  const mankoj = new Set(k8.mankoj);
+  const kunRimedo: K8Devio[] = [];
+  const senRimedo: K8Devio[] = [];
+  for (const kombinacio of k8.kombinacioj) {
+    for (const merkmal of K8_MERKMALOJ) {
+      const valoro = kombinacio.merkmaloj[merkmal];
+      if (valoro === 1) continue;
+      const tekstoj = kombinacio.kialoj
+        .filter((kialo) => kialo.merkmal === merkmal)
+        .map((kialo) => kialo.teksto);
+      const pfado = tekstoj
+        .map((teksto) => /`([^`]+)`/.exec(teksto)?.[1])
+        .find((trovita) => trovita !== undefined);
+      const devio: K8Devio = {
+        merkmal,
+        valoro,
+        loko: `${kombinacio.aspekto} ${kombinacio.scheme}${pfado === undefined ? "" : `: ${pfado}`}`,
+        kialo: tekstoj.length === 0 ? `K8 ${merkmal}: ${valoro}` : tekstoj.join("; "),
+      };
+      (mankoj.has(merkmal) ? senRimedo : kunRimedo).push(devio);
+    }
+  }
+  return { kunRimedo, senRimedo };
+}
+
+/**
+ * The K8 deviations „mangels Mittel“ of one screen (C-4, D-16): features below 1 the Modelo has no
+ * means for (`k8.mankoj`). They never keep a screen from green; the report shows them.
+ */
+export function senRimedajDe(slug: string, taksado: Taksado): Restanta[] {
+  if (taksado.k8 === undefined) return [];
+  return k8Devioj(taksado.k8).senRimedo.map((devio) => ({
+    ekrano: slug,
+    regulo: K8_REGULOJ[devio.merkmal],
+    loko: devio.loko,
+    kialo: devio.kialo,
+  }));
+}
+
 /** The marker of a screen whose build answer held no markup, also after one more question. */
 export const MALPLENA_RESPONDO = "leere-antwort" satisfies Malhelpo;
 
@@ -315,6 +413,19 @@ export function trovojDe(e: {
       sugesto: K_TROVOJ[kinds[0] ?? ""]?.sugesto ?? "",
       kialo: `D-04: grün nur mit ${k} = 1.`,
     });
+  }
+  // Spec 038 (C-4): one finding per combination and K8 feature below 1 that has a means.
+  if (e.taksado.k8 !== undefined) {
+    for (const devio of k8Devioj(e.taksado.k8).kunRimedo) {
+      const priskribo = K8_TROVOJ[devio.merkmal];
+      trovoj.push({
+        regulo: K8_REGULOJ[devio.merkmal],
+        loko: devio.loko,
+        mesagxo: `${priskribo.mesagxo} (K8 ${devio.merkmal} ${devio.valoro}, nötig ist 1).`,
+        sugesto: priskribo.sugesto,
+        kialo: devio.kialo,
+      });
+    }
   }
   return trovoj;
 }
@@ -419,7 +530,8 @@ export async function kuruEkranojn(
       for (let r = faritaj + 1; r <= MAKS_RONDOJ; r += 1) {
         const portita: Rondo = {};
         for (const [slug, ekrano] of Object.entries(lasta)) {
-          portita[slug] = { ...ekrano, verdaEkde: ekrano.verdaEkde ?? faritaj };
+          // C-6: a carried round has no effort of its own.
+          portita[slug] = { ...senPeno(ekrano), verdaEkde: ekrano.verdaEkde ?? faritaj };
         }
         rondoj.push(portita);
       }
@@ -451,6 +563,11 @@ export async function kuruEkranojn(
         });
       }
     }
+    // Spec 038 (C-4, D-16): the K8 features without a means, per screen of the last round.
+    const senRimedaj = plano.ekranoj.flatMap((ekrano) => {
+      const stato = lasta?.[ekrano.slug];
+      return stato === undefined ? [] : senRimedajDe(ekrano.slug, stato.taksado);
+    });
     peno.ms = Date.now() - komenco;
     peno.bytes = [...fragmentoj.values()].reduce((sumo, f) => sumo + Buffer.byteLength(f), 0);
     const rezulto: EkranojRezulto = {
@@ -473,6 +590,7 @@ export async function kuruEkranojn(
       takso,
       faritajRondoj: faritaj,
       notoj,
+      ...(senRimedaj.length === 0 ? {} : { senRimedaj }),
     };
     await deps.eligo?.fino?.(rezulto);
     return rezulto;
@@ -482,6 +600,10 @@ export async function kuruEkranojn(
   let gvidanto: string | undefined;
   let iloj: ToolInfo[] = [];
   let kontrolilo: UzKontrolilo | undefined;
+  // Spec 038 (3.2, D-S038-20-2): the shell, read once per run on a server that lists check_markup
+  // and list_arangxoj; the Kurzprofile of the Eroj, read once per name and run.
+  let sxelo: SxelaKunteksto | undefined;
+  const profiloj: ProfilaKasxmemoro = new Map();
   if (varianto === "F" && deps.tools !== undefined) {
     gvidanto = (await deps.tools.prompt?.()) ?? "";
     const listitaj = await deps.tools.list();
@@ -491,6 +613,7 @@ export async function kuruEkranojn(
     kontrolilo = uzKontroliloDe(deps.tools, listitaj);
     // The allowlist also for an injected bridge: only the build tools, never the brand workshop.
     iloj = filtriIlojn(listitaj);
+    if (sxelaServilo(listitaj)) sxelo = await legiSxelon(deps.tools, deps.log);
   }
 
   // The plan: given, or asked (with the user's names, or free).
@@ -528,10 +651,23 @@ export async function kuruEkranojn(
   for (let r = 1; r <= MAKS_RONDOJ && haltigo === undefined; r += 1) {
     let konstruitaj = 0;
     const malplenaj = new Set<string>();
+    /** C-6: the effort of each build of this round, the run's `peno` after minus before. */
+    const penoj = new Map<string, Peno>();
     for (const ekrano of plano.ekranoj) {
       if (verdaEkde.has(ekrano.slug)) continue;
       const antaua = lastaStato.get(ekrano.slug);
+      const antauPeno = { ...peno };
+      const ekde = Date.now();
+      let bytes = 0;
       try {
+        // The Kurzprofile of the Eroj of the last fragment: read by ekranoj, no tool call of
+        // the agent; their text is input of the request (D-S038-20-2).
+        const eroProfiloj =
+          sxelo === undefined || deps.tools === undefined || antaua?.fragmento === undefined
+            ? undefined
+            : await legiEroProfilojn(deps.tools, eroNomojDe(antaua.fragmento), profiloj, (linio) =>
+                deps.log(`${ekrano.slug} Runde ${r}: ${linio}`),
+              );
         const { fragmento, mankoj, malplena } = await konstruiEkranon({
           chat: deps.chat,
           budget,
@@ -551,7 +687,10 @@ export async function kuruEkranojn(
             : { antaua: { fragmento: antaua.fragmento, trovoj: antaua.trovoj ?? [] } }),
           lingvo,
           log: deps.log,
+          ...(sxelo === undefined ? {} : { sxelo }),
+          ...(eroProfiloj === undefined ? {} : { eroProfiloj }),
         });
+        bytes = Buffer.byteLength(fragmento);
         fragmentoj.set(ekrano.slug, fragmento);
         fragmentoRondoj.set(ekrano.slug, r);
         konstruitaj += 1;
@@ -579,6 +718,8 @@ export async function kuruEkranojn(
       } catch (error) {
         halti(error, `in Runde ${r} bei ${ekrano.slug}`);
         break;
+      } finally {
+        penoj.set(ekrano.slug, penoDiferenco(peno, antauPeno, Date.now() - ekde, bytes));
       }
     }
     if (konstruitaj === 0) break;
@@ -597,6 +738,7 @@ export async function kuruEkranojn(
       verdaEkde,
       lastaStato,
       notoj,
+      penoj,
     });
     rondoj.push(rondo);
     await deps.eligo?.rondo?.({ rondo: r, stato: rondo, plano });
@@ -623,6 +765,26 @@ interface RondoKunteksto {
   verdaEkde: Map<string, number>;
   lastaStato: Map<string, RondoEkrano>;
   notoj: string[];
+  /** The effort of each build of this round (C-6); a screen not built in it has none. */
+  penoj: ReadonlyMap<string, Peno>;
+}
+
+/** The effort between two states of the run's `peno` (C-6): tokens, requests, tool calls. */
+function penoDiferenco(post: Peno, antau: Peno, ms: number, bytes: number): Peno {
+  return {
+    inputTokens: post.inputTokens - antau.inputTokens,
+    outputTokens: post.outputTokens - antau.outputTokens,
+    toolCalls: post.toolCalls - antau.toolCalls,
+    requests: post.requests - antau.requests,
+    ms,
+    bytes,
+  };
+}
+
+/** A screen state without its effort: what a round carried forward repeats (C-6, D-26). */
+function senPeno(stato: RondoEkrano): RondoEkrano {
+  const { peno: _peno, ...resto } = stato;
+  return resto;
 }
 
 /** The check of one round: render, score, check_usage, navigation over all screens, green. */
@@ -644,9 +806,12 @@ async function kontroliRondon(k: RondoKunteksto): Promise<Rondo> {
       continue;
     }
     try {
+      // The scorer's K8 probes, when it has any (D-S038-17-2); without them the options of before.
+      const sondoPetoj = deps.taksilo.sondoPetoj;
       const bildigo = await deps.bildigilo.render(dokumento, {
         aspektoj: [k.enigo.marko],
         varianto,
+        ...(sondoPetoj === undefined ? {} : { sondoPetoj }),
       });
       faktoj[ekrano.slug] = bildigo.fakto;
       await deps.eligo?.bildigita?.({ rondo: r, slug: ekrano.slug, bildigo });
@@ -669,7 +834,7 @@ async function kontroliRondon(k: RondoKunteksto): Promise<Rondo> {
     const ekde = k.verdaEkde.get(ekrano.slug);
     const antaua = k.lastaStato.get(ekrano.slug);
     if (ekde !== undefined && antaua !== undefined) {
-      rondo[ekrano.slug] = { ...antaua, verdaEkde: ekde };
+      rondo[ekrano.slug] = { ...senPeno(antaua), verdaEkde: ekde };
       continue;
     }
     const fakto = faktoj[ekrano.slug];
@@ -711,6 +876,7 @@ async function kontroliRondon(k: RondoKunteksto): Promise<Rondo> {
     const verda = decido.verda && !malplena;
     // A stop left the screen unbuilt this round: its older fragment was checked again.
     const fragmentoRondo = k.fragmentoRondoj.get(ekrano.slug);
+    const peno = k.penoj.get(ekrano.slug);
     const stato: RondoEkrano = {
       taksado,
       malobservoj,
@@ -724,6 +890,7 @@ async function kontroliRondon(k: RondoKunteksto): Promise<Rondo> {
       ...(sxablonajSugestoj.length === 0 ? {} : { sxablonajSugestoj }),
       fragmento,
       fakto,
+      ...(peno === undefined ? {} : { peno }),
       trovoj: verda
         ? []
         : trovojDe({

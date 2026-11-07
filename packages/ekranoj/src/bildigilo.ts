@@ -9,10 +9,24 @@
 // gives `undefined` with one log line, and the run goes on without photos and without axe, never
 // green (edge case „Browser nicht verfügbar“). Pages are opened from their file (file://) or set as
 // content; every request other than a local file is aborted (no network).
+//
+// K8 (Spec 038 Lauf 3, 3.4b, D-S038-17-1…3): only when the scorer gives probes (`sondoPetoj`), each
+// render also carries the K8 facts – read with the twin of nordstelo's extractor on the screen
+// without the frame (the DOM of `elements`, so the indices match), the brand's token values
+// measured in a second page that holds only the brand stylesheets and the same `data-fm-*`. Under
+// file:// a page set as content on about:blank cannot load file:// stylesheets, so the probe page
+// first opens the first stylesheet itself (a file:// page, no script, no fragment) and then gets
+// the probe document as content, with `<base>` at the screen's file.
 
 import { pathToFileURL } from "node:url";
-import type { Browser, Page } from "playwright";
-import { agentaTeksto, KADRO_ATRIBUTO } from "./konstruo.js";
+import type { Browser, BrowserContext, Page, Route } from "playwright";
+import {
+  aspektoFaktojEnPagxo,
+  normigiAspektoFaktojn,
+  type SondoPetoForma,
+  sondojEnPagxo,
+} from "./aspekto-faktoj.js";
+import { agentaTeksto, KADRO_ATRIBUTO, sxirmi } from "./konstruo.js";
 import type {
   Bildigilo,
   BildigoRezulto,
@@ -136,11 +150,121 @@ async function kvieti(page: Page): Promise<void> {
   );
 }
 
+/** Puts a page into one Aspekto and scheme at contrast default: the root's `data-fm-*`. */
+async function agordiRadikon(page: Page, aspekto: string, scheme: "light" | "dark"): Promise<void> {
+  await page.evaluate(
+    ({ a, s }) => {
+      const root = document.documentElement;
+      root.setAttribute("data-fm-aspekto", a);
+      root.setAttribute("data-fm-color-scheme", s);
+      root.setAttribute("data-fm-motion", "reduced");
+      root.removeAttribute("data-fm-contrast");
+    },
+    { a: aspekto, s: scheme },
+  );
+}
+
+/** Puts a page into one mode: the media features, then the root's `data-fm-*`. */
+async function agordiModon(page: Page, aspekto: string, scheme: "light" | "dark"): Promise<void> {
+  await page.emulateMedia({
+    colorScheme: scheme,
+    contrast: "no-preference",
+    reducedMotion: "reduce",
+  });
+  await agordiRadikon(page, aspekto, scheme);
+}
+
+/** Every request other than a local file is aborted (no network). */
+const nurLokaj = (route: Route): Promise<void> => {
+  const url = route.request().url();
+  return /^(?:file|data|blob|about):/.test(url) ? route.continue() : route.abort();
+};
+
+/** The `<link rel="stylesheet">` tags of a document's head, verbatim: the brand build of the frame. */
+export function markajStilfolioj(html: string): string[] {
+  const kapo = /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/i.exec(html)?.[1] ?? "";
+  return Array.from(
+    kapo.matchAll(/<link\b[^>]*\brel=["']?stylesheet["']?[^>]*>/gi),
+    (trovo) => trovo[0],
+  );
+}
+
+/**
+ * The probe page of K8 (D-S038-17-3, as nordstelo's probe document): the brand stylesheets of the
+ * screen and an empty body – never the fragment, no script. Under file:// it first opens the first
+ * stylesheet (a file:// page), so the stylesheets of the probe document may load (R-5).
+ */
+async function malfermiSondon(context: BrowserContext, dokumento: EkranaDokumento): Promise<Page> {
+  const sondilo = await context.newPage();
+  await sondilo.route("**/*", nurLokaj);
+  const ligiloj = markajStilfolioj(dokumento.html);
+  const lingvo = /<html\b[^>]*\slang="([^"]*)"/i.exec(dokumento.html)?.[1] ?? "";
+  const baza = dokumento.dosiero === undefined ? undefined : pathToFileURL(dokumento.dosiero).href;
+  const unua = /\bhref="([^"]*)"/i.exec(ligiloj[0] ?? "")?.[1];
+  if (baza !== undefined && unua !== undefined) {
+    const url = new URL(unua.replace(/&amp;/g, "&"), baza).href;
+    await sondilo.goto(url, { waitUntil: "load", timeout: BILDIGO_TEMPOLIMO });
+  }
+  await sondilo.setContent(
+    [
+      "<!doctype html>",
+      `<html lang="${lingvo}">`,
+      "<head>",
+      '<meta charset="utf-8">',
+      ...(baza === undefined ? [] : [`<base href="${sxirmi(baza)}">`]),
+      "<title>Sondo</title>",
+      ...ligiloj,
+      "</head>",
+      "<body></body>",
+      "</html>",
+      "",
+    ].join("\n"),
+    { waitUntil: "load", timeout: BILDIGO_TEMPOLIMO },
+  );
+  return sondilo;
+}
+
+/**
+ * The K8 facts of every render (D-S038-17-1…3): the frame's elements removed first, then per
+ * Aspekto × scheme the page part on the screen and the probes in the probe page, normalised.
+ * `renders` is in the same Aspekto × scheme order.
+ */
+async function aldoniK8(
+  context: BrowserContext,
+  page: Page,
+  dokumento: EkranaDokumento,
+  aspektoj: readonly string[],
+  petoj: readonly SondoPetoForma[],
+  renders: FaktoBildigo[],
+): Promise<void> {
+  await page.evaluate((kadro) => {
+    for (const ero of Array.from(document.querySelectorAll(`[${kadro}]`))) ero.remove();
+  }, KADRO_ATRIBUTO);
+  const sondilo = await malfermiSondon(context, dokumento);
+  let indekso = 0;
+  for (const aspekto of aspektoj) {
+    for (const scheme of SKEMOJ_BILDIGO) {
+      await agordiModon(page, aspekto, scheme);
+      await kvieti(page);
+      const pagxo = await page.evaluate(aspektoFaktojEnPagxo);
+      await agordiModon(sondilo, aspekto, scheme);
+      const sondoj = await sondilo.evaluate(sondojEnPagxo, [...petoj]);
+      const render = renders[indekso];
+      indekso += 1;
+      if (render !== undefined) render.k8 = normigiAspektoFaktojn({ ...pagxo, ...sondoj });
+    }
+  }
+}
+
 async function bildigiUnu(
   browser: Browser,
   axe: AxeModulo,
   dokumento: EkranaDokumento,
-  opcioj: { aspektoj: readonly string[]; varianto: Varianto },
+  opcioj: {
+    aspektoj: readonly string[];
+    varianto: Varianto;
+    sondoPetoj?: readonly SondoPetoForma[];
+  },
 ): Promise<BildigoRezulto> {
   const context = await browser.newContext({ viewport: VIDPUNKTO, reducedMotion: "reduce" });
   const page = await context.newPage();
@@ -153,10 +277,7 @@ async function bildigiUnu(
     konzolo.push(teksto);
   });
   page.on("pageerror", (eraro) => konzolo.push(`${eraro.name}: ${eraro.message}`));
-  await page.route("**/*", (route) => {
-    const url = route.request().url();
-    return /^(?:file|data|blob|about):/.test(url) ? route.continue() : route.abort();
-  });
+  await page.route("**/*", nurLokaj);
   try {
     if (dokumento.dosiero === undefined) {
       await page.setContent(dokumento.html, { waitUntil: "load", timeout: BILDIGO_TEMPOLIMO });
@@ -171,21 +292,7 @@ async function bildigiUnu(
     const bildoj: Partial<Record<"light" | "dark", Uint8Array>> = {};
     for (const aspekto of opcioj.aspektoj) {
       for (const scheme of SKEMOJ_BILDIGO) {
-        await page.emulateMedia({
-          colorScheme: scheme,
-          contrast: "no-preference",
-          reducedMotion: "reduce",
-        });
-        await page.evaluate(
-          ({ a, s }) => {
-            const root = document.documentElement;
-            root.setAttribute("data-fm-aspekto", a);
-            root.setAttribute("data-fm-color-scheme", s);
-            root.setAttribute("data-fm-motion", "reduced");
-            root.removeAttribute("data-fm-contrast");
-          },
-          { a: aspekto, s: scheme },
-        );
+        await agordiModon(page, aspekto, scheme);
         await kvieti(page);
         if (bildoj[scheme] === undefined) {
           bildoj[scheme] = await page.screenshot({ fullPage: true });
@@ -205,6 +312,10 @@ async function bildigiUnu(
             .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)),
         });
       }
+    }
+    // K8 only with the scorer's probes (C-2); without them nothing here runs.
+    if (opcioj.sondoPetoj !== undefined) {
+      await aldoniK8(context, page, dokumento, opcioj.aspektoj, opcioj.sondoPetoj, renders);
     }
     // The facts: first Aspekto, light; the frame's elements gone (D-27).
     const unua = opcioj.aspektoj[0];

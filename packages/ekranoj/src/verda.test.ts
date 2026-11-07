@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { decidiVerdon, type Malobservo, type VerdaEnigo } from "./index.js";
+import {
+  decidiVerdon,
+  K8_MERKMALOJ,
+  type K8Merkmal,
+  type Malobservo,
+  type TaksadoK8Rezulto,
+  type VerdaEnigo,
+} from "./index.js";
 import { bildigo, faktoKunLigiloj, taksado } from "./test-doubles/faktoj.js";
 
 const malobservo = (severity: Malobservo["severity"]): Malobservo => ({
@@ -89,5 +96,83 @@ describe("decidiVerdon (C-5, D-04)", () => {
     expect(
       decidiVerdon({ ...base, taksado: taksado({ K1: 0, K5: 0.6 }), kompleta: false }).malhelpoj,
     ).toEqual(["K1", "K5", "navigado"]);
+  });
+});
+
+// Spec 038 Lauf 3 (3.4, D-08, D-16, D-145): with K8 a screen is green only if `k8.plena`; ekranoj
+// reads `plena` as the scorer hands it in and never computes it.
+describe("decidiVerdon with K8 (Spec 038, 3.4)", () => {
+  /** K8 of one combination with `merkmal` at `valoro` (all others 1), `plena` as given. */
+  const k8 = (e: {
+    plena: boolean;
+    merkmal?: K8Merkmal;
+    valoro?: number;
+    mankoj?: K8Merkmal[];
+  }): TaksadoK8Rezulto => {
+    const merkmaloj = Object.fromEntries(
+      K8_MERKMALOJ.map((m) => [m, m === e.merkmal ? (e.valoro ?? 0.5) : 1]),
+    ) as Record<K8Merkmal, number>;
+    return {
+      kvoto: 0.875,
+      kombinacioj: [
+        {
+          aspekto: "komuna",
+          scheme: "light",
+          merkmaloj,
+          kvoto: 0.875,
+          kialoj: K8_MERKMALOJ.map((m) => ({ merkmal: m, teksto: "vollständig" })),
+        },
+      ],
+      mankoj: e.mankoj ?? [],
+      plena: e.plena,
+    };
+  };
+
+  it("keeps the decision of before when k8 is plena", () => {
+    for (const varianto of ["F", "0"] as const) {
+      const sen = green(varianto);
+      const kun = { ...sen, taksado: { ...sen.taksado, k8: k8({ plena: true }) } };
+      expect(decidiVerdon(kun), varianto).toEqual(decidiVerdon(sen));
+      const malverda = { ...kun, kompleta: false };
+      expect(decidiVerdon(malverda).malhelpoj, varianto).toEqual(["navigado"]);
+    }
+  });
+
+  it("is not green on any feature below 1 with plena false, and names K8 as the last condition", () => {
+    expect(K8_MERKMALOJ).toEqual(["ersatzschrift", "nativaj", "interspacoj", "sxablono"]);
+    for (const merkmal of K8_MERKMALOJ) {
+      const base = green("F");
+      const enigo = { ...base, taksado: { ...base.taksado, k8: k8({ plena: false, merkmal }) } };
+      expect(decidiVerdon(enigo), merkmal).toEqual({
+        verda: false,
+        malhelpoj: ["K8"],
+        sugestoj: [],
+      });
+      const pluraj = { ...enigo, taksado: { ...enigo.taksado, k: { ...enigo.taksado.k, K1: 0 } } };
+      expect(decidiVerdon({ ...pluraj, kompleta: false }).malhelpoj, merkmal).toEqual([
+        "K1",
+        "navigado",
+        "K8",
+      ]);
+    }
+  });
+
+  it("stays green with a feature below 1 that the Modelo has no means for (mankoj, plena true)", () => {
+    const base = green("F");
+    const enigo = {
+      ...base,
+      taksado: {
+        ...base.taksado,
+        k8: k8({ plena: true, merkmal: "interspacoj", valoro: 0.6667, mankoj: ["interspacoj"] }),
+      },
+    };
+    expect(decidiVerdon(enigo)).toEqual({ verda: true, malhelpoj: [], sugestoj: [] });
+  });
+
+  it("reads plena as given and never recomputes it (D-145)", () => {
+    const base = green("F");
+    // All features 1, but the scorer says not plena: the scorer's word counts.
+    const enigo = { ...base, taksado: { ...base.taksado, k8: k8({ plena: false }) } };
+    expect(decidiVerdon(enigo).malhelpoj).toEqual(["K8"]);
   });
 });

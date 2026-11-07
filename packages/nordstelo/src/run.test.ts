@@ -15,6 +15,8 @@ import {
 } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import type { Budget } from "./agent.js";
+import type { Facts } from "./facts.js";
+import { k8 } from "./k8/k8.js";
 import { type RunDeps, runNordstelo } from "./run.js";
 import { facts, h } from "./test-doubles/facts.js";
 
@@ -178,5 +180,43 @@ describe("runNordstelo", () => {
     ];
     for (const text of texts) expect(text).not.toContain(SECRET);
     delete process.env.NORDSTELO_TEST_KEY;
+  });
+});
+
+// Spec 038 (F-S038-13-2): `raporto.json` carries K8 per record exactly when the render had K8
+// facts – the share of the score (`k8.kvoto`), never a weight.
+describe("runNordstelo: K8 per record in raporto.json", () => {
+  const k8Facts = JSON.parse(
+    readFileSync(new URL("../test/fixtures/k8/roh/faktoj.json", import.meta.url), "utf8"),
+  ) as Facts;
+
+  const records = async (render: RunDeps["render"]) => {
+    const out = mkdtempSync(join(tmpdir(), "nordstelo-"));
+    const d = { ...deps(out), render };
+    const result = await runNordstelo(
+      { taskoj: ["faq"], variants: ["F", "0"], repeats: 1, maxTokens: 1_000_000, concurrency: 1 },
+      d,
+    );
+    const report = JSON.parse(readFileSync(join(out, result.id, "raporto.json"), "utf8")) as {
+      records: Record<string, unknown>[];
+    };
+    return report.records;
+  };
+
+  it("has records[].k8 = k8(facts).kvoto with K8 facts", async () => {
+    const atendo = k8(k8Facts, modelo)?.kvoto;
+    expect(typeof atendo).toBe("number");
+    const kun = await records(async () => ({
+      facts: structuredClone(k8Facts),
+      screenshot: new Uint8Array([137, 80, 78, 71]),
+    }));
+    expect(kun).toHaveLength(2);
+    for (const record of kun) expect(record.k8).toBe(atendo);
+  });
+
+  it("has no records[].k8 without K8 facts", async () => {
+    const sen = await records(deps("unused").render);
+    expect(sen).toHaveLength(2);
+    for (const record of sen) expect("k8" in record).toBe(false);
   });
 });

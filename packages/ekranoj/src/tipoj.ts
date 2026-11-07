@@ -5,7 +5,18 @@
 // (D-03), so this package never imports nordstelo, mcp, eroj or the Gvidanto (AC-10).
 
 import type { Budget, ChatMessage, ToolInfo } from "@fundamento/metiejo";
+import type { FaktoAspekto, SondoPetoForma } from "./aspekto-faktoj.js";
 
+// The K8 facts twin (Spec 038 Lauf 3, C-2): its structural types, under nordstelo's names.
+export type {
+  FaktoAspekto,
+  FaktoAspektoKruda,
+  Interspaco,
+  NativaFingrospuro,
+  Sondo,
+  SondoPetoForma,
+  Tekstero,
+} from "./aspekto-faktoj.js";
 export type { Budget, ChatMessage, ToolInfo };
 
 /** A structured problem (code-style): where, which rule, what is wrong, what to do. */
@@ -66,6 +77,12 @@ export interface FaktoBildigo {
   scheme: "light" | "dark";
   contrast: "default" | "high";
   axe: { id: string; nodes: number }[];
+  /**
+   * The K8 facts of this render (Spec 038 Lauf 3, D-S038-17-1): only when the scorer asked for
+   * probes (`Taksilo.sondoPetoj`) and only at contrast „default“. Read on the screen without the
+   * frame, so every index equals the one in `Fakto.elements` (D-S038-17-3).
+   */
+  k8?: FaktoAspekto;
 }
 
 /** What the browser measured on one screen, stored with the run (D-33). */
@@ -89,16 +106,56 @@ export type Varianto = "F" | "0";
 /** The six scored criteria of the north-star measure (Spec 030); K7 (effort) is never weighted. */
 export type Kriterio = "K1" | "K2" | "K3" | "K4" | "K5" | "K6";
 
+/** The four K8 features (Spec 038, D-08): the same string union as nordstelo's `K8Merkmal`. */
+export type K8Merkmal = "ersatzschrift" | "nativaj" | "interspacoj" | "sxablono";
+
+/** K8 of one brand × scheme: a structural twin of nordstelo's `K8Kombinacio` (C-3). */
+export interface TaksadoK8Kombinacio {
+  aspekto: string;
+  scheme: "light" | "dark";
+  /** Hit shares 0–1 per feature. */
+  merkmaloj: Record<K8Merkmal, number>;
+  kvoto: number;
+  /** One German sentence per feature (the place, e.g. a tag path in backticks, inside it). */
+  kialoj: { merkmal: K8Merkmal; teksto: string }[];
+  /** A brand family is declared but not loaded; the value stays computed. */
+  nekomparebla?: "tiparo-ne-sxargita";
+}
+
+/**
+ * K8 of one screen as the scorer hands it in (Spec 038 Lauf 3, C-3, D-S038-18-1): nordstelo's
+ * `K8Rezulto` plus `plena`. `plena` comes only from nordstelo's `k8Plena` (D-145); ekranoj reads
+ * it and never computes it.
+ */
+export interface TaksadoK8Rezulto {
+  kvoto: number;
+  kombinacioj: TaksadoK8Kombinacio[];
+  /** Features the Modelo has no means for (D-16): reported, never blocking. */
+  mankoj: K8Merkmal[];
+  /** Every feature is 1 in every combination, except the features in `mankoj`. */
+  plena: boolean;
+}
+
 /** The score of one screen: share per criterion (null = does not apply), total, gaps. */
 export interface Taksado {
   k: Record<Kriterio, number | null>;
   total: number;
   mankoj: { kind: string; key: string }[];
+  /**
+   * K8 beside the score (Spec 038, D-94, C-3): only when the renders carried K8 facts. It never
+   * enters `total`, the weights or the gate; with it, a screen is green only if `plena` (D-08).
+   */
+  k8?: TaksadoK8Rezulto;
 }
 
 /** The injected scorer (D-03); nordstelo implements it with its unchanged `score()` (C-8). */
 export interface Taksilo {
   taksi(e: { fakto: Fakto; ekrano: PlanoEkrano; varianto: Varianto }): Taksado;
+  /**
+   * The brand tokens the renderer measures in its probe document for K8 (D-S038-17-2); nordstelo
+   * fills them with `sondojDe(modelo)`. Absent: no K8 facts, K8 „nicht geprüft“.
+   */
+  sondoPetoj?: readonly SondoPetoForma[];
 }
 
 // --- check_usage -------------------------------------------------------------------------------
@@ -160,7 +217,9 @@ export type Malhelpo =
   | "K5"
   | "navigado"
   /** The agent answered without markup, also after being asked once more (S037-10 Befund 1). */
-  | "leere-antwort";
+  | "leere-antwort"
+  /** K8 is there and not `plena` (Spec 038, D-08, D-16): the last condition. */
+  | "K8";
 
 export interface VerdaEnigo {
   varianto: Varianto;
@@ -234,7 +293,12 @@ export interface BildigoRezulto {
 export interface Bildigilo {
   render(
     dokumento: EkranaDokumento,
-    opcioj: { aspektoj: readonly string[]; varianto: Varianto },
+    opcioj: {
+      aspektoj: readonly string[];
+      varianto: Varianto;
+      /** The probes of the scorer (`Taksilo.sondoPetoj`); absent = no K8 facts (C-2). */
+      sondoPetoj?: readonly SondoPetoForma[];
+    },
   ): Promise<BildigoRezulto>;
   close(): Promise<void>;
 }
@@ -248,6 +312,12 @@ export interface Bildigilo {
 export interface MarkoKonstruo {
   css: string[];
   skripto?: string;
+  /**
+   * The CSS custom-property name of the brand's base font (C-5, S038-19), as the brand build
+   * derives it (`--fm-…`). The frame uses it only as `var(<name>)` on `body`, never as a value;
+   * absent = no font rule.
+   */
+  bazaTiparo?: string;
 }
 
 /** The brand build: writes it into `<out>/marko/` and says what a screen must load. */
@@ -379,6 +449,12 @@ export interface RondoEkrano {
   fakto?: Fakto;
   /** The findings the next round gets as feedback (S037-03, additive). */
   trovoj?: Trovo[];
+  /**
+   * The effort of building this screen in this round only (Spec 038 C-6, additive): the run's
+   * `peno` after the build minus before it. The plan request is not in it (run total only);
+   * a round carried forward (D-26) has none.
+   */
+  peno?: Peno;
 }
 
 /** A finding of a check, as the agent gets it for the next round and the report shows it. */
@@ -442,6 +518,11 @@ export interface EkranojRezulto {
   faritajRondoj?: number;
   /** Notes for the report: a shortened plan (D-38), the reason of a stop, a renderer error. */
   notoj?: string[];
+  /**
+   * K8 deviations „mangels Mittel“ (Spec 038, C-4, D-16): a feature below 1 that the Modelo has
+   * no means for (`k8.mankoj`), per screen of the last round. Never blocking; absent when empty.
+   */
+  senRimedaj?: Restanta[];
 }
 
 /** The whole flow (implemented in S037-03): sentence and brand in, checked screens out. */

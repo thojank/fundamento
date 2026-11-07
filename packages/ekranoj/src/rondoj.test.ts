@@ -5,25 +5,46 @@
 import { CostLimitReached, DayLimitReached } from "@fundamento/metiejo";
 import { describe, expect, it } from "vitest";
 import {
+  K8_MERKMALOJ,
+  K8_REGULOJ,
   kuruEkranojn,
+  MAKS_EKRANOJ,
   MAKS_RONDOJ,
   MalpermesitaModelo,
+  NAVIGADA_REGULO,
   NevalidaEnigo,
   PERMESITA_MODELO,
   PROMPT_0,
+  SISTEMO_F,
+  trovojDe,
 } from "./index.js";
 import { BildigiloDouble } from "./test-doubles/bildigilo.js";
 import {
+  ilaRespondo,
   type Peto,
   respondo,
   rondoDePeto,
   SkriptaModelo,
   slugDePeto,
 } from "./test-doubles/chat.js";
-import { planoKun } from "./test-doubles/faktoj.js";
-import { MemoraPonto } from "./test-doubles/iloj.js";
+import { faktoKunLigiloj, planoKun } from "./test-doubles/faktoj.js";
+import { CXIUJ_ILOJ, MALNOVAJ_ILOJ, MemoraPonto } from "./test-doubles/iloj.js";
 import { MALVERDA, neniamVerda, TaksiloDouble, VERDA, verdaEkde } from "./test-doubles/taksilo.js";
-import type { EkranojDeps, EkranojEnigo, KostoTakso, Plano } from "./tipoj.js";
+import type {
+  BildigoRezulto,
+  EkranaDokumento,
+  EkranojDeps,
+  EkranojEnigo,
+  K8Merkmal,
+  KostoTakso,
+  Peno,
+  Plano,
+  RondoEkrano,
+  SondoPetoForma,
+  Taksado,
+  TaksadoK8Rezulto,
+  Varianto,
+} from "./tipoj.js";
 
 const PLANO: Plano = planoKun(2); // liste → detail
 
@@ -80,6 +101,13 @@ function depsDe(e: {
     log: (linio) => e.linioj?.push(linio),
     ...(e.takso === undefined ? {} : { takso: e.takso }),
   };
+}
+
+/** A screen state without its effort (Spec 038 C-6): what a carried round repeats. */
+function senPeno(stato: RondoEkrano | undefined): Omit<RondoEkrano, "peno"> | undefined {
+  if (stato === undefined) return undefined;
+  const { peno: _peno, ...resto } = stato;
+  return resto;
 }
 
 const konstruoj = (chat: SkriptaModelo) =>
@@ -155,8 +183,15 @@ describe("rounds (AC-8, V-3, D-26)", () => {
     expect(rezulto.rondoj).toHaveLength(3);
     expect(rezulto.rondoj[1]?.liste?.verda).toBe(true);
     expect(rezulto.rondoj[1]?.liste?.verdaEkde).toBeUndefined();
-    expect(rezulto.rondoj[2]?.liste).toEqual({ ...rezulto.rondoj[1]?.liste, verdaEkde: 2 });
-    expect(rezulto.rondoj[2]?.detail).toEqual({ ...rezulto.rondoj[1]?.detail, verdaEkde: 2 });
+    // Spec 038 C-6: a carried round has no effort of its own.
+    expect(rezulto.rondoj[2]?.liste).toEqual({
+      ...senPeno(rezulto.rondoj[1]?.liste),
+      verdaEkde: 2,
+    });
+    expect(rezulto.rondoj[2]?.detail).toEqual({
+      ...senPeno(rezulto.rondoj[1]?.detail),
+      verdaEkde: 2,
+    });
     expect(rezulto.restantaj).toEqual([]);
   });
 
@@ -541,5 +576,553 @@ describe("Variante 0 (D-34) and no renderer", () => {
       "liste axe-nekontrolita",
       "detail axe-nekontrolita",
     ]);
+  });
+});
+
+// K8 probes (Spec 038 Lauf 3, 3.4b, D-S038-17-2): the scorer names the tokens to measure, the run
+// hands them to the renderer unchanged; a scorer without them changes nothing.
+describe("K8 probes from the scorer to the renderer (3.4b)", () => {
+  const PETOJ: readonly SondoPetoForma[] = [
+    { token: "color.text.default", css: "--fm-color-text-default", eco: "color" },
+    { token: "font.family.body", css: "--fm-font-family-body", eco: "font-family" },
+    { token: "spacing.m", css: "--fm-spacing-m", eco: "spacing" },
+  ];
+
+  /** The renderer double that also keeps the options of every render. */
+  class OpciaBildigilo extends BildigiloDouble {
+    readonly opcioj: Record<string, unknown>[] = [];
+
+    override async render(
+      dokumento: EkranaDokumento,
+      opcioj: {
+        aspektoj: readonly string[];
+        varianto: Varianto;
+        sondoPetoj?: readonly SondoPetoForma[];
+      },
+    ): Promise<BildigoRezulto> {
+      this.opcioj.push({ ...opcioj });
+      return super.render(dokumento, opcioj);
+    }
+  }
+
+  /** The scorer double with probes. */
+  class SondaTaksilo extends TaksiloDouble {
+    readonly sondoPetoj = PETOJ;
+  }
+
+  it("hands the scorer's sondoPetoj to every render", async () => {
+    const chat = new SkriptaModelo(skripto(PLANO), { modelo: PERMESITA_MODELO });
+    const bildigilo = new OpciaBildigilo();
+    await kuruEkranojn(
+      enigoDe(),
+      depsDe({ chat, bildigilo, taksilo: new SondaTaksilo(() => MALVERDA) }),
+    );
+    expect(bildigilo.opcioj).toHaveLength(bildigilo.dokumentoj.length);
+    expect(bildigilo.opcioj.length).toBeGreaterThan(0);
+    for (const opcioj of bildigilo.opcioj) expect(opcioj.sondoPetoj).toBe(PETOJ);
+  });
+
+  it("gives the renderer the options of before, and the same result, without sondoPetoj", async () => {
+    const kuri = async (taksilo: TaksiloDouble) => {
+      const chat = new SkriptaModelo(skripto(PLANO), { modelo: PERMESITA_MODELO });
+      const bildigilo = new OpciaBildigilo();
+      const rezulto = await kuruEkranojn(enigoDe(), depsDe({ chat, bildigilo, taksilo }));
+      return { rezulto, bildigilo };
+    };
+    const sen = await kuri(new TaksiloDouble(() => MALVERDA));
+    for (const opcioj of sen.bildigilo.opcioj) {
+      expect(opcioj).toStrictEqual({ aspektoj: ["komuna"], varianto: "F" });
+    }
+    const kun = await kuri(new SondaTaksilo(() => MALVERDA));
+    // The probes reach only the renderer; the double renders no K8, so the run is the same
+    // (but for the wall time of the run, which no double fixes).
+    const senTempo = (rezulto: typeof sen.rezulto) =>
+      JSON.stringify({ ...rezulto, peno: { ...rezulto.peno, ms: 0 } });
+    expect(senTempo(kun.rezulto)).toBe(senTempo(sen.rezulto));
+  });
+});
+
+// K8 findings (Spec 038 Lauf 3, 3.4a, C-4, D-16): a feature below 1 that the Modelo has a means
+// for is a finding with rule, place and reason (to the next round and `restantaj`); one without a
+// means is a deviation „mangels Mittel“ that never blocks.
+describe("K8 findings and deviations „mangels Mittel“ (3.4a, C-4)", () => {
+  const PFADO = "main > fm-karto > p";
+  const tekstoDe = (merkmal: K8Merkmal, scheme: string) =>
+    `2 von 4 Treffern für ${merkmal} in ${scheme} verfehlt, zuerst \`${PFADO}\``;
+
+  /** K8 over light and dark of `komuna`: `merkmal` at 0.5, every other feature 1. */
+  const k8Kun = (e: {
+    merkmal: K8Merkmal;
+    plena: boolean;
+    mankoj?: K8Merkmal[];
+  }): TaksadoK8Rezulto => ({
+    kvoto: 0.875,
+    kombinacioj: (["dark", "light"] as const).map((scheme) => ({
+      aspekto: "komuna",
+      scheme,
+      merkmaloj: Object.fromEntries(
+        K8_MERKMALOJ.map((m) => [m, m === e.merkmal ? 0.5 : 1]),
+      ) as Record<K8Merkmal, number>,
+      kvoto: 0.875,
+      kialoj: K8_MERKMALOJ.map((m) => ({
+        merkmal: m,
+        teksto: m === e.merkmal ? tekstoDe(m, scheme) : "vollständig",
+      })),
+    })),
+    mankoj: e.mankoj ?? [],
+    plena: e.plena,
+  });
+
+  const kunK8 = (k8: TaksadoK8Rezulto): Taksado => ({ ...VERDA, k8 });
+
+  it("names the rule of every feature", () => {
+    expect(K8_REGULOJ).toEqual({
+      ersatzschrift: "k8-ersatzschrift",
+      nativaj: "k8-nativa",
+      interspacoj: "k8-interspaco",
+      sxablono: "k8-sxablono",
+    });
+  });
+
+  it("gives one finding per combination and feature below 1, with rule, place and reason from the kialo", () => {
+    for (const merkmal of K8_MERKMALOJ) {
+      const k8 = k8Kun({ merkmal, plena: false });
+      const trovoj = trovojDe({
+        slug: "liste",
+        taksado: kunK8(k8),
+        malobservoj: [],
+        fakto: faktoKunLigiloj(["detail.html"]),
+        navigado: { kompleta: true, mankantaj: [], mortaj: [] },
+        malhelpoj: ["K8"],
+      });
+      const k8Trovoj = trovoj.filter((t) => t.regulo.startsWith("k8-"));
+      expect(k8Trovoj.length, merkmal).toBe(k8.kombinacioj.length);
+      expect(
+        k8Trovoj.map(({ regulo, loko, kialo }) => ({ regulo, loko, kialo })),
+        merkmal,
+      ).toEqual(
+        k8.kombinacioj.map((k) => ({
+          regulo: K8_REGULOJ[merkmal],
+          loko: `komuna ${k.scheme}: ${PFADO}`,
+          kialo: tekstoDe(merkmal, k.scheme),
+        })),
+      );
+      for (const trovo of k8Trovoj) {
+        expect(trovo.mesagxo, merkmal).not.toBe("");
+        expect(trovo.sugesto, merkmal).not.toBe("");
+      }
+    }
+  });
+
+  it("brings every K8 finding to the next round and into restantaj; the screen is not green", async () => {
+    for (const merkmal of K8_MERKMALOJ) {
+      const k8 = k8Kun({ merkmal, plena: false });
+      const chat = new SkriptaModelo(skripto(PLANO), { modelo: PERMESITA_MODELO });
+      const rezulto = await kuruEkranojn(
+        enigoDe(),
+        depsDe({ chat, taksilo: new TaksiloDouble(() => kunK8(k8)) }),
+      );
+      expect(rezulto.faritajRondoj, merkmal).toBe(MAKS_RONDOJ);
+      expect(rezulto.rondoj[0]?.liste?.verda, merkmal).toBe(false);
+      expect(rezulto.rondoj[0]?.liste?.malhelpoj, merkmal).toEqual(["K8"]);
+      const dua = chat.petoj.find(
+        (peto) => slugDePeto(peto) === "liste" && rondoDePeto(peto) === 2,
+      );
+      const tasko = dua?.messages.find((m) => m.role === "user")?.content ?? "";
+      expect(tasko, merkmal).toContain(K8_REGULOJ[merkmal]);
+      expect(rezulto.restantaj, merkmal).toEqual(
+        PLANO.ekranoj.flatMap(({ slug }) =>
+          k8.kombinacioj.map((k) => ({
+            ekrano: slug,
+            regulo: K8_REGULOJ[merkmal],
+            loko: `komuna ${k.scheme}: ${PFADO}`,
+            kialo: tekstoDe(merkmal, k.scheme),
+          })),
+        ),
+      );
+      expect(rezulto.senRimedaj, merkmal).toBeUndefined();
+    }
+  });
+
+  it("lists a feature below 1 without a means as a deviation „mangels Mittel“ that blocks nothing", async () => {
+    const k8 = k8Kun({ merkmal: "interspacoj", plena: true, mankoj: ["interspacoj"] });
+    const chat = new SkriptaModelo(skripto(PLANO), { modelo: PERMESITA_MODELO });
+    const rezulto = await kuruEkranojn(
+      enigoDe(),
+      depsDe({ chat, taksilo: new TaksiloDouble(() => kunK8(k8)) }),
+    );
+    expect(rezulto.faritajRondoj).toBe(1);
+    expect(rezulto.rondoj[0]?.liste?.verda).toBe(true);
+    expect(rezulto.rondoj[0]?.liste?.malhelpoj).toEqual([]);
+    expect(rezulto.restantaj).toEqual([]);
+    expect(rezulto.senRimedaj).toEqual(
+      PLANO.ekranoj.flatMap(({ slug }) =>
+        k8.kombinacioj.map((k) => ({
+          ekrano: slug,
+          regulo: K8_REGULOJ.interspacoj,
+          loko: `komuna ${k.scheme}: ${PFADO}`,
+          kialo: tekstoDe("interspacoj", k.scheme),
+        })),
+      ),
+    );
+  });
+
+  it("makes no K8 finding of a feature without a means, and none at all without k8", async () => {
+    const k8 = k8Kun({ merkmal: "interspacoj", plena: true, mankoj: ["interspacoj"] });
+    const trovoj = trovojDe({
+      slug: "liste",
+      taksado: { ...MALVERDA, k8 },
+      malobservoj: [],
+      fakto: faktoKunLigiloj(["detail.html"]),
+      navigado: { kompleta: true, mankantaj: [], mortaj: [] },
+      malhelpoj: ["K5"],
+    });
+    expect(trovoj.filter((t) => t.regulo.startsWith("k8-"))).toEqual([]);
+
+    const chat = new SkriptaModelo(skripto(PLANO), { modelo: PERMESITA_MODELO });
+    const rezulto = await kuruEkranojn(enigoDe(), depsDe({ chat }));
+    const cxiujTrovoj = rezulto.rondoj.flatMap((rondo) =>
+      Object.values(rondo).flatMap((ekrano) => ekrano.trovoj ?? []),
+    );
+    expect(cxiujTrovoj.length).toBeGreaterThan(0);
+    expect(cxiujTrovoj.filter((t) => t.regulo.startsWith("k8-"))).toEqual([]);
+    expect(rezulto.restantaj.filter((r) => r.regulo.startsWith("k8-"))).toEqual([]);
+    expect("senRimedaj" in rezulto).toBe(false);
+  });
+});
+
+describe("the shell in the system text, the context per screen and round (S038-20, AC-7, C-6)", () => {
+  const PROFILO_SXELO = '{"sxablono":"sxelo","regions":[{"name":"nav","marker":"slot=nav"}]}';
+  const PROFILO_PAGXO = '{"sxablono":"pagxo","regions":[{"name":"title"}]}';
+  const ARANGXOJ = '{"sxablonoj":["sxelo","pagxo"],"interspacoj":["space.m"]}';
+  const GVIDANTO = "GVIDANTO-PROMPT: Frag zuerst describe.";
+  /** What the agent's own get_ero answers, many characters: re-sending it would show. */
+  const longa = "x".repeat(4_000);
+
+  /** A Gvidanto double that answers the shell's tools and fails where it is told to. */
+  class SxelaPonto extends MemoraPonto {
+    readonly #malsukcesaj: ReadonlySet<string>;
+
+    constructor(iloj: string[] = CXIUJ_ILOJ, malsukcesaj: readonly string[] = []) {
+      super({ iloj });
+      this.#malsukcesaj = new Set(malsukcesaj);
+    }
+
+    override async call(name: string, args: Record<string, unknown>): Promise<string> {
+      const sxlosilo = `${name} ${String(args.name ?? "")}`.trim();
+      if (this.#malsukcesaj.has(sxlosilo)) {
+        this.vokoj.push({ name, args });
+        throw new Error(`${sxlosilo} nicht erreichbar`);
+      }
+      if (name === "get_sxablono") {
+        this.vokoj.push({ name, args });
+        return args.name === "sxelo" ? PROFILO_SXELO : PROFILO_PAGXO;
+      }
+      if (name === "list_arangxoj") {
+        this.vokoj.push({ name, args });
+        return ARANGXOJ;
+      }
+      if (name === "describe") {
+        this.vokoj.push({ name, args });
+        return longa;
+      }
+      return super.call(name, args);
+    }
+  }
+
+  /** The characters of a request, as the double counts them. */
+  const signoj = (peto: Peto | undefined): number =>
+    (peto?.messages ?? []).reduce((sumo, m) => sumo + m.content.length, 0);
+
+  /**
+   * Plan requests get the plan; a build conversation asks describe once (one agent tool call),
+   * then answers with the fragment. Input tokens = characters of the request, so text that
+   * ekranoj puts into a request counts as input.
+   */
+  function ilaSkripto(plano: Plano) {
+    return (peto: Peto) => {
+      const slug = slugDePeto(peto);
+      const enigo = { input: signoj(peto), output: 7 };
+      if (slug === undefined) {
+        return respondo(`\`\`\`json\n${JSON.stringify(plano)}\n\`\`\``, enigo);
+      }
+      if (!peto.messages.some((m) => m.role === "tool")) {
+        return ilaRespondo([{ name: "describe" }], enigo);
+      }
+      return respondo(`\`\`\`html\n${fragmentoDe(plano, slug, rondoDePeto(peto))}\n\`\`\``, enigo);
+    };
+  }
+
+  const konversacioj = (chat: SkriptaModelo) => {
+    const mapo = new Map<string, Peto[]>();
+    for (const peto of chat.petoj) {
+      const slug = slugDePeto(peto);
+      if (slug === undefined) continue;
+      const sxlosilo = `${slug}#${rondoDePeto(peto)}`;
+      mapo.set(sxlosilo, [...(mapo.get(sxlosilo) ?? []), peto]);
+    }
+    return mapo;
+  };
+
+  const kuri = async (
+    e: { tools?: MemoraPonto; taksilo?: TaksiloDouble; linioj?: string[] } = {},
+  ) => {
+    const chat = new SkriptaModelo(ilaSkripto(PLANO), { modelo: PERMESITA_MODELO });
+    const tools = e.tools ?? new SxelaPonto();
+    const rezulto = await kuruEkranojn(
+      enigoDe({ plano: null }),
+      depsDe({
+        chat,
+        tools,
+        ...(e.taksilo === undefined ? {} : { taksilo: e.taksilo }),
+        ...(e.linioj === undefined ? {} : { linioj: e.linioj }),
+      }),
+    );
+    return { chat, tools, rezulto };
+  };
+
+  it("keeps 5 screens and 3 rounds", () => {
+    expect(MAKS_EKRANOJ).toBe(5);
+    expect(MAKS_RONDOJ).toBe(3);
+  });
+
+  it("starts every build conversation fresh: one system message, one user message, no tool answer of an earlier call", async () => {
+    const { chat } = await kuri();
+    const mapo = konversacioj(chat);
+    expect([...mapo.keys()]).toEqual([
+      "liste#1",
+      "detail#1",
+      "liste#2",
+      "detail#2",
+      "liste#3",
+      "detail#3",
+    ]);
+    for (const [sxlosilo, petoj] of mapo) {
+      const [unua, ...pliaj] = petoj;
+      expect(
+        unua?.messages.map((m) => m.role),
+        sxlosilo,
+      ).toEqual(["system", "user"]);
+      for (const peto of petoj) {
+        expect(
+          peto.messages.filter((m) => m.role === "system"),
+          sxlosilo,
+        ).toHaveLength(1);
+        expect(
+          peto.messages.filter((m) => m.role === "user"),
+          sxlosilo,
+        ).toHaveLength(1);
+        // Only the tool answers of this call: as many as this call asked for.
+        const demanditaj = peto.messages.flatMap((m) => m.tool_calls ?? []).length;
+        expect(
+          peto.messages.filter((m) => m.role === "tool"),
+          sxlosilo,
+        ).toHaveLength(demanditaj);
+      }
+      for (const peto of pliaj) expect(peto.messages.slice(0, 2)).toEqual(unua?.messages);
+    }
+  });
+
+  it("states the shell, the layout means and the navigation rule once per run in the system text", async () => {
+    const { chat, tools } = await kuri();
+    const sistemoj = new Set(
+      chat.petoj
+        .filter((peto) => slugDePeto(peto) !== undefined)
+        .map((peto) => peto.messages[0]?.content ?? ""),
+    );
+    expect(sistemoj.size).toBe(1);
+    const [sistemo = ""] = sistemoj;
+    expect(sistemo.startsWith(`${SISTEMO_F}\n\n${GVIDANTO}\n\n`)).toBe(true);
+    for (const ero of [PROFILO_SXELO, PROFILO_PAGXO, ARANGXOJ, NAVIGADA_REGULO]) {
+      expect(sistemo).toContain(ero);
+    }
+    // Read once per run by ekranoj, not by the agent.
+    expect(tools.vokoj.filter((voko) => voko.name === "get_sxablono").map((v) => v.args)).toEqual([
+      { name: "sxelo", brief: true, marker: true },
+      { name: "pagxo", brief: true, marker: true },
+    ]);
+    expect(tools.vokoj.filter((voko) => voko.name === "list_arangxoj")).toHaveLength(1);
+  });
+
+  it("asks round 2 with plan excerpt, the Kurzprofile of the last fragment's Eroj, that fragment, its findings and the task", async () => {
+    const { chat, rezulto, tools } = await kuri();
+    const mapo = konversacioj(chat);
+    const dua = mapo.get("liste#2")?.[0];
+    const tasko = dua?.messages[1]?.content ?? "";
+    const antaua = rezulto.rondoj[0]?.liste;
+    const fragmento = antaua?.fragmento ?? "-";
+    const trovoj = JSON.stringify(antaua?.trovoj ?? [], null, 2);
+    // The Kurzprofile of the Eroj of the last fragment (fm-karto, fm-butono), sorted.
+    const profiloj = ["butono", "karto"].map((nomo) =>
+      JSON.stringify({ ero: nomo, description: nomo === "butono" ? "Eine Aktion" : "Eine Karte" }),
+    );
+    expect(
+      tools.vokoj
+        .filter((voko) => voko.name === "get_ero" && String(voko.args.fields) === "brief")
+        .map((voko) => voko.args.name),
+    ).toEqual(["butono", "karto"]);
+    for (const ero of [
+      "Screens des Ablaufs:",
+      "- liste.html – Titel liste: Zweck von liste",
+      "Laut Plan verweist dieser Screen auf: detail.html.",
+      ...profiloj,
+      fragmento,
+      trovoj,
+      "Baue jetzt den Screen „Titel liste“ (liste.html)",
+    ]) {
+      expect(tasko, ero).toContain(ero);
+    }
+    // Round 1 has only the shell profiles from the system text.
+    const unua = mapo.get("liste#1")?.[0]?.messages[1]?.content ?? "";
+    for (const profilo of profiloj) expect(unua).not.toContain(profilo);
+    // Nothing of round 1's conversation is sent again: round 2's request is at most round 1's
+    // request plus the last fragment and its findings (characters of the double) – the tool
+    // answer of round 1 (4 000 characters) is not in it.
+    const unuaVoko = mapo.get("liste#1") ?? [];
+    expect(dua?.messages.some((m) => m.content.includes(longa))).toBe(false);
+    expect(signoj(dua)).toBeLessThanOrEqual(
+      signoj(unuaVoko.at(-1)) + fragmento.length + trovoj.length,
+    );
+    // Beyond round 1's first request it carries only fragment, findings, Kurzprofile and their
+    // headings – less than one tool answer of round 1.
+    const profilaj = profiloj.reduce((s, p) => s + p.length, 0);
+    expect(
+      signoj(dua) - signoj(unuaVoko[0]) - fragmento.length - trovoj.length - profilaj,
+    ).toBeLessThan(longa.length);
+  });
+
+  it("keeps the requests of Spec 037 byte for byte without check_markup or list_arangxoj", async () => {
+    for (const iloj of [
+      MALNOVAJ_ILOJ,
+      CXIUJ_ILOJ.filter((nomo) => nomo !== "list_arangxoj"),
+      CXIUJ_ILOJ.filter((nomo) => nomo !== "check_markup"),
+    ]) {
+      const tools = new SxelaPonto(iloj);
+      const { chat, rezulto } = await kuri({ tools });
+      const mapo = konversacioj(chat);
+      for (const [sxlosilo, petoj] of mapo) {
+        expect(petoj[0]?.messages[0], sxlosilo).toEqual({
+          role: "system",
+          content: `${SISTEMO_F}\n\n${GVIDANTO}`,
+        });
+      }
+      const plano = rezulto.plano;
+      const tasko = (slug: string, rondo: number): string => {
+        const ekrano = plano.ekranoj.find((e) => e.slug === slug);
+        const celoj = plano.kantoj.filter((k) => k.de === slug).map((k) => `${k.al}.html`);
+        const linioj = [
+          `Ablauf: ${plano.celo}`,
+          `Satz des Auftrags: ${enigoDe().frazo}`,
+          "Screens des Ablaufs:",
+          ...plano.ekranoj.map((e) => `- ${e.slug}.html – ${e.titolo}: ${e.celo}`),
+          "",
+          `Baue jetzt den Screen „${ekrano?.titolo}“ (${slug}.html): ${ekrano?.celo}`,
+          celoj.length === 0
+            ? "Laut Plan verweist dieser Screen auf keinen anderen Screen."
+            : `Laut Plan verweist dieser Screen auf: ${celoj.join(", ")}.`,
+          "Sprache der Texte: Deutsch.",
+        ];
+        if (rondo > 1) {
+          const antaua = rezulto.rondoj[rondo - 2]?.[slug];
+          linioj.push(
+            "",
+            `Runde ${rondo}: Dein Stand aus Runde ${rondo - 1}:`,
+            "```html",
+            antaua?.fragmento ?? "",
+            "```",
+            "Befunde der Prüfung (JSON: regulo, loko, mesagxo, sugesto, kialo):",
+            "```json",
+            JSON.stringify(antaua?.trovoj ?? [], null, 2),
+            "```",
+            "Verbessere den Stand so, dass die Befunde verschwinden, und sende den ganzen Stand neu.",
+          );
+        }
+        return linioj.join("\n");
+      };
+      for (const [sxlosilo, petoj] of mapo) {
+        const [slug = "", rondo = "1"] = sxlosilo.split("#");
+        expect(petoj[0]?.messages[1], sxlosilo).toEqual({
+          role: "user",
+          content: tasko(slug, Number(rondo)),
+        });
+      }
+      // No shell read and no Kurzprofil read by ekranoj on this path.
+      const nomoj = tools.vokoj.map((voko) => voko.name);
+      expect(nomoj).not.toContain("get_sxablono");
+      expect(nomoj).not.toContain("list_arangxoj");
+      expect(
+        tools.vokoj.filter(
+          (voko) => voko.name === "get_ero" && String(voko.args.fields) === "brief",
+        ),
+      ).toEqual([]);
+    }
+  });
+
+  it("keeps the effort of every build per screen and round: their sum and the plan request give the run's effort", async () => {
+    for (const taksilo of [
+      neniamVerda(),
+      verdaEkde(2),
+      new TaksiloDouble((slug) => (slug === "liste" ? VERDA : MALVERDA)),
+    ]) {
+      const { chat, rezulto } = await kuri({ taksilo });
+      const planaj = chat.petoj.filter((peto) => slugDePeto(peto) === undefined);
+      expect(planaj).toHaveLength(1);
+      const plano: Peno = {
+        inputTokens: planaj.reduce((sumo, peto) => sumo + signoj(peto), 0),
+        outputTokens: 7 * planaj.length,
+        toolCalls: 0,
+        requests: planaj.length,
+        ms: 0,
+        bytes: 0,
+      };
+      const mapo = konversacioj(chat);
+      const sumo = { ...plano };
+      for (const [index, rondo] of rezulto.rondoj.entries()) {
+        for (const [slug, stato] of Object.entries(rondo)) {
+          const petoj = mapo.get(`${slug}#${index + 1}`);
+          if (petoj === undefined) {
+            // Carried forward (D-26): no effort of its own.
+            expect(stato.peno, `${slug}#${index + 1}`).toBeUndefined();
+            continue;
+          }
+          // The build's own requests: their characters (pre-fetched Kurzprofile included) as input.
+          expect(stato.peno, `${slug}#${index + 1}`).toMatchObject({
+            inputTokens: petoj.reduce((s, peto) => s + signoj(peto), 0),
+            outputTokens: 7 * petoj.length,
+            requests: petoj.length,
+            toolCalls: petoj.length - 1,
+          });
+          sumo.inputTokens += stato.peno?.inputTokens ?? Number.NaN;
+          sumo.outputTokens += stato.peno?.outputTokens ?? Number.NaN;
+          sumo.requests += stato.peno?.requests ?? Number.NaN;
+          sumo.toolCalls += stato.peno?.toolCalls ?? Number.NaN;
+        }
+      }
+      for (const kampo of ["inputTokens", "outputTokens", "requests", "toolCalls"] as const) {
+        expect(sumo[kampo], kampo).toBe(rezulto.peno[kampo]);
+      }
+      // The pre-fetch calls are no tool calls of the agent: one describe per conversation.
+      expect(rezulto.peno.toolCalls).toBe(mapo.size);
+    }
+  });
+
+  it("skips a failing pre-fetch with a log line and never stops the run", async () => {
+    const linioj: string[] = [];
+    const tools = new SxelaPonto(CXIUJ_ILOJ, ["get_sxablono pagxo", "get_ero karto"]);
+    const { chat, rezulto } = await kuri({ tools, linioj });
+    expect(rezulto.haltigo).toBeUndefined();
+    expect(rezulto.faritajRondoj).toBe(MAKS_RONDOJ);
+    const sistemo = chat.petoj.find((peto) => slugDePeto(peto) !== undefined)?.messages[0]?.content;
+    expect(sistemo).toContain(PROFILO_SXELO);
+    expect(sistemo).not.toContain(PROFILO_PAGXO);
+    const dua = konversacioj(chat).get("liste#2")?.[0]?.messages[1]?.content ?? "";
+    expect(dua).toContain(JSON.stringify({ ero: "butono", description: "Eine Aktion" }));
+    expect(dua).not.toContain(JSON.stringify({ ero: "karto", description: "Eine Karte" }));
+    expect(
+      linioj.filter((linio) => linio.includes("pagxo") && linio.includes("nicht erreichbar")),
+    ).toHaveLength(1);
+    expect(
+      linioj.filter((linio) => linio.includes("karto") && linio.includes("nicht erreichbar")),
+    ).toHaveLength(1);
   });
 });

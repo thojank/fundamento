@@ -27,9 +27,15 @@ import type {
   Taksilo,
   ToolInfo,
 } from "@fundamento/ekranoj";
+import { cssVariable } from "@fundamento/projekcioj";
 import { describe, expect, it } from "vitest";
 import type { CliContext } from "./command.js";
-import { type EkranojMedio, ekranojKomando } from "./commands/ekranoj.js";
+import {
+  BAZA_TIPARO_TOKENO,
+  type EkranojMedio,
+  ekranojKomando,
+  realaMedio,
+} from "./commands/ekranoj.js";
 
 const built = fileURLToPath(new URL("../dist/index.js", import.meta.url));
 const repoRoot = dirname(dirname(fileURLToPath(new URL("..", import.meta.url))));
@@ -582,5 +588,18 @@ describe("fm ekranoj: a run", () => {
     for (const dosiero of skribitaj) {
       expect(readFileSync(dosiero, "utf8"), dosiero).not.toContain(SXLOSILO);
     }
+  });
+});
+
+describe("fm ekranoj: the brand build names the base font (S038-19, C-5, D-S038-19-2)", () => {
+  it("returns the CSS variable of the body font token with the default config, declared by the built stylesheet", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "fm-ekranoj-marko-"));
+    const marko = await realaMedio().marko({ config: undefined, marko: "komuna" });
+    const konstruo = await marko.konstrui(dir);
+    const atendata = cssVariable(BAZA_TIPARO_TOKENO);
+    expect(konstruo.bazaTiparo).toBe(atendata);
+    // The brand's stylesheet declares it: the frame's var() resolves to the brand's family.
+    const css = readFileSync(join(dir, "css", "fundamento.css"), "utf8");
+    expect(css).toMatch(new RegExp(`${atendata}\\s*:`));
   });
 });

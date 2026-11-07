@@ -42,7 +42,7 @@ import {
   projectModeloSource,
   readNordstelo,
 } from "@fundamento/modelo";
-import { buildProjekcioj } from "@fundamento/projekcioj";
+import { buildProjekcioj, cssVariable } from "@fundamento/projekcioj";
 import { parseFlags, UsageError } from "../args.js";
 import { type CliContext, type Command, EXIT_FAIL, EXIT_OK, EXIT_USAGE } from "../command.js";
 
@@ -56,6 +56,12 @@ const DEFAULT_DIR = ".fundamento/ekranoj";
 export const EKRANOJ_MAKS_TOKENOJ = 250_000;
 /** The word that makes the first argument the sub-mode instead of a sentence (D-29). */
 export const MANKOJ_MODUSO = "mankoj";
+/**
+ * The token of the brand's base font (C-5, S038-19): the body family of the core set
+ * (`packages/vortaro/sets/core.json` → `font.family.body`, overridden per Aspekto). The screens name
+ * it only through its CSS variable, derived by `cssVariable` (Art. II), never as a value.
+ */
+export const BAZA_TIPARO_TOKENO = "font.family.body";
 /** The built entry of this cli: the Gvidanto runs as its `fm mcp` child process. */
 const CLI_ENIRO = fileURLToPath(new URL("../index.js", import.meta.url));
 
@@ -273,7 +279,11 @@ export function realaMedio(): EkranojMedio {
             );
           }
           const skripto = skriptoDe(dir, marko);
-          return { css: ["css/fundamento.css"], ...(skripto === undefined ? {} : { skripto }) };
+          return {
+            css: ["css/fundamento.css"],
+            ...(skripto === undefined ? {} : { skripto }),
+            bazaTiparo: cssVariable(BAZA_TIPARO_TOKENO),
+          };
         },
       };
     },

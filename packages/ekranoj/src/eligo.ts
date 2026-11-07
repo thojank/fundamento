@@ -94,7 +94,17 @@ export interface RaportoEkrano {
   malhelpoj: Malhelpo[];
   /** The page rules of check_markup, hints only (Spec 038 D-29); absent when there are none. */
   sxablonajSugestoj?: Malobservo[];
+  /**
+   * The effort of building this screen in this round (Spec 038 C-6, D-S038-21-1); absent for a
+   * screen carried forward (D-26) and for results without it.
+   */
+  peno?: Peno;
+  /** K8 of this screen (Spec 038 C-3, 3.4c): share and `plena`; absent when not checked. */
+  k8?: { kvoto: number; plena: boolean };
 }
+
+/** The counted part of an effort: what Σ screen × round + plan = run holds for (C-6). */
+export type PenoParto = Pick<Peno, "inputTokens" | "outputTokens" | "requests" | "toolCalls">;
 
 export interface FluaNavigado {
   kvoto: number;
@@ -148,6 +158,13 @@ export interface RaportoJson {
   dauxroMs: number;
   takso?: KostoTakso;
   notoj: string[];
+  /** K8 deviations „mangels Mittel“ (Spec 038, C-4, D-16); absent when there are none. */
+  senRimedaj?: Restanta[];
+  /**
+   * The effort of the plan request (Spec 038 C-6, D-S038-21-1): run `peno` minus the sum of every
+   * screen × round `peno`. Absent when no screen × round carries a `peno` (results before C-6).
+   */
+  penoPlano?: PenoParto;
 }
 
 export interface RaportoEnigo {
@@ -212,7 +229,34 @@ function raportoEkranoDe(stato: RondoEkrano): RaportoEkrano {
     ...(stato.sxablonajSugestoj === undefined
       ? {}
       : { sxablonajSugestoj: stato.sxablonajSugestoj }),
+    // Spec 038 C-6: only a screen built in this round has its effort (D-S038-21-1).
+    ...(stato.peno === undefined ? {} : { peno: stato.peno }),
+    ...(stato.taksado.k8 === undefined
+      ? {}
+      : { k8: { kvoto: stato.taksado.k8.kvoto, plena: stato.taksado.k8.plena } }),
   };
+}
+
+const PENO_ZAEHLER = ["inputTokens", "outputTokens", "requests", "toolCalls"] as const;
+
+/**
+ * The plan request's effort (C-6): run `peno` minus every screen × round `peno`, so that the sum
+ * of both is the run total. Undefined when no screen × round has a `peno` (results before C-6).
+ * The difference also holds a build cut off without a state (F-S038-20-2).
+ */
+function penoPlanoDe(rezulto: EkranojRezulto): PenoParto | undefined {
+  const penoj = rezulto.rondoj.flatMap((rondo) =>
+    rezulto.plano.ekranoj.flatMap(({ slug }) => {
+      const peno = rondo[slug]?.peno;
+      return peno === undefined ? [] : [peno];
+    }),
+  );
+  if (penoj.length === 0) return undefined;
+  const plano: PenoParto = { inputTokens: 0, outputTokens: 0, requests: 0, toolCalls: 0 };
+  for (const z of PENO_ZAEHLER) {
+    plano[z] = penoj.reduce((resto, peno) => resto - peno[z], rezulto.peno[z]);
+  }
+  return plano;
 }
 
 /** The last state of every screen that was built: its round and its state. */
@@ -293,6 +337,7 @@ export function raportoDe(e: RaportoEnigo): RaportoJson {
       }),
     ),
   }));
+  const penoPlano = penoPlanoDe(rezulto);
   const cxiujVerdaj =
     ekranoj.length > 0 && ekranoj.every((ekrano) => ekrano.verda && ekrano.dosiero !== undefined);
   return {
@@ -323,6 +368,10 @@ export function raportoDe(e: RaportoEnigo): RaportoJson {
     dauxroMs: rezulto.peno.ms,
     ...(rezulto.takso === undefined ? {} : { takso: rezulto.takso }),
     notoj: [...(rezulto.notoj ?? []), ...(e.notoj ?? [])],
+    ...(rezulto.senRimedaj === undefined || rezulto.senRimedaj.length === 0
+      ? {}
+      : { senRimedaj: rezulto.senRimedaj }),
+    ...(penoPlano === undefined ? {} : { penoPlano }),
   };
 }
 
@@ -357,6 +406,36 @@ function navigadoCxelo(navigado: EkranaNavigado): string {
     ...(navigado.mortaj.length === 0 ? [] : [`tot: ${navigado.mortaj.join(", ")}`]),
   ];
   return partoj.length === 0 ? "unvollständig" : partoj.join("; ");
+}
+
+/** K8 of a screen in a round table (3.4c): share and `plena`, or „nicht geprüft“. */
+function k8Cxelo(k8: RaportoEkrano["k8"]): string {
+  if (k8 === undefined) return "nicht geprüft";
+  return `${nombro(k8.kvoto)}, ${k8.plena ? "vollständig" : "nicht vollständig"}`;
+}
+
+/** The table „Tokens je Screen und Runde“ (3.4c, C-6): built screens, plan, sum = run. */
+function penoTabelo(r: RaportoJson): string[] {
+  const linioj = ["### Tokens je Screen und Runde", ""];
+  if (r.penoPlano === undefined) {
+    linioj.push("Kein Aufwand je Screen und Runde erfasst.", "");
+    return linioj;
+  }
+  const zaehler = (p: PenoParto) => PENO_ZAEHLER.map((z) => p[z]);
+  linioj.push(
+    "Aufwand des Baus je Screen und Runde; übernommene Screens (D-26) haben keine Zeile. Plan = Summe des Laufs minus alle Zeilen der Screens: die Plananfrage, dazu ein abgebrochener Bau ohne Stand.",
+    "",
+    vico(["Screen", "Runde", "Tokens ein", "Tokens aus", "Anfragen", "Werkzeugaufrufe"]),
+    "|---|---|---|---|---|---|",
+  );
+  for (const rondo of r.rondoj) {
+    for (const [slug, ekrano] of Object.entries(rondo.ekranoj)) {
+      if (ekrano.peno !== undefined) linioj.push(vico([slug, rondo.n, ...zaehler(ekrano.peno)]));
+    }
+  }
+  linioj.push(vico(["Plan", "–", ...zaehler(r.penoPlano)]));
+  linioj.push(vico(["Summe", "–", ...zaehler(r.peno)]), "");
+  return linioj;
 }
 
 const kantoj = (listo: readonly Kanto[]): string =>
@@ -437,8 +516,9 @@ export function raportoMarkdown(r: RaportoJson): string {
         "axe dunkel",
         "Navigation",
         "grün",
+        "K8",
       ]),
-      `|${"---|".repeat(KRITERIOJ.length + 8)}`,
+      `|${"---|".repeat(KRITERIOJ.length + 9)}`,
     );
     const malobservoj: string[] = [];
     const sxablonajSugestoj: string[] = [];
@@ -457,6 +537,7 @@ export function raportoMarkdown(r: RaportoJson): string {
           axeCxelo(ekrano.axe.malhela),
           navigadoCxelo(ekrano.navigado),
           verdaCxelo(ekrano, rondo.n),
+          k8Cxelo(ekrano.k8),
         ]),
       );
       for (const m of ekrano.malobservoj) {
@@ -508,6 +589,18 @@ export function raportoMarkdown(r: RaportoJson): string {
   }
   linioj.push("");
 
+  // Spec 038 (C-4, D-16): K8 features below 1 the Modelo has no means for; never blocking.
+  if (r.senRimedaj !== undefined && r.senRimedaj.length > 0) {
+    linioj.push("## Abweichungen mangels Mittel (D-16)", "");
+    linioj.push(
+      "K8-Merkmale unter 1, für die das Modelo kein Mittel hat. Sie halten keinen Screen von grün ab.",
+      "",
+    );
+    linioj.push(vico(["Screen", "Regel", "Ort", "Grund"]), "|---|---|---|---|");
+    for (const a of r.senRimedaj) linioj.push(vico([a.ekrano, a.regulo, a.loko, a.kialo]));
+    linioj.push("");
+  }
+
   // Teil 3 (S037-06): the gaps of this run, the table of the Lückenliste (also in mankoj.json).
   linioj.push("## Lücken (Teil 3)", "", mankojMarkdown(r.mankoj).trimEnd(), "");
 
@@ -523,6 +616,7 @@ export function raportoMarkdown(r: RaportoJson): string {
       : `- Kosten: ${r.kosto.usd.toFixed(6)} $`,
   );
   linioj.push(`- Dauer: ${r.dauxroMs} ms`, "");
+  linioj.push(...penoTabelo(r));
 
   linioj.push("## Halt", "");
   linioj.push(`- Haltgrund: ${r.haltigoTeksto}`);
@@ -630,7 +724,13 @@ export function eligoDe(opcioj: EligoOpcioj = {}): EkranojEligo {
           skripto = KLASIKA_SKRIPTO;
         }
       }
-      marko = { css: e.marko.css.map(rel), ...(skripto === undefined ? {} : { skripto }) };
+      const { bazaTiparo } = e.marko;
+      marko = {
+        css: e.marko.css.map(rel),
+        ...(skripto === undefined ? {} : { skripto }),
+        // C-5: the base-font name of the brand build reaches every screen and the overview.
+        ...(bazaTiparo === undefined ? {} : { bazaTiparo }),
+      };
     },
 
     dokumento(e) {

@@ -276,21 +276,30 @@ export function instancojElElementoj(
 
 type RegionEntry = NonNullable<SxablonoInstance["regions"]>[string][number];
 
+/** A Sxablono instance with the index of its element in the list it was derived from. */
+export interface SxablonoEnElemento {
+  /** Index of the `fm-<name>` element in `elementoj`. */
+  elemento: number;
+  instanco: SxablonoInstance;
+}
+
 /**
- * The Sxablono instances of a page, in document order: every `fm-<name>` element whose name is a
- * Sxablono, its props typed by its Skemo, and in each region what its markers put there – a direct
- * child with `slot` = the region's marker slot, a child without `slot` (and the element's own text)
- * in the default region; a child whose slot names no region is not shown by the browser and counts
+ * The one derivation of the Sxablono instances of a page (MG-5): what check_markup reports as
+ * `sxablonoj` and what K8 of nordstelo reads (Spec 038 S038-16, E-2), each with the index of its
+ * element in `elementoj`. In document order: every `fm-<name>` element whose name is a Sxablono,
+ * its props typed by its Skemo, and in each region what its markers put there – a direct child
+ * with `slot` = the region's marker slot, a child without `slot` (and the element's own text) in
+ * the default region; a child whose slot names no region is not shown by the browser and counts
  * nowhere. A child Ero stands as `{ ero, props }`, a Sxablono as `{ sxablono }`, anything else as
  * "text". Regions in the order of the Skemo, empty ones left out.
  */
-function sxablonojElElementoj(
+export function sxablonojElElementoj(
   elementoj: readonly GvidantoElemento[],
   modelo: Modelo,
-): SxablonoInstance[] {
+): SxablonoEnElemento[] {
   const eroj = erojOf(modelo);
   const sxablonoj = sxablonojOf(modelo);
-  const instances: SxablonoInstance[] = [];
+  const instances: SxablonoEnElemento[] = [];
   for (const [index, element] of elementoj.entries()) {
     const name = fmName(element.tag);
     const entry = name === undefined ? undefined : sxablonoj.get(name);
@@ -329,9 +338,8 @@ function sxablonojElElementoj(
       if (children !== undefined) regions[region] = children;
     }
     instances.push({
-      sxablono: name,
-      props: typedProps(entry.skemo.props, element.attrs),
-      regions,
+      elemento: index,
+      instanco: { sxablono: name, props: typedProps(entry.skemo.props, element.attrs), regions },
     });
   }
   return instances;
@@ -398,7 +406,7 @@ export function checkMarkup(modelo: Modelo, input: CheckMarkupInput): CheckMarku
   // A refused input stays as check_usage words it (paths check_usage/…), so the clients' findings
   // stay what they were.
   if (!rezulto.ok) return rezulto;
-  const sxablonoj = sxablonojElElementoj(read.elementoj, modelo);
+  const sxablonoj = sxablonojElElementoj(read.elementoj, modelo).map(({ instanco }) => instanco);
   if (sxablonoj.length === 0) {
     return { ok: true, output: { eroj, sxablonoj, rezulto: rezulto.output } };
   }

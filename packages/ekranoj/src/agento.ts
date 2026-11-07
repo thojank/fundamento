@@ -382,6 +382,13 @@ export interface KonstruoPeto {
   maksIlojVokoj?: number;
   /** Characters of one tool result the agent gets (as nordstelo: 20 000). */
   maksIlaRezulto?: number;
+  /**
+   * Spec 038 (3.2, D-S038-20-2): the shell, read once per run when the server lists check_markup
+   * and list_arangxoj. Its presence picks the new system text and task; absent = Spec 037 path.
+   */
+  sxelo?: SxelaKunteksto;
+  /** The Kurzprofile of the Eroj in the previous round's fragment (new path, rounds 2 and 3). */
+  eroProfiloj?: readonly Profilo[];
 }
 
 /** What one build conversation gave: the markup, the agent's gaps, and whether it stayed empty. */
@@ -425,6 +432,189 @@ export function taskoDe(peto: KonstruoPeto): string {
   return linioj.join("\n");
 }
 
+// --- Spec 038: the shell in the system text, the context per screen and round (S038-20) ----------
+
+/** The tools whose presence in the run's tool list picks the shell path (D-03, D-S038-20-2). */
+export const SXELAJ_ILOJ = ["check_markup", "list_arangxoj"] as const;
+
+/** The Sxablonoj of the shell, whose Kurzprofile stand in the system text. */
+export const SXELAJ_SXABLONOJ = ["sxelo", "pagxo"] as const;
+
+/** The rule where the links to other screens belong (the form of the overview, S038-19). */
+export const NAVIGADA_REGULO = [
+  "Baue jeden Screen in der Shell: <fm-sxelo> außen, der Inhalt in ihrem Standardbereich, gern in <fm-pagxo>.",
+  'Verweise auf andere Screens des Ablaufs gehören in die Navigation der Shell: ein <fm-navigado label="…"> im slot="nav" von <fm-sxelo>, darin jeder Verweis als direktes Kind <a href="<slug>.html">.',
+].join("\n");
+
+/** One Kurzprofil read by ekranoj (not by the agent): the name and the answer as the tool gave it. */
+export interface Profilo {
+  nomo: string;
+  teksto: string;
+}
+
+/** The shell of a run: the Kurzprofile of its Sxablonoj and the layout means, read once. */
+export interface SxelaKunteksto {
+  /** `get_sxablono { name, brief: true, marker: true }`, in the order of `SXELAJ_SXABLONOJ`. */
+  profiloj: Profilo[];
+  /** The answer of `list_arangxoj`; absent when the call failed. */
+  arangxoj?: string;
+}
+
+/** Whether the run takes the shell path: the server lists check_markup and list_arangxoj. */
+export function sxelaServilo(iloj: readonly Pick<ToolInfo, "name">[]): boolean {
+  const nomoj = new Set(iloj.map((ilo) => ilo.name));
+  return SXELAJ_ILOJ.every((nomo) => nomoj.has(nomo));
+}
+
+/** A JSON object of a tool answer, or undefined (no JSON, a list, a refusal with `issues`). */
+const respondoObjekto = (teksto: string): Record<string, unknown> | undefined => {
+  const body = parse(teksto);
+  return isObject(body) && body.issues === undefined && body.error === undefined ? body : undefined;
+};
+
+/** One read of ekranoj (not of the agent): the answer, or undefined with a log line. */
+async function antauxpreni(
+  ponto: ToolBridge,
+  nomo: string,
+  args: Record<string, unknown>,
+  log: (linio: string) => void,
+): Promise<string | undefined> {
+  const kio = `${nomo}${typeof args.name === "string" ? ` ${args.name}` : ""}`;
+  try {
+    const respondo = await ponto.call(nomo, args);
+    if (respondoObjekto(respondo) !== undefined) return respondo;
+    log(`Kurzprofil ${kio} übersprungen: keine lesbare Antwort.`);
+  } catch (error) {
+    log(
+      `Kurzprofil ${kio} übersprungen: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+  return undefined;
+}
+
+/** The shell of a run over the bridge; a failing call is skipped with a log line. */
+export async function legiSxelon(
+  ponto: ToolBridge,
+  log: (linio: string) => void,
+): Promise<SxelaKunteksto> {
+  const profiloj: Profilo[] = [];
+  for (const nomo of SXELAJ_SXABLONOJ) {
+    const teksto = await antauxpreni(
+      ponto,
+      "get_sxablono",
+      { name: nomo, brief: true, marker: true },
+      log,
+    );
+    if (teksto !== undefined) profiloj.push({ nomo, teksto });
+  }
+  const arangxoj = await antauxpreni(ponto, "list_arangxoj", {}, log);
+  return { profiloj, ...(arangxoj === undefined ? {} : { arangxoj }) };
+}
+
+/** The names of the `fm-*` tags of a fragment, sorted and once each, the shell's Sxablonoj left out. */
+export function eroNomojDe(fragmento: string): string[] {
+  const sxelaj: ReadonlySet<string> = new Set(SXELAJ_SXABLONOJ);
+  const nomoj = [...fragmento.matchAll(/<fm-([a-z0-9-]+)/gi)].map((m) =>
+    (m[1] ?? "").toLowerCase(),
+  );
+  return [...new Set(nomoj)].filter((nomo) => nomo !== "" && !sxelaj.has(nomo)).sort();
+}
+
+/** A cache of Kurzprofile per run: one read per name, misses included. */
+export type ProfilaKasxmemoro = Map<string, Promise<Profilo | undefined>>;
+
+/**
+ * The Kurzprofile `get_ero { name, fields: ["brief"] }` of the names that are Eroj; an answer
+ * that is no Ero or a failing call is skipped with a log line, never an error of the run.
+ */
+export async function legiEroProfilojn(
+  ponto: ToolBridge,
+  nomoj: readonly string[],
+  kasxmemoro: ProfilaKasxmemoro,
+  log: (linio: string) => void,
+): Promise<Profilo[]> {
+  const profiloj: Profilo[] = [];
+  for (const nomo of nomoj) {
+    let profilo = kasxmemoro.get(nomo);
+    if (profilo === undefined) {
+      profilo = antauxpreni(ponto, "get_ero", { name: nomo, fields: ["brief"] }, log).then(
+        (teksto) => (teksto === undefined ? undefined : { nomo, teksto }),
+      );
+      kasxmemoro.set(nomo, profilo);
+    }
+    const legita = await profilo;
+    if (legita !== undefined) profiloj.push(legita);
+  }
+  return profiloj;
+}
+
+/** The system text of Variante F: SISTEMO_F, the Gvidanto's prompt, and on the new path the shell. */
+export function sistemoDe(gvidanto: string, sxelo?: SxelaKunteksto): string {
+  const partoj = [SISTEMO_F, ...(gvidanto === "" ? [] : [gvidanto])];
+  if (sxelo !== undefined) {
+    if (sxelo.profiloj.length > 0) {
+      partoj.push(
+        [
+          "Die Shell von Fundamento (Kurzprofile aus get_sxablono, mit den Markern der Bereiche):",
+          ...sxelo.profiloj.map((profilo) => `- fm-${profilo.nomo}: ${profilo.teksto}`),
+        ].join("\n"),
+      );
+    }
+    if (sxelo.arangxoj !== undefined) {
+      partoj.push(`Die Layout-Mittel (list_arangxoj):\n${sxelo.arangxoj}`);
+    }
+    partoj.push(NAVIGADA_REGULO);
+  }
+  return partoj.join("\n\n");
+}
+
+/** The user message of the new path: plan excerpt, Kurzprofile, last fragment, findings, task. */
+export function sxelaTaskoDe(peto: KonstruoPeto): string {
+  const { plano, ekrano } = peto;
+  const celoj = plano.kantoj.filter((kanto) => kanto.de === ekrano.slug).map((k) => `${k.al}.html`);
+  const linioj = [
+    `Ablauf: ${plano.celo}`,
+    `Satz des Auftrags: ${peto.frazo}`,
+    "Screens des Ablaufs:",
+    ...plano.ekranoj.map((e) => `- ${e.slug}.html – ${e.titolo}: ${e.celo}`),
+    celoj.length === 0
+      ? "Laut Plan verweist dieser Screen auf keinen anderen Screen."
+      : `Laut Plan verweist dieser Screen auf: ${celoj.join(", ")}.`,
+  ];
+  const profiloj = peto.antaua === undefined ? [] : (peto.eroProfiloj ?? []);
+  if (profiloj.length > 0) {
+    linioj.push(
+      "",
+      "Kurzprofile der Eroj deines Stands (get_ero, brief):",
+      ...profiloj.map((profilo) => `- fm-${profilo.nomo}: ${profilo.teksto}`),
+    );
+  }
+  if (peto.antaua !== undefined) {
+    linioj.push(
+      "",
+      `Runde ${peto.rondo}: Dein Stand aus Runde ${peto.rondo - 1}:`,
+      "```html",
+      peto.antaua.fragmento,
+      "```",
+      "Befunde der Prüfung (JSON: regulo, loko, mesagxo, sugesto, kialo):",
+      "```json",
+      JSON.stringify(peto.antaua.trovoj, null, 2),
+      "```",
+    );
+  }
+  linioj.push(
+    "",
+    `Baue jetzt den Screen „${ekrano.titolo}“ (${ekrano.slug}.html): ${ekrano.celo}`,
+    ...(peto.antaua === undefined
+      ? []
+      : [
+          "Verbessere den Stand so, dass die Befunde verschwinden, und sende den ganzen Stand neu.",
+        ]),
+    `Sprache der Texte: ${peto.lingvo === "en" ? "Englisch" : "Deutsch"}.`,
+  );
+  return linioj.join("\n");
+}
+
 /** The tools a model may be offered: never a writing one, whatever the bridge lists. */
 export function ofertotajIloj(iloj: readonly ToolInfo[]): ToolInfo[] {
   const skribaj: ReadonlySet<string> = new Set(SKRIBAJ_ILOJ);
@@ -465,14 +655,14 @@ async function redemandi(
 export async function konstruiEkranon(peto: KonstruoPeto): Promise<KonstruoRezulto> {
   const maksVokoj = peto.maksIlojVokoj ?? 24;
   const maksRezulto = peto.maksIlaRezulto ?? 20_000;
-  const tasko = taskoDe(peto);
+  const nova = peto.varianto === "F" && peto.sxelo !== undefined;
+  const tasko = nova ? sxelaTaskoDe(peto) : taskoDe(peto);
   const messages: ChatMessage[] = [];
   const iloj = peto.varianto === "F" ? ofertotajIloj(peto.iloj ?? []) : [];
   if (peto.varianto === "F") {
-    const gvidanto = peto.gvidanto ?? "";
     messages.push({
       role: "system",
-      content: gvidanto === "" ? SISTEMO_F : `${SISTEMO_F}\n\n${gvidanto}`,
+      content: sistemoDe(peto.gvidanto ?? "", nova ? peto.sxelo : undefined),
     });
     messages.push({ role: "user", content: tasko });
   } else {

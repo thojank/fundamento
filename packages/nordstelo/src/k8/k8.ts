@@ -1,13 +1,19 @@
 // K8 „Erscheinung“ (Spec 038 Lauf 2, contract C-D): how close a rendered screen looks to
 // Fundamento, per brand × scheme at contrast "default" (D-96). Pure: it reads only the stored K8
 // facts of the renders, `facts.elements`, the Modelo's layout gaps (`listArangxoj(...).mankoj`)
-// and its Sxablonoj with their region markers (`markerOf`, D-S038-12-1).
+// and the Sxablono instances the Modelo derives from the elements (`sxablonojElElementoj`, the
+// derivation check_markup uses; Spec 038 S038-16, E-2).
 //
 // Every Sollwert comes from the render's own probes (D-S038-11-1): the brand's font families,
 // colours and spacing steps as the browser computed them from the brand's tokens. No value is
 // written here: no family, colour, length or token path.
 
-import { type ArangxoCelo, listArangxoj, type Modelo, markerOf } from "@fundamento/modelo";
+import {
+  type ArangxoCelo,
+  listArangxoj,
+  type Modelo,
+  sxablonojElElementoj,
+} from "@fundamento/modelo";
 import type { Element, Facts, FaktoAspekto, Render } from "../facts.js";
 
 export type K8Merkmal = "ersatzschrift" | "nativaj" | "interspacoj" | "sxablono";
@@ -201,27 +207,16 @@ function interspacoj(fakto: FaktoAspekto, soloj: Soloj, elementoj: readonly Elem
 }
 
 /**
- * 1 when the markup holds an `fm-<name>` of a Sxablono of the Modelo with at least one region
- * filled by the rule of `markerOf` (D-S038-12-1): a direct child whose `slot` is a region's marker
- * slot, or – for the default region – a child without `slot` or the element's own text.
+ * 1 when a Sxablono instance, as the Modelo derives them (`sxablonojElElementoj`, the one
+ * derivation check_markup uses, MG-5), has at least one region filled; the kialo names the path of
+ * the element of the first such instance in document order.
  */
 function sxablono(facts: Facts, modelo: Modelo): Rezulto {
-  const sxablonoj = new Map((modelo.sxablonoj ?? []).map((entry) => [entry.sxablono.name, entry]));
-  const elementoj = facts.elements;
-  for (const [indekso, elemento] of elementoj.entries()) {
-    if (!elemento.tag.startsWith("fm-")) continue;
-    const entry = sxablonoj.get(elemento.tag.slice("fm-".length));
-    if (entry === undefined) continue;
-    const markiloj = entry.skemo.regions.map((region) => markerOf(modelo, entry, region));
-    const regionoEkzistas = (slot: string | undefined): boolean =>
-      markiloj.some((markilo) =>
-        slot === undefined ? markilo.default === true : markilo.slot === slot,
-      );
-    const plenigita =
-      (elemento.text !== "" && regionoEkzistas(undefined)) ||
-      elementoj.some((infano) => infano.parent === indekso && regionoEkzistas(infano.attrs.slot));
-    if (plenigita) return { valoro: 1, teksto: `${PLENA}: \`${pfadoDe(elementoj, indekso)}\`` };
-  }
+  const unua = sxablonojElElementoj(facts.elements, modelo).find(
+    ({ instanco }) => Object.keys(instanco.regions ?? {}).length > 0,
+  );
+  if (unua !== undefined)
+    return { valoro: 1, teksto: `${PLENA}: \`${pfadoDe(facts.elements, unua.elemento)}\`` };
   return { valoro: 0, teksto: "keine Sxablono mit erkannter Region im Markup" };
 }
 
