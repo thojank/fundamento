@@ -45,12 +45,20 @@ export const SISTEMO_F = [
   'Fehlt dir eine Ero, ein Sxablono oder ein Werkzeug, nenne es danach in einem ```mankoj-Block als JSON-Liste: [{"speco": "ero" | "sxablono" | "ilo", "nomo": "…", "ekzemplo": "wofür du es gebraucht hättest", "propono": "was es können sollte"}].',
 ].join("\n");
 
+/** The placeholder of `SISTEMO_F`'s link sentence, which the shell path replaces (B-2). */
+const VERWEIS_PLATZHALTER = "schreibst du als <slug>.html und";
+
 /**
- * The system text of Variante F on the shell path (Spec 038 B-2): `SISTEMO_F` with the screens of
- * this run as concrete file names instead of the placeholder. Stub until S038-37a green.
+ * The system text of Variante F on the shell path (Spec 038 B-2): `SISTEMO_F` with its link
+ * sentence naming the screens of this run as concrete file names, in plan order, instead of the
+ * `<slug>.html` placeholder (a model copied it literally). Everything else stays byte for byte.
  */
-export function sxelaSistemoDe(_slugoj: readonly string[]): string {
-  return SISTEMO_F;
+export function sxelaSistemoDe(slugoj: readonly string[]): string {
+  const ziele = slugoj.length === 0 ? "" : ` (${slugoj.map((slug) => `${slug}.html`).join(", ")})`;
+  return SISTEMO_F.replace(
+    VERWEIS_PLATZHALTER,
+    `schreibst du mit dem Dateinamen des Screens als Ziel${ziele} und`,
+  );
 }
 
 /**
@@ -488,14 +496,22 @@ export const NAVIGADA_REGULO = [
   'Verweise auf andere Screens des Ablaufs gehören in die Navigation der Shell: ein <fm-navigado label="…"> im slot="nav" von <fm-sxelo>, darin jeder Verweis als direktes Kind <a href="<slug>.html">.',
 ].join("\n");
 
+/** The placeholder link of `NAVIGADA_REGULO`, which the rule of a run replaces (B-2). */
+const NAVIGADA_PLATZHALTER = '<a href="<slug>.html">';
+
 /**
- * The navigation rule of a run (Spec 038 F-2): `NAVIGADA_REGULO` and the screens that exist in
- * this run, as `<slug>.html` in plan order. Without a screen only `NAVIGADA_REGULO`.
+ * The navigation rule of a run (Spec 038 F-2, B-2): `NAVIGADA_REGULO` with its placeholder link
+ * replaced by the concrete links to the screens of this run, in plan order, and the list of those
+ * screens. Without a screen only the shell sentence and that there is nothing to link to.
  */
 export function navigadaReguloDe(slugoj: readonly string[]): string {
-  if (slugoj.length === 0) return NAVIGADA_REGULO;
+  const [sxelo = ""] = NAVIGADA_REGULO.split("\n");
+  if (slugoj.length === 0) {
+    return `${sxelo}\nIn diesem Lauf gibt es keine anderen Screens; schreibe keine Verweise.`;
+  }
+  const ligiloj = slugoj.map((slug) => `<a href="${slug}.html">`).join(" oder ");
   const ekranoj = slugoj.map((slug) => `${slug}.html`).join(", ");
-  return `${NAVIGADA_REGULO}\nVerweise nur auf diese Screens: ${ekranoj}. Andere Ziele gibt es in diesem Lauf nicht.`;
+  return `${NAVIGADA_REGULO.replace(NAVIGADA_PLATZHALTER, ligiloj)}\nVerweise nur auf diese Screens: ${ekranoj}. Andere Ziele gibt es in diesem Lauf nicht.`;
 }
 
 /** One Kurzprofil read by ekranoj (not by the agent): the name and the answer as the tool gave it. */
@@ -618,15 +634,19 @@ export async function legiEroProfilojn(
 }
 
 /**
- * The system text of Variante F: SISTEMO_F, the Gvidanto's prompt, and on the new path the shell
- * with the navigation rule; given the slugs of the built screens, the rule names them (F-2).
+ * The system text of Variante F: SISTEMO_F and the Gvidanto's prompt (Spec 037, byte for byte);
+ * on the new path the shell's variant `sxelaSistemoDe`, the prompt, the shell and the navigation
+ * rule, both naming the built screens as concrete targets, never the `<slug>.html` placeholder
+ * (F-2, B-2).
  */
 export function sistemoDe(
   gvidanto: string,
   sxelo?: SxelaKunteksto,
   slugoj?: readonly string[],
 ): string {
-  const partoj = [SISTEMO_F, ...(gvidanto === "" ? [] : [gvidanto])];
+  const ekranoj = slugoj ?? [];
+  const komenco = sxelo === undefined ? SISTEMO_F : sxelaSistemoDe(ekranoj);
+  const partoj = [komenco, ...(gvidanto === "" ? [] : [gvidanto])];
   if (sxelo !== undefined) {
     if (sxelo.profiloj.length > 0) {
       partoj.push(
@@ -639,7 +659,7 @@ export function sistemoDe(
     if (sxelo.arangxoj !== undefined) {
       partoj.push(`Die Layout-Mittel (list_arangxoj):\n${sxelo.arangxoj}`);
     }
-    partoj.push(slugoj === undefined ? NAVIGADA_REGULO : navigadaReguloDe(slugoj));
+    partoj.push(navigadaReguloDe(ekranoj));
   }
   return partoj.join("\n\n");
 }
