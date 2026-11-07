@@ -133,6 +133,13 @@ export const PROPONO_044 = {
   herkunft: [],
 };
 
+/** What a request of the course is: its name, with or without the proposal, cold or warm. */
+export interface Art {
+  was: string;
+  propono: boolean;
+  temperatur: string;
+}
+
 export interface Fall {
   fall: string;
   status: number;
@@ -180,7 +187,7 @@ export async function ablauf044(
   server: TestServilo,
   marke: (typeof MARKEN_044)[number],
   name: string,
-  jeFall: (fall: string, antwort: Antwort) => void,
+  jeFall: (fall: string, antwort: Antwort, art: Art) => void,
 ): Promise<void> {
   await markeAnlegen(server, name, marke.basis);
   const schritte = [undefined, ...AENDERUNGEN_044];
@@ -195,6 +202,7 @@ export async function ablauf044(
           jeFall(
             `${marke.fall} rev${rev}${propono ? " propono" : ""} ${anfrage.was} ${temperatur}`,
             antwort,
+            { was: anfrage.was, propono, temperatur },
           );
         }
       }
