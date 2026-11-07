@@ -86,3 +86,59 @@ export class SkriptaModelo implements ChatModel {
     return rezulto;
   }
 }
+
+// --- Provider errors (Spec 038 A-1) --------------------------------------------------------------
+
+/** What a failed call spent, as metiejo's `chatCompletion` puts it on its error (`spent`). */
+export interface Elspezo {
+  input?: number;
+  output?: number;
+  requests?: number;
+}
+
+/**
+ * A provider error in the shape metiejo's `chatCompletion` throws it for a status it does not retry
+ * any more: „Anbieter <name> antwortet <status>: <body>“, the spent tokens on `spent`.
+ */
+export function anbieterEraro(status: number, korpo: string, elspezo: Elspezo = {}): Error {
+  return Object.assign(new Error(`Anbieter mistral antwortet ${status}: ${korpo}`), {
+    spent: {
+      input: elspezo.input ?? 0,
+      output: elspezo.output ?? 0,
+      requests: elspezo.requests ?? 1,
+      waits: 0,
+    },
+  });
+}
+
+/** A network error as `chatCompletion` throws it: the redacted `String(error)` of fetch. */
+export function retaEraro(elspezo: Elspezo = {}): Error {
+  return Object.assign(new Error("TypeError: fetch failed"), {
+    spent: {
+      input: elspezo.input ?? 0,
+      output: elspezo.output ?? 0,
+      requests: elspezo.requests ?? 1,
+      waits: 0,
+    },
+  });
+}
+
+/** Mistral's answer to an assistant message without content and without tool_calls (Lauf 4). */
+export const MISTRALA_400 =
+  '{"object":"error","message":"Assistant message must have either content or tool_calls, but not none.","type":"invalid_request_message_order","param":null,"code":"3230"}';
+
+/**
+ * Mistral's rule in front of a script (F-S038-28-1): a request that holds an assistant message
+ * without content and without tool_calls is refused with 400 and the real message text.
+ */
+export function mistralaRegulo(skripto: Skripto): Skripto {
+  return (peto, index) => {
+    const malplena = peto.messages.some(
+      (m) =>
+        m.role === "assistant" &&
+        (m.content ?? "").trim() === "" &&
+        (m.tool_calls === undefined || m.tool_calls.length === 0),
+    );
+    return malplena ? anbieterEraro(400, MISTRALA_400) : skripto(peto, index);
+  };
+}

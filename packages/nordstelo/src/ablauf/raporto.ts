@@ -8,7 +8,14 @@
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
-import type { Haltigo, Kriterio, Peno, Taksilo, Varianto } from "@fundamento/ekranoj";
+import type {
+  AnbieterEraro,
+  Haltigo,
+  Kriterio,
+  Peno,
+  Taksilo,
+  Varianto,
+} from "@fundamento/ekranoj";
 import { kostoOf } from "@fundamento/metiejo";
 import {
   defaultModeloSource,
@@ -89,6 +96,11 @@ export interface KuroRekordo {
   restantaj: number;
   notoj: string[];
   sxargo: KuroSxargo;
+  /**
+   * Every caught provider error of the run (Spec 038 A-1, C-1, the shape of ekranoj), messages
+   * cleaned; absent when nothing was caught and in older `kuro.json`.
+   */
+  anbieterfehleroj?: AnbieterEraro[];
 }
 
 /** `lauf.json`: the settings of the whole measurement. */

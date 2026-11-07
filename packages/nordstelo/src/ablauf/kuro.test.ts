@@ -8,6 +8,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  type AnbieterEraro,
   type KuruEkranojn,
   kunigiMankojn,
   MalpermesitaModelo,
@@ -469,5 +470,83 @@ describe("the measurement „ganzer Ablauf“", () => {
     await expect(chat.send([])).rejects.toThrow(/Kostengrenze/);
     // A scorer that ignores the facts still lets the run finish (no dependency on the real one).
     expect(konstantaTaksilo(50).taksi).toBeTypeOf("function");
+  });
+});
+
+describe("provider errors in kuro.json (Spec 038 A-1, AK-2, C-1)", () => {
+  // Invented secrets, built at run time so no source line looks like a key.
+  const SK = ["sk", "or", "v1", "0f1e2d3c4b5a6978".repeat(4)].join("-");
+  const BEARER_VALORO = "ab12cd34".repeat(5);
+  const QUERY_VALORO = "erfunden123";
+  const SEKRETOJ = [SK, BEARER_VALORO, QUERY_VALORO];
+  const SEKRETA = `Anbieter mistral antwortet 500: {"error":"bad ${SK}","url":"https://api.example.test/v1?key=${QUERY_VALORO}","h":"Authorization: Bearer ${BEARER_VALORO}"}`;
+  const senSekretoj = (teksto: string) => SEKRETOJ.filter((s) => teksto.includes(s));
+  const ERO: AnbieterEraro = {
+    ekrano: "liste",
+    rondo: 2,
+    provo: 1,
+    status: 503,
+    mesagxo: 'Anbieter mistral antwortet 503: {"message":"Service unavailable"}',
+    ago: "ripeto",
+  };
+
+  it("stores the caught errors of a run in the shape of ekranoj, and no field when there are none", async () => {
+    const out = mkdtempSync(join(tmpdir(), "s038-32-kuro-"));
+    const duobla = duoblaKuro({ faktoj });
+    const kunEroj: KuruEkranojn = async (enigo, d) => {
+      const rezulto = await duobla.kuruEkranojn(enigo, d);
+      return enigo.varianto === "F"
+        ? { ...rezulto, anbieterfehleroj: [ERO, { ...ERO, provo: 2, mesagxo: SEKRETA }] }
+        : rezulto;
+    };
+    const { dir } = await kuriAblaufon(
+      { taskoj: [LFD], maksTokenoj: 1_000_000, out },
+      deps({ kuruEkranojn: kunEroj }),
+    );
+    const f = kuroJson(dir, LFD, "F");
+    expect(f.anbieterfehleroj?.[0]).toEqual(ERO);
+    expect(f.anbieterfehleroj?.[1]).toMatchObject({
+      ekrano: "liste",
+      rondo: 2,
+      provo: 2,
+      status: 503,
+      ago: "ripeto",
+    });
+    expect(senSekretoj(readFileSync(join(kuroDir(dir, LFD, "F", 1), "kuro.json"), "utf8"))).toEqual(
+      [],
+    );
+    expect("anbieterfehleroj" in kuroJson(dir, LFD, "0")).toBe(false);
+  });
+
+  it("cleans the message of a run that fails and keeps the errors it carries (error path)", async () => {
+    const out = mkdtempSync(join(tmpdir(), "s038-32-kuro-"));
+    const duobla = duoblaKuro({ faktoj });
+    const linioj: string[] = [];
+    const { dir, kuroj, raporto } = await kuriAblaufon(
+      { taskoj: [LFD], maksTokenoj: 1_000_000, out },
+      deps({
+        log: (linio) => linioj.push(linio),
+        kuruEkranojn: async (enigo, ekranojDeps) => {
+          if (enigo.varianto === "F") {
+            throw Object.assign(new Error(SEKRETA), {
+              anbieterfehleroj: [ERO, { ...ERO, provo: 2, mesagxo: SEKRETA }],
+            });
+          }
+          return duobla.kuruEkranojn(enigo, ekranojDeps);
+        },
+      }),
+    );
+    const f = kuroj[0];
+    expect(f?.haltigo).toBe("eraro");
+    expect(f?.eraro?.startsWith("Anbieter mistral antwortet 500: ")).toBe(true);
+    expect(f?.anbieterfehleroj?.map((e) => [e.ekrano, e.rondo, e.provo, e.status, e.ago])).toEqual([
+      ["liste", 2, 1, 503, "ripeto"],
+      ["liste", 2, 2, 503, "ripeto"],
+    ]);
+    const kuroTeksto = readFileSync(join(kuroDir(dir, LFD, "F", 1), "kuro.json"), "utf8");
+    expect(senSekretoj(kuroTeksto)).toEqual([]);
+    expect(senSekretoj(linioj.join("\n"))).toEqual([]);
+    expect(senSekretoj(raporto.md)).toEqual([]);
+    expect("anbieterfehleroj" in (kuroj[1] ?? {})).toBe(false);
   });
 });

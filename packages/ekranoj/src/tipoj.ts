@@ -5,6 +5,7 @@
 // (D-03), so this package never imports nordstelo, mcp, eroj or the Gvidanto (AC-10).
 
 import type { Budget, ChatMessage, ToolInfo } from "@fundamento/metiejo";
+import type { AnbieterEraro } from "./anbieterfehleroj.js";
 import type { FaktoAspekto, SondoPetoForma } from "./aspekto-faktoj.js";
 
 // The K8 facts twin (Spec 038 Lauf 3, C-2): its structural types, under nordstelo's names.
@@ -219,7 +220,12 @@ export type Malhelpo =
   /** The agent answered without markup, also after being asked once more (S037-10 Befund 1). */
   | "leere-antwort"
   /** K8 is there and not `plena` (Spec 038, D-08, D-16): the last condition. */
-  | "K8";
+  | "K8"
+  /**
+   * The build of this round ended on provider errors (Spec 038 A-1, C-1): the screen keeps the
+   * fragment of an earlier round, or has none.
+   */
+  | "anbieterfehler";
 
 export interface VerdaEnigo {
   varianto: Varianto;
@@ -340,6 +346,11 @@ export interface EkranojDeps {
   takso?: (takso: KostoTakso) => void | Promise<void>;
   /** The seam for the screen documents and the output folder (S037-04; S037-03, additive). */
   eligo?: EkranojEligo;
+  /**
+   * The wait before a repeat after a provider error (Spec 038 A-1, additive); absent = a real
+   * timer. Tests inject one that does not wait.
+   */
+  dormi?: (ms: number) => Promise<void>;
 }
 
 /**
@@ -523,6 +534,11 @@ export interface EkranojRezulto {
    * no means for (`k8.mankoj`), per screen of the last round. Never blocking; absent when empty.
    */
   senRimedaj?: Restanta[];
+  /**
+   * Every caught provider error of the run in order (Spec 038 A-1, C-1), messages cleaned;
+   * absent when nothing was caught. 401/403 and the limits are stops, not entries.
+   */
+  anbieterfehleroj?: AnbieterEraro[];
 }
 
 /** The whole flow (implemented in S037-03): sentence and brand in, checked screens out. */
