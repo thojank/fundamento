@@ -525,7 +525,9 @@ async function kuri(
 ): Promise<EkranojRezulto> {
   const varianto: Varianto = enigo.varianto ?? "F";
   const lingvo = enigo.lingvo ?? "de";
-  if (deps.chat.modelo !== undefined) gardiModelon({ toString: () => deps.chat.modelo ?? "" });
+  if (deps.chat.modelo !== undefined) {
+    gardiModelon({ toString: () => deps.chat.modelo ?? "" }, enigo.kontrolo);
+  }
   const problemoj = kontroliEnigon(enigo, deps);
   if (problemoj.length > 0) throw new NevalidaEnigo(problemoj);
 

@@ -26,14 +26,69 @@ export interface Kontrolo {
   kontrolModelo?: string;
 }
 
-/** The control pair alone, without a provider (C-3): [] or one problem. */
-export function kontroliKontrolon(_kontrolo: Kontrolo = {}): Problemo[] {
-  throw new Error("S038-36: kontroliKontrolon is not implemented yet");
+const KONTROLA_SUGESTO = `--lauf-id ${KONTROLA_PREFIKSO}<name> --kontroll-modelo ${KONTROLA_MODELO}`;
+
+/**
+ * The control pair alone, without a provider (C-3): [] or one problem. The option must name exactly
+ * `KONTROLA_MODELO` (`model-not-allowed`), only a run id `kontrolle-…` may carry it
+ * (`control-run-id`), and a run id `kontrolle-…` needs it (`control-model-option`).
+ */
+export function kontroliKontrolon(kontrolo: Kontrolo = {}): Problemo[] {
+  const { laufId, kontrolModelo } = kontrolo;
+  const kontrolLauf = laufId?.startsWith(KONTROLA_PREFIKSO) === true;
+  if (kontrolModelo !== undefined && kontrolModelo !== KONTROLA_MODELO) {
+    return [
+      {
+        path: "/kontroll-modelo",
+        rule: "model-not-allowed",
+        message: `--kontroll-modelo „${kontrolModelo}“ ist nicht erlaubt; der Kontrolllauf nimmt nur ${KONTROLA_MODELO}.`,
+        suggestion: `--kontroll-modelo ${KONTROLA_MODELO} angeben oder die Option weglassen (dann gilt ${PERMESITA_MODELO} aus der .env).`,
+      },
+    ];
+  }
+  if (kontrolModelo !== undefined && !kontrolLauf) {
+    return [
+      {
+        path: "/lauf-id",
+        rule: "control-run-id",
+        message: `--kontroll-modelo gilt nur für einen Kontrolllauf; die Lauf-ID ${laufId === undefined ? "fehlt" : `„${laufId}“ beginnt nicht mit ${KONTROLA_PREFIKSO}`}.`,
+        suggestion: `${KONTROLA_SUGESTO} angeben, oder --kontroll-modelo weglassen.`,
+      },
+    ];
+  }
+  if (kontrolModelo === undefined && kontrolLauf) {
+    return [
+      {
+        path: "/kontroll-modelo",
+        rule: "control-model-option",
+        message: `Die Lauf-ID „${laufId}“ ist ein Kontrolllauf, aber --kontroll-modelo fehlt.`,
+        suggestion: `${KONTROLA_SUGESTO} angeben, oder eine Lauf-ID ohne ${KONTROLA_PREFIKSO} wählen.`,
+      },
+    ];
+  }
+  return [];
 }
 
-/** [] when the model is the allowed one, otherwise one problem. */
-export function kontroliModelon(provider: NomitaModelo, _kontrolo?: Kontrolo): Problemo[] {
+/**
+ * [] when the model may run, otherwise one problem: (a) `PERMESITA_MODELO` without the option and
+ * without a control run id, or (b) a control run id with `--kontroll-modelo KONTROLA_MODELO` and
+ * the provider built from it. Every other combination is refused.
+ */
+export function kontroliModelon(provider: NomitaModelo, kontrolo?: Kontrolo): Problemo[] {
+  const paro = kontroliKontrolon(kontrolo);
+  if (paro.length > 0) return paro;
   const nomo = provider.toString();
+  if (kontrolo?.kontrolModelo !== undefined) {
+    if (nomo === KONTROLA_MODELO) return [];
+    return [
+      {
+        path: "/kontroll-modelo",
+        rule: "model-not-allowed",
+        message: `Der Kontrolllauf nimmt ${KONTROLA_MODELO}, gebaut ist aber „${nomo}“.`,
+        suggestion: `Den Anbieter des Kontrolllaufs aus --kontroll-modelo ${KONTROLA_MODELO} bauen (Schlüssel OPENROUTER_API_KEY in der .env).`,
+      },
+    ];
+  }
   if (nomo === PERMESITA_MODELO) return [];
   const [name, ...model] = PERMESITA_MODELO.split("/");
   return [
@@ -41,7 +96,10 @@ export function kontroliModelon(provider: NomitaModelo, _kontrolo?: Kontrolo): P
       path: "FM_KI_MODELL",
       rule: "model-not-allowed",
       message: `Das Modell „${nomo}“ ist nicht erlaubt; erlaubt ist nur ${PERMESITA_MODELO}.`,
-      suggestion: `In der .env FM_KI_ANBIETER=${name} und FM_KI_MODELL=${model.join("/")} setzen.`,
+      suggestion:
+        nomo === KONTROLA_MODELO
+          ? `${KONTROLA_MODELO} läuft nur als Kontrolllauf: ${KONTROLA_SUGESTO} angeben und in der .env FM_KI_ANBIETER=${name} und FM_KI_MODELL=${model.join("/")} lassen.`
+          : `In der .env FM_KI_ANBIETER=${name} und FM_KI_MODELL=${model.join("/")} setzen.`,
     },
   ];
 }
@@ -51,10 +109,11 @@ export function kontroliModelon(provider: NomitaModelo, _kontrolo?: Kontrolo): P
  * `FM_KI_ANBIETER`/`FM_KI_MODELL` taken from `--kontroll-modelo` (the key stays the .env's).
  */
 export function agordojPorKontrolo(
-  _agordoj: Readonly<Record<string, string | undefined>>,
-  _kontrolModelo: string,
+  agordoj: Readonly<Record<string, string | undefined>>,
+  kontrolModelo: string,
 ): Record<string, string | undefined> {
-  throw new Error("S038-36: agordojPorKontrolo is not implemented yet");
+  const [anbieter = "", ...modelo] = kontrolModelo.split("/");
+  return { ...agordoj, FM_KI_ANBIETER: anbieter, FM_KI_MODELL: modelo.join("/") };
 }
 
 /** Refused before any request: carries the problem, never the key. */
@@ -68,7 +127,7 @@ export class MalpermesitaModelo extends Error {
   }
 }
 
-/** Throws `MalpermesitaModelo` unless the model is the allowed one. */
+/** Throws `MalpermesitaModelo` unless the model may run (`kontroliModelon`). */
 export function gardiModelon(provider: NomitaModelo, kontrolo?: Kontrolo): void {
   const [problemo] = kontroliModelon(provider, kontrolo);
   if (problemo !== undefined) throw new MalpermesitaModelo(problemo);

@@ -846,11 +846,12 @@ export interface ChatModelOpcioj {
 
 /**
  * The real chat model over metiejo's `chatCompletion` (429 waits, retries and the budget check stay
- * there). The model guard (D-19) runs here, before any request can be made.
+ * there). The model guard (D-19; the control pair of Spec 038 C-3) runs here, before any request
+ * can be made.
  */
 export function chatModelDe(opcioj: ChatModelOpcioj): ChatModel {
   const { provider } = opcioj;
-  gardiModelon(provider);
+  gardiModelon(provider, opcioj.kontrolo);
   const timeout = Math.min(opcioj.timeout ?? PETO_TEMPOLIMO, PETO_TEMPOLIMO);
   return {
     modelo: provider.toString(),

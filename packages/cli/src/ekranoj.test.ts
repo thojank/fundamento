@@ -628,8 +628,12 @@ describe("fm ekranoj: the brand build names the base font (S038-19, C-5, D-S038-
 });
 
 describe("fm ekranoj: the control model exception (Spec 038 A-5, C-3, AK-6)", () => {
-  /** The .env of the run with ministral and, beside it, the OpenRouter key of the control run. */
-  const MIT_OPENROUTER = `FM_KI_ANBIETER=mistral\nFM_KI_MODELL=${PERMESITA}\nMISTRAL_API_KEY=${SXLOSILO}\nOPENROUTER_API_KEY=${SXLOSILO}-or\n`;
+  /**
+   * The .env of the run with ministral and, beside it, the OpenRouter key of the control run. The
+   * chat double logs SXLOSILO, so the key in use (OpenRouter's) is SXLOSILO; the Mistral key holds
+   * it too, so no output may contain either.
+   */
+  const MIT_OPENROUTER = `FM_KI_ANBIETER=mistral\nFM_KI_MODELL=${PERMESITA}\nMISTRAL_API_KEY=${SXLOSILO}-mistral\nOPENROUTER_API_KEY=${SXLOSILO}\n`;
   const PARO = ["--lauf-id", "kontrolle-komuna", "--kontroll-modelo", KONTROLA_MODELO];
 
   it("names both options in its help", () => {

@@ -321,8 +321,8 @@ function anbieterfehlerojKampo(rezulto: EkranojRezulto): Pick<KuroRekordo, "anbi
 
 /** The whole measurement: every run, its records, then the report. */
 export async function kuriAblaufon(opcioj: AblaufOpcioj, deps: AblaufDeps): Promise<AblaufRezulto> {
-  // D-19: another model is refused before anything else happens – no folder, no request.
-  gardiModelon({ toString: () => deps.kiModelo });
+  // D-19 and C-3: another model is refused before anything else happens – no folder, no request.
+  gardiModelon({ toString: () => deps.kiModelo }, deps.kontrolo);
   const problemoj = validiAblaufon(opcioj);
   if (problemoj.length > 0) throw new NevalidaAblauf(problemoj);
 
@@ -436,6 +436,7 @@ export async function kuriAblaufon(opcioj: AblaufOpcioj, deps: AblaufDeps): Prom
             plano: planoDe(tasko, lingvo),
             varianto,
             lingvo,
+            ...(deps.kontrolo === undefined ? {} : { kontrolo: deps.kontrolo }),
           },
           ekranojDeps,
         );
