@@ -288,9 +288,23 @@ export function penojDe(rezulto: EkranojRezulto): Pick<KuroRekordo, "penoj" | "p
  * and rules sorted; `{}` when nothing is left.
  */
 export function restantajLauxReguloDe(
-  _restantaj: readonly Restanta[],
+  restantaj: readonly Restanta[],
 ): Record<string, Record<string, number>> {
-  throw new Error("ne implementita: restantajLauxReguloDe (S038-33)");
+  const kalkulo = new Map<string, Map<string, number>>();
+  for (const { ekrano, regulo } of restantaj) {
+    const reguloj = kalkulo.get(ekrano) ?? new Map<string, number>();
+    reguloj.set(regulo, (reguloj.get(regulo) ?? 0) + 1);
+    kalkulo.set(ekrano, reguloj);
+  }
+  const ordigitaj = (keys: Iterable<string>) => [...keys].sort();
+  const own: Record<string, Record<string, number>> = {};
+  for (const ekrano of ordigitaj(kalkulo.keys())) {
+    const reguloj = kalkulo.get(ekrano) ?? new Map<string, number>();
+    own[ekrano] = Object.fromEntries(
+      ordigitaj(reguloj.keys()).map((regulo) => [regulo, reguloj.get(regulo) ?? 0]),
+    );
+  }
+  return own;
 }
 
 /** `anbieterfehleroj` of a result for `kuro.json` (C-1): cleaned, absent when there are none. */
@@ -439,6 +453,8 @@ export async function kuriAblaufon(opcioj: AblaufOpcioj, deps: AblaufDeps): Prom
               }),
           stato: statoDe(rezulto),
           restantaj: rezulto.restantaj.length,
+          // Spec 038 A-2 (C-2): the same list per slug and rule; Σ = restantaj.
+          restantajLauxRegulo: restantajLauxReguloDe(rezulto.restantaj),
           notoj: rezulto.notoj ?? [],
           sxargo: { antaux: antaux.sxargo, post: post.sxargo, kernoj: post.kernoj },
           // Spec 038 A-1 (C-1): the caught provider errors, cleaned once more; absent when none.
