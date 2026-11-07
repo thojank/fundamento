@@ -1,6 +1,7 @@
 // Public entry of @fundamento/nordstelo (Spec 030): the agent, the facts of a render, the score,
 // the report, the run and the renderer. `cli.ts` is the command `pnpm nordstelo`.
 
+export * from "./ablauf/komparo.js";
 export * from "./agent.js";
 export * from "./ekrano-taksilo.js";
 export * from "./facts.js";
