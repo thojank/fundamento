@@ -109,6 +109,13 @@ import {
   storeUpload,
   writeDraft,
 } from "./marko.js";
+import {
+  type MessRoute,
+  type MessSenke,
+  type Messung,
+  messungOf,
+  OHNE_MESSUNG,
+} from "./messung.js";
 import { NORDSTELO_DIR, type NordsteloHistorio, nordsteloScreen } from "./nordstelo.js";
 import { transkribi } from "./parolo/parolo.js";
 import { type PrivataDeps, privataState, uploadFont } from "./privata.js";
@@ -207,6 +214,11 @@ export interface ServiloOptions {
    * imported on the first need; a test passes a double.
    */
   esploro?: { fetch?: (url: string, init?: RequestInit) => Promise<Response>; bildilo?: Bildilo };
+  /**
+   * Spec 044 (V-2): where the time of `/pruefung`, `stato`, the preview and the Asistanto goes, one
+   * entry per step when the response is finished; absent, nothing is measured.
+   */
+  messung?: MessSenke;
 }
 
 export interface ServiloIo {
@@ -555,9 +567,12 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
   };
 
   /** The derivation with every check of a draft, once per revision. */
-  const pruefungOf = (draft: Draft): Derivation => {
+  const pruefungOf = (draft: Draft, messung: Messung = OHNE_MESSUNG): Derivation => {
     if (draft.pruefung?.rev !== draft.rev) {
-      draft.pruefung = { rev: draft.rev, derivation: checkDraft(draft.agordo, bases) };
+      draft.pruefung = {
+        rev: draft.rev,
+        derivation: messung.schritt("ableitung+pruefung", () => checkDraft(draft.agordo, bases)),
+      };
     }
     return draft.pruefung.derivation;
   };
@@ -611,7 +626,10 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     };
   };
 
-  const klartextOfDraft = (draft: Draft): Klartext => klartextOf(pruefungOf(draft).raporto);
+  const klartextOfDraft = (draft: Draft, messung: Messung = OHNE_MESSUNG): Klartext => {
+    const { raporto } = pruefungOf(draft, messung);
+    return messung.schritt("css-js", () => klartextOf(raporto));
+  };
 
   /** The origin of a token in a draft, as the Studio shows it. */
   const herkunftOf = (agordo: Agordo, token: string): string => {
@@ -633,13 +651,13 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
 
   // Spec 033 S1: the state of the brand model of a draft – the Kroniko, and the open problems of the
   // check (a fixed rule, or an adjustable one without its Jugxo).
-  const statoOf = (name: string, draft: Draft): Vollstaendigkeit =>
+  const statoOf = (name: string, draft: Draft, messung: Messung = OHNE_MESSUNG): Vollstaendigkeit =>
     vollstaendigkeitOf({
       facetoj,
       modelo: modeloOf(),
       agordo: draft.agordo,
       kroniko: readKroniko(options.workdir, name),
-      probleme: pruefungOf(draft).raporto.violations.filter(
+      probleme: pruefungOf(draft, messung).raporto.violations.filter(
         (violation) => violation.fixed || violation.jugxo === undefined,
       ),
     });
@@ -1371,6 +1389,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     response: ServerResponse,
     port: number,
   ): Promise<void> {
+    const eingang = performance.now();
     const host = request.headers.host ?? "";
     if (!LOOPBACK.some((name) => host === `${name}:${port}`)) {
       sendHtml(
@@ -1383,6 +1402,9 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     const url = new URL(request.url ?? "/", `http://${HTTP_HOST}:${port}`);
     const path = url.pathname;
     const method = request.method ?? "GET";
+    /** Spec 044 (V-2): the measure of this request; without a sink it only runs the steps. */
+    const messen = (route: MessRoute, marke: string): Messung =>
+      messungOf(options.messung, route, marke, eingang, response);
 
     if (method === "GET" && path === "/") {
       sendHtml(response, screen(inputOf("start", undefined)));
@@ -1502,12 +1524,14 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     const asistanto = /^\/asistanto\/([a-z0-9-]+)(?:\/([a-z]+))?$/.exec(path);
     if (asistanto !== null && method === "GET") {
       const [, name = "", page] = asistanto;
-      const draft = draftOf(name);
+      const messung = messen("asistanto", name);
+      const draft = messung.schritt("marke-laden", () => draftOf(name));
       if (draft === undefined) {
         notFound(response);
         return;
       }
-      const stato = statoOf(name, draft);
+      messung.rev(draft.rev);
+      const stato = statoOf(name, draft, messung);
       const current =
         stato.facetoj.find((entry) => entry.name === page) ??
         (page === undefined ? undefined : null);
@@ -1572,13 +1596,15 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       );
     if (asistantoApi !== null) {
       const [, name = "", action = ""] = asistantoApi;
-      const draft = draftOf(name);
+      const messung = action === "stato" && method === "GET" ? messen("stato", name) : OHNE_MESSUNG;
+      const draft = messung.schritt("marke-laden", () => draftOf(name));
       if (draft === undefined) {
         sendJson(response, { satz: "Diese Marke gibt es nicht." }, 404);
         return;
       }
+      messung.rev(draft.rev);
       if (action === "stato" && method === "GET") {
-        const stato = statoOf(name, draft);
+        const stato = statoOf(name, draft, messung);
         const fremda = fremdaOf(name);
         sendJson(response, {
           rev: draft.rev,
@@ -2147,7 +2173,8 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     );
     if (api !== null && method === "POST") {
       const [, name = "", action = ""] = api;
-      const draft = draftOf(name);
+      const messung = action === "pruefung" ? messen("pruefung", name) : OHNE_MESSUNG;
+      const draft = messung.schritt("marke-laden", () => draftOf(name));
       if (draft === undefined) {
         sendJson(
           response,
@@ -2165,9 +2192,13 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         );
         return;
       }
+      messung.rev(draft.rev);
       if (action === "pruefung") {
-        const klartext = klartextOfDraft(draft);
-        sendJson(response, { ...klartext, html: klartextHtml(klartext, { firstAsMain: true }) });
+        const klartext = klartextOfDraft(draft, messung);
+        sendJson(response, {
+          ...klartext,
+          html: messung.schritt("css-js", () => klartextHtml(klartext, { firstAsMain: true })),
+        });
         return;
       }
       let body: unknown;
@@ -2443,11 +2474,21 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     const marko = /^\/marko\/([a-z0-9-]+)\/([a-z]+)(\.css)?$/.exec(path);
     if (marko !== null) {
       const [, name = "", key = "", css] = marko;
-      const draft = draftOf(name);
+      const messRoute: MessRoute | undefined =
+        method !== "GET" || key !== "vorschau"
+          ? undefined
+          : css === ".css"
+            ? "vorschau.css"
+            : url.searchParams.has("sxtupo")
+              ? "vorschau"
+              : undefined;
+      const messung = messRoute === undefined ? OHNE_MESSUNG : messen(messRoute, name);
+      const draft = messung.schritt("marke-laden", () => draftOf(name));
       if (draft === undefined) {
         notFound(response);
         return;
       }
+      messung.rev(draft.rev);
       // Spec 035, Befund 4.5.1: the preview with an open proposal laid on the draft (the draft stays).
       const propono = url.searchParams.get("propono");
       const shown = (): Agordo => {
@@ -2460,51 +2501,53 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       if (method === "GET" && key === "vorschau" && css === ".css") {
         response
           .writeHead(200, { "content-type": TYPES[".css"] ?? "" })
-          .end(previewCss(shown(), bases));
+          .end(previewCss(messung.schritt("marke-laden", shown), bases, messung));
         return;
       }
       if (method === "GET" && key === "vorschau" && url.searchParams.has("sxtupo")) {
         const sxtupo = url.searchParams.get("sxtupo") ?? "vorschau";
         const breite = url.searchParams.get("breite") ?? "mittel";
-        const agordo = shown();
+        const agordo = messung.schritt("marke-laden", shown);
         sendHtml(
           response,
-          previewDocument({
-            name,
-            cssHref: `/marko/${encodeURIComponent(name)}/vorschau.css?rev=${draft.rev}${propono === null ? "" : `&propono=${encodeURIComponent(propono)}`}`,
-            fontFace: fontFaceOf(agordo),
-            scheme: url.searchParams.get("scheme") === "dark" ? "dark" : "light",
-            attributes: Object.fromEntries(
-              (["density", "contrast", "viewport"] as const)
-                .map((key) => [`data-fm-${key}`, url.searchParams.get(key) ?? ""])
-                .filter(([, value]) => value !== ""),
-            ),
-            body:
-              previewBody(
-                isSxtupoKey(sxtupo) ||
-                  sxtupo.startsWith("studio-") ||
-                  sxtupo.startsWith("komponento-") ||
-                  sxtupo.startsWith("buehne-")
-                  ? sxtupo
-                  : "vorschau",
-                breite,
-                agordo,
-                zeloOf(url.searchParams),
-              ) +
-              // Spec 036, Befund 3.5: the stage's frame „Jetzt“ shows the open problems of the
-              // draft's check per component (the step's state counts the same problems).
-              (sxtupo.startsWith("buehne-") && propono === null
-                ? pruefungHtml(
-                    pruefmarkojOf(
-                      pruefungOf(draft).raporto.violations.filter(
-                        (violation) => violation.fixed || violation.jugxo === undefined,
+          messung.schritt("css-js", () =>
+            previewDocument({
+              name,
+              cssHref: `/marko/${encodeURIComponent(name)}/vorschau.css?rev=${draft.rev}${propono === null ? "" : `&propono=${encodeURIComponent(propono)}`}`,
+              fontFace: fontFaceOf(agordo),
+              scheme: url.searchParams.get("scheme") === "dark" ? "dark" : "light",
+              attributes: Object.fromEntries(
+                (["density", "contrast", "viewport"] as const)
+                  .map((key) => [`data-fm-${key}`, url.searchParams.get(key) ?? ""])
+                  .filter(([, value]) => value !== ""),
+              ),
+              body:
+                previewBody(
+                  isSxtupoKey(sxtupo) ||
+                    sxtupo.startsWith("studio-") ||
+                    sxtupo.startsWith("komponento-") ||
+                    sxtupo.startsWith("buehne-")
+                    ? sxtupo
+                    : "vorschau",
+                  breite,
+                  agordo,
+                  zeloOf(url.searchParams),
+                ) +
+                // Spec 036, Befund 3.5: the stage's frame „Jetzt“ shows the open problems of the
+                // draft's check per component (the step's state counts the same problems).
+                (sxtupo.startsWith("buehne-") && propono === null
+                  ? pruefungHtml(
+                      pruefmarkojOf(
+                        pruefungOf(draft, messung).raporto.violations.filter(
+                          (violation) => violation.fixed || violation.jugxo === undefined,
+                        ),
+                        modeloOf(),
+                        satzOf,
                       ),
-                      modeloOf(),
-                      satzOf,
-                    ),
-                  )
-                : ""),
-          }),
+                    )
+                  : ""),
+            }),
+          ),
         );
         return;
       }

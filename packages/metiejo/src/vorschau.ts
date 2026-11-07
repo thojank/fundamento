@@ -28,6 +28,7 @@ import {
   srgbComponentsOf,
 } from "@fundamento/modelo";
 import { CSS_CELO } from "@fundamento/projekcioj";
+import { type Messung, OHNE_MESSUNG } from "./messung.js";
 
 export interface Bases {
   structure: Structure;
@@ -146,12 +147,20 @@ export function komunaCss(bases: Bases): string {
  * — and composed with the structure; the CSS Celo writes the stylesheet with every Aspekto and
  * Dimensio, switched by data-fm-* on the root. No check runs here; that is `checkDraft`.
  */
-export function previewCss(agordo: Agordo, bases: Bases): string {
-  const { palettes, gestalt } = derivationBasis(agordo, bases.structure, bases.calibration);
-  const documents = packageDocuments(agordo, bases.structure, palettes, [], gestalt);
-  const files = composeFiles(bases.structure, packageLabel(agordo), documents, []);
-  const modelo = buildModelo(files).modelo;
-  return CSS_CELO.generate({ modelo } as Parameters<typeof CSS_CELO.generate>[0])[0]?.text ?? "";
+export function previewCss(agordo: Agordo, bases: Bases, messung: Messung = OHNE_MESSUNG): string {
+  // Spec 044 (V-2): the three steps of the measure – derivation, projection, stylesheet.
+  const documents = messung.schritt("ableitung", () => {
+    const { palettes, gestalt } = derivationBasis(agordo, bases.structure, bases.calibration);
+    return packageDocuments(agordo, bases.structure, palettes, [], gestalt);
+  });
+  const modelo = messung.schritt("projektion", () => {
+    const files = composeFiles(bases.structure, packageLabel(agordo), documents, []);
+    return buildModelo(files).modelo;
+  });
+  return messung.schritt(
+    "css-js",
+    () => CSS_CELO.generate({ modelo } as Parameters<typeof CSS_CELO.generate>[0])[0]?.text ?? "",
+  );
 }
 
 /** The derivation with every check of the CI (G5 of Spec 016): the report, the export decision. */
