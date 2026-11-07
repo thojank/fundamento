@@ -7,6 +7,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   K8_MERKMALOJ,
   K8_REGULOJ,
+  KONTROLA_MODELO,
   KURZPROFILAJ_KAMPOJ,
   kuruEkranojn,
   MAKS_EKRANOJ,
@@ -483,6 +484,28 @@ describe("input (V-2, D-19)", () => {
       MalpermesitaModelo,
     );
     expect(chat.petoj).toEqual([]);
+  });
+
+  it("runs the control model only with the control pair of the input (Spec 038 A-5, C-3)", async () => {
+    const sen = new SkriptaModelo(skripto(PLANO), { modelo: KONTROLA_MODELO });
+    await expect(kuruEkranojn(enigoDe(), depsDe({ chat: sen }))).rejects.toBeInstanceOf(
+      MalpermesitaModelo,
+    );
+    await expect(
+      kuruEkranojn(
+        enigoDe({ kontrolo: { laufId: "foo", kontrolModelo: KONTROLA_MODELO } }),
+        depsDe({ chat: sen }),
+      ),
+    ).rejects.toMatchObject({ problemo: { path: "/lauf-id", rule: "control-run-id" } });
+    expect(sen.petoj).toEqual([]);
+
+    const kun = new SkriptaModelo(skripto(PLANO), { modelo: KONTROLA_MODELO });
+    const rezulto = await kuruEkranojn(
+      enigoDe({ kontrolo: { laufId: "kontrolle-komuna", kontrolModelo: KONTROLA_MODELO } }),
+      depsDe({ chat: kun, taksilo: verdaEkde(1) }),
+    );
+    expect(rezulto.faritajRondoj).toBe(1);
+    expect(kun.petoj.length).toBeGreaterThan(0);
   });
 });
 

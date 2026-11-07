@@ -7,6 +7,7 @@ import {
   chatModelDe,
   eltiriRespondon,
   eroNomojDe,
+  KONTROLA_MODELO,
   KURZPROFILAJ_KAMPOJ,
   konstruiEkranon,
   legiEroProfilojn,
@@ -684,6 +685,34 @@ describe("the real ChatModel (D-18, D-19)", () => {
       chatModelDe({ provider: new Provider("openrouter", "eine-andere:free", KEY), fetch }),
     ).toThrow(MalpermesitaModelo);
     expect(petoj).toEqual([]);
+  });
+
+  it("takes the control model only with the control pair (Spec 038 A-5, C-3), refused before any request", async () => {
+    const { fetch, petoj } = fetchDouble();
+    const sonnet = () => new Provider("openrouter", "anthropic/claude-sonnet-5.5", KEY);
+    expect(() => chatModelDe({ provider: sonnet(), fetch })).toThrow(MalpermesitaModelo);
+    expect(() =>
+      chatModelDe({ provider: sonnet(), fetch, kontrolo: { laufId: "kontrolle-x" } }),
+    ).toThrow(MalpermesitaModelo);
+    expect(() =>
+      chatModelDe({
+        provider: sonnet(),
+        fetch,
+        kontrolo: { laufId: "foo", kontrolModelo: KONTROLA_MODELO },
+      }),
+    ).toThrow(MalpermesitaModelo);
+    expect(petoj).toEqual([]);
+    const chat = chatModelDe({
+      provider: sonnet(),
+      fetch,
+      sleep: async () => {},
+      kontrolo: { laufId: "kontrolle-komuna", kontrolModelo: KONTROLA_MODELO },
+    });
+    expect(chat.modelo).toBe(KONTROLA_MODELO);
+    await chat.send([{ role: "user", content: "Standard A-12" }]);
+    expect(petoj).toHaveLength(1);
+    expect(petoj[0]?.url).toContain("openrouter.ai");
+    expect(petoj[0]?.body).toMatchObject({ model: "anthropic/claude-sonnet-5.5" });
   });
 
   it("sends through chatCompletion with the gate, charges the run's budget, offers merged schemas, never logs the key", async () => {

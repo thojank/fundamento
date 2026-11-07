@@ -9,6 +9,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   type AnbieterEraro,
+  KONTROLA_MODELO,
   type KuruEkranojn,
   kunigiMankojn,
   MalpermesitaModelo,
@@ -314,6 +315,45 @@ describe("the measurement „ganzer Ablauf“", () => {
     expect(duobla.vokoj).toHaveLength(0);
     expect(own.kuraVokoj).toBe(0);
     expect(existsSync(out)).toBe(false);
+  });
+
+  it("accepts the control model only with the control pair and hands the pair to every run (Spec 038 C-3)", async () => {
+    for (const kontrolo of [
+      undefined,
+      { laufId: "kontrolle-komuna" },
+      { laufId: "foo", kontrolModelo: KONTROLA_MODELO },
+      { kontrolModelo: KONTROLA_MODELO },
+    ]) {
+      const out = join(mkdtempSync(join(tmpdir(), "s038-kontrolo-")), "nie");
+      const duobla = duoblaKuro({ faktoj });
+      const own = deps({
+        kuruEkranojn: duobla.kuruEkranojn,
+        kiModelo: KONTROLA_MODELO,
+        ...(kontrolo === undefined ? {} : { kontrolo }),
+      });
+      await expect(
+        kuriAblaufon({ taskoj: [LFD], maksTokenoj: 1_000_000, out }, own),
+        JSON.stringify(kontrolo),
+      ).rejects.toBeInstanceOf(MalpermesitaModelo);
+      expect(duobla.vokoj).toHaveLength(0);
+      expect(existsSync(out)).toBe(false);
+    }
+    const paro = { laufId: "kontrolle-komuna", kontrolModelo: KONTROLA_MODELO };
+    const out = mkdtempSync(join(tmpdir(), "s038-kontrolo-"));
+    const duobla = duoblaKuro({ faktoj });
+    const { kuroj } = await kuriAblaufon(
+      { taskoj: [LFD], maksTokenoj: 1_000_000, out },
+      deps({ kuruEkranojn: duobla.kuruEkranojn, kiModelo: KONTROLA_MODELO, kontrolo: paro }),
+    );
+    expect(kuroj).toHaveLength(2);
+    expect(duobla.vokoj.map((voko) => voko.enigo.kontrolo)).toEqual([paro, paro]);
+    // The ministral measurement stays as it was: no pair in any run.
+    const sen = duoblaKuro({ faktoj });
+    await kuriAblaufon(
+      { taskoj: [LFD], maksTokenoj: 1_000_000, out: mkdtempSync(join(tmpdir(), "s038-kontrolo-")) },
+      deps({ kuruEkranojn: sen.kuruEkranojn }),
+    );
+    expect(sen.vokoj.map((voko) => voko.enigo.kontrolo)).toEqual([undefined, undefined]);
   });
 
   it("keeps one token budget over the whole measurement: the run at the limit stops, the next does not start", async () => {

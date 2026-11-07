@@ -21,6 +21,7 @@ import type {
   EkranojEnigo,
   EkranojRezulto,
   GvidantoKonekto,
+  Kontrolo,
   KostoTakso,
   Marko,
   Problemo,
@@ -128,6 +129,8 @@ export interface EkranojMedio {
     provider: Provider;
     ledger: string;
     log: (linio: string) => void;
+    /** The control pair (`--lauf-id`, `--kontroll-modelo`; Spec 038 C-3); absent otherwise. */
+    kontrolo?: Kontrolo;
   }): ChatModel | Promise<ChatModel>;
   /** The Gvidanto: `fm mcp [--config <cfg>]` of this cli as a child process over stdio. */
   gvidanto(e: {

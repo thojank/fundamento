@@ -14,7 +14,12 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { PERMESITA_MODELO, type Varianto } from "@fundamento/ekranoj";
+import {
+  KONTROLA_MODELO,
+  type Kontrolo,
+  PERMESITA_MODELO,
+  type Varianto,
+} from "@fundamento/ekranoj";
 import { defaultModeloSource, loadModelo, type Modelo } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { cleanRenders } from "../test-doubles/facts.js";
@@ -55,6 +60,8 @@ function medio(env: Record<string, string> | undefined) {
     stderr: "",
     envVokoj: 0,
     preparoj: 0,
+    /** What each `preparo` was given: the provider's name and the control pair (Spec 038 C-3). */
+    preparArgs: [] as { provider: string; anbieter: string; kontrolo: Kontrolo | undefined }[],
     fermitaj: 0,
     duobla,
     medio: {
@@ -69,13 +76,18 @@ function medio(env: Record<string, string> | undefined) {
         own.envVokoj += 1;
         return env;
       },
-      preparo: async (): Promise<Preparo> => {
+      preparo: async (e): Promise<Preparo> => {
         own.preparoj += 1;
+        own.preparArgs.push({
+          provider: e.provider.toString(),
+          anbieter: e.provider.name,
+          kontrolo: e.kontrolo,
+        });
         return {
           kuruEkranojn: duobla.kuruEkranojn,
           markoj: ASPEKTOJ_DUOBLAJ,
           kuraDeps: () => ({
-            chat: kalkulantaChat({ input: 400, output: 100, modelo: PERMESITA_MODELO }),
+            chat: kalkulantaChat({ input: 400, output: 100, modelo: e.provider.toString() }),
             tools: { list: async () => [], call: async () => "" },
             marko: { konstrui: async () => ({ css: [] }) },
             nun: () => new Date(Date.UTC(2026, 9, 31, 12, 0)),
@@ -428,5 +440,129 @@ describe("pnpm nordstelo --art komparo (Spec 038 C-4)", () => {
     expect(ablauf.stdout).toBe(`${HELPO_ABLAUF}\n`);
     // Options of the comparison are no options of the measurement.
     expect(await kuriArton(["--art", "ablauf", "--antaux", "x"], medio(permesita).medio)).toBe(2);
+  });
+});
+
+describe("pnpm nordstelo --art ablauf: the control model exception (Spec 038 A-5, C-3, AK-6)", () => {
+  const mitOpenRouter = { ...permesita, OPENROUTER_API_KEY: `${SXLOSILO}-or` };
+  const sonnetEnv = {
+    FM_KI_ANBIETER: "openrouter",
+    FM_KI_MODELL: "anthropic/claude-sonnet-5.5",
+    OPENROUTER_API_KEY: SXLOSILO,
+  };
+  const PARO = ["--lauf-id", "kontrolle-komuna", "--kontroll-modelo", KONTROLA_MODELO];
+
+  it("names both options in its help", () => {
+    expect(HELPO_ABLAUF).toContain("--lauf-id <id>");
+    expect(HELPO_ABLAUF).toContain("--kontroll-modelo <provider/model>");
+    expect(HELPO_ABLAUF).toContain(KONTROLA_MODELO);
+  });
+
+  it("refuses every other combination with exit 2 before anything is built, path and rule exact, no key", async () => {
+    const kazoj: [string, Record<string, string>, string[], string, string][] = [
+      [
+        "option without run id",
+        mitOpenRouter,
+        ["--kontroll-modelo", KONTROLA_MODELO],
+        "/lauf-id",
+        "control-run-id",
+      ],
+      [
+        "prefix without option",
+        mitOpenRouter,
+        ["--lauf-id", "kontrolle-x"],
+        "/kontroll-modelo",
+        "control-model-option",
+      ],
+      [
+        "other model with option",
+        mitOpenRouter,
+        ["--lauf-id", "kontrolle-x", "--kontroll-modelo", "openrouter/other/model"],
+        "/kontroll-modelo",
+        "model-not-allowed",
+      ],
+      [
+        "option, plain run id",
+        mitOpenRouter,
+        ["--lauf-id", "foo", "--kontroll-modelo", KONTROLA_MODELO],
+        "/lauf-id",
+        "control-run-id",
+      ],
+      [
+        "other model in the .env",
+        { ...permesita, FM_KI_MODELL: "mistral-large-2512" },
+        [],
+        "FM_KI_MODELL",
+        "model-not-allowed",
+      ],
+      ["sonnet only in the .env", sonnetEnv, [], "FM_KI_MODELL", "model-not-allowed"],
+    ];
+    for (const [nomo, env, args, path, rule] of kazoj) {
+      for (const json of [true, false]) {
+        const own = medio(env);
+        const kodo = await kuriArton(
+          [
+            "--art",
+            "ablauf",
+            "--taskoj",
+            "liste-filter-detail",
+            ...args,
+            ...(json ? ["--json"] : []),
+          ],
+          own.medio,
+        );
+        expect(kodo, nomo).toBe(2);
+        expect(own.stderr, nomo).toContain(`${path} ${rule}: `);
+        if (json) {
+          const dok = JSON.parse(own.stdout) as {
+            problemoj: { path: string; rule: string; suggestion: string }[];
+          };
+          expect(
+            dok.problemoj.map((p) => ({ path: p.path, rule: p.rule })),
+            nomo,
+          ).toEqual([{ path, rule }]);
+          expect(dok.problemoj[0]?.suggestion.length, nomo).toBeGreaterThan(0);
+        } else {
+          expect(own.stdout, nomo).toBe("");
+        }
+        expect(own.preparoj, nomo).toBe(0);
+        expect(own.duobla.vokoj, nomo).toHaveLength(0);
+        expect(`${own.stdout}${own.stderr}`, nomo).not.toContain(SXLOSILO);
+      }
+    }
+  });
+
+  it("builds an openrouter provider from the option and hands the pair to the measurement and every run", async () => {
+    const own = medio(mitOpenRouter);
+    const out = join(own.medio.root, "ablauf");
+    const kodo = await kuriArton(
+      ["--art", "ablauf", "--taskoj", "liste-filter-detail", "--out", out, ...PARO, "--json"],
+      own.medio,
+    );
+    expect(kodo, own.stderr).toBe(0);
+    const paro: Kontrolo = { laufId: "kontrolle-komuna", kontrolModelo: KONTROLA_MODELO };
+    expect(own.preparArgs).toEqual([
+      { provider: KONTROLA_MODELO, anbieter: "openrouter", kontrolo: paro },
+    ]);
+    expect(own.duobla.vokoj.map((voko) => voko.enigo.kontrolo)).toEqual([paro, paro]);
+    const lauf = JSON.parse(readFileSync(join(out, "20261031-1200", "lauf.json"), "utf8")) as {
+      kiModelo: string;
+    };
+    expect(lauf.kiModelo).toBe(KONTROLA_MODELO);
+    expect(`${own.stdout}${own.stderr}`).not.toContain(SXLOSILO);
+  });
+
+  it("keeps the run of ministral as it was: no pair handed on", async () => {
+    const own = medio(permesita);
+    const out = join(own.medio.root, "ablauf");
+    const kodo = await kuriArton(
+      ["--art", "ablauf", "--taskoj", "liste-filter-detail", "--out", out, "--json"],
+      own.medio,
+    );
+    expect(kodo, own.stderr).toBe(0);
+    expect(own.preparArgs).toEqual([
+      { provider: PERMESITA_MODELO, anbieter: "mistral", kontrolo: undefined },
+    ]);
+    expect(own.duobla.vokoj.map((voko) => voko.enigo.kontrolo)).toEqual([undefined, undefined]);
   });
 });

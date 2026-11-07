@@ -14,6 +14,7 @@ import {
   type EkranojDeps,
   type EkranojRezulto,
   gardiModelon,
+  type Kontrolo,
   type KuruEkranojn,
   MalpermesitaModelo,
   type Peno,
@@ -71,6 +72,11 @@ export interface AblaufDeps {
   kuruEkranojn: KuruEkranojn;
   /** `<provider>/<model>` of the chat model (D-19, price). */
   kiModelo: string;
+  /**
+   * The control pair of the call (Spec 038 A-5, C-3): the guard accepts `KONTROLA_MODELO` only
+   * with a run id `kontrolle-…` and the option; every ekranoj run gets it, too. Absent otherwise.
+   */
+  kontrolo?: Kontrolo;
   /** Dependencies of the run of a flow, a variant and a repetition. Tools are dropped for 0. */
   kuraDeps(e: {
     tasko: AblaufTasko;

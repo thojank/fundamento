@@ -7,6 +7,7 @@
 import type { Budget, ChatMessage, ToolInfo } from "@fundamento/metiejo";
 import type { AnbieterEraro } from "./anbieterfehleroj.js";
 import type { FaktoAspekto, SondoPetoForma } from "./aspekto-faktoj.js";
+import type { Kontrolo } from "./gardo.js";
 
 // The K8 facts twin (Spec 038 Lauf 3, C-2): its structural types, under nordstelo's names.
 export type {
@@ -429,6 +430,11 @@ export interface EkranojEnigo {
   plano?: Plano;
   varianto?: Varianto;
   lingvo?: "de" | "en";
+  /**
+   * The control pair of the call (Spec 038 A-5, C-3): run id and `--kontroll-modelo`. The model
+   * guard of the run accepts `KONTROLA_MODELO` only with it; absent for every other run.
+   */
+  kontrolo?: Kontrolo;
 }
 
 // --- The result of a run -----------------------------------------------------------------------

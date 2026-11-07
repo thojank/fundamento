@@ -15,6 +15,7 @@ import { parseArgs } from "node:util";
 import {
   type Bildigilo,
   gardiModelon,
+  type Kontrolo,
   type KuruEkranojn,
   MalpermesitaModelo,
   type Marko,
@@ -138,6 +139,8 @@ export interface ArtoMedio {
     out: string;
     ledger: string;
     log: (linio: string) => void;
+    /** The control pair (`--lauf-id`, `--kontroll-modelo`; Spec 038 C-3); absent otherwise. */
+    kontrolo?: Kontrolo;
   }): Promise<Preparo>;
   modelo(): Modelo;
   sxargo(): { sxargo: Sxargo; kernoj: number };

@@ -16,7 +16,7 @@ import {
   type ToolInfo,
 } from "@fundamento/metiejo";
 import { type FehlerKaptilo, sendiKunKapto } from "./anbieterfehleroj.js";
-import { gardiModelon } from "./gardo.js";
+import { gardiModelon, type Kontrolo } from "./gardo.js";
 import { sendiSubBudgxeto } from "./kostoj.js";
 import { SKRIBAJ_ILOJ } from "./mcp-kliento.js";
 import { MAKS_EKRANOJ, SLUG_FORMO, validiPlanon } from "./plano.js";
@@ -840,6 +840,8 @@ export interface ChatModelOpcioj {
   sleep?: (ms: number) => Promise<void>;
   /** Lines of the request (waits after 429 …); the key is taken out before. */
   log?: (linio: string) => void;
+  /** The control pair of the call (Spec 038 A-5, C-3); the guard accepts the control model only with it. */
+  kontrolo?: Kontrolo;
 }
 
 /**
