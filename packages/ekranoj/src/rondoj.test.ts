@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 import {
   K8_MERKMALOJ,
   K8_REGULOJ,
+  KURZPROFILAJ_KAMPOJ,
   kuruEkranojn,
   MAKS_EKRANOJ,
   MAKS_RONDOJ,
@@ -28,7 +29,7 @@ import {
   slugDePeto,
 } from "./test-doubles/chat.js";
 import { faktoKunLigiloj, planoKun } from "./test-doubles/faktoj.js";
-import { CXIUJ_ILOJ, MALNOVAJ_ILOJ, MemoraPonto } from "./test-doubles/iloj.js";
+import { CXIUJ_ILOJ, kampojDeTabelo, MALNOVAJ_ILOJ, MemoraPonto } from "./test-doubles/iloj.js";
 import { MALVERDA, neniamVerda, TaksiloDouble, VERDA, verdaEkde } from "./test-doubles/taksilo.js";
 import type {
   BildigoRezulto,
@@ -952,15 +953,19 @@ describe("the shell in the system text, the context per screen and round (S038-2
     const antaua = rezulto.rondoj[0]?.liste;
     const fragmento = antaua?.fragmento ?? "-";
     const trovoj = JSON.stringify(antaua?.trovoj ?? [], null, 2);
-    // The Kurzprofile of the Eroj of the last fragment (fm-karto, fm-butono), sorted.
+    // The Kurzprofile of the Eroj of the last fragment (fm-karto, fm-butono), sorted: brief and
+    // slots as the answer gives them (S038-24 F-1).
     const profiloj = ["butono", "karto"].map((nomo) =>
-      JSON.stringify({ ero: nomo, description: nomo === "butono" ? "Eine Aktion" : "Eine Karte" }),
+      JSON.stringify(kampojDeTabelo(nomo, KURZPROFILAJ_KAMPOJ)),
     );
     expect(
       tools.vokoj
-        .filter((voko) => voko.name === "get_ero" && String(voko.args.fields) === "brief")
+        .filter((voko) => voko.name === "get_ero" && String(voko.args.fields) === "brief,slots")
         .map((voko) => voko.args.name),
     ).toEqual(["butono", "karto"]);
+    expect(tasko).toContain(
+      "Kurzprofile der Eroj deines Stands (get_ero, brief und slots – nur diese Inhalte je Slot sind erlaubt):",
+    );
     for (const ero of [
       "Screens des Ablaufs:",
       "- liste.html – Titel liste: Zweck von liste",
@@ -1116,8 +1121,8 @@ describe("the shell in the system text, the context per screen and round (S038-2
     expect(sistemo).toContain(PROFILO_SXELO);
     expect(sistemo).not.toContain(PROFILO_PAGXO);
     const dua = konversacioj(chat).get("liste#2")?.[0]?.messages[1]?.content ?? "";
-    expect(dua).toContain(JSON.stringify({ ero: "butono", description: "Eine Aktion" }));
-    expect(dua).not.toContain(JSON.stringify({ ero: "karto", description: "Eine Karte" }));
+    expect(dua).toContain(JSON.stringify(kampojDeTabelo("butono", KURZPROFILAJ_KAMPOJ)));
+    expect(dua).not.toContain(JSON.stringify(kampojDeTabelo("karto", KURZPROFILAJ_KAMPOJ)));
     expect(
       linioj.filter((linio) => linio.includes("pagxo") && linio.includes("nicht erreichbar")),
     ).toHaveLength(1);

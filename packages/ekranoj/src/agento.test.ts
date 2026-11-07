@@ -7,6 +7,7 @@ import {
   chatModelDe,
   eltiriRespondon,
   eroNomojDe,
+  KURZPROFILAJ_KAMPOJ,
   konstruiEkranon,
   legiEroProfilojn,
   legiMankojn,
@@ -30,7 +31,13 @@ import {
 } from "./index.js";
 import { ilaRespondo, respondo, SkriptaModelo } from "./test-doubles/chat.js";
 import { planoKun } from "./test-doubles/faktoj.js";
-import { CXIUJ_ILOJ, ilo, MALNOVAJ_ILOJ, MemoraPonto } from "./test-doubles/iloj.js";
+import {
+  CXIUJ_ILOJ,
+  ilo,
+  kampojDeTabelo,
+  MALNOVAJ_ILOJ,
+  MemoraPonto,
+} from "./test-doubles/iloj.js";
 import type { Peno, Trovo } from "./tipoj.js";
 
 const peno = (): Peno => ({
@@ -424,7 +431,14 @@ describe("the shell and the context per screen and round (S038-20, AC-7)", () =>
     expect(eroNomojDe("<p>Keine Ero.</p>")).toEqual([]);
   });
 
-  it("reads the Kurzprofile with get_ero fields brief, once per name and run, and skips what is no Ero or fails", async () => {
+  /** The Kurzprofile of the double with the slot rules (F-1): the answer as get_ero gives it. */
+  const kurzprofilo = (nomo: string) => ({
+    nomo,
+    teksto: JSON.stringify(kampojDeTabelo(nomo, KURZPROFILAJ_KAMPOJ)),
+  });
+
+  it("reads the Kurzprofile with get_ero fields brief and slots, once per name and run, and skips what is no Ero or fails", async () => {
+    expect(KURZPROFILAJ_KAMPOJ).toEqual(["brief", "slots"]);
     const ponto = new SxelaPonto(["get_ero ligilo"]);
     const kasxmemoro: ProfilaKasxmemoro = new Map();
     const linioj: string[] = [];
@@ -436,14 +450,58 @@ describe("the shell and the context per screen and round (S038-20, AC-7)", () =>
       log,
     );
     const dua = await legiEroProfilojn(ponto, ["butono", "karto"], kasxmemoro, log);
-    expect(unua).toEqual(PROFILOJ);
-    expect(dua).toEqual(PROFILOJ);
+    const atendataj = ["butono", "karto"].map(kurzprofilo);
+    expect(unua).toEqual(atendataj);
+    expect(dua).toEqual(atendataj);
     expect(ponto.vokoj.map((voko) => voko.args)).toEqual(
-      ["butono", "karto", "nekonata", "ligilo"].map((name) => ({ name, fields: ["brief"] })),
+      ["butono", "karto", "nekonata", "ligilo"].map((name) => ({
+        name,
+        fields: ["brief", "slots"],
+      })),
     );
     expect(linioj).toHaveLength(2);
     expect(linioj[0]).toContain("nekonata");
     expect(linioj[1]).toContain("ligilo");
+  });
+
+  it("puts the slot rules of round 2's Kurzprofile into the task under their heading (F-1)", async () => {
+    const ponto = new SxelaPonto();
+    const profiloj = await legiEroProfilojn(ponto, ["butono", "karto"], new Map(), () => {});
+    const chat = new SkriptaModelo(() => respondo("```html\n<p>x</p>\n```"));
+    await konstrui(chat, { rondo: 2, sxelo: SXELO, eroProfiloj: profiloj });
+    const tasko = chat.petoj[0]?.messages[1]?.content ?? "";
+    expect(tasko).toContain(
+      "Kurzprofile der Eroj deines Stands (get_ero, brief und slots – nur diese Inhalte je Slot sind erlaubt):",
+    );
+    expect(tasko).not.toContain("Kurzprofile der Eroj deines Stands (get_ero, brief):");
+    for (const nomo of ["butono", "karto"]) {
+      const kampoj = kampojDeTabelo(nomo, KURZPROFILAJ_KAMPOJ) as { slots?: unknown };
+      expect(kampoj.slots, nomo).toBeDefined();
+      expect(tasko, nomo).toContain(`- fm-${nomo}: ${JSON.stringify(kampoj)}`);
+      expect(tasko, nomo).toContain(`"slots":${JSON.stringify(kampoj.slots)}`);
+    }
+  });
+
+  it("keeps a Kurzprofil without slots (missing or in rest) as brief, with one log line and no follow-up call", async () => {
+    const OHNE_SLOTS = { ero: "butono", description: "Eine Aktion", rest: ["slots"] };
+    const NUR_BRIEF = { ero: "karto", description: "Eine Karte" };
+    const ponto = new MemoraPonto({
+      iloj: CXIUJ_ILOJ,
+      kampoj: (nomo) => (nomo === "butono" ? OHNE_SLOTS : NUR_BRIEF),
+    });
+    const linioj: string[] = [];
+    const profiloj = await legiEroProfilojn(ponto, ["butono", "karto"], new Map(), (linio) =>
+      linioj.push(linio),
+    );
+    expect(profiloj).toEqual([
+      { nomo: "butono", teksto: JSON.stringify(OHNE_SLOTS) },
+      { nomo: "karto", teksto: JSON.stringify(NUR_BRIEF) },
+    ]);
+    expect(ponto.vokoj).toHaveLength(2);
+    expect(linioj).toHaveLength(2);
+    expect(linioj[0]).toContain("butono");
+    expect(linioj[1]).toContain("karto");
+    for (const linio of linioj) expect(linio).toContain("slots");
   });
 
   it("puts the shell's Kurzprofile, the layout means and the navigation rule into the system text", () => {

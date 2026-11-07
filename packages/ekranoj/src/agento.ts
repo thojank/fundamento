@@ -520,6 +520,12 @@ export function eroNomojDe(fragmento: string): string[] {
   return [...new Set(nomoj)].filter((nomo) => nomo !== "" && !sxelaj.has(nomo)).sort();
 }
 
+/**
+ * The parts of an Ero's Kurzprofil from round 2 on (Spec 038 F-1): the brief and the slot rules,
+ * as `get_ero` answers them under its size ceiling.
+ */
+export const KURZPROFILAJ_KAMPOJ = ["brief", "slots"] as const;
+
 /** A cache of Kurzprofile per run: one read per name, misses included. */
 export type ProfilaKasxmemoro = Map<string, Promise<Profilo | undefined>>;
 

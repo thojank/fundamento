@@ -8,6 +8,7 @@
 import { describe, expect, it } from "vitest";
 import {
   ERO_KAMPOJ,
+  KURZPROFILAJ_KAMPOJ,
   kampaLegiloDe,
   kontroliMarkon,
   kontroliUzon,
@@ -128,10 +129,10 @@ describe("the path of a run (Spec 038 1.8c, D-03)", () => {
       fragment: fragmentoDe(PLANO, "liste", 1),
       lingvo: "de",
     });
-    // The reads of the checker; the Kurzprofile ekranoj puts into round 2 (`fields: ["brief"]`,
-    // S038-20) are asserted in rondoj.test.ts.
+    // The reads of the checker; the Kurzprofile ekranoj puts into round 2
+    // (`fields: KURZPROFILAJ_KAMPOJ`, S038-20, S038-24) are asserted in rondoj.test.ts.
     const eroj = tools.vokoj.filter(
-      (voko) => voko.name === "get_ero" && String(voko.args.fields) !== "brief",
+      (voko) => voko.name === "get_ero" && String(voko.args.fields) !== String(KURZPROFILAJ_KAMPOJ),
     );
     expect(eroj.map((voko) => voko.args)).toEqual([
       { name: "karto", fields: [...ERO_KAMPOJ] },
