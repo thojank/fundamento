@@ -17,17 +17,21 @@ import type { ChatModel, ChatRespondo, Haltigo, KostoTakso, Varianto } from "./t
 
 /**
  * Tokens of one screen in one round, Variante F – an estimate, not a limit. Measured in the model
- * runs of Spec 038 (`specs/038-gvidanto-agentoj/plan.md`, section „Messung 1.9“): the runs
- * `teil1-komuna` and `abnahme-provo` on code head C `20961e72` spent 459 306 tokens in on 7 built
- * screen-rounds, the plan share included; the mean is 65 615 per screen-round (65 615,14, rounded
- * to whole tokens). Before, the value was 70 000 (Spec 037 D-186): the acceptance run komuna of
- * Spec 037 (S037-10) spent 213 397 tokens on the plan request and three built screen-rounds,
- * rounded up. The first estimate of Reihe K pages (≈ 40 000, D-20) was 3–4 × too low because
- * every request resends the conversation.
+ * runs of Spec 038 (`specs/038-gvidanto-agentoj/plan.md`, section „Messung 4“, F-S038-28-2): the
+ * run `nachher-ablauf` on code head D `bfe19023` spent 2 080 286 tokens in on 26 built
+ * screen-rounds of Variante F (from `penoj`); the mean is 2 080 286 ÷ 26 = 80 011 per
+ * screen-round. Before, the value was 65 615 (Spec 038 „Messung 1.9“, S038-26: 459 306 tokens in
+ * on 7 screen-rounds) and before that 70 000 (Spec 037 D-186, the acceptance run komuna of
+ * S037-10, rounded up). The first estimate of Reihe K pages (≈ 40 000, D-20) was 3–4 × too low
+ * because every request resends the conversation.
  */
-export const TOKENOJ_EKRANO_RONDO_F = 65_615;
-/** The same for Variante 0: Reihe K ≈ 1,5 k per page, rounded up (D-20). */
-export const TOKENOJ_EKRANO_RONDO_0 = 2_000;
+export const TOKENOJ_EKRANO_RONDO_F = 80_011;
+/**
+ * The same for Variante 0 – an estimate, not a limit. Measured in Spec 038 „Messung 4“: 3 609 and
+ * 5 414 tokens in per built screen-round nachher; the upper value is taken, an estimate must not
+ * underestimate (D-S038-35-1). Before, Reihe K ≈ 1,5 k per page, rounded up to 2 000 (D-20).
+ */
+export const TOKENOJ_EKRANO_RONDO_0 = 5_414;
 /** The plan request: one sentence in, one plan of ≤ 5 screens out (D-20). */
 export const TOKENOJ_PLANO = 5_000;
 
