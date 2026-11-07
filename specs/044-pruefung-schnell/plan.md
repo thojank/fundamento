@@ -69,6 +69,35 @@ Der Lauf ist unbeaufsichtigt. Wo die Spec offen ließ, gilt die Annahme. „ange
 
 ## Befunde
 
+### CI vorher aus den Traces (T1, gelesen am 2026-11-07)
+
+Alle Artefakte waren abrufbar (Ablauf laut API 2026-11-13). Geladen je Artefakt in ein eigenes, neues, leeres Verzeichnis außerhalb des Repos, nur gelesen: `testberichte-eroj-2-1`, `testberichte-eroj-4-1` und `testberichte-unit-metiejo-1` beider Läufe. Gelesen wurden die Netzwerk-Einträge (`*.network`) der Traces unter `eroj/test-reports/playwright/html/data/*.zip`: Beginn, Methode, Status, Dauer (`time`). „unbeendet“ = die Anfrage lief bei Testende noch. Je Schritt gibt es in CI keine Werte, weil auf `main` keine Messpunkte laufen (Annahme der Implementierungs-Spec): die Schritt-Zeilen „CI vorher“ heißen „–“.
+
+**Lauf 42252367951** (`main` `93b6cae`, `push`):
+
+| Test (Browser) | `/pruefung` | Rahmen `vorschau?…rev=` | `vorschau.css` | weitere |
+|---|---|---|---|---|
+| `zweitfarbe-036:196` Schnellstart (Chromium) | rev 1: **4443 ms** | rev 1 (`farbe`): 4450 ms, gleichzeitig mit der Prüfung | rev 1: 433 ms (beginnt erst nach der Prüfung) | – |
+| `zweitfarbe-036:196` Schnellstart (WebKit) | rev 1: **4492 ms** | rev 1 (`farbe`): 4500 ms | rev 1: 476 ms | – |
+| `zweitfarbe-036:129` Assistent (WebKit) | – | rev 1 (`buehne-farbe`): 36 ms; mit `propono`: 6 ms. rev 2: **4340 ms** | rev 1: 958 ms, mit `propono`: 507 ms; rev 2: unbeendet | `GET /asistanto/…/gvidkoloro` 4417 ms (erstes Laden); `GET stato` 1628 ms (hinter dem Rahmen rev 2) |
+
+**Lauf 42180054807** (`f027522`, Befunde von Spec 043):
+
+| Test (Browser) | `/pruefung` | Rahmen `vorschau?…rev=` | `vorschau.css` | weitere |
+|---|---|---|---|---|
+| `zweitfarbe-036:121` Schnellstart (Chromium) | rev 1: 3706 ms; rev 2: 3667 ms; rev 2 noch einmal: 9 ms; rev 3: **4216 ms** | rev 1: 7 ms, rev 2: 2 bzw. 9 ms; rev 3: 3 ms, dann **4216 ms** (gleichzeitig mit der Prüfung) | rev 1: **4011 ms** (hinter der Prüfung); rev 2: 359 bzw. 493 ms; rev 3: unbeendet | – |
+| `zweitfarbe-036:121` Assistent (Chromium) | – | rev 1: 5–6 ms; rev 2: **3696 ms**; rev 3: **3329 ms** | rev 1: 661 ms, mit `propono` 353 ms; rev 2: 296, 645 bzw. 341 ms; rev 3: unbeendet, mit `propono` 271 ms | `GET /asistanto/…` 4270 ms (erstes Laden), 3336 ms (rev 3); `GET stato` **3451 ms** (rev 2) |
+| `buehne-navigation-042:200` (Firefox) | – | rev 1 und 2: je 1–3 ms | rev 1: 606/355/339 ms, mit `propono` 321/669/582 ms; rev 2: 408/648 ms, mit `propono` 701/376 ms | `GET /asistanto/…` **5091 ms** (erstes Laden); `GET stato` **3243 ms** (der `stato`-Takt stößt die Prüfung des neuen rev an) |
+| `metiejo-036-uebernahme:89` 4.1 (WebKit) | rev 1: **4316 ms** | rev 1 (`farbe`): 4360 ms | rev 1: unbeendet | – |
+| `metiejo-036-uebernahme:67` 4.2 (WebKit) | rev 1: **4403 ms** | rev 1 (`farbe`): 4393 ms | rev 1: unbeendet | – |
+
+**Was die Traces zeigen:**
+- Wer nach einem neuen `rev` zuerst nach der Prüfung fragt (`/pruefung`, `GET stato`, `GET /asistanto/…`, Rahmen `buehne-*` ohne `propono`), rechnet sie: **3,2–5,1 s** in CI. Eine zweite `/pruefung` desselben `rev` braucht 9 ms (der heutige Ein-Eintrag-Speicher `draft.pruefung` greift).
+- Der Rahmen `vorschau?sxtupo=farbe` rechnet die Prüfung nicht (sonst 2–9 ms). Er dauert 4,2–4,5 s nur, weil er im Event-Loop hinter der Prüfung steht. Ebenso `vorschau.css` rev 1 (4011 ms) und `GET stato` (1628 ms) hinter dem Rahmen rev 2. Das bestätigt A-04.
+- `vorschau.css` hat keinen Speicher: jede Anfrage rechnet neu, in CI **270–960 ms** je Anfrage, auch für dasselbe `rev` (z. B. rev 1 dreimal: 606, 355, 339 ms).
+
+**Unit-Job `metiejo`** (A-07): Job `Unit tests (metiejo)` im Lauf 42252367951 von 16:26:38 bis 16:34:09 (7,5 min von `timeout-minutes: 15`); Vitest `time="365.204"` s für 557 Tests (Lauf 42180054807: 363 s, 553 Tests).
+
 ## Messungen
 
 ## Messanleitung
@@ -78,4 +107,12 @@ Der Lauf ist unbeaufsichtigt. Wo die Spec offen ließ, gilt die Annahme. „ange
 wc -c /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec044/spec.md specs/044-pruefung-schnell/spec.md
 shasum -a 256 /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec044/spec.md specs/044-pruefung-schnell/spec.md
 git show HEAD:specs/044-pruefung-schnell/spec.md | shasum -a 256
+
+# CI vorher: Traces lesen (nur lesen, je Artefakt ein neues leeres Verzeichnis außerhalb des Repos)
+for run in 42252367951 42180054807; do for a in testberichte-eroj-2-1 testberichte-eroj-4-1 testberichte-unit-metiejo-1; do
+  d=$(mktemp -d); gh run download $run -R thojank/fundamento -n $a -D "$d"; echo "$run $a → $d"
+done; done
+# je Trace: eroj/test-reports/playwright/html/data/*.zip; Netz in *.network (JSON je Zeile,
+# snapshot.request.url, snapshot.response.status, snapshot.startedDateTime, snapshot.time),
+# Titel und Browser in context-options der *.trace
 ```
