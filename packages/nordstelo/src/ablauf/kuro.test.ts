@@ -15,12 +15,19 @@ import {
   type Manko,
   PERMESITA_MODELO,
   type Peno,
+  type Restanta,
   type Varianto,
 } from "@fundamento/ekranoj";
 import { defaultModeloSource, loadModelo, type Modelo } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { type AblaufTasko, planoDe, trovuTaskon } from "./katalogo.js";
-import { type AblaufDeps, kunKomunaBudgxeto, kuriAblaufon, validiAblaufon } from "./kuro.js";
+import {
+  type AblaufDeps,
+  kunKomunaBudgxeto,
+  kuriAblaufon,
+  restantajLauxReguloDe,
+  validiAblaufon,
+} from "./kuro.js";
 import type { FluaPoento, KuraPoento } from "./poentoj.js";
 import { legiKatalogon } from "./poentoj.js";
 import {
@@ -28,6 +35,7 @@ import {
   kuroDir,
   type LaufRekordo,
   type PenoKvar,
+  stabilaJson,
   taksiloPorMezuro,
 } from "./raporto.js";
 import {
@@ -548,5 +556,135 @@ describe("provider errors in kuro.json (Spec 038 A-1, AK-2, C-1)", () => {
     expect(senSekretoj(linioj.join("\n"))).toEqual([]);
     expect(senSekretoj(raporto.md)).toEqual([]);
     expect("anbieterfehleroj" in (kuroj[1] ?? {})).toBe(false);
+  });
+});
+
+describe("open deviations per rule in kuro.json and the report (Spec 038 A-2, AK-5, C-2)", () => {
+  const slugoj = taskoDe(LFD).ekranoj.map((ekrano) => ekrano.slug);
+  const [unua = "", dua = "", lasta = ""] = slugoj;
+  const restanta = (ekrano: string, regulo: string): Restanta => ({
+    ekrano,
+    regulo,
+    loko: `${ekrano}.html`,
+    kialo: `${regulo} offen`,
+  });
+  // The last screen is never built (`nicht-gebaut`); rule totals aria 2, ero-prop-constraint 2,
+  // label 1, nicht-gebaut 1 – the top three are aria, ero-prop-constraint (tie by name) and label
+  // (tie with nicht-gebaut, by name).
+  const RESTANTAJ: Restanta[] = [
+    restanta(unua, "ero-prop-constraint"),
+    restanta(dua, "aria"),
+    restanta(unua, "aria"),
+    restanta(lasta, "nicht-gebaut"),
+    restanta(dua, "label"),
+    restanta(unua, "ero-prop-constraint"),
+  ];
+  const LAUX_REGULO = {
+    [unua]: { aria: 1, "ero-prop-constraint": 2 },
+    [dua]: { aria: 1, label: 1 },
+    [lasta]: { "nicht-gebaut": 1 },
+  };
+
+  /** F leaves the last screen unbuilt and the deviations above; 0 leaves nothing open. */
+  const kunRestantaj = (): KuruEkranojn => {
+    const duobla = duoblaKuro({ faktoj });
+    return async (enigo, d) => {
+      const rezulto = await duobla.kuruEkranojn(enigo, d);
+      if (enigo.varianto !== "F") return rezulto;
+      return {
+        ...rezulto,
+        rondoj: rezulto.rondoj.map((rondo) =>
+          Object.fromEntries(Object.entries(rondo).filter(([slug]) => slug !== lasta)),
+        ),
+        restantaj: RESTANTAJ,
+      };
+    };
+  };
+
+  it("counts the deviations of ekranoj per slug and rule, sorted, whatever their order", () => {
+    expect(restantajLauxReguloDe(RESTANTAJ)).toEqual(LAUX_REGULO);
+    const inversa = restantajLauxReguloDe([...RESTANTAJ].reverse());
+    expect(stabilaJson(inversa)).toBe(stabilaJson(LAUX_REGULO));
+    expect(Object.keys(inversa)).toEqual(Object.keys(inversa).sort());
+    for (const reguloj of Object.values(inversa))
+      expect(Object.keys(reguloj)).toEqual(Object.keys(reguloj).sort());
+    expect(restantajLauxReguloDe([])).toEqual({});
+  });
+
+  it("stores restantajLauxRegulo per slug of the last round, Σ = restantaj (unbuilt screens included)", async () => {
+    const out = mkdtempSync(join(tmpdir(), "s038-33-kuro-"));
+    const { dir, raporto } = await kuriAblaufon(
+      { taskoj: [LFD], maksTokenoj: 1_000_000, out },
+      deps({ kuruEkranojn: kunRestantaj() }),
+    );
+    const f = kuroJson(dir, LFD, "F");
+    // The existing number is unchanged: the length of the list of ekranoj.
+    expect(f.restantaj).toBe(RESTANTAJ.length);
+    expect(f.restantajLauxRegulo).toEqual(LAUX_REGULO);
+    expect(f.restantajLauxRegulo?.[lasta]).toEqual({ "nicht-gebaut": 1 });
+    // The sum check (C-2): Σ over every slug and rule === restantaj.
+    const sumo = Object.values(f.restantajLauxRegulo ?? {})
+      .flatMap((reguloj) => Object.values(reguloj))
+      .reduce((a, b) => a + b, 0);
+    expect(sumo).toBe(f.restantaj);
+    // Nothing open: the field is there and empty, restantaj 0.
+    const nul = kuroJson(dir, LFD, "0");
+    expect(nul.restantaj).toBe(0);
+    expect(nul.restantajLauxRegulo).toEqual({});
+
+    // The report: the three most frequent rules per flow × variant, ties by name.
+    expect(raporto.md).toContain(
+      "## Offene Abweichungen je Regel (nach der letzten Runde, häufigste drei)",
+    );
+    expect(raporto.md).toContain("| Aufgabe | Variante | offen | häufigste Regeln |");
+    expect(raporto.md).toContain(
+      `| ${LFD} | F | ${RESTANTAJ.length} | aria 2, ero-prop-constraint 2, label 1 |`,
+    );
+    expect(raporto.md).toContain(`| ${LFD} | 0 | 0 | – |`);
+    expect(readFileSync(join(dir, "raporto.md"), "utf8")).toBe(raporto.md);
+    // The report data stay as they were (integra-raporto.json byte-identical).
+    const json = readFileSync(join(dir, "raporto.json"), "utf8");
+    expect(json).not.toContain("restantajLauxRegulo");
+    expect(json).not.toContain("restantajSupraj");
+  });
+
+  it("writes the same kuro.json and report twice", async () => {
+    const kuri = async () => {
+      const out = mkdtempSync(join(tmpdir(), "s038-33-kuro-"));
+      const { dir, raporto } = await kuriAblaufon(
+        { taskoj: [LFD], maksTokenoj: 1_000_000, out },
+        deps({ kuruEkranojn: kunRestantaj() }),
+      );
+      return {
+        kuro: readFileSync(join(kuroDir(dir, LFD, "F", 1), "kuro.json"), "utf8"),
+        md: raporto.md,
+      };
+    };
+    const unuaKuro = await kuri();
+    const duaKuro = await kuri();
+    expect(duaKuro.kuro).toBe(unuaKuro.kuro);
+    expect(duaKuro.md).toBe(unuaKuro.md);
+    expect(unuaKuro.kuro).toContain('"restantajLauxRegulo"');
+  });
+
+  it("has no restantajLauxRegulo on the error path; the report says „nicht vorhanden“", async () => {
+    const out = mkdtempSync(join(tmpdir(), "s038-33-kuro-"));
+    const duobla = duoblaKuro({ faktoj });
+    const { dir, kuroj, raporto } = await kuriAblaufon(
+      { taskoj: [LFD], maksTokenoj: 1_000_000, out },
+      deps({
+        kuruEkranojn: async (enigo, ekranojDeps) => {
+          if (enigo.varianto === "F") throw new Error("Renderer weg");
+          return duobla.kuruEkranojn(enigo, ekranojDeps);
+        },
+      }),
+    );
+    expect(kuroj[0]?.haltigo).toBe("eraro");
+    expect(kuroj[0]?.restantaj).toBe(0);
+    expect("restantajLauxRegulo" in (kuroj[0] ?? {})).toBe(false);
+    expect("restantajLauxRegulo" in kuroJson(dir, LFD, "F")).toBe(false);
+    expect(kuroJson(dir, LFD, "0").restantajLauxRegulo).toEqual({});
+    expect(raporto.md).toContain(`| ${LFD} | F | – | nicht vorhanden |`);
+    expect(raporto.md).toContain(`| ${LFD} | 0 | 0 | – |`);
   });
 });

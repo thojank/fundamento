@@ -101,6 +101,48 @@ export interface KuroRekordo {
    * cleaned; absent when nothing was caught and in older `kuro.json`.
    */
   anbieterfehleroj?: AnbieterEraro[];
+  /**
+   * The deviations left after the last round per screen slug and rule (Spec 038 A-2, C-2,
+   * additive): Σ over all slugs and rules === {@link restantaj} (unbuilt screens as
+   * `nicht-gebaut`). Absent on the error path, for a run that did not start and in older
+   * `kuro.json`.
+   */
+  restantajLauxRegulo?: Record<string, Record<string, number>>;
+}
+
+/** How many rules the reports show per flow × variant (Spec 038 A-2: the three most frequent). */
+export const RESTANTAJ_SUPRAJ = 3;
+
+/** One rule with the number of its open deviations. */
+export interface RegulaNombro {
+  regulo: string;
+  nombro: number;
+}
+
+/** The open deviations of some runs: their sum and the most frequent rules (C-2). */
+export interface RestantajSupraj {
+  /** Σ over every rule (= Σ `restantaj` of the runs). */
+  sumo: number;
+  /** At most {@link RESTANTAJ_SUPRAJ} rules, most frequent first, ties by rule name. */
+  supraj: RegulaNombro[];
+}
+
+/** What {@link restantajSuprajDe} reads of one run. */
+export interface RestantajEnKuro {
+  restantaj: number;
+  /** null: the record has no `restantajLauxRegulo` (older shape, error path). */
+  restantajLauxRegulo: Record<string, Record<string, number>> | null;
+}
+
+/**
+ * The open deviations of the started runs of one flow × variant, summed over the runs and screens
+ * per rule (Spec 038 A-2, C-2). null („nicht vorhanden“) where no run carries
+ * `restantajLauxRegulo` or a run with open deviations lacks it (an older `kuro.json`): a sum is
+ * only shown when it is complete. A run without the field and without deviations (the error path)
+ * adds nothing.
+ */
+export function restantajSuprajDe(_kuroj: readonly RestantajEnKuro[]): RestantajSupraj | null {
+  throw new Error("ne implementita: restantajSuprajDe (S038-33)");
 }
 
 /** `lauf.json`: the settings of the whole measurement. */

@@ -14,6 +14,7 @@ import {
   LAUF_DOSIERO,
   lastoSuperKernoj,
   type PenoKvar,
+  type RestantajSupraj,
   STREUUNG_FONTO,
   STREUUNG_REIHE_K,
 } from "./raporto.js";
@@ -78,6 +79,11 @@ export interface KomparoValoroj {
   /** The load before and after each repetition, with the cores (D-09). */
   sxargoj: KuroSxargo[];
   lastoSuperKernoj: boolean;
+  /**
+   * The open deviations after the last round per rule, summed over the started repetitions, with
+   * the three most frequent rules (Spec 038 A-2, C-2); null: „nicht vorhanden“ (older kuro.json).
+   */
+  restantajSupraj: RestantajSupraj | null;
 }
 
 /** After − before of one flow × variant. */
@@ -621,6 +627,7 @@ function valorojDe(
     k8JeMarko,
     sxargoj,
     lastoSuperKernoj: lasto,
+    restantajSupraj: null,
   };
 }
 

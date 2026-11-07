@@ -19,6 +19,7 @@ import {
   type Peno,
   type Problemo,
   purigiTekston,
+  type Restanta,
   type Taksilo,
   taksoPorEnigo,
   type Varianto,
@@ -279,6 +280,17 @@ export function penojDe(rezulto: EkranojRezulto): Pick<KuroRekordo, "penoj" | "p
     if (Object.keys(own).length > 0) penoj[String(index + 1)] = own;
   }
   return Object.keys(penoj).length === 0 ? {} : { penoj, penoPlano: plano };
+}
+
+/**
+ * The deviations left after the last round per screen slug and rule (Spec 038 A-2, C-2): the
+ * `restantaj` of ekranoj counted, unbuilt screens under `nicht-gebaut`; Σ = their number. Slugs
+ * and rules sorted; `{}` when nothing is left.
+ */
+export function restantajLauxReguloDe(
+  _restantaj: readonly Restanta[],
+): Record<string, Record<string, number>> {
+  throw new Error("ne implementita: restantajLauxReguloDe (S038-33)");
 }
 
 /** `anbieterfehleroj` of a result for `kuro.json` (C-1): cleaned, absent when there are none. */

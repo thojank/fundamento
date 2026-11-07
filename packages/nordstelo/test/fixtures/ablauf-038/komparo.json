@@ -120,6 +120,7 @@
           "R3": null,
           "delto": null
         },
+        "restantajSupraj": null,
         "ripetoj": [
           1
         ],
@@ -193,6 +194,7 @@
           "R3": 97.7,
           "delto": 3.9
         },
+        "restantajSupraj": null,
         "ripetoj": [
           1
         ],
@@ -383,6 +385,7 @@
           "R3": 43,
           "delto": 1.8
         },
+        "restantajSupraj": null,
         "ripetoj": [
           1
         ],
@@ -472,6 +475,7 @@
           "R3": 41.2,
           "delto": 0
         },
+        "restantajSupraj": null,
         "ripetoj": [
           1
         ],
