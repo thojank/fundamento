@@ -30,7 +30,13 @@ import {
   type ValidationIssue,
   WCAG2_METRIC,
 } from "@fundamento/modelo";
-import { cssSpeicherOf, type PruefEintrag, type PruefTor, pruefSpeicherOf } from "./ableitungen.js";
+import {
+  cssSpeicherOf,
+  type PruefEintrag,
+  type PruefTor,
+  pruefRechnungOf,
+  pruefSpeicherOf,
+} from "./ableitungen.js";
 import { avertoOf, KONFIRMO_TEKSTO } from "./asistanto/averto.js";
 import { babili } from "./asistanto/babilo.js";
 import { asistantoScreen } from "./asistanto/ekrano.js";
@@ -163,7 +169,7 @@ import {
   checkDraft,
   komunaCss,
   loadBases,
-  previewCss,
+  previewCssInTeilen,
   startAgordo,
 } from "./vorschau.js";
 import { previewBody } from "./vorschau-korpo.js";
@@ -225,6 +231,12 @@ export interface ServiloOptions {
    * computation; absent in production (no await, no difference).
    */
   pruefTor?: PruefTor;
+  /**
+   * Spec 044 T3 (D-02): the module of the check's worker thread; a test passes its own. Default: the
+   * one beside the server in the built package; where it is missing (the TS source under Vitest)
+   * the check runs in the main thread.
+   */
+  pruefWorker?: URL;
 }
 
 export interface ServiloIo {
@@ -412,13 +424,13 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
   const tiparoj = readTiparoj();
   const drafts = new Map<string, Draft>();
   // Spec 044 (V-5): the check per draft and rev, the stylesheet of the preview per brand, rev and
-  // proposal; each computed once and shared by the requests that ask while it runs.
-  const pruefSpeicher = pruefSpeicherOf(
-    async (agordo) => checkDraft(agordo, bases),
-    options.pruefTor,
-  );
+  // proposal; each computed once and shared by the requests that ask while it runs. T3: the check
+  // runs in a worker thread, started on its first need (after `listen`), the stylesheet in parts
+  // in the main thread – never in one queue with the check (A-04).
+  const pruefRechnung = pruefRechnungOf((agordo) => checkDraft(agordo, bases), options.pruefWorker);
+  const pruefSpeicher = pruefSpeicherOf(pruefRechnung.rechner, options.pruefTor);
   const cssSpeicher = cssSpeicherOf(
-    async (agordo, messung) => previewCss(agordo, bases, messung),
+    (agordo, messung) => previewCssInTeilen(agordo, bases, messung),
     (marke) => drafts.get(marke)?.rev,
   );
   const erojDist = join(
@@ -1224,7 +1236,9 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       const before = await pruefungOf(name, draft);
       // Spec 044: the draft moved on while its check ran; the setting goes onto the draft as it is.
       if (draft.rev !== rev) return festlegen(name, draft, body, reply);
-      derivation = checkDraft(agordo, bases);
+      // T3: the candidate's check in the worker too; the draft may move on meanwhile (D-13).
+      derivation = await pruefRechnung.rechner(agordo);
+      if (draft.rev !== rev) return festlegen(name, draft, body, reply);
       const known = new Set(before.issues.map((issue) => `${issue.rule} ${issue.path}`));
       const fresh = derivation.issues.filter(
         (issue) =>
@@ -2754,11 +2768,17 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
   return {
     url,
     port,
-    close: () =>
-      new Promise<void>((done, fail) => {
-        server.closeAllConnections();
-        server.close((error) => (error === undefined ? done() : fail(error)));
-      }),
+    close: async () => {
+      try {
+        await new Promise<void>((done, fail) => {
+          server.closeAllConnections();
+          server.close((error) => (error === undefined ? done() : fail(error)));
+        });
+      } finally {
+        // Spec 044 T3: the worker of the check ends with the server.
+        await pruefRechnung.beenden();
+      }
+    },
   };
 }
 

@@ -1,8 +1,10 @@
 // Spec 044 (D-03, V-2): where the time of a request goes. With a sink in `ServiloOptions.messung`
 // each measured request reports, when its response is finished, one entry per step it ran – the
 // summed duration of that step – then `warten` (from entering the handler to the start of its own
-// work, plus the time it waited on a shared computation another request runs) and `gesamt` (from entering the handler to the end of the response). Without a sink nothing
-// is measured, written or reported: every step just runs. Node's `performance` only.
+// work, plus the time it waited on a shared computation another request runs) and `gesamt` (from
+// entering the handler to the end of the response). A step whose work ends later – the check in a
+// worker thread (T3) – counts until its promise settles. Without a sink nothing is measured,
+// written or reported: every step just runs. Node's `performance` only.
 
 import type { ServerResponse } from "node:http";
 
@@ -38,6 +40,11 @@ const ARBEIT: readonly MessSchritt[] = [
 /** The measure of one request; `schritt` runs its work and, when measured, times it. */
 export interface Messung {
   schritt<T>(schritt: MessSchritt, work: () => T): T;
+  /**
+   * A step whose work ends later (Spec 044 T3: the check in a worker thread): timed from its start
+   * until its promise settles. Never run inside another step.
+   */
+  schrittBisFertig<T>(schritt: MessSchritt, work: () => Promise<T>): Promise<T>;
   /** The rev the request found (its draft's, when it was loaded). */
   rev(rev: number): void;
   /**
@@ -50,6 +57,7 @@ export interface Messung {
 /** Runs every step unmeasured: the measure of a server without a sink. */
 export const OHNE_MESSUNG: Messung = {
   schritt: (_schritt, work) => work(),
+  schrittBisFertig: (_schritt, work) => work(),
   rev: () => undefined,
   warten: () => undefined,
 };
@@ -97,6 +105,23 @@ export function messungOf(
         const aussen = offen.length - 1;
         if (aussen >= 0) offen[aussen] = (offen[aussen] ?? 0) + ms;
       }
+    },
+    schrittBisFertig: (schritt, work) => {
+      const start = performance.now();
+      beginn ??= start;
+      const gemessen = () => {
+        dauer[schritt] = (dauer[schritt] ?? 0) + performance.now() - start;
+      };
+      return work().then(
+        (value) => {
+          gemessen();
+          return value;
+        },
+        (error: unknown) => {
+          gemessen();
+          throw error;
+        },
+      );
     },
     rev: (value) => {
       rev = value;

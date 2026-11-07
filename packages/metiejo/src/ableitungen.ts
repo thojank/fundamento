@@ -5,9 +5,13 @@
 // key: requests at the same time share one computation. A failed computation is dropped at once,
 // its requests get its error. A result is kept only while its rev still holds; each request gets
 // the result of the state it started with, because the Agordo is taken as a value at the start.
-// The calculators are injected (T3 may swap them for a worker or a computation in parts); this
-// module holds no clock, no limit by time and hands no iteration of a Map into an answer.
+// The calculators are injected: since T3 the check runs in a worker thread (`pruefRechnungOf`), the
+// stylesheet in parts in the main thread. This module holds no clock, no limit by time and hands no
+// iteration of a Map into an answer.
 
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { Worker } from "node:worker_threads";
 import type { Agordo, Derivation } from "@fundamento/agordilo";
 import { type Messung, OHNE_MESSUNG } from "./messung.js";
 
@@ -70,7 +74,8 @@ export function pruefSpeicherOf(rechner: PruefRechner, tor?: PruefTor): PruefSpe
     messung: Messung,
   ): Promise<Derivation> => {
     if (tor !== undefined) await tor(marke, rev);
-    return messung.schritt("ableitung+pruefung", () => rechner(agordo));
+    // Until the computation ends, also when it runs in a worker thread (T3).
+    return messung.schrittBisFertig("ableitung+pruefung", () => rechner(agordo));
   };
   return {
     pruefung: (halter, marke, messung = OHNE_MESSUNG) => {
@@ -174,6 +179,106 @@ export function cssSpeicherOf(
       eintrag = { form, ergebnis, fertig: false };
       bucket.eintraege.set(propono, eintrag);
       return ergebnis;
+    },
+  };
+}
+
+/** A check the server hands to the worker (Spec 044 T3): its number and the Agordo as a value. */
+export interface PruefAuftrag {
+  id: number;
+  agordo: Agordo;
+}
+
+/**
+ * What the worker answers: the derivation (structured clone keeps it equal, with key order and
+ * shared parts, R-2), or what its check threw.
+ */
+export type PruefAntwort = { id: number; derivation: Derivation } | { id: number; fehler: unknown };
+
+/** The calculator of the check and where it runs, decided once when the server starts. */
+export interface PruefRechnung {
+  readonly ort: "worker" | "haupt-thread";
+  readonly rechner: PruefRechner;
+  /** Ends the worker (the server's close); a check it holds fails. A later need starts a new one. */
+  beenden(): Promise<void>;
+}
+
+/** The module of the check's worker: beside this one in the built package. */
+export const PRUEF_WORKER = new URL("./pruefung-worker.js", import.meta.url);
+
+/**
+ * Spec 044 T3 (D-02, A-06): the check in a worker thread when its module is there, else – the TS
+ * source under Vitest, which a worker cannot load – `haupt` in the main thread, the same function
+ * the worker runs. Decided once, here, never per request.
+ */
+export function pruefRechnungOf(
+  haupt: (agordo: Agordo) => Derivation,
+  modul: URL = PRUEF_WORKER,
+): PruefRechnung {
+  if (!existsSync(fileURLToPath(modul)))
+    return {
+      ort: "haupt-thread",
+      rechner: async (agordo) => haupt(agordo),
+      beenden: async () => undefined,
+    };
+  return pruefWorkerOf(modul);
+}
+
+/**
+ * One worker for the checks only (A-04: the stylesheet never waits behind it), started on the first
+ * need – after the server listens (R-6) – and computing one check after the other. A check that
+ * throws in the worker fails with that error, as a throw in the main thread would; a worker that
+ * dies fails every check it holds with its error, and the next need starts a new one. No retry, no
+ * limit by time.
+ */
+function pruefWorkerOf(modul: URL): PruefRechnung {
+  let worker: Worker | undefined;
+  let naechste = 0;
+  const offen = new Map<number, { erfuellen(d: Derivation): void; ablehnen(e: unknown): void }>();
+  /** The worker `beendet` is gone: every check it held fails with `fehler`. */
+  const aus = (beendet: Worker, fehler: unknown): void => {
+    if (worker !== beendet) return;
+    worker = undefined;
+    const gehalten = [...offen.values()];
+    offen.clear();
+    for (const auftrag of gehalten) auftrag.ablehnen(fehler);
+  };
+  const gestartet = (): Worker => {
+    if (worker !== undefined) return worker;
+    const neu = new Worker(modul);
+    neu.on("message", (antwort: PruefAntwort) => {
+      const auftrag = offen.get(antwort.id);
+      if (auftrag === undefined) return;
+      offen.delete(antwort.id);
+      if ("derivation" in antwort) auftrag.erfuellen(antwort.derivation);
+      else auftrag.ablehnen(antwort.fehler);
+    });
+    neu.on("error", (fehler) => aus(neu, fehler));
+    neu.on("messageerror", (fehler) => {
+      aus(neu, fehler);
+      void neu.terminate();
+    });
+    neu.on("exit", (code) =>
+      aus(neu, new Error(`The worker of the check ended (exit code ${code}).`)),
+    );
+    worker = neu;
+    return neu;
+  };
+  return {
+    ort: "worker",
+    rechner: (agordo) =>
+      new Promise<Derivation>((erfuellen, ablehnen) => {
+        const id = naechste++;
+        offen.set(id, { erfuellen, ablehnen });
+        try {
+          gestartet().postMessage({ id, agordo } satisfies PruefAuftrag);
+        } catch (fehler) {
+          offen.delete(id);
+          ablehnen(fehler);
+        }
+      }),
+    beenden: async () => {
+      await worker?.terminate();
     },
   };
 }

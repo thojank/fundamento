@@ -5,7 +5,8 @@
 // one short line per step to the log. This file checks the form only (every step there, every
 // number ≥ 0), never a duration: the numbers are for the plan, not a limit. Since T2 a second part
 // times from outside, without a gate, how long the `stato` of a checked brand takes while the check
-// of another brand runs.
+// of another brand runs. Since T3 the server is the built package (`dist/`), as in production: there
+// the check runs in a worker thread (on the TS source it would run in the main thread, A-06).
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { cpus } from "node:os";
@@ -25,6 +26,7 @@ import {
   entwurf,
   MARKEN_044,
   markeAnlegen,
+  startServiloDist,
   type TestServilo,
   testServilo,
 } from "./test-doubles/servilo-044.js";
@@ -90,11 +92,15 @@ const aussen: Record<"GET stato B während POST pruefung A" | "POST pruefung A",
 };
 
 beforeAll(async () => {
-  server = await testServilo("fm-messung-044-", {
-    messung: (eintrag) => {
-      eintraege.push(eintrag);
+  server = await testServilo(
+    "fm-messung-044-",
+    {
+      messung: (eintrag) => {
+        eintraege.push(eintrag);
+      },
     },
-  });
+    await startServiloDist(),
+  );
 });
 
 const median = (values: readonly number[]): number => {
@@ -152,6 +158,8 @@ afterAll(async () => {
     stand: standOf(process.cwd()) ?? "unbekannt",
     rechner: cpus()[0]?.model ?? "unbekannt",
     kerne: cpus().length,
+    // Spec 044 T3: the server the course ran on.
+    server: "dist (Prüfung im Worker)",
     n: N,
     durchlaeufe: einzeln.derivationBasis.length,
     tabelle,
