@@ -13,7 +13,6 @@ import {
   MAKS_EKRANOJ,
   MAKS_RONDOJ,
   MalpermesitaModelo,
-  NAVIGADA_REGULO,
   NevalidaEnigo,
   navigadaReguloDe,
   PERMESITA_MODELO,
@@ -22,6 +21,7 @@ import {
   raportoDe,
   raportoMarkdown,
   SISTEMO_F,
+  sxelaSistemoDe,
   TOKENOJ_EKRANO_RONDO_F,
   TOKENOJ_PLANO,
   trovojDe,
@@ -1072,8 +1072,13 @@ describe("the shell in the system text, the context per screen and round (S038-2
     );
     expect(sistemoj.size).toBe(1);
     const [sistemo = ""] = sistemoj;
-    expect(sistemo.startsWith(`${SISTEMO_F}\n\n${GVIDANTO}\n\n`)).toBe(true);
-    for (const ero of [PROFILO_SXELO, PROFILO_PAGXO, ARANGXOJ, NAVIGADA_REGULO]) {
+    expect(
+      sistemo.startsWith(
+        `${sxelaSistemoDe(PLANO.ekranoj.map((ekrano) => ekrano.slug))}\n\n${GVIDANTO}\n\n`,
+      ),
+    ).toBe(true);
+    expect(sistemo).not.toContain("<slug>");
+    for (const ero of [PROFILO_SXELO, PROFILO_PAGXO, ARANGXOJ]) {
       expect(sistemo).toContain(ero);
     }
     // The rule names exactly the built screens of the run, in plan order (S038-24 F-2).

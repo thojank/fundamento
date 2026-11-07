@@ -34,9 +34,9 @@ import {
   MAKS_EKRANOJ,
   MAKS_RONDOJ,
   type Marko,
-  NAVIGADA_REGULO,
-  SISTEMO_F,
+  navigadaReguloDe,
   statikaFakto,
+  sxelaSistemoDe,
   type Taksado,
   type Taksilo,
   type ToolInfo,
@@ -403,8 +403,12 @@ describe("fm ekranoj with the real Gvidanto: the run folder (AC-6)", () => {
     const prompt = await gvidanto.ponto.prompt?.();
     await gvidanto.fermi();
     expect((prompt ?? "").length).toBeGreaterThan(0);
-    expect(konstruo?.messages[0]?.content.startsWith(`${SISTEMO_F}\n\n${prompt}\n\n`)).toBe(true);
-    expect(konstruo?.messages[0]?.content).toContain(NAVIGADA_REGULO);
+    expect(
+      konstruo?.messages[0]?.content.startsWith(
+        `${sxelaSistemoDe(["liste", "detail"])}\n\n${prompt}\n\n`,
+      ),
+    ).toBe(true);
+    expect(konstruo?.messages[0]?.content).toContain(navigadaReguloDe(["liste", "detail"]));
     // get_ero of the link Ero, answered by the Modelo: the target prop `to`.
     const respondo = a.agento.petoj
       .flatMap((peto) => peto.messages)

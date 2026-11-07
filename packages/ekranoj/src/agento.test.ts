@@ -30,6 +30,7 @@ import {
   sistemoDe,
   slugDe,
   sxelaServilo,
+  sxelaSistemoDe,
 } from "./index.js";
 import { ilaRespondo, respondo, SkriptaModelo } from "./test-doubles/chat.js";
 import { planoKun } from "./test-doubles/faktoj.js";
@@ -509,10 +510,11 @@ describe("the shell and the context per screen and round (S038-20, AC-7)", () =>
 
   it("puts the shell's Kurzprofile, the layout means and the navigation rule into the system text", () => {
     const sistemo = sistemoDe("GVIDANTO", SXELO);
-    expect(sistemo.startsWith(`${SISTEMO_F}\n\nGVIDANTO\n\n`)).toBe(true);
+    expect(sistemo.startsWith(`${sxelaSistemoDe([])}\n\nGVIDANTO\n\n`)).toBe(true);
     for (const profilo of SXELO.profiloj) expect(sistemo).toContain(profilo.teksto);
     expect(sistemo).toContain(SXELO.arangxoj);
-    expect(sistemo).toContain(NAVIGADA_REGULO);
+    expect(sistemo).toContain(navigadaReguloDe([]));
+    expect(sistemo).not.toContain("<slug>");
     for (const ero of [
       "<fm-navigado",
       'slot="nav"',
@@ -605,9 +607,7 @@ describe("the shell and the context per screen and round (S038-20, AC-7)", () =>
         "Laut Plan verweist dieser Screen auf: detail.html.",
       );
       expect(tasko, `Runde ${rondo}`).not.toContain("archiv");
-      expect(sistemo, `Runde ${rondo}`).toContain(
-        `${NAVIGADA_REGULO}\nVerweise nur auf diese Screens: liste.html, detail.html. Andere Ziele gibt es in diesem Lauf nicht.`,
-      );
+      expect(sistemo, `Runde ${rondo}`).toContain(navigadaReguloDe(["liste", "detail"]));
       expect(sistemo, `Runde ${rondo}`).not.toContain("archiv");
       expect(sistemo, `Runde ${rondo}`).toBe(sistemoDe("GVIDANTO", SXELO, ["liste", "detail"]));
     }
@@ -625,18 +625,83 @@ describe("the shell and the context per screen and round (S038-20, AC-7)", () =>
 
   it("states the navigation rule with the built slugs in plan order, one screen too (F-2)", () => {
     expect(navigadaReguloDe(["liste", "detail"])).toBe(
-      `${NAVIGADA_REGULO}\nVerweise nur auf diese Screens: liste.html, detail.html. Andere Ziele gibt es in diesem Lauf nicht.`,
+      [
+        "Baue jeden Screen in der Shell: <fm-sxelo> außen, der Inhalt in ihrem Standardbereich, gern in <fm-pagxo>.",
+        'Verweise auf andere Screens des Ablaufs gehören in die Navigation der Shell: ein <fm-navigado label="…"> im slot="nav" von <fm-sxelo>, darin jeder Verweis als direktes Kind <a href="liste.html"> oder <a href="detail.html">.',
+        "Verweise nur auf diese Screens: liste.html, detail.html. Andere Ziele gibt es in diesem Lauf nicht.",
+      ].join("\n"),
     );
     expect(navigadaReguloDe(["detail", "liste"])).toContain(
       "Verweise nur auf diese Screens: detail.html, liste.html.",
     );
     expect(navigadaReguloDe(["liste"])).toBe(
-      `${NAVIGADA_REGULO}\nVerweise nur auf diese Screens: liste.html. Andere Ziele gibt es in diesem Lauf nicht.`,
+      [
+        "Baue jeden Screen in der Shell: <fm-sxelo> außen, der Inhalt in ihrem Standardbereich, gern in <fm-pagxo>.",
+        'Verweise auf andere Screens des Ablaufs gehören in die Navigation der Shell: ein <fm-navigado label="…"> im slot="nav" von <fm-sxelo>, darin jeder Verweis als direktes Kind <a href="liste.html">.',
+        "Verweise nur auf diese Screens: liste.html. Andere Ziele gibt es in diesem Lauf nicht.",
+      ].join("\n"),
+    );
+    // Without a screen no link target and no placeholder (B-2).
+    expect(navigadaReguloDe([])).toBe(
+      [
+        "Baue jeden Screen in der Shell: <fm-sxelo> außen, der Inhalt in ihrem Standardbereich, gern in <fm-pagxo>.",
+        "In diesem Lauf gibt es keine anderen Screens; schreibe keine Verweise.",
+      ].join("\n"),
     );
     const sistemo = sistemoDe("GVIDANTO", SXELO, ["liste"]);
     expect(sistemo.endsWith(`\n\n${navigadaReguloDe(["liste"])}`)).toBe(true);
     // Without the shell the slugs change nothing: the Spec 037 text, byte for byte.
     expect(sistemoDe("GVIDANTO", undefined, ["liste"])).toBe(`${SISTEMO_F}\n\nGVIDANTO`);
+  });
+
+  it("keeps NAVIGADA_REGULO and SISTEMO_F byte for byte (D-212, Spec 037 path)", () => {
+    expect(NAVIGADA_REGULO).toBe(
+      [
+        "Baue jeden Screen in der Shell: <fm-sxelo> außen, der Inhalt in ihrem Standardbereich, gern in <fm-pagxo>.",
+        'Verweise auf andere Screens des Ablaufs gehören in die Navigation der Shell: ein <fm-navigado label="…"> im slot="nav" von <fm-sxelo>, darin jeder Verweis als direktes Kind <a href="<slug>.html">.',
+      ].join("\n"),
+    );
+    expect(SISTEMO_F.split("\n")[3]).toBe(
+      "Verweise auf andere Screens des Ablaufs schreibst du als <slug>.html und mit der passenden Ero (frag den Gvidanto, statt zu raten).",
+    );
+    expect(sistemoDe("GVIDANTO")).toBe(`${SISTEMO_F}\n\nGVIDANTO`);
+  });
+
+  it("derives the shell's system text from SISTEMO_F: only the link sentence names the planned screens (B-2)", () => {
+    const linioj = SISTEMO_F.split("\n");
+    const sxelaj = sxelaSistemoDe(["liste", "detail"]).split("\n");
+    expect(sxelaj).toHaveLength(linioj.length);
+    expect(sxelaj[3]).toBe(
+      "Verweise auf andere Screens des Ablaufs schreibst du mit dem Dateinamen des Screens als Ziel (liste.html, detail.html) und mit der passenden Ero (frag den Gvidanto, statt zu raten).",
+    );
+    expect(sxelaj.filter((_linio, index) => index !== 3)).toEqual(
+      linioj.filter((_linio, index) => index !== 3),
+    );
+    expect(sxelaSistemoDe(["detail", "liste"])).toContain("(detail.html, liste.html)");
+    expect(sxelaSistemoDe([]).split("\n")[3]).toBe(
+      "Verweise auf andere Screens des Ablaufs schreibst du mit dem Dateinamen des Screens als Ziel und mit der passenden Ero (frag den Gvidanto, statt zu raten).",
+    );
+    for (const slugoj of [[], ["liste"], ["liste", "detail"]]) {
+      expect(sxelaSistemoDe(slugoj)).not.toContain("<slug>");
+    }
+  });
+
+  it("sends no <slug> placeholder on the shell path, every planned target as a concrete href in plan order (B-2)", async () => {
+    const tri = planoKun(3);
+    for (const rondo of [1, 2]) {
+      const chat = new SkriptaModelo(() => respondo("```html\n<p>x</p>\n```"));
+      await konstrui(chat, { rondo, sxelo: SXELO, eroProfiloj: PROFILOJ, plano: tri });
+      const sistemo = chat.petoj[0]?.messages[0]?.content ?? "";
+      expect(sistemo, `Runde ${rondo}`).not.toContain("<slug>");
+      expect(sistemo, `Runde ${rondo}`).toBe(
+        sistemoDe("GVIDANTO", SXELO, ["liste", "detail", "bearbeiten"]),
+      );
+      const hrefs = [...sistemo.matchAll(/href="([^"]*)"/g)].map((treffer) => treffer[1]);
+      expect(hrefs, `Runde ${rondo}`).toEqual(["liste.html", "detail.html", "bearbeiten.html"]);
+      expect(sistemo.startsWith(`${sxelaSistemoDe(["liste", "detail", "bearbeiten"])}\n\n`)).toBe(
+        true,
+      );
+    }
   });
 
   it("keeps the plan's no-edge line when a screen links nowhere (F-2)", async () => {
@@ -653,7 +718,7 @@ describe("the shell and the context per screen and round (S038-20, AC-7)", () =>
     const chat = new SkriptaModelo(() => respondo("```html\n<p>x</p>\n```"));
     await konstrui(chat, { sxelo: SXELO });
     const tasko = chat.petoj[0]?.messages[1]?.content ?? "";
-    expect(chat.petoj[0]?.messages[0]?.content).toContain(NAVIGADA_REGULO);
+    expect(chat.petoj[0]?.messages[0]?.content).toContain(navigadaReguloDe(["liste", "detail"]));
     expect(tasko).toContain("Baue jetzt den Screen „Titel liste“ (liste.html)");
     expect(tasko).not.toContain("Kurzprofil");
     expect(/^Runde \d+:/m.test(tasko)).toBe(false);

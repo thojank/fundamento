@@ -46,6 +46,14 @@ export const SISTEMO_F = [
 ].join("\n");
 
 /**
+ * The system text of Variante F on the shell path (Spec 038 B-2): `SISTEMO_F` with the screens of
+ * this run as concrete file names instead of the placeholder. Stub until S038-37a green.
+ */
+export function sxelaSistemoDe(_slugoj: readonly string[]): string {
+  return SISTEMO_F;
+}
+
+/**
  * The question when a build answer held no markup (S037-10 Befund 1): asked once, in the same
  * conversation and without tools – one more request inside the run's budget, no new limit.
  */
