@@ -141,10 +141,45 @@ export function legiMankojn(bloko: string): AgentaManko[] {
   });
 }
 
+const HTML_MALFERMO = /^\s*```\s*html\b/i;
+const NUDA_BARILO = /^\s*```\s*$/;
+const FERMA_ETIKEDO = /<\/[A-Za-z]/;
+
+/**
+ * The last ```html block of a text, read so that a fence inside the page does not end it (Spec 038
+ * B-4, S038-37c): a bare fence line closes the block only when no closing tag stands between it
+ * and the next ```html opening (or the last bare fence) – markup after it means the page goes on,
+ * e.g. Markdown with its own fenced block in an fm-markdovido. Without a closing fence the block
+ * runs to the end. Undefined = the text has no ```html opening.
+ */
+function lastaHtmlBloko(teksto: string): string | undefined {
+  const linioj = teksto.split("\n");
+  const malfermoj = linioj.flatMap((linio, i) => (HTML_MALFERMO.test(linio) ? [i] : []));
+  const bariloj = linioj.flatMap((linio, i) => (NUDA_BARILO.test(linio) ? [i] : []));
+  const lastaBarilo = bariloj.at(-1) ?? -1;
+  let bloko: string | undefined;
+  let komenco = malfermoj[0];
+  while (komenco !== undefined) {
+    const ek = komenco;
+    const fino = bariloj.find((barilo) => {
+      if (barilo <= ek) return false;
+      const sekva = malfermoj.find((malfermo) => malfermo > barilo) ?? lastaBarilo;
+      return !linioj
+        .slice(barilo + 1, Math.max(sekva, barilo + 1))
+        .some((l) => FERMA_ETIKEDO.test(l));
+    });
+    bloko = linioj.slice(ek + 1, fino ?? linioj.length).join("\n");
+    if (fino === undefined) break;
+    komenco = malfermoj.find((malfermo) => malfermo > fino);
+  }
+  return bloko;
+}
+
 /**
  * The markup of an answer and its gaps. The `mankoj` blocks are taken out first; the markup is the
- * last fenced block, else the text. Variante F keeps only what stands in <body> when the agent wrote
- * a whole document anyway; nothing else is changed (K5 and AC-7 judge the rest).
+ * last ```html block (a fence inside the page does not end it, B-4), else the last fenced block,
+ * else the text. Variante F keeps only what stands in <body> when the agent wrote a whole document
+ * anyway; nothing else is changed (K5 and AC-7 judge the rest).
  */
 export function eltiriRespondon(
   respondo: string,
@@ -155,7 +190,7 @@ export function eltiriRespondon(
   );
   const resto = respondo.replace(MANKOJ_BLOKO, "");
   const blokoj = [...resto.matchAll(/```(?:html)?[^\n]*\n([\s\S]*?)```/gi)];
-  let fragmento = (blokoj.at(-1)?.[1] ?? resto).trim();
+  let fragmento = (lastaHtmlBloko(resto) ?? blokoj.at(-1)?.[1] ?? resto).trim();
   if (varianto === "F") {
     const body = /<body[^>]*>([\s\S]*?)<\/body>/i.exec(fragmento)?.[1];
     if (body !== undefined) fragmento = body.trim();
@@ -167,8 +202,8 @@ export function eltiriRespondon(
  * Spec 038 B-4 (S038-37c): whether a page renders as an empty page – no element content: after
  * the comments are taken out, no opening tag is left (only closing tags, text or nothing).
  */
-export function malplenaPagxo(_fragmento: string): boolean {
-  throw new Error("malplenaPagxo: not implemented yet (S038-37c green)");
+export function malplenaPagxo(fragmento: string): boolean {
+  return !/<[A-Za-z]/.test(fragmento.replace(/<!--[\s\S]*?-->/g, ""));
 }
 
 /** The gaps of a run as C-7 counts them: one per kind and name, the screens that named it. */
@@ -501,6 +536,7 @@ export function taskoDe(peto: KonstruoPeto): string {
       "Verbessere den Stand so, dass die Befunde verschwinden, und sende den ganzen Stand neu.",
     );
   }
+  if (peto.rekomenco === true) linioj.push("", REKOMENCO_F);
   return linioj.join("\n");
 }
 
@@ -738,6 +774,7 @@ export function sxelaTaskoDe(peto: KonstruoPeto): string {
         ]),
     `Sprache der Texte: ${peto.lingvo === "en" ? "Englisch" : "Deutsch"}.`,
   );
+  if (peto.rekomenco === true) linioj.push("", REKOMENCO_F);
   return linioj.join("\n");
 }
 
@@ -812,7 +849,9 @@ export async function konstruiEkranon(peto: KonstruoPeto): Promise<KonstruoRezul
     if (petitaj.length === 0 || peto.ponto === undefined || peto.varianto === "0") {
       const content = message.content ?? "";
       const legita = eltiriRespondon(content, peto.varianto);
-      return legita.fragmento === "" ? redemandi(peto, messages, content, legita) : legita;
+      return legita.fragmento === ""
+        ? redemandi(peto, messages, content, legita)
+        : { ...legita, respondo: content };
     }
     // Has tool_calls, so never empty (A-1); the same message as before.
     const asistanta = asistantaMesagxoDe(message.content, petitaj);

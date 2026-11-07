@@ -7,6 +7,7 @@
 //   rondoj/<n>/<slug>.html           state of every round (D-26: carried rounds included)
 //   rondoj/<n>/<slug>.fakto.json     the facts each round was scored on (D-33)
 //   rondoj/<n>/<slug>.respondo.txt   the raw answers of a build without markup (S037-10 Befund 1)
+//                                    or of a page without element content, cleaned (Spec 038 B-4)
 //
 // `eligoDe` is the `EkranojEligo` seam of `kuruEkranojn`: it writes as the run goes (documents
 // before their render, photos, rounds) and everything once more at the end from the result, so a
@@ -385,6 +386,10 @@ export function raportoDe(e: RaportoEnigo): RaportoJson {
     ...(rezulto.anbieterfehleroj === undefined || rezulto.anbieterfehleroj.length === 0
       ? {}
       : { anbieterfehleroj: rezulto.anbieterfehleroj.map(puraEro) }),
+    // Spec 038 B-4 (S038-37c): every screen-round whose page had no element content.
+    ...(rezulto.malplenajPagxoj === undefined || rezulto.malplenajPagxoj.length === 0
+      ? {}
+      : { malplenajPagxoj: rezulto.malplenajPagxoj }),
   };
 }
 
@@ -631,6 +636,34 @@ export function raportoMarkdown(r: RaportoJson): string {
     linioj.push("");
   }
 
+  // Spec 038 B-4 (S038-37c): the pages without element content, per screen-round.
+  if (r.malplenajPagxoj !== undefined && r.malplenajPagxoj.length > 0) {
+    linioj.push("## Leere Seiten (B-4)", "");
+    linioj.push(
+      "Seiten ohne Element (nur schließende Tags, Text oder nichts). Runde 1 fragt einmal in einem frischen Gespräch, spätere Runden geben einen Befund weiter; die Antworten liegen bereinigt im Laufordner.",
+      "",
+    );
+    linioj.push(
+      vico(["Screen", "Runde", "Bytes", "Folge", "Noch leer", "Antwort"]),
+      "|---|---|---|---|---|---|",
+    );
+    for (const m of r.malplenajPagxoj) {
+      linioj.push(
+        vico([
+          m.ekrano,
+          m.rondo,
+          m.bytes,
+          m.ago === "nova-konversacio"
+            ? "frisches Gespräch, Shell als Ausgangspunkt"
+            : "Befund für die nächste Runde",
+          m.restis ? "ja (AK-2 verletzt)" : "nein",
+          m.respondo,
+        ]),
+      );
+    }
+    linioj.push("");
+  }
+
   // Teil 3 (S037-06): the gaps of this run, the table of the Lückenliste (also in mankoj.json).
   linioj.push("## Lücken (Teil 3)", "", mankojMarkdown(r.mankoj).trimEnd(), "");
 
@@ -669,16 +702,20 @@ export interface EligoOpcioj {
   redakti?: (teksto: string) => string;
 }
 
-/** The raw answers of an empty build as one text file (S037-10 Befund 1). */
-export function respondoTeksto(respondoj: readonly string[]): string {
-  return `${respondoj
-    .map((respondo, index) =>
-      [
-        index === 0 ? "--- Antwort ---" : `--- Antwort ${index + 1} (nach der Nachfrage) ---`,
-        respondo,
-      ].join("\n"),
-    )
-    .join("\n")}\n`;
+/**
+ * The raw answers of an empty build as one text file (S037-10 Befund 1); with `leere-seite` the
+ * answers of a page without element content and of its fresh conversation (Spec 038 B-4).
+ */
+export function respondoTeksto(respondoj: readonly string[], kialo?: "leere-seite"): string {
+  const titolo = (index: number): string =>
+    kialo === "leere-seite"
+      ? index === 0
+        ? "--- Antwort (leere Seite) ---"
+        : `--- Antwort ${index + 1} (frisches Gespräch, Shell als Ausgangspunkt) ---`
+      : index === 0
+        ? "--- Antwort ---"
+        : `--- Antwort ${index + 1} (nach der Nachfrage) ---`;
+  return `${respondoj.map((respondo, index) => [titolo(index), respondo].join("\n")).join("\n")}\n`;
 }
 
 function skribi(dosiero: string, enhavo: string | Uint8Array): void {
@@ -782,7 +819,7 @@ export function eligoDe(opcioj: EligoOpcioj = {}): EkranojEligo {
     },
 
     respondo(e) {
-      const teksto = respondoTeksto(e.respondoj);
+      const teksto = respondoTeksto(e.respondoj, e.kialo);
       skribi(
         join(out, "rondoj", String(e.rondo), `${e.slug}.respondo.txt`),
         opcioj.redakti === undefined ? teksto : opcioj.redakti(teksto),

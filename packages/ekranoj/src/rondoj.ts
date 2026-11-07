@@ -20,6 +20,7 @@ import {
   konstruiEkranon,
   legiEroProfilojn,
   legiSxelon,
+  malplenaPagxo,
   PlanoMalsukcesis,
   type ProfilaKasxmemoro,
   planiEkranojn,
@@ -56,6 +57,7 @@ import type {
   KostoTakso,
   Malhelpo,
   Malobservo,
+  MalplenaPagxo,
   Peno,
   Plano,
   PlanoEkrano,
@@ -396,6 +398,9 @@ export function trovojDe(e: {
   ekranoj?: readonly string[];
 }): Trovo[] {
   const trovoj: Trovo[] = [];
+  // B-4 (S038-37c): a page without element content – start again from the shell.
+  if (e.malhelpoj.includes(LEERA_PAGXO))
+    trovoj.push({ ...LEERA_PAGXO_TROVO, loko: `${e.slug}.html` });
   if (e.malhelpoj.includes(MALPLENA_RESPONDO)) {
     trovoj.push({
       regulo: MALPLENA_RESPONDO,
@@ -603,6 +608,8 @@ async function kuri(
   let haltigo: Haltigo | undefined;
   let faritaj = 0;
   const dormi = deps.dormi ?? realaDormo;
+  /** B-4 (S038-37c): every screen-round whose page had no element content, in order. */
+  const malplenajPagxoj: MalplenaPagxo[] = [];
   /** Screens left without any fragment by provider errors (A-1): their reason in `restantaj`. */
   const senFragmento = new Set<string>();
   const kaptiloDe = (ekrano: string, rondo: number): FehlerKaptilo => ({
@@ -703,6 +710,7 @@ async function kuri(
       notoj,
       ...(senRimedaj.length === 0 ? {} : { senRimedaj }),
       ...(anbieterfehleroj.length === 0 ? {} : { anbieterfehleroj: [...anbieterfehleroj] }),
+      ...(malplenajPagxoj.length === 0 ? {} : { malplenajPagxoj: [...malplenajPagxoj] }),
     };
     await deps.eligo?.fino?.(rezulto);
     return rezulto;
@@ -780,6 +788,8 @@ async function kuri(
   for (let r = 1; r <= MAKS_RONDOJ && haltigo === undefined; r += 1) {
     let konstruitaj = 0;
     const malplenaj = new Set<string>();
+    /** B-4: screens whose page of this round has no element content (after the fresh conversation). */
+    const leerajPagxoj = new Set<string>();
     /** A-1: screens whose build of this round ended on provider errors (fragment of before or none). */
     const anbieterfehleraj = new Set<string>();
     /** C-6: the effort of each build of this round with a request (D-203), `peno` after – before. */
@@ -822,7 +832,57 @@ async function kuri(
           ...(eroProfiloj === undefined ? {} : { eroProfiloj }),
           kaptilo: kaptiloDe(ekrano.slug, r),
         };
-        const konstruo = await konstruiKunKapto(konstruoPeto, antaua?.fragmento !== undefined);
+        const havasAntauan = antaua?.fragmento !== undefined;
+        let konstruo = await konstruiKunKapto(konstruoPeto, havasAntauan);
+        // B-4 (S038-37c): a page without element content (not an answer without markup, which
+        // S037-10 handles) – round 1 asks once in a fresh conversation from the shell, a later
+        // round hands a finding to the next one; the raw answers go cleaned into the run folder.
+        if (
+          konstruo !== undefined &&
+          varianto === "F" &&
+          konstruo.malplena === undefined &&
+          malplenaPagxo(konstruo.fragmento)
+        ) {
+          const bytesMalplenaj = Buffer.byteLength(konstruo.fragmento);
+          const respondoj = [konstruo.respondo ?? konstruo.fragmento];
+          let restis = true;
+          if (r === 1) {
+            deps.log(
+              `Runde 1: ${ekrano.slug} – leere Seite (${bytesMalplenaj} Bytes), ein frisches Gespräch mit der Shell als Ausgangspunkt`,
+            );
+            const dua = await konstruiKunKapto({ ...konstruoPeto, rekomenco: true }, havasAntauan);
+            if (dua !== undefined) {
+              respondoj.push(dua.respondo ?? dua.malplena?.respondoj.join("\n") ?? dua.fragmento);
+              if (dua.malplena === undefined && !malplenaPagxo(dua.fragmento)) {
+                konstruo = dua;
+                restis = false;
+              }
+            }
+          }
+          if (restis) {
+            leerajPagxoj.add(ekrano.slug);
+            notoj.push(
+              r === 1
+                ? `Runde 1: ${ekrano.slug} blieb eine leere Seite, auch in einem frischen Gespräch mit der Shell als Ausgangspunkt (AK-2 verletzt).`
+                : `Runde ${r}: ${ekrano.slug} ergab eine leere Seite (AK-2 verletzt); die nächste Runde bekommt den Befund ${LEERA_PAGXO}.`,
+            );
+            deps.log(notoj.at(-1) ?? "");
+          }
+          malplenajPagxoj.push({
+            ekrano: ekrano.slug,
+            rondo: r,
+            bytes: bytesMalplenaj,
+            ago: r === 1 ? "nova-konversacio" : "trovo",
+            restis,
+            respondo: `rondoj/${r}/${ekrano.slug}.respondo.txt`,
+          });
+          await deps.eligo?.respondo?.({
+            rondo: r,
+            slug: ekrano.slug,
+            respondoj: respondoj.map(purigiTekston),
+            kialo: "leere-seite",
+          });
+        }
         if (konstruo === undefined) {
           // A-1: the screen-round ends on provider errors; the run goes on with the next screen.
           anbieterfehleraj.add(ekrano.slug);
@@ -889,6 +949,7 @@ async function kuri(
       fragmentoj,
       fragmentoRondoj,
       malplenaj,
+      leerajPagxoj,
       anbieterfehleraj,
       verdaEkde,
       lastaStato,
@@ -917,6 +978,8 @@ interface RondoKunteksto {
   fragmentoRondoj: ReadonlyMap<string, number>;
   /** Screens whose build of this round ended without markup (S037-10 Befund 1). */
   malplenaj: ReadonlySet<string>;
+  /** Screens whose page of this round has no element content (Spec 038 B-4, S038-37c). */
+  leerajPagxoj: ReadonlySet<string>;
   /** Screens whose build of this round ended on provider errors (Spec 038 A-1). */
   anbieterfehleraj: ReadonlySet<string>;
   verdaEkde: Map<string, number>;
@@ -1029,11 +1092,14 @@ async function kontroliRondon(k: RondoKunteksto): Promise<Rondo> {
     const malplena = k.malplenaj.has(ekrano.slug);
     // A-1: a screen not built this round because of provider errors is not green this round.
     const anbieterfehlera = k.anbieterfehleraj.has(ekrano.slug);
+    // B-4: a page without element content is never green either (detected before the score).
+    const leera = k.leerajPagxoj.has(ekrano.slug);
     const malhelpoj: Malhelpo[] = [];
+    if (leera) malhelpoj.push(LEERA_PAGXO);
     if (anbieterfehlera) malhelpoj.push(ANBIETERFEHLER);
     if (malplena) malhelpoj.push(MALPLENA_RESPONDO);
     malhelpoj.push(...decido.malhelpoj);
-    const verda = decido.verda && !malplena && !anbieterfehlera;
+    const verda = decido.verda && !malplena && !anbieterfehlera && !leera;
     // A stop left the screen unbuilt this round: its older fragment was checked again.
     const fragmentoRondo = k.fragmentoRondoj.get(ekrano.slug);
     const peno = k.penoj.get(ekrano.slug);
