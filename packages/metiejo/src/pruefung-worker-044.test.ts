@@ -8,7 +8,6 @@
 // after the URL line, before any check, and close() ends it at any point of its start. Invented
 // brands, no model, no clock.
 
-import { once } from "node:events";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -315,8 +314,11 @@ describe("the worker starts right after the URL line, before any check (B-10, R-
 const zaehler = ${JSON.stringify(starts)};
 const start = Number(readFileSync(zaehler, "utf8")) + 1;
 writeFileSync(zaehler, String(start));
-if (start === 1) throw new Error("the worker broke while it started");
-await import(${JSON.stringify(new URL("pruefung-worker.js", DIST).href)});
+if (start === 1) {
+  throw new Error("the worker broke while it started");
+} else {
+  await import(${JSON.stringify(new URL("pruefung-worker.js", DIST).href)});
+}
 `,
     );
     const gestartet = naechsterWorker();
@@ -328,7 +330,8 @@ await import(${JSON.stringify(new URL("pruefung-worker.js", DIST).href)});
     );
     try {
       const erster = await gestartet;
-      await once(erster, "exit");
+      // Its end, not its error (which the server hears; `once` would throw it here).
+      await new Promise((done) => erster.once("exit", done));
       expect(ohneStartzeilen()).toEqual(["url", "worker"]);
       await markeAnlegen(server, "lumeta", "leer");
       const pruefung = await server.anfrage("POST", "/api/marko/lumeta/pruefung");

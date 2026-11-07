@@ -199,6 +199,12 @@ export type PruefAntwort = { id: number; derivation: Derivation } | { id: number
 export interface PruefRechnung {
   readonly ort: "worker" | "haupt-thread";
   readonly rechner: PruefRechner;
+  /**
+   * Spec 044 B-10: starts the worker now, ahead of the first need, so it has loaded its modules
+   * and bases when the first check comes; in the main thread nothing. A worker that fails while it
+   * starts says nothing: the next need starts a new one.
+   */
+  vorstarten(): void;
   /** Ends the worker (the server's close); a check it holds fails. A later need starts a new one. */
   beenden(): Promise<void>;
 }
@@ -219,17 +225,18 @@ export function pruefRechnungOf(
     return {
       ort: "haupt-thread",
       rechner: async (agordo) => haupt(agordo),
+      vorstarten: () => undefined,
       beenden: async () => undefined,
     };
   return pruefWorkerOf(modul);
 }
 
 /**
- * One worker for the checks only (A-04: the stylesheet never waits behind it), started on the first
- * need – after the server listens (R-6) – and computing one check after the other. A check that
- * throws in the worker fails with that error, as a throw in the main thread would; a worker that
- * dies fails every check it holds with its error, and the next need starts a new one. No retry, no
- * limit by time.
+ * One worker for the checks only (A-04: the stylesheet never waits behind it), started ahead by the
+ * server right after it listens (B-10, R-6) or else on the first need, and computing one check
+ * after the other. A check that throws in the worker fails with that error, as a throw in the main
+ * thread would; a worker that dies fails every check it holds with its error, and the next need
+ * starts a new one. No retry, no limit by time.
  */
 function pruefWorkerOf(modul: URL): PruefRechnung {
   let worker: Worker | undefined;
@@ -277,6 +284,13 @@ function pruefWorkerOf(modul: URL): PruefRechnung {
           ablehnen(fehler);
         }
       }),
+    vorstarten: () => {
+      try {
+        gestartet();
+      } catch {
+        // A worker that cannot be made now is made on the next need, which gets its error.
+      }
+    },
     beenden: async () => {
       await worker?.terminate();
     },

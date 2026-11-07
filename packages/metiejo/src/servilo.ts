@@ -425,8 +425,8 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
   const drafts = new Map<string, Draft>();
   // Spec 044 (V-5): the check per draft and rev, the stylesheet of the preview per brand, rev and
   // proposal; each computed once and shared by the requests that ask while it runs. T3: the check
-  // runs in a worker thread, started on its first need (after `listen`), the stylesheet in parts
-  // in the main thread – never in one queue with the check (A-04).
+  // runs in a worker thread, started right after the URL line (B-10) or else on its first need, the
+  // stylesheet in parts in the main thread – never in one queue with the check (A-04).
   const pruefRechnung = pruefRechnungOf((agordo) => checkDraft(agordo, bases), options.pruefWorker);
   const pruefSpeicher = pruefSpeicherOf(pruefRechnung.rechner, options.pruefTor);
   const cssSpeicher = cssSpeicherOf(
@@ -2765,10 +2765,23 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       options.settings.present.filter((name) => name !== "FM_TIPAROJ_REPO").length
     }\n`,
   );
+  // Spec 044 B-10: the worker of the check starts in the turn after the URL line (R-6: the line comes
+  // no later), loads its modules and bases while the first page loads, and the first check finds it
+  // ready. Only where the check runs in a worker; the main thread has nothing to start.
+  let vorstart: NodeJS.Immediate | undefined =
+    pruefRechnung.ort === "worker"
+      ? setImmediate(() => {
+          vorstart = undefined;
+          pruefRechnung.vorstarten();
+        })
+      : undefined;
   return {
     url,
     port,
     close: async () => {
+      // A close before that turn starts no worker.
+      if (vorstart !== undefined) clearImmediate(vorstart);
+      vorstart = undefined;
       try {
         await new Promise<void>((done, fail) => {
           server.closeAllConnections();
