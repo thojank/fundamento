@@ -530,8 +530,10 @@ export const KURZPROFILAJ_KAMPOJ = ["brief", "slots"] as const;
 export type ProfilaKasxmemoro = Map<string, Promise<Profilo | undefined>>;
 
 /**
- * The Kurzprofile `get_ero { name, fields: ["brief"] }` of the names that are Eroj; an answer
- * that is no Ero or a failing call is skipped with a log line, never an error of the run.
+ * The Kurzprofile `get_ero { name, fields: KURZPROFILAJ_KAMPOJ }` of the names that are Eroj, taken
+ * as answered; an answer that is no Ero or a failing call is skipped with a log line, never an
+ * error of the run. An answer without `slots` (missing, or named in `rest` because it did not fit
+ * under the size ceiling) stays the brief with one log line and no follow-up call (D-S038-24-3).
  */
 export async function legiEroProfilojn(
   ponto: ToolBridge,
@@ -543,9 +545,18 @@ export async function legiEroProfilojn(
   for (const nomo of nomoj) {
     let profilo = kasxmemoro.get(nomo);
     if (profilo === undefined) {
-      profilo = antauxpreni(ponto, "get_ero", { name: nomo, fields: ["brief"] }, log).then(
-        (teksto) => (teksto === undefined ? undefined : { nomo, teksto }),
-      );
+      profilo = antauxpreni(
+        ponto,
+        "get_ero",
+        { name: nomo, fields: [...KURZPROFILAJ_KAMPOJ] },
+        log,
+      ).then((teksto) => {
+        if (teksto === undefined) return undefined;
+        if (respondoObjekto(teksto)?.slots === undefined) {
+          log(`Kurzprofil get_ero ${nomo} ohne slots (fehlt oder in rest): nur brief.`);
+        }
+        return { nomo, teksto };
+      });
       kasxmemoro.set(nomo, profilo);
     }
     const legita = await profilo;
@@ -591,7 +602,7 @@ export function sxelaTaskoDe(peto: KonstruoPeto): string {
   if (profiloj.length > 0) {
     linioj.push(
       "",
-      "Kurzprofile der Eroj deines Stands (get_ero, brief):",
+      "Kurzprofile der Eroj deines Stands (get_ero, brief und slots – nur diese Inhalte je Slot sind erlaubt):",
       ...profiloj.map((profilo) => `- fm-${profilo.nomo}: ${profilo.teksto}`),
     );
   }
