@@ -7,7 +7,7 @@ Ein Strang, ein PR (T1 → T2 → T3 → T4 → T5). Lokal nur unter der Maschin
 | Ticket | Inhalt | Dateien | Stand | rot → grün |
 |---|---|---|---|---|
 | T1 | Messung vorher, Byte-Fixture vom Stand `main`, roter `stato`-Test; Gerüst `specs/044-pruefung-schnell/` | `specs/044-pruefung-schnell/{spec,plan,tasks}.md`, `packages/metiejo/src/{messung.ts,servilo.ts,vorschau.ts}`, neu `antworten-044.test.ts`, `messung-044.test.ts`, `stato-044.test.ts`, `test-doubles/{antworten-044.json,servilo-044.ts}` | erledigt | Fixture grün `87888366`; Messpunkte `63f1e56a`; `stato-044` rot `68014c61` (grün in T2) |
-| T2 | Geteilter Speicher je Entwurf+`rev` und Marke+`rev`+`propono`, Routen asynchron, `pruefTor` | `packages/metiejo/src/{ableitungen.ts,servilo.ts}`, ggf. `vorschau.ts`, `asistanto/iloj.ts`, neu `ableitungen-044.test.ts` | offen | – |
+| T2 | Geteilter Speicher je Entwurf+`rev` und Marke+`rev`+`propono`, Routen asynchron, `pruefTor` | `packages/metiejo/src/{ableitungen.ts,servilo.ts,messung.ts,messung-044.test.ts}`, neu `ableitungen-044.test.ts`; `vorschau.ts` und `asistanto/iloj.ts` unverändert (D-12) | erledigt | `ableitungen-044` rot `32f5bb39` → grün `5bcda814`; `stato-044` grün ohne Änderung |
 | T3 | Event-Loop frei (nur falls nach T2 nötig): Worker für die Prüfung, `previewCss` in Teilen | `packages/metiejo/src/{ableitungen.ts,vorschau.ts,servilo.ts}`, neues Worker-Modul, Test gegen `dist/` | offen | – |
 | T4 | Byte-Gleichheit, Tests, Messung nachher, Diff-Suche (Test-Ticket) | `packages/metiejo/src/*-044.test.ts`, `specs/044-pruefung-schnell/{plan,tasks}.md` | offen | – |
 | T5 | PR, ein Push, genau ein Dispatch, CI-Messung nachher (PR-Kommentar), Bericht | `specs/044-pruefung-schnell/{plan,tasks}.md` (nur vor dem Push) | offen | – |
@@ -25,6 +25,13 @@ Ein Strang, ein PR (T1 → T2 → T3 → T4 → T5). Lokal nur unter der Maschin
 - [x] Schluss unter der Sperre: `pnpm test:betroffen` (cli, ekranoj, metiejo, modelo, nordstelo; Chromium): 13 von 14 Tasks grün, `metiejo` 570 bestanden, **2 rot = genau die zwei Fälle von `stato-044`** (erwartet); `pnpm --filter @fundamento/metiejo lint` grün (eine Warnung in `komponentoj.ts`, schon auf `6a3e55e3`).
 
 ## T2 im Einzelnen
+
+- [x] `ableitungen-044.test.ts` rot zuerst (`Cannot find module './ableitungen.js'`), gezählte echte Rechner (`checkDraft`, `previewCss`; nur der Fehlerfall wirft einmal vor der Rechnung): Prüfung (a) gleichzeitig = eine Rechnung, (b) neuer `rev` verwirft, (c) Fehler bleibt nicht, (d) `rev`-Wechsel während der Rechnung trägt nichts ein und rechnet den Start-Stand, (e) Kopie und Entwurf mit gleichem `rev` je eigenes Ergebnis (A-01), (V-5.5) `eintragen` ohne Rechnung und ohne Tor; CSS (a)–(d) und (f) geänderter Vorschlag bei gleichem `rev` (A-02); Server (g) `stato` antwortet den `rev`, den es vorfand – `32f5bb39`.
+- [x] `ableitungen.ts` nach V-5 (D-15), `pruefTor` in `ServiloOptions` (V-3), `Draft.pruefung` ist der `PruefEintrag`; `messung.ts` zählt das Warten auf eine fremde Rechnung zu `warten` (D-16).
+- [x] Routen asynchron: `/pruefung`, `stato`, `/asistanto/…`, `faceto` (Prüfung und Antwort), Chat- und Einstiegs-Antworten mit `stato`, Studio-GET, Komponenten-Seite, `fertig`, Rahmen `buehne-*` ohne Vorschlag, `festlegen` (auch über das Studio-Formular) warten auf die geteilte Prüfung; `vorschau.css` auf den CSS-Speicher (B-4 erhalten, D-14); übrige Rahmen warten auf nichts. Stand der Antwort nach D-13; Chat-Pfade nach D-12 (A-03).
+- [x] `messung-044`: `vorschau.css` warm meldet nur `marke-laden` (D-16); neuer Teil „außen“: `stato` B während `/pruefung` A ohne Tor (D-17).
+- [x] Grün: `ableitungen-044` (12), `stato-044` (2, unverändert seit `68014c61`), `antworten-044` (3, Test und Fixture unverändert); ganze `metiejo`-Suite unter der Sperre 578 bestanden, 0 rot in 293 s (`FM_MESSUNG_044_N=2`); `pnpm --filter @fundamento/metiejo lint` grün (eine Warnung in `komponentoj.ts`, schon auf `6a3e55e3`) – `5bcda814`.
+- [x] Messung „nach T2“ lokal unter der Sperre (N = 10) und Entscheidung zu T3 in plan.md: Ziele „`/pruefung` < 1 s“ und „`stato` während Prüfung < 200 ms“ verfehlt (1517 bzw. 1555 ms Median) → **T3 nötig** – Doku-Commit „Spec 044: Messung nach T2 …“.
 
 ## T3 im Einzelnen
 
