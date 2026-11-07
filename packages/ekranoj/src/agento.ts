@@ -446,6 +446,14 @@ export const NAVIGADA_REGULO = [
   'Verweise auf andere Screens des Ablaufs gehören in die Navigation der Shell: ein <fm-navigado label="…"> im slot="nav" von <fm-sxelo>, darin jeder Verweis als direktes Kind <a href="<slug>.html">.',
 ].join("\n");
 
+/**
+ * The navigation rule of a run (Spec 038 F-2): `NAVIGADA_REGULO` and the screens that exist in
+ * this run, as `<slug>.html` in plan order.
+ */
+export function navigadaReguloDe(_slugoj: readonly string[]): string {
+  throw new Error("navigadaReguloDe: noch nicht umgesetzt (S038-24 rot)");
+}
+
 /** One Kurzprofil read by ekranoj (not by the agent): the name and the answer as the tool gave it. */
 export interface Profilo {
   nomo: string;
@@ -566,7 +574,11 @@ export async function legiEroProfilojn(
 }
 
 /** The system text of Variante F: SISTEMO_F, the Gvidanto's prompt, and on the new path the shell. */
-export function sistemoDe(gvidanto: string, sxelo?: SxelaKunteksto): string {
+export function sistemoDe(
+  gvidanto: string,
+  sxelo?: SxelaKunteksto,
+  _slugoj?: readonly string[],
+): string {
   const partoj = [SISTEMO_F, ...(gvidanto === "" ? [] : [gvidanto])];
   if (sxelo !== undefined) {
     if (sxelo.profiloj.length > 0) {

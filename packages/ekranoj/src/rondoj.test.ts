@@ -14,6 +14,7 @@ import {
   MalpermesitaModelo,
   NAVIGADA_REGULO,
   NevalidaEnigo,
+  navigadaReguloDe,
   PERMESITA_MODELO,
   PROMPT_0,
   SISTEMO_F,
@@ -937,6 +938,8 @@ describe("the shell in the system text, the context per screen and round (S038-2
     for (const ero of [PROFILO_SXELO, PROFILO_PAGXO, ARANGXOJ, NAVIGADA_REGULO]) {
       expect(sistemo).toContain(ero);
     }
+    // The rule names exactly the built screens of the run, in plan order (S038-24 F-2).
+    expect(sistemo).toContain(navigadaReguloDe(PLANO.ekranoj.map((ekrano) => ekrano.slug)));
     // Read once per run by ekranoj, not by the agent.
     expect(tools.vokoj.filter((voko) => voko.name === "get_sxablono").map((v) => v.args)).toEqual([
       { name: "sxelo", brief: true, marker: true },
