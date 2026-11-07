@@ -2,7 +2,7 @@
 
 **Spec:** [`spec.md`](spec.md) (unverändert mit `cp` kopiert; SHA-256 `5bea3ab5a3d8ec94f9ee7fc5b16b55bdb30ffdfbf65ff767ffcab891f71810aa`) · **Aufgaben:** [`tasks.md`](tasks.md) · **Basis:** `main` `6a3e55e3` (Merge #155, Spec 038 Lauf 4) · **Branch:** `261107-spec-044-schnelle-prfung-65e63e` · **Regel 0** gilt. **Keine Grenzen, Zeitlimits, Schwellen, Abfrageintervalle, Toleranzen oder Wiederholungen angehoben. Nichts gemergt.** Kein Sprachmodell (0 $).
 
-**Datum:** 2026-11-07 · **Stand:** T1 fertig (Messung vorher, Fixture, roter `stato`-Test); T2 fertig (geteilter Speicher, Routen asynchron, Messung „nach T2“); T3 fertig (Prüfung im Worker-Thread, Stylesheet in Teilen, Messung „nach T3“); T4 fertig (Abdeckung, `grenzfaelle-044`, Schlusslauf, Ende-zu-Ende in drei Engines, Messung „lokal nachher“, Diff-Suche, N in CI 2; Befund B-10); **Nacharbeit B-10 in T3** fertig (Worker startet nach der URL-Zeile, D-28; Messung „lokal nachher“ neu; Befunde B-11, B-12).
+**Datum:** 2026-11-07 · **Stand:** T1 fertig (Messung vorher, Fixture, roter `stato`-Test); T2 fertig (geteilter Speicher, Routen asynchron, Messung „nach T2“); T3 fertig (Prüfung im Worker-Thread, Stylesheet in Teilen, Messung „nach T3“); T4 fertig (Abdeckung, `grenzfaelle-044`, Schlusslauf, Ende-zu-Ende in drei Engines, Messung „lokal nachher“, Diff-Suche, N in CI 2; Befund B-10); **Nacharbeit B-10 in T3** fertig (Worker startet nach der URL-Zeile, D-28; Messung „lokal nachher“ neu; Befunde B-11, B-12); **T5** Abschluss vor dem Dispatch (Berichtstabelle mit der Spalte „CI nachher: siehe PR-Kommentar“, A-08; Befunde B-1 … B-12 zusammengefasst unter „Befunde – Übersicht vor dem Dispatch (T5)“). Danach ein Push, ein PR, genau ein `workflow_dispatch`; die CI-Werte „nachher“ und das Ergebnis je Job stehen nur im PR-Kommentar, nicht in dieser Datei.
 
 ### G-0 Quelle
 
@@ -58,9 +58,9 @@ Der Lauf ist unbeaufsichtigt. Wo die Spec offen ließ, gilt die Annahme. „ange
 | A-03 | Mehr synchrone Aufrufer von `pruefungOf` als genannt: `statoOf` (über `/asistanto/…`, `stato`, `faceto`, Chat-Züge), Studio-GET, Komponenten-Seite, `fertig`, `festlegen`, `Laborejo.probleme()`/`pruefung()`. Das Neuladen `GET /asistanto/…` (3336 ms im Trace von Spec 043) stößt die Prüfung selbst an. | Alle Anfragepfade warten auf die **geteilte** Prüfung. Chat-Züge dürfen synchron bleiben, wenn sie vorher die geteilte Prüfung abwarten. Kopien rechnen selbst (A-01). Ob `Laborejo` asynchron wird, entscheidet T2. | entschieden (T2, D-12): `Laborejo` bleibt synchron |
 | A-04 | `vorschau.css` und `vorschau?sxtupo=<nicht buehne-*>` rufen `pruefungOf` nicht auf; die „Abhängigkeit“ in Spec 043 ist die Serialisierung im Event-Loop. | „Trennung“ heißt: keine Route wartet auf Arbeit, die sie nicht braucht, und Prüfung und Kalt-Render stehen nicht in **derselben** seriellen Warteschlange. | T2 angewandt (nur `buehne-*` ohne Vorschlag wartet auf die Prüfung, `vorschau.css` auf den CSS-Speicher); Event-Loop: T3 |
 | A-05 | `derivationBasis` baut je Aufruf den Struktur-Modelo neu (`structureModelo`, `agordilo/src/calibration.ts:117`), in `previewCss` **und** in `deriveAspekto`. | `agordilo` bleibt unverändert (D-02). Ist der Anteil groß, steht er als Befund mit Werten im Bericht (Kandidat Folge-Spec). | Befund B-2: klein (≈ 7 % von `derivationBasis`) |
-| A-06 | Ein `Worker` auf die TS-Quelle startet unter Vitest nicht ohne neue Abhängigkeit. | Falls T3 einen Worker einführt: synchroner Fallback mit derselben Funktion unter Vitest; Worker-Pfad belegt ein Test gegen `dist/`. | offen (T3) |
+| A-06 | Ein `Worker` auf die TS-Quelle startet unter Vitest nicht ohne neue Abhängigkeit. | Falls T3 einen Worker einführt: synchroner Fallback mit derselben Funktion unter Vitest; Worker-Pfad belegt ein Test gegen `dist/`. | angewandt (T3, D-19, D-23: Fallback auf der TS-Quelle, `pruefung-worker-044` gegen `dist`) |
 | A-07 | CI-Budget: `Unit tests (metiejo)` brauchte im Lauf 42252367951 7,5 von 15 min; Vitest `testTimeout` 120 s je Test. | Grenzen bleiben. Jeder Messdurchlauf ist ein eigenes `it`. Lokal N = 10; N in CI als Parameter mit Rechnung (Abschnitt Messungen). | angewandt (T1) |
-| A-08 | „Kein Push nach dem Dispatch“ gegen „CI nachher in `plan.md`“. | Die Spalte „CI nachher“ verweist auf den **PR-Kommentar** (T5). | offen (T5) |
+| A-08 | „Kein Push nach dem Dispatch“ gegen „CI nachher in `plan.md`“. | Die Spalte „CI nachher“ verweist auf den **PR-Kommentar** (T5). | angewandt (T5): Spalte „CI nachher: siehe PR-Kommentar“ in der Berichtstabelle; nach dem Push kein Commit mehr |
 | A-09 | Der Sperrpfad aus Spec 042 V-1 gibt es nicht mehr. | Sperre `mkdir /Users/thorstenjankowski/.purple-code/worktrees/fundamento-wt-mw6h7yq8m04k3mrx/.lauf-sperre` mit `besitzer.txt`; zu jeder Messung `uptime` davor und danach und die Liste fremder Test-Prozesse. Unter Fremdlast nur „zur Information“. | angewandt (T1) |
 | A-10 | Pipeline-Regel „letztes Ticket = Test-Ticket“ gegen die Reihenfolge der Quelle. | Die Quelle gilt: **T4 ist das Test-Ticket**, T5 ändert keinen Code. | angewandt (T4: Abdeckung unter „T4 – Nachweis“, neu `grenzfaelle-044.test.ts`) |
 
@@ -354,16 +354,16 @@ Die erste Prüfung eines Servers ist mit dem Worker also **≈ 0,56 s (≈ 36 %)
 
 **Berichtstabelle** (Zeilen der Product-Spec › „Bericht“), in ms, Median / Max; „vorher“ = `63f1e56a` (T1). „CI nachher“ steht nach dem Dispatch im PR-Kommentar (A-08).
 
-| Schritt | Lokal vorher | **Lokal nachher** | CI vorher | CI nachher |
+| Schritt | Lokal vorher | **Lokal nachher** | CI vorher | CI nachher: siehe PR-Kommentar |
 |---|---|---|---|---|
-| Laden der Marke (`marke-laden`; `/pruefung`, `vorschau.css`, Rahmen kalt) | 0 / 0 | 0 / 0 | – | PR-Kommentar |
-| Ableitung (`vorschau.css` kalt) | 95,0 / 135,0 | 89,5 / 119,2 (T4 96,0 / 118,2) | – | PR-Kommentar |
-| Regeln/Prüfung (`ableitung+pruefung`, `/pruefung` kalt) | 1623 / 1862 | **1466 / 1899** (im Worker, vorgestartet, D-28; T4 1486 / 2134 – das Max war die erste Prüfung eines neuen Workers, B-10) | – | PR-Kommentar |
-| Projektion (`vorschau.css` kalt) | 9,2 / 15,3 | 8,8 / 12,7 (T4 9,6 / 13,7) | – | PR-Kommentar |
-| CSS/JS-Erzeugung (`vorschau.css` kalt; `/pruefung`; Rahmen `farbe` kalt) | 32,9 / 43,0; 0 / 0,3; 0,1 / 7,0 | 34,2 / 50,7; 0 / 0,4; 0,1 / 6,9 (T4 33,6 / 53,6; 0 / 0,3; 0,1 / 7,3) | – | PR-Kommentar |
-| `/pruefung` gesamt (kalt; warm) | 1623 / 1863; 0,2 / 0,4 | **1466 / 1900**; 0,1 / 0,5 (T4 1486 / 2135; 0,1 / 0,4) | 3667–4492 (Traces) | PR-Kommentar |
-| Erstes Rendern gesamt (Rahmen `farbe` kalt + `vorschau.css` kalt) | 0,2 / 7,5 + 142,5 / 176,9 ≈ **143** | 0,2 / 7,4 + 141,6 / 165,3 ≈ **142** (T4 ≈ 147) | Rahmen 2–9, `vorschau.css` 270–960; hinter einer Prüfung 4011–4500 | PR-Kommentar |
-| `stato` während Prüfung (`stato` B während `POST /pruefung` A, von außen, D-17) | – (in T1 nicht gemessen; nach T2, mit derselben Blockade: 1555 / 1633) | **0,7 / 1,1** (T4 0,8 / 1,3) | mit Prüfung 3243–3451; hinter einem Rahmen 1628 | PR-Kommentar |
+| Laden der Marke (`marke-laden`; `/pruefung`, `vorschau.css`, Rahmen kalt) | 0 / 0 | 0 / 0 | – | siehe PR-Kommentar |
+| Ableitung (`vorschau.css` kalt) | 95,0 / 135,0 | 89,5 / 119,2 (T4 96,0 / 118,2) | – | siehe PR-Kommentar |
+| Regeln/Prüfung (`ableitung+pruefung`, `/pruefung` kalt) | 1623 / 1862 | **1466 / 1899** (im Worker, vorgestartet, D-28; T4 1486 / 2134 – das Max war die erste Prüfung eines neuen Workers, B-10) | – | siehe PR-Kommentar |
+| Projektion (`vorschau.css` kalt) | 9,2 / 15,3 | 8,8 / 12,7 (T4 9,6 / 13,7) | – | siehe PR-Kommentar |
+| CSS/JS-Erzeugung (`vorschau.css` kalt; `/pruefung`; Rahmen `farbe` kalt) | 32,9 / 43,0; 0 / 0,3; 0,1 / 7,0 | 34,2 / 50,7; 0 / 0,4; 0,1 / 6,9 (T4 33,6 / 53,6; 0 / 0,3; 0,1 / 7,3) | – | siehe PR-Kommentar |
+| `/pruefung` gesamt (kalt; warm) | 1623 / 1863; 0,2 / 0,4 | **1466 / 1900**; 0,1 / 0,5 (T4 1486 / 2135; 0,1 / 0,4) | 3667–4492 (Traces) | siehe PR-Kommentar |
+| Erstes Rendern gesamt (Rahmen `farbe` kalt + `vorschau.css` kalt) | 0,2 / 7,5 + 142,5 / 176,9 ≈ **143** | 0,2 / 7,4 + 141,6 / 165,3 ≈ **142** (T4 ≈ 147) | Rahmen 2–9, `vorschau.css` 270–960; hinter einer Prüfung 4011–4500 | siehe PR-Kommentar |
+| `stato` während Prüfung (`stato` B während `POST /pruefung` A, von außen, D-17) | – (in T1 nicht gemessen; nach T2, mit derselben Blockade: 1555 / 1633) | **0,7 / 1,1** (T4 0,8 / 1,3) | mit Prüfung 3243–3451; hinter einem Rahmen 1628 | siehe PR-Kommentar |
 
 Weitere Zeilen nachher (B-10): `vorschau.css` warm 0,5 / 0,7 (vorher 132,8 / 177,5), mit Vorschlag kalt 136,0 / 150,2, warm 0,7 / 0,9; Rahmen `buehne-farbe` (Prüfung im Speicher) 0,2 / 0,4; `stato` kalt 0,3 / 9,3; `POST /pruefung` A „außen“ 1517 / 1556; einzeln (A-05) `derivationBasis` 73,0 / 78,6, Struktur-Anteil 5,1 / 5,6, `structureModelo` 3,5 / 4,7. (T4: mit Vorschlag kalt 141,8 / 149,0; `stato` kalt 0,4 / 9,3; „außen“ 1514 / 1670; `derivationBasis` 77,1 / 80,7, Struktur-Anteil 5,1 / 5,5, `structureModelo` 3,6 / 10,9.)
 
@@ -530,6 +530,36 @@ Commit-Texte origin/main..HEAD: R-12-Wort 0 Treffer; Repo-Name 0 Treffer
 | B-11 | **`ekranoj` `rondoj.test.ts:733` wackelt** („gives the renderer the options of before, and the same result“): Der Test vergleicht zwei Läufe als JSON und setzt nur das oberste `peno.ms` auf 0; die `peno.ms` je Bildschirm (`rondoj.ts:724`, `Date.now() - ekde`) bleiben stehen. Allein 1 von 3 Läufen rot, in `pnpm test:betroffen` zweimal rot, mit `--continue` grün. `ekranoj` ist im Diff unverändert (es läuft mit, weil es von `@fundamento/metiejo` abhängt); kein Bezug zum Worker. | Außerhalb der Zone, keine Änderung. Kandidat für eine kleine Folge-Spec (Zeiten je Bildschirm im Vergleich neutralisieren). In CI kann er unabhängig von diesem Strang rot werden. |
 | B-12 | **WebKit Ende-zu-Ende nach der Nacharbeit 27 von 150 rot**, alle mit „eine Prüfung ist nicht in 5 s beantwortet“: Schnellstart `:129`/`:196` („the page's request to …/pruefung is answered“), Assistent `:129` (der Rahmen `buehne-farbe` von rev 2 wartet auf die Prüfung seines `rev`, D-01: „the frame … is loaded ({"rev":2})“, einmal „Execution context was destroyed“). In den roten Schnellstart-Läufen kam die erste Prüfung 1,2–2,5 s nach der URL-Zeile (Worker geladen) und lief trotzdem über 5 s; wo sie fertig wurde, 3254 und 3635 ms. Die 14 roten Assistent-Läufe sind **keine** ersten Tests eines Servers (kein `beforeAll` im Trace), der Start des Workers spielt dort keine Rolle. Die Maschine war während des Laufs deutlich langsamer: `POST /marko` 240–379 ms (sonst einstellig), `vorschau.css` 417–493 ms (Messung 142 ms), Last 5,5 → 59,7 (T4 16,3 → 19,1); daneben liefen Desktop-Programme (Finder ≈ 40 % CPU, Spotlight `mds_stores`, Kurzbefehle). Chromium 50 / 50. | Ob der Unterschied zu T4 (98 / 100) an der Last oder am Code liegt, lässt sich ohne weitere WebKit-Wiederholungen nicht trennen; die Grenze von 30 je Test ist für diese Nacharbeit erreicht, daher kein weiterer Lauf. Die Messungen ohne Browser zeigen keinen Nachteil des Vorstarts (erste Prüfung 1621 statt 2003 ms, Startzeit gleich). **Risiko für AC-4 im Dispatch (T5) bleibt:** Die Prüfung selbst dauert ≈ 1,5 s ruhig und unter Last mit fünf Servern 3–5 s+ (B-6, `deriveAspekto`). Entscheidung beim Orchestrator. |
 
+
+## Befunde – Übersicht vor dem Dispatch (T5)
+
+Alle Befunde des Laufs an einem Ort, Stand `8158600d` (Code `141b56bc`). Einzelheiten und Werte stehen in den Abschnitten der Tickets. Nichts davon hat eine Grenze, ein Zeitlimit oder einen Test geändert.
+
+| ID | Ticket | Kurz | Stand vor dem Dispatch |
+|---|---|---|---|
+| B-1 | T1 | Prüfung = ein synchroner Block `checkDraft` (lokal 1623 / 1862 ms, CI ≈ 3,7–4,5 s) | behoben für den Event-Loop (Worker, T3); die Dauer selbst bleibt (B-6) |
+| B-2 | T1 | A-05 klein: `structureModelo` 3,9 ms, ≈ 7 % von `derivationBasis` | keine Folge-Spec aus diesem Grund |
+| B-3 | T1 | `vorschau.css` ohne Speicher (warm 132,8 ms) | behoben (T2): warm 0,5 / 0,7 ms |
+| B-4 | T1 | `vorschau.css` setzt `writeHead(200)` vor der Rechnung: Fehler = 200 mit leerem Körper | erhalten (D-14), belegt in `grenzfaelle-044` |
+| B-5 | T1 | `warten` auf `6a3e55e3` ≈ 0: die Blockade lag vor `handle` | Beleg über `stato-044` und die Messung „außen“ (D-17) |
+| B-6 | T3 | **`/pruefung` kalt < 1 s verfehlt:** lokal 1466 / 1900 ms (ein Aufruf `deriveAspekto` in `agordilo`, D-02) | offen, AC-2-Befund; Kandidat Folge-Spec `deriveAspekto` (Worker-Vorstart ist mit D-28 umgesetzt) |
+| B-7 | T3 | Noch synchron im Haupt-Thread: `pruefungJetzt` (`Laborejo`), `confirmed` in `vorschlagDe` (409), `exportMarko` | offen; Kandidat Folge-Spec |
+| B-8 | T3 | `vorschau.css` kalt durch die Teile nicht schneller; Gewinn ist die kürzere Sperre | nur zur Information |
+| B-9 | T3 | `pnpm test:betroffen` lokal lastempfindlich (`modelo`, `nordstelo`: Zeitgrenzen unter Parallellast) | lokal `modelo` zuerst allein; in CI eigene Jobs |
+| B-10 | T4 | Erste Prüfung eines Servers mit Worker ≈ 0,56 s länger | behoben bis auf ≈ 0,1 s (D-28, `141b56bc`) bei realistischem Abstand |
+| B-11 | T3 Nacharbeit | **`ekranoj` `rondoj.test.ts:733` wackelt** (`peno.ms` je Bildschirm nicht neutralisiert, `rondoj.ts:724`) | außerhalb der Zone, unverändert; kann im Dispatch unabhängig von diesem Strang rot werden |
+| B-12 | T3 Nacharbeit | **WebKit Ende-zu-Ende lokal 123 / 150** unter starker Fremdlast (Last 5,5 → 59,7; T4 bei 16–19: 98 / 100); rot jeweils „Prüfung nicht in 5 s“ | Last oder Code lokal nicht trennbar, Grenze von 30 Wiederholungen erreicht; der Dispatch-Lauf entscheidet AC-4 |
+
+**Ziele (AC-2, lokal):** `stato` während einer Prüfung 0,7 ms (< 200 ms, erreicht), erstes Rendern ≈ 142 ms (< 1 s, erreicht), `/pruefung` kalt 1466 ms (< 1 s, verfehlt: B-6). **CI („sicher < 5 s“) und AC-4/AC-6:** nach dem Dispatch im PR-Kommentar (A-08).
+
+### Ablauf T5 (nach diesem Commit, ohne weiteren Commit)
+
+1. `git fetch origin`; ist `origin/main` über `6a3e55e3` hinaus: `git merge-tree --write-tree origin/main HEAD` (sauber → kein Rebase; Konflikt → stoppen).
+2. Ein Push: `git push -u origin 261107-spec-044-schnelle-prfung-65e63e`.
+3. Ein PR gegen `main` („nicht mergen vor Prüfung durch den Maintainer“).
+4. Genau ein Dispatch: `gh workflow run ci.yml -R thojank/fundamento --ref 261107-spec-044-schnelle-prfung-65e63e`; kein Rerun, kein zweiter Push, kein zweiter Dispatch. Die PR-Checks (`pull_request`) laufen von selbst.
+5. Auswertung je Job; CI nachher aus dem Artefakt `testberichte-unit-metiejo-1` (`metiejo/test-reports/messung-044.json`); bei Rot von `zweitfarbe-036` der Trace aus `testberichte-eroj-<shard>-1` (Spec 043 › „Trace lesen“).
+6. PR-Kommentar mit CI je Job und der Tabelle „CI nachher“; Bericht im Feature-Ordner. Nicht mergen.
 
 ## Messanleitung
 

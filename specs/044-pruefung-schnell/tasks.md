@@ -10,7 +10,7 @@ Ein Strang, ein PR (T1 → T2 → T3 → T4 → T5). Lokal nur unter der Maschin
 | T2 | Geteilter Speicher je Entwurf+`rev` und Marke+`rev`+`propono`, Routen asynchron, `pruefTor` | `packages/metiejo/src/{ableitungen.ts,servilo.ts,messung.ts,messung-044.test.ts}`, neu `ableitungen-044.test.ts`; `vorschau.ts` und `asistanto/iloj.ts` unverändert (D-12) | erledigt | `ableitungen-044` rot `32f5bb39` → grün `5bcda814`; `stato-044` grün ohne Änderung |
 | T3 | Event-Loop frei (nach T2 nötig): Worker für die Prüfung, `previewCss` in Teilen | `packages/metiejo/src/{ableitungen.ts,vorschau.ts,servilo.ts,messung.ts,messung-044.test.ts,test-doubles/servilo-044.ts}`, neu `pruefung-worker.ts`, `pruefung-worker-044.test.ts` | erledigt (Nacharbeit B-10 erledigt) | `pruefung-worker-044` rot `14a3fdbf` → grün `9e6060b6`; `stato-044`, `antworten-044`, Fixture unverändert grün; **Nacharbeit B-10:** rot `1857f630` → grün `141b56bc` (D-28) |
 | T4 | Byte-Gleichheit, Tests, Messung nachher, Diff-Suche (Test-Ticket) | neu `packages/metiejo/src/grenzfaelle-044.test.ts`, `messung-044.test.ts` (N in CI 2), `specs/044-pruefung-schnell/{plan,tasks}.md` | erledigt (Befund B-10) | `grenzfaelle-044` grün `0a0d6bdf` (Abdeckungstest nach T2/T3, kein Rot vorher möglich: `pruefTor` gibt es erst seit T2) |
-| T5 | PR, ein Push, genau ein Dispatch, CI-Messung nachher (PR-Kommentar), Bericht | `specs/044-pruefung-schnell/{plan,tasks}.md` (nur vor dem Push) | offen | – |
+| T5 | PR, Dispatch, Bericht: ein Push, ein PR, genau ein Dispatch, CI-Messung nachher (PR-Kommentar, A-08), Bericht | `specs/044-pruefung-schnell/{plan,tasks}.md` (nur vor dem Push, Commit „Spec 044: Abschluss vor dem Dispatch“) | Abschluss vor dem Dispatch committet; Push, PR, Dispatch und Auswertung danach ohne Commit (Ergebnis im PR-Kommentar) | – (kein Code) |
 
 ## T1 im Einzelnen
 
@@ -69,3 +69,12 @@ Ein Strang, ein PR (T1 → T2 → T3 → T4 → T5). Lokal nur unter der Maschin
 - [x] Diff-Suche (wörtlich in plan.md): keine Treffer, nur Zone, keine Abhängigkeit, drei Dateien ohne Diff, R-12-Wort und Repo-Name 0 Treffer. Doku-Commit „Spec 044: Nacharbeit B-10 …“. Nichts gepusht.
 
 ## T5 im Einzelnen
+
+- [x] Vor dem Push: Berichtstabelle in plan.md mit der Spalte „CI nachher: siehe PR-Kommentar“ (A-08), Befunde B-1 … B-12 zusammengefasst („Befunde – Übersicht vor dem Dispatch (T5)“, darunter B-6, B-11, B-12), A-06/A-08 auf „angewandt“; diese Liste. Doku-Commit „Spec 044: Abschluss vor dem Dispatch“. Danach kein Commit mehr (A-08).
+- [ ] `git fetch origin`; `origin/main` über `6a3e55e3` hinaus → `git merge-tree --write-tree origin/main HEAD` (sauber: kein Rebase; Konflikt: stoppen).
+- [ ] Ein Push `git push -u origin 261107-spec-044-schnelle-prfung-65e63e`.
+- [ ] Ein PR gegen `main`, nicht mergen vor Prüfung durch den Maintainer.
+- [ ] Genau ein `workflow_dispatch` (`ci.yml`, Ref des Branches); kein Rerun, kein zweiter Push, kein zweiter Dispatch.
+- [ ] Auswertung je Job (AC-4: `zweitfarbe-036.spec.ts:196` Chromium/WebKit, `:129` WebKit; AC-6), CI nachher aus `testberichte-unit-metiejo-1`, PR-Kommentar mit CI je Job und Tabelle „CI nachher“, Bericht. Stopp.
+
+Die offenen Häkchen bleiben in dieser Datei offen: Nach dem Push gibt es keinen Commit (A-08). Ihr Ergebnis steht im PR-Kommentar.
