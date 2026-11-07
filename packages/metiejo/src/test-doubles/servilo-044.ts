@@ -29,11 +29,30 @@ export interface TestServilo {
   close(): Promise<void>;
 }
 
-/** A server on a free port with an empty brand folder of its own; `extra` adds options. */
+/**
+ * Spec 044 T3 (A-06): `startServilo` of the built package (`dist/`). There the check runs in a worker
+ * thread; on the TS source under Vitest the worker module is missing and the check runs in the main
+ * thread (the fallback).
+ */
+export async function startServiloDist(): Promise<typeof startServilo> {
+  const dist = (await import(new URL("../../dist/index.js", import.meta.url).href)) as {
+    startServilo: typeof startServilo;
+  };
+  return dist.startServilo;
+}
+
+/**
+ * A server on a free port with an empty brand folder of its own; `extra` adds options. `start` is
+ * the server of the TS source unless a test passes another; with `FM_SERVILO_044=dist` every test
+ * of this spec runs the built package (the worker path), unchanged.
+ */
 export async function testServilo(
   prefix: string,
   extra: Partial<ServiloOptions> = {},
+  start?: typeof startServilo,
 ): Promise<TestServilo> {
+  const starten =
+    start ?? (process.env.FM_SERVILO_044 === "dist" ? await startServiloDist() : startServilo);
   const scratch = mkdtempSync(join(tmpdir(), prefix));
   const root = join(scratch, "checkout");
   const workdir = join(root, MARKEN_DIR);
@@ -45,7 +64,7 @@ export async function testServilo(
     cacheDir: join(scratch, "cache"),
     env: {},
   };
-  const servilo = await startServilo(
+  const servilo = await starten(
     { port: 0, workdir, root, settings: settingsOf(parseEnv("")), deps, ...extra },
     { stderr: () => undefined },
   );
