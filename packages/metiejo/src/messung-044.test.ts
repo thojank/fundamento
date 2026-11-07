@@ -131,10 +131,15 @@ afterAll(async () => {
   };
   mkdirSync(fileURLToPath(new URL(".", REPORT)), { recursive: true });
   writeFileSync(REPORT, `${JSON.stringify(report, null, 2)}\n`);
-  for (const row of tabelle)
-    console.log(
-      `messung-044 ${row.zeile} · ${row.schritt}: Median ${row.median} ms, Max ${row.max} ms (n ${row.n})`,
-    );
+  // One short line per step in the log, also under the terse reporter of CI (FM_AUSGABE=knapp).
+  process.stdout.write(
+    tabelle
+      .map(
+        (row) =>
+          `messung-044 ${row.zeile} · ${row.schritt}: Median ${row.median} ms, Max ${row.max} ms (n ${row.n})\n`,
+      )
+      .join(""),
+  );
 });
 
 describe(`the measure of the fixed course (Spec 044, N = ${N})`, () => {
