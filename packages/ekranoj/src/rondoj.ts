@@ -338,6 +338,23 @@ export const MALPLENA_RESPONDO = "leere-antwort" satisfies Malhelpo;
 /** The marker of a screen-round that ended on provider errors (Spec 038 A-1). */
 export const ANBIETERFEHLER: Malhelpo = "anbieterfehler";
 
+/** The marker of a screen-round whose page had no element content (Spec 038 B-4, S038-37c). */
+export const LEERA_PAGXO = "leere-seite" satisfies Malhelpo;
+
+/**
+ * The finding of a page without element content (B-4): what the next round gets – start again in
+ * a fresh conversation, from the shell.
+ */
+export const LEERA_PAGXO_TROVO: Readonly<Omit<Trovo, "loko">> = {
+  regulo: LEERA_PAGXO,
+  mesagxo:
+    "Die Seite war leer: das Fragment hatte kein Element, nur schließende Tags oder Text (B-4).",
+  sugesto:
+    "In einem frischen Gespräch neu beginnen, mit der Shell als Ausgangspunkt (fm-sxelo mit fm-pagxo und main): den leeren Stand verwerfen, die Regionen füllen und den ganzen Screen in einem einzigen ```html-Block senden.",
+  kialo:
+    "AK-2: jeder Screen jeder Runde hat ein Fragment mit Inhalt; eine leere Seite ist kein gebauter Screen.",
+};
+
 /**
  * One build with the screen layer of A-1: when the request layer gives up, a screen with a
  * fragment of an earlier round keeps it (`portita`, undefined back); one without is asked once in

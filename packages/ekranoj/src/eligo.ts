@@ -38,6 +38,7 @@ import type {
   Kriterio,
   Malhelpo,
   Malobservo,
+  MalplenaPagxo,
   Manko,
   Peno,
   Plano,
@@ -171,6 +172,8 @@ export interface RaportoJson {
    * nothing was caught.
    */
   anbieterfehleroj?: AnbieterEraro[];
+  /** Screen-rounds whose page had no element content (Spec 038 B-4); absent when none. */
+  malplenajPagxoj?: MalplenaPagxo[];
 }
 
 export interface RaportoEnigo {

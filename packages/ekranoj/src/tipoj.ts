@@ -226,7 +226,13 @@ export type Malhelpo =
    * The build of this round ended on provider errors (Spec 038 A-1, C-1): the screen keeps the
    * fragment of an earlier round, or has none.
    */
-  | "anbieterfehler";
+  | "anbieterfehler"
+  /**
+   * The page of this round had no element content – only closing tags, text or nothing but
+   * comments (Spec 038 B-4, S038-37c): also after one fresh conversation (round 1), or built in
+   * round 2 or later (a finding for the next round).
+   */
+  | "leere-seite";
 
 export interface VerdaEnigo {
   varianto: Varianto;
@@ -379,7 +385,16 @@ export interface EkranojEligo {
    * A screen's build ended without markup, also after asking once more (S037-10 Befund 1): the raw
    * answers of that conversation, for `rondoj/<n>/<slug>.respondo.txt`.
    */
-  respondo?(e: { rondo: number; slug: string; respondoj: readonly string[] }): void | Promise<void>;
+  respondo?(e: {
+    rondo: number;
+    slug: string;
+    respondoj: readonly string[];
+    /**
+     * Why the answers are kept: absent = no markup (S037-10 Befund 1); `leere-seite` = a page
+     * without element content (Spec 038 B-4), the answers already cleaned of secrets.
+     */
+    kialo?: "leere-seite";
+  }): void | Promise<void>;
   /** A round was checked: its state per screen. */
   rondo?(e: { rondo: number; stato: Rondo; plano: Plano }): void | Promise<void>;
   /** The run ended (also a partial one): the whole result. */
@@ -545,6 +560,31 @@ export interface EkranojRezulto {
    * absent when nothing was caught. 401/403 and the limits are stops, not entries.
    */
   anbieterfehleroj?: AnbieterEraro[];
+  /**
+   * Every screen-round whose page had no element content (Spec 038 B-4, S038-37c), in order;
+   * absent when there was none.
+   */
+  malplenajPagxoj?: MalplenaPagxo[];
+}
+
+/**
+ * A screen-round whose built page had no element content (Spec 038 B-4, S038-37c,
+ * D-S038-37c-2): what the run did and whether the page stayed empty.
+ */
+export interface MalplenaPagxo {
+  ekrano: string;
+  rondo: number;
+  /** Bytes of the empty fragment of the first build of this screen-round. */
+  bytes: number;
+  /**
+   * `nova-konversacio`: round 1, one fresh conversation with the shell as starting point;
+   * `trovo`: round 2 or later, a finding with that instruction for the next round.
+   */
+  ago: "nova-konversacio" | "trovo";
+  /** The page stayed empty in this screen-round (AK-2 violated, reported, never silent). */
+  restis: boolean;
+  /** The cleaned raw answers, relative to the run folder: `rondoj/<n>/<slug>.respondo.txt`. */
+  respondo: string;
 }
 
 /** The whole flow (implemented in S037-03): sentence and brand in, checked screens out. */

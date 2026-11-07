@@ -71,6 +71,13 @@ export const REDEMANDO_F =
 export const REDEMANDO_0 =
   "Deine Antwort enthielt kein HTML-Dokument. Antworte jetzt nur mit dem HTML-Dokument in einem ```html-Block.";
 
+/**
+ * The closing words of the task in the one fresh conversation after a page without element content
+ * (Spec 038 B-4, S038-37c): start again from the shell, the whole screen in one block.
+ */
+export const REKOMENCO_F =
+  "Ein früherer Versuch ergab eine leere Seite (kein Element, nur schließende Tags). Beginne neu mit der Shell als Ausgangspunkt: fm-sxelo mit fm-pagxo und main, fülle die Regionen mit dem Inhalt des Screens und sende den ganzen Screen in einem einzigen ```html-Block.";
+
 /** Variante 0 (D-34): the same words as nordstelo's PROMPT_0. */
 export const PROMPT_0 =
   "Baue es als HTML. Antworte nur mit dem HTML-Dokument in einem ```html-Block.";
@@ -154,6 +161,14 @@ export function eltiriRespondon(
     if (body !== undefined) fragmento = body.trim();
   }
   return { fragmento, mankoj };
+}
+
+/**
+ * Spec 038 B-4 (S038-37c): whether a page renders as an empty page – no element content: after
+ * the comments are taken out, no opening tag is left (only closing tags, text or nothing).
+ */
+export function malplenaPagxo(_fragmento: string): boolean {
+  throw new Error("malplenaPagxo: not implemented yet (S038-37c green)");
 }
 
 /** The gaps of a run as C-7 counts them: one per kind and name, the screens that named it. */
@@ -439,6 +454,11 @@ export interface KonstruoPeto {
   eroProfiloj?: readonly Profilo[];
   /** The catch layer of provider errors of this screen-round (Spec 038 A-1); absent = pass. */
   kaptilo?: FehlerKaptilo;
+  /**
+   * Spec 038 B-4 (S038-37c): the one fresh conversation after a page without element content –
+   * the task ends with `REKOMENCO_F` (the shell as starting point).
+   */
+  rekomenco?: boolean;
 }
 
 /** What one build conversation gave: the markup, the agent's gaps, and whether it stayed empty. */
@@ -447,6 +467,8 @@ export interface KonstruoRezulto {
   mankoj: AgentaManko[];
   /** No markup, also after asking once more (S037-10 Befund 1): the raw answers, in order. */
   malplena?: { respondoj: string[] };
+  /** The raw text of the answer the markup was taken from (Spec 038 B-4, for the run folder). */
+  respondo?: string;
 }
 
 /** The task of one screen: the flow, the screen, its planned links, and in a later round the findings. */

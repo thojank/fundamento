@@ -1,0 +1,28 @@
+Hier ist der Screen „Standard-Details“ (detail.html), geprüft mit check_markup.
+
+```html
+<fm-sxelo>
+  <fm-pagxo>
+    <main>
+      <section>
+        <fm-titolo level="1">Standard A-12</fm-titolo>
+        <fm-teksto>Team Nord · Version 3 · gültig ab 1. Oktober</fm-teksto>
+        <fm-butono intent="danger" emphasis="high">Standard A-12 löschen</fm-butono>
+        <fm-ligilo to="liste.html" placement="standalone">Zur Liste</fm-ligilo>
+        <fm-markdovido>
+          <fm-teksto>
+## Inhalt
+
+Jeder Screen nennt seine Aktion als Verb.
+
+```yaml
+id: A-12
+team: Nord
+```
+</fm-teksto>
+        </fm-markdovido>
+      </section>
+    </main>
+  </fm-pagxo>
+</fm-sxelo>
+```

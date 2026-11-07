@@ -1,0 +1,16 @@
+{
+  "fonto": "spec038/abnahme-l4/komuna (raporto.json, rondoj/1/detail.html; sha256 der Rundendatei 2ab2801c260b0ca5f5fe46c88dad1cace5a72e7149e726d8b16ef9ebefd54d6a)",
+  "ekrano": "detail",
+  "rondo": 1,
+  "peno": {
+    "requests": 4,
+    "toolCalls": 23,
+    "inputTokens": 165247,
+    "outputTokens": 1601,
+    "bytes": 92
+  },
+  "iloj": { "get_ero": 17, "get_sxablono": 1, "suggest_ero": 4, "check_markup": 1 },
+  "mankoj": [{ "key": "empty page", "kind": "render" }],
+  "sugestojSenTrafo": ["Inhalte anzeigen"],
+  "nerekuperebla": "Die rohe Modellantwort wurde nicht gespeichert; respondo-hipotezo.txt ist eine Rekonstruktion (Hypothese), keine Aufzeichnung."
+}
