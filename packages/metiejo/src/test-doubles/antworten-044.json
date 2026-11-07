@@ -1,0 +1,402 @@
+{
+  "stand": "6a3e55e3",
+  "normalisierung": [],
+  "faelle": [
+    {
+      "fall": "A rev1 POST pruefung kalt",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "2fe4506fe2d799231ff84fa5553644f99efd0bab864fc2a7297c21680ab584ee"
+    },
+    {
+      "fall": "A rev1 POST pruefung warm",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "2fe4506fe2d799231ff84fa5553644f99efd0bab864fc2a7297c21680ab584ee"
+    },
+    {
+      "fall": "A rev1 GET stato kalt",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "01559bdebd080ce4d4eb148e92e029b016fea40e83f28d1c00b62dedfc785a80"
+    },
+    {
+      "fall": "A rev1 GET stato warm",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "01559bdebd080ce4d4eb148e92e029b016fea40e83f28d1c00b62dedfc785a80"
+    },
+    {
+      "fall": "A rev1 GET vorschau farbe kalt",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "d969b341ba0c926699cfa029fdc705ffbf567d1901465876effc4e7d5e00347f"
+    },
+    {
+      "fall": "A rev1 GET vorschau farbe warm",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "d969b341ba0c926699cfa029fdc705ffbf567d1901465876effc4e7d5e00347f"
+    },
+    {
+      "fall": "A rev1 GET vorschau buehne-farbe kalt",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "e79738b19ff9c3a408e06475385e7dc563b10138b340097b16ff9c3ea5cd86bd"
+    },
+    {
+      "fall": "A rev1 GET vorschau buehne-farbe warm",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "e79738b19ff9c3a408e06475385e7dc563b10138b340097b16ff9c3ea5cd86bd"
+    },
+    {
+      "fall": "A rev1 GET vorschau.css kalt",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8",
+      "sha256": "b433b0fc6d05523732a1a84ec078d4aab2fc259f03249c1904618273f6c20d70"
+    },
+    {
+      "fall": "A rev1 GET vorschau.css warm",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8",
+      "sha256": "b433b0fc6d05523732a1a84ec078d4aab2fc259f03249c1904618273f6c20d70"
+    },
+    {
+      "fall": "A rev2 POST pruefung kalt",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "db1cdf0b3b1926801a7792a37c475d5b32ac5d3b8e437294b247bade6d28f5cd"
+    },
+    {
+      "fall": "A rev2 POST pruefung warm",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "db1cdf0b3b1926801a7792a37c475d5b32ac5d3b8e437294b247bade6d28f5cd"
+    },
+    {
+      "fall": "A rev2 GET stato kalt",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "6fc3963aa420e1e1e0fe5880a480e37b99e48caf879227ff5638145d8a96398e"
+    },
+    {
+      "fall": "A rev2 GET stato warm",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "6fc3963aa420e1e1e0fe5880a480e37b99e48caf879227ff5638145d8a96398e"
+    },
+    {
+      "fall": "A rev2 GET vorschau farbe kalt",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "29d41f8784221aced9bd549108dd232138630643162720d7c3ba63fc89f6df05"
+    },
+    {
+      "fall": "A rev2 GET vorschau farbe warm",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "29d41f8784221aced9bd549108dd232138630643162720d7c3ba63fc89f6df05"
+    },
+    {
+      "fall": "A rev2 GET vorschau buehne-farbe kalt",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "ec5504ade581d6b2c24ae86aa74ae3a4df620c6ea309bbd6d23cf51996964b3d"
+    },
+    {
+      "fall": "A rev2 GET vorschau buehne-farbe warm",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "ec5504ade581d6b2c24ae86aa74ae3a4df620c6ea309bbd6d23cf51996964b3d"
+    },
+    {
+      "fall": "A rev2 GET vorschau.css kalt",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8",
+      "sha256": "f8520a3e592b9787b2d4e41b8818f53b5dc8408eea719bd15073b0e94b1e68da"
+    },
+    {
+      "fall": "A rev2 GET vorschau.css warm",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8",
+      "sha256": "f8520a3e592b9787b2d4e41b8818f53b5dc8408eea719bd15073b0e94b1e68da"
+    },
+    {
+      "fall": "A rev3 POST pruefung kalt",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "0ce7c9368294ca132ead5d9e869b6d190231b2f55df0ae5a89f7c5cd55db776d"
+    },
+    {
+      "fall": "A rev3 POST pruefung warm",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "0ce7c9368294ca132ead5d9e869b6d190231b2f55df0ae5a89f7c5cd55db776d"
+    },
+    {
+      "fall": "A rev3 GET stato kalt",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "94beb3f4adb09c4f3980a7b52bee911f080e8900d1243724a2ec590c0c8e5c7f"
+    },
+    {
+      "fall": "A rev3 GET stato warm",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "94beb3f4adb09c4f3980a7b52bee911f080e8900d1243724a2ec590c0c8e5c7f"
+    },
+    {
+      "fall": "A rev3 GET vorschau farbe kalt",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "af8c9e51ec362abba9c615a3f32b031a3eea25a0a23ab8a2c5123312748e7b9f"
+    },
+    {
+      "fall": "A rev3 GET vorschau farbe warm",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "af8c9e51ec362abba9c615a3f32b031a3eea25a0a23ab8a2c5123312748e7b9f"
+    },
+    {
+      "fall": "A rev3 GET vorschau buehne-farbe kalt",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "ef15be054ad9036b57157d2e58faa28c896e1ed6504150beb51dfdedb854b1f6"
+    },
+    {
+      "fall": "A rev3 GET vorschau buehne-farbe warm",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "ef15be054ad9036b57157d2e58faa28c896e1ed6504150beb51dfdedb854b1f6"
+    },
+    {
+      "fall": "A rev3 GET vorschau.css kalt",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8",
+      "sha256": "4a83b511a5a80b89a539da52121a26365645f0a023ddc8e841d3bb7a1742f126"
+    },
+    {
+      "fall": "A rev3 GET vorschau.css warm",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8",
+      "sha256": "4a83b511a5a80b89a539da52121a26365645f0a023ddc8e841d3bb7a1742f126"
+    },
+    {
+      "fall": "A rev3 propono GET vorschau farbe kalt",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "0a93ecf1bc2baf010382f7dbf80d35e3b1a56f9a0ba065b917dd8b10ba4e3ba0"
+    },
+    {
+      "fall": "A rev3 propono GET vorschau farbe warm",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "0a93ecf1bc2baf010382f7dbf80d35e3b1a56f9a0ba065b917dd8b10ba4e3ba0"
+    },
+    {
+      "fall": "A rev3 propono GET vorschau buehne-farbe kalt",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "dea972e6d58de32b5df3cf7e97705c52a1486472583ccd9a4800341d982f216b"
+    },
+    {
+      "fall": "A rev3 propono GET vorschau buehne-farbe warm",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "dea972e6d58de32b5df3cf7e97705c52a1486472583ccd9a4800341d982f216b"
+    },
+    {
+      "fall": "A rev3 propono GET vorschau.css kalt",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8",
+      "sha256": "0f60890b75ba274a272d2f36a74cd7731523db022952e7f10776fd94c38d8cf4"
+    },
+    {
+      "fall": "A rev3 propono GET vorschau.css warm",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8",
+      "sha256": "0f60890b75ba274a272d2f36a74cd7731523db022952e7f10776fd94c38d8cf4"
+    },
+    {
+      "fall": "B rev1 POST pruefung kalt",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "2ece0742c8ca06419b8159af7ad863d857da6796e8e0f08ced9e6806ab455ea7"
+    },
+    {
+      "fall": "B rev1 POST pruefung warm",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "2ece0742c8ca06419b8159af7ad863d857da6796e8e0f08ced9e6806ab455ea7"
+    },
+    {
+      "fall": "B rev1 GET stato kalt",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "01559bdebd080ce4d4eb148e92e029b016fea40e83f28d1c00b62dedfc785a80"
+    },
+    {
+      "fall": "B rev1 GET stato warm",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "01559bdebd080ce4d4eb148e92e029b016fea40e83f28d1c00b62dedfc785a80"
+    },
+    {
+      "fall": "B rev1 GET vorschau farbe kalt",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "d81bd8d111e842676997a6abdad7c659f0f0d075cc9f42f2d0c32c83cf0b8f30"
+    },
+    {
+      "fall": "B rev1 GET vorschau farbe warm",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "d81bd8d111e842676997a6abdad7c659f0f0d075cc9f42f2d0c32c83cf0b8f30"
+    },
+    {
+      "fall": "B rev1 GET vorschau buehne-farbe kalt",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "5b4fae17de6ee09b8b7bbdc45f6b472c5aab77d60745952d90f623ada706886c"
+    },
+    {
+      "fall": "B rev1 GET vorschau buehne-farbe warm",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "5b4fae17de6ee09b8b7bbdc45f6b472c5aab77d60745952d90f623ada706886c"
+    },
+    {
+      "fall": "B rev1 GET vorschau.css kalt",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8",
+      "sha256": "67081f91cf12466c5c0346157e16a94ae06660b451f005b606e1db789fd62f34"
+    },
+    {
+      "fall": "B rev1 GET vorschau.css warm",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8",
+      "sha256": "67081f91cf12466c5c0346157e16a94ae06660b451f005b606e1db789fd62f34"
+    },
+    {
+      "fall": "B rev2 POST pruefung kalt",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "db1cdf0b3b1926801a7792a37c475d5b32ac5d3b8e437294b247bade6d28f5cd"
+    },
+    {
+      "fall": "B rev2 POST pruefung warm",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "db1cdf0b3b1926801a7792a37c475d5b32ac5d3b8e437294b247bade6d28f5cd"
+    },
+    {
+      "fall": "B rev2 GET stato kalt",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "6fc3963aa420e1e1e0fe5880a480e37b99e48caf879227ff5638145d8a96398e"
+    },
+    {
+      "fall": "B rev2 GET stato warm",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "6fc3963aa420e1e1e0fe5880a480e37b99e48caf879227ff5638145d8a96398e"
+    },
+    {
+      "fall": "B rev2 GET vorschau farbe kalt",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "053a84eb956a8a3bb6c926d16a1400b8c358773f43d1e9410e50954c1f5400ca"
+    },
+    {
+      "fall": "B rev2 GET vorschau farbe warm",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "053a84eb956a8a3bb6c926d16a1400b8c358773f43d1e9410e50954c1f5400ca"
+    },
+    {
+      "fall": "B rev2 GET vorschau buehne-farbe kalt",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "c11a74c7fd87bd23f662254bb1587b2e24e82d94aaf1319e7b12f8171b43c0f7"
+    },
+    {
+      "fall": "B rev2 GET vorschau buehne-farbe warm",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "c11a74c7fd87bd23f662254bb1587b2e24e82d94aaf1319e7b12f8171b43c0f7"
+    },
+    {
+      "fall": "B rev2 GET vorschau.css kalt",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8",
+      "sha256": "39ae609ea62208248a432ba265ea1b41a680df84238e8b97de86315fe771d2d7"
+    },
+    {
+      "fall": "B rev2 GET vorschau.css warm",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8",
+      "sha256": "39ae609ea62208248a432ba265ea1b41a680df84238e8b97de86315fe771d2d7"
+    },
+    {
+      "fall": "B rev3 POST pruefung kalt",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "0ce7c9368294ca132ead5d9e869b6d190231b2f55df0ae5a89f7c5cd55db776d"
+    },
+    {
+      "fall": "B rev3 POST pruefung warm",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "0ce7c9368294ca132ead5d9e869b6d190231b2f55df0ae5a89f7c5cd55db776d"
+    },
+    {
+      "fall": "B rev3 GET stato kalt",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "94beb3f4adb09c4f3980a7b52bee911f080e8900d1243724a2ec590c0c8e5c7f"
+    },
+    {
+      "fall": "B rev3 GET stato warm",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "94beb3f4adb09c4f3980a7b52bee911f080e8900d1243724a2ec590c0c8e5c7f"
+    },
+    {
+      "fall": "B rev3 GET vorschau farbe kalt",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "441d9322ff20e8e242307cbe05579f2b4b9522aedd9ffcf0d00d2642edebd2e7"
+    },
+    {
+      "fall": "B rev3 GET vorschau farbe warm",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "441d9322ff20e8e242307cbe05579f2b4b9522aedd9ffcf0d00d2642edebd2e7"
+    },
+    {
+      "fall": "B rev3 GET vorschau buehne-farbe kalt",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "1f9ea0594c4f93c7718ccb7693b7c81b4ffb3cab5cb66180e8f5c540534dab97"
+    },
+    {
+      "fall": "B rev3 GET vorschau buehne-farbe warm",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "sha256": "1f9ea0594c4f93c7718ccb7693b7c81b4ffb3cab5cb66180e8f5c540534dab97"
+    },
+    {
+      "fall": "B rev3 GET vorschau.css kalt",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8",
+      "sha256": "935418b583b1bdf50b213325de90f8916a673e4dbc83dc9a6f5e0331ed391685"
+    },
+    {
+      "fall": "B rev3 GET vorschau.css warm",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8",
+      "sha256": "935418b583b1bdf50b213325de90f8916a673e4dbc83dc9a6f5e0331ed391685"
+    }
+  ]
+}

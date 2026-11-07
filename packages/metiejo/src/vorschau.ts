@@ -28,6 +28,7 @@ import {
   srgbComponentsOf,
 } from "@fundamento/modelo";
 import { CSS_CELO } from "@fundamento/projekcioj";
+import { type Messung, OHNE_MESSUNG } from "./messung.js";
 
 export interface Bases {
   structure: Structure;
@@ -146,12 +147,54 @@ export function komunaCss(bases: Bases): string {
  * — and composed with the structure; the CSS Celo writes the stylesheet with every Aspekto and
  * Dimensio, switched by data-fm-* on the root. No check runs here; that is `checkDraft`.
  */
-export function previewCss(agordo: Agordo, bases: Bases): string {
-  const { palettes, gestalt } = derivationBasis(agordo, bases.structure, bases.calibration);
-  const documents = packageDocuments(agordo, bases.structure, palettes, [], gestalt);
-  const files = composeFiles(bases.structure, packageLabel(agordo), documents, []);
-  const modelo = buildModelo(files).modelo;
-  return CSS_CELO.generate({ modelo } as Parameters<typeof CSS_CELO.generate>[0])[0]?.text ?? "";
+export function previewCss(agordo: Agordo, bases: Bases, messung: Messung = OHNE_MESSUNG): string {
+  const schritte = previewSchritte(agordo, bases, messung);
+  let schritt = schritte.next();
+  while (schritt.done !== true) schritt = schritte.next();
+  return schritt.value;
+}
+
+/**
+ * The same stylesheet in parts (Spec 044 T3): between its four steps the event loop answers other
+ * requests (`setImmediate`, no timer with a duration). The same steps in the same order as
+ * `previewCss`, so the same bytes.
+ */
+export async function previewCssInTeilen(
+  agordo: Agordo,
+  bases: Bases,
+  messung: Messung = OHNE_MESSUNG,
+): Promise<string> {
+  const schritte = previewSchritte(agordo, bases, messung);
+  let schritt = schritte.next();
+  while (schritt.done !== true) {
+    await new Promise<void>((done) => setImmediate(done));
+    schritt = schritte.next();
+  }
+  return schritt.value;
+}
+
+/**
+ * The four steps of the stylesheet, a pause between each two. Spec 044 (V-2): the measure counts
+ * the first two to the derivation, then the projection and the stylesheet.
+ */
+function* previewSchritte(agordo: Agordo, bases: Bases, messung: Messung): Generator<void, string> {
+  const { palettes, gestalt } = messung.schritt("ableitung", () =>
+    derivationBasis(agordo, bases.structure, bases.calibration),
+  );
+  yield;
+  const documents = messung.schritt("ableitung", () =>
+    packageDocuments(agordo, bases.structure, palettes, [], gestalt),
+  );
+  yield;
+  const modelo = messung.schritt("projektion", () => {
+    const files = composeFiles(bases.structure, packageLabel(agordo), documents, []);
+    return buildModelo(files).modelo;
+  });
+  yield;
+  return messung.schritt(
+    "css-js",
+    () => CSS_CELO.generate({ modelo } as Parameters<typeof CSS_CELO.generate>[0])[0]?.text ?? "",
+  );
 }
 
 /** The derivation with every check of the CI (G5 of Spec 016): the report, the export decision. */
