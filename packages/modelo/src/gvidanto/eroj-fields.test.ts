@@ -71,34 +71,48 @@ const pairs = (entries: Record<string, string | readonly string[]>): string =>
     .map(([key, value]) => `${key}=${typeof value === "string" ? value : value.join(" or ")}`)
     .join(" and ");
 
+/** A label rule judges the label (its source is the default) and blocks (check_usage's severity). */
+const blockingLabelRule = (rule: NonNullable<LoadedEro["uzo"]>["content"][number]): boolean =>
+  (rule.of ?? "slot:label") === "slot:label" &&
+  (rule.fixed ? "error" : (rule.severity ?? "error")) === "error";
+
 /**
- * The oracle of the constraints field (Spec 038 B-3, C-4), read from the data on its own: one line
- * of the Skemo's constraints, one of the Uzo's label rules with the statement get_ero without
- * fields cites (in the language asked for); absent where the data has neither.
+ * The oracle of the constraints field (Spec 038 B-3, C-4, D-S038-37b-4), read from the data on its
+ * own: one line of the Skemo's prop combinations (constraints that name props only), one of the
+ * Uzo's blocking label rules – their statements as get_ero without fields cites them (in the
+ * language asked for), grouped by their condition; absent where the data has neither.
  */
 function expectedConstraints(
   entry: LoadedEro,
   lingvo?: Lingvo,
 ): { props?: string; label?: string } | undefined {
-  const props = (entry.skemo.constraints ?? []).map(
-    (constraint) => `${pairs(constraint.when)} only with ${pairs(constraint.allowed)}`,
-  );
+  const propNames = new Set(entry.skemo.props.map((prop) => prop.name));
+  const props = (entry.skemo.constraints ?? [])
+    .filter((constraint) =>
+      [...Object.keys(constraint.when), ...Object.keys(constraint.allowed)].every((key) =>
+        propNames.has(key),
+      ),
+    )
+    .map((constraint) => `${pairs(constraint.when)} only with ${pairs(constraint.allowed)}`);
   const full = getEro(modelo, {
     name: entry.ero.name,
     ...(lingvo === undefined ? {} : { lingvo }),
   });
   if (!full.ok) throw new Error(`get_ero ${entry.ero.name} failed`);
   const statements = new Map(full.output.reguloj.map((ref) => [ref.name, ref.statement]));
-  const label = (entry.uzo?.content ?? [])
-    .filter((rule) => (rule.of ?? "slot:label") === "slot:label" && statements.has(rule.regulo))
-    .map((rule) => {
-      const conditions = [
-        ...(rule.when?.goal === undefined ? [] : [pairs({ goal: rule.when.goal })]),
-        ...(rule.when?.props === undefined ? [] : [pairs(rule.when.props)]),
-      ];
-      const when = conditions.length === 0 ? "" : ` (if ${conditions.join(" and ")})`;
-      return `${rule.regulo}${when}: ${statements.get(rule.regulo)}`;
-    });
+  const groups = new Map<string, string[]>();
+  for (const rule of entry.uzo?.content ?? []) {
+    const statement = statements.get(rule.regulo);
+    if (!blockingLabelRule(rule) || statement === undefined) continue;
+    const condition = [
+      ...(rule.when?.goal === undefined ? [] : [pairs({ goal: rule.when.goal })]),
+      ...(rule.when?.props === undefined ? [] : [pairs(rule.when.props)]),
+    ].join(" and ");
+    groups.set(condition, [...(groups.get(condition) ?? []), statement]);
+  }
+  const label = [...groups].map(
+    ([condition, texts]) => `${condition === "" ? "" : `If ${condition}: `}${texts.join(" ")}`,
+  );
   if (props.length === 0 && label.length === 0) return undefined;
   return {
     ...(props.length === 0 ? {} : { props: props.join("; ") }),
@@ -534,9 +548,7 @@ describe("get_ero with fields: constraints (B-3, C-4)", () => {
     if (!full.ok) throw new Error("get_ero butono failed");
     const regulo = full.output.reguloj.find((ref) => ref.name === "destructive-label-names-object");
     expect(regulo).toBeDefined();
-    expect(constraints?.label).toContain(
-      `destructive-label-names-object (if goal=destructive): ${regulo?.statement}`,
-    );
+    expect(constraints?.label).toContain(`If goal=destructive: ${regulo?.statement}`);
     for (const line of [constraints?.props, constraints?.label]) expect(line).not.toContain("\n");
     expect(constraints).toEqual(expectedConstraints(entryNamed("butono")));
     // brief and slots as without the new field.
@@ -568,12 +580,21 @@ describe("get_ero with fields: constraints (B-3, C-4)", () => {
         }
       }
     }
-    const withData = modelo.eroj.filter(
-      (entry) =>
-        (entry.skemo.constraints ?? []).length > 0 ||
-        (entry.uzo?.content ?? []).some((rule) => (rule.of ?? "slot:label") === "slot:label"),
-    );
+    const withData = modelo.eroj.filter((entry) => {
+      const propNames = new Set(entry.skemo.props.map((prop) => prop.name));
+      return (
+        (entry.skemo.constraints ?? []).some((constraint) =>
+          [...Object.keys(constraint.when), ...Object.keys(constraint.allowed)].every((key) =>
+            propNames.has(key),
+          ),
+        ) || (entry.uzo?.content ?? []).some(blockingLabelRule)
+      );
+    });
     expect(constrained).toBe(withData.length);
+    // butono, kampo and the ligilo are among them; the count follows the data.
+    expect(withData.map((entry) => entry.ero.name)).toEqual(
+      expect.arrayContaining(["butono", "kampo", "ligilo"]),
+    );
     expect(offending).toEqual([]);
   });
 
