@@ -217,14 +217,15 @@ export type GetEroBriefResult = { ok: true; output: GetEroBrief } | GetEroFailur
 
 /**
  * The parts of an Ero get_ero answers with `fields` (Spec 038 MG-3/MG-4, D-28): in the order an
- * agent names them; the answer is filled in FILL_ORDER.
+ * agent names them; the answer is filled in FILL_ORDER. `constraints` (B-3, C-4, D-S038-37b-1) is
+ * additive: an answer without it keeps its bytes.
  */
-export const ERO_FIELDS = ["brief", "slots", "role", "navigation"] as const;
+export const ERO_FIELDS = ["brief", "slots", "role", "navigation", "constraints"] as const;
 
 export type EroField = (typeof ERO_FIELDS)[number];
 
 /** D-28: the order in which the fields enter an answer while it stays below the ceiling. */
-const FILL_ORDER: readonly EroField[] = ["brief", "role", "navigation", "slots"];
+const FILL_ORDER: readonly EroField[] = ["brief", "role", "navigation", "slots", "constraints"];
 
 /**
  * The ceiling of every get_ero answer with `fields` (Spec 038 AC-L5), the same as of the briefs
@@ -266,8 +267,8 @@ export interface EroSlot {
 /**
  * What an Ero's data allows and how its label is judged (Spec 038 B-3, C-4), each at most one line:
  * `props` the allowed prop combinations from the Skemo's constraints (what check_usage reports as
- * ero-prop-constraint), `label` the Reguloj of the Uzo that judge the label. Generated from the
- * Skemo, the Uzo and the Regularo only, never written per Ero.
+ * ero-prop-constraint), `label` the blocking Reguloj of the Uzo that judge the label. Generated from
+ * the Skemo, the Uzo and the Regularo only, never written per Ero (constraintsOf).
  */
 export interface EroConstraints {
   props?: string;
@@ -695,16 +696,68 @@ export function slotsOf(entry: Pick<LoadedEro, "skemo" | "uzo">): Record<string,
   return slots;
 }
 
+/** The source of a text rule that judges the label (check_usage's default source, usage.ts). */
+const LABEL_SOURCE = "slot:label";
+
+/** `key=value`, `key=a or b`, joined by `and`: how a constraint line names props and their values. */
+function pairsLine(entries: Record<string, string | readonly string[]>): string {
+  return Object.entries(entries)
+    .map(([key, value]) => `${key}=${typeof value === "string" ? value : value.join(" or ")}`)
+    .join(" and ");
+}
+
 /**
- * The constraint lines of an Ero (Spec 038 B-3, C-4), or nothing when its data has neither a Skemo
- * constraint nor a label Regulo.
+ * The constraint lines of an Ero (Spec 038 B-3, C-4, D-S038-37b-4), or nothing when its data has
+ * neither a prop combination nor a blocking label rule. Nothing is written per Ero (Art. VII):
+ * - `props`: every constraint of the Skemo that names props only (a combination of props, what
+ *   check_usage reports as ero-prop-constraint), in Skemo order, `<when> only with <allowed>`
+ *   (`intent=danger only with emphasis=high`), joined by `; `. Constraints on a slot's or a string
+ *   prop's filling (`slot:…`, `prop:…`) are no combination and stay with get_ero without fields.
+ * - `label`: the statements of the Uzo's text rules on the label whose Regulo applies to the Ero
+ *   and whose finding is an error (check_usage's severity: fixed, or no lower severity), in the
+ *   language asked for, grouped by their condition (`If goal=destructive: …`), joined by a space.
+ * Both stay short so that brief, slots and constraints of fm-butono fit below the ceiling.
  */
 export function constraintsOf(
-  _modelo: Modelo,
-  _entry: Pick<LoadedEro, "ero" | "skemo" | "uzo">,
-  _lingvo?: Lingvo,
+  modelo: Modelo,
+  entry: Pick<LoadedEro, "ero" | "skemo" | "uzo">,
+  lingvo?: Lingvo,
 ): EroConstraints | undefined {
-  throw new Error("S038-37b: constraintsOf is not implemented yet");
+  const propNames = new Set(entry.skemo.props.map((prop) => prop.name));
+  const props = (entry.skemo.constraints ?? [])
+    .filter((constraint) =>
+      [...Object.keys(constraint.when), ...Object.keys(constraint.allowed)].every((key) =>
+        propNames.has(key),
+      ),
+    )
+    .map(
+      (constraint) => `${pairsLine(constraint.when)} only with ${pairsLine(constraint.allowed)}`,
+    );
+  const reguloj = new Map(
+    regulojOf(modelo, entry.ero.name).map((regulo) => [regulo.name, regulo] as const),
+  );
+  const groups = new Map<string, string[]>();
+  for (const rule of entry.uzo?.content ?? []) {
+    const regulo = reguloj.get(rule.regulo);
+    const severity = rule.fixed ? "error" : (rule.severity ?? "error");
+    if ((rule.of ?? LABEL_SOURCE) !== LABEL_SOURCE || severity !== "error" || regulo === undefined)
+      continue;
+    const condition = [
+      ...(rule.when?.goal === undefined ? [] : [pairsLine({ goal: rule.when.goal })]),
+      ...(rule.when?.props === undefined ? [] : [pairsLine(rule.when.props)]),
+    ].join(" and ");
+    const { statement } = reguloIn(modelo, reguloRef(regulo), lingvo);
+    groups.set(condition, [...(groups.get(condition) ?? []), statement]);
+  }
+  const label = [...groups].map(
+    ([condition, statements]) =>
+      `${condition === "" ? "" : `If ${condition}: `}${statements.join(" ")}`,
+  );
+  if (props.length === 0 && label.length === 0) return undefined;
+  return {
+    ...(props.length === 0 ? {} : { props: props.join("; ") }),
+    ...(label.length === 0 ? {} : { label: label.join(" ") }),
+  };
 }
 
 /** The brief in the language asked for (Nachlese 8 ③), as get_ero with brief: true answers. */
@@ -760,7 +813,8 @@ function fieldsFailure(input: GetEroInput): GetEroFailure | undefined {
  * in it – stays below the ceiling, else it goes to `rest`. So delivered ∪ rest = requested and
  * every answer stays below 750. A request of one field always gets it: that is the follow-up for
  * `rest`, and it must end there. A field that alone reaches the ceiling is a finding (S038-02),
- * never a raised limit; navigation of an Ero that is no link is delivered as its absence.
+ * never a raised limit; navigation of an Ero that is no link is delivered as its absence, and so
+ * are the constraints of an Ero whose data has none (B-3).
  */
 function fieldsAnswer(
   modelo: Modelo,
@@ -772,12 +826,16 @@ function fieldsAnswer(
   const brief = requested.includes("brief") ? briefIn(modelo, entry, lingvo) : undefined;
   const navigation = navigationOf(entry);
   const slots = requested.includes("slots") ? slotsOf(entry) : undefined;
+  const constraints = requested.includes("constraints")
+    ? constraintsOf(modelo, entry, lingvo)
+    : undefined;
   const compose = (delivered: ReadonlySet<EroField>, rest: EroField[]): GetEroFieldsOutput => {
     const out: GetEroFieldsOutput =
       brief !== undefined && delivered.has("brief") ? { ...brief } : { ero: entry.ero.name };
     if (delivered.has("role")) out.role = entry.skemo.a11y.role;
     if (delivered.has("navigation") && navigation !== undefined) out.navigation = { ...navigation };
     if (slots !== undefined && delivered.has("slots")) out.slots = slots;
+    if (constraints !== undefined && delivered.has("constraints")) out.constraints = constraints;
     if (rest.length > 0) out.rest = rest;
     return out;
   };

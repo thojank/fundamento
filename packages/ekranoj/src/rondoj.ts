@@ -408,6 +408,11 @@ export function trovojDe(e: {
       kialo: AXE_KIALO,
     })),
   );
+  // B-3 (C-4): the scorer's K3 gap names a rule; its suggestion is check_usage's for that rule
+  // (e.g. ero-prop-constraint, destructive-label-names-object), else the general one.
+  const sugestoDeRegulo = (regulo: string): string | undefined =>
+    e.malobservoj.find((m) => (m.regulo?.name ?? m.rule) === regulo && m.suggestion !== "")
+      ?.suggestion;
   for (const manko of e.taksado.mankoj) {
     if (manko.kind === "a11y" && axeTrovoj.length > 0) continue;
     const priskribo = K_TROVOJ[manko.kind];
@@ -415,7 +420,10 @@ export function trovojDe(e: {
       regulo: manko.kind,
       loko: manko.key,
       mesagxo: `${priskribo?.mesagxo ?? manko.kind}: ${manko.key}.`,
-      sugesto: priskribo?.sugesto ?? "Den Befund mit dem Gvidanto klären.",
+      sugesto:
+        (manko.kind === "regulo" ? sugestoDeRegulo(manko.key) : undefined) ??
+        priskribo?.sugesto ??
+        "Den Befund mit dem Gvidanto klären.",
       kialo: priskribo?.kialo ?? `Bewertung: ${manko.kind}.`,
     });
   }
@@ -438,12 +446,17 @@ export function trovojDe(e: {
       kialo: "D-05: jeder geplante Übergang muss als Verweis da sein.",
     });
   }
+  // F-S038-37a-1: the planned screens by name, never the `<slug>.html` placeholder.
+  const ekranoj = (e.ekranoj ?? []).map((slug) => `${slug}.html`);
   for (const href of e.navigado.mortaj) {
     trovoj.push({
       regulo: "navigado-morta",
       loko: href,
       mesagxo: `Der Verweis ${href} führt ins Leere.`,
-      sugesto: "Nur auf geplante Screens als <slug>.html verweisen.",
+      sugesto:
+        ekranoj.length === 0
+          ? "Den Verweis entfernen; in diesem Lauf gibt es keine geplanten Screens."
+          : `Nur auf geplante Screens verweisen: ${ekranoj.join(", ")}.`,
       kialo: "D-05: ein toter Verweis bricht den Ablauf.",
     });
   }
@@ -1030,6 +1043,7 @@ async function kontroliRondon(k: RondoKunteksto): Promise<Rondo> {
             fakto,
             navigado: navigadoEkrano,
             malhelpoj,
+            ekranoj: plano.ekranoj.map((planita) => planita.slug),
           }),
     };
     rondo[ekrano.slug] = stato;

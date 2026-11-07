@@ -590,9 +590,11 @@ export function eroNomojDe(fragmento: string): string[] {
 
 /**
  * The parts of an Ero's Kurzprofil from round 2 on (Spec 038 F-1): the brief and the slot rules,
- * as `get_ero` answers them under its size ceiling.
+ * as `get_ero` answers them under its size ceiling; since B-3 (C-4) also the constraints – the
+ * allowed prop combinations and the blocking label rules, one line each (absent or in `rest` where
+ * the Ero has none or they do not fit; taken as answered).
  */
-export const KURZPROFILAJ_KAMPOJ = ["brief", "slots"] as const;
+export const KURZPROFILAJ_KAMPOJ = ["brief", "slots", "constraints"] as const;
 
 /** A cache of Kurzprofile per run: one read per name, misses included. */
 export type ProfilaKasxmemoro = Map<string, Promise<Profilo | undefined>>;
@@ -687,7 +689,7 @@ export function sxelaTaskoDe(peto: KonstruoPeto): string {
   if (profiloj.length > 0) {
     linioj.push(
       "",
-      "Kurzprofile der Eroj deines Stands (get_ero, brief und slots – nur diese Inhalte je Slot sind erlaubt):",
+      "Kurzprofile der Eroj deines Stands (get_ero, brief, slots und constraints – nur diese Inhalte je Slot sind erlaubt; constraints nennt die erlaubten Prop-Kombinationen und die Label-Regeln):",
       ...profiloj.map((profilo) => `- fm-${profilo.nomo}: ${profilo.teksto}`),
     );
   }
