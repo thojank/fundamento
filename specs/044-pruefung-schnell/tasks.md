@@ -8,7 +8,7 @@ Ein Strang, ein PR (T1 → T2 → T3 → T4 → T5). Lokal nur unter der Maschin
 |---|---|---|---|---|
 | T1 | Messung vorher, Byte-Fixture vom Stand `main`, roter `stato`-Test; Gerüst `specs/044-pruefung-schnell/` | `specs/044-pruefung-schnell/{spec,plan,tasks}.md`, `packages/metiejo/src/{messung.ts,servilo.ts,vorschau.ts}`, neu `antworten-044.test.ts`, `messung-044.test.ts`, `stato-044.test.ts`, `test-doubles/{antworten-044.json,servilo-044.ts}` | erledigt | Fixture grün `87888366`; Messpunkte `63f1e56a`; `stato-044` rot `68014c61` (grün in T2) |
 | T2 | Geteilter Speicher je Entwurf+`rev` und Marke+`rev`+`propono`, Routen asynchron, `pruefTor` | `packages/metiejo/src/{ableitungen.ts,servilo.ts,messung.ts,messung-044.test.ts}`, neu `ableitungen-044.test.ts`; `vorschau.ts` und `asistanto/iloj.ts` unverändert (D-12) | erledigt | `ableitungen-044` rot `32f5bb39` → grün `5bcda814`; `stato-044` grün ohne Änderung |
-| T3 | Event-Loop frei (nur falls nach T2 nötig): Worker für die Prüfung, `previewCss` in Teilen | `packages/metiejo/src/{ableitungen.ts,vorschau.ts,servilo.ts}`, neues Worker-Modul, Test gegen `dist/` | offen | – |
+| T3 | Event-Loop frei (nach T2 nötig): Worker für die Prüfung, `previewCss` in Teilen | `packages/metiejo/src/{ableitungen.ts,vorschau.ts,servilo.ts,messung.ts,messung-044.test.ts,test-doubles/servilo-044.ts}`, neu `pruefung-worker.ts`, `pruefung-worker-044.test.ts` | erledigt | `pruefung-worker-044` rot `14a3fdbf` → grün `9e6060b6`; `stato-044`, `antworten-044`, Fixture unverändert grün |
 | T4 | Byte-Gleichheit, Tests, Messung nachher, Diff-Suche (Test-Ticket) | `packages/metiejo/src/*-044.test.ts`, `specs/044-pruefung-schnell/{plan,tasks}.md` | offen | – |
 | T5 | PR, ein Push, genau ein Dispatch, CI-Messung nachher (PR-Kommentar), Bericht | `specs/044-pruefung-schnell/{plan,tasks}.md` (nur vor dem Push) | offen | – |
 
@@ -35,6 +35,15 @@ Ein Strang, ein PR (T1 → T2 → T3 → T4 → T5). Lokal nur unter der Maschin
 - [x] Schluss unter der Sperre: `pnpm test:betroffen` (cli, ekranoj, metiejo, modelo, nordstelo; Chromium) 14 von 14 Tasks grün; `stato-044`, `antworten-044` und die Fixture seit T1 unverändert (`git diff` leer). Nichts gepusht.
 
 ## T3 im Einzelnen
+
+- [x] Entscheidung (Pflicht-Schritt) mit den Werten „nach T2“ aus plan.md: `/pruefung` kalt 1517 / 1744 ms (Median / Max), `stato` B während `/pruefung` A 1555 / 1633 ms (Ziel < 200 ms), `vorschau.css` kalt 135 / 173 ms – zwei Ziele verfehlt, Ursache ein synchroner Block `checkDraft` im Haupt-Thread → **T3 nötig**, kein „entfällt“.
+- [x] Rot zuerst: `pruefung-worker-044.test.ts` gegen das gebaute Paket (`dist`) – fester Ablauf gegen dieselbe Fixture (auf dem Stand vorher schon grün), `stato` B vor der ungehaltenen Prüfung A (`['pruefung A', 'stato B']` statt `['stato B', 'pruefung A']`), Wurf/Tod des Workers wie ein Wurf im Haupt-Thread (`expected 200 to be 500`), Rechner im Worker (`pruefRechnungOf is not a function`): 5 rot, 2 grün; `test-doubles/servilo-044.ts` mit `startServiloDist` und `FM_SERVILO_044=dist` (D-23) – `14a3fdbf`.
+- [x] `previewCss` in vier Teilen (Generator, `setImmediate` zwischen den Schritten, gleiche Bytes; D-25).
+- [x] Worker für die Prüfung (D-18): `pruefRechnungOf` in `ableitungen.ts`, Modul `pruefung-worker.ts`, lazy beim ersten Bedarf (nach `listen`), eigene Schlange nur für Prüfungen, Basen über `loadBases()` im Worker (gemessen statt Klonen), Structured Clone ohne Änderung (R-2), keine Zeitgrenze; Fehler/Tod → dieselbe `500` wie ein Wurf im Haupt-Thread, Neustart erst beim nächsten Bedarf, `close()` beendet den Worker (D-20); `festlegen` prüft den Kandidaten auch im Worker (D-22).
+- [x] Fallback (D-19): ohne `pruefung-worker.js` neben dem Modul (TS-Quelle unter Vitest) rechnet derselbe `checkDraft` im Haupt-Thread, entschieden einmal beim Start; Testnaht `ServiloOptions.pruefWorker`.
+- [x] Messung: `Messung.schrittBisFertig` misst `ableitung+pruefung` bis zum Ende der Rechnung im Worker (D-21); `messung-044` läuft gegen `dist` (D-23).
+- [x] Grün: `pruefung-worker-044` (7), `stato-044` (2), `antworten-044` (3), `ableitungen-044` (12) – 24 von 24; dieselben `stato-044`, `antworten-044`, `ableitungen-044` **unverändert mit `FM_SERVILO_044=dist`** (Worker-Pfad) 17 von 17; ganze `metiejo`-Suite unter der Sperre 585 bestanden, 0 rot in 325 s (`FM_MESSUNG_044_N=2`); `pnpm --filter @fundamento/metiejo lint` grün (eine Warnung in `komponentoj.ts`, schon auf `6a3e55e3`) – `9e6060b6`.
+- [x] Messung „nach T3“ unter der Sperre (N = 10, `dist`): `stato` B während `/pruefung` A **0,9 / 1,4 ms** (Ziel erreicht); erstes Rendern ≈ 157 ms (erreicht); `/pruefung` kalt 1679 / 2441 ms (verfehlt, B-6); Startzeit bis zur URL-Zeile vorher 475,5 / 481,5 ms, nachher 481,8 / 508,4 ms (R-6) – plan.md „Lokal nach T3“.
 
 ## T4 im Einzelnen
 

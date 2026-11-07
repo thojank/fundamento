@@ -2,7 +2,7 @@
 
 **Spec:** [`spec.md`](spec.md) (unverändert mit `cp` kopiert; SHA-256 `5bea3ab5a3d8ec94f9ee7fc5b16b55bdb30ffdfbf65ff767ffcab891f71810aa`) · **Aufgaben:** [`tasks.md`](tasks.md) · **Basis:** `main` `6a3e55e3` (Merge #155, Spec 038 Lauf 4) · **Branch:** `261107-spec-044-schnelle-prfung-65e63e` · **Regel 0** gilt. **Keine Grenzen, Zeitlimits, Schwellen, Abfrageintervalle, Toleranzen oder Wiederholungen angehoben. Nichts gemergt.** Kein Sprachmodell (0 $).
 
-**Datum:** 2026-11-07 · **Stand:** T1 fertig (Messung vorher, Fixture, roter `stato`-Test); T2 fertig (geteilter Speicher, Routen asynchron, Messung „nach T2“); T3 offen.
+**Datum:** 2026-11-07 · **Stand:** T1 fertig (Messung vorher, Fixture, roter `stato`-Test); T2 fertig (geteilter Speicher, Routen asynchron, Messung „nach T2“); T3 fertig (Prüfung im Worker-Thread, Stylesheet in Teilen, Messung „nach T3“).
 
 ### G-0 Quelle
 
@@ -22,12 +22,14 @@ Ein Strang, ein PR, ein Push, genau ein `workflow_dispatch` (Spec, „Begrenzung
 | Datei | T1 | T2 | T3 | T4 | T5 |
 |---|---|---|---|---|---|
 | `specs/044-pruefung-schnell/{spec,plan,tasks}.md` | anlegen | fortschreiben | fortschreiben | fortschreiben | abschließen (vor dem Push) |
-| `packages/metiejo/src/messung.ts` | **neu** | `warten` für geteilte Rechnungen (D-16) | benutzen | – | – |
+| `packages/metiejo/src/messung.ts` | **neu** | `warten` für geteilte Rechnungen (D-16) | `schrittBisFertig` (D-21) | – | – |
 | `packages/metiejo/src/servilo.ts`, `vorschau.ts` | nur Messpunkte und Option `messung` | Speicher, Routen `async`, `pruefTor` | Rechner (Worker, Teile) | – | – |
-| `packages/metiejo/src/ableitungen.ts` | – | **neu** | nur Rechner | – | – |
-| `packages/metiejo/src/antworten-044.test.ts`, `test-doubles/antworten-044.json` | **neu** (Fixture auf `6a3e55e3`) | unverändert | `dist`-Pfad dazu | prüfen | – |
-| `packages/metiejo/src/messung-044.test.ts` | **neu** | angepasst (D-16, D-17) | – | ggf. ergänzen | – |
-| `packages/metiejo/src/stato-044.test.ts` | **neu, rot** | grün | grün | – | – |
+| `packages/metiejo/src/ableitungen.ts` | – | **neu** | nur Rechner (`pruefRechnungOf`, D-18) | – | – |
+| `packages/metiejo/src/pruefung-worker.ts` | – | – | **neu** (Worker-Modul, D-18) | – | – |
+| `packages/metiejo/src/pruefung-worker-044.test.ts`, `test-doubles/servilo-044.ts` | – (`servilo-044.ts` neu in T1) | – | **neu, rot → grün** (`dist`-Pfad, D-20); `startServiloDist`, `FM_SERVILO_044=dist` (D-23) | ggf. ergänzen | – |
+| `packages/metiejo/src/antworten-044.test.ts`, `test-doubles/antworten-044.json` | **neu** (Fixture auf `6a3e55e3`) | unverändert | unverändert; `dist`-Pfad in `pruefung-worker-044` (D-23) | prüfen | – |
+| `packages/metiejo/src/messung-044.test.ts` | **neu** | angepasst (D-16, D-17) | Server aus `dist` (D-23) | ggf. ergänzen | – |
+| `packages/metiejo/src/stato-044.test.ts` | **neu, rot** | grün | grün, unverändert (auch auf `dist`) | – | – |
 | `packages/metiejo/src/ableitungen-044.test.ts` | – | **neu, rot → grün** | – | ggf. ergänzen | – |
 | alles andere | tabu | tabu | tabu | tabu | tabu |
 
@@ -42,7 +44,7 @@ Der Lauf ist unbeaufsichtigt. Wo die Spec offen ließ, gilt die Annahme. „ange
 | ID | Frage | Entscheidung | Stand |
 |---|---|---|---|
 | D-01 | Für welche `stato`-Anfrage gilt „< 200 ms während einer Prüfung“? | Für `stato` einer **anderen Marke** und für `stato` eines schon geprüften `rev`. `stato` derselben Marke für den gerade geprüften `rev` **wartet auf dieselbe laufende Prüfung** (rechnet nicht doppelt) und bleibt byte-gleich. Vom Maintainer am 2026-11-07 bestätigt. | angewandt (T2, `5bcda814`): `stato` derselben Marke wartet auf das geteilte Promise (`stato-044` Fall 2) |
-| D-02 | Darf T3 `packages/agordilo` ändern? | **Nein.** Reicht T2 nicht, rechnet T3 die Prüfung in einem Worker (`node:worker_threads`). Vom Maintainer am 2026-11-07 bestätigt. | offen (T3) |
+| D-02 | Darf T3 `packages/agordilo` ändern? | **Nein.** Reicht T2 nicht, rechnet T3 die Prüfung in einem Worker (`node:worker_threads`). Vom Maintainer am 2026-11-07 bestätigt. | angewandt (T3, `9e6060b6`): `agordilo` unverändert, Prüfung im Worker (D-18) |
 | D-03 | Wie wird gemessen, ohne Antworten und `.github/**` zu ändern? | `packages/metiejo/src/messung.ts` mit `performance.now()` und einer optionalen Senke `ServiloOptions.messung`. Ohne Senke keine Ausgabe, kein anderes Verhalten. Lokal und in CI misst `messung-044.test.ts`; er prüft nur die Form. `ci.yml` lädt `packages/*/test-reports/` schon hoch (`testberichte-unit-metiejo-<attempt>`), also auch `messung-044.json`. | angewandt (`63f1e56a`, `4b0b03cd`) |
 | D-04 | Was heißt „byte-gleich“? | Körper, Statuscode und `content-type` jeder Antwort. Keine neuen Header. | Fixture angewandt (`87888366`); Nachweis T4 |
 | D-05 | Wie wird „rot zuerst“ für den `stato`-Test ohne Uhr erreicht? | Beleg ist die Reihenfolge: Prüfung A gestartet und über `pruefTor` festgehalten, `stato` B gesendet, `stato` B antwortet vor Prüfung A. | rot (T1); grün in T2 (`5bcda814`), Test unverändert |
@@ -78,6 +80,14 @@ Der Lauf ist unbeaufsichtigt. Wo die Spec offen ließ, gilt die Annahme. „ange
 | D-15 | T2 | V-5 im Detail: Schnittstelle und „nur eintragen, wenn die Form noch gilt“ beim CSS. | `ableitungen.ts`: `pruefSpeicherOf(rechner, pruefTor?)` mit `pruefung(halter, marke, messung?)`, `fertig(halter)`, `eintragen(halter, derivation)`; `cssSpeicherOf(rechner, revOf)` mit `css(marke, rev, propono, agordo, messung?)`. **Abweichung:** Der CSS-Rechner hat die Signatur `(agordo, messung) => Promise<string>` statt `(agordo) => …`, damit `ableitung`/`projektion`/`css-js` in der rechnenden Anfrage gemessen werden; T3 behält das. Beim Abschluss prüft der CSS-Speicher den `rev` über `revOf` (der gehaltene Entwurf der Marke); die Form prüft jeder Treffer (`rev` **und** `JSON.stringify` des gezeigten `Agordo`), ein Eintrag mit veralteter Form wird also nie ausgeliefert und vom nächsten Aufruf ersetzt. Abgelehnte Promises werden sofort entfernt; jedes Promise hat einen eigenen leeren Fehler-Handler gegen unbehandelte Rejections, die wartenden Anfragen bekommen den Fehler trotzdem. Keine Iteration über die `Map`s, keine Zeit. | angewandt |
 | D-16 | T2 | Was misst `warten` ab T2 (D-08)? | Eine Anfrage, die sich an eine **laufende** Rechnung einer anderen Anfrage hängt, zählt ihre Wartezeit zu `warten` (`Messung.warten`); die rechnende Anfrage meldet den Schritt (`ableitung+pruefung` bzw. die CSS-Schritte). Ein fertiges Ergebnis ergibt keinen Schritt (V-2). `messung-044` erwartet deshalb bei `vorschau.css` warm nur noch `marke-laden`, `warten`, `gesamt`. | angewandt |
 | D-17 | T2 | Wie wird „`stato` während einer Prüfung“ ohne Tor gemessen (T2 Schritt 5)? | Zweiter Teil in `messung-044.test.ts`, je Durchlauf ein `it`: Marke B ist geprüft; A bekommt einen neuen `rev`, dann `POST /pruefung` A und gleich danach `GET stato` B, jede auf eigener Verbindung. Gemessen von außen (Zeit des Clients vom Senden bis zur ganzen Antwort), Zeilen „außen …“ im Bericht. Nur Formprüfung (beide 200, Zahlen ≥ 0), keine Dauer als Kriterium. In CI läuft er mit demselben N (je Durchlauf eine Prüfung mehr). | angewandt |
+| D-18 | T3 | Wie sieht der Worker aus (T3 Schritt 2, D-02, A-04)? | `ableitungen.ts` bekommt den Rechner `pruefRechnungOf(haupt, modul?)`; die Speicher-Logik bleibt (V-5). **Ein** Worker je Server (`node:worker_threads`, keine Abhängigkeit) nur für Prüfungen; das Stylesheet rechnet weiter im Haupt-Thread (in Teilen, D-25), steht also nie in derselben Schlange (A-04). Der Worker startet **beim ersten Bedarf** einer Prüfung, also erst nach `listen` (R-6), und rechnet die Aufträge der Reihe nach (die Nachrichten-Schlange des Ports ist die Prüf-Schlange). Auftrag `{ id, agordo }` (das `Agordo` als Wert, V-5.4), Antwort `{ id, derivation }` oder `{ id, fehler }`. Das Modul `pruefung-worker.ts` ruft **dieselbe** Funktion `checkDraft` wie der Haupt-Thread, mit Basen aus `loadBases()` im Worker. **Basen laden statt klonen** (gemessen, Probe unter der Sperre): `loadBases()` 133 ms einmal je Worker **im Worker**; `structuredClone(bases)` 13–21 ms, aber **im Haupt-Thread** und je Worker-Start – Laden blockiert den Haupt-Thread nie. **Structured Clone** ändert die `Derivation` nicht (R-2): `isDeepStrictEqual` (mit Prototypen) und gleiche `JSON.stringify`-Bytes (Reihenfolge der Schlüssel) gegen den Haupt-Thread, dazu die Fixture im `dist`-Pfad – eine serialisierte Form ist nicht nötig. Keine Zeitgrenze, keine `resourceLimits`, kein Retry. | angewandt (`9e6060b6`) |
+| D-19 | T3 | Fallback ohne Worker (T3 Schritt 3, A-06)? | Entschieden **einmal beim Start** in `pruefRechnungOf`: Gibt es das Modul `pruefung-worker.js` neben `ableitungen` (gebautes Paket), rechnet der Worker; fehlt es (TS-Quelle unter Vitest, dort liegt nur `.ts`), rechnet derselbe `checkDraft` im Haupt-Thread (`ort: "haupt-thread"`). Kein Raten je Anfrage. `ServiloOptions.pruefWorker` (Testnaht wie `pruefTor`) nennt ein anderes Modul; ohne sie gilt das Modul neben dem Server. `tsconfig.build.json` gibt `dist/pruefung-worker.js` unverändert aus (geprüft). | angewandt |
+| D-20 | T3 | Fehler und Tod des Workers (AC-7)? | Wirft die Prüfung im Worker, geht der geworfene Wert per Structured Clone zurück (ein `Error` bleibt `Error` mit derselben `message`; ein nicht kopierbarer Wert als `String(…)` – genau der Text, den der Server-`catch` zeigt). Stirbt der Worker (`error`, `messageerror`, `exit`), schlagen **alle** Aufträge fehl, die er hielt: mit seinem Fehler bzw. `The worker of the check ended (exit code N).`. Der Speicher entfernt das abgelehnte Promise (V-5.2), die Anfrage bekommt `500` mit derselben Meldung wie bei einem Wurf im Haupt-Thread. Erst der **nächste Bedarf** startet einen neuen Worker; die Anfrage wird nicht wiederholt. `close()` des Servers beendet den Worker (`terminate`), auch wenn das Schließen des Servers fehlschlägt. Beleg: `pruefung-worker-044.test.ts` (Wurf, `exit 7`, Wurf in der echten Prüfung ohne `Agordo` – je gleiche Antwort wie ein Wurf im Haupt-Thread über `pruefTor`; danach Rahmen und Prüfung mit den Bytes der Fixture; genau 3 Worker-Starts für 3 Fehler). | angewandt |
+| D-21 | T3 | Wie misst der Speicher `ableitung+pruefung`, wenn die Rechnung im Worker läuft (Hinweis aus T2)? | Neu `Messung.schrittBisFertig(schritt, work)`: misst vom Start bis zum Abschluss des Promise (auch bei Ablehnung). Der Prüf-Speicher misst damit; ohne Senke ruft `OHNE_MESSUNG` nur `work()` (keine Ausgabe, V-2). Im Fallback misst er wie bisher die synchrone Dauer. Die Zeit enthält im Worker-Pfad das Warten in der Prüf-Schlange und beim ersten Bedarf den Start des Workers. | angewandt |
+| D-22 | T3 | Welche Prüfungen außerhalb des Speichers laufen im Worker? | `festlegen` rechnet die Prüfung des **Kandidaten** über denselben Rechner (`await pruefRechnung.rechner(agordo)`) und beginnt danach von vorn, wenn sich der `rev` inzwischen geändert hat (wie D-13 nach dem Warten auf `before`). **Synchron bleiben:** `pruefungJetzt` für die Werkzeuge des `Laborejo` (D-12, D-24), `confirmed` in `vorschlagDe` (nur auf dem Weg der Ablehnung `409`, je Kandidat eine Prüfung) und `exportMarko` beim Speichern (`/speichern`). Das sind Befunde (B-7), keine Änderung in diesem Lauf. | angewandt |
+| D-23 | T3 | Wie laufen die Tests gegen den Worker-Pfad (T3 Schritt 4, A-06)? | `test-doubles/servilo-044.ts` hat `startServiloDist()` (lädt `dist/index.js`) und einen dritten Parameter `start` von `testServilo`; mit **`FM_SERVILO_044=dist`** laufen alle Tests dieses Strangs, die `testServilo` benutzen, unverändert gegen das gebaute Paket. `pruefung-worker-044.test.ts` läuft immer gegen `dist`: fester Ablauf gegen **dieselbe** Fixture (66 Hashes), `stato` B vor der Prüfung A ohne Tor, Fehler/Tod des Workers, Rechner im Worker gleich dem Haupt-Thread, Ende und Neustart, Fallback auf der Quelle. **`messung-044` misst seit T3 den Server aus `dist`** (Bericht: `"server": "dist (Prüfung im Worker)"`), lokal wie in CI, weil das der Weg der Produktion ist; auf der Quelle würde er den Fallback messen. `antworten-044.test.ts`, die Fixture und `stato-044.test.ts` bleiben unverändert. | angewandt |
+| D-24 | T3 | `Laborejo` rechnet synchron (D-12): Was passiert, wenn der Worker dieselbe Prüfung gerade rechnet? | **Wirkung:** `pruefungJetzt` findet kein fertiges Ergebnis und rechnet die Prüfung ein zweites Mal synchron im Haupt-Thread (≈ 1,5 s Sperre wie vor T3) und trägt sie ein; das Ergebnis des Workers kommt danach, wird nicht mehr eingetragen (der Eintrag ist ersetzt) und geht an die Anfragen, die auf ihn warteten. Beide Ergebnisse sind gleich (D-18), die Bytes also auch. Der Fall braucht einen neuen `rev` mitten in einem Chat-Zug (`apliki`) **und** eine gleichzeitige Anfrage, die die Prüfung dieses `rev` im Worker anstößt (z. B. der `stato`-Takt). **Nicht vermieden:** Ein synchrones Warten auf den Worker (`Atomics.wait` + `receiveMessageOnPort`) würde den Haupt-Thread ebenso sperren und eine zweite Nachrichten-Bahn brauchen – nicht billig in der Zone. Kandidat für eine Folge-Spec: asynchrone `Laborejo`-Schnittstelle. | dokumentiert |
+| D-25 | T3 | `previewCss` in Teilen (T3 Schritt 1)? | Die vier Schritte (`derivationBasis` · `packageDocuments` · `composeFiles` + `buildModelo` · `CSS_CELO.generate`) stehen einmal in einem Generator; `previewCss` läuft ihn synchron durch, `previewCssInTeilen` wartet zwischen je zwei Schritten auf `setImmediate` (kein Timer mit Dauer). Gleicher Code, gleiche Reihenfolge, gleiche Bytes. Der CSS-Rechner des Servers ist `previewCssInTeilen` (Signatur `(agordo, messung)`, D-15). Die Messung zählt die ersten beiden Schritte zu `ableitung` (zwei Aufrufe, summiert). Längste Sperre durch einen Kalt-Render: `derivationBasis` (≈ 75 ms) statt des ganzen Renders (≈ 135 ms). Der Fehlerweg B-4 bleibt (D-14). | angewandt |
 
 ## Befunde
 
@@ -198,6 +208,51 @@ In ms, Median / Max. Die Spalte „vorher“ wiederholt die Werte von `63f1e56a`
 
 **T3 ist nötig.** Erst ein Worker für die Prüfung (D-02) gibt den Event-Loop frei: Dann sollten `stato` und die Rahmen während einer Prüfung in der Größe ihrer eigenen Arbeit antworten (< 1 ms bzw. ≈ 135 ms für `vorschau.css` kalt). Das Zerlegen von `previewCss` mit `setImmediate` senkt die längste Sperre durch einen Kalt-Render von bis zu 173 ms auf den größten Teil (`ableitung` bis 132 ms). Das Ziel „`/pruefung` < 1 s“ erreicht auch ein Worker nicht: Die Prüfung selbst bleibt ≈ 1,5 s (ohne Änderung an `agordilo`, D-02) – Befund mit Werten (R-1, AC-2), Kandidat für eine Folge-Spec ist dann `deriveAspekto` selbst, nicht `structureModelo` (B-2: 3,8 ms).
 
+### Lokal nach T3 (`messung-044.test.ts` gegen `dist`, Prüfung im Worker)
+
+**Rechner:** wie vorher (Apple M1 Max, 10 Kerne, macOS 26.5.1, Node v24.21.0). **Code:** `9e6060b6` (T3 grün). **Server:** gebautes Paket (`dist`), Prüfung im Worker-Thread (D-18, D-23; Bericht `"server": "dist (Prüfung im Worker)"`). **Zeit:** 2026-11-07, 16:53–16:55 Ortszeit, unter der Sperre (A-09), nach `pnpm turbo run build --filter=@fundamento/cli... --filter=@fundamento/metiejo...`: `FM_AUSGABE=knapp pnpm --filter @fundamento/metiejo exec vitest run src/messung-044.test.ts` 20 von 20 grün in 137,5 s. **N = 10** (n = 60 je Zeile, mit Vorschlag n = 10). **Last:** `uptime` vorher 6,66 / nachher 7,22 (1 min), etwas höher als bei „nach T2“ (5,65 / 5,68). Fremde Test-Prozesse: dieselben **ruhenden** Treffer wie vorher (Playwright-MCP, sechs alte Metiejo-Server aus `/private/tmp/s035-t3`, je 0,0 % CPU) – keine fremde Test-Last; die Grundlast kommt von Desktop-Programmen (p0, Figma, WindowServer).
+
+In ms, Median / Max.
+
+| Route | Schritt | vorher kalt | nach T2 kalt | **nach T3 kalt** | nach T2 warm | **nach T3 warm** |
+|---|---|---|---|---|---|---|
+| `POST /pruefung` | `ableitung+pruefung` | 1623 / 1862 | 1517 / 1744 | **1679 / 2441** (im Worker, D-21) | – | – |
+| | `css-js` | 0 / 0,3 | 0 / 0,2 | 0 / 0,4 | 0 / 0,1 | 0 / 0,2 |
+| | `warten` | 0 / 0,2 | 0 / 0,2 | 0 / 0,2 | 0 / 0,2 | 0 / 0,3 |
+| | **gesamt** | 1623 / 1863 | 1517 / 1744 | **1679 / 2442** | 0,2 / 0,4 | 0,1 / 0,7 |
+| `GET stato` (Prüfung im Speicher) | gesamt | 0,3 / 9,9 | 0,3 / 8,1 | 0,4 / 9,3 | 0,2 / 0,5 | 0,3 / 4,6 |
+| `GET vorschau?sxtupo=farbe` | gesamt | 0,2 / 7,5 | 0,2 / 7,2 | 0,3 / 17,9 | 0,1 / 0,5 | 0,2 / 1,6 |
+| `GET vorschau?sxtupo=buehne-farbe` (Prüfung im Speicher) | gesamt | 0,2 / 0,4 | 0,2 / 0,4 | 0,2 / 0,5 | 0,2 / 0,3 | 0,2 / 0,3 |
+| `GET vorschau…` mit Vorschlag (`farbe` / `buehne-farbe`) | gesamt | 0,6 / 0,7 bzw. 0,3 / 0,5 | 0,4 / 0,6 bzw. 0,2 / 0,4 | 0,4 / 0,6 bzw. 0,3 / 1,1 | 0,2 / 0,4 bzw. 0,3 / 0,4 | 0,3 / 0,7 bzw. 0,3 / 0,5 |
+| `GET vorschau.css` | `ableitung` (zwei Teile, D-25) | 95,0 / 135,0 | 91,3 / 132,0 | 98,8 / 130,5 | – | – |
+| | `projektion` | 9,2 / 15,3 | 7,3 / 14,5 | 10,3 / 71,9 | – | – |
+| | `css-js` | 32,9 / 43,0 | 32,4 / 37,6 | 40,8 / 115,3 | – | – |
+| | **gesamt** | 142,5 / 176,9 | 135,4 / 173,3 | **156,4 / 299,4** | 0,5 / 0,7 | 0,5 / 1,8 |
+| `GET vorschau.css` mit Vorschlag | gesamt | 139,0 / 142,8 | 140,9 / 166,2 | 151,0 / 175,9 | 0,7 / 1,0 | 0,9 / 1,6 |
+| **`GET stato` B während `POST /pruefung` A** (von außen, ohne Tor, D-17) | gesamt | – (Traces: 1,6–3,5 s) | 1555 / 1633 | **0,9 / 1,4** | | |
+| `POST /pruefung` A dabei (von außen) | gesamt | – | 1555 / 1632 | 1643 / 2104 | | |
+| einzeln (A-05) | `derivationBasis` / Struktur-Anteil / `structureModelo` | 77,2 / 81,2 · 5,1 / 13,1 · 3,9 / 4,7 | 75,3 / 90,8 · 4,8 / 8,0 · 3,8 / 4,8 | 75,2 / 112,8 · 5,2 / 17,0 · 3,5 / 9,8 | | |
+
+**Startzeit des Servers bis zur URL-Zeile (R-6)**, `fm metiejo --port <p> --workdir <tmp>` aus `packages/cli/dist`, Zeit vom `spawn` bis `http://localhost:<p>` auf stderr, N = 10 je Stand, unter der Sperre, Werkzeug außerhalb des Repos (`/tmp/s044t3/werkzeug/start-zeit.mjs`): **vorher** (`ddebe102`, 16:39, `uptime` 5,99) **475,5 / 481,5 ms**; **nach T3** (`9e6060b6`, 16:53, `uptime` 6,26) **481,8 / 508,4 ms**. Der Worker startet nicht beim Start (D-18); der Unterschied liegt im Rauschen.
+
+**Probe Worker (einmal, unter derselben Sperre, `dist`, `/tmp/s044t3/werkzeug/worker-probe.mjs`):** `loadBases()` 132,9 ms; `structuredClone(bases)` 13,2–21,1 ms (5×, im Haupt-Thread); Prüfung im Haupt-Thread 1822,7 ms; **erste Prüfung im neuen Worker 2095,1 ms** (Start des Workers: Module laden, `loadBases`, kalter JIT); weitere Prüfungen im Worker 1493–1658 ms.
+
+### Ziele nach T3 (AC-2, lokal)
+
+| Ziel (lokal, Median) | nach T3 | erreicht? |
+|---|---|---|
+| `stato` während einer Prüfung < 200 ms | **0,9 ms** (Max 1,4) statt 1555 ms | **ja** |
+| erstes Rendern < 1 s | Rahmen 0,2–0,3 ms + `vorschau.css` kalt 156 ms ≈ 157 ms; eine laufende Prüfung sperrt den Event-Loop nicht mehr (siehe `stato`), der Rahmen `buehne-*` ohne Vorschlag wartet weiter auf die Prüfung **seines** `rev` (D-01) | **ja** (der Rahmen `buehne-*` beim ersten Mal: so lange wie die Prüfung) |
+| `/pruefung` < 1 s | **1679 ms** kalt (Max 2441); warm 0,1 ms | **nein** – Befund B-6 |
+
+### Befunde (T3)
+
+| ID | Befund | Folge |
+|---|---|---|
+| B-6 | **`/pruefung` kalt bleibt ≈ 1,5–1,7 s** (R-1, AC-2): Die Prüfung ist ein Aufruf `deriveAspekto` in `agordilo` (D-02: unverändert); der Worker gibt nur den Event-Loop frei. Im Worker ist sie etwas langsamer als nach T2 (1679 statt 1517 ms Median): die **erste** Prüfung eines Servers trägt den Start des Workers (Probe: 2095 statt ≈ 1550 ms, Max 2441 ms in der Messung), der Worker-Thread hat einen eigenen, kalten JIT, und die Grundlast war höher (`uptime` 6,7–7,2 statt 5,7). | Ziel „`/pruefung` < 1 s“ verfehlt. Kandidat für eine Folge-Spec: `deriveAspekto` selbst (nicht `structureModelo`, B-2); optional den Worker beim Start vorwärmen (nach `listen`), was T3 nach der Implementierungs-Spec nicht tut (lazy). |
+| B-7 | **Weitere synchrone Prüfungen im Haupt-Thread** (D-22): `pruefungJetzt` der `Laborejo`-Werkzeuge (D-12, D-24: nur wenn kein fertiges Ergebnis da ist), `confirmed` in `vorschlagDe` (Ablehnung `409` beim Festlegen; je Kandidat eine Prüfung) und `exportMarko` beim Speichern. Sie sperren den Event-Loop weiter für je ≈ 1,5 s. | Nicht in diesem Lauf (keine Route des Strangs, Antworten unverändert). Kandidat für eine Folge-Spec. |
+| B-8 | `vorschau.css` kalt ist nicht schneller (156 / 299 ms gegen 135 / 173 ms nach T2): Die Teile ändern die eigene Arbeit nicht; die Max-Werte von `projektion` (72 ms) und `css-js` (115 ms) liegen in einzelnen Läufen unter der höheren Grundlast. Der Gewinn von D-25 ist, dass ein Kalt-Render andere Anfragen höchstens ≈ 75–130 ms (`derivationBasis`) statt den ganzen Render sperrt. | Nur zur Information; T4 misst „lokal nachher“ noch einmal. |
+
 ### N in CI (A-07, D-11)
 
 `messung-044` läuft in CI mit **N = 3** (Parameter in der Datei: lokal 10, mit `CI` gesetzt 3; `FM_MESSUNG_044_N` überschreibt für Probeläufe). Rechnung: lokal kostet ein Durchlauf ≈ 12,1 s (121,2 s für N = 10), mit dem Faktor CI/lokal ≈ 2,6 aus Spec 043 ≈ 31 s. N = 3 ≈ 95 s; dazu `antworten-044` (lokal 14,5 s → ≈ 38 s) und `stato-044` (lokal ≈ 7 s → ≈ 18 s, ab T2 ähnlich): zusammen ≈ 2,5 min. Der Job brauchte 7,5 von 15 min (Puffer 7,5 min); danach ≈ 10 min, Puffer ≈ 5 min. N = 10 kostete in CI ≈ 6 min und ließe ≈ 1,5 min Puffer – zu knapp. Keine Grenze wird geändert.
@@ -250,4 +305,11 @@ FM_AUSGABE=knapp pnpm --filter @fundamento/metiejo exec vitest run src/ableitung
 # T2: ganze metiejo-Suite (N der Messung für diesen Lauf klein) und Lint
 FM_MESSUNG_044_N=2 FM_AUSGABE=knapp pnpm --filter @fundamento/metiejo test
 pnpm --filter @fundamento/metiejo lint
+
+# T3: Worker-Pfad (gebautes Paket; vitest.config.ts baut vorher) und dieselben Tests unverändert gegen dist
+FM_AUSGABE=knapp pnpm --filter @fundamento/metiejo exec vitest run src/pruefung-worker-044.test.ts
+FM_SERVILO_044=dist FM_AUSGABE=knapp pnpm --filter @fundamento/metiejo exec vitest run src/stato-044.test.ts src/antworten-044.test.ts src/ableitungen-044.test.ts
+# T3: Startzeit bis zur URL-Zeile (R-6), N = 10, Werkzeug außerhalb des Repos (spawn von packages/cli/dist/index.js metiejo, Zeit bis „http://localhost:<port>“)
+pnpm turbo run build --filter=@fundamento/cli...
+node /tmp/s044t3/werkzeug/start-zeit.mjs "$PWD" 10
 ```
