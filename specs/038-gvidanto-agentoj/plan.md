@@ -14,7 +14,7 @@ Bezug 2.5 = entfällt, ersetzt durch ‚vorher' in Lauf 4 auf Bezug-SHA
 
 **Lauf:** 3 von 4 (Teil 3, PR C „Spec 038 – Screens auf Fundamento-Niveau“) · Basis `main` = `93b6caea` (Merge #153; enthält #151 = `636e7119` und #152 = `e5057afc`) · Branch `261106-spec-038-lauf-3-screens-9dc27a` (PR-Branch = Worktree-Branch, wie D-111) · Datum 2026-11-06 · **Stand (S038-22, vor dem Push):** V-1, V-2 und Teil 3 (3.1 bis 3.4c) erledigt; 1.9 und 3.5 gemessen auf Code-Kopf C `20961e72` (drei Läufe, keiner gestört, Ledger Spec 038 0,139656 $). Abnahme: 0 grüne Screens je Marke, Ursache `check_usage` (K3-Reguloj der Eroj) und `navigado`, nicht K8 (K8 `plena` bei allen vier Screens). `pnpm check` lief einmal: rot nur durch Zeitgrenzen unter der Last des Laufs selbst, der rote Check einzeln grün (Befund F-S038-22-1). Prüfungen sauber, `main` unverändert `93b6caea`, keine offenen PRs. Push, PR C, CI-Auswertung und Bericht folgen ohne Commit (wie D-25; Lauf 4 trägt nach).
 
-**Lauf:** 4 von 4 (Teil 4, PR D „Spec 038 – Messung“) · Basis `main` = `43010159` (Merge #154; enthält #151 = `636e7119`, #152 = `e5057afc`, #154 = PR C mit Kopf `c9ecd6c2`) · Branch `261107-spec-038-lauf-4-messung-a4db73` (PR-Branch = Worktree-Branch, wie D-111) · Datum 2026-11-07 · Bezug vorher unverändert `e4873c57` (`/tmp/s038-bezug`) · **Stand (S038-23):** Nachtrag Lauf 3 (V-1) erledigt, Gerüst Lauf 4 angelegt, Werkzeuge `$W` auf Lauf 4 umgestellt; F-1 bis F-4, 4.1 bis 4.5, 4.2a, T-1 und T-2 offen. Gemessen wird auf dem Code-Kopf D (= Grün-Commit S038-27, E-2) und auf dem Bezug.
+**Lauf:** 4 von 4 (Teil 4, PR D „Spec 038 – Messung“) · Basis `main` = `43010159` (Merge #154; enthält #151 = `636e7119`, #152 = `e5057afc`, #154 = PR C mit Kopf `c9ecd6c2`) · Branch `261107-spec-038-lauf-4-messung-a4db73` (PR-Branch = Worktree-Branch, wie D-111) · Datum 2026-11-07 · Bezug vorher unverändert `e4873c57` (`/tmp/s038-bezug`) · **Stand (S038-23):** Nachtrag Lauf 3 (V-1) erledigt, Gerüst Lauf 4 angelegt, Werkzeuge `$W` auf Lauf 4 umgestellt; F-1 bis F-4, 4.1 bis 4.5, 4.2a, T-1 und T-2 offen. Gemessen wird auf dem Code-Kopf D (= Grün-Commit S038-27, E-2) und auf dem Bezug. **Stand (S038-30, vor dem Push):** F-1 bis F-4, 4.2a, 4.3, 4.4, T-1 und T-2 erledigt; 4.1 und 4.2 teilweise (Scheiben verbraucht, Befehle und Schätzungen im Abschnitt „Messung 4“); gemessen auf Code-Kopf D `bfe19023` und dem Bezug `e4873c57` (vier Läufe, keiner gestört, Ledger Spec 038 0,876548 $). Grün: 0 Screens im Ablauf nachher, Abnahme komuna 0/2 wie Lauf 3. `pnpm check` lief einmal: rot nur durch eine Hook-Zeitgrenze in eroj unter der Last des Laufs selbst, der rote Check einzeln grün (Befund F-S038-30-1). Prüfungen sauber, `main` unverändert `43010159`, keine offenen PRs. Push, PR D, CI-Auswertung und Bericht folgen ohne Commit; das CI-Ergebnis trägt der Maintainer nach (es gibt keinen Lauf 5).
 
 **Ablage (D-21):** `spec.md`, `plan.md` und `tasks.md` kommen mit PR A auf `main`; jeder spätere Lauf ergänzt sie in seinem PR. Jedes Ticket schreibt seinen Beitrag zusätzlich in eine Datei außerhalb des Repos (`s038-beitraege/<Ticket>.md` im Feature-Ordner der Purple-Doku); S038-08 führt die Entscheidungen hier zusammen (vorläufige IDs `D-S038-0x-n` → D-39 ff.).
 
@@ -216,10 +216,35 @@ Aus den Beiträgen `s038-beitraege/S038-15.md` bis `S038-22.md` (S038-22).
 
 ### Tatsächlich berührte Dateien Lauf 4
 
-Aus den Beiträgen S038-23 bis S038-30; trägt S038-30 ein.
+Aus den Beiträgen S038-23 bis S038-30 (S038-30).
 
 | Datei | Art | Commit |
 |---|---|---|
+| `specs/038-gvidanto-agentoj/{plan,tasks}.md` | frei, geändert (`spec.md` byte-gleich) | `dd0d374f` (S038-23), `5b89844e` (S038-28, nur plan), Abschluss-Commit (S038-30) |
+| `packages/ekranoj/src/agento.ts` | frei, geändert (`KURZPROFILAJ_KAMPOJ`, `navigadaReguloDe`, `sistemoDe(…, slugoj?)`, Filter in `sxelaTaskoDe`; `NAVIGADA_REGULO` byte-gleich) | `b38898d8` rot (Stub), `3e7a2c81` grün (F-1); `e4a5ce35` rot (Stub), `05b5d223` grün (F-2) – S038-24 |
+| `packages/ekranoj/src/agento.test.ts` | frei, geändert (F-1, F-2; D-S038-24-2) | `b38898d8`, `e4a5ce35` rot (S038-24) |
+| `packages/ekranoj/src/kontroli-markon.test.ts` | frei, geändert (Filter an `KURZPROFILAJ_KAMPOJ`, F-S038-24-1) | `b38898d8` rot (S038-24) |
+| `packages/ekranoj/src/rondoj.ts` | frei, geändert (`penoj` nur bei `requests > 0`, D-203) | `15f8cb50` grün (S038-25) |
+| `packages/ekranoj/src/rondoj.test.ts` | frei, geändert (Kurzprofile brief+slots, Systemtext, „Grenze vor der ersten Anfrage einer Runde“, abgeleitete Schätzung) | `b38898d8`, `e4a5ce35` (S038-24), `145a7db3` (S038-25), `20352e6a` (S038-26), alle rot |
+| `packages/ekranoj/src/kostoj.ts` | frei, geändert (`TOKENOJ_EKRANO_RONDO_F = 65_615` mit Quelle; Zeile „… an estimate, not a limit.“ byte-gleich) | `6d5c05fa` grün (S038-26) |
+| `packages/ekranoj/src/kostoj.test.ts` | frei, geändert (Konstante fest, Ableitungen, 037-Test auf Spec-038-Quelle; D-S038-26-1/-2) | `20352e6a` rot (S038-26) |
+| `packages/ekranoj/src/index.ts` | frei, geändert (additiver Export `aspektoFaktojEnPagxo`, `normigiAspektoFaktojn`, `sondojEnPagxo`, `unuaFamilio`; D-208, einzige Produktionsänderung nach Code-Kopf D) | `2a1081fc` (S038-29) |
+| `packages/cli/src/ekranoj.test.ts` | vereinbarte Ausnahme (D-S038-26-1, zu bestätigen): zwei Erwartungen aus den Konstanten abgeleitet, eine Wertimportzeile | `20352e6a` rot (S038-26) |
+| `packages/nordstelo/test/fixtures/ablauf/integra-raporto.json` | frei, geändert (nur `lauf.takso` 608535 / 0.121707, aus der Testausgabe) | `20352e6a` rot (S038-26) |
+| `packages/nordstelo/src/ablauf/raporto.ts` | frei, geändert (`PenoKvar`, `KuroRekordo.penoj?/penoPlano?`) | `4aa58d31` rot (S038-27) |
+| `packages/nordstelo/src/ablauf/kuro.ts` | frei, geändert (`penojDe`) | `bfe19023` grün (S038-27) |
+| `packages/nordstelo/src/ablauf/komparo.ts` | frei, neu (Vergleich 4.3) | `4aa58d31` rot (Typen, Stubs), `bfe19023` grün (S038-27) |
+| `packages/nordstelo/src/ablauf/cli-ablauf.ts` | frei, geändert (`ARTOJ = ["ablauf", "komparo"]`, `HELPO_KOMPARO`; `--art ablauf` byte-gleich) | `4aa58d31` rot, `bfe19023` grün (S038-27) |
+| `packages/nordstelo/src/cli.ts`, `src/index.ts` | frei, geändert (Hilfezeile, Export) | `bfe19023` grün (S038-27) |
+| `packages/nordstelo/src/ablauf/{komparo,kuro,cli-ablauf}.test.ts` | frei, neu bzw. geändert | `4aa58d31` rot (S038-27) |
+| `packages/nordstelo/src/ablauf/test-doubles/laufoj.ts` | frei, neu (Attrappe für Laufordner) | `4aa58d31` rot (S038-27) |
+| `packages/nordstelo/test/fixtures/ablauf-038/**` | frei, neu (16 Dateien, 430 957 Bytes; drei echte Laufordner von anmelden-und-konto und `komparo.json`) | `2a1081fc` (S038-29) |
+| `packages/nordstelo/src/ablauf/komparo-038.test.ts` | frei, neu (T-1) | `2a1081fc` (S038-29) |
+| `packages/nordstelo/src/k8/zwilling.test.ts` | frei, neu (T-2) | `2a1081fc` (S038-29) |
+| `packages/nordstelo/src/k8/test-doubles/aspekto-kazoj.ts` | frei, neu (Normalisierungsfälle aus `faktoj.test.ts`) | `2a1081fc` (S038-29) |
+| `packages/nordstelo/src/k8/faktoj.test.ts` | frei, geändert (Fälle importiert; Tests und Erwartungen unverändert) | `2a1081fc` (S038-29) |
+
+41 Dateien im Diff gegen `origin/main` (21 neu): ekranoj 8, nordstelo 30, cli 1 (`src/ekranoj.test.ts`, vereinbart), specs 2. Keine Tabu-Datei (`packages/eroj/**`, `packages/metiejo/**`, Wurzeldateien, `.github/**`, `scripts/**`), nichts in `packages/modelo/**`, `packages/{projekcioj,vortaro,mcp,agordilo}/**`. `navigado.ts`, `verda.ts`, `check_usage` und K8 ohne Diff (L4-13).
 
 ## Vertrags-Fixtures (T0)
 
@@ -618,26 +643,43 @@ Aus der Implementierungs-Spec von Lauf 3 (§5) und den Beiträgen S038-15 bis S0
 
 #### Vorläufige Entscheidungen Lauf 4 (D-210 ff., durch S038-30 nummeriert)
 
-Aus der Implementierungs-Spec von Lauf 4 (§5) und den Beiträgen S038-23 bis S038-30; S038-30 nummeriert sie ab **D-210** durch (vorläufige ID in Klammern); vom Maintainer zu bestätigen. D-200 bis D-209 behalten ihre Nummern.
+Aus der Implementierungs-Spec von Lauf 4 (§5) und den Beiträgen S038-23 bis S038-30, fortlaufend ab **D-210** nummeriert (vorläufige ID in Klammern); vom Maintainer zu bestätigen. D-200 bis D-209 behalten ihre Nummern. Besonders prüfen: **D-212** (`NAVIGADA_REGULO` bleibt), **D-219** (zwei Erwartungen in `packages/cli/src/ekranoj.test.ts`, außerhalb von L4-5) und **D-220** (037-Test von `kostoj.test.ts` auf die Spec-038-Quelle umgestellt). D-219 und D-220 hat der Orchestrator vor S038-26 freigegeben (Standard übernommen).
 
-| vorläufig | Entscheidung | Grund |
+| # | Entscheidung | Grund |
 |---|---|---|
-| D-S038-23-1 | `$W` zeigt auf das Worktree-Repo von Lauf 4 (`lib.mjs` `R`, `sperre.mjs` eigene Stände und Plan-Repo) neben `/tmp/s038-bezug`; der Wächter wird nach seinem Selbsttest neu gestartet. | Beide nannten fest das Worktree von Lauf 3; eine falsche „eigen“-Regel macht eigene Läufe „gestört“ oder fremde unsichtbar. |
-| D-S038-23-2 | `mezuri` bucht Ablaufmessungen aus dem nordstelo-Bericht (`sumo.tokenoj`, `sumo.anfragoj`, `sumo.usd`, `lauf.commit`) des unter `--out` neu angelegten Laufordners; neue Selbsttestfälle. | `ausRaporto` las nur die ekranoj-Form und hätte 0 $ gebucht. |
-| D-S038-24-1 | `NAVIGADA_REGULO` bleibt exportiert und byte-gleich; `navigadaReguloDe(slugoj)` hängt den Satz an. | `cli/src/ekranoj-integra.test.ts:407` (nicht frei) und vier ekranoj-Prüfungen nutzen ihn; präzisiert die Formulierung von D-202. |
-| D-S038-24-2 | Die bestehende Prüfung `fields: ["brief"]` (`agento.test.ts:427-447`) wird durch die Erwartung von F-1 ersetzt; weitere geänderte Prüfungen stehen im Beitrag. | F-1 ändert genau dieses Verhalten. |
-| D-S038-24-3 | Kurzprofile nehmen `get_ero` wie beantwortet; `slots` in `rest` oder fehlend → nur `brief` mit Logzeile, kein Folgeaufruf. | Edge Case der Product-Spec; die Grenze 750 bleibt (L4-9). |
-| D-S038-24-4 | Kein zusätzlicher Filter, wo `--ekranoj` wirkt: `plano.ekranoj` in `kuruEkranojn` ist schon die gebaute Liste; der Filter liegt in `sxelaTaskoDe`. | Geprüft an `planoElNomoj`/`enNomojn`/`mallongigiPlanon`; erledigt den Rückfall der technical-spec. |
-| D-S038-26-1 | Festgehaltene Erwartungen der Schätzung (ekranoj, nordstelo `integra-raporto.json` `lauf.takso`, zwei Zeilen in `cli/src/ekranoj.test.ts`) werden im Rot-Commit angepasst, wo möglich aus den Konstanten abgeleitet. **Zu bestätigen** (der cli-Test liegt außerhalb von L4-5). | E-6 ändert die Konstante; testing.md: ableiten. Vorbild D-187. |
-| D-S038-26-2 | `kostoj.test.ts:26-37` (Schätzung deckt die 037-Abnahme) wird auf die Quelle aus Spec 038 umgestellt, mit ausdrücklicher Rundung. **Zu bestätigen.** | 3 × 65 615 + 5 000 = 201 845 < 213 397; E-6 setzt den Wert bewusst. |
-| D-S038-27-1 | Der Vergleich liest die gespeicherten `raporto.json`/`kuro.json`/`lauf.json` jeder Seite und bewertet nie neu. | Jeder Stand wird mit seinem eigenen Bewerter beurteilt; kein Modelo, kein Browser im Vergleich; Determinismus T-1 auf gespeicherten Daten. |
-| D-S038-27-2 | „gestört“ kommt als Eingabe in den Vergleich (`--gestoert <Laufordner>`), „Last > Kerne“ aus den Daten. | „gestört“ steht nur in `$S/laeufe.tsv`. |
-| D-S038-27-3 | `--antaux`/`--post`/`--zusatz` nehmen einen Laufordner (mit `lauf.json`) oder einen Elternordner mit genau einem; andere Geschwister werden übergangen. | `--out` legt einen Unterordner mit Zeitstempel an; `messpunkt-1/` enthält auch `projekcioj/`. |
-| D-S038-27-4 | `KuroRekordo.penoj?/penoPlano?` werden in `raporto.ts` deklariert (dort liegt der Typ) und in `kuro.ts` gefüllt; `penoPlanoDe` darf vor dem Code-Kopf D additiv aus ekranoj exportiert werden. | Echter Ort des Typs; eine Definition des Plananteils. |
-| D-S038-28-1 | Die Lückenliste wird mit den Elternordnern aufgerufen; `fm ekranoj mankoj` sucht rekursiv. | Das Muster der technical-spec ist eine Ebene zu kurz. |
-| D-S038-28-2 | S038-28 schreibt seine plan-Abschnitte und committet sie in einem Doku-Commit nach dem letzten Lauf. | Fortsetzbarkeit; keine Wirkung auf den Build des Code-Kopfs D. |
-| D-S038-30-1 | QA nach S038-30 nur lesend; Befunde in den QA-Bericht, den PR-Text (ohne Commit) und den Laufbericht. | L4-2 (ein Push). |
-| D-S038-30-2 | Kein eigenes Test-Ticket; Abdeckung nach §4.2 der Implementierungs-Spec. | Ticketliste L4-1 bindend (wie D-144, D-196). |
+| D-210 (D-S038-23-1) | `$W` zeigt auf das Worktree-Repo von Lauf 4 (`lib.mjs` `R`, `sperre.mjs` eigene Stände und Plan-Repo) neben `/tmp/s038-bezug`; der Wächter wird nach seinem Selbsttest neu gestartet (PID 4320 → 28603). | Beide nannten fest das Worktree von Lauf 3; eine falsche „eigen“-Regel macht eigene Läufe „gestört“ oder fremde unsichtbar. |
+| D-211 (D-S038-23-2) | `mezuri` bucht Ablaufmessungen aus dem nordstelo-Bericht (`sumo.tokenoj`, `sumo.anfragoj`, `sumo.usd`, `lauf.commit`) des unter `--out` neu angelegten Laufordners, sonst Σ `peno` der `kuro.json`; neue Selbsttestfälle (127/127, 99/99). | `ausRaporto` las nur die ekranoj-Form und hätte 0 $ gebucht. |
+| D-212 (D-S038-24-1) | `NAVIGADA_REGULO` bleibt exportiert und byte-gleich; `navigadaReguloDe(slugoj)` hängt den Satz mit den gebauten Slugs an. **Zu bestätigen.** | `cli/src/ekranoj-integra.test.ts:407` (nicht frei) und vier ekranoj-Prüfungen nutzen ihn; präzisiert die Formulierung von D-202. |
+| D-213 (D-S038-24-2) | Die bestehende Prüfung `fields: ["brief"]` (`agento.test.ts:427-447`) wird durch die Erwartung von F-1 ersetzt; dazu `agento.test.ts:491`, `rondoj.test.ts:958-963` und `:1121-1122`, `kontroli-markon.test.ts:131-135` (Beitrag S038-24). | F-1 ändert genau dieses Verhalten. |
+| D-214 (D-S038-24-3) | Kurzprofile nehmen `get_ero` wie beantwortet; `slots` in `rest` oder fehlend → nur `brief` mit Logzeile, kein Folgeaufruf. | Edge Case der Product-Spec; die Grenze 750 bleibt (L4-9). |
+| D-215 (D-S038-24-4) | Kein zusätzlicher Filter, wo `--ekranoj` wirkt: `plano.ekranoj` in `kuruEkranojn` ist schon die gebaute Liste; der Filter liegt in `sxelaTaskoDe`; `rondoj.ts` bleibt dafür unberührt. | Geprüft an `planoElNomoj`/`enNomojn`/`mallongigiPlanon`; erledigt den Rückfall der technical-spec. |
+| D-216 (D-S038-25-1) | D-203 an genau einer Stelle: im `finally` der Baurunde wird `penoDiferenco` weiter gerechnet, `penoj.set` nur bei `requests > 0`. | Kleinste Änderung; `portitaEl`, `verdaEkde`, Budget und Plananteil unverändert. |
+| D-217 (D-S038-25-2) | `eligo.ts` bleibt unverändert. | `penoTabelo` überspringt schon jeden Screen ohne `peno` (`eligo.ts:433`). |
+| D-218 (D-S038-25-3) | Kein eigener Test für „erster Screen in Runde 1 hält vor der ersten Anfrage“. | Dann wird die Runde gar nicht erfasst (`rondoj = []`, bestehender Test zu `CostLimitReached`). |
+| D-219 (D-S038-26-1) | Festgehaltene Erwartungen der Schätzung (ekranoj, nordstelo `integra-raporto.json` `lauf.takso` = 608535 / 0.121707 aus der Testausgabe, zwei Zeilen und eine Wertimportzeile in `cli/src/ekranoj.test.ts`) werden im Rot-Commit angepasst, aus den Konstanten abgeleitet. **Zu bestätigen** (der cli-Test liegt außerhalb von L4-5). | E-6 ändert die Konstante; testing.md: ableiten. Vorbild D-187. |
+| D-220 (D-S038-26-2) | `kostoj.test.ts` (Schätzung deckt die 037-Abnahme) wird auf die Quelle aus Spec 038 umgestellt (459 306 Tokens auf 7 gebaute Screen-Runden), mit ausdrücklicher Rundung (7 × 65 615 = 459 305); nicht gelöscht, nicht `.skip`. **Zu bestätigen.** | 3 × 65 615 + 5 000 = 201 845 < 213 397; E-6 setzt den Wert bewusst. |
+| D-221 (D-S038-26-3) | Der eine „geändert“-Treffer von `$W/audit-ac4` (`kostoj.test.ts: - maksTokenoj: 250_000,`) gilt als erklärt: Eingabe des ersetzten 037-Tests, der neue Test nutzt `1e6`; keine Grenze im Code berührt oder angehoben (AC-5). | AC-5 erlaubt erklärte Treffer. |
+| D-222 (D-S038-26-4) | Um `lauf.takso` aus der Testausgabe zu nehmen, wurde `kostoj.ts` vor dem Rot-Commit kurz auf 65 615 gesetzt und die eigene, nicht committete Probeänderung zurückgesetzt; ekranoj danach neu gebaut, Rot lief gegen 70 000. | Kein Wert von Hand gerechnet. |
+| D-223 (D-S038-26-5) | Der neue Wackel-Test `packages/ekranoj/src/rondoj.test.ts:733` wird nicht geändert (L4-3); Befund mit Fix-Vorschlag. | Eigener Wackler aus S038-17, unabhängig von Lauf 4 (Befunde Lauf 4). |
+| D-224 (D-S038-27-1) | Der Vergleich liest die gespeicherten `raporto.json`/`kuro.json`/`lauf.json` jeder Seite, tolerant gegenüber älteren Formen, und bewertet nie neu. | Jeder Stand wird mit seinem eigenen Bewerter beurteilt; kein Modelo, kein Browser im Vergleich; Determinismus T-1. |
+| D-225 (D-S038-27-2) | „gestört“ kommt als Eingabe in den Vergleich (`--gestoert <Laufordner>`), „Last > Kerne“ aus den Daten. | „gestört“ steht nur in `$S/laeufe.tsv`. |
+| D-226 (D-S038-27-3) | `--antaux`/`--post`/`--zusatz` nehmen einen Laufordner (mit `lauf.json`) oder einen Elternordner mit genau einem; andere Geschwister werden übergangen. | `--out` legt einen Unterordner mit Zeitstempel an; `messpunkt-1/` enthält auch `projekcioj/`. |
+| D-227 (D-S038-27-4) | `KuroRekordo.penoj?/penoPlano?` werden in `raporto.ts` deklariert und in `kuro.ts` gefüllt; `penoPlano` wird in nordstelo nachgerechnet (kein Export aus ekranoj nötig). | Echter Ort des Typs; ekranoj vor Code-Kopf D unverändert. |
+| D-228 (D-S038-27-5) | „Gebaute Screen-Runde“ in nordstelo-Daten = Screen mit `total ≠ null` in einer Runde ≤ `faritajRondoj`, ohne grün mitgetragene; das abgeleitete Mittel schließt den Plananteil ein, das Mittel aus `penoj` nicht – Δ trägt dann `tokenojAbgeleitet`. | D-199 (`k7.bytes`) gibt es nur im ekranoj-Bericht. |
+| D-229 (D-S038-27-6) | „teilweise“ je Paar bei `haltigo` oder nicht gestarteten Wiederholungen, „nicht gestartet“ ohne Lauf; beides ohne Δ. „Last > Kerne“ verhindert das ganze Δ. | Spec 4.3; nur Vollständiges wird verglichen. |
+| D-230 (D-S038-27-7) | Paare = alle Aufzeichnungen beider Seiten; nur geplante Paare erscheinen als Grund; `--zusatz` fügt keine Paare hinzu. | Nichts Gemessenes fällt heraus, nichts Ungemessenes wird erfunden. |
+| D-231 (D-S038-27-8) | Grün ist je Screen nur für `ABLAUF_MARKO` = komuna gespeichert; je weiterer Marke gibt es `k8JeMarko`. | Die Ablaufdaten tragen keinen Grün-Zustand je weiterer Marke. |
+| D-232 (D-S038-28-1) | Die Lückenliste wird mit den Elternordnern aufgerufen; `fm ekranoj mankoj` sucht rekursiv. | Das Muster der technical-spec ist eine Ebene zu kurz. |
+| D-233 (D-S038-28-2) | S038-28 schreibt seine plan-Abschnitte und committet sie in einem Doku-Commit nach dem letzten Lauf (`5b89844e`). | Fortsetzbarkeit; keine Wirkung auf den Build des Code-Kopfs D. |
+| D-234 (D-S038-28-3) | Vergleich und Lückenliste laufen als `cd $R && pnpm …` statt `pnpm --dir $R …`. | `pnpm --dir` außerhalb eines Checkouts bricht mit `ERR_PNPM_BAD_PM_VERSION` ab (Corepack-pnpm gegen `packageManager`). |
+| D-235 (D-S038-28-4) | Die vorher-Läufe werden mit dem echten Rest der Scheibe reserviert (`--usd 0.253829`, `--usd 0.207957`), nicht mit der 0,05-$-Schätzung. | Die Scheibenprüfung soll der echten Grenze gelten (F-S038-23-3). |
+| D-236 (D-S038-29-1) | `packages/ekranoj/src/index.ts` exportiert additiv `aspektoFaktojEnPagxo`, `normigiAspektoFaktojn`, `sondojEnPagxo`, `unuaFamilio` (benannt); einzige Produktionsänderung nach Code-Kopf D, ohne Verhaltensänderung (D-208). | `package.json` `exports` erlaubt nur `.`; der Zwillingstest braucht die Funktionen. |
+| D-237 (D-S038-29-2) | Fixture `ablauf-038` = drei echte Laufordner (`antaux/<id>` zweimal, `post/<id>`), benannt nach den Lauf-IDs der Messung. | `komparo.json` trägt dieselben `lauf`-Werte wie die Messung; D-207 hat zwei vorher-Ordner. |
+| D-238 (D-S038-29-3) | Je Lauf × Variante nur der Screen `anmelden` der letzten Runde; `raporto.json` per Skript auf den Ablauf gekürzt, alle anderen Dateien byte-gleich kopiert. | Größe (431 KB statt ≈ 1,3 MB); 16 `k8`-Renders reichen für T-2. |
+| D-239 (D-S038-29-4) | Die Normalisierungsfälle von `faktoj.test.ts` liegen in `src/k8/test-doubles/aspekto-kazoj.ts` und werden von beiden Tests importiert; keine Erwartung geändert. | Import aus einer `.test.ts` registriert deren Tests doppelt; Abschreiben driftet. |
+| D-240 (D-S038-29-5) | Zwillings-Normalisierung = Kommentare, Leerraum, Schlusskomma (nicht nach `,`/`[`), Funktionsname; Literale bleiben ganz. Am echten Paar bewiesen (nötig: Leerraum, Kommentare, Schlusskomma). | tsc behält Schlusskommas, Vite entfernt sie (R-6, kein echter Unterschied). |
+| D-241 (D-S038-30-1) | QA nach S038-30 nur lesend; Befunde in den QA-Bericht, den PR-Text (ohne Commit) und den Laufbericht. | L4-2 (ein Push). |
+| D-242 (D-S038-30-2) | Kein eigenes Test-Ticket; Abdeckung nach §4.2 der Implementierungs-Spec (S038-29 Tests aus der Messung, S038-30 `test:betroffen` und `pnpm check`). | Ticketliste L4-1 bindend (wie D-144, D-196). |
 
 ## Lieferliste
 
@@ -671,18 +713,36 @@ Aus der Implementierungs-Spec von Lauf 4 (§5) und den Beiträgen S038-23 bis S0
 | 3.4c | Tokens je Screen und Runde und Spalte K8 in `raporto.json`/`raporto.md` | erledigt (S038-21, `0a27c25e` → `20961e72`): `rondoj[n].ekranoj[slug].peno`, `penoPlano`, Tabelle „Tokens je Screen und Runde“ und Spalte K8 in `raporto.md`; in beiden Abnahmeläufen Σ + Plan = Laufsumme |
 | 3.5 | Abnahme komuna und provo nachher (`teil1-komuna`, `abnahme-provo`), Fotos vorher/nachher, Sichtprüfung | teilweise (S038-22, T3844/T3845): Läufe komuna und provo gemessen, Fotos vorher/nachher mit Sichtprüfung (Abschnitte „Abnahme 3.5“, „Bildschirmfotos vorher/nachher“); **0 grüne Screens je Marke** – Ursache `check_usage` und `navigado`, nicht K8 (F-S038-22-4); nichts gelockert |
 | V-1 (L4) | Nachtrag Lauf 3 (wie D-25): PR C #154, Merge `43010159`, CI beider Läufe und Nachtlauf mit Run-IDs, Einordnung je rotem Job, QA-Befund I-1, Wackel-Quoten; T3847 abgehakt; D-145 bis D-199 bestätigt (E-1); Kopfzeile, Startbedingung, Frei/Tabu und Entscheidungen Lauf 4; `$W` auf Lauf 4 | erledigt (S038-23, Doku-Commit `Spec 038: Nachtrag Lauf 3 und Start Lauf 4 in plan und tasks`) |
-| F-1 | Slot-Regeln in den Kurzprofilen: `get_ero { name, fields: ["brief", "slots"] }` ab Runde 2, Slot-Inhalt je Ero im Auftragstext; 750 je Kombination unverändert; Spec-037-Pfad byte-gleich (F-S038-22-4 a) | offen (S038-24) |
-| F-2 | Navigationsregel nur auf gebaute Screens: Regel im Systemtext mit den Slugs von `plano.ekranoj`, „Laut Plan verweist …“ nur mit gebauten Zielen; Spec-037-Pfad byte-gleich (F-S038-22-4 b) | offen (S038-24) |
-| F-3 | `peno` nur bei gelaufenem Bau (I-1), Test „Grenze vor der ersten Anfrage einer Runde“, Invariante Σ + `penoPlano` = `peno` | offen (S038-25) |
-| F-4 | Schätzkonstante `TOKENOJ_EKRANO_RONDO_F = 65_615` mit Quelle (E-6); die beiden anderen Konstanten unverändert | offen (S038-26) |
-| 4.1 | Vorher auf dem Bezug `e4873c57`: `vorher-ablauf-0` (Variante 0, alle fünf), dann `vorher-ablauf-F` (Katalog) aus dem Rest der Scheibe „vorher“; Zusatzzeile „Stand vor 036 Teil 5“ (037-Messpunkt `07585b5e`) | offen (S038-28) |
-| 4.2 | Nachher auf dem Code-Kopf D: `nachher-ablauf`, alle fünf, F und 0, eine Wiederholung, Scheibe 0,45 $ | offen (S038-28) |
-| 4.2a | Abnahme komuna `abnahme-komuna-l4` auf dem Code-Kopf D, grüne Screens gegen Lauf 3 (0/2) (E-3) | offen (S038-28) |
-| 4.3 | Vergleich vorher/nachher als Code (`nordstelo --art komparo`, `penoj` in `kuro.json`), Tabelle im plan | offen (S038-27 Code, S038-28 Tabelle) |
-| 4.4 | Lückenliste aus `fm ekranoj mankoj` und `list_arangxoj` → „Mankoj – Eroj-Runde 7“ | offen (S038-28) |
-| 4.5 | Doku: plan, tasks, Bericht `$S/bericht-lauf-4.md`; `spec.md` byte-gleich | offen (S038-30) |
-| T-1 | Fixtures `ablauf-038` aus der Messung, Determinismustest gegen `komparo.json` | offen (S038-29) |
-| T-2 | Zwillingstest der K8-Extraktoren mit Negativfall (D-06, E-4) | offen (S038-29) |
+| F-1 | Slot-Regeln in den Kurzprofilen: `get_ero { name, fields: ["brief", "slots"] }` ab Runde 2, Slot-Inhalt je Ero im Auftragstext; 750 je Kombination unverändert; Spec-037-Pfad byte-gleich (F-S038-22-4 a) | erledigt (S038-24, `b38898d8` → `3e7a2c81`): `KURZPROFILAJ_KAMPOJ = ["brief", "slots"]` ab Runde 2, Slot-Teil unter der neuen Überschrift, ohne `slots` nur brief mit Logzeile (D-S038-24-3); in der Messung 0 Kurzprofile ohne slots (R-1 nicht eingetreten) |
+| F-2 | Navigationsregel nur auf gebaute Screens: Regel im Systemtext mit den Slugs von `plano.ekranoj`, „Laut Plan verweist …“ nur mit gebauten Zielen; Spec-037-Pfad byte-gleich (F-S038-22-4 b) | erledigt (S038-24, `e4a5ce35` → `05b5d223`): `navigadaReguloDe(slugoj)` mit den gebauten Slugs, `sxelaTaskoDe` nur mit gebauten Zielen; `NAVIGADA_REGULO` und Spec-037-Pfad byte-gleich (D-S038-24-1, zu bestätigen) |
+| F-3 | `peno` nur bei gelaufenem Bau (I-1), Test „Grenze vor der ersten Anfrage einer Runde“, Invariante Σ + `penoPlano` = `peno` | erledigt (S038-25, `145a7db3` → `15f8cb50`): Test „Grenze vor der ersten Anfrage einer Runde“, Invariante für vier Zähler; Abnahme `raporto.md` ohne Zeile mit 0 Anfragen |
+| F-4 | Schätzkonstante `TOKENOJ_EKRANO_RONDO_F = 65_615` mit Quelle (E-6); die beiden anderen Konstanten unverändert | erledigt (S038-26, `20352e6a` → `6d5c05fa`): 65 615 mit Quelle; Erwartungen abgeleitet (D-S038-26-1/-2, zu bestätigen). Gemessen nachher F 80 011 je gebauter Screen-Runde (F-S038-28-2) |
+| 4.1 | Vorher auf dem Bezug `e4873c57`: `vorher-ablauf-0` (Variante 0, alle fünf), dann `vorher-ablauf-F` (Katalog) aus dem Rest der Scheibe „vorher“; Zusatzzeile „Stand vor 036 Teil 5“ (037-Messpunkt `07585b5e`) | teilweise (S038-28, T3861): `vorher-ablauf-0` alle fünf Abläufe je 3 Runden; `vorher-ablauf-F` nur anmelden-und-konto Runde 1 – Scheibe „vorher“ verbraucht (Rest 0,010953 $); fehlende Teile mit Befehl und Schätzung im Abschnitt „Messung 4“; Zusatzzeile „Stand vor 036 Teil 5“ vorhanden |
+| 4.2 | Nachher auf dem Code-Kopf D: `nachher-ablauf`, alle fünf, F und 0, eine Wiederholung, Scheibe 0,45 $ | teilweise (S038-28, T3860): `nachher-ablauf` auf `bfe19023`, 5 von 10 Läufen gebaut (anmelden-und-konto F und 0, liste-filter-detail 0 vollständig; liste-filter-detail F Anbieterfehler in Runde 2, F-S038-28-1; formular-in-schritten F Grenze in Runde 2; 5 nicht gestartet) – Scheibe 0,45 $ verbraucht; Befehle und Schätzungen im Abschnitt „Messung 4“ |
+| 4.2a | Abnahme komuna `abnahme-komuna-l4` auf dem Code-Kopf D, grüne Screens gegen Lauf 3 (0/2) (E-3) | erledigt (S038-28, T3859): `abnahme-komuna-l4` gemessen, Fotos `$S/abnahme-l4/komuna/bildoj/`; **0/2 grün wie Lauf 3** (F-S038-28-3), `restantaj` je Regel im Abschnitt „Ziel grün“; nichts gelockert |
+| 4.3 | Vergleich vorher/nachher als Code (`nordstelo --art komparo`, `penoj` in `kuro.json`), Tabelle im plan | erledigt (S038-27 Code `4aa58d31` → `bfe19023`; S038-28 Tabelle „Messung 4“): 10 Paare, 2 mit Δ (Variante 0, beide ≈); F-Paare ohne Δ, weil vorher F teilweise |
+| 4.4 | Lückenliste aus `fm ekranoj mankoj` und `list_arangxoj` → „Mankoj – Eroj-Runde 7“ | erledigt (S038-28, T3863): 7 Zeilen „Lückenliste 4.4“ unter „Mankoj – Eroj-Runde 7“, ohne Doppelte |
+| 4.5 | Doku: plan, tasks, Bericht `$S/bericht-lauf-4.md`; `spec.md` byte-gleich | erledigt bis auf den Bericht (S038-30): plan und tasks im Abschluss-Commit, `spec.md` byte-gleich; `$S/bericht-lauf-4.md` folgt nach dem Push ohne Commit |
+| T-1 | Fixtures `ablauf-038` aus der Messung, Determinismustest gegen `komparo.json` | erledigt (S038-29, `2a1081fc`): `ablauf-038` (anmelden-und-konto, 16 Dateien, 430 957 Bytes), `komparo-038.test.ts` byte-gleich gegen `komparo.json` |
+| T-2 | Zwillingstest der K8-Extraktoren mit Negativfall (D-06, E-4) | erledigt (S038-29, `2a1081fc`): `zwilling.test.ts` 8 Tests, Negativfall rot gezeigt (4 von 8 rot mit veränderter Kopie, nicht committet) |
+| Q-1 | `spec.md` byte-gleich, `plan.md` und `tasks.md` fortgeschrieben | erledigt: `spec.md` SHA-256 `dedf2760…` in allen vier PRs unverändert; plan/tasks in A, B, C und D fortgeschrieben |
+| Q-2 | Konfliktprüfung gegen `main` und offene PRs; Merge-Reihenfolge „D zuletzt“ | erledigt vor dem Push (S038-30): `main` unverändert `43010159`, keine offenen PRs; A, B, C gemergt; Mergebarkeit von PR D nach dem Push im PR-Text |
+| Q-3 | Bericht im Format von Spec 035 mit dem Abschluss der Lieferliste von Spec 038 | folgt nach dem Push ohne Commit (`$S/bericht-lauf-4.md`, S038-30) |
+
+### Abschluss der Lieferliste Spec 038 (S038-30, vor dem Push)
+
+| Teil | Punkte | Stand |
+|---|---|---|
+| T0 und Teil 1 (PR A #151, gemergt `636e7119`) | L-0, 1.1 bis 1.8c; 1.9 (gemessen in Lauf 3) | erledigt |
+| Teil 2 (PR B #152, gemergt `e5057afc`) | 2.1 bis 2.4 (2.5 entfällt, ersetzt durch „vorher“ in Lauf 4) | erledigt |
+| Teil 3 (PR C #154, gemergt `43010159`) | V-1, V-2, 3.1 bis 3.4c | erledigt |
+| Teil 3 | 3.5 | teilweise: gemessen und fotografiert, 0 grüne Screens je Marke; die Ursachen (Slot-Regeln, Navigation) mit F-1/F-2 in Lauf 4 angegangen, Abnahme komuna weiter 0/2 (neue Hindernisse: Label-Reguloj, Platzhalter-Verweis, leere Seite nach Runde 1) |
+| Teil 4 (PR D) | V-1 (L4), F-1 bis F-4, 4.2a, 4.3, 4.4, T-1, T-2 | erledigt |
+| Teil 4 | 4.1, 4.2 | teilweise: die Kappe 1,00 $ reicht nicht für alle fünf Abläufe auf beiden Seiten; Rest ≈ 0,52 $ nachher und ≈ 2,32 $ vorher F (Befehle im Abschnitt „Messung 4“) |
+| Teil 4 | 4.5, Q-3 | Bericht nach dem Push ohne Commit; plan und tasks erledigt |
+| Querschnitt | Q-1, Q-2 | erledigt |
+
+Offen: nichts außer dem CI-Ergebnis von Lauf 4 (T3868, Maintainer). Blockiert: nichts.
 
 ## Befunde
 
@@ -776,6 +836,25 @@ S038-03 (MG-5): keine – jedes Regionsmerkmal ist aus der Skemo ableitbar.
 - **F-S038-22-4 Abnahme 0 grün je Marke, nicht durch K8:** alle vier Screens haben `k8.plena`; Hindernisse `check_usage` (z. B. komuna liste: `fm-teksto` im Slot `caption` von `fm-tabelo`, `uzo-slot-accepts`/`uzo-slot-nesting`; provo detail: erfundener Slot `karto.slot=entries`) und `navigado` (tote Verweise auf nicht gebaute Screens `edit.html`, `bearbeiten.html`, `einstellungen.html`, weil der Lauf nur liste und detail baut). Kein Lockern; Vorschlag Lauf 4: Kurzprofile um die Slot-Regeln (`accepts`, Verschachtelung) der verwendeten Eroj ergänzen prüfen, Navigationsregel auf die gebauten Screens beschränken.
 - **F-S038-22-5 Abstand der Shell nicht auf einer Stufe:** in beiden Marken nennt `senRimedaj` (`k8-interspaco`, Manko `interspacoj`) zuerst `fm-sxelo > fm-navigado` (9 px) bzw. `fm-sxelo > fm-pagxo` (25 px) – der Abstand kommt aus den Sxablonoj selbst, nicht vom Agenten. Hinweis für Eroj/Sxablonoj (tabu in Lauf 3).
 - **F-S038-22-6 Sichtprüfung** (S-1 bis S-7 im Abschnitt „Bildschirmfotos vorher/nachher“): Schrift und Rahmen in beiden Marken behoben; offen sind fehlende Tabelle (komuna liste, Ladezustand), fehlender Karteninhalt (provo detail, erfundener Slot), enge Feld- und Spaltenabstände.
+
+### Lauf 4
+
+- **F-S038-23-1** Das Worktree von Lauf 3 (`fundamento-wt-mw5a76zz3v5iq8h6`) besteht noch; es zählt nicht mehr als eigen – ein Messwerkzeug dort wäre ein fremder Treffer (gewollt).
+- **F-S038-23-2** Der Nachtlauf `main` 42328889167 war schon vor dem Push von PR C in eroj rot (`zweitfarbe-036`).
+- **F-S038-23-3** `kosten reservieren` ohne `--usd` reserviert die Schätzung 0,05 $; die echte Grenze ist `--max-tokens` (in S038-28 mit D-235 behoben).
+- **F-S038-24-1** `kontroli-markon.test.ts` pinnte ebenfalls `fields: ["brief"]` (nicht in der Spec vorhergesehen); jetzt an `KURZPROFILAJ_KAMPOJ` gebunden.
+- **F-S038-24-2** `navigadaReguloDe([])` gibt nur `NAVIGADA_REGULO` zurück; im Lauf nicht erreichbar (ein Plan hat ≥ 1 Screen). Ein Kurzprofil ohne slots wird ungekürzt durchgereicht und kann `"rest":["slots"]` enthalten.
+- **D-221 (D-S038-26-3) `audit-ac4`:** ein „geändert“-Treffer `packages/ekranoj/src/kostoj.test.ts: - maksTokenoj: 250_000,` – Eingabe des ersetzten 037-Tests (D-220), der neue Test nutzt `1e6`; keine Grenze angehoben. Die 40 „neu“-Zeilen sind Testeingaben, Kommentare und gespeicherte Messdaten der Fixture `ablauf-038` (`maksTokenoj` der Läufe, `haltigo: "max-tokens"`, gemessene `outputTokens: 750`).
+- **D-223 (D-S038-26-5) Eigener Wackel-Test `packages/ekranoj/src/rondoj.test.ts:733`** („K8 probes from the scorer to the renderer (3.4b) › gives the renderer the options of before, and the same result, without sondoPetoj“, seit S038-17): allein 26/30 rot, in `test:betroffen` 1/2 (S038-26), danach 0 (S038-27, S038-29, S038-30). Ursache: der Test vergleicht zwei Läufe als JSON und nullt nur `rezulto.peno.ms`, nicht `rondoj[n].ekranoj[slug].peno.ms`. **Fix-Vorschlag (Folgeauftrag, kein Push in Spec 038):** vor dem Vergleich auch jedes `rondoj[n].ekranoj[slug].peno.ms` auf 0 setzen (oder alle `ms`-Felder per Ersetzer aus dem JSON nehmen); keine Zeitgrenze, keine Erwartung lockern.
+- **F-S038-28-1** Anbieterfehler 400 („Assistant message must have either content or tool_calls, but not none.“) beendete nachher liste-filter-detail F in Runde 2. Vorschlag: eine leere Assistentennachricht vor dem nächsten Aufruf verwerfen oder neu anfragen.
+- **F-S038-28-2** Schätzkonstante zu niedrig: nachher F 80 011 Tokens ein je gebauter Screen-Runde (Mittel über 26) gegen 65 615; Variante 0 3 609–5 414 gegen 2 000. Darum 2½ statt ≈ 3 Abläufe nachher. Vorschlag: nach dieser Messung neu bestimmen (Folge-Spec).
+- **F-S038-28-3** Abnahme komuna weiter 0/2 grün: Label-Reguloj (`destructive-label-names-object`, `ero-prop-constraint`), Platzhalter-Verweis `slug.html`, detail leer nach 165 247 Tokens in Runde 1. Nichts gelockert.
+- **F-S038-28-4** Vorher F grün 2/4, nachher 0/4 (anmelden-und-konto): vorher nur Runde 1 und ohne K8-Regeln bewertet (Bezug) – nicht vergleichbar.
+- **F-S038-28-5** `restantaj` stehen in den Ablaufdaten nur als Zahl je Lauf. Vorschlag: `restantaj` je Regel additiv in `kuro.json`.
+- **F-S038-28-6** R-1 nicht eingetreten: 0 Kurzprofile ohne slots; 3 übersprungene Kurzprofile für Sxablono-Namen (filtrilo, formularo).
+- **F-S038-29-1** Auch `normigiAspektoFaktojn` und `unuaFamilio` sind nach der Normalisierung quelltextgleich; der Test prüft `normigiAspektoFaktojn` bewusst über das Verhalten (Modul-Helfer zeigt `toString()` nicht).
+- **F-S038-30-1 `pnpm check` rot unter eigener Last** (D-92/D-93, wie S038-14-1): einmal gelaufen (2026-11-07 13:07:53Z–13:08:09Z), rot nach 16 s in `@fundamento/eroj#test`: `packages/eroj/test/vitrino-partoj.test.ts:101` „Hook timed out in 10000ms“ (Datei fremd, tabu, unverändert), 1-min-Last bis 22,5; turbo brach die übrigen Test-Tasks ab, die Checks hinter `&&` liefen nicht. eroj `vitest run` allein 43/43 grün, `vitrino-partoj.test.ts` allein 0/10 rot, `pnpm check:privat` allein grün. Kein zweites `pnpm check`, keine Grenze angehoben; die CI prüft den Rest.
+- **F-S038-30-2 (Hinweis)** `test:betroffen` in S038-30 lief vollständig aus dem Turbo-Cache (13/13, Baum identisch mit dem grünen Lauf von S038-29 auf `2a1081fc`).
 
 ## Abschluss (S038-08, vor dem Push)
 
@@ -1032,6 +1111,34 @@ Aus `$S/ablauf/vergleich/vergleich.md` (`pnpm nordstelo --art komparo --antaux $
 - **Befund (weiter 0 grün):** häufigste `restantaj` je Regel in der Abnahme: `destructive-label-names-object` und `ero-prop-constraint` (je 2, ein Button „Löschen“ zweimal, dazu je `regulo`). Die Hindernisse von Lauf 3 (`uzo-slot-accepts`, `navigado` zu nicht geplanten Screens) erscheinen in der Abnahme nicht mehr; belastbar ist das nicht (nur Runde 1, detail leer). Im Ablauf nachher bleibt `uzo-slot-accepts` (formular-in-schritten, `antrag-pruefen` `fm-menuo`). Nichts gelockert (L4-13).
 - **R-1 (Kurzprofile ohne slots):** Logzeile „ohne slots (fehlt oder in rest)“ **0-mal** in allen vier Läufen. Dreimal „Kurzprofil get_ero filtrilo/formularo übersprungen: keine lesbare Antwort“ (Abnahme 1, nachher 2) – beide Namen sind Sxablonoj, kein `get_ero`-Treffer; wie vorgesehen ohne Fehler des Laufs.
 
+## Prüfungen vor dem Push (Lauf 4, S038-30)
+
+| Prüfung | Ergebnis |
+|---|---|
+| `FM_AUSGABE=knapp pnpm test:betroffen` (2026-11-07 13:07Z) | exit 0, 13/13 Tasks (alle aus dem Cache des grünen Laufs von S038-29, Baum identisch; F-S038-30-2), kein Wackler (`/tmp/s038-logs/s038-30-betroffen.log`) |
+| `FM_AUSGABE=knapp pnpm check` (einmal, 13:07:53Z–13:08:09Z) | rot nach 16 s in `turbo run build test` (`Failed: @fundamento/eroj#test`), `packages/eroj/test/vitrino-partoj.test.ts:101` Hook 10 s unter der Last des Laufs selbst (1-min bis 22,5; F-S038-30-1, D-92/D-93) |
+| roter Check einzeln | eroj `vitest run` allein 43/43 grün; `vitrino-partoj.test.ts` allein 0/10 rot; Schritte hinter `&&` nicht gelaufen, `pnpm check:privat` allein grün (0 Fehler, 4 272 Dateien, 17 Ausnahmen unverändert) |
+| `$W/pruefen -C $R --diff origin/main..HEAD` und `--datei` (plan, tasks, Abschluss-Nachricht) | sauber |
+| `$W/audit-ac4 -C $R origin/main..HEAD` | 1 „geändert“, erklärt (D-221: Eingabe `maksTokenoj: 250_000` des ersetzten 037-Tests in `kostoj.test.ts`, keine Grenze); 40 „neu“ zur Sichtung: Testeingaben, Kommentare, gespeicherte Messdaten der Fixture; 750/5/3/24/20 000/16,7 unverändert, 65 615 ist eine Schätzung (E-6) |
+| Tabu-Diff `git diff --name-only origin/main...HEAD` | 41 Dateien, nur freie Pfade und die vereinbarte `packages/cli/src/ekranoj.test.ts` (Abschnitt „Tatsächlich berührte Dateien Lauf 4“); `navigado.ts`, `verda.ts`, `check_usage`, K8 ohne Diff |
+| `spec.md` | byte-gleich (`git diff --quiet origin/main`, SHA-256 `dedf2760…c6c7`) |
+| `.only(`/`.skip(` in `packages/{ekranoj,nordstelo,cli}/src` | keine |
+| `git check-ignore -v` auf die 21 neuen Dateien (Fixture `ablauf-038/**`, `komparo-038.test.ts`, `komparo.test.ts`, `komparo.ts`, `zwilling.test.ts`, `test-doubles/{laufoj,aspekto-kazoj}.ts`) | kein Treffer |
+| `git fetch origin` | `origin/main` = `43010159`, unverändert seit S038-23; kein `merge-tree`, kein Rebase |
+| Offene PRs (`gh pr list --state open`) | keine; keine Überschneidung |
+
+## Wackel-Tests Lauf 4 (L4-3, je ≤ 30 Wiederholungen, nichts geändert)
+
+| Test | Trefferquote (Läufe, in denen das Paket lief; allein) |
+|---|---|
+| nordstelo `ac8.test.ts:156` (Hook 10 s) | S038-24 1/4, S038-25 1/2; sonst 0 |
+| nordstelo `ablauf/integra.test.ts:131` (Hook 10 s) | S038-24 1/4; sonst 0 |
+| modelo `ci/turbo-inputs.test.ts:679` (N-9) | S038-24 1/3; sonst 0 |
+| **ekranoj `rondoj.test.ts:733`** („… without sondoPetoj“, eigen, seit S038-17) | S038-26 1/2 in `test:betroffen`, **allein 26/30**; S038-27, S038-29, S038-30 0 – Befund D-223 mit Fix-Vorschlag |
+| eroj `vitrino-partoj.test.ts:101` (Hook 10 s, fremd) | `pnpm check` 1/1; allein 0/10 |
+
+Bis auf `rondoj.test.ts:733` (Vergleich mit Zeitfeld, kein Zeitlimit) sind alle Treffer Zeitgrenzen unter Last.
+
 ## Blockiert
 
 Nichts.
@@ -1136,3 +1243,10 @@ Kein „eigener“ roter Job (L4-8: eroj und modelo N-9 sind fremd), darum kein 
 - **QA nach dem Push (lesend, PASS) – Befund I-1** (klein, eigen, S038-20/S038-21): ein übernommener Screen bekommt eine Null-Aufwandszeile. In `$S/abnahme/provo/raporto.json` hat `rondoj[1].ekranoj.detail` `portitaEl: 1` und zugleich `peno` mit lauter Nullen; `raporto.md` druckt `| detail | 2 | 0 | 0 | 0 | 0 |`. Ursache: `rondoj.ts` setzt `penoj` im `finally` jeder Schleife, auch wenn der Bau an der Tokengrenze vor der ersten Anfrage endete; die Invariante Σ + `penoPlano` = `peno` bleibt. Behebung in Lauf 4: F-3 (S038-25, D-203).
 - **Wackel-Quoten** (aus `$S/bericht-lauf-3.md`, Tabelle „Wackel-Tests Lauf 3“ oben): nur Zeitgrenzen unter Last, nichts geändert – nordstelo `ac8.test.ts:156`, `ablauf/integra.test.ts:131`, `ablauf/raporto.test.ts:70/84/236` (allein 0); modelo `ci/turbo-inputs.test.ts:679` lokal 4/9, CI 1/2 auf `c9ecd6c2`; cli `index.test.ts:343` 3/7; eroj `zweitfarbe-036.spec.ts:129/196` lokal 3/4, CI 2/2 Läufe (je ein Shard) und Nachtlauf `main`.
 - **Bericht:** `$S/bericht-lauf-3.md` (Stand 2026-11-07 07:15 CET).
+
+### Bericht Lauf 4
+
+Stand vor dem Push (S038-30): Messung, Vergleich, Lückenliste, Tests aus der Messung und Prüfungen in den Abschnitten oben. Push, PR D „Spec 038 – Messung“ (Branch `261107-spec-038-lauf-4-messung-a4db73`, Basis `main` `43010159`, Code-Kopf D `bfe19023`), die CI beider Läufe (`pull_request` und genau ein `workflow_dispatch`) und `$S/bericht-lauf-4.md` folgen ohne Commit; das Ergebnis steht im PR-Text und im Bericht. Es gibt keinen Lauf 5: das CI-Ergebnis trägt der Maintainer nach und hakt T3868 ab.
+
+- **Rot → grün:** S038-24 F-1 `b38898d8` → `3e7a2c81`, F-2 `e4a5ce35` → `05b5d223` · S038-25 `145a7db3` → `15f8cb50` · S038-26 `20352e6a` → `6d5c05fa` · S038-27 `4aa58d31` → `bfe19023` (Code-Kopf D). Ohne Paar: `dd0d374f` (S038-23), `5b89844e` (S038-28), `2a1081fc` (S038-29, Tests mit Negativfall), Abschluss-Commit (S038-30).
+- **Merge-Reihenfolge:** A, B, C gemergt; D zuletzt.
