@@ -3,7 +3,7 @@
 // Variante 0 (D-34) – on doubles only: no network, no browser, no provider.
 
 import { CostLimitReached, DayLimitReached } from "@fundamento/metiejo";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   K8_MERKMALOJ,
   K8_REGULOJ,
@@ -731,17 +731,25 @@ describe("K8 probes from the scorer to the renderer (3.4b)", () => {
   });
 
   it("gives the renderer the options of before, and the same result, without sondoPetoj", async () => {
-    const kuri = async (taksilo: TaksiloDouble) => {
-      const chat = new SkriptaModelo(skripto(PLANO), { modelo: PERMESITA_MODELO });
-      const bildigilo = new OpciaBildigilo();
-      const rezulto = await kuruEkranojn(enigoDe(), depsDe({ chat, bildigilo, taksilo }));
-      return { rezulto, bildigilo };
+    // A test clock (D-223): each run's clock ticks by its own step on every read, so every
+    // measured `ms` differs between the two runs, as the wall time of two real runs may.
+    const kuri = async (taksilo: TaksiloDouble, pasxo: number) => {
+      let horo = Date.UTC(2026, 9, 31, 12);
+      const horlogo = vi.spyOn(Date, "now").mockImplementation(() => (horo += pasxo));
+      try {
+        const chat = new SkriptaModelo(skripto(PLANO), { modelo: PERMESITA_MODELO });
+        const bildigilo = new OpciaBildigilo();
+        const rezulto = await kuruEkranojn(enigoDe(), depsDe({ chat, bildigilo, taksilo }));
+        return { rezulto, bildigilo };
+      } finally {
+        horlogo.mockRestore();
+      }
     };
-    const sen = await kuri(new TaksiloDouble(() => MALVERDA));
+    const sen = await kuri(new TaksiloDouble(() => MALVERDA), 1);
     for (const opcioj of sen.bildigilo.opcioj) {
       expect(opcioj).toStrictEqual({ aspektoj: ["komuna"], varianto: "F" });
     }
-    const kun = await kuri(new SondaTaksilo(() => MALVERDA));
+    const kun = await kuri(new SondaTaksilo(() => MALVERDA), 7);
     // The probes reach only the renderer; the double renders no K8, so the run is the same
     // (but for the wall time of the run, which no double fixes).
     const senTempo = (rezulto: typeof sen.rezulto) =>
