@@ -14,6 +14,8 @@ Bezug 2.5 = entfällt, ersetzt durch ‚vorher' in Lauf 4 auf Bezug-SHA
 
 **Lauf:** 3 von 4 (Teil 3, PR C „Spec 038 – Screens auf Fundamento-Niveau“) · Basis `main` = `93b6caea` (Merge #153; enthält #151 = `636e7119` und #152 = `e5057afc`) · Branch `261106-spec-038-lauf-3-screens-9dc27a` (PR-Branch = Worktree-Branch, wie D-111) · Datum 2026-11-06 · **Stand (S038-22, vor dem Push):** V-1, V-2 und Teil 3 (3.1 bis 3.4c) erledigt; 1.9 und 3.5 gemessen auf Code-Kopf C `20961e72` (drei Läufe, keiner gestört, Ledger Spec 038 0,139656 $). Abnahme: 0 grüne Screens je Marke, Ursache `check_usage` (K3-Reguloj der Eroj) und `navigado`, nicht K8 (K8 `plena` bei allen vier Screens). `pnpm check` lief einmal: rot nur durch Zeitgrenzen unter der Last des Laufs selbst, der rote Check einzeln grün (Befund F-S038-22-1). Prüfungen sauber, `main` unverändert `93b6caea`, keine offenen PRs. Push, PR C, CI-Auswertung und Bericht folgen ohne Commit (wie D-25; Lauf 4 trägt nach).
 
+**Lauf:** 4 von 4 (Teil 4, PR D „Spec 038 – Messung“) · Basis `main` = `43010159` (Merge #154; enthält #151 = `636e7119`, #152 = `e5057afc`, #154 = PR C mit Kopf `c9ecd6c2`) · Branch `261107-spec-038-lauf-4-messung-a4db73` (PR-Branch = Worktree-Branch, wie D-111) · Datum 2026-11-07 · Bezug vorher unverändert `e4873c57` (`/tmp/s038-bezug`) · **Stand (S038-23):** Nachtrag Lauf 3 (V-1) erledigt, Gerüst Lauf 4 angelegt, Werkzeuge `$W` auf Lauf 4 umgestellt; F-1 bis F-4, 4.1 bis 4.5, 4.2a, T-1 und T-2 offen. Gemessen wird auf dem Code-Kopf D (= Grün-Commit S038-27, E-2) und auf dem Bezug.
+
 **Ablage (D-21):** `spec.md`, `plan.md` und `tasks.md` kommen mit PR A auf `main`; jeder spätere Lauf ergänzt sie in seinem PR. Jedes Ticket schreibt seinen Beitrag zusätzlich in eine Datei außerhalb des Repos (`s038-beitraege/<Ticket>.md` im Feature-Ordner der Purple-Doku); S038-08 führt die Entscheidungen hier zusammen (vorläufige IDs `D-S038-0x-n` → D-39 ff.).
 
 ## Startbedingung (T0)
@@ -189,6 +191,36 @@ Aus den Beiträgen `s038-beitraege/S038-15.md` bis `S038-22.md` (S038-22).
 
 29 Dateien im Diff gegen `origin/main` (davon 3 neu); keine Tabu-Datei (`packages/eroj/**`, `packages/metiejo/**`, Wurzeldateien, `.github/**`, `scripts/**`, `packages/{projekcioj,vortaro,mcp,agordilo}/**`). `packages/nordstelo/test/fixtures/k8/**` und `atendo.json` unverändert (Generator ohne Diff, S038-16).
 
+
+### Startbedingung Lauf 4
+
+`git fetch origin` am 2026-11-07 (S038-23, 10:45Z): `origin/main` = `43010159ae2b39f2a2f6f953ef937bebbc16caf5` (Merge #154, PR C, gemergt 2026-11-07T06:46:06Z; Kopf von #154 `c9ecd6c268a9a97c9e483c4c2decf8573c5c7375`); `git merge-base --is-ancestor` → ja für `636e7119` (#151, PR A), `e5057afc` (#152, PR B) und `c9ecd6c2` (#154, PR C). Der Branch `261107-spec-038-lauf-4-messung-a4db73` stand ohne eigene Commits auf `origin/main`; offene PRs: keine. `Bezug vorher` bleibt `e4873c57` aus Lauf 1: `git -C /tmp/s038-bezug rev-parse HEAD` = `e4873c577bc90e3138279346394e11d4154883ed`, gebaut (`packages/nordstelo/dist/cli.js` vorhanden), `pnpm --dir /tmp/s038-bezug nordstelo --art ablauf --help` druckt die Hilfe; `/tmp/s038-bezug` wird nicht neu gesetzt. Wächter von Spec 038 neu gestartet mit der Konfiguration von Lauf 4 (PID 4320 beendet, neu PID 28603; Abschnitt „Werkzeuge (D-27)“). Der alte Wächter von Spec 037 (PID 61094, F-S038-15-1) läuft weiter und bleibt unberührt. `$S/mezuri.aktiv/` leer (kein Eintrag eines beendeten Prozesses). Ledger Spec 038 unverändert 0,139656 $.
+
+### Frei/Tabu für Lauf 4
+
+**Frei (L4-5, D-21):**
+
+- `packages/ekranoj/**` (Slot-Regeln in den Kurzprofilen und Navigationsregel nur auf gebaute Screens F-1/F-2, `peno` nur bei gelaufenem Bau F-3, Schätzkonstante F-4; nach dem Code-Kopf D höchstens der additive Export für den Zwillingstest, D-208)
+- `packages/nordstelo/**` (`penoj` in `kuro.json`, Vergleich `--art komparo`, Fixtures `ablauf-038`, Determinismus- und Zwillingstest)
+- `packages/cli/src/commands/ekranoj.ts` nur additiv und nur, wenn eine Option zwingend ist; dazu nach D-S038-26-1 (zu bestätigen) die zwei aus der Schätzkonstante abgeleiteten Erwartungen in `packages/cli/src/ekranoj.test.ts`
+- `specs/038-gvidanto-agentoj/{plan,tasks}.md`; `spec.md` bleibt byte-gleich (SHA-256 `dedf2760…`)
+
+**Nicht erwartet:** `packages/modelo/**` und die übrigen Pakete (`packages/{projekcioj,vortaro,mcp,agordilo}/**`, `packages/cli/**` außer oben); ein Bedarf dort wird zum Befund (L4-5).
+
+**Tabu (L4-4, Änderung nur als Befund hier):**
+
+- `packages/eroj/**`, `packages/metiejo/**`
+- alle Wurzeldateien (`package.json`, `turbo.json`, `pnpm-lock.yaml`, `biome.json`, …), `.github/**`, `scripts/**`
+
+**Unverändert im Diff (L4-9, L4-13):** `check_usage`, `packages/ekranoj/src/navigado.ts`, `packages/ekranoj/src/verda.ts` (`decidiVerdon`), K8; keine Grenze angehoben (750 Tokens je Kurzprofil-Kombination, 5 Screens, 3 Runden, 24 Werkzeugaufrufe, 20 000 Zeichen, Streuung 16,7).
+
+### Tatsächlich berührte Dateien Lauf 4
+
+Aus den Beiträgen S038-23 bis S038-30; trägt S038-30 ein.
+
+| Datei | Art | Commit |
+|---|---|---|
+
 ## Vertrags-Fixtures (T0)
 
 **Generator:** `node packages/mcp/test/kontrakto/generi.mjs <repo-wurzel> <ziel-wurzel>`. Lädt `@fundamento/mcp`, `@fundamento/modelo`, `@fundamento/nordstelo`, `@fundamento/ekranoj` und den MCP-Client aus `<repo-wurzel>/packages/*/dist` bzw. dessen `node_modules` per Datei-URL, startet den Server im Prozess (wie `connectGvidanto`: `createFundamentoServer(loadServed())` + In-Memory-Transport) und schreibt unter `<ziel-wurzel>` die drei Ordner `packages/mcp/test/fixtures/kontrakto/`, `packages/nordstelo/test/fixtures/ac8/`, `packages/ekranoj/test/fixtures/ac8/` (jeweils vorher geleert). Kein Netz, keine Uhr, kein Modell. Er bricht mit Exit 3 ab, ohne zu schreiben, wenn eine Antwort den Pfad der Repo-Wurzel (auch aufgelöst) oder das Home-Verzeichnis enthält (Probe: mit `HOME=/dark` → Exit 3, nichts geschrieben).
@@ -274,6 +306,8 @@ Aus den Beiträgen `s038-beitraege/S038-15.md` bis `S038-22.md` (S038-22).
 **Lauf 2 (S038-09, 2026-11-06):** `$W` vorhanden (`pruefen`, `commit`, `filtern`, `audit-ac4`, `listen/`, `selbsttest`), nicht neu gebaut; Selbsttest 103 von 103 OK (`/tmp/s038-logs/s038-09-selbsttest.log`).
 
 **Lauf 3 (S038-15, 2026-11-06):** `$W` ergänzt um die Messwerkzeuge, neu gebaut nach den Beiträgen S037-01/S037-09 und `/tmp/s037-werkzeug/gardisto` (D-S038-15-1 bis -7): `sperre.mjs` (gemeinsame Logik), `gardisto` (Wächter, Takt 12 s, Fenster 300 s, D-07), `mezuri` (Messlauf unter der Sperre, Prüfung alle 15 s, „gestört“, Buchung aus `raporto.json`; Exit 5 = Sperre nicht frei), `kosten` (Kappe 1,00 $, Scheiben nach Präfix, nur `ministral-14b-2512`), `bildigi-fragmentojn.mjs` (Fotos vorher ohne Modell über den gebauten Bezug) und `gardisto-selbsttest`. Ledger in `$S`: `kostoj.tsv` (Spalten wie 037), `anfragoj.json`, `laeufe.tsv` (mit `gestoert`), `pruefprotokoll.tsv`, `sperre.{tsv,stato}`, `gardisto.pid`. `selbsttest` 103 von 103 OK (`/tmp/s038-logs/s038-15-selbsttest.log`), `gardisto-selbsttest` 93 von 93 OK (`/tmp/s038-logs/s038-15-gardisto-selbsttest.log`), Smoke von `bildigi-fragmentojn.mjs` auf einem 037-Fragment (`abnahme/komuna/rondoj/2/liste.html`) nach `/tmp/s038-15-smoke/`: zwei Fotos, byte-gleich mit den 037-Originalen. `kosten stand`: 0,00 $ von 1,00 $. Aufruf für S038-22 im Beitrag S038-15 und in `$W/README.md`.
+
+**Lauf 4 (S038-23, 2026-11-07, D-S038-23-1/-2):** `$W` vollständig, auf Lauf 4 umgestellt: `lib.mjs` `R` und `sperre.mjs` `REPO_LAUF4` = Worktree-Repo von Lauf 4 (überschreibbar mit `S038_REPO`), daneben `/tmp/s038-bezug` als zweiter eigener Stand; das Worktree von Lauf 3 zählt nicht mehr als eigen; die Plan-Prüfung des Wächters liest im Worktree von Lauf 4. `mezuri` bucht zusätzlich die Form von `nordstelo --art ablauf` (`sumo.tokenoj.{enigo,eligo}`, `sumo.anfragoj`, `sumo.usd`, Commit und Modell aus `lauf.json`): ohne `--raporto` aus dem Laufordner `<JJJJMMTT-HHMM>[-n]/`, den die Messung unter `--out` neu anlegt (Schnappschuss vor dem Start; ältere Laufordner und Geschwister wie `projekcioj/` zählen nicht), ohne `raporto.json` aus der Summe der `peno` der `kuro.json`. `kosten`: Präfixe und Scheiben unverändert und passend zu E-7 (`abnahme-` 0,10 · `nachher-` 0,45 · `vorher-` 0,30 · `wdh-` 0,10 · Kappe 1,00 $; Reste `abnahme-` 0,052061 · `vorher-` 0,253829 $). `selbsttest` 127 von 127 OK (24 neue Fälle: eigene Stände Lauf 4, Lauf 3 nicht mehr eigen, Buchung aus Ablauf-Laufordnern einschließlich des echten 037-Messpunkts; `/tmp/s038-logs/s038-23-selbsttest.log`), `gardisto-selbsttest` 99 von 99 OK (`mezuri` bucht eine Ablaufmessung über `--out`; `/tmp/s038-logs/s038-23-gardisto-selbsttest.log`). Wächter danach neu gestartet (`gardisto stopp`: PID 4320; `gardisto start`: PID 28603, eigen = Worktree von Lauf 4 und `/tmp/s038-bezug`). `kosten stand`: 0,139656 $ von 1,00 $. Vorher-Stand der geänderten Dateien unter `/tmp/s038-werkzeug-vor-S038-23/`.
 
 ## Entscheidungen, vom Maintainer zu bestätigen
 
@@ -484,74 +518,126 @@ Vorläufige IDs der Implementierungs-Spec (§5) und der Beiträge `s038-beitraeg
 
 ### Entscheidungen Lauf 3 (D-145 ff.)
 
-Vorschläge der technical-spec von Lauf 3 (D-145 bis D-149, wörtlich, vom Maintainer zu bestätigen) und die Entscheidungen des Maintainers für diesen Lauf (E-1 bis E-6 der Lauf-Spec, 2026-11-06). Die vorläufigen IDs der Implementierungs-Spec und der Beiträge (`D-S038-1x-n`, `D-S038-2x-n`) nummeriert S038-22 ab **D-150** durch, vorläufige ID in Klammern.
+Vorschläge der technical-spec von Lauf 3 (D-145 bis D-149, wörtlich, vom Maintainer zu bestätigen) und die Entscheidungen des Maintainers für diesen Lauf (E-1 bis E-6 der Lauf-Spec, 2026-11-06). Die vorläufigen IDs der Implementierungs-Spec und der Beiträge (`D-S038-1x-n`, `D-S038-2x-n`) nummeriert S038-22 ab **D-150** durch, vorläufige ID in Klammern. **Lauf 4 (E-1):** D-145 bis D-199 bestätigt (Maintainer, 2026-11-07).
 
 | # | Entscheidung |
 |---|---|
-| D-145 | `k8.plena` setzt der nordstelo-Adapter. ekranoj rechnet `k8Plena` nicht nach (eine Quelle der Regel, kein Import). |
-| D-146 | Der Export der Ableitung nimmt eine schmale strukturelle Eingabeform (Tag, Slot, Kinder), damit `GvidantoElemento` und `Facts` sie ohne Adapter nutzen. |
-| D-147 | Die Messläufe „nachher“ laufen auf dem lokalen Code-Kopf von C vor dem Abschluss-Commit (E-5). |
-| D-148 | `vorher-komuna` kommt aus der Scheibe „vorher“ (E-3). Lauf 4 bekommt den Rest dieser Scheibe. |
-| D-149 | `peno` je Screen und Runde ist additiv in `RondoEkrano`. Das Gesamt-`peno` bleibt die Summe. |
+| D-145 | `k8.plena` setzt der nordstelo-Adapter. ekranoj rechnet `k8Plena` nicht nach (eine Quelle der Regel, kein Import). **bestätigt (Maintainer, 2026-11-07)** |
+| D-146 | Der Export der Ableitung nimmt eine schmale strukturelle Eingabeform (Tag, Slot, Kinder), damit `GvidantoElemento` und `Facts` sie ohne Adapter nutzen. **bestätigt (Maintainer, 2026-11-07)** |
+| D-147 | Die Messläufe „nachher“ laufen auf dem lokalen Code-Kopf von C vor dem Abschluss-Commit (E-5). **bestätigt (Maintainer, 2026-11-07)** |
+| D-148 | `vorher-komuna` kommt aus der Scheibe „vorher“ (E-3). Lauf 4 bekommt den Rest dieser Scheibe. **bestätigt (Maintainer, 2026-11-07)** |
+| D-149 | `peno` je Screen und Runde ist additiv in `RondoEkrano`. Das Gesamt-`peno` bleibt die Summe. **bestätigt (Maintainer, 2026-11-07)** |
 
 **Entscheidungen des Maintainers (Lauf 3):** E-1 D-97 bis D-144 bestätigt · E-2 F-S038-12-3 ja (Export der Ableitung, additiv, Verträge, Gegenprobe und `atendo.json` unverändert) · E-3 „vorher“ 1.9 zusätzlich ein Lauf komuna auf `/tmp/s038-bezug`, 037-Abnahme als Zusatzzeile · E-4 genau eine Wiederholung eines gestörten Laufs aus der Reserve, gestörte Werte nie verglichen · E-5 Messläufe „nachher“ auf dem letzten Code-Commit von C vor dem Abschluss-Commit · E-6 plan und tasks in PR C fortgeschrieben.
 
 #### Vorläufige Entscheidungen Lauf 3 (D-150 ff., durch S038-22 nummeriert)
 
-Aus der Implementierungs-Spec von Lauf 3 (§5) und den Beiträgen S038-15 bis S038-22, fortlaufend ab **D-150** nummeriert (vorläufige ID in Klammern); vom Maintainer zu bestätigen. D-145 bis D-149 behalten ihre Nummern.
+Aus der Implementierungs-Spec von Lauf 3 (§5) und den Beiträgen S038-15 bis S038-22, fortlaufend ab **D-150** nummeriert (vorläufige ID in Klammern); vom Maintainer zu bestätigen. D-145 bis D-149 behalten ihre Nummern. **Lauf 4 (E-1):** D-150 bis D-199 bestätigt (Maintainer, 2026-11-07).
 
 | # | Entscheidung | Grund |
 |---|---|---|
-| D-150 (D-S038-15-1) | `mezuri`/`gardisto` schließen eigene Prozesse über den Prozessbaum und über cwd ∈ {Worktree-Repo von Lauf 3, `/tmp/s038-bezug`} aus (037: `/tmp/s037-*`). | Das Worktree liegt nicht unter `/tmp`; der Bezugslauf darf sich nicht selbst sperren. |
-| D-151 (D-S038-15-2) | „gestört“ = fremde Messung während des Laufs **oder** 1-min-Last vor oder nach > `hw.ncpu`. | L3-11 „unter Last“; 037 markierte Last nur und verglich trotzdem. |
-| D-152 (D-S038-15-3) | Scheibe nach Präfix der Lauf-ID: `teil1-` 0,05 · `abnahme-` 0,10 · `nachher-` 0,45 · `vorher-` 0,30 · `wdh-` 0,10 (Reserve); ohne Präfix Exit 2; Kappe 1,00 $ für Spec 038. | D-04/D-18; derselbe Weg wie D-S037-01-2. |
-| D-153 (D-S038-15-4) | Plan-Prüfung des Wächters: eine hinzugefügte Zeile „Messung … läuft“ in `specs/*/plan.md` eines nicht gemergten lokalen Branches (`refs/heads`, `refs/remotes/origin`) außer Spec 038 ist ein Treffer; je Ref-SHA einmal gelesen; kein `git fetch`. | 036 ist gemergt, die 037-Regel (Branches mit `036`) greift nicht mehr; lokale Sitzungen teilen das Git-Verzeichnis, ein `fetch` würde dort schreiben. |
-| D-154 (D-S038-15-5) | Reservierung = Zeile `status reserviert` in `kostoj.tsv` mit einer Schätzung (Vorgabe 0,05 $, 037-Ledger ≈ 0,043 $ je Lauf); Summen zählen nur `gebucht`; `mezuri` startet nur mit offener Reservierung; eine schon gebuchte Lauf-ID wird nicht neu reserviert (Wiederholung als `wdh-<id>`). | Die 037-Spalten haben keine Scheibenspalte; keine weitere Ledger-Datei. |
-| D-155 (D-S038-15-6) | Messwerkzeuge zusätzlich `fm ekranoj`, `mezuri` anderer Specs und `bildigi-fragmentojn`; Browser nur über den Pfad `ms-playwright/` bzw. `headless_shell` (auch Firefox und WebKit aus dem Playwright-Cache; der Browser des Nutzers zählt nicht). | 1.9 und 3.5 laufen über `fm ekranoj`; fremde Playwright-Läufe nutzen auch Firefox. |
-| D-156 (D-S038-15-7) | `bildigi-fragmentojn.mjs` baut Marke und Dokumente in einem Temp-Ordner und schreibt nach `<out>` nur `bildoj/*.png` und `last.txt`; ein vorhandenes `last.txt` → Exit 2 (nichts überschrieben); Marke aus der Konfiguration muss zur Marke des Fragments passen. | `$S` klein halten; vorher-Fotos nur einmal. |
-| D-157 (D-S038-16-1) | Der Export behält die Eingabe `readonly GvidantoElemento[]`; keine neue Form „Tag/Slot/Kinder“. | `GvidantoElemento` ist schon strukturell nordstelo `Element` und ekranoj `FaktoElemento`; präzisiert D-146. |
-| D-158 (D-S038-16-2) | Der Export liefert je Instanz den Index ihres Elements (additive Ausgabe); die Ausgabe von `checkMarkup` bleibt unverändert. | Der `kialo` von `k8` nennt den Tag-Pfad des Elements; ohne Index wiche `atendo.json` ab. |
-| D-159 (D-S038-16-3) | Der AC-8-Vergleich über die Fixture-Dateien liegt in nordstelo `k8.test.ts` (liest `packages/nordstelo/test/fixtures/ac8/*.json` und `packages/ekranoj/test/fixtures/ac8/*.json` wie `ac8.test.ts`); der modelo-Test trägt die AC-8-Sxablono-Seite als Inline-Kopie. | Ein modelo-Test, der Dateien eines anderen Pakets liest, bräuchte eine Wurzel-Eingabe in `turbo.json` (Spec 040 T-5); Wurzeldateien sind tabu. |
-| D-160 (D-S038-16-4) | Rot-Stub: die private Ableitung wurde für den Rot-Commit umbenannt (`sxablonInstancoj`, ohne Logikänderung), damit der Exportname als werfender Stub stehen konnte und `checkMarkup` grün blieb; Grün nimmt die Umbenennung zurück. | Rot muss an einer Assertion oder einem Stub-Wurf scheitern, nicht an einem fehlenden Modul; `checkMarkup` darf nicht rot werden. |
-| D-161 (D-S038-17-1) | K8-Fakten auf `FaktoBildigo.k8?` (je Render), nicht `Fakto.k8`. | nordstelo `k8()` liest `facts.renders[].k8`; Zuweisbarkeit C-2. |
-| D-162 (D-S038-17-2) | Sondenanfragen kommen als optionales `Taksilo.sondoPetoj` (nordstelo-Adapter: `sondojDe(modelo)`) und gehen an `Bildigilo.render`. Ohne sie keine K8-Fakten → „nicht geprüft“. | ekranoj hat keine Modelo und kann keine bekommen (Lockfile tabu); der Bewerter sagt, was gemessen werden muss; `cli` bleibt dafür unberührt. |
-| D-163 (D-S038-17-3) | K8-Fakten werden am DOM ohne Rahmen gelesen, je Aspekto × Schema, Kontrast default; Sonden aus einem Sondendokument nur mit den Stylesheets der Marke. | Indexgleichheit mit `elements` (D-27); dieselbe Sondensemantik wie D-114. |
-| D-164 (D-S038-17-4) | Sondendokument unter `file://`: erst `goto` auf die erste Stylesheet-Datei des Screens, dann `setContent` mit `<base href>` und den Link-Tags des Screens (ohne Skript, ohne Fragment, ohne Rahmen). | `setContent` auf `about:blank` lädt keine `file://`-Stylesheets (R-5); keine Temp-Datei, nichts im Ausgabeordner. |
-| D-165 (D-S038-17-5) | Die K8-Fakten werden nach den axe-/Foto-Renders in einem zweiten Durchgang je Aspekto × Schema gelesen (Rahmen dann entfernt); `renders[i].k8` nach Reihenfolge zugeordnet. | Fotos und axe bleiben mit Rahmen und unverändert. |
-| D-166 (D-S038-17-6) | Die Erwartungen in `aspekto-faktoj.test.ts` werden aus den Rohdaten nach der dokumentierten Regel abgeleitet (`atendoDe`), nicht aus nordstelo kopiert; die Rohdaten sind nordstelos Fälle. | Kein Import aus nordstelo (AC-3), trotzdem dieselben Fälle. |
-| D-167 (D-S038-18-1) | ekranoj `Taksado.k8` spiegelt das echte `K8Rezulto` (`aspekto`, `scheme`, `kialoj` je Kombination, `nekomparebla?`) plus `plena: boolean`. | Die Form der technical-spec passt nicht zum Code auf `93b6caea`. |
-| D-168 (D-S038-18-2) | Die eine bestehende Erwartung `ekrano-taksilo.test.ts:222` `toEqual(nova.k8)` wird um genau `plena` erweitert. | D-145 legt `plena` in das `k8` des Adapters; sonst ändert sich nichts. |
-| D-169 (D-S038-18-3) | Keine Codeänderung für den Re-Export von `TaksadoK8`/`TaksiloK8`; ein Test importiert sie aus dem Paketeintrag. | `export * from "./ekrano-taksilo.js"` exportiert sie schon (der Hinweis aus Lauf 2 war falsch). |
-| D-170 (D-S038-18-4) | `Malhelpo` bekommt `"K8"` als letzte Bedingung. K8-Befunde sind `Trovo`s (→ nächste Runde und `restantaj`). „mangels Mittel“ ist eine eigene optionale Liste und ein eigener Abschnitt im Bericht. | Nutzt den vorhandenen Befundweg; D-16. |
-| D-171 (D-S038-18-5) | „mangels Mittel“ als `EkranojRezulto.senRimedaj?: Restanta[]` (nicht je Runde), aus der letzten Runde aller geplanten Screens (auch grüner). | Bericht und S038-21 lesen ihn wie `restantaj`; je Runde lässt er sich aus `taksado.k8` mit `senRimedajDe` ableiten. |
-| D-172 (D-S038-18-6) | `loko` eines K8-Befunds = `"<aspekto> <scheme>: <Pfad>"`, `scheme` wörtlich (`light`/`dark`), Pfad = erster Backtick-Ausdruck des Kialo; axe-Orte bleiben „hell/dunkel“. | Form C-4; der Pfad zeigt auf das Element. |
-| D-173 (D-S038-18-7) | K8-Befunde entstehen aus den Werten (Merkmal ≠ 1 und nicht in `mankoj`), nicht aus `malhelpoj`; bei konsistentem `plena` dasselbe Ergebnis. | Eine Quelle (D-145), kein Nachrechnen. |
-| D-174 (D-S038-19-1) | Variante 0 behält den `<a>`-Rückverweis und die Regex in `agentaTeksto`. | V0 lädt keine Eroj (D-34); ein `fm-ligilo` wäre dort kein Link. |
-| D-175 (D-S038-19-2) | Hintergrund aus `fundamento.css` `:where(:root)` (nichts hinzugefügt). Grundschrift `var(<name>)`, der Name aus dem Markenbau (`MarkoKonstruo`, optional), gefüllt in cli `realaMedio().marko` über `cssVariable`. Eine additive Zeile in `cli/src/commands/ekranoj.ts`, keine Option. **Zu bestätigen** (Lesart von L3-5). | Der Build hat keine Schriftklasse oder -regel; Art. II verbietet von Hand getippte Zielnamen; ekranoj kann projekcioj nicht importieren. |
-| D-176 (D-S038-19-3) | Die Gleichheit nach D-27 umfasst `elements`, `aria`, `lingvo`, `bytes`. K8-Fakten dürfen sich mit dem Rahmen ändern. | Der Rahmen soll die Erscheinung ändern. |
-| D-177 (D-S038-19-4) | Variante F schreibt `fm-ligilo` nur, wenn die Seite die Eroj lädt (`marko.skripto`); sonst bleibt `<a href>`. | Ohne Definition wäre `fm-ligilo` kein Link. |
-| D-178 (D-S038-19-5) | Die Grundschrift-Regel steht unmarkiert im `<head>` (nicht `data-ekranoj-kadro`). | Markiert würde sie vor dem Lesen der K8-Fakten entfernt (S038-17), die Ersatzschrift bliebe; Body-Walk und D-05 sehen den Kopf nie. |
-| D-179 (D-S038-19-6) | Übersicht: „Übersicht“/„Overview“ in `brand`, Plan-Ziel als `<h1 slot="title">` in `fm-pagxo`; Kacheln behalten ihre Links; `fm-navigado label` „Bericht und Screens“. | Shell-Form aus der Skemo, Navigation zusätzlich in `fm-navigado`. |
-| D-180 (D-S038-19-7) | Der Name der Grundschrift wird nur geschrieben, wenn er `^--[A-Za-z0-9_-]+$` erfüllt. | Keine Injektion in die Regel. |
-| D-181 (D-S038-20-1) | „Frisches Gespräch je Screen und Runde“ gilt schon. S038-20 ergänzt Shell, das Vorladen der Kurzprofile und die Tests. | `konstruiEkranon` baut `messages` auf `93b6caea` je Aufruf neu. |
-| D-182 (D-S038-20-2) | Neuer Weg ⇔ `check_markup` und `list_arangxoj` gelistet. Shell-Profile einmal je Lauf; Ero-Kurzprofile des vorigen Fragments je Runde. Vorgeladene Aufrufe sind keine `toolCalls` des Agenten, ihr Text zählt als Eingabe-Tokens. | D-03, D-09; K7 bleibt mit 037 vergleichbar. |
-| D-183 (D-S038-20-3) | Ero-Kurzprofile nur ab Runde 2 und nur mit letztem Fragment; `sxelo`/`pagxo` nicht über `get_ero` (stehen im Systemtext); andere Nicht-Eroj fallen über die `issues`-Antwort mit Logzeile heraus. | D-09: Kontext aus Plan und Vorrunde. |
-| D-184 (D-S038-20-4) | Vorabruf-Zwischenspeicher je Lauf und Name, auch für Fehlschläge (wie `kampaLegiloDe`). | Höchstens ein Abruf je Name und Lauf, eine Logzeile. |
-| D-185 (D-S038-20-5) | Größenvergleich „Runde 2 ≤ Runde 1 + Befunde + Fragment“ gegen die **letzte** Anfrage der Runde-1-Unterhaltung desselben Screens; zusätzlich Runde 2 minus (erste Anfrage Runde 1, Fragment, Befunde, Kurzprofile) < eine Werkzeugantwort. | Die Kurzprofile sind neuer Inhalt der Runde 2; gegen die erste Anfrage wäre der Vergleich nicht erfüllbar. |
-| D-186 (D-S038-20-6) | `RondoEkrano.peno.ms`/`.bytes` = Baudauer / Bytes des Fragments; die Invariante Σ + Plan = Lauf gilt für Tokens, Anfragen, Werkzeugaufrufe. | Wie C-6. |
-| D-187 (D-S038-20-7) | Der cli-Integrationstest `ekranoj-integra.test.ts:405` ist an den AC-7-Systemtext angepasst (nur Test: `startsWith(SISTEMO_F + Prompt)` und `toContain(NAVIGADA_REGULO)`). **Zu bestätigen.** | Der echte Gvidanto listet `check_markup` und `list_arangxoj`; der Test pinnte den alten Systemtext und war durch AC-7 gewollt rot (F-S038-20-1). |
-| D-188 (D-S038-21-1) | `peno` unter `rondoj[n].ekranoj[slug].peno` (Record nach Slug); der Aufwand der Plananfrage ist ein eigenes Feld; übernommene Runden tragen keins; Σ + Plan = Gesamt. | Echte Form von `raporto.json`; die Übernahme nach D-26 würde doppelt zählen. |
-| D-189 (D-S038-21-2) | `penoPlano` nur, wenn mindestens ein Screen × Runde `peno` trägt; reine Differenz, nicht geklemmt (enthält Teilaufwand abgebrochener Baus, F-S038-20-2). | `raporto.json` eines alten Ergebnisses bleibt byte-gleich. |
-| D-190 (D-S038-21-3) | Die Tabelle ist ein `###`-Unterabschnitt von „## Aufwand und Kosten“; die K8-Spalte steht am Ende der Rundentabellen. | Der cli-Integrationstest prüft `##`-Abschnitte und die Kopfzeile als Teilzeichenkette (`ekranoj-integra.test.ts:367`). |
-| D-191 (D-S038-21-4) | `peno` in `raporto.json` ist das volle `Peno` (mit `ms`, `bytes`); `penoPlano` nur die vier Zähler der Invariante. | Keine zweite Form für dieselben Daten. |
-| D-192 (D-S038-22-1) | Vorher (Bezug) und 037 haben nur Laufsummen. Die Tabelle zeigt nachher je Screen × Runde, vorher und 037 als Summen plus ein abgeleitetes Mittel je gebauter Screen-Runde. Δ nur auf Summen. | `peno` je Runde gibt es erst ab diesem Lauf. |
-| D-193 (D-S038-22-2) | Neu gerenderte 037-Fragmente nach `$S/vorher-fragmente/{komuna,provo}/bildoj/`. | `$S/vorher/komuna` ist der Ausgabeordner des Laufs `vorher-komuna`. |
-| D-194 (D-S038-22-3) | provo über `--config <stand>/packages/modelo/test/fixtures/valid/aspekto-provo/fundamento.config.json`; `--ledger $S`. | Die CLI hat kein `--marko` (wie S037-10). |
-| D-195 (D-S038-22-4) | QA nach S038-22 nur lesend. Befunde in den QA-Bericht, den PR-Text (ohne Commit) und den Laufbericht. | L3-2 (ein Push). |
-| D-196 (D-S038-22-5) | Kein eigenes Test-Ticket; Abdeckung nach §4.2 der Implementierungs-Spec. | Ticketliste L3-1 bindend (wie D-144). |
-| D-197 (D-S038-22-6) | S038-22 führt eine Schritt-Tabelle in seinem Beitrag und wiederholt keinen unumkehrbaren Schritt ohne Prüfung seines Ergebnisses. | Ein Push, ein Dispatch; die Sitzung von S038-14 brach in Lauf 2 während des CI-Wartens ab. |
-| D-198 (D-S038-22-7) | Die Schätzkonstante 70 000 (Spec 037 D-186) wird in PR C **nicht** neu gesetzt; der gemessene Wert kommt als Vorschlag für Lauf 4 in den plan. | Gemessen wird nach dem letzten Code-Commit (E-5); eine spätere Codeänderung entwertete die Messung. |
-| D-199 (D-S038-22-8) | „Gebaute Screen-Runde“ = Eintrag in `rondoj[n].ekranoj` mit Fragment (`k7.bytes` > 0); das abgeleitete Mittel je gebauter Screen-Runde ist Laufsumme ÷ deren Zahl (inkl. Plananfrage und abgebrochener Baus). | Für vorher (Bezug) und 037 gibt es nur Laufsummen (D-S038-22-1); ein Bau ohne Fragment (037 detail „empty page“, vorher detail abgebrochen) ist keine gebaute Screen-Runde. |
+| D-150 (D-S038-15-1) | `mezuri`/`gardisto` schließen eigene Prozesse über den Prozessbaum und über cwd ∈ {Worktree-Repo von Lauf 3, `/tmp/s038-bezug`} aus (037: `/tmp/s037-*`). **bestätigt (Maintainer, 2026-11-07)** | Das Worktree liegt nicht unter `/tmp`; der Bezugslauf darf sich nicht selbst sperren. |
+| D-151 (D-S038-15-2) | „gestört“ = fremde Messung während des Laufs **oder** 1-min-Last vor oder nach > `hw.ncpu`. **bestätigt (Maintainer, 2026-11-07)** | L3-11 „unter Last“; 037 markierte Last nur und verglich trotzdem. |
+| D-152 (D-S038-15-3) | Scheibe nach Präfix der Lauf-ID: `teil1-` 0,05 · `abnahme-` 0,10 · `nachher-` 0,45 · `vorher-` 0,30 · `wdh-` 0,10 (Reserve); ohne Präfix Exit 2; Kappe 1,00 $ für Spec 038. **bestätigt (Maintainer, 2026-11-07)** | D-04/D-18; derselbe Weg wie D-S037-01-2. |
+| D-153 (D-S038-15-4) | Plan-Prüfung des Wächters: eine hinzugefügte Zeile „Messung … läuft“ in `specs/*/plan.md` eines nicht gemergten lokalen Branches (`refs/heads`, `refs/remotes/origin`) außer Spec 038 ist ein Treffer; je Ref-SHA einmal gelesen; kein `git fetch`. **bestätigt (Maintainer, 2026-11-07)** | 036 ist gemergt, die 037-Regel (Branches mit `036`) greift nicht mehr; lokale Sitzungen teilen das Git-Verzeichnis, ein `fetch` würde dort schreiben. |
+| D-154 (D-S038-15-5) | Reservierung = Zeile `status reserviert` in `kostoj.tsv` mit einer Schätzung (Vorgabe 0,05 $, 037-Ledger ≈ 0,043 $ je Lauf); Summen zählen nur `gebucht`; `mezuri` startet nur mit offener Reservierung; eine schon gebuchte Lauf-ID wird nicht neu reserviert (Wiederholung als `wdh-<id>`). **bestätigt (Maintainer, 2026-11-07)** | Die 037-Spalten haben keine Scheibenspalte; keine weitere Ledger-Datei. |
+| D-155 (D-S038-15-6) | Messwerkzeuge zusätzlich `fm ekranoj`, `mezuri` anderer Specs und `bildigi-fragmentojn`; Browser nur über den Pfad `ms-playwright/` bzw. `headless_shell` (auch Firefox und WebKit aus dem Playwright-Cache; der Browser des Nutzers zählt nicht). **bestätigt (Maintainer, 2026-11-07)** | 1.9 und 3.5 laufen über `fm ekranoj`; fremde Playwright-Läufe nutzen auch Firefox. |
+| D-156 (D-S038-15-7) | `bildigi-fragmentojn.mjs` baut Marke und Dokumente in einem Temp-Ordner und schreibt nach `<out>` nur `bildoj/*.png` und `last.txt`; ein vorhandenes `last.txt` → Exit 2 (nichts überschrieben); Marke aus der Konfiguration muss zur Marke des Fragments passen. **bestätigt (Maintainer, 2026-11-07)** | `$S` klein halten; vorher-Fotos nur einmal. |
+| D-157 (D-S038-16-1) | Der Export behält die Eingabe `readonly GvidantoElemento[]`; keine neue Form „Tag/Slot/Kinder“. **bestätigt (Maintainer, 2026-11-07)** | `GvidantoElemento` ist schon strukturell nordstelo `Element` und ekranoj `FaktoElemento`; präzisiert D-146. |
+| D-158 (D-S038-16-2) | Der Export liefert je Instanz den Index ihres Elements (additive Ausgabe); die Ausgabe von `checkMarkup` bleibt unverändert. **bestätigt (Maintainer, 2026-11-07)** | Der `kialo` von `k8` nennt den Tag-Pfad des Elements; ohne Index wiche `atendo.json` ab. |
+| D-159 (D-S038-16-3) | Der AC-8-Vergleich über die Fixture-Dateien liegt in nordstelo `k8.test.ts` (liest `packages/nordstelo/test/fixtures/ac8/*.json` und `packages/ekranoj/test/fixtures/ac8/*.json` wie `ac8.test.ts`); der modelo-Test trägt die AC-8-Sxablono-Seite als Inline-Kopie. **bestätigt (Maintainer, 2026-11-07)** | Ein modelo-Test, der Dateien eines anderen Pakets liest, bräuchte eine Wurzel-Eingabe in `turbo.json` (Spec 040 T-5); Wurzeldateien sind tabu. |
+| D-160 (D-S038-16-4) | Rot-Stub: die private Ableitung wurde für den Rot-Commit umbenannt (`sxablonInstancoj`, ohne Logikänderung), damit der Exportname als werfender Stub stehen konnte und `checkMarkup` grün blieb; Grün nimmt die Umbenennung zurück. **bestätigt (Maintainer, 2026-11-07)** | Rot muss an einer Assertion oder einem Stub-Wurf scheitern, nicht an einem fehlenden Modul; `checkMarkup` darf nicht rot werden. |
+| D-161 (D-S038-17-1) | K8-Fakten auf `FaktoBildigo.k8?` (je Render), nicht `Fakto.k8`. **bestätigt (Maintainer, 2026-11-07)** | nordstelo `k8()` liest `facts.renders[].k8`; Zuweisbarkeit C-2. |
+| D-162 (D-S038-17-2) | Sondenanfragen kommen als optionales `Taksilo.sondoPetoj` (nordstelo-Adapter: `sondojDe(modelo)`) und gehen an `Bildigilo.render`. Ohne sie keine K8-Fakten → „nicht geprüft“. **bestätigt (Maintainer, 2026-11-07)** | ekranoj hat keine Modelo und kann keine bekommen (Lockfile tabu); der Bewerter sagt, was gemessen werden muss; `cli` bleibt dafür unberührt. |
+| D-163 (D-S038-17-3) | K8-Fakten werden am DOM ohne Rahmen gelesen, je Aspekto × Schema, Kontrast default; Sonden aus einem Sondendokument nur mit den Stylesheets der Marke. **bestätigt (Maintainer, 2026-11-07)** | Indexgleichheit mit `elements` (D-27); dieselbe Sondensemantik wie D-114. |
+| D-164 (D-S038-17-4) | Sondendokument unter `file://`: erst `goto` auf die erste Stylesheet-Datei des Screens, dann `setContent` mit `<base href>` und den Link-Tags des Screens (ohne Skript, ohne Fragment, ohne Rahmen). **bestätigt (Maintainer, 2026-11-07)** | `setContent` auf `about:blank` lädt keine `file://`-Stylesheets (R-5); keine Temp-Datei, nichts im Ausgabeordner. |
+| D-165 (D-S038-17-5) | Die K8-Fakten werden nach den axe-/Foto-Renders in einem zweiten Durchgang je Aspekto × Schema gelesen (Rahmen dann entfernt); `renders[i].k8` nach Reihenfolge zugeordnet. **bestätigt (Maintainer, 2026-11-07)** | Fotos und axe bleiben mit Rahmen und unverändert. |
+| D-166 (D-S038-17-6) | Die Erwartungen in `aspekto-faktoj.test.ts` werden aus den Rohdaten nach der dokumentierten Regel abgeleitet (`atendoDe`), nicht aus nordstelo kopiert; die Rohdaten sind nordstelos Fälle. **bestätigt (Maintainer, 2026-11-07)** | Kein Import aus nordstelo (AC-3), trotzdem dieselben Fälle. |
+| D-167 (D-S038-18-1) | ekranoj `Taksado.k8` spiegelt das echte `K8Rezulto` (`aspekto`, `scheme`, `kialoj` je Kombination, `nekomparebla?`) plus `plena: boolean`. **bestätigt (Maintainer, 2026-11-07)** | Die Form der technical-spec passt nicht zum Code auf `93b6caea`. |
+| D-168 (D-S038-18-2) | Die eine bestehende Erwartung `ekrano-taksilo.test.ts:222` `toEqual(nova.k8)` wird um genau `plena` erweitert. **bestätigt (Maintainer, 2026-11-07)** | D-145 legt `plena` in das `k8` des Adapters; sonst ändert sich nichts. |
+| D-169 (D-S038-18-3) | Keine Codeänderung für den Re-Export von `TaksadoK8`/`TaksiloK8`; ein Test importiert sie aus dem Paketeintrag. **bestätigt (Maintainer, 2026-11-07)** | `export * from "./ekrano-taksilo.js"` exportiert sie schon (der Hinweis aus Lauf 2 war falsch). |
+| D-170 (D-S038-18-4) | `Malhelpo` bekommt `"K8"` als letzte Bedingung. K8-Befunde sind `Trovo`s (→ nächste Runde und `restantaj`). „mangels Mittel“ ist eine eigene optionale Liste und ein eigener Abschnitt im Bericht. **bestätigt (Maintainer, 2026-11-07)** | Nutzt den vorhandenen Befundweg; D-16. |
+| D-171 (D-S038-18-5) | „mangels Mittel“ als `EkranojRezulto.senRimedaj?: Restanta[]` (nicht je Runde), aus der letzten Runde aller geplanten Screens (auch grüner). **bestätigt (Maintainer, 2026-11-07)** | Bericht und S038-21 lesen ihn wie `restantaj`; je Runde lässt er sich aus `taksado.k8` mit `senRimedajDe` ableiten. |
+| D-172 (D-S038-18-6) | `loko` eines K8-Befunds = `"<aspekto> <scheme>: <Pfad>"`, `scheme` wörtlich (`light`/`dark`), Pfad = erster Backtick-Ausdruck des Kialo; axe-Orte bleiben „hell/dunkel“. **bestätigt (Maintainer, 2026-11-07)** | Form C-4; der Pfad zeigt auf das Element. |
+| D-173 (D-S038-18-7) | K8-Befunde entstehen aus den Werten (Merkmal ≠ 1 und nicht in `mankoj`), nicht aus `malhelpoj`; bei konsistentem `plena` dasselbe Ergebnis. **bestätigt (Maintainer, 2026-11-07)** | Eine Quelle (D-145), kein Nachrechnen. |
+| D-174 (D-S038-19-1) | Variante 0 behält den `<a>`-Rückverweis und die Regex in `agentaTeksto`. **bestätigt (Maintainer, 2026-11-07)** | V0 lädt keine Eroj (D-34); ein `fm-ligilo` wäre dort kein Link. |
+| D-175 (D-S038-19-2) | Hintergrund aus `fundamento.css` `:where(:root)` (nichts hinzugefügt). Grundschrift `var(<name>)`, der Name aus dem Markenbau (`MarkoKonstruo`, optional), gefüllt in cli `realaMedio().marko` über `cssVariable`. Eine additive Zeile in `cli/src/commands/ekranoj.ts`, keine Option. **Zu bestätigen** (Lesart von L3-5). **bestätigt (Maintainer, 2026-11-07)** | Der Build hat keine Schriftklasse oder -regel; Art. II verbietet von Hand getippte Zielnamen; ekranoj kann projekcioj nicht importieren. |
+| D-176 (D-S038-19-3) | Die Gleichheit nach D-27 umfasst `elements`, `aria`, `lingvo`, `bytes`. K8-Fakten dürfen sich mit dem Rahmen ändern. **bestätigt (Maintainer, 2026-11-07)** | Der Rahmen soll die Erscheinung ändern. |
+| D-177 (D-S038-19-4) | Variante F schreibt `fm-ligilo` nur, wenn die Seite die Eroj lädt (`marko.skripto`); sonst bleibt `<a href>`. **bestätigt (Maintainer, 2026-11-07)** | Ohne Definition wäre `fm-ligilo` kein Link. |
+| D-178 (D-S038-19-5) | Die Grundschrift-Regel steht unmarkiert im `<head>` (nicht `data-ekranoj-kadro`). **bestätigt (Maintainer, 2026-11-07)** | Markiert würde sie vor dem Lesen der K8-Fakten entfernt (S038-17), die Ersatzschrift bliebe; Body-Walk und D-05 sehen den Kopf nie. |
+| D-179 (D-S038-19-6) | Übersicht: „Übersicht“/„Overview“ in `brand`, Plan-Ziel als `<h1 slot="title">` in `fm-pagxo`; Kacheln behalten ihre Links; `fm-navigado label` „Bericht und Screens“. **bestätigt (Maintainer, 2026-11-07)** | Shell-Form aus der Skemo, Navigation zusätzlich in `fm-navigado`. |
+| D-180 (D-S038-19-7) | Der Name der Grundschrift wird nur geschrieben, wenn er `^--[A-Za-z0-9_-]+$` erfüllt. **bestätigt (Maintainer, 2026-11-07)** | Keine Injektion in die Regel. |
+| D-181 (D-S038-20-1) | „Frisches Gespräch je Screen und Runde“ gilt schon. S038-20 ergänzt Shell, das Vorladen der Kurzprofile und die Tests. **bestätigt (Maintainer, 2026-11-07)** | `konstruiEkranon` baut `messages` auf `93b6caea` je Aufruf neu. |
+| D-182 (D-S038-20-2) | Neuer Weg ⇔ `check_markup` und `list_arangxoj` gelistet. Shell-Profile einmal je Lauf; Ero-Kurzprofile des vorigen Fragments je Runde. Vorgeladene Aufrufe sind keine `toolCalls` des Agenten, ihr Text zählt als Eingabe-Tokens. **bestätigt (Maintainer, 2026-11-07)** | D-03, D-09; K7 bleibt mit 037 vergleichbar. |
+| D-183 (D-S038-20-3) | Ero-Kurzprofile nur ab Runde 2 und nur mit letztem Fragment; `sxelo`/`pagxo` nicht über `get_ero` (stehen im Systemtext); andere Nicht-Eroj fallen über die `issues`-Antwort mit Logzeile heraus. **bestätigt (Maintainer, 2026-11-07)** | D-09: Kontext aus Plan und Vorrunde. |
+| D-184 (D-S038-20-4) | Vorabruf-Zwischenspeicher je Lauf und Name, auch für Fehlschläge (wie `kampaLegiloDe`). **bestätigt (Maintainer, 2026-11-07)** | Höchstens ein Abruf je Name und Lauf, eine Logzeile. |
+| D-185 (D-S038-20-5) | Größenvergleich „Runde 2 ≤ Runde 1 + Befunde + Fragment“ gegen die **letzte** Anfrage der Runde-1-Unterhaltung desselben Screens; zusätzlich Runde 2 minus (erste Anfrage Runde 1, Fragment, Befunde, Kurzprofile) < eine Werkzeugantwort. **bestätigt (Maintainer, 2026-11-07)** | Die Kurzprofile sind neuer Inhalt der Runde 2; gegen die erste Anfrage wäre der Vergleich nicht erfüllbar. |
+| D-186 (D-S038-20-6) | `RondoEkrano.peno.ms`/`.bytes` = Baudauer / Bytes des Fragments; die Invariante Σ + Plan = Lauf gilt für Tokens, Anfragen, Werkzeugaufrufe. **bestätigt (Maintainer, 2026-11-07)** | Wie C-6. |
+| D-187 (D-S038-20-7) | Der cli-Integrationstest `ekranoj-integra.test.ts:405` ist an den AC-7-Systemtext angepasst (nur Test: `startsWith(SISTEMO_F + Prompt)` und `toContain(NAVIGADA_REGULO)`). **Zu bestätigen.** **bestätigt (Maintainer, 2026-11-07)** | Der echte Gvidanto listet `check_markup` und `list_arangxoj`; der Test pinnte den alten Systemtext und war durch AC-7 gewollt rot (F-S038-20-1). |
+| D-188 (D-S038-21-1) | `peno` unter `rondoj[n].ekranoj[slug].peno` (Record nach Slug); der Aufwand der Plananfrage ist ein eigenes Feld; übernommene Runden tragen keins; Σ + Plan = Gesamt. **bestätigt (Maintainer, 2026-11-07)** | Echte Form von `raporto.json`; die Übernahme nach D-26 würde doppelt zählen. |
+| D-189 (D-S038-21-2) | `penoPlano` nur, wenn mindestens ein Screen × Runde `peno` trägt; reine Differenz, nicht geklemmt (enthält Teilaufwand abgebrochener Baus, F-S038-20-2). **bestätigt (Maintainer, 2026-11-07)** | `raporto.json` eines alten Ergebnisses bleibt byte-gleich. |
+| D-190 (D-S038-21-3) | Die Tabelle ist ein `###`-Unterabschnitt von „## Aufwand und Kosten“; die K8-Spalte steht am Ende der Rundentabellen. **bestätigt (Maintainer, 2026-11-07)** | Der cli-Integrationstest prüft `##`-Abschnitte und die Kopfzeile als Teilzeichenkette (`ekranoj-integra.test.ts:367`). |
+| D-191 (D-S038-21-4) | `peno` in `raporto.json` ist das volle `Peno` (mit `ms`, `bytes`); `penoPlano` nur die vier Zähler der Invariante. **bestätigt (Maintainer, 2026-11-07)** | Keine zweite Form für dieselben Daten. |
+| D-192 (D-S038-22-1) | Vorher (Bezug) und 037 haben nur Laufsummen. Die Tabelle zeigt nachher je Screen × Runde, vorher und 037 als Summen plus ein abgeleitetes Mittel je gebauter Screen-Runde. Δ nur auf Summen. **bestätigt (Maintainer, 2026-11-07)** | `peno` je Runde gibt es erst ab diesem Lauf. |
+| D-193 (D-S038-22-2) | Neu gerenderte 037-Fragmente nach `$S/vorher-fragmente/{komuna,provo}/bildoj/`. **bestätigt (Maintainer, 2026-11-07)** | `$S/vorher/komuna` ist der Ausgabeordner des Laufs `vorher-komuna`. |
+| D-194 (D-S038-22-3) | provo über `--config <stand>/packages/modelo/test/fixtures/valid/aspekto-provo/fundamento.config.json`; `--ledger $S`. **bestätigt (Maintainer, 2026-11-07)** | Die CLI hat kein `--marko` (wie S037-10). |
+| D-195 (D-S038-22-4) | QA nach S038-22 nur lesend. Befunde in den QA-Bericht, den PR-Text (ohne Commit) und den Laufbericht. **bestätigt (Maintainer, 2026-11-07)** | L3-2 (ein Push). |
+| D-196 (D-S038-22-5) | Kein eigenes Test-Ticket; Abdeckung nach §4.2 der Implementierungs-Spec. **bestätigt (Maintainer, 2026-11-07)** | Ticketliste L3-1 bindend (wie D-144). |
+| D-197 (D-S038-22-6) | S038-22 führt eine Schritt-Tabelle in seinem Beitrag und wiederholt keinen unumkehrbaren Schritt ohne Prüfung seines Ergebnisses. **bestätigt (Maintainer, 2026-11-07)** | Ein Push, ein Dispatch; die Sitzung von S038-14 brach in Lauf 2 während des CI-Wartens ab. |
+| D-198 (D-S038-22-7) | Die Schätzkonstante 70 000 (Spec 037 D-186) wird in PR C **nicht** neu gesetzt; der gemessene Wert kommt als Vorschlag für Lauf 4 in den plan. **bestätigt (Maintainer, 2026-11-07)** | Gemessen wird nach dem letzten Code-Commit (E-5); eine spätere Codeänderung entwertete die Messung. |
+| D-199 (D-S038-22-8) | „Gebaute Screen-Runde“ = Eintrag in `rondoj[n].ekranoj` mit Fragment (`k7.bytes` > 0); das abgeleitete Mittel je gebauter Screen-Runde ist Laufsumme ÷ deren Zahl (inkl. Plananfrage und abgebrochener Baus). **bestätigt (Maintainer, 2026-11-07)** | Für vorher (Bezug) und 037 gibt es nur Laufsummen (D-S038-22-1); ein Bau ohne Fragment (037 detail „empty page“, vorher detail abgebrochen) ist keine gebaute Screen-Runde. |
+
+### Entscheidungen Lauf 4 (D-200 ff.)
+
+**Entscheidungen des Maintainers (Lauf 4, 2026-11-07):**
+
+| # | Entscheidung |
+|---|---|
+| E-1 | D-145 bis D-199 sind bestätigt und hier als bestätigt markiert. |
+| E-2 | Nachher läuft auf dem Code-Kopf von D: `main` plus S038-24 bis S038-27, lokal gebaut und gemessen vor dem Abschluss-Commit (wie E-5/D-147 in Lauf 3); der SHA steht in Ledger und plan. Ersetzt „nachher auf `main`“ aus dem Go-Text. |
+| E-3 | Ziel „grün > 0“ zweifach belegt: grüne Screens je Ablauf und Marke aus der Messung nachher und ein Abnahme-Lauf komuna `abnahme-komuna-l4` mit der Eingabe von Lauf 3, aus dem Rest der Scheibe Teil 3 (≈ 0,052 $); kein Abnahme-Lauf provo. |
+| E-4 | Zwillingstest ohne Browser, in der CI: ein nordstelo-Unit-Test prüft die Quelltextgleichheit der In-Page-Funktionen und die gleiche Normalisierung, mit Negativfall; kein neues `test:browser` in nordstelo. |
+| E-5 | Ein „gestörter“ Messlauf bekommt genau eine Wiederholung aus der Reserve (0,10 $); ist auch sie gestört, ist das ein Befund; gestörte Werte werden nie verglichen. |
+| E-6 | Schätzkonstante `TOKENOJ_EKRANO_RONDO_F` = 65 615 mit Quelle im Kommentar (plan „Messung 1.9“, 7 gebaute Screen-Runden aus `teil1-komuna` und `abnahme-provo`, Plananteil eingerechnet); ein Schätzwert, keine Grenze. |
+| E-7 | Kappe und Scheiben aus D-04 unverändert: Rest „vorher“ 0,2538 $, Reserve 0,10 $, „nachher“ 0,45 $, Rest Teil 3 ≈ 0,052 $; Spec 038 insgesamt unter 1,00 $. |
+
+**Vorschläge der technical-spec von Lauf 4 (D-200 bis D-209, wörtlich, vom Maintainer zu bestätigen):**
+
+| # | Entscheidung |
+|---|---|
+| D-200 | Nachher läuft auf dem Code-Kopf D (= Grün-Commit S038-27), nicht auf `main` (E-2). |
+| D-201 | Die Slot-Regeln kommen über `fields: ["brief","slots"]` nur in die Kurzprofile ab Runde 2. In Runde 1 kommen keine Kurzprofile dazu (kein Fragment, keine Ero-Liste). |
+| D-202 | „Gebaute Screens“ für die Navigationsregel = `plano.ekranoj` nach `--ekranoj`. `navigado` bleibt unverändert. |
+| D-203 | `peno` je Screen und Runde nur bei `requests > 0` (I-1). Ein Bau mit Anfragen ohne Fragment behält seine Zeile. |
+| D-204 | Die Schätzkonstante wird im Test als Zahl festgehalten, weil die Spec sie setzt; die Quelle steht im Kommentar und nicht in einem Test, der `plan.md` liest (turbo-inputs). |
+| D-205 | Der Vergleich 4.3 ist Code in nordstelo (`--art komparo`) und kein Skript unter `specs/`, damit Determinismus und Fixtures testbar sind. |
+| D-206 | `kuro.json` bekommt `penoj` je Runde und Screen additiv. Der Bezug hat das Feld nicht, dort gilt das abgeleitete Mittel nach D-199. |
+| D-207 | Die Vorher-Messung läuft als zwei Aufrufe (`--varianten 0`, dann `--varianten F`), weil die Ablaufmessung je Ablauf F und 0 nacheinander fährt und D-05 Variante 0 für alle fünf zuerst verlangt. |
+| D-208 | Fixtures `ablauf-038` und Zwillingstest kommen nach der Messung (S038-29) und enthalten nur Tests, Fixtures und höchstens einen additiven Export, damit die Messung auf dem Code-Kopf D gültig bleibt. |
+| D-209 | Der Zwillingstest prüft ohne Browser die Quelltextgleichheit der In-Page-Funktionen und die gleiche Normalisierung, mit Negativfall (E-4). |
+
+#### Vorläufige Entscheidungen Lauf 4 (D-210 ff., durch S038-30 nummeriert)
+
+Aus der Implementierungs-Spec von Lauf 4 (§5) und den Beiträgen S038-23 bis S038-30; S038-30 nummeriert sie ab **D-210** durch (vorläufige ID in Klammern); vom Maintainer zu bestätigen. D-200 bis D-209 behalten ihre Nummern.
+
+| vorläufig | Entscheidung | Grund |
+|---|---|---|
+| D-S038-23-1 | `$W` zeigt auf das Worktree-Repo von Lauf 4 (`lib.mjs` `R`, `sperre.mjs` eigene Stände und Plan-Repo) neben `/tmp/s038-bezug`; der Wächter wird nach seinem Selbsttest neu gestartet. | Beide nannten fest das Worktree von Lauf 3; eine falsche „eigen“-Regel macht eigene Läufe „gestört“ oder fremde unsichtbar. |
+| D-S038-23-2 | `mezuri` bucht Ablaufmessungen aus dem nordstelo-Bericht (`sumo.tokenoj`, `sumo.anfragoj`, `sumo.usd`, `lauf.commit`) des unter `--out` neu angelegten Laufordners; neue Selbsttestfälle. | `ausRaporto` las nur die ekranoj-Form und hätte 0 $ gebucht. |
+| D-S038-24-1 | `NAVIGADA_REGULO` bleibt exportiert und byte-gleich; `navigadaReguloDe(slugoj)` hängt den Satz an. | `cli/src/ekranoj-integra.test.ts:407` (nicht frei) und vier ekranoj-Prüfungen nutzen ihn; präzisiert die Formulierung von D-202. |
+| D-S038-24-2 | Die bestehende Prüfung `fields: ["brief"]` (`agento.test.ts:427-447`) wird durch die Erwartung von F-1 ersetzt; weitere geänderte Prüfungen stehen im Beitrag. | F-1 ändert genau dieses Verhalten. |
+| D-S038-24-3 | Kurzprofile nehmen `get_ero` wie beantwortet; `slots` in `rest` oder fehlend → nur `brief` mit Logzeile, kein Folgeaufruf. | Edge Case der Product-Spec; die Grenze 750 bleibt (L4-9). |
+| D-S038-24-4 | Kein zusätzlicher Filter, wo `--ekranoj` wirkt: `plano.ekranoj` in `kuruEkranojn` ist schon die gebaute Liste; der Filter liegt in `sxelaTaskoDe`. | Geprüft an `planoElNomoj`/`enNomojn`/`mallongigiPlanon`; erledigt den Rückfall der technical-spec. |
+| D-S038-26-1 | Festgehaltene Erwartungen der Schätzung (ekranoj, nordstelo `integra-raporto.json` `lauf.takso`, zwei Zeilen in `cli/src/ekranoj.test.ts`) werden im Rot-Commit angepasst, wo möglich aus den Konstanten abgeleitet. **Zu bestätigen** (der cli-Test liegt außerhalb von L4-5). | E-6 ändert die Konstante; testing.md: ableiten. Vorbild D-187. |
+| D-S038-26-2 | `kostoj.test.ts:26-37` (Schätzung deckt die 037-Abnahme) wird auf die Quelle aus Spec 038 umgestellt, mit ausdrücklicher Rundung. **Zu bestätigen.** | 3 × 65 615 + 5 000 = 201 845 < 213 397; E-6 setzt den Wert bewusst. |
+| D-S038-27-1 | Der Vergleich liest die gespeicherten `raporto.json`/`kuro.json`/`lauf.json` jeder Seite und bewertet nie neu. | Jeder Stand wird mit seinem eigenen Bewerter beurteilt; kein Modelo, kein Browser im Vergleich; Determinismus T-1 auf gespeicherten Daten. |
+| D-S038-27-2 | „gestört“ kommt als Eingabe in den Vergleich (`--gestoert <Laufordner>`), „Last > Kerne“ aus den Daten. | „gestört“ steht nur in `$S/laeufe.tsv`. |
+| D-S038-27-3 | `--antaux`/`--post`/`--zusatz` nehmen einen Laufordner (mit `lauf.json`) oder einen Elternordner mit genau einem; andere Geschwister werden übergangen. | `--out` legt einen Unterordner mit Zeitstempel an; `messpunkt-1/` enthält auch `projekcioj/`. |
+| D-S038-27-4 | `KuroRekordo.penoj?/penoPlano?` werden in `raporto.ts` deklariert (dort liegt der Typ) und in `kuro.ts` gefüllt; `penoPlanoDe` darf vor dem Code-Kopf D additiv aus ekranoj exportiert werden. | Echter Ort des Typs; eine Definition des Plananteils. |
+| D-S038-28-1 | Die Lückenliste wird mit den Elternordnern aufgerufen; `fm ekranoj mankoj` sucht rekursiv. | Das Muster der technical-spec ist eine Ebene zu kurz. |
+| D-S038-28-2 | S038-28 schreibt seine plan-Abschnitte und committet sie in einem Doku-Commit nach dem letzten Lauf. | Fortsetzbarkeit; keine Wirkung auf den Build des Code-Kopfs D. |
+| D-S038-30-1 | QA nach S038-30 nur lesend; Befunde in den QA-Bericht, den PR-Text (ohne Commit) und den Laufbericht. | L4-2 (ein Push). |
+| D-S038-30-2 | Kein eigenes Test-Ticket; Abdeckung nach §4.2 der Implementierungs-Spec. | Ticketliste L4-1 bindend (wie D-144, D-196). |
 
 ## Lieferliste
 
@@ -584,6 +670,19 @@ Aus der Implementierungs-Spec von Lauf 3 (§5) und den Beiträgen S038-15 bis S0
 | 3.4b | Zwilling des Extraktors `packages/ekranoj/src/aspekto-faktoj.ts` (D-06), K8-Fakten im `bildigilo.ts` | erledigt (S038-17, `d8820af0` → `7321b5e9`): `aspekto-faktoj.ts` ohne Import aus nordstelo, Normalisierungsfälle wie nordstelo, K8-Fakten je Render im `bildigilo.ts` (Sondendokument unter `file://`, D-164); Gleichheitstest über beide Pakete in Lauf 4 |
 | 3.4c | Tokens je Screen und Runde und Spalte K8 in `raporto.json`/`raporto.md` | erledigt (S038-21, `0a27c25e` → `20961e72`): `rondoj[n].ekranoj[slug].peno`, `penoPlano`, Tabelle „Tokens je Screen und Runde“ und Spalte K8 in `raporto.md`; in beiden Abnahmeläufen Σ + Plan = Laufsumme |
 | 3.5 | Abnahme komuna und provo nachher (`teil1-komuna`, `abnahme-provo`), Fotos vorher/nachher, Sichtprüfung | teilweise (S038-22, T3844/T3845): Läufe komuna und provo gemessen, Fotos vorher/nachher mit Sichtprüfung (Abschnitte „Abnahme 3.5“, „Bildschirmfotos vorher/nachher“); **0 grüne Screens je Marke** – Ursache `check_usage` und `navigado`, nicht K8 (F-S038-22-4); nichts gelockert |
+| V-1 (L4) | Nachtrag Lauf 3 (wie D-25): PR C #154, Merge `43010159`, CI beider Läufe und Nachtlauf mit Run-IDs, Einordnung je rotem Job, QA-Befund I-1, Wackel-Quoten; T3847 abgehakt; D-145 bis D-199 bestätigt (E-1); Kopfzeile, Startbedingung, Frei/Tabu und Entscheidungen Lauf 4; `$W` auf Lauf 4 | erledigt (S038-23, Doku-Commit `Spec 038: Nachtrag Lauf 3 und Start Lauf 4 in plan und tasks`) |
+| F-1 | Slot-Regeln in den Kurzprofilen: `get_ero { name, fields: ["brief", "slots"] }` ab Runde 2, Slot-Inhalt je Ero im Auftragstext; 750 je Kombination unverändert; Spec-037-Pfad byte-gleich (F-S038-22-4 a) | offen (S038-24) |
+| F-2 | Navigationsregel nur auf gebaute Screens: Regel im Systemtext mit den Slugs von `plano.ekranoj`, „Laut Plan verweist …“ nur mit gebauten Zielen; Spec-037-Pfad byte-gleich (F-S038-22-4 b) | offen (S038-24) |
+| F-3 | `peno` nur bei gelaufenem Bau (I-1), Test „Grenze vor der ersten Anfrage einer Runde“, Invariante Σ + `penoPlano` = `peno` | offen (S038-25) |
+| F-4 | Schätzkonstante `TOKENOJ_EKRANO_RONDO_F = 65_615` mit Quelle (E-6); die beiden anderen Konstanten unverändert | offen (S038-26) |
+| 4.1 | Vorher auf dem Bezug `e4873c57`: `vorher-ablauf-0` (Variante 0, alle fünf), dann `vorher-ablauf-F` (Katalog) aus dem Rest der Scheibe „vorher“; Zusatzzeile „Stand vor 036 Teil 5“ (037-Messpunkt `07585b5e`) | offen (S038-28) |
+| 4.2 | Nachher auf dem Code-Kopf D: `nachher-ablauf`, alle fünf, F und 0, eine Wiederholung, Scheibe 0,45 $ | offen (S038-28) |
+| 4.2a | Abnahme komuna `abnahme-komuna-l4` auf dem Code-Kopf D, grüne Screens gegen Lauf 3 (0/2) (E-3) | offen (S038-28) |
+| 4.3 | Vergleich vorher/nachher als Code (`nordstelo --art komparo`, `penoj` in `kuro.json`), Tabelle im plan | offen (S038-27 Code, S038-28 Tabelle) |
+| 4.4 | Lückenliste aus `fm ekranoj mankoj` und `list_arangxoj` → „Mankoj – Eroj-Runde 7“ | offen (S038-28) |
+| 4.5 | Doku: plan, tasks, Bericht `$S/bericht-lauf-4.md`; `spec.md` byte-gleich | offen (S038-30) |
+| T-1 | Fixtures `ablauf-038` aus der Messung, Determinismustest gegen `komparo.json` | offen (S038-29) |
+| T-2 | Zwillingstest der K8-Extraktoren mit Negativfall (D-06, E-4) | offen (S038-29) |
 
 ## Befunde
 
@@ -886,3 +985,27 @@ Kein roter Job mit Ursache PR B, darum kein Fix-Vorschlag (D-24 greift nicht). *
 ### Bericht Lauf 3
 
 Stand vor dem Push (S038-22): Messung, Abnahme, Fotos und Prüfungen in den Abschnitten oben. Push, PR C, die CI beider Läufe (`pull_request` und genau ein `workflow_dispatch`) und `$S/bericht-lauf-3.md` folgen ohne Commit; das Ergebnis steht im PR-Text und im Bericht, Lauf 4 trägt es hier nach und hakt T3847 ab (wie D-25).
+
+**Nachtrag (Lauf 4, wie D-25, S038-23)** aus `$S/bericht-lauf-3.md`, geprüft mit `gh pr view 154`, `gh run view <id> --json jobs` und `gh run view <id> --log-failed --job <job>`:
+
+- **PR C** [#154](https://github.com/thojank/fundamento/pull/154) „Spec 038 – Screens auf Fundamento-Niveau“, Branch `261106-spec-038-lauf-3-screens-9dc27a`, Kopf `c9ecd6c2` (`c9ecd6c268a9a97c9e483c4c2decf8573c5c7375`, Abschluss-Commit von S038-22), Code-Kopf C `20961e72`, ein Push, genau ein `workflow_dispatch`. Vom Maintainer gemergt als `43010159` (`43010159ae2b39f2a2f6f953ef937bebbc16caf5`, Merge #154, 2026-11-07T06:46:06Z).
+
+| Lauf | Run | Ergebnis |
+|---|---|---|
+| `pull_request` | [42344555173](https://github.com/thojank/fundamento/actions/runs/42344555173) | rot, 23/25 Jobs grün |
+| `workflow_dispatch` (genau einer) | [42344565131](https://github.com/thojank/fundamento/actions/runs/42344565131) | rot, 24/25 Jobs grün |
+| Nachtlauf `main` `93b6caea` (Vergleich, vor dem Push) | [42328889167](https://github.com/thojank/fundamento/actions/runs/42328889167) | rot, 23/25 Jobs grün: Rendered Eroj Shard 3 ([Job 128270620115](https://github.com/thojank/fundamento/actions/runs/42328889167/job/128270620115)) und Shard 4 ([Job 128270620137](https://github.com/thojank/fundamento/actions/runs/42328889167/job/128270620137)), beide `zweitfarbe-036.spec.ts:196` und `:129` |
+
+| Job | `pull_request` | Dispatch | Einordnung / erster Fehler |
+|---|---|---|---|
+| Unit tests (ekranoj, nordstelo, cli, mcp, agordilo, metiejo; Projekcioj Shard 1–2) – die Jobs der Pakete von PR C | grün | grün | |
+| Affected packages; Build, lint and Modelo checks; Rendered Eroj (Shard 1, 2); Rendered accessibility (Shard 1–3); Rendered checks (Make Kit, Quickstart; Vitrino cetero-1..3; Vitrino-Werkstatt werkstatt-1..2); Timing checks | grün | grün | |
+| **Unit tests (modelo)** | **rot** | grün | **fremd** (N-9) – [Job 128319416272](https://github.com/thojank/fundamento/actions/runs/42344555173/job/128319416272), Schritt „Test“: `packages/modelo/src/ci/turbo-inputs.test.ts` › „turbo.json covers what the tests read (Spec 040 T-5, E-6)“: „Hook timed out in 10000ms“ (`:679`); einziger roter Test, grün im Dispatch auf demselben Kopf |
+| **Rendered Eroj (Playwright, shard 4 of 4)** | **rot** | grün | **fremd** (`packages/eroj`, Spec 036) – [Job 128319416151](https://github.com/thojank/fundamento/actions/runs/42344555173/job/128319416151), Schritt „Test“: `packages/eroj/test/zweitfarbe-036.spec.ts:196` „the Schnellstart's colour step: the screen is ready while its preview still loads“: Erwartung „the page's request to /api/marko/…/pruefung is answered“ nicht erfüllt (`:216`); derselbe Fehler im Nachtlauf `main` |
+| **Rendered Eroj (Playwright, shard 3 of 4)** | grün | **rot** | **fremd** (`packages/eroj`, Spec 036) – [Job 128319452301](https://github.com/thojank/fundamento/actions/runs/42344565131/job/128319452301), Schritt „Test“: `zweitfarbe-036.spec.ts:196` [firefox] (wie oben, `:216`) und `:129` „the assistant's step „Leitfarbe und Akzente“: „Keine Zweitfarbe“, a colour typed with the keyboard, then cleared“: „the frame iframe[data-mt-vorschau] is loaded ({"rev":2})“ (`:157`); dieselben Fehler im Nachtlauf `main` |
+
+Kein „eigener“ roter Job (L4-8: eroj und modelo N-9 sind fremd), darum kein Fix-Vorschlag. **Kein Rerun, kein zweiter Push** (L3-2). Jeder Job ist auf dem Kopf `c9ecd6c2` in mindestens einem der beiden Läufe grün. Logs (gefiltert): `/tmp/s038-logs/s038-23-ci-{modelo,eroj4,eroj3}.log`, `/tmp/s038-logs/s038-23-ci-nacht-*.log`.
+
+- **QA nach dem Push (lesend, PASS) – Befund I-1** (klein, eigen, S038-20/S038-21): ein übernommener Screen bekommt eine Null-Aufwandszeile. In `$S/abnahme/provo/raporto.json` hat `rondoj[1].ekranoj.detail` `portitaEl: 1` und zugleich `peno` mit lauter Nullen; `raporto.md` druckt `| detail | 2 | 0 | 0 | 0 | 0 |`. Ursache: `rondoj.ts` setzt `penoj` im `finally` jeder Schleife, auch wenn der Bau an der Tokengrenze vor der ersten Anfrage endete; die Invariante Σ + `penoPlano` = `peno` bleibt. Behebung in Lauf 4: F-3 (S038-25, D-203).
+- **Wackel-Quoten** (aus `$S/bericht-lauf-3.md`, Tabelle „Wackel-Tests Lauf 3“ oben): nur Zeitgrenzen unter Last, nichts geändert – nordstelo `ac8.test.ts:156`, `ablauf/integra.test.ts:131`, `ablauf/raporto.test.ts:70/84/236` (allein 0); modelo `ci/turbo-inputs.test.ts:679` lokal 4/9, CI 1/2 auf `c9ecd6c2`; cli `index.test.ts:343` 3/7; eroj `zweitfarbe-036.spec.ts:129/196` lokal 3/4, CI 2/2 Läufe (je ein Shard) und Nachtlauf `main`.
+- **Bericht:** `$S/bericht-lauf-3.md` (Stand 2026-11-07 07:15 CET).
