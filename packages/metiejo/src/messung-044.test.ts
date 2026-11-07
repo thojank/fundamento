@@ -122,7 +122,9 @@ afterAll(async () => {
       });
   const report = {
     spec: "044",
-    stand: standOf(fileURLToPath(new URL("../../..", import.meta.url))) ?? "unbekannt",
+    // The commit from the package directory (git finds the checkout itself); a path to the root
+    // would count as a read of the whole checkout (turbo-inputs.test.ts, Spec 040 T-5).
+    stand: standOf(process.cwd()) ?? "unbekannt",
     rechner: cpus()[0]?.model ?? "unbekannt",
     kerne: cpus().length,
     n: N,
