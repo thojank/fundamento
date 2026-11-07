@@ -16,23 +16,43 @@ import { respondo, SkriptaModelo } from "./test-doubles/chat.js";
 import type { ChatModel } from "./tipoj.js";
 
 describe("estimate (D-20)", () => {
-  it("names its constants: F from the acceptance runs of S037-10, 0 and the plan from Reihe K", () => {
+  it("names its constants: F from the Spec 038 measurement 1.9, 0 and the plan from Reihe K", () => {
+    // The spec fixes these numbers (E-6, D-204); the source stands in kostoj.ts, not in a test.
     expect([TOKENOJ_EKRANO_RONDO_F, TOKENOJ_EKRANO_RONDO_0, TOKENOJ_PLANO]).toEqual([
-      70_000, 2_000, 5_000,
+      65_615, 2_000, 5_000,
     ]);
   });
 
-  it("covers what the acceptance run komuna spent on a plan and three screen-rounds (S037-10 Befund 2)", () => {
-    // abnahme-komuna: plan request + 3 built screen-rounds = 210 402 tokens in + 2 995 out.
-    const gemessen = 210_402 + 2_995;
+  it("computes Variante F from TOKENOJ_EKRANO_RONDO_F per screen-round", () => {
     const takso = taksiKostojn({
-      ekranoj: 1,
+      ekranoj: 2,
       rondoj: 3,
       varianto: "F",
-      planPeto: true,
-      maksTokenoj: 250_000,
+      planPeto: false,
+      maksTokenoj: 1e6,
     });
-    expect(takso.tokenoj).toBeGreaterThanOrEqual(gemessen);
+    expect(takso.tokenoj).toBe(2 * 3 * TOKENOJ_EKRANO_RONDO_F);
+  });
+
+  it("is the mean of what the Spec 038 runs spent per built screen-round, plan share included (Messung 1.9)", () => {
+    // Spec 038 plan „Messung 1.9“, code head C 20961e72: teil1-komuna 223 132 tokens in (4 built
+    // screen-rounds) + abnahme-provo 236 174 (3 built screen-rounds), each run sum with its plan
+    // requests = 459 306 tokens in over 7 built screen-rounds, mean 65 615,14. The constant is that
+    // mean rounded to whole tokens: 7 × 65 615 = 459 305, one token below the measured sum.
+    // Before (Spec 037 S037-10 Befund 2, D-186): abnahme-komuna, plan request + 3 built
+    // screen-rounds = 210 402 tokens in + 2 995 out = 213 397, covered by 3 × 70 000 + 5 000.
+    const gemessen = 223_132 + 236_174;
+    const gebautajRondoj = 4 + 3;
+    const takso = taksiKostojn({
+      ekranoj: 1,
+      rondoj: gebautajRondoj,
+      varianto: "F",
+      planPeto: false,
+      maksTokenoj: 1e6,
+    });
+    expect(takso.tokenoj).toBe(Math.round(gemessen / gebautajRondoj) * gebautajRondoj);
+    // Covers the measured sum up to the rounding: less than one token short per screen-round.
+    expect(takso.tokenoj).toBeGreaterThan(gemessen - gebautajRondoj);
   });
 
   it("counts screens × rounds × tokens + the plan request and prices them with kostoOf", () => {
@@ -43,17 +63,26 @@ describe("estimate (D-20)", () => {
       modelo: PERMESITA_MODELO,
       maksTokenoj: 250_000,
     });
+    const tokenoj = 3 * 3 * TOKENOJ_EKRANO_RONDO_F + TOKENOJ_PLANO;
+    // Priced at the higher of the input and output price (the estimate does not split).
+    const usd = Math.max(
+      kostoDe(PERMESITA_MODELO, { enigo: tokenoj, eligo: 0 }).usd ?? Number.NaN,
+      kostoDe(PERMESITA_MODELO, { enigo: 0, eligo: tokenoj }).usd ?? Number.NaN,
+    );
     expect(takso).toMatchObject({
       ekranoj: 3,
       rondoj: 3,
-      tokenoj: 635_000,
-      superasLimon: true,
+      tokenoj,
+      superasLimon: tokenoj > 250_000,
       maksTokenoj: 250_000,
     });
-    expect(takso.usd).toBeCloseTo(0.127, 10);
+    expect(takso.superasLimon).toBe(true);
+    expect(takso.usd).toBeCloseTo(usd, 10);
     expect(takso.satz).toContain("3 Screens × 3 Runden (Variante F) + Plananfrage");
-    expect(takso.satz).toContain("635.000 Tokens");
-    expect(takso.satz).toContain("0,127 $");
+    expect(takso.satz).toContain(`${new Intl.NumberFormat("de-DE").format(tokenoj)} Tokens`);
+    expect(takso.satz).toContain(
+      `${new Intl.NumberFormat("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(usd)} $`,
+    );
     expect(takso.satz).toContain("Teilergebnis");
   });
 

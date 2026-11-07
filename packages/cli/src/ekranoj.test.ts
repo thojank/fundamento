@@ -27,6 +27,7 @@ import type {
   Taksilo,
   ToolInfo,
 } from "@fundamento/ekranoj";
+import { TOKENOJ_EKRANO_RONDO_F, TOKENOJ_PLANO } from "@fundamento/ekranoj";
 import { cssVariable } from "@fundamento/projekcioj";
 import { describe, expect, it } from "vitest";
 import type { CliContext } from "./command.js";
@@ -256,8 +257,10 @@ describe("fm ekranoj: nothing starts before the input, the model and the user ag
     const run = await a.kuri([FRAZO, "--ekranoj", "liste,detail"]);
     expect(run.code).toBe(2);
     expect(run.stdout).toContain("Schätzung: 2 Screens × 3 Runden");
-    // 2 × 3 × 70 000 + 5 000 (S037-10 Befund 2): above the acceptance slice, said before the start.
-    expect(run.stdout).toContain("≈ 425.000 Tokens");
+    // 2 × 3 × TOKENOJ_EKRANO_RONDO_F + TOKENOJ_PLANO (E-6): above the slice, said before the start.
+    expect(run.stdout).toContain(
+      `≈ ${new Intl.NumberFormat("de-DE").format(2 * 3 * TOKENOJ_EKRANO_RONDO_F + TOKENOJ_PLANO)} Tokens`,
+    );
     expect(run.stdout).toContain("über der Grenze von 250.000 Tokens");
     expect(run.stdout).toContain("$");
     expect(run.stderr).toContain("--ja");
@@ -427,7 +430,7 @@ describe("fm ekranoj --json: every exit 2 is one JSON document on stdout (QA-2-1
     const run = await a.kuri([FRAZO, "--ekranoj", "liste,detail", "--json"]);
     expect(run.code).toBe(2);
     const dok = jsonEraro(run.stdout);
-    expect(dok.takso?.tokenoj).toBe(425_000);
+    expect(dok.takso?.tokenoj).toBe(2 * 3 * TOKENOJ_EKRANO_RONDO_F + TOKENOJ_PLANO);
     expect(dok.takso?.satz).toContain("Schätzung: 2 Screens × 3 Runden");
     expect(dok.problemoj).toContainEqual(expect.objectContaining({ path: "/ja" }));
     expect(a.babilo.petoj).toHaveLength(0);
