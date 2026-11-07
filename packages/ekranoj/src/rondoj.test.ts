@@ -17,6 +17,9 @@ import {
   navigadaReguloDe,
   PERMESITA_MODELO,
   PROMPT_0,
+  type RaportoJson,
+  raportoDe,
+  raportoMarkdown,
   SISTEMO_F,
   trovojDe,
 } from "./index.js";
@@ -37,6 +40,7 @@ import type {
   EkranaDokumento,
   EkranojDeps,
   EkranojEnigo,
+  EkranojRezulto,
   K8Merkmal,
   KostoTakso,
   Peno,
@@ -348,6 +352,101 @@ describe("token limit (AC-9, D-20)", () => {
     expect(linioj[0]).toBe(takso?.satz);
     expect(takso).toMatchObject({ ekranoj: 2, rondoj: 3, planPeto: true, tokenoj: 425_000 });
     expect(rezulto.takso).toEqual(takso);
+  });
+});
+
+describe("Grenze vor der ersten Anfrage einer Runde (S038-25, I-1, D-203, C-2)", () => {
+  const ZAEHLER = ["inputTokens", "outputTokens", "requests", "toolCalls"] as const;
+
+  /** Σ over screens × rounds of `peno`; with a given plan there is no plan request. */
+  function sumoDe(rezulto: EkranojRezulto): Record<(typeof ZAEHLER)[number], number> {
+    const sumo = { inputTokens: 0, outputTokens: 0, requests: 0, toolCalls: 0 };
+    for (const rondo of rezulto.rondoj) {
+      for (const stato of Object.values(rondo)) {
+        if (stato.peno === undefined) continue;
+        for (const z of ZAEHLER) sumo[z] += stato.peno[z];
+      }
+    }
+    return sumo;
+  }
+
+  const raportoMdDe = (rezulto: EkranojRezulto): { md: string; json: RaportoJson } => {
+    const json = raportoDe({
+      id: "s038-25",
+      enigo: enigoDe(),
+      varianto: "F",
+      lingvo: "de",
+      bildigilo: true,
+      rezulto,
+      bildoj: [],
+    });
+    return { md: raportoMarkdown(json), json };
+  };
+
+  it("Grenze vor der ersten Anfrage einer Runde: no peno and no report row for a build that never asked", async () => {
+    const chat = new SkriptaModelo(skripto(PLANO), { modelo: PERMESITA_MODELO });
+    // 120 tokens per request: liste#1, detail#1, liste#2 = 360; detail#2 would bring 480 > 400.
+    const rezulto = await kuruEkranojn(enigoDe({ maksTokenoj: 400 }), depsDe({ chat }));
+    expect(konstruoj(chat)).toEqual(["liste#1", "detail#1", "liste#2"]);
+    expect(rezulto.haltigo).toBe("max-tokens");
+    const detail = rezulto.rondoj[1]?.detail;
+    expect(detail?.portitaEl).toBe(1);
+    expect(detail).toBeDefined();
+    expect(detail).not.toHaveProperty("peno");
+    // The builds that asked keep their effort.
+    expect(rezulto.rondoj[1]?.liste?.peno?.requests).toBe(1);
+    expect(rezulto.rondoj[0]?.detail?.peno?.requests).toBe(1);
+
+    const { md, json } = raportoMdDe(rezulto);
+    expect(md).toContain("| liste | 2 |");
+    expect(md).not.toContain("| detail | 2 |");
+    expect(json.rondoj[1]?.ekranoj.detail?.portitaEl).toBe(1);
+    expect("peno" in (json.rondoj[1]?.ekranoj.detail ?? {})).toBe(false);
+    // Σ screens × rounds + plan = run, for every counter (D-191); the plan is given: plan = 0.
+    const sumo = sumoDe(rezulto);
+    for (const z of ZAEHLER) {
+      expect(sumo[z] + (json.penoPlano?.[z] ?? Number.NaN), z).toBe(rezulto.peno[z]);
+      expect(json.penoPlano?.[z], z).toBe(0);
+    }
+  });
+
+  it("keeps the row of a build that asked at least once but left no fragment (stop in the tool loop)", async () => {
+    // Every build asks describe once, then sends its fragment; 120 tokens per request.
+    const chat = new SkriptaModelo(
+      (peto) => {
+        const slug = slugDePeto(peto);
+        if (slug === undefined) return skripto(PLANO)(peto);
+        if (!peto.messages.some((m) => m.role === "tool")) {
+          return ilaRespondo([{ name: "describe" }]);
+        }
+        return skripto(PLANO)(peto);
+      },
+      { modelo: PERMESITA_MODELO },
+    );
+    // liste#1, detail#1, liste#2 = 6 requests = 720; detail#2 asks once (840), its second
+    // request would bring 960 > 900.
+    const rezulto = await kuruEkranojn(enigoDe({ maksTokenoj: 900 }), depsDe({ chat }));
+    expect(rezulto.haltigo).toBe("max-tokens");
+    expect(konstruoj(chat)).toEqual([
+      "liste#1",
+      "liste#1",
+      "detail#1",
+      "detail#1",
+      "liste#2",
+      "liste#2",
+      "detail#2",
+    ]);
+    const detail = rezulto.rondoj[1]?.detail;
+    expect(detail?.portitaEl).toBe(1);
+    expect(detail?.peno).toMatchObject({ inputTokens: 100, outputTokens: 20, requests: 1 });
+
+    const { md, json } = raportoMdDe(rezulto);
+    expect(md).toContain("| detail | 2 | 100 | 20 | 1 |");
+    const sumo = sumoDe(rezulto);
+    for (const z of ZAEHLER) {
+      expect(sumo[z] + (json.penoPlano?.[z] ?? Number.NaN), z).toBe(rezulto.peno[z]);
+      expect(json.penoPlano?.[z], z).toBe(0);
+    }
   });
 });
 
