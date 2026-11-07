@@ -448,10 +448,12 @@ export const NAVIGADA_REGULO = [
 
 /**
  * The navigation rule of a run (Spec 038 F-2): `NAVIGADA_REGULO` and the screens that exist in
- * this run, as `<slug>.html` in plan order.
+ * this run, as `<slug>.html` in plan order. Without a screen only `NAVIGADA_REGULO`.
  */
-export function navigadaReguloDe(_slugoj: readonly string[]): string {
-  throw new Error("navigadaReguloDe: noch nicht umgesetzt (S038-24 rot)");
+export function navigadaReguloDe(slugoj: readonly string[]): string {
+  if (slugoj.length === 0) return NAVIGADA_REGULO;
+  const ekranoj = slugoj.map((slug) => `${slug}.html`).join(", ");
+  return `${NAVIGADA_REGULO}\nVerweise nur auf diese Screens: ${ekranoj}. Andere Ziele gibt es in diesem Lauf nicht.`;
 }
 
 /** One Kurzprofil read by ekranoj (not by the agent): the name and the answer as the tool gave it. */
@@ -573,11 +575,14 @@ export async function legiEroProfilojn(
   return profiloj;
 }
 
-/** The system text of Variante F: SISTEMO_F, the Gvidanto's prompt, and on the new path the shell. */
+/**
+ * The system text of Variante F: SISTEMO_F, the Gvidanto's prompt, and on the new path the shell
+ * with the navigation rule; given the slugs of the built screens, the rule names them (F-2).
+ */
 export function sistemoDe(
   gvidanto: string,
   sxelo?: SxelaKunteksto,
-  _slugoj?: readonly string[],
+  slugoj?: readonly string[],
 ): string {
   const partoj = [SISTEMO_F, ...(gvidanto === "" ? [] : [gvidanto])];
   if (sxelo !== undefined) {
@@ -592,15 +597,21 @@ export function sistemoDe(
     if (sxelo.arangxoj !== undefined) {
       partoj.push(`Die Layout-Mittel (list_arangxoj):\n${sxelo.arangxoj}`);
     }
-    partoj.push(NAVIGADA_REGULO);
+    partoj.push(slugoj === undefined ? NAVIGADA_REGULO : navigadaReguloDe(slugoj));
   }
   return partoj.join("\n\n");
 }
 
-/** The user message of the new path: plan excerpt, Kurzprofile, last fragment, findings, task. */
+/**
+ * The user message of the new path: plan excerpt, Kurzprofile, last fragment, findings, task. The
+ * planned links name only screens of `plano.ekranoj`, the built ones (F-2, D-202).
+ */
 export function sxelaTaskoDe(peto: KonstruoPeto): string {
   const { plano, ekrano } = peto;
-  const celoj = plano.kantoj.filter((kanto) => kanto.de === ekrano.slug).map((k) => `${k.al}.html`);
+  const konstruitaj = new Set(plano.ekranoj.map((e) => e.slug));
+  const celoj = plano.kantoj
+    .filter((kanto) => kanto.de === ekrano.slug && konstruitaj.has(kanto.al))
+    .map((k) => `${k.al}.html`);
   const linioj = [
     `Ablauf: ${plano.celo}`,
     `Satz des Auftrags: ${peto.frazo}`,
@@ -691,7 +702,13 @@ export async function konstruiEkranon(peto: KonstruoPeto): Promise<KonstruoRezul
   if (peto.varianto === "F") {
     messages.push({
       role: "system",
-      content: sistemoDe(peto.gvidanto ?? "", nova ? peto.sxelo : undefined),
+      content: nova
+        ? sistemoDe(
+            peto.gvidanto ?? "",
+            peto.sxelo,
+            peto.plano.ekranoj.map((e) => e.slug),
+          )
+        : sistemoDe(peto.gvidanto ?? ""),
     });
     messages.push({ role: "user", content: tasko });
   } else {
