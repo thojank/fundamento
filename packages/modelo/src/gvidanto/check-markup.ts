@@ -227,11 +227,18 @@ export function instancojElElementoj(
     if (name === undefined || entry === undefined) continue;
     const props = typedProps(entry.skemo.props, element.attrs);
     const slotNames = new Set((entry.skemo.slots ?? []).map((slot) => slot.name));
+    // A child in the default slot named explicitly is adopted by the Ero as unslotted (Nachlese 11
+    // B-2: the components drop `slot="<default>"`), so it counts as the label, as in the browser.
+    const defaultSlot = (entry.skemo.slots ?? []).find((slot) => slot.default === true)?.name;
+    const slotOf = (child: number): string | undefined => {
+      const slot = elementoj[child]?.attrs.slot;
+      return slot === defaultSlot ? undefined : slot;
+    };
     const children = childrenOf(elementoj, index);
     const texts: Record<string, string | string[]> = {};
     const slots: NonNullable<EroInstance["slots"]> = {};
     for (const child of children) {
-      const slot = elementoj[child]?.attrs.slot;
+      const slot = slotOf(child);
       if (slot === undefined || !slotNames.has(slot)) continue;
       const childName = fmName(elementoj[child]?.tag ?? "");
       const filled = slots[slot] ?? [];
@@ -247,7 +254,7 @@ export function instancojElElementoj(
     const label = [
       element.text,
       ...children
-        .filter((child) => elementoj[child]?.attrs.slot === undefined)
+        .filter((child) => slotOf(child) === undefined)
         .map((child) => textOf(elementoj, child)),
     ]
       .filter((part) => part !== "")
