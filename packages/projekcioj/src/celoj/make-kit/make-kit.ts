@@ -50,6 +50,7 @@ import {
   isPopover,
   isSkip,
   isSuggest,
+  isTimeline,
   isUpload,
   lightStylesheetOf,
   namesOf,
@@ -668,7 +669,9 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
   // with a caption, one record the list around the platform's own description list, a known value
   // in a known range the meter with its number as text; generated from the roles table, list and
   // meter, the companions named where the Modelo has them.
-  const recordName = eroj.find((entry) => entry.skemo.a11y.role === "list");
+  const recordName = eroj.find(
+    (entry) => entry.skemo.a11y.role === "list" && !isTimeline(entry.skemo),
+  );
   const badgeName = eroj.find(
     (entry) =>
       entry.skemo.a11y.role === "generic" &&
@@ -684,10 +687,22 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
     )
     .join("\n");
   const recordLines = eroj
-    .filter((entry) => entry.skemo.a11y.role === "list" && entry.uzo !== undefined)
+    .filter(
+      (entry) =>
+        entry.skemo.a11y.role === "list" && !isTimeline(entry.skemo) && entry.uzo !== undefined,
+    )
     .map(
       (entry) =>
         `- Every record shown as names and values is an \`<${componentName(entry.ero)}>\` around the platform's own description list; never a table for one record${fieldName === undefined ? "" : `, and editing is a form of \`<${componentName(fieldName.ero)}>\``}.`,
+    )
+    .join("\n");
+  // Spec 046 T4: what happened in the order of time is the timeline around the platform's own
+  // ordered list, its status in data-status – the sign and the word are the element's.
+  const timelineLines = eroj
+    .filter((entry) => isTimeline(entry.skemo) && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- What happened in the order of time is a \`<${componentName(entry.ero)}>\` around the platform's own ordered list: a \`<time>\`, a title and what happened per entry, its status in data-status (done, current, upcoming), never a colour of its own.`,
     )
     .join("\n");
   const meterLines = eroj
@@ -958,6 +973,7 @@ ${noticeLines}
 ${stateLines}
 ${tableLines}
 ${recordLines}
+${timelineLines}
 ${meterLines}
 ${navigationLines}
 ${paginationLines}

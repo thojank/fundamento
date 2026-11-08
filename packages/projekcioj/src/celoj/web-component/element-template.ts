@@ -2707,7 +2707,8 @@ const MIN_WIDTHS: Readonly<Record<string, string>> = ${JSON.stringify(gridMinWid
       attributeFilter: ${isNav ? '["slot", "href", "data-page", "data-count", "data-count-description"]' : isBreadcrumb ? '["slot", "href", "data-page"]' : isSelecting ? '["slot", "data-sort", "numeric", "data-key", "data-selected"]' : isTimeline ? '["slot", "data-sort", "numeric", "data-status"]' : '["slot", "data-sort", "numeric"]'},
     });
 ${
-  isNav || isBreadcrumb
+  // Spec 046 T4: a timeline has no sort button and says no sort-change (its Skemo has no event).
+  isNav || isBreadcrumb || isTimeline
     ? ""
     : `    this.addEventListener("click", (event) => {
       const button = event
