@@ -234,3 +234,35 @@ Grüne CI ist für `packages/projekcioj/src/celoj/figma` keine Abnahme (testing.
 **Kern-Token-Zahl:** `modelo/src/data/coverage.test.ts:39` (250–400) grün, 400.
 
 **Dateiliste** (`git diff --name-only 626043f9`, 141 Dateien): außerhalb der freien Pfade nur `packages/metiejo/src/komponentoj.test.ts` (Ausnahme T1); keine Datei von PR B (`check-markup.ts`, `check-markup.test.ts`, `eroj/usage.ts`, `usage.test.ts`, `uzo-rules.ts`, `ekranoj/test/fixtures/ac8/*`, `nordstelo/test/fixtures/ac8/*`), kein `mcp/schema/**`, `kontrakto/index.json` unverändert. Schnittmenge mit der Dateiliste von PR B (`70f3ab94`): leer.
+
+## PR B (T7) – Entscheidungen und Befunde (übertragen durch den Orchestrator, T8)
+
+Branch `261108-spec-046-eroj-runde-7-pr-b`, Worktree `repos/fundamento-046-b`, Basis `626043f9`. Dateien: `packages/modelo/src/gvidanto/check-markup.ts` (+Test), `packages/modelo/src/eroj/usage.ts` (+Test), `packages/ekranoj/test/fixtures/ac8/{ero-mit-slot-daten,link-ero,regelverstoss,abnahme-komuna-r2-liste}.json`. Schnittmenge mit PR A: leer (`comm -12`).
+
+| # | Entscheidung |
+|---|---|
+| D-B1 | L5-1 nur leserseitig: `checkMarkup` übernimmt vor dem Kern ein ausdrücklich benanntes Standard-Slot-Kind wie `#adoptDefault`; `legiMarkon` und `instancojElElementoj` unverändert, nordstelo-K3 auf gespeicherten Fakten unberührt. Kein Eingriff in den gemeinsamen Kern (Browser-Fakten tragen den übernommenen Stand bereits). |
+| D-B2 | L5-2: `one-primary-per-container` überspringt Aktions-Behälter, abgeleitet aus den Uzo-Daten (Eroj aus `appliesTo`, deren Uzo einen Slot hat, der eine weitere Ero aus `appliesTo` annimmt → dialogo, avizo, karto). `reguloj.json` unverändert (gehört PR A), Eintrag bleibt sachlich richtig. |
+| D-B3 | L5-3 nur in `check_markup`, ändert nur `suggestion` der `uzo-slot-accepts`-Befunde; `check_usage` byte-gleich (schützt `kuroj-kontakt-fehler-F-2`). `uzo-rules.ts` unberührt (Befund liegt in `usage.ts`). |
+| D-B4 | `kuroj-werkzeugliste-F-1`: unverändert, Generat byte-gleich. |
+| D-B5 | AC-8-Fixtures: nur die vier genannten ekranoj-Fälle neu gefasst (`70f3ab94`); `list_reguloj.json` unverändert (kein Unterschied). |
+
+| # | Befund |
+|---|---|
+| F-B1 | **AC-8 Rückfallpfad rot (offen).** `nordstelo/src/ac8.test.ts` prüft beide ekranoj-Pfade (check_markup und Rückfall check_usage) gegen ein `expected`. Neuer Pfad grün für alle Fälle, Rückfall rot für genau die vier neu gefassten Fälle. Auswege: (a) enge Ausnahme in `ac8.test.ts` (je Pfad eine Erwartung) plus `generi.mjs` schreibt den check_markup-Pfad; (b) Übernahme auch in ekranoj-Zwilling `instancojElFakto` (löst L5-1, nicht `regelverstoss`/L5-3). Beides außerhalb der Ausnahmeliste, nicht geändert. |
+| F-B2 | `packages/mcp/test/kontrakto/generi.mjs` läuft auf `main` nicht (kein Katalogeintrag für `list_arangxoj`, `check_markup`) und schreibt die ekranoj-Fälle über den Rückfallpfad. |
+| F-B3 | Nach L5-1 werden ausdrücklich geslottete Kinder eines Standard-Slots (menuo `items`) nicht mehr gegen `accepts` geprüft; in `abnahme-komuna-r2-liste` entfallen zwei `uzo-slot-accepts` für `fm-ligilo`. Kandidat nächste Runde. |
+| F-B4 | `uzo-slot-accepts`: `message` sagt weiter „holds text in the slot actions“, `suggestion` nennt `<div>` (QA O2). |
+
+**K3-Vergleichbarkeit (D-300):** K3 vor und nach L5-1 nicht direkt vergleichbar. nordstelo-K3 auf gespeicherten Fakten bewegt sich in PR B nicht; jede Beurteilung über `check_markup` bei ausdrücklich benanntem Standard-Slot (ekranoj „grün“, malobservoj) ändert sich: weniger `label-required`/`field-label-visible`, Standard-Slot-Kinder zählen als Label.
+
+## QA (Lauf 1, 2026-11-08)
+
+- **Web (Vitrino, Chromium über Playwright MCP, statischer Server):** PASS. Sechs Eroj in komuna/ekzemplo/provo hell/dunkel sichtbar; tabelo Sortierung, Tastatur-Auswahl (Tab, Name, Space, `select`/`data-selected`), Kopfkasten, `aria-busy` + 3 Skelettzeilen, Leerzustand, fester Kopf; krado stapelt bei 375 px, `data-span="2"` bei 1280 px; vico `wrap` bricht um; templinio in Graustufen unterscheidbar, `<time>` und Statuswort vorhanden; Gaps aus `--fm-*`. Konsole ohne `fm-*`-Fehler (nur favicon-404 und zwei `fm-ikono`-Warnungen aus kampo/listelektilo, bestehend). Hinweise (low): `krado columns="auto"`-Demos zeigen bei 1280 px eine Spalte (kleinster `min-width`-Token 640 px, Demo-Zelle ~794 px; vgl. F-T2-1); Vitrino-Seite schrumpft nicht unter 1464 px (bestehend). Bericht `qa-results/qa-report-eroj-runde-7-layout-tabelle-web.md`, 31 Screenshots.
+- **API (MCP Streamable HTTP, PR A 7401, PR B 7402):** PASS, 11 Prüfungen. `list_arangxoj` vier Layoutmittel, `mankoj = []`; `dataForm` tabelo `table`, templinio `list`; butono de brief+slots+constraints 2 237 Zeichen ≈ 746 Tokens ohne `rest`; `suggest_ero` create new/Neu anlegen → formularo + butono high/submit, Inhalte anzeigen/Standard-Informationen anzeigen → atributlisto, Zeitliche Folge der Änderungen → templinio, sign-in/Anmeldung/details/Löschen unverändert; `check_markup` krado `data-span` ohne Befund; Fehler strukturiert (`ero-unknown`, `ero-field-unknown`, `mcp-input-invalid`). PR B: `<span slot="label">` ohne `label-required`, zwei karto ohne Verstoß, zwei butono high mit Verstoß, Vorschlag nennt `<div>`. Hinweise (low): `kialo` einer Sxablono-Antwort bei `lingvo: de` englisch (bestehend, auch auf Basis); F-B4; L5-4-Marge 4 Tokens (F-T6-6). Bericht `qa-results/qa-report-eroj-runde-7-layout-tabelle-api.md`.
+
+## T8 – Abschluss
+
+- Disjunktheit: `git diff --name-only 626043f9...` A 141 Dateien, B 8 Dateien, `comm -12` leer; Merge-Base beider Zweige `626043f9`; außerhalb der erlaubten Pfade nur `packages/metiejo/src/komponentoj.test.ts` (A). SHA-256 `specs/046-eroj-runde-7/spec.md` = `6b842691dbca177757a574a9239ee33b95306e4c73fc1e844d8f425d74f2d1f9`.
+- Offene Maintainer-Entscheidungen (außerhalb der Ausnahmeliste, nicht geändert): B-1/B-2 (`docs.test.ts`), B-3 (`datumoj.test.ts:383`), F-T1-4, F-T1-5, F-T1-6, F-T2-5, F-T6-1, F-T6-2, F-T6-7 (agordilo), F-T6-8 (metiejo), F-B1 (AC-8 Rückfallpfad), Parität F-T5-3 (Etappe F).
+- Je PR genau ein Push, ein `workflow_dispatch`; PR-Links, Run-IDs und CI je Job stehen im Bericht `purple/documentation/…/bericht-spec-046.md`.

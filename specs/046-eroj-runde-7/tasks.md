@@ -81,3 +81,9 @@ PR A ist ein Strang T1 → T6 (B-8), T7 läuft parallel in PR B im eigenen Workt
 - [x] Läufe (einzeln): modelo 4909/7 rot (F-T1-1, -2, -5, -6, -10, F-T6-1, F-T6-2), mcp 507/1 (F-T1-6), projekcioj 1544/7 (F-T1-4, F-T1-3, F-T5-3 ×5), nordstelo 268/2 (F-T2-5), ekranoj 293/0, cli 120/0, eroj Vitest 43/0, eroj Playwright alle Engines 2021/2 (F-T6-9, F-T6-10), agordilo 139/8 (F-T6-7), metiejo 603/5 (F-T6-8), vortaro und aspekto-komuna-0-2 grün.
 - [x] Abschluss PR A: `pnpm build && pnpm test:betroffen` einmal (Abbruch unter Last, F-T6-11), `pnpm lint` grün, `pnpm check` einmal (Abbruch am Testschritt, F-T6-11) und die Prüfungen einzeln; Diff-Suche, Dateiliste, Kern 400 – siehe plan.md › Abschluss PR A.
 - [x] Plan (D-37 bis D-42, F-T6-1 bis F-T6-12, Vertrags-Fixtures, Abschluss PR A).
+
+## T7 (PR B) und T8 im Einzelnen
+
+- [x] T7: L5-1, L5-2, L5-3 in Worktree B (`63c937c7` rot, `85a42e32` Umsetzung, `70f3ab94` Ausnahme AC-8-Fixtures ekranoj). AC-8 Rückfallpfad rot (F-B1, Maintainer-Entscheidung). Entscheidungen D-B1 bis D-B5 in plan.md.
+- [x] QA Lauf 1: Web PASS, API PASS (plan.md › QA).
+- [x] T8: Disjunktheit geprüft, SHA geprüft, je PR ein Push und ein Dispatch; Bericht `bericht-spec-046.md`.
