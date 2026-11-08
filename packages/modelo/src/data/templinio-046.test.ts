@@ -72,8 +72,10 @@ describe("templinio in the repo Modelo (Spec 046 T4)", () => {
     expect(new Set(STATUSES.map((status) => texts[`${status}-name`]?.de)).size).toBe(3);
   });
 
-  it("colours only with roles that have contrast pairs on the backgrounds", () => {
-    const pairs = new Set(modelo.kontrastparoj.map((pair) => pair.foreground));
+  it("colours only with roles that already have contrast pairs (no new pair)", () => {
+    const pairs = new Set(
+      modelo.kontrastParoj.flatMap((pair) => [pair.foreground, pair.background]),
+    );
     const colours = Object.values(skemo?.parts ?? {}).flatMap((properties) =>
       ["color", "fill"].flatMap((property) => {
         const source = properties[property as "color" | "fill"];
@@ -235,13 +237,20 @@ describe("the templinio Skemo in a fixture Modelo (Spec 046 T4)", () => {
     ).toEqual([{ rule: "skemo-web-term", path: `${FILE}#/skemo/parts/title` }]);
   });
 
-  it("negative: a marker sized by a colour is skemo-token-type at its size", () => {
+  it("negative: a marker sized by a colour is skemo-token-type at its size (and its Ero-Token)", () => {
     expect(
       issuesOf((file) => {
         const size = file.skemo.parts.marker?.size;
         if (size !== undefined) size.fixed = "color.text.default";
       }),
-    ).toEqual([{ rule: "skemo-token-type", path: `${FILE}#/skemo/parts/marker/size/fixed` }]);
+    ).toEqual([
+      { rule: "skemo-token-type", path: `${FILE}#/skemo/parts/marker/size/fixed` },
+      // The Ero-Token derived for the size aliases a colour where a dimension stands.
+      {
+        rule: "alias-type-mismatch",
+        path: "vortaro/sets/core.json#/ero/templinio/marker/size/$value",
+      },
+    ]);
   });
 
   it("negative: a dashed ring bound to a missing stroke is skemo-token-missing", () => {

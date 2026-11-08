@@ -2106,7 +2106,28 @@
       "ske_01M523FAAXJ1AADZWZ6NQRX83K/props/selectable": "Zeilenauswahl",
       "ske_01M523FAAXJ1AADZWZ6NQRX83K/props/loading": "Lädt",
       "ske_01M523FAAXJ1AADZWZ6NQRX83K/props/sticky-header": "Fester Kopf",
-      "ske_01M523FAAXJ1AADZWZ6NQRX83K/parts/skeleton": "Skelett"
+      "ske_01M523FAAXJ1AADZWZ6NQRX83K/parts/skeleton": "Skelett",
+      "ero_01M6XW0N2EEDQVCT6FTF7RCTHP/name": "Zeitleiste",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/parts/list": "Liste",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/parts/box": "Box",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/parts/item": "Eintrag",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/parts/date": "Datum",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/parts/subject": "Titel",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/parts/marker": "Zeichen",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/parts/line": "Linie",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/parts/done": "Erledigt",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/parts/current": "Aktuell",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/parts/upcoming": "Ausstehend",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/props/label": "Beschriftung",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/states/rest": "Ruhe",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/slots/entries": "Einträge",
+      "uzo_01M6XW0NZNHRPAQT30MM520SSK/purpose": "Zeigt, was geschehen ist, in der Reihenfolge der Zeit: jeder Eintrag ein Datum, ein Titel und was geschah, sein Status erledigt, aktuell oder ausstehend.",
+      "uzo_01M6XW0NZNHRPAQT30MM520SSK/instead/events-compared/kialo": "Viele Ereignisse mit denselben Feldern, die eine Person sortiert und vergleicht, sind eine Tabelle, weil eine Zeitleiste sie nacheinander liest und nach nichts als der Zeit ordnet.",
+      "uzo_01M6XW0NZNHRPAQT30MM520SSK/boundary/horizontal/kialo": "Eine Zeitleiste läuft von oben nach unten, weil ihre Einträge Text beliebiger Länge tragen und eine Reihe davon umbrechen würde; eine waagerechte wird nicht unterstützt.",
+      "uzo_01M6XW0NZNHRPAQT30MM520SSK/composes/containers/page-section/kialo": "Die Geschichte einer Sache steht in einem Abschnitt ihrer Seite, weil die Person sie neben der Sache liest, von der sie erzählt.",
+      "uzo_01M6XW0NZNHRPAQT30MM520SSK/composes/containers/card/kialo": "Eine Karte darf die letzten Schritte dessen zeigen, wofür sie steht, weil sein Stand ein Teil von ihm ist.",
+      "uzo_01M6XW0NZNHRPAQT30MM520SSK/composes/with/ligilo/kialo": "Was geschah, darf dorthin führen, wo es geschah, weil eine Änderung einen eigenen Ort hat.",
+      "uzo_01M6XW0NZNHRPAQT30MM520SSK/composes/with/insigno/kialo": "Eine Version oder die Art einer Änderung neben dem Titel ist ein Badge, weil sie ein oder zwei Wörter ist."
     },
     "en": {
       "ero_01M584YD41VQDMJ4QZJEEC7DA4/name": "File upload",
@@ -3596,7 +3617,21 @@
       "ske_01M523FAAXJ1AADZWZ6NQRX83K/props/selectable": "Row selection",
       "ske_01M523FAAXJ1AADZWZ6NQRX83K/props/loading": "Loading",
       "ske_01M523FAAXJ1AADZWZ6NQRX83K/props/sticky-header": "Sticky header",
-      "ske_01M523FAAXJ1AADZWZ6NQRX83K/parts/skeleton": "Skeleton"
+      "ske_01M523FAAXJ1AADZWZ6NQRX83K/parts/skeleton": "Skeleton",
+      "ero_01M6XW0N2EEDQVCT6FTF7RCTHP/name": "Timeline",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/parts/list": "List",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/parts/box": "Box",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/parts/item": "Entry",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/parts/date": "Date",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/parts/subject": "Title",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/parts/marker": "Sign",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/parts/line": "Line",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/parts/done": "Done",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/parts/current": "Current",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/parts/upcoming": "Upcoming",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/props/label": "Label",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/states/rest": "Rest",
+      "ske_01M6XW0NG95V9C0JRCMQJKXQKE/slots/entries": "Entries"
     }
   }
 }

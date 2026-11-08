@@ -3623,6 +3623,50 @@
       ]
     },
     {
+      "uri": "urn:fundamento:ontologio#Templinio",
+      "term": "Templinio",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Templinio",
+        "en": "timeline",
+        "de": "Zeitleiste"
+      },
+      "altLabel": {
+        "en": [
+          "templinio",
+          "timeline",
+          "chronology"
+        ],
+        "de": [
+          "Zeitleiste",
+          "Zeitstrahl",
+          "Verlauf",
+          "templinio"
+        ]
+      },
+      "definition": {
+        "en": "A timeline: an Ero that shows what happened in the order of time. It styles the platform's own ordered list; every entry holds a time, a title and what happened, its status done, current or upcoming (data-status). The status is never a colour alone: a sign of its own shape stands at the start of every entry – filled when done, a solid ring when current, a dashed ring when upcoming – and the status is heard as a word. Many events compared field by field are the tabelo's; the fields of one record the atributlisto's.",
+        "de": "Eine Zeitleiste: ein Ero, das zeigt, was geschehen ist, in der Reihenfolge der Zeit. Es gestaltet die geordnete Liste der Plattform; jeder Eintrag trägt eine Zeit, einen Titel und was geschah, seinen Status erledigt, aktuell oder ausstehend (data-status). Der Status ist nie nur eine Farbe: am Anfang jedes Eintrags steht ein Zeichen eigener Form – gefüllt, wenn erledigt, ein durchgezogener Ring, wenn aktuell, ein gestrichelter Ring, wenn ausstehend –, und der Status wird als Wort vorgelesen. Viele Ereignisse, Feld für Feld verglichen, gehören der tabelo; die Felder eines Datensatzes der atributlisto."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Tabelo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Atributlisto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Insigno"
+        }
+      ]
+    },
+    {
       "uri": "urn:fundamento:ontologio#Deziraro",
       "term": "Deziraro",
       "inScheme": "laboro",

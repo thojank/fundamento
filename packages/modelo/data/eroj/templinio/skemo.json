@@ -1,0 +1,158 @@
+{
+  "ero": {
+    "id": "ero_01M6XW0N2EEDQVCT6FTF7RCTHP",
+    "name": "templinio",
+    "skemo": "ske_01M6XW0NG95V9C0JRCMQJKXQKE",
+    "description": "A timeline: shows what happened in the order of time. It styles the platform's own ordered list <ol>; every <li> holds a <time>, a title (a heading or <strong>) and what happened, its status in data-status – done, current or upcoming. A sign of its own shape stands at the start of every entry, a line joins the signs, and the status is heard as a word: never a colour alone."
+  },
+  "skemo": {
+    "id": "ske_01M6XW0NG95V9C0JRCMQJKXQKE",
+    "ero": "ero_01M6XW0N2EEDQVCT6FTF7RCTHP",
+    "props": [
+      {
+        "name": "label",
+        "kind": "string",
+        "description": "The accessible name of the list when the page has more than one timeline."
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "entries",
+        "default": true
+      }
+    ],
+    "parts": {
+      "list": {
+        "gap": {
+          "fixed": "spacing.large"
+        }
+      },
+      "box": {
+        "gap": {
+          "fixed": "spacing.medium"
+        }
+      },
+      "item": {
+        "color": {
+          "fixed": "color.text.subtle"
+        },
+        "typography": {
+          "fixed": "typography.body.2"
+        }
+      },
+      "date": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.label.2"
+        }
+      },
+      "subject": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        }
+      },
+      "marker": {
+        "size": {
+          "fixed": "size.icon.small"
+        },
+        "width": {
+          "fixed": "border.width.strong"
+        },
+        "color": {
+          "fixed": "color.border.strong"
+        },
+        "fill": {
+          "fixed": "color.background.default"
+        },
+        "radius": {
+          "fixed": "radius.role.pill"
+        },
+        "stroke": {
+          "fixed": "stroke.dashed"
+        }
+      },
+      "line": {
+        "width": {
+          "fixed": "border.width.default"
+        },
+        "color": {
+          "fixed": "color.border.default"
+        }
+      },
+      "done": {
+        "fill": {
+          "fixed": "color.border.strong"
+        },
+        "stroke": {
+          "fixed": "stroke.solid"
+        }
+      },
+      "current": {
+        "stroke": {
+          "fixed": "stroke.solid"
+        },
+        "weight": {
+          "fixed": "font.weight.semibold"
+        }
+      },
+      "upcoming": {
+        "color": {
+          "fixed": "color.border.default"
+        }
+      }
+    },
+    "bindings": [],
+    "a11y": {
+      "role": "list",
+      "name": [
+        "prop:label"
+      ],
+      "states": {},
+      "keys": [],
+      "texts": {
+        "done-name": {
+          "de": "Erledigt",
+          "en": "Done"
+        },
+        "current-name": {
+          "de": "Aktuell",
+          "en": "Current"
+        },
+        "upcoming-name": {
+          "de": "Ausstehend",
+          "en": "Upcoming"
+        }
+      }
+    },
+    "goals": [
+      {
+        "goal": "timeline",
+        "keywords": {
+          "en": [
+            "timeline",
+            "chronological",
+            "chronology",
+            "changelog"
+          ],
+          "de": [
+            "zeitleiste",
+            "zeitstrahl",
+            "zeitliche",
+            "chronologie",
+            "verlauf",
+            "änderungsverlauf"
+          ]
+        },
+        "props": {}
+      }
+    ]
+  }
+}
