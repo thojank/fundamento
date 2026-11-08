@@ -574,8 +574,9 @@ async function kuri(
 
   // The output starts before the first request: the brand build once per run (Variante F only –
   // Variante 0 has no Fundamento CSS and no Eroj, D-34), then the seam. A failing brand build is a
-  // setup error and is thrown before anything is asked.
-  if (deps.eligo !== undefined) {
+  // setup error and is thrown before anything is asked. A seam without `komenco` (the measurement's
+  // answers-only seam, F-S038-37t-1) gets no brand build.
+  if (deps.eligo?.komenco !== undefined) {
     const marko =
       varianto === "F" ? await deps.marko.konstrui(join(enigo.out, "marko")) : undefined;
     await deps.eligo.komenco?.({

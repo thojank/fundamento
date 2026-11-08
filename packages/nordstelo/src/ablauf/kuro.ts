@@ -12,6 +12,7 @@ import {
   anbieterfehlerojDe,
   type ChatModel,
   type EkranojDeps,
+  type EkranojEligo,
   type EkranojRezulto,
   gardiModelon,
   type Kontrolo,
@@ -21,6 +22,7 @@ import {
   type Problemo,
   purigiTekston,
   type Restanta,
+  respondoTeksto,
   type Taksilo,
   taksoPorEnigo,
   type Varianto,
@@ -319,6 +321,33 @@ function anbieterfehlerojKampo(rezulto: EkranojRezulto): Pick<KuroRekordo, "anbi
   return anbieterfehleroj === undefined ? {} : { anbieterfehleroj };
 }
 
+/** `malplenajPagxoj` of a result for `kuro.json` (B-4, D-S038-37c-5): absent when there are none. */
+function malplenajPagxojKampo(rezulto: EkranojRezulto): Pick<KuroRekordo, "malplenajPagxoj"> {
+  const malplenajPagxoj = rezulto.malplenajPagxoj ?? [];
+  return malplenajPagxoj.length === 0 ? {} : { malplenajPagxoj };
+}
+
+/**
+ * The seam of a run (F-S038-37t-1): the raw answers ekranoj hands over (B-4 empty pages, S037-10
+ * builds without markup) go to `rondoj/<n>/<slug>.respondo.txt` of the run folder, the layout of
+ * `fm ekranoj`, cleaned once more. A caller's eligo with its own `respondo` is kept as it is; one
+ * without gets only `respondo` added (no `komenco`, so the run builds no brand into its folder).
+ */
+function eligoDe(own: string, eligo: EkranojEligo | undefined): EkranojEligo {
+  if (eligo?.respondo !== undefined) return eligo;
+  return {
+    ...eligo,
+    respondo(e) {
+      const rondoDir = join(own, "rondoj", String(e.rondo));
+      mkdirSync(rondoDir, { recursive: true });
+      writeFileSync(
+        join(rondoDir, `${e.slug}.respondo.txt`),
+        purigiTekston(respondoTeksto(e.respondoj, e.kialo)),
+      );
+    },
+  };
+}
+
 /** The whole measurement: every run, its records, then the report. */
 export async function kuriAblaufon(opcioj: AblaufOpcioj, deps: AblaufDeps): Promise<AblaufRezulto> {
   // D-19 and C-3: another model is refused before anything else happens – no folder, no request.
@@ -422,6 +451,7 @@ export async function kuriAblaufon(opcioj: AblaufOpcioj, deps: AblaufDeps): Prom
         ...(varianto === "F" && tools !== undefined ? { ...senIloj, tools } : senIloj),
         chat: kunKomunaBudgxeto(kuraj.chat, komuna),
         taksilo: deps.taksiloPor(tasko),
+        eligo: eligoDe(own, kuraj.eligo),
       };
       deps.log(`${tasko.slug} ${varianto}-${ripeto}: Start.`);
       const jamEnigo = komuna.input;
@@ -466,6 +496,8 @@ export async function kuriAblaufon(opcioj: AblaufOpcioj, deps: AblaufDeps): Prom
           sxargo: { antaux: antaux.sxargo, post: post.sxargo, kernoj: post.kernoj },
           // Spec 038 A-1 (C-1): the caught provider errors, cleaned once more; absent when none.
           ...anbieterfehlerojKampo(rezulto),
+          // Spec 038 B-4 (AK-2): the screen-rounds with an empty page; absent when none.
+          ...malplenajPagxojKampo(rezulto),
         };
       } catch (error) {
         if (error instanceof MalpermesitaModelo) throw error;
