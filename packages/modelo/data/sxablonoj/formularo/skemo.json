@@ -111,6 +111,31 @@
             }
           }
         ]
+      },
+      {
+        "goal": "create",
+        "keywords": {
+          "en": [
+            "new",
+            "create-new"
+          ],
+          "de": [
+            "neu",
+            "neu-anlegen"
+          ]
+        },
+        "props": {},
+        "kialo": "Creating something new is a form, because what is created is entered in its fields and sent once with its one primary submit button.",
+        "children": [
+          {
+            "region": "actions",
+            "ero": "butono",
+            "props": {
+              "type": "submit",
+              "emphasis": "high"
+            }
+          }
+        ]
       }
     ],
     "events": [
