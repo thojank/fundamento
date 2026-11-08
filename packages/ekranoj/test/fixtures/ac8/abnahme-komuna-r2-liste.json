@@ -19,14 +19,7 @@
           "emphasis": "high",
           "intent": "neutral"
         },
-        "texts": {
-          "label": "Neuen Standard erstellen"
-        },
-        "slots": {
-          "label": [
-            "text"
-          ]
-        },
+        "label": "Neuen Standard erstellen",
         "container": "pagxo-1",
         "lingvo": "de"
       },
@@ -36,14 +29,7 @@
           "kind": "search",
           "clearable": true
         },
-        "texts": {
-          "label": "Suche"
-        },
-        "slots": {
-          "label": [
-            "text"
-          ]
-        },
+        "label": "Suche",
         "container": "pagxo-1",
         "lingvo": "de"
       },
@@ -52,14 +38,11 @@
         "props": {
           "density": "comfortable"
         },
+        "label": "Standards",
         "texts": {
-          "caption": "Standards",
           "content": "Name Beschreibung Aktionen Standard 1 Beschreibung des Standards 1 Details anzeigen Bearbeiten"
         },
         "slots": {
-          "caption": [
-            "text"
-          ],
           "content": [
             "text"
           ]
@@ -73,26 +56,7 @@
           "label": "Aktionen",
           "placement": "block-end"
         },
-        "texts": {
-          "items": [
-            "Details anzeigen",
-            "",
-            "Bearbeiten"
-          ]
-        },
-        "slots": {
-          "items": [
-            {
-              "ero": "ligilo"
-            },
-            {
-              "ero": "apartigilo"
-            },
-            {
-              "ero": "ligilo"
-            }
-          ]
-        },
+        "label": "Details anzeigen Bearbeiten",
         "container": "tabelo-2",
         "lingvo": "de"
       },
@@ -101,14 +65,7 @@
         "props": {
           "to": "detail.html"
         },
-        "texts": {
-          "label": "Details anzeigen"
-        },
-        "slots": {
-          "label": [
-            "text"
-          ]
-        },
+        "label": "Details anzeigen",
         "container": "menuo-3",
         "lingvo": "de"
       },
@@ -125,73 +82,37 @@
         "props": {
           "to": "edit.html"
         },
-        "texts": {
-          "label": "Bearbeiten"
-        },
-        "slots": {
-          "label": [
-            "text"
-          ]
-        },
+        "label": "Bearbeiten",
         "container": "menuo-3",
         "lingvo": "de"
       }
     ],
     "malobservoj": [
       {
-        "rule": "label-required",
-        "severity": "error",
+        "rule": "label-names-action",
+        "severity": "warning",
         "path": "instances#/1",
-        "message": "Instance 1 of butono has neither a visible label nor a label prop.",
-        "suggestion": "Give the label as slot text, or for an icon-only button set the label prop as its accessible name.",
+        "message": "Instance 1 of butono says \"Neuen Standard erstellen\" (slot:label): it names no verb of a goal of the Ero (nothing says what happens on activation).",
+        "suggestion": "Write the text as the approved example does, e.g. \"Speichern\".",
         "regulo": {
-          "id": "reg_01M2XMV80DG7JCJDTZGE66MGHY",
-          "name": "label-required",
-          "kialo": "A button without a name cannot be found or understood by assistive technology, and an icon alone is not understood by everyone; the name is what a screen reader announces and what voice control listens for."
+          "id": "reg_01M4RPB19HEMSFTRDZNPTHJV7P",
+          "name": "label-names-action",
+          "kialo": "A person decides from the label alone what happens on activation. A verb says it; a noun or a mood makes them guess."
         },
-        "loko": "fm-butono"
-      },
-      {
-        "rule": "field-label-visible",
-        "severity": "error",
-        "path": "instances#/2",
-        "message": "Instance 2 of kampo has no visible label.",
-        "suggestion": "Give the label as the text of the element or as label=\"…\" (both are shown, Nachlese 12); a placeholder disappears while typing and names nothing afterwards.",
-        "regulo": {
-          "id": "reg_01M4S1ZR7F1KE1AV1C7X5W8GD5",
-          "name": "field-label-visible",
-          "kialo": "WCAG 3.3.2 (Labels or Instructions): a placeholder disappears while typing, and a label only a screen reader hears does not help the sighted person who finds the field half filled."
-        },
-        "loko": "fm-kampo"
+        "loko": "fm-butono „Neuen Standard erstellen“"
       },
       {
         "rule": "label-names-action",
         "severity": "warning",
         "path": "instances#/4",
-        "message": "Instance 4 of menuo says \"Aktionen\" (slot:items): it names no verb of a goal of the Ero (nothing says what happens on activation).",
+        "message": "Instance 4 of menuo says \"Details anzeigen Bearbeiten\" (slot:items): it names no verb of a goal of the Ero (nothing says what happens on activation).",
         "suggestion": "Write a text that follows the rule: The label of a butono names its action as a verb; so does every entry of a menuo.",
         "regulo": {
           "id": "reg_01M4RPB19HEMSFTRDZNPTHJV7P",
           "name": "label-names-action",
           "kialo": "A person decides from the label alone what happens on activation. A verb says it; a noun or a mood makes them guess."
         },
-        "loko": "fm-menuo"
-      },
-      {
-        "rule": "uzo-slot-accepts",
-        "severity": "error",
-        "path": "instances#/4",
-        "message": "Instance 4 of menuo holds the Ero ligilo in the slot items, which accepts text or ikono or apartigilo.",
-        "suggestion": "Put text or ikono or apartigilo in the slot items.",
-        "loko": "fm-menuo"
-      },
-      {
-        "rule": "uzo-slot-accepts",
-        "severity": "error",
-        "path": "instances#/4",
-        "message": "Instance 4 of menuo holds the Ero ligilo in the slot items, which accepts text or ikono or apartigilo.",
-        "suggestion": "Put text or ikono or apartigilo in the slot items.",
-        "loko": "fm-menuo"
+        "loko": "fm-menuo „Details anzeigen Bearbeiten“"
       }
     ]
   }
