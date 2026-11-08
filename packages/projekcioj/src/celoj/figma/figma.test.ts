@@ -17,7 +17,7 @@ import {
   VITRINO_OPTIONS,
   VITRINO_SLOT_TEXTS,
 } from "../vitrino/datumoj.js";
-import { isLayout } from "../web-component/web-component.js";
+import { isLayout, isTimeline } from "../web-component/web-component.js";
 import {
   ALPHA_VARIES,
   BACKDROP_EXAMPLE,
@@ -4220,12 +4220,17 @@ describe("the layout Eroj stay out of the Figma plan until T5 (Spec 046 T1)", ()
       .filter((entry) => isLayout(entry.skemo))
       .map((entry) => entry.ero.name);
     expect(layout).toEqual(expect.arrayContaining(["kolumno", "stako", "vico"]));
+    // Spec 046 T4: the timeline stays out alike (isTimeline), until T5 decides its Bauform.
+    const out = prepared.input.modelo.eroj
+      .filter((entry) => isLayout(entry.skemo) || isTimeline(entry.skemo))
+      .map((entry) => entry.ero.name);
+    expect(out).toEqual(expect.arrayContaining([...layout, "templinio"]));
     const sets = plan.components.map((component) => component.set);
-    for (const name of layout) expect(sets).not.toContain(name);
+    for (const name of out) expect(sets).not.toContain(name);
     expect(sets).toEqual(
       prepared.input.modelo.eroj
         .map((entry) => entry.ero.name)
-        .filter((name) => !layout.includes(name)),
+        .filter((name) => !out.includes(name)),
     );
   });
 });
