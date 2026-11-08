@@ -71,6 +71,7 @@ import {
   vitrinoCalendar,
 } from "../vitrino/datumoj.js";
 import { signOf } from "../web-component/element-template.js";
+import { isLayout } from "../web-component/web-component.js";
 import {
   drawnPartPropertiesOf,
   pluginManifest,
@@ -3965,12 +3966,16 @@ export const FIGMA_CELO: Celo = {
     const knownVariables = new Set(
       collections.flatMap((collection) => collection.variables.map((variable) => variable.name)),
     );
+    // Spec 046 T1 (F-T1-8): the layout Eroj (vico, kolumno, stako — role generic plus a layout
+    // goal, the isLayout of the Web Component and the Make Kit) draw nothing of their own; until T5
+    // decides their Bauform they are not in the plan.
+    const drawn = modelo.eroj.filter((entry) => !isLayout(entry.skemo));
     const plan: FigmaPlan = {
       fundamento: modeloJson.fundamento.version,
       fontFallback: FIGMA_FONT_FALLBACK,
       collections,
       ...(ikonoj === undefined ? {} : { ikonoj }),
-      components: modelo.eroj.map((entry) =>
+      components: drawn.map((entry) =>
         componentSetOf(
           entry,
           modeloJson.fundamento.version,
@@ -3987,7 +3992,7 @@ export const FIGMA_CELO: Celo = {
             sxablonoj: (modelo.sxablonoj ?? []).map((entry) =>
               sxablonoFrameOf(
                 entry,
-                new Set(modelo.eroj.map((ero) => ero.ero.name)),
+                new Set(drawn.map((ero) => ero.ero.name)),
                 (name) => knownVariables.has(name),
                 base,
               ),
