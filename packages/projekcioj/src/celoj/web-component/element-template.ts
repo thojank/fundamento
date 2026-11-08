@@ -2685,7 +2685,7 @@ const MIN_WIDTHS: Readonly<Record<string, string>> = ${JSON.stringify(gridMinWid
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ${isNav ? '["slot", "href", "data-page", "data-count", "data-count-description"]' : isBreadcrumb ? '["slot", "href", "data-page"]' : '["slot", "data-sort", "numeric"]'},
+      attributeFilter: ${isNav ? '["slot", "href", "data-page", "data-count", "data-count-description"]' : isBreadcrumb ? '["slot", "href", "data-page"]' : '["slot", "data-sort", "numeric", "data-key", "data-selected"]'},
     });
 ${
   isNav || isBreadcrumb
@@ -2703,6 +2703,29 @@ ${
       const direction =
         current === column && this.propValue("direction") === "ascending" ? "descending" : "ascending";
       this.dispatchEvent(new CustomEvent("sort-change", { bubbles: true, detail: { column, direction } }));
+    });
+    // Spec 046 T3 (plan D-19): a box of the selection column says select with the keys the
+    // selection would hold, in DOM order – the application writes data-selected, the table never
+    // selects itself; the box's own input and change stay inside, and its mark follows the row.
+    this.addEventListener("input", (event) => {
+      if (this.#selectBox(event) !== undefined) event.stopPropagation();
+    });
+    this.addEventListener("change", (event) => {
+      const box = this.#selectBox(event);
+      const table = this.#native("table");
+      if (box === undefined || table === undefined) return;
+      event.stopPropagation();
+      const rows = this.#keyedRows(table);
+      const row = box.closest("tr");
+      const all = rows.length > 0 && rows.every((candidate) => candidate.hasAttribute("data-selected"));
+      const head = row?.parentElement?.tagName.toLowerCase() === "thead";
+      const keys = rows
+        .filter((candidate) =>
+          head ? !all : candidate === row ? !candidate.hasAttribute("data-selected") : candidate.hasAttribute("data-selected"),
+        )
+        .map((candidate) => candidate.getAttribute("data-key") ?? "");
+      this.dispatchEvent(new CustomEvent("select", { bubbles: true, detail: { keys } }));
+      this.#render();
     });
 `
 }`
@@ -2886,7 +2909,81 @@ ${
   }
 
 `
-}  /** Writes what the Ero adds to the native element; every write first compares. */
+}  /** Spec 046 T3: the fm-markobutono of the selection column an event comes from, if any. */
+  #selectBox(event: Event): HTMLElement | undefined {
+    const box = event.target;
+    return box instanceof HTMLElement &&
+      box.tagName.toLowerCase() === "fm-markobutono" &&
+      box.parentElement?.hasAttribute("data-fm-select") === true &&
+      this.contains(box)
+      ? box
+      : undefined;
+  }
+
+  /** Spec 046 T3: the rows of the body a selection can hold – those with a data-key, in DOM order. */
+  #keyedRows(table: HTMLElement): HTMLElement[] {
+    return [...table.querySelectorAll<HTMLElement>(":scope > tbody > tr[data-key]")];
+  }
+
+  /**
+   * Spec 046 T3 (plan D-18, D-19): selectable – a first cell in every row; in the first head row
+   * and in every body row with a data-key an fm-markobutono, named by the Modelo's words (and the
+   * row's header), checked while its row carries data-selected (the head's while every keyed row
+   * does). A body row without data-key has no box, and the console says so. Without selectable the
+   * cells the element wrote go.
+   */
+  #selectColumn(table: HTMLElement): void {
+    const cells = [...table.querySelectorAll(":scope > :is(thead, tbody, tfoot) > tr > [data-fm-select]")];
+    if (!(HAS_PROP.has("selectable") && this.propValue("selectable") === true)) {
+      for (const cell of cells) cell.remove();
+      return;
+    }
+    const lingvo = this.#lingvo();
+    const word = (key: string): string => TEXTS[key]?.[lingvo] ?? TEXTS[key]?.en ?? "";
+    const keyed = this.#keyedRows(table);
+    const firstHead = table.querySelector(":scope > thead > tr");
+    const rows = [...table.querySelectorAll<HTMLElement>(":scope > :is(thead, tbody, tfoot) > tr")].filter(
+      (row) => !row.hasAttribute("data-fm-empty") && !row.hasAttribute("data-fm-skeleton"),
+    );
+    for (const row of rows) {
+      const section = row.parentElement?.tagName.toLowerCase();
+      const head = section === "thead";
+      let cell = row.querySelector(":scope > [data-fm-select]");
+      if (cell === null) {
+        cell = document.createElement(head ? "th" : "td");
+        cell.setAttribute("data-fm-select", "");
+        if (head) cell.setAttribute("scope", "col");
+      }
+      if (row.firstElementChild !== cell) row.prepend(cell);
+      const key = section === "tbody" ? row.getAttribute("data-key") : null;
+      if (section === "tbody" && key === null) {
+        warn("${tag}: a row without data-key cannot be selected; give every <tr> in the body a data-key (selectable).");
+      }
+      let box = cell.querySelector(":scope > fm-markobutono");
+      if (!(row === firstHead || key !== null)) {
+        box?.remove();
+        continue;
+      }
+      if (box === null) {
+        box = document.createElement("fm-markobutono");
+        box.setAttribute("size", "small");
+        const words = document.createElement("span");
+        words.className = "fm-hidden";
+        box.append(words);
+        cell.append(box);
+      }
+      const header = row.querySelector(":scope > th:not([data-fm-select])") ?? row.querySelector(":scope > :not([data-fm-select])");
+      const name = head ? word("head-name") : word("selectable") + ": " + (header?.textContent?.trim() ?? key ?? "");
+      const words = box.querySelector(":scope > .fm-hidden");
+      if (words !== null && words.textContent !== name) words.textContent = name;
+      const checked = head
+        ? keyed.length > 0 && keyed.every((candidate) => candidate.hasAttribute("data-selected"))
+        : row.hasAttribute("data-selected");
+      if (box.hasAttribute("checked") !== checked) box.toggleAttribute("checked", checked);
+    }
+  }
+
+  /** Writes what the Ero adds to the native element; every write first compares. */
   #decorate(): void {${contentSlot === undefined ? "" : "\n    this.#adoptContent();"}
     const table = this.#native("table");
     if (table !== undefined) this.#decorateTable(table);
@@ -2943,10 +3040,12 @@ ${
       const arrowName = wanted === "descending" ? "sort-descending" : "sort-ascending";
       if (arrow !== null && arrow.getAttribute("name") !== arrowName) arrow.setAttribute("name", arrowName);
     }
+    // Spec 046 T3: the selection column comes first, so the columns below count it.
+    this.#selectColumn(table);
     // A numeric column (Spec 011 ④, D-09): the header carries numeric, its cells get the mark.
     const headers = [...table.querySelectorAll(":scope > thead th")];
     const numeric = headers.map((header) => header.hasAttribute("numeric"));
-    for (const row of table.querySelectorAll(":scope > tbody > tr:not([data-fm-empty])")) {
+    for (const row of table.querySelectorAll(":scope > tbody > tr:not([data-fm-empty]):not([data-fm-skeleton])")) {
       [...row.children].forEach((cell, index) => {
         if (numeric[index] === true && !cell.hasAttribute("numeric")) cell.setAttribute("numeric", "");
       });
@@ -2956,9 +3055,26 @@ ${
     // Nachlese 7 ② B-3: a butono in the empty slot is the next step — it moves into the state's
     // actions while the state shows (the application's element, its listeners stay) and back into
     // the slot when rows come; the words of the state are the slot's text without it.
+    // Spec 046 T3 (plan D-20): loading – aria-busy on the table and three skeleton rows in the
+    // body, one bar per column, unheard; they come before the empty state, which waits.
+    const loading = HAS_PROP.has("loading") && this.propValue("loading") === true;
+    if (loading && table.getAttribute("aria-busy") !== "true") table.setAttribute("aria-busy", "true");
+    if (!loading && table.hasAttribute("aria-busy")) table.removeAttribute("aria-busy");
     const body = table.querySelector(":scope > tbody");
+    if (body !== null) {
+      const skeleton = [...body.querySelectorAll(":scope > tr[data-fm-skeleton]")];
+      const columns = Math.max(1, headers.length);
+      const fits = skeleton.length === 3 && skeleton.every((row) => row.children.length === columns);
+      if (!loading || !fits) for (const row of skeleton) row.remove();
+      if (loading && !fits) {
+        const row = '<tr data-fm-skeleton aria-hidden="true">' + "<td><span></span></td>".repeat(columns) + "</tr>";
+        body.insertAdjacentHTML("beforeend", row.repeat(3));
+      }
+    }
     if (body !== null && NAMED_SLOTS.includes("empty")) {
-      const rows = [...body.children].filter((row) => !row.hasAttribute("data-fm-empty"));
+      const rows = [...body.children].filter(
+        (row) => !row.hasAttribute("data-fm-empty") && !row.hasAttribute("data-fm-skeleton"),
+      );
       const placeholder = body.querySelector(":scope > tr[data-fm-empty]");
       const emptySlot = this.shadowRoot?.querySelector('slot[name="empty"]');
       const emptyNodes = emptySlot instanceof HTMLSlotElement ? emptySlot.assignedNodes({ flatten: true }) : [];
@@ -2969,7 +3085,7 @@ ${
         .map((node) => node.textContent ?? "")
         .join("")
         .trim();
-      if (rows.length === 0 && emptyText !== "") {
+      if (rows.length === 0 && emptyText !== "" && !loading) {
         if (placeholder === null) {
           body.insertAdjacentHTML(
             "beforeend",

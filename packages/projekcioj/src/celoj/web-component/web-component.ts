@@ -1588,6 +1588,14 @@ const lightStructure = (skemo: Skemo, owner?: string): string =>
       : [
           ":host { display: block; }",
           ':where([part="region"]) { display: block; overflow-x: auto; box-sizing: border-box; border-style: solid; }',
+          // Spec 046 T3 (plan D-21): with sticky-header a bounded host bounds its region, which
+          // then scrolls along the block axis too; unbounded, nothing changes.
+          ...(skemo.props.some((prop) => prop.name === "sticky-header")
+            ? [
+                ":host([sticky-header]) { display: flex; flex-direction: column; }",
+                ':host([sticky-header]) :where([part="region"]) { min-block-size: 0; }',
+              ]
+            : []),
           ':where([part="region"]:focus:not(:focus-visible)) { outline-width: 0; }',
           ':where([part="list"]) { display: block; }',
           // Spec 036 Teil 5 ②b-2 (A-atributlisto-1): the button for the rest, a tertiary action.
@@ -2052,7 +2060,11 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
         case "caption":
           return `${t} > caption`;
         case "head":
-          return `${t} > thead th`;
+          // Spec 046 T3 (plan D-21): the layer of the head lies above the rows only while it
+          // sticks (sticky-header, the host's attribute); a table without it keeps every rule.
+          return property === "layer"
+            ? `${tag}${data}[sticky-header] > table > thead th`
+            : `${t} > thead th`;
         case "cell":
         case "border":
           return `${t} :is(td, th)`;
@@ -2067,6 +2079,9 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
           return `${t} > tfoot :is(td, th)`;
         case "focus-ring":
           return `${t} > thead th > button:focus-visible`;
+        // Spec 046 T3 (plan D-20): the bar in every cell of a skeleton row while loading.
+        case "skeleton":
+          return `${t} > tbody > tr[data-fm-skeleton] > td > span`;
         default:
           return undefined;
       }
@@ -2219,6 +2234,13 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
             `${tag} > table > thead th > button { display: inline-flex; align-items: center; appearance: none; border-style: none; cursor: pointer; font: inherit; color: inherit; text-align: inherit; }`,
             `${tag} > table > thead th > button > fm-ikono { flex: none; }`,
             `${tag} > table > tbody > tr[data-fm-empty] > td { text-align: center; }`,
+            // Spec 046 T3 (plan D-19 to D-21): the column of selection boxes keeps to its box; while
+            // loading the skeleton rows stand in place of the rows (the rows stay, unseen); the
+            // head sticks to the top of the region while it scrolls. Host attributes, no axis.
+            `${tag} > table > :is(thead, tbody, tfoot) > tr > [data-fm-select] { white-space: nowrap; vertical-align: middle; }`,
+            `${tag}[loading] > table > tbody > tr:not([data-fm-skeleton]) { display: none; }`,
+            `${tag} > table > tbody > tr[data-fm-skeleton] > td > span { display: block; }`,
+            `${tag}[sticky-header] > table > thead th { position: sticky; inset-block-start: 0; }`,
             `${tag} ${HIDDEN_TEXT}`,
           ]
         : [
