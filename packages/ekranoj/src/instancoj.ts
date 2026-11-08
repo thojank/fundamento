@@ -150,18 +150,11 @@ export function instancojElFakto(
       } else props[prop.name] = value;
     }
     const slotNomoj = new Set(skemo.slots.map((slot) => slot.name));
-    // A child in the default slot named explicitly counts as unslotted, as the Ero adopts it
-    // (Nachlese 11 B-2) and as the Gvidanto core reads it (S038-39b).
-    const defaultSlot = skemo.slots.find((slot) => slot.default === true)?.name;
-    const slotDe = (infano: number): string | undefined => {
-      const slot = elements[infano]?.attrs.slot;
-      return slot === defaultSlot ? undefined : slot;
-    };
     const infanoj = infanojDe(elements, index);
     const texts: Record<string, string | string[]> = {};
     const slots: NonNullable<EroInstanco["slots"]> = {};
     for (const infano of infanoj) {
-      const slot = slotDe(infano);
+      const slot = elements[infano]?.attrs.slot;
       if (slot === undefined || !slotNomoj.has(slot)) continue;
       const infanNomo = fmNomo(elements[infano]?.tag ?? "");
       const plena = slots[slot] ?? [];
@@ -177,7 +170,7 @@ export function instancojElFakto(
     const label = [
       element.text,
       ...infanoj
-        .filter((infano) => slotDe(infano) === undefined)
+        .filter((infano) => elements[infano]?.attrs.slot === undefined)
         .map((infano) => tekstoDe(elements, infano)),
     ]
       .filter((part) => part !== "")

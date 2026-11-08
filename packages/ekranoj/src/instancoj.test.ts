@@ -72,27 +72,6 @@ describe("instances from facts (D-32)", () => {
     ]);
   });
 
-  it("takes a child in the default slot named explicitly as unslotted, as the Ero adopts it (Nachlese 11 B-2, S038-39b)", () => {
-    const fakto = (slot: Record<string, string>): Fakto => ({
-      ...FAKTO,
-      elements: [
-        { tag: "fm-karto", attrs: { level: "2" }, parent: -1, text: "" },
-        { tag: "span", attrs: { slot: "heading" }, parent: 0, text: "Standard A-12" },
-        { tag: "fm-butono", attrs: { intent: "primary" }, parent: 0, text: "" },
-        { tag: "span", attrs: slot, parent: 2, text: "Bearbeiten" },
-      ],
-    });
-    const benannt = instancojElFakto(fakto({ slot: "label" }), skemoj);
-    expect(benannt[1]).toEqual({
-      ero: "butono",
-      props: { intent: "primary" },
-      label: "Bearbeiten",
-      container: "karto-1",
-      lingvo: "de",
-    });
-    expect(JSON.stringify(benannt)).toBe(JSON.stringify(instancojElFakto(fakto({}), skemoj)));
-  });
-
   it("maps violations to their instances with Regulo and kialo, and a refused input to its issues", () => {
     const instancoj = instancojElFakto(FAKTO, skemoj);
     const respondo = JSON.stringify({
