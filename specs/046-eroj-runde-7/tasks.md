@@ -19,3 +19,10 @@ PR A ist ein Strang T1 → T6 (B-8), T7 läuft parallel in PR B im eigenen Workt
 
 - [x] G-0: Quelle und Kopie 6 283 Byte, SHA-256 `6b842691dbca177757a574a9239ee33b95306e4c73fc1e844d8f425d74f2d1f9`, kopiert mit `cp`.
 - [x] `pnpm check:privat` mit der Kopie: grün (4 299 Dateien, 0 Treffer).
+- [x] Rote Tests zuerst (`0fef323b`): `layout-046.test.ts` (modelo, 21 rot), `arangxoj.test.ts` neuer Block (2 rot), `web-component/layout-046.test.ts` (projekcioj, 13 rot), `eroj/test/vico.spec.ts` (Chromium, 3 rot).
+- [x] Abweichung D-06 `reguloj.json` (`123d780b`).
+- [x] Modelo: Skemo, Uzo, tradukoj, ontologio, IDs, Ero-Tokens (`95bd2118`, `9b50036a`, `49619545`, `f0c6526f`).
+- [x] Ausnahme `arangxoj.test` ohne Layout-Eroj (`781ec764`).
+- [x] Web-Component-Host `layout` (`e079139f`, `64605938`); `neu-seit-main` (`6c0601e4`).
+- [x] Ausnahme Eroj-Zahl aus den Daten (`a7f81616`); `vico.spec.ts` liest die Kinder des Light DOM (`5e2f10d1`).
+- [ ] Offene Sweeps (Figma-Plan, Make Kit, Vitrino-Karte der Rollen, Bericht der Figma-Variablen): siehe plan.md › Befunde.
