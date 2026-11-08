@@ -166,7 +166,8 @@
         ],
         "required": true,
         "max": 1,
-        "nesting": 1
+        "nesting": 1,
+        "dataForm": "table"
       },
       "empty": {
         "accepts": [

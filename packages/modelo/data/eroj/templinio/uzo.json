@@ -68,7 +68,8 @@
           "text"
         ],
         "required": true,
-        "nesting": 0
+        "nesting": 0,
+        "dataForm": "list"
       }
     },
     "layout": {
