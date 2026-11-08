@@ -59,6 +59,12 @@ const SEKUNDO = /^color\.(palette\.sekundo|sekundo)\./;
  */
 const EROJ_046 = /^ero\.(vico|kolumno|stako|krado|templinio)\./;
 
+/**
+ * Spec 046 T3 (plan D-20, D-21): the tabelo's skeleton bar while loading (fill, radius, height)
+ * and the layer of its sticky head are new since main's record.
+ */
+const TABELO_046 = /^ero\.tabelo\.(skeleton\.(fill|radius|height)|head\.layer)$/;
+
 export const addedSinceMain = (name: string): boolean =>
   SPINNER.test(name) ||
   CLEAR.test(name) ||
@@ -67,7 +73,8 @@ export const addedSinceMain = (name: string): boolean =>
   STATUS.test(name) ||
   MULTILINE.test(name) ||
   SEKUNDO.test(name) ||
-  EROJ_046.test(name);
+  EROJ_046.test(name) ||
+  TABELO_046.test(name);
 
 /** ②b-1 M-1: tokens main had under another name; each keeps main's value. */
 const MOVED: Readonly<Record<string, string>> = {
@@ -326,6 +333,7 @@ const ADDED_LISTS: readonly (readonly [string, RegExp])[] = [
   ...REST_2B3.lists,
   ...REST_2B5.lists,
   ["EROJ_046", EROJ_046],
+  ["TABELO_046", TABELO_046],
 ];
 
 /** The lists that justify a token as added after main's record; none for a token main had. */
