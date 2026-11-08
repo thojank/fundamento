@@ -42,6 +42,7 @@ import {
   isAvatar,
   isChip,
   isEditor,
+  isLayout,
   isLight,
   isListselect,
   isMultiline,
@@ -595,11 +596,31 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
         entry.skemo.a11y.role === "generic" &&
         !isChip(entry.skemo) &&
         !isEditor(entry.skemo) &&
+        // Spec 046 T1: a layout Ero is no badge (its sentence follows with the layout Eroj).
+        !isLayout(entry.skemo) &&
         entry.uzo !== undefined,
     )
     .map(
       (entry) =>
         `- Every status in one to three words next to what it describes (draft, in review, 3 violations) is an \`<${componentName(entry.ero)}>\`${noticeName === undefined ? "" : `; a sentence is an \`<${componentName(noticeName.ero)}>\``}.`,
+    )
+    .join("\n");
+  // Spec 046 T1: the layout Eroj, one sentence per layout purpose their goal answers; the gap is a
+  // step of their prop gap, never a margin of the children.
+  const LAYOUT_SENTENCES: Readonly<Record<string, string>> = {
+    row: "Children side by side, with the gap of a spacing step between them, are",
+    column: "Children one below the other that are aligned or spread along the height are",
+    stack: "A plain stack of children over the full width is",
+  };
+  const layoutLines = eroj
+    .filter((entry) => isLayout(entry.skemo) && entry.uzo !== undefined)
+    .flatMap((entry) =>
+      (entry.skemo.goals ?? []).flatMap((goal) => {
+        const sentence = LAYOUT_SENTENCES[goal.goal];
+        return sentence === undefined
+          ? []
+          : [`- ${sentence} \`<${componentName(entry.ero)}>\` (gap, never a margin).`];
+      }),
     )
     .join("\n");
   // Spec 011 ③ (plan ③ D-12): a message in the flow of the page is the notice (a live region with
@@ -645,7 +666,10 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
   const recordName = eroj.find((entry) => entry.skemo.a11y.role === "list");
   const badgeName = eroj.find(
     (entry) =>
-      entry.skemo.a11y.role === "generic" && !isChip(entry.skemo) && !isEditor(entry.skemo),
+      entry.skemo.a11y.role === "generic" &&
+      !isChip(entry.skemo) &&
+      !isEditor(entry.skemo) &&
+      !isLayout(entry.skemo),
   );
   const tableLines = eroj
     .filter((entry) => entry.skemo.a11y.role === "table" && entry.uzo !== undefined)
@@ -924,6 +948,7 @@ ${checkboxLines}
 ${radioLines}
 ${selectLines}
 ${badgeLines}
+${layoutLines}
 ${noticeLines}
 ${stateLines}
 ${tableLines}
