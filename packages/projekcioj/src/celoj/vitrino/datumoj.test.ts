@@ -611,15 +611,18 @@ describe("the Vitrino shows the insigno, the avizo and the plenstato (Spec 011 �
 describe("the Vitrino shows the tabelo, the atributlisto and the mezurilo (Spec 011 ④)", () => {
   it("tabelo: a row per density, each a captioned table with a sortable head, a numeric column and three rows", () => {
     const grid = datumoj.eroj.tabelo ?? "";
-    // Spec 036 Teil 5 ②b-2 (A-tabelo-1): three densities.
-    expect((grid.match(/<fm-tabelo /g) ?? []).length).toBe(3);
+    // Spec 036 Teil 5 ②b-2 (A-tabelo-1): three densities. Spec 046 T5 (F-T3-1): each density with
+    // the column selectable too, and the rows loading and sticky-header – 3 × 2 + 2.
+    expect((grid.match(/<fm-tabelo /g) ?? []).length).toBe(8);
     expect(grid).toContain(
       '<fm-tabelo density="compact">compact<table slot="content"><thead><tr><th scope="col" data-sort="name">Name</th>',
     );
     expect(grid).toContain('<th scope="col" numeric>Anzahl</th>');
     // Three row headers per table, plus the Vitrino's own row header per combination.
     // And the row of Nachlese 7 ② B-3 (the empty table with its butono).
-    expect((grid.match(/<th scope="row">/g) ?? []).length).toBe(13);
+    // Spec 046 T5 (F-T3-1): two tables per density (3 × (2 × 3 + 1)), the empty row (1), loading
+    // (1 + 3) and sticky-header over ten rows (1 + 10).
+    expect((grid.match(/<th scope="row">/g) ?? []).length).toBe(37);
   });
 
   it("atributlisto: a row per layout (columns, stacked, auto since Spec 014 ①), each a dl with three entries, the last value empty", () => {
