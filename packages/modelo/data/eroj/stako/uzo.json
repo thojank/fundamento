@@ -10,10 +10,10 @@
         "goal": "aligned-column",
         "keywords": {
           "en": [
-            "aligned"
+            "columnwise"
           ],
           "de": [
-            "ausgerichtet"
+            "spaltenweise"
           ]
         },
         "ero": "kolumno",
