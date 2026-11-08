@@ -87,7 +87,7 @@ describe("Web Component Celo for the layout Eroj (Spec 046 T1)", () => {
 
       it("the parity inventory names the gap steps and the one state rest", () => {
         const inventory = stylesheetInventory(raw[`eroj/src/generated/${ero}.styles.ts`] ?? "");
-        expect(Object.keys(inventory.props)).toContain("gap");
+        expect(Object.keys(inventory.props)).toEqual(["gap"]);
         expect(inventory.states).toEqual(["rest"]);
       });
     });
@@ -98,10 +98,10 @@ describe("Web Component Celo for the layout Eroj (Spec 046 T1)", () => {
       const css = cssOf(ero);
       expect(css).toContain(':host([wrap]) :where([part="control"]) { flex-wrap: wrap; }');
       expect(css).toContain(
-        ':where([part="control"][data-align="center"]) { align-items: center; }',
+        ':host([align="center"]) :where([part="control"]) { align-items: center; }',
       );
       expect(css).toContain(
-        ':where([part="control"][data-justify="space-between"]) { justify-content: space-between; }',
+        ':host([justify="space-between"]) :where([part="control"]) { justify-content: space-between; }',
       );
     }
     const stako = cssOf("stako");

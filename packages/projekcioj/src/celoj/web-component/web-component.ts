@@ -1365,19 +1365,28 @@ const HIDDEN_TEXT =
  */
 const layoutStructure = (skemo: Skemo): string => {
   const direction = layoutDirectionOf(skemo) ?? "column";
-  const valuesOf = (name: string) =>
-    (skemo.props.find((prop) => prop.name === name && prop.kind === "enum")?.values ?? []).map(
-      String,
-    );
+  const enumOf = (name: string) =>
+    skemo.props.find((prop) => prop.name === name && prop.kind === "enum");
+  // The value as the host's own attribute, as the karto reads its orientation: no axis of the
+  // parts, so the parity inventory names none; an absent or unknown value keeps the default.
+  const placed = (name: string, property: string) => {
+    const prop = enumOf(name);
+    if (prop === undefined) return [];
+    return [
+      ...(prop.default === undefined
+        ? []
+        : [`:where([part="control"]) { ${property}: ${String(prop.default)}; }`]),
+      ...(prop.values ?? []).map(
+        (value) =>
+          `:host([${name}="${String(value)}"]) :where([part="control"]) { ${property}: ${String(value)}; }`,
+      ),
+    ];
+  };
   return [
     ":host { display: block; }",
     `:where([part="control"]) { display: flex; flex-direction: ${direction}; box-sizing: border-box; margin: 0; min-inline-size: 0; }`,
-    ...valuesOf("align").map(
-      (value) => `:where([part="control"][data-align="${value}"]) { align-items: ${value}; }`,
-    ),
-    ...valuesOf("justify").map(
-      (value) => `:where([part="control"][data-justify="${value}"]) { justify-content: ${value}; }`,
-    ),
+    ...placed("align", "align-items"),
+    ...placed("justify", "justify-content"),
     ...(skemo.props.some((prop) => prop.name === "wrap" && prop.kind === "boolean")
       ? [':host([wrap]) :where([part="control"]) { flex-wrap: wrap; }']
       : []),
