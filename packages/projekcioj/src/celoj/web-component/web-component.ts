@@ -263,8 +263,21 @@ export function layoutDirectionOf(skemo: Skemo): "row" | "column" | undefined {
   return undefined;
 }
 
-/** Spec 046 T1: a layout Ero (vico, kolumno, stako) places its children and draws nothing. */
+/** Spec 046 T1: a layout Ero (vico, kolumno, stako, krado) places its children and draws nothing. */
 export const isLayout = (skemo: Skemo): boolean => layoutDirectionOf(skemo) !== undefined;
+
+/**
+ * Spec 046 T2 (plan D-14): a layout Ero with a number of columns is a grid (the krado) – its goal
+ * is column like the kolumno's, but it lays its children in columns, not one below the other.
+ */
+export const isGrid = (skemo: Skemo): boolean =>
+  isLayout(skemo) && skemo.props.some((prop) => prop.name === "columns" && prop.kind === "enum");
+
+/** The values of the grid's columns that are a number of columns (1 to 12; auto is none). */
+const columnCounts = (skemo: Skemo): number[] =>
+  (skemo.props.find((prop) => prop.name === "columns")?.values ?? [])
+    .map((value) => Number(value))
+    .filter((count) => Number.isInteger(count) && count > 0);
 
 /** Static text (Spec 011 ③, D-08): the badge, a span without a role (Spec 025 ③: not the chip, not the editor). */
 const isText = (skemo: Skemo): boolean =>
@@ -1196,6 +1209,15 @@ function declarations(
       return token === "none" ? ["display: none;"] : [`max-block-size: ${variable(token)};`];
     }
   }
+  // Spec 046 T2 (plan D-13, D-14): the least width of a grid's column (min-width) lays as many
+  // columns as fit (auto-fill); a column never takes more than the grid (min with 100%), so a
+  // grid narrower than one step has one column. A number of columns (the host's columns) lays its
+  // own tracks over this.
+  if (isGrid(skemo) && part === "cell" && property === "width") {
+    return [
+      `grid-template-columns: repeat(auto-fill, minmax(min(${variable(token)}, 100%), 1fr));`,
+    ];
+  }
   switch (property as SkemoPartProperty) {
     case "fill":
       return [`background-color: ${variable(token)};`];
@@ -1390,6 +1412,43 @@ const layoutStructure = (skemo: Skemo): string => {
     ...(skemo.props.some((prop) => prop.name === "wrap" && prop.kind === "boolean")
       ? [':host([wrap]) :where([part="control"]) { flex-wrap: wrap; }']
       : []),
+  ].join("\n");
+};
+
+/**
+ * Layout of a grid (Spec 046 T2, plan D-14, D-15), keywords only: the control is a grid. A number
+ * of columns (the host's columns, as the karto reads its orientation: no axis of the parts) lays
+ * that many tracks of equal width; without one (auto) the Skemo's binding of the least width
+ * (cell.width by min-width) lays as many as fit. A number of columns stacks into one while the
+ * element marks it so (fm-stacked, below the Uzo's columns-from). A child spans its data-span
+ * (1 to 12, as the th carries data-sort); where the element counts fewer columns (fm-columns-n),
+ * a wider span takes the whole row (1 / -1: every column there is), never a column of its own.
+ * The gap is the Skemo's binding (box.gap by gap). No colour, no font, no border, no length.
+ */
+const gridStructure = (skemo: Skemo): string => {
+  const counts = columnCounts(skemo);
+  const most = Math.max(0, ...counts);
+  const spans = Array.from({ length: most }, (_, index) => index + 1);
+  return [
+    ":host { display: block; }",
+    ':where([part="control"]) { display: grid; grid-template-columns: minmax(0, 1fr); box-sizing: border-box; margin: 0; min-inline-size: 0; }',
+    ...counts.map(
+      (count) =>
+        `:host([columns="${count}"]) :where([part="control"]) { grid-template-columns: repeat(${count}, minmax(0, 1fr)); }`,
+    ),
+    ':host([columns]) :where([part="control"].fm-stacked) { grid-template-columns: minmax(0, 1fr); }',
+    ...spans
+      .filter((span) => span > 1)
+      .map((span) => `::slotted([data-span="${span}"]) { grid-column: span ${span}; }`),
+    ...spans
+      .filter((count) => count < most)
+      .map(
+        (count) =>
+          `:where([part="control"].fm-columns-${count}) ::slotted(:is(${spans
+            .filter((span) => span > count)
+            .map((span) => `[data-span="${span}"]`)
+            .join(", ")})) { grid-column: 1 / -1; }`,
+      ),
   ].join("\n");
 };
 
@@ -2590,67 +2649,69 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
                       ? headingStructure
                       : isParagraph(skemo)
                         ? paragraphStructure
-                        : isLayout(skemo)
-                          ? layoutStructure(skemo)
-                          : isText(skemo)
-                            ? textStructure(
-                                bordered,
-                                skemo.slots.some((slot) => slot.name === "icon-start"),
-                              )
-                            : isStatus(skemo)
-                              ? statusStructure(skemo)
-                              : isMeter(skemo)
-                                ? meterStructure
-                                : isPagination(skemo)
-                                  ? paginationStructure
-                                  : isUpload(skemo)
-                                    ? uploadStructure(disables)
-                                    : isSlider(skemo)
-                                      ? sliderStructure(disables)
-                                      : isCodeblock(skemo)
-                                        ? codeblockStructure()
-                                        : isMarkdown(skemo)
-                                          ? markdownStructure
-                                          : isCard(skemo)
-                                            ? cardStructure
-                                            : isAvatar(skemo)
-                                              ? avatarStructure
-                                              : isLight(skemo)
-                                                ? lightStructure(skemo, owner)
-                                                : isTabs(skemo)
-                                                  ? tabsStructure
-                                                  : isDisclosure(skemo)
-                                                    ? disclosureStructure
-                                                    : isField(skemo)
-                                                      ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo), skemo.parts.decrement !== undefined || isDatepicker(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}${isDatepicker(skemo) ? `\n${datepickerStructure}` : ""}`
-                                                      : isGroup(skemo)
-                                                        ? groupStructure(
-                                                            disables,
-                                                            skemo.parts["required-mark"] !==
-                                                              undefined,
-                                                          )
-                                                        : isToggle(skemo)
-                                                          ? toggleStructure(
+                        : isGrid(skemo)
+                          ? gridStructure(skemo)
+                          : isLayout(skemo)
+                            ? layoutStructure(skemo)
+                            : isText(skemo)
+                              ? textStructure(
+                                  bordered,
+                                  skemo.slots.some((slot) => slot.name === "icon-start"),
+                                )
+                              : isStatus(skemo)
+                                ? statusStructure(skemo)
+                                : isMeter(skemo)
+                                  ? meterStructure
+                                  : isPagination(skemo)
+                                    ? paginationStructure
+                                    : isUpload(skemo)
+                                      ? uploadStructure(disables)
+                                      : isSlider(skemo)
+                                        ? sliderStructure(disables)
+                                        : isCodeblock(skemo)
+                                          ? codeblockStructure()
+                                          : isMarkdown(skemo)
+                                            ? markdownStructure
+                                            : isCard(skemo)
+                                              ? cardStructure
+                                              : isAvatar(skemo)
+                                                ? avatarStructure
+                                                : isLight(skemo)
+                                                  ? lightStructure(skemo, owner)
+                                                  : isTabs(skemo)
+                                                    ? tabsStructure
+                                                    : isDisclosure(skemo)
+                                                      ? disclosureStructure
+                                                      : isField(skemo)
+                                                        ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo), skemo.parts.decrement !== undefined || isDatepicker(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}${isDatepicker(skemo) ? `\n${datepickerStructure}` : ""}`
+                                                        : isGroup(skemo)
+                                                          ? groupStructure(
                                                               disables,
-                                                              uzo?.layout.wrap !== undefined &&
-                                                                uzo.layout.wrap !== "never",
-                                                              skemo.slots.some(
-                                                                (slot) =>
-                                                                  slot.default !== true &&
-                                                                  slot.text === true,
-                                                              ),
                                                               skemo.parts["required-mark"] !==
                                                                 undefined,
-                                                              skemo.props.some(
-                                                                (prop) =>
-                                                                  prop.name === "label-side",
-                                                              ),
                                                             )
-                                                          : structure(
-                                                              uzo?.layout.wrap === "with-text",
-                                                              disables,
-                                                              bordered,
-                                                            );
+                                                          : isToggle(skemo)
+                                                            ? toggleStructure(
+                                                                disables,
+                                                                uzo?.layout.wrap !== undefined &&
+                                                                  uzo.layout.wrap !== "never",
+                                                                skemo.slots.some(
+                                                                  (slot) =>
+                                                                    slot.default !== true &&
+                                                                    slot.text === true,
+                                                                ),
+                                                                skemo.parts["required-mark"] !==
+                                                                  undefined,
+                                                                skemo.props.some(
+                                                                  (prop) =>
+                                                                    prop.name === "label-side",
+                                                                ),
+                                                              )
+                                                            : structure(
+                                                                uzo?.layout.wrap === "with-text",
+                                                                disables,
+                                                                bordered,
+                                                              );
   // A skip link adds its place above the page to a control's structure (Spec 014 ②, D-07).
   const floating = isSkip(skemo) ? `\n${skipStructure}` : "";
   const ending = isBoxedField(skemo) ? `\n${endStructure(isTextarea(skemo))}` : "";
@@ -2805,6 +2866,24 @@ export function namesOf(ero: LoadedEro["ero"]): {
 }
 
 /**
+ * Spec 046 T2 (plan D-14): the custom property of the least width of a grid's column per step of
+ * min-width – the Ero-Token of cell.width in that combination, else the token the Skemo binds.
+ */
+function gridMinWidthsOf(entry: LoadedEro): Record<string, string> {
+  const { skemo } = entry;
+  const steps = skemo.props.find((prop) => prop.name === "min-width")?.values ?? [];
+  return Object.fromEntries(
+    steps.flatMap((step) => {
+      const combination = { "min-width": String(step) };
+      const bound = boundToken(skemo, "cell", "width", combination);
+      if (bound === undefined) return [];
+      const token = named(entry.ero.name, skemo, "cell", "width", combination, bound.token);
+      return [[String(step), nomRegulo("css").derive(token)]];
+    }),
+  );
+}
+
+/**
  * Everything the element template needs of one Ero: names, the native control, the slots. The
  * Ikonaro (Spec 014 ②) is what the icon element knows of the names and which of them mirror.
  */
@@ -2866,6 +2945,9 @@ export function elementNamesOf(
     // Spec 014 ① (plan ① D-03): the width from which layout auto lays name and value side by side,
     // the Uzo's columns-from as the custom property its token is projected to.
     ...(columnsFrom === undefined ? {} : { columnsFrom: nomRegulo("css").derive(columnsFrom) }),
+    // Spec 046 T2 (plan D-14): a grid counts its columns at the least width of its min-width step,
+    // the custom property of that step's Ero-Token.
+    ...(isGrid(entry.skemo) ? { gridMinWidths: gridMinWidthsOf(entry) } : {}),
     // Nachlese 8 ② (F-5): a Markdown view indents a nested list as its first level, by the indent
     // of its Skemo — in the light DOM, where ::slotted does not reach.
     ...(isMarkdown(entry.skemo) ? { documentCss: markdownDocumentCss(entry) } : {}),
@@ -3002,7 +3084,11 @@ export function stylesheetInventory(moduleText: string): ParityItem {
   const states = new Set<string>();
   for (const [, rawSelector = ""] of css.matchAll(/([^{}]+)\{[^{}]*\}/g)) {
     // `:focus:not(:focus-visible)` resets the ring; the state is what stays outside the :not().
-    const selector = rawSelector.replaceAll(/:not\([^()]*\)/g, "");
+    // Spec 046 T2 (plan D-14): what a child in a slot carries (the data-span of a grid's child,
+    // like the data-sort of a th) is the child's, no prop of the Ero.
+    const selector = rawSelector
+      .replaceAll(/:not\([^()]*\)/g, "")
+      .replaceAll(/::slotted\((?:[^()]|\([^()]*\))*\)/g, "");
     // The combination stands on the control, or on the field of a composite (Spec 009) or a
     // toggle (Spec 010 ②: the size of a checkbox keys only its label and its check mark, never
     // the box itself — the box is the mark plus its border).

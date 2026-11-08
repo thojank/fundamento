@@ -111,6 +111,12 @@ export interface ElementNames {
    */
   columnsFrom?: string;
   /**
+   * Spec 046 T2 (plan D-14): a layout Ero that is a grid (the krado) – the custom property each
+   * step of min-width reads (its Ero-Token), by the step's name. The element counts the columns
+   * it lays out from it (auto) or from columns, so a span wider than the grid takes the row.
+   */
+  gridMinWidths?: Readonly<Record<string, string>>;
+  /**
    * Rules for the light DOM of a Markdown view (Nachlese 8 ②, F-5): what its shadow cannot reach
    * — the indent of a nested list —, adopted by the document once, like a table's.
    */
@@ -1159,6 +1165,7 @@ export function elementSource({
   indicator = false,
   dismiss = false,
   columnsFrom,
+  gridMinWidths,
   documentCss = "",
   ikonaro = [],
   skip = false,
@@ -2506,7 +2513,10 @@ ${
   // Spec 015 ③ (plan ③ D-04): a horizontal card stacks below the Uzo's columns-from, measured as
   // layout auto measures its width.
   const isStacking = isCard && columnsFrom !== undefined;
-  const observesSize = isAuto || isStacking;
+  // Spec 046 T2 (plan D-14, D-15): a grid counts the columns it lays out and stacks a number of
+  // columns below the Uzo's columns-from, measured as the card measures.
+  const isGrid = host === "layout" && gridMinWidths !== undefined;
+  const observesSize = isAuto || isStacking || isGrid;
   const lightRender = isLight
     ? `    this.#decorate();
 ${isAuto ? "    this.#autoLayout();\n" : ""}`
@@ -2514,10 +2524,16 @@ ${isAuto ? "    this.#autoLayout();\n" : ""}`
   const autoConstant = observesSize
     ? `/** The width from which layout auto lays name and value side by side, a card its media beside its body (Spec 014 ①, Spec 015 ③: the Uzo's columns-from). */
 const COLUMNS_FROM = ${JSON.stringify(columnsFrom)};
+${
+  isGrid
+    ? `/** The custom property of the least width of a column per step of min-width (Spec 046 T2, plan D-14). */
+const MIN_WIDTHS: Readonly<Record<string, string>> = ${JSON.stringify(gridMinWidths)};
 `
+    : ""
+}`
     : "";
   const autoField = observesSize
-    ? "  /** Observes the inline size of the element while its layout is auto (Spec 014 ①) or it is a horizontal card (Spec 015 ③). */\n  #sizes: ResizeObserver | undefined;\n"
+    ? "  /** Observes the inline size of the element while its layout is auto (Spec 014 ①), it is a horizontal card (Spec 015 ③) or a grid (Spec 046 T2). */\n  #sizes: ResizeObserver | undefined;\n"
     : "";
   const autoDisconnect = observesSize
     ? `
@@ -2527,8 +2543,68 @@ const COLUMNS_FROM = ${JSON.stringify(columnsFrom)};
   }
 `
     : "";
-  const autoMethods = isStacking
+  const autoMethods = isGrid
     ? `
+  /** A length of a custom property in pixels: px, or rem and em by their font size. */
+  #pixels(raw: string, style: CSSStyleDeclaration): number {
+    const number = Number.parseFloat(raw);
+    return raw.endsWith("rem")
+      ? number * Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
+      : raw.endsWith("em")
+        ? number * Number.parseFloat(style.fontSize)
+        : number;
+  }
+
+  /**
+   * A grid (Spec 046 T2, plan D-14, D-15): the number of columns it lays out – columns, or with
+   * auto as many as fit at the least width of the min-width step (the platform's auto-fill:
+   * columns of that width and the gaps between them) – marks the control (fm-columns-<n>), so a
+   * data-span wider than that takes the whole row instead of making a column of its own. A number
+   * of columns stacks into one while the element is narrower than the Uzo's columns-from, measured
+   * as the card measures (a container query takes no var()). Classes, no data attributes: the
+   * parity inventory reads data-* as props of the Skemo.
+   */
+  #gridLayout(): void {
+    const control = this.#control;
+    if (!this.isConnected) {
+      this.#sizes?.disconnect();
+      this.#sizes = undefined;
+      return;
+    }
+    if (this.#sizes === undefined && typeof ResizeObserver !== "undefined") {
+      this.#sizes = new ResizeObserver(() => requestAnimationFrame(() => this.#gridLayout()));
+      this.#sizes.observe(this);
+    }
+    const style = getComputedStyle(this);
+    const box = this.getBoundingClientRect();
+    const inline = style.writingMode.startsWith("horizontal") ? box.width : box.height;
+    const columns = String(this.propValue("columns") ?? "auto");
+    let count = 1;
+    if (columns === "auto") {
+      control.classList.remove("fm-stacked");
+      const step = String(this.propValue("min-width") ?? "");
+      const least = this.#pixels(style.getPropertyValue(MIN_WIDTHS[step] ?? "").trim(), style);
+      const gap = Number.parseFloat(getComputedStyle(control).columnGap) || 0;
+      // Without the token (no Aspekto loaded) one column, as the stylesheet then draws none.
+      if (Number.isFinite(least) && least > 0 && inline > 0) {
+        count = Math.max(1, Math.floor((inline + gap) / (Math.min(least, inline) + gap) + 1e-6));
+      }
+    } else {
+      const threshold = this.#pixels(style.getPropertyValue(COLUMNS_FROM).trim(), style);
+      // Without the token (no Aspekto loaded) the columns stand, as the stylesheet draws them.
+      const stacked = Number.isFinite(threshold) && inline < threshold;
+      control.classList.toggle("fm-stacked", stacked);
+      count = stacked ? 1 : Number(columns);
+    }
+    const mark = \`fm-columns-\${count}\`;
+    for (const name of [...control.classList]) {
+      if (name.startsWith("fm-columns-") && name !== mark) control.classList.remove(name);
+    }
+    control.classList.add(mark);
+  }
+`
+    : isStacking
+      ? `
   /**
    * A horizontal card (Spec 015 ③, plan ③ D-04): the media beside the body while the element is
    * at least as wide as the Uzo's columns-from, else stacked like a vertical card — measured as
@@ -2561,8 +2637,8 @@ const COLUMNS_FROM = ${JSON.stringify(columnsFrom)};
     control.classList.toggle("fm-stacked", Number.isFinite(threshold) && inline < threshold);
   }
 `
-    : isAuto
-      ? `
+      : isAuto
+        ? `
   /**
    * Layout auto (Spec 014 ①, plan ① D-03): columns while the element is at least as wide as the
    * Uzo's columns-from, else stacked; columns and stacked stand as they are. A container query
@@ -2595,7 +2671,7 @@ const COLUMNS_FROM = ${JSON.stringify(columnsFrom)};
     if (this.getAttribute("data-layout") !== resolved) this.setAttribute("data-layout", resolved);
   }
 `
-      : "";
+        : "";
   const lightInit = isLight
     ? `    if (lightSheet === undefined) {
       lightSheet = new CSSStyleSheet();
@@ -6801,7 +6877,7 @@ ${
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
     // disabled wins over readonly; help and error show only while they have text.
     const described: string[] = [];
-${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${paginationRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${datepickerRender}${chipRender}${listRender}${editorRender}${uploadRender}${sliderRender}${cardRender}${avatarRender}${isCodeblock ? codeblockRender : ""}${isMarkdown ? markdownRender : ""}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${paginationRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${datepickerRender}${chipRender}${listRender}${editorRender}${uploadRender}${sliderRender}${cardRender}${isGrid ? "    this.#gridLayout();\n" : ""}${avatarRender}${isCodeblock ? codeblockRender : ""}${isMarkdown ? markdownRender : ""}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");

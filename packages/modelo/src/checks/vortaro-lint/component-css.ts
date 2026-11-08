@@ -60,6 +60,9 @@ export const STRUCTURAL_PROPERTIES: readonly string[] = [
   "caption-side",
   "font-variant-numeric",
   "grid-template-columns",
+  // Spec 046 T2 (plan D-14): how many columns of a grid a child spans (span n, or 1 / -1 for the
+  // whole row) is structure, a count of tracks and no length.
+  "grid-column",
   "overflow-x",
   // Spec 014 ② (plan ② D-05, D-07): a glyph is a mask of the Aspekto's picture (the image a
   // token reference, size, repeat and position keywords); a part above the page is fixed at the
