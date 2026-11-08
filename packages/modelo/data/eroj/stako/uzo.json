@@ -63,7 +63,7 @@
     "slots": {},
     "layout": {
       "size": "container",
-      "wrap": "never"
+      "wrap": "allowed"
     },
     "content": [],
     "when-not": [
