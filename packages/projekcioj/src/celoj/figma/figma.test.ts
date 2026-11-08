@@ -43,6 +43,7 @@ import {
   VERTICAL_EXAMPLE,
   verticalOf,
 } from "./figma.js";
+import { isLayout } from "../web-component/web-component.js";
 import { FIGMA_MODE_LIMIT } from "./plugin.js";
 
 const config = new URL(
@@ -4207,5 +4208,24 @@ describe("the Figma plan draws the selection Eroj (Spec 025 ③)", () => {
       (variant) => variant.props.editing === "false" && variant.props.state === "disabled",
     );
     expect(disabled?.bindings["text.color"]).toBe("color/text/disabled");
+  });
+});
+
+// Spec 046 T1 (F-T1-8, Option 1): the layout Eroj (role generic plus a layout goal — the isLayout
+// of the Web Component and the Make Kit) draw nothing of their own. Until T5 decides their Bauform
+// they are not in the Figma plan; every other Ero keeps its set.
+describe("the layout Eroj stay out of the Figma plan until T5 (Spec 046 T1)", () => {
+  it("plans no set for vico, kolumno and stako and one for every other Ero", () => {
+    const layout = prepared.input.modelo.eroj
+      .filter((entry) => isLayout(entry.skemo))
+      .map((entry) => entry.ero.name);
+    expect(layout).toEqual(expect.arrayContaining(["kolumno", "stako", "vico"]));
+    const sets = plan.components.map((component) => component.set);
+    for (const name of layout) expect(sets).not.toContain(name);
+    expect(sets).toEqual(
+      prepared.input.modelo.eroj
+        .map((entry) => entry.ero.name)
+        .filter((name) => !layout.includes(name)),
+    );
   });
 });
