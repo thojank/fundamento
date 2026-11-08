@@ -2344,7 +2344,7 @@ function timelineStylesheetOf(skemo: Skemo, tag: string, owner?: string): string
       ],
     ],
     [`${li} > :not([data-fm-marker])`, ["margin: 0;"]],
-    [`${li} > time`, [`color: ${token("date", "color")};`, ...typography("date")]],
+    [`${li} > time`, [`color: ${token("moment", "color")};`, ...typography("moment")]],
     [`${li} > ${title}`, [`color: ${token("subject", "color")};`, ...typography("subject")]],
     [
       `${li} > [data-fm-marker]`,

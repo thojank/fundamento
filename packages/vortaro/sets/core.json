@@ -24754,14 +24754,14 @@
           }
         }
       },
-      "date": {
+      "moment": {
         "color": {
           "$type": "color",
           "$value": "{color.text.muted}",
-          "$description": "templinio: date.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$description": "templinio: moment.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
           "$extensions": {
             "fundamento": {
-              "id": "tok_01M6XW23WZ22SHGD8069ED742J",
+              "id": "tok_01M6XWW14S3RB0WGHS6ZNV2F3G",
               "role": "ero"
             }
           }
@@ -24769,10 +24769,10 @@
         "typography": {
           "$type": "typography",
           "$value": "{typography.label.2}",
-          "$description": "templinio: date.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$description": "templinio: moment.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
           "$extensions": {
             "fundamento": {
-              "id": "tok_01M6XW23WZ22SHGD8069ED742K"
+              "id": "tok_01M6XWW14T4QTRQPNE9WYBCAFK"
             }
           }
         }

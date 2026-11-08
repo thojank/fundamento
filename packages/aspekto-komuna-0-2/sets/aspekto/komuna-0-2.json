@@ -10846,7 +10846,7 @@
           "$value": "{typography.body.2}"
         }
       },
-      "date": {
+      "moment": {
         "color": {
           "$type": "color",
           "$value": "{color.text.muted}"

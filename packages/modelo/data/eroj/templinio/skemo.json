@@ -46,7 +46,7 @@
           "fixed": "typography.body.2"
         }
       },
-      "date": {
+      "moment": {
         "color": {
           "fixed": "color.text.muted"
         },
