@@ -6,7 +6,7 @@ PR A ist ein Strang T1 → T6 (B-8), T7 läuft parallel in PR B im eigenen Workt
 
 | Ticket | Inhalt | PR | Stand |
 |---|---|---|---|
-| T1 | Gerüst; `fm-vico`, `fm-kolumno`, `fm-stako`; abgeleitete Eroj-Zahlen | A | in Arbeit |
+| T1 | Gerüst; `fm-vico`, `fm-kolumno`, `fm-stako`; abgeleitete Eroj-Zahlen | A | erledigt (Befunde F-T1-1 bis F-T1-11) |
 | T2 | `fm-krado` | A | offen |
 | T3 | `fm-tabelo`: Auswahl, Laden, fester Kopf, geschlossene Grenzen | A | offen |
 | T4 | `fm-templinio` | A | offen |
@@ -25,4 +25,8 @@ PR A ist ein Strang T1 → T6 (B-8), T7 läuft parallel in PR B im eigenen Workt
 - [x] Ausnahme `arangxoj.test` ohne Layout-Eroj (`781ec764`).
 - [x] Web-Component-Host `layout` (`e079139f`, `64605938`); `neu-seit-main` (`6c0601e4`).
 - [x] Ausnahme Eroj-Zahl aus den Daten (`a7f81616`); `vico.spec.ts` liest die Kinder des Light DOM (`5e2f10d1`).
-- [ ] Offene Sweeps (Figma-Plan, Make Kit, Vitrino-Karte der Rollen, Bericht der Figma-Variablen): siehe plan.md › Befunde.
+- [x] Make Kit: Leitlinien der Layout-Eroj (`d25d1de1`), Ausnahme Eroj-Zahl Make Kit (`93b17665`).
+- [x] D-11 (F-T1-8, Option 1): Layout-Eroj bis T5 nicht im Figma-Plan; rot `5431fdd7`, grün `236328a9`. Variablenbericht 3 958 Zeichen.
+- [x] Ausnahme Eroj-Zahl aus den Daten (Vitrino, Karte Ero → Rolle) (`276a0267`).
+- [x] D-12: `stako` `uzo.layout.wrap` `allowed` (`7cf79f21`).
+- [x] Bleiben rot als Befund: F-T1-1, F-T1-2, F-T1-3 (B-3), F-T1-4, F-T1-6; F-T1-5, F-T1-7 (T6); F-T1-10 (`check:parity` bis T5). Siehe plan.md › Befunde.
