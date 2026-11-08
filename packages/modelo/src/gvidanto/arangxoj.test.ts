@@ -395,3 +395,38 @@ describe("listArangxoj on the repo Modelo with the layout Eroj (Spec 046 T1)", (
     }
   });
 });
+
+describe("listArangxoj on the repo Modelo with the grid (Spec 046 T2)", () => {
+  // The four layout Eroj of Eroj-Runde 7: krado answers column beside kolumno (the list of layout
+  // purposes stays as it is, no purpose grid). Its example sets a number of columns and a gap.
+  const LAYOUT: [string, string][] = [
+    ["vico", "row"],
+    ["kolumno", "column"],
+    ["stako", "stack"],
+    ["krado", "column"],
+  ];
+
+  it("lists vico, kolumno, stako and krado, krado under column with kolumno", () => {
+    const output = arangxoj(modelo);
+    const eroj = output.arangxoj.filter((item) => item.kind === "ero");
+    expect(eroj.map((item) => [item.name, item.celo]).sort()).toEqual([...LAYOUT].sort());
+    expect(
+      eroj
+        .filter((item) => item.celo === "column")
+        .map((item) => item.name)
+        .sort(),
+    ).toEqual(["kolumno", "krado"]);
+    expect(output.mankoj.map((manko) => manko.celo)).not.toContain("column");
+  });
+
+  it("gives krado example markup with its columns and a gap from the spacing steps", () => {
+    const output = arangxoj(modelo);
+    const steps = output.interspacoj.map((item) => item.token);
+    const krado = output.arangxoj.find((item) => item.kind === "ero" && item.name === "krado");
+    const example = krado?.example.match(/^<fm-krado columns="(\d+)" gap="([a-z]+)"><\/fm-krado>$/);
+    expect(Number(example?.[1])).toBeGreaterThanOrEqual(1);
+    expect(Number(example?.[1])).toBeLessThanOrEqual(12);
+    expect(steps).toContain(`spacing.${example?.[2] ?? ""}`);
+    expect(krado?.props.map((prop) => prop.name)).toEqual(["columns", "min-width", "gap"]);
+  });
+});
