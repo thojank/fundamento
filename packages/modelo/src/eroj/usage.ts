@@ -1024,11 +1024,12 @@ const rangeStated: UsageEnforcer = ({ modelo, regulo, instances, eroOf }) =>
 
 /** Enforcers of the Ero Reguloj by name (the repo test accepts this table next to the Modelo's). */
 export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
-  "one-primary-per-container": ({ instances, eroOf, regulo }) => {
+  "one-primary-per-container": ({ modelo, instances, eroOf, regulo }) => {
+    const containers = actionContainers(modelo, regulo);
     const groups = new Map<string, number[]>();
     instances.forEach((instance, index) => {
       const ero = eroOf(instance);
-      if (ero === undefined || !applies(regulo, ero)) return;
+      if (ero === undefined || !applies(regulo, ero) || containers.has(ero.ero.name)) return;
       if (effectiveProps(ero.skemo, instance.props)[EMPHASIS] !== PRIMARY) return;
       const container = instance.container ?? NO_CONTAINER;
       groups.set(container, [...(groups.get(container) ?? []), index]);
@@ -1206,6 +1207,29 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
 
 function applies(regulo: Regulo, ero: LoadedEro): boolean {
   return regulo.appliesTo?.eroj?.includes(ero.ero.name) ?? false;
+}
+
+/**
+ * The Eroj of a Regulo that only hold its actions (Spec 046 L5-2): those whose Uzo lets a slot
+ * take another Ero of the Regulo – dialogo, avizo and karto with butono in `actions`. They are
+ * the containers of one-primary-per-container and count as no action themselves; the emphasis of
+ * a karto is its surface, not a call to action.
+ */
+function actionContainers(modelo: Modelo, regulo: Regulo): Set<string> {
+  const named = new Set(regulo.appliesTo?.eroj ?? []);
+  return new Set(
+    modelo.eroj
+      .filter(
+        (entry) =>
+          named.has(entry.ero.name) &&
+          Object.values(entry.uzo?.slots ?? {}).some((slot) =>
+            (slot.accepts ?? []).some(
+              (accepted) => accepted !== entry.ero.name && named.has(accepted),
+            ),
+          ),
+      )
+      .map((entry) => entry.ero.name),
+  );
 }
 
 /** Evaluates instances against the Ero Reguloj and the Skemo constraints (FR-03, FR-13). */
