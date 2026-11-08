@@ -3576,6 +3576,53 @@
       ]
     },
     {
+      "uri": "urn:fundamento:ontologio#Krado",
+      "term": "Krado",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Krado",
+        "en": "grid",
+        "de": "Raster"
+      },
+      "altLabel": {
+        "en": [
+          "krado",
+          "grid",
+          "column grid"
+        ],
+        "de": [
+          "Raster",
+          "Spaltenraster",
+          "krado"
+        ]
+      },
+      "definition": {
+        "en": "A grid: a layout Ero that sets any children in columns – a number of them from 1 to 12 (columns), or as many as fit, each at least as wide as a step of the container widths (columns auto, min-width) – with the gap of a spacing step between them (gap). A child spans as many columns as its data-span says, at most as many as the grid has; below the container width of its Uzo the grid stacks. It draws nothing of its own; children only one below the other are the stako's, side by side in one line the vico's.",
+        "de": "Ein Raster: ein Layout-Ero, das beliebige Kinder in Spalten stellt – eine Zahl von 1 bis 12 (columns) oder so viele, wie passen, jede mindestens so breit wie eine Stufe der Containerbreiten (columns auto, min-width) –, mit dem Abstand einer Abstandsstufe dazwischen (gap). Ein Kind überspannt so viele Spalten, wie sein data-span sagt, höchstens so viele, wie das Raster hat; unter der Containerbreite seiner Uzo stapelt das Raster. Es zeichnet nichts selbst; Kinder nur untereinander gehören dem stako, nebeneinander in einer Zeile der vico."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Stako"
+        },
+        {
+          "predicate": "references",
+          "target": "#Vico"
+        },
+        {
+          "predicate": "references",
+          "target": "#Karto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Tabelo"
+        }
+      ]
+    },
+    {
       "uri": "urn:fundamento:ontologio#Deziraro",
       "term": "Deziraro",
       "inScheme": "laboro",

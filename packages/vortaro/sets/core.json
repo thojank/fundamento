@@ -15533,6 +15533,112 @@
         }
       }
     },
+    "krado": {
+      "box": {
+        "gap": {
+          "gap": {
+            "xsmall": {
+              "$type": "dimension",
+              "$value": "{spacing.xsmall}",
+              "$description": "krado: box.gap when gap=xsmall (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6XQ1T814Z9FDZHJ5WDT3SXR"
+                }
+              }
+            },
+            "small": {
+              "$type": "dimension",
+              "$value": "{spacing.small}",
+              "$description": "krado: box.gap when gap=small (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6XQ1T82MY8GKCPGTRY53JK6"
+                }
+              }
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{spacing.medium}",
+              "$description": "krado: box.gap when gap=medium (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6XQ1T82MY8GKCPGTRY53JK7"
+                }
+              }
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{spacing.large}",
+              "$description": "krado: box.gap when gap=large (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6XQ1T82MY8GKCPGTRY53JK8"
+                }
+              }
+            },
+            "xlarge": {
+              "$type": "dimension",
+              "$value": "{spacing.xlarge}",
+              "$description": "krado: box.gap when gap=xlarge (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6XQ1T82MY8GKCPGTRY53JK9"
+                }
+              }
+            },
+            "xxlarge": {
+              "$type": "dimension",
+              "$value": "{spacing.xxlarge}",
+              "$description": "krado: box.gap when gap=xxlarge (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6XQ1T82MY8GKCPGTRY53JKA"
+                }
+              }
+            }
+          }
+        }
+      },
+      "cell": {
+        "width": {
+          "min": {
+            "width": {
+              "small": {
+                "$type": "dimension",
+                "$value": "{size.container.small}",
+                "$description": "krado: cell.width when min-width=small (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+                "$extensions": {
+                  "fundamento": {
+                    "id": "tok_01M6XQ1T82MY8GKCPGTRY53JKB"
+                  }
+                }
+              },
+              "medium": {
+                "$type": "dimension",
+                "$value": "{size.container.medium}",
+                "$description": "krado: cell.width when min-width=medium (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+                "$extensions": {
+                  "fundamento": {
+                    "id": "tok_01M6XQ1T82MY8GKCPGTRY53JKC"
+                  }
+                }
+              },
+              "large": {
+                "$type": "dimension",
+                "$value": "{size.container.large}",
+                "$description": "krado: cell.width when min-width=large (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+                "$extensions": {
+                  "fundamento": {
+                    "id": "tok_01M6XQ1T82MY8GKCPGTRY53JKD"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "langetaro": {
       "tab": {
         "fill": {

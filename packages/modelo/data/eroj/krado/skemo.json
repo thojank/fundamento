@@ -1,0 +1,184 @@
+{
+  "ero": {
+    "id": "ero_01M6XPZD9QEBNBVDB02SWP94D3",
+    "name": "krado",
+    "skemo": "ske_01M6XPZDFV88Z6A0M2CH70GP2J",
+    "description": "A grid: sets any children in columns – a number of them, or as many as fit, each at least as wide as a step of the container widths – with the gap of a spacing step between them; a child spans as many columns as its data-span says, at most as many as there are, and below the container width of its Uzo the grid stacks. It draws nothing of its own: no colour, no font, no role."
+  },
+  "skemo": {
+    "id": "ske_01M6XPZDFV88Z6A0M2CH70GP2J",
+    "ero": "ero_01M6XPZD9QEBNBVDB02SWP94D3",
+    "props": [
+      {
+        "name": "columns",
+        "kind": "enum",
+        "values": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "auto"
+        ],
+        "default": "auto",
+        "description": "How many columns the grid lays: 1 to 12, or auto – as many as fit, each at least as wide as min-width. A child spans as many columns as its data-span says (an integer from 1 to 12 on the child, like the data-sort of a th), at most as many as the grid has; a wider span takes the whole row. Below the container width of the Uzo (columns-from) a grid of a number of columns stacks into one column."
+      },
+      {
+        "name": "min-width",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "default": "small",
+        "description": "The least width of a column while columns is auto: a step of the container widths of core (size.container.small to size.container.large), never a length of its own; without it the default step stands."
+      },
+      {
+        "name": "gap",
+        "kind": "enum",
+        "values": [
+          "xsmall",
+          "small",
+          "medium",
+          "large",
+          "xlarge",
+          "xxlarge"
+        ],
+        "default": "medium",
+        "description": "The room between the columns and the rows of the grid: a spacing step of core (spacing.xsmall to spacing.xxlarge), never a value of its own; the Ero owns the space between its children (spacing-owned-by-container)."
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "content",
+        "default": true
+      }
+    ],
+    "parts": {
+      "box": {
+        "gap": {
+          "by": [
+            "gap"
+          ]
+        }
+      },
+      "cell": {
+        "width": {
+          "by": [
+            "min-width"
+          ]
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "box",
+        "property": "gap",
+        "when": {
+          "gap": "xsmall"
+        },
+        "token": "spacing.xsmall"
+      },
+      {
+        "part": "box",
+        "property": "gap",
+        "when": {
+          "gap": "small"
+        },
+        "token": "spacing.small"
+      },
+      {
+        "part": "box",
+        "property": "gap",
+        "when": {
+          "gap": "medium"
+        },
+        "token": "spacing.medium"
+      },
+      {
+        "part": "box",
+        "property": "gap",
+        "when": {
+          "gap": "large"
+        },
+        "token": "spacing.large"
+      },
+      {
+        "part": "box",
+        "property": "gap",
+        "when": {
+          "gap": "xlarge"
+        },
+        "token": "spacing.xlarge"
+      },
+      {
+        "part": "box",
+        "property": "gap",
+        "when": {
+          "gap": "xxlarge"
+        },
+        "token": "spacing.xxlarge"
+      },
+      {
+        "part": "cell",
+        "property": "width",
+        "when": {
+          "min-width": "small"
+        },
+        "token": "size.container.small"
+      },
+      {
+        "part": "cell",
+        "property": "width",
+        "when": {
+          "min-width": "medium"
+        },
+        "token": "size.container.medium"
+      },
+      {
+        "part": "cell",
+        "property": "width",
+        "when": {
+          "min-width": "large"
+        },
+        "token": "size.container.large"
+      }
+    ],
+    "a11y": {
+      "role": "generic",
+      "name": [],
+      "states": {},
+      "keys": []
+    },
+    "goals": [
+      {
+        "goal": "column",
+        "keywords": {
+          "en": [
+            "multicolumn",
+            "gridlayout"
+          ],
+          "de": [
+            "mehrspaltig",
+            "spaltenraster"
+          ]
+        },
+        "props": {
+          "columns": "3",
+          "gap": "medium"
+        }
+      }
+    ]
+  }
+}

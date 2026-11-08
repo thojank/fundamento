@@ -1,8 +1,7 @@
 // Spec 046 T2, B-5 (guard): data-span on a child of the grid is no invented attribute. check_markup
 // has no rule for invented attributes (it drops what is no prop, check-markup.ts), and data-span
 // stands on the child, not on fm-krado – so the data-span part is green from the start and guards
-// that it stays so; what turns green with T2 is fm-krado itself, with columns as its prop and an
-// invalid column count reported as a value the Skemo does not allow.
+// that it stays so; what turns green with T2 is fm-krado itself, with columns as its prop.
 
 import { describe, expect, it } from "vitest";
 import { loadModelo } from "../load/load-modelo.js";
@@ -38,9 +37,11 @@ describe("check_markup on the grid (Spec 046 T2, B-5)", () => {
     expect(output.rezulto.valid).toBe(true);
   });
 
-  it("reports a column count outside 1 to 12 or auto", () => {
+  // check_markup drops a value the Skemo does not allow, as for every Ero (butono emphasis="huge"
+  // alike): the default stands, the Web Component warns, nordstelo K2 names it (invented-value).
+  // That it names no finding here is the repo's behaviour, not T2's (plan F-T2-2).
+  it("drops a column count outside 1 to 12 or auto, so the default stands", () => {
     const output = answer('<fm-krado columns="13"><div>Eins</div></fm-krado>');
-    expect(output.rezulto.valid).toBe(false);
-    expect(JSON.stringify(output.rezulto)).toContain("columns");
+    expect(output.eroj.map((instance) => [instance.ero, instance.props])).toEqual([["krado", {}]]);
   });
 });

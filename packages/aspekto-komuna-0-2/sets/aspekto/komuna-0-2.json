@@ -6721,6 +6721,58 @@
         }
       }
     },
+    "krado": {
+      "box": {
+        "gap": {
+          "gap": {
+            "xsmall": {
+              "$type": "dimension",
+              "$value": "{spacing.xsmall}"
+            },
+            "small": {
+              "$type": "dimension",
+              "$value": "{spacing.small}"
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{spacing.medium}"
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{spacing.large}"
+            },
+            "xlarge": {
+              "$type": "dimension",
+              "$value": "{spacing.xlarge}"
+            },
+            "xxlarge": {
+              "$type": "dimension",
+              "$value": "{spacing.xxlarge}"
+            }
+          }
+        }
+      },
+      "cell": {
+        "width": {
+          "min": {
+            "width": {
+              "small": {
+                "$type": "dimension",
+                "$value": "{size.container.small}"
+              },
+              "medium": {
+                "$type": "dimension",
+                "$value": "{size.container.medium}"
+              },
+              "large": {
+                "$type": "dimension",
+                "$value": "{size.container.large}"
+              }
+            }
+          }
+        }
+      }
+    },
     "langetaro": {
       "tab": {
         "fill": {

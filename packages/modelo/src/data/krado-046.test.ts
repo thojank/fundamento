@@ -138,6 +138,8 @@ describe("krado in the repo Modelo (Spec 046 T2)", () => {
 // test adds the container widths small and medium of core): the krado Skemo of the repo.
 describe("the krado Skemo in a fixture Modelo (Spec 046 T2)", () => {
   const FILE = "data/eroj/krado/skemo.json";
+  /** The Ero-Tokens of cell.width by min-width in the core of the copy. */
+  const CELL = "vortaro/sets/core.json#/ero/krado/cell/width/min/width";
   type Binding = { part: string; property: string; when?: Record<string, string>; token: string };
   type Prop = { name: string; values?: string[]; default?: string };
   type EroFile = {
@@ -168,16 +170,24 @@ describe("the krado Skemo in a fixture Modelo (Spec 046 T2)", () => {
     { step: "medium", value: 960, id: `tok_01M6ZKRAD${"0".repeat(15)}A2` },
   ];
 
+  /** The repo Skemo with the steps the fixture core has. */
+  const narrowed = (): EroFile => {
+    const file = repoFile();
+    narrow(file, "gap", ["small", "medium"]);
+    narrow(file, "min-width", ["small", "medium"]);
+    return file;
+  };
+
   function issuesOf(change: (file: EroFile) => void) {
     const root = mutatedFixture("ero-minimal", (edit) => {
-      const file = repoFile();
-      narrow(file, "gap", ["small", "medium"]);
-      narrow(file, "min-width", ["small", "medium"]);
+      const file = narrowed();
       change(file);
       edit(FILE, () => file);
       // The fixture core has no container widths: the two of core, with IDs of the copy.
+      // The fixture core has no container widths: the two of core, with IDs of the copy, before
+      // the groups ero and sxablono (they stay the last members of the set file).
       edit("vortaro/sets/core.json", (set: Record<string, unknown>) => {
-        set.size = {
+        const size = {
           container: Object.fromEntries(
             CONTAINERS.map(({ step, value, id }) => [
               step,
@@ -189,7 +199,12 @@ describe("the krado Skemo in a fixture Modelo (Spec 046 T2)", () => {
             ]),
           ),
         };
-        return set;
+        const last = ["ero", "sxablono"];
+        return Object.fromEntries([
+          ...Object.entries(set).filter(([key]) => !last.includes(key)),
+          ["size", size],
+          ...Object.entries(set).filter(([key]) => last.includes(key)),
+        ]);
       });
       edit("data/ids.lock.json", (lock: { ids: Record<string, unknown> }) => {
         lock.ids[file.ero.id] = { status: "active", type: "ero" };
@@ -230,29 +245,33 @@ describe("the krado Skemo in a fixture Modelo (Spec 046 T2)", () => {
     ).toEqual([{ rule: "skemo-goal-invalid", path: `${FILE}#/skemo/goals/0/props/columns` }]);
   });
 
-  it("negative: a min-width bound to a length instead of a token name is a schema violation", () => {
-    const file = repoFile();
-    narrow(file, "min-width", ["small", "medium"]);
-    const index = bindingOf(file, "small");
+  // A length is no token name: core has no token 240px, so the binding is skemo-token-missing, and
+  // the Ero-Token derived for that step points at nothing (alias-target-missing).
+  it("negative: a min-width bound to a length instead of a token name is skemo-token-missing", () => {
+    const index = bindingOf(narrowed(), "small");
     expect(index).toBeGreaterThanOrEqual(0);
     expect(
       issuesOf((each) => {
         const binding = each.skemo.bindings[index];
         if (binding !== undefined) binding.token = "240px";
       }),
-    ).toEqual([{ rule: "schema-violation", path: `${FILE}#/skemo/bindings/${index}/token` }]);
+    ).toEqual([
+      { rule: "skemo-token-missing", path: `${FILE}#/skemo/bindings/${index}/token` },
+      { rule: "alias-target-missing", path: `${CELL}/small/$value` },
+    ]);
   });
 
   it("negative: a min-width bound to a token core does not have is skemo-token-missing", () => {
-    const file = repoFile();
-    narrow(file, "min-width", ["small", "medium"]);
-    const index = bindingOf(file, "medium");
+    const index = bindingOf(narrowed(), "medium");
     expect(
       issuesOf((each) => {
         const binding = each.skemo.bindings[index];
         if (binding !== undefined) binding.token = "size.container.tiny";
       }),
-    ).toEqual([{ rule: "skemo-token-missing", path: `${FILE}#/skemo/bindings/${index}/token` }]);
+    ).toEqual([
+      { rule: "skemo-token-missing", path: `${FILE}#/skemo/bindings/${index}/token` },
+      { rule: "alias-target-missing", path: `${CELL}/medium/$value` },
+    ]);
   });
 
   it("negative: a goal with a min-width that is a length is skemo-goal-invalid at that prop", () => {
