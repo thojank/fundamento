@@ -2,15 +2,15 @@
   {
     "fall": "ohne-lingvo",
     "eingabe": {},
-    "sha256": "aa26c330b7aecdd0f234bfc0ee1338e4a5774157adc62008cb2d657abdb8bee2",
-    "bytes": 16116
+    "sha256": "ee2acff0e815c2e5a500f18ed8a109d16fb6baac31ebdbd4fdfafae4e094c815",
+    "bytes": 18447
   },
   {
     "fall": "lingvo-de",
     "eingabe": {
       "lingvo": "de"
     },
-    "sha256": "8d93ce39ca77d4a46ce03dad703451e71ab2ac704cfc67fe6a13f4c16ac90e1d",
-    "bytes": 17007
+    "sha256": "63c5713deacc213ad76687155fbcffb5fd19ca91a8e1557f8571367364c18a0d",
+    "bytes": 19426
   }
 ]
