@@ -101,7 +101,7 @@ describe("Spec 046 T5: the tabelo in the Vitrino with sorting, selection, loadin
         grid(),
       );
     expect(sticky).not.toBeNull();
-    expect((sticky?.[1].match(/<th scope="row">/g) ?? []).length).toBe(10);
+    expect((sticky?.[1]?.match(/<th scope="row">/g) ?? []).length).toBe(10);
     expect(grid()).toContain('<tr><th scope="row">empty mit butono</th>');
   });
 });
