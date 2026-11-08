@@ -17,6 +17,7 @@ import {
   VITRINO_OPTIONS,
   VITRINO_SLOT_TEXTS,
 } from "../vitrino/datumoj.js";
+import { isLayout } from "../web-component/web-component.js";
 import {
   ALPHA_VARIES,
   BACKDROP_EXAMPLE,
@@ -43,7 +44,6 @@ import {
   VERTICAL_EXAMPLE,
   verticalOf,
 } from "./figma.js";
-import { isLayout } from "../web-component/web-component.js";
 import { FIGMA_MODE_LIMIT } from "./plugin.js";
 
 const config = new URL(
