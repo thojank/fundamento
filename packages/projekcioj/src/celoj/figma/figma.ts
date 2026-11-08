@@ -256,6 +256,9 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   "navigado:icon": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
   // A-plurelektilo-1: „alle wählen“ stands with select-all only, a property.
   "plurelektilo:select-all": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  // Spec 046 T5 (F-T3-3): the skeleton rows of the tabelo stand with loading only, a property; the
+  // set shows the table with its rows.
+  "tabelo:skeleton": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
   "listelektilo:icon": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
   "listelektilo:description": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
   "plurelektilo:filter": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
