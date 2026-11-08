@@ -2497,11 +2497,15 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
     expect(structureOf("table")).toBe("table");
     expect(set?.structure).toBe("table");
     // Spec 036 Teil 5 ②b-2 (A-tabelo-1): three densities; lines a property, no variant.
+    // Spec 046 T5 (F-T3-6): selectable, loading and sticky-header are BOOLEAN properties, no axis.
     expect(set?.properties).toEqual({
       density: ["compact", "default", "comfortable"],
       "caption-hidden": "BOOLEAN",
       sort: "TEXT",
       direction: ["ascending", "descending"],
+      selectable: "BOOLEAN",
+      loading: "BOOLEAN",
+      "sticky-header": "BOOLEAN",
       lines: ["rows", "columns", "grid", "none"],
       state: ["rest", "hover", "focus"],
     });
@@ -2545,6 +2549,8 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
       "head.fill": "color/background/sunken",
       "head.color": "color/text/default",
       "head.typography": "typography/label/1",
+      // Spec 046 T5 (F-T3-6): the layer of the sticky head, bound.
+      "head.layer": "elevation/layer/raised",
       "cell.color": "color/text/default",
       "cell.typography": "typography/body/2",
       "cell.inline-padding": "spacing/medium",
@@ -2561,6 +2567,10 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
       "focus-ring.ring": "focus/ring",
       "focus-ring.offset": "focus/offset",
       "focus-ring.color": "color/focus/inner",
+      // Spec 046 T5 (F-T3-3, F-T3-6): the skeleton of loading, bound, not drawn.
+      "skeleton.fill": "color/background/sunken",
+      "skeleton.radius": "radius/role/control",
+      "skeleton.height": "size/icon/small",
       // Spec 036 Teil 5 ②b-3 (A-tabelo-4): the foot, bound, not drawn.
       "foot.fill": "color/background/sunken",
       "foot.color": "color/text/default",
@@ -2601,6 +2611,10 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
     expect(rest?.notDrawn).toEqual({
       "foot.color": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
       "foot.fill": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+      // Spec 046 T5 (F-T3-3): the skeleton stands with loading only (Jugxo).
+      "skeleton.fill": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+      "skeleton.radius": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+      "skeleton.height": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
     });
     expect(rest?.hidden).toBeUndefined();
     expect(rest?.stroke).toBeUndefined();
@@ -2616,11 +2630,15 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
 
   it("states the tabelo in the parity inventory: density, caption-hidden a boolean, sort a string, direction, three states, the sort fill per state", () => {
     const items = figmaPlanInventory(plan);
+    // Spec 046 T5 (F-T3-6): the three new booleans.
     expect(items.tabelo?.props).toEqual({
       density: ["compact", "default", "comfortable"],
       "caption-hidden": ["boolean"],
       sort: ["string"],
       direction: ["ascending", "descending"],
+      selectable: ["boolean"],
+      loading: ["boolean"],
+      "sticky-header": ["boolean"],
       lines: ["rows", "columns", "grid", "none"],
     });
     expect(items.tabelo?.states).toEqual(["rest", "hover", "focus"]);
