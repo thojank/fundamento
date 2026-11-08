@@ -788,3 +788,91 @@ describe("fm ekranoj: the control model exception (Spec 038 A-5, C-3, AK-6)", ()
     expect(a.spuro.chatFabrikoj).toHaveLength(0);
   });
 });
+
+describe("fm ekranoj: the shared guard matrix of both CLIs (Spec 038 C-3, S038-37t)", () => {
+  /** The table `nordstelo --art ablauf` and `gardo.ts` are tested against, too. */
+  const matrico = JSON.parse(
+    readFileSync(
+      new URL("../../ekranoj/test/fixtures/c3-gardo-matrico/kazoj.json", import.meta.url),
+      "utf8",
+    ),
+  ) as {
+    env: Record<string, Record<string, string>>;
+    kazoj: {
+      nomo: string;
+      env: string;
+      args: string[];
+      atendo: { path: string; rule: string } | { provider: string; kontrolo: Kontrolo | null };
+    }[];
+  };
+  /**
+   * The .env of a case: its model, the Mistral key and the OpenRouter key (both invented, both
+   * holding SXLOSILO). The key of the provider in use is SXLOSILO itself – the one the chat double
+   * logs, so the command must take it out.
+   */
+  const envDe = (nomo: string, aktiva = "mistral") =>
+    `${Object.entries(matrico.env[nomo] ?? {})
+      .map(([k, v]) => `${k}=${v}\n`)
+      .join(
+        "",
+      )}MISTRAL_API_KEY=${SXLOSILO}${aktiva === "mistral" ? "" : "-mistral"}\nOPENROUTER_API_KEY=${SXLOSILO}${aktiva === "openrouter" ? "" : "-or"}\n`;
+
+  it("refuses each refused case of the table with exit 2, exactly its path and rule, before any request, no key", async () => {
+    const malsamaj: string[] = [];
+    for (const kazo of matrico.kazoj) {
+      if (!("rule" in kazo.atendo)) continue;
+      for (const json of [true, false]) {
+        const a = arangxo({ env: envDe(kazo.env) });
+        const run = await a.kuri([
+          FRAZO,
+          "--ekranoj",
+          "liste,detail",
+          ...kazo.args,
+          "--ja",
+          ...(json ? ["--json"] : []),
+        ]);
+        const nomo = `${kazo.nomo}${json ? " --json" : ""}`;
+        if (run.code !== 2) malsamaj.push(`${nomo}: exit ${run.code}`);
+        const akirita = json
+          ? jsonEraro(run.stdout)
+              .problemoj.map((p) => `${p.path} ${p.rule}`)
+              .join("; ")
+          : (/fm ekranoj: (\S+ \S+): /.exec(run.stderr)?.[1] ?? run.stderr);
+        if (akirita !== `${kazo.atendo.path} ${kazo.atendo.rule}`)
+          malsamaj.push(`${nomo}: ${akirita}`);
+        if (a.spuro.chatFabrikoj.length + a.babilo.petoj.length + a.spuro.gvidantoj.length > 0)
+          malsamaj.push(`${nomo}: started`);
+        if (`${run.stdout}${run.stderr}`.includes(SXLOSILO)) malsamaj.push(`${nomo}: key`);
+      }
+    }
+    expect(malsamaj).toEqual([]);
+  });
+
+  it("runs each allowed case of the table with its provider and hands its pair on", async () => {
+    const malsamaj: string[] = [];
+    for (const kazo of matrico.kazoj) {
+      if (!("provider" in kazo.atendo)) continue;
+      const a = arangxo({
+        env: envDe(kazo.env, kazo.atendo.provider.split("/")[0]),
+        babilo: new Babilo({ modelo: kazo.atendo.provider }),
+      });
+      const run = await a.kuri([
+        FRAZO,
+        "--ekranoj",
+        "liste,detail",
+        ...kazo.args,
+        "--ja",
+        "--json",
+      ]);
+      if (run.code !== 0) malsamaj.push(`${kazo.nomo}: exit ${run.code} ${run.stderr}`);
+      const provider = a.spuro.chatFabrikoj.map((f) => f.provider).join(",");
+      if (provider !== kazo.atendo.provider) malsamaj.push(`${kazo.nomo}: ${provider}`);
+      const kontroloj = JSON.stringify(a.spuro.kontroloj.map((k) => k ?? null));
+      if (kontroloj !== JSON.stringify([kazo.atendo.kontrolo]))
+        malsamaj.push(`${kazo.nomo}: ${kontroloj}`);
+      if (a.babilo.petoj.length === 0) malsamaj.push(`${kazo.nomo}: no request`);
+      if (`${run.stdout}${run.stderr}`.includes(SXLOSILO)) malsamaj.push(`${kazo.nomo}: key`);
+    }
+    expect(malsamaj).toEqual([]);
+  });
+});

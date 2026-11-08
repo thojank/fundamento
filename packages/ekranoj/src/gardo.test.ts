@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   agordojPorKontrolo,
@@ -227,5 +228,74 @@ describe("the control model exception (Spec 038 A-5, C-3, AK-6)", () => {
     });
     // The .env itself is not changed.
     expect(agordoj.FM_KI_ANBIETER).toBe("mistral");
+  });
+});
+
+describe("the shared guard matrix of both CLIs (Spec 038 C-3, S038-37t)", () => {
+  /** The table `fm ekranoj` and `nordstelo --art ablauf` are tested against, too. */
+  const matrico = JSON.parse(
+    readFileSync(new URL("../test/fixtures/c3-gardo-matrico/kazoj.json", import.meta.url), "utf8"),
+  ) as {
+    env: Record<string, { FM_KI_ANBIETER: string; FM_KI_MODELL: string }>;
+    kazoj: {
+      nomo: string;
+      env: string;
+      args: string[];
+      atendo: { path: string; rule: string } | { provider: string; kontrolo: Kontrolo | null };
+    }[];
+  };
+
+  /** What both CLIs do: the pair from the options, the pair alone, then the provider built. */
+  function gardo(kazo: (typeof matrico.kazoj)[number]) {
+    const valoro = (nomo: string) => {
+      const index = kazo.args.indexOf(nomo);
+      return index < 0 ? undefined : kazo.args[index + 1];
+    };
+    const laufId = valoro("--lauf-id");
+    const kontrolModelo = valoro("--kontroll-modelo");
+    const kontrolo: Kontrolo | undefined =
+      laufId === undefined && kontrolModelo === undefined
+        ? undefined
+        : {
+            ...(laufId === undefined ? {} : { laufId }),
+            ...(kontrolModelo === undefined ? {} : { kontrolModelo }),
+          };
+    const paro = kontroliKontrolon(kontrolo);
+    if (paro.length > 0) return { problemoj: paro, kontrolo };
+    const env = matrico.env[kazo.env];
+    const nomo = kontrolModelo ?? `${env?.FM_KI_ANBIETER}/${env?.FM_KI_MODELL}`;
+    return { problemoj: kontroliModelon({ toString: () => nomo }, kontrolo), kontrolo, nomo };
+  }
+
+  it("covers every rule of C-3 and both allowed forms", () => {
+    const reguloj = new Set(
+      matrico.kazoj.flatMap((kazo) => ("rule" in kazo.atendo ? [kazo.atendo.rule] : [])),
+    );
+    expect([...reguloj].sort()).toEqual([
+      "control-model-option",
+      "control-run-id",
+      "model-not-allowed",
+    ]);
+    expect(
+      matrico.kazoj.flatMap((kazo) => ("provider" in kazo.atendo ? [kazo.atendo.provider] : [])),
+    ).toEqual(expect.arrayContaining([KONTROLA_MODELO, PERMESITA_MODELO]));
+  });
+
+  it("gives every case of the table exactly its path and rule, or lets it run with its provider", () => {
+    const malsamaj: string[] = [];
+    for (const kazo of matrico.kazoj) {
+      const { problemoj, kontrolo, nomo } = gardo(kazo);
+      if ("rule" in kazo.atendo) {
+        const akiritaj = problemoj.map(({ path, rule }) => `${path} ${rule}`).join("; ");
+        if (akiritaj !== `${kazo.atendo.path} ${kazo.atendo.rule}`)
+          malsamaj.push(`${kazo.nomo}: ${akiritaj}`);
+      } else {
+        if (problemoj.length > 0) malsamaj.push(`${kazo.nomo}: ${problemoj[0]?.rule}`);
+        if (nomo !== kazo.atendo.provider) malsamaj.push(`${kazo.nomo}: ${nomo}`);
+        if (JSON.stringify(kontrolo ?? null) !== JSON.stringify(kazo.atendo.kontrolo))
+          malsamaj.push(`${kazo.nomo}: ${JSON.stringify(kontrolo)}`);
+      }
+    }
+    expect(malsamaj).toEqual([]);
   });
 });

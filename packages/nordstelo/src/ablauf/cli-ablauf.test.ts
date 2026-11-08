@@ -566,3 +566,88 @@ describe("pnpm nordstelo --art ablauf: the control model exception (Spec 038 A-5
     expect(own.duobla.vokoj.map((voko) => voko.enigo.kontrolo)).toEqual([undefined, undefined]);
   });
 });
+
+describe("pnpm nordstelo --art ablauf: the shared guard matrix of both CLIs (Spec 038 C-3, S038-37t)", () => {
+  /** The table `fm ekranoj` and `gardo.ts` are tested against, too. */
+  const matrico = JSON.parse(
+    readFileSync(
+      new URL("../../../ekranoj/test/fixtures/c3-gardo-matrico/kazoj.json", import.meta.url),
+      "utf8",
+    ),
+  ) as {
+    env: Record<string, Record<string, string>>;
+    kazoj: {
+      nomo: string;
+      env: string;
+      args: string[];
+      atendo: { path: string; rule: string } | { provider: string; kontrolo: Kontrolo | null };
+    }[];
+  };
+  /** The .env of a case: its model and both keys (invented, both holding SXLOSILO). */
+  const envDe = (nomo: string) => ({
+    ...matrico.env[nomo],
+    MISTRAL_API_KEY: `${SXLOSILO}-mistral`,
+    OPENROUTER_API_KEY: `${SXLOSILO}-or`,
+  });
+  const komando = (args: readonly string[]) => [
+    "--art",
+    "ablauf",
+    "--taskoj",
+    "liste-filter-detail",
+    ...args,
+  ];
+
+  it("refuses each refused case of the table with exit 2, exactly its path and rule, before anything is built, no key", async () => {
+    const malsamaj: string[] = [];
+    for (const kazo of matrico.kazoj) {
+      if (!("rule" in kazo.atendo)) continue;
+      for (const json of [true, false]) {
+        const own = medio(envDe(kazo.env));
+        const kodo = await kuriArton(
+          komando([...kazo.args, ...(json ? ["--json"] : [])]),
+          own.medio,
+        );
+        const nomo = `${kazo.nomo}${json ? " --json" : ""}`;
+        if (kodo !== 2) malsamaj.push(`${nomo}: exit ${kodo}`);
+        const akirita = json
+          ? (JSON.parse(own.stdout) as { problemoj: { path: string; rule: string }[] }).problemoj
+              .map((p) => `${p.path} ${p.rule}`)
+              .join("; ")
+          : (/^(\S+ \S+): /.exec(own.stderr)?.[1] ?? own.stderr);
+        if (akirita !== `${kazo.atendo.path} ${kazo.atendo.rule}`)
+          malsamaj.push(`${nomo}: ${akirita}`);
+        if (own.preparoj + own.duobla.vokoj.length > 0) malsamaj.push(`${nomo}: started`);
+        if (`${own.stdout}${own.stderr}`.includes(SXLOSILO)) malsamaj.push(`${nomo}: key`);
+      }
+    }
+    expect(malsamaj).toEqual([]);
+  });
+
+  it("runs each allowed case of the table with its provider and hands its pair to every run", async () => {
+    const malsamaj: string[] = [];
+    for (const kazo of matrico.kazoj) {
+      if (!("provider" in kazo.atendo)) continue;
+      const own = medio(envDe(kazo.env));
+      const out = join(own.medio.root, "ablauf");
+      const kodo = await kuriArton(komando([...kazo.args, "--out", out, "--json"]), own.medio);
+      if (kodo !== 0) malsamaj.push(`${kazo.nomo}: exit ${kodo} ${own.stderr}`);
+      const provider = own.preparArgs.map((p) => p.provider).join(",");
+      if (provider !== kazo.atendo.provider) malsamaj.push(`${kazo.nomo}: ${provider}`);
+      // The provider is built for the named service (openrouter for the pair, mistral otherwise).
+      const anbieter = kazo.atendo.provider.split("/")[0];
+      if (own.preparArgs.some((p) => p.anbieter !== anbieter))
+        malsamaj.push(`${kazo.nomo}: ${own.preparArgs.map((p) => p.anbieter).join(",")}`);
+      const atendita = JSON.stringify(kazo.atendo.kontrolo);
+      const kontroloj = [
+        ...own.preparArgs.map((p) => p.kontrolo),
+        ...own.duobla.vokoj.map((voko) => voko.enigo.kontrolo),
+      ].map((k) => JSON.stringify(k ?? null));
+      if (own.duobla.vokoj.length !== 2)
+        malsamaj.push(`${kazo.nomo}: ${own.duobla.vokoj.length} runs`);
+      if (kontroloj.some((k) => k !== atendita))
+        malsamaj.push(`${kazo.nomo}: ${kontroloj.join(" ")}`);
+      if (`${own.stdout}${own.stderr}`.includes(SXLOSILO)) malsamaj.push(`${kazo.nomo}: key`);
+    }
+    expect(malsamaj).toEqual([]);
+  });
+});
