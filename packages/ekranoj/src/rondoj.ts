@@ -421,9 +421,63 @@ function sugestoKunHulo(sugesto: string, mesagxo: string, fakto: Fakto): string 
   return [sugesto, ...aldonoj].filter((parto) => parto !== "").join(" ");
 }
 
-/** The suggestion a finding hands on: check_usage's, for a slot wrapper with its name (S038-39b). */
-const sugestoDe = (m: Malobservo, fakto: Fakto): string =>
-  m.rule === SLOT_ACCEPTS ? sugestoKunHulo(m.suggestion, m.message, fakto) : m.suggestion;
+/** The rule of check_usage for an Ero without a label. */
+const LABEL_REQUIRED = "label-required";
+
+/**
+ * S038-39b (F-S038-39a-1): check_markup counts only the own and the unslotted text of an Ero as its
+ * label (the one derivation, pinned by AC-8). Where an Ero of the finding has no such text but text
+ * in a slotted child that is no Ero, the suggestion names it, read from the fragment of the round
+ * (the browser's facts no longer show the slot of an adopted default slot).
+ */
+function sugestoKunSlotaTeksto(sugesto: string, mesagxo: string, fragmento: string): string {
+  const ero = /^Instance \d+ of (\S+) has/.exec(mesagxo)?.[1];
+  if (ero === undefined || fragmento.trim() === "") return sugesto;
+  const { elements } = statikaFakto(fragmento, "");
+  const tekstoDe = (index: number): string =>
+    [
+      elements[index]?.text ?? "",
+      ...elements.flatMap((infano, i) => (infano.parent === index ? [tekstoDe(i)] : [])),
+    ]
+      .filter((parto) => parto !== "")
+      .join(" ");
+  const aldonoj = new Map<string, string>();
+  for (const [index, element] of elements.entries()) {
+    if (element.tag !== `fm-${ero}`) continue;
+    const infanoj = elements.flatMap((infano, i) => (infano.parent === index ? [i] : []));
+    const neslota = [
+      element.text,
+      ...infanoj
+        .filter((infano) => elements[infano]?.attrs.slot === undefined)
+        .map((infano) => tekstoDe(infano)),
+    ].join("");
+    if (neslota.trim() !== "") continue;
+    for (const infano of infanoj) {
+      const ido = elements[infano];
+      const slot = ido?.attrs.slot;
+      if (ido === undefined || slot === undefined || ido.tag.startsWith("fm-")) continue;
+      const teksto = tekstoDe(infano);
+      const sxlosilo = `${ido.tag} ${slot}`;
+      if (teksto === "" || aldonoj.has(sxlosilo)) continue;
+      aldonoj.set(
+        sxlosilo,
+        `Der Text „${teksto}“ steht in <${ido.tag} slot="${slot}">; ein Kind mit slot-Attribut zählt nicht als Label: den Text ohne Hülle und ohne slot-Attribut direkt ins Element schreiben, z. B. <fm-${ero}>${teksto}</fm-${ero}>.`,
+      );
+    }
+  }
+  return [sugesto, ...aldonoj.values()].filter((parto) => parto !== "").join(" ");
+}
+
+/**
+ * The suggestion a finding hands on: check_usage's; for a slot wrapper and for a label in a slotted
+ * child with what the page shows (S038-39b).
+ */
+const sugestoDe = (m: Malobservo, fakto: Fakto, fragmento: string | undefined): string => {
+  if (m.rule === SLOT_ACCEPTS) return sugestoKunHulo(m.suggestion, m.message, fakto);
+  if (m.rule === LABEL_REQUIRED && fragmento !== undefined)
+    return sugestoKunSlotaTeksto(m.suggestion, m.message, fragmento);
+  return m.suggestion;
+};
 
 /** The findings of one checked screen: what the next round gets and what is left at the end. */
 export function trovojDe(e: {
@@ -435,6 +489,8 @@ export function trovojDe(e: {
   malhelpoj: readonly Malhelpo[];
   /** The slugs of the planned screens of the run, in plan order (F-S038-37a-1). */
   ekranoj?: readonly string[];
+  /** The fragment the agent wrote this round, as check_markup read it (S038-39b). */
+  fragmento?: string;
 }): Trovo[] {
   const trovoj: Trovo[] = [];
   // B-4 (S038-37c): a page without element content – start again from the shell.
@@ -456,7 +512,7 @@ export function trovojDe(e: {
       regulo: m.regulo?.name ?? m.rule,
       loko: m.loko ?? m.path,
       mesagxo: m.message,
-      sugesto: sugestoDe(m, e.fakto),
+      sugesto: sugestoDe(m, e.fakto, e.fragmento),
       kialo: m.regulo?.kialo ?? m.message,
     });
   }
@@ -476,7 +532,7 @@ export function trovojDe(e: {
       (kandidato) =>
         (kandidato.regulo?.name ?? kandidato.rule) === regulo && kandidato.suggestion !== "",
     );
-    return m === undefined ? undefined : sugestoDe(m, e.fakto);
+    return m === undefined ? undefined : sugestoDe(m, e.fakto, e.fragmento);
   };
   for (const manko of e.taksado.mankoj) {
     if (manko.kind === "a11y" && axeTrovoj.length > 0) continue;
@@ -1171,6 +1227,7 @@ async function kontroliRondon(k: RondoKunteksto): Promise<Rondo> {
             navigado: navigadoEkrano,
             malhelpoj,
             ekranoj: plano.ekranoj.map((planita) => planita.slug),
+            fragmento,
           }),
     };
     rondo[ekrano.slug] = stato;
