@@ -14,23 +14,23 @@ const row = (attributes: string, width: string) =>
     .map((word) => `<div style="inline-size: 6rem; flex: none">${word}</div>`)
     .join("")}</fm-vico></div>`;
 
+// The children of the light DOM (a CSS locator would pierce the shadow and find the control too).
 const topsOf = (page: Parameters<typeof serve>[0]) =>
   page
-    .locator("#r > div")
-    .evaluateAll((boxes) => boxes.map((box) => Math.round(box.getBoundingClientRect().top)));
+    .locator("#r")
+    .evaluate((row) => [...row.children].map((box) => Math.round(box.getBoundingClientRect().top)));
 
 const gapsOf = (page: Parameters<typeof serve>[0]) =>
-  page
-    .locator("#r > div")
-    .evaluateAll((boxes) =>
-      boxes
-        .slice(1)
-        .map((box, index) =>
-          Math.round(
-            box.getBoundingClientRect().left - (boxes[index]?.getBoundingClientRect().right ?? 0),
-          ),
+  page.locator("#r").evaluate((row) => {
+    const boxes = [...row.children];
+    return boxes
+      .slice(1)
+      .map((box, index) =>
+        Math.round(
+          box.getBoundingClientRect().left - (boxes[index]?.getBoundingClientRect().right ?? 0),
         ),
-    );
+      );
+  });
 
 const tokenPx = (page: Parameters<typeof serve>[0], name: string) =>
   page.evaluate(
