@@ -55,13 +55,6 @@ const WORDS = [
   "thirty-nine",
   // Spec 025 ③: forty Eroj (the tag, the styled list, the multi-select, the inline editor).
   "forty",
-  // Spec 046: forty-three Eroj (the layout Eroj vico, kolumno, stako), forty-four with the krado,
-  // forty-five with the templinio.
-  "forty-one",
-  "forty-two",
-  "forty-three",
-  "forty-four",
-  "forty-five",
 ] as const;
 
 /** A count as an English word for 0 to 35 (`no` for zero), otherwise as digits. */
