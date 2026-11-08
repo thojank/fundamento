@@ -44,6 +44,17 @@ describe("Spec 046 T5: the tabelo's new props in Figma", () => {
     for (const [key, value] of skeleton) expect(value, key).toBe(`not drawn (${JUGXO})`);
   });
 
+  it("Nachbesserung F-T5-1: tabelo:selection, the target of the selection's boxes, has no node and is released by the same Jugxo, which names it", () => {
+    expect(FIGMA_NOT_DRAWN["tabelo:selection"]).toBe(JUGXO);
+    const kialo = (modelo?.jugxoj ?? []).find((candidate) => candidate.id === JUGXO)?.kialo;
+    expect(kialo).toContain("Teil selection bei selectable");
+    const values = figmaPlanInventory(plan).tabelo?.values ?? {};
+    const selection = Object.entries(values).filter(([key]) => key.startsWith("selection."));
+    // Two properties in density × state (3 × 3).
+    expect(selection).toHaveLength(18);
+    for (const [key, value] of selection) expect(value, key).toBe(`not drawn (${JUGXO})`);
+  });
+
   it("the five new Eroj stay out of the plan (Befund Etappe F)", () => {
     const sets = plan.components.map((component) => component.set);
     for (const ero of ["vico", "kolumno", "stako", "krado", "templinio"]) {

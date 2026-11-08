@@ -7,9 +7,10 @@
 
 import { expect, type Page, test } from "@playwright/test";
 import { TAB } from "./alirebleco.js";
+import { ASPEKTOJ_046, applyAssignment, declarationsOf, tokenPxIn } from "./aspektoj-046.js";
 import { buildProjections, serve } from "./serve.js";
 
-const { out } = await buildProjections();
+const { out, input } = await buildProjections();
 
 const TABLE = `<table slot="content"><thead><tr><th scope="col" data-sort="name">Name</th><th scope="col">Status</th><th scope="col" numeric data-sort="count">Verstöße</th></tr></thead><tbody><tr><th scope="row">Barrierefreiheit</th><td>gültig</td><td>0</td></tr><tr><th scope="row">Datenschutz</th><td>Entwurf</td><td>3</td></tr></tbody></table>`;
 const table = (attributes: string, body = TABLE, slots = "") =>
@@ -676,4 +677,54 @@ test.describe("fm-tabelo Spec 046 T3", () => {
       expect(numeric).toEqual({ align: "end", numerals: "tabular-nums", text: "0" });
     }
   });
+});
+
+// Spec 046 T3 Nachbesserung (F-T5-1, WCAG 2.5.8): every box of the selection is a target of at least
+// size.target.min – the value the token resolves to in komuna light and dark and in ekzemplo – in
+// every density: its box is that wide and high, and the boxes of two rows lie at least that far
+// apart, centre to centre (the spacing axe's target-size measures).
+test.describe("Spec 046 T3 Nachbesserung: the boxes of the selection are targets of size.target.min", () => {
+  test.use({ viewport: { width: 1024, height: 600 } });
+  const ROWS = `<table slot="content"><thead><tr><th scope="col">Name</th><th scope="col">Status</th></tr></thead><tbody><tr data-key="a"><th scope="row">Barrierefreiheit</th><td>gültig</td></tr><tr data-key="b" data-selected><th scope="row">Datenschutz</th><td>Entwurf</td></tr><tr data-key="c"><th scope="row">Sicherheit</th><td>gültig</td></tr></tbody></table>`;
+  for (const [aspekto, scheme] of ASPEKTOJ_046) {
+    test(`${aspekto} ${scheme}: each box at least size.target.min wide and high, the boxes that far apart, in every density`, async ({
+      page,
+    }) => {
+      const { assignment, declarations } = declarationsOf(input, aspekto, scheme);
+      for (const density of ["compact", "default", "comfortable"]) {
+        await serve(page, out, table(`selectable density="${density}"`, ROWS));
+        await applyAssignment(page, assignment);
+        const target = await tokenPxIn(page, declarations, "size.target.min");
+        expect(target).toBeGreaterThan(0);
+        await expect(page.locator("#t fm-markobutono")).toHaveCount(4);
+        const boxes = await page.locator("#t fm-markobutono").evaluateAll(async (elements) => {
+          await document.fonts.ready;
+          await new Promise((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(resolve)),
+          );
+          return elements.map((element) => {
+            const box = element.getBoundingClientRect();
+            // The checkbox axe measures: the control in the box's shadow.
+            const control = element.shadowRoot
+              ?.querySelector('[part="control"]')
+              ?.getBoundingClientRect();
+            return {
+              width: box.width,
+              height: box.height,
+              centre: control === undefined ? Number.NaN : control.y + control.height / 2,
+            };
+          });
+        });
+        for (const [index, box] of boxes.entries()) {
+          const where = `${density} box ${index}`;
+          expect(box.width, `${where} width`).toBeGreaterThanOrEqual(target);
+          expect(box.height, `${where} height`).toBeGreaterThanOrEqual(target);
+          const next = boxes[index + 1];
+          if (next !== undefined) {
+            expect(next.centre - box.centre, `${where} to the next`).toBeGreaterThanOrEqual(target);
+          }
+        }
+      }
+    });
+  }
 });

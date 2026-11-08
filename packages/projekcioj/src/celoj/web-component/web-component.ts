@@ -2091,6 +2091,10 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
         // Spec 046 T3 (plan D-20): the bar in every cell of a skeleton row while loading.
         case "skeleton":
           return `${t} > tbody > tr[data-fm-skeleton] > td > span`;
+        // Spec 046 T3 Nachbesserung (F-T5-1, WCAG 2.5.8): the box of the selection is a target of
+        // at least size.target.min, so the boxes of two rows lie that far apart.
+        case "selection":
+          return `${t} > :is(thead, tbody, tfoot) > tr > [data-fm-select] > fm-markobutono`;
         default:
           return undefined;
       }
@@ -2247,6 +2251,8 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
             // loading the skeleton rows stand in place of the rows (the rows stay, unseen); the
             // head sticks to the top of the region while it scrolls. Host attributes, no axis.
             `${tag} > table > :is(thead, tbody, tfoot) > tr > [data-fm-select] { white-space: nowrap; vertical-align: middle; }`,
+            // Spec 046 T3 Nachbesserung (F-T5-1): the box keeps its mark in the middle of its target.
+            `${tag} > table > :is(thead, tbody, tfoot) > tr > [data-fm-select] > fm-markobutono { display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; }`,
             `${tag}[loading] > table > tbody > tr:not([data-fm-skeleton]) { display: none; }`,
             `${tag} > table > tbody > tr[data-fm-skeleton] > td > span { display: block; }`,
             `${tag}[sticky-header] > table > thead th { position: sticky; inset-block-start: 0; }`,

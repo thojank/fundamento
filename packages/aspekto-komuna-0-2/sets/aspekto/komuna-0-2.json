@@ -10400,6 +10400,16 @@
           "$value": "{size.icon.small}"
         }
       },
+      "selection": {
+        "width": {
+          "$type": "dimension",
+          "$value": "{size.target.min}"
+        },
+        "height": {
+          "$type": "dimension",
+          "$value": "{size.target.min}"
+        }
+      },
       "foot": {
         "fill": {
           "$type": "color",

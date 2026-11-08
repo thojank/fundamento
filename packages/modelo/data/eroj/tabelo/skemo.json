@@ -194,6 +194,14 @@
           "fixed": "size.icon.small"
         }
       },
+      "selection": {
+        "width": {
+          "fixed": "size.target.min"
+        },
+        "height": {
+          "fixed": "size.target.min"
+        }
+      },
       "foot": {
         "fill": {
           "fixed": "color.background.sunken"

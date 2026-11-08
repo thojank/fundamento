@@ -83,6 +83,8 @@ describe("tabelo in the repo Modelo (section ④, G1, G2, E10)", () => {
         "foot",
         // Spec 046 T3 (plan D-20): the bars of the skeleton rows while loading.
         "skeleton",
+        // Spec 046 T3 Nachbesserung (F-T5-1): the target of the selection's boxes.
+        "selection",
       ].sort(),
     );
     // The caption is text of the Ero too (axe measured black on the dark page without it).
@@ -310,6 +312,13 @@ describe("tabelo selection, loading and sticky header (Spec 046 T3)", () => {
       fill: { fixed: "color.background.sunken" },
       radius: { fixed: "radius.role.control" },
       height: { fixed: "size.icon.small" },
+    });
+  });
+
+  it("Nachbesserung F-T5-1: the box of the selection is a target of at least size.target.min, wide and high (WCAG 2.5.8)", () => {
+    expect(skemo?.parts.selection).toEqual({
+      width: { fixed: "size.target.min" },
+      height: { fixed: "size.target.min" },
     });
   });
 

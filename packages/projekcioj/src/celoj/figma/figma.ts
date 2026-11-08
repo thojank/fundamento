@@ -259,6 +259,9 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   // Spec 046 T5 (F-T3-3): the skeleton rows of the tabelo stand with loading only, a property; the
   // set shows the table with its rows.
   "tabelo:skeleton": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  // Spec 046 T3 Nachbesserung (F-T5-1): the target of the selection's boxes stands with selectable
+  // only, a property; the set shows the table without the selection.
+  "tabelo:selection": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
   "listelektilo:icon": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
   "listelektilo:description": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
   "plurelektilo:filter": "jug_01M5H5HFYHBZB8R9TVTJE9874J",

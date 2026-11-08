@@ -61,9 +61,11 @@ const EROJ_046 = /^ero\.(vico|kolumno|stako|krado|templinio)\./;
 
 /**
  * Spec 046 T3 (plan D-20, D-21): the tabelo's skeleton bar while loading (fill, radius, height)
- * and the layer of its sticky head are new since main's record.
+ * and the layer of its sticky head are new since main's record; the Nachbesserung of T3 (F-T5-1)
+ * adds the target of the selection's box (width, height).
  */
-const TABELO_046 = /^ero\.tabelo\.(skeleton\.(fill|radius|height)|head\.layer)$/;
+const TABELO_046 =
+  /^ero\.tabelo\.(skeleton\.(fill|radius|height)|head\.layer|selection\.(width|height))$/;
 
 export const addedSinceMain = (name: string): boolean =>
   SPINNER.test(name) ||

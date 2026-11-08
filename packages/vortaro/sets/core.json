@@ -23756,6 +23756,28 @@
           }
         }
       },
+      "selection": {
+        "width": {
+          "$type": "dimension",
+          "$value": "{size.target.min}",
+          "$description": "tabelo: selection.width (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6Y1VCJ1670N014E5887Q50K"
+            }
+          }
+        },
+        "height": {
+          "$type": "dimension",
+          "$value": "{size.target.min}",
+          "$description": "tabelo: selection.height (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6Y1VCJ261DH476Y73R9C9CR"
+            }
+          }
+        }
+      },
       "foot": {
         "fill": {
           "$type": "color",
