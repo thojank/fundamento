@@ -6,9 +6,10 @@
 // columns, at most as many as the grid has. Chromium (Spec 046 T2); the Vitrino follows in T5.
 
 import { expect, type Page, test } from "@playwright/test";
+import { ASPEKTOJ_046, applyAssignment, declarationsOf, tokenPxIn } from "./aspektoj-046.js";
 import { buildProjections, serve } from "./serve.js";
 
-const { out } = await buildProjections();
+const { out, input } = await buildProjections();
 
 /** A grid inside a container of `width`, its children given as [word, data-span?]. */
 const grid = (attributes: string, width: string, children: [string, number?][]) =>
@@ -180,4 +181,57 @@ test.describe("fm-krado behaviour", () => {
       font: "23px",
     });
   });
+});
+
+// Spec 046 T5 (A-10: geometry and style, no picture): in komuna light and dark and in ekzemplo, three
+// columns lie with the gap of the step between them and between their rows – the value the spacing
+// token resolves to in that Aspekto; a child of data-span="2" covers two columns and the gap; below
+// the container width of the Uzo, resolved in that Aspekto, the grid stacks into one column.
+test.describe("Spec 046 T5: the grid of fm-krado per Aspekto", () => {
+  for (const [aspekto, scheme] of ASPEKTOJ_046) {
+    test(`${aspekto} ${scheme}: columns, rows and span with the gap of its step; stacked below columns-from`, async ({
+      page,
+    }) => {
+      const { assignment, declarations } = declarationsOf(input, aspekto, scheme);
+      const children: [string, number?][] = [["Eins"], ["Zwei"], ["Drei"], ["Vier", 2], ["Fünf"]];
+      await serve(page, out, grid('columns="3" gap="large"', "100%", children));
+      await applyAssignment(page, assignment);
+      const small = await tokenPxIn(page, declarations, "size.container.small");
+      const gap = await tokenPxIn(page, declarations, "spacing.large");
+      expect(gap).toBeGreaterThan(0);
+      await page.locator("#frame").evaluate((frame, px) => {
+        (frame as HTMLElement).style.inlineSize = `${px * 1.5}px`;
+      }, small);
+      await expect
+        .poll(async () => new Set((await boxesOf(page)).children.map((c) => c.top)).size)
+        .toBe(2);
+      const { control, children: boxes } = await boxesOf(page);
+      const [one, two, three, four, five] = boxes;
+      const column = (control.width - 2 * gap) / 3;
+      const findings: string[] = [];
+      const near = (actual: number, expected: number, what: string) => {
+        if (Math.abs(actual - expected) > 1) findings.push(`${what}: ${actual} ≠ ${expected}`);
+      };
+      near((two?.left ?? 0) - ((one?.left ?? 0) + (one?.width ?? 0)), gap, "column gap");
+      near((three?.left ?? 0) - ((two?.left ?? 0) + (two?.width ?? 0)), gap, "column gap");
+      near(one?.width ?? 0, column, "column");
+      near(four?.width ?? 0, 2 * column + gap, "data-span 2");
+      near((five?.left ?? 0) - ((four?.left ?? 0) + (four?.width ?? 0)), gap, "gap after the span");
+      const rowGap = await page.locator("#g").evaluate((element) => {
+        const [first, , , fourth] = [...element.children].map((child) =>
+          child.getBoundingClientRect(),
+        );
+        return Math.round((fourth?.top ?? 0) - (first?.bottom ?? 0));
+      });
+      near(rowGap, gap, "row gap");
+      // Below columns-from of this Aspekto: one column.
+      await page.locator("#frame").evaluate((frame, px) => {
+        (frame as HTMLElement).style.inlineSize = `${px - 1}px`;
+      }, small);
+      await expect
+        .poll(async () => new Set((await boxesOf(page)).children.map((c) => c.left)).size)
+        .toBe(1);
+      expect(findings).toEqual([]);
+    });
+  }
 });

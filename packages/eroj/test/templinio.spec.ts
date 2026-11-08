@@ -7,6 +7,7 @@
 // nothing and throws nothing. Chromium (Spec 046 T4); the Vitrino follows in T5.
 
 import { expect, type Page, test } from "@playwright/test";
+import { ASPEKTOJ_046, applyAssignment, declarationsOf, tokenPxIn } from "./aspektoj-046.js";
 import { buildProjections, serve } from "./serve.js";
 
 const { out, input } = await buildProjections();
@@ -152,4 +153,63 @@ test.describe("fm-templinio behaviour", () => {
     expect(await page.locator("[data-fm-marker]").count()).toBe(0);
     expect(errors).toEqual([]);
   });
+});
+
+// Spec 046 T5 (A-10: geometry and style, no picture): in komuna light and dark and in ekzemplo, the
+// time, the title and what happened stand one below the other with the gap of the entry (item.gap),
+// the entries with the gap of the list (list.gap) – the values the tokens of the Skemo resolve to in
+// that Aspekto; every sign sits on the line, its middle on the line's middle.
+const fixedOf = (part: string, property: string): string => {
+  const bound = (templinio?.skemo.parts[part] as Record<string, { fixed?: string }> | undefined)?.[
+    property
+  ]?.fixed;
+  if (bound === undefined) throw new Error(`${part}.${property} not fixed`);
+  return bound;
+};
+
+test.describe("Spec 046 T5: the spacing of fm-templinio per Aspekto", () => {
+  for (const [aspekto, scheme] of ASPEKTOJ_046) {
+    test(`${aspekto} ${scheme}: item.gap within an entry, list.gap between entries, the sign on the line`, async ({
+      page,
+    }) => {
+      const { assignment, declarations } = declarationsOf(input, aspekto, scheme);
+      await served(page, timeline());
+      await applyAssignment(page, assignment);
+      await expect(page.locator("#t li > [data-fm-marker]")).toHaveCount(3);
+      const item = await tokenPxIn(page, declarations, fixedOf("item", "gap"));
+      const list = await tokenPxIn(page, declarations, fixedOf("list", "gap"));
+      expect(item).toBeGreaterThan(0);
+      expect(list).toBeGreaterThan(item);
+      const measured = await page.locator("#t").evaluate((element) =>
+        [...element.querySelectorAll("li")].map((entry) => {
+          const box = (selector: string) =>
+            (entry.querySelector(`:scope > ${selector}`) as HTMLElement).getBoundingClientRect();
+          const marker = box("[data-fm-marker]");
+          const style = getComputedStyle(entry);
+          const line = Number.parseFloat(style.borderInlineStartWidth);
+          const left = entry.getBoundingClientRect().left;
+          return {
+            time: box("time"),
+            title: box("strong"),
+            body: box("p"),
+            markerMiddle: marker.left + marker.width / 2,
+            lineMiddle: line > 0 ? left + line / 2 : undefined,
+          };
+        }),
+      );
+      const findings: string[] = [];
+      const near = (actual: number, expected: number, what: string) => {
+        if (Math.abs(actual - expected) > 1) findings.push(`${what}: ${actual} ≠ ${expected}`);
+      };
+      for (const [index, entry] of measured.entries()) {
+        near(entry.title.top - entry.time.bottom, item, `${index} time → title`);
+        near(entry.body.top - entry.title.bottom, item, `${index} title → body`);
+        const next = measured[index + 1];
+        if (next !== undefined) near(next.time.top - entry.body.bottom, list, `${index} → next`);
+        if (entry.lineMiddle !== undefined)
+          near(entry.markerMiddle, entry.lineMiddle, `${index} sign`);
+      }
+      expect(findings).toEqual([]);
+    });
+  }
 });

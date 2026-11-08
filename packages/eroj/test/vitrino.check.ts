@@ -18,7 +18,7 @@ import {
   REFERENZ_SCHNELL_MS,
   referenzLast,
 } from "./ableitung.js";
-import { axeViolations, contrast } from "./alirebleco.js";
+import { axeViolations, contrast, TAB } from "./alirebleco.js";
 import {
   M5_GRENZE_MS,
   type M5Messung,
@@ -2335,5 +2335,204 @@ test.describe("the Bezugswert of the derivation from the calibration in CI (Spec
 
   test("REFERENZ_SCHNELL_MS is the median reference of the fast runners in the table", () => {
     expect(REFERENZ_SCHNELL_MS).toBe(bezugswertOf(versuche));
+  });
+});
+
+// Spec 046 T5 (Akzeptanzkriterien „Eroj und Vitrino“; technische Spec „Web-Tests“): the five new
+// Eroj and the tabelo's new states in komuna, ekzemplo and provo (fundamento.tri.config.json),
+// light and dark. One page load, the six combinations by fragment; every finding is collected and
+// the test ends in one comparison. It names no part of vitrino-partoj.ts: it lands in cetero-3.
+const TRI_CONFIG = fileURLToPath(
+  new URL(
+    "../../modelo/test/fixtures/valid/aspekto-provo/fundamento.tri.config.json",
+    import.meta.url,
+  ),
+);
+const EROJ_046 = ["vico", "kolumno", "stako", "krado", "templinio"] as const;
+const SECTIONS_046 = [...EROJ_046, "tabelo"].map((ero) => `#fm-vitrino-${ero}`).join(", ");
+const DOKU_046 = [...EROJ_046, "tabelo"].map((ero) => `#fm-vitrino-doku-${ero}`).join(", ");
+
+test.describe("Spec 046 T5: the new Eroj and the states of the tabelo", () => {
+  let tri = "";
+
+  test.beforeAll(async () => {
+    tri = mkdtempSync(join(tmpdir(), "fm-vitrino-046-"));
+    const built = await buildProjekcioj({ outDir: tri, source: projectModeloSource(TRI_CONFIG) });
+    expect(built.ok).toBe(true);
+  });
+
+  test("vico, kolumno, stako, krado and templinio with their documentation, the tabelo sorted, selected, loading, empty and with a sticky head, in komuna, ekzemplo and provo, light and dark; by keyboard; axe-clean", async ({
+    page,
+    browserName,
+  }) => {
+    const problems = await open(page, "", tri);
+    const findings: string[] = [];
+    const note = (holds: boolean, text: string) => {
+      if (!holds) findings.push(text);
+    };
+    for (const ero of EROJ_046) {
+      note((await page.locator(`#fm-vitrino-${ero}`).count()) === 1, `${ero}: section`);
+      note(
+        (await page.locator(`#fm-vitrino-doku-${ero}`).count()) === 1,
+        `${ero}: #fm-vitrino-doku-${ero}`,
+      );
+    }
+    for (const aspekto of ["komuna", "ekzemplo", "provo"]) {
+      for (const scheme of ["light", "dark"]) {
+        const where = `${aspekto}/${scheme}`;
+        await page.evaluate((hash) => {
+          location.hash = hash;
+        }, `#aspekto=${aspekto}&color-scheme=${scheme}`);
+        await expect
+          .poll(() =>
+            page.evaluate(() => [
+              document.documentElement.getAttribute("data-fm-aspekto"),
+              document.documentElement.getAttribute("data-fm-color-scheme"),
+            ]),
+          )
+          .toEqual([aspekto, scheme]);
+        // Every new Ero upgraded and drawn; a layout Ero's children stand apart by the gap of its
+        // step (the row of gap=medium: its custom property, resolved in this Aspekto).
+        for (const ero of EROJ_046) {
+          const shown = await page.locator(`#fm-vitrino-${ero} fm-${ero}`).evaluateAll((elements) =>
+            elements.map((element) => {
+              const box = element.getBoundingClientRect();
+              return element.matches(":defined") && box.width * box.height > 0;
+            }),
+          );
+          note(shown.length > 0 && shown.every(Boolean), `${where} ${ero}: upgraded and drawn`);
+        }
+        const gaps = await page
+          .locator('#fm-vitrino-vico fm-vico[gap="medium"]')
+          .evaluate((row) => {
+            const probe = document.createElement("div");
+            probe.style.inlineSize = "var(--fm-spacing-medium)";
+            row.append(probe);
+            const medium = Math.round(probe.getBoundingClientRect().width);
+            probe.remove();
+            const boxes = [...row.children].map((child) => child.getBoundingClientRect());
+            return {
+              medium,
+              gaps: boxes
+                .slice(1)
+                .map((box, index) => Math.round(box.left - (boxes[index]?.right ?? 0))),
+            };
+          });
+        note(
+          gaps.medium > 0 && gaps.gaps.every((gap) => gap === gaps.medium),
+          `${where} vico: gaps ${gaps.gaps.join(",")} = spacing.medium ${gaps.medium}`,
+        );
+        const timeline = await page
+          .locator("#fm-vitrino-templinio fm-templinio")
+          .evaluate((element) =>
+            [...element.querySelectorAll("li")].map((entry) => {
+              const marker = entry.querySelector(":scope > [data-fm-marker]");
+              const box = marker?.getBoundingClientRect();
+              return `${entry.getAttribute("data-status")}:${(box?.width ?? 0) > 0 ? (marker?.textContent ?? "").trim() : "-"}`;
+            }),
+          );
+        note(
+          timeline.length === 3 &&
+            timeline.every((entry) => !entry.endsWith(":-") && !entry.endsWith(":")),
+          `${where} templinio: a sign with its word per entry (${timeline.join(" ")})`,
+        );
+        const tabelo = await page.locator("#fm-vitrino-tabelo").evaluate(async (section) => {
+          const visible = (element: Element | null | undefined) => {
+            const box = element?.getBoundingClientRect();
+            return box !== undefined && box.width > 0 && box.height > 0;
+          };
+          const selectable = [...section.querySelectorAll("fm-tabelo[selectable]")];
+          const loading = section.querySelector("fm-tabelo[loading]");
+          const sticky = section.querySelector("fm-tabelo[sticky-header]");
+          const region = sticky?.shadowRoot?.querySelector('[part="region"]') as HTMLElement | null;
+          const head = sticky?.querySelector("thead th") as HTMLElement | null;
+          let headAtTop = false;
+          if (region !== null && region !== undefined && head !== null) {
+            region.scrollTop = region.scrollHeight;
+            await new Promise((resolve) =>
+              requestAnimationFrame(() => requestAnimationFrame(resolve)),
+            );
+            headAtTop =
+              region.scrollTop > 0 &&
+              Math.abs(head.getBoundingClientRect().top - region.getBoundingClientRect().top) <= 1;
+            region.scrollTop = 0;
+          }
+          return {
+            sort: section.querySelectorAll("fm-tabelo th[data-sort] > button").length,
+            boxes: selectable.map(
+              (table) => [...table.querySelectorAll("fm-markobutono")].filter(visible).length,
+            ),
+            selected: selectable.map((table) =>
+              [...table.querySelectorAll("tbody tr")]
+                .filter((row) => row.querySelector("fm-markobutono[checked]") !== null)
+                .map((row) => row.getAttribute("data-key"))
+                .join(),
+            ),
+            busy: loading?.querySelector(":scope > table")?.getAttribute("aria-busy") ?? null,
+            skeleton: [...(loading?.querySelectorAll("tr[data-fm-skeleton]") ?? [])].filter(visible)
+              .length,
+            rowsAside: [
+              ...(loading?.querySelectorAll("tbody tr:not([data-fm-skeleton])") ?? []),
+            ].every((row) => !visible(row)),
+            empty: visible(
+              [...section.querySelectorAll("fm-tabelo")]
+                .find((table) => table.querySelector('[slot="empty"]') !== null)
+                ?.querySelector("fm-plenstato, [data-fm-empty]"),
+            ),
+            headAtTop,
+          };
+        });
+        note(tabelo.sort === 6, `${where} tabelo: sort buttons ${tabelo.sort}`);
+        note(
+          tabelo.boxes.length === 3 && tabelo.boxes.every((count) => count === 4),
+          `${where} tabelo: boxes ${tabelo.boxes.join(",")}`,
+        );
+        note(
+          tabelo.selected.every((keys) => keys === "datenschutz"),
+          `${where} tabelo: selected ${tabelo.selected.join(" | ")}`,
+        );
+        note(tabelo.busy === "true", `${where} tabelo: aria-busy ${tabelo.busy}`);
+        note(
+          tabelo.skeleton === 3 && tabelo.rowsAside,
+          `${where} tabelo: skeleton ${tabelo.skeleton}`,
+        );
+        note(tabelo.empty, `${where} tabelo: the empty state`);
+        note(tabelo.headAtTop, `${where} tabelo: the sticky head at the top of its region`);
+        // axe on the sections of the Eroj in every combination; their documentation (the same
+        // words in every combination, its contrast matrix filled per combination) once below.
+        for (const violation of await axeViolations(page, SECTIONS_046)) {
+          findings.push(`${where} axe: ${violation}`);
+        }
+      }
+    }
+    for (const violation of await axeViolations(page, DOKU_046)) {
+      findings.push(`provo/dark axe (Doku): ${violation}`);
+    }
+    // By keyboard: the box of a row is reached with Tab and named by the row; Space selects it,
+    // the Vitrino answers select as an application does (data-selected), the box follows.
+    const table = page.locator("#fm-vitrino-tabelo fm-tabelo[selectable]").first();
+    const first = table.getByRole("checkbox", { name: "Zeile auswählen: Barrierefreiheit" });
+    if ((await first.count()) === 1) {
+      await first.focus();
+      await page.keyboard.press(TAB(browserName));
+      note(
+        await table
+          .getByRole("checkbox", { name: "Zeile auswählen: Datenschutz" })
+          .evaluate((box) => box.matches(":focus")),
+        "keyboard: Tab reaches the next row's box",
+      );
+      await page.keyboard.press(TAB(browserName));
+      await page.keyboard.press("Space");
+      await expect
+        .poll(() => table.locator('tr[data-key="sicherheit"]').getAttribute("data-selected"))
+        .toBe("");
+      note(
+        await table.getByRole("checkbox", { name: "Zeile auswählen: Sicherheit" }).isChecked(),
+        "keyboard: Space selects the row, its box follows",
+      );
+    } else {
+      findings.push("keyboard: no box named „Zeile auswählen: Barrierefreiheit“");
+    }
+    expect([...findings, ...problems]).toEqual([]);
   });
 });
