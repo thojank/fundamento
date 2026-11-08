@@ -153,7 +153,9 @@ describe("the vico Skemo in a fixture Modelo (Spec 046 T1)", () => {
   it("negative: a step without its binding is skemo-binding-missing at the gap of the box", () => {
     expect(
       issuesOf((file) => {
-        file.skemo.bindings = file.skemo.bindings.filter((binding) => binding.when?.gap !== "small");
+        file.skemo.bindings = file.skemo.bindings.filter(
+          (binding) => binding.when?.gap !== "small",
+        );
       }),
     ).toEqual([{ rule: "skemo-binding-missing", path: `${FILE}#/skemo/parts/box/gap` }]);
   });

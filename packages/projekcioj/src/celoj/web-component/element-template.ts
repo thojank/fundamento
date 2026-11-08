@@ -66,7 +66,10 @@ export type HostControl =
   | "chip"
   | "listselect"
   | "multiselect"
-  | "editor";
+  | "editor"
+  // Spec 046 T1: a layout Ero (vico, kolumno, stako) — a flex container around its children that
+  // draws nothing itself, no role of its own.
+  | "layout";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -167,8 +170,11 @@ export function hostOf(
   chip = false,
   listselect = false,
   editor = false,
+  layout = false,
 ): HostControl {
   if (role === "link") return "a";
+  // Spec 046 T1: a generic whose goal is a layout purpose places its children and draws nothing.
+  if (role === "generic" && layout) return "layout";
   // Spec 025 ③ (plan ③ D-18): a generic with a remove part is the chip, with an edit part the
   // inline editor; a combobox with an item part is the styled select-only list; a listbox is the
   // multi-select — a button over the platform's popover, as the list of the kompletigilo.
@@ -704,6 +710,14 @@ function textMarkup(slots: NonNullable<ElementNames["slots"]>): string {
 }
 
 /**
+ * The shadow markup of a layout Ero (Spec 046 T1): one div as the control that places the children
+ * of the default slot — no role, no text of its own; the stylesheet makes it a flex container.
+ */
+function layoutMarkup(): string {
+  return '<div part="control"><slot></slot><span id="fm-texts" hidden></span></div>';
+}
+
+/**
  * The shadow markup of a live region (Spec 011 ③, D-09, D-10, G4): a div with role status as
  * the control; first the words assistive technology hears with the content (the kind of a notice,
  * "lädt"), clipped from sight; the indicator where the Skemo has one; then the text slots in the
@@ -1084,6 +1098,7 @@ function hostMarkup(
   parts: readonly string[] = [],
 ): string {
   if (host === "text") return textMarkup(slots);
+  if (host === "layout") return layoutMarkup();
   if (host === "slider") return sliderMarkup(slots);
   if (host === "status") return statusMarkup(slots, indicator, dismiss, icon);
   if (host === "icon") return iconMarkup();
@@ -1185,43 +1200,45 @@ export function elementSource({
                     ? "select"
                     : host === "text"
                       ? "span"
-                      : host === "status"
-                        ? "div"
-                        : host === "meter"
+                      : host === "layout"
+                        ? "[part='control']"
+                        : host === "status"
                           ? "div"
-                          : host === "light"
-                            ? "[part='region'], [part='list']"
-                            : host === "tabs"
-                              ? "[role=tablist]"
-                              : host === "icon"
-                                ? "span"
-                                : host === "separator"
-                                  ? "div"
-                                  : host === "heading"
-                                    ? "[part='text']"
-                                    : host === "paragraph"
-                                      ? "p"
-                                      : host === "tooltip"
-                                        ? "[part='control']"
-                                        : host === "disclosure"
-                                          ? "details"
-                                          : host === "pagination"
-                                            ? "[part='list']"
-                                            : host === "suggest" || host === "upload"
-                                              ? "input"
-                                              : host === "card"
-                                                ? "article"
-                                                : host === "avatar" || host === "markdown"
-                                                  ? "[part='control']"
-                                                  : host === "codeblock"
-                                                    ? "figure"
-                                                    : host === "popover"
-                                                      ? "[role=dialog]"
-                                                      : host === "menu"
-                                                        ? "[role=menu]"
-                                                        : host === "slider"
-                                                          ? "[part='track']"
-                                                          : "button";
+                          : host === "meter"
+                            ? "div"
+                            : host === "light"
+                              ? "[part='region'], [part='list']"
+                              : host === "tabs"
+                                ? "[role=tablist]"
+                                : host === "icon"
+                                  ? "span"
+                                  : host === "separator"
+                                    ? "div"
+                                    : host === "heading"
+                                      ? "[part='text']"
+                                      : host === "paragraph"
+                                        ? "p"
+                                        : host === "tooltip"
+                                          ? "[part='control']"
+                                          : host === "disclosure"
+                                            ? "details"
+                                            : host === "pagination"
+                                              ? "[part='list']"
+                                              : host === "suggest" || host === "upload"
+                                                ? "input"
+                                                : host === "card"
+                                                  ? "article"
+                                                  : host === "avatar" || host === "markdown"
+                                                    ? "[part='control']"
+                                                    : host === "codeblock"
+                                                      ? "figure"
+                                                      : host === "popover"
+                                                        ? "[role=dialog]"
+                                                        : host === "menu"
+                                                          ? "[role=menu]"
+                                                          : host === "slider"
+                                                            ? "[part='track']"
+                                                            : "button";
   const isToggle = host === "toggle";
   const isGroup = host === "group";
   // Spec 036 Teil 5 ②b-3 (A-elekto-4): a group whose options carry a description (the part).
@@ -1267,6 +1284,7 @@ export function elementSource({
   const isStatic =
     isStatus ||
     host === "text" ||
+    host === "layout" ||
     isMeter ||
     isLight ||
     isTabs ||

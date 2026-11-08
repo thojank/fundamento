@@ -243,9 +243,32 @@ const isTooltip = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "toolti
 /** A menu (Spec 014 ④, D-05): a layer of the platform with the role menu and rows of entries. */
 const isMenu = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "menu";
 
+/**
+ * Spec 046 T1: the direction a layout Ero lays its children in, by the layout purpose its Skemo
+ * goal answers (list_arangxoj): a row side by side, a column and a stack one below the other.
+ */
+const LAYOUT_DIRECTIONS: Readonly<Record<string, "row" | "column">> = {
+  row: "row",
+  column: "column",
+  stack: "column",
+};
+
+/** Spec 046 T1: the direction of a layout Ero — a generic whose goal is a layout purpose. */
+export function layoutDirectionOf(skemo: Skemo): "row" | "column" | undefined {
+  if (skemo.a11y.role !== "generic") return undefined;
+  for (const goal of skemo.goals ?? []) {
+    const direction = LAYOUT_DIRECTIONS[goal.goal];
+    if (direction !== undefined) return direction;
+  }
+  return undefined;
+}
+
+/** Spec 046 T1: a layout Ero (vico, kolumno, stako) places its children and draws nothing. */
+export const isLayout = (skemo: Skemo): boolean => layoutDirectionOf(skemo) !== undefined;
+
 /** Static text (Spec 011 ③, D-08): the badge, a span without a role (Spec 025 ③: not the chip, not the editor). */
 const isText = (skemo: Skemo): boolean =>
-  hostOf(skemo.a11y.role) === "text" && !isChip(skemo) && !isEditor(skemo);
+  hostOf(skemo.a11y.role) === "text" && !isChip(skemo) && !isEditor(skemo) && !isLayout(skemo);
 
 /** A live region (Spec 011 ③, D-09, D-10): the notice, the loading and empty state. */
 const isStatus = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "status";
@@ -1331,6 +1354,35 @@ const dialogStructure: string = [
  */
 const HIDDEN_TEXT =
   ".fm-hidden { position: absolute; clip-path: inset(50%); overflow: hidden; white-space: nowrap; }";
+
+/**
+ * Layout of a layout Ero (Spec 046 T1), keywords only: a block whose control is a flex container
+ * in the Ero's direction; the children of the default slot are its items. The values of align and
+ * justify are the CSS keywords of the same name (Celo knowledge): align places the children across
+ * the direction, justify along it, both on the control as the element writes them (data-*); wrap
+ * lets them break into a new line. The gap is the Skemo's binding (box.gap by gap). No colour, no
+ * font, no border: the Ero draws nothing.
+ */
+const layoutStructure = (skemo: Skemo): string => {
+  const direction = layoutDirectionOf(skemo) ?? "column";
+  const valuesOf = (name: string) =>
+    (skemo.props.find((prop) => prop.name === name && prop.kind === "enum")?.values ?? []).map(
+      String,
+    );
+  return [
+    ":host { display: block; }",
+    `:where([part="control"]) { display: flex; flex-direction: ${direction}; box-sizing: border-box; margin: 0; min-inline-size: 0; }`,
+    ...valuesOf("align").map(
+      (value) => `:where([part="control"][data-align="${value}"]) { align-items: ${value}; }`,
+    ),
+    ...valuesOf("justify").map(
+      (value) => `:where([part="control"][data-justify="${value}"]) { justify-content: ${value}; }`,
+    ),
+    ...(skemo.props.some((prop) => prop.name === "wrap" && prop.kind === "boolean")
+      ? [':host([wrap]) :where([part="control"]) { flex-wrap: wrap; }']
+      : []),
+  ].join("\n");
+};
 
 /**
  * Layout of static text (Spec 011 ③, D-08), keywords only: the badge is an inline block that
@@ -2529,64 +2581,67 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
                       ? headingStructure
                       : isParagraph(skemo)
                         ? paragraphStructure
-                        : isText(skemo)
-                          ? textStructure(
-                              bordered,
-                              skemo.slots.some((slot) => slot.name === "icon-start"),
-                            )
-                          : isStatus(skemo)
-                            ? statusStructure(skemo)
-                            : isMeter(skemo)
-                              ? meterStructure
-                              : isPagination(skemo)
-                                ? paginationStructure
-                                : isUpload(skemo)
-                                  ? uploadStructure(disables)
-                                  : isSlider(skemo)
-                                    ? sliderStructure(disables)
-                                    : isCodeblock(skemo)
-                                      ? codeblockStructure()
-                                      : isMarkdown(skemo)
-                                        ? markdownStructure
-                                        : isCard(skemo)
-                                          ? cardStructure
-                                          : isAvatar(skemo)
-                                            ? avatarStructure
-                                            : isLight(skemo)
-                                              ? lightStructure(skemo, owner)
-                                              : isTabs(skemo)
-                                                ? tabsStructure
-                                                : isDisclosure(skemo)
-                                                  ? disclosureStructure
-                                                  : isField(skemo)
-                                                    ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo), skemo.parts.decrement !== undefined || isDatepicker(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}${isDatepicker(skemo) ? `\n${datepickerStructure}` : ""}`
-                                                    : isGroup(skemo)
-                                                      ? groupStructure(
-                                                          disables,
-                                                          skemo.parts["required-mark"] !==
-                                                            undefined,
-                                                        )
-                                                      : isToggle(skemo)
-                                                        ? toggleStructure(
+                        : isLayout(skemo)
+                          ? layoutStructure(skemo)
+                          : isText(skemo)
+                            ? textStructure(
+                                bordered,
+                                skemo.slots.some((slot) => slot.name === "icon-start"),
+                              )
+                            : isStatus(skemo)
+                              ? statusStructure(skemo)
+                              : isMeter(skemo)
+                                ? meterStructure
+                                : isPagination(skemo)
+                                  ? paginationStructure
+                                  : isUpload(skemo)
+                                    ? uploadStructure(disables)
+                                    : isSlider(skemo)
+                                      ? sliderStructure(disables)
+                                      : isCodeblock(skemo)
+                                        ? codeblockStructure()
+                                        : isMarkdown(skemo)
+                                          ? markdownStructure
+                                          : isCard(skemo)
+                                            ? cardStructure
+                                            : isAvatar(skemo)
+                                              ? avatarStructure
+                                              : isLight(skemo)
+                                                ? lightStructure(skemo, owner)
+                                                : isTabs(skemo)
+                                                  ? tabsStructure
+                                                  : isDisclosure(skemo)
+                                                    ? disclosureStructure
+                                                    : isField(skemo)
+                                                      ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo), skemo.parts.decrement !== undefined || isDatepicker(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}${isDatepicker(skemo) ? `\n${datepickerStructure}` : ""}`
+                                                      : isGroup(skemo)
+                                                        ? groupStructure(
                                                             disables,
-                                                            uzo?.layout.wrap !== undefined &&
-                                                              uzo.layout.wrap !== "never",
-                                                            skemo.slots.some(
-                                                              (slot) =>
-                                                                slot.default !== true &&
-                                                                slot.text === true,
-                                                            ),
                                                             skemo.parts["required-mark"] !==
                                                               undefined,
-                                                            skemo.props.some(
-                                                              (prop) => prop.name === "label-side",
-                                                            ),
                                                           )
-                                                        : structure(
-                                                            uzo?.layout.wrap === "with-text",
-                                                            disables,
-                                                            bordered,
-                                                          );
+                                                        : isToggle(skemo)
+                                                          ? toggleStructure(
+                                                              disables,
+                                                              uzo?.layout.wrap !== undefined &&
+                                                                uzo.layout.wrap !== "never",
+                                                              skemo.slots.some(
+                                                                (slot) =>
+                                                                  slot.default !== true &&
+                                                                  slot.text === true,
+                                                              ),
+                                                              skemo.parts["required-mark"] !==
+                                                                undefined,
+                                                              skemo.props.some(
+                                                                (prop) =>
+                                                                  prop.name === "label-side",
+                                                              ),
+                                                            )
+                                                          : structure(
+                                                              uzo?.layout.wrap === "with-text",
+                                                              disables,
+                                                              bordered,
+                                                            );
   // A skip link adds its place above the page to a control's structure (Spec 014 ②, D-07).
   const floating = isSkip(skemo) ? `\n${skipStructure}` : "";
   const ending = isBoxedField(skemo) ? `\n${endStructure(isTextarea(skemo))}` : "";
@@ -2685,7 +2740,8 @@ function selectorOf(
   if (isIcon(skemo)) return `:where([part="glyph"]${data})`;
   // A heading (Spec 014 ③): its text is the control; a paragraph: the control is the text.
   if (isHeading(skemo)) return `:where([part="text"]${data})`;
-  if (isText(skemo) || isSeparator(skemo) || isParagraph(skemo)) {
+  // Spec 046 T1: a layout Ero keys its gap on the control, as static text keys its parts.
+  if (isText(skemo) || isLayout(skemo) || isSeparator(skemo) || isParagraph(skemo)) {
     return `:where([part="control"]${data})`;
   }
   if (isDisclosure(skemo))
@@ -2764,6 +2820,7 @@ export function elementNamesOf(
       isChip(entry.skemo),
       isListselect(entry.skemo),
       isEditor(entry.skemo),
+      isLayout(entry.skemo),
     ),
     role: entry.skemo.a11y.role,
     // Spec 015 ① (plan ① D-04): the breadcrumb is a light host with a list in its shadow.

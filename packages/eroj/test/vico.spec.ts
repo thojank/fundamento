@@ -15,20 +15,22 @@ const row = (attributes: string, width: string) =>
     .join("")}</fm-vico></div>`;
 
 const topsOf = (page: Parameters<typeof serve>[0]) =>
-  page.locator("#r > div").evaluateAll((boxes) =>
-    boxes.map((box) => Math.round(box.getBoundingClientRect().top)),
-  );
+  page
+    .locator("#r > div")
+    .evaluateAll((boxes) => boxes.map((box) => Math.round(box.getBoundingClientRect().top)));
 
 const gapsOf = (page: Parameters<typeof serve>[0]) =>
-  page.locator("#r > div").evaluateAll((boxes) =>
-    boxes
-      .slice(1)
-      .map((box, index) =>
-        Math.round(
-          box.getBoundingClientRect().left - (boxes[index]?.getBoundingClientRect().right ?? 0),
+  page
+    .locator("#r > div")
+    .evaluateAll((boxes) =>
+      boxes
+        .slice(1)
+        .map((box, index) =>
+          Math.round(
+            box.getBoundingClientRect().left - (boxes[index]?.getBoundingClientRect().right ?? 0),
+          ),
         ),
-      ),
-  );
+    );
 
 const tokenPx = (page: Parameters<typeof serve>[0], name: string) =>
   page.evaluate(
@@ -80,6 +82,11 @@ test.describe("fm-vico behaviour", () => {
         font: style.fontSize,
       };
     });
-    expect(own).toEqual({ role: null, background: "rgba(0, 0, 0, 0)", border: "0px", font: "23px" });
+    expect(own).toEqual({
+      role: null,
+      background: "rgba(0, 0, 0, 0)",
+      border: "0px",
+      font: "23px",
+    });
   });
 });

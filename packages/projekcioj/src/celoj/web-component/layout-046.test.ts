@@ -3,7 +3,11 @@
 // taken from the spacing step the Skemo binds (spacing.*, A-4) – never a literal, never a colour
 // or a font of their own. vico lays a row, kolumno and stako a column; wrap lets a row break.
 
-import { componentCssIssues, cssPhysicalPropertyIssues, defaultModeloSource } from "@fundamento/modelo";
+import {
+  componentCssIssues,
+  cssPhysicalPropertyIssues,
+  defaultModeloSource,
+} from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
 import { traRolojCss } from "../../test-doubles/tra-roloj.js";
@@ -22,8 +26,9 @@ const cssOf = (ero: string, roles = true) => {
   const path = `eroj/src/generated/${ero}.styles.ts`;
   const text = roles ? read(path) : (raw[path] ?? "");
   return JSON.parse(
-    new RegExp(`export const ${ero.toUpperCase()}_CSS = ("(?:[^"\\\\]|\\\\.)*");`).exec(text)?.[1] ??
-      '""',
+    new RegExp(`export const ${ero.toUpperCase()}_CSS = ("(?:[^"\\\\]|\\\\.)*");`).exec(
+      text,
+    )?.[1] ?? '""',
   ) as string;
 };
 const skemoOf = (ero: string) =>
@@ -92,7 +97,9 @@ describe("Web Component Celo for the layout Eroj (Spec 046 T1)", () => {
     for (const ero of ["vico", "kolumno"]) {
       const css = cssOf(ero);
       expect(css).toContain(':host([wrap]) :where([part="control"]) { flex-wrap: wrap; }');
-      expect(css).toContain(':where([part="control"][data-align="center"]) { align-items: center; }');
+      expect(css).toContain(
+        ':where([part="control"][data-align="center"]) { align-items: center; }',
+      );
       expect(css).toContain(
         ':where([part="control"][data-justify="space-between"]) { justify-content: space-between; }',
       );
