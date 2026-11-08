@@ -347,3 +347,40 @@ describe("listArangxoj (Spec 038 MG-1)", () => {
     }
   });
 });
+
+describe("listArangxoj on the repo Modelo with the layout Eroj (Spec 046 T1)", () => {
+  // The Eroj of Eroj-Runde 7 named by their Skemo goal: row by vico, column by kolumno, stack by
+  // stako. The test reads the answer of the real Modelo; the spacing step comes from interspacoj.
+  const expected: [string, string][] = [
+    ["vico", "row"],
+    ["kolumno", "column"],
+    ["stako", "stack"],
+  ];
+
+  it("answers row, column and stack with an Ero each; mankoj names none of them", () => {
+    const output = arangxoj(modelo);
+    const eroj = output.arangxoj.filter((item) => item.kind === "ero");
+    for (const [name, celo] of expected) {
+      expect(eroj.filter((item) => item.name === name).map((item) => item.celo)).toEqual([celo]);
+    }
+    const missing = output.mankoj.map((manko) => manko.celo);
+    expect(missing).not.toContain("row");
+    expect(missing).not.toContain("column");
+    expect(missing).not.toContain("stack");
+  });
+
+  it("gives every layout Ero example markup with a gap from the spacing steps", () => {
+    const output = arangxoj(modelo);
+    const steps = output.interspacoj.map((item) => item.token);
+    expect(steps.length).toBeGreaterThan(0);
+    for (const [name] of expected) {
+      const entry = output.arangxoj.find((item) => item.kind === "ero" && item.name === name);
+      const gap = entry?.example.match(/^<fm-([a-z]+) gap="([a-z]+)"><\/fm-\1>$/);
+      expect(gap?.[1]).toBe(name);
+      expect(steps).toContain(`spacing.${gap?.[2] ?? ""}`);
+      // The gap prop takes exactly the spacing steps, by their last name.
+      const prop = entry?.props.find((item) => item.name === "gap");
+      expect(prop?.values).toEqual(steps.map((token) => token.split(".").at(-1)));
+    }
+  });
+});
