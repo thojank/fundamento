@@ -9,7 +9,7 @@ PR A ist ein Strang T1 → T6 (B-8), T7 läuft parallel in PR B im eigenen Workt
 | T1 | Gerüst; `fm-vico`, `fm-kolumno`, `fm-stako`; abgeleitete Eroj-Zahlen | A | erledigt (Befunde F-T1-1 bis F-T1-11) |
 | T2 | `fm-krado` | A | erledigt (Befunde F-T2-1 bis F-T2-6) |
 | T3 | `fm-tabelo`: Auswahl, Laden, fester Kopf, geschlossene Grenzen | A | erledigt (Befunde F-T3-1 bis F-T3-6) |
-| T4 | `fm-templinio` | A | offen |
+| T4 | `fm-templinio` | A | erledigt (Befunde F-T4-1 bis F-T4-6) |
 | T5 | Vitrino, Geometrie- und Stiltests, Alirebleco, Figma-Bauformen | A | offen |
 | T6 | `dataForm`, L5-4, „create new“, „Inhalte anzeigen“, Vertragsfortschreibung | A | offen |
 | T7 | L5-1 mit AC-8, L5-2, L5-3 | B | offen |
@@ -49,3 +49,13 @@ PR A ist ein Strang T1 → T6 (B-8), T7 läuft parallel in PR B im eigenen Workt
 - [x] `neu-seit-main.ts`: `ero.tabelo.skeleton.*` und `ero.tabelo.head.layer` neu seit dem Stand von main (wie D-08) (`934c29ff`).
 - [x] Läufe: modelo 4873/5 rot (F-T1-1, -2, -5, -6, -10), mcp 505/2 (F-T1-6, -7), projekcioj 16 rot im Gesamtlauf, davon nach den letzten Commits offen: F-T1-4, F-T1-3, F-T3-1, F-T3-6 (×3), F-T1-10/F-T2-4/F-T3-3 (`parity.test.ts` ×5); `figma-cxiuj.test.ts:32` einmal Zeitgrenze des Hooks unter Last, allein grün (wie F-T2-6). eroj Vitest 43/43. Playwright `tabelo.spec.ts` 15/15 in Chromium, Firefox, WebKit; `nachlese-7`, `nachlese-11-konformeco`, `pflicht`, `react` (Chromium) 16/16. Checks grün: lint, regularo, dokumentaro (44), vortaro-lint, mankoj, make-kit, alirebleco; rot: parity (F-T1-10/F-T2-4 plus F-T3-3).
 - [x] Plan (D-18 bis D-22, F-T3-1 bis F-T3-6).
+
+## T4 im Einzelnen
+
+- [x] Rote Tests zuerst (`635878d7`): `modelo src/data/templinio-046.test.ts` (17, 15 rot; Wächter „andere Goals behalten ihre Antwort“ und „validiert ohne Befund in seinen Dateien“ grün ab Beginn), `projekcioj web-component/templinio-046.test.ts` (7, 4 rot; Wächter atributlisto/tabelo, CSS-Prüfungen, Figma-Plan grün ab Beginn), `eroj/test/templinio.spec.ts` (Chromium, 4 rot) – zusammen 23 rot.
+- [x] Abweichung D-06 für `templinio` (`b5422742`).
+- [x] Modelo: Skemo, Uzo, tradukoj, ontologio, IDs, 22 Ero-Tokens (Kern und gepflegte Aspekto-Sets, `invalid/aspekto-incomplete`; Kern 400) (`963c2884`, `028c704f`, `34da80dd`); Goal `timeline` (D-23).
+- [x] Web Component: Light-Host `isTimeline`, Zeichen und Wort je Eintrag, Linie, Stylesheet nur aus Tokens (`076ddc1c`); Make Kit und kein `sort-change` (`42769d79`); übrige 99 erzeugte Dateien byte-gleich.
+- [x] Figma: `templinio` bis T5 nicht im Plan (D-27), T1-Test nennt ihn mit (`a2b11654`).
+- [x] Läufe: modelo 4891/6 rot (F-T1-1, -2, -5, -6, -10 und `export-modelo.test.ts:414`, behoben in `34da80dd`, danach grün), mcp 506/2 (F-T1-6, -7), projekcioj 1523/14 rot im Gesamtlauf, davon nach `42769d79` behoben: `make-kit.test.ts:865` (×2), `nachlese-11.test.ts:90`; verbleibend nur die bekannten F-T1-4, F-T1-3, F-T3-1, F-T3-6 (×3), F-T1-10/F-T2-4/F-T3-3/F-T4-2 (`parity.test.ts` ×5). eroj Vitest 43/43. Playwright Chromium `templinio.spec.ts` 4/4, `nachlese-7` 7/7, `nachlese-11-konformeco` 2/2, `pflicht` 5/5, `react` 2/2. Checks grün: lint, regularo, dokumentaro (45), vortaro-lint, mankoj, make-kit (5/5), alirebleco (315 Paare, 0 Fehler); rot: parity (32 = 5 `parity-item-missing` + 27 aus F-T3-3). Kurzprofil `templinio` 180 (< 750), `kampo` (747) bleibt das größte.
+- [x] Plan (D-23 bis D-28, F-T4-1 bis F-T4-6).
