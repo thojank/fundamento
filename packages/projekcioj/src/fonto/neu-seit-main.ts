@@ -53,6 +53,12 @@ const MULTILINE = /^radius\.role\.multiline$/;
 const SEKUNDO = /^color\.(palette\.sekundo|sekundo)\./;
 
 /** Whether a token was added after main's record. */
+/**
+ * Spec 046 (Eroj-Runde 7): the Ero-Tokens of the new Eroj – every token of the layout Eroj
+ * (T1 vico, kolumno, stako; T2 krado) and of the templinio (T4) is new since main's record.
+ */
+const EROJ_046 = /^ero\.(vico|kolumno|stako|krado|templinio)\./;
+
 export const addedSinceMain = (name: string): boolean =>
   SPINNER.test(name) ||
   CLEAR.test(name) ||
@@ -60,7 +66,8 @@ export const addedSinceMain = (name: string): boolean =>
   TARGET.test(name) ||
   STATUS.test(name) ||
   MULTILINE.test(name) ||
-  SEKUNDO.test(name);
+  SEKUNDO.test(name) ||
+  EROJ_046.test(name);
 
 /** ②b-1 M-1: tokens main had under another name; each keeps main's value. */
 const MOVED: Readonly<Record<string, string>> = {
@@ -318,6 +325,7 @@ const ADDED_LISTS: readonly (readonly [string, RegExp])[] = [
   ...REST_2B2.lists,
   ...REST_2B3.lists,
   ...REST_2B5.lists,
+  ["EROJ_046", EROJ_046],
 ];
 
 /** The lists that justify a token as added after main's record; none for a token main had. */
