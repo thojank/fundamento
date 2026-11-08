@@ -8,7 +8,7 @@ PR A ist ein Strang T1 → T6 (B-8), T7 läuft parallel in PR B im eigenen Workt
 |---|---|---|---|
 | T1 | Gerüst; `fm-vico`, `fm-kolumno`, `fm-stako`; abgeleitete Eroj-Zahlen | A | erledigt (Befunde F-T1-1 bis F-T1-11) |
 | T2 | `fm-krado` | A | erledigt (Befunde F-T2-1 bis F-T2-6) |
-| T3 | `fm-tabelo`: Auswahl, Laden, fester Kopf, geschlossene Grenzen | A | offen |
+| T3 | `fm-tabelo`: Auswahl, Laden, fester Kopf, geschlossene Grenzen | A | erledigt (Befunde F-T3-1 bis F-T3-6) |
 | T4 | `fm-templinio` | A | offen |
 | T5 | Vitrino, Geometrie- und Stiltests, Alirebleco, Figma-Bauformen | A | offen |
 | T6 | `dataForm`, L5-4, „create new“, „Inhalte anzeigen“, Vertragsfortschreibung | A | offen |
@@ -38,3 +38,14 @@ PR A ist ein Strang T1 → T6 (B-8), T7 läuft parallel in PR B im eigenen Workt
 - [x] Modelo: Skemo, Uzo, tradukoj, ontologio, IDs, Ero-Tokens (Kern und Aspekto-Hauptsets, `invalid/aspekto-incomplete`; 9 neu, Kern 400) (`b88ea778`); D-13 Messung der Token-Reihe.
 - [x] Web Component: Grid, `data-span`-Begrenzung, Stapeln unter `columns-from` (`dde8db00`); Make Kit (`cbe5089f`).
 - [x] Plan und Aufgaben (D-13 bis D-17, F-T2-1 bis F-T2-6).
+
+## T3 im Einzelnen
+
+- [x] Rote Tests zuerst (`7ac87f5a`): `eroj/test/tabelo.spec.ts` neuer Block (Chromium: 9 Tests, 8 rot; der Geometrie-/DOM-Test ohne neue Props ist Wächter und grün ab Beginn), `modelo src/data/tabelo.test.ts` (7 rot) – zusammen 15 rot.
+- [x] Geometrie und DOM ohne neue Props auf `486b6c03` gemessen (Viewport 1024 × 600, je Engine und Dichte) und als Zahlen festgehalten; nach T3 unverändert in Chromium, Firefox und WebKit.
+- [x] Ausnahme `row-selection` und `sticky-header` geschlossen (`4faee9cd`): nur diese Erwartungen in `tabelo.test.ts`, `s011-daten.test.ts`, `make-kit.test.ts`.
+- [x] Modelo: Props, Ereignis `select`, Teil `skeleton`, `head.layer`, `a11y.texts`, Goals statt Grenzen, Tastatur, tradukoj, IDs, Ero-Tokens (Kern und gepflegte Aspekto-Sets, Kern 400) (`f913968f`).
+- [x] Web Component: Auswahlspalte, Laden mit Skelett, fester Kopf (`05d4e87d`); nur für eine Skemo mit `selectable` bzw. Teil `skeleton`, die erzeugte `fm-atributlisto` ist byte-gleich zum Stand vor T3 (`ea996232`, `nachlese-11.test.ts:90`); `content-template.ts` ohne Diff.
+- [x] `neu-seit-main.ts`: `ero.tabelo.skeleton.*` und `ero.tabelo.head.layer` neu seit dem Stand von main (wie D-08) (`934c29ff`).
+- [x] Läufe: modelo 4873/5 rot (F-T1-1, -2, -5, -6, -10), mcp 505/2 (F-T1-6, -7), projekcioj 16 rot im Gesamtlauf, davon nach den letzten Commits offen: F-T1-4, F-T1-3, F-T3-1, F-T3-6 (×3), F-T1-10/F-T2-4/F-T3-3 (`parity.test.ts` ×5); `figma-cxiuj.test.ts:32` einmal Zeitgrenze des Hooks unter Last, allein grün (wie F-T2-6). eroj Vitest 43/43. Playwright `tabelo.spec.ts` 15/15 in Chromium, Firefox, WebKit; `nachlese-7`, `nachlese-11-konformeco`, `pflicht`, `react` (Chromium) 16/16. Checks grün: lint, regularo, dokumentaro (44), vortaro-lint, mankoj, make-kit, alirebleco; rot: parity (F-T1-10/F-T2-4 plus F-T3-3).
+- [x] Plan (D-18 bis D-22, F-T3-1 bis F-T3-6).
