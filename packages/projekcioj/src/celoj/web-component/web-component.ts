@@ -2970,6 +2970,8 @@ export function elementNamesOf(
     // Spec 046 T2 (plan D-14): a grid counts its columns at the least width of its min-width step,
     // the custom property of that step's Ero-Token.
     ...(isGrid(entry.skemo) ? { gridMinWidths: gridMinWidthsOf(entry) } : {}),
+    // Spec 046 T3 (plan D-19): the table writes its selection column where the Skemo has selectable.
+    selectable: entry.skemo.props.some((prop) => prop.name === "selectable"),
     // Nachlese 8 ② (F-5): a Markdown view indents a nested list as its first level, by the indent
     // of its Skemo — in the light DOM, where ::slotted does not reach.
     ...(isMarkdown(entry.skemo) ? { documentCss: markdownDocumentCss(entry) } : {}),

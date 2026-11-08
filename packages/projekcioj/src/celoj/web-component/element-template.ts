@@ -117,6 +117,11 @@ export interface ElementNames {
    */
   gridMinWidths?: Readonly<Record<string, string>>;
   /**
+   * Spec 046 T3 (plan D-19): a table whose Skemo has the prop selectable – the element writes the
+   * column of selection boxes and says select. Without it the element is as before.
+   */
+  selectable?: boolean;
+  /**
    * Rules for the light DOM of a Markdown view (Nachlese 8 ②, F-5): what its shadow cannot reach
    * — the indent of a nested list —, adopted by the document once, like a table's.
    */
@@ -1166,6 +1171,7 @@ export function elementSource({
   dismiss = false,
   columnsFrom,
   gridMinWidths,
+  selectable = false,
   documentCss = "",
   ikonaro = [],
   skip = false,
@@ -2516,6 +2522,10 @@ ${
   // Spec 046 T2 (plan D-14, D-15): a grid counts the columns it lays out and stacks a number of
   // columns below the Uzo's columns-from, measured as the card measures.
   const isGrid = host === "layout" && gridMinWidths !== undefined;
+  // Spec 046 T3 (plan D-19, D-20): the selection column of a table and its skeleton rows while
+  // loading, only where the Skemo has the prop selectable and the part skeleton.
+  const isSelecting = isLight && selectable;
+  const isSkeleton = isLight && parts.includes("skeleton");
   const observesSize = isAuto || isStacking || isGrid;
   const lightRender = isLight
     ? `    this.#decorate();
@@ -2685,7 +2695,7 @@ const MIN_WIDTHS: Readonly<Record<string, string>> = ${JSON.stringify(gridMinWid
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ${isNav ? '["slot", "href", "data-page", "data-count", "data-count-description"]' : isBreadcrumb ? '["slot", "href", "data-page"]' : '["slot", "data-sort", "numeric", "data-key", "data-selected"]'},
+      attributeFilter: ${isNav ? '["slot", "href", "data-page", "data-count", "data-count-description"]' : isBreadcrumb ? '["slot", "href", "data-page"]' : isSelecting ? '["slot", "data-sort", "numeric", "data-key", "data-selected"]' : '["slot", "data-sort", "numeric"]'},
     });
 ${
   isNav || isBreadcrumb
@@ -2704,7 +2714,9 @@ ${
         current === column && this.propValue("direction") === "ascending" ? "descending" : "ascending";
       this.dispatchEvent(new CustomEvent("sort-change", { bubbles: true, detail: { column, direction } }));
     });
-    // Spec 046 T3 (plan D-19): a box of the selection column says select with the keys the
+${
+  isSelecting
+    ? `    // Spec 046 T3 (plan D-19): a box of the selection column says select with the keys the
     // selection would hold, in DOM order – the application writes data-selected, the table never
     // selects itself; the box's own input and change stay inside, and its mark follows the row.
     this.addEventListener("input", (event) => {
@@ -2728,6 +2740,8 @@ ${
       this.#render();
     });
 `
+    : ""
+}`
 }`
     : "";
   const lightMethods = isBreadcrumb
@@ -2909,7 +2923,9 @@ ${
   }
 
 `
-}  /** Spec 046 T3: the fm-markobutono of the selection column an event comes from, if any. */
+}${
+  isSelecting
+    ? `  /** Spec 046 T3: the fm-markobutono of the selection column an event comes from, if any. */
   #selectBox(event: Event): HTMLElement | undefined {
     const box = event.target;
     return box instanceof HTMLElement &&
@@ -2983,7 +2999,9 @@ ${
     }
   }
 
-  /** Writes what the Ero adds to the native element; every write first compares. */
+`
+    : ""
+}  /** Writes what the Ero adds to the native element; every write first compares. */
   #decorate(): void {${contentSlot === undefined ? "" : "\n    this.#adoptContent();"}
     const table = this.#native("table");
     if (table !== undefined) this.#decorateTable(table);
@@ -3040,41 +3058,39 @@ ${
       const arrowName = wanted === "descending" ? "sort-descending" : "sort-ascending";
       if (arrow !== null && arrow.getAttribute("name") !== arrowName) arrow.setAttribute("name", arrowName);
     }
-    // Spec 046 T3: the selection column comes first, so the columns below count it.
-    this.#selectColumn(table);
-    // A numeric column (Spec 011 ④, D-09): the header carries numeric, its cells get the mark.
+${isSelecting ? "    // Spec 046 T3: the selection column comes first, so the columns below count it.\n    this.#selectColumn(table);\n" : ""}    // A numeric column (Spec 011 ④, D-09): the header carries numeric, its cells get the mark.
     const headers = [...table.querySelectorAll(":scope > thead th")];
     const numeric = headers.map((header) => header.hasAttribute("numeric"));
-    for (const row of table.querySelectorAll(":scope > tbody > tr:not([data-fm-empty]):not([data-fm-skeleton])")) {
+    for (const row of table.querySelectorAll(":scope > tbody > tr:not([data-fm-empty])${isSkeleton ? ":not([data-fm-skeleton])" : ""}")) {
       [...row.children].forEach((cell, index) => {
         if (numeric[index] === true && !cell.hasAttribute("numeric")) cell.setAttribute("numeric", "");
       });
     }
-    // The empty state (Spec 011 ④, D-09): without rows, the empty slot's text as a plenstato over
-    // all columns; rows take it away.
-    // Nachlese 7 ② B-3: a butono in the empty slot is the next step — it moves into the state's
-    // actions while the state shows (the application's element, its listeners stay) and back into
-    // the slot when rows come; the words of the state are the slot's text without it.
-    // Spec 046 T3 (plan D-20): loading – aria-busy on the table and three skeleton rows in the
+${
+  isSkeleton
+    ? `    // Spec 046 T3 (plan D-20): loading – aria-busy on the table and three skeleton rows in the
     // body, one bar per column, unheard; they come before the empty state, which waits.
     const loading = HAS_PROP.has("loading") && this.propValue("loading") === true;
     if (loading && table.getAttribute("aria-busy") !== "true") table.setAttribute("aria-busy", "true");
     if (!loading && table.hasAttribute("aria-busy")) table.removeAttribute("aria-busy");
-    const body = table.querySelector(":scope > tbody");
-    if (body !== null) {
-      const skeleton = [...body.querySelectorAll(":scope > tr[data-fm-skeleton]")];
-      const columns = Math.max(1, headers.length);
-      const fits = skeleton.length === 3 && skeleton.every((row) => row.children.length === columns);
-      if (!loading || !fits) for (const row of skeleton) row.remove();
-      if (loading && !fits) {
-        const row = '<tr data-fm-skeleton aria-hidden="true">' + "<td><span></span></td>".repeat(columns) + "</tr>";
-        body.insertAdjacentHTML("beforeend", row.repeat(3));
-      }
+    const skeleton = [...table.querySelectorAll(":scope > tbody > tr[data-fm-skeleton]")];
+    const columns = Math.max(1, headers.length);
+    const fits = skeleton.length === 3 && skeleton.every((row) => row.children.length === columns);
+    if (!loading || !fits) for (const row of skeleton) row.remove();
+    if (loading && !fits) {
+      const row = '<tr data-fm-skeleton aria-hidden="true">' + "<td><span></span></td>".repeat(columns) + "</tr>";
+      table.querySelector(":scope > tbody")?.insertAdjacentHTML("beforeend", row.repeat(3));
     }
+`
+    : ""
+}    // The empty state (Spec 011 ④, D-09): without rows, the empty slot's text as a plenstato over
+    // all columns; rows take it away.
+    // Nachlese 7 ② B-3: a butono in the empty slot is the next step — it moves into the state's
+    // actions while the state shows (the application's element, its listeners stay) and back into
+    // the slot when rows come; the words of the state are the slot's text without it.
+    const body = table.querySelector(":scope > tbody");
     if (body !== null && NAMED_SLOTS.includes("empty")) {
-      const rows = [...body.children].filter(
-        (row) => !row.hasAttribute("data-fm-empty") && !row.hasAttribute("data-fm-skeleton"),
-      );
+      const rows = [...body.children].filter((row) => !row.hasAttribute("data-fm-empty")${isSkeleton ? ' && !row.hasAttribute("data-fm-skeleton")' : ""});
       const placeholder = body.querySelector(":scope > tr[data-fm-empty]");
       const emptySlot = this.shadowRoot?.querySelector('slot[name="empty"]');
       const emptyNodes = emptySlot instanceof HTMLSlotElement ? emptySlot.assignedNodes({ flatten: true }) : [];
@@ -3085,7 +3101,7 @@ ${
         .map((node) => node.textContent ?? "")
         .join("")
         .trim();
-      if (rows.length === 0 && emptyText !== "" && !loading) {
+      if (rows.length === 0 && emptyText !== ""${isSkeleton ? " && !loading" : ""}) {
         if (placeholder === null) {
           body.insertAdjacentHTML(
             "beforeend",
