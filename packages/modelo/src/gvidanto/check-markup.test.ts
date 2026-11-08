@@ -209,6 +209,29 @@ describe("the core instancojElElementoj (D-22, the semantics of nordstelo's inst
     expect(kerno(elementoj)).toEqual(expected());
   });
 
+  it("takes a child in the default slot named explicitly as unslotted, as the Ero adopts it (Nachlese 11 B-2, S038-39b)", () => {
+    const benannt = [
+      el("fm-butono", -1, { emphasis: "medium" }),
+      el("span", 0, { slot: "label" }, "Bearbeiten"),
+      el("fm-ikono", 0, { slot: "icon-start", name: "edit" }),
+    ];
+    const ohne = benannt.map((element, index) =>
+      index === 1 ? el("span", 0, {}, "Bearbeiten") : element,
+    );
+    expect(kerno(benannt, "de")).toEqual([
+      {
+        ero: "butono",
+        props: { emphasis: "medium" },
+        label: "Bearbeiten",
+        texts: { "icon-start": "" },
+        slots: { "icon-start": [{ ero: "ikono" }] },
+        lingvo: "de",
+      },
+      { ero: "ikono", props: { name: "edit" }, container: "butono-1", lingvo: "de" },
+    ]);
+    expect(JSON.stringify(kerno(benannt, "de"))).toBe(JSON.stringify(kerno(ohne, "de")));
+  });
+
   it("derives nothing from elements that are no Ero", () => {
     expect(kerno([el("fm-gibtsnicht", -1, {}, "x"), el("div", -1, {}, "y")], "de")).toEqual([]);
     expect(kerno([], "de")).toEqual([]);
@@ -251,6 +274,24 @@ describe("checkMarkup (MG-2, D-29)", () => {
     expect(
       primary.map((violation) => [violation.issue.path, violation.issue.regulo?.name]),
     ).toEqual([["instances#/0", "one-primary-per-container"]]);
+  });
+
+  it('sees the label of a butono written in slot="label" (abnahme-komuna-l5-v1 detail, S038-39b)', () => {
+    const result = output(
+      check({
+        fragment:
+          '<fm-karto level="2"><span slot="heading">Standard-Informationen</span>' +
+          '<fm-butono slot="actions" emphasis="medium" intent="neutral"><span slot="label">Bearbeiten</span></fm-butono>' +
+          '<fm-butono slot="actions" emphasis="high" intent="danger"><span slot="label">Standard löschen</span></fm-butono></fm-karto>',
+        lingvo: "de",
+      }),
+    );
+    const butonoj = (result.eroj as Answer[]).filter((ero) => ero.ero === "butono");
+    expect(butonoj.map((ero) => ero.label)).toEqual(["Bearbeiten", "Standard löschen"]);
+    const rezulto = result.rezulto as { violations: { issue: Issue }[] };
+    expect(rezulto.violations.map((violation) => violation.issue.rule)).not.toContain(
+      "label-required",
+    );
   });
 
   it("derives no instance from an unknown Ero tag and judges what is left", () => {
