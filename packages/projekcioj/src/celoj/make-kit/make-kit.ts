@@ -42,6 +42,7 @@ import {
   isAvatar,
   isChip,
   isEditor,
+  isGrid,
   isLayout,
   isLight,
   isListselect,
@@ -612,11 +613,15 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
     column: "Children one below the other that are aligned or spread along the height are",
     stack: "A plain stack of children over the full width is",
   };
+  // Spec 046 T2: the grid answers column as the kolumno does; its sentence is its own (columns
+  // side by side, a child spanning its data-span), so no two rules begin alike (A-4).
+  const GRID_SENTENCE =
+    "Children in the columns of a grid, each spanning as many as its data-span says, are";
   const layoutLines = eroj
     .filter((entry) => isLayout(entry.skemo) && entry.uzo !== undefined)
     .flatMap((entry) =>
       (entry.skemo.goals ?? []).flatMap((goal) => {
-        const sentence = LAYOUT_SENTENCES[goal.goal];
+        const sentence = isGrid(entry.skemo) ? GRID_SENTENCE : LAYOUT_SENTENCES[goal.goal];
         return sentence === undefined
           ? []
           : [`- ${sentence} \`<${componentName(entry.ero)}>\` (gap, never a margin).`];
