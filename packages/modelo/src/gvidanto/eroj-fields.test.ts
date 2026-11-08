@@ -353,8 +353,10 @@ describe("get_ero with fields: role, navigation, slots (MG-3, MG-4)", () => {
           offending.push(`${at}: default`);
         if (slot.min !== rule?.min) offending.push(`${at}: min`);
         if (slot.max !== rule?.max) offending.push(`${at}: max`);
-        // D-38: a data form only where the data carries one; no Skemo or Uzo carries one yet.
-        if ("dataForm" in slot) offending.push(`${at}: dataForm without data`);
+        // D-38: a data form only where the data carries one (Spec 046 T6: the Uzo slot's dataForm).
+        if (slot.dataForm !== rule?.dataForm) offending.push(`${at}: dataForm`);
+        if ("dataForm" in slot && rule?.dataForm === undefined)
+          offending.push(`${at}: dataForm without data`);
       }
     }
     expect(offending).toEqual([]);
