@@ -1451,3 +1451,52 @@ describe("findings for the next round: a wrapper in a slot (S038-39b)", () => {
     ).toEqual([SUGESTO, SUGESTO]);
   });
 });
+
+// S038-39b (F-S038-39a-1): on detail of abnahme-komuna-l5-v1 the model wrote the butono labels as
+// <span slot="label">…</span>; check_markup reads text in a slotted child as no label (AC-8 pins
+// that derivation), the browser shows it. The finding names the slotted text from the fragment.
+describe("findings for the next round: a label in a slotted child (S038-39b)", () => {
+  const SUGESTO =
+    "Give the label as slot text, or for an icon-only button set the label prop as its accessible name.";
+  const KIALO = "A button without a name cannot be found or understood by assistive technology.";
+  const malobservo = (index: number): Malobservo => ({
+    rule: "label-required",
+    severity: "error",
+    path: `instances#/${index}`,
+    message: `Instance ${index} of butono has neither a visible label nor a label prop.`,
+    suggestion: SUGESTO,
+    regulo: { id: "reg-label", name: "label-required", kialo: KIALO },
+    loko: "fm-butono",
+  });
+  const FRAGMENTO = [
+    '<fm-karto level="2"><span slot="heading">Standard-Informationen</span>',
+    '<div slot="actions"><fm-butono emphasis="medium"><span slot="label">Bearbeiten</span></fm-butono>',
+    '<fm-butono intent="danger"><span slot="label">Standard löschen</span></fm-butono></div>',
+    '<fm-butono emphasis="low">Zurück</fm-butono></fm-karto>',
+  ].join("\n");
+  const sen = { kompleta: true, mankantaj: [], mortaj: [] };
+  const trovojKun = (fragmento?: string) =>
+    trovojDe({
+      slug: "detail",
+      taksado: MALVERDA,
+      malobservoj: [malobservo(13), malobservo(14)],
+      fakto: faktoKunLigiloj([]),
+      navigado: sen,
+      malhelpoj: ["check_usage"],
+      ...(fragmento === undefined ? {} : { fragmento }),
+    })
+      .filter((t) => t.regulo === "label-required")
+      .map((t) => t.sugesto);
+
+  it("names the slotted text and how to write the label instead, read from the fragment", () => {
+    const atendata = `${SUGESTO} Der Text „Bearbeiten“ steht in <span slot="label">; ein Kind mit slot-Attribut zählt nicht als Label: den Text ohne Hülle und ohne slot-Attribut direkt ins Element schreiben, z. B. <fm-butono>Bearbeiten</fm-butono>.`;
+    expect(trovojKun(FRAGMENTO)).toEqual([atendata, atendata]);
+  });
+
+  it("keeps the suggestion of check_usage where no slotted text stands in the Ero or no fragment is given", () => {
+    expect(trovojKun()).toEqual([SUGESTO, SUGESTO]);
+    expect(
+      trovojKun('<fm-butono><fm-ikono slot="icon-start" name="add"></fm-ikono></fm-butono>'),
+    ).toEqual([SUGESTO, SUGESTO]);
+  });
+});

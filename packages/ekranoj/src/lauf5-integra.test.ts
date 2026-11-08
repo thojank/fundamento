@@ -463,6 +463,64 @@ describe("Lauf 5 end to end: a wrapper in a slot is named for the next round (S0
   });
 });
 
+// S038-39b (F-S038-39a-1): a butono label written as <span slot="label"> is no label for
+// check_markup; the finding handed to round 2 names the slotted text, read from the fragment.
+describe("Lauf 5 end to end: a label in a slotted child is named for the next round (S038-39b)", () => {
+  const BUTONO = '<fm-butono><span slot="label">Bearbeiten</span></fm-butono>';
+  const MESAGXO = "Instance 1 of butono has neither a visible label nor a label prop.";
+  const SUGESTO =
+    "Give the label as slot text, or for an icon-only button set the label prop as its accessible name.";
+  const kontrolo = (args: Record<string, unknown>) => {
+    const kunSlot = String(args.fragment ?? "").includes('<span slot="label">');
+    return {
+      eroj: [
+        { ero: "karto", props: {} },
+        { ero: "butono", props: {} },
+      ],
+      sxablonoj: [],
+      rezulto: kunSlot
+        ? {
+            instances: 2,
+            valid: false,
+            violations: [
+              {
+                instance: [1],
+                issue: {
+                  rule: "label-required",
+                  severity: "error",
+                  path: "instances#/1",
+                  message: MESAGXO,
+                  suggestion: SUGESTO,
+                  regulo: { id: "reg-label", name: "label-required", kialo: "Ohne Namen." },
+                },
+              },
+            ],
+          }
+        : { instances: 2, valid: true, violations: [] },
+    };
+  };
+
+  it("asks round 2 of detail with a suggestion that names the slotted text", async () => {
+    const detail1 = pagxo("detail", 1).replace("</fm-karto>", `${BUTONO}</fm-karto>`);
+    const { chat, rezulto } = await kuri({
+      taksilo: new TaksiloDouble(() => MALVERDA),
+      antauaj: { "detail#1": [respondo(`\`\`\`html\n${detail1}\n\`\`\``)] },
+      tools: new MemoraPonto({ iloj: CXIUJ_ILOJ, checkMarkup: kontrolo }),
+    });
+    const atendata = `${SUGESTO} Der Text „Bearbeiten“ steht in <span slot="label">; ein Kind mit slot-Attribut zählt nicht als Label: den Text ohne Hülle und ohne slot-Attribut direkt ins Element schreiben, z. B. <fm-butono>Bearbeiten</fm-butono>.`;
+    expect(
+      (rezulto.rondoj[0]?.detail?.trovoj ?? [])
+        .filter((t) => t.regulo === "label-required")
+        .map((t) => t.sugesto),
+    ).toEqual([atendata]);
+    const detail2 = chat.petoj.find(
+      (peto) => slugDePeto(peto) === "detail" && rondoDePeto(peto) === 2,
+    );
+    const tasko = detail2?.messages.find((m) => m.role === "user")?.content ?? "";
+    expect(tasko).toContain(JSON.stringify(atendata));
+  });
+});
+
 describe("Lauf 5 end to end: what the run writes (C-1, B-4, secret check)", () => {
   it("writes the same anbieterfehleroj and malplenajPagxoj to raporto.json as the result, and restantaj with them", async () => {
     const { out, rezulto } = await kuri();
