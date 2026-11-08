@@ -10,7 +10,7 @@ PR A ist ein Strang T1 → T6 (B-8), T7 läuft parallel in PR B im eigenen Workt
 | T2 | `fm-krado` | A | erledigt (Befunde F-T2-1 bis F-T2-6) |
 | T3 | `fm-tabelo`: Auswahl, Laden, fester Kopf, geschlossene Grenzen | A | erledigt (Befunde F-T3-1 bis F-T3-6) |
 | T4 | `fm-templinio` | A | erledigt (Befunde F-T4-1 bis F-T4-6) |
-| T5 | Vitrino, Geometrie- und Stiltests, Alirebleco, Figma-Bauformen | A | offen |
+| T5 | Vitrino, Geometrie- und Stiltests, Alirebleco, Figma-Bauformen | A | erledigt (Befunde F-T5-1 bis F-T5-5, Etappe F EF-1 bis EF-5) |
 | T6 | `dataForm`, L5-4, „create new“, „Inhalte anzeigen“, Vertragsfortschreibung | A | offen |
 | T7 | L5-1 mit AC-8, L5-2, L5-3 | B | offen |
 | T8 | Je PR ein Push, ein Dispatch, Bericht | A und B | offen |
@@ -59,3 +59,12 @@ PR A ist ein Strang T1 → T6 (B-8), T7 läuft parallel in PR B im eigenen Workt
 - [x] Figma: `templinio` bis T5 nicht im Plan (D-27), T1-Test nennt ihn mit (`a2b11654`).
 - [x] Läufe: modelo 4891/6 rot (F-T1-1, -2, -5, -6, -10 und `export-modelo.test.ts:414`, behoben in `34da80dd`, danach grün), mcp 506/2 (F-T1-6, -7), projekcioj 1523/14 rot im Gesamtlauf, davon nach `42769d79` behoben: `make-kit.test.ts:865` (×2), `nachlese-11.test.ts:90`; verbleibend nur die bekannten F-T1-4, F-T1-3, F-T3-1, F-T3-6 (×3), F-T1-10/F-T2-4/F-T3-3/F-T4-2 (`parity.test.ts` ×5). eroj Vitest 43/43. Playwright Chromium `templinio.spec.ts` 4/4, `nachlese-7` 7/7, `nachlese-11-konformeco` 2/2, `pflicht` 5/5, `react` 2/2. Checks grün: lint, regularo, dokumentaro (45), vortaro-lint, mankoj, make-kit (5/5), alirebleco (315 Paare, 0 Fehler); rot: parity (32 = 5 `parity-item-missing` + 27 aus F-T3-3). Kurzprofil `templinio` 180 (< 750), `kampo` (747) bleibt das größte.
 - [x] Plan (D-23 bis D-28, F-T4-1 bis F-T4-6).
+
+## T5 im Einzelnen
+
+- [x] Rote Tests zuerst (`3260e4d0`): `projekcioj src/celoj/vitrino/eroj-046.test.ts` (10, 9 rot), `projekcioj src/celoj/figma/tabelo-046.test.ts` (4, 2 rot; Props BOOLEAN und „fünf Eroj nicht im Plan“ Wächter), `eroj/test/vitrino.check.ts` neuer Test (1 rot, 37 Befunde; Doku-Anker Wächter), `vico`/`krado`/`templinio.spec.ts` je Aspekto (9 Wächter, grün ab Beginn in allen drei Engines), `alirebleco.check.ts` neuer Block (Chromium 8, 2 rot: F-T5-1) – zusammen 12 rot plus F-T5-1.
+- [x] Vitrino: Layout-Eroj mit Kindern, `wrap`, Raster mit `data-span`, Zeitstrahl, `tabelo` mit Auswahl, Laden, festem Kopf; Skript beantwortet `select` (`6f02fb0f`, D-29, D-30).
+- [x] Folge F-T3-1 (`830059d7`), Folge `vitrino.check.ts:486` (`8247773d`, F-T5-2).
+- [x] Figma: `tabelo:skeleton` in `FIGMA_NOT_DRAWN`, Wortlaut der Jugxo (`497da613`, D-35); Folge F-T3-6 (`91d9bada`). Keine Bauform für die fünf neuen Eroj (D-34, Etappe F EF-1 bis EF-5). Kopfzeile des Berichts 3 958 (core + ekzemplo) / 3 742 (Repo), Grenze 4 000 unverändert; `bild-main.json` unverändert (kein neues Set).
+- [x] Läufe: projekcioj 1543/7 rot (F-T1-4, F-T1-3/B-3, `parity.test.ts` ×5 = F-T5-3); modelo 4892/5 rot (F-T1-1, -2, -5, -6, -10); mcp 506/2 (F-T1-6, -7); eroj Vitest 43/43. Playwright Chromium `vico` 6/6, `krado` 8/8, `templinio` 7/7, `nachlese-7` 7/7, `nachlese-11-konformeco` 2/2, `pflicht` 5/5, `react` 2/2; die neuen T5-Tests auch in Firefox und WebKit grün. Vitrino `-g "Spec 046 T5"` 1/1 (1,9 min), dazu `fm-tabelo, fm-atributlisto…`, `the Vitrino wires…`, `every table names itself`, `fm-insigno, fm-avizo…`, `the Lingvo switch…`, `axe finds nothing in light/high`, `every Ero page has the nine sections…` grün. Checks grün: lint, regularo, dokumentaro (45), vortaro-lint, mankoj, make-kit (5/5), alirebleco; `check:alirebleco-eroj` (Chromium) 217/2 rot (F-T5-1; Firefox/WebKit des neuen Blocks grün); `check:parity` 5 Fehler (F-T5-3, vorher 32).
+- [x] Plan (D-29 bis D-35, F-T5-1 bis F-T5-5, Befunde Etappe F, „Im echten Figma-Plugin zu messen“).
