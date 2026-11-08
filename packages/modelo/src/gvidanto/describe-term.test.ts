@@ -4,6 +4,7 @@
 import { describe, expect, it } from "vitest";
 import { loadModelo } from "../load/load-modelo.js";
 import { projectModeloSource } from "../load/source.js";
+import { REPO_EROJ } from "../validate/test-doubles/eroj.js";
 import { fixtureRoot } from "../validate/test-doubles/fixtures.js";
 import { type DescribeTermOutput, describeTerm } from "./describe-term.js";
 
@@ -75,48 +76,7 @@ describe("describe_term (FR-12)", () => {
   );
 
   it("names the instances of Ero", () => {
-    expect(success("Ero").instances?.names).toEqual([
-      "alsxutilo",
-      "apartigilo",
-      "atributlisto",
-      "avataro",
-      "avizo",
-      "butono",
-      "datelektilo",
-      "dialogo",
-      "elektilo",
-      "elekto",
-      "faldilo",
-      "glitilo",
-      "ikono",
-      "insigno",
-      "kampo",
-      "karto",
-      "kodbloko",
-      "kompletigilo",
-      "konsileto",
-      "langetaro",
-      "ligilo",
-      "listelektilo",
-      "lokredaktilo",
-      "markdovido",
-      "markobutono",
-      "menuo",
-      "mezurilo",
-      "navigado",
-      "pagxigilo",
-      "plenstato",
-      "plurelektilo",
-      "saltligilo",
-      "signeto",
-      "spuro",
-      "sxaltilo",
-      "sxvebilo",
-      "tabelo",
-      "tekstareo",
-      "teksto",
-      "titolo",
-    ]);
+    expect(success("Ero").instances?.names).toEqual([...REPO_EROJ]);
   });
 
   // Spec 007 (A13, plan D-11, OP-1): the Uzo is found under its German and English names, and its

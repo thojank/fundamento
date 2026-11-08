@@ -16,6 +16,7 @@ import {
   output,
   preload,
 } from "../test-doubles/client.js";
+import { REPO_EROJ } from "../test-doubles/eroj.js";
 
 afterAll(closeClients);
 preload({ config: EKZEMPLO_CONFIG });
@@ -57,7 +58,7 @@ beforeAll(async () => {
 describe("list_sxablonoj and get_sxablono (G3)", () => {
   it("list_eroj stays with the Eroj (34 since Spec 020 ③); list_sxablonoj names pagxo and sxelo with their regions", async () => {
     const eroj = await output<{ eroj: unknown[] }>(client, "list_eroj", {});
-    expect(eroj.eroj).toHaveLength(40);
+    expect(eroj.eroj).toHaveLength(REPO_EROJ.length);
     const listed = await output<Listed>(client, "list_sxablonoj", {});
     // Spec 020 ②: formularo and filtrilo beside them.
     expect(listed.sxablonoj.map((entry) => [entry.name, entry.kind, entry.regions])).toEqual([

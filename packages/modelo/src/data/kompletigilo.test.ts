@@ -13,6 +13,7 @@ import { briefOf } from "../gvidanto/eroj.js";
 import { suggestEro } from "../gvidanto/suggest-ero.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
+import { REPO_EROJ } from "../validate/test-doubles/eroj.js";
 
 const { modelo } = loadModelo(defaultModeloSource());
 if (modelo === undefined) throw new Error("the repo Modelo must load");
@@ -36,7 +37,7 @@ const suggest = (goal: string) => {
 describe("kompletigilo in the repo Modelo (section ⑤, G1, G2)", () => {
   it("lives in data/eroj/kompletigilo/skemo.json, one of forty Eroj", () => {
     expect(kompletigilo?.file).toBe("modelo/data/eroj/kompletigilo/skemo.json");
-    expect(modelo.eroj).toHaveLength(40);
+    expect(modelo.eroj).toHaveLength(REPO_EROJ.length);
   });
 
   it("has the props of the elektilo without empty-label, plus allow-free, min-chars and expanded; the states of a field; label, options, help and error", () => {

@@ -14,6 +14,7 @@ import {
   output,
   preload,
 } from "../test-doubles/client.js";
+import { REPO_EROJ } from "../test-doubles/eroj.js";
 
 afterAll(closeClients);
 preload({ config: EKZEMPLO_CONFIG });
@@ -99,7 +100,7 @@ describe("check_usage of the Aufklappen", () => {
 describe("list_eroj and the briefs", () => {
   it("lists forty Eroj; the briefs of faldilo and kompletigilo name their axes and duties", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
-    expect(listed.eroj).toHaveLength(40);
+    expect(listed.eroj).toHaveLength(REPO_EROJ.length);
     const faldiloBrief = await output<Brief>(client, "get_ero", { name: "faldilo", brief: true });
     expect(faldiloBrief.axes.map((axis) => axis.name)).toEqual(["open", "indicator-side"]);
     expect(faldiloBrief.required).toEqual({ props: [], slots: ["content", "summary"] });

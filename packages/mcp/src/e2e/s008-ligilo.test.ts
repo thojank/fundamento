@@ -16,6 +16,7 @@ import {
   output,
   preload,
 } from "../test-doubles/client.js";
+import { REPO_EROJ } from "../test-doubles/eroj.js";
 
 afterAll(closeClients);
 preload({ config: EKZEMPLO_CONFIG });
@@ -166,48 +167,7 @@ describe("S3: the agent does not take the link for an action", () => {
 describe("list_eroj and the brief (A5, acceptance 1)", () => {
   it("lists two Eroj and answers get_ero ligilo with Skemo and Uzo", async () => {
     const listed = await output<{ eroj: { name: string }[] }>(client, "list_eroj", {});
-    expect(listed.eroj.map((entry) => entry.name)).toEqual([
-      "alsxutilo",
-      "apartigilo",
-      "atributlisto",
-      "avataro",
-      "avizo",
-      "butono",
-      "datelektilo",
-      "dialogo",
-      "elektilo",
-      "elekto",
-      "faldilo",
-      "glitilo",
-      "ikono",
-      "insigno",
-      "kampo",
-      "karto",
-      "kodbloko",
-      "kompletigilo",
-      "konsileto",
-      "langetaro",
-      "ligilo",
-      "listelektilo",
-      "lokredaktilo",
-      "markdovido",
-      "markobutono",
-      "menuo",
-      "mezurilo",
-      "navigado",
-      "pagxigilo",
-      "plenstato",
-      "plurelektilo",
-      "saltligilo",
-      "signeto",
-      "spuro",
-      "sxaltilo",
-      "sxvebilo",
-      "tabelo",
-      "tekstareo",
-      "teksto",
-      "titolo",
-    ]);
+    expect(listed.eroj.map((entry) => entry.name)).toEqual([...REPO_EROJ]);
     const full = await output<{ skemo: { a11y: { role: string } }; uzo?: { purpose: string } }>(
       client,
       "get_ero",

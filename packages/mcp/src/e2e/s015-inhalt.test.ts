@@ -14,6 +14,7 @@ import {
   output,
   preload,
 } from "../test-doubles/client.js";
+import { REPO_EROJ } from "../test-doubles/eroj.js";
 
 afterAll(closeClients);
 preload({ config: EKZEMPLO_CONFIG });
@@ -157,7 +158,7 @@ describe("the content dialogs of the spec (Spec 015 ③)", () => {
 
   it("lists forty Eroj; the briefs of the karto and the avataro name their axes and duties", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
-    expect(listed.eroj).toHaveLength(40);
+    expect(listed.eroj).toHaveLength(REPO_EROJ.length);
     expect(listed.eroj.map((entry) => entry.name)).toContain("karto");
     const brief = await output<Brief>(client, "get_ero", { name: "karto", brief: true });
     // Spec 036 Teil 5 ②b-2: the new axis of the look.

@@ -16,6 +16,7 @@ import { briefOf } from "../gvidanto/eroj.js";
 import { suggestEro } from "../gvidanto/suggest-ero.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
+import { REPO_EROJ } from "../validate/test-doubles/eroj.js";
 
 const { modelo } = loadModelo(defaultModeloSource());
 if (modelo === undefined) throw new Error("the repo Modelo must load");
@@ -44,7 +45,7 @@ const brief750 = (name: string) => {
 
 describe("the four Eroj of Spec 025 ③ in the repo Modelo (forty Eroj)", () => {
   it("lists forty Eroj in name order: listelektilo and lokredaktilo after ligilo, plurelektilo after plenstato, signeto after saltligilo", () => {
-    expect(modelo.eroj).toHaveLength(40);
+    expect(modelo.eroj).toHaveLength(REPO_EROJ.length);
     const names = modelo.eroj.map((entry) => entry.ero.name);
     expect(names.indexOf("listelektilo")).toBe(names.indexOf("ligilo") + 1);
     expect(names.indexOf("lokredaktilo")).toBe(names.indexOf("listelektilo") + 1);

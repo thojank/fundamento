@@ -14,6 +14,7 @@ import { defaultModeloSource, fixtureModeloSource } from "../load/source.js";
 import { MODELO_VERSION } from "../load/version.js";
 import { allAssignments, completeAssignment, resolve } from "../resolve/index.js";
 import { fixtureRoot } from "../resolve/test-doubles/fixtures.js";
+import { REPO_EROJ } from "../validate/test-doubles/eroj.js";
 import {
   buildRezolvojJson,
   expandRezolvo,
@@ -245,7 +246,7 @@ describe("exportModelo: uzoj (Spec 007)", () => {
     expect(exportOf("ero-minimal")).not.toHaveProperty("uzoj");
     // Spec 008: every Ero of the repo has a Uzo, in Ero order.
     expect(modeloJson.uzoj?.map((uzo) => uzo.ero)).toEqual(modeloJson.eroj.map((ero) => ero.id));
-    expect(modeloJson.uzoj).toHaveLength(40);
+    expect(modeloJson.uzoj).toHaveLength(REPO_EROJ.length);
   });
 
   it("the export with uzoj validates against the exported schema", () => {

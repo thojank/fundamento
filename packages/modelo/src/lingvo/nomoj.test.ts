@@ -12,6 +12,7 @@ import { suggestEro } from "../gvidanto/suggest-ero.js";
 import { getSxablono, listSxablonoj } from "../gvidanto/sxablonoj.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
+import { REPO_EROJ } from "../validate/test-doubles/eroj.js";
 import { labelOf, NOMO_LINGVOJ, nomo, nomojOf } from "./nomoj.js";
 import { tradukoIssues } from "./tradukoj.js";
 
@@ -25,7 +26,7 @@ describe("every name the Vitrino shows has a German and an English name under it
   it("names the 40 Eroj and 5 Sxablonoj, their parts, axes, values, states, slots and regions, the Dimensioj and their values", () => {
     const nomoj = nomojOf(modelo);
     const kinds = (kind: string) => nomoj.filter((entry) => entry.kind === kind);
-    expect(kinds("ero")).toHaveLength(40);
+    expect(kinds("ero")).toHaveLength(REPO_EROJ.length);
     expect(kinds("sxablono")).toHaveLength(5);
     expect(kinds("dimensio")).toHaveLength(6);
     expect(kinds("valoro")).toHaveLength(12);

@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
 import { checkOntologio, type OntologioProblem, readOntologio } from "../ontologio/check.js";
+import { REPO_EROJ } from "../validate/test-doubles/eroj.js";
 
 const constitution = readFileSync(
   new URL("../../../../.specify/memory/constitution.md", import.meta.url),
@@ -257,90 +258,10 @@ describe("the scheme eroj (Spec 008 T009)", () => {
   const eroj = concepts.filter((concept) => concept.inScheme === "eroj");
 
   it("holds one concept per Ero of the Modelo, under #Ero, related to each other", () => {
-    expect(eroNames).toEqual([
-      "alsxutilo",
-      "apartigilo",
-      "atributlisto",
-      "avataro",
-      "avizo",
-      "butono",
-      "datelektilo",
-      "dialogo",
-      "elektilo",
-      "elekto",
-      "faldilo",
-      "glitilo",
-      "ikono",
-      "insigno",
-      "kampo",
-      "karto",
-      "kodbloko",
-      "kompletigilo",
-      "konsileto",
-      "langetaro",
-      "ligilo",
-      "listelektilo",
-      "lokredaktilo",
-      "markdovido",
-      "markobutono",
-      "menuo",
-      "mezurilo",
-      "navigado",
-      "pagxigilo",
-      "plenstato",
-      "plurelektilo",
-      "saltligilo",
-      "signeto",
-      "spuro",
-      "sxaltilo",
-      "sxvebilo",
-      "tabelo",
-      "tekstareo",
-      "teksto",
-      "titolo",
-    ]);
-    expect(eroj.map((concept) => concept.term).sort()).toEqual([
-      "Alsxutilo",
-      "Apartigilo",
-      "Atributlisto",
-      "Avataro",
-      "Avizo",
-      "Butono",
-      "Datelektilo",
-      "Dialogo",
-      "Elektilo",
-      "Elekto",
-      "Faldilo",
-      "Glitilo",
-      "Ikono",
-      "Insigno",
-      "Kampo",
-      "Karto",
-      "Kodbloko",
-      "Kompletigilo",
-      "Konsileto",
-      "Langetaro",
-      "Ligilo",
-      "Listelektilo",
-      "Lokredaktilo",
-      "Markdovido",
-      "Markobutono",
-      "Menuo",
-      "Mezurilo",
-      "Navigado",
-      "Pagxigilo",
-      "Plenstato",
-      "Plurelektilo",
-      "Saltligilo",
-      "Signeto",
-      "Spuro",
-      "Sxaltilo",
-      "Sxvebilo",
-      "Tabelo",
-      "Tekstareo",
-      "Teksto",
-      "Titolo",
-    ]);
+    expect(eroNames).toEqual([...REPO_EROJ]);
+    expect(eroj.map((concept) => concept.term).sort()).toEqual(
+      REPO_EROJ.map((name) => `${name[0]?.toUpperCase()}${name.slice(1)}`),
+    );
     for (const concept of eroj) {
       expect(concept.broader).toEqual(["#Ero"]);
       expect(concept.notation).toBeUndefined();

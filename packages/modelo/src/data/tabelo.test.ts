@@ -13,6 +13,7 @@ import { briefOf } from "../gvidanto/eroj.js";
 import { suggestEro } from "../gvidanto/suggest-ero.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
+import { REPO_EROJ } from "../validate/test-doubles/eroj.js";
 
 const { modelo } = loadModelo(defaultModeloSource());
 if (modelo === undefined) throw new Error("the repo Modelo must load");
@@ -32,7 +33,7 @@ const suggest = (goal: string) => {
 describe("tabelo in the repo Modelo (section ④, G1, G2, E10)", () => {
   it("lives in data/eroj/tabelo/skemo.json, thirty-seventh of forty Eroj", () => {
     expect(tabelo?.file).toBe("modelo/data/eroj/tabelo/skemo.json");
-    expect(modelo.eroj[36]?.ero.name).toBe("tabelo");
+    expect(modelo.eroj[REPO_EROJ.indexOf("tabelo")]?.ero.name).toBe("tabelo");
   });
 
   it("has density, caption-hidden, sort (the column) and direction as props; the states of the sort button", () => {

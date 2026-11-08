@@ -12,6 +12,7 @@ import { briefOf } from "../gvidanto/eroj.js";
 import { suggestEro } from "../gvidanto/suggest-ero.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
+import { REPO_EROJ } from "../validate/test-doubles/eroj.js";
 
 const { modelo } = loadModelo(defaultModeloSource());
 if (modelo === undefined) throw new Error("the repo Modelo must load");
@@ -31,7 +32,7 @@ const suggest = (goal: string) => {
 describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
   it("lives in data/eroj/langetaro/skemo.json, nineteenth of forty Eroj", () => {
     expect(langetaro?.file).toBe("modelo/data/eroj/langetaro/skemo.json");
-    expect(modelo.eroj[19]?.ero.name).toBe("langetaro");
+    expect(modelo.eroj[REPO_EROJ.indexOf("langetaro")]?.ero.name).toBe("langetaro");
   });
 
   it("has label (a duty) and selected (the id of the chosen tab) as props; the states of a tab", () => {

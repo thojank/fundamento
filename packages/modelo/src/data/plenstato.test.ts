@@ -13,6 +13,7 @@ import { briefOf } from "../gvidanto/eroj.js";
 import { suggestEro } from "../gvidanto/suggest-ero.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
+import { REPO_EROJ } from "../validate/test-doubles/eroj.js";
 
 const { modelo } = loadModelo(defaultModeloSource());
 if (modelo === undefined) throw new Error("the repo Modelo must load");
@@ -32,7 +33,7 @@ const suggest = (goal: string) => {
 describe("plenstato in the repo Modelo (section ③, G1, G2)", () => {
   it("lives in data/eroj/plenstato/skemo.json, thirtieth of forty Eroj", () => {
     expect(plenstato?.file).toBe("modelo/data/eroj/plenstato/skemo.json");
-    expect(modelo.eroj[29]?.ero.name).toBe("plenstato");
+    expect(modelo.eroj[REPO_EROJ.indexOf("plenstato")]?.ero.name).toBe("plenstato");
   });
 
   it("has kind (loading, empty) as its one prop, a duty without a default; one state, rest", () => {

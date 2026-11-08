@@ -7,6 +7,7 @@
 import { describe, expect, it } from "vitest";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
+import { REPO_EROJ } from "../validate/test-doubles/eroj.js";
 import { labelOf } from "./nomoj.js";
 import { tradukoIssues } from "./tradukoj.js";
 
@@ -31,7 +32,7 @@ describe("the purposes in German (Nachlese 10 N-6)", () => {
       ...modelo.eroj.flatMap((entry) => (entry.uzo === undefined ? [] : [entry.uzo])),
       ...(modelo.sxablonoj ?? []).flatMap((entry) => (entry.uzo === undefined ? [] : [entry.uzo])),
     ];
-    expect(uzoj).toHaveLength(45);
+    expect(uzoj).toHaveLength(REPO_EROJ.length + 5);
     for (const uzo of uzoj) expect(de[`${uzo.id}/purpose`], uzo.id).toBeTruthy();
     const glitilo = modelo.eroj.find((entry) => entry.ero.name === "glitilo")?.uzo;
     const without = { ...de };

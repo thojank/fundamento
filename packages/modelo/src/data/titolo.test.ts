@@ -12,6 +12,7 @@ import { briefOf } from "../gvidanto/eroj.js";
 import { suggestEro } from "../gvidanto/suggest-ero.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
+import { REPO_EROJ } from "../validate/test-doubles/eroj.js";
 
 const { modelo } = loadModelo(defaultModeloSource());
 if (modelo === undefined) throw new Error("the repo Modelo must load");
@@ -31,7 +32,7 @@ const suggest = (goal: string) => {
 describe("titolo in the repo Modelo (section ③, G1, G2)", () => {
   it("lives in data/eroj/titolo/skemo.json, one of forty Eroj", () => {
     expect(titolo?.file).toBe("modelo/data/eroj/titolo/skemo.json");
-    expect(modelo.eroj).toHaveLength(40);
+    expect(modelo.eroj).toHaveLength(REPO_EROJ.length);
   });
 
   it("has level (a duty, 1–6, no default) and size (seven roles, no default: derived from the level) as props; one state; the label slot", () => {

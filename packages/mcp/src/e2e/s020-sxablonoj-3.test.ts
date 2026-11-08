@@ -12,6 +12,7 @@ import {
   output,
   preload,
 } from "../test-doubles/client.js";
+import { REPO_EROJ } from "../test-doubles/eroj.js";
 
 afterAll(closeClients);
 preload({ config: EKZEMPLO_CONFIG });
@@ -77,6 +78,6 @@ describe("the example dialogs of Spec 020 ③", () => {
     expect(listed.eroj.map((entry) => entry.name)).toEqual(
       expect.arrayContaining(["kodbloko", "markdovido"]),
     );
-    expect(listed.eroj).toHaveLength(40);
+    expect(listed.eroj).toHaveLength(REPO_EROJ.length);
   });
 });

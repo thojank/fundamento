@@ -7,8 +7,9 @@ import { readModeloSchema } from "../contracts/schema.js";
 import { buildModelo } from "../load/build.js";
 import { readModeloFiles } from "../load/files.js";
 import { defaultModeloSource, projectModeloSource } from "../load/source.js";
+import { REPO_EROJ } from "../validate/test-doubles/eroj.js";
 import { fixtureRoot } from "../validate/test-doubles/fixtures.js";
-import { describeModelo } from "./describe.js";
+import { countWord, describeModelo } from "./describe.js";
 import { exportModelo } from "./export-modelo.js";
 
 function modeloJsonOf(source = defaultModeloSource()): ModeloJson {
@@ -57,7 +58,10 @@ describe("describeModelo (D-14)", () => {
   it("names Dimensioj, Aspektoj and counts per group in the sentence", () => {
     const { sentence, tokensByGroup } = describeModelo(project);
     expect(sentence).toMatch(
-      /^Fundamento v0\.2\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), two Aspektoj \(`komuna`: reference, MIT, Geist; `ekzemplo`: external, MIT, Archivo\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, forty Eroj \(`alsxutilo`, `apartigilo`, `atributlisto`, `avataro`, `avizo`, `butono`, `datelektilo`, `dialogo`, `elektilo`, `elekto`, `faldilo`, `glitilo`, `ikono`, `insigno`, `kampo`, `karto`, `kodbloko`, `kompletigilo`, `konsileto`, `langetaro`, `ligilo`, `listelektilo`, `lokredaktilo`, `markdovido`, `markobutono`, `menuo`, `mezurilo`, `navigado`, `pagxigilo`, `plenstato`, `plurelektilo`, `saltligilo`, `signeto`, `spuro`, `sxaltilo`, `sxvebilo`, `tabelo`, `tekstareo`, `teksto`, `titolo`\)\. Ask explain why a value is what it is\.$/,
+      /^Fundamento v0\.2\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), two Aspektoj \(`komuna`: reference, MIT, Geist; `ekzemplo`: external, MIT, Archivo\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, \w+(?:-\w+)? Eroj \([^)]*\)\. Ask explain why a value is what it is\.$/,
+    );
+    expect(sentence).toContain(
+      `${countWord(REPO_EROJ.length)} Eroj (${REPO_EROJ.map((name) => `\`${name}\``).join(", ")})`,
     );
     expect(sentence).toContain(`color ${tokensByGroup.color}`);
     expect(sentence).toContain(`typography ${tokensByGroup.typography}`);

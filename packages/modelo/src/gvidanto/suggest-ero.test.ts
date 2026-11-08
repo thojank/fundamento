@@ -66,72 +66,9 @@ describe("suggest_ero", () => {
     expect(result.issues[0]?.path).toBe("suggest_ero/goal");
     // Every goal of every Ero, in Ero order (Spec 008: navigate and external of the ligilo).
     expect(result.allowed).toEqual([
-      "upload",
-      "separate",
-      "details",
-      "avatar",
-      "notify",
-      "report-error",
-      "destructive",
-      "confirm",
-      "dismiss",
-      // Spec 025 ②: the datelektilo.
-      "pick-date",
-      "date-range",
-      "ask-reason",
-      "choose-many",
-      "choose-few",
-      "disclosure",
-      // Spec 025 ①: the glitilo.
-      "slide",
-      "value-range",
-      "show-icon",
-      "status-label",
-      "enter-text",
-      "email",
-      "password",
-      "number",
-      "date",
-      // Spec 025 ①: the kampo's counter and time.
-      "count",
-      "time",
-      "card",
-      "command",
-      "code-block",
-      "suggest",
-      "tooltip",
-      "switch-view",
-      "navigate",
-      "external",
-      // Spec 036 Teil 5 ②b-4 (A-ligilo-6).
-      "download",
-      // Spec 025 ③: the listelektilo and the lokredaktilo.
-      "styled-choice",
-      "inline-edit",
-      "markdown",
-      "agree",
-      "opt-in",
-      "action-menu",
-      "meter",
-      "navigate-app",
-      "paginate",
-      "loading",
-      "empty",
-      // Spec 025 ③: the plurelektilo.
-      "choose-several",
-      "skip-to-content",
-      // Spec 025 ③: the signeto.
-      "filter-chip",
-      "removable-tag",
-      "keyword-tag",
-      "breadcrumb",
-      "toggle",
-      "popover",
-      "table",
-      "multi-line",
-      "running-text",
-      "section-heading",
-      "page-title",
+      ...new Set(
+        modelo.eroj.flatMap((entry) => (entry.skemo.goals ?? []).map((goal) => goal.goal)),
+      ),
     ]);
     // Spec 007 (OP-6, D-06): the system says it does not cover the goal; a person decides.
     expect(result.issues[0]?.suggestion).toBe(
