@@ -3441,6 +3441,141 @@
       ]
     },
     {
+      "uri": "urn:fundamento:ontologio#Vico",
+      "term": "Vico",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Vico",
+        "en": "row",
+        "de": "Reihe"
+      },
+      "altLabel": {
+        "en": [
+          "vico",
+          "row",
+          "horizontal stack"
+        ],
+        "de": [
+          "Reihe",
+          "Zeilenlayout",
+          "vico"
+        ]
+      },
+      "definition": {
+        "en": "A row: a layout Ero that sets any children side by side with the gap of a spacing step between them (gap), aligns them across the row (align), places them along it (justify) and lets them break into a new line where the row is full (wrap). It draws nothing of its own – no colour, no font, no role; children one below the other are the stako's, the grid of a page stops with a person.",
+        "de": "Eine Reihe: ein Layout-Ero, das beliebige Kinder nebeneinander stellt, mit dem Abstand einer Abstandsstufe dazwischen (gap), sie quer zur Reihe ausrichtet (align), entlang verteilt (justify) und umbrechen lässt, wo die Reihe voll ist (wrap). Es zeichnet nichts selbst – keine Farbe, keine Schrift, keine Rolle; Kinder untereinander gehören dem stako, das Raster einer Seite entscheidet eine Person."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Stako"
+        },
+        {
+          "predicate": "references",
+          "target": "#Karto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Insigno"
+        }
+      ]
+    },
+    {
+      "uri": "urn:fundamento:ontologio#Kolumno",
+      "term": "Kolumno",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Kolumno",
+        "en": "column",
+        "de": "Spalte"
+      },
+      "altLabel": {
+        "en": [
+          "kolumno",
+          "column",
+          "vertical stack"
+        ],
+        "de": [
+          "Spalte",
+          "Spaltenlayout",
+          "kolumno"
+        ]
+      },
+      "definition": {
+        "en": "A column: a layout Ero that sets any children one below the other with the gap of a spacing step between them (gap), aligns them across the column (align), places them along it (justify) and lets them break into a further column where the height is bounded (wrap). It draws nothing of its own; children side by side are the vico's, the plain stack over the full width the stako's.",
+        "de": "Eine Spalte: ein Layout-Ero, das beliebige Kinder untereinander stellt, mit dem Abstand einer Abstandsstufe dazwischen (gap), sie quer zur Spalte ausrichtet (align), entlang verteilt (justify) und in eine weitere Spalte umbrechen lässt, wo die Höhe begrenzt ist (wrap). Es zeichnet nichts selbst; Kinder nebeneinander gehören der vico, der einfache Stapel über die volle Breite dem stako."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Vico"
+        },
+        {
+          "predicate": "references",
+          "target": "#Stako"
+        },
+        {
+          "predicate": "references",
+          "target": "#Kampo"
+        }
+      ]
+    },
+    {
+      "uri": "urn:fundamento:ontologio#Stako",
+      "term": "Stako",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Stako",
+        "en": "stack",
+        "de": "Stapel"
+      },
+      "altLabel": {
+        "en": [
+          "stako",
+          "stack"
+        ],
+        "de": [
+          "Stapel",
+          "stako"
+        ]
+      },
+      "definition": {
+        "en": "A stack: the short form of a column – a layout Ero that sets any children one below the other over the full width, with the gap of a spacing step between them (gap) and nothing else. It draws nothing of its own; aligned or spread children are the kolumno's, children side by side the vico's.",
+        "de": "Ein Stapel: die Kurzform einer Spalte – ein Layout-Ero, das beliebige Kinder über die volle Breite untereinander stellt, mit dem Abstand einer Abstandsstufe dazwischen (gap), und sonst nichts. Es zeichnet nichts selbst; ausgerichtete oder verteilte Kinder gehören der kolumno, Kinder nebeneinander der vico."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Kolumno"
+        },
+        {
+          "predicate": "references",
+          "target": "#Vico"
+        },
+        {
+          "predicate": "references",
+          "target": "#Karto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Avizo"
+        }
+      ]
+    },
+    {
       "uri": "urn:fundamento:ontologio#Deziraro",
       "term": "Deziraro",
       "inScheme": "laboro",

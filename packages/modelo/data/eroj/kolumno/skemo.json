@@ -1,0 +1,150 @@
+{
+  "ero": {
+    "id": "ero_01M6X3XKZC59PJJEVWB8HVZVJW",
+    "name": "kolumno",
+    "skemo": "ske_01M6X3XMCN6SMC962Y26Y6W77J",
+    "description": "A column: sets any children one below the other with the gap of a spacing step between them, aligned across the column and placed along it, and lets them break into a further column where the height is bounded (wrap). It draws nothing of its own: no colour, no font, no role."
+  },
+  "skemo": {
+    "id": "ske_01M6X3XMCN6SMC962Y26Y6W77J",
+    "ero": "ero_01M6X3XKZC59PJJEVWB8HVZVJW",
+    "props": [
+      {
+        "name": "gap",
+        "kind": "enum",
+        "values": [
+          "xsmall",
+          "small",
+          "medium",
+          "large",
+          "xlarge",
+          "xxlarge"
+        ],
+        "default": "medium",
+        "description": "The room between the children of the column: a spacing step of core (spacing.xsmall to spacing.xxlarge), never a value of its own; the Ero owns the space between its children (spacing-owned-by-container)."
+      },
+      {
+        "name": "align",
+        "kind": "enum",
+        "values": [
+          "start",
+          "center",
+          "end",
+          "stretch"
+        ],
+        "default": "stretch",
+        "description": "Where the children stand across the column: at its start, in its middle, at its end, or stretched over it."
+      },
+      {
+        "name": "justify",
+        "kind": "enum",
+        "values": [
+          "start",
+          "center",
+          "end",
+          "space-between"
+        ],
+        "default": "start",
+        "description": "Where the children stand along the column: together at its start, in its middle or at its end, or spread with the first at the start and the last at the end."
+      },
+      {
+        "name": "wrap",
+        "kind": "boolean",
+        "default": false,
+        "description": "Whether the children may break into a further column where the container is too narrow for them; without wrap they stay in one line."
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "content",
+        "default": true
+      }
+    ],
+    "parts": {
+      "box": {
+        "gap": {
+          "by": [
+            "gap"
+          ]
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "box",
+        "property": "gap",
+        "when": {
+          "gap": "xsmall"
+        },
+        "token": "spacing.xsmall"
+      },
+      {
+        "part": "box",
+        "property": "gap",
+        "when": {
+          "gap": "small"
+        },
+        "token": "spacing.small"
+      },
+      {
+        "part": "box",
+        "property": "gap",
+        "when": {
+          "gap": "medium"
+        },
+        "token": "spacing.medium"
+      },
+      {
+        "part": "box",
+        "property": "gap",
+        "when": {
+          "gap": "large"
+        },
+        "token": "spacing.large"
+      },
+      {
+        "part": "box",
+        "property": "gap",
+        "when": {
+          "gap": "xlarge"
+        },
+        "token": "spacing.xlarge"
+      },
+      {
+        "part": "box",
+        "property": "gap",
+        "when": {
+          "gap": "xxlarge"
+        },
+        "token": "spacing.xxlarge"
+      }
+    ],
+    "a11y": {
+      "role": "generic",
+      "name": [],
+      "states": {},
+      "keys": []
+    },
+    "goals": [
+      {
+        "goal": "column",
+        "keywords": {
+          "en": [
+            "column",
+            "columnwise"
+          ],
+          "de": [
+            "spalte",
+            "spaltenweise"
+          ]
+        },
+        "props": {
+          "gap": "medium"
+        }
+      }
+    ]
+  }
+}
