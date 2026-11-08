@@ -234,11 +234,15 @@ const malplenaAsistanto = (peto: Peto) =>
   );
 
 async function kuri(
-  e: { taksilo?: TaksiloDouble; antauaj?: Record<string, (ChatRespondo | Error)[]> } = {},
+  e: {
+    taksilo?: TaksiloDouble;
+    antauaj?: Record<string, (ChatRespondo | Error)[]>;
+    tools?: MemoraPonto;
+  } = {},
 ) {
   const out = mkdtempSync(join(tmpdir(), "s038-37t-"));
   const chat = new SkriptaModelo(skriptoDe(e.antauaj ?? MIKSAJXO()), { modelo: PERMESITA_MODELO });
-  const tools = new MemoraPonto({ iloj: CXIUJ_ILOJ });
+  const tools = e.tools ?? new MemoraPonto({ iloj: CXIUJ_ILOJ });
   const deps = depsDe(chat, tools, e.taksilo ?? detailVerda());
   const rezulto = await kuruEkranojn(enigoDe(out), deps);
   return { out, chat, tools, deps, rezulto };
@@ -369,6 +373,66 @@ describe("Lauf 5 end to end: the mix of provider errors and empty pages over fiv
     expect(
       (rezulto.anbieterfehleroj ?? []).map((e) => `${e.ekrano}#${e.rondo} ${e.ago}`).at(-1),
     ).toBe("einstellungen#1 rezigno");
+  });
+});
+
+// S038-39b (F-S038-39a-3): the detail page of abnahme-komuna-l5-v1 kept `<div slot="actions">` for
+// three rounds; check_usage's suggestion did not name the wrapper. The finding handed to round 2
+// now names it – generic for any slot and Ero, read from the facts of the page.
+describe("Lauf 5 end to end: a wrapper in a slot is named for the next round (S038-39b)", () => {
+  const HULO = '<div slot="actions"><fm-butono>Bearbeiten</fm-butono></div>';
+  const MESAGXO =
+    "Instance 0 of karto holds text in the slot actions, which accepts butono or ligilo.";
+  const SUGESTO = "Put butono or ligilo in the slot actions.";
+  /** check_markup that judges the wrapper as the real check_usage does (uzo-slot-accepts). */
+  const kontrolo = (args: Record<string, unknown>) => {
+    const kunHulo = String(args.fragment ?? "").includes('<div slot="actions">');
+    return {
+      eroj: [{ ero: "karto", props: {} }],
+      sxablonoj: [],
+      rezulto: kunHulo
+        ? {
+            instances: 1,
+            valid: false,
+            violations: [
+              {
+                instance: [0],
+                issue: {
+                  rule: "uzo-slot-accepts",
+                  severity: "error",
+                  path: "instances#/0",
+                  message: MESAGXO,
+                  suggestion: SUGESTO,
+                },
+              },
+            ],
+          }
+        : { instances: 1, valid: true, violations: [] },
+    };
+  };
+
+  it("asks round 2 of detail with a suggestion that names the wrapper and the Eroj in it", async () => {
+    const detail1 = pagxo("detail", 1).replace("</fm-karto>", `${HULO}</fm-karto>`);
+    const { chat, rezulto } = await kuri({
+      taksilo: new TaksiloDouble(() => MALVERDA),
+      antauaj: { "detail#1": [respondo(`\`\`\`html\n${detail1}\n\`\`\``)] },
+      tools: new MemoraPonto({ iloj: CXIUJ_ILOJ, checkMarkup: kontrolo }),
+    });
+    const atendata = `${SUGESTO} Im Slot actions steht ein <div> als Hülle; eine Hülle zählt als Text: slot="actions" direkt an jedes fm-butono darin setzen und das <div> weglassen.`;
+    expect(
+      (rezulto.rondoj[0]?.detail?.trovoj ?? [])
+        .filter((t) => t.regulo === "uzo-slot-accepts")
+        .map((t) => t.sugesto),
+    ).toEqual([atendata]);
+    const detail2 = chat.petoj.find(
+      (peto) => slugDePeto(peto) === "detail" && rondoDePeto(peto) === 2,
+    );
+    const tasko = detail2?.messages.find((m) => m.role === "user")?.content ?? "";
+    expect(tasko).toContain(JSON.stringify(atendata));
+    // liste never had the wrapper: its findings keep no such suggestion.
+    expect(
+      (rezulto.rondoj[0]?.liste?.trovoj ?? []).filter((t) => t.sugesto.includes("Hülle")),
+    ).toEqual([]);
   });
 });
 

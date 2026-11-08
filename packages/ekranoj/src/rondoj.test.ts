@@ -44,6 +44,7 @@ import type {
   EkranojDeps,
   EkranojEnigo,
   EkranojRezulto,
+  Fakto,
   K8Merkmal,
   KostoTakso,
   Malobservo,
@@ -1366,5 +1367,87 @@ describe("findings for the next round: the rule's suggestion and concrete target
     expect(sugestoj).toEqual([
       `Nur auf geplante Screens verweisen: ${PLANO.ekranoj.map((e) => `${e.slug}.html`).join(", ")}.`,
     ]);
+  });
+});
+
+// S038-39b (F-S038-39a-3): a wrapper element in a slot that accepts Eroj only counts as text; the
+// finding names it, so the next round moves the slot attribute onto the Eroj themselves.
+describe("findings for the next round: a wrapper in a slot (S038-39b)", () => {
+  const LOKO = "fm-karto „Standard-Informationen“";
+  const MESAGXO =
+    "Instance 1 of karto holds text in the slot actions, which accepts butono or ligilo.";
+  const SUGESTO = "Put butono or ligilo in the slot actions.";
+  const MALOBSERVO: Malobservo = {
+    rule: "uzo-slot-accepts",
+    severity: "error",
+    path: "instances#/1",
+    message: MESAGXO,
+    suggestion: SUGESTO,
+    loko: LOKO,
+  };
+  const sen = { kompleta: true, mankantaj: [], mortaj: [] };
+  const taksado: Taksado = {
+    ...MALVERDA,
+    mankoj: [{ kind: "regulo" as const, key: "uzo-slot-accepts" }],
+  };
+  /** The detail page of abnahme-komuna-l5-v1 round 3, as far as the slots go. */
+  const faktoKun = (actions: "hulo" | "rekte"): Fakto => {
+    const bazo = faktoKunLigiloj([]);
+    const karto = bazo.elements.length;
+    const elements: Fakto["elements"] = [
+      ...bazo.elements,
+      { tag: "fm-karto", attrs: { level: "2" }, parent: -1, text: "" },
+      { tag: "span", attrs: { slot: "heading" }, parent: karto, text: "Standard-Informationen" },
+      { tag: "fm-atributlisto", attrs: { label: "Details" }, parent: karto, text: "" },
+      { tag: "div", attrs: { slot: "entries" }, parent: karto + 2, text: "" },
+      { tag: "fm-teksto", attrs: {}, parent: karto + 3, text: "Name" },
+    ];
+    if (actions === "hulo") {
+      const hulo = elements.length;
+      elements.push(
+        { tag: "div", attrs: { slot: "actions" }, parent: karto, text: "" },
+        { tag: "fm-butono", attrs: { emphasis: "medium" }, parent: hulo, text: "Bearbeiten" },
+        { tag: "fm-butono", attrs: { intent: "danger" }, parent: hulo, text: "Standard löschen" },
+        { tag: "fm-ligilo", attrs: { to: "liste.html" }, parent: hulo, text: "Zur Liste" },
+      );
+    } else {
+      elements.push({ tag: "span", attrs: { slot: "actions" }, parent: karto, text: "Bearbeiten" });
+    }
+    return { ...bazo, elements };
+  };
+
+  it("names the wrapper and the Eroj in it, in the finding of check_usage and of the scorer's K3 gap", () => {
+    const trovoj = trovojDe({
+      slug: "detail",
+      taksado,
+      malobservoj: [MALOBSERVO],
+      fakto: faktoKun("hulo"),
+      navigado: sen,
+      malhelpoj: ["check_usage"],
+    });
+    const pri = trovoj.filter(
+      (t) => t.regulo === "uzo-slot-accepts" || t.loko === "uzo-slot-accepts",
+    );
+    expect(pri).toHaveLength(2);
+    const atendata = `${SUGESTO} Im Slot actions steht ein <div> als Hülle; eine Hülle zählt als Text: slot="actions" direkt an jedes fm-butono und fm-ligilo darin setzen und das <div> weglassen.`;
+    expect(pri.map((t) => t.sugesto)).toEqual([atendata, atendata]);
+    // The wrapper of another slot (entries) is not named.
+    expect(pri.some((t) => t.sugesto.includes("entries"))).toBe(false);
+  });
+
+  it("keeps the suggestion of check_usage unchanged where the slot holds no wrapper", () => {
+    const trovoj = trovojDe({
+      slug: "detail",
+      taksado,
+      malobservoj: [MALOBSERVO],
+      fakto: faktoKun("rekte"),
+      navigado: sen,
+      malhelpoj: ["check_usage"],
+    });
+    expect(
+      trovoj
+        .filter((t) => t.regulo === "uzo-slot-accepts" || t.loko === "uzo-slot-accepts")
+        .map((t) => t.sugesto),
+    ).toEqual([SUGESTO, SUGESTO]);
   });
 });
