@@ -85,16 +85,12 @@ describe("the data dialogs of the spec: a table, one record, a meter", () => {
     expect(valueInRange.ero).toBe("mezurilo");
   });
 
-  it("'eine feste Kopfzeile' stops: not supported, with the table's reason", async () => {
+  it("'eine feste Kopfzeile' is the tabelo with sticky-header (Spec 046 T3 closes the boundary)", async () => {
     const answer = await output<Suggested>(client, "suggest_ero", {
       goal: "eine feste Kopfzeile",
     });
-    expect(answer.suggestion).toBeNull();
-    expect(answer.boundary).toMatchObject({
-      ero: "tabelo",
-      case: "sticky-header",
-      action: "not-supported",
-    });
+    expect(answer.suggestion).toEqual({ ero: "tabelo", props: { "sticky-header": true } });
+    expect(answer.boundary).toBeUndefined();
   });
 });
 

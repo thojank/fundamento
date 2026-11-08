@@ -131,6 +131,13 @@ describe("tabelo in the repo Modelo (section ④, G1, G2, E10)", () => {
   it("knows the goal table with the words of the spec (no word of another Ero), citing the caption rule", () => {
     expect(skemo?.goals?.map((goal) => [goal.goal, goal.regulo])).toEqual([
       ["table", "table-caption-names-the-content"],
+      // Spec 046 T3: the boundaries row-selection and sticky-header are closed by the table's props.
+      ["row-selection", undefined],
+      ["sticky-header", undefined],
+    ]);
+    expect(skemo?.goals?.slice(1).map((goal) => goal.props)).toEqual([
+      { selectable: true },
+      { "sticky-header": true },
     ]);
     expect(skemo?.goals?.[0]?.keywords).toEqual({
       en: ["table", "records", "grid", "datatable"],
@@ -163,13 +170,11 @@ describe("the Uzo of the tabelo (section ④, G5)", () => {
     ]);
   });
 
-  it("names its boundaries: selection, pagination, inline edit, row menu and row tint ask a person; a sticky header is not supported", () => {
+  it("names its boundaries: pagination and inline edit are other Eroj', row tint asks a person; selection and a sticky header are its own (Spec 046 T3)", () => {
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
-      ["row-selection", "ask-human"],
       // Spec 015 ①: the pagination is the pagxigilo's.
       ["pagination", "use-instead"],
       ["inline-edit", "use-instead"],
-      ["sticky-header", "not-supported"],
       ["row-tint", "ask-human"],
     ]);
     for (const entry of [...(uzo?.instead ?? []), ...(uzo?.boundary ?? [])]) {
@@ -266,13 +271,15 @@ describe("check_usage and suggest_ero of the table (G6, G7, Gvidanto)", () => {
     expect(one.suggestion).toEqual({ ero: "atributlisto", props: {} });
   });
 
-  it("row selection and pagination ask a person; a sticky header stops", () => {
-    expect(suggest("Zeilenauswahl der Zeilen").action).toBe("ask-human");
-    expect(suggest("Zeilen mit Seitennummerierung").action).toBe("ask-human");
-    expect(suggest("eine feste Kopfzeile").boundary).toMatchObject({
+  it("pagination asks a person; row selection and a sticky header are the tabelo with its prop (Spec 046 T3)", () => {
+    expect(suggest("Zeilenauswahl der Zeilen").suggestion).toEqual({
       ero: "tabelo",
-      case: "sticky-header",
-      action: "not-supported",
+      props: { selectable: true },
+    });
+    expect(suggest("Zeilen mit Seitennummerierung").action).toBe("ask-human");
+    expect(suggest("eine feste Kopfzeile").suggestion).toEqual({
+      ero: "tabelo",
+      props: { "sticky-header": true },
     });
   });
 });

@@ -654,7 +654,9 @@ describe("Make Kit and the tabelo, atributlisto and mezurilo (Spec 011 ④)", ()
       expect(table).toContain("# Tabelo");
       expect(table).toContain("`density`");
       expect(table).toContain("**table-caption-names-the-content**");
-      expect(table).toContain("**sticky-header**");
+      // Spec 046 T3: the boundary sticky-header is closed; the table has the prop.
+      expect(table).not.toContain("**sticky-header**");
+      expect(table).toContain("`sticky-header`");
       const list = kit(aspekto, "guidelines/components/atributlisto.md");
       expect(list).toContain("# Atributlisto");
       expect(list).toContain("`layout`");
