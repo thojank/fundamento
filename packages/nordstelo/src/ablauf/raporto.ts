@@ -12,6 +12,7 @@ import type {
   AnbieterEraro,
   Haltigo,
   Kriterio,
+  MalplenaPagxo,
   Peno,
   Taksilo,
   Varianto,
@@ -108,6 +109,12 @@ export interface KuroRekordo {
    * `kuro.json`.
    */
   restantajLauxRegulo?: Record<string, Record<string, number>>;
+  /**
+   * Every screen-round whose page had no element content (Spec 038 B-4, AK-2, the records of
+   * ekranoj's `EkranojRezulto.malplenajPagxoj`, D-S038-37c-5); `respondo` is relative to the run
+   * folder. Absent when there are none, on the error path and in older `kuro.json`.
+   */
+  malplenajPagxoj?: MalplenaPagxo[];
 }
 
 /** How many rules the reports show per flow × variant (Spec 038 A-2: the three most frequent). */

@@ -8,6 +8,7 @@
 // `vergleich.{json,md}`). Doubles only: no Gvidanto process, no network, no wait, no browser.
 
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readdirSync,
@@ -153,7 +154,11 @@ const NUN = new Date(Date.UTC(2026, 10, 8, 12, 0));
 const ILOJ = { list: async () => [], call: async () => "" };
 
 /** The dependencies of one ekranoj run, as the measurement and `fm ekranoj` give them. */
-function kuraDepsDe(varianto: Varianto, linioj: string[]): Omit<EkranojDeps, "taksilo"> {
+function kuraDepsDe(
+  varianto: Varianto,
+  linioj: string[],
+  kunEligo = true,
+): Omit<EkranojDeps, "taksilo"> {
   return {
     chat: new SkriptaModelo(varianto === "F" ? miksajxo() : {}),
     tools: ILOJ,
@@ -161,7 +166,8 @@ function kuraDepsDe(varianto: Varianto, linioj: string[]): Omit<EkranojDeps, "ta
     nun: () => NUN,
     log: (linio) => linioj.push(linio),
     dormi: async () => undefined,
-    eligo: eligoDe(),
+    // The real `--art ablauf` gives no eligo of its own (F-S038-37t-1).
+    ...(kunEligo ? { eligo: eligoDe() } : {}),
   };
 }
 
@@ -174,7 +180,7 @@ interface Mezuro {
 }
 
 /** One measurement of the flow, F and 0, through the real kuruEkranojn. */
-async function mezuri(out: string): Promise<Mezuro> {
+async function mezuri(out: string, kunEligo = true): Promise<Mezuro> {
   const linioj: string[] = [];
   const ekranoj = new Map<Varianto, EkranojRezulto>();
   const deps: AblaufDeps = {
@@ -184,7 +190,7 @@ async function mezuri(out: string): Promise<Mezuro> {
       return rezulto;
     },
     kiModelo: PERMESITA_MODELO,
-    kuraDeps: ({ varianto }) => kuraDepsDe(varianto, linioj),
+    kuraDeps: ({ varianto }) => kuraDepsDe(varianto, linioj, kunEligo),
     taksiloPor: () => konstantaTaksilo(50),
     modelo,
     markoj: ASPEKTOJ_DUOBLAJ,
@@ -299,6 +305,39 @@ describe("Lauf 5 across ekranoj and nordstelo: the measurement with the real kur
       (kuro.anbieterfehleroj ?? []).map((e: AnbieterEraro) => Object.keys(e).sort().join(",")),
     );
     expect([...sxlosiloj]).toEqual(["ago,ekrano,mesagxo,provo,rondo,status"]);
+  });
+
+  it("stores ekranoj's malplenajPagxoj in kuro.json and the cleaned raw answer in the run folder, also without an eligo of the caller (B-4, F-S038-37t-1)", async () => {
+    const malobservoj: string[] = [];
+    for (const kunEligo of [true, false]) {
+      const { dir, ekranoj, linioj } = await mezuri(
+        mkdtempSync(join(tmpdir(), "s038-37c-ablauf-")),
+        kunEligo,
+      );
+      const own = kuroDir(dir, LFD, "F", 1);
+      const kuro = legiJson<KuroRekordo>(join(own, "kuro.json"));
+      const atendataj = ekranoj.get("F")?.malplenajPagxoj;
+      expect(
+        atendataj?.map((m) => m.respondo),
+        String(kunEligo),
+      ).toEqual([`rondoj/2/${UNUA}.respondo.txt`]);
+      expect(kuro.malplenajPagxoj, String(kunEligo)).toEqual(atendataj);
+      expect(
+        "malplenajPagxoj" in legiJson<KuroRekordo>(join(kuroDir(dir, LFD, "0", 1), "kuro.json")),
+      ).toBe(false);
+      for (const m of atendataj ?? []) {
+        const dosiero = join(own, m.respondo);
+        const teksto = existsSync(dosiero) ? readFileSync(dosiero, "utf8") : "";
+        if (!teksto.startsWith("--- Antwort (leere Seite) ---\n"))
+          malobservoj.push(`${kunEligo}: ${m.respondo} fehlt`);
+        if (!teksto.includes("[entfernt]")) malobservoj.push(`${kunEligo}: ${m.respondo} roh`);
+        if (sekretojEn(teksto).length > 0) malobservoj.push(`${kunEligo}: ${m.respondo} Schlüssel`);
+      }
+      if (sekretojEn(readFileSync(join(own, "kuro.json"), "utf8")).length > 0)
+        malobservoj.push(`${kunEligo}: kuro.json Schlüssel`);
+      if (sekretojEn(linioj.join("\n")).length > 0) malobservoj.push(`${kunEligo}: log Schlüssel`);
+    }
+    expect(malobservoj).toEqual([]);
   });
 
   it("counts Σ restantajLauxRegulo = restantaj = the length of ekranoj's restantaj, nicht-gebaut included (C-2, AK-5)", async () => {

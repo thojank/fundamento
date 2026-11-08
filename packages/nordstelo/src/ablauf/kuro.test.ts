@@ -3,7 +3,7 @@
 // with F against 0 and round 1 against round 3 per flow and per screen, the model guard before any
 // request, one Budget over the whole measurement and the load before and after each run.
 
-import { existsSync, mkdtempSync, readFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -13,10 +13,13 @@ import {
   type KuruEkranojn,
   kunigiMankojn,
   MalpermesitaModelo,
+  type MalplenaPagxo,
   type Manko,
   PERMESITA_MODELO,
   type Peno,
+  purigiTekston,
   type Restanta,
+  respondoTeksto,
   type Varianto,
 } from "@fundamento/ekranoj";
 import { defaultModeloSource, loadModelo, type Modelo } from "@fundamento/modelo";
@@ -726,5 +729,107 @@ describe("open deviations per rule in kuro.json and the report (Spec 038 A-2, AK
     expect(kuroJson(dir, LFD, "0").restantajLauxRegulo).toEqual({});
     expect(raporto.md).toContain(`| ${LFD} | F | – | nicht vorhanden |`);
     expect(raporto.md).toContain(`| ${LFD} | 0 | 0 | – |`);
+  });
+});
+
+describe("empty pages in kuro.json and the run folder (Spec 038 B-4, AK-2, F-S038-37t-1)", () => {
+  // Invented key, built at run time so no source line looks like a key.
+  const SK = ["sk", "or", "v1", "9a8b7c6d5e4f3021".repeat(4)].join("-");
+  const VOSTO =
+    "</fm-teksto>\n        </fm-markdovido>\n      </section>\n    </main>\n  </fm-pagxo>\n</fm-sxelo>";
+  const RESPONDOJ = [`\`\`\`html\n${VOSTO}\n\`\`\`\nSchlüssel ${SK}`, "Nur Text, kein Element."];
+  const MALPLENA: MalplenaPagxo = {
+    ekrano: "standard-detail",
+    rondo: 2,
+    bytes: 92,
+    ago: "trovo",
+    restis: true,
+    respondo: "rondoj/2/standard-detail.respondo.txt",
+  };
+
+  /** Variante F reports one empty page through the seam and in its result, as ekranoj does. */
+  const kunMalplena =
+    (duobla: ReturnType<typeof duoblaKuro>, eraro?: Error): KuruEkranojn =>
+    async (enigo, d) => {
+      if (enigo.varianto !== "F") return duobla.kuruEkranojn(enigo, d);
+      await d.eligo?.respondo?.({
+        rondo: 2,
+        slug: "standard-detail",
+        respondoj: RESPONDOJ,
+        kialo: "leere-seite",
+      });
+      if (eraro !== undefined) throw eraro;
+      const rezulto = await duobla.kuruEkranojn(enigo, d);
+      return { ...rezulto, malplenajPagxoj: [MALPLENA] };
+    };
+
+  const respondojEn = (own: string): string[] =>
+    existsSync(join(own, "rondoj"))
+      ? readdirSync(join(own, "rondoj")).flatMap((n) =>
+          readdirSync(join(own, "rondoj", n))
+            .filter((nomo) => nomo.endsWith(".respondo.txt"))
+            .map((nomo) => `rondoj/${n}/${nomo}`),
+        )
+      : [];
+
+  it("stores malplenajPagxoj of ekranoj in kuro.json and the cleaned raw answer in rondoj/<n>/<slug>.respondo.txt", async () => {
+    const out = mkdtempSync(join(tmpdir(), "s038-37c-kuro-"));
+    const duobla = duoblaKuro({ faktoj });
+    const { dir, kuroj } = await kuriAblaufon(
+      { taskoj: [LFD], maksTokenoj: 1_000_000, out },
+      // The dependencies as the real `--art ablauf` gives them: no eligo of its own.
+      deps({ kuruEkranojn: kunMalplena(duobla) }),
+    );
+    const f = kuroJson(dir, LFD, "F");
+    expect(f.malplenajPagxoj).toEqual([MALPLENA]);
+    expect(kuroj[0]?.malplenajPagxoj).toEqual([MALPLENA]);
+    expect("malplenajPagxoj" in kuroJson(dir, LFD, "0")).toBe(false);
+
+    const ownF = kuroDir(dir, LFD, "F", 1);
+    expect(respondojEn(ownF)).toEqual([MALPLENA.respondo]);
+    const teksto = readFileSync(join(ownF, MALPLENA.respondo), "utf8");
+    expect(teksto).toBe(purigiTekston(respondoTeksto(RESPONDOJ, "leere-seite")));
+    expect(teksto.startsWith("--- Antwort (leere Seite) ---\n")).toBe(true);
+    expect(teksto).toContain(VOSTO);
+    // The secret check covers the new file and kuro.json.
+    expect(teksto.includes(SK)).toBe(false);
+    expect(readFileSync(join(ownF, "kuro.json"), "utf8").includes(SK)).toBe(false);
+    expect(respondojEn(kuroDir(dir, LFD, "0", 1))).toEqual([]);
+    // Only the answers: the seam does not make the run build the brand into its folder.
+    expect(existsSync(join(ownF, "marko"))).toBe(false);
+  });
+
+  it("has no malplenajPagxoj on the error path; the answer written before the error stays, cleaned", async () => {
+    const out = mkdtempSync(join(tmpdir(), "s038-37c-kuro-"));
+    const duobla = duoblaKuro({ faktoj });
+    const { dir, kuroj } = await kuriAblaufon(
+      { taskoj: [LFD], maksTokenoj: 1_000_000, out },
+      deps({ kuruEkranojn: kunMalplena(duobla, new Error("Renderer weg")) }),
+    );
+    expect(kuroj[0]?.haltigo).toBe("eraro");
+    expect("malplenajPagxoj" in kuroJson(dir, LFD, "F")).toBe(false);
+    const ownF = kuroDir(dir, LFD, "F", 1);
+    expect(respondojEn(ownF)).toEqual([MALPLENA.respondo]);
+    expect(readFileSync(join(ownF, MALPLENA.respondo), "utf8").includes(SK)).toBe(false);
+  });
+
+  it("keeps the eligo a caller gives: its respondo writes, nothing is written twice", async () => {
+    const out = mkdtempSync(join(tmpdir(), "s038-37c-kuro-"));
+    const duobla = duoblaKuro({ faktoj });
+    const vokoj: string[] = [];
+    const basaj = deps({ kuruEkranojn: kunMalplena(duobla) });
+    const { dir } = await kuriAblaufon(
+      { taskoj: [LFD], maksTokenoj: 1_000_000, out },
+      {
+        ...basaj,
+        kuraDeps: async (e) => ({
+          ...(await basaj.kuraDeps(e)),
+          eligo: { respondo: (r) => void vokoj.push(`${r.rondo}/${r.slug} ${r.kialo}`) },
+        }),
+      },
+    );
+    expect(vokoj).toEqual(["2/standard-detail leere-seite"]);
+    expect(respondojEn(kuroDir(dir, LFD, "F", 1))).toEqual([]);
+    expect(kuroJson(dir, LFD, "F").malplenajPagxoj).toEqual([MALPLENA]);
   });
 });
