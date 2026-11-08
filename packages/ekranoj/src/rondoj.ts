@@ -386,6 +386,45 @@ async function konstruiKunKapto(
   }
 }
 
+/** The rule of check_usage for a slot that holds what it does not accept. */
+const SLOT_ACCEPTS = "uzo-slot-accepts";
+
+const kajListo = (eroj: readonly string[]): string =>
+  eroj.length <= 1 ? (eroj[0] ?? "") : `${eroj.slice(0, -1).join(", ")} und ${eroj.at(-1)}`;
+
+/**
+ * S038-39b (F-S038-39a-3): where check_usage finds text in a slot that accepts Eroj and the facts
+ * show a wrapper there – an element that is no Ero, in a slot of an `fm-*` element, with Eroj
+ * inside – the suggestion names it and the Eroj it holds (generic for every slot and Ero).
+ */
+function sugestoKunHulo(sugesto: string, mesagxo: string, fakto: Fakto): string {
+  const { elements } = fakto;
+  const aldonoj = new Set<string>();
+  for (const [index, element] of elements.entries()) {
+    const slot = element.attrs.slot;
+    if (slot === undefined || element.tag.startsWith("fm-")) continue;
+    if (!(elements[element.parent]?.tag ?? "").startsWith("fm-")) continue;
+    const nomo = slot.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    if (!new RegExp(`\\bslot ${nomo}(?![\\w-])`).test(mesagxo)) continue;
+    const eroj = [
+      ...new Set(
+        elements.flatMap((infano) =>
+          infano.parent === index && infano.tag.startsWith("fm-") ? [infano.tag] : [],
+        ),
+      ),
+    ];
+    if (eroj.length === 0) continue;
+    aldonoj.add(
+      `Im Slot ${slot} steht ein <${element.tag}> als Hülle; eine Hülle zählt als Text: slot="${slot}" direkt an jedes ${kajListo(eroj)} darin setzen und das <${element.tag}> weglassen.`,
+    );
+  }
+  return [sugesto, ...aldonoj].filter((parto) => parto !== "").join(" ");
+}
+
+/** The suggestion a finding hands on: check_usage's, for a slot wrapper with its name (S038-39b). */
+const sugestoDe = (m: Malobservo, fakto: Fakto): string =>
+  m.rule === SLOT_ACCEPTS ? sugestoKunHulo(m.suggestion, m.message, fakto) : m.suggestion;
+
 /** The findings of one checked screen: what the next round gets and what is left at the end. */
 export function trovojDe(e: {
   slug: string;
@@ -417,7 +456,7 @@ export function trovojDe(e: {
       regulo: m.regulo?.name ?? m.rule,
       loko: m.loko ?? m.path,
       mesagxo: m.message,
-      sugesto: m.suggestion,
+      sugesto: sugestoDe(m, e.fakto),
       kialo: m.regulo?.kialo ?? m.message,
     });
   }
@@ -432,9 +471,13 @@ export function trovojDe(e: {
   );
   // B-3 (C-4): the scorer's K3 gap names a rule; its suggestion is check_usage's for that rule
   // (e.g. ero-prop-constraint, destructive-label-names-object), else the general one.
-  const sugestoDeRegulo = (regulo: string): string | undefined =>
-    e.malobservoj.find((m) => (m.regulo?.name ?? m.rule) === regulo && m.suggestion !== "")
-      ?.suggestion;
+  const sugestoDeRegulo = (regulo: string): string | undefined => {
+    const m = e.malobservoj.find(
+      (kandidato) =>
+        (kandidato.regulo?.name ?? kandidato.rule) === regulo && kandidato.suggestion !== "",
+    );
+    return m === undefined ? undefined : sugestoDe(m, e.fakto);
+  };
   for (const manko of e.taksado.mankoj) {
     if (manko.kind === "a11y" && axeTrovoj.length > 0) continue;
     const priskribo = K_TROVOJ[manko.kind];
