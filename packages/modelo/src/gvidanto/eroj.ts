@@ -253,8 +253,8 @@ export type EroSlotContent = "text" | "icon" | { ero: string } | { eroj: string[
 export interface EroSlot {
   content: EroSlotContent[];
   /**
-   * The form of the data the slot takes (Spec 038 MG-3), only where the Modelo carries one (D-38);
-   * no Skemo or Uzo does yet (the tabelo's columns and rows are a Manko of Eroj-Runde 7).
+   * The form of the data the slot takes (Spec 038 MG-3), only where the Modelo carries one (D-38):
+   * the Uzo slot's `dataForm` (Spec 046 D), passed on unchanged, never derived.
    */
   dataForm?: string;
   /** The slot takes the content without a slot attribute (the Skemo's default slot). */
@@ -687,6 +687,7 @@ export function slotsOf(entry: Pick<LoadedEro, "skemo" | "uzo">): Record<string,
     const rule = entry.uzo?.slots[slot.name];
     slots[slot.name] = {
       content: slotContent(slot, rule),
+      ...(rule?.dataForm === undefined ? {} : { dataForm: rule.dataForm }),
       ...(slot.default === true ? { default: true as const } : {}),
       ...(rule?.required === true ? { required: true as const } : {}),
       ...(rule?.min === undefined ? {} : { min: rule.min }),

@@ -3163,6 +3163,10 @@
         "nesting": {
           "type": "integer",
           "minimum": 0
+        },
+        "dataForm": {
+          "description": "The form of the data the slot takes (Spec 046 D, Spec 038 MG-3): get_ero with fields: [slots] passes it on unchanged. Only where the data says so; nothing derives it.",
+          "enum": ["text", "list", "table", "tree", "media"]
         }
       },
       "additionalProperties": false

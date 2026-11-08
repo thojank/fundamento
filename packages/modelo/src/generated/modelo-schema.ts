@@ -1092,6 +1092,10 @@ export interface UzoSlot {
   min?: number;
   required?: boolean;
   nesting?: number;
+  /**
+   * The form of the data the slot takes (Spec 046 D, Spec 038 MG-3): get_ero with fields: [slots] passes it on unchanged. Only where the data says so; nothing derives it.
+   */
+  dataForm?: "text" | "list" | "table" | "tree" | "media";
 }
 /**
  * Layout behaviour in platform-neutral words (A6, Art. VIII). Every key besides size and wrap is a boolean prop of the Skemo with the containers or Dimensio values it is allowed in.
