@@ -865,9 +865,9 @@ Das CI-Ergebnis von Lauf 4 (T3868) ist mit S038-31 nachgetragen (Abschnitt „Be
 | C-1 | Bezug′ `/tmp/s038-bezug-prim` = `e4873c57` + nur A-1, Diff geprüft (D-248) | S038-38 | – | erledigt (S038-38) |
 | B-1, B-5 | Abnahme `komuna` Versuch 1 (`abnahme-komuna-l5-v1`, `--max-tokens` aus der Scheibe) | S038-39a | E | erledigt (S038-39a): **1/2 grün** (liste grün, detail 99 an `check_usage`) – Abschnitt „Abnahme komuna (Lauf 5)“ |
 | B-5 | Fundamento-seitige Nachbesserung und Versuch 2 (`abnahme-komuna-l5-v2`), nur wenn v1 < 2/2 | S038-39b | E | erledigt (S038-39b): zwei Befund-Korrekturen (`be7b1f6f`, `0f32cb17`), Versuch 2 **0/2 grün** → **D-249: Stopp** – Abschnitt „Abnahme komuna (Lauf 5)“ |
-| C-2 | nachher: 5 Läufe je Ablauf auf Code-Kopf E (`nachher-l5-<ablauf>`), nur bei 2/2 | S038-40a | F | offen |
-| C-4 | Kontrolllauf `kontrolle-komuna` (Sonnet 5.5, AK-6), läuft in beiden Zweigen | S038-40b | F | offen |
-| C-2, C-3 | vorher F: 5 Läufe je Ablauf auf Bezug′ (`vorher-l5-<ablauf>`), nur bei 2/2 | S038-40c | F | offen |
+| C-2 | nachher: 5 Läufe je Ablauf auf Code-Kopf E (`nachher-l5-<ablauf>`), nur bei 2/2 | S038-40a | F | erledigt (40b; 40a/40c entfallen, D-249): S038-40a entfällt – komuna < 2/2, Messung entfällt |
+| C-4 | Kontrolllauf `kontrolle-komuna` (Sonnet 5.5, AK-6), läuft in beiden Zweigen | S038-40b | F | erledigt (40b; 40a/40c entfallen, D-249): **Sonnet 2/2 grün** nach Runde 2, 0,687350 $ – Abschnitte „Läufe und Kosten (Lauf 5)“, „Kontrolllauf kontrolle-komuna (Sonnet 5.5)“ |
+| C-2, C-3 | vorher F: 5 Läufe je Ablauf auf Bezug′ (`vorher-l5-<ablauf>`), nur bei 2/2 | S038-40c | F | erledigt (40b; 40a/40c entfallen, D-249): S038-40c entfällt – Bezug′ gebaut, nicht gemessen (Abschnitt „Bezug′ (D-248)“) |
 | D-1 | Ursache der eroj-Wackler (Befund, nur lesen) | S038-41 | F | offen |
 | C-5, E | Vergleich (AK-3), „Modell oder Fundamento“, Fotos, Entscheidungstabelle D-200 bis D-251 (+ D-252 ff.), Prüfungen, Abschluss, Bericht | S038-42 | F | offen |
 | D-2 bis D-4 | Push PR E, Push PR F (gestapelt), ein Dispatch nach dem eroj-Fix auf `main`, CI in einem Lauf (AK-4) | Maintainer | E, F | offen (nicht in diesem Lauf) |
@@ -1354,6 +1354,151 @@ Offline mit dem echten `checkMarkup` des Gvidanto auf den gespeicherten Fragment
 |---|---|---|---|---|---|
 | v1 | [liste hell](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v1/bildoj/liste-hela.png) | [liste dunkel](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v1/bildoj/liste-malhela.png) | [detail hell](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v1/bildoj/detail-hela.png) | [detail dunkel](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v1/bildoj/detail-malhela.png) | [raporto.md](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v1/raporto.md) |
 | v2 | [liste hell](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v2/bildoj/liste-hela.png) | [liste dunkel](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v2/bildoj/liste-malhela.png) | [detail hell](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v2/bildoj/detail-hela.png) | [detail dunkel](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v2/bildoj/detail-malhela.png) | [raporto.md](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v2/raporto.md) |
+
+## Bezug′ (D-248)
+
+Gebaut in S038-38 (2026-11-08, ≈00:50Z–01:10Z); in Lauf 5 nicht gemessen, weil die Messung nach D-249 entfällt. Bleibt als Stand für einen späteren vorher-Lauf.
+
+- **Stand:** `/tmp/s038-bezug-prim`, losgelöster Worktree (kein Branch) aus `$R`, Basis Bezug `e4873c577bc90e3138279346394e11d4154883ed`.
+- **Commit Bezug′:** `8535874ceab0540ffb3cb5addd4b28bf6c2eaa34` `Spec 038 Bezug′: A-1 Fehlerfang auf e4873c57 (D-248)` – ein Commit, Identität über `$W/commit`, nicht gepusht.
+- **Diff:** `$S/lauf5/bezug-prim.diff` (`git diff e4873c57..8535874c`, 72 736 Bytes, SHA-256 `02d75b38c8c42adcbbc072c8aa4fe1f0beababccf14d065ce0ddac6d1b349503`, 44 Hunks).
+- **Sicherung:** `$S/lauf5/bezug-prim.bundle` (`git bundle create … HEAD ^e4873c57`, Kopf `8535874c`, SHA-256 `77ad020a1e8f50d4534a7edc4d5018526512f7286f7381b463746c360b57914b`); der Commit hängt an keiner Ref, nach Reboot + `worktree prune` hält ihn nur das Bundle (D-S038-38-3).
+- **Inhalt:** nur A-1 aus S038-32 (`398df1c9` rot, `8926e552` grün): Ursache (keine Assistentennachricht ohne Inhalt und ohne `tool_calls`), Klassifizierer/Wiederhol-Schicht `anbieterfehleroj.ts`, C-1-Bericht (`anbieterfehleroj` in ekranoj `raporto.json`/`raporto.md` und nordstelo `kuro.json` inkl. Fehlerpfad), Reinigung `purigiTekston`, Tests von S038-32. **Nicht** enthalten: A-2, A-3, A-4 (`TOKENOJ_EKRANO_RONDO_F` bleibt 70 000), A-5, B-2, B-3, B-4, S038-37t.
+
+```
+ packages/ekranoj/src/agento.ts                |  55 ++-
+ packages/ekranoj/src/anbieterfehleroj.test.ts | 682 ++++++++++++++++++++++++++
+ packages/ekranoj/src/anbieterfehleroj.ts      | 311 ++++++++++++
+ packages/ekranoj/src/eligo.ts                 |  27 +
+ packages/ekranoj/src/index.ts                 |   2 +
+ packages/ekranoj/src/rondoj.ts                | 145 +++++-
+ packages/ekranoj/src/test-doubles/chat.ts     |  56 +++
+ packages/ekranoj/src/tipoj.ts                 |  18 +-
+ packages/nordstelo/src/ablauf/kuro.test.ts    |  80 +++
+ packages/nordstelo/src/ablauf/kuro.ts         |  15 +-
+ packages/nordstelo/src/ablauf/raporto.ts      |  14 +-
+ 11 files changed, 1380 insertions(+), 25 deletions(-)
+```
+
+**Prüfung (S038-38):** maschinell die sortierte Liste aller `+`/`−`-Zeilen von `e4873c57..8535874c` gegen `255741b7..8926e552` – identisch bis auf drei Anpassungen an den Bezug-Code; `anbieterfehleroj.ts` byte-gleich mit `8926e552`; keine Zeile mit `malplenajPagxoj`, `respondo.txt`, `restantajLauxRegulo`, `TOKENOJ_EKRANO`, `eroProfiloj`, `sxelo`. Ergebnis **44/44 Hunks A-1, kein Hunk außerhalb**, kein Neubau.
+
+| Bereich | Hunks | A-1-Punkt |
+|---|---|---|
+| `agento.ts` | 9 | Import, `asistantaMesagxoDe`/`sendi`, Plan und Build über Kaptilo, Ursache in Plan-Rückfrage, `redemandi` und Werkzeugschleife |
+| `anbieterfehleroj.ts`, `.test.ts` (neu) | 2 | Klassifizierer, Wiederholung, Reinigung; 39 Tests |
+| `eligo.ts`, `index.ts` | 5 | C-1 `raporto.json`/`raporto.md`, Export |
+| `rondoj.ts` | 14 | Screen-Ebene `konstruiKunKapto`, Fehlerpfad, Warte-Injektion, Reinigung, `restantaj`-Grund, Plananfrage, Runde zählt weiter, Malhelpo `anbieterfehler` |
+| `test-doubles/chat.ts`, `tipoj.ts` | 5 | Test-Doubles, Typen, `EkranojDeps.dormi?`, `EkranojRezulto.anbieterfehleroj?` |
+| nordstelo `kuro.ts`, `kuro.test.ts`, `raporto.ts` | 9 | `kuro.json` mit `anbieterfehleroj` inkl. Fehlerpfad, `KuroRekordo`, 2 Tests |
+
+Anpassungen (D-S038-38-2): (a) zwei Assertions in `anbieterfehleroj.test.ts` lesen den Lauf-`peno` (Bezug hat kein C-6); (b) Import `type KuruEkranojn` in `kuro.test.ts`; (c) Diff-Kontext in `tipoj.ts` (`"leere-antwort"` statt `"K8"`). Tests in `$BP`: ekranoj 173/173, nordstelo 132/132, `anbieterfehleroj.test.ts` 39/39, tsc + Biome sauber, `pruefen` sauber; `audit-ac4` nur die drei ersetzten `sendiSubBudgxeto`-Zeilen (gleiches Budget), keine Grenze erhöht.
+
+Neu anlegen nach einem Neustart:
+
+```sh
+git -C $R worktree prune
+git -C $R cat-file -e 8535874ceab0540ffb3cb5addd4b28bf6c2eaa34^{commit} 2>/dev/null \
+  || git -C $R fetch $S/lauf5/bezug-prim.bundle HEAD
+git -C $R worktree add --detach /tmp/s038-bezug-prim 8535874ceab0540ffb3cb5addd4b28bf6c2eaa34
+(cd /tmp/s038-bezug-prim && pnpm install --frozen-lockfile --ignore-scripts && pnpm build)
+git -C /tmp/s038-bezug-prim diff e4873c57..HEAD | cmp - $S/lauf5/bezug-prim.diff   # gleich
+```
+
+## Läufe und Kosten (Lauf 5)
+
+Alle bezahlten Läufe von Lauf 5, je über `$W/kosten reservieren` und `$W/mezuri` (Sperre frei, Wächter lief, Prüfprotokoll `$S/lauf5/pruefprotokoll.tsv`, je ein Versuch, keine Ablehnung), einer nach dem anderen, kein Test, Build oder Playwright daneben. Quelle `$S/lauf5/laeufe.tsv`, `$S/lauf5/kostoj.tsv`.
+
+| Lauf-ID | Zweck | Modell | Commit | `--max-tokens` | Tokens ein / aus | Anfragen | $ | Dauer | 429-Wartezeilen | Last vor → nach (1/5/15 min, 10 Kerne) | gestört |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `abnahme-komuna-l5-v1` | B-5 Versuch 1 | `ministral-14b-2512` | `0ada621f` | 756 000 | 188 180 / 3 299 | 54 | 0,038296 | 517,9 s | 41 (≈ 446 s) | 1,61 3,71 5,70 → 3,34 2,95 4,37 | nein |
+| `abnahme-komuna-l5-v2` | B-5 Versuch 2 | `ministral-14b-2512` | `0f32cb17` (Code-Kopf E) | 1 058 000 | 332 677 / 9 122 | 79 | 0,068360 | 828,1 s | 60 (≈ 662 s) | 5,91 6,96 8,46 → 1,79 2,45 4,75 | nein |
+| `kontrolle-komuna` | C-4 Kontrolle | `openrouter/anthropic/claude-sonnet-5.5` | `2f6dd869` (Code = E) | 479 000 | 304 170 / 7 901 | 14 | 0,687350 | 61,7 s (02:04:09Z–02:05:11Z) | 0 | 2,70 2,93 4,19 → 1,46 2,53 3,95 | nein |
+
+- **`--max-tokens`:** v1 ⌊min(0,121 × 1,25; 0,25) ÷ 0,20 $ × 10⁶⌋ = 756 250 → 756 000; v2 ⌊0,211704 ÷ 0,20 $ × 10⁶⌋ = 1 058 520 → 1 058 000 (≥ 605 000); `kontrolle-komuna` ⌊1,15 $ ÷ p_eff⌋ mit p_eff = 0,95 × 2 $ + 0,05 × 10 $ = 2,40 $ je 10⁶ → 479 166 → **479 000** (D-S038-31-5; die Schätzung der CLI 485 066 lag darüber, der Lauf hätte vorher angehalten, verbraucht wurden 312 071 = 65 %).
+- **Buchung `kontrolle-`** aus Tokens (D-S038-31-2; metiejo kennt den Preis nicht, `fm ekranoj` meldet „Kosten unbekannt“, `raporto.json` ohne `kosto.usd`, F-S038-31-3): 304 170 × 2 $ + 7 901 × 10 $ je 10⁶ = 0,608340 + 0,079010 = **0,687350 $** ≤ 1,15 $. Ausgabeanteil 2,5 % (Annahme 5 %), wirksamer Preis 2,20 $ je 10⁶.
+- **OpenRouter-Gegenprobe** (`GET /api/v1/key`, nur lesend): Nutzung vorher 30,069491 $, nachher 30,432125 $, **Δ 0,362634 $** – gut die Hälfte der Buchung (F-S038-40b-1).
+- **Code-Kopf:** `kontrolle-komuna` lief auf HEAD `2f6dd869` (Doku-Commit S038-39b); `git diff --stat 0f32cb17..2f6dd869 -- packages` leer, `pnpm build` 9/9 aus dem Cache, Baum sauber – gemessen wurde Code-Kopf E.
+- **Ledger Lauf 5:** 0,794006 $ von 5,00 $.
+
+| Scheibe | Basis | gebucht | Rest | Stand |
+|---|---|---|---|---|
+| `abnahme-` | 0,25 | 0,106656 | 0,143344 | abgeschlossen (v1, v2) |
+| `nachher-` | 0,95 | 0 | 0,95 | nicht benutzt – S038-40a entfällt (D-249) |
+| `kontrolle-` | 1,15 (hart) | 0,687350 | 0,462650 | abgeschlossen (`kontrolle-komuna`) |
+| `vorher-` | 2,60 | 0 | 2,60 | nicht benutzt – S038-40c entfällt (D-249) |
+| `wdh-` | 0,05 | 0 | 0,05 | nicht benutzt – kein Lauf gestört |
+| **Summe** | **5,00** | **0,794006** | **4,205994** | keine Umbuchung, nichts offen |
+
+Ledger Lauf 1–4 unverändert 0,876548 $ von 1,00 $; Spec 038 gesamt **1,670554 $** (Kappen 6,00 $). Laufordner: `$S/abnahme-l5/komuna-v1`, `$S/abnahme-l5/komuna-v2`, `$S/kontrolle-l5/komuna`; Logs `/tmp/s038-logs/mezuri-<lauf-id>.log`.
+
+## Kontrolllauf kontrolle-komuna (Sonnet 5.5)
+
+**Kontrolle: Sonnet 2/2 grün** – nach Runde 2 („Alle Screens grün nach Runde 2.“), keine `restantaj`; nicht „Kontrolle teilweise“. Gleiches Szenario wie AK-1 (Satz, `--ekranoj liste,detail`, Variante F, höchstens 3 Runden, Code-Kopf E), einziger Unterschied das Modell (A-5, D-244). Ein Lauf, kein Ersatzmodell, kein zweiter Versuch.
+
+**Modell-ID geprüft** (öffentliche Liste `https://openrouter.ai/api/v1/models`, ohne Schlüssel) am **2026-11-08 02:03:50Z**: `anthropic/claude-sonnet-5.5` („Anthropic: Claude Sonnet 5.5“) vorhanden, Preis **2 $ / 10 $ je 10⁶ ein/aus** (`prompt` 0.000002, `completion` 0.00001; Cache lesen 0.0000001, schreiben 0.0000025), Kontext 1 000 000 – wie S038-31 (2026-11-07 20:23Z). `OPENROUTER_API_KEY` in `$M/.env` vorhanden (nur Länge geprüft).
+
+Befehl: `$W/kosten reservieren kontrolle-komuna --zweck "C-4 Kontrolle Sonnet 5.5" --usd 1.15`, dann im Hintergrund `$W/mezuri kontrolle-komuna "C-4 Kontrolle" --cwd $R --raporto $S/kontrolle-l5/komuna/raporto.json -- pnpm fm ekranoj "Eine Verwaltung für Standards mit Liste, Detail, Bearbeiten und Einstellungen" --ekranoj liste,detail --lauf-id kontrolle-komuna --kontroll-modelo openrouter/anthropic/claude-sonnet-5.5 --max-tokens 479000 --ja --env $M/.env --ledger $S --out $S/kontrolle-l5/komuna`.
+
+| Lauf-ID | Commit | `--max-tokens` | Exit | Dauer | Tokens ein / aus | Anfragen | Werkzeugaufrufe | $ (aus Tokens) | Halt | grün |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `kontrolle-komuna` | `2f6dd869` (Code = E `0f32cb17`) | 479 000 | 0 | 61,7 s | 304 170 / 7 901 | 14 | 23 | 0,687350 | alle grün nach Runde 2 | **2/2** |
+
+`anbieterfehleroj` und `malplenajPagxoj` fehlen, `notoj` leer, keine `.respondo.txt`, keine 429-Wartezeile; jede gebaute Screen-Runde hat ein nicht leeres Fragment (K7 liste 1 510 B, detail 1 345 / 1 382 B) → AK-2 auch hier erfüllt.
+
+### Grün je Screen (nach `decidiVerdon`; hell und dunkel)
+
+| Runde | Screen | K1 | K2 | K3 | K4 | K5 | Total | axe hell/dunkel | K8 | Navigation | check_usage-Fehler | grün |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | liste | 1 | 1 | 1 | 1 | 1 | 100 | 0/0 | 0,95 vollständig | vollständig | 0 | **ja** (R2/R3 übernommen) |
+| 1 | detail | 1 | 1 | 1 | 0 | 1 | 80 | 1/1 (`dlitem`, 10 Knoten) | 0,938 vollständig | vollständig | 0 | nein (axe) |
+| 2 | detail | 1 | 1 | 1 | 1 | 1 | 100 | 0/0 | 0,958 vollständig | vollständig | 0 | **ja** |
+
+detail R1: `<dt>`/`<dd>` direkt in `fm-atributlisto` ohne `<dl>`; der Befund der Runde 1 führte in R2 zur Hülle `<dl>` – sonst kein Unterschied. Seitenregel (D-29, zählt nicht): `k8-interspaco` an `fm-sxelo > fm-navigado` (9 px) in beiden Screens, hell und dunkel – dieselbe Shell wie bei ministral.
+
+### Aufwand je Screen-Runde gegen ministral (ein / aus / Anfragen / Werkzeugaufrufe)
+
+| Screen-Runde | v1 (ministral) | v2 (ministral) | Kontrolle (Sonnet 5.5) |
+|---|---|---|---|
+| Plan | 227 / 319 / 1 / 0 | 227 / 329 / 1 / 0 | 396 / 486 / 1 / 0 |
+| liste R1 | 70 691 / 866 / 17 / 20 | 53 490 / 1 413 / 13 / 32 | 99 440 / 2 252 / 4 / 7 |
+| liste R2 | grün übernommen | 69 152 / 1 423 / 12 / 20 | grün übernommen |
+| liste R3 | grün übernommen | 81 840 / 2 542 / 21 / 25 | grün übernommen |
+| detail R1 | 61 081 / 770 / 18 / 17 | 40 035 / 982 / 12 / 26 | 114 560 / 2 887 / 5 / 12 |
+| detail R2 | 28 551 / 808 / 7 / 7 | 35 600 / 1 213 / 7 / 9 | 89 774 / 2 276 / 4 / 4 |
+| detail R3 | 27 630 / 536 / 11 / 5 | 52 333 / 1 220 / 13 / 9 | nicht nötig |
+| **Lauf** | 188 180 / 3 299 / 54 / 49 · 517,9 s | 332 677 / 9 122 / 79 / 121 · 828,1 s | 304 170 / 7 901 / 14 / 23 · 61,7 s |
+
+Sonnet braucht je Screen-Runde mehr Eingabe (größere Kontexte je Anfrage), aber weniger Anfragen und Werkzeugaufrufe und keine Wartezeit; der Lauf ist nach 2 statt 3 Runden fertig.
+
+### `restantaj` je Regel (letzte Runde): Eingabe für „Modell oder Fundamento“ (S038-42)
+
+Vorläufiges Urteil: „Modell“ = verschwindet mit Sonnet und hat keine bekannte Fundamento-Ursache; „Fundamento“ = bekannte Ursache in Fundamento (F-S038-39b-1/-2), auch wenn Sonnet das auslösende Muster nicht schrieb. Sonnets Seiten enthalten **kein** `fm-karto`, **kein** `fm-butono`, **kein** `slot="label"` (liste: tabelo, ligilo, insigno, teksto, titolo; detail: atributlisto, ligilo, insigno, teksto, titolo) – die Ursachen von F-S038-39b-1/-2 wurden also nicht ausgelöst, nicht widerlegt.
+
+| Regel | v1 | v2 | Sonnet | Muster bei Sonnet | vorläufig | Beleg |
+|---|---|---|---|---|---|---|
+| `label-required` | 2 (detail `fm-butono` mit `<span slot="label">`) | 0 | 0 | nicht geschrieben | **Fundamento** (Auslöser vom Modell) | F-S038-39b-1 |
+| `uzo-slot-accepts` | 1 (detail, Text in karto `actions`) | 3 (liste 2 `fm-faldilo`; detail 1 karto `content`) | 0 | kein faldilo, keine karto | gemischt: v1 und v2 liste **Modell**, v2 detail **Fundamento** | F-S038-39a-3, F-S038-39b-3; F-S038-39b-1 |
+| `uzo-slot-nesting` | 0 | 2 (liste `fm-faldilo` `summary`; detail karto `content`) | 0 | wie oben | gemischt: liste **Modell**, detail **Fundamento** | F-S038-39b-3; F-S038-39b-1 |
+| `regulo` (K3-Lücke) | 1 | 3 | 0 | – | folgt den Regeln oben | – |
+| `one-primary-per-container` | 0 | 1 (detail, zwei `fm-karto`) | 0 | keine karto | **Fundamento** | F-S038-39b-2 |
+| `invented-attribute` | 0 | 2 (liste `faldilo.label`, `insigno.label`) | 0 | – | **Modell** | F-S038-39b-3 |
+| `axe:nested-interactive` | 0 | 2 (liste hell/dunkel) | 0 | – | **Modell** (`fm-faldilo`-Missbrauch) | F-S038-39b-3 |
+| `axe:target-size` | 0 | 2 (liste hell/dunkel) | 0 | – | **Modell** | F-S038-39b-3 |
+| `navigado-morta` (nicht geplante Screens) | 0 | 0 (R1/R2: `einstellungen.html`, `bearbeiten.html`) | 0 (in keiner Runde) | – | **Modell** | F-S038-39b-3 |
+| `axe:dlitem` | 0 | 0 | 0 (nur R1, in R2 behoben) | – | **Modell**, von der Rundenschleife behoben | dieser Lauf |
+| **Summe** | **4** | **15** | **0** | | | |
+
+### Fotos
+
+| Lauf | liste hell | liste dunkel | detail hell | detail dunkel | Bericht |
+|---|---|---|---|---|---|
+| `kontrolle-komuna` | [liste hell](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/kontrolle-l5/komuna/bildoj/liste-hela.png) | [liste dunkel](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/kontrolle-l5/komuna/bildoj/liste-malhela.png) | [detail hell](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/kontrolle-l5/komuna/bildoj/detail-hela.png) | [detail dunkel](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/kontrolle-l5/komuna/bildoj/detail-malhela.png) | [raporto.md](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/kontrolle-l5/komuna/raporto.md) · [Übersicht](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/kontrolle-l5/komuna/superrigardo.html) |
+
+### Befunde
+
+- **F-S038-40b-1 (Kosten):** Die OpenRouter-Gegenprobe zeigt Δ 0,362634 $ gegen 0,687350 $ aus Tokens × Listenpreis. Wahrscheinlich rechnet OpenRouter den wiederholten Gesprächsanfang in der Werkzeugschleife als Cache-Lesen (0,10 $ je 10⁶ statt 2 $); belegbar ist das ohne Anfrage-IDs nicht, Δ umfasst zudem jede gleichzeitige Nutzung des Schlüssels. Gebucht bleibt die Tokenrechnung (D-S038-31-2, konservativ); nichts umgebucht.
+- **F-S038-40b-2 (Hinweis):** Sonnet baut schlankere Seiten (detail ohne Karten und ohne Bearbeiten-Knopf) und vermeidet damit genau die Muster, an denen ministral an Fundamento-Ursachen scheitert. Das grüne Ergebnis belegt: Gvidanto, Prüfer und Rundenschleife lassen `komuna` 2/2 grün zu; es widerlegt F-S038-39b-1/-2 nicht.
+- **F-S038-40b-3 (Hinweis):** Die Schätzung der CLI (485 066 Tokens) lag über `--max-tokens` 479 000 und meldete ein mögliches Teilergebnis; tatsächlich reichten 312 071 Tokens (2 Runden). Die Schätzkonstanten (A-4) sind auf ministral gemessen.
 
 ## Blockiert
 
