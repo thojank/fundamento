@@ -6,7 +6,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { EroInstance, Regulo } from "../contracts/modelo.js";
 import { loadModelo } from "../load/load-modelo.js";
-import { fixtureModeloSource } from "../load/source.js";
+import { defaultModeloSource, fixtureModeloSource } from "../load/source.js";
 import { mutatedFixture } from "../validate/test-doubles/fixtures.js";
 import { evaluateUsage, USAGE_ENFORCERS } from "./usage.js";
 
@@ -167,5 +167,57 @@ describe("evaluateUsage (T006)", () => {
       name: stored?.name,
       kialo: stored?.kialo,
     });
+  });
+});
+
+// Spec 046 L5-2: one-primary-per-container counts only butono with emphasis=high; karto, dialogo
+// and avizo are containers of actions only (their own emphasis is a surface, not a call to
+// action). On the repository Modelo, where all four Eroj stand in appliesTo.
+describe("one-primary-per-container counts actions only (Spec 046 L5-2)", () => {
+  const repo = loadModelo(defaultModeloSource()).modelo;
+  if (repo === undefined) throw new Error("the repository Modelo must load");
+  const primaries = (instances: EroInstance[]) =>
+    evaluateUsage(repo, instances)
+      .violations.filter((violation) => violation.issue.rule === "one-primary-per-container")
+      .map((violation) => violation.instance);
+  const karto = (extra: Partial<EroInstance> = {}): EroInstance => ({
+    ero: "karto",
+    props: {},
+    texts: { heading: "Titel" },
+    slots: { heading: ["text"] },
+    ...extra,
+  });
+
+  it("two karto without emphasis in one container are no violation", () => {
+    expect(primaries([karto({ container: "list" }), karto({ container: "list" })])).toEqual([]);
+    expect(primaries([karto(), karto()])).toEqual([]);
+  });
+
+  it("two karto with emphasis=high in one container are no violation either", () => {
+    expect(
+      primaries([karto({ props: { emphasis: "high" } }), karto({ props: { emphasis: "high" } })]),
+    ).toEqual([]);
+  });
+
+  it("two butono with emphasis=high in one container still are", () => {
+    const high: EroInstance = { ero: "butono", props: { emphasis: "high" }, label: "Weiter" };
+    expect(
+      primaries([
+        { ...high, container: "karto-1" },
+        { ...high, label: "Senden", container: "karto-1" },
+      ]),
+    ).toEqual([[0, 1]]);
+    expect(primaries([karto(), high, karto(), { ...high, label: "Senden" }])).toEqual([[1, 3]]);
+  });
+
+  it("dialogo and avizo are containers only", () => {
+    expect(
+      primaries([
+        { ero: "dialogo", props: { open: true }, texts: { heading: "Frage" } },
+        { ero: "dialogo", props: { open: true }, texts: { heading: "Frage" } },
+        { ero: "avizo", props: {}, texts: { message: "Hinweis" } },
+        { ero: "avizo", props: {}, texts: { message: "Hinweis" } },
+      ]),
+    ).toEqual([]);
   });
 });
