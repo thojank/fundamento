@@ -2472,8 +2472,10 @@ test.describe("Spec 046 T5: the new Eroj and the states of the tabelo", () => {
             skeleton: [...(loading?.querySelectorAll("tr[data-fm-skeleton]") ?? [])].filter(visible)
               .length,
             rowsAside: [
-              ...(loading?.querySelectorAll("tbody tr:not([data-fm-skeleton])") ?? []),
-            ].every((row) => !visible(row)),
+              ...(loading?.querySelectorAll(
+                ":scope > table > tbody > tr:not([data-fm-skeleton])",
+              ) ?? []),
+            ].map((row) => getComputedStyle(row).display),
             empty: visible(
               [...section.querySelectorAll("fm-tabelo")]
                 .find((table) => table.querySelector('[slot="empty"]') !== null)
@@ -2482,7 +2484,8 @@ test.describe("Spec 046 T5: the new Eroj and the states of the tabelo", () => {
             headAtTop,
           };
         });
-        note(tabelo.sort === 6, `${where} tabelo: sort buttons ${tabelo.sort}`);
+        // The sortable head of every table but the empty one: two per density, loading, sticky-header.
+        note(tabelo.sort === 8, `${where} tabelo: sort buttons ${tabelo.sort}`);
         note(
           tabelo.boxes.length === 3 && tabelo.boxes.every((count) => count === 4),
           `${where} tabelo: boxes ${tabelo.boxes.join(",")}`,
@@ -2493,8 +2496,10 @@ test.describe("Spec 046 T5: the new Eroj and the states of the tabelo", () => {
         );
         note(tabelo.busy === "true", `${where} tabelo: aria-busy ${tabelo.busy}`);
         note(
-          tabelo.skeleton === 3 && tabelo.rowsAside,
-          `${where} tabelo: skeleton ${tabelo.skeleton}`,
+          tabelo.skeleton === 3 &&
+            tabelo.rowsAside.length === 3 &&
+            tabelo.rowsAside.every((display) => display === "none"),
+          `${where} tabelo: skeleton ${tabelo.skeleton}, rows ${tabelo.rowsAside.join(",")}`,
         );
         note(tabelo.empty, `${where} tabelo: the empty state`);
         note(tabelo.headAtTop, `${where} tabelo: the sticky head at the top of its region`);
