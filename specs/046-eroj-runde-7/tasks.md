@@ -11,7 +11,7 @@ PR A ist ein Strang T1 → T6 (B-8), T7 läuft parallel in PR B im eigenen Workt
 | T3 | `fm-tabelo`: Auswahl, Laden, fester Kopf, geschlossene Grenzen | A | erledigt (Befunde F-T3-1 bis F-T3-6) |
 | T4 | `fm-templinio` | A | erledigt (Befunde F-T4-1 bis F-T4-6) |
 | T5 | Vitrino, Geometrie- und Stiltests, Alirebleco, Figma-Bauformen | A | erledigt (Befunde F-T5-1 bis F-T5-5, Etappe F EF-1 bis EF-5; F-T5-1 behoben in der T3-Nachbesserung, D-36) |
-| T6 | `dataForm`, L5-4, „create new“, „Inhalte anzeigen“, Vertragsfortschreibung | A | offen |
+| T6 | `dataForm`, L5-4, „create new“, „Inhalte anzeigen“, Vertragsfortschreibung | A | erledigt (Befunde F-T6-1 bis F-T6-12); **PR A bereit für T8** |
 | T7 | L5-1 mit AC-8, L5-2, L5-3 | B | offen |
 | T8 | Je PR ein Push, ein Dispatch, Bericht | A und B | offen |
 
@@ -69,3 +69,15 @@ PR A ist ein Strang T1 → T6 (B-8), T7 läuft parallel in PR B im eigenen Workt
 - [x] Figma: `tabelo:skeleton` in `FIGMA_NOT_DRAWN`, Wortlaut der Jugxo (`497da613`, D-35); Folge F-T3-6 (`91d9bada`). Keine Bauform für die fünf neuen Eroj (D-34, Etappe F EF-1 bis EF-5). Kopfzeile des Berichts 3 958 (core + ekzemplo) / 3 742 (Repo), Grenze 4 000 unverändert; `bild-main.json` unverändert (kein neues Set).
 - [x] Läufe: projekcioj 1543/7 rot (F-T1-4, F-T1-3/B-3, `parity.test.ts` ×5 = F-T5-3); modelo 4892/5 rot (F-T1-1, -2, -5, -6, -10); mcp 506/2 (F-T1-6, -7); eroj Vitest 43/43. Playwright Chromium `vico` 6/6, `krado` 8/8, `templinio` 7/7, `nachlese-7` 7/7, `nachlese-11-konformeco` 2/2, `pflicht` 5/5, `react` 2/2; die neuen T5-Tests auch in Firefox und WebKit grün. Vitrino `-g "Spec 046 T5"` 1/1 (1,9 min), dazu `fm-tabelo, fm-atributlisto…`, `the Vitrino wires…`, `every table names itself`, `fm-insigno, fm-avizo…`, `the Lingvo switch…`, `axe finds nothing in light/high`, `every Ero page has the nine sections…` grün. Checks grün: lint, regularo, dokumentaro (45), vortaro-lint, mankoj, make-kit (5/5), alirebleco; `check:alirebleco-eroj` (Chromium) 217/2 rot (F-T5-1; Firefox/WebKit des neuen Blocks grün); `check:parity` 5 Fehler (F-T5-3, vorher 32).
 - [x] Plan (D-29 bis D-35, F-T5-1 bis F-T5-5, Befunde Etappe F, „Im echten Figma-Plugin zu messen“).
+
+## T6 im Einzelnen
+
+- [x] Rote Tests zuerst (`1ccf4e40`): `modelo src/gvidanto/eroj-runde-7.test.ts` (18 Tests, 13 rot: `dataForm` ×3, Schema positiv, L5-4, „create new“ ×4, „Inhalte anzeigen“ ×4; grün ab Beginn: `list_arangxoj` ×2, „Zeitliche Folge der Änderungen“ ×2, Schema negativ). Befehl `pnpm --filter @fundamento/modelo exec vitest run src/gvidanto/eroj-runde-7.test.ts`.
+- [x] `dataForm` im Schema `UzoSlot`, Typen, `slotsOf` (`93aac005`, D-37); Ausnahme `eroj-fields.test.ts:357` (`d3a31f4b`); Daten `tabelo`/`templinio` (`39034b2b`).
+- [x] L5-4: deutsche Texte der `butono` gekürzt, 746 < 750 ohne `rest` (`73727a1b`, D-38).
+- [x] `suggest_ero`: Goal `create` der `formularo` mit `children`, Stichwörter am Goal `details` der `atributlisto` (`a22018b6`, D-39, D-40).
+- [x] Ausnahme Vertrags-Fixtures, 11 Einträge (`9ee8d430`, D-41); AC-8 der Ausgabe byte-gleich; `index.json` unverändert.
+- [x] F-T1-5 entschieden: bleibt rot (D-42). B-9 geprüft: grün (F-T6-5).
+- [x] Läufe (einzeln): modelo 4909/7 rot (F-T1-1, -2, -5, -6, -10, F-T6-1, F-T6-2), mcp 507/1 (F-T1-6), projekcioj 1544/7 (F-T1-4, F-T1-3, F-T5-3 ×5), nordstelo 268/2 (F-T2-5), ekranoj 293/0, cli 120/0, eroj Vitest 43/0, eroj Playwright alle Engines 2021/2 (F-T6-9, F-T6-10), agordilo 139/8 (F-T6-7), metiejo 603/5 (F-T6-8), vortaro und aspekto-komuna-0-2 grün.
+- [x] Abschluss PR A: `pnpm build && pnpm test:betroffen` einmal (Abbruch unter Last, F-T6-11), `pnpm lint` grün, `pnpm check` einmal (Abbruch am Testschritt, F-T6-11) und die Prüfungen einzeln; Diff-Suche, Dateiliste, Kern 400 – siehe plan.md › Abschluss PR A.
+- [x] Plan (D-37 bis D-42, F-T6-1 bis F-T6-12, Vertrags-Fixtures, Abschluss PR A).
