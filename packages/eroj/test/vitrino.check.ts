@@ -489,16 +489,18 @@ test("fm-tabelo, fm-atributlisto and fm-mezurilo are upgraded in their sections,
   await open(page);
   const tables = page.locator("#fm-vitrino-tabelo fm-tabelo");
   // Two, and the empty table of Nachlese 7 ② B-3 (its next step a butono); three densities since
-  // Spec 036 Teil 5 ②b-2 (A-tabelo-1).
-  await expect(tables).toHaveCount(4);
+  // Spec 036 Teil 5 ②b-2 (A-tabelo-1). Spec 046 T5: each density selectable too (since T3), and
+  // the rows loading and sticky-header – 3 × 2 + 1 + 2.
+  await expect(tables).toHaveCount(9);
   // The section's own grid is a table too: count the tables inside the Eroj.
-  await expect(page.locator("#fm-vitrino-tabelo fm-tabelo").getByRole("table")).toHaveCount(4);
+  await expect(page.locator("#fm-vitrino-tabelo fm-tabelo").getByRole("table")).toHaveCount(9);
   await expect(
     page
       .locator("#fm-vitrino-tabelo fm-plenstato")
       .getByRole("button", { name: "Standard anlegen" }),
   ).toBeVisible();
-  await expect(page.locator("#fm-vitrino-tabelo th[data-sort] > button")).toHaveCount(3);
+  // Spec 046 T5: every table but the empty one sorts by name.
+  await expect(page.locator("#fm-vitrino-tabelo th[data-sort] > button")).toHaveCount(8);
   const lists = page.locator("#fm-vitrino-atributlisto fm-atributlisto");
   // Spec 014 ① (plan ① D-03): a third row, layout auto, beside columns and stacked.
   await expect(lists).toHaveCount(3);
