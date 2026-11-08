@@ -11185,6 +11185,10 @@
         }
       },
       "item": {
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.xsmall}"
+        },
         "color": {
           "$type": "color",
           "$value": "{color.text.subtle}"

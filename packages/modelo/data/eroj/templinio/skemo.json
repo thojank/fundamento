@@ -36,6 +36,9 @@
         }
       },
       "item": {
+        "gap": {
+          "fixed": "spacing.xsmall"
+        },
         "color": {
           "fixed": "color.text.subtle"
         },

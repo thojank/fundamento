@@ -24722,6 +24722,16 @@
         }
       },
       "item": {
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.xsmall}",
+          "$description": "templinio: item.gap (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XW7SYHDJ4188X4DKPTMW4X"
+            }
+          }
+        },
         "color": {
           "$type": "color",
           "$value": "{color.text.subtle}",
