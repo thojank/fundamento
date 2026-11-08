@@ -780,6 +780,7 @@ Aus der Implementierungs-Spec von Lauf 5 (§5) und dem Beitrag S038-31; S038-42 
 | D-S038-37b-1 | Die Angaben zu Prop-Kombinationen und Label-Regel kommen als additives `get_ero`-Feld; bestehende Antworten byte-gleich; `modelo/data/**` unberührt. | MG-3, Verträge aus Lauf 1. |
 | D-S038-37t-1 | Das Test-Ticket liegt vor der Messung. | D-251 (PR F nur Doku); Code-Kopf E muss der getestete Baum sein. |
 | D-S038-38-1 | Bezug′ = lokaler Commit in einem abgelösten Worktree auf `e4873c57` nur mit A-1; AK-2 wird auf den vorher-Läufen an Anbieterfehlern und Abbrüchen gemessen. | D-248; sauberer SHA in `lauf.json`. |
+| D-S038-39b-1 | Die Ableitung der Ero-Instanzen (D-22) bleibt wie im Bezugsstand; ein ausdrücklich benannter Standard-Slot wird in Lauf 5 nicht übernommen (Fix `c3ac128e` zurückgenommen, `af1ee0a6`), stattdessen nennt der Befund für die nächste Runde den geslotteten Text. | AC-8-Orakel (nordstelo `ac8.test.ts`, ekranoj gegen den echten Server) und `rescore.test.ts` wurden rot; K3 des Bewerters muss für vorher/nachher gleich bleiben. Befund F-S038-39b-1 für S038-42. |
 | D-S038-42-1 | PR E und PR F als Commit-Bereiche auf einem Branch plus lokaler Branch `261107-spec-038-kugelsicher-pr-e` am letzten PR-E-Commit; kein Push in diesem Lauf. | D-251; Push nur im freigegebenen PR-Schritt. |
 
 ## Lieferliste
@@ -857,13 +858,13 @@ Das CI-Ergebnis von Lauf 4 (T3868) ist mit S038-31 nachgetragen (Abschnitt „Be
 | A-2 | `restantajLauxRegulo` in `kuro.json`, oberste drei Regeln in `--art komparo` und Ablaufbericht (AK-5) | S038-33 | E | offen |
 | A-4 | Schätzkonstanten aus der Messung von Lauf 4 (80 011; Variante 0) | S038-35 | E | offen |
 | A-5 | Ausnahme für das Kontrollmodell (`--lauf-id`, `--kontroll-modelo`, AK-6 Wächter) | S038-36 | E | offen |
-| B-2 | Platzhalter-Verweis `<slug>.html` im Shell-Pfad durch konkrete Ziele ersetzen (AK-1) | S038-37a | E | offen |
-| B-3 | Prop-Kombinationen und Label-Regel im Kurzprofil, `suggestion` im Befund (AK-1) | S038-37b | E | offen |
-| B-4 | Leere/abgeschnittene Seite detail: Ursache benennen, beheben (AK-1, AK-2) | S038-37c | E | offen |
-| T-L5 | Integrationstests Lauf 5 (AK-2, AK-5, AK-6), Tor Schritt 1 | S038-37t | E | offen |
-| C-1 | Bezug′ `/tmp/s038-bezug-prim` = `e4873c57` + nur A-1, Diff geprüft (D-248) | S038-38 | – | offen |
-| B-1, B-5 | Abnahme `komuna` Versuch 1 (`abnahme-komuna-l5-v1`, `--max-tokens` aus der Scheibe) | S038-39a | E | offen |
-| B-5 | Fundamento-seitige Nachbesserung und Versuch 2 (`abnahme-komuna-l5-v2`), nur wenn v1 < 2/2 | S038-39b | E | offen |
+| B-2 | Platzhalter-Verweis `<slug>.html` im Shell-Pfad durch konkrete Ziele ersetzen (AK-1) | S038-37a | E | erledigt (S038-37a, `635ff5ad`/`479c5ad4`) |
+| B-3 | Prop-Kombinationen und Label-Regel im Kurzprofil, `suggestion` im Befund (AK-1) | S038-37b | E | erledigt (S038-37b, `fa12e4d2`/`90ca725e`/`c61ab3c9`) |
+| B-4 | Leere/abgeschnittene Seite detail: Ursache benennen, beheben (AK-1, AK-2) | S038-37c | E | erledigt (S038-37c, `e4af6488`/`5089d5d1`, `115bcc6b`/`0ada621f`) |
+| T-L5 | Integrationstests Lauf 5 (AK-2, AK-5, AK-6), Tor Schritt 1 | S038-37t | E | erledigt (S038-37t, `21c70b02`; erweitert in S038-39b) |
+| C-1 | Bezug′ `/tmp/s038-bezug-prim` = `e4873c57` + nur A-1, Diff geprüft (D-248) | S038-38 | – | erledigt (S038-38) |
+| B-1, B-5 | Abnahme `komuna` Versuch 1 (`abnahme-komuna-l5-v1`, `--max-tokens` aus der Scheibe) | S038-39a | E | erledigt (S038-39a): **1/2 grün** (liste grün, detail 99 an `check_usage`) – Abschnitt „Abnahme komuna (Lauf 5)“ |
+| B-5 | Fundamento-seitige Nachbesserung und Versuch 2 (`abnahme-komuna-l5-v2`), nur wenn v1 < 2/2 | S038-39b | E | erledigt (S038-39b): zwei Befund-Korrekturen (`be7b1f6f`, `0f32cb17`), Versuch 2 **0/2 grün** → **D-249: Stopp** – Abschnitt „Abnahme komuna (Lauf 5)“ |
 | C-2 | nachher: 5 Läufe je Ablauf auf Code-Kopf E (`nachher-l5-<ablauf>`), nur bei 2/2 | S038-40a | F | offen |
 | C-4 | Kontrolllauf `kontrolle-komuna` (Sonnet 5.5, AK-6), läuft in beiden Zweigen | S038-40b | F | offen |
 | C-2, C-3 | vorher F: 5 Läufe je Ablauf auf Bezug′ (`vorher-l5-<ablauf>`), nur bei 2/2 | S038-40c | F | offen |
@@ -1274,6 +1275,85 @@ Aus `$S/ablauf/vergleich/vergleich.md` (`pnpm nordstelo --art komparo --antaux $
 | eroj `vitrino-partoj.test.ts:101` (Hook 10 s, fremd) | `pnpm check` 1/1; allein 0/10 |
 
 Bis auf `rondoj.test.ts:733` (Vergleich mit Zeitfeld, kein Zeitlimit) sind alle Treffer Zeitgrenzen unter Last.
+
+## Abnahme komuna (Lauf 5)
+
+**D-249: Stopp** – komuna 1/2 (`abnahme-komuna-l5-v1`) und 0/2 (`abnahme-komuna-l5-v2`) nach 2 Versuchen; Messung entfällt (S038-40a/c übersprungen); Kontrolllauf folgt (S038-40b). Nichts gelockert, kein `komuna`-eigener Prompt, keine Grenze angehoben, nichts aus der Tabu-Liste berührt.
+
+Befehl je Versuch (§2.6, D-246/D-247): `$W/kosten reservieren <id> --zweck "B-5 Versuch <n>" --usd <x>`, dann im Hintergrund `$W/mezuri <id> "B-5 Versuch <n>" --cwd $R --raporto $S/abnahme-l5/komuna-v<n>/raporto.json -- pnpm fm ekranoj "Eine Verwaltung für Standards mit Liste, Detail, Bearbeiten und Einstellungen" --ekranoj liste,detail --max-tokens <N> --ja --env $M/.env --ledger $S --out $S/abnahme-l5/komuna-v<n>`; Sperre frei, Wächter lief, nichts daneben. Modell nur `mistral/ministral-14b-2512`. Quelle `$S/lauf5/laeufe.tsv`, `$S/lauf5/kostoj.tsv`.
+
+| Lauf-ID | Commit | `--max-tokens` | Exit | Dauer | Tokens ein / aus | Anfragen | Werkzeugaufrufe | $ | Last vor → nach (1/5/15 min, 10 Kerne) | gestört | Halt | grün |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `abnahme-komuna-l5-v1` | `0ada621f` (Kopf vor S038-39b) | 756 000 | 0 | 517,9 s (00:58:38Z–01:07:15Z) | 188 180 / 3 299 | 54 | 49 | 0,038296 | 1,61 3,71 5,70 → 3,34 2,95 4,37 | nein | 3 Runden | **1/2** (liste ab R1) |
+| `abnahme-komuna-l5-v2` | `0f32cb17` (**Code-Kopf E**) | 1 058 000 | 0 | 828,1 s (01:43:56Z–01:57:45Z) | 332 677 / 9 122 | 79 | 121 | 0,068360 | 5,91 6,96 8,46 → 1,79 2,45 4,75 | nein | 3 Runden | **0/2** |
+
+- `--max-tokens`: v1 ⌊min(0,15125; 0,25) ÷ 0,20 $ × 10⁶⌋ = 756 250 → 756 000; v2 ⌊0,211704 ÷ 0,20 $ × 10⁶⌋ = 1 058 520 → **1 058 000** (≥ 605 000, Start erlaubt). Verbraucht: v1 191 479, v2 341 799 Tokens (32 % der Grenze) – keine Tokengrenze, kein Anbieterfehler.
+- **Code-Kopf E = `0f32cb17d20dfb5cff60e25b973b08b4ab7fd938`** (Grün-Commit S038-39b; `pnpm build` 9/9, `git status --porcelain` leer). Gemessen wird in Lauf 5 nur noch der Kontrolllauf (S038-40b) auf diesem Kopf.
+- 429-Drosselung (F-S038-39a-2): v1 41 Wartezeilen, v2 60 Wartezeilen (Σ 662 s von 828 s), alle in der unteren Wiederholung von metiejo aufgefangen; `anbieterfehleroj` fehlt in beiden `raporto.json` (nichts kam bis C-1), `malplenajPagxoj` fehlt (keine leere Seite).
+- Ledger nach v2: Lauf 5 0,106656 $ von 5,00 $; `abnahme-` 0,106656 gebucht, Rest 0,143344 $, nichts offen; Lauf 1–4 unverändert 0,876548 $.
+
+### Grün je Screen (nach `decidiVerdon`; hell und dunkel)
+
+| Versuch | Runde | Screen | K1 | K2 | K3 | K4 | K5 | Total | axe hell/dunkel | K8 | Navigation | check_usage-Fehler | grün |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| v1 | 1 | liste | 1 | 1 | 1 | 1 | 1 | 100 | 0/0 | 0,982 vollständig | vollständig | 0 | **ja** (R2/R3 übernommen) |
+| v1 | 1 | detail | 1 | 0,973 | 0,75 | 1 | 1 | 95,8 | 0/0 | 0,917 vollständig | vollständig | 5 | nein |
+| v1 | 2 | detail | 1 | 1 | 0,813 | 1 | 1 | 97,2 | 0/0 | 0,938 vollständig | vollständig | 5 | nein |
+| v1 | 3 | detail | 1 | 1 | 0,933 | 1 | 1 | 99 | 0/0 | 0,875 vollständig | vollständig | 3 | nein |
+| v2 | 1 | liste | 1 | 1 | 1 | 1 | 1 | 100 | 0/0 | 0,95 vollständig | tot: `einstellungen.html`, `bearbeiten.html` | 2 | nein |
+| v2 | 1 | detail | 1 | 0,977 | 0,6 | 1 | 1 | 93,7 | 0/0 | 0,875 vollständig | vollständig | 8 | nein |
+| v2 | 2 | liste | 1 | 1 | 1 | 1 | 1 | 100 | 0/0 | 0,95 vollständig | tot: `bearbeiten.html` | 0 | nein (nur Navigation) |
+| v2 | 2 | detail | 1 | 1 | 0,65 | 1 | 1 | 94,8 | 0/0 | 0,9 vollständig | vollständig | 9 | nein |
+| v2 | 3 | liste | 1 | 0,949 | 0,882 | 0 | 1 | 77,5 | 2/2 | 0,893 vollständig | vollständig | 3 | nein |
+| v2 | 3 | detail | 1 | 1 | 0,944 | 1 | 1 | 99,2 | 0/0 | 0,833 vollständig | vollständig | 3 | nein |
+
+AK-2 in beiden Versuchen erfüllt: jede gebaute Screen-Runde hat ein nicht leeres Fragment (K7 v1 1 333–1 685 B, v2 1 545–2 840 B), Endgrund „Höchstzahl von 3 Runden“, kein Anbieterfehler, keine Tokengrenze.
+
+### `restantaj` je Regel (letzte Runde) gegen Lauf 4
+
+| Regel | Lauf 4 (`abnahme-komuna-l4`) | v1 | v2 |
+|---|---|---|---|
+| `destructive-label-names-object` | 2 (liste) | 0 | 0 |
+| `ero-prop-constraint` | 2 (liste) | 0 | 0 |
+| `regulo` (K3-Lücke) | 2 (liste) | 1 (detail, `uzo-slot-accepts`) | 3 (liste `uzo-slot-accepts`, `uzo-slot-nesting`; detail `one-primary-per-container`) |
+| `k8-sxablono` | 2 (detail) | 0 | 0 |
+| `navigado-morta` | 1 (liste, `slug.html`) | 0 | 0 (R1/R2: `einstellungen.html`, `bearbeiten.html`) |
+| `render` | 1 (detail) | 0 | 0 |
+| `K5` | 1 (detail) | 0 | 0 |
+| `label-required` | 0 | 2 (detail, `fm-butono`) | 0 |
+| `uzo-slot-accepts` | 0 | 1 (detail, karto `actions`) | 3 (liste 2 `fm-faldilo` `content`/`summary`; detail 1 karto `content` ← atributlisto) |
+| `uzo-slot-nesting` | 0 | 0 | 2 (liste `fm-faldilo` `summary`; detail karto `content`) |
+| `one-primary-per-container` | 0 | 0 | 1 (detail, zwei `fm-karto`) |
+| `invented-attribute` | 0 | 0 | 2 (liste `faldilo.label`, `insigno.label`) |
+| `axe:nested-interactive` | 0 | 0 | 2 (liste hell/dunkel) |
+| `axe:target-size` | 0 | 0 | 2 (liste hell/dunkel) |
+| **Summe** | **11** | **4** | **15** |
+
+Behoben gegenüber Lauf 4 und in beiden Versuchen stabil: tote Platzhalter-Verweise, Prop-Kombinationen, Löschen-Label, leere detail-Seite, `k8-sxablono`. v2 liste war in R2 bis auf einen toten Verweis auf einen nicht geplanten Screen (`bearbeiten.html`, aus dem Satz „… Bearbeiten und Einstellungen“) grün und verschlechterte sich in R3 (neue `fm-faldilo`-Fehler, axe); v2 detail scheitert in R3 an zwei Ursachen, siehe unten.
+
+### Ursachen und Korrekturen (S038-39b)
+
+Offline mit dem echten `checkMarkup` des Gvidanto auf den gespeicherten Fragmenten (`rondoj/<n>/<slug>.html`), Probe `/tmp/s038-39b-probe/`.
+
+- **v1 `label-required` ×2 (detail).** Das Modell schrieb `<fm-butono …><span slot="label">Bearbeiten</span></fm-butono>` (der Leitfaden erlaubt `slot="label"`). Die Eroj übernehmen ein Kind im ausdrücklich benannten Standard-Slot und entfernen das Attribut (`#adoptDefault`, Nachlese 11 B-2) – darum sehen Browser-Fakten und K3 ein Label, das gespeicherte `detail.fakto.json` trägt kein `slot`. `check_markup` liest das rohe Fragment; `instancojElElementoj` legt den Text unter `texts.label` ab, nicht als `label` → `label-required`. Reproduziert: genau die drei Fehler von v1 R3. Ein Fix im Kern (`ff7c91b7` rot / `c3ac128e` grün) machte v1 R3 bis auf `uzo-slot-accepts` sauber, brach aber das AC-8-Orakel (nordstelo `ac8.test.ts`, ekranoj gegen den echten Server, `rescore.test.ts`) und hätte K3 zwischen vorher und nachher verschoben → zurückgenommen (`af1ee0a6`, D-S038-39b-1). Stattdessen nennt der Befund für die nächste Runde den geslotteten Text (`568418ce` rot / `0f32cb17` grün): „Der Text „Bearbeiten“ steht in <span slot="label">; ein Kind mit slot-Attribut zählt nicht als Label: den Text ohne Hülle und ohne slot-Attribut direkt ins Element schreiben, z. B. <fm-butono>Bearbeiten</fm-butono>.“
+- **v1 `uzo-slot-accepts` ×1 + `regulo` ×1 (detail).** `<div slot="actions">` um die Butonoj; die Regel ist richtig (karto `actions` nimmt butono/ligilo), der Vorschlag nannte die Hülle nicht. Befund für die nächste Runde nennt sie jetzt (`f4de845a` + Nachtrag `3532c00a` rot / `be7b1f6f` grün): „Im Slot actions steht ein <div> als Hülle; eine Hülle zählt als Text: slot="actions" direkt an jedes fm-butono darin setzen und das <div> weglassen.“ Die K3-Lücke `regulo` bekommt denselben Vorschlag.
+- Beide Korrekturen allgemein für jede Ero und jeden Slot, nur in `packages/ekranoj/src/rondoj.ts`; `check_usage`, Reguloj/Skemoj, `verda.ts`, `navigado.ts`, K8, Kurzprofile unverändert (`git diff --stat 0ada621f..0f32cb17`: `rondoj.ts`, `rondoj.test.ts`, `lauf5-integra.test.ts`). In v2 kamen beide Fälle nicht vor (kein `slot="label"`, keine Hülle), die neuen Sätze wurden also nicht gebraucht.
+- Tor vor v2: `rondoj.test.ts` allein 30/30 (47/47), `test:betroffen` seriell 18/18 (`/tmp/s038-logs/s038-39b-betroffen.log`; erster Durchgang mit dem Kern-Fix rot in nordstelo, `s038-39b-betroffen-1-rot.log`), bekannte Flaker (`ac8.test.ts:156`, `integra.test.ts:131`, `turbo-inputs.test.ts:679`) nicht getroffen (10 von 18 Aufgaben aus dem Cache; eroj webkit `achsen-2b2.spec.ts:82` nicht gelaufen, nur chromium); `$W/audit-ac4 0ada621f..HEAD` geändert 0, neu 0.
+- **v2 detail R3 (letzte Runde):** `one-primary-per-container` (zwei `fm-karto` ohne `emphasis` in `fm-pagxo`) und `uzo-slot-accepts`/`uzo-slot-nesting` (`<fm-atributlisto slot="content">` in `fm-karto`). Probe mit übernommenem Standard-Slot: es bliebe nur `one-primary-per-container` – in v2 liste R1 (`uzo-slot-accepts`/`-nesting`), v2 detail R2 (2 der 9 Fehler) und R3 (2 von 3) wirkt dieselbe Ursache wie bei v1 `label-required` (F-S038-39b-1).
+
+### Befunde für S038-42 („Modell oder Fundamento“)
+
+- **F-S038-39b-1 (Fundamento, AC-8-gebunden):** `check_markup`/`instancojElElementoj` behandeln ein Kind mit `slot="<Standard-Slot>"` als geslottet, die Eroj (Browser, K3) als ungeslottet. Folgen in beiden Versuchen: v1 `label-required` ×2 in allen drei Runden; v2 `uzo-slot-accepts`/`uzo-slot-nesting` für `slot="content"` an karto. Vorschlag: im Leser von `check_markup` (nach `legiMarkon`) den Standard-Slot übernehmen wie `#adoptDefault`, mit Neufassung der AC-8-Fixtures `ero-mit-slot-daten`, `link-ero`, `regelverstoss`, `abnahme-komuna-r2-liste` (ekranoj) und Entscheidung zur Neubewertung von `kuroj-werkzeugliste-F-1` (`rescore.test.ts`) – erst nach dem Vergleich von Lauf 5, damit K3 vorher/nachher gleich bleibt.
+- **F-S038-39b-2 (Fundamento, Tabu in Lauf 5):** `one-primary-per-container` zählt jede `fm-karto` mit dem Standardwert `emphasis=high` als primäre Aktion (`appliesTo` butono, dialogo, avizo, karto; bei karto ist `emphasis` die Fläche, Spec 029 ②a, Standard `high`). Zwei Karten in einer Seite verletzen die Regel immer, wenn das Modell `emphasis` nicht setzt – v2 detail in allen drei Runden. Vorschlag (`modelo/data/reguloj.json` oder der Prüfer in `modelo/src/eroj/usage.ts`): nur butono-Instanzen zählen, karto/dialogo/avizo nur als Behälter.
+- **F-S038-39b-3 (Modell):** v2 liste verweist in R1/R2 auf nicht geplante Screens (`bearbeiten.html`, `einstellungen.html`) trotz des Befunds „Nur auf geplante Screens verweisen: liste.html, detail.html.“; R3 behebt das und baut neue Fehler (`fm-faldilo` mit `butono` im Slot `summary`, `plurelektilo` in `content`, erfundenes `label`, axe `nested-interactive`/`target-size`). v2 detail: `fm-titolo`/`fm-teksto` im Slot `heading` (R1/R2), behoben in R3.
+- **F-S038-39b-4 (Hinweis):** Die Ergebnisse streuen stark zwischen den Versuchen (v1 liste grün ab R1, v2 liste nie grün; v1 detail 1 Karte, v2 detail 2 Karten) – mit zwei Versuchen ist „Modell oder Fundamento“ nur je Regel belegbar, nicht als Rate.
+
+### Fotos
+
+| Versuch | liste hell | liste dunkel | detail hell | detail dunkel | Bericht |
+|---|---|---|---|---|---|
+| v1 | [liste hell](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v1/bildoj/liste-hela.png) | [liste dunkel](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v1/bildoj/liste-malhela.png) | [detail hell](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v1/bildoj/detail-hela.png) | [detail dunkel](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v1/bildoj/detail-malhela.png) | [raporto.md](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v1/raporto.md) |
+| v2 | [liste hell](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v2/bildoj/liste-hela.png) | [liste dunkel](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v2/bildoj/liste-malhela.png) | [detail hell](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v2/bildoj/detail-hela.png) | [detail dunkel](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v2/bildoj/detail-malhela.png) | [raporto.md](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v2/raporto.md) |
 
 ## Blockiert
 
