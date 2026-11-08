@@ -15,8 +15,22 @@ import {
   NevalidaKomparo,
   trovuLaufon,
 } from "./komparo.js";
-import { STREUUNG_REIHE_K, stabilaJson } from "./raporto.js";
-import { EKRANA_PENO, K, LFD, RUN_PENO, skribiLaufon, UK } from "./test-doubles/laufoj.js";
+import {
+  RESTANTAJ_SUPRAJ,
+  type RestantajEnKuro,
+  restantajSuprajDe,
+  STREUUNG_REIHE_K,
+  stabilaJson,
+} from "./raporto.js";
+import {
+  EKRANA_PENO,
+  K,
+  LFD,
+  RUN_PENO,
+  restantajSumo,
+  skribiLaufon,
+  UK,
+} from "./test-doubles/laufoj.js";
 
 const tmp = (prefix: string) => mkdtempSync(join(tmpdir(), prefix));
 
@@ -292,5 +306,101 @@ describe("the comparison 4.3 (komparo, C-4)", () => {
     expect(komparo([{ dir: antaux }], [{ dir: post }]).paroj.every((p) => !("zusatz" in p))).toBe(
       true,
     );
+  });
+});
+
+describe("open deviations per rule in the comparison (Spec 038 A-2, AK-5, C-2)", () => {
+  // After: rule totals ero-prop-constraint 3, aria 2, label 2, nicht-gebaut 1 – aria and label tie
+  // and are ordered by name; nicht-gebaut is the fourth and drops out of the top three.
+  const LAUX_REGULO = {
+    a: { "nicht-gebaut": 1, "ero-prop-constraint": 2 },
+    b: { "ero-prop-constraint": 1, label: 2, aria: 2 },
+  };
+  const SUMO = restantajSumo(LAUX_REGULO);
+  const SUPRAJ = [
+    { regulo: "ero-prop-constraint", nombro: 3 },
+    { regulo: "aria", nombro: 2 },
+    { regulo: "label", nombro: 2 },
+  ];
+
+  function laufoj() {
+    const radiko = tmp("s038-33-komparo-");
+    const antaux = skribiLaufon(join(radiko, "vorher"), "20261107-0900", {
+      commit: "e4873c57",
+      kuroj: [
+        // The older shape: a number of open deviations, no rules.
+        { tasko: LFD, varianto: "F", total: 70, restantaj: 5 },
+        { tasko: LFD, varianto: "0", total: 40 },
+      ],
+    });
+    const post = skribiLaufon(join(radiko, "nachher"), "20261107-1000", {
+      commit: "c0de4d00",
+      kuroj: [
+        { tasko: LFD, varianto: "F", total: 80, penoj: true, restantajLauxRegulo: LAUX_REGULO },
+        { tasko: LFD, varianto: "0", total: 50, penoj: true, restantajLauxRegulo: {} },
+      ],
+    });
+    return { antaux, post };
+  }
+
+  it("gives per flow × variant × side the sum and the three most frequent rules, ties by name", () => {
+    const { antaux, post } = laufoj();
+    const datumoj = komparo([{ dir: antaux }], [{ dir: post }]);
+    const lfdF = paro(datumoj, LFD, "F");
+    expect(lfdF.post?.restantajSupraj).toEqual({ sumo: SUMO, supraj: SUPRAJ });
+    expect(lfdF.post?.restantajSupraj?.supraj).toHaveLength(RESTANTAJ_SUPRAJ);
+    // Older shape: „nicht vorhanden“, never a guessed 0.
+    expect(lfdF.antaux?.restantajSupraj).toBeNull();
+    // Nothing open: the sum 0 and no rule.
+    expect(paro(datumoj, LFD, "0").post?.restantajSupraj).toEqual({ sumo: 0, supraj: [] });
+    expect(paro(datumoj, LFD, "0").antaux?.restantajSupraj).toBeNull();
+  });
+
+  it("shows the column in vergleich.md: the rules with their number, „nicht vorhanden“ for older shapes", () => {
+    const { antaux, post } = laufoj();
+    const md = komparoMd(komparo([{ dir: antaux }], [{ dir: post }]));
+    expect(md).toContain(
+      "## Offene Abweichungen je Regel (nach der letzten Runde, häufigste drei)",
+    );
+    expect(md).toContain("| Ablauf | Variante | Seite | offen | häufigste Regeln |");
+    const teksto = SUPRAJ.map((r) => `${r.regulo} ${r.nombro}`).join(", ");
+    expect(md).toContain(`| ${LFD} | F | nachher | ${SUMO} | ${teksto} |`);
+    expect(md).toContain(`| ${LFD} | F | vorher | – | nicht vorhanden |`);
+    expect(md).toContain(`| ${LFD} | 0 | nachher | 0 | – |`);
+    expect(md).not.toContain("nicht-gebaut 1");
+  });
+
+  it("gives the same bytes when computed twice", () => {
+    const { antaux, post } = laufoj();
+    const unua = komparo([{ dir: antaux }], [{ dir: post }]);
+    const dua = komparo([{ dir: antaux }], [{ dir: post }]);
+    expect(stabilaJson(dua)).toBe(stabilaJson(unua));
+    expect(komparoMd(dua)).toBe(komparoMd(unua));
+  });
+
+  it("sums the runs per rule and is only complete where every run with deviations has the rules", () => {
+    const nova = (lauxRegulo: Record<string, Record<string, number>>): RestantajEnKuro => ({
+      restantaj: restantajSumo(lauxRegulo),
+      restantajLauxRegulo: lauxRegulo,
+    });
+    const unua = nova({ a: { "nicht-gebaut": 1, zeta: 1 }, b: { beta: 1 } });
+    const dua = nova({ a: { zeta: 2 }, c: { "nicht-gebaut": 1, alfa: 1 } });
+    const ambaux = restantajSuprajDe([unua, dua]);
+    expect(ambaux).toEqual({
+      sumo: unua.restantaj + dua.restantaj,
+      supraj: [
+        { regulo: "zeta", nombro: 3 },
+        { regulo: "nicht-gebaut", nombro: 2 },
+        { regulo: "alfa", nombro: 1 },
+      ],
+    });
+    // The error path (no field, nothing open) adds nothing.
+    expect(restantajSuprajDe([unua, dua, { restantaj: 0, restantajLauxRegulo: null }])).toEqual(
+      ambaux,
+    );
+    // An older record with open deviations makes the sum incomplete: „nicht vorhanden“.
+    expect(restantajSuprajDe([unua, { restantaj: 4, restantajLauxRegulo: null }])).toBeNull();
+    expect(restantajSuprajDe([{ restantaj: 0, restantajLauxRegulo: null }])).toBeNull();
+    expect(restantajSuprajDe([])).toBeNull();
   });
 });

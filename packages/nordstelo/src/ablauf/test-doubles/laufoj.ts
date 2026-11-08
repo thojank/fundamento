@@ -28,7 +28,17 @@ export interface KuroPeco {
   penoj?: boolean;
   /** Drop fields the 037 measurement point does not have either. */
   malnova?: boolean;
+  /** Open deviations per slug and rule: `restantajLauxRegulo` in kuro.json, Σ as `restantaj`. */
+  restantajLauxRegulo?: Record<string, Record<string, number>>;
+  /** `restantaj` of a record in the older shape (no `restantajLauxRegulo`). */
+  restantaj?: number;
 }
+
+/** Σ over every slug and rule of a `restantajLauxRegulo`. */
+export const restantajSumo = (lauxRegulo: Record<string, Record<string, number>>): number =>
+  Object.values(lauxRegulo)
+    .flatMap((reguloj) => Object.values(reguloj))
+    .reduce((a, b) => a + b, 0);
 
 export const K = (v: number) => ({ K1: v, K2: v, K3: 1, K4: 1, K5: 1, K6: 1 });
 export const RUN_PENO = {
@@ -95,7 +105,10 @@ function kuroEnRaporto(peco: KuroPeco) {
     faritajRondoj: nekomencita ? 0 : peco.haltigo === undefined ? 3 : 1,
     peno: nekomencita ? { ...RUN_PENO, inputTokens: 0, outputTokens: 0, requests: 0 } : RUN_PENO,
     sxargo,
-    restantaj: 0,
+    restantaj:
+      peco.restantajLauxRegulo === undefined
+        ? (peco.restantaj ?? 0)
+        : restantajSumo(peco.restantajLauxRegulo),
     notoj: [],
     ...(peco.malnova === true
       ? {}
@@ -191,7 +204,14 @@ export function skribiLaufon(
             penoPlano: { inputTokens: 6_000, outputTokens: 60, requests: 0, toolCalls: 3 },
           }
         : {};
-    writeFileSync(join(kuroDir, "kuro.json"), stabilaJson({ ...rekordo, stato: {}, ...penoj }));
+    const restantaj =
+      peco.restantajLauxRegulo === undefined
+        ? {}
+        : { restantajLauxRegulo: peco.restantajLauxRegulo };
+    writeFileSync(
+      join(kuroDir, "kuro.json"),
+      stabilaJson({ ...rekordo, stato: {}, ...penoj, ...restantaj }),
+    );
   }
   return dir;
 }

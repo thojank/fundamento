@@ -1,0 +1,91 @@
+{
+  "priskribo": "The guard matrix of Spec 038 C-3 (S038-37t): one table for gardo.ts, fm ekranoj and nordstelo --art ablauf. env names the model of the .env (ministral, mistral-large, sonnet); each test writes its own invented keys (MISTRAL_API_KEY and OPENROUTER_API_KEY). atendo is either the refusal (path, rule; exit 2, nothing started) or the provider built and the pair handed on to every run (kontrolo null = none).",
+  "env": {
+    "ministral": { "FM_KI_ANBIETER": "mistral", "FM_KI_MODELL": "ministral-14b-2512" },
+    "mistral-large": { "FM_KI_ANBIETER": "mistral", "FM_KI_MODELL": "mistral-large-2512" },
+    "sonnet": { "FM_KI_ANBIETER": "openrouter", "FM_KI_MODELL": "anthropic/claude-sonnet-5.5" }
+  },
+  "kazoj": [
+    {
+      "nomo": "option without run id",
+      "env": "ministral",
+      "args": ["--kontroll-modelo", "openrouter/anthropic/claude-sonnet-5.5"],
+      "atendo": { "path": "/lauf-id", "rule": "control-run-id" }
+    },
+    {
+      "nomo": "prefix without option",
+      "env": "ministral",
+      "args": ["--lauf-id", "kontrolle-x"],
+      "atendo": { "path": "/kontroll-modelo", "rule": "control-model-option" }
+    },
+    {
+      "nomo": "other model with option",
+      "env": "ministral",
+      "args": ["--lauf-id", "kontrolle-x", "--kontroll-modelo", "openrouter/other/model"],
+      "atendo": { "path": "/kontroll-modelo", "rule": "model-not-allowed" }
+    },
+    {
+      "nomo": "other model with option, plain run id",
+      "env": "ministral",
+      "args": ["--lauf-id", "foo", "--kontroll-modelo", "openrouter/other/model"],
+      "atendo": { "path": "/kontroll-modelo", "rule": "model-not-allowed" }
+    },
+    {
+      "nomo": "option, plain run id",
+      "env": "ministral",
+      "args": ["--lauf-id", "foo", "--kontroll-modelo", "openrouter/anthropic/claude-sonnet-5.5"],
+      "atendo": { "path": "/lauf-id", "rule": "control-run-id" }
+    },
+    {
+      "nomo": "wrong prefix",
+      "env": "ministral",
+      "args": ["--lauf-id", "kontrolle_x", "--kontroll-modelo", "openrouter/anthropic/claude-sonnet-5.5"],
+      "atendo": { "path": "/lauf-id", "rule": "control-run-id" }
+    },
+    {
+      "nomo": "other model in the .env",
+      "env": "mistral-large",
+      "args": [],
+      "atendo": { "path": "FM_KI_MODELL", "rule": "model-not-allowed" }
+    },
+    {
+      "nomo": "sonnet only in the .env",
+      "env": "sonnet",
+      "args": [],
+      "atendo": { "path": "FM_KI_MODELL", "rule": "model-not-allowed" }
+    },
+    {
+      "nomo": "sonnet only in the .env, plain run id",
+      "env": "sonnet",
+      "args": ["--lauf-id", "abnahme-komuna-l5-v1"],
+      "atendo": { "path": "FM_KI_MODELL", "rule": "model-not-allowed" }
+    },
+    {
+      "nomo": "sonnet in the .env with the prefix but no option",
+      "env": "sonnet",
+      "args": ["--lauf-id", "kontrolle-komuna"],
+      "atendo": { "path": "/kontroll-modelo", "rule": "control-model-option" }
+    },
+    {
+      "nomo": "the control pair",
+      "env": "ministral",
+      "args": ["--lauf-id", "kontrolle-komuna", "--kontroll-modelo", "openrouter/anthropic/claude-sonnet-5.5"],
+      "atendo": {
+        "provider": "openrouter/anthropic/claude-sonnet-5.5",
+        "kontrolo": { "laufId": "kontrolle-komuna", "kontrolModelo": "openrouter/anthropic/claude-sonnet-5.5" }
+      }
+    },
+    {
+      "nomo": "ministral as it was",
+      "env": "ministral",
+      "args": [],
+      "atendo": { "provider": "mistral/ministral-14b-2512", "kontrolo": null }
+    },
+    {
+      "nomo": "ministral with a plain run id",
+      "env": "ministral",
+      "args": ["--lauf-id", "abnahme-komuna-l5-v1"],
+      "atendo": { "provider": "mistral/ministral-14b-2512", "kontrolo": { "laufId": "abnahme-komuna-l5-v1" } }
+    }
+  ]
+}

@@ -14,6 +14,11 @@ import {
   LAUF_DOSIERO,
   lastoSuperKernoj,
   type PenoKvar,
+  type RestantajSupraj,
+  restantajLauxReguloEl,
+  restantajSumoTeksto,
+  restantajSuprajDe,
+  restantajTeksto,
   STREUUNG_FONTO,
   STREUUNG_REIHE_K,
 } from "./raporto.js";
@@ -78,6 +83,11 @@ export interface KomparoValoroj {
   /** The load before and after each repetition, with the cores (D-09). */
   sxargoj: KuroSxargo[];
   lastoSuperKernoj: boolean;
+  /**
+   * The open deviations after the last round per rule, summed over the started repetitions, with
+   * the three most frequent rules (Spec 038 A-2, C-2); null: „nicht vorhanden“ (older kuro.json).
+   */
+  restantajSupraj: RestantajSupraj | null;
 }
 
 /** After − before of one flow × variant. */
@@ -236,6 +246,10 @@ interface LegitaKuro {
   rondoj: Record<string, LegitaRondo>;
   penoj: Record<string, Record<string, PenoKvar>> | null;
   penoPlano: PenoKvar | null;
+  /** `restantaj` of the report data (null where missing). */
+  restantaj: number | null;
+  /** `restantajLauxRegulo` of kuro.json (C-2); null in older shapes and on the error path. */
+  restantajLauxRegulo: Record<string, Record<string, number>> | null;
 }
 
 interface LegitaLauf {
@@ -348,6 +362,8 @@ function legiKuron(dir: string, kuro: Obj, path: string): LegitaKuro | null {
     rondoj,
     penoj,
     penoPlano: penoj === null ? null : penoKvarDe(rekordo?.penoPlano),
+    restantaj: num(kuro.restantaj),
+    restantajLauxRegulo: restantajLauxReguloEl(rekordo?.restantajLauxRegulo),
   };
 }
 
@@ -621,6 +637,13 @@ function valorojDe(
     k8JeMarko,
     sxargoj,
     lastoSuperKernoj: lasto,
+    // A count missing from the report data cannot be checked: treated as „not 0“.
+    restantajSupraj: restantajSuprajDe(
+      startitaj.map((kuro) => ({
+        restantaj: kuro.restantaj ?? Number.NaN,
+        restantajLauxRegulo: kuro.restantajLauxRegulo,
+      })),
+    ),
   };
 }
 
@@ -963,6 +986,25 @@ export function komparoMd(datumoj: KomparoDatumoj): string {
         valoroj === null
           ? `| ${paro.tasko} | ${paro.varianto} | ${seite} | — | — | — |`
           : `| ${paro.tasko} | ${paro.varianto} | ${seite} | ${n(valoroj.r1r3.R1, 1)} | ${n(valoroj.r1r3.R3, 1)} | ${dTotal(valoroj.r1r3.delto)} |`,
+      );
+    }
+  }
+
+  lines.push(
+    "",
+    "## Offene Abweichungen je Regel (nach der letzten Runde, häufigste drei)",
+    "",
+    "Summe über die gestarteten Wiederholungen; nicht gebaute Screens als „nicht-gebaut“; gleich häufige Regeln nach Namen. „nicht vorhanden“: die Aufzeichnung hat keine Regeln (älterer Stand).",
+    "",
+    "| Ablauf | Variante | Seite | offen | häufigste Regeln |",
+    "|---|---|---|---|---|",
+  );
+  for (const paro of datumoj.paroj) {
+    for (const [seite, valoroj] of flankojDe(paro)) {
+      lines.push(
+        valoroj === null
+          ? `| ${paro.tasko} | ${paro.varianto} | ${seite} | — | — |`
+          : `| ${paro.tasko} | ${paro.varianto} | ${seite} | ${restantajSumoTeksto(valoroj.restantajSupraj)} | ${restantajTeksto(valoroj.restantajSupraj)} |`,
       );
     }
   }

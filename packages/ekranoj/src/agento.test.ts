@@ -7,6 +7,7 @@ import {
   chatModelDe,
   eltiriRespondon,
   eroNomojDe,
+  KONTROLA_MODELO,
   KURZPROFILAJ_KAMPOJ,
   konstruiEkranon,
   legiEroProfilojn,
@@ -29,6 +30,7 @@ import {
   sistemoDe,
   slugDe,
   sxelaServilo,
+  sxelaSistemoDe,
 } from "./index.js";
 import { ilaRespondo, respondo, SkriptaModelo } from "./test-doubles/chat.js";
 import { planoKun } from "./test-doubles/faktoj.js";
@@ -36,6 +38,7 @@ import {
   CXIUJ_ILOJ,
   ilo,
   kampojDeTabelo,
+  LIMOJ,
   MALNOVAJ_ILOJ,
   MemoraPonto,
 } from "./test-doubles/iloj.js";
@@ -439,8 +442,8 @@ describe("the shell and the context per screen and round (S038-20, AC-7)", () =>
     teksto: JSON.stringify(kampojDeTabelo(nomo, KURZPROFILAJ_KAMPOJ)),
   });
 
-  it("reads the Kurzprofile with get_ero fields brief and slots, once per name and run, and skips what is no Ero or fails", async () => {
-    expect(KURZPROFILAJ_KAMPOJ).toEqual(["brief", "slots"]);
+  it("reads the Kurzprofile with get_ero fields brief, slots and constraints, once per name and run, and skips what is no Ero or fails", async () => {
+    expect(KURZPROFILAJ_KAMPOJ).toEqual(["brief", "slots", "constraints"]);
     const ponto = new SxelaPonto(["get_ero ligilo"]);
     const kasxmemoro: ProfilaKasxmemoro = new Map();
     const linioj: string[] = [];
@@ -458,7 +461,7 @@ describe("the shell and the context per screen and round (S038-20, AC-7)", () =>
     expect(ponto.vokoj.map((voko) => voko.args)).toEqual(
       ["butono", "karto", "nekonata", "ligilo"].map((name) => ({
         name,
-        fields: ["brief", "slots"],
+        fields: ["brief", "slots", "constraints"],
       })),
     );
     expect(linioj).toHaveLength(2);
@@ -473,7 +476,7 @@ describe("the shell and the context per screen and round (S038-20, AC-7)", () =>
     await konstrui(chat, { rondo: 2, sxelo: SXELO, eroProfiloj: profiloj });
     const tasko = chat.petoj[0]?.messages[1]?.content ?? "";
     expect(tasko).toContain(
-      "Kurzprofile der Eroj deines Stands (get_ero, brief und slots – nur diese Inhalte je Slot sind erlaubt):",
+      "Kurzprofile der Eroj deines Stands (get_ero, brief, slots und constraints – nur diese Inhalte je Slot sind erlaubt; constraints nennt die erlaubten Prop-Kombinationen und die Label-Regeln):",
     );
     expect(tasko).not.toContain("Kurzprofile der Eroj deines Stands (get_ero, brief):");
     for (const nomo of ["butono", "karto"]) {
@@ -482,6 +485,28 @@ describe("the shell and the context per screen and round (S038-20, AC-7)", () =>
       expect(tasko, nomo).toContain(`- fm-${nomo}: ${JSON.stringify(kampoj)}`);
       expect(tasko, nomo).toContain(`"slots":${JSON.stringify(kampoj.slots)}`);
     }
+  });
+
+  // Spec 038 B-3 (C-4): the allowed prop combinations and the label rule stand in the Kurzprofil
+  // part of the task of round 2, never in the system text.
+  it("puts the constraint lines of round 2's Kurzprofile into the task, not into the system text (B-3)", async () => {
+    const ponto = new SxelaPonto();
+    const profiloj = await legiEroProfilojn(ponto, ["butono", "karto"], new Map(), () => {});
+    const chat = new SkriptaModelo(() => respondo("```html\n<p>x</p>\n```"));
+    await konstrui(chat, { rondo: 2, sxelo: SXELO, eroProfiloj: profiloj });
+    const sistemo = chat.petoj[0]?.messages[0]?.content ?? "";
+    const tasko = chat.petoj[0]?.messages[1]?.content ?? "";
+    const limoj = LIMOJ.butono;
+    expect(limoj?.props).toBeDefined();
+    expect(limoj?.label).toBeDefined();
+    const kurzprofiloj = tasko.slice(tasko.indexOf("Kurzprofile der Eroj deines Stands"));
+    expect(kurzprofiloj).toContain(`"constraints":${JSON.stringify(limoj)}`);
+    expect(sistemo).not.toContain(limoj?.props ?? "-");
+    expect(sistemo).not.toContain(limoj?.label ?? "-");
+    // Round 1 reads no Kurzprofil: no constraint line in its task.
+    const unua = new SkriptaModelo(() => respondo("```html\n<p>x</p>\n```"));
+    await konstrui(unua, { rondo: 1, sxelo: SXELO, eroProfiloj: profiloj });
+    expect(unua.petoj[0]?.messages[1]?.content ?? "").not.toContain(limoj?.props ?? "-");
   });
 
   it("keeps a Kurzprofil without slots (missing or in rest) as brief, with one log line and no follow-up call", async () => {
@@ -508,10 +533,11 @@ describe("the shell and the context per screen and round (S038-20, AC-7)", () =>
 
   it("puts the shell's Kurzprofile, the layout means and the navigation rule into the system text", () => {
     const sistemo = sistemoDe("GVIDANTO", SXELO);
-    expect(sistemo.startsWith(`${SISTEMO_F}\n\nGVIDANTO\n\n`)).toBe(true);
+    expect(sistemo.startsWith(`${sxelaSistemoDe([])}\n\nGVIDANTO\n\n`)).toBe(true);
     for (const profilo of SXELO.profiloj) expect(sistemo).toContain(profilo.teksto);
     expect(sistemo).toContain(SXELO.arangxoj);
-    expect(sistemo).toContain(NAVIGADA_REGULO);
+    expect(sistemo).toContain(navigadaReguloDe([]));
+    expect(sistemo).not.toContain("<slug>");
     for (const ero of [
       "<fm-navigado",
       'slot="nav"',
@@ -604,9 +630,7 @@ describe("the shell and the context per screen and round (S038-20, AC-7)", () =>
         "Laut Plan verweist dieser Screen auf: detail.html.",
       );
       expect(tasko, `Runde ${rondo}`).not.toContain("archiv");
-      expect(sistemo, `Runde ${rondo}`).toContain(
-        `${NAVIGADA_REGULO}\nVerweise nur auf diese Screens: liste.html, detail.html. Andere Ziele gibt es in diesem Lauf nicht.`,
-      );
+      expect(sistemo, `Runde ${rondo}`).toContain(navigadaReguloDe(["liste", "detail"]));
       expect(sistemo, `Runde ${rondo}`).not.toContain("archiv");
       expect(sistemo, `Runde ${rondo}`).toBe(sistemoDe("GVIDANTO", SXELO, ["liste", "detail"]));
     }
@@ -624,18 +648,83 @@ describe("the shell and the context per screen and round (S038-20, AC-7)", () =>
 
   it("states the navigation rule with the built slugs in plan order, one screen too (F-2)", () => {
     expect(navigadaReguloDe(["liste", "detail"])).toBe(
-      `${NAVIGADA_REGULO}\nVerweise nur auf diese Screens: liste.html, detail.html. Andere Ziele gibt es in diesem Lauf nicht.`,
+      [
+        "Baue jeden Screen in der Shell: <fm-sxelo> außen, der Inhalt in ihrem Standardbereich, gern in <fm-pagxo>.",
+        'Verweise auf andere Screens des Ablaufs gehören in die Navigation der Shell: ein <fm-navigado label="…"> im slot="nav" von <fm-sxelo>, darin jeder Verweis als direktes Kind <a href="liste.html"> oder <a href="detail.html">.',
+        "Verweise nur auf diese Screens: liste.html, detail.html. Andere Ziele gibt es in diesem Lauf nicht.",
+      ].join("\n"),
     );
     expect(navigadaReguloDe(["detail", "liste"])).toContain(
       "Verweise nur auf diese Screens: detail.html, liste.html.",
     );
     expect(navigadaReguloDe(["liste"])).toBe(
-      `${NAVIGADA_REGULO}\nVerweise nur auf diese Screens: liste.html. Andere Ziele gibt es in diesem Lauf nicht.`,
+      [
+        "Baue jeden Screen in der Shell: <fm-sxelo> außen, der Inhalt in ihrem Standardbereich, gern in <fm-pagxo>.",
+        'Verweise auf andere Screens des Ablaufs gehören in die Navigation der Shell: ein <fm-navigado label="…"> im slot="nav" von <fm-sxelo>, darin jeder Verweis als direktes Kind <a href="liste.html">.',
+        "Verweise nur auf diese Screens: liste.html. Andere Ziele gibt es in diesem Lauf nicht.",
+      ].join("\n"),
+    );
+    // Without a screen no link target and no placeholder (B-2).
+    expect(navigadaReguloDe([])).toBe(
+      [
+        "Baue jeden Screen in der Shell: <fm-sxelo> außen, der Inhalt in ihrem Standardbereich, gern in <fm-pagxo>.",
+        "In diesem Lauf gibt es keine anderen Screens; schreibe keine Verweise.",
+      ].join("\n"),
     );
     const sistemo = sistemoDe("GVIDANTO", SXELO, ["liste"]);
     expect(sistemo.endsWith(`\n\n${navigadaReguloDe(["liste"])}`)).toBe(true);
     // Without the shell the slugs change nothing: the Spec 037 text, byte for byte.
     expect(sistemoDe("GVIDANTO", undefined, ["liste"])).toBe(`${SISTEMO_F}\n\nGVIDANTO`);
+  });
+
+  it("keeps NAVIGADA_REGULO and SISTEMO_F byte for byte (D-212, Spec 037 path)", () => {
+    expect(NAVIGADA_REGULO).toBe(
+      [
+        "Baue jeden Screen in der Shell: <fm-sxelo> außen, der Inhalt in ihrem Standardbereich, gern in <fm-pagxo>.",
+        'Verweise auf andere Screens des Ablaufs gehören in die Navigation der Shell: ein <fm-navigado label="…"> im slot="nav" von <fm-sxelo>, darin jeder Verweis als direktes Kind <a href="<slug>.html">.',
+      ].join("\n"),
+    );
+    expect(SISTEMO_F.split("\n")[3]).toBe(
+      "Verweise auf andere Screens des Ablaufs schreibst du als <slug>.html und mit der passenden Ero (frag den Gvidanto, statt zu raten).",
+    );
+    expect(sistemoDe("GVIDANTO")).toBe(`${SISTEMO_F}\n\nGVIDANTO`);
+  });
+
+  it("derives the shell's system text from SISTEMO_F: only the link sentence names the planned screens (B-2)", () => {
+    const linioj = SISTEMO_F.split("\n");
+    const sxelaj = sxelaSistemoDe(["liste", "detail"]).split("\n");
+    expect(sxelaj).toHaveLength(linioj.length);
+    expect(sxelaj[3]).toBe(
+      "Verweise auf andere Screens des Ablaufs schreibst du mit dem Dateinamen des Screens als Ziel (liste.html, detail.html) und mit der passenden Ero (frag den Gvidanto, statt zu raten).",
+    );
+    expect(sxelaj.filter((_linio, index) => index !== 3)).toEqual(
+      linioj.filter((_linio, index) => index !== 3),
+    );
+    expect(sxelaSistemoDe(["detail", "liste"])).toContain("(detail.html, liste.html)");
+    expect(sxelaSistemoDe([]).split("\n")[3]).toBe(
+      "Verweise auf andere Screens des Ablaufs schreibst du mit dem Dateinamen des Screens als Ziel und mit der passenden Ero (frag den Gvidanto, statt zu raten).",
+    );
+    for (const slugoj of [[], ["liste"], ["liste", "detail"]]) {
+      expect(sxelaSistemoDe(slugoj)).not.toContain("<slug>");
+    }
+  });
+
+  it("sends no <slug> placeholder on the shell path, every planned target as a concrete href in plan order (B-2)", async () => {
+    const tri = planoKun(3);
+    for (const rondo of [1, 2]) {
+      const chat = new SkriptaModelo(() => respondo("```html\n<p>x</p>\n```"));
+      await konstrui(chat, { rondo, sxelo: SXELO, eroProfiloj: PROFILOJ, plano: tri });
+      const sistemo = chat.petoj[0]?.messages[0]?.content ?? "";
+      expect(sistemo, `Runde ${rondo}`).not.toContain("<slug>");
+      expect(sistemo, `Runde ${rondo}`).toBe(
+        sistemoDe("GVIDANTO", SXELO, ["liste", "detail", "bearbeiten"]),
+      );
+      const hrefs = [...sistemo.matchAll(/href="([^"]*)"/g)].map((treffer) => treffer[1]);
+      expect(hrefs, `Runde ${rondo}`).toEqual(["liste.html", "detail.html", "bearbeiten.html"]);
+      expect(sistemo.startsWith(`${sxelaSistemoDe(["liste", "detail", "bearbeiten"])}\n\n`)).toBe(
+        true,
+      );
+    }
   });
 
   it("keeps the plan's no-edge line when a screen links nowhere (F-2)", async () => {
@@ -652,7 +741,7 @@ describe("the shell and the context per screen and round (S038-20, AC-7)", () =>
     const chat = new SkriptaModelo(() => respondo("```html\n<p>x</p>\n```"));
     await konstrui(chat, { sxelo: SXELO });
     const tasko = chat.petoj[0]?.messages[1]?.content ?? "";
-    expect(chat.petoj[0]?.messages[0]?.content).toContain(NAVIGADA_REGULO);
+    expect(chat.petoj[0]?.messages[0]?.content).toContain(navigadaReguloDe(["liste", "detail"]));
     expect(tasko).toContain("Baue jetzt den Screen „Titel liste“ (liste.html)");
     expect(tasko).not.toContain("Kurzprofil");
     expect(/^Runde \d+:/m.test(tasko)).toBe(false);
@@ -684,6 +773,34 @@ describe("the real ChatModel (D-18, D-19)", () => {
       chatModelDe({ provider: new Provider("openrouter", "eine-andere:free", KEY), fetch }),
     ).toThrow(MalpermesitaModelo);
     expect(petoj).toEqual([]);
+  });
+
+  it("takes the control model only with the control pair (Spec 038 A-5, C-3), refused before any request", async () => {
+    const { fetch, petoj } = fetchDouble();
+    const sonnet = () => new Provider("openrouter", "anthropic/claude-sonnet-5.5", KEY);
+    expect(() => chatModelDe({ provider: sonnet(), fetch })).toThrow(MalpermesitaModelo);
+    expect(() =>
+      chatModelDe({ provider: sonnet(), fetch, kontrolo: { laufId: "kontrolle-x" } }),
+    ).toThrow(MalpermesitaModelo);
+    expect(() =>
+      chatModelDe({
+        provider: sonnet(),
+        fetch,
+        kontrolo: { laufId: "foo", kontrolModelo: KONTROLA_MODELO },
+      }),
+    ).toThrow(MalpermesitaModelo);
+    expect(petoj).toEqual([]);
+    const chat = chatModelDe({
+      provider: sonnet(),
+      fetch,
+      sleep: async () => {},
+      kontrolo: { laufId: "kontrolle-komuna", kontrolModelo: KONTROLA_MODELO },
+    });
+    expect(chat.modelo).toBe(KONTROLA_MODELO);
+    await chat.send([{ role: "user", content: "Standard A-12" }]);
+    expect(petoj).toHaveLength(1);
+    expect(petoj[0]?.url).toContain("openrouter.ai");
+    expect(petoj[0]?.body).toMatchObject({ model: "anthropic/claude-sonnet-5.5" });
   });
 
   it("sends through chatCompletion with the gate, charges the run's budget, offers merged schemas, never logs the key", async () => {

@@ -15,7 +15,8 @@ import {
   type Provider,
   type ToolInfo,
 } from "@fundamento/metiejo";
-import { gardiModelon } from "./gardo.js";
+import { type FehlerKaptilo, sendiKunKapto } from "./anbieterfehleroj.js";
+import { gardiModelon, type Kontrolo } from "./gardo.js";
 import { sendiSubBudgxeto } from "./kostoj.js";
 import { SKRIBAJ_ILOJ } from "./mcp-kliento.js";
 import { MAKS_EKRANOJ, SLUG_FORMO, validiPlanon } from "./plano.js";
@@ -44,6 +45,22 @@ export const SISTEMO_F = [
   'Fehlt dir eine Ero, ein Sxablono oder ein Werkzeug, nenne es danach in einem ```mankoj-Block als JSON-Liste: [{"speco": "ero" | "sxablono" | "ilo", "nomo": "…", "ekzemplo": "wofür du es gebraucht hättest", "propono": "was es können sollte"}].',
 ].join("\n");
 
+/** The placeholder of `SISTEMO_F`'s link sentence, which the shell path replaces (B-2). */
+const VERWEIS_PLATZHALTER = "schreibst du als <slug>.html und";
+
+/**
+ * The system text of Variante F on the shell path (Spec 038 B-2): `SISTEMO_F` with its link
+ * sentence naming the screens of this run as concrete file names, in plan order, instead of the
+ * `<slug>.html` placeholder (a model copied it literally). Everything else stays byte for byte.
+ */
+export function sxelaSistemoDe(slugoj: readonly string[]): string {
+  const ziele = slugoj.length === 0 ? "" : ` (${slugoj.map((slug) => `${slug}.html`).join(", ")})`;
+  return SISTEMO_F.replace(
+    VERWEIS_PLATZHALTER,
+    `schreibst du mit dem Dateinamen des Screens als Ziel${ziele} und`,
+  );
+}
+
 /**
  * The question when a build answer held no markup (S037-10 Befund 1): asked once, in the same
  * conversation and without tools – one more request inside the run's budget, no new limit.
@@ -53,6 +70,13 @@ export const REDEMANDO_F =
 /** The same for Variante 0, which writes a whole document. */
 export const REDEMANDO_0 =
   "Deine Antwort enthielt kein HTML-Dokument. Antworte jetzt nur mit dem HTML-Dokument in einem ```html-Block.";
+
+/**
+ * The closing words of the task in the one fresh conversation after a page without element content
+ * (Spec 038 B-4, S038-37c): start again from the shell, the whole screen in one block.
+ */
+export const REKOMENCO_F =
+  "Ein früherer Versuch ergab eine leere Seite (kein Element, nur schließende Tags). Beginne neu mit der Shell als Ausgangspunkt: fm-sxelo mit fm-pagxo und main, fülle die Regionen mit dem Inhalt des Screens und sende den ganzen Screen in einem einzigen ```html-Block.";
 
 /** Variante 0 (D-34): the same words as nordstelo's PROMPT_0. */
 export const PROMPT_0 =
@@ -117,10 +141,45 @@ export function legiMankojn(bloko: string): AgentaManko[] {
   });
 }
 
+const HTML_MALFERMO = /^\s*```\s*html\b/i;
+const NUDA_BARILO = /^\s*```\s*$/;
+const FERMA_ETIKEDO = /<\/[A-Za-z]/;
+
+/**
+ * The last ```html block of a text, read so that a fence inside the page does not end it (Spec 038
+ * B-4, S038-37c): a bare fence line closes the block only when no closing tag stands between it
+ * and the next ```html opening (or the last bare fence) – markup after it means the page goes on,
+ * e.g. Markdown with its own fenced block in an fm-markdovido. Without a closing fence the block
+ * runs to the end. Undefined = the text has no ```html opening.
+ */
+function lastaHtmlBloko(teksto: string): string | undefined {
+  const linioj = teksto.split("\n");
+  const malfermoj = linioj.flatMap((linio, i) => (HTML_MALFERMO.test(linio) ? [i] : []));
+  const bariloj = linioj.flatMap((linio, i) => (NUDA_BARILO.test(linio) ? [i] : []));
+  const lastaBarilo = bariloj.at(-1) ?? -1;
+  let bloko: string | undefined;
+  let komenco = malfermoj[0];
+  while (komenco !== undefined) {
+    const ek = komenco;
+    const fino = bariloj.find((barilo) => {
+      if (barilo <= ek) return false;
+      const sekva = malfermoj.find((malfermo) => malfermo > barilo) ?? lastaBarilo;
+      return !linioj
+        .slice(barilo + 1, Math.max(sekva, barilo + 1))
+        .some((l) => FERMA_ETIKEDO.test(l));
+    });
+    bloko = linioj.slice(ek + 1, fino ?? linioj.length).join("\n");
+    if (fino === undefined) break;
+    komenco = malfermoj.find((malfermo) => malfermo > fino);
+  }
+  return bloko;
+}
+
 /**
  * The markup of an answer and its gaps. The `mankoj` blocks are taken out first; the markup is the
- * last fenced block, else the text. Variante F keeps only what stands in <body> when the agent wrote
- * a whole document anyway; nothing else is changed (K5 and AC-7 judge the rest).
+ * last ```html block (a fence inside the page does not end it, B-4), else the last fenced block,
+ * else the text. Variante F keeps only what stands in <body> when the agent wrote a whole document
+ * anyway; nothing else is changed (K5 and AC-7 judge the rest).
  */
 export function eltiriRespondon(
   respondo: string,
@@ -131,12 +190,20 @@ export function eltiriRespondon(
   );
   const resto = respondo.replace(MANKOJ_BLOKO, "");
   const blokoj = [...resto.matchAll(/```(?:html)?[^\n]*\n([\s\S]*?)```/gi)];
-  let fragmento = (blokoj.at(-1)?.[1] ?? resto).trim();
+  let fragmento = (lastaHtmlBloko(resto) ?? blokoj.at(-1)?.[1] ?? resto).trim();
   if (varianto === "F") {
     const body = /<body[^>]*>([\s\S]*?)<\/body>/i.exec(fragmento)?.[1];
     if (body !== undefined) fragmento = body.trim();
   }
   return { fragmento, mankoj };
+}
+
+/**
+ * Spec 038 B-4 (S038-37c): whether a page renders as an empty page – no element content: after
+ * the comments are taken out, no opening tag is left (only closing tags, text or nothing).
+ */
+export function malplenaPagxo(fragmento: string): boolean {
+  return !/<[A-Za-z]/.test(fragmento.replace(/<!--[\s\S]*?-->/g, ""));
 }
 
 /** The gaps of a run as C-7 counts them: one per kind and name, the screens that named it. */
@@ -277,6 +344,34 @@ export class PlanoMalsukcesis extends Error {
   }
 }
 
+/**
+ * The assistant message of an answer as it goes back into the conversation (Spec 038 A-1,
+ * F-S038-28-1): never one without content and without tool_calls – Mistral refuses that with 400
+ * („Assistant message must have either content or tool_calls, but not none.“). An answer with
+ * tool calls stays as it was; an empty one is left out.
+ */
+export function asistantaMesagxoDe(
+  content: string | null | undefined,
+  toolCalls?: ChatMessage["tool_calls"],
+): ChatMessage | undefined {
+  const teksto = content ?? "";
+  if (toolCalls !== undefined && toolCalls.length > 0) {
+    return { role: "assistant", content: teksto, tool_calls: toolCalls };
+  }
+  return teksto.trim() === "" ? undefined : { role: "assistant", content: teksto };
+}
+
+/** One request: through the catch layer of provider errors when the run gives one (A-1). */
+function sendi(
+  peto: { chat: ChatModel; budget: Budget; peno: Peno; kaptilo?: FehlerKaptilo },
+  messages: ChatMessage[],
+  tools?: readonly ToolInfo[],
+) {
+  return peto.kaptilo === undefined
+    ? sendiSubBudgxeto(peto.chat, peto.budget, messages, tools)
+    : sendiKunKapto(peto.chat, peto.budget, peto.peno, messages, tools, peto.kaptilo);
+}
+
 /** Counts a response into the effort of the run. */
 function kalkuli(peno: Peno, respondo: { input: number; output: number; requests: number }): void {
   peno.inputTokens += respondo.input;
@@ -291,6 +386,8 @@ export interface PlanPeto {
   frazo: string;
   /** The user's screen names: the agent plans purposes and edges for exactly these. */
   nomoj?: readonly string[];
+  /** The catch layer of provider errors (Spec 038 A-1); absent = errors pass through. */
+  kaptilo?: FehlerKaptilo;
 }
 
 /**
@@ -314,7 +411,7 @@ export async function planiEkranojn(peto: PlanPeto): Promise<{ plano: Plano; not
   ];
   const notoj: string[] = [];
   for (let provo = 1; ; provo += 1) {
-    const respondo = await sendiSubBudgxeto(peto.chat, peto.budget, messages);
+    const respondo = await sendi(peto, messages);
     kalkuli(peto.peno, respondo);
     const answer = respondo.message.content ?? "";
     const legita = legiPlanon(answer);
@@ -345,7 +442,8 @@ export async function planiEkranojn(peto: PlanPeto): Promise<{ plano: Plano; not
         : validiPlanon(plano);
     if (plano !== undefined && problemoj.length === 0) return { plano, notoj };
     if (provo >= 2) throw new PlanoMalsukcesis(problemoj);
-    messages.push({ role: "assistant", content: answer });
+    const asistanta = asistantaMesagxoDe(answer);
+    if (asistanta !== undefined) messages.push(asistanta);
     messages.push({
       role: "user",
       content: [
@@ -389,6 +487,13 @@ export interface KonstruoPeto {
   sxelo?: SxelaKunteksto;
   /** The Kurzprofile of the Eroj in the previous round's fragment (new path, rounds 2 and 3). */
   eroProfiloj?: readonly Profilo[];
+  /** The catch layer of provider errors of this screen-round (Spec 038 A-1); absent = pass. */
+  kaptilo?: FehlerKaptilo;
+  /**
+   * Spec 038 B-4 (S038-37c): the one fresh conversation after a page without element content –
+   * the task ends with `REKOMENCO_F` (the shell as starting point).
+   */
+  rekomenco?: boolean;
 }
 
 /** What one build conversation gave: the markup, the agent's gaps, and whether it stayed empty. */
@@ -397,6 +502,8 @@ export interface KonstruoRezulto {
   mankoj: AgentaManko[];
   /** No markup, also after asking once more (S037-10 Befund 1): the raw answers, in order. */
   malplena?: { respondoj: string[] };
+  /** The raw text of the answer the markup was taken from (Spec 038 B-4, for the run folder). */
+  respondo?: string;
 }
 
 /** The task of one screen: the flow, the screen, its planned links, and in a later round the findings. */
@@ -429,6 +536,7 @@ export function taskoDe(peto: KonstruoPeto): string {
       "Verbessere den Stand so, dass die Befunde verschwinden, und sende den ganzen Stand neu.",
     );
   }
+  if (peto.rekomenco === true) linioj.push("", REKOMENCO_F);
   return linioj.join("\n");
 }
 
@@ -446,14 +554,22 @@ export const NAVIGADA_REGULO = [
   'Verweise auf andere Screens des Ablaufs gehören in die Navigation der Shell: ein <fm-navigado label="…"> im slot="nav" von <fm-sxelo>, darin jeder Verweis als direktes Kind <a href="<slug>.html">.',
 ].join("\n");
 
+/** The placeholder link of `NAVIGADA_REGULO`, which the rule of a run replaces (B-2). */
+const NAVIGADA_PLATZHALTER = '<a href="<slug>.html">';
+
 /**
- * The navigation rule of a run (Spec 038 F-2): `NAVIGADA_REGULO` and the screens that exist in
- * this run, as `<slug>.html` in plan order. Without a screen only `NAVIGADA_REGULO`.
+ * The navigation rule of a run (Spec 038 F-2, B-2): `NAVIGADA_REGULO` with its placeholder link
+ * replaced by the concrete links to the screens of this run, in plan order, and the list of those
+ * screens. Without a screen only the shell sentence and that there is nothing to link to.
  */
 export function navigadaReguloDe(slugoj: readonly string[]): string {
-  if (slugoj.length === 0) return NAVIGADA_REGULO;
+  const [sxelo = ""] = NAVIGADA_REGULO.split("\n");
+  if (slugoj.length === 0) {
+    return `${sxelo}\nIn diesem Lauf gibt es keine anderen Screens; schreibe keine Verweise.`;
+  }
+  const ligiloj = slugoj.map((slug) => `<a href="${slug}.html">`).join(" oder ");
   const ekranoj = slugoj.map((slug) => `${slug}.html`).join(", ");
-  return `${NAVIGADA_REGULO}\nVerweise nur auf diese Screens: ${ekranoj}. Andere Ziele gibt es in diesem Lauf nicht.`;
+  return `${NAVIGADA_REGULO.replace(NAVIGADA_PLATZHALTER, ligiloj)}\nVerweise nur auf diese Screens: ${ekranoj}. Andere Ziele gibt es in diesem Lauf nicht.`;
 }
 
 /** One Kurzprofil read by ekranoj (not by the agent): the name and the answer as the tool gave it. */
@@ -532,9 +648,11 @@ export function eroNomojDe(fragmento: string): string[] {
 
 /**
  * The parts of an Ero's Kurzprofil from round 2 on (Spec 038 F-1): the brief and the slot rules,
- * as `get_ero` answers them under its size ceiling.
+ * as `get_ero` answers them under its size ceiling; since B-3 (C-4) also the constraints – the
+ * allowed prop combinations and the blocking label rules, one line each (absent or in `rest` where
+ * the Ero has none or they do not fit; taken as answered).
  */
-export const KURZPROFILAJ_KAMPOJ = ["brief", "slots"] as const;
+export const KURZPROFILAJ_KAMPOJ = ["brief", "slots", "constraints"] as const;
 
 /** A cache of Kurzprofile per run: one read per name, misses included. */
 export type ProfilaKasxmemoro = Map<string, Promise<Profilo | undefined>>;
@@ -576,15 +694,19 @@ export async function legiEroProfilojn(
 }
 
 /**
- * The system text of Variante F: SISTEMO_F, the Gvidanto's prompt, and on the new path the shell
- * with the navigation rule; given the slugs of the built screens, the rule names them (F-2).
+ * The system text of Variante F: SISTEMO_F and the Gvidanto's prompt (Spec 037, byte for byte);
+ * on the new path the shell's variant `sxelaSistemoDe`, the prompt, the shell and the navigation
+ * rule, both naming the built screens as concrete targets, never the `<slug>.html` placeholder
+ * (F-2, B-2).
  */
 export function sistemoDe(
   gvidanto: string,
   sxelo?: SxelaKunteksto,
   slugoj?: readonly string[],
 ): string {
-  const partoj = [SISTEMO_F, ...(gvidanto === "" ? [] : [gvidanto])];
+  const ekranoj = slugoj ?? [];
+  const komenco = sxelo === undefined ? SISTEMO_F : sxelaSistemoDe(ekranoj);
+  const partoj = [komenco, ...(gvidanto === "" ? [] : [gvidanto])];
   if (sxelo !== undefined) {
     if (sxelo.profiloj.length > 0) {
       partoj.push(
@@ -597,7 +719,7 @@ export function sistemoDe(
     if (sxelo.arangxoj !== undefined) {
       partoj.push(`Die Layout-Mittel (list_arangxoj):\n${sxelo.arangxoj}`);
     }
-    partoj.push(slugoj === undefined ? NAVIGADA_REGULO : navigadaReguloDe(slugoj));
+    partoj.push(navigadaReguloDe(ekranoj));
   }
   return partoj.join("\n\n");
 }
@@ -625,7 +747,7 @@ export function sxelaTaskoDe(peto: KonstruoPeto): string {
   if (profiloj.length > 0) {
     linioj.push(
       "",
-      "Kurzprofile der Eroj deines Stands (get_ero, brief und slots – nur diese Inhalte je Slot sind erlaubt):",
+      "Kurzprofile der Eroj deines Stands (get_ero, brief, slots und constraints – nur diese Inhalte je Slot sind erlaubt; constraints nennt die erlaubten Prop-Kombinationen und die Label-Regeln):",
       ...profiloj.map((profilo) => `- fm-${profilo.nomo}: ${profilo.teksto}`),
     );
   }
@@ -652,6 +774,7 @@ export function sxelaTaskoDe(peto: KonstruoPeto): string {
         ]),
     `Sprache der Texte: ${peto.lingvo === "en" ? "Englisch" : "Deutsch"}.`,
   );
+  if (peto.rekomenco === true) linioj.push("", REKOMENCO_F);
   return linioj.join("\n");
 }
 
@@ -672,9 +795,11 @@ async function redemandi(
   unua: string,
   legita: { mankoj: AgentaManko[] },
 ): Promise<KonstruoRezulto> {
-  messages.push({ role: "assistant", content: unua });
+  // A-1: an empty first answer is not sent back (Mistral refuses it with 400, F-S038-28-1).
+  const asistanta = asistantaMesagxoDe(unua);
+  if (asistanta !== undefined) messages.push(asistanta);
   messages.push({ role: "user", content: peto.varianto === "F" ? REDEMANDO_F : REDEMANDO_0 });
-  const respondo = await sendiSubBudgxeto(peto.chat, peto.budget, messages);
+  const respondo = await sendi(peto, messages);
   kalkuli(peto.peno, respondo);
   const dua = respondo.message.content ?? "";
   const duaLegita = eltiriRespondon(dua, peto.varianto);
@@ -717,21 +842,20 @@ export async function konstruiEkranon(peto: KonstruoPeto): Promise<KonstruoRezul
   let vokoj = 0;
   for (;;) {
     const proponi = peto.varianto === "F" && iloj.length > 0 && vokoj < maksVokoj;
-    const respondo = await sendiSubBudgxeto(
-      peto.chat,
-      peto.budget,
-      messages,
-      proponi ? iloj : undefined,
-    );
+    const respondo = await sendi(peto, messages, proponi ? iloj : undefined);
     kalkuli(peto.peno, respondo);
     const { message } = respondo;
     const petitaj = message.tool_calls ?? [];
     if (petitaj.length === 0 || peto.ponto === undefined || peto.varianto === "0") {
       const content = message.content ?? "";
       const legita = eltiriRespondon(content, peto.varianto);
-      return legita.fragmento === "" ? redemandi(peto, messages, content, legita) : legita;
+      return legita.fragmento === ""
+        ? redemandi(peto, messages, content, legita)
+        : { ...legita, respondo: content };
     }
-    messages.push({ role: "assistant", content: message.content ?? "", tool_calls: petitaj });
+    // Has tool_calls, so never empty (A-1); the same message as before.
+    const asistanta = asistantaMesagxoDe(message.content, petitaj);
+    if (asistanta !== undefined) messages.push(asistanta);
     for (const voko of petitaj) {
       vokoj += 1;
       peto.peno.toolCalls += 1;
@@ -807,15 +931,18 @@ export interface ChatModelOpcioj {
   sleep?: (ms: number) => Promise<void>;
   /** Lines of the request (waits after 429 …); the key is taken out before. */
   log?: (linio: string) => void;
+  /** The control pair of the call (Spec 038 A-5, C-3); the guard accepts the control model only with it. */
+  kontrolo?: Kontrolo;
 }
 
 /**
  * The real chat model over metiejo's `chatCompletion` (429 waits, retries and the budget check stay
- * there). The model guard (D-19) runs here, before any request can be made.
+ * there). The model guard (D-19; the control pair of Spec 038 C-3) runs here, before any request
+ * can be made.
  */
 export function chatModelDe(opcioj: ChatModelOpcioj): ChatModel {
   const { provider } = opcioj;
-  gardiModelon(provider);
+  gardiModelon(provider, opcioj.kontrolo);
   const timeout = Math.min(opcioj.timeout ?? PETO_TEMPOLIMO, PETO_TEMPOLIMO);
   return {
     modelo: provider.toString(),

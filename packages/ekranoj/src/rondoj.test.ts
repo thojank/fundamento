@@ -3,16 +3,16 @@
 // Variante 0 (D-34) – on doubles only: no network, no browser, no provider.
 
 import { CostLimitReached, DayLimitReached } from "@fundamento/metiejo";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   K8_MERKMALOJ,
   K8_REGULOJ,
+  KONTROLA_MODELO,
   KURZPROFILAJ_KAMPOJ,
   kuruEkranojn,
   MAKS_EKRANOJ,
   MAKS_RONDOJ,
   MalpermesitaModelo,
-  NAVIGADA_REGULO,
   NevalidaEnigo,
   navigadaReguloDe,
   PERMESITA_MODELO,
@@ -21,6 +21,7 @@ import {
   raportoDe,
   raportoMarkdown,
   SISTEMO_F,
+  sxelaSistemoDe,
   TOKENOJ_EKRANO_RONDO_F,
   TOKENOJ_PLANO,
   trovojDe,
@@ -43,8 +44,10 @@ import type {
   EkranojDeps,
   EkranojEnigo,
   EkranojRezulto,
+  Fakto,
   K8Merkmal,
   KostoTakso,
+  Malobservo,
   Peno,
   Plano,
   RondoEkrano,
@@ -484,6 +487,28 @@ describe("input (V-2, D-19)", () => {
     );
     expect(chat.petoj).toEqual([]);
   });
+
+  it("runs the control model only with the control pair of the input (Spec 038 A-5, C-3)", async () => {
+    const sen = new SkriptaModelo(skripto(PLANO), { modelo: KONTROLA_MODELO });
+    await expect(kuruEkranojn(enigoDe(), depsDe({ chat: sen }))).rejects.toBeInstanceOf(
+      MalpermesitaModelo,
+    );
+    await expect(
+      kuruEkranojn(
+        enigoDe({ kontrolo: { laufId: "foo", kontrolModelo: KONTROLA_MODELO } }),
+        depsDe({ chat: sen }),
+      ),
+    ).rejects.toMatchObject({ problemo: { path: "/lauf-id", rule: "control-run-id" } });
+    expect(sen.petoj).toEqual([]);
+
+    const kun = new SkriptaModelo(skripto(PLANO), { modelo: KONTROLA_MODELO });
+    const rezulto = await kuruEkranojn(
+      enigoDe({ kontrolo: { laufId: "kontrolle-komuna", kontrolModelo: KONTROLA_MODELO } }),
+      depsDe({ chat: kun, taksilo: verdaEkde(1) }),
+    );
+    expect(rezulto.faritajRondoj).toBe(1);
+    expect(kun.petoj.length).toBeGreaterThan(0);
+  });
 });
 
 describe("plan request (D-38, C-6)", () => {
@@ -731,21 +756,30 @@ describe("K8 probes from the scorer to the renderer (3.4b)", () => {
   });
 
   it("gives the renderer the options of before, and the same result, without sondoPetoj", async () => {
-    const kuri = async (taksilo: TaksiloDouble) => {
-      const chat = new SkriptaModelo(skripto(PLANO), { modelo: PERMESITA_MODELO });
-      const bildigilo = new OpciaBildigilo();
-      const rezulto = await kuruEkranojn(enigoDe(), depsDe({ chat, bildigilo, taksilo }));
-      return { rezulto, bildigilo };
+    // A test clock (D-223): each run's clock ticks by its own step on every read, so every
+    // measured `ms` differs between the two runs, as the wall time of two real runs may.
+    const kuri = async (taksilo: TaksiloDouble, pasxo: number) => {
+      let horo = Date.UTC(2026, 9, 31, 12);
+      const horlogo = vi.spyOn(Date, "now").mockImplementation(() => (horo += pasxo));
+      try {
+        const chat = new SkriptaModelo(skripto(PLANO), { modelo: PERMESITA_MODELO });
+        const bildigilo = new OpciaBildigilo();
+        const rezulto = await kuruEkranojn(enigoDe(), depsDe({ chat, bildigilo, taksilo }));
+        return { rezulto, bildigilo };
+      } finally {
+        horlogo.mockRestore();
+      }
     };
-    const sen = await kuri(new TaksiloDouble(() => MALVERDA));
+    const sen = await kuri(new TaksiloDouble(() => MALVERDA), 1);
     for (const opcioj of sen.bildigilo.opcioj) {
       expect(opcioj).toStrictEqual({ aspektoj: ["komuna"], varianto: "F" });
     }
-    const kun = await kuri(new SondaTaksilo(() => MALVERDA));
+    const kun = await kuri(new SondaTaksilo(() => MALVERDA), 7);
     // The probes reach only the renderer; the double renders no K8, so the run is the same
-    // (but for the wall time of the run, which no double fixes).
+    // (but for the wall time, which no double fixes: every `ms` – of the run and of each screen
+    // in each round – is dropped before the comparison, D-223).
     const senTempo = (rezulto: typeof sen.rezulto) =>
-      JSON.stringify({ ...rezulto, peno: { ...rezulto.peno, ms: 0 } });
+      JSON.stringify(rezulto, (sxlosilo, valoro) => (sxlosilo === "ms" ? undefined : valoro));
     expect(senTempo(kun.rezulto)).toBe(senTempo(sen.rezulto));
   });
 });
@@ -1040,8 +1074,13 @@ describe("the shell in the system text, the context per screen and round (S038-2
     );
     expect(sistemoj.size).toBe(1);
     const [sistemo = ""] = sistemoj;
-    expect(sistemo.startsWith(`${SISTEMO_F}\n\n${GVIDANTO}\n\n`)).toBe(true);
-    for (const ero of [PROFILO_SXELO, PROFILO_PAGXO, ARANGXOJ, NAVIGADA_REGULO]) {
+    expect(
+      sistemo.startsWith(
+        `${sxelaSistemoDe(PLANO.ekranoj.map((ekrano) => ekrano.slug))}\n\n${GVIDANTO}\n\n`,
+      ),
+    ).toBe(true);
+    expect(sistemo).not.toContain("<slug>");
+    for (const ero of [PROFILO_SXELO, PROFILO_PAGXO, ARANGXOJ]) {
       expect(sistemo).toContain(ero);
     }
     // The rule names exactly the built screens of the run, in plan order (S038-24 F-2).
@@ -1069,11 +1108,14 @@ describe("the shell in the system text, the context per screen and round (S038-2
     );
     expect(
       tools.vokoj
-        .filter((voko) => voko.name === "get_ero" && String(voko.args.fields) === "brief,slots")
+        .filter(
+          (voko) =>
+            voko.name === "get_ero" && String(voko.args.fields) === "brief,slots,constraints",
+        )
         .map((voko) => voko.args.name),
     ).toEqual(["butono", "karto"]);
     expect(tasko).toContain(
-      "Kurzprofile der Eroj deines Stands (get_ero, brief und slots – nur diese Inhalte je Slot sind erlaubt):",
+      "Kurzprofile der Eroj deines Stands (get_ero, brief, slots und constraints – nur diese Inhalte je Slot sind erlaubt; constraints nennt die erlaubten Prop-Kombinationen und die Label-Regeln):",
     );
     for (const ero of [
       "Screens des Ablaufs:",
@@ -1238,5 +1280,223 @@ describe("the shell in the system text, the context per screen and round (S038-2
     expect(
       linioj.filter((linio) => linio.includes("karto") && linio.includes("nicht erreichbar")),
     ).toHaveLength(1);
+  });
+});
+
+// Spec 038 B-3 (C-4) and F-S038-37a-1: what a finding hands to the next round.
+describe("findings for the next round: the rule's suggestion and concrete targets (B-3)", () => {
+  const LOKO = "fm-butono „Löschen“";
+  const MALOBSERVOJ: Malobservo[] = [
+    {
+      rule: "ero-prop-constraint",
+      severity: "error",
+      path: "instances#/1",
+      message:
+        "Instance 1 of butono combines emphasis=medium and intent=danger, which the Skemo forbids.",
+      suggestion: "Use emphasis=high with intent=danger.",
+      loko: LOKO,
+    },
+    {
+      rule: "destructive-label-names-object",
+      severity: "error",
+      path: "instances#/1",
+      message: 'Instance 1 of butono says "Löschen": it names no object.',
+      suggestion: 'Write the text as the approved example does, e.g. "Entwurf löschen".',
+      regulo: { id: "reg-1", name: "destructive-label-names-object", kialo: "Das Objekt fehlt." },
+      loko: LOKO,
+    },
+  ];
+  const sen = { kompleta: true, mankantaj: [], mortaj: [] };
+
+  it("every finding of ero-prop-constraint and destructive-label-names-object carries the suggestion of check_usage, also the scorer's", () => {
+    const taksado: Taksado = {
+      ...MALVERDA,
+      mankoj: MALOBSERVOJ.map((m) => ({ kind: "regulo" as const, key: m.regulo?.name ?? m.rule })),
+    };
+    const trovoj = trovojDe({
+      slug: "liste",
+      taksado,
+      malobservoj: MALOBSERVOJ,
+      fakto: faktoKunLigiloj([]),
+      navigado: sen,
+      malhelpoj: ["check_usage"],
+    });
+    const malsamaj: string[] = [];
+    for (const m of MALOBSERVOJ) {
+      const regulo = m.regulo?.name ?? m.rule;
+      const pri = trovoj.filter((t) => t.regulo === regulo || t.loko === regulo);
+      // One from check_usage, one from the scorer's K3 gap.
+      if (pri.length !== 2) malsamaj.push(`${regulo}: ${pri.length} findings`);
+      for (const t of pri) {
+        if (t.sugesto !== m.suggestion) malsamaj.push(`${regulo} (${t.regulo}): ${t.sugesto}`);
+      }
+    }
+    expect(malsamaj).toEqual([]);
+  });
+
+  it("a dead link's suggestion names the planned screens, never the <slug>.html placeholder (F-S038-37a-1)", () => {
+    const trovoj = trovojDe({
+      slug: "liste",
+      taksado: VERDA,
+      malobservoj: [],
+      fakto: faktoKunLigiloj(["slug.html"]),
+      navigado: { kompleta: false, mankantaj: [], mortaj: ["slug.html"] },
+      malhelpoj: ["navigado"],
+      ekranoj: ["liste", "detail", "bearbeiten"],
+    });
+    const morta = trovoj.find((t) => t.regulo === "navigado-morta");
+    expect(morta?.sugesto).toBe(
+      "Nur auf geplante Screens verweisen: liste.html, detail.html, bearbeiten.html.",
+    );
+    expect(morta?.sugesto).not.toContain("<slug>");
+  });
+
+  it("a run hands the planned screens of its plan to the dead link's suggestion", async () => {
+    const skriptoKunMorta = (peto: Peto) => {
+      const slug = slugDePeto(peto);
+      if (slug === undefined) return respondo(`\`\`\`json\n${JSON.stringify(PLANO)}\n\`\`\``);
+      return respondo(
+        `\`\`\`html\n${fragmentoDe(PLANO, slug, rondoDePeto(peto)).replace("</nav>", '<a href="slug.html">X</a></nav>')}\n\`\`\``,
+      );
+    };
+    const chat = new SkriptaModelo(skriptoKunMorta);
+    const rezulto = await kuruEkranojn(enigoDe(), depsDe({ chat }));
+    const sugestoj = (rezulto.rondoj[0]?.liste?.trovoj ?? [])
+      .filter((t) => t.regulo === "navigado-morta")
+      .map((t) => t.sugesto);
+    expect(sugestoj).toEqual([
+      `Nur auf geplante Screens verweisen: ${PLANO.ekranoj.map((e) => `${e.slug}.html`).join(", ")}.`,
+    ]);
+  });
+});
+
+// S038-39b (F-S038-39a-3): a wrapper element in a slot that accepts Eroj only counts as text; the
+// finding names it, so the next round moves the slot attribute onto the Eroj themselves.
+describe("findings for the next round: a wrapper in a slot (S038-39b)", () => {
+  const LOKO = "fm-karto „Standard-Informationen“";
+  const MESAGXO =
+    "Instance 1 of karto holds text in the slot actions, which accepts butono or ligilo.";
+  const SUGESTO = "Put butono or ligilo in the slot actions.";
+  const MALOBSERVO: Malobservo = {
+    rule: "uzo-slot-accepts",
+    severity: "error",
+    path: "instances#/1",
+    message: MESAGXO,
+    suggestion: SUGESTO,
+    loko: LOKO,
+  };
+  const sen = { kompleta: true, mankantaj: [], mortaj: [] };
+  const taksado: Taksado = {
+    ...MALVERDA,
+    mankoj: [{ kind: "regulo" as const, key: "uzo-slot-accepts" }],
+  };
+  /** The detail page of abnahme-komuna-l5-v1 round 3, as far as the slots go. */
+  const faktoKun = (actions: "hulo" | "rekte"): Fakto => {
+    const bazo = faktoKunLigiloj([]);
+    const karto = bazo.elements.length;
+    const elements: Fakto["elements"] = [
+      ...bazo.elements,
+      { tag: "fm-karto", attrs: { level: "2" }, parent: -1, text: "" },
+      { tag: "span", attrs: { slot: "heading" }, parent: karto, text: "Standard-Informationen" },
+      { tag: "fm-atributlisto", attrs: { label: "Details" }, parent: karto, text: "" },
+      { tag: "div", attrs: { slot: "entries" }, parent: karto + 2, text: "" },
+      { tag: "fm-teksto", attrs: {}, parent: karto + 3, text: "Name" },
+    ];
+    if (actions === "hulo") {
+      const hulo = elements.length;
+      elements.push(
+        { tag: "div", attrs: { slot: "actions" }, parent: karto, text: "" },
+        { tag: "fm-butono", attrs: { emphasis: "medium" }, parent: hulo, text: "Bearbeiten" },
+        { tag: "fm-butono", attrs: { intent: "danger" }, parent: hulo, text: "Standard löschen" },
+        { tag: "fm-ligilo", attrs: { to: "liste.html" }, parent: hulo, text: "Zur Liste" },
+      );
+    } else {
+      elements.push({ tag: "span", attrs: { slot: "actions" }, parent: karto, text: "Bearbeiten" });
+    }
+    return { ...bazo, elements };
+  };
+
+  it("names the wrapper and the Eroj in it, in the finding of check_usage and of the scorer's K3 gap", () => {
+    const trovoj = trovojDe({
+      slug: "detail",
+      taksado,
+      malobservoj: [MALOBSERVO],
+      fakto: faktoKun("hulo"),
+      navigado: sen,
+      malhelpoj: ["check_usage"],
+    });
+    const pri = trovoj.filter(
+      (t) => t.regulo === "uzo-slot-accepts" || t.loko === "uzo-slot-accepts",
+    );
+    expect(pri).toHaveLength(2);
+    const atendata = `${SUGESTO} Im Slot actions steht ein <div> als Hülle; eine Hülle zählt als Text: slot="actions" direkt an jedes fm-butono und fm-ligilo darin setzen und das <div> weglassen.`;
+    expect(pri.map((t) => t.sugesto)).toEqual([atendata, atendata]);
+    // The wrapper of another slot (entries) is not named.
+    expect(pri.some((t) => t.sugesto.includes("entries"))).toBe(false);
+  });
+
+  it("keeps the suggestion of check_usage unchanged where the slot holds no wrapper", () => {
+    const trovoj = trovojDe({
+      slug: "detail",
+      taksado,
+      malobservoj: [MALOBSERVO],
+      fakto: faktoKun("rekte"),
+      navigado: sen,
+      malhelpoj: ["check_usage"],
+    });
+    expect(
+      trovoj
+        .filter((t) => t.regulo === "uzo-slot-accepts" || t.loko === "uzo-slot-accepts")
+        .map((t) => t.sugesto),
+    ).toEqual([SUGESTO, SUGESTO]);
+  });
+});
+
+// S038-39b (F-S038-39a-1): on detail of abnahme-komuna-l5-v1 the model wrote the butono labels as
+// <span slot="label">…</span>; check_markup reads text in a slotted child as no label (AC-8 pins
+// that derivation), the browser shows it. The finding names the slotted text from the fragment.
+describe("findings for the next round: a label in a slotted child (S038-39b)", () => {
+  const SUGESTO =
+    "Give the label as slot text, or for an icon-only button set the label prop as its accessible name.";
+  const KIALO = "A button without a name cannot be found or understood by assistive technology.";
+  const malobservo = (index: number): Malobservo => ({
+    rule: "label-required",
+    severity: "error",
+    path: `instances#/${index}`,
+    message: `Instance ${index} of butono has neither a visible label nor a label prop.`,
+    suggestion: SUGESTO,
+    regulo: { id: "reg-label", name: "label-required", kialo: KIALO },
+    loko: "fm-butono",
+  });
+  const FRAGMENTO = [
+    '<fm-karto level="2"><span slot="heading">Standard-Informationen</span>',
+    '<div slot="actions"><fm-butono emphasis="medium"><span slot="label">Bearbeiten</span></fm-butono>',
+    '<fm-butono intent="danger"><span slot="label">Standard löschen</span></fm-butono></div>',
+    '<fm-butono emphasis="low">Zurück</fm-butono></fm-karto>',
+  ].join("\n");
+  const sen = { kompleta: true, mankantaj: [], mortaj: [] };
+  const trovojKun = (fragmento?: string) =>
+    trovojDe({
+      slug: "detail",
+      taksado: MALVERDA,
+      malobservoj: [malobservo(13), malobservo(14)],
+      fakto: faktoKunLigiloj([]),
+      navigado: sen,
+      malhelpoj: ["check_usage"],
+      ...(fragmento === undefined ? {} : { fragmento }),
+    })
+      .filter((t) => t.regulo === "label-required")
+      .map((t) => t.sugesto);
+
+  it("names the slotted text and how to write the label instead, read from the fragment", () => {
+    const atendata = `${SUGESTO} Der Text „Bearbeiten“ steht in <span slot="label">; ein Kind mit slot-Attribut zählt nicht als Label: den Text ohne Hülle und ohne slot-Attribut direkt ins Element schreiben, z. B. <fm-butono>Bearbeiten</fm-butono>.`;
+    expect(trovojKun(FRAGMENTO)).toEqual([atendata, atendata]);
+  });
+
+  it("keeps the suggestion of check_usage where no slotted text stands in the Ero or no fragment is given", () => {
+    expect(trovojKun()).toEqual([SUGESTO, SUGESTO]);
+    expect(
+      trovojKun('<fm-butono><fm-ikono slot="icon-start" name="add"></fm-ikono></fm-butono>'),
+    ).toEqual([SUGESTO, SUGESTO]);
   });
 });

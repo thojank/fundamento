@@ -3,23 +3,35 @@
 // with F against 0 and round 1 against round 3 per flow and per screen, the model guard before any
 // request, one Budget over the whole measurement and the load before and after each run.
 
-import { existsSync, mkdtempSync, readFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  type AnbieterEraro,
+  KONTROLA_MODELO,
   type KuruEkranojn,
   kunigiMankojn,
   MalpermesitaModelo,
+  type MalplenaPagxo,
   type Manko,
   PERMESITA_MODELO,
   type Peno,
+  purigiTekston,
+  type Restanta,
+  respondoTeksto,
   type Varianto,
 } from "@fundamento/ekranoj";
 import { defaultModeloSource, loadModelo, type Modelo } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { type AblaufTasko, planoDe, trovuTaskon } from "./katalogo.js";
-import { type AblaufDeps, kunKomunaBudgxeto, kuriAblaufon, validiAblaufon } from "./kuro.js";
+import {
+  type AblaufDeps,
+  kunKomunaBudgxeto,
+  kuriAblaufon,
+  restantajLauxReguloDe,
+  validiAblaufon,
+} from "./kuro.js";
 import type { FluaPoento, KuraPoento } from "./poentoj.js";
 import { legiKatalogon } from "./poentoj.js";
 import {
@@ -27,6 +39,7 @@ import {
   kuroDir,
   type LaufRekordo,
   type PenoKvar,
+  stabilaJson,
   taksiloPorMezuro,
 } from "./raporto.js";
 import {
@@ -307,6 +320,45 @@ describe("the measurement „ganzer Ablauf“", () => {
     expect(existsSync(out)).toBe(false);
   });
 
+  it("accepts the control model only with the control pair and hands the pair to every run (Spec 038 C-3)", async () => {
+    for (const kontrolo of [
+      undefined,
+      { laufId: "kontrolle-komuna" },
+      { laufId: "foo", kontrolModelo: KONTROLA_MODELO },
+      { kontrolModelo: KONTROLA_MODELO },
+    ]) {
+      const out = join(mkdtempSync(join(tmpdir(), "s038-kontrolo-")), "nie");
+      const duobla = duoblaKuro({ faktoj });
+      const own = deps({
+        kuruEkranojn: duobla.kuruEkranojn,
+        kiModelo: KONTROLA_MODELO,
+        ...(kontrolo === undefined ? {} : { kontrolo }),
+      });
+      await expect(
+        kuriAblaufon({ taskoj: [LFD], maksTokenoj: 1_000_000, out }, own),
+        JSON.stringify(kontrolo),
+      ).rejects.toBeInstanceOf(MalpermesitaModelo);
+      expect(duobla.vokoj).toHaveLength(0);
+      expect(existsSync(out)).toBe(false);
+    }
+    const paro = { laufId: "kontrolle-komuna", kontrolModelo: KONTROLA_MODELO };
+    const out = mkdtempSync(join(tmpdir(), "s038-kontrolo-"));
+    const duobla = duoblaKuro({ faktoj });
+    const { kuroj } = await kuriAblaufon(
+      { taskoj: [LFD], maksTokenoj: 1_000_000, out },
+      deps({ kuruEkranojn: duobla.kuruEkranojn, kiModelo: KONTROLA_MODELO, kontrolo: paro }),
+    );
+    expect(kuroj).toHaveLength(2);
+    expect(duobla.vokoj.map((voko) => voko.enigo.kontrolo)).toEqual([paro, paro]);
+    // The ministral measurement stays as it was: no pair in any run.
+    const sen = duoblaKuro({ faktoj });
+    await kuriAblaufon(
+      { taskoj: [LFD], maksTokenoj: 1_000_000, out: mkdtempSync(join(tmpdir(), "s038-kontrolo-")) },
+      deps({ kuruEkranojn: sen.kuruEkranojn }),
+    );
+    expect(sen.vokoj.map((voko) => voko.enigo.kontrolo)).toEqual([undefined, undefined]);
+  });
+
   it("keeps one token budget over the whole measurement: the run at the limit stops, the next does not start", async () => {
     const out = mkdtempSync(join(tmpdir(), "s037-ablauf-"));
     // Each request: 400 in + 100 out, two per built round. F of liste-filter-detail builds rounds
@@ -469,5 +521,315 @@ describe("the measurement „ganzer Ablauf“", () => {
     await expect(chat.send([])).rejects.toThrow(/Kostengrenze/);
     // A scorer that ignores the facts still lets the run finish (no dependency on the real one).
     expect(konstantaTaksilo(50).taksi).toBeTypeOf("function");
+  });
+});
+
+describe("provider errors in kuro.json (Spec 038 A-1, AK-2, C-1)", () => {
+  // Invented secrets, built at run time so no source line looks like a key.
+  const SK = ["sk", "or", "v1", "0f1e2d3c4b5a6978".repeat(4)].join("-");
+  const BEARER_VALORO = "ab12cd34".repeat(5);
+  const QUERY_VALORO = "erfunden123";
+  const SEKRETOJ = [SK, BEARER_VALORO, QUERY_VALORO];
+  const SEKRETA = `Anbieter mistral antwortet 500: {"error":"bad ${SK}","url":"https://api.example.test/v1?key=${QUERY_VALORO}","h":"Authorization: Bearer ${BEARER_VALORO}"}`;
+  const senSekretoj = (teksto: string) => SEKRETOJ.filter((s) => teksto.includes(s));
+  const ERO: AnbieterEraro = {
+    ekrano: "liste",
+    rondo: 2,
+    provo: 1,
+    status: 503,
+    mesagxo: 'Anbieter mistral antwortet 503: {"message":"Service unavailable"}',
+    ago: "ripeto",
+  };
+
+  it("stores the caught errors of a run in the shape of ekranoj, and no field when there are none", async () => {
+    const out = mkdtempSync(join(tmpdir(), "s038-32-kuro-"));
+    const duobla = duoblaKuro({ faktoj });
+    const kunEroj: KuruEkranojn = async (enigo, d) => {
+      const rezulto = await duobla.kuruEkranojn(enigo, d);
+      return enigo.varianto === "F"
+        ? { ...rezulto, anbieterfehleroj: [ERO, { ...ERO, provo: 2, mesagxo: SEKRETA }] }
+        : rezulto;
+    };
+    const { dir } = await kuriAblaufon(
+      { taskoj: [LFD], maksTokenoj: 1_000_000, out },
+      deps({ kuruEkranojn: kunEroj }),
+    );
+    const f = kuroJson(dir, LFD, "F");
+    expect(f.anbieterfehleroj?.[0]).toEqual(ERO);
+    expect(f.anbieterfehleroj?.[1]).toMatchObject({
+      ekrano: "liste",
+      rondo: 2,
+      provo: 2,
+      status: 503,
+      ago: "ripeto",
+    });
+    expect(senSekretoj(readFileSync(join(kuroDir(dir, LFD, "F", 1), "kuro.json"), "utf8"))).toEqual(
+      [],
+    );
+    expect("anbieterfehleroj" in kuroJson(dir, LFD, "0")).toBe(false);
+  });
+
+  it("cleans the message of a run that fails and keeps the errors it carries (error path)", async () => {
+    const out = mkdtempSync(join(tmpdir(), "s038-32-kuro-"));
+    const duobla = duoblaKuro({ faktoj });
+    const linioj: string[] = [];
+    const { dir, kuroj, raporto } = await kuriAblaufon(
+      { taskoj: [LFD], maksTokenoj: 1_000_000, out },
+      deps({
+        log: (linio) => linioj.push(linio),
+        kuruEkranojn: async (enigo, ekranojDeps) => {
+          if (enigo.varianto === "F") {
+            throw Object.assign(new Error(SEKRETA), {
+              anbieterfehleroj: [ERO, { ...ERO, provo: 2, mesagxo: SEKRETA }],
+            });
+          }
+          return duobla.kuruEkranojn(enigo, ekranojDeps);
+        },
+      }),
+    );
+    const f = kuroj[0];
+    expect(f?.haltigo).toBe("eraro");
+    expect(f?.eraro?.startsWith("Anbieter mistral antwortet 500: ")).toBe(true);
+    expect(f?.anbieterfehleroj?.map((e) => [e.ekrano, e.rondo, e.provo, e.status, e.ago])).toEqual([
+      ["liste", 2, 1, 503, "ripeto"],
+      ["liste", 2, 2, 503, "ripeto"],
+    ]);
+    const kuroTeksto = readFileSync(join(kuroDir(dir, LFD, "F", 1), "kuro.json"), "utf8");
+    expect(senSekretoj(kuroTeksto)).toEqual([]);
+    expect(senSekretoj(linioj.join("\n"))).toEqual([]);
+    expect(senSekretoj(raporto.md)).toEqual([]);
+    expect("anbieterfehleroj" in (kuroj[1] ?? {})).toBe(false);
+  });
+});
+
+describe("open deviations per rule in kuro.json and the report (Spec 038 A-2, AK-5, C-2)", () => {
+  const slugoj = taskoDe(LFD).ekranoj.map((ekrano) => ekrano.slug);
+  const [unua = "", dua = "", lasta = ""] = slugoj;
+  const restanta = (ekrano: string, regulo: string): Restanta => ({
+    ekrano,
+    regulo,
+    loko: `${ekrano}.html`,
+    kialo: `${regulo} offen`,
+  });
+  // The last screen is never built (`nicht-gebaut`); rule totals aria 2, ero-prop-constraint 2,
+  // label 1, nicht-gebaut 1 – the top three are aria, ero-prop-constraint (tie by name) and label
+  // (tie with nicht-gebaut, by name).
+  const RESTANTAJ: Restanta[] = [
+    restanta(unua, "ero-prop-constraint"),
+    restanta(dua, "aria"),
+    restanta(unua, "aria"),
+    restanta(lasta, "nicht-gebaut"),
+    restanta(dua, "label"),
+    restanta(unua, "ero-prop-constraint"),
+  ];
+  const LAUX_REGULO = {
+    [unua]: { aria: 1, "ero-prop-constraint": 2 },
+    [dua]: { aria: 1, label: 1 },
+    [lasta]: { "nicht-gebaut": 1 },
+  };
+
+  /** F leaves the last screen unbuilt and the deviations above; 0 leaves nothing open. */
+  const kunRestantaj = (): KuruEkranojn => {
+    const duobla = duoblaKuro({ faktoj });
+    return async (enigo, d) => {
+      const rezulto = await duobla.kuruEkranojn(enigo, d);
+      if (enigo.varianto !== "F") return rezulto;
+      return {
+        ...rezulto,
+        rondoj: rezulto.rondoj.map((rondo) =>
+          Object.fromEntries(Object.entries(rondo).filter(([slug]) => slug !== lasta)),
+        ),
+        restantaj: RESTANTAJ,
+      };
+    };
+  };
+
+  it("counts the deviations of ekranoj per slug and rule, sorted, whatever their order", () => {
+    expect(restantajLauxReguloDe(RESTANTAJ)).toEqual(LAUX_REGULO);
+    const inversa = restantajLauxReguloDe([...RESTANTAJ].reverse());
+    expect(stabilaJson(inversa)).toBe(stabilaJson(LAUX_REGULO));
+    expect(Object.keys(inversa)).toEqual(Object.keys(inversa).sort());
+    for (const reguloj of Object.values(inversa))
+      expect(Object.keys(reguloj)).toEqual(Object.keys(reguloj).sort());
+    expect(restantajLauxReguloDe([])).toEqual({});
+  });
+
+  it("stores restantajLauxRegulo per slug of the last round, Σ = restantaj (unbuilt screens included)", async () => {
+    const out = mkdtempSync(join(tmpdir(), "s038-33-kuro-"));
+    const { dir, raporto } = await kuriAblaufon(
+      { taskoj: [LFD], maksTokenoj: 1_000_000, out },
+      deps({ kuruEkranojn: kunRestantaj() }),
+    );
+    const f = kuroJson(dir, LFD, "F");
+    // The existing number is unchanged: the length of the list of ekranoj.
+    expect(f.restantaj).toBe(RESTANTAJ.length);
+    expect(f.restantajLauxRegulo).toEqual(LAUX_REGULO);
+    expect(f.restantajLauxRegulo?.[lasta]).toEqual({ "nicht-gebaut": 1 });
+    // The sum check (C-2): Σ over every slug and rule === restantaj.
+    const sumo = Object.values(f.restantajLauxRegulo ?? {})
+      .flatMap((reguloj) => Object.values(reguloj))
+      .reduce((a, b) => a + b, 0);
+    expect(sumo).toBe(f.restantaj);
+    // Nothing open: the field is there and empty, restantaj 0.
+    const nul = kuroJson(dir, LFD, "0");
+    expect(nul.restantaj).toBe(0);
+    expect(nul.restantajLauxRegulo).toEqual({});
+
+    // The report: the three most frequent rules per flow × variant, ties by name.
+    expect(raporto.md).toContain(
+      "## Offene Abweichungen je Regel (nach der letzten Runde, häufigste drei)",
+    );
+    expect(raporto.md).toContain("| Aufgabe | Variante | offen | häufigste Regeln |");
+    expect(raporto.md).toContain(
+      `| ${LFD} | F | ${RESTANTAJ.length} | aria 2, ero-prop-constraint 2, label 1 |`,
+    );
+    expect(raporto.md).toContain(`| ${LFD} | 0 | 0 | – |`);
+    expect(readFileSync(join(dir, "raporto.md"), "utf8")).toBe(raporto.md);
+    // The report data stay as they were (integra-raporto.json byte-identical).
+    const json = readFileSync(join(dir, "raporto.json"), "utf8");
+    expect(json).not.toContain("restantajLauxRegulo");
+    expect(json).not.toContain("restantajSupraj");
+  });
+
+  it("writes the same kuro.json and report twice", async () => {
+    const kuri = async () => {
+      const out = mkdtempSync(join(tmpdir(), "s038-33-kuro-"));
+      const { dir, raporto } = await kuriAblaufon(
+        { taskoj: [LFD], maksTokenoj: 1_000_000, out },
+        deps({ kuruEkranojn: kunRestantaj() }),
+      );
+      return {
+        kuro: readFileSync(join(kuroDir(dir, LFD, "F", 1), "kuro.json"), "utf8"),
+        md: raporto.md,
+      };
+    };
+    const unuaKuro = await kuri();
+    const duaKuro = await kuri();
+    expect(duaKuro.kuro).toBe(unuaKuro.kuro);
+    expect(duaKuro.md).toBe(unuaKuro.md);
+    expect(unuaKuro.kuro).toContain('"restantajLauxRegulo"');
+  });
+
+  it("has no restantajLauxRegulo on the error path; the report says „nicht vorhanden“", async () => {
+    const out = mkdtempSync(join(tmpdir(), "s038-33-kuro-"));
+    const duobla = duoblaKuro({ faktoj });
+    const { dir, kuroj, raporto } = await kuriAblaufon(
+      { taskoj: [LFD], maksTokenoj: 1_000_000, out },
+      deps({
+        kuruEkranojn: async (enigo, ekranojDeps) => {
+          if (enigo.varianto === "F") throw new Error("Renderer weg");
+          return duobla.kuruEkranojn(enigo, ekranojDeps);
+        },
+      }),
+    );
+    expect(kuroj[0]?.haltigo).toBe("eraro");
+    expect(kuroj[0]?.restantaj).toBe(0);
+    expect("restantajLauxRegulo" in (kuroj[0] ?? {})).toBe(false);
+    expect("restantajLauxRegulo" in kuroJson(dir, LFD, "F")).toBe(false);
+    expect(kuroJson(dir, LFD, "0").restantajLauxRegulo).toEqual({});
+    expect(raporto.md).toContain(`| ${LFD} | F | – | nicht vorhanden |`);
+    expect(raporto.md).toContain(`| ${LFD} | 0 | 0 | – |`);
+  });
+});
+
+describe("empty pages in kuro.json and the run folder (Spec 038 B-4, AK-2, F-S038-37t-1)", () => {
+  // Invented key, built at run time so no source line looks like a key.
+  const SK = ["sk", "or", "v1", "9a8b7c6d5e4f3021".repeat(4)].join("-");
+  const VOSTO =
+    "</fm-teksto>\n        </fm-markdovido>\n      </section>\n    </main>\n  </fm-pagxo>\n</fm-sxelo>";
+  const RESPONDOJ = [`\`\`\`html\n${VOSTO}\n\`\`\`\nSchlüssel ${SK}`, "Nur Text, kein Element."];
+  const MALPLENA: MalplenaPagxo = {
+    ekrano: "standard-detail",
+    rondo: 2,
+    bytes: 92,
+    ago: "trovo",
+    restis: true,
+    respondo: "rondoj/2/standard-detail.respondo.txt",
+  };
+
+  /** Variante F reports one empty page through the seam and in its result, as ekranoj does. */
+  const kunMalplena =
+    (duobla: ReturnType<typeof duoblaKuro>, eraro?: Error): KuruEkranojn =>
+    async (enigo, d) => {
+      if (enigo.varianto !== "F") return duobla.kuruEkranojn(enigo, d);
+      await d.eligo?.respondo?.({
+        rondo: 2,
+        slug: "standard-detail",
+        respondoj: RESPONDOJ,
+        kialo: "leere-seite",
+      });
+      if (eraro !== undefined) throw eraro;
+      const rezulto = await duobla.kuruEkranojn(enigo, d);
+      return { ...rezulto, malplenajPagxoj: [MALPLENA] };
+    };
+
+  const respondojEn = (own: string): string[] =>
+    existsSync(join(own, "rondoj"))
+      ? readdirSync(join(own, "rondoj")).flatMap((n) =>
+          readdirSync(join(own, "rondoj", n))
+            .filter((nomo) => nomo.endsWith(".respondo.txt"))
+            .map((nomo) => `rondoj/${n}/${nomo}`),
+        )
+      : [];
+
+  it("stores malplenajPagxoj of ekranoj in kuro.json and the cleaned raw answer in rondoj/<n>/<slug>.respondo.txt", async () => {
+    const out = mkdtempSync(join(tmpdir(), "s038-37c-kuro-"));
+    const duobla = duoblaKuro({ faktoj });
+    const { dir, kuroj } = await kuriAblaufon(
+      { taskoj: [LFD], maksTokenoj: 1_000_000, out },
+      // The dependencies as the real `--art ablauf` gives them: no eligo of its own.
+      deps({ kuruEkranojn: kunMalplena(duobla) }),
+    );
+    const f = kuroJson(dir, LFD, "F");
+    expect(f.malplenajPagxoj).toEqual([MALPLENA]);
+    expect(kuroj[0]?.malplenajPagxoj).toEqual([MALPLENA]);
+    expect("malplenajPagxoj" in kuroJson(dir, LFD, "0")).toBe(false);
+
+    const ownF = kuroDir(dir, LFD, "F", 1);
+    expect(respondojEn(ownF)).toEqual([MALPLENA.respondo]);
+    const teksto = readFileSync(join(ownF, MALPLENA.respondo), "utf8");
+    expect(teksto).toBe(purigiTekston(respondoTeksto(RESPONDOJ, "leere-seite")));
+    expect(teksto.startsWith("--- Antwort (leere Seite) ---\n")).toBe(true);
+    expect(teksto).toContain(VOSTO);
+    // The secret check covers the new file and kuro.json.
+    expect(teksto.includes(SK)).toBe(false);
+    expect(readFileSync(join(ownF, "kuro.json"), "utf8").includes(SK)).toBe(false);
+    expect(respondojEn(kuroDir(dir, LFD, "0", 1))).toEqual([]);
+    // Only the answers: the seam does not make the run build the brand into its folder.
+    expect(existsSync(join(ownF, "marko"))).toBe(false);
+  });
+
+  it("has no malplenajPagxoj on the error path; the answer written before the error stays, cleaned", async () => {
+    const out = mkdtempSync(join(tmpdir(), "s038-37c-kuro-"));
+    const duobla = duoblaKuro({ faktoj });
+    const { dir, kuroj } = await kuriAblaufon(
+      { taskoj: [LFD], maksTokenoj: 1_000_000, out },
+      deps({ kuruEkranojn: kunMalplena(duobla, new Error("Renderer weg")) }),
+    );
+    expect(kuroj[0]?.haltigo).toBe("eraro");
+    expect("malplenajPagxoj" in kuroJson(dir, LFD, "F")).toBe(false);
+    const ownF = kuroDir(dir, LFD, "F", 1);
+    expect(respondojEn(ownF)).toEqual([MALPLENA.respondo]);
+    expect(readFileSync(join(ownF, MALPLENA.respondo), "utf8").includes(SK)).toBe(false);
+  });
+
+  it("keeps the eligo a caller gives: its respondo writes, nothing is written twice", async () => {
+    const out = mkdtempSync(join(tmpdir(), "s038-37c-kuro-"));
+    const duobla = duoblaKuro({ faktoj });
+    const vokoj: string[] = [];
+    const basaj = deps({ kuruEkranojn: kunMalplena(duobla) });
+    const { dir } = await kuriAblaufon(
+      { taskoj: [LFD], maksTokenoj: 1_000_000, out },
+      {
+        ...basaj,
+        kuraDeps: async (e) => ({
+          ...(await basaj.kuraDeps(e)),
+          eligo: { respondo: (r) => void vokoj.push(`${r.rondo}/${r.slug} ${r.kialo}`) },
+        }),
+      },
+    );
+    expect(vokoj).toEqual(["2/standard-detail leere-seite"]);
+    expect(respondojEn(kuroDir(dir, LFD, "F", 1))).toEqual([]);
+    expect(kuroJson(dir, LFD, "F").malplenajPagxoj).toEqual([MALPLENA]);
   });
 });

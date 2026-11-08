@@ -15,9 +15,12 @@ import { Budget } from "@fundamento/metiejo";
 import {
   type AgentaManko,
   eroNomojDe,
+  type KonstruoPeto,
+  type KonstruoRezulto,
   konstruiEkranon,
   legiEroProfilojn,
   legiSxelon,
+  malplenaPagxo,
   PlanoMalsukcesis,
   type ProfilaKasxmemoro,
   planiEkranojn,
@@ -25,6 +28,15 @@ import {
   type SxelaKunteksto,
   sxelaServilo,
 } from "./agento.js";
+import {
+  type AnbieterEraro,
+  AnbieterRezigno,
+  type FehlerKaptilo,
+  noti,
+  PLANA_EKRANO,
+  purigiTekston,
+  realaDormo,
+} from "./anbieterfehleroj.js";
 import { statikaFakto } from "./fakto-statika.js";
 import { gardiModelon } from "./gardo.js";
 import { type UzKontrolilo, uzKontroliloDe } from "./instancoj.js";
@@ -45,6 +57,7 @@ import type {
   KostoTakso,
   Malhelpo,
   Malobservo,
+  MalplenaPagxo,
   Peno,
   Plano,
   PlanoEkrano,
@@ -324,6 +337,148 @@ export function senRimedajDe(slug: string, taksado: Taksado): Restanta[] {
 /** The marker of a screen whose build answer held no markup, also after one more question. */
 export const MALPLENA_RESPONDO = "leere-antwort" satisfies Malhelpo;
 
+/** The marker of a screen-round that ended on provider errors (Spec 038 A-1). */
+export const ANBIETERFEHLER: Malhelpo = "anbieterfehler";
+
+/** The marker of a screen-round whose page had no element content (Spec 038 B-4, S038-37c). */
+export const LEERA_PAGXO = "leere-seite" satisfies Malhelpo;
+
+/**
+ * The finding of a page without element content (B-4): what the next round gets – start again in
+ * a fresh conversation, from the shell.
+ */
+export const LEERA_PAGXO_TROVO: Readonly<Omit<Trovo, "loko">> = {
+  regulo: LEERA_PAGXO,
+  mesagxo:
+    "Die Seite war leer: das Fragment hatte kein Element, nur schließende Tags oder Text (B-4).",
+  sugesto:
+    "In einem frischen Gespräch neu beginnen, mit der Shell als Ausgangspunkt (fm-sxelo mit fm-pagxo und main): den leeren Stand verwerfen, die Regionen füllen und den ganzen Screen in einem einzigen ```html-Block senden.",
+  kialo:
+    "AK-2: jeder Screen jeder Runde hat ein Fragment mit Inhalt; eine leere Seite ist kein gebauter Screen.",
+};
+
+/**
+ * One build with the screen layer of A-1: when the request layer gives up, a screen with a
+ * fragment of an earlier round keeps it (`portita`, undefined back); one without is asked once in
+ * a fresh conversation (`nova-konversacio`), and when that gives up too, it stays without
+ * (`rezigno`, undefined back). Every other error passes through.
+ */
+async function konstruiKunKapto(
+  peto: KonstruoPeto & { kaptilo: FehlerKaptilo },
+  havasAntauan: boolean,
+): Promise<KonstruoRezulto | undefined> {
+  try {
+    return await konstruiEkranon(peto);
+  } catch (error) {
+    if (!(error instanceof AnbieterRezigno)) throw error;
+    if (havasAntauan) {
+      noti(peto.kaptilo, error.status, error.mesagxo, "portita");
+      return undefined;
+    }
+    noti(peto.kaptilo, error.status, error.mesagxo, "nova-konversacio");
+  }
+  try {
+    return await konstruiEkranon(peto);
+  } catch (error) {
+    if (!(error instanceof AnbieterRezigno)) throw error;
+    noti(peto.kaptilo, error.status, error.mesagxo, "rezigno");
+    return undefined;
+  }
+}
+
+/** The rule of check_usage for a slot that holds what it does not accept. */
+const SLOT_ACCEPTS = "uzo-slot-accepts";
+
+const kajListo = (eroj: readonly string[]): string =>
+  eroj.length <= 1 ? (eroj[0] ?? "") : `${eroj.slice(0, -1).join(", ")} und ${eroj.at(-1)}`;
+
+/**
+ * S038-39b (F-S038-39a-3): where check_usage finds text in a slot that accepts Eroj and the facts
+ * show a wrapper there – an element that is no Ero, in a slot of an `fm-*` element, with Eroj
+ * inside – the suggestion names it and the Eroj it holds (generic for every slot and Ero).
+ */
+function sugestoKunHulo(sugesto: string, mesagxo: string, fakto: Fakto): string {
+  const { elements } = fakto;
+  const aldonoj = new Set<string>();
+  for (const [index, element] of elements.entries()) {
+    const slot = element.attrs.slot;
+    if (slot === undefined || element.tag.startsWith("fm-")) continue;
+    if (!(elements[element.parent]?.tag ?? "").startsWith("fm-")) continue;
+    const nomo = slot.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    if (!new RegExp(`\\bslot ${nomo}(?![\\w-])`).test(mesagxo)) continue;
+    const eroj = [
+      ...new Set(
+        elements.flatMap((infano) =>
+          infano.parent === index && infano.tag.startsWith("fm-") ? [infano.tag] : [],
+        ),
+      ),
+    ];
+    if (eroj.length === 0) continue;
+    aldonoj.add(
+      `Im Slot ${slot} steht ein <${element.tag}> als Hülle; eine Hülle zählt als Text: slot="${slot}" direkt an jedes ${kajListo(eroj)} darin setzen und das <${element.tag}> weglassen.`,
+    );
+  }
+  return [sugesto, ...aldonoj].filter((parto) => parto !== "").join(" ");
+}
+
+/** The rule of check_usage for an Ero without a label. */
+const LABEL_REQUIRED = "label-required";
+
+/**
+ * S038-39b (F-S038-39a-1): check_markup counts only the own and the unslotted text of an Ero as its
+ * label (the one derivation, pinned by AC-8). Where an Ero of the finding has no such text but text
+ * in a slotted child that is no Ero, the suggestion names it, read from the fragment of the round
+ * (the browser's facts no longer show the slot of an adopted default slot).
+ */
+function sugestoKunSlotaTeksto(sugesto: string, mesagxo: string, fragmento: string): string {
+  const ero = /^Instance \d+ of (\S+) has/.exec(mesagxo)?.[1];
+  if (ero === undefined || fragmento.trim() === "") return sugesto;
+  const { elements } = statikaFakto(fragmento, "");
+  const tekstoDe = (index: number): string =>
+    [
+      elements[index]?.text ?? "",
+      ...elements.flatMap((infano, i) => (infano.parent === index ? [tekstoDe(i)] : [])),
+    ]
+      .filter((parto) => parto !== "")
+      .join(" ");
+  const aldonoj = new Map<string, string>();
+  for (const [index, element] of elements.entries()) {
+    if (element.tag !== `fm-${ero}`) continue;
+    const infanoj = elements.flatMap((infano, i) => (infano.parent === index ? [i] : []));
+    const neslota = [
+      element.text,
+      ...infanoj
+        .filter((infano) => elements[infano]?.attrs.slot === undefined)
+        .map((infano) => tekstoDe(infano)),
+    ].join("");
+    if (neslota.trim() !== "") continue;
+    for (const infano of infanoj) {
+      const ido = elements[infano];
+      const slot = ido?.attrs.slot;
+      if (ido === undefined || slot === undefined || ido.tag.startsWith("fm-")) continue;
+      const teksto = tekstoDe(infano);
+      const sxlosilo = `${ido.tag} ${slot}`;
+      if (teksto === "" || aldonoj.has(sxlosilo)) continue;
+      aldonoj.set(
+        sxlosilo,
+        `Der Text „${teksto}“ steht in <${ido.tag} slot="${slot}">; ein Kind mit slot-Attribut zählt nicht als Label: den Text ohne Hülle und ohne slot-Attribut direkt ins Element schreiben, z. B. <fm-${ero}>${teksto}</fm-${ero}>.`,
+      );
+    }
+  }
+  return [sugesto, ...aldonoj.values()].filter((parto) => parto !== "").join(" ");
+}
+
+/**
+ * The suggestion a finding hands on: check_usage's; for a slot wrapper and for a label in a slotted
+ * child with what the page shows (S038-39b).
+ */
+const sugestoDe = (m: Malobservo, fakto: Fakto, fragmento: string | undefined): string => {
+  if (m.rule === SLOT_ACCEPTS) return sugestoKunHulo(m.suggestion, m.message, fakto);
+  if (m.rule === LABEL_REQUIRED && fragmento !== undefined)
+    return sugestoKunSlotaTeksto(m.suggestion, m.message, fragmento);
+  return m.suggestion;
+};
+
 /** The findings of one checked screen: what the next round gets and what is left at the end. */
 export function trovojDe(e: {
   slug: string;
@@ -332,8 +487,15 @@ export function trovojDe(e: {
   fakto: Fakto;
   navigado: EkranaNavigado;
   malhelpoj: readonly Malhelpo[];
+  /** The slugs of the planned screens of the run, in plan order (F-S038-37a-1). */
+  ekranoj?: readonly string[];
+  /** The fragment the agent wrote this round, as check_markup read it (S038-39b). */
+  fragmento?: string;
 }): Trovo[] {
   const trovoj: Trovo[] = [];
+  // B-4 (S038-37c): a page without element content – start again from the shell.
+  if (e.malhelpoj.includes(LEERA_PAGXO))
+    trovoj.push({ ...LEERA_PAGXO_TROVO, loko: `${e.slug}.html` });
   if (e.malhelpoj.includes(MALPLENA_RESPONDO)) {
     trovoj.push({
       regulo: MALPLENA_RESPONDO,
@@ -350,7 +512,7 @@ export function trovojDe(e: {
       regulo: m.regulo?.name ?? m.rule,
       loko: m.loko ?? m.path,
       mesagxo: m.message,
-      sugesto: m.suggestion,
+      sugesto: sugestoDe(m, e.fakto, e.fragmento),
       kialo: m.regulo?.kialo ?? m.message,
     });
   }
@@ -363,6 +525,15 @@ export function trovojDe(e: {
       kialo: AXE_KIALO,
     })),
   );
+  // B-3 (C-4): the scorer's K3 gap names a rule; its suggestion is check_usage's for that rule
+  // (e.g. ero-prop-constraint, destructive-label-names-object), else the general one.
+  const sugestoDeRegulo = (regulo: string): string | undefined => {
+    const m = e.malobservoj.find(
+      (kandidato) =>
+        (kandidato.regulo?.name ?? kandidato.rule) === regulo && kandidato.suggestion !== "",
+    );
+    return m === undefined ? undefined : sugestoDe(m, e.fakto, e.fragmento);
+  };
   for (const manko of e.taksado.mankoj) {
     if (manko.kind === "a11y" && axeTrovoj.length > 0) continue;
     const priskribo = K_TROVOJ[manko.kind];
@@ -370,7 +541,10 @@ export function trovojDe(e: {
       regulo: manko.kind,
       loko: manko.key,
       mesagxo: `${priskribo?.mesagxo ?? manko.kind}: ${manko.key}.`,
-      sugesto: priskribo?.sugesto ?? "Den Befund mit dem Gvidanto klären.",
+      sugesto:
+        (manko.kind === "regulo" ? sugestoDeRegulo(manko.key) : undefined) ??
+        priskribo?.sugesto ??
+        "Den Befund mit dem Gvidanto klären.",
       kialo: priskribo?.kialo ?? `Bewertung: ${manko.kind}.`,
     });
   }
@@ -393,12 +567,17 @@ export function trovojDe(e: {
       kialo: "D-05: jeder geplante Übergang muss als Verweis da sein.",
     });
   }
+  // F-S038-37a-1: the planned screens by name, never the `<slug>.html` placeholder.
+  const ekranoj = (e.ekranoj ?? []).map((slug) => `${slug}.html`);
   for (const href of e.navigado.mortaj) {
     trovoj.push({
       regulo: "navigado-morta",
       loko: href,
       mesagxo: `Der Verweis ${href} führt ins Leere.`,
-      sugesto: "Nur auf geplante Screens als <slug>.html verweisen.",
+      sugesto:
+        ekranoj.length === 0
+          ? "Den Verweis entfernen; in diesem Lauf gibt es keine geplanten Screens."
+          : `Nur auf geplante Screens verweisen: ${ekranoj.join(", ")}.`,
       kialo: "D-05: ein toter Verweis bricht den Ablauf.",
     });
   }
@@ -462,9 +641,29 @@ export async function kuruEkranojn(
   enigo: EkranojEnigo,
   deps: EkranojDeps,
 ): Promise<EkranojRezulto> {
+  // Spec 038 A-1 (C-1): the caught provider errors of the run; an error that still leaves the run
+  // carries them out (nordstelo's error path writes them into kuro.json).
+  const anbieterfehleroj: AnbieterEraro[] = [];
+  try {
+    return await kuri(enigo, deps, anbieterfehleroj);
+  } catch (error) {
+    if (error instanceof Error && anbieterfehleroj.length > 0) {
+      Object.assign(error, { anbieterfehleroj: [...anbieterfehleroj] });
+    }
+    throw error;
+  }
+}
+
+async function kuri(
+  enigo: EkranojEnigo,
+  deps: EkranojDeps,
+  anbieterfehleroj: AnbieterEraro[],
+): Promise<EkranojRezulto> {
   const varianto: Varianto = enigo.varianto ?? "F";
   const lingvo = enigo.lingvo ?? "de";
-  if (deps.chat.modelo !== undefined) gardiModelon({ toString: () => deps.chat.modelo ?? "" });
+  if (deps.chat.modelo !== undefined) {
+    gardiModelon({ toString: () => deps.chat.modelo ?? "" }, enigo.kontrolo);
+  }
   const problemoj = kontroliEnigon(enigo, deps);
   if (problemoj.length > 0) throw new NevalidaEnigo(problemoj);
 
@@ -474,8 +673,9 @@ export async function kuruEkranojn(
 
   // The output starts before the first request: the brand build once per run (Variante F only –
   // Variante 0 has no Fundamento CSS and no Eroj, D-34), then the seam. A failing brand build is a
-  // setup error and is thrown before anything is asked.
-  if (deps.eligo !== undefined) {
+  // setup error and is thrown before anything is asked. A seam without `komenco` (the measurement's
+  // answers-only seam, F-S038-37t-1) gets no brand build.
+  if (deps.eligo?.komenco !== undefined) {
     const marko =
       varianto === "F" ? await deps.marko.konstrui(join(enigo.out, "marko")) : undefined;
     await deps.eligo.komenco?.({
@@ -507,6 +707,19 @@ export async function kuruEkranojn(
   const fragmentoRondoj = new Map<string, number>();
   let haltigo: Haltigo | undefined;
   let faritaj = 0;
+  const dormi = deps.dormi ?? realaDormo;
+  /** B-4 (S038-37c): every screen-round whose page had no element content, in order. */
+  const malplenajPagxoj: MalplenaPagxo[] = [];
+  /** Screens left without any fragment by provider errors (A-1): their reason in `restantaj`. */
+  const senFragmento = new Set<string>();
+  const kaptiloDe = (ekrano: string, rondo: number): FehlerKaptilo => ({
+    ekrano,
+    rondo,
+    provo: 0,
+    eroj: anbieterfehleroj,
+    dormi,
+    log: deps.log,
+  });
 
   const halti = (error: unknown, kie: string): void => {
     const kialo = haltigoDe(error);
@@ -516,7 +729,10 @@ export async function kuruEkranojn(
         `Kostengrenze von ${enigo.maksTokenoj} Tokens erreicht (verbraucht: ${budget.spent}) ${kie}; Teilergebnis.`,
       );
     } else {
-      notoj.push(`${kialo === "tagolimo" ? "Tageslimit" : "Fehler"} ${kie}: ${mesagxoDe(error)}`);
+      // A-1: a provider message may hold parts of the request – cleaned before it is noted.
+      notoj.push(
+        `${kialo === "tagolimo" ? "Tageslimit" : "Fehler"} ${kie}: ${purigiTekston(mesagxoDe(error))}`,
+      );
     }
     deps.log(notoj.at(-1) ?? "");
   };
@@ -549,7 +765,9 @@ export async function kuruEkranojn(
               ? "Die Tokengrenze war erreicht, bevor der Screen gebaut wurde."
               : haltigo === "tagolimo"
                 ? "Das Tageslimit des Anbieters war erreicht, bevor der Screen gebaut wurde."
-                : "Der Screen wurde nicht gebaut.",
+                : senFragmento.has(ekrano.slug)
+                  ? "Anbieterfehler: der Screen blieb nach Wiederholungen und einem frischen Gespräch ohne Fragment (AK-2)."
+                  : "Der Screen wurde nicht gebaut.",
         });
         continue;
       }
@@ -591,6 +809,8 @@ export async function kuruEkranojn(
       faritajRondoj: faritaj,
       notoj,
       ...(senRimedaj.length === 0 ? {} : { senRimedaj }),
+      ...(anbieterfehleroj.length === 0 ? {} : { anbieterfehleroj: [...anbieterfehleroj] }),
+      ...(malplenajPagxoj.length === 0 ? {} : { malplenajPagxoj: [...malplenajPagxoj] }),
     };
     await deps.eligo?.fino?.(rezulto);
     return rezulto;
@@ -622,13 +842,30 @@ export async function kuruEkranojn(
     plano = enigo.plano;
   } else {
     try {
-      const planita = await planiEkranojn({
+      // A-1: the plan request with the catch layer; when it gives up, one fresh plan request, then
+      // the run stops with the reason (no screen started, not an AK-2 violation).
+      const kaptilo = kaptiloDe(PLANA_EKRANO, 0);
+      const planPeto = {
         chat: deps.chat,
         budget,
         peno,
         frazo: enigo.frazo,
         ...(enigo.ekranoj === undefined ? {} : { nomoj: enigo.ekranoj }),
-      });
+        kaptilo,
+      };
+      let planita: Awaited<ReturnType<typeof planiEkranojn>>;
+      try {
+        planita = await planiEkranojn(planPeto);
+      } catch (error) {
+        if (!(error instanceof AnbieterRezigno)) throw error;
+        noti(kaptilo, error.status, error.mesagxo, "nova-konversacio");
+        try {
+          planita = await planiEkranojn(planPeto);
+        } catch (dua) {
+          if (dua instanceof AnbieterRezigno) noti(kaptilo, dua.status, dua.mesagxo, "rezigno");
+          throw dua;
+        }
+      }
       plano = planita.plano;
       notoj.push(...planita.notoj);
     } catch (error) {
@@ -651,6 +888,10 @@ export async function kuruEkranojn(
   for (let r = 1; r <= MAKS_RONDOJ && haltigo === undefined; r += 1) {
     let konstruitaj = 0;
     const malplenaj = new Set<string>();
+    /** B-4: screens whose page of this round has no element content (after the fresh conversation). */
+    const leerajPagxoj = new Set<string>();
+    /** A-1: screens whose build of this round ended on provider errors (fragment of before or none). */
+    const anbieterfehleraj = new Set<string>();
     /** C-6: the effort of each build of this round with a request (D-203), `peno` after – before. */
     const penoj = new Map<string, Peno>();
     for (const ekrano of plano.ekranoj) {
@@ -668,7 +909,7 @@ export async function kuruEkranojn(
             : await legiEroProfilojn(deps.tools, eroNomojDe(antaua.fragmento), profiloj, (linio) =>
                 deps.log(`${ekrano.slug} Runde ${r}: ${linio}`),
               );
-        const { fragmento, mankoj, malplena } = await konstruiEkranon({
+        const konstruoPeto: KonstruoPeto & { kaptilo: FehlerKaptilo } = {
           chat: deps.chat,
           budget,
           peno,
@@ -689,7 +930,75 @@ export async function kuruEkranojn(
           log: deps.log,
           ...(sxelo === undefined ? {} : { sxelo }),
           ...(eroProfiloj === undefined ? {} : { eroProfiloj }),
-        });
+          kaptilo: kaptiloDe(ekrano.slug, r),
+        };
+        const havasAntauan = antaua?.fragmento !== undefined;
+        let konstruo = await konstruiKunKapto(konstruoPeto, havasAntauan);
+        // B-4 (S038-37c): a page without element content (not an answer without markup, which
+        // S037-10 handles) – round 1 asks once in a fresh conversation from the shell, a later
+        // round hands a finding to the next one; the raw answers go cleaned into the run folder.
+        if (
+          konstruo !== undefined &&
+          varianto === "F" &&
+          konstruo.malplena === undefined &&
+          malplenaPagxo(konstruo.fragmento)
+        ) {
+          const bytesMalplenaj = Buffer.byteLength(konstruo.fragmento);
+          const respondoj = [konstruo.respondo ?? konstruo.fragmento];
+          let restis = true;
+          if (r === 1) {
+            deps.log(
+              `Runde 1: ${ekrano.slug} – leere Seite (${bytesMalplenaj} Bytes), ein frisches Gespräch mit der Shell als Ausgangspunkt`,
+            );
+            const dua = await konstruiKunKapto({ ...konstruoPeto, rekomenco: true }, havasAntauan);
+            if (dua !== undefined) {
+              respondoj.push(dua.respondo ?? dua.malplena?.respondoj.join("\n") ?? dua.fragmento);
+              if (dua.malplena === undefined && !malplenaPagxo(dua.fragmento)) {
+                konstruo = dua;
+                restis = false;
+              }
+            }
+          }
+          if (restis) {
+            leerajPagxoj.add(ekrano.slug);
+            notoj.push(
+              r === 1
+                ? `Runde 1: ${ekrano.slug} blieb eine leere Seite, auch in einem frischen Gespräch mit der Shell als Ausgangspunkt (AK-2 verletzt).`
+                : `Runde ${r}: ${ekrano.slug} ergab eine leere Seite (AK-2 verletzt); die nächste Runde bekommt den Befund ${LEERA_PAGXO}.`,
+            );
+            deps.log(notoj.at(-1) ?? "");
+          }
+          malplenajPagxoj.push({
+            ekrano: ekrano.slug,
+            rondo: r,
+            bytes: bytesMalplenaj,
+            ago: r === 1 ? "nova-konversacio" : "trovo",
+            restis,
+            respondo: `rondoj/${r}/${ekrano.slug}.respondo.txt`,
+          });
+          await deps.eligo?.respondo?.({
+            rondo: r,
+            slug: ekrano.slug,
+            respondoj: respondoj.map(purigiTekston),
+            kialo: "leere-seite",
+          });
+        }
+        if (konstruo === undefined) {
+          // A-1: the screen-round ends on provider errors; the run goes on with the next screen.
+          anbieterfehleraj.add(ekrano.slug);
+          if (antaua?.fragmento === undefined) {
+            if (!fragmentoj.has(ekrano.slug)) senFragmento.add(ekrano.slug);
+            notoj.push(
+              `Runde ${r}: ${ekrano.slug} blieb nach Anbieterfehlern ohne Fragment, auch in einem frischen Gespräch (AK-2 verletzt).`,
+            );
+            deps.log(notoj.at(-1) ?? "");
+          } else {
+            deps.log(`Runde ${r}: ${ekrano.slug} – Anbieterfehler, Fragment der Vorrunde behalten`);
+          }
+          continue;
+        }
+        const { fragmento, mankoj, malplena } = konstruo;
+        senFragmento.delete(ekrano.slug);
         bytes = Buffer.byteLength(fragmento);
         fragmentoj.set(ekrano.slug, fragmento);
         fragmentoRondoj.set(ekrano.slug, r);
@@ -725,7 +1034,9 @@ export async function kuruEkranojn(
         if (diferenco.requests > 0) penoj.set(ekrano.slug, diferenco);
       }
     }
-    if (konstruitaj === 0) break;
+    // A-1: a round whose builds all ended on provider errors still counts and is checked (the
+    // screens keep their fragments); the run ends only by „all green“ or three rounds.
+    if (konstruitaj === 0 && anbieterfehleraj.size === 0) break;
     faritaj = r;
     const rondo = await kontroliRondon({
       r,
@@ -738,6 +1049,8 @@ export async function kuruEkranojn(
       fragmentoj,
       fragmentoRondoj,
       malplenaj,
+      leerajPagxoj,
+      anbieterfehleraj,
       verdaEkde,
       lastaStato,
       notoj,
@@ -765,6 +1078,10 @@ interface RondoKunteksto {
   fragmentoRondoj: ReadonlyMap<string, number>;
   /** Screens whose build of this round ended without markup (S037-10 Befund 1). */
   malplenaj: ReadonlySet<string>;
+  /** Screens whose page of this round has no element content (Spec 038 B-4, S038-37c). */
+  leerajPagxoj: ReadonlySet<string>;
+  /** Screens whose build of this round ended on provider errors (Spec 038 A-1). */
+  anbieterfehleraj: ReadonlySet<string>;
   verdaEkde: Map<string, number>;
   lastaStato: Map<string, RondoEkrano>;
   notoj: string[];
@@ -873,10 +1190,16 @@ async function kontroliRondon(k: RondoKunteksto): Promise<Rondo> {
     });
     // An empty answer is never a green screen, whatever the score of the empty page says.
     const malplena = k.malplenaj.has(ekrano.slug);
-    const malhelpoj: Malhelpo[] = malplena
-      ? [MALPLENA_RESPONDO, ...decido.malhelpoj]
-      : decido.malhelpoj;
-    const verda = decido.verda && !malplena;
+    // A-1: a screen not built this round because of provider errors is not green this round.
+    const anbieterfehlera = k.anbieterfehleraj.has(ekrano.slug);
+    // B-4: a page without element content is never green either (detected before the score).
+    const leera = k.leerajPagxoj.has(ekrano.slug);
+    const malhelpoj: Malhelpo[] = [];
+    if (leera) malhelpoj.push(LEERA_PAGXO);
+    if (anbieterfehlera) malhelpoj.push(ANBIETERFEHLER);
+    if (malplena) malhelpoj.push(MALPLENA_RESPONDO);
+    malhelpoj.push(...decido.malhelpoj);
+    const verda = decido.verda && !malplena && !anbieterfehlera && !leera;
     // A stop left the screen unbuilt this round: its older fragment was checked again.
     const fragmentoRondo = k.fragmentoRondoj.get(ekrano.slug);
     const peno = k.penoj.get(ekrano.slug);
@@ -903,6 +1226,8 @@ async function kontroliRondon(k: RondoKunteksto): Promise<Rondo> {
             fakto,
             navigado: navigadoEkrano,
             malhelpoj,
+            ekranoj: plano.ekranoj.map((planita) => planita.slug),
+            fragmento,
           }),
     };
     rondo[ekrano.slug] = stato;

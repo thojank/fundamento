@@ -13,9 +13,13 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import {
+  agordojPorKontrolo,
   type Bildigilo,
-  gardiModelon,
+  KONTROLA_MODELO,
+  type Kontrolo,
   type KuruEkranojn,
+  kontroliKontrolon,
+  kontroliModelon,
   MalpermesitaModelo,
   type Marko,
   type Problemo,
@@ -51,10 +55,17 @@ export const HELPO_ABLAUF = `pnpm nordstelo --art ablauf [Optionen]
   --ledger <Ordner>    Ordner von anfragoj.json (Anfragen je Tag), Standard: --out
   --env <Datei>        die .env mit FM_KI_ANBIETER, FM_KI_MODELL und dem Schlüssel (Standard: .env im Checkout);
                        nur mistral/ministral-14b-2512 ist erlaubt, jedes andere Modell endet mit Exit 2
+  --lauf-id <id>       die Lauf-ID (wie das Kostenbuch sie bucht); eine ID mit kontrolle- am Anfang
+                       ist ein Kontrolllauf und braucht --kontroll-modelo
+  --kontroll-modelo <provider/model>
+                       das Modell des Kontrolllaufs, nur ${KONTROLA_MODELO} und nur
+                       mit --lauf-id kontrolle-…; der Anbieter wird daraus gebaut, der Schlüssel ist
+                       OPENROUTER_API_KEY der .env. Jede andere Kombination endet mit Exit 2
   --json               die Zusammenfassung als JSON
 
 Exit 0: Bericht geschrieben (auch wenn die Tokengrenze einen Lauf beendet hat), 1: kein Screen
-gebaut oder Fehler, 2: Aufruf, .env oder Modell nicht zulässig.`;
+gebaut oder Fehler, 2: Aufruf, .env, Modell oder Kontrollpaar nicht zulässig (mit --json die
+Probleme als { problemoj } auf stdout).`;
 
 export const HELPO_KOMPARO = `pnpm nordstelo --art komparo --antaux <Ordner> --post <Ordner> --out <Ordner> [Optionen]
                                      Vergleich 4.3 (Spec 038): vorher gegen nachher je Ablauf ×
@@ -138,6 +149,8 @@ export interface ArtoMedio {
     out: string;
     ledger: string;
     log: (linio: string) => void;
+    /** The control pair (`--lauf-id`, `--kontroll-modelo`; Spec 038 C-3); absent otherwise. */
+    kontrolo?: Kontrolo;
   }): Promise<Preparo>;
   modelo(): Modelo;
   sxargo(): { sxargo: Sxargo; kernoj: number };
@@ -189,7 +202,12 @@ async function realaPreparo(
         `${JSON.stringify(mergeLedger(legi(), ledger.entries), null, 2)}\n`,
       ),
   });
-  const chat = ekranoj.chatModelDe({ provider: e.provider, gate, log: e.log });
+  const chat = ekranoj.chatModelDe({
+    provider: e.provider,
+    gate,
+    log: e.log,
+    ...(e.kontrolo === undefined ? {} : { kontrolo: e.kontrolo }),
+  });
 
   // D-39: the css of all repo Aspektoj (cxiuj config), as the Kennzahl renders its pages.
   const projekcioj = join(e.out, "projekcioj");
@@ -421,6 +439,8 @@ export async function kuriArton(
         lingvo: { type: "string" },
         out: { type: "string" },
         ledger: { type: "string" },
+        "lauf-id": { type: "string" },
+        "kontroll-modelo": { type: "string" },
         json: { type: "boolean" },
         help: { type: "boolean", short: "h" },
       },
@@ -465,6 +485,26 @@ export async function kuriArton(
     );
   }
 
+  // The control pair (Spec 038 C-3, D-S038-36-1) before the .env: a wrong pair needs no file.
+  const laufId = values["lauf-id"];
+  const kontrolModelo = values["kontroll-modelo"];
+  const kontrolo: Kontrolo | undefined =
+    typeof laufId !== "string" && typeof kontrolModelo !== "string"
+      ? undefined
+      : {
+          ...(typeof laufId === "string" ? { laufId } : {}),
+          ...(typeof kontrolModelo === "string" ? { kontrolModelo } : {}),
+        };
+  const malpermeso = (problemoj: readonly Problemo[]): number => {
+    medio.stderr(
+      `${problemoj.map((p) => `${p.path} ${p.rule}: ${p.message} ${p.suggestion}`).join("\n")}\nNichts wurde gestartet.\n`,
+    );
+    if (values.json === true) medio.stdout(stabilaJson({ problemoj }));
+    return 2;
+  };
+  const paroProblemoj = kontroliKontrolon(kontrolo);
+  if (paroProblemoj.length > 0) return malpermeso(paroProblemoj);
+
   const envFile = resolve(String(values.env ?? join(medio.root, ".env")));
   const settings = medio.legiEnv(envFile);
   if (settings === undefined) {
@@ -475,24 +515,37 @@ export async function kuriArton(
   }
   let provider: Provider;
   try {
-    provider = providerOf(settings);
-    // D-19 before anything is built or asked.
-    gardiModelon(provider);
+    // The control run builds its provider from --kontroll-modelo; the key stays the .env's.
+    provider = providerOf(
+      kontrolo?.kontrolModelo === undefined
+        ? settings
+        : agordojPorKontrolo(settings, kontrolo.kontrolModelo),
+    );
   } catch (error) {
     medio.stderr(`${mesagxoDe(error)}\n`);
     return 2;
   }
+  // D-19 and C-3 before anything is built or asked.
+  const malpermesoj = kontroliModelon(provider, kontrolo);
+  if (malpermesoj.length > 0) return malpermeso(malpermesoj);
   const log = (linio: string) => medio.stderr(`${provider.redact(linio)}\n`);
 
   let preparo: Preparo | undefined;
   try {
     const modelo = medio.modelo();
     const katalogo = legiKatalogon();
-    preparo = await medio.preparo({ provider, out: opcioj.out, ledger, log });
+    preparo = await medio.preparo({
+      provider,
+      out: opcioj.out,
+      ledger,
+      log,
+      ...(kontrolo === undefined ? {} : { kontrolo }),
+    });
     log(`Messung „ganzer Ablauf“ mit ${provider.toString()} auf ${medio.commit()}`);
     const rezulto = await kuriAblaufon(opcioj, {
       kuruEkranojn: preparo.kuruEkranojn,
       kiModelo: provider.toString(),
+      ...(kontrolo === undefined ? {} : { kontrolo }),
       kuraDeps: preparo.kuraDeps,
       taksiloPor: (tasko) => taksiloPorMezuro({ modelo, katalogo, tasko }),
       modelo,

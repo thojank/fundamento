@@ -3,12 +3,14 @@
 // what no longer fits stands in `rest` and comes with one follow-up call. Without `fields` get_ero
 // answers as before (guarded byte by byte in packages/mcp/src/kontrakto-038.test.ts).
 
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { LoadedEro, Modelo } from "../contracts/modelo.js";
 import type { Lingvo } from "../lingvo/tradukoj.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
-import { ERO_FIELDS, getEro, navigationOf, slotsOf } from "./eroj.js";
+import { constraintsOf, ERO_FIELDS, getEro, navigationOf, slotsOf } from "./eroj.js";
 import { getSxablono } from "./sxablonoj.js";
 
 const loaded = loadModelo(defaultModeloSource()).modelo;
@@ -21,7 +23,9 @@ const CEILING = 750;
 
 /** The four fields as the spec names them, and the order in which an answer is filled (D-28). */
 const FIELDS = ["brief", "slots", "role", "navigation"];
-const FILL_ORDER = ["brief", "role", "navigation", "slots"];
+/** Spec 038 B-3 (C-4, D-S038-37b-1): the additive fifth field, filled last. */
+const CONSTRAINTS = "constraints";
+const FILL_ORDER = ["brief", "role", "navigation", "slots", CONSTRAINTS];
 
 /** Every non-empty subset of the four fields, each in the order the spec names them. */
 function subsets(): string[][] {
@@ -61,6 +65,61 @@ function expectedTarget(entry: LoadedEro): string | undefined {
   return targets.length === 1 ? targets[0]?.name : undefined;
 }
 
+/** `key=value` and `key=a or b`: how a line names a prop (or a slot's state) and its values. */
+const pairs = (entries: Record<string, string | readonly string[]>): string =>
+  Object.entries(entries)
+    .map(([key, value]) => `${key}=${typeof value === "string" ? value : value.join(" or ")}`)
+    .join(" and ");
+
+/** A label rule judges the label (its source is the default) and blocks (check_usage's severity). */
+const blockingLabelRule = (rule: NonNullable<LoadedEro["uzo"]>["content"][number]): boolean =>
+  (rule.of ?? "slot:label") === "slot:label" &&
+  (rule.fixed ? "error" : (rule.severity ?? "error")) === "error";
+
+/**
+ * The oracle of the constraints field (Spec 038 B-3, C-4, D-S038-37b-4), read from the data on its
+ * own: one line of the Skemo's prop combinations (constraints that name props only), one of the
+ * Uzo's blocking label rules – their statements as get_ero without fields cites them (in the
+ * language asked for), grouped by their condition; absent where the data has neither.
+ */
+function expectedConstraints(
+  entry: LoadedEro,
+  lingvo?: Lingvo,
+): { props?: string; label?: string } | undefined {
+  const propNames = new Set(entry.skemo.props.map((prop) => prop.name));
+  const props = (entry.skemo.constraints ?? [])
+    .filter((constraint) =>
+      [...Object.keys(constraint.when), ...Object.keys(constraint.allowed)].every((key) =>
+        propNames.has(key),
+      ),
+    )
+    .map((constraint) => `${pairs(constraint.when)} only with ${pairs(constraint.allowed)}`);
+  const full = getEro(modelo, {
+    name: entry.ero.name,
+    ...(lingvo === undefined ? {} : { lingvo }),
+  });
+  if (!full.ok) throw new Error(`get_ero ${entry.ero.name} failed`);
+  const statements = new Map(full.output.reguloj.map((ref) => [ref.name, ref.statement]));
+  const groups = new Map<string, string[]>();
+  for (const rule of entry.uzo?.content ?? []) {
+    const statement = statements.get(rule.regulo);
+    if (!blockingLabelRule(rule) || statement === undefined) continue;
+    const condition = [
+      ...(rule.when?.goal === undefined ? [] : [pairs({ goal: rule.when.goal })]),
+      ...(rule.when?.props === undefined ? [] : [pairs(rule.when.props)]),
+    ].join(" and ");
+    groups.set(condition, [...(groups.get(condition) ?? []), statement]);
+  }
+  const label = [...groups].map(
+    ([condition, texts]) => `${condition === "" ? "" : `If ${condition}: `}${texts.join(" ")}`,
+  );
+  if (props.length === 0 && label.length === 0) return undefined;
+  return {
+    ...(props.length === 0 ? {} : { props: props.join("; ") }),
+    ...(label.length === 0 ? {} : { label: label.join(" ") }),
+  };
+}
+
 /**
  * What is wrong with one answer to one request (empty when nothing): the size, the partition of
  * the requested fields into delivered and rest, and each delivered field as §2.2 defines it.
@@ -70,6 +129,7 @@ function answerViolations(
   fields: readonly string[],
   out: Answer,
   briefOutput: Answer,
+  lingvo?: Lingvo,
 ): string[] {
   const violations: string[] = [];
   const size = tokens(out);
@@ -102,7 +162,7 @@ function answerViolations(
     }
   }
   const tail = keys.slice(delivered.has("brief") ? briefKeys.length : 1);
-  const allowedTail = ["role", "navigation", "slots", "rest"];
+  const allowedTail = ["role", "navigation", "slots", CONSTRAINTS, "rest"];
   const tailInOrder = allowedTail.filter((key) => tail.includes(key));
   if (JSON.stringify(tail) !== JSON.stringify(tailInOrder)) {
     violations.push(`keys after the brief: ${tail.join(",")}`);
@@ -127,12 +187,20 @@ function answerViolations(
       violations.push(`slot names ${Object.keys(slots).join(",")}`);
     }
   } else if ("slots" in out) violations.push("slots without being delivered");
+
+  const constraints = expectedConstraints(entry, lingvo);
+  if (delivered.has(CONSTRAINTS) && constraints !== undefined) {
+    if (JSON.stringify(out.constraints) !== JSON.stringify(constraints)) {
+      violations.push(`constraints ${JSON.stringify(out.constraints)}`);
+    }
+  } else if (CONSTRAINTS in out)
+    violations.push("constraints without data or without being delivered");
   return violations;
 }
 
 describe("get_ero with fields: shape and order (MG-3, D-31)", () => {
-  it("names the four fields the spec allows", () => {
-    expect([...ERO_FIELDS]).toEqual(FIELDS);
+  it("names the four fields the spec allows, and constraints after them (B-3, C-4)", () => {
+    expect([...ERO_FIELDS]).toEqual([...FIELDS, CONSTRAINTS]);
   });
 
   it("answers flat: the brief's keys first, then role, navigation, slots – whatever order was asked", () => {
@@ -425,14 +493,14 @@ describe("get_ero with fields: refused input (structured, never ignored)", () =>
   const ruleAndPath = (result: ReturnType<typeof getEro>) =>
     result.ok ? [] : result.issues.map(({ rule, path }) => ({ rule, path }));
 
-  it("an unknown field: ero-field-unknown at its index, the four fields allowed", () => {
+  it("an unknown field: ero-field-unknown at its index, the five fields allowed", () => {
     const result = getEro(modelo, { name: "butono", fields: ["brief", "colour", "role", "x"] });
     expect(result.ok).toBe(false);
     expect(ruleAndPath(result)).toEqual([
       { rule: "ero-field-unknown", path: "get_ero/fields/1" },
       { rule: "ero-field-unknown", path: "get_ero/fields/3" },
     ]);
-    expect(result.ok ? undefined : result.allowed).toEqual(FIELDS);
+    expect(result.ok ? undefined : result.allowed).toEqual([...FIELDS, CONSTRAINTS]);
   });
 
   it("fields together with brief: true, an empty list and a field twice are refused at fields", () => {
@@ -459,5 +527,133 @@ describe("get_ero with fields: refused input (structured, never ignored)", () =>
       ok: true,
       output: { ero: "butono", role: entryNamed("butono").skemo.a11y.role },
     });
+  });
+});
+
+// Spec 038 B-3 (AK-1, C-4, D-S038-37b-1): the allowed prop combinations and the label rule in the
+// Kurzprofil, as a fifth field only requests naming it receive; every other answer keeps its bytes.
+describe("get_ero with fields: constraints (B-3, C-4)", () => {
+  /** Every subset of the four fields with constraints added: 16 requests per Ero. */
+  const withConstraints = (): string[][] => [
+    [CONSTRAINTS],
+    ...subsets().map((fields) => [...fields, CONSTRAINTS]),
+  ];
+
+  it("fm-butono with brief, slots and constraints: the prop combination and the label rule, one line each, below 750", () => {
+    const out = answer("butono", ["brief", "slots", CONSTRAINTS]);
+    expect(out.rest).toBeUndefined();
+    const constraints = out.constraints as { props?: string; label?: string } | undefined;
+    expect(constraints?.props).toContain("intent=danger only with emphasis=high");
+    const full = getEro(modelo, { name: "butono" });
+    if (!full.ok) throw new Error("get_ero butono failed");
+    const regulo = full.output.reguloj.find((ref) => ref.name === "destructive-label-names-object");
+    expect(regulo).toBeDefined();
+    expect(constraints?.label).toContain(`If goal=destructive: ${regulo?.statement}`);
+    for (const line of [constraints?.props, constraints?.label]) expect(line).not.toContain("\n");
+    expect(constraints).toEqual(expectedConstraints(entryNamed("butono")));
+    // brief and slots as without the new field.
+    const { constraints: _constraints, ...rest } = out;
+    expect(JSON.stringify(rest)).toBe(JSON.stringify(answer("butono", ["brief", "slots"])));
+    expect(tokens(out)).toBeLessThan(CEILING);
+  });
+
+  it("is derived from the data for every Ero: Skemo constraints and label Reguloj, absent where there are none", () => {
+    const offending: string[] = [];
+    let constrained = 0;
+    for (const entry of modelo.eroj) {
+      for (const lingvo of [undefined, "de"] as const) {
+        const expected = expectedConstraints(entry, lingvo);
+        const out = answer(entry.ero.name, [CONSTRAINTS], lingvo);
+        const at = `${entry.ero.name} (${lingvo ?? "default"})`;
+        if (expected === undefined) {
+          if (JSON.stringify(out) !== JSON.stringify({ ero: entry.ero.name })) {
+            offending.push(`${at}: ${JSON.stringify(out)}`);
+          }
+          continue;
+        }
+        if (lingvo === undefined) constrained += 1;
+        if (JSON.stringify(out.constraints) !== JSON.stringify(expected)) {
+          offending.push(`${at}: ${JSON.stringify(out.constraints)}`);
+        }
+        if (JSON.stringify(constraintsOf(modelo, entry, lingvo)) !== JSON.stringify(expected)) {
+          offending.push(`${at}: constraintsOf`);
+        }
+      }
+    }
+    const withData = modelo.eroj.filter((entry) => {
+      const propNames = new Set(entry.skemo.props.map((prop) => prop.name));
+      return (
+        (entry.skemo.constraints ?? []).some((constraint) =>
+          [...Object.keys(constraint.when), ...Object.keys(constraint.allowed)].every((key) =>
+            propNames.has(key),
+          ),
+        ) || (entry.uzo?.content ?? []).some(blockingLabelRule)
+      );
+    });
+    expect(constrained).toBe(withData.length);
+    // butono, kampo and the ligilo are among them; the count follows the data.
+    expect(withData.map((entry) => entry.ero.name)).toEqual(
+      expect.arrayContaining(["butono", "kampo", "ligilo"]),
+    );
+    expect(offending).toEqual([]);
+  });
+
+  it("the label line speaks the language asked for", () => {
+    const de = answer("butono", [CONSTRAINTS], "de").constraints as { label?: string };
+    const en = answer("butono", [CONSTRAINTS]).constraints as { label?: string };
+    expect(de.label).toBeDefined();
+    expect(de.label).not.toBe(en.label);
+    expect(de).toEqual(expectedConstraints(entryNamed("butono"), "de"));
+  });
+
+  it("every Ero × every subset with constraints: below 750, delivered ∪ rest = requested, each field as defined; every rest ends with one follow-up", () => {
+    const violations: string[] = [];
+    let answers = 0;
+    for (const entry of modelo.eroj) {
+      const briefOutput = brief(entry.ero.name);
+      for (const fields of withConstraints()) {
+        answers += 1;
+        const out = answer(entry.ero.name, fields);
+        const at = `${entry.ero.name} [${fields.join(",")}]`;
+        for (const violation of answerViolations(entry, fields, out, briefOutput)) {
+          violations.push(`${at}: ${violation}`);
+        }
+        const rest = out.rest as string[] | undefined;
+        if (rest === undefined) continue;
+        const follow = answer(entry.ero.name, rest);
+        if ("rest" in follow) violations.push(`${at} → rest: ${JSON.stringify(follow.rest)}`);
+        for (const violation of answerViolations(entry, rest, follow, briefOutput)) {
+          violations.push(`${at} → [${rest.join(",")}]: ${violation}`);
+        }
+      }
+    }
+    expect(answers).toBe(modelo.eroj.length * (subsets().length + 1));
+    expect(violations).toEqual([]);
+  });
+
+  it("every answer without constraints keeps the bytes of 479c5ad4: get_ero, brief: true and the 15 subsets, in every language", () => {
+    const fixture = JSON.parse(
+      readFileSync(
+        new URL("../../test/fixtures/gvidanto/get-ero-bezug-479c5ad4.json", import.meta.url),
+        "utf8",
+      ),
+    ) as { eroj: Record<string, string> };
+    const differing: string[] = [];
+    for (const entry of modelo.eroj) {
+      const name = entry.ero.name;
+      const texts: string[] = [];
+      for (const lingvo of [undefined, "de", "en"] as const) {
+        const given = lingvo === undefined ? {} : { lingvo };
+        texts.push(JSON.stringify(getEro(modelo, { name, ...given })));
+        texts.push(JSON.stringify(getEro(modelo, { name, brief: true, ...given })));
+        for (const fields of subsets()) {
+          texts.push(JSON.stringify(getEro(modelo, { name, fields, ...given })));
+        }
+      }
+      const sha = createHash("sha256").update(texts.join("\n"), "utf8").digest("hex");
+      if (sha !== fixture.eroj[name]) differing.push(name);
+    }
+    expect(Object.keys(fixture.eroj).sort()).toEqual(modelo.eroj.map((e) => e.ero.name).sort());
+    expect(differing).toEqual([]);
   });
 });

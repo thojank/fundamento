@@ -22,12 +22,18 @@ import type {
   ChatModel,
   ChatRespondo,
   GvidantoKonekto,
+  Kontrolo,
   Marko,
   Taksado,
   Taksilo,
   ToolInfo,
 } from "@fundamento/ekranoj";
-import { TOKENOJ_EKRANO_RONDO_F, TOKENOJ_PLANO } from "@fundamento/ekranoj";
+import {
+  KONTROLA_MODELO,
+  PERMESITA_MODELO,
+  TOKENOJ_EKRANO_RONDO_F,
+  TOKENOJ_PLANO,
+} from "@fundamento/ekranoj";
 import { cssVariable } from "@fundamento/projekcioj";
 import { describe, expect, it } from "vitest";
 import type { CliContext } from "./command.js";
@@ -63,15 +69,19 @@ const VERDA: Taksado = {
 
 /** A scripted chat model: a plan for the plan request, a fragment with the planned links else. */
 class Babilo implements ChatModel {
-  readonly modelo = `mistral/${PERMESITA}`;
+  readonly modelo: string;
   readonly petoj: ChatMessage[][] = [];
   readonly #eraro: Error | undefined;
   readonly #malplena: string | undefined;
 
-  /** `malplena`: the screen whose every answer holds no markup (an empty html block). */
-  constructor(opcioj: { eraro?: Error; malplena?: string } = {}) {
+  /**
+   * `malplena`: the screen whose every answer holds no markup (an empty html block); `modelo`: the
+   * `<provider>/<model>` the double names (default the allowed one).
+   */
+  constructor(opcioj: { eraro?: Error; malplena?: string; modelo?: string } = {}) {
     this.#eraro = opcioj.eraro;
     this.#malplena = opcioj.malplena;
+    this.modelo = opcioj.modelo ?? `mistral/${PERMESITA}`;
   }
 
   async send(messages: readonly ChatMessage[]): Promise<ChatRespondo> {
@@ -119,6 +129,8 @@ const ilo = (name: string): ToolInfo => ({
 
 interface Spuro {
   chatFabrikoj: { ledger: string; provider: string }[];
+  /** The control pair each chat factory call was given (Spec 038 C-3); undefined without it. */
+  kontroloj: (Kontrolo | undefined)[];
   gvidantoj: (string | undefined)[];
   fermitaj: number;
   demandoj: string[];
@@ -136,7 +148,14 @@ function arangxo(
       : `FM_KI_ANBIETER=mistral\nFM_KI_MODELL=${PERMESITA}\nMISTRAL_API_KEY=${SXLOSILO}\n`;
   if (env !== undefined) writeFileSync(join(baseDir, ".env"), env);
   const babilo = opcioj.babilo ?? new Babilo();
-  const spuro: Spuro = { chatFabrikoj: [], gvidantoj: [], fermitaj: 0, demandoj: [], markoj: [] };
+  const spuro: Spuro = {
+    chatFabrikoj: [],
+    kontroloj: [],
+    gvidantoj: [],
+    fermitaj: 0,
+    demandoj: [],
+    markoj: [],
+  };
   const stdout: string[] = [];
   const stderr: string[] = [];
   const context: CliContext = {
@@ -161,6 +180,7 @@ function arangxo(
     },
     chat: (e) => {
       spuro.chatFabrikoj.push({ ledger: e.ledger, provider: e.provider.toString() });
+      spuro.kontroloj.push(e.kontrolo);
       // A log line that repeats the key: the command must take it out before it is printed.
       e.log(`Probe der Schwärzung: ${SXLOSILO}`);
       return babilo;
@@ -604,5 +624,255 @@ describe("fm ekranoj: the brand build names the base font (S038-19, C-5, D-S038-
     // The brand's stylesheet declares it: the frame's var() resolves to the brand's family.
     const css = readFileSync(join(dir, "css", "fundamento.css"), "utf8");
     expect(css).toMatch(new RegExp(`${atendata}\\s*:`));
+  });
+});
+
+describe("fm ekranoj: the control model exception (Spec 038 A-5, C-3, AK-6)", () => {
+  /**
+   * The .env of the run with ministral and, beside it, the OpenRouter key of the control run. The
+   * chat double logs SXLOSILO, so the key in use (OpenRouter's) is SXLOSILO; the Mistral key holds
+   * it too, so no output may contain either.
+   */
+  const MIT_OPENROUTER = `FM_KI_ANBIETER=mistral\nFM_KI_MODELL=${PERMESITA}\nMISTRAL_API_KEY=${SXLOSILO}-mistral\nOPENROUTER_API_KEY=${SXLOSILO}\n`;
+  const PARO = ["--lauf-id", "kontrolle-komuna", "--kontroll-modelo", KONTROLA_MODELO];
+
+  it("names both options in its help", () => {
+    const helpo = ekranojKomando().help ?? "";
+    expect(helpo).toContain("--lauf-id <id>");
+    expect(helpo).toContain("--kontroll-modelo <provider/model>");
+    expect(helpo).toContain(KONTROLA_MODELO);
+  });
+
+  it("refuses every other combination with exit 2 before any request, path and rule exact, no key", async () => {
+    const kazoj: [string, string | undefined, string[], string, string][] = [
+      [
+        "option without run id",
+        MIT_OPENROUTER,
+        ["--kontroll-modelo", KONTROLA_MODELO],
+        "/lauf-id",
+        "control-run-id",
+      ],
+      [
+        "prefix without option",
+        MIT_OPENROUTER,
+        ["--lauf-id", "kontrolle-x"],
+        "/kontroll-modelo",
+        "control-model-option",
+      ],
+      [
+        "other model with option",
+        MIT_OPENROUTER,
+        ["--lauf-id", "kontrolle-x", "--kontroll-modelo", "openrouter/other/model"],
+        "/kontroll-modelo",
+        "model-not-allowed",
+      ],
+      [
+        "option, plain run id",
+        MIT_OPENROUTER,
+        ["--lauf-id", "foo", "--kontroll-modelo", KONTROLA_MODELO],
+        "/lauf-id",
+        "control-run-id",
+      ],
+      [
+        "wrong prefix",
+        MIT_OPENROUTER,
+        ["--lauf-id", "kontrolle_x", "--kontroll-modelo", KONTROLA_MODELO],
+        "/lauf-id",
+        "control-run-id",
+      ],
+      [
+        "other model in the .env",
+        `FM_KI_ANBIETER=mistral\nFM_KI_MODELL=mistral-large-2512\nMISTRAL_API_KEY=${SXLOSILO}\n`,
+        [],
+        "FM_KI_MODELL",
+        "model-not-allowed",
+      ],
+      [
+        "sonnet only in the .env",
+        `FM_KI_ANBIETER=openrouter\nFM_KI_MODELL=anthropic/claude-sonnet-5.5\nOPENROUTER_API_KEY=${SXLOSILO}\n`,
+        [],
+        "FM_KI_MODELL",
+        "model-not-allowed",
+      ],
+      [
+        "sonnet only in the .env, plain run id",
+        `FM_KI_ANBIETER=openrouter\nFM_KI_MODELL=anthropic/claude-sonnet-5.5\nOPENROUTER_API_KEY=${SXLOSILO}\n`,
+        ["--lauf-id", "abnahme-komuna-l5-v1"],
+        "FM_KI_MODELL",
+        "model-not-allowed",
+      ],
+    ];
+    for (const [nomo, env, args, path, rule] of kazoj) {
+      for (const json of [true, false]) {
+        const a = arangxo({ env });
+        const run = await a.kuri([
+          FRAZO,
+          "--ekranoj",
+          "liste,detail",
+          ...args,
+          "--ja",
+          ...(json ? ["--json"] : []),
+        ]);
+        expect(run.code, nomo).toBe(2);
+        if (json) {
+          const [problemo, ...cetero] = jsonEraro(run.stdout).problemoj;
+          expect(cetero, nomo).toEqual([]);
+          expect({ path: problemo?.path, rule: problemo?.rule }, nomo).toEqual({ path, rule });
+        } else {
+          expect(run.stderr, nomo).toContain(`fm ekranoj: ${path} ${rule}: `);
+        }
+        expect(a.spuro.chatFabrikoj, nomo).toHaveLength(0);
+        expect(a.spuro.gvidantoj, nomo).toHaveLength(0);
+        expect(a.babilo.petoj, nomo).toHaveLength(0);
+        expect(`${run.stdout}${run.stderr}`, nomo).not.toContain(SXLOSILO);
+        expect(existsSync(join(a.baseDir, ".fundamento")), nomo).toBe(false);
+      }
+    }
+  });
+
+  it("passes the guard with the pair and stops at the missing --ja without a terminal (nothing started)", async () => {
+    const a = arangxo({ env: MIT_OPENROUTER, tty: false });
+    const run = await a.kuri([FRAZO, "--ekranoj", "liste,detail", ...PARO, "--json"]);
+    expect(run.code).toBe(2);
+    const dok = jsonEraro(run.stdout);
+    expect(dok.problemoj.map(({ path, rule }) => ({ path, rule }))).toEqual([
+      { path: "/ja", rule: "confirmation-missing" },
+    ]);
+    expect(dok.takso?.satz).toContain("Schätzung: 2 Screens × 3 Runden");
+    expect(a.spuro.chatFabrikoj).toHaveLength(0);
+    expect(a.babilo.petoj).toHaveLength(0);
+    expect(`${run.stdout}${run.stderr}`).not.toContain(SXLOSILO);
+  });
+
+  it("builds an openrouter provider from the option, the key from the .env, and hands the pair on", async () => {
+    const a = arangxo({ env: MIT_OPENROUTER, babilo: new Babilo({ modelo: KONTROLA_MODELO }) });
+    const run = await a.kuri([FRAZO, "--ekranoj", "liste,detail", ...PARO, "--ja", "--json"]);
+    expect(run.code, run.stderr).toBe(0);
+    expect(a.spuro.chatFabrikoj.map((f) => f.provider)).toEqual([KONTROLA_MODELO]);
+    expect(a.spuro.kontroloj).toEqual([
+      { laufId: "kontrolle-komuna", kontrolModelo: KONTROLA_MODELO },
+    ]);
+    expect(a.babilo.petoj.length).toBeGreaterThan(0);
+    expect(`${run.stdout}${run.stderr}`).not.toContain(SXLOSILO);
+  });
+
+  it("keeps the run of ministral as it was: no pair handed on, a plain run id allowed", async () => {
+    const a = arangxo();
+    const run = await a.kuri([FRAZO, "--ekranoj", "liste,detail", "--ja", "--json"]);
+    expect(run.code, run.stderr).toBe(0);
+    expect(a.spuro.chatFabrikoj.map((f) => f.provider)).toEqual([PERMESITA_MODELO]);
+    expect(a.spuro.kontroloj).toEqual([undefined]);
+    const b = arangxo();
+    const kun = await b.kuri([
+      FRAZO,
+      "--ekranoj",
+      "liste,detail",
+      "--lauf-id",
+      "abnahme-komuna-l5-v1",
+      "--ja",
+      "--json",
+    ]);
+    expect(kun.code, kun.stderr).toBe(0);
+    expect(b.spuro.kontroloj).toEqual([{ laufId: "abnahme-komuna-l5-v1" }]);
+  });
+
+  it("names the missing OpenRouter key by its variable only, exit 2 before any request", async () => {
+    const a = arangxo();
+    const run = await a.kuri([FRAZO, "--ekranoj", "liste,detail", ...PARO, "--ja", "--json"]);
+    expect(run.code).toBe(2);
+    expect(jsonEraro(run.stdout).problemoj).toContainEqual(
+      expect.objectContaining({ path: "/env", rule: "env-invalid" }),
+    );
+    expect(run.stdout).toContain("OPENROUTER_API_KEY");
+    expect(`${run.stdout}${run.stderr}`).not.toContain(SXLOSILO);
+    expect(a.spuro.chatFabrikoj).toHaveLength(0);
+  });
+});
+
+describe("fm ekranoj: the shared guard matrix of both CLIs (Spec 038 C-3, S038-37t)", () => {
+  /** The table `nordstelo --art ablauf` and `gardo.ts` are tested against, too. */
+  const matrico = JSON.parse(
+    readFileSync(
+      new URL("../../ekranoj/test/fixtures/c3-gardo-matrico/kazoj.json", import.meta.url),
+      "utf8",
+    ),
+  ) as {
+    env: Record<string, Record<string, string>>;
+    kazoj: {
+      nomo: string;
+      env: string;
+      args: string[];
+      atendo: { path: string; rule: string } | { provider: string; kontrolo: Kontrolo | null };
+    }[];
+  };
+  /**
+   * The .env of a case: its model, the Mistral key and the OpenRouter key (both invented, both
+   * holding SXLOSILO). The key of the provider in use is SXLOSILO itself – the one the chat double
+   * logs, so the command must take it out.
+   */
+  const envDe = (nomo: string, aktiva = "mistral") =>
+    `${Object.entries(matrico.env[nomo] ?? {})
+      .map(([k, v]) => `${k}=${v}\n`)
+      .join(
+        "",
+      )}MISTRAL_API_KEY=${SXLOSILO}${aktiva === "mistral" ? "" : "-mistral"}\nOPENROUTER_API_KEY=${SXLOSILO}${aktiva === "openrouter" ? "" : "-or"}\n`;
+
+  it("refuses each refused case of the table with exit 2, exactly its path and rule, before any request, no key", async () => {
+    const malsamaj: string[] = [];
+    for (const kazo of matrico.kazoj) {
+      if (!("rule" in kazo.atendo)) continue;
+      for (const json of [true, false]) {
+        const a = arangxo({ env: envDe(kazo.env) });
+        const run = await a.kuri([
+          FRAZO,
+          "--ekranoj",
+          "liste,detail",
+          ...kazo.args,
+          "--ja",
+          ...(json ? ["--json"] : []),
+        ]);
+        const nomo = `${kazo.nomo}${json ? " --json" : ""}`;
+        if (run.code !== 2) malsamaj.push(`${nomo}: exit ${run.code}`);
+        const akirita = json
+          ? jsonEraro(run.stdout)
+              .problemoj.map((p) => `${p.path} ${p.rule}`)
+              .join("; ")
+          : (/fm ekranoj: (\S+ \S+): /.exec(run.stderr)?.[1] ?? run.stderr);
+        if (akirita !== `${kazo.atendo.path} ${kazo.atendo.rule}`)
+          malsamaj.push(`${nomo}: ${akirita}`);
+        if (a.spuro.chatFabrikoj.length + a.babilo.petoj.length + a.spuro.gvidantoj.length > 0)
+          malsamaj.push(`${nomo}: started`);
+        if (`${run.stdout}${run.stderr}`.includes(SXLOSILO)) malsamaj.push(`${nomo}: key`);
+      }
+    }
+    expect(malsamaj).toEqual([]);
+  });
+
+  it("runs each allowed case of the table with its provider and hands its pair on", async () => {
+    const malsamaj: string[] = [];
+    for (const kazo of matrico.kazoj) {
+      if (!("provider" in kazo.atendo)) continue;
+      const a = arangxo({
+        env: envDe(kazo.env, kazo.atendo.provider.split("/")[0]),
+        babilo: new Babilo({ modelo: kazo.atendo.provider }),
+      });
+      const run = await a.kuri([
+        FRAZO,
+        "--ekranoj",
+        "liste,detail",
+        ...kazo.args,
+        "--ja",
+        "--json",
+      ]);
+      if (run.code !== 0) malsamaj.push(`${kazo.nomo}: exit ${run.code} ${run.stderr}`);
+      const provider = a.spuro.chatFabrikoj.map((f) => f.provider).join(",");
+      if (provider !== kazo.atendo.provider) malsamaj.push(`${kazo.nomo}: ${provider}`);
+      const kontroloj = JSON.stringify(a.spuro.kontroloj.map((k) => k ?? null));
+      if (kontroloj !== JSON.stringify([kazo.atendo.kontrolo]))
+        malsamaj.push(`${kazo.nomo}: ${kontroloj}`);
+      if (a.babilo.petoj.length === 0) malsamaj.push(`${kazo.nomo}: no request`);
+      if (`${run.stdout}${run.stderr}`.includes(SXLOSILO)) malsamaj.push(`${kazo.nomo}: key`);
+    }
+    expect(malsamaj).toEqual([]);
   });
 });

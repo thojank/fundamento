@@ -221,7 +221,7 @@ describe("get_ero with fields (MG-3, MG-4; D-31)", () => {
     expect(result.isError).toBe(true);
     const envelope = result.structuredContent as Envelope;
     expect(rulesAndPaths(envelope)).toEqual([["ero-field-unknown", "get_ero/fields/1"]]);
-    expect(envelope.allowed).toEqual(["brief", "slots", "role", "navigation"]);
+    expect(envelope.allowed).toEqual(["brief", "slots", "role", "navigation", "constraints"]);
   });
 
   it("refuses an empty list and a repeated field at the schema", async () => {
@@ -241,6 +241,32 @@ describe("get_ero with fields (MG-3, MG-4; D-31)", () => {
     expect(rulesAndPaths(result.structuredContent as Envelope)).toEqual([
       ["ero-fields-invalid", "get_ero/fields"],
     ]);
+  });
+
+  // Spec 038 B-3 (C-4, D-S038-37b-1): the additive field constraints, accepted by the input schema
+  // and answered within the output schema.
+  it("answers fields with constraints as getEro does, within the output schema, below the ceiling", async () => {
+    const tool = (await client.listTools()).tools.find((entry) => entry.name === "get_ero");
+    const properties = (tool?.inputSchema.properties ?? {}) as Record<
+      string,
+      { description?: string }
+    >;
+    const fields = properties.fields;
+    expect(fields?.description).toContain("constraints");
+    for (const input of [
+      { name: "butono", fields: ["brief", "slots", "constraints"] },
+      { name: "butono", fields: ["constraints"], lingvo: "de" },
+    ]) {
+      const result = await call(client, "get_ero", input);
+      expect(result.isError ?? false, JSON.stringify(input)).toBe(false);
+      expect(result.structuredContent).toEqual(outputOf(getEro(served.modelo, input as never)));
+      const answer = result.structuredContent as {
+        constraints?: { props?: string };
+        rest?: unknown;
+      };
+      expect(answer.rest).toBeUndefined();
+      expect(answer.constraints?.props).toContain("intent=danger");
+    }
   });
 
   it("takes fields by ID as by name", async () => {

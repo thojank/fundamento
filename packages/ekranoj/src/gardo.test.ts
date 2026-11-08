@@ -1,5 +1,16 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { gardiModelon, kontroliModelon, MalpermesitaModelo, PERMESITA_MODELO } from "./index.js";
+import {
+  agordojPorKontrolo,
+  gardiModelon,
+  KONTROLA_MODELO,
+  KONTROLA_PREFIKSO,
+  type Kontrolo,
+  kontroliKontrolon,
+  kontroliModelon,
+  MalpermesitaModelo,
+  PERMESITA_MODELO,
+} from "./index.js";
 
 /** Stands for metiejo's `Provider`: `toString()` is `<provider>/<model>`, the key stays inside. */
 const provider = (name: string, model: string) => ({
@@ -40,5 +51,251 @@ describe("model guard (D-19)", () => {
     expect(problemo.message).toContain(PERMESITA_MODELO);
     expect(JSON.stringify(problemo)).not.toContain(refused.key);
     expect(String(caught)).not.toContain(refused.key);
+  });
+});
+
+describe("the control model exception (Spec 038 A-5, C-3, AK-6)", () => {
+  const ministral = provider("mistral", "ministral-14b-2512");
+  const sonnet = provider("openrouter", "anthropic/claude-sonnet-5.5");
+  const kerno = (problemoj: readonly { path: string; rule: string }[]) =>
+    problemoj.map(({ path, rule }) => ({ path, rule }));
+
+  it("names the control model and the run id prefix exactly; the one model stays as it was", () => {
+    expect(KONTROLA_MODELO).toBe("openrouter/anthropic/claude-sonnet-5.5");
+    expect(KONTROLA_PREFIKSO).toBe("kontrolle-");
+    expect(PERMESITA_MODELO).toBe("mistral/ministral-14b-2512");
+  });
+
+  it("allows (a) ministral without the option and with any run id that is no control run", () => {
+    for (const kontrolo of [undefined, {}, { laufId: "abnahme-komuna-l5-v1" }, { laufId: "x" }]) {
+      expect(kontroliModelon(ministral, kontrolo), JSON.stringify(kontrolo)).toEqual([]);
+      expect(() => gardiModelon(ministral, kontrolo)).not.toThrow();
+    }
+    expect(kontroliKontrolon({})).toEqual([]);
+    expect(kontroliKontrolon()).toEqual([]);
+  });
+
+  it("allows (b) the control model with a run id kontrolle-… and the option naming it exactly", () => {
+    const kontrolo: Kontrolo = { laufId: "kontrolle-komuna", kontrolModelo: KONTROLA_MODELO };
+    expect(kontroliKontrolon(kontrolo)).toEqual([]);
+    expect(kontroliModelon(sonnet, kontrolo)).toEqual([]);
+    expect(() => gardiModelon(sonnet, kontrolo)).not.toThrow();
+  });
+
+  it("refuses every other combination with one structured problem: path and rule exact", () => {
+    const kazoj: [string, ReturnType<typeof provider>, Kontrolo | undefined, string, string][] = [
+      // The option without the prefix: a wrong prefix, another id, no id at all.
+      [
+        "wrong prefix",
+        sonnet,
+        { laufId: "kontrolle_komuna", kontrolModelo: KONTROLA_MODELO },
+        "/lauf-id",
+        "control-run-id",
+      ],
+      [
+        "prefix not at the start",
+        sonnet,
+        { laufId: "x-kontrolle-komuna", kontrolModelo: KONTROLA_MODELO },
+        "/lauf-id",
+        "control-run-id",
+      ],
+      [
+        "other run id",
+        sonnet,
+        { laufId: "foo", kontrolModelo: KONTROLA_MODELO },
+        "/lauf-id",
+        "control-run-id",
+      ],
+      [
+        "option without run id",
+        sonnet,
+        { kontrolModelo: KONTROLA_MODELO },
+        "/lauf-id",
+        "control-run-id",
+      ],
+      // The prefix without the option, whatever the .env says.
+      [
+        "prefix without option (ministral)",
+        ministral,
+        { laufId: "kontrolle-x" },
+        "/kontroll-modelo",
+        "control-model-option",
+      ],
+      [
+        "prefix without option (sonnet in .env)",
+        sonnet,
+        { laufId: "kontrolle-x" },
+        "/kontroll-modelo",
+        "control-model-option",
+      ],
+      // Another model with the option: with and without the prefix.
+      [
+        "other model with option and prefix",
+        provider("openrouter", "other/model"),
+        { laufId: "kontrolle-x", kontrolModelo: "openrouter/other/model" },
+        "/kontroll-modelo",
+        "model-not-allowed",
+      ],
+      [
+        "other model with option, no prefix",
+        provider("openrouter", "other/model"),
+        { laufId: "foo", kontrolModelo: "openrouter/other/model" },
+        "/kontroll-modelo",
+        "model-not-allowed",
+      ],
+      [
+        "ministral as the option",
+        ministral,
+        { laufId: "kontrolle-x", kontrolModelo: PERMESITA_MODELO },
+        "/kontroll-modelo",
+        "model-not-allowed",
+      ],
+      [
+        "case differs",
+        sonnet,
+        { laufId: "kontrolle-x", kontrolModelo: "openrouter/anthropic/Claude-Sonnet-5.5" },
+        "/kontroll-modelo",
+        "model-not-allowed",
+      ],
+      // The pair is right, but the provider is not the one the option names.
+      [
+        "pair right, provider from the .env",
+        ministral,
+        { laufId: "kontrolle-x", kontrolModelo: KONTROLA_MODELO },
+        "/kontroll-modelo",
+        "model-not-allowed",
+      ],
+      // Another model without the option.
+      [
+        "other model, no option",
+        provider("mistral", "mistral-large-2512"),
+        { laufId: "foo" },
+        "FM_KI_MODELL",
+        "model-not-allowed",
+      ],
+      // Sonnet only in the .env, without the option (with or without a plain run id).
+      ["sonnet only in .env", sonnet, undefined, "FM_KI_MODELL", "model-not-allowed"],
+      [
+        "sonnet only in .env, plain id",
+        sonnet,
+        { laufId: "abnahme-komuna-l5-v1" },
+        "FM_KI_MODELL",
+        "model-not-allowed",
+      ],
+    ];
+    for (const [nomo, modelo, kontrolo, path, rule] of kazoj) {
+      const problemoj = kontroliModelon(modelo, kontrolo);
+      expect(kerno(problemoj), nomo).toEqual([{ path, rule }]);
+      const [problemo] = problemoj;
+      expect(problemo?.message.length, nomo).toBeGreaterThan(0);
+      expect(problemo?.suggestion.length, nomo).toBeGreaterThan(0);
+      expect(JSON.stringify(problemoj), nomo).not.toContain(modelo.key);
+      expect(() => gardiModelon(modelo, kontrolo), nomo).toThrow(MalpermesitaModelo);
+    }
+  });
+
+  it("checks the pair alone, without a provider, with the same rules", () => {
+    expect(kerno(kontroliKontrolon({ laufId: "kontrolle-x" }))).toEqual([
+      { path: "/kontroll-modelo", rule: "control-model-option" },
+    ]);
+    expect(kerno(kontroliKontrolon({ laufId: "foo", kontrolModelo: KONTROLA_MODELO }))).toEqual([
+      { path: "/lauf-id", rule: "control-run-id" },
+    ]);
+    expect(
+      kerno(kontroliKontrolon({ laufId: "kontrolle-x", kontrolModelo: "openrouter/other/model" })),
+    ).toEqual([{ path: "/kontroll-modelo", rule: "model-not-allowed" }]);
+    expect(kerno(kontroliKontrolon({ laufId: "foo" }))).toEqual([]);
+  });
+
+  it("points the suggestion of Sonnet in the .env at the two options", () => {
+    const [problemo] = kontroliModelon(sonnet);
+    expect(problemo?.message).toContain(KONTROLA_MODELO);
+    expect(problemo?.suggestion).toContain("--lauf-id kontrolle-");
+    expect(problemo?.suggestion).toContain(`--kontroll-modelo ${KONTROLA_MODELO}`);
+  });
+
+  it("builds the settings of the control provider from the option, the key stays the .env's", () => {
+    const agordoj = {
+      FM_KI_ANBIETER: "mistral",
+      FM_KI_MODELL: "ministral-14b-2512",
+      MISTRAL_API_KEY: "m-geheim",
+      OPENROUTER_API_KEY: "o-geheim",
+    };
+    expect(agordojPorKontrolo(agordoj, KONTROLA_MODELO)).toEqual({
+      ...agordoj,
+      FM_KI_ANBIETER: "openrouter",
+      FM_KI_MODELL: "anthropic/claude-sonnet-5.5",
+    });
+    // The .env itself is not changed.
+    expect(agordoj.FM_KI_ANBIETER).toBe("mistral");
+  });
+});
+
+describe("the shared guard matrix of both CLIs (Spec 038 C-3, S038-37t)", () => {
+  /** The table `fm ekranoj` and `nordstelo --art ablauf` are tested against, too. */
+  const matrico = JSON.parse(
+    readFileSync(new URL("../test/fixtures/c3-gardo-matrico/kazoj.json", import.meta.url), "utf8"),
+  ) as {
+    env: Record<string, { FM_KI_ANBIETER: string; FM_KI_MODELL: string }>;
+    kazoj: {
+      nomo: string;
+      env: string;
+      args: string[];
+      atendo: { path: string; rule: string } | { provider: string; kontrolo: Kontrolo | null };
+    }[];
+  };
+
+  /** What both CLIs do: the pair from the options, the pair alone, then the provider built. */
+  function gardo(kazo: (typeof matrico.kazoj)[number]) {
+    const valoro = (nomo: string) => {
+      const index = kazo.args.indexOf(nomo);
+      return index < 0 ? undefined : kazo.args[index + 1];
+    };
+    const laufId = valoro("--lauf-id");
+    const kontrolModelo = valoro("--kontroll-modelo");
+    const kontrolo: Kontrolo | undefined =
+      laufId === undefined && kontrolModelo === undefined
+        ? undefined
+        : {
+            ...(laufId === undefined ? {} : { laufId }),
+            ...(kontrolModelo === undefined ? {} : { kontrolModelo }),
+          };
+    const paro = kontroliKontrolon(kontrolo);
+    if (paro.length > 0) return { problemoj: paro, kontrolo };
+    const env = matrico.env[kazo.env];
+    const nomo = kontrolModelo ?? `${env?.FM_KI_ANBIETER}/${env?.FM_KI_MODELL}`;
+    return { problemoj: kontroliModelon({ toString: () => nomo }, kontrolo), kontrolo, nomo };
+  }
+
+  it("covers every rule of C-3 and both allowed forms", () => {
+    const reguloj = new Set(
+      matrico.kazoj.flatMap((kazo) => ("rule" in kazo.atendo ? [kazo.atendo.rule] : [])),
+    );
+    expect([...reguloj].sort()).toEqual([
+      "control-model-option",
+      "control-run-id",
+      "model-not-allowed",
+    ]);
+    expect(
+      matrico.kazoj.flatMap((kazo) => ("provider" in kazo.atendo ? [kazo.atendo.provider] : [])),
+    ).toEqual(expect.arrayContaining([KONTROLA_MODELO, PERMESITA_MODELO]));
+  });
+
+  it("gives every case of the table exactly its path and rule, or lets it run with its provider", () => {
+    const malsamaj: string[] = [];
+    for (const kazo of matrico.kazoj) {
+      const { problemoj, kontrolo, nomo } = gardo(kazo);
+      if ("rule" in kazo.atendo) {
+        const akiritaj = problemoj.map(({ path, rule }) => `${path} ${rule}`).join("; ");
+        if (akiritaj !== `${kazo.atendo.path} ${kazo.atendo.rule}`)
+          malsamaj.push(`${kazo.nomo}: ${akiritaj}`);
+      } else {
+        if (problemoj.length > 0) malsamaj.push(`${kazo.nomo}: ${problemoj[0]?.rule}`);
+        if (nomo !== kazo.atendo.provider) malsamaj.push(`${kazo.nomo}: ${nomo}`);
+        if (JSON.stringify(kontrolo ?? null) !== JSON.stringify(kazo.atendo.kontrolo))
+          malsamaj.push(`${kazo.nomo}: ${JSON.stringify(kontrolo)}`);
+      }
+    }
+    expect(malsamaj).toEqual([]);
   });
 });

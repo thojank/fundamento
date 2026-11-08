@@ -20,7 +20,7 @@
       "enum": ["en", "de"]
     },
     "fields": {
-      "description": "Only these parts of the Ero (Spec 038 MG-3, MG-4): brief (the brief answer), slots (each slot with what it lets in, default, required, how many), role (the element's ARIA role) and navigation (the prop that holds a link's target; absent for an Ero that is no link). The answer stays under the measured size ceiling: what does not fit is named in rest, ask for it with fields set to rest. Not together with brief: true.",
+      "description": "Only these parts of the Ero (Spec 038 MG-3, MG-4): brief (the brief answer), slots (each slot with what it lets in, default, required, how many), role (the element's ARIA role) and navigation (the prop that holds a link's target; absent for an Ero that is no link). The answer stays under the measured size ceiling: what does not fit is named in rest, ask for it with fields set to rest. Not together with brief: true. Since Spec 038 B-3 also constraints (the allowed prop combinations of the Skemo, e.g. intent=danger only with emphasis=high, and the statements of the blocking label rules, one line each; absent for an Ero without them).",
       "type": "array",
       "items": {
         "type": "string"

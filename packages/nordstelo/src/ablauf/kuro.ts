@@ -9,14 +9,20 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import {
+  anbieterfehlerojDe,
   type ChatModel,
   type EkranojDeps,
+  type EkranojEligo,
   type EkranojRezulto,
   gardiModelon,
+  type Kontrolo,
   type KuruEkranojn,
   MalpermesitaModelo,
   type Peno,
   type Problemo,
+  purigiTekston,
+  type Restanta,
+  respondoTeksto,
   type Taksilo,
   taksoPorEnigo,
   type Varianto,
@@ -68,6 +74,11 @@ export interface AblaufDeps {
   kuruEkranojn: KuruEkranojn;
   /** `<provider>/<model>` of the chat model (D-19, price). */
   kiModelo: string;
+  /**
+   * The control pair of the call (Spec 038 A-5, C-3): the guard accepts `KONTROLA_MODELO` only
+   * with a run id `kontrolle-…` and the option; every ekranoj run gets it, too. Absent otherwise.
+   */
+  kontrolo?: Kontrolo;
   /** Dependencies of the run of a flow, a variant and a repetition. Tools are dropped for 0. */
   kuraDeps(e: {
     tasko: AblaufTasko;
@@ -279,10 +290,68 @@ export function penojDe(rezulto: EkranojRezulto): Pick<KuroRekordo, "penoj" | "p
   return Object.keys(penoj).length === 0 ? {} : { penoj, penoPlano: plano };
 }
 
+/**
+ * The deviations left after the last round per screen slug and rule (Spec 038 A-2, C-2): the
+ * `restantaj` of ekranoj counted, unbuilt screens under `nicht-gebaut`; Σ = their number. Slugs
+ * and rules sorted; `{}` when nothing is left.
+ */
+export function restantajLauxReguloDe(
+  restantaj: readonly Restanta[],
+): Record<string, Record<string, number>> {
+  const kalkulo = new Map<string, Map<string, number>>();
+  for (const { ekrano, regulo } of restantaj) {
+    const reguloj = kalkulo.get(ekrano) ?? new Map<string, number>();
+    reguloj.set(regulo, (reguloj.get(regulo) ?? 0) + 1);
+    kalkulo.set(ekrano, reguloj);
+  }
+  const ordigitaj = (keys: Iterable<string>) => [...keys].sort();
+  const own: Record<string, Record<string, number>> = {};
+  for (const ekrano of ordigitaj(kalkulo.keys())) {
+    const reguloj = kalkulo.get(ekrano) ?? new Map<string, number>();
+    own[ekrano] = Object.fromEntries(
+      ordigitaj(reguloj.keys()).map((regulo) => [regulo, reguloj.get(regulo) ?? 0]),
+    );
+  }
+  return own;
+}
+
+/** `anbieterfehleroj` of a result for `kuro.json` (C-1): cleaned, absent when there are none. */
+function anbieterfehlerojKampo(rezulto: EkranojRezulto): Pick<KuroRekordo, "anbieterfehleroj"> {
+  const anbieterfehleroj = anbieterfehlerojDe(rezulto);
+  return anbieterfehleroj === undefined ? {} : { anbieterfehleroj };
+}
+
+/** `malplenajPagxoj` of a result for `kuro.json` (B-4, D-S038-37c-5): absent when there are none. */
+function malplenajPagxojKampo(rezulto: EkranojRezulto): Pick<KuroRekordo, "malplenajPagxoj"> {
+  const malplenajPagxoj = rezulto.malplenajPagxoj ?? [];
+  return malplenajPagxoj.length === 0 ? {} : { malplenajPagxoj };
+}
+
+/**
+ * The seam of a run (F-S038-37t-1): the raw answers ekranoj hands over (B-4 empty pages, S037-10
+ * builds without markup) go to `rondoj/<n>/<slug>.respondo.txt` of the run folder, the layout of
+ * `fm ekranoj`, cleaned once more. A caller's eligo with its own `respondo` is kept as it is; one
+ * without gets only `respondo` added (no `komenco`, so the run builds no brand into its folder).
+ */
+function eligoDe(own: string, eligo: EkranojEligo | undefined): EkranojEligo {
+  if (eligo?.respondo !== undefined) return eligo;
+  return {
+    ...eligo,
+    respondo(e) {
+      const rondoDir = join(own, "rondoj", String(e.rondo));
+      mkdirSync(rondoDir, { recursive: true });
+      writeFileSync(
+        join(rondoDir, `${e.slug}.respondo.txt`),
+        purigiTekston(respondoTeksto(e.respondoj, e.kialo)),
+      );
+    },
+  };
+}
+
 /** The whole measurement: every run, its records, then the report. */
 export async function kuriAblaufon(opcioj: AblaufOpcioj, deps: AblaufDeps): Promise<AblaufRezulto> {
-  // D-19: another model is refused before anything else happens – no folder, no request.
-  gardiModelon({ toString: () => deps.kiModelo });
+  // D-19 and C-3: another model is refused before anything else happens – no folder, no request.
+  gardiModelon({ toString: () => deps.kiModelo }, deps.kontrolo);
   const problemoj = validiAblaufon(opcioj);
   if (problemoj.length > 0) throw new NevalidaAblauf(problemoj);
 
@@ -382,6 +451,7 @@ export async function kuriAblaufon(opcioj: AblaufOpcioj, deps: AblaufDeps): Prom
         ...(varianto === "F" && tools !== undefined ? { ...senIloj, tools } : senIloj),
         chat: kunKomunaBudgxeto(kuraj.chat, komuna),
         taksilo: deps.taksiloPor(tasko),
+        eligo: eligoDe(own, kuraj.eligo),
       };
       deps.log(`${tasko.slug} ${varianto}-${ripeto}: Start.`);
       const jamEnigo = komuna.input;
@@ -396,6 +466,7 @@ export async function kuriAblaufon(opcioj: AblaufOpcioj, deps: AblaufDeps): Prom
             plano: planoDe(tasko, lingvo),
             varianto,
             lingvo,
+            ...(deps.kontrolo === undefined ? {} : { kontrolo: deps.kontrolo }),
           },
           ekranojDeps,
         );
@@ -419,18 +490,26 @@ export async function kuriAblaufon(opcioj: AblaufOpcioj, deps: AblaufDeps): Prom
               }),
           stato: statoDe(rezulto),
           restantaj: rezulto.restantaj.length,
+          // Spec 038 A-2 (C-2): the same list per slug and rule; Σ = restantaj.
+          restantajLauxRegulo: restantajLauxReguloDe(rezulto.restantaj),
           notoj: rezulto.notoj ?? [],
           sxargo: { antaux: antaux.sxargo, post: post.sxargo, kernoj: post.kernoj },
+          // Spec 038 A-1 (C-1): the caught provider errors, cleaned once more; absent when none.
+          ...anbieterfehlerojKampo(rezulto),
+          // Spec 038 B-4 (AK-2): the screen-rounds with an empty page; absent when none.
+          ...malplenajPagxojKampo(rezulto),
         };
       } catch (error) {
         if (error instanceof MalpermesitaModelo) throw error;
         const post = deps.sxargo();
+        const anbieterfehleroj = anbieterfehlerojDe(error);
         rekordo = {
           tasko: tasko.slug,
           varianto,
           ripeto,
           haltigo: "eraro",
-          eraro: mesagxoDe(error),
+          // A-1: a provider message may hold parts of the request – cleaned before it is written.
+          eraro: purigiTekston(mesagxoDe(error)),
           faritajRondoj: 0,
           // What the run used before the error still counts.
           peno: {
@@ -442,6 +521,7 @@ export async function kuriAblaufon(opcioj: AblaufOpcioj, deps: AblaufDeps): Prom
           restantaj: 0,
           notoj: [],
           sxargo: { antaux: antaux.sxargo, post: post.sxargo, kernoj: post.kernoj },
+          ...(anbieterfehleroj === undefined ? {} : { anbieterfehleroj }),
         };
         deps.log(`${tasko.slug} ${varianto}-${ripeto}: Fehler: ${rekordo.eraro}`);
       }

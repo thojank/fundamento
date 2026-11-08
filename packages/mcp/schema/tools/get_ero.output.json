@@ -733,6 +733,10 @@
           "description": "With fields (Spec 038 MG-3): every slot with what it lets in.",
           "$ref": "urn:fundamento:schema:mcp:common#/$defs/EroSlots"
         },
+        "constraints": {
+          "description": "With fields (Spec 038 B-3): the allowed prop combinations and the blocking label rules, one line each; absent for an Ero without them.",
+          "$ref": "urn:fundamento:schema:mcp:common#/$defs/EroConstraints"
+        },
         "rest": {
           "description": "With fields (Spec 038, D-31): the requested parts that did not fit under the size ceiling, in fill order; ask for them with fields set to rest.",
           "type": "array",
@@ -746,7 +750,7 @@
       "additionalProperties": false
     },
     {
-      "description": "The parts asked for with fields, without the brief (Spec 038 MG-3, MG-4; D-31): the Ero, then role, navigation, slots as asked, and rest for what did not fit.",
+      "description": "The parts asked for with fields, without the brief (Spec 038 MG-3, MG-4; D-31): the Ero, then role, navigation, slots, constraints as asked, and rest for what did not fit.",
       "type": "object",
       "properties": {
         "ero": {
@@ -764,6 +768,10 @@
         "slots": {
           "description": "With fields (Spec 038 MG-3): every slot with what it lets in.",
           "$ref": "urn:fundamento:schema:mcp:common#/$defs/EroSlots"
+        },
+        "constraints": {
+          "description": "With fields (Spec 038 B-3): the allowed prop combinations and the blocking label rules, one line each; absent for an Ero without them.",
+          "$ref": "urn:fundamento:schema:mcp:common#/$defs/EroConstraints"
         },
         "rest": {
           "description": "With fields (Spec 038, D-31): the requested parts that did not fit under the size ceiling, in fill order; ask for them with fields set to rest.",

@@ -16,6 +16,8 @@ Bezug 2.5 = entfällt, ersetzt durch ‚vorher' in Lauf 4 auf Bezug-SHA
 
 **Lauf:** 4 von 4 (Teil 4, PR D „Spec 038 – Messung“) · Basis `main` = `43010159` (Merge #154; enthält #151 = `636e7119`, #152 = `e5057afc`, #154 = PR C mit Kopf `c9ecd6c2`) · Branch `261107-spec-038-lauf-4-messung-a4db73` (PR-Branch = Worktree-Branch, wie D-111) · Datum 2026-11-07 · Bezug vorher unverändert `e4873c57` (`/tmp/s038-bezug`) · **Stand (S038-23):** Nachtrag Lauf 3 (V-1) erledigt, Gerüst Lauf 4 angelegt, Werkzeuge `$W` auf Lauf 4 umgestellt; F-1 bis F-4, 4.1 bis 4.5, 4.2a, T-1 und T-2 offen. Gemessen wird auf dem Code-Kopf D (= Grün-Commit S038-27, E-2) und auf dem Bezug. **Stand (S038-30, vor dem Push):** F-1 bis F-4, 4.2a, 4.3, 4.4, T-1 und T-2 erledigt; 4.1 und 4.2 teilweise (Scheiben verbraucht, Befehle und Schätzungen im Abschnitt „Messung 4“); gemessen auf Code-Kopf D `bfe19023` und dem Bezug `e4873c57` (vier Läufe, keiner gestört, Ledger Spec 038 0,876548 $). Grün: 0 Screens im Ablauf nachher, Abnahme komuna 0/2 wie Lauf 3. `pnpm check` lief einmal: rot nur durch eine Hook-Zeitgrenze in eroj unter der Last des Laufs selbst, der rote Check einzeln grün (Befund F-S038-30-1). Prüfungen sauber, `main` unverändert `43010159`, keine offenen PRs. Push, PR D, CI-Auswertung und Bericht folgen ohne Commit; das CI-Ergebnis trägt der Maintainer nach (es gibt keinen Lauf 5).
 
+**Lauf:** 5 (Teil A–E, PR E „Spec 038 – Korrekturen“, PR F „Spec 038 – Messung“, „kugelsicher“) · Basis `main` = `76158a0d` (Merge #156; enthält #151 = `636e7119`, #152 = `e5057afc`, #154 = `43010159`, #155 = PR D mit Kopf `7f4b65d7`, gemergt als `6a3e55e3`) · Branch `261107-spec-038-kugelsicher-planen-1b0fb8` (Worktree-Branch; PR E und PR F als Commit-Bereiche, D-251) · Datum 2026-11-07 · Bezug vorher `e4873c57` (`/tmp/s038-bezug`), Bezug′ = `e4873c57` + nur A-1 (`/tmp/s038-bezug-prim`, D-248, S038-38) · Ledger Lauf 5 getrennt, Kappe 5,00 $ (D-243) · **Stand (S038-31):** Nachtrag Lauf 4 erledigt (T3868), Gerüst Lauf 5 angelegt, Werkzeuge `$W` auf Lauf 5 umgestellt, Kontrollmodell `openrouter/anthropic/claude-sonnet-5.5` geprüft; A-1 bis A-5, B-1 bis B-5, C-1 bis C-6, D-1 und E offen. Gemessen wird auf dem Code-Kopf E (letzter grüner Code-Commit von PR E) und auf Bezug′. Push, PRs, Dispatch und Merge nur im freigegebenen PR-Schritt (Schritt 5 und 10), nicht in diesem Lauf.
+
 **Ablage (D-21):** `spec.md`, `plan.md` und `tasks.md` kommen mit PR A auf `main`; jeder spätere Lauf ergänzt sie in seinem PR. Jedes Ticket schreibt seinen Beitrag zusätzlich in eine Datei außerhalb des Repos (`s038-beitraege/<Ticket>.md` im Feature-Ordner der Purple-Doku); S038-08 führt die Entscheidungen hier zusammen (vorläufige IDs `D-S038-0x-n` → D-39 ff.).
 
 ## Startbedingung (T0)
@@ -246,6 +248,62 @@ Aus den Beiträgen S038-23 bis S038-30 (S038-30).
 
 41 Dateien im Diff gegen `origin/main` (21 neu): ekranoj 8, nordstelo 30, cli 1 (`src/ekranoj.test.ts`, vereinbart), specs 2. Keine Tabu-Datei (`packages/eroj/**`, `packages/metiejo/**`, Wurzeldateien, `.github/**`, `scripts/**`), nichts in `packages/modelo/**`, `packages/{projekcioj,vortaro,mcp,agordilo}/**`. `navigado.ts`, `verda.ts`, `check_usage` und K8 ohne Diff (L4-13).
 
+### Startbedingung Lauf 5
+
+`git fetch origin` am 2026-11-07 (S038-31, 20:22Z): `origin/main` = `76158a0dac512457a777fe642acfc06888c8b68c` (Merge #156 „Spec 044: Metiejo – /pruefung und erstes Rendern ohne Blockade“, 2026-11-07T18:54:12Z; 13 Dateien in `packages/metiejo/**`, 3 in `specs/044-pruefung-schnell/**`, keine in den Pfaden dieses Laufs; `asistanto/ki.ts` unverändert). PR D #155 „Spec 038 – Messung“: MERGED 2026-11-07T14:01:40Z, Kopf `7f4b65d71985b0d17e69e455eb911d1fbdeb62e2`, Merge-SHA `6a3e55e3e939a5616919d12bae3ea585948a0ae6`; `git merge-base --is-ancestor` → ja für `6a3e55e3` und `7f4b65d7`. Der Branch `261107-spec-038-kugelsicher-planen-1b0fb8` stand ohne eigene Commits auf `origin/main`; offene PRs (`gh pr list --state open`): keine, also keine Überschneidung. `Bezug vorher` bleibt `e4873c57`: `git -C /tmp/s038-bezug rev-parse HEAD` = `e4873c577bc90e3138279346394e11d4154883ed`; `/tmp/s038-bezug-prim` gibt es noch nicht (S038-38). `spec.md` SHA-256 `dedf2760…c6c7` (byte-gleich). `$M/.env`: `OPENROUTER_API_KEY` und `MISTRAL_API_KEY` vorhanden und nicht leer (nur Name und Länge geprüft, kein Wert gelesen oder ausgegeben); `FM_KI_ANBIETER=mistral`, `FM_KI_MODELL=ministral-14b-2512`. Wächter von Spec 038 neu gestartet mit der Konfiguration von Lauf 5 (Abschnitt „Werkzeuge (D-27)“); ein Wächter von Spec 037 lief nicht mehr. `$S/mezuri.aktiv/` leer. Ledger Lauf 1–4 unverändert 0,876548 $, Ledger Lauf 5 0,00 $ von 5,00 $.
+
+### Kontrollmodell Lauf 5 (D-244, A-5)
+
+Öffentliche Modellliste von OpenRouter (`GET https://openrouter.ai/api/v1/models`, ohne Schlüssel) am **2026-11-07 20:23Z** einmal gelesen:
+
+| Feld | Wert |
+|---|---|
+| ID (OpenRouter) | **`anthropic/claude-sonnet-5.5`** („Anthropic: Claude Sonnet 5.5“) – im Wächter und in den CLIs als `openrouter/anthropic/claude-sonnet-5.5` (`KONTROLA_MODELO`, C-3) |
+| Preis | **2 $ je 10⁶ Tokens ein, 10 $ je 10⁶ Tokens aus** (`pricing.prompt` 0.000002, `pricing.completion` 0.00001 je Token; Cache lesen 0,10 $, schreiben 2,50 $ je 10⁶) – wie D-244 |
+| Kontext / Ausgabe | 1 000 000 / höchstens 128 000 Tokens |
+| Denken | **Standard des Anbieters, nicht angefordert** (der Lauf sendet weder `reasoning` noch `reasoning_effort`; `chatModelDe` sendet `temperature: 0.2`, `tool_choice: "auto"`) |
+| Schlüssel | `OPENROUTER_API_KEY` in `$M/.env` (vorhanden, nie im Log) |
+
+Daneben steht `anthropic/claude-sonnet-5.5:batch` (1 $ / 5 $): nicht gewählt, nur die genaue ID oben ist erlaubt (A-5, kein Ersatzmodell).
+
+### Budget Lauf 5 (D-243 … D-247)
+
+Eigenes Ledger `$S/lauf5/` (D-S038-31-1), Kappe **5,00 $** zusätzlich zu den 0,876548 $ von Lauf 1–4 (Spec 038 gesamt ≤ 5,88 $). Preise: `ministral-14b-2512` 0,20 $ je 10⁶ ein und aus; Sonnet 5.5 2 $ / 10 $ je 10⁶ ein/aus. `--max-tokens` = ⌊min(Schätzung × 1,25, Rest der Scheibe) ÷ Preis⌋, abgerundet auf 1 000 (D-247), vor jedem Lauf aus `$W/kosten stand` neu gerechnet (`$W/kosten vorab` druckt den Wert).
+
+| Scheibe | Läufe | Schätzung je Lauf (Tokens / $) | `--max-tokens` bei vollem Rest | Scheibe |
+|---|---|---|---|---|
+| `abnahme-` | `abnahme-komuna-l5-v1`, `-v2` (nur wenn v1 < 2/2) | 2 × 3 × 100 000 + 5 000 = 605 000 / 0,121 $ | v1: 756 000; v2: ⌊Rest⌋, startet nur bei ≥ 605 000 | 0,25 $ |
+| `nachher-` | 5 × `nachher-l5-<ablauf>`, `--varianten F,0` | 4 Screens: 1 062 472 / 0,2125 $ · 3 Screens: 799 354 / 0,1599 $ (Σ 0,9046 $) | 4 Screens: 1 328 000 · 3 Screens: 999 000 | 0,95 $ |
+| `kontrolle-` | `kontrolle-komuna` | ≈ 480 000 ein + Ausgabe ≈ 1,2 $ | 479 000 (p_eff 2,40 $ je 10⁶, D-S038-31-5) – hart | 1,15 $ |
+| `vorher-` | 5 × `vorher-l5-<ablauf>` auf `/tmp/s038-bezug-prim`, `--varianten F` | 4 Screens: 2 960 060 / 0,5920 $ · 3 Screens: 2 221 295 / 0,4443 $ (Σ 2,5168 $) | 4 Screens: 3 700 000 · 3 Screens: 2 776 000 | 2,60 $ |
+| `wdh-` | eine kleine Wiederholung eines gestörten Laufs | ≤ 250 000 Tokens | – | 0,05 $ |
+| **Summe** | | **≈ 4,86 $** | | **5,00 $** |
+
+Vorabprüfung C-3 (`$W/kosten vorab`): Schätzung × 1,25 ≤ Rest für `nachher-`/`vorher-`/`wdh-`, × 1,0 für `abnahme-`, `kontrolle-` ausgenommen (D-S038-31-3). Erwarteter Fragepunkt: der fünfte `vorher-`-Lauf verfehlt C-3 um ≈ 0,028 $ auch bei genauer Schätzung → Umbuchung aus einer abgeschlossenen Scheibe (`$W/kosten umbuchen`, Logzeile unten im Abschnitt „Läufe und Kosten (Lauf 5)“, D-S038-31-4) oder Frage; `wdh-` wird nie umgebucht.
+
+**Lauf-IDs und Ordner (C-5, ab hier fest):** `abnahme-komuna-l5-v1`, `abnahme-komuna-l5-v2` → `$S/abnahme-l5/komuna-v1`, `$S/abnahme-l5/komuna-v2` · `nachher-l5-<ablauf>` → `$S/ablauf-l5/nachher/<ablauf>` · `kontrolle-komuna` → `$S/kontrolle-l5/komuna` · `vorher-l5-<ablauf>` → `$S/ablauf-l5/vorher-F/<ablauf>` · `wdh-<id>` · Vergleich `$S/ablauf-l5/vergleich`. Abläufe in Katalogreihenfolge: anmelden-und-konto (4 Screens), liste-filter-detail (3), formular-in-schritten (4), einstellungen-konto (3), uebersicht-kennzahlen (3).
+
+### Frei/Tabu für Lauf 5
+
+**Frei:**
+
+- `packages/ekranoj/**`; `packages/nordstelo/**`
+- `packages/cli/src/commands/ekranoj.ts` nur additiv (`--lauf-id`, `--kontroll-modelo`, D-S038-36-1); `packages/cli/src/ekranoj-integra.test.ts:406–407` und abgeleitete Zeilen von `packages/cli/src/ekranoj.test.ts` (D-S038-37a-1, Muster D-219, zu bestätigen)
+- `packages/modelo/src/gvidanto/**` und `packages/mcp/schema/tools/get_ero.input.json` samt MCP-/Vertragstests, die das additive Feld nennen müssen (nur S038-37b, D-S038-37b-1)
+- `specs/038-gvidanto-agentoj/{plan,tasks}.md`; `spec.md` bleibt byte-gleich (SHA-256 `dedf2760…c6c7`)
+
+**Tabu (Änderung nur als Befund hier):** `packages/eroj/**` (D-250), `packages/metiejo/**`, `packages/vortaro/**`, `packages/projekcioj/**`, `packages/modelo/data/**` (Skemoj, Reguloj), alle Wurzeldateien, `.github/**`, `scripts/**`.
+
+**Unverändert im Diff:** `packages/ekranoj/src/verda.ts` (`decidiVerdon`), `packages/ekranoj/src/navigado.ts`, `check_usage` (`packages/modelo/src/gvidanto/check-usage.ts`), K8 (`packages/nordstelo/src/k8/**`, `packages/ekranoj/src/aspekto-faktoj.ts`); keine Grenze angehoben (750 Tokens je Kurzprofil-Kombination, 5 Screens, 3 Runden, 24 Werkzeugaufrufe, 20 000 Zeichen, Streuung 16,7); `PERMESITA_MODELO` und `NAVIGADA_REGULO` byte-gleich; der Spec-037-Pfad und jede bestehende Gvidanto-Antwort byte-gleich.
+
+### Tatsächlich berührte Dateien Lauf 5
+
+Aus den Beiträgen S038-31 bis S038-42 (S038-42).
+
+| Datei | Art | Commit |
+|---|---|---|
+| `specs/038-gvidanto-agentoj/{plan,tasks}.md` | frei, geändert (`spec.md` byte-gleich) | Doku-Commit S038-31 |
+
 ## Vertrags-Fixtures (T0)
 
 **Generator:** `node packages/mcp/test/kontrakto/generi.mjs <repo-wurzel> <ziel-wurzel>`. Lädt `@fundamento/mcp`, `@fundamento/modelo`, `@fundamento/nordstelo`, `@fundamento/ekranoj` und den MCP-Client aus `<repo-wurzel>/packages/*/dist` bzw. dessen `node_modules` per Datei-URL, startet den Server im Prozess (wie `connectGvidanto`: `createFundamentoServer(loadServed())` + In-Memory-Transport) und schreibt unter `<ziel-wurzel>` die drei Ordner `packages/mcp/test/fixtures/kontrakto/`, `packages/nordstelo/test/fixtures/ac8/`, `packages/ekranoj/test/fixtures/ac8/` (jeweils vorher geleert). Kein Netz, keine Uhr, kein Modell. Er bricht mit Exit 3 ab, ohne zu schreiben, wenn eine Antwort den Pfad der Repo-Wurzel (auch aufgelöst) oder das Home-Verzeichnis enthält (Probe: mit `HOME=/dark` → Exit 3, nichts geschrieben).
@@ -333,6 +391,8 @@ Aus den Beiträgen S038-23 bis S038-30 (S038-30).
 **Lauf 3 (S038-15, 2026-11-06):** `$W` ergänzt um die Messwerkzeuge, neu gebaut nach den Beiträgen S037-01/S037-09 und `/tmp/s037-werkzeug/gardisto` (D-S038-15-1 bis -7): `sperre.mjs` (gemeinsame Logik), `gardisto` (Wächter, Takt 12 s, Fenster 300 s, D-07), `mezuri` (Messlauf unter der Sperre, Prüfung alle 15 s, „gestört“, Buchung aus `raporto.json`; Exit 5 = Sperre nicht frei), `kosten` (Kappe 1,00 $, Scheiben nach Präfix, nur `ministral-14b-2512`), `bildigi-fragmentojn.mjs` (Fotos vorher ohne Modell über den gebauten Bezug) und `gardisto-selbsttest`. Ledger in `$S`: `kostoj.tsv` (Spalten wie 037), `anfragoj.json`, `laeufe.tsv` (mit `gestoert`), `pruefprotokoll.tsv`, `sperre.{tsv,stato}`, `gardisto.pid`. `selbsttest` 103 von 103 OK (`/tmp/s038-logs/s038-15-selbsttest.log`), `gardisto-selbsttest` 93 von 93 OK (`/tmp/s038-logs/s038-15-gardisto-selbsttest.log`), Smoke von `bildigi-fragmentojn.mjs` auf einem 037-Fragment (`abnahme/komuna/rondoj/2/liste.html`) nach `/tmp/s038-15-smoke/`: zwei Fotos, byte-gleich mit den 037-Originalen. `kosten stand`: 0,00 $ von 1,00 $. Aufruf für S038-22 im Beitrag S038-15 und in `$W/README.md`.
 
 **Lauf 4 (S038-23, 2026-11-07, D-S038-23-1/-2):** `$W` vollständig, auf Lauf 4 umgestellt: `lib.mjs` `R` und `sperre.mjs` `REPO_LAUF4` = Worktree-Repo von Lauf 4 (überschreibbar mit `S038_REPO`), daneben `/tmp/s038-bezug` als zweiter eigener Stand; das Worktree von Lauf 3 zählt nicht mehr als eigen; die Plan-Prüfung des Wächters liest im Worktree von Lauf 4. `mezuri` bucht zusätzlich die Form von `nordstelo --art ablauf` (`sumo.tokenoj.{enigo,eligo}`, `sumo.anfragoj`, `sumo.usd`, Commit und Modell aus `lauf.json`): ohne `--raporto` aus dem Laufordner `<JJJJMMTT-HHMM>[-n]/`, den die Messung unter `--out` neu anlegt (Schnappschuss vor dem Start; ältere Laufordner und Geschwister wie `projekcioj/` zählen nicht), ohne `raporto.json` aus der Summe der `peno` der `kuro.json`. `kosten`: Präfixe und Scheiben unverändert und passend zu E-7 (`abnahme-` 0,10 · `nachher-` 0,45 · `vorher-` 0,30 · `wdh-` 0,10 · Kappe 1,00 $; Reste `abnahme-` 0,052061 · `vorher-` 0,253829 $). `selbsttest` 127 von 127 OK (24 neue Fälle: eigene Stände Lauf 4, Lauf 3 nicht mehr eigen, Buchung aus Ablauf-Laufordnern einschließlich des echten 037-Messpunkts; `/tmp/s038-logs/s038-23-selbsttest.log`), `gardisto-selbsttest` 99 von 99 OK (`mezuri` bucht eine Ablaufmessung über `--out`; `/tmp/s038-logs/s038-23-gardisto-selbsttest.log`). Wächter danach neu gestartet (`gardisto stopp`: PID 4320; `gardisto start`: PID 28603, eigen = Worktree von Lauf 4 und `/tmp/s038-bezug`). `kosten stand`: 0,139656 $ von 1,00 $. Vorher-Stand der geänderten Dateien unter `/tmp/s038-werkzeug-vor-S038-23/`.
+
+**Lauf 5 (S038-31, 2026-11-07, D-S038-31-1 … -5, -8 … -11):** `$W` auf Lauf 5 umgestellt, Vorher-Stand unter `/tmp/s038-werkzeug-vor-S038-31/`. Eigene Stände: Worktree-Repo von Lauf 5 (`lib.mjs` `R`, `sperre.mjs` `REPO_LAUF5`, auch Plan-Repo des Wächters), `/tmp/s038-bezug-prim` (Bezug′, eigen schon vor S038-38) und `/tmp/s038-bezug`; die Worktrees von Lauf 3 und Lauf 4 sind nicht mehr eigen. **Eigenes Ledger Lauf 5** in `$S/lauf5/` (`kostoj.tsv`, `laeufe.tsv`, `pruefprotokoll.tsv`, `umbuchungen.tsv`): Kappe 5,00 $, Scheiben `abnahme-` 0,25 · `nachher-` 0,95 · `kontrolle-` 1,15 (hart; nur `openrouter/anthropic/claude-sonnet-5.5`, gebucht aus Tokens × 2 $ / 10 $ je 10⁶ ein/aus) · `vorher-` 2,60 · `wdh-` 0,05 (alle außer `kontrolle-` nur `ministral-14b-2512`); unbekanntes Präfix (auch `teil1-`) → Exit 2; `reservieren` nur mit `--usd`. Neu `kosten vorab <id> --usd <schätzung>` (C-3: Exit 0 oder 3 mit Fehlbetrag, druckt `--max-tokens` nach D-247) und `kosten umbuchen <von> <nach> --usd x` (in der Kappe, nie aus `wdh-`, nie in `kontrolle-`, nur aus abgeschlossenen Scheiben; druckt die Logzeile für den plan). `mezuri` prüft die Lauf-ID im Befehl (`--lauf-id` gleich; `kontrolle-` nur mit `--lauf-id` und `--kontroll-modelo openrouter/anthropic/claude-sonnet-5.5`), gibt `S038_LAUF_ID` weiter, bucht `kontrolle-` aus den Tokens der ekranoj- oder nordstelo-Form und liest für `kontrolle-` die Nutzung des OpenRouter-Schlüssels vor und nach dem Lauf (`GET /api/v1/key`, nur lesend; Gegenprobe als Logzeile). Das Ledger von Lauf 1–4 (`$S/kostoj.tsv`, 0,876548 $) bleibt unverändert und mit `S038_LAUF=4` bedienbar; die Sperre (`sperre.*`, `gardisto.pid`, `mezuri.aktiv/`) bleibt gemeinsam in `$S`. `selbsttest` **193 von 193 OK** (127 → 193; neue Fälle: eigene Stände Lauf 5/Bezug′/Bezug, Lauf 3 und 4 nicht eigen, Ledger Lauf 5 mit Scheiben, Modellen, `vorab` inkl. Exit 3 bei × 1,25 über der Scheibe, `umbuchen`, `kontrolle-`-Preis, Lauf-ID-Prüfung, Berichtsformen, echtes Ledger Lauf 1–4 = 0,876548 $ und unverändert; `/tmp/s038-logs/s038-31-selbsttest.log`), `gardisto-selbsttest` **126 von 126 OK** (99 → 126; `mezuri` bucht in `lauf5/`, `kontrolle-` 0,7 $ aus 300 000 / 10 000 Tokens mit Gegenprobe gegen einen lokalen Probe-Server, Schlüssel nie im Log, Lauf-ID-Fälle, nordstelo-Form unter `vorher-`; `/tmp/s038-logs/s038-31-gardisto-selbsttest.log`). Negativprobe: mit den alten `lib.mjs`/`sperre.mjs`/`mezuri`/`kosten` bricht der neue `selbsttest` ab. Wächter danach gestartet (`gardisto start`, PID **27601**, eigen = Worktree von Lauf 5, `/tmp/s038-bezug-prim`, `/tmp/s038-bezug`); der alte Stand „belegt … Wächter beendet (SIGTERM)“ wurde dadurch ersetzt, keine Datei von Hand geändert. `kosten stand`: Lauf 5 0,00 $ von 5,00 $; Lauf 1–4 0,876548 $ von 1,00 $. Messbefehle für S038-39 und S038-40 in `$W/README.md` (Abschnitt „Lauf 5“).
 
 ## Entscheidungen, vom Maintainer zu bestätigen
 
@@ -681,6 +741,48 @@ Aus der Implementierungs-Spec von Lauf 4 (§5) und den Beiträgen S038-23 bis S0
 | D-241 (D-S038-30-1) | QA nach S038-30 nur lesend; Befunde in den QA-Bericht, den PR-Text (ohne Commit) und den Laufbericht. | L4-2 (ein Push). |
 | D-242 (D-S038-30-2) | Kein eigenes Test-Ticket; Abdeckung nach §4.2 der Implementierungs-Spec (S038-29 Tests aus der Messung, S038-30 `test:betroffen` und `pnpm check`). | Ticketliste L4-1 bindend (wie D-144, D-196). |
 
+### Entscheidungen Lauf 5 (D-243 ff.)
+
+**Entscheidungen aus der Klärung der Spec „kugelsicher“ (2026-11-07, Maintainer):**
+
+| # | Entscheidung | Folge |
+|---|---|---|
+| D-243 | **Kappe 5,00 $** für Lauf 5, eigenes Ledger (getrennt vom Ledger Lauf 1–4, 0,876548 $) | Scheiben je Präfix, Abschnitt „Budget Lauf 5“ |
+| D-244 | **Kontrollmodell Claude Sonnet 5.5 über OpenRouter** (Listenpreis 2 $ / 10 $ je 10⁶ Tokens ein/aus) | Schlüssel `OPENROUTER_API_KEY` in der `.env`, nie im Log; ID im Abschnitt „Kontrollmodell Lauf 5“ |
+| D-245 | Kontrolllauf auf dem **Abnahme-Szenario `komuna`** (2 Screens, 3 Runden), nicht auf liste-filter-detail | passt in 5,00 $; zielt direkt auf die Lücke 0/2 |
+| D-246 | Abnahme `komuna` mit ministral höchstens **2 Versuche** | Budget für die Messung bleibt gesichert |
+| D-247 | `--max-tokens` je Lauf ist **Budget, keine Grenze**: aus der Dollar-Scheibe abgeleitet | die feste 250 000 der Abnahme entfällt; die fünf genannten Grenzen bleiben |
+| D-248 | **Bezug′** = Bezug `e4873c57` + **nur** der Fehlerfang aus A-1, als eigener Stand `/tmp/s038-bezug-prim` | vorher F wird auf Bezug′ gemessen; vorher-0 (Lauf 4) bleibt gültig |
+| D-249 | Ist `komuna` nach 2 Versuchen nicht 2/2: **Stopp und Befund mit Beleg** (Kontrolllauf daneben), keine weiteren Läufe ohne neue Freigabe | Messung (Teil C) läuft dann nicht |
+| D-250 | **eroj-Wackler: Ursache hier, Fix in eigener Sitzung** (Spec-036-Gebiet), die vor dem CI-Abschluss von PR F auf `main` gemergt sein muss; `packages/eroj` bleibt Tabu | AK-4 hängt an dieser Sitzung |
+| D-251 | **Zwei PRs:** PR E „Korrekturen“ von `main`; PR F „Messung“ gestapelt auf E (nur Doku und Messdaten); Messung auf dem Kopf von E | wie Lauf 1–4 |
+
+#### Vorläufige Entscheidungen Lauf 5 (D-252 ff., durch S038-42 nummeriert)
+
+Aus der Implementierungs-Spec von Lauf 5 (§5) und dem Beitrag S038-31; S038-42 nummeriert sie ab **D-252** und ergänzt die der übrigen Tickets. Vom Maintainer zu bestätigen; besonders **D-S038-37a-1** (cli-Erwartungen außerhalb von ekranoj, Muster D-219).
+
+| # | Entscheidung | Grund |
+|---|---|---|
+| D-S038-31-1 | Ledger Lauf 5 getrennt von Lauf 1–4 (`$S/lauf5/`), Kappe 5,00 $ zusätzlich zu 0,876548 $ (Spec 038 gesamt ≤ 5,88 $). | D-243; offener Punkt der Spec wie angenommen beantwortet. |
+| D-S038-31-2 | `kontrolle-` wird in `$W` aus Tokens × 2 $ / 10 $ gebucht; Gegenprobe über die Nutzung des OpenRouter-Schlüssels (`GET /api/v1/key`, vorher/nachher); kein Preis in ekranoj; der fehlende Preis in metiejo ist ein Befund (F-S038-31-3). | metiejo ist tabu. |
+| D-S038-31-3 | C-3 (× 1,25) gilt für nachher/vorher (und `wdh-`); die Abnahme rechnet nach D-247 und startet, wenn `--max-tokens` ≥ Schätzung (× 1,0); der Kontrolllauf ist ausgenommen (Scheibe hart). | Die Scheiben sind ohne die Marge bemessen (Abschnitt „Budget Lauf 5“). |
+| D-S038-31-4 | Unverbrauchte Reste abgeschlossener Scheiben werden in der Kappe mit Logzeile im plan umgebucht; `wdh-` wird nie umgebucht; reicht es nicht → Frage. | Spec „Umbuchung … nie über die Kappe“. |
+| D-S038-31-5 | `--max-tokens` des Kontrolllaufs aus p_eff = 0,95 × 2 $ + 0,05 × 10 $ = 2,40 $ je 10⁶ → 479 000. | Token-Budget gegen Dollar-Scheibe. |
+| D-S038-31-6 | 18 Tickets trotz der Obergrenze 8 aus `delivery.md`: die Lieferliste der Spec ist bindend, die Teilungen nur für die Größe einer Sitzung. | Wie D-144, D-242. |
+| D-S038-31-7 | Feldname `restantajLauxRegulo`; Denken des Kontrollmodells = Standard des Anbieters (nicht angefordert), festgehalten. | Offene Punkte der Spec. |
+| D-S038-31-8 | Keine Umbuchung in die harte Scheibe `kontrolle-` und keine aus einer Scheibe mit offener Reservierung; `kosten reservieren` in Lauf 5 nur mit `--usd`. | C-4 „hart“; „abgeschlossene Scheiben“ (D-S038-31-4); F-S038-23-3. |
+| D-S038-31-9 | Im Ledger Lauf 5 liegen auch `laeufe.tsv`, `pruefprotokoll.tsv` und `umbuchungen.tsv` in `$S/lauf5/`; Sperre und `anfragoj.json` bleiben gemeinsam in `$S`; das Ledger Lauf 1–4 bleibt mit `S038_LAUF=4` bedienbar. | Dateien von Lauf 1–4 bleiben unberührt; ein Wächter für beide. |
+| D-S038-31-10 | `mezuri` prüft die Lauf-ID im Befehl (`--lauf-id` gleich der gebuchten ID; `kontrolle-` nur mit `--lauf-id` und `--kontroll-modelo openrouter/anthropic/claude-sonnet-5.5`; sonst kein `--kontroll-modelo`), Exit 2 vor dem Start, und gibt `S038_LAUF_ID` weiter. | C-3/C-5: dieselbe ID wird gebucht und an die CLI gegeben (D-S038-36-1). |
+| D-S038-31-11 | Die OpenRouter-Gegenprobe ist nur eine Logzeile; gebucht wird immer Tokens × Preis. Das Δ umfasst jede gleichzeitige Nutzung desselben Schlüssels. | Die Nutzung des Schlüssels ist nicht je Lauf getrennt. |
+| D-S038-35-1 | `TOKENOJ_EKRANO_RONDO_0 = 5_414` (oberer Messwert). | Eine Schätzung darf nicht unterschätzen. |
+| D-S038-36-1 | `--lauf-id` und `--kontroll-modelo` als additive Optionen beider CLIs; Regeln `model-not-allowed`, `control-run-id`, `control-model-option`. | `fm ekranoj` hat keine Lauf-ID. |
+| D-S038-37a-1 | Die cli-Erwartungen `ekranoj-integra.test.ts:406–407` werden aus der exportierten Funktion des Shell-Pfads abgeleitet. **Zu bestätigen.** | Platzhalter entfällt im Shell-Pfad; Vorbild D-219. |
+| D-S038-37b-1 | Die Angaben zu Prop-Kombinationen und Label-Regel kommen als additives `get_ero`-Feld; bestehende Antworten byte-gleich; `modelo/data/**` unberührt. | MG-3, Verträge aus Lauf 1. |
+| D-S038-37t-1 | Das Test-Ticket liegt vor der Messung. | D-251 (PR F nur Doku); Code-Kopf E muss der getestete Baum sein. |
+| D-S038-38-1 | Bezug′ = lokaler Commit in einem abgelösten Worktree auf `e4873c57` nur mit A-1; AK-2 wird auf den vorher-Läufen an Anbieterfehlern und Abbrüchen gemessen. | D-248; sauberer SHA in `lauf.json`. |
+| D-S038-39b-1 | Die Ableitung der Ero-Instanzen (D-22) bleibt wie im Bezugsstand; ein ausdrücklich benannter Standard-Slot wird in Lauf 5 nicht übernommen (Fix `c3ac128e` zurückgenommen, `af1ee0a6`), stattdessen nennt der Befund für die nächste Runde den geslotteten Text. | AC-8-Orakel (nordstelo `ac8.test.ts`, ekranoj gegen den echten Server) und `rescore.test.ts` wurden rot; K3 des Bewerters muss für vorher/nachher gleich bleiben. Befund F-S038-39b-1 für S038-42. |
+| D-S038-42-1 | PR E und PR F als Commit-Bereiche auf einem Branch plus lokaler Branch `261107-spec-038-kugelsicher-pr-e` am letzten PR-E-Commit; kein Push in diesem Lauf. | D-251; Push nur im freigegebenen PR-Schritt. |
+
 ## Lieferliste
 
 | # | Punkt | Stand |
@@ -743,6 +845,32 @@ Aus der Implementierungs-Spec von Lauf 4 (§5) und den Beiträgen S038-23 bis S0
 | Querschnitt | Q-1, Q-2 | erledigt |
 
 Offen: nichts außer dem CI-Ergebnis von Lauf 4 (T3868, Maintainer). Blockiert: nichts.
+
+### Lieferliste Lauf 5
+
+Das CI-Ergebnis von Lauf 4 (T3868) ist mit S038-31 nachgetragen (Abschnitt „Bericht Lauf 4“). Reihenfolge und Tore nach der Implementierungs-Spec von Lauf 5 (ein Strang; PR E = S038-31 bis S038-39, PR F = S038-40 bis S038-42, D-251).
+
+| # | Punkt | Ticket | PR | Stand |
+|---|---|---|---|---|
+| V-1 (L5) | Nachtrag Lauf 4 (PR D #155, Merge `6a3e55e3`, CI je Job „fremd/eigen“, T3868), Gerüst Lauf 5, Kontrollmodell-ID, `$W` auf Lauf 5 (A-6), Selbsttests, Wächter | S038-31 | E | erledigt (S038-31, Doku-Commit `Spec 038: Nachtrag Lauf 4 und Start Lauf 5 in plan und tasks`) |
+| A-3 | Wackel-Test D-223 deterministisch, `rondoj.test.ts` allein 30/30 (AK-4) | S038-34 | E | offen |
+| A-1 | Anbieterfehler: Ursache beheben, abfangen, berichten (`anbieterfehleroj`, AK-2) | S038-32 | E | offen |
+| A-2 | `restantajLauxRegulo` in `kuro.json`, oberste drei Regeln in `--art komparo` und Ablaufbericht (AK-5) | S038-33 | E | offen |
+| A-4 | Schätzkonstanten aus der Messung von Lauf 4 (80 011; Variante 0) | S038-35 | E | offen |
+| A-5 | Ausnahme für das Kontrollmodell (`--lauf-id`, `--kontroll-modelo`, AK-6 Wächter) | S038-36 | E | offen |
+| B-2 | Platzhalter-Verweis `<slug>.html` im Shell-Pfad durch konkrete Ziele ersetzen (AK-1) | S038-37a | E | erledigt (S038-37a, `635ff5ad`/`479c5ad4`) |
+| B-3 | Prop-Kombinationen und Label-Regel im Kurzprofil, `suggestion` im Befund (AK-1) | S038-37b | E | erledigt (S038-37b, `fa12e4d2`/`90ca725e`/`c61ab3c9`) |
+| B-4 | Leere/abgeschnittene Seite detail: Ursache benennen, beheben (AK-1, AK-2) | S038-37c | E | erledigt (S038-37c, `e4af6488`/`5089d5d1`, `115bcc6b`/`0ada621f`) |
+| T-L5 | Integrationstests Lauf 5 (AK-2, AK-5, AK-6), Tor Schritt 1 | S038-37t | E | erledigt (S038-37t, `21c70b02`; erweitert in S038-39b) |
+| C-1 | Bezug′ `/tmp/s038-bezug-prim` = `e4873c57` + nur A-1, Diff geprüft (D-248) | S038-38 | – | erledigt (S038-38) |
+| B-1, B-5 | Abnahme `komuna` Versuch 1 (`abnahme-komuna-l5-v1`, `--max-tokens` aus der Scheibe) | S038-39a | E | erledigt (S038-39a): **1/2 grün** (liste grün, detail 99 an `check_usage`) – Abschnitt „Abnahme komuna (Lauf 5)“ |
+| B-5 | Fundamento-seitige Nachbesserung und Versuch 2 (`abnahme-komuna-l5-v2`), nur wenn v1 < 2/2 | S038-39b | E | erledigt (S038-39b): zwei Befund-Korrekturen (`be7b1f6f`, `0f32cb17`), Versuch 2 **0/2 grün** → **D-249: Stopp** – Abschnitt „Abnahme komuna (Lauf 5)“ |
+| C-2 | nachher: 5 Läufe je Ablauf auf Code-Kopf E (`nachher-l5-<ablauf>`), nur bei 2/2 | S038-40a | F | offen |
+| C-4 | Kontrolllauf `kontrolle-komuna` (Sonnet 5.5, AK-6), läuft in beiden Zweigen | S038-40b | F | offen |
+| C-2, C-3 | vorher F: 5 Läufe je Ablauf auf Bezug′ (`vorher-l5-<ablauf>`), nur bei 2/2 | S038-40c | F | offen |
+| D-1 | Ursache der eroj-Wackler (Befund, nur lesen) | S038-41 | F | offen |
+| C-5, E | Vergleich (AK-3), „Modell oder Fundamento“, Fotos, Entscheidungstabelle D-200 bis D-251 (+ D-252 ff.), Prüfungen, Abschluss, Bericht | S038-42 | F | offen |
+| D-2 bis D-4 | Push PR E, Push PR F (gestapelt), ein Dispatch nach dem eroj-Fix auf `main`, CI in einem Lauf (AK-4) | Maintainer | E, F | offen (nicht in diesem Lauf) |
 
 ## Befunde
 
@@ -855,6 +983,15 @@ S038-03 (MG-5): keine – jedes Regionsmerkmal ist aus der Skemo ableitbar.
 - **F-S038-29-1** Auch `normigiAspektoFaktojn` und `unuaFamilio` sind nach der Normalisierung quelltextgleich; der Test prüft `normigiAspektoFaktojn` bewusst über das Verhalten (Modul-Helfer zeigt `toString()` nicht).
 - **F-S038-30-1 `pnpm check` rot unter eigener Last** (D-92/D-93, wie S038-14-1): einmal gelaufen (2026-11-07 13:07:53Z–13:08:09Z), rot nach 16 s in `@fundamento/eroj#test`: `packages/eroj/test/vitrino-partoj.test.ts:101` „Hook timed out in 10000ms“ (Datei fremd, tabu, unverändert), 1-min-Last bis 22,5; turbo brach die übrigen Test-Tasks ab, die Checks hinter `&&` liefen nicht. eroj `vitest run` allein 43/43 grün, `vitrino-partoj.test.ts` allein 0/10 rot, `pnpm check:privat` allein grün. Kein zweites `pnpm check`, keine Grenze angehoben; die CI prüft den Rest.
 - **F-S038-30-2 (Hinweis)** `test:betroffen` in S038-30 lief vollständig aus dem Turbo-Cache (13/13, Baum identisch mit dem grünen Lauf von S038-29 auf `2a1081fc`).
+
+### Lauf 5
+
+- **F-S038-31-1** PR D #155: ein **eigener** roter Job – Unit tests (ekranoj) im `pull_request`-Lauf an `packages/ekranoj/src/rondoj.test.ts:733` (Wackler D-223, `:749`), grün im Dispatch; Fix in Lauf 5 als A-3 (S038-34).
+- **F-S038-31-2** Der Push-Lauf auf `main` nach dem Merge von PR D (`6a3e55e3`, Run 42379643892) ist rot nur durch fremde Jobs: Rendered Eroj Shard 3 (firefox) und Shard 4 (**webkit**) an `packages/eroj/test/zweitfarbe-036.spec.ts:196` und `:129`, Unit tests (modelo) `turbo-inputs.test.ts` Hook 10 s (N-9); der Push-Lauf auf `76158a0d` (Run 42403577019) ist rot an Rendered Eroj Shard 3 und 4. `zweitfarbe-036` reißt damit auch in WebKit – Eingabe für D-1 (S038-41).
+- **F-S038-31-3** metiejo kennt keinen Preis für `openrouter/anthropic/claude-sonnet-5.5` (`packages/metiejo/data/prezoj.json`); `fm ekranoj` meldet für den Kontrolllauf „Kosten unbekannt“, `raporto.json` hat kein `kosto.usd`. Gebucht wird in `$W` aus Tokens × 2 $ / 10 $ (D-S038-31-2). Vorschlag für eine metiejo-Sitzung: Eintrag mit 2 $ / 10 $ je 10⁶ ein/aus.
+- **F-S038-31-4 (Hinweis)** Die OpenRouter-Liste führt neben `anthropic/claude-sonnet-5.5` auch `anthropic/claude-sonnet-5.5:batch` (1 $ / 5 $); nur die genaue ID ist erlaubt. Das Modell unterstützt `reasoning`/`reasoning_effort`; der Lauf fordert sie nicht an (Standard des Anbieters).
+- **F-S038-31-5 (Hinweis)** Beim Start lief kein Wächter, `sperre.stato` stand auf „belegt seit 2026-11-07T14:05:46Z · Wächter beendet (SIGTERM)“; `gardisto start` hat den Stand ersetzt (dokumentierter Weg, keine Datei von Hand). Der Wächter von Spec 037 (PID 61094, F-S038-15-1) läuft nicht mehr.
+- **F-S038-31-6 (Hinweis)** Die Läufe von Lauf 5 schreiben weiter `$S/anfragoj.json` (Anfragen je Tag der CLI, `--ledger $S`) und die gemeinsamen Sperrdateien in `$S`; die Ledger-Dateien von Lauf 1–4 (`kostoj.tsv`, `laeufe.tsv`, `pruefprotokoll.tsv`) bleiben unberührt (D-S038-31-9).
 
 ## Abschluss (S038-08, vor dem Push)
 
@@ -1139,6 +1276,85 @@ Aus `$S/ablauf/vergleich/vergleich.md` (`pnpm nordstelo --art komparo --antaux $
 
 Bis auf `rondoj.test.ts:733` (Vergleich mit Zeitfeld, kein Zeitlimit) sind alle Treffer Zeitgrenzen unter Last.
 
+## Abnahme komuna (Lauf 5)
+
+**D-249: Stopp** – komuna 1/2 (`abnahme-komuna-l5-v1`) und 0/2 (`abnahme-komuna-l5-v2`) nach 2 Versuchen; Messung entfällt (S038-40a/c übersprungen); Kontrolllauf folgt (S038-40b). Nichts gelockert, kein `komuna`-eigener Prompt, keine Grenze angehoben, nichts aus der Tabu-Liste berührt.
+
+Befehl je Versuch (§2.6, D-246/D-247): `$W/kosten reservieren <id> --zweck "B-5 Versuch <n>" --usd <x>`, dann im Hintergrund `$W/mezuri <id> "B-5 Versuch <n>" --cwd $R --raporto $S/abnahme-l5/komuna-v<n>/raporto.json -- pnpm fm ekranoj "Eine Verwaltung für Standards mit Liste, Detail, Bearbeiten und Einstellungen" --ekranoj liste,detail --max-tokens <N> --ja --env $M/.env --ledger $S --out $S/abnahme-l5/komuna-v<n>`; Sperre frei, Wächter lief, nichts daneben. Modell nur `mistral/ministral-14b-2512`. Quelle `$S/lauf5/laeufe.tsv`, `$S/lauf5/kostoj.tsv`.
+
+| Lauf-ID | Commit | `--max-tokens` | Exit | Dauer | Tokens ein / aus | Anfragen | Werkzeugaufrufe | $ | Last vor → nach (1/5/15 min, 10 Kerne) | gestört | Halt | grün |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `abnahme-komuna-l5-v1` | `0ada621f` (Kopf vor S038-39b) | 756 000 | 0 | 517,9 s (00:58:38Z–01:07:15Z) | 188 180 / 3 299 | 54 | 49 | 0,038296 | 1,61 3,71 5,70 → 3,34 2,95 4,37 | nein | 3 Runden | **1/2** (liste ab R1) |
+| `abnahme-komuna-l5-v2` | `0f32cb17` (**Code-Kopf E**) | 1 058 000 | 0 | 828,1 s (01:43:56Z–01:57:45Z) | 332 677 / 9 122 | 79 | 121 | 0,068360 | 5,91 6,96 8,46 → 1,79 2,45 4,75 | nein | 3 Runden | **0/2** |
+
+- `--max-tokens`: v1 ⌊min(0,15125; 0,25) ÷ 0,20 $ × 10⁶⌋ = 756 250 → 756 000; v2 ⌊0,211704 ÷ 0,20 $ × 10⁶⌋ = 1 058 520 → **1 058 000** (≥ 605 000, Start erlaubt). Verbraucht: v1 191 479, v2 341 799 Tokens (32 % der Grenze) – keine Tokengrenze, kein Anbieterfehler.
+- **Code-Kopf E = `0f32cb17d20dfb5cff60e25b973b08b4ab7fd938`** (Grün-Commit S038-39b; `pnpm build` 9/9, `git status --porcelain` leer). Gemessen wird in Lauf 5 nur noch der Kontrolllauf (S038-40b) auf diesem Kopf.
+- 429-Drosselung (F-S038-39a-2): v1 41 Wartezeilen, v2 60 Wartezeilen (Σ 662 s von 828 s), alle in der unteren Wiederholung von metiejo aufgefangen; `anbieterfehleroj` fehlt in beiden `raporto.json` (nichts kam bis C-1), `malplenajPagxoj` fehlt (keine leere Seite).
+- Ledger nach v2: Lauf 5 0,106656 $ von 5,00 $; `abnahme-` 0,106656 gebucht, Rest 0,143344 $, nichts offen; Lauf 1–4 unverändert 0,876548 $.
+
+### Grün je Screen (nach `decidiVerdon`; hell und dunkel)
+
+| Versuch | Runde | Screen | K1 | K2 | K3 | K4 | K5 | Total | axe hell/dunkel | K8 | Navigation | check_usage-Fehler | grün |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| v1 | 1 | liste | 1 | 1 | 1 | 1 | 1 | 100 | 0/0 | 0,982 vollständig | vollständig | 0 | **ja** (R2/R3 übernommen) |
+| v1 | 1 | detail | 1 | 0,973 | 0,75 | 1 | 1 | 95,8 | 0/0 | 0,917 vollständig | vollständig | 5 | nein |
+| v1 | 2 | detail | 1 | 1 | 0,813 | 1 | 1 | 97,2 | 0/0 | 0,938 vollständig | vollständig | 5 | nein |
+| v1 | 3 | detail | 1 | 1 | 0,933 | 1 | 1 | 99 | 0/0 | 0,875 vollständig | vollständig | 3 | nein |
+| v2 | 1 | liste | 1 | 1 | 1 | 1 | 1 | 100 | 0/0 | 0,95 vollständig | tot: `einstellungen.html`, `bearbeiten.html` | 2 | nein |
+| v2 | 1 | detail | 1 | 0,977 | 0,6 | 1 | 1 | 93,7 | 0/0 | 0,875 vollständig | vollständig | 8 | nein |
+| v2 | 2 | liste | 1 | 1 | 1 | 1 | 1 | 100 | 0/0 | 0,95 vollständig | tot: `bearbeiten.html` | 0 | nein (nur Navigation) |
+| v2 | 2 | detail | 1 | 1 | 0,65 | 1 | 1 | 94,8 | 0/0 | 0,9 vollständig | vollständig | 9 | nein |
+| v2 | 3 | liste | 1 | 0,949 | 0,882 | 0 | 1 | 77,5 | 2/2 | 0,893 vollständig | vollständig | 3 | nein |
+| v2 | 3 | detail | 1 | 1 | 0,944 | 1 | 1 | 99,2 | 0/0 | 0,833 vollständig | vollständig | 3 | nein |
+
+AK-2 in beiden Versuchen erfüllt: jede gebaute Screen-Runde hat ein nicht leeres Fragment (K7 v1 1 333–1 685 B, v2 1 545–2 840 B), Endgrund „Höchstzahl von 3 Runden“, kein Anbieterfehler, keine Tokengrenze.
+
+### `restantaj` je Regel (letzte Runde) gegen Lauf 4
+
+| Regel | Lauf 4 (`abnahme-komuna-l4`) | v1 | v2 |
+|---|---|---|---|
+| `destructive-label-names-object` | 2 (liste) | 0 | 0 |
+| `ero-prop-constraint` | 2 (liste) | 0 | 0 |
+| `regulo` (K3-Lücke) | 2 (liste) | 1 (detail, `uzo-slot-accepts`) | 3 (liste `uzo-slot-accepts`, `uzo-slot-nesting`; detail `one-primary-per-container`) |
+| `k8-sxablono` | 2 (detail) | 0 | 0 |
+| `navigado-morta` | 1 (liste, `slug.html`) | 0 | 0 (R1/R2: `einstellungen.html`, `bearbeiten.html`) |
+| `render` | 1 (detail) | 0 | 0 |
+| `K5` | 1 (detail) | 0 | 0 |
+| `label-required` | 0 | 2 (detail, `fm-butono`) | 0 |
+| `uzo-slot-accepts` | 0 | 1 (detail, karto `actions`) | 3 (liste 2 `fm-faldilo` `content`/`summary`; detail 1 karto `content` ← atributlisto) |
+| `uzo-slot-nesting` | 0 | 0 | 2 (liste `fm-faldilo` `summary`; detail karto `content`) |
+| `one-primary-per-container` | 0 | 0 | 1 (detail, zwei `fm-karto`) |
+| `invented-attribute` | 0 | 0 | 2 (liste `faldilo.label`, `insigno.label`) |
+| `axe:nested-interactive` | 0 | 0 | 2 (liste hell/dunkel) |
+| `axe:target-size` | 0 | 0 | 2 (liste hell/dunkel) |
+| **Summe** | **11** | **4** | **15** |
+
+Behoben gegenüber Lauf 4 und in beiden Versuchen stabil: tote Platzhalter-Verweise, Prop-Kombinationen, Löschen-Label, leere detail-Seite, `k8-sxablono`. v2 liste war in R2 bis auf einen toten Verweis auf einen nicht geplanten Screen (`bearbeiten.html`, aus dem Satz „… Bearbeiten und Einstellungen“) grün und verschlechterte sich in R3 (neue `fm-faldilo`-Fehler, axe); v2 detail scheitert in R3 an zwei Ursachen, siehe unten.
+
+### Ursachen und Korrekturen (S038-39b)
+
+Offline mit dem echten `checkMarkup` des Gvidanto auf den gespeicherten Fragmenten (`rondoj/<n>/<slug>.html`), Probe `/tmp/s038-39b-probe/`.
+
+- **v1 `label-required` ×2 (detail).** Das Modell schrieb `<fm-butono …><span slot="label">Bearbeiten</span></fm-butono>` (der Leitfaden erlaubt `slot="label"`). Die Eroj übernehmen ein Kind im ausdrücklich benannten Standard-Slot und entfernen das Attribut (`#adoptDefault`, Nachlese 11 B-2) – darum sehen Browser-Fakten und K3 ein Label, das gespeicherte `detail.fakto.json` trägt kein `slot`. `check_markup` liest das rohe Fragment; `instancojElElementoj` legt den Text unter `texts.label` ab, nicht als `label` → `label-required`. Reproduziert: genau die drei Fehler von v1 R3. Ein Fix im Kern (`ff7c91b7` rot / `c3ac128e` grün) machte v1 R3 bis auf `uzo-slot-accepts` sauber, brach aber das AC-8-Orakel (nordstelo `ac8.test.ts`, ekranoj gegen den echten Server, `rescore.test.ts`) und hätte K3 zwischen vorher und nachher verschoben → zurückgenommen (`af1ee0a6`, D-S038-39b-1). Stattdessen nennt der Befund für die nächste Runde den geslotteten Text (`568418ce` rot / `0f32cb17` grün): „Der Text „Bearbeiten“ steht in <span slot="label">; ein Kind mit slot-Attribut zählt nicht als Label: den Text ohne Hülle und ohne slot-Attribut direkt ins Element schreiben, z. B. <fm-butono>Bearbeiten</fm-butono>.“
+- **v1 `uzo-slot-accepts` ×1 + `regulo` ×1 (detail).** `<div slot="actions">` um die Butonoj; die Regel ist richtig (karto `actions` nimmt butono/ligilo), der Vorschlag nannte die Hülle nicht. Befund für die nächste Runde nennt sie jetzt (`f4de845a` + Nachtrag `3532c00a` rot / `be7b1f6f` grün): „Im Slot actions steht ein <div> als Hülle; eine Hülle zählt als Text: slot="actions" direkt an jedes fm-butono darin setzen und das <div> weglassen.“ Die K3-Lücke `regulo` bekommt denselben Vorschlag.
+- Beide Korrekturen allgemein für jede Ero und jeden Slot, nur in `packages/ekranoj/src/rondoj.ts`; `check_usage`, Reguloj/Skemoj, `verda.ts`, `navigado.ts`, K8, Kurzprofile unverändert (`git diff --stat 0ada621f..0f32cb17`: `rondoj.ts`, `rondoj.test.ts`, `lauf5-integra.test.ts`). In v2 kamen beide Fälle nicht vor (kein `slot="label"`, keine Hülle), die neuen Sätze wurden also nicht gebraucht.
+- Tor vor v2: `rondoj.test.ts` allein 30/30 (47/47), `test:betroffen` seriell 18/18 (`/tmp/s038-logs/s038-39b-betroffen.log`; erster Durchgang mit dem Kern-Fix rot in nordstelo, `s038-39b-betroffen-1-rot.log`), bekannte Flaker (`ac8.test.ts:156`, `integra.test.ts:131`, `turbo-inputs.test.ts:679`) nicht getroffen (10 von 18 Aufgaben aus dem Cache; eroj webkit `achsen-2b2.spec.ts:82` nicht gelaufen, nur chromium); `$W/audit-ac4 0ada621f..HEAD` geändert 0, neu 0.
+- **v2 detail R3 (letzte Runde):** `one-primary-per-container` (zwei `fm-karto` ohne `emphasis` in `fm-pagxo`) und `uzo-slot-accepts`/`uzo-slot-nesting` (`<fm-atributlisto slot="content">` in `fm-karto`). Probe mit übernommenem Standard-Slot: es bliebe nur `one-primary-per-container` – in v2 liste R1 (`uzo-slot-accepts`/`-nesting`), v2 detail R2 (2 der 9 Fehler) und R3 (2 von 3) wirkt dieselbe Ursache wie bei v1 `label-required` (F-S038-39b-1).
+
+### Befunde für S038-42 („Modell oder Fundamento“)
+
+- **F-S038-39b-1 (Fundamento, AC-8-gebunden):** `check_markup`/`instancojElElementoj` behandeln ein Kind mit `slot="<Standard-Slot>"` als geslottet, die Eroj (Browser, K3) als ungeslottet. Folgen in beiden Versuchen: v1 `label-required` ×2 in allen drei Runden; v2 `uzo-slot-accepts`/`uzo-slot-nesting` für `slot="content"` an karto. Vorschlag: im Leser von `check_markup` (nach `legiMarkon`) den Standard-Slot übernehmen wie `#adoptDefault`, mit Neufassung der AC-8-Fixtures `ero-mit-slot-daten`, `link-ero`, `regelverstoss`, `abnahme-komuna-r2-liste` (ekranoj) und Entscheidung zur Neubewertung von `kuroj-werkzeugliste-F-1` (`rescore.test.ts`) – erst nach dem Vergleich von Lauf 5, damit K3 vorher/nachher gleich bleibt.
+- **F-S038-39b-2 (Fundamento, Tabu in Lauf 5):** `one-primary-per-container` zählt jede `fm-karto` mit dem Standardwert `emphasis=high` als primäre Aktion (`appliesTo` butono, dialogo, avizo, karto; bei karto ist `emphasis` die Fläche, Spec 029 ②a, Standard `high`). Zwei Karten in einer Seite verletzen die Regel immer, wenn das Modell `emphasis` nicht setzt – v2 detail in allen drei Runden. Vorschlag (`modelo/data/reguloj.json` oder der Prüfer in `modelo/src/eroj/usage.ts`): nur butono-Instanzen zählen, karto/dialogo/avizo nur als Behälter.
+- **F-S038-39b-3 (Modell):** v2 liste verweist in R1/R2 auf nicht geplante Screens (`bearbeiten.html`, `einstellungen.html`) trotz des Befunds „Nur auf geplante Screens verweisen: liste.html, detail.html.“; R3 behebt das und baut neue Fehler (`fm-faldilo` mit `butono` im Slot `summary`, `plurelektilo` in `content`, erfundenes `label`, axe `nested-interactive`/`target-size`). v2 detail: `fm-titolo`/`fm-teksto` im Slot `heading` (R1/R2), behoben in R3.
+- **F-S038-39b-4 (Hinweis):** Die Ergebnisse streuen stark zwischen den Versuchen (v1 liste grün ab R1, v2 liste nie grün; v1 detail 1 Karte, v2 detail 2 Karten) – mit zwei Versuchen ist „Modell oder Fundamento“ nur je Regel belegbar, nicht als Rate.
+
+### Fotos
+
+| Versuch | liste hell | liste dunkel | detail hell | detail dunkel | Bericht |
+|---|---|---|---|---|---|
+| v1 | [liste hell](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v1/bildoj/liste-hela.png) | [liste dunkel](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v1/bildoj/liste-malhela.png) | [detail hell](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v1/bildoj/detail-hela.png) | [detail dunkel](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v1/bildoj/detail-malhela.png) | [raporto.md](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v1/raporto.md) |
+| v2 | [liste hell](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v2/bildoj/liste-hela.png) | [liste dunkel](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v2/bildoj/liste-malhela.png) | [detail hell](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v2/bildoj/detail-hela.png) | [detail dunkel](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v2/bildoj/detail-malhela.png) | [raporto.md](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec038/abnahme-l5/komuna-v2/raporto.md) |
+
 ## Blockiert
 
 Nichts.
@@ -1250,3 +1466,23 @@ Stand vor dem Push (S038-30): Messung, Vergleich, Lückenliste, Tests aus der Me
 
 - **Rot → grün:** S038-24 F-1 `b38898d8` → `3e7a2c81`, F-2 `e4a5ce35` → `05b5d223` · S038-25 `145a7db3` → `15f8cb50` · S038-26 `20352e6a` → `6d5c05fa` · S038-27 `4aa58d31` → `bfe19023` (Code-Kopf D). Ohne Paar: `dd0d374f` (S038-23), `5b89844e` (S038-28), `2a1081fc` (S038-29, Tests mit Negativfall), Abschluss-Commit (S038-30).
 - **Merge-Reihenfolge:** A, B, C gemergt; D zuletzt.
+
+**Nachtrag (Lauf 5, wie D-25, S038-31)** aus `$S/bericht-lauf-4.md`, geprüft mit `gh pr view 155`, `gh run view <id> --json jobs` und `gh run view --job <job> --log-failed`:
+
+- **PR D** [#155](https://github.com/thojank/fundamento/pull/155) „Spec 038 – Messung“, Branch `261107-spec-038-lauf-4-messung-a4db73`, Kopf `7f4b65d7` (`7f4b65d71985b0d17e69e455eb911d1fbdeb62e2`, Abschluss-Commit von S038-30), Code-Kopf D `bfe19023`, ein Push, genau ein `workflow_dispatch`, kein Rerun. Vom Maintainer gemergt als `6a3e55e3` (`6a3e55e3e939a5616919d12bae3ea585948a0ae6`, Merge #155, 2026-11-07T14:01:40Z).
+
+| Lauf | Run | Ergebnis |
+|---|---|---|
+| `pull_request` | [42376047412](https://github.com/thojank/fundamento/actions/runs/42376047412) | rot, 24/25 Jobs grün |
+| `workflow_dispatch` (genau einer) | [42376059543](https://github.com/thojank/fundamento/actions/runs/42376059543) | rot, 23/25 Jobs grün |
+| Push `main` nach dem Merge (`6a3e55e3`, Vergleich) | [42379643892](https://github.com/thojank/fundamento/actions/runs/42379643892) | rot, 22/25 Jobs grün: Rendered Eroj Shard 3 ([Job 128424420412](https://github.com/thojank/fundamento/actions/runs/42379643892/job/128424420412), `zweitfarbe-036.spec.ts:196`/`:129` [firefox]) und Shard 4 ([Job 128424420363](https://github.com/thojank/fundamento/actions/runs/42379643892/job/128424420363), dieselben [webkit]), Unit tests (modelo) ([Job 128424420454](https://github.com/thojank/fundamento/actions/runs/42379643892/job/128424420454), `turbo-inputs.test.ts` Hook 10 s, N-9) – alle fremd |
+
+| Job | `pull_request` | Dispatch | Einordnung / erster Fehler |
+|---|---|---|---|
+| Unit tests (nordstelo, cli) – die Jobs der Pakete von PR D | grün | grün | |
+| Affected packages; Build, lint and Modelo checks; Unit tests (modelo, mcp, agordilo, metiejo; Projekcioj Shard 1–2); Rendered Eroj (Shard 1, 4); Rendered accessibility (Shard 1–3); Rendered checks (Make Kit, Quickstart; Vitrino cetero-1..3; Vitrino-Werkstatt werkstatt-1..2); Timing checks | grün | grün | |
+| **Unit tests (ekranoj)** | **rot** | grün | **eigen** (Wackler D-223, seit S038-17) – [Job 128413796669](https://github.com/thojank/fundamento/actions/runs/42376047412/job/128413796669), Schritt „Test“: `packages/ekranoj/src/rondoj.test.ts:733` „K8 probes from the scorer to the renderer (3.4b) › gives the renderer the options of before, and the same result, without sondoPetoj“: `AssertionError: expected '{"dir":…' to be '{"dir":…'` (`:749`); einziger roter Test, grün im Dispatch auf demselben Kopf. Fix in Lauf 5: A-3 (S038-34). |
+| **Rendered Eroj (Playwright, shard 2 of 4)** | grün | **rot** | **fremd** (`packages/eroj`, Spec 036) – [Job 128413839737](https://github.com/thojank/fundamento/actions/runs/42376059543/job/128413839737), Schritt „Test“: `packages/eroj/test/buehne-036.spec.ts:463` „Bühne (Spec 036, Befund 3.4) › 3.4: material opens in a dialog …“ [firefox]: „locator.evaluate: Execution context was destroyed, most likely because of a navigation“ (`:260`) |
+| **Rendered Eroj (Playwright, shard 3 of 4)** | grün | **rot** | **fremd** (`packages/eroj`, Spec 036) – [Job 128413839700](https://github.com/thojank/fundamento/actions/runs/42376059543/job/128413839700), Schritt „Test“: `zweitfarbe-036.spec.ts:196` [firefox] „the page's request to /api/marko/dukolora-rahmen-30/pruefung is answered“ (`:216`) und `:129` „the frame iframe[data-mt-vorschau] is loaded ({"rev":2})“ (`:157`); dieselben Fehler im Nachtlauf `main` und im Push-Lauf nach dem Merge |
+
+Ein „eigener“ roter Job (ekranoj, Wackler D-223) mit Fix in Lauf 5 (A-3), zwei fremde (eroj, Ursache in Lauf 5 als D-1). **Kein Rerun, kein zweiter Push** (L4-2). Jeder Job ist auf dem Kopf `7f4b65d7` in mindestens einem der beiden Läufe grün. Wackel-Quote auf `7f4b65d7`: ekranoj `rondoj.test.ts:733` 1/2; eroj `zweitfarbe-036:129/196` 1/2, `buehne-036:463` [firefox] 1/2. Logs (gefiltert): `/tmp/s038-logs/s038-31-ci-{128413796669,128413839700,128413839737}.log`, `/tmp/s038-logs/s038-31-ci-merge-{128424420363,128424420412,128424420454}.log`. T3868 abgehakt. **Bericht:** `$S/bericht-lauf-4.md`.

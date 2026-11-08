@@ -148,7 +148,17 @@
     },
     "EroFieldName": {
       "description": "A part of an Ero that get_ero answers with fields (Spec 038 MG-3, MG-4).",
-      "enum": ["brief", "slots", "role", "navigation"]
+      "enum": ["brief", "slots", "role", "navigation", "constraints"]
+    },
+    "EroConstraints": {
+      "description": "What an Ero's data allows and how its label is judged (Spec 038 B-3), each one line generated from the Skemo, the Uzo and the Regularo: props the allowed prop combinations (constraints naming props only), label the statements of the blocking label rules, grouped by their condition.",
+      "type": "object",
+      "properties": {
+        "props": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
     },
     "EroNavigation": {
       "description": "The prop that holds the target of a link Ero (Spec 038 MG-4).",

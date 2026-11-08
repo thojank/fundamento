@@ -21,6 +21,7 @@ import type {
   EkranojEnigo,
   EkranojRezulto,
   GvidantoKonekto,
+  Kontrolo,
   KostoTakso,
   Marko,
   Problemo,
@@ -69,6 +70,7 @@ export const EKRANOJ_HELPO = `${COMMAND_LINE}: Build up to five linked, self-che
 
 Usage: ${COMMAND_LINE} "<Satz>" [--config <fundamento.config.json>] [--ekranoj a,b,c] [--out <dir>]
                   [--max-tokens <n>] [--env <file>] [--ledger <dir>] [--ja] [--json]
+                  [--lauf-id <id> --kontroll-modelo <provider/model>]
        ${COMMAND_LINE} ${MANKOJ_MODUSO} <ordner…> [--out <file>] [--json]
 
 An agent plans the screens of the sentence (at most 5), builds each with the Eroj and Sxablonoj
@@ -87,6 +89,13 @@ Options:
                       run stops and reports what it built (exit 0)
   --env <file>        The .env with FM_KI_ANBIETER, FM_KI_MODELL and the key (default: .env in
                       the current directory). Only mistral/ministral-14b-2512 is allowed
+                      (the one exception: a control run, see --kontroll-modelo)
+  --lauf-id <id>      The run id (as the cost ledger books it). An id starting with kontrolle-
+                      is a control run and needs --kontroll-modelo
+  --kontroll-modelo <provider/model>
+                      The model of a control run, only openrouter/anthropic/claude-sonnet-5.5
+                      and only with --lauf-id kontrolle-…; the provider is built from it, the
+                      key is OPENROUTER_API_KEY of the .env. Any other combination: exit 2
   --ledger <dir>      Folder of anfragoj.json, the requests per day (default: ${DEFAULT_DIR})
   --ja                Start without asking after the estimate (needed without a terminal)
   --json              Print the summary as JSON; on exit 2 one JSON document
@@ -101,7 +110,7 @@ Sub-mode:
                       list as a JSON array, --json prints the same array. No .env, no model.
 
 Exit codes: 0 screens built (also a run stopped by --max-tokens), 1 no screen could be built,
-2 usage error, missing .env, model not allowed, or the start not confirmed.
+2 usage error, missing .env, model or control pair not allowed, or the start not confirmed.
 `;
 
 const FLAGS = {
@@ -113,6 +122,8 @@ const FLAGS = {
   ledger: { type: "string" },
   ja: { type: "boolean" },
   json: { type: "boolean" },
+  "lauf-id": { type: "string" },
+  "kontroll-modelo": { type: "string" },
 } as const;
 
 /** Everything the command touches outside itself; tests and the smoke run replace parts of it. */
@@ -128,6 +139,8 @@ export interface EkranojMedio {
     provider: Provider;
     ledger: string;
     log: (linio: string) => void;
+    /** The control pair (`--lauf-id`, `--kontroll-modelo`; Spec 038 C-3); absent otherwise. */
+    kontrolo?: Kontrolo;
   }): ChatModel | Promise<ChatModel>;
   /** The Gvidanto: `fm mcp [--config <cfg>]` of this cli as a child process over stdio. */
   gvidanto(e: {
@@ -219,7 +232,7 @@ export function realaMedio(): EkranojMedio {
         rl.close();
       }
     },
-    chat: async ({ provider, ledger, log }) => {
+    chat: async ({ provider, ledger, log, kontrolo }) => {
       const { chatModelDe } = await import("@fundamento/ekranoj");
       // The limits of the provider and the requests of each UTC day, as `pnpm nordstelo` keeps them.
       mkdirSync(ledger, { recursive: true });
@@ -239,7 +252,7 @@ export function realaMedio(): EkranojMedio {
             `${JSON.stringify(mergeLedger(legi(), anfragoj.entries), null, 2)}\n`,
           ),
       });
-      return chatModelDe({ provider, gate, log });
+      return chatModelDe({ provider, gate, log, ...(kontrolo === undefined ? {} : { kontrolo }) });
     },
     gvidanto: async ({ config, log }) => {
       const { konektiGvidanton } = await import("@fundamento/ekranoj");
@@ -425,6 +438,22 @@ function legiMaksTokenojn(valoro: string | boolean | (string | boolean)[] | unde
   return nombro;
 }
 
+/**
+ * The control pair of the call (Spec 038 C-3, D-S038-36-1): `--lauf-id` and `--kontroll-modelo`,
+ * undefined when neither is given (the run of ministral as before).
+ */
+function kontroloDe(
+  values: Readonly<Record<string, string | boolean | (string | boolean)[] | undefined>>,
+): Kontrolo | undefined {
+  const laufId = values["lauf-id"];
+  const kontrolModelo = values["kontroll-modelo"];
+  if (typeof laufId !== "string" && typeof kontrolModelo !== "string") return undefined;
+  return {
+    ...(typeof laufId === "string" ? { laufId } : {}),
+    ...(typeof kontrolModelo === "string" ? { kontrolModelo } : {}),
+  };
+}
+
 /** The summary of a run for the console and `--json`. */
 function resumoDe(rezulto: EkranojRezulto, marko: string, verdaj: number): Record<string, unknown> {
   return {
@@ -487,6 +516,7 @@ async function run(
       : join(radiko, kuroNomo(medio.nun(), frazoSlug(frazo, ek.slugDe), radiko));
   const ledger =
     typeof values.ledger === "string" ? resolve(context.baseDir, values.ledger) : radiko;
+  const kontrolo = kontroloDe(values);
   const enigo: EkranojEnigo = {
     frazo,
     marko,
@@ -495,10 +525,16 @@ async function run(
     ...(nomoj === undefined ? {} : { ekranoj: nomoj }),
     varianto: "F",
     lingvo: "de",
+    ...(kontrolo === undefined ? {} : { kontrolo }),
   };
   const problemoj = ek.kontroliEnigon(enigo).filter((p) => p.rule !== "gvidanto-missing");
   if (problemoj.length > 0) {
     return malsukceso(context, json, problemoj, { fino: "Nothing was started." });
+  }
+  // The control pair (C-3) before the .env: a wrong pair needs no file to be refused.
+  const paroProblemoj = ek.kontroliKontrolon(kontrolo);
+  if (paroProblemoj.length > 0) {
+    return malsukceso(context, json, paroProblemoj, { fino: "Nothing was started." });
   }
 
   // The .env and the model guard (D-19), before any request can be made.
@@ -523,9 +559,16 @@ async function run(
   }
   let provider: Provider;
   try {
-    provider = providerOf(agordoj);
-    const malpermesoj = ek.kontroliModelon(provider);
-    if (malpermesoj.length > 0) return malsukceso(context, json, malpermesoj);
+    // The control run builds its provider from --kontroll-modelo; the key stays the .env's.
+    provider = providerOf(
+      kontrolo?.kontrolModelo === undefined
+        ? agordoj
+        : ek.agordojPorKontrolo(agordoj, kontrolo.kontrolModelo),
+    );
+    const malpermesoj = ek.kontroliModelon(provider, kontrolo);
+    if (malpermesoj.length > 0) {
+      return malsukceso(context, json, malpermesoj, { fino: "Nothing was started." });
+    }
   } catch (eraro) {
     // providerOf names the variable that is missing, never a value.
     if (!json) {
@@ -594,7 +637,12 @@ async function run(
   let bildigilo: Bildigilo | undefined;
   let rezulto: EkranojRezulto;
   try {
-    const chat = await medio.chat({ provider, ledger, log });
+    const chat = await medio.chat({
+      provider,
+      ledger,
+      log,
+      ...(kontrolo === undefined ? {} : { kontrolo }),
+    });
     gvidanto = await medio.gvidanto({ config, log });
     const taksilo = await medio.taksilo({ config });
     const markoKonstruo = await medio.marko({ config, marko });

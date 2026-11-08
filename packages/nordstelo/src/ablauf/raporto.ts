@@ -8,7 +8,15 @@
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
-import type { Haltigo, Kriterio, Peno, Taksilo, Varianto } from "@fundamento/ekranoj";
+import type {
+  AnbieterEraro,
+  Haltigo,
+  Kriterio,
+  MalplenaPagxo,
+  Peno,
+  Taksilo,
+  Varianto,
+} from "@fundamento/ekranoj";
 import { kostoOf } from "@fundamento/metiejo";
 import {
   defaultModeloSource,
@@ -89,6 +97,106 @@ export interface KuroRekordo {
   restantaj: number;
   notoj: string[];
   sxargo: KuroSxargo;
+  /**
+   * Every caught provider error of the run (Spec 038 A-1, C-1, the shape of ekranoj), messages
+   * cleaned; absent when nothing was caught and in older `kuro.json`.
+   */
+  anbieterfehleroj?: AnbieterEraro[];
+  /**
+   * The deviations left after the last round per screen slug and rule (Spec 038 A-2, C-2,
+   * additive): Σ over all slugs and rules === {@link restantaj} (unbuilt screens as
+   * `nicht-gebaut`). Absent on the error path, for a run that did not start and in older
+   * `kuro.json`.
+   */
+  restantajLauxRegulo?: Record<string, Record<string, number>>;
+  /**
+   * Every screen-round whose page had no element content (Spec 038 B-4, AK-2, the records of
+   * ekranoj's `EkranojRezulto.malplenajPagxoj`, D-S038-37c-5); `respondo` is relative to the run
+   * folder. Absent when there are none, on the error path and in older `kuro.json`.
+   */
+  malplenajPagxoj?: MalplenaPagxo[];
+}
+
+/** How many rules the reports show per flow × variant (Spec 038 A-2: the three most frequent). */
+export const RESTANTAJ_SUPRAJ = 3;
+
+/** One rule with the number of its open deviations. */
+export interface RegulaNombro {
+  regulo: string;
+  nombro: number;
+}
+
+/** The open deviations of some runs: their sum and the most frequent rules (C-2). */
+export interface RestantajSupraj {
+  /** Σ over every rule (= Σ `restantaj` of the runs). */
+  sumo: number;
+  /** At most {@link RESTANTAJ_SUPRAJ} rules, most frequent first, ties by rule name. */
+  supraj: RegulaNombro[];
+}
+
+/** What {@link restantajSuprajDe} reads of one run. */
+export interface RestantajEnKuro {
+  restantaj: number;
+  /** null: the record has no `restantajLauxRegulo` (older shape, error path). */
+  restantajLauxRegulo: Record<string, Record<string, number>> | null;
+}
+
+/**
+ * The open deviations of the started runs of one flow × variant, summed over the runs and screens
+ * per rule (Spec 038 A-2, C-2). null („nicht vorhanden“) where no run carries
+ * `restantajLauxRegulo` or a run with open deviations lacks it (an older `kuro.json`): a sum is
+ * only shown when it is complete. A run without the field and without deviations (the error path)
+ * adds nothing.
+ */
+export function restantajSuprajDe(kuroj: readonly RestantajEnKuro[]): RestantajSupraj | null {
+  if (!kuroj.some((kuro) => kuro.restantajLauxRegulo !== null)) return null;
+  if (kuroj.some((kuro) => kuro.restantajLauxRegulo === null && kuro.restantaj !== 0)) return null;
+  const jeRegulo = new Map<string, number>();
+  for (const kuro of kuroj) {
+    for (const reguloj of Object.values(kuro.restantajLauxRegulo ?? {})) {
+      for (const [regulo, nombro] of Object.entries(reguloj))
+        jeRegulo.set(regulo, (jeRegulo.get(regulo) ?? 0) + nombro);
+    }
+  }
+  const cxiuj = [...jeRegulo.entries()]
+    .map(([regulo, nombro]) => ({ regulo, nombro }))
+    .sort(
+      (a, b) => b.nombro - a.nombro || (a.regulo < b.regulo ? -1 : a.regulo > b.regulo ? 1 : 0),
+    );
+  return {
+    sumo: cxiuj.reduce((sumo, r) => sumo + r.nombro, 0),
+    supraj: cxiuj.slice(0, RESTANTAJ_SUPRAJ),
+  };
+}
+
+/** The rules of {@link RestantajSupraj} in a table cell: „regulo n, …“, „–“, „nicht vorhanden“. */
+export const restantajTeksto = (restantaj: RestantajSupraj | null): string =>
+  restantaj === null
+    ? "nicht vorhanden"
+    : restantaj.supraj.length === 0
+      ? "–"
+      : restantaj.supraj.map((r) => `${r.regulo} ${r.nombro}`).join(", ");
+
+/** The sum of {@link RestantajSupraj} in a table cell („–“ where not available). */
+export const restantajSumoTeksto = (restantaj: RestantajSupraj | null): string =>
+  restantaj === null ? "–" : String(restantaj.sumo);
+
+/** Read `restantajLauxRegulo` of a stored record, tolerant: null where missing or malformed. */
+export function restantajLauxReguloEl(
+  value: unknown,
+): Record<string, Record<string, number>> | null {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return null;
+  const own: Record<string, Record<string, number>> = {};
+  for (const [slug, reguloj] of Object.entries(value)) {
+    if (reguloj === null || typeof reguloj !== "object" || Array.isArray(reguloj)) return null;
+    const unu: Record<string, number> = {};
+    for (const [regulo, nombro] of Object.entries(reguloj)) {
+      if (typeof nombro !== "number" || !Number.isFinite(nombro)) return null;
+      unu[regulo] = nombro;
+    }
+    own[slug] = unu;
+  }
+  return own;
 }
 
 /** `lauf.json`: the settings of the whole measurement. */
@@ -238,6 +346,17 @@ export interface RaportoDatumoj {
 export interface AblaufRaporto {
   md: string;
   datumoj: RaportoDatumoj;
+}
+
+/**
+ * One row of „Offene Abweichungen je Regel“ in `raporto.md` (Spec 038 A-2, C-2): the started
+ * repetitions of a flow × variant. Only in the Markdown – the report data (`raporto.json`) keep
+ * their shape; the rules live in `kuro.json`.
+ */
+export interface RestantajVico {
+  tasko: string;
+  varianto: Varianto;
+  restantajSupraj: RestantajSupraj | null;
 }
 
 // --- Helpers -----------------------------------------------------------------------------------
@@ -397,6 +516,14 @@ class K8Kolektilo {
 
 /** The report data of a stored run folder (pure apart from reading it). */
 export function raportoDatumoj(dir: string, opcioj: RaportoOpcioj = {}): RaportoDatumoj {
+  return kolekti(dir, opcioj).datumoj;
+}
+
+/** The report data and the rows of open deviations per rule of a stored run folder. */
+function kolekti(
+  dir: string,
+  opcioj: RaportoOpcioj,
+): { datumoj: RaportoDatumoj; restantaj: RestantajVico[] } {
   const lauf = legiJson<LaufRekordo>(join(dir, LAUF_DOSIERO));
   const modelo = opcioj.modelo ?? loadModelo(defaultModeloSource()).modelo;
   if (modelo === undefined) throw new Error("Die Modelo des Repositorys lässt sich nicht laden.");
@@ -409,16 +536,25 @@ export function raportoDatumoj(dir: string, opcioj: RaportoOpcioj = {}): Raporto
     });
 
   const kuroj: KuroEnRaporto[] = [];
+  const restantaj: RestantajVico[] = [];
   const k8Kolektilo = new K8Kolektilo();
   for (const slug of lauf.taskoj) {
     const tasko = trovuTaskon(slug);
     if (tasko === undefined) throw new Error(`Die Aufgabe ${slug} steht nicht im Katalog.`);
     const taksilo = taksiloPor(tasko);
     for (const varianto of lauf.varianten) {
+      const restantajEnKuroj: RestantajEnKuro[] = [];
+      let kunRekordo = false;
       for (let ripeto = 1; ripeto <= lauf.ripetoj; ripeto += 1) {
         const own = kuroDir(dir, slug, varianto, ripeto);
         if (!existsSync(join(own, KURO_DOSIERO))) continue;
         const rekordo = legiJson<KuroRekordo>(join(own, KURO_DOSIERO));
+        kunRekordo = true;
+        if (rekordo.nekomencita !== true)
+          restantajEnKuroj.push({
+            restantaj: rekordo.restantaj,
+            restantajLauxRegulo: restantajLauxReguloEl(rekordo.restantajLauxRegulo),
+          });
         const rondoj: KuroEnRaporto["rondoj"] = {};
         if (existsSync(join(own, "plano.json"))) {
           const poentoj = poentiKuron({ tasko, varianto, kuro: legiKuron(own), taksilo, modelo });
@@ -448,6 +584,12 @@ export function raportoDatumoj(dir: string, opcioj: RaportoOpcioj = {}): Raporto
           rondoj,
         });
       }
+      if (kunRekordo)
+        restantaj.push({
+          tasko: slug,
+          varianto,
+          restantajSupraj: restantajSuprajDe(restantajEnKuroj),
+        });
     }
   }
 
@@ -545,7 +687,7 @@ export function raportoDatumoj(dir: string, opcioj: RaportoOpcioj = {}): Raporto
 
   const usdoj = kuroj.filter((kuro) => !kuro.nekomencita).map((kuro) => kuro.usd);
   const k8Vicoj = k8Kolektilo.vicoj();
-  return {
+  const datumoj: RaportoDatumoj = {
     id: basename(dir),
     lauf,
     streuung: { reiheK: STREUUNG_REIHE_K, fonto: STREUUNG_FONTO },
@@ -577,6 +719,7 @@ export function raportoDatumoj(dir: string, opcioj: RaportoOpcioj = {}): Raporto
       ),
     },
   };
+  return { datumoj, restantaj };
 }
 
 // --- Markdown ----------------------------------------------------------------------------------
@@ -610,8 +753,14 @@ const jesNe = (value: boolean | null): string => (value === null ? "–" : value
 const k8Teksto = (value: number | undefined): string =>
   value === undefined ? "nicht geprüft" : n(value);
 
-/** The Markdown report of the data: German, tables, no timestamp. */
-export function raportoMd(datumoj: RaportoDatumoj): string {
+/**
+ * The Markdown report of the data: German, tables, no timestamp. With `restantaj` (Spec 038 A-2)
+ * the section „Offene Abweichungen je Regel“ follows the effort table.
+ */
+export function raportoMd(
+  datumoj: RaportoDatumoj,
+  restantaj: readonly RestantajVico[] = [],
+): string {
   const { lauf, komparoj, sumo } = datumoj;
   const lines = [
     `# Nordstern-Kennzahl „ganzer Ablauf“ – Lauf ${datumoj.id}`,
@@ -718,6 +867,21 @@ export function raportoMd(datumoj: RaportoDatumoj): string {
       `| ${kuro.tasko} | ${kuro.varianto} | ${kuro.ripeto} | ${kuro.faritajRondoj} | ${halt} | ${n(kuro.peno.inputTokens)} | ${n(kuro.peno.outputTokens)} | ${n(kuro.peno.requests)} | ${n(kuro.peno.toolCalls)} | ${n(kuro.peno.bytes)} B | ${dauer} | ${usdTeksto(kuro.usd)} | ${sxargoTeksto(kuro.sxargo.antaux)} | ${sxargoTeksto(kuro.sxargo.post)} | ${kuro.sxargo.kernoj} | ${kuro.restantaj} |`,
     );
   }
+  if (restantaj.length > 0) {
+    lines.push(
+      "",
+      "## Offene Abweichungen je Regel (nach der letzten Runde, häufigste drei)",
+      "",
+      "Summe über die gestarteten Wiederholungen; nicht gebaute Screens als „nicht-gebaut“. „nicht vorhanden“: die Aufzeichnung hat keine Regeln (älterer Stand) oder der Lauf endete mit einem Fehler.",
+      "",
+      "| Aufgabe | Variante | offen | häufigste Regeln |",
+      "|---|---|---|---|",
+      ...restantaj.map(
+        (vico) =>
+          `| ${vico.tasko} | ${vico.varianto} | ${restantajSumoTeksto(vico.restantajSupraj)} | ${restantajTeksto(vico.restantajSupraj)} |`,
+      ),
+    );
+  }
   lines.push(
     "",
     "## Summe",
@@ -743,8 +907,8 @@ export function raportoMd(datumoj: RaportoDatumoj): string {
 
 /** The report of a stored run folder (D-33): the same folder gives the same bytes. */
 export function raporto(dir: string, opcioj: RaportoOpcioj = {}): AblaufRaporto {
-  const datumoj = raportoDatumoj(dir, opcioj);
-  return { md: raportoMd(datumoj), datumoj };
+  const { datumoj, restantaj } = kolekti(dir, opcioj);
+  return { md: raportoMd(datumoj, restantaj), datumoj };
 }
 
 /** Writes `raporto.md` and `raporto.json` into the run folder. */

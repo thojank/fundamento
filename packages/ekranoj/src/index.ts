@@ -4,8 +4,10 @@
 // and the costs; since S037-06 the gaps of a run and the Lückenliste of many runs (Teil 3).
 // Since S038-29 (C-5, D-208) also the K8 facts extractor, so nordstelo's twin test can compare it
 // with its own copy; additive, nothing in ekranoj imports from nordstelo.
+// Since S038-32 (Lauf 5, C-1) the provider error layer and its report shape `AnbieterEraro`.
 
 export * from "./agento.js";
+export * from "./anbieterfehleroj.js";
 export {
   aspektoFaktojEnPagxo,
   normigiAspektoFaktojn,
