@@ -13,6 +13,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { statikaFakto } from "./fakto-statika.js";
 import {
   type AnbieterEraro,
   eligoDe,
@@ -25,6 +26,7 @@ import {
   type RaportoJson,
   REKOMENCO_F,
 } from "./index.js";
+import { fragmentoEl } from "./konstruo.js";
 import { BildigiloDouble } from "./test-doubles/bildigilo.js";
 import {
   anbieterEraro,
@@ -41,7 +43,16 @@ import {
 import { planoKun } from "./test-doubles/faktoj.js";
 import { CXIUJ_ILOJ, kampojDeTabelo, LIMOJ, MemoraPonto } from "./test-doubles/iloj.js";
 import { MALVERDA, TaksiloDouble, VERDA } from "./test-doubles/taksilo.js";
-import type { ChatRespondo, EkranojDeps, EkranojEnigo, EkranojRezulto, Plano } from "./tipoj.js";
+import type {
+  BildigoRezulto,
+  ChatRespondo,
+  EkranaDokumento,
+  EkranojDeps,
+  EkranojEnigo,
+  EkranojRezulto,
+  Plano,
+  Varianto,
+} from "./tipoj.js";
 
 const FIKSAJXOJ = fileURLToPath(new URL("../test/fixtures/b4-leere-seite/", import.meta.url));
 const legi = (nomo: string): string => readFileSync(join(FIKSAJXOJ, nomo), "utf8");
@@ -238,12 +249,14 @@ async function kuri(
     taksilo?: TaksiloDouble;
     antauaj?: Record<string, (ChatRespondo | Error)[]>;
     tools?: MemoraPonto;
+    bildigilo?: BildigiloDouble;
   } = {},
 ) {
   const out = mkdtempSync(join(tmpdir(), "s038-37t-"));
   const chat = new SkriptaModelo(skriptoDe(e.antauaj ?? MIKSAJXO()), { modelo: PERMESITA_MODELO });
   const tools = e.tools ?? new MemoraPonto({ iloj: CXIUJ_ILOJ });
   const deps = depsDe(chat, tools, e.taksilo ?? detailVerda());
+  if (e.bildigilo !== undefined) deps.bildigilo = e.bildigilo;
   const rezulto = await kuruEkranojn(enigoDe(out), deps);
   return { out, chat, tools, deps, rezulto };
 }
@@ -411,12 +424,26 @@ describe("Lauf 5 end to end: a wrapper in a slot is named for the next round (S0
     };
   };
 
+  /** A renderer double whose facts keep the element tree of the fragment, as the browser's do. */
+  class ArbaBildigilo extends BildigiloDouble {
+    override async render(
+      dokumento: EkranaDokumento,
+      opcioj: { aspektoj: readonly string[]; varianto: Varianto },
+    ): Promise<BildigoRezulto> {
+      const rezulto = await super.render(dokumento, opcioj);
+      const fragmento = fragmentoEl(dokumento.html) ?? dokumento.html;
+      const { elements } = statikaFakto(fragmento, "de");
+      return { ...rezulto, fakto: { ...rezulto.fakto, elements } };
+    }
+  }
+
   it("asks round 2 of detail with a suggestion that names the wrapper and the Eroj in it", async () => {
     const detail1 = pagxo("detail", 1).replace("</fm-karto>", `${HULO}</fm-karto>`);
     const { chat, rezulto } = await kuri({
       taksilo: new TaksiloDouble(() => MALVERDA),
       antauaj: { "detail#1": [respondo(`\`\`\`html\n${detail1}\n\`\`\``)] },
       tools: new MemoraPonto({ iloj: CXIUJ_ILOJ, checkMarkup: kontrolo }),
+      bildigilo: new ArbaBildigilo(),
     });
     const atendata = `${SUGESTO} Im Slot actions steht ein <div> als Hülle; eine Hülle zählt als Text: slot="actions" direkt an jedes fm-butono darin setzen und das <div> weglassen.`;
     expect(
