@@ -2571,6 +2571,9 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
       "skeleton.fill": "color/background/sunken",
       "skeleton.radius": "radius/role/control",
       "skeleton.height": "size/icon/small",
+      // Spec 046 T3 Nachbesserung (F-T5-1): the target of the selection's boxes, bound, not drawn.
+      "selection.width": "size/target/min",
+      "selection.height": "size/target/min",
       // Spec 036 Teil 5 ②b-3 (A-tabelo-4): the foot, bound, not drawn.
       "foot.fill": "color/background/sunken",
       "foot.color": "color/text/default",
@@ -2615,6 +2618,9 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
       "skeleton.fill": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
       "skeleton.radius": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
       "skeleton.height": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+      // Spec 046 T3 Nachbesserung (F-T5-1): the selection stands with selectable only (Jugxo).
+      "selection.width": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+      "selection.height": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
     });
     expect(rest?.hidden).toBeUndefined();
     expect(rest?.stroke).toBeUndefined();

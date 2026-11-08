@@ -10,7 +10,7 @@ PR A ist ein Strang T1 → T6 (B-8), T7 läuft parallel in PR B im eigenen Workt
 | T2 | `fm-krado` | A | erledigt (Befunde F-T2-1 bis F-T2-6) |
 | T3 | `fm-tabelo`: Auswahl, Laden, fester Kopf, geschlossene Grenzen | A | erledigt (Befunde F-T3-1 bis F-T3-6) |
 | T4 | `fm-templinio` | A | erledigt (Befunde F-T4-1 bis F-T4-6) |
-| T5 | Vitrino, Geometrie- und Stiltests, Alirebleco, Figma-Bauformen | A | erledigt (Befunde F-T5-1 bis F-T5-5, Etappe F EF-1 bis EF-5) |
+| T5 | Vitrino, Geometrie- und Stiltests, Alirebleco, Figma-Bauformen | A | erledigt (Befunde F-T5-1 bis F-T5-5, Etappe F EF-1 bis EF-5; F-T5-1 behoben in der T3-Nachbesserung, D-36) |
 | T6 | `dataForm`, L5-4, „create new“, „Inhalte anzeigen“, Vertragsfortschreibung | A | offen |
 | T7 | L5-1 mit AC-8, L5-2, L5-3 | B | offen |
 | T8 | Je PR ein Push, ein Dispatch, Bericht | A und B | offen |
@@ -49,6 +49,7 @@ PR A ist ein Strang T1 → T6 (B-8), T7 läuft parallel in PR B im eigenen Workt
 - [x] `neu-seit-main.ts`: `ero.tabelo.skeleton.*` und `ero.tabelo.head.layer` neu seit dem Stand von main (wie D-08) (`934c29ff`).
 - [x] Läufe: modelo 4873/5 rot (F-T1-1, -2, -5, -6, -10), mcp 505/2 (F-T1-6, -7), projekcioj 16 rot im Gesamtlauf, davon nach den letzten Commits offen: F-T1-4, F-T1-3, F-T3-1, F-T3-6 (×3), F-T1-10/F-T2-4/F-T3-3 (`parity.test.ts` ×5); `figma-cxiuj.test.ts:32` einmal Zeitgrenze des Hooks unter Last, allein grün (wie F-T2-6). eroj Vitest 43/43. Playwright `tabelo.spec.ts` 15/15 in Chromium, Firefox, WebKit; `nachlese-7`, `nachlese-11-konformeco`, `pflicht`, `react` (Chromium) 16/16. Checks grün: lint, regularo, dokumentaro (44), vortaro-lint, mankoj, make-kit, alirebleco; rot: parity (F-T1-10/F-T2-4 plus F-T3-3).
 - [x] Plan (D-18 bis D-22, F-T3-1 bis F-T3-6).
+- [x] Nachbesserung F-T5-1 (D-36, `9708cc08`): Teil `selection` (`size.target.min`) am Kästchen jeder Auswahlzelle, Ero-Tokens für Kern und gepflegte Aspekto-Sets, Freigabe in Figma (`tabelo:selection`, Jugxo), rot zuerst `tabelo.spec.ts` „Spec 046 T3 Nachbesserung“ (3 rot), grün in Chromium, Firefox, WebKit; `check:alirebleco-eroj` 219/219 je Engine. Folge `figma.test.ts:2543` (eigener Commit).
 
 ## T4 im Einzelnen
 
