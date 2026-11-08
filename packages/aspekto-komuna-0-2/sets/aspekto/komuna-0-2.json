@@ -10262,6 +10262,10 @@
         "typography": {
           "$type": "typography",
           "$value": "{typography.label.1}"
+        },
+        "layer": {
+          "$type": "number",
+          "$value": "{elevation.layer.raised}"
         }
       },
       "cell": {
@@ -10380,6 +10384,20 @@
             "$type": "color",
             "$value": "{color.focus.inner}"
           }
+        }
+      },
+      "skeleton": {
+        "fill": {
+          "$type": "color",
+          "$value": "{color.background.sunken}"
+        },
+        "radius": {
+          "$type": "dimension",
+          "$value": "{radius.role.control}"
+        },
+        "height": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}"
         }
       },
       "foot": {

@@ -42,6 +42,24 @@
         "description": "The direction of the sorted column."
       },
       {
+        "name": "selectable",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 046 T3: a first column of fm-markobutono, one per row with a data-key and one in the head for all; the table says select, the application writes data-selected on the rows (as it sets sort)."
+      },
+      {
+        "name": "loading",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 046 T3: the rows load: aria-busy on the table and three skeleton rows in the body in place of the rows and before the empty state."
+      },
+      {
+        "name": "sticky-header",
+        "kind": "boolean",
+        "default": false,
+        "description": "Spec 046 T3: the head row stays at the top of the table's own scroll region while the rows scroll; the region scrolls where its height is bounded."
+      },
+      {
         "name": "lines",
         "kind": "enum",
         "values": [
@@ -92,6 +110,9 @@
         },
         "typography": {
           "fixed": "typography.label.1"
+        },
+        "layer": {
+          "fixed": "elevation.layer.raised"
         }
       },
       "cell": {
@@ -160,6 +181,17 @@
         },
         "color": {
           "fixed": "color.focus.inner"
+        }
+      },
+      "skeleton": {
+        "fill": {
+          "fixed": "color.background.sunken"
+        },
+        "radius": {
+          "fixed": "radius.role.control"
+        },
+        "height": {
+          "fixed": "size.icon.small"
         }
       },
       "foot": {
@@ -257,12 +289,26 @@
       "keys": [
         "Enter",
         "Space"
-      ]
+      ],
+      "texts": {
+        "selectable": {
+          "de": "Zeile auswählen",
+          "en": "Select row"
+        },
+        "head-name": {
+          "de": "Alle Zeilen auswählen",
+          "en": "Select all rows"
+        }
+      }
     },
     "events": [
       {
         "name": "sort-change",
         "description": "A sortable header was pressed (detail: column, direction); sorting itself is the application's, the table shows sort and direction."
+      },
+      {
+        "name": "select",
+        "description": "Spec 046 T3: a selection box was pressed (detail: keys, the data-key of every row the selection would hold, in DOM order); selecting itself is the application's, the table shows data-selected."
       }
     ],
     "goals": [
@@ -284,6 +330,39 @@
         },
         "props": {},
         "regulo": "table-caption-names-the-content"
+      },
+      {
+        "goal": "row-selection",
+        "keywords": {
+          "en": [
+            "selection",
+            "selectable"
+          ],
+          "de": [
+            "zeilenauswahl",
+            "markieren"
+          ]
+        },
+        "props": {
+          "selectable": true
+        }
+      },
+      {
+        "goal": "sticky-header",
+        "keywords": {
+          "en": [
+            "sticky",
+            "fixed"
+          ],
+          "de": [
+            "fixiert",
+            "feste",
+            "kopfzeile"
+          ]
+        },
+        "props": {
+          "sticky-header": true
+        }
       }
     ]
   }

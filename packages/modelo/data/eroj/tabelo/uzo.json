@@ -53,21 +53,6 @@
     ],
     "boundary": [
       {
-        "case": "row-selection",
-        "action": "ask-human",
-        "keywords": {
-          "en": [
-            "selection",
-            "checkboxes"
-          ],
-          "de": [
-            "zeilenauswahl",
-            "markieren"
-          ]
-        },
-        "kialo": "Selecting rows adds a column of boxes and actions on the selection, because a selection without actions says nothing; a person decides the pattern."
-      },
-      {
         "case": "pagination",
         "action": "use-instead",
         "keywords": {
@@ -98,22 +83,6 @@
         },
         "kialo": "Editing a value in a cell is the lokredaktilo's, because the cell becomes a field with save and cancel on the spot (Spec 025 ③ closes the boundary inline-edit); a form for every cell stays a form.",
         "ero": "lokredaktilo"
-      },
-      {
-        "case": "sticky-header",
-        "action": "not-supported",
-        "keywords": {
-          "en": [
-            "sticky",
-            "fixed"
-          ],
-          "de": [
-            "fixiert",
-            "feste",
-            "kopfzeile"
-          ]
-        },
-        "kialo": "A header that stays while the rows scroll needs a scroll rule of the region, because the table itself does not scroll; that comes with the region's second round."
       },
       {
         "case": "row-tint",
@@ -293,6 +262,15 @@
         "action": {
           "de": "Auf dem Kopf einer sortierbaren Spalte bitten die Tasten, nach ihr zu sortieren; ein zweites Mal kehrt die Richtung um.",
           "en": "On the header of a sortable column the keys ask to sort by it; a second time reverses the direction."
+        }
+      },
+      {
+        "keys": [
+          "Space"
+        ],
+        "action": {
+          "de": "Auf dem Kästchen einer Zeile bittet die Taste, die Zeile aus- oder abzuwählen; das Kästchen im Kopf bittet um alle Zeilen.",
+          "en": "On the box of a row the key asks to select or deselect the row; the box in the head asks for every row."
         }
       }
     ]

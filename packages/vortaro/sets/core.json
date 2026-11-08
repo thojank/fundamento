@@ -23453,6 +23453,16 @@
               "id": "tok_01M5GF0TQY40AAXJHBF90R5XTN"
             }
           }
+        },
+        "layer": {
+          "$type": "number",
+          "$value": "{elevation.layer.raised}",
+          "$description": "tabelo: head.layer (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XSN8Y4MF2VGK8BN8S90FQE"
+            }
+          }
         }
       },
       "cell": {
@@ -23709,6 +23719,39 @@
                 "id": "tok_01M5GF0TQY40AAXJHBF90R5XV9",
                 "role": "ero"
               }
+            }
+          }
+        }
+      },
+      "skeleton": {
+        "fill": {
+          "$type": "color",
+          "$value": "{color.background.sunken}",
+          "$description": "tabelo: skeleton.fill (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XS9KNCCV11GYHV56PMGZMA",
+              "role": "ero"
+            }
+          }
+        },
+        "radius": {
+          "$type": "dimension",
+          "$value": "{radius.role.control}",
+          "$description": "tabelo: skeleton.radius (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XS9KND52914B84FNHFJVE7"
+            }
+          }
+        },
+        "height": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}",
+          "$description": "tabelo: skeleton.height (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XSV817KGE2G3SJNJ66YHE9"
             }
           }
         }

@@ -288,9 +288,7 @@
       "uzo_01M51ZRGEPTH2CEY385GE1PB0M/purpose": "Füllt einen Bereich, während sein Inhalt lädt oder wenn es keinen gibt: Standards werden geladen, noch keine Standards; ein Titel (Slot heading) sagt, wo die Person ist, ein Symbol (Slot icon), was fehlt.",
       "uzo_01M523FAR3SN5JRQRQTM841HAB/boundary/inline-edit/kialo": "Einen Wert in einer Zelle zu bearbeiten gehört dem lokredaktilo, weil die Zelle an Ort und Stelle ein Feld mit Speichern und Abbrechen wird (Spec 025 ③ schließt die Grenze inline-edit); ein Formular für jede Zelle bleibt ein Formular.",
       "uzo_01M523FAR3SN5JRQRQTM841HAB/boundary/pagination/kialo": "Seiten einer Tabelle sind Navigation zwischen Teilen der Daten, weil die Tabelle jeweils einen Teil zeigt; der pagxigilo unter der Tabelle wechselt zwischen ihnen (Spec 015 ① schließt die Grenze pagination).",
-      "uzo_01M523FAR3SN5JRQRQTM841HAB/boundary/row-selection/kialo": "Zeilen auswählen fügt eine Spalte mit Kästchen und Aktionen an der Auswahl hinzu, weil eine Auswahl ohne Aktionen nichts sagt; eine Person entscheidet das Muster.",
       "uzo_01M523FAR3SN5JRQRQTM841HAB/boundary/row-tint/kialo": "Eine farbige Zeile sagt nur mit einem Wort etwas, weil Farbe allein keine Bedeutung trägt (WCAG 1.4.1 Benutzung von Farbe); eine Person entscheidet, was die Zeile sagt und wo.",
-      "uzo_01M523FAR3SN5JRQRQTM841HAB/boundary/sticky-header/kialo": "Ein Kopf, der stehen bleibt, während die Zeilen scrollen, braucht eine Scrollregel der Region, weil die Tabelle selbst nicht scrollt; das kommt mit der zweiten Runde der Region.",
       "uzo_01M523FAR3SN5JRQRQTM841HAB/composes/containers/page-section/kialo": "Eine Tabelle füllt einen Abschnitt der Seite, weil sie die Breite ihres Containers nimmt und in ihrer eigenen Region scrollt.",
       "uzo_01M523FAR3SN5JRQRQTM841HAB/composes/with/butono/kialo": "Eine Aktion an einer Zeile ist ein kleiner butono in ihrer Zelle, weil die Aktion ihren Namen neben der Zeile behält (size small).",
       "uzo_01M523FAR3SN5JRQRQTM841HAB/composes/with/ikono/kialo": "Der Sortierpfeil in einer sortierbaren Kopfzelle ist ein ikono (sort-ascending, sort-descending), weil die Richtung ein Zeichen der Ikonaro ist, das die Aspekto zeichnet; aria-sort sagt sie laut.",
@@ -2104,7 +2102,11 @@
       "uzo_01M6XPZDP2M9R28SBN4RXK7NAT/boundary/page-areas/kialo": "Die Bereiche einer ganzen Seite – Kopf, Navigation, Hauptteil – sind der Rahmen des Screens, weil sie von der Ansicht ringsum abhängen; sie gehören in eine Sxablono, und bis es eine gibt, entscheidet eine Person.",
       "uzo_01M6XPZDP2M9R28SBN4RXK7NAT/composes/containers/page-section/kialo": "Ein Abschnitt einer Seite legt seine Eroj in ein Raster, weil der Abschnitt entscheidet, wie viele nebeneinander stehen, und das Layout-Ero den Abstand aus einer Abstandsstufe nimmt.",
       "uzo_01M6XPZDP2M9R28SBN4RXK7NAT/composes/with/karto/kialo": "Karten derselben Art stehen in einem Raster, weil eine Person sie in Zeilen und Spalten gleicher Breite überfliegt.",
-      "uzo_01M6XPZDP2M9R28SBN4RXK7NAT/composes/with/atributlisto/kialo": "Listen von Angaben stehen in einem Raster, weil ein breiter Screen mehrere nebeneinander zeigt und ein schmaler sie stapelt."
+      "uzo_01M6XPZDP2M9R28SBN4RXK7NAT/composes/with/atributlisto/kialo": "Listen von Angaben stehen in einem Raster, weil ein breiter Screen mehrere nebeneinander zeigt und ein schmaler sie stapelt.",
+      "ske_01M523FAAXJ1AADZWZ6NQRX83K/props/selectable": "Zeilenauswahl",
+      "ske_01M523FAAXJ1AADZWZ6NQRX83K/props/loading": "Lädt",
+      "ske_01M523FAAXJ1AADZWZ6NQRX83K/props/sticky-header": "Fester Kopf",
+      "ske_01M523FAAXJ1AADZWZ6NQRX83K/parts/skeleton": "Skelett"
     },
     "en": {
       "ero_01M584YD41VQDMJ4QZJEEC7DA4/name": "File upload",
@@ -3590,7 +3592,11 @@
       "ske_01M6XPZDFV88Z6A0M2CH70GP2J/props/gap/values/xlarge": "Extra large",
       "ske_01M6XPZDFV88Z6A0M2CH70GP2J/props/gap/values/xxlarge": "Extra extra large",
       "ske_01M6XPZDFV88Z6A0M2CH70GP2J/states/rest": "Rest",
-      "ske_01M6XPZDFV88Z6A0M2CH70GP2J/slots/content": "Content"
+      "ske_01M6XPZDFV88Z6A0M2CH70GP2J/slots/content": "Content",
+      "ske_01M523FAAXJ1AADZWZ6NQRX83K/props/selectable": "Row selection",
+      "ske_01M523FAAXJ1AADZWZ6NQRX83K/props/loading": "Loading",
+      "ske_01M523FAAXJ1AADZWZ6NQRX83K/props/sticky-header": "Sticky header",
+      "ske_01M523FAAXJ1AADZWZ6NQRX83K/parts/skeleton": "Skeleton"
     }
   }
 }

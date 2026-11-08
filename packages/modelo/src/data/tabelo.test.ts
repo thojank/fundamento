@@ -45,11 +45,12 @@ describe("tabelo in the repo Modelo (section ④, G1, G2, E10)", () => {
         ["caption-hidden", "boolean", false],
         ["sort", "string", undefined],
         ["direction", ["ascending", "descending"], "ascending"],
-        ["lines", ["rows", "columns", "grid", "none"], "rows"],
-        // Spec 046 T3 (plan D-18): selection, loading and a sticky header, off by default.
+        // Spec 046 T3 (plan D-18): selection, loading and a sticky header, off by default; lines
+        // stays the last prop (achsen-2b2.test.ts).
         ["selectable", "boolean", false],
         ["loading", "boolean", false],
         ["sticky-header", "boolean", false],
+        ["lines", ["rows", "columns", "grid", "none"], "rows"],
       ],
     );
     expect(skemo?.states).toEqual(["rest", "hover", "focus"]);
@@ -120,10 +121,11 @@ describe("tabelo in the repo Modelo (section ④, G1, G2, E10)", () => {
       name: ["slot:caption"],
       states: {},
       keys: ["Enter", "Space"],
-      // Spec 046 T3 (plan D-19): the names of the selection boxes.
+      // Spec 046 T3 (plan D-19): the names of the selection boxes – a row's box (selectable,
+      // followed by the row's name) and the box in the head.
       texts: {
-        "select-all": { de: "Alle Zeilen auswählen", en: "Select all rows" },
-        "select-row": { de: "Zeile auswählen", en: "Select row" },
+        selectable: { de: "Zeile auswählen", en: "Select row" },
+        "head-name": { de: "Alle Zeilen auswählen", en: "Select all rows" },
       },
     });
   });
@@ -303,10 +305,11 @@ describe("tabelo selection, loading and sticky header (Spec 046 T3)", () => {
     expect(skemo.props.find((prop) => prop.name === "loading")?.description).toMatch(/three/);
   });
 
-  it("the skeleton binds existing roles only: the sunken ground and the control's radius", () => {
+  it("the skeleton binds existing roles only: the sunken ground, the control's radius, the height of a small icon", () => {
     expect(skemo?.parts.skeleton).toEqual({
       fill: { fixed: "color.background.sunken" },
       radius: { fixed: "radius.role.control" },
+      height: { fixed: "size.icon.small" },
     });
   });
 
