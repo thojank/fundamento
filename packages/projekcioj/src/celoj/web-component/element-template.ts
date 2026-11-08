@@ -122,6 +122,12 @@ export interface ElementNames {
    */
   selectable?: boolean;
   /**
+   * Spec 046 T4: a timeline – a list whose goal is timeline (the templinio). The element writes a
+   * sign at the start of every entry of the platform's ol, with the word of its status (data-status)
+   * clipped from sight. Without it the element is as before.
+   */
+  timeline?: boolean;
+  /**
    * Rules for the light DOM of a Markdown view (Nachlese 8 ②, F-5): what its shadow cannot reach
    * — the indent of a nested list —, adopted by the document once, like a table's.
    */
@@ -1172,6 +1178,7 @@ export function elementSource({
   columnsFrom,
   gridMinWidths,
   selectable = false,
+  timeline = false,
   documentCss = "",
   ikonaro = [],
   skip = false,
@@ -2526,6 +2533,8 @@ ${
   // loading, only where the Skemo has the prop selectable and the part skeleton.
   const isSelecting = isLight && selectable;
   const isSkeleton = isLight && parts.includes("skeleton");
+  // Spec 046 T4: the sign and the status word of every entry of a timeline's ol.
+  const isTimeline = isLight && timeline;
   const observesSize = isAuto || isStacking || isGrid;
   const lightRender = isLight
     ? `    this.#decorate();
@@ -2695,7 +2704,7 @@ const MIN_WIDTHS: Readonly<Record<string, string>> = ${JSON.stringify(gridMinWid
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ${isNav ? '["slot", "href", "data-page", "data-count", "data-count-description"]' : isBreadcrumb ? '["slot", "href", "data-page"]' : isSelecting ? '["slot", "data-sort", "numeric", "data-key", "data-selected"]' : '["slot", "data-sort", "numeric"]'},
+      attributeFilter: ${isNav ? '["slot", "href", "data-page", "data-count", "data-count-description"]' : isBreadcrumb ? '["slot", "href", "data-page"]' : isSelecting ? '["slot", "data-sort", "numeric", "data-key", "data-selected"]' : isTimeline ? '["slot", "data-sort", "numeric", "data-status"]' : '["slot", "data-sort", "numeric"]'},
     });
 ${
   isNav || isBreadcrumb
@@ -2893,7 +2902,7 @@ ${
       : isLight
         ? `
   /** The platform's own table or list in the light DOM, the first child of its kind. */
-  #native(kind: "table" | "dl"): HTMLElement | undefined {
+  #native(kind: "table" | "dl"${isTimeline ? ' | "ol"' : ""}): HTMLElement | undefined {
     const node = [...this.children].find((child) => child.tagName.toLowerCase() === kind);
     return node instanceof HTMLElement ? node : undefined;
   }
@@ -3006,9 +3015,62 @@ ${
     const table = this.#native("table");
     if (table !== undefined) this.#decorateTable(table);
     const list = this.#native("dl");
-    if (list !== undefined) this.#decorateList(list);
+    if (list !== undefined) this.#decorateList(list);${
+      isTimeline
+        ? `
+    const timeline = this.#native("ol");
+    if (timeline !== undefined) this.#decorateTimeline(timeline);`
+        : ""
+    }
   }
-
+${
+  isTimeline
+    ? `
+  /**
+   * Spec 046 T4: a timeline – the name of the list from the label prop; at the start of every entry
+   * a sign the stylesheet draws by its data-status, holding the word of that status clipped from
+   * sight (a11y.texts <status>-name), so the status is seen by its shape and heard by its word,
+   * never a colour alone. The status is the application's: an entry without a known one keeps its
+   * sign and says no word. Every write first compares (the observer of the light DOM).
+   */
+  #decorateTimeline(list: HTMLElement): void {
+    const label = this.propValue("label");
+    const name = typeof label === "string" && label !== "" ? label : null;
+    if (list.getAttribute("aria-label") !== name) {
+      if (name === null) list.removeAttribute("aria-label");
+      else list.setAttribute("aria-label", name);
+    }
+    const lingvo = this.#lingvo();
+    for (const item of list.querySelectorAll(":scope > li")) {
+      let sign = item.querySelector(":scope > [data-fm-marker]");
+      if (!(sign instanceof HTMLElement)) {
+        sign = document.createElement("span");
+        sign.setAttribute("data-fm-marker", "");
+        item.prepend(sign);
+      } else if (sign !== item.firstElementChild) {
+        item.prepend(sign);
+      }
+      const status = item.getAttribute("data-status") ?? "";
+      const heard = status === "" ? undefined : TEXTS[\`\${status}-name\`];
+      const word = heard === undefined ? "" : (heard[lingvo] ?? heard.en ?? "");
+      const words = sign.querySelector(":scope > .fm-hidden");
+      if (word === "") {
+        words?.remove();
+        continue;
+      }
+      if (words instanceof HTMLElement) {
+        if (words.textContent !== word) words.textContent = word;
+        continue;
+      }
+      const span = document.createElement("span");
+      span.className = "fm-hidden";
+      span.textContent = word;
+      sign.append(span);
+    }
+  }
+`
+    : ""
+}
   #decorateTable(table: HTMLElement): void {
     // The caption from the default slot (Spec 011 ④, D-09): written into the table, where the
     // platform names it; hidden from sight with caption-hidden, never removed (G4).

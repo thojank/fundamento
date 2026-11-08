@@ -273,6 +273,14 @@ export const isLayout = (skemo: Skemo): boolean => layoutDirectionOf(skemo) !== 
 export const isGrid = (skemo: Skemo): boolean =>
   isLayout(skemo) && skemo.props.some((prop) => prop.name === "columns" && prop.kind === "enum");
 
+/**
+ * Spec 046 T4: a timeline (the templinio) – a list whose goal is timeline. It styles the
+ * platform's own ordered list in the light DOM, as the atributlisto its dl, and draws a sign at the
+ * start of every entry by its status.
+ */
+export const isTimeline = (skemo: Skemo): boolean =>
+  skemo.a11y.role === "list" && (skemo.goals ?? []).some((goal) => goal.goal === "timeline");
+
 /** The values of the grid's columns that are a number of columns (1 to 12; auto is none). */
 const columnCounts = (skemo: Skemo): number[] =>
   (skemo.props.find((prop) => prop.name === "columns")?.values ?? [])
@@ -1992,6 +2000,7 @@ const skipStructure: string = [
  * data-layout). Celo knowledge: which element of the platform's table or list a part is.
  */
 export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): string {
+  if (isTimeline(skemo)) return timelineStylesheetOf(skemo, tag, owner);
   const rules: [string, string[]][] = [];
   const add = (selector: string, lines: readonly string[]) => {
     if (lines.length === 0) return;
@@ -2255,6 +2264,119 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
           ];
   return `${structure.join("\n")}\n${rules
     .map(([selector, body]) => `${selector} {\n${body.map((line) => `  ${line}`).join("\n")}\n}`)
+    .join("\n")}\n`;
+}
+
+/**
+ * Spec 046 T4: the stylesheet of a timeline in the light DOM. The ol is a column of its entries
+ * without the platform's numbers; every entry a column of its time, its title (a heading or
+ * strong) and what happened, the gap of the item between them and the list's gap below it. A line
+ * runs along the inline start of every entry but the last (the line part), so it joins the signs;
+ * the sign the element writes at the start of an entry (data-fm-marker) lies centred on that line
+ * – a ring of the marker's size, width, colour and stroke (dashed), filled with the ground so the
+ * line does not run through it. Its status changes its shape, not only its colour: done fills it
+ * and makes it solid, current makes it solid and its title heavier, upcoming lightens its ring.
+ * Arithmetic over the bound tokens only (half the sign, half the line), no length of its own.
+ */
+function timelineStylesheetOf(skemo: Skemo, tag: string, owner?: string): string {
+  const token = (part: string, property: string): string => {
+    const bound = fixedToken(skemo.parts[part]?.[property as SkemoPartProperty]);
+    return bound === undefined ? "0" : variable(named(owner, skemo, part, property, {}, bound));
+  };
+  const typography = (part: string): string[] => {
+    const bound = fixedToken(skemo.parts[part]?.typography);
+    return bound === undefined
+      ? []
+      : declarations(
+          skemo,
+          part,
+          "typography",
+          named(owner, skemo, part, "typography", {}, bound),
+          owner,
+        );
+  };
+  const size = token("marker", "size");
+  const line = token("line", "width");
+  const ol = `${tag} > ol`;
+  const li = `${ol} > li`;
+  const status = (value: string) => `${ol} > li[data-status="${value}"]`;
+  const title = ":is(h2, h3, h4, h5, h6, strong)";
+  const rules: [string, string[]][] = [
+    [
+      ol,
+      [
+        "display: flex;",
+        "flex-direction: column;",
+        "list-style: none;",
+        "margin: 0;",
+        "padding-block: 0;",
+        "padding-inline-end: 0;",
+        `padding-inline-start: calc(${size} / 2 - ${line} / 2);`,
+      ],
+    ],
+    [
+      li,
+      [
+        "position: relative;",
+        "display: flex;",
+        "flex-direction: column;",
+        "align-items: flex-start;",
+        "box-sizing: border-box;",
+        "margin: 0;",
+        "border-style: none;",
+        "border-inline-start-style: solid;",
+        `border-inline-start-width: ${line};`,
+        `border-inline-start-color: ${token("line", "color")};`,
+        `padding-inline-start: calc(${size} / 2 + ${token("box", "gap")});`,
+        `row-gap: ${token("item", "gap")};`,
+        `color: ${token("item", "color")};`,
+        ...typography("item"),
+      ],
+    ],
+    [`${li}:not(:last-child)`, [`padding-block-end: ${token("list", "gap")};`]],
+    // The last entry draws no line below its sign; its padding takes the line's width, so its text
+    // and its sign stand where those of the others stand.
+    [
+      `${li}:last-child`,
+      [
+        "border-inline-start-style: none;",
+        `padding-inline-start: calc(${size} / 2 + ${token("box", "gap")} + ${line});`,
+      ],
+    ],
+    [`${li} > :not([data-fm-marker])`, ["margin: 0;"]],
+    [`${li} > time`, [`color: ${token("date", "color")};`, ...typography("date")]],
+    [`${li} > ${title}`, [`color: ${token("subject", "color")};`, ...typography("subject")]],
+    [
+      `${li} > [data-fm-marker]`,
+      [
+        "position: absolute;",
+        "inset-block-start: 0;",
+        "inset-inline-start: 0;",
+        "box-sizing: border-box;",
+        `inline-size: ${size};`,
+        `block-size: ${size};`,
+        `margin-inline-start: calc(${size} / -2 - ${line} / 2);`,
+        `border-width: ${token("marker", "width")};`,
+        `border-color: ${token("marker", "color")};`,
+        `border-style: ${token("marker", "stroke")};`,
+        `border-radius: ${token("marker", "radius")};`,
+        `background-color: ${token("marker", "fill")};`,
+      ],
+    ],
+    [
+      `${li}:last-child > [data-fm-marker]`,
+      [`margin-inline-start: calc(${size} / -2 + ${line} / 2);`],
+    ],
+    [
+      `${status("done")} > [data-fm-marker]`,
+      [`background-color: ${token("done", "fill")};`, `border-style: ${token("done", "stroke")};`],
+    ],
+    [`${status("current")} > [data-fm-marker]`, [`border-style: ${token("current", "stroke")};`]],
+    [`${status("current")} > ${title}`, [`font-weight: ${token("current", "weight")};`]],
+    [`${status("upcoming")} > [data-fm-marker]`, [`border-color: ${token("upcoming", "color")};`]],
+  ];
+  return `${tag} ${HIDDEN_TEXT}\n${rules
+    .map(([selector, body]) => `${selector} {\n${body.map((each) => `  ${each}`).join("\n")}\n}`)
     .join("\n")}\n`;
 }
 
@@ -2972,6 +3094,8 @@ export function elementNamesOf(
     ...(isGrid(entry.skemo) ? { gridMinWidths: gridMinWidthsOf(entry) } : {}),
     // Spec 046 T3 (plan D-19): the table writes its selection column where the Skemo has selectable.
     selectable: entry.skemo.props.some((prop) => prop.name === "selectable"),
+    // Spec 046 T4: a timeline writes a sign and the word of its status into every entry.
+    ...(isTimeline(entry.skemo) ? { timeline: true } : {}),
     // Nachlese 8 ② (F-5): a Markdown view indents a nested list as its first level, by the indent
     // of its Skemo — in the light DOM, where ::slotted does not reach.
     ...(isMarkdown(entry.skemo) ? { documentCss: markdownDocumentCss(entry) } : {}),

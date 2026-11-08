@@ -71,7 +71,7 @@ import {
   vitrinoCalendar,
 } from "../vitrino/datumoj.js";
 import { signOf } from "../web-component/element-template.js";
-import { isLayout } from "../web-component/web-component.js";
+import { isLayout, isTimeline } from "../web-component/web-component.js";
 import {
   drawnPartPropertiesOf,
   pluginManifest,
@@ -3969,7 +3969,9 @@ export const FIGMA_CELO: Celo = {
     // Spec 046 T1 (F-T1-8): the layout Eroj (vico, kolumno, stako — role generic plus a layout
     // goal, the isLayout of the Web Component and the Make Kit) draw nothing of their own; until T5
     // decides their Bauform they are not in the plan.
-    const drawn = modelo.eroj.filter((entry) => !isLayout(entry.skemo));
+    // Spec 046 T4: so does the timeline (templinio): a list the plan would draw as the Bauform of
+    // the key-value list, which has no sign per entry; T5 decides its Bauform.
+    const drawn = modelo.eroj.filter((entry) => !isLayout(entry.skemo) && !isTimeline(entry.skemo));
     const plan: FigmaPlan = {
       fundamento: modeloJson.fundamento.version,
       fontFallback: FIGMA_FONT_FALLBACK,
