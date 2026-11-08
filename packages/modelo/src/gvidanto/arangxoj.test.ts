@@ -67,6 +67,17 @@ function stringsOf(value: unknown, path = ""): [string, string][] {
 }
 
 /** The Modelo with one Ero more, whose only goal is named `goal`. */
+/**
+ * Spec 046 T1 (Ausnahme): the Modelo without the layout Eroj of Eroj-Runde 7. The two tests below
+ * check the answer for a layout purpose without a means; on the repo Modelo there is none left
+ * once vico, kolumno, stako and krado exist, so they run on the Modelo without those four.
+ */
+const LAYOUT_EROJ: readonly string[] = ["vico", "kolumno", "stako", "krado"];
+const withoutLayout: Modelo = {
+  ...modelo,
+  eroj: modelo.eroj.filter((entry) => !LAYOUT_EROJ.includes(entry.ero.name)),
+};
+
 function withGoalEro(goal: string): Modelo {
   const base = modelo.eroj[0] as LoadedEro;
   const added: LoadedEro = {
@@ -74,7 +85,7 @@ function withGoalEro(goal: string): Modelo {
     ero: { ...base.ero, name: `provo-${goal}` },
     skemo: { ...base.skemo, goals: [{ goal, keywords: { en: [goal] }, props: {} }] },
   };
-  return { ...modelo, eroj: [...modelo.eroj, added] };
+  return { ...withoutLayout, eroj: [...withoutLayout.eroj, added] };
 }
 
 describe("listArangxoj (Spec 038 MG-1)", () => {
@@ -258,7 +269,7 @@ describe("listArangxoj (Spec 038 MG-1)", () => {
   });
 
   it("names every layout purpose without a means in mankoj, each with a proposal (Eroj-Runde 7)", () => {
-    const output = arangxoj(modelo);
+    const output = arangxoj(withoutLayout);
     expect(output.mankoj.length).toBeGreaterThan(0);
     const violations: string[] = [];
     for (const manko of output.mankoj) {
@@ -311,7 +322,7 @@ describe("listArangxoj (Spec 038 MG-1)", () => {
   });
 
   it("lists an Ero whose goal is a missing layout purpose, and that purpose is no Manko then", () => {
-    const missing = arangxoj(modelo).mankoj.map((manko) => manko.celo);
+    const missing = arangxoj(withoutLayout).mankoj.map((manko) => manko.celo);
     expect(missing.length).toBeGreaterThan(0);
     for (const celo of missing) {
       const output = arangxoj(withGoalEro(celo));
