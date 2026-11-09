@@ -12,7 +12,7 @@ import {
   skemoLegiloDe,
 } from "./index.js";
 import { MemoraPonto, SKEMOJ } from "./test-doubles/iloj.js";
-import type { Fakto } from "./tipoj.js";
+import type { Fakto, ToolBridge } from "./tipoj.js";
 
 const skemoj = new Map<string, EroSkemo>(
   Object.entries(SKEMOJ).flatMap(([nomo, body]) => {
@@ -226,5 +226,163 @@ describe("link props from the Skemo (S037-04)", () => {
         await ligilajAtributojDe({ liste: fakto }, async () => skemoDe(JSON.stringify(body))),
       ).toEqual(LIGILAJ_ATRIBUTOJ);
     }
+  });
+});
+
+// Spec 046 F-B1: the fallback adopts the default slot and names the found child as check_markup
+// does (L5-1, L5-3); the two paths meet the same AC-8 expectation (nordstelo/src/ac8.test.ts).
+describe("the default slot on the fallback (Spec 046 F-B1, L5-1)", () => {
+  const faktoDe = (elements: Fakto["elements"]): Fakto => ({ ...FAKTO, elements });
+
+  it("adopts a direct child in the explicitly named default slot, without changing the facts", () => {
+    const fakto = faktoDe([
+      { tag: "fm-butono", attrs: {}, parent: -1, text: "" },
+      { tag: "span", attrs: { slot: "label" }, parent: 0, text: "Speichern" },
+    ]);
+    const antaue = structuredClone(fakto);
+    expect(instancojElFakto(fakto, skemoj)).toEqual([
+      { ero: "butono", props: {}, label: "Speichern", lingvo: "de" },
+    ]);
+    expect(fakto).toEqual(antaue);
+  });
+
+  it("does not adopt a child in the default slot of an Ero further up", () => {
+    const fakto = faktoDe([
+      { tag: "fm-karto", attrs: {}, parent: -1, text: "" },
+      { tag: "fm-butono", attrs: {}, parent: 0, text: "" },
+      { tag: "span", attrs: { slot: "content" }, parent: 1, text: "Innen" },
+    ]);
+    expect(instancojElFakto(fakto, skemoj)).toEqual([
+      { ero: "karto", props: {}, label: "Innen", lingvo: "de" },
+      { ero: "butono", props: {}, container: "karto-1", lingvo: "de" },
+    ]);
+  });
+
+  it("leaves a child in a slot that is not the default slot as it was", () => {
+    const fakto = faktoDe([
+      { tag: "fm-butono", attrs: {}, parent: -1, text: "" },
+      { tag: "span", attrs: { slot: "icon" }, parent: 0, text: "x" },
+    ]);
+    expect(instancojElFakto(fakto, skemoj)).toEqual([
+      { ero: "butono", props: {}, texts: { icon: "x" }, slots: { icon: ["text"] }, lingvo: "de" },
+    ]);
+  });
+});
+
+describe("the found child in a uzo-slot-accepts suggestion on the fallback (Spec 046 F-B1, L5-3)", () => {
+  const DIALOGO = {
+    ero: { id: "ero-dialogo", name: "dialogo", description: "Ein Dialog" },
+    skemo: { props: [], slots: [{ name: "heading", default: true }, { name: "actions" }] },
+    uzo: {
+      slots: { heading: { accepts: ["text"] }, actions: { accepts: ["butono"] } },
+      boundary: [],
+    },
+  };
+  const AVIZO = {
+    ero: { id: "ero-avizo", name: "avizo", description: "Ein Hinweis" },
+    skemo: { props: [], slots: [{ name: "content", default: true }, { name: "icon" }] },
+    uzo: { slots: { content: { accepts: ["text"] }, icon: { accepts: ["icon"] } }, boundary: [] },
+  };
+  const trovo = (rule: string, suggestion: string, instance = 0) => ({
+    instance: [instance],
+    issue: {
+      rule,
+      severity: "error",
+      path: `instances#/${instance}`,
+      message: `Befund ${rule}.`,
+      suggestion,
+    },
+  });
+  const ponto = (eroj: Record<string, unknown>, violations: unknown[]): ToolBridge => ({
+    list: async () => [],
+    call: async (name, args) =>
+      JSON.stringify(
+        name === "get_ero"
+          ? (eroj[String(args.name)] ?? { issues: [] })
+          : { instances: 1, valid: false, violations },
+      ),
+  });
+  const fakto = (elements: Fakto["elements"]): Fakto => ({ ...FAKTO, elements });
+  const ALT = "Put butono in the slot actions.";
+  const malobservoj = async (
+    eroj: Record<string, unknown>,
+    elements: Fakto["elements"],
+    violations: unknown[],
+  ): Promise<string[]> => {
+    const servilo = ponto(eroj, violations);
+    const rezulto = await kontroliUzon(servilo, fakto(elements), skemoLegiloDe(servilo));
+    return rezulto.malobservoj.map((malobservo) => malobservo.suggestion);
+  };
+
+  const DIALOGO_KUN_DIV: Fakto["elements"] = [
+    { tag: "fm-dialogo", attrs: {}, parent: -1, text: "" },
+    { tag: "span", attrs: { slot: "heading" }, parent: 0, text: "Entfernen?" },
+    { tag: "div", attrs: { slot: "actions" }, parent: 0, text: "" },
+  ];
+
+  it("reads the slot rules of the Uzo from a get_ero answer", () => {
+    expect(skemoDe(JSON.stringify(DIALOGO))?.uzo).toEqual({
+      accepts: { heading: ["text"], actions: ["butono"] },
+      limigitajSlotoj: [],
+    });
+    expect(skemoDe(JSON.stringify(SKEMOJ.butono))).not.toHaveProperty("uzo");
+  });
+
+  it("names a wrapper element and tells to slot each accepted Ero, leaving other rules as they are", async () => {
+    expect(
+      await malobservoj({ dialogo: DIALOGO }, DIALOGO_KUN_DIV, [
+        trovo("uzo-slot-accepts", ALT),
+        trovo("another-rule", "Bleibt."),
+      ]),
+    ).toEqual([
+      'The slot actions holds a <div>, and it accepts fm-butono: set slot="actions" directly on each fm-butono instead of on the wrapping <div>.',
+      "Bleibt.",
+    ]);
+  });
+
+  it("names a wrong Ero, and keeps a kind such as icon as it is", async () => {
+    const elements: Fakto["elements"] = [
+      { tag: "fm-dialogo", attrs: {}, parent: -1, text: "" },
+      { tag: "fm-avizo", attrs: { slot: "actions" }, parent: 0, text: "" },
+      { tag: "fm-avizo", attrs: {}, parent: -1, text: "" },
+      { tag: "span", attrs: { slot: "icon" }, parent: 2, text: "x" },
+    ];
+    expect(
+      await malobservoj({ dialogo: DIALOGO, avizo: AVIZO }, elements, [
+        trovo("uzo-slot-accepts", ALT),
+        trovo("uzo-slot-accepts", "Put icon in the slot icon.", 2),
+      ]),
+    ).toEqual([
+      "The slot actions holds a <fm-avizo>, and it accepts fm-butono: put fm-butono in the slot actions instead.",
+      "The slot icon holds a <span>, and it accepts icon: put icon in the slot icon instead.",
+    ]);
+  });
+
+  it("changes nothing where get_ero has no Uzo or the findings do not match the children", async () => {
+    const senUzo = { dialogo: { ...DIALOGO, uzo: undefined } };
+    expect(await malobservoj(senUzo, DIALOGO_KUN_DIV, [trovo("uzo-slot-accepts", ALT)])).toEqual([
+      ALT,
+    ]);
+    expect(
+      await malobservoj({ dialogo: DIALOGO }, DIALOGO_KUN_DIV, [
+        trovo("uzo-slot-accepts", ALT),
+        trovo("uzo-slot-accepts", ALT),
+      ]),
+    ).toEqual([ALT, ALT]);
+  });
+
+  it("skips a slot a boundary covers, as check_usage does", async () => {
+    const eroj = {
+      dialogo: {
+        ...DIALOGO,
+        uzo: { ...DIALOGO.uzo, boundary: [{ case: "x", via: { slot: "actions" } }] },
+      },
+      avizo: AVIZO,
+    };
+    const elements: Fakto["elements"] = [
+      { tag: "fm-dialogo", attrs: {}, parent: -1, text: "" },
+      { tag: "fm-avizo", attrs: { slot: "actions" }, parent: 0, text: "" },
+    ];
+    expect(await malobservoj(eroj, elements, [trovo("uzo-slot-accepts", ALT)])).toEqual([ALT]);
   });
 });
