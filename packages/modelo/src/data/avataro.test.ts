@@ -15,6 +15,7 @@ import { briefOf } from "../gvidanto/eroj.js";
 import { suggestEro } from "../gvidanto/suggest-ero.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
+import { REPO_EROJ } from "../validate/test-doubles/eroj.js";
 
 const { modelo } = loadModelo(defaultModeloSource());
 if (modelo === undefined) throw new Error("the repo Modelo must load");
@@ -40,7 +41,7 @@ const suggest = (goal: string) => {
 describe("avataro in the repo Modelo (section ③, G1, G2)", () => {
   it("lives in data/eroj/avataro/skemo.json, fourth of forty Eroj", () => {
     expect(avataro?.file).toBe("modelo/data/eroj/avataro/skemo.json");
-    expect(modelo.eroj).toHaveLength(40);
+    expect(modelo.eroj).toHaveLength(REPO_EROJ.length);
     expect(modelo.eroj[3]?.ero.name).toBe("avataro");
   });
 

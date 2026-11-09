@@ -8,6 +8,9 @@
 //   quickstart of the kit (setup.md) says so.
 // B-7 stands in the browser (packages/eroj/test/nachlese-11.spec.ts).
 
+import { existsSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { defaultModeloSource, getEro } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "./build.js";
@@ -20,6 +23,12 @@ import {
 } from "./celoj/make-kit/make-kit.js";
 import { REACT_CELO, reactInventory } from "./celoj/react/react.js";
 import { elementEvents, WEB_COMPONENT_CELO } from "./celoj/web-component/web-component.js";
+
+/** Spec 046 T1: the number of Eroj, read from the folders of the repo Modelo (testing.md). */
+const EROJ_DIR = fileURLToPath(new URL("../../modelo/data/eroj/", import.meta.url));
+const ERO_COUNT = readdirSync(EROJ_DIR).filter((name) =>
+  existsSync(join(EROJ_DIR, name, "skemo.json")),
+).length;
 
 const prepared = celoInputOf(defaultModeloSource());
 if (!prepared.ok) throw new Error("the repo Modelo must be valid");
@@ -73,9 +82,9 @@ const names = Object.keys(skemoSides).sort();
 
 describe("Nachlese 11 B-2: Skemo, Web Component and React say the same (conformance)", () => {
   it("covers the 40 Eroj and the 5 Sxablonoj", () => {
-    expect(modelo.eroj).toHaveLength(40);
+    expect(modelo.eroj).toHaveLength(ERO_COUNT);
     expect(modelo.sxablonoj ?? []).toHaveLength(5);
-    expect(names).toHaveLength(45);
+    expect(names).toHaveLength(ERO_COUNT + 5);
   });
 
   it.each(names)(

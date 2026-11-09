@@ -16,6 +16,7 @@ import {
   output,
   preload,
 } from "../test-doubles/client.js";
+import { REPO_EROJ } from "../test-doubles/eroj.js";
 
 afterAll(closeClients);
 preload({ config: EKZEMPLO_CONFIG });
@@ -105,48 +106,7 @@ describe("the example dialog: a button that switches the dark mode on", () => {
 describe("list_eroj and the brief (acceptance 1)", () => {
   it("lists the Eroj; the brief of the sxaltilo names the purpose, the axes and the label as a duty", async () => {
     const listed = await output<{ eroj: { name: string }[] }>(client, "list_eroj", {});
-    expect(listed.eroj.map((entry) => entry.name)).toEqual([
-      "alsxutilo",
-      "apartigilo",
-      "atributlisto",
-      "avataro",
-      "avizo",
-      "butono",
-      "datelektilo",
-      "dialogo",
-      "elektilo",
-      "elekto",
-      "faldilo",
-      "glitilo",
-      "ikono",
-      "insigno",
-      "kampo",
-      "karto",
-      "kodbloko",
-      "kompletigilo",
-      "konsileto",
-      "langetaro",
-      "ligilo",
-      "listelektilo",
-      "lokredaktilo",
-      "markdovido",
-      "markobutono",
-      "menuo",
-      "mezurilo",
-      "navigado",
-      "pagxigilo",
-      "plenstato",
-      "plurelektilo",
-      "saltligilo",
-      "signeto",
-      "spuro",
-      "sxaltilo",
-      "sxvebilo",
-      "tabelo",
-      "tekstareo",
-      "teksto",
-      "titolo",
-    ]);
+    expect(listed.eroj.map((entry) => entry.name)).toEqual([...REPO_EROJ]);
     const brief = await output<Brief>(client, "get_ero", { name: "sxaltilo", brief: true });
     expect(brief.purpose).toBe(sxaltilo.purpose);
     expect(brief.required).toEqual({ props: [], slots: ["label"] });

@@ -29,6 +29,7 @@ import {
   type ValidationIssue,
 } from "@fundamento/modelo";
 import type { CeloInput } from "../../build.js";
+import { isGrid, isLayout, isTimeline, layoutDirectionOf } from "../web-component/web-component.js";
 import { BAZOJ_TEKSTOJ, bazojDatumoj, type VitrinoBazoj } from "./bazoj.js";
 import { DOKU_TEKSTOJ } from "./doku.js";
 
@@ -918,6 +919,69 @@ export const VITRINO_TABLE =
   '<table slot="content"><thead><tr><th scope="col" data-sort="name">Name</th><th scope="col">Status</th><th scope="col" numeric>Anzahl</th></tr></thead><tbody><tr><th scope="row">Barrierefreiheit</th><td>gültig</td><td>0</td></tr><tr><th scope="row">Datenschutz</th><td>Entwurf</td><td>3</td></tr><tr><th scope="row">Sicherheit</th><td>in Prüfung</td><td>1</td></tr></tbody></table>';
 
 /**
+ * Spec 046 T5: the table of a selectable cell – the Vitrino's table with a key on every row (the
+ * application's key, the row header in lower case) and the second row selected, so the column
+ * shows a box per row, one ticked, and the box of the head.
+ */
+export const VITRINO_TABLE_KEYED = VITRINO_TABLE.replace(
+  /<tr><th scope="row">([^<]+)<\/th>/g,
+  (_, name: string) =>
+    `<tr data-key="${name.toLowerCase()}"${name === "Datenschutz" ? " data-selected" : ""}><th scope="row">${name}</th>`,
+);
+
+/**
+ * Spec 046 T5: the rows of the table with the sticky head – ten, more than its bounded region
+ * shows, so the rows scroll under the head.
+ */
+export const VITRINO_TABLE_ROWS: readonly (readonly [string, string, number])[] = [
+  ["Barrierefreiheit", "gültig", 0],
+  ["Datenschutz", "Entwurf", 3],
+  ["Sicherheit", "in Prüfung", 1],
+  ["Kontrast", "gültig", 0],
+  ["Fokus", "gültig", 2],
+  ["Sprache", "Entwurf", 4],
+  ["Bewegung", "in Prüfung", 1],
+  ["Tastatur", "gültig", 0],
+  ["Leistung", "Entwurf", 5],
+  ["Wartung", "gültig", 2],
+];
+
+const VITRINO_TABLE_LONG = `<table slot="content"><thead><tr><th scope="col" data-sort="name">Name</th><th scope="col">Status</th><th scope="col" numeric>Anzahl</th></tr></thead><tbody>${VITRINO_TABLE_ROWS.map(([name, status, count]) => `<tr><th scope="row">${name}</th><td>${status}</td><td>${count}</td></tr>`).join("")}</tbody></table>`;
+
+/**
+ * Spec 046 T5: the children of a layout Ero in the Vitrino – three badges, so the gap of its step
+ * stands between visible boxes; the row that wraps holds six.
+ */
+const layoutChildren = (count: number): string =>
+  Array.from(
+    { length: count },
+    (_, index) =>
+      `<fm-insigno>${VITRINO_OPTIONS[index % VITRINO_OPTIONS.length] ?? ""}</fm-insigno>`,
+  ).join("");
+
+/**
+ * Spec 046 T5: the entries of the timeline in the Vitrino, one per status – the time as written,
+ * the title and what happened (the same words as templinio.spec.ts).
+ */
+export const VITRINO_TIMELINE: readonly (readonly [string, string, string, string, string])[] = [
+  ["done", "2026-10-01", "1. Oktober", "Entwurf", "Die erste Fassung steht."],
+  ["current", "2026-10-15", "15. Oktober", "Prüfung", "Die Fassung wird geprüft."],
+  ["upcoming", "2026-11-02", "2. November", "Freigabe", "Die Fassung wird freigegeben."],
+];
+
+/** The name of the Vitrino's timeline (its label, the list's name). */
+export const VITRINO_TIMELINE_LABEL = "Verlauf";
+
+/** A timeline (Spec 046 T5): the platform's ordered list, an entry per status. */
+function timelineMarkup(tag: string): string {
+  const entries = VITRINO_TIMELINE.map(
+    ([status, datetime, words, title, body]) =>
+      `<li data-status="${status}"><time datetime="${datetime}">${words}</time><strong>${title}</strong><p>${body}</p></li>`,
+  ).join("");
+  return `<table><caption>${tag}, jeder Status</caption><thead><tr><th scope="col">Kombination</th><th scope="col">rest</th></tr></thead><tbody><tr><th scope="row">rest</th><td><${tag} label="${VITRINO_TIMELINE_LABEL}"><ol>${entries}</ol></${tag}></td></tr></tbody></table>`;
+}
+
+/**
  * The names of the Eroj whose name is a required prop label (Spec 011 ⑤, plan ⑤ D-11): the
  * navigation and the tabs are heard by it; a link's `to` points at the section itself instead.
  */
@@ -1098,6 +1162,19 @@ function additionRows(entry: LoadedEro, tag: string, menuItems = ""): string {
   const row = (head: string, cell: string) =>
     `<tr><th scope="row">${head}</th><td>${cell}</td></tr>`;
   const has = (prop: string) => entry.skemo.props.some((candidate) => candidate.name === prop);
+  // Spec 046 T5: a row that wraps its six children in a narrow container; a grid of three columns
+  // with a child over two of them, wide and narrow (below its columns-from it stacks).
+  const narrow = (markup: string) =>
+    `<div class="fm-breite" data-fm-breite="schmal">${markup}</div>`;
+  if (isGrid(entry.skemo)) {
+    const spanned = `<${tag} columns="3"><fm-insigno>${VITRINO_OPTIONS[0] ?? ""}</fm-insigno><fm-insigno data-span="2">${VITRINO_OPTIONS[1] ?? ""}</fm-insigno><fm-insigno>${VITRINO_OPTIONS[2] ?? ""}</fm-insigno></${tag}>`;
+    return row("columns=3 · data-span=2", spanned) + row("schmal", narrow(spanned));
+  }
+  if (isLayout(entry.skemo)) {
+    return layoutDirectionOf(entry.skemo) === "row" && has("wrap")
+      ? row("wrap", narrow(`<${tag} wrap>${layoutChildren(6)}</${tag}>`))
+      : "";
+  }
   switch (entry.ero.name) {
     case "mezurilo":
       return has("label-hidden")
@@ -1107,9 +1184,22 @@ function additionRows(entry: LoadedEro, tag: string, menuItems = ""): string {
           )
         : "";
     case "tabelo":
-      return row(
-        "empty mit butono",
-        `<${tag}>Standards<table slot="content"><thead><tr><th scope="col">Name</th><th scope="col">Status</th></tr></thead><tbody></tbody></table><span slot="empty">Noch keine Standards im Projekt.</span><fm-butono slot="empty" emphasis="medium">Standard anlegen</fm-butono></${tag}>`,
+      return (
+        row(
+          "empty mit butono",
+          `<${tag}>Standards<table slot="content"><thead><tr><th scope="col">Name</th><th scope="col">Status</th></tr></thead><tbody></tbody></table><span slot="empty">Noch keine Standards im Projekt.</span><fm-butono slot="empty" emphasis="medium">Standard anlegen</fm-butono></${tag}>`,
+        ) +
+        // Spec 046 T5: loading – the skeleton rows instead of the rows; the sticky head over ten
+        // rows in a bounded table (data-fm-begrenzt, the Vitrino's layout).
+        (has("loading")
+          ? row("loading", `<${tag} loading>${VITRINO_TABLE_CAPTION}${VITRINO_TABLE}</${tag}>`)
+          : "") +
+        (has("sticky-header")
+          ? row(
+              "sticky-header",
+              `<${tag} sticky-header data-fm-begrenzt>${VITRINO_TABLE_CAPTION}${VITRINO_TABLE_LONG}</${tag}>`,
+            )
+          : "")
       );
     case "menuo":
       return has("disabled") ? row("disabled", `<${tag} disabled>${menuItems}</${tag}>`) : "";
@@ -1213,6 +1303,8 @@ function sxablonojMarkup(sxablonoj: readonly LoadedSxablono[]): Record<string, s
  */
 export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = []): string {
   const tag = `fm-${entry.ero.name}`;
+  // Spec 046 T5: a timeline shows its ordered list, an entry per status.
+  if (isTimeline(entry.skemo)) return timelineMarkup(tag);
   // A card (Spec 015 ③): both orientations, with and without its picture.
   if (entry.skemo.a11y.role === "article") return cardMarkup(tag);
   // A slider (Spec 025 ①): single, range and with the field beside, in the states of a field.
@@ -1331,9 +1423,12 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
   // A light-DOM host (Spec 011 ④, plan ④ D-13, E10): the table or the list of the Vitrino in the
   // light DOM of every cell; a meter shows the value example.
   const role = entry.skemo.a11y.role;
+  // Spec 046 T5: a layout Ero holds three children and no word of its own.
+  const layout = isLayout(entry.skemo);
   // Tabs (Spec 011 ⑤, plan ⑤ D-11) show the panel of the first tab beside their tabs.
-  const light =
-    role === "table"
+  const light = layout
+    ? layoutChildren(3)
+    : role === "table"
       ? VITRINO_TABLE
       : role === "list"
         ? VITRINO_LIST
@@ -1387,14 +1482,14 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
       // the row's heading, whatever layout the list chooses.
       // A Markdown view (Spec 020 ③) shows the Vitrino's Markdown, no word beside it.
       const markdown = entry.skemo.props.some((prop) => prop.name === "source");
-      const named = role !== "list" && !entriesInDefault && !markdown;
+      const named = role !== "list" && !entriesInDefault && !markdown && !layout;
       // Nachlese 8 ② (V-5): a code block shows a command in every row, not the word of the row.
       const content = role === "figure" ? VITRINO_SHORT_COMMAND : label;
       const source = markdown ? ` source="${VITRINO_MARKDOWN.replaceAll("\n", "&#10;")}"` : "";
       const cells = [undefined, ...columns]
         .map(
           (column) =>
-            `<td>${opener}<${tag}${identity}${attributes}${duties}${examples}${required}${chosen}${source}${column === undefined ? "" : ` ${column}`}>${named ? content : ""}${optionTexts(entry)}${slotTexts(entry, column, combination)}${actions}${light}</${tag}></td>`,
+            `<td>${opener}<${tag}${identity}${attributes}${duties}${examples}${required}${chosen}${source}${column === undefined ? "" : ` ${column}`}>${named ? content : ""}${optionTexts(entry)}${slotTexts(entry, column, combination)}${actions}${role === "table" && column === "selectable" ? VITRINO_TABLE_KEYED : light}</${tag}></td>`,
         )
         .join("");
       return `<tr><th scope="row">${label}</th>${cells}</tr>`;

@@ -1,0 +1,112 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M6X3XMV3MKJF5HQJ0MMTA09B",
+    "ero": "ero_01M6X3XKZB7XZKGW59V7CF9PA4",
+    "skemo": "ske_01M6X3XMCMCSTBQGD3310SY2BQ",
+    "purpose": "Sets its children side by side with the gap of a spacing step between them.",
+    "instead": [
+      {
+        "goal": "one-below-another",
+        "keywords": {
+          "en": [
+            "underneath"
+          ],
+          "de": [
+            "untereinander"
+          ]
+        },
+        "ero": "stako",
+        "kialo": "Children that stand one below the other are a stack, because a row would push them beside each other and break the reading order of a form or a list."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "page-grid",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "pagegrid"
+          ],
+          "de": [
+            "seitenraster"
+          ]
+        },
+        "kialo": "The grid of a whole page is the frame of the screen, because its columns and regions depend on the view around them; it belongs to a Sxablono, and a person decides it until there is one."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page-section",
+          "kialo": "A section of a page holds its Eroj in a row, because the section decides how its parts stand to each other and the layout Ero takes that gap from a spacing step."
+        }
+      ],
+      "with": [
+        {
+          "ero": "butono",
+          "kialo": "Actions stand in a row, because a person compares them side by side; at most one with emphasis high (one-primary-per-container)."
+        },
+        {
+          "ero": "insigno",
+          "kialo": "Badges of one thing stand in a row, because they are read together at a glance."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {},
+    "layout": {
+      "size": "container",
+      "wrap": "allowed"
+    },
+    "content": [],
+    "when-not": [
+      {
+        "case": {
+          "de": "Die Kinder sollen untereinander stehen.",
+          "en": "The children should stand one below the other."
+        },
+        "ero": "stako"
+      },
+      {
+        "case": {
+          "de": "Der Inhalt über ein Ding soll auf einer Fläche mit Überschrift stehen.",
+          "en": "The content about one thing should stand on a surface with a heading."
+        },
+        "ero": "karto"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Nimm den Abstand aus den Stufen der Reihe (gap) und lass die Reihe den Raum zwischen ihren Kindern besitzen.",
+          "en": "Take the gap from the steps of the row (gap) and let the row own the space between its children."
+        },
+        {
+          "de": "Setze wrap, wo die Reihe schmaler als ihre Kinder sein kann, damit nichts aus dem Container läuft.",
+          "en": "Set wrap where the row may be narrower than its children, so nothing runs out of its container."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Dem Layout eine Farbe, einen Rand oder eine Schrift geben; es ordnet nur seine Kinder an, eine Fläche ist die der karto.",
+          "en": "Give the layout a colour, a border or a font; it only places its children, a surface is the karto's."
+        },
+        {
+          "de": "Den Kindern einen Außenabstand geben, um sie zu trennen; der gap des Layouts ist der eine Abstand zwischen ihnen.",
+          "en": "Write a margin on the children to space them; the gap of the layout is the one distance between them."
+        }
+      ]
+    },
+    "keyboard": {
+      "none": {
+        "de": "Das Layout nimmt weder den Fokus noch eine Taste; seine Kinder behalten ihre eigene Reihenfolge beim Lesen und mit Tab.",
+        "en": "The layout takes neither the focus nor a key; its children keep their own order in the reading and the tab sequence."
+      }
+    }
+  }
+}

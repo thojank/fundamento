@@ -15,8 +15,9 @@ import { buildModelo } from "../load/build.js";
 import { readModeloFiles } from "../load/files.js";
 import { defaultModeloSource } from "../load/source.js";
 import { fixtureRoot } from "../resolve/test-doubles/fixtures.js";
+import { REPO_EROJ } from "../validate/test-doubles/eroj.js";
 import { celoMappingLeaks } from "./celo-mappings.js";
-import { describeModelo } from "./describe.js";
+import { countWord, describeModelo } from "./describe.js";
 import { EXPORT_FILE_NAMES, exportModelo } from "./export-modelo.js";
 import { distDriftReport, turboCacheDir } from "./test-doubles/dist-drift.js";
 
@@ -148,7 +149,10 @@ describe("the S6 dialog from dist/modelo.json alone (AK-06)", () => {
     );
     // Counts change while Spec 001 fills the Vortaro; the shape of the sentence does not.
     expect(description.sentence).toMatch(
-      /^Fundamento v0\.2\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto \(`komuna`: reference, MIT, Geist\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, forty Eroj \(`alsxutilo`, `apartigilo`, `atributlisto`, `avataro`, `avizo`, `butono`, `datelektilo`, `dialogo`, `elektilo`, `elekto`, `faldilo`, `glitilo`, `ikono`, `insigno`, `kampo`, `karto`, `kodbloko`, `kompletigilo`, `konsileto`, `langetaro`, `ligilo`, `listelektilo`, `lokredaktilo`, `markdovido`, `markobutono`, `menuo`, `mezurilo`, `navigado`, `pagxigilo`, `plenstato`, `plurelektilo`, `saltligilo`, `signeto`, `spuro`, `sxaltilo`, `sxvebilo`, `tabelo`, `tekstareo`, `teksto`, `titolo`\)\. Ask explain why a value is what it is\.$/,
+      /^Fundamento v0\.2\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto \(`komuna`: reference, MIT, Geist\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, \w+(?:-\w+)? Eroj \([^)]*\)\. Ask explain why a value is what it is\.$/,
+    );
+    expect(description.sentence).toContain(
+      `${countWord(REPO_EROJ.length)} Eroj (${REPO_EROJ.map((name) => `\`${name}\``).join(", ")})`,
     );
   });
 });

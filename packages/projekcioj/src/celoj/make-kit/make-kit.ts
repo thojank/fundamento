@@ -42,12 +42,15 @@ import {
   isAvatar,
   isChip,
   isEditor,
+  isGrid,
+  isLayout,
   isLight,
   isListselect,
   isMultiline,
   isPopover,
   isSkip,
   isSuggest,
+  isTimeline,
   isUpload,
   lightStylesheetOf,
   namesOf,
@@ -595,11 +598,35 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
         entry.skemo.a11y.role === "generic" &&
         !isChip(entry.skemo) &&
         !isEditor(entry.skemo) &&
+        // Spec 046 T1: a layout Ero is no badge (its sentence follows with the layout Eroj).
+        !isLayout(entry.skemo) &&
         entry.uzo !== undefined,
     )
     .map(
       (entry) =>
         `- Every status in one to three words next to what it describes (draft, in review, 3 violations) is an \`<${componentName(entry.ero)}>\`${noticeName === undefined ? "" : `; a sentence is an \`<${componentName(noticeName.ero)}>\``}.`,
+    )
+    .join("\n");
+  // Spec 046 T1: the layout Eroj, one sentence per layout purpose their goal answers; the gap is a
+  // step of their prop gap, never a margin of the children.
+  const LAYOUT_SENTENCES: Readonly<Record<string, string>> = {
+    row: "Children side by side, with the gap of a spacing step between them, are",
+    column: "Children one below the other that are aligned or spread along the height are",
+    stack: "A plain stack of children over the full width is",
+  };
+  // Spec 046 T2: the grid answers column as the kolumno does; its sentence is its own (columns
+  // side by side, a child spanning its data-span), so no two rules begin alike (A-4).
+  const GRID_SENTENCE =
+    "Children in the columns of a grid, each spanning as many as its data-span says, are";
+  const layoutLines = eroj
+    .filter((entry) => isLayout(entry.skemo) && entry.uzo !== undefined)
+    .flatMap((entry) =>
+      (entry.skemo.goals ?? []).flatMap((goal) => {
+        const sentence = isGrid(entry.skemo) ? GRID_SENTENCE : LAYOUT_SENTENCES[goal.goal];
+        return sentence === undefined
+          ? []
+          : [`- ${sentence} \`<${componentName(entry.ero)}>\` (gap, never a margin).`];
+      }),
     )
     .join("\n");
   // Spec 011 ③ (plan ③ D-12): a message in the flow of the page is the notice (a live region with
@@ -642,10 +669,15 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
   // with a caption, one record the list around the platform's own description list, a known value
   // in a known range the meter with its number as text; generated from the roles table, list and
   // meter, the companions named where the Modelo has them.
-  const recordName = eroj.find((entry) => entry.skemo.a11y.role === "list");
+  const recordName = eroj.find(
+    (entry) => entry.skemo.a11y.role === "list" && !isTimeline(entry.skemo),
+  );
   const badgeName = eroj.find(
     (entry) =>
-      entry.skemo.a11y.role === "generic" && !isChip(entry.skemo) && !isEditor(entry.skemo),
+      entry.skemo.a11y.role === "generic" &&
+      !isChip(entry.skemo) &&
+      !isEditor(entry.skemo) &&
+      !isLayout(entry.skemo),
   );
   const tableLines = eroj
     .filter((entry) => entry.skemo.a11y.role === "table" && entry.uzo !== undefined)
@@ -655,10 +687,22 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
     )
     .join("\n");
   const recordLines = eroj
-    .filter((entry) => entry.skemo.a11y.role === "list" && entry.uzo !== undefined)
+    .filter(
+      (entry) =>
+        entry.skemo.a11y.role === "list" && !isTimeline(entry.skemo) && entry.uzo !== undefined,
+    )
     .map(
       (entry) =>
         `- Every record shown as names and values is an \`<${componentName(entry.ero)}>\` around the platform's own description list; never a table for one record${fieldName === undefined ? "" : `, and editing is a form of \`<${componentName(fieldName.ero)}>\``}.`,
+    )
+    .join("\n");
+  // Spec 046 T4: what happened in the order of time is the timeline around the platform's own
+  // ordered list, its status in data-status – the sign and the word are the element's.
+  const timelineLines = eroj
+    .filter((entry) => isTimeline(entry.skemo) && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- What happened in the order of time is a \`<${componentName(entry.ero)}>\` around the platform's own ordered list: a \`<time>\`, a title and what happened per entry, its status in data-status (done, current, upcoming), never a colour of its own.`,
     )
     .join("\n");
   const meterLines = eroj
@@ -924,10 +968,12 @@ ${checkboxLines}
 ${radioLines}
 ${selectLines}
 ${badgeLines}
+${layoutLines}
 ${noticeLines}
 ${stateLines}
 ${tableLines}
 ${recordLines}
+${timelineLines}
 ${meterLines}
 ${navigationLines}
 ${paginationLines}

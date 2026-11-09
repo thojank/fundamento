@@ -1,0 +1,113 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M6XPZDP2M9R28SBN4RXK7NAT",
+    "ero": "ero_01M6XPZD9QEBNBVDB02SWP94D3",
+    "skemo": "ske_01M6XPZDFV88Z6A0M2CH70GP2J",
+    "purpose": "Sets its children in a grid of columns with the gap of a spacing step between them; a child spans as many columns as its data-span says.",
+    "instead": [
+      {
+        "goal": "records-compared",
+        "keywords": {
+          "en": [
+            "fieldbyfield"
+          ],
+          "de": [
+            "feldweise"
+          ]
+        },
+        "ero": "tabelo",
+        "kialo": "Records with the same fields that a person compares field by field are a table, because a grid of cards puts each record on its own and hides that the fields stand under one another."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "page-areas",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "pageareas"
+          ],
+          "de": [
+            "seitenbereiche"
+          ]
+        },
+        "kialo": "The areas of a whole page – header, navigation, main part – are the frame of the screen, because they depend on the view around them; they belong to a Sxablono, and a person decides them until there is one."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page-section",
+          "kialo": "A section of a page lays its Eroj in a grid, because the section decides how many stand side by side and the layout Ero takes the gap from a spacing step."
+        }
+      ],
+      "with": [
+        {
+          "ero": "karto",
+          "kialo": "Cards of the same kind stand in a grid, because a person scans them in rows and columns of the same width."
+        },
+        {
+          "ero": "atributlisto",
+          "kialo": "Lists of details stand in a grid, because a wide screen shows several of them side by side and a narrow one stacks them."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {},
+    "layout": {
+      "size": "container",
+      "wrap": "allowed",
+      "columns-from": "size.container.small"
+    },
+    "content": [],
+    "when-not": [
+      {
+        "case": {
+          "de": "Die Kinder sollen nur untereinander stehen, in einer Spalte.",
+          "en": "The children should only stand one below the other, in one column."
+        },
+        "ero": "stako"
+      },
+      {
+        "case": {
+          "de": "Die Kinder sollen in einer Zeile nebeneinander stehen und umbrechen dürfen.",
+          "en": "The children should stand side by side in one line and may break into the next."
+        },
+        "ero": "vico"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Nimm columns auto mit einer Stufe für min-width, wo die Zahl der Spalten von der Breite abhängen soll.",
+          "en": "Take columns auto with a step of min-width where the number of columns should follow the width."
+        },
+        {
+          "de": "Gib einem Kind data-span, damit es mehrere Spalten überspannt; mehr als die Spalten des Rasters nimmt es nie.",
+          "en": "Give a child data-span to let it span several columns; it never takes more than the columns of the grid."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Eine Breite in Pixeln für min-width schreiben; die Stufen kommen aus den Containerbreiten.",
+          "en": "Write a width in pixels for min-width; the steps come from the container widths."
+        },
+        {
+          "de": "Den Kindern einen Außenabstand geben, um sie zu trennen; der gap des Rasters ist der eine Abstand zwischen ihnen.",
+          "en": "Write a margin on the children to space them; the gap of the grid is the one distance between them."
+        }
+      ]
+    },
+    "keyboard": {
+      "none": {
+        "de": "Das Raster nimmt weder den Fokus noch eine Taste; seine Kinder behalten ihre Reihenfolge beim Lesen und mit Tab, Zeile für Zeile.",
+        "en": "The grid takes neither the focus nor a key; its children keep their order in the reading and the tab sequence, row by row."
+      }
+    }
+  }
+}

@@ -17,6 +17,7 @@ import {
   VITRINO_OPTIONS,
   VITRINO_SLOT_TEXTS,
 } from "../vitrino/datumoj.js";
+import { isLayout, isTimeline } from "../web-component/web-component.js";
 import {
   ALPHA_VARIES,
   BACKDROP_EXAMPLE,
@@ -2496,11 +2497,15 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
     expect(structureOf("table")).toBe("table");
     expect(set?.structure).toBe("table");
     // Spec 036 Teil 5 ②b-2 (A-tabelo-1): three densities; lines a property, no variant.
+    // Spec 046 T5 (F-T3-6): selectable, loading and sticky-header are BOOLEAN properties, no axis.
     expect(set?.properties).toEqual({
       density: ["compact", "default", "comfortable"],
       "caption-hidden": "BOOLEAN",
       sort: "TEXT",
       direction: ["ascending", "descending"],
+      selectable: "BOOLEAN",
+      loading: "BOOLEAN",
+      "sticky-header": "BOOLEAN",
       lines: ["rows", "columns", "grid", "none"],
       state: ["rest", "hover", "focus"],
     });
@@ -2544,6 +2549,8 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
       "head.fill": "color/background/sunken",
       "head.color": "color/text/default",
       "head.typography": "typography/label/1",
+      // Spec 046 T5 (F-T3-6): the layer of the sticky head, bound.
+      "head.layer": "elevation/layer/raised",
       "cell.color": "color/text/default",
       "cell.typography": "typography/body/2",
       "cell.inline-padding": "spacing/medium",
@@ -2560,6 +2567,13 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
       "focus-ring.ring": "focus/ring",
       "focus-ring.offset": "focus/offset",
       "focus-ring.color": "color/focus/inner",
+      // Spec 046 T5 (F-T3-3, F-T3-6): the skeleton of loading, bound, not drawn.
+      "skeleton.fill": "color/background/sunken",
+      "skeleton.radius": "radius/role/control",
+      "skeleton.height": "size/icon/small",
+      // Spec 046 T3 Nachbesserung (F-T5-1): the target of the selection's boxes, bound, not drawn.
+      "selection.width": "size/target/min",
+      "selection.height": "size/target/min",
       // Spec 036 Teil 5 ②b-3 (A-tabelo-4): the foot, bound, not drawn.
       "foot.fill": "color/background/sunken",
       "foot.color": "color/text/default",
@@ -2600,6 +2614,13 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
     expect(rest?.notDrawn).toEqual({
       "foot.color": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
       "foot.fill": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
+      // Spec 046 T5 (F-T3-3): the skeleton stands with loading only (Jugxo).
+      "skeleton.fill": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+      "skeleton.radius": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+      "skeleton.height": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+      // Spec 046 T3 Nachbesserung (F-T5-1): the selection stands with selectable only (Jugxo).
+      "selection.width": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+      "selection.height": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
     });
     expect(rest?.hidden).toBeUndefined();
     expect(rest?.stroke).toBeUndefined();
@@ -2615,11 +2636,15 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
 
   it("states the tabelo in the parity inventory: density, caption-hidden a boolean, sort a string, direction, three states, the sort fill per state", () => {
     const items = figmaPlanInventory(plan);
+    // Spec 046 T5 (F-T3-6): the three new booleans.
     expect(items.tabelo?.props).toEqual({
       density: ["compact", "default", "comfortable"],
       "caption-hidden": ["boolean"],
       sort: ["string"],
       direction: ["ascending", "descending"],
+      selectable: ["boolean"],
+      loading: ["boolean"],
+      "sticky-header": ["boolean"],
       lines: ["rows", "columns", "grid", "none"],
     });
     expect(items.tabelo?.states).toEqual(["rest", "hover", "focus"]);
@@ -4207,5 +4232,29 @@ describe("the Figma plan draws the selection Eroj (Spec 025 ③)", () => {
       (variant) => variant.props.editing === "false" && variant.props.state === "disabled",
     );
     expect(disabled?.bindings["text.color"]).toBe("color/text/disabled");
+  });
+});
+
+// Spec 046 T1 (F-T1-8, Option 1): the layout Eroj (role generic plus a layout goal — the isLayout
+// of the Web Component and the Make Kit) draw nothing of their own. Until T5 decides their Bauform
+// they are not in the Figma plan; every other Ero keeps its set.
+describe("the layout Eroj stay out of the Figma plan until T5 (Spec 046 T1)", () => {
+  it("plans no set for vico, kolumno and stako and one for every other Ero", () => {
+    const layout = prepared.input.modelo.eroj
+      .filter((entry) => isLayout(entry.skemo))
+      .map((entry) => entry.ero.name);
+    expect(layout).toEqual(expect.arrayContaining(["kolumno", "stako", "vico"]));
+    // Spec 046 T4: the timeline stays out alike (isTimeline), until T5 decides its Bauform.
+    const out = prepared.input.modelo.eroj
+      .filter((entry) => isLayout(entry.skemo) || isTimeline(entry.skemo))
+      .map((entry) => entry.ero.name);
+    expect(out).toEqual(expect.arrayContaining([...layout, "templinio"]));
+    const sets = plan.components.map((component) => component.set);
+    for (const name of out) expect(sets).not.toContain(name);
+    expect(sets).toEqual(
+      prepared.input.modelo.eroj
+        .map((entry) => entry.ero.name)
+        .filter((name) => !out.includes(name)),
+    );
   });
 });

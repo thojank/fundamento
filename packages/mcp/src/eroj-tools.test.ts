@@ -5,6 +5,7 @@ import { checkUsage, getEro, listEroj, suggestEro } from "@fundamento/modelo";
 import { afterAll, describe, expect, it } from "vitest";
 import { compileToolSchemas } from "./schemas.js";
 import { call, closeClients, connect, EKZEMPLO_CONFIG, output } from "./test-doubles/client.js";
+import { REPO_GOALS } from "./test-doubles/eroj.js";
 
 afterAll(closeClients);
 
@@ -33,13 +34,14 @@ describe("get_ero (FR-13)", () => {
     expect(result.isError).toBe(true);
     // The five nearest names: with six Eroj (Spec 010 ③) the farthest drops out; with nine
     // (Spec 011 ②) dialogo is nearer to "butonno" than markobutono.
-    // Spec 014 ②: ikono is nearer to "butonno" than insigno.
+    // Spec 014 ②: ikono is nearer to "butonno" than insigno. Spec 046 T1 (F-T1-6): kolumno, one of
+    // the five new Eroj, is nearer than menuo and takes its place among the five nearest.
     expect(result.structuredContent?.allowed).toEqual([
       "butono",
       "ikono",
       "titolo",
       "insigno",
-      "menuo",
+      "kolumno",
     ]);
   });
 });
@@ -142,74 +144,7 @@ describe("suggest_ero (FR-13)", () => {
     expect(result.structuredContent?.issues).toEqual([
       expect.objectContaining({ rule: "goal-unknown", path: "suggest_ero/goal" }),
     ]);
-    expect(result.structuredContent?.allowed).toEqual([
-      "upload",
-      "separate",
-      "details",
-      "avatar",
-      "notify",
-      "report-error",
-      "destructive",
-      "confirm",
-      "dismiss",
-      // Spec 025 ②: the datelektilo.
-      "pick-date",
-      "date-range",
-      "ask-reason",
-      "choose-many",
-      "choose-few",
-      "disclosure",
-      // Spec 025 ①: the glitilo's goals.
-      "slide",
-      "value-range",
-      "show-icon",
-      "status-label",
-      "enter-text",
-      "email",
-      "password",
-      "number",
-      "date",
-      // Spec 025 ①: a counter with its stepper and a time.
-      "count",
-      "time",
-      "card",
-      "command",
-      "code-block",
-      "suggest",
-      "tooltip",
-      "switch-view",
-      "navigate",
-      "external",
-      // Spec 036 Teil 5 ②b-4 (A-ligilo-6).
-      "download",
-      // Spec 025 ③: the listelektilo and the lokredaktilo.
-      "styled-choice",
-      "inline-edit",
-      "markdown",
-      "agree",
-      "opt-in",
-      "action-menu",
-      "meter",
-      "navigate-app",
-      "paginate",
-      "loading",
-      "empty",
-      // Spec 025 ③: the plurelektilo.
-      "choose-several",
-      "skip-to-content",
-      // Spec 025 ③: the signeto.
-      "filter-chip",
-      "removable-tag",
-      "keyword-tag",
-      "breadcrumb",
-      "toggle",
-      "popover",
-      "table",
-      "multi-line",
-      "running-text",
-      "section-heading",
-      "page-title",
-    ]);
+    expect(result.structuredContent?.allowed).toEqual([...REPO_GOALS]);
   });
 });
 

@@ -9,8 +9,17 @@
 // default slot takes its content with and without slot="<its name>". The events and React stand
 // in packages/projekcioj/src/nachlese-11.test.ts.
 
+import { existsSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
 import { buildProjections, serve } from "./serve.js";
+
+/** Spec 046 T1: the number of Eroj, read from the folders of the repo Modelo (testing.md). */
+const EROJ_DIR = fileURLToPath(new URL("../../modelo/data/eroj/", import.meta.url));
+const ERO_COUNT = readdirSync(EROJ_DIR).filter((name) =>
+  existsSync(join(EROJ_DIR, name, "skemo.json")),
+).length;
 
 const { out, input } = await buildProjections();
 
@@ -45,7 +54,7 @@ const entities: Entity[] = [
 ];
 
 test("covers the 40 Eroj and the 5 Sxablonoj", () => {
-  expect(entities).toHaveLength(45);
+  expect(entities).toHaveLength(ERO_COUNT + 5);
 });
 
 test.describe("Nachlese 11 B-2: the element takes what the Skemo names, and nothing else", () => {

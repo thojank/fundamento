@@ -1,0 +1,114 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M6X3XMV44ZHNEJE04Y1AKASJ",
+    "ero": "ero_01M6X3XKZC59PJJEVWB8HVZVJX",
+    "skemo": "ske_01M6X3XMCN6SMC962Y26Y6W77K",
+    "purpose": "Sets its children one below the other over the full width with the gap of a spacing step.",
+    "instead": [
+      {
+        "goal": "aligned-column",
+        "keywords": {
+          "en": [
+            "columnwise"
+          ],
+          "de": [
+            "spaltenweise"
+          ]
+        },
+        "ero": "kolumno",
+        "kialo": "Children that are aligned or spread along their height need the column, because the stack only places them below each other over the full width."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "overlap",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "overlap",
+            "overlay"
+          ],
+          "de": [
+            "überlappen",
+            "überlagern"
+          ]
+        },
+        "kialo": "Children laid on top of each other cover what is below them, because one hides the other for the eye and the pointer; a person decides what may lie over what."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page-section",
+          "kialo": "A section of a page holds its Eroj in a stack, because the section decides how its parts stand to each other and the layout Ero takes that gap from a spacing step."
+        }
+      ],
+      "with": [
+        {
+          "ero": "karto",
+          "kialo": "Cards of a list stand in a stack, because each is read after the one above it."
+        },
+        {
+          "ero": "avizo",
+          "kialo": "Notices stand in a stack above the content they speak about, because the newest is read first."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {},
+    "layout": {
+      "size": "container",
+      "wrap": "allowed"
+    },
+    "content": [],
+    "when-not": [
+      {
+        "case": {
+          "de": "Die Kinder sollen ausgerichtet oder über die Höhe verteilt werden.",
+          "en": "The children should be aligned or spread along the height."
+        },
+        "ero": "kolumno"
+      },
+      {
+        "case": {
+          "de": "Die Kinder sollen nebeneinander stehen.",
+          "en": "The children should stand side by side."
+        },
+        "ero": "vico"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Nutze den Stapel für den einfachen Fall: Kinder untereinander, der Abstand aus einer Stufe (gap).",
+          "en": "Use the stack for the plain case: children below each other, the gap from one step (gap)."
+        },
+        {
+          "de": "Schachtle einen Stapel in eine Reihe oder eine Reihe in einen Stapel, damit jede Gruppe ihren eigenen Abstand besitzt.",
+          "en": "Nest a stack in a row or a row in a stack, so each group owns its own gap."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Dem Layout eine Farbe, einen Rand oder eine Schrift geben; es ordnet nur seine Kinder an, eine Fläche ist die der karto.",
+          "en": "Give the layout a colour, a border or a font; it only places its children, a surface is the karto's."
+        },
+        {
+          "de": "Den Kindern einen Außenabstand geben, um sie zu trennen; der gap des Layouts ist der eine Abstand zwischen ihnen.",
+          "en": "Write a margin on the children to space them; the gap of the layout is the one distance between them."
+        }
+      ]
+    },
+    "keyboard": {
+      "none": {
+        "de": "Das Layout nimmt weder den Fokus noch eine Taste; seine Kinder behalten ihre eigene Reihenfolge beim Lesen und mit Tab.",
+        "en": "The layout takes neither the focus nor a key; its children keep their own order in the reading and the tab sequence."
+      }
+    }
+  }
+}

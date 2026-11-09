@@ -8,6 +8,7 @@
 import { describe, expect, it } from "vitest";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
+import { REPO_EROJ } from "../validate/test-doubles/eroj.js";
 
 const { modelo } = loadModelo(defaultModeloSource());
 if (modelo === undefined) throw new Error("the repo Modelo must load");
@@ -15,7 +16,7 @@ const ero = (name: string) => modelo.eroj.find((entry) => entry.ero.name === nam
 
 describe("the Eroj of Spec 020 ③", () => {
   it("are two more: forty Eroj", () => {
-    expect(modelo.eroj).toHaveLength(40);
+    expect(modelo.eroj).toHaveLength(REPO_EROJ.length);
     expect(ero("kodbloko")?.file).toBe("modelo/data/eroj/kodbloko/skemo.json");
     expect(ero("markdovido")?.file).toBe("modelo/data/eroj/markdovido/skemo.json");
   });

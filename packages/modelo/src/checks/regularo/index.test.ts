@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 import type { CheckResult } from "../../contracts/checks.js";
+import { REPO_EROJ } from "../../validate/test-doubles/eroj.js";
 import { check } from "./index.js";
 
 const repoRoot = fileURLToPath(new URL("../../../../../", import.meta.url));
@@ -96,7 +97,7 @@ describe("regularo on the repo", () => {
             ),
           ) as { jugxoj: unknown[] }
         ).jugxoj.length,
-      uzoj: 40,
+      uzoj: REPO_EROJ.length,
     });
   });
 });
@@ -184,7 +185,7 @@ describe("built runner", () => {
     const child = spawnSync(process.execPath, [builtRunner, "regularo"], { encoding: "utf8" });
     expect(child.status).toBe(0);
     expect(child.stdout.split("\n")[0]).toMatch(/^PASS regularo: /);
-    expect(child.stdout).toMatch(/stats: .*uzoj=40/);
+    expect(child.stdout).toMatch(new RegExp(`stats: .*uzoj=${REPO_EROJ.length}`));
   });
 
   it("exits 0 with the warning on valid/ero-minimal", () => {

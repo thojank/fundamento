@@ -1,0 +1,120 @@
+{
+  "ero": {
+    "id": "ero_01M6X3XKZC59PJJEVWB8HVZVJX",
+    "name": "stako",
+    "skemo": "ske_01M6X3XMCN6SMC962Y26Y6W77K",
+    "description": "A stack: the short form of a column – sets any children one below the other, each over the full width, with the gap of a spacing step between them. It draws nothing of its own: no colour, no font, no role."
+  },
+  "skemo": {
+    "id": "ske_01M6X3XMCN6SMC962Y26Y6W77K",
+    "ero": "ero_01M6X3XKZC59PJJEVWB8HVZVJX",
+    "props": [
+      {
+        "name": "gap",
+        "kind": "enum",
+        "values": [
+          "xsmall",
+          "small",
+          "medium",
+          "large",
+          "xlarge",
+          "xxlarge"
+        ],
+        "default": "medium",
+        "description": "The room between the children of the stack: a spacing step of core (spacing.xsmall to spacing.xxlarge), never a value of its own; the Ero owns the space between its children (spacing-owned-by-container)."
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "content",
+        "default": true
+      }
+    ],
+    "parts": {
+      "box": {
+        "gap": {
+          "by": [
+            "gap"
+          ]
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "box",
+        "property": "gap",
+        "when": {
+          "gap": "xsmall"
+        },
+        "token": "spacing.xsmall"
+      },
+      {
+        "part": "box",
+        "property": "gap",
+        "when": {
+          "gap": "small"
+        },
+        "token": "spacing.small"
+      },
+      {
+        "part": "box",
+        "property": "gap",
+        "when": {
+          "gap": "medium"
+        },
+        "token": "spacing.medium"
+      },
+      {
+        "part": "box",
+        "property": "gap",
+        "when": {
+          "gap": "large"
+        },
+        "token": "spacing.large"
+      },
+      {
+        "part": "box",
+        "property": "gap",
+        "when": {
+          "gap": "xlarge"
+        },
+        "token": "spacing.xlarge"
+      },
+      {
+        "part": "box",
+        "property": "gap",
+        "when": {
+          "gap": "xxlarge"
+        },
+        "token": "spacing.xxlarge"
+      }
+    ],
+    "a11y": {
+      "role": "generic",
+      "name": [],
+      "states": {},
+      "keys": []
+    },
+    "goals": [
+      {
+        "goal": "stack",
+        "keywords": {
+          "en": [
+            "stack",
+            "underneath"
+          ],
+          "de": [
+            "stapel",
+            "untereinander"
+          ]
+        },
+        "props": {
+          "gap": "medium"
+        }
+      }
+    ]
+  }
+}

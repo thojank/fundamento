@@ -71,6 +71,7 @@ import {
   vitrinoCalendar,
 } from "../vitrino/datumoj.js";
 import { signOf } from "../web-component/element-template.js";
+import { isLayout, isTimeline } from "../web-component/web-component.js";
 import {
   drawnPartPropertiesOf,
   pluginManifest,
@@ -255,6 +256,12 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   "navigado:icon": "jug_01M6A96J2MG3AQAVBNWQ87Q5V1",
   // A-plurelektilo-1: „alle wählen“ stands with select-all only, a property.
   "plurelektilo:select-all": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  // Spec 046 T5 (F-T3-3): the skeleton rows of the tabelo stand with loading only, a property; the
+  // set shows the table with its rows.
+  "tabelo:skeleton": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
+  // Spec 046 T3 Nachbesserung (F-T5-1): the target of the selection's boxes stands with selectable
+  // only, a property; the set shows the table without the selection.
+  "tabelo:selection": "jug_01M6A2EXBGT5473CTBGY1WRV5E",
   "listelektilo:icon": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
   "listelektilo:description": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
   "plurelektilo:filter": "jug_01M5H5HFYHBZB8R9TVTJE9874J",
@@ -3965,12 +3972,18 @@ export const FIGMA_CELO: Celo = {
     const knownVariables = new Set(
       collections.flatMap((collection) => collection.variables.map((variable) => variable.name)),
     );
+    // Spec 046 T1 (F-T1-8): the layout Eroj (vico, kolumno, stako — role generic plus a layout
+    // goal, the isLayout of the Web Component and the Make Kit) draw nothing of their own; until T5
+    // decides their Bauform they are not in the plan.
+    // Spec 046 T4: so does the timeline (templinio): a list the plan would draw as the Bauform of
+    // the key-value list, which has no sign per entry; T5 decides its Bauform.
+    const drawn = modelo.eroj.filter((entry) => !isLayout(entry.skemo) && !isTimeline(entry.skemo));
     const plan: FigmaPlan = {
       fundamento: modeloJson.fundamento.version,
       fontFallback: FIGMA_FONT_FALLBACK,
       collections,
       ...(ikonoj === undefined ? {} : { ikonoj }),
-      components: modelo.eroj.map((entry) =>
+      components: drawn.map((entry) =>
         componentSetOf(
           entry,
           modeloJson.fundamento.version,
@@ -3987,7 +4000,7 @@ export const FIGMA_CELO: Celo = {
             sxablonoj: (modelo.sxablonoj ?? []).map((entry) =>
               sxablonoFrameOf(
                 entry,
-                new Set(modelo.eroj.map((ero) => ero.ero.name)),
+                new Set(drawn.map((ero) => ero.ero.name)),
                 (name) => knownVariables.has(name),
                 base,
               ),

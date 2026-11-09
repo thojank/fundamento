@@ -1,9 +1,10 @@
 // What the Vitrino shows (Spec 004 T008–T010, FR-06): the sections in the document and the data
 // island behind them. Every number here is the one the checks compute, not a second calculation.
 
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { defaultModeloSource, evaluateAlirebleco, getEro, loadModelo } from "@fundamento/modelo";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildProjekcioj } from "../../build.js";
@@ -16,6 +17,22 @@ import {
   type VitrinoDatumoj,
 } from "./datumoj.js";
 import { VITRINO_FILE } from "./vitrino.js";
+
+/** Spec 046 T1: every Ero of the repo Modelo with its a11y role, read from its Skemo file. */
+const EROJ_DIR = fileURLToPath(new URL("../../../../modelo/data/eroj/", import.meta.url));
+const REPO_A11Y_ROLOJ: Record<string, string> = Object.fromEntries(
+  readdirSync(EROJ_DIR)
+    .filter((name) => existsSync(join(EROJ_DIR, name, "skemo.json")))
+    .sort()
+    .map((name) => [
+      name,
+      (
+        JSON.parse(readFileSync(join(EROJ_DIR, name, "skemo.json"), "utf8")) as {
+          skemo: { a11y: { role: string } };
+        }
+      ).skemo.a11y.role,
+    ]),
+);
 
 const dirs: string[] = [];
 let html = "";
@@ -313,56 +330,9 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
   // C8 (Spec 008 and 009): "Label darf umbrechen" holds for the ligilo only inline, and the kampo's
   // line that never breaks is the input line, not the label. The subject comes from the a11y role.
   it("the layout sentence names the subject and the placement (C8)", () => {
-    expect(datumoj.a11yRoloj).toEqual({
-      // Spec 015 ②: the platform's file input is heard as a button.
-      alsxutilo: "button",
-      apartigilo: "separator",
-      atributlisto: "list",
-      // Spec 015 ③: the avatar is an image (told apart from the icon by its initials).
-      avataro: "img",
-      avizo: "status",
-      butono: "button",
-      // Spec 025 ②: the date picker is a textbox with a calendar.
-      datelektilo: "textbox",
-      dialogo: "dialog",
-      elektilo: "combobox",
-      elekto: "radiogroup",
-      faldilo: "group",
-      // Spec 025 ①: the slider.
-      glitilo: "slider",
-      ikono: "img",
-      insigno: "generic",
-      kampo: "textbox",
-      // Spec 015 ③: the card is the platform's article.
-      karto: "article",
-      // Spec 020 ③: the code block is the platform's figure, the Markdown view a document.
-      kodbloko: "figure",
-      kompletigilo: "combobox",
-      konsileto: "tooltip",
-      langetaro: "tablist",
-      ligilo: "link",
-      // Spec 025 ③: the styled list shares the role combobox, the multi-select is a listbox, the
-      // tag and the inline editor are generic like the badge.
-      listelektilo: "combobox",
-      lokredaktilo: "generic",
-      markdovido: "document",
-      markobutono: "checkbox",
-      menuo: "menu",
-      mezurilo: "meter",
-      navigado: "navigation",
-      pagxigilo: "navigation",
-      plenstato: "status",
-      plurelektilo: "listbox",
-      saltligilo: "link",
-      signeto: "generic",
-      spuro: "navigation",
-      sxaltilo: "switch",
-      sxvebilo: "dialog",
-      tabelo: "table",
-      tekstareo: "textbox",
-      teksto: "paragraph",
-      titolo: "heading",
-    });
+    // Spec 046 T1 Ausnahme: the map of every Ero to its a11y role, read from the Skemoj of the
+    // repo Modelo (testing.md) instead of pinned for the forty Eroj of before.
+    expect(datumoj.a11yRoloj).toEqual(REPO_A11Y_ROLOJ);
     expect(html).toContain("Größe aus dem Inhalt, Label bricht nie um.");
     expect(html).toContain("Größe aus dem Inhalt, Label darf umbrechen (inline), standalone nie.");
     expect(html).toContain("Größe aus dem Container, Eingabezeile bricht nie um.");
@@ -415,7 +385,8 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
       '<button type="button" id="fm-vitrino-komparo-switch">Zur Gegenüberstellung</button>',
     );
     expect(html).not.toContain("fm-kolumnoj");
-    expect(html).not.toContain("fm-kolumno ");
+    // Spec 046 T5: the Ero <fm-kolumno> is a tag in the grid; the old two-column class is what must stay gone.
+    expect(html).not.toContain('class="fm-kolumno');
     // Spec 016 ②: the section belongs to the mode Ansehen; the Werkstatt hides it.
     expect(html).toContain(
       '<section id="fm-vitrino-komparo" tabindex="-1" data-fm-modus-only="ansehen">',
@@ -641,15 +612,18 @@ describe("the Vitrino shows the insigno, the avizo and the plenstato (Spec 011 �
 describe("the Vitrino shows the tabelo, the atributlisto and the mezurilo (Spec 011 ④)", () => {
   it("tabelo: a row per density, each a captioned table with a sortable head, a numeric column and three rows", () => {
     const grid = datumoj.eroj.tabelo ?? "";
-    // Spec 036 Teil 5 ②b-2 (A-tabelo-1): three densities.
-    expect((grid.match(/<fm-tabelo /g) ?? []).length).toBe(3);
+    // Spec 036 Teil 5 ②b-2 (A-tabelo-1): three densities. Spec 046 T5 (F-T3-1): each density with
+    // the column selectable too, and the rows loading and sticky-header – 3 × 2 + 2.
+    expect((grid.match(/<fm-tabelo /g) ?? []).length).toBe(8);
     expect(grid).toContain(
       '<fm-tabelo density="compact">compact<table slot="content"><thead><tr><th scope="col" data-sort="name">Name</th>',
     );
     expect(grid).toContain('<th scope="col" numeric>Anzahl</th>');
     // Three row headers per table, plus the Vitrino's own row header per combination.
     // And the row of Nachlese 7 ② B-3 (the empty table with its butono).
-    expect((grid.match(/<th scope="row">/g) ?? []).length).toBe(13);
+    // Spec 046 T5 (F-T3-1): two tables per density (3 × (2 × 3 + 1)), the empty row (1), loading
+    // (1 + 3) and sticky-header over ten rows (1 + 10).
+    expect((grid.match(/<th scope="row">/g) ?? []).length).toBe(37);
   });
 
   it("atributlisto: a row per layout (columns, stacked, auto since Spec 014 ①), each a dl with three entries, the last value empty", () => {

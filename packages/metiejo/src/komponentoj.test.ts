@@ -5,6 +5,9 @@
 // behaviour the Skemo knows —, the usage beside it in German (Uzo, Kialo, Do and Don't, keyboard,
 // writing rules) and Zurücksetzen, which restores the alias on the role.
 
+import { existsSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { Agordo } from "@fundamento/agordilo";
 import { fixtureModeloSource, loadModelo } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
@@ -20,6 +23,12 @@ import { DEFAULT_KOMBINATION } from "./studio.js";
 import { loadBases } from "./vorschau.js";
 import { previewBody } from "./vorschau-korpo.js";
 
+/** Spec 046 T1: the number of Eroj, read from the folders of the repo Modelo (testing.md). */
+const EROJ_DIR = fileURLToPath(new URL("../../modelo/data/eroj/", import.meta.url));
+const ERO_COUNT = readdirSync(EROJ_DIR).filter((name) =>
+  existsSync(join(EROJ_DIR, name, "skemo.json")),
+).length;
+
 const bases = loadBases();
 const agordo: Agordo = { name: "provo", leitfarbe: "#6b4fa0", etikedoj: { marko: "Provo GmbH" } };
 const BUTONO = { kind: "ero", name: "butono" } as const;
@@ -28,7 +37,7 @@ const FILL = "ero.butono.surface.fill.emphasis.high.intent.neutral.rest";
 describe("komponentoList (M-4: a page per Ero and per Sxablono, from the Skemo)", () => {
   it("lists every Ero of the structure, then every Sxablono, each with a title", () => {
     const list = komponentoList(bases);
-    expect(list.filter((entry) => entry.kind === "ero")).toHaveLength(40);
+    expect(list.filter((entry) => entry.kind === "ero")).toHaveLength(ERO_COUNT);
     expect(list.filter((entry) => entry.kind === "sxablono")).toHaveLength(5);
     expect(list[0]).toMatchObject({ kind: "ero", name: "alsxutilo" });
     expect(list.at(-1)).toMatchObject({ kind: "sxablono", name: "sxelo" });

@@ -243,9 +243,53 @@ const isTooltip = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "toolti
 /** A menu (Spec 014 ④, D-05): a layer of the platform with the role menu and rows of entries. */
 const isMenu = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "menu";
 
+/**
+ * Spec 046 T1: the direction a layout Ero lays its children in, by the layout purpose its Skemo
+ * goal answers (list_arangxoj): a row side by side, a column and a stack one below the other.
+ */
+const LAYOUT_DIRECTIONS: Readonly<Record<string, "row" | "column">> = {
+  row: "row",
+  column: "column",
+  stack: "column",
+};
+
+/** Spec 046 T1: the direction of a layout Ero — a generic whose goal is a layout purpose. */
+export function layoutDirectionOf(skemo: Skemo): "row" | "column" | undefined {
+  if (skemo.a11y.role !== "generic") return undefined;
+  for (const goal of skemo.goals ?? []) {
+    const direction = LAYOUT_DIRECTIONS[goal.goal];
+    if (direction !== undefined) return direction;
+  }
+  return undefined;
+}
+
+/** Spec 046 T1: a layout Ero (vico, kolumno, stako, krado) places its children and draws nothing. */
+export const isLayout = (skemo: Skemo): boolean => layoutDirectionOf(skemo) !== undefined;
+
+/**
+ * Spec 046 T2 (plan D-14): a layout Ero with a number of columns is a grid (the krado) – its goal
+ * is column like the kolumno's, but it lays its children in columns, not one below the other.
+ */
+export const isGrid = (skemo: Skemo): boolean =>
+  isLayout(skemo) && skemo.props.some((prop) => prop.name === "columns" && prop.kind === "enum");
+
+/**
+ * Spec 046 T4: a timeline (the templinio) – a list whose goal is timeline. It styles the
+ * platform's own ordered list in the light DOM, as the atributlisto its dl, and draws a sign at the
+ * start of every entry by its status.
+ */
+export const isTimeline = (skemo: Skemo): boolean =>
+  skemo.a11y.role === "list" && (skemo.goals ?? []).some((goal) => goal.goal === "timeline");
+
+/** The values of the grid's columns that are a number of columns (1 to 12; auto is none). */
+const columnCounts = (skemo: Skemo): number[] =>
+  (skemo.props.find((prop) => prop.name === "columns")?.values ?? [])
+    .map((value) => Number(value))
+    .filter((count) => Number.isInteger(count) && count > 0);
+
 /** Static text (Spec 011 ③, D-08): the badge, a span without a role (Spec 025 ③: not the chip, not the editor). */
 const isText = (skemo: Skemo): boolean =>
-  hostOf(skemo.a11y.role) === "text" && !isChip(skemo) && !isEditor(skemo);
+  hostOf(skemo.a11y.role) === "text" && !isChip(skemo) && !isEditor(skemo) && !isLayout(skemo);
 
 /** A live region (Spec 011 ③, D-09, D-10): the notice, the loading and empty state. */
 const isStatus = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "status";
@@ -1173,6 +1217,15 @@ function declarations(
       return token === "none" ? ["display: none;"] : [`max-block-size: ${variable(token)};`];
     }
   }
+  // Spec 046 T2 (plan D-13, D-14): the least width of a grid's column (min-width) lays as many
+  // columns as fit (auto-fill); a column never takes more than the grid (min with 100%), so a
+  // grid narrower than one step has one column. A number of columns (the host's columns) lays its
+  // own tracks over this.
+  if (isGrid(skemo) && part === "cell" && property === "width") {
+    return [
+      `grid-template-columns: repeat(auto-fill, minmax(min(${variable(token)}, 100%), 1fr));`,
+    ];
+  }
   switch (property as SkemoPartProperty) {
     case "fill":
       return [`background-color: ${variable(token)};`];
@@ -1333,6 +1386,81 @@ const HIDDEN_TEXT =
   ".fm-hidden { position: absolute; clip-path: inset(50%); overflow: hidden; white-space: nowrap; }";
 
 /**
+ * Layout of a layout Ero (Spec 046 T1), keywords only: a block whose control is a flex container
+ * in the Ero's direction; the children of the default slot are its items. The values of align and
+ * justify are the CSS keywords of the same name (Celo knowledge): align places the children across
+ * the direction, justify along it, both on the control as the element writes them (data-*); wrap
+ * lets them break into a new line. The gap is the Skemo's binding (box.gap by gap). No colour, no
+ * font, no border: the Ero draws nothing.
+ */
+const layoutStructure = (skemo: Skemo): string => {
+  const direction = layoutDirectionOf(skemo) ?? "column";
+  const enumOf = (name: string) =>
+    skemo.props.find((prop) => prop.name === name && prop.kind === "enum");
+  // The value as the host's own attribute, as the karto reads its orientation: no axis of the
+  // parts, so the parity inventory names none; an absent or unknown value keeps the default.
+  const placed = (name: string, property: string) => {
+    const prop = enumOf(name);
+    if (prop === undefined) return [];
+    return [
+      ...(prop.default === undefined
+        ? []
+        : [`:where([part="control"]) { ${property}: ${String(prop.default)}; }`]),
+      ...(prop.values ?? []).map(
+        (value) =>
+          `:host([${name}="${String(value)}"]) :where([part="control"]) { ${property}: ${String(value)}; }`,
+      ),
+    ];
+  };
+  return [
+    ":host { display: block; }",
+    `:where([part="control"]) { display: flex; flex-direction: ${direction}; box-sizing: border-box; margin: 0; min-inline-size: 0; }`,
+    ...placed("align", "align-items"),
+    ...placed("justify", "justify-content"),
+    ...(skemo.props.some((prop) => prop.name === "wrap" && prop.kind === "boolean")
+      ? [':host([wrap]) :where([part="control"]) { flex-wrap: wrap; }']
+      : []),
+  ].join("\n");
+};
+
+/**
+ * Layout of a grid (Spec 046 T2, plan D-14, D-15), keywords only: the control is a grid. A number
+ * of columns (the host's columns, as the karto reads its orientation: no axis of the parts) lays
+ * that many tracks of equal width; without one (auto) the Skemo's binding of the least width
+ * (cell.width by min-width) lays as many as fit. A number of columns stacks into one while the
+ * element marks it so (fm-stacked, below the Uzo's columns-from). A child spans its data-span
+ * (1 to 12, as the th carries data-sort); where the element counts fewer columns (fm-columns-n),
+ * a wider span takes the whole row (1 / -1: every column there is), never a column of its own.
+ * The gap is the Skemo's binding (box.gap by gap). No colour, no font, no border, no length.
+ */
+const gridStructure = (skemo: Skemo): string => {
+  const counts = columnCounts(skemo);
+  const most = Math.max(0, ...counts);
+  const spans = Array.from({ length: most }, (_, index) => index + 1);
+  return [
+    ":host { display: block; }",
+    ':where([part="control"]) { display: grid; grid-template-columns: minmax(0, 1fr); box-sizing: border-box; margin: 0; min-inline-size: 0; }',
+    ...counts.map(
+      (count) =>
+        `:host([columns="${count}"]) :where([part="control"]) { grid-template-columns: repeat(${count}, minmax(0, 1fr)); }`,
+    ),
+    ':host([columns]) :where([part="control"].fm-stacked) { grid-template-columns: minmax(0, 1fr); }',
+    ...spans
+      .filter((span) => span > 1)
+      .map((span) => `::slotted([data-span="${span}"]) { grid-column: span ${span}; }`),
+    ...spans
+      .filter((count) => count < most)
+      .map(
+        (count) =>
+          `:where([part="control"].fm-columns-${count}) ::slotted(:is(${spans
+            .filter((span) => span > count)
+            .map((span) => `[data-span="${span}"]`)
+            .join(", ")})) { grid-column: 1 / -1; }`,
+      ),
+  ].join("\n");
+};
+
+/**
  * Layout of static text (Spec 011 ③, D-08), keywords only: the badge is an inline block that
  * hugs its label and never wraps (the Uzo says never); no cursor, no transition, nothing to press.
  */
@@ -1468,6 +1596,14 @@ const lightStructure = (skemo: Skemo, owner?: string): string =>
       : [
           ":host { display: block; }",
           ':where([part="region"]) { display: block; overflow-x: auto; box-sizing: border-box; border-style: solid; }',
+          // Spec 046 T3 (plan D-21): with sticky-header a bounded host bounds its region, which
+          // then scrolls along the block axis too; unbounded, nothing changes.
+          ...(skemo.props.some((prop) => prop.name === "sticky-header")
+            ? [
+                ":host([sticky-header]) { display: flex; flex-direction: column; }",
+                ':host([sticky-header]) :where([part="region"]) { min-block-size: 0; }',
+              ]
+            : []),
           ':where([part="region"]:focus:not(:focus-visible)) { outline-width: 0; }',
           ':where([part="list"]) { display: block; }',
           // Spec 036 Teil 5 ②b-2 (A-atributlisto-1): the button for the rest, a tertiary action.
@@ -1864,6 +2000,7 @@ const skipStructure: string = [
  * data-layout). Celo knowledge: which element of the platform's table or list a part is.
  */
 export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): string {
+  if (isTimeline(skemo)) return timelineStylesheetOf(skemo, tag, owner);
   const rules: [string, string[]][] = [];
   const add = (selector: string, lines: readonly string[]) => {
     if (lines.length === 0) return;
@@ -1932,7 +2069,11 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
         case "caption":
           return `${t} > caption`;
         case "head":
-          return `${t} > thead th`;
+          // Spec 046 T3 (plan D-21): the layer of the head lies above the rows only while it
+          // sticks (sticky-header, the host's attribute); a table without it keeps every rule.
+          return property === "layer"
+            ? `${tag}${data}[sticky-header] > table > thead th`
+            : `${t} > thead th`;
         case "cell":
         case "border":
           return `${t} :is(td, th)`;
@@ -1947,6 +2088,13 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
           return `${t} > tfoot :is(td, th)`;
         case "focus-ring":
           return `${t} > thead th > button:focus-visible`;
+        // Spec 046 T3 (plan D-20): the bar in every cell of a skeleton row while loading.
+        case "skeleton":
+          return `${t} > tbody > tr[data-fm-skeleton] > td > span`;
+        // Spec 046 T3 Nachbesserung (F-T5-1, WCAG 2.5.8): the box of the selection is a target of
+        // at least size.target.min, so the boxes of two rows lie that far apart.
+        case "selection":
+          return `${t} > :is(thead, tbody, tfoot) > tr > [data-fm-select] > fm-markobutono`;
         default:
           return undefined;
       }
@@ -2099,6 +2247,15 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
             `${tag} > table > thead th > button { display: inline-flex; align-items: center; appearance: none; border-style: none; cursor: pointer; font: inherit; color: inherit; text-align: inherit; }`,
             `${tag} > table > thead th > button > fm-ikono { flex: none; }`,
             `${tag} > table > tbody > tr[data-fm-empty] > td { text-align: center; }`,
+            // Spec 046 T3 (plan D-19 to D-21): the column of selection boxes keeps to its box; while
+            // loading the skeleton rows stand in place of the rows (the rows stay, unseen); the
+            // head sticks to the top of the region while it scrolls. Host attributes, no axis.
+            `${tag} > table > :is(thead, tbody, tfoot) > tr > [data-fm-select] { white-space: nowrap; vertical-align: middle; }`,
+            // Spec 046 T3 Nachbesserung (F-T5-1): the box keeps its mark in the middle of its target.
+            `${tag} > table > :is(thead, tbody, tfoot) > tr > [data-fm-select] > fm-markobutono { display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; }`,
+            `${tag}[loading] > table > tbody > tr:not([data-fm-skeleton]) { display: none; }`,
+            `${tag} > table > tbody > tr[data-fm-skeleton] > td > span { display: block; }`,
+            `${tag}[sticky-header] > table > thead th { position: sticky; inset-block-start: 0; }`,
             `${tag} ${HIDDEN_TEXT}`,
           ]
         : [
@@ -2113,6 +2270,119 @@ export function lightStylesheetOf(skemo: Skemo, tag: string, owner?: string): st
           ];
   return `${structure.join("\n")}\n${rules
     .map(([selector, body]) => `${selector} {\n${body.map((line) => `  ${line}`).join("\n")}\n}`)
+    .join("\n")}\n`;
+}
+
+/**
+ * Spec 046 T4: the stylesheet of a timeline in the light DOM. The ol is a column of its entries
+ * without the platform's numbers; every entry a column of its time, its title (a heading or
+ * strong) and what happened, the gap of the item between them and the list's gap below it. A line
+ * runs along the inline start of every entry but the last (the line part), so it joins the signs;
+ * the sign the element writes at the start of an entry (data-fm-marker) lies centred on that line
+ * – a ring of the marker's size, width, colour and stroke (dashed), filled with the ground so the
+ * line does not run through it. Its status changes its shape, not only its colour: done fills it
+ * and makes it solid, current makes it solid and its title heavier, upcoming lightens its ring.
+ * Arithmetic over the bound tokens only (half the sign, half the line), no length of its own.
+ */
+function timelineStylesheetOf(skemo: Skemo, tag: string, owner?: string): string {
+  const token = (part: string, property: string): string => {
+    const bound = fixedToken(skemo.parts[part]?.[property as SkemoPartProperty]);
+    return bound === undefined ? "0" : variable(named(owner, skemo, part, property, {}, bound));
+  };
+  const typography = (part: string): string[] => {
+    const bound = fixedToken(skemo.parts[part]?.typography);
+    return bound === undefined
+      ? []
+      : declarations(
+          skemo,
+          part,
+          "typography",
+          named(owner, skemo, part, "typography", {}, bound),
+          owner,
+        );
+  };
+  const size = token("marker", "size");
+  const line = token("line", "width");
+  const ol = `${tag} > ol`;
+  const li = `${ol} > li`;
+  const status = (value: string) => `${ol} > li[data-status="${value}"]`;
+  const title = ":is(h2, h3, h4, h5, h6, strong)";
+  const rules: [string, string[]][] = [
+    [
+      ol,
+      [
+        "display: flex;",
+        "flex-direction: column;",
+        "list-style: none;",
+        "margin: 0;",
+        "padding-block: 0;",
+        "padding-inline-end: 0;",
+        `padding-inline-start: calc(${size} / 2 - ${line} / 2);`,
+      ],
+    ],
+    [
+      li,
+      [
+        "position: relative;",
+        "display: flex;",
+        "flex-direction: column;",
+        "align-items: flex-start;",
+        "box-sizing: border-box;",
+        "margin: 0;",
+        "border-style: none;",
+        "border-inline-start-style: solid;",
+        `border-inline-start-width: ${line};`,
+        `border-inline-start-color: ${token("line", "color")};`,
+        `padding-inline-start: calc(${size} / 2 + ${token("box", "gap")});`,
+        `row-gap: ${token("item", "gap")};`,
+        `color: ${token("item", "color")};`,
+        ...typography("item"),
+      ],
+    ],
+    [`${li}:not(:last-child)`, [`padding-block-end: ${token("list", "gap")};`]],
+    // The last entry draws no line below its sign; its padding takes the line's width, so its text
+    // and its sign stand where those of the others stand.
+    [
+      `${li}:last-child`,
+      [
+        "border-inline-start-style: none;",
+        `padding-inline-start: calc(${size} / 2 + ${token("box", "gap")} + ${line});`,
+      ],
+    ],
+    [`${li} > :not([data-fm-marker])`, ["margin: 0;"]],
+    [`${li} > time`, [`color: ${token("moment", "color")};`, ...typography("moment")]],
+    [`${li} > ${title}`, [`color: ${token("subject", "color")};`, ...typography("subject")]],
+    [
+      `${li} > [data-fm-marker]`,
+      [
+        "position: absolute;",
+        "inset-block-start: 0;",
+        "inset-inline-start: 0;",
+        "box-sizing: border-box;",
+        `inline-size: ${size};`,
+        `block-size: ${size};`,
+        `margin-inline-start: calc(${size} / -2 - ${line} / 2);`,
+        `border-width: ${token("marker", "width")};`,
+        `border-color: ${token("marker", "color")};`,
+        `border-style: ${token("marker", "stroke")};`,
+        `border-radius: ${token("marker", "radius")};`,
+        `background-color: ${token("marker", "fill")};`,
+      ],
+    ],
+    [
+      `${li}:last-child > [data-fm-marker]`,
+      [`margin-inline-start: calc(${size} / -2 + ${line} / 2);`],
+    ],
+    [
+      `${status("done")} > [data-fm-marker]`,
+      [`background-color: ${token("done", "fill")};`, `border-style: ${token("done", "stroke")};`],
+    ],
+    [`${status("current")} > [data-fm-marker]`, [`border-style: ${token("current", "stroke")};`]],
+    [`${status("current")} > ${title}`, [`font-weight: ${token("current", "weight")};`]],
+    [`${status("upcoming")} > [data-fm-marker]`, [`border-color: ${token("upcoming", "color")};`]],
+  ];
+  return `${tag} ${HIDDEN_TEXT}\n${rules
+    .map(([selector, body]) => `${selector} {\n${body.map((each) => `  ${each}`).join("\n")}\n}`)
     .join("\n")}\n`;
 }
 
@@ -2529,64 +2799,69 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo, owner?: string): string {
                       ? headingStructure
                       : isParagraph(skemo)
                         ? paragraphStructure
-                        : isText(skemo)
-                          ? textStructure(
-                              bordered,
-                              skemo.slots.some((slot) => slot.name === "icon-start"),
-                            )
-                          : isStatus(skemo)
-                            ? statusStructure(skemo)
-                            : isMeter(skemo)
-                              ? meterStructure
-                              : isPagination(skemo)
-                                ? paginationStructure
-                                : isUpload(skemo)
-                                  ? uploadStructure(disables)
-                                  : isSlider(skemo)
-                                    ? sliderStructure(disables)
-                                    : isCodeblock(skemo)
-                                      ? codeblockStructure()
-                                      : isMarkdown(skemo)
-                                        ? markdownStructure
-                                        : isCard(skemo)
-                                          ? cardStructure
-                                          : isAvatar(skemo)
-                                            ? avatarStructure
-                                            : isLight(skemo)
-                                              ? lightStructure(skemo, owner)
-                                              : isTabs(skemo)
-                                                ? tabsStructure
-                                                : isDisclosure(skemo)
-                                                  ? disclosureStructure
-                                                  : isField(skemo)
-                                                    ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo), skemo.parts.decrement !== undefined || isDatepicker(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}${isDatepicker(skemo) ? `\n${datepickerStructure}` : ""}`
-                                                    : isGroup(skemo)
-                                                      ? groupStructure(
-                                                          disables,
-                                                          skemo.parts["required-mark"] !==
-                                                            undefined,
-                                                        )
-                                                      : isToggle(skemo)
-                                                        ? toggleStructure(
-                                                            disables,
-                                                            uzo?.layout.wrap !== undefined &&
-                                                              uzo.layout.wrap !== "never",
-                                                            skemo.slots.some(
-                                                              (slot) =>
-                                                                slot.default !== true &&
-                                                                slot.text === true,
-                                                            ),
-                                                            skemo.parts["required-mark"] !==
-                                                              undefined,
-                                                            skemo.props.some(
-                                                              (prop) => prop.name === "label-side",
-                                                            ),
-                                                          )
-                                                        : structure(
-                                                            uzo?.layout.wrap === "with-text",
-                                                            disables,
-                                                            bordered,
-                                                          );
+                        : isGrid(skemo)
+                          ? gridStructure(skemo)
+                          : isLayout(skemo)
+                            ? layoutStructure(skemo)
+                            : isText(skemo)
+                              ? textStructure(
+                                  bordered,
+                                  skemo.slots.some((slot) => slot.name === "icon-start"),
+                                )
+                              : isStatus(skemo)
+                                ? statusStructure(skemo)
+                                : isMeter(skemo)
+                                  ? meterStructure
+                                  : isPagination(skemo)
+                                    ? paginationStructure
+                                    : isUpload(skemo)
+                                      ? uploadStructure(disables)
+                                      : isSlider(skemo)
+                                        ? sliderStructure(disables)
+                                        : isCodeblock(skemo)
+                                          ? codeblockStructure()
+                                          : isMarkdown(skemo)
+                                            ? markdownStructure
+                                            : isCard(skemo)
+                                              ? cardStructure
+                                              : isAvatar(skemo)
+                                                ? avatarStructure
+                                                : isLight(skemo)
+                                                  ? lightStructure(skemo, owner)
+                                                  : isTabs(skemo)
+                                                    ? tabsStructure
+                                                    : isDisclosure(skemo)
+                                                      ? disclosureStructure
+                                                      : isField(skemo)
+                                                        ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo), skemo.parts.decrement !== undefined || isDatepicker(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}${isDatepicker(skemo) ? `\n${datepickerStructure}` : ""}`
+                                                        : isGroup(skemo)
+                                                          ? groupStructure(
+                                                              disables,
+                                                              skemo.parts["required-mark"] !==
+                                                                undefined,
+                                                            )
+                                                          : isToggle(skemo)
+                                                            ? toggleStructure(
+                                                                disables,
+                                                                uzo?.layout.wrap !== undefined &&
+                                                                  uzo.layout.wrap !== "never",
+                                                                skemo.slots.some(
+                                                                  (slot) =>
+                                                                    slot.default !== true &&
+                                                                    slot.text === true,
+                                                                ),
+                                                                skemo.parts["required-mark"] !==
+                                                                  undefined,
+                                                                skemo.props.some(
+                                                                  (prop) =>
+                                                                    prop.name === "label-side",
+                                                                ),
+                                                              )
+                                                            : structure(
+                                                                uzo?.layout.wrap === "with-text",
+                                                                disables,
+                                                                bordered,
+                                                              );
   // A skip link adds its place above the page to a control's structure (Spec 014 ②, D-07).
   const floating = isSkip(skemo) ? `\n${skipStructure}` : "";
   const ending = isBoxedField(skemo) ? `\n${endStructure(isTextarea(skemo))}` : "";
@@ -2685,7 +2960,8 @@ function selectorOf(
   if (isIcon(skemo)) return `:where([part="glyph"]${data})`;
   // A heading (Spec 014 ③): its text is the control; a paragraph: the control is the text.
   if (isHeading(skemo)) return `:where([part="text"]${data})`;
-  if (isText(skemo) || isSeparator(skemo) || isParagraph(skemo)) {
+  // Spec 046 T1: a layout Ero keys its gap on the control, as static text keys its parts.
+  if (isText(skemo) || isLayout(skemo) || isSeparator(skemo) || isParagraph(skemo)) {
     return `:where([part="control"]${data})`;
   }
   if (isDisclosure(skemo))
@@ -2740,6 +3016,24 @@ export function namesOf(ero: LoadedEro["ero"]): {
 }
 
 /**
+ * Spec 046 T2 (plan D-14): the custom property of the least width of a grid's column per step of
+ * min-width – the Ero-Token of cell.width in that combination, else the token the Skemo binds.
+ */
+function gridMinWidthsOf(entry: LoadedEro): Record<string, string> {
+  const { skemo } = entry;
+  const steps = skemo.props.find((prop) => prop.name === "min-width")?.values ?? [];
+  return Object.fromEntries(
+    steps.flatMap((step) => {
+      const combination = { "min-width": String(step) };
+      const bound = boundToken(skemo, "cell", "width", combination);
+      if (bound === undefined) return [];
+      const token = named(entry.ero.name, skemo, "cell", "width", combination, bound.token);
+      return [[String(step), nomRegulo("css").derive(token)]];
+    }),
+  );
+}
+
+/**
  * Everything the element template needs of one Ero: names, the native control, the slots. The
  * Ikonaro (Spec 014 ②) is what the icon element knows of the names and which of them mirror.
  */
@@ -2764,6 +3058,7 @@ export function elementNamesOf(
       isChip(entry.skemo),
       isListselect(entry.skemo),
       isEditor(entry.skemo),
+      isLayout(entry.skemo),
     ),
     role: entry.skemo.a11y.role,
     // Spec 015 ① (plan ① D-04): the breadcrumb is a light host with a list in its shadow.
@@ -2800,6 +3095,13 @@ export function elementNamesOf(
     // Spec 014 ① (plan ① D-03): the width from which layout auto lays name and value side by side,
     // the Uzo's columns-from as the custom property its token is projected to.
     ...(columnsFrom === undefined ? {} : { columnsFrom: nomRegulo("css").derive(columnsFrom) }),
+    // Spec 046 T2 (plan D-14): a grid counts its columns at the least width of its min-width step,
+    // the custom property of that step's Ero-Token.
+    ...(isGrid(entry.skemo) ? { gridMinWidths: gridMinWidthsOf(entry) } : {}),
+    // Spec 046 T3 (plan D-19): the table writes its selection column where the Skemo has selectable.
+    selectable: entry.skemo.props.some((prop) => prop.name === "selectable"),
+    // Spec 046 T4: a timeline writes a sign and the word of its status into every entry.
+    ...(isTimeline(entry.skemo) ? { timeline: true } : {}),
     // Nachlese 8 ② (F-5): a Markdown view indents a nested list as its first level, by the indent
     // of its Skemo — in the light DOM, where ::slotted does not reach.
     ...(isMarkdown(entry.skemo) ? { documentCss: markdownDocumentCss(entry) } : {}),
@@ -2936,7 +3238,11 @@ export function stylesheetInventory(moduleText: string): ParityItem {
   const states = new Set<string>();
   for (const [, rawSelector = ""] of css.matchAll(/([^{}]+)\{[^{}]*\}/g)) {
     // `:focus:not(:focus-visible)` resets the ring; the state is what stays outside the :not().
-    const selector = rawSelector.replaceAll(/:not\([^()]*\)/g, "");
+    // Spec 046 T2 (plan D-14): what a child in a slot carries (the data-span of a grid's child,
+    // like the data-sort of a th) is the child's, no prop of the Ero.
+    const selector = rawSelector
+      .replaceAll(/:not\([^()]*\)/g, "")
+      .replaceAll(/::slotted\((?:[^()]|\([^()]*\))*\)/g, "");
     // The combination stands on the control, or on the field of a composite (Spec 009) or a
     // toggle (Spec 010 ②: the size of a checkbox keys only its label and its check mark, never
     // the box itself — the box is the mark plus its border).

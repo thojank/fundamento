@@ -70,6 +70,8 @@ const LAYOUT = `:root { color-scheme: light dark; }
 .fm-breite[data-fm-breite="schmal"] { inline-size: calc(var(--fm-size-container-small) / 2); }
 .fm-breite[data-fm-breite="mittel"] { inline-size: var(--fm-size-container-medium); max-inline-size: 100%; }
 .fm-breite[data-fm-breite="breit"] { inline-size: var(--fm-size-container-large); max-inline-size: 100%; }
+/* Spec 046 T5: the table with the sticky head stands in a bounded height, so its rows scroll under the head. */
+fm-tabelo[data-fm-begrenzt] { max-block-size: calc(var(--fm-size-container-small) / 4); }
 body { margin: 0; font-family: var(--fm-typography-body-1-font-family); background-color: var(--fm-${VITRINO_SURFACE.replaceAll(".", "-")}); color: var(--fm-color-text-default); }
 header, main { padding: var(--fm-spacing-large); display: flex; flex-direction: column; gap: var(--fm-spacing-large); }
 h1, h2 { margin: 0; font-family: var(--fm-typography-headline-2-font-family); }

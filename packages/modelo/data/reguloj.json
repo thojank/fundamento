@@ -394,7 +394,7 @@
       "name": "spacing-owned-by-container",
       "statement": "The space between sibling Eroj belongs to their container; an Ero carries no outer spacing.",
       "kialo": "An Ero does not know its neighbours. If each one brought its own distance, two Eroj side by side would add up their distances, and the rhythm of a view would depend on which Ero stands where.",
-      "scope": "eroj: every Ero's instances in a design or in code (butono, ligilo, kampo, sxaltilo, markobutono, elekto, elektilo, tekstareo, dialogo, insigno, avizo, plenstato, tabelo, atributlisto, mezurilo, navigado, langetaro); glitilo instances alike (Spec 025 ①, E5); datelektilo instances alike (Spec 025 ②, E5); signeto, listelektilo, plurelektilo, lokredaktilo instances alike (Spec 025 ③, E5)",
+      "scope": "eroj: every Ero's instances in a design or in code (butono, ligilo, kampo, sxaltilo, markobutono, elekto, elektilo, tekstareo, dialogo, insigno, avizo, plenstato, tabelo, atributlisto, mezurilo, navigado, langetaro); glitilo instances alike (Spec 025 ①, E5); datelektilo instances alike (Spec 025 ②, E5); signeto, listelektilo, plurelektilo, lokredaktilo instances alike (Spec 025 ③, E5); vico, kolumno, stako instances alike (Spec 046 T1, the layout Eroj own the gap between their children); krado instances alike (Spec 046 T2, the grid owns the gap between its children); templinio instances alike (Spec 046 T4, the timeline stands in its container like the atributlisto)",
       "checkability": "manual",
       "appliesTo": {
         "eroj": [
@@ -437,7 +437,12 @@
           "signeto",
           "listelektilo",
           "plurelektilo",
-          "lokredaktilo"
+          "lokredaktilo",
+          "vico",
+          "kolumno",
+          "stako",
+          "krado",
+          "templinio"
         ]
       }
     },

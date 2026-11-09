@@ -14,6 +14,7 @@ import {
   output,
   preload,
 } from "../test-doubles/client.js";
+import { REPO_EROJ } from "../test-doubles/eroj.js";
 
 afterAll(closeClients);
 preload({ config: EKZEMPLO_CONFIG });
@@ -132,7 +133,7 @@ describe("the input dialogs of the spec (Spec 025 ①)", () => {
 
   it("lists forty Eroj; the brief of the glitilo names field as its axis and the label as its duty; get_ero names its events", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
-    expect(listed.eroj).toHaveLength(40);
+    expect(listed.eroj).toHaveLength(REPO_EROJ.length);
     expect(listed.eroj.map((ero) => ero.name)).toContain("glitilo");
     const brief = await output<Brief>(client, "get_ero", { name: "glitilo", brief: true });
     expect(brief.axes.map((axis) => axis.name)).toEqual([

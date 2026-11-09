@@ -3,6 +3,7 @@
 import { describe, expect, it } from "vitest";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource, fixtureModeloSource } from "../load/source.js";
+import { REPO_EROJ } from "../validate/test-doubles/eroj.js";
 import { fixtureRoot } from "../validate/test-doubles/fixtures.js";
 import { getEro, listEroj } from "./eroj.js";
 
@@ -21,48 +22,7 @@ describe("list_eroj", () => {
     expect(listEroj(modelo).eroj.map((entry) => entry.name)).toEqual(
       modelo.eroj.map((entry) => entry.ero.name),
     );
-    expect(listEroj(modelo).eroj.map((entry) => entry.name)).toEqual([
-      "alsxutilo",
-      "apartigilo",
-      "atributlisto",
-      "avataro",
-      "avizo",
-      "butono",
-      "datelektilo",
-      "dialogo",
-      "elektilo",
-      "elekto",
-      "faldilo",
-      "glitilo",
-      "ikono",
-      "insigno",
-      "kampo",
-      "karto",
-      "kodbloko",
-      "kompletigilo",
-      "konsileto",
-      "langetaro",
-      "ligilo",
-      "listelektilo",
-      "lokredaktilo",
-      "markdovido",
-      "markobutono",
-      "menuo",
-      "mezurilo",
-      "navigado",
-      "pagxigilo",
-      "plenstato",
-      "plurelektilo",
-      "saltligilo",
-      "signeto",
-      "spuro",
-      "sxaltilo",
-      "sxvebilo",
-      "tabelo",
-      "tekstareo",
-      "teksto",
-      "titolo",
-    ]);
+    expect(listEroj(modelo).eroj.map((entry) => entry.name)).toEqual([...REPO_EROJ]);
     expect(listEroj(modelo).eroj[5]).toEqual({
       id: butono.ero.id,
       name: "butono",
@@ -71,7 +31,7 @@ describe("list_eroj", () => {
       props: ["emphasis", "intent", "size", "type", "disabled", "loading", "full-width", "label"],
     });
     // Spec 020 ③: the kodbloko stands before the ligilo; Spec 025 ①: the glitilo too.
-    expect(listEroj(modelo).eroj[20]).toMatchObject({
+    expect(listEroj(modelo).eroj[REPO_EROJ.indexOf("ligilo")]).toMatchObject({
       name: "ligilo",
       variants: ["inline", "standalone"],
       // Spec 036 Teil 5 ②b-4 (A-ligilo-6): download.
@@ -243,8 +203,9 @@ describe("get_ero", () => {
     // The five nearest names (nearestNames): with six Eroj (Spec 010 ③) the farthest drops out.
     // Spec 011 ②: with nine Eroj dialogo is nearer to "butonno" than markobutono.
     // Spec 014 ②: ikono is nearer to "butonno" than insigno. Spec 014 ③: titolo too; dialogo
-    // drops. Spec 014 ④: menuo is nearer than avizo.
-    expect(missing.allowed).toEqual(["butono", "ikono", "titolo", "insigno", "menuo"]);
+    // drops. Spec 014 ④: menuo is nearer than avizo. Spec 046 T1 (F-T1-6): kolumno, one of the
+    // five new Eroj, is nearer than menuo and takes its place among the five nearest.
+    expect(missing.allowed).toEqual(["butono", "ikono", "titolo", "insigno", "kolumno"]);
   });
 });
 

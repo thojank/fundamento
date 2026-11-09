@@ -18,6 +18,7 @@ import {
   output,
   preload,
 } from "../test-doubles/client.js";
+import { REPO_EROJ } from "../test-doubles/eroj.js";
 
 afterAll(closeClients);
 preload({ config: EKZEMPLO_CONFIG });
@@ -162,48 +163,7 @@ describe("check_usage of the radio group", () => {
 describe("list_eroj and the brief (acceptance 1)", () => {
   it("lists the Eroj; the brief of the elekto names the purpose, the axes, label and options as duties, its alternatives", async () => {
     const listed = await output<{ eroj: { name: string }[] }>(client, "list_eroj", {});
-    expect(listed.eroj.map((entry) => entry.name)).toEqual([
-      "alsxutilo",
-      "apartigilo",
-      "atributlisto",
-      "avataro",
-      "avizo",
-      "butono",
-      "datelektilo",
-      "dialogo",
-      "elektilo",
-      "elekto",
-      "faldilo",
-      "glitilo",
-      "ikono",
-      "insigno",
-      "kampo",
-      "karto",
-      "kodbloko",
-      "kompletigilo",
-      "konsileto",
-      "langetaro",
-      "ligilo",
-      "listelektilo",
-      "lokredaktilo",
-      "markdovido",
-      "markobutono",
-      "menuo",
-      "mezurilo",
-      "navigado",
-      "pagxigilo",
-      "plenstato",
-      "plurelektilo",
-      "saltligilo",
-      "signeto",
-      "spuro",
-      "sxaltilo",
-      "sxvebilo",
-      "tabelo",
-      "tekstareo",
-      "teksto",
-      "titolo",
-    ]);
+    expect(listed.eroj.map((entry) => entry.name)).toEqual([...REPO_EROJ]);
     const brief = await output<Brief>(client, "get_ero", { name: "elekto", brief: true });
     expect(brief.purpose).toBe(elekto.purpose);
     expect(brief.required).toEqual({ props: [], slots: ["label", "options"] });

@@ -3441,6 +3441,232 @@
       ]
     },
     {
+      "uri": "urn:fundamento:ontologio#Vico",
+      "term": "Vico",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Vico",
+        "en": "row",
+        "de": "Reihe"
+      },
+      "altLabel": {
+        "en": [
+          "vico",
+          "row",
+          "horizontal stack"
+        ],
+        "de": [
+          "Reihe",
+          "Zeilenlayout",
+          "vico"
+        ]
+      },
+      "definition": {
+        "en": "A row: a layout Ero that sets any children side by side with the gap of a spacing step between them (gap), aligns them across the row (align), places them along it (justify) and lets them break into a new line where the row is full (wrap). It draws nothing of its own – no colour, no font, no role; children one below the other are the stako's, the grid of a page stops with a person.",
+        "de": "Eine Reihe: ein Layout-Ero, das beliebige Kinder nebeneinander stellt, mit dem Abstand einer Abstandsstufe dazwischen (gap), sie quer zur Reihe ausrichtet (align), entlang verteilt (justify) und umbrechen lässt, wo die Reihe voll ist (wrap). Es zeichnet nichts selbst – keine Farbe, keine Schrift, keine Rolle; Kinder untereinander gehören dem stako, das Raster einer Seite entscheidet eine Person."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Stako"
+        },
+        {
+          "predicate": "references",
+          "target": "#Karto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Insigno"
+        }
+      ]
+    },
+    {
+      "uri": "urn:fundamento:ontologio#Kolumno",
+      "term": "Kolumno",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Kolumno",
+        "en": "column",
+        "de": "Spalte"
+      },
+      "altLabel": {
+        "en": [
+          "kolumno",
+          "column",
+          "vertical stack"
+        ],
+        "de": [
+          "Spalte",
+          "Spaltenlayout",
+          "kolumno"
+        ]
+      },
+      "definition": {
+        "en": "A column: a layout Ero that sets any children one below the other with the gap of a spacing step between them (gap), aligns them across the column (align), places them along it (justify) and lets them break into a further column where the height is bounded (wrap). It draws nothing of its own; children side by side are the vico's, the plain stack over the full width the stako's.",
+        "de": "Eine Spalte: ein Layout-Ero, das beliebige Kinder untereinander stellt, mit dem Abstand einer Abstandsstufe dazwischen (gap), sie quer zur Spalte ausrichtet (align), entlang verteilt (justify) und in eine weitere Spalte umbrechen lässt, wo die Höhe begrenzt ist (wrap). Es zeichnet nichts selbst; Kinder nebeneinander gehören der vico, der einfache Stapel über die volle Breite dem stako."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Vico"
+        },
+        {
+          "predicate": "references",
+          "target": "#Stako"
+        },
+        {
+          "predicate": "references",
+          "target": "#Kampo"
+        }
+      ]
+    },
+    {
+      "uri": "urn:fundamento:ontologio#Stako",
+      "term": "Stako",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Stako",
+        "en": "stack",
+        "de": "Stapel"
+      },
+      "altLabel": {
+        "en": [
+          "stako",
+          "stack"
+        ],
+        "de": [
+          "Stapel",
+          "stako"
+        ]
+      },
+      "definition": {
+        "en": "A stack: the short form of a column – a layout Ero that sets any children one below the other over the full width, with the gap of a spacing step between them (gap) and nothing else. It draws nothing of its own; aligned or spread children are the kolumno's, children side by side the vico's.",
+        "de": "Ein Stapel: die Kurzform einer Spalte – ein Layout-Ero, das beliebige Kinder über die volle Breite untereinander stellt, mit dem Abstand einer Abstandsstufe dazwischen (gap), und sonst nichts. Es zeichnet nichts selbst; ausgerichtete oder verteilte Kinder gehören der kolumno, Kinder nebeneinander der vico."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Kolumno"
+        },
+        {
+          "predicate": "references",
+          "target": "#Vico"
+        },
+        {
+          "predicate": "references",
+          "target": "#Karto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Avizo"
+        }
+      ]
+    },
+    {
+      "uri": "urn:fundamento:ontologio#Krado",
+      "term": "Krado",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Krado",
+        "en": "grid",
+        "de": "Raster"
+      },
+      "altLabel": {
+        "en": [
+          "krado",
+          "grid",
+          "column grid"
+        ],
+        "de": [
+          "Raster",
+          "Spaltenraster",
+          "krado"
+        ]
+      },
+      "definition": {
+        "en": "A grid: a layout Ero that sets any children in columns – a number of them from 1 to 12 (columns), or as many as fit, each at least as wide as a step of the container widths (columns auto, min-width) – with the gap of a spacing step between them (gap). A child spans as many columns as its data-span says, at most as many as the grid has; below the container width of its Uzo the grid stacks. It draws nothing of its own; children only one below the other are the stako's, side by side in one line the vico's.",
+        "de": "Ein Raster: ein Layout-Ero, das beliebige Kinder in Spalten stellt – eine Zahl von 1 bis 12 (columns) oder so viele, wie passen, jede mindestens so breit wie eine Stufe der Containerbreiten (columns auto, min-width) –, mit dem Abstand einer Abstandsstufe dazwischen (gap). Ein Kind überspannt so viele Spalten, wie sein data-span sagt, höchstens so viele, wie das Raster hat; unter der Containerbreite seiner Uzo stapelt das Raster. Es zeichnet nichts selbst; Kinder nur untereinander gehören dem stako, nebeneinander in einer Zeile der vico."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Stako"
+        },
+        {
+          "predicate": "references",
+          "target": "#Vico"
+        },
+        {
+          "predicate": "references",
+          "target": "#Karto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Tabelo"
+        }
+      ]
+    },
+    {
+      "uri": "urn:fundamento:ontologio#Templinio",
+      "term": "Templinio",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Templinio",
+        "en": "timeline",
+        "de": "Zeitleiste"
+      },
+      "altLabel": {
+        "en": [
+          "templinio",
+          "timeline",
+          "chronology"
+        ],
+        "de": [
+          "Zeitleiste",
+          "Zeitstrahl",
+          "Verlauf",
+          "templinio"
+        ]
+      },
+      "definition": {
+        "en": "A timeline: an Ero that shows what happened in the order of time. It styles the platform's own ordered list; every entry holds a time, a title and what happened, its status done, current or upcoming (data-status). The status is never a colour alone: a sign of its own shape stands at the start of every entry – filled when done, a solid ring when current, a dashed ring when upcoming – and the status is heard as a word. Many events compared field by field are the tabelo's; the fields of one record the atributlisto's.",
+        "de": "Eine Zeitleiste: ein Ero, das zeigt, was geschehen ist, in der Reihenfolge der Zeit. Es gestaltet die geordnete Liste der Plattform; jeder Eintrag trägt eine Zeit, einen Titel und was geschah, seinen Status erledigt, aktuell oder ausstehend (data-status). Der Status ist nie nur eine Farbe: am Anfang jedes Eintrags steht ein Zeichen eigener Form – gefüllt, wenn erledigt, ein durchgezogener Ring, wenn aktuell, ein gestrichelter Ring, wenn ausstehend –, und der Status wird als Wort vorgelesen. Viele Ereignisse, Feld für Feld verglichen, gehören der tabelo; die Felder eines Datensatzes der atributlisto."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Tabelo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Atributlisto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Insigno"
+        }
+      ]
+    },
+    {
       "uri": "urn:fundamento:ontologio#Deziraro",
       "term": "Deziraro",
       "inScheme": "laboro",

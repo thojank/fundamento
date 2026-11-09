@@ -1,0 +1,112 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M6X3XMV3MKJF5HQJ0MMTA09C",
+    "ero": "ero_01M6X3XKZC59PJJEVWB8HVZVJW",
+    "skemo": "ske_01M6X3XMCN6SMC962Y26Y6W77J",
+    "purpose": "Sets its children one below the other with the gap of a spacing step, aligned and placed along the column.",
+    "instead": [
+      {
+        "goal": "side-by-side",
+        "keywords": {
+          "en": [
+            "sidebyside"
+          ],
+          "de": [
+            "nebeneinander"
+          ]
+        },
+        "ero": "vico",
+        "kialo": "Children that stand beside each other are a row, because a column would put them below each other and the eye would lose that they belong together."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "masonry",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "masonry"
+          ],
+          "de": [
+            "mauerwerk"
+          ]
+        },
+        "kialo": "Columns of different heights that fill each other's gaps are a layout of the page, because the reading order then jumps between them; a person decides it."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page-section",
+          "kialo": "A section of a page holds its Eroj in a column, because the section decides how its parts stand to each other and the layout Ero takes that gap from a spacing step."
+        }
+      ],
+      "with": [
+        {
+          "ero": "kampo",
+          "kialo": "The fields of a form stand in a column, because a person fills them in one after the other."
+        },
+        {
+          "ero": "vico",
+          "kialo": "A column holds rows, because a screen stands its groups one below the other and lays the parts of a group side by side."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {},
+    "layout": {
+      "size": "container",
+      "wrap": "allowed"
+    },
+    "content": [],
+    "when-not": [
+      {
+        "case": {
+          "de": "Die Kinder sollen nebeneinander stehen.",
+          "en": "The children should stand side by side."
+        },
+        "ero": "vico"
+      },
+      {
+        "case": {
+          "de": "Die Kinder sollen nur über die volle Breite untereinander stehen, ohne Ausrichtung.",
+          "en": "The children only stack over the full width, without alignment."
+        },
+        "ero": "stako"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Nimm den Abstand aus den Stufen der Spalte (gap) und richte die Kinder mit align quer zu ihr aus.",
+          "en": "Take the gap from the steps of the column (gap) and align the children across it with align."
+        },
+        {
+          "de": "Nutze justify nur, wo die Spalte eine eigene Höhe hat, damit die Kinder Raum haben, sich entlang zu verteilen.",
+          "en": "Use justify only where the column has a height of its own, so the children have room to move along it."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Dem Layout eine Farbe, einen Rand oder eine Schrift geben; es ordnet nur seine Kinder an, eine Fläche ist die der karto.",
+          "en": "Give the layout a colour, a border or a font; it only places its children, a surface is the karto's."
+        },
+        {
+          "de": "Den Kindern einen Außenabstand geben, um sie zu trennen; der gap des Layouts ist der eine Abstand zwischen ihnen.",
+          "en": "Write a margin on the children to space them; the gap of the layout is the one distance between them."
+        }
+      ]
+    },
+    "keyboard": {
+      "none": {
+        "de": "Das Layout nimmt weder den Fokus noch eine Taste; seine Kinder behalten ihre eigene Reihenfolge beim Lesen und mit Tab.",
+        "en": "The layout takes neither the focus nor a key; its children keep their own order in the reading and the tab sequence."
+      }
+    }
+  }
+}

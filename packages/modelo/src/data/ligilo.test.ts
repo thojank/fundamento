@@ -13,6 +13,7 @@ import { evaluateUsage, USAGE_ENFORCERS } from "../eroj/usage.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
 import { REGULO_ENFORCERS } from "../validate/regularo-enforcement.js";
+import { REPO_EROJ } from "../validate/test-doubles/eroj.js";
 import { validateModelo } from "../validate/validate-modelo.js";
 
 const { modelo } = loadModelo(defaultModeloSource());
@@ -31,48 +32,7 @@ const SKEMO_REGULOJ = ["link-not-color-only", "external-link-marked"];
 describe("ligilo in the repo Modelo (T006)", () => {
   it("lives in data/eroj/ligilo/skemo.json, after the butono, and the repo Modelo stays valid", () => {
     expect(ligilo.file).toBe("modelo/data/eroj/ligilo/skemo.json");
-    expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
-      "alsxutilo",
-      "apartigilo",
-      "atributlisto",
-      "avataro",
-      "avizo",
-      "butono",
-      "datelektilo",
-      "dialogo",
-      "elektilo",
-      "elekto",
-      "faldilo",
-      "glitilo",
-      "ikono",
-      "insigno",
-      "kampo",
-      "karto",
-      "kodbloko",
-      "kompletigilo",
-      "konsileto",
-      "langetaro",
-      "ligilo",
-      "listelektilo",
-      "lokredaktilo",
-      "markdovido",
-      "markobutono",
-      "menuo",
-      "mezurilo",
-      "navigado",
-      "pagxigilo",
-      "plenstato",
-      "plurelektilo",
-      "saltligilo",
-      "signeto",
-      "spuro",
-      "sxaltilo",
-      "sxvebilo",
-      "tabelo",
-      "tekstareo",
-      "teksto",
-      "titolo",
-    ]);
+    expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([...REPO_EROJ]);
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
     expect(ligilo.ero.description).toBe(
       "A link: moves to another view or place. Its label names the destination.",
@@ -305,47 +265,8 @@ describe("the Reguloj of the ligilo (T005, A2, D-13)", () => {
   });
 
   it("spacing-owned-by-container applies to butono and ligilo", () => {
-    expect(named("spacing-owned-by-container")?.appliesTo?.eroj).toEqual([
-      "butono",
-      "ligilo",
-      "kampo",
-      "sxaltilo",
-      "markobutono",
-      "elekto",
-      "elektilo",
-      "tekstareo",
-      "dialogo",
-      "insigno",
-      "avizo",
-      "plenstato",
-      "tabelo",
-      "atributlisto",
-      "mezurilo",
-      "navigado",
-      "langetaro",
-      "ikono",
-      "apartigilo",
-      "saltligilo",
-      "titolo",
-      "teksto",
-      "konsileto",
-      "sxvebilo",
-      "menuo",
-      "faldilo",
-      "kompletigilo",
-      "pagxigilo",
-      "spuro",
-      "alsxutilo",
-      "karto",
-      "avataro",
-      "kodbloko",
-      "markdovido",
-      "glitilo",
-      "datelektilo",
-      "signeto",
-      "listelektilo",
-      "plurelektilo",
-      "lokredaktilo",
+    expect([...(named("spacing-owned-by-container")?.appliesTo?.eroj ?? [])].sort()).toEqual([
+      ...REPO_EROJ,
     ]);
   });
 

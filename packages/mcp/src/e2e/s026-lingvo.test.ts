@@ -12,6 +12,7 @@ import {
   output,
   preload,
 } from "../test-doubles/client.js";
+import { REPO_EROJ } from "../test-doubles/eroj.js";
 
 afterAll(closeClients);
 preload({ config: EKZEMPLO_CONFIG });
@@ -54,7 +55,7 @@ describe("lingvo names the display name (Spec 026 ②)", () => {
     const eroj = await output<{ eroj: { name: string; label?: string }[] }>(client, "list_eroj", {
       lingvo: "de",
     });
-    expect(eroj.eroj).toHaveLength(40);
+    expect(eroj.eroj).toHaveLength(REPO_EROJ.length);
     expect(eroj.eroj.every((entry) => (entry.label ?? "") !== "")).toBe(true);
     expect(eroj.eroj.find((entry) => entry.name === "butono")?.label).toBe("Schaltfläche");
     const plain = await output<{ eroj: { name: string; label?: string }[] }>(

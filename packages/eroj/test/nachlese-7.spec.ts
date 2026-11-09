@@ -4,10 +4,17 @@
 // renders without a child left unassigned (unseen); A-6 a native caption of a tabelo stays when the
 // slot is empty. Chromium, Firefox and WebKit.
 
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
 import { buildProjections, serve } from "./serve.js";
+
+/** Spec 046 T1: the number of Eroj, read from the folders of the repo Modelo (testing.md). */
+const EROJ_DIR = fileURLToPath(new URL("../../modelo/data/eroj/", import.meta.url));
+const ERO_COUNT = readdirSync(EROJ_DIR).filter((name) =>
+  existsSync(join(EROJ_DIR, name, "skemo.json")),
+).length;
 
 const { out, input } = await buildProjections();
 const TAGS = input.modelo.eroj.map((entry) => `fm-${entry.ero.name}`).sort();
@@ -83,7 +90,7 @@ test.describe("Nachlese 7 ① (0.1.1)", () => {
   }) => {
     await serve(page, out, '<main id="host"></main>');
     // Spec 020 ③: 34 with the kodbloko and the markdovido; Spec 025 ①: 35 with the glitilo and the markdovido.
-    expect(TAGS).toHaveLength(40);
+    expect(TAGS).toHaveLength(ERO_COUNT);
     const results = await page.evaluate((tags) => {
       // A constructor that writes an attribute on its host breaks createElement: the platform
       // reports the error and hands back an HTMLUnknownElement instead of the Ero.
@@ -113,7 +120,7 @@ test.describe("Nachlese 7 ① (0.1.1)", () => {
   }) => {
     await serve(page, out, '<main id="host"></main>');
     const files = readdirSync(GUIDELINES).filter((file) => file.endsWith(".md"));
-    expect(files).toHaveLength(40);
+    expect(files).toHaveLength(ERO_COUNT);
     const failures: string[] = [];
     for (const file of files) {
       for (const example of examplesOf(file)) {

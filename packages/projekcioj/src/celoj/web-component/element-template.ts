@@ -66,7 +66,10 @@ export type HostControl =
   | "chip"
   | "listselect"
   | "multiselect"
-  | "editor";
+  | "editor"
+  // Spec 046 T1: a layout Ero (vico, kolumno, stako) — a flex container around its children that
+  // draws nothing itself, no role of its own.
+  | "layout";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -107,6 +110,23 @@ export interface ElementNames {
    * --fm-size-container-small); absent, the element has no auto layout to resolve.
    */
   columnsFrom?: string;
+  /**
+   * Spec 046 T2 (plan D-14): a layout Ero that is a grid (the krado) – the custom property each
+   * step of min-width reads (its Ero-Token), by the step's name. The element counts the columns
+   * it lays out from it (auto) or from columns, so a span wider than the grid takes the row.
+   */
+  gridMinWidths?: Readonly<Record<string, string>>;
+  /**
+   * Spec 046 T3 (plan D-19): a table whose Skemo has the prop selectable – the element writes the
+   * column of selection boxes and says select. Without it the element is as before.
+   */
+  selectable?: boolean;
+  /**
+   * Spec 046 T4: a timeline – a list whose goal is timeline (the templinio). The element writes a
+   * sign at the start of every entry of the platform's ol, with the word of its status (data-status)
+   * clipped from sight. Without it the element is as before.
+   */
+  timeline?: boolean;
   /**
    * Rules for the light DOM of a Markdown view (Nachlese 8 ②, F-5): what its shadow cannot reach
    * — the indent of a nested list —, adopted by the document once, like a table's.
@@ -167,8 +187,11 @@ export function hostOf(
   chip = false,
   listselect = false,
   editor = false,
+  layout = false,
 ): HostControl {
   if (role === "link") return "a";
+  // Spec 046 T1: a generic whose goal is a layout purpose places its children and draws nothing.
+  if (role === "generic" && layout) return "layout";
   // Spec 025 ③ (plan ③ D-18): a generic with a remove part is the chip, with an edit part the
   // inline editor; a combobox with an item part is the styled select-only list; a listbox is the
   // multi-select — a button over the platform's popover, as the list of the kompletigilo.
@@ -704,6 +727,14 @@ function textMarkup(slots: NonNullable<ElementNames["slots"]>): string {
 }
 
 /**
+ * The shadow markup of a layout Ero (Spec 046 T1): one div as the control that places the children
+ * of the default slot — no role, no text of its own; the stylesheet makes it a flex container.
+ */
+function layoutMarkup(): string {
+  return '<div part="control"><slot></slot><span id="fm-texts" hidden></span></div>';
+}
+
+/**
  * The shadow markup of a live region (Spec 011 ③, D-09, D-10, G4): a div with role status as
  * the control; first the words assistive technology hears with the content (the kind of a notice,
  * "lädt"), clipped from sight; the indicator where the Skemo has one; then the text slots in the
@@ -1084,6 +1115,7 @@ function hostMarkup(
   parts: readonly string[] = [],
 ): string {
   if (host === "text") return textMarkup(slots);
+  if (host === "layout") return layoutMarkup();
   if (host === "slider") return sliderMarkup(slots);
   if (host === "status") return statusMarkup(slots, indicator, dismiss, icon);
   if (host === "icon") return iconMarkup();
@@ -1144,6 +1176,9 @@ export function elementSource({
   indicator = false,
   dismiss = false,
   columnsFrom,
+  gridMinWidths,
+  selectable = false,
+  timeline = false,
   documentCss = "",
   ikonaro = [],
   skip = false,
@@ -1185,43 +1220,45 @@ export function elementSource({
                     ? "select"
                     : host === "text"
                       ? "span"
-                      : host === "status"
-                        ? "div"
-                        : host === "meter"
+                      : host === "layout"
+                        ? "[part='control']"
+                        : host === "status"
                           ? "div"
-                          : host === "light"
-                            ? "[part='region'], [part='list']"
-                            : host === "tabs"
-                              ? "[role=tablist]"
-                              : host === "icon"
-                                ? "span"
-                                : host === "separator"
-                                  ? "div"
-                                  : host === "heading"
-                                    ? "[part='text']"
-                                    : host === "paragraph"
-                                      ? "p"
-                                      : host === "tooltip"
-                                        ? "[part='control']"
-                                        : host === "disclosure"
-                                          ? "details"
-                                          : host === "pagination"
-                                            ? "[part='list']"
-                                            : host === "suggest" || host === "upload"
-                                              ? "input"
-                                              : host === "card"
-                                                ? "article"
-                                                : host === "avatar" || host === "markdown"
-                                                  ? "[part='control']"
-                                                  : host === "codeblock"
-                                                    ? "figure"
-                                                    : host === "popover"
-                                                      ? "[role=dialog]"
-                                                      : host === "menu"
-                                                        ? "[role=menu]"
-                                                        : host === "slider"
-                                                          ? "[part='track']"
-                                                          : "button";
+                          : host === "meter"
+                            ? "div"
+                            : host === "light"
+                              ? "[part='region'], [part='list']"
+                              : host === "tabs"
+                                ? "[role=tablist]"
+                                : host === "icon"
+                                  ? "span"
+                                  : host === "separator"
+                                    ? "div"
+                                    : host === "heading"
+                                      ? "[part='text']"
+                                      : host === "paragraph"
+                                        ? "p"
+                                        : host === "tooltip"
+                                          ? "[part='control']"
+                                          : host === "disclosure"
+                                            ? "details"
+                                            : host === "pagination"
+                                              ? "[part='list']"
+                                              : host === "suggest" || host === "upload"
+                                                ? "input"
+                                                : host === "card"
+                                                  ? "article"
+                                                  : host === "avatar" || host === "markdown"
+                                                    ? "[part='control']"
+                                                    : host === "codeblock"
+                                                      ? "figure"
+                                                      : host === "popover"
+                                                        ? "[role=dialog]"
+                                                        : host === "menu"
+                                                          ? "[role=menu]"
+                                                          : host === "slider"
+                                                            ? "[part='track']"
+                                                            : "button";
   const isToggle = host === "toggle";
   const isGroup = host === "group";
   // Spec 036 Teil 5 ②b-3 (A-elekto-4): a group whose options carry a description (the part).
@@ -1267,6 +1304,7 @@ export function elementSource({
   const isStatic =
     isStatus ||
     host === "text" ||
+    host === "layout" ||
     isMeter ||
     isLight ||
     isTabs ||
@@ -2488,7 +2526,16 @@ ${
   // Spec 015 ③ (plan ③ D-04): a horizontal card stacks below the Uzo's columns-from, measured as
   // layout auto measures its width.
   const isStacking = isCard && columnsFrom !== undefined;
-  const observesSize = isAuto || isStacking;
+  // Spec 046 T2 (plan D-14, D-15): a grid counts the columns it lays out and stacks a number of
+  // columns below the Uzo's columns-from, measured as the card measures.
+  const isGrid = host === "layout" && gridMinWidths !== undefined;
+  // Spec 046 T3 (plan D-19, D-20): the selection column of a table and its skeleton rows while
+  // loading, only where the Skemo has the prop selectable and the part skeleton.
+  const isSelecting = isLight && selectable;
+  const isSkeleton = isLight && parts.includes("skeleton");
+  // Spec 046 T4: the sign and the status word of every entry of a timeline's ol.
+  const isTimeline = isLight && timeline;
+  const observesSize = isAuto || isStacking || isGrid;
   const lightRender = isLight
     ? `    this.#decorate();
 ${isAuto ? "    this.#autoLayout();\n" : ""}`
@@ -2496,10 +2543,16 @@ ${isAuto ? "    this.#autoLayout();\n" : ""}`
   const autoConstant = observesSize
     ? `/** The width from which layout auto lays name and value side by side, a card its media beside its body (Spec 014 ①, Spec 015 ③: the Uzo's columns-from). */
 const COLUMNS_FROM = ${JSON.stringify(columnsFrom)};
+${
+  isGrid
+    ? `/** The custom property of the least width of a column per step of min-width (Spec 046 T2, plan D-14). */
+const MIN_WIDTHS: Readonly<Record<string, string>> = ${JSON.stringify(gridMinWidths)};
 `
+    : ""
+}`
     : "";
   const autoField = observesSize
-    ? "  /** Observes the inline size of the element while its layout is auto (Spec 014 ①) or it is a horizontal card (Spec 015 ③). */\n  #sizes: ResizeObserver | undefined;\n"
+    ? "  /** Observes the inline size of the element while its layout is auto (Spec 014 ①), it is a horizontal card (Spec 015 ③) or a grid (Spec 046 T2). */\n  #sizes: ResizeObserver | undefined;\n"
     : "";
   const autoDisconnect = observesSize
     ? `
@@ -2509,8 +2562,68 @@ const COLUMNS_FROM = ${JSON.stringify(columnsFrom)};
   }
 `
     : "";
-  const autoMethods = isStacking
+  const autoMethods = isGrid
     ? `
+  /** A length of a custom property in pixels: px, or rem and em by their font size. */
+  #pixels(raw: string, style: CSSStyleDeclaration): number {
+    const number = Number.parseFloat(raw);
+    return raw.endsWith("rem")
+      ? number * Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
+      : raw.endsWith("em")
+        ? number * Number.parseFloat(style.fontSize)
+        : number;
+  }
+
+  /**
+   * A grid (Spec 046 T2, plan D-14, D-15): the number of columns it lays out – columns, or with
+   * auto as many as fit at the least width of the min-width step (the platform's auto-fill:
+   * columns of that width and the gaps between them) – marks the control (fm-columns-<n>), so a
+   * data-span wider than that takes the whole row instead of making a column of its own. A number
+   * of columns stacks into one while the element is narrower than the Uzo's columns-from, measured
+   * as the card measures (a container query takes no var()). Classes, no data attributes: the
+   * parity inventory reads data-* as props of the Skemo.
+   */
+  #gridLayout(): void {
+    const control = this.#control;
+    if (!this.isConnected) {
+      this.#sizes?.disconnect();
+      this.#sizes = undefined;
+      return;
+    }
+    if (this.#sizes === undefined && typeof ResizeObserver !== "undefined") {
+      this.#sizes = new ResizeObserver(() => requestAnimationFrame(() => this.#gridLayout()));
+      this.#sizes.observe(this);
+    }
+    const style = getComputedStyle(this);
+    const box = this.getBoundingClientRect();
+    const inline = style.writingMode.startsWith("horizontal") ? box.width : box.height;
+    const columns = String(this.propValue("columns") ?? "auto");
+    let count = 1;
+    if (columns === "auto") {
+      control.classList.remove("fm-stacked");
+      const step = String(this.propValue("min-width") ?? "");
+      const least = this.#pixels(style.getPropertyValue(MIN_WIDTHS[step] ?? "").trim(), style);
+      const gap = Number.parseFloat(getComputedStyle(control).columnGap) || 0;
+      // Without the token (no Aspekto loaded) one column, as the stylesheet then draws none.
+      if (Number.isFinite(least) && least > 0 && inline > 0) {
+        count = Math.max(1, Math.floor((inline + gap) / (Math.min(least, inline) + gap) + 1e-6));
+      }
+    } else {
+      const threshold = this.#pixels(style.getPropertyValue(COLUMNS_FROM).trim(), style);
+      // Without the token (no Aspekto loaded) the columns stand, as the stylesheet draws them.
+      const stacked = Number.isFinite(threshold) && inline < threshold;
+      control.classList.toggle("fm-stacked", stacked);
+      count = stacked ? 1 : Number(columns);
+    }
+    const mark = \`fm-columns-\${count}\`;
+    for (const name of [...control.classList]) {
+      if (name.startsWith("fm-columns-") && name !== mark) control.classList.remove(name);
+    }
+    control.classList.add(mark);
+  }
+`
+    : isStacking
+      ? `
   /**
    * A horizontal card (Spec 015 ③, plan ③ D-04): the media beside the body while the element is
    * at least as wide as the Uzo's columns-from, else stacked like a vertical card — measured as
@@ -2543,8 +2656,8 @@ const COLUMNS_FROM = ${JSON.stringify(columnsFrom)};
     control.classList.toggle("fm-stacked", Number.isFinite(threshold) && inline < threshold);
   }
 `
-    : isAuto
-      ? `
+      : isAuto
+        ? `
   /**
    * Layout auto (Spec 014 ①, plan ① D-03): columns while the element is at least as wide as the
    * Uzo's columns-from, else stacked; columns and stacked stand as they are. A container query
@@ -2577,7 +2690,7 @@ const COLUMNS_FROM = ${JSON.stringify(columnsFrom)};
     if (this.getAttribute("data-layout") !== resolved) this.setAttribute("data-layout", resolved);
   }
 `
-      : "";
+        : "";
   const lightInit = isLight
     ? `    if (lightSheet === undefined) {
       lightSheet = new CSSStyleSheet();
@@ -2591,10 +2704,11 @@ const COLUMNS_FROM = ${JSON.stringify(columnsFrom)};
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ${isNav ? '["slot", "href", "data-page", "data-count", "data-count-description"]' : isBreadcrumb ? '["slot", "href", "data-page"]' : '["slot", "data-sort", "numeric"]'},
+      attributeFilter: ${isNav ? '["slot", "href", "data-page", "data-count", "data-count-description"]' : isBreadcrumb ? '["slot", "href", "data-page"]' : isSelecting ? '["slot", "data-sort", "numeric", "data-key", "data-selected"]' : isTimeline ? '["slot", "data-sort", "numeric", "data-status"]' : '["slot", "data-sort", "numeric"]'},
     });
 ${
-  isNav || isBreadcrumb
+  // Spec 046 T4: a timeline has no sort button and says no sort-change (its Skemo has no event).
+  isNav || isBreadcrumb || isTimeline
     ? ""
     : `    this.addEventListener("click", (event) => {
       const button = event
@@ -2610,7 +2724,34 @@ ${
         current === column && this.propValue("direction") === "ascending" ? "descending" : "ascending";
       this.dispatchEvent(new CustomEvent("sort-change", { bubbles: true, detail: { column, direction } }));
     });
+${
+  isSelecting
+    ? `    // Spec 046 T3 (plan D-19): a box of the selection column says select with the keys the
+    // selection would hold, in DOM order – the application writes data-selected, the table never
+    // selects itself; the box's own input and change stay inside, and its mark follows the row.
+    this.addEventListener("input", (event) => {
+      if (this.#selectBox(event) !== undefined) event.stopPropagation();
+    });
+    this.addEventListener("change", (event) => {
+      const box = this.#selectBox(event);
+      const table = this.#native("table");
+      if (box === undefined || table === undefined) return;
+      event.stopPropagation();
+      const rows = this.#keyedRows(table);
+      const row = box.closest("tr");
+      const all = rows.length > 0 && rows.every((candidate) => candidate.hasAttribute("data-selected"));
+      const head = row?.parentElement?.tagName.toLowerCase() === "thead";
+      const keys = rows
+        .filter((candidate) =>
+          head ? !all : candidate === row ? !candidate.hasAttribute("data-selected") : candidate.hasAttribute("data-selected"),
+        )
+        .map((candidate) => candidate.getAttribute("data-key") ?? "");
+      this.dispatchEvent(new CustomEvent("select", { bubbles: true, detail: { keys } }));
+      this.#render();
+    });
 `
+    : ""
+}`
 }`
     : "";
   const lightMethods = isBreadcrumb
@@ -2762,7 +2903,7 @@ ${
       : isLight
         ? `
   /** The platform's own table or list in the light DOM, the first child of its kind. */
-  #native(kind: "table" | "dl"): HTMLElement | undefined {
+  #native(kind: "table" | "dl"${isTimeline ? ' | "ol"' : ""}): HTMLElement | undefined {
     const node = [...this.children].find((child) => child.tagName.toLowerCase() === kind);
     return node instanceof HTMLElement ? node : undefined;
   }
@@ -2792,14 +2933,145 @@ ${
   }
 
 `
+}${
+  isSelecting
+    ? `  /** Spec 046 T3: the fm-markobutono of the selection column an event comes from, if any. */
+  #selectBox(event: Event): HTMLElement | undefined {
+    const box = event.target;
+    return box instanceof HTMLElement &&
+      box.tagName.toLowerCase() === "fm-markobutono" &&
+      box.parentElement?.hasAttribute("data-fm-select") === true &&
+      this.contains(box)
+      ? box
+      : undefined;
+  }
+
+  /** Spec 046 T3: the rows of the body a selection can hold – those with a data-key, in DOM order. */
+  #keyedRows(table: HTMLElement): HTMLElement[] {
+    return [...table.querySelectorAll<HTMLElement>(":scope > tbody > tr[data-key]")];
+  }
+
+  /**
+   * Spec 046 T3 (plan D-18, D-19): selectable – a first cell in every row; in the first head row
+   * and in every body row with a data-key an fm-markobutono, named by the Modelo's words (and the
+   * row's header), checked while its row carries data-selected (the head's while every keyed row
+   * does). A body row without data-key has no box, and the console says so. Without selectable the
+   * cells the element wrote go.
+   */
+  #selectColumn(table: HTMLElement): void {
+    const cells = [...table.querySelectorAll(":scope > :is(thead, tbody, tfoot) > tr > [data-fm-select]")];
+    if (!(HAS_PROP.has("selectable") && this.propValue("selectable") === true)) {
+      for (const cell of cells) cell.remove();
+      return;
+    }
+    const lingvo = this.#lingvo();
+    const word = (key: string): string => TEXTS[key]?.[lingvo] ?? TEXTS[key]?.en ?? "";
+    const keyed = this.#keyedRows(table);
+    const firstHead = table.querySelector(":scope > thead > tr");
+    const rows = [...table.querySelectorAll<HTMLElement>(":scope > :is(thead, tbody, tfoot) > tr")].filter(
+      (row) => !row.hasAttribute("data-fm-empty") && !row.hasAttribute("data-fm-skeleton"),
+    );
+    for (const row of rows) {
+      const section = row.parentElement?.tagName.toLowerCase();
+      const head = section === "thead";
+      let cell = row.querySelector(":scope > [data-fm-select]");
+      if (cell === null) {
+        cell = document.createElement(head ? "th" : "td");
+        cell.setAttribute("data-fm-select", "");
+        if (head) cell.setAttribute("scope", "col");
+      }
+      if (row.firstElementChild !== cell) row.prepend(cell);
+      const key = section === "tbody" ? row.getAttribute("data-key") : null;
+      if (section === "tbody" && key === null) {
+        warn("${tag}: a row without data-key cannot be selected; give every <tr> in the body a data-key (selectable).");
+      }
+      let box = cell.querySelector(":scope > fm-markobutono");
+      if (!(row === firstHead || key !== null)) {
+        box?.remove();
+        continue;
+      }
+      if (box === null) {
+        box = document.createElement("fm-markobutono");
+        box.setAttribute("size", "small");
+        const words = document.createElement("span");
+        words.className = "fm-hidden";
+        box.append(words);
+        cell.append(box);
+      }
+      const header = row.querySelector(":scope > th:not([data-fm-select])") ?? row.querySelector(":scope > :not([data-fm-select])");
+      const name = head ? word("head-name") : word("selectable") + ": " + (header?.textContent?.trim() ?? key ?? "");
+      const words = box.querySelector(":scope > .fm-hidden");
+      if (words !== null && words.textContent !== name) words.textContent = name;
+      const checked = head
+        ? keyed.length > 0 && keyed.every((candidate) => candidate.hasAttribute("data-selected"))
+        : row.hasAttribute("data-selected");
+      if (box.hasAttribute("checked") !== checked) box.toggleAttribute("checked", checked);
+    }
+  }
+
+`
+    : ""
 }  /** Writes what the Ero adds to the native element; every write first compares. */
   #decorate(): void {${contentSlot === undefined ? "" : "\n    this.#adoptContent();"}
     const table = this.#native("table");
     if (table !== undefined) this.#decorateTable(table);
     const list = this.#native("dl");
-    if (list !== undefined) this.#decorateList(list);
+    if (list !== undefined) this.#decorateList(list);${
+      isTimeline
+        ? `
+    const timeline = this.#native("ol");
+    if (timeline !== undefined) this.#decorateTimeline(timeline);`
+        : ""
+    }
   }
-
+${
+  isTimeline
+    ? `
+  /**
+   * Spec 046 T4: a timeline – the name of the list from the label prop; at the start of every entry
+   * a sign the stylesheet draws by its data-status, holding the word of that status clipped from
+   * sight (a11y.texts <status>-name), so the status is seen by its shape and heard by its word,
+   * never a colour alone. The status is the application's: an entry without a known one keeps its
+   * sign and says no word. Every write first compares (the observer of the light DOM).
+   */
+  #decorateTimeline(list: HTMLElement): void {
+    const label = this.propValue("label");
+    const name = typeof label === "string" && label !== "" ? label : null;
+    if (list.getAttribute("aria-label") !== name) {
+      if (name === null) list.removeAttribute("aria-label");
+      else list.setAttribute("aria-label", name);
+    }
+    const lingvo = this.#lingvo();
+    for (const item of list.querySelectorAll(":scope > li")) {
+      let sign = item.querySelector(":scope > [data-fm-marker]");
+      if (!(sign instanceof HTMLElement)) {
+        sign = document.createElement("span");
+        sign.setAttribute("data-fm-marker", "");
+        item.prepend(sign);
+      } else if (sign !== item.firstElementChild) {
+        item.prepend(sign);
+      }
+      const status = item.getAttribute("data-status") ?? "";
+      const heard = status === "" ? undefined : TEXTS[\`\${status}-name\`];
+      const word = heard === undefined ? "" : (heard[lingvo] ?? heard.en ?? "");
+      const words = sign.querySelector(":scope > .fm-hidden");
+      if (word === "") {
+        words?.remove();
+        continue;
+      }
+      if (words instanceof HTMLElement) {
+        if (words.textContent !== word) words.textContent = word;
+        continue;
+      }
+      const span = document.createElement("span");
+      span.className = "fm-hidden";
+      span.textContent = word;
+      sign.append(span);
+    }
+  }
+`
+    : ""
+}
   #decorateTable(table: HTMLElement): void {
     // The caption from the default slot (Spec 011 ④, D-09): written into the table, where the
     // platform names it; hidden from sight with caption-hidden, never removed (G4).
@@ -2849,22 +3121,39 @@ ${
       const arrowName = wanted === "descending" ? "sort-descending" : "sort-ascending";
       if (arrow !== null && arrow.getAttribute("name") !== arrowName) arrow.setAttribute("name", arrowName);
     }
-    // A numeric column (Spec 011 ④, D-09): the header carries numeric, its cells get the mark.
+${isSelecting ? "    // Spec 046 T3: the selection column comes first, so the columns below count it.\n    this.#selectColumn(table);\n" : ""}    // A numeric column (Spec 011 ④, D-09): the header carries numeric, its cells get the mark.
     const headers = [...table.querySelectorAll(":scope > thead th")];
     const numeric = headers.map((header) => header.hasAttribute("numeric"));
-    for (const row of table.querySelectorAll(":scope > tbody > tr:not([data-fm-empty])")) {
+    for (const row of table.querySelectorAll(":scope > tbody > tr:not([data-fm-empty])${isSkeleton ? ":not([data-fm-skeleton])" : ""}")) {
       [...row.children].forEach((cell, index) => {
         if (numeric[index] === true && !cell.hasAttribute("numeric")) cell.setAttribute("numeric", "");
       });
     }
-    // The empty state (Spec 011 ④, D-09): without rows, the empty slot's text as a plenstato over
+${
+  isSkeleton
+    ? `    // Spec 046 T3 (plan D-20): loading – aria-busy on the table and three skeleton rows in the
+    // body, one bar per column, unheard; they come before the empty state, which waits.
+    const loading = HAS_PROP.has("loading") && this.propValue("loading") === true;
+    if (loading && table.getAttribute("aria-busy") !== "true") table.setAttribute("aria-busy", "true");
+    if (!loading && table.hasAttribute("aria-busy")) table.removeAttribute("aria-busy");
+    const skeleton = [...table.querySelectorAll(":scope > tbody > tr[data-fm-skeleton]")];
+    const columns = Math.max(1, headers.length);
+    const fits = skeleton.length === 3 && skeleton.every((row) => row.children.length === columns);
+    if (!loading || !fits) for (const row of skeleton) row.remove();
+    if (loading && !fits) {
+      const row = '<tr data-fm-skeleton aria-hidden="true">' + "<td><span></span></td>".repeat(columns) + "</tr>";
+      table.querySelector(":scope > tbody")?.insertAdjacentHTML("beforeend", row.repeat(3));
+    }
+`
+    : ""
+}    // The empty state (Spec 011 ④, D-09): without rows, the empty slot's text as a plenstato over
     // all columns; rows take it away.
     // Nachlese 7 ② B-3: a butono in the empty slot is the next step — it moves into the state's
     // actions while the state shows (the application's element, its listeners stay) and back into
     // the slot when rows come; the words of the state are the slot's text without it.
     const body = table.querySelector(":scope > tbody");
     if (body !== null && NAMED_SLOTS.includes("empty")) {
-      const rows = [...body.children].filter((row) => !row.hasAttribute("data-fm-empty"));
+      const rows = [...body.children].filter((row) => !row.hasAttribute("data-fm-empty")${isSkeleton ? ' && !row.hasAttribute("data-fm-skeleton")' : ""});
       const placeholder = body.querySelector(":scope > tr[data-fm-empty]");
       const emptySlot = this.shadowRoot?.querySelector('slot[name="empty"]');
       const emptyNodes = emptySlot instanceof HTMLSlotElement ? emptySlot.assignedNodes({ flatten: true }) : [];
@@ -2875,7 +3164,7 @@ ${
         .map((node) => node.textContent ?? "")
         .join("")
         .trim();
-      if (rows.length === 0 && emptyText !== "") {
+      if (rows.length === 0 && emptyText !== ""${isSkeleton ? " && !loading" : ""}) {
         if (placeholder === null) {
           body.insertAdjacentHTML(
             "beforeend",
@@ -6783,7 +7072,7 @@ ${
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
     // disabled wins over readonly; help and error show only while they have text.
     const described: string[] = [];
-${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${paginationRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${datepickerRender}${chipRender}${listRender}${editorRender}${uploadRender}${sliderRender}${cardRender}${avatarRender}${isCodeblock ? codeblockRender : ""}${isMarkdown ? markdownRender : ""}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${paginationRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${datepickerRender}${chipRender}${listRender}${editorRender}${uploadRender}${sliderRender}${cardRender}${isGrid ? "    this.#gridLayout();\n" : ""}${avatarRender}${isCodeblock ? codeblockRender : ""}${isMarkdown ? markdownRender : ""}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");

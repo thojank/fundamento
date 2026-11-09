@@ -13,8 +13,8 @@ import {
 } from "../../eroj/inventories.js";
 import { loadModelo } from "../../load/load-modelo.js";
 import { defaultModeloSource } from "../../load/source.js";
-import { check } from "./index.js";
-import type { ParityInventory } from "./inventory.js";
+import { check, FIGMA_EROJ_NOT_DRAWN, jugxoBackedReleases } from "./index.js";
+import { compareInventories, type ParityInventory } from "./inventory.js";
 
 const repoRoot = fileURLToPath(new URL("../../../../../", import.meta.url));
 const fixture = (path: string): string =>
@@ -164,6 +164,104 @@ describe("parity default run (T021)", () => {
     const result = await check({ json: true, repoRoot, projekcioj: dir });
     expect(result.ok).toBe(false);
     expect(result.errors.some((issue) => issue.rule === "schema-violation")).toBe(true);
+  });
+});
+
+describe("Spec 046 Nachtrag: the five Eroj without a Figma set until Etappe F", () => {
+  const FIVE = ["kolumno", "krado", "stako", "templinio", "vico"];
+  const JUGXOJ = modelo?.jugxoj ?? [];
+  const without = (file: string, ...names: string[]) =>
+    writeProjections((sides) => {
+      for (const name of names) delete sides[file]?.items[name];
+    });
+
+  it("names exactly these five, each with a Jugxo that says until Etappe F", () => {
+    expect(Object.keys(FIGMA_EROJ_NOT_DRAWN).sort()).toEqual(FIVE);
+    for (const name of FIVE) {
+      const jugxo = JUGXOJ.find((entry) => entry.id === FIGMA_EROJ_NOT_DRAWN[name]);
+      expect(jugxo?.decision, name).toBe("approved");
+      expect(jugxo?.ref, name).toMatchObject({ artikolo: "VIII", celo: "figma" });
+      expect(jugxo?.kialo, name).toContain("bis Etappe F");
+      expect(jugxo?.kialo, name).toContain(name);
+    }
+  });
+
+  it("releases each of them when the Figma side lacks it, as a named warning", async () => {
+    const result = await check({
+      json: true,
+      repoRoot,
+      projekcioj: without("figma.json", ...FIVE),
+    });
+    expect(result.errors).toEqual([]);
+    expect(result.ok).toBe(true);
+    expect(rulesAndPaths(result.warnings)).toEqual(
+      FIVE.map((name) => ({ rule: "parity-part-not-drawn", path: `items.${name}` })),
+    );
+    for (const [index, name] of FIVE.entries()) {
+      expect(result.warnings[index]?.message).toContain(FIGMA_EROJ_NOT_DRAWN[name]);
+      expect(result.warnings[index]?.message).toContain("Etappe F");
+    }
+    expect(result.stats.released).toBe(FIVE.length);
+    expect(result.stats.differences).toBe(0);
+  });
+
+  it("still fails for any other Ero the Figma side lacks", async () => {
+    const result = await check({
+      json: true,
+      repoRoot,
+      projekcioj: without("figma.json", "butono"),
+    });
+    expect(result.ok).toBe(false);
+    expect(rulesAndPaths(result.errors)).toEqual([
+      { rule: "parity-item-missing", path: "items.butono" },
+    ]);
+    expect(result.warnings).toEqual([]);
+  });
+
+  it.each(["web-component.json", "react.json", "guidelines-komuna.json"])(
+    "still fails for one of the five missing from %s",
+    async (file) => {
+      const result = await check({ json: true, repoRoot, projekcioj: without(file, "vico") });
+      expect(result.ok).toBe(false);
+      expect(rulesAndPaths(result.errors)).toEqual([
+        { rule: "parity-item-missing", path: "items.vico" },
+      ]);
+      expect(result.warnings).toEqual([]);
+    },
+  );
+
+  it("still compares one of the five that the Figma side does have", async () => {
+    const dir = writeProjections((sides) => {
+      const item = sides["figma.json"]?.items.vico;
+      if (item !== undefined) item.props.gap = ["huge"];
+    });
+    const result = await check({ json: true, repoRoot, projekcioj: dir });
+    expect(result.ok).toBe(false);
+    expect(rulesAndPaths(result.errors)).toEqual([
+      { rule: "parity-prop-mismatch", path: "items.vico.props.gap" },
+    ]);
+  });
+
+  it("releases only what the side lacks, never what the Skemo lacks", () => {
+    const item = { props: {}, states: [], values: {} };
+    const releasedMissing = { vico: "jug_X" };
+    expect(
+      compareInventories({ items: {} }, { items: { vico: item } }, { releasedMissing }).map(
+        ({ rule, severity }) => ({ rule, severity }),
+      ),
+    ).toEqual([{ rule: "parity-item-missing", severity: "error" }]);
+    expect(
+      compareInventories({ items: { vico: item } }, { items: {} }, { releasedMissing }).map(
+        ({ rule, severity }) => ({ rule, severity }),
+      ),
+    ).toEqual([{ rule: "parity-part-not-drawn", severity: "warning" }]);
+  });
+
+  it("drops a release whose Jugxo is not in the Modelo", () => {
+    const jugxo = JUGXOJ.find((entry) => entry.id === FIGMA_EROJ_NOT_DRAWN.vico);
+    expect(jugxo).toBeDefined();
+    expect(jugxoBackedReleases(FIGMA_EROJ_NOT_DRAWN, JUGXOJ)).toEqual(FIGMA_EROJ_NOT_DRAWN);
+    expect(jugxoBackedReleases(FIGMA_EROJ_NOT_DRAWN, [])).toEqual({});
   });
 });
 

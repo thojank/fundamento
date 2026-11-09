@@ -13,6 +13,7 @@ import { briefOf } from "../gvidanto/eroj.js";
 import { suggestEro } from "../gvidanto/suggest-ero.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
+import { REPO_EROJ } from "../validate/test-doubles/eroj.js";
 
 const { modelo } = loadModelo(defaultModeloSource());
 if (modelo === undefined) throw new Error("the repo Modelo must load");
@@ -32,7 +33,7 @@ const suggest = (goal: string) => {
 describe("tabelo in the repo Modelo (section ④, G1, G2, E10)", () => {
   it("lives in data/eroj/tabelo/skemo.json, thirty-seventh of forty Eroj", () => {
     expect(tabelo?.file).toBe("modelo/data/eroj/tabelo/skemo.json");
-    expect(modelo.eroj[36]?.ero.name).toBe("tabelo");
+    expect(modelo.eroj[REPO_EROJ.indexOf("tabelo")]?.ero.name).toBe("tabelo");
   });
 
   it("has density, caption-hidden, sort (the column) and direction as props; the states of the sort button", () => {
@@ -44,6 +45,11 @@ describe("tabelo in the repo Modelo (section ④, G1, G2, E10)", () => {
         ["caption-hidden", "boolean", false],
         ["sort", "string", undefined],
         ["direction", ["ascending", "descending"], "ascending"],
+        // Spec 046 T3 (plan D-18): selection, loading and a sticky header, off by default; lines
+        // stays the last prop (achsen-2b2.test.ts).
+        ["selectable", "boolean", false],
+        ["loading", "boolean", false],
+        ["sticky-header", "boolean", false],
         ["lines", ["rows", "columns", "grid", "none"], "rows"],
       ],
     );
@@ -75,6 +81,10 @@ describe("tabelo in the repo Modelo (section ④, G1, G2, E10)", () => {
         "sort-indicator",
         // Spec 036 Teil 5 ②b-3 (A-tabelo-4): the foot.
         "foot",
+        // Spec 046 T3 (plan D-20): the bars of the skeleton rows while loading.
+        "skeleton",
+        // Spec 046 T3 Nachbesserung (F-T5-1): the target of the selection's boxes.
+        "selection",
       ].sort(),
     );
     // The caption is text of the Ero too (axe measured black on the dark page without it).
@@ -113,12 +123,25 @@ describe("tabelo in the repo Modelo (section ④, G1, G2, E10)", () => {
       name: ["slot:caption"],
       states: {},
       keys: ["Enter", "Space"],
+      // Spec 046 T3 (plan D-19): the names of the selection boxes – a row's box (selectable,
+      // followed by the row's name) and the box in the head.
+      texts: {
+        selectable: { de: "Zeile auswählen", en: "Select row" },
+        "head-name": { de: "Alle Zeilen auswählen", en: "Select all rows" },
+      },
     });
   });
 
   it("knows the goal table with the words of the spec (no word of another Ero), citing the caption rule", () => {
     expect(skemo?.goals?.map((goal) => [goal.goal, goal.regulo])).toEqual([
       ["table", "table-caption-names-the-content"],
+      // Spec 046 T3: the boundaries row-selection and sticky-header are closed by the table's props.
+      ["row-selection", undefined],
+      ["sticky-header", undefined],
+    ]);
+    expect(skemo?.goals?.slice(1).map((goal) => goal.props)).toEqual([
+      { selectable: true },
+      { "sticky-header": true },
     ]);
     expect(skemo?.goals?.[0]?.keywords).toEqual({
       en: ["table", "records", "grid", "datatable"],
@@ -135,7 +158,8 @@ describe("the Uzo of the tabelo (section ④, G5)", () => {
     );
     expect(uzo?.slots).toEqual({
       caption: { accepts: ["text"], required: true, max: 1, nesting: 0 },
-      content: { accepts: ["text"], required: true, max: 1, nesting: 1 },
+      // Spec 046 T6 (F-T6-1): the data form of the table's content.
+      content: { accepts: ["text"], required: true, max: 1, nesting: 1, dataForm: "table" },
       // Nachlese 7 ② B-3: the empty state names its next step with a butono.
       empty: { accepts: ["text", "butono"], max: 2, nesting: 1 },
     });
@@ -151,13 +175,11 @@ describe("the Uzo of the tabelo (section ④, G5)", () => {
     ]);
   });
 
-  it("names its boundaries: selection, pagination, inline edit, row menu and row tint ask a person; a sticky header is not supported", () => {
+  it("names its boundaries: pagination and inline edit are other Eroj', row tint asks a person; selection and a sticky header are its own (Spec 046 T3)", () => {
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
-      ["row-selection", "ask-human"],
       // Spec 015 ①: the pagination is the pagxigilo's.
       ["pagination", "use-instead"],
       ["inline-edit", "use-instead"],
-      ["sticky-header", "not-supported"],
       ["row-tint", "ask-human"],
     ]);
     for (const entry of [...(uzo?.instead ?? []), ...(uzo?.boundary ?? [])]) {
@@ -254,13 +276,61 @@ describe("check_usage and suggest_ero of the table (G6, G7, Gvidanto)", () => {
     expect(one.suggestion).toEqual({ ero: "atributlisto", props: {} });
   });
 
-  it("row selection and pagination ask a person; a sticky header stops", () => {
-    expect(suggest("Zeilenauswahl der Zeilen").action).toBe("ask-human");
-    expect(suggest("Zeilen mit Seitennummerierung").action).toBe("ask-human");
-    expect(suggest("eine feste Kopfzeile").boundary).toMatchObject({
+  it("pagination asks a person; row selection and a sticky header are the tabelo with its prop (Spec 046 T3)", () => {
+    expect(suggest("Zeilenauswahl der Zeilen").suggestion).toEqual({
       ero: "tabelo",
-      case: "sticky-header",
-      action: "not-supported",
+      props: { selectable: true },
     });
+    expect(suggest("Zeilen mit Seitennummerierung").action).toBe("ask-human");
+    expect(suggest("eine feste Kopfzeile").suggestion).toEqual({
+      ero: "tabelo",
+      props: { "sticky-header": true },
+    });
+  });
+});
+
+// Spec 046 T3 (plan D-18 to D-22): the native table gets selection, loading and a sticky header;
+// the application owns the selection as it owns the sort.
+describe("tabelo selection, loading and sticky header (Spec 046 T3)", () => {
+  it("says sort-change and select (detail keys: the data-key of the selected rows, in DOM order)", () => {
+    expect(skemo?.events?.map((event) => event.name)).toEqual(["sort-change", "select"]);
+    expect(skemo?.events?.[1]?.description).toMatch(/keys/);
+    expect(skemo?.events?.[1]?.description).toMatch(/data-key/);
+  });
+
+  it("the new props are booleans without a binding: no axis, no data attribute, no new combination", () => {
+    if (skemo === undefined) throw new Error("missing");
+    for (const name of ["selectable", "loading", "sticky-header"]) {
+      const prop = skemo.props.find((candidate) => candidate.name === name);
+      expect(prop, name).toMatchObject({ kind: "boolean", default: false });
+    }
+    expect(variantKeys(skemo)).toEqual(["density", "state"]);
+    expect(skemo.props.find((prop) => prop.name === "loading")?.description).toMatch(/three/);
+  });
+
+  it("the skeleton binds existing roles only: the sunken ground, the control's radius, the height of a small icon", () => {
+    expect(skemo?.parts.skeleton).toEqual({
+      fill: { fixed: "color.background.sunken" },
+      radius: { fixed: "radius.role.control" },
+      height: { fixed: "size.icon.small" },
+    });
+  });
+
+  it("Nachbesserung F-T5-1: the box of the selection is a target of at least size.target.min, wide and high (WCAG 2.5.8)", () => {
+    expect(skemo?.parts.selection).toEqual({
+      width: { fixed: "size.target.min" },
+      height: { fixed: "size.target.min" },
+    });
+  });
+
+  it("the brief names the three as flags and stays under 750; the kampo's stays the largest", () => {
+    if (tabelo === undefined) throw new Error("missing");
+    const brief = briefOf(tabelo);
+    expect(brief.flags).toEqual(["caption-hidden", "selectable", "loading", "sticky-header"]);
+    const size = Math.ceil(JSON.stringify(brief).length / 3);
+    expect(size).toBeLessThanOrEqual(750);
+    const kampo = eroNamed("kampo");
+    if (kampo === undefined) throw new Error("missing");
+    expect(size).toBeLessThan(Math.ceil(JSON.stringify(briefOf(kampo)).length / 3));
   });
 });

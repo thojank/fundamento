@@ -1,0 +1,129 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M6XW0NZNHRPAQT30MM520SSK",
+    "ero": "ero_01M6XW0N2EEDQVCT6FTF7RCTHP",
+    "skemo": "ske_01M6XW0NG95V9C0JRCMQJKXQKE",
+    "purpose": "Shows what happened in the order of time: every entry a date, a title and what happened, its status done, current or upcoming.",
+    "instead": [
+      {
+        "goal": "events-compared",
+        "keywords": {
+          "en": [
+            "eventlog"
+          ],
+          "de": [
+            "ereignisprotokoll"
+          ]
+        },
+        "ero": "tabelo",
+        "kialo": "Many events with the same fields that a person sorts and compares are a table, because a timeline reads them one after the other and sorts by nothing but time."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "horizontal",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "horizontaltimeline"
+          ],
+          "de": [
+            "waagerechte"
+          ]
+        },
+        "kialo": "A timeline runs from top to bottom, because its entries carry text of any length and a row of them would break; a horizontal one is not supported."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page-section",
+          "kialo": "The history of a thing stands in a section of its page, because the person reads it next to the thing it tells about."
+        },
+        {
+          "name": "card",
+          "kialo": "A card may show the last steps of what it stands for, because its state is a part of it."
+        }
+      ],
+      "with": [
+        {
+          "ero": "ligilo",
+          "kialo": "What happened may lead to where it happened, because a change has a place of its own."
+        },
+        {
+          "ero": "insigno",
+          "kialo": "A version or a kind of change beside the title is a badge, because it is one or two words."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "entries": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "nesting": 0,
+        "dataForm": "list"
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "allowed"
+    },
+    "content": [],
+    "when-not": [
+      {
+        "case": {
+          "de": "Viele Ereignisse mit denselben Feldern sollen sortiert und verglichen werden.",
+          "en": "Many events with the same fields are to be sorted and compared."
+        },
+        "ero": "tabelo"
+      },
+      {
+        "case": {
+          "de": "Die Felder eines einzelnen Datensatzes sollen als Name und Wert stehen.",
+          "en": "The fields of a single record are to stand as name and value."
+        },
+        "ero": "atributlisto"
+      }
+    ],
+    "do-dont": {
+      "do": [
+        {
+          "de": "Gib jedem Eintrag ein <time> mit datetime, damit Maschinen das Datum lesen und Menschen es in ihren Worten sehen.",
+          "en": "Give every entry a <time> with datetime, so that machines read the date and people see it in their words."
+        },
+        {
+          "de": "Setze data-status an jeden Eintrag; höchstens einer ist current.",
+          "en": "Set data-status on every entry; at most one is current."
+        },
+        {
+          "de": "Benenne die Zeitleiste mit label, sobald eine Seite mehr als eine zeigt.",
+          "en": "Name the timeline with label as soon as a page shows more than one."
+        }
+      ],
+      "dont": [
+        {
+          "de": "Den Status nur über eine eigene Farbe zeigen, denn die Form des Zeichens und das gesprochene Wort tragen ihn.",
+          "en": "Show the status only by a colour of your own, because the shape of the sign and the spoken word carry it."
+        },
+        {
+          "de": "Die Einträge gegen die Zeit sortieren, denn die Reihenfolge der Liste ist die Reihenfolge der Zeit.",
+          "en": "Sort the entries against time, because the order of the list is the order of time."
+        }
+      ]
+    },
+    "keyboard": {
+      "none": {
+        "de": "Die Zeitleiste nimmt weder den Fokus noch eine Taste; Links in ihren Einträgen erreicht Tab in der Reihenfolge der Zeit.",
+        "en": "The timeline takes neither the focus nor a key; Tab reaches the links in its entries in the order of time."
+      }
+    }
+  }
+}

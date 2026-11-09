@@ -11,6 +11,7 @@ import { evaluateUsage, slotStates } from "../eroj/usage.js";
 import { suggestEro } from "../gvidanto/suggest-ero.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
+import { REPO_EROJ } from "../validate/test-doubles/eroj.js";
 import { validateModelo } from "../validate/validate-modelo.js";
 
 const { modelo } = loadModelo(defaultModeloSource());
@@ -25,48 +26,7 @@ const kampo = modelo.eroj.find((entry) => entry.ero.name === "kampo");
 describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
   it("lives in data/eroj/markobutono/skemo.json, after ligilo and before sxaltilo, and the repo Modelo stays valid", () => {
     expect(markobutono?.file).toBe("modelo/data/eroj/markobutono/skemo.json");
-    expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
-      "alsxutilo",
-      "apartigilo",
-      "atributlisto",
-      "avataro",
-      "avizo",
-      "butono",
-      "datelektilo",
-      "dialogo",
-      "elektilo",
-      "elekto",
-      "faldilo",
-      "glitilo",
-      "ikono",
-      "insigno",
-      "kampo",
-      "karto",
-      "kodbloko",
-      "kompletigilo",
-      "konsileto",
-      "langetaro",
-      "ligilo",
-      "listelektilo",
-      "lokredaktilo",
-      "markdovido",
-      "markobutono",
-      "menuo",
-      "mezurilo",
-      "navigado",
-      "pagxigilo",
-      "plenstato",
-      "plurelektilo",
-      "saltligilo",
-      "signeto",
-      "spuro",
-      "sxaltilo",
-      "sxvebilo",
-      "tabelo",
-      "tekstareo",
-      "teksto",
-      "titolo",
-    ]);
+    expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([...REPO_EROJ]);
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
   });
 
@@ -434,47 +394,8 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
   });
 
   it("spacing-owned-by-container applies to the markobutono and every other Ero", () => {
-    expect(named("spacing-owned-by-container")?.appliesTo?.eroj).toEqual([
-      "butono",
-      "ligilo",
-      "kampo",
-      "sxaltilo",
-      "markobutono",
-      "elekto",
-      "elektilo",
-      "tekstareo",
-      "dialogo",
-      "insigno",
-      "avizo",
-      "plenstato",
-      "tabelo",
-      "atributlisto",
-      "mezurilo",
-      "navigado",
-      "langetaro",
-      "ikono",
-      "apartigilo",
-      "saltligilo",
-      "titolo",
-      "teksto",
-      "konsileto",
-      "sxvebilo",
-      "menuo",
-      "faldilo",
-      "kompletigilo",
-      "pagxigilo",
-      "spuro",
-      "alsxutilo",
-      "karto",
-      "avataro",
-      "kodbloko",
-      "markdovido",
-      "glitilo",
-      "datelektilo",
-      "signeto",
-      "listelektilo",
-      "plurelektilo",
-      "lokredaktilo",
+    expect([...(named("spacing-owned-by-container")?.appliesTo?.eroj ?? [])].sort()).toEqual([
+      ...REPO_EROJ,
     ]);
   });
 

@@ -7,8 +7,10 @@ import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { ModeloJson } from "../contracts/modelo.js";
 import { celoMappingLeaks } from "../export/celo-mappings.js";
+import { countWord } from "../export/describe.js";
 import { EXPORT_FILE_NAMES } from "../export/export-modelo.js";
 import { describeModelo } from "../index.js";
+import { REPO_EROJ } from "../validate/test-doubles/eroj.js";
 import {
   MODELO_DIST,
   type Run,
@@ -46,53 +48,15 @@ describe("AK-06: the S6 dialog is answered from dist/modelo.json alone", () => {
     expect(modeloJson.tokens).toHaveLength(description.tokenCount);
     expect(new Set(modeloJson.tokens.map((token) => token.type)).size).toBe(description.typeCount);
     expect(modeloJson.reguloj.every((regulo) => regulo.kialo.trim() !== "")).toBe(true);
-    expect(modeloJson.eroj.map((ero) => ero.name)).toEqual([
-      "alsxutilo",
-      "apartigilo",
-      "atributlisto",
-      "avataro",
-      "avizo",
-      "butono",
-      "datelektilo",
-      "dialogo",
-      "elektilo",
-      "elekto",
-      "faldilo",
-      "glitilo",
-      "ikono",
-      "insigno",
-      "kampo",
-      "karto",
-      "kodbloko",
-      "kompletigilo",
-      "konsileto",
-      "langetaro",
-      "ligilo",
-      "listelektilo",
-      "lokredaktilo",
-      "markdovido",
-      "markobutono",
-      "menuo",
-      "mezurilo",
-      "navigado",
-      "pagxigilo",
-      "plenstato",
-      "plurelektilo",
-      "saltligilo",
-      "signeto",
-      "spuro",
-      "sxaltilo",
-      "sxvebilo",
-      "tabelo",
-      "tekstareo",
-      "teksto",
-      "titolo",
-    ]);
+    expect(modeloJson.eroj.map((ero) => ero.name)).toEqual([...REPO_EROJ]);
   });
 
   it("AK-06: states the S6 sentence", () => {
     expect(describeModelo(modeloJson).sentence).toMatch(
-      /^Fundamento v0\.2\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto \(`komuna`: reference, MIT, Geist\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, forty Eroj \(`alsxutilo`, `apartigilo`, `atributlisto`, `avataro`, `avizo`, `butono`, `datelektilo`, `dialogo`, `elektilo`, `elekto`, `faldilo`, `glitilo`, `ikono`, `insigno`, `kampo`, `karto`, `kodbloko`, `kompletigilo`, `konsileto`, `langetaro`, `ligilo`, `listelektilo`, `lokredaktilo`, `markdovido`, `markobutono`, `menuo`, `mezurilo`, `navigado`, `pagxigilo`, `plenstato`, `plurelektilo`, `saltligilo`, `signeto`, `spuro`, `sxaltilo`, `sxvebilo`, `tabelo`, `tekstareo`, `teksto`, `titolo`\)\. Ask explain why a value is what it is\.$/,
+      /^Fundamento v0\.2\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto \(`komuna`: reference, MIT, Geist\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, \w+(?:-\w+)? Eroj \([^)]*\)\. Ask explain why a value is what it is\.$/,
+    );
+    expect(describeModelo(modeloJson).sentence).toContain(
+      `${countWord(REPO_EROJ.length)} Eroj (${REPO_EROJ.map((name) => `\`${name}\``).join(", ")})`,
     );
   });
 });

@@ -1995,3 +1995,79 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   }
 }
+
+// Spec 046 T5 (Akzeptanzkriterium „axe ohne Verstoß“ for every new Ero; Tastatur): the rendered
+// layout Eroj with children, the templinio with every status and the tabelo selectable, loading
+// and with a sticky head, in every colour class of komuna and ekzemplo. axe on all of them; the
+// timeline's time, title and text at least 4.5:1 on the page, each sign's edge at least 3:1 (a
+// non-text contrast, WCAG 1.4.11); the boxes of the selection reached by Tab and named by their row.
+const children046 = ["Eins", "Zwei", "Drei"]
+  .map((word) => `<fm-insigno>${word}</fm-insigno>`)
+  .join("");
+const keyedTable046 = `<table slot="content"><thead><tr><th scope="col" data-sort="name">Name</th><th scope="col">Status</th></tr></thead><tbody><tr data-key="a"><th scope="row">Barrierefreiheit</th><td>gültig</td></tr><tr data-key="b" data-selected><th scope="row">Datenschutz</th><td>Entwurf</td></tr></tbody></table>`;
+const eroj046 = [
+  `<fm-vico gap="small" wrap>${children046}</fm-vico>`,
+  `<fm-kolumno gap="medium">${children046}</fm-kolumno>`,
+  `<fm-stako gap="large">${children046}</fm-stako>`,
+  `<fm-krado columns="3"><fm-insigno>Eins</fm-insigno><fm-insigno data-span="2">Zwei</fm-insigno><fm-insigno>Drei</fm-insigno></fm-krado>`,
+  `<fm-templinio id="tl-046" label="Verlauf"><ol><li data-status="done"><time datetime="2026-10-01">1. Oktober</time><strong>Entwurf</strong><p>Die erste Fassung steht.</p></li><li data-status="current"><time datetime="2026-10-15">15. Oktober</time><strong>Prüfung</strong><p>Die Fassung wird geprüft.</p></li><li data-status="upcoming"><time datetime="2026-11-02">2. November</time><strong>Freigabe</strong><p>Die Fassung wird freigegeben.</p></li></ol></fm-templinio>`,
+  `<fm-tabelo id="ta-046" selectable sort="name">Auswahl${keyedTable046}</fm-tabelo>`,
+  `<fm-tabelo loading>Laden${keyedTable046}</fm-tabelo>`,
+  `<fm-tabelo sticky-header style="max-block-size: 6rem">Fester Kopf${keyedTable046}</fm-tabelo>`,
+].join("");
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on vico, kolumno, stako, krado, the templinio and the tabelo selectable, loading and with a sticky head; timeline texts ≥ 4.5:1, signs ≥ 3:1`, async ({
+        page,
+        browserName,
+      }) => {
+        await serve(page, out, eroj046);
+        await page.evaluate(
+          ([a, s, k]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", k ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        await expect(page.locator("#tl-046 [data-fm-marker]")).toHaveCount(3);
+        expect(await axeViolations(page)).toEqual([]);
+        const measured = await page.locator("#tl-046").evaluate((element) => {
+          const page = getComputedStyle(document.body).backgroundColor;
+          return [...element.querySelectorAll("li")].map((entry) => {
+            const colour = (selector: string) =>
+              getComputedStyle(entry.querySelector(`:scope > ${selector}`) as Element);
+            return {
+              status: entry.getAttribute("data-status") ?? "",
+              texts: [colour("time").color, colour("strong").color, colour("p").color],
+              edge: colour("[data-fm-marker]").borderTopColor,
+              page,
+            };
+          });
+        });
+        for (const entry of measured) {
+          for (const text of entry.texts) {
+            expect(contrastOf(text, entry.page), `${entry.status} text`).toBeGreaterThanOrEqual(
+              4.5,
+            );
+          }
+          expect(contrastOf(entry.edge, entry.page), `${entry.status} sign`).toBeGreaterThanOrEqual(
+            3,
+          );
+        }
+        // The head's box is named for all rows; Tab goes from the box of a row to the next row's,
+        // each named by its row.
+        const table = page.locator("#ta-046");
+        await expect(table.getByRole("checkbox", { name: "Alle Zeilen auswählen" })).toHaveCount(1);
+        await table.getByRole("checkbox", { name: "Zeile auswählen: Barrierefreiheit" }).focus();
+        await page.keyboard.press(TAB(browserName));
+        await expect(
+          table.getByRole("checkbox", { name: "Zeile auswählen: Datenschutz" }),
+        ).toBeFocused();
+      });
+    }
+  }
+}

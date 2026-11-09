@@ -12,6 +12,7 @@ import { briefOf } from "../gvidanto/eroj.js";
 import { suggestEro } from "../gvidanto/suggest-ero.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
+import { REPO_EROJ } from "../validate/test-doubles/eroj.js";
 
 const { modelo } = loadModelo(defaultModeloSource());
 if (modelo === undefined) throw new Error("the repo Modelo must load");
@@ -35,7 +36,7 @@ const suggest = (goal: string) => {
 describe("faldilo in the repo Modelo (section ⑤, G1, G2)", () => {
   it("lives in data/eroj/faldilo/skemo.json, one of forty Eroj", () => {
     expect(faldilo?.file).toBe("modelo/data/eroj/faldilo/skemo.json");
-    expect(modelo.eroj).toHaveLength(40);
+    expect(modelo.eroj).toHaveLength(REPO_EROJ.length);
   });
 
   it("has open (a keyed boolean, the axis), group and disabled as props; the states of the summary; summary, content and disabled-reason slots", () => {

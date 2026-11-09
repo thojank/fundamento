@@ -3217,6 +3217,9 @@ describe("Spec 026 ② documentation (specs/026-lingvo)", () => {
       const dir = join(repoRoot, "packages/modelo/data", kind);
       for (const name of readdirSync(dir)) {
         if (!existsSync(join(dir, name, "skemo.json"))) continue;
+        // Spec 046 Nachtrag: the plan of Spec 026 is frozen; it names its 40 Eroj and 5 Sxablonoj
+        // (45 rows), never an Ero built later.
+        if (!plan.includes(`| \`${name}\` |`)) continue;
         const entry = JSON.parse(read(`packages/modelo/data/${kind}/${name}/skemo.json`))[key] as {
           id: string;
         };
@@ -3654,7 +3657,11 @@ describe("Spec 029 ②a documentation (specs/029-fonto-astryx)", () => {
   it("every one of the 40 Eroj has its counterpart and one row per aspect with proposal and reason", () => {
     const data = abgleich();
     const dir = join(repoRoot, "packages/modelo/data/eroj");
-    const eroj = readdirSync(dir).filter((name) => existsSync(join(dir, name, "skemo.json")));
+    // Spec 046 Nachtrag: the abgleich of Spec 029 is frozen; it names its 40 Eroj, never one built later.
+    const frozen = new Set(data.eroj.map((entry) => entry.ero));
+    const eroj = readdirSync(dir).filter(
+      (name) => existsSync(join(dir, name, "skemo.json")) && frozen.has(name),
+    );
     expect(eroj).toHaveLength(40);
     expect(data.eroj.map((entry) => entry.ero).sort()).toEqual([...eroj].sort());
     const ids = new Set<string>();

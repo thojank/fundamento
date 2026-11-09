@@ -53,8 +53,8 @@
         }
       ]
     },
-    "sha256": "ce2e1b4bc60ad10ddeccf581cff7a3fda797b7220d6aab703b622459ae801f66",
-    "bytes": 636,
-    "antwort": "{\"instances\":1,\"valid\":false,\"violations\":[{\"instance\":[0],\"issue\":{\"rule\":\"ero-unknown\",\"severity\":\"error\",\"path\":\"instances#/0\",\"message\":\"Instance 0 names the Ero wolkenschaukel, which does not exist.\",\"suggestion\":\"Use one of alsxutilo, apartigilo, atributlisto, avataro, avizo, butono, datelektilo, dialogo, elektilo, elekto, faldilo, glitilo, ikono, insigno, kampo, karto, kodbloko, kompletigilo, konsileto, langetaro, ligilo, listelektilo, lokredaktilo, markdovido, markobutono, menuo, mezurilo, navigado, pagxigilo, plenstato, plurelektilo, saltligilo, signeto, spuro, sxaltilo, sxvebilo, tabelo, tekstareo, teksto, titolo.\"}}]}"
+    "sha256": "e00d0aaf248819c14a6c57fe31c1e29ba620c6e2d8e9a8bfa7e15f33d65b1004",
+    "bytes": 676,
+    "antwort": "{\"instances\":1,\"valid\":false,\"violations\":[{\"instance\":[0],\"issue\":{\"rule\":\"ero-unknown\",\"severity\":\"error\",\"path\":\"instances#/0\",\"message\":\"Instance 0 names the Ero wolkenschaukel, which does not exist.\",\"suggestion\":\"Use one of alsxutilo, apartigilo, atributlisto, avataro, avizo, butono, datelektilo, dialogo, elektilo, elekto, faldilo, glitilo, ikono, insigno, kampo, karto, kodbloko, kolumno, kompletigilo, konsileto, krado, langetaro, ligilo, listelektilo, lokredaktilo, markdovido, markobutono, menuo, mezurilo, navigado, pagxigilo, plenstato, plurelektilo, saltligilo, signeto, spuro, stako, sxaltilo, sxvebilo, tabelo, tekstareo, teksto, templinio, titolo, vico.\"}}]}"
   }
 ]

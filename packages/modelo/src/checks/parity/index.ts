@@ -8,7 +8,7 @@
 import { isAbsolute, join, relative } from "node:path";
 import type { CheckOptions, CheckResult } from "../../contracts/checks.js";
 import type { ValidationIssue } from "../../contracts/issues.js";
-import type { Modelo } from "../../contracts/modelo.js";
+import type { Jugxo, Modelo } from "../../contracts/modelo.js";
 import {
   baseResolution,
   PARITY_ASPECTS,
@@ -45,6 +45,31 @@ export interface ParitySide {
   aspects: readonly ParityAspect[];
   /** `styled`: only the props a stylesheet or a variant set can express. */
   props?: "all" | "styled";
+  /** Eroj this side may lack, each with the Jugxo that releases it (FIGMA_EROJ_NOT_DRAWN). */
+  releasedMissing?: Readonly<Record<string, string>>;
+}
+
+/**
+ * Eroj the Figma plan has no set for, each with the Jugxo that releases the missing set: no
+ * existing structure fits them (Spec 046 D-34, EF-1 to EF-3). Exactly these five names and only on
+ * the Figma side (D-43, F-T8-2), until Etappe F builds the sets: then the entries, the option and
+ * the Jugxo go, as `projekcioj/src/celoj/figma/tabelo-046.test.ts` then demands.
+ */
+export const FIGMA_EROJ_NOT_DRAWN: Readonly<Record<string, string>> = {
+  kolumno: "jug_01M6YTZJNTW7D866N8186KYQGH",
+  krado: "jug_01M6YTZJNTW7D866N8186KYQGH",
+  stako: "jug_01M6YTZJNTW7D866N8186KYQGH",
+  templinio: "jug_01M6YTZJNTW7D866N8186KYQGH",
+  vico: "jug_01M6YTZJNTW7D866N8186KYQGH",
+};
+
+/** The releases whose Jugxo stands in the Modelo: a release without its Jugxo does not hold. */
+export function jugxoBackedReleases(
+  releases: Readonly<Record<string, string>>,
+  jugxoj: readonly Pick<Jugxo, "id">[],
+): Record<string, string> {
+  const known = new Set(jugxoj.map((jugxo) => jugxo.id));
+  return Object.fromEntries(Object.entries(releases).filter(([, id]) => known.has(id)));
 }
 
 /** The Aspektoj of a Modelo: the values of the aspekto Dimensio (one Make Kit each). */
@@ -89,7 +114,12 @@ export function paritySides(modelo: Modelo): ParitySide[] {
     { file: "react.json", label: "react", aspects: ["props"] },
     // The Figma side restates the colours and the measures the plugin applies (F8, F11) — and only
     // those: a part it does not draw is named, never claimed.
-    { file: "figma.json", label: "figma", aspects: ["props", "states", "paints", "geometry"] },
+    {
+      file: "figma.json",
+      label: "figma",
+      aspects: ["props", "states", "paints", "geometry"],
+      releasedMissing: FIGMA_EROJ_NOT_DRAWN,
+    },
     // The guidelines document props, states and the defaults; the resolved paints are the Figma
     // side's business (F8), so they are not compared here.
     ...aspektojOf(modelo).map((aspekto) => ({
@@ -183,6 +213,7 @@ export async function check(options: CheckOptions): Promise<CheckResult> {
     errors.push(
       ...compareInventories(expected, restrictParityInventory(read.inventory, side.aspects), {
         labels: ["skemo", side.label],
+        releasedMissing: jugxoBackedReleases(side.releasedMissing ?? {}, modelo.jugxoj),
       }),
     );
   }

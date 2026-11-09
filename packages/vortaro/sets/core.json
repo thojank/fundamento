@@ -14337,6 +14337,74 @@
         }
       }
     },
+    "kolumno": {
+      "box": {
+        "gap": {
+          "gap": {
+            "xsmall": {
+              "$type": "dimension",
+              "$value": "{spacing.xsmall}",
+              "$description": "kolumno: box.gap when gap=xsmall (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6X4CFR1GF9Y7H2MX95RQ07C"
+                }
+              }
+            },
+            "small": {
+              "$type": "dimension",
+              "$value": "{spacing.small}",
+              "$description": "kolumno: box.gap when gap=small (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6X4CFR1GF9Y7H2MX95RQ07D"
+                }
+              }
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{spacing.medium}",
+              "$description": "kolumno: box.gap when gap=medium (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6X4CFR1GF9Y7H2MX95RQ07E"
+                }
+              }
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{spacing.large}",
+              "$description": "kolumno: box.gap when gap=large (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6X4CFR1GF9Y7H2MX95RQ07F"
+                }
+              }
+            },
+            "xlarge": {
+              "$type": "dimension",
+              "$value": "{spacing.xlarge}",
+              "$description": "kolumno: box.gap when gap=xlarge (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6X4CFR1GF9Y7H2MX95RQ07G"
+                }
+              }
+            },
+            "xxlarge": {
+              "$type": "dimension",
+              "$value": "{spacing.xxlarge}",
+              "$description": "kolumno: box.gap when gap=xxlarge (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6X4CFR1GF9Y7H2MX95RQ07H"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "kompletigilo": {
       "label": {
         "color": {
@@ -15460,6 +15528,112 @@
           "$extensions": {
             "fundamento": {
               "id": "tok_01M5GF0TQY40AAXJHBF90R5XHR"
+            }
+          }
+        }
+      }
+    },
+    "krado": {
+      "box": {
+        "gap": {
+          "gap": {
+            "xsmall": {
+              "$type": "dimension",
+              "$value": "{spacing.xsmall}",
+              "$description": "krado: box.gap when gap=xsmall (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6XQ1T814Z9FDZHJ5WDT3SXR"
+                }
+              }
+            },
+            "small": {
+              "$type": "dimension",
+              "$value": "{spacing.small}",
+              "$description": "krado: box.gap when gap=small (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6XQ1T82MY8GKCPGTRY53JK6"
+                }
+              }
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{spacing.medium}",
+              "$description": "krado: box.gap when gap=medium (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6XQ1T82MY8GKCPGTRY53JK7"
+                }
+              }
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{spacing.large}",
+              "$description": "krado: box.gap when gap=large (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6XQ1T82MY8GKCPGTRY53JK8"
+                }
+              }
+            },
+            "xlarge": {
+              "$type": "dimension",
+              "$value": "{spacing.xlarge}",
+              "$description": "krado: box.gap when gap=xlarge (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6XQ1T82MY8GKCPGTRY53JK9"
+                }
+              }
+            },
+            "xxlarge": {
+              "$type": "dimension",
+              "$value": "{spacing.xxlarge}",
+              "$description": "krado: box.gap when gap=xxlarge (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6XQ1T82MY8GKCPGTRY53JKA"
+                }
+              }
+            }
+          }
+        }
+      },
+      "cell": {
+        "width": {
+          "min": {
+            "width": {
+              "small": {
+                "$type": "dimension",
+                "$value": "{size.container.small}",
+                "$description": "krado: cell.width when min-width=small (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+                "$extensions": {
+                  "fundamento": {
+                    "id": "tok_01M6XQ1T82MY8GKCPGTRY53JKB"
+                  }
+                }
+              },
+              "medium": {
+                "$type": "dimension",
+                "$value": "{size.container.medium}",
+                "$description": "krado: cell.width when min-width=medium (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+                "$extensions": {
+                  "fundamento": {
+                    "id": "tok_01M6XQ1T82MY8GKCPGTRY53JKC"
+                  }
+                }
+              },
+              "large": {
+                "$type": "dimension",
+                "$value": "{size.container.large}",
+                "$description": "krado: cell.width when min-width=large (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+                "$extensions": {
+                  "fundamento": {
+                    "id": "tok_01M6XQ1T82MY8GKCPGTRY53JKD"
+                  }
+                }
+              }
             }
           }
         }
@@ -22178,6 +22352,74 @@
         }
       }
     },
+    "stako": {
+      "box": {
+        "gap": {
+          "gap": {
+            "xsmall": {
+              "$type": "dimension",
+              "$value": "{spacing.xsmall}",
+              "$description": "stako: box.gap when gap=xsmall (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6X4CFR1GF9Y7H2MX95RQ07J"
+                }
+              }
+            },
+            "small": {
+              "$type": "dimension",
+              "$value": "{spacing.small}",
+              "$description": "stako: box.gap when gap=small (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6X4CFR1GF9Y7H2MX95RQ07K"
+                }
+              }
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{spacing.medium}",
+              "$description": "stako: box.gap when gap=medium (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6X4CFR1GF9Y7H2MX95RQ07M"
+                }
+              }
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{spacing.large}",
+              "$description": "stako: box.gap when gap=large (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6X4CFR1GF9Y7H2MX95RQ07N"
+                }
+              }
+            },
+            "xlarge": {
+              "$type": "dimension",
+              "$value": "{spacing.xlarge}",
+              "$description": "stako: box.gap when gap=xlarge (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6X4CFR1GF9Y7H2MX95RQ07P"
+                }
+              }
+            },
+            "xxlarge": {
+              "$type": "dimension",
+              "$value": "{spacing.xxlarge}",
+              "$description": "stako: box.gap when gap=xxlarge (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6X4CFR1GF9Y7H2MX95RQ07Q"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "sxaltilo": {
       "label": {
         "color": {
@@ -23211,6 +23453,16 @@
               "id": "tok_01M5GF0TQY40AAXJHBF90R5XTN"
             }
           }
+        },
+        "layer": {
+          "$type": "number",
+          "$value": "{elevation.layer.raised}",
+          "$description": "tabelo: head.layer (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XSN8Y4MF2VGK8BN8S90FQE"
+            }
+          }
         }
       },
       "cell": {
@@ -23467,6 +23719,61 @@
                 "id": "tok_01M5GF0TQY40AAXJHBF90R5XV9",
                 "role": "ero"
               }
+            }
+          }
+        }
+      },
+      "skeleton": {
+        "fill": {
+          "$type": "color",
+          "$value": "{color.background.sunken}",
+          "$description": "tabelo: skeleton.fill (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XS9KNCCV11GYHV56PMGZMA",
+              "role": "ero"
+            }
+          }
+        },
+        "radius": {
+          "$type": "dimension",
+          "$value": "{radius.role.control}",
+          "$description": "tabelo: skeleton.radius (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XS9KND52914B84FNHFJVE7"
+            }
+          }
+        },
+        "height": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}",
+          "$description": "tabelo: skeleton.height (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XSV817KGE2G3SJNJ66YHE9"
+            }
+          }
+        }
+      },
+      "selection": {
+        "width": {
+          "$type": "dimension",
+          "$value": "{size.target.min}",
+          "$description": "tabelo: selection.width (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6Y1VCJ1670N014E5887Q50K"
+            }
+          }
+        },
+        "height": {
+          "$type": "dimension",
+          "$value": "{size.target.min}",
+          "$description": "tabelo: selection.height (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6Y1VCJ261DH476Y73R9C9CR"
             }
           }
         }
@@ -24411,6 +24718,256 @@
         }
       }
     },
+    "templinio": {
+      "list": {
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.large}",
+          "$description": "templinio: list.gap (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XW23WZ22SHGD8069ED742E"
+            }
+          }
+        }
+      },
+      "box": {
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.medium}",
+          "$description": "templinio: box.gap (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XW23WZ22SHGD8069ED742F"
+            }
+          }
+        }
+      },
+      "item": {
+        "gap": {
+          "$type": "dimension",
+          "$value": "{spacing.xsmall}",
+          "$description": "templinio: item.gap (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XW7SYHDJ4188X4DKPTMW4X"
+            }
+          }
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.subtle}",
+          "$description": "templinio: item.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XW23WZ22SHGD8069ED742G",
+              "role": "ero"
+            }
+          }
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.body.2}",
+          "$description": "templinio: item.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XW23WZ22SHGD8069ED742H"
+            }
+          }
+        }
+      },
+      "moment": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.muted}",
+          "$description": "templinio: moment.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XWW14S3RB0WGHS6ZNV2F3G",
+              "role": "ero"
+            }
+          }
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.label.2}",
+          "$description": "templinio: moment.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XWW14T4QTRQPNE9WYBCAFK"
+            }
+          }
+        }
+      },
+      "subject": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.text.default}",
+          "$description": "templinio: subject.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XW23WZ22SHGD8069ED742M",
+              "role": "ero"
+            }
+          }
+        },
+        "typography": {
+          "$type": "typography",
+          "$value": "{typography.label.1}",
+          "$description": "templinio: subject.typography (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XW23WZ22SHGD8069ED742N"
+            }
+          }
+        }
+      },
+      "marker": {
+        "size": {
+          "$type": "dimension",
+          "$value": "{size.icon.small}",
+          "$description": "templinio: marker.size (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XW23WZ22SHGD8069ED742P"
+            }
+          }
+        },
+        "width": {
+          "$type": "dimension",
+          "$value": "{border.width.strong}",
+          "$description": "templinio: marker.width (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XW23WZ22SHGD8069ED742Q"
+            }
+          }
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.border.strong}",
+          "$description": "templinio: marker.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XW23WZ22SHGD8069ED742R",
+              "role": "ero"
+            }
+          }
+        },
+        "fill": {
+          "$type": "color",
+          "$value": "{color.background.default}",
+          "$description": "templinio: marker.fill (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XW23WZ22SHGD8069ED742S",
+              "role": "ero"
+            }
+          }
+        },
+        "radius": {
+          "$type": "dimension",
+          "$value": "{radius.role.pill}",
+          "$description": "templinio: marker.radius (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XW23WZ22SHGD8069ED742T"
+            }
+          }
+        },
+        "stroke": {
+          "$type": "strokeStyle",
+          "$value": "{stroke.dashed}",
+          "$description": "templinio: marker.stroke (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XW23WZ22SHGD8069ED742V"
+            }
+          }
+        }
+      },
+      "line": {
+        "width": {
+          "$type": "dimension",
+          "$value": "{border.width.default}",
+          "$description": "templinio: line.width (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XW23WZ22SHGD8069ED742W"
+            }
+          }
+        },
+        "color": {
+          "$type": "color",
+          "$value": "{color.border.default}",
+          "$description": "templinio: line.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XW23WZ22SHGD8069ED742X",
+              "role": "ero"
+            }
+          }
+        }
+      },
+      "done": {
+        "fill": {
+          "$type": "color",
+          "$value": "{color.border.strong}",
+          "$description": "templinio: done.fill (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XW23WZ22SHGD8069ED742Y",
+              "role": "ero"
+            }
+          }
+        },
+        "stroke": {
+          "$type": "strokeStyle",
+          "$value": "{stroke.solid}",
+          "$description": "templinio: done.stroke (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XW23WZ22SHGD8069ED742Z"
+            }
+          }
+        }
+      },
+      "current": {
+        "stroke": {
+          "$type": "strokeStyle",
+          "$value": "{stroke.solid}",
+          "$description": "templinio: current.stroke (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XW23WZ22SHGD8069ED7430"
+            }
+          }
+        },
+        "weight": {
+          "$type": "fontWeight",
+          "$value": "{font.weight.semibold}",
+          "$description": "templinio: current.weight (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XW23WZ22SHGD8069ED7431"
+            }
+          }
+        }
+      },
+      "upcoming": {
+        "color": {
+          "$type": "color",
+          "$value": "{color.border.default}",
+          "$description": "templinio: upcoming.color (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+          "$extensions": {
+            "fundamento": {
+              "id": "tok_01M6XW23WZ22SHGD8069ED7432",
+              "role": "ero"
+            }
+          }
+        }
+      }
+    },
     "titolo": {
       "text": {
         "color": {
@@ -24497,6 +25054,74 @@
                   "fundamento": {
                     "id": "tok_01M5GF0TQY40AAXJHBF90R5XX7"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "vico": {
+      "box": {
+        "gap": {
+          "gap": {
+            "xsmall": {
+              "$type": "dimension",
+              "$value": "{spacing.xsmall}",
+              "$description": "vico: box.gap when gap=xsmall (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6X4CFR1GF9Y7H2MX95RQ07R"
+                }
+              }
+            },
+            "small": {
+              "$type": "dimension",
+              "$value": "{spacing.small}",
+              "$description": "vico: box.gap when gap=small (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6X4CFR1GF9Y7H2MX95RQ07S"
+                }
+              }
+            },
+            "medium": {
+              "$type": "dimension",
+              "$value": "{spacing.medium}",
+              "$description": "vico: box.gap when gap=medium (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6X4CFR1GF9Y7H2MX95RQ07T"
+                }
+              }
+            },
+            "large": {
+              "$type": "dimension",
+              "$value": "{spacing.large}",
+              "$description": "vico: box.gap when gap=large (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6X4CFR1GF9Y7H2MX95RQ07V"
+                }
+              }
+            },
+            "xlarge": {
+              "$type": "dimension",
+              "$value": "{spacing.xlarge}",
+              "$description": "vico: box.gap when gap=xlarge (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6X4CFR1GF9Y7H2MX95RQ07W"
+                }
+              }
+            },
+            "xxlarge": {
+              "$type": "dimension",
+              "$value": "{spacing.xxlarge}",
+              "$description": "vico: box.gap when gap=xxlarge (Constitution v2.3, the Ero-Token of this cell); by default the role token the Skemo binds.",
+              "$extensions": {
+                "fundamento": {
+                  "id": "tok_01M6X4CFR1GF9Y7H2MX95RQ07X"
                 }
               }
             }

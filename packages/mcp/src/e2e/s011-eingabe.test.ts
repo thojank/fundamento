@@ -14,6 +14,7 @@ import {
   output,
   preload,
 } from "../test-doubles/client.js";
+import { REPO_EROJ } from "../test-doubles/eroj.js";
 
 afterAll(closeClients);
 preload({ config: EKZEMPLO_CONFIG });
@@ -157,48 +158,7 @@ describe("check_usage of the dialog and the text area", () => {
 describe("list_eroj and the briefs (acceptance 1)", () => {
   it("lists forty Eroj; the briefs of dialogo and tekstareo name their axes and duties", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
-    expect(listed.eroj.map((entry) => entry.name)).toEqual([
-      "alsxutilo",
-      "apartigilo",
-      "atributlisto",
-      "avataro",
-      "avizo",
-      "butono",
-      "datelektilo",
-      "dialogo",
-      "elektilo",
-      "elekto",
-      "faldilo",
-      "glitilo",
-      "ikono",
-      "insigno",
-      "kampo",
-      "karto",
-      "kodbloko",
-      "kompletigilo",
-      "konsileto",
-      "langetaro",
-      "ligilo",
-      "listelektilo",
-      "lokredaktilo",
-      "markdovido",
-      "markobutono",
-      "menuo",
-      "mezurilo",
-      "navigado",
-      "pagxigilo",
-      "plenstato",
-      "plurelektilo",
-      "saltligilo",
-      "signeto",
-      "spuro",
-      "sxaltilo",
-      "sxvebilo",
-      "tabelo",
-      "tekstareo",
-      "teksto",
-      "titolo",
-    ]);
+    expect(listed.eroj.map((entry) => entry.name)).toEqual([...REPO_EROJ]);
     const dialogo = await output<Brief>(client, "get_ero", { name: "dialogo", brief: true });
     expect(dialogo.axes.map((axis) => axis.name)).toEqual(["size", "reason", "dismiss"]);
     // The served Modelo sorts keys (export, deterministic): actions before heading.

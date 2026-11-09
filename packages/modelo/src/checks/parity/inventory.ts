@@ -25,6 +25,11 @@ export const EMPTY_PARITY_INVENTORY: ParityInventory = { items: {} };
 export interface CompareInventoriesOptions {
   /** How the two sides are named in messages; defaults to `["a", "b"]`. */
   labels?: readonly [string, string];
+  /**
+   * Items side b may lack, each with the Jugxo that releases it. A lacking item is reported as a
+   * warning (`parity-part-not-drawn`); an item only side b has is never released. Spec 046 D-43.
+   */
+  releasedMissing?: Readonly<Record<string, string>>;
 }
 
 /** Whitespace is insignificant: trim, and collapse inner runs to one space. */
@@ -134,7 +139,8 @@ function compareIssues(a: ValidationIssue, b: ValidationIssue): number {
  * Compares two inventories after normalizing both. Returns one error per difference, sorted by
  * path: `parity-item-missing` (`items.<item>`), `parity-prop-mismatch`
  * (`items.<item>.props.<prop>`), `parity-state-mismatch` (`items.<item>.states.<state>`) and
- * `parity-value-mismatch` (`items.<item>.values.<key>`). Symmetric apart from message wording.
+ * `parity-value-mismatch` (`items.<item>.values.<key>`). Symmetric apart from message wording
+ * and `releasedMissing`, which only ever releases what side b lacks.
  */
 export function compareInventories(
   a: ParityInventory,
@@ -161,6 +167,20 @@ export function compareInventories(
     const itemB = right.items[name];
     if (itemA === undefined || itemB === undefined) {
       const [has, lacks] = itemA === undefined ? [labelB, labelA] : [labelA, labelB];
+      const release =
+        itemB === undefined && Object.hasOwn(options.releasedMissing ?? {}, name)
+          ? options.releasedMissing?.[name]
+          : undefined;
+      if (release !== undefined) {
+        add(
+          "parity-part-not-drawn",
+          ["items", name],
+          `Item "${name}" exists in ${has} but ${lacks} has no set for it until Etappe F. Released by ${release}.`,
+          `Build the set in ${lacks}, then remove the release of "${name}" and retire ${release} (Spec 046 D-43).`,
+          "warning",
+        );
+        continue;
+      }
       add(
         "parity-item-missing",
         ["items", name],
@@ -225,7 +245,7 @@ export function compareInventories(
           "parity-part-not-drawn",
           ["items", name, "values", key],
           `Value "${key}" of item "${name}" is not drawn by ${side}; ${other} has ${JSON.stringify(valueA === notDrawn ? valueB : valueA)}. Released by ${jugxo}.`,
-          `Draw the part in ${side}, or keep ${jugxo} and its entry in the Vojmapo current.`,
+          `Draw it in ${side}, or keep ${jugxo} and its Vojmapo entry current.`,
           "warning",
         );
         continue;

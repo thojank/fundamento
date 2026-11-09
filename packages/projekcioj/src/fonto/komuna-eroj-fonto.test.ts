@@ -129,7 +129,15 @@ describe("Spec 029 ①b b): the Ero-Tokens of komuna after the Fonto", () => {
     const files = readdirSync(faelle)
       .filter((name) => name.endsWith(".mjs"))
       .map((name) => name.replace(".mjs", ""));
-    expect(files.sort()).toEqual(modelo.eroj.map((entry) => entry.ero.name).sort());
+    // Spec 046 Nachtrag: the cases of the comparison (Spec 029) are frozen at their 40 Eroj; an Ero
+    // built later has none. Every one of the 40 still stands in the Modelo.
+    expect(files).toHaveLength(40);
+    expect(files.sort()).toEqual(
+      modelo.eroj
+        .map((entry) => entry.ero.name)
+        .filter((name) => files.includes(name))
+        .sort(),
+    );
     const deveno = (modelo.deveno ?? []).filter((entry) => entry.token.startsWith("ero."));
     const covered = new Set(deveno.map((entry) => entry.token.split(".")[1]));
     // Every Ero whose case maps at least one part to an element of the Fonto has values from it.

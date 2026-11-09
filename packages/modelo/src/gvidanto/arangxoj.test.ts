@@ -67,6 +67,17 @@ function stringsOf(value: unknown, path = ""): [string, string][] {
 }
 
 /** The Modelo with one Ero more, whose only goal is named `goal`. */
+/**
+ * Spec 046 T1 (Ausnahme): the Modelo without the layout Eroj of Eroj-Runde 7. The two tests below
+ * check the answer for a layout purpose without a means; on the repo Modelo there is none left
+ * once vico, kolumno, stako and krado exist, so they run on the Modelo without those four.
+ */
+const LAYOUT_EROJ: readonly string[] = ["vico", "kolumno", "stako", "krado"];
+const withoutLayout: Modelo = {
+  ...modelo,
+  eroj: modelo.eroj.filter((entry) => !LAYOUT_EROJ.includes(entry.ero.name)),
+};
+
 function withGoalEro(goal: string): Modelo {
   const base = modelo.eroj[0] as LoadedEro;
   const added: LoadedEro = {
@@ -74,7 +85,7 @@ function withGoalEro(goal: string): Modelo {
     ero: { ...base.ero, name: `provo-${goal}` },
     skemo: { ...base.skemo, goals: [{ goal, keywords: { en: [goal] }, props: {} }] },
   };
-  return { ...modelo, eroj: [...modelo.eroj, added] };
+  return { ...withoutLayout, eroj: [...withoutLayout.eroj, added] };
 }
 
 describe("listArangxoj (Spec 038 MG-1)", () => {
@@ -258,7 +269,7 @@ describe("listArangxoj (Spec 038 MG-1)", () => {
   });
 
   it("names every layout purpose without a means in mankoj, each with a proposal (Eroj-Runde 7)", () => {
-    const output = arangxoj(modelo);
+    const output = arangxoj(withoutLayout);
     expect(output.mankoj.length).toBeGreaterThan(0);
     const violations: string[] = [];
     for (const manko of output.mankoj) {
@@ -311,7 +322,7 @@ describe("listArangxoj (Spec 038 MG-1)", () => {
   });
 
   it("lists an Ero whose goal is a missing layout purpose, and that purpose is no Manko then", () => {
-    const missing = arangxoj(modelo).mankoj.map((manko) => manko.celo);
+    const missing = arangxoj(withoutLayout).mankoj.map((manko) => manko.celo);
     expect(missing.length).toBeGreaterThan(0);
     for (const celo of missing) {
       const output = arangxoj(withGoalEro(celo));
@@ -345,5 +356,77 @@ describe("listArangxoj (Spec 038 MG-1)", () => {
       expect(output.interspacoj).toEqual(plain.interspacoj);
       expect(output.mankoj).toEqual(plain.mankoj);
     }
+  });
+});
+
+describe("listArangxoj on the repo Modelo with the layout Eroj (Spec 046 T1)", () => {
+  // The Eroj of Eroj-Runde 7 named by their Skemo goal: row by vico, column by kolumno, stack by
+  // stako. The test reads the answer of the real Modelo; the spacing step comes from interspacoj.
+  const expected: [string, string][] = [
+    ["vico", "row"],
+    ["kolumno", "column"],
+    ["stako", "stack"],
+  ];
+
+  it("answers row, column and stack with an Ero each; mankoj names none of them", () => {
+    const output = arangxoj(modelo);
+    const eroj = output.arangxoj.filter((item) => item.kind === "ero");
+    for (const [name, celo] of expected) {
+      expect(eroj.filter((item) => item.name === name).map((item) => item.celo)).toEqual([celo]);
+    }
+    const missing = output.mankoj.map((manko) => manko.celo);
+    expect(missing).not.toContain("row");
+    expect(missing).not.toContain("column");
+    expect(missing).not.toContain("stack");
+  });
+
+  it("gives every layout Ero example markup with a gap from the spacing steps", () => {
+    const output = arangxoj(modelo);
+    const steps = output.interspacoj.map((item) => item.token);
+    expect(steps.length).toBeGreaterThan(0);
+    for (const [name] of expected) {
+      const entry = output.arangxoj.find((item) => item.kind === "ero" && item.name === name);
+      const gap = entry?.example.match(/^<fm-([a-z]+) gap="([a-z]+)"><\/fm-\1>$/);
+      expect(gap?.[1]).toBe(name);
+      expect(steps).toContain(`spacing.${gap?.[2] ?? ""}`);
+      // The gap prop takes exactly the spacing steps, by their last name.
+      const prop = entry?.props.find((item) => item.name === "gap");
+      expect(prop?.values).toEqual(steps.map((token) => token.split(".").at(-1)));
+    }
+  });
+});
+
+describe("listArangxoj on the repo Modelo with the grid (Spec 046 T2)", () => {
+  // The four layout Eroj of Eroj-Runde 7: krado answers column beside kolumno (the list of layout
+  // purposes stays as it is, no purpose grid). Its example sets a number of columns and a gap.
+  const LAYOUT: [string, string][] = [
+    ["vico", "row"],
+    ["kolumno", "column"],
+    ["stako", "stack"],
+    ["krado", "column"],
+  ];
+
+  it("lists vico, kolumno, stako and krado, krado under column with kolumno", () => {
+    const output = arangxoj(modelo);
+    const eroj = output.arangxoj.filter((item) => item.kind === "ero");
+    expect(eroj.map((item) => [item.name, item.celo]).sort()).toEqual([...LAYOUT].sort());
+    expect(
+      eroj
+        .filter((item) => item.celo === "column")
+        .map((item) => item.name)
+        .sort(),
+    ).toEqual(["kolumno", "krado"]);
+    expect(output.mankoj.map((manko) => manko.celo)).not.toContain("column");
+  });
+
+  it("gives krado example markup with its columns and a gap from the spacing steps", () => {
+    const output = arangxoj(modelo);
+    const steps = output.interspacoj.map((item) => item.token);
+    const krado = output.arangxoj.find((item) => item.kind === "ero" && item.name === "krado");
+    const example = krado?.example.match(/^<fm-krado columns="(\d+)" gap="([a-z]+)"><\/fm-krado>$/);
+    expect(Number(example?.[1])).toBeGreaterThanOrEqual(1);
+    expect(Number(example?.[1])).toBeLessThanOrEqual(12);
+    expect(steps).toContain(`spacing.${example?.[2] ?? ""}`);
+    expect(krado?.props.map((prop) => prop.name)).toEqual(["columns", "min-width", "gap"]);
   });
 });

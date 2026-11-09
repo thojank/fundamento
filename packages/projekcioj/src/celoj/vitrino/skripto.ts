@@ -318,6 +318,16 @@ for (const tabs of document.querySelectorAll("fm-langetaro")) {
     if (panel && tab) panel.textContent = (tab.textContent || "").trim();
   });
 }
+// Spec 046 T5: the application owns a table's selection – the Vitrino answers select as one does,
+// every row whose key the event names is selected (data-selected), every other row not.
+for (const table of document.querySelectorAll("fm-tabelo[selectable]")) {
+  table.addEventListener("select", (event) => {
+    const keys = (event.detail && event.detail.keys) || [];
+    for (const row of table.querySelectorAll("tr[data-key]")) {
+      row.toggleAttribute("data-selected", keys.includes(row.getAttribute("data-key")));
+    }
+  });
+}
 for (const table of document.querySelectorAll("fm-tabelo")) {
   table.addEventListener("sort-change", (event) => {
     const column = event.detail && event.detail.column;
