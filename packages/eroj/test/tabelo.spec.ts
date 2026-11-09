@@ -186,188 +186,97 @@ test("the sort button holds an fm-ikono whose name follows the direction", async
 
 const KEYED = `<table slot="content"><thead><tr><th scope="col" data-sort="name">Name</th><th scope="col">Status</th><th scope="col" numeric data-sort="count">Verstöße</th></tr></thead><tbody><tr data-key="a"><th scope="row">Barrierefreiheit</th><td>gültig</td><td>0</td></tr><tr data-key="b"><th scope="row">Datenschutz</th><td>Entwurf</td><td>3</td></tr></tbody><tfoot><tr><th scope="row">Summe</th><td></td><td>3</td></tr></tfoot></table>`;
 
-// Measured on the build before T3 (486b6c03, viewport 1024 × 600, core + komuna + ekzemplo):
-// width and height of host and table, x and width of the three columns, y and height of the head
-// row, the two rows and the foot row. Numbers, no PNG (A-10).
-const MEASURED: Record<
-  string,
-  Record<string, { host: number[]; table: number[]; cols: number[][]; rows: number[][] }>
-> = {
-  chromium: {
-    compact: {
-      host: [1008, 116],
-      table: [252.55, 114],
-      cols: [
-        [9, 105.94],
-        [114.94, 51.38],
-        [166.31, 95.23],
-      ],
-      rows: [
-        [29, 24.5],
-        [53.5, 23],
-        [76.5, 23],
-        [99.5, 23],
-      ],
-    },
-    default: {
-      host: [1008, 116],
-      table: [264.55, 114],
-      cols: [
-        [9, 109.94],
-        [118.94, 55.38],
-        [174.31, 99.23],
-      ],
-      rows: [
-        [29, 24.5],
-        [53.5, 23],
-        [76.5, 23],
-        [99.5, 23],
-      ],
-    },
-    comfortable: {
-      host: [1008, 116],
-      table: [276.55, 114],
-      cols: [
-        [9, 113.94],
-        [122.94, 59.38],
-        [182.31, 103.23],
-      ],
-      rows: [
-        [29, 24.5],
-        [53.5, 23],
-        [76.5, 23],
-        [99.5, 23],
-      ],
-    },
-  },
-  firefox: {
-    compact: {
-      host: [1008, 116],
-      table: [248.5, 114],
-      cols: [
-        [9, 105.9],
-        [114.9, 51.37],
-        [166.27, 91.23],
-      ],
-      rows: [
-        [29, 24.5],
-        [53.5, 23],
-        [76.5, 23],
-        [99.5, 23],
-      ],
-    },
-    default: {
-      host: [1008, 116],
-      table: [260.5, 114],
-      cols: [
-        [9, 109.9],
-        [118.9, 55.37],
-        [174.27, 95.23],
-      ],
-      rows: [
-        [29, 24.5],
-        [53.5, 23],
-        [76.5, 23],
-        [99.5, 23],
-      ],
-    },
-    comfortable: {
-      host: [1008, 116],
-      table: [272.5, 114],
-      cols: [
-        [9, 113.9],
-        [122.9, 59.37],
-        [182.27, 99.23],
-      ],
-      rows: [
-        [29, 24.5],
-        [53.5, 23],
-        [76.5, 23],
-        [99.5, 23],
-      ],
-    },
-  },
-  webkit: {
-    compact: {
-      host: [1008, 119],
-      table: [252.55, 117],
-      cols: [
-        [9, 105.94],
-        [114.94, 51.38],
-        [166.31, 95.23],
-      ],
-      rows: [
-        [29, 27.5],
-        [56.5, 23],
-        [79.5, 23],
-        [102.5, 23],
-      ],
-    },
-    default: {
-      host: [1008, 119],
-      table: [264.55, 117],
-      cols: [
-        [9, 109.94],
-        [118.94, 55.38],
-        [174.31, 99.23],
-      ],
-      rows: [
-        [29, 27.5],
-        [56.5, 23],
-        [79.5, 23],
-        [102.5, 23],
-      ],
-    },
-    comfortable: {
-      host: [1008, 119],
-      table: [276.55, 117],
-      cols: [
-        [9, 113.94],
-        [122.94, 59.38],
-        [182.31, 103.23],
-      ],
-      rows: [
-        [29, 27.5],
-        [56.5, 23],
-        [79.5, 23],
-        [102.5, 23],
-      ],
-    },
-  },
-};
-
 // The DOM the table wrote before T3 (density default, sort name), light and shadow.
 const MEASURED_DOM =
   '<fm-tabelo id="t" density="default" sort="name" data-density="default" data-direction="ascending" data-lines="rows">Standards<table slot="content"><caption data-fm-caption="">Standards</caption><thead><tr><th scope="col" data-sort="name" aria-sort="ascending"><button type="button">Name<fm-ikono name="sort-ascending" size="small"></fm-ikono></button></th><th scope="col">Status</th><th scope="col" numeric="" data-sort="count"><button type="button">Verstöße<fm-ikono name="sort-ascending" size="small"></fm-ikono></button></th></tr></thead><tbody><tr data-key="a"><th scope="row">Barrierefreiheit</th><td>gültig</td><td numeric="">0</td></tr><tr data-key="b"><th scope="row">Datenschutz</th><td>Entwurf</td><td numeric="">3</td></tr></tbody><tfoot><tr><th scope="row">Summe</th><td></td><td>3</td></tr></tfoot></table></fm-tabelo>';
 const MEASURED_SHADOW =
   '<div part="region" role="region" tabindex="0" data-density="default" data-direction="ascending" data-lines="rows" aria-label="Standards"><slot name="content"></slot></div><slot hidden=""></slot><slot name="empty" hidden=""></slot><span id="fm-texts" hidden=""></span>';
 
-/** Geometry and DOM of #t once fonts are loaded and two frames have passed. */
+/**
+ * Geometry and DOM of #t once fonts are loaded and two frames have passed. Every number is a
+ * difference of two edges, rounded like before to two decimals, so it holds on any platform: none
+ * depends on how wide a text is (F-T8-1, the Linux runner lays text wider than macOS).
+ */
 async function measure(page: Page) {
   await page.getByRole("table", { name: "Standards" }).waitFor();
   return page.evaluate(async () => {
     await document.fonts.ready;
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     const host = document.getElementById("t") as HTMLElement;
+    const table = host.querySelector("table") as HTMLTableElement;
     const r2 = (n: number) => Math.round(n * 100) / 100;
-    const rect = (element: Element) => {
-      const box = element.getBoundingClientRect();
-      return [r2(box.x), r2(box.y), r2(box.width), r2(box.height)];
-    };
-    const cells = [...host.querySelectorAll("table :is(th, td)")].map(rect);
-    const at = (index: number) => cells[index] ?? [];
+    const rows = [...table.rows];
+    const headCells = [...(rows[0] as HTMLTableRowElement).cells].map((cell) =>
+      cell.getBoundingClientRect(),
+    );
+    const rowBoxes = rows.map((row) => row.getBoundingClientRect());
+    // The distance from a cell's edge to its text: the start of a text at the start edge, the end
+    // of a right-aligned numeric text at the end edge. Never the width of the text.
+    const textOffsets = [...(table.tBodies[0] as HTMLTableSectionElement).rows].flatMap((row) =>
+      [...row.cells].flatMap((cell) => {
+        const range = document.createRange();
+        range.selectNodeContents(cell);
+        const text = range.getBoundingClientRect();
+        const box = cell.getBoundingClientRect();
+        return cell.hasAttribute("numeric")
+          ? [r2(box.right - text.right)]
+          : [r2(text.left - box.left)];
+      }),
+    );
     return {
-      geometry: {
-        host: rect(host).slice(2),
-        table: rect(host.querySelector("table") as Element).slice(2),
-        cols: [0, 1, 2].map((index) => [at(index)[0], at(index)[2]]),
-        rows: [0, 3, 6, 9].map((index) => [at(index)[1], at(index)[3]]),
-      },
+      hostWidth: r2(host.getBoundingClientRect().width),
+      bodyWidth: r2(document.body.getBoundingClientRect().width),
+      tableWidth: table.getBoundingClientRect().width,
+      columnStarts: headCells.map((cell) => cell.x),
+      columnWidths: headCells.map((cell) => cell.width),
+      columnGaps: headCells.slice(1).map((cell, index) => {
+        const previous = headCells[index] as DOMRect;
+        return r2(cell.x - (previous.x + previous.width));
+      }),
+      columnOffsets: rows.flatMap((row) =>
+        [...row.cells].map((cell, index) =>
+          r2(cell.getBoundingClientRect().x - (headCells[index]?.x ?? 0)),
+        ),
+      ),
+      rowGaps: rowBoxes.slice(1).map((box, index) => {
+        const previous = rowBoxes[index] as DOMRect;
+        return r2(box.y - (previous.y + previous.height));
+      }),
+      rowHeights: rowBoxes.map((box) => r2(box.height)),
+      textOffsets,
+      selection: host.querySelectorAll("[data-fm-select]").length,
+      skeleton: host.querySelectorAll("[data-fm-skeleton]").length,
+      busy: host.hasAttribute("aria-busy") || table.hasAttribute("aria-busy"),
       dom: host.outerHTML,
       shadow: host.shadowRoot?.innerHTML,
     };
   });
 }
+
+/** The token the Skemo binds to the inline padding of a cell in a density. */
+function paddingToken(density: string): string {
+  const binding = input.modelo.eroj
+    .find((entry) => entry.ero.name === "tabelo")
+    ?.skemo.bindings.find(
+      (candidate) =>
+        candidate.part === "cell" &&
+        candidate.property === "inline-padding" &&
+        candidate.when?.density === density,
+    );
+  if (binding === undefined) throw new Error(`cell.inline-padding of ${density} is not bound`);
+  return binding.token;
+}
+
+/** The pixels a token resolves to on this very page, to two decimals (a width on a probe). */
+const paddingPx = (page: Page, token: string) =>
+  page.evaluate((name) => {
+    const probe = document.createElement("div");
+    probe.style.inlineSize = `var(--fm-${name.replaceAll(".", "-")})`;
+    document.body.append(probe);
+    const width = probe.getBoundingClientRect().width;
+    probe.remove();
+    return Math.round(width * 100) / 100;
+  }, token);
 
 /** Records every select the table says on window.heard; with apply, writes data-selected as an application does. */
 async function listen(page: Page, apply: boolean) {
@@ -402,22 +311,65 @@ const checked = (page: Page, key: string) =>
 test.describe("fm-tabelo Spec 046 T3", () => {
   test.use({ viewport: { width: 1024, height: 600 } });
 
-  test("without the new props DOM and geometry are as measured before T3, in every density", async ({
+  // F-T8-1: no absolute pixel pin: the DOM and shadow strings are exact in every density, the
+  // geometry is relative (order, no overlap, equal rows, the room of a cell from its token).
+  test("without the new props DOM and relative geometry are as before T3, in every density", async ({
     page,
-    browserName,
   }) => {
-    for (const density of ["compact", "default", "comfortable"]) {
+    const densities = ["compact", "default", "comfortable"];
+    const measures: Record<string, Awaited<ReturnType<typeof measure>>> = {};
+    const padding: Record<string, number> = {};
+    for (const density of densities) {
       await serve(
         page,
         out,
         `<fm-tabelo id="t" density="${density}" sort="name">Standards${KEYED}</fm-tabelo>`,
       );
       const measured = await measure(page);
-      expect(measured.geometry, density).toEqual(MEASURED[browserName]?.[density]);
-      if (density === "default") {
-        expect(measured.dom).toBe(MEASURED_DOM);
-        expect(measured.shadow).toBe(MEASURED_SHADOW);
-      }
+      measures[density] = measured;
+      padding[density] = await paddingPx(page, paddingToken(density));
+      expect(measured.dom, density).toBe(
+        MEASURED_DOM.replaceAll('density="default"', `density="${density}"`),
+      );
+      expect(measured.shadow, density).toBe(
+        MEASURED_SHADOW.replaceAll('data-density="default"', `data-density="${density}"`),
+      );
+      expect(measured.hostWidth, density).toBe(measured.bodyWidth);
+      expect(
+        { selection: measured.selection, skeleton: measured.skeleton, busy: measured.busy },
+        density,
+      ).toEqual({ selection: 0, skeleton: 0, busy: false });
+      // Three columns, one after the other, without overlap; every row keeps the head's columns.
+      expect(measured.columnStarts, density).toHaveLength(3);
+      expect(measured.columnStarts, density).toEqual(
+        [...measured.columnStarts].sort((a, b) => a - b),
+      );
+      for (const width of measured.columnWidths) expect(width, density).toBeGreaterThan(0);
+      expect(measured.columnGaps, density).toEqual([0, 0]);
+      for (const offset of measured.columnOffsets) expect(offset, density).toBe(0);
+      // Head, two body rows and the foot, one below the other; the rows of the body and the foot
+      // are equally high.
+      expect(measured.rowHeights, density).toHaveLength(4);
+      expect(measured.rowGaps, density).toEqual([0, 0, 0]);
+      for (const height of measured.rowHeights) expect(height, density).toBeGreaterThan(0);
+      expect(new Set(measured.rowHeights.slice(1)).size, density).toBe(1);
+      // The room between the text of a cell and its edge is the inline padding the density binds.
+      expect(padding[density], density).toBeGreaterThan(0);
+      for (const offset of measured.textOffsets) expect(offset, density).toBe(padding[density]);
+    }
+    // Density changes the room, nothing else: the same rows, wider by what the tokens add, two
+    // sides per column.
+    const delta = (from: string, to: string) =>
+      Math.round(((measures[to]?.tableWidth ?? 0) - (measures[from]?.tableWidth ?? 0)) * 100) / 100;
+    for (const [from, to] of [
+      ["compact", "default"],
+      ["default", "comfortable"],
+    ] as const) {
+      expect(padding[to]).toBeGreaterThan(padding[from] ?? Number.POSITIVE_INFINITY);
+      expect(delta(from, to), `${from} to ${to}`).toBe(
+        Math.round(3 * 2 * ((padding[to] ?? 0) - (padding[from] ?? 0)) * 100) / 100,
+      );
+      expect(measures[to]?.rowHeights, `${from} to ${to}`).toEqual(measures[from]?.rowHeights);
     }
   });
 
