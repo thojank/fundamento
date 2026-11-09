@@ -209,7 +209,7 @@ Die Produkt-Spec schließt neue Figma-Bauformen aus („was fehlt, ist ein Befun
 | EF-4 | Bericht des Plugins | Platz in der Kopfzeile des gedruckten Berichts für fünf weitere Sets | Mit den fünf Sets 4 079 bzw. 4 295 Zeichen (Grenze 4 000). Weg des Repos (siehe `plugin.ts` `reportParts`): ein weiteres Feld der Kopfzeile in den Teil `state` je Set verschieben. |
 | EF-5 | `tabelo` | Auswahlspalte, Skelettzeilen, fester Kopf als Knoten | Heute BOOLEAN-Eigenschaften ohne Knoten (wie `line-numbers` des kodbloko); das Skelett freigegeben über `jug_01M6A2EXBGT5473CTBGY1WRV5E`. Ob Etappe F sie zeichnet, entscheidet der Maintainer. |
 
-Sobald EF-1 bis EF-3 gebaut sind, entfallen die Auslassungen in `FIGMA_CELO` (`isLayout`, `isTimeline`) und die fünf `parity-item-missing`.
+Sobald EF-1 bis EF-3 gebaut sind, entfallen die Auslassungen in `FIGMA_CELO` (`isLayout`, `isTimeline`) und die fünf `parity-item-missing`. Seit dem Nachtrag (D-43) sind diese fünf bis dahin über `FIGMA_EROJ_NOT_DRAWN` und `jug_01M6YTZJNTW7D866N8186KYQGH` freigegeben; **Etappe F muss diese Freigabe entfernen.**
 
 ## Im echten Figma-Plugin zu messen (Text für PR A)
 
@@ -266,3 +266,52 @@ Branch `261108-spec-046-eroj-runde-7-pr-b`, Worktree `repos/fundamento-046-b`, B
 - Disjunktheit: `git diff --name-only 626043f9...` A 141 Dateien, B 8 Dateien, `comm -12` leer; Merge-Base beider Zweige `626043f9`; außerhalb der erlaubten Pfade nur `packages/metiejo/src/komponentoj.test.ts` (A). SHA-256 `specs/046-eroj-runde-7/spec.md` = `6b842691dbca177757a574a9239ee33b95306e4c73fc1e844d8f425d74f2d1f9`.
 - Offene Maintainer-Entscheidungen (außerhalb der Ausnahmeliste, nicht geändert): B-1/B-2 (`docs.test.ts`), B-3 (`datumoj.test.ts:383`), F-T1-4, F-T1-5, F-T1-6, F-T2-5, F-T6-1, F-T6-2, F-T6-7 (agordilo), F-T6-8 (metiejo), F-B1 (AC-8 Rückfallpfad), Parität F-T5-3 (Etappe F).
 - Je PR genau ein Push, ein `workflow_dispatch`; PR-Links, Run-IDs und CI je Job stehen im Bericht `purple/documentation/…/bericht-spec-046.md`.
+
+## Nachtrag: zweiter Push, einmalig (Maintainer, 2026-11-09)
+
+Auftrag: PR A grün machen, ohne eine Grenze, Regel oder Toleranz zu ändern. Commits auf `cc438d0c`, kein Rebase, kein Amend. Keine Datei von PR B, kein `.github/**`, kein `ac8.test.ts`.
+
+| ID | Frage | Wahl und Grund |
+|---|---|---|
+| D-43 | Parität der fünf Eroj ohne Figma-Set | `testing.md` verbietet das Abschwächen einer Konformitätsprüfung und verlangt einen Jugxo. Die Parität kannte nur Freigaben je Wert (`not drawn (jug_…)`, F-T1-10), keine je Ero. Neu, in der Form von `FIGMA_NOT_DRAWN`: `FIGMA_EROJ_NOT_DRAWN` (`modelo/src/checks/parity/index.ts`), eine Tabelle Ero → Jugxo mit genau `kolumno`, `krado`, `stako`, `templinio`, `vico`, nur an der Seite `figma.json` (`ParitySide.releasedMissing`). Kein Schalter, kein Muster. `compareInventories` meldet eine freigegebene fehlende Ero als Warnung `parity-part-not-drawn` am Pfad `items.<ero>`; nur was die Seite fehlt, nie was der Skemo fehlt. Eine Freigabe gilt nur, wenn ihr Jugxo im Modelo steht (`jugxoBackedReleases`). Jugxo `jug_01M6YTZJNTW7D866N8186KYQGH` (`ref` VIII/figma, `approved`, `kialo`: „bis Etappe F“). Rot zuerst `checks/parity/index.test.ts` (4 rot vor der Umsetzung). Gegenproben: jede andere Ero ohne Figma-Set bleibt `parity-item-missing`; eine der fünf, die in Web Component, React oder Guidelines fehlt, bleibt `parity-item-missing`; eine vorhandene der fünf wird weiter verglichen (`parity-prop-mismatch`); ein Eintrag ohne Jugxo gilt nicht. **Die Freigabe muss mit Etappe F entfallen** (EF-1 bis EF-3): `projekcioj/src/celoj/figma/tabelo-046.test.ts` „the plan leaves out exactly the five …“ wird rot, sobald ein Set gebaut ist. |
+| D-44 | F-T8-1, `tabelo.spec.ts:405` | Keine absoluten Pixel mehr. DOM- und Shadow-String wörtlich in jeder Dichte; relative Maße in jeder Dichte (Reihenfolge und Lückenlosigkeit der Spalten, Zellen in ihrer Spalte, Zeilen ohne Lücke, Körper und Fuß gleich hoch, Abstand Zellrand–Text = der von der Dichte gebundene `spacing`-Token, im selben Lauf aufgelöst, kein Auswahlkästchen, kein Skelett, kein `aria-busy`); zwischen den Dichten: Tabellenbreite = 3 × 2 × Differenz der Tokens, gleiche Zeilenhöhen. Keine Zahl hängt von einer Textbreite ab; Rundung wie zuvor 0,01 px. Gegenprobe (zurückgenommen): `ero.tabelo.cell.inline.padding.density.compact` auf `spacing.large` rot (4 gegen 16), `border-collapse: separate` im Generator rot (`columnGaps` `[2, 2]`). |
+| D-45 | Eingefrorene Dokumente | `specs/026-*` und `specs/029-*` unverändert. `docs.test.ts:3192/:3654` und `komuna-eroj-fonto.test.ts:128` vergleichen nur noch die Eroj, die das Dokument nennt; die eingefrorenen Zahlen (45 Zeilen, 40 Eroj) bleiben. |
+
+| # | Befund |
+|---|---|
+| F-T8-1 | Siehe D-44. Behoben. |
+| F-T8-2 | Zu D-43: Die Freigabe ist neue Mechanik der Parität, ausdrücklich beauftragt. EF-1 bis EF-3 bleiben offen; `check:parity` nennt die fünf als Warnung mit Jugxo. |
+| F-T8-3 | Die Ausgabe von `parity --json` lag mit 1 055 805 Byte über dem Standard-`maxBuffer` von `spawnSync` (1 048 576 Byte, `parity.test.ts:42`); der Prozess endet mit SIGTERM, Status `null`, Test „expected -1“. Die 5 `parity.test.ts`-Roten aus F-T5-3 hatten damit eine zweite, verdeckte Ursache, die durch die 45 Werte von T3/T5 entstand (ohne sie und die fünf neuen Warnungen rechnerisch rund 1 032 600 Byte). Grenze und Test nicht geändert. Abhilfe: Vorschlagstext der freigegebenen Werte 13 Zeichen kürzer (`inventory.ts`), jetzt 1 028 180 Byte, Abstand 20 396 Byte. Jede weitere freigegebene Differenz zählt darauf; Kandidat für die nächste Runde: `parity.test.ts` bekommt ein eigenes `maxBuffer`, oder `--json` gibt ohne Einrückung aus (Maintainer-Entscheidung). |
+| F-T8-4 | `nordstelo/test/k8/generi.mjs` ändert neben `roh/atendo.json` auch `sxablono/atendo.json` (dieselbe Zeile `mankoj`); der Test prüft beide, beide übernommen. `faktoj.json` byte-gleich. |
+| F-T8-5 | `antworten-044.json` heißt weiter „Stand 6a3e55e3“ (der Generator schreibt das Feld fest), der Test weiter „byte-equal to main“; `get-ero-bezug-479c5ad4.json` entsprechend. Beide Namen sind ab jetzt nur noch für die unveränderten Einträge wörtlich wahr. |
+| F-T8-6 | Lastabhängig, Grenzen unverändert: `projekcioj/src/celoj/figma/figma-cxiuj.test.ts:32` lief im Gesamtlauf von projekcioj einmal in die Hook-Grenze 180 s (wie F-T1-11, F-T2-6), allein zweimal 5/5 in 52 s. `modelo/src/checks/vortaro-lint/index.test.ts:21` scheiterte einmal im Gesamtlauf von modelo an `ENOENT .fundamento/release`, allein und im nächsten Gesamtlauf grün; Ursache nicht bestimmt. |
+
+### Was je Eintrag dazukommt (Text für PR A)
+
+„Nur neu“ steht nur dort, wo es belegt ist.
+
+| Paket | Eintrag | Änderung | Nur neu? |
+|---|---|---|---|
+| modelo | `docs.test.ts:3192` | Vergleich nur über die Namen, die `specs/026-lingvo/plan.md` nennt; `rows` bleibt 45 | Keine neue Erwartung, der Vergleich ist auf das eingefrorene Dokument begrenzt |
+| modelo | `docs.test.ts:3654` | Vergleich nur über die Eroj von `specs/029-fonto-astryx/abgleich.json`; 40 bleibt | Wie oben |
+| modelo | `eroj.test.ts:197` | `menuo` → `kolumno` unter den fünf nächsten Namen | **Nein:** ein Name ersetzt einen anderen, die Grenze von fünf bleibt (F-T1-6) |
+| modelo | `data/tabelo.test.ts:154` | `content` + `dataForm: "table"` | Ja |
+| modelo | `data/atributlisto.test.ts:107` | `de` + `inhalte-anzeigen`, `informationen-anzeigen` | Ja |
+| modelo | `get-ero-bezug-479c5ad4.json` | + 5 Hashes (`kolumno`, `krado`, `stako`, `templinio`, `vico`); 3 ersetzt; 37 unverändert | **Nein:** `atributlisto` (Stichwörter D-40), `butono` (gekürzte deutsche Texte D-38), `tabelo` (Props, `dataForm`, geschlossene Grenzen `row-selection`/`sticky-header`, D-22/D-37) |
+| mcp | `eroj-tools.test.ts:31` | `menuo` → `kolumno` | **Nein:** wie `eroj.test.ts:197` |
+| mcp | `list_jugxoj/standard` | 182 320 → 183 180 Byte | Ja: ohne den neuen Jugxo exakt der alte SHA-256 (Folge von D-43) |
+| mcp | `describe/standard` | `jugxoj.count` 233 → 234, im Satz „234 Jugxoj“ | **Nein:** ein Zähler (Folge von D-43) |
+| projekcioj | `vitrino/datumoj.test.ts:383` | `"fm-kolumno "` → `class="fm-kolumno` | **Nein:** Text der Erwartung geändert; verboten bleibt die alte Klasse, der Tag `<fm-kolumno>` ist gewollt (B-3) |
+| projekcioj | `fonto/komuna-eroj-fonto.test.ts:128` | Vergleich nur über die 40 Fälle; neu `toHaveLength(40)` | Keine neue Erwartung außer der festen 40 |
+| projekcioj | `celoj/figma/tabelo-046.test.ts` | + ein Test: der Plan lässt genau die fünf aus | Ja, neuer Wächter (D-43) |
+| nordstelo | `k8/roh/atendo.json`, `k8/sxablono/atendo.json` | `"mankoj": ["interspacoj"]` → `[]`, mit `generi.mjs`; `faktoj.json` byte-gleich | **Nein:** ein Eintrag entfällt, gewollt: das Modelo beantwortet `row`/`column`/`stack` (F-T2-5) |
+| agordilo | `aspekto-{provo,provo-kompakta,dukolora}/aspekto.json` | je 1 Zeile `agordilo.structure.sha256`, 3b6d5706… → 7eeca2ee…, mit `pnpm --filter @fundamento/agordilo fixtures` | **Nein:** ein Fingerabdruck wird ersetzt; Grund: die Struktur enthält die neuen Eroj |
+| agordilo | `fixtures/stufe1-provo.json` | 2 Prüfsummen ersetzt | Inhaltlich ja: `sets/aspekto/provo.json` ohne die neuen Ero-Tokens hat exakt die alte Summe; `aspekto.json` ändert sich nur um den Fingerabdruck |
+| agordilo | `struktur-029.test.ts:27` (Zeile 44) | Literal des Fingerabdrucks ersetzt; dafür gibt es keinen Generator | **Nein:** Hash ersetzt, derselbe Grund |
+| metiejo | `antworten-044.json` | 14 von 66 Hashes (`GET vorschau.css`), Status und Content-Type aller 66 gleich, 52 Hashes gleich; mit `FM_ANTWORTEN_044=schreiben` | Inhaltlich ja: ohne die Zeilen `--fm-ero-(vico\|kolumno\|stako\|krado\|templinio)` und `--fm-ero-tabelo-(selection\|skeleton\|head-layer)` exakt der alte SHA-256, in allen 14 Fällen |
+
+### Läufe (Nachtrag)
+
+`pnpm build`, dann nacheinander mit `FM_AUSGABE=knapp`: modelo 4925/0, mcp 508/0, projekcioj 1547/1 rot (F-T8-6, allein grün), nordstelo 270/0, agordilo 147/0, metiejo 608/0, cli 120/0, ekranoj 293/0, eroj Vitest 43/0, `tabelo.spec.ts` je 18/0 in Chromium, Firefox, WebKit. `pnpm lint`, `check:parity`, `check:regularo`, `check:dokumentaro`, `check:vortaro-lint`, `check:alirebleco`, `check:make-kit`, `check:privat`: Exit 0. Linux nicht lokal gelaufen; ob F-T8-1 dort grün ist, zeigt erst die CI.
+
+Diff-Suche über `cc438d0c..HEAD` nach `retries`, `timeout`, `toBeLessThan`, `toBeGreaterThan`, Toleranz, `maxBuffer`, `CEILING`, 750, 4000, 2000, `.only(`, `.skip(`: vier Treffer, alle `toBeGreaterThan` der neuen relativen Maße in `tabelo.spec.ts`; keine Grenze angehoben, keine entfernt. Kern-Token-Zahl 400 unverändert (`core.json` nicht im Diff).

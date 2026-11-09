@@ -87,3 +87,11 @@ PR A ist ein Strang T1 → T6 (B-8), T7 läuft parallel in PR B im eigenen Workt
 - [x] T7: L5-1, L5-2, L5-3 in Worktree B (`63c937c7` rot, `85a42e32` Umsetzung, `70f3ab94` Ausnahme AC-8-Fixtures ekranoj). AC-8 Rückfallpfad rot (F-B1, Maintainer-Entscheidung). Entscheidungen D-B1 bis D-B5 in plan.md.
 - [x] QA Lauf 1: Web PASS, API PASS (plan.md › QA).
 - [x] T8: Disjunktheit geprüft, SHA geprüft, je PR ein Push und ein Dispatch; Bericht `bericht-spec-046.md`.
+
+## Nachtrag: zweiter Push (2026-11-09)
+
+- [x] `check:parity`: benannte, Jugxo-gestützte Freigabe der fünf Eroj bis Etappe F, rot zuerst (`d3253db8`, D-43, F-T8-2, F-T8-3); Vertrags-Fixtures `list_jugxoj`, `describe` als Folge.
+- [x] F-T8-1: `tabelo.spec.ts:405` ohne absolute Pixel, relative Maße, Gegenprobe (`f8e4e8b7`, D-44).
+- [x] Fixtures und Pins je Paket: modelo `2a74da85`, mcp `6c64d8bc`, projekcioj `a7d7b90e`, nordstelo `1ced542b`, agordilo `a852866a`, metiejo `107d0654` (D-45, Tabelle „Was je Eintrag dazukommt“ in plan.md).
+- [x] Läufe nacheinander, `pnpm lint`, sieben Prüfungen, Diff-Suche (plan.md › Läufe (Nachtrag)). Einzig `figma-cxiuj.test.ts:32` einmal unter Last rot, allein grün (F-T8-6).
+- [ ] Push und `workflow_dispatch` durch den Orchestrator; CI auf Linux offen.
