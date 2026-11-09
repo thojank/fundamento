@@ -158,7 +158,8 @@ describe("the Uzo of the tabelo (section ④, G5)", () => {
     );
     expect(uzo?.slots).toEqual({
       caption: { accepts: ["text"], required: true, max: 1, nesting: 0 },
-      content: { accepts: ["text"], required: true, max: 1, nesting: 1 },
+      // Spec 046 T6 (F-T6-1): the data form of the table's content.
+      content: { accepts: ["text"], required: true, max: 1, nesting: 1, dataForm: "table" },
       // Nachlese 7 ② B-3: the empty state names its next step with a butono.
       empty: { accepts: ["text", "butono"], max: 2, nesting: 1 },
     });

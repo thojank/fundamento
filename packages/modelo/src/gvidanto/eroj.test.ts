@@ -203,8 +203,9 @@ describe("get_ero", () => {
     // The five nearest names (nearestNames): with six Eroj (Spec 010 ③) the farthest drops out.
     // Spec 011 ②: with nine Eroj dialogo is nearer to "butonno" than markobutono.
     // Spec 014 ②: ikono is nearer to "butonno" than insigno. Spec 014 ③: titolo too; dialogo
-    // drops. Spec 014 ④: menuo is nearer than avizo.
-    expect(missing.allowed).toEqual(["butono", "ikono", "titolo", "insigno", "menuo"]);
+    // drops. Spec 014 ④: menuo is nearer than avizo. Spec 046 T1 (F-T1-6): kolumno, one of the
+    // five new Eroj, is nearer than menuo and takes its place among the five nearest.
+    expect(missing.allowed).toEqual(["butono", "ikono", "titolo", "insigno", "kolumno"]);
   });
 });
 

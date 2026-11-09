@@ -108,7 +108,15 @@ describe("atributlisto in the repo Modelo (section ④, G1, G2, E10)", () => {
     expect(skemo?.goals?.map((goal) => goal.goal)).toEqual(["details"]);
     expect(skemo?.goals?.[0]?.keywords).toEqual({
       en: ["details", "metadata", "properties", "attributes"],
-      de: ["details", "metadaten", "eigenschaften", "angaben"],
+      // Spec 046 T6 (D-40, F-T6-2): the two words of "Inhalte anzeigen".
+      de: [
+        "details",
+        "metadaten",
+        "eigenschaften",
+        "angaben",
+        "inhalte-anzeigen",
+        "informationen-anzeigen",
+      ],
     });
   });
 });
