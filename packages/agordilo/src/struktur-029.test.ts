@@ -41,8 +41,9 @@ describe("Spec 029 ①: the structure of komuna 0.2 for the Agordilo", () => {
     // alias).
     // Spec 036 Teil 6: pinned for the structure with the new names (D-25), the same documents
     // before and after the script run; the stored fingerprints above follow the derivation.
+    // Spec 046 Nachtrag (F-T6-7): the structure with the five new Eroj and the Ero-Tokens of T1–T5.
     expect(fingerprintOf(convertNames(structure.files, nameForm("neutral")))).toBe(
-      "3b6d57066ca341dd5700d193263889cc34b5c54d4b2a26f5b1973a6650f31cd6",
+      "7eeca2ee477340bb65bb24af8c6f3cbf83d1cb25c9ddf8a818caaf876c94cd15",
     );
   });
 

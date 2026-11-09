@@ -28,7 +28,7 @@
   },
   "sha256": {
     "$themes.json": "32d20d206abf9b832c41c26c654fb33aef9694a5661ff89655091a4aae9931d3",
-    "aspekto.json": "d12c669751725147ea94ba16011e8ad186ead01f3c3742f7740ff4a63a5a648f",
+    "aspekto.json": "b88db49e335b016d4a9b183a1f86d4e817bc80699b6adf9cee6e3d66abfbe2d4",
     "ids.lock.json": "19279ae73d078332a67f90d7e401fa8878e9fc7794e8496809c133730e1e564e",
     "ikonoj/LICENSE": "ddbe6082ec3cf979db47e5af549d2849c5d6182b3e005ef91ce1dbb9eb122f11",
     "ikonoj/add.svg": "4baa2c668c8800442d47ab39d716e35142c125a9146efefa50f701e9622f2000",
@@ -59,6 +59,6 @@
     "raporto.json": "c04becc545c47932ca28e1d9ed439af4d1a3fc739eec2a1dc92148b53d8495a8",
     "raporto.md": "112b16eeabb5f39df21055dee98ac61fc79966f39d1b80c249c3834b1ee60c31",
     "sets/aspekto/provo+color-scheme/dark.json": "fd40feedbab57016b8f96950b15ce56d215b3aa2094d7d4625a7bfbea8c15e01",
-    "sets/aspekto/provo.json": "fc145bd31ef6ef9a4ef3afcefcc7cd52ff44315d603c56ee441aef2ce729f8e8"
+    "sets/aspekto/provo.json": "68afabeaeeb2f05d7386b4258da84145ca52d8bc5cbdcf0a640d419e978e822a"
   }
 }
