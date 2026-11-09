@@ -4610,6 +4610,17 @@
       "kialo": "Teile, die erst der Inhalt einer Option oder eines Eintrags bringt, stehen im Set ohne Knoten: die Beschreibung einer Option des elekto (Teil option-description, aus ihrem Attribut description), die Überschrift einer Gruppe von Optionen bei elektilo, listelektilo, kompletigilo und plurelektilo (Teil group-heading, aus dem Attribut group), der Trenner zwischen zwei Gruppen des listelektilo (Teil divider), das Symbol eines Eintrags und die Überschrift einer Gruppe von Einträgen des menuo (Teile icon und group-heading, aus den Attributen icon und group) die Abschnittsüberschrift und das Symbol eines Eintrags der navigado (Teile section-heading und icon, aus den Überschriften und dem Slot icon-start, die sie hält) das Symbol des ersten Eintrags der spuro (Teil icon, aus dem Slot icon-start), der Titel der atributlisto (Teil heading, aus dem Slot heading), Titel und Symbol des plenstato (Teile heading und icon, aus den Slots heading und icon) und die Fußzeile des tabelo (Teil foot, aus der Zeile tfoot). Das Set zeigt die Optionen und Einträge der Vitrino ohne diesen Inhalt, wie das Web ohne ihn; die Teile haben im Set darum keinen Knoten (FIGMA_NOT_DRAWN). Zeichnet das Plugin eines Tages Optionen oder Einträge mit diesem Inhalt, entfällt ihr Eintrag.",
       "date": "2026-11-01",
       "context": "Spec 036 Teil 5 ②b-3 (Spec 029 abgleich.json A-elekto-4, A-elektilo-4, A-listelektilo-4, A-kompletigilo-4, A-plurelektilo-4, A-menuo-4, A-navigado-1, A-navigado-4, A-spuro-4, A-atributlisto-4, A-plenstato-4, A-tabelo-4): check:parity meldet die Werte dieser Teile als freigegeben (parity-part-not-drawn), keine Differenz. Von P0 angelegt, zur Bestätigung durch den Maintainer."
+    },
+    {
+      "id": "jug_01M6YTZJNTW7D866N8186KYQGH",
+      "ref": {
+        "artikolo": "VIII",
+        "celo": "figma"
+      },
+      "decision": "approved",
+      "kialo": "Die fünf Eroj vico, kolumno, stako, krado und templinio haben bis Etappe F kein Set im Figma-Plan: keine bestehende Bauform passt (Rahmen mit Richtung und Kindern, Raster, Zeitstrahl), und neue Bauformen sind Sache von Etappe F. Darum darf die Figma-Seite der Parität genau diese fünf bis Etappe F auslassen; jede andere Ero und jede andere Seite bleibt eine Differenz (FIGMA_EROJ_NOT_DRAWN). Sobald Etappe F die Sets baut, entfällt diese Freigabe.",
+      "date": "2026-11-09",
+      "context": "Spec 046 Nachtrag (plan.md D-43, F-T8-2, Befunde EF-1 bis EF-3): check:parity meldet die fünf fehlenden Sets als freigegeben (parity-part-not-drawn am Pfad items.<ero>), nicht als parity-item-missing. Von P0 angelegt, im Auftrag des Maintainers vom 2026-11-09."
     }
   ]
 }

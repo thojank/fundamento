@@ -61,4 +61,14 @@ describe("Spec 046 T5: the tabelo's new props in Figma", () => {
       expect(sets, ero).not.toContain(ero);
     }
   });
+
+  it("Nachtrag D-43: the plan leaves out exactly the five Eroj the parity check releases until Etappe F", () => {
+    // When Etappe F builds a set, this fails: remove the Ero's entry of FIGMA_EROJ_NOT_DRAWN
+    // (modelo/src/checks/parity/index.ts), and with the last one the option and the Jugxo.
+    const sets = new Set(plan.components.map((component) => component.set));
+    const left = (modelo?.eroj ?? [])
+      .map((entry) => entry.ero.name)
+      .filter((ero) => !sets.has(ero));
+    expect(left.sort()).toEqual(["kolumno", "krado", "stako", "templinio", "vico"]);
+  });
 });
