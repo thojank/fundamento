@@ -11,6 +11,11 @@
 // judgement from the answer, the Skemo parts with `get_ero` and `fields` (one follow-up for `rest`,
 // D-28) and the link Eroj from `navigation.target`. A server without it keeps the path above
 // unchanged (D-03); the tool list decides once per run (`uzKontroliloDe`).
+//
+// Spec 046 F-B1: the path above stays the twin of check_markup, so both give one result (AC-8): a
+// direct child in slot="<the default slot>" of an Ero goes to the default slot (L5-1,
+// `adoptiDefaulton`), and a `uzo-slot-accepts` suggestion names the found child (L5-3,
+// `kunTrovitajInfanoj`). check_usage itself is untouched; the answer is rewritten here.
 
 import { LIGILAJ_ATRIBUTOJ } from "./navigado.js";
 import type { Fakto, FaktoElemento, Malobservo, ToolBridge, ToolInfo } from "./tipoj.js";
@@ -38,6 +43,11 @@ export interface EroSkemo {
   slots: { name: string; default?: boolean }[];
   /** The ARIA role the Skemo gives the Ero (`a11y.role`; S037-04, additive). */
   rolo?: string;
+  /**
+   * What the Uzo says of the slots (`uzo` of get_ero; Spec 046 F-B1, additive): what each slot
+   * accepts and the slots a boundary covers. Absent where the server gives no Uzo.
+   */
+  uzo?: { accepts: Record<string, string[]>; limigitajSlotoj: string[] };
 }
 
 /** Reads the Skemo of an Ero by name; undefined when the name is no Ero. */
@@ -56,6 +66,24 @@ const parse = (teksto: string): unknown => {
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
+
+/** The slot rules of the Uzo of a `get_ero` answer; undefined where it carries none. */
+function uzoDe(uzo: unknown): EroSkemo["uzo"] {
+  if (!isObject(uzo) || !isObject(uzo.slots)) return undefined;
+  const accepts = Object.fromEntries(
+    Object.entries(uzo.slots).flatMap(([slot, regulo]): [string, string[]][] =>
+      isObject(regulo) && Array.isArray(regulo.accepts)
+        ? [[slot, regulo.accepts.filter((ero): ero is string => typeof ero === "string")]]
+        : [],
+    ),
+  );
+  const limigitajSlotoj = (Array.isArray(uzo.boundary) ? uzo.boundary : []).flatMap((limo) =>
+    isObject(limo) && isObject(limo.via) && typeof limo.via.slot === "string"
+      ? [limo.via.slot]
+      : [],
+  );
+  return { accepts, limigitajSlotoj };
+}
 
 /** The Skemo part of a `get_ero` answer; undefined for an error or another shape. */
 export function skemoDe(respondo: string): EroSkemo | undefined {
@@ -86,7 +114,13 @@ export function skemoDe(respondo: string): EroSkemo | undefined {
       : [],
   );
   const rolo = isObject(body.skemo.a11y) ? body.skemo.a11y.role : undefined;
-  return { props, slots, ...(typeof rolo === "string" ? { rolo } : {}) };
+  const uzo = uzoDe(body.uzo);
+  return {
+    props,
+    slots,
+    ...(typeof rolo === "string" ? { rolo } : {}),
+    ...(uzo === undefined ? {} : { uzo }),
+  };
 }
 
 /** A reader over the bridge with one `get_ero` per name and run (cached, also the misses). */
@@ -125,6 +159,31 @@ function fmPraulo(elements: readonly FaktoElemento[], index: number): number {
   return -1;
 }
 
+/**
+ * The element list as the browser holds it once the Eroj are connected (Spec 046 L5-1), the twin of
+ * `adoptDefault` of check_markup and of the Web Component's `#adoptDefault`: a direct child of an
+ * Ero with slot="<that Ero's default slot>" goes to the default slot by losing the attribute. Only
+ * direct children, only the Ero's own default slot; the list is not changed in place.
+ */
+function adoptiDefaulton(
+  elements: readonly FaktoElemento[],
+  skemoj: ReadonlyMap<string, EroSkemo>,
+): FaktoElemento[] {
+  const defaultoDe = (index: number): string | undefined => {
+    const nomo = fmNomo(elements[index]?.tag ?? "");
+    const skemo = nomo === undefined ? undefined : skemoj.get(nomo);
+    return skemo?.slots.find((slot) => slot.default === true)?.name;
+  };
+  return elements.map((element) => {
+    const slot = element.attrs.slot;
+    if (slot === undefined || element.parent === -1 || defaultoDe(element.parent) !== slot) {
+      return element;
+    }
+    const { slot: _adoptita, ...attrs } = element.attrs;
+    return { ...element, attrs };
+  });
+}
+
 /** The instances of a screen from its facts and the known Skemoj (pure, deterministic). */
 export function instancojElFakto(
   fakto: Fakto,
@@ -132,7 +191,7 @@ export function instancojElFakto(
 ): EroInstanco[] {
   const instancoj: EroInstanco[] = [];
   const ujoj = new Map<number, string>();
-  const { elements } = fakto;
+  const elements = adoptiDefaulton(fakto.elements, skemoj);
   for (const [index, element] of elements.entries()) {
     const nomo = fmNomo(element.tag);
     const skemo = nomo === undefined ? undefined : skemoj.get(nomo);
@@ -274,6 +333,101 @@ export function malobservojDe(respondo: string, instancoj: readonly EroInstanco[
   return [];
 }
 
+/** What a slot accepts besides an Ero name (the Modelo's `SLOT_CONTENT_KINDS`, restated). */
+const SLOTAJ_SPECOJ: ReadonlySet<string> = new Set(["text", "icon"]);
+
+/** The suggestion of one `uzo-slot-accepts` finding with the child found (L5-3, the same words). */
+function akceptaSugesto(tag: string, slot: string, accepts: readonly string[]): string {
+  const nomita = accepts
+    .map((akceptita) => (SLOTAJ_SPECOJ.has(akceptita) ? akceptita : `fm-${akceptita}`))
+    .join(" or ");
+  const eroj = accepts.filter((akceptita) => !SLOTAJ_SPECOJ.has(akceptita));
+  if (fmNomo(tag) === undefined && eroj.length > 0) {
+    const tagoj = eroj.map((ero) => `fm-${ero}`).join(" or ");
+    return `The slot ${slot} holds a <${tag}>, and it accepts ${nomita}: set slot="${slot}" directly on each ${tagoj} instead of on the wrapping <${tag}>.`;
+  }
+  return `The slot ${slot} holds a <${tag}>, and it accepts ${nomita}: put ${nomita} in the slot ${slot} instead.`;
+}
+
+/** A `uzo-slot-accepts` violation with the index of its instance; undefined for any other. */
+function akceptaTrovoDe(
+  violation: unknown,
+): { indekso: number; issue: Record<string, unknown> } | undefined {
+  if (!isObject(violation) || !isObject(violation.issue)) return undefined;
+  if (violation.issue.rule !== "uzo-slot-accepts") return undefined;
+  const unua = Array.isArray(violation.instance) ? violation.instance[0] : undefined;
+  return { indekso: typeof unua === "number" ? unua : -1, issue: violation.issue };
+}
+
+/**
+ * A check_usage answer with `uzo-slot-accepts` suggestions that name the found child (Spec 046
+ * L5-3), the twin of `nameFoundChildren` of check_markup. The findings of one instance come in the
+ * order check_usage judges its slot entries (slots in the order of their first entry, entries in
+ * document order, a slot a boundary covers skipped); the offending children are found in the same
+ * order. Where the counts differ, nothing is renamed; without a Uzo the answer stays as it is.
+ */
+function kunTrovitajInfanoj(
+  respondo: string,
+  fakto: Fakto,
+  instancoj: readonly EroInstanco[],
+  skemoj: ReadonlyMap<string, EroSkemo>,
+): string {
+  const body = parse(respondo);
+  if (!isObject(body) || !Array.isArray(body.violations)) return respondo;
+  const elements = adoptiDefaulton(fakto.elements, skemoj);
+  // Instances stand in the order of their elements: every `fm-*` element whose name is a known Ero.
+  const instancajElementoj = elements.flatMap((element, index) => {
+    const nomo = fmNomo(element.tag);
+    return nomo !== undefined && skemoj.has(nomo) ? [index] : [];
+  });
+  const trovitaj = new Map<number, string[]>();
+  for (const [indekso, instanco] of instancoj.entries()) {
+    const uzo = skemoj.get(instanco.ero)?.uzo;
+    const elemento = instancajElementoj[indekso];
+    if (uzo === undefined || elemento === undefined) continue;
+    const enhavoj = instanco.slots ?? {};
+    const infanoj = infanojDe(elements, elemento).filter((infano) => {
+      const slot = elements[infano]?.attrs.slot;
+      return slot !== undefined && enhavoj[slot] !== undefined;
+    });
+    const sugestoj = Object.keys(enhavoj).flatMap((slot) => {
+      const accepts = uzo.accepts[slot];
+      const kovrita =
+        uzo.limigitajSlotoj.includes(slot) &&
+        (enhavoj[slot] ?? []).some((enhavo) => typeof enhavo === "object");
+      if (accepts === undefined || kovrita) return [];
+      return infanoj.flatMap((infano) => {
+        if (elements[infano]?.attrs.slot !== slot) return [];
+        const tag = elements[infano]?.tag ?? "";
+        const nomo = fmNomo(tag);
+        const speco = nomo !== undefined && skemoj.has(nomo) ? nomo : "text";
+        return accepts.includes(speco) ? [] : [akceptaSugesto(tag, slot, accepts)];
+      });
+    });
+    if (sugestoj.length > 0) trovitaj.set(indekso, sugestoj);
+  }
+  if (trovitaj.size === 0) return respondo;
+  const nombroj = new Map<number, number>();
+  for (const violation of body.violations) {
+    const trovo = akceptaTrovoDe(violation);
+    if (trovo !== undefined) nombroj.set(trovo.indekso, (nombroj.get(trovo.indekso) ?? 0) + 1);
+  }
+  const uzitaj = new Map<number, number>();
+  const violations = body.violations.map((violation) => {
+    const trovo = akceptaTrovoDe(violation);
+    if (trovo === undefined) return violation;
+    const sugestoj = trovitaj.get(trovo.indekso);
+    if (sugestoj === undefined || sugestoj.length !== nombroj.get(trovo.indekso)) return violation;
+    const at = uzitaj.get(trovo.indekso) ?? 0;
+    uzitaj.set(trovo.indekso, at + 1);
+    const suggestion = sugestoj[at];
+    return suggestion === undefined
+      ? violation
+      : { ...violation, issue: { ...trovo.issue, suggestion } };
+  });
+  return JSON.stringify({ ...body, violations });
+}
+
 /** check_usage over MCP for one screen: [] when the screen uses no Ero. */
 export async function kontroliUzon(
   ponto: ToolBridge,
@@ -284,7 +438,10 @@ export async function kontroliUzon(
   const instancoj = instancojElFakto(fakto, skemoj);
   if (instancoj.length === 0) return { instancoj, malobservoj: [] };
   const respondo = await ponto.call("check_usage", { instances: instancoj });
-  return { instancoj, malobservoj: malobservojDe(respondo, instancoj) };
+  return {
+    instancoj,
+    malobservoj: malobservojDe(kunTrovitajInfanoj(respondo, fakto, instancoj, skemoj), instancoj),
+  };
 }
 
 /**

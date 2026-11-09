@@ -9,14 +9,11 @@
         "props": {
           "open": true
         },
+        "label": "Eintrag entfernen?",
         "texts": {
-          "heading": "Eintrag entfernen?",
           "actions": "Entfernen Abbrechen"
         },
         "slots": {
-          "heading": [
-            "text"
-          ],
           "actions": [
             "text"
           ]
@@ -49,8 +46,8 @@
         "severity": "error",
         "path": "instances#/0",
         "message": "Instance 0 of dialogo holds text in the slot actions, which accepts butono.",
-        "suggestion": "Put butono in the slot actions.",
-        "loko": "fm-dialogo"
+        "suggestion": "The slot actions holds a <div>, and it accepts fm-butono: set slot=\"actions\" directly on each fm-butono instead of on the wrapping <div>.",
+        "loko": "fm-dialogo „Eintrag entfernen?“"
       },
       {
         "rule": "destructive-label-names-object",

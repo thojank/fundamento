@@ -13,6 +13,9 @@
 // - `checkMarkup`: reader + core + `checkUsage` on the Ero instances (`rezulto`, as K3 and
 //   ekranoj judge, D-29), and the Sxablonoj of the page with their regions found by the region
 //   markers (MG-5, `markerOf`), judged apart (`sxablonoRezulto`, informative only). Pure.
+//   Spec 046 L5-1: before the core, a child in slot="<the default slot>" of an Ero goes to the
+//   default slot, as the Web Component's `#adoptDefault` does it in the browser (`adoptDefault`).
+//   Spec 046 L5-3: a `uzo-slot-accepts` suggestion names the child the markup put in the slot.
 
 import type { ValidationIssue } from "../contracts/issues.js";
 import type {
@@ -217,8 +220,17 @@ export function instancojElElementoj(
   modelo: Modelo,
   options: { lingvo?: string } = {},
 ): EroInstance[] {
+  return instancojEnElementoj(elementoj, modelo, options).map(({ instanco }) => instanco);
+}
+
+/** The Ero instances of `instancojElElementoj`, each with the index of its element. */
+function instancojEnElementoj(
+  elementoj: readonly GvidantoElemento[],
+  modelo: Modelo,
+  options: { lingvo?: string },
+): { elemento: number; instanco: EroInstance }[] {
   const eroj = erojOf(modelo);
-  const instances: EroInstance[] = [];
+  const instances: { elemento: number; instanco: EroInstance }[] = [];
   const containers = new Map<number, string>();
   const lingvo = (options.lingvo ?? "").slice(0, 2).toLowerCase();
   for (const [index, element] of elementoj.entries()) {
@@ -260,16 +272,142 @@ export function instancojElElementoj(
       );
     }
     instances.push({
-      ero: name,
-      props,
-      ...(label === "" ? {} : { label }),
-      ...(Object.keys(texts).length === 0 ? {} : { texts }),
-      ...(Object.keys(slots).length === 0 ? {} : { slots }),
-      ...(container === -1 ? {} : { container: containers.get(container) ?? "" }),
-      ...(/^[a-z]{2}$/.test(lingvo) ? { lingvo } : {}),
+      elemento: index,
+      instanco: {
+        ero: name,
+        props,
+        ...(label === "" ? {} : { label }),
+        ...(Object.keys(texts).length === 0 ? {} : { texts }),
+        ...(Object.keys(slots).length === 0 ? {} : { slots }),
+        ...(container === -1 ? {} : { container: containers.get(container) ?? "" }),
+        ...(/^[a-z]{2}$/.test(lingvo) ? { lingvo } : {}),
+      },
     });
   }
   return instances;
+}
+
+// --- The default slot as the Eroj adopt it (Spec 046 L5-1, D-22) ---------------------------------
+
+/**
+ * The element list as the browser holds it once the Eroj are connected: the Web Component of an
+ * Ero with a default slot takes a direct child with slot="<that slot's name>" into the default
+ * slot by removing the attribute (`#adoptDefault`, element-template.ts, Nachlese 11 B-2). The same
+ * here, so the core sees what the person sees: `<fm-butono><span slot="label">` is the label.
+ * Only direct children of an Ero, only its own default slot; the list is not changed in place.
+ */
+function adoptDefault(elementoj: readonly GvidantoElemento[], modelo: Modelo): GvidantoElemento[] {
+  const eroj = erojOf(modelo);
+  const defaultOf = (index: number): string | undefined => {
+    const name = fmName(elementoj[index]?.tag ?? "");
+    const ero = name === undefined ? undefined : eroj.get(name);
+    return ero?.skemo.slots?.find((slot) => slot.default === true)?.name;
+  };
+  return elementoj.map((element) => {
+    const slot = element.attrs.slot;
+    if (slot === undefined || element.parent === -1 || defaultOf(element.parent) !== slot) {
+      return element;
+    }
+    const { slot: _adopted, ...attrs } = element.attrs;
+    return { ...element, attrs };
+  });
+}
+
+// --- The found child in a uzo-slot-accepts suggestion (Spec 046 L5-3) ----------------------------
+
+type SlotEntry = NonNullable<EroInstance["slots"]>[string][number];
+
+/** How a suggestion names what a slot accepts: an Ero by its tag, a kind ("text") as it is. */
+const acceptedName = (accepted: string, eroj: ReadonlyMap<string, LoadedEro>): string =>
+  eroj.has(accepted) ? `fm-${accepted}` : accepted;
+
+/**
+ * The suggestion of one `uzo-slot-accepts` finding with the child the markup put in the slot
+ * (`<div>`, `<fm-avizo>`), where check_usage, seeing only "text" or an Ero name, cannot name it.
+ * A wrapper element around Eroj the slot accepts is the common case: the slot belongs on each Ero.
+ */
+function acceptsSuggestion(
+  tag: string,
+  slot: string,
+  accepts: readonly string[],
+  eroj: ReadonlyMap<string, LoadedEro>,
+): string {
+  const named = accepts.map((accepted) => acceptedName(accepted, eroj)).join(" or ");
+  const acceptedEroj = accepts.filter((accepted) => eroj.has(accepted));
+  if (fmName(tag) === undefined && acceptedEroj.length > 0) {
+    const tags = acceptedEroj.map((accepted) => `fm-${accepted}`).join(" or ");
+    return `The slot ${slot} holds a <${tag}>, and it accepts ${named}: set slot="${slot}" directly on each ${tags} instead of on the wrapping <${tag}>.`;
+  }
+  return `The slot ${slot} holds a <${tag}>, and it accepts ${named}: put ${named} in the slot ${slot} instead.`;
+}
+
+/**
+ * The `uzo-slot-accepts` findings of check_usage with suggestions that name the found child. The
+ * findings of one instance come in the order check_usage judges its slot entries (slots in the
+ * order of their first entry, entries in document order, a slot a boundary covers skipped); the
+ * offending children are found in the same order. Where the counts differ, nothing is renamed.
+ */
+function nameFoundChildren(
+  rezulto: CheckUsageOutput,
+  elementoj: readonly GvidantoElemento[],
+  instancoj: readonly { elemento: number; instanco: EroInstance }[],
+  modelo: Modelo,
+): CheckUsageOutput {
+  const eroj = erojOf(modelo);
+  const found = new Map<number, string[]>();
+  for (const [index, { elemento, instanco }] of instancoj.entries()) {
+    const ero = eroj.get(instanco.ero);
+    const uzo = ero?.uzo;
+    if (ero === undefined || uzo === undefined) continue;
+    const entries = instanco.slots ?? {};
+    const covered = new Set(
+      uzo.boundary.flatMap((boundary) =>
+        boundary.via !== undefined &&
+        "slot" in boundary.via &&
+        (entries[boundary.via.slot] ?? []).some((entry: SlotEntry) => typeof entry === "object")
+          ? [boundary.via.slot]
+          : [],
+      ),
+    );
+    const children = childrenOf(elementoj, elemento).flatMap((child) => {
+      const slot = elementoj[child]?.attrs.slot;
+      return slot === undefined || entries[slot] === undefined ? [] : [{ child, slot }];
+    });
+    const suggestions = Object.keys(entries).flatMap((slot) => {
+      const accepts = uzo.slots[slot]?.accepts;
+      if (accepts === undefined || covered.has(slot)) return [];
+      return children.flatMap((entry) => {
+        if (entry.slot !== slot) return [];
+        const tag = elementoj[entry.child]?.tag ?? "";
+        const name = fmName(tag);
+        const kind = name !== undefined && eroj.has(name) ? name : "text";
+        return accepts.includes(kind) ? [] : [acceptsSuggestion(tag, slot, accepts, eroj)];
+      });
+    });
+    if (suggestions.length > 0) found.set(index, suggestions);
+  }
+  const counts = new Map<number, number>();
+  for (const violation of rezulto.violations) {
+    if (violation.issue.rule !== "uzo-slot-accepts") continue;
+    const index = violation.instance?.[0] ?? -1;
+    counts.set(index, (counts.get(index) ?? 0) + 1);
+  }
+  const used = new Map<number, number>();
+  return {
+    ...rezulto,
+    violations: rezulto.violations.map((violation) => {
+      if (violation.issue.rule !== "uzo-slot-accepts") return violation;
+      const index = violation.instance?.[0] ?? -1;
+      const suggestions = found.get(index);
+      if (suggestions === undefined || suggestions.length !== counts.get(index)) return violation;
+      const at = used.get(index) ?? 0;
+      used.set(index, at + 1);
+      const suggestion = suggestions[at];
+      return suggestion === undefined
+        ? violation
+        : { ...violation, issue: { ...violation.issue, suggestion } };
+    }),
+  };
 }
 
 // --- The Sxablonoj of a page (MG-5) --------------------------------------------------------------
@@ -392,23 +530,29 @@ export function checkMarkup(modelo: Modelo, input: CheckMarkupInput): CheckMarku
     };
   }
   const read = legiMarkon(input.fragment);
+  const elementoj = adoptDefault(read.elementoj, modelo);
   const lingvo = read.lingvo ?? input.lingvo;
-  const eroj = instancojElElementoj(
-    read.elementoj,
+  const instancoj = instancojEnElementoj(
+    elementoj,
     modelo,
     lingvo === undefined ? {} : { lingvo },
-  ).map((instance) => ({
-    ...instance,
-    ...(input.aspekto === undefined ? {} : { aspekto: input.aspekto }),
-    ...(input.dimensioj === undefined ? {} : { dimensioj: { ...input.dimensioj } }),
+  ).map(({ elemento, instanco }) => ({
+    elemento,
+    instanco: {
+      ...instanco,
+      ...(input.aspekto === undefined ? {} : { aspekto: input.aspekto }),
+      ...(input.dimensioj === undefined ? {} : { dimensioj: { ...input.dimensioj } }),
+    },
   }));
-  const rezulto = checkUsage(modelo, { instances: eroj });
+  const eroj = instancoj.map(({ instanco }) => instanco);
+  const judged = checkUsage(modelo, { instances: eroj });
   // A refused input stays as check_usage words it (paths check_usage/…), so the clients' findings
   // stay what they were.
-  if (!rezulto.ok) return rezulto;
-  const sxablonoj = sxablonojElElementoj(read.elementoj, modelo).map(({ instanco }) => instanco);
+  if (!judged.ok) return judged;
+  const rezulto = nameFoundChildren(judged.output, elementoj, instancoj, modelo);
+  const sxablonoj = sxablonojElElementoj(elementoj, modelo).map(({ instanco }) => instanco);
   if (sxablonoj.length === 0) {
-    return { ok: true, output: { eroj, sxablonoj, rezulto: rezulto.output } };
+    return { ok: true, output: { eroj, sxablonoj, rezulto } };
   }
   const violations = evaluateSxablonoUsage(modelo, sxablonoj);
   return {
@@ -416,7 +560,7 @@ export function checkMarkup(modelo: Modelo, input: CheckMarkupInput): CheckMarku
     output: {
       eroj,
       sxablonoj,
-      rezulto: rezulto.output,
+      rezulto,
       sxablonoRezulto: {
         instances: sxablonoj.length,
         valid: violations.every((violation) => violation.issue.severity !== "error"),

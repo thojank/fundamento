@@ -17,14 +17,7 @@
         "props": {
           "to": "detail.html"
         },
-        "texts": {
-          "label": "Details anzeigen"
-        },
-        "slots": {
-          "label": [
-            "text"
-          ]
-        },
+        "label": "Details anzeigen",
         "lingvo": "de"
       },
       {

@@ -459,6 +459,106 @@ describe("checkMarkup (MG-2, D-29)", () => {
     expect(unread).toEqual([]);
   });
 
+  // Spec 046 L5-1 (D-22): a child in slot="<the default slot>" belongs to the default slot, as the
+  // Web Component's #adoptDefault has it (element-template.ts, Nachlese 11 B-2).
+  it("adopts an explicitly named default slot as the Eroj do: no label-required (L5-1)", () => {
+    const result = output(
+      check({
+        fragment: '<fm-butono><span slot="label">Speichern</span></fm-butono>',
+        lingvo: "de",
+      }),
+    );
+    expect(result.eroj).toEqual([{ ero: "butono", props: {}, label: "Speichern", lingvo: "de" }]);
+    const rules = (result.rezulto as { violations: { issue: Issue }[] }).violations.map(
+      (violation) => violation.issue.rule,
+    );
+    expect(rules).not.toContain("label-required");
+    expect(result.eroj).toEqual(
+      output(check({ fragment: "<fm-butono>Speichern</fm-butono>", lingvo: "de" })).eroj,
+    );
+  });
+
+  it("adopts the default slot of a karto (slot=content) like its unslotted content (L5-1)", () => {
+    const named = output(
+      check({
+        fragment:
+          '<fm-karto><span slot="heading">Titel</span><p slot="content">Text der Karte</p></fm-karto>',
+      }),
+    );
+    const plain = output(
+      check({
+        fragment: '<fm-karto><span slot="heading">Titel</span><p>Text der Karte</p></fm-karto>',
+      }),
+    );
+    expect(named.eroj).toEqual(plain.eroj);
+    expect(named.eroj).toEqual([
+      {
+        ero: "karto",
+        props: {},
+        label: "Text der Karte",
+        texts: { heading: "Titel" },
+        slots: { heading: ["text"] },
+      },
+    ]);
+    expect(named.rezulto).toEqual(plain.rezulto);
+  });
+
+  it("adopts only the direct children of an Ero, and only its own default slot (L5-1)", () => {
+    const result = output(
+      check({
+        fragment:
+          '<fm-butono><span slot="icon-start"><span slot="label">x</span></span>Weiter</fm-butono><div><span slot="label">frei</span></div>',
+      }),
+    );
+    expect(result.eroj).toEqual([
+      {
+        ero: "butono",
+        props: {},
+        label: "Weiter",
+        texts: { "icon-start": "x" },
+        slots: { "icon-start": ["text"] },
+      },
+    ]);
+  });
+
+  // Spec 046 L5-3: the suggestion names the child the markup put in the slot, not "text".
+  it("names the found child in the suggestion of uzo-slot-accepts (L5-3)", () => {
+    const result = output(
+      check({
+        fragment:
+          '<fm-karto><span slot="heading">Titel</span>Inhalt<div slot="actions"><fm-butono>OK</fm-butono></div></fm-karto>',
+        lingvo: "de",
+      }),
+    );
+    const accepts = (
+      result.rezulto as {
+        violations: { instance: number[]; issue: Issue & { suggestion: string } }[];
+      }
+    ).violations.filter((violation) => violation.issue.rule === "uzo-slot-accepts");
+    expect(accepts.map((violation) => [violation.instance, violation.issue.path])).toEqual([
+      [[0], "instances#/0"],
+    ]);
+    const suggestion = accepts[0]?.issue.suggestion ?? "";
+    expect(suggestion).toContain("<div>");
+    expect(suggestion).toContain('slot="actions"');
+    expect(suggestion).toContain("fm-butono");
+  });
+
+  it("names an Ero found in a slot that does not accept it by its tag (L5-3)", () => {
+    const result = output(
+      check({
+        fragment:
+          '<fm-kampo><span slot="label">Name</span><fm-avizo slot="error">Fehler</fm-avizo></fm-kampo>',
+        lingvo: "de",
+      }),
+    );
+    const accepts = (
+      result.rezulto as { violations: { issue: Issue & { suggestion: string } }[] }
+    ).violations.filter((violation) => violation.issue.rule === "uzo-slot-accepts");
+    expect(accepts).toHaveLength(1);
+    expect(accepts[0]?.issue.suggestion).toContain("<fm-avizo>");
+  });
+
   it("imports nothing from ekranoj, nordstelo or projekcioj", () => {
     const source = readFileSync(new URL("./check-markup.ts", import.meta.url), "utf8");
     const imports = [...source.matchAll(/from\s+["']([^"']+)["']/g)].map((match) => match[1]);
