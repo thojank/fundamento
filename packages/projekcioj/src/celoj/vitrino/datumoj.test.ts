@@ -385,7 +385,8 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
       '<button type="button" id="fm-vitrino-komparo-switch">Zur Gegenüberstellung</button>',
     );
     expect(html).not.toContain("fm-kolumnoj");
-    expect(html).not.toContain("fm-kolumno ");
+    // Spec 046 T5: the Ero <fm-kolumno> is a tag in the grid; the old two-column class is what must stay gone.
+    expect(html).not.toContain('class="fm-kolumno');
     // Spec 016 ②: the section belongs to the mode Ansehen; the Werkstatt hides it.
     expect(html).toContain(
       '<section id="fm-vitrino-komparo" tabindex="-1" data-fm-modus-only="ansehen">',
