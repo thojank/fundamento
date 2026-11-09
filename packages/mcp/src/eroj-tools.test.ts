@@ -34,13 +34,14 @@ describe("get_ero (FR-13)", () => {
     expect(result.isError).toBe(true);
     // The five nearest names: with six Eroj (Spec 010 ③) the farthest drops out; with nine
     // (Spec 011 ②) dialogo is nearer to "butonno" than markobutono.
-    // Spec 014 ②: ikono is nearer to "butonno" than insigno.
+    // Spec 014 ②: ikono is nearer to "butonno" than insigno. Spec 046 T1 (F-T1-6): kolumno, one of
+    // the five new Eroj, is nearer than menuo and takes its place among the five nearest.
     expect(result.structuredContent?.allowed).toEqual([
       "butono",
       "ikono",
       "titolo",
       "insigno",
-      "menuo",
+      "kolumno",
     ]);
   });
 });
