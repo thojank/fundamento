@@ -31,6 +31,7 @@ import {
   type ValidationIssue,
   WCAG2_METRIC,
 } from "@fundamento/modelo";
+import { CSS_CELO } from "@fundamento/projekcioj";
 import {
   cssSpeicherOf,
   type PruefEintrag,
@@ -94,7 +95,7 @@ import type { Settings } from "./env.js";
 import { esplori } from "./esploro/esploro.js";
 import { GrafeoEraro, grafeoDe, grafeoDePaket, serializeGrafeo } from "./grafeo.js";
 import { EKZEMPLO_DIR, paketoDosieroj } from "./grafeo-fontoj.js";
-import { CLIENT_SCRIPT, escapeHtml, previewDocument } from "./html.js";
+import { CLIENT_SCRIPT, escapeHtml, grafeoScreen, previewDocument } from "./html.js";
 import { identOf } from "./ident.js";
 import { type Klartext, klartextOf, satzOf, vorschlagOf } from "./klartext.js";
 import {
@@ -475,6 +476,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
   const ekzemploDir = options.ekzemploDir !== undefined ? options.ekzemploDir : EKZEMPLO_DIR;
   const paketoGrafeoj = new Map<string, string>();
   const markoGrafeoj = new Map<string, { rev: number; korpo: string }>();
+  const paketoStiloj = new Map<string, string>();
   const vitrinoDir = join(options.root, ".fundamento", "projekcioj", "vitrino");
   const nordsteloDir = join(options.root, ...NORDSTELO_DIR);
   const stand = options.stand ?? standOf(options.root);
@@ -1618,6 +1620,82 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       sendGrafeo(korpo);
       return;
     }
+    // T4: the screens of the canvas and the stylesheet of a package. A thing that is not there
+    // answers first (404, the ekzemplo sentence), a missing bundle next (503); the stylesheet and
+    // the API never need the bundle. The scheme comes from `?scheme=` (default light).
+    const grafeoMarko = /^\/marko\/([a-z0-9-]+)\/grafeo$/.exec(path);
+    if (method === "GET" && grafeoMarko !== null) {
+      const [, name = ""] = grafeoMarko;
+      const draft = draftOf(name);
+      if (draft === undefined) {
+        notFound(response);
+        return;
+      }
+      if (leinwand === null) {
+        sendHtml(response, LEINWAND_NICHT_GEBAUT, 503);
+        return;
+      }
+      // The draft as the request found it, with the shared check of that rev (as the Studio).
+      const { agordo, rev } = draft;
+      const derivation = await pruefungOf(name, draft);
+      const scheme = kombinationOf(url.searchParams).scheme;
+      sendHtml(
+        response,
+        grafeoScreen({
+          aspekto: name,
+          scheme,
+          cssHref: `/marko/${encodeURIComponent(name)}/vorschau.css?rev=${rev}`,
+          fontFace: fontFaceOf(agordo),
+          fonto: `/api/grafeo?marko=${encodeURIComponent(name)}`,
+          studioHref: `/studio/${encodeURIComponent(name)}/farbe${scheme === "light" ? "" : `?scheme=${scheme}`}`,
+          neEksportebla: !derivation.exportable,
+        }),
+      );
+      return;
+    }
+    const grafeoAspekto = /^\/aspekto\/([a-z0-9-]+)\/grafeo(\.css)?$/.exec(path);
+    if (method === "GET" && grafeoAspekto !== null) {
+      const [, label = "", css] = grafeoAspekto;
+      if (label !== "komuna" && label !== "ekzemplo") {
+        notFound(response);
+        return;
+      }
+      const files = paketoDosieroj(label, ekzemploDir);
+      if (files === undefined) {
+        sendHtml(
+          response,
+          "<!doctype html><title>404</title><p>ekzemplo ist nur im Repo vorhanden",
+          404,
+        );
+        return;
+      }
+      if (css !== undefined) {
+        let stilo = paketoStiloj.get(label);
+        if (stilo === undefined) {
+          // The same call as `komunaCss`, on the package's own Modelo; in memory, once per label.
+          const modelo = buildModelo(files).modelo;
+          stilo =
+            CSS_CELO.generate({ modelo } as Parameters<typeof CSS_CELO.generate>[0])[0]?.text ?? "";
+          paketoStiloj.set(label, stilo);
+        }
+        response.writeHead(200, { "content-type": TYPES[".css"] ?? "" }).end(stilo);
+        return;
+      }
+      if (leinwand === null) {
+        sendHtml(response, LEINWAND_NICHT_GEBAUT, 503);
+        return;
+      }
+      sendHtml(
+        response,
+        grafeoScreen({
+          aspekto: label,
+          scheme: kombinationOf(url.searchParams).scheme,
+          cssHref: `/aspekto/${label}/grafeo.css`,
+          fonto: `/api/grafeo?aspekto=${label}`,
+        }),
+      );
+      return;
+    }
     // Spec 030: the north-star measure over time, and the pages and screenshots of its runs.
     if (method === "GET" && path === "/nordstelo") {
       const file = join(nordsteloDir, "historio.json");
@@ -2631,6 +2709,12 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           ...(feedback.betroffen === undefined ? {} : { betroffen: feedback.betroffen }),
           expert: expertOf(agordo),
           komponentoj: komponentoList(bases),
+          // Spec 047 (NE-1): the canvas of the brand, only while its bundle is built.
+          ...(leinwand === null
+            ? {}
+            : {
+                grafeoHref: `/marko/${encodeURIComponent(name)}/grafeo?scheme=${kombination.scheme}`,
+              }),
         }),
       );
       return;

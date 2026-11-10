@@ -9,7 +9,7 @@ Sechs Tickets, ein Strang (Spec: „höchstens 6 Tickets, ein PR“). T1–T5 se
 | T1 | Spec-Ordner; `grafeoDe`, `grafeoDePaket`, Sicht-Logik; `grafeo-047`, `grafeo-neu-047`, `grafeo-kialo-047` | erledigt (Befunde F-T1-1 bis F-T1-4, Entscheidungen D-T1-1 bis D-T1-10) |
 | T2 | Paket `nodredaktilo`, React-Insel zugeklappt, Routen `/nodredaktilo/*` und `/api/grafeo`; `abhaengigkeiten-047`; B-1 (b) | erledigt (Befunde F-T2-1 bis F-T2-6, Entscheidungen D-T2-1 bis D-T2-7; B-1 (b): `workspace.test.ts` rot, benannte Ausnahme) |
 | T3 | Knoten als Eroj, Seitenspalte mit Regel, Kialo und „fehlt“, Herkunftskette und Abhängige | erledigt (Befunde F-T3-1 bis F-T3-4, Entscheidungen D-T3-1 bis D-T3-7) |
-| T4 | Marken-Tokens auf der Leinwand (hell/dunkel), Bildschirme, Knopf „Graph ansehen“; `grafeo-route-047` | offen |
+| T4 | Marken-Tokens auf der Leinwand (hell/dunkel), Bildschirme, Knopf „Graph ansehen“; `grafeo-route-047` | erledigt (Befunde F-T4-1 bis F-T4-4, Entscheidungen D-T4-1 bis D-T4-7) |
 | T5 | Skript `bilder`, Messung, Lückenliste, Diff-Suche, Bericht-Entwurf | offen |
 | T6 | Ein PR, ein Push, ein `workflow_dispatch`, Bericht (Orchestrator) | offen |
 
@@ -162,7 +162,102 @@ Ohne Kialo je Gruppe – komuna: farbe/komponenten 453, raum/komponenten 184, fo
 
 ## T4 im Einzelnen
 
-(offen)
+- [x] **Roter Test zuerst** `packages/metiejo/src/grafeo-route-047.test.ts` (8 Fälle, zwei Server über `testServilo`: „mit“ = `leinwand` auf ein Temp-Verzeichnis mit Stub-`leinwand.js`, ekzemplo vorhanden; „ohne“ = `leinwand: null`, `ekzemploDir: null`; provo als Fixture-Datei in den Markenordner kopiert, neuer Export `PROVO_DOSIERO` in `test-doubles/grafeo-047.ts`). Rot beobachtet (`FM_AUSGABE=knapp`): 4 bestanden, 4 rot – Bildschirme (88 Abweichungen, Routen fehlen → 404), `grafeo.css` (404 statt 200), Studio („Graph ansehen“ 0 statt 1), Konsistenz (`/aspekto/komuna/grafeo.css` 404). Commit `0821385a`. Grün: 8/8.
+- [x] **`grafeoScreen(doc: GrafeoScreen)`** in `html.ts` (eine Funktion, ein Interface, eine CSS-Konstante): Wurzel `data-fm-aspekto` + `data-fm-color-scheme`; `<link rel="stylesheet">` (`/marko/<name>/vorschau.css?rev=<rev>` bzw. `/aspekto/<label>/grafeo.css`); `@font-face` der Marke inline (wie die Vorschau); `/eroj/define.js`; Kopf `header.nr-kapo` mit `fm-titolo level="1"` „Graph <name>“, bei Marken `fm-ligilo` „Zum Studio“ (`/studio/<name>/farbe`, mit `?scheme=dark` im Dunkeln) und bei `exportable: false` `<fm-insigno intent="warning" id="nr-ne-eksportebla">nicht exportierbar</fm-insigno>`; `#nr-leinwand[data-nr-fonto]`; `<script type="module" src="/nodredaktilo/leinwand.js">`. Inline-CSS nur `--fm-*` und logische Eigenschaften; die Seite füllt das Fenster, `#nr-leinwand` bekommt den Rest (`flex: 1 1 auto`) und `min-block-size: var(--fm-size-container-small)` (F-T2-4 erledigt; im Browser 936 von 1000 Höhe).
+- [x] **Routen** im Spec-047-Block von `servilo.ts` (nach `/api/grafeo`, vor Nordstelo und der generischen `/marko/:name/:key`):
+  - `GET /marko/:name/grafeo[?scheme=]`: unbekannte Marke 404 `notFound`; ohne Bündel 503 (Bau-Satz); sonst `grafeoScreen` mit dem Entwurf, wie die Anfrage ihn fand, und der geteilten Prüfung dieser rev (`pruefungOf` = `pruefSpeicher.pruefung`, wie das Studio) für das Schildchen.
+  - `GET /aspekto/:label/grafeo[?scheme=]`: anderes Label 404 `notFound`; ekzemplo fehlt 404 „ekzemplo ist nur im Repo vorhanden“; ohne Bündel 503; sonst `grafeoScreen`.
+  - `GET /aspekto/:label/grafeo.css`: dieselben 404; sonst `CSS_CELO.generate` auf `buildModelo(paketoDosieroj(...))` (derselbe Aufruf wie `komunaCss`), im Speicher, je Label einmal; `text/css; charset=utf-8`; braucht das Bündel nicht.
+  - Schema über `kombinationOf(url.searchParams).scheme` (D-8; Unbekanntes → `light`).
+- [x] **Studio-Knopf**: `StudioInput.grafeoHref?: string`; gesetzt → `<fm-butono size="small" emphasis="low" data-href="…">Graph ansehen</fm-butono>` im `principal`-Span nach „Speichern“. `servilo.ts` setzt ihn nur bei `leinwand !== null` auf `/marko/<name>/grafeo?scheme=<kombination.scheme>`. Navigation über den vorhandenen `data-href`-Handler (D-9). `studio.test.ts`, `studio-035.test.ts` unverändert grün.
+- [x] **Thema der Leinwand** (`packages/nodredaktilo/src/roloj.ts`, neu): `XY_ROLOJ` (`satisfies Readonly<Record<\`--xy-${string}\`, \`var(--fm-${string})\`>>`), als `style` auf `<ReactFlow>` (`XY_STILO`); Schrift/Farbe des Textes (`TEKSTO_STILO`: `--fm-typography-body-1-*`, `--fm-color-text-default`) auf dem Rahmen um Leinwand und Seitenspalte; Kantenbeschriftung `labelStyle` = `--fm-typography-caption-*`. `<Background />` (Punkte, Standardwerte der Bibliothek) neu, damit Punkte da sind. Keine `.css`-Datei, kein `hideAttribution`, keine Literale (`grep` auf px/rem/ms/#hex/rgb/oklch in `src` und im Inline-CSS: leer).
+
+### Von React Flow gelesene `--xy-*` (aus `@xyflow/react@12.12.1/dist/style.css`, `grep -o "var(--xy-[a-z0-9-]*"`)
+
+Das Stylesheet liest jede Größe als `var(--xy-X, var(--xy-X-default))` (Teile zusätzlich `var(--xy-X-props, …)`). `XY_ROLOJ` setzt jedes `--xy-X` (35); die `-default`-Variablen sind die Rückfälle der Bibliothek dahinter (werden nie erreicht), die `-props`-Variablen schreiben Komponenten nur aus Props, die die Leinwand nicht übergibt (D-T4-3).
+
+| `--xy-*` | `--fm-*` |
+|---|---|
+| background-color | color-background-canvas |
+| background-pattern-color | color-border-default |
+| edge-stroke | color-border-strong |
+| edge-stroke-selected | color-focus-ring |
+| edge-stroke-width | border-width-default |
+| edge-label-background-color | color-background-canvas |
+| edge-label-color | color-text-muted |
+| connectionline-stroke | color-border-strong |
+| connectionline-stroke-width | border-width-default |
+| node-color | color-text-default |
+| node-background-color | color-background-default |
+| node-group-background-color | color-background-sunken |
+| node-border | border-width-default + stroke-solid + color-border-default |
+| node-border-radius | radius-role-surface |
+| node-boxshadow-hover | elevation-shadow-raised |
+| node-boxshadow-selected | elevation-shadow-floating |
+| handle-background-color | color-border-strong |
+| handle-border-color | color-background-canvas |
+| selection-background-color | color-status-info-subtle |
+| selection-border | border-width-default + stroke-dashed + color-focus-ring |
+| resize-background-color | color-focus-ring |
+| controls-box-shadow | elevation-shadow-raised |
+| controls-button-background-color | color-background-raised |
+| controls-button-background-color-hover | color-background-sunken |
+| controls-button-color | color-text-default |
+| controls-button-color-hover | color-text-default |
+| controls-button-border-color | color-border-subtle |
+| attribution-background-color | color-background-raised |
+| minimap-background-color | color-background-raised |
+| minimap-mask-background-color | color-backdrop |
+| minimap-mask-stroke-color | color-border-subtle |
+| minimap-mask-stroke-width | border-width-default |
+| minimap-node-background-color | color-background-sunken |
+| minimap-node-stroke-color | color-border-default |
+| minimap-node-stroke-width | border-width-default |
+
+Jede `--fm-*`-Variable in `src` und im Inline-CSS gegen die erzeugte komuna-CSS (`CSS_CELO`) geprüft: alle vorhanden. Nur Rollen, keine Palettenstufen.
+
+### Browser (Playwright MCP, 1600×1000, `pnpm build`, Workdir `/tmp/ne1-marken` mit provo, `metiejo --port 7301`, Server danach gestoppt)
+
+Stichprobe: berechneter Wert am Element (`getComputedStyle`) gegen den berechneten Wert der zugeordneten `--fm-*` (Hilfselement in `.react-flow` mit `var(--fm-…)`), jeweils gleich:
+
+| Bildschirm | Hintergrund | Punkte | Kante | Controls (Grund / Text) | Text | weitere |
+|---|---|---|---|---|---|---|
+| provo hell | rgb(234,234,236) | rgb(109,106,115) | rgb(84,82,91) | rgb(250,248,255) / rgb(40,39,45) | rgb(40,39,45) | Kantenbeschriftung rgb(84,82,91) auf rgb(234,234,236), Attribution rgb(250,248,255), Tenilo rgb(84,82,91), Schrift „Geist, system-ui, sans-serif“ (Leinwand und Kantenbeschriftung) |
+| provo dunkel | rgb(30,29,34) | rgb(169,167,176) | rgb(198,196,203) | rgb(62,60,68) / rgb(243,242,244) | rgb(243,242,244) | |
+| komuna hell | rgb(241,241,241) | – | gleich | – | – | |
+| komuna dunkel | rgb(27,27,27) | rgb(145,145,145) | rgb(241,241,241) | rgb(48,48,48) | rgb(248,248,248) | |
+| ekzemplo hell | rgb(238,238,238) | – | rgb(0,0,0) | gleich | – | |
+| ekzemplo dunkel | rgb(31,31,31) | – | rgb(190,190,190) | gleich | – | |
+
+- Alle sechs: Wurzel `data-fm-aspekto` (provo/komuna/ekzemplo) und `data-fm-color-scheme` wie `?scheme=`; `data-nr-preta` gesetzt; zugeklappt provo 8, komuna 8, ekzemplo 7 Knoten (leere Gruppen fehlen, ekzemplo hat eine Achse weniger); Attribution sichtbar; Konsole ohne Fehler.
+- Studio `/studio/provo/farbe?scheme=dark`: genau ein „Graph ansehen“, `data-href="/marko/provo/grafeo?scheme=dark"`; Klick führt auf den Bildschirm (dunkel).
+- 422: Marke `zyklo` (provo-Kopie) per `POST /api/marko/zyklo/entwurf` mit Zyklus in `festgelegt`: API 422 `grafeo-ciklo`; der Bildschirm zeigt `#nr-eraroj`, keine `.react-flow`, und `nicht exportierbar` (die Prüfung dieser rev: `exportable: false`). Die einzige Konsolenmeldung ist der 422-Abruf selbst.
+- 503: `dist/leinwand.js` weggenommen, Server neu: `/marko/provo/grafeo`, `/aspekto/komuna/grafeo`, `/nodredaktilo/leinwand.js` 503 mit dem Bau-Satz, `/api/grafeo?aspekto=komuna` 200, Studio ohne Knopf. Datei zurückgelegt.
+- ekzemplo-404 mit `ekzemploDir: null`: über den Test (Bildschirm, CSS, API).
+- Bilder (nicht im Repo): `qa-screenshots/t4-provo-hell.png`, `t4-provo-dunkel.png`, `t4-komuna-dunkel.png`, `t4-ekzemplo-hell.png`, `t4-studio-graph-ansehen.png`, `t4-zyklo-422-nicht-exportierbar.png`.
+
+### Prüfungen
+
+- `pnpm --filter @fundamento/metiejo lint` grün (die bekannte Warnung `src/komponentoj.ts:42` bleibt); `pnpm --filter @fundamento/nodredaktilo lint` und `build` grün (`dist/leinwand.js` 632 437 Byte, gzip 169 139); keine `.css`-Datei unter `packages/nodredaktilo`.
+- `grafeo-047`, `grafeo-neu-047`, `grafeo-kialo-047`, `abhaengigkeiten-047`, `grafeo-route-047`, `servilo.test.ts`, `studio.test.ts`, `studio-035.test.ts` mit `FM_AUSGABE=knapp`: 84 bestanden, 0 rot.
+- `packages/modelo/src/ci/turbo-inputs.test.ts` allein: 8/8, kein `*-047`-Eintrag. `test-setup.test.ts` allein: 4/4.
+
+### Befunde
+
+- **F-T4-1** Der 422-Zweig „`readAgordo` meldet etwas“ ist über HTTP nicht erreichbar: jeder Entwurf im Speicher kommt durch `readAgordo` (Datei lesen, `entwurf`-Route), F-T2-2 bestätigt. Erreichbar und getestet ist 422 über einen Zyklus unter festen Tokens (`festgelegt` mit `color.text.default ↔ color.text.muted`), den `readAgordo` annimmt und `grafeoDe` als `GrafeoEraro` meldet. Für NE-2: ob `readAgordo` solche Zyklen selbst ablehnen soll.
+- **F-T4-2** provo ist exportierbar; das Schildchen erscheint deshalb nur bei der Zyklus-Marke (Test und Browser).
+- **F-T4-3** (NE-2, war F-T3-4) Das Öffnen der Seitenspalte passt die Leinwand nicht neu ein. Nicht in T4 geändert: ein `fitView` bei jeder Auswahl würde den Zoom des Nutzers bei jedem Klick verwerfen; das ist eine Entscheidung für NE-2, keine Thema-Frage.
+- **F-T4-4** Feste Größen der Bibliothek bleiben ihre (Controls-Knöpfe 26 px, Attribution 10 px, Tenilo 6 px, Panel-Rand 15 px): sie hängen nicht an `--xy-*`, und ein Überschreiben bräuchte CSS-Regeln (B-2). Für NE-2 notiert.
+
+### Entscheidungen
+
+- **D-T4-1** Reihenfolge der Antworten: erst „gibt es nicht“ (404 `notFound` bzw. der ekzemplo-Satz), dann „Bündel fehlt“ (503). So antwortet derselbe fehlende Gegenstand auf API, Bildschirm und CSS gleich; `/nodredaktilo/*` kennt keinen Gegenstand und antwortet ohne Bündel immer 503.
+- **D-T4-2** `GET /aspekto/:label/grafeo.css` braucht das Bündel nicht (es ist nur CSS), wie die API (A-3).
+- **D-T4-3** `XY_ROLOJ` deckt jede `--xy-X`, die das Stylesheet liest (35, inkl. Minimap und Resize, die NE-1 nicht zeigt); die `-default`- und `-props`-Variablen werden bewusst nicht gesetzt (Rückfälle bzw. Prop-Kanäle).
+- **D-T4-4** Rahmen-Kurzformen (`node-border`, `selection-border`) sind drei Rollen hintereinander (`border-width-default`, `stroke-solid|dashed`, Farbrolle); der Typ erlaubt das, weil der Wert mit `var(--fm-` beginnt und mit `)` endet.
+- **D-T4-5** Der Bildschirm lädt die `@font-face` der Marke wie die Vorschau (sonst fiele die Anzeigeschrift von provo, Prata, auf den Ersatz zurück). Kopf-Link „Zum Studio“ behält das Schema.
+- **D-T4-6** `<Background />` mit den Standardwerten der Bibliothek (Punkte); Abstand und Punktgröße sind Zahlen-Props von React Flow, keine eigenen Literale.
+- **D-T4-7** Testweg 422 wie F-T4-1; der Test prüft außerdem, dass der Bildschirm der Zyklus-Marke 200 liefert und das Schildchen trägt.
 
 ## T5 im Einzelnen
 

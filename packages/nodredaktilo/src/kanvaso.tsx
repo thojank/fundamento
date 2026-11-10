@@ -14,6 +14,7 @@ import {
   sichtbaro,
 } from "@fundamento/metiejo/grafeo";
 import {
+  Background,
   Controls,
   type Edge,
   type NodeMouseHandler,
@@ -34,6 +35,7 @@ import {
   type Skemo,
   valoroEn,
 } from "./nodoj.js";
+import { RANDETIKEDO_STILO, TEKSTO_STILO, XY_STILO } from "./roloj.js";
 
 export interface KanvasoProps {
   /** The mount element `#nr-leinwand`; it carries the ready marks. */
@@ -55,6 +57,7 @@ const randoj = (sicht: Sicht): Edge[] =>
     source: l.al,
     target: l.de,
     label: abhaengigkeiten(l.nombro),
+    labelStyle: RANDETIKEDO_STILO,
   }));
 
 const flowNodoj = (sicht: Sicht, nodoj: ReadonlyMap<string, Nodo>, skemo: Skemo): FlowNodo[] =>
@@ -187,9 +190,16 @@ function Grafeujo({ ujo, grafeo, koloro }: { ujo: HTMLElement; grafeo: Grafeo; k
   return (
     <FaldiKunteksto.Provider value={faldi}>
       <ElektoKunteksto.Provider value={elektita}>
-        {/* Layout only: the canvas takes the room the side panel leaves; gaps and the panel's width
-            are tokens of the brand. */}
-        <div style={{ display: "flex", blockSize: "100%", gap: "var(--fm-spacing-medium)" }}>
+        {/* The canvas takes the room the side panel leaves; type, gaps and the panel's width are
+            roles of the brand, and React Flow's variables take the brand's roles (XY_ROLOJ). */}
+        <div
+          style={{
+            ...TEKSTO_STILO,
+            display: "flex",
+            blockSize: "100%",
+            gap: "var(--fm-spacing-medium)",
+          }}
+        >
           <div style={{ flex: "1 1 0", minInlineSize: 0 }}>
             <ReactFlow
               nodes={nodoj}
@@ -202,7 +212,9 @@ function Grafeujo({ ujo, grafeo, koloro }: { ujo: HTMLElement; grafeo: Grafeo; k
               nodesConnectable={false}
               elementsSelectable={false}
               minZoom={0}
+              style={XY_STILO}
             >
+              <Background />
               <Controls showInteractive={false} />
             </ReactFlow>
           </div>

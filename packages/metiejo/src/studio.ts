@@ -736,6 +736,8 @@ export interface StudioInput {
   betroffen?: string[];
   /** The components the navigation lists (Spec 024 ②). */
   komponentoj?: readonly KomponentoEntry[];
+  /** Spec 047 (NE-1): the screen of the graph canvas; only while its bundle is built. */
+  grafeoHref?: string;
 }
 
 const HERKUNFT_LABEL: Readonly<Record<Herkunft, string>> = {
@@ -1023,7 +1025,7 @@ export function studioScreen(input: StudioInput): string {
       : `<fm-ligilo slot="actions" to="${escapeHtml(input.expert.href)}" placement="standalone" external>Expertenansicht</fm-ligilo>`;
   const body = `<fm-sxelo>
 <span slot="brand">Studio</span>
-<span slot="principal">Marke ${escapeHtml(label)} · Prüfung: <fm-insigno intent="${input.probleme === 0 ? "success" : "warning"}" id="mt-probleme">${input.probleme} ${input.probleme === 1 ? "Problem" : "Probleme"}</fm-insigno> <fm-butono emphasis="high" size="small" data-mt-post="/studio/${encodeURIComponent(name)}/speichern">Speichern</fm-butono></span>
+<span slot="principal">Marke ${escapeHtml(label)} · Prüfung: <fm-insigno intent="${input.probleme === 0 ? "success" : "warning"}" id="mt-probleme">${input.probleme} ${input.probleme === 1 ? "Problem" : "Probleme"}</fm-insigno> <fm-butono emphasis="high" size="small" data-mt-post="/studio/${encodeURIComponent(name)}/speichern">Speichern</fm-butono>${input.grafeoHref === undefined ? "" : ` <fm-butono size="small" emphasis="low" data-href="${escapeHtml(input.grafeoHref)}">Graph ansehen</fm-butono>`}</span>
 ${input.message === undefined ? "" : `<fm-avizo slot="notices" intent="success">${escapeHtml(input.message)}</fm-avizo>`}
 ${input.problem === undefined ? "" : `<fm-avizo slot="notices" intent="danger">${escapeHtml(input.problem)}</fm-avizo>`}
 <fm-avizo slot="notices" intent="warning" id="mt-studio-meldung" hidden></fm-avizo>

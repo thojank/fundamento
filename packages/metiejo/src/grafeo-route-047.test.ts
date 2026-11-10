@@ -11,8 +11,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { grafeoDe, grafeoDePaket, serializeGrafeo } from "./grafeo.js";
-import { entwurf, type TestServilo, testServilo } from "./test-doubles/servilo-044.js";
 import { PROVO_DOSIERO, paketo, provoAgordo } from "./test-doubles/grafeo-047.js";
+import { entwurf, type TestServilo, testServilo } from "./test-doubles/servilo-044.js";
 import { checkDraft, loadBases } from "./vorschau.js";
 
 const NICHT_GEBAUT = "Leinwand nicht gebaut: pnpm --filter @fundamento/nodredaktilo build";
@@ -128,6 +128,14 @@ describe("Spec 047 T4: the routes of the graph canvas", () => {
     expect(eraroj.map((e) => e.rule)).toEqual(["grafeo-ciklo"]);
     expect(eraroj[0]?.path).toBe("color.text.default");
     expect(Object.keys(JSON.parse(text(antwort.body)) as object)).toEqual(["eraroj"]);
+    // The screen is still shown: the canvas reads the 422 and shows the errors (`#nr-eraroj`), and
+    // the shared check of this rev refuses the export, so the header says so.
+    const ekrano = await mit.anfrage("GET", "/marko/zyklo/grafeo");
+    expect(ekrano.status).toBe(200);
+    expect(count(text(ekrano.body), `data-nr-fonto="/api/grafeo?marko=zyklo"`)).toBe(1);
+    expect(text(ekrano.body)).toContain(
+      `<fm-insigno intent="warning" id="nr-ne-eksportebla">nicht exportierbar</fm-insigno>`,
+    );
   });
 
   it("shows each screen in the brand and the scheme, with the mount point and both scripts", async () => {
@@ -165,7 +173,8 @@ describe("Spec 047 T4: the routes of the graph canvas", () => {
             : `<link rel="stylesheet" href="/aspekto/${ekrano.aspekto}/grafeo.css">`;
         pruefe(count(html, stylesheet) === 1, "stylesheet");
         pruefe(
-          ekrano.aspekto !== "provo" || html.includes(`href="/studio/provo/farbe"`),
+          ekrano.aspekto !== "provo" ||
+            html.includes(`to="/studio/provo/farbe${scheme === "dark" ? "?scheme=dark" : ""}"`),
           "link back to the Studio",
         );
       }
