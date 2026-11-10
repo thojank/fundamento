@@ -28,16 +28,15 @@ import type { Bases } from "../vorschau.js";
 
 const repoRoot = fileURLToPath(new URL("../../../../", import.meta.url));
 
+/** The fixture file of the brand provo (Spec 016); T4 copies it into a server's brand folder. */
+export const PROVO_DOSIERO = join(
+  repoRoot,
+  "packages/modelo/test/fixtures/valid/aspekto-provo/agordo.json",
+);
+
 /** The fixture Agordo of the brand provo (Spec 016), read and checked. */
 export function provoAgordo(): Agordo {
-  const { agordo } = readAgordo(
-    JSON.parse(
-      readFileSync(
-        join(repoRoot, "packages/modelo/test/fixtures/valid/aspekto-provo/agordo.json"),
-        "utf8",
-      ),
-    ),
-  );
+  const { agordo } = readAgordo(JSON.parse(readFileSync(PROVO_DOSIERO, "utf8")));
   if (agordo === undefined) throw new Error("the provo fixture must be a valid Agordo");
   return agordo;
 }
