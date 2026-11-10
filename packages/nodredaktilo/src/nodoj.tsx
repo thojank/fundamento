@@ -1,18 +1,42 @@
-// Spec 047 (NE-1, 2.5): the two node types of the canvas. A group node carries its toggle
-// (`fm-butono[data-nr-faldi]`); a click on it opens or closes the group and never selects the
-// node. A token node (or `enigo:` node) shows its label and kind. Content and look grow in T3/T4.
+// Spec 047 (NE-1, 2.5): the two node types of the canvas, each an fm-karto. Its heading is the
+// `etikedo` in the card's heading slot – fm-karto composes the fm-titolo at its own `level` – and
+// its meta row an fm-insigno with the kind. A group node carries its toggle
+// (`fm-butono[data-nr-faldi]`) in the actions; a click on it opens or closes the group and never
+// selects the node. A token node (or `enigo:` node) shows its value in the current scheme.
 
-import type { SichtNodo } from "@fundamento/metiejo/grafeo";
+import type { Nodo, SichtNodo } from "@fundamento/metiejo/grafeo";
 import { Handle, type Node, type NodeProps, Position } from "@xyflow/react";
 import { createContext, type MouseEvent, useContext } from "react";
 
-export type NodoDatumoj = { nodo: SichtNodo };
+export type Skemo = "light" | "dark";
+
+export type NodoDatumoj = {
+  nodo: SichtNodo;
+  /** Token nodes: the value in the current scheme (P-7). */
+  valoro?: string;
+};
 export type GrupoFlowNodo = Node<NodoDatumoj, "grupo">;
 export type TokenoFlowNodo = Node<NodoDatumoj, "nodo">;
 export type FlowNodo = GrupoFlowNodo | TokenoFlowNodo;
 
+/** The cards on the canvas and the side panel sit one level below the screen's heading. */
+export const KARTO_NIVELO = "2";
+
 /** Opens or closes a group; given by the canvas. */
 export const FaldiKunteksto = createContext<(grupo: string) => void>(() => undefined);
+
+/** The id of the selected node, or null; given by the canvas. */
+export const ElektoKunteksto = createContext<string | null>(null);
+
+/** The value of a node in `skemo`; `dark` falls back to `light` (P-7). */
+export function valoroEn(nodo: Nodo, skemo: Skemo): string | undefined {
+  if (nodo.valoro === undefined) return undefined;
+  return skemo === "dark" ? (nodo.valoro.dark ?? nodo.valoro.light) : nodo.valoro.light;
+}
+
+/** The kind a token node shows in its badge. */
+export const specoTeksto = (speco: SichtNodo["speco"]): string =>
+  speco === "enigo" ? "Eingabe" : speco === "grupo" ? "Gruppe" : "Ableitung";
 
 function Tenilo({ speco }: { speco: "target" | "source" }) {
   return (
@@ -40,10 +64,10 @@ export function GrupoNodo({ data }: NodeProps<GrupoFlowNodo>) {
     // biome-ignore lint/a11y/useKeyWithClickEvents lint/a11y/noStaticElementInteractions: the click comes from the fm-butono inside, which carries focus and keys.
     <div data-nr-grupo={nodo.id} data-nr-malfermita={String(malfermita)} onClick={onClick}>
       <Tenilo speco="target" />
-      <fm-karto level="2">
-        <fm-titolo level="3">{nodo.etikedo}</fm-titolo>
-        <fm-insigno>{`Gruppe · ${nodo.nombro ?? 0}`}</fm-insigno>
-        <fm-butono data-nr-faldi="" size="small" emphasis="low">
+      <fm-karto level={KARTO_NIVELO}>
+        <span slot="heading">{nodo.etikedo}</span>
+        <fm-insigno slot="meta">{`${specoTeksto("grupo")} · ${nodo.nombro ?? 0}`}</fm-insigno>
+        <fm-butono slot="actions" data-nr-faldi="" size="small" emphasis="low">
           {malfermita ? "Zuklappen" : "Aufklappen"}
         </fm-butono>
       </fm-karto>
@@ -53,13 +77,20 @@ export function GrupoNodo({ data }: NodeProps<GrupoFlowNodo>) {
 }
 
 export function TokenoNodo({ data }: NodeProps<TokenoFlowNodo>) {
-  const { nodo } = data;
+  const elektita = useContext(ElektoKunteksto) === data.nodo.id;
+  const { nodo, valoro } = data;
   return (
-    <div data-nr-nodo={nodo.id}>
+    <div data-nr-nodo={nodo.id} data-nr-elektita={elektita ? "true" : undefined}>
       <Tenilo speco="target" />
-      <fm-karto level="3">
-        <fm-titolo level="4">{nodo.etikedo}</fm-titolo>
-        <fm-insigno>{nodo.speco === "enigo" ? "Eingabe" : "Ableitung"}</fm-insigno>
+      {/* The selected node takes the sunken surface of the card – a prop of the Ero, no style. */}
+      <fm-karto level={KARTO_NIVELO} emphasis={elektita ? "medium" : "high"}>
+        <span slot="heading">{nodo.etikedo}</span>
+        {valoro === undefined ? null : (
+          <fm-teksto slot="content" max-lines="2">
+            {valoro}
+          </fm-teksto>
+        )}
+        <fm-insigno slot="meta">{specoTeksto(nodo.speco)}</fm-insigno>
       </fm-karto>
       <Tenilo speco="source" />
     </div>

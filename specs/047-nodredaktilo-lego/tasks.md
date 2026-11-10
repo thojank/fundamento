@@ -8,7 +8,7 @@ Sechs Tickets, ein Strang (Spec: „höchstens 6 Tickets, ein PR“). T1–T5 se
 |---|---|---|
 | T1 | Spec-Ordner; `grafeoDe`, `grafeoDePaket`, Sicht-Logik; `grafeo-047`, `grafeo-neu-047`, `grafeo-kialo-047` | erledigt (Befunde F-T1-1 bis F-T1-4, Entscheidungen D-T1-1 bis D-T1-10) |
 | T2 | Paket `nodredaktilo`, React-Insel zugeklappt, Routen `/nodredaktilo/*` und `/api/grafeo`; `abhaengigkeiten-047`; B-1 (b) | erledigt (Befunde F-T2-1 bis F-T2-6, Entscheidungen D-T2-1 bis D-T2-7; B-1 (b): `workspace.test.ts` rot, benannte Ausnahme) |
-| T3 | Knoten als Eroj, Seitenspalte mit Regel, Kialo und „fehlt“, Herkunftskette und Abhängige | offen |
+| T3 | Knoten als Eroj, Seitenspalte mit Regel, Kialo und „fehlt“, Herkunftskette und Abhängige | erledigt (Befunde F-T3-1 bis F-T3-4, Entscheidungen D-T3-1 bis D-T3-7) |
 | T4 | Marken-Tokens auf der Leinwand (hell/dunkel), Bildschirme, Knopf „Graph ansehen“; `grafeo-route-047` | offen |
 | T5 | Skript `bilder`, Messung, Lückenliste, Diff-Suche, Bericht-Entwurf | offen |
 | T6 | Ein PR, ein Push, ein `workflow_dispatch`, Bericht (Orchestrator) | offen |
@@ -129,7 +129,36 @@ Ohne Kialo je Gruppe – komuna: farbe/komponenten 453, raum/komponenten 184, fo
 
 ## T3 im Einzelnen
 
-(offen)
+- [x] **Knoten als Eroj** (`src/nodoj.tsx`): jeder Knoten ist eine `fm-karto level="2"`. Die Überschrift ist das `etikedo` im Slot `heading` (`<span slot="heading">`); `fm-karto` setzt daraus selbst ihr `fm-titolo` in der Shadow-Wurzel, mit dem `level` der Karte (Skemo/Uzo karto: Slot `heading` nimmt Text). Im Slot `meta` ein `fm-insigno` „Eingabe“/„Ableitung“ bzw. „Gruppe · <nombro>“, bei Token-Knoten im Slot `content` ein `fm-teksto max-lines="2"` mit dem `valoro` des aktuellen Schemas (`dark` fällt auf `light` zurück, `valoroEn`). Der Gruppen-Schalter `fm-butono[data-nr-faldi]` steht im Slot `actions`; sein Klick wird wie in D-T2-1 am `div[data-nr-grupo]` gefangen und wählt nichts.
+- [x] **Auswahl**: `onNodeClick` setzt nur den gewählten Knoten (React-State, nur Token- und `enigo:`-Knoten); `elementsSelectable` bleibt `false`. Der gewählte Knoten trägt `data-nr-elektita="true"` und `emphasis="medium"` an seiner Karte (eine Prop des Ero, kein Stil). Kein `localStorage`, nichts wird geschrieben.
+- [x] **Seitenspalte** (`src/flanko.tsx`): `fm-karto#nr-flanko[data-nr-elektita="<id>"] level="2"` rechts neben der Leinwand. Überschrift = id; `fm-atributlisto layout="stacked"` mit „Wert (Hell|Dunkel)“ (`fm-teksto kind="code" data-nr-valoro="<aktuelles Schema>"`, darunter klein `fm-teksto kind="caption" data-nr-valoro="<anderes Schema>"`, P-7), „Regel“ (`dd[data-nr-regulo]`, Text `regulo` oder „keine“), „Begründung“ (`dd[data-nr-kialo]`, Text `kialo` oder ein `fm-insigno intent="warning"` „fehlt“). Ableitung: `fm-titolo level="3"` „Herkunft“ und `ol` mit `fm-butono[data-nr-deveno="<id>"]` nach `devenoDe` (erster Eintrag der Knoten selbst, letzter eine Eingabe). Eingabe (`speco: "enigo"`): „Hängt davon ab“, `ol` mit `fm-butono[data-nr-dependanto="<id>"]` (`rektaj`, sortiert) und `fm-teksto[data-nr-dependantoj-sumo="<cxiuj>"]`. Jeder Eintrag trägt ein `fm-insigno` mit der Art. Schließen: `fm-butono[data-nr-fermi]` im Slot `actions`.
+- [x] **Klick auf einen Eintrag** (Kette und Abhängige): wählt den Knoten und öffnet die Gruppen aus `grupojDe`, die noch zu sind (Vereinigung mit den offenen). Danach wird der Knoten statt der ganzen Übersicht eingepasst (`fitView({ nodes: [id], maxZoom: 1 })`). Öffnet der Klick Gruppen, zählt er wie ein Aufklappen: `data-nr-rev` +1, `data-nr-dauro` gesetzt. Ist der Knoten schon sichtbar, wird nur gewählt und eingepasst (kein rev).
+- [x] Layout nur über `--fm-*`: Zeile mit `gap: var(--fm-spacing-medium)`, Seitenspalte `inline-size: var(--fm-size-container-small)` (höchstens 50 %), scrollt. Kein neues Token, kein `px`/`rem`/`ms`/Farbliteral in `src`, keine `.css`-Datei.
+- [x] Prüfungen: `pnpm --filter @fundamento/nodredaktilo lint` grün, `build` grün (`dist/leinwand.js` 629 500 Byte, gzip 169 810); `find packages/nodredaktilo -name '*.css' -not -path '*/node_modules/*'` leer. `grafeo-047`, `grafeo-neu-047`, `grafeo-kialo-047`, `abhaengigkeiten-047` mit `FM_AUSGABE=knapp`: 26 bestanden, 0 rot. `grafeo-sicht.ts` unverändert.
+- [x] **Browser** (Playwright MCP, Behelfsseite wie in T2: Seite der Metiejo, Wurzel mit `data-fm-aspekto`/`data-fm-color-scheme`, Stylesheet der Marke bzw. `/css/fundamento.css`, `#nr-leinwand` mit `block-size: 100vh`, 1600×1000; nichts davon im Repo; Server danach gestoppt):
+  - provo hell: zugeklappt 8 Knoten. „Eingaben“ aufgeklappt (rev 1), Klick auf `enigo:leitfarbe`: Knoten zeigt `#6b4fa0`, Seitenspalte `data-nr-elektita="enigo:leitfarbe"`, Regel „keine“, Begründung „fehlt“, **32 direkte Abhängige** (`color.palette.accent.*` und `color.palette.neutral.*`), **858 transitiv**. Kein Knoten bekam `.selected`; Knotenklick erhöht `data-nr-rev` nicht. → `qa-screenshots/t3-provo-hell-leitfarbe-abhaengige.png`
+  - provo hell: `farbe` → `farbe/rollen` aufgeklappt, Klick auf `color.text.default`: Regel `alias · reg_01M2X5DXT0TJ1ZYQG95RWX02ZV`, Kialo aus der Regulo, Kette `color.text.default → color.palette.neutral.50 → enigo:leitfarbe` (Ende `enigo`). Klick auf den Eintrag `color.palette.neutral.50` (Gruppe `farbe/palette` zu): Gruppe geöffnet, Knoten sichtbar, gewählt und mittig eingepasst, rev 3→4, `dauro` 453 ms. Schalter „Aufklappen“ von `raum` und Klick auf die Karte `bewegung` ändern die Auswahl nicht; „Schließen“ entfernt `#nr-flanko`. `localStorage` leer.
+  - provo dunkel: Knoten `color.text.default` zeigt `#f3f2f4`, Seitenspalte „Wert (Dunkel)“ `#f3f2f4`, darunter „Hell: #28272d“; React Flow in `dark`. → `qa-screenshots/t3-provo-dunkel-text-default-herkunft.png`
+  - komuna hell: abgeleiteter Knoten ohne Kialo `border.default` (Gruppe klein genug): Regel `alias`, Begründung „fehlt“ (`fm-insigno intent="warning"`), Kette `border.default → border.width.default → border.width.scale.1` (Ende `enigo`, `fiksa`). Klick auf den letzten Eintrag: gewählt, sichtbar, 1 direkter Abhängiger, 40 transitiv. → `qa-screenshots/t3-komuna-hell-border-default-fehlt.png`
+  - Konsole: keine Fehler; die einzige Warnung (`fm-ikono: name is required`) stammt von der Startseite der Metiejo vor dem Behelf, nicht von der Leinwand.
+
+### Befunde
+
+- **F-T3-1** (T4) Die Leinwand hat noch die Schrift des Browsers (Serifen in den Knoten), Abstände und Farben der Knoten sind die der Eroj, React Flow ist ungefärbt. Das ist T4 (`XY_ROLOJ`, Schrift aus `--fm-*`).
+- **F-T3-2** (T4/T5) Zusammengesetzte Werte (Typografie, Rahmen, Schatten) sind lange JSON-Texte; im Knoten auf zwei Zeilen gekürzt (`max-lines="2"`), in der Seitenspalte voll. Knoten mit solchen Werten sind breit; die Gruppe `schrift` wird dadurch breit.
+- **F-T3-3** (NE-2) Die Seitenspalte kann lang werden: `enigo:leitfarbe` (provo) hat 32 direkte Abhängige, die alle als Einträge stehen. Bei Eingaben mit Hunderten direkter Abhängiger wäre eine `max-entries`-ähnliche Kürzung zu bedenken.
+- **F-T3-4** (T4) Öffnet sich die Seitenspalte, wird die Leinwand schmaler, aber nicht neu eingepasst (ein Knotenklick ist keine Layoutänderung). Rechts liegende Knoten können dann unter die Spalte rücken, bis man „Übersicht einpassen“ drückt.
+- **F-T2-6 erledigt**: alle Karten `level="2"`, die Unterüberschriften der Seitenspalte `fm-titolo level="3"`; das `fm-titolo` der Knoten setzt `fm-karto` selbst.
+
+### Entscheidungen
+
+- **D-T3-1** Abweichung vom Wortlaut „`<fm-titolo>` = `etikedo`“: Das `etikedo` steht im Slot `heading` der `fm-karto`; die Karte rendert dafür selbst ein `fm-titolo` (Shadow-Wurzel, `level` der Karte). Ein zweites `fm-titolo` im Inhalt würde eine leere Überschrift der Karte und eine zweite daneben ergeben (Uzo karto: Slot `heading` nimmt nur Text). Prüfen in QA/T5: `[data-nr-nodo] fm-karto` → `shadowRoot` `fm-titolo`, oder Text über `innerText`/`span[slot=heading]`.
+- **D-T3-2** Nur Token- und `enigo:`-Knoten sind wählbar; ein Klick auf eine Gruppenkarte (außerhalb des Schalters) wählt nichts. Die Seitenspalte erklärt Knoten, keine Gruppen.
+- **D-T3-3** Kette für `speco: "derivajxo"`, Abhängige für `speco: "enigo"` (also auch feste Werte, `fiksa`, nicht nur `enigo:*`).
+- **D-T3-4** `[data-nr-dependantoj-sumo]` trägt die Zahl als Attributwert, der Text ist ein Satz („858 Knoten hängen insgesamt davon ab“). `[data-nr-regulo]` zeigt „keine“, wo `regulo` fehlt (Eingaben aus dem Agordo).
+- **D-T3-5** Einträge der Abhängigen sind wie die Kette klickbar (gleicher Handler: wählen + `grupojDe` öffnen).
+- **D-T3-6** Ein Klick, der Gruppen öffnet, setzt `data-nr-rev`/`data-nr-dauro` wie ein Aufklappen und passt statt der Übersicht den gewählten Knoten ein (`maxZoom` 1). Sonst bleibt D-T2-4 (nach jedem Layout `fitView`).
+- **D-T3-7** Die Seitenspalte nutzt Eroj außerhalb ihrer Uzo-Liste (`fm-atributlisto`, `fm-butono` im Inhalt der `fm-karto`); die Insel ist von A-1 ausgenommen, keine Markup-Prüfung läuft auf ihr. Für NE-2 notiert.
 
 ## T4 im Einzelnen
 
