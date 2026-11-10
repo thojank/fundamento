@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["es2024", "dom", "dom.iterable"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "types": ["node", "vite/client"],
+    "noEmit": true,
+    "paths": {
+      "@fundamento/metiejo/grafeo": ["../metiejo/src/grafeo-sicht.ts"]
+    }
+  },
+  "include": ["src", "scripts", "vite.config.ts"]
+}

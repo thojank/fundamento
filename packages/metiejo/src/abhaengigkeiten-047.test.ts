@@ -11,7 +11,6 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const PACKAGES_DIR = fileURLToPath(new URL("../../", import.meta.url));
-const CHECKOUT = fileURLToPath(new URL("../../../", import.meta.url));
 
 interface Manifest {
   name: string;
@@ -202,7 +201,10 @@ describe("Spec 047 (P-5): the canvas adds no run-time dependency", () => {
   });
 
   it("(4) no module outside nodredaktilo imports react, react-dom, @xyflow/* or @dagrejs/*", () => {
-    const stale = Object.keys(ESCEPTOJ).filter((file) => !existsSync(join(CHECKOUT, file)));
+    // The paths are named from the checkout root; they are looked up below the packages dir.
+    const stale = Object.keys(ESCEPTOJ).filter(
+      (file) => !existsSync(join(PACKAGES_DIR, file.slice("packages/".length))),
+    );
     expect(stale).toEqual([]);
 
     const violations: string[] = [];
