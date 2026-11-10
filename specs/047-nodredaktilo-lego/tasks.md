@@ -10,7 +10,7 @@ Sechs Tickets, ein Strang (Spec: „höchstens 6 Tickets, ein PR“). T1–T5 se
 | T2 | Paket `nodredaktilo`, React-Insel zugeklappt, Routen `/nodredaktilo/*` und `/api/grafeo`; `abhaengigkeiten-047`; B-1 (b) | erledigt (Befunde F-T2-1 bis F-T2-6, Entscheidungen D-T2-1 bis D-T2-7; B-1 (b): `workspace.test.ts` rot, benannte Ausnahme) |
 | T3 | Knoten als Eroj, Seitenspalte mit Regel, Kialo und „fehlt“, Herkunftskette und Abhängige | erledigt (Befunde F-T3-1 bis F-T3-4, Entscheidungen D-T3-1 bis D-T3-7) |
 | T4 | Marken-Tokens auf der Leinwand (hell/dunkel), Bildschirme, Knopf „Graph ansehen“; `grafeo-route-047` | erledigt (Befunde F-T4-1 bis F-T4-4, Entscheidungen D-T4-1 bis D-T4-7) |
-| T5 | Skript `bilder`, Messung, Lückenliste, Diff-Suche, Bericht-Entwurf | offen |
+| T5 | Skript `bilder`, Messung, Lückenliste, Diff-Suche, Bericht-Entwurf | erledigt (Befunde F-T5-1 bis F-T5-4, Entscheidungen D-T5-1 bis D-T5-5; Bericht-Entwurf) |
 | T6 | Ein PR, ein Push, ein `workflow_dispatch`, Bericht (Orchestrator) | offen |
 
 ## T1 im Einzelnen
@@ -261,7 +261,71 @@ Stichprobe: berechneter Wert am Element (`getComputedStyle`) gegen den berechnet
 
 ## T5 im Einzelnen
 
-(offen)
+- [x] Skript `packages/nodredaktilo/scripts/bilder.ts`, Eintrag `"bilder": "tsx scripts/bilder.ts"` in `packages/nodredaktilo/package.json` (sonst unverändert; `scripts` stand schon im `include` der `tsconfig.json`, Biome prüft es mit `biome check .`). Aufruf `pnpm --filter @fundamento/nodredaktilo bilder --ziel <dir> [--luecken <datei>]`; relative Pfade gelten ab dem Aufrufort (`INIT_CWD`).
+  - Ohne `--ziel`: schreibt nichts, nennt den Grund, Exit 2 (geprüft: `git status --porcelain` danach unverändert).
+  - Fehlt `packages/cli/dist/index.js` oder `packages/nodredaktilo/dist/leinwand.js`: nennt `pnpm build`, Exit 2.
+  - Temporärer Arbeitsordner mit `provo/agordo.json` aus `packages/modelo/test/fixtures/valid/aspekto-provo/agordo.json`; `node packages/cli/dist/index.js metiejo --port <frei> --workdir <tmp>` als Kindprozess (kein Import der Metiejo, D-2); wartet, bis `GET /` antwortet (oder der Kindprozess endet), beendet ihn im `finally`, löscht den Ordner.
+  - Chromium über `playwright` 1.63.0 (Chromium 153.0.8010.12, schon installiert; keine Installation nötig), Viewport 1600×1000. Playwright-Standardgrenzen unverändert; ein Schritt, der in eine läuft, steht als `"nicht gemessen: Playwright-Standardgrenze"` in `messung.json` und auf stderr.
+- [x] Lauf: `pnpm build` (grün), dann `pnpm --filter @fundamento/nodredaktilo bilder --ziel /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec047 --luecken specs/047-nodredaktilo-lego/luecken.json` → Exit 0, 1 min 50 s. Neun PNG unter `…/spec047/bilder/` (`{komuna,ekzemplo,provo}-{hell,dunkel,offen}.png`), `…/spec047/messung.json`, `specs/047-nodredaktilo-lego/luecken.json` (202 091 Byte, kanonisch). Kein Schritt „nicht gemessen“.
+
+### Messung (`messung.json`, je 5 Läufe)
+
+| Marke | Knoten | Kanten | zugeklappt | bis sichtbar ms Median / Max | größte Gruppe (direkt) | Aufklappen ms Median / Max |
+|---|---:|---:|---:|---:|---|---:|
+| komuna | 2115 | 2200 | 8 | 316 / 382 | `farbe/komponenten` 920 | 1364 / 1446 |
+| ekzemplo | 2115 | 2058 | 7 | 337 / 345 | `farbe/komponenten` 920 | 1391 / 1512 |
+| provo | 2133 | 2420 | 8 | 159 / 185 | `farbe/komponenten` 920 | 1463 / 1695 |
+
+### Lückenliste (`luecken.json`)
+
+Abgeleitete Knoten ohne `kialo`: komuna 920, ekzemplo 1842, provo 1852 (gleich der Vorstufe aus T1). Je Gruppe im Bericht, Abschnitt 4.
+
+### Diff-Suche (gegen `origin/main` = Merge-Basis `943cc22f`, F-T2-1; Stand nach dem Commit des Skripts, Arbeitsbaum sauber)
+
+1. `git diff --name-only origin/main...HEAD` + `git status --porcelain`: 30 Dateien (mit `bericht.md` aus dem zweiten T5-Commit 31), alle in den erlaubten Bereichen (`packages/nodredaktilo/**` 12, `packages/metiejo/src/grafeo*.ts` 3, `*-047.test.ts` 5, `test-doubles/grafeo-047.ts`, `servilo.ts`, `html.ts`, `studio.ts`, `packages/metiejo/package.json`, `pnpm-lock.yaml`, `specs/047-nodredaktilo-lego/**`). Gegenprobe `… | grep -vE '^(packages/nodredaktilo/|packages/metiejo/src/grafeo[^/]*\.ts$|packages/metiejo/src/[^/]*-047\.test\.ts$|packages/metiejo/src/test-doubles/grafeo-047\.ts$|packages/metiejo/src/(servilo|html|studio)\.ts$|packages/metiejo/package\.json$|pnpm-lock\.yaml$|specs/047-nodredaktilo-lego/)'`: leer.
+2. `… | grep -E '^(packages/vortaro/|packages/modelo/data/|packages/agordilo/|packages/eroj/|\.github/)|^[^/]+$' | grep -v '^pnpm-lock.yaml$'`: leer.
+3. `git diff -U0 origin/main -- . ':!pnpm-lock.yaml' | grep -nE '^\+.*(timeout|threshold|sojlo|limit|toBeLessThan)'`: drei Treffer vor T5, alle erklärt:
+   - `packages/metiejo/src/grafeo-047.test.ts`: `toBeLessThanOrEqual(40)` – die von der Spec vorgegebene Prüfung „zugeklappt höchstens 40“, keine geänderte Grenze.
+   - `specs/047-nodredaktilo-lego/plan.md`: der Satz der technischen Präzisierung, der diese Diff-Suche beschreibt (byte-gleiche Kopie).
+   - `specs/047-nodredaktilo-lego/spec.md`: „Zeitlimits“ in Regel 0 der Spec (byte-gleiche Kopie).
+   - Nach T5 kommen Treffer in `tasks.md` hinzu: diese Liste selbst (der zitierte Befehl und seine Erklärung). Das Skript `bilder.ts` hat **keinen** Treffer: es nutzt die Playwright-Standardgrenzen, ohne eine Zahl zu setzen.
+4. `git diff origin/main -- packages/metiejo/package.json`: genau eine Zeile hinzu (`"@fundamento/nodredaktilo": "workspace:*"` unter `devDependencies`), `--numstat` `1 0`.
+5. `find packages/nodredaktilo -name '*.css' -not -path '*/node_modules/*'`: leer.
+6. `git status --porcelain | grep -E '\.png$|messung\.json'`: leer (die Bilder und `messung.json` liegen außerhalb des Checkouts).
+
+### Lokale Läufe (`FM_AUSGABE=knapp`, im Hintergrund, nie zwei Playwright-Suiten zugleich)
+
+Der Rechner war während der Läufe stark belastet (`uptime`: Last 45–58 bei 10 Kernen, auch durch Prozesse außerhalb dieses Laufs). Unter paralleler turbo-Last liefen Tests verschiedener Pakete in ihre **eigenen, unveränderten** vitest-Zeitgrenzen; keine Grenze wurde angehoben, jedes betroffene Paket allein ist grün.
+
+| Lauf | Ergebnis |
+|---|---|
+| `pnpm test:betroffen` #1 | `alle: true` (Lockfile, E-8), Engines chromium. Rot: `@fundamento/eroj` – `test/knapp-playwright.test.ts:54` und `test/vitrino-partoj.test.ts:101` „Hook timed out in 10000ms“ (Last); turbo bricht beim ersten Fehler ab. Die beiden Dateien allein: 13/13 grün. |
+| `pnpm test:betroffen` #2 | eroj grün. Rot: `@fundamento/nordstelo` 11 Tests, alle „Test/Hook timed out“ (5000/10000 ms). nordstelo allein (`pnpm --filter` und `turbo --filter`): grün (270/270). |
+| `pnpm test:betroffen` #3 | wieder nordstelo (12, nur Zeitüberschreitungen); danach allein grün (s. o.). |
+| `pnpm test:betroffen` #4 | Rot: `@fundamento/mcp` 13 Tests, alle „timed out“ (30 000 / 120 000 ms), 756 s. mcp allein über turbo: grün. |
+| `pnpm test:betroffen` #5 | Rot: `@fundamento/agordilo` 5 Tests, alle „Test timed out in 120000ms“, 545 s. |
+| `PLAYWRIGHT_ENGINES=chromium FM_AUSGABE=knapp pnpm turbo run test --concurrency=1 --continue --output-logs=errors-only` (dieselbe Aufgabenmenge wie `test:betroffen` mit `alle: true`, nur seriell) | **18 von 19 Aufgaben grün** (agordilo, metiejo, cli, ekranoj, eroj, mcp, nordstelo, projekcioj, … grün). Einzige rote: `@fundamento/modelo` – `src/workspace.test.ts:40` (4933 grün, 1 rot) = **B-1 (b)**, benannt. `modelo turbo-inputs` und `eroj zweitfarbe-036` sind lokal grün. |
+| `pnpm lint` | grün, 22/22 Aufgaben (bekannte alte Warnung `packages/metiejo/src/komponentoj.ts:42`). |
+| `pnpm check:vortaro-lint` (A-1) | PASS, 0 Fehler, 0 Warnungen (`cssFiles=5`, keine aus nodredaktilo). |
+| `pnpm check:clean-room` (A-1) | PASS, 0 Fehler, 0 Warnungen. |
+| `pnpm check:privat` (A-1) | PASS, 0 Treffer; nach dem T5-Commit wiederholt (mit `bericht.md`): PASS. |
+
+Durch diesen Branch verursacht und rot bleibt nur B-1 (b). Kein Fix in T1–T4-Zonen nötig.
+
+### Befunde
+
+- **F-T5-1** (NE-2) `farbe/komponenten` (920 Knoten) aufgeklappt und eingepasst ist eine einzige Spalte (dagre `LR`, alle Mitglieder in einem Rang): kein Knoten lesbar, und weder ein Knoten noch der Schalter „Zuklappen“ der Gruppe ist mit dem Zeiger zu treffen (Playwright `click` auf den Schalter lief beim Zuklappen in seine Standardgrenze). Siehe `*-offen.png`.
+- **F-T5-2** Aufklappen dauert im Skript 1,36–1,46 s (Median), T2 maß im Browser der QA rund 0,6 s für dieselbe Gruppe (F-T2-5). Unterschied: seit T3/T4 sind Knoten `fm-karto` mit Eroj-Inhalt und Marken-Stilen (mehr zu messen und zu malen); das Skript läuft headless. Keine Grenze, nur Messung.
+- **F-T5-3** (NE-2) Kanten laufen hinter Knoten durch; ihr Etikett kann verdeckt sein (`provo-hell.png`: Eingaben → Form unter „Schrift“).
+- **F-T5-4** „Bis sichtbar“ ist bei provo (159 ms) halb so lang wie bei komuna/ekzemplo (316/337 ms), obwohl provo auf die gemeinsame Prüfung wartet; die Paket-Bildschirme laden das Paket-CSS über `/aspekto/:label/grafeo.css`. Nicht weiter untersucht.
+
+### Entscheidungen
+
+- **D-T5-1** Das Zuklappen zwischen den Messzyklen und die Auswahl eines Knotens in der offenen Gruppe lösen das `click`-Ereignis direkt am Element aus (`dispatchEvent`), weil der Zeiger es nicht trifft (F-T5-1). Das Aufklappen, das gemessen wird, ist ein echter Zeigerklick; die Leinwand startet ihre Uhr ohnehin im Klick-Handler, `dauro` bedeutet in beiden Fällen dasselbe.
+- **D-T5-2** „Bis sichtbar“ und „zugeklappt“ aus 5 frischen Browser-Kontexten im Schema hell (je ein Kontext, kein geteilter Cache); die Bilder hell/dunkel aus je einer eigenen Ladung. „Aufklappen“: Achse `farbe` einmal öffnen, dann 5 × `farbe/komponenten` auf (gemessen) und zu, der letzte Zyklus bleibt offen für das Bild.
+- **D-T5-3** „Größte Gruppe“ = Gruppe der Ebene 2 (mit `patro`) mit den meisten direkten `nodoj`, bei Gleichstand die kleinere Id. Gewählter Knoten = erstes Mitglied (sortiert), `ero.alsxutilo.border.color.disabled` in allen drei Graphen.
+- **D-T5-4** `messung.json` trägt je Marke zusätzlich `groessteGruppe`, die Einzelwerte `laeufe` und `offenBild` (gewählte Id); die Schlüssel der Spec stehen unverändert.
+- **D-T5-5** Das Warten auf den Start der Metiejo hat keine eigene Zeitgrenze: es endet, sobald `GET /` antwortet oder der Kindprozess endet (keine neue Zahl).
 
 ## T6 im Einzelnen
 
