@@ -12,6 +12,7 @@
     "dist"
   ],
   "scripts": {
+    "bilder": "tsx scripts/bilder.ts",
     "build": "vite build",
     "lint": "tsc -p tsconfig.json --noEmit && biome check ."
   },
