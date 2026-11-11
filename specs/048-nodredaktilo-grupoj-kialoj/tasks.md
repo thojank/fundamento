@@ -9,7 +9,7 @@ Fünf Tickets, ein Strang (Spec: „höchstens 5 Tickets, ein PR“). T1–T4 se
 | T1 (NE1B-1) | Spec-Ordner; dritte Ebene (Komponenten-Untergruppen) und 60er-Regel in `grafeo.ts`; `grafeo-grupoj-048` | erledigt (Befunde F-T1-1 bis F-T1-4, Entscheidungen D-T1-1 bis D-T1-5; eine D-6-Änderung an einem 047-Test) |
 | T2 (NE1B-2) | `knotenartDe`, `kialoDe`, `begruendungDe`, `ohneGrund` in `sichtbaro` (Opt-in); `grafeo-kialo-048` | erledigt (Befunde F-T2-1 bis F-T2-5, Entscheidungen D-T2-1 bis D-T2-4; kein 047-Test geändert) |
 | T3 (NE1B-3) | Leinwand: Aufklappen in Stufen, Seitenspalte mit Art und geerbtem Grund, Zahl an Gruppen | erledigt (Browser-Beleg unten; Befund F-T3-1 behoben, F-T3-2 fremd; Entscheidungen D-T3-1 bis D-T3-3; kein 047-Test geändert) |
-| T4 (NE1B-4) | Messung, Bilder, `luecken.json`, Diff-Suche, Bericht-Entwurf | offen |
+| T4 (NE1B-4) | Messung, Bilder, `luecken.json`, Diff-Suche, Bericht-Entwurf | erledigt (9 Bilder und `messung.json` außerhalb des Repos; `luecken.json` 75 / 156 / 160; Diff-Suche 1–7 sauber; lokale Läufe grün, ein Lastbefund zugeordnet; Bericht-Entwurf mit Platzhalter für T5; Entscheidungen D-T4-1 bis D-T4-4; kein 047-Test geändert) |
 | T5 (NE1B-5) | Ein PR, ein Push, ein `workflow_dispatch`, Bericht (Orchestrator) | offen |
 
 ## T1 im Einzelnen
@@ -175,3 +175,70 @@ Bilder (außerhalb des Repos): `purple/documentation/261111-spec-048-node-editor
 ### Commits
 
 - (dieser Commit) Spec 048 T3: canvas shows kind, inherited reason and ohne-Grund badges
+
+## T4 im Einzelnen
+
+- [x] `packages/nodredaktilo/scripts/bilder.ts` erweitert, Aufruf gleich (`--ziel <dir> [--luecken <file>]`). Unverändert aus 047: Metiejo als Kindprozess auf freiem Port, Wegwerf-Arbeitsordner mit der provo-Fixture, Chromium 1600×1000, Playwright-Standardgrenzen unangetastet (`NICHT_GEMESSEN`), `INIT_CWD`, kanonisches JSON.
+  - `luecken()`: Entscheidungen ohne Grund (`begruendungDe(…).montro === "fehlt"`), je `nodo.grupo`, Ids sortiert.
+  - Je Marke `arten`, `ohneGrund`, `geerbt` (`montro: "geerbt"`), `keinGrundInKette` (`montro: "neniu"`) aus dem API-Graphen mit den T2-Funktionen; `vorher047` fest 920 / 1842 / 1852 (komuna / ekzemplo / provo).
+  - Laufzeit-Import über den Alias `@fundamento/metiejo/grafeo` (tsconfig `paths` → `grafeo-sicht.ts`): mit tsx 4.23.15 geprüft (`pnpm exec tsx -e 'import { begruendungDe, knotenartDe } from "@fundamento/metiejo/grafeo"; …'` → `function function`), kein relativer Import nötig.
+  - `groessteGruppeJeEbene` 1–4 (Ebene = Zahl der `/`-Teile, Kinder = direkte Knoten + direkte Untergruppen, Gleichstand → kleinere Id); `aufklappenMsJeEbene` 1–4: je Ebene eine frische Seite, Vorfahren ungemessen geöffnet, dann 5 gemessene Aufklapp-Zyklen (`data-nr-dauro`), Median und Max; `klickAuf`/`klickZu` hält fest, ob Zeigerklick oder `click`-Ereignis.
+  - Bilder (hell, eingepasst): `bilder/<marke>-zu.png`, `<marke>-farbe-komponenten.png`, `<marke>-ero-offen-geerbt.png`; die alten Namen `-hell`/`-dunkel`/`-offen` entfallen.
+  - Beibehalten zum Vergleich: `nodoj`, `ligoj`, `zugeklappt`, `bisSichtbarMs`. Entfallen: `groessteGruppe`, `aufklappenMs`, `offenBild` (ersetzt durch die Felder je Ebene und `geerbtBild`).
+- [x] `pnpm build` grün (10/10); `pnpm --filter @fundamento/nodredaktilo lint` grün.
+- [x] Lauf aus dem Repo-Wurzelverzeichnis: `pnpm --filter @fundamento/nodredaktilo bilder --ziel /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec048 --luecken specs/048-nodredaktilo-grupoj-kialoj/luecken.json` → Exit 0, Chromium 153.0.8010.12; kein `NICHT_GEMESSEN`. Geschrieben: 9 PNG unter `…/.fundamento/spec048/bilder/`, `…/.fundamento/spec048/messung.json` (SHA-256 `d8f8d98d…0fa4`), `luecken.json` (SHA-256 `13288e6f…1590`). Metiejo und Browser vom Skript beendet.
+- [x] Eine Definition: `luecken.json` 75 / 156 / 160 = `messung.json.ohneGrund` = Summe der Achsen-`ohneGrund` (das Skript bricht ab, wenn die drei nicht gleich sind) = die T2-Zahlen.
+- [x] Alle 9 Bilder angesehen: „zu“ zeigt 8 / 7 / 8 Achsen mit „`<n>` ohne Grund“; „farbe-komponenten“ die Untergruppen von `farbe/komponenten` (eingepasst eine schmale Spalte, Befund F-T4-1); „ero-offen-geerbt“ die Seitenspalte mit „Übernahme“ und „geerbt von“: komuna `ero.alsxutilo.border.color.dragover` ← `color.border.strong`, ekzemplo und provo `ero.alsxutilo.border.color.disabled` ← `color.palette.neutral.300`.
+
+### Messung (aus `messung.json`)
+
+| | komuna | ekzemplo | provo |
+|---|---:|---:|---:|
+| Knoten / Kanten | 2115 / 2200 | 2115 / 2058 | 2133 / 2420 |
+| Entscheidung / Mechanik / Übernahme | 339 / 0 / 1776 | 317 / 0 / 1798 | 222 / 102 / 1809 |
+| ohne Grund (vorher 047) | 75 (920) | 156 (1842) | 160 (1852) |
+| geerbt / kein Grund in der Kette | 832 / 77 | 1471 / 308 | 1475 / 308 |
+| Ebene 1: Gruppe (Kinder), Aufklappen Median / Max ms | `weitere` (8), 80 / 94 | `elevation` (3), 80 / 94 | `eingaben` (18), 80 / 94 |
+| Ebene 2: `raum/komponenten` (47) | 80 / 96 | 80 / 81 | 80 / 96 |
+| Ebene 3: `farbe/komponenten/kampo` (55) | 96 / 129 | 96 / 113 | 96 / 112 |
+| Ebene 4: `farbe/komponenten/butono/border` (24) | 95 / 95 | 78 / 80 | 79 / 80 |
+| 047: `farbe/komponenten` (920), Median / Max ms | 1364 / 1446 | 1391 / 1512 | 1463 / 1695 |
+| zugeklappt | 8 | 7 | 8 |
+| bis sichtbar Median / Max ms (047) | 334 / 356 (316 / 382) | 351 / 421 (337 / 345) | 201 / 235 (159 / 185) |
+| Klicks | alle `zeiger` | alle `zeiger` | alle `zeiger` |
+
+### Diff-Suche (gegen `origin/main` = `946248b9`, RR-11; nach dem ersten T4-Commit `d63ff7e6`, Wiederholung nach dem letzten Commit siehe unten)
+
+1. `git diff --name-only origin/main...HEAD` + `git status --porcelain`: 13 Pfade (`packages/metiejo/src/grafeo{,-sicht}.ts`, `grafeo-grupoj-048.test.ts`, `grafeo-kialo-048.test.ts`, `grafeo-neu-047.test.ts`, `packages/nodredaktilo/scripts/bilder.ts`, `src/{flanko,kanvaso,nodoj}.tsx`, `specs/048-nodredaktilo-grupoj-kialoj/{spec,plan,tasks}.md`, `luecken.json`) plus das neue `bericht.md`. Gegenprobe `grep -vE '^(packages/metiejo/src/grafeo[^/]*\.ts|packages/nodredaktilo/|specs/048-nodredaktilo-grupoj-kialoj/)'`: **leer**.
+2. `git diff --name-only origin/main...HEAD -- packages/modelo packages/agordilo packages/eroj packages/mcp packages/vortaro .github packages/metiejo/src/test-doubles`: **0**. Keine Root-Datei, kein `package.json`, kein `pnpm-lock.yaml`.
+3. `git diff -U0 origin/main -- . | grep -nE '^\+.*(timeout|Timeout|threshold|sojlo|limit|Limit|toBeLessThan|GRUPPE_MAX|\b60\b|\b40\b)'`: Treffer nur in `grafeo.ts` (3: `GRUPPE_MAX = 60`, Kommentar und Vergleich der 60er-Regel), `grafeo-grupoj-048.test.ts` (15: `GRUPPE_MAX` und der Testname „keeps the limit of the spec as a constant“), `grafeo-neu-047.test.ts` (1: D-6-Kommentar „the 60-rule“), `spec.md` (3) und `plan.md` (4) als wörtliche Kopien, `tasks.md` (13 nach `d63ff7e6`, nach dem letzten Commit mehr: diese Diff-Suche zitiert das Muster, „Grenze 40 unverändert“, „Hook-Timeout“ von `turbo-inputs`, die nordstelo-Zeitgrenzen der lokalen Läufe), `bericht.md` (1: Befund „Nahe an 60“). `bilder.ts`: 0. Keine Grenze angehoben.
+4. Private Namen (RR-6): `pnpm check:privat` nach dem Commit **PASS** (4358 Dateien, 0 Treffer). Zusätzlich die hinzugefügten Zeilen und die Commit-Nachrichten mit dem Matcher des Repos: `git diff origin/main...HEAD | grep '^+' > /tmp/ne1b-plus.txt; git log origin/main..HEAD --format=%B >> /tmp/ne1b-plus.txt; node -e 'import("./packages/modelo/dist/checks/privat/rules.js").then(m=>{…findPrivateNames…})'` → **0** (2599 Zeilen).
+5. Marken: die hinzugefügten Zeilen nennen nur `komuna`, `ekzemplo`, `provo` (gelesen; Gegenprobe gegen eine Liste fremder Marken- und Design-System-Namen leer). `pnpm check:clean-room` **PASS**.
+6. Kein neuer Kern-Token: keine Änderung an Vortaro- oder Modelo-Daten (durch 2. abgedeckt).
+7. `git status --porcelain | grep -E '\.png$|messung\.json'`: **leer**; `git ls-files` kennt kein Bild und keine `messung.json` aus diesem Lauf.
+
+### Lokale Läufe (Hintergrund, `FM_AUSGABE=knapp`, RR-10)
+
+- `pnpm test:betroffen` (Basis `946248b9`; 6 Pakete: cli, ekranoj, metiejo, modelo, nodredaktilo, nordstelo; Engines nur Chromium): **rot**, 1 von 15 Aufgaben – `@fundamento/nordstelo#test` 3 rot, alle in unveränderte Zeitgrenzen bei paralleler Last: `packages/nordstelo/src/ablauf/raporto.test.ts:236` (Test-Timeout 5 s), `packages/nordstelo/src/ac8.test.ts:156` und `packages/nordstelo/src/ablauf/integra.test.ts:131` (Hook-Timeout 10 s). Turbo hat danach die übrigen Aufgaben nicht mehr gestartet.
+- Dieselbe Auswahl seriell (`pnpm exec turbo run test --output-logs=errors-only --concurrency=1 --continue --filter=…` mit denselben sechs Paketen und `PLAYWRIGHT_ENGINES=chromium`): **15/15 grün** (650 s); JUnit: cli 120, ekranoj 301, metiejo 675, modelo 4938 (auch `turbo-inputs` diesmal grün), nordstelo 270 Tests, je 0 rot. Zuordnung: Lastbefund wie in 047 (Bericht 047 Abschnitt 1, „Parallel unter hoher Rechnerlast …“), nicht durch Spec 048 (nordstelo ist nur betroffen, weil es von metiejo abhängt; keine Datei von nordstelo geändert). Keine Wiederholung über den einen seriellen Lauf hinaus nötig.
+- `pnpm lint`: **grün**. `pnpm check:vortaro-lint`: **PASS**. `pnpm check:clean-room`: **PASS**. `pnpm check:privat`: **PASS**.
+- Bekannt rot und fremd (RR-7), nicht angefasst: `packages/eroj/test/zweitfarbe-036*` (nicht betroffen, lief nicht) und `modelo turbo-inputs` (lief grün).
+
+### Befunde
+
+- **F-T4-1** Eingepasst liegen die 43 Untergruppen von `farbe/komponenten` in einer einzigen Spalte; bei 1600×1000 ist dann kein Knoten lesbar (`*-farbe-komponenten.png`, `*-ero-offen-geerbt.png`). Befund für NE-2 (Geschwister umbrechen oder auf die geöffnete Gruppe einpassen).
+- **F-T4-2** Geerbte Gründe kommen aus wenigen Texten: ekzemplo und provo erben 1471 / 1475 mal aus 11 verschiedenen `kialo`-Texten (komuna 832 aus 77); in provo stammen 380 von einem Mechanik-Knoten (Text der Rampen-Regel), häufigste Quellen `color.text.default` (190), `color.text.muted` (120), `spacing.small` (77). Gezählt mit einem Wegwerf-Skript außerhalb des Repos gegen `packages/metiejo/dist/grafeo-sicht.js` und die API-Graphen. Eingang für die Antwort „Trägt die Dreiteilung?“.
+- **F-T4-3** Jeder Klick erreichte sein Ziel mit dem Zeiger; in 047 mussten Zuklappen der 920er-Gruppe und Knotenwahl als `click`-Ereignis laufen.
+- **F-T4-4** `dist/leinwand.js` 635 947 Byte, gzip 170 082 Byte (Stufe 6; 047: 632 437 / 169 139).
+
+### Entscheidungen
+
+- **D-T4-1** Aufklappen je Ebene auf einer frischen Seite je Ebene, damit offene Gruppen einer Ebene die nächste nicht beeinflussen; die Vorfahren aus `grupojDe` ungemessen.
+- **D-T4-2** Zeiger oder Ereignis entscheidet ein Treffertest (`document.elementFromPoint` in der Mitte des Ziels liegt im Ziel); so wartet kein Klick auf eine Playwright-Grenze.
+- **D-T4-3** Die dunklen Bilder aus 047 entfallen (Spec 048 C nennt drei helle Bilder je Marke); Ebenen oder Bild-Ziele, die eine Marke nicht hat, würden als „nicht vorhanden“ geschrieben (kam nicht vor).
+- **D-T4-4** Das Skript prüft die eine Definition (2.2) selbst und bricht ab, wenn `luecken`, `ohneGrund` und die Achsen-Summe auseinanderlaufen.
+
+### Commits
+
+- `d63ff7e6` Spec 048 T4: bilder measures kinds, reasons and every level; luecken.json lists decisions without a reason
+- (dieser Commit) Spec 048 T4: tasks and bericht draft
