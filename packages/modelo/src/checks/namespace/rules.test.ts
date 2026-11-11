@@ -9,6 +9,7 @@ import {
   checkPathAscii,
   checkVortaroSet,
 } from "./rules.js";
+import { scanNamespace } from "./scan.js";
 
 // Built at runtime so this test file never contains a literal registration call that the repo-wide
 // custom-element scan would pick up.
@@ -149,6 +150,65 @@ describe("checkCssCustomProperties", () => {
     const result = checkCssCustomProperties("a.css", ":root { --fm-a: 1px;");
     expect(result.issues.map((issue) => issue.rule)).toEqual(["namespace-custom-property"]);
     expect(result.issues[0]?.path).toMatch(/^a\.css:\d+:\d+$/);
+  });
+});
+
+describe("checkCssCustomProperties: the canvas library variables (Spec 047 B-2)", () => {
+  const DECLARATION = ":root {\n  --xy-edge-stroke-default: var(--fm-color-border-default);\n}";
+
+  it("accepts an --xy- declaration inside packages/nodredaktilo, source and dist", () => {
+    for (const file of [
+      "packages/nodredaktilo/src/leinwand.css",
+      "packages/nodredaktilo/dist/leinwand.css",
+    ]) {
+      const result = checkCssCustomProperties(file, DECLARATION);
+      expect(result.issues, file).toEqual([]);
+      expect(result.definitions, file).toBe(1);
+    }
+  });
+
+  it("still reports the same declaration in any other package, with its path and rule", () => {
+    for (const file of [
+      "packages/metiejo/src/leinwand.css",
+      "packages/eroj/dist/leinwand.css",
+      "packages/nodredaktilo-x/src/leinwand.css",
+      "leinwand.css",
+    ]) {
+      const result = checkCssCustomProperties(file, DECLARATION);
+      expect(rulesAndPaths(result.issues), file).toEqual([
+        { rule: "namespace-custom-property", path: `${file}:2:3` },
+      ]);
+    }
+  });
+
+  it("still reports other foreign names and --xy- @theme entries inside packages/nodredaktilo", () => {
+    const file = "packages/nodredaktilo/src/leinwand.css";
+    const result = checkCssCustomProperties(
+      file,
+      ":root {\n  --rf-color: red;\n}\n@theme {\n  --xy-color: red;\n}",
+    );
+    expect(rulesAndPaths(result.issues)).toEqual([
+      { rule: "namespace-custom-property", path: `${file}:2:3` },
+      { rule: "namespace-custom-property", path: `${file}:5:3` },
+    ]);
+  });
+
+  it("keeps the scan as strict as before outside packages/nodredaktilo", () => {
+    const inside = "packages/nodredaktilo/dist/leinwand.css";
+    const outside = "packages/metiejo/dist/leinwand.css";
+    const { issues } = scanNamespace({
+      root: "/repo",
+      listing: "git",
+      paths: [],
+      generatedCss: [inside, outside],
+      texts: new Map([
+        [inside, DECLARATION],
+        [outside, DECLARATION],
+      ]),
+    });
+    expect(rulesAndPaths(issues)).toEqual([
+      { rule: "namespace-custom-property", path: `${outside}:2:3` },
+    ]);
   });
 });
 
