@@ -339,3 +339,26 @@ Durch diesen Branch verursacht und rot bleibt nur B-1 (b). Kein Fix in T1–T4-Z
 - Ein `workflow_dispatch`: https://github.com/thojank/fundamento/actions/runs/42927702644, rot (22/25 grün). Rot: `unit (modelo)` (B-1 (b) `workspace.test.ts:40` + fremd `turbo-inputs.test.ts:679` Hook-Timeout), `Rendered Eroj` shard 2 und 4 (nur fremd `zweitfarbe-036.spec.ts`). Kein Rerun, kein weiterer Push.
 - Browser-QA nach dem Bau: PASS (10/10), siehe Bericht Abschnitt 1.
 - Bericht Abschnitt 1 ausgefüllt, dieser Commit nur lokal (A-2).
+
+## Nachtrag (Refine 2026-11-11)
+
+Auftrag des Maintainers vom 2026-11-11 („Zweiter Push freigegeben, einmalig. Vier kleine Punkte, kein neuer Umfang“). Die Sperre ist nur für die genannten Dateien und nur für diese Punkte aufgehoben. Punkte 1, 3 und 4 hier, je ein lokaler Commit; Punkt 2 (T6-Commit mitpushen), Push, Dispatch, Auswertung und der Nachtrag im Bericht macht der Orchestrator.
+
+- **B-1 (Punkt 1)** `packages/modelo/src/workspace.test.ts`: Eintrag `nodredaktilo: "@fundamento/nodredaktilo"` zwischen `modelo` und `nordstelo` mit Kommentar `// Spec 047 (NE-1): …`; der Testtitel nennt zusätzlich „the Nodredaktilo (Spec 047)“. Sonst nichts in der Datei. Damit ist B-1 (b) aufgelöst: die Datei allein 9/9 grün (vorher rot an Zeile 40).
+- **Jugxo A-1 (Punkt 3)** `packages/modelo/data/jugxoj.json`, neu `jug_01M7529VTNHYB7ZBX9S37TWNES` (mit `pnpm id:new jugxo` erzeugt, dadurch auch ein Eintrag in `packages/modelo/data/ids.lock.json`). `ref: { "artikolo": "X" }`, `decision: "approved"`, `date: "2026-11-09"` (Tag der Entscheidung). `ref.artikolo` X, nicht `ref.regulo`: Die Ausnahme hebt die Konformitätsprüfung 4 (Alirebleco) für ein Paket auf, keine einzelne Regulo; jede Regulo der Barrierefreiheit gilt weiter für die Eroj und die Marken. Das Schema (`Jugxo`, `additionalProperties: false`) hat kein Feld für ein Paket; `aspekto` und `ref.celo` meinen anderes. Der Geltungsbereich `packages/nodredaktilo` steht deshalb im Kialo und im `context`, wie bei früheren Jugxoj zu Art. X mit begrenztem Bereich (z. B. `jug_01M2W3K1YPP05F4XF86J71RGTK`). Keine Zahl angehoben: die Zählungen kommen aus den Daten (`check:regularo` 235 Jugxoj, vorher 234).
+- **B-2 (Punkt 4)** Benannte Ausnahme im bestehenden Mechanismus der Namensraum-Prüfung: in `packages/modelo/src/checks/namespace/rules.ts` nach dem Muster von `GENERATOR_PATH`/`isEroGeneratorSource` (Spec 003 D-07) die Konstanten `CANVAS_LIBRARY_PATH` (`/(^|\/)packages\/nodredaktilo\//`) und `CANVAS_LIBRARY_PREFIX` (`--xy-`) und `isCanvasLibraryProperty(file, prop)`; `checkCssCustomProperties` meldet eine `--xy-`-Deklaration außerhalb von `@theme` nur dann nicht, wenn die Datei in `packages/nodredaktilo` liegt. Andere fremde Namen dort, `--xy-` in `@theme` und `--xy-` an jeder anderen Stelle bleiben `namespace-custom-property`. Keine `.css`-Datei in `packages/nodredaktilo`, Leinwand unverändert.
+  - Tests zuerst in `rules.test.ts` (`checkCssCustomProperties: the canvas library variables (Spec 047 B-2)`, 4 Tests): rot beobachtet (2 rot: Annahme in `src/` und `dist/`, und `scanNamespace` über einen Baum mit beiden Dateien), danach grün. Die Strenge-Tests waren schon vorher grün und bleiben es: dieselbe Deklaration in `packages/metiejo/src/leinwand.css`, `packages/eroj/dist/leinwand.css`, `packages/nodredaktilo-x/src/leinwand.css` und `leinwand.css` meldet genau `{ rule: "namespace-custom-property", path: "<datei>:2:3" }`.
+
+| Lauf (lokal, `FM_AUSGABE=knapp`) | Ergebnis |
+|---|---|
+| `vitest run src/workspace.test.ts` (modelo) | grün, 9/9 |
+| `vitest run src/ids src/checks/regularo src/validate/validate-modelo.test.ts src/contracts/schema.test.ts src/export/celo-mappings.test.ts src/load/load-modelo.test.ts src/data/phase0-data.test.ts` | grün, 736/736 |
+| `vitest run src/checks/namespace/rules.test.ts` vor der Umsetzung | rot, 35 grün / 2 rot (die zwei Annahme-Tests, erwartet) |
+| `vitest run src/checks/namespace` nach der Umsetzung | grün, 42/42 |
+| `pnpm fm modelo validate` | VALID, 0 Fehler, 0 Warnungen (jugxoj 235) |
+| `pnpm check:regularo` | PASS, 62 Reguloj, 235 Jugxoj, 0 Fehler |
+| `pnpm check:vortaro-lint` | PASS, 0 Fehler, 0 Warnungen (`cssFiles=5`) |
+| `pnpm check:clean-room` | PASS, 0 Fehler, 0 Warnungen |
+| `pnpm check:privat` | PASS, 0 Treffer |
+| `pnpm lint` | grün, 22/22 (bekannte alte Warnungen in nicht berührten Dateien) |
+| `pnpm --filter @fundamento/modelo test` | grün, 4938/4938 (vorher 4933 grün + 1 rot B-1 (b); +4 neue Tests), `turbo-inputs` diesmal grün |
