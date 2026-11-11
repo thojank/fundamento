@@ -330,3 +330,12 @@ Durch diesen Branch verursacht und rot bleibt nur B-1 (b). Kein Fix in T1–T4-Z
 ## T6 im Einzelnen
 
 (offen)
+
+## T6 – PR, Dispatch, Bericht (Orchestrator, 2026-11-11)
+
+- `origin/main` = `943cc22f` (Merge-Basis), nicht bewegt: kein Rebase.
+- Ein Push: `db4803ad` → `origin/261110-spec-047-node-editor-graph-les-d83783`.
+- PR #161 https://github.com/thojank/fundamento/pull/161, mergeable, nicht gemergt.
+- Ein `workflow_dispatch`: https://github.com/thojank/fundamento/actions/runs/42927702644, rot (22/25 grün). Rot: `unit (modelo)` (B-1 (b) `workspace.test.ts:40` + fremd `turbo-inputs.test.ts:679` Hook-Timeout), `Rendered Eroj` shard 2 und 4 (nur fremd `zweitfarbe-036.spec.ts`). Kein Rerun, kein weiterer Push.
+- Browser-QA nach dem Bau: PASS (10/10), siehe Bericht Abschnitt 1.
+- Bericht Abschnitt 1 ausgefüllt, dieser Commit nur lokal (A-2).

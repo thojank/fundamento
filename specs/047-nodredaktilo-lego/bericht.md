@@ -1,17 +1,34 @@
 # Spec 047 – Bericht (NE-1: den Graphen lesen)
 
-Entwurf aus T5 (2026-11-11). Abschnitt 1 füllt T6 nach Push und Dispatch und committet ihn nur lokal (A-2). Quellen: [`spec.md`](spec.md), [`plan.md`](plan.md) (Nachtrag NE-1), [`tasks.md`](tasks.md). Konzept und Benchmark liegen außerhalb des Repos (D-1): `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/konzepte/node-editor-konzept.md`, `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/research/node-editor-benchmark-2026-11-10.md`.
+Entwurf aus T5, Abschnitt 1 von T6 ausgefüllt (2026-11-11), nur lokal committet (A-2). Quellen: [`spec.md`](spec.md), [`plan.md`](plan.md) (Nachtrag NE-1), [`tasks.md`](tasks.md). Konzept und Benchmark liegen außerhalb des Repos (D-1): `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/konzepte/node-editor-konzept.md`, `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/research/node-editor-benchmark-2026-11-10.md`.
 
 ## 1. PR, Commit, Dispatch, CI
 
-<!-- T6: PR, Commit, Dispatch, CI je Job -->
-- PR: _(T6)_
-- Commit (Kopf des Pushs): _(T6)_
-- Dispatch-Lauf: _(T6)_
+<!-- T6: PR, Commit, Dispatch, CI je Job – ausgefüllt 2026-11-11 -->
+- PR: https://github.com/thojank/fundamento/pull/161 (`261110-spec-047-node-editor-graph-les-d83783` → `main`, mergeable, **nicht mergen**)
+- Commit (Kopf des einen Pushs): `db4803ade12ba58c893baf770e3648bb684578f5` (Basis `origin/main` = `943cc22f`, nicht bewegt, kein Rebase)
+- Dispatch-Lauf (genau einer, kein Rerun): https://github.com/thojank/fundamento/actions/runs/42927702644 – Ergebnis **rot**, 22 von 25 Jobs grün
 
 | Job | Ergebnis | Notiz |
 |---|---|---|
-| _(T6)_ | | |
+| Build, lint and Modelo checks | grün | |
+| Affected packages (betroffen) | grün | Lockfile macht alles betroffen (erwartet) |
+| Unit tests (metiejo) | grün | enthält alle fünf `*-047`-Tests |
+| Unit tests (agordilo, cli, ekranoj, mcp, nordstelo) | grün | |
+| Unit tests (Projekcioj, shard 1 und 2) | grün | |
+| **Unit tests (modelo)** | **rot** | 4929 grün, 2 rot: `packages/modelo/src/workspace.test.ts:40` (B-1 (b), durch Spec 047, 11 statt 10 Pakete) und `packages/modelo/src/ci/turbo-inputs.test.ts:679` (Hook-Timeout 10 s, bekannt rot und fremd) |
+| **Rendered Eroj (Playwright, shard 2 of 4)** | **rot** | 504 grün, 1 rot: `packages/eroj/test/zweitfarbe-036.spec.ts:196` [chromium] (bekannt rot und fremd) |
+| Rendered Eroj (Playwright, shard 1 und 3) | grün | |
+| **Rendered Eroj (Playwright, shard 4 of 4)** | **rot** | 503 grün, 2 rot: `zweitfarbe-036.spec.ts:196` und `:129` [webkit] (bekannt rot und fremd) |
+| Rendered accessibility (Alirebleco, shard 1–3) | grün | |
+| Rendered checks (Make Kit, Quickstart) | grün | |
+| Rendered checks (Vitrino, cetero-1…3) | grün | |
+| Rendered checks (Vitrino-Werkstatt, werkstatt-1, -2) | grün | |
+| Timing checks (M5, Gegenprobe, Ableitung, G5) | grün | |
+
+Alle drei roten Jobs sind zugeordnet: zwei nur auf die bekannt-fremde `zweitfarbe-036`, einer auf B-1 (b) plus die bekannt-fremde `turbo-inputs`. Kein weiterer Push, kein Rerun (Laufzeit-Grenzen der Spec).
+
+QA im Browser nach dem Bau (Playwright MCP, 10 Prüfungen, 1 Durchlauf): PASS, keine Befunde; Bericht in `purple/documentation/261110-neue-spec-047-node-editor-ne-1-den-graphen-lese/qa-results/qa-report-node-editor-graph-lesen-web.md` (außerhalb des Repos).
 
 Bekannt rot und fremd, nicht angefasst: `packages/eroj/test/zweitfarbe-036`, `modelo turbo-inputs`. Durch Spec 047 rot und benannt (B-1 (b)): `packages/modelo/src/workspace.test.ts:40` im Job `unit (modelo)`.
 
