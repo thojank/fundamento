@@ -36,9 +36,9 @@ describe("Spec 047 T1: a new token appears without a code change", () => {
       (nodo) => !antaue.nodoj.some((malnova) => malnova.id === nodo.id),
     );
     expect(kunKonata.nodoj.length).toBe(antaue.nodoj.length + 1);
-    expect(nove.map(({ id, grupo }) => ({ id, grupo }))).toEqual([
-      { id: "color.zzzprobo", grupo: "farbe/rollen" },
-    ]);
+    // Spec 048 (D-6): the 60-rule splits farbe/rollen, so the token lands in it or below it.
+    expect(nove.map(({ id }) => id)).toEqual(["color.zzzprobo"]);
+    expect(nove[0]?.grupo).toMatch(/^farbe\/rollen(\/|$)/);
   });
 
   it("adds exactly one node for a token under an unknown prefix, in weitere", () => {

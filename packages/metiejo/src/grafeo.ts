@@ -131,6 +131,31 @@ function grupoLauTabelo(id: string): string {
 
 const aksoDe = (grupo: string): string => grupo.split("/")[0] ?? grupo;
 
+/**
+ * Spec 048 (NE-1b): no group shows more than this many children once it is opened – its direct
+ * nodes plus its direct sub-groups. A group with more direct nodes is split (`dividu`).
+ */
+export const GRUPPE_MAX = 60;
+
+/** The parent and label of every group id the assignment created; the tree of `grupoj`. */
+type Arbo = Map<string, { etikedo: string; patro?: string }>;
+
+/** Registers a group once (its first parent and label win) and returns its id. */
+function aldonuGrupon(arbo: Arbo, id: string, etikedo: string, patro?: string): string {
+  if (!arbo.has(id)) arbo.set(id, patro === undefined ? { etikedo } : { etikedo, patro });
+  return id;
+}
+
+/**
+ * A group of the table (`<akso>` or `<akso>/<sub>`, literals of this file) with its axis: level 1
+ * carries the axis label, level 2 the label from SUBGRUPOJ.
+ */
+function tabelaGrupo(arbo: Arbo, grupo: string): string {
+  const [akso = grupo, sub] = grupo.split("/");
+  aldonuGrupon(arbo, akso, AKSOJ.find((entry) => entry.id === akso)?.etikedo ?? akso);
+  return sub === undefined ? akso : aldonuGrupon(arbo, grupo, SUBGRUPOJ[sub] ?? sub, akso);
+}
+
 // ---------------------------------------------------------------------------------------------
 // Values
 
@@ -413,22 +438,25 @@ function konstruu(k: Konstruo): Grafeo {
     ligoj,
   );
 
-  assignGroups(nodoj, ligoj);
-  return { nodoj, ligoj, grupoj: groupsOf(nodoj) };
+  const arbo = assignGroups(nodoj, ligoj);
+  dividu(nodoj, arbo);
+  return { nodoj, ligoj, grupoj: groupsOf(nodoj, arbo) };
 }
 
 /**
- * The group of every node: by the prefix table; a component token by the axis of the first
- * non-component node on its chain of origin (the smallest `al` at each step, up to an input),
- * "weitere" when the chain reaches none.
+ * The group of every node: by the prefix table; a component token (`ero.*`, `sxablono.*`) by the
+ * axis of the first non-component node on its chain of origin (the smallest `al` at each step, up
+ * to an input), in `<akso>/komponenten/<second path part>` (Spec 048, D-1); "weitere" itself when
+ * the chain reaches no axis with sub-groups (D-2). Returns the tree of the groups it used.
  */
-function assignGroups(nodoj: Nodo[], ligoj: readonly Ligo[]): void {
+function assignGroups(nodoj: Nodo[], ligoj: readonly Ligo[]): Arbo {
+  const arbo: Arbo = new Map();
   const next = new Map<string, string>();
   for (const ligo of ligoj) if (!next.has(ligo.de)) next.set(ligo.de, ligo.al);
   const speco = new Map(nodoj.map((nodo) => [nodo.id, nodo.speco]));
   for (const nodo of nodoj) {
     if (!isKomponento(nodo.id)) {
-      nodo.grupo = grupoLauTabelo(nodo.id);
+      nodo.grupo = tabelaGrupo(arbo, grupoLauTabelo(nodo.id));
       continue;
     }
     const seen = new Set<string>([nodo.id]);
@@ -446,37 +474,104 @@ function assignGroups(nodoj: Nodo[], ligoj: readonly Ligo[]): void {
     }
     const akso = found === undefined ? WEITERE : aksoDe(grupoLauTabelo(found));
     const withSub = AKSOJ.find((entry) => entry.id === akso)?.subgrupoj === true;
-    nodo.grupo = withSub ? `${akso}/komponenten` : WEITERE;
+    if (!withSub) {
+      nodo.grupo = tabelaGrupo(arbo, WEITERE);
+      continue;
+    }
+    const komponentoj = tabelaGrupo(arbo, `${akso}/komponenten`);
+    const nomo = nodo.id.split(".")[1] || nodo.id;
+    nodo.grupo = aldonuGrupon(arbo, `${komponentoj}/${nomo}`, nomo, komponentoj);
+  }
+  return arbo;
+}
+
+/** The members of every group, by group id. */
+function membrojDe(nodoj: readonly Nodo[]): Map<string, Nodo[]> {
+  const members = new Map<string, Nodo[]>();
+  for (const nodo of nodoj) {
+    const list = members.get(nodo.grupo) ?? [];
+    list.push(nodo);
+    members.set(nodo.grupo, list);
+  }
+  return members;
+}
+
+/**
+ * The 60-rule (Spec 048): a group with more than GRUPPE_MAX direct nodes is split by the first
+ * dot-separated path index at which its members do not all agree, into `<gruppe>/<teil>` (label
+ * `<teil>`, parent the old group), and again for every new group still too large. A split group
+ * keeps no direct node. A member whose path ends before that index goes by its last part; a group
+ * whose members all fall into one part stays as it is (the test then names it), nothing is dropped.
+ */
+function dividu(nodoj: readonly Nodo[], arbo: Arbo): void {
+  const members = membrojDe(nodoj);
+  const queue = [...members.keys()].sort(compareText);
+  for (let index = 0; index < queue.length; index += 1) {
+    const grupo = queue[index] ?? "";
+    const list = members.get(grupo) ?? [];
+    if (list.length <= GRUPPE_MAX) continue;
+    const partoj = list.map((nodo) => nodo.id.split("."));
+    const longo = Math.max(...partoj.map((parts) => parts.length));
+    const unua = partoj[0] ?? [];
+    let je = 0;
+    while (je < longo && partoj.every((parts) => parts[je] === unua[je])) je += 1;
+    const teiloj = new Map<string, Nodo[]>();
+    list.forEach((nodo, at) => {
+      const parts = partoj[at] ?? [];
+      const teil = parts[je] ?? parts.at(-1) ?? nodo.id;
+      const sub = teiloj.get(teil) ?? [];
+      sub.push(nodo);
+      teiloj.set(teil, sub);
+    });
+    if (teiloj.size < 2) continue;
+    for (const teil of [...teiloj.keys()].sort(compareText)) {
+      const id = aldonuGrupon(arbo, `${grupo}/${teil}`, teil, grupo);
+      const sub = teiloj.get(teil) ?? [];
+      for (const nodo of sub) nodo.grupo = id;
+      members.set(id, sub);
+      queue.push(id);
+    }
+    members.delete(grupo);
   }
 }
 
-/** The groups that hold at least one node (transitively), sorted by axis order, then id. */
-function groupsOf(nodoj: readonly Nodo[]): Grupo[] {
+/**
+ * The groups that hold at least one node (transitively): the axes in their fixed order, below
+ * each the tree depth-first, siblings sorted by id. A group lists its direct members, sorted.
+ */
+function groupsOf(nodoj: readonly Nodo[], arbo: Arbo): Grupo[] {
   const members = new Map<string, string[]>();
-  for (const nodo of nodoj) {
-    const list = members.get(nodo.grupo) ?? [];
-    list.push(nodo.id);
-    members.set(nodo.grupo, list);
+  for (const [id, list] of membrojDe(nodoj)) {
+    const ids = list.map((nodo) => nodo.id);
+    members.set(id, ids);
+  }
+  const children = new Map<string, string[]>();
+  const used = new Set<string>();
+  for (const id of members.keys()) {
+    let current: string | undefined = id;
+    while (current !== undefined && !used.has(current)) {
+      used.add(current);
+      const patro: string | undefined = arbo.get(current)?.patro;
+      if (patro !== undefined) {
+        const list = children.get(patro) ?? [];
+        list.push(current);
+        children.set(patro, list);
+      }
+      current = patro;
+    }
   }
   const grupoj: Grupo[] = [];
-  AKSOJ.forEach((akso) => {
-    const own = members.get(akso.id) ?? [];
-    const subs = Object.keys(SUBGRUPOJ)
-      .map((sub) => `${akso.id}/${sub}`)
-      .filter((id) => (members.get(id)?.length ?? 0) > 0)
-      .sort(compareText);
-    if (own.length === 0 && subs.length === 0) return;
-    grupoj.push({ id: akso.id, etikedo: akso.etikedo, nodoj: [...own].sort(compareText) });
-    for (const id of subs) {
-      const sub = id.slice(akso.id.length + 1);
-      grupoj.push({
-        id,
-        etikedo: SUBGRUPOJ[sub] ?? sub,
-        patro: akso.id,
-        nodoj: [...(members.get(id) ?? [])].sort(compareText),
-      });
-    }
-  });
+  const visit = (id: string): void => {
+    const meta = arbo.get(id);
+    grupoj.push({
+      id,
+      etikedo: meta?.etikedo ?? id,
+      ...(meta?.patro === undefined ? {} : { patro: meta.patro }),
+      nodoj: [...(members.get(id) ?? [])].sort(compareText),
+    });
+    for (const child of [...(children.get(id) ?? [])].sort(compareText)) visit(child);
+  };
+  for (const akso of AKSOJ) if (used.has(akso.id)) visit(akso.id);
   return grupoj;
 }
 
