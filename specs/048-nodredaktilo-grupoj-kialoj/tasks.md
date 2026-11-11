@@ -10,7 +10,7 @@ Fünf Tickets, ein Strang (Spec: „höchstens 5 Tickets, ein PR“). T1–T4 se
 | T2 (NE1B-2) | `knotenartDe`, `kialoDe`, `begruendungDe`, `ohneGrund` in `sichtbaro` (Opt-in); `grafeo-kialo-048` | erledigt (Befunde F-T2-1 bis F-T2-5, Entscheidungen D-T2-1 bis D-T2-4; kein 047-Test geändert) |
 | T3 (NE1B-3) | Leinwand: Aufklappen in Stufen, Seitenspalte mit Art und geerbtem Grund, Zahl an Gruppen | erledigt (Browser-Beleg unten; Befund F-T3-1 behoben, F-T3-2 fremd; Entscheidungen D-T3-1 bis D-T3-3; kein 047-Test geändert) |
 | T4 (NE1B-4) | Messung, Bilder, `luecken.json`, Diff-Suche, Bericht-Entwurf | erledigt (9 Bilder und `messung.json` außerhalb des Repos; `luecken.json` 75 / 156 / 160; Diff-Suche 1–7 sauber; lokale Läufe grün, ein Lastbefund zugeordnet; Bericht-Entwurf mit Platzhalter für T5; Entscheidungen D-T4-1 bis D-T4-4; kein 047-Test geändert) |
-| T5 (NE1B-5) | Ein PR, ein Push, ein `workflow_dispatch`, Bericht (Orchestrator) | offen |
+| T5 (NE1B-5) | Ein PR, ein Push, ein `workflow_dispatch`, Bericht (Orchestrator) | erledigt (Web-QA bestanden; ein Push `2d0ab016`; PR #162; ein Dispatch 43055211973: 23/25 grün, 2 rot nur `zweitfarbe-036` (bekannt fremd); Bericht Abschnitt 1 nur lokal committet) |
 
 ## T1 im Einzelnen
 

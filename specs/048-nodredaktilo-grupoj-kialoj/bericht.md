@@ -1,17 +1,32 @@
 # Spec 048 – Bericht (NE-1b: Untergruppen je Ero und geerbte Gründe)
 
-Entwurf aus T4 (2026-11-11). Abschnitt 1 füllt T5 nach dem einen Push und dem einen Dispatch und committet ihn nur lokal (D-7). Quellen: [`spec.md`](spec.md), [`plan.md`](plan.md) (Nachtrag NE-1b), [`tasks.md`](tasks.md). Bilder und Messung liegen außerhalb des Repos unter `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec048/`.
+Entwurf aus T4 (2026-11-11); Abschnitt 1 aus T5 nach dem einen Push und dem einen Dispatch, nur lokal committet (D-7). Quellen: [`spec.md`](spec.md), [`plan.md`](plan.md) (Nachtrag NE-1b), [`tasks.md`](tasks.md). Bilder und Messung liegen außerhalb des Repos unter `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec048/`.
 
 ## 1. PR, Commit, Dispatch, CI
 
-<!-- NE1B-5: PR, Commit, Dispatch, CI je Job -->
-- PR:
-- Commit (Kopf des einen Pushs):
-- Dispatch-Lauf (genau einer, kein Rerun):
+- PR: [#162](https://github.com/thojank/fundamento/pull/162) „Spec 048 NE-1b: Untergruppen je Ero und geerbte Gründe“ gegen `main`, nicht gemergt.
+- Commit (Kopf des einen Pushs): `2d0ab0160bcb80c718a57ef82ca4ebf44edf82d3` (`origin/main` = `946248b9` unverändert, kein Rebase).
+- Dispatch-Lauf (genau einer, kein Rerun): [43055211973](https://github.com/thojank/fundamento/actions/runs/43055211973), Ergebnis `failure` – 23 von 25 Jobs grün, die 2 roten nur durch den bekannt fremden `zweitfarbe-036`. Der `pull_request`-Lauf, den das Öffnen des PR selbst startet (43055188183), ist grün; er ist nicht der Dispatch.
+- Web-QA vor dem Push: bestanden (12/12, provo/komuna/ekzemplo, hell und dunkel).
 
 | Job | Ergebnis | Notiz |
 |---|---|---|
-| | | |
+| Affected packages (betroffen) | grün | |
+| Build, lint and Modelo checks | grün | |
+| Unit tests (metiejo) | grün | enthält `grafeo-grupoj-048`, `grafeo-kialo-048` und die 047-Tests |
+| Unit tests (modelo) | grün | `turbo-inputs` diesmal grün |
+| Unit tests (cli · ekranoj · nordstelo · agordilo · mcp) | grün | |
+| Unit tests (Projekcioj, shard 1 und 2 von 2) | grün | |
+| Timing checks (M5, Gegenprobe, Ableitung, G5) | grün | |
+| Rendered Eroj (Playwright, shard 1 und 2 von 4) | grün | |
+| Rendered Eroj (Playwright, shard 3 von 4) | rot, bekannt fremd | `packages/eroj/test/zweitfarbe-036.spec.ts:129` und `:196` [firefox]: Antwort auf `/api/marko/dukolora-rahmen-30/pruefung` bzw. Vorschau-Frame `rev 2` nicht innerhalb 5000 ms |
+| Rendered Eroj (Playwright, shard 4 von 4) | rot, bekannt fremd | dieselben zwei Tests `zweitfarbe-036.spec.ts:129` und `:196` [webkit] |
+| Rendered accessibility (Alirebleco, shard 1–3 von 3) | grün | |
+| Rendered checks (Vitrino, cetero-1 bis -3) | grün | |
+| Rendered checks (Vitrino-Werkstatt, werkstatt-1 und -2) | grün | |
+| Rendered checks (Make Kit, Quickstart) | grün | |
+
+Keine Datei unter `packages/eroj/**` ist geändert; die zwei roten Jobs sind die in der Spec genannte Ausnahme.
 
 ## 2. Bilder (keine Baselines, nichts vergleicht sie)
 
