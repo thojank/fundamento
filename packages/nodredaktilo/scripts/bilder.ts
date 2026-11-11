@@ -1,12 +1,15 @@
-// Spec 047 (NE-1, T5, P-3): images and measurements of the graph canvas, written outside the repo.
+// Spec 047 (NE-1, T5, P-3), extended by Spec 048 (NE-1b, T4): images and measurements of the graph
+// canvas, written outside the repo.
 //
 //   pnpm --filter @fundamento/nodredaktilo bilder --ziel <dir> [--luecken <file>]
 //
 // Starts the built CLI (`fm metiejo`) as a child process on a free port with a temporary workdir
 // that holds the provo fixture as a brand. It never imports the Metiejo: nodredaktilo does not
-// depend on it (D-2). Chromium via Playwright, fixed viewport, Playwright defaults untouched: a
-// step that runs into one is written to messung.json as NICHT_GEMESSEN, never retried longer.
-// These images are measurements, not baselines; nothing compares them.
+// depend on it (D-2); the pure view logic comes through the same alias the bundle uses
+// (`@fundamento/metiejo/grafeo` → `grafeo-sicht.ts`, no import of its own). Chromium via
+// Playwright, fixed viewport, Playwright defaults untouched: a step that runs into one is written
+// to messung.json as NICHT_GEMESSEN, never retried longer. These images are measurements, not
+// baselines; nothing compares them.
 
 import { type ChildProcess, spawn } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -17,8 +20,16 @@ import { dirname, join, resolve } from "node:path";
 import { setTimeout as warten } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
-import type { Grafeo, Grupo } from "@fundamento/metiejo/grafeo";
-import { type Browser, chromium, errors, type Page } from "playwright";
+import {
+  begruendungDe,
+  type Grafeo,
+  type Grupo,
+  grupojDe,
+  type Knotenart,
+  knotenartDe,
+  sichtbaro,
+} from "@fundamento/metiejo/grafeo";
+import { type Browser, chromium, errors, type Locator, type Page } from "playwright";
 
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const CLI = join(REPO, "packages/cli/dist/index.js");
@@ -27,15 +38,25 @@ const PROVO_AGORDO = join(REPO, "packages/modelo/test/fixtures/valid/aspekto-pro
 const BAU_BEFEHL = "pnpm build";
 
 const VIEWPORT = { width: 1600, height: 1000 } as const;
-/** Fresh page loads per brand, and expand cycles of the largest group (spec NE1-T5). */
+/** Fresh page loads per brand, and expand cycles per level (spec NE1-T5, Spec 048 C). */
 const LAEUFE = 5;
 /** Poll interval while the Metiejo starts. */
 const START_TAKT_MS = 250;
+/** The levels of the group tree that are measured (Spec 048 C: 1 to 4). */
+const EBENOJ = [1, 2, 3, 4] as const;
+/** "fehlt" per brand in Spec 047 (`specs/047-nodredaktilo-lego/luecken.json`, counted). */
+const VORHER_047 = { komuna: 920, ekzemplo: 1842, provo: 1852 } as const;
+/** The group whose ero sub-groups the second and third image show. */
+const FARBE_KOMPONENTEN = "farbe/komponenten";
 
 const NICHT_GEMESSEN = "nicht gemessen: Playwright-Standardgrenze";
+/** A level, or an image subject, that the graph of a brand does not have. */
+const NICHT_VORHANDEN = "nicht vorhanden";
+
+type MarkenName = keyof typeof VORHER_047;
 
 interface Marke {
-  marke: "komuna" | "ekzemplo" | "provo";
+  marke: MarkenName;
   seite: string;
   api: string;
 }
@@ -46,12 +67,8 @@ const MARKEN: readonly Marke[] = [
   { marke: "provo", seite: "/marko/provo/grafeo", api: "/api/grafeo?marko=provo" },
 ];
 
-const SKEMOJ = [
-  { skemo: "light", datei: "hell" },
-  { skemo: "dark", datei: "dunkel" },
-] as const;
-
 type Wert<T> = T | typeof NICHT_GEMESSEN;
+type Vorhanden<T> = T | typeof NICHT_VORHANDEN;
 
 interface Zeiten {
   median: number;
@@ -59,14 +76,47 @@ interface Zeiten {
   laeufe: number[];
 }
 
+/**
+ * How a toggle was clicked: `zeiger` a real pointer click (the toggle is the topmost element at its
+ * centre), `ereignis` the click event sent to the toggle directly (047 D-T5-1: covered or too
+ * small at the fitted zoom), `gemischt` both within one measurement.
+ */
+type Klick = "zeiger" | "ereignis" | "gemischt";
+
+interface Aufklappen extends Zeiten {
+  gruppe: string;
+  /** The timed clicks that open the group. */
+  klickAuf: Klick;
+  /** The untimed clicks that close it again between two runs. */
+  klickZu: Klick;
+}
+
+interface GroessteGruppe {
+  id: string;
+  /** What opening it shows: direct nodes + direct sub-groups. */
+  kinder: number;
+}
+
+interface GeerbtBild {
+  id: string;
+  gruppe: string;
+  de: string;
+  klick: Klick;
+}
+
 interface MarkenMessung {
   nodoj: number;
   ligoj: number;
-  groessteGruppe: { id: string; patro: string; nodoj: number };
+  arten: Record<Knotenart, number>;
+  ohneGrund: number;
+  geerbt: number;
+  keinGrundInKette: number;
+  vorher047: number;
+  groessteGruppeJeEbene: Record<string, Vorhanden<GroessteGruppe>>;
+  aufklappenMsJeEbene: Record<string, Vorhanden<Wert<Aufklappen>>>;
   zugeklappt: Wert<number>;
   bisSichtbarMs: Wert<Zeiten>;
-  aufklappenMs: Wert<Zeiten>;
-  offenBild: Wert<string>;
+  geerbtBild: Vorhanden<Wert<GeerbtBild>>;
 }
 
 /** Runs a step; a Playwright default that runs out becomes NICHT_GEMESSEN, anything else throws. */
@@ -92,6 +142,13 @@ function zeitenAus(laeufe: readonly number[]): Zeiten {
   return { median, max: sortiert.at(-1) ?? 0, laeufe: [...laeufe] };
 }
 
+const klickAus = (klicks: readonly Exclude<Klick, "gemischt">[]): Klick =>
+  klicks.every((k) => k === "zeiger")
+    ? "zeiger"
+    : klicks.every((k) => k === "ereignis")
+      ? "ereignis"
+      : "gemischt";
+
 function sortiereSchluessel(wert: unknown): unknown {
   if (Array.isArray(wert)) return wert.map(sortiereSchluessel);
   if (wert !== null && typeof wert === "object") {
@@ -109,32 +166,92 @@ function kanonisch(wert: unknown): string {
   return `${JSON.stringify(sortiereSchluessel(wert), null, 2)}\n`;
 }
 
-/** Every derived node without `kialo`, by group, ids sorted. */
+/**
+ * Every Entscheidung without a reason (`begruendungDe` → "fehlt", the one definition of Spec 048
+ * 2.2), by group, ids sorted.
+ */
 function luecken(grafeo: Grafeo): Record<string, string[]> {
   const proGruppe = new Map<string, string[]>();
   for (const nodo of grafeo.nodoj) {
-    if (nodo.speco !== "derivajxo" || nodo.kialo !== undefined) continue;
+    const begruendung = begruendungDe(grafeo, nodo.id);
+    if (begruendung === undefined || !("montro" in begruendung) || begruendung.montro !== "fehlt")
+      continue;
     proGruppe.set(nodo.grupo, [...(proGruppe.get(nodo.grupo) ?? []), nodo.id]);
   }
   return Object.fromEntries([...proGruppe].map(([grupo, ids]) => [grupo, ids.sort()]));
 }
 
-/** The level-2 group with the most direct nodes; ties go to the smaller id. */
-function groessteGruppe(grafeo: Grafeo): Grupo & { patro: string } {
-  let beste: (Grupo & { patro: string }) | undefined;
-  for (const grupo of grafeo.grupoj) {
-    const { patro } = grupo;
-    if (patro === undefined) continue;
-    if (
-      beste === undefined ||
-      grupo.nodoj.length > beste.nodoj.length ||
-      (grupo.nodoj.length === beste.nodoj.length && grupo.id < beste.id)
-    ) {
-      beste = { ...grupo, patro };
-    }
+/** Kinds and reasons per brand, from the graph alone (Spec 048 C). */
+function zaehle(grafeo: Grafeo) {
+  const arten: Record<Knotenart, number> = { decido: 0, mekaniko: 0, transpreno: 0 };
+  let ohneGrund = 0;
+  let geerbt = 0;
+  let keinGrundInKette = 0;
+  for (const nodo of grafeo.nodoj) {
+    const art = knotenartDe(grafeo, nodo.id);
+    const begruendung = begruendungDe(grafeo, nodo.id);
+    if (art === undefined || begruendung === undefined) continue;
+    arten[art] += 1;
+    if (!("montro" in begruendung)) continue;
+    if (begruendung.montro === "fehlt") ohneGrund += 1;
+    if (begruendung.montro === "geerbt") geerbt += 1;
+    if (begruendung.montro === "neniu") keinGrundInKette += 1;
   }
-  if (beste === undefined) throw new Error("Der Graph hat keine Gruppe der Ebene 2.");
+  return { arten, ohneGrund, geerbt, keinGrundInKette };
+}
+
+/** One definition everywhere (2.2): the work list, the count and the axis badges must agree. */
+function pruefeEineDefinition(
+  marke: string,
+  grafeo: Grafeo,
+  liste: Record<string, string[]>,
+  ohneGrund: number,
+): void {
+  const inListe = Object.values(liste).reduce((summe, ids) => summe + ids.length, 0);
+  const anAchsen = sichtbaro(grafeo, [], { ohneGrund: true })
+    .nodoj.filter((nodo) => nodo.speco === "grupo" && nodo.grupo === undefined)
+    .reduce((summe, nodo) => summe + (nodo.ohneGrund ?? 0), 0);
+  if (inListe !== ohneGrund || anAchsen !== ohneGrund) {
+    throw new Error(
+      `${marke}: luecken ${inListe}, ohneGrund ${ohneGrund}, Achsen ${anAchsen} – nicht eine Definition.`,
+    );
+  }
+}
+
+const ebeneDe = (grupo: Grupo): number => grupo.id.split("/").length;
+
+/** What opening a group shows: its direct nodes and its direct sub-groups. */
+function kinderJeGruppe(grafeo: Grafeo): Map<string, number> {
+  const kinder = new Map(grafeo.grupoj.map((grupo) => [grupo.id, grupo.nodoj.length]));
+  for (const grupo of grafeo.grupoj) {
+    if (grupo.patro !== undefined) kinder.set(grupo.patro, (kinder.get(grupo.patro) ?? 0) + 1);
+  }
+  return kinder;
+}
+
+/** Per level the group with the most children; ties go to the smaller id. */
+function groessteGruppeJeEbene(grafeo: Grafeo): Map<number, GroessteGruppe> {
+  const kinder = kinderJeGruppe(grafeo);
+  const beste = new Map<number, GroessteGruppe>();
+  for (const grupo of grafeo.grupoj) {
+    const ebene = ebeneDe(grupo);
+    const n = kinder.get(grupo.id) ?? 0;
+    const bisher = beste.get(ebene);
+    if (bisher === undefined || n > bisher.kinder || (n === bisher.kinder && grupo.id < bisher.id))
+      beste.set(ebene, { id: grupo.id, kinder: n });
+  }
   return beste;
+}
+
+/** The Übernahme for the third image: smallest `ero.*` id under `farbe/komponenten` with "geerbt". */
+function geerbtWahl(grafeo: Grafeo): { id: string; gruppe: string; de: string } | undefined {
+  for (const nodo of grafeo.nodoj) {
+    if (!nodo.id.startsWith("ero.") || !nodo.grupo.startsWith(`${FARBE_KOMPONENTEN}/`)) continue;
+    const begruendung = begruendungDe(grafeo, nodo.id);
+    if (begruendung !== undefined && "montro" in begruendung && begruendung.montro === "geerbt")
+      return { id: nodo.id, gruppe: nodo.grupo, de: begruendung.de };
+  }
+  return undefined;
 }
 
 const freierPort = (): Promise<number> =>
@@ -195,6 +312,27 @@ async function einpassen(seite: Page): Promise<void> {
   await gemalt(seite);
 }
 
+/** Whether a pointer at the element's centre hits the element (inside the viewport, uncovered). */
+const erreichbar = (ziel: Locator): Promise<boolean> =>
+  ziel.evaluate((element) => {
+    const rahmen = element.getBoundingClientRect();
+    const x = rahmen.left + rahmen.width / 2;
+    const y = rahmen.top + rahmen.height / 2;
+    if (rahmen.width === 0 || x < 0 || y < 0 || x > innerWidth || y > innerHeight) return false;
+    const getroffen = document.elementFromPoint(x, y);
+    return getroffen !== null && (getroffen === element || element.contains(getroffen));
+  });
+
+/** A real pointer click where it reaches the element, else the click event (047 D-T5-1). */
+async function klicke(ziel: Locator): Promise<Exclude<Klick, "gemischt">> {
+  if (await erreichbar(ziel)) {
+    await ziel.click();
+    return "zeiger";
+  }
+  await ziel.dispatchEvent("click");
+  return "ereignis";
+}
+
 interface Geladen {
   seite: Page;
   preta: number;
@@ -220,22 +358,104 @@ async function laden(browser: Browser, url: string): Promise<Geladen> {
 }
 
 /**
- * Clicks a group's toggle and returns `data-nr-dauro` once `data-nr-rev` has moved on. `zeiger`:
- * a pointer click. Without it the click event goes to the toggle directly – needed to close the
- * largest group, whose toggle is a few pixels and covered by its members at the fitted zoom. The
- * canvas starts its clock in the click handler either way, so `dauro` means the same.
+ * Clicks a group's toggle (`klicke`) and returns `data-nr-dauro` once `data-nr-rev` has moved on,
+ * with how it clicked. The canvas starts its clock in the click handler either way, so `dauro`
+ * means the same for both kinds of click.
  */
-async function faldi(seite: Page, grupo: string, zeiger = true): Promise<number> {
+async function faldi(
+  seite: Page,
+  grupo: string,
+): Promise<{ dauro: number; klick: Exclude<Klick, "gemischt"> }> {
   const rev = await leinwandAttribut(seite, "data-nr-rev");
-  const knopf = seite.locator(`[data-nr-grupo="${grupo}"] [data-nr-faldi]`);
-  if (zeiger) await knopf.click();
-  else await knopf.dispatchEvent("click");
+  const klick = await klicke(seite.locator(`[data-nr-grupo="${grupo}"] [data-nr-faldi]`));
   await seite.waitForFunction(
     (vorher) =>
       Number(document.querySelector("#nr-leinwand")?.getAttribute("data-nr-rev")) > vorher,
     rev,
   );
-  return leinwandAttribut(seite, "data-nr-dauro");
+  return { dauro: await leinwandAttribut(seite, "data-nr-dauro"), klick };
+}
+
+/** Opens the groups in order (outermost first), untimed. */
+async function oeffne(seite: Page, grupoj: readonly string[]): Promise<void> {
+  for (const grupo of grupoj) await faldi(seite, grupo);
+}
+
+/** The three images of a brand, light and fitted, on one page. */
+async function bilderDerMarke(
+  geladen: Geladen,
+  marke: MarkenName,
+  grafeo: Grafeo,
+  bilder: string,
+): Promise<Vorhanden<Wert<GeerbtBild>>> {
+  const { seite } = geladen;
+  await gemessen(`${marke}-zu.png`, async () => {
+    await einpassen(seite);
+    await seite.screenshot({ path: join(bilder, `${marke}-zu.png`) });
+  });
+
+  const farbe = await gemessen(`${marke}-farbe-komponenten.png`, async () => {
+    await oeffne(seite, grupojDe(grafeo, FARBE_KOMPONENTEN).concat(FARBE_KOMPONENTEN));
+    await einpassen(seite);
+    await seite.screenshot({ path: join(bilder, `${marke}-farbe-komponenten.png`) });
+  });
+  if (farbe === NICHT_GEMESSEN) return NICHT_GEMESSEN;
+
+  const wahl = geerbtWahl(grafeo);
+  if (wahl === undefined) {
+    console.error(
+      `${marke}-ero-offen-geerbt.png: ${NICHT_VORHANDEN} (keine Übernahme mit „geerbt“)`,
+    );
+    return NICHT_VORHANDEN;
+  }
+  return gemessen(`${marke}-ero-offen-geerbt.png`, async () => {
+    const offen = new Set([...grupojDe(grafeo, FARBE_KOMPONENTEN), FARBE_KOMPONENTEN]);
+    await oeffne(
+      seite,
+      grupojDe(grafeo, wahl.id).filter((grupo) => !offen.has(grupo)),
+    );
+    const klick = await klicke(seite.locator(`[data-nr-nodo="${wahl.id}"]`));
+    const flanko = seite.locator(`#nr-flanko[data-nr-elektita="${wahl.id}"]`);
+    await flanko.waitFor();
+    await flanko.locator(`[data-nr-art="Übernahme"]`).waitFor();
+    await flanko.locator(`[data-nr-geerbt="${wahl.de}"]`).waitFor();
+    await einpassen(seite);
+    await seite.screenshot({ path: join(bilder, `${marke}-ero-offen-geerbt.png`) });
+    return { ...wahl, klick };
+  });
+}
+
+/**
+ * Expand time of the largest group of one level: a fresh page, its ancestors opened untimed, then
+ * LAEUFE timed openings, each but the last closed again untimed.
+ */
+async function aufklappen(
+  browser: Browser,
+  url: string,
+  grafeo: Grafeo,
+  gruppe: string,
+  name: string,
+): Promise<Wert<Aufklappen>> {
+  const geladen = await gemessen(`${name} laden`, () => laden(browser, url));
+  if (geladen === NICHT_GEMESSEN) return NICHT_GEMESSEN;
+  const { seite } = geladen;
+  try {
+    return await gemessen(name, async () => {
+      await oeffne(seite, grupojDe(grafeo, gruppe));
+      const dauroj: number[] = [];
+      const auf: Exclude<Klick, "gemischt">[] = [];
+      const zu: Exclude<Klick, "gemischt">[] = [];
+      for (let lauf = 0; lauf < LAEUFE; lauf++) {
+        const offen = await faldi(seite, gruppe);
+        dauroj.push(offen.dauro);
+        auf.push(offen.klick);
+        if (lauf < LAEUFE - 1) zu.push((await faldi(seite, gruppe)).klick);
+      }
+      return { gruppe, ...zeitenAus(dauroj), klickAuf: klickAus(auf), klickZu: klickAus(zu) };
+    });
+  } finally {
+    await geladen.schliessen();
+  }
 }
 
 async function misseMarke(
@@ -245,29 +465,24 @@ async function misseMarke(
   grafeo: Grafeo,
   bilder: string,
 ): Promise<MarkenMessung> {
-  const gruppe = groessteGruppe(grafeo);
-  const url = (skemo: string) => `${basis}${marke.seite}?scheme=${skemo}`;
+  const url = `${basis}${marke.seite}?scheme=light`;
 
-  // Collapsed images, light and dark, fitted.
-  for (const { skemo, datei } of SKEMOJ) {
-    await gemessen(`${marke.marke}-${datei}.png`, async () => {
-      const geladen = await laden(browser, url(skemo));
-      try {
-        await einpassen(geladen.seite);
-        await geladen.seite.screenshot({ path: join(bilder, `${marke.marke}-${datei}.png`) });
-      } finally {
-        await geladen.schliessen();
-      }
-    });
+  // The three images on one page: collapsed, farbe/komponenten open, one ero sub-group open.
+  let geerbtBild: Vorhanden<Wert<GeerbtBild>> = NICHT_GEMESSEN;
+  const bildSeite = await gemessen(`${marke.marke} laden`, () => laden(browser, url));
+  if (bildSeite !== NICHT_GEMESSEN) {
+    try {
+      geerbtBild = await bilderDerMarke(bildSeite, marke.marke, grafeo, bilder);
+    } finally {
+      await bildSeite.schliessen();
+    }
   }
 
   // Time to visible and collapsed count: fresh loads in light.
   const preta: number[] = [];
   let zugeklappt: Wert<number> = NICHT_GEMESSEN;
   for (let lauf = 0; lauf < LAEUFE; lauf++) {
-    const geladen = await gemessen(`${marke.marke} bisSichtbarMs`, () =>
-      laden(browser, url("light")),
-    );
+    const geladen = await gemessen(`${marke.marke} bisSichtbarMs`, () => laden(browser, url));
     if (geladen === NICHT_GEMESSEN) break;
     preta.push(geladen.preta);
     if (lauf === 0) zugeklappt = geladen.zugeklappt;
@@ -275,47 +490,35 @@ async function misseMarke(
   }
   const bisSichtbarMs: Wert<Zeiten> = preta.length === LAEUFE ? zeitenAus(preta) : NICHT_GEMESSEN;
 
-  // Expand cycles of the largest group (its axis open), then the open image with a node selected.
-  let aufklappenMs: Wert<Zeiten> = NICHT_GEMESSEN;
-  let offenBild: Wert<string> = NICHT_GEMESSEN;
-  const geladen = await gemessen(`${marke.marke} laden`, () => laden(browser, url("light")));
-  if (geladen !== NICHT_GEMESSEN) {
-    const { seite } = geladen;
-    try {
-      aufklappenMs = await gemessen(`${marke.marke} aufklappenMs`, async () => {
-        await faldi(seite, gruppe.patro);
-        const dauroj: number[] = [];
-        for (let lauf = 0; lauf < LAEUFE; lauf++) {
-          dauroj.push(await faldi(seite, gruppe.id));
-          if (lauf < LAEUFE - 1) await faldi(seite, gruppe.id, false);
-        }
-        return zeitenAus(dauroj);
-      });
-      offenBild = await gemessen(`${marke.marke}-offen.png`, async () => {
-        const erster = gruppe.nodoj[0];
-        if (erster === undefined) throw new Error(`Gruppe ${gruppe.id} ist leer.`);
-        // At the fitted zoom a node of a group this size is a few pixels tall and covered by its
-        // neighbours, so a pointer click cannot hit it: the click event goes to the node directly.
-        await seite.locator(`[data-nr-nodo="${erster}"]`).dispatchEvent("click");
-        await seite.locator(`#nr-flanko[data-nr-elektita="${erster}"]`).waitFor();
-        await einpassen(seite);
-        const datei = `${marke.marke}-offen.png`;
-        await seite.screenshot({ path: join(bilder, datei) });
-        return erster;
-      });
-    } finally {
-      await geladen.schliessen();
-    }
+  // Largest group and expand time per level.
+  const groesste = groessteGruppeJeEbene(grafeo);
+  const groessteGruppeJeEbeneWert: Record<string, Vorhanden<GroessteGruppe>> = {};
+  const aufklappenMsJeEbene: Record<string, Vorhanden<Wert<Aufklappen>>> = {};
+  for (const ebene of EBENOJ) {
+    const gruppe = groesste.get(ebene);
+    groessteGruppeJeEbeneWert[ebene] = gruppe ?? NICHT_VORHANDEN;
+    aufklappenMsJeEbene[ebene] =
+      gruppe === undefined
+        ? NICHT_VORHANDEN
+        : await aufklappen(
+            browser,
+            url,
+            grafeo,
+            gruppe.id,
+            `${marke.marke} aufklappenMs Ebene ${ebene}`,
+          );
   }
 
   return {
     nodoj: grafeo.nodoj.length,
     ligoj: grafeo.ligoj.length,
-    groessteGruppe: { id: gruppe.id, patro: gruppe.patro, nodoj: gruppe.nodoj.length },
+    ...zaehle(grafeo),
+    vorher047: VORHER_047[marke.marke],
+    groessteGruppeJeEbene: groessteGruppeJeEbeneWert,
+    aufklappenMsJeEbene,
     zugeklappt,
     bisSichtbarMs,
-    aufklappenMs,
-    offenBild,
+    geerbtBild,
   };
 }
 
@@ -366,9 +569,12 @@ async function main(): Promise<number> {
     const lueckenListe: Record<string, Record<string, string[]>> = {};
     for (const marke of MARKEN) {
       const grafeo = await holeGrafeo(basis, marke.api);
-      messung[marke.marke] = await misseMarke(browser, basis, marke, grafeo, bilder);
-      lueckenListe[marke.marke] = luecken(grafeo);
-      console.log(`${marke.marke}: ${JSON.stringify(messung[marke.marke])}`);
+      const liste = luecken(grafeo);
+      const gemessenFuerMarke = await misseMarke(browser, basis, marke, grafeo, bilder);
+      pruefeEineDefinition(marke.marke, grafeo, liste, gemessenFuerMarke.ohneGrund);
+      messung[marke.marke] = gemessenFuerMarke;
+      lueckenListe[marke.marke] = liste;
+      console.log(`${marke.marke}: ${JSON.stringify(gemessenFuerMarke)}`);
     }
     await writeFile(join(ziel, "messung.json"), kanonisch(messung));
     console.log(`Geschrieben: ${join(ziel, "messung.json")}, ${bilder}`);

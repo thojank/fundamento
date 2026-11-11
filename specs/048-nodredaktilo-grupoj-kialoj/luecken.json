@@ -1,0 +1,509 @@
+{
+  "ekzemplo": {
+    "bewegung/palette": [
+      "motion.duration.scale.0",
+      "motion.duration.scale.1",
+      "motion.duration.scale.2",
+      "motion.duration.scale.3",
+      "motion.duration.scale.4",
+      "motion.easing.curve.accelerate",
+      "motion.easing.curve.decelerate",
+      "motion.easing.curve.expressive",
+      "motion.easing.curve.linear",
+      "motion.easing.curve.smooth"
+    ],
+    "elevation/palette": [
+      "elevation.shadow.floating",
+      "elevation.shadow.modal",
+      "elevation.shadow.overlay",
+      "elevation.shadow.raised"
+    ],
+    "elevation/rollen": [
+      "elevation.layer.base",
+      "elevation.layer.modal",
+      "elevation.layer.navigation",
+      "elevation.layer.overlay",
+      "elevation.layer.raised",
+      "elevation.layer.toast"
+    ],
+    "farbe/rollen/color/action": [
+      "color.action.danger.text",
+      "color.action.primary.disabled",
+      "color.action.primary.text",
+      "color.action.secondary.disabled",
+      "color.action.secondary.text",
+      "color.action.tertiary.disabled",
+      "color.action.tertiary.text"
+    ],
+    "farbe/rollen/color/backdrop": [
+      "color.backdrop"
+    ],
+    "farbe/rollen/color/background": [
+      "color.background.inverse"
+    ],
+    "farbe/rollen/color/border": [
+      "color.border.default",
+      "color.border.disabled",
+      "color.border.strong",
+      "color.border.subtle"
+    ],
+    "farbe/rollen/color/focus": [
+      "color.focus.inner"
+    ],
+    "farbe/rollen/color/link": [
+      "color.link.hover"
+    ],
+    "farbe/rollen/color/navigation": [
+      "color.navigation.hover",
+      "color.navigation.rest",
+      "color.navigation.selected",
+      "color.navigation.text.rest",
+      "color.navigation.text.selected"
+    ],
+    "farbe/rollen/color/status": [
+      "color.status.danger.basic",
+      "color.status.danger.border",
+      "color.status.danger.subtle",
+      "color.status.danger.text",
+      "color.status.danger.weak",
+      "color.status.info.basic",
+      "color.status.info.border",
+      "color.status.info.subtle",
+      "color.status.info.text",
+      "color.status.info.weak",
+      "color.status.success.basic",
+      "color.status.success.border",
+      "color.status.success.subtle",
+      "color.status.success.text",
+      "color.status.success.weak",
+      "color.status.warning.basic",
+      "color.status.warning.border",
+      "color.status.warning.subtle",
+      "color.status.warning.text",
+      "color.status.warning.weak"
+    ],
+    "farbe/rollen/color/syntax": [
+      "color.syntax.comment",
+      "color.syntax.keyword",
+      "color.syntax.name",
+      "color.syntax.number",
+      "color.syntax.string"
+    ],
+    "farbe/rollen/color/text": [
+      "color.text.disabled",
+      "color.text.inverse"
+    ],
+    "farbe/rollen/opacity": [
+      "opacity.disabled",
+      "opacity.hover",
+      "opacity.overlay",
+      "opacity.pressed"
+    ],
+    "form/palette": [
+      "border.width.default",
+      "border.width.focus",
+      "border.width.scale.1",
+      "border.width.scale.2",
+      "border.width.scale.3",
+      "border.width.strong",
+      "radius.full",
+      "radius.large",
+      "radius.medium",
+      "radius.none",
+      "radius.small",
+      "radius.xlarge"
+    ],
+    "form/rollen": [
+      "focus.offset",
+      "radius.role.control",
+      "radius.role.multiline",
+      "radius.role.pill",
+      "radius.role.surface",
+      "radius.role.tag",
+      "stroke.dashed",
+      "stroke.solid"
+    ],
+    "raum/palette": [
+      "size.scale.100",
+      "size.scale.1000",
+      "size.scale.200",
+      "size.scale.300",
+      "size.scale.400",
+      "size.scale.500",
+      "size.scale.600",
+      "size.scale.700",
+      "size.scale.800",
+      "size.scale.900",
+      "spacing.scale.0",
+      "spacing.scale.100",
+      "spacing.scale.1000",
+      "spacing.scale.1200",
+      "spacing.scale.150",
+      "spacing.scale.200",
+      "spacing.scale.300",
+      "spacing.scale.400",
+      "spacing.scale.50",
+      "spacing.scale.500",
+      "spacing.scale.600",
+      "spacing.scale.800"
+    ],
+    "raum/rollen": [
+      "layout.columns.12",
+      "layout.columns.4",
+      "layout.columns.8",
+      "size.breakpoint.expanded",
+      "size.breakpoint.medium",
+      "size.container.large",
+      "size.container.max",
+      "size.container.medium",
+      "size.container.small",
+      "size.icon.large",
+      "size.icon.medium",
+      "size.icon.small"
+    ],
+    "schrift/palette/family": [
+      "font.family.body",
+      "font.family.code",
+      "font.family.display"
+    ],
+    "schrift/palette/lineheight": [
+      "font.lineheight.scale.loose",
+      "font.lineheight.scale.normal",
+      "font.lineheight.scale.relaxed",
+      "font.lineheight.scale.snug",
+      "font.lineheight.scale.solid",
+      "font.lineheight.scale.tight"
+    ],
+    "schrift/palette/tracking": [
+      "font.tracking.scale.100",
+      "font.tracking.scale.1000",
+      "font.tracking.scale.1100",
+      "font.tracking.scale.1200",
+      "font.tracking.scale.200",
+      "font.tracking.scale.300",
+      "font.tracking.scale.400",
+      "font.tracking.scale.500",
+      "font.tracking.scale.600",
+      "font.tracking.scale.700",
+      "font.tracking.scale.800",
+      "font.tracking.scale.900",
+      "font.tracking.scale.caps"
+    ],
+    "schrift/palette/weight": [
+      "font.weight.black",
+      "font.weight.bold",
+      "font.weight.extrabold",
+      "font.weight.extralight",
+      "font.weight.light",
+      "font.weight.medium",
+      "font.weight.regular",
+      "font.weight.semibold",
+      "font.weight.thin"
+    ]
+  },
+  "komuna": {
+    "bewegung/palette": [
+      "motion.duration.scale.0",
+      "motion.easing.curve.accelerate",
+      "motion.easing.curve.decelerate",
+      "motion.easing.curve.expressive",
+      "motion.easing.curve.linear"
+    ],
+    "elevation/rollen": [
+      "elevation.layer.base",
+      "elevation.layer.modal",
+      "elevation.layer.navigation",
+      "elevation.layer.overlay",
+      "elevation.layer.raised",
+      "elevation.layer.toast"
+    ],
+    "farbe/rollen/color/syntax": [
+      "color.syntax.comment",
+      "color.syntax.keyword",
+      "color.syntax.name",
+      "color.syntax.number",
+      "color.syntax.string"
+    ],
+    "form/palette": [
+      "border.width.scale.1",
+      "border.width.scale.2",
+      "border.width.scale.3",
+      "border.width.strong"
+    ],
+    "form/rollen": [
+      "radius.role.control",
+      "radius.role.multiline",
+      "radius.role.pill",
+      "radius.role.surface",
+      "radius.role.tag",
+      "stroke.dashed",
+      "stroke.solid"
+    ],
+    "raum/palette": [
+      "size.scale.100",
+      "size.scale.1000",
+      "size.scale.200",
+      "size.scale.300",
+      "size.scale.400",
+      "size.scale.500",
+      "size.scale.600",
+      "size.scale.900"
+    ],
+    "raum/rollen": [
+      "layout.columns.12",
+      "layout.columns.4",
+      "layout.columns.8",
+      "size.breakpoint.expanded",
+      "size.breakpoint.medium",
+      "size.container.large",
+      "size.container.max",
+      "size.container.medium",
+      "size.container.small"
+    ],
+    "schrift/palette/family": [
+      "font.family.body",
+      "font.family.code",
+      "font.family.display"
+    ],
+    "schrift/palette/lineheight": [
+      "font.lineheight.scale.loose",
+      "font.lineheight.scale.normal",
+      "font.lineheight.scale.relaxed",
+      "font.lineheight.scale.snug",
+      "font.lineheight.scale.solid",
+      "font.lineheight.scale.tight"
+    ],
+    "schrift/palette/tracking": [
+      "font.tracking.scale.100",
+      "font.tracking.scale.1000",
+      "font.tracking.scale.1100",
+      "font.tracking.scale.1200",
+      "font.tracking.scale.200",
+      "font.tracking.scale.300",
+      "font.tracking.scale.400",
+      "font.tracking.scale.500",
+      "font.tracking.scale.600",
+      "font.tracking.scale.700",
+      "font.tracking.scale.800",
+      "font.tracking.scale.900",
+      "font.tracking.scale.caps"
+    ],
+    "schrift/palette/weight": [
+      "font.weight.black",
+      "font.weight.bold",
+      "font.weight.extrabold",
+      "font.weight.extralight",
+      "font.weight.light",
+      "font.weight.medium",
+      "font.weight.regular",
+      "font.weight.semibold",
+      "font.weight.thin"
+    ]
+  },
+  "provo": {
+    "bewegung/palette": [
+      "motion.duration.scale.0",
+      "motion.duration.scale.1",
+      "motion.duration.scale.2",
+      "motion.duration.scale.3",
+      "motion.duration.scale.4",
+      "motion.easing.curve.accelerate",
+      "motion.easing.curve.decelerate",
+      "motion.easing.curve.expressive",
+      "motion.easing.curve.linear",
+      "motion.easing.curve.smooth"
+    ],
+    "eingaben": [
+      "enigo:festgelegt.font.family.display",
+      "enigo:festgelegt.typography.display.1",
+      "enigo:festgelegt.typography.display.2",
+      "enigo:festgelegt.typography.display.3",
+      "enigo:festgelegt.typography.headline.1",
+      "enigo:festgelegt.typography.headline.2",
+      "enigo:festgelegt.typography.headline.3",
+      "enigo:festgelegt.typography.headline.4",
+      "enigo:form.radius",
+      "enigo:ikono.gewicht",
+      "enigo:leitfarbe",
+      "enigo:neutral.toenung",
+      "enigo:raum.abstand",
+      "enigo:regler.helligkeit",
+      "enigo:regler.kontrast",
+      "enigo:regler.saettigung",
+      "enigo:schriften.display",
+      "enigo:zusatzfarben.info"
+    ],
+    "elevation/rollen": [
+      "elevation.layer.base",
+      "elevation.layer.modal",
+      "elevation.layer.navigation",
+      "elevation.layer.overlay",
+      "elevation.layer.raised",
+      "elevation.layer.toast"
+    ],
+    "farbe/rollen/color/action": [
+      "color.action.danger.text",
+      "color.action.primary.disabled",
+      "color.action.primary.text",
+      "color.action.secondary.disabled",
+      "color.action.secondary.text",
+      "color.action.tertiary.disabled",
+      "color.action.tertiary.text"
+    ],
+    "farbe/rollen/color/backdrop": [
+      "color.backdrop"
+    ],
+    "farbe/rollen/color/background": [
+      "color.background.inverse"
+    ],
+    "farbe/rollen/color/border": [
+      "color.border.default",
+      "color.border.disabled",
+      "color.border.strong",
+      "color.border.subtle"
+    ],
+    "farbe/rollen/color/focus": [
+      "color.focus.inner"
+    ],
+    "farbe/rollen/color/link": [
+      "color.link.hover"
+    ],
+    "farbe/rollen/color/navigation": [
+      "color.navigation.hover",
+      "color.navigation.rest",
+      "color.navigation.selected",
+      "color.navigation.text.rest",
+      "color.navigation.text.selected"
+    ],
+    "farbe/rollen/color/status": [
+      "color.status.danger.basic",
+      "color.status.danger.border",
+      "color.status.danger.subtle",
+      "color.status.danger.text",
+      "color.status.danger.weak",
+      "color.status.info.basic",
+      "color.status.info.border",
+      "color.status.info.subtle",
+      "color.status.info.text",
+      "color.status.info.weak",
+      "color.status.success.basic",
+      "color.status.success.border",
+      "color.status.success.subtle",
+      "color.status.success.text",
+      "color.status.success.weak",
+      "color.status.warning.basic",
+      "color.status.warning.border",
+      "color.status.warning.subtle",
+      "color.status.warning.text",
+      "color.status.warning.weak"
+    ],
+    "farbe/rollen/color/syntax": [
+      "color.syntax.comment",
+      "color.syntax.keyword",
+      "color.syntax.name",
+      "color.syntax.number",
+      "color.syntax.string"
+    ],
+    "farbe/rollen/color/text": [
+      "color.text.disabled",
+      "color.text.inverse"
+    ],
+    "farbe/rollen/opacity": [
+      "opacity.disabled",
+      "opacity.hover",
+      "opacity.overlay",
+      "opacity.pressed"
+    ],
+    "form/palette": [
+      "border.width.default",
+      "border.width.focus",
+      "border.width.scale.1",
+      "border.width.scale.2",
+      "border.width.scale.3",
+      "border.width.strong",
+      "radius.full",
+      "radius.none"
+    ],
+    "form/rollen": [
+      "focus.offset",
+      "radius.role.control",
+      "radius.role.multiline",
+      "radius.role.pill",
+      "radius.role.surface",
+      "radius.role.tag",
+      "stroke.dashed",
+      "stroke.solid"
+    ],
+    "raum/palette": [
+      "size.scale.100",
+      "size.scale.1000",
+      "size.scale.200",
+      "size.scale.300",
+      "size.scale.400",
+      "size.scale.500",
+      "size.scale.600",
+      "size.scale.700",
+      "size.scale.800",
+      "size.scale.900",
+      "spacing.scale.0",
+      "spacing.scale.100",
+      "spacing.scale.150",
+      "spacing.scale.200",
+      "spacing.scale.300",
+      "spacing.scale.50"
+    ],
+    "raum/rollen": [
+      "layout.columns.12",
+      "layout.columns.4",
+      "layout.columns.8",
+      "size.breakpoint.expanded",
+      "size.breakpoint.medium",
+      "size.container.large",
+      "size.container.max",
+      "size.container.medium",
+      "size.container.small",
+      "size.icon.large",
+      "size.icon.medium",
+      "size.icon.small"
+    ],
+    "schrift/palette/family": [
+      "font.family.body",
+      "font.family.code",
+      "font.family.display"
+    ],
+    "schrift/palette/lineheight": [
+      "font.lineheight.scale.loose",
+      "font.lineheight.scale.normal",
+      "font.lineheight.scale.relaxed",
+      "font.lineheight.scale.snug",
+      "font.lineheight.scale.solid",
+      "font.lineheight.scale.tight"
+    ],
+    "schrift/palette/tracking": [
+      "font.tracking.scale.100",
+      "font.tracking.scale.1000",
+      "font.tracking.scale.1100",
+      "font.tracking.scale.1200",
+      "font.tracking.scale.200",
+      "font.tracking.scale.300",
+      "font.tracking.scale.400",
+      "font.tracking.scale.500",
+      "font.tracking.scale.600",
+      "font.tracking.scale.700",
+      "font.tracking.scale.800",
+      "font.tracking.scale.900",
+      "font.tracking.scale.caps"
+    ],
+    "schrift/palette/weight": [
+      "font.weight.black",
+      "font.weight.bold",
+      "font.weight.extrabold",
+      "font.weight.extralight",
+      "font.weight.light",
+      "font.weight.medium",
+      "font.weight.regular",
+      "font.weight.semibold",
+      "font.weight.thin"
+    ]
+  }
+}
