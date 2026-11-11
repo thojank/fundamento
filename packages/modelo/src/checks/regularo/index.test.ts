@@ -85,7 +85,17 @@ describe("regularo on the repo", () => {
         ) as Record<string, unknown[]>
       )[key]?.length;
     expect(result.stats).toEqual({
-      reguloj: count("reguloj.json", "reguloj"),
+      // Spec 049: and the Reguloj of komuna's package (its decision log, one Kialo per choice).
+      reguloj:
+        (count("reguloj.json", "reguloj") ?? 0) +
+        (
+          JSON.parse(
+            readFileSync(
+              new URL("../../../../aspekto-komuna/reguloj.json", import.meta.url),
+              "utf8",
+            ),
+          ) as { reguloj: unknown[] }
+        ).reguloj.length,
       // Spec 029 ①: and the eight Jugxoj of komuna's package (the Fonto's values a rule changed).
       jugxoj:
         (count("jugxoj.json", "jugxoj") ?? 0) +
