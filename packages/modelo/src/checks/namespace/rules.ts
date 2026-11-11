@@ -124,6 +124,19 @@ export function cssSyntaxIssue(file: string, error: unknown, rule: RuleId): Vali
   );
 }
 
+/**
+ * The node editor's canvas library (Spec 047, B-2, maintainer 2026-11-11): React Flow declares and
+ * reads its own variables under --xy-; the canvas sets them to --fm- roles (XY_ROLOJ in
+ * packages/nodredaktilo). Only inside that package is an --xy- declaration outside @theme allowed;
+ * every other name there, and --xy- in every other place, keeps the full rule.
+ */
+const CANVAS_LIBRARY_PATH = /(^|\/)packages\/nodredaktilo\//;
+const CANVAS_LIBRARY_PREFIX = "--xy-";
+
+export function isCanvasLibraryProperty(file: string, prop: string): boolean {
+  return prop.startsWith(CANVAS_LIBRARY_PREFIX) && CANVAS_LIBRARY_PATH.test(file);
+}
+
 export function checkCssCustomProperties(file: string, css: string): CountedIssues {
   let root: ReturnType<typeof parse>;
   try {
@@ -154,7 +167,7 @@ export function checkCssCustomProperties(file: string, css: string): CountedIssu
       }
       return;
     }
-    if (nomRegulo("css").invert(prop) === null) {
+    if (nomRegulo("css").invert(prop) === null && !isCanvasLibraryProperty(file, prop)) {
       issues.push(
         issue(
           "namespace-custom-property",

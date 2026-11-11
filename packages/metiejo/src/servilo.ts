@@ -27,9 +27,11 @@ import {
   readFacetoj,
   reguloIn,
   resolveCombination,
+  serializeCanonicalJson,
   type ValidationIssue,
   WCAG2_METRIC,
 } from "@fundamento/modelo";
+import { CSS_CELO } from "@fundamento/projekcioj";
 import {
   cssSpeicherOf,
   type PruefEintrag,
@@ -91,7 +93,9 @@ import {
 } from "./enportilo/uebernahme/index.js";
 import type { Settings } from "./env.js";
 import { esplori } from "./esploro/esploro.js";
-import { CLIENT_SCRIPT, escapeHtml, previewDocument } from "./html.js";
+import { GrafeoEraro, grafeoDe, grafeoDePaket, serializeGrafeo } from "./grafeo.js";
+import { EKZEMPLO_DIR, paketoDosieroj } from "./grafeo-fontoj.js";
+import { CLIENT_SCRIPT, escapeHtml, grafeoScreen, previewDocument } from "./html.js";
 import { identOf } from "./ident.js";
 import { type Klartext, klartextOf, satzOf, vorschlagOf } from "./klartext.js";
 import {
@@ -237,6 +241,17 @@ export interface ServiloOptions {
    * the check runs in the main thread.
    */
   pruefWorker?: URL;
+  /**
+   * Spec 047 (NE-1): the dist dir of @fundamento/nodredaktilo, where `leinwand.js` lies; null = not
+   * built (the canvas routes answer 503). Default: resolved beside the Eroj, null where the package
+   * cannot be resolved or `dist/leinwand.js` is missing.
+   */
+  leinwand?: string | null;
+  /**
+   * Spec 047 (NE-1): the dir of the ekzemplo fixture package; null = absent (outside a checkout,
+   * `/api/grafeo?aspekto=ekzemplo` answers 404). Default: EKZEMPLO_DIR.
+   */
+  ekzemploDir?: string | null;
 }
 
 export interface ServiloIo {
@@ -419,6 +434,23 @@ export function familyOfFilename(filename: string): string {
     .trim();
 }
 
+/** Spec 047 (NE-1): the dist dir of the built canvas, or null when it is not there. */
+function leinwandDist(): string | null {
+  try {
+    const dir = join(
+      dirname(fileURLToPath(import.meta.resolve("@fundamento/nodredaktilo/package.json"))),
+      "dist",
+    );
+    return existsSync(join(dir, "leinwand.js")) ? dir : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Spec 047 (NE-1): the answer of every canvas route while the bundle is missing. */
+const LEINWAND_NICHT_GEBAUT =
+  "<!doctype html><title>503</title><p>Leinwand nicht gebaut: pnpm --filter @fundamento/nodredaktilo build";
+
 export async function startServilo(options: ServiloOptions, io: ServiloIo): Promise<Servilo> {
   const bases: Bases = loadBases();
   const tiparoj = readTiparoj();
@@ -437,6 +469,14 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     dirname(fileURLToPath(import.meta.resolve("@fundamento/eroj/package.json"))),
     "dist",
   );
+  // Spec 047 (NE-1): the bundle of the canvas and the package graphs. The bundle is a devDependency,
+  // so outside the checkout it does not resolve: then the canvas is "not built". The graph API never
+  // depends on it. A package graph does not change while the process runs; it is built once per label.
+  const leinwand = options.leinwand !== undefined ? options.leinwand : leinwandDist();
+  const ekzemploDir = options.ekzemploDir !== undefined ? options.ekzemploDir : EKZEMPLO_DIR;
+  const paketoGrafeoj = new Map<string, string>();
+  const markoGrafeoj = new Map<string, { rev: number; korpo: string }>();
+  const paketoStiloj = new Map<string, string>();
   const vitrinoDir = join(options.root, ".fundamento", "projekcioj", "vitrino");
   const nordsteloDir = join(options.root, ...NORDSTELO_DIR);
   const stand = options.stand ?? standOf(options.root);
@@ -1500,6 +1540,162 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       sendStatic(response, vitrinoDir, path.slice("/vitrino/".length));
       return;
     }
+    // Spec 047 (NE-1): the graph canvas – its bundle and the graph as JSON. Before the generic
+    // `/marko/:name/:key` route, which would answer its paths with 404.
+    if (method === "GET" && path.startsWith("/nodredaktilo/")) {
+      if (leinwand === null) {
+        sendHtml(response, LEINWAND_NICHT_GEBAUT, 503);
+        return;
+      }
+      sendStatic(response, leinwand, path.slice("/nodredaktilo/".length));
+      return;
+    }
+    if (method === "GET" && path === "/api/grafeo") {
+      const markoName = url.searchParams.get("marko");
+      const aspekto = url.searchParams.get("aspekto");
+      const sendGrafeo = (korpo: string): void => {
+        response.writeHead(200, { "content-type": TYPES[".json"] ?? "" }).end(korpo);
+      };
+      if ((markoName === null) === (aspekto === null)) {
+        sendHtml(
+          response,
+          "<!doctype html><title>400</title><p>Genau einer der Parameter marko oder aspekto.",
+          400,
+        );
+        return;
+      }
+      if (markoName !== null) {
+        const draft = draftOf(markoName);
+        if (draft === undefined) {
+          notFound(response);
+          return;
+        }
+        const cached = markoGrafeoj.get(markoName);
+        if (cached?.rev === draft.rev) {
+          sendGrafeo(cached.korpo);
+          return;
+        }
+        const read = readAgordo(draft.agordo);
+        const eraroj: { path: string; rule: string; message: string }[] =
+          read.agordo === undefined
+            ? read.issues.map(({ path: where, rule, message }) => ({ path: where, rule, message }))
+            : [];
+        let korpo: string | undefined;
+        if (read.agordo !== undefined) {
+          try {
+            korpo = serializeGrafeo(grafeoDe(read.agordo, bases));
+          } catch (error) {
+            if (!(error instanceof GrafeoEraro)) throw error;
+            eraroj.push({ path: error.path, rule: error.rule, message: error.message });
+          }
+        }
+        if (korpo === undefined) {
+          response
+            .writeHead(422, { "content-type": TYPES[".json"] ?? "" })
+            .end(serializeCanonicalJson({ eraroj }));
+          return;
+        }
+        markoGrafeoj.set(markoName, { rev: draft.rev, korpo });
+        sendGrafeo(korpo);
+        return;
+      }
+      if (aspekto !== "komuna" && aspekto !== "ekzemplo") {
+        notFound(response);
+        return;
+      }
+      let korpo = paketoGrafeoj.get(aspekto);
+      if (korpo === undefined) {
+        const files = paketoDosieroj(aspekto, ekzemploDir);
+        if (files === undefined) {
+          sendHtml(
+            response,
+            "<!doctype html><title>404</title><p>ekzemplo ist nur im Repo vorhanden",
+            404,
+          );
+          return;
+        }
+        korpo = serializeGrafeo(grafeoDePaket(aspekto, files));
+        paketoGrafeoj.set(aspekto, korpo);
+      }
+      sendGrafeo(korpo);
+      return;
+    }
+    // T4: the screens of the canvas and the stylesheet of a package. A thing that is not there
+    // answers first (404, the ekzemplo sentence), a missing bundle next (503); the stylesheet and
+    // the API never need the bundle. The scheme comes from `?scheme=` (default light).
+    const grafeoMarko = /^\/marko\/([a-z0-9-]+)\/grafeo$/.exec(path);
+    if (method === "GET" && grafeoMarko !== null) {
+      const [, name = ""] = grafeoMarko;
+      const draft = draftOf(name);
+      if (draft === undefined) {
+        notFound(response);
+        return;
+      }
+      if (leinwand === null) {
+        sendHtml(response, LEINWAND_NICHT_GEBAUT, 503);
+        return;
+      }
+      // The draft as the request found it, with the shared check of that rev (as the Studio).
+      const { agordo, rev } = draft;
+      const derivation = await pruefungOf(name, draft);
+      const scheme = kombinationOf(url.searchParams).scheme;
+      sendHtml(
+        response,
+        grafeoScreen({
+          aspekto: name,
+          scheme,
+          cssHref: `/marko/${encodeURIComponent(name)}/vorschau.css?rev=${rev}`,
+          fontFace: fontFaceOf(agordo),
+          fonto: `/api/grafeo?marko=${encodeURIComponent(name)}`,
+          studioHref: `/studio/${encodeURIComponent(name)}/farbe${scheme === "light" ? "" : `?scheme=${scheme}`}`,
+          neEksportebla: !derivation.exportable,
+        }),
+      );
+      return;
+    }
+    const grafeoAspekto = /^\/aspekto\/([a-z0-9-]+)\/grafeo(\.css)?$/.exec(path);
+    if (method === "GET" && grafeoAspekto !== null) {
+      const [, label = "", css] = grafeoAspekto;
+      if (label !== "komuna" && label !== "ekzemplo") {
+        notFound(response);
+        return;
+      }
+      const files = paketoDosieroj(label, ekzemploDir);
+      if (files === undefined) {
+        sendHtml(
+          response,
+          "<!doctype html><title>404</title><p>ekzemplo ist nur im Repo vorhanden",
+          404,
+        );
+        return;
+      }
+      if (css !== undefined) {
+        let stilo = paketoStiloj.get(label);
+        if (stilo === undefined) {
+          // The same call as `komunaCss`, on the package's own Modelo; in memory, once per label.
+          const modelo = buildModelo(files).modelo;
+          stilo =
+            CSS_CELO.generate({ modelo } as Parameters<typeof CSS_CELO.generate>[0])[0]?.text ?? "";
+          paketoStiloj.set(label, stilo);
+        }
+        response.writeHead(200, { "content-type": TYPES[".css"] ?? "" }).end(stilo);
+        return;
+      }
+      if (leinwand === null) {
+        sendHtml(response, LEINWAND_NICHT_GEBAUT, 503);
+        return;
+      }
+      sendHtml(
+        response,
+        grafeoScreen({
+          aspekto: label,
+          scheme: kombinationOf(url.searchParams).scheme,
+          cssHref: `/aspekto/${label}/grafeo.css`,
+          fonto: `/api/grafeo?aspekto=${label}`,
+        }),
+      );
+      return;
+    }
     // Spec 030: the north-star measure over time, and the pages and screenshots of its runs.
     if (method === "GET" && path === "/nordstelo") {
       const file = join(nordsteloDir, "historio.json");
@@ -2513,6 +2709,12 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           ...(feedback.betroffen === undefined ? {} : { betroffen: feedback.betroffen }),
           expert: expertOf(agordo),
           komponentoj: komponentoList(bases),
+          // Spec 047 (NE-1): the canvas of the brand, only while its bundle is built.
+          ...(leinwand === null
+            ? {}
+            : {
+                grafeoHref: `/marko/${encodeURIComponent(name)}/grafeo?scheme=${kombination.scheme}`,
+              }),
         }),
       );
       return;

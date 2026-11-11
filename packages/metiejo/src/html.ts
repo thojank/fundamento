@@ -917,3 +917,64 @@ ${doc.body}
 </html>
 `;
 }
+
+/** Spec 047 (NE-1): what the screen of the graph canvas shows. */
+export interface GrafeoScreen {
+  /** The Aspekto on the root: the brand's name or the package label (komuna, ekzemplo). */
+  aspekto: string;
+  scheme: "light" | "dark";
+  /** The stylesheet: the brand's preview CSS of its rev, or the package CSS. */
+  cssHref: string;
+  /** `@font-face` rules of the brand's webfonts, inline (none for a package). */
+  fontFace?: string;
+  /** The JSON URL the canvas reads: `/api/grafeo?marko=<name>` or `?aspekto=<label>`. */
+  fonto: string;
+  /** Brands: the Studio page to go back to. */
+  studioHref?: string;
+  /** Brands: the shared check of the current rev says `exportable: false`. */
+  neEksportebla?: boolean;
+}
+
+/**
+ * Spec 047 (NE-1): the room of the canvas. The page fills the window; the header takes its height
+ * and the canvas the rest (React Flow needs a block size), with a floor of the brand's small
+ * container. Only roles of the brand and logical properties.
+ */
+const GRAFEO_CSS = `:root { color-scheme: light dark; block-size: 100%; }
+body { margin: 0; block-size: 100%; box-sizing: border-box; padding: var(--fm-spacing-medium); display: flex; flex-direction: column; gap: var(--fm-spacing-medium); font-family: var(--fm-typography-body-1-font-family); background-color: var(--fm-color-background-canvas); color: var(--fm-color-text-default); }
+.nr-kapo { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fm-spacing-medium); }
+#nr-leinwand { flex: 1 1 auto; min-block-size: var(--fm-size-container-small); }`;
+
+/**
+ * Spec 047 (NE-1): the screen of the graph canvas, after `previewDocument` – the brand (or package)
+ * on the root in the asked scheme, its stylesheet, the Eroj, a small header and the mount point of
+ * the canvas with its bundle. The canvas itself is drawn in the browser.
+ */
+export function grafeoScreen(doc: GrafeoScreen): string {
+  const zurueck =
+    doc.studioHref === undefined
+      ? ""
+      : ` <fm-ligilo to="${escapeHtml(doc.studioHref)}" placement="standalone">Zum Studio</fm-ligilo>`;
+  const insigno =
+    doc.neEksportebla === true
+      ? ` <fm-insigno intent="warning" id="nr-ne-eksportebla">nicht exportierbar</fm-insigno>`
+      : "";
+  return `<!doctype html>
+<html lang="de" data-fm-aspekto="${escapeHtml(doc.aspekto)}" data-fm-color-scheme="${doc.scheme}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Graph ${escapeHtml(doc.aspekto)}</title>
+<link rel="stylesheet" href="${escapeHtml(doc.cssHref)}">
+<style>${doc.fontFace ?? ""}
+${GRAFEO_CSS}</style>
+<script type="module" src="/eroj/define.js"></script>
+</head>
+<body>
+<header class="nr-kapo"><fm-titolo level="1">Graph ${escapeHtml(doc.aspekto)}</fm-titolo>${zurueck}${insigno}</header>
+<div id="nr-leinwand" data-nr-fonto="${escapeHtml(doc.fonto)}"></div>
+<script type="module" src="/nodredaktilo/leinwand.js"></script>
+</body>
+</html>
+`;
+}
