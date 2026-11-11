@@ -34,6 +34,30 @@ Bekannt rot und fremd, nicht angefasst: `packages/eroj/test/zweitfarbe-036`, `mo
 
 Lokal vor dem Push (T5, Einzelheiten in [`tasks.md`](tasks.md)): alle Test-Aufgaben seriell grün bis auf B-1 (b); `pnpm lint`, `check:vortaro-lint`, `check:clean-room`, `check:privat` grün. Parallel unter hoher Rechnerlast liefen einzelne Tests von eroj, nordstelo, mcp und agordilo in ihre unveränderten Zeitgrenzen; jedes dieser Pakete allein ist grün.
 
+## 1a. Nachtrag (Refine 2026-11-11): zweiter Push, zweiter Dispatch
+
+Vom Maintainer einmalig freigegeben: B-1, der lokale T6-Commit, die Jugxo für A-1 und die Namensraum-Ausnahme B-2 (Einzelheiten in [`tasks.md`](tasks.md), „Nachtrag (Refine 2026-11-11)“).
+
+- Push (zweiter und letzter): `d3427ec9` (T6) + `cf92f2c8` (B-1) + `89c6741d` (Jugxo `jug_01M7529VTNHYB7ZBX9S37TWNES`) + `7cf25484` (B-2) + `8e9ef744` (tasks.md); Kopf `8e9ef74433740deda219477e923657d5cfb7924d`. `origin/main` weiterhin `943cc22f`, kein Rebase. PR #161 mergeable, Text ergänzt, **nicht gemergt**.
+- Dispatch-Lauf (zweiter, kein Rerun): https://github.com/thojank/fundamento/actions/runs/43004483794 – Ergebnis **rot**, 22 von 25 Jobs grün.
+
+| Job | Ergebnis | Notiz |
+|---|---|---|
+| Build, lint and Modelo checks | grün | enthält `check:vortaro-lint`, `check:clean-room`, `check:regularo` mit der neuen Jugxo und der `--xy-*`-Ausnahme |
+| Affected packages (betroffen) | grün | |
+| Unit tests (metiejo, agordilo, cli, ekranoj, nordstelo, Projekcioj 1+2) | grün | |
+| **Unit tests (modelo)** | **rot** | 4934 grün, 1 rot: nur noch `packages/modelo/src/ci/turbo-inputs.test.ts:679` (Hook-Timeout 10 s, bekannt rot und fremd). **B-1 ist erledigt:** `workspace.test.ts` grün. |
+| **Unit tests (mcp)** | **rot** | 507 grün, 1 rot: `packages/mcp/src/kontrakto-038.test.ts:101` „every catalog entry answers with the bytes of the Bezug“. **Durch diesen Nachtrag verursacht**, siehe unten. |
+| **Rendered Eroj (Playwright, shard 2 of 4)** | **rot** | 503 grün, 2 rot: `zweitfarbe-036.spec.ts:196` [chromium] (bekannt rot und fremd) und `packages/eroj/test/buehne-036.spec.ts:545` [firefox] (Hover/Fokus-Rahmen; im ersten Lauf grün, keine Eroj-Datei in diesem Branch geändert, nicht durch Spec 047 verursacht, Befund) |
+| Rendered Eroj (Playwright, shard 1, 3, 4) | grün | shard 4 war im ersten Lauf rot (`zweitfarbe-036` [webkit]) |
+| Rendered accessibility (Alirebleco, shard 1–3) | grün | |
+| Rendered checks (Make Kit, Quickstart; Vitrino cetero-1…3; Werkstatt 1, 2) | grün | |
+| Timing checks (M5, Gegenprobe, Ableitung, G5) | grün | |
+
+**Befund mcp (durch den Nachtrag, kein weiterer Push):** Der Vertragstest vergleicht jede Werkzeug-Antwort Byte für Byte mit den Fixtures unter `packages/mcp/test/fixtures/kontrakto/` (Bezugsstand Spec 038). Die neue Jugxo ändert zwei Antworten: `list_jugxoj/standard` (183 180 → 184 442 Byte) und `describe/standard` (gleiche Länge, andere sha256, die Jugxo-Zahl 234 → 235). Lokal auf `8e9ef744` reproduzierbar (1 rot von 9). Die Kopfzeile des Tests sagt „A fixture is never regenerated to make this file green“; das ist eine Entscheidung des Maintainers. Es gibt einen Präzedenzfall: Spec 046 T6 (`9ee8d430` „Vertrags-Fixtures fortgeschrieben“) hat genau die roten Einträge aus `node packages/mcp/test/kontrakto/generi.mjs <repo-root> <target-root>` (Wegwerf-Kopie außerhalb des Repos) übernommen. Der gleiche Weg gilt hier für die zwei Einträge `describe/standard` und `list_jugxoj/standard`. Nicht in diesem Lauf gemacht: die Freigabe galt für einen Push.
+
+**Stand nach dem Nachtrag:** von den Maintainer-Punkten in Abschnitt 6 sind 2 (B-1), 3 (T6-Commit), 4 (Namensraum) und 5 (Jugxo) erledigt. Offen: der mcp-Vertrag (zwei Fixture-Einträge, Entscheidung wie Spec 046 T6), `turbo-inputs` und `zweitfarbe-036` (fremd), `buehne-036` [firefox] (neu, fremd, einmal gesehen), und NE-2 (Punkt 6). Dieser Nachtrag ist nur lokal committet.
+
 ## 2. Bilder (keine Baselines, nichts vergleicht sie)
 
 Skript `pnpm --filter @fundamento/nodredaktilo bilder --ziel …`, Chromium 153, 1600×1000. Zugeklappt nach `data-nr-preta` und „Übersicht einpassen“; „offen“ = `farbe` und `farbe/komponenten` aufgeklappt, `ero.alsxutilo.border.color.disabled` gewählt, Übersicht eingepasst.
