@@ -252,6 +252,14 @@ Stand 2026-11-11, KIA-1.1. Quelle: Implementation Spec `kialoj-komuna` (Abschnit
 - **D-KIA1-5** (e) prüft zusätzlich, dass kein Knoten seinen Grund verliert; „`neniu` nachher ≤ vorher“ ist ein Befund im Sammel-Array, keine Vergleichs-Assertion (die Diff-Suche §8 sucht `toBeLessThan`). Keine feste Zahl.
 - **D-KIA1-6** `scope` wird nur auf das Präfix `aspekto komuna:` geprüft (Wortlaut der Implementation Spec), nicht auf die genaue Form aus D-2.
 
+### Nachtrag KIA-2.1: F-KIA2-1 und die Codeänderung (außerhalb der Frei-Liste §7)
+
+- **F-KIA2-1.** Mit den 24 Reguloj scheiterten `pnpm build` (modelo) und `pnpm fm modelo validate` an **48 × `traduko-missing`** (je Regulo `…/statement` und `…/kialo`), keine andere Regel. `tekstojOf` (`packages/modelo/src/lingvo/tradukoj.ts`) erkannte Paket-Reguloj nur am Namensraum der Id (`coreId`: `reg_<ns>_…`). komuna ist das Referenz-Aspekto ohne `idNamespace` und prägt Kern-Ids (`reg_01…`), seine Reguloj galten also als Kern-Texte, die in `packages/modelo/data/tradukoj.json` (tabu) eine deutsche Übersetzung brauchen. Der Kommentar dort wollte Paket-Reguloj ausdrücklich ausnehmen.
+- **Maintainer-Entscheidung 2026-11-11: Option 2** – den Filter in `tradukoj.ts` korrigieren (verworfen: 48 Einträge in `data/tradukoj.json`; `idNamespace` für komuna).
+- **Codeänderung** `packages/modelo/src/lingvo/tradukoj.ts:70` vorher `.filter((regulo) => coreId(regulo.id))` → nachher `:72` `.filter((regulo) => regulo.aspekto === undefined && coreId(regulo.id))`; Doc-Kommentar von `tekstojOf` (`:59` → `:59-61`) nennt den Grund. Kein Kern-Regulo trägt `aspekto` (`packages/modelo/data/reguloj.json`: 0 von 62), `packageEntries` (`build.ts:271`) setzt es bei jeder Paket-Regulo. Kern-Texte und `data/tradukoj.json` bleiben unverändert.
+- **Neuer Test** `packages/modelo/src/lingvo/tradukoj-049.test.ts` (zuerst rot: 4 statt 2 Schlüssel, 2 × `traduko-missing`; nach der Änderung grün).
+- Beide Dateien stehen außerhalb der Frei-Liste §7 und der Liste aus Abschnitt 3 der Implementation Spec; sie gehören in den PR-Text.
+
 ### Abhängigkeiten
 
 Keine neue Abhängigkeit: `pnpm-lock.yaml`, alle Root-Dateien und alle `package.json` bleiben unverändert.
