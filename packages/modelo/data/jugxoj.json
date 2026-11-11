@@ -4621,6 +4621,16 @@
       "kialo": "Die fünf Eroj vico, kolumno, stako, krado und templinio haben bis Etappe F kein Set im Figma-Plan: keine bestehende Bauform passt (Rahmen mit Richtung und Kindern, Raster, Zeitstrahl), und neue Bauformen sind Sache von Etappe F. Darum darf die Figma-Seite der Parität genau diese fünf bis Etappe F auslassen; jede andere Ero und jede andere Seite bleibt eine Differenz (FIGMA_EROJ_NOT_DRAWN). Sobald Etappe F die Sets baut, entfällt diese Freigabe.",
       "date": "2026-11-09",
       "context": "Spec 046 Nachtrag (plan.md D-43, F-T8-2, Befunde EF-1 bis EF-3): check:parity meldet die fünf fehlenden Sets als freigegeben (parity-part-not-drawn am Pfad items.<ero>), nicht als parity-item-missing. Von P0 angelegt, im Auftrag des Maintainers vom 2026-11-09."
+    },
+    {
+      "id": "jug_01M7529VTNHYB7ZBX9S37TWNES",
+      "ref": {
+        "artikolo": "X"
+      },
+      "decision": "approved",
+      "kialo": "Barrierefreiheit ist für das Paket packages/nodredaktilo ausgenommen: Es ist die Leinwand der Metiejo, die die Ableitung einer bestehenden Marke als Graph zum Lesen zeigt, ein Werkzeug für die Arbeit an einer Marke und keine Oberfläche, die Fundamento für eine Marke erzeugt. Die Ausnahme gilt nur für dieses Paket. Die Eroj, die die Leinwand in ihren Knoten zeigt, die Bildschirme der Metiejo außerhalb der Leinwand und die erzeugten Marken behalten jede Regel und jede Prüfung der Barrierefreiheit.",
+      "date": "2026-11-09",
+      "context": "Spec 047 (Node-Editor NE-1), Entscheidung A-1 des Maintainers vom 2026-11-09 (spec.md, Tabelle der Entscheidungen); in plan.md D-12 offen geblieben, weil diese Datei in jenem Lauf tabu war. ref.artikolo X, weil die Ausnahme die Konformitätsprüfung 4 (Alirebleco: Fokus, Tastatur, ARIA, das Benchmark-Werkzeug) für ein Paket aufhebt und keine einzelne Regulo: Jede Regulo der Barrierefreiheit gilt weiter für die Eroj und die Marken. Das Schema kennt kein Feld für ein Paket; der Geltungsbereich packages/nodredaktilo steht deshalb im Kialo und hier. Angelegt im Auftrag des Maintainers vom 2026-11-11 (Spec 047 Nachtrag)."
     }
   ]
 }
