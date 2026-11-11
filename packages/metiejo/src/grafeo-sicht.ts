@@ -10,7 +10,7 @@ export interface Nodo {
   /** Token name, or `enigo:<agordo path>` for a facet of the Agordo. */
   id: string;
   speco: Speco;
-  /** The id of a Grupo of the lowest level. */
+  /** The id of a Grupo without sub-groups (a leaf of the group tree, at any depth). */
   grupo: string;
   /** The last part of the path, never translated. */
   etikedo: string;
@@ -29,11 +29,13 @@ export interface Ligo {
 }
 
 export interface Grupo {
+  /** The `/`-joined path from the axis down: `farbe`, `farbe/komponenten`, `farbe/komponenten/butono`, … */
   id: string;
+  /** Level 1: the axis label; level 2 of an axis with sub-groups: its label; below: the path part. */
   etikedo: string;
-  /** The axis of a level-2 group. */
+  /** The direct parent group; absent for an axis (level 1). */
   patro?: string;
-  /** The direct members, sorted. */
+  /** The direct members, sorted; empty exactly when the group has sub-groups (never both). */
   nodoj: string[];
 }
 
@@ -42,14 +44,17 @@ export interface Grafeo {
   nodoj: Nodo[];
   /** Sorted by (de, al), without duplicates. */
   ligoj: Ligo[];
-  /** Sorted by axis order, then id; only groups with at least one node (counted transitively). */
+  /**
+   * The axes in their fixed order, below each its tree depth-first with siblings sorted by id; only
+   * groups with at least one node (counted transitively).
+   */
   grupoj: Grupo[];
 }
 
 export interface SichtNodo {
   id: string;
   speco: Speco | "grupo";
-  /** The group of a token node; the parent of a level-2 group node. */
+  /** The group of a token node; the parent group of a group node (absent for an axis). */
   grupo?: string;
   etikedo: string;
   /** Group nodes: the number of token nodes inside, counted transitively. */
@@ -85,8 +90,8 @@ function ancestorsOf(byId: ReadonlyMap<string, Grupo>, id: string): string[] {
 
 /**
  * What the canvas shows with the groups `malfermitaj` open. A top-level group is always visible; a
- * level-2 group when its parent is open (a group counts as open only when its ancestors are); a
- * token node when its group and every ancestor are open. Every ligo is drawn between the nearest
+ * group at any deeper level when its parent is open (a group counts as open only when all its
+ * ancestors are); a token node when its group and every ancestor are open. Every ligo is drawn between the nearest
  * visible representatives of its ends – the node itself or its highest closed group – self-loops
  * dropped, duplicates summed into `nombro`. Nodes are sorted by group order (a group before its
  * members), then id; edges by (de, al).
