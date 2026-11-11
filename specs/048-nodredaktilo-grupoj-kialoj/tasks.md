@@ -7,7 +7,7 @@ Fünf Tickets, ein Strang (Spec: „höchstens 5 Tickets, ein PR“). T1–T4 se
 | Ticket | Inhalt | Stand |
 |---|---|---|
 | T1 (NE1B-1) | Spec-Ordner; dritte Ebene (Komponenten-Untergruppen) und 60er-Regel in `grafeo.ts`; `grafeo-grupoj-048` | erledigt (Befunde F-T1-1 bis F-T1-4, Entscheidungen D-T1-1 bis D-T1-5; eine D-6-Änderung an einem 047-Test) |
-| T2 (NE1B-2) | `knotenartDe`, `kialoDe`, `begruendungDe`, `ohneGrund` in `sichtbaro` (Opt-in); `grafeo-kialo-048` | offen |
+| T2 (NE1B-2) | `knotenartDe`, `kialoDe`, `begruendungDe`, `ohneGrund` in `sichtbaro` (Opt-in); `grafeo-kialo-048` | erledigt (Befunde F-T2-1 bis F-T2-5, Entscheidungen D-T2-1 bis D-T2-4; kein 047-Test geändert) |
 | T3 (NE1B-3) | Leinwand: Aufklappen in Stufen, Seitenspalte mit Art und geerbtem Grund, Zahl an Gruppen | offen |
 | T4 (NE1B-4) | Messung, Bilder, `luecken.json`, Diff-Suche, Bericht-Entwurf | offen |
 | T5 (NE1B-5) | Ein PR, ein Push, ein `workflow_dispatch`, Bericht (Orchestrator) | offen |
@@ -80,4 +80,53 @@ Keine Gruppe über 60. Ebene 4 gibt es unter `farbe/komponenten/butono`, `farbe/
 ### Commits
 
 - `520fa032` Spec 048 T1: red test – grafeo-grupoj-048
-- (dieser Commit) Spec 048 T1: component sub-groups and the 60-rule
+- `a2147f51` Spec 048 T1: component sub-groups and the 60-rule
+
+## T2 im Einzelnen
+
+- [x] Roter Test zuerst: `packages/metiejo/src/grafeo-kialo-048.test.ts`. Lauf gegen `a2147f51` (`FM_AUSGABE=knapp pnpm --filter @fundamento/metiejo exec vitest run src/grafeo-kialo-048.test.ts`): **19 rot, 3 grün** (2,4 s). Rot aus dem erwarteten Grund: `knotenartDe`/`kialoDe`/`begruendungDe` „is not a function“ (es gibt sie noch nicht), dazu `:323` „counts the decisions without own reason“: `expected [ 'eingaben=-', 'farbe=-', … ] to deeply equal [ 'eingaben=1', 'farbe=3', … ]` (kein `ohneGrund`). Grün schon vorher: „leaves the view of 047 unchanged without the option“, „answers what 047 answered without the option“ (die Option wurde noch ignoriert) und „has no import statement“. Commit `d909caf2`.
+- [x] Umsetzung in `packages/metiejo/src/grafeo-sicht.ts` (weiter **null** Import-Anweisungen; der Test prüft das mit einem Grep über die Datei):
+  - `export type Knotenart = "decido" | "mekaniko" | "transpreno"`; `knotenartDe(g, id)` nach den Regeln der technischen Spec B, erste passende Regel: (1) `speco === "enigo"` → `decido`; (2) `regulo` beginnt mit `paletto`/`gestalto` → `mekaniko` (vor der Rolle); (3) keine Komponente (`ero.`/`sxablono.`), mindestens eine Ligo von einem `ero.*`-Knoten, und das eigene `al` (D-5: `devenoDe(g, id)[1]`) liegt in einer Palette-Gruppe (D-4: zweites Segment der Gruppen-Id ist `palette`) oder hat ein `regulo`, das mit `fiksa` beginnt → `decido`; (4) sonst `transpreno`. Unbekannte Id → `undefined`.
+  - `kialoDe(g, id)`: eigenes `kialo` → `{ fonto: "propra", kialo }`; sonst der erste Knoten mit `kialo` ab `devenoDe(g, id)[1]` → `{ fonto: "heredita", de, kialo }`; sonst (und für eine unbekannte Id) `{ fonto: "neniu" }`.
+  - `export type Begruendung` und `begruendungDe(g, id)` genau nach Vertrag 2.2: Mechanik → `{ art: "mekaniko" }`; Entscheidung mit eigenem Grund → `grund`, sonst `fehlt` (ein geerbter Grund zählt nicht); Übernahme → `grund` / `geerbt` (mit `de`, `kialo`) / `neniu`. Unbekannte Id → `undefined`.
+  - `SichtNodo.ohneGrund?: number`; `sichtbaro(g, malfermitaj, opcioj = {})`: nur mit `{ ohneGrund: true }` trägt jeder Gruppenknoten `ohneGrund` (transitiv, 0 eingeschlossen; D-3). Ohne Option ist die Ausgabe dieselbe wie in 047 (kein Schlüssel `ohneGrund`).
+  - Geschwindigkeit: ein Index je Graph (`WeakMap<Grafeo, Indekso>`) mit Knoten nach Id, dem kleinsten `al` je Knoten (das nächste Glied der Kette), den Zielen von `ero.*`-Ligoj, Gruppen, Vorfahren und Knotenzahl je Gruppe; die `ohneGrund`-Zählung je Gruppe entsteht beim ersten Aufruf mit Option und bleibt am Index. `devenoDe` läuft jetzt über denselben Index (gleiche Ausgabe, kein Neuaufbau der ausgehenden Ligoj je Aufruf; `outgoing()` entfällt). Gemessen (Wegwerf-Skript gegen `packages/metiejo/dist`, provo, `farbe` + `farbe/komponenten` offen): erster `sichtbaro`-Aufruf mit Option 4,1 ms (baut Index und Zählung), danach je Umschalten Median 0,8 ms (max 2,0 ms), ohne Option 0,9 ms; `begruendungDe` für alle 2 133 Knoten 1,7 ms. Eine Messung, kein Budget.
+- [x] Grün: `grafeo-kialo-048` **22/22**. Zusammen mit `grafeo-grupoj-048`, `grafeo-047`, `grafeo-neu-047`, `grafeo-kialo-047`, `grafeo-route-047`, `abhaengigkeiten-047`: **67 bestanden, 0 rot** (20,8 s). Kein 047-Test geändert (D-3 hält `grafeo-047.test.ts:256-264` grün).
+- [x] `pnpm --filter @fundamento/metiejo lint`: grün (1 alte Biome-Warnung `src/komponentoj.ts:42`, unverändert). `pnpm --filter @fundamento/nodredaktilo lint`: grün. `pnpm --filter @fundamento/nodredaktilo build` (ohne turbo, F-6): grün, `dist/leinwand.js` 633,62 kB.
+
+### Zählung je Marke (nach T2)
+
+Aus dem Graphen mit den T2-Funktionen gezählt (Wegwerf-Skript außerhalb des Repos gegen `packages/metiejo/dist`); der Test leitet dieselben Zahlen aus den Daten ab und hält keine fest. „ohne Grund“ = Entscheidungen mit `begruendungDe(…).montro === "fehlt"` = Summe von `ohneGrund` über die Achsen-Gruppenknoten (eine Definition, 2.2).
+
+| | komuna | ekzemplo | provo |
+|---|---:|---:|---:|
+| Knoten | 2 115 | 2 115 | 2 133 |
+| Entscheidung (`decido`) | 339 | 317 | 222 |
+| Mechanik (`mekaniko`) | 0 | 0 | 102 |
+| Übernahme (`transpreno`) | 1 776 | 1 798 | 1 809 |
+| ohne Grund (Entscheidung „fehlt“) | 75 | 156 | 160 |
+| geerbt (Übernahme mit `heredita`) | 832 | 1 471 | 1 475 |
+| kein Grund in der Kette | 77 | 308 | 308 |
+| „fehlt“ in 047 (`vorher047`) | 920 | 1 842 | 1 852 |
+
+`ohneGrund` je Achse (zugeklappt): komuna `farbe` 5, `schrift` 31, `form` 11, `raum` 17, `dichte` 0, `elevation` 6, `bewegung` 5, `weitere` 0; ekzemplo `farbe` 51, `schrift` 31, `form` 20, `raum` 34, `dichte` 0, `elevation` 10, `bewegung` 10; provo `eingaben` 18, `farbe` 51, `schrift` 31, `form` 16, `raum` 28, `dichte` 0, `elevation` 6, `bewegung` 10. Die Summen ergeben je Marke die Zeile „ohne Grund“.
+
+### Befunde: wo die vorläufige Definition falsch einzuordnen scheint (für den Bericht; die Regeln bleiben)
+
+- **F-T2-1 (F-1)** komuna/ekzemplo haben **0 Mechanik**: Palettenstufen sind dort feste Werte (`speco: "enigo"`, `regulo` `fiksa · …`), z. B. `color.palette.danger.150` in `farbe/palette/danger` → Entscheidung (Regel 1); in provo ist derselbe Token `paletto` → Mechanik. Alle 99 `color.palette.*`-Entscheidungen in komuna und ekzemplo sind solche Stufen.
+- **F-T2-2** Gestalt-Token, auf den Eroj verweisen, zählt als Mechanik: provo `radius.small` (`form/palette`, `gestalto`, Ziel von `ero.avataro.image.radius.corner.soft` und `ero.avataro.initials.radius.corner.soft`) → Mechanik, ohne Zeile „Begründung“. In komuna und ekzemplo ist derselbe Token eine Entscheidung (fester Wert). In provo der einzige direkt von Eroj referenzierte Mechanik-Knoten.
+- **F-T2-3** Ein Alias in einer Palette-Gruppe wird zur Entscheidung, weil sein `al` in derselben Palette-Gruppe liegt (D-4): `border.width.default` (`form/palette`, `alias` → `border.width.scale.1`, Ziel von 36–37 Ero-Tokens). Inhaltlich eine Rolle, die `GRUPO_TABELO` in die Palette sortiert. Solche Nicht-Eingaben als Entscheidung in Palette-Gruppen: komuna 10, ekzemplo 10, provo 6 (u. a. `border.width.focus`, `elevation.shadow.floating`, `motion.duration.fast`).
+- **F-T2-4** Eine Rollen-Entscheidung zeigt „fehlt“, obwohl ihre Kette einen Grund trägt: provo `color.action.primary.text` → `color.palette.neutral.0` (der `kialo` der Regel für die Palette). Der geerbte Grund erklärt die Stufe, nicht die Wahl der Rolle; nach Spec richtig „fehlt“, aber auffällig. Entscheidungen mit „fehlt“ und geerbtem Grund: komuna 10, ekzemplo 51, provo 47.
+- **F-T2-5** Ein einziger Ero-Verweis macht eine Rolle zur Entscheidung: `color.syntax.keyword` (`farbe/rollen/color/syntax`, nur `ero.kodbloko.keyword.color` verweist darauf, `al` = `color.palette.danger.150`/`.300`) → Entscheidung „fehlt“ in allen drei Marken. Ebenso `radius.role.control` (`form/rollen`, `al` = `radius.medium` in `form/palette`), das in provo auf einem Gestalt-Token (Mechanik) aufsetzt.
+
+### Entscheidungen
+
+- **D-T2-1** `kialoDe` liefert die Union `KialoRezulto` (`propra` mit `kialo`; `heredita` mit `de` und `kialo`; `neniu`), exportiert als Typ. Die nicht vorhandenen Felder sind als `?: never` deklariert, so passt die Union auf die Vertragsform `{ fonto; de?; kialo? }` und lässt sich trotzdem über `fonto` eingrenzen.
+- **D-T2-2** Komponente heißt in Regel 3 `ero.*` oder `sxablono.*` (wie `KOMPONENTOJ` in `grafeo.ts`, in `grafeo-sicht.ts` gespiegelt, weil die Datei nichts importiert; D-1). Der Verweis, der eine Rolle auslöst, muss von einem `ero.*`-Knoten kommen (Wortlaut der Spec); ein `sxablono.*`-Verweis allein reicht nicht.
+- **D-T2-3** Ein Graph gilt nach dem Lesen als unveränderlich; der Index hängt per `WeakMap` am Objekt. Keine Funktion schreibt in den Graphen (Test: `serializeGrafeo` vor und nach allen Aufrufen gleich), die Rückgaben sind frische Objekte.
+- **D-T2-4** Ein eigener `kialo` zählt, sobald der Schlüssel einen Wert hat (`!== undefined`), wie in 047 (`flanko.tsx`: `nodo.kialo ?? …`).
+
+### Commits
+
+- `d909caf2` Spec 048 T2: red test – grafeo-kialo-048
+- (dieser Commit) Spec 048 T2: knotenartDe, kialoDe, begruendungDe and opt-in ohneGrund

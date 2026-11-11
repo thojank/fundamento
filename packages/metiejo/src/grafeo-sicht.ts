@@ -61,6 +61,11 @@ export interface SichtNodo {
   nombro?: number;
   /** Group nodes: whether the group is open. */
   malfermita?: boolean;
+  /**
+   * Group nodes, only with `sichtbaro(…, { ohneGrund: true })` (Spec 048, D-3): the number of
+   * decisions without an own reason inside, counted transitively (`begruendungDe` → "fehlt").
+   */
+  ohneGrund?: number;
 }
 
 /** An edge between visible nodes; `nombro` counts the ligoj it stands for. */
@@ -76,6 +81,90 @@ export interface Sicht {
 }
 
 const compareText = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
+
+/** The prefixes of component tokens – the same as `KOMPONENTOJ` in `grafeo.ts` (no import here). */
+const KOMPONENTOJ = ["ero.", "sxablono."];
+
+/**
+ * What every question about one graph needs, built once per graph object (Spec 048, NE1B-2): the
+ * canvas asks on every toggle, and rebuilding the outgoing ligoj per node would cost a pass over all
+ * ligoj each time. A Grafeo is never changed after it is read, so the index stays valid for the
+ * life of the object; the WeakMap lets it go with the graph. Nothing is written into the graph.
+ */
+interface Indekso {
+  nodoj: Map<string, Nodo>;
+  /** Per node the smallest `al` of its outgoing ligoj – the next link of the chain of origin. */
+  sekva: Map<string, string>;
+  /** The nodes an `ero.*` node has a ligo to. */
+  eroCelo: Set<string>;
+  grupoj: Map<string, Grupo>;
+  /** Per group its ancestors, outermost first. */
+  praoj: Map<string, string[]>;
+  /** Per group the number of token nodes inside, counted transitively. */
+  nombro: Map<string, number>;
+  /** Per group the number of decisions without own reason inside; built on first use. */
+  ohneGrund?: Map<string, number>;
+}
+
+const indeksoj = new WeakMap<Grafeo, Indekso>();
+
+function indeksoDe(g: Grafeo): Indekso {
+  const cached = indeksoj.get(g);
+  if (cached !== undefined) return cached;
+  const sekva = new Map<string, string>();
+  const eroCelo = new Set<string>();
+  for (const ligo of g.ligoj) {
+    const al = sekva.get(ligo.de);
+    if (al === undefined || compareText(ligo.al, al) < 0) sekva.set(ligo.de, ligo.al);
+    if (ligo.de.startsWith("ero.")) eroCelo.add(ligo.al);
+  }
+  const grupoj = new Map(g.grupoj.map((grupo) => [grupo.id, grupo]));
+  const praoj = new Map(g.grupoj.map((grupo) => [grupo.id, ancestorsOf(grupoj, grupo.id)]));
+  const nombro = new Map<string, number>();
+  for (const nodo of g.nodoj) {
+    for (const id of [...(praoj.get(nodo.grupo) ?? []), nodo.grupo]) {
+      nombro.set(id, (nombro.get(id) ?? 0) + 1);
+    }
+  }
+  const indekso: Indekso = {
+    nodoj: new Map(g.nodoj.map((nodo) => [nodo.id, nodo])),
+    sekva,
+    eroCelo,
+    grupoj,
+    praoj,
+    nombro,
+  };
+  indeksoj.set(g, indekso);
+  return indekso;
+}
+
+/** The chain of origin over the index (see `devenoDe`). */
+function cxenoDe(indekso: Indekso, id: string): string[] {
+  if (!indekso.nodoj.has(id)) return [];
+  const chain = [id];
+  let current = id;
+  while (indekso.nodoj.get(current)?.speco !== "enigo") {
+    const al = indekso.sekva.get(current);
+    if (al === undefined || chain.includes(al)) break;
+    chain.push(al);
+    current = al;
+  }
+  return chain;
+}
+
+/** Per group the decisions without own reason inside, transitively; built once per graph. */
+function ohneGrundDe(g: Grafeo, indekso: Indekso): Map<string, number> {
+  if (indekso.ohneGrund !== undefined) return indekso.ohneGrund;
+  const out = new Map<string, number>();
+  for (const nodo of g.nodoj) {
+    if (nodo.kialo !== undefined || artoDe(indekso, nodo) !== "decido") continue;
+    for (const id of [...(indekso.praoj.get(nodo.grupo) ?? []), nodo.grupo]) {
+      out.set(id, (out.get(id) ?? 0) + 1);
+    }
+  }
+  indekso.ohneGrund = out;
+  return out;
+}
 
 /** The ancestors of a group, outermost first (cycle-safe). */
 function ancestorsOf(byId: ReadonlyMap<string, Grupo>, id: string): string[] {
@@ -96,22 +185,22 @@ function ancestorsOf(byId: ReadonlyMap<string, Grupo>, id: string): string[] {
  * dropped, duplicates summed into `nombro`. Nodes are sorted by group order (a group before its
  * members), then id; edges by (de, al).
  */
-export function sichtbaro(g: Grafeo, malfermitaj: readonly string[]): Sicht {
-  const byId = new Map(g.grupoj.map((grupo) => [grupo.id, grupo]));
+export function sichtbaro(
+  g: Grafeo,
+  malfermitaj: readonly string[],
+  opcioj: { ohneGrund?: boolean } = {},
+): Sicht {
+  const indekso = indeksoDe(g);
+  const byId = indekso.grupoj;
   const order = new Map(g.grupoj.map((grupo, index) => [grupo.id, index]));
   const wanted = new Set(malfermitaj);
-  const ancestors = new Map(g.grupoj.map((grupo) => [grupo.id, ancestorsOf(byId, grupo.id)]));
+  const ancestors = indekso.praoj;
+  const count = indekso.nombro;
+  const ohneGrund = opcioj.ohneGrund === true ? ohneGrundDe(g, indekso) : undefined;
   const isOpen = (id: string): boolean =>
     wanted.has(id) && (ancestors.get(id) ?? []).every((patro) => wanted.has(patro));
   const isVisible = (grupo: Grupo): boolean =>
     grupo.patro === undefined || (byId.has(grupo.patro) && isOpen(grupo.patro));
-
-  const count = new Map<string, number>();
-  for (const nodo of g.nodoj) {
-    for (const id of [...(ancestors.get(nodo.grupo) ?? []), nodo.grupo]) {
-      count.set(id, (count.get(id) ?? 0) + 1);
-    }
-  }
 
   /** The visible node a token node is drawn as. */
   const representative = new Map<string, string>();
@@ -131,6 +220,7 @@ export function sichtbaro(g: Grafeo, malfermitaj: readonly string[]): Sicht {
       nombro: count.get(grupo.id) ?? 0,
       malfermita: isOpen(grupo.id),
     };
+    if (ohneGrund !== undefined) nodo.ohneGrund = ohneGrund.get(grupo.id) ?? 0;
     if (grupo.patro !== undefined) nodo.grupo = grupo.patro;
     keyed.push({ group: order.get(grupo.id) ?? 0, member: 0, nodo });
   }
@@ -174,36 +264,99 @@ export function grupojDe(g: Grafeo, nodoId: string): string[] {
   return [...ancestorsOf(byId, nodo.grupo), nodo.grupo];
 }
 
-/** The outgoing ligoj of every node, targets sorted. */
-function outgoing(g: Grafeo): Map<string, string[]> {
-  const out = new Map<string, string[]>();
-  for (const ligo of g.ligoj) {
-    const targets = out.get(ligo.de) ?? [];
-    targets.push(ligo.al);
-    out.set(ligo.de, targets);
-  }
-  for (const targets of out.values()) targets.sort(compareText);
-  return out;
-}
-
 /**
  * The chain of origin, starting with `id`: along the outgoing ligo (the smallest `al` where there
  * are several) until an input (`speco: "enigo"`) or a node without outgoing ligoj. A node seen
  * twice ends the chain. Empty for an unknown id.
  */
 export function devenoDe(g: Grafeo, id: string): string[] {
-  const speco = new Map(g.nodoj.map((nodo) => [nodo.id, nodo.speco]));
-  if (!speco.has(id)) return [];
-  const next = outgoing(g);
-  const chain = [id];
-  let current = id;
-  while (speco.get(current) !== "enigo") {
-    const al = next.get(current)?.[0];
-    if (al === undefined || chain.includes(al)) break;
-    chain.push(al);
-    current = al;
+  return cxenoDe(indeksoDe(g), id);
+}
+
+// Spec 048 (NE-1b, T2): the kind of a node and its reason, computed from the graph alone and
+// never stored in it. The classification is provisional (tech spec B); where it errs, the bericht
+// collects examples – the rules are not changed for them.
+
+/** Entscheidung (set by a person), Mechanik (derived by a mechanism), Übernahme (passed on). */
+export type Knotenart = "decido" | "mekaniko" | "transpreno";
+
+/** Where the reason of a node comes from: its own `kialo`, the first one along its chain, or none. */
+export type KialoRezulto =
+  | { fonto: "propra"; kialo: string; de?: never }
+  | { fonto: "heredita"; de: string; kialo: string }
+  | { fonto: "neniu"; de?: never; kialo?: never };
+
+/** What the panel shows in the row "Begründung" (D-8); Mechanik has no such row. */
+export type Begruendung =
+  | { art: "mekaniko" }
+  | { art: "decido" | "transpreno"; montro: "grund"; kialo: string }
+  | { art: "decido"; montro: "fehlt" }
+  | { art: "transpreno"; montro: "geerbt"; de: string; kialo: string }
+  | { art: "transpreno"; montro: "neniu" };
+
+/** The rules of tech spec B, the first that fits (see `knotenartDe`). */
+function artoDe(indekso: Indekso, nodo: Nodo): Knotenart {
+  if (nodo.speco === "enigo") return "decido";
+  const regulo = nodo.regulo ?? "";
+  if (regulo.startsWith("paletto") || regulo.startsWith("gestalto")) return "mekaniko";
+  const komponento = KOMPONENTOJ.some((praefikso) => nodo.id.startsWith(praefikso));
+  if (!komponento && indekso.eroCelo.has(nodo.id)) {
+    // D-5: the own `al` is the next link of the chain, devenoDe(g, id)[1].
+    const al = indekso.nodoj.get(cxenoDe(indekso, nodo.id)[1] ?? "");
+    // D-4: a palette node lies in `<axis>/palette` or below it.
+    if (
+      al !== undefined &&
+      (al.grupo.split("/")[1] === "palette" || al.regulo?.startsWith("fiksa"))
+    )
+      return "decido";
   }
-  return chain;
+  return "transpreno";
+}
+
+/**
+ * The kind of a node, by the first rule that fits: (1) an input is an Entscheidung; (2) a `regulo`
+ * starting with `paletto` or `gestalto` is Mechanik – checked before the role; (3) a node that is no
+ * component, is pointed at by an `ero.*` node and whose own `al` (D-5: the next link of the chain)
+ * is a palette node (D-4: second group segment `palette`) or `fiksa` is an Entscheidung (a role);
+ * (4) everything else is an Übernahme. `undefined` for an unknown id.
+ */
+export function knotenartDe(g: Grafeo, id: string): Knotenart | undefined {
+  const indekso = indeksoDe(g);
+  const nodo = indekso.nodoj.get(id);
+  return nodo === undefined ? undefined : artoDe(indekso, nodo);
+}
+
+/**
+ * The reason of a node: its own `kialo`; else the first `kialo` along `devenoDe` from the second
+ * link on, with the node it comes from; else none (the chain ends at an input or a node without
+ * outgoing ligo). `{ fonto: "neniu" }` for an unknown id. Never generated text (047 P-8).
+ */
+export function kialoDe(g: Grafeo, id: string): KialoRezulto {
+  const indekso = indeksoDe(g);
+  const kialo = indekso.nodoj.get(id)?.kialo;
+  if (kialo !== undefined) return { fonto: "propra", kialo };
+  for (const de of cxenoDe(indekso, id).slice(1)) {
+    const heredita = indekso.nodoj.get(de)?.kialo;
+    if (heredita !== undefined) return { fonto: "heredita", de, kialo: heredita };
+  }
+  return { fonto: "neniu" };
+}
+
+/**
+ * What the row "Begründung" shows (tech spec B, table): nothing for Mechanik; the own reason; for an
+ * Entscheidung without one "fehlt" (an inherited reason does not count); for an Übernahme the
+ * inherited reason with its source, or "kein Grund in der Kette". `undefined` for an unknown id.
+ */
+export function begruendungDe(g: Grafeo, id: string): Begruendung | undefined {
+  const art = knotenartDe(g, id);
+  if (art === undefined) return undefined;
+  if (art === "mekaniko") return { art };
+  const kialo = kialoDe(g, id);
+  if (kialo.fonto === "propra") return { art, montro: "grund", kialo: kialo.kialo };
+  if (art === "decido") return { art, montro: "fehlt" };
+  if (kialo.fonto === "heredita")
+    return { art, montro: "geerbt", de: kialo.de, kialo: kialo.kialo };
+  return { art, montro: "neniu" };
 }
 
 /** The direct dependants of a node (sorted) and the number of all its transitive dependants. */
