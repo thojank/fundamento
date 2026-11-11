@@ -44,4 +44,7 @@ Vier Tickets, ein Strang (Spec: „höchstens 5 Tickets, ein PR“): `KIA-1.1 �
 
 ### Commits
 
-- (dieser Commit) Spec 049 KIA-1.1: spec folder and the three red tests
+- `5dae0bf8` Spec 049 KIA-1.1: spec folder and the three red tests
+- (dieser Commit) Spec 049 KIA-1.1: record the commit in tasks.md
+
+Nach dem Commit: `pnpm check:privat` PASS, `pnpm check:clean-room` PASS; `packages/modelo/src/ci/turbo-inputs.test.ts` allein **8/8** grün (4,1 s), kein ungedeckter `*-049`-Zugriff. Die Suche §8 Schritt 2 (`timeout|threshold|sojlo|limit|toBeLessThan` in hinzugefügten Zeilen) trifft nur Text in `spec.md`/`plan.md` (Regel 0, §8, D-KIA1-5), keine Grenze im Code.
