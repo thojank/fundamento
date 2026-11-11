@@ -1,10 +1,12 @@
-// Spec 047 (NE-1, 2.5): the canvas. It fetches the graph once, computes the view with `sichtbaro`
-// (collapsed on open), lets React Flow measure the nodes, lays them out with dagre on the measured
+// Spec 047 (NE-1, 2.5), extended in Spec 048 (NE-1b): the canvas. It fetches the graph once,
+// computes the view with `sichtbaro` (collapsed on open; each group node with its count of decisions
+// without a reason), lets React Flow measure the nodes, lays them out with dagre on the measured
 // sizes and fits the view. The mount element carries the ready marks the measuring script and
 // QA wait on: `data-nr-preta` after the first layout, `data-nr-rev` and `data-nr-dauro` after each
 // expand or collapse once it is painted. A click on a token node only selects it and opens the side
-// panel `#nr-flanko`; an entry there selects its node and opens the groups it sits in. State (open
-// groups, selected node) lives in React only; nothing is stored or written.
+// panel `#nr-flanko`; an entry there selects its node and opens every group it sits in, down to
+// the deepest level, in one step. State (open groups, selected node) lives in React only; nothing
+// is stored or written.
 
 import {
   type Grafeo,
@@ -81,7 +83,10 @@ function Grafeujo({ ujo, grafeo, koloro }: { ujo: HTMLElement; grafeo: Grafeo; k
   const [malfermitaj, setMalfermitaj] = useState<string[]>([]);
   const [elektita, setElektita] = useState<string | null>(null);
   const nodojLauId = useMemo(() => new Map(grafeo.nodoj.map((n) => [n.id, n])), [grafeo]);
-  const sicht = useMemo(() => sichtbaro(grafeo, malfermitaj), [grafeo, malfermitaj]);
+  const sicht = useMemo(
+    () => sichtbaro(grafeo, malfermitaj, { ohneGrund: true }),
+    [grafeo, malfermitaj],
+  );
   const [nodoj, setNodoj, onNodesChange] = useNodesState<FlowNodo>([]);
   const [ligoj, setLigoj] = useState<Edge[]>([]);
   /** Bumped after each layout; the fit and the ready marks follow it. */
@@ -100,7 +105,7 @@ function Grafeujo({ ujo, grafeo, koloro }: { ujo: HTMLElement; grafeo: Grafeo; k
     );
   }, []);
 
-  /** Selects a node from the side panel and opens the groups it sits in (`grupojDe`). */
+  /** Selects a node from the side panel and opens all the groups it sits in (`grupojDe`). */
   const elekti = useCallback(
     (id: string) => {
       setElektita(id);

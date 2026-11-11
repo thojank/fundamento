@@ -1,14 +1,20 @@
-// Spec 047 (NE-1, 2.5): the side panel `#nr-flanko`. It explains the selected node from the graph's
-// data alone: its value in the current scheme with the other scheme small below (P-7), its
-// mechanism (`[data-nr-regulo]`) and its reason (`[data-nr-kialo]`, "fehlt" where the data has
-// none, P-8). For a derived node it lists the chain of origin down to an input
-// (`[data-nr-deveno]`), for an input what depends on it (`[data-nr-dependanto]`, then the
-// transitive count in `[data-nr-dependantoj-sumo]`). An entry's click selects that node.
+// Spec 047 (NE-1, 2.5), extended in Spec 048 (NE-1b): the side panel `#nr-flanko`. It explains the
+// selected node from the graph's data alone: its value in the current scheme with the other scheme
+// small below (P-7), its kind (`[data-nr-art]`: Entscheidung, Mechanik or Übernahme), its mechanism
+// (`[data-nr-regulo]`) and its reason (`[data-nr-kialo]`) as `begruendungDe` decides: the own
+// reason; "fehlt" for an Entscheidung without one (P-8); for an Übernahme the inherited reason with
+// its source (`[data-nr-geerbt]`) or "kein Grund in der Kette"; no reason row for Mechanik. For a
+// derived node it lists the chain of origin down to an input (`[data-nr-deveno]`), for an input what
+// depends on it (`[data-nr-dependanto]`, then the transitive count in `[data-nr-dependantoj-sumo]`).
+// A click on an entry or on the inherited reason's source selects that node.
 
 import {
+  type Begruendung,
+  begruendungDe,
   dependantojDe,
   devenoDe,
   type Grafeo,
+  type Knotenart,
   type Nodo,
   type Speco,
 } from "@fundamento/metiejo/grafeo";
@@ -27,6 +33,12 @@ export interface FlankoProps {
 const SUBNIVELO = String(Number(KARTO_NIVELO) + 1);
 
 const SKEMO_NOMO: Record<Skemo, string> = { light: "Hell", dark: "Dunkel" };
+
+const ARTO_NOMO: Record<Knotenart, string> = {
+  decido: "Entscheidung",
+  mekaniko: "Mechanik",
+  transpreno: "Übernahme",
+};
 
 const abhaengige = (nombro: number): string =>
   nombro === 1 ? "1 Knoten hängt insgesamt davon ab" : `${nombro} Knoten hängen insgesamt davon ab`;
@@ -48,7 +60,9 @@ function Listo({
   speco: ReadonlyMap<string, Speco>;
   elekti: (id: string) => void;
 }) {
-  // One handler on the list (delegation): the fm-butono entries get no React event prop.
+  // One handler on the list (delegation): the fm-butono entries get no React event prop. The panel
+  // keys each list by the selected node, so a new node mounts a new list: Chromium kept the old
+  // numbers when React removed only the leading entries (048, F-T3-1).
   const onClick = (evento: MouseEvent<HTMLOListElement>) => {
     const id = celoDe(evento, atributo);
     if (id !== undefined) elekti(id);
@@ -68,6 +82,44 @@ function Listo({
   );
 }
 
+/** The row "Begründung" of a node that is no Mechanik (tech spec B, table). */
+function Kialo({
+  begruendung,
+  elekti,
+}: {
+  begruendung: Exclude<Begruendung, { art: "mekaniko" }>;
+  elekti: (id: string) => void;
+}) {
+  // One handler on the cell (delegation), as in `Listo`: the source's fm-butono gets no event prop.
+  const onClick = (evento: MouseEvent<HTMLElement>) => {
+    const id = celoDe(evento, "data-nr-geerbt");
+    if (id !== undefined) elekti(id);
+  };
+  switch (begruendung.montro) {
+    case "grund":
+      return <dd data-nr-kialo="">{begruendung.kialo}</dd>;
+    case "fehlt":
+      return (
+        <dd data-nr-kialo="">
+          <fm-insigno intent="warning">fehlt</fm-insigno>
+        </dd>
+      );
+    case "geerbt":
+      return (
+        // biome-ignore lint/a11y/useKeyWithClickEvents: the click comes from the fm-butono inside, which carries focus and keys.
+        <dd data-nr-kialo="" onClick={onClick}>
+          geerbt von{" "}
+          <fm-butono data-nr-geerbt={begruendung.de} size="small" emphasis="low">
+            {begruendung.de}
+          </fm-butono>
+          <fm-teksto>{begruendung.kialo}</fm-teksto>
+        </dd>
+      );
+    case "neniu":
+      return <dd data-nr-kialo="">kein Grund in der Kette</dd>;
+  }
+}
+
 export function Flanko({ grafeo, nodo, skemo, elekti, fermi }: FlankoProps) {
   const speco = useMemo(() => new Map(grafeo.nodoj.map((n) => [n.id, n.speco])), [grafeo]);
   const deveno = useMemo(
@@ -78,6 +130,7 @@ export function Flanko({ grafeo, nodo, skemo, elekti, fermi }: FlankoProps) {
     () => (nodo.speco === "enigo" ? dependantojDe(grafeo, nodo.id) : undefined),
     [grafeo, nodo],
   );
+  const begruendung = useMemo(() => begruendungDe(grafeo, nodo.id), [grafeo, nodo]);
   const alia: Skemo = skemo === "dark" ? "light" : "dark";
   const valoro = valoroEn(nodo, skemo);
 
@@ -103,24 +156,40 @@ export function Flanko({ grafeo, nodo, skemo, elekti, fermi }: FlankoProps) {
                 </fm-teksto>
               )}
             </dd>
+            {begruendung === undefined ? null : (
+              <>
+                <dt>Art</dt>
+                <dd data-nr-art={ARTO_NOMO[begruendung.art]}>{ARTO_NOMO[begruendung.art]}</dd>
+              </>
+            )}
             <dt>Regel</dt>
             <dd data-nr-regulo="">{nodo.regulo ?? "keine"}</dd>
-            <dt>Begründung</dt>
-            <dd data-nr-kialo="">
-              {nodo.kialo ?? <fm-insigno intent="warning">fehlt</fm-insigno>}
-            </dd>
+            {/* Mechanik: only the rule, no row "Begründung" and no "fehlt". */}
+            {begruendung === undefined || begruendung.art === "mekaniko" ? null : (
+              <>
+                <dt>Begründung</dt>
+                <Kialo begruendung={begruendung} elekti={elekti} />
+              </>
+            )}
           </dl>
         </fm-atributlisto>
         {nodo.speco === "derivajxo" ? (
           <section>
             <fm-titolo level={SUBNIVELO}>Herkunft</fm-titolo>
-            <Listo ids={deveno} atributo="data-nr-deveno" speco={speco} elekti={elekti} />
+            <Listo
+              key={nodo.id}
+              ids={deveno}
+              atributo="data-nr-deveno"
+              speco={speco}
+              elekti={elekti}
+            />
           </section>
         ) : null}
         {dependantoj === undefined ? null : (
           <section>
             <fm-titolo level={SUBNIVELO}>Hängt davon ab</fm-titolo>
             <Listo
+              key={nodo.id}
               ids={dependantoj.rektaj}
               atributo="data-nr-dependanto"
               speco={speco}

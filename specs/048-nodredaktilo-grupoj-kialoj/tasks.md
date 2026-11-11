@@ -8,7 +8,7 @@ Fünf Tickets, ein Strang (Spec: „höchstens 5 Tickets, ein PR“). T1–T4 se
 |---|---|---|
 | T1 (NE1B-1) | Spec-Ordner; dritte Ebene (Komponenten-Untergruppen) und 60er-Regel in `grafeo.ts`; `grafeo-grupoj-048` | erledigt (Befunde F-T1-1 bis F-T1-4, Entscheidungen D-T1-1 bis D-T1-5; eine D-6-Änderung an einem 047-Test) |
 | T2 (NE1B-2) | `knotenartDe`, `kialoDe`, `begruendungDe`, `ohneGrund` in `sichtbaro` (Opt-in); `grafeo-kialo-048` | erledigt (Befunde F-T2-1 bis F-T2-5, Entscheidungen D-T2-1 bis D-T2-4; kein 047-Test geändert) |
-| T3 (NE1B-3) | Leinwand: Aufklappen in Stufen, Seitenspalte mit Art und geerbtem Grund, Zahl an Gruppen | offen |
+| T3 (NE1B-3) | Leinwand: Aufklappen in Stufen, Seitenspalte mit Art und geerbtem Grund, Zahl an Gruppen | erledigt (Browser-Beleg unten; Befund F-T3-1 behoben, F-T3-2 fremd; Entscheidungen D-T3-1 bis D-T3-3; kein 047-Test geändert) |
 | T4 (NE1B-4) | Messung, Bilder, `luecken.json`, Diff-Suche, Bericht-Entwurf | offen |
 | T5 (NE1B-5) | Ein PR, ein Push, ein `workflow_dispatch`, Bericht (Orchestrator) | offen |
 
@@ -130,3 +130,48 @@ Aus dem Graphen mit den T2-Funktionen gezählt (Wegwerf-Skript außerhalb des Re
 
 - `d909caf2` Spec 048 T2: red test – grafeo-kialo-048
 - (dieser Commit) Spec 048 T2: knotenartDe, kialoDe, begruendungDe and opt-in ohneGrund
+
+## T3 im Einzelnen
+
+- [x] `packages/nodredaktilo/src/flanko.tsx`: neue Zeile „Art“ (`dd[data-nr-art]` = „Entscheidung“ | „Mechanik“ | „Übernahme“, derselbe Text als Attributwert). Die Zeile „Begründung“ kommt aus `begruendungDe` (Tabelle der technischen Spec B): `grund` → Text des Grundes; `fehlt` → `fm-insigno intent="warning"` „fehlt“ (wie 047); `geerbt` → „geerbt von“ + `fm-butono[data-nr-geerbt="<id>"]`, darunter der Grund in `fm-teksto`; `neniu` → reiner Text „kein Grund in der Kette“ (kein Insigno, kein Warnton). Mechanik: kein `dt`/`dd` „Begründung“, die Zeile „Regel“ bleibt. Der Klick auf „geerbt von“ läuft wie die Herkunftsliste über einen delegierten Handler an der Zelle und ruft `elekti`.
+- [x] `packages/nodredaktilo/src/nodoj.tsx`: zweites `fm-insigno slot="meta" intent="warning" data-nr-ohne-grund="<n>"` mit „`<n>` ohne Grund“ am Gruppenknoten, nur bei n > 0.
+- [x] `packages/nodredaktilo/src/kanvaso.tsx`: `sichtbaro(grafeo, malfermitaj, { ohneGrund: true })`. `elekti`/`grupojDe` unverändert: der Browser zeigt keine Lücke bis Ebene 4 (siehe unten).
+- [x] Kopfkommentare der drei Dateien auf NE-1b nachgezogen (Gruppen jeder Ebene, Art, geerbter Grund, Zahl ohne Grund, „öffnet jede Gruppe bis zur tiefsten Ebene“).
+- [x] Nur vorhandene `fm-*`-Eroj und ihre Props; kein neuer `--fm-*`-Token, keine Farbe/Größe als Literal, keine `.css` (`find packages/nodredaktilo -name '*.css' -not -path '*/node_modules/*'` leer). `fm-elementoj.d.ts` unverändert (`data-*` ist über `HTMLAttributes` schon typisiert).
+- [x] `pnpm --filter @fundamento/nodredaktilo lint` grün, `pnpm --filter @fundamento/nodredaktilo build` (ohne turbo, F-6) grün, `dist/leinwand.js` 635,94 kB (T2: 633,62 kB). `pnpm build` grün (10/10).
+- [x] `FM_AUSGABE=knapp pnpm --filter @fundamento/metiejo exec vitest run src/grafeo-grupoj-048.test.ts src/grafeo-kialo-048.test.ts src/grafeo-route-047.test.ts`: **41 bestanden, 0 rot** (16,8 s).
+
+### Browser-Beleg (Playwright-MCP, Chromium 1600×1000, Metiejo nach Abschnitt 5 auf Port 7301, Arbeitsordner `/tmp/ne1b-marken` mit der provo-Agordo aus der Fixture; nichts im Repo)
+
+Gewartet wurde auf `#nr-leinwand[data-nr-preta]`, nach jedem Umschalten auf einen neuen `data-nr-rev`. Klicks auf die `fm-butono` mit echtem Zeiger (Playwright `locator.click`).
+
+| Abnahme | Weg (Ids) | Ergebnis |
+|---|---|---|
+| Aufklappen in Stufen (provo hell) | zugeklappt → `farbe` → `farbe/komponenten` → `farbe/komponenten/alsxutilo` | zugeklappt 8 Gruppen, `rev` 0. `farbe`: `farbe/komponenten`, `farbe/palette`, `farbe/rollen` als Gruppen, 0 Tokenknoten, `rev` 1, `dauro` 88. `farbe/komponenten`: 43 Ero-/Sxablono-Untergruppen, **0 Tokenknoten**, `rev` 2, `dauro` 81. `alsxutilo`: 41 Tokenknoten, `rev` 3, `dauro` 88. |
+| Übernahme mit geerbtem Grund | `ero.alsxutilo.border.color.disabled` | `[data-nr-art]` „Übernahme“, Regel `alias`, `[data-nr-kialo]` „geerbt von“ + `[data-nr-geerbt="color.palette.neutral.300"]`, darunter der Grund; kein Insigno. Herkunft: `ero.alsxutilo.border.color.disabled` → `color.border.disabled` → `color.palette.neutral.300` → `enigo:leitfarbe`. Bild `t3-provo-alsxutilo-geerbt.png`. |
+| Klick auf „geerbt von“ | `[data-nr-geerbt="color.palette.neutral.300"]` | gewählt `color.palette.neutral.300`, geöffnet `farbe/palette` und `farbe/palette/neutral`, `rev` 3 → 4 (`dauro` 129), Knoten sichtbar, eingepasst (Mitte der Leinwand, `data-nr-elektita="true"`). |
+| Mechanik | `color.palette.neutral.300` (provo, `paletto · reg_…`) | „Mechanik“, Zeilen `Wert`, `Art`, `Regel`; **kein** `[data-nr-kialo]`, kein „fehlt“. Bild `t3-provo-mechanik.png`. |
+| Herkunft-Klick in eine geschlossene Gruppe der Ebene 4 | `ero.alsxutilo.border.color.disabled` gewählt, dann Achse `farbe` zugeklappt, dann Herkunft `color.border.disabled` | **ein Klick** öffnet `farbe` → `farbe/rollen` → `farbe/rollen/color` → `farbe/rollen/color/border`; `rev` 4 → 5 (ein Schritt, `dauro` 181), Knoten sichtbar. Panel: „Entscheidung“ + „fehlt“ (Rolle mit Ero-Verweis, F-T2-4). |
+| Letzter Herkunft-Eintrag | `enigo:leitfarbe` | `eingaben` geht auf, `rev` 5 → 6; „Entscheidung“ + `fm-insigno intent="warning"` „fehlt“, Regel „keine“. |
+| Kein Grund in der Kette | `form` → `form/komponenten` → `form/komponenten/alsxutilo`, `ero.alsxutilo.border.stroke.dropzone.true.disabled` | „Übernahme“; `[data-nr-kialo]` enthält nur den Text „kein Grund in der Kette“, 0 `fm-insigno`, 0 `[intent="warning"]`. |
+| Eigener Grund | `farbe/rollen/color/action`: `color.action.danger.rest` / `color.action.tertiary.selected` | „Entscheidung“ bzw. „Übernahme“, jeweils der eigene Grund als Text, kein Insigno. |
+| Zahl an Gruppen | zugeklappt, alle drei Marken, hell und dunkel | provo `eingaben` 18, `farbe` 51, `schrift` 31, `form` 16, `raum` 28, `dichte` –, `elevation` 6, `bewegung` 10 = **160**; komuna `farbe` 5, `schrift` 31, `form` 11, `raum` 17, `dichte` –, `elevation` 6, `bewegung` 5, `weitere` – = **75**; ekzemplo `farbe` 51, `schrift` 31, `form` 20, `raum` 34, `dichte` –, `elevation` 10, `bewegung` 10 = **156**. Gleich den T2-Summen. Jedes `[data-nr-ohne-grund]` > 0 und `intent="warning"`; bei 0 fehlt es (`dichte`, `weitere`, `farbe/palette`, `farbe/komponenten`, `…/color/brand`, `…/color/sekundo`). Unter `farbe/rollen/color` (12 Untergruppen): `action` 7, `backdrop` 1, `background` 1, `border` 4, `focus` 1, `link` 1, `navigation` 5, `status` 20, `syntax` 5, `text` 2 = 47; mit `opacity` 4 = `farbe/rollen` 51 = `farbe` 51. Bild `t3-provo-rollen-color-ohne-grund.png`. |
+| komuna Palette (F-1) | `/aspekto/komuna/grafeo`: `farbe` → `farbe/palette` (9 Untergruppen) → `farbe/palette/danger`, `color.palette.danger.150` | „Entscheidung“, Regel `fiksa · reg_…`, eigener Grund – erwartet nach F-1/F-T2-1, kein Fehler. |
+| 047-Verhalten | alle drei Marken, `?scheme=dark` | zugeklappt 8/7/8; React Flow `colorMode` folgt dem Schema (hell/dunkel); 0 Konsolenfehler auf den Graph-Seiten (beide Schemata); 0 `.selected`, `localStorage`/`sessionStorage` leer; „Graph ansehen“ in `/studio/provo/farbe` führt zu `/marko/provo/grafeo?scheme=light`, die Leinwand wird bereit. |
+
+Bilder (außerhalb des Repos): `purple/documentation/261111-spec-048-node-editor-ne-1b-untergruppen-je-ero-und-geerbte-grnde/qa-screenshots/t3-provo-alsxutilo-geerbt.png`, `t3-provo-mechanik.png`, `t3-provo-rollen-color-ohne-grund.png`. Server danach gestoppt, Browser geschlossen.
+
+### Befunde
+
+- **F-T3-1 (behoben)** Herkunftsliste zeigte nach einem Klick in die Kette „3.“, „4.“ statt „1.“, „2.“: React entfernt bei gleichen Schlüsseln nur die vorderen `li`, Chromium zählte das `ol` dabei nicht neu (DOM korrekt: 2 `li`, `start` 1). Schon in 047 so, mit „geerbt von“ jetzt häufiger. Behebung in `flanko.tsx`: beide Listen bekommen `key={nodo.id}`, so entsteht je gewähltem Knoten eine neue Liste. Im Browser geprüft (danach „1.“, „2.“).
+- **F-T3-2 (fremd)** `/studio/provo/farbe` meldet zweimal die Warnung `fm-ikono: name is required …` (Studio-Seite, nicht die Leinwand; `html.ts`/Eroj sind tabu). Keine Fehler.
+
+### Entscheidungen
+
+- **D-T3-1** `data-nr-art` trägt als Wert denselben Text wie die Zelle („Entscheidung“/„Mechanik“/„Übernahme“), damit sowohl `dd[data-nr-art]` mit Textvergleich als auch `[data-nr-art="Übernahme"]` greifen (T4, QA).
+- **D-T3-2** „geerbt von“ steht als Text in der Zelle, die Quelle als `fm-butono size="small" emphasis="low"` (wie die Einträge der Herkunftsliste), der Grund darunter als `fm-teksto`.
+- **D-T3-3** Ein Knoten ohne Ergebnis von `begruendungDe` (nur bei unbekannter Id, kommt in der Leinwand nicht vor) zeigt weder „Art“ noch „Begründung“.
+
+### Commits
+
+- (dieser Commit) Spec 048 T3: canvas shows kind, inherited reason and ohne-Grund badges

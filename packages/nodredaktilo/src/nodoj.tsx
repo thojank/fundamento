@@ -1,8 +1,10 @@
-// Spec 047 (NE-1, 2.5): the two node types of the canvas, each an fm-karto. Its heading is the
-// `etikedo` in the card's heading slot – fm-karto composes the fm-titolo at its own `level` – and
-// its meta row an fm-insigno with the kind. A group node carries its toggle
-// (`fm-butono[data-nr-faldi]`) in the actions; a click on it opens or closes the group and never
-// selects the node. A token node (or `enigo:` node) shows its value in the current scheme.
+// Spec 047 (NE-1, 2.5), extended in Spec 048 (NE-1b): the two node types of the canvas, each an
+// fm-karto. Its heading is the `etikedo` in the card's heading slot – fm-karto composes the
+// fm-titolo at its own `level` – and its meta row an fm-insigno with the kind. A group node (at any
+// level) carries its toggle (`fm-butono[data-nr-faldi]`) in the actions; a click on it opens or
+// closes the group and never selects the node. Where decisions inside the group lack a reason, a
+// second fm-insigno names how many (`[data-nr-ohne-grund]`). A token node (or `enigo:` node) shows
+// its value in the current scheme.
 
 import type { Nodo, SichtNodo } from "@fundamento/metiejo/grafeo";
 import { Handle, type Node, type NodeProps, Position } from "@xyflow/react";
@@ -52,6 +54,7 @@ export function GrupoNodo({ data }: NodeProps<GrupoFlowNodo>) {
   const faldi = useContext(FaldiKunteksto);
   const { nodo } = data;
   const malfermita = nodo.malfermita === true;
+  const ohneGrund = nodo.ohneGrund ?? 0;
   // The toggle's click is taken on the wrapper (delegation): the custom element gets no React event
   // prop, and the click stops here, so React Flow never treats it as a click on the node.
   const onClick = (evento: MouseEvent<HTMLDivElement>) => {
@@ -67,6 +70,11 @@ export function GrupoNodo({ data }: NodeProps<GrupoFlowNodo>) {
       <fm-karto level={KARTO_NIVELO}>
         <span slot="heading">{nodo.etikedo}</span>
         <fm-insigno slot="meta">{`${specoTeksto("grupo")} · ${nodo.nombro ?? 0}`}</fm-insigno>
+        {ohneGrund > 0 ? (
+          <fm-insigno slot="meta" intent="warning" data-nr-ohne-grund={String(ohneGrund)}>
+            {`${ohneGrund} ohne Grund`}
+          </fm-insigno>
+        ) : null}
         <fm-butono slot="actions" data-nr-faldi="" size="small" emphasis="low">
           {malfermita ? "Zuklappen" : "Aufklappen"}
         </fm-butono>
