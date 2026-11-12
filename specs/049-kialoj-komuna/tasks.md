@@ -9,8 +9,8 @@ Vier Tickets, ein Strang (Spec: „höchstens 5 Tickets, ein PR“): `KIA-1.1 �
 | Ticket | Inhalt | Stand |
 |---|---|---|
 | KIA-1.1 | Spec-Ordner; drei rote Tests (`grafeo-kialo-049`, `regularo-komuna-049`, `explain-049`) | erledigt (rot aus dem erwarteten Grund; kein bestehender Test geändert; Entscheidungen D-KIA1-1 bis D-KIA1-6 im Nachtrag von `plan.md`) |
-| KIA-2.1 | 24 Ids, `packages/aspekto-komuna/reguloj.json`, `NOT_CHECKABLE`, erzwungene Änderung `checks/regularo/index.test.ts` (B-3), 038-Fixture `describe/standard` (B-1 A), alles grün | gestoppt an F-KIA2-2 (T4-Kialo nennt „Figma“, AK-12 rot); F-KIA2-1 gelöst |
-| KIA-3.1 | `bilder`-Lauf, `luecken.json` (049), Bericht-Entwurf, Diff-Suche §8 | offen |
+| KIA-2.1 | 24 Ids, `packages/aspekto-komuna/reguloj.json`, `NOT_CHECKABLE`, erzwungene Änderung `checks/regularo/index.test.ts` (B-3), 038-Fixture `describe/standard` (B-1 A), alles grün | erledigt (F-KIA2-1 und F-KIA2-2 nach Maintainer-Entscheidung gelöst; `00f536eb`) |
+| KIA-3.1 | `bilder`-Lauf, `luecken.json` (049), Bericht-Entwurf, Diff-Suche §8 | erledigt (komuna 75 → 0; ekzemplo/provo id-gleich mit 048) |
 | KIA-4.1 | Ein PR, ein Push, ein `workflow_dispatch`, CI je Job in Bericht und PR-Text | offen |
 
 ## KIA-1.1 im Einzelnen
@@ -49,7 +49,7 @@ Vier Tickets, ein Strang (Spec: „höchstens 5 Tickets, ein PR“): `KIA-1.1 �
 
 Nach dem Commit: `pnpm check:privat` PASS, `pnpm check:clean-room` PASS; `packages/modelo/src/ci/turbo-inputs.test.ts` allein **8/8** grün (4,1 s), kein ungedeckter `*-049`-Zugriff. Die Suche §8 Schritt 2 (`timeout|threshold|sojlo|limit|toBeLessThan` in hinzugefügten Zeilen) trifft nur Text in `spec.md`/`plan.md` (Regel 0, §8, D-KIA1-5), keine Grenze im Code.
 
-## KIA-2.1 im Einzelnen (gestoppt: Blocker F-KIA2-2)
+## KIA-2.1 im Einzelnen
 
 - [x] `pnpm build` (Cache), dann genau ein Aufruf `pnpm id:new regulo --count 24 --lock packages/aspekto-komuna/ids.lock.json --json`: 24 Ids `reg_01M7610SVZTWGTRP9088GZQ9P9` … `reg_01M7610SW0468972WKNSC1Y3P1`, aufsteigend, in Tabellenreihenfolge B1 … T4 vergeben, alle größer als die größte Kern-Id `reg_01M69KM4J9STWVW0E2VZK64HC8`. Diff von `ids.lock.json`: 96 Zeilen hinzugefügt, 0 entfernt, nur `{"status":"active","type":"regulo"}`.
 - [x] `packages/aspekto-komuna/reguloj.json`: 24 Einträge aus §5 (Wegwerf-Skript außerhalb des Repos, D-1/D-2), nach Id sortiert, mit Biome formatiert (`pnpm --filter @fundamento/aspekto-komuna lint` = `biome check .` grün). Kialo-Vergleich (`node verify.mjs <user-provided-technical-spec-kialoj-komuna.md> packages/aspekto-komuna/reguloj.json`: §5-Zeile → vorletzte Zelle, ohne Backticks und ohne abschließendes ` **A**`): **24/24 gleich**.
@@ -60,7 +60,7 @@ Nach dem Commit: `pnpm check:privat` PASS, `pnpm check:clean-room` PASS; `packag
 - [x] Grün, je einzeln (`FM_AUSGABE=knapp`): `regularo-komuna-049` + `explain-049` + `tradukoj-049` 15/15; `regularo-repo` 17/17; `checks/regularo/index` 13/13; `explain` + `nachlese-8-germana` + `nomoj` 23/23; `grafeo-kialo-049` 8/8; metiejo `047` + `048` (alle sechs Dateien) 67/67; `gvidanto-038` grün (mit `kontrakto-038` 40/40); `komuna-fonto` 11/11.
 - [x] **B-1 (A):** `kontrakto-038` nach dem Daten-Commit rot mit genau einem Eintrag, `describe/standard`. Verfahren aus 047: Wegwerf-Kopie außerhalb des Repos (`generi.mjs` dort so geändert, dass es `list_arangxoj` und `check_markup` überspringt, die keinen Katalog-Eintrag haben), `node packages/mcp/test/kontrakto/generi.mjs <kopie> <ziel>` → 124 Einträge. Kontrolllauf auf einer zweiten Kopie mit `ids.lock.json` von `origin/main` (`6374f18f`) und ohne `reguloj.json`: **114/114** Katalog-Einträge des Repos byte-gleich; zwischen beiden Läufen unterscheidet sich genau `describe/standard` (123/124 gleich). Im Eintrag ändern sich `reguloj.count` und `reguloj.withKialo` (62 → 86) und der Satz (62 → 86 rules); `bytes` bleibt 1882. Nur `describe.json` übernommen; `index.json`, `tool-names.json`, `input-schemas.json`, Prompt und AC-8 bleiben (ekranoj gleich; vier nordstelo-Fälle weichen schon auf `origin/main`-Daten ab, Spec 046 F-B1, beide Läufe gleich). Danach `kontrakto-038` + `gvidanto-038` 40/40.
 - [x] `pnpm check` einmal, schrittweise ohne Kettenabbruch und ohne den Zeitschritt `pnpm perf` (kein Zeittest lokal): `lint`, `check:vortaro-lint`, `check:parity`, `check:regularo`, `check:mankoj`, `check:alirebleco`, `check:clean-room`, `check:ikonaro`, `check:fontoj`, `check:dokumentaro`, `check:privat`, `check:alirebleco-eroj` (657), `check:make-kit`, `check:quickstart`, `check:vitrino` (89), `check:release`, `check:tiparoj`: **alle Exit 0**. `turbo run build test --continue`: Exit 1 – rund 170 Zeitüberschreitungen unter voller Parallel-Last (alle Pakete gleichzeitig, bis 1 600 s je Paket; Stichproben einzeln grün: `cli quickstart` 2/2, modelo `kampo`/`butono`/`parity`/`turbo-inputs` 103/103, nordstelo `raporto` 8/8) und **3 echte Assertion-Fehler, alle AK-12** (F-KIA2-2).
-- [ ] `pnpm test:betroffen`: nicht gelaufen (gestoppt an F-KIA2-2).
+- [x] Betroffene Pakete (`node scripts/ci/betroffen.mjs --lokal`: 10 Pakete) mit `turbo run test --concurrency=1` nach `00f536eb`: 9/10 grün; `projekcioj` 1546 bestanden, 2 rot durch Zeitgrenzen unter Last (`fonto/komuna-fonto.test.ts` ①-6, `celoj/figma/figma-cxiuj.test.ts`). Beide allein: **16/16 grün** (51,9 s). Kein Paket-Code von `projekcioj` ist geändert; keine Grenze angehoben.
 - [x] `.only(`/`.skip(` in hinzugefügten Zeilen: keine. `timeout|threshold|sojlo|limit|toBeLessThan` in hinzugefügten Zeilen: nur Text in `spec.md`/`plan.md`/`tasks.md`.
 
 ### Befunde
@@ -74,3 +74,26 @@ Nach dem Commit: `pnpm check:privat` PASS, `pnpm check:clean-room` PASS; `packag
 - `f58f2c36` Spec 049 KIA-2.1: 24 komuna Reguloj with the approved Kialoj
 - `7c38abc8` Spec 049 Nachtrag: Vertrags-Fixture describe fortgeschrieben (Maintainer-Entscheidung 2026-11-11)
 - (dieser Commit) Spec 049 KIA-2.1: record the state in tasks.md and plan.md
+- `00f536eb` Spec 049 KIA-2.1: T4 kialo without a Celo tool name (F-KIA2-2)
+
+**F-KIA2-2 gelöst (Maintainer-Entscheidung 2026-11-12, T4 ✎):** „Web und Figma“ → „Web und Design-Werkzeug“ (Wortlaut vorher/nachher im Nachtrag von `plan.md`). Danach grün: `fm modelo validate` (VALID, 0 Fehler, 0 Warnungen); modelo `export/build`, `e2e/export`, die 049-Tests, `tradukoj-049`, `regularo-repo`, `checks/regularo/index` 65/65; metiejo `grafeo-kialo-049` 8/8; mcp `kontrakto-038` 9/9 (`describe` durch die Umformulierung unverändert).
+
+## KIA-3.1 im Einzelnen
+
+- [x] `pnpm build`, dann `pnpm --filter @fundamento/nodredaktilo bilder --ziel /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec049 --luecken specs/049-kialoj-komuna/luecken.json`: **Exit 0**, Chromium 153, 1600×1000. Skript unverändert. 9 Bilder und `messung.json` nur unter dem Zielpfad.
+- [x] `luecken.json` (049) vom Skript geschrieben. Vergleich mit 048 (`node -e` mit `util.isDeepStrictEqual`): komuna `{}` (048: 75), ekzemplo **id-gleich** (156), provo **id-gleich** (160).
+- [x] `bericht.md` als Entwurf mit Platzhalter für PR und CI (Abschnitt 1).
+- [x] Diff-Suche §8:
+  1. `git diff --name-only origin/main...HEAD` ⊆ Frei-Liste plus die vom Maintainer erlaubten Dateien (`packages/modelo/src/lingvo/tradukoj.ts`, `packages/modelo/src/lingvo/tradukoj-049.test.ts`, `packages/mcp/test/fixtures/kontrakto/describe.json`, `packages/modelo/src/checks/regularo/index.test.ts`).
+  2. `git diff -U0 origin/main...HEAD -- . ':!specs' | grep -E '^\+' | grep -Ei 'timeout|threshold|sojlo|limit|toBeLessThan'`: kein Treffer.
+  3. `pnpm check:privat` PASS (0 Fehler, 0 Warnungen), `pnpm check:clean-room` PASS (0 Fehler, 0 Warnungen).
+  4. Kein PNG, keine `messung.json` im Diff.
+
+### Geänderte bestehende Tests (für den PR-Text)
+
+| Datei:Zeile | vorher | nachher | Grund |
+|---|---|---|---|
+| `packages/modelo/src/data/regularo-repo.test.ts` (nach Z. 40) | – | 24 `NOT_CHECKABLE`-Einträge | D-19-Wächter: jede `manual`-Regulo braucht einen Eintrag (AC-4) |
+| `packages/modelo/src/checks/regularo/index.test.ts:88` | `reguloj: count("reguloj.json", "reguloj"),` | Z. 88–98: Kern + Länge von `packages/aspekto-komuna/reguloj.json`, aus der Datei | `check:regularo` zählt Paket-Reguloj mit (B-3, Maintainer 2026-11-11) |
+| `packages/mcp/test/fixtures/kontrakto/describe.json` (`describe/standard`) | `reguloj` 62 / `withKialo` 62 | 86 / 86, Satz entsprechend | `describe` zählt Paket-Reguloj (B-1 A, Maintainer 2026-11-11) |
+
