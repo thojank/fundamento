@@ -1,17 +1,32 @@
 # Spec 049 – Bericht (Gründe für komuna: 24 Reguloj, 75 Entscheidungen)
 
-Entwurf aus KIA-3.1 (2026-11-12). Abschnitt 1 wird nach dem einen Push und dem einen Dispatch in einem nur lokalen Commit gefüllt. Quellen: [`spec.md`](spec.md), [`plan.md`](plan.md) (Nachtrag 049), [`tasks.md`](tasks.md). Bilder und Messung liegen außerhalb des Repos unter `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec049/`.
+Entwurf aus KIA-3.1 (2026-11-12). Abschnitt 1 aus KIA-4.1 nach dem einen Push und dem einen Dispatch, nur lokal committet. Quellen: [`spec.md`](spec.md), [`plan.md`](plan.md) (Nachtrag 049), [`tasks.md`](tasks.md). Bilder und Messung liegen außerhalb des Repos unter `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec049/`.
 
 ## 1. PR, Commit, Dispatch, CI
 
-<!-- PLATZHALTER KIA-4.1: PR-Link, Kopf-Commit, Dispatch-Lauf, CI je Job -->
-- PR: _offen_
-- Commit (Kopf des einen Pushs): _offen_
-- Dispatch-Lauf: _offen_
+- PR: [#163](https://github.com/thojank/fundamento/pull/163) „Spec 049: Gründe für komuna (24 Reguloj, 75 Entscheidungen)“ gegen `main`, nicht gemergt.
+- Commit (Kopf des einen Pushs): `ba10d3405a7801e9aa5f43a690ccba0415243f15` (`origin/main` = `6374f18f` unverändert, kein Rebase).
+- Dispatch-Lauf (genau einer, kein Rerun): [43174596533](https://github.com/thojank/fundamento/actions/runs/43174596533). Ergebnis `failure`: 21 von 25 Jobs grün. Die 4 roten sind bekannt fremd oder Zeitgrenzen unter Last; keiner berührt eine geänderte Datei.
+- Der `pull_request`-Lauf, den das Öffnen des PR startet ([43174586258](https://github.com/thojank/fundamento/actions/runs/43174586258), nicht der Dispatch), ist auf demselben Commit nur in den drei Playwright-Shards rot, und zwar nur durch `zweitfarbe-036`. Dort sind `buehne-036:545` und `Unit tests (modelo)` grün.
 
 | Job | Ergebnis | Notiz |
 |---|---|---|
-| _offen_ | | |
+| Affected packages (betroffen) | grün | |
+| Build, lint and Modelo checks | grün | enthält `fm modelo validate` und `pnpm check` |
+| Unit tests (metiejo) | grün | enthält `grafeo-kialo-049` sowie die 047/048-Tests |
+| Unit tests (modelo) | rot, bekannt fremd | `ci/turbo-inputs.test.ts:679`: „Hook timed out in 10000ms“ (nur Zeitgrenze). Im `pull_request`-Lauf grün. |
+| Unit tests (mcp) | grün | enthält `kontrakto-038` mit fortgeschriebenem `describe/standard` |
+| Unit tests (cli · ekranoj · nordstelo · agordilo) | grün | |
+| Unit tests (Projekcioj, shard 1 und 2 von 2) | grün | |
+| Timing checks (M5, Gegenprobe, Ableitung, G5) | grün | |
+| Rendered Eroj (Playwright, shard 1 von 4) | grün | |
+| Rendered Eroj (Playwright, shard 2 von 4) | rot, Befund F-049-3 | `buehne-036.spec.ts:545` [firefox]: Test-Timeout 120 s nach der Prüfung. Im `pull_request`-Lauf auf demselben Commit grün; keine Datei unter `packages/eroj/**` geändert. |
+| Rendered Eroj (Playwright, shard 3 von 4) | rot, bekannt fremd | `zweitfarbe-036.spec.ts:129` und `:196` [firefox] |
+| Rendered Eroj (Playwright, shard 4 von 4) | rot, bekannt fremd | `zweitfarbe-036.spec.ts:129` und `:196` [webkit] |
+| Rendered accessibility (Alirebleco, shard 1–3 von 3) | grün | |
+| Rendered checks (Vitrino, cetero-1 bis -3) | grün | |
+| Rendered checks (Vitrino-Werkstatt, werkstatt-1 und -2) | grün | |
+| Rendered checks (Make Kit, Quickstart) | grün | |
 
 ## 2. Bilder (keine Baselines)
 
@@ -90,6 +105,7 @@ Alle in `packages/aspekto-komuna/reguloj.json`, `aspekto: "komuna"`, `manual`. I
 - **F-KIA2-2 (Maintainer 2026-11-12):** Der Kialo von T4 nannte ein Design-Werkzeug, was AK-12 (Art. VIII) in Regulo-Texten verbietet. Er wurde zu „…damit Web und Design-Werkzeug dieselbe Zahl verstehen…“ geändert. Die Prüfung bleibt unverändert.
 - **F-049-2 / Q-5 (offen):** `packages/aspekto-komuna/package.json` führt `reguloj.json` nicht in `files`. Ein veröffentlichtes npm-Paket trüge die Gründe nicht. Das Repo liest den Ordner direkt, deshalb sind die Tests grün.
 - **F-KIA1-2:** Über alle Knoten hatte komuna vor 049 142 Knoten mit `kialoDe` = `neniu`; 048 zählte 77 nur bei Übernahmen. Nachher zeigt `bilder` 0 Übernahmen ohne Grund in der Kette.
+- **F-049-3 (CI):** `buehne-036.spec.ts:545` [firefox] lief im Dispatch in die Test-Zeitgrenze, war im `pull_request`-Lauf auf demselben Commit aber grün. Es ist ein weiterer Zeittest nach einer Server-Prüfung, wie `zweitfarbe-036`. Er wurde nicht wiederholt, und keine Grenze wurde angehoben.
 - **Lokale Läufe:** Von den 10 betroffenen Paketen sind 9 grün (`--concurrency=1`). In `projekcioj` liefen 2 Tests unter Last in die Zeitgrenze (`komuna-fonto` ①-6, `figma-cxiuj`); allein laufen beide grün. Keine Grenze wurde angehoben.
 
 ## 7. Was der Maintainer als Nächstes tut

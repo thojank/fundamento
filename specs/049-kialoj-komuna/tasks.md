@@ -11,7 +11,7 @@ Vier Tickets, ein Strang (Spec: „höchstens 5 Tickets, ein PR“): `KIA-1.1 �
 | KIA-1.1 | Spec-Ordner; drei rote Tests (`grafeo-kialo-049`, `regularo-komuna-049`, `explain-049`) | erledigt (rot aus dem erwarteten Grund; kein bestehender Test geändert; Entscheidungen D-KIA1-1 bis D-KIA1-6 im Nachtrag von `plan.md`) |
 | KIA-2.1 | 24 Ids, `packages/aspekto-komuna/reguloj.json`, `NOT_CHECKABLE`, erzwungene Änderung `checks/regularo/index.test.ts` (B-3), 038-Fixture `describe/standard` (B-1 A), alles grün | erledigt (F-KIA2-1 und F-KIA2-2 nach Maintainer-Entscheidung gelöst; `00f536eb`) |
 | KIA-3.1 | `bilder`-Lauf, `luecken.json` (049), Bericht-Entwurf, Diff-Suche §8 | erledigt (komuna 75 → 0; ekzemplo/provo id-gleich mit 048) |
-| KIA-4.1 | Ein PR, ein Push, ein `workflow_dispatch`, CI je Job in Bericht und PR-Text | offen |
+| KIA-4.1 | Ein PR, ein Push, ein `workflow_dispatch`, CI je Job in Bericht und PR-Text | erledigt (PR #163, ein Push `ba10d340`, ein Dispatch 43174596533; Bericht §1 nur lokal) |
 
 ## KIA-1.1 im Einzelnen
 
