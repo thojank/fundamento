@@ -64,6 +64,102 @@
       "status": "active",
       "type": "jugxo"
     },
+    "reg_01M7610SVZTWGTRP9088GZQ9P9": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3NB": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3NC": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3ND": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3NE": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3NF": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3NG": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3NH": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3NJ": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3NK": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3NM": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3NN": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3NP": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3NQ": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3NR": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3NS": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3NT": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3NV": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3NW": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3NX": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3NY": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3NZ": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3P0": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M7610SW0468972WKNSC1Y3P1": {
+      "status": "active",
+      "type": "regulo"
+    },
     "set_01M2VEEDW32MC4ZQPRN0GC9JRS": {
       "status": "active",
       "type": "tokenSet"

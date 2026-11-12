@@ -1,0 +1,292 @@
+{
+  "reguloj": [
+    {
+      "id": "reg_01M7610SVZTWGTRP9088GZQ9P9",
+      "name": "komuna-dauer-null",
+      "statement": "In komuna dauert die Stufe 0 der Bewegungsdauer 0 ms.",
+      "kialo": "Stufe 0 ist genau null und nicht bloß kurz, weil motion-reduced-instant jede Dauer auf diese Stufe legt, wenn eine Person weniger Bewegung wünscht, und dann wirklich nichts mehr animiert sein darf.",
+      "scope": "aspekto komuna: motion.duration.scale.0",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["motion.duration.scale.0"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3NB",
+      "name": "komuna-kurven",
+      "statement": "komuna führt die Bewegungskurven accelerate [0.3,0,1,1], decelerate [0,0,0.2,1], expressive [0.2,0,0,1] und linear [0,0,1,1].",
+      "kialo": "Jede Kurve steht für eine Bewegungsart: Was hereinkommt, bremst ab, was geht, beschleunigt, was betont wird, startet schnell, und linear bleibt für Fortschritt, der gleichmäßig laufen muss. Mehr Kurven würden Bewegungen trennen, die niemand unterscheidet.",
+      "scope": "aspekto komuna: motion.easing.curve.*",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["motion.easing.curve.*"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3NC",
+      "name": "komuna-ebenen",
+      "statement": "komuna führt die Ebenen base 0, raised 1, navigation 100, overlay 200, modal 300 und toast 400.",
+      "kialo": "Die Ebenen stehen in Hunderterschritten, damit die Reihenfolge Navigation < Überlagerung < Dialog < Meldung fest ist und ein Ero Platz für eine Zwischenebene findet, ohne neu zu nummerieren. raised hebt mit 1 nur innerhalb der Seite, etwa einen haftenden Tabellenkopf.",
+      "scope": "aspekto komuna: elevation.layer.*",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["elevation.layer.*"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3ND",
+      "name": "komuna-syntax-schluesselwort",
+      "statement": "color.syntax.keyword ist in komuna hell danger 700, dunkel danger 150 und dunkel mit hohem Kontrast danger 50.",
+      "kialo": "Schlüsselwörter tragen das Gerüst des Codes und bekommen den kräftigsten, wärmsten Ton der Marke (danger), damit man die Struktur zuerst sieht. Im Codeblock bedeutet Rot keinen Fehler, weil dort keine Zustände angezeigt werden.",
+      "scope": "aspekto komuna: color.syntax.keyword",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["color.syntax.keyword"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3NE",
+      "name": "komuna-syntax-name",
+      "statement": "color.syntax.name ist in komuna hell info 800 und dunkel info 200.",
+      "kialo": "Namen von Funktionen, Eigenschaften und Befehlen nehmen den info-Ton, weil man beim Lesen nach ihnen sucht und das kühle Blau sie vom warmen Gerüst trennt.",
+      "scope": "aspekto komuna: color.syntax.name",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["color.syntax.name"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3NF",
+      "name": "komuna-syntax-zeichenkette",
+      "statement": "color.syntax.string ist in komuna hell success 800 und dunkel success 300.",
+      "kialo": "Zeichenketten sind grün (success), weil Text in Anführungszeichen der ruhigste Teil des Codes ist und sich so am deutlichsten von Schlüsselwörtern absetzt.",
+      "scope": "aspekto komuna: color.syntax.string",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["color.syntax.string"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3NG",
+      "name": "komuna-syntax-zahl",
+      "statement": "color.syntax.number ist in komuna hell warning 700 und dunkel warning 200.",
+      "kialo": "Zahlen und Literale (true, false, null) nehmen den warning-Ton, weil man Werte beim Lesen prüft. Sie sollen auffallen, ohne mit Schlüsselwörtern oder Zeichenketten verwechselt zu werden.",
+      "scope": "aspekto komuna: color.syntax.number",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["color.syntax.number"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3NH",
+      "name": "komuna-syntax-kommentar",
+      "statement": "color.syntax.comment ist in komuna hell neutral 700 und dunkel neutral 300.",
+      "kialo": "Kommentare stehen neutral und leiser als der Code, aber über der Lesegrenze, weil sie zur Erklärung gehören und nicht verschwinden dürfen.",
+      "scope": "aspekto komuna: color.syntax.comment",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["color.syntax.comment"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3NJ",
+      "name": "komuna-randbreiten",
+      "statement": "komuna führt die Randbreiten 1, 2 und 3 px.",
+      "kialo": "Drei ganze Pixel reichen: 1 px für jeden Rand, 2 px für Betonung und Fokus, 3 px als Reserve. Halbe Pixel würden auf normalen Bildschirmen verwaschen, und mehr Stufen könnte niemand auseinanderhalten.",
+      "scope": "aspekto komuna: border.width.scale.*",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["border.width.scale.*"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3NK",
+      "name": "komuna-rand-betont",
+      "statement": "border.width.strong verweist in komuna auf border.width.scale.2 (2 px).",
+      "kialo": "Betonte Linien (aktiver Reiter, aktuelle Seite, Akzent einer Meldung) sind doppelt so breit wie der normale Rand, damit die Betonung auch ohne Farbe erkennbar ist. Sie teilen die Breite mit dem Fokusrand, damit es nur zwei Strichstärken gibt.",
+      "scope": "aspekto komuna: border.width.strong",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["border.width.strong"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3NM",
+      "name": "komuna-rundung-bedienelement",
+      "statement": "radius.role.control verweist in komuna auf die Rundung medium (10 px).",
+      "kialo": "Bedienelemente nehmen die mittlere Rundung: weich genug, dass sie als anfassbar gelten, und kantig genug, dass sie sich von pillenförmigen Auswahlen und von großen Flächen unterscheiden.",
+      "scope": "aspekto komuna: radius.role.control",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["radius.role.control"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3NN",
+      "name": "komuna-rundung-mehrzeilig",
+      "statement": "radius.role.multiline verweist in komuna auf die Rundung medium (10 px).",
+      "kialo": "Mehrzeilige Felder und kleine Textflächen nehmen dieselbe Rundung wie einzeilige Bedienelemente, damit ein Formular aus einem Guss wirkt. Eine Pille würde mit wachsender Höhe zur Ellipse.",
+      "scope": "aspekto komuna: radius.role.multiline",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["radius.role.multiline"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3NP",
+      "name": "komuna-rundung-pille",
+      "statement": "radius.role.pill verweist in komuna auf die volle Rundung full.",
+      "kialo": "Volle Rundung kennzeichnet kompakte Auswahl- und Zustandselemente (Auswahlchip, Insigno, Schalter, Fortschrittsbalken), damit sie sich auf einen Blick von rechteckigen Aktionen und Feldern unterscheiden.",
+      "scope": "aspekto komuna: radius.role.pill",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["radius.role.pill"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3NQ",
+      "name": "komuna-rundung-flaeche",
+      "statement": "radius.role.surface verweist in komuna auf die Rundung large (12 px).",
+      "kialo": "Flächen wie Karten, Dialoge und Menüs sind größer als ihr Inhalt und bekommen deshalb die große Rundung, damit ihre Ecken im Verhältnis genauso weich wirken wie die der Bedienelemente darin.",
+      "scope": "aspekto komuna: radius.role.surface",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["radius.role.surface"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3NR",
+      "name": "komuna-rundung-tag",
+      "statement": "radius.role.tag verweist in komuna auf die Rundung small (6 px).",
+      "kialo": "Tags, die eine Person wählt oder entfernt, bleiben knapp gerundet, damit man sie von pillenförmigen Insignoj unterscheidet, die nur anzeigen.",
+      "scope": "aspekto komuna: radius.role.tag",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["radius.role.tag"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3NS",
+      "name": "komuna-strichart",
+      "statement": "komuna führt die Stricharten dashed und solid.",
+      "kialo": "Durchgezogen ist der Normalfall. Gestrichelt heißt „hier kann oder wird noch etwas sein“ (Ablagefläche, leerer Zustand, kommender Schritt), weil die Lücke im Strich die Lücke im Inhalt zeigt.",
+      "scope": "aspekto komuna: stroke.*",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["stroke.*"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3NT",
+      "name": "komuna-groessen",
+      "statement": "komuna führt die Größenstufen 100 bis 1000 von 12 px bis 64 px, alle als Vielfache von 4 px.",
+      "kialo": "Alle Größen sind Vielfache von 4 px, damit Symbole, Bedienelemente und Ziele auf einem Raster liegen. Stufe 400 ist mit 24 px zugleich das Mindestziel des Zeigers (touch-target-min, WCAG 2.5.8).",
+      "scope": "aspekto komuna: size.scale.*",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["size.scale.*"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3NV",
+      "name": "komuna-spalten",
+      "statement": "komuna führt Raster mit 4, 8 und 12 Spalten.",
+      "kialo": "4, 8 und 12 Spalten lassen sich ohne Rest halbieren und vierteln, 12 auch dritteln. Ein Layout behält so beim Wechsel von kompakt über mittel zu breit seine Proportionen. 8 ist das Standardraster.",
+      "scope": "aspekto komuna: layout.columns.*",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["layout.columns.*"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3NW",
+      "name": "komuna-umbrueche",
+      "statement": "komuna führt die Umbrüche medium 600 px und expanded 1024 px.",
+      "kialo": "Zwei Grenzen reichen für drei Layouts: Unter 600 px ist ein Telefon im Hochformat, ab 1024 px ist Platz für Seitenleiste und Inhalt nebeneinander. Mehr Grenzen würden Zwischenzustände erzeugen, die niemand gestaltet.",
+      "scope": "aspekto komuna: size.breakpoint.*",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["size.breakpoint.*"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3NX",
+      "name": "komuna-container",
+      "statement": "komuna führt die Containerbreiten small 640, medium 960, large 1280 und max 1440 px.",
+      "kialo": "Die Containerbreiten wachsen in Schritten von 320 px und passen damit auf das 4-, 8- und 12-Spalten-Raster. 1440 px ist die Obergrenze, damit Zeilen und Formulare auf großen Bildschirmen lesbar bleiben.",
+      "scope": "aspekto komuna: size.container.*",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["size.container.*"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3NY",
+      "name": "komuna-schriftfamilien",
+      "statement": "In komuna sind body und display dieselbe Sans-Familie unter OFL-1.1, code ist deren Mono-Schnitt, je mit generischen Ausweichschriften.",
+      "kialo": "Eine Familie für Fließtext und Überschriften hält die Marke ruhig. Der Mono-Schnitt derselben Familie setzt Code ab, ohne eine zweite Handschrift einzuführen. Beide stehen unter freier Lizenz, und die generischen Ausweichschriften tragen das Layout, bevor die Schrift geladen ist.",
+      "scope": "aspekto komuna: font.family.*",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["font.family.*"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3NZ",
+      "name": "komuna-zeilenhoehen",
+      "statement": "komuna führt die Zeilenhöhen solid 1, tight 1,1, snug 1,25, normal 1,5, relaxed 1,625 und loose 1,75.",
+      "kialo": "Die Skala reicht von 1 für einzeilige Bedienelemente bis 1,75 für lange Lesetexte. Die engen Stufen braucht type-rhythm, weil große Schrift weniger Durchschuss bekommen muss, damit eine Überschrift ein Block bleibt.",
+      "scope": "aspekto komuna: font.lineheight.scale.*",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["font.lineheight.scale.*"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3P0",
+      "name": "komuna-laufweite",
+      "statement": "komuna führt die Laufweite 0 für die Stufen 100 bis 800, −0,4, −0,6, −0,8 und −1 px für die Stufen 900 bis 1200 und +0,6 px für caps.",
+      "kialo": "Die Laufweite gehört zur Schriftgröße. Bis Stufe 800 bleibt sie 0, ab Display-Größen wird sie schrittweise negativ, weil große Buchstaben sonst optisch auseinanderfallen. Versalien bekommen +0,6 px, weil eng gesetzte Großbuchstaben schwer zu lesen sind.",
+      "scope": "aspekto komuna: font.tracking.scale.*",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["font.tracking.scale.*"]
+      }
+    },
+    {
+      "id": "reg_01M7610SW0468972WKNSC1Y3P1",
+      "name": "komuna-schriftgewichte",
+      "statement": "komuna führt die neun Schriftgewichte 100 bis 900 der CSS-Skala.",
+      "kialo": "Die neun Gewichte folgen den CSS-Stufen 100 bis 900, damit Web und Design-Werkzeug dieselbe Zahl verstehen. Im Einsatz trägt semibold die Hervorhebung des aktuellen Elements, die übrigen stehen bereit, wo eine Schrift sie hat.",
+      "scope": "aspekto komuna: font.weight.*",
+      "checkability": "manual",
+      "aspekto": "komuna",
+      "appliesTo": {
+        "tokens": ["font.weight.*"]
+      }
+    }
+  ]
+}

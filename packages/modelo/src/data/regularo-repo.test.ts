@@ -38,6 +38,54 @@ const NOT_CHECKABLE: Record<string, string> = {
   // Spec 007 A4: a Regulo candidate; an instance does not state the spacing of its container.
   "spacing-owned-by-container":
     "a candidate (Spec 007, A4): instances carry no spacing, so nothing can violate it yet",
+  "komuna-dauer-null":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-kurven":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-ebenen":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-syntax-schluesselwort":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-syntax-name":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-syntax-zeichenkette":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-syntax-zahl":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-syntax-kommentar":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-randbreiten":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-rand-betont":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-rundung-bedienelement":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-rundung-mehrzeilig":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-rundung-pille":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-rundung-flaeche":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-rundung-tag":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-strichart":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-groessen":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-spalten":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-umbrueche":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-container":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-schriftfamilien":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-zeilenhoehen":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-laufweite":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
+  "komuna-schriftgewichte":
+    "Spec 049: Entscheidungsprotokoll für komuna – begründet eine Wahl; der Wert ist die Wahl selbst, darüber hinaus gibt es nichts zu prüfen",
 };
 
 /** Automatic Reguloj enforced by an always-on rule instead of an enforcer (Constitution). */

@@ -28,6 +28,8 @@ describe("@fundamento/aspekto-komuna (D-05)", () => {
       // Spec 029 ①: the Jugxoj of the values a rule changed, and the provenance of every value.
       "jugxoj.json",
       "deveno.json",
+      // Spec 049 (Q-5): the package Reguloj with the Kialoj of komuna's decisions.
+      "reguloj.json",
     ]);
     expect((manifest.exports as Record<string, string>)["./ikonoj/*"]).toBe("./ikonoj/*");
   });

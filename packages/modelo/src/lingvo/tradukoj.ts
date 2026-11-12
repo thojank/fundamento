@@ -56,7 +56,9 @@ const coreId = (id: string) => !/^[a-z]{3}_[a-z]{2,8}_/.test(id);
 /**
  * Every text of the core Modelo the Vitrino shows (Nachlese 8 ③): the purpose and the kialoj of
  * every Uzo of an Ero and of a Sxablono, the statement and the kialo of every Regulo — in the
- * order of the Modelo. A Regulo of an Aspekto package is its own text and stays English.
+ * order of the Modelo. A Regulo of an Aspekto package is its own text and stays as written there:
+ * it carries its `aspekto` (no core Regulo does) or a namespaced ID — komuna, the reference
+ * Aspekto, mints core-format IDs, so its Reguloj are known by the field (Spec 049, F-KIA2-1).
  */
 export function tekstojOf(modelo: Modelo): Teksto[] {
   return [
@@ -67,7 +69,7 @@ export function tekstojOf(modelo: Modelo): Teksto[] {
       entry.uzo === undefined ? [] : uzoTekstoj(entry.uzo as unknown as UzoTexts),
     ),
     ...modelo.reguloj
-      .filter((regulo) => coreId(regulo.id))
+      .filter((regulo) => regulo.aspekto === undefined && coreId(regulo.id))
       .flatMap((regulo) => [
         { key: `${regulo.id}/statement`, en: regulo.statement },
         { key: `${regulo.id}/kialo`, en: regulo.kialo },
