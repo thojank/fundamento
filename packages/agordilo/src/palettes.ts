@@ -222,6 +222,31 @@ export function floored(moved: number, calibrated: number, floors: TargetFloors)
   return result;
 }
 
+/**
+ * Spec 050 T2: the steps already solved, by everything a step's solution depends on – its target,
+ * its chroma, its hue and the surface of its mode (`solveStep` is pure and reads nothing else). A
+ * change of one colour (the Zweitfarbe) asks the other palettes for the very same steps, so a new
+ * rev solves only what is new. Numbers are keyed exactly (`-0` apart from `0`); a full store is
+ * emptied, never trimmed by age, so its size stays bounded and no result depends on it.
+ */
+const SOLVED_LIMIT = 4096;
+const solvedSteps = new Map<string, StepSolution>();
+
+const exactKey = (value: number): string => (Object.is(value, -0) ? "-0" : String(value));
+
+/** The solution of a step, solved once per request; each caller gets its own copy. */
+function solvedStep(target: number, mode: Mode, chroma: number, hue: number): StepSolution {
+  const key = `${mode}|${exactKey(target)}|${exactKey(chroma)}|${exactKey(hue)}`;
+  let solution = solvedSteps.get(key);
+  if (solution === undefined) {
+    solution = solveStep({ target, surface: mode === "light" ? WHITE : BLACK, chroma, hue });
+    if (solvedSteps.size >= SOLVED_LIMIT) solvedSteps.clear();
+    solvedSteps.set(key, solution);
+  }
+  const [r, g, b] = solution.components;
+  return { ...solution, components: [r, g, b] };
+}
+
 const hexOf = (components: readonly number[]): string =>
   `#${components
     .map((channel) =>
@@ -251,12 +276,7 @@ function solve(
       ? transformTarget(lightTarget, agordo.regler, floors)
       : floored(mode === "light" ? own : MAX_CONTRAST / own, lightTarget, floors);
   const target = mode === "light" ? moved : MAX_CONTRAST / moved;
-  const solution = solveStep({
-    target,
-    surface: mode === "light" ? WHITE : BLACK,
-    chroma: requested,
-    hue: source.hue,
-  });
+  const solution = solvedStep(target, mode, requested, source.hue);
   return {
     ...solution,
     palette,
