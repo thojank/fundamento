@@ -14,7 +14,8 @@
     "sets",
     "ikonoj",
     "jugxoj.json",
-    "deveno.json"
+    "deveno.json",
+    "reguloj.json"
   ],
   "exports": {
     "./package.json": "./package.json",
