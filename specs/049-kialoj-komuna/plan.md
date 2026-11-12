@@ -263,3 +263,12 @@ Stand 2026-11-11, KIA-1.1. Quelle: Implementation Spec `kialoj-komuna` (Abschnit
 ### Abhängigkeiten
 
 Keine neue Abhängigkeit: `pnpm-lock.yaml`, alle Root-Dateien und alle `package.json` bleiben unverändert.
+
+### Nachtrag KIA-2.1: F-KIA2-2 (T4 geändert) und die Fixture `describe`
+
+- **F-KIA2-2.** Der freigegebene Kialo von T4 `komuna-schriftgewichte` nannte „Figma“. Die AK-12-Prüfung (Art. VIII, `packages/modelo/src/export/celo-mappings.ts:25`, `TEXT_NAMES`) meldete `/reguloj/85/kialo` im Export `modelo.json`; rot waren `export/build.test.ts:163`, `:170` und `e2e/export.test.ts:99`. Eine Regulo hat kein typisiertes Celo-Feld (wie `ref.celo` einer Jugxo), die Prüfung bleibt.
+- **Maintainer-Entscheidung 2026-11-12: T4 ✎.**
+  - vorher: „Die neun Gewichte folgen den CSS-Stufen 100 bis 900, damit Web und Figma dieselbe Zahl verstehen. Im Einsatz trägt semibold die Hervorhebung des aktuellen Elements, die übrigen stehen bereit, wo eine Schrift sie hat.“
+  - nachher: „Die neun Gewichte folgen den CSS-Stufen 100 bis 900, damit Web und Design-Werkzeug dieselbe Zahl verstehen. Im Einsatz trägt semibold die Hervorhebung des aktuellen Elements, die übrigen stehen bereit, wo eine Schrift sie hat.“
+  - Die übrigen 23 Kialoj bleiben §5 nach D-1. Alle 24 Statements, Kialoj, Scopes und Namen wurden gegen die Namen aus `celo-mappings.ts` geprüft: kein weiterer Treffer außer „CSS“ (Statement und Kialo von T4), das die Prüfung in Prosa ausdrücklich erlaubt (`css` steht nicht in `TEXT_NAMES`); `celoMappingLeaks` über `modelo.json` und `modelo.schema.json`: leer.
+- **B-1 (A), Abweichung im Eintrag `describe/standard`:** Außer `reguloj.count` und dem Satz ändert sich auch `reguloj.withKialo` (62 → 86), weil es dieselben Reguloj zählt (alle 24 tragen einen Kialo); `bytes` bleibt 1882. Die Umformulierung von T4 ändert `describe` nicht (`kontrakto-038` danach grün ohne neue Fortschreibung).

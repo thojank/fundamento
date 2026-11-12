@@ -280,7 +280,7 @@
       "id": "reg_01M7610SW0468972WKNSC1Y3P1",
       "name": "komuna-schriftgewichte",
       "statement": "komuna führt die neun Schriftgewichte 100 bis 900 der CSS-Skala.",
-      "kialo": "Die neun Gewichte folgen den CSS-Stufen 100 bis 900, damit Web und Figma dieselbe Zahl verstehen. Im Einsatz trägt semibold die Hervorhebung des aktuellen Elements, die übrigen stehen bereit, wo eine Schrift sie hat.",
+      "kialo": "Die neun Gewichte folgen den CSS-Stufen 100 bis 900, damit Web und Design-Werkzeug dieselbe Zahl verstehen. Im Einsatz trägt semibold die Hervorhebung des aktuellen Elements, die übrigen stehen bereit, wo eine Schrift sie hat.",
       "scope": "aspekto komuna: font.weight.*",
       "checkability": "manual",
       "aspekto": "komuna",
